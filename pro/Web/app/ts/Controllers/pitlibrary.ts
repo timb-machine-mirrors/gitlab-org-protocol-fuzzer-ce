@@ -1,6 +1,4 @@
-﻿/// <reference path="../../../Scripts/typings/angular-ui-bootstrap/angular-ui-bootstrap.d.ts" />
-/// <reference path="../Services/peach.ts" />
-/// <reference path="main.ts" />
+﻿/// <reference path="../includes.d.ts" />
 
 module DashApp {
 	"use strict";
@@ -19,8 +17,8 @@ module DashApp {
 			dirSelectable: false
 		}
 
-		public notAPit:boolean = false;
-		
+		public notAPit: boolean = false;
+
 		private modalInstance: ng.ui.bootstrap.IModalServiceInstance;
 
 		constructor($scope: ViewModelScope, $modalInstance: ng.ui.bootstrap.IModalServiceInstance, peachsvc: Services.IPeachService, canCancel: boolean) {
@@ -118,7 +116,6 @@ module DashApp {
 					output.push(libitem);
 				}
 			}
-
 			return output;
 		}
 	}

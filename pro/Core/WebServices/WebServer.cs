@@ -11,15 +11,15 @@ using Nancy.ViewEngines;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using Peach.Pro.Core.Runtime;
 using System;
-using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Threading;
 
-namespace Peach.Enterprise.WebServices
+namespace Peach.Pro.Core.WebServices
 {
 	internal class CustomJsonSerializer : JsonSerializer
 	{
@@ -44,7 +44,7 @@ namespace Peach.Enterprise.WebServices
 		{
 			var enumerable = context.Request.Headers.Accept;
 
-			var ranges = enumerable.OrderByDescending(o => o.Item2).Select(o => MediaRange.FromString(o.Item1)).ToList();
+			var ranges = enumerable.OrderByDescending(o => o.Item2).Select(o => new MediaRange(o.Item1)).ToList();
 			foreach (var item in ranges)
 			{
 				if (item.Matches("application/json"))
@@ -102,7 +102,7 @@ namespace Peach.Enterprise.WebServices
 		{
 			// Do this here since RootNamespaces is static, and
 			// ConfigureApplicationContainer can be called more than once.
-			ResourceViewLocationProvider.RootNamespaces.Add(Assembly.GetExecutingAssembly(), "Peach.Core.WebServices.Views");
+			ResourceViewLocationProvider.RootNamespaces.Add(Assembly.GetExecutingAssembly(), "Peach.Pro.Core.WebServices.Views");
 		}
 
 		public Bootstrapper(WebContext context)
@@ -124,12 +124,6 @@ namespace Peach.Enterprise.WebServices
 			container.Register<IndexService>();
 			container.Register<ErrorStatusCodeHandler>();
 			container.Register<ResourceViewLocationProvider>();
-
-		}
-
-		protected override void ConfigureRequestContainer(TinyIoCContainer container, NancyContext context)
-		{
-			base.ConfigureRequestContainer(container, context);
 		}
 
 		protected override void ConfigureConventions(NancyConventions nancyConventions)
@@ -137,9 +131,12 @@ namespace Peach.Enterprise.WebServices
 			base.ConfigureConventions(nancyConventions);
 
 			// Need to go before the default '/Content' handler in nancy
-			nancyConventions.StaticContentsConventions.Insert(0, StaticContentConventionBuilder.AddDirectory("/", @"web"));
-			nancyConventions.StaticContentsConventions.Insert(0, StaticContentConventionBuilder.AddDirectory("/docs", @"webhelp/docs"));
-
+			nancyConventions.StaticContentsConventions.Insert(0,
+				StaticContentConventionBuilder.AddDirectory("/", @"web")
+			);
+			nancyConventions.StaticContentsConventions.Insert(0,
+				StaticContentConventionBuilder.AddDirectory("/docs", @"webhelp/docs")
+			);
 		}
 
 		protected override void RequestStartup(TinyIoCContainer container, Nancy.Bootstrapper.IPipelines pipelines, NancyContext context)
@@ -357,10 +354,10 @@ namespace Peach.Enterprise.WebServices
 					{
 					}
 
-					Core.Runtime.ConsoleWatcher.WriteInfoMark();
+					ConsoleWatcher.WriteInfoMark();
 					Console.WriteLine("Web site running at: {0}", svc.Uri);
 
-					Peach.Core.Runtime.ConsoleWatcher.WriteInfoMark();
+					ConsoleWatcher.WriteInfoMark();
 					Console.WriteLine("Press Ctrl-C to exit.");
 
 					try

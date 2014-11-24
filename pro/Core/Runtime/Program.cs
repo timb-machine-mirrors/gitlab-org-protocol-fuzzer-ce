@@ -28,25 +28,16 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Reflection;
 using System.IO;
-using System.Xml;
-
-using System.Linq;
-
-using Peach.Core.Dom;
+using System.Reflection;
+using System.Threading;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Analyzers;
-
+using Peach.Core.Runtime;
 using SharpPcap;
-using NLog;
-using NLog.Targets;
-using NLog.Config;
-using System.Threading;
 
-namespace Peach.Core.Runtime
+namespace Peach.Pro.Core.Runtime
 {
 	/// <summary>
 	/// Command line interface for Peach 3.  Mostly backwards compatable with
@@ -108,7 +99,7 @@ namespace Peach.Core.Runtime
 		/// <summary>
 		/// The result of parsing the pit file
 		/// </summary>
-		protected Dom.Dom dom = null;
+		protected Peach.Core.Dom.Dom dom = null;
 
 		/// <summary>
 		/// Configuration options for the engine
@@ -230,18 +221,18 @@ namespace Peach.Core.Runtime
 
 				exitCode = 0;
 			}
-            		catch (ArgumentException ae)
-            		{
-                		Console.WriteLine(ae.Message + " " + ae.ParamName + "\n");
-                		Console.WriteLine("Use -h for help");
-            		}
+			catch (ArgumentException ae)
+			{
+				Console.WriteLine(ae.Message + " " + ae.ParamName + "\n");
+				Console.WriteLine("Use -h for help");
+			}
 			catch (SyntaxException)
 			{
 				// Ignore, thrown by syntax()
 			}
 			catch (OptionException oe)
 			{
-					Console.WriteLine(oe.Message +"\n"); 
+				Console.WriteLine(oe.Message + "\n");
 			}
 			catch (PeachException ee)
 			{
@@ -303,7 +294,7 @@ namespace Peach.Core.Runtime
 			if ((bool)field.GetValue(null) == false)
 				throw new PeachException("Error, analyzer not configured to run from command line.");
 
-			var analyzerInstance = Activator.CreateInstance(analyzerType) as Analyzer;
+			var analyzerInstance = (Analyzer)Activator.CreateInstance(analyzerType);
 
 			ConsoleWatcher.WriteInfoMark();
 			Console.WriteLine("Starting Analyzer");
@@ -325,7 +316,7 @@ namespace Peach.Core.Runtime
 			if (agentType == null)
 				throw new PeachException("Error, unable to locate agent server for protocol '" + agent + "'.\n");
 
-			var agentServer = Activator.CreateInstance(agentType) as IAgentServer;
+			var agentServer = (IAgentServer)Activator.CreateInstance(agentType);
 
 			ConsoleWatcher.WriteInfoMark();
 			Console.WriteLine("Starting agent server");
@@ -340,7 +331,7 @@ namespace Peach.Core.Runtime
 		/// <param name="extra">Extra command line options</param>
 		protected virtual void OnRunJob(bool test, List<string> extra)
 		{
-			Console.CancelKeyPress += new ConsoleCancelEventHandler(Console_CancelKeyPress);
+			Console.CancelKeyPress += Console_CancelKeyPress;
 
 			if (extra.Count == 0)
 				Syntax();
@@ -352,7 +343,7 @@ namespace Peach.Core.Runtime
 				config.runName = extra[1];
 
 			AddNewDefine("Peach.Cwd=" + Environment.CurrentDirectory);
-			AddNewDefine("Peach.Pwd=" + Path.GetDirectoryName(Assembly.GetCallingAssembly().Location));
+			AddNewDefine("Peach.Pwd=" + Utilities.ExecutionDirectory);
 
 			// Do we have pit.xml.config file?
 			// If so load it as the first defines file.
@@ -698,7 +689,7 @@ Debug Peach XML File
 
 				using (var stream = new FileStream("peach.xsd", FileMode.Create, FileAccess.Write))
 				{
-					Xsd.SchemaBuilder.Generate(typeof(Xsd.Dom), stream);
+					Peach.Core.Xsd.SchemaBuilder.Generate(typeof(Peach.Core.Xsd.Dom), stream);
 
 					Console.WriteLine("Successfully generated {0}", stream.Name);
 				}

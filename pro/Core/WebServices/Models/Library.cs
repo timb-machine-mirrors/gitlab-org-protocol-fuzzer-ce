@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Peach.Enterprise.WebServices.Models
+namespace Peach.Pro.Core.WebServices.Models
 {
 	public class Library
 	{

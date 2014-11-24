@@ -2,10 +2,10 @@
 // Copyright (c) Deja vu Security
 //
 
+using Peach.Core;
 using Peach.Core.Dom;
-using System;
 
-namespace Peach.Core.Mutators.Utility
+namespace Peach.Pro.Core.Mutators.Utility
 {
 	/// <summary>
 	/// Extension of StringLengthVariance that injects BOM characters randomly-ish into the strings.

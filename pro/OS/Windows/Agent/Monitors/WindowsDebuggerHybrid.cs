@@ -27,36 +27,26 @@
 // $Id$
 
 using System;
-using System.IO;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading;
+using System.Diagnostics;
+using System.IO;
 using System.Reflection;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Channels;
-using System.Runtime.Remoting.Channels.Ipc;
-
-using Peach.Core.Dom;
-using Peach.Core.Agent.Monitors.WindowsDebug;
-
+using System.Threading;
 using NLog;
+using Peach.Core;
+using Peach.Core.Agent;
+using Peach.Pro.OS.Windows.Agent.Monitors.WindowsDebug;
+using Monitor = Peach.Core.Agent.Monitor;
+using Random = Peach.Core.Random;
 
-/* Code to determine if an exe is 32/64bit.  Can be used to locate correct windbg.
- * 
- * //I added FileAccess.Read to your FileStream instantiation - otherwise it blows us when trying to determine bitness of DLLs in either C:\Windows or C:\Program Files – AngryHacker Aug 26 '11 at 17:45
-
- *
- */
-
-namespace Peach.Core.Agent.Monitors
+namespace Peach.Pro.OS.Windows.Agent.Monitors
 {
 	[Monitor("WindowsDebugger", true)]
 	[Monitor("WindowsDebuggerHybrid")]
 	[Monitor("WindowsDebugEngine")]
 	[Monitor("debugger.WindowsDebugEngine")]
-	[Parameter("CommandLine", typeof(string), "Command line of program to start.")]
-	[Parameter("Executable", typeof(string), "Executable to launch")]
+	[Parameter("CommandLine", typeof(string), "Command line of program to start.", "")]
+	[Parameter("Executable", typeof(string), "Executable to launch", "")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
 	[Parameter("ProcessName", typeof(string), "Name of process to attach too.", "")]
 	[Parameter("KernelConnectionString", typeof(string), "Connection string for kernel debugging.", "")]
@@ -64,9 +54,9 @@ namespace Peach.Core.Agent.Monitors
 	[Parameter("SymbolsPath", typeof(string), "Optional Symbol path.  Default is Microsoft public symbols server.", "SRV*http://msdl.microsoft.com/download/symbols")]
 	[Parameter("WinDbgPath", typeof(string), "Path to WinDbg install.  If not provided we will try and locate it.", "")]
 	[Parameter("StartOnCall", typeof(string), "Indicate the debugger should wait to start or attach to process until notified by state machine.", "")]
-	[Parameter("IgnoreFirstChanceGuardPage", typeof(string), "Ignore first chance guard page faults.  These are sometimes false posistives or anti-debugging faults.", "false")]
-	[Parameter("IgnoreSecondChanceGuardPage", typeof(string), "Ignore second chance guard page faults.  These are sometimes false posistives or anti-debugging faults.", "false")]
-	[Parameter("NoCpuKill", typeof(string), "Don't use process CPU usage to terminate early.", "false")]
+	[Parameter("IgnoreFirstChanceGuardPage", typeof(bool), "Ignore first chance guard page faults.  These are sometimes false posistives or anti-debugging faults.", "false")]
+	[Parameter("IgnoreSecondChanceGuardPage", typeof(bool), "Ignore second chance guard page faults.  These are sometimes false posistives or anti-debugging faults.", "false")]
+	[Parameter("NoCpuKill", typeof(bool), "Don't use process CPU usage to terminate early.", "false")]
 	[Parameter("CpuPollInterval", typeof(uint), "How often to poll for idle CPU in milliseconds.", "200")]
 	[Parameter("FaultOnEarlyExit", typeof(bool), "Trigger fault if process exists (defaults to false)", "false")]
 	[Parameter("WaitForExitOnCall", typeof(string), "Wait for process to exit on state model call and fault if timeout is reached", "")]

@@ -1,14 +1,12 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using Peach.Core.Test;
 
-using NUnit.Framework;
-
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class StringCaseRandomTests
@@ -18,7 +16,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringCaseRandom");
 
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 
 			// Empty string, not supported
 			str.DefaultValue = new Variant("");
@@ -50,7 +48,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringCaseRandom");
 
-			var str = new Dom.String("String") { DefaultValue = new Variant("Hello") };
+			var str = new Peach.Core.Dom.String("String") { DefaultValue = new Variant("Hello") };
 
 			// String length is mutation count
 			var m1 = runner.Sequential(str);
@@ -76,7 +74,7 @@ namespace Peach.Core.Test.Mutators
 			var runner = new MutatorRunner("StringCaseRandom");
 
 			var exp = "HelloWorld";
-			var str = new Dom.String("String") { DefaultValue = new Variant(exp) };
+			var str = new Peach.Core.Dom.String("String") { DefaultValue = new Variant(exp) };
 
 			var m = runner.Random(100, str);
 			Assert.AreEqual(100, m.Count());

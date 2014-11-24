@@ -27,25 +27,19 @@
 // $Id$
 
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Text;
-using System.Reflection;
-using System.Linq;
-
-using Peach.Core.IO;
-using Peach.Core.Dom;
-using Peach.Core.Cracker;
-
-using NLog;
 using System.Diagnostics;
+using System.Linq;
+using NLog;
+using Peach.Core;
+using Peach.Core.Dom;
+using Random = Peach.Core.Random;
 
 /*
  * If not 1st iteration, pick fandom data model to change
  * 
  */
-namespace Peach.Core.MutationStrategies
+namespace Peach.Pro.Core.MutationStrategies
 {
 	[DefaultMutationStrategy]
 	[MutationStrategy("Random", true)]
@@ -210,12 +204,12 @@ namespace Peach.Core.MutationStrategies
 		/// <summary>
 		/// The most recent state that has started.
 		/// </summary>
-		Dom.State currentState;
+		Peach.Core.Dom.State currentState;
 
 		/// <summary>
 		/// The most recent action that was started.
 		/// </summary>
-		Dom.Action currentAction;
+		Peach.Core.Dom.Action currentAction;
 
 		/// <summary>
 		/// Current fuzzing iteration number
@@ -260,6 +254,8 @@ namespace Peach.Core.MutationStrategies
 				if (stateMutations && m.GetStaticField<bool>("affectStateModel"))
 					stateMutators.Add(GetMutatorInstance(m, context.test.stateModel));
 			}
+
+			RecordDataSets();
 		}
 
 		public override void Finalize(RunContext context, Engine engine)
@@ -323,12 +319,13 @@ namespace Peach.Core.MutationStrategies
 
 			if (context.controlIteration && context.controlRecordingIteration)
 			{
-				dataSets.Clear();
 				mutableItems.Clear();
 
 				mutationScopeGlobal = new MutationScope("All");
 				mutationScopeState = new List<MutationScope>();
 				mutationScopeAction = new List<MutationScope>();
+
+				SyncDataSets();
 			}
 			else
 			{
@@ -420,7 +417,7 @@ namespace Peach.Core.MutationStrategies
 			}
 		}
 
-		void ActionStarting(RunContext context, Dom.Action action)
+		void ActionStarting(RunContext context, Peach.Core.Dom.Action action)
 		{
 			currentAction = action;
 
@@ -430,8 +427,6 @@ namespace Peach.Core.MutationStrategies
 
 			if (context.controlIteration && context.controlRecordingIteration)
 			{
-				RecordDataSet(action);
-				SyncDataSet(action);
 				RecordDataModel(action);
 			}
 			else if (!context.controlIteration)
@@ -486,85 +481,94 @@ namespace Peach.Core.MutationStrategies
 			}
 		}
 
-		private void RecordDataSet(Core.Dom.Action action)
+		private void RecordDataSets()
 		{
-			foreach (var item in action.outputData)
+			var states = Context.test.stateModel.states;
+
+			foreach (var item in states.SelectMany(s => s.actions).SelectMany(a => a.outputData))
 			{
 				var options = item.allData.ToList();
 
-				if (options.Count > 0)
-				{
-					// Don't use the instance name here, we only pick the data set
-					// once per state, not each time the state is re-entered.
-					if (!dataSets.Contains(item.modelName))
-						dataSets.Add(new DataSetTracker(item.modelName, options));
-				}
+				if (options.Count <= 0)
+					continue;
+
+				// Don't use the instance name here, we only pick the data set
+				// once per state, not each time the state is re-entered.
+				System.Diagnostics.Debug.Assert(!dataSets.Contains(item.modelName));
+				dataSets.Add(new DataSetTracker(item.modelName, options));
 			}
 		}
 
-		private void SyncDataSet(Dom.Action action)
+		private void SyncDataSets()
 		{
 			System.Diagnostics.Debug.Assert(Iteration != 0);
 
 			// Compute the iteration we need to switch on
 			var switchIteration = GetSwitchIteration();
 
-			foreach (var item in action.outputData)
+			var states = Context.test.stateModel.states;
+
+			foreach (var item in states.SelectMany(s => s.actions).SelectMany(a => a.outputData))
 			{
-				// Note: use the model name, not the instance name so
-				// we only set the data set once for re-enterant states.
-				var modelName = item.modelName;
-
-				DataSetTracker val;
-				if (!dataSets.TryGetValue(modelName, out val))
-					return;
-
-				// If the last switch was within the current iteration range then we don't have to switch.
-				if (switchIteration == val.Iteration)
-					return;
-
-				// Don't switch files if we are only using a single file :)
-				if (val.Options.Where(x => !x.Ignore).Count() < 2)
-					return;
-
-				do
-				{
-					var opt = randomDataSet.Choice(val.Options);
-
-					// If data set was determined to be bad, ignore it
-					if (opt.Ignore)
-						continue;
-
-					try
-					{
-						// Apply the data set option
-						item.Apply(opt);
-
-						// Save off the last switch iteration
-						val.Iteration = switchIteration;
-
-						// Done!
-						return;
-					}
-					catch (PeachException ex)
-					{
-						logger.Debug(ex.Message);
-						logger.Debug("Unable to apply data '{0}', removing from sample list.", opt.name);
-
-						// Mark data set as ignored.
-						// This is so skip-to will still be deterministic
-						opt.Ignore = true;
-					}
-				}
-				while (val.Options.Where(x => !x.Ignore).Any());
-
-				throw new PeachException("Error, RandomStrategy was unable to apply data for \"" + item.dataModel.fullName + "\"");
+				ApplyDataSet(item, switchIteration);
 			}
+		}
+
+		private void ApplyDataSet(ActionData item, uint switchIteration)
+		{
+			// Note: use the model name, not the instance name so
+			// we only set the data set once for re-enterant states.
+			var modelName = item.modelName;
+
+			DataSetTracker val;
+			if (!dataSets.TryGetValue(modelName, out val))
+				return;
+
+			// If the last switch was within the current iteration range then we don't have to switch.
+			if (switchIteration == val.Iteration)
+				return;
+
+			// Don't switch files if we are only using a single file :)
+			if (val.Options.Count(x => !x.Ignore) < 2)
+				return;
+
+			do
+			{
+				var opt = randomDataSet.Choice(val.Options);
+
+				// If data set was determined to be bad, ignore it
+				if (opt.Ignore)
+					continue;
+
+				try
+				{
+					// Apply the data set option
+					item.Apply(opt);
+
+					// Save off the last switch iteration
+					val.Iteration = switchIteration;
+
+					// Done!
+					return;
+				}
+				catch (PeachException ex)
+				{
+					logger.Debug(ex.Message);
+					logger.Debug("Unable to apply data '{0}', removing from sample list.", opt.name);
+
+					// Mark data set as ignored.
+					// This is so skip-to will still be deterministic
+					opt.Ignore = true;
+				}
+			}
+			while (val.Options.Any(x => !x.Ignore));
+
+			throw new PeachException("Error, RandomStrategy was unable to apply data for \"" + item.dataModel.fullName + "\"");
 		}
 
 		#endregion
 
-		private void RecordDataModel(Dom.Action action)
+		private void RecordDataModel(Peach.Core.Dom.Action action)
 		{
 			var scopeState = mutationScopeState.Last();
 
@@ -627,7 +631,7 @@ namespace Peach.Core.MutationStrategies
 			}
 		}
 
-		private void MutateDataModel(Core.Dom.Action action)
+		private void MutateDataModel(Peach.Core.Dom.Action action)
 		{
 			// MutateDataModel should only be called after ParseDataModel
 			System.Diagnostics.Debug.Assert(Iteration > 0);
@@ -655,7 +659,7 @@ namespace Peach.Core.MutationStrategies
 			return nextState;
 		}
 
-		public override Dom.Action NextAction(State state, Dom.Action lastAction, Dom.Action nextAction)
+		public override Peach.Core.Dom.Action NextAction(State state, Peach.Core.Dom.Action lastAction, Peach.Core.Dom.Action nextAction)
 		{
 			if (stateModelMutation != null)
 			{

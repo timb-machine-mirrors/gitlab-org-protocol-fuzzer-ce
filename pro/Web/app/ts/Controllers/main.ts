@@ -1,13 +1,7 @@
-﻿/// <reference path="../../../Scripts/typings/angular-ui-bootstrap/angular-ui-bootstrap.d.ts" />
-/// <reference path="../Models/models.ts" />
-/// <reference path="../Services/peach.ts" />
-/// <reference path="../Services/pitconfigurator.ts" />
-/// <reference path="../Controllers/pitlibrary.ts" />
-/// <reference path="../Controllers/copypit.ts" />
+﻿/// <reference path="../includes.d.ts" />
 
 module DashApp {
 	"use strict";
-
 
 	export class MainController {
 		private peachSvc: Services.IPeachService;
@@ -121,14 +115,19 @@ module DashApp {
 		public get CanViewMetrics(): boolean {
 			return (this.job !== undefined && this.job.hasMetrics);
 		}
-
-
 		//#endregion
 
+		static $inject = ["$scope", "$resource", "$location", "$modal", "poller", "peachService", "pitConfiguratorService", "$http"];
 
-		static $inject = ["$scope", "$resource", "$location", "$modal", "poller", "peachService", "pitConfiguratorService","$http"];
-
-		constructor($scope: ViewModelScope, $resource, $location: ng.ILocationService, $modal: ng.ui.bootstrap.IModalService, poller, peachService: Services.IPeachService, pitConfiguratorService: Services.IPitConfiguratorService, $http: ng.IHttpService) {
+		constructor(
+			$scope: ViewModelScope,
+			$resource,
+			$location: ng.ILocationService,
+			$modal: ng.ui.bootstrap.IModalService,
+			poller,
+			peachService: Services.IPeachService,
+			pitConfiguratorService: Services.IPitConfiguratorService,
+			$http: ng.IHttpService) {
 			$scope.vm = this;
 
 			this.modal = $modal;
@@ -137,14 +136,13 @@ module DashApp {
 			this.pitConfigSvc = pitConfiguratorService;
 			this.poller = poller;
 
-
 			this.initialize();
 		}
 
 		private initialize() {
 			this.peachSvc.GetJob((job: Models.Job) => {
 				if (job != undefined) {
-					this.pitConfigSvc.Job = job; 
+					this.pitConfigSvc.Job = job;
 				}
 				else {
 					this.showPitSelector();
@@ -167,25 +165,23 @@ module DashApp {
 						return that.pitConfigSvc.Pit !== undefined;
 					}
 				}
-			})
-			.result.then((pitUrl: string) => {
-				this.peachSvc.GetPit(pitUrl, (data: Models.Pit) =>
-				{
-					if (data.locked) {
-						this.showPitCopier(data);
-					}
-					else {
-						this.pitConfigSvc.Pit = new Models.Pit(data);
-						if (data.configured == false) {
-							this.location.path("#/configurator/intro");
+			}).result.then((pitUrl: string) => {
+					this.peachSvc.GetPit(pitUrl, (data: Models.Pit) => {
+						if (data.locked) {
+							this.showPitCopier(data);
 						}
-					}
-				});
-			});
+						else {
+							this.pitConfigSvc.Pit = new Models.Pit(data);
+							if (data.configured == false) {
+								this.location.path("#/quickstart/intro");
+							}
+						}
+					});
+				})
+			;
 		}
 
 		public exportPit() {
-
 		}
 
 		public showPitCopier(pit: Models.Pit) {
@@ -206,11 +202,12 @@ module DashApp {
 					}
 				}
 			}).result.then((pit: Models.Pit) => {
-				this.pitConfigSvc.Pit = new Models.Pit(pit);
-				if (this.pitConfigSvc.Pit.configured == false) {
-					this.location.path("/configurator/intro");
-				}
-			});
+					this.pitConfigSvc.Pit = new Models.Pit(pit);
+					if (this.pitConfigSvc.Pit.configured == false) {
+						this.location.path("/quickstart/intro");
+					}
+				})
+			;
 		}
 	}
 

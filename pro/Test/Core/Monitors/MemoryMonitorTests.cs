@@ -1,24 +1,13 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
-using NUnit.Framework;
-using NUnit.Framework.Constraints;
-using Peach.Core;
-using Peach.Core.Dom;
-using Peach.Core.Analyzers;
-using Peach.Core.IO;
-using Peach.Core.Agent;
-using System.Collections;
-using System.Net.NetworkInformation;
-using System.Net;
-using System.Net.Sockets;
 using System.Diagnostics;
-using System.Threading;
+using System.IO;
+using System.Linq;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Analyzers;
 
-namespace Peach.Core.Test.Monitors
+namespace Peach.Pro.Test.Core.Monitors
 {
 	[TestFixture] [Category("Peach")]
 	class MemoryMonitorTests
@@ -41,7 +30,7 @@ namespace Peach.Core.Test.Monitors
 			faults = null;
 		}
 
-		void _Fault(RunContext context, uint currentIteration, Dom.StateModel stateModel, Fault[] faults)
+		void _Fault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faults)
 		{
 			Assert.Null(this.faults);
 			this.faults = faults;
@@ -95,7 +84,7 @@ namespace Peach.Core.Test.Monitors
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
 			dom.tests[0].includedMutators.Add("StringCaseMutator");
 

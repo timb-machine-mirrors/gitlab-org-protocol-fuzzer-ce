@@ -28,14 +28,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.IO.Compression;
-using System.IO;
 using System.Security.Cryptography;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
-namespace Peach.Core.Transformers.Crypto
+namespace Peach.Pro.Core.Transformers.Crypto
 {
 	[Description("SHA-256 transform (hex & binary).")]
 	[Transformer("Sha256", true)]

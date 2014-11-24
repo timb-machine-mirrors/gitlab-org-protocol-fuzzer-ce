@@ -1,7 +1,7 @@
-using Peach.Core;
 using System;
+using Peach.Core;
 
-namespace Peach.Enterprise.WebServices
+namespace Peach.Pro.Core.WebServices
 {
 	/// <summary>
 	/// The context that is passed to each WebService instance.

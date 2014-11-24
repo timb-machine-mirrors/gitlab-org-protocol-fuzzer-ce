@@ -1,14 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Xml.XPath;
-
-using NLog;
-
-using Peach.Core;
-using Peach.Core.IO;
-using Peach.Core.Dom;
 
 namespace Peach.Core.Dom.XPath
 {
@@ -25,8 +18,6 @@ namespace Peach.Core.Dom.XPath
 	/// </remarks>
 	public class PeachXPathNavigator : XPathNavigator
 	{
-		protected List<object> moveToHistory = new List<object>();
-
 		/// <summary>
 		/// Attributes for each known type
 		/// </summary>
@@ -183,6 +174,15 @@ namespace Peach.Core.Dom.XPath
 		{
 			//logger.Trace("MoveToFirstChild(" + ((INamed)currentNode).name + ")");
 
+			if (currentNode is Choice)
+			{
+				var container = currentNode as Choice;
+				if (container.choiceElements.Count == 0)
+					return false;
+
+				currentNode = container.choiceElements[0];
+				return true;
+			}
 			if (currentNode is DataElementContainer)
 			{
 				var container = currentNode as DataElementContainer;
@@ -310,8 +310,26 @@ namespace Peach.Core.Dom.XPath
 				currentNodeType = PeachXPathNodeType.DataModel;
 				return true;
 			}
-			else if (currentNode is DataElement)
+
+			if (currentNode is DataElement)
 			{
+				var asChoice = parent as Choice;
+
+				if (asChoice != null)
+				{
+					var curr = (DataElement)currentNode;
+					var next = asChoice.choiceElements
+						.Select(kv => kv.Value)
+						.SkipWhile(e => e != curr)
+						.ElementAtOrDefault(1);
+
+					if (next == null)
+						return false;
+
+					currentNode = next;
+					return true;
+				}
+
 				if (parent is DataElementContainer)
 				{
 					var curr = currentNode as DataElement;

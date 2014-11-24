@@ -30,10 +30,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-
 using NLog;
+using Peach.Core;
+using Peach.Core.Agent;
 
-namespace Peach.Core.Agent
+namespace Peach.Pro.Core.Agent
 {
 	/// <summary>
 	/// Agent logic.  This class is typically
@@ -117,7 +118,6 @@ namespace Peach.Core.Agent
 			{
 				throw new PeachException("Could not start monitor \"" + cls + "\".  " + ex.InnerException.Message, ex);
 			}
-
 		}
 
 		public void StopAllMonitors()

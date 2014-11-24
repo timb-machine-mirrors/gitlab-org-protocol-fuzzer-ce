@@ -1,10 +1,10 @@
-namespace Peach.Core.Debuggers.DebugEngine.Tlb
-{
-    using System;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
+using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
-    [ComImport, InterfaceType((short) 1), Guid("23F79D6C-8AAF-4F7C-A607-9995F5407E63")]
+namespace Peach.Pro.OS.Windows.Debuggers.DebugEngine.Tlb
+{
+	[ComImport, InterfaceType((short) 1), Guid("23F79D6C-8AAF-4F7C-A607-9995F5407E63")]
     public interface IDebugDataSpaces3
     {
         [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType=MethodCodeType.Runtime)]

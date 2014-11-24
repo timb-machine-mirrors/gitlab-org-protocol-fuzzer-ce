@@ -1,5 +1,3 @@
-using System;
-
 namespace Peach.Core
 {
 	// Implementation of TinyMT - A smaller version of the mersenne twister algorithm.

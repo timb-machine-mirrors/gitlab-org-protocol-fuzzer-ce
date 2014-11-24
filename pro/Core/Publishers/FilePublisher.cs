@@ -25,17 +25,14 @@
 //   Michael Eddington (mike@dejavusecurity.com)
 
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
 using System.Threading;
-
-using Peach.Core.Dom;
+using NLog;
+using Peach.Core;
 using Peach.Core.IO;
 
-using NLog;
-
-namespace Peach.Core.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	[Publisher("File", true)]
 	[Publisher("FileStream")]

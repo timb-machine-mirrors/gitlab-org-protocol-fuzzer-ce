@@ -28,14 +28,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Xml;
 using System.Xml.Serialization;
-
-using Peach.Core;
-
-using NLog;
 using System.ComponentModel;
 
 namespace Peach.Core.Dom

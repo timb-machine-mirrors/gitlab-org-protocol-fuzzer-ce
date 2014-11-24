@@ -1,4 +1,3 @@
-using Peach.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,8 +6,9 @@ using System.Text;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
+using Peach.Core;
 
-namespace Peach.Enterprise
+namespace Peach.Pro.Core
 {
 	public static class XmlTools
 	{

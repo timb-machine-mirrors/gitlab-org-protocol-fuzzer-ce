@@ -1,11 +1,11 @@
-using Nancy;
-using Nancy.ModelBinding;
-using Peach.Enterprise.WebServices.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Nancy;
+using Nancy.ModelBinding;
+using Peach.Pro.Core.WebServices.Models;
 
-namespace Peach.Enterprise.WebServices
+namespace Peach.Pro.Core.WebServices
 {
 	public class PitService : WebService
 	{
@@ -17,6 +17,7 @@ namespace Peach.Enterprise.WebServices
 			Get[""] = _ => GetPits();
 			Get["/{id}"] = _ => GetPit(_.id);
 			Get["/{id}/config"] = _ => GetPitConfig(_.id);
+			Get["/{id}/agents"] = _ => GetPitAgents(_.id);
 
 			Post[""] = _ => CopyPit();
 		}
@@ -44,6 +45,14 @@ namespace Peach.Enterprise.WebServices
 			return cfg;
 		}
 
+		object GetPitAgents(string id)
+		{
+			var agents = PitDatabase.GetAgentsById(id);
+			if (agents == null)
+				return HttpStatusCode.NotFound;
+			return agents;
+		}
+
 		object CopyPit()
 		{
 			var data = this.Bind<PitCopy>();
@@ -65,10 +74,6 @@ namespace Peach.Enterprise.WebServices
 			catch (ArgumentException)
 			{
 				return HttpStatusCode.BadRequest;
-			}
-			catch (Exception)
-			{
-				throw;
 			}
 
 			var newPit = db.GetPitByUrl(newUrl);

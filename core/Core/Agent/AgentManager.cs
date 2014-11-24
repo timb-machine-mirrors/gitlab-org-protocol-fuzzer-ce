@@ -28,13 +28,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
-using System.Reflection;
-using Peach.Core.Dom;
 using NLog;
-using Peach.Core.Agent;
-using Peach.Core.IO;
 
 namespace Peach.Core.Agent
 {

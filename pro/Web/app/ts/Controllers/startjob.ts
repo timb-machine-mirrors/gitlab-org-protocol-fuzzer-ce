@@ -1,9 +1,10 @@
-﻿module DashApp {
+﻿/// <reference path="../includes.d.ts" />
+
+module DashApp {
 	export class StartJobController {
 		private modalInstance: ng.ui.bootstrap.IModalServiceInstance;
 
-
-		static $inject = ["$scope","$modalInstance"]; 
+		static $inject = ["$scope", "$modalInstance"];
 
 		constructor($scope: ViewModelScope, $modalInstance: ng.ui.bootstrap.IModalServiceInstance) {
 			this.modalInstance = $modalInstance;

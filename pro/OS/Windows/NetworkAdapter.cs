@@ -1,10 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Management;
 using System.Net.NetworkInformation;
+using Peach.Core;
 
-namespace Peach.Core
+namespace Peach.Pro.OS.Windows
 {
 	[PlatformImpl(Platform.OS.Windows)]
 	public class NetworkAdapterImpl : NetworkAdapter

@@ -49,16 +49,17 @@ namespace Peach.Core
 
 		#region Exclude List
 
-		static readonly string[] excludeList = new string[] {
+		static readonly string[] excludeList =
+		{
 			"aardvark.dll", 
 			"aardvark_net.dll", 
 			"Aga.Controls.dll", 
+			"Alchemy.dll",
 			"Be.Windows.Forms.HexBox.dll", 
 			"BouncyCastle.Crypto.dll", 
 			"ComTest.dll", 
 			"EasyHook.dll", 
-			//"Godel.Tests.dll", 
-			//"Godel.Tests.WebService.dll", 
+			"Godel.Tests.dll", 
 			"Ionic.Zip.dll", 
 			"IronPython.dll", 
 			"IronPython.Modules.dll", 
@@ -78,6 +79,7 @@ namespace Peach.Core
 			"MySql.Data.dll", 
 			"Nancy.dll", 
 			"Nancy.Hosting.Self.dll", 
+			"Nancy.Metadata.Module.dll",
 			"Nancy.Serialization.JsonNet.dll", 
 			"Newtonsoft.Json.dll", 
 			"NLog.dll", 
@@ -85,25 +87,27 @@ namespace Peach.Core
 			"nunit.framework.dll", 
 			"PacketDotNet.dll", 
 			//"Peach.Core.Test.dll", 
-			//"Peach.Core.Test.OS.Linux.dll", 
-			//"Peach.Core.Test.OS.OSX.dll", 
-			//"Peach.Core.Test.OS.Windows.dll", 
-			//"Peach.Enterprise.Test.dll", 
 			"PeachFarm.Admin.dll", 
 			"PeachFarm.Common.dll", 
 			"PeachFarm.Controller.dll", 
 			"PeachFarm.Node.dll", 
 			"PeachFarm.Reporting.dll", 
 			"PeachFarm.Reporting.Reports.dll", 
+			"PeachFarm.Test.dll", 
 			"PeachFarmMonitor.dll", 
 			"PeachHooker.File.dll", 
 			"PeachHooker.Network.dll", 
+			//"Peach.Pro.Test.dll", 
+			//"Peach.Pro.Test.OS.Linux.dll", 
+			//"Peach.Pro.Test.OS.OSX.dll", 
+			//"Peach.Pro.Test.OS.Windows.dll", 
 			"Portable.Licensing.dll", 
 			"RabbitMQ.Client.dll", 
 			"Renci.SshNet.dll", 
 			"SharpPcap.dll", 
 			"SuperSocket.Common.dll", 
 			"SuperSocket.SocketBase.dll", 
+			"SuperSocket.SocketEngine.dll", 
 			"SuperWebSocket.dll", 
 			"Syslog.Server.dll", 
 			"System.Data.SQLite.dll", 
@@ -146,9 +150,9 @@ namespace Peach.Core
 
 		static ClassLoader()
 		{
-			foreach (string path in searchPath)
+			foreach (var path in searchPath)
 			{
-				foreach (string file in Directory.GetFiles(path))
+				foreach (var file in Directory.GetFiles(path))
 				{
 					if (!file.EndsWith(".exe") && !file.EndsWith(".dll"))
 						continue;
@@ -161,7 +165,7 @@ namespace Peach.Core
 
 					try
 					{
-						Assembly asm = Load(file);
+						var asm = Load(file);
 						asm.GetExportedTypes(); // make sure we can load exported types.
 						AssemblyCache.Add(file, asm);
 					}
@@ -182,7 +186,7 @@ namespace Peach.Core
 			{
 				// Always try and load the assembly first. It will succeed regardless of security
 				// zone if it is directly referenced or loadFromRemoteSources is true.
-				Assembly asm = Assembly.LoadFrom(fullPath);
+				var asm = Assembly.LoadFrom(fullPath);
 				return asm;
 			}
 			catch (Exception ex)
@@ -249,9 +253,9 @@ namespace Peach.Core
 			}
 			else
 			{
-				foreach (string path in searchPath)
+				foreach (var path in searchPath)
 				{
-					string fullPath = Path.Combine(path, fileName);
+					var fullPath = Path.Combine(path, fileName);
 
 					if (File.Exists(fullPath))
 						return fullPath;
@@ -270,7 +274,7 @@ namespace Peach.Core
 			}
 			else
 			{
-				foreach (string path in searchPath)
+				foreach (var path in searchPath)
 				{
 					if (TryLoad(Path.Combine(path, fileName)))
 						return;
@@ -281,23 +285,45 @@ namespace Peach.Core
 		}
 
 		/// <summary>
+		/// Extension to the Type class. Return all attributes matching the specified type.
+		/// </summary>
+		/// <typeparam name="TAttr">Attribute type to find.</typeparam>
+		/// <param name="type">Type in which the search should run over.</param>
+		/// <returns>A generator which yields the attributes specified.</returns>
+		public static IEnumerable<TAttr> GetAttributes<TAttr>(this Type type)
+			where TAttr : Attribute
+		{
+			return GetCustomAttributes(type).OfType<TAttr>();
+		}
+
+		/// <summary>
 		/// Extension to the Type class. Return all attributes matching the specified type and predicate.
 		/// </summary>
-		/// <typeparam name="A">Attribute type to find.</typeparam>
+		/// <typeparam name="TAttr">Attribute type to find.</typeparam>
 		/// <param name="type">Type in which the search should run over.</param>
 		/// <param name="predicate">Returns an attribute if the predicate returns true or the predicate itself is null.</param>
 		/// <returns>A generator which yields the attributes specified.</returns>
-		public static IEnumerable<A> GetAttributes<A>(this Type type, Func<Type, A, bool> predicate)
-			where A : Attribute
+		public static IEnumerable<TAttr> GetAttributes<TAttr>(this Type type, Func<Type, TAttr, bool> predicate)
+			where TAttr : Attribute
 		{
-			foreach (var attr in GetCustomAttributes(type))
+			foreach (var attr in GetCustomAttributes(type).OfType<TAttr>())
 			{
-				var concrete = attr as A;
-				if (concrete != null && (predicate == null || predicate(type, concrete)))
+				if (predicate == null || predicate(type, attr))
 				{
-					yield return concrete;
+					yield return attr;
 				}
 			}
+		}
+
+		/// <summary>
+		/// Finds all types that are decorated with the specified Attribute type.
+		/// </summary>
+		/// <typeparam name="TAttr">Attribute type to find.</typeparam>
+		/// <returns>A generator which yields KeyValuePair elements of custom attribute and type found.</returns>
+		public static IEnumerable<KeyValuePair<TAttr, Type>> GetAllByAttribute<TAttr>()
+			where TAttr : Attribute
+		{
+			return GetAllByAttribute<TAttr>(null);
 		}
 
 		/// <summary>
@@ -309,7 +335,7 @@ namespace Peach.Core
 		public static IEnumerable<KeyValuePair<A, Type>> GetAllByAttribute<A>(Func<Type, A, bool> predicate)
 			where A : Attribute
 		{
-			foreach (var asm in ClassLoader.AssemblyCache.Values)
+			foreach (var asm in AssemblyCache.Values)
 			{
 				//if (asm.IsDynamic)
 				//	continue;
@@ -373,12 +399,12 @@ namespace Peach.Core
 		public static T FindAndCreateByTypeAndName<T>(string name)
 			where T : class
 		{
-			foreach (var asm in ClassLoader.AssemblyCache.Values)
+			foreach (var asm in AssemblyCache.Values)
 			{
 				//if (asm.IsDynamic)
 				//	continue;
 
-				Type type = asm.GetType(name);
+				var type = asm.GetType(name);
 				if (type == null)
 					continue;
 

@@ -28,12 +28,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Reflection;
 
 using Peach.Core.Dom;
-
-using NLog;
 
 namespace Peach.Core
 {

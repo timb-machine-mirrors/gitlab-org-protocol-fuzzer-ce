@@ -1,6 +1,4 @@
 using System;
-using System.Xml;
-using System.Collections.Generic;
 using Peach.Core.Dom.XPath;
 using System.Xml.Serialization;
 using System.ComponentModel;

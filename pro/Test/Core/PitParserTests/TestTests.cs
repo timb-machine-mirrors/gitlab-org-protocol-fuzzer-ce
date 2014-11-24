@@ -26,19 +26,13 @@
 
 // $Id$
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-
 using NUnit.Framework;
-
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
+using Peach.Core.Dom;
 
-namespace Peach.Core.Test.PitParserTests
+namespace Peach.Pro.Test.Core.PitParserTests
 {
 	[TestFixture] [Category("Peach")]
 	class TestTests
@@ -67,7 +61,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var config = new RunConfiguration() { singleIteration = true };
 			var engine = new Engine(null);
@@ -102,7 +96,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var config = new RunConfiguration() { singleIteration = true };
 			var engine = new Engine(null);
@@ -138,7 +132,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var config = new RunConfiguration() { singleIteration = true };
 			var engine = new Engine(null);
@@ -178,7 +172,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var config = new RunConfiguration() { singleIteration = true };
 			var engine = new Engine(null);
@@ -222,7 +216,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var config = new RunConfiguration() { singleIteration = true };
 			var engine = new Engine(null);
@@ -261,7 +255,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var config = new RunConfiguration() { singleIteration = true };
 			var engine = new Engine(null);
@@ -332,6 +326,65 @@ namespace Peach.Core.Test.PitParserTests
 		}
 
 		[Test]
+		public void ExcludeNonSelected()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Choice name='q'>
+			<String name='str'/>
+			<Number name='num' size='32'/>
+			<Blob name='blob'/>
+		</Choice>
+	</DataModel>
+
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+				<Data>
+					<Field name='q.blob' value='00 00 00 00' valueType='hex' />
+				</Data>
+			</Action> 
+		</State>
+	</StateModel>
+
+	<Test name='Test0'>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+		<Exclude xpath='//str'/>
+	</Test>
+
+	<Test name='Test1'>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+		<Exclude xpath='//blob'/>
+	</Test>
+</Peach>
+";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			var config = new RunConfiguration();
+			config.singleIteration = true;
+			config.runName = "Test1";
+
+			var engine = new Engine(null);
+			engine.startFuzzing(dom, config);
+
+			var dm = dom.tests[1].stateModel.states["initial"].actions[0].dataModel;
+			Assert.AreEqual(1, dm.Count);
+			var c = dm[0] as Choice;
+			Assert.NotNull(c);
+			Assert.False(c.SelectedElement.isMutable);
+			Assert.AreEqual(3, c.choiceElements.Count);
+			Assert.True(c.choiceElements[0].isMutable);
+			Assert.True(c.choiceElements[1].isMutable);
+			Assert.False(c.choiceElements[2].isMutable);
+		}
+
+		[Test]
 		public void WaitTime()
 		{
 			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
@@ -356,7 +409,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual(10.5, dom.tests[0].waitTime);
 			Assert.AreEqual(99.9, dom.tests[0].faultWaitTime);

@@ -1,15 +1,15 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
+using Peach.Core;
 using Peach.Core.Analyzers;
 
-namespace Peach.Core.Test.Monitors
+namespace Peach.Pro.Test.Core.Monitors
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Category("Peach")]
 	class PingMonitorTests
 	{
 		class Params : Dictionary<string, string> { }
@@ -24,7 +24,7 @@ namespace Peach.Core.Test.Monitors
 			faults = null;
 		}
 
-		void _Fault(RunContext context, uint currentIteration, Dom.StateModel stateModel, Fault[] faults)
+		void _Fault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faults)
 		{
 			Assert.Null(this.faults);
 			this.faults = faults;
@@ -80,7 +80,7 @@ namespace Peach.Core.Test.Monitors
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
 			dom.tests[0].includedMutators.Add("StringCaseMutator");
 

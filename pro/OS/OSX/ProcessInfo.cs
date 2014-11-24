@@ -1,7 +1,8 @@
 using System;
 using System.Runtime.InteropServices;
-using NLog;
-namespace Peach.Core
+using Peach.Core;
+
+namespace Peach.Pro.OS.OSX
 {
 	[PlatformImpl(Platform.OS.OSX)]
 	public class ProcessInfoImpl : IProcessInfo

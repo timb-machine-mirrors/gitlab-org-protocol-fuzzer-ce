@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 using Peach.Core;
 
-namespace Peach.Enterprise.Analyzers
+namespace Peach.Pro.Core.Analyzers
 {
 	[Serializable]
 	public abstract class BasePythonAnalyzer : Analyzer

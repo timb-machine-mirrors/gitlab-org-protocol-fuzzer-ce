@@ -27,21 +27,22 @@
 // $Id$
 
 using System;
-using System.IO;
-using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-using System.Linq;
-using System.Threading;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
-using Peach.Core.Dom;
-using Proc = System.Diagnostics.Process;
+using System.Text;
 using System.Text.RegularExpressions;
-using NLog;
+using System.Threading;
+using Peach.Core;
+using Peach.Core.Agent;
+using Encoding = Peach.Core.Encoding;
+using Monitor = Peach.Core.Agent.Monitor;
 
-namespace Peach.Core.Agent.Monitors
+namespace Peach.Pro.OS.OSX.Agent.Monitors
 {
 	static class ConfigExtensions
 	{
@@ -100,8 +101,8 @@ namespace Peach.Core.Agent.Monitors
 		protected string _cwLogFile = "cw.log";
 		protected string _cwLockFile = "cw.lck";
 		protected string _cwPidFile = "cw.pid";
-		protected Proc _procHandler = null;
-		protected Proc _procCommand = null;
+		protected Process _procHandler = null;
+		protected Process _procCommand = null;
 		protected bool? _detectedFault = null;
 		protected ulong _totalProcessorTime = 0;
 		protected bool _faultOnEarlyExit = false;
@@ -210,6 +211,12 @@ namespace Peach.Core.Agent.Monitors
 
 		public override void SessionStarting()
 		{
+			_execHandler = Utilities.FindProgram(
+				Path.GetDirectoryName(_execHandler),
+				Path.GetFileName(_execHandler),
+				"ExecHandler"
+			);
+
 			if (_startOnCall == null)
 				_StartProcess();
 		}
@@ -257,7 +264,7 @@ namespace Peach.Core.Agent.Monitors
 			return null;
 		}
 
-		private ulong _GetTotalCputime(Proc p)
+		private ulong _GetTotalCputime(Process p)
 		{
 			try
 			{
@@ -274,7 +281,7 @@ namespace Peach.Core.Agent.Monitors
 			return _procCommand != null && !_procCommand.HasExited && !_IsZombie(_procCommand);
 		}
 
-		private bool _IsZombie(Proc p)
+		private bool _IsZombie(Process p)
 		{
 			try
 			{
@@ -288,7 +295,7 @@ namespace Peach.Core.Agent.Monitors
 
 		private bool _CommandExists()
 		{
-			using (var p = new Proc())
+			using (var p = new Process())
 			{
 				p.StartInfo = new ProcessStartInfo("which", "-s \"" + _command + "\"");
 				p.Start();
@@ -331,7 +338,7 @@ namespace Peach.Core.Agent.Monitors
 			if (_exploitableReads)
 				si.EnvironmentVariables["CW_EXPLOITABLE_READS"] = "1";
 
-			_procHandler = new Proc();
+			_procHandler = new Process();
 			_procHandler.StartInfo = si;
 
 			try
@@ -356,7 +363,7 @@ namespace Peach.Core.Agent.Monitors
 
 			try
 			{
-				_procCommand = Proc.GetProcessById(pid);
+				_procCommand = Process.GetProcessById(pid);
 			}
 			catch (ArgumentException ex)
 			{

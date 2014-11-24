@@ -3,7 +3,6 @@ using System.IO;
 
 using Peach.Core.Xsd;
 using System.Xml.Serialization;
-using System.ComponentModel;
 
 namespace Peach.Core.Test
 {

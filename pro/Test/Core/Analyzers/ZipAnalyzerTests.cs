@@ -1,13 +1,12 @@
-using System;
 using System.IO;
-using NUnit.Framework;
-using Peach.Core.Analyzers;
-using Peach.Core.IO;
-using Peach.Core.Cracker;
-using Peach.Core;
 using Ionic.Zip;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Analyzers;
+using Peach.Core.Cracker;
+using Peach.Core.IO;
 
-namespace Peach.Core.Test.Analyzers
+namespace Peach.Pro.Test.Core.Analyzers
 {
 	[TestFixture] [Category("Peach")]
 	class ZipAnalyzerTests

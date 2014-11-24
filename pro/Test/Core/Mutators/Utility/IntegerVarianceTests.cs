@@ -1,11 +1,12 @@
-using NUnit.Framework;
-using Peach.Core.Dom;
-using Peach.Core.Mutators.Utility;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Dom;
+using Peach.Pro.Core.Mutators.Utility;
 
-namespace Peach.Core.Test.Mutators.Utility
+namespace Peach.Pro.Test.Core.Mutators.Utility
 {
 	[TestFixture]
 	class IntegerVarianceTests
@@ -77,12 +78,12 @@ namespace Peach.Core.Test.Mutators.Utility
 				max = (long)num.MaxValue;
 			}
 
-			protected override void performMutation(Dom.DataElement obj, long value)
+			protected override void performMutation(Peach.Core.Dom.DataElement obj, long value)
 			{
 				LongMutation(value);
 			}
 
-			protected override void performMutation(Dom.DataElement obj, ulong value)
+			protected override void performMutation(Peach.Core.Dom.DataElement obj, ulong value)
 			{
 				ULongMutation(value);
 			}

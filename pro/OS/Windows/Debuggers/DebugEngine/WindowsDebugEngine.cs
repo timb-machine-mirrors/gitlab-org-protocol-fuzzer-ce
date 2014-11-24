@@ -27,24 +27,19 @@
 // $Id$
 
 using System;
+using System.Diagnostics;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Runtime.InteropServices;
-using System.Runtime;
-using System.Reflection;
-using System.Runtime.InteropServices.ComTypes;
-using System.Diagnostics;
 using System.Threading;
-
-using Peach.Core.Dom;
-using Peach.Core.Debuggers.DebugEngine.Tlb;
-
 using NLog;
+using Peach.Core;
+using Peach.Pro.OS.Windows.Debuggers.DebugEngine.Tlb;
+using Encoding = Peach.Core.Encoding;
 
-namespace Peach.Core.Debuggers.DebugEngine
+namespace Peach.Pro.OS.Windows.Debuggers.DebugEngine
 {
 	public class WindowsDebugEngine : IDisposable
 	{

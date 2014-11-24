@@ -3,13 +3,11 @@
 //
 
 using System;
-using System.Text;
-
+using NLog;
+using Peach.Core;
 using Peach.Core.Dom;
 
-using NLog;
-
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("StringLengthEdgeCase")]
 	[Description("Produce Gaussian distributed string lengths around numerical edge cases.")]

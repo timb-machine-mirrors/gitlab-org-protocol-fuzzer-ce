@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using Point=System.Drawing.Point;
 
-namespace Peach.Core.UI.Windows
+namespace Peach.Pro.OS.Windows.UI.Windows
 {
     /// <summary>
     /// Allows the searching, navigation, and manipulation of Hwnd objects.

@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Xml;
-
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.Dom.XPath;

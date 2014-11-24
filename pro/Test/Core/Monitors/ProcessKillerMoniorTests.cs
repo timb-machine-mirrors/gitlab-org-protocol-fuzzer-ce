@@ -1,15 +1,11 @@
-using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NUnit.Framework;
-using NUnit.Framework.Constraints;
-using Peach.Core.Analyzers;
-using Proc = System.Diagnostics.Process;
 using System.Diagnostics;
+using System.IO;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Analyzers;
 
-namespace Peach.Core.Test.Monitors
+namespace Peach.Pro.Test.Core.Monitors
 {
 	[TestFixture] [Category("Peach")]
 	class ProcessKillerMonitorTests
@@ -70,7 +66,7 @@ namespace Peach.Core.Test.Monitors
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
 			dom.tests[0].includedMutators.Add("StringCaseMutator");
 
@@ -95,7 +91,7 @@ namespace Peach.Core.Test.Monitors
 			// Specify a process name that is not running
 			Run(testProcess, IterationStarting);
 
-			var procs = Proc.GetProcessesByName(testProcess);
+			var procs = Process.GetProcessesByName(testProcess);
 			foreach (var p in procs)
 				p.Close();
 
@@ -108,7 +104,7 @@ namespace Peach.Core.Test.Monitors
 
 		void IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
 		{
-			Proc p = new Proc();
+			Process p = new Process();
 			p.StartInfo = new ProcessStartInfo(testProcess);
 			madeProcess = p.Start();
 			System.Threading.Thread.Sleep(1000);

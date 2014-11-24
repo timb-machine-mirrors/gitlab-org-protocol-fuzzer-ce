@@ -27,17 +27,15 @@
 // $Id$
 
 using System;
-using System.IO;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
 using System.Threading;
-
-using Peach.Core.Dom;
-
 using NLog;
+using Peach.Core;
+using Peach.Core.Agent;
+using Monitor = Peach.Core.Agent.Monitor;
 
-namespace Peach.Core.Agent.Monitors
+namespace Peach.Pro.Core.Agent.Monitors
 {
 	/// <summary>
 	/// Start a process

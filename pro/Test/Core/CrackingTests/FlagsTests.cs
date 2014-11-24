@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
+using Peach.Core.Dom;
 using Peach.Core.IO;
+using Peach.Core.Test;
+using Peach.Pro.Test.Core.Publishers;
 
-namespace Peach.Core.Test.CrackingTests
+namespace Peach.Pro.Test.Core.CrackingTests
 {
 	[TestFixture] [Category("Peach")]
 	class FlagsTests
@@ -43,10 +41,10 @@ namespace Peach.Core.Test.CrackingTests
 	</Test>
 </Peach>
 ";
-			var pub = new Peach.Core.Test.Publishers.TestPublisher();
+			var pub = new TestPublisher();
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].publishers[0] = pub;
 
 			RunConfiguration config = new RunConfiguration();
@@ -81,7 +79,7 @@ namespace Peach.Core.Test.CrackingTests
 ";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}", new byte[] { 0xe6 });
 
@@ -118,7 +116,7 @@ namespace Peach.Core.Test.CrackingTests
 ";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}", new byte[] { 0x00, 0xff });
 
@@ -166,7 +164,7 @@ namespace Peach.Core.Test.CrackingTests
 ";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
@@ -203,7 +201,7 @@ namespace Peach.Core.Test.CrackingTests
 </Peach>
 ".Fmt(size);
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			DataCracker cracker = new DataCracker();
 			cracker.CrackData(dom.dataModels[0], data);

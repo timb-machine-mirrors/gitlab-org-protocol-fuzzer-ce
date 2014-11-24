@@ -1,11 +1,11 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using Peach.Core.Dom;
 using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Dom;
 using Peach.Core.IO;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class StringUtf8BomStaticTests
@@ -15,7 +15,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringUtf8BomStatic");
 
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 			Assert.True(runner.IsSupported(str));
 
 			str.DefaultValue = new Variant("hello");
@@ -51,7 +51,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringUtf8BomStatic");
 
-			var str = new Dom.String("String") { DefaultValue = new Variant("Hello") };
+			var str = new Peach.Core.Dom.String("String") { DefaultValue = new Variant("Hello") };
 
 			var m = runner.Sequential(str);
 
@@ -63,7 +63,6 @@ namespace Peach.Core.Test.Mutators
 			foreach (var item in m)
 			{
 				var bs = item.Value;
-				var a = bs.ToArray();
 				var i = bs.IndexOf(token, 0);
 
 				// The utf8 bom should always be found
@@ -76,7 +75,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringUtf8BomStatic");
 
-			var str = new Dom.String("String") { DefaultValue = new Variant("Hello") };
+			var str = new Peach.Core.Dom.String("String") { DefaultValue = new Variant("Hello") };
 
 			var m = runner.Random(500, str);
 

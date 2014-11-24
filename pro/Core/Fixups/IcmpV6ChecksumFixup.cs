@@ -28,14 +28,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Net;
-using System.Linq;
-using Peach.Core.Fixups.Libraries;
-using Peach.Core.Dom;
 using System.Net.Sockets;
+using Peach.Core;
+using Peach.Core.Dom;
+using Peach.Pro.Core.Fixups.Libraries;
 
-namespace Peach.Core.Fixups
+namespace Peach.Pro.Core.Fixups
 {
 	[Description("Standard ICMPv6 checksum.")]
 	[Fixup("IcmpV6Checksum", true)]

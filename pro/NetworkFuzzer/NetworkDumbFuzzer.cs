@@ -7,8 +7,8 @@ using Peach.Core;
 using Peach.Core.IO;
 using Peach.Core.Dom;
 using Peach.Core.Analyzers;
-using Peach.Core.Proxy.Net;
-using Peach.Core.Mutators;
+using Peach.Pro.Core.Proxy;
+using Peach.Pro.Core.Proxy.Net;
 
 namespace PeachNetworkFuzzer
 {
@@ -25,7 +25,7 @@ namespace PeachNetworkFuzzer
 			proxy.Run();
 		}
 
-		void proxy_ServerDataReceived(Peach.Core.Proxy.Connection conn)
+		void proxy_ServerDataReceived(Connection conn)
 		{
 			MemoryStream sin = conn.ServerInputStream;
 			byte[] buff = new byte[sin.Length - sin.Position];
@@ -36,7 +36,7 @@ namespace PeachNetworkFuzzer
 			conn.ClientStream.Write(buff, 0, len);
 		}
 
-		void proxy_ClientDataReceived(Peach.Core.Proxy.Connection conn)
+		void proxy_ClientDataReceived(Connection conn)
 		{
 			MemoryStream sin = conn.ClientInputStream;
 			byte[] buff = new byte[sin.Length - sin.Position];

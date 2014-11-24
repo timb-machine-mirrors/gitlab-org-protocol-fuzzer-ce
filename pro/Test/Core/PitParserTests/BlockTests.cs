@@ -26,18 +26,13 @@
 
 // $Id$
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.PitParserTests
+namespace Peach.Pro.Test.Core.PitParserTests
 {
 	[TestFixture] [Category("Peach")]
 	class BlockTests

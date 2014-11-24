@@ -1,13 +1,11 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
 using System.Diagnostics;
-using Peach.Core;
-using NUnit.Framework;
+using System.IO;
 using NLog;
+using NUnit.Framework;
+using Peach.Core;
 
-namespace Peach.Core.Test.OS.OSX
+namespace Peach.Pro.Test.OS.OSX
 {
 	[TestFixture] [Category("Peach")]
 	public class PlatformTests

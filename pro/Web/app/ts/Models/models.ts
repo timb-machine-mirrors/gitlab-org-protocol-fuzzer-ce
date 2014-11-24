@@ -1,4 +1,4 @@
-﻿/// <reference path="../../../Scripts/typings/jquery/jquery.d.ts" />
+﻿/// <reference path="../includes.d.ts" />
 
 module DashApp.Models {
 	"use strict";
@@ -126,20 +126,25 @@ module DashApp.Models {
 		agentUrl: string = "";
 		monitors: Monitor[] = [];
 		description: string = "";
-	}
+		name: string = "";
+ 	}
 
 	export interface Monitor {
 		monitorClass: string;
 		path: number[];
 		map: ParameterMap[];
 		description: string;
+		name: string;
 	}
 
 	export interface ParameterMap {
 		key: string;
 		param: string;
+		type: string;
 		value: any;
-		//optional: boolean;
+		enumValues: string[];
+		required: boolean;
+		description: string;
 	}
 
 	export class QuestionTypes {

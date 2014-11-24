@@ -1,18 +1,12 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-
-using NUnit.Framework;
-
-using Peach.Core;
-using System.Xml.Serialization;
-using System.Xml.Schema;
 using System.Xml;
-using System.Reflection;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Pro.Core;
 
-namespace Peach.Enterprise.Test
+namespace Peach.Pro.Test.Core
 {
 	[TestFixture] [Category("Peach")]
 	public class PitDefinesTests

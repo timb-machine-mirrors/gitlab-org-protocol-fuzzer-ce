@@ -30,12 +30,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Security.Cryptography;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
-namespace Peach.Core.Fixups
+namespace Peach.Pro.Core.Fixups
 {
     [Description("Standard Hmac checksum.")]
 	[Fixup("Hmac", true)]

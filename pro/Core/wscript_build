@@ -40,8 +40,12 @@ deps = [
 	'Godel.Core.dll',
 
 	'Nancy.dll',
+	'Nancy.Metadata.Module.dll',
 	'Nancy.Hosting.Self.dll',
 	'Nancy.Serialization.JsonNet.dll',
+#	'Nancy.Swagger.Annotations.dll',
+#	'Nancy.Swagger.dll',
+#	'Swagger.ObjectModel.dll',
 
 	'Managed.Adb.dll',
 	'BouncyCastle.Crypto.dll',
@@ -65,5 +69,5 @@ bld(
 	resource = bld.path.ant_glob('Resources/**/* WebServices/Views/**/*'),
 	content = 'IronPython.StdLib',
 	name = 'Peach.Pro.dll',
-	namespace = 'Peach.Core',
+	namespace = 'Peach.Pro.Core',
 )

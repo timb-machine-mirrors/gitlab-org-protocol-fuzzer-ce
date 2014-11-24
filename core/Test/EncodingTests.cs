@@ -1,7 +1,5 @@
-using System;
 using System.Text;
 using System.Linq;
-using System.Collections.Generic;
 using NUnit.Framework;
 
 using Enc = System.Text.Encoding;
@@ -9,7 +7,8 @@ using System.Globalization;
 
 namespace Peach.Core.Test
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture] 
+	[Category("Peach")]
 	class EncodingTests
 	{
 		static byte[] AppendByte(byte[] buf, int val = -1)
@@ -22,7 +21,7 @@ namespace Peach.Core.Test
 			return list.ToArray();
 		}
 
-		static Enc latin1 = Enc.GetEncoding(1252);
+		static readonly Enc latin1 = Enc.GetEncoding(1252);
 
 		[Test]
 		public void TestBaseEncodings()
@@ -38,45 +37,35 @@ namespace Peach.Core.Test
 			// Why???
 			if (Platform.GetOS() == Platform.OS.Windows)
 			{
-				Assert.AreEqual(2, Enc.ASCII.GetMaxByteCount(1));
-				Assert.AreEqual(2, latin1.GetMaxByteCount(1));
-				Assert.AreEqual(4, Enc.BigEndianUnicode.GetMaxByteCount(1));
-				Assert.AreEqual(4, Enc.Unicode.GetMaxByteCount(1));
-				Assert.AreEqual(5, Enc.UTF7.GetMaxByteCount(1));
-				Assert.AreEqual(6, Enc.UTF8.GetMaxByteCount(1));
-				Assert.AreEqual(8, Enc.UTF32.GetMaxByteCount(1));
+				Assert.AreEqual(2, Enc.ASCII.GetMaxByteCount(1), "ASCII");
+				Assert.AreEqual(2, latin1.GetMaxByteCount(1), "latin1");
+				Assert.AreEqual(4, Enc.BigEndianUnicode.GetMaxByteCount(1), "BigEndianUnicode");
+				Assert.AreEqual(4, Enc.Unicode.GetMaxByteCount(1), "Unicode");
+				Assert.AreEqual(5, Enc.UTF7.GetMaxByteCount(1), "UTF7");
+				Assert.AreEqual(6, Enc.UTF8.GetMaxByteCount(1), "UTF8");
+				Assert.AreEqual(8, Enc.UTF32.GetMaxByteCount(1), "UTF32");
 			}
 			else
 			{
-				Assert.AreEqual(1, Enc.ASCII.GetMaxByteCount(1));
-				Assert.AreEqual(1, latin1.GetMaxByteCount(1));
-				Assert.AreEqual(2, Enc.BigEndianUnicode.GetMaxByteCount(1));
-				Assert.AreEqual(2, Enc.Unicode.GetMaxByteCount(1));
-				Assert.AreEqual(5, Enc.UTF7.GetMaxByteCount(1));
-				Assert.AreEqual(4, Enc.UTF8.GetMaxByteCount(1));
-				Assert.AreEqual(4, Enc.UTF32.GetMaxByteCount(1));
+				Assert.AreEqual(1, Enc.ASCII.GetMaxByteCount(1), "ASCII");
+				Assert.AreEqual(1, latin1.GetMaxByteCount(1), "latin1");
+				Assert.AreEqual(2, Enc.BigEndianUnicode.GetMaxByteCount(1), "BigEndianUnicode");
+				Assert.AreEqual(2, Enc.Unicode.GetMaxByteCount(1), "Unicode");
+				Assert.AreEqual(5, Enc.UTF7.GetMaxByteCount(1), "UTF7");
+				Assert.AreEqual(6, Enc.UTF8.GetMaxByteCount(1), "UTF8");
+				Assert.AreEqual(4, Enc.UTF32.GetMaxByteCount(1), "UTF32");
 			}
 		}
 
 		[Test]
 		public void TestConvert()
 		{
-			Assert.Throws<EncoderFallbackException>(delegate()
-			{
-				Encoding.ASCII.GetBytes("\u08abX");
-			});
+			Assert.Throws<EncoderFallbackException>(() => Encoding.ASCII.GetBytes("\u08abX"));
 
 			if (Platform.GetOS() == Platform.OS.Windows)
-			{
-				Assert.Throws<EncoderFallbackException>(delegate()
-				{
-					Encoding.Unicode.GetBytes("\ud860");
-				});
-			}
+				Assert.Throws<EncoderFallbackException>(() => Encoding.Unicode.GetBytes("\ud860"));
 			else
-			{
 				Encoding.Unicode.GetBytes("\ud860");
-			}
 
 			var bufD = Encoding.ISOLatin1.GetBytes("\x80");
 			Assert.AreEqual(1, bufD.Length);
@@ -95,9 +84,7 @@ namespace Peach.Core.Test
 			var buf7 = Encoding.UTF7.GetBytes("\u00abX");
 			Assert.AreEqual(6, buf7.Length);
 
-			string str;
-
-			str = Encoding.ASCII.GetString(buf);
+			var str = Encoding.ASCII.GetString(buf);
 			Assert.AreEqual("Hello", str);
 			str = Encoding.ISOLatin1.GetString(bufD);
 			Assert.AreEqual("\x80", str);
@@ -112,39 +99,21 @@ namespace Peach.Core.Test
 			str = Encoding.UTF32.GetString(buf32);
 			Assert.AreEqual("\u00abX", str);
 
-			Assert.Throws<DecoderFallbackException>(delegate()
-			{
-				Encoding.ASCII.GetString(AppendByte(buf, 0xff));
-			});
+			Assert.Throws<DecoderFallbackException>(() => Encoding.ASCII.GetString(AppendByte(buf, 0xff)));
 
-			Assert.Throws<DecoderFallbackException>(delegate()
-			{
-				Encoding.Unicode.GetString(AppendByte(buf16));
-			});
+			Assert.Throws<DecoderFallbackException>(() => Encoding.Unicode.GetString(AppendByte(buf16)));
 
-			Assert.Throws<DecoderFallbackException>(delegate()
-			{
-				Encoding.BigEndianUnicode.GetString(AppendByte(buf16be));
-			});
+			Assert.Throws<DecoderFallbackException>(() => Encoding.BigEndianUnicode.GetString(AppendByte(buf16be)));
 
-			Assert.Throws<DecoderFallbackException>(delegate()
-			{
-				Encoding.UTF32.GetString(AppendByte(buf32));
-			});
+			Assert.Throws<DecoderFallbackException>(() => Encoding.UTF32.GetString(AppendByte(buf32)));
 
-			Assert.Throws<DecoderFallbackException>(delegate()
-			{
-				Encoding.UTF8.GetString(AppendByte(buf8));
-			});
+			Assert.Throws<DecoderFallbackException>(() => Encoding.UTF8.GetString(AppendByte(buf8)));
 
-			Assert.Throws<DecoderFallbackException>(delegate()
-			{
-				Encoding.UTF7.GetString(AppendByte(buf7));
-			});
+			Assert.Throws<DecoderFallbackException>(() => Encoding.UTF7.GetString(AppendByte(buf7)));
 		}
 
 		[Test]
-		public void PartialUTF7()
+		public void PartialUtf7()
 		{
 			var buf7 = Encoding.UTF7.GetBytes("\u00abX");
 

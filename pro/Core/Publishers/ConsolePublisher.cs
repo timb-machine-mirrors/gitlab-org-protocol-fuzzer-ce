@@ -26,15 +26,13 @@
 
 // $Id$
 
-using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Text;
-using Peach.Core.Dom;
+using System.IO;
 using NLog;
+using Peach.Core;
 using Peach.Core.IO;
 
-namespace Peach.Core.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	[Publisher("Console", true)]
 	[Publisher("Stdout")]

@@ -4,14 +4,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.IO;
 using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Reflection;
-
+using Peach.Core;
 using Peach.Core.Dom;
 
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("StringUnicodeAbstractCharacters")]
 	[Description("Produce string comprised of unicode abstract characters.")]
@@ -23,7 +23,7 @@ namespace Peach.Core.Mutators
 		{
 			var items = new List<int[]>();
 
-			using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Peach.Core.Resources.NamedSequences.txt"))
+			using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Peach.Pro.Core.Resources.NamedSequences.txt"))
 			{
 				using (var rdr = new StreamReader(stream))
 				{

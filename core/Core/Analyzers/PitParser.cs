@@ -40,7 +40,6 @@ using NLog;
 
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using System.Globalization;
 using System.Net;
 
 namespace Peach.Core.Analyzers
@@ -300,7 +299,7 @@ namespace Peach.Core.Analyzers
 
 			// Load the schema
 			var set = new XmlSchemaSet();
-			var xsd = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "peach.xsd");
+			var xsd = Utilities.GetAppResourcePath("peach.xsd");
 			using (var tr = XmlReader.Create(xsd))
 			{
 				set.Add(PEACH_NAMESPACE_URI, tr);
@@ -397,15 +396,10 @@ namespace Peach.Core.Analyzers
 
 						if (!File.Exists(normalized))
 						{
-							string newFileName = Path.Combine(
-								Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-								fileName);
-
+							string newFileName = Utilities.GetAppResourcePath(fileName);
 							normalized = Path.GetFullPath(newFileName);
-
 							if (!File.Exists(normalized))
 								throw new PeachException("Error, Unable to locate Pit file [" + fileName + "].\n");
-
 							fileName = newFileName;
 						}
 

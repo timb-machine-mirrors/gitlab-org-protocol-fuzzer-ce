@@ -15,7 +15,8 @@ import "ocidl.idl";
 	helpstring("IPeachComTest Interface"),
 	pointer_default(unique)
 ]
-interface IPeachComTest : IDispatch{
+interface IPeachComTest : IDispatch
+{
 	[id(1), helpstring("method Method1")] HRESULT Method1([in] BSTR str, [out,retval] BSTR* ret);
 	[id(2), helpstring("method Method2")] HRESULT Method2([out,retval] BSTR* ret);
 	[id(3), helpstring("method Method3")] HRESULT Method3([in] BSTR str);

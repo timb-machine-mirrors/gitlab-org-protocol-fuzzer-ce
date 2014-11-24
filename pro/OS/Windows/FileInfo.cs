@@ -1,7 +1,7 @@
-using System;
 using System.IO;
+using Peach.Core;
 
-namespace Peach.Core
+namespace Peach.Pro.OS.Windows
 {
 	[PlatformImpl(Platform.OS.Windows)]
 	public class FileInfoImpl : IFileInfo

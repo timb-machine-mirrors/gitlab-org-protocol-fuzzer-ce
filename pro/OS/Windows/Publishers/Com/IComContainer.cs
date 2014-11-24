@@ -26,12 +26,7 @@
 
 // $Id$
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Peach.Core.Publishers.Com
+namespace Peach.Pro.OS.Windows.Publishers.Com
 {
 	public interface IComContainer
 	{

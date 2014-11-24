@@ -27,22 +27,18 @@
 // $Id$
 
 using System;
-using System.IO;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
 using System.Linq;
-
-using Peach.Core;
-using Peach.Core.Agent;
-using Peach.Core.Dom;
-
-using NLog;
-using Peach.Core.IO;
-
 using Newtonsoft.Json;
+using NLog;
+using Peach.Core;
+using Peach.Core.Dom;
+using Peach.Core.IO;
+using Encoding = Peach.Core.Encoding;
+using Logger = Peach.Core.Logger;
 
-namespace Peach.Core.Loggers
+namespace Peach.Pro.Core.Loggers
 {
 	/// <summary>
 	/// Standard file system logger.
@@ -283,7 +279,7 @@ namespace Peach.Core.Loggers
 				});
 		}
 
-		protected override void ActionStarting(RunContext context, Dom.Action action)
+		protected override void ActionStarting(RunContext context, Peach.Core.Dom.Action action)
 		{
 			var rec = new Fault.Action()
 			{
@@ -309,7 +305,7 @@ namespace Peach.Core.Loggers
 			states.Last().actions.Add(rec);
 		}
 
-		protected override void ActionFinished(RunContext context, Dom.Action action)
+		protected override void ActionFinished(RunContext context, Peach.Core.Dom.Action action)
 		{
 			var rec = states.Last().actions.Last();
 			if (rec.models == null)

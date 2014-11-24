@@ -19,14 +19,13 @@ def prepare_nunit_test(self):
 	self.ut_exec.extend([
 		self.env.NUNIT,
 		'-nologo',
-		'-noshadow',
 		'-out=%s' % self.outputs[1].abspath(),
 		'-xml=%s' % self.outputs[0].abspath(),
 	])
 
 	opts = self.generator.bld.options
 	if opts.testcase:
-		self.ut_exec.extend(['/run=%s' % opts.testcase])
+		self.ut_exec.extend(['-run=%s' % opts.testcase])
 
 	self.ut_exec.extend([ x.abspath() for x in self.inputs ])
 
@@ -57,22 +56,21 @@ def make_test(self):
 
 	if getattr(self, 'cs_task', None):
 		bintype = getattr(self, 'bintype', self.gen.endswith('.dll') and 'library' or 'exe')
-		dest = getattr(self, 'install_path', bintype=='exe' and '${BINDIR}' or '${LIBDIR}')
+		dest = getattr(self, 'install_path', bintype == 'exe' and '${BINDIR}' or '${LIBDIR}')
 		inputs = [ get_inst_node(self, dest, self.cs_task.outputs[0].name) ]
 
-		if self.gen.endswith('.dll'):
-			test = getattr(self.bld, 'nunit_task', None)
-			if not test:
-				xml = get_inst_node(self, '${PREFIX}/utest', 'nunit.xml')
-				log = get_inst_node(self, '${PREFIX}/utest', 'nunit.log')
-				outputs = [ xml, log ]
-				tg = self.bld(name = '')
-				test = tg.create_task('utest', inputs, outputs)
-				run_after_last_test(self, test)
-				setattr(self.bld, 'nunit_task', test)
-				tg.ut_fun = prepare_nunit_test
-			else:
-				test.inputs.extend(inputs)
+		test = getattr(self.bld, 'nunit_task', None)
+		if not test:
+			xml = get_inst_node(self, '${PREFIX}/utest', 'nunit.xml')
+			log = get_inst_node(self, '${PREFIX}/utest', 'nunit.log')
+			outputs = [ xml, log ]
+			tg = self.bld(name = '')
+			test = tg.create_task('utest', inputs, outputs)
+			run_after_last_test(self, test)
+			setattr(self.bld, 'nunit_task', test)
+			tg.ut_fun = prepare_nunit_test
+		else:
+			test.inputs.extend(inputs)
 
 	if not inputs:
 		raise Errors.WafError('No test to run at: %r' % self)

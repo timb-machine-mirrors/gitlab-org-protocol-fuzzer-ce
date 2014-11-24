@@ -28,13 +28,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Security.Cryptography;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using System.Security.Cryptography;
-using System.IO;
 
-namespace Peach.Core.Transformers.Encode
+namespace Peach.Pro.Core.Transformers.Encode
 {
 	[Description("Encode on output as Base64.")]
 	[Transformer("Base64Encode", true)]

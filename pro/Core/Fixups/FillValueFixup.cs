@@ -29,12 +29,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
+using Peach.Core;
 using Peach.Core.Dom;
-using Peach.Core.Fixups.Libraries;
 using Peach.Core.IO;
 
-namespace Peach.Core.Fixups
+namespace Peach.Pro.Core.Fixups
 {
 	[Description("Will fill a BitStream with incrementing values from 'start' to 'stop'.")]
 	[Fixup("FillValue", true)]

@@ -29,7 +29,7 @@ namespace Peach.Core.IO
 			_streams = new List<BitwiseStream>(capacity);
 		}
 
-		public BitStreamList(IEnumerable<BitStream> collection)
+		public BitStreamList(IEnumerable<BitwiseStream> collection)
 		{
 			_streams = new List<BitwiseStream>(collection);
 		}

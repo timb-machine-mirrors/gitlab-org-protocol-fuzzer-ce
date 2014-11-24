@@ -1,11 +1,10 @@
-using System;
 using System.Linq;
-
-using Peach.Core.Dom;
-
 using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Dom;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class DataElementRemoveTests
@@ -91,8 +90,8 @@ namespace Peach.Core.Test.Mutators
 
 			var runner = new MutatorRunner("DataElementRemove");
 
-			var array = new Dom.Array("Array") { occurs = 1 };
-			array.OriginalElement = new Dom.String("Array") { DefaultValue = new Variant("Hello") };
+			var array = new Peach.Core.Dom.Array("Array") { occurs = 1 };
+			array.OriginalElement = new Peach.Core.Dom.String("Array") { DefaultValue = new Variant("Hello") };
 
 			Assert.AreEqual(Encoding.ASCII.GetBytes("Hello"), array.Value.ToArray());
 			Assert.AreEqual(1, array.Count);

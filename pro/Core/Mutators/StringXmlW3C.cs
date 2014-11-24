@@ -2,17 +2,15 @@
 // Copyright (c) Deja vu Security
 //
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-
+using Ionic.Zip;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
-using Ionic.Zip;
-
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("StringXmlW3C")]
 	[Description("Performs the W3C parser tests. Only works on <String> elements with a <Hint name=\"type\" value=\"xml\">")]
@@ -25,7 +23,7 @@ namespace Peach.Core.Mutators
 
 		static StringXmlW3C()
 		{
-			stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Peach.Core.Resources.xmltests.zip");
+			stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Peach.Pro.Core.Resources.xmltests.zip");
 			zip = ZipFile.Read(stream);
 
 			var list = new List<string>();
@@ -53,7 +51,7 @@ namespace Peach.Core.Mutators
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			if (obj is Dom.String && obj.isMutable)
+			if (obj is Peach.Core.Dom.String && obj.isMutable)
 			{
 				Hint h = null;
 				if (obj.Hints.TryGetValue("XML", out h))

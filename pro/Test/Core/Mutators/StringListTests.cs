@@ -1,13 +1,12 @@
 using System;
 using System.IO;
 using System.Linq;
-
-using Peach.Core.Dom;
-
 using NUnit.Framework;
-using Peach.Core.IO;
+using Peach.Core;
+using Peach.Core.Dom;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class StringListTests
@@ -36,7 +35,7 @@ namespace Peach.Core.Test.Mutators
 			var hintEmpty = new Hint("StringList", "");
 			var hintValid = new Hint("StringList", file);
 
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 			Assert.False(runner.IsSupported(str));
 
 			str.Hints["StringList"] = hintEmpty;
@@ -53,7 +52,7 @@ namespace Peach.Core.Test.Mutators
 
 			var hintInvalid = new Hint("StringList", "some_missing_file");
 
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 			str.Hints["StringList"] = hintInvalid;
 
 			Assert.True(runner.IsSupported(str));
@@ -79,7 +78,7 @@ namespace Peach.Core.Test.Mutators
 
 			var hint = new Hint("StringList", file);
 
-			var str = new Dom.String();
+			var str = new Peach.Core.Dom.String();
 			str.Hints[hint.Name] = hint;
 
 			var m1 = runner.Sequential(str);
@@ -97,7 +96,7 @@ namespace Peach.Core.Test.Mutators
 
 			var hint = new Hint("StringList", file);
 
-			var str = new Dom.String();
+			var str = new Peach.Core.Dom.String();
 			str.Hints[hint.Name] = hint;
 
 			var m1 = runner.Random(100, str);

@@ -1,9 +1,7 @@
-﻿/// <reference path="../../../Scripts/typings/moment/moment.d.ts" />
-/// <reference path="../Services/peach.ts" />
-/// <reference path="../Models/models.ts" />
+﻿/// <reference path="../includes.d.ts" />
 
 module DashApp {
-	"use strict"; 
+	"use strict";
 
 	export interface MetricsParams extends ng.route.IRouteParamsService {
 		metric: string;
@@ -99,8 +97,6 @@ module DashApp {
 					"1st Iteration: " + item.data.iteration + "<br /></div>";
 			}
 		};
-		
-
 
 		// #region timeline
 
@@ -233,13 +229,14 @@ module DashApp {
 
 		//labels: this.faultTimelineData.map(i => moment(i.date).format("h:mm:ss a")),
 
-		public metrics_faultsOverTime_chart = {};
+		public metrics_faultsOverTime_chart = {
+			labels:	[]
+		};
 
 		// #region metrics_faultsOverTime_options
 
 		public metrics_faultsOverTime_options = {};
 		//#endregion
-
 
 		public gridMetricsMutator = {
 			data: "vm.mutatorData",
@@ -253,7 +250,6 @@ module DashApp {
 				{ field: "faultCount", displayName: "Fault Count" }
 			]
 		};
-
 
 		public gridMetricsElement = {
 			data: "vm.elementData",
@@ -306,7 +302,7 @@ module DashApp {
 		};
 
 		/*
-		 		{ field: "dataset", displayName: "Data Set" },
+				{ field: "dataset", displayName: "Data Set" },
 				{ field: "action", displayName: "Action" },
 				{ field: "element", displayName: "Element" },
 
@@ -356,7 +352,6 @@ module DashApp {
 									}
 								]
 							};
-
 
 							this.metrics_faultsOverTime_options = {
 								// Boolean - whether or not the chart should be responsive and resize when the browser does.
@@ -500,10 +495,6 @@ module DashApp {
 						break;
 				}
 			});
-
-
 		}
-
-
 	}
 }

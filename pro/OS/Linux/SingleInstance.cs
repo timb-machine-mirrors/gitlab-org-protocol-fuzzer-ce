@@ -1,8 +1,9 @@
 using System;
-using System.Runtime.InteropServices;
 using System.IO;
+using System.Runtime.InteropServices;
+using Peach.Core;
 
-namespace Peach.Core
+namespace Peach.Pro.OS.Linux
 {
 	[PlatformImpl(Platform.OS.Linux)]
 	public class SingleInstanceImpl : SingleInstance

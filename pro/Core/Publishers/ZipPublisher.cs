@@ -1,15 +1,14 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
+using System.Threading;
+using Ionic.Zip;
+using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
-using NLog;
-using Ionic.Zip;
 using Peach.Core.IO;
-using System.Threading;
 
-namespace Peach.Enterprise.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	[Publisher("Zip", true)]
 	[Parameter("FileName", typeof(string), "Name of file to open for reading/writing")]

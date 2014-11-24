@@ -27,10 +27,7 @@
 // $Id$
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Text;
-using System.Reflection;
 using System.Threading;
 using System.Linq;
 
@@ -409,7 +406,7 @@ namespace Peach.Core
 						context.controlStatesExecuted.Clear();
 
 
-						if (context.config.singleIteration && !context.controlIteration && iterationCount == 1)
+						if (context.config.singleIteration && !context.controlIteration)
 						{
 							logger.Debug("runTest: context.config.singleIteration == true");
 							break;

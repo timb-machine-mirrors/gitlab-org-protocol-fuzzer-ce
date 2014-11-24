@@ -1,14 +1,14 @@
-using Peach.Core;
-using Peach.Enterprise.WebServices.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
+using Peach.Core;
+using Peach.Pro.Core.Loggers;
+using Peach.Pro.Core.WebServices.Models;
 
-namespace Peach.Enterprise.WebServices
+namespace Peach.Pro.Core.WebServices
 {
 	public class JobRunner
 	{
@@ -167,7 +167,7 @@ namespace Peach.Enterprise.WebServices
 				HasMetrics = dom.tests
 					.Where(t => t.name == config.runName)
 					.SelectMany(t => t.loggers)
-					.Where(l => l is Peach.Enterprise.Loggers.MetricsLogger)
+					.Where(l => l is MetricsLogger)
 					.Any(),
 			};
 
