@@ -82,15 +82,8 @@ namespace Peach.Core
 
 		public static string EulaText(Feature version)
 		{
-			var res = "Peach.Core.Resources.Eula.{0}.txt".Fmt(version);
-
-			using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(res))
-			{
-				using (var rdr = new StreamReader(stream))
-				{
-					return rdr.ReadToEnd();
-				}
-			}
+			var res = "Peach.Pro.Core.Resources.Eula.{0}.txt".Fmt(version);
+			return Utilities.LoadStringResource(Assembly.GetExecutingAssembly(), res);
 		}
 
 		static string Read()
