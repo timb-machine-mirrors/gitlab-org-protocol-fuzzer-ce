@@ -36,27 +36,27 @@ namespace Peach.Core.Test.Mutators
 			Assert.False(runner.IsSupported(array));
 		}
 
-        [Test]
-        public void SequenceSupportedTest()
-        {
-            var runner = new MutatorRunner("ArrayReverseOrder");
+		[Test]
+		public void SequenceSupportedTest()
+		{
+			var runner = new MutatorRunner("ArrayReverseOrder");
 
-            var array = new Dom.Sequence("Sequence");
+			var array = new Dom.Sequence("Sequence");
 
-            // Empty array can be expanded
-            Assert.False(runner.IsSupported(array));
+			// Empty array can be expanded
+			Assert.False(runner.IsSupported(array));
 
-            // Single element array can be expanded
-            array.Add(new Dom.String("Str"));
-            Assert.False(runner.IsSupported(array));
+			// Single element array can be expanded
+			array.Add(new Dom.String("Str"));
+			Assert.False(runner.IsSupported(array));
 
-            // Anything > 1 element is expandable
-            array.Add(new Dom.String("Str2"));
-            Assert.True(runner.IsSupported(array));
+			// Anything > 1 element is expandable
+			array.Add(new Dom.String("Str2"));
+			Assert.True(runner.IsSupported(array));
 
-            array.isMutable = false;
-            Assert.False(runner.IsSupported(array));
-        }
+			array.isMutable = false;
+			Assert.False(runner.IsSupported(array));
+		}
 
 		[Test]
 		public void TestSequential()
@@ -79,36 +79,36 @@ namespace Peach.Core.Test.Mutators
 			Assert.AreEqual(exp, val);
 		}
 
-        [Test]
-        public void SequenceTestSequential()
-        {
-            var runner = new MutatorRunner("ArrayReverseOrder");
+		[Test]
+		public void SequenceTestSequential()
+		{
+			var runner = new MutatorRunner("ArrayReverseOrder");
 
-            var seq = new Dom.Sequence("Seq");
+			var seq = new Dom.Sequence("Seq");
 
-            //Add 10 strings to seq
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
+			//Add 10 strings to seq
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
 
-            for (int i = 0; i < seq.Count; ++i)
-                seq[i].DefaultValue = new Variant(i.ToString());
+			for (int i = 0; i < seq.Count; ++i)
+				seq[i].DefaultValue = new Variant(i.ToString());
 
-            var m = runner.Sequential(seq);
-            Assert.AreEqual(1, m.Count());
+			var m = runner.Sequential(seq);
+			Assert.AreEqual(1, m.Count());
 
-            var val = m.First().Value.ToArray();
-            var exp = Encoding.ASCII.GetBytes("9876543210");
+			var val = m.First().Value.ToArray();
+			var exp = Encoding.ASCII.GetBytes("9876543210");
 
-            Assert.AreEqual(exp, val);
-        }
+			Assert.AreEqual(exp, val);
+		}
 
 		[Test]
 		public void TestRandom()
@@ -134,38 +134,38 @@ namespace Peach.Core.Test.Mutators
 			}
 		}
 
-        [Test]
-        public void SequenceTestRandom()
-        {
-            var runner = new MutatorRunner("ArrayReverseOrder");
+		[Test]
+		public void SequenceTestRandom()
+		{
+			var runner = new MutatorRunner("ArrayReverseOrder");
 
-            var seq = new Dom.Sequence("Seq");
+			var seq = new Dom.Sequence("Seq");
 
-            //Add 10 strings to seq
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
+			//Add 10 strings to seq
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
 
-            for (int i = 0; i < seq.Count; ++i)
-                seq[i].DefaultValue = new Variant(i.ToString());
+			for (int i = 0; i < seq.Count; ++i)
+				seq[i].DefaultValue = new Variant(i.ToString());
 
-            var m = runner.Random(10, seq);
-            Assert.AreEqual(10, m.Count());
+			var m = runner.Random(10, seq);
+			Assert.AreEqual(10, m.Count());
 
-            var exp = Encoding.ASCII.GetBytes("9876543210");
+			var exp = Encoding.ASCII.GetBytes("9876543210");
 
-            foreach (var item in m)
-            {
-                var val = item.Value.ToArray();
-                Assert.AreEqual(exp, val);
-            }
-        }
+			foreach (var item in m)
+			{
+				var val = item.Value.ToArray();
+				Assert.AreEqual(exp, val);
+			}
+		}
 	}
 }

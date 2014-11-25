@@ -42,27 +42,27 @@ namespace Peach.Core.Test.Mutators
 			Assert.False(runner.IsSupported(array));
 		}
 
-        [Test]
-        public void SequenceSupportedTest()
-        {
-            var runner = new MutatorRunner("ArrayVariance");
+		[Test]
+		public void SequenceSupportedTest()
+		{
+			var runner = new MutatorRunner("ArrayVariance");
 
-            var array = new Dom.Sequence("Sequence");
+			var array = new Dom.Sequence("Sequence");
 
-            // Empty array can be expanded
-            Assert.False(runner.IsSupported(array));
+			// Empty array can be expanded
+			Assert.False(runner.IsSupported(array));
 
-            // Single element array can be expanded
-            array.Add(new Dom.String("Str"));
-            Assert.True(runner.IsSupported(array));
+			// Single element array can be expanded
+			array.Add(new Dom.String("Str"));
+			Assert.True(runner.IsSupported(array));
 
-            // Anything > 1 element is expandable
-            array.Add(new Dom.String("Str2"));
-            Assert.True(runner.IsSupported(array));
+			// Anything > 1 element is expandable
+			array.Add(new Dom.String("Str2"));
+			Assert.True(runner.IsSupported(array));
 
-            array.isMutable = false;
-            Assert.False(runner.IsSupported(array));
-        }
+			array.isMutable = false;
+			Assert.False(runner.IsSupported(array));
+		}
 
 		[Test]
 		public void TestMaxOutputSize()
@@ -100,10 +100,10 @@ namespace Peach.Core.Test.Mutators
 			Assert.AreEqual(92, mutatedDataModels.Count);
 		}
 
-        [Test]
-        public void SequenceMaxOutputSizeTest()
-        {
-            string xml = @"
+		[Test]
+		public void SequenceMaxOutputSizeTest()
+		{
+			string xml = @"
 <Peach>
 	<DataModel name='DM'>
         <Sequence name='seq'>
@@ -131,12 +131,12 @@ namespace Peach.Core.Test.Mutators
 </Peach>
 ";
 
-            RunEngine(xml);
+			RunEngine(xml);
 
-            // Size is 11 bytes, max is 1024, default is 11 bytes
-            // (1024 - 11)/11 - 1 (skip 0) = 91
-            // plus 1 reduce for 92 mutations total
-            Assert.AreEqual(92, mutatedDataModels.Count);
-        }
+			// Size is 11 bytes, max is 1024, default is 11 bytes
+			// (1024 - 11)/11 - 1 (skip 0) = 91
+			// plus 1 reduce for 92 mutations total
+			Assert.AreEqual(92, mutatedDataModels.Count);
+		}
 	}
 }

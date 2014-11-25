@@ -13,16 +13,16 @@ using Peach.Enterprise.Dom;
 
 namespace Peach.Enterprise.Test.Dom
 {
-    class BoolTests : DataModelCollector
-    {
-        [Test]
-        [Category("Peach")]
-        public void SimpleTest()
-        {
-            var b = new Bool();
+	class BoolTests : DataModelCollector
+	{
+		[Test]
+		[Category("Peach")]
+		public void SimpleTest()
+		{
+			var b = new Bool();
 
-            Assert.AreEqual(1, b.lengthAsBits);
-            Assert.AreEqual(LengthType.Bits, b.lengthType);
-        }
-    }
+			Assert.AreEqual(1, b.lengthAsBits);
+			Assert.AreEqual(LengthType.Bits, b.lengthType);
+		}
+	}
 }

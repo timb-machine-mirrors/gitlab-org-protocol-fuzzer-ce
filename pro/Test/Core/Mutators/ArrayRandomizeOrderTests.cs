@@ -37,30 +37,30 @@ namespace Peach.Core.Test.Mutators
 			Assert.False(runner.IsSupported(array));
 		}
 
-        [Test]
-        public void SequenceSupportedTest()
-        {
-            var runner = new MutatorRunner("ArrayRandomizeOrder");
+		[Test]
+		public void SequenceSupportedTest()
+		{
+			var runner = new MutatorRunner("ArrayRandomizeOrder");
 
-            var array = new Dom.Sequence("Seq");
-            
-            // Empty array can't be randomized
-            Assert.False(runner.IsSupported(array));
+			var array = new Dom.Sequence("Seq");
 
-            // Single element array can't be randomized
-            array.Add(new Dom.String());
-            Assert.False(runner.IsSupported(array));
+			// Empty array can't be randomized
+			Assert.False(runner.IsSupported(array));
 
-            // Anything > 1 element is randomizable
-            array.Add(new Dom.String());
-            Assert.True(runner.IsSupported(array));
+			// Single element array can't be randomized
+			array.Add(new Dom.String());
+			Assert.False(runner.IsSupported(array));
 
-            array.Add(new Dom.String());
-            Assert.True(runner.IsSupported(array));
+			// Anything > 1 element is randomizable
+			array.Add(new Dom.String());
+			Assert.True(runner.IsSupported(array));
 
-            array.isMutable = false;
-            Assert.False(runner.IsSupported(array));
-        }
+			array.Add(new Dom.String());
+			Assert.True(runner.IsSupported(array));
+
+			array.isMutable = false;
+			Assert.False(runner.IsSupported(array));
+		}
 
 		[Test]
 		public void TestSmallSequential()
@@ -86,30 +86,30 @@ namespace Peach.Core.Test.Mutators
 			Assert.GreaterOrEqual(totals.Count, 3);
 		}
 
-        [Test]
-        public void SequenceSmallSequentialTest()
-        {
-            var runner = new MutatorRunner("ArrayRandomizeOrder");
+		[Test]
+		public void SequenceSmallSequentialTest()
+		{
+			var runner = new MutatorRunner("ArrayRandomizeOrder");
 
-            runner.SeedOverride = 1;
+			runner.SeedOverride = 1;
 
-            var seq = new Dom.Sequence("Seq");
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
+			var seq = new Dom.Sequence("Seq");
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
 
-            for (int i = 0; i < seq.Count; ++i)
-                seq[i].DefaultValue = new Variant(i.ToString());
+			for (int i = 0; i < seq.Count; ++i)
+				seq[i].DefaultValue = new Variant(i.ToString());
 
-            // 3 elements, has 6 permutations
-            var m = runner.Sequential(seq);
-            Assert.AreEqual(6, m.Count());
+			// 3 elements, has 6 permutations
+			var m = runner.Sequential(seq);
+			Assert.AreEqual(6, m.Count());
 
-            var totals = m.Select(i => Encoding.ASCII.GetString(i.Value.ToArray())).Total();
+			var totals = m.Select(i => Encoding.ASCII.GetString(i.Value.ToArray())).Total();
 
-            // For 6 mutations, expect at least 3 unique
-            Assert.GreaterOrEqual(totals.Count, 3);
-        }
+			// For 6 mutations, expect at least 3 unique
+			Assert.GreaterOrEqual(totals.Count, 3);
+		}
 
 		[Test]
 		public void TestSmallRandom()
@@ -133,28 +133,28 @@ namespace Peach.Core.Test.Mutators
 			Assert.AreEqual(6, totals.Count);
 		}
 
-        [Test]
-        public void SequenceSmallRandomTest()
-        {
-            var runner = new MutatorRunner("ArrayRandomizeOrder");
+		[Test]
+		public void SequenceSmallRandomTest()
+		{
+			var runner = new MutatorRunner("ArrayRandomizeOrder");
 
-            var seq = new Dom.Sequence("Seq");
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
-            seq.Add(new Dom.String());
+			var seq = new Dom.Sequence("Seq");
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
+			seq.Add(new Dom.String());
 
-            for (int i = 0; i < seq.Count; ++i)
-                seq[i].DefaultValue = new Variant(i.ToString());
+			for (int i = 0; i < seq.Count; ++i)
+				seq[i].DefaultValue = new Variant(i.ToString());
 
-            // 3 elements, has 6 permutations
-            var m = runner.Random(100, seq);
-            Assert.AreEqual(100, m.Count());
+			// 3 elements, has 6 permutations
+			var m = runner.Random(100, seq);
+			Assert.AreEqual(100, m.Count());
 
-            var totals = m.Select(i => Encoding.ASCII.GetString(i.Value.ToArray())).Total();
+			var totals = m.Select(i => Encoding.ASCII.GetString(i.Value.ToArray())).Total();
 
-            // Should have hit every permutation
-            Assert.AreEqual(6, totals.Count);
-        }
+			// Should have hit every permutation
+			Assert.AreEqual(6, totals.Count);
+		}
 
 		[Test]
 		public void TestLargeSequential()
@@ -178,30 +178,30 @@ namespace Peach.Core.Test.Mutators
 			Assert.AreEqual(100, totals.Count);
 		}
 
-        [Test]
-        public void SequenceLargeSequentialTest()
-        {
-            var runner = new MutatorRunner("ArrayRandomizeOrder");
+		[Test]
+		public void SequenceLargeSequentialTest()
+		{
+			var runner = new MutatorRunner("ArrayRandomizeOrder");
 
-            var seq = new Dom.Sequence("Seq");
+			var seq = new Dom.Sequence("Seq");
 
-            for (int i = 0; i < 200; ++i)
-            {
-                seq.Add(new Dom.String());
-            }
+			for (int i = 0; i < 200; ++i)
+			{
+				seq.Add(new Dom.String());
+			}
 
-            for (int i = 0; i < seq.Count; ++i)
-                seq[i].DefaultValue = new Variant(" 0x{0:X2}".Fmt(i));
+			for (int i = 0; i < seq.Count; ++i)
+				seq[i].DefaultValue = new Variant(" 0x{0:X2}".Fmt(i));
 
-            // 3 elements, has 6 permutations
-            var m = runner.Sequential(seq);
-            Assert.AreEqual(100, m.Count());
+			// 3 elements, has 6 permutations
+			var m = runner.Sequential(seq);
+			Assert.AreEqual(100, m.Count());
 
-            var totals = m.Select(i => Encoding.ASCII.GetString(i.Value.ToArray())).Total();
+			var totals = m.Select(i => Encoding.ASCII.GetString(i.Value.ToArray())).Total();
 
-            // Expect 100 different mutations
-            Assert.AreEqual(100, totals.Count);
-        }
+			// Expect 100 different mutations
+			Assert.AreEqual(100, totals.Count);
+		}
 
 		[Test]
 		public void TestLargeRandom()
@@ -225,29 +225,29 @@ namespace Peach.Core.Test.Mutators
 			Assert.AreEqual(count, totals.Count);
 		}
 
-        [Test]
-        public void SequenceLargeRandomTest()
-        {
-            var runner = new MutatorRunner("ArrayRandomizeOrder");
+		[Test]
+		public void SequenceLargeRandomTest()
+		{
+			var runner = new MutatorRunner("ArrayRandomizeOrder");
 
-            var seq = new Dom.Sequence("Seq");
+			var seq = new Dom.Sequence("Seq");
 
-            for (int i = 0; i < 200; ++i)
-            {
-                seq.Add(new Dom.String());
-            }
+			for (int i = 0; i < 200; ++i)
+			{
+				seq.Add(new Dom.String());
+			}
 
-            for (int i = 0; i < seq.Count; ++i)
-                seq[i].DefaultValue = new Variant(" 0x{0:X2}".Fmt(i));
+			for (int i = 0; i < seq.Count; ++i)
+				seq[i].DefaultValue = new Variant(" 0x{0:X2}".Fmt(i));
 
-            const int count = 5000;
-            var m = runner.Random(count, seq);
-            Assert.AreEqual(count, m.Count());
+			const int count = 5000;
+			var m = runner.Random(count, seq);
+			Assert.AreEqual(count, m.Count());
 
-            var totals = m.Select(i => Encoding.ASCII.GetString(i.Value.ToArray())).Total();
+			var totals = m.Select(i => Encoding.ASCII.GetString(i.Value.ToArray())).Total();
 
-            // Expect all mutations to be different
-            Assert.AreEqual(count, totals.Count);
-        }
+			// Expect all mutations to be different
+			Assert.AreEqual(count, totals.Count);
+		}
 	}
 }

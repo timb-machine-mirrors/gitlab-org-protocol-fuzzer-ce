@@ -266,7 +266,9 @@ namespace Peach.Core.Dom
 		public override void WritePit(XmlWriter pit)
 		{
 			pit.WriteStartElement("String");
-			
+
+			pit.WriteAttributeString("name", name);
+
 			if(padCharacter != '\0')
 				pit.WriteAttributeString("padCharacter", padCharacter.ToString());
 
