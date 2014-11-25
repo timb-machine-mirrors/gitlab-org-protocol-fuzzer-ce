@@ -32,13 +32,16 @@ def config_uselib(conf, var, name, ext):
 		conf.env[uselib] = value
 
 def config_external(conf, name, ext):
-	msvc = Utils.to_list(ext.get('MSVC', []))
-	if msvc:
-		ver = '%s %s' % (conf.env['MSVC_COMPILER'], conf.env['MSVC_VERSION'])
-		conf.msg('Checking for ' + str(msvc), ver)
-		conf.to_log('msvc external=%r supported=%r -> %r' % (name, msvc, ver))
-		if str(ver) not in msvc:
-			conf.fatal('Compiler \'%s\' not in supported list of %s' % (ver, msvc))
+	msvc_ver = Utils.to_list(ext.get('MSVC_VER', []))
+	if msvc_ver:
+		ver = conf.get_version('CXX')
+		conf.msg('Checking msvc version', ver)
+		conf.to_log('msvc external=%r supported=%r -> %r' % (name, msvc_ver, ver))
+		found = False
+		for v in msvc_ver:
+			found = ver.startswith(v) or found
+		if not found:
+			conf.fatal('Found compiler version \'%s\' but requires one of %s' % (ver, msvc_ver))
 
 	paths = ext.get('INCLUDES', conf.env['INCLUDES'])
 	for x in ext.get('HEADERS', []):
