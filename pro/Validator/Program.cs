@@ -32,7 +32,7 @@ namespace PeachValidator
 
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new MainForm() { pitFileName = pit, sampleFileName = sample });
+			Application.Run(new MainForm() { PitFileName = pit, SampleFileName = sample });
 		}
 	}
 }
