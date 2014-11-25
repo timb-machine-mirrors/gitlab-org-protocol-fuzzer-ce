@@ -679,7 +679,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 		p['AllowUnsafeBlocks'] = getattr(tg, 'unsafe', False)
 
 		if getattr(tg, 'tsc', False):
-			self.global_props['TypeScriptOutFile'] = tg.target
+			self.global_props['TypeScriptOutFile'] = tg.tsc_out[0]
 
 		# Add ide_use task generator outputs as post build copy
 		# Using abspath since macros like $(ProjectDir) don't seem to work

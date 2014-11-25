@@ -7,8 +7,8 @@ module DashApp {
 
 	export class ConfigurationMonitorsController {
 		//#region private variables
-		private peach: Services.IPeachService;
-		private pitconfig: Services.IPitConfiguratorService;
+		private peach: Services.PeachService;
+		private pitconfig: Services.PitConfiguratorService;
 		private timeout: ng.ITimeoutService;
 		//#endregion
 
@@ -18,8 +18,8 @@ module DashApp {
 		constructor(
 			$scope: ViewModelScope,
 			$timeout: ng.ITimeoutService,
-			peachService: Services.IPeachService,
-			pitConfiguratorService: Services.IPitConfiguratorService
+			peachService: Services.PeachService,
+			pitConfiguratorService: Services.PitConfiguratorService
 		) {
 			$scope.vm = this;
 			this.peach = peachService;

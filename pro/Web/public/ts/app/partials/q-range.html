@@ -9,8 +9,11 @@
 		{{vm.currentQuestion.rangeMin}} and {{vm.currentQuestion.rangeMax}})
 	</label>
 	<div>
-		<input ng-model="vm.currentQuestion.value" ng-enter="vm.next()" ng-enter="vm.next()"
-					 step="1" ng-min="vm.currentQuestion.rangeMin"
+		<input ng-model="vm.currentQuestion.value" 
+		       ng-enter="vm.next()" 
+					 ng-enter="vm.next()"
+		       step="1" 
+					 ng-min="vm.currentQuestion.rangeMin"
 					 ng-max="vm.currentQuestion.rangeMax"
 					 type="number"
 					 ng-required="vm.currentQuestion.required"

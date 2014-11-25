@@ -59,8 +59,8 @@ module DashApp {
 
 	export class MetricsController {
 		private scope: ViewModelScope;
-		private peachSvc: Services.IPeachService;
-		private pitConfigSvc: Services.IPitConfiguratorService;
+		private peachSvc: Services.PeachService;
+		private pitConfigSvc: Services.PitConfiguratorService;
 		private visDataSet;
 
 		public metric: string;
@@ -75,9 +75,21 @@ module DashApp {
 		public bucketData: Models.IBucketMetric[] = [];
 
 
-		static $inject = ["$scope", "$routeParams", "pitConfiguratorService", "peachService", "visDataSet"];
+		static $inject = [
+			"$scope",
+			"$routeParams",
+			"pitConfiguratorService",
+			"peachService",
+			"visDataSet"
+		];
 
-		constructor($scope: ViewModelScope, $routeParams: MetricsParams, pitConfiguratorService: Services.IPitConfiguratorService, peachService: Services.IPeachService, visDataSet) {
+		constructor(
+			$scope: ViewModelScope,
+			$routeParams: MetricsParams,
+			pitConfiguratorService: Services.PitConfiguratorService,
+			peachService: Services.PeachService,
+			visDataSet
+		) {
 			$scope.vm = this;
 			this.scope = $scope;
 			this.metric = $routeParams.metric;
@@ -86,7 +98,6 @@ module DashApp {
 			//this.jobStartDate = this.pitConfigSvc.Job.startDate; 
 			this.visDataSet = visDataSet;
 			this.initializeData();
-
 		}
 
 		public bucketTimelineOptions: TimelineOptions = {

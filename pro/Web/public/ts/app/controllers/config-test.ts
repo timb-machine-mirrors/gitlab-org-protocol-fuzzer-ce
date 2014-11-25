@@ -6,9 +6,9 @@ module DashApp {
 	declare function ngGridFlexibleHeightPlugin(opts?: any): void;
 
 	export class ConfigurationTestController {
-		private pitConfigSvc: Services.IPitConfiguratorService;
+		private pitConfigSvc: Services.PitConfiguratorService;
 		private location: ng.ILocationService;
-		private peach: Services.IPeachService;
+		private peach: Services.PeachService;
 		private q: ng.IQService;
 		private pollerSvc;
 		private testPoller;
@@ -44,8 +44,8 @@ module DashApp {
 			$q: ng.IQService,
 			$location: ng.ILocationService,
 			poller,
-			peachService: Services.IPeachService,
-			pitConfiguratorService: Services.IPitConfiguratorService
+			peachService: Services.PeachService,
+			pitConfiguratorService: Services.PitConfiguratorService
 		) {
 			$scope.vm = this;
 			this.pitConfigSvc = pitConfiguratorService;

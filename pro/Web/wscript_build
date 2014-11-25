@@ -14,8 +14,8 @@ content = [
 ]
 
 public = bld.path.ant_glob('public/**/*', excl = [
-	'public/js/app/app.js*',
-	'public/js/test/test.js*',
+	'public/js/app/*',
+	'public/js/test/*',
 	'public/**/*.ts',
 ])
 
@@ -36,6 +36,7 @@ bld(
 	features = 'tsc',
 	name = 'Peach.Pro.Web.Test',
 	source = 'public/ts/test/reference.ts',
+	ide_content = content + public,
 	ide_aspnet = True,
 	target = 'public/js/test/test.js',
 )

@@ -38,6 +38,9 @@ def process_tsc(self):
 			dst = os.path.sep.join(dst)
 			i = self.bld.install_as('%s/%s' % (inst_to, dst), o, env=self.env, chmod=Utils.O644)
 			tools.utils.save_inst_task(self, i)
+			tsc_out = getattr(self, 'tsc_out', [])
+			tsc_out.append(dst)
+			self.tsc_out = tsc_out
 
 def parse_tsc(self):
 	env = self.env

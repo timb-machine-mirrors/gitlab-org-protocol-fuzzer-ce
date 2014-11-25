@@ -1,9 +1,6 @@
 /** Library references (unordered) */
 /// <reference path="../def/reference.ts" />
 
-/** The models package (unordered) */
-/// <reference path="models/models.ts" />
-
 /** Managed references (unordered) */
 //grunt-start
 /// <reference path="controllers/config-monitors.ts" />
@@ -18,8 +15,10 @@
 /// <reference path="controllers/pittest.ts" />
 /// <reference path="controllers/startjob.ts" />
 /// <reference path="controllers/wizard.ts" />
-/// <reference path="services/peach.ts" />
-/// <reference path="services/pitconfigurator.ts" />
+/// <reference path="models/PitConfig.ts" />
+/// <reference path="models/models.ts" />
+/// <reference path="services/PeachService.ts" />
+/// <reference path="services/PitConfiguratorService.ts" />
 //grunt-end
 
 /** Angular module dependencies
