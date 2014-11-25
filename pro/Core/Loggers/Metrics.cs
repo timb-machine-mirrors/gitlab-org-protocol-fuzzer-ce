@@ -26,7 +26,7 @@ namespace Peach.Pro.Core.Loggers
 		private List<Sample> samples = new List<Sample>();
 
 		private static string schema = Utilities.LoadStringResource(
-			Assembly.GetExecutingAssembly(), "Peach.Pro.Core.Loggers.Metrics.sql"
+			Assembly.GetExecutingAssembly(), "Peach.Pro.Core.Resources.Metrics.sql"
 		);
 
 		#region foreign key queries

@@ -23,7 +23,7 @@ namespace Peach.Pro.Core.Mutators
 
 		static StringXmlW3C()
 		{
-			stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Peach.Pro.Core.xmltests.zip");
+			stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Peach.Pro.Core.Resources.xmltests.zip");
 			zip = ZipFile.Read(stream);
 
 			var list = new List<string>();

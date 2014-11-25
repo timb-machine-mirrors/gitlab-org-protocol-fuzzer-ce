@@ -23,7 +23,7 @@ namespace Peach.Pro.Core.Mutators
 		{
 			var items = new List<int[]>();
 
-			using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Peach.Pro.Core.NamedSequences.txt"))
+			using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Peach.Pro.Core.Resources.NamedSequences.txt"))
 			{
 				using (var rdr = new StreamReader(stream))
 				{

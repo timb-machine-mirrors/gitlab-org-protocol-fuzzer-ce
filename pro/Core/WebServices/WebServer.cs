@@ -1,9 +1,3 @@
-using System;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Reflection;
-using System.Threading;
 using Nancy;
 using Nancy.Bootstrapper;
 using Nancy.Conventions;
@@ -18,6 +12,12 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using Peach.Pro.Core.Runtime;
+using System;
+using System.Linq;
+using System.Net;
+using System.Net.Sockets;
+using System.Reflection;
+using System.Threading;
 
 namespace Peach.Pro.Core.WebServices
 {
@@ -102,7 +102,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 			// Do this here since RootNamespaces is static, and
 			// ConfigureApplicationContainer can be called more than once.
-			ResourceViewLocationProvider.RootNamespaces.Add(Assembly.GetExecutingAssembly(), "Peach.Pro.Core.WebServices");
+			ResourceViewLocationProvider.RootNamespaces.Add(Assembly.GetExecutingAssembly(), "Peach.Pro.Core.WebServices.Views");
 		}
 
 		public Bootstrapper(WebContext context)
@@ -141,22 +141,54 @@ namespace Peach.Pro.Core.WebServices
 
 		protected override void RequestStartup(TinyIoCContainer container, Nancy.Bootstrapper.IPipelines pipelines, NancyContext context)
 		{
+			// NOTE: The pipelies do not get called when serving static content.
+			// Need to investigate disabling this if we want the back end to do
+			// global redirects to the EULA.
+			// https://github.com/NancyFx/Nancy/pull/982
+
+			base.RequestStartup(container, pipelines, context);
+
+			// Enable static content
+			StaticContent.Enable(pipelines);
+
+			// Ensure these get insterted after all default handlers
+			pipelines.BeforeRequest.AddItemToStartOfPipeline((ctx) =>
+			{
+				if (!Peach.Core.License.EulaAccepted)
+				{
+					if (ctx.Request.Path == "/favicon.ico")
+						return null;
+
+					if (ctx.Request.Path != "/eula")
+						return new RedirectResponse("/eula");
+				}
+
+				return null;
+			});
+
 			pipelines.OnError.AddItemToEndOfPipeline((ctx, ex) =>
 			{
 				// Wrap all exceptions in an error response
 				return ErrorResponse.FromException(ex);
 			});
-
-			base.RequestStartup(container, pipelines, context);
 		}
 
 		protected override NancyInternalConfiguration InternalConfiguration
 		{
 			get
 			{
-				// Tell Nancy views are embedded resources
-				return NancyInternalConfiguration.WithOverrides(c => c.ViewLocationProvider = typeof(ResourceViewLocationProvider));
+				// Allow overriding default nancy configuration
+				return NancyInternalConfiguration.WithOverrides(OnConfigurationBuilder);
 			}
+		}
+
+		void OnConfigurationBuilder(NancyInternalConfiguration c)
+		{
+			// Tell Nancy views are embedded resources
+			c.ViewLocationProvider = typeof(ResourceViewLocationProvider);
+
+			// Tell nancy to send all sttic content thru the request pipeline
+			c.StaticContentProvider = typeof(DisabledStaticContentProvider);
 		}
 	}
 

@@ -12,6 +12,8 @@ deps = [
 	'System.Web.Services.dll',
 	'System.Configuration.dll',
 
+	'Portable.Licensing.dll',
+
 	'NLog.dll',
 	'SharpPcap.dll',
 	'PacketDotNet.dll',
@@ -64,7 +66,7 @@ bld(
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
-	resource = bld.path.ant_glob('xmltests.zip NamedSequences.txt WebServices/*.sshtml Loggers/Metrics.sql'),
+	resource = bld.path.ant_glob('Resources/**/* WebServices/Views/**/*'),
 	content = 'IronPython.StdLib',
 	name = 'Peach.Pro.dll',
 	namespace = 'Peach.Pro.Core',
