@@ -30,6 +30,7 @@
     "moment": "~2.8.4",
     "ace-bootstrap": "*",
     "font-awesome": "~4.2.0",
-    "chosen-build": "~1.1.0"
+    "chosen-build": "~1.1.0",
+    "angular-mocks": "1.2.27"
   }
 }
