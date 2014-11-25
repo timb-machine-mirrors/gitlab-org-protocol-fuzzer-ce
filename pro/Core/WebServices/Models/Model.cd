@@ -1,0 +1,292 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Peach.Pro.Core.WebServices.Models.Library">
+    <Position X="0.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAABAEAgAAAgAAAAAAACBAQAAAAAAAEAAAAAAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\Library.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Groups" />
+      <Property Name="Versions" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.Group">
+    <Position X="0.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAEAQAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\Group.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Access" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.LibraryVersion">
+    <Position X="3" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAgAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\LibraryVersion.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Pits" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.LibraryPit">
+    <Position X="5.5" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAQAAgAAAAAAAAAAQAAAAAAEAAAAAAAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\LibraryPit.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Tags" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.Tag">
+    <Position X="5.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\Tag.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.Pit">
+    <Position X="8" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACABAAAgQAAgAAAAAAACAAQAAAAAAEEAAAAAAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\Pit.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Peaches" />
+      <Property Name="Tags" />
+      <Property Name="Versions" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.PitConfig">
+    <Position X="0.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAQgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\PitConfig.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Config" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.Parameter">
+    <Position X="0.5" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAIAABEgAAQAEAAAAAAAAAAAAAAAAQAgAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\Monitor.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Type" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.PeachVersion">
+    <Position X="5.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAAAAAAAAAAAAAAAEAAgAAAAAAgAAAAACA=</HashCode>
+      <FileName>WebServices\Models\PeachVersion.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.PitVersion">
+    <Position X="5.5" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>YAABAAAgAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAIA=</HashCode>
+      <FileName>WebServices\Models\PitVersion.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Files" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.PitFile">
+    <Position X="5.5" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAgAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\PitFile.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.PitMonitors">
+    <Position X="3" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\PitMonitors.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Monitors" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.Agent">
+    <Position X="3" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAAAAAAAAAAAQAAAAAAAAAABAAAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\Monitor.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Monitors" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.Monitor">
+    <Position X="3" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABAgAAAAAAAAAAQAAAAAAAABAAAAAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\Monitor.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Map" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.PitCopy">
+    <Position X="10.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAACBAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\PitCopy.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Pit" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.Node">
+    <Position X="8" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>KEAAAAAEABAAAAAAAAACAAQAAAAAAEAAAAAAAAAAIAA=</HashCode>
+      <FileName>WebServices\Models\Node.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Status" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Tags" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.FaultDetail">
+    <Position X="13" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAQAAQgAgAEAAAEAAQAAAAAAAAAAAAAAAAAAAAIA=</HashCode>
+      <FileName>WebServices\Models\FaultDetail.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Files" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.FaultSummary">
+    <Position X="13" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAgAAAAQAAAAAgAAAAACAACAACAIAAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\FaultSummary.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.File">
+    <Position X="13" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgIAAgAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\File.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.FaultTimelineMetric">
+    <Position X="17.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAIAAAAAAAAAAAAAAAAAABAAAAAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\JobMetrics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.BucketTimelineMetric">
+    <Position X="17.5" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAAoAQAAAAAgAAAAACAAAAAAQAAAAAAAQA=</HashCode>
+      <FileName>WebServices\Models\JobMetrics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.MutatorMetric">
+    <Position X="15.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAIAAAAAAGAAAAAACAAAIAAAAAAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\JobMetrics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.ElementMetric">
+    <Position X="15.5" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAIAAAAAgEAAAAAACQAAAAAAAABAAAAAQ=</HashCode>
+      <FileName>WebServices\Models\JobMetrics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.StateMetric">
+    <Position X="17.5" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>WebServices\Models\JobMetrics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.DatasetMetric">
+    <Position X="19.5" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAIAIAAAAAAEAAAAAACAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\JobMetrics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.BucketMetric">
+    <Position X="15.5" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAIAAAAAgGAAAAAAAAAAAAAAAAAAAIAAA=</HashCode>
+      <FileName>WebServices\Models\JobMetrics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.IterationMetric">
+    <Position X="19.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAIAAAAAAAgGAAAAAAAQAAAAAAAABAAAAAQ=</HashCode>
+      <FileName>WebServices\Models\JobMetrics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.TestResult">
+    <Position X="8" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAAAAAAAAAAAAAAAAAggAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\TestResult.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Status" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Events" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Peach.Pro.Core.WebServices.Models.TestEvent">
+    <Position X="10.5" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAEAACgAACAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\TestEvent.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Status" />
+    </ShowAsAssociation>
+  </Class>
+  <Enum Name="Peach.Pro.Core.WebServices.Models.GroupAccess" Collapsed="true">
+    <Position X="0.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>WebServices\Models\Group.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Peach.Pro.Core.WebServices.Models.ParameterType" Collapsed="true">
+    <Position X="0.5" Y="11" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAACAgwSgCAAAAAAAAAIAAAAAAAAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\Monitor.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Peach.Pro.Core.WebServices.Models.NodeStatus" Collapsed="true">
+    <Position X="10.5" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQIAQAAAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\Node.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Peach.Pro.Core.WebServices.Models.TestStatus" Collapsed="true">
+    <Position X="10.5" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAQAAAAAAAAAAAgAAAAAAAAgAAAAAAAAAAA=</HashCode>
+      <FileName>WebServices\Models\TestEvent.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
