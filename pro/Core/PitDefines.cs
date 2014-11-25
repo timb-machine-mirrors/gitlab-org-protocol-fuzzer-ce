@@ -1,15 +1,12 @@
-using Peach.Core;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml;
-using System.Xml.Schema;
 using System.Xml.Serialization;
+using Peach.Core;
 
-namespace Peach.Enterprise
+namespace Peach.Pro.Core
 {
 	[XmlRoot("PitDefines", IsNullable = false, Namespace = "http://peachfuzzer.com/2012/PitDefines")]
 	public class PitDefines

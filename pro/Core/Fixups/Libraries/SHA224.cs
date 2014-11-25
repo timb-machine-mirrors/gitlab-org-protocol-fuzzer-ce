@@ -31,7 +31,7 @@
 
 using System.Security.Cryptography;
 
-namespace Peach.Core.Fixups.Libraries
+namespace Peach.Pro.Core.Fixups.Libraries
 {
     internal sealed class SHAConstants
     {

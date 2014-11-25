@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Threading;
 using System.IO.Ports;
 using NLog;
+using Peach.Core;
 
-namespace Peach.Core.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	[Publisher("SerialPort", true)]
 	[Parameter("PortName", typeof(string), "Com interface for the device to connect to")]

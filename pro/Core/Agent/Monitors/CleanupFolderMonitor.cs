@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
 using System.Linq;
 using NLog;
+using Peach.Core;
+using Peach.Core.Agent;
 
-namespace Peach.Core.Agent.Monitors
+namespace Peach.Pro.Core.Agent.Monitors
 {
 	[Monitor("CleanupFolder", true)]
 	[Parameter("Folder", typeof(string), "The folder to cleanup.")]

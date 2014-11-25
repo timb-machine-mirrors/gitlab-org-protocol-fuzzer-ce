@@ -1,9 +1,7 @@
-using System;
-using Peach.Core;
-using Peach.Core.Mutators;
 using NUnit.Framework;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class ArrayEdgeCaseTests : DataModelCollector
@@ -19,8 +17,8 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("ArrayEdgeCase");
 
-			var array = new Dom.Array("Array");
-			array.OriginalElement = new Dom.String("Str");
+			var array = new Peach.Core.Dom.Array("Array");
+			array.OriginalElement = new Peach.Core.Dom.String("Str");
 			array.ExpandTo(0);
 
 			// Empty array can be expanded

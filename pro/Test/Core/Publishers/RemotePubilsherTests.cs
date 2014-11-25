@@ -4,7 +4,7 @@ using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Test;
 
-namespace Peach.Pro.Test.Publishers
+namespace Peach.Pro.Test.Core.Publishers
 {
 	[TestFixture]
 	[Category("Peach")]

@@ -1,16 +1,13 @@
 using System;
-using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
-using Peach.Core;
-using Peach.Core.Agent.Monitors;
-using NUnit.Framework;
-using System.Threading;
-using Peach.Core.Analyzers;
 using System.IO;
-using System.Text;
+using System.Linq;
+using System.Threading;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Analyzers;
 
-namespace Peach.Core.Test.Agent.Monitors
+namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 {
 	[TestFixture] [Category("Peach")]
 	public class PopupWatcherTest
@@ -27,7 +24,7 @@ namespace Peach.Core.Test.Agent.Monitors
 			faultIteration = "0";
 		}
 
-		void _Fault(RunContext context, uint currentIteration, Dom.StateModel stateModel, Fault[] faults)
+		void _Fault(RunContext context, uint currentIteration, Core.Dom.StateModel stateModel, Fault[] faults)
 		{
 			Assert.Null(this.faults);
 			this.faults = faults;
@@ -82,7 +79,7 @@ namespace Peach.Core.Test.Agent.Monitors
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
 			dom.tests[0].includedMutators.Add("StringCaseMutator");
 

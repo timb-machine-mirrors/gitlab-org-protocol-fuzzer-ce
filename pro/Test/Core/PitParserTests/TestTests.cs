@@ -26,19 +26,14 @@
 
 // $Id$
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-
 using NUnit.Framework;
-
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
+using Peach.Core.Dom;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.PitParserTests
+namespace Peach.Pro.Test.Core.PitParserTests
 {
 	[TestFixture] [Category("Peach")]
 	class TestTests
@@ -67,7 +62,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var config = new RunConfiguration() { singleIteration = true };
 			var engine = new Engine(null);
@@ -102,7 +97,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var config = new RunConfiguration() { singleIteration = true };
 			var engine = new Engine(null);
@@ -138,7 +133,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var config = new RunConfiguration() { singleIteration = true };
 			var engine = new Engine(null);
@@ -178,7 +173,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var config = new RunConfiguration() { singleIteration = true };
 			var engine = new Engine(null);
@@ -222,7 +217,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var config = new RunConfiguration() { singleIteration = true };
 			var engine = new Engine(null);
@@ -261,7 +256,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var config = new RunConfiguration() { singleIteration = true };
 			var engine = new Engine(null);
@@ -415,7 +410,7 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual(10.5, dom.tests[0].waitTime);
 			Assert.AreEqual(99.9, dom.tests[0].faultWaitTime);
@@ -548,6 +543,45 @@ namespace Peach.Core.Test.PitParserTests
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(1, count);
+		}
+
+		[Test]
+		public void TestTargetLifetime()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str'/>
+	</DataModel>
+
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action> 
+		</State>
+	</StateModel>
+
+	<Test name='Default' {0}>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>
+";
+
+			var dom1 = DataModelCollector.ParsePit(xml.Fmt(""));
+			Assert.AreEqual(Peach.Core.Dom.Test.Lifetime.Session, dom1.tests[0].TargetLifetime);
+
+			var dom2 = DataModelCollector.ParsePit(xml.Fmt("targetLifetime='session'"));
+			Assert.AreEqual(Peach.Core.Dom.Test.Lifetime.Session, dom2.tests[0].TargetLifetime);
+
+			var dom3 = DataModelCollector.ParsePit(xml.Fmt("targetLifetime='iteration'"));
+			Assert.AreEqual(Peach.Core.Dom.Test.Lifetime.Iteration, dom3.tests[0].TargetLifetime);
+
+			var ex = Assert.Throws<PeachException>(() =>
+				DataModelCollector.ParsePit(xml.Fmt("targetLifetime='foo'"))
+			);
+			Assert.That(ex.Message, Is.StringStarting("Error, Pit file failed to validate"));
 		}
 	}
 }

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Peach.Core.Dom;
+using Peach.Core;
 
-namespace Peach.Core.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	[Publisher("FilePerIteration", true)]
 	[Parameter("FileName", typeof(string), "Name of file to open for reading/writing")]

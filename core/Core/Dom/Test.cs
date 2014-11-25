@@ -28,10 +28,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using System.Xml.Serialization;
-
-using System.Linq;
 using System.ComponentModel;
 
 namespace Peach.Core.Dom
@@ -116,6 +113,24 @@ namespace Peach.Core.Dom
 	/// </summary>
 	public class Test : INamed, IOwned<Dom>
 	{
+		/// <summary>
+		/// Defines the lifetime of the fuzzing target.
+		/// </summary>
+		public enum Lifetime
+		{
+			/// <summary>
+			/// The fuzzing target is restarted once per fuzzing session.
+			/// </summary>
+			[XmlEnum("session")]
+			Session,
+
+			/// <summary>
+			/// The fuzzing target is restarted once per fuzzing iteration.
+			/// </summary>
+			[XmlEnum("iteration")]
+			Iteration,
+		}
+
 		#region Attributes
 
 		/// <summary>
@@ -179,6 +194,13 @@ namespace Peach.Core.Dom
 		[XmlAttribute]
 		[DefaultValue(1073741824)]
 		public ulong maxOutputSize { get; set; }
+
+		/// <summary>
+		/// Defines the lifetime of the fuzzing target.
+		/// </summary>
+		[XmlAttribute("targetLifetime")]
+		[DefaultValue("session")]
+		public Lifetime TargetLifetime { get; set; }
 
 		#endregion
 
@@ -273,6 +295,7 @@ namespace Peach.Core.Dom
 			waitTime = 0;
 			faultWaitTime = 2;
 			maxOutputSize = 1073741824; // 1024 * 1024 * 1024 (1Gb)
+			TargetLifetime = Lifetime.Session;
 
 			loggers = new List<Logger>();
 			mutables = new List<MarkMutable>();

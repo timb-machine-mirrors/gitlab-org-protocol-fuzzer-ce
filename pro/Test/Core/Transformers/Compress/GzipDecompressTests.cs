@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
+﻿using System.IO;
 using System.IO.Compression;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Transformers.Compress
+namespace Peach.Pro.Test.Core.Transformers.Compress
 {
     [TestFixture] [Category("Peach")]
     class GzipDecompressTests : DataModelCollector
@@ -48,7 +44,7 @@ namespace Peach.Core.Test.Transformers.Compress
 
             PitParser parser = new PitParser();
 
-            Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+            Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
             var dataModel = dom.tests[0].stateModel.states["Initial"].actions[0].dataModel;
             dataModel["Data"].DefaultValue = new Variant(data.ToArray());
 

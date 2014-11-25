@@ -1,20 +1,13 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml;
-using System.Xml.Schema;
-
+using System.IO;
 using System.Text.RegularExpressions;
-using NLog;
-
+using System.Xml;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using Peach.Core.Cracker;
 
-namespace Peach.Pro.Analyzers
+namespace Peach.Pro.Core.Analyzers
 {
     [Analyzer("Regex", true)]
     [Description("Break up a string using a regex. Each group will become strings. The group name will be used as the element name.")]

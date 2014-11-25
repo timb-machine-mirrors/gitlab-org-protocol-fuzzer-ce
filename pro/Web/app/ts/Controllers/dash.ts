@@ -1,7 +1,4 @@
-/// <reference path="../../../Scripts/typings/moment/moment.d.ts" />
-/// <reference path="../Services/pitconfigurator.ts" />
-/// <reference path="main.ts" />
-/// <reference path="startjob.ts" />
+/// <reference path="../includes.d.ts" />
 
 module DashApp {
 	"use strict";

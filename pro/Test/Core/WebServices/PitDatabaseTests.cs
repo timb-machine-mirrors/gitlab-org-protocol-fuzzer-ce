@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
 using NUnit.Framework;
-using Peach.Core.Agent;
-using Peach.Enterprise.WebServices;
 using Peach.Core;
+using Peach.Core.Agent;
+using Peach.Pro.Core.WebServices;
+using Monitor = Peach.Pro.Core.WebServices.Models.Monitor;
+using TestStatus = Peach.Pro.Core.WebServices.Models.TestStatus;
 
-
-namespace Peach.Enterprise.Test.WebServices
+namespace Peach.Pro.Test.Core.WebServices
 {
 	[TestFixture] [Category("Peach")]
 	public class PitDatabaseTests
@@ -322,18 +322,18 @@ namespace Peach.Enterprise.Test.WebServices
 			var pit = db.Entries.First();
 			var pitFile = pit.Versions[0].Files[0].Name;
 
-			var res = new Peach.Enterprise.WebServices.PitTester(root, pitFile);
+			var res = new PitTester(root, pitFile);
 
 			Assert.NotNull(res);
 
-			while (res.Status == Enterprise.WebServices.Models.TestStatus.Active)
+			while (res.Status == TestStatus.Active)
 				System.Threading.Thread.Sleep(1000);
 
-			Assert.AreEqual(Enterprise.WebServices.Models.TestStatus.Pass, res.Status);
+			Assert.AreEqual(TestStatus.Pass, res.Status);
 
 			foreach (var ev in res.Result.Events.ToList())
 			{
-				Assert.AreEqual(Enterprise.WebServices.Models.TestStatus.Pass, ev.Status);
+				Assert.AreEqual(TestStatus.Pass, ev.Status);
 			}
 		}
 
@@ -476,7 +476,7 @@ namespace Peach.Enterprise.Test.WebServices
 },
 ]";
 
-			var monitors = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Peach.Enterprise.WebServices.Models.Agent>>(json);
+			var monitors = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Pro.Core.WebServices.Models.Agent>>(json);
 			Assert.NotNull(monitors);
 
 			PitDatabase.SaveMonitors(pit, monitors);
@@ -515,7 +515,7 @@ namespace Peach.Enterprise.Test.WebServices
 			VerifyMonitor(monitors[3].Monitors[0], dom.tests[0].agents[2].monitors[0]);
 		}
 
-		private void VerifyMonitor(Enterprise.WebServices.Models.Monitor jsonMon, Core.Dom.Monitor domMon)
+		private void VerifyMonitor(Monitor jsonMon, Peach.Core.Dom.Monitor domMon)
 		{
 			Assert.AreEqual(jsonMon.MonitorClass, domMon.cls);
 			Assert.AreEqual(jsonMon.Map.Count, domMon.parameters.Count);
@@ -558,7 +558,7 @@ namespace Peach.Enterprise.Test.WebServices
 	],
 },
 ]";
-			var monitors = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Peach.Enterprise.WebServices.Models.Agent>>(json);
+			var monitors = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Pro.Core.WebServices.Models.Agent>>(json);
 
 			PitDatabase.SaveMonitors(pit, monitors);
 

@@ -28,20 +28,10 @@
 
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Collections;
-using System.Text;
-using System.Runtime.InteropServices;
-using System.Runtime;
-using System.Reflection;
-using System.Runtime.Serialization;
 using System.Xml;
 
 using Peach.Core.Analyzers;
 using Peach.Core.IO;
-using Peach.Core.Cracker;
-
-using NLog;
 
 namespace Peach.Core.Dom
 {

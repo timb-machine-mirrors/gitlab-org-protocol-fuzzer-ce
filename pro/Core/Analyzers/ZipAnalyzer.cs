@@ -1,19 +1,15 @@
 using System;
-using System.Xml;
-using System.Xml.Schema;
 using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.IO;
-using System.Reflection;
-
-using Peach.Core.Dom;
-using Peach.Core.IO;
+using System.Text.RegularExpressions;
+using Ionic.Zip;
 using Peach.Core;
 using Peach.Core.Cracker;
-using Ionic.Zip;
+using Peach.Core.Dom;
+using Peach.Core.IO;
+using Stream = Peach.Pro.Core.Dom.Stream;
 
-namespace Peach.Enterprise.Analyzers
+namespace Peach.Pro.Core.Analyzers
 {
 	[Analyzer("Zip", true)]
 	[Description("Converts Zip data in Blobs into the appropriate streams.")]
@@ -104,7 +100,7 @@ namespace Peach.Enterprise.Analyzers
 						cracker.CrackData(content, entryData);
 
 						var elemName = root.UniqueName(block.UniqueName("Stream"));
-						var stream = new Peach.Enterprise.Dom.Stream(elemName);
+						var stream = new Stream(elemName);
 
 						stream.DefaultValue = new Variant(entryName);
 

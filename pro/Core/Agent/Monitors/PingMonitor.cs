@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
-using System.Text;
 using System.Net.Sockets;
+using System.Text;
 using NLog;
+using Peach.Core;
+using Peach.Core.Agent;
+using ASCIIEncoding = Peach.Core.ASCIIEncoding;
+using Encoding = Peach.Core.Encoding;
 
-namespace Peach.Core.Agent.Monitors
+namespace Peach.Pro.Core.Agent.Monitors
 {
 	[Monitor("Ping", true)]
 	[Parameter("Host", typeof(string), "Host to ping")]

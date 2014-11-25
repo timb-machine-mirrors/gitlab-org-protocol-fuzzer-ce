@@ -1,7 +1,6 @@
 using Newtonsoft.Json;
-using System;
 
-namespace Peach.Enterprise.WebServices.Models
+namespace Peach.Pro.Core.WebServices.Models
 {
 	public enum TestStatus
 	{

@@ -1,10 +1,45 @@
-﻿body {
-    font-family: 'Segoe UI', sans-serif;
-		position: absolute;
-		left: 0;
-		top: 0;
-		right: 0;
-		bottom: 0;
+﻿@font-face {
+	font-family: 'Open Sans';
+	font-style: normal;
+	font-weight: 300;
+	src: local('Open Sans Light'), local('OpenSans-Light'), url('../../bower_components/ace-bootstrap/fonts/font1.woff') format('woff');
+}
+
+@font-face {
+	font-family: 'Open Sans';
+	font-style: normal;
+	font-weight: 400;
+	src: local('Open Sans'), local('OpenSans'), url('../../bower_components/ace-bootstrap/fonts/font2.woff') format('woff');
+}
+
+@font-face {
+	font-family: 'FontAwesome2';
+	src: url('../../bower_components/ace-bootstrap/fonts/fontawesome-webfont.eot?v=3.2.1');
+	src: url('../../bower_components/ace-bootstrap/fonts/fontawesome-webfont.eot?#iefix&v=3.2.1') format('embedded-opentype'),
+		url('../../bower_components/ace-bootstrap/fonts/fontawesome-webfont.woff?v=3.2.1') format('woff'),
+		url('../../bower_components/ace-bootstrap/fonts/fontawesome-webfont.ttf?v=3.2.1') format('truetype'),
+		url('../../bower_components/ace-bootstrap/fonts/fontawesome-webfont.svg#fontawesomeregular?v=3.2.1') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+	font-family: FontAwesome2;
+	font-weight: normal;
+	font-style: normal;
+	text-decoration: inherit;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	*margin-right: .3em;
+}
+
+body {
+	font-family: 'Segoe UI', sans-serif;
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
 }
 
 div#main-container {
@@ -20,7 +55,7 @@ div.main-container-inner {
 }
 
 .gridStyle {
-  border: 1px solid rgb(212,212,212);
+	border: 1px solid rgb(212,212,212);
 	height: 300px;
 }
 
@@ -52,11 +87,11 @@ a.disabled {
 }
 
 .nav-tabs > li {
-	cursor: pointer
+	cursor: pointer;
 }
 
 .dropdown-menu > li {
-	cursor: pointer
+	cursor: pointer;
 }
 
 div.tabs-left#metricstabs {
@@ -72,7 +107,7 @@ div.tabs-left#metricstabs {
 }
 
 span.accordion-toggle {
-	cursor: pointer
+	cursor: pointer;
 }
 
 .dropdown-light-blue li span:hover,
@@ -88,8 +123,7 @@ span.accordion-toggle {
 .dropdown-light-blue li.active div,
 .dropdown-light-blue li.active div:hover,
 .dropdown-light-blue .dropdown-submenu:hover > div,
-.nav-tabs .dropdown-light-blue li > div:focus
-{
-  background: #ecf3f9;
-  color: #445566;
+.nav-tabs .dropdown-light-blue li > div:focus {
+	background: #ecf3f9;
+	color: #445566;
 }

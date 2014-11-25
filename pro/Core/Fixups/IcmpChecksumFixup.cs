@@ -30,11 +30,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
+using Peach.Core;
 using Peach.Core.Dom;
-using Peach.Core.Fixups.Libraries;
+using Peach.Pro.Core.Fixups.Libraries;
 
-namespace Peach.Core.Fixups
+namespace Peach.Pro.Core.Fixups
 {
 	[Description("Standard ICMP checksum.")]
 	[Fixup("IcmpChecksum", true)]

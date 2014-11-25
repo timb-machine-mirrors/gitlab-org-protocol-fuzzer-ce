@@ -29,13 +29,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Linq;
+using Peach.Core;
 using Peach.Core.Dom;
-using System.Runtime.Serialization;
-using Action = Peach.Core.Dom.Action;
 
-namespace Peach.Core.Fixups
+namespace Peach.Pro.Core.Fixups
 {
 	[Description("Standard sequential increment fixup.")]
 	[Fixup("SequenceIncrement", true)]
@@ -65,11 +62,11 @@ namespace Peach.Core.Fixups
 
 		protected override Variant OnActionRun(RunContext ctx)
 		{
-			if (!(parent is Dom.Number) && !(parent is Dom.String && parent.Hints.ContainsKey("NumericalString")))
+			if (!(parent is Peach.Core.Dom.Number) && !(parent is Peach.Core.Dom.String && parent.Hints.ContainsKey("NumericalString")))
 				throw new PeachException("SequenceIncrementFixup has non numeric parent '" + parent.fullName + "'.");
 
 			bool increment = true;
-			ulong max = parent is Dom.Number ? ((Dom.Number)parent).MaxValue : ulong.MaxValue;
+			ulong max = parent is Peach.Core.Dom.Number ? ((Peach.Core.Dom.Number)parent).MaxValue : ulong.MaxValue;
 			ulong value = 0;
 			object obj = null;
 

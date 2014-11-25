@@ -28,15 +28,16 @@
 
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.IO;
+using System.Reflection;
+using System.Threading;
+using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Analyzers;
-
+using Peach.Core.Runtime;
 using SharpPcap;
-using System.Threading;
 
-namespace Peach.Core.Runtime
+namespace Peach.Pro.Core.Runtime
 {
 	/// <summary>
 	/// Command line interface for Peach 3.  Mostly backwards compatable with
@@ -98,7 +99,7 @@ namespace Peach.Core.Runtime
 		/// <summary>
 		/// The result of parsing the pit file
 		/// </summary>
-		protected Dom.Dom dom = null;
+		protected Peach.Core.Dom.Dom dom = null;
 
 		/// <summary>
 		/// Configuration options for the engine
@@ -688,7 +689,7 @@ Debug Peach XML File
 
 				using (var stream = new FileStream("peach.xsd", FileMode.Create, FileAccess.Write))
 				{
-					Xsd.SchemaBuilder.Generate(typeof(Xsd.Dom), stream);
+					Peach.Core.Xsd.SchemaBuilder.Generate(typeof(Peach.Core.Xsd.Dom), stream);
 
 					Console.WriteLine("Successfully generated {0}", stream.Name);
 				}

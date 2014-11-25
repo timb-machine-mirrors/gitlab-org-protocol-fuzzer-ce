@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
 using NUnit.Framework;
+using Peach.Pro.Core.Runtime;
 
 // ReSharper disable once CheckNamespace (required for NUnit SetupFixture)
-namespace Peach
+namespace Peach.Pro.Test.Core
 {
 	class AssertTestFail : TraceListener
 	{
@@ -33,18 +36,19 @@ namespace Peach
 		{
 			var pid = Process.GetCurrentProcess().Id;
 			var seed = Environment.TickCount * pid;
-			var rng = new Core.Random((uint)seed);
+			var rng = new Peach.Core.Random((uint)seed);
 			var ret = (ushort)rng.Next(min, max);
 			return ret;
 		}
 
-		static TestBase()
+		[SetUp]
+		public void Initialize()
 		{
 			Debug.Listeners.Insert(0, new AssertTestFail());
 
 			if (!(LogManager.Configuration != null && LogManager.Configuration.LoggingRules.Count > 0))
 			{
-				var consoleTarget = new ConsoleTarget {Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}"};
+				var consoleTarget = new ConsoleTarget { Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}" };
 
 				var config = new LoggingConfiguration();
 				config.AddTarget("console", consoleTarget);
@@ -55,12 +59,19 @@ namespace Peach
 				LogManager.Configuration = config;
 			}
 
-			Core.Runtime.Program.LoadPlatformAssembly();
+			Program.LoadPlatformAssembly();
 		}
-
-		[SetUp]
-		public void Initialize()
+	
+		public static MemoryStream LoadResource(string name)
 		{
+			var asm = Assembly.GetExecutingAssembly();
+			var fullName = "Peach.Pro.Test.Core.Resources." + name;
+			using (var stream = asm.GetManifestResourceStream(fullName))
+			{
+				var ms = new MemoryStream();
+				stream.CopyTo(ms);
+				return ms;
+			}
 		}
 	}
 
@@ -77,7 +88,6 @@ namespace Peach
 #else
 			Debug.Assert(false);
 #endif
-
 		}
 	}
 }

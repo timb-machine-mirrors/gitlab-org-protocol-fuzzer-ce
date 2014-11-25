@@ -27,17 +27,7 @@
 // $Id$
 
 using System;
-using System.Collections.Generic;
-using System.Collections;
-using System.Text;
-using System.Runtime.InteropServices;
-using System.Runtime;
-using System.Reflection;
-using System.Runtime.Serialization;
 using System.Xml;
-using System.Diagnostics;
-
-using NLog;
 
 namespace Peach.Core.Dom
 {

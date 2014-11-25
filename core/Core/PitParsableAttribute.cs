@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Peach.Core.Analyzers;
 using System.Xml;
 using Peach.Core.Dom;

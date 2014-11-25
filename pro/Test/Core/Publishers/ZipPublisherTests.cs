@@ -1,12 +1,11 @@
-using System;
-using System.Linq;
 using System.IO;
+using System.Linq;
+using Ionic.Zip;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
-using Ionic.Zip;
 
-namespace Peach.Enterprise.Test.Publishers
+namespace Peach.Pro.Test.Core.Publishers
 {
 	[TestFixture] [Category("Peach")]
 	class ZipPublisherTests

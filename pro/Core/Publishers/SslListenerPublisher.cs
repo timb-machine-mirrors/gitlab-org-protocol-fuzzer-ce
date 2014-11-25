@@ -1,18 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using System.IO; 
-using System.Net.Sockets;
 using System.Net.Security;
+using System.Net.Sockets;
+using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Authentication; 
-using System.Threading;
-
-using Peach.Core.IO; 
-
 using NLog;
+using Peach.Core;
 
-namespace Peach.Core.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	[Publisher("SslListener", true)]
 	[Parameter("Interface", typeof(IPAddress), "IP of interface to bind to")]

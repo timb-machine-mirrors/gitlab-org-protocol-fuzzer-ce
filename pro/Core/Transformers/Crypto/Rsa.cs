@@ -1,25 +1,16 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.IO.Compression;
-using System.IO;
-using System.Security.Cryptography;
-using Peach.Core.Dom;
-using Peach.Core.IO;
-using System.Linq;
-using Org.BouncyCastle.Pkcs;
+using NLog;
 using Org.BouncyCastle.Crypto.Encodings;
 using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Crypto.Tls;
-using Org.BouncyCastle.Security;
-using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Math;
+using Org.BouncyCastle.Security;
+using Peach.Core;
+using Peach.Core.Dom;
+using Peach.Core.IO;
 
-using NLog;
-
-namespace Peach.Core.Transformers.Crypto
+namespace Peach.Pro.Core.Transformers.Crypto
 {
 	[Transformer("Rsa", true, IsTest = true)]
 	[Description("RSA encryption and decryption")]

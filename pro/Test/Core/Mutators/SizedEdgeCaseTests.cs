@@ -1,9 +1,7 @@
-using System;
-using System.Linq;
-using Peach.Core;
 using NUnit.Framework;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class SizedEdgeCaseTests : DataModelCollector

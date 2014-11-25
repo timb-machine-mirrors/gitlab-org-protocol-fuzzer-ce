@@ -2,12 +2,11 @@
 // Copyright (c) Deja vu Security
 //
 
-using System;
 using System.IO;
-
+using Peach.Core;
 using Peach.Core.Dom;
 
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("StringList")]
 	[Description("Mutates string using a lines from a user defined file.")]
@@ -29,7 +28,7 @@ namespace Peach.Core.Mutators
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			if (obj is Dom.String && obj.isMutable)
+			if (obj is Peach.Core.Dom.String && obj.isMutable)
 			{
 				var str = getHint(obj, "StringList");
 				if (!string.IsNullOrEmpty(str))

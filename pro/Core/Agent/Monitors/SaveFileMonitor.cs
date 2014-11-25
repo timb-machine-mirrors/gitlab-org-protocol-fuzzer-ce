@@ -1,10 +1,9 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Peach.Core;
+using Peach.Core.Agent;
 
-namespace Peach.Core.Agent.Monitors
+namespace Peach.Pro.Core.Agent.Monitors
 {
 	/// <summary>
 	/// Save a file when a fault occurs.

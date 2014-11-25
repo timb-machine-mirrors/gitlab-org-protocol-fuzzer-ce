@@ -3,12 +3,10 @@
 //
 
 using System;
-
+using Peach.Core;
 using Peach.Core.Dom;
 
-using NLog;
-
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("NumberRandom")]
 	[Description("Produce random number in range of underlying element.")]
@@ -22,11 +20,11 @@ namespace Peach.Core.Mutators
 		public NumberRandom(DataElement obj)
 			: base(obj)
 		{
-			var asNum = obj as Dom.Number;
+			var asNum = obj as Peach.Core.Dom.Number;
 
 			if (asNum == null)
 			{
-				System.Diagnostics.Debug.Assert(obj is Dom.String);
+				System.Diagnostics.Debug.Assert(obj is Peach.Core.Dom.String);
 
 				total = maxCount;
 				gen = () => new Variant(context.Random.Next(long.MinValue, long.MaxValue).ToString());
@@ -67,12 +65,12 @@ namespace Peach.Core.Mutators
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			if (obj is Dom.String && obj.isMutable)
+			if (obj is Peach.Core.Dom.String && obj.isMutable)
 				return obj.Hints.ContainsKey("NumericalString");
 
 			// Ignore numbers <= 8 bits, they will be mutated
 			// with the NumericalVariance mutator
-			return obj is Dom.Number && obj.isMutable && obj.lengthAsBits > 8;
+			return obj is Peach.Core.Dom.Number && obj.isMutable && obj.lengthAsBits > 8;
 		}
 
 		public override int count

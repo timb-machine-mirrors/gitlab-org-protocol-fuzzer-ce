@@ -28,11 +28,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
+using Peach.Core;
 using Peach.Core.Dom;
 
-
-namespace Peach.Core.Fixups
+namespace Peach.Pro.Core.Fixups
 {
 	[Description("Provide scripting expression to perform fixup.")]
 	[Fixup("Expression", true)]

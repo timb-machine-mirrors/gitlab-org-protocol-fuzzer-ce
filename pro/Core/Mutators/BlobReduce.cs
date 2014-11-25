@@ -2,13 +2,12 @@
 // Copyright (c) Deja vu Security
 //
 
-using System;
 using System.IO;
-
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	/// <summary>
 	/// Picks a random range of bytes up to 255 inside the blob and removes it.

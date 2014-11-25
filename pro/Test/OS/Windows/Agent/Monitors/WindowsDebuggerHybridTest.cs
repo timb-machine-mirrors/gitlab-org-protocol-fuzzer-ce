@@ -1,17 +1,12 @@
 using System;
-using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
-using Peach.Core;
-using Peach.Core.Agent.Monitors;
-using NUnit.Framework;
-using System.Threading;
-using Peach.Core.Analyzers;
 using System.IO;
-using System.Text;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Analyzers;
 using Peach.Pro.OS.Windows.Agent.Monitors;
 
-namespace Peach.Core.Test.Agent.Monitors
+namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 {
 	[TestFixture] [Category("Peach")]
 	public class WindowsDebuggerHybridTest
@@ -30,7 +25,7 @@ namespace Peach.Core.Test.Agent.Monitors
 				Assert.Ignore("Cannot run the 64bit version of this test on a 32bit operating system.");
 		}
 
-		void _Fault(RunContext context, uint currentIteration, Dom.StateModel stateModel, Fault[] faults)
+		void _Fault(RunContext context, uint currentIteration, Core.Dom.StateModel stateModel, Fault[] faults)
 		{
 			Assert.Null(this.faults);
 			Assert.True(context.reproducingFault);
@@ -38,7 +33,7 @@ namespace Peach.Core.Test.Agent.Monitors
 			this.faults = faults;
 		}
 
-		void _AppendFault(RunContext context, uint currentIteration, Dom.StateModel stateModel, Fault[] faults)
+		void _AppendFault(RunContext context, uint currentIteration, Core.Dom.StateModel stateModel, Fault[] faults)
 		{
 			List<Fault> tmp = new List<Fault>();
 			if (this.faults != null)
@@ -90,7 +85,7 @@ namespace Peach.Core.Test.Agent.Monitors
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
 			dom.tests[0].includedMutators.Add("StringCaseMutator");
 
@@ -110,7 +105,7 @@ namespace Peach.Core.Test.Agent.Monitors
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators.Add("StringMutator");
 
 			RunConfiguration config = new RunConfiguration();
@@ -168,7 +163,7 @@ namespace Peach.Core.Test.Agent.Monitors
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(pit)));
+			Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(pit)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.range = true;

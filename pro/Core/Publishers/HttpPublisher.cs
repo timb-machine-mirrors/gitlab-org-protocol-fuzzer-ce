@@ -27,18 +27,17 @@
 // $Id$
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Collections.Generic;
 using System.Text;
-using System.Threading;
-
+using NLog;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using Encoding = Peach.Core.Encoding;
 
-using NLog;
-
-namespace Peach.Core.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	[Publisher("Http", true)]
 	[Parameter("Method", typeof(string), "Method type")]

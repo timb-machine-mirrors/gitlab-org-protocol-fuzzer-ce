@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
-
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
-using Peach.Core.IO;
-using Peach.Core.Publishers;
+using Peach.Core.Dom;
+using Peach.Core.Test;
+using Peach.Pro.Core.Publishers;
 
-namespace Peach.Core.Test
+namespace Peach.Pro.Test.Core
 {
 	[TestFixture] [Category("Peach")]
 	class RunTests
@@ -49,7 +44,7 @@ namespace Peach.Core.Test
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
 			dom.tests[0].includedMutators.Add("BlobExpandAllRandom");
 
@@ -122,7 +117,7 @@ namespace Peach.Core.Test
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators.Add("StringCaseUpper");
 			dom.tests[0].includedMutators.Add("StringCaseLower");
 			dom.tests[0].includedMutators.Add("DataElementRemove");
@@ -509,7 +504,7 @@ namespace Peach.Core.Test
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
@@ -569,7 +564,7 @@ namespace Peach.Core.Test
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].publishers[0] = new WantBytesPub("", new Dictionary<string, Variant>());
 
 			RunConfiguration config = new RunConfiguration();
@@ -614,7 +609,7 @@ namespace Peach.Core.Test
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
@@ -660,7 +655,7 @@ namespace Peach.Core.Test
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;

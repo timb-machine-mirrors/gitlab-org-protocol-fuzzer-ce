@@ -1,15 +1,14 @@
-﻿using NUnit.Framework;
-using Peach.Core;
-using Peach.Core.Agent.Monitors;
-using Peach.Core.Analyzers;
-using Peach.Core.Dom;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Analyzers;
+using Peach.Core.Dom;
+using Peach.Pro.Core.Agent.Monitors;
 
-namespace Peach.Pro.Test.Monitors
+namespace Peach.Pro.Test.Core.Monitors
 {
 	[TestFixture]
 	[Category("Peach")]
@@ -41,7 +40,7 @@ namespace Peach.Pro.Test.Monitors
 		void OnFault(
 			RunContext context,
 			uint currentIteration,
-			StateModel stateModel,
+			Peach.Core.Dom.StateModel stateModel,
 			Fault[] faults)
 		{
 			Assert.Null(this.faults);

@@ -60,7 +60,7 @@ def parse_tsc(self):
 		cwd = node.parent
 
 		# If this is a child, add it to the outputs
-		if cwd.is_child_of(basedir):
+		if cwd.is_child_of(basedir) and not node.name.endswith('.d.ts'):
 			outputs.append(node.change_ext('.js'))
 			outputs.append(node.change_ext('.js.map'))
 

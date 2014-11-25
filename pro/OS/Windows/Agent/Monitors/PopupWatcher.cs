@@ -28,12 +28,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
+using Peach.Core;
+using Peach.Core.Agent;
+using Monitor = Peach.Core.Agent.Monitor;
 
-namespace Peach.Core.Agent.Monitors
+namespace Peach.Pro.OS.Windows.Agent.Monitors
 {
 	[Monitor("PopupWatcher", true)]
 	[Parameter("WindowNames", typeof(string[]), "Window names separated by a ','")]
