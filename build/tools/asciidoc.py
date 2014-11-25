@@ -41,8 +41,7 @@ def configure(conf):
 
 	# Ensure fopub is initialized
 	test = conf.bldnode.make_node('docbook_test.xml')
-	pdf = test.change_ext('.pdf')
-	if not os.path.isfile(pdf.abspath()):
+	if not os.path.isfile(test.abspath()):
 		test.write('''<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <article lang="en">
@@ -77,8 +76,6 @@ def configure(conf):
 	]
 
 	docbook = j('docs', 'publishing', 'docbook-xsl-1.78.1')
-	conf.env['WEBHELP_PNG'] = j('docs', 'publishing', 'logo.png')
-	conf.env['WEBHELP_ICO'] = j('docs', 'publishing', 'favicon.ico')
 	conf.env['WEBHELP_DIR'] = j(docbook, 'webhelp')
 	conf.env['WEBHELP_XSL'] = j(conf.path.abspath(), docbook, 'webhelp', 'xsl', 'webhelp.xsl')
 
@@ -209,18 +206,6 @@ def apply_webhelp(self):
 	inst = self.bld.install_files('${BINDIR}/%s/docs' % self.name, template.ant_glob('**/*', excl='favicon.ico'), cwd = template, relative_trick = True, chmod = Utils.O644)
 	if inst:
 		self.install_extras.append(inst)
-
-	# Install favicon to BINDIR
-	ico = root.find_resource(self.env.WEBHELP_ICO)
-	inst = self.bld.install_files('${BINDIR}/%s/docs' % self.name, ico, cwd = ico.parent, relative_trick = True, chmod = Utils.O644)
-	if inst:
-		self.install_extras.append(inst)
-
-	png = root.find_resource(self.env.WEBHELP_PNG)
-	inst = self.bld.install_files('${BINDIR}/%s/docs' % self.name, png, cwd = png.parent, relative_trick = True, chmod = Utils.O644)
-	if inst:
-		self.install_extras.append(inst)
-
 
 @extension('.adoc')
 def adoc_hook(self, node):
