@@ -3,11 +3,10 @@
 /// <reference path="main.ts" />
 /// <reference path="startjob.ts" />
 
-
 module DashApp {
 	"use strict";
 
-	declare function ngGridFlexibleHeightPlugin(opts?: any): void; 
+	declare function ngGridFlexibleHeightPlugin(opts?: any): void;
 
 	export class DashController {
 
@@ -63,8 +62,7 @@ module DashApp {
 				keyboard: false,
 				backdrop: "static",
 				controller: StartJobController
-			})
-			.result.then((job: Models.Job) => {
+			}).result.then((job: Models.Job) => {
 				this.pitConfigSvc.StartJob(job);
 			});
 		}
@@ -94,8 +92,8 @@ module DashApp {
 			totalServerItems: "vm.job.faultCount",
 			showFooter: false,
 			plugins: [new ngGridFlexibleHeightPlugin({ minHeight: 300 })]
-		}; 
-		
+		};
+
 		public recentFaults: Models.Fault[] = [];
 
 		static $inject = ["$scope", "pitConfiguratorService", "$location", "$modal"];
@@ -110,7 +108,7 @@ module DashApp {
 				this.recentFaults = this.pitConfigSvc.Faults.sort((a: Models.Fault, b: Models.Fault) => {
 					if (a.iteration == b.iteration) { return 0; }
 					else if (a.iteration > b.iteration) { return -1; }
-					else { return 1;}
+					else { return 1; }
 				}).slice(0, 9);
 			});
 		}

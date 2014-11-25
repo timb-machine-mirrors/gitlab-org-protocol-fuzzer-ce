@@ -23,17 +23,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-using System.Threading;
 using System.Net.Sockets;
-
-using Peach.Core.Dom;
-
-using NLog;
 using System.Net;
-using Peach.Core.IO;
 
 namespace Peach.Core.Publishers
 {
@@ -46,7 +38,7 @@ namespace Peach.Core.Publishers
 		protected EndPoint _localEp = null;
 		protected EndPoint _remoteEp = null;
 
-		public TcpPublisher(Dictionary<string, Variant> args)
+		protected TcpPublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
 		}

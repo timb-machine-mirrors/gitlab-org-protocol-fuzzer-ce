@@ -1,5 +1,8 @@
 ﻿<div ng-switch="vm.isFaultSelected" style="min-height:387px">
-	<h3 ng-switch-when="false" style="text-align: center">No Fault selected. Return to the Summary tab.</h3>
+	<h3 ng-switch-when="false" 
+	    style="text-align: center">
+		No Fault selected. Return to the Summary tab.
+	</h3>
 	<table ng-switch-when="true">
 		<tr>
 			<td>Iteration:</td>
@@ -35,12 +38,19 @@
 				<table>
 					<tr>
 						<td>
-							<a href="{{vm.urlPrefix}}{{vm.currentFault.faultUrl}}/archive/fault.zip">Full Archive</a>
+							<a href="{{vm.urlPrefix}}{{vm.currentFault.faultUrl}}/archive/fault.zip">
+								Full Archive
+							</a>
 						</td>
 					</tr>
 					<tr ng-repeat="file in vm.currentFault.files">
 						<td>
-							<a href="{{vm.urlPrefix}}{{file.fileUrl}}/{{file.name}}">{{file.fullName}}</a>
+							<a href="{{vm.urlPrefix}}{{file.fileUrl}}/{{file.name}}">
+								{{file.fullName}}
+							</a>
+						</td>
+						<td>
+							{{file.size | filesize:2}}
 						</td>
 					</tr>
 				</table>

@@ -300,7 +300,7 @@ namespace Peach.Core.Analyzers
 
 			// Load the schema
 			var set = new XmlSchemaSet();
-			var xsd = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "peach.xsd");
+			var xsd = Utilities.GetAppResourcePath("peach.xsd");
 			using (var tr = XmlReader.Create(xsd))
 			{
 				set.Add(PEACH_NAMESPACE_URI, tr);

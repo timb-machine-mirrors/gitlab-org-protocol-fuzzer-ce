@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 
 using NUnit.Framework;
+using Peach.Core.Agent;
 using Peach.Enterprise.WebServices;
 using Peach.Core;
 
@@ -58,7 +59,6 @@ namespace Peach.Enterprise.Test.WebServices
        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
        xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
        author='Deja Vu Security, LLC'
-       description='IMG PIT'
        version='0.0.1'>
 
 	<Agent name='TheAgent'>
@@ -368,6 +368,29 @@ namespace Peach.Enterprise.Test.WebServices
 			var img = db.Entries.Where(e => e.Name == "IMG").FirstOrDefault();
 			Assert.NotNull(img);
 			Assert.True(img.Versions[0].Configured);
+		}
+
+		[Test]
+		public void TestMonitorParams()
+		{
+
+			var monitors = ClassLoader.GetAllByAttribute<MonitorAttribute>((t,a) => a.IsDefault);
+
+			bool errored = false;
+
+			db.ValidationEventHandler += (s, e) =>
+			{
+				errored = true;
+			};
+
+			foreach (var p in monitors.SelectMany(kv => kv.Value.GetAttributes<ParameterAttribute>()))
+			{
+				errored = false;
+
+				var testobj = db.ParameterAttrToModel(p);
+				Assert.IsNotNull(testobj);
+				Assert.IsFalse(errored);
+			}
 		}
 
 		[Test]

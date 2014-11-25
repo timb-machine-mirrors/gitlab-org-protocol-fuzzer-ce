@@ -20,6 +20,7 @@ namespace Peach.Core.Test
 			StringType.utf16,
 			StringType.utf16be,
 			StringType.utf32,
+			StringType.utf32be,
 			StringType.utf7,
 			StringType.utf8,
 		};

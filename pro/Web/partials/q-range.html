@@ -1,6 +1,13 @@
 ﻿<div>
-	<div class="header blue" ng-class="{hidden: vm.location.path() != '/configurator/setvars'}">{{vm.currentQuestion.shortName || vm.currentQuestion.key}}</div>
-	<label>{{vm.currentQuestion.q}} (value must be a number between {{vm.currentQuestion.rangeMin}} and {{vm.currentQuestion.rangeMax}})</label>
+	<div class="header blue"
+			 ng-class="{hidden: vm.location.path() != '/quickstart/setvars'}">
+		{{vm.currentQuestion.shortName || vm.currentQuestion.key}}
+	</div>
+	<label>
+		{{vm.currentQuestion.q}}
+		(value must be a number between
+		{{vm.currentQuestion.rangeMin}} and {{vm.currentQuestion.rangeMax}})
+	</label>
 	<div>
 		<input ng-model="vm.currentQuestion.value" ng-enter="vm.next()" ng-enter="vm.next()"
 					 step="1" ng-min="vm.currentQuestion.rangeMin"
@@ -14,7 +21,9 @@
 			<i class="icon-arrow-left"></i>
 			Back
 		</button>
-		<button class="btn btn-success btn-next" ng-click="vm.next()" ng-disabled="configuratorForm.$invalid">
+		<button class="btn btn-success btn-next" 
+		        ng-click="vm.next()" 
+						ng-disabled="configuratorForm.$invalid">
 			Next
 			<i class="icon-arrow-right icon-on-right"></i>
 		</button>

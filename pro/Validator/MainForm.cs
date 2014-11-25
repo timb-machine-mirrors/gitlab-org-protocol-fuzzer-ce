@@ -36,9 +36,8 @@ namespace PeachValidator
 			InitializeComponent();
 
 			setTitle();
-			AddNewDefine("Peach.Pwd=" + Path.GetDirectoryName(Assembly.GetCallingAssembly().Location));
-
-            var nconfig = new LoggingConfiguration();
+			AddNewDefine("Peach.Pwd=" + Utilities.ExecutionDirectory);
+           var nconfig = new LoggingConfiguration();
             logTarget = new MemoryTarget();
             nconfig.AddTarget("console", logTarget);
             logTarget.Layout = "${logger} ${message}";
@@ -158,7 +157,7 @@ namespace PeachValidator
 
                 // Display debug logs
                 textBoxLogs.AppendText(string.Join("\r\n", logTarget.Logs)); 
-            }
+			}
 			catch (Exception ex)
 			{
 				MessageBox.Show("Error cracking file: " + ex.ToString());

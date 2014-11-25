@@ -72,8 +72,7 @@ module DashApp.Models {
 		}
 
 		public s(name: string, value: any) {
-			if (this.containsKey(name))
-			{
+			if (this.containsKey(name)) {
 				var index = this.getIndex(name);
 				this.items[index].value = value;
 			}
@@ -90,7 +89,7 @@ module DashApp.Models {
 
 		public r(name: string): void {
 			var i = this.getIndex(name);
-			if(i >= 0) {
+			if (i >= 0) {
 				this.items.splice(i, 1);
 			}
 		}
@@ -99,7 +98,7 @@ module DashApp.Models {
 			var result = this.getIndex(name);
 			return (result != undefined);
 		}
-		
+
 		private getItem(name: string): StateItem {
 			return $.grep(this.items, (e: StateItem) => { return e.key == name; })[0];
 		}
@@ -127,20 +126,25 @@ module DashApp.Models {
 		agentUrl: string = "";
 		monitors: Monitor[] = [];
 		description: string = "";
-	}
+		name: string = "";
+ 	}
 
 	export interface Monitor {
 		monitorClass: string;
 		path: number[];
 		map: ParameterMap[];
 		description: string;
+		name: string;
 	}
 
 	export interface ParameterMap {
 		key: string;
 		param: string;
+		type: string;
 		value: any;
-		//optional: boolean;
+		enumValues: string[];
+		required: boolean;
+		description: string;
 	}
 
 	export class QuestionTypes {
@@ -149,7 +153,7 @@ module DashApp.Models {
 		static Number = "int";
 		static Range = "range";
 		static IPV4 = "ipv4";
-		static IPV6 = "ipv6"; 
+		static IPV6 = "ipv6";
 		static MACAddress = "hwaddr";
 		static NetworkInterface = "iface";
 		static OnCall = "oncall";
@@ -483,7 +487,14 @@ module DashApp.Models {
 		folderName: string;
 		timeStamp: string;
 		bucketName: string;
-		files: any[]
+		files: FaultFile[];
+	}
+
+	export interface FaultFile {
+		name: string;
+		fullName: string;
+		fileUrl: string;
+		size: number;
 	}
 
 	export interface PostMonitorsRequest {

@@ -39,12 +39,13 @@
 
 	<script src="../Scripts/ng-grid.min.js"></script>
 	<script src="../Scripts/ng-grid-flexible-height.js"></script>
-
+	<script src="../Content/js/chosen.jquery.min.js"></script>
 	<script src="../Content/js/typeahead-bs2.min.js"></script>
 	<script src="../Content/js/ace-elements.min.js"></script>
 	<script src="../Content/js/ace.min.js"></script>
 	<script src="../Content/js/ace-extra.min.js"></script>
 	<script src="../Scripts/moment.min.js"></script>
+
 
 	<script src="../Content/visjs/vis.js"></script>
 	<script src="../Content/js/angular-vis.js"></script>
@@ -62,6 +63,9 @@
 	<script src="js/Controllers/wizard.js"></script>
 	<script src="js/Controllers/metrics.js"></script>
 	<script src="js/Controllers/startjob.js"></script>
+	<script src="js/Controllers/config-variables.js"></script>
+	<script src="js/Controllers/config-monitors.js"></script>
+	<script src="js/Controllers/config-test.js"></script>
 	<script src="js/app.js"></script>
 
 </head>
@@ -205,54 +209,54 @@
 					<li class="tooltip-warning" data-original-title="{{vm.jobRunningTooltip}}" data-rel="tooltip" data-placement="right" ng-class="{'disabled': vm.CanConfigurePit == false}">
 						<a class="dropdown-toggle" href="#" ng-class="{'disabled': vm.CanConfigurePit == false}">
 							<i class="icon-desktop"></i>
-							<span class="menu-text"> Configure Pit </span>
+							<span class="menu-text">Quick Start</span>
 							<b class="arrow icon-angle-down"></b>
 						</a>
 						<ul class="submenu" style="display: none;">
-							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configurator/intro'}">
-								<a href="#/configurator/intro">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/quickstart/intro'}">
+								<a href="#/quickstart/intro">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="{'icon-ok-sign green': vm.IntroComplete}"></i>
 									Introduction
 								</a>
 							</li>
-							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configurator/setvars'}">
-								<a href="#/configurator/setvars">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/quickstart/setvars'}">
+								<a href="#/quickstart/setvars">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="{'icon-ok-sign green': vm.SetVarsComplete}"></i>
 									Set Variables
 								</a>
 							</li>
-							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configurator/fault'}">
-								<a href="#/configurator/fault">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/quickstart/fault'}">
+								<a href="#/quickstart/fault">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="{'icon-ok-sign green': vm.FaultComplete}"></i>
 									Fault Detection
 								</a>
 							</li>
-							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configurator/data'}">
-								<a href="#/configurator/data">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/quickstart/data'}">
+								<a href="#/quickstart/data">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="{'icon-ok-sign green': vm.DataComplete}"></i>
 									Data Collection
 								</a>
 							</li>
-							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configurator/auto'}">
-								<a href="#/configurator/auto">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/quickstart/auto'}">
+								<a href="#/quickstart/auto">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="{'icon-ok-sign green': vm.AutoComplete}"></i>
 									Automation
 								</a>
 							</li>
-							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configurator/test'}">
-								<a href="#/configurator/test">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/quickstart/test'}">
+								<a href="#/quickstart/test">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="{'icon-ok-sign green': vm.TestComplete}"></i>
 									Test
 								</a>
 							</li>
-							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configurator/done'}">
-								<a href="#/configurator/done">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/quickstart/done'}">
+								<a href="#/quickstart/done">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="{'icon-ok-sign green': vm.DoneComplete}"></i>
 									Done
@@ -260,28 +264,40 @@
 							</li>
 						</ul>
 					</li>
+
+					<li class="tooltip-warning" data-original-title="{{vm.jobRunningTooltip}}" data-rel="tooltip" data-placement="right" ng-class="{'disabled': vm.CanConfigurePit == false}">
+						<a class="dropdown-toggle" href="#" ng-class="{'disabled': vm.CanConfigurePit == false}">
+							<i class="icon-desktop"></i>
+							<span class="menu-text">Configuration</span>
+							<b class="arrow icon-angle-down"></b>
+						</a>
+						<ul class="submenu" style="display: none;">
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configuration/variables'}">
+								<a href="#/configuration/variables">
+									<i class="icon-double-angle-right"></i>
+									Variables
+								</a>
+							</li>
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configuration/monitors'}">
+								<a href="#/configuration/monitors">
+									<i class="icon-double-angle-right"></i>
+									Monitoring
+								</a>
+							</li>
+							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/configuration/test'}">
+								<a href="#/configuration/test">
+									<i class="icon-double-angle-right"></i>
+									Test
+								</a>
+							</li>
+						</ul>
+					</li>
+
 					<li>
 						<a href="/docs" target="_blank">
 							<i class="icon-book"></i>
 							<span class="menu-text"> Documentation </span>
 						</a>
-						<!--
-							<ul class="submenu">
-								<li>
-									<a href="#">
-										<i class="icon-double-angle-right"></i>
-										Chapter 1
-									</a>
-								</li>
-
-								<li>
-									<a href="#">
-										<i class="icon-double-angle-right"></i>
-										Chapter 2
-									</a>
-								</li>
-							</ul>
-						-->
 					</li>
 					<li>
 						<a href="https://forums.peachfuzzer.com" target="_blank">
@@ -317,7 +333,7 @@
 
 		var version = getHtmlVer();
 		if (version < 5) {
-			alert("This application requires an HTML 5 and ECMAScript 5 capable browser. Please upgrade your browser to a more recent version");
+			alert("This application requires an HTML 5 and ECMAScript 5 capable browser. Please upgrade your browser to a more recent version.");
 		}
 		else {
 			initialize();

@@ -59,10 +59,8 @@ namespace Peach.Core.Test.Mutators
 			var src = new byte[10];
 			var m = runner.Sequential(new Blob() { DefaultValue = new Variant(src) });
 
-			foreach (var item in m)
+			foreach (var val in m.Select(item => item.Value.ToArray()))
 			{
-				var val = item.Value.ToArray();
-
 				Assert.AreEqual(src.Length, val.Length);
 				Assert.AreNotEqual(src, val);
 			}
@@ -75,10 +73,8 @@ namespace Peach.Core.Test.Mutators
 			var src = new byte[1];
 			var m = runner.Sequential(new Blob() { DefaultValue = new Variant(src) });
 
-			foreach (var item in m)
+			foreach (var val in m.Select(item => item.Value.ToArray()))
 			{
-				var val = item.Value.ToArray();
-
 				Assert.AreEqual(src.Length, val.Length);
 				Assert.AreNotEqual(src, val);
 			}
@@ -87,14 +83,12 @@ namespace Peach.Core.Test.Mutators
 		[Test]
 		public void TestRandom()
 		{
-			var runner = new MutatorRunner("BlobChangeRandom");
+			var runner = new MutatorRunner("BlobChangeRandom") {SeedOverride = 0x31337};
 			var src = new byte[10];
 			var m = runner.Random(100, new Blob() { DefaultValue = new Variant(src) });
 
-			foreach (var item in m)
+			foreach (var val in m.Select(item => item.Value.ToArray()))
 			{
-				var val = item.Value.ToArray();
-
 				Assert.AreEqual(src.Length, val.Length);
 				Assert.AreNotEqual(src, val);
 			}
@@ -108,10 +102,8 @@ namespace Peach.Core.Test.Mutators
 			var m = runner.Random(100, new Blob() { DefaultValue = new Variant(src) });
 
 			var numSame = 0;
-			foreach (var item in m)
+			foreach (var val in m.Select(item => item.Value.ToArray()))
 			{
-				var val = item.Value.ToArray();
-
 				if (src.SequenceEqual(val))
 					++numSame;
 
@@ -129,10 +121,8 @@ namespace Peach.Core.Test.Mutators
 			var src = new byte[0];
 			var m = runner.Random(100, new Blob() { DefaultValue = new Variant(src) });
 
-			foreach (var item in m)
+			foreach (var val in m.Select(item => item.Value.ToArray()))
 			{
-				var val = item.Value.ToArray();
-
 				Assert.AreEqual(src, val);
 			}
 		}

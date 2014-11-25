@@ -52,7 +52,7 @@ namespace Peach.Core.Agent.Monitors
 	[Parameter("StartOnCall", typeof(string), "Start command on state model call", "")]
 	[Parameter("WaitForExitOnCall", typeof(string), "Wait for process to exit on state model call and fault if timeout is reached", "")]
 	[Parameter("WaitForExitTimeout", typeof(int), "Wait for exit timeout value in milliseconds (-1 is infinite)", "10000")]
-	public class Process : Monitor
+	public class ProcessMonitor : Monitor
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -69,7 +69,7 @@ namespace Peach.Core.Agent.Monitors
 		public string WaitForExitOnCall { get; private set; }
 		public int WaitForExitTimeout { get; private set; }
 
-		public Process(IAgent agent, string name, Dictionary<string, Variant> args)
+		public ProcessMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
 			: base(agent, name, args)
 		{
 			ParameterParser.Parse(this, args);

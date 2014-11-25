@@ -1,0 +1,273 @@
+﻿<form name="advConfigForm">
+	<div class="page-content">
+		<div class="page-header head">
+			<h1>Monitoring Configuration</h1>
+		</div>
+		<div class="row">
+			<div class="col-xs-12" style="padding: 0 30px 0 0;">
+				<div class="row" style="margin: 0 0 10px 0">
+					<div class="col-xs-6">
+						<span ng-show="advConfigForm.$dirty == false && advConfigForm.$pristine == false" 
+						      class="green">
+							Saved successfully.
+						</span>
+						<span ng-show="advConfigForm.$invalid == true && advConfigForm.$dirty == true" 
+						      class="red">
+							You have some validation issues to correct.
+						</span>
+						<span ng-show="vm.Agents.length == 0" 
+									class="red">
+							You'll need an Agent, click the "Add Agent" button.
+						</span>
+					</div>
+					<div class="col-xs-6 text-right">
+						<div>
+							<button class="btn btn-xs btn-danger" 
+							        ng-click="vm.Save(advConfigForm)" 
+											ng-disabled="advConfigForm.$pristine == true || advConfigForm.$dirty == false || advConfigForm.$invalid || vm.Agents.length == 0 || vm.Agents[0].monitors.length == 0">
+								Save
+							</button>
+							<button class="btn btn-xs btn-info" 
+											ng-click="vm.AddAgent()">
+								Add Agent
+								<i class="icon-plus icon-on-right"></i>
+							</button>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-12">
+						<div id="agentsaccordion" 
+						     class="accordion-style1 panel-group" 
+								 style="overflow: visible">
+							<div ng-repeat="agent in vm.Agents track by $index" 
+							     ng-init="agentIndex = $index" 
+							     class="panel panel-default" 
+									 style="overflow: visible">
+								<div class="panel-heading" 
+										 style="overflow: visible">
+									<table cellpadding="0" cellspacing="0" border="0" width="100%">
+										<tr>
+											<td>
+												<h4 class="panel-title">
+													<span class="accordion-toggle collapsed" 
+													      data-toggle="collapse" 
+													      data-parent="#agentsaccordion" 
+																href="#agentcollapse{{agentIndex}}">
+														<i class="icon-angle-down bigger-110" 
+														   data-icon-hide="icon-angle-down" 
+															 data-icon-show="icon-angle-right"></i>
+														&nbsp;{{agent.name || 'New Agent'}} ({{agent.agentUrl || 'local'}})
+													</span>
+												</h4>
+											</td>
+											<td align="right" style="padding-right: 5px">
+												<button class="btn btn-xs btn-info" 
+												        ng-click="vm.AgentUp(agentIndex)" 
+																ng-disabled="agentIndex == 0">
+													<i class="icon-angle-up"></i>
+												</button>
+												<button class="btn btn-xs btn-info" 
+												        ng-click="vm.AgentDown(agentIndex)" 
+																ng-disabled="agentIndex == vm.Agents.length - 1">
+													<i class="icon-angle-down"></i>
+												</button>
+												<button class="btn btn-xs btn-danger" 
+																ng-click="vm.RemoveAgent(agentIndex)">
+													<i class="icon-trash"></i>
+												</button>
+											</td>
+										</tr>
+									</table>
+								</div>
+								<div class="panel-collapse collapse" 
+								     id="agentcollapse{{agentIndex}}" 
+										 onmouseover="initTooltips()">
+									<div class="panel-body">
+										<table width="100%" style="margin-bottom: 10px">
+											<tr>
+												<td align="right">Name:</td>
+												<td>
+													<input type="text" 
+													       ng-model="agent.name" 
+													       placeholder="New Agent" 
+													       style="width: 300px" 
+																 ng-required="true" />
+													<i class="icon-question blue tooltip-info" 
+													   data-rel="tooltip" 
+													   data-placement="right" 
+													   style="cursor: pointer" 
+													   data-original-title="Friendly name for your agent">
+													</i>
+													<span class="red bolder">*</span>
+												</td>
+											</tr>
+											<tr>
+												<td align="right">Location:</td>
+												<td>
+													<input type="text" 
+													       ng-model="agent.agentUrl" 
+													       placeholder="local" 
+																 style="width: 300px" />
+													<i class="icon-question blue tooltip-info" 
+													   data-rel="tooltip" 
+													   data-placement="right" 
+													   style="cursor: pointer" 
+													   data-original-title="URL for the agent. Leave blank for local agent, or enter URL for remote agent.">
+													</i>
+												</td>
+											</tr>
+											<tr>
+												<td>&nbsp;</td>
+												<td align="right">
+													<span ng-show="vm.Agents[agentIndex].monitors.length == 0" 
+													      class="red">
+														You'll need a Monitor, click the "Add Monitor" button.
+													</span>
+													<div class="btn-group">
+														<button data-toggle="dropdown" 
+																		class="btn btn-xs btn-info dropdown-toggle">
+															Add Monitor
+															<i class="icon-plus icon-on-right"></i>
+														</button>
+														<ul class="dropdown-menu dropdown-danger pull-right dropdown-light-blue">
+															<li ng-repeat="monitor in vm.AvailableMonitors">
+																<div ng-click="vm.AddMonitor(agent,monitor)"
+																		 style="padding-right: 5px">
+																	{{monitor.monitorClass}}
+																</div>
+															</li>
+														</ul>
+													</div>
+												</td>
+											</tr>
+										</table>
+										<div id="monitorsaccordion{{agentIndex}}" 
+												 class="accordion-style1 panel-group">
+											<div ng-repeat="monitor in agent.monitors track by $index" 
+											     ng-init="monitorIndex = $index" 
+													 class="panel panel-default">
+												<div class="panel-heading">
+													<table cellpadding="0" cellspacing="0" border="0" width="100%">
+														<tr>
+															<td>
+																<h4 class="panel-title">
+																	<span class="accordion-toggle collapsed" 
+																	      data-toggle="collapse" 
+																	      data-parent="#monitorsaccordion{{agentIndex}}" 
+																				href="#monitorcollapse{{agentIndex}}{{monitorIndex}}">
+																		<i class="icon-angle-down bigger-110" 
+																		   data-icon-hide="icon-angle-down" 
+																			 data-icon-show="icon-angle-right"></i>
+																		&nbsp;{{monitor.name || 'New Monitor'}} ({{monitor.monitorClass}})
+																	</span>
+																</h4>
+															</td>
+															<td align="right" style="padding-right: 5px">
+																<button class="btn btn-xs btn-info" 
+																        ng-click="vm.MonitorUp(agentIndex, monitorIndex)" 
+																				ng-disabled="monitorIndex == 0">
+																	<i class="icon-angle-up"></i>
+																</button>
+																<button class="btn btn-xs btn-info" 
+																        ng-click="vm.MonitorDown(agentIndex, monitorIndex)" 
+																				ng-disabled="monitorIndex == agent.monitors.length - 1">
+																	<i class="icon-angle-down"></i>
+																</button>
+																<button class="btn btn-xs btn-danger" 
+																				ng-click="vm.RemoveMonitor(agentIndex, monitorIndex)">
+																	<i class="icon-trash"></i>
+																</button>
+															</td>
+														</tr>
+													</table>
+												</div>
+												<div class="panel-collapse collapse" 
+												     id="monitorcollapse{{agentIndex}}{{monitorIndex}}" 
+														 onmouseover="initTooltips()">
+													<table>
+														<tr>
+															<td>&nbsp;</td>
+															<td>
+																<span class="red bolder">*</span>
+																<span class="red">denotes required field</span>
+															</td>
+														</tr>
+														<tr>
+															<td align="right">Name:</td>
+															<td>
+																<input type="text" 
+																       ng-model="monitor.name" 
+																       style="width: 300px" 
+																			 placeholder="New Monitor" />
+																<i class="icon-question blue tooltip-info" 
+																   data-rel="tooltip" 
+																   data-placement="right" 
+																   style="cursor: pointer" 
+																	 data-original-title="Friendly name for your monitor"></i>
+															</td>
+														</tr>
+														<tr ng-repeat="mapitem in monitor.map" 
+																ng-init="mapIndex = $index">
+															<td style="text-align: right">
+																{{mapitem.param}}:
+															</td>
+															<td>
+																<div>
+																	<span ng-switch="mapitem.type">
+																		<input ng-switch-default 
+																		       ng-model="mapitem.value" 
+																		       type="text" 
+																		       style="width: 300px" 
+																					 ng-required="mapitem.required" />
+																		<input ng-switch-when="int" 
+																		       ng-model="mapitem.value" 
+																		       step="1" 
+																		       type="number" 
+																		       integer 
+																					 ng-required="mapitem.required" />
+																		<input ng-switch-when="range" 
+																		       ng-model="mapitem.value" 
+																		       step="1" ng-min="mapitem.min" 
+																		       ng-max="mapitem.max" 
+																		       type="number" 
+																		       ng-required="mapitem.required" 
+																					 integer />
+																		<input ng-switch-when="bool" 
+																		       type="checkbox" 
+																		       ng-model="mapitem.value" 
+																					 ng-checked="mapitem.value" />
+																		<select ng-switch-when="enum" 
+																		        ng-model="mapitem.value" 
+																		        ng-options="item for item in mapitem.enumValues" 
+																						ng-required="mapitem.required" />
+																	</span>
+																	<i class="icon-question blue tooltip-info" 
+																	   data-rel="tooltip" 
+																	   data-placement="right" 
+																	   style="cursor: pointer" 
+																		 data-original-title="{{mapitem.description}}"></i>
+																	<span class="red bolder" 
+																	      ng-show="mapitem.required">*</span>
+																</div>
+															</td>
+														</tr>
+													</table>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		function initTooltips() {
+			$('[data-rel=tooltip]').tooltip();
+		}
+	</script>
+</form>

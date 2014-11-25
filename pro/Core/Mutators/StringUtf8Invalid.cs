@@ -103,12 +103,7 @@ namespace Peach.Core.Mutators
 			var buf = Encoding.UTF8.GetBytes(str);
 
 			// Pick number from 1-6 (stddev = 5/3
-			int num;
-			do
-			{
-				num = (int)Math.Round(Math.Abs(context.Random.NextGaussian(0, 1.6666))) + 1;
-			}
-			while (num > 6);
+			var num = context.Random.PickSix();
 
 			var indices = context.Random.Permutation(buf.Length, num);
 

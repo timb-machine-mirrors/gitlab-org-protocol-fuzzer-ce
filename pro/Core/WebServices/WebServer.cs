@@ -43,7 +43,7 @@ namespace Peach.Enterprise.WebServices
 		{
 			var enumerable = context.Request.Headers.Accept;
 
-			var ranges = enumerable.OrderByDescending(o => o.Item2).Select(o => MediaRange.FromString(o.Item1)).ToList();
+			var ranges = enumerable.OrderByDescending(o => o.Item2).Select(o => new MediaRange(o.Item1)).ToList();
 			foreach (var item in ranges)
 			{
 				if (item.Matches("application/json"))
@@ -123,7 +123,6 @@ namespace Peach.Enterprise.WebServices
 			container.Register<IndexService>();
 			container.Register<ErrorStatusCodeHandler>();
 			container.Register<ResourceViewLocationProvider>();
-
 		}
 
 		protected override void ConfigureRequestContainer(TinyIoCContainer container, NancyContext context)
@@ -315,7 +314,10 @@ namespace Peach.Enterprise.WebServices
 
 					try
 					{
-						System.Diagnostics.Process.Start(svc.Uri.ToString());
+						if (!System.Diagnostics.Debugger.IsAttached)
+						{
+							System.Diagnostics.Process.Start(svc.Uri.ToString());
+						}
 					}
 					catch
 					{

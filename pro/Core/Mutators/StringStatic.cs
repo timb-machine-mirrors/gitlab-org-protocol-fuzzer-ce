@@ -39,18 +39,21 @@ namespace Peach.Core.Mutators
 			set;
 		}
 
-		public override void sequentialMutation(DataElement obj)
+		public sealed override void sequentialMutation(DataElement obj)
 		{
-			obj.mutationFlags = MutateOverride.Default;
-			obj.MutatedValue = new Variant(values[mutation]);
+			performMutation(obj, (int)mutation);
 		}
 
-		public override void randomMutation(DataElement obj)
+		public sealed override void randomMutation(DataElement obj)
 		{
 			var idx = context.Random.Next(0, values.Length);
+			performMutation(obj, idx);
+		}
 
+		protected virtual void performMutation(DataElement obj, int index)
+		{
 			obj.mutationFlags = MutateOverride.Default;
-			obj.MutatedValue = new Variant(values[idx]);
+			obj.MutatedValue = new Variant(values[index]);
 		}
 	}
 }

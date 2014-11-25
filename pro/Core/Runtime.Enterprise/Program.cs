@@ -232,21 +232,15 @@ Debug Peach XML File
 		{
 			if (pitLibraryPath == null)
 			{
-				var pwd = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-				var lib = Path.Combine(pwd, "pits");
-
+				var lib = Utilities.GetAppResourcePath("pits");
 				if (!Directory.Exists(lib))
 					throw new PeachException("Could not locate the Peach Pit Library. Ensure there is a 'pits' folder in your Peach installation directory or speficy the location of the Peach Pit Library using the '--pits' command line option.");
-
 				return lib;
 			}
-			else
-			{
-				if (!Directory.Exists(pitLibraryPath))
-					throw new PeachException("The specified Peach Pit Library location '{0}' does not exist.".Fmt(pitLibraryPath));
 
-				return pitLibraryPath;
-			}
+			if (!Directory.Exists(pitLibraryPath))
+				throw new PeachException("The specified Peach Pit Library location '{0}' does not exist.".Fmt(pitLibraryPath));
+			return pitLibraryPath;
 		}
 	}
 }

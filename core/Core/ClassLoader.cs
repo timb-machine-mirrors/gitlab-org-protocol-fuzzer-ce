@@ -281,23 +281,45 @@ namespace Peach.Core
 		}
 
 		/// <summary>
+		/// Extension to the Type class. Return all attributes matching the specified type.
+		/// </summary>
+		/// <typeparam name="TAttr">Attribute type to find.</typeparam>
+		/// <param name="type">Type in which the search should run over.</param>
+		/// <returns>A generator which yields the attributes specified.</returns>
+		public static IEnumerable<TAttr> GetAttributes<TAttr>(this Type type)
+			where TAttr : Attribute
+		{
+			return GetCustomAttributes(type).OfType<TAttr>();
+		}
+
+		/// <summary>
 		/// Extension to the Type class. Return all attributes matching the specified type and predicate.
 		/// </summary>
-		/// <typeparam name="A">Attribute type to find.</typeparam>
+		/// <typeparam name="TAttr">Attribute type to find.</typeparam>
 		/// <param name="type">Type in which the search should run over.</param>
 		/// <param name="predicate">Returns an attribute if the predicate returns true or the predicate itself is null.</param>
 		/// <returns>A generator which yields the attributes specified.</returns>
-		public static IEnumerable<A> GetAttributes<A>(this Type type, Func<Type, A, bool> predicate)
-			where A : Attribute
+		public static IEnumerable<TAttr> GetAttributes<TAttr>(this Type type, Func<Type, TAttr, bool> predicate)
+			where TAttr : Attribute
 		{
-			foreach (var attr in GetCustomAttributes(type))
+			foreach (var attr in GetCustomAttributes(type).OfType<TAttr>())
 			{
-				var concrete = attr as A;
-				if (concrete != null && (predicate == null || predicate(type, concrete)))
+				if (predicate == null || predicate(type, attr))
 				{
-					yield return concrete;
+					yield return attr;
 				}
 			}
+		}
+
+		/// <summary>
+		/// Finds all types that are decorated with the specified Attribute type.
+		/// </summary>
+		/// <typeparam name="TAttr">Attribute type to find.</typeparam>
+		/// <returns>A generator which yields KeyValuePair elements of custom attribute and type found.</returns>
+		public static IEnumerable<KeyValuePair<TAttr, Type>> GetAllByAttribute<TAttr>()
+			where TAttr : Attribute
+		{
+			return GetAllByAttribute<TAttr>(null);
 		}
 
 		/// <summary>

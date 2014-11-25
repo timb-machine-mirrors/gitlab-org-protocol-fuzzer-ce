@@ -53,7 +53,7 @@ namespace Peach.Core.Mutators
 				return;
 			}
 
-			Mutate(obj, value);
+			Utility.SizedHelpers.ExpandStringTo(obj, value);
 		}
 
 		protected override void performMutation(DataElement obj, ulong value)
@@ -62,34 +62,5 @@ namespace Peach.Core.Mutators
 			throw new NotImplementedException();
 		}
 
-		internal static void Mutate(DataElement obj, long value)
-		{
-			var src = (string)obj.InternalValue;
-			var dst = ExpandTo(src, value);
-
-			obj.MutatedValue = new Variant(dst);
-			obj.mutationFlags = MutateOverride.Default;
-		}
-
-		private static string ExpandTo(string value, long length)
-		{
-			if (string.IsNullOrEmpty(value))
-			{
-				return new string('A', (int)length);
-			}
-			else if (value.Length >= length)
-			{
-				return value.Substring(0, (int)length);
-			}
-
-			var sb = new StringBuilder();
-
-			while (sb.Length + value.Length < length)
-				sb.Append(value);
-
-			sb.Append(value.Substring(0, (int)(length - sb.Length)));
-
-			return sb.ToString();
-		}
 	}
 }

@@ -9,6 +9,7 @@ using System.Threading;
 using Peach.Core.Analyzers;
 using System.IO;
 using System.Text;
+using Peach.Pro.OS.Windows.Agent.Monitors;
 
 namespace Peach.Core.Test.Agent.Monitors
 {

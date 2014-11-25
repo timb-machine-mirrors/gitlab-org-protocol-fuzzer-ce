@@ -3,7 +3,7 @@
 /// <reference path="../Models/models.ts" />
 
 module DashApp {
-	"use strict"; 
+	"use strict";
 
 	export interface MetricsParams extends ng.route.IRouteParamsService {
 		metric: string;
@@ -99,8 +99,6 @@ module DashApp {
 					"1st Iteration: " + item.data.iteration + "<br /></div>";
 			}
 		};
-		
-
 
 		// #region timeline
 
@@ -240,7 +238,6 @@ module DashApp {
 		public metrics_faultsOverTime_options = {};
 		//#endregion
 
-
 		public gridMetricsMutator = {
 			data: "vm.mutatorData",
 			sortInfo: { fields: ["mutator"], directions: ["asc"] },
@@ -253,7 +250,6 @@ module DashApp {
 				{ field: "faultCount", displayName: "Fault Count" }
 			]
 		};
-
 
 		public gridMetricsElement = {
 			data: "vm.elementData",
@@ -306,7 +302,7 @@ module DashApp {
 		};
 
 		/*
-		 		{ field: "dataset", displayName: "Data Set" },
+				{ field: "dataset", displayName: "Data Set" },
 				{ field: "action", displayName: "Action" },
 				{ field: "element", displayName: "Element" },
 
@@ -356,7 +352,6 @@ module DashApp {
 									}
 								]
 							};
-
 
 							this.metrics_faultsOverTime_options = {
 								// Boolean - whether or not the chart should be responsive and resize when the browser does.
@@ -500,10 +495,6 @@ module DashApp {
 						break;
 				}
 			});
-
-
 		}
-
-
 	}
 }

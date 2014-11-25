@@ -19,8 +19,8 @@ module DashApp {
 			dirSelectable: false
 		}
 
-		public notAPit:boolean = false;
-		
+		public notAPit: boolean = false;
+
 		private modalInstance: ng.ui.bootstrap.IModalServiceInstance;
 
 		constructor($scope: ViewModelScope, $modalInstance: ng.ui.bootstrap.IModalServiceInstance, peachsvc: Services.IPeachService, canCancel: boolean) {
@@ -118,7 +118,6 @@ module DashApp {
 					output.push(libitem);
 				}
 			}
-
 			return output;
 		}
 	}
