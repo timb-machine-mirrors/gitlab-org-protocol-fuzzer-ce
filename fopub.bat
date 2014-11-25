@@ -33,9 +33,21 @@ set SOURCE_ROOTNAME=%~dpn1
 shift
 @rem Process second argument
 if %1a==a goto endInit
-set TYPE=%1
-shift
+if "%1" == "-f" (
+  set TYPE=%2
+  shift
+  shift
+)
 :endInit
+
+set PARAMS=
+
+:extra
+if %1a==a goto endExtra
+set PARAMS=%PARAMS%%1 
+shift
+goto extra
+:endExtra
 
 if "%SOURCE_FILE%" == "" (
   echo .
@@ -64,13 +76,13 @@ set XSLTHL_CONFIG_URI=!XSLTHL_CONFIG_URI:\=/!
 
 if "%TYPE%" == "pdf" (
   set OUTPUT_PDF_FILE="%SOURCE_ROOTNAME%.pdf"
-  %FOPUB_CMD% -q -catalog -c "%DOCBOOK_XSL_DIR%\fop-config.xml" -xml "%SOURCE_FILE%" -xsl "%DOCBOOK_XSL_DIR%\fo-pdf.xsl" -pdf !OUTPUT_PDF_FILE! -param highlight.xslthl.config "%XSLTHL_CONFIG_URI%" -param admon.graphics.path "%DOCBOOK_DIR_PARAM%/images/" -param callout.graphics.path "%DOCBOOK_DIR_PARAM%/images/callouts/"
+  call %FOPUB_CMD% -q -catalog -c "%DOCBOOK_XSL_DIR%\fop-config.xml" -xml "%SOURCE_FILE%" -xsl "%DOCBOOK_XSL_DIR%\fo-pdf.xsl" -pdf !OUTPUT_PDF_FILE! -param highlight.xslthl.config "%XSLTHL_CONFIG_URI%" -param admon.graphics.path "%DOCBOOK_DIR_PARAM%/images/" -param callout.graphics.path "%DOCBOOK_DIR_PARAM%/images/callouts/" %PARAMS%
   if not "%ERRORLEVEL%"=="0" goto fail else goto mainEnd
 )
 
 if "%TYPE%" == "fo" (
   set OUTPUT_FO_FILE="%SOURCE_ROOTNAME%.fo"
-  %FOPUB_CMD% -q -catalog -c "%DOCBOOK_XSL_DIR%\fop-config.xml" -xml "%SOURCE_FILE%" -xsl "%DOCBOOK_XSL_DIR%\fo-pdf.xsl" -foout !OUTPUT_FO_FILE! -param highlight.xslthl.config "%XSLTHL_CONFIG_URI%" -param admon.graphics.path "%DOCBOOK_DIR_PARAM%/images/" -param callout.graphics.path "%DOCBOOK_DIR_PARAM%/images/callouts/"
+  call %FOPUB_CMD% -q -catalog -c "%DOCBOOK_XSL_DIR%\fop-config.xml" -xml "%SOURCE_FILE%" -xsl "%DOCBOOK_XSL_DIR%\fo-pdf.xsl" -foout !OUTPUT_FO_FILE! -param highlight.xslthl.config "%XSLTHL_CONFIG_URI%" -param admon.graphics.path "%DOCBOOK_DIR_PARAM%/images/" -param callout.graphics.path "%DOCBOOK_DIR_PARAM%/images/callouts/" %PARAMS%
   if not "%ERRORLEVEL%"=="0" goto fail else goto mainEnd
 )
 

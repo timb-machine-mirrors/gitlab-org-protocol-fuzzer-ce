@@ -102,11 +102,11 @@
   -->
 
   <xsl:param name="hyphenate">false</xsl:param>
+  <xsl:param name="line-height">1.5</xsl:param>
   <!--
   <xsl:param name="alignment">left</xsl:param>
   -->
   <xsl:param name="alignment">justify</xsl:param>
-  <xsl:param name="line-height">1.5</xsl:param>
   <xsl:param name="body.font.master">12</xsl:param>
   <xsl:param name="body.font.size">
     <xsl:value-of select="$body.font.master"/><xsl:text>pt</xsl:text>
@@ -258,6 +258,7 @@
   <xsl:param name="body.end.indent">0</xsl:param> <!-- text recess from right -->
   <xsl:param name="region.before.extent">10mm</xsl:param> <!-- height of page header -->
   <xsl:param name="region.after.extent">10mm</xsl:param> <!-- height of page footer -->
+  <xsl:param name="header.column.widths">1 5 1</xsl:param>
 
   <!--
     Table of Contents
@@ -506,7 +507,7 @@
               <xsl:with-param name="default.units" select="'px'"/>
             </xsl:call-template>
           </xsl:when>
-          <xsl:when test="not(@depth) and not(ancestor::inlinemediaobject) and $default.image.width != ''">
+          <xsl:when test="not(@depth) and name(../..) != 'inlinemediaobject' and $default.image.width != ''">
             <xsl:call-template name="length-spec">
               <xsl:with-param name="length" select="$default.image.width"/>
               <xsl:with-param name="default.units" select="'px'"/>
@@ -528,7 +529,7 @@
               <xsl:with-param name="default.units" select="'px'"/>
             </xsl:call-template>
           </xsl:when>
-          <xsl:when test="ancestor::inlinemediaobject">
+          <xsl:when test="name(../..) = 'inlinemediaobject' and $default.inline.image.height != ''">
             <xsl:call-template name="length-spec">
               <xsl:with-param name="length" select="$default.inline.image.height"/>
               <xsl:with-param name="default.units" select="'px'"/>
@@ -788,6 +789,24 @@
       <xsl:when test="$itemsymbol='checked'">&#x25A0;</xsl:when>
       <xsl:when test="$itemsymbol='unchecked'">&#x25A1;</xsl:when>
       <xsl:otherwise>&#x2022;</xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <xsl:template match="db:listitem/db:simpara[1] | listitem/simpara">
+    <xsl:choose>
+      <xsl:when test="count(following-sibling::*) > 0">
+        <!-- Treat first paragraph of complex list item as normal paragraph (padding below) -->
+        <fo:block xsl:use-attribute-sets="normal.para.spacing">
+          <xsl:call-template name="anchor"/>
+          <xsl:apply-templates/>
+        </fo:block>
+      </xsl:when>
+      <xsl:otherwise>
+        <fo:block>
+          <xsl:call-template name="anchor"/>
+          <xsl:apply-templates/>
+        </fo:block>
+      </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
 
