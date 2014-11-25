@@ -41,8 +41,7 @@ def configure(conf):
 
 	# Ensure fopub is initialized
 	test = conf.bldnode.make_node('docbook_test.xml')
-	pdf = test.change_ext('.pdf')
-	if not os.path.isfile(pdf.abspath()):
+	if not os.path.isfile(test.abspath()):
 		test.write('''<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <article lang="en">
