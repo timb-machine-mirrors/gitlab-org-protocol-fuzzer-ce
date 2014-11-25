@@ -138,7 +138,7 @@ namespace Peach.Pro.Core.Runtime
 
 		public Program(string[] args)
 		{
-			Peach.Core.AssertWriter.Register();
+			AssertWriter.Register();
 
 			config.commandLine = args;
 

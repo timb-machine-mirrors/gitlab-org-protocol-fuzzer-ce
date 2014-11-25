@@ -58,5 +58,3 @@ _Resharper*
 .depproj/
 /WebEssentials-Settings.json
 
-/pro/Web/[Bb]in/
-/pro/Web/[Oo]bj/

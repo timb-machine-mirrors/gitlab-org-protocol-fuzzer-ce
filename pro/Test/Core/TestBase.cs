@@ -6,26 +6,17 @@ using NLog;
 using NLog.Config;
 using NLog.Targets;
 using NUnit.Framework;
+using Peach.Core;
 using Peach.Pro.Core.Runtime;
 
 // ReSharper disable once CheckNamespace (required for NUnit SetupFixture)
 namespace Peach.Pro.Test.Core
 {
-	class AssertTestFail : TraceListener
+	class AssertTestFail : AssertWriter
 	{
-		public override void Write(string message)
+		protected override void OnAssert(string message)
 		{
 			Assert.Fail(message);
-		}
-
-		public override void WriteLine(string message)
-		{
-			var sb = new System.Text.StringBuilder();
-
-			sb.AppendLine("Assertion " + message);
-			sb.AppendLine(new StackTrace(2, true).ToString());
-
-			Assert.Fail(sb.ToString());
 		}
 	}
 
@@ -44,11 +35,14 @@ namespace Peach.Pro.Test.Core
 		[SetUp]
 		public void Initialize()
 		{
-			Debug.Listeners.Insert(0, new AssertTestFail());
+			AssertWriter.Register<AssertTestFail>();
 
 			if (!(LogManager.Configuration != null && LogManager.Configuration.LoggingRules.Count > 0))
 			{
-				var consoleTarget = new ConsoleTarget { Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}" };
+				var consoleTarget = new ConsoleTarget
+				{
+					Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}"
+				};
 
 				var config = new LoggingConfiguration();
 				config.AddTarget("console", consoleTarget);
