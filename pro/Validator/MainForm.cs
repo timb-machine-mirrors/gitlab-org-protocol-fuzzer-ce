@@ -1,13 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using Be.Windows.Forms;
+using NLog.Config;
+using NLog.Targets;
 using Peach.Core.Dom;
 using Peach.Core;
 using Peach.Core.Cracker;
@@ -15,6 +13,7 @@ using Peach.Core.IO;
 using Peach.Core.Analyzers;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using NLog;
 
 namespace PeachValidator
 {
@@ -30,6 +29,7 @@ namespace PeachValidator
 		Dictionary<string, object> parserArgs = new Dictionary<string, object>();
 		CrackModel crackModel = new CrackModel();
 		Dictionary<DataElement, CrackNode> crackMap = new Dictionary<DataElement, CrackNode>();
+	    private MemoryTarget logTarget = null;
 
 		public MainForm()
 		{
@@ -37,6 +37,15 @@ namespace PeachValidator
 
 			setTitle();
 			AddNewDefine("Peach.Pwd=" + Utilities.ExecutionDirectory);
+           var nconfig = new LoggingConfiguration();
+            logTarget = new MemoryTarget();
+            nconfig.AddTarget("console", logTarget);
+            logTarget.Layout = "${logger} ${message}";
+
+		    var rule = new LoggingRule("*", LogLevel.Debug, logTarget);
+            nconfig.LoggingRules.Add(rule);
+
+            LogManager.Configuration = nconfig;
 		}
 
 		public void AddNewDefine(string value)
@@ -83,6 +92,8 @@ namespace PeachValidator
             var holder = (DataModelHolder)toolStripComboBoxDataModel.SelectedItem;
 			try
 			{
+                textBoxLogs.Clear();
+
 				if (holder == null || string.IsNullOrEmpty(sampleFileName) || string.IsNullOrEmpty(pitFileName))
 					return;
 
@@ -128,7 +139,6 @@ namespace PeachValidator
 								crackMap[element.parent].Children.Add(currentModel);
 						}
 					}
-
 				}
 
 				foreach (var node in crackMap.Values)
@@ -144,6 +154,9 @@ namespace PeachValidator
 
 				// No longer needed
 				crackMap.Clear();
+
+                // Display debug logs
+                textBoxLogs.AppendText(string.Join("\r\n", logTarget.Logs)); 
 			}
 			catch (Exception ex)
 			{
