@@ -24,7 +24,7 @@ module Peach {
 			poller,
 			peachService: Services.PeachService,
 			pitConfiguratorService: Services.PitConfiguratorService
-			) {
+		) {
 			$scope.vm = this;
 			this.pitConfigSvc = pitConfiguratorService;
 			this.pollerSvc = poller;
@@ -49,8 +49,8 @@ module Peach {
 		}
 
 		public tabs: ITab[] = [
-			{ title: "Summary", content: "ts/app/partials/test-grid.html", active: true, disabled: false },
-			{ title: "Log", content: "ts/app/partials/test-raw.html", active: false, disabled: false }
+			{ title: "Summary", content: "html/test-grid.html", active: true, disabled: false },
+			{ title: "Log", content: "html/test-raw.html", active: false, disabled: false }
 		];
 
 		public dataGridOptions: ngGrid.IGridOptions = {
@@ -60,11 +60,11 @@ module Peach {
 					field: "status",
 					displayName: " ",
 					width: 25,
-					cellTemplate: "ts/app/partials/test-grid-status-template.html"
+					cellTemplate: "html/test-grid-status-template.html"
 				},
 				{
 					displayName: "Message",
-					cellTemplate: "ts/app/partials/test-grid-message-template.html"
+					cellTemplate: "html/test-grid-message-template.html"
 				}
 			],
 			rowHeight: 45,

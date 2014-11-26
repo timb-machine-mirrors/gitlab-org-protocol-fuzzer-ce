@@ -32,43 +32,43 @@ module Peach {
 			($routeProvider: ng.route.IRouteProvider, $locationProvider: ng.ILocationProvider) => {
 				$routeProvider
 					.when("/", {
-						templateUrl: "ts/app/partials/dash.html",
+						templateUrl: "html/dash.html",
 						controller: DashController
 					})
 					.when("/faults/:bucket", {
-						templateUrl: "ts/app/partials/faults.html",
+						templateUrl: "html/faults.html",
 						controller: FaultsController
 					})
 					.when("/quickstart/intro", {
-						templateUrl: "ts/app/partials/quickstart-intro.html",
+						templateUrl: "html/quickstart-intro.html",
 						controller: WizardController
 					})
 					.when("/metrics/:metric", {
-						templateUrl: "ts/app/partials/metrics.html",
+						templateUrl: "html/metrics.html",
 						controller: MetricsController
 					})
 					.when("/quickstart/test", {
-						templateUrl: "ts/app/partials/quickstart-test.html",
+						templateUrl: "html/quickstart-test.html",
 						controller: PitTestController
 					})
 					.when("/quickstart/done", {
-						templateUrl: "ts/app/partials/quickstart-done.html",
+						templateUrl: "html/quickstart-done.html",
 						controller: WizardController
 					})
 					.when("/quickstart/:step", {
-						templateUrl: "ts/app/partials/wizard.html",
+						templateUrl: "html/wizard.html",
 						controller: WizardController
 					})
 					.when("/configuration/monitors", {
-						templateUrl: "ts/app/partials/configuration-monitors.html",
+						templateUrl: "html/configuration-monitors.html",
 						controller: ConfigurationMonitorsController
 					})
 					.when("/configuration/variables", {
-						templateUrl: "ts/app/partials/configuration-variables.html",
+						templateUrl: "html/configuration-variables.html",
 						controller: ConfigurationVariablesController
 					})
 					.when("/configuration/test", {
-						templateUrl: "ts/app/partials/configuration-test.html",
+						templateUrl: "html/configuration-test.html",
 						controller: ConfigurationTestController
 					})
 					.otherwise({
