@@ -1,6 +1,6 @@
 ﻿/// <reference path="reference.ts" />
 
-module DashApp {
+module Peach {
 	"use strict";
 
 	var INTEGER_REGEXP = /^\-?\d+$/;

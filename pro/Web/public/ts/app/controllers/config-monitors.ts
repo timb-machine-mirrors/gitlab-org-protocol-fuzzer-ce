@@ -1,6 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module DashApp {
+module Peach {
 	"use strict";
 
 	declare function ngGridFlexibleHeightPlugin(opts?: any): void;

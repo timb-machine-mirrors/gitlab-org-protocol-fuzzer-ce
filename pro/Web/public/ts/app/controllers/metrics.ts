@@ -1,6 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module DashApp {
+module Peach {
 	"use strict";
 
 	export interface MetricsParams extends ng.route.IRouteParamsService {

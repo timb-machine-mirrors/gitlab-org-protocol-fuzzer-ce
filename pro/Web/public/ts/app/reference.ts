@@ -15,8 +15,14 @@
 /// <reference path="controllers/pittest.ts" />
 /// <reference path="controllers/startjob.ts" />
 /// <reference path="controllers/wizard.ts" />
+/// <reference path="models/Fault.ts" />
+/// <reference path="models/Job.ts" />
+/// <reference path="models/Library.ts" />
+/// <reference path="models/Metrics.ts" />
+/// <reference path="models/Pit.ts" />
 /// <reference path="models/PitConfig.ts" />
-/// <reference path="models/models.ts" />
+/// <reference path="models/PitTest.ts" />
+/// <reference path="models/Wizard.ts" />
 /// <reference path="services/PeachService.ts" />
 /// <reference path="services/PitConfiguratorService.ts" />
 //grunt-end
