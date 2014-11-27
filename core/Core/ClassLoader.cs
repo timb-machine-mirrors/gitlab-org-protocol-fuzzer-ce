@@ -217,23 +217,26 @@ namespace Peach.Core
 
 		static object[] GetCustomAttributes(Type type)
 		{
-			object[] attrs;
+			lock (AttributeCache)
+			{
+				object[] attrs;
 
-			if (AttributeCache.TryGetValue(type, out attrs))
+				if (AttributeCache.TryGetValue(type, out attrs))
+					return attrs;
+
+				try
+				{
+					attrs = type.GetCustomAttributes(true);
+				}
+				catch (TypeLoadException)
+				{
+					attrs = new object[0];
+				}
+
+				AttributeCache.Add(type, attrs);
+
 				return attrs;
-
-			try
-			{
-				attrs = type.GetCustomAttributes(true);
 			}
-			catch (TypeLoadException)
-			{
-				attrs = new object[0];
-			}
-
-			AttributeCache.Add(type, attrs);
-
-			return attrs;
 		}
 
 		public static string[] SearchPaths
