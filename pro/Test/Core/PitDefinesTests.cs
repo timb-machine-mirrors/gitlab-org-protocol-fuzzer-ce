@@ -68,6 +68,7 @@ namespace Peach.Pro.Test.Core
 
 			var defs = PitDefines.Parse(new StringReader(xml));
 			Assert.NotNull(defs);
+			Assert.Fail("TODO: Improve");
 		}
 
 		[Test]
@@ -218,7 +219,11 @@ namespace Peach.Pro.Test.Core
 				Assert.NotNull(ex);
 			}
 		}
+
+		[Test]
+		public void TestUserDefine()
+		{
+			Assert.Fail("TODO");
+		}
 	}
-
-
 }

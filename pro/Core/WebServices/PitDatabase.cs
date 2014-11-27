@@ -410,20 +410,42 @@ namespace Peach.Pro.Core.WebServices
 			return item.PitUrl;
 		}
 
+		/// <summary>
+		/// Save Pit Config
+		/// </summary>
+		/// <param name="pit"></param>
+		/// <param name="config"></param>
+		/// <remarks>
+		/// only allow user parameters to add/delete
+		/// only allow user parameters where the key doesn't collide with system parameters
+		/// only allow system parameter values to be updated
+		/// </remarks>
 		public static void SaveConfig(Pit pit, List<Parameter> config)
 		{
 			var fileName = pit.Versions[0].Files[0].Name + ".config";
-			var defines = PitDefines.Parse(fileName);
 
-			// For now, read in the current defines off disk and
-			// apply any applicable changes. We don't currently expect
-			// this api to add new defines or delete old defines.
-			foreach (var item in config)
+			var defines = new List<PitDefines.Define>();
+
+			var reserved = new HashSet<string>();
+			foreach (var def in PitDefines.Parse(fileName))
 			{
-				foreach (var def in defines)
+				if (def.ConfigType != ParameterType.User)
 				{
-					if (def.Key == item.Key)
-						def.Value = item.Value;
+					var param = config.SingleOrDefault((x) => x.Key == def.Key);
+					if (param != null)
+					{
+						def.Value = param.Value;
+					}
+					defines.Add(def);
+					reserved.Add(def.Key);
+				}
+			}
+
+			foreach (var param in config)
+			{
+				if (param.Type == ParameterType.User && !reserved.Contains(param.Key))
+				{
+					defines.Add(PitDefines.Define.FromParameter(param));
 				}
 			}
 
@@ -432,7 +454,7 @@ namespace Peach.Pro.Core.WebServices
 				Platforms = new List<PitDefines.Collection>(new[] {
 					new PitDefines.All
 					{
-						Defines = defines,
+						Defines = defines.ToList(),
 					}
 				}),
 			};
@@ -484,7 +506,7 @@ namespace Peach.Pro.Core.WebServices
 						{
 							m.Map.Add(new Parameter
 							{
-								Param = param.Name,
+								Name = param.Name,
 								Value = param.Value,
 								Type = ParameterType.String,
 							});
@@ -523,7 +545,7 @@ namespace Peach.Pro.Core.WebServices
 		private static int ParameterSorter(Parameter lhs, Parameter rhs)
 		{
 			if (lhs.Required == rhs.Required)
-				return string.CompareOrdinal(lhs.Param, rhs.Param);
+				return string.CompareOrdinal(lhs.Name, rhs.Name);
 
 			return lhs.Required ? -1 : 1;
 		}
@@ -616,7 +638,7 @@ namespace Peach.Pro.Core.WebServices
 					{
 						w.WriteStartElement("Param", PeachElement.Namespace);
 
-						if (p.Param == "StartMode")
+						if (p.Name == "StartMode")
 						{
 							if (p.Value == "StartOnCall") // File fzzing
 							{
@@ -640,7 +662,7 @@ namespace Peach.Pro.Core.WebServices
 						}
 						else
 						{
-							w.WriteAttributeString("name", p.Param);
+							w.WriteAttributeString("name", p.Name);
 							w.WriteAttributeString("value", p.Value);
 						}
 
@@ -850,9 +872,9 @@ namespace Peach.Pro.Core.WebServices
 					Type = d.ConfigType,
 					Key = d.Key,
 					Value = d.Value,
-					Param = d.Name,
+					Name = d.Name,
 					Description = d.Description,
-					Defaults = new List<string>(d.Defaults),
+					Defaults = d.Defaults.ToList(),
 					Min = d.Min,
 					Max = d.Max,
 				};
@@ -883,6 +905,9 @@ namespace Peach.Pro.Core.WebServices
 								.Where(a => a.Address.AddressFamily == AddressFamily.InterNetworkV6)
 								.Select(a => a.Address.ToString()));
 						break;
+					case ParameterType.Enum:
+						item.EnumType = d.EnumType != null ? d.EnumType.FullName : null;
+						break;
 				}
 
 				ret.Add(item);
@@ -895,7 +920,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 			var p = new Parameter
 			{
-				Param = attr.name,
+				Name = attr.name,
 				Value = attr.defaultValue,
 				Required = attr.required,
 				Description = attr.description

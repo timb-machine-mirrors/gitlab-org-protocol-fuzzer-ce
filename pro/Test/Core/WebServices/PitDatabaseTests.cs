@@ -407,17 +407,17 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			""monitorClass"":""PageHeap"",
 			""map"": [
-				{ ""key"":""WinDbgExecutable"", ""param"":""Executable"", ""value"":""Foo.exe"" },
-				{ ""key"":""WinDbgPath"", ""param"":""WinDbgPath"", ""value"":""C:\\WinDbg""  }
+				{ ""key"":""WinDbgExecutable"", ""name"":""Executable"", ""value"":""Foo.exe"" },
+				{ ""key"":""WinDbgPath"", ""name"":""WinDbgPath"", ""value"":""C:\\WinDbg""  }
 			],
 			""description"": ""Page Heap: {WinDbgExecutable} {WinDbgPath}""
 		},
 		{
 			""monitorClass"":""WindowsDebugger"",
 			""map"": [
-				{ ""key"":""WinDbgExecutable"",	""param"":""Executable"", ""value"":""Foo.exe"" },
-				{ ""key"":""WinDbgArguments"", ""param"":""Arguments"", ""value"":""--arg"" },
-				{ ""key"":""WinDbgIgnoreFirstChanceGuardPage"",	""param"":""IgnoreFirstChanceGuardPage"", ""value"":""false"" }
+				{ ""key"":""WinDbgExecutable"",	""name"":""Executable"", ""value"":""Foo.exe"" },
+				{ ""key"":""WinDbgArguments"", ""name"":""Arguments"", ""value"":""--arg"" },
+				{ ""key"":""WinDbgIgnoreFirstChanceGuardPage"",	""name"":""IgnoreFirstChanceGuardPage"", ""value"":""false"" }
 			],
 			""description"": ""Windows Debugger: {WinDbgExecutable} {WinDbgPath} {WinDbgProcessName} {WinDbgService} {WinDbgStart} {WinDbgIgnoreFirstChanceGuardPage}""
 		},
@@ -429,8 +429,8 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			""monitorClass"":""Pcap"",
 			""map"":[
-				{""key"":""PcapDevice"", ""param"":""Device"", ""value"":""eth0"" },
-				{""key"":""PcapFilter"", ""param"":""Filter"", ""value"":""tcp port 80"" }
+				{""key"":""PcapDevice"", ""name"":""Device"", ""value"":""eth0"" },
+				{""key"":""PcapFilter"", ""name"":""Filter"", ""value"":""tcp port 80"" }
 				],
 			""description"":""Network capture on {AgentUrl}, interface {PcapDevice} using {PcapFilter}.""
 		},
@@ -442,8 +442,8 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			""monitorClass"":""CanaKit"",
 			""map"": [
-				{""key"":""CanaKitRelaySerialPort"",	""param"":""SerialPort"", ""value"":""COM1"" },
-				{""key"":""CanaKitRelayRelayNumber"",	""param"":""RelayNumber"", ""value"":""1"" },
+				{""key"":""CanaKitRelaySerialPort"",	""name"":""SerialPort"", ""value"":""COM1"" },
+				{""key"":""CanaKitRelayRelayNumber"",	""name"":""RelayNumber"", ""value"":""1"" },
 			]
 		},
 	],
@@ -454,8 +454,8 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			""monitorClass"":""Pcap"",
 			""map"":[
-				{""key"":""PcapDevice"", ""param"":""Device"", ""value"":""eth0"" },
-				{""key"":""PcapFilter"", ""param"":""Filter"", ""value"":""tcp port 80"" }
+				{""key"":""PcapDevice"", ""name"":""Device"", ""value"":""eth0"" },
+				{""key"":""PcapFilter"", ""name"":""Filter"", ""value"":""tcp port 80"" }
 				],
 			""description"":""Network capture on {AgentUrl}, interface {PcapDevice} using {PcapFilter}.""
 		},
@@ -467,8 +467,8 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			""monitorClass"":""Pcap"",
 			""map"":[
-				{""key"":""PcapDevice"", ""param"":""Device"", ""value"":""eth0"" },
-				{""key"":""PcapFilter"", ""param"":""Filter"", ""value"":""tcp port 8080"" }
+				{""key"":""PcapDevice"", ""name"":""Device"", ""value"":""eth0"" },
+				{""key"":""PcapFilter"", ""name"":""Filter"", ""value"":""tcp port 8080"" }
 				],
 			""description"":""Network capture on {AgentUrl}, interface {PcapDevice} using {PcapFilter}.""
 		},
@@ -522,8 +522,8 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			foreach (var item in jsonMon.Map)
 			{
-				Assert.True(domMon.parameters.ContainsKey(item.Param));
-				Assert.AreEqual(item.Value, (string)domMon.parameters[item.Param]);
+				Assert.True(domMon.parameters.ContainsKey(item.Name));
+				Assert.AreEqual(item.Value, (string)domMon.parameters[item.Name]);
 			}
 		}
 
@@ -540,19 +540,19 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			""monitorClass"":""WindowsDebugger"",
 			""map"": [
-				{ ""key"":""WinDbgProcessStart"", ""param"":""StartMode"", ""value"":""StartOnCall"" },
+				{ ""key"":""WinDbgProcessStart"", ""name"":""StartMode"", ""value"":""StartOnCall"" },
 			],
 		},
 		{
 			""monitorClass"":""WindowsDebugger"",
 			""map"": [
-				{ ""key"":""WinDbgProcessStart"", ""param"":""StartMode"", ""value"":""RestartOnEachTest"" },
+				{ ""key"":""WinDbgProcessStart"", ""name"":""StartMode"", ""value"":""RestartOnEachTest"" },
 			],
 		},
 		{
 			""monitorClass"":""WindowsDebugger"",
 			""map"": [
-				{ ""key"":""WinDbgProcessStart"", ""param"":""StartMode"", ""value"":""StartOnEachIteration"" },
+				{ ""key"":""WinDbgProcessStart"", ""name"":""StartMode"", ""value"":""StartOnEachIteration"" },
 			],
 		},
 	],

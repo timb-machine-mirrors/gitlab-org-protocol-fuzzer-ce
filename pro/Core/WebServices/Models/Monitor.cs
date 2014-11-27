@@ -12,7 +12,8 @@ namespace Peach.Pro.Core.WebServices.Models
 		Hwaddr,
 		Iface,
 		Enum,
-		Bool
+		Bool,
+		User
 	}
 
 	/// <summary>
@@ -34,8 +35,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <example>
 		/// "Device"
 		/// </example>
-		/// TODO: Rename this to "Name"
-		public string Param { get; set; }
+		public string Name { get; set; }
 
 		/// <summary>
 		/// The value of the parameter
@@ -79,6 +79,11 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// </summary>
 		public ulong? Max { get; set; }
 
+		/// <summary>
+		/// 
+		/// </summary>
+		[Newtonsoft.Json.JsonConverter(typeof(CamelCaseStringEnumConverter))]
+		public string EnumType { get; set; }
 	}
 
 	/// <summary>
