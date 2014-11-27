@@ -3,9 +3,9 @@
 
 /** Managed references (unordered) */
 //grunt-start
-/// <reference path="controllers/config-monitors.ts" />
-/// <reference path="controllers/config-test.ts" />
-/// <reference path="controllers/config-variables.ts" />
+/// <reference path="controllers/ConfigureMonitors.ts" />
+/// <reference path="controllers/ConfigureTest.ts" />
+/// <reference path="controllers/ConfigureVars.ts" />
 /// <reference path="controllers/copypit.ts" />
 /// <reference path="controllers/dash.ts" />
 /// <reference path="controllers/faults.ts" />

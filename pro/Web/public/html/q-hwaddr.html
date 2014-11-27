@@ -17,7 +17,7 @@
 		       type="text" 
 		       class="dropdown-toggle" 
 		       ng-required="vm.currentQuestion.required" 
-					 ng-enter="vm.next()" />
+					 ng-enter="vm.Next()" />
 		<ul class="dropdown-menu" 
 				ng-class="{hidden: vm.location.path() != '/quickstart/setvars'}">
 			<li ng-repeat="default in vm.currentQuestion.defaults">
@@ -29,13 +29,13 @@
 		</ul>
 	</div>
 	<div class="row-fluid wizard-actions">
-		<button class="btn btn-prev" 
-						ng-click="vm.back()">
+		<button class="btn btn-prev"
+						ng-click="vm.Back()">
 			<i class="icon-arrow-left"></i>
 			Back
 		</button>
 		<button class="btn btn-success btn-next" 
-		        ng-click="vm.next()" 
+		        ng-click="vm.Next()" 
 						ng-disabled="configuratorForm.$invalid">
 			Next
 			<i class="icon-arrow-right icon-on-right"></i>

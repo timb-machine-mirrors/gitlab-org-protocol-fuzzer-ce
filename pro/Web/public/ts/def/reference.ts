@@ -10,3 +10,5 @@
 /// <reference path="jquery/jquery.d.ts" />
 /// <reference path="jasmine/jasmine.d.ts" />
 /// <reference path="angularjs/angular-mocks.d.ts" />
+
+/// <reference path="ng-grid/ng-grid-plugins.d.ts" />

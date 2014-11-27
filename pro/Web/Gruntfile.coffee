@@ -13,6 +13,7 @@ module.exports = (grunt) ->
 					'public/lib/angular-mocks'     : 'angular-mocks:main'
 					'public/lib/angular-resource'  : 'angular-resource:main'
 					'public/lib/angular-route'     : 'angular-route:main'
+					'public/lib/angular-ui-utils'  : 'angular-ui-utils:main'
 					'public/lib/jquery'            : 'jquery:main'
 					'public/lib/moment'            : 'moment:main'
 					'public/lib/ng-grid'           : 'ng-grid:main'

@@ -11,9 +11,10 @@ content = [
 	'package.json',
 	'README.adoc',
 	'tsd.json',
-]
+] + bld.path.ant_glob('public/ts/test/**/*.ts')
 
 public = bld.path.ant_glob('public/**/*', excl = [
+	'public/tests.html',
 	'public/js/app/*',
 	'public/js/test/*',
 	'public/**/*.ts',
@@ -29,14 +30,4 @@ bld(
 	ide_content = content,
 	ide_aspnet = True,
 	use = deps,
-	target = 'public/js/app/app.js',
-)
-
-bld(
-	features = 'tsc',
-	name = 'Peach.Pro.Web.Test',
-	source = 'public/ts/test/reference.ts',
-	ide_content = content + public,
-	ide_aspnet = True,
-	target = 'public/js/test/test.js',
 )

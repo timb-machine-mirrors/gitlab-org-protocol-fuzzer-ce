@@ -16,7 +16,7 @@
 					 class="dropdown-toggle"
 					 ng-required="vm.currentQuestion.required"
 					 style="width: 300px"
-					 ng-enter="vm.next()" />
+					 ng-enter="vm.Next()" />
 		<ul class="dropdown-menu"
 				ng-class="{hidden: vm.location.path() != '/quickstart/setvars'}">
 			<li ng-repeat="default in vm.currentQuestion.defaults">
@@ -49,21 +49,24 @@
 
 			<div class="panel-collapse collapse" id="collapseOne">
 				<div class="panel-body">
-					<div class="gridStyle"
-							 ng-grid="vm.definesGridOptions"></div>
+					<div class="grid-border">
+						<div class="gridStyle"
+						     ng-grid="vm.definesGridOptions">
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 	<div class="space-6" />
 	<div class="row-fluid wizard-actions">
-		<button class="btn btn-prev" 
+		<button class="btn btn-prev"
 						ng-click="vm.back()">
 			<i class="icon-arrow-left"></i>
 			Back
 		</button>
-		<button class="btn btn-success btn-next" 
-		        ng-click="vm.next()" 
+		<button class="btn btn-success btn-next"
+						ng-click="vm.Next()"
 						ng-disabled="configuratorForm.$invalid">
 			Next
 			<i class="icon-arrow-right icon-on-right"></i>

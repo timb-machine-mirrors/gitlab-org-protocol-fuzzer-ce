@@ -1,34 +1,39 @@
-﻿<div>
+﻿<form>
 	<div class="modal-header">
-		<h3 class="modal-title">Select a Pit</h3>
+		<h3 class="modal-title">
+			Select a Pit
+		</h3>
 	</div>
 	<div class="modal-body">
 		<div treecontrol
 				 class="tree-classic"
-				 tree-model="vm.libraries"
-				 options="vm.treeOptions"
-				 on-selection="vm.changeSelection(node.pitUrl)"
+				 tree-model="vm.Libraries"
+				 options="vm.TreeOptions"
+				 on-selection="vm.OnSelection(node.pitUrl)"
 				 style="max-height: 200px; height: 200px; overflow-y: scroll">
-			<span>{{node.text}}</span>
+			<span>
+				{{node.text}}
+			</span>
 		</div>
 	</div>
-
 	<div class="modal-footer">
 		<span class="label label-danger"
-					ng-class="{hidden: vm.notAPit == false}"
+					ng-show="!vm.IsValidPit()"
 					style="margin-right: 20px">
 			Please select a Pit, not a Library or Category.
 		</span>
-		<button class="btn btn-default"
-						ng-click="vm.cancel()"
-						ng-class="{hidden: vm.CanCancel == false}">
+		<button type="button"
+						class="btn btn-default"
+						ng-click="vm.Cancel()">
 			Cancel
 		</button>
-		<!-- <button class="btn" ng-click="vm.exportPit()" ng-class="{disabled: vm.notAPit == true}">Export</button> -->
-		<button class="btn btn-primary"
-						ng-click="vm.selectPit()"
-						ng-class="{disabled: vm.notAPit == true}">
+		<button type="submit"
+						class="btn btn-primary"
+						ng-enter="vm.SelectPit()"
+						ng-click="vm.SelectPit()"
+						ng-disabled="!vm.IsValidPit()"
+						autofocus>
 			Select
 		</button>
 	</div>
-</div>
+</form>

@@ -8,7 +8,7 @@ module Peach.Models {
 		values: string[];
 	}
 
-	export interface IPitLibrary {
+	export interface IPitLibrary extends ng.resource.IResource<IPitLibrary> {
 		libraryUrl: string;
 		name: string;
 		description: string;
@@ -18,6 +18,8 @@ module Peach.Models {
 		user: string;
 		timeStamp: Date;
 	}
+
+	export interface IPitLibraryResource extends ng.resource.IResourceClass<IPitLibrary> {}
 
 	export interface IPitLibraryVersion {
 		version: number;

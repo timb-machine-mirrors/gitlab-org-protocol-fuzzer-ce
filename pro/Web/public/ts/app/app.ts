@@ -16,16 +16,22 @@ module Peach {
 		"angles",
 		"ngVis"
 	])
-		.service("peachService", [
-			"$resource",
-			"$http",
-			($resource, $http) => new Services.PeachService($resource, $http)
+		.factory('PitLibraryResource', [
+			'$resource',
+			($resource: ng.resource.IResourceService): Models.IPitLibraryResource => {
+				return <Models.IPitLibraryResource> $resource('/p/libraries');
+			}
 		])
-		.service("pitConfiguratorService", [
-			"poller",
-			"peachService",
-			(poller, peachService) => new Services.PitConfiguratorService(poller, peachService)
+		.factory('MonitorResource', [
+			'$resource',
+			($resource: ng.resource.IResourceService): Models.IMonitorResource => {
+				return <Models.IMonitorResource> $resource('/p/conf/wizard/monitors', {}, {
+					query: { method: 'GET', isArray: true, cache: true }
+				});
+			}
 		])
+		.service("peachService", Services.PeachService)
+		.service("pitConfiguratorService", Services.PitConfiguratorService)
 		.config([
 			"$routeProvider",
 			"$locationProvider",
@@ -59,22 +65,21 @@ module Peach {
 						templateUrl: "html/wizard.html",
 						controller: WizardController
 					})
-					.when("/configuration/monitors", {
-						templateUrl: "html/configuration-monitors.html",
-						controller: ConfigurationMonitorsController
+					.when("/cfg/monitors", {
+						templateUrl: "html/cfg-monitors.html",
+						controller: ConfigureMonitorsController
 					})
-					.when("/configuration/variables", {
-						templateUrl: "html/configuration-variables.html",
-						controller: ConfigurationVariablesController
+					.when("/cfg/variables", {
+						templateUrl: "html/cfg-variables.html",
+						controller: ConfigureVariablesController
 					})
-					.when("/configuration/test", {
-						templateUrl: "html/configuration-test.html",
-						controller: ConfigurationTestController
+					.when("/cfg/test", {
+						templateUrl: "html/cfg-test.html",
+						controller: ConfigureTestController
 					})
 					.otherwise({
 						redirectTo: "/"
-					})
-				;
+					});
 			}
 		])
 		.directive("integer", () => {
@@ -199,13 +204,26 @@ module Peach {
 				return (value.match(/\.0*$/) ? value.substr(0, value.indexOf('.')) : value) + ' ' + units[unit];
 			};
 		})
-		.run(($rootScope, $templateCache) => {
+		.directive('ngEnter', () => {
+			return (scope: ng.IScope, element: ng.IAugmentedJQuery, attrs: ng.IAttributes) => {
+				element.bind('keypress', (evt: JQueryEventObject) => {
+					if (evt.which === 13) {
+						scope.$apply(() => {
+							scope.$eval(attrs['ngEnter']);
+						});
+						evt.preventDefault();
+					}
+				});
+			}
+		})
+		.run(($rootScope: ng.IRootScopeService, $templateCache: ng.ITemplateCacheService) => {
 			$rootScope.$on('$routeChangeStart', (event, next, current) => {
 				if (typeof (current) !== 'undefined') {
 					$templateCache.remove(current.templateUrl);
 				}
 			});
-		});
+		})
+	;
 
 	function isEmpty(value) {
 		return angular.isUndefined(value) || value === '' || value === null || value !== value;
@@ -223,3 +241,79 @@ module Peach {
 		ngMax: any;
 	}
 }
+
+// This hack is in place to fix autofocus issues with modal instances
+// https://github.com/angular-ui/bootstrap/issues/1696
+angular.module('ui.bootstrap.modal').directive('modalWindow', ($timeout: ng.ITimeoutService) => {
+	return {
+		priority: 1,
+		link: (scope: ng.IScope, element: ng.IAugmentedJQuery) => {
+			// it appears animation takes ~300ms, so wait until this is done
+			// if it's too soon, the cursor will appear to float outside the bounds of the input element
+			$timeout(() => {
+				element.find('[autofocus]').focus();
+			}, 400);
+		}
+	};
+});
+
+// hack to fix scroll flickering issues
+// http://pushkarkinikar.wordpress.com/2014/07/10/ng-grid-scroll-flickering-issue/
+// override/replace existing directives
+// https://stackoverflow.com/questions/18421732/angularjs-how-to-override-directive-ngclick
+angular.module('ngGrid.directives')
+	.directive('ngViewport', () => {
+		return {
+			replace: false,
+			link: ($scope: any, elm) => {
+				var isMouseWheelActive;
+				var prevScollLeft;
+				var prevScollTop = 0;
+				var ensureDigest = () => {
+					if (!$scope.$root.$$phase) {
+						$scope.$digest();
+					}
+				};
+				var scrollTimer;
+
+				function scroll(evt) {
+					var scrollLeft = evt.target.scrollLeft,
+						scrollTop = evt.target.scrollTop;
+					if ($scope.$headerContainer) {
+						$scope.$headerContainer.scrollLeft(scrollLeft);
+					}
+					$scope.adjustScrollLeft(scrollLeft);
+					$scope.adjustScrollTop(scrollTop);
+					if ($scope.forceSyncScrolling) {
+						ensureDigest();
+					} else {
+						clearTimeout(scrollTimer);
+						scrollTimer = setTimeout(ensureDigest, 150);
+					}
+					prevScollLeft = scrollLeft;
+					prevScollTop = scrollTop;
+					isMouseWheelActive = false;
+					return true;
+				}
+
+				elm.bind('scroll', scroll);
+
+				elm.on('$destroy', () => {
+					elm.off('scroll', scroll);
+				});
+
+				if (!$scope.enableCellSelection) {
+					$scope.domAccessProvider.selectionHandlers($scope, elm);
+				}
+			}
+		}
+	})
+	.config(($provide: ng.auto.IProvideService) => {
+		$provide.decorator('ngViewportDirective', [
+			'$delegate', ($delegate: ng.IDirective[]) => {
+				$delegate.shift();
+				return $delegate;
+			}
+		]);
+	})
+;

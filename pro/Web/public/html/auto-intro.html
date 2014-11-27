@@ -1,14 +1,14 @@
 ﻿<!-- Configure Pit: Introduction for Automation section -->
 <div>
 	<p>The Automation section allows you to configure actions that Peach will take during fuzzing iterations to automate the test environment.</p>
-	
+
 	<p>This can include such things as:</p>
 	<ul>
 		<li>Control power to a hardware device</li>
 		<li>Start or stop processes</li>
 		<li>Run commands locally or remotely via SSH</li>
 		<li>Click buttons, or simulate plugging and unplugging cables</li>
-	</ul> 
+	</ul>
 
 	<p>	The Pit Automation section is optional. If you don't have the appropriate hardware or don't want to initiate a process while fuzzing, you may skip this section.</p>
 
@@ -27,13 +27,19 @@
 		<div ng-switch-when="0"></div>
 		<div ng-switch-default>
 			<h4>Items Already Added</h4>
-			<div class="gridStyle" ng-grid="vm.autoGridOptions"></div>
+			<div class="grid-border">
+				<div class="gridStyle" 
+						 ng-grid="vm.autoGridOptions">
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
 <div class="row-fluid wizard-actions">
 	<div class="space-6"></div>
-	<button class="btn btn-success btn-next" ng-click="vm.next()" ng-disabled="configuratorForm.$invalid">
+	<button class="btn btn-success btn-next"
+					ng-click="vm.Next()"
+					ng-disabled="configuratorForm.$invalid">
 		Next
 		<i class="icon-arrow-right icon-on-right"></i>
 	</button>
