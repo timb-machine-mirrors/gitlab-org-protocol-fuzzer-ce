@@ -19,6 +19,21 @@ namespace Peach.Core.Test
 		public string name { get; set; }
 	}
 
+	[XmlRoot("IntRoot")]
+	public class IntObject
+	{
+		[XmlAttribute]
+		public int Int { get; set; }
+
+		[XmlAttribute]
+		public uint UnsignedInt { get; set; }
+
+		[XmlAttribute]
+		public int Long { get; set; }
+
+		[XmlAttribute]
+		public uint UnsignedLong { get; set; }
+	}
 	public abstract class TestAbstract
 	{
 		public TestAbstract()
@@ -130,6 +145,11 @@ namespace Peach.Core.Test
 			obj.def = obj.Objects[0];
 
 			Serialize(obj);
+		}
+
+		public void Test6()
+		{
+			TestType(typeof(IntObject));
 		}
 	}
 }

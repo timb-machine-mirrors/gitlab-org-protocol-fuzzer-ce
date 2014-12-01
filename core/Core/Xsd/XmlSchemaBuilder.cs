@@ -1023,18 +1023,6 @@ namespace Peach.Core.Xsd
 			if (type == typeof(bool))
 				return new XmlQualifiedName("boolean", XmlSchema.Namespace);
 
-			if (type == typeof(uint))
-				return new XmlQualifiedName("unsignedInt", XmlSchema.Namespace);
-
-			if (type == typeof(int))
-				return new XmlQualifiedName("int", XmlSchema.Namespace);
-
-			if (type == typeof(ulong)) // Linux doesn't recognize unsignedLong
-				return new XmlQualifiedName("unsignedInt", XmlSchema.Namespace);
-
-			if (type == typeof(long)) // Linux doesn't recognize long
-				return new XmlQualifiedName("int", XmlSchema.Namespace);
-
 			if (type == typeof(decimal))
 				return new XmlQualifiedName("decimal", XmlSchema.Namespace);
 
@@ -1055,9 +1043,9 @@ namespace Peach.Core.Xsd
 			attr.Name = name;
 			attr.Annotate(pi);
 
-			if (pi.PropertyType.IsEnum)
+			if (IsSimpleType(pi.PropertyType))
 			{
-				attr.SchemaType = GetEnumType(pi.PropertyType);
+				attr.SchemaType = GetSimpleType(pi.PropertyType);
 			}
 			else
 			{
@@ -1110,9 +1098,9 @@ namespace Peach.Core.Xsd
 			attr.Name = name;
 			attr.Annotate(paramAttr.description);
 
-			if (paramAttr.type.IsEnum)
+			if (IsSimpleType(paramAttr.type))
 			{
-				attr.SchemaType = GetEnumType(paramAttr.type);
+				attr.SchemaType = GetSimpleType(paramAttr.type);
 			}
 			else
 			{
@@ -1149,6 +1137,68 @@ namespace Peach.Core.Xsd
 
 			return attr;
 		}
+
+		bool IsSimpleType(Type type)
+		{
+			if (IsGenericType(type, typeof(Nullable<>)))
+				type = type.GetGenericArguments()[0];
+
+			if (type.IsEnum)
+				return true;
+
+			// Mono has issues with xs:int, xs:unsignedInt, xs:long, xs:unsignedLong
+			// So use xs:integer with min/max restrictions
+
+			if (type == typeof(uint))
+				return true;
+
+			if (type == typeof(int))
+				return true;
+
+			if (type == typeof(ulong)) // Linux doesn't recognize unsignedLong
+				return true;
+
+			if (type == typeof(long)) // Linux doesn't recognize long
+				return false;
+
+			return false;
+		}
+
+		private XmlSchemaSimpleType GetSimpleType(Type type)
+		{
+			if (IsGenericType(type, typeof(Nullable<>)))
+				type = type.GetGenericArguments()[0];
+
+			if (type.IsEnum)
+				return GetEnumType(type);
+
+			XmlSchemaSimpleType ret;
+			if (enumTypeCache.TryGetValue(type, out ret))
+				return ret;
+
+			var content = new XmlSchemaSimpleTypeRestriction()
+			{
+				BaseTypeName = new XmlQualifiedName("integer", XmlSchema.Namespace),
+			};
+
+			var minFacet = new XmlSchemaMinInclusiveFacet();
+			minFacet.Value = type.GetField("MinValue", BindingFlags.Static | BindingFlags.Public).GetValue(null).ToString();
+			content.Facets.Add(minFacet);
+
+			var maxFacet = new XmlSchemaMaxInclusiveFacet();
+			maxFacet.Value = type.GetField("MaxValue", BindingFlags.Static | BindingFlags.Public).GetValue(null).ToString();
+			content.Facets.Add(maxFacet);
+
+			ret = new XmlSchemaSimpleType()
+			{
+				Content = content,
+			};
+
+			enumTypeCache.Add(type, ret);
+
+			return ret;
+		}
+
 
 		XmlSchemaSimpleType GetEnumType(Type type)
 		{
