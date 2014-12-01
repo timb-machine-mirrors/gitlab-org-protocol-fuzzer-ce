@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-
+using Peach.Core.Dom;
 using Peach.Core.Xsd;
 using System.Xml.Serialization;
 
@@ -33,6 +33,9 @@ namespace Peach.Core.Test
 
 		[XmlAttribute]
 		public uint UnsignedLong { get; set; }
+
+		[XmlAttribute]
+		public Peach.Core.Dom.Test.Lifetime Endian { get; set; }
 	}
 	public abstract class TestAbstract
 	{

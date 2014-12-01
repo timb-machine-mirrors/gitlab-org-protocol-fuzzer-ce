@@ -472,7 +472,9 @@ namespace Peach.Core.Xsd
 			if (doc == null)
 				return null;
 
-			var name = string.IsNullOrEmpty(suffix) ? type.FullName : string.Join(".", type.FullName, suffix);
+			// Member types have a '+' in their name, the docs use a '.'
+			var fullName = type.FullName.Replace('+', '.');
+			var name = string.IsNullOrEmpty(suffix) ? fullName : string.Join(".", fullName, suffix);
 			var query = string.Format("/doc/members/member[@name='{0}:{1}{2}']/summary", prefix, name, args);
 
 			var navi = doc.CreateNavigator();
