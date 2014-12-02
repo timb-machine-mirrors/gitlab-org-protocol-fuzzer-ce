@@ -163,12 +163,32 @@ namespace PitTester
 			foreach (var i in skipList)
 				Logger.Debug("Ignoring {0} from index {1} to {2}", i.Item1, i.Item2, i.Item3);
 
-			for (int i = 0; i < actual.Length; ++i)
-			{
-				var skip = skipList.Any(p => p.Item2 <= i && p.Item3 > i);
-				if (!skip && expected[i] != actual[i])
-					throw new PeachException("\nTest failed on action: {0}\n\tValues differ at offset 0x{3:x8}\n\tExpected: 0x{1:x2}\n\tBut was: 0x{2:x2}\n".Fmt(testLogger.ActionName, expected[i], actual[i], i));
-			}
+		    for (int i = 0; i < actual.Length; ++i)
+		    {
+		        var skip = skipList.Any(p => p.Item2 <= i && p.Item3 > i);
+		        if (!skip && expected[i] != actual[i])
+		        {
+                    Logger.Debug("vv Dumping DataModel vvvvvvvvvvvvvvvvv");
+                    long pos = 0;
+
+                    foreach (var item in dataModel.Walk())
+		            {
+                        Logger.Debug("0x{1:x}-0x{2:X}: {0}: {3}", 
+                            item.fullName, 
+                            pos,
+                            pos + item.Value.Length,
+                            Utilities.HexDump(item.Value));
+
+                        if(!(item is DataElementContainer))
+    		                pos += item.Value.Length;
+		            }
+                    Logger.Debug("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+
+		            throw new PeachException(
+		                "\nTest failed on action: {0}\n\tValues differ at offset 0x{3:x8}\n\tExpected: 0x{1:x2}\n\tBut was: 0x{2:x2}\n"
+		                    .Fmt(testLogger.ActionName, expected[i], actual[i], i));
+		        }
+		    }
 		}
 
 		protected override void OnOutput(BitwiseStream data)
