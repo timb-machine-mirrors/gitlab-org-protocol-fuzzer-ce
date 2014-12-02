@@ -3,12 +3,6 @@
 module Peach.Models {
 	"use strict";
 
-	export interface IChoice {
-		value: any;
-		a: string;
-		next: number;
-	}
-
 	export class QuestionTypes {
 		static String = "string";
 		static HexString = "hex";
@@ -25,51 +19,52 @@ module Peach.Models {
 		static Done = "done";
 	}
 
-	export class Question {
+	export interface IChoice {
+		a?: string;
+		value?: any;
+		next?: number;
+	}
+
+	export interface IQuestion {
 		id: number;
-
-		q: string;
-		qref: string;
-
 		type: string;
 
-		choice: IChoice[];
+		q?: string;
+		key?: string;
+		qref?: string;
+		choice?: IChoice[];
+		shortName?: string;
+		next?: number;
+		required?: boolean;
+		value?: any;
+		defaults?: any[];
+		rangeMin?: number;
+		rangeMax?: number;
+	}
 
-		shortName: string;
+	export interface IWizardTemplate {
+		qa: IQuestion[];
+		monitors: IMonitor[];
+	}
 
-		key: string;
-		next: number;
+	export interface ITrack {
+		// readonly
+		title: string;
+		qref?: string;
+		next?: string;
+		template?: IWizardTemplate; 
 
-		required: boolean = true;
-		value: any;
+		// dynamic values
+		isComplete?: boolean;
+		agents?: Agent[];
+		history: number[];
 
-		defaults: any[] = [];
+		Begin(): ng.IPromise<any>;
+		Finish();
+		Restart();
 
-		rangeMin: number;
-		rangeMax: number;
-
-		constructor(question?: Question) {
-			if (question) {
-				this.id = question.id;
-				this.q = question.q;
-				this.qref = question.qref;
-				this.type = question.type;
-				this.choice = question.choice;
-				this.shortName = question.shortName;
-				this.key = question.key;
-				this.value = question.value;
-				this.defaults = question.defaults;
-				this.rangeMin = question.rangeMin;
-				this.rangeMax = question.rangeMax;
-				this.next = question.next;
-				if (question.required !== undefined) {
-					this.required = question.required;
-				}
-			}
-		}
-
-		public static CreateQA(questions: Question[]): Question[] {
-			return questions.map((q: Question) => { return new Question(q); });
-		}
+		GetQuestionById(id: number): IQuestion;
+		GetQuestionByKey(key: string): IQuestion;
+		GetValueByKey(key: string): any;
 	}
 }

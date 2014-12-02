@@ -8,3 +8,5 @@
 /.tscache
 /.grunt
 .baseDir.ts
+/Gruntfile.js*
+/Gruntfile.min*

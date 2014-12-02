@@ -3,30 +3,24 @@
 module Peach.Models {
 	"use strict";
 
-	export interface ITag {
-		name: string;
-		values: string[];
-	}
+	import IResourceClass = ng.resource.IResourceClass;
+	import IResource = ng.resource.IResource;
 
-	export interface IPitLibrary extends ng.resource.IResource<IPitLibrary> {
+	export interface ILibrary extends IResource<ILibrary> {
 		libraryUrl: string;
 		name: string;
 		description: string;
 		locked: boolean;
-		versions: IPitLibraryVersion[];
+		versions: ILibraryVersion[];
 		groups: IGroup[];
 		user: string;
 		timeStamp: Date;
 	}
 
-	export interface IPitLibraryResource extends ng.resource.IResourceClass<IPitLibrary> {}
-
-	export interface IPitLibraryVersion {
+	export interface ILibraryVersion {
 		version: number;
 		locked: boolean;
-		pits: Pit[];
-		//user: string;
-		//timeStamp: Date;
+		pits: IPit[];
 	}
 
 	export interface IGroup {
@@ -34,8 +28,11 @@ module Peach.Models {
 		access: string;
 	}
 
-	export interface IPostMonitorsRequest {
-		pitUrl: string;
-		monitors: Agent[];
+	export interface ITag {
+		name: string;
+		values: string[];
 	}
+
+	// resources
+	export interface ILibraryResource extends IResourceClass<ILibrary> { }
 }

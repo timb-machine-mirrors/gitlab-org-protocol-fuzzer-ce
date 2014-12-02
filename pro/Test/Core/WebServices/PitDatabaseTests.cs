@@ -163,7 +163,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			var ent = db.Entries.ToList();
 			Assert.AreEqual(2, ent.Count);
 
-			var img = ent.Where(e => e.Name == "IMG").First();
+			var img = ent.First(e => e.Name == "IMG");
 
 			var cfg1 = db.GetConfigByUrl(img.PitUrl);
 			Assert.NotNull(cfg1);
@@ -171,7 +171,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			// Expect PitLibraryPath to be removed
 			Assert.AreEqual(1, cfg1.Config.Count);
 
-			var imgCopy = ent.Where(e => e.Name == "IMG Copy").First();
+			var imgCopy = ent.First(e => e.Name == "IMG Copy");
 
 			var cfg2 = db.GetConfigByUrl(imgCopy.PitUrl);
 			Assert.NotNull(cfg2);
@@ -361,11 +361,11 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.NotNull(db);
 			Assert.AreEqual(2, db.Entries.Count());
 
-			var file = db.Entries.Where(e => e.Name == "File").FirstOrDefault();
+			var file = db.Entries.FirstOrDefault(e => e.Name == "File");
 			Assert.NotNull(file);
 			Assert.False(file.Versions[0].Configured);
 
-			var img = db.Entries.Where(e => e.Name == "IMG").FirstOrDefault();
+			var img = db.Entries.FirstOrDefault(e => e.Name == "IMG");
 			Assert.NotNull(img);
 			Assert.True(img.Versions[0].Configured);
 		}
@@ -479,7 +479,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			var monitors = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Pro.Core.WebServices.Models.Agent>>(json);
 			Assert.NotNull(monitors);
 
-			PitDatabase.SaveMonitors(pit, monitors);
+			PitDatabase.SaveAgents(pit, monitors);
 
 			var parser = new Peach.Core.Analyzers.PitParser();
 
@@ -560,14 +560,16 @@ namespace Peach.Pro.Test.Core.WebServices
 ]";
 			var monitors = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Pro.Core.WebServices.Models.Agent>>(json);
 
-			PitDatabase.SaveMonitors(pit, monitors);
+			PitDatabase.SaveAgents(pit, monitors);
 
 			var parser = new Peach.Core.Analyzers.PitParser();
 
 			var opts = new Dictionary<string, object>();
-			var defs = new Dictionary<string, string>();
-			defs.Add("PitLibraryPath", root);
-			defs.Add("Strategy", "Random");
+			var defs = new Dictionary<string, string>
+			{
+				{"PitLibraryPath", root}, 
+				{"Strategy", "Random"}
+			};
 			opts[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
 
 			var dom = parser.asParser(opts, pit.Versions[0].Files[0].Name);
@@ -606,7 +608,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.NotNull(db);
 			Assert.AreEqual(2, db.Entries.Count());
 
-			var file = db.Entries.Where(e => e.Name == "Remote").FirstOrDefault();
+			var file = db.Entries.FirstOrDefault(e => e.Name == "Remote");
 			Assert.NotNull(file);
 			Assert.AreEqual(1, file.Versions[0].Files.Count);
 		}
@@ -649,7 +651,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.NotNull(db);
 			Assert.AreEqual(2, db.Entries.Count());
 
-			var file = db.Entries.Where(e => e.Name == "My").FirstOrDefault();
+			var file = db.Entries.FirstOrDefault(e => e.Name == "My");
 			Assert.NotNull(file);
 			Assert.AreEqual(2, file.Versions[0].Files.Count);
 		}

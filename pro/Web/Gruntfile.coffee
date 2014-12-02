@@ -17,6 +17,7 @@ module.exports = (grunt) ->
 					'public/lib/jquery'            : 'jquery:main'
 					'public/lib/moment'            : 'moment:main'
 					'public/lib/ng-grid'           : 'ng-grid:main'
+					'public/lib/underscore'        : 'underscore:main'
 
 			mainless:
 				options:
@@ -91,6 +92,8 @@ module.exports = (grunt) ->
 					'public/lib/angular/angular.js'
 					# unordered libraries
 					'public/lib/**/*.js'
+					# extra stuff
+					'public/js/angular-vis.js'
 					# local code
 					'public/js/test/test.js'
 				]

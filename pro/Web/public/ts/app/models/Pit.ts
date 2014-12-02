@@ -3,7 +3,10 @@
 module Peach.Models {
 	"use strict";
 
-	export class IPit {
+	import IResource = ng.resource.IResource;
+	import IResourceClass = ng.resource.IResourceClass;
+
+	export interface IPit extends IResource<IPit> {
 		pitUrl: string;
 		name: string;
 		description: string;
@@ -23,57 +26,9 @@ module Peach.Models {
 		libraryUrl: string;
 
 		// Pit record. Use only pitUrl, name, and description
-		pit: Pit;
+		pit: IPit;
 	}
 
-	export class Pit extends IPit {
-		public get configured(): boolean {
-			if (this.hasVersion === false) {
-				this.addVersion();
-			}
-
-			return this.versions[this.versions.length - 1].configured;
-		}
-
-		public set configured(value: boolean) {
-			if (this.hasVersion === false) {
-				this.addVersion();
-			}
-			this.versions[this.versions.length - 1].configured = value;
-		}
-
-		constructor(pit?: IPit) {
-			super();
-
-			if (pit !== undefined) {
-				this.pitUrl = pit.pitUrl;
-				this.name = pit.name;
-				this.description = pit.description;
-				this.tags = pit.tags;
-				this.locked = pit.locked;
-
-				if (pit.versions === undefined) {
-					this.addVersion();
-				} else {
-					this.versions = pit.versions;
-				}
-			}
-		}
-
-		private addVersion() {
-			var v: IPitVersion = {
-				locked: false,
-				configured: false,
-				version: 0
-			};
-			if (this.versions === undefined) {
-				this.versions = [];
-			}
-			this.versions.push(v);
-		}
-
-		public get hasVersion(): boolean {
-			return (this.versions !== undefined && this.versions.length > 0);
-		}
-	}
+	// resources
+	export interface IPitResource extends IResourceClass<IPit> { }
 }

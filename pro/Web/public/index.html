@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html ng-app="peachDash" data-framework="typescript">
+<html ng-app="Peach" data-framework="typescript">
 <head>
 	<meta http-equiv="cache-control" content="no-cache" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title></title>
+	<title>Peach Fuzzer</title>
 
 	<link rel="shortcut icon" href="img/favicon.ico">
 
@@ -27,6 +27,7 @@
 	<script src="lib/angular-route/angular-route.js"></script>
 	<script src="lib/angular-bootstrap/ui-bootstrap-tpls.js"></script>
 	<script src="lib/angular-tree-control/js/angular-tree-control.js"></script>
+	<!--<script src="lib/angular-ui-utils/ui-utils.js"></script>-->
 	<script src="lib/chartjs/Chart.js"></script>
 	<script src="lib/angles/angles.js"></script>
 	<script src="lib/ng-grid/ng-grid.js"></script>
@@ -38,33 +39,39 @@
 	<script src="lib/ace-bootstrap/ace-extra.js"></script>
 	<script src="lib/moment/moment.js"></script>
 	<script src="lib/vis/vis.js"></script>
+	<script src="lib/underscore/underscore.js"></script>
 	<script src="js/angular-vis.js"></script>
 
 	<script src="js/app/app.js"></script>
 </head>
-<body class="skin-1" ng-controller="Peach.MainController">
+<body class="skin-1"
+			ng-controller="Peach.MainController">
 
-	<div class="navbar navbar-default" id="navbar">
+	<div class="navbar navbar-default" 
+			 id="navbar">
 
-		<div class="navbar-container" id="navbar-container">
+		<div class="navbar-container" 
+				 id="navbar-container">
 			<div class="navbar-header pull-left">
 				<small>
 					<img src="img/peachlogo.png" height="50" />
 				</small>
-			</div><!-- /.navbar-header -->
+			</div>
 
-			<div class="navbar-header pull-right" id="breadcrumbs">
-				<ul class="nav ace-nav" style="background: none">
-					<li data-original-title="{{vm.jobRunningTooltip}}"
+			<div class="navbar-header pull-right" 
+					 id="breadcrumbs">
+				<ul class="nav ace-nav" 
+						style="background: none">
+					<li data-original-title="{{vm.JobRunningTooltip}}"
 							class="tooltip-warning"
 							data-rel="tooltip"
 							data-placement="left">
 						<a data-toggle="dropdown"
 							 class="dropdown-toggle"
 							 style="background-color: transparent; font-size: 20px; cursor: pointer"
-							 ng-class="{disabled: vm.CanSelectPit == false}">
+							 ng-disabled="!vm.CanSelectPit">
 							<span>
-								{{vm.pit.name || '(none)'}}
+								{{vm.PitName}}
 							</span>
 
 							<i class="icon-caret-down"></i>
@@ -72,23 +79,17 @@
 
 						<ul class="user-menu pull-right dropdown-menu dropdown-light-blue dropdown-caret dropdown-close">
 							<li>
-								<a ng-click="vm.showPitSelector()" style="cursor: pointer">
+								<a ng-click="vm.OnSelectPit()" 
+									 style="cursor: pointer">
 									Select another Pit
 								</a>
 							</li>
-							<!--
-							<li>
-									<a ng-click="vm.exportPit()" style="cursor: pointer">
-											Export Pit
-									</a>
-							</li>
-							-->
 						</ul>
 					</li>
 				</ul>
 
 			</div>
-		</div><!-- /.container -->
+		</div>
 	</div>
 
 	<div class="main-container" id="main-container">
@@ -101,22 +102,19 @@
 			<div class="sidebar" id="sidebar">
 
 				<ul class="nav nav-list">
-					<li ng-class="{active: vm.location.path() == '/'}">
+					
+					<li ng-class="{active: vm.IsActive('/')}">
 						<a href="#/">
 							<i class="icon-dashboard"></i>
-							<span class="menu-text"> Dashboard </span>
+							<span class="menu-text">
+								Dashboard
+							</span>
 						</a>
 					</li>
-					<!--
-					<li ng-class="{active: vm.location.path() == '/visualizer'}">
-							<a href="#/visualizer">
-									<i class="icon-eye-open"></i>
-									<span class="menu-text"> Visualizer </span>
-							</a>
-					</li>
-					-->
-					<li ng-class="{active: vm.location.path() == '/faults','disabled': vm.CanViewFaults == false}"
-							data-original-title="{{vm.faultsUnavailableTooltip}}"
+
+					<li ng-class="{active: vm.IsActive('/faults')}"
+							ng-disabled="!vm.CanViewFaults"
+							data-original-title="{{vm.FaultsUnavailableTooltip}}"
 							class="tooltip-warning"
 							data-rel="tooltip"
 							data-placement="right">
@@ -124,60 +122,75 @@
 							<i class="icon-fire"></i>
 							<span class="menu-text">
 								Faults
-								<span class="badge badge-primary ">{{vm.job.faultCount}}</span>
+								<span class="badge badge-primary ">{{vm.FaultCount}}</span>
 							</span>
 						</a>
 					</li>
-					<li data-original-title="{{vm.metricsUnavailableTooltip}}"
+
+					<li data-original-title="{{vm.MetricsUnavailableTooltip}}"
 							class="tooltip-warning"
 							data-rel="tooltip"
 							data-placement="right"
-							ng-class="{active: vm.location.path() == '/metrics','disabled': vm.CanViewMetrics == false}">
-						<a class="dropdown-toggle"
-							 href="#"
-							 ng-class="{'disabled': vm.CanViewMetrics == false}">
+							ng-class="{active: vm.IsActive('/metrics')}"
+							ng-disabled="!vm.CanViewMetrics">
+						<a href="#"
+						   class="dropdown-toggle"
+						   ng-disabled="!vm.CanViewMetrics">
 							<i class="icon-signal"></i>
-							<span class="menu-text"> Metrics </span>
+							<span class="menu-text">
+								Metrics
+							</span>
 							<b class="arrow icon-angle-down"></b>
 						</a>
-						<ul class="submenu" style="display:none">
-							<li ng-class="{active: vm.location.path() == '/metrics/bucketTimeline'}">
+
+						<ul class="submenu"
+								style="display:none">
+
+							<li ng-class="{active: vm.IsActive('/metrics/bucketTimeline')}">
 								<a href="#/metrics/bucketTimeline">
 									<i class="icon-double-angle-right"></i>
-									<span class="menu-text">Bucket Timeline</span>
+									<span class="menu-text">
+										Bucket Timeline
+									</span>
 								</a>
 							</li>
-							<li ng-class="{active: vm.location.path() == '/metrics/faultsOverTime'}">
+
+							<li ng-class="{active: vm.IsActive('/metrics/faultsOverTime')}">
 								<a href="#/metrics/faultsOverTime">
 									<i class="icon-double-angle-right"></i>
 									<span class="menu-text">Faults Over Time</span>
 								</a>
 							</li>
-							<li ng-class="{active: vm.location.path() == '/metrics/mutators'}">
+
+							<li ng-class="{active: vm.IsActive('/metrics/mutators')}">
 								<a href="#/metrics/mutators">
 									<i class="icon-double-angle-right"></i>
 									<span class="menu-text">Mutators</span>
 								</a>
 							</li>
-							<li ng-class="{active: vm.location.path() == '/metrics/elements'}">
+
+							<li ng-class="{active: vm.IsActive('/metrics/elements')}">
 								<a href="#/metrics/elements">
 									<i class="icon-double-angle-right"></i>
 									<span class="menu-text">Elements</span>
 								</a>
 							</li>
-							<li ng-class="{active: vm.location.path() == '/metrics/states'}">
+
+							<li ng-class="{active: vm.IsActive('/metrics/states')}">
 								<a href="#/metrics/states">
 									<i class="icon-double-angle-right"></i>
 									<span class="menu-text">States</span>
 								</a>
 							</li>
-							<li ng-class="{active: vm.location.path() == '/metrics/datasets'}">
+
+							<li ng-class="{active: vm.IsActive('/metrics/datasets')}">
 								<a href="#/metrics/datasets">
 									<i class="icon-double-angle-right"></i>
 									<span class="menu-text">Datasets</span>
 								</a>
 							</li>
-							<li ng-class="{active: vm.location.path() == '/metrics/buckets'}">
+
+							<li ng-class="{active: vm.IsActive('/metrics/buckets')}">
 								<a href="#/metrics/buckets">
 									<i class="icon-double-angle-right"></i>
 									<span class="menu-text">Buckets</span>
@@ -185,96 +198,108 @@
 							</li>
 						</ul>
 					</li>
+
 					<li class="tooltip-warning"
-							data-original-title="{{vm.jobRunningTooltip}}"
+							data-original-title="{{vm.JobRunningTooltip}}"
 							data-rel="tooltip"
 							data-placement="right"
-							ng-class="{'disabled': vm.CanConfigurePit == false}">
+							ng-disabled="!vm.CanConfigurePit">
 						<a class="dropdown-toggle"
 							 href="#"
-							 ng-class="{'disabled': vm.CanConfigurePit == false}">
+							 ng-disabled="!vm.CanConfigurePit">
 							<i class="icon-desktop"></i>
 							<span class="menu-text">Quick Start</span>
 							<b class="arrow icon-angle-down"></b>
 						</a>
 						<ul class="submenu" style="display: none;">
-							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/quickstart/intro'}">
+							<li ng-class="{active: vm.IsActive('/quickstart/intro')}"
+									ng-disabled="!vm.CanConfigurePit">
 								<a href="#/quickstart/intro">
 									<i class="icon-double-angle-right"></i>
-									<i ng-class="{'icon-ok-sign green': vm.IntroComplete}"></i>
+									<i ng-class="{'icon-ok-sign green': vm.IsComplete('intro')}"></i>
 									Introduction
 								</a>
 							</li>
-							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/quickstart/setvars'}">
+							<li ng-class="{active: vm.IsActive('/quickstart/setvars')}"
+									ng-disabled="!vm.CanConfigurePit">
 								<a href="#/quickstart/setvars">
 									<i class="icon-double-angle-right"></i>
-									<i ng-class="{'icon-ok-sign green': vm.SetVarsComplete}"></i>
+									<i ng-class="{'icon-ok-sign green': vm.IsComplete('setvars')}"></i>
 									Set Variables
 								</a>
 							</li>
-							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/quickstart/fault'}">
+							<li ng-class="{active: vm.IsActive('/quickstart/fault')}"
+									ng-disabled="!vm.CanConfigurePit">
 								<a href="#/quickstart/fault">
 									<i class="icon-double-angle-right"></i>
-									<i ng-class="{'icon-ok-sign green': vm.FaultComplete}"></i>
+									<i ng-class="{'icon-ok-sign green': vm.IsComplete('fault')}"></i>
 									Fault Detection
 								</a>
 							</li>
-							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/quickstart/data'}">
+							<li ng-class="{active: vm.IsActive('/quickstart/data')}"
+									ng-disabled="!vm.CanConfigurePit">
 								<a href="#/quickstart/data">
 									<i class="icon-double-angle-right"></i>
-									<i ng-class="{'icon-ok-sign green': vm.DataComplete}"></i>
+									<i ng-class="{'icon-ok-sign green': vm.IsComplete('data')}"></i>
 									Data Collection
 								</a>
 							</li>
-							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/quickstart/auto'}">
+							<li ng-class="{active: vm.IsActive('/quickstart/auto')}"
+									ng-disabled="!vm.CanConfigurePit">
 								<a href="#/quickstart/auto">
 									<i class="icon-double-angle-right"></i>
-									<i ng-class="{'icon-ok-sign green': vm.AutoComplete}"></i>
+									<i ng-class="{'icon-ok-sign green': vm.IsComplete('auto')}"></i>
 									Automation
 								</a>
 							</li>
-							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/quickstart/test'}">
+							<li ng-class="{active: vm.IsActive('/quickstart/test')}"
+									ng-disabled="!vm.CanConfigurePit">
 								<a href="#/quickstart/test">
 									<i class="icon-double-angle-right"></i>
-									<i ng-class="{'icon-ok-sign green': vm.TestComplete}"></i>
+									<i ng-class="{'icon-ok-sign green': vm.IsComplete('test')}"></i>
 									Test
 								</a>
 							</li>
-							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/quickstart/done'}">
+							<li ng-class="{active: vm.IsActive('/quickstart/done')}"
+									ng-disabled="!vm.CanConfigurePit">
 								<a href="#/quickstart/done">
 									<i class="icon-double-angle-right"></i>
-									<i ng-class="{'icon-ok-sign green': vm.DoneComplete}"></i>
+									<i ng-class="{'icon-ok-sign green': vm.IsComplete('done')}"></i>
 									Done
 								</a>
 							</li>
 						</ul>
 					</li>
+
 					<li class="tooltip-warning"
-							data-original-title="{{vm.jobRunningTooltip}}"
+							data-original-title="{{vm.JobRunningTooltip}}"
 							data-rel="tooltip"
 							data-placement="right"
-							ng-class="{'disabled': vm.CanConfigurePit == false}">
+							ng-disabled="!vm.CanConfigurePit">
 						<a class="dropdown-toggle"
 							 href="#"
-							 ng-class="{'disabled': vm.CanConfigurePit == false}">
+							 ng-disabled="!vm.CanConfigurePit">
 							<i class="icon-desktop"></i>
 							<span class="menu-text">Configuration</span>
 							<b class="arrow icon-angle-down"></b>
 						</a>
 						<ul class="submenu" style="display: none;">
-							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/cfg/variables'}">
+							<li ng-class="{active: vm.IsActive('/cfg/variables')}"
+									ng-disabled="!vm.CanConfigurePit">
 								<a href="#/cfg/variables">
 									<i class="icon-double-angle-right"></i>
 									Variables
 								</a>
 							</li>
-							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/cfg/monitors'}">
+							<li ng-class="{active: vm.IsActive('/cfg/monitors')}"
+									ng-disabled="!vm.CanConfigurePit">
 								<a href="#/cfg/monitors">
 									<i class="icon-double-angle-right"></i>
 									Monitoring
 								</a>
 							</li>
-							<li ng-class="{'disabled': vm.CanConfigurePit == false, active: vm.location.path() == '/cfg/test'}">
+							<li ng-class="{active: vm.IsActive('/cfg/test')}"
+									ng-disabled="!vm.CanConfigurePit">
 								<a href="#/cfg/test">
 									<i class="icon-double-angle-right"></i>
 									Test
@@ -284,21 +309,29 @@
 					</li>
 
 					<li>
-						<a href="/docs" target="_blank">
+						<a href="/docs" 
+						   target="_blank">
 							<i class="icon-book"></i>
-							<span class="menu-text"> Documentation </span>
+							<span class="menu-text">
+								Documentation
+							</span>
 						</a>
 					</li>
+
 					<li>
-						<a href="https://forums.peachfuzzer.com" target="_blank">
+						<a href="https://forums.peachfuzzer.com" 
+						   target="_blank">
 							<i class="icon-bookmark"></i>
-							<span class="menu-text"> Forums </span>
+							<span class="menu-text">
+								Forums
+							</span>
 						</a>
 					</li>
 
-				</ul><!-- /.nav-list -->
+				</ul>
 
-				<div class="sidebar-collapse" id="sidebar-collapse">
+				<div class="sidebar-collapse" 
+						 id="sidebar-collapse">
 					<i class="icon-double-angle-left"
 						 data-icon1="icon-double-angle-left"
 						 data-icon2="icon-double-angle-right"></i>
@@ -308,62 +341,13 @@
 
 			<div class="main-content" ng-view>
 
-			</div><!-- /.main-container-inner -->
+			</div>
 
-		</div><!-- /.main-container -->
+		</div>
 	</div>
 
 	<script type="text/javascript">
-		window.onerror = function (message, url, lineNo) {
-			console.log('Error: ' + message + '\n' + 'Line Number: ' + lineNo);
-
-			return true;
-		}
-
-		var version = getHtmlVer();
-		if (version < 5) {
-			alert("This application requires an HTML 5 and ECMAScript 5 capable browser. Please upgrade your browser to a more recent version.");
-		}
-		else {
-			initialize();
-		}
-
-		function initialize() {
-			jQuery(function ($) {
-				// shows tooltips
-				$('[data-rel=tooltip]').tooltip();
-
-				// handles disabling of navbar items
-				$("ul.nav-list").on('click', 'li.disabled', false);
-			});
-		}
-
-		function getHtmlVer() {
-			var CName = navigator.appCodeName;
-			var UAgent = navigator.userAgent;
-			var HtmlVer = 0.0;
-			// Remove start of string in UAgent upto CName or end of string if not found.
-			UAgent = UAgent.substring((UAgent + CName).toLowerCase().indexOf(CName.toLowerCase()));
-			// Remove CName from start of string. (Eg. '/5.0 (Windows; U...)
-			UAgent = UAgent.substring(CName.length);
-			// Remove any spaves or '/' from start of string.
-			while (UAgent.substring(0, 1) == " " || UAgent.substring(0, 1) == "/") {
-				UAgent = UAgent.substring(1);
-			}
-			// Remove the end of the string from first characrer that is not a number or point etc.
-			var pointer = 0;
-			while ("0123456789.+-".indexOf((UAgent + "?").substring(pointer, pointer + 1)) >= 0) {
-				pointer = pointer + 1;
-			}
-			UAgent = UAgent.substring(0, pointer);
-
-			if (!isNaN(UAgent)) {
-				if (UAgent > 0) {
-					HtmlVer = UAgent;
-				}
-			}
-			return parseFloat(HtmlVer);
-		}
+		Peach.Startup();
 	</script>
 </body>
 </html>

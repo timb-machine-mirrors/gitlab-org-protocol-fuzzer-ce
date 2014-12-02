@@ -1,0 +1,49 @@
+﻿<form name="form">
+	<div class="page-content">
+		<div class="page-header">
+			<h1>Configuration &raquo; Variables</h1>
+		</div>
+		<div class="row">
+			<div class="col-xs-12" 
+					 style="padding: 0 30px 0 0;">
+				<div class="row" 
+						 style="margin: 0 0 10px 0">
+					<div class="col-xs-6">
+						Click on a Value cell to edit it.
+						<span ng-show="vm.ShowSaved"
+									class="green">
+							Saved successfully.
+						</span>
+						<span ng-show="vm.ShowValidation"
+									class="red">
+							You have some validation issues to correct.
+						</span>
+					</div>
+					<div class="col-xs-6 text-right">
+						<div>
+							<button class="btn btn-xs btn-danger"
+											ng-disabled="!vm.CanSave"
+											ng-click="vm.Save">
+								Save
+							</button>
+							<button class="btn btn-xs btn-info"
+											ng-click="vm.Add()">
+								Add Variable
+								<i class="icon-plus icon-on-right">
+								</i>
+							</button>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="grid-border">
+							<div class="gridStyle"
+									 ng-grid="vm.grid"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>

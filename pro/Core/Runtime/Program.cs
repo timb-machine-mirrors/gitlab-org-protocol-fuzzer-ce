@@ -443,7 +443,7 @@ Syntax:
   --seed N                   Sets the seed used by the random number generator
   --parseonly                Test parse a Peach XML file
   --makexsd                  Generate peach.xsd
-  --showenv                  Print a list of all DataElements, Fixups, Monitors
+  --showenv                  Print a list of all DataElements, Fixups, Agents
                              Publishers and their associated parameters.
   --showdevices              Display the list of PCAP devices
   --analyzer                 Launch Peach Analyzer

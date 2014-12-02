@@ -7,8 +7,8 @@
       <FileName>WebServices\Models\Library.cs</FileName>
     </TypeIdentifier>
     <ShowAsCollectionAssociation>
-      <Property Name="Groups" />
       <Property Name="Versions" />
+      <Property Name="Groups" />
     </ShowAsCollectionAssociation>
   </Class>
   <Class Name="Peach.Pro.Core.WebServices.Models.Group">
@@ -55,9 +55,9 @@
       <FileName>WebServices\Models\Pit.cs</FileName>
     </TypeIdentifier>
     <ShowAsCollectionAssociation>
-      <Property Name="Peaches" />
       <Property Name="Tags" />
       <Property Name="Versions" />
+      <Property Name="Peaches" />
     </ShowAsCollectionAssociation>
   </Class>
   <Class Name="Peach.Pro.Core.WebServices.Models.PitConfig">
@@ -73,7 +73,7 @@
   <Class Name="Peach.Pro.Core.WebServices.Models.Parameter">
     <Position X="0.5" Y="8" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAEAAIAABEgAAQAEAAAAAAAAAAAAAAAAQAgAAAAAAA=</HashCode>
+      <HashCode>AAAEAAAAABEgAAQAEAAAAAQAAAAAAAAAAwAgAAAAAAA=</HashCode>
       <FileName>WebServices\Models\Monitor.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -104,11 +104,11 @@
       <FileName>WebServices\Models\PitFile.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Peach.Pro.Core.WebServices.Models.PitMonitors">
+  <Class Name="Peach.Pro.Core.WebServices.Models.PitAgents">
     <Position X="3" Y="3.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAA=</HashCode>
-      <FileName>WebServices\Models\PitMonitors.cs</FileName>
+      <FileName>WebServices\Models\PitAgents.cs</FileName>
     </TypeIdentifier>
     <ShowAsCollectionAssociation>
       <Property Name="Monitors" />
@@ -270,7 +270,7 @@
   <Enum Name="Peach.Pro.Core.WebServices.Models.ParameterType" Collapsed="true">
     <Position X="0.5" Y="11" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAACAgwSgCAAAAAAAAAIAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAABAAAAAAAACAgwSgCAAAAAAAAAIAAAAAAAAAAAAAA=</HashCode>
       <FileName>WebServices\Models\Monitor.cs</FileName>
     </TypeIdentifier>
   </Enum>

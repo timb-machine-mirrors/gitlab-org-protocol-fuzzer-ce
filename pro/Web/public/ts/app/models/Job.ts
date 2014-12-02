@@ -4,9 +4,8 @@ module Peach.Models {
 	"use strict";
 
 	export interface IJob {
-
 		// URL to configured pit
-		///p/pits/ID
+		// /p/pits/ID
 		pitUrl: string;
 
 		jobUrl?: string;
@@ -82,7 +81,7 @@ module Peach.Models {
 		hasMetrics?: boolean;
 	}
 
-	export class JobStatuses {
+	export class JobStatus {
 		public static StartPending: string = "startPending";
 		public static Running: string = "running";
 		public static PausePending: string = "pausePending";

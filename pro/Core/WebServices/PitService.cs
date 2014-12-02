@@ -16,9 +16,12 @@ namespace Peach.Pro.Core.WebServices
 		{
 			Get[""] = _ => GetPits();
 			Get["/{id}"] = _ => GetPit(_.id);
+
 			Get["/{id}/config"] = _ => GetPitConfig(_.id);
 			Post["/{id}/config"] = _ => PostPitConfig(_.id);
+
 			Get["/{id}/agents"] = _ => GetPitAgents(_.id);
+			Post["/{id}/agents"] = _ => PostPitAgents(_.id);
 
 			Post[""] = _ => CopyPit();
 		}
@@ -42,7 +45,6 @@ namespace Peach.Pro.Core.WebServices
 			var cfg = PitDatabase.GetConfigById(id);
 			if (cfg == null)
 				return HttpStatusCode.NotFound;
-
 			return cfg;
 		}
 
@@ -93,10 +95,25 @@ namespace Peach.Pro.Core.WebServices
 			if (pit.Locked)
 				return HttpStatusCode.Forbidden;
 
-			var cfg = this.Bind<List<Parameter>>();
-			PitDatabase.SaveConfig(pit, cfg);
+			var data = this.Bind<PitConfig>();
+			PitDatabase.SaveConfig(pit, data.Config);
+			return data;
+		}
 
-			return HttpStatusCode.OK;
+		object PostPitAgents(string id)
+		{
+			var pit = PitDatabase.GetPitById(id);
+			if (pit == null)
+				return HttpStatusCode.NotFound;
+	
+			// Don't allow changing configuration values
+			// of locked pits
+			if (pit.Locked)
+				return HttpStatusCode.Forbidden;
+
+			var data = this.Bind<PitAgents>();
+			PitDatabase.SaveAgents(pit, data.Agents);
+			return data;
 		}
 	}
 }

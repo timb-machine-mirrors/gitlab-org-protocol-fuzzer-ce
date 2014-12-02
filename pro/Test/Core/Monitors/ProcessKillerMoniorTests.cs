@@ -15,7 +15,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		[SetUp]
 		public void SetUp()
 		{
-			si = SingleInstance.CreateInstance("Peach.Core.Test.Monitors.ProcessKillerMonitorTests");
+			si = SingleInstance.CreateInstance("Peach.Core.Test.Agents.ProcessKillerMonitorTests");
 			si.Lock();
 		}
 

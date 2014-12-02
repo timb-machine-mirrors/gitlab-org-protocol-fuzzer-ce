@@ -1,0 +1,38 @@
+﻿<div>
+	<div class="header blue"
+			 ng-class="{hidden: vm.location.path() != '/quickstart/setvars'}">
+		{{vm.Question.shortName || vm.Question.key}}
+	</div>
+	<label>{{vm.Question.q}}</label>
+	<div class="dropdown" >
+		<input name="{{vm.Question.key}}"
+					 ng-model="vm.Question.value"
+					 type="text"
+					 ng-enter="vm.Next()"
+					 class="dropdown-toggle"
+					 hexstring
+					 ng-required="vm.Question.required" />
+		<ul class="dropdown-menu"
+				ng-class="{hidden: vm.location.path() != '/quickstart/setvars'}">
+			<li ng-repeat="default in vm.Question.defaults">
+				<div ng-click="vm.Question.value = default"
+						 style="width: 100%; cursor: pointer">
+					{{default}}
+				</div>
+			</li>
+		</ul>
+	</div>
+	<div class="row-fluid wizard-actions">
+		<button class="btn btn-prev"
+						ng-click="vm.Back()">
+			<i class="icon-arrow-left"></i>
+			Back
+		</button>
+		<button class="btn btn-success btn-next" 
+		        ng-click="vm.Next()" 
+						ng-disabled="configuratorForm.$invalid">
+			Next
+			<i class="icon-arrow-right icon-on-right"></i>
+		</button>
+	</div>
+</div>

@@ -1,0 +1,33 @@
+﻿<div ng-enter="vm.Next()">
+	<div class="header blue"
+			 ng-class="{hidden: vm.location.path() != '/quickstart/setvars'}">
+		{{vm.Question.shortName || vm.Question.key}}
+	</div>
+	<label>{{vm.Question.q}}</label>
+	<div class="control-group">
+		<div ng-repeat="choice in vm.Question.choice"
+				 class="radio">
+			<input type="radio"
+						 name="dummy"
+						 ng-model="vm.Question.value"
+						 ng-value="choice.value"
+						 id="choice{{$index+1}}" />
+			<label for="choice{{$index+1}}">
+				{{choice.a}}
+			</label>
+		</div>
+	</div>
+	<div class="row-fluid wizard-actions">
+		<button class="btn btn-prev"
+						ng-click="vm.Back()">
+			<i class="icon-arrow-left"></i>
+			Back
+		</button>
+		<button class="btn btn-success btn-next"
+						ng-click="vm.Next()"
+						ng-disabled="configuratorForm.$invalid">
+			Next
+			<i class="icon-arrow-right icon-on-right"></i>
+		</button>
+	</div>
+</div>

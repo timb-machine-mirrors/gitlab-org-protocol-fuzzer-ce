@@ -105,5 +105,17 @@ span.accordion-toggle {
 }
 
 pre {
-	white-space: pre-line;
+	white-space: pre-wrap;
+}
+
+/* fix for backdrop, for some reason this is missing */
+.modal-backdrop {
+	bottom: 0;
+}
+
+/* turn off animation, this can screw with autofocus */
+.modal.fade .modal-dialog, .modal.in .modal-dialog {
+	-webkit-transform: translate(0, 0);
+	-ms-transform: translate(0, 0);
+	transform: translate(0, 0);
 }

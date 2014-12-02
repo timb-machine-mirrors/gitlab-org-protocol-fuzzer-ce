@@ -462,20 +462,23 @@ namespace Peach.Pro.Core.WebServices
 			XmlTools.Serialize(fileName, final);
 		}
 
-		public List<Models.Agent> GetAgentsById(string guid)
+		public PitAgents GetAgentsById(string guid)
 		{
 			return GetAgentsByUrl(PitService.Prefix + "/" + guid);
 		}
 
-		public List<Models.Agent> GetAgentsByUrl(string url)
+		public PitAgents GetAgentsByUrl(string url)
 		{
 			var pit = GetPitByUrl(url);
-
 			if (pit == null)
 				return null;
 
 			var doc = Parse(pit.Versions[0].Files[0].Name);
-			var models = new List<Models.Agent>();
+			var ret = new PitAgents
+			{
+				PitUrl = url,
+				Agents = new List<Models.Agent>(),
+			};
 			foreach(var agent in doc.Children.OfType<PeachElement.AgentElement>())
 			{
 				var a = new Models.Agent
@@ -536,10 +539,10 @@ namespace Peach.Pro.Core.WebServices
 
 					a.Monitors.Add(m);
 				}
-				models.Add(a);
+				ret.Agents.Add(a);
 			}
 
-			return models;
+			return ret;
 		}
 
 		private static int ParameterSorter(Parameter lhs, Parameter rhs)
@@ -555,7 +558,7 @@ namespace Peach.Pro.Core.WebServices
 			return string.CompareOrdinal(lhs.MonitorClass, rhs.MonitorClass);
 		}
 
-		public static void SaveMonitors(Pit pit, List<Models.Agent> monitors)
+		public static void SaveAgents(Pit pit, List<Models.Agent> agents)
 		{
 			var fileName = pit.Versions[0].Files[0].Name;
 			var doc = new XmlDocument();
@@ -600,12 +603,11 @@ namespace Peach.Pro.Core.WebServices
 			if (test == null)
 				throw new PeachException("Could not find a <Test> element in the pit '" + fileName + "'.");
 
-			var agents = new OrderedDictionary<string, XmlWriter>();
-
-			foreach (var item in monitors)
+			var final = new OrderedDictionary<string, XmlWriter>();
+			foreach (var item in agents)
 			{
 				XmlWriter w;
-				if (!agents.TryGetValue(item.AgentUrl, out w))
+				if (!final.TryGetValue(item.AgentUrl, out w))
 				{
 					var agentName = "Agent" + agents.Count;
 					if (!string.IsNullOrEmpty(item.Name))
@@ -624,7 +626,7 @@ namespace Peach.Pro.Core.WebServices
 						testWriter.WriteEndElement();
 					}
 
-					agents.Add(item.AgentUrl, w);
+					final.Add(item.AgentUrl, w);
 				}
 
 				foreach (var m in item.Monitors)
@@ -673,7 +675,7 @@ namespace Peach.Pro.Core.WebServices
 				}
 			}
 
-			foreach (var a in agents)
+			foreach (var a in final)
 			{
 				a.Value.Close();
 			}

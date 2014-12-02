@@ -12,3 +12,4 @@
 /// <reference path="angularjs/angular-mocks.d.ts" />
 
 /// <reference path="ng-grid/ng-grid-plugins.d.ts" />
+/// <reference path="underscore/underscore.d.ts" />

@@ -3,7 +3,11 @@
 
 /** Unordered deps */
 //grunt-start
-/// <reference path="models/PitConfigTests.ts" />
-/// <reference path="services/PeachServiceTests.ts" />
+/// <reference path="controllers/ConfigVarsTests.ts" />
+/// <reference path="controllers/DashboardTests.ts" />
+/// <reference path="controllers/MainTests.ts" />
+/// <reference path="controllers/PitTestTests.ts" />
+/// <reference path="controllers/WizardTests.ts" />
 /// <reference path="services/PitConfiguratorServiceTests.ts" />
+/// <reference path="services/PitServiceTests.ts" />
 //grunt-end

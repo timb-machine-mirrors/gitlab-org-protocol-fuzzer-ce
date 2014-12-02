@@ -1,20 +1,26 @@
 /** Library references (unordered) */
 /// <reference path="../def/reference.ts" />
 
+/** Manual references (ordered) */
+/// <reference path="wizards/auto.ts" />
+/// <reference path="wizards/data.ts" />
+/// <reference path="wizards/fault.ts" />
+
 /** Managed references (unordered) */
 //grunt-start
-/// <reference path="controllers/ConfigureMonitors.ts" />
-/// <reference path="controllers/ConfigureTest.ts" />
-/// <reference path="controllers/ConfigureVars.ts" />
-/// <reference path="controllers/copypit.ts" />
-/// <reference path="controllers/dash.ts" />
-/// <reference path="controllers/faults.ts" />
-/// <reference path="controllers/main.ts" />
-/// <reference path="controllers/metrics.ts" />
-/// <reference path="controllers/pitlibrary.ts" />
-/// <reference path="controllers/pittest.ts" />
-/// <reference path="controllers/startjob.ts" />
-/// <reference path="controllers/wizard.ts" />
+/// <reference path="controllers/ConfigMonitorsCtrl.ts" />
+/// <reference path="controllers/ConfigTestCtrl.ts" />
+/// <reference path="controllers/ConfigVarsCtrl.ts" />
+/// <reference path="controllers/CopyPitCtrl.ts" />
+/// <reference path="controllers/DashboardCtrl.ts" />
+/// <reference path="controllers/FaultsCtrl.ts" />
+/// <reference path="controllers/MainCtrl.ts" />
+/// <reference path="controllers/MetricsCtrl.ts" />
+/// <reference path="controllers/PitLibraryCtrl.ts" />
+/// <reference path="controllers/PitTestCtrl.ts" />
+/// <reference path="controllers/StartJobCtrl.ts" />
+/// <reference path="controllers/WizardCtrl.ts" />
+/// <reference path="hacks.ts" />
 /// <reference path="models/Fault.ts" />
 /// <reference path="models/Job.ts" />
 /// <reference path="models/Library.ts" />
@@ -23,8 +29,14 @@
 /// <reference path="models/PitConfig.ts" />
 /// <reference path="models/PitTest.ts" />
 /// <reference path="models/Wizard.ts" />
+/// <reference path="services/JobService.ts" />
+/// <reference path="services/MetricsService.ts" />
 /// <reference path="services/PeachService.ts" />
 /// <reference path="services/PitConfiguratorService.ts" />
+/// <reference path="services/PitService.ts" />
+/// <reference path="services/TestService.ts" />
+/// <reference path="services/WizardService.ts" />
+/// <reference path="utils.ts" />
 //grunt-end
 
 /** Angular module dependencies
