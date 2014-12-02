@@ -124,6 +124,19 @@ namespace Peach.Core
 		}
 
 		/// <summary>
+		/// Gets the value of an xml attribute as an unsigned int.
+		/// Throws an error if the attribute does not exist or
+		/// if the value can not be converted to an unsigned int.
+		/// </summary>
+		/// <param name="node">Xml node</param>
+		/// <param name="name">Name of the attribute</param>
+		/// <returns>Attribute value as an int</returns>
+		public static uint getAttrUInt32(this XmlNode node, string name)
+		{
+			return StringToUInt32(node, name, node.getAttrString(name));
+		}
+
+		/// <summary>
 		/// Gets the value of an xml attribute as a ulong.
 		/// Throws an error if the attribute does not exist or
 		/// if the value can not be converted to a ulong.
@@ -283,6 +296,14 @@ namespace Peach.Core
 			int ret;
 			if (!int.TryParse(value, out ret))
 				throw new PeachException(getError(node, name) + "  Could not convert value '" + value + "' to an integer.");
+			return ret;
+		}
+
+		private static uint StringToUInt32(XmlNode node, string name, string value)
+		{
+			uint ret;
+			if (!uint.TryParse(value, out ret))
+				throw new PeachException(getError(node, name) + "  Could not convert value '" + value + "' to a 32-bit unsigned integer.");
 			return ret;
 		}
 
