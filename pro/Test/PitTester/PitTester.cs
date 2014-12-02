@@ -126,7 +126,9 @@ namespace PitTester
 			}
 
 
+			uint num = 0;
 			var e = new Engine(null);
+			e.IterationStarting += (ctx, it, tot) => num = it;
 
 			try
 			{
@@ -135,7 +137,7 @@ namespace PitTester
 			catch (Exception ex)
 			{
 				var msg = "Encountered an unhandled exception on iteration {0}, seed {1}.\n{2}".Fmt(
-					e.context.currentIteration,
+					num,
 					config.randomSeed,
 					ex.Message);
 				throw new PeachException(msg, ex);
