@@ -132,7 +132,7 @@ namespace PitTester
 			if (expected.Length != actual.Length)
 				throw new PeachException("Length mismatch in action {0}. Expected {1} bytes but got {2} bytes.".Fmt(testLogger.ActionName, expected.Length, actual.Length));
 
-			var skipList = new List<Tuple<long, long>>();
+			var skipList = new List<Tuple<string, long, long>>();
 
 			foreach (var ignore in testLogger.Ignores)
 			{
@@ -144,21 +144,28 @@ namespace PitTester
 
 				var tgt = dataModel.find(elem.fullName);
 				if (tgt == null)
-					throw new PeachException("Error, couldn't locate {0} in model on action {1} for ignoring.".Fmt(elem, testLogger.ActionName));
+				{
+					// Can happen when we ignore non-selected choice elements
+					logger.Debug("Couldn't locate {0} in model on action {1} for ignoring.", elem, testLogger.ActionName);
+					continue;
+				}
+
+				// If we found the data element in the model, we expect to find its position
 
 				long pos;
-				var lst = dataModel.Value as BitStreamList;
+				var lst = (BitStreamList)dataModel.Value;
 				if (!lst.TryGetPosition(elem.fullName, out pos))
-					throw new PeachException("Error, couldn't locate position of {0} in model on action {1} for ignoring.".Fmt(elem, testLogger.ActionName));
+					throw new PeachException("Error, Couldn't locate position of {0} in model on action {1} for ignoring.".Fmt(elem, testLogger.ActionName));
 
-				skipList.Add(new Tuple<long, long>(pos / 8, (pos / 8) + (tgt.Value.LengthBits + 7) / 8));
+				skipList.Add(new Tuple<string, long, long>(elem.fullName, pos / 8, (pos / 8) + (tgt.Value.LengthBits + 7) / 8));
 			}
 
-			if (skipList.Any())
-				Logger.Debug("Ignoring bytyes {0}", string.Join(", ", skipList.Select(i => "{0}:{1}".Fmt(i.Item1, i.Item2))));
+			foreach (var i in skipList)
+				Logger.Debug("Ignoring {0} from index {1} to {2}", i.Item1, i.Item2, i.Item3);
+
 			for (int i = 0; i < actual.Length; ++i)
 			{
-				var skip = skipList.Where(p => p.Item1 <= i && p.Item2 > i).Any();
+				var skip = skipList.Any(p => p.Item2 <= i && p.Item3 > i);
 				if (!skip && expected[i] != actual[i])
 					throw new PeachException("\nTest failed on action: {0}\n\tValues differ at offset 0x{3:x8}\n\tExpected: 0x{1:x2}\n\tBut was: 0x{2:x2}\n".Fmt(testLogger.ActionName, expected[i], actual[i], i));
 			}

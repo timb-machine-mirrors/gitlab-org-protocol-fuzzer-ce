@@ -205,7 +205,7 @@ namespace Peach.Core.Dom
 			// Try our cache (if any) first.
 			foreach (var item in _choiceCache)
 			{
-				if (TokenCheck(data, item.Value, startPosition))
+				if (TokenCheck(sizedData, item.Value, startPosition))
 				{
 					var child = choiceElements[item.Key];
 
@@ -381,7 +381,7 @@ namespace Peach.Core.Dom
 			if (SelectedElement == null)
 				SelectDefault();
 
-			return new Variant(SelectedElement.Value);
+			return new Variant(new BitStreamList(new BitwiseStream[] { SelectedElement.Value }));
 		}
 	}
 }
