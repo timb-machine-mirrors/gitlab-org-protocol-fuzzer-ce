@@ -184,12 +184,12 @@ module Peach {
 		return {
 			restrict: 'A',
 			require: 'ngModel',
-			link: (scope, elem, attr: ng.IAttributes, ctrl) => {
-				scope.$watch(attr['ngMin'], () => {
+			link: (scope: ng.IScope, elm: ng.IAugmentedJQuery, attrs: ng.IAttributes, ctrl: ng.INgModelController) => {
+				scope.$watch(attrs['ngMin'], () => {
 					ctrl.$setViewValue(ctrl.$viewValue);
 				});
 				var minValidator = value => {
-					var min = scope.$eval(attr['ngMin']) || 0;
+					var min = scope.$eval(attrs['ngMin']) || 0;
 					if (!isEmpty(value) && value < min) {
 						ctrl.$setValidity('ngMin', false);
 						return undefined;
@@ -207,12 +207,12 @@ module Peach {
 	p.directive('ngMax', () => {
 		return {
 			require: 'ngModel',
-			link: (scope, elem, attr: ng.IAttributes, ctrl) => {
-				scope.$watch(attr['ngMax'], () => {
+			link: (scope: ng.IScope, elm: ng.IAugmentedJQuery, attrs: ng.IAttributes, ctrl: ng.INgModelController) => {
+				scope.$watch(attrs['ngMax'], () => {
 					ctrl.$setViewValue(ctrl.$viewValue);
 				});
 				var maxValidator = value => {
-					var max = scope.$eval(attr['ngMax']) || Infinity;
+					var max = scope.$eval(attrs['ngMax']) || Infinity;
 					if (!isEmpty(value) && value > max) {
 						ctrl.$setValidity('ngMax', false);
 						return undefined;
@@ -261,6 +261,52 @@ module Peach {
 			return (value.match(/\.0*$/) ? value.substr(0, value.indexOf('.')) : value) + ' ' + units[unit];
 		};
 	});
+	// hack to allow form field names to be dynamic
+	// http://stackoverflow.com/questions/14378401/dynamic-validation-and-name-in-a-form-with-angularjs
+	p.config([
+		'$provide', $provide => {
+			$provide.decorator('ngModelDirective', $delegate => {
+				var ngModel = $delegate[0];
+				var controller = ngModel.controller;
+				ngModel.controller = [
+					'$scope',
+					'$element',
+					'$attrs',
+					'$injector',
+					function(scope: ng.IScope, elm: ng.IAugmentedJQuery, attrs: ng.IAttributes, $injector: ng.auto.IInjectorService) {
+						var $interpolate = $injector.get('$interpolate');
+						attrs.$set('name', $interpolate(attrs['name'] || '')(scope));
+						$injector.invoke(controller, this, {
+							'$scope': scope,
+							'$element': elm,
+							'$attrs': attrs
+						});
+					}
+				];
+				return $delegate;
+			});
+			$provide.decorator('formDirective', $delegate => {
+				var form = $delegate[0];
+				var controller = form.controller;
+				form.controller = [
+					'$scope',
+					'$element',
+					'$attrs',
+					'$injector',
+					function(scope: ng.IScope, elm: ng.IAugmentedJQuery, attrs: ng.IAttributes, $injector: ng.auto.IInjectorService) {
+						var $interpolate = $injector.get('$interpolate');
+						attrs.$set('name', $interpolate(attrs['name'] || attrs['ngForm'] || '')(scope));
+						$injector.invoke(controller, this, {
+							'$scope': scope,
+							'$element': elm,
+							'$attrs': attrs
+						});
+					}
+				];
+				return $delegate;
+			});
+		}
+	]);
 
 	export function Startup() {
 		window.onerror = (message, url, lineNo) => {

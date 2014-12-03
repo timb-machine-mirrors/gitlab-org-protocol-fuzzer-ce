@@ -131,7 +131,6 @@ module Peach.Services {
 		}
 
 		private onError(response) {
-			console.dir(response);
 			alert("Peach is busy with another task.\n" +
 				"Confirm that there aren't multiple browsers accessing the same instance of Peach.");
 			this.job = undefined;

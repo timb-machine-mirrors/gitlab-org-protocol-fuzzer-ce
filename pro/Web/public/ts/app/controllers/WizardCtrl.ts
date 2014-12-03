@@ -11,14 +11,16 @@ module Peach {
 			"$scope",
 			"$location",
 			"PitService",
-			"WizardService"
+			"WizardService",
+			"JobService"
 		];
 
 		constructor(
 			private $scope: IViewModelScope,
 			private $location: ng.ILocationService,
 			private pitService: Services.PitService,
-			private wizardService: Services.WizardService
+			private wizardService: Services.WizardService,
+			private jobService: Services.JobService
 		) {
 			$scope.vm = this;
 			var promise = this.track.Begin();
@@ -30,19 +32,19 @@ module Peach {
 		}
 
 		public dataGridOptions: ngGrid.IGridOptions = {
-			data: "vm.DataMonitors",
+			data: "vm.DataAgents",
 			columnDefs: [
-				{ cellTemplate: "html/grid/monitors/cell.html", width: 40, maxWidth: 40 },
-				{ field: "description", displayName: "" }
+				{ cellTemplate: "html/grid/agents/cell.html", width: 40, maxWidth: 40 },
+				{ cellTemplate: "html/grid/agents/agents.html" }
 			],
 			plugins: [new ngGridFlexibleHeightPlugin()]
 		};
 
 		public autoGridOptions: ngGrid.IGridOptions = {
-			data: "vm.AutoMonitors",
+			data: "vm.AutoAgents",
 			columnDefs: [
-				{ cellTemplate: "html/grid/monitors/cell.html", width: 40, maxWidth: 40 },
-				{ field: "description", displayName: "" }
+				{ cellTemplate: "html/grid/agents/cell.html", width: 40, maxWidth: 40 },
+				{ cellTemplate: "html/grid/agents/agents.html" }
 			],
 			plugins: [new ngGridFlexibleHeightPlugin()]
 		};
@@ -78,15 +80,23 @@ module Peach {
 			return this.pitService.PitConfig.config;
 		}
 
-		public get FaultMonitorDescription(): string {
-			return this.wizardService.GetTrack("fault").agents[0].description;
+		public get FaultAgentDescription(): string {
+			var agent = this.wizardService.GetTrack("fault").agents[0];
+			var ret = '';
+			agent.monitors.forEach((item: Models.IMonitor) => {
+				if (!ret) {
+					ret += ' ';
+				}
+				ret += item.description;
+			});
+			return ret;
 		}
 
-		public get DataMonitors(): Models.Agent[] {
+		public get DataAgents(): Models.Agent[] {
 			return this.wizardService.GetTrack("data").agents;
 		}
 
-		public get AutoMonitors(): Models.Agent[] {
+		public get AutoAgents(): Models.Agent[] {
 			return this.wizardService.GetTrack("auto").agents;
 		}
 
@@ -224,12 +234,11 @@ module Peach {
 		}
 
 		public get CanStartJob() {
-			//return (this.pitConfigSvc.CanStartJob);
-			return false;
+			return this.jobService.CanStartJob;
 		}
 
 		public StartJob() {
-			//this.pitConfigSvc.StartJob();
+			this.jobService.StartJob();
 			this.OnSubmit();
 		}
 

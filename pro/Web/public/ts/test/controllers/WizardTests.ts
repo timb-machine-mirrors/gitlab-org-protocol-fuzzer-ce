@@ -150,9 +150,9 @@ describe("Peach", () => {
 				expect(ctrl.Question.type).toBe(Peach.Models.QuestionTypes.Intro);
 				ctrl.Next();
 
-				expect(ctrl.Question.key).toBe("IsLocal");
+				expect(ctrl.Question.key).toBe("AgentScheme");
 				expect(ctrl.Question.id).toBe(1);
-				ctrl.Question.value = true;
+				ctrl.Question.value = "local";
 				ctrl.Next();
 
 				expect(ctrl.Question.id).toBe(100);
@@ -191,28 +191,27 @@ describe("Peach", () => {
 					"agents": [
 						{
 							"name": "",
-							"description": "Enable page heap debugging options for an executable. \nEnable Windows debugging. \n",
 							"agentUrl": "local://",
 							"monitors": [
 								{
 									"monitorClass": "PageHeap",
 									"path": [1110],
 									"map": [
-										{ "key": "WinDbgExecutable", "name": "Executable", "value": "C:\\some\\program.exe" },
-										{ "key": "WinDbgPath", "name": "WinDbgPath", "value": "" }
+										{ "name": "Executable", "value": "C:\\some\\program.exe" },
+										{ "name": "WinDbgPath", "value": "" }
 									],
 									"description": "Enable page heap debugging options for an executable. "
 								}, {
 									"monitorClass": "WindowsDebugger",
 									"path": [1100],
 									"map": [
-										{ "key": "WinDbgExecutable", "name": "Executable", "value": "C:\\some\\program.exe" },
-										{ "key": "WinDbgArguments", "name": "Arguments", "value": "/args" },
-										{ "key": "WinDbgProcessName", "name": "ProcessName" },
-										{ "key": "WinDbgService", "name": "Service" },
-										{ "key": "WinDbgPath", "name": "WinDbgPath", "value": "" },
-										{ "key": "WinDbgStart", "name": "StartMode", "value": "StartOnEachIteration" },
-										{ "key": "WinDbgIgnoreFirstChanceGuardPage", "name": "IgnoreFirstChanceGuardPage", "value": true }
+										{ "name": "Executable", "value": "C:\\some\\program.exe" },
+										{ "name": "Arguments", "value": "/args" },
+										{ "name": "ProcessName" },
+										{ "name": "Service" },
+										{ "name": "WinDbgPath", "value": "" },
+										{ "name": "StartMode", "value": "StartOnEachIteration" },
+										{ "name": "IgnoreFirstChanceGuardPage", "value": true }
 									],
 									"description": "Enable Windows debugging. "
 								}
@@ -239,14 +238,20 @@ describe("Peach", () => {
 					{
 						id: 1,
 						type: "choice",
-						key: "IsLocal",
+						key: "AgentScheme",
 						choice: [
-							{ value: true, next: 2 },
-							{ value: false, next: 2 }
+							{ value: "local", next: 3 },
+							{ value: "tcp", next: 2 }
 						]
 					},
 					{
 						id: 2,
+						type: "string",
+						key: "AgentHost",
+						next: 3
+					},
+					{
+						id: 3,
 						type: "choice",
 						choice: [
 							{ value: 0, next: 1000 },
@@ -313,10 +318,10 @@ describe("Peach", () => {
 				ctrl.Next();
 
 				expect(ctrl.Question.id).toBe(1);
-				ctrl.Question.value = true;
+				ctrl.Question.value = "local";
 				ctrl.Next();
 
-				expect(ctrl.Question.id).toBe(2);
+				expect(ctrl.Question.id).toBe(3);
 				ctrl.Question.value = 0;
 				ctrl.Next();
 
@@ -329,13 +334,12 @@ describe("Peach", () => {
 						{
 							"name": "",
 							"agentUrl": "local://",
-							"description": "Foo monitor.\n",
 							"monitors": [
 								{
 									"monitorClass": "FooMonitor",
 									"path": [1000],
 									"map": [
-										{ "key": "FooParam", "name": "Param", "value": "FooValue" }
+										{ "name": "Param", "value": "FooValue" }
 									],
 									"description": "Foo monitor."
 								}
@@ -354,10 +358,10 @@ describe("Peach", () => {
 				ctrl.Next();
 
 				expect(ctrl.Question.id).toBe(1);
-				ctrl.Question.value = true;
+				ctrl.Question.value = "local";
 				ctrl.Next();
 
-				expect(ctrl.Question.id).toBe(2);
+				expect(ctrl.Question.id).toBe(3);
 				ctrl.Question.value = 0;
 				ctrl.Next();
 
@@ -370,13 +374,12 @@ describe("Peach", () => {
 						{
 							"name": "",
 							"agentUrl": "local://",
-							"description": "Foo monitor.\n",
 							"monitors": [
 								{
 									"monitorClass": "FooMonitor",
 									"path": [1000],
 									"map": [
-										{ "key": "FooParam", "name": "Param", "value": "FooValue" }
+										{ "name": "Param", "value": "FooValue" }
 									],
 									"description": "Foo monitor."
 								}
@@ -394,10 +397,14 @@ describe("Peach", () => {
 				ctrl.Next();
 
 				expect(ctrl.Question.id).toBe(1);
-				ctrl.Question.value = true;
+				ctrl.Question.value = "tcp";
 				ctrl.Next();
 
 				expect(ctrl.Question.id).toBe(2);
+				ctrl.Question.value = "host";
+				ctrl.Next();
+
+				expect(ctrl.Question.id).toBe(3);
 				ctrl.Question.value = 1;
 				ctrl.Next();
 
@@ -410,13 +417,12 @@ describe("Peach", () => {
 						{
 							"name": "",
 							"agentUrl": "local://",
-							"description": "Foo monitor.\n",
 							"monitors": [
 								{
 									"monitorClass": "FooMonitor",
 									"path": [1000],
 									"map": [
-										{ "key": "FooParam", "name": "Param", "value": "FooValue" }
+										{ "name": "Param", "value": "FooValue" }
 									],
 									"description": "Foo monitor."
 								}
@@ -424,14 +430,13 @@ describe("Peach", () => {
 						},
 						{
 							"name": "",
-							"agentUrl": "local://",
-							"description": "Bar monitor.\n",
+							"agentUrl": "tcp://host",
 							"monitors": [
 								{
 									"monitorClass": "BarMonitor",
 									"path": [2000],
 									"map": [
-										{ "key": "BarParam", "name": "Param", "value": "BarValue" }
+										{ "name": "Param", "value": "BarValue" }
 									],
 									"description": "Bar monitor."
 								}
