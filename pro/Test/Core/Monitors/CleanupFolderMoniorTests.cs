@@ -49,9 +49,9 @@ namespace Peach.Pro.Test.Core.Monitors
 				{ "Folder", "some_unknown_filder" },
 			});
 
-			var fault = runner.Run();
+			var faults = runner.Run();
 
-			Assert.Null(fault, "Monitor should produce no faults");
+			Assert.AreEqual(0, faults.Length, "Monitor should produce no faults");
 		}
 
 		[Test]
@@ -64,9 +64,9 @@ namespace Peach.Pro.Test.Core.Monitors
 				{ "Folder", tmp },
 			});
 
-			var fault = runner.Run();
+			var faults = runner.Run();
 
-			Assert.Null(fault, "Monitor should produce no faults");
+			Assert.AreEqual(0, faults.Length, "Monitor should produce no faults");
 		}
 
 		[Test]
@@ -81,27 +81,22 @@ namespace Peach.Pro.Test.Core.Monitors
 				{ "Folder", tmp },
 			});
 
-			runner.IterationStarting += () =>
+			runner.IterationStarting += (m, it, repro) =>
 			{
-				Assert.True(Directory.Exists(tmp), "Temp directory '{0}' should exist".Fmt(tmp));
-
 				Directory.CreateDirectory(dir2);
 				File.Create(file2).Close();
 				File.Create(dir2File).Close();
-			};
 
-			runner.IterationFinished += () =>
-			{
-				Assert.True(Directory.Exists(tmp), "Temp directory '{0}' should exist".Fmt(tmp));
+				m.IterationStarting(it, repro);
 
 				Assert.False(Directory.Exists(dir2), "Directory '{0}' should not exist".Fmt(dir2));
 				Assert.False(File.Exists(file2), "File '{0}' should not exist".Fmt(file2));
 				Assert.False(File.Exists(dir2File), "File '{0}' should not exist".Fmt(dir2File));
 			};
 
-			var fault = runner.Run();
+			var faults = runner.Run();
 
-			Assert.Null(fault, "Monitor should produce no faults");
+			Assert.AreEqual(0, faults.Length, "Monitor should produce no faults");
 		}
 	}
 }
