@@ -1,8 +1,8 @@
 using System;
-using Peach.Core;
 using NUnit.Framework;
+using Peach.Core;
 
-namespace Peach.Core.Test
+namespace Peach.Pro.Test.Core
 {
 	[TestFixture]
 	class EulaTests

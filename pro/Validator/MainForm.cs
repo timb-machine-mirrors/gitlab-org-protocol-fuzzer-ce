@@ -209,6 +209,9 @@ namespace PeachValidator
 				RemoveElement(item);
 			exceptions.Clear();
 
+		    if (!_crackMap.ContainsKey(element))
+		        return;
+
 			var currentModel = _crackMap[element];
 			currentModel.StopBits = position;
 
