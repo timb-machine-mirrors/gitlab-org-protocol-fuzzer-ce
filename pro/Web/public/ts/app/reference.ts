@@ -9,7 +9,6 @@
 /** Managed references (unordered) */
 //grunt-start
 /// <reference path="controllers/ConfigMonitorsCtrl.ts" />
-/// <reference path="controllers/ConfigTestCtrl.ts" />
 /// <reference path="controllers/ConfigVarsCtrl.ts" />
 /// <reference path="controllers/CopyPitCtrl.ts" />
 /// <reference path="controllers/DashboardCtrl.ts" />

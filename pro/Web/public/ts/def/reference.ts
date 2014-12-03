@@ -13,3 +13,4 @@
 
 /// <reference path="ng-grid/ng-grid-plugins.d.ts" />
 /// <reference path="underscore/underscore.d.ts" />
+/// <reference path="chartjs/chart.d.ts" />

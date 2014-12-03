@@ -1,14 +1,9 @@
 ﻿/// <reference path="../reference.ts" />
 
-/*
 module Peach {
 	"use strict";
 
-	export interface MetricsParams extends ng.route.IRouteParamsService {
-		metric: string;
-	}
-
-	export interface TimelineItem {
+	export interface ITimelineItem {
 		className?: string;
 		content: string;
 		end?: Date;
@@ -20,7 +15,7 @@ module Peach {
 		data?: Models.IBucketTimelineMetric
 	}
 
-	export interface TimelineOptions {
+	export interface ITimelineOptions {
 		align?: string;
 		autoResize?: boolean;
 		clickToUse?: boolean;
@@ -59,59 +54,96 @@ module Peach {
 	}
 
 	export class MetricsController {
-		private scope: ViewModelScope;
-
-		public metric: string;
-
-		//public bucketTimelineData: Models.BucketTimelineMetric[] = [];
-		public bucketTimelineData = {};
-
-		public mutatorData: Models.IMutatorMetric[] = [];
-		public elementData: Models.IElementMetric[] = [];
-		public datasetData: Models.IDatasetMetric[] = [];
-		public stateData: Models.IStateMetric[] = [];
-		public bucketData: Models.IBucketMetric[] = [];
-
 		static $inject = [
 			"$scope",
 			"$routeParams",
-			"pitConfiguratorService",
-			"peachService",
-			"visDataSet"
+			"$http",
+			"visDataSet",
+			"JobService"
 		];
 
 		constructor(
-			$scope: ViewModelScope,
-			$routeParams: MetricsParams,
-			private pitConfigSvc: Services.PitConfiguratorService,
-			private peachSvc: Services.PeachService,
-			private visDataSet
+			$scope: IViewModelScope,
+			$routeParams: ng.route.IRouteParamsService,
+			private $http: ng.IHttpService,
+			private visDataSet,
+			private jobService: Services.JobService
 		) {
 			$scope.vm = this;
-			this.scope = $scope;
-			this.metric = $routeParams.metric;
+			this.Metric = $routeParams['metric'];
 			this.initializeData();
 		}
 
-		public bucketTimelineOptions: TimelineOptions = {
+		public Metric: string;
+
+		public MutatorData: Models.IMutatorMetric[] = [];
+		public ElementData: Models.IElementMetric[] = [];
+		public DatasetData: Models.IDatasetMetric[] = [];
+		public StateData: Models.IStateMetric[] = [];
+		public BucketData: Models.IBucketMetric[] = [];
+
+		public BucketTimelineData = {
+			single: true,
+			load: []
+		};
+
+		public BucketTimelineOptions: ITimelineOptions = {
 			selectable: false,
-			template: function (item: TimelineItem) {
-				return "<div><a ng-click=\"event.stopPropagation()\" href=\"#/faults/" + item.data.label + "\" style=\"background: transparent\">" + item.data.label + "</a><br />" +
-					"Faults: " + item.data.faultCount + "<br />" +
-					"1st Iteration: " + item.data.iteration + "<br /></div>";
-			}
+			template: (item: ITimelineItem) =>
+				"<div><a ng-click=\"event.stopPropagation()\" href=\"#/faults/" +
+				item.data.label +
+				"\" style=\"background: transparent\">" +
+				item.data.label +
+				"</a><br />" +
+				"Faults: " + item.data.faultCount + "<br />" +
+				"1st Iteration: " + item.data.iteration + "<br /></div>"
 		};
 
-		private faultTimelineData: Models.IFaultTimelineMetric[] = [];
-
-		public metrics_faultsOverTime_chart = {
-			labels:	[]
+		public MetricsFaultsOverTimeData: LinearChartData = {
+			labels: [],
+			datasets: []
 		};
 
-		public metrics_faultsOverTime_options = {};
+		public MetricsFaultsOverTime: ITimelineOptions = {
+			responsive: true,
+			showTooltips: true,
+			tooltipEvents: ["mousemove", "touchstart", "touchmove"],
+			tooltipFillColor: "rgba(0,0,0,0.8)",
+			tooltipFontFamily: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+			tooltipFontSize: 14,
+			tooltipFontStyle: "normal",
+			tooltipFontColor: "#fff",
+			tooltipTitleFontFamily: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+			tooltipTitleFontSize: 14,
+			tooltipTitleFontStyle: "bold",
+			tooltipTitleFontColor: "#fff",
+			tooltipYPadding: 6,
+			tooltipXPadding: 6,
+			tooltipCaretSize: 8,
+			tooltipCornerRadius: 6,
+			tooltipXOffset: 10,
+			tooltipTemplate: "<%if (label){%><%=label%>: <%}%><%= value %>",
+			multiTooltipTemplate: "<%= value %>",
+			showScale: true,
+			scaleOverride: false,
+			scaleStartValue: 0,
+			scaleShowGridLines: true,
+			scaleGridLineColor: "rgba(0,0,0,.05)",
+			scaleGridLineWidth: 1,
+			bezierCurve: true,
+			bezierCurveTension: 0.4,
+			pointDot: true,
+			pointDotRadius: 4,
+			pointDotStrokeWidth: 1,
+			pointHitDetectionRadius: 20,
+			datasetStroke: true,
+			datasetStrokeWidth: 2,
+			datasetFill: true,
+			legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].lineColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
+		};
 
-		public gridMetricsMutator = {
-			data: "vm.mutatorData",
+		public GridMetricsMutator: ngGrid.IGridOptions = {
+			data: "vm.MutatorData",
 			sortInfo: { fields: ["mutator"], directions: ["asc"] },
 			enableColumnResize: true,
 			columnDefs: [
@@ -120,11 +152,12 @@ module Peach {
 				{ field: "iterationCount", displayName: "Iteration Count" },
 				{ field: "bucketCount", displayName: "Bucket Count" },
 				{ field: "faultCount", displayName: "Fault Count" }
-			]
+			],
+			plugins: [ new ngGridFlexibleHeightPlugin() ]
 		};
 
-		public gridMetricsElement = {
-			data: "vm.elementData",
+		public GridMetricsElement: ngGrid.IGridOptions = {
+			data: "vm.ElementData",
 			sortInfo: { fields: ["faultCount"], directions: ["desc"] },
 			enableColumnResize: true,
 			columnDefs: [
@@ -135,21 +168,23 @@ module Peach {
 				{ field: "iterationCount", displayName: "Iterations" },
 				{ field: "bucketCount", displayName: "Buckets" },
 				{ field: "faultCount", displayName: "Faults" }
-			]
+			],
+			plugins: [new ngGridFlexibleHeightPlugin()]
 		};
 
-		public gridMetricsState = {
-			data: "vm.stateData",
+		public GridMetricsState: ngGrid.IGridOptions = {
+			data: "vm.StateData",
 			sortInfo: { fields: ["state"], directions: ["asc"] },
 			enableColumnResize: true,
 			columnDefs: [
 				{ field: "state", displayName: "State" },
 				{ field: "executionCount", displayName: "Executions" }
-			]
+			],
+			plugins: [new ngGridFlexibleHeightPlugin()]
 		};
 
-		public gridMetricsDataset = {
-			data: "vm.datasetData",
+		public GridMetricsDataset: ngGrid.IGridOptions = {
+			data: "vm.DatasetData",
 			sortInfo: { fields: ["faultCount"], directions: ["desc"] },
 			enableColumnResize: true,
 			columnDefs: [
@@ -157,11 +192,12 @@ module Peach {
 				{ field: "iterationCount", displayName: "Iterations" },
 				{ field: "bucketCount", displayName: "Buckets" },
 				{ field: "faultCount", displayName: "Faults" }
-			]
+			],
+			plugins: [new ngGridFlexibleHeightPlugin()]
 		};
 
-		public gridMetricsBucket = {
-			data: "vm.bucketData",
+		public GridMetricsBucket: ngGrid.IGridOptions = {
+			data: "vm.BucketData",
 			sortInfo: { fields: ["faultCount"], directions: ["desc"] },
 			enableColumnResize: true,
 			columnDefs: [
@@ -170,195 +206,80 @@ module Peach {
 				{ field: "element", displayName: "Element" },
 				{ field: "iterationCount", displayName: "Iteration Count" },
 				{ field: "faultCount", displayName: "Fault Count" }
-			]
+			],
+			plugins: [new ngGridFlexibleHeightPlugin()]
 		};
 
 		private initializeData(): void {
-			this.peachSvc.GetJobs((job: Models.IJob) => {
-				var jobUrl = job.jobUrl;
-				var jobStart = job.startDate;
+			var promise = this.getData();
+			switch (this.Metric) {
+			case "bucketTimeline":
+				promise.success((data: Models.IBucketTimelineMetric[]) => {
+					var timelineData = data.map((item: Models.IBucketTimelineMetric) => {
+						return <ITimelineItem> {
+							id: item.id,
+							type: "box",
+							content: "",
+							start: item.time,
+							data: item
+						};
+					});
+					this.BucketTimelineData = this.visDataSet(timelineData);
+				});
+				break;
+			case "faultTimeline":
+				promise.success((data: Models.IFaultTimelineMetric[]) => {
+					this.MetricsFaultsOverTimeData = {
+						labels: data.map(i => moment(i.date).format("M/D h a")),
+						datasets: [
+							{
+								label: "My First dataset",
+								fillColor: "rgba(0,0,220,0.2)",
+								strokeColor: "rgba(220,220,220,1)",
+								pointColor: "rgba(220,220,220,1)",
+								pointStrokeColor: "#fff",
+								pointHighlightFill: "#fff",
+								pointHighlightStroke: "rgba(220,220,220,1)",
+								data: data.map(i => i.faultCount)
+							}
+						]
+					};
+				});
+				break;
+			case "mutators":
+				promise.success((data: Models.IMutatorMetric[]) => {
+					this.MutatorData = data;
+				});
+				break;
+			case "elements":
+				promise.success((data: Models.IElementMetric[]) => {
+					this.ElementData = data;
+				});
+				break;
+			case "dataset":
+				promise.success((data: Models.IDatasetMetric[]) => {
+					this.DatasetData = data;
+				});
+				break;
+			case "states":
+				promise.success((data: Models.IStateMetric[]) => {
+					this.StateData = data;
+				});
+				break;
+			case "buckets":
+				promise.success((data: Models.IBucketMetric[]) => {
+					this.BucketData = data;
+				});
+				break;
+			}
+		}
 
-				switch (this.metric) {
-					case "bucketTimeline":
-						this.peachSvc.GetBucketTimeline(jobUrl, (data: Models.IBucketTimelineMetric[]) => {
-							var timelineData = [];
-							data.forEach((item: Models.IBucketTimelineMetric) => {
-								timelineData.push({
-									id: item.id,
-									type: "box",
-									content: "",
-									data: item,
-									start: item.time
-								});
-							});
-							var dataset = this.visDataSet(timelineData);
-							this.bucketTimelineData = dataset;
-							this.bucketTimelineOptions = { selectable: false };
-						});
-						break;
-					case "faultsOverTime":
-						this.peachSvc.GetFaultTimeline(jobUrl, (data: Models.IFaultTimelineMetric[]) => {
-							this.faultTimelineData = data;
+		private getData<T>(): ng.IHttpPromise<T> {
+			return this.$http.get(this.makeUrl(this.Metric));
+		}
 
-							this.metrics_faultsOverTime_chart = {
-								labels: this.faultTimelineData.map(i => moment(i.date).format("M/D h a")),
-								datasets: [
-									{
-										label: "My First dataset",
-										fillColor: "rgba(0,0,220,0.2)",
-										strokeColor: "rgba(220,220,220,1)",
-										pointColor: "rgba(220,220,220,1)",
-										pointStrokeColor: "#fff",
-										pointHighlightFill: "#fff",
-										pointHighlightStroke: "rgba(220,220,220,1)",
-										data: this.faultTimelineData.map(i => i.faultCount)
-									}
-								]
-							};
-
-							this.metrics_faultsOverTime_options = {
-								// Boolean - whether or not the chart should be responsive and resize when the browser does.
-								responsive: true,
-
-								// Boolean - Determines whether to draw tooltips on the canvas or not
-								showTooltips: true,
-
-								// Array - Array of string names to attach tooltip events
-								tooltipEvents: ["mousemove", "touchstart", "touchmove"],
-
-								// String - Tooltip background colour
-								tooltipFillColor: "rgba(0,0,0,0.8)",
-
-								// String - Tooltip label font declaration for the scale label
-								tooltipFontFamily: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
-
-								// Number - Tooltip label font size in pixels
-								tooltipFontSize: 14,
-
-								// String - Tooltip font weight style
-								tooltipFontStyle: "normal",
-
-								// String - Tooltip label font colour
-								tooltipFontColor: "#fff",
-
-								// String - Tooltip title font declaration for the scale label
-								tooltipTitleFontFamily: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
-
-								// Number - Tooltip title font size in pixels
-								tooltipTitleFontSize: 14,
-
-								// String - Tooltip title font weight style
-								tooltipTitleFontStyle: "bold",
-
-								// String - Tooltip title font colour
-								tooltipTitleFontColor: "#fff",
-
-								// Number - pixel width of padding around tooltip text
-								tooltipYPadding: 6,
-
-								// Number - pixel width of padding around tooltip text
-								tooltipXPadding: 6,
-
-								// Number - Size of the caret on the tooltip
-								tooltipCaretSize: 8,
-
-								// Number - Pixel radius of the tooltip border
-								tooltipCornerRadius: 6,
-
-								// Number - Pixel offset from point x to tooltip edge
-								tooltipXOffset: 10,
-
-								// String - Template string for single tooltips
-								tooltipTemplate: "<%if (label){%><%=label%>: <%}%><%= value %>",
-
-								// String - Template string for single tooltips
-								multiTooltipTemplate: "<%= value %>",
-
-								// Boolean - If we should show the scale at all
-								showScale: true,
-
-								// Boolean - If we want to override with a hard coded scale
-								scaleOverride: false,
-
-								// ** Required if scaleOverride is true **
-								// Number - The number of steps in a hard coded scale
-								//scaleSteps: this.getMaxOfArray(this.faultTimelineData.map(i => i.faultCount)),
-								// Number - The value jump in the hard coded scale
-								//scaleStepWidth: max,
-								// Number - The scale starting value
-								scaleStartValue: 0,
-
-								///Boolean - Whether grid lines are shown across the chart
-								scaleShowGridLines: true,
-
-								//String - Colour of the grid lines
-								scaleGridLineColor: "rgba(0,0,0,.05)",
-
-								//Number - Width of the grid lines
-								scaleGridLineWidth: 1,
-
-								//Boolean - Whether the line is curved between points
-								bezierCurve: true,
-
-								//Number - Tension of the bezier curve between points
-								bezierCurveTension: 0.4,
-
-								//Boolean - Whether to show a dot for each point
-								pointDot: true,
-
-								//Number - Radius of each point dot in pixels
-								pointDotRadius: 4,
-
-								//Number - Pixel width of point dot stroke
-								pointDotStrokeWidth: 1,
-
-								//Number - amount extra to add to the radius to cater for hit detection outside the drawn point
-								pointHitDetectionRadius: 20,
-
-								//Boolean - Whether to show a stroke for datasets
-								datasetStroke: true,
-
-								//Number - Pixel width of dataset stroke
-								datasetStrokeWidth: 2,
-
-								//Boolean - Whether to fill the dataset with a colour
-								datasetFill: true,
-
-								//String - A legend template
-								legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].lineColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
-							};
-
-
-						});
-						break;
-					case "mutators":
-						this.peachSvc.GetMutatorMetrics(jobUrl, (data: Models.IMutatorMetric[]) => {
-							this.mutatorData = data;
-						});
-						break;
-					case "elements":
-						this.peachSvc.GetElementMetrics(jobUrl, (data: Models.IElementMetric[]) => {
-							this.elementData = data;
-						});
-						break;
-					case "datasets":
-						this.peachSvc.GetDatasetMetrics(jobUrl, (data: Models.IDatasetMetric[]) => {
-							this.datasetData = data;
-						});
-						break;
-					case "states":
-						this.peachSvc.GetStateMetrics(jobUrl, (data: Models.IStateMetric[]) => {
-							this.stateData = data;
-						});
-						break;
-					case "buckets":
-						this.peachSvc.GetBucketMetrics(jobUrl, (data: Models.IBucketMetric[]) => {
-							this.bucketData = data;
-						});
-						break;
-				}
-			});
+		private makeUrl(part: string): string {
+			return this.jobService.Job.jobUrl + "/metrics/" + part;
 		}
 	}
 }
-*/

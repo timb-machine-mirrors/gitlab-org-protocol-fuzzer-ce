@@ -69,8 +69,8 @@
 	</table>
 	<div class="row-fluid wizard-actions">
 		<button class="btn btn-warning btn-next"
-		        ng-click="vm.OnBeginTest()"
-		        ng-disabled="!vm.CanBeginTest">
+						ng-click="vm.OnBeginTest()"
+						ng-class="{disabled: !vm.CanBeginTest}">
 			Begin Test
 		</button>
 	</div>
@@ -104,8 +104,8 @@
 			Testing failed, please correct the errors described above and return to this page to test again.
 		</span>
 		<button class="btn btn-success btn-next"
-		        ng-click="vm.OnSubmit()"
-		        ng-disabled="vm.TestStatus != 'pass'">
+						ng-click="vm.OnSubmit()"
+						ng-class="{disabled: vm.TestStatus != 'pass'}">
 			Continue
 			<i class="icon-arrow-right icon-on-right"></i>
 		</button>

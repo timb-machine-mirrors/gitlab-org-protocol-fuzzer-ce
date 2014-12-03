@@ -3,7 +3,7 @@
 module Peach.Services {
 	"use strict";
 
-	export var TEST_INTERVAL = 100;
+	export var TEST_INTERVAL = 250;
 
 	export class TestService {
 

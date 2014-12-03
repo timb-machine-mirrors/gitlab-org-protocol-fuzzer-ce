@@ -19,13 +19,13 @@
 		<div class="space-6"></div>
 		<button class="btn btn-success btn-next"
 						ng-click="vm.OnRestart()"
-						ng-disabled="configuratorForm.$invalid">
+						ng-class="{disabled: configuratorForm.$invalid}">
 			<i class="icon-arrow-left"></i>
 			Add More Data Collection
 		</button>
 		<button class="btn btn-success btn-next"
 						ng-click="vm.OnSubmit()"
-						ng-disabled="configuratorForm.$invalid">
+						ng-class="{disabled: configuratorForm.$invalid}">
 			Continue to Automation
 			<i class="icon-arrow-right icon-on-right"></i>
 		</button>

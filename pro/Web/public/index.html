@@ -69,7 +69,7 @@
 						<a data-toggle="dropdown"
 							 class="dropdown-toggle"
 							 style="background-color: transparent; font-size: 20px; cursor: pointer"
-							 ng-disabled="!vm.CanSelectPit">
+							 ng-class="{disabled: !vm.CanSelectPit}">
 							<span>
 								{{vm.PitName}}
 							</span>
@@ -112,8 +112,7 @@
 						</a>
 					</li>
 
-					<li ng-class="{active: vm.IsActive('/faults')}"
-							ng-disabled="!vm.CanViewFaults"
+					<li ng-class="{active: vm.IsActive('/faults/all'), disabled: !vm.CanViewFaults}"
 							data-original-title="{{vm.FaultsUnavailableTooltip}}"
 							class="tooltip-warning"
 							data-rel="tooltip"
@@ -128,14 +127,13 @@
 					</li>
 
 					<li data-original-title="{{vm.MetricsUnavailableTooltip}}"
-							class="tooltip-warning"
-							data-rel="tooltip"
-							data-placement="right"
-							ng-class="{active: vm.IsActive('/metrics')}"
-							ng-disabled="!vm.CanViewMetrics">
+					    class="tooltip-warning"
+					    data-rel="tooltip"
+					    data-placement="right"
+					    ng-class="{active: vm.IsActive('/metrics'), disabled: !vm.CanViewMetrics}">
 						<a href="#"
-						   class="dropdown-toggle"
-						   ng-disabled="!vm.CanViewMetrics">
+							 class="dropdown-toggle"
+							 ng-class="{disabled: !vm.CanViewMetrics}">
 							<i class="icon-signal"></i>
 							<span class="menu-text">
 								Metrics
@@ -155,8 +153,8 @@
 								</a>
 							</li>
 
-							<li ng-class="{active: vm.IsActive('/metrics/faultsOverTime')}">
-								<a href="#/metrics/faultsOverTime">
+							<li ng-class="{active: vm.IsActive('/metrics/faultTimeline')}">
+								<a href="#/metrics/faultTimeline">
 									<i class="icon-double-angle-right"></i>
 									<span class="menu-text">Faults Over Time</span>
 								</a>
@@ -183,8 +181,8 @@
 								</a>
 							</li>
 
-							<li ng-class="{active: vm.IsActive('/metrics/datasets')}">
-								<a href="#/metrics/datasets">
+							<li ng-class="{active: vm.IsActive('/metrics/dataset')}">
+								<a href="#/metrics/dataset">
 									<i class="icon-double-angle-right"></i>
 									<span class="menu-text">Datasets</span>
 								</a>
@@ -203,65 +201,58 @@
 							data-original-title="{{vm.JobRunningTooltip}}"
 							data-rel="tooltip"
 							data-placement="right"
-							ng-disabled="!vm.CanConfigurePit">
+							ng-class="{disabled: !vm.CanConfigurePit}">
 						<a class="dropdown-toggle"
 							 href="#"
-							 ng-disabled="!vm.CanConfigurePit">
+							 ng-class="{disabled: !vm.CanConfigurePit}">
 							<i class="icon-desktop"></i>
 							<span class="menu-text">Quick Start</span>
 							<b class="arrow icon-angle-down"></b>
 						</a>
 						<ul class="submenu" style="display: none;">
-							<li ng-class="{active: vm.IsActive('/quickstart/intro')}"
-									ng-disabled="!vm.CanConfigurePit">
+							<li ng-class="{active: vm.IsActive('/quickstart/intro'), disabled: !vm.CanConfigurePit}">
 								<a href="#/quickstart/intro">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="{'icon-ok-sign green': vm.IsComplete('intro')}"></i>
 									Introduction
 								</a>
 							</li>
-							<li ng-class="{active: vm.IsActive('/quickstart/setvars')}"
-									ng-disabled="!vm.CanConfigurePit">
+							<li ng-class="{active: vm.IsActive('/quickstart/setvars'), disabled: !vm.CanConfigurePit}">
 								<a href="#/quickstart/setvars">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="{'icon-ok-sign green': vm.IsComplete('setvars')}"></i>
 									Set Variables
 								</a>
 							</li>
-							<li ng-class="{active: vm.IsActive('/quickstart/fault')}"
-									ng-disabled="!vm.CanConfigurePit">
+							<li ng-class="{active: vm.IsActive('/quickstart/fault'), disabled: !vm.CanConfigurePit}">
 								<a href="#/quickstart/fault">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="{'icon-ok-sign green': vm.IsComplete('fault')}"></i>
 									Fault Detection
 								</a>
 							</li>
-							<li ng-class="{active: vm.IsActive('/quickstart/data')}"
-									ng-disabled="!vm.CanConfigurePit">
+							<li ng-class="{active: vm.IsActive('/quickstart/data'), disabled: !vm.CanConfigurePit}">
 								<a href="#/quickstart/data">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="{'icon-ok-sign green': vm.IsComplete('data')}"></i>
 									Data Collection
 								</a>
 							</li>
-							<li ng-class="{active: vm.IsActive('/quickstart/auto')}"
-									ng-disabled="!vm.CanConfigurePit">
+							<li ng-class="{active: vm.IsActive('/quickstart/auto'), disabled: !vm.CanConfigurePit}">
 								<a href="#/quickstart/auto">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="{'icon-ok-sign green': vm.IsComplete('auto')}"></i>
 									Automation
 								</a>
 							</li>
-							<li ng-class="{active: vm.IsActive('/quickstart/test')}"
-									ng-disabled="!vm.CanConfigurePit">
+							<li ng-class="{active: vm.IsActive('/quickstart/test'), disabled: !vm.CanConfigurePit}">
 								<a href="#/quickstart/test">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="{'icon-ok-sign green': vm.IsComplete('test')}"></i>
 									Test
 								</a>
 							</li>
-							<li ng-class="{active: vm.IsActive('/quickstart/done')}"
-									ng-disabled="!vm.CanConfigurePit">
+							<li ng-class="{active: vm.IsActive('/quickstart/done'), disabled: !vm.CanConfigurePit}">
 								<a href="#/quickstart/done">
 									<i class="icon-double-angle-right"></i>
 									<i ng-class="{'icon-ok-sign green': vm.IsComplete('done')}"></i>
@@ -275,31 +266,28 @@
 							data-original-title="{{vm.JobRunningTooltip}}"
 							data-rel="tooltip"
 							data-placement="right"
-							ng-disabled="!vm.CanConfigurePit">
+							ng-class="{disabled: !vm.CanConfigurePit}">
 						<a class="dropdown-toggle"
 							 href="#"
-							 ng-disabled="!vm.CanConfigurePit">
+							 ng-class="{disabled: !vm.CanConfigurePit}">
 							<i class="icon-desktop"></i>
 							<span class="menu-text">Configuration</span>
 							<b class="arrow icon-angle-down"></b>
 						</a>
 						<ul class="submenu" style="display: none;">
-							<li ng-class="{active: vm.IsActive('/cfg/variables')}"
-									ng-disabled="!vm.CanConfigurePit">
+							<li ng-class="{active: vm.IsActive('/cfg/variables'), disabled: !vm.CanConfigurePit}">
 								<a href="#/cfg/variables">
 									<i class="icon-double-angle-right"></i>
 									Variables
 								</a>
 							</li>
-							<li ng-class="{active: vm.IsActive('/cfg/monitors')}"
-									ng-disabled="!vm.CanConfigurePit">
+							<li ng-class="{active: vm.IsActive('/cfg/monitors'), disabled: !vm.CanConfigurePit}">
 								<a href="#/cfg/monitors">
 									<i class="icon-double-angle-right"></i>
 									Monitoring
 								</a>
 							</li>
-							<li ng-class="{active: vm.IsActive('/cfg/test')}"
-									ng-disabled="!vm.CanConfigurePit">
+							<li ng-class="{active: vm.IsActive('/cfg/test'), disabled: !vm.CanConfigurePit}">
 								<a href="#/cfg/test">
 									<i class="icon-double-angle-right"></i>
 									Test

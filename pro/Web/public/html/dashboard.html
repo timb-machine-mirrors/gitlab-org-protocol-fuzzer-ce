@@ -128,12 +128,12 @@
 					<div class="btn-group">
 						<button class="btn btn-lg btn-primary" 
 						        ng-click="vm.Start()"
-										ng-disabled="!vm.CanStart">
+										ng-class="{disabled: !vm.CanStart}">
 							START
 						</button>
 						<button class="btn btn-lg btn-primary dropdown-toggle" 
 						        data-toggle="dropdown" 
-						        ng-disabled="!vm.CanStart">
+						        ng-class="{disabled: !vm.CanStart}">
 							<i class="icon-caret-down"></i>
 						</button>
 						<ul class="dropdown-menu dropdown-success">
@@ -153,13 +153,13 @@
 
 					<button class="btn btn-lg btn-danger" 
 					        ng-click="vm.Stop()"
-					        ng-disabled="!vm.CanStop">
+					        ng-class="{disabled: !vm.CanStop}">
 						STOP
 					</button>
 
 					<button class="btn btn-lg btn-default"
 					        ng-click="vm.Pause()"
-									ng-disabled="!vm.CanPause">
+									ng-class="{disabled: !vm.CanPause}">
 						PAUSE
 					</button>
 				</div>

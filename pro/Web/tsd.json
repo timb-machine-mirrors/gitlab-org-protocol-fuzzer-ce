@@ -43,6 +43,9 @@
     },
     "underscore/underscore.d.ts": {
       "commit": "16fc1fb8b440e55e88bd1bbb393dcf2e9fb07d22"
+    },
+    "chartjs/chart.d.ts": {
+      "commit": "bd0833a22eb1c4e4a963068d4e2550fe866399d1"
     }
   }
 }

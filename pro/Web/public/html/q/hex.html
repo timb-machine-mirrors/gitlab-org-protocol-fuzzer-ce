@@ -28,9 +28,9 @@
 			<i class="icon-arrow-left"></i>
 			Back
 		</button>
-		<button class="btn btn-success btn-next" 
-		        ng-click="vm.Next()" 
-						ng-disabled="configuratorForm.$invalid">
+		<button class="btn btn-success btn-next"
+						ng-click="vm.Next()"
+						ng-class="{disabled: configuratorForm.$invalid}">
 			Next
 			<i class="icon-arrow-right icon-on-right"></i>
 		</button>

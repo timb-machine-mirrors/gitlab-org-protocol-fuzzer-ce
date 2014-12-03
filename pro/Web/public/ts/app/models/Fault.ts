@@ -3,27 +3,27 @@
 module Peach.Models {
 	"use strict";
 
-	export interface IFault {
-		id: string;
+	export interface IFaultSummary {
 		faultUrl: string;
-		jobUrl: string;
-		targetUrl: string;
-		pitUrl: string;
-		nodeUrl: string;
-		peachUrl: string;
-		title: string;
-		description: string;
-		source: string;
 		reproducable: boolean;
 		iteration: number;
-		seed: number;
-		faultType: string;
+		timeStamp: string;
+		bucketName: string;
+		source: string;
 		exploitability: string;
 		majorHash: string;
 		minorHash: string;
-		folderName: string;
-		timeStamp: string;
-		bucketName: string;
+	}
+
+	export interface IFaultDetail extends IFaultSummary, ng.resource.IResource<IFaultDetail> {
+		nodeUrl: string;
+		targetUrl: string;
+		targetConfigUrl: string;
+		pitUrl: string;
+		peachUrl: string;
+		title: string;
+		description: string;
+		seed: number;
 		files: IFaultFile[];
 	}
 
@@ -33,4 +33,6 @@ module Peach.Models {
 		fileUrl: string;
 		size: number;
 	}
+
+	export interface IFaultDetailResource extends ng.resource.IResourceClass<IFaultDetail> { }
 }

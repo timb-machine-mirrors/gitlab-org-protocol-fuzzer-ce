@@ -15,7 +15,7 @@
 		</button>
 		<button class="btn btn-success btn-next"
 						ng-click="vm.OnSubmit()"
-						ng-disabled="configuratorForm.$invalid">
+						ng-class="{disabled: configuratorForm.$invalid}">
 			Continue to Fault Detection
 			<i class="icon-arrow-right icon-on-right"></i>
 		</button>

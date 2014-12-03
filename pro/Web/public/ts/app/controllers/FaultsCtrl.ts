@@ -8,15 +8,15 @@ module Peach {
 		static $inject = [
 			"$scope",
 			"$routeParams",
-			"PitService",
-			"JobService"
+			"JobService",
+			"FaultDetailResource"
 		];
 
 		constructor(
 			$scope: IViewModelScope,
 			$routeParams: ng.route.IRouteParamsService,
-			private pitService: Services.PitService,
-			private jobService: Services.JobService
+			private jobService: Services.JobService,
+			private faultDetailResource: Models.IFaultDetailResource
 		) {
 			$scope.vm = this;
 			var bucket = $routeParams['bucket'];
@@ -26,11 +26,9 @@ module Peach {
 			} else {
 				this.Title = "Faults For " + bucket;
 				this.GridFaults.data = "vm.BucketFaults";
-				//this.peachSvc.GetJobFaults(this.pitConfigSvc.Job.jobUrl, (faults: Models.IFault[]) => {
-				//	this.bucketFaults = $.grep(faults, (e) => {
-				//		return this.bucket === e.majorHash + '_' + e.minorHash;
-				//	});
-				//});
+				this.BucketFaults = _.filter(this.jobService.Faults, (fault: Models.IFaultSummary) => {
+					return bucket === (fault.majorHash + '_' + fault.minorHash);
+				});
 			}
 		}
 
@@ -38,13 +36,19 @@ module Peach {
 			return this.jobService.Job;
 		}
 
-		public get Faults(): Models.IFault[] {
+		public get Faults(): Models.IFaultSummary[] {
 			return this.jobService.Faults;
+		}
+
+		public get IsFaultSelected(): boolean {
+			return !_.isUndefined(this.CurrentFault);
 		}
 
 		public Title: string = "All Faults";
 
-		public BucketFaults: Models.IFault[];
+		public BucketFaults: Models.IFaultSummary[];
+
+		public CurrentFault: Models.IFaultDetail;
 
 		public Tabs: ITab[] = [
 			{ title: "Summary", content: "html/fault/summary.html", active: true, disabled: false },
@@ -52,7 +56,7 @@ module Peach {
 		];
 
 		public GridFaults: ngGrid.IGridOptions = {
-			data: "vm.faults",
+			data: "vm.Faults",
 			sortInfo: { fields: ["iteration"], directions: ["asc"] },
 			columnDefs: [
 				{ field: "iteration", displayName: "#" },
@@ -69,19 +73,20 @@ module Peach {
 			],
 			totalServerItems: "vm.job.faultCount",
 			multiSelect: false,
-			afterSelectionChange: (r, e) => {
-				//this.peachSvc.GetFault((<Models.IFault>r.entity).faultUrl, (data: Models.IFault) => {
-				//	this.CurrentFault = data;
-				//	this.Tabs[1].active = true;
-				//});
+			afterSelectionChange: (rowItem?: ngGrid.IRow) => {
+				if (!rowItem.selected) {
+					// ignore 'deselected' events
+					return;
+				}
+				var fault = <Models.IFaultSummary> rowItem.entity;
+				var promise = this.faultDetailResource.get({ id: ExtractId('faults', fault.faultUrl) });
+				promise.$promise.then((detail: Models.IFaultDetail) => {
+					this.CurrentFault = detail;
+					this.Tabs[1].active = true;
+				});
 			},
-			keepLastSelected: true
+			keepLastSelected: true,
+			plugins: [new ngGridFlexibleHeightPlugin({ minHeight: 500 })]
 		};
-
-		public CurrentFault: Models.IFault;
-
-		public get IsFaultSelected(): boolean {
-			return !_.isUndefined(this.CurrentFault);
-		}
 	}
 }

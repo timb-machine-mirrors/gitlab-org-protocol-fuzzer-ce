@@ -3,29 +3,33 @@
 module Peach.Services {
 	"use strict";
 
-	export var JOB_INTERVAL = 250;
+	export var JOB_INTERVAL = 500;
 
 	export class JobService {
 		static $inject = [
+			"$q",
 			"$http",
 			"$interval",
 			"PitService"
 		];
 
 		constructor(
+			private $q: ng.IQService,
 			private $http: ng.IHttpService,
 			private $interval: ng.IIntervalService,
 			public pitService: PitService
 		) {
 		}
 
+		private poller: ng.IPromise<any>;
+
 		private job: Models.IJob;
 		public get Job(): Models.IJob {
 			return this.job;
 		}
 
-		private faults: Models.IFault[] = [];
-		public get Faults(): Models.IFault[] {
+		private faults: Models.IFaultSummary[] = [];
+		public get Faults(): Models.IFaultSummary[] {
 			return this.faults;
 		}
 
@@ -59,6 +63,20 @@ module Peach.Services {
 				return "";
 			}
 			return moment(new Date(0, 0, 0, 0, 0, this.job.runtime)).format("H:mm:ss");
+		}
+
+		public GetJobs(): ng.IPromise<void> {
+			var deferred = this.$q.defer<void>();
+			var promise = this.$http.get("/p/jobs");
+			promise.success((jobs: Models.IJob[]) => {
+				if (jobs.length > 0) {
+					this.job = _.first(jobs);
+					this.startJobPoller();
+				}
+				deferred.resolve();
+			});
+			promise.error(reason => this.onError(reason));
+			return deferred.promise;
 		}
 
 		public StartJob(job?: Models.IJob) {
@@ -120,13 +138,18 @@ module Peach.Services {
 		}
 
 		private startJobPoller() {
-			var interval = this.$interval(() => {
+			if (!_.isUndefined(this.poller)) {
+				return;
+			}
+
+			this.poller = this.$interval(() => {
 				this.reloadFaults();
 				var promise = this.$http.get(this.job.jobUrl);
 				promise.success((job: Models.IJob) => {
 					this.job = job;
 					if (job.status === Models.JobStatus.Stopped) {
-						this.$interval.cancel(interval);
+						this.$interval.cancel(this.poller);
+						this.poller = undefined;
 					}
 				});
 				promise.error(reason => this.onError(reason));
@@ -135,7 +158,7 @@ module Peach.Services {
 
 		private reloadFaults() {
 			var promise = this.$http.get(this.job.faultsUrl);
-			promise.success((faults: Models.IFault[]) => {
+			promise.success((faults: Models.IFaultSummary[]) => {
 				this.faults = faults;
 			});
 			promise.error(reason => this.onError(reason));

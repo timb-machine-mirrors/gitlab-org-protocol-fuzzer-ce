@@ -60,7 +60,7 @@ module Peach.Services {
 		//          -> CopyPit
 		public SelectPit(url: string): ng.IPromise<Models.IPit> {
 			var deferred = this.$q.defer<Models.IPit>();
-			var promise = this.PitResource.get({ id: this.ExtractPidId(url) }).$promise;
+			var promise = this.PitResource.get({ id: ExtractId('pits', url) }).$promise;
 			promise.then((pit: Models.IPit) => {
 				if (pit.locked) {
 					var modal = this.$modal.open({
@@ -102,7 +102,7 @@ module Peach.Services {
 		}
 
 		public get PitId(): string {
-			return onlyIf(this.Pit, () => this.ExtractPidId(this.Pit.pitUrl));
+			return onlyIf(this.Pit, () => ExtractId('pits', this.pit.pitUrl));
 		}
 
 		public LoadPitConfig(): Models.IPitConfig {
@@ -132,11 +132,6 @@ module Peach.Services {
 			}
 			this.pitAgents.pitUrl = this.pit.pitUrl;
 			this.pitAgents.$save({ id: this.PitId });
-		}
-
-		public ExtractPidId(url: string): string {
-			var re = new RegExp('/p/pits/([^/]+).*');
-			return re.exec(url)[1];
 		}
 
 		public get IsConfigured(): boolean {

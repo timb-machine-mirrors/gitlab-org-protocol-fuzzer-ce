@@ -35,12 +35,14 @@ describe("Peach", () => {
 				}
 			});
 
+			$httpBackend.expectGET('/p/jobs').respond([]);
 			ctrl = $controller('Peach.MainController', {
 				$scope: $rootScope.$new(),
 				$location: $location,
 				$modal: $modal,
 				PitService: service
 			});
+			$httpBackend.flush();
 		}));
 
 		afterEach(() => {

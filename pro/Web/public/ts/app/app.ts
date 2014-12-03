@@ -75,6 +75,14 @@ module Peach {
 			);
 		}
 	]);
+	p.factory('FaultDetailResource', [
+		'$resource',
+		($resource: ng.resource.IResourceService): Models.IFaultDetailResource => {
+			return <Models.IFaultDetailResource> $resource(
+				'/p/faults/:id', { id: '@id' }
+			);
+		}
+	]);
 	p.service('PitService', Services.PitService);
 	p.service('JobService', Services.JobService);
 	p.service('TestService', Services.TestService);
@@ -87,14 +95,14 @@ module Peach {
 					templateUrl: "html/dashboard.html",
 					controller: DashboardController
 				})
-				//.when("/faults/:bucket", {
-				//	templateUrl: "html/faults.html",
-				//	controller: FaultsController
-				//})
-				//.when("/metrics/:metric", {
-				//	templateUrl: "html/metrics.html",
-				//	controller: MetricsController
-				//})
+				.when("/faults/:bucket", {
+					templateUrl: "html/faults.html",
+					controller: FaultsController
+				})
+				.when("/metrics/:metric", {
+					templateUrl: "html/metrics.html",
+					controller: MetricsController
+				})
 				.when("/quickstart/intro", {
 					templateUrl: "html/wizard/intro.html",
 					controller: WizardController
@@ -258,7 +266,7 @@ module Peach {
 		window.onerror = (message, url, lineNo) => {
 			console.log('Error: ' + message + '\n' + 'Line Number: ' + lineNo);
 			return true;
-		}
+		};
 
 		var version = getHtmlVer();
 		if (version < 5) {
@@ -266,8 +274,7 @@ module Peach {
 				"This application requires an HTML 5 and ECMAScript 5 capable browser. " +
 				"Please upgrade your browser to a more recent version."
 			);
-		}
-		else {
+		} else {
 			initialize();
 		}
 

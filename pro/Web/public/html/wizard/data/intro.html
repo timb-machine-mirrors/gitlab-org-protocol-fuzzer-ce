@@ -54,7 +54,7 @@
 	<div class="space-6"></div>
 	<button class="btn btn-success btn-next"
 					ng-click="vm.Next()"
-					ng-disabled="configuratorForm.$invalid">
+					ng-class="{disabled: configuratorForm.$invalid}">
 		Next
 		<i class="icon-arrow-right icon-on-right"></i>
 	</button>

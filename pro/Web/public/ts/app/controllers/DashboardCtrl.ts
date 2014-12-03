@@ -4,6 +4,7 @@ module Peach {
 	"use strict";
 
 	export class DashboardController {
+		public Faults: Models.IFaultSummary[] = [];
 
 		static $inject = [
 			"$scope",
@@ -21,10 +22,15 @@ module Peach {
 			$scope.vm = this;
 
 			$scope.$watch("vm.Job.faultCount", () => {
-				this.Faults = this.jobService.Faults.sort((a: Models.IFault, b: Models.IFault) => {
-					if (a.iteration == b.iteration) { return 0; }
-					else if (a.iteration > b.iteration) { return -1; }
-					else { return 1; }
+				this.Faults = this.jobService.Faults.sort(
+				(a: Models.IFaultSummary, b: Models.IFaultSummary) => {
+					if (a.iteration === b.iteration) {
+						return 0;
+					} else if (a.iteration > b.iteration) {
+						return -1;
+					} else {
+						return 1;
+					}
 				}).slice(0, 9);
 			});
 		}
@@ -96,7 +102,5 @@ module Peach {
 			showFooter: false,
 			plugins: [new ngGridFlexibleHeightPlugin({ minHeight: 303 })]
 		};
-
-		public Faults: Models.IFault[] = [];
 	}
 }

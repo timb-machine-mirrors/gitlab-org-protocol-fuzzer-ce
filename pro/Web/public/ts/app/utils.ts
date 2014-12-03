@@ -27,3 +27,9 @@ String.prototype.startsWith = function(pattern: string): boolean {
 function isEmpty(value) {
 	return _.isUndefined(value) || value === '' || value === null || value !== value;
 }
+
+function ExtractId(part: string, url: string): string {
+	var pattern = '/p/' + part + '/([^/]+).*';
+	var re = new RegExp(pattern);
+	return re.exec(url)[1];
+}

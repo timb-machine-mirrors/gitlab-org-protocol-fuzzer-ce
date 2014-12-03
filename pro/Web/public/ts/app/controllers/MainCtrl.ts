@@ -24,21 +24,17 @@ module Peach {
 		) {
 			$scope.vm = this;
 
-			var pitId = $location.search()['pit'];
-			if (pitId) {
-				this.pitService.SelectPit('/p/pits/' + pitId);
-			} else if (!this.pitService.Pit) {
-				this.OnSelectPit();
-			}
-
-			//this.peachSvc.GetJobs((job: Models.IJob) => {
-			//	if (job) {
-			//		this.pitConfigSvc.Job = job;
-			//	}
-			//	else {
-			//		this.showPitSelector();
-			//	}
-			//});
+			var promise = this.jobService.GetJobs();
+			promise.then(() => {
+				if (_.isUndefined(this.job)) {
+					var pitId = $location.search()['pit'];
+					if (pitId) {
+						this.pitService.SelectPit('/p/pits/' + pitId);
+					} else if (!this.pitService.Pit) {
+						this.OnSelectPit();
+					}
+				}
+			});
 		}
 
 		private get pit(): Models.IPit {
@@ -107,14 +103,14 @@ module Peach {
 			);
 		}
 
-		public get CanConfigurePit() {
+		public get CanConfigurePit(): boolean {
 			return (
 				(this.job === undefined || this.job.status === Models.JobStatus.Stopped) &&
 				(this.pit !== undefined && this.pit.pitUrl !== undefined && this.pit.pitUrl.length > 0)
 			);
 		}
 
-		public get CanViewFaults() {
+		public get CanViewFaults(): boolean {
 			return !_.isUndefined(this.job);
 		}
 
