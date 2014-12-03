@@ -48,6 +48,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 		protected string _tempFileName = Path.GetTempFileName();
 		protected object _lock = new object();
 		protected int _numPackets = 0;
+
 		protected LibPcapLiveDevice _device = null;
 		protected CaptureFileWriterDevice _writer = null;
 
@@ -123,14 +124,14 @@ namespace Peach.Pro.Core.Agent.Monitors
 				{
 					var dev = item as LibPcapLiveDevice;
 					System.Diagnostics.Debug.Assert(dev != null);
-					if (dev.Interface.FriendlyName != null && dev.Interface.FriendlyName.Length > 0)
+					if (!string.IsNullOrEmpty(dev.Interface.FriendlyName))
 						Console.WriteLine(" " + dev.Interface.FriendlyName);
 				}
 				throw new PeachException("Error, PcapMonitor was unable to locate device '" + _deviceName + "'.");
 			}
 
-			_device.OnPacketArrival += new PacketArrivalEventHandler(_OnPacketArrival);
-			_device.Open();
+			_device.OnPacketArrival += _OnPacketArrival;
+			_device.Open(DeviceMode.Normal, 1);
 
 			try
 			{
@@ -148,10 +149,18 @@ namespace Peach.Pro.Core.Agent.Monitors
 		{
 			if (_device != null)
 			{
-				_device.StopCapture();
-				_device.Close();
-
 				IterationFinished();
+
+				try
+				{
+					_device.StopCapture();
+				}
+				catch (PcapException ex)
+				{
+					System.Diagnostics.Debug.Assert(ex != null);
+				}
+
+				_device.Close();
 			}
 		}
 
@@ -183,12 +192,15 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		public override Fault GetMonitorData()
 		{
-			Fault fault = new Fault();
+			
+			var fault = new Fault
+			{
+				detectionSource = "PcapMonitor",
+				folderName = "PcapMonitor",
+				type = FaultType.Data,
+				description = "Collected " + _numPackets + " packets."
+			};
 
-			fault.detectionSource = "PcapMonitor";
-			fault.folderName = "PcapMonitor";
-			fault.type = FaultType.Data;
-			fault.description = "Collected " + _numPackets + " packets.";
 			fault.collectedData.Add(new Fault.Data("NetworkCapture.pcap", File.ReadAllBytes(_writer.Name)));
 
 			return fault;
