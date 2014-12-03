@@ -16,12 +16,12 @@ namespace Peach.Pro.Test.Core.Loggers
 		{
 			static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
-			Engine engine;
+			readonly RunContext context;
 
-			public ExceptionalPublisher(Engine engine, Dictionary<string, Variant> args)
+			public ExceptionalPublisher(RunContext context, Dictionary<string, Variant> args)
 				: base(args)
 			{
-				this.engine = engine;
+				this.context = context;
 			}
 
 			protected override void OnOutput(Peach.Core.IO.BitwiseStream data)
@@ -30,7 +30,7 @@ namespace Peach.Pro.Test.Core.Loggers
 
 			protected override Variant OnCall(string method, List<ActionParameter> args)
 			{
-				if (engine.context.controlIteration && !engine.context.controlRecordingIteration)
+				if (context.controlIteration && !context.controlRecordingIteration)
 				{
 					if (method == "throw")
 						throw new SoftException("Erroring on a control iteration");
@@ -105,7 +105,8 @@ namespace Peach.Pro.Test.Core.Loggers
 			var dom = DataModelCollector.ParsePit(xml);
 			var e = new Engine(null);
 
-			dom.tests[0].publishers[0] = new ExceptionalPublisher(e, new Dictionary<string, Variant>());
+			e.TestStarting += (ctx) =>
+				dom.tests[0].publishers[0] = new ExceptionalPublisher(ctx, new Dictionary<string, Variant>());
 
 			var cfg = new RunConfiguration()
 			{
@@ -187,7 +188,8 @@ namespace Peach.Pro.Test.Core.Loggers
 			var dom = DataModelCollector.ParsePit(xml);
 			var e = new Engine(null);
 
-			dom.tests[0].publishers[0] = new ExceptionalPublisher(e, new Dictionary<string, Variant>());
+			e.TestStarting += (ctx) => 
+				dom.tests[0].publishers[0] = new ExceptionalPublisher(ctx, new Dictionary<string, Variant>());
 
 			var cfg = new RunConfiguration()
 			{
@@ -282,7 +284,8 @@ namespace Peach.Pro.Test.Core.Loggers
 			var dom = DataModelCollector.ParsePit(xml);
 			var e = new Engine(null);
 
-			dom.tests[0].publishers[0] = new ExceptionalPublisher(e, new Dictionary<string, Variant>());
+			e.TestStarting += (ctx) =>
+				dom.tests[0].publishers[0] = new ExceptionalPublisher(ctx, new Dictionary<string, Variant>());
 
 			var cfg = new RunConfiguration()
 			{

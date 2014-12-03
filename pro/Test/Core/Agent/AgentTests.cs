@@ -223,7 +223,7 @@ namespace Peach.Pro.Test.Core.Agent
 		</Monitor>
 	</Agent>
 
-	<Test name='Default' replayEnabled='false'>
+	<Test name='Default' targetLifetime='iteration'>
 		<Agent ref='RemoteAgent'/>
 		<StateModel ref='TheState'/>
 		<Publisher name='Remote' class='Remote'>
@@ -270,11 +270,13 @@ namespace Peach.Pro.Test.Core.Agent
 "IterationStarting 85 false", "IterationFinished", 
 // Agent is restarted & fault is detected
 "SessionStarting", "IterationStarting 86 false", "IterationFinished", "DetectedFault", "GetMonitorData", "MustStop",
+// Reproduction occurs & fault is detected
+"IterationStarting 86 true", "IterationFinished", "DetectedFault", "GetMonitorData", "MustStop",
 // Fussing stops
 "SessionFinished", "StopMonitor"
 				};
 
-				Assert.AreEqual(expected, contents);
+				Assert.That(contents, Is.EquivalentTo(expected));
 			}
 			finally
 			{
@@ -322,7 +324,7 @@ namespace Peach.Pro.Test.Core.Agent
 		</Monitor>
 	</Agent>
 
-	<Test name='Default' replayEnabled='false'>
+	<Test name='Default' targetLifetime='session'>
 		<Agent ref='RemoteAgent'/>
 		<StateModel ref='TheState'/>
 		<Publisher name='Remote' class='Remote'>
@@ -362,12 +364,6 @@ namespace Peach.Pro.Test.Core.Agent
 		[Test]
 		public void TestBadProcess()
 		{
-			var error = "System debugger could not start process 'MissingProgram'.";
-			if (Platform.GetOS() != Platform.OS.Windows)
-			{
-				error = "Could not start process 'MissingProgram'.";
-			}
-
 			var xml = @"
 <Peach>
 	<DataModel name='TheDataModel'>
@@ -388,7 +384,7 @@ namespace Peach.Pro.Test.Core.Agent
 		</Monitor>
 	</Agent>
 
-	<Test name='Default' replayEnabled='false'>
+	<Test name='Default'>
 		<Agent ref='RemoteAgent'/>
 		<StateModel ref='TheState'/>
 		<Publisher class='Null'/>
@@ -407,15 +403,13 @@ namespace Peach.Pro.Test.Core.Agent
 
 				var e = new Engine(null);
 
-				try
-				{
-					e.startFuzzing(dom, config);
-					Assert.Fail("Should throw!");
-				}
-				catch (PeachException pe)
-				{
-					Assert.True(pe.Message.StartsWith(error), "Expected: {0}\nBut was: {1}", error, pe.Message);
-				}
+				var ex = Assert.Throws<PeachException>(() => e.startFuzzing(dom, config));
+
+				var msg = Platform.GetOS() != Platform.OS.Windows
+					? "Could not start process 'MissingProgram'."
+					: "System debugger could not start process 'MissingProgram'.";
+
+				Assert.That(ex.Message, Is.StringStarting(msg));
 			}
 			finally
 			{
@@ -514,7 +508,7 @@ namespace Peach.Pro.Test.Core.Agent
 		<Monitor name='Local2.mon2' class='LoggingMonitor'/>
 	</Agent>
 
-	<Test name='Default' replayEnabled='false'>
+	<Test name='Default'>
 		<Agent ref='Local1'/>
 		<Agent ref='Local2'/>
 		<StateModel ref='TheState'/>
@@ -571,7 +565,7 @@ namespace Peach.Pro.Test.Core.Agent
 				"Local1.mon1.StopMonitor",
 			};
 
-			Assert.AreEqual(expected, history.ToArray());
+			Assert.That(history, Is.EquivalentTo(expected));
 
 		}
 
@@ -776,7 +770,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 	<Agent name='RemoteAgent' location='tcp://127.0.0.1:9001'/>
 
-	<Test name='Default' replayEnabled='false'>
+	<Test name='Default'>
 		<Agent ref='RemoteAgent'/>
 		<StateModel ref='TheState'/>
 		<Publisher class='Remote'>
@@ -818,7 +812,7 @@ namespace Peach.Pro.Test.Core.Agent
 					"OnStop",
 				};
 
-				Assert.AreEqual(expected, contents);
+				Assert.That(contents, Is.EquivalentTo(expected));
 
 				var st = dom.tests[0].stateModel.states[0];
 				//var act = st.actions["call"] as Dom.Actions.Call;

@@ -168,13 +168,6 @@ namespace Peach.Core.Dom
 		public decimal faultWaitTime { get; set; }
 
 		/// <summary>
-		/// Should iterations be replayed when a fault occurs.
-		/// </summary>
-		[XmlAttribute]
-		[DefaultValue(true)]
-		public bool replayEnabled { get; set; }
-
-		/// <summary>
 		/// How often we should perform a control iteration.
 		/// </summary>
 		[XmlAttribute]
@@ -201,6 +194,20 @@ namespace Peach.Core.Dom
 		[XmlAttribute("targetLifetime")]
 		[DefaultValue("session")]
 		public Lifetime TargetLifetime { get; set; }
+
+		/// <summary>
+		/// Number of iteration to search backwards trying to reproduce a fault.
+		/// </summary>
+		/// <remarks>
+		/// Many times, especially with network fuzzing, the iteration we detect a fault on is not the
+		/// correct iteration, or the fault requires multiple iterations to reproduce.
+		/// 
+		/// Peach will start reproducing at the current iteration count then start moving backwards
+		/// until we locate the iteration causing the crash, or reach our max back search value.
+		/// </remarks>
+		[XmlAttribute("maxBackSearch")]
+		[DefaultValue(100)]
+		public uint MaxBackSearch { get; set; }
 
 		#endregion
 
@@ -291,11 +298,11 @@ namespace Peach.Core.Dom
 		{
 			publishers.AddEvent += new AddEventHandler<string, Publisher>(publishers_AddEvent);
 
-			replayEnabled = true;
 			waitTime = 0;
 			faultWaitTime = 2;
 			maxOutputSize = 1073741824; // 1024 * 1024 * 1024 (1Gb)
 			TargetLifetime = Lifetime.Session;
+			MaxBackSearch = 100;
 
 			loggers = new List<Logger>();
 			mutables = new List<MarkMutable>();

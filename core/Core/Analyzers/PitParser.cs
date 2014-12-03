@@ -1679,14 +1679,14 @@ namespace Peach.Core.Analyzers
 			if (node.hasAttr("controlIteration"))
 				test.controlIteration = int.Parse(node.getAttrString("controlIteration"));
 
-			if (node.hasAttr("replayEnabled"))
-				test.replayEnabled = node.getAttrBool("replayEnabled");
-
 			if (node.hasAttr("nonDeterministicActions"))
 				test.nonDeterministicActions = node.getAttrBool("nonDeterministicActions");
 
 			if (node.hasAttr("maxOutputSize"))
 				test.maxOutputSize = node.getAttrUInt64("maxOutputSize");
+
+			if (node.hasAttr("maxBackSearch"))
+				test.MaxBackSearch = node.getAttrUInt32("maxBackSearch");
 
 			var lifetime = node.getAttr("targetLifetime", null);
 			if (lifetime != null)

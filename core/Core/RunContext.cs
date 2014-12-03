@@ -438,18 +438,6 @@ namespace Peach.Core
 		public bool reproducingFault = false;
 
 		/// <summary>
-		/// Number of iteration to search backwards trying to reproduce a fault.
-		/// </summary>
-		/// <remarks>
-		/// Many times, especially with network fuzzing, the iteration we detect a fault on is not the
-		/// correct iteration, or the fault requires multiple iterations to reproduce.
-		/// 
-		/// Peach will start reproducing at the current iteration count then start moving backwards
-		/// until we locate the iteration causing the crash, or reach our max back search value.
-		/// </remarks>
-		public uint reproducingMaxBacksearch = 100;
-
-		/// <summary>
 		/// The initial iteration we detected fault on
 		/// </summary>
 		public uint reproducingInitialIteration = 0;

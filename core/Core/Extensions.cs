@@ -4,6 +4,15 @@ using System.Xml;
 
 namespace Peach.Core
 {
+	public static class EnumerableExtensions
+	{
+		public static void ForEach<T>(this IEnumerable<T> sequence, Action<T> action)
+		{
+			foreach (var item in sequence)
+				action(item);
+		}
+	}
+
 	public static class ListExtensions
 	{
 		public static T First<T>(this List<T> list)
