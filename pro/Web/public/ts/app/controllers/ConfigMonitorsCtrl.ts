@@ -27,9 +27,6 @@ module Peach {
 			$scope.vm = this;
 			this.AvailableMonitors = availableMonitorsResource.query();
 			this.Model = pitService.LoadPitAgents();
-			//this.Model.$promise.then(() => {
-			//	this.$scope.form.$setPristine();
-			//});
 		}
 
 		public get ShowSaved(): boolean {
@@ -95,7 +92,7 @@ module Peach {
 						monitor.map[i].value = (monitor.map[i].value === 'true');
 						break;
 					case "int":
-						monitor.map[i].value = Number(monitor.map[i].value);
+						monitor.map[i].value = parseInt(monitor.map[i].value);
 						break;
 				}
 			}

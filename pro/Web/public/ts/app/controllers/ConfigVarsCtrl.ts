@@ -32,8 +32,6 @@ module Peach {
 					editableCellTemplate: "html/grid/vars/edit-value.html"
 				},
 				{
-					field: "_actions",
-					displayName: "",
 					width: "27px",
 					enableCellEdit: false,
 					cellTemplate: "html/grid/vars/actions.html"
@@ -76,47 +74,68 @@ module Peach {
 
 			modal.result.then((param: Models.IParameter) => {
 				this.PitConfig.config.push(param);
+				this.$scope.form.$setDirty();
 			});
 		}
 
 		public RemoveRow(row: ngGrid.IRow) {
 			this.PitConfig.config.splice(row.rowIndex, 1);
+			this.$scope.form.$setDirty();
 		}
 	}
 
 	export class NewVarController {
-		public Param: Models.IParameter;
-
 		static $inject = [
 			"$scope",
-			"$modalInstance"
+			"$modalInstance",
+			"PitService"
 		];
 
 		constructor(
-			$scope: IViewModelScope,
-			private $modalInstance: ng.ui.bootstrap.IModalServiceInstance
+			private $scope: IFormScope,
+			private $modalInstance: ng.ui.bootstrap.IModalServiceInstance,
+			private pitService: Services.PitService
 		) {
 			$scope.vm = this;
 
 			this.Param = {
-				key: null,
-				value: null,
-				name: null,
+				key: "",
+				value: "",
+				name: "",
 				description: 'User-defined variable',
-				type: 'user',
-				enumType: undefined,
-				defaults: [],
-				min: undefined,
-				max: undefined
+				type: 'user'
 			};
 		}
 
+		private hasBlurred: boolean;
+
+		public Param: Models.IParameter;
+
+		public get ParamKeys(): string[] {
+			return _.pluck(this.pitService.PitConfig.config, 'key');
+		}
+		
 		public Cancel() {
 			this.$modalInstance.dismiss();
 		}
 
 		public Accept() {
 			this.$modalInstance.close(this.Param);
+		}
+
+		public OnNameBlur() {
+			this.hasBlurred = true;
+		}
+
+		public OnNameChanged() {
+			var value = this.Param.name;
+			if (!this.hasBlurred) {
+				if (_.isString(value)) {
+					this.Param.key = value.replace(new RegExp(' ', 'g'), '');
+				} else {
+					this.Param.key = undefined;
+				}
+			}
 		}
 	}
 }

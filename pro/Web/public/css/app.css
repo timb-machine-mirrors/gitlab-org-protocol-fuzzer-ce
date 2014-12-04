@@ -108,6 +108,16 @@ pre {
 	white-space: pre-wrap;
 }
 
+.css-form input.ng-invalid.ng-dirty {
+	background-color: #FA787E;
+}
+
+/*
+.css-form input.ng-valid.ng-dirty {
+	background-color: #78FA89;
+}
+*/
+
 /* fix for backdrop, for some reason this is missing */
 .modal-backdrop {
 	bottom: 0;

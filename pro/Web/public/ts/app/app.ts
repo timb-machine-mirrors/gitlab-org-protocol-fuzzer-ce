@@ -19,14 +19,15 @@ module Peach {
 
 	var p = angular.module("Peach", [
 		"ngResource",
-		"emguo.poller",
-		"ngGrid",
 		"ngRoute",
+		"ngGrid",
 		"ui.bootstrap",
+		"ui.utils",
 		"treeControl",
 		"angles",
 		"ngVis"
 	]);
+
 	p.factory('PeachConfigResource', [
 		'$resource',
 		($resource: ng.resource.IResourceService): Models.IKeyValueResource => {
@@ -83,10 +84,12 @@ module Peach {
 			);
 		}
 	]);
+
 	p.service('PitService', Services.PitService);
 	p.service('JobService', Services.JobService);
 	p.service('TestService', Services.TestService);
 	p.service('WizardService', Services.WizardService);
+
 	p.config([
 		"$routeProvider",
 		($routeProvider: ng.route.IRouteProvider) => {
@@ -136,35 +139,43 @@ module Peach {
 				});
 		}
 	]);
+
+	function regexValidate(
+		name: string,
+		pattern: RegExp,
+		scope: ng.IScope,
+		elm: ng.IAugmentedJQuery,
+		attrs: ng.IAttributes,
+		ctrl: ng.INgModelController
+	) {
+		ctrl.$parsers.unshift(viewValue => {
+			var match = pattern.test(viewValue);
+			ctrl.$setValidity(name, match);
+			if (match) {
+				return viewValue;
+			}
+			return undefined;
+		});
+	}
+
 	p.directive("integer", () => {
 		return {
 			require: 'ngModel',
 			link: (scope: ng.IScope, elm: ng.IAugmentedJQuery, attrs: ng.IAttributes, ctrl: ng.INgModelController) => {
-				ctrl.$parsers.unshift(viewValue => {
-					var isIntValue = INTEGER_REGEXP.test(viewValue);
-					ctrl.$setValidity('integer', isIntValue);
-					if (isIntValue) {
-						return viewValue;
-					}
-					return undefined;
-				});
+				return regexValidate('integer', INTEGER_REGEXP, scope, elm, attrs, ctrl);
 			}
 		};
 	});
+
 	p.directive('hexstring', () => {
 		return {
 			require: 'ngModel',
 			link: (scope: ng.IScope, elm: ng.IAugmentedJQuery, attrs: ng.IAttributes, ctrl: ng.INgModelController) => {
-				ctrl.$parsers.unshift(viewValue => {
-					var isHexValue = HEX_REGEXP.test(viewValue);
-					ctrl.$setValidity('hexstring', isHexValue);
-					if (isHexValue) {
-						return viewValue;
-					}
-				});
+				return regexValidate('hexstring', HEX_REGEXP, scope, elm, attrs, ctrl);
 			}
 		};
 	});
+
 	p.directive('ngEnter', () => {
 		return {
 			link: (scope: ng.IScope, element: ng.IAugmentedJQuery, attrs: ng.IAttributes) => {
@@ -180,53 +191,80 @@ module Peach {
 			}
 		};
 	});
+
+	p.directive('unique', () => {
+		return {
+			restrict: 'A',
+			require: 'ngModel',
+			link: (scope: ng.IScope, elm: ng.IAugmentedJQuery, attrs: ng.IAttributes, ctrl: ng.INgModelController) => {
+				var validate = value => {
+					var expression = attrs['unique'];
+					var list = scope.$eval(expression);
+					var unique = !_.contains(list, value);
+					ctrl.$setValidity('unique', unique);
+					return unique ? value : undefined;
+				};
+
+				var watch = attrs['uniqueWatch'];
+				if (watch) {
+					scope.$watch(watch, () => {
+						var model = attrs['ngModel'];
+						var value = scope.$eval(model);
+						validate(value);
+					});
+				}
+
+				ctrl.$parsers.unshift(validate);
+			}
+		}
+	});
+
+	function boundsValidate(
+		name: string,
+		scope: ng.IScope,
+		elm: ng.IAugmentedJQuery,
+		attrs: ng.IAttributes,
+		ctrl: ng.INgModelController
+	) {
+		var isMax = (name == 'ngMax');
+		scope.$watch(attrs[name], () => {
+			ctrl.$setViewValue(ctrl.$viewValue);
+		});
+		var validator = value => {
+			var bound = scope.$eval(attrs[name]) || 0;
+			if (!isEmpty(value) && ((isMax && value > bound) || (!isMax && value < bound))) {
+				ctrl.$setValidity(name, false);
+				return undefined;
+			} else {
+				ctrl.$setValidity(name, true);
+				return value;
+			}
+		};
+
+		ctrl.$parsers.push(validator);
+		ctrl.$formatters.push(validator);
+	}
+
 	p.directive('ngMin', () => {
 		return {
 			restrict: 'A',
 			require: 'ngModel',
 			link: (scope: ng.IScope, elm: ng.IAugmentedJQuery, attrs: ng.IAttributes, ctrl: ng.INgModelController) => {
-				scope.$watch(attrs['ngMin'], () => {
-					ctrl.$setViewValue(ctrl.$viewValue);
-				});
-				var minValidator = value => {
-					var min = scope.$eval(attrs['ngMin']) || 0;
-					if (!isEmpty(value) && value < min) {
-						ctrl.$setValidity('ngMin', false);
-						return undefined;
-					} else {
-						ctrl.$setValidity('ngMin', true);
-						return value;
-					}
-				};
-
-				ctrl.$parsers.push(minValidator);
-				ctrl.$formatters.push(minValidator);
+				boundsValidate('ngMin', scope, elm, attrs, ctrl);
 			}
 		};
 	});
+
 	p.directive('ngMax', () => {
 		return {
+			restrict: 'A',
 			require: 'ngModel',
 			link: (scope: ng.IScope, elm: ng.IAugmentedJQuery, attrs: ng.IAttributes, ctrl: ng.INgModelController) => {
-				scope.$watch(attrs['ngMax'], () => {
-					ctrl.$setViewValue(ctrl.$viewValue);
-				});
-				var maxValidator = value => {
-					var max = scope.$eval(attrs['ngMax']) || Infinity;
-					if (!isEmpty(value) && value > max) {
-						ctrl.$setValidity('ngMax', false);
-						return undefined;
-					} else {
-						ctrl.$setValidity('ngMax', true);
-						return value;
-					}
-				};
-
-				ctrl.$parsers.push(maxValidator);
-				ctrl.$formatters.push(maxValidator);
+				boundsValidate('ngMax', scope, elm, attrs, ctrl);
 			}
 		};
 	});
+
 	p.filter('filesize', () => {
 		var units = [
 			'bytes',
@@ -261,6 +299,7 @@ module Peach {
 			return (value.match(/\.0*$/) ? value.substr(0, value.indexOf('.')) : value) + ' ' + units[unit];
 		};
 	});
+
 	// hack to allow form field names to be dynamic
 	// http://stackoverflow.com/questions/14378401/dynamic-validation-and-name-in-a-form-with-angularjs
 	p.config([

@@ -17,22 +17,21 @@
   ],
   "dependencies": {
     "angular": "1.2",
-    "jquery": "2.1",
-    "bootstrap": "~3.3.1",
+    "angular-mocks": "1.2",
     "angular-resource": "1.2",
-    "angular-poller": "~0.3.2",
     "angular-route": "1.2",
     "angular-bootstrap": "~0.12.0",
     "angular-tree-control": "~0.2.7",
-    "ng-grid": "~2.0.14",
+    "angular-ui-utils": "~0.1.1",
     "angles": "*",
+    "ace-bootstrap": "*",
+    "bootstrap": "~3.3.1",
+    "jquery": "2.1",
+    "ng-grid": "~2.0.14",
     "vis": "~3.7.0",
     "moment": "~2.8.4",
-    "ace-bootstrap": "*",
     "font-awesome": "~4.2.0",
     "chosen-build": "~1.1.0",
-    "angular-mocks": "1.2.27",
-    "angular-ui-utils": "~0.1.1",
     "underscore": "~1.7.0"
   }
 }
