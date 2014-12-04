@@ -141,6 +141,28 @@ namespace Peach.Core.Agent
 		{
 			return null;
 		}
+
+		/// <summary>
+		/// An event handler that can be used by monitor implementations
+		/// to alert others about interesting events occuring.
+		/// The peach core does not make use of this event.
+		/// </summary>
+		/// <remarks>
+		/// This event handler is completly ignroed by the peach core.
+		/// It can be useful for writing tests against monitors so the
+		/// testing framework can get notified when interesting things happen.
+		/// </remarks>
+		public event EventHandler InternalEvent;
+
+		/// <summary>
+		/// Raises the InternalEvent event.
+		/// </summary>
+		/// <param name="args">Arbitrary arguments to pass to event subscribers.</param>
+		protected void OnInternalEvent(EventArgs args)
+		{
+			if (InternalEvent != null)
+				InternalEvent(this, args);
+		}
 	}
 
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
