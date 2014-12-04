@@ -1,9 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
 using System.Xml;
 
 namespace Peach.Core
 {
+	public static class SocketExtensions
+	{
+		public static void SendTo(this Socket socket, string msg, IPEndPoint remote)
+		{
+			socket.SendTo(Encoding.ASCII.GetBytes(msg), remote);
+		}
+
+		public static void Send(this Socket socket, string msg)
+		{
+			socket.Send(Encoding.ASCII.GetBytes(msg), SocketFlags.None);
+		}
+	}
+
 	public static class EnumerableExtensions
 	{
 		public static void ForEach<T>(this IEnumerable<T> sequence, Action<T> action)
