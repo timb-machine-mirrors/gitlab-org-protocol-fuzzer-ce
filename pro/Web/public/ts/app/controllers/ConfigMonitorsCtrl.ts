@@ -26,6 +26,7 @@ module Peach {
 		) {
 			$scope.vm = this;
 			this.AvailableMonitors = availableMonitorsResource.query();
+			pitService.LoadPitConfig();
 			this.Model = pitService.LoadPitAgents();
 		}
 
@@ -45,31 +46,13 @@ module Peach {
 			return this.$scope.form.$dirty && !this.$scope.form.$invalid && this.numMonitors > 0;
 		}
 
-		public get ErrorText(): string {
-			console.dir(this.$scope.form);
-			return this.$scope.form.$error;
-		}
-
-		private get numAgents(): number {
-			if (this.Model && this.Model.$resolved) {
-				return this.Model.agents.length;
-			}
-			return 0;
-		}
-
-		private get numMonitors(): number {
-			if (this.Model && this.Model.$resolved && this.Model.agents.length) {
-				return _.first(this.Model.agents).monitors.length;
-			}
-			return 0;
-		}
-
 		public AddAgent(): void {
 			this.Model.agents.push(new Models.Agent());
 		}
 
 		public RemoveAgent(agentIndex: number): void {
 			this.Model.agents.splice(agentIndex, 1);
+			this.$scope.form.$setDirty();
 		}
 
 		public AgentUp(agentIndex: number): void {
@@ -101,6 +84,7 @@ module Peach {
 
 		public RemoveMonitor(agentIndex: number, monitorIndex: number): void {
 			this.Model.agents[agentIndex].monitors.splice(monitorIndex, 1);
+			this.$scope.form.$setDirty();
 		}
 
 		public MonitorUp(agentIndex: number, monitorIndex: number): void {
@@ -127,7 +111,34 @@ module Peach {
 			});
 		}
 
-		private arrayItemUp<T>(array: T[], i: number): T[] {
+		public get BooleanChoices(): string[] {
+			return this.defines().concat(['true', 'false']);
+		}
+
+		public EnumChoices(defaults: string[]): string[] {
+			return this.defines().concat(defaults);
+		}
+
+		private defines(): string[] {
+			var names = _.pluck(this.pitService.PitConfig.config, 'key');
+			return _.map(names, x => '##' + x + '##');
+		}
+
+		private get numAgents(): number {
+			if (this.Model && this.Model.$resolved) {
+				return this.Model.agents.length;
+			}
+			return 0;
+		}
+
+		private get numMonitors(): number {
+			if (this.Model && this.Model.$resolved && this.Model.agents.length) {
+				return _.first(this.Model.agents).monitors.length;
+			}
+			return 0;
+		}
+
+		private arrayItemUp<T>(array: T[], i: number): T[]{
 			if (i > 0) {
 				var x = array[i - 1];
 				array[i - 1] = array[i];

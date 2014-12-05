@@ -1,4 +1,5 @@
-﻿[class^="icon-"], [class*=" icon-"] {
+﻿[class^="icon-"],
+[class*=" icon-"] {
 	font-family: FontAwesome2;
 	font-weight: normal;
 	font-style: normal;
@@ -112,6 +113,28 @@ pre {
 	background-color: #FA787E;
 }
 
+.peach-field-info:before {
+	content: "\f059";
+}
+
+.peach-field-info {
+	font-family: FontAwesome2;
+	cursor: pointer;
+}
+
+.pointer {
+	cursor: pointer;
+}
+
+/* 
+	fix for ace.css
+	default seems to be relative
+	this can cause main-content form-groups to flow below the bottom of the sidebar
+*/
+.sidebar {
+	position: absolute;
+}
+
 /*
 .css-form input.ng-valid.ng-dirty {
 	background-color: #78FA89;
@@ -124,7 +147,8 @@ pre {
 }
 
 /* turn off animation, this can screw with autofocus */
-.modal.fade .modal-dialog, .modal.in .modal-dialog {
+.modal.fade .modal-dialog,
+.modal.in .modal-dialog {
 	-webkit-transform: translate(0, 0);
 	-ms-transform: translate(0, 0);
 	transform: translate(0, 0);

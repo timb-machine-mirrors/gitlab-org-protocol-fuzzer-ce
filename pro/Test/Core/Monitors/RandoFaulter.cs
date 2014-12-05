@@ -9,6 +9,9 @@ namespace Peach.Pro.Test.Core.Monitors
 	[Parameter("Fault", typeof(int), "How often to fault", "10")]
 	[Parameter("NewMajor", typeof(int), "How often to generate a new major", "5")]
 	[Parameter("NewMinor", typeof(int), "How often to generate a new minor", "5")]
+	[Parameter("Boolean", typeof(bool), "A boolean parameter", "true")]
+	[Parameter("String", typeof(string), "A string parameter", "some string")]
+	[Parameter("When", typeof(When), "An enum parameter", "OnCall")]
 	public class RandoFaulter : Monitor
 	{
 		System.Random rnd = new System.Random();
@@ -16,6 +19,9 @@ namespace Peach.Pro.Test.Core.Monitors
 		public int Fault { get; set; }
 		public int NewMajor { get; set; }
 		public int NewMinor { get; set; }
+		public bool Boolean { get; set; }
+		public string String { get; set; }
+		public When _When { get; set; }
 
 		bool isControl = false;
 
