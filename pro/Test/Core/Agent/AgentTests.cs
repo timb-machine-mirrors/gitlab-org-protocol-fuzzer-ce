@@ -324,7 +324,7 @@ namespace Peach.Pro.Test.Core.Agent
 		</Monitor>
 	</Agent>
 
-	<Test name='Default' targetLifetime='session'>
+	<Test name='Default' targetLifetime='iteration'>
 		<Agent ref='RemoteAgent'/>
 		<StateModel ref='TheState'/>
 		<Publisher name='Remote' class='Remote'>
