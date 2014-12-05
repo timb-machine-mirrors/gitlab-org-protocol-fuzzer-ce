@@ -1,6 +1,5 @@
+using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Dom;
@@ -10,27 +9,28 @@ using Peach.Core.Test;
 namespace Peach.Pro.Test.Core.Loggers
 {
 	[TestFixture]
-	class FileTests
+	class ControlIterationFaultTests
 	{
 		class ExceptionalPublisher : Publisher
 		{
-			static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+			static readonly NLog.Logger ClassLogger = NLog.LogManager.GetCurrentClassLogger();
 
-			readonly RunContext context;
+			readonly RunContext _context;
 
 			public ExceptionalPublisher(RunContext context, Dictionary<string, Variant> args)
 				: base(args)
 			{
-				this.context = context;
+				_context = context;
 			}
 
-			protected override void OnOutput(Peach.Core.IO.BitwiseStream data)
+			protected override void OnOutput(BitwiseStream data)
 			{
+				if (data == null) throw new ArgumentNullException("data");
 			}
 
 			protected override Variant OnCall(string method, List<ActionParameter> args)
 			{
-				if (context.controlIteration && !context.controlRecordingIteration)
+				if (_context.controlIteration && !_context.controlRecordingIteration)
 				{
 					if (method == "throw")
 						throw new SoftException("Erroring on a control iteration");
@@ -43,33 +43,14 @@ namespace Peach.Pro.Test.Core.Loggers
 
 			protected override NLog.Logger Logger
 			{
-				get { return logger; }
+				get { return ClassLogger; }
 			}
-		}
-
-		string logDir;
-
-		[SetUp]
-		public void SetUp()
-		{
-			logDir = Path.GetTempFileName();
-
-			File.Delete(logDir);
-		}
-
-		[TearDown]
-		public void TearDown()
-		{
-			if (Directory.Exists(logDir))
-				Directory.Delete(logDir, true);
-
-			logDir = null;
 		}
 
 		[Test]
 		public void TestSoftException()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<DataModel name='DM'>
 		<String name='str' value='Hello' />
@@ -95,46 +76,60 @@ namespace Peach.Pro.Test.Core.Loggers
 		<StateModel ref='SM' />
 		<Publisher class='Null' name='Pub' />
 		<Strategy class='Random' />
-		<Logger class='File'>
-			<Param name='Path' value='{0}' />
-		</Logger>
 	</Test>
 </Peach>
-".Fmt(logDir);
+";
 
 			var dom = DataModelCollector.ParsePit(xml);
 			var e = new Engine(null);
 
-			e.TestStarting += (ctx) =>
+			e.TestStarting += ctx =>
 				dom.tests[0].publishers[0] = new ExceptionalPublisher(ctx, new Dictionary<string, Variant>());
 
-			var cfg = new RunConfiguration()
+			var cfg = new RunConfiguration
 			{
 				range = true,
 				rangeStart = 1,
 				rangeStop = 3,
-				pitFile = "FileTests"
 			};
+
+			Fault[] faults = null;
+
+			e.ReproFault += (ctx, it, sm, f) =>
+			{
+				Assert.Null(faults, "Should only detect a single fault.");
+				Assert.AreEqual(3, it, "Should have detected fault on iteration 2");
+				Assert.True(ctx.controlIteration, "Should have detected fault on control iteration");
+				Assert.False(ctx.controlRecordingIteration, "Should have detected fault on non record control iteration");
+
+				faults = f;
+
+				ctx.continueFuzzing = false;
+			};
+
+			e.ReproFailed += (ctx, it) => Assert.Fail("Shouuld never get repro failed");
+			e.Fault += (ctx, it, sm, f) => Assert.Fail("Shouuld never get repro success");
 
 			e.startFuzzing(dom, cfg);
 
-			var subdirs = Directory.EnumerateDirectories(logDir).ToList();
-			Assert.AreEqual(1, subdirs.Count);
-			var root = subdirs[0];
+			Assert.NotNull(faults, "Should have detected a fault");
+			Assert.AreEqual(1, faults.Length);
+			Assert.AreEqual(3, faults[0].iteration);
 
-			var faultDir = Path.Combine(root, "Faults", "ControlIteration", "3");
-			Assert.True(Directory.Exists(faultDir));
-			var desc = Path.Combine(faultDir, "PeachControlIteration.description.txt");
-			Assert.True(File.Exists(desc));
-			var asStr = File.ReadAllText(desc);
+			Assert.AreEqual("Peach Control Iteration Failed", faults[0].title);
+			Assert.AreEqual("PeachControlIteration", faults[0].detectionSource);
+			Assert.AreEqual("ControlIteration", faults[0].folderName);
 
-			Assert.True(asStr.Contains("Erroring on a control iteration"));
+			var asStr = faults[0].description;
+
+			Assert.That(asStr, Is.StringContaining("SoftException Detected"));
+			Assert.That(asStr, Is.StringContaining("Erroring on a control iteration"));
 		}
 
 		[Test]
 		public void TestMissedActions()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<DataModel name='DM'>
 		<String name='str' value='Hello' />
@@ -178,49 +173,62 @@ namespace Peach.Pro.Test.Core.Loggers
 		<StateModel ref='SM' />
 		<Publisher class='Null' name='Pub' />
 		<Strategy class='Random' />
-		<Logger class='File'>
-			<Param name='Path' value='{0}' />
-		</Logger>
 	</Test>
 </Peach>
-".Fmt(logDir);
+";
 
 			var dom = DataModelCollector.ParsePit(xml);
 			var e = new Engine(null);
 
-			e.TestStarting += (ctx) => 
+			e.TestStarting += ctx => 
 				dom.tests[0].publishers[0] = new ExceptionalPublisher(ctx, new Dictionary<string, Variant>());
 
-			var cfg = new RunConfiguration()
+			var cfg = new RunConfiguration
 			{
 				range = true,
 				rangeStart = 1,
 				rangeStop = 3,
-				pitFile = "FileTests"
 			};
+
+			Fault[] faults = null;
+
+			e.ReproFault += (ctx, it, sm, f) =>
+			{
+				Assert.Null(faults, "Should only detect a single fault.");
+				Assert.AreEqual(3, it, "Should have detected fault on iteration 2");
+				Assert.True(ctx.controlIteration, "Should have detected fault on control iteration");
+				Assert.False(ctx.controlRecordingIteration, "Should have detected fault on non record control iteration");
+
+				faults = f;
+
+				ctx.continueFuzzing = false;
+			};
+
+			e.ReproFailed += (ctx, it) => Assert.Fail("Shouuld never get repro failed");
+			e.Fault += (ctx, it, sm, f) => Assert.Fail("Shouuld never get repro success");
 
 			e.startFuzzing(dom, cfg);
 
-			var subdirs = Directory.EnumerateDirectories(logDir).ToList();
-			Assert.AreEqual(1, subdirs.Count);
-			var root = subdirs[0];
+			Assert.NotNull(faults, "Should have detected a fault");
+			Assert.AreEqual(1, faults.Length);
+			Assert.AreEqual(3, faults[0].iteration);
 
-			var faultDir = Path.Combine(root, "Faults", "ControlIteration", "3");
-			Assert.True(Directory.Exists(faultDir));
-			var desc = Path.Combine(faultDir, "PeachControlIteration.description.txt");
-			Assert.True(File.Exists(desc));
-			var asStr = File.ReadAllText(desc);
+			Assert.AreEqual("Peach Control Iteration Failed", faults[0].title);
+			Assert.AreEqual("PeachControlIteration", faults[0].detectionSource);
+			Assert.AreEqual("ControlIteration", faults[0].folderName);
 
-			Assert.True(asStr.Contains("The following actions were not performed"));
-			Assert.True(asStr.Contains("Action_X1"));
-			Assert.True(asStr.Contains("Action_X2"));
-			Assert.True(asStr.Contains("Action_X3"));
+			var asStr = faults[0].description;
+
+			Assert.That(asStr, Is.StringContaining("The following actions were not performed"));
+			Assert.That(asStr, Is.StringContaining("Action_X1"));
+			Assert.That(asStr, Is.StringContaining("Action_X2"));
+			Assert.That(asStr, Is.StringContaining("Action_X3"));
 		}
 
 		[Test]
 		public void TestMissedStates()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<DataModel name='DM'>
 		<String name='str' value='Hello' />
@@ -274,42 +282,55 @@ namespace Peach.Pro.Test.Core.Loggers
 		<StateModel ref='SM' />
 		<Publisher class='Null' name='Pub' />
 		<Strategy class='Random' />
-		<Logger class='File'>
-			<Param name='Path' value='{0}' />
-		</Logger>
 	</Test>
 </Peach>
-".Fmt(logDir);
+";
 
 			var dom = DataModelCollector.ParsePit(xml);
 			var e = new Engine(null);
 
-			e.TestStarting += (ctx) =>
+			e.TestStarting += ctx =>
 				dom.tests[0].publishers[0] = new ExceptionalPublisher(ctx, new Dictionary<string, Variant>());
 
-			var cfg = new RunConfiguration()
+			var cfg = new RunConfiguration
 			{
 				range = true,
 				rangeStart = 1,
 				rangeStop = 3,
-				pitFile = "FileTests"
 			};
+
+			Fault[] faults = null;
+
+			e.ReproFault += (ctx, it, sm, f) =>
+			{
+				Assert.Null(faults, "Should only detect a single fault.");
+				Assert.AreEqual(3, it, "Should have detected fault on iteration 2");
+				Assert.True(ctx.controlIteration, "Should have detected fault on control iteration");
+				Assert.False(ctx.controlRecordingIteration, "Should have detected fault on non record control iteration");
+
+				faults = f;
+
+				ctx.continueFuzzing = false;
+			};
+
+			e.ReproFailed += (ctx, it) => Assert.Fail("Shouuld never get repro failed");
+			e.Fault += (ctx, it, sm, f) => Assert.Fail("Shouuld never get repro success");
 
 			e.startFuzzing(dom, cfg);
 
-			var subdirs = Directory.EnumerateDirectories(logDir).ToList();
-			Assert.AreEqual(1, subdirs.Count);
-			var root = subdirs[0];
+			Assert.NotNull(faults, "Should have detected a fault");
+			Assert.AreEqual(1, faults.Length);
+			Assert.AreEqual(3, faults[0].iteration);
 
-			var faultDir = Path.Combine(root, "Faults", "ControlIteration", "3");
-			Assert.True(Directory.Exists(faultDir));
-			var desc = Path.Combine(faultDir, "PeachControlIteration.description.txt");
-			Assert.True(File.Exists(desc));
-			var asStr = File.ReadAllText(desc);
+			Assert.AreEqual("Peach Control Iteration Failed", faults[0].title);
+			Assert.AreEqual("PeachControlIteration", faults[0].detectionSource);
+			Assert.AreEqual("ControlIteration", faults[0].folderName);
 
-			Assert.True(asStr.Contains("The following states were not performed"));
-			Assert.True(asStr.Contains("State_True_1"));
-			Assert.True(asStr.Contains("State_True_2"));
+			var asStr = faults[0].description;
+
+			Assert.That(asStr, Is.StringContaining("The following states were not performed"));
+			Assert.That(asStr, Is.StringContaining("State_True_1"));
+			Assert.That(asStr, Is.StringContaining("State_True_2"));
 		}
 	}
 }
