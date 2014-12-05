@@ -154,12 +154,12 @@ namespace Peach.Core.Test
 					}).Where(f => f != null));
 				}
 
-				Reverse.ForEach(m => m.MustStop());
+				Reverse.ForEach(m => MustStop(m));
 			}
 
-			Reverse.ForEach(m => m.SessionFinished());
+			Reverse.ForEach(m => SessionFinished(m));
 
-			Reverse.ForEach(m => m.StopMonitor());
+			Reverse.ForEach(m => StopMonitor(m));
 
 			return ret.ToArray();
 		}
