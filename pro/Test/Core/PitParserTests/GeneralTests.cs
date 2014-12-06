@@ -746,5 +746,32 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			Assert.AreEqual(false, dom.stateModels[0].states[0].actions[0].dataModel.isMutable);
 
 		}
+
+		[Test]
+		public void LineNumbers()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel bad_attr=''/>
+
+	<StateModel/>
+
+	<Test name='Default'/>
+</Peach>
+";
+
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+
+			var lines = ex.Message.Split('\n');
+			Assert.AreEqual(5, lines.Length, "Expected 5 lines, got:\n{0}", ex.Message);
+
+			StringAssert.Contains("file failed to validate", lines[0]);
+			StringAssert.Contains("Line: 3, Position: 13", lines[1]);
+			StringAssert.Contains("The 'bad_attr' attribute is not declared.", lines[1]);
+			StringAssert.Contains("Line: 5, Position: 3", lines[2]);
+			StringAssert.Contains("The required attribute 'initialState' is missing.", lines[2]);
+			StringAssert.Contains("Line: 5, Position: 3", lines[3]);
+			StringAssert.Contains("The required attribute 'name' is missing.", lines[3]);
+		}
 	}
 }

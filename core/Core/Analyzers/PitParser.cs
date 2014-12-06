@@ -1763,6 +1763,12 @@ namespace Peach.Core.Analyzers
 					{
 						switch (platform.ToLower())
 						{
+							case "all":
+								parent.agents[refName].platform = Platform.OS.All;
+								break;
+							case "none":
+								parent.agents[refName].platform = Platform.OS.None;
+								break;
 							case "windows":
 								parent.agents[refName].platform = Platform.OS.Windows;
 								break;
@@ -1770,8 +1776,10 @@ namespace Peach.Core.Analyzers
 								parent.agents[refName].platform = Platform.OS.OSX;
 								break;
 							case "linux":
-							case "unix":
 								parent.agents[refName].platform = Platform.OS.Linux;
+								break;
+							case "unix":
+								parent.agents[refName].platform = Platform.OS.Unix;
 								break;
 						}
 					}

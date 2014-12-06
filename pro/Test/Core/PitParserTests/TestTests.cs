@@ -583,5 +583,60 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			);
 			Assert.That(ex.Message, Is.StringStarting("Error, Pit file failed to validate"));
 		}
+
+		[Test]
+		public void TestAgentPlatform()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str'/>
+	</DataModel>
+
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action> 
+		</State>
+	</StateModel>
+
+	<Agent name='NoneAgent' />
+	<Agent name='AllAgent' />
+	<Agent name='WindowsAgent' />
+	<Agent name='OsxAgent' />
+	<Agent name='LinuxAgent' />
+
+	<Test name='Default' {0}>
+		<Agent ref='NoneAgent' platform='none' />
+		<Agent ref='AllAgent' platform='all' />
+		<Agent ref='WindowsAgent' platform='windows' />
+		<Agent ref='OsxAgent' platform='osx' />
+		<Agent ref='LinuxAgent' platform='linux' />
+
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>
+";
+
+			var dom1 = DataModelCollector.ParsePit(xml.Fmt(""));
+			Assert.AreEqual(5, dom1.tests[0].agents.Count);
+
+			Assert.AreEqual("NoneAgent", dom1.tests[0].agents[0].name);
+			Assert.AreEqual(Platform.OS.None, dom1.tests[0].agents[0].platform);
+
+			Assert.AreEqual("AllAgent", dom1.tests[0].agents[1].name);
+			Assert.AreEqual(Platform.OS.All, dom1.tests[0].agents[1].platform);
+
+			Assert.AreEqual("WindowsAgent", dom1.tests[0].agents[2].name);
+			Assert.AreEqual(Platform.OS.Windows, dom1.tests[0].agents[2].platform);
+
+			Assert.AreEqual("OsxAgent", dom1.tests[0].agents[3].name);
+			Assert.AreEqual(Platform.OS.OSX, dom1.tests[0].agents[3].platform);
+
+			Assert.AreEqual("LinuxAgent", dom1.tests[0].agents[4].name);
+			Assert.AreEqual(Platform.OS.Linux, dom1.tests[0].agents[4].platform);
+		}
 	}
 }
