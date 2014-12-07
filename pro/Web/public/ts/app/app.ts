@@ -178,6 +178,7 @@ module Peach {
 
 	p.directive('ngEnter', () => {
 		return {
+			restrict: 'A',
 			link: (scope: ng.IScope, element: ng.IAugmentedJQuery, attrs: ng.IAttributes) => {
 				element.bind("keydown keypress", (event: JQueryEventObject) => {
 					if (event.which === 13) {
