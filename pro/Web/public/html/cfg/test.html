@@ -4,28 +4,10 @@
 	</div>
 	<div class="row-fluid wizard-actions">
 		<button class="btn btn-warning btn-next"
-						ng-click="vm.OnBeginTest()">
+		        ng-click="vm.OnBeginTest()">
 			Begin Test
 		</button>
 	</div>
-	<div class="row">
-		<div class="col-xs-12">
-			<hr />
-			<h3>
-				Test Output
-				<span ng-switch="vm.TestTime.length">
-					<span ng-switch-when="0" />
-					<span ng-switch-default>({{vm.TestTime}})</span>
-				</span>
-			</h3>
-			<tabset>
-				<tab ng-repeat="tab in vm.Tabs" 
-				     heading="{{tab.title}}" 
-				     active="tab.active" 
-						 disabled="tab.disabled">
-					<div ng-include="tab.content"></div>
-				</tab>
-			</tabset>
-		</div>
-	</div>
+	<peach:test>
+	</peach:test>
 </div>

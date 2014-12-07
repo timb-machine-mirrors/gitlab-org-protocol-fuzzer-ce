@@ -23,6 +23,7 @@
 /// <reference path="directives/AgentDirective.ts" />
 /// <reference path="directives/MonitorDirective.ts" />
 /// <reference path="directives/ParameterDirective.ts" />
+/// <reference path="directives/TestDirective.ts" />
 /// <reference path="hacks.ts" />
 /// <reference path="models/Fault.ts" />
 /// <reference path="models/Job.ts" />

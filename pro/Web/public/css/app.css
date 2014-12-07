@@ -36,7 +36,8 @@ a.disabled {
 }
 
 pre {
-	white-space: pre-wrap;
+	word-wrap: normal;
+	overflow: auto;
 }
 
 .peach-field-info:before {
@@ -68,8 +69,16 @@ pre {
 	color: red !important;
 }
 
-.btn-xs .glyphicon  {
+.btn-xs .glyphicon {
 	margin-right: 0;
+}
+
+.peach-test-event-status {
+	width: 25px;
+}
+
+pre.peach-test-log {
+	min-height: 300px;
 }
 
 /* 
