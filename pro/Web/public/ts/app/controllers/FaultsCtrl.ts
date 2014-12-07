@@ -50,17 +50,14 @@ module Peach {
 
 		public CurrentFault: Models.IFaultDetail;
 
-		public Tabs: ITab[] = [
-			{ title: "Summary", content: "html/fault/summary.html", active: true, disabled: false },
-			{ title: "Detail", content: "html/fault/detail.html", active: false, disabled: false }
-		];
+		public IsDetailActive: boolean;
 
 		public GridFaults: ngGrid.IGridOptions = {
 			data: "vm.Faults",
 			sortInfo: { fields: ["iteration"], directions: ["asc"] },
 			columnDefs: [
 				{ field: "iteration", displayName: "#" },
-				{ field: "timeStamp", displayName: "When", cellFilter: "date:'M/d/yy h:mma'" },
+				{ field: "timeStamp", displayName: "When", cellFilter: "date:'M/d/yy h:mm a'" },
 				{ field: "source", displayName: "Monitor" },
 				{ field: "exploitability", displayName: "Risk" },
 				{ field: "majorHash", displayName: "Major Hash" },
@@ -82,7 +79,7 @@ module Peach {
 				var promise = this.faultDetailResource.get({ id: ExtractId('faults', fault.faultUrl) });
 				promise.$promise.then((detail: Models.IFaultDetail) => {
 					this.CurrentFault = detail;
-					this.Tabs[1].active = true;
+					this.IsDetailActive = true;
 				});
 			},
 			keepLastSelected: true,

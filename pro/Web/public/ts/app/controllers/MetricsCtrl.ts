@@ -70,11 +70,15 @@ module Peach {
 			private jobService: Services.JobService
 		) {
 			$scope.vm = this;
-			this.Metric = $routeParams['metric'];
+			this.metric = $routeParams['metric'];
 			this.initializeData();
 		}
 
-		public Metric: string;
+		public get IncludeUrl(): string {
+			return 'html/metrics/' + this.metric + '.html';
+		}
+
+		private metric: string;
 
 		public MutatorData: Models.IMutatorMetric[] = [];
 		public ElementData: Models.IElementMetric[] = [];
@@ -121,8 +125,7 @@ module Peach {
 			pointHitDetectionRadius: 20,
 			datasetStroke: true,
 			datasetStrokeWidth: 2,
-			datasetFill: true,
-			legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].lineColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
+			datasetFill: true
 		};
 
 		public GridMetricsMutator: ngGrid.IGridOptions = {
@@ -208,7 +211,7 @@ module Peach {
 				}
 				return "<div>" +
 						"<a ng-click='event.stopPropagation()' " +
-						"href='#/faults/" + item.data.label + "\" " +
+						"href='#/faults/" + item.data.label + "' " +
 						"style='background: transparent'>" +
 							item.data.label +
 						"</a>" +
@@ -221,7 +224,7 @@ module Peach {
 
 		private initializeData(): void {
 			var promise = this.getData();
-			switch (this.Metric) {
+			switch (this.metric) {
 			case "bucketTimeline":
 				promise.success((data: Models.IBucketTimelineMetric[]) => {
 					var items = data.map((item: Models.IBucketTimelineMetric) => {
@@ -297,7 +300,7 @@ module Peach {
 		}
 
 		private getData<T>(): ng.IHttpPromise<T> {
-			return this.$http.get(this.makeUrl(this.Metric));
+			return this.$http.get(this.makeUrl(this.metric));
 		}
 
 		private makeUrl(part: string): string {

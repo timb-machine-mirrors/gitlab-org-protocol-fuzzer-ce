@@ -287,7 +287,7 @@ module Peach {
 				return "?";
 			}
 
-			if (typeof precision === 'undefined') {
+			if (_.isUndefined(precision)) {
 				precision = 1;
 			}
 
