@@ -24,9 +24,9 @@ namespace Peach.Pro.Test.Core.WebServices
             {
                 ""monitorClass"":""Pcap"",
                 ""map"":[
-                    {""key"":""PcapDevice"", ""name"":""Device"", value:""MyInterface""},
-                    {""key"":""PcapFilter"", ""name"":""Filter"", value:""MyFilter""}
-                    ],
+                    {""name"":""Device"", value:""MyInterface""},
+                    {""name"":""Filter"", value:""MyFilter""}
+                ],
                 ""description"":""Network capture on interface {PcapDevice} using {PcapFilter}, collect from {AgentUrl}""
             }
         ]

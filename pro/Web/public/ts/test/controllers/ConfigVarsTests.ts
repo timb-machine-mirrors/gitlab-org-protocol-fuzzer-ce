@@ -96,7 +96,7 @@ describe("Peach", () => {
 				}
 
 				$httpBackend.expectPOST(pitUrl + '/config').respond({});
-				ctrl.Save();
+				ctrl.OnSave();
 				$httpBackend.flush();
 				expect($scope['form'].$dirty).toBe(false);
 			});

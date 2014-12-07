@@ -48,59 +48,6 @@ namespace Peach.Pro.Core
 			{
 				get { return null; }
 			}
-
-			// only used by EnumDefine
-			[XmlIgnore]
-			public Type EnumType{ get; protected set; }
-
-			public static Define FromParameter(Parameter param)
-			{
-				Define def;
-				switch (param.Type)
-				{
-					case ParameterType.Bool:
-						def = new EnumDefine() { EnumTypeName = typeof(bool).ToString() };
-						break;
-					case ParameterType.Enum:
-						def = new EnumDefine() { EnumTypeName = param.EnumType };
-						break;
-					case ParameterType.Hex:
-						def = new HexDefine();
-						break;
-					case ParameterType.Hwaddr:
-						def = new HwaddrDefine();
-						break;
-					case ParameterType.Iface:
-						def = new IfaceDefine();
-						break;
-					case ParameterType.Ipv4:
-						def = new Ipv4Define();
-						break;
-					case ParameterType.Ipv6:
-						def = new Ipv6Define();
-						break;
-					case ParameterType.Range:
-						def = new RangeDefine()
-						{
-							MinValue = param.Min.GetValueOrDefault(),
-							MaxValue = param.Max.GetValueOrDefault(),
-						};
-						break;
-					case ParameterType.String:
-						def = new StringDefine();
-						break;
-					case ParameterType.User:
-						def = new UserDefine();
-						break;
-					default:
-						throw new InvalidEnumArgumentException("param", (int)param.Type, typeof(ParameterType));
-				}
-				def.Key = param.Key;
-				def.Name = param.Name;
-				def.Value = param.Value;
-				def.Description = param.Description;
-				return def;
-			}
 		}
 
 		public class UserDefine : Define
@@ -209,6 +156,9 @@ namespace Peach.Pro.Core
 
 		public class EnumDefine : Define
 		{
+			[XmlIgnore]
+			public Type EnumType { get; protected set; }
+			
 			[XmlAttribute("enumType")]
 			public string EnumTypeName
 			{

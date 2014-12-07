@@ -1,0 +1,124 @@
+﻿<ng-form name="form">
+	<accordion-group is-open="isOpen">
+		<accordion-heading>
+			<span style="line-height: 22px">
+				<i class="glyphicon"
+					 ng-class="{'glyphicon-chevron-down': isOpen, 'glyphicon-chevron-right': !isOpen}">
+				</i>
+				&nbsp;
+				{{agent.agentUrl || 'local://'}} {{agent.name ? '(' + agent.name + ')' : ''}}
+				<span class="btn-group btn-group-xs pull-right">
+					<button type="button"
+									class="btn btn-xs btn-info"
+									ng-click="vm.OnMoveUp($event)"
+									ng-class="{disabled: !vm.CanMoveUp}">
+						<i class="glyphicon glyphicon-chevron-up">
+						</i>
+					</button>
+					<button type="button"
+									class="btn btn-xs btn-info"
+									ng-click="vm.OnMoveDown($event)"
+									ng-class="{disabled: !vm.CanMoveDown}">
+						<i class="glyphicon glyphicon-chevron-down">
+						</i>
+					</button>
+					<button type="button"
+									class="btn btn-xs btn-danger"
+									ng-click="vm.OnRemove($event)">
+						<i class="glyphicon glyphicon-remove">
+						</i>
+					</button>
+				</span>
+			</span>
+		</accordion-heading>
+		<div class="form-group"
+				 ng-class="{'has-error': form.name.$invalid && form.name.$dirty}">
+			<label class="col-sm-2 control-label">
+				Name
+			</label>
+			<div class="col-sm-6">
+				<div class="input-group">
+					<input name="name"
+								 type="text"
+								 ng-model="agent.name"
+								 ng-required="true"
+								 class="form-control" />
+					<span class="peach-field-info tooltip-info input-group-addon"
+								tooltip="Friendly name for your agent"
+								tooltip-placement="right"
+								tooltip-append-to-body="true">
+					</span>
+				</div>
+			</div>
+			<span class="help-block"
+						style="display: inline-block">
+				<span class="glyphicon glyphicon-star pointer"
+							tooltip="Required"
+							tooltip-placement="right"
+							ng-class="{red: form.name.$error.required}">
+				</span>
+			</span>
+			<span class="help-block"
+						style="display: inline-block"
+						ng-show="form.name.$error.required && form.name.$dirty">
+				Required
+			</span>
+		</div>
+		<div class="form-group"
+				 ng-class="{'has-error': form.location.$invalid && form.location.$dirty}">
+			<label class="col-sm-2 control-label">
+				Location
+			</label>
+			<div class="col-sm-6">
+				<div class="input-group">
+					<input name="location"
+								 type="text"
+								 placeholder="local://"
+								 ng-model="agent.agentUrl"
+								 class="form-control" />
+					<span class="peach-field-info tooltip-info input-group-addon"
+								tooltip="URL for the agent. Leave blank for a local agent."
+								tooltip-placement="right"
+								tooltip-append-to-body="true">
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="clearfix"
+				 style="margin-bottom: 10px">
+			<div class="text-right">
+				<span ng-show="agent.monitors.length === 0"
+							class="red"
+							style="margin-right: 15px;">
+					You'll need a Monitor, click the "Add Monitor" button.
+				</span>
+				<div class="btn-group btn-group-xs"
+						 dropdown
+						 is-open="isDropdownOpen">
+					<button type="button"
+									dropdown-toggle
+									class="btn btn-xs btn-info dropdown-toggle">
+						Add Monitor &nbsp;
+						<i class="glyphicon glyphicon-plus">
+						</i>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-right">
+						<li ng-repeat="monitor in vm.AvailableMonitors">
+							<a class="pointer"
+								 ng-click="vm.OnAddMonitor($event, monitor)">
+								{{monitor.monitorClass}}
+							</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<accordion ng-repeat="monitor in agent.monitors track by $index">
+			<peach:monitor monitors="agent.monitors"
+										 monitor="monitor"
+										 agent-index="agentIndex"
+										 monitor-index="$index">
+			</peach:monitor>
+		</accordion>
+	</accordion-group>
+</ng-form>

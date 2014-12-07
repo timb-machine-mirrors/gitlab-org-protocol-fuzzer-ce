@@ -6,24 +6,11 @@ module Peach {
 	var INTEGER_REGEXP = /^\-?\d+$/;
 	var HEX_REGEXP = /^[0-9A-Fa-f]+$/;
 
-	export interface IViewModelScope extends ng.IScope {
-		vm: any;
-	}
-
-	export interface ITab {
-		title: string;
-		content: string;
-		active: boolean;
-		disabled: boolean;
-	}
-
 	var p = angular.module("Peach", [
 		"ngResource",
 		"ngRoute",
 		"ngGrid",
 		"ui.bootstrap",
-		//"ui.select",
-		//"ui.utils",
 		"treeControl",
 		"angles",
 		"ngVis"
@@ -91,6 +78,14 @@ module Peach {
 	p.service('TestService', Services.TestService);
 	p.service('WizardService', Services.WizardService);
 
+	p.controller('ParameterController', ParameterController);
+	p.controller('AgentController', AgentController);
+	p.controller('MonitorController', MonitorController);
+
+	p.directive('peachAgent', () => new AgentDirective());
+	p.directive('peachMonitor', () => new MonitorDirective());
+	p.directive('peachParameter', () => new ParameterDirective());
+
 	p.config([
 		"$routeProvider",
 		($routeProvider: ng.route.IRouteProvider) => {
@@ -124,7 +119,7 @@ module Peach {
 					controller: WizardController
 				})
 				.when("/cfg/monitors", {
-					templateUrl: "html/cfg/monitors.html",
+					templateUrl: "html/cfg/monitoring.html",
 					controller: ConfigureMonitorsController
 				})
 				.when("/cfg/variables", {

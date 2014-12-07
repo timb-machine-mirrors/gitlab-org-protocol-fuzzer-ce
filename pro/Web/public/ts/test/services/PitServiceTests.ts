@@ -4,38 +4,32 @@
 
 describe('startsWith', () => {
 	it("'abc' startsWith 'a' is true", () => {
-		expect(startsWith('abc', 'a')).toBe(true);
 		expect('abc'.startsWith('a')).toBe(true);
 	});
 	it("'abc' startsWith 'ab' is true", () => {
-		expect(startsWith('abc', 'ab')).toBe(true);
 		expect('abc'.startsWith('ab')).toBe(true);
 	});
 	it("'abc' startsWith 'abc' is true", () => {
-		expect(startsWith('abc', 'abc')).toBe(true);
 		expect('abc'.startsWith('abc')).toBe(true);
 	});
 	it("'abc' startsWith 'abcd' is false", () => {
-		expect(startsWith('abc', 'abcd')).toBe(false);
 		expect('abc'.startsWith('abcd')).toBe(false);
 	});
 	it("'abc' startsWith 'b' is false", () => {
-		expect(startsWith('abc', 'b')).toBe(false);
 		expect('abc'.startsWith('b')).toBe(false);
 	});
 	it("'abc' startsWith '' is true", () => {
-		expect(startsWith('abc', '')).toBe(true);
 		expect('abc'.startsWith('')).toBe(true);
 	});
 });
 
 describe('isEmpty', () => {
-	it("0         -> !isEmpty", () => expect(isEmpty(0)).toBe(false));
-	it("{}        -> !isEmpty", () => expect(isEmpty({})).toBe(false));
-	it("[]        -> !isEmpty", () => expect(isEmpty([])).toBe(false));
-	it("''        -> isEmpty", () => expect(isEmpty('')).toBe(true));
-	it("null      -> isEmpty", () => expect(isEmpty(null)).toBe(true));
-	it("undefined -> isEmpty", () => expect(isEmpty(undefined)).toBe(true));
+	it("0         -> !isEmpty", () => expect(Peach.isEmpty(0)).toBe(false));
+	it("{}        -> !isEmpty", () => expect(Peach.isEmpty({})).toBe(false));
+	it("[]        -> !isEmpty", () => expect(Peach.isEmpty([])).toBe(false));
+	it("''        -> isEmpty", () => expect(Peach.isEmpty('')).toBe(true));
+	it("null      -> isEmpty", () => expect(Peach.isEmpty(null)).toBe(true));
+	it("undefined -> isEmpty", () => expect(Peach.isEmpty(undefined)).toBe(true));
 });
 
 describe("Peach", () => {

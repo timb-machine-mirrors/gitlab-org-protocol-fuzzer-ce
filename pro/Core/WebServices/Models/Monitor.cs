@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using Newtonsoft.Json;
+using Peach.Core;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
@@ -51,18 +53,18 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <example>
 		/// "string"
 		/// </example>
-		[Newtonsoft.Json.JsonConverter(typeof(CamelCaseStringEnumConverter))]
+		[JsonConverter(typeof(CamelCaseStringEnumConverter))]
 		public ParameterType Type { get; set; }
 
 		/// <summary>
 		/// List of values for enum types
 		/// </summary>
-		public List<string> Defaults { get; set; }
+		public List<string> Options { get; set; }
 
 		/// <summary>
 		/// Is this parameter required?
 		/// </summary>
-		public bool Required { get; set; }
+		public string DefaultValue { get; set; }
 
 		/// <summary>
 		/// Description of the parameter
@@ -78,12 +80,6 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// 
 		/// </summary>
 		public ulong? Max { get; set; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		[Newtonsoft.Json.JsonConverter(typeof(CamelCaseStringEnumConverter))]
-		public string EnumType { get; set; }
 	}
 
 	/// <summary>
@@ -98,18 +94,6 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// "Pcap"
 		/// </example>
 		public string MonitorClass { get; set; }
-
-#if DISABLED
-		The Path is disabled due to a bug deserializing integers in mono.
-		Newtonsoft.Json tries to use BigInteger.Parse which throws
-		a MissingMethodException on mono 2.10
-		http://json.codeplex.com/workitem/24176
-
-		/// <summary>
-		/// The wizard path that resulted in this monitor
-		/// </summary>
-		public List<uint> Path { get; set; }
-#endif
 
 		/// <summary>
 		/// The parameters to the monitor
@@ -128,6 +112,11 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// User friendly name of the monitor instance
 		/// </summary>
 		public string Name { get; set; }
+
+		/// <summary>
+		/// The set of operating systems that this monitor supports.
+		/// </summary>
+		public string OS { get; set; }
 	}
 
 	/// <summary>

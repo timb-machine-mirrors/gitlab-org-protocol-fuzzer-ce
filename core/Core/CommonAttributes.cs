@@ -79,12 +79,14 @@ namespace Peach.Core
 		public Type Type { get; private set; }
 		public bool IsDefault { get; private set; }
 		public bool IsTest { get; set; }
+		public Platform.OS OS { get; set; }
 
 		protected PluginAttribute(Type type, string name, bool isDefault)
 		{
 			this.Name = name;
 			this.Type = type;
 			this.IsDefault = isDefault;
+			this.OS = Platform.OS.All;
 		}
 	}
 

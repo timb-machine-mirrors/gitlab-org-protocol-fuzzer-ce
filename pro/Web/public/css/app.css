@@ -1,47 +1,5 @@
-﻿[class^="icon-"],
-[class*=" icon-"] {
-	font-family: FontAwesome2;
-	font-weight: normal;
-	font-style: normal;
-	text-decoration: inherit;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	*margin-right: .3em;
-}
-
-body {
-	font-family: 'Segoe UI', sans-serif;
-	position: absolute;
-	left: 0;
-	top: 0;
-	right: 0;
-	bottom: 0;
-}
-
-div#main-container {
-	position: absolute;
-	left: 0;
-	top: 50px;
-	right: 0;
-	bottom: 0;
-}
-
-div.main-container-inner {
-	height: 100%;
-}
-
-.grid-border {
-	border: 1px solid rgb(212,212,212);
-	margin-top: 5px;
-	margin-bottom: 5px;
-}
-
-.hidden {
+﻿.hidden {
 	display: none;
-}
-
-.panel-title a {
-	cursor: pointer;
 }
 
 .skin-1 .nav-list > li.disabled > a > .menu-text,
@@ -55,35 +13,7 @@ a.disabled {
 	cursor: not-allowed;
 }
 
-.absolute-fill {
-	position: absolute;
-	left: 0;
-	top: 0;
-	right: 0;
-	bottom: 0;
-}
-
-.nav-tabs > li {
-	cursor: pointer;
-}
-
-.dropdown-menu > li {
-	cursor: pointer;
-}
-
-div.tabs-left#metricstabs {
-	position: relative;
-	bottom: 0;
-	top: 0;
-	right: 0;
-	left: 0;
-}
-
 .timeline.vis .box.item {
-	cursor: pointer;
-}
-
-span.accordion-toggle {
 	cursor: pointer;
 }
 
@@ -109,10 +39,6 @@ pre {
 	white-space: pre-wrap;
 }
 
-.css-form input.ng-invalid.ng-dirty {
-	background-color: #FA787E;
-}
-
 .peach-field-info:before {
 	content: "\f059";
 }
@@ -126,6 +52,26 @@ pre {
 	cursor: pointer;
 }
 
+.accordion-toggle:hover {
+	text-decoration: none;
+}
+
+.accordion-toggle:focus {
+	outline: none;
+	cursor: pointer;
+}
+
+.btn-cell {
+	line-height: 24px;
+	background-color: transparent !important;
+	border-color: transparent !important;
+	color: red !important;
+}
+
+.btn-xs .glyphicon  {
+	margin-right: 0;
+}
+
 /* 
 	fix for ace.css
 	default seems to be relative
@@ -134,12 +80,6 @@ pre {
 .sidebar {
 	position: absolute;
 }
-
-/*
-.css-form input.ng-valid.ng-dirty {
-	background-color: #78FA89;
-}
-*/
 
 /* fix for backdrop, for some reason this is missing */
 .modal-backdrop {

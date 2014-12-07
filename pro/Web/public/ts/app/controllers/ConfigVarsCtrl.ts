@@ -21,52 +21,29 @@ module Peach {
 			this.PitConfig = pitService.LoadPitConfig();
 		}
 
-		private grid: ngGrid.IGridOptions = {
-			data: "vm.PitConfig.config",
-			columnDefs: [
-				{ field: "name", displayName: "Name", enableCellEdit: false },
-				{ field: "key", displayName: "Key", enableCellEdit: false },
-				{
-					field: "value",
-					displayName: "Value",
-					editableCellTemplate: "html/grid/vars/edit-value.html"
-				},
-				{
-					width: "27px",
-					enableCellEdit: false,
-					cellTemplate: "html/grid/vars/actions.html"
-				}
-			],
-			enableRowSelection: false,
-			multiSelect: false,
-			enableCellEditOnFocus: true,
-			plugins: [new ngGridFlexibleHeightPlugin()]
-		};
-
 		public get ShowSaved() {
 			return !this.$scope.form.$dirty && !this.$scope.form.$pristine;
 		}
 
 		public get ShowValidation() {
-			return this.$scope.form.$invalid && this.$scope.form.$dirty;
+			return this.$scope.form.$dirty && this.$scope.form.$invalid;
 		}
 
 		public get CanSave() {
-			return this.$scope.form.$dirty;
+			return this.$scope.form.$dirty && !this.$scope.form.$invalid;
 		}
 
-		public Save(): void {
+		public CanRemove(param: Models.IParameter) {
+			return param.type === 'user';
+		}
+
+		public OnSave(): void {
 			this.PitConfig.$save({ id: this.pitService.PitId }, () => {
 				this.$scope.form.$dirty = false;
 			});
 		}
 
-		public ShowActions(row: ngGrid.IRow) {
-			var param = <Models.IParameter> row.entity;
-			return param.type === 'user';
-		}
-
-		public Add() {
+		public OnAdd() {
 			var modal = this.$modal.open({
 				templateUrl: "html/modal/NewVar.html",
 				controller: NewVarController
@@ -78,9 +55,18 @@ module Peach {
 			});
 		}
 
-		public RemoveRow(row: ngGrid.IRow) {
-			this.PitConfig.config.splice(row.rowIndex, 1);
+		public OnRemove(index: number) {
+			this.PitConfig.config.splice(index, 1);
 			this.$scope.form.$setDirty();
+		}
+
+		public Choices(param: Models.IParameter) {
+			return this.defines().concat(param.options);
+		}
+
+		private defines(): string[]{
+			var names = _.pluck(this.pitService.PitConfig.config, 'key');
+			return _.map(names, x => '##' + x + '##');
 		}
 	}
 

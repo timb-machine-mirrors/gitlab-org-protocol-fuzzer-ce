@@ -2,16 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using Newtonsoft.Json;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Agent;
+using Peach.Core.Analyzers;
 using Peach.Pro.Core.WebServices;
 using Monitor = Peach.Pro.Core.WebServices.Models.Monitor;
 using TestStatus = Peach.Pro.Core.WebServices.Models.TestStatus;
 
 namespace Peach.Pro.Test.Core.WebServices
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Category("Peach")]
 	public class PitDatabaseTests
 	{
 		string root;
@@ -118,7 +122,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			File.WriteAllText(Path.Combine(cat, "IMG.xml.config"), configExample);
 
 			db = new PitDatabase();
-			db.ValidationEventHandler += (o, e) => { throw new PeachException("DB failed to load", e.Exception);  };
+			db.ValidationEventHandler += OnValidationEvent;
 			db.Load(root);
 		}
 
@@ -130,6 +134,11 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			root = null;
 			db = null;
+		}
+
+		private void OnValidationEvent(object sender, ValidationEventArgs args)
+		{
+			throw new PeachException("DB failed to load", args.Exception);
 		}
 
 		[Test]
@@ -327,7 +336,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.NotNull(res);
 
 			while (res.Status == TestStatus.Active)
-				System.Threading.Thread.Sleep(1000);
+				Thread.Sleep(1000);
 
 			Assert.AreEqual(TestStatus.Pass, res.Status);
 
@@ -371,26 +380,41 @@ namespace Peach.Pro.Test.Core.WebServices
 		}
 
 		[Test]
-		public void TestMonitorParams()
+		public void TestAllMonitors()
 		{
+			// remove test SetUp handler for this test
+			db.ValidationEventHandler -= OnValidationEvent;
 
-			var monitors = ClassLoader.GetAllByAttribute<MonitorAttribute>((t,a) => a.IsDefault);
-
-			bool errored = false;
-
+			var error = false;
 			db.ValidationEventHandler += (s, e) =>
 			{
-				errored = true;
+				error = true;
 			};
 
-			foreach (var p in monitors.SelectMany(kv => kv.Value.GetAttributes<ParameterAttribute>()))
-			{
-				errored = false;
+			db.GetAllMonitors();
+			Assert.IsFalse(error);
+		}
 
-				var testobj = db.ParameterAttrToModel(p);
-				Assert.IsNotNull(testobj);
-				Assert.IsFalse(errored);
-			}
+		[Test]
+		public void TestInvalidMonitor()
+		{
+			// remove test SetUp handler for this test
+			db.ValidationEventHandler -= OnValidationEvent;
+
+			var error = false;
+			db.ValidationEventHandler += (s, e) =>
+			{
+				error = true;
+			};
+
+			var attr = new MonitorAttribute("FakeMonitor")
+			{
+				OS = Platform.OS.Unix
+			};
+
+			var monitor = db.MakeMonitor(attr, typeof(string));
+			Assert.IsTrue(error);
+			Assert.AreEqual("", monitor.OS);
 		}
 
 		[Test]
@@ -407,34 +431,34 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			""monitorClass"":""PageHeap"",
 			""map"": [
-				{ ""key"":""WinDbgExecutable"", ""name"":""Executable"", ""value"":""Foo.exe"" },
-				{ ""key"":""WinDbgPath"", ""name"":""WinDbgPath"", ""value"":""C:\\WinDbg""  }
+				{ ""name"":""Executable"", ""value"":""Foo.exe"" },
+				{ ""name"":""WinDbgPath"", ""value"":""C:\\WinDbg""  }
 			],
 			""description"": ""Page Heap: {WinDbgExecutable} {WinDbgPath}""
 		},
 		{
 			""monitorClass"":""WindowsDebugger"",
 			""map"": [
-				{ ""key"":""WinDbgExecutable"",	""name"":""Executable"", ""value"":""Foo.exe"" },
-				{ ""key"":""WinDbgArguments"", ""name"":""Arguments"", ""value"":""--arg"" },
-				{ ""key"":""WinDbgIgnoreFirstChanceGuardPage"",	""name"":""IgnoreFirstChanceGuardPage"", ""value"":""false"" }
+				{ ""name"":""Executable"", ""value"":""Foo.exe"" },
+				{ ""name"":""Arguments"", ""value"":""--arg"" },
+				{ ""name"":""IgnoreFirstChanceGuardPage"", ""value"":""false"" }
 			],
 			""description"": ""Windows Debugger: {WinDbgExecutable} {WinDbgPath} {WinDbgProcessName} {WinDbgService} {WinDbgStart} {WinDbgIgnoreFirstChanceGuardPage}""
-		},
-	],
+		}
+	]
 },
 {
 	""agentUrl"":""tcp://remotehostname"",
 	""monitors"": [
 		{
 			""monitorClass"":""Pcap"",
-			""map"":[
-				{""key"":""PcapDevice"", ""name"":""Device"", ""value"":""eth0"" },
-				{""key"":""PcapFilter"", ""name"":""Filter"", ""value"":""tcp port 80"" }
-				],
+			""map"": [
+				{""name"":""Device"", ""value"":""eth0"" },
+				{""name"":""Filter"", ""value"":""tcp port 80"" }
+			],
 			""description"":""Network capture on {AgentUrl}, interface {PcapDevice} using {PcapFilter}.""
-		},
-	],
+		}
+	]
 },
 {
 	""agentUrl"":""local://"",
@@ -442,52 +466,57 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			""monitorClass"":""CanaKit"",
 			""map"": [
-				{""key"":""CanaKitRelaySerialPort"",	""name"":""SerialPort"", ""value"":""COM1"" },
-				{""key"":""CanaKitRelayRelayNumber"",	""name"":""RelayNumber"", ""value"":""1"" },
+				{""name"":""SerialPort"", ""value"":""COM1"" },
+				{""name"":""RelayNumber"", ""value"":""1"" }
 			]
-		},
-	],
+		}
+	]
 },
 {
 	""agentUrl"":""tcp://remotehostname2"",
 	""monitors"": [
 		{
 			""monitorClass"":""Pcap"",
-			""map"":[
-				{""key"":""PcapDevice"", ""name"":""Device"", ""value"":""eth0"" },
-				{""key"":""PcapFilter"", ""name"":""Filter"", ""value"":""tcp port 80"" }
-				],
+			""map"": [
+				{""name"":""Device"", ""value"":""eth0"" },
+				{""name"":""Filter"", ""value"":""tcp port 80"" }
+			],
 			""description"":""Network capture on {AgentUrl}, interface {PcapDevice} using {PcapFilter}.""
-		},
-	],
+		}
+	]
 },
 {
 	""agentUrl"":""tcp://remotehostname"",
 	""monitors"": [
 		{
 			""monitorClass"":""Pcap"",
-			""map"":[
-				{""key"":""PcapDevice"", ""name"":""Device"", ""value"":""eth0"" },
-				{""key"":""PcapFilter"", ""name"":""Filter"", ""value"":""tcp port 8080"" }
-				],
+			""map"": [
+				{""name"":""Device"", ""value"":""eth0"" },
+				{""name"":""Filter"", ""value"":""tcp port 8080"" }
+			],
 			""description"":""Network capture on {AgentUrl}, interface {PcapDevice} using {PcapFilter}.""
 		},
-	],
-},
+	]
+}
 ]";
 
-			var monitors = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Pro.Core.WebServices.Models.Agent>>(json);
+			var monitors = JsonConvert.DeserializeObject<List<Pro.Core.WebServices.Models.Agent>>(json);
 			Assert.NotNull(monitors);
 
 			PitDatabase.SaveAgents(pit, monitors);
 
-			var parser = new Peach.Core.Analyzers.PitParser();
+			var parser = new PitParser();
 
-			var opts = new Dictionary<string, object>();
-			var defs = new Dictionary<string, string>();
-			defs.Add("PitLibraryPath", root);
-			defs.Add("Strategy", "Random");
-			opts[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
+			var defs = new Dictionary<string, string>
+			{
+				{"PitLibraryPath", root}, 
+				{"Strategy", "Random"}
+			};
+
+			var opts = new Dictionary<string, object>
+			{
+				{PitParser.DEFINED_VALUES, defs}
+			};
 
 			var dom = parser.asParser(opts, pit.Versions[0].Files[0].Name);
 
@@ -540,37 +569,37 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			""monitorClass"":""WindowsDebugger"",
 			""map"": [
-				{ ""key"":""WinDbgProcessStart"", ""name"":""StartMode"", ""value"":""StartOnCall"" },
+				{ ""name"":""StartMode"", ""value"":""StartOnCall"" },
 			],
 		},
 		{
 			""monitorClass"":""WindowsDebugger"",
 			""map"": [
-				{ ""key"":""WinDbgProcessStart"", ""name"":""StartMode"", ""value"":""RestartOnEachTest"" },
+				{ ""name"":""StartMode"", ""value"":""RestartOnEachTest"" },
 			],
 		},
 		{
 			""monitorClass"":""WindowsDebugger"",
 			""map"": [
-				{ ""key"":""WinDbgProcessStart"", ""name"":""StartMode"", ""value"":""StartOnEachIteration"" },
+				{ ""name"":""StartMode"", ""value"":""StartOnEachIteration"" },
 			],
 		},
 	],
 },
 ]";
-			var monitors = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Pro.Core.WebServices.Models.Agent>>(json);
+			var agents = JsonConvert.DeserializeObject<List<Pro.Core.WebServices.Models.Agent>>(json);
 
-			PitDatabase.SaveAgents(pit, monitors);
+			PitDatabase.SaveAgents(pit, agents);
 
-			var parser = new Peach.Core.Analyzers.PitParser();
+			var parser = new PitParser();
 
 			var opts = new Dictionary<string, object>();
 			var defs = new Dictionary<string, string>
 			{
-				{"PitLibraryPath", root}, 
+				{"PitLibraryPath", root},
 				{"Strategy", "Random"}
 			};
-			opts[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
+			opts[PitParser.DEFINED_VALUES] = defs;
 
 			var dom = parser.asParser(opts, pit.Versions[0].Files[0].Name);
 

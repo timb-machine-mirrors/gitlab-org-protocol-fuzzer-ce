@@ -1,0 +1,48 @@
+<div ng-form="form"
+		 class="form-group"
+		 ng-class="{'has-error': form.param.$invalid && form.param.$dirty}">
+	<label class="col-sm-2 control-label">
+		{{param.name}}
+	</label>
+	<div class="col-sm-6">
+		<div class="input-group">
+			<input type="text"
+						 class="form-control"
+						 ng-model="param.value"
+						 ng-required="vm.IsRequired"
+						 name="param"
+						 placeholder="{{param.defaultValue}}"
+						 typeahead="choice for choice in vm.Choices | filter: $viewValue"
+						 typeahead-editable="{{param.type !== 'bool' && param.type !== 'enum'}}" />
+			<span class="peach-field-info tooltip-info input-group-addon"
+						tooltip="{{param.description}}"
+						tooltip-placement="right"
+						tooltip-append-to-body="true">
+			</span>
+		</div>
+	</div>
+	<span class="help-block"
+				style="display: inline-block"
+				ng-show="vm.IsRequired">
+		<span class="glyphicon glyphicon-star pointer"
+		      tooltip="Required"
+		      tooltip-placement="right"
+		      ng-class="{red: form.param.$error.required}">
+		</span>
+	</span>
+	<span class="help-block"
+				style="display: inline-block"
+				ng-show="form.param.$error.integer">
+		Not a number
+	</span>
+	<span class="help-block"
+				style="display: inline-block"
+				ng-show="form.param.$error.required && form.param.$dirty">
+		Required
+	</span>
+	<span class="help-block"
+				style="display: inline-block"
+				ng-show="form.param.$error.editable">
+		Invalid value
+	</span>
+</div>
