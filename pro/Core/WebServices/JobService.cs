@@ -146,7 +146,6 @@ namespace Peach.Pro.Core.WebServices
 				Seed = Runner.Seed,
 				IterationCount = Logger.CurrentIteration,
 				StartDate = Runner.StartDate,
-				StopDate = Runner.StopDate,
 				Runtime = (uint)elapsed.TotalSeconds,
 				Speed = (uint)((Logger.CurrentIteration - Logger.StartIteration) / elapsed.TotalHours),
 				FaultCount = Logger.FaultCount,
@@ -154,6 +153,9 @@ namespace Peach.Pro.Core.WebServices
 				Groups = new List<Group>(new[] { group }),
 				HasMetrics = Runner.HasMetrics
 			};
+
+			if (Runner.Status == JobStatus.Stopped)
+				job.StopDate = Runner.StopDate;
 
 			return job;
 		}

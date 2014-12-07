@@ -11,7 +11,7 @@ module Peach {
 		id?: number;
 		start: Date;
 		title?: string;
-		type: string;
+		type?: string;
 		data?: Models.IBucketTimelineMetric
 	}
 
@@ -81,23 +81,6 @@ module Peach {
 		public DatasetData: Models.IDatasetMetric[] = [];
 		public StateData: Models.IStateMetric[] = [];
 		public BucketData: Models.IBucketMetric[] = [];
-
-		public BucketTimelineData = {
-			single: true,
-			load: []
-		};
-
-		public BucketTimelineOptions: ITimelineOptions = {
-			selectable: false,
-			template: (item: ITimelineItem) =>
-				"<div><a ng-click=\"event.stopPropagation()\" href=\"#/faults/" +
-				item.data.label +
-				"\" style=\"background: transparent\">" +
-				item.data.label +
-				"</a><br />" +
-				"Faults: " + item.data.faultCount + "<br />" +
-				"1st Iteration: " + item.data.iteration + "<br /></div>"
-		};
 
 		public MetricsFaultsOverTimeData: LinearChartData = {
 			labels: [],
@@ -210,21 +193,60 @@ module Peach {
 			plugins: [new ngGridFlexibleHeightPlugin()]
 		};
 
+		public BucketTimelineData = {
+			single: true,
+			load: []
+		};
+
+		public BucketTimelineOptions: ITimelineOptions = {
+			showCurrentTime: true,
+			selectable: false,
+			type: "box",
+			template: (item: ITimelineItem) => {
+				if (item.content) {
+					return item.content;
+				}
+				return "<div>" +
+						"<a ng-click='event.stopPropagation()' " +
+						"href='#/faults/" + item.data.label + "\" " +
+						"style='background: transparent'>" +
+							item.data.label +
+						"</a>" +
+						"<br />" +
+						"Faults: " + item.data.faultCount + "<br />" +
+						"1st Iteration: " + item.data.iteration + "<br />" +
+					"</div>";
+			}
+		}
+
 		private initializeData(): void {
 			var promise = this.getData();
 			switch (this.Metric) {
 			case "bucketTimeline":
 				promise.success((data: Models.IBucketTimelineMetric[]) => {
-					var timelineData = data.map((item: Models.IBucketTimelineMetric) => {
+					var items = data.map((item: Models.IBucketTimelineMetric) => {
 						return <ITimelineItem> {
 							id: item.id,
-							type: "box",
 							content: "",
 							start: item.time,
 							data: item
 						};
 					});
-					this.BucketTimelineData = this.visDataSet(timelineData);
+					items.unshift({
+						id: 0,
+						style: "color: green",
+						content: "Job Start",
+						start: this.jobService.Job.startDate
+					});
+					if (this.jobService.Job.stopDate) {
+						items.push({
+							id: -1,
+							style: "color: red",
+							content: "Job End",
+							start: this.jobService.Job.stopDate
+						});
+					}
+					this.BucketTimelineData = this.visDataSet(items);
 				});
 				break;
 			case "faultTimeline":

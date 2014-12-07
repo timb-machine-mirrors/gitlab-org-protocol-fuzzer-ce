@@ -130,7 +130,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// The date the job ended
 		/// </summary>
-		public DateTime StopDate { get; set; }
+		public DateTime? StopDate { get; set; }
 
 		/// <summary>
 		/// The number of seconds the job has been running for
