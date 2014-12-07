@@ -33,8 +33,6 @@ module.exports = (grunt) ->
 					'angular-tree-control/js'     : 'angular-tree-control/angular-tree-control.js'
 					'chosen/chosen.css'           : 'chosen-build/chosen.css'
 					'chosen/chosen.jquery.js'     : 'chosen-build/chosen.jquery.js'
-					'font-awesome/css'            : 'font-awesome/css/font-awesome.css'
-					'font-awesome/fonts'          : 'font-awesome/fonts/*'
 					'bootstrap/css'               : 'bootstrap/dist/css/bootstrap.css'
 					'bootstrap/fonts'             : 'bootstrap/dist/fonts/*'
 					'bootstrap/js'                : 'bootstrap/dist/js/bootstrap.js'
