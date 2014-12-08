@@ -45,6 +45,7 @@ namespace Peach.Pro.Test.Core.Monitors
 	[Category("Peach")]
 	class PcapMonitorTests
 	{
+		private AutoResetEvent _evt;
 		private string _iface;
 		private Socket _socket;
 		private IPEndPoint _localEp;
@@ -82,7 +83,13 @@ namespace Peach.Pro.Test.Core.Monitors
 
 				_localEp = new IPEndPoint(new IPAddress(raw), 0);
 
-				var mask = addr.IPv4Mask.GetAddressBytes();
+				// addr.IPv4Mask is not implemented on mono, use SharpPcap
+				// to get the netmask instead
+
+				var mask = dev.Addresses
+					.Where(a => addr.Address.Equals(a.Addr.ipAddress))
+					.Select(a => a.Netmask.ipAddress.GetAddressBytes())
+					.First();
 
 				Assert.AreEqual(raw.Length, mask.Length);
 
@@ -96,7 +103,11 @@ namespace Peach.Pro.Test.Core.Monitors
 				_socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 				_socket.Bind(_localEp);
 
+				_socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, true);
+
 				_localEp = (IPEndPoint) _socket.LocalEndPoint;
+
+				_evt = new AutoResetEvent(false);
 
 				return;
 			}
@@ -107,9 +118,13 @@ namespace Peach.Pro.Test.Core.Monitors
 		[TearDown]
 		public void TearDown()
 		{
+			if (_evt != null)
+				_evt.Dispose();
+
 			if (_socket != null)
 				_socket.Dispose();
 
+			_evt = null;
 			_socket = null;
 			_iface = null;
 			_localEp = null;
@@ -132,19 +147,33 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void DataCollection()
 		{
+			const int max = 10;
+			var num = 0;
+
 			var runner = new MonitorRunner("Pcap", new Dictionary<string, string>
 			{
 				{ "Device", _iface },
 			})
 			{
+				SessionStarting = m =>
+				{
+					m.InternalEvent += (o, e) =>
+					{
+						if (++num == max)
+							_evt.Set();
+					};
+
+					m.SessionStarting();
+				},
 				IterationFinished = m =>
 				{
 					// Capture starts in IterationStarting, and stops in IterationFinished
-					for (var i = 0; i < 10; ++i)
+					for (var i = 0; i < max; ++i)
 						_socket.SendTo("Hello World", _remoteEp);
 
 					// Ensure packets are captured
-					Thread.Sleep(100);
+					if (!_evt.WaitOne(5000))
+						Assert.Fail("Didn't receive packets within 5 second.");
 
 					m.IterationFinished();
 				},
@@ -157,7 +186,14 @@ namespace Peach.Pro.Test.Core.Monitors
 				},
 			};
 
-			var faults = runner.Run();
+			Fault[] faults;
+
+			using (var si = SingleInstance.CreateInstance("Peach.Pro.Test.Core.Monitors.PcapMonitorTests.DataCollection"))
+			{
+				si.Lock();
+
+				faults = runner.Run();
+			}
 
 			Assert.AreEqual(1, faults.Length);
 			Assert.AreEqual(FaultType.Data, faults[0].type);
@@ -174,7 +210,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			var str = faults[0].description.Substring(begin.Length, faults[0].description.Length - begin.Length - end.Length);
 			var cnt = int.Parse(str);
 
-			Assert.GreaterOrEqual(cnt, 10, "Captured {0} packets, expected at least 10".Fmt(cnt));
+			Assert.GreaterOrEqual(cnt, max, "Captured {0} packets, expected at least 10".Fmt(cnt));
 		}
 
 		[Test]
@@ -231,10 +267,21 @@ namespace Peach.Pro.Test.Core.Monitors
 		public void MultipleMonitorsTest()
 		{
 			const int count = 5;
+			var num = 0;
 			bool first = true;
 
 			var runner = new MonitorRunner
 			{
+				SessionStarting = m =>
+				{
+					m.InternalEvent += (s, e) =>
+					{
+						if (++num == count)
+							_evt.Set();
+					};
+
+					m.SessionStarting();
+				},
 				IterationFinished = m =>
 				{
 					// Send test packets on IterationFinished to 1st monitor
@@ -243,12 +290,13 @@ namespace Peach.Pro.Test.Core.Monitors
 						// Capture starts in IterationStarting, and stops in IterationFinished
 						for (var i = 0; i < count; ++i)
 						{
-							var ep = new IPEndPoint(_remoteEp.Address, _remoteEp.Port + i);
+							var ep = new IPEndPoint(_remoteEp.Address, _remoteEp.Port + 1 + i);
 							_socket.SendTo("Hello World", ep);
 						}
 
 						// Ensure packets are captured
-						Thread.Sleep(200);
+						if (!_evt.WaitOne(5000))
+							Assert.Fail("Didn't receive packets within 5 second.");
 					}
 
 					first = false;
@@ -265,16 +313,24 @@ namespace Peach.Pro.Test.Core.Monitors
 			};
 
 			// Add one extra that is not sent to
+			// Skew by one so we don't conflict with DataCollection test port
 			for (var i = 0; i <= count; ++i)
 			{
 				runner.Add("Pcap", new Dictionary<string, string>()
 				{
 					{ "Device", _iface },
-					{ "Filter", "udp and dst port " + (_remoteEp.Port + i) },
+					{ "Filter", "udp and dst port " + (_remoteEp.Port + 1 + i) },
 				});
 			}
 
-			var faults = runner.Run();
+			Fault[] faults;
+
+			using (var si = SingleInstance.CreateInstance("Peach.Pro.Test.Core.Monitors.PcapMonitorTests.MultipleMonitorsTest"))
+			{
+				si.Lock();
+
+				faults = runner.Run();
+			}
 
 			// Expect a fault for each pcap monitor
 			Assert.AreEqual(count + 1, faults.Length);

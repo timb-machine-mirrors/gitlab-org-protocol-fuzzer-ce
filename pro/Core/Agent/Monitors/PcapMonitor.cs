@@ -70,6 +70,8 @@ namespace Peach.Pro.Core.Agent.Monitors
 				{
 					_writer.Write(packet.Packet);
 					_numPackets += 1;
+
+					OnInternalEvent(EventArgs.Empty);
 				}
 			}
 		}
@@ -131,7 +133,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			}
 
 			_device.OnPacketArrival += _OnPacketArrival;
-			_device.Open(DeviceMode.Normal, 1);
+			_device.Open(DeviceMode.Normal);
 
 			try
 			{
