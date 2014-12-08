@@ -568,9 +568,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				_debuggerProcess.StartInfo.CreateNoWindow = true;
 				_debuggerProcess.StartInfo.UseShellExecute = false;
 				_debuggerProcess.StartInfo.Arguments = _debuggerChannelName;
-				_debuggerProcess.StartInfo.FileName = Path.Combine(
-					Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-					"Peach.Pro.WindowsDebugInstance.exe");
+				_debuggerProcess.StartInfo.FileName = Utilities.GetAppResourcePath("Peach.Pro.WindowsDebugInstance.exe");
 
 				if (logger.IsTraceEnabled)
 				{
@@ -665,9 +663,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				_debuggerProcess.StartInfo.CreateNoWindow = true;
 				_debuggerProcess.StartInfo.UseShellExecute = false;
 				_debuggerProcess.StartInfo.Arguments = _debuggerChannelName;
-				_debuggerProcess.StartInfo.FileName = Path.Combine(
-					Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-					"Peach.Pro.WindowsDebugInstance.exe");
+				_debuggerProcess.StartInfo.FileName = Utilities.GetAppResourcePath("Peach.Pro.WindowsDebugInstance.exe");
 
 				if (logger.IsTraceEnabled)
 				{
