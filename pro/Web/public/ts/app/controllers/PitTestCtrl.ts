@@ -29,12 +29,24 @@ module Peach {
 			return this.IsComplete('fault');
 		}
 
+		public get ShowTestPass(): boolean {
+			return this.testService.TestResult.status === 'pass';
+		}
+
+		public get ShowTestFail() {
+			return this.testService.TestResult.status === 'fail';
+		}
+
+		public get CanContinue() {
+			return this.testService.TestResult.status === 'pass';
+		}
+
 		public OnBeginTest() {
 			this.wizardService.GetTrack("test").isComplete = false;
 			this.testService.BeginTest();
 		}
 
-		public OnSubmit() {
+		public OnNextTrack() {
 			this.wizardService.GetTrack("test").isComplete = true;
 			this.$location.path("/quickstart/done");
 		}

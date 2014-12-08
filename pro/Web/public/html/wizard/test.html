@@ -70,23 +70,22 @@
 			</td>
 		</tr>
 	</table>
-	<div class="row-fluid wizard-actions">
-		<span class="bigger-110"
-					ng-show="vm.TestStatus == 'pass'">
+	<div class="wizard-actions">
+		<span ng-show="vm.ShowTestPass">
 			Testing passed, press Continue
 		</span>
-		<span ng-show="vm.TestStatus == 'fail'">
-			Testing failed, please correct the errors described above and return to this page to test again.
+		<span ng-show="vm.ShowTestFail">
+			Testing failed, please correct the errors described and return to this page to test again.
 		</span>
-		<button class="btn btn-success btn-next"
-						ng-click="vm.OnSubmit()"
-						ng-class="{disabled: vm.TestStatus != 'pass'}">
+		<button class="btn btn-success btn-sm"
+						ng-click="vm.OnNextTrack()"
+						ng-class="{disabled: !vm.CanContinue}">
 			Continue
 			<i class="icon-arrow-right icon-on-right"></i>
 		</button>
-		<button class="btn btn-warning btn-next"
-		        ng-click="vm.OnBeginTest()"
-		        ng-class="{disabled: !vm.CanBeginTest}">
+		<button class="btn btn-warning btn-sm"
+						ng-click="vm.OnBeginTest()"
+						ng-class="{disabled: !vm.CanBeginTest}">
 			Begin Test
 		</button>
 	</div>

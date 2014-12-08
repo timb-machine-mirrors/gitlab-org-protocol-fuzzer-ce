@@ -83,7 +83,7 @@ describe("Peach", () => {
 				});
 
 				it("OnSubmit() moves to the next wizard", () => {
-					ctrl.OnSubmit();
+					ctrl.OnNextTrack();
 					expect($location.path()).toBe("/quickstart/fault");
 				});
 			});

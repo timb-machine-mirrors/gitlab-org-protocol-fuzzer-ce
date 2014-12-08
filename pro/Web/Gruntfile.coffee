@@ -28,6 +28,7 @@ module.exports = (grunt) ->
 						'ace-bootstrap/fonts/*'
 						'ace-bootstrap/js/*'
 					]
+					'angular-smart-table/smart-table.js' : 'angular-smart-table/dist/smart-table.debug.js'
 					'angular-tree-control/css'    : 'angular-tree-control/css/*'
 					'angular-tree-control/images' : 'angular-tree-control/images/*'
 					'angular-tree-control/js'     : 'angular-tree-control/angular-tree-control.js'

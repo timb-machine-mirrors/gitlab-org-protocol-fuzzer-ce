@@ -1,6 +1,6 @@
 ﻿<div>
 	<div class="header blue"
-			 ng-class="{hidden: vm.location.path() != '/quickstart/setvars'}">
+			 ng-show="vm.IsSetVars">
 		{{vm.Question.shortName || vm.Question.key}}
 	</div>
 	<label>
@@ -17,18 +17,5 @@
 					 type="number"
 					 ng-required="vm.Question.required"
 					 integer />
-	</div>
-	<div class="row-fluid wizard-actions">
-		<button class="btn btn-prev" 
-						ng-click="vm.Back()">
-			<i class="icon-arrow-left"></i>
-			Back
-		</button>
-		<button class="btn btn-success btn-next"
-						ng-click="vm.Next()"
-						ng-class="{disabled: configuratorForm.$invalid}">
-			Next
-			<i class="icon-arrow-right icon-on-right"></i>
-		</button>
 	</div>
 </div>

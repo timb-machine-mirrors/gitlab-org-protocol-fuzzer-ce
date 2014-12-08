@@ -52,6 +52,8 @@ module Peach.Models {
 		title: string;
 		qref?: string;
 		next?: string;
+		nextPrompt?: string;
+		backPrompt?: string;
 		template?: IWizardTemplate; 
 
 		// dynamic values

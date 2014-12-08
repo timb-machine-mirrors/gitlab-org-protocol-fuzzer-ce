@@ -1,31 +1,12 @@
 ﻿<div>
-	<div>
-		<h4>Review</h4>
-	</div>
-	<div>
+	<h4>Review</h4>
+	<p>
 		You have successfully completed the Fault Detection wizard!
 		You’re now ready to continue on to the Data Collection wizard,
 		or if you have made a mistake you can redo the Fault Detection wizard.
 		Based on your answers, Peach will do the following to detect faults:
-	</div>
-	<div class="space-6" />
-	<div>
-		<span class="alert-success bigger-120">
-			{{ vm.FaultAgentDescription }}
-		</span>
-	</div>
-	<div class="space-6" />
-	<div class="row-fluid wizard-actions">
-		<button class="btn btn-prev" 
-						ng-click="vm.OnRestart()">
-			<i class="icon-arrow-left"></i>
-			Redo Fault Detection
-		</button>
-		<button class="btn btn-success btn-next"
-						ng-click="vm.OnSubmit()"
-						ng-class="{disabled: configuratorForm.$invalid}">
-			Continue to Data Collection
-			<i class="icon-arrow-right icon-on-right"></i>
-		</button>
+	</p>
+	<div class="alert alert-success">
+		{{ vm.FaultAgentDescription }}
 	</div>
 </div>

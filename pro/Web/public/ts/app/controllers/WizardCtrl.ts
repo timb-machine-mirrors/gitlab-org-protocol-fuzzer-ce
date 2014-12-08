@@ -16,13 +16,14 @@ module Peach {
 		];
 
 		constructor(
-			private $scope: IViewModelScope,
+			private $scope: IFormScope,
 			private $location: ng.ILocationService,
 			private pitService: Services.PitService,
 			private wizardService: Services.WizardService,
 			private jobService: Services.JobService
 		) {
 			$scope.vm = this;
+			this.resetPrompts();
 			var promise = this.track.Begin();
 			if (promise) {
 				promise.then(() => {
@@ -31,50 +32,15 @@ module Peach {
 			}
 		}
 
-		public dataGridOptions: ngGrid.IGridOptions = {
-			data: "vm.DataAgents",
-			columnDefs: [
-				{ cellTemplate: "html/grid/agents/cell.html", width: 40, maxWidth: 40 },
-				{ cellTemplate: "html/grid/agents/agents.html" }
-			],
-			plugins: [new ngGridFlexibleHeightPlugin()]
-		};
-
-		public autoGridOptions: ngGrid.IGridOptions = {
-			data: "vm.AutoAgents",
-			columnDefs: [
-				{ cellTemplate: "html/grid/agents/cell.html", width: 40, maxWidth: 40 },
-				{ cellTemplate: "html/grid/agents/agents.html" }
-			],
-			plugins: [new ngGridFlexibleHeightPlugin()]
-		};
-
-		public definesGridOptions: ngGrid.IGridOptions = {
-			data: "vm.Defines",
-			columnDefs: [
-				{ field: "name", displayName: "Name" },
-				{ field: "key", displayName: "Key" },
-				{ field: "value", displayName: "Value" },
-				{ cellTemplate: "html/grid/vars/cell.html" }
-			],
-			enableCellSelection: false,
-			enableRowSelection: false,
-			multiSelect: false,
-			plugins: [new ngGridFlexibleHeightPlugin()]
-		};
-
-		public gridReview: ngGrid.IGridOptions = {
-			data: "vm.Defines",
-			columnDefs: [
-				{ field: "name", displayName: "Name" },
-				{ field: "key", displayName: "Key" },
-				{ field: "value", displayName: "Value" }
-			],
-			enableCellSelection: false,
-			enableRowSelection: false,
-			multiSelect: false,
-			plugins: [new ngGridFlexibleHeightPlugin()]
-		};
+		public get IncludeUrl(): string {
+			if (_.isUndefined(this.Question)) {
+				return "";
+			}
+			if (_.isUndefined(this.Question.qref)) {
+				return 'html/q/' + this.Question.type + '.html';
+			}
+			return this.Question.qref;
+		}
 
 		public get Defines(): Models.IParameter[] {
 			return this.pitService.PitConfig.config;
@@ -108,45 +74,40 @@ module Peach {
 			return this.wizardService.GetTrack("test").isComplete;
 		}
 
-		private getNextId(q: Models.IQuestion): number {
-			if (q.type === Models.QuestionTypes.Choice ||
-				q.type === Models.QuestionTypes.Jump) {
-				// get next id from selected choice
-				var choice = _.find(q.choice, e => {
-					if (e.value === undefined && e.next !== undefined) {
-						return e.next.toString() === q.value.toString();
-					} else if (e.value !== undefined && q.value !== undefined) {
-						return e.value.toString() === q.value.toString();
-					} else {
-						return false;
-					}
-				});
+		public get IsSetVars(): boolean {
+			return this.$location.path() === '/quickstart/setvars';
+		}
 
-				if (_.isObject(choice)) {
-					return choice.next;
-				}
+		public NextPrompt: string;
 
-				if (q.value !== undefined) {
-					return q.choice[parseInt(q.value)].next;
-				}
+		public get CanMoveNext(): boolean {
+			return !this.$scope.form.$invalid;
+		}
 
-				return undefined;
-			}
-			return q.next;
+		public BackPrompt: string;
+
+		public get CanMoveBack(): boolean {
+			return this.track.history.length > 0;
 		}
 
 		public Next() {
-			if (this.Question === undefined) {
+			if (_.isUndefined(this.Question)) {
 				// if we're not on a question, get the first available
 				this.Question = this.track.GetQuestionById(0);
 			} else {
 				var q = this.Question;
+
+				if (q.type === Models.QuestionTypes.Done) {
+					this.OnNextTrack();
+					return;
+				}
+
 				if (q.type !== Models.QuestionTypes.Jump) {
 					this.track.history.push(q.id);
 				}
 
 				var nextId = this.getNextId(q);
-				if (nextId === undefined) {
+				if (_.isUndefined(nextId)) {
 					// no more questions, this track is complete
 					this.track.Finish();
 
@@ -155,6 +116,9 @@ module Peach {
 						type: Models.QuestionTypes.Done,
 						qref: this.track.qref
 					};
+
+					this.NextPrompt = this.track.nextPrompt;
+					this.BackPrompt = this.track.backPrompt;
 				} else {
 					this.Question = this.track.GetQuestionById(nextId);
 				}
@@ -165,42 +129,12 @@ module Peach {
 			this.prepareQuestion();
 		}
 
-		private prepareQuestion() {
-			// special stuff to do based on the next question
-			switch (this.Question.type) {
-				case Models.QuestionTypes.Intro:
-					this.Step = 1;
-					break;
-				case Models.QuestionTypes.Jump:
-					this.Next();
-					break;
-				case Models.QuestionTypes.Choice:
-					// what to do when there's no value already set for a choice question
-					// if the first choice has a value, set default selection to first
-					// if the first choice doesn't have a value it's a un-keyed choice, set default to 0
-					// look at q-choice.html to see how its binding works
-					if (this.Question.value === undefined) {
-						if (this.Question.choice[0].value === undefined) {
-							this.Question.value = this.Question.choice[0].next;
-						} else {
-							this.Question.value = this.Question.choice[0].value;
-						}
-					}
-					break;
-				case Models.QuestionTypes.Range:
-					if (this.Question.value === undefined) {
-						this.Question.value = this.Question.rangeMin;
-					}
-					break;
-				case Models.QuestionTypes.Done:
-					this.Step = 3;
-					break;
-				default:
-					break;
-			}
-		}
-
 		public Back() {
+			if (this.Question.type === Models.QuestionTypes.Done) {
+				this.OnRestart();
+				return;
+			}
+
 			// pop the history and get the question
 			var previousId = 0;
 			if (this.track.history.length > 0) {
@@ -218,18 +152,19 @@ module Peach {
 			}
 		}
 
-		public OnSubmit() {
+		public OnNextTrack() {
 			this.track.isComplete = true;
 			this.$location.path(this.track.next);
 		}
 
 		public OnRestart() {
 			this.track.Restart();
+			this.resetPrompts();
 			this.Question = undefined;
 			this.Next();
 		}
 
-		public OnRemoveMonitor(index: number) {
+		public OnRemoveAgent(index: number) {
 			this.track.agents.splice(index, 1);
 		}
 
@@ -239,14 +174,77 @@ module Peach {
 
 		public StartJob() {
 			this.jobService.StartJob();
-			this.OnSubmit();
+			this.OnNextTrack();
 		}
 
-		public OnInsertDefine(row) {
-			if (this.Question.value === undefined) {
+		public OnInsertDefine(def: Models.IParameter) {
+			if (_.isUndefined(this.Question.value)) {
 				this.Question.value = "";
 			}
-			this.Question.value += "##" + row.getProperty("key") + "##";
+			this.Question.value += "##" + def.key + "##";
+		}
+
+		private getNextId(q: Models.IQuestion): number {
+			if (q.type === Models.QuestionTypes.Choice ||
+				q.type === Models.QuestionTypes.Jump) {
+				// get next id from selected choice
+				var choice = _.find(q.choice, e => {
+					if (_.isUndefined(e.value) && !_.isUndefined(e.next)) {
+						return e.next.toString() === q.value.toString();
+					} else if (!_.isUndefined(e.value) && !_.isUndefined(q.value)) {
+						return e.value.toString() === q.value.toString();
+					} else {
+						return false;
+					}
+				});
+
+				if (_.isObject(choice)) {
+					return choice.next;
+				}
+
+				if (!_.isUndefined(q.value)) {
+					return q.choice[parseInt(q.value)].next;
+				}
+
+				return undefined;
+			}
+			return q.next;
+		}
+
+		private prepareQuestion() {
+			// special stuff to do based on the next question
+			switch (this.Question.type) {
+				case Models.QuestionTypes.Intro:
+					this.Step = 1;
+					break;
+				case Models.QuestionTypes.Jump:
+					this.Next();
+					break;
+				case Models.QuestionTypes.Choice:
+					// what to do when there's no value already set for a choice question
+					// if the first choice has a value, set default selection to first
+					// if the first choice doesn't have a value it's a un-keyed choice, set default to 0
+					// look at q-choice.html to see how its binding works
+					if (_.isUndefined(this.Question.value)) {
+						var first = _.first(this.Question.choice);
+						if (_.isUndefined(first.value)) {
+							this.Question.value = first.next;
+						} else {
+							this.Question.value = first.value;
+						}
+					}
+					break;
+				case Models.QuestionTypes.Range:
+					if (_.isUndefined(this.Question.value)) {
+						this.Question.value = this.Question.rangeMin;
+					}
+					break;
+				case Models.QuestionTypes.Done:
+					this.Step = 3;
+					break;
+				default:
+					break;
+			}
 		}
 
 		private get track(): Models.ITrack {
@@ -256,6 +254,11 @@ module Peach {
 				return this.wizardService.GetTrack(match[1]);
 			}
 			return this.wizardService.GetTrack("null");;
+		}
+
+		private resetPrompts() {
+			this.NextPrompt = "Next";
+			this.BackPrompt = "Back";
 		}
 	}
 }
