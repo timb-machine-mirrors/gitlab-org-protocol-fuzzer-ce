@@ -136,7 +136,11 @@ namespace Peach.Pro.Test.Core.Monitors
 			Assert.AreEqual(1, faults.Length);
 			Assert.AreEqual("PingMonitor", faults[0].detectionSource);
 			Assert.AreEqual(FaultType.Fault, faults[0].type);
-			Assert.That(faults[0].description, Is.StringContaining("No such host is known"));
+
+			if (Platform.GetOS() == Platform.OS.Windows)
+				Assert.That(faults[0].description, Is.StringContaining("No such host is known"));
+			else
+				Assert.That(faults[0].description, Is.StringContaining("Could not resolve host"));
 		}
 
 		[Test]
@@ -154,7 +158,11 @@ namespace Peach.Pro.Test.Core.Monitors
 			Assert.AreEqual(1, faults.Length);
 			Assert.AreEqual("PingMonitor", faults[0].detectionSource);
 			Assert.AreEqual(FaultType.Fault, faults[0].type);
-			Assert.That(faults[0].description, Is.StringContaining("No such host is known"));
+
+			if (Platform.GetOS() == Platform.OS.Windows)
+				Assert.That(faults[0].description, Is.StringContaining("No such host is known"));
+			else
+				Assert.That(faults[0].description, Is.StringContaining("Could not resolve host"));
 		}
 
 		[TestCase(1000)]
