@@ -6,7 +6,7 @@ module Peach {
 	export class ParameterDirective implements ng.IDirective {
 		public restrict = 'E';
 		public templateUrl = 'html/directives/parameter.html';
-		public controller = 'ParameterController';
+		public controller = ParameterController;
 		public scope = { param: '=' };
 
 		//public link(

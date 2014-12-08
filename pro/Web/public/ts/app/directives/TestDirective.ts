@@ -6,7 +6,7 @@ module Peach {
 	export class TestDirective implements ng.IDirective {
 		public restrict = 'E';
 		public templateUrl = 'html/directives/test.html';
-		public controller = 'TestController';
+		public controller = TestController;
 		public scope = {};
 	}
 

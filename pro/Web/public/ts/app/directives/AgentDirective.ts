@@ -6,7 +6,7 @@ module Peach {
 	export class AgentDirective implements ng.IDirective {
 		public restrict = 'E';
 		public templateUrl = 'html/directives/agent.html';
-		public controller = 'AgentController';
+		public controller = AgentController;
 		public scope = {
 			agents: '=',
 			agent: '=',

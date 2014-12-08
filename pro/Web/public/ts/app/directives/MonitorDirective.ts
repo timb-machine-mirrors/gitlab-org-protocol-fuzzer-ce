@@ -6,7 +6,7 @@ module Peach {
 	export class MonitorDirective implements ng.IDirective {
 		public restrict = 'E';
 		public templateUrl = 'html/directives/monitor.html';
-		public controller = 'MonitorController';
+		public controller = MonitorController;
 		public scope = {
 			monitors: '=',
 			monitor: '=',

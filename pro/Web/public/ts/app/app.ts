@@ -78,11 +78,6 @@ module Peach {
 	p.service('TestService', Services.TestService);
 	p.service('WizardService', Services.WizardService);
 
-	p.controller('ParameterController', ParameterController);
-	p.controller('AgentController', AgentController);
-	p.controller('MonitorController', MonitorController);
-	p.controller('TestController', TestController);
-
 	p.directive('peachAgent', () => new AgentDirective());
 	p.directive('peachMonitor', () => new MonitorDirective());
 	p.directive('peachParameter', () => new ParameterDirective());
