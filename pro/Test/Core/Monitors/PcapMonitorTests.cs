@@ -54,65 +54,44 @@ namespace Peach.Pro.Test.Core.Monitors
 		[SetUp]
 		public void SetUp()
 		{
-			List<PcapInterface> pcaps = null;
+			_localEp = new IPEndPoint(IPAddress.None, 0);
+			_remoteEp = new IPEndPoint(IPAddress.Parse("1.1.1.1"), 22222);
 
-			try
+			using (var s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
 			{
-				pcaps = CaptureDeviceList.Instance.OfType<LibPcapLiveDevice>().Select(d => d.Interface).ToList();
-			}
-			catch (Exception ex)
-			{
-				Assert.Ignore("Can't get pcap device list: {0}".Fmt(ex.Message));
-			}
-
-			var nics = NetworkInterface.GetAllNetworkInterfaces();
-
-			foreach (var item in nics.Where(n => n.OperationalStatus == OperationalStatus.Up && n.NetworkInterfaceType == NetworkInterfaceType.Ethernet))
-			{
-				var addr = item.GetIPProperties().UnicastAddresses
-					.FirstOrDefault(a => a.Address.AddressFamily == AddressFamily.InterNetwork);
-
-				if (addr == null)
-					continue;
-
-				var dev = pcaps.FirstOrDefault(p => p.MacAddress.Equals(item.GetPhysicalAddress()));
-				if (dev == null)
-					continue;
-
-				var raw = addr.Address.GetAddressBytes();
-
-				_localEp = new IPEndPoint(new IPAddress(raw), 0);
-
-				// addr.IPv4Mask is not implemented on mono, use SharpPcap
-				// to get the netmask instead
-
-				var mask = dev.Addresses
-					.Where(a => addr.Address.Equals(a.Addr.ipAddress))
-					.Select(a => a.Netmask.ipAddress.GetAddressBytes())
-					.First();
-
-				Assert.AreEqual(raw.Length, mask.Length);
-
-				for (var i = 0; i < raw.Length; ++i)
-					raw[i] |= (byte) ~mask[i];
-
-				_remoteEp = new IPEndPoint(new IPAddress(raw), 22222);
-
-				_iface = dev.FriendlyName;
-
-				_socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-				_socket.Bind(_localEp);
-
-				_socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, true);
-
-				_localEp = (IPEndPoint) _socket.LocalEndPoint;
-
-				_evt = new AutoResetEvent(false);
-
-				return;
+				try
+				{
+					s.Connect(_remoteEp);
+					_localEp.Address = ((IPEndPoint)s.LocalEndPoint).Address;
+				}
+				catch (SocketException)
+				{
+					Assert.Ignore("Couldn't find primary local IP address.");
+				}
 			}
 
-			Assert.Fail("Could not find a valid adapter to use for testing.");
+			var macAddr = NetworkInterface.GetAllNetworkInterfaces()
+				.Where(n => n.GetIPProperties().UnicastAddresses.Any(a => a.Address.Equals(_localEp.Address)))
+				.Select(n => n.GetPhysicalAddress())
+				.First();
+
+			_iface = CaptureDeviceList.Instance
+				.OfType<LibPcapLiveDevice>()
+				.Select(p => p.Interface)
+				.Where(i => i.MacAddress.Equals(macAddr))
+				.Select(i => i.FriendlyName)
+				.FirstOrDefault();
+
+			if (_iface == null)
+				Assert.Ignore("Could not find a valid adapter to use for testing.");
+
+			_socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+			_socket.Bind(_localEp);
+			_socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, true);
+
+			_localEp = (IPEndPoint) _socket.LocalEndPoint;
+
+			_evt = new AutoResetEvent(false);
 		}
 
 		[TearDown]
