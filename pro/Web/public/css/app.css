@@ -1,8 +1,4 @@
-﻿.hidden {
-	display: none;
-}
-
-.skin-1 .nav-list > li.disabled > a > .menu-text,
+﻿.skin-1 .nav-list > li.disabled > a > .menu-text,
 .skin-1 .nav-list > li.disabled > a > i,
 .skin-1 .nav-list > li.disabled > a > .arrow {
 	color: #595D60;
@@ -15,24 +11,6 @@ a.disabled {
 
 .timeline.vis .box.item {
 	cursor: pointer;
-}
-
-.dropdown-light-blue li span:hover,
-.dropdown-light-blue li span:focus,
-.dropdown-light-blue li span:active,
-.dropdown-light-blue li.active span,
-.dropdown-light-blue li.active span:hover,
-.dropdown-light-blue .dropdown-submenu:hover > span,
-.nav-tabs .dropdown-light-blue li > span:focus,
-.dropdown-light-blue li div:hover,
-.dropdown-light-blue li div:focus,
-.dropdown-light-blue li div:active,
-.dropdown-light-blue li.active div,
-.dropdown-light-blue li.active div:hover,
-.dropdown-light-blue .dropdown-submenu:hover > div,
-.nav-tabs .dropdown-light-blue li > div:focus {
-	background: #ecf3f9;
-	color: #445566;
 }
 
 pre {
