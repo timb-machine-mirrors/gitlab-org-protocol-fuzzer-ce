@@ -3,7 +3,19 @@
 		<h1>Configuration &raquo; Test</h1>
 	</div>
 	<div class="wizard-actions">
-		<button class="btn btn-warning btn-next"
+		<span ng-show="vm.ShowTestPass">
+			Testing passed, press Continue
+		</span>
+		<span ng-show="vm.ShowTestFail">
+			Testing failed, please correct the errors described and return to this page to test again.
+		</span>
+		<button class="btn btn-success btn-sm"
+						ng-click="vm.OnNextTrack()"
+						ng-class="{disabled: !vm.CanContinue}">
+			Continue
+			<i class="icon-arrow-right icon-on-right"></i>
+		</button>
+		<button class="btn btn-warning btn-sm"
 		        ng-click="vm.OnBeginTest()">
 			Begin Test
 		</button>
