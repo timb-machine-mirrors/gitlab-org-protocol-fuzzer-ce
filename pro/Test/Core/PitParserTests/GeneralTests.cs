@@ -767,11 +767,21 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 			StringAssert.Contains("file failed to validate", lines[0]);
 			StringAssert.Contains("Line: 3, Position: 13", lines[1]);
-			StringAssert.Contains("The 'bad_attr' attribute is not declared.", lines[1]);
 			StringAssert.Contains("Line: 5, Position: 3", lines[2]);
-			StringAssert.Contains("The required attribute 'initialState' is missing.", lines[2]);
 			StringAssert.Contains("Line: 5, Position: 3", lines[3]);
-			StringAssert.Contains("The required attribute 'name' is missing.", lines[3]);
+
+			if (Platform.GetOS() == Platform.OS.Windows)
+			{
+				StringAssert.Contains("The 'bad_attr' attribute is not declared.", lines[1]);
+				StringAssert.Contains("The required attribute 'initialState' is missing.", lines[2]);
+				StringAssert.Contains("The required attribute 'name' is missing.", lines[3]);
+			}
+			else
+			{
+				StringAssert.Contains("Attribute declaration was not found for bad_attr", lines[1]);
+				StringAssert.Contains("Required attribute initialState was not found", lines[2]);
+				StringAssert.Contains("Required attribute name was not found", lines[3]);
+			}
 		}
 	}
 }
