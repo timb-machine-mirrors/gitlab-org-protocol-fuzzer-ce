@@ -1,6 +1,7 @@
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.Dom.XPath;
+using Peach.Core.Fixups;
 using Peach.Core.IO;
 using System;
 using System.Collections.Generic;
@@ -68,6 +69,8 @@ namespace PitTester
 					test.publishers[key] = new TestPublisher(key, logger);
 			}
 
+			var fixupOverrides = new Dictionary<string, Variant>();
+
 			if (testData.Slurps.Count > 0)
 			{
 				var doc = new XmlDocument();
@@ -94,6 +97,18 @@ namespace PitTester
 							throw new PeachException("Error, slurp setXpath did not return a Data Element. [" + slurp.SetXpath + "]");
 
 						setElement.DefaultValue = blob.DefaultValue;
+
+						if (setElement.fixup is VolatileFixup)
+						{
+							var dm = setElement.root as DataModel;
+							if (dm != null && dm.actionData != null)
+							{
+								// If the element is under an action, and has a volatile fixup
+								// store off the value for overriding during TestStarting
+								var key = "Peach.VolatileOverride.{0}.{1}".Fmt(dm.actionData.outputName, setElement.fullName);
+								fixupOverrides[key] = blob.DefaultValue;
+							}
+						}
 
 						if (blob.DefaultValue.GetVariantType() == Variant.VariantType.BitStream)
 							((BitwiseStream)blob.DefaultValue).Position = 0;
@@ -128,6 +143,14 @@ namespace PitTester
 
 			uint num = 0;
 			var e = new Engine(null);
+			e.IterationStarting += (ctx, it, tot) => num = it;
+
+			e.TestStarting += ctx =>
+			{
+				foreach (var kv in fixupOverrides)
+					ctx.stateStore.Add(kv.Key, kv.Value);
+			};
+
 			e.IterationStarting += (ctx, it, tot) => num = it;
 
 			try

@@ -266,5 +266,74 @@ namespace PitTester
 
 			Assert.That(ex.Message, Is.StringStarting("Encountered an unhandled exception on iteration 1"));
 		}
+
+		[Test]
+		public void SlurpStringRandomFixup()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str1' value='0'>
+			<Fixup class='SequenceRandom' />
+		</String>
+		<Number size='8' value='0' />
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action name='Act1' type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+			<Action name='Act2' type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default' maxOutputSize='65535'>
+		<StateModel ref='TheState'/>
+		<Publisher name='Pub' class='Null' />
+	</Test>
+</Peach>
+";
+
+			const string test = @"
+<TestData>
+	<Slurp setXpath='//Act1/DM/str1' value='1234567890'/>
+	<Slurp setXpath='//Act2/DM/str1' value='31337'/>
+
+	<Test name='Default'>
+		<Open   action='TheState.Initial.Act1' publisher='Pub'/>
+		<Output action='TheState.Initial.Act1' publisher='Pub'>
+<![CDATA[
+0000000: 3132 3334 3536 3738 3930 00              1234567890.
+]]>
+		</Output>
+		<Output action='TheState.Initial.Act2' publisher='Pub'>
+<![CDATA[
+0000000: 3331 3333 3700                           31337.
+]]>
+		</Output>
+	</Test>
+</TestData>
+";
+
+			// Ensure we can run when there is an ignore that matches a de-selected choice
+			var pitFile = Path.GetTempFileName();
+			var pitTest = pitFile + ".test";
+
+			File.WriteAllText(pitFile, xml);
+			File.WriteAllText(pitTest, test);
+
+			try
+			{
+				PitTester.TestPit("", pitFile, false, null);
+			}
+			finally
+			{
+				File.Delete(pitFile);
+				File.Delete(pitTest);
+			}
+		}
 	}
 }
