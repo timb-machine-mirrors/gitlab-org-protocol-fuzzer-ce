@@ -255,8 +255,12 @@ Debug Peach XML File
 
 		private void ShowEula()
 		{
-			Console.WriteLine();
 			Console.WriteLine(License.EulaText());
+
+			Console.WriteLine(@"
+BY TYPING ""YES"" YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTAND, AND
+AGREE TO BE BOUND BY THE TERMS ABOVE.
+");
 
 			while (true)
 			{

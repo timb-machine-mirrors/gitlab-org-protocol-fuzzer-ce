@@ -9,6 +9,83 @@ namespace Peach.Core.Test
 {
 	public class MonitorRunner
 	{
+		class Agent : IAgent
+		{
+			private readonly MonitorRunner _runner;
+
+			public Agent(MonitorRunner runner)
+			{
+				_runner = runner;
+			}
+
+			public void AgentConnect()
+			{
+				throw new NotImplementedException();
+			}
+
+			public void AgentDisconnect()
+			{
+				throw new NotImplementedException();
+			}
+
+			public void StartMonitor(string name, string cls, IEnumerable<KeyValuePair<string, Variant>> args)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void StopAllMonitors()
+			{
+				throw new NotImplementedException();
+			}
+
+			public void SessionStarting()
+			{
+				throw new NotImplementedException();
+			}
+
+			public void SessionFinished()
+			{
+				throw new NotImplementedException();
+			}
+
+			public void IterationStarting(uint iterationCount, bool isReproduction)
+			{
+				throw new NotImplementedException();
+			}
+
+			public bool IterationFinished()
+			{
+				throw new NotImplementedException();
+			}
+
+			public bool DetectedFault()
+			{
+				throw new NotImplementedException();
+			}
+
+			public Fault[] GetMonitorData()
+			{
+				throw new NotImplementedException();
+			}
+
+			public bool MustStop()
+			{
+				throw new NotImplementedException();
+			}
+
+			public Variant Message(string name, Variant data)
+			{
+				throw new NotImplementedException();
+			}
+
+			public object QueryMonitors(string query)
+			{
+				return _runner.Forward
+					.Select(mon => mon.ProcessQueryMonitors(query))
+					.FirstOrDefault(r => r != null);
+			}
+		}
+
 		/// <summary>
 		/// Controls the SessionStarting behaviour for each monitor.
 		/// The default is m => m.SessionStarting()
@@ -74,6 +151,7 @@ namespace Peach.Core.Test
 
 		public MonitorRunner()
 		{
+			_agent = new Agent(this);
 			_monitors = new List<Monitor>();
 
 			SessionStarting = m => m.SessionStarting();
@@ -89,15 +167,19 @@ namespace Peach.Core.Test
 
 		public void Add(string monitorClass, Dictionary<string, string> parameters)
 		{
+			Add("Mon_{0}".Fmt(_monitors.Count), monitorClass, parameters);
+		}
+
+		public void Add(string monitorName, string monitorClass, Dictionary<string, string> parameters)
+		{
 			var type = ClassLoader.FindTypeByAttribute<MonitorAttribute>((x, y) => y.Name == monitorClass);
 			Assert.NotNull(type, "Unable to locate monitor '{0}'".Fmt(monitorClass));
 
-			var name = "Mon_{0}".Fmt(_monitors.Count);
 			var asDict = parameters.ToDictionary(t => t.Key, t => new Variant(t.Value));
 
 			try
 			{
-				_monitors.Add((Monitor)Activator.CreateInstance(type, (IAgent)null, name, asDict));
+				_monitors.Add((Monitor)Activator.CreateInstance(type, _agent, monitorName, asDict));
 			}
 			catch (TargetInvocationException ex)
 			{
@@ -169,6 +251,8 @@ namespace Peach.Core.Test
 		private IEnumerable<Monitor> Reverse { get { return Forward.Reverse(); } }
 
 		private readonly List<Monitor> _monitors;
+
+		private readonly Agent _agent;
 	}
 	
 }

@@ -156,6 +156,12 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.AreEqual(1, libs[0].Versions.Count);
 			Assert.True(libs[0].Versions[0].Locked);
 			Assert.AreEqual(1, libs[0].Versions[0].Pits.Count);
+			Assert.AreEqual("IMG", libs[0].Versions[0].Pits[0].Name);
+
+			var p = db.GetPitByUrl(libs[0].Versions[0].Pits[0].PitUrl);
+			Assert.NotNull(p);
+
+			Assert.AreEqual(true, p.Versions[0].Configured);
 
 			Assert.False(libs[1].Locked);
 			Assert.AreEqual(1, libs[1].Versions.Count);

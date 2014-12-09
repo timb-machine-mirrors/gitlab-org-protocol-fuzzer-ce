@@ -123,9 +123,19 @@ namespace Peach.Pro.Core.Agent.Monitors
 				_fault.title = "Exception";
 
 				if (ex is PingException)
-					_fault.description = ex.InnerException.Message;
+				{
+					var se = ex.InnerException as SocketException;
+
+					//  An MX record is returned but no A record—indicating the host itself exists, but is not directly reachable.
+					if (se != null && se.SocketErrorCode == SocketError.NoData)
+						_fault.description = new SocketException((int)SocketError.HostNotFound).Message;
+					else
+						_fault.description = ex.InnerException.Message;
+				}
 				else
+				{
 					_fault.description = ex.Message;
+				}
 			}
 
 			return _fault.type == FaultType.Fault;

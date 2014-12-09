@@ -125,10 +125,10 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestBadHost()
 		{
-			// Use a valid TLD to make sure resolution fails.
+			// RFC6761 says .invalid is guranteed to be an invalid TLD
 			var runner = new MonitorRunner("Ping", new Dictionary<string, string>
 			{
-				{ "Host", "invalid.host.dejavusecurity.com" },
+				{ "Host", "some.host.invalid" },
 			});
 
 			var faults = runner.Run();
@@ -146,10 +146,10 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestBadHostSuccess()
 		{
-			// Use a valid TLD to make sure resolution fails.
+			// RFC6761 says .invalid is guranteed to be an invalid TLD
 			var runner = new MonitorRunner("Ping", new Dictionary<string, string>
 			{
-				{ "Host", "invalid.host.dejavusecurity.com" },
+				{ "Host", "some.host.invalid" },
 				{ "FaultOnSuccess", "true" },
 			});
 
