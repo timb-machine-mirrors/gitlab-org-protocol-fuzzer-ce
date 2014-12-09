@@ -418,16 +418,14 @@ namespace Peach.Pro.OS.Windows.Debuggers.DebugEngine
 				if (IntPtr.Size == 4)
 				{
 					// 32bit
-					string path = Assembly.GetExecutingAssembly().Location;
-					path = Path.GetDirectoryName(path);
+					string path = Utilities.ExecutionDirectory;
 					path = Path.Combine(path, "Debuggers\\DebugEngine\\msec86.dll");
 					_engine.dbgControl.Execute((uint)Const.DEBUG_OUTCTL_THIS_CLIENT, ".load " + path, (uint)Const.DEBUG_EXECUTE_ECHO);
 				}
 				else
 				{
 					// 64bit
-					string path = Assembly.GetExecutingAssembly().Location;
-					path = Path.GetDirectoryName(path);
+					string path = Utilities.ExecutionDirectory;
 					path = Path.Combine(path, "Debuggers\\DebugEngine\\msec64.dll");
 					_engine.dbgControl.Execute((uint)Const.DEBUG_OUTCTL_THIS_CLIENT, ".load " + path, (uint)Const.DEBUG_EXECUTE_ECHO);
 				}

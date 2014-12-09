@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-
+using Peach.Core.Dom;
 using Peach.Core.Xsd;
 using System.Xml.Serialization;
 
@@ -19,6 +19,24 @@ namespace Peach.Core.Test
 		public string name { get; set; }
 	}
 
+	[XmlRoot("IntRoot")]
+	public class IntObject
+	{
+		[XmlAttribute]
+		public int Int { get; set; }
+
+		[XmlAttribute]
+		public uint UnsignedInt { get; set; }
+
+		[XmlAttribute]
+		public int Long { get; set; }
+
+		[XmlAttribute]
+		public uint UnsignedLong { get; set; }
+
+		[XmlAttribute]
+		public Peach.Core.Dom.Test.Lifetime Endian { get; set; }
+	}
 	public abstract class TestAbstract
 	{
 		public TestAbstract()
@@ -130,6 +148,11 @@ namespace Peach.Core.Test
 			obj.def = obj.Objects[0];
 
 			Serialize(obj);
+		}
+
+		public void Test6()
+		{
+			TestType(typeof(IntObject));
 		}
 	}
 }

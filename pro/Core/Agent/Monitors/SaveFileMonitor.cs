@@ -48,6 +48,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		public override Fault GetMonitorData()
 		{
+			if (!File.Exists(Filename))
+				return null;
+
 			Fault fault = new Fault();
 			fault.type = FaultType.Data;
 			fault.title = "Save File \"" + Filename + "\"";

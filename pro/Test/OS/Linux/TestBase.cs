@@ -1,14 +1,13 @@
 ﻿using NLog;
-using NLog.Targets;
 using NLog.Config;
+using NLog.Targets;
 using NUnit.Framework;
 using Peach.Core;
 
-// ReSharper disable once CheckNamespace
-namespace Peach
+namespace Peach.Pro.Test.OS.Linux
 {
 	[SetUpFixture]
-	public class TestBase
+	class TestBase
 	{
 		[SetUp]
 		public void Initialize()

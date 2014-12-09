@@ -28,311 +28,311 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
-using Peach.Core.Agent;
-using Peach.Core.Analyzers;
-using Random = Peach.Core.Random;
+using Peach.Core.Test;
+using SharpPcap;
+using SharpPcap.LibPcap;
 
 namespace Peach.Pro.Test.Core.Monitors
 {
-	[Monitor("TestMonitor", true, IsTest = true)]
-	public class TestMonitor : Peach.Core.Agent.Monitor
-	{
-		private IPAddress _dest;
-		private Socket _socket;
-		private int port1;
-		private int port2;
-
-		public TestMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
-		{
-			bool ret = IPAddress.TryParse((string)args["Address"], out _dest);
-			System.Diagnostics.Debug.Assert(ret);
-			port1 = int.Parse((string)args["Port1"]);
-			port2 = int.Parse((string)args["Port2"]);
-		}
-
-		public override void StopMonitor()
-		{
-		}
-
-		public override void SessionStarting()
-		{
-			_socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.IP);
-		}
-
-		public override void SessionFinished()
-		{
-			if (_socket != null)
-				_socket.Close();
-		}
-
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
-		{
-			_socket.SendTo(Encoding.ASCII.GetBytes("Hello"), new IPEndPoint(_dest, port1));
-			_socket.SendTo(Encoding.ASCII.GetBytes("Hello"), new IPEndPoint(_dest, port2));
-			_socket.SendTo(Encoding.ASCII.GetBytes("Hello"), new IPEndPoint(_dest, port2));
-			System.Threading.Thread.Sleep(1000);
-		}
-
-		public override bool IterationFinished()
-		{
-			return false;
-		}
-
-		public override bool DetectedFault()
-		{
-			return true;
-		}
-
-		public override Fault GetMonitorData()
-		{
-			return null;
-		}
-
-		public override bool MustStop()
-		{
-			return false;
-		}
-
-		public override Variant Message(string name, Variant data)
-		{
-			return null;
-		}
-	}
-
 	[TestFixture]
 	[Category("Peach")]
 	class PcapMonitorTests
 	{
-		List<string> testResults = new List<string>();
+		private AutoResetEvent _evt;
+		private string _iface;
+		private Socket _socket;
+		private IPEndPoint _localEp;
+		private IPEndPoint _remoteEp;
 
-		// Return a tuple of interface name and broadcast IP for the first
-		// interface that is up and has a valid IPv4 address.
-		private static Tuple<string, IPAddress> GetInterface()
+		[SetUp]
+		public void SetUp()
 		{
-			if (Platform.GetOS() == Platform.OS.Linux)
-				return new Tuple<string, IPAddress>("lo", IPAddress.Loopback);
+			_localEp = new IPEndPoint(IPAddress.None, 0);
+			_remoteEp = new IPEndPoint(IPAddress.Parse("1.1.1.1"), 22222);
 
-			if (Platform.GetOS() == Platform.OS.OSX)
-				return new Tuple<string, IPAddress>("lo0", IPAddress.Loopback);
-
-			NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
-			foreach (NetworkInterface adapter in nics)
+			using (var s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
 			{
-				if (adapter.OperationalStatus != OperationalStatus.Up)
-					continue;
-
-				foreach (var addr in adapter.GetIPProperties().UnicastAddresses)
+				try
 				{
-					if (addr.Address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
-						continue;
-
-					byte[] raw = addr.Address.GetAddressBytes();
-					byte[] mask = addr.IPv4Mask.GetAddressBytes();
-
-					for (int i = 0; i < 4; ++i)
-					{
-						raw[i] |= (byte)~mask[i];
-					}
-
-					return new Tuple<string, IPAddress>(adapter.Name, new IPAddress(raw));
+					s.Connect(_remoteEp);
+					_localEp.Address = ((IPEndPoint)s.LocalEndPoint).Address;
+				}
+				catch (SocketException)
+				{
+					Assert.Ignore("Couldn't find primary local IP address.");
 				}
 			}
 
-			throw new Exception("Couldn't find a valid network adapter");
+			var macAddr = NetworkInterface.GetAllNetworkInterfaces()
+				.Where(n => n.GetIPProperties().UnicastAddresses.Any(a => a.Address.Equals(_localEp.Address)))
+				.Select(n => n.GetPhysicalAddress())
+				.First();
+
+			_iface = CaptureDeviceList.Instance
+				.OfType<LibPcapLiveDevice>()
+				.Select(p => p.Interface)
+				.Where(i => i.MacAddress.Equals(macAddr))
+				.Select(i => i.FriendlyName)
+				.FirstOrDefault();
+
+			if (_iface == null)
+				Assert.Ignore("Could not find a valid adapter to use for testing.");
+
+			_socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+			_socket.Bind(_localEp);
+			_socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, true);
+
+			_localEp = (IPEndPoint) _socket.LocalEndPoint;
+
+			_evt = new AutoResetEvent(false);
 		}
 
-		private static string pre_xml =
-			"<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
-			"<Peach>" +
-			"	<DataModel name=\"TheDataModel\">" +
-			"		<String value=\"Hello World\" />" +
-			"	</DataModel>";
-
-		private static string post_xml =
-			"	<StateModel name=\"TheState\" initialState=\"Initial\">" +
-			"		<State name=\"Initial\">" +
-			"			<Action type=\"output\">" +
-			"				<DataModel ref=\"TheDataModel\"/>" +
-			"			</Action>" +
-			"		</State>" +
-			"	</StateModel>" +
-			"	" +
-			"	<Test name=\"Default\" replayEnabled='false'>" +
-			"		<Agent ref=\"LocalAgent\"/>" +
-			"		<StateModel ref=\"TheState\"/>" +
-			"		<Publisher class=\"Null\" />" +
-			"		<Strategy class=\"RandomDeterministic\"/>" +
-			"	</Test>" +
-			"</Peach>";
-
-		private void RunTest(string xml, uint iterations, Engine.FaultEventHandler OnFault)
+		[TearDown]
+		public void TearDown()
 		{
-			var pid = System.Diagnostics.Process.GetCurrentProcess().Id;
-			var rng = new Random((uint)pid);
-			var iface = GetInterface();
-			var port1 = rng.Next(8000, 10000);
-			var port2 = rng.Next(100, 1000) + port1;
-			xml = pre_xml + string.Format(xml, iface.Item1, iface.Item2, port1, port2) + post_xml;
+			if (_evt != null)
+				_evt.Dispose();
 
-			PitParser parser = new PitParser();
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			if (_socket != null)
+				_socket.Dispose();
 
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
-
-			Engine e = new Engine(null);
-			config.range = true;
-			config.rangeStart = 1;
-			config.rangeStop = 1 + iterations;
-
-			if (OnFault == null)
-			{
-				e.startFuzzing(dom, config);
-				return;
-			}
-
-			e.Fault += OnFault;
-
-			try
-			{
-				e.startFuzzing(dom, config);
-				Assert.Fail("Should throw.");
-			}
-			catch (PeachException ex)
-			{
-				Assert.AreEqual("Fault detected on control iteration.", ex.Message);
-			}
-
-			Assert.AreEqual(1, testResults.Count);
-			testResults.Clear();
-
-			Assert.AreEqual(0, testResults.Count);
+			_evt = null;
+			_socket = null;
+			_iface = null;
+			_localEp = null;
+			_remoteEp = null;
 		}
 
 		[Test]
 		public void BasicTest()
 		{
-			string agent_xml =
-				"	<Agent name=\"LocalAgent\">" +
-				"		<Monitor class=\"Pcap\">" +
-				"			<Param name=\"Device\" value=\"{0}\"/>" +
-				"		</Monitor>" +
-				"	</Agent>";
+			var runner = new MonitorRunner("Pcap", new Dictionary<string, string>
+			{
+				{ "Device", _iface },
+			});
 
-			RunTest(agent_xml, 1, null);
+			var faults = runner.Run();
+
+			Assert.AreEqual(0, faults.Length);
+		}
+
+		[Test]
+		public void DataCollection()
+		{
+			const int max = 10;
+			var num = 0;
+
+			var runner = new MonitorRunner("Pcap", new Dictionary<string, string>
+			{
+				{ "Device", _iface },
+			})
+			{
+				SessionStarting = m =>
+				{
+					m.InternalEvent += (o, e) =>
+					{
+						if (++num == max)
+							_evt.Set();
+					};
+
+					m.SessionStarting();
+				},
+				IterationFinished = m =>
+				{
+					// Capture starts in IterationStarting, and stops in IterationFinished
+					for (var i = 0; i < max; ++i)
+						_socket.SendTo("Hello World", _remoteEp);
+
+					// Ensure packets are captured
+					if (!_evt.WaitOne(5000))
+						Assert.Fail("Didn't receive packets within 5 second.");
+
+					m.IterationFinished();
+				},
+				DetectedFault = m =>
+				{
+					Assert.False(m.DetectedFault(), "Monitor should not detect fault");
+
+					// Trigger data collection
+					return true;
+				},
+			};
+
+			Fault[] faults;
+
+			using (var si = SingleInstance.CreateInstance("Peach.Pro.Test.Core.Monitors.PcapMonitorTests.DataCollection"))
+			{
+				si.Lock();
+
+				faults = runner.Run();
+			}
+
+			Assert.AreEqual(1, faults.Length);
+			Assert.AreEqual(FaultType.Data, faults[0].type);
+			Assert.AreEqual("PcapMonitor", faults[0].detectionSource);
+			Assert.AreEqual(1, faults[0].collectedData.Count);
+			Assert.AreEqual("NetworkCapture.pcap", faults[0].collectedData[0].Key);
+
+			const string begin = "Collected ";
+			Assert.That(faults[0].description, Is.StringStarting(begin));
+
+			const string end = " packets.";
+			Assert.That(faults[0].description, Is.StringEnding(end));
+
+			var str = faults[0].description.Substring(begin.Length, faults[0].description.Length - begin.Length - end.Length);
+			var cnt = int.Parse(str);
+
+			Assert.GreaterOrEqual(cnt, max, "Captured {0} packets, expected at least 10".Fmt(cnt));
 		}
 
 		[Test]
 		public void MultipleIterationsTest()
 		{
-			string agent_xml =
-				"	<Agent name=\"LocalAgent\">" +
-				"		<Monitor class=\"Pcap\">" +
-				"			<Param name=\"Device\" value=\"{0}\"/>" +
-				"		</Monitor>" +
-				"	</Agent>";
+			var runner = new MonitorRunner("Pcap", new Dictionary<string, string>
+			{
+				{ "Device", _iface },
+			});
 
-			RunTest(agent_xml, 10, null);
+			var faults = runner.Run(10);
+
+			Assert.AreEqual(0, faults.Length);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, PcapMonitor was unable to locate device 'Some Unknown Device'.")]
+		[Test]
 		public void BadDeviceTest()
 		{
-			string agent_xml =
-				"	<Agent name=\"LocalAgent\">" +
-				"		<Monitor class=\"Pcap\">" +
-				"			<Param name=\"Device\" value=\"Some Unknown Device\"/>" +
-				"		</Monitor>" +
-				"	</Agent>";
+			var runner = new MonitorRunner("Pcap", new Dictionary<string, string>
+			{
+				{ "Device", "Some Unknown Device" },
+			});
 
-			RunTest(agent_xml, 1, null);
+			var ex = Assert.Throws<PeachException>(() => runner.Run());
+
+			Assert.AreEqual("Error, PcapMonitor was unable to locate device 'Some Unknown Device'.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, PcapMonitor requires a device name.")]
+		[Test]
 		public void NoDeviceTest()
 		{
-			string agent_xml =
-				"	<Agent name=\"LocalAgent\">" +
-				"		<Monitor class=\"Pcap\">" +
-				"		</Monitor>" +
-				"	</Agent>";
+			var runner = new MonitorRunner("Pcap", new Dictionary<string, string>());
 
-			RunTest(agent_xml, 1, null);
+			var ex = Assert.Throws<PeachException>(() => runner.Run());
+
+			Assert.AreEqual("Error, PcapMonitor requires a device name.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, PcapMonitor was unable to set the filter 'bad filter string'.")]
+		[Test]
 		public void BadFilterTest()
 		{
-			string agent_xml =
-				"	<Agent name=\"LocalAgent\">" +
-				"		<Monitor class=\"Pcap\">" +
-				"			<Param name=\"Device\" value=\"{0}\"/>" +
-				"			<Param name=\"Filter\" value=\"bad filter string\"/>" +
-				"		</Monitor>" +
-				"	</Agent>";
+			var runner = new MonitorRunner("Pcap", new Dictionary<string, string>
+			{
+				{ "Device", _iface },
+				{ "Filter", "Bad filter string" },
+			});
 
-			RunTest(agent_xml, 1, null);
+			var ex = Assert.Throws<PeachException>(() => runner.Run());
+
+			Assert.AreEqual("Error, PcapMonitor was unable to set the filter 'Bad filter string'.", ex.Message);
 		}
 
 		[Test]
 		public void MultipleMonitorsTest()
 		{
-			string agent_xml =
-				"	<Agent name=\"LocalAgent\">" +
-				"		<Monitor class=\"Pcap\" name=\"Mon0\">" +
-				"			<Param name=\"Device\" value=\"{0}\"/>" +
-				"			<Param name=\"Filter\" value=\"ip src 255.255.255.255\"/>" +
-				"		</Monitor>" +
-				"		<Monitor class=\"Pcap\" name=\"Mon1\">" +
-				"			<Param name=\"Device\" value=\"{0}\"/>" +
-				"			<Param name=\"Filter\" value=\"udp port {2}\"/>" +
-				"		</Monitor>" +
-				"		<Monitor class=\"Pcap\" name=\"Mon2\">" +
-				"			<Param name=\"Device\" value=\"{0}\"/>" +
-				"			<Param name=\"Filter\" value=\"udp port {3}\"/>" +
-				"		</Monitor>" +
-				"		<Monitor class=\"TestMonitor\">" +
-				"			<Param name=\"Address\" value=\"{1}\"/>" +
-				"			<Param name=\"Port1\" value=\"{2}\"/>" +
-				"			<Param name=\"Port2\" value=\"{3}\"/>" +
-				"		</Monitor>" +
-				"	</Agent>";
+			const int count = 5;
+			var num = 0;
+			bool first = true;
 
-			RunTest(agent_xml, 1, new Engine.FaultEventHandler(_Fault));
-		}
+			var runner = new MonitorRunner
+			{
+				SessionStarting = m =>
+				{
+					m.InternalEvent += (s, e) =>
+					{
+						if (++num == count)
+							_evt.Set();
+					};
 
-		void _Fault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faults)
-		{
-			Assert.AreEqual(3, faults.Length);
+					m.SessionStarting();
+				},
+				IterationFinished = m =>
+				{
+					// Send test packets on IterationFinished to 1st monitor
+					if (first)
+					{
+						// Capture starts in IterationStarting, and stops in IterationFinished
+						for (var i = 0; i < count; ++i)
+						{
+							var ep = new IPEndPoint(_remoteEp.Address, _remoteEp.Port + 1 + i);
+							_socket.SendTo("Hello World", ep);
+						}
 
-			Assert.AreEqual("Collected 0 packets.", faults[0].description);
+						// Ensure packets are captured
+						if (!_evt.WaitOne(5000))
+							Assert.Fail("Didn't receive packets within 5 second.");
+					}
+
+					first = false;
+
+					m.IterationFinished();
+				},
+				DetectedFault = m =>
+				{
+					Assert.False(m.DetectedFault(), "Monitor should not detect fault");
+
+					// Trigger data collection
+					return true;
+				},
+			};
+
+			// Add one extra that is not sent to
+			// Skew by one so we don't conflict with DataCollection test port
+			for (var i = 0; i <= count; ++i)
+			{
+				runner.Add("Pcap", new Dictionary<string, string>()
+				{
+					{ "Device", _iface },
+					{ "Filter", "udp and dst port " + (_remoteEp.Port + 1 + i) },
+				});
+			}
+
+			Fault[] faults;
+
+			using (var si = SingleInstance.CreateInstance("Peach.Pro.Test.Core.Monitors.PcapMonitorTests.MultipleMonitorsTest"))
+			{
+				si.Lock();
+
+				faults = runner.Run();
+			}
+
+			// Expect a fault for each pcap monitor
+			Assert.AreEqual(count + 1, faults.Length);
+
+			for (var i = 0; i <= count; ++i)
+			{
+				var f = faults[i];
+
+				Assert.AreEqual(FaultType.Data, f.type);
+				Assert.AreEqual("PcapMonitor", f.detectionSource);
+				Assert.AreEqual(1, f.collectedData.Count);
+				Assert.AreEqual("NetworkCapture.pcap", f.collectedData[0].Key);
+
+				var msg = "Collected {0} packets.".Fmt(i == count ? 0 : 1);
+
+				Assert.AreEqual(msg, f.description);
+			}
+
+
+			Assert.AreEqual(FaultType.Data, faults[0].type);
+			Assert.AreEqual("PcapMonitor", faults[0].detectionSource);
 			Assert.AreEqual(1, faults[0].collectedData.Count);
-			Assert.AreEqual("Mon0", faults[0].monitorName);
-			Assert.AreEqual("NetworkCapture.pcap", faults[1].collectedData[0].Key);
-			Assert.Greater(faults[0].collectedData[0].Value.Length, 0);
-
-			Assert.AreEqual("Collected 1 packets.", faults[1].description);
-			Assert.AreEqual(1, faults[1].collectedData.Count);
-			Assert.AreEqual("Mon1", faults[1].monitorName);
-			Assert.AreEqual("NetworkCapture.pcap", faults[1].collectedData[0].Key);
-			Assert.Greater(faults[1].collectedData[0].Value.Length, 0);
-
-			Assert.AreEqual("Collected 2 packets.", faults[2].description);
-			Assert.AreEqual(1, faults[2].collectedData.Count);
-			Assert.AreEqual("Mon2", faults[2].monitorName);
-			Assert.AreEqual("NetworkCapture.pcap", faults[2].collectedData[0].Key);
-			Assert.Greater(faults[2].collectedData[0].Value.Length, 0);
-
-			testResults.Add("Success");
+			Assert.AreEqual("NetworkCapture.pcap", faults[0].collectedData[0].Key);
 		}
 	}
 }
-
-// end

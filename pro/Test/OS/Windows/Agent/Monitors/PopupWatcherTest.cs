@@ -1,124 +1,42 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading;
+using System.Windows.Forms;
 using NUnit.Framework;
 using Peach.Core;
-using Peach.Core.Analyzers;
+using Peach.Core.Test;
+using Peach.Pro.OS.Windows.Agent.Monitors;
 
 namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture, Category("Peach")]
 	public class PopupWatcherTest
 	{
-		class Params : Dictionary<string, string> { }
-
-		private Fault[] faults;
-		private string faultIteration;
-
-		[SetUp]
-		public void SetUp()
+		class LameWindow : NativeWindow, IDisposable
 		{
-			faults = null;
-			faultIteration = "0";
-		}
+			// ReSharper disable once InconsistentNaming
+			private const uint WM_CLOSE = 0x0010;
+			private readonly ApplicationContext _ctx = new ApplicationContext();
 
-		void _Fault(RunContext context, uint currentIteration, Core.Dom.StateModel stateModel, Fault[] faults)
-		{
-			Assert.Null(this.faults);
-			this.faults = faults;
-		}
-
-		string MakeXml(Params parameters)
-		{
-			string fmt = "<Param name='{0}' value='{1}'/>";
-
-			string template = @"
-<Peach>
-	<DataModel name='TheDataModel'>
-		<String value='Hello' mutable='false'/>
-	</DataModel>
-
-	<StateModel name='TheState' initialState='Initial'>
-		<State name='Initial'>
-			<Action type='output'>
-				<DataModel ref='TheDataModel'/>
-			</Action>
-		</State>
-	</StateModel>
-
-	<Agent name='LocalAgent'>
-		<Monitor class='FaultingMonitor'>
-			<Param name='Iteration' value='{0}'/>
-		</Monitor>
-		<Monitor class='PopupWatcher'>
-{1}
-		</Monitor>
-	</Agent>
-
-	<Test name='Default' replayEnabled='false'>
-		<Agent ref='LocalAgent'/>
-		<StateModel ref='TheState'/>
-		<Publisher class='Null'/>
-	</Test>
-</Peach>";
-
-			var items = parameters.Select(kv => string.Format(fmt, kv.Key, kv.Value));
-			var joined = string.Join(Environment.NewLine, items);
-			var ret = string.Format(template, faultIteration, joined);
-
-			return ret;
-		}
-
-		void Run(Params parameters, bool shouldFault)
-		{
-			string xml = MakeXml(parameters);
-
-			faults = null;
-
-			PitParser parser = new PitParser();
-
-			Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("StringCaseMutator");
-
-			RunConfiguration config = new RunConfiguration();
-
-			Engine e = new Engine(null);
-			e.Fault += _Fault;
-
-			if (!shouldFault)
+			private LameWindow()
 			{
-				e.startFuzzing(dom, config);
-				return;
 			}
 
-			try
+			public static void Run(string windowTitle)
 			{
-				e.startFuzzing(dom, config);
-				Assert.Fail("Should throw.");
+				using (var ret = new LameWindow())
+				{
+					ret.CreateHandle(new CreateParams { Caption = windowTitle });
+					Application.Run(ret._ctx);
+				}
 			}
-			catch (PeachException ex)
-			{
-				Assert.AreEqual("Fault detected on control iteration.", ex.Message);
-			}
-		}
 
-		[Test, ExpectedException(ExpectedException = typeof(PeachException), ExpectedMessage = "Could not start monitor \"PopupWatcher\".  Monitor 'PopupWatcher' is missing required parameter 'WindowNames'.")]
-		public void TestNoWindow()
-		{
-			Run(new Params(), false);
-			Assert.Null(faults);
-		}
-
-		class LameWindow : System.Windows.Forms.NativeWindow, IDisposable
-		{
-			public LameWindow(string windowTitle)
+			protected override void WndProc(ref Message m)
 			{
-				var cp = new System.Windows.Forms.CreateParams();
-				cp.Caption = windowTitle;
-				CreateHandle(cp);
+				if (m.Msg == WM_CLOSE)
+					_ctx.ExitThread();
+
+				base.WndProc(ref m);
 			}
 
 			public void Dispose()
@@ -127,101 +45,154 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			}
 		}
 
-		private AutoResetEvent evt = new AutoResetEvent(false);
-
-		void ThreadProc(object windowTitle)
+		[Test]
+		public void TestNoWindow()
 		{
-			evt.Reset();
-			using (var wnd = new LameWindow(windowTitle.ToString()))
-			{
-				System.Windows.Forms.Application.DoEvents();
-				evt.Set();
-				System.Windows.Forms.Application.Run();
-				Console.WriteLine("Done!");
-			}
+			var ex = Assert.Throws<PeachException>(() => new PopupWatcher(null, null, new Dictionary<string, Variant>()));
+			Assert.AreEqual("Monitor 'PopupWatcher' is missing required parameter 'WindowNames'.", ex.Message);
 		}
 
 		[Test]
-		public void TestWindow()
+		public void TestNoFault()
 		{
-			string windowName = "PopupWatcherTest - " + System.Diagnostics.Process.GetCurrentProcess().Id;
-			var th = new Thread(ThreadProc);
-			th.Start(windowName);
-			evt.WaitOne();
+			var windowName = "PopupWatcherTest - " + System.Diagnostics.Process.GetCurrentProcess().Id;
 
-			faultIteration = "C";
-
-			try
+			var runner = new MonitorRunner("PopupWatcher", new Dictionary<string, string>
 			{
-				Run(new Params { { "WindowNames", windowName } }, true);
-			}
-			finally
+				
+				{ "WindowNames", windowName },
+				{ "Fault", "false" },
+			})
 			{
-				System.Windows.Forms.Application.Exit();
-				th.Join();
-			}
+				Message = m =>
+				{
+					// Monitor won't produce a fault unless the window is closed
+					// between IterationStarting and IterationFinished
 
-			Assert.NotNull(faults);
-			Assert.AreEqual(2, faults.Length);
-			Assert.AreEqual("FaultingMonitor", faults[0].detectionSource);
-			Assert.AreEqual("PopupWatcher", faults[1].detectionSource);
-			Assert.AreEqual("Closed 1 popup window.", faults[1].title);
-			Assert.True(faults[1].description.Contains("PopupWatcherTest"));
-			Assert.AreEqual(FaultType.Data, faults[1].type);
+					// Window gets closed by posting a WM_CLOSE message
+
+					var th = new Thread(() => LameWindow.Run(windowName));
+
+					th.Start();
+
+					if (th.Join(500))
+						return;
+
+					th.Abort();
+					Assert.Fail("Window did not get closed within 500ms");
+				},
+				DetectedFault = m =>
+				{
+					Assert.False(m.DetectedFault(), "Monitor should not detect fault");
+
+					return true; // Trigger GetMonitorData()
+				}
+			};
+
+			var faults = runner.Run();
+
+			Assert.AreEqual(1, faults.Length);
+			Assert.AreEqual("PopupWatcher", faults[0].detectionSource);
+			Assert.AreEqual("Closed 1 popup window.", faults[0].title);
+			Assert.AreEqual(FaultType.Data, faults[0].type);
+			Assert.True(faults[0].description.Contains(windowName));
 		}
 
 		[Test]
 		public void TestWindowList()
 		{
-			string windowName = "PopupWatcherTest - " + System.Diagnostics.Process.GetCurrentProcess().Id;
-			var th = new Thread(ThreadProc);
-			th.Start(windowName);
-			evt.WaitOne();
+			var windowName1 = "Foo - " + System.Diagnostics.Process.GetCurrentProcess().Id;
+			var windowName2 = "Bar - " + System.Diagnostics.Process.GetCurrentProcess().Id;
 
-			faultIteration = "C";
-
-			try
+			var runner = new MonitorRunner("PopupWatcher", new Dictionary<string, string>
 			{
-				Run(new Params { { "WindowNames", "Window1,Window2," + windowName } }, true);
-			}
-			finally
+				
+				{ "WindowNames", windowName1 + "," + windowName2 },
+				{ "Fault", "false" },
+			})
 			{
-				System.Windows.Forms.Application.Exit();
-				th.Join();
-			}
+				Message = m =>
+				{
+					// Monitor won't produce a fault unless the window is closed
+					// between IterationStarting and IterationFinished
 
-			Assert.NotNull(faults);
-			Assert.AreEqual(2, faults.Length);
-			Assert.AreEqual("FaultingMonitor", faults[0].detectionSource);
-			Assert.AreEqual("PopupWatcher", faults[1].detectionSource);
-			Assert.AreEqual("Closed 1 popup window.", faults[1].title);
-			Assert.True(faults[1].description.Contains(windowName));
-			Assert.AreEqual(FaultType.Data, faults[1].type);
+					// Window gets closed by posting a WM_CLOSE message
+
+					var th1 = new Thread(() =>
+					{
+						var th2 = new Thread(() => LameWindow.Run(windowName1));
+
+						th2.Start();
+
+						LameWindow.Run(windowName2);
+
+						th2.Join();
+					});
+
+
+					th1.Start();
+
+					if (th1.Join(50000))
+						return;
+
+					th1.Abort();
+					Assert.Fail("Window did not get closed within 500ms");
+				},
+				DetectedFault = m =>
+				{
+					Assert.False(m.DetectedFault(), "Monitor should not detect fault");
+
+					return true; // Trigger GetMonitorData()
+				}
+			};
+
+			var faults = runner.Run();
+
+			Assert.AreEqual(1, faults.Length);
+			Assert.AreEqual("PopupWatcher", faults[0].detectionSource);
+			Assert.AreEqual("Closed 2 popup windows.", faults[0].title);
+			Assert.AreEqual(FaultType.Data, faults[0].type);
+			StringAssert.Contains(windowName1, faults[0].description);
+			StringAssert.Contains(windowName2, faults[0].description);
 		}
 
 		[Test]
 		public void TestFault()
 		{
-			string windowName = "PopupWatcherTest - " + System.Diagnostics.Process.GetCurrentProcess().Id;
+			var windowName = "PopupWatcherTest - " + System.Diagnostics.Process.GetCurrentProcess().Id;
 
-			var th = new Thread(ThreadProc);
-			th.Start(windowName);
-			evt.WaitOne();
-
-			try
+			var runner = new MonitorRunner("PopupWatcher", new Dictionary<string,string>
 			{
-				Run(new Params { { "WindowNames", windowName }, { "Fault", "true" } }, true);
-			}
-			finally
+				
+				{ "WindowNames", windowName },
+				{ "Fault", "true" },
+			})
 			{
-				System.Windows.Forms.Application.Exit();
-				th.Join();
-			}
+				Message = m =>
+				{
+					// Monitor won't produce a fault unless the window is closed
+					// between IterationStarting and IterationFinished
 
-			Assert.NotNull(faults);
+					// Window gets closed by posting a WM_CLOSE message
+
+					var th = new Thread(() => LameWindow.Run(windowName));
+
+					th.Start();
+
+					if (th.Join(500))
+						return;
+
+					th.Abort();
+					Assert.Fail("Window did not get closed within 500ms");
+				}
+			};
+
+			var faults = runner.Run();
+
 			Assert.AreEqual(1, faults.Length);
 			Assert.AreEqual("PopupWatcher", faults[0].detectionSource);
 			Assert.AreEqual("Closed 1 popup window.", faults[0].title);
+			Assert.AreEqual(FaultType.Fault, faults[0].type);
 			Assert.True(faults[0].description.Contains(windowName));
 		}
 	}

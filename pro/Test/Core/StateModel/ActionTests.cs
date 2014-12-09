@@ -83,8 +83,11 @@ namespace Peach.Pro.Test.Core.StateModel
 			started = false;
 			finished = false;
 
-			e.context.ActionStarting += ActionStarting;
-			e.context.ActionFinished += ActionFinished;
+			e.TestStarting += (ctx) =>
+			{
+				ctx.ActionStarting += ActionStarting;
+				ctx.ActionFinished += ActionFinished;
+			};
 
 			try
 			{
@@ -731,15 +734,25 @@ namespace Peach.Pro.Test.Core.StateModel
 			config.singleIteration = true;
 
 			var e = new Engine(null);
+
+			var testFinished = false;
+
+			e.TestFinished += (ctx) =>
+			{
+				testFinished = true;
+
+				Assert.NotNull(ctx);
+				Assert.NotNull(ctx.stateStore);
+				Assert.AreEqual(4, ctx.stateStore.Count);
+				Assert.True(ctx.stateStore.ContainsKey("stateComplete"));
+				Assert.True(ctx.stateStore.ContainsKey("initialComplete"));
+				Assert.True(ctx.stateStore.ContainsKey("changeComplete"));
+				Assert.True(ctx.stateStore.ContainsKey("secondComplete"));
+			};
+
 			e.startFuzzing(dom, config);
 
-			Assert.NotNull(e.context);
-			Assert.NotNull(e.context.stateStore);
-			Assert.AreEqual(4, e.context.stateStore.Count);
-			Assert.True(e.context.stateStore.ContainsKey("stateComplete"));
-			Assert.True(e.context.stateStore.ContainsKey("initialComplete"));
-			Assert.True(e.context.stateStore.ContainsKey("changeComplete"));
-			Assert.True(e.context.stateStore.ContainsKey("secondComplete"));
+			Assert.True(testFinished, "TestFinished was never called!");
 		}
 	}
 }

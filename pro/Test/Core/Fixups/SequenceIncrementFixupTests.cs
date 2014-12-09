@@ -948,7 +948,7 @@ namespace Peach.Pro.Test.Core.Fixups
 		</Monitor>
 	</Agent>
 
-	<Test name='Default' faultWaitTime='0' replayEnabled='true'>
+	<Test name='Default' faultWaitTime='0' targetLifetime='iteration'>
 		<Agent ref='LocalAgent'/>
 		<StateModel ref='TheState'/>
 		<Publisher class='Null'/>
@@ -1016,7 +1016,7 @@ namespace Peach.Pro.Test.Core.Fixups
 		</Monitor>
 	</Agent>
 
-	<Test name='Default' faultWaitTime='0' replayEnabled='true'>
+	<Test name='Default' faultWaitTime='0' targetLifetime='iteration'>
 		<Agent ref='LocalAgent'/>
 		<StateModel ref='TheState'/>
 		<Publisher class='Null'/>

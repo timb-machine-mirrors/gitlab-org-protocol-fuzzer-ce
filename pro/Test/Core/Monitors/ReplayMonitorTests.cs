@@ -1,139 +1,131 @@
 ﻿using System.Collections.Generic;
-using System.IO;
+using System.Linq;
 using NUnit.Framework;
 using Peach.Core;
-using Peach.Core.Analyzers;
 using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Monitors
 {
-    [TestFixture] [Category("Peach")]
-    class ReplayMonitorTests : DataModelCollector
-    {
-        [Test]
-        public void Test1()
-        {
-            // Test that the repeated iterations are producing the same values.
+	[TestFixture]
+	[Category("Peach")]
+	internal class ReplayMonitorTests
+	{
+		private readonly List<Fault> _nonRerpoFaults = new List<Fault>();
+		private readonly List<Fault> _reproFaults = new List<Fault>();
+		private readonly List<Fault> _initialFaults = new List<Fault>();
 
-            string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
-                "<Peach>" +
-                "   <DataModel name=\"TheDataModel\">" +
-                "       <String name=\"str1\" value=\"Hello, World!\"/>" +
-                "   </DataModel>" +
-
-                "   <StateModel name=\"TheState\" initialState=\"Initial\">" +
-                "       <State name=\"Initial\">" +
-                "           <Action type=\"output\">" +
-                "               <DataModel ref=\"TheDataModel\"/>" +
-                "           </Action>" +
-                "       </State>" +
-                "   </StateModel>" +
-
-                "   <Agent name=\"LocalAgent\">" +
-                "       <Monitor class=\"FaultingMonitor\">" +
-                "       </Monitor>" +
-                "   </Agent>" +
-
-                "   <Test name=\"Default\" replayEnabled=\"true\">" +
-                "       <Agent ref=\"LocalAgent\"/>" +
-                "       <StateModel ref=\"TheState\"/>" +
-                "       <Publisher class=\"Null\"/>" +
-                "       <Strategy class=\"RandomDeterministic\"/>" +
-                "   </Test>" +
-                "</Peach>";
-
-            PitParser parser = new PitParser();
-
-            Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-            dom.tests[0].includedMutators = new List<string>();
-            dom.tests[0].includedMutators.Add("StringCaseUpper");
-            dom.tests[0].includedMutators.Add("StringCaseLower");
-
-            RunConfiguration config = new RunConfiguration();
-
-            Engine e = new Engine(this);
-            e.startFuzzing(dom, config);
-
-            // verify values
-            Assert.AreEqual(4, mutations.Count);
-            Assert.AreEqual((string)mutations[0], (string)mutations[1]);
-            Assert.AreEqual((string)mutations[2], (string)mutations[3]);
-        }
-
-
-		[Test]
-		public void ReplayControl()
+		[TestCase(true)]
+		[TestCase(false)]
+		public void Run(bool controlIteration)
 		{
-			string xml = @"
+			var xml = @"
 <Peach>
 	<DataModel name='TheDataModel'>
-		<String value='Hello World'/>
+		<String name='str1' value='Hello, World!' />
+		<String name='str2' value='Hello, World!' />
 	</DataModel>
 
 	<StateModel name='TheState' initialState='Initial'>
 		<State name='Initial'>
 			<Action type='output'>
-				<DataModel ref='TheDataModel'/>
+				<DataModel ref='TheDataModel' />
 			</Action>
 		</State>
 	</StateModel>
 
 	<Agent name='LocalAgent'>
 		<Monitor class='FaultingMonitor'>
-			<Param name='Iteration' value='C'/>
+			<Param name='Iteration' value='{0}'/>
 		</Monitor>
 	</Agent>
 
-	<Test name='Default' faultWaitTime='0' replayEnabled='true'>
-		<Agent ref='LocalAgent'/>
-		<StateModel ref='TheState'/>
-		<Publisher class='Null'/>
-		<Strategy class='RandomDeterministic'/>
+	<Test name='Default' targetLifetime='iteration' faultWaitTime='0.0'>
+		<Agent ref='LocalAgent' />
+		<StateModel ref='TheState' />
+		<Publisher class='Null' />
+		<Strategy class='RandomDeterministic' />
+		<Mutators mode='include'>
+			<Mutator class='StringCaseUpper' />
+			<Mutator class='StringCaseLower' />
+		</Mutators>
+		<Strategy class='RandomDeterministic' />
 	</Test>
-</Peach>";
+</Peach>
+".Fmt(controlIteration ? "C" : "");
 
-			PitParser parser = new PitParser();
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var dom = DataModelCollector.ParsePit(xml);
+			var cfg = new RunConfiguration();
+			var e = new Engine(null);
 
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
-
-			Engine e = new Engine(this);
-			e.Fault += _Fault;
-			e.ReproFault += _ReproFault;
-
-			try
+			e.ReproFault += (ctx, it, sm, faults) =>
 			{
-				e.startFuzzing(dom, config);
-				Assert.Fail("Should throw!");
-			}
-			catch (PeachException ex)
+				Assert.AreEqual(1, faults.Length);
+				faults[0].collectedData.AddRange(
+					sm.dataActions.Select(kv => new Fault.Data(kv.Key, kv.Value.ToArray())));
+				_initialFaults.Add(faults[0]);
+			};
+
+			e.Fault += (ctx, it, sm, faults) =>
 			{
+				Assert.AreEqual(1, faults.Length);
+				faults[0].collectedData.AddRange(
+					sm.dataActions.Select(kv => new Fault.Data(kv.Key, kv.Value.ToArray())));
+				_reproFaults.Add(faults[0]);
+			};
+
+			e.ReproFailed += (ctx, it) =>
+			{
+				Assert.Greater(_initialFaults.Count, 1);
+				var last = _initialFaults.Count - 1;
+				_nonRerpoFaults.Add(_initialFaults[last]);
+				_initialFaults.RemoveAt(last);
+			};
+
+			_nonRerpoFaults.Clear();
+			_reproFaults.Clear();
+			_initialFaults.Clear();
+
+			int expectedFaults;
+
+			if (controlIteration)
+			{
+				var ex = Assert.Throws<PeachException>(() => e.startFuzzing(dom, cfg));
+
 				Assert.AreEqual("Fault detected on control iteration.", ex.Message);
+
+				expectedFaults = 1;
+			}
+			else
+			{
+				e.startFuzzing(dom, cfg);
+
+				// 2 elements, 2 mutators = 4 faults
+				expectedFaults = 4;
 			}
 
-			Assert.NotNull(faults);
-			Assert.AreEqual(1, faults.Length);
+			Assert.AreEqual(0, _nonRerpoFaults.Count);
+			Assert.AreEqual(expectedFaults, _reproFaults.Count);
+			Assert.AreEqual(_reproFaults.Count, _initialFaults.Count);
 
-			Assert.NotNull(reproFaults);
-			Assert.AreEqual(1, reproFaults.Length);
+			for (var i = 0; i < _reproFaults.Count; ++i)
+			{
+				var initial = _initialFaults[i];
+				var repro = _reproFaults[i];
+
+				Assert.AreEqual(initial.title, repro.title);
+				Assert.AreEqual(initial.iteration, repro.iteration);
+
+				// Two pieces of data: FaultingMonitor and sm.dataActions
+				Assert.AreEqual(2, initial.collectedData.Count);
+				Assert.AreEqual(initial.collectedData.Count, repro.collectedData.Count);
+
+				for (var j = 0; j < initial.collectedData.Count; ++j)
+				{
+					Assert.AreEqual(initial.collectedData[j].Key, repro.collectedData[j].Key);
+					Assert.AreEqual(initial.collectedData[j].Path, repro.collectedData[j].Path);
+					Assert.AreEqual(initial.collectedData[j].Value, repro.collectedData[j].Value);
+				}
+			}
 		}
-
-		Fault[] faults = null;
-		Fault[] reproFaults = null;
-
-		void _ReproFault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faultData)
-		{
-			Assert.Null(reproFaults);
-			reproFaults = faultData;
-		}
-
-		void _Fault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faultData)
-		{
-			Assert.Null(faults);
-			faults = faultData;
-		}
-    }
+	}
 }
-
-// end

@@ -3,120 +3,214 @@ using System.Diagnostics;
 using System.IO;
 using NUnit.Framework;
 using Peach.Core;
-using Peach.Core.Analyzers;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Monitors
 {
 	[TestFixture] [Category("Peach")]
 	class ProcessKillerMonitorTests
 	{
-		SingleInstance si;
-
-		[SetUp]
-		public void SetUp()
-		{
-			si = SingleInstance.CreateInstance("Peach.Core.Test.Agents.ProcessKillerMonitorTests");
-			si.Lock();
-		}
-
-		[TearDown]
-		public void TearDown()
-		{
-			si.Dispose();
-			si = null;
-		}
-
-		string MakeXml(string folder)
-		{
-			string template = @"
-<Peach>
-	<DataModel name='TheDataModel'>
-		<String value='Hello' mutable='false'/>
-	</DataModel>
-
-	<StateModel name='TheState' initialState='Initial'>
-		<State name='Initial'>
-			<Action type='output'>
-				<DataModel ref='TheDataModel'/>
-			</Action>
-		</State>
-	</StateModel>
-
-	<Agent name='LocalAgent'>
-		<Monitor class='ProcessKiller'>
-			<Param name='ProcessNames' value='{0}'/>
-		</Monitor>
-	</Agent>
-
-	<Test name='Default' replayEnabled='false'>
-		<Agent ref='LocalAgent'/>
-		<StateModel ref='TheState'/>
-		<Publisher class='Null'/>
-		<Strategy class='RandomDeterministic'/>
-	</Test>
-</Peach>";
-
-			var ret = string.Format(template, folder);
-			return ret;
-		}
-
-		void Run(string proccessNames, Engine.IterationStartingEventHandler OnIterStart = null)
-		{
-			string xml = MakeXml(proccessNames);
-
-			PitParser parser = new PitParser();
-
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("StringCaseMutator");
-
-			RunConfiguration config = new RunConfiguration();
-
-			Engine e = new Engine(null);
-			if (OnIterStart != null)
-				e.IterationStarting += OnIterStart;
-			e.startFuzzing(dom, config);
-		}
-
 		[Test]
 		public void TestBadProcss()
 		{
-			// Specify a process name that is not running
-			Run("some_invalid_process");
+			// Nothing happens if process doesn't exist
+
+			var runner = new MonitorRunner("ProcessKiller", new Dictionary<string, string>
+			{
+				{"ProcessNames", "some_invalid_process"},
+			});
+
+			var faults = runner.Run();
+
+			Assert.AreEqual(0, faults.Length);
 		}
 
 		[Test]
-		public void TestProcss()
+		public void TestSingleProcss()
 		{
-			// Specify a process name that is not running
-			Run(testProcess, IterationStarting);
+			const string args = "127.0.0.1 0";
+			var exe = GetTempExeName();
 
-			var procs = Process.GetProcessesByName(testProcess);
-			foreach (var p in procs)
+			// On windows, the process name does not include the extension!
+			var procName = Path.GetFileNameWithoutExtension(exe);
+
+			Process p = null;
+
+			try
+			{
+				p = RunProcess(exe, args);
+
+				var runner = new MonitorRunner("ProcessKiller", new Dictionary<string, string>
+					{
+						{ "ProcessNames", procName },
+					})
+				{
+					IterationFinished = m =>
+					{
+						Assert.True(ProcessExists(procName), "Process '{0}' should exist before IterationFinished".Fmt(procName));
+
+						m.IterationFinished();
+
+						Assert.False(ProcessExists(procName), "Process '{0}' should not exist after IterationFinished".Fmt(procName));
+					},
+				};
+
+				var faults = runner.Run();
+
+				// never faults!
+				Assert.AreEqual(0, faults.Length);
+			}
+			finally
+			{
+				KillProcess(p);
+
+				try
+				{
+					File.Delete(exe);
+				}
+				// ReSharper disable once EmptyGeneralCatchClause
+				catch
+				{
+				}
+			}
+
+			Assert.False(ProcessExists(procName), "Process '{0}' should not exist after test".Fmt(procName));
+		}
+
+		[Test]
+		public void TestMultiProcss()
+		{
+			const string args = "127.0.0.1 0";
+			var exe1 = GetTempExeName();
+			var exe2 = GetTempExeName();
+
+			// On windows, the process name does not include the extension!
+			var procName1 = Path.GetFileNameWithoutExtension(exe1);
+			var procName2 = Path.GetFileNameWithoutExtension(exe2);
+
+			Process p1 = null;
+			Process p2 = null;
+
+			try
+			{
+				p1 = RunProcess(exe1, args);
+				p2 = RunProcess(exe2, args);
+
+				var runner = new MonitorRunner("ProcessKiller", new Dictionary<string, string>
+					{
+						{ "ProcessNames", "{0},{1},some_invalid_process".Fmt(procName1, procName2) },
+					})
+				{
+					IterationFinished = m =>
+					{
+						Assert.True(ProcessExists(procName1), "Process 1 '{0}' should exist before IterationFinished".Fmt(procName1));
+						Assert.True(ProcessExists(procName2), "Process 2 '{0}' should exist before IterationFinished".Fmt(procName2));
+
+						m.IterationFinished();
+
+						Assert.False(ProcessExists(procName1), "Process '{0}' should not exist after IterationFinished".Fmt(procName1));
+						Assert.False(ProcessExists(procName2), "Process '{0}' should not exist after IterationFinished".Fmt(procName2));
+					},
+				};
+
+				var faults = runner.Run();
+
+				// never faults!
+				Assert.AreEqual(0, faults.Length);
+			}
+			finally
+			{
+				KillProcess(p1);
+				KillProcess(p2);
+
+				try
+				{
+					File.Delete(exe1);
+				}
+				// ReSharper disable once EmptyGeneralCatchClause
+				catch
+				{
+				}
+
+				try
+				{
+					File.Delete(exe2);
+				}
+				// ReSharper disable once EmptyGeneralCatchClause
+				catch
+				{
+				}
+			}
+
+			Assert.False(ProcessExists(procName1), "Process '{0}' should not exist after test".Fmt(procName1));
+			Assert.False(ProcessExists(procName2), "Process '{0}' should not exist after test".Fmt(procName2));
+		}
+
+		static string GetTempExeName()
+		{
+			var exe = Platform.GetOS() == Platform.OS.Windows ? "CrashableServer.exe" : "CrashableServer";
+			var tmp = Path.GetTempFileName();
+			var dir = Path.GetDirectoryName(tmp);
+
+			if (string.IsNullOrEmpty(dir))
+				Assert.Fail("Temp directory should not be null or empty");
+
+			var name = Path.GetFileNameWithoutExtension(tmp);
+
+			var tmpExe = Path.Combine(dir, name + "-" + exe);
+
+			File.Delete(tmp);
+			File.Copy(Utilities.GetAppResourcePath(exe), tmpExe);
+
+			return tmpExe;
+		}
+
+		static Process RunProcess(string exe, string args)
+		{
+			var p = new Process
+			{
+				StartInfo = new ProcessStartInfo
+				{
+					FileName = exe,
+					Arguments = args,
+					UseShellExecute = false,
+					CreateNoWindow = true,
+				}
+			};
+
+			p.Start();
+
+			return p;
+		}
+
+		static void KillProcess(Process p)
+		{
+			if (p == null)
+				return;
+
+			try
+			{
+				if (!p.HasExited)
+				{
+					p.Kill();
+					p.WaitForExit(10000);
+				}
+			}
+			// ReSharper disable once EmptyGeneralCatchClause
+			catch
+			{
+			}
+			finally
+			{
 				p.Close();
-
-			Assert.True(madeProcess);
-			Assert.AreEqual(0, procs.Length);
+			}
 		}
 
-		string testProcess = GetTestProcess();
-		bool madeProcess = false;
-
-		void IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
+		static bool ProcessExists(string name)
 		{
-			Process p = new Process();
-			p.StartInfo = new ProcessStartInfo(testProcess);
-			madeProcess = p.Start();
-			System.Threading.Thread.Sleep(1000);
-			p.Close();
-		}
-
-		static string GetTestProcess()
-		{
-			if (Platform.GetOS() == Platform.OS.Windows)
-				return "notepad";
-			else
-				return "tail";
+			var procs = Process.GetProcessesByName(name);
+			procs.ForEach(p => p.Close());
+			return procs.Length > 0;
 		}
 	}
 }
