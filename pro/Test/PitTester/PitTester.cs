@@ -1,7 +1,6 @@
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.Dom.XPath;
-using Peach.Core.Fixups;
 using Peach.Core.IO;
 using System;
 using System.Collections.Generic;
@@ -11,6 +10,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.XPath;
 using Peach.Pro.Core;
+using Peach.Pro.Core.Fixups;
 using Peach.Pro.Core.WebServices;
 
 namespace PitTester
