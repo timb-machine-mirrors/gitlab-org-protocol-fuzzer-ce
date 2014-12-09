@@ -1,11 +1,15 @@
 @IfNot.Rejected
-<pre>
-License Type: @!Model.Version
-</pre>
 
-<textarea readonly="true" cols="80">
+<!-- License Type: @!Model.Version -->
+
+<textarea readonly="true" cols="80" rows="24">
 @!Model.EulaText
 </textarea>
+
+<pre>
+BY CLICKING "I ACCEPT" YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTAND, AND
+AGREE TO BE BOUND BY THE TERMS ABOVE.
+</pre>
 
 <form action="/eula" method="POST">
   <button type="submit" name="accept" value="true">Accept</button>
