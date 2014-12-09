@@ -33,6 +33,7 @@
 /// <reference path="models/PitConfig.ts" />
 /// <reference path="models/PitTest.ts" />
 /// <reference path="models/Wizard.ts" />
+/// <reference path="services/HttpErrorService.ts" />
 /// <reference path="services/JobService.ts" />
 /// <reference path="services/PitService.ts" />
 /// <reference path="services/TestService.ts" />

@@ -10,10 +10,17 @@ module Peach {
 		"ngResource",
 		"ngRoute",
 		"ngGrid",
+		"ngVis",
 		"ui.bootstrap",
 		"treeControl",
-		"angles",
-		"ngVis"
+		"angles"
+	]);
+
+	p.service('HttpErrorService', Services.HttpErrorService);
+	p.config([
+		'$httpProvider', ($httpProvider: ng.IHttpProvider) => {
+			$httpProvider.interceptors.push('HttpErrorService');
+		}
 	]);
 
 	p.factory('PeachConfigResource', [
