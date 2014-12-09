@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Peach.Core;
+using File = System.IO.File;
 
 namespace PitTester
 {
