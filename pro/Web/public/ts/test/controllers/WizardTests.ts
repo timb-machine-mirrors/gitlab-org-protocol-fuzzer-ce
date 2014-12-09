@@ -185,44 +185,43 @@ describe("Peach", () => {
 
 				expect(ctrl.Question.id).toBe(1143);
 				ctrl.Question.value = true;
-
-				var data = <Peach.Models.IPitAgents> {
-					pitUrl: pitUrl,
-					"agents": [
-						{
-							"name": "",
-							"agentUrl": "local://",
-							"monitors": [
-								{
-									"monitorClass": "PageHeap",
-									"path": [1110],
-									"map": [
-										{ "name": "Executable", "value": "C:\\some\\program.exe" },
-										{ "name": "WinDbgPath", "value": "" }
-									],
-									"description": "Enable page heap debugging options for an executable. "
-								}, {
-									"monitorClass": "WindowsDebugger",
-									"path": [1100],
-									"map": [
-										{ "name": "Executable", "value": "C:\\some\\program.exe" },
-										{ "name": "Arguments", "value": "/args" },
-										{ "name": "ProcessName" },
-										{ "name": "Service" },
-										{ "name": "WinDbgPath", "value": "" },
-										{ "name": "StartMode", "value": "StartOnEachIteration" },
-										{ "name": "IgnoreFirstChanceGuardPage", "value": true }
-									],
-									"description": "Enable Windows debugging. "
-								}
-							]
-						}
-					]
-				};
-				$httpBackend.expectPOST(pitUrl + "/agents", data).respond(data);
 				ctrl.Next();
-				$httpBackend.flush();
+
 				expect(ctrl.Question.type).toBe(Peach.Models.QuestionTypes.Done);
+
+				var expected: Peach.Models.Agent[] = [
+					{
+						"name": "",
+						"agentUrl": "local://",
+						"monitors": [
+							{
+								"monitorClass": "PageHeap",
+								"path": [1110],
+								"map": [
+									{ "name": "Executable", "value": "C:\\some\\program.exe" },
+									{ "name": "WinDbgPath", "value": "" }
+								],
+								"description": "Enable page heap debugging options for an executable. "
+							}, {
+								"monitorClass": "WindowsDebugger",
+								"path": [1100],
+								"map": [
+									{ "name": "Executable", "value": "C:\\some\\program.exe" },
+									{ "name": "Arguments", "value": "/args" },
+									{ "name": "ProcessName" },
+									{ "name": "Service" },
+									{ "name": "WinDbgPath", "value": "" },
+									{ "name": "StartMode", "value": "StartOnEachIteration" },
+									{ "name": "IgnoreFirstChanceGuardPage", "value": true }
+								],
+								"description": "Enable Windows debugging. "
+							}
+						]
+					}
+				];
+				
+				var actual = wizardService.GetTrack("fault").agents;
+				expect(JSON.stringify(actual)).toEqual(JSON.stringify(expected));
 			});
 		});
 
@@ -327,30 +326,29 @@ describe("Peach", () => {
 
 				expect(ctrl.Question.id).toBe(1000);
 				ctrl.Question.value = "FooValue";
-
-				var data = <Peach.Models.IPitAgents> {
-					pitUrl: pitUrl,
-					"agents": [
-						{
-							"name": "",
-							"agentUrl": "local://",
-							"monitors": [
-								{
-									"monitorClass": "FooMonitor",
-									"path": [1000],
-									"map": [
-										{ "name": "Param", "value": "FooValue" }
-									],
-									"description": "Foo monitor."
-								}
-							]
-						}
-					]
-				};
-				$httpBackend.expectPOST(pitUrl + "/agents", data).respond(data);
 				ctrl.Next();
-				$httpBackend.flush();
+
 				expect(ctrl.Question.type).toBe(Peach.Models.QuestionTypes.Done);
+
+				var expected: Peach.Models.Agent[] = [
+					{
+						"name": "",
+						"agentUrl": "local://",
+						"monitors": [
+							{
+								"monitorClass": "FooMonitor",
+								"path": [1000],
+								"map": [
+									{ "name": "Param", "value": "FooValue" }
+								],
+								"description": "Foo monitor."
+							}
+						]
+					}
+				];
+
+				var actual = wizardService.GetTrack("data").agents;
+				expect(JSON.stringify(actual)).toEqual(JSON.stringify(expected));
 			});
 
 			it("should allow adding multiple agents", () => {
@@ -367,30 +365,29 @@ describe("Peach", () => {
 
 				expect(ctrl.Question.id).toBe(1000);
 				ctrl.Question.value = "FooValue";
-
-				var data1 = <Peach.Models.IPitAgents> {
-					pitUrl: pitUrl,
-					"agents": [
-						{
-							"name": "",
-							"agentUrl": "local://",
-							"monitors": [
-								{
-									"monitorClass": "FooMonitor",
-									"path": [1000],
-									"map": [
-										{ "name": "Param", "value": "FooValue" }
-									],
-									"description": "Foo monitor."
-								}
-							]
-						}
-					]
-				};
-				$httpBackend.expectPOST(pitUrl + "/agents", data1).respond(data1);
 				ctrl.Next();
-				$httpBackend.flush();
+
 				expect(ctrl.Question.type).toBe(Peach.Models.QuestionTypes.Done);
+
+				var expected1: Peach.Models.Agent[] = [
+					{
+						"name": "",
+						"agentUrl": "local://",
+						"monitors": [
+							{
+								"monitorClass": "FooMonitor",
+								"path": [1000],
+								"map": [
+									{ "name": "Param", "value": "FooValue" }
+								],
+								"description": "Foo monitor."
+							}
+						]
+					}
+				];
+
+				var actual = wizardService.GetTrack("data").agents;
+				expect(JSON.stringify(actual)).toEqual(JSON.stringify(expected1));
 
 				ctrl.OnRestart();
 				expect(ctrl.Question.type).toBe(Peach.Models.QuestionTypes.Intro);
@@ -410,44 +407,43 @@ describe("Peach", () => {
 
 				expect(ctrl.Question.id).toBe(2000);
 				ctrl.Question.value = "BarValue";
-
-				var data2 = <Peach.Models.IPitAgents> {
-					pitUrl: pitUrl,
-					"agents": [
-						{
-							"name": "",
-							"agentUrl": "local://",
-							"monitors": [
-								{
-									"monitorClass": "FooMonitor",
-									"path": [1000],
-									"map": [
-										{ "name": "Param", "value": "FooValue" }
-									],
-									"description": "Foo monitor."
-								}
-							]
-						},
-						{
-							"name": "",
-							"agentUrl": "tcp://host",
-							"monitors": [
-								{
-									"monitorClass": "BarMonitor",
-									"path": [2000],
-									"map": [
-										{ "name": "Param", "value": "BarValue" }
-									],
-									"description": "Bar monitor."
-								}
-							]
-						}
-					]
-				};
-				$httpBackend.expectPOST(pitUrl + "/agents", data2).respond(data2);
 				ctrl.Next();
-				$httpBackend.flush();
+
 				expect(ctrl.Question.type).toBe(Peach.Models.QuestionTypes.Done);
+
+				var expected2: Peach.Models.Agent[] = [
+					{
+						"name": "",
+						"agentUrl": "local://",
+						"monitors": [
+							{
+								"monitorClass": "FooMonitor",
+								"path": [1000],
+								"map": [
+									{ "name": "Param", "value": "FooValue" }
+								],
+								"description": "Foo monitor."
+							}
+						]
+					},
+					{
+						"name": "",
+						"agentUrl": "tcp://host",
+						"monitors": [
+							{
+								"monitorClass": "BarMonitor",
+								"path": [2000],
+								"map": [
+									{ "name": "Param", "value": "BarValue" }
+								],
+								"description": "Bar monitor."
+							}
+						]
+					}
+				];
+
+				actual = wizardService.GetTrack("data").agents;
+				expect(JSON.stringify(actual)).toEqual(JSON.stringify(expected2));
 			});
 		});
 	});
