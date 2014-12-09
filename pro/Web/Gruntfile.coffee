@@ -1,6 +1,8 @@
 'use strict'
 
 module.exports = (grunt) ->
+	proxy = require('grunt-connect-proxy/lib/utils').proxyRequest
+
 	grunt.initConfig
 		pkg: grunt.file.readJSON 'package.json'
 
@@ -106,12 +108,31 @@ module.exports = (grunt) ->
 				options:
 					atBegin: true
 
+		connect:
+			options:
+				hostname: 'localhost'
+				port: 9000
+				base: 'public'
+				open: true
+			proxies: [
+				context: '/p/'
+				host: 'localhost'
+				port: 8888
+			]
+			livereload:
+				options:
+					debug: true
+					middleware: (connect, options) -> 
+						[ proxy, connect.static(options.base[0]) ]
+
 	grunt.loadNpmTasks 'grunt-bowercopy'
 	grunt.loadNpmTasks 'grunt-contrib-clean'
 	grunt.loadNpmTasks 'grunt-contrib-copy'
 	grunt.loadNpmTasks 'grunt-contrib-jasmine'
 	grunt.loadNpmTasks 'grunt-contrib-uglify'
 	grunt.loadNpmTasks 'grunt-contrib-watch'
+	grunt.loadNpmTasks 'grunt-contrib-connect'
+	grunt.loadNpmTasks 'grunt-connect-proxy'
 	grunt.loadNpmTasks 'grunt-ts'
 	grunt.loadNpmTasks 'grunt-tsd'
 
@@ -122,10 +143,12 @@ module.exports = (grunt) ->
 	grunt.registerTask 'compile-work', ['ts:app']
 	grunt.registerTask 'compile-test', ['ts:test']
 
+	grunt.registerTask 'server', ['configureProxies', 'connect:livereload']
+
 	grunt.registerTask 'work-and-watch', ['ts:watch']
 	grunt.registerTask 'test-and-watch', ['watch:test']
 
 	grunt.registerTask 'run-test', ['jasmine:test']
 
-	grunt.registerTask 'work', ['clean:app', 'work-and-watch']
+	grunt.registerTask 'work', ['clean:app', 'server', 'work-and-watch']
 	grunt.registerTask 'test', ['clean:app', 'test-and-watch']

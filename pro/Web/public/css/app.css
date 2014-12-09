@@ -59,6 +59,34 @@ pre.peach-test-log {
 	min-height: 300px;
 }
 
+.pagination > li {
+	cursor: pointer;
+}
+
+.peach-table th[st-sort] {
+	cursor: pointer;
+}
+
+.peach-table th[st-sort]::after {
+	content: "\f0dc";
+	display: inline-block;
+	color: #555;
+	font-family: FontAwesome2;
+	font-size: 13px;
+	font-weight: normal;
+	float: right;
+	margin-right: 4px;
+	position: relative;
+}
+
+.peach-table th.st-sort-descent::after {
+	content: "\f0dd";
+}
+
+.peach-table th.st-sort-ascent::after {
+	content: "\f0de";
+}
+
 /* 
 	fix for ace.css
 	default seems to be relative

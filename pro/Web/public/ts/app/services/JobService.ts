@@ -142,13 +142,15 @@ module Peach.Services {
 			}
 
 			this.poller = this.$interval(() => {
-				this.reloadFaults();
 				var promise = this.$http.get(this.job.jobUrl);
 				promise.success((job: Models.IJob) => {
 					this.job = job;
 					if (job.status === Models.JobStatus.Stopped) {
 						this.$interval.cancel(this.poller);
 						this.poller = undefined;
+					}
+					if (this.faults.length !== job.faultCount) {
+						this.reloadFaults();
 					}
 				});
 				promise.error(reason => this.onError(reason));

@@ -12,6 +12,7 @@ module Peach {
 		"ngGrid",
 		"ngVis",
 		"ui.bootstrap",
+		"smart-table",
 		"treeControl",
 		"angles"
 	]);
