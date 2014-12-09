@@ -3,8 +3,47 @@
 		Metrics &raquo; Buckets
 	</h1>
 </div>
-<div class="grid-border">
-	<div class="gridStyle" 
-			 ng-grid="vm.GridMetricsBucket">
-	</div>
-</div>
+<table st-table="vm.BucketData"
+			 st-safe-src="vm.AllBucketData"
+			 class="table table-striped table-bordered table-hover peach-table">
+	<thead>
+		<tr>
+			<th st-sort="bucket">
+				Fault Bucket
+			</th>
+			<th st-sort="mutator">
+				Mutator
+			</th>
+			<th st-sort="element">
+				Element
+			</th>
+			<th st-sort="iterationCount">
+				Iteration Count
+			</th>
+			<th st-sort="faultCount"
+					st-sort-default="reverse">
+				Fault Count
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr ng-repeat="row in vm.BucketData">
+			<td>{{row.bucket}}</td>
+			<td>{{row.mutator}}</td>
+			<td>{{row.element}}</td>
+			<td>{{row.iterationCount}}</td>
+			<td>{{row.faultCount}}</td>
+		</tr>
+	</tbody>
+	<tfoot>
+		<tr ng-if="vm.AllBucketData.length > 25">
+			<td colspan="5"
+					class="text-center">
+				<div st-pagination
+						 st-items-by-page="25"
+						 st-displayed-pages="10">
+				</div>
+			</td>
+		</tr>
+	</tfoot>
+</table>

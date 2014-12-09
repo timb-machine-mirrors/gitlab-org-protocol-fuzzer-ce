@@ -18,7 +18,6 @@ module.exports = (grunt) ->
 					'public/lib/angular-ui-utils'  : 'angular-ui-utils:main'
 					'public/lib/jquery'            : 'jquery:main'
 					'public/lib/moment'            : 'moment:main'
-					'public/lib/ng-grid'           : 'ng-grid:main'
 					'public/lib/underscore'        : 'underscore:main'
 
 			mainless:
@@ -40,7 +39,6 @@ module.exports = (grunt) ->
 					'bootstrap/fonts'             : 'bootstrap/dist/fonts/*'
 					'bootstrap/js'                : 'bootstrap/dist/js/bootstrap.js'
 					'chartjs'                     : 'chartjs/Chart.js'
-					'ng-grid/plugins'             : 'ng-grid/plugins/ng-grid-flexible-height.js'
 					'vis/img'                     : 'vis/dist/img/*'
 					'vis/vis.css'                 : 'vis/dist/vis.css'
 					'vis/vis.js'                  : 'vis/dist/vis.js'

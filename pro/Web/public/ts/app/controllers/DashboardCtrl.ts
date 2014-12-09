@@ -4,7 +4,6 @@ module Peach {
 	"use strict";
 
 	export class DashboardController {
-		public Faults: Models.IFaultSummary[] = [];
 
 		static $inject = [
 			"$scope",
@@ -21,19 +20,16 @@ module Peach {
 		) {
 			$scope.vm = this;
 
-			$scope.$watch("vm.Job.faultCount", () => {
-				this.Faults = this.jobService.Faults.sort(
-				(a: Models.IFaultSummary, b: Models.IFaultSummary) => {
-					if (a.iteration === b.iteration) {
-						return 0;
-					} else if (a.iteration > b.iteration) {
-						return -1;
-					} else {
-						return 1;
-					}
-				}).slice(0, 9);
+			$scope.$watch('vm.jobService.Faults.length', (newVal, oldVal) => {
+				if (newVal !== oldVal) {
+					this.refreshFaults();
+				}
 			});
+
+			this.refreshFaults();
 		}
+
+		public Faults: Models.IFaultSummary[] = [];
 
 		public get IsConfigured(): boolean {
 			return this.pitService.IsConfigured;
@@ -85,22 +81,8 @@ module Peach {
 			this.jobService.StopJob();
 		}
 
-		public Grid = {
-			data: "vm.Faults",
-			sortInfo: { fields: ["iteration"], directions: ["desc"] },
-			columnDefs: [
-				{ field: "iteration", displayName: "#" },
-				{ field: "timeStamp", displayName: "When", cellFilter: "date:'M/d/yy h:mma'" },
-				{ field: "source", displayName: "Monitor" },
-				{ field: "exploitability", displayName: "Risk" },
-				{ field: "majorHash", displayName: "Major Hash" },
-				{ field: "minorHash", displayName: "Minor Hash" }
-			],
-			enablePaging: true,
-			pagingOptions: { pageSize: 10, currentPage: 1, pageSizes: [10] },
-			totalServerItems: "vm.Job.faultCount",
-			showFooter: false,
-			plugins: [new ngGridFlexibleHeightPlugin({ minHeight: 303 })]
-		};
+		private refreshFaults() {
+			this.Faults = _.last(this.jobService.Faults, 10).reverse();
+		}
 	}
 }

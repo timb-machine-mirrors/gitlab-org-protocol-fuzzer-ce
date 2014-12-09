@@ -3,8 +3,47 @@
 		Metrics &raquo; Mutators
 	</h1>
 </div>
-<div class="grid-border">
-	<div class="gridStyle"
-	     ng-grid="vm.GridMetricsMutator">
-	</div>
-</div>
+<table st-table="vm.MutatorData"
+			 st-safe-src="vm.AllMutatorData"
+			 class="table table-striped table-bordered table-hover peach-table">
+	<thead>
+		<tr>
+			<th st-sort="mutator"
+					st-sort-default>
+				Mutator
+			</th>
+			<th st-sort="elementCount">
+				Element Count
+			</th>
+			<th st-sort="iterationCount">
+				Iteration Count
+			</th>
+			<th st-sort="bucketCount">
+				Bucket Count
+			</th>
+			<th st-sort="faultCount">
+				Fault Count
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr ng-repeat="row in vm.BucketData">
+			<td>{{row.mutator}}</td>
+			<td>{{row.elementCount}}</td>
+			<td>{{row.iterationCount}}</td>
+			<td>{{row.bucketCount}}</td>
+			<td>{{row.faultCount}}</td>
+		</tr>
+	</tbody>
+	<tfoot>
+		<tr ng-if="vm.AllMutatorData.length > 25">
+			<td colspan="5"
+					class="text-center">
+				<div st-pagination
+						 st-items-by-page="25"
+						 st-displayed-pages="10">
+				</div>
+			</td>
+		</tr>
+	</tfoot>
+</table>

@@ -81,10 +81,19 @@ module Peach {
 		private metric: string;
 
 		public MutatorData: Models.IMutatorMetric[] = [];
+		public AllMutatorData: Models.IMutatorMetric[] = [];
+
 		public ElementData: Models.IElementMetric[] = [];
+		public AllElementData: Models.IElementMetric[] = [];
+
 		public DatasetData: Models.IDatasetMetric[] = [];
+		public AllDatasetData: Models.IDatasetMetric[] = [];
+
 		public StateData: Models.IStateMetric[] = [];
+		public AllStateData: Models.IStateMetric[] = [];
+
 		public BucketData: Models.IBucketMetric[] = [];
+		public AllBucketData: Models.IBucketMetric[] = [];
 
 		public MetricsFaultsOverTimeData: LinearChartData = {
 			labels: [],
@@ -126,74 +135,6 @@ module Peach {
 			datasetStroke: true,
 			datasetStrokeWidth: 2,
 			datasetFill: true
-		};
-
-		public GridMetricsMutator: ngGrid.IGridOptions = {
-			data: "vm.MutatorData",
-			sortInfo: { fields: ["mutator"], directions: ["asc"] },
-			enableColumnResize: true,
-			columnDefs: [
-				{ field: "mutator", displayName: "Mutator" },
-				{ field: "elementCount", displayName: "Element Count" },
-				{ field: "iterationCount", displayName: "Iteration Count" },
-				{ field: "bucketCount", displayName: "Bucket Count" },
-				{ field: "faultCount", displayName: "Fault Count" }
-			],
-			plugins: [ new ngGridFlexibleHeightPlugin() ]
-		};
-
-		public GridMetricsElement: ngGrid.IGridOptions = {
-			data: "vm.ElementData",
-			sortInfo: { fields: ["faultCount"], directions: ["desc"] },
-			enableColumnResize: true,
-			columnDefs: [
-				{ field: "state", displayName: "State" },
-				{ field: "action", displayName: "Action" },
-				{ field: "parameter", displayName: "Parameter" },
-				{ field: "element", displayName: "Element" },
-				{ field: "iterationCount", displayName: "Iterations" },
-				{ field: "bucketCount", displayName: "Buckets" },
-				{ field: "faultCount", displayName: "Faults" }
-			],
-			plugins: [new ngGridFlexibleHeightPlugin()]
-		};
-
-		public GridMetricsState: ngGrid.IGridOptions = {
-			data: "vm.StateData",
-			sortInfo: { fields: ["state"], directions: ["asc"] },
-			enableColumnResize: true,
-			columnDefs: [
-				{ field: "state", displayName: "State" },
-				{ field: "executionCount", displayName: "Executions" }
-			],
-			plugins: [new ngGridFlexibleHeightPlugin()]
-		};
-
-		public GridMetricsDataset: ngGrid.IGridOptions = {
-			data: "vm.DatasetData",
-			sortInfo: { fields: ["faultCount"], directions: ["desc"] },
-			enableColumnResize: true,
-			columnDefs: [
-				{ field: "dataset", displayName: "Data Set" },
-				{ field: "iterationCount", displayName: "Iterations" },
-				{ field: "bucketCount", displayName: "Buckets" },
-				{ field: "faultCount", displayName: "Faults" }
-			],
-			plugins: [new ngGridFlexibleHeightPlugin()]
-		};
-
-		public GridMetricsBucket: ngGrid.IGridOptions = {
-			data: "vm.BucketData",
-			sortInfo: { fields: ["faultCount"], directions: ["desc"] },
-			enableColumnResize: true,
-			columnDefs: [
-				{ field: "bucket", displayName: "Fault Bucket" },
-				{ field: "mutator", displayName: "Mutator" },
-				{ field: "element", displayName: "Element" },
-				{ field: "iterationCount", displayName: "Iteration Count" },
-				{ field: "faultCount", displayName: "Fault Count" }
-			],
-			plugins: [new ngGridFlexibleHeightPlugin()]
 		};
 
 		public BucketTimelineData = {
@@ -272,28 +213,33 @@ module Peach {
 				});
 				break;
 			case "mutators":
+				this.MutatorData = _.clone(this.AllMutatorData);
 				promise.success((data: Models.IMutatorMetric[]) => {
-					this.MutatorData = data;
+					this.AllMutatorData = data;
 				});
 				break;
 			case "elements":
+				this.ElementData = _.clone(this.AllElementData);
 				promise.success((data: Models.IElementMetric[]) => {
-					this.ElementData = data;
+					this.AllElementData = data;
 				});
 				break;
 			case "dataset":
+				this.DatasetData = _.clone(this.AllDatasetData);
 				promise.success((data: Models.IDatasetMetric[]) => {
-					this.DatasetData = data;
+					this.AllDatasetData = data;
 				});
 				break;
 			case "states":
+				this.StateData = _.clone(this.AllStateData);
 				promise.success((data: Models.IStateMetric[]) => {
-					this.StateData = data;
+					this.AllStateData = data;
 				});
 				break;
 			case "buckets":
+				this.BucketData = _.clone(this.AllBucketData);
 				promise.success((data: Models.IBucketMetric[]) => {
-					this.BucketData = data;
+					this.AllBucketData = data;
 				});
 				break;
 			}

@@ -9,7 +9,6 @@ module Peach {
 	var p = angular.module("Peach", [
 		"ngResource",
 		"ngRoute",
-		"ngGrid",
 		"ngVis",
 		"ui.bootstrap",
 		"smart-table",
