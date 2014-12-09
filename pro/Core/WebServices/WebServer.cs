@@ -132,7 +132,7 @@ namespace Peach.Pro.Core.WebServices
 
 			// Need to go before the default '/Content' handler in nancy
 			nancyConventions.StaticContentsConventions.Insert(0,
-				StaticContentConventionBuilder.AddDirectory("/", @"web")
+				StaticContentConventionBuilder.AddDirectory("/", @"public")
 			);
 			nancyConventions.StaticContentsConventions.Insert(0,
 				StaticContentConventionBuilder.AddDirectory("/docs", @"webhelp/docs")

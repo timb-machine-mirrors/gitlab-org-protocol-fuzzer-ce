@@ -43,24 +43,45 @@ namespace Peach.Core
 	/// <summary>
 	/// Helper class to add a debug listener so asserts get written to the console.
 	/// </summary>
-	// NOTE: Tell msvs this is not a 'Component' (must be fully namespaced)
+	// NOTE: Tell msvs this is not a 'Component'
 	[DesignerCategory("Code")]
 	public class AssertWriter : TraceListener
 	{
+		static readonly NLog.Logger Logger = LogManager.GetLogger("TraceListener");
+
 		public static void Register()
 		{
-			Debug.Listeners.Insert(0, new AssertWriter());
+			Register<AssertWriter>();
+		}
+
+		public static void Register<T>() where T : AssertWriter, new()
+		{
+			Debug.Listeners.Insert(0, new T());
+		}
+
+		protected virtual void OnAssert(string message)
+		{
+			Console.WriteLine(message);
+		}
+
+		public override void Fail(string message)
+		{
+			var sb = new StringBuilder();
+
+			sb.AppendLine("Assertion " + message);
+			sb.AppendLine(new StackTrace(2, true).ToString());
+
+			OnAssert(sb.ToString());
 		}
 
 		public override void Write(string message)
 		{
-			Console.Write(message);
+			Logger.Trace(message);
 		}
 
 		public override void WriteLine(string message)
 		{
-			Console.WriteLine("Assertion {0}", message);
-			Console.WriteLine(new StackTrace(2, true));
+			Logger.Trace(message);
 		}
 	}
 

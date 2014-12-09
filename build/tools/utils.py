@@ -53,13 +53,15 @@ def do_install(self, inst_to, attr, chmod):
 	val = getattr(self, attr, [])
 
 	if isinstance(val, dict):
-		for cwd,items in val.iteritems():
+		for cwd, items in val.iteritems():
+			if isinstance(cwd, str):
+				cwd = self.path.find_node(cwd)
 			do_install2(self, inst_to, cwd, items, chmod)
 	else:
 		do_install2(self, inst_to, self.path, val, chmod)
 
 def do_install2(self, inst_to, cwd, items, chmod):
-	extras = self.to_nodes(Utils.to_list(items), path=cwd)
+	extras = self.to_nodes(items, path=cwd)
 
 	if extras:
 		if not inst_to:

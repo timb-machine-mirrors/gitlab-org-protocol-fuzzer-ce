@@ -63,6 +63,7 @@ namespace Peach.Core
 	/// </summary>
 	public static class Platform
 	{
+		[Flags]
 		public enum OS
 		{
 			[XmlEnum("none")]

@@ -1,6 +1,7 @@
 from waflib.TaskGen import feature, before_method, after_method, extension
 from waflib import Task, Utils, Logs, Configure, Context, Options, Errors
 import re, os.path
+import tools.utils
 
 refs = re.compile('<reference\s+path="(.*)"\s*/>', re.M)
 
@@ -21,7 +22,7 @@ def configure(conf):
 @after_method('process_source')
 def process_tsc(self):
 	outputs = []
-	for t in getattr(self, 'compiled_tasks', []):
+	for t in getattr(self, 'tsc', []):
 		outputs.extend(t.outputs)
 
 	# remember that the install paths are given by the task generators
@@ -35,8 +36,11 @@ def process_tsc(self):
 			dst = o.path_from(self.path.get_bld()).split(os.path.sep)
 			dst = [ x == 'ts' and 'js' or x for x in dst ]
 			dst = os.path.sep.join(dst)
-			i = self.bld.install_as('%s/%s' % (inst_to, dst), o, env=self.env, chmod=Utils.O644);
-			self.install_extras.append(i)
+			i = self.bld.install_as('%s/%s' % (inst_to, dst), o, env=self.env, chmod=Utils.O644)
+			tools.utils.save_inst_task(self, i)
+			tsc_out = getattr(self, 'tsc_out', [])
+			tsc_out.append(dst)
+			self.tsc_out = tsc_out
 
 def parse_tsc(self):
 	env = self.env
@@ -49,20 +53,13 @@ def parse_tsc(self):
 	to_see = [self.inputs[0]]
 	basedir = self.inputs[0].get_src().parent;
 
-	# Find dependencies and generate the list of output files
-
+	# Find dependencies
 	while to_see:
 		node = to_see.pop(0)
 		if node in seen:
 			continue
 		seen.append(node)
 		lst_src.append(node)
-		cwd = node.parent
-
-		# If this is a child, add it to the outputs
-		if cwd.is_child_of(basedir) and not node.name.endswith('.d.ts'):
-			outputs.append(node.change_ext('.js'))
-			outputs.append(node.change_ext('.js.map'))
 
 		# read the file
 		code = node.read()
@@ -77,8 +74,6 @@ def parse_tsc(self):
 				missing.append(u)
 				Logs.warn('could not find %r' % n)
 
-	self.outputs = outputs
-
 	# Cache for the scanner function
 	# Dep nodes, Unresolved names
 	self.tsc_deps = (lst_src, missing)
@@ -90,19 +85,22 @@ class tsc(Task.Task):
 	"""
 	Run tsc
 	"""
-	run_str = '${TSC} ${TSC_FLAGS} -outDir ${TGT[0].bld_dir()} ${SRC}'
+	run_str = '${TSC} ${TSC_FLAGS} -out ${TGT[0].abspath()} ${SRC}'
 	inst_to = '${BINDIR}'
 	chmod   = Utils.O644
 	scan    = tsc_scan
 
 @extension('.ts')
 def tsc_hook(self, node):
-	self.tsc = self.create_task('tsc', node)
+	task = self.create_task('tsc', node)
+	task.outputs = [
+		node.change_ext('.js'),
+		node.change_ext('.js.map'),
+	]
+	parse_tsc(task)
 
-	parse_tsc(self.tsc)
+	tasks = getattr(self, 'tsc', [])
+	tasks.append(task)
+	self.tsc = tasks
 
-	try:
-		self.compiled_tasks.append(self.tsc)
-	except AttributeError:
-		self.compiled_tasks = [self.tsc]
-	return self.tsc
+	return task

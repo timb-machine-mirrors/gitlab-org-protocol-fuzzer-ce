@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using Peach.Core;
+using Peach.Pro.Core.WebServices.Models;
 
 namespace Peach.Pro.Core
 {
@@ -28,24 +30,31 @@ namespace Peach.Pro.Core
 			[DefaultValue("")]
 			public string Description { get; set; }
 
-			public abstract WebServices.Models.ParameterType ConfigType
-			{
-				get;
-			}
+			public abstract ParameterType ConfigType { get; }
 
 			public virtual string[] Defaults
 			{
 				get { return new string[0]; }
 			}
 
-			public virtual int? Min
+			// only used by RangeDefine
+			public virtual long? Min
 			{
 				get { return null; }
 			}
 
-			public virtual uint? Max
+			// only used by RangeDefine
+			public virtual ulong? Max
 			{
 				get { return null; }
+			}
+		}
+
+		public class UserDefine : Define
+		{
+			public override ParameterType ConfigType
+			{
+				get { return ParameterType.User; }
 			}
 		}
 
@@ -54,39 +63,39 @@ namespace Peach.Pro.Core
 		/// </summary>
 		public class StringDefine : Define
 		{
-			public override WebServices.Models.ParameterType ConfigType
+			public override ParameterType ConfigType
 			{
-				get { return WebServices.Models.ParameterType.String; }
+				get { return ParameterType.String; }
 			}
 		}
 
 		public class HexDefine : Define
 		{
-			public override WebServices.Models.ParameterType ConfigType
+			public override ParameterType ConfigType
 			{
-				get { return WebServices.Models.ParameterType.Hex; }
+				get { return ParameterType.Hex; }
 			}
 		}
 
 		public class RangeDefine : Define
 		{
 			[XmlAttribute("min")]
-			public int MinValue { get; set; }
+			public long MinValue { get; set; }
 
 			[XmlAttribute("max")]
-			public uint MaxValue { get; set; }
+			public ulong MaxValue { get; set; }
 
-			public override WebServices.Models.ParameterType ConfigType
+			public override ParameterType ConfigType
 			{
-				get { return WebServices.Models.ParameterType.Range; }
+				get { return ParameterType.Range; }
 			}
 
-			public override int? Min
+			public override long? Min
 			{
 				get { return MinValue; }
 			}
 
-			public override uint? Max
+			public override ulong? Max
 			{
 				get { return MaxValue; }
 			}
@@ -94,41 +103,41 @@ namespace Peach.Pro.Core
 
 		public class Ipv4Define : Define
 		{
-			public override WebServices.Models.ParameterType ConfigType
+			public override ParameterType ConfigType
 			{
-				get { return WebServices.Models.ParameterType.Ipv4; }
+				get { return ParameterType.Ipv4; }
 			}
 		}
 
 		public class Ipv6Define : Define
 		{
-			public override WebServices.Models.ParameterType ConfigType
+			public override ParameterType ConfigType
 			{
-				get { return WebServices.Models.ParameterType.Ipv6; }
+				get { return ParameterType.Ipv6; }
 			}
 		}
 
 		public class HwaddrDefine : Define
 		{
-			public override WebServices.Models.ParameterType ConfigType
+			public override ParameterType ConfigType
 			{
-				get { return WebServices.Models.ParameterType.Hwaddr; }
+				get { return ParameterType.Hwaddr; }
 			}
 		}
 
 		public class IfaceDefine : Define
 		{
-			public override WebServices.Models.ParameterType ConfigType
+			public override ParameterType ConfigType
 			{
-				get { return WebServices.Models.ParameterType.Iface; }
+				get { return ParameterType.Iface; }
 			}
 		}
 
 		public class StrategyDefine : Define
 		{
-			public override WebServices.Models.ParameterType ConfigType
+			public override ParameterType ConfigType
 			{
-				get { return WebServices.Models.ParameterType.Enum; }
+				get { return ParameterType.Enum; }
 			}
 
 			public override string[] Defaults
@@ -148,8 +157,8 @@ namespace Peach.Pro.Core
 		public class EnumDefine : Define
 		{
 			[XmlIgnore]
-			public Type EnumType { get; private set; }
-
+			public Type EnumType { get; protected set; }
+			
 			[XmlAttribute("enumType")]
 			public string EnumTypeName
 			{
@@ -176,9 +185,9 @@ namespace Peach.Pro.Core
 				}
 			}
 
-			public override WebServices.Models.ParameterType ConfigType
+			public override ParameterType ConfigType
 			{
-				get { return WebServices.Models.ParameterType.Enum; }
+				get { return ParameterType.Enum; }
 			}
 
 			public override string[] Defaults
@@ -196,13 +205,13 @@ namespace Peach.Pro.Core
 
 		public abstract class Collection
 		{
-			public Collection()
+			protected Collection()
 			{
 				Defines = new List<Define>();
 			}
 
 			[XmlIgnore]
-			public abstract Peach.Core.Platform.OS Platform { get; }
+			public abstract Platform.OS Platform { get; }
 
 			[XmlElement("String", Type = typeof(StringDefine))]
 			[XmlElement("Hex", Type = typeof(HexDefine))]
@@ -213,13 +222,14 @@ namespace Peach.Pro.Core
 			[XmlElement("Iface", Type = typeof(IfaceDefine))]
 			[XmlElement("Strategy", Type = typeof(StrategyDefine))]
 			[XmlElement("Enum", Type = typeof(EnumDefine))]
+			[XmlElement("Define", Type = typeof(UserDefine))]
 			public List<Define> Defines { get; set; }
 		}
 
 		public class None : Collection
 		{
 			[XmlIgnore]
-			public override Peach.Core.Platform.OS Platform
+			public override Platform.OS Platform
 			{
 				get { return Peach.Core.Platform.OS.None; }
 			}
@@ -228,7 +238,7 @@ namespace Peach.Pro.Core
 		public class Windows : Collection
 		{
 			[XmlIgnore]
-			public override Peach.Core.Platform.OS Platform
+			public override Platform.OS Platform
 			{
 				get { return Peach.Core.Platform.OS.Windows; }
 			}
@@ -237,7 +247,7 @@ namespace Peach.Pro.Core
 		public class OSX : Collection
 		{
 			[XmlIgnore]
-			public override Peach.Core.Platform.OS Platform
+			public override Platform.OS Platform
 			{
 				get { return Peach.Core.Platform.OS.OSX; }
 			}
@@ -246,7 +256,7 @@ namespace Peach.Pro.Core
 		public class Linux : Collection
 		{
 			[XmlIgnore]
-			public override Peach.Core.Platform.OS Platform
+			public override Platform.OS Platform
 			{
 				get { return Peach.Core.Platform.OS.Linux; }
 			}
@@ -255,7 +265,7 @@ namespace Peach.Pro.Core
 		public class Unix : Collection
 		{
 			[XmlIgnore]
-			public override Peach.Core.Platform.OS Platform
+			public override Platform.OS Platform
 			{
 				get { return Peach.Core.Platform.OS.Unix; }
 			}
@@ -264,7 +274,7 @@ namespace Peach.Pro.Core
 		public class All : Collection
 		{
 			[XmlIgnore]
-			public override Peach.Core.Platform.OS Platform
+			public override Platform.OS Platform
 			{
 				get { return Peach.Core.Platform.OS.All; }
 			}
@@ -296,12 +306,12 @@ namespace Peach.Pro.Core
 			return Parse(XmlTools.Deserialize<PitDefines>(inputUri));
 		}
 
-		public static List<Define> Parse(System.IO.Stream stream)
+		public static List<Define> Parse(Stream stream)
 		{
 			return Parse(XmlTools.Deserialize<PitDefines>(stream));
 		}
 
-		public static List<Define> Parse(System.IO.TextReader textReader)
+		public static List<Define> Parse(TextReader textReader)
 		{
 			return Parse(XmlTools.Deserialize<PitDefines>(textReader));
 		}
@@ -334,13 +344,13 @@ namespace Peach.Pro.Core
 				return val ?? m.Groups[0].Value;
 			});
 
-			for (var i = 0; i < ret.Count;)
+			for (var i = 0; i < ret.Count; )
 			{
 				var oldVal = ret[i].Value;
 				var newVal = re.Replace(oldVal, evaluator);
 
 				if (oldVal != newVal)
-					ret[i] = new KeyValuePair<string,string>(ret[i].Key, newVal);
+					ret[i] = new KeyValuePair<string, string>(ret[i].Key, newVal);
 				else
 					++i;
 			}

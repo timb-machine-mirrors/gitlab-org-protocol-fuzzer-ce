@@ -1,0 +1,14 @@
+﻿<div>
+	<div>
+		<h4>Review</h4>
+	</div>
+	<div ng-switch="vm.DataAgents.length">
+		<div ng-switch-when="0">
+			You have elected to not perform Data Collection. Click Continue to move on to Automation.
+		</div>
+		<div ng-switch-default>
+			<div ng-include="'html/wizard/data/table.html'">
+			</div>
+		</div>
+	</div>
+</div>

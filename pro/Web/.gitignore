@@ -1,0 +1,12 @@
+/[Bb]in/
+/[Oo]bj/
+/public/js/app/
+/public/js/test/
+/public/tests.html
+/bower_components
+/node_modules
+/.tscache
+/.grunt
+.baseDir.ts
+/Gruntfile.js*
+/Gruntfile.min*

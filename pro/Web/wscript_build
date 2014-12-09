@@ -5,33 +5,29 @@ deps = [
 	'System.Web.dll',
 ]
 
-extras = [
-	'README.adoc',
-	'index.html',
-	'package.json',
+content = [
 	'bower.json',
+	'Gruntfile.coffee',
+	'package.json',
+	'README.adoc',
 	'tsd.json',
-]
+] + bld.path.ant_glob('public/ts/test/**/*.ts')
 
-dirs = [ 
-	'app', 
-	'Content', 
-	'partials', 
-	'testdata',
-	'bower_components',
-]
-
-for d in dirs:
-	extras.extend(bld.path.ant_glob('%s/**/*' % d, excl = ['app/js/*', '**/*.ts']))
+public = bld.path.ant_glob('public/**/*', excl = [
+	'public/tests.html',
+	'public/js/app/*',
+	'public/js/test/*',
+	'public/**/*.ts',
+])
 
 bld(
 	features = 'tsc',
 	name ='Peach.Pro.Web',
-	source = 'app/ts/app.ts',
-	install_path = '${BINDIR}/web',
-	install_644 = extras,
+	source = 'public/ts/app/app.ts',
+	install_path = '${BINDIR}',
+	install_644 = public,
 	ide_source = 'ReverseProxy.cs',
-	ide_content = bld.path.ant_glob('typings/**/*'),
+	ide_content = content,
 	ide_aspnet = True,
 	use = deps,
 )

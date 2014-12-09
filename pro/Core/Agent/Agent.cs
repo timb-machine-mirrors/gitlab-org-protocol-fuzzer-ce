@@ -265,7 +265,7 @@ namespace Peach.Pro.Core.Agent
 		/// Send an information request (query) to all local monitors.
 		/// </summary>
 		/// <remarks>
-		/// Monitors may expose information that other monitors can query.  For example a
+		/// Agents may expose information that other monitors can query.  For example a
 		/// debugger monitor may expose a "QueryPid" to get the current process id.  This
 		/// information could be useful to a window closing monitor that monitors windows created
 		/// by the process id and closes them if needed.

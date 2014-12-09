@@ -1,0 +1,15 @@
+﻿<div>
+	<div>
+		<h4>Review</h4>
+	</div>
+	<div ng-switch="vm.AutoAgents.length">
+		<div ng-switch-when="0">
+			You have elected to not perform Automation.
+			Click Continue to move on to Test.
+		</div>
+		<div ng-switch-default>
+			<div ng-include="'html/wizard/auto/table.html'">
+			</div>
+		</div>
+	</div>
+</div>

@@ -47,7 +47,7 @@ namespace Peach.Pro.Core.WebServices
 			public class AgentReferenceElement
 			{
 				[XmlAttribute("ref")]
-				public string Ref { get; set; } 
+				public string Ref { get; set; }
 			}
 
 			public TestElement()
@@ -62,7 +62,7 @@ namespace Peach.Pro.Core.WebServices
 			public List<AgentReferenceElement> AgentRefs { get; set; }
 		}
 
-		public class AgentElement: ChildElement
+		public class AgentElement : ChildElement
 		{
 			public class MonitorElement : ChildElement
 			{
@@ -209,11 +209,11 @@ namespace Peach.Pro.Core.WebServices
 				if (list[i].Key != key)
 					continue;
 
-				list[i] = new KeyValuePair<string,string>(key, value);
+				list[i] = new KeyValuePair<string, string>(key, value);
 				return;
 			}
 
-			list.Add(new KeyValuePair<string,string>(key, value));
+			list.Add(new KeyValuePair<string, string>(key, value));
 		}
 
 		public static List<KeyValuePair<string, string>> ParseConfig(string pitLibraryPath, string pitConfig)
@@ -245,22 +245,7 @@ namespace Peach.Pro.Core.WebServices
 
 			foreach (var kv in ClassLoader.GetAllByAttribute<MonitorAttribute>((t, a) => a.IsDefault))
 			{
-				var attr = kv.Key;
-				var type = kv.Value;
-
-				var m = new Monitor
-				{
-					Description = type.GetAttributes<DescriptionAttribute>().Select(a => a.Description).FirstOrDefault() ?? "",
-					MonitorClass = attr.Name,
-					Map = new List<Parameter>(),
-				};
-
-				foreach (var p in type.GetAttributes<ParameterAttribute>())
-				{
-					m.Map.Add(ParameterAttrToModel(p));
-				}
-
-				m.Map.Sort(ParameterSorter);
+				var m = MakeMonitor(kv.Key, kv.Value);
 
 				ret.Add(m);
 			}
@@ -268,6 +253,37 @@ namespace Peach.Pro.Core.WebServices
 			ret.Sort(MonitorSorter);
 
 			return ret;
+		}
+
+		internal Monitor MakeMonitor(MonitorAttribute attr, Type type)
+		{
+			var os = "";
+			if (attr.OS == Platform.OS.Unix)
+			{
+				var ex = new NotSupportedException("Monitor {0} specifies unsupported OS {1}".Fmt(attr.Name, attr.OS));
+				if (ValidationEventHandler != null)
+					ValidationEventHandler(this, new ValidationEventArgs(ex, ""));
+			}
+			else if (attr.OS != Platform.OS.All)
+			{
+				os = attr.OS.ToString();
+			}
+
+			var m = new Monitor
+			{
+				Description = type.GetAttributes<DescriptionAttribute>().Select(a => a.Description).FirstOrDefault() ?? "",
+				MonitorClass = attr.Name,
+				Map = new List<Parameter>(),
+				OS = os,
+			};
+
+			foreach (var p in type.GetAttributes<ParameterAttribute>())
+			{
+				m.Map.Add(ParameterAttrToModel(attr.Name, p));
+			}
+
+			m.Map.Sort(ParameterSorter);
+			return m;
 		}
 
 		public PitDatabase()
@@ -410,20 +426,48 @@ namespace Peach.Pro.Core.WebServices
 			return item.PitUrl;
 		}
 
+		/// <summary>
+		/// Save Pit Config
+		/// </summary>
+		/// <param name="pit"></param>
+		/// <param name="config"></param>
+		/// <remarks>
+		/// only allow user parameters to add/delete
+		/// only allow user parameters where the key doesn't collide with system parameters
+		/// only allow system parameter values to be updated
+		/// </remarks>
 		public static void SaveConfig(Pit pit, List<Parameter> config)
 		{
 			var fileName = pit.Versions[0].Files[0].Name + ".config";
-			var defines = PitDefines.Parse(fileName);
 
-			// For now, read in the current defines off disk and
-			// apply any applicable changes. We don't currently expect
-			// this api to add new defines or delete old defines.
-			foreach (var item in config)
+			var defines = new List<PitDefines.Define>();
+
+			var reserved = new HashSet<string>();
+			foreach (var def in PitDefines.Parse(fileName))
 			{
-				foreach (var def in defines)
+				if (def.ConfigType != ParameterType.User)
 				{
-					if (def.Key == item.Key)
-						def.Value = item.Value;
+					var param = config.SingleOrDefault((x) => x.Key == def.Key);
+					if (param != null)
+					{
+						def.Value = param.Value;
+					}
+					defines.Add(def);
+					reserved.Add(def.Key);
+				}
+			}
+
+			foreach (var param in config)
+			{
+				if (param.Type == ParameterType.User && !reserved.Contains(param.Key))
+				{
+					defines.Add(new PitDefines.UserDefine
+					{
+						Key = param.Key,
+						Name = param.Name,
+						Value = param.Value,
+						Description = param.Description
+					});
 				}
 			}
 
@@ -432,7 +476,7 @@ namespace Peach.Pro.Core.WebServices
 				Platforms = new List<PitDefines.Collection>(new[] {
 					new PitDefines.All
 					{
-						Defines = defines,
+						Defines = defines.ToList(),
 					}
 				}),
 			};
@@ -440,21 +484,24 @@ namespace Peach.Pro.Core.WebServices
 			XmlTools.Serialize(fileName, final);
 		}
 
-		public List<Models.Agent> GetAgentsById(string guid)
+		public PitAgents GetAgentsById(string guid)
 		{
 			return GetAgentsByUrl(PitService.Prefix + "/" + guid);
 		}
 
-		public List<Models.Agent> GetAgentsByUrl(string url)
+		public PitAgents GetAgentsByUrl(string url)
 		{
 			var pit = GetPitByUrl(url);
-
 			if (pit == null)
 				return null;
 
 			var doc = Parse(pit.Versions[0].Files[0].Name);
-			var models = new List<Models.Agent>();
-			foreach(var agent in doc.Children.OfType<PeachElement.AgentElement>())
+			var ret = new PitAgents
+			{
+				PitUrl = url,
+				Agents = new List<Models.Agent>(),
+			};
+			foreach (var agent in doc.Children.OfType<PeachElement.AgentElement>())
 			{
 				var a = new Models.Agent
 				{
@@ -463,7 +510,7 @@ namespace Peach.Pro.Core.WebServices
 					Monitors = new List<Monitor>()
 				};
 
-				foreach(var monitor in agent.Monitors)
+				foreach (var monitor in agent.Monitors)
 				{
 					var m = new Monitor
 					{
@@ -484,7 +531,7 @@ namespace Peach.Pro.Core.WebServices
 						{
 							m.Map.Add(new Parameter
 							{
-								Param = param.Name,
+								Name = param.Name,
 								Value = param.Value,
 								Type = ParameterType.String,
 							});
@@ -499,7 +546,7 @@ namespace Peach.Pro.Core.WebServices
 
 						foreach (var attr in type.GetAttributes<ParameterAttribute>())
 						{
-							var p = ParameterAttrToModel(attr);
+							var p = ParameterAttrToModel(monitor.Class, attr);
 
 							p.Value = monitor.Params
 								.Where(i => i.Name == attr.name)
@@ -514,18 +561,18 @@ namespace Peach.Pro.Core.WebServices
 
 					a.Monitors.Add(m);
 				}
-				models.Add(a);
+				ret.Agents.Add(a);
 			}
 
-			return models;
+			return ret;
 		}
 
 		private static int ParameterSorter(Parameter lhs, Parameter rhs)
 		{
-			if (lhs.Required == rhs.Required)
-				return string.CompareOrdinal(lhs.Param, rhs.Param);
+			if (IsRequired(lhs) == IsRequired(rhs))
+				return string.CompareOrdinal(lhs.Name, rhs.Name);
 
-			return lhs.Required ? -1 : 1;
+			return IsRequired(lhs) ? -1 : 1;
 		}
 
 		private static int MonitorSorter(Monitor lhs, Monitor rhs)
@@ -533,7 +580,7 @@ namespace Peach.Pro.Core.WebServices
 			return string.CompareOrdinal(lhs.MonitorClass, rhs.MonitorClass);
 		}
 
-		public static void SaveMonitors(Pit pit, List<Models.Agent> monitors)
+		public static void SaveAgents(Pit pit, List<Models.Agent> agents)
 		{
 			var fileName = pit.Versions[0].Files[0].Name;
 			var doc = new XmlDocument();
@@ -578,14 +625,13 @@ namespace Peach.Pro.Core.WebServices
 			if (test == null)
 				throw new PeachException("Could not find a <Test> element in the pit '" + fileName + "'.");
 
-			var agents = new OrderedDictionary<string, XmlWriter>();
-
-			foreach (var item in monitors)
+			var final = new OrderedDictionary<string, XmlWriter>();
+			foreach (var item in agents)
 			{
 				XmlWriter w;
-				if (!agents.TryGetValue(item.AgentUrl, out w))
+				if (!final.TryGetValue(item.AgentUrl, out w))
 				{
-					var agentName = "Agent" + agents.Count;
+					var agentName = "Agent" + final.Count;
 					if (!string.IsNullOrEmpty(item.Name))
 						agentName = item.Name;
 
@@ -602,7 +648,7 @@ namespace Peach.Pro.Core.WebServices
 						testWriter.WriteEndElement();
 					}
 
-					agents.Add(item.AgentUrl, w);
+					final.Add(item.AgentUrl, w);
 				}
 
 				foreach (var m in item.Monitors)
@@ -614,9 +660,13 @@ namespace Peach.Pro.Core.WebServices
 
 					foreach (var p in m.Map)
 					{
+						// TODO: don't trust user input, use reflection as canonical source of metadata
+						if (string.IsNullOrEmpty(p.Value) || p.Value == p.DefaultValue)
+							continue;
+
 						w.WriteStartElement("Param", PeachElement.Namespace);
 
-						if (p.Param == "StartMode")
+						if (p.Name == "StartMode")
 						{
 							if (p.Value == "StartOnCall") // File fzzing
 							{
@@ -640,7 +690,7 @@ namespace Peach.Pro.Core.WebServices
 						}
 						else
 						{
-							w.WriteAttributeString("name", p.Param);
+							w.WriteAttributeString("name", p.Name);
 							w.WriteAttributeString("value", p.Value);
 						}
 
@@ -651,7 +701,7 @@ namespace Peach.Pro.Core.WebServices
 				}
 			}
 
-			foreach (var a in agents)
+			foreach (var a in final)
 			{
 				a.Value.Close();
 			}
@@ -850,9 +900,9 @@ namespace Peach.Pro.Core.WebServices
 					Type = d.ConfigType,
 					Key = d.Key,
 					Value = d.Value,
-					Param = d.Name,
+					Name = d.Name,
 					Description = d.Description,
-					Defaults = new List<string>(d.Defaults),
+					Options = d.Defaults.ToList(),
 					Min = d.Min,
 					Max = d.Max,
 				};
@@ -860,28 +910,31 @@ namespace Peach.Pro.Core.WebServices
 				switch (item.Type)
 				{
 					case ParameterType.Hwaddr:
-						item.Defaults.AddRange(
+						item.Options.AddRange(
 							Interfaces
 								.Select(i => i.GetPhysicalAddress().GetAddressBytes())
 								.Select(a => string.Join(":", a.Select(b => b.ToString("x2"))))
 								.Where(s => !string.IsNullOrEmpty(s)));
 						break;
 					case ParameterType.Iface:
-						item.Defaults.AddRange(Interfaces.Select(i => i.Name));
+						item.Options.AddRange(Interfaces.Select(i => i.Name));
 						break;
 					case ParameterType.Ipv4:
-						item.Defaults.AddRange(
+						item.Options.AddRange(
 							Interfaces
 								.SelectMany(i => i.GetIPProperties().UnicastAddresses)
 								.Where(a => a.Address.AddressFamily == AddressFamily.InterNetwork)
 								.Select(a => a.Address.ToString()));
 						break;
 					case ParameterType.Ipv6:
-						item.Defaults.AddRange(
+						item.Options.AddRange(
 							Interfaces
 								.SelectMany(i => i.GetIPProperties().UnicastAddresses)
 								.Where(a => a.Address.AddressFamily == AddressFamily.InterNetworkV6)
 								.Select(a => a.Address.ToString()));
+						break;
+					case ParameterType.Bool:
+						item.Options.AddRange(new[] {"true", "false"});
 						break;
 				}
 
@@ -891,13 +944,12 @@ namespace Peach.Pro.Core.WebServices
 			return ret;
 		}
 
-		internal Parameter ParameterAttrToModel(ParameterAttribute attr)
+		internal Parameter ParameterAttrToModel(string monitorClass, ParameterAttribute attr)
 		{
 			var p = new Parameter
 			{
-				Param = attr.name,
-				Value = attr.defaultValue,
-				Required = attr.required,
+				Name = attr.name,
+				DefaultValue = attr.required ? null : attr.defaultValue,
 				Description = attr.description
 			};
 
@@ -934,10 +986,11 @@ namespace Peach.Pro.Core.WebServices
 					break;
 				case "Boolean":
 					p.Type = ParameterType.Bool;
+					p.Options = new List<string> {"true", "false"};
 					break;
 				case "Enum":
 					p.Type = ParameterType.Enum;
-					p.Defaults = Enum.GetNames(attr.type).ToList();
+					p.Options = Enum.GetNames(attr.type).ToList();
 					break;
 				case "IPAddress":
 					p.Type = ParameterType.Ipv4;
@@ -945,8 +998,10 @@ namespace Peach.Pro.Core.WebServices
 				default:
 					p.Type = ParameterType.String;
 
-					if(ValidationEventHandler != null)
-						ValidationEventHandler(this, new ValidationEventArgs(new NotSupportedException("ParameterAttrToModel: Cannot make model type for parameter type " + attr.type.FullName), ""));
+					var ex =
+						new NotSupportedException("Monitor {0} has invalid parameter type {1}".Fmt(monitorClass, attr.type.FullName));
+					if (ValidationEventHandler != null)
+						ValidationEventHandler(this, new ValidationEventArgs(ex, ""));
 
 					break;
 			}
@@ -954,6 +1009,10 @@ namespace Peach.Pro.Core.WebServices
 			return p;
 		}
 
+		private static bool IsRequired(Parameter param)
+		{
+			return param.DefaultValue == null;
+		}
 
 		private static bool IsConfigured(PeachElement elem)
 		{

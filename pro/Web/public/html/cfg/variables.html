@@ -1,0 +1,95 @@
+﻿<form name="form">
+	<div class="page-content">
+		<div class="page-header">
+			<h1>Configuration &raquo; Variables</h1>
+		</div>
+		<div class="row"
+				 style="margin-bottom: 10px">
+			<div class="col-xs-6">
+				<span ng-show="vm.ShowSaved"
+							class="green">
+					Saved successfully.
+				</span>
+				<span ng-show="vm.ShowValidation"
+							class="red">
+					You have some validation issues to correct.
+				</span>
+			</div>
+			<div class="col-xs-6 text-right">
+				<button class="btn btn-xs btn-danger"
+								ng-class="{disabled: !vm.CanSave}"
+								ng-click="vm.OnSave()">
+					Save
+				</button>
+				<button class="btn btn-xs btn-info"
+								ng-click="vm.OnAdd()">
+					Add Variable &nbsp;
+					<i class="glyphicon glyphicon-plus">
+					</i>
+				</button>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-12">
+				<table class="table table-striped table-hover table-bordered">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Key</th>
+							<th>Value</th>
+							<th class="center">Remove</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="param in vm.PitConfig.config"
+								ng-form="form">
+							<td class="align-middle">
+								<span>
+									{{param.name}}
+								</span>
+								<span class="peach-field-info tooltip-info pull-right"
+											style="margin-right: 10px"
+											tooltip="{{param.description}}"
+											tooltip-placement="right"
+											tooltip-append-to-body="true">
+								</span>
+							</td>
+							<td class="align-middle">
+								{{param.key}}
+							</td>
+							<td ng-class="{'has-error': form.param.$invalid && form.param.$dirty}">
+								<input type="text"
+											 class="form-control"
+											 ng-model="param.value"
+											 name="param"
+											 ng-required="!vm.CanRemove(param)"
+											 placeholder="{{param.defaultValue}}"
+											 typeahead="choice for choice in vm.Choices(param) | filter: $viewValue"
+											 typeahead-editable="{{param.type !== 'bool' && param.type !== 'enum'}}" />
+								<span class="help-block"
+											ng-show="form.param.$error.integer">
+									Not a number
+								</span>
+								<span class="help-block"
+											ng-show="form.param.$error.required && form.param.$dirty">
+									Required
+								</span>
+								<span class="help-block"
+											ng-show="form.param.$error.editable">
+									Invalid value
+								</span>
+							</td>
+							<td class="center">
+								<button class="btn btn-xs btn-cell"
+												ng-show="vm.CanRemove(param)"
+												ng-click="vm.OnRemove($index)">
+									<i class="glyphicon glyphicon-remove"></i>
+								</button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</form>

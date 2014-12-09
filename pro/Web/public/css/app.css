@@ -1,0 +1,82 @@
+﻿.skin-1 .nav-list > li.disabled > a > .menu-text,
+.skin-1 .nav-list > li.disabled > a > i,
+.skin-1 .nav-list > li.disabled > a > .arrow {
+	color: #595D60;
+	cursor: not-allowed;
+}
+
+a.disabled {
+	cursor: not-allowed;
+}
+
+.timeline.vis .box.item {
+	cursor: pointer;
+}
+
+pre {
+	word-wrap: normal;
+	overflow: auto;
+}
+
+.peach-field-info:before {
+	content: "\f059";
+}
+
+.peach-field-info {
+	font-family: FontAwesome2;
+	cursor: pointer;
+}
+
+.pointer {
+	cursor: pointer;
+}
+
+.accordion-toggle:hover {
+	text-decoration: none;
+}
+
+.accordion-toggle:focus {
+	outline: none;
+	cursor: pointer;
+}
+
+.btn-cell {
+	line-height: 24px;
+	background-color: transparent !important;
+	border-color: transparent !important;
+	color: red !important;
+}
+
+.btn-xs .glyphicon {
+	margin-right: 0;
+}
+
+.peach-icon-cell {
+	width: 25px;
+}
+
+pre.peach-test-log {
+	min-height: 300px;
+}
+
+/* 
+	fix for ace.css
+	default seems to be relative
+	this can cause main-content form-groups to flow below the bottom of the sidebar
+*/
+.sidebar {
+	position: absolute;
+}
+
+/* fix for backdrop, for some reason this is missing */
+.modal-backdrop {
+	bottom: 0;
+}
+
+/* turn off animation, this can screw with autofocus */
+.modal.fade .modal-dialog,
+.modal.in .modal-dialog {
+	-webkit-transform: translate(0, 0);
+	-ms-transform: translate(0, 0);
+	transform: translate(0, 0);
+}

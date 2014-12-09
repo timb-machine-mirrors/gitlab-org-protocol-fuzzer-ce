@@ -1,0 +1,21 @@
+﻿<div>
+	<div class="header blue"
+			 ng-show="vm.IsSetVars">
+		{{vm.Question.shortName || vm.Question.key}}
+	</div>
+	<label>
+		{{vm.Question.q}}
+		(value must be a number between
+		{{vm.Question.rangeMin}} and {{vm.Question.rangeMax}})
+	</label>
+	<div>
+		<input ng-model="vm.Question.value"
+					 ng-enter="vm.Next()"
+					 step="1"
+					 ng-min="vm.Question.rangeMin"
+					 ng-max="vm.Question.rangeMax"
+					 type="number"
+					 ng-required="vm.Question.required"
+					 integer />
+	</div>
+</div>

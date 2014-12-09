@@ -1,0 +1,25 @@
+﻿<div>
+	<div class="header blue"
+			 ng-show="vm.IsSetVars">
+		{{vm.Question.shortName || vm.Question.key}}
+	</div>
+	<label>{{vm.Question.q}}</label>
+	<div class="dropdown" >
+		<input name="{{vm.Question.key}}"
+					 ng-model="vm.Question.value"
+					 type="text"
+					 ng-enter="vm.Next()"
+					 class="dropdown-toggle"
+					 hexstring
+					 ng-required="vm.Question.required" />
+		<ul class="dropdown-menu"
+				ng-show="vm.IsSetVars">
+			<li ng-repeat="default in vm.Question.defaults">
+				<div ng-click="vm.Question.value = default"
+						 style="width: 100%; cursor: pointer">
+					{{default}}
+				</div>
+			</li>
+		</ul>
+	</div>
+</div>

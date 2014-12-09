@@ -1,0 +1,49 @@
+﻿<form name="form"
+			class="form-horizontal"
+			novalidate>
+	<div class="page-content">
+		<div class="page-header">
+			<h1>Configuration &raquo; Monitoring</h1>
+		</div>
+		<div class="row"
+				 style="margin-bottom: 10px">
+			<div class="col-xs-6">
+				<span ng-show="vm.ShowSaved"
+							class="green">
+					Saved successfully.
+				</span>
+				<span ng-show="vm.ShowError"
+							class="red">
+					You have some validation issues to correct.
+				</span>
+				<span ng-show="vm.ShowIntro"
+							class="red">
+					You'll need an Agent, click the "Add Agent" button.
+				</span>
+			</div>
+			<div class="col-xs-6 text-right">
+				<button class="btn btn-xs btn-danger"
+								ng-click="vm.Save()"
+								ng-class="{disabled: !vm.CanSave}">
+					Save
+				</button>
+				<button class="btn btn-xs btn-info"
+								ng-click="vm.AddAgent()">
+					Add Agent &nbsp;
+					<i class="glyphicon glyphicon-plus">
+					</i>
+				</button>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-12">
+				<accordion ng-repeat="agent in vm.Model.agents track by $index">
+					<peach:agent agents="vm.Model.agents"
+											 agent="agent"
+											 agent-index="$index">
+					</peach:agent>
+				</accordion>
+			</div>
+		</div>
+	</div>
+</form>
