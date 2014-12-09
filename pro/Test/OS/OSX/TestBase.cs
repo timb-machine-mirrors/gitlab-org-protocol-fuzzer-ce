@@ -1,16 +1,15 @@
 ﻿using NLog;
-using NLog.Targets;
 using NLog.Config;
+using NLog.Targets;
 using NUnit.Framework;
 using Peach.Core;
 
-// ReSharper disable once CheckNamespace
-namespace Peach
+namespace Peach.Pro.Test.OS.OSX
 {
 	[SetUpFixture]
 	class TestBase
 	{
-		SingleInstance si;
+		SingleInstance _si;
 
 		[SetUp]
 		public void Initialize()
@@ -33,17 +32,17 @@ namespace Peach
 			LogManager.Configuration = config;
 
 			// Ensure only 1 instance of the platform tests runs at a time
-			si = SingleInstance.CreateInstance("Peach.Pro.Test.OS.OSX.dll");
-			si.Lock();
+			_si = SingleInstance.CreateInstance("Peach.Pro.Test.OS.OSX.dll");
+			_si.Lock();
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
-			if (si != null)
+			if (_si != null)
 			{
-				si.Dispose();
-				si = null;
+				_si.Dispose();
+				_si = null;
 			}
 		}
 	}

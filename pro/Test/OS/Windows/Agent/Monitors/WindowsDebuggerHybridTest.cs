@@ -64,7 +64,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 		</Monitor>
 	</Agent>
 
-	<Test name='Default'>
+	<Test name='Default' targetLifetime='iteration'>
 		<Agent ref='LocalAgent'/>
 		<StateModel ref='TheState'/>
 		<Publisher class='Tcp'>
@@ -155,7 +155,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 		</Monitor>
 	</Agent>
 
-	<Test name='Default' replayEnabled='true'>
+	<Test name='Default' targetLifetime='iteration'>
 		<Agent ref='LocalAgent'/>
 		<StateModel ref='TheState'/>
 		<Publisher class='Null'/>

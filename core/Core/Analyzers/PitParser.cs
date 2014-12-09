@@ -1679,14 +1679,14 @@ namespace Peach.Core.Analyzers
 			if (node.hasAttr("controlIteration"))
 				test.controlIteration = int.Parse(node.getAttrString("controlIteration"));
 
-			if (node.hasAttr("replayEnabled"))
-				test.replayEnabled = node.getAttrBool("replayEnabled");
-
 			if (node.hasAttr("nonDeterministicActions"))
 				test.nonDeterministicActions = node.getAttrBool("nonDeterministicActions");
 
 			if (node.hasAttr("maxOutputSize"))
 				test.maxOutputSize = node.getAttrUInt64("maxOutputSize");
+
+			if (node.hasAttr("maxBackSearch"))
+				test.MaxBackSearch = node.getAttrUInt32("maxBackSearch");
 
 			var lifetime = node.getAttr("targetLifetime", null);
 			if (lifetime != null)
@@ -1763,6 +1763,12 @@ namespace Peach.Core.Analyzers
 					{
 						switch (platform.ToLower())
 						{
+							case "all":
+								parent.agents[refName].platform = Platform.OS.All;
+								break;
+							case "none":
+								parent.agents[refName].platform = Platform.OS.None;
+								break;
 							case "windows":
 								parent.agents[refName].platform = Platform.OS.Windows;
 								break;
@@ -1770,8 +1776,10 @@ namespace Peach.Core.Analyzers
 								parent.agents[refName].platform = Platform.OS.OSX;
 								break;
 							case "linux":
-							case "unix":
 								parent.agents[refName].platform = Platform.OS.Linux;
+								break;
+							case "unix":
+								parent.agents[refName].platform = Platform.OS.Unix;
 								break;
 						}
 					}

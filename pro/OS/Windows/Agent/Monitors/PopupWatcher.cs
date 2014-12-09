@@ -104,9 +104,10 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 					lock (_lock)
 					{
 						_closedWindows.Add(strTitle);
+						OnInternalEvent(EventArgs.Empty);
 					}
 
-					_continue = false;
+					_continue &= WindowNames.Length > 1;
 					return _continue;
 				}
 			}

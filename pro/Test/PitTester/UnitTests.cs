@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Peach.Core;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using File = System.IO.File;
@@ -206,6 +207,64 @@ namespace PitTester
 				File.Delete(pitFile);
 				File.Delete(pitTest);
 			}
+		}
+
+		[Test]
+		public void UnhandledException()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str1' />
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='TheState'/>
+		<Publisher name='Pub' class='Tcp'>
+			<Param name='Host' value='localhost' />
+			<Param name='Port' value='65500' />
+		</Publisher>
+	</Test>
+</Peach>
+";
+
+			const string test = @"
+<TestData>
+	<Test name='Default'>
+		<Open   action='TheState.Initial.Action' publisher='Pub'/>
+	</Test>
+</TestData>
+";
+
+			// Ensure we can run when there is an ignore that matches a de-selected choice
+			var pitFile = Path.GetTempFileName();
+			var pitTest = pitFile + ".test";
+
+			File.WriteAllText(pitFile, xml);
+			File.WriteAllText(pitTest, test);
+
+			var ex = Assert.Throws<PeachException>(() =>
+			{
+				try
+				{
+					PitTester.TestPit("", pitFile, true, null);
+				}
+				finally
+				{
+					File.Delete(pitFile);
+					File.Delete(pitTest);
+				}
+			});
+
+			Assert.That(ex.Message, Is.StringStarting("Encountered an unhandled exception on iteration 1"));
 		}
 	}
 }

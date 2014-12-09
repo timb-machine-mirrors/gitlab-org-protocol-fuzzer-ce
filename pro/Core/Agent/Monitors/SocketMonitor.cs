@@ -158,6 +158,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 				_socket.Bind(new IPEndPoint(local, Port));
 			}
 
+			// Allow for ephemeral ports
+			Port = (ushort)((IPEndPoint)_socket.LocalEndPoint).Port;
+
 			if (Protocol == Proto.Tcp)
 				_socket.Listen(Backlog);
 		}

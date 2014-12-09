@@ -41,17 +41,17 @@ namespace Peach.Core
 	/// <summary>
 	/// The main Peach fuzzing engine!
 	/// </summary>
-	[Serializable]
 	public class Engine
 	{
-		[NonSerialized]
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		[NonSerialized]
-		public Watcher watcher = null;
-		public RunContext context = null;
-		public Dom.Dom dom = null;
-		public Test test = null;
+		private readonly Watcher _watcher;
+		private readonly RunContext _context;
+
+		[Obsolete("This property is obsolete.")]
+		public RunContext context { get { return _context; } }
+		//public Dom.Dom dom { get { return runContext.dom; } }
+		//public Test test  { get { return runContext.test; } }
 
 		#region Events
 
@@ -73,115 +73,137 @@ namespace Peach.Core
 		/// contains multiple Tests.
 		/// </summary>
 		public event TestStartingEventHandler TestStarting;
+
 		/// <summary>
 		/// Fired at the start of each iteration.  This event will
 		/// be fired often.
 		/// </summary>
 		public event IterationStartingEventHandler IterationStarting;
+
 		/// <summary>
 		/// Fired at end of each iteration.  This event will be fired often.
 		/// </summary>
 		public event IterationFinishedEventHandler IterationFinished;
+
 		/// <summary>
 		/// Fired when a Fault is detected and the engine starts retrying to reproduce it.
 		/// </summary>
 		public event ReproFaultEventHandler ReproFault;
+
 		/// <summary>
 		/// Fired when a Fault is is unable to be reproduced
 		/// </summary>
 		public event ReproFailedEventHandler ReproFailed;
+
 		/// <summary>
 		/// Fired when a Fault is detected.
 		/// </summary>
 		public event FaultEventHandler Fault;
+
 		/// <summary>
 		/// Fired when a Test is finished.
 		/// </summary>
 		public event TestFinishedEventHandler TestFinished;
+
 		/// <summary>
 		/// Fired when a recoverable warning occurs during a Test.
 		/// </summary>
 		public event TestWarningEventHandler TestWarning;
+
 		/// <summary>
 		/// Fired when we know the count of iterations the Test will take.
 		/// </summary>
 		public event TestErrorEventHandler TestError;
+
 		/// <summary>
 		/// Fired when we know the count of iterations the Test will take.
 		/// </summary>
 		public event HaveCountEventHandler HaveCount;
+
 		/// <summary>
 		/// Fired when we know the range of iterations the parallel Test will take.
 		/// </summary>
 		public event HaveParallelEventHandler HaveParallel;
 
-		public void OnTestStarting(RunContext context)
+		private void OnTestStarting()
 		{
 			if (TestStarting != null)
-				TestStarting(context);
+				TestStarting(_context);
 		}
-		public void OnIterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
+
+		private void OnIterationStarting(uint currentIteration, uint? totalIterations)
 		{
 			if (IterationStarting != null)
-				IterationStarting(context, currentIteration, totalIterations);
+				IterationStarting(_context, currentIteration, totalIterations);
 		}
-		public void OnIterationFinished(RunContext context, uint currentIteration)
+
+		private void OnIterationFinished(uint currentIteration)
 		{
 			if (IterationFinished != null)
-				IterationFinished(context, currentIteration);
+				IterationFinished(_context, currentIteration);
 		}
-		public void OnFault(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faultData)
+
+		private void OnFault(uint currentIteration, StateModel stateModel, Fault[] faultData)
 		{
 			logger.Debug(">> OnFault");
 
 			if (Fault != null)
-				Fault(context, currentIteration, stateModel, faultData);
+				Fault(_context, currentIteration, stateModel, faultData);
 
 			logger.Debug("<< OnFault");
 		}
-		public void OnReproFault(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faultData)
+
+		private void OnReproFault(uint currentIteration, StateModel stateModel, Fault[] faultData)
 		{
 			if (ReproFault != null)
-				ReproFault(context, currentIteration, stateModel, faultData);
+				ReproFault(_context, currentIteration, stateModel, faultData);
 		}
-		public void OnReproFailed(RunContext context, uint currentIteration)
+
+		private void OnReproFailed(uint currentIteration)
 		{
 			if (ReproFailed != null)
-				ReproFailed(context, currentIteration);
+				ReproFailed(_context, currentIteration);
 		}
-		public void OnTestFinished(RunContext context)
+
+		private void OnTestFinished()
 		{
 			if (TestFinished != null)
-				TestFinished(context);
+				TestFinished(_context);
 		}
-		public void OnTestError(RunContext context, Exception e)
+
+		private void OnTestError(Exception e)
 		{
 			if (TestError != null)
-				TestError(context, e);
+				TestError(_context, e);
 		}
-		public void OnTestWarning(RunContext context, string msg)
+
+		private void OnTestWarning(string msg)
 		{
 			if (TestWarning != null)
-				TestWarning(context, msg);
+				TestWarning(_context, msg);
 		}
-		public void OnHaveCount(RunContext context, uint totalIterations)
+
+		private void OnHaveCount(uint totalIterations)
 		{
 			if (HaveCount != null)
-				HaveCount(context, totalIterations);
+				HaveCount(_context, totalIterations);
 		}
-		public void OnHaveParallel(RunContext context, uint startIteration, uint stopIteration)
+
+		private void OnHaveParallel(uint startIteration, uint stopIteration)
 		{
 			if (HaveParallel != null)
-				HaveParallel(context, startIteration, stopIteration);
+				HaveParallel(_context, startIteration, stopIteration);
 		}
 
 		#endregion
 
 		public Engine(Watcher watcher)
 		{
-			this.watcher = watcher;
-			context = new RunContext();
-			context.engine = this;
+			_watcher = watcher;
+			_context = new RunContext
+			{
+				engine = this,
+			};
 		}
 
 		/// <summary>
@@ -192,82 +214,74 @@ namespace Peach.Core
 		public void startFuzzing(Dom.Dom dom, RunConfiguration config)
 		{
 			if (dom == null)
-				throw new ArgumentNullException("dom parameter is null");
+				throw new ArgumentNullException("dom");
 			if (config == null)
-				throw new ArgumentNullException("config paremeter is null");
+				throw new ArgumentNullException("config");
 
-			Test test = null;
+			Test test;
 
-			try
-			{
-				test = dom.tests[config.runName];
-			}
-			catch (Exception ex)
-			{
-				throw new PeachException("Unable to locate test named '" + config.runName + "'.", ex);
-			}
+			if (!dom.tests.TryGetValue(config.runName, out test))
+				throw new PeachException("Unable to locate test named '" + config.runName + "'.");
 
 			startFuzzing(dom, test, config);
 		}
 
 		protected void startFuzzing(Dom.Dom dom, Test test, RunConfiguration config)
 		{
+			if (dom == null)
+				throw new ArgumentNullException("dom");
+			if (test == null)
+				throw new ArgumentNullException("test");
+			if (config == null)
+				throw new ArgumentNullException("config");
+
+			_context.config = config;
+			_context.dom = dom;
+			_context.test = test;
+
 			try
 			{
-				if (dom == null)
-					throw new ArgumentNullException("dom parameter is null");
-				if (test == null)
-					throw new ArgumentNullException("test parameter is null");
-				if (config == null)
-					throw new ArgumentNullException("config paremeter is null");
-
-				context.config = config;
-				context.dom = dom;
-				context.test = test;
-
-				dom.context = context;
-
 				// Initialize any watchers and loggers
-				if (watcher != null)
-					watcher.Initialize(this, context);
+				if (_watcher != null)
+					_watcher.Initialize(this, _context);
 
-				foreach (var logger in test.loggers)
-					logger.Initialize(this, context);
+				foreach (var item in test.loggers)
+					item.Initialize(this, _context);
 
-				runTest(context.dom, context.test, context);
+				StartTest();
+
+				RunTest();
 			}
 			finally
 			{
-				foreach (var logger in test.loggers)
-					logger.Finalize(this, context);
+				EndTest();
 
-				if (watcher != null)
-					watcher.Finalize(this, context);
+				foreach (var item in test.loggers)
+					item.Finalize(this, _context);
+
+				if (_watcher != null)
+					_watcher.Finalize(this, _context);
 			}
 		}
 
-		/// <summary>
-		/// Start fuzzing using a RunContext object to provide
-		/// needed configuration.  This allows the caller to pre-configure
-		/// any Agents prior to calling the fuzzing engine.
-		/// </summary>
-		/// <param name="context">Fuzzing configuration</param>
-		public void startFuzzing(RunContext context)
+		protected void StartTest()
 		{
-			if (context == null)
-				throw new ArgumentNullException("context parameter is null");
+			_context.dom.context = _context;
+		}
 
-			runTest(context.dom, context.test, context);
+		protected void EndTest()
+		{
+			_context.dom.context = null;
 		}
 
 		/// <summary>
 		/// Run a test case.  Contains main fuzzing loop.
 		/// </summary>
-		/// <param name="dom"></param>
-		/// <param name="test"></param>
-		/// <param name="context"></param>
-		protected void runTest(Dom.Dom dom, Test test, RunContext context)
+		protected void RunTest()
 		{
+			var test = _context.test;
+			var context = _context;
+
 			try
 			{
 				context.test = test;
@@ -282,7 +296,7 @@ namespace Peach.Core
 					var attr = ClassLoader.GetAttributes<MutationStrategyAttribute>(test.strategy.GetType(), null).Where(a => a.IsDefault == true).FirstOrDefault();
 					var name = attr != null ? attr.Name : test.strategy.GetType().Name;
 					var msg = "The '{0}' mutation strategy does not allow setting the random seed.".Fmt(name);
-					OnTestWarning(context, msg);
+					OnTestWarning(msg);
 				}
 
 				// Get mutation strategy
@@ -338,7 +352,7 @@ namespace Peach.Core
 
 				test.markMutableElements();
 
-				OnTestStarting(context);
+				OnTestStarting();
 
 				// Start agents
 				foreach (Dom.Agent agent in test.agents.Values)
@@ -370,8 +384,6 @@ namespace Peach.Core
 						{
 							throw new PeachException("General Agent Failure: " + ex.Message, ex);
 						}
-
-
 					}
 				}
 
@@ -417,8 +429,7 @@ namespace Peach.Core
 
 						try
 						{
-							if (IterationStarting != null)
-								IterationStarting(context, iterationCount, iterationTotal.HasValue ? iterationStop : iterationTotal);
+							OnIterationStarting(iterationCount, iterationTotal.HasValue ? iterationStop : iterationTotal);
 
 							if (context.controlIteration)
 							{
@@ -450,7 +461,7 @@ namespace Peach.Core
 							{
 								logger.Debug("runTest: SoftException on control iteration, saving as fault");
 								var ex = se.InnerException ?? se;
-								OnControlFault(context, iterationCount, "SoftException Detected:\n" + ex.ToString());
+								OnControlFault("SoftException Detected:\n" + ex.ToString());
 							}
 
 							logger.Debug("runTest: SoftException, skipping to next iteration");
@@ -475,8 +486,7 @@ namespace Peach.Core
 						{
 							context.agentManager.IterationFinished();
 
-							if (IterationFinished != null)
-								IterationFinished(context, iterationCount);
+							OnIterationFinished(iterationCount);
 
 							// If this was a control iteration, verify it againt our origional
 							// recording.
@@ -493,7 +503,7 @@ to execute same as initial control.  Number of actions is different. {0} != {1}"
 										context.controlActionsExecuted.Count);
 
 									logger.Debug(description);
-									OnControlFault(context, iterationCount, description);
+									OnControlFault(description);
 								}
 								else if (context.controlRecordingStatesExecuted.Count != context.controlStatesExecuted.Count)
 								{
@@ -503,7 +513,7 @@ to execute same as initial control.  Number of states is different. {0} != {1}",
 										context.controlStatesExecuted.Count);
 
 									logger.Debug(description);
-									OnControlFault(context, iterationCount, description);
+									OnControlFault(description);
 								}
 
 								// Check states first, since actions will always be different if
@@ -533,7 +543,7 @@ to execute same as initial control.  Number of states is different. {0} != {1}",
 										var description = sb.ToString();
 
 										logger.Debug(description);
-										OnControlFault(context, iterationCount, description);
+										OnControlFault(description);
 									}
 								}
 
@@ -562,7 +572,7 @@ to execute same as initial control.  Number of states is different. {0} != {1}",
 										var description = sb.ToString();
 
 										logger.Debug(description);
-										OnControlFault(context, iterationCount, description);
+										OnControlFault(description);
 									}
 								}
 							}
@@ -595,12 +605,18 @@ to execute same as initial control.  Number of states is different. {0} != {1}",
 								fault.controlRecordingIteration = context.controlRecordingIteration;
 							}
 
-							if (context.reproducingFault || !test.replayEnabled)
-								OnFault(context, iterationCount, test.stateModel, context.faults.ToArray());
+							if (context.reproducingFault)
+								OnFault(iterationCount, test.stateModel, context.faults.ToArray());
 							else
-								OnReproFault(context, iterationCount, test.stateModel, context.faults.ToArray());
+								OnReproFault(iterationCount, test.stateModel, context.faults.ToArray());
 
-							if (context.controlRecordingIteration && (!test.replayEnabled || context.reproducingFault))
+							if (context.controlRecordingIteration && context.reproducingFault)
+							{
+								logger.Debug("runTest: Fault detected on control iteration");
+								throw new PeachException("Fault detected on control iteration.");
+							}
+
+							if (context.controlIteration && context.reproducingFault && test.TargetLifetime == Test.Lifetime.Iteration)
 							{
 								logger.Debug("runTest: Fault detected on control iteration");
 								throw new PeachException("Fault detected on control iteration.");
@@ -626,7 +642,7 @@ to execute same as initial control.  Number of states is different. {0} != {1}",
 
 								logger.Debug("runTest: Reproduced fault, continuing fuzzing at iteration {0}", iterationCount);
 							}
-							else if (test.replayEnabled)
+							else
 							{
 								logger.Debug("runTest: Attempting to reproduce fault.");
 
@@ -634,43 +650,45 @@ to execute same as initial control.  Number of states is different. {0} != {1}",
 								context.reproducingInitialIteration = iterationCount;
 								context.reproducingIterationJumpCount = 1;
 
-								// User can specify a time to wait between iterations
-								// we can use that time to better detect faults
-								if (context.test.waitTime > 0)
-									Thread.Sleep((int)(context.test.waitTime * 1000));
-
-								// User can specify a time to wait between iterations
-								// when reproducing faults.
-								if (context.test.faultWaitTime > 0)
-									Thread.Sleep((int)(context.test.faultWaitTime * 1000));
-
 								logger.Debug("runTest: replaying iteration " + iterationCount);
-								continue;
 							}
 						}
 						else if (context.reproducingFault)
 						{
-							uint maxJump = context.reproducingInitialIteration - lastReproFault - 1;
-
-							if (context.reproducingIterationJumpCount >= (maxJump * 2) || context.reproducingIterationJumpCount > context.reproducingMaxBacksearch)
+							if (test.TargetLifetime == Test.Lifetime.Iteration)
 							{
-								logger.Debug("runTest: Giving up reproducing fault, reached max backsearch.");
+								logger.Debug("runTest: Could not reproducing fault.");
 
 								context.reproducingFault = false;
 								iterationCount = context.reproducingInitialIteration;
 
-								OnReproFailed(context, iterationCount);
+								OnReproFailed(iterationCount);
 							}
-							else
+							else if (test.TargetLifetime == Test.Lifetime.Session)
 							{
-								uint delta = Math.Min(maxJump, context.reproducingIterationJumpCount);
-								iterationCount = (uint)context.reproducingInitialIteration - delta - 1;
+								uint maxJump = context.reproducingInitialIteration - lastReproFault - 1;
 
-								logger.Debug("runTest: Moving backwards {0} iterations to reproduce fault.", delta);
+								if (context.reproducingIterationJumpCount >= (maxJump*2) ||
+								    context.reproducingIterationJumpCount > test.MaxBackSearch)
+								{
+									logger.Debug("runTest: Giving up reproducing fault, reached max backsearch.");
+
+									context.reproducingFault = false;
+									iterationCount = context.reproducingInitialIteration;
+
+									OnReproFailed(iterationCount);
+								}
+								else
+								{
+									uint delta = Math.Min(maxJump, context.reproducingIterationJumpCount);
+									iterationCount = (uint) context.reproducingInitialIteration - delta - 1;
+
+									logger.Debug("runTest: Moving backwards {0} iterations to reproduce fault.", delta);
+								}
+
+								// Make next jump larger
+								context.reproducingIterationJumpCount *= context.reproducingSkipMultiple;
 							}
-
-							// Make next jump larger
-							context.reproducingIterationJumpCount *= context.reproducingSkipMultiple;
 						}
 
 						if (context.agentManager.MustStop())
@@ -680,12 +698,15 @@ to execute same as initial control.  Number of states is different. {0} != {1}",
 							throw new PeachException("Error, agent monitor stopped run!");
 						}
 
+						if (context.faults.Count > 0 && context.reproducingFault)
+							continue;
+
 						// Update our totals and stop based on new count
 						if (context.controlIteration && context.controlRecordingIteration && !iterationTotal.HasValue)
 						{
 							if (context.config.countOnly)
 							{
-								OnHaveCount(context, mutationStrategy.Count);
+								OnHaveCount(mutationStrategy.Count);
 								break;
 							}
 
@@ -703,7 +724,7 @@ to execute same as initial control.  Number of states is different. {0} != {1}",
 								iterationStart = range.Item1;
 								iterationStop = range.Item2;
 
-								OnHaveParallel(context, iterationStart, iterationStop);
+								OnHaveParallel(iterationStart, iterationStop);
 
 								if (context.config.skipToIteration > iterationStart)
 									iterationStart = context.config.skipToIteration;
@@ -751,7 +772,7 @@ to execute same as initial control.  Number of states is different. {0} != {1}",
 			}
 			catch (Exception e)
 			{
-				OnTestError(context, e);
+				OnTestError(e);
 				throw;
 			}
 			finally
@@ -770,7 +791,7 @@ to execute same as initial control.  Number of states is different. {0} != {1}",
 				context.agentManager.SessionFinished();
 				context.agentManager.StopAllMonitors();
 				context.agentManager.Shutdown();
-				OnTestFinished(context);
+				OnTestFinished();
 
 				context.test = null;
 
@@ -778,32 +799,26 @@ to execute same as initial control.  Number of states is different. {0} != {1}",
 			}
 		}
 
-		private void OnControlFault(RunContext context, uint iterationCount, string description)
+		private void OnControlFault(string description)
 		{
 			// Don't tell the engine to stop, let the replay logic determine what to do
 			// If a fault is detected or reproduced on a control iteration the engine
 			// will automatically stop.
 
-			Fault fault = new Fault();
-			fault.detectionSource = "PeachControlIteration";
-			fault.iteration = iterationCount;
-			fault.controlIteration = context.controlIteration;
-			fault.controlRecordingIteration = context.controlRecordingIteration;
-			fault.title = "Peach Control Iteration Failed";
-			fault.description = description;
-			fault.folderName = "ControlIteration";
-			fault.type = FaultType.Fault;
-			context.faults.Add(fault);
-		}
-	}
+			var fault = new Fault
+			{
+				detectionSource = "PeachControlIteration",
+				iteration = _context.currentIteration,
+				controlIteration = _context.controlIteration,
+				controlRecordingIteration = _context.controlRecordingIteration,
+				title = "Peach Control Iteration Failed",
+				description = description,
+				folderName = "ControlIteration",
+				type = FaultType.Fault
+			};
 
-	public enum DebugLevel
-	{
-		Critical,
-		Warning,
-		DebugNormal,
-		DebugVerbose,
-		DebugSuperVerbose
+			_context.faults.Add(fault);
+		}
 	}
 }
 

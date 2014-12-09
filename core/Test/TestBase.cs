@@ -1,13 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using NLog;
-using NLog.Targets;
 using NLog.Config;
-
+using NLog.Targets;
 using NUnit.Framework;
 
-// ReSharper disable once CheckNamespace
-namespace Peach
+namespace Peach.Core.Test
 {
 	class AssertTestFail : TraceListener
 	{
