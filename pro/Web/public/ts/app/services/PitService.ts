@@ -121,15 +121,11 @@ module Peach.Services {
 			});
 		}
 
-		public SavePitAgents(agents: Models.Agent[], append: boolean) {
+		public SavePitAgents(agents: Models.Agent[]) {
 			if (!this.pitAgents) {
 				this.pitAgents = new this.PitAgentsResource();
 			}
-			if (_.isArray(this.pitAgents.agents) && append) {
-				this.pitAgents.agents = this.pitAgents.agents.concat(agents);
-			} else {
-				this.pitAgents.agents = agents;
-			}
+			this.pitAgents.agents = agents;
 			this.pitAgents.pitUrl = this.pit.pitUrl;
 			this.pitAgents.$save({ id: this.PitId });
 		}

@@ -19,6 +19,9 @@ module Peach {
 			private wizardService: Services.WizardService
 		) {
 			$scope.vm = this;
+			if ($location.path() === '/quickstart/test') {
+				this.wizardService.GetTrack('test').Begin();
+			}
 		}
 
 		public IsComplete(step: string) {
