@@ -7,13 +7,13 @@ module Peach {
 	var HEX_REGEXP = /^[0-9A-Fa-f]+$/;
 
 	var p = angular.module("Peach", [
+		"angles",
 		"ngResource",
 		"ngRoute",
 		"ngVis",
 		"ui.bootstrap",
 		"smart-table",
-		"treeControl",
-		"angles"
+		"treeControl"
 	]);
 
 	p.service('HttpErrorService', Services.HttpErrorService);
@@ -89,6 +89,12 @@ module Peach {
 	p.directive('peachMonitor', () => new MonitorDirective());
 	p.directive('peachParameter', () => new ParameterDirective());
 	p.directive('peachTest', () => new TestDirective());
+	p.directive('peachUnsaved', [
+		'$modal', '$location', (
+			$modal: ng.ui.bootstrap.IModalService,
+			$location: ng.ILocationService
+		) => new UnsavedDirective($modal, $location)
+	]);
 
 	p.config([
 		"$routeProvider",
