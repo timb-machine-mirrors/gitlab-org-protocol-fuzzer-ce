@@ -275,7 +275,7 @@ namespace Peach.Core.Dom
 		public OrderedDictionary<string, Publisher> publishers = new OrderedDictionary<string, Publisher>();
 
 		[NonSerialized]
-		public OrderedDictionary<string, Agent> agents = new OrderedDictionary<string, Agent>();
+		public NamedCollection<Agent> agents = new NamedCollection<Agent>();
 
 		/// <summary>
 		/// List of mutators to include in run

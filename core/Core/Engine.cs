@@ -355,7 +355,7 @@ namespace Peach.Core
 				OnTestStarting();
 
 				// Start agents
-				foreach (Dom.Agent agent in test.agents.Values)
+				foreach (var agent in test.agents)
 				{
 					// Only use agent if on correct platform
 					if ((agent.platform & Platform.GetOS()) != Platform.OS.None)

@@ -1750,13 +1750,19 @@ namespace Peach.Core.Analyzers
 				// Agent
 				if (child.Name == "Agent")
 				{
-					string refName = child.getAttrString("ref");
+					var refName = child.getAttrString("ref");
 
 					var agent = parent.getRef<Dom.Agent>(refName, a => a.agents);
 					if (agent == null)
-						throw new PeachException("Error, Test::" + test.name + " Agent name in ref attribute not found.");
+						throw new PeachException("Error, could not locate Agent named '" +
+							refName + "' for Test '" + test.name + "'.");
 
-					test.agents.Add(refName, agent);
+					// Make a copy to ensure the platform attribute doesn't
+					// cross test boundaries and update the name just incase
+					// it is in a different namespace
+					agent = ObjectCopier.Clone(agent);
+
+					agent.name = refName;
 
 					var platform = child.getAttr("platform", null);
 					if (platform != null)
@@ -1764,25 +1770,27 @@ namespace Peach.Core.Analyzers
 						switch (platform.ToLower())
 						{
 							case "all":
-								parent.agents[refName].platform = Platform.OS.All;
+								agent.platform = Platform.OS.All;
 								break;
 							case "none":
-								parent.agents[refName].platform = Platform.OS.None;
+								agent.platform = Platform.OS.None;
 								break;
 							case "windows":
-								parent.agents[refName].platform = Platform.OS.Windows;
+								agent.platform = Platform.OS.Windows;
 								break;
 							case "osx":
-								parent.agents[refName].platform = Platform.OS.OSX;
+								agent.platform = Platform.OS.OSX;
 								break;
 							case "linux":
-								parent.agents[refName].platform = Platform.OS.Linux;
+								agent.platform = Platform.OS.Linux;
 								break;
 							case "unix":
-								parent.agents[refName].platform = Platform.OS.Unix;
+								agent.platform = Platform.OS.Unix;
 								break;
 						}
 					}
+
+					test.agents.Add(agent);
 				}
 
 				// StateModel
