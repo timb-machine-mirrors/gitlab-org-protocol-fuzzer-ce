@@ -293,7 +293,7 @@ namespace Peach.Core
 
 				if (context.config.userDefinedSeed && !test.strategy.UsesRandomSeed)
 				{
-					var attr = ClassLoader.GetAttributes<MutationStrategyAttribute>(test.strategy.GetType(), null).Where(a => a.IsDefault == true).FirstOrDefault();
+					var attr = test.strategy.GetType().GetDefaultAttr<MutationStrategyAttribute>();
 					var name = attr != null ? attr.Name : test.strategy.GetType().Name;
 					var msg = "The '{0}' mutation strategy does not allow setting the random seed.".Fmt(name);
 					OnTestWarning(msg);
