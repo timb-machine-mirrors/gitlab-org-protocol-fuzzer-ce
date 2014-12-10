@@ -69,7 +69,8 @@ peach_ws_client.js:: JavaScript code used by _peach_ws_client.html_
 
   <Agent name="TheAgent">
     <Monitor class="WindowsDebugger">
-      <Param name="CommandLine" value="C:\Program Files (x86)\Mozilla Firefox\firefox.exe peach_ws_client.html" />
+      <Param name="Executable" value="C:\Program Files (x86)\Mozilla Firefox\firefox.exe" />
+      <Param name="Arguments" value="peach_ws_client.html" />
     </Monitor>
   </Agent>
 

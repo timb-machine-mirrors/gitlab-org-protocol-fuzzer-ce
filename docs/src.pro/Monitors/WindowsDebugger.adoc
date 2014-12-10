@@ -16,7 +16,8 @@ The source code can be found in peach\Peach.Core.Test.OS.Windows\Agent\Monitors.
 
 _One of the following parameters is required:_
 
-CommandLine:: Window names separated by a comma
+Executable:: Executable to launch
+Arguments:: Command line arguments
 ProcessName:: Trigger fault when a window is found (optional, default false)
 KernelConnectionString:: Connection string for kernel debugging.
 Service:: Name of Windows Service to attach to.  Service will be started if stopped or crashes.
@@ -42,7 +43,8 @@ RestartOnEachTest:: Restart process for each iteration (optional, defaults to fa
 ----
 <Agent name="Local">
 	<Monitor class="WindowsDebugger">
-		<Param name="CommandLine" value="CrashableServer.exe 127.0.0.1 4244" />
+		<Param name="Executable" value="CrashableServer.exe" />
+		<Param name="Arguments" value="127.0.0.1 4244" />
 		<!--<Param name="WinDbgPath" value="C:\Program Files (x86)\Debugging Tools for Windows (x86)" />-->
 	</Monitor>
 </Agent>
@@ -86,7 +88,8 @@ RestartOnEachTest:: Restart process for each iteration (optional, defaults to fa
 
 <Agent name="Local">
     <Monitor class="WindowsDebugger">
-        <Param name="CommandLine" value="CrashableServer.exe 127.0.0.1 4244"/>
+        <Param name="Executable" value="CrashableServer.exe"/>
+        <Param name="Arguments" value="127.0.0.1 4244"/>
         <Param name="StartOnCall" value="launchProgram"/>
     </Monitor>
 </Agent>
@@ -99,7 +102,8 @@ RestartOnEachTest:: Restart process for each iteration (optional, defaults to fa
 ----
 <Agent name="Local">
     <Monitor class="WindowsDebugger">
-        <Param name="CommandLine" value="CrashableServer.exe 127.0.0.1 4244"/>
+        <Param name="Executable" value="CrashableServer.exe"/>
+        <Param name="Arguments" value="127.0.0.1 4244"/>
         <Param name="NoCpuKill" value="true"/>
         <Param name="FaultOnEarlyExit" value="false"/>
         <Param name="WaitForExitTimeout" value="250"/>
@@ -121,7 +125,8 @@ RestartOnEachTest:: Restart process for each iteration (optional, defaults to fa
 
 <Agent name="Local">
     <Monitor class="WindowsDebugger">
-        <Param name="CommandLine" value="CrashableServer.exe 127.0.0.1 4244"/>
+        <Param name="Executable" value="CrashableServer.exe"/>
+        <Param name="Arguments" value="127.0.0.1 4244"/>
         <Param name="WaitForExitOnCall" value="exitProgram"/>
     </Monitor>
 </Agent>

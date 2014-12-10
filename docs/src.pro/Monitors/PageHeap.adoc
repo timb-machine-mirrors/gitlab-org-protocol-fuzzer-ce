@@ -40,7 +40,8 @@ WinDbgPath:: Path to windbg install. Optional, will attempt to locate if not pro
 
   <Agent name="Local">
     <Monitor class="WindowsDebugger">
-        <Param name="CommandLine" value="notepad.exe fuzzed.txt"/>
+        <Param name="Executable" value="notepad.exe"/>
+        <Param name="Arguments" value="fuzzed.txt"/>
         <Param name="StartOnCall" value="launchProgram"/>
     </Monitor>
     <Monitor class="PageHeap">

@@ -704,7 +704,8 @@ This example shows a complete agent session using the REST JSON agent channel (p
 ----
 <Agent name="TheAgent" location="http://127.0.0.1:9980">
 	<Monitor class="WindowsDebugger">
-		<Param name="CommandLine" value="mspaint.exe fuzzed.png" />
+		<Param name="Executable" value="mspaint.exe" />
+		<Param name="Arguments" value="fuzzed.png" />
 		<Param name="WinDbgPath" value="C:\Program Files (x86)\Debugging Tools for Windows (x86)" />
 		<Param name="StartOnCall" value="ScoobySnacks"/>
 	</Monitor>
@@ -731,7 +732,7 @@ GET /Agent/AgentConnect
 << { "Status":"true" }
 
 POST /Agent/StartMonitor?name=Monitor_0&cls=WindowsDebugger
->> {"args":{"CommandLine":"mspaint.exe fuzzed.png","WinDbgPath":"C:\\Program Files (x86)\\Debugging Tools for Windows (x86)","StartOnCall":"ScoobySnacks"}}
+>> {"args":{"Executable":"mspaint.exe,"Arguments":"fuzzed.png","WinDbgPath":"C:\\Program Files (x86)\\Debugging Tools for Windows (x86)","StartOnCall":"ScoobySnacks"}}
 << { "Status":"true" }
 
 POST /Agent/StartMonitor?name=Monitor_1&cls=PageHeap
@@ -828,7 +829,8 @@ This example shows the channel messages when a remote publisher is in use.
 ----
 <Agent name="TheAgent" location="http://127.0.0.1:9980">
 	<Monitor class="WindowsDebugger">
-		<Param name="CommandLine" value="mspaint.exe fuzzed.png" />
+		<Param name="Executable" value="mspaint.exe" />
+		<Param name="Arguments" value="fuzzed.png" />
 		<Param name="WinDbgPath" value="C:\Program Files (x86)\Debugging Tools for Windows (x86)" />
 		<Param name="StartOnCall" value="ScoobySnacks"/>
 	</Monitor>
@@ -857,7 +859,7 @@ GET /Agent/AgentConnect
 << { "Status":"true" }
 
 POST /Agent/StartMonitor?name=Monitor_0&cls=WindowsDebugger
->> {"args":{"CommandLine":"mspaint.exe fuzzed.png","WinDbgPath":"C:\\Program Files (x86)\\Debugging Tools for Windows (x86)","StartOnCall":"ScoobySnacks"}}
+>> {"args":{"Executable":"mspaint.exe","Arguments":"fuzzed.png","WinDbgPath":"C:\\Program Files (x86)\\Debugging Tools for Windows (x86)","StartOnCall":"ScoobySnacks"}}
 << { "Status":"true" }
 
 POST /Agent/StartMonitor?name=Monitor_1&cls=PageHeap
