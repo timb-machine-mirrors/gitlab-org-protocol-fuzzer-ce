@@ -1671,10 +1671,10 @@ namespace Peach.Core.Analyzers
 			test.name = node.getAttrString("name");
 
 			if (node.hasAttr("waitTime"))
-				test.waitTime = decimal.Parse(node.getAttrString("waitTime"));
+				test.waitTime = double.Parse(node.getAttrString("waitTime"));
 
 			if (node.hasAttr("faultWaitTime"))
-				test.faultWaitTime = decimal.Parse(node.getAttrString("faultWaitTime"));
+				test.faultWaitTime = double.Parse(node.getAttrString("faultWaitTime"));
 
 			if (node.hasAttr("controlIteration"))
 				test.controlIteration = int.Parse(node.getAttrString("controlIteration"));

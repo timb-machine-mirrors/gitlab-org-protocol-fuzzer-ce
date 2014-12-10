@@ -571,14 +571,14 @@ to execute same as initial control.  Number of states is different. {0} != {1}",
 						// User can specify a time to wait between iterations
 						// we can use that time to better detect faults
 						if (context.test.waitTime > 0)
-							Thread.Sleep((int)(context.test.waitTime * 1000));
+							Thread.Sleep(TimeSpan.FromSeconds(context.test.waitTime));
 
 						if (context.reproducingFault)
 						{
 							// User can specify a time to wait between iterations
 							// when reproducing faults.
 							if (context.test.faultWaitTime > 0)
-								Thread.Sleep((int)(context.test.faultWaitTime * 1000));
+								Thread.Sleep(TimeSpan.FromSeconds(context.test.faultWaitTime));
 						}
 
 						// Collect any faults that were found
