@@ -350,38 +350,7 @@ namespace Peach.Core
 
 				OnTestStarting();
 
-				// Start agents
-				foreach (var agent in test.agents)
-				{
-					// Only use agent if on correct platform
-					if ((agent.platform & Platform.GetOS()) != Platform.OS.None)
-					{
-						try
-						{
-							// Note: We want to perfrom SessionStarting on each agent
-							//       in turn.  We do this incase the first agent starts
-							//       a virtual machine that contains the second agent.
-							context.agentManager.AgentConnect(agent);
-							context.agentManager.GetAgent(agent.name).SessionStarting();
-						}
-						catch (SoftException)
-						{
-							throw;
-						}
-						catch (PeachException)
-						{
-							throw;
-						}
-						catch (AgentException ae)
-						{
-							throw new PeachException("Agent Failure: " + ae.Message, ae);
-						}
-						catch (Exception ex)
-						{
-							throw new PeachException("General Agent Failure: " + ex.Message, ex);
-						}
-					}
-				}
+				StartAgents();
 
 				while ((firstRun || iterationCount <= iterationStop) && context.continueFuzzing)
 				{
@@ -476,95 +445,9 @@ namespace Peach.Core
 
 							OnIterationFinished(iterationCount);
 
-							// If this was a control iteration, verify it againt our origional
-							// recording.
-							if (context.faults.Count == 0 &&
-								context.controlRecordingIteration == false &&
-								context.controlIteration &&
-								!test.nonDeterministicActions)
-							{
-								if (context.controlRecordingActionsExecuted.Count != context.controlActionsExecuted.Count)
-								{
-									string description = string.Format(@"The Peach control iteration performed failed
-to execute same as initial control.  Number of actions is different. {0} != {1}",
-										context.controlRecordingActionsExecuted.Count,
-										context.controlActionsExecuted.Count);
-
-									logger.Debug(description);
-									OnControlFault(description);
-								}
-								else if (context.controlRecordingStatesExecuted.Count != context.controlStatesExecuted.Count)
-								{
-									string description = string.Format(@"The Peach control iteration performed failed
-to execute same as initial control.  Number of states is different. {0} != {1}",
-										context.controlRecordingStatesExecuted.Count,
-										context.controlStatesExecuted.Count);
-
-									logger.Debug(description);
-									OnControlFault(description);
-								}
-
-								// Check states first, since actions will always be different if
-								// states are not executed
-								if (context.faults.Count == 0)
-								{
-									var missedStates = context.controlRecordingStatesExecuted
-										.Where(s => !context.controlStatesExecuted.Contains(s))
-										.ToList();
-
-									if (missedStates.Count > 0)
-									{
-										var sb = new StringBuilder();
-										sb.Append("The Peach control iteration performed failed to execute same as initial control. ");
-
-										if (missedStates.Count == 1)
-										{
-											sb.AppendFormat("State '{0}' was not performed.", missedStates[0].name);
-										}
-										else
-										{
-											sb.AppendLine("The following states were not performed:");
-											foreach (var s in missedStates)
-												sb.AppendLine("\t'{0}'".Fmt(s.name));
-										}
-
-										var description = sb.ToString();
-
-										logger.Debug(description);
-										OnControlFault(description);
-									}
-								}
-
-								if (context.faults.Count == 0)
-								{
-									var missedActions = context.controlRecordingActionsExecuted
-										.Where(a => !context.controlActionsExecuted.Contains(a))
-										.ToList();
-
-									if (missedActions.Count > 0)
-									{
-										var sb = new StringBuilder();
-										sb.Append("The Peach control iteration performed failed to execute same as initial control. ");
-
-										if (missedActions.Count == 1)
-										{
-											sb.AppendFormat("Action '{0}.{1}' was not performed.", missedActions[0].parent.name, missedActions[0].name);
-										}
-										else
-										{
-											sb.AppendLine("The following actions were not performed:");
-											foreach (var a in missedActions)
-												sb.AppendLine("\t'{0}.{1}'".Fmt(a.parent.name, a.name));
-										}
-
-										var description = sb.ToString();
-
-										logger.Debug(description);
-										OnControlFault(description);
-									}
-								}
-							}
 						}
+
+						CollectControlFaults();
 
 						// User can specify a time to wait between iterations
 						// we can use that time to better detect faults
@@ -765,6 +648,142 @@ to execute same as initial control.  Number of states is different. {0} != {1}",
 				context.test = null;
 
 				test.strategy.Finalize(context, this);
+			}
+		}
+
+		/// <summary>
+		/// Start up the agents required for the current test
+		/// </summary>
+		private void StartAgents()
+		{
+			var ctx = _context;
+
+			foreach (var agent in ctx.test.agents)
+			{
+				// Only use agent if on correct platform
+				if ((agent.platform & Platform.GetOS()) != Platform.OS.None)
+				{
+					try
+					{
+						// Note: We want to perfrom SessionStarting on each agent
+						//       in turn.  We do this incase the first agent starts
+						//       a virtual machine that contains the second agent.
+						ctx.agentManager.AgentConnect(agent);
+						ctx.agentManager.GetAgent(agent.name).SessionStarting();
+					}
+					catch (SoftException)
+					{
+						throw;
+					}
+					catch (PeachException)
+					{
+						throw;
+					}
+					catch (AgentException ae)
+					{
+						throw new PeachException("Agent Failure: " + ae.Message, ae);
+					}
+					catch (Exception ex)
+					{
+						throw new PeachException("General Agent Failure: " + ex.Message, ex);
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// If this was a control iteration, verify it againt our origional recording.
+		/// </summary>
+		private void CollectControlFaults()
+		{
+			var ctx = _context;
+
+			if (!ctx.controlIteration)
+				return;
+
+			if (ctx.controlRecordingIteration)
+				return;
+
+			if (ctx.test.nonDeterministicActions)
+				return;
+
+			if (ctx.faults.Count > 0)
+				return;
+
+			if (ctx.controlRecordingActionsExecuted.Count != ctx.controlActionsExecuted.Count)
+			{
+				var desc = string.Format(@"The Peach control iteration performed failed to execute same as initial control.  Number of actions is different. {0} != {1}",
+					ctx.controlRecordingActionsExecuted.Count,
+					ctx.controlActionsExecuted.Count);
+
+				logger.Debug(desc);
+				OnControlFault(desc);
+				return;
+			}
+
+			if (ctx.controlRecordingStatesExecuted.Count != ctx.controlStatesExecuted.Count)
+			{
+				var desc = string.Format(@"The Peach control iteration performed failed to execute same as initial control.  Number of states is different. {0} != {1}",
+					ctx.controlRecordingStatesExecuted.Count,
+					ctx.controlStatesExecuted.Count);
+
+				logger.Debug(desc);
+				OnControlFault(desc);
+				return;
+			}
+
+			// Check states first, since actions will always be different if states are not executed
+			var missedStates = ctx.controlRecordingStatesExecuted
+				.Where(s => !ctx.controlStatesExecuted.Contains(s))
+				.ToList();
+
+			if (missedStates.Count > 0)
+			{
+				var sb = new StringBuilder();
+				sb.Append("The Peach control iteration performed failed to execute same as initial control. ");
+
+				if (missedStates.Count == 1)
+				{
+					sb.AppendFormat("State '{0}' was not performed.", missedStates[0].name);
+				}
+				else
+				{
+					sb.AppendLine("The following states were not performed:");
+					foreach (var s in missedStates)
+						sb.AppendLine("\t'{0}'".Fmt(s.name));
+				}
+
+				var desc = sb.ToString();
+
+				logger.Debug(desc);
+				OnControlFault(desc);
+				return;
+			}
+
+			var missedActions = ctx.controlRecordingActionsExecuted
+				.Where(a => !ctx.controlActionsExecuted.Contains(a))
+				.ToList();
+
+			if (missedActions.Count > 0)
+			{
+				var sb = new StringBuilder();
+				sb.Append("The Peach control iteration performed failed to execute same as initial control. ");
+
+				if (missedActions.Count == 1)
+				{
+					sb.AppendFormat("Action '{0}.{1}' was not performed.", missedActions[0].parent.name, missedActions[0].name);
+				}
+				else
+				{
+					sb.AppendLine("The following actions were not performed:");
+					foreach (var a in missedActions)
+						sb.AppendLine("\t'{0}.{1}'".Fmt(a.parent.name, a.name));
+				}
+
+				var desc = sb.ToString();
+
+				logger.Debug(desc);
+				OnControlFault(desc);
 			}
 		}
 
