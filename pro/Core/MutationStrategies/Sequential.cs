@@ -147,7 +147,7 @@ namespace Peach.Pro.Core.MutationStrategies
 		{
 			System.Diagnostics.Debug.Assert(value > 0);
 
-			if (_context.controlIteration && _context.controlRecordingIteration)
+			if (Context.controlIteration && Context.controlRecordingIteration)
 			{
 				return;
 			}
@@ -191,10 +191,10 @@ namespace Peach.Pro.Core.MutationStrategies
 			if (!action.outputData.Any())
 				return;
 
-			if (!_context.controlIteration)
+			if (!Context.controlIteration)
 				MutateDataModel(action);
 
-			else if(_context.controlIteration && _context.controlRecordingIteration)
+			else if (Context.controlIteration && Context.controlRecordingIteration)
 				RecordDataModel(action);
 		}
 
@@ -244,7 +244,7 @@ namespace Peach.Pro.Core.MutationStrategies
 		private void RecordDataModel(Peach.Core.Dom.Action action)
 		{
 			// ParseDataModel should only be called during iteration 0
-			System.Diagnostics.Debug.Assert(_context.controlIteration && _context.controlRecordingIteration);
+			System.Diagnostics.Debug.Assert(Context.controlIteration && Context.controlRecordingIteration);
 
 			foreach (var item in action.outputData)
 			{
@@ -260,7 +260,7 @@ namespace Peach.Pro.Core.MutationStrategies
 		/// <returns></returns>
 		public override State MutateChangingState(State state)
 		{
-			if (_context.controlIteration)
+			if (Context.controlIteration)
 				return state;
 
 			var key = "Run_{0}.{1}".Fmt(state.runCount, state.name);
@@ -300,7 +300,7 @@ namespace Peach.Pro.Core.MutationStrategies
 			// MutateDataModel should only be called after ParseDataModel
 			System.Diagnostics.Debug.Assert(_count >= 1);
 			System.Diagnostics.Debug.Assert(_iteration > 0);
-			System.Diagnostics.Debug.Assert(!_context.controlIteration);
+			System.Diagnostics.Debug.Assert(!Context.controlIteration);
 
 			foreach (var item in action.outputData)
 			{

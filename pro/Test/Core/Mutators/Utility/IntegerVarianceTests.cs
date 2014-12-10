@@ -20,9 +20,8 @@ namespace Peach.Pro.Test.Core.Mutators.Utility
 				public Strategy()
 					: base(null)
 				{
-					_context = new RunContext() { config = new RunConfiguration() };
-
 				}
+
 				public override bool UsesRandomSeed
 				{
 					get { return false; }
@@ -59,6 +58,7 @@ namespace Peach.Pro.Test.Core.Mutators.Utility
 				: base(obj, useValue)
 			{
 				this.context = new Strategy();
+				this.context.Initialize(new RunContext() { config = new RunConfiguration() }, null);
 			}
 
 			static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
