@@ -308,8 +308,6 @@ namespace Peach.Core
 				uint? iterationTotal = null;
 				uint lastControlIteration = 0;
 
-				uint redoCount = 0;
-
 				if (!mutationStrategy.IsDeterministic)
 				{
 					if (context.config.parallel)
@@ -465,14 +463,6 @@ namespace Peach.Core
 							}
 
 							logger.Debug("runTest: SoftException, skipping to next iteration");
-						}
-						catch (PathException)
-						{
-							// We should just eat PathException.
-							// They indicate we should move to the next
-							// iteration.
-
-							logger.Debug("runTest: PathException, skipping to next iteration");
 						}
 						catch (System.OutOfMemoryException ex)
 						{
@@ -737,20 +727,6 @@ to execute same as initial control.  Number of states is different. {0} != {1}",
 						// control iteration
 						if (!context.controlIteration)
 							++iterationCount;
-
-						redoCount = 0;
-					}
-					catch (RedoIterationException rte)
-					{
-						logger.Debug("runTest: redoing test iteration for the {0} time.", redoCount);
-
-						// Repeat the same iteration unless
-						// we have already retried 3 times.
-
-						if (redoCount >= 3)
-							throw new PeachException(rte.Message, rte);
-
-						redoCount++;
 					}
 					finally
 					{
@@ -764,11 +740,6 @@ to execute same as initial control.  Number of states is different. {0} != {1}",
 						}
 					}
 				}
-			}
-			catch (MutatorCompleted)
-			{
-				// Ignore, signals end of fuzzing run
-				logger.Debug("runTest: MutatorCompleted exception, ending fuzzing");
 			}
 			catch (Exception e)
 			{
