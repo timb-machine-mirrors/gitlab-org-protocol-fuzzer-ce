@@ -447,7 +447,7 @@ namespace Peach.Core
 
 							if (context.controlRecordingIteration)
 							{
-								logger.Debug("runTest: SoftException on control recording iteration");
+								logger.Debug("runTest: SoftException on recording iteration");
 								if (se.InnerException != null && string.IsNullOrEmpty(se.Message))
 									throw new PeachException(se.InnerException.Message, se);
 								throw new PeachException(se.Message, se);
@@ -457,12 +457,12 @@ namespace Peach.Core
 							{
 								logger.Debug("runTest: SoftException on control iteration, saving as fault");
 								var ex = se.InnerException ?? se;
-								OnControlFault("SoftException Detected:\n" + ex.ToString());
+								OnControlFault("SoftException Detected:\n" + ex);
 							}
 
 							logger.Debug("runTest: SoftException, skipping to next iteration");
 						}
-						catch (System.OutOfMemoryException ex)
+						catch (OutOfMemoryException ex)
 						{
 							logger.Debug(ex.Message);
 							logger.Debug(ex.StackTrace);
@@ -622,7 +622,7 @@ to execute same as initial control.  Number of states is different. {0} != {1}",
 
 								if (context.reproducingInitialIteration - iterationCount > 20)
 								{
-									iterationCount = (uint)context.reproducingInitialIteration;
+									iterationCount = context.reproducingInitialIteration;
 								}
 
 								context.reproducingFault = false;
@@ -669,7 +669,7 @@ to execute same as initial control.  Number of states is different. {0} != {1}",
 								else
 								{
 									uint delta = Math.Min(maxJump, context.reproducingIterationJumpCount);
-									iterationCount = (uint) context.reproducingInitialIteration - delta - 1;
+									iterationCount = context.reproducingInitialIteration - delta - 1;
 
 									logger.Debug("runTest: Moving backwards {0} iterations to reproduce fault.", delta);
 								}
