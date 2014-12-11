@@ -39,6 +39,7 @@ module.exports = (grunt) ->
 					'bootstrap/fonts'             : 'bootstrap/dist/fonts/*'
 					'bootstrap/js'                : 'bootstrap/dist/js/bootstrap.js'
 					'chartjs'                     : 'chartjs/Chart.js'
+					'pithy'                       : 'pithy/lib/pithy.js'
 					'vis/img'                     : 'vis/dist/img/*'
 					'vis/vis.css'                 : 'vis/dist/vis.css'
 					'vis/vis.js'                  : 'vis/dist/vis.js'

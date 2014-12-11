@@ -42,26 +42,29 @@
 								 type="text"
 								 ng-model="agent.name"
 								 ng-required="true"
-								 class="form-control" />
+								 class="form-control"
+								 peach:unique-channel="agent.name" />
 					<span class="peach-field-info tooltip-info input-group-addon"
 								tooltip="Friendly name for your agent"
 								tooltip-placement="right"
 								tooltip-append-to-body="true">
 					</span>
 				</div>
-			</div>
-			<span class="help-block"
-						style="display: inline-block">
-				<span class="glyphicon glyphicon-star pointer"
-							tooltip="Required"
-							tooltip-placement="right"
-							ng-class="{red: form.name.$error.required}">
+				<span class="help-block"
+							ng-show="form.name.$error.required && form.name.$dirty">
+					Required
 				</span>
-			</span>
-			<span class="help-block"
-						style="display: inline-block"
-						ng-show="form.name.$error.required && form.name.$dirty">
-				Required
+				<span class="help-block"
+							ng-show="form.name.$error.unique">
+					A unique name must be provided
+				</span>
+			</div>
+			<span class="help-block">
+				<span class="glyphicon glyphicon-star pointer"
+				      tooltip="Required"
+				      tooltip-placement="right"
+				      ng-class="{red: form.name.$error.required}">
+				</span>
 			</span>
 		</div>
 		<div class="form-group"
@@ -75,13 +78,19 @@
 								 type="text"
 								 placeholder="local://"
 								 ng-model="agent.agentUrl"
-								 class="form-control" />
+								 class="form-control"
+								 peach:unique-channel="agent.agentUrl"
+								 peach:unique-default="local://" />
 					<span class="peach-field-info tooltip-info input-group-addon"
-								tooltip="URL for the agent. Leave blank for a local agent."
-								tooltip-placement="right"
-								tooltip-append-to-body="true">
+					      tooltip="URL for the agent. Leave blank for a local agent."
+					      tooltip-placement="right"
+					      tooltip-append-to-body="true">
 					</span>
 				</div>
+				<span class="help-block"
+							ng-show="form.location.$error.unique">
+					A unique location must be provided
+				</span>
 			</div>
 		</div>
 		<div class="clearfix"

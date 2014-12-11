@@ -36,14 +36,14 @@
 			</label>
 			<div class="col-sm-8">
 				<input name="key"
-				       ng-model="vm.Param.key"
-				       type="text"
-				       class="form-control"
-				       placeholder="Key"
-				       tabindex="2"
-				       required
-				       unique="vm.ParamKeys" 
-							 unique-watch="vm.Param.name" />
+							 ng-model="vm.Param.key"
+							 type="text"
+							 class="form-control"
+							 placeholder="Key"
+							 tabindex="2"
+							 required
+							 peach:unique="vm.ParamKeys"
+							 peach:unique-watch="vm.Param.name" />
 				<span class="help-block"
 							ng-show="form.key.$error.required">
 					Required
