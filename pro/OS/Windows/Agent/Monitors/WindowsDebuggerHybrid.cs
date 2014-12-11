@@ -45,7 +45,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 	[Monitor("WindowsDebuggerHybrid")]
 	[Monitor("WindowsDebugEngine")]
 	[Monitor("debugger.WindowsDebugEngine")]
-	[Parameter("CommandLine", typeof(string), "Command line of program to start.", "")]
 	[Parameter("Executable", typeof(string), "Executable to launch", "")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
 	[Parameter("ProcessName", typeof(string), "Name of process to attach too.", "")]
@@ -131,6 +130,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			}
 			else if (args.ContainsKey("CommandLine"))
 			{
+				logger.Info("The parameter 'CommandLine' on the monitor 'WindowsDebugger' is deprecated.  Use the parameters 'Executable' and 'Arguments' instead.");
 				_commandLine = (string)args["CommandLine"];
 			}
 			else if (args.ContainsKey("ProcessName"))

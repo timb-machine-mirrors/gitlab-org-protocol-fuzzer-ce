@@ -20,9 +20,8 @@ namespace Peach.Pro.Test.Core.Mutators.Utility
 				public Strategy()
 					: base(null)
 				{
-					_context = new RunContext() { config = new RunConfiguration() };
-
 				}
+
 				public override bool UsesRandomSeed
 				{
 					get { return false; }
@@ -59,6 +58,20 @@ namespace Peach.Pro.Test.Core.Mutators.Utility
 				: base(obj)
 			{
 				this.context = new Strategy();
+				this.context.Initialize(new RunContext() { config = new RunConfiguration() }, null);
+			}
+
+			public Tester(Number obj, uint seed)
+				: base(obj)
+			{
+				this.context = new Strategy();
+				this.context.Initialize(new RunContext
+				{
+					config = new RunConfiguration
+					{
+						randomSeed = seed
+					}
+				}, null);
 			}
 
 			static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
@@ -123,7 +136,7 @@ namespace Peach.Pro.Test.Core.Mutators.Utility
 		{
 			var num = new Number("num") { length = size, Signed = signed };
 
-			var tester = new Tester(num);
+			var tester = new Tester(num, 1);
 			var blob = new Blob();
 
 			Assert.AreEqual(count, tester.count);

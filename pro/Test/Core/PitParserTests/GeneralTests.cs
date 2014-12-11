@@ -623,6 +623,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 	<Test name='Other'>
 		<StateModel ref='foo:SM'/>
+		<Agent ref='foo:SomeAgent' platform='none' />
 		<Publisher class='Null'/>
 	</Test>
 
@@ -645,6 +646,22 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			var expected = Encoding.ASCII.GetBytes("Hello World");
 
 			Assert.AreEqual(expected, final);
+
+			Assert.AreEqual(3, dom.tests.Count);
+
+			Assert.AreEqual(0, dom.tests[0].agents.Count);
+			Assert.AreEqual(1, dom.tests[1].agents.Count);
+			Assert.AreEqual(2, dom.tests[2].agents.Count);
+
+			Assert.AreEqual("foo:SomeAgent", dom.tests[1].agents[0].name);
+			Assert.AreEqual(Platform.OS.None, dom.tests[1].agents[0].platform);
+
+			Assert.AreEqual("foo:SomeAgent", dom.tests[2].agents[0].name);
+			Assert.AreEqual(Platform.OS.All, dom.tests[2].agents[0].platform);
+
+			Assert.AreEqual("foo:bar:ThirdAgent", dom.tests[2].agents[1].name);
+			Assert.AreEqual(Platform.OS.All, dom.tests[2].agents[1].platform);
+
 		}
 
 		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, a <DataModel> element named 'DM' already exists.")]

@@ -1025,7 +1025,7 @@ namespace Peach.Core.Xsd
 			if (type == typeof(bool))
 				return new XmlQualifiedName("boolean", XmlSchema.Namespace);
 
-			if (type == typeof(decimal))
+			if (type == typeof(double))
 				return new XmlQualifiedName("decimal", XmlSchema.Namespace);
 
 			if (type == typeof(Peach.Core.Dom.DataElement))

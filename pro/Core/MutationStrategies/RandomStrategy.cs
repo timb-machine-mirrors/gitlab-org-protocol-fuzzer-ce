@@ -439,7 +439,7 @@ namespace Peach.Pro.Core.MutationStrategies
 		{
 			currentState = state;
 
-			if (context.controlIteration && _context.controlRecordingIteration)
+			if (context.controlIteration && Context.controlRecordingIteration)
 			{
 				var name = "Run_{0}.{1}".Fmt(state.runCount, state.name);
 				var scope = new MutationScope(name);

@@ -152,7 +152,7 @@ namespace Peach.Core.Dom
 		/// </summary>
 		[XmlAttribute]
 		[DefaultValue(0.0)]
-		public decimal waitTime { get; set; }
+		public double waitTime { get; set; }
 
 		/// <summary>
 		/// Time to wait in seconds between each iteration when in fault reproduction mode.
@@ -165,7 +165,7 @@ namespace Peach.Core.Dom
 		/// </remarks>
 		[XmlAttribute]
 		[DefaultValue(2.0)]
-		public decimal faultWaitTime { get; set; }
+		public double faultWaitTime { get; set; }
 
 		/// <summary>
 		/// How often we should perform a control iteration.
@@ -275,7 +275,7 @@ namespace Peach.Core.Dom
 		public OrderedDictionary<string, Publisher> publishers = new OrderedDictionary<string, Publisher>();
 
 		[NonSerialized]
-		public OrderedDictionary<string, Agent> agents = new OrderedDictionary<string, Agent>();
+		public NamedCollection<Agent> agents = new NamedCollection<Agent>();
 
 		/// <summary>
 		/// List of mutators to include in run

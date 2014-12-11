@@ -151,7 +151,8 @@ This is an example of dumb file fuzzing. The data from _sample.png_ will be crac
 
 			<!-- The command line to run.  Notice the filename provided matched up
 				to what is provided below in the Publisher configuration -->
-			<Param name="CommandLine" value="c:\windows\system32\mspaint.exe fuzzfile.bin" />
+			<Param name="Executable" value="c:\windows\system32\mspaint.exe" />
+			<Param name="Arguments" value="fuzzfile.bin" />
 
 			<!-- This parameter will cause the debugger to wait for an action-call in
 				the state model with a method="ScoobySnacks" before running
