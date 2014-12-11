@@ -52,9 +52,24 @@ namespace Peach.Core.Fixups
 			if (num == null && !(parent is Dom.String && parent.Hints.ContainsKey("NumericalString")))
 				throw new PeachException("SequenceRandomFixup has non numeric parent '" + parent.fullName + "'.");
 
+			object obj;
+
+			if (ctx.controlRecordingIteration)
+			{
+				var dm = parent.root as DataModel;
+				if (dm != null && dm.actionData != null)
+				{
+					// Allow value to be overridden via the stateStore using key:
+					// Peach.VolatileOverride.StateName.ActionName.ModelName.Path.To.Element
+					var key = "Peach.VolatileOverride.{0}.{1}".Fmt(dm.actionData.outputName, parent.fullName);
+
+					if (ctx.stateStore.TryGetValue(key, out obj))
+						return (Variant) obj;
+				}
+			}
+
 			Random rng;
 
-			object obj;
 			if (!ctx.iterationStateStore.TryGetValue("SequenceRandomFixup", out obj))
 			{
 				rng = new Random(ctx.config.randomSeed + ctx.currentIteration);

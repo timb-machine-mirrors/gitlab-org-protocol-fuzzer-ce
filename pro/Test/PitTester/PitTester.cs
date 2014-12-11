@@ -1,6 +1,7 @@
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.Dom.XPath;
+using Peach.Core.Fixups;
 using Peach.Core.IO;
 using Peach.Enterprise;
 using Peach.Enterprise.WebServices;
@@ -68,6 +69,8 @@ namespace PitTester
 					test.publishers[key] = new TestPublisher(key, logger);
 			}
 
+			var fixupOverrides = new Dictionary<string, Variant>();
+
 			if (testData.Slurps.Count > 0)
 			{
 				var doc = new XmlDocument();
@@ -94,6 +97,18 @@ namespace PitTester
 							throw new PeachException("Error, slurp setXpath did not return a Data Element. [" + slurp.SetXpath + "]");
 
 						setElement.DefaultValue = blob.DefaultValue;
+
+						if (setElement.fixup is VolatileFixup)
+						{
+							var dm = setElement.root as DataModel;
+							if (dm != null && dm.actionData != null)
+							{
+								// If the element is under an action, and has a volatile fixup
+								// store off the value for overriding during TestStarting
+								var key = "Peach.VolatileOverride.{0}.{1}".Fmt(dm.actionData.outputName, setElement.fullName);
+								fixupOverrides[key] = blob.DefaultValue;
+							}
+						}
 
 						if (blob.DefaultValue.GetVariantType() == Variant.VariantType.BitStream)
 							((BitwiseStream)blob.DefaultValue).Position = 0;
@@ -126,7 +141,16 @@ namespace PitTester
 			}
 
 
+			uint num = 0;
 			var e = new Engine(null);
+
+			e.TestStarting += ctx =>
+			{
+				foreach (var kv in fixupOverrides)
+					ctx.stateStore.Add(kv.Key, kv.Value);
+			};
+
+			e.IterationStarting += (ctx, it, tot) => num = it;
 
 			try
 			{
@@ -135,7 +159,7 @@ namespace PitTester
 			catch (Exception ex)
 			{
 				var msg = "Encountered an unhandled exception on iteration {0}, seed {1}.\n{2}".Fmt(
-					e.context.currentIteration,
+					num,
 					config.randomSeed,
 					ex.Message);
 				throw new PeachException(msg, ex);
@@ -281,7 +305,7 @@ namespace PitTester
 							gotStart = true;
 						else if (meth == "ExitIterationEvent")
 							gotEnd = true;
-						else
+						else if (!gotStart && !ShouldSkipStart(actions))
 							errors.AppendLine(string.Format("StateModel '{0}' has an unexpected call action.  Method is '{1}' and should be 'StartIterationEvent' or 'EndIterationEvent'.", smName, meth));
 					}
 
@@ -315,14 +339,10 @@ namespace PitTester
 				throw new ApplicationException(errors.ToString());
 		}
 
-		static string GetRelativePath(string basePath, string fullPath)
+		private static bool ShouldSkipStart(XPathNodeIterator actions)
 		{
-			if (basePath.LastOrDefault() != Path.DirectorySeparatorChar)
-				basePath += Path.DirectorySeparatorChar;
-
-			var relPath = fullPath.Substring(basePath.Length);
-
-			return relPath;
+			var preceding = actions.Current.SelectSingleNode("preceding-sibling::comment()");
+			return (preceding != null && preceding.Value.Contains("PitTester: Skip_StartIterationEvent"));
 		}
 	}
 }
