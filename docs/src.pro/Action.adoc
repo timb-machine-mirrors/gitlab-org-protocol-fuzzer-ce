@@ -29,7 +29,7 @@ Action elements perform various operations in the xref:StateModel[StateModel].
 
 Many Actions are called by Peach implicitly (without an explicit declaration in a State). Two examples follow:
 
-* The xref:Action_start[_start_] action performs every iteration automatically  
+* The xref:Action_start[_start_] action performs every iteration automatically.  
 * The  xref:Action_open[_open_] action called before any outputs or inputs occur.
 
 
@@ -103,8 +103,22 @@ Since Pits may contain multiple Publishers within a Test, many Actions have a pa
 
 _Required:_
 
-xref:name[name]:: Name of the action
-xref:Action_Types[type]:: Action type, see list of action types
+xref:name[name]:: Name of the action.
+xref:Action_Types[type]:: Action type. The following enumeration summarizes the available action types. Detailed descriptions of the actions follow the child elements.
+
+* xref:Accept[accept] - temporarily blocks execution.
+* xref:Call[call] - provides a method-calling metaphor.
+* xref:ChangeState[changeState] - transitions from one state to another within the xref:StateModel[StateModel].
+* xref:Close[close] - causes the associated Publisher to close.
+* xref:GetProperty[getProperty] - provides the retrieval function of a property metaphor (get function).
+* xref:Input[input] - reads input data using the Publisher.
+* xref:Open[open (or connect)] - causes the associated Publisher to open its resources.
+* xref:Output[output] - causes the associated Publisher to write data.
+* xref:SetProperty[setProperty] - provides the output function of a property metaphor (set function) that modifies the value of the property.
+* xref:Slurp[slurp] - copies a value from a data element in one DataModel to a data element in another DataModel. 
+* xref:Start[start] - causes a Publisher to initialize itself.
+* xref:Stop[stop] - causes a Publisher to perform final cleanup.
+
 
 _Required Based on Type:_
 
@@ -115,17 +129,17 @@ property:: Name of the property to get or set in the publisher when type is +set
 
 _Optional:_
 
-publisher:: Name of the publisher that this action should be called on, or Peach.Agent
-xref:Action_when[when]:: Perform the action if the provided expression evaluates to true
-xref:Action_onComplete[onComplete]:: Expression to run when an action completes
-xref:Action_onStart[onStart]:: Expression to run at the start of an action
+publisher:: Name of the publisher that this action should be called on, or Peach.Agent.
+xref:Action_onComplete[onComplete]:: Expression to evaluate when an action completes.
+xref:Action_onStart[onStart]:: Expression to evaluate at the start of an action.
+xref:Action_when[when]:: Perform the action if the provided expression evaluates to true.
 
 === Child Elements
 
-xref:DataModel[DataModel]:: Reference to a DataModel to fuzz
-xref:Data[Data]:: Set of initial data to crack into the above DataModel before fuzzing
-xref:Param[Param]:: Argument passed with the call.  Will be fuzzed
-xref:Result[Result]:: Output of the call Action.  Cracked into a DataModel
+xref:DataModel[DataModel]:: Reference to a DataModel to fuzz.
+xref:Data[Data]:: Set of initial data to crack into the above DataModel before fuzzing.
+xref:Param[Param]:: Argument passed with the call.  Will be fuzzed.
+xref:Result[Result]:: Output of the call Action.  Cracked into a DataModel.
 
 [[Action_Types]]
 == Action Types
