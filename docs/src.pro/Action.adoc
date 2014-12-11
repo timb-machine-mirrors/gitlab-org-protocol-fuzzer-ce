@@ -20,18 +20,31 @@
 // described scripting and showed an example of multiple publishers
 // fixed children and attributes
 
-Action elements are child elements of xref:State[State]. Actions send commands to the xref:Publisher[Publisher].
+Action elements are part of the xref:StateModel[StateModel], and send commands to xref:Publisher[Publisher]. Within the StateModel, Action elements are child elements of xref:State[State].
 
-Action elements perform various operations in the xref:StateModel[StateModel].
+Action elements set up and manage state in a fuzzing session. They issue commands to set up and control the Peach environment. For example, the open action initializes a listener by initiating a network connection or opening a file handle. And, the close action releases resources at the end of a fuzzing iteration. 
 
-* Actions can send output, receive input, open a connection, and much more. For example, the open action initializes a listener by initiating a network connection or opening a file handle. Similarly, the close action releases resources.
-* Actions can control the Peach environment by changing to another state in the xref:StateModel[StateModel], moving data between xref:DataModel[DataModels], and calling custom methods defined by xref:Agent[Agents].
+Action elements provide control over state changes, movement of data between data models, and calling custom methods defined by agents. For example, the changeState action initiates a transition to a new state in the StateModel.
 
-Many Actions are called by Peach implicitly (without an explicit declaration in a State). Two examples follow:
+Additionally, Action elements issue directives to Publishers to do things such as read input, send output, and access a property. 
 
-* The xref:Action_start[_start_] action performs every iteration automatically.  
-* The  xref:Action_open[_open_] action called before any outputs or inputs occur.
+Four Actions elements are implicit—start, stop, open, and close. They execute automatically and do not need to be declared in the StateModel. 
 
+* The start and stop actions occur at the start and end of a fuzzing session. 
+* The open and close actions occur at the start and end of each iteration in a fuzzing session.
+
+Other actions require explicit declarations in order to execute. 
+
+.Default Order of Actions
+****
+The following is the default order in which Actions are performed when fuzzing:
+
+. start - Implicit, once per session
+. open - Implicit, once per iteration
+. Explicit actions (accept, input, output, etc.)
+. close - Implicit, once per iteration
+. stop - Implicit, once per session
+****
 
 === Syntax
 
