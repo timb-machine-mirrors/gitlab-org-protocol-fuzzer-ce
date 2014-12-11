@@ -50,7 +50,7 @@ module Peach {
 		constructor(
 			private service: UniqueService
 		) {
-			this.link = _.bind(this._link, this);
+			this.link = this._link.bind(this);
 		}
 
 		public restrict = 'A';
@@ -108,19 +108,15 @@ module Peach {
 		}
 
 		public Register(scope: IUniqueScope) {
-			if (scope.channel) {
-				var channel = this.getChannel(scope.channel);
-				channel[scope.$id.toString()] = scope;
-			}
+			var channel = this.getChannel(scope.channel);
+			channel[scope.$id.toString()] = scope;
 		}
 
 		public Unregister(scope: IUniqueScope) {
-			if (scope.channel) {
-				var channel = this.getChannel(scope.channel);
-				delete channel[scope.$id.toString()];
-				if (_.isEmpty(channel)) {
-					delete this.channels[scope.channel];
-				}
+			var channel = this.getChannel(scope.channel);
+			delete channel[scope.$id.toString()];
+			if (_.isEmpty(channel)) {
+				delete this.channels[scope.channel];
 			}
 		}
 
