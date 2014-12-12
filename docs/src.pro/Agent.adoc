@@ -9,7 +9,7 @@ Local::
 	Agent is hosted in the current Peach process. This is the default channel.
 
 TCP Remoting::
-	Peach agent communicates using .NET TCP Remoting (RPC) protocol. Requires agent be written using Microsoft.NET framework. Peach can be run as a TCP remoting agent using the +-a tcp+ arguments.
+	Peach agent communicates using .NET TCP Remoting (RPC) protocol. The agent must be written using the Microsoft.NET framework. Peach can run as a TCP remoting agent using the +-a tcp+ arguments.
 
 REST JSON::
 	Agent protocol using REST style calls over HTTP. This channel is best suited for custom Peach agents. Example agents in C, C++, and Python are included in the Peach SDK.
@@ -54,9 +54,9 @@ c:\peach3> peach.exe -a tcp
 
 ===== Multiple Interfaces on Agent Machine
 
-There is a bug in the Microsoft.NET remoting framework that causes default network adapters IP address to be used, event when communication occurs over a secondary interface.
+There is a bug in the Microsoft.NET remoting framework that causes the default IP address of the network adapter to be used, event when communication occurs over a secondary interface.
 
-When running a Peach Agent on a machine that has muliple network interfaces, the interface can be explicitly bound to using a configuration setting. This configuration setting is only required for the Peach Agent process.
+When running a Peach Agent on a machine that has muliple network interfaces, the interface can be explicitly bound to the appropriate network adapter IP address using a configuration setting. This configuration setting is only required for the Peach Agent process.
 
 The following XML can be added to the +Peach.exe.config+ file inside of the _configuration_ element:
 
