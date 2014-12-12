@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Diagnostics;
 using NLog;
-using Proc = System.Diagnostics.Process;
+using Peach.Core;
+using Peach.Core.Agent;
 
-namespace Peach.Core.Agent.Monitors
+namespace Peach.Pro.Core.Agent.Monitors
 {
 	[Monitor("ProcessKiller", true)]
 	[Parameter("ProcessNames", typeof(string[]), "Comma seperated list of process to kill.")]
@@ -66,7 +67,7 @@ namespace Peach.Core.Agent.Monitors
 
 		void Kill(string processName)
 		{
-			Proc[] procs = Proc.GetProcessesByName(processName);
+			Process[] procs = Process.GetProcessesByName(processName);
 
 			foreach (var p in procs)
 			{

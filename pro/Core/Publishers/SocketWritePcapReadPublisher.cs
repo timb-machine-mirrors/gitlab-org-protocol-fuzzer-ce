@@ -1,17 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using System.Threading;
-
 using NLog;
-
 using Peach.Core;
-using Peach.Core.IO;
-using Peach.Core.Publishers;
 
-namespace Peach.Pro.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	/// <summary>
 	/// Base class for publishers that will write data over a Stream interface, but read data via

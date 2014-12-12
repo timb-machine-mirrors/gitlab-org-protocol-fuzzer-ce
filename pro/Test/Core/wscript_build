@@ -27,7 +27,7 @@ bld(
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs **/*.resx'),
 	name = 'Peach.Pro.Test.dll',
-	ide_content = bld.path.ant_glob('Resources/**/*'),
-	resource = 'google.der',
+	resource = bld.path.ant_glob('Resources/**/*'),
 	ide_use = 'CrashingProgram CrashingFileConsumer CrashableServer',
+	namespace = 'Peach.Pro.Test.Core',
 )

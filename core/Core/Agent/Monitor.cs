@@ -27,11 +27,8 @@
 // $Id$
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Peach.Core.Dom;
 
 namespace Peach.Core.Agent
 {
@@ -42,12 +39,24 @@ namespace Peach.Core.Agent
 	/// </summary>
 	public abstract class Monitor
 	{
-		public Monitor(IAgent agent, string name, Dictionary<string, Variant> args)
+		protected Monitor(IAgent agent, string name, Dictionary<string, Variant> args)
 		{
 			Agent = agent;
 			Name = name;
 			Class = GetType().GetAttributes<MonitorAttribute>(null).First().Name;
 		}
+
+		public enum When
+		{
+			DetectFault,
+			OnCall,
+			OnStart,
+			OnEnd,
+			OnIterationStart,
+			OnIterationEnd,
+			OnFault,
+			OnIterationStartAfterFault
+		};
 
 		/// <summary>
 		/// The agent that is running this monitor.
@@ -92,7 +101,6 @@ namespace Peach.Core.Agent
 		/// <returns>Returns true to indicate iteration should be re-run, else false.</returns>
 		public abstract bool IterationFinished();
 
-
 		/// <summary>
 		/// Was a fault detected during current iteration?
 		/// </summary>
@@ -132,6 +140,28 @@ namespace Peach.Core.Agent
 		public virtual object ProcessQueryMonitors(string query)
 		{
 			return null;
+		}
+
+		/// <summary>
+		/// An event handler that can be used by monitor implementations
+		/// to alert others about interesting events occuring.
+		/// The peach core does not make use of this event.
+		/// </summary>
+		/// <remarks>
+		/// This event handler is completly ignroed by the peach core.
+		/// It can be useful for writing tests against monitors so the
+		/// testing framework can get notified when interesting things happen.
+		/// </remarks>
+		public event EventHandler InternalEvent;
+
+		/// <summary>
+		/// Raises the InternalEvent event.
+		/// </summary>
+		/// <param name="args">Arbitrary arguments to pass to event subscribers.</param>
+		protected void OnInternalEvent(EventArgs args)
+		{
+			if (InternalEvent != null)
+				InternalEvent(this, args);
 		}
 	}
 

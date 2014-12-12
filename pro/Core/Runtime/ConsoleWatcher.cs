@@ -27,18 +27,11 @@
 // $Id$
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
-
 using Peach.Core;
-using Peach.Core.Agent;
-
-using NLog;
 using Peach.Core.Dom;
 
-namespace Peach.Core.Runtime
+namespace Peach.Pro.Core.Runtime
 {
 	public class ConsoleWatcher : Watcher
 	{

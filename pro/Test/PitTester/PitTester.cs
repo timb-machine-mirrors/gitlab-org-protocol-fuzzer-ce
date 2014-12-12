@@ -1,10 +1,7 @@
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.Dom.XPath;
-using Peach.Core.Fixups;
 using Peach.Core.IO;
-using Peach.Enterprise;
-using Peach.Enterprise.WebServices;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,6 +9,9 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.XPath;
+using Peach.Pro.Core;
+using Peach.Pro.Core.Fixups;
+using Peach.Pro.Core.WebServices;
 
 namespace PitTester
 {
@@ -143,6 +143,7 @@ namespace PitTester
 
 			uint num = 0;
 			var e = new Engine(null);
+			e.IterationStarting += (ctx, it, tot) => num = it;
 
 			e.TestStarting += ctx =>
 			{

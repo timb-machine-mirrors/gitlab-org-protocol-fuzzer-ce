@@ -1,9 +1,9 @@
-using System;
-using System.Runtime.InteropServices;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using Mono.Unix;
+using Peach.Core;
 
-namespace Peach.Core
+namespace Peach.Pro.OS.Linux
 {
 	[PlatformImpl(Platform.OS.Linux)]
 	public class NetworkAdapterImpl : NetworkAdapter

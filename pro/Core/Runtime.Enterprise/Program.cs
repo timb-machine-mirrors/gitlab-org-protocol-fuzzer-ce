@@ -1,12 +1,15 @@
-using Peach.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Godel.Core;
+using Peach.Core;
+using Peach.Core.Runtime;
+using Peach.Pro.Core.WebServices;
 
-namespace Peach.Enterprise.Runtime
+namespace Peach.Pro.Core.Runtime.Enterprise
 {
-	public class Program : Peach.Core.Runtime.Program
+	public class Program : Runtime.Program
 	{
 		Uri webUri;
 		string pitLibraryPath;
@@ -17,7 +20,7 @@ namespace Peach.Enterprise.Runtime
 		{
 		}
 
-		protected override void AddCustomOptions(Core.Runtime.OptionSet options)
+		protected override void AddCustomOptions(OptionSet options)
 		{
 			options.Add("pits=", v => pitLibraryPath = v);
 			options.Add("noweb", v => noweb = true);
@@ -45,7 +48,7 @@ namespace Peach.Enterprise.Runtime
 			{
 				if (config.debug > 0)
 				{
-					return new Peach.Core.Runtime.ConsoleWatcher();
+					return new Runtime.ConsoleWatcher();
 				}
 
 				// Ensure console is interactive
@@ -53,18 +56,18 @@ namespace Peach.Enterprise.Runtime
 
 				var title = webUri == null ? "" : " ({0})".Fmt(webUri);
 
-				return new Peach.Enterprise.Runtime.ConsoleWatcher(title);
+				return new ConsoleWatcher(title);
 
 			}
 			catch (IOException)
 			{
-				return new Peach.Core.Runtime.ConsoleWatcher();
+				return new Runtime.ConsoleWatcher();
 			}
 		}
 
 		protected override Analyzer GetParser()
 		{
-			var parser = new Godel.Core.GodelPitParser();
+			var parser = new GodelPitParser();
 			Analyzer.defaultParser = parser;
 
 			return base.GetParser();
@@ -77,11 +80,18 @@ namespace Peach.Enterprise.Runtime
 			return ret;
 		}
 
-		protected override void OnRunJob(bool test, System.Collections.Generic.List<string> extra)
+		protected override void OnRunJob(bool test, List<string> extra)
 		{
 			if (extra.Count > 0)
 			{
 				// Pit was specified on the command line, do normal behavior
+				// Ensure the EULA has been accepted before running a job
+				// on the command line.  The WebUI will present a EULA
+				// in the later case.
+
+				if (!License.EulaAccepted)
+					ShowEula();
+
 				base.OnRunJob(test, extra);
 			}
 			else if (!noweb)
@@ -89,7 +99,7 @@ namespace Peach.Enterprise.Runtime
 				// Ensure pit library exists
 				var pits = FindPitLibrary();
 
-				Peach.Enterprise.WebServices.WebServer.Run(pits);
+				WebServer.Run(pits);
 			}
 		}
 
@@ -104,16 +114,16 @@ namespace Peach.Enterprise.Runtime
 			// Pass an empty pit library path if we are running a job off of
 			// the command line.
 
-			using (var svc = new WebServices.WebServer(""))
+			using (var svc = new WebServer(""))
 			{
 				// Tell the web service the job is running off the command line
-				svc.Context.AttachJob(this.dom, config);
+				svc.Context.AttachJob(dom, config);
 
 				svc.Start();
 
 				webUri = svc.Uri;
 
-				Core.Runtime.ConsoleWatcher.WriteInfoMark();
+				Runtime.ConsoleWatcher.WriteInfoMark();
 				Console.WriteLine("Web site running at: {0}", svc.Uri);
 
 				// Add the web logger as the 1st logger to each test
@@ -155,7 +165,7 @@ Syntax:
   --seed N                   Sets the seed used by the random number generator
   --parseonly                Test parse a Peach XML file
   --makexsd                  Generate peach.xsd
-  --showenv                  Print a list of all DataElements, Fixups, Monitors
+  --showenv                  Print a list of all DataElements, Fixups, Agents
                              Publishers and their associated parameters.
   --showdevices              Display the list of PCAP devices
   --analyzer                 Launch Peach Analyzer
@@ -225,27 +235,52 @@ Debug Peach XML File
   debugging as well.
 ";
 			Console.WriteLine(syntax);
-			throw new Core.Runtime.SyntaxException();
+			throw new SyntaxException();
 		}
 
 		private string FindPitLibrary()
 		{
 			if (pitLibraryPath == null)
 			{
-				var pwd = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-				var lib = Path.Combine(pwd, "pits");
-
+				var lib = Utilities.GetAppResourcePath("pits");
 				if (!Directory.Exists(lib))
 					throw new PeachException("Could not locate the Peach Pit Library. Ensure there is a 'pits' folder in your Peach installation directory or speficy the location of the Peach Pit Library using the '--pits' command line option.");
-
 				return lib;
 			}
-			else
-			{
-				if (!Directory.Exists(pitLibraryPath))
-					throw new PeachException("The specified Peach Pit Library location '{0}' does not exist.".Fmt(pitLibraryPath));
 
-				return pitLibraryPath;
+			if (!Directory.Exists(pitLibraryPath))
+				throw new PeachException("The specified Peach Pit Library location '{0}' does not exist.".Fmt(pitLibraryPath));
+			return pitLibraryPath;
+		}
+
+		private void ShowEula()
+		{
+			Console.WriteLine(License.EulaText());
+
+			Console.WriteLine(@"
+BY TYPING ""YES"" YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTAND, AND
+AGREE TO BE BOUND BY THE TERMS ABOVE.
+");
+
+			while (true)
+			{
+				Console.WriteLine("Do you accept the end user license agreement?");
+
+				Console.Write("(yes/no) ");
+				var answer = Console.ReadLine();
+				Console.WriteLine();
+
+				if (answer == "no")
+					Environment.Exit(-1);
+
+				if (answer == "yes")
+				{
+					License.EulaAccepted = true;
+					return;
+				}
+
+				Console.WriteLine("The answer \"{0}\" is invalid. It must be one of \"yes\" or \"no\".", answer);
+				Console.WriteLine();
 			}
 		}
 	}

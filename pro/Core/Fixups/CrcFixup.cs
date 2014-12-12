@@ -30,12 +30,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
+using Peach.Core;
 using Peach.Core.Dom;
-using Peach.Core.Fixups.Libraries;
-using System.Runtime.Serialization;
+using Peach.Pro.Core.Fixups.Libraries;
 
-namespace Peach.Core.Fixups
+namespace Peach.Pro.Core.Fixups
 {
 	[Description("CRC Fixup library including CRC32 as defined by ISO 3309.")]
 	[Fixup("Crc", true)]

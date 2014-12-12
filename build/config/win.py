@@ -56,8 +56,8 @@ def prepare(conf):
 			'LINKFLAGS' : [ '/EXPORT:main', '/ENTRY:Ptrace_DllMainCRTStartup@12', '/BASE:0x55000000' ],
 		},
 		'com' : {
-			'HEADERS' : [ 'atlbase.h' ],
 			'DEFINES' : [ '_WINDLL' ],
+			'STLIB' : [ 'Ole32', 'OleAut32', 'Advapi32' ],
 		},
 		'network' : {
 			'HEADERS' : [ 'winsock2.h' ],
@@ -87,8 +87,8 @@ def prepare(conf):
 			'LINKFLAGS' : [ '/EXPORT:main', '/ENTRY:Ptrace_DllMainCRTStartup', '/BASE:0xC5000000' ],
 		},
 		'com' : {
-			'HEADERS' : [ 'atlbase.h' ],
 			'DEFINES' : [ '_WINDLL' ],
+			'STLIB' : [ 'Ole32', 'OleAut32', 'Advapi32' ],
 		},
 		'network' : {
 			'HEADERS' : [ 'winsock2.h' ],
@@ -201,6 +201,7 @@ def configure(conf):
 		'/DEBUG',
 		'/INCREMENTAL:NO',
 		'/WX',
+		'/MACHINE:%s' % env.SUBARCH,
 	])
 
 	env['CSPLATFORM'] = env.SUBARCH

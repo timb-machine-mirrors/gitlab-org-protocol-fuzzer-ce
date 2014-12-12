@@ -1,7 +1,6 @@
-using System;
 using NUnit.Framework;
 
-namespace Peach.Enterprise.Test.MutationStrategies
+namespace Peach.Pro.Test.Core.MutationStrategies
 {
 	[TestFixture] [Category("Peach")]
 	class ReplayStrategyTests

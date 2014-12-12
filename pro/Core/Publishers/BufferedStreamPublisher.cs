@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using Peach.Core;
 using Peach.Core.IO;
 
-namespace Peach.Core.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	/// <summary>
 	/// Helper class for creating stream based publishers.
@@ -31,7 +32,7 @@ namespace Peach.Core.Publishers
 		protected MemoryStream _buffer = null;
 		protected bool _timeout = false;
 
-		public BufferedStreamPublisher(Dictionary<string, Variant> args)
+		protected BufferedStreamPublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
 		}
@@ -299,7 +300,6 @@ namespace Peach.Core.Publishers
 				Logger.Error("output: Error during send.  " + ex.Message);
 				throw new SoftException(ex);
 			}
-
 		}
 
 		public override void WantBytes(long count)

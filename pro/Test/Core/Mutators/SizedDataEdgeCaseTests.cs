@@ -1,9 +1,7 @@
-using System;
-using System.Linq;
-using Peach.Core;
 using NUnit.Framework;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class SizedDataEdgeCaseTests : DataModelCollector
@@ -41,9 +39,11 @@ namespace Peach.Core.Test.Mutators
 
 			RunEngine(xml);
 
-			// Size is 11 bytes, max is 50
-			// (50 - 4) + 1 = 47 expansions
+			// min is 0, max is 46 = 47 mutations
 			Assert.AreEqual(47, mutatedDataModels.Count);
+
+			foreach (var m in mutatedDataModels)
+				Assert.LessOrEqual(m.Value.Length, 50);
 		}
 	}
 }

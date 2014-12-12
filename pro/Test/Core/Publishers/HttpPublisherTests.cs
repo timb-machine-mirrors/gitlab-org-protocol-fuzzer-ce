@@ -1,37 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NUnit.Framework;
-using NUnit.Framework.Constraints;
-using Peach.Core;
-using Peach.Core.Analyzers;
 using System.IO;
-using System.Net.Sockets;
 using System.Net;
 using System.Threading;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Analyzers;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Publishers
+namespace Peach.Pro.Test.Core.Publishers
 {
 
 	class SimpleHttpListener
 	{
-		bool stop = false;
+		bool _stop;
 
 		public SimpleHttpListener()
 		{
 			Assert.True(HttpListener.IsSupported);
 		}
 
-		HttpListener listener;
+		HttpListener _listener;
 
 		public void Stop()
 		{
-			this.stop = true;
+			_stop = true;
 
 			try
 			{
-				listener.Stop();
+				_listener.Stop();
 			}
 			catch
 			{
@@ -47,45 +43,45 @@ namespace Peach.Core.Test.Publishers
 				throw new ArgumentException("prefixes");
 
 			// Create a listener.
-			listener = new HttpListener();
+			_listener = new HttpListener();
 			// Add the prefixes. 
-			foreach (string s in prefixes)
+			foreach (var s in prefixes)
 			{
-				listener.Prefixes.Add(s);
+				_listener.Prefixes.Add(s);
 			}
-			listener.Start();
+			_listener.Start();
 
 			IAsyncResult ar = null;
 
-			while(!stop)
+			while (!_stop)
 			{
 				try
 				{
 					if (ar == null)
-						 ar = listener.BeginGetContext(null, null);
+						ar = _listener.BeginGetContext(null, null);
 
 					if (!ar.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(1)))
 						continue;
 
 					// Note: The GetContext method blocks while waiting for a request. 
-					HttpListenerContext context = listener.EndGetContext(ar);
-					HttpListenerRequest request = context.Request;
+					var context = _listener.EndGetContext(ar);
+					var request = context.Request;
 					// Obtain a response object.
 
 					if (request.ContentLength64 > 0)
 					{
-						byte[] buf = new byte[request.ContentLength64];
+						var buf = new byte[request.ContentLength64];
 						request.InputStream.Read(buf, 0, buf.Length);
 					}
 
-					HttpListenerResponse response = context.Response;
+					var response = context.Response;
 
 					// Construct a response. 
-					string responseString = request.HttpMethod + " Hello World Too = " + request.ContentLength64;
-					byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
+					var responseString = request.HttpMethod + " Hello World Too = " + request.ContentLength64;
+					var buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
 					// Get a response stream and write the response to it.
 					response.ContentLength64 = buffer.Length;
-					System.IO.Stream output = response.OutputStream;
+					var output = response.OutputStream;
 					output.Write(buffer, 0, buffer.Length);
 					// You must close the output stream.
 					output.Close();
@@ -102,11 +98,11 @@ namespace Peach.Core.Test.Publishers
 		}
 	}
 
-
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Category("Peach")]
 	public class HttpPublisherTests : DataModelCollector
 	{
-		public string send_recv_template = @"
+		private const string SendRecvTemplate = @"
 <Peach>
 	<DataModel name=""TheDataModel"">
 		<String name=""str"" value=""Hello World""/>
@@ -139,7 +135,7 @@ namespace Peach.Core.Test.Publishers
 </Peach>
 ";
 
-		public string recv_template = @"
+		private const string RecvTemplate = @"
 <Peach>
 	<DataModel name=""TheDataModel"">
 		<String name=""str""/>
@@ -165,27 +161,27 @@ namespace Peach.Core.Test.Publishers
 </Peach>
 ";
 
-		public void HttpClient(bool send_recv, string method)
+		public void HttpClient(bool sendRecv, string method)
 		{
-			HttpClient(send_recv, method, false);
+			HttpClient(sendRecv, method, false);
 		}
 
-		public void HttpClient(bool send_recv, string method, bool isHttps)
+		public void HttpClient(bool sendRecv, string method, bool isHttps)
 		{
-			ushort port = TestBase.MakePort(56000, 57000);
-			string url = null;
+			var port = TestBase.MakePort(56000, 57000);
+			string url;
 			SimpleHttpListener listener = null;
 			Thread lThread = null;
-			if ( isHttps)
+			if (isHttps)
 			{
 				url = "https://changethisurltotest.peach";
 			}
 			else
 			{
-				url = "http://localhost:" + port.ToString() + "/";
+				url = "http://localhost:" + port + "/";
 
 				listener = new SimpleHttpListener();
-				string[] prefixes = new string[1] { url };
+				var prefixes = new string[1] { url };
 				lThread = new Thread(() => listener.Listen(prefixes));
 
 				lThread.Start();
@@ -193,18 +189,17 @@ namespace Peach.Core.Test.Publishers
 
 			try
 			{
-				string xml = string.Format(send_recv ? send_recv_template : recv_template, method, url);
+				var xml = string.Format(sendRecv ? SendRecvTemplate : RecvTemplate, method, url);
 
-				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				var parser = new PitParser();
+				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
-				RunConfiguration config = new RunConfiguration();
-				config.singleIteration = true;
+				var config = new RunConfiguration {singleIteration = true};
 
-				Engine e = new Engine(this);
+				var e = new Engine(this);
 				e.startFuzzing(dom, config);
 
-				if (send_recv && ! isHttps)
+				if (sendRecv && !isHttps)
 				{
 					Assert.AreEqual(2, actions.Count);
 
@@ -213,26 +208,26 @@ namespace Peach.Core.Test.Publishers
 					var de2 = actions[1].dataModel.find("TheDataModel2.str");
 					Assert.NotNull(de2);
 
-					string send = (string)de1.DefaultValue;
-					string recv = (string)de2.DefaultValue;
+					var send = (string)de1.DefaultValue;
+					var recv = (string)de2.DefaultValue;
 
 					Assert.AreEqual("Hello World", send);
 					Assert.AreEqual(method + " Hello World Too = 11", recv);
 				}
-				else if ( ! isHttps)
+				else if (!isHttps)
 				{
 					Assert.AreEqual(1, actions.Count);
 					var de1 = actions[0].dataModel.find("TheDataModel.str");
 					Assert.NotNull(de1);
 
-					string recv = (string)de1.DefaultValue;
+					var recv = (string)de1.DefaultValue;
 
 					Assert.AreEqual(method + " Hello World Too = 0", recv);
 				}
 			}
 			finally
 			{
-				if ( ! isHttps)
+				if (!isHttps)
 				{
 					listener.Stop();
 					lThread.Join();

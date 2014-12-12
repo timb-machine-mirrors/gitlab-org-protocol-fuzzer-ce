@@ -1,19 +1,16 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NUnit.Framework;
-using NUnit.Framework.Constraints;
-using Peach.Core;
-using Peach.Core.Dom;
 using System.IO;
-using Peach.Core.Analyzers;
 using NLog;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Analyzers;
+using Peach.Core.Test;
+using Peach.Pro.Core.Publishers;
 
-namespace Peach.Core.Test.Publishers
+namespace Peach.Pro.Test.Core.Publishers
 {
 	// Only returns input bytes when asked
-	class BytePublisher : Peach.Core.Publishers.StreamPublisher
+	class BytePublisher : StreamPublisher
 	{
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }

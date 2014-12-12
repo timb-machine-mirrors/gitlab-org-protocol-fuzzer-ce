@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
-using System.Text;
-using SharpPcap;
-using SharpPcap.LibPcap;
-using SharpPcap.WinPcap;
-using PacketDotNet;
 using NLog;
-
+using PacketDotNet;
 using Peach.Core;
+using SharpPcap;
 
-namespace Peach.Pro.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	/// <summary>
 	/// Listen and queue incoming packets for use by Publisher

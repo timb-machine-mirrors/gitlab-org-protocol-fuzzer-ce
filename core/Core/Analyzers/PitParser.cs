@@ -40,7 +40,6 @@ using NLog;
 
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using System.Globalization;
 using System.Net;
 
 namespace Peach.Core.Analyzers
@@ -300,7 +299,7 @@ namespace Peach.Core.Analyzers
 
 			// Load the schema
 			var set = new XmlSchemaSet();
-			var xsd = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "peach.xsd");
+			var xsd = Utilities.GetAppResourcePath("peach.xsd");
 			using (var tr = XmlReader.Create(xsd))
 			{
 				set.Add(PEACH_NAMESPACE_URI, tr);
@@ -397,15 +396,10 @@ namespace Peach.Core.Analyzers
 
 						if (!File.Exists(normalized))
 						{
-							string newFileName = Path.Combine(
-								Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-								fileName);
-
+							string newFileName = Utilities.GetAppResourcePath(fileName);
 							normalized = Path.GetFullPath(newFileName);
-
 							if (!File.Exists(normalized))
 								throw new PeachException("Error, Unable to locate Pit file [" + fileName + "].\n");
-
 							fileName = newFileName;
 						}
 
@@ -1677,22 +1671,38 @@ namespace Peach.Core.Analyzers
 			test.name = node.getAttrString("name");
 
 			if (node.hasAttr("waitTime"))
-				test.waitTime = decimal.Parse(node.getAttrString("waitTime"));
+				test.waitTime = double.Parse(node.getAttrString("waitTime"));
 
 			if (node.hasAttr("faultWaitTime"))
-				test.faultWaitTime = decimal.Parse(node.getAttrString("faultWaitTime"));
+				test.faultWaitTime = double.Parse(node.getAttrString("faultWaitTime"));
 
 			if (node.hasAttr("controlIteration"))
 				test.controlIteration = int.Parse(node.getAttrString("controlIteration"));
-
-			if (node.hasAttr("replayEnabled"))
-				test.replayEnabled = node.getAttrBool("replayEnabled");
 
 			if (node.hasAttr("nonDeterministicActions"))
 				test.nonDeterministicActions = node.getAttrBool("nonDeterministicActions");
 
 			if (node.hasAttr("maxOutputSize"))
 				test.maxOutputSize = node.getAttrUInt64("maxOutputSize");
+
+			if (node.hasAttr("maxBackSearch"))
+				test.MaxBackSearch = node.getAttrUInt32("maxBackSearch");
+
+			var lifetime = node.getAttr("targetLifetime", null);
+			if (lifetime != null)
+			{
+				switch (lifetime.ToLower())
+				{
+					case "session":
+						test.TargetLifetime = Test.Lifetime.Session;
+						break;
+					case "iteration":
+						test.TargetLifetime = Test.Lifetime.Iteration;
+						break;
+					default:
+						throw new PeachException("Error, Test '{1}' attribute targetLifetime has invalid value '{0}'.".Fmt(lifetime, test.name));
+				}
+			}
 
 			foreach (XmlNode child in node.ChildNodes)
 			{
@@ -1740,31 +1750,47 @@ namespace Peach.Core.Analyzers
 				// Agent
 				if (child.Name == "Agent")
 				{
-					string refName = child.getAttrString("ref");
+					var refName = child.getAttrString("ref");
 
 					var agent = parent.getRef<Dom.Agent>(refName, a => a.agents);
 					if (agent == null)
-						throw new PeachException("Error, Test::" + test.name + " Agent name in ref attribute not found.");
+						throw new PeachException("Error, could not locate Agent named '" +
+							refName + "' for Test '" + test.name + "'.");
 
-					test.agents.Add(refName, agent);
+					// Make a copy to ensure the platform attribute doesn't
+					// cross test boundaries and update the name just incase
+					// it is in a different namespace
+					agent = ObjectCopier.Clone(agent);
+
+					agent.name = refName;
 
 					var platform = child.getAttr("platform", null);
 					if (platform != null)
 					{
 						switch (platform.ToLower())
 						{
+							case "all":
+								agent.platform = Platform.OS.All;
+								break;
+							case "none":
+								agent.platform = Platform.OS.None;
+								break;
 							case "windows":
-								parent.agents[refName].platform = Platform.OS.Windows;
+								agent.platform = Platform.OS.Windows;
 								break;
 							case "osx":
-								parent.agents[refName].platform = Platform.OS.OSX;
+								agent.platform = Platform.OS.OSX;
 								break;
 							case "linux":
+								agent.platform = Platform.OS.Linux;
+								break;
 							case "unix":
-								parent.agents[refName].platform = Platform.OS.Linux;
+								agent.platform = Platform.OS.Unix;
 								break;
 						}
 					}
+
+					test.agents.Add(agent);
 				}
 
 				// StateModel

@@ -2,13 +2,11 @@
 // Copyright (c) Deja vu Security
 //
 
-using System;
-
+using NLog;
+using Peach.Core;
 using Peach.Core.Dom;
 
-using NLog;
-
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("NumberEdgeCase")]
 	[Description("Produce Gaussian distributed numbers around numerical edge cases.")]
@@ -31,7 +29,7 @@ namespace Peach.Core.Mutators
 
 		protected override void GetLimits(DataElement obj, out long min, out ulong max)
 		{
-			var asNum = obj as Dom.Number;
+			var asNum = obj as Peach.Core.Dom.Number;
 			if (asNum != null)
 			{
 				min = asNum.MinValue;
@@ -39,7 +37,7 @@ namespace Peach.Core.Mutators
 			}
 			else
 			{
-				System.Diagnostics.Debug.Assert(obj is Dom.String);
+				System.Diagnostics.Debug.Assert(obj is Peach.Core.Dom.String);
 
 				min = long.MinValue;
 				max = long.MaxValue;
@@ -48,12 +46,12 @@ namespace Peach.Core.Mutators
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			if (obj is Dom.String && obj.isMutable)
+			if (obj is Peach.Core.Dom.String && obj.isMutable)
 				return obj.Hints.ContainsKey("NumericalString");
 
 			// Ignore numbers <= 8 bits, they will be mutated
 			// with the NumericalVariance mutator
-			return obj is Dom.Number && obj.isMutable && obj.lengthAsBits > 8;
+			return obj is Peach.Core.Dom.Number && obj.isMutable && obj.lengthAsBits > 8;
 		}
 
 		protected override void performMutation(DataElement obj, long value)

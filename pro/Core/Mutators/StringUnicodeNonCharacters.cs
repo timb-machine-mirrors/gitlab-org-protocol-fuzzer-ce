@@ -2,12 +2,11 @@
 // Copyright (c) Deja vu Security
 //
 
-using System;
 using System.Collections.Generic;
-
+using Peach.Core;
 using Peach.Core.Dom;
 
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	/// <summary>
 	/// Certain noncharacter code points are guaranteed never to be used for

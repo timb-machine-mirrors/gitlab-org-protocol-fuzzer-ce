@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Fixups
+namespace Peach.Pro.Test.Core.Fixups
 {
     [TestFixture] [Category("Peach")]
     class SequenceRandomFixupTests : DataModelCollector
@@ -42,7 +40,7 @@ namespace Peach.Core.Test.Fixups
 
             PitParser parser = new PitParser();
 
-            Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+            Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
             RunConfiguration config = new RunConfiguration();
             config.singleIteration = true;
@@ -93,7 +91,7 @@ namespace Peach.Core.Test.Fixups
 		{
 			// Random numbers are produced for every action
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(pit)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(pit)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.range = true;
@@ -144,7 +142,7 @@ namespace Peach.Core.Test.Fixups
 		{
 			// Ensure numbers change based on seed
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(pit)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(pit)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.randomSeed = 1;
@@ -187,7 +185,7 @@ namespace Peach.Core.Test.Fixups
 		{
 			// Ensure rerun produces same value
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(pit)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(pit)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.randomSeed = 1;
@@ -263,7 +261,7 @@ namespace Peach.Core.Test.Fixups
 ";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.range = true;
@@ -336,7 +334,7 @@ namespace Peach.Core.Test.Fixups
 ";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual("Hello World", (string)dom.dataModels[0][0].DefaultValue);
 			Assert.AreEqual("Hello World", (string)dom.dataModels[0][0].InternalValue);
@@ -385,7 +383,7 @@ namespace Peach.Core.Test.Fixups
 ";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual(new byte[0], dom.dataModels[0][0].DefaultValue.BitsToArray());
 			Assert.AreEqual(new byte[0], dom.dataModels[0][0].InternalValue.BitsToArray());

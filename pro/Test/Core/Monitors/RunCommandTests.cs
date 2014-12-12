@@ -1,237 +1,295 @@
 ﻿using System;
-using System.IO;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-using Peach.Core;
-using Peach.Core.Dom;
-using Peach.Core.Analyzers;
-using Peach.Core.IO;
-using Peach.Core.Agent;
-using NUnit.Framework;
-using NUnit.Framework.Constraints;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Monitors
+namespace Peach.Pro.Test.Core.Monitors
 {
 	[TestFixture] [Category("Peach")]
 	class RunCommandTests
 	{
-		string MakeXml(string[] options)
-		{
-			string template = @"
-			<Peach>
-				<DataModel name='TheDataModel'>
-					<String value='Hello'/>
-				</DataModel>
-
-				<StateModel name='TheState' initialState='Initial'>
-					<State name='Initial'>
-						<Action type='output'>
-							<DataModel ref='TheDataModel'/>
-						</Action>
-					</State>
-				</StateModel>
-
-				<Agent name='LocalAgent'>
-					<Monitor class='RunCommand'>
-						<Param name='Command' value='{0}'/>
-						<Param name='Arguments' value='{1}'/>
-						<Param name='When' value='{2}'/>
-					</Monitor>
-
-					{3}
-				</Agent>
-
-				<Test name='Default' replayEnabled='false'>
-					<Agent ref='LocalAgent'/>
-					<StateModel ref='TheState'/>
-					<Publisher class='Null'/>
-					<Strategy class='RandomDeterministic'/>
-				</Test>
-			</Peach>";
-
-			var ret = string.Format(template, options);
-			return ret;
-		}
-
-		void Run(string testName, string arguments="", string faultAgent = "")
-		{
-			string tempFile = Path.GetTempFileName();
-			string testFile = createScript(testName, tempFile);
-			string xml = MakeXml(new string[] {testFile , arguments, testName, faultAgent});
-
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
-
-			Engine e = new Engine(null);
-			e.startFuzzing(dom, config);
-
-			string[] output = File.ReadAllLines(tempFile);
-
-			Assert.AreEqual(1, output.Length);
-			Assert.AreEqual(testName, output[0]);
-		}
-
 		[DllImport("libc")]
 		private static extern int chmod(string path, int mode);
 
-		private string createScript(string testName, string tempFile)
-		{
-			var fileName = Path.GetTempFileName() + ".bat";
+		private string _scriptFile;
+		private string _outputFile;
 
-			using (var f = new StreamWriter(fileName))
+		[SetUp]
+		public void SetUp()
+		{
+			_outputFile = Path.GetTempFileName();
+			_scriptFile = _outputFile + ".cmd";
+
+			using (var f = new StreamWriter(_scriptFile))
 			{
 				if (Platform.GetOS() != Platform.OS.Windows)
 				{
-					chmod(fileName, Convert.ToInt32("777", 8));
+					chmod(_scriptFile, Convert.ToInt32("777", 8));
 					f.WriteLine("#!/usr/bin/env sh");
+					f.WriteLine("echo $* >> {0}", _outputFile);
 				}
-
-				f.WriteLine("echo {0}>> {1}", testName, tempFile);
+				else
+				{
+					f.WriteLine("echo %* >> {0}", _outputFile);
+				}
 			}
+		}
 
-			return fileName;
+		[TearDown]
+		public void TearDown()
+		{
+			File.Delete(_outputFile);
+			File.Delete(_scriptFile);
+		}
+
+		private MonitorRunner MakeWhen(string when)
+		{
+			return new MonitorRunner("RunCommand", new Dictionary<string, string>
+			{
+				{ "Command", _scriptFile },
+				{ "Arguments", when },
+				{ "When", when },
+			});
+		}
+
+		private void AddCall(MonitorRunner runner, string startOnCall)
+		{
+			runner.Add("RunCommand", new Dictionary<string, string>
+			{
+				{ "Command", _scriptFile },
+				{ "Arguments", "OnCall" },
+				{ "When", "OnCall" },
+				{ "StartOnCall", startOnCall },
+			});
+		}
+
+		private void Verify(string expected)
+		{
+			var lines = File.ReadAllText(_outputFile);
+			Assert.AreEqual(expected, lines.Trim());
+		}
+
+		private void VerifyLines(IEnumerable<string> expected)
+		{
+			var lines = File.ReadAllLines(_outputFile).Select(s => s.Trim());
+			Assert.That(expected, Is.EquivalentTo(lines));
+		}
+
+		private void VerifyCall(int index)
+		{
+			switch (index)
+			{
+				case 0:
+					VerifyLines(new string[0]);
+					break;
+				case 1:
+					VerifyLines(new[] { "CallOne" });
+					break;
+				case 2:
+					VerifyLines(new[] { "CallOne", "CallTwo" });
+					break;
+				case 3:
+					VerifyLines(new[] { "CallOne", "CallTwo", "CallThree" });
+					break;
+				default:
+					Assert.Fail("Unexpected number of lines to verify");
+					break;
+			}
 		}
 
 		[Test]
-		public void MultipleOnCall()
+		public void TestNoArgs()
 		{
-			string template = @"
-			<Peach>
-				<StateModel name='TheState' initialState='Initial'>
-					<State name='Initial'>
-						<Action type='call' method='RunMyScript' publisher='Peach.Agent'/>
-					</State>
-				</StateModel>
+			var ex = Assert.Throws<PeachException>(() =>
+				new MonitorRunner("RunCommand", new Dictionary<string, string>())
+			);
 
-				<Agent name='LocalAgent'>
-					<Monitor class='RunCommand'>
-						<Param name='Command' value='{0}'/>
-						<Param name='StartOnCall' value='RunMyScript'/>
-					</Monitor>
-					<Monitor class='RunCommand'>
-						<Param name='Command' value='{1}'/>
-						<Param name='StartOnCall' value='RunMyScript'/>
-					</Monitor>
-					<Monitor class='RunCommand'>
-						<Param name='Command' value='{2}'/>
-						<Param name='StartOnCall' value='RunMyScript'/>
-					</Monitor>
-				</Agent>
+			const string msg = "Could not start monitor \"RunCommand\".  Monitor 'RunCommand' is missing required parameter 'Command'.";
+			Assert.AreEqual(msg, ex.Message);
+		}
 
-				<Test name='Default'>
-					<Agent ref='LocalAgent'/>
-					<StateModel ref='TheState'/>
-					<Publisher class='Null'/>
-				</Test>
-			</Peach>";
+		[Test]
+		public void TestNoWhen()
+		{
+			var ex = Assert.Throws<PeachException>(() => MakeWhen(""));
 
-			var tmp = Path.GetTempFileName();
-			var script1 = createScript("Cmd1", tmp);
-			var script2 = createScript("Cmd2", tmp);
-			var script3 = createScript("Cmd3", tmp);
-
-			var xml = string.Format(template, script1, script2, script3);
-
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
-
-			Engine e = new Engine(null);
-			e.startFuzzing(dom, config);
-
-			string[] output = File.ReadAllLines(tmp);
-			Assert.AreEqual(3, output.Length);
-			Assert.AreEqual("Cmd1", output[0]);
-			Assert.AreEqual("Cmd2", output[1]);
-			Assert.AreEqual("Cmd3", output[2]);
-
+			const string msg = "Could not start monitor \"RunCommand\".  Monitor 'RunCommand' could not set value type parameter 'When' to 'null'.";
+			Assert.AreEqual(msg, ex.Message);
 		}
 
 		[Test]
 		public void TestOnStart()
 		{
-			Run("OnStart");
+			var runner = MakeWhen("OnStart");
+
+			runner.SessionStarting = m =>
+			{
+				Verify("");
+
+				m.SessionStarting();
+
+				Verify("OnStart");
+			};
+
+			runner.Run();
+
+			Verify("OnStart");
 		}
 
 		[Test]
 		public void TestOnEnd()
 		{
-			Run("OnEnd");
+			var runner = MakeWhen("OnEnd");
+
+			runner.SessionFinished = m =>
+			{
+				Verify("");
+
+				m.SessionFinished();
+
+				Verify("OnEnd");
+			};
+
+			runner.Run();
+
+			Verify("OnEnd");
 		}
 
 		[Test]
 		public void TestOnIterationStart()
 		{
-			Run("OnIterationStart");
+			var runner = MakeWhen("OnIterationStart");
+
+			runner.IterationStarting = (m, it, repro) =>
+			{
+				Verify("");
+
+				m.IterationStarting(it, repro);
+
+				Verify("OnIterationStart");
+			};
+
+			runner.Run();
+
+			Verify("OnIterationStart");
 		}
 
 		[Test]
 		public void TestOnIterationEnd()
 		{
-			Run("OnIterationEnd");
+			var runner = MakeWhen("OnIterationEnd");
+
+			runner.IterationFinished = m =>
+			{
+				Verify("");
+
+				m.IterationFinished();
+
+				Verify("OnIterationEnd");
+			};
+
+			runner.Run();
+
+			Verify("OnIterationEnd");
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Could not start monitor \"RunCommand\".  Monitor 'RunCommand' could not set value type parameter 'When' to 'null'.")]
-        public void TestNoWhen()
-		{
-			Run("");
-		}
 
 		[Test]
 		public void TestOnFault()
 		{
-			string faultAgent = @"
-			<Monitor class='FaultingMonitor'>
-				<Param name='Iteration' value='C'/>
-			</Monitor>";
+			var runner = MakeWhen("OnFault");
 
-			try
+			runner.DetectedFault = m =>
 			{
-				Run("OnFault", "", faultAgent);
-				Assert.Fail("Should throw.");
-			}
-			catch (PeachException ex)
+				Assert.False(m.DetectedFault(), "Monitor should not have detected fault.");
+
+				// Trigger fault to runner
+				return true;
+			};
+
+			runner.GetMonitorData = m =>
 			{
-				Assert.AreEqual("Fault detected on control iteration.", ex.Message);
-			}
+				Verify("");
+
+				var ret = m.GetMonitorData();
+
+				Verify("OnFault");
+
+				return ret;
+			};
+
+			runner.Run();
+
+			Verify("OnFault");
 		}
 
 		[Test]
 		public void TestIterAfterFault()
 		{
-			string faultAgent = @"
-			<Monitor class='FaultingMonitor'>
-				<Param name='Iteration' value='1'/>
-			</Monitor>";
+			var runner = MakeWhen("OnIterationStartAfterFault");
 
-			string testName = "OnIterationStartAfterFault";
-			string tempFile = Path.GetTempFileName();
-			string testFile = createScript(testName, tempFile);
-			string xml = MakeXml(new string[] { testFile, "", testName, faultAgent });
+			runner.DetectedFault = m =>
+			{
+				Assert.False(m.DetectedFault(), "Monitor should not have detected fault.");
 
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				// Trigger fault to runner
+				return true;
+			};
 
-			RunConfiguration config = new RunConfiguration();
-			config.range = true;
-			config.rangeStart = 1;
-			config.rangeStop = 2;
+			runner.IterationStarting = (m, it, repro) =>
+			{
+				Verify("");
 
-			Engine e = new Engine(null);
-			e.startFuzzing(dom, config);
+				m.IterationStarting(it, repro);
 
-			string[] output = File.ReadAllLines(tempFile);
+				// We fault on every iteration, so iteration two is the first iteration after fault
+				var exp = it == 2 ? "OnIterationStartAfterFault" : "";
 
-			Assert.AreEqual(1, output.Length);
-			Assert.AreEqual(testName, output[0]);
+				Verify(exp);
+			};
+
+			runner.Run(2);
+
+			Verify("OnIterationStartAfterFault");
 		}
 
+		[Test]
+		public void TestMissingStartOnCall()
+		{
+			var runner = MakeWhen("OnCall");
+
+			runner.Run();
+
+			Verify("");
+		}
+
+		[Test]
+		public void TestOnCall()
+		{
+			var runner = new MonitorRunner();
+
+			AddCall(runner, "CallOne");
+			AddCall(runner, "CallTwo");
+			AddCall(runner, "CallThree");
+
+			var idx = 0;
+
+			runner.Message = m =>
+			{
+				VerifyCall(idx++);
+
+				// Called for each monitor, but each monitor just listens to
+				// the specific message, so send every message to every monitor
+				m.Message("Action.Call", new Variant("CallOne"));
+				m.Message("Action.Call", new Variant("CallTwo"));
+				m.Message("Action.Call", new Variant("CallThree"));
+
+				VerifyCall(idx);
+			};
+		}
 	}
 }

@@ -7,7 +7,7 @@ using System.Text;
 using System.IO;
 using System.Xml;
 using System.Windows.Forms;
-using Peach.Core.Xml;
+using Peach.Pro.Core.Xml;
 
 namespace PeachXmlGenerator
 {

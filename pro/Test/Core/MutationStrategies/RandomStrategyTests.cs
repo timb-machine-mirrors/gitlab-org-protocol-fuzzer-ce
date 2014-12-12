@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
-using Peach.Core.IO;
-using Peach.Core.MutationStrategies;
+using Peach.Core.Dom;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.MutationStrategies
+namespace Peach.Pro.Test.Core.MutationStrategies
 {
 	[TestFixture] [Category("Peach")]
 	class RandomStrategyTests : DataModelCollector
@@ -340,7 +335,7 @@ namespace Peach.Core.Test.MutationStrategies
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
 			dom.tests[0].includedMutators.Add("StringCaseMutator");
 
@@ -364,7 +359,7 @@ namespace Peach.Core.Test.MutationStrategies
 			for (int i = 0; i < 55; ++i)
 			{
 				Assert.AreEqual(1, dataModels[i].Count);
-				Dom.Array item = dataModels[i][0] as Dom.Array;
+				Peach.Core.Dom.Array item = dataModels[i][0] as Peach.Core.Dom.Array;
 
 				// Its either an array of 1 or an array of 2
 				Assert.GreaterOrEqual(item.Count, 1);
@@ -423,7 +418,7 @@ namespace Peach.Core.Test.MutationStrategies
 				"       </State>" +
 				"   </StateModel>" +
 
-				"   <Test name=\"Default\" maxOutputSize=\"65535\">" +
+				"   <Test name=\"Default\" maxOutputSize='65535'>" +
 				"       <StateModel ref=\"TheState\"/>" +
 				"       <Publisher class=\"Null\"/>" +
 				"       <Strategy class=\"RandomStrategy\">" +
@@ -878,7 +873,7 @@ namespace Peach.Core.Test.MutationStrategies
 		{
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.rangeStart = start;
@@ -890,7 +885,7 @@ namespace Peach.Core.Test.MutationStrategies
 			e.startFuzzing(dom, config);
 		}
 
-		private void VerifySameResults(List<string> oldStrategies, List<Dom.Action> oldActions)
+		private void VerifySameResults(List<string> oldStrategies, List<Action> oldActions)
 		{
 			Assert.AreEqual(allStrategies.Count, oldStrategies.Count);
 			Assert.AreEqual(actions.Count, oldActions.Count);

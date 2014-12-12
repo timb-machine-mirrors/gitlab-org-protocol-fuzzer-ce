@@ -3,12 +3,11 @@
 //
 
 using System;
-
+using NLog;
+using Peach.Core;
 using Peach.Core.Dom;
 
-using NLog;
-
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("StringLengthVariance")]
 	[Description("Produce strings with lengths from length - N to length + N.")]
@@ -57,7 +56,7 @@ namespace Peach.Core.Mutators
 			}
 
 			// Same as edge case except for how value is picked
-			StringLengthEdgeCase.Mutate(obj, value);
+			Utility.SizedHelpers.ExpandStringTo(obj, value);
 		}
 
 		protected override void performMutation(DataElement obj, ulong value)

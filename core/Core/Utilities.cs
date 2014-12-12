@@ -27,176 +27,189 @@
 // $Id$
 
 using System;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
-using System.Net;
 using System.Net.NetworkInformation;
-using System.Linq;
-using System.Reflection;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
+using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 using NLog;
 using NLog.Targets;
 using NLog.Config;
-using System.Security;
-using System.Security.Policy;
 
 namespace Peach.Core
 {
 	/// <summary>
 	/// Helper class to add a debug listener so asserts get written to the console.
 	/// </summary>
-	// NOTE: Tell msvs this is not a 'Component' (must be fully namespaced)
-	[System.ComponentModel.DesignerCategory("Code")]
-	public class AssertWriter : System.Diagnostics.TraceListener
+	// NOTE: Tell msvs this is not a 'Component'
+	[DesignerCategory("Code")]
+	public class AssertWriter : TraceListener
 	{
+		static readonly NLog.Logger Logger = LogManager.GetLogger("TraceListener");
+
 		public static void Register()
 		{
-			System.Diagnostics.Debug.Listeners.Insert(0, new AssertWriter());
+			Register<AssertWriter>();
+		}
+
+		public static void Register<T>() where T : AssertWriter, new()
+		{
+			Debug.Listeners.Insert(0, new T());
+		}
+
+		protected virtual void OnAssert(string message)
+		{
+			Console.WriteLine(message);
+		}
+
+		public override void Fail(string message)
+		{
+			var sb = new StringBuilder();
+
+			sb.AppendLine("Assertion " + message);
+			sb.AppendLine(new StackTrace(2, true).ToString());
+
+			OnAssert(sb.ToString());
 		}
 
 		public override void Write(string message)
 		{
-			Console.Write(message);
+			Logger.Trace(message);
 		}
 
 		public override void WriteLine(string message)
 		{
-			Console.WriteLine("Assertion {0}", message);
-			Console.WriteLine(new System.Diagnostics.StackTrace(2, true));
+			Logger.Trace(message);
 		}
 	}
 
-    /// <summary>
-    /// A simple number generation class.
-    /// </summary>
-    public static class NumberGenerator
-    {
-        /// <summary>
-        /// Generate a list of numbers around size edge cases.
-        /// </summary>
-        /// <param name="size">The size (in bits) of the data</param>
-        /// <param name="n">The +/- range number</param>
-        /// <returns>Returns a list of all sizes to be used</returns>
-        public static long[] GenerateBadNumbers(int size, int n = 50)
-        {
-            if (size == 8)
-                return BadNumbers8(n);
-            else if (size == 16)
-                return BadNumbers16(n);
-            else if (size == 24)
-                return BadNumbers24(n);
-            else if (size == 32)
-                return BadNumbers32(n);
-            else if (size == 64)
-                return BadNumbers64(n);
-            else
-                throw new ArgumentOutOfRangeException("size");
-        }
+	/// <summary>
+	/// A simple number generation class.
+	/// </summary>
+	public static class NumberGenerator
+	{
+		/// <summary>
+		/// Generate a list of numbers around size edge cases.
+		/// </summary>
+		/// <param name="size">The size (in bits) of the data</param>
+		/// <param name="n">The +/- range number</param>
+		/// <returns>Returns a list of all sizes to be used</returns>
+		public static long[] GenerateBadNumbers(int size, int n = 50)
+		{
+			if (size == 8)
+				return BadNumbers8(n);
+			if (size == 16)
+				return BadNumbers16(n);
+			if (size == 24)
+				return BadNumbers24(n);
+			if (size == 32)
+				return BadNumbers32(n);
+			if (size == 64)
+				return BadNumbers64(n);
+			throw new ArgumentOutOfRangeException("size");
+		}
 
-        public static long[] GenerateBadPositiveNumbers(int size = 16, int n = 50)
-        {
-            if (size == 16)
-                return BadPositiveNumbers16(n);
-            else
-                return null;
-        }
+		public static long[] GenerateBadPositiveNumbers(int size = 16, int n = 50)
+		{
+			if (size == 16)
+				return BadPositiveNumbers16(n);
+			return null;
+		}
 
-        public static ulong[] GenerateBadPositiveUInt64(int n = 50)
-        {
-            ulong[] edgeCases = new ulong[] { 50, 127, 255, 32767, 65535, 2147483647, 4294967295, 9223372036854775807, 18446744073709551615 };
-            List<ulong> temp = new List<ulong>();
+		public static ulong[] GenerateBadPositiveUInt64(int n = 50)
+		{
+			var edgeCases = new ulong[] { 50, 127, 255, 32767, 65535, 2147483647, 4294967295, 9223372036854775807, 18446744073709551615 };
+			var temp = new List<ulong>();
 
-            ulong start;
-            ulong end;
-            for (int i = 0; i < edgeCases.Length - 1; ++i)
-            {
-                start = edgeCases[i] - (ulong)n;
-                end = edgeCases[i] + (ulong)n;
+			ulong start;
+			ulong end;
+			for (var i = 0; i < edgeCases.Length - 1; ++i)
+			{
+				start = edgeCases[i] - (ulong)n;
+				end = edgeCases[i] + (ulong)n;
 
-                for (ulong j = start; j <= end; ++j)
-                    temp.Add(j);
-            }
+				for (var j = start; j <= end; ++j)
+					temp.Add(j);
+			}
 
-            start = edgeCases[8] - (ulong)n;
-            end = edgeCases[8];
-            for (ulong i = start; i < end; ++i)
-                temp.Add(i);
-            temp.Add(end);
+			start = edgeCases[8] - (ulong)n;
+			end = edgeCases[8];
+			for (var i = start; i < end; ++i)
+				temp.Add(i);
+			temp.Add(end);
 
-            return temp.ToArray();
-        }
+			return temp.ToArray();
+		}
 
-        private static long[] BadNumbers8(int n)
-        {
-            long[] edgeCases = new long[] { 0, -128, 127, 255 };
-            return Populate(edgeCases, n);
-        }
+		private static long[] BadNumbers8(int n)
+		{
+			var edgeCases = new long[] { 0, -128, 127, 255 };
+			return Populate(edgeCases, n);
+		}
 
-        private static long[] BadNumbers16(int n)
-        {
-            long[] edgeCases = new long[] { 0, -128, 127, 255, -32768, 32767, 65535 };
-            return Populate(edgeCases, n);
-        }
+		private static long[] BadNumbers16(int n)
+		{
+			var edgeCases = new long[] { 0, -128, 127, 255, -32768, 32767, 65535 };
+			return Populate(edgeCases, n);
+		}
 
-        private static long[] BadNumbers24(int n)
-        {
-            long[] edgeCases = new long[] { 0, -128, 127, 255, -32768, 32767, 65535, -8388608, 8388607, 16777215 };
-            return Populate(edgeCases, n);
-        }
+		private static long[] BadNumbers24(int n)
+		{
+			var edgeCases = new long[] { 0, -128, 127, 255, -32768, 32767, 65535, -8388608, 8388607, 16777215 };
+			return Populate(edgeCases, n);
+		}
 
-        private static long[] BadNumbers32(int n)
-        {
-            long[] edgeCases = new long[] { 0, -128, 127, 255, -32768, 32767, 65535, -2147483648, 2147483647, 4294967295 };
-            return Populate(edgeCases, n);
-        }
+		private static long[] BadNumbers32(int n)
+		{
+			var edgeCases = new long[] { 0, -128, 127, 255, -32768, 32767, 65535, -2147483648, 2147483647, 4294967295 };
+			return Populate(edgeCases, n);
+		}
 
-        private static long[] BadNumbers64(int n)
-        {
-            long[] edgeCases = new long[] { 0, -128, 127, 255, -32768, 32767, 65535, -2147483648, 2147483647, 4294967295, -9223372036854775808, 9223372036854775807 };    // UInt64.Max = 18446744073709551615;
-            return Populate(edgeCases, n);
-        }
+		private static long[] BadNumbers64(int n)
+		{
+			var edgeCases = new long[] { 0, -128, 127, 255, -32768, 32767, 65535, -2147483648, 2147483647, 4294967295, -9223372036854775808, 9223372036854775807 };    // UInt64.Max = 18446744073709551615;
+			return Populate(edgeCases, n);
+		}
 
-        private static long[] BadPositiveNumbers16(int n)
-        {
-            long[] edgeCases = new long[] { 50, 127, 255, 32767, 65535 };
-            return Populate(edgeCases, n);
-        }
+		private static long[] BadPositiveNumbers16(int n)
+		{
+			var edgeCases = new long[] { 50, 127, 255, 32767, 65535 };
+			return Populate(edgeCases, n);
+		}
 
-        private static long[] Populate(long[] values, int n)
-        {
-            List<long> temp = new List<long>();
+		private static long[] Populate(long[] values, int n)
+		{
+			var temp = new List<long>();
 
-            for (int i = 0; i < values.Length; ++i)
-            {
-                long start = values[i] - n;
-                long end = values[i] + n;
+			for (var i = 0; i < values.Length; ++i)
+			{
+				var start = values[i] - n;
+				var end = values[i] + n;
 
-                for (long j = start; j <= end; ++j)
-                    temp.Add(j);
-            }
+				for (var j = start; j <= end; ++j)
+					temp.Add(j);
+			}
 
-            return temp.ToArray();
-        }
-    }
+			return temp.ToArray();
+		}
+	}
 
-    [Serializable]
+	[Serializable]
 	public class HexString
 	{
 		public byte[] Value { get; private set; }
 
 		private HexString(byte[] value)
 		{
-			this.Value = value;
+			Value = value;
 		}
 
 		public static HexString Parse(string s)
 		{
 
-			s = s.Replace(" ", ""); 
+			s = s.Replace(" ", "");
 			if (s.Length % 2 == 0)
 			{
 				var array = ToArray(s);
@@ -212,12 +225,12 @@ namespace Peach.Core
 			if (s.Length % 2 != 0)
 				throw new ArgumentException("s");
 
-			byte[] ret = new byte[s.Length / 2];
+			var ret = new byte[s.Length / 2];
 
-			for (int i = 0; i < s.Length; i += 2)
+			for (var i = 0; i < s.Length; i += 2)
 			{
-				int nibble1 = GetNibble(s[i]);
-				int nibble2 = GetNibble(s[i + 1]);
+				var nibble1 = GetNibble(s[i]);
+				var nibble2 = GetNibble(s[i + 1]);
 
 				if (nibble1 < 0 || nibble1 > 0xF || nibble2 < 0 | nibble2 > 0xF)
 					return null;
@@ -231,11 +244,10 @@ namespace Peach.Core
 		private static int GetNibble(char c)
 		{
 			if (c >= 'a')
-				return 0xA + (int)(c - 'a');
-			else if (c >= 'A')
-				return 0xA + (int)(c - 'A');
-			else
-				return (int)(c - '0');
+				return 0xA + (c - 'a');
+			if (c >= 'A')
+				return 0xA + (c - 'A');
+			return c - '0';
 		}
 	}
 
@@ -287,7 +299,12 @@ namespace Peach.Core
 
 		public static string FindProgram(string path, string program, string parameter)
 		{
-			var paths = path == null ? Environment.GetEnvironmentVariable("PATH") : path;
+			var paths = path;
+			if (string.IsNullOrEmpty(path))
+			{
+				paths = Environment.GetEnvironmentVariable("PATH");
+			}
+			Debug.Assert(!string.IsNullOrEmpty((paths)));
 			var dirs = paths.Split(Path.PathSeparator);
 			foreach (var dir in dirs)
 			{
@@ -300,80 +317,101 @@ namespace Peach.Core
 				program, path != null ? " in specified" : ", please specify using", parameter));
 		}
 
-        public static string FormatAsPrettyHex(byte[] data, int startPos = 0, int length = -1)
-        {
-            StringBuilder sb = new StringBuilder();
-            StringBuilder rightSb = new StringBuilder();
-            int lineLength = 15;
-            int groupLength = 7;
-            string gap = "  ";
-            byte b;
+		public static string ExecutionDirectory
+		{
+			get { return AppDomain.CurrentDomain.BaseDirectory; }
+		}
 
-            if (length == -1)
-                length = data.Length;
+		public static string GetAppResourcePath(string resource)
+		{
+			return Path.Combine(ExecutionDirectory, resource);
+		}
 
-            int cnt = 0;
-            for (int i = startPos; i<data.Length && i<length; i++)
-            {
-                b = data[i];
+		public static string LoadStringResource(Assembly asm, string name)
+		{
+			using (var stream = asm.GetManifestResourceStream(name))
+			{
+				using (var reader = new StreamReader(stream))
+				{
+					return reader.ReadToEnd();
+				}
+			}
+		}
 
-                sb.Append(b.ToString("X2"));
+		public static string FormatAsPrettyHex(byte[] data, int startPos = 0, int length = -1)
+		{
+			var sb = new StringBuilder();
+			var rightSb = new StringBuilder();
+			var lineLength = 15;
+			var groupLength = 7;
+			var gap = "  ";
+			byte b;
 
-                if (b >= 32 && b < 127)
-                    rightSb.Append(ASCIIEncoding.ASCII.GetString(new byte[] {b}));
-                else
-                    rightSb.Append(".");
+			if (length == -1)
+				length = data.Length;
+
+			var cnt = 0;
+			for (var i = startPos; i < data.Length && i < length; i++)
+			{
+				b = data[i];
+
+				sb.Append(b.ToString("X2"));
+
+				if (b >= 32 && b < 127)
+					rightSb.Append(Encoding.ASCII.GetString(new byte[] { b }));
+				else
+					rightSb.Append(".");
 
 
-                if (cnt == groupLength)
-                {
-                    sb.Append("  ");
-                }
-                else if (cnt == lineLength)
-                {
-                    sb.Append(gap);
-                    sb.Append(rightSb);
-                    sb.Append("\n");
-                    rightSb.Clear();
+				if (cnt == groupLength)
+				{
+					sb.Append("  ");
+				}
+				else if (cnt == lineLength)
+				{
+					sb.Append(gap);
+					sb.Append(rightSb);
+					sb.Append("\n");
+					rightSb.Clear();
 
-                    cnt = -1; // (+1 happens later)
-                }
-                else
-                {
-                    sb.Append(" ");
-                }
+					cnt = -1; // (+1 happens later)
+				}
+				else
+				{
+					sb.Append(" ");
+				}
 
-                cnt++;
-            }
+				cnt++;
+			}
 
-            for (; cnt <= lineLength; cnt++)
-            {
-                sb.Append("  ");
+			for (; cnt <= lineLength; cnt++)
+			{
+				sb.Append("  ");
 
-                if (cnt == groupLength)
-                    sb.Append(" ");
-                else if (cnt < lineLength)
-                {
-                    sb.Append(" ");
-                }
-            }
+				if (cnt == groupLength)
+					sb.Append(" ");
+				else if (cnt < lineLength)
+				{
+					sb.Append(" ");
+				}
+			}
 
-            sb.Append(gap);
-            sb.Append(rightSb);
-            sb.Append("\n");
-            rightSb.Clear();
+			sb.Append(gap);
+			sb.Append(rightSb);
+			sb.Append("\n");
+			rightSb.Clear();
 
-            return sb.ToString();
-        }
+			return sb.ToString();
+		}
 
 		public static bool TcpPortAvailable(int port)
 		{
-			bool isAvailable = true;
+			var isAvailable = true;
 
-			IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
-			TcpConnectionInformation[] tcpConnInfoArray = ipGlobalProperties.GetActiveTcpConnections();
+			var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+			var tcpConnInfoArray = ipGlobalProperties.GetActiveTcpConnections();
 
-			foreach (TcpConnectionInformation tcpi in tcpConnInfoArray)
+			foreach (var tcpi in tcpConnInfoArray)
 			{
 				if (tcpi.LocalEndPoint.Port == port)
 				{
@@ -382,9 +420,9 @@ namespace Peach.Core
 				}
 			}
 
-			IPEndPoint[] objEndPoints = ipGlobalProperties.GetActiveTcpListeners();
+			var objEndPoints = ipGlobalProperties.GetActiveTcpListeners();
 
-			foreach (IPEndPoint endp in objEndPoints)
+			foreach (var endp in objEndPoints)
 			{
 				if (endp.Port == port)
 				{
@@ -411,12 +449,12 @@ namespace Peach.Core
 			if (curSlice == 0 || curSlice > numSlices)
 				throw new ArgumentOutOfRangeException("curSlice");
 
-			uint total = end - begin + 1;
+			var total = end - begin + 1;
 
 			if (numSlices == 0 || numSlices > total)
 				throw new ArgumentOutOfRangeException("numSlices");
 
-			uint slice = total / numSlices;
+			var slice = total / numSlices;
 
 			end = curSlice * slice + begin - 1;
 			begin = end - slice + 1;
@@ -434,27 +472,27 @@ namespace Peach.Core
 
 		private static void HexDump(HexInputFunc input, HexOutputFunc output, int bytesPerLine = 16)
 		{
-			byte[] bytes = new byte[bytesPerLine];
-			char[] HexChars = "0123456789ABCDEF".ToCharArray();
+			var bytes = new byte[bytesPerLine];
+			var HexChars = "0123456789ABCDEF".ToCharArray();
 
-			int firstHexColumn =
+			var firstHexColumn =
 				  8                   // 8 characters for the address
 				+ 3;                  // 3 spaces
 
-			int firstCharColumn = firstHexColumn
+			var firstCharColumn = firstHexColumn
 				+ bytesPerLine * 3       // - 2 digit for the hexadecimal value and 1 space
 				+ (bytesPerLine - 1) / 8 // - 1 extra space every 8 characters from the 9th
 				+ 2;                  // 2 spaces 
 
-			int lineLength = firstCharColumn
+			var lineLength = firstCharColumn
 				+ bytesPerLine           // - characters to show the ascii value
 				+ Environment.NewLine.Length; // Carriage return and line feed (should normally be 2)
 
-			char[] line = (new System.String(' ', lineLength - Environment.NewLine.Length) + Environment.NewLine).ToCharArray();
+			var line = (new String(' ', lineLength - Environment.NewLine.Length) + Environment.NewLine).ToCharArray();
 
-			for (int i = 0; ; i += bytesPerLine)
+			for (var i = 0; ; i += bytesPerLine)
 			{
-				int readLen = input(bytes, bytesPerLine);
+				var readLen = input(bytes, bytesPerLine);
 				if (readLen == 0)
 					break;
 
@@ -467,10 +505,10 @@ namespace Peach.Core
 				line[6] = HexChars[(i >> 4) & 0xF];
 				line[7] = HexChars[(i >> 0) & 0xF];
 
-				int hexColumn = firstHexColumn;
-				int charColumn = firstCharColumn;
+				var hexColumn = firstHexColumn;
+				var charColumn = firstCharColumn;
 
-				for (int j = 0; j < bytesPerLine; j++)
+				for (var j = 0; j < bytesPerLine; j++)
 				{
 					if (j > 0 && (j & 7) == 0) hexColumn++;
 					if (j >= readLen)
@@ -481,7 +519,7 @@ namespace Peach.Core
 					}
 					else
 					{
-						byte b = bytes[j];
+						var b = bytes[j];
 						line[hexColumn] = HexChars[(b >> 4) & 0xF];
 						line[hexColumn + 1] = HexChars[b & 0xF];
 						line[charColumn] = ((b < 32 || b > 126) ? '.' : (char)b);
@@ -497,7 +535,7 @@ namespace Peach.Core
 
 		public static void HexDump(Stream input, Stream output, int bytesPerLine = 16)
 		{
-			long pos = input.Position;
+			var pos = input.Position;
 
 			HexInputFunc inputFunc = delegate(byte[] buf, int max)
 			{
@@ -506,7 +544,7 @@ namespace Peach.Core
 
 			HexOutputFunc outputFunc = delegate(char[] line)
 			{
-				byte[] buf = System.Text.Encoding.ASCII.GetBytes(line);
+				var buf = System.Text.Encoding.ASCII.GetBytes(line);
 				output.Write(buf, 0, buf.Length);
 			};
 
@@ -519,7 +557,7 @@ namespace Peach.Core
 		{
 			HexInputFunc inputFunc = delegate(byte[] buf, int max)
 			{
-				int len = Math.Min(count, max);
+				var len = Math.Min(count, max);
 				Buffer.BlockCopy(buffer, offset, buf, 0, len);
 				offset += len;
 				count -= len;
@@ -528,7 +566,7 @@ namespace Peach.Core
 
 			HexOutputFunc outputFunc = delegate(char[] line)
 			{
-				byte[] buf = System.Text.Encoding.ASCII.GetBytes(line);
+				var buf = System.Text.Encoding.ASCII.GetBytes(line);
 				output.Write(buf, 0, buf.Length);
 			};
 
@@ -537,18 +575,11 @@ namespace Peach.Core
 
 		public static string HexDump(Stream input, int bytesPerLine = 16)
 		{
-			StringBuilder sb = new StringBuilder();
-			long pos = input.Position;
+			var sb = new StringBuilder();
+			var pos = input.Position;
 
-			HexInputFunc inputFunc = delegate(byte[] buf, int max)
-			{
-				return input.Read(buf, 0, max);
-			};
-
-			HexOutputFunc outputFunc = delegate(char[] line)
-			{
-				sb.Append(line);
-			};
+			HexInputFunc inputFunc = (buf, max) => input.Read(buf, 0, max);
+			HexOutputFunc outputFunc = line => sb.Append(line);
 
 			HexDump(inputFunc, outputFunc, bytesPerLine);
 
@@ -559,21 +590,18 @@ namespace Peach.Core
 
 		public static string HexDump(byte[] buffer, int offset, int count, int bytesPerLine = 16)
 		{
-			StringBuilder sb = new StringBuilder();
+			var sb = new StringBuilder();
 
 			HexInputFunc inputFunc = delegate(byte[] buf, int max)
 			{
-				int len = Math.Min(count, max);
+				var len = Math.Min(count, max);
 				Buffer.BlockCopy(buffer, offset, buf, 0, len);
 				offset += len;
 				count -= len;
 				return len;
 			};
 
-			HexOutputFunc outputFunc = delegate(char[] line)
-			{
-				sb.Append(line);
-			};
+			HexOutputFunc outputFunc = line => sb.Append(line);
 
 			HexDump(inputFunc, outputFunc, bytesPerLine);
 
@@ -591,7 +619,7 @@ namespace Peach.Core
 				return (bytes / (1024 * 1024.0)).ToString("0.###") + " Mbytes";
 			if (bytes > 1024)
 				return (bytes / 1024.0).ToString("0.###") + " Kbytes";
-			return bytes.ToString() + " Bytes";
+			return bytes + " Bytes";
 		}
 	}
 }

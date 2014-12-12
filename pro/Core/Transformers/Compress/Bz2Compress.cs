@@ -28,14 +28,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.IO.Compression;
 using System.IO;
+using Ionic.BZip2;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using Ionic.BZip2;
 
-namespace Peach.Core.Transformers.Compress
+namespace Peach.Pro.Core.Transformers.Compress
 {
 	[Description("Compress on output using bz2.")]
 	[Transformer("Bz2Compress", true)]

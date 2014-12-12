@@ -119,18 +119,18 @@ _Required:_
 xref:name[name]:: Name of the action.
 xref:Action_Types[type]:: Action type. The following enumeration summarizes the available action types. Detailed descriptions of the actions follow the child elements.
 
-* xref:Accept[accept] - temporarily blocks execution.
-* xref:Call[call] - provides a method-calling metaphor.
-* xref:ChangeState[changeState] - transitions from one state to another within the xref:StateModel[StateModel].
-* xref:Close[close] - causes the associated Publisher to close.
-* xref:GetProperty[getProperty] - provides the retrieval function of a property metaphor (get function).
-* xref:Input[input] - reads input data using the Publisher.
-* xref:Open[open (or connect)] - causes the associated Publisher to open its resources.
-* xref:Output[output] - causes the associated Publisher to write data.
-* xref:SetProperty[setProperty] - provides the output function of a property metaphor (set function) that modifies the value of the property.
-* xref:Slurp[slurp] - copies a value from a data element in one DataModel to a data element in another DataModel. 
-* xref:Start[start] - causes a Publisher to initialize itself.
-* xref:Stop[stop] - causes a Publisher to perform final cleanup.
+* xref:Action_accept[accept] - temporarily blocks execution.
+* xref:Action_call[call] - provides a method-calling metaphor.
+* xref:Action_changeState[changeState] - transitions from one state to another within the xref:StateModel[StateModel].
+* xref:Action_close[close] - causes the associated Publisher to close.
+* xref:Action_getProperty[getProperty] - provides the retrieval function of a property metaphor (get function).
+* xref:Action_input[input] - reads input data using the Publisher.
+* xref:Action_open[open (or connect)] - causes the associated Publisher to open its resources.
+* xref:Action_output[output] - causes the associated Publisher to write data.
+* xref:Action_setProperty[setProperty] - provides the output function of a property metaphor (set function) that modifies the value of the property.
+* xref:Action_slurp[slurp] - copies a value from a data element in one DataModel to a data element in another DataModel. 
+* xref:Action_start[start] - causes a Publisher to initialize itself.
+* xref:Action_stop[stop] - causes a Publisher to perform final cleanup.
 
 
 _Required Based on Type:_

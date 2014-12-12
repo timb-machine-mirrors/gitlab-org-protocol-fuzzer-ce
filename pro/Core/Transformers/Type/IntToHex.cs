@@ -27,15 +27,13 @@
 // $Id$
 
 using System;
-using System.Globalization;
 using System.Collections.Generic;
-using System.Text;
-using System.IO.Compression;
-using System.IO;
+using System.Globalization;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
-namespace Peach.Core.Transformers.Type
+namespace Peach.Pro.Core.Transformers.Type
 {
 	[Description("Transforms an integer into hex.")]
 	[Transformer("IntToHex", true)]

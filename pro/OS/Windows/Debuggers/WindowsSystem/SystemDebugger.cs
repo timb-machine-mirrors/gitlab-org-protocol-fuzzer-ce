@@ -28,15 +28,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Runtime.InteropServices;
-using NLog;
 using System.ComponentModel;
-using Peach.Core.OS.Windows;
+using System.Runtime.InteropServices;
+using System.Text;
+using NLog;
+using Peach.Core;
+using Encoding = Peach.Core.Encoding;
 
-namespace Peach.Core.Debuggers.WindowsSystem
+namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 {
 	/// <summary>
 	/// A lightweight Windows debugger written using the 

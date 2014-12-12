@@ -27,11 +27,11 @@
 // $Id$
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Security.Cryptography;
+using System.Text;
+using Encoding = Peach.Core.Encoding;
 
-namespace Peach.Core.Transformers.Crypto
+namespace Peach.Pro.Core.Transformers.Crypto
 {
     public static class UnixMd5CryptTool
     {

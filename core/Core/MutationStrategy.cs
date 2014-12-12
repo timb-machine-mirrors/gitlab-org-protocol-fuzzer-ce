@@ -28,12 +28,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Reflection;
 
 using Peach.Core.Dom;
-
-using NLog;
 
 namespace Peach.Core
 {
@@ -46,36 +43,32 @@ namespace Peach.Core
 	[Serializable]
 	public abstract class MutationStrategy
 	{
-		protected RunContext _context;
-		protected Engine _engine;
-		protected Random _random;
-
-		public MutationStrategy(Dictionary<string, Variant> args)
+		protected MutationStrategy(Dictionary<string, Variant> args)
 		{
 		}
 
 		public virtual void Initialize(RunContext context, Engine engine)
 		{
-			_context = context;
-			_engine = engine;
+			Context = context;
+			Engine = engine;
 		}
 
 		public virtual void Finalize(RunContext context, Engine engine)
 		{
-			_context = null;
-			_engine = null;
+			Context = null;
+			Engine = null;
 		}
 
-		public virtual RunContext Context
+		public RunContext Context
 		{
-			get { return _context; }
-			set { _context = value; }
+			get;
+			private set;
 		}
 
-		public virtual Engine Engine
+		public Engine Engine
 		{
-			get { return _engine; }
-			set { _engine = value; }
+			get;
+			private set;
 		}
 
 		public abstract bool UsesRandomSeed
@@ -101,20 +94,21 @@ namespace Peach.Core
 
 		public Random Random
 		{
-			get { return _random; }
+			get;
+			private set;
 		}
 
 		public uint Seed
 		{
 			get
 			{
-				return _context.config.randomSeed;
+				return Context.config.randomSeed;
 			}
 		}
 
 		protected void SeedRandom()
 		{
-			_random = new Random(Seed + Iteration);
+			Random = new Random(Seed + Iteration);
 		}
 
 		/// <summary>
@@ -221,15 +215,15 @@ namespace Peach.Core
 		/// <returns></returns>
 		protected IEnumerable<Type> EnumerateValidMutators()
 		{
-			if (_context.test == null)
+			if (Context.test == null)
 				throw new ArgumentException("Error, _context.test == null");
 
 			Func<Type, MutatorAttribute, bool> predicate = delegate(Type type, MutatorAttribute attr)
 			{
-				if (_context.test.includedMutators.Count > 0 && !_context.test.includedMutators.Contains(type.Name))
+				if (Context.test.includedMutators.Count > 0 && !Context.test.includedMutators.Contains(type.Name))
 					return false;
 
-				if (_context.test.excludedMutators.Count > 0 && _context.test.excludedMutators.Contains(type.Name))
+				if (Context.test.excludedMutators.Count > 0 && Context.test.excludedMutators.Contains(type.Name))
 					return false;
 
 				return true;

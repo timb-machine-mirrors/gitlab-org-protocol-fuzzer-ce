@@ -1,29 +1,37 @@
 {
-  "name": "angular-seed",
-  "description": "A starter project for AngularJS",
-  "version": "0.0.0",
-  "homepage": "https://github.com/angular/angular-seed",
-  "license": "MIT",
+  "name": "Peach",
+  "description": "Peach",
+  "version": "3.4.0",
+  "homepage": "http://peachfuzzer.com/",
   "private": true,
+  "authors": [
+    "Deja Vu Security"
+  ],
+  "main": "index.html",
+  "license": "Proprietary",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test"
+  ],
   "dependencies": {
-    "bootstrap":            "~3.1.1",
-
-    "angular":              "1.2.16",
-    "angular-animate":      "1.2.16",
-    "angular-cookies":      "1.2.16",
-    "angular-loader":       "1.2.16",
-    "angular-mocks":        "1.2.16",
-    "angular-resource":     "1.2.16",
-    "angular-route":        "1.2.16",
-    "angular-sanitize":     "1.2.16",
-    "angular-scenario":     "1.2.16",
-    "angular-touch":        "1.2.16",
-    "angular-ui-router":    "0.2.10",
-
-    "ng-grid":              "2.0.1",
-
-    "angular-ui-bootstrap": "0.10.0",
-
-    "jQuery":               "2.1.0"
+    "angular": "1.2",
+    "angular-mocks": "1.2",
+    "angular-resource": "1.2",
+    "angular-route": "1.2",
+    "angular-bootstrap": "~0.12.0",
+    "angular-tree-control": "~0.2.7",
+    "angular-ui-utils": "~0.1.1",
+    "angles": "*",
+    "ace-bootstrap": "*",
+    "bootstrap": "~3.3.1",
+    "jquery": "2.1",
+    "vis": "~3.7.0",
+    "moment": "~2.8.4",
+    "chosen-build": "~1.1.0",
+    "underscore": "~1.7.0",
+    "angular-smart-table": "~1.4.5",
+    "pithy": "*"
   }
 }

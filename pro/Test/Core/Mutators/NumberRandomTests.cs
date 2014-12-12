@@ -1,12 +1,11 @@
 using System;
 using System.Linq;
-
-using Peach.Core.Dom;
-
 using NUnit.Framework;
-using System.Collections.Generic;
+using Peach.Core;
+using Peach.Core.Dom;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class NumberRandomTests
@@ -28,10 +27,10 @@ namespace Peach.Core.Test.Mutators
 			Assert.True(runner.IsSupported(new Flag() { length = 9 }));
 			Assert.True(runner.IsSupported(new Flag() { length = 32 }));
 
-			Assert.False(runner.IsSupported(new Dom.String() { DefaultValue = new Variant("Hello") }));
-			Assert.True(runner.IsSupported(new Dom.String() { DefaultValue = new Variant("0") }));
-			Assert.True(runner.IsSupported(new Dom.String() { DefaultValue = new Variant("100") }));
-			Assert.True(runner.IsSupported(new Dom.String() { DefaultValue = new Variant("-100") }));
+			Assert.False(runner.IsSupported(new Peach.Core.Dom.String() { DefaultValue = new Variant("Hello") }));
+			Assert.True(runner.IsSupported(new Peach.Core.Dom.String() { DefaultValue = new Variant("0") }));
+			Assert.True(runner.IsSupported(new Peach.Core.Dom.String() { DefaultValue = new Variant("100") }));
+			Assert.True(runner.IsSupported(new Peach.Core.Dom.String() { DefaultValue = new Variant("-100") }));
 		}
 
 		[Test]
@@ -44,7 +43,7 @@ namespace Peach.Core.Test.Mutators
 			{
 				for (int len = 9; len <= 64; ++len)
 				{
-					var n = new Dom.Number("num") { length = len, Signed = s };
+					var n = new Peach.Core.Dom.Number("num") { length = len, Signed = s };
 
 					var m = runner.Sequential(n);
 
@@ -57,7 +56,7 @@ namespace Peach.Core.Test.Mutators
 				}
 			}
 
-			var str = new Dom.String("str") { DefaultValue = new Variant("1") };
+			var str = new Peach.Core.Dom.String("str") { DefaultValue = new Variant("1") };
 			var cnt = runner.Sequential(str).Count();
 			Assert.AreEqual(5000, cnt);
 		}

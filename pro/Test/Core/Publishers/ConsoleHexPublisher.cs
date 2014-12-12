@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NUnit.Framework;
-using NUnit.Framework.Constraints;
-using Peach.Core;
-using Peach.Core.Dom;
 using System.IO;
+using NUnit.Framework;
+using Peach.Core;
 using Peach.Core.Analyzers;
 
-namespace Peach.Core.Test.Publishers
+namespace Peach.Pro.Test.Core.Publishers
 {
-	class TestPublisher : Peach.Core.Publishers.ConsoleHexPublisher
+	class TestPublisher : Pro.Core.Publishers.ConsoleHexPublisher
 	{
 		public TestPublisher()
 			: base(new Dictionary<string,Variant>())
@@ -61,7 +57,7 @@ namespace Peach.Core.Test.Publishers
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].publishers[0] = new TestPublisher();
 
 			RunConfiguration config = new RunConfiguration();

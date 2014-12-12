@@ -26,22 +26,16 @@
 
 // $Id$
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
-
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
+using Peach.Core.Dom;
 using Peach.Core.IO;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Analyzers
+namespace Peach.Pro.Test.Core.Analyzers
 {
     [TestFixture] [Category("Peach")]
     class BinaryAnalyzerTests
@@ -60,7 +54,7 @@ namespace Peach.Core.Test.Analyzers
                 "</Peach>";
 
             PitParser parser = new PitParser();
-            Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+            Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
             Random rnd = new Random(123);
 
@@ -92,10 +86,10 @@ namespace Peach.Core.Test.Analyzers
             Assert.AreEqual(bs.ToArray(), dom.dataModels["TheDataModel"].Value.ToArray());
 
             var block = dom.dataModels["TheDataModel"][0] as Block;
-            Assert.IsTrue(block[5] is Dom.String);
+            Assert.IsTrue(block[5] is Peach.Core.Dom.String);
             Assert.AreEqual("Hello WorldYY&", (string)block[5].InternalValue);
 
-            Assert.IsTrue(block[11] is Dom.String);
+            Assert.IsTrue(block[11] is Peach.Core.Dom.String);
             Assert.AreEqual("Peach Fuzzer|", (string)block[11].InternalValue);
         }
     }

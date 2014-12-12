@@ -1,9 +1,8 @@
-using System;
 using System.Linq;
-using Peach.Core;
 using NUnit.Framework;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class StringLengthEdgeCaseTests : DataModelCollector
@@ -13,7 +12,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringLengthEdgeCase");
 
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 
 			Assert.True(runner.IsSupported(str));
 		}
@@ -23,7 +22,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringLengthEdgeCase");
 
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 
 			var m = runner.Sequential(str);
 
@@ -50,7 +49,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringLengthEdgeCase");
 
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 
 			var m = runner.Random(1000, str);
 			Assert.AreEqual(1000, m.Count());

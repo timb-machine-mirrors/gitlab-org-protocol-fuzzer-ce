@@ -1,5 +1,4 @@
 using System;
-using Peach.Core;
 
 namespace Peach.Core
 {

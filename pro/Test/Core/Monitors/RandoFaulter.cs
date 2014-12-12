@@ -1,20 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
-using System.IO;
-
+﻿using System.Collections.Generic;
 using Peach.Core;
 using Peach.Core.Agent;
 
-namespace Peach.Pro.Test.Monitors
+namespace Peach.Pro.Test.Core.Monitors
 {
 	[Monitor("RandoFaulter", true, IsTest = true)]
 	[Description("Generate random faults for metrics testing")]
 	[Parameter("Fault", typeof(int), "How often to fault", "10")]
 	[Parameter("NewMajor", typeof(int), "How often to generate a new major", "5")]
 	[Parameter("NewMinor", typeof(int), "How often to generate a new minor", "5")]
+	[Parameter("Boolean", typeof(bool), "A boolean parameter", "true")]
+	[Parameter("String", typeof(string), "A string parameter", "some string")]
+	[Parameter("When", typeof(When), "An enum parameter", "OnCall")]
 	public class RandoFaulter : Monitor
 	{
 		System.Random rnd = new System.Random();
@@ -22,6 +19,9 @@ namespace Peach.Pro.Test.Monitors
 		public int Fault { get; set; }
 		public int NewMajor { get; set; }
 		public int NewMinor { get; set; }
+		public bool Boolean { get; set; }
+		public string String { get; set; }
+		public When _When { get; set; }
 
 		bool isControl = false;
 
@@ -32,6 +32,8 @@ namespace Peach.Pro.Test.Monitors
 		//Dictionary<string, Dictionary<string, string>> severities = new Dictionary<string, Dictionary<string, string>>();
 
 		string[] severity = { "EXPLOITABLE", "PROBABLY EXPLOITABLE", "PROBABLY NOT EXPLOITABLE", "UNKNOWN" };
+
+		private static byte[] snmpv2cPacket = TestBase.LoadResource("snmpv2c.pcap").ToArray();
 
 		public RandoFaulter(IAgent agent, string name, Dictionary<string, Variant> args)
 			: base(agent, name, args)
@@ -76,36 +78,26 @@ namespace Peach.Pro.Test.Monitors
 
 		public override Fault GetMonitorData()
 		{
-			try
-			{
-				Fault fault = new Fault();
+			Fault fault = new Fault();
 
-				fault.type = FaultType.Fault;
-				fault.monitorName = this.Name;
-				fault.detectionSource = "RandoFaulter";
+			fault.type = FaultType.Fault;
+			fault.monitorName = this.Name;
+			fault.detectionSource = "RandoFaulter";
 
-				var buckets = GetBuckets();
+			var buckets = GetBuckets();
 
-				fault.majorHash = buckets[0];
-				fault.minorHash = buckets[1];
-				fault.exploitability = severity[rnd.Next(severity.Length)];
+			fault.majorHash = buckets[0];
+			fault.minorHash = buckets[1];
+			fault.exploitability = severity[rnd.Next(severity.Length)];
 
-				fault.title = "Rando Faulter Funbag";
-				fault.description = @"CUPERTINO, CA—Ending weeks of anticipation and intense speculation, tech giant Apple unveiled a short and fleeting moment of excitement to the general public Tuesday during a media event at its corporate headquarters. “With this groundbreaking new release, Apple has completely revolutionized the way we experience an ephemeral sense of wonder lasting no longer than several moments,” said Wired writer Gary Turnham, who added that the company has once again proved why it’s the global leader in developing exhilarating sensations that only temporarily mask one’s underlying feelings before dissolving away. “Even before today’s announcement, people across the country were lining up to be among the first to get their hands on this new short-lived and non-renewable flash of satisfaction. And they won’t be disappointed; this already vanishing glimmer of pleasure is exactly what we’ve come to expect from Apple.” According to Turnham, rumors are already swirling that Apple engineers are working on a slimmer, briefer moment of excitement projected for release next fall.";
+			fault.title = "Rando Faulter Funbag";
+			fault.description = @"CUPERTINO, CA—Ending weeks of anticipation and intense speculation, tech giant Apple unveiled a short and fleeting moment of excitement to the general public Tuesday during a media event at its corporate headquarters. “With this groundbreaking new release, Apple has completely revolutionized the way we experience an ephemeral sense of wonder lasting no longer than several moments,” said Wired writer Gary Turnham, who added that the company has once again proved why it’s the global leader in developing exhilarating sensations that only temporarily mask one’s underlying feelings before dissolving away. “Even before today’s announcement, people across the country were lining up to be among the first to get their hands on this new short-lived and non-renewable flash of satisfaction. And they won’t be disappointed; this already vanishing glimmer of pleasure is exactly what we’ve come to expect from Apple.” According to Turnham, rumors are already swirling that Apple engineers are working on a slimmer, briefer moment of excitement projected for release next fall.";
 
-				fault.collectedData.Add(new Fault.Data(
-					"NetworkCapture1.pcap", Peach.Pro.Test.Resource1.snmpv2c));
-				fault.collectedData.Add(new Fault.Data(
-					"NetworkCapture2.pcapng", Peach.Pro.Test.Resource1.snmpv2c));
-				fault.collectedData.Add(new Fault.Data(
-					"BinaryData.bin", Peach.Pro.Test.Resource1.snmpv2c));
+			fault.collectedData.Add(new Fault.Data("NetworkCapture1.pcap", snmpv2cPacket));
+			fault.collectedData.Add(new Fault.Data("NetworkCapture2.pcapng", snmpv2cPacket));
+			fault.collectedData.Add(new Fault.Data("BinaryData.bin", snmpv2cPacket));
 
-				return fault;
-			}
-			catch
-			{
-				throw;
-			}
+			return fault;
 		}
 
 		public string[] GetBuckets()

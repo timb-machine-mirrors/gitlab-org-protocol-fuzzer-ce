@@ -33,7 +33,8 @@ The OSX agent will only be comprised of a single monitor: CrashWrangler.
 
         <!-- The command line to run.  Notice the filename provided matched up
              to what is provided below in the Publisher configuration -->
-        <Param name="CommandLine" value="c:\mplayer\mplayer.exe fuzzed.wav" />
+        <Param name="Executable" value="c:\mplayer\mplayer.exe" />
+        <Param name="Arguments" value="fuzzed.wav" />
 
         <!-- This parameter will cause the debugger to wait for an action-call in
              the state model with a method="StartMPlayer" before running

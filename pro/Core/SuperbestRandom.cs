@@ -2,14 +2,32 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Random = Peach.Core.Random;
 
-namespace Peach.Core
+namespace Peach.Pro.Core
 {
 	/// <summary>
 	/// https://bitbucket.org/Superbest/superbest-random
 	/// </summary>
 	public static class SuperbestRandom
 	{
+		/// <summary>
+		///   Return a random number between 1 and 6 inclusive.
+		///   The numbers are gaussian and centered around 1.
+		/// </summary>
+		/// <param name="r"></param>
+		/// <returns></returns>
+		public static int PickSix(this Random r)
+		{
+			while (true)
+			{
+				int i = (int)Math.Round(Math.Abs(r.NextGaussian(0, 1.6666))) + 1;
+
+				if (i <= 6)
+					return i;
+			}
+		}
+
 		/// <summary>
 		///   Generates normally distributed numbers. Each operation makes two Gaussians for the 
 		///   price of one, and apparently they can be cached or something for better performance, 

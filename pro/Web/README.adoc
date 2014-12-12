@@ -1,0 +1,27 @@
+# Peach.Pro.Web
+
+TypeScript files (*.ts) are checked in under app\ts.
+
+When the project is built, the TypeScript files are translated to JavaScript and 
+placed in app\js, though are not checked in.
+
+To maintain project dependencies, npm and bower are used.
+
+Example for looking for package updates:
+
+```
+bower ls
+```
+
+To add a new package (in this case `angular`):
+
+```
+bower install angular -S
+tsd query angular -rosa install
+```
+
+
+```
+public/index.html#?pit=deb9f3921e3e816b2b363d3e813b4a7e
+```
+

@@ -101,7 +101,8 @@ Peach can uses a single state and three actions for a simple file fuzzer.
   
   <Agent name="LocalAgent">
     <Monitor class="WindowsDebugger">
-      <Param name="CommandLine" value="c:\windows\system32\notepad.exe fuzzfile.bin" />
+      <Param name="Executable" value="c:\windows\system32\notepad.exe" />
+      <Param name="Arguments" value="fuzzfile.bin" />
       <Param name="StartOnCall" value="ScoobySnacks" />
     </Monitor>
     <Monitor class="PageHeap">
@@ -160,7 +161,8 @@ The sample executable _CrashableServer.exe_ is included with the Peach distribut
 
 	<Agent name="LocalAgent">
 		<Monitor class="WindowsDebugger">
-			<Param name="CommandLine" value="CrashableServer.exe 127.0.0.1 4244" />
+			<Param name="Executable" value="CrashableServer.exe" />
+			<Param name="Arguments" value="127.0.0.1 4244" />
 			<!--<Param name="WinDbgPath" value="C:\Program Files (x86)\Debugging Tools for Windows (x86)" />-->
 		</Monitor>
  		<Monitor class="PageHeap">

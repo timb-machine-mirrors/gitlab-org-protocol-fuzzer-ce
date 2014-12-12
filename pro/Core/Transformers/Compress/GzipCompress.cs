@@ -28,16 +28,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.IO.Compression;
 using System.IO;
-
+using System.IO.Compression;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
-using NLog;
-
-namespace Peach.Core.Transformers.Compress
+namespace Peach.Pro.Core.Transformers.Compress
 {
 	[Description("Compress on output using gzip.")]
 	[Transformer("GzipCompress", true)]

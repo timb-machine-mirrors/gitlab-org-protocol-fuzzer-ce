@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
@@ -473,7 +472,9 @@ namespace Peach.Core.Xsd
 			if (doc == null)
 				return null;
 
-			var name = string.IsNullOrEmpty(suffix) ? type.FullName : string.Join(".", type.FullName, suffix);
+			// Member types have a '+' in their name, the docs use a '.'
+			var fullName = type.FullName.Replace('+', '.');
+			var name = string.IsNullOrEmpty(suffix) ? fullName : string.Join(".", fullName, suffix);
 			var query = string.Format("/doc/members/member[@name='{0}:{1}{2}']/summary", prefix, name, args);
 
 			var navi = doc.CreateNavigator();
@@ -1024,7 +1025,7 @@ namespace Peach.Core.Xsd
 			if (type == typeof(bool))
 				return new XmlQualifiedName("boolean", XmlSchema.Namespace);
 
-			if (type == typeof(decimal))
+			if (type == typeof(double))
 				return new XmlQualifiedName("decimal", XmlSchema.Namespace);
 
 			if (type == typeof(Peach.Core.Dom.DataElement))

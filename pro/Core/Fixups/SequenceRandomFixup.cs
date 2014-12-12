@@ -29,10 +29,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
+using Peach.Core;
 using Peach.Core.Dom;
+using Random = Peach.Core.Random;
 
-namespace Peach.Core.Fixups
+namespace Peach.Pro.Core.Fixups
 {
 	[Description("Standard sequential random fixup.")]
 	[Fixup("SequenceRandom", true)]
@@ -48,8 +49,8 @@ namespace Peach.Core.Fixups
 
 		protected override Variant OnActionRun(RunContext ctx)
 		{
-			Dom.Number num = parent as Dom.Number;
-			if (num == null && !(parent is Dom.String && parent.Hints.ContainsKey("NumericalString")))
+			Peach.Core.Dom.Number num = parent as Peach.Core.Dom.Number;
+			if (num == null && !(parent is Peach.Core.Dom.String && parent.Hints.ContainsKey("NumericalString")))
 				throw new PeachException("SequenceRandomFixup has non numeric parent '" + parent.fullName + "'.");
 
 			object obj;

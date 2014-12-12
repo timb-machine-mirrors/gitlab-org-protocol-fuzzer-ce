@@ -1,13 +1,12 @@
 using System;
 using System.Xml;
-
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
-using Peach.Core.IO;
 using Peach.Core.Cracker;
+using Peach.Core.Dom;
+using Peach.Core.IO;
 
-namespace Peach.Enterprise.Dom
+namespace Peach.Pro.Core.Dom
 {
 	/// <summary>
 	/// Block element

@@ -1,19 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using Peach.Core;
 using Peach.Core.Analyzers;
-using System.IO;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Publishers
+namespace Peach.Pro.Test.Core.Publishers
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Category("Peach")]
 	class RemotePublisherTests
 	{
-		string template = @"<?xml version=""1.0"" encoding=""utf-8""?>
+		private const string template = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Peach>
 	<DataModel name=""TheDataModel"">
 		<String value=""Hello""/>
@@ -41,7 +38,7 @@ namespace Peach.Core.Test.Publishers
 	</Test>
 </Peach>";
 
-		string raw_eth = @"<?xml version=""1.0"" encoding=""utf-8""?>
+		private const string raw_eth = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Peach>
 	<DataModel name=""TheDataModel"">
 		<Blob value=""Hello!Hello!001122334455""/>
@@ -72,7 +69,7 @@ namespace Peach.Core.Test.Publishers
 	</Test>
 </Peach>";
 
-		string udp = @"<?xml version=""1.0"" encoding=""utf-8""?>
+		private const string udp = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Peach>
 	<DataModel name=""TheDataModel"">
 		<String value=""Hello!Hello!001122334455"" token=""true""/>
@@ -108,29 +105,29 @@ namespace Peach.Core.Test.Publishers
 		[Test]
 		public void TestCreate()
 		{
-			string xml = string.Format(template, "tile.txt");
+			var xml = string.Format(template, "tile.txt");
 
-			PitParser parser = new PitParser();
-			parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var parser = new PitParser();
+			parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 		}
 
 		[Test]
 		public void TestRun()
 		{
-			string tempFile = Path.GetTempFileName();
+			var tempFile = Path.GetTempFileName();
 
-			string xml = string.Format(template, tempFile);
+			var xml = string.Format(template, tempFile);
 
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
-			RunConfiguration config = new RunConfiguration();
+			var config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(null);
+			var e = new Engine(null);
 			e.startFuzzing(dom, config);
 
-			string[] output = File.ReadAllLines(tempFile);
+			var output = File.ReadAllLines(tempFile);
 
 			Assert.AreEqual(1, output.Length);
 			Assert.AreEqual("Hello", output[0]);
@@ -142,13 +139,12 @@ namespace Peach.Core.Test.Publishers
 
 			try
 			{
-				PitParser parser = new PitParser();
-				Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				var parser = new PitParser();
+				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
-				RunConfiguration config = new RunConfiguration();
-				config.singleIteration = true;
+				var config = new RunConfiguration {singleIteration = true};
 
-				Engine e = new Engine(null);
+				var e = new Engine(null);
 				e.startFuzzing(dom, config);
 			}
 			finally
@@ -160,7 +156,7 @@ namespace Peach.Core.Test.Publishers
 		[Test]
 		public void TestRaw()
 		{
-			if (Peach.Core.Platform.GetOS() != Peach.Core.Platform.OS.Linux)
+			if (Platform.GetOS() != Platform.OS.Linux)
 				Assert.Ignore("Only supported on Linux");
 
 			RunRemote(raw_eth);

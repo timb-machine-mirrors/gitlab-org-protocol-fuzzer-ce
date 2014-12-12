@@ -1,8 +1,9 @@
-using NUnit.Framework;
-using System;
 using System.Collections.Generic;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Pro.Core;
 
-namespace Peach.Core.Test
+namespace Peach.Pro.Test.Core
 {
 	[TestFixture]
 	class SuperbestRandomTests

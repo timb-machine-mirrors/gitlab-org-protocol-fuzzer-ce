@@ -27,8 +27,6 @@
 // $Id$
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Peach.Core
@@ -57,19 +55,6 @@ namespace Peach.Core
 	}
 
 	/// <summary>
-	/// Thrown to cause the Peach Engine to re-run
-	/// the same test iteration.
-	/// </summary>
-	[Serializable]
-	public class RedoIterationException : ApplicationException
-	{
-		protected RedoIterationException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-		}
-	}
-
-	/// <summary>
 	/// Thrown to stop current iteration and move to next.
 	/// </summary>
 	[Serializable]
@@ -91,19 +76,6 @@ namespace Peach.Core
 		}
 
 		protected SoftException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-		}
-	}
-
-	/// <summary>
-	/// Similar to SoftException but used by state model
-	/// path code.
-	/// </summary>
-	[Serializable]
-	public class PathException : ApplicationException
-	{
-		protected PathException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}

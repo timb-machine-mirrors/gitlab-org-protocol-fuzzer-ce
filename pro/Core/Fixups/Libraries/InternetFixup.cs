@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Net;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
-namespace Peach.Core.Fixups.Libraries
+namespace Peach.Pro.Core.Fixups.Libraries
 {
 	/// <summary>
 	/// Computes the checksum in Host order for an array of bytes

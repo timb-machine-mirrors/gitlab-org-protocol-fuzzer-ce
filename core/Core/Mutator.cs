@@ -27,8 +27,6 @@
 // $Id$
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Peach.Core.Dom;
 
 namespace Peach.Core

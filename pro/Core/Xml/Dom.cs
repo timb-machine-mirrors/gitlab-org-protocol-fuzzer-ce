@@ -26,12 +26,10 @@
 
 // $Id$
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Peach.Core.Xml
+namespace Peach.Pro.Core.Xml
 {
 	/// <summary>
 	/// Element Model

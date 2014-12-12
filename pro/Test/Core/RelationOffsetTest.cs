@@ -26,22 +26,15 @@
 
 // $Id$
 
-using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using Peach.Core;
-using Peach.Core.IO;
-using Peach.Core.Dom;
-using Peach.Core.Cracker;
-using Peach.Core.Analyzers;
-
+using System.IO;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
+using Peach.Core;
+using Peach.Core.Analyzers;
+using Peach.Core.IO;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test
+namespace Peach.Pro.Test.Core
 {
 	[TestFixture] [Category("Peach")]
 	class RelationOffsetTest : DataModelCollector
@@ -49,7 +42,7 @@ namespace Peach.Core.Test
 		[Test]
 		public void BasicTest()
 		{
-			string xml = @"
+			var xml = @"
 <Peach>
 	<DataModel name='Block'>
 		<Number size='32' endian='big'>
@@ -67,8 +60,8 @@ namespace Peach.Core.Test
 	</DataModel>
 </Peach>";
 
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual(2, dom.dataModels.Count);
 
@@ -76,15 +69,15 @@ namespace Peach.Core.Test
 			Assert.AreEqual("TheDataModel", dm.name);
 
 			// "1234   12    4    test"
-			byte[] expected = new byte[] { 49, 50, 51, 52, 0, 0, 0, 12, 0, 0, 0, 4, 116, 101, 115, 116 };
-			byte[] actual = dm.Value.ToArray();
+			var expected = new byte[] { 49, 50, 51, 52, 0, 0, 0, 12, 0, 0, 0, 4, 116, 101, 115, 116 };
+			var actual = dm.Value.ToArray();
 			Assert.AreEqual(expected, actual);
 		}
 
 		[Test]
 		public void BasicBlockTest()
 		{
-			string xml = @"
+			var xml = @"
 <Peach>
 	<DataModel name='Block'>
 		<Number size='32' endian='big'>
@@ -104,8 +97,8 @@ namespace Peach.Core.Test
 	</DataModel>
 </Peach>";
 
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual(2, dom.dataModels.Count);
 
@@ -113,15 +106,15 @@ namespace Peach.Core.Test
 			Assert.AreEqual("TheDataModel", dm.name);
 
 			// "1234   12    4    test"
-			byte[] expected = new byte[] { 49, 50, 51, 52, 0, 0, 0, 12, 0, 0, 0, 4, 116, 101, 115, 116 };
-			byte[] actual = dm.Value.ToArray();
+			var expected = new byte[] { 49, 50, 51, 52, 0, 0, 0, 12, 0, 0, 0, 4, 116, 101, 115, 116 };
+			var actual = dm.Value.ToArray();
 			Assert.AreEqual(expected, actual);
 		}
 
 		[Test]
 		public void BasicBlockTest2()
 		{
-			string xml = @"
+			var xml = @"
 <Peach>
 	<DataModel name='TheDataModel'>
 
@@ -135,23 +128,23 @@ namespace Peach.Core.Test
 	</DataModel>
 </Peach>";
 
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual(1, dom.dataModels.Count);
 
 			var dm = dom.dataModels[0];
 			Assert.AreEqual("TheDataModel", dm.name);
 
-			byte[] expected = new byte[] { 8, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF };
-			byte[] actual = dm.Value.ToArray();
+			var expected = new byte[] { 8, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF };
+			var actual = dm.Value.ToArray();
 			Assert.AreEqual(expected, actual);
 		}
 
 		[Test]
 		public void FlagsTest()
 		{
-			string xml = @"
+			var xml = @"
 <Peach>
 	<DataModel name='Block'>
 		<Number size='32' endian='big'>
@@ -171,8 +164,8 @@ namespace Peach.Core.Test
 	</DataModel>
 </Peach>";
 
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual(2, dom.dataModels.Count);
 
@@ -180,15 +173,15 @@ namespace Peach.Core.Test
 			Assert.AreEqual("TheDataModel", dm.name);
 
 			// "1234   12    4    test"
-			byte[] expected = new byte[] { 49, 50, 51, 52, 0, 0, 0, 12, 0, 0, 0, 4, 116, 101, 115, 116 };
-			byte[] actual = dm.Value.ToArray();
+			var expected = new byte[] { 49, 50, 51, 52, 0, 0, 0, 12, 0, 0, 0, 4, 116, 101, 115, 116 };
+			var actual = dm.Value.ToArray();
 			Assert.AreEqual(expected, actual);
 		}
 
 		[Test]
 		public void RefTest()
 		{
-			string xml = @"
+			var xml = @"
 <Peach>
 	<DataModel name='Block'>
 		<Number size='32' endian='big'>
@@ -208,8 +201,8 @@ namespace Peach.Core.Test
 	</DataModel>
 </Peach>";
 
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual(2, dom.dataModels.Count);
 
@@ -217,15 +210,15 @@ namespace Peach.Core.Test
 			Assert.AreEqual("TheDataModel", dm.name);
 
 			// "1234   12    4    test"
-			byte[] expected = new byte[] { 49, 50, 51, 52, 0, 0, 0, 8, 0, 0, 0, 4, 116, 101, 115, 116 };
-			byte[] actual = dm.Value.ToArray();
+			var expected = new byte[] { 49, 50, 51, 52, 0, 0, 0, 8, 0, 0, 0, 4, 116, 101, 115, 116 };
+			var actual = dm.Value.ToArray();
 			Assert.AreEqual(expected, actual);
 		}
 
 		[Test]
 		public void RefTest2()
 		{
-			string xml = @"
+			var xml = @"
 <Peach>
 	<DataModel name='Block'>
 		<Number size='32' endian='big'>
@@ -249,8 +242,8 @@ namespace Peach.Core.Test
 	</DataModel>
 </Peach>";
 
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual(3, dom.dataModels.Count);
 
@@ -258,15 +251,15 @@ namespace Peach.Core.Test
 			Assert.AreEqual("TheDataModel", dm.name);
 
 			// "1234   12    4    test"
-			byte[] expected = new byte[] { 49, 50, 51, 52, 0, 0, 0, 8, 0, 0, 0, 4, 116, 101, 115, 116 };
-			byte[] actual = dm.Value.ToArray();
+			var expected = new byte[] { 49, 50, 51, 52, 0, 0, 0, 8, 0, 0, 0, 4, 116, 101, 115, 116 };
+			var actual = dm.Value.ToArray();
 			Assert.AreEqual(expected, actual);
 		}
 
 		[Test]
 		public void RefTest3()
 		{
-			string xml = @"
+			var xml = @"
 <Peach>
 	<DataModel name='Block'>
 		<Number name='BlockSize' size='32' signed='false' endian='big'>
@@ -313,8 +306,8 @@ namespace Peach.Core.Test
 	</DataModel>
 </Peach>";
 
-			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
 			Assert.AreEqual(2, dom.dataModels.Count);
 
@@ -322,19 +315,19 @@ namespace Peach.Core.Test
 			Assert.AreEqual("TheDataModel", dm.name);
 
 			// "1234   12    4    test"
-			byte[] expected = new byte[] {
+			var expected = new byte[] {
 				0,  0,  0, 36,    0,  0,  0,  2,   84, 97,103, 48,
 				0,  0,  0, 32,    0,  0,  0,  4,   84, 97,103, 49,
 				0,  0,  0, 32,    0,  0,  0,  4,  116,101,115,116,
 			};
-			byte[] actual = dm.Value.ToArray();
+			var actual = dm.Value.ToArray();
 			Assert.AreEqual(expected, actual);
 		}
 
 		[Test]
 		public void TestFuzz()
 		{
-			string xml = @"
+			var xml = @"
 <Peach>
 	<DataModel name='TheDataModel'>
 		<Number name='num' size='32' signed='false' endian='big'>
@@ -359,15 +352,14 @@ namespace Peach.Core.Test
 	</Test>
 </Peach>";
 
-			PitParser parser = new PitParser();
+			var parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("StringStatic");
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			dom.tests[0].includedMutators = new List<string> {"StringStatic"};
 
-			RunConfiguration config = new RunConfiguration();
+			var config = new RunConfiguration();
 
-			Engine e = new Engine(this);
+			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(1660, dataModels.Count);
@@ -381,7 +373,7 @@ namespace Peach.Core.Test
 				val.Seek(0, SeekOrigin.Begin);
 				var rdr = new BitReader(val);
 				rdr.BigEndian();
-				uint offset = rdr.ReadUInt32();
+				var offset = rdr.ReadUInt32();
 
 				Assert.AreEqual(len, offset * 8);
 			}
@@ -390,7 +382,7 @@ namespace Peach.Core.Test
 		[Test]
 		public void TestRelativeTo()
 		{
-			string xml = @"
+			var xml = @"
 <Peach>
 	<DataModel name='TheDataModel'>
 		<Number name='len' size='32' signed='false' endian='big'>
@@ -420,15 +412,14 @@ namespace Peach.Core.Test
 	</Test>
 </Peach>";
 
-			PitParser parser = new PitParser();
+			var parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("StringStatic");
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			dom.tests[0].includedMutators = new List<string> {"StringStatic"};
 
-			RunConfiguration config = new RunConfiguration();
+			var config = new RunConfiguration();
 
-			Engine e = new Engine(this);
+			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(3319, dataModels.Count);
@@ -442,10 +433,10 @@ namespace Peach.Core.Test
 				val.Seek(0, SeekOrigin.Begin);
 				var rdr = new BitReader(val);
 				rdr.BigEndian();
-				uint beginLen = rdr.ReadUInt32();
+				var beginLen = rdr.ReadUInt32();
 
 				val.Seek(beginLen + 2, SeekOrigin.Current);
-				uint offset = rdr.ReadUInt32();
+				var offset = rdr.ReadUInt32();
 
 				Assert.AreEqual((4 + beginLen + offset) * 8, len);
 			}
@@ -454,7 +445,7 @@ namespace Peach.Core.Test
 		[Test]
 		public void TestRelative()
 		{
-			string xml = @"
+			var xml = @"
 <Peach>
 	<DataModel name='TheDataModel'>
 		<Number name='len' size='32' signed='false' endian='big'>
@@ -484,15 +475,14 @@ namespace Peach.Core.Test
 	</Test>
 </Peach>";
 
-			PitParser parser = new PitParser();
+			var parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("StringStatic");
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			dom.tests[0].includedMutators = new List<string> {"StringStatic"};
 
-			RunConfiguration config = new RunConfiguration();
+			var config = new RunConfiguration();
 
-			Engine e = new Engine(this);
+			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(3319, dataModels.Count);
@@ -506,10 +496,10 @@ namespace Peach.Core.Test
 				val.Seek(0, SeekOrigin.Begin);
 				var rdr = new BitReader(val);
 				rdr.BigEndian();
-				uint beginLen = rdr.ReadUInt32();
+				var beginLen = rdr.ReadUInt32();
 
 				val.Seek(beginLen + 2, SeekOrigin.Current);
-				uint offset = rdr.ReadUInt32();
+				var offset = rdr.ReadUInt32();
 
 				Assert.AreEqual((4 + beginLen + 2 + offset) * 8, len);
 			}
@@ -518,7 +508,7 @@ namespace Peach.Core.Test
 		[Test]
 		public void TestAbsolute()
 		{
-			string xml = @"
+			var xml = @"
 <Peach>
 	<DataModel name='TheDataModel'>
 		<Number name='len' size='32' signed='false' endian='big'>
@@ -550,15 +540,14 @@ namespace Peach.Core.Test
 	</Test>
 </Peach>";
 
-			PitParser parser = new PitParser();
+			var parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("StringStatic");
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			dom.tests[0].includedMutators = new List<string> {"StringStatic"};
 
-			RunConfiguration config = new RunConfiguration();
+			var config = new RunConfiguration();
 
-			Engine e = new Engine(this);
+			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(3319, dataModels.Count);
@@ -572,10 +561,10 @@ namespace Peach.Core.Test
 				val.Seek(0, SeekOrigin.Begin);
 				var rdr = new BitReader(val);
 				rdr.BigEndian();
-				uint beginLen = rdr.ReadUInt32();
+				var beginLen = rdr.ReadUInt32();
 
 				val.Seek(beginLen + 2, SeekOrigin.Current);
-				uint offset = rdr.ReadUInt32();
+				var offset = rdr.ReadUInt32();
 
 				Assert.AreEqual(len, offset * 8);
 			}
@@ -584,7 +573,7 @@ namespace Peach.Core.Test
 		[Test]
 		public void TestAbsoluteChoice()
 		{
-			string xml = @"
+			var xml = @"
 <Peach>
 	<DataModel name='TheDataModel'>
 		<Number name='len' size='32' signed='false' endian='big'>
@@ -610,16 +599,14 @@ namespace Peach.Core.Test
 	</Test>
 </Peach>";
 
-			PitParser parser = new PitParser();
+			var parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("StringStatic");
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			dom.tests[0].includedMutators = new List<string> {"StringStatic"};
 
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
+			var config = new RunConfiguration {singleIteration = true};
 
-			Engine e = new Engine(this);
+			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(1, dataModels.Count);
@@ -633,7 +620,7 @@ namespace Peach.Core.Test
 				val.Seek(0, SeekOrigin.Begin);
 				var rdr = new BitReader(val);
 				rdr.BigEndian();
-				uint offset = rdr.ReadUInt32();
+				var offset = rdr.ReadUInt32();
 
 				Assert.AreEqual(offset, 4);
 			}

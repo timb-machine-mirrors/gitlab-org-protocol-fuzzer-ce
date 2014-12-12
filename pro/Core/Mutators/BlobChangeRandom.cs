@@ -2,13 +2,12 @@
 // Copyright (c) Deja vu Security
 //
 
-using System;
 using System.IO;
-
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	/// <summary>
 	/// Alter the blob by a random number of bytes between 1 and 100.
@@ -31,10 +30,7 @@ namespace Peach.Core.Mutators
 
 		protected override NLog.Logger Logger
 		{
-			get
-			{
-				return logger;
-			}
+			get { return logger; }
 		}
 
 		protected override BitwiseStream PerformMutation(BitStream data, long start, long length)
@@ -47,7 +43,7 @@ namespace Peach.Core.Mutators
 
 			// Add length bytes of random values
 			var buf = new byte[length];
-			for (int i = 0; i < buf.Length; ++i)
+			for (var i = 0; i < buf.Length; ++i)
 				buf[i] = (byte)context.Random.Next(0, 256);
 			ret.Add(new BitStream(buf));
 
@@ -65,7 +61,7 @@ namespace Peach.Core.Mutators
 		public new static bool supportedDataElement(DataElement obj)
 		{
 			// Don't attach to elements that are empty
-			return Utility.BlobMutator.supportedNonEmptyDataElement(obj);
+			return supportedNonEmptyDataElement(obj);
 		}
 	}
 }

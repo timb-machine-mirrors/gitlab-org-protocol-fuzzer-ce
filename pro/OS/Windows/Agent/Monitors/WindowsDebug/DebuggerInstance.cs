@@ -27,20 +27,13 @@
 // $Id$
 
 using System;
-using System.IO;
-using System.Diagnostics;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.ServiceProcess;
 using System.Management;
-
-using Peach.Core.Dom;
-using Peach.Core.Agent.Monitors;
-
+using System.ServiceProcess;
+using System.Threading;
 using NLog;
+using Peach.Core;
 
-namespace Peach.Core.Agent.Monitors.WindowsDebug
+namespace Peach.Pro.OS.Windows.Agent.Monitors.WindowsDebug
 {
 	/// <summary>
 	/// DebuggerInstance will start up a debugger engine

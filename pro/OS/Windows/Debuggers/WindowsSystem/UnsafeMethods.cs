@@ -27,12 +27,10 @@
 // $Id$
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Runtime.InteropServices;
+using System.Text;
 
-namespace Peach.Core.Debuggers.WindowsSystem
+namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 {
 	/// <summary>
 	/// Contains definitions for marshaled method calls and related

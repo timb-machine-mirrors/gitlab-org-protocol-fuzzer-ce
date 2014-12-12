@@ -26,14 +26,10 @@
 
 // $Id$
 
-using System;
-using System.Diagnostics;
-using System.IO;
 using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
+using System.IO;
 
-namespace Peach.Core.Xml
+namespace Peach.Pro.Core.Xml
 {
 	/// <summary>
 	/// Abstract base class for all XML schema parsers (DTD, Schema, relaxedng, etc)

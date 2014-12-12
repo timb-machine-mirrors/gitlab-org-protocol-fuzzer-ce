@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using Peach.Core.Dom;
 using NLog;
+using Peach.Core;
+using Peach.Core.Dom;
 
-namespace Peach.Core.Fixups
+namespace Peach.Pro.Core.Fixups
 {
 	/// <summary>
 	/// Proxy class to allow writing fixups in a scripting language like python

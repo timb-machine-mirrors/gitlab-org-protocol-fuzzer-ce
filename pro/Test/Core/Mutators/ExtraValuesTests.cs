@@ -1,12 +1,11 @@
-using System;
 using System.Linq;
-
-using Peach.Core.Dom;
-
 using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Dom;
 using Peach.Core.IO;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class ExtraValuesTests
@@ -19,7 +18,7 @@ namespace Peach.Core.Test.Mutators
 			var hintEmpty = new Hint("ExtraValues", "");
 			var hintValid = new Hint("ExtraValues", "foo;bar;baz");
 
-			var blob = new Dom.Blob("Blob");
+			var blob = new Peach.Core.Dom.Blob("Blob");
 			Assert.False(runner.IsSupported(blob));
 
 			blob.Hints["ExtraValues"] = hintEmpty;
@@ -28,7 +27,7 @@ namespace Peach.Core.Test.Mutators
 			blob.Hints["ExtraValues"] = hintValid;
 			Assert.True(runner.IsSupported(blob));
 
-			var num = new Dom.Number("Number");
+			var num = new Peach.Core.Dom.Number("Number");
 			Assert.False(runner.IsSupported(num));
 
 			num.Hints["ExtraValues"] = hintEmpty;
@@ -37,7 +36,7 @@ namespace Peach.Core.Test.Mutators
 			num.Hints["ExtraValues"] = hintValid;
 			Assert.True(runner.IsSupported(num));
 
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 			Assert.False(runner.IsSupported(str));
 
 			str.Hints["ExtraValues"] = hintEmpty;
@@ -46,7 +45,7 @@ namespace Peach.Core.Test.Mutators
 			str.Hints["ExtraValues"] = hintValid;
 			Assert.True(runner.IsSupported(str));
 
-			var blk = new Dom.Block("Block");
+			var blk = new Peach.Core.Dom.Block("Block");
 			Assert.False(runner.IsSupported(blk));
 
 			blk.Hints["ExtraValues"] = hintEmpty;
@@ -62,7 +61,7 @@ namespace Peach.Core.Test.Mutators
 			var runner = new MutatorRunner("ExtraValues");
 
 			// Empty ValidValues hint is unsupported
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 			str.Hints["ValidValues"] = new Hint("ValidValues", ""); ;
 			Assert.False(runner.IsSupported(str));
 
@@ -98,7 +97,7 @@ namespace Peach.Core.Test.Mutators
 
 			var hint = new Hint("ExtraValues", "111;222;333;444");
 
-			var str = new Dom.String();
+			var str = new Peach.Core.Dom.String();
 			str.Hints[hint.Name] = hint;
 
 			var m1 = runner.Sequential(str);
@@ -108,7 +107,7 @@ namespace Peach.Core.Test.Mutators
 			var e1 = new string[] { "111", "222", "333", "444" };
 			Assert.AreEqual(e1, v1);
 
-			var num = new Dom.Number() { LittleEndian = false, length = 32 };
+			var num = new Peach.Core.Dom.Number() { LittleEndian = false, length = 32 };
 			num.Hints[hint.Name] = hint;
 
 			var m2 = runner.Sequential(num);
@@ -118,7 +117,7 @@ namespace Peach.Core.Test.Mutators
 			var e2 = new int[] { 111, 222, 333, 444 };
 			Assert.AreEqual(e2, v2);
 
-			var blob = new Dom.Blob();
+			var blob = new Peach.Core.Dom.Blob();
 			blob.Hints[hint.Name] = hint;
 
 			var m3 = runner.Sequential(blob);
@@ -136,7 +135,7 @@ namespace Peach.Core.Test.Mutators
 
 			var hint = new Hint("ExtraValues", "111;222;333;444");
 
-			var str = new Dom.String();
+			var str = new Peach.Core.Dom.String();
 			str.Hints[hint.Name] = hint;
 
 			var m1 = runner.Random(100, str);
