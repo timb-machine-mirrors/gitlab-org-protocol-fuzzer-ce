@@ -20,18 +20,18 @@
 // described scripting and showed an example of multiple publishers
 // fixed children and attributes
 
-Action elements are part of the xref:StateModel[StateModel], and send commands to xref:Publisher[Publisher]. Within the StateModel, Action elements are child elements of xref:State[State].
+Action elements are part of the xref:StateModel[StateModel], and send commands to a xref:Publisher[Publisher]. Within the StateModel, Action elements are child elements of xref:State[State].
 
-Action elements set up and manage state in a fuzzing session. They issue commands to set up and control the Peach environment. For example, the open action initializes a listener by initiating a network connection or opening a file handle. And, the close action releases resources at the end of a fuzzing iteration. 
+Action elements set up and manage state in a fuzzing session. They issue commands to set up and control the Peach environment. For example, the _open_ action initializes a listener by initiating a network connection or opening a file handle. And, the _close_ action releases resources at the end of a fuzzing iteration. 
 
-Action elements provide control over state changes, movement of data between data models, and calling custom methods defined by agents. For example, the changeState action initiates a transition to a new state in the StateModel.
+Action elements provide control over state changes, movement of data between data models, and calling custom methods defined by agents. For example, the _changeState_ action initiates a transition to a new state in the _StateModel_.
 
 Additionally, Action elements issue directives to Publishers to do things such as read input, send output, and access a property. 
 
-Four Actions elements are implicit—start, stop, open, and close. They execute automatically and do not need to be declared in the StateModel. 
+Four Actions elements are implicit—_start_, _stop_, _open_, and _close_. They execute automatically and do not need to be declared in the StateModel. 
 
-* The start and stop actions occur at the start and end of a fuzzing session. 
-* The open and close actions occur at the start and end of each iteration in a fuzzing session.
+* The _start_ and _stop_ actions occur at the start and end of a fuzzing session. 
+* The _open_ and _close_ actions occur at the start and end of each iteration in a fuzzing session.
 
 Other actions require explicit declarations in order to execute. 
 
@@ -39,11 +39,11 @@ Other actions require explicit declarations in order to execute.
 ****
 The following is the default order in which Actions are performed when fuzzing:
 
-. start - Implicit, once per session
-. open - Implicit, once per iteration
-. Explicit actions (accept, input, output, etc.)
-. close - Implicit, once per iteration
-. stop - Implicit, once per session
+. _start_ - Implicit, once per session
+. _open_ - Implicit, once per iteration
+. Explicit actions (_accept_, _input_, _output_, etc.)
+. _close_ - Implicit, once per iteration
+. _stop_ - Implicit, once per session
 ****
 
 === Syntax
@@ -66,7 +66,7 @@ The following is the default order in which Actions are performed when fuzzing:
 
 Complicated StateModels that have counters (or other advanced operations) use Action parameters that execute scripts at certain times (such as before the Action starts or once it has completed).
 
-Since Pits may contain multiple Publishers within a Test, many Actions have a parameter to declare the Publisher that will carry out the the command.
+Since Pits can contain multiple Publishers within a Test, many Actions have a parameter to declare the Publisher that will carry out the the command.
 
 [source,xml]
 ----
@@ -129,30 +129,30 @@ xref:Action_Types[type]:: Action type. The following enumeration summarizes the 
 * xref:Action_output[output] - causes the associated Publisher to write data.
 * xref:Action_setProperty[setProperty] - provides the output function of a property metaphor (set function) that modifies the value of the property.
 * xref:Action_slurp[slurp] - copies a value from a data element in one DataModel to a data element in another DataModel. 
-* xref:Action_start[start] - causes a Publisher to initialize itself.
+* xref:Action_start[start] - causes a Publisher to perform its initialization tasks.
 * xref:Action_stop[stop] - causes a Publisher to perform final cleanup.
 
 
 _Required Based on Type:_
 
-xref:xpath[valueXpath]:: Path to the source element defined using XPath notation when type is +slurp+.
-xref:xpath[setXpath]:: Path to the destination element defined using XPath notation when type is +slurp+.
-xref:ref[ref]:: Reference of the state to change to when type is +changeState+.
-property:: Name of the property to get or set in the publisher when type is +setProperty+ or +getProperty+.
+xref:xpath[valueXpath]:: Path to the source element defined using XPath notation when the Action type is +slurp+.
+xref:xpath[setXpath]:: Path to the destination element defined using XPath notation when Action type is +slurp+.
+xref:ref[ref]:: Reference of the state to change to when the Action type is +changeState+.
+property:: Name of the property to get or set in the publisher when the Action type is +setProperty+ or +getProperty+.
 
 _Optional:_
 
-publisher:: Name of the publisher that this action should be called on, or Peach.Agent.
+publisher:: Name of the Publisher, or *Peach.Agent*, to perform the action.
 xref:Action_onComplete[onComplete]:: Expression to evaluate when an action completes.
 xref:Action_onStart[onStart]:: Expression to evaluate at the start of an action.
 xref:Action_when[when]:: Perform the action if the provided expression evaluates to true.
 
 === Child Elements
 
-xref:DataModel[DataModel]:: Reference to a DataModel to fuzz.
-xref:Data[Data]:: Set of initial data to crack into the above DataModel before fuzzing.
-xref:Param[Param]:: Argument passed with the call.  Will be fuzzed.
-xref:Result[Result]:: Output of the call Action.  Cracked into a DataModel.
+xref:DataModel[DataModel]:: DataModel to fuzz.
+xref:Data[Data]:: Set of initial data to crack into the DataModel before fuzzing.
+xref:Param[Param]:: Argument passed with the call. The argument will be fuzzed.
+xref:Result[Result]:: Output of the call Action.  The result will be cracked into a DataModel.
 
 [[Action_Types]]
 == Action Types
