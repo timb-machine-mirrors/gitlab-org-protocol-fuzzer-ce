@@ -502,6 +502,14 @@ namespace Peach.Core
 					{
 						logger.Debug("runTest: detected fault on iteration {0}", iterationCount);
 
+						if (!context.reproducingFault)
+						{
+							// Set these on the context now so that OnFault handlers
+							// can properly reference them.
+							context.reproducingInitialIteration = iterationCount;
+							context.reproducingIterationJumpCount = 0;
+						}
+
 						foreach (Fault fault in context.faults)
 						{
 							fault.iteration = iterationCount;
@@ -543,8 +551,6 @@ namespace Peach.Core
 							logger.Debug("runTest: Attempting to reproduce fault.");
 
 							context.reproducingFault = true;
-							context.reproducingInitialIteration = iterationCount;
-							context.reproducingIterationJumpCount = 0;
 
 							logger.Debug("runTest: replaying iteration " + iterationCount);
 						}
@@ -583,6 +589,7 @@ namespace Peach.Core
 										context.reproducingIterationJumpCount *= 2;
 
 									var delta = Math.Min(maxJump, context.reproducingIterationJumpCount);
+									context.reproducingIterationJumpCount = delta;
 									iterationCount = context.reproducingInitialIteration - delta - 1;
 
 									logger.Debug("runTest: Moving backwards {0} iterations to reproduce fault.", delta);

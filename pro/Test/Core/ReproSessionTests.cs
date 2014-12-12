@@ -333,7 +333,7 @@ namespace Peach.Pro.Test.Core
 		}
 
 
-		string Run(Args args)
+		private string Run(Args args)
 		{
 			var max = args.MaxBackSearch.HasValue ? "maxBackSearch='{0}'".Fmt(args.MaxBackSearch) : "";
 
@@ -409,9 +409,31 @@ namespace Peach.Pro.Test.Core
 
 			e.IterationFinished += (ctx, it) => sw.Restart();
 
-			e.Fault += (ctx, it, sm, fault) => history.Add("Fault");
-			e.ReproFault += (ctx, it, sm, fault) => history.Add("ReproFault");
-			e.ReproFailed += (ctx, it) => history.Add("ReproFailed");
+			e.Fault += (ctx, it, sm, fault) =>
+			{
+				history.Add("Fault");
+
+				Assert.AreEqual(1, fault.Length);
+				Assert.LessOrEqual(it, ctx.reproducingInitialIteration);
+				Assert.GreaterOrEqual(ctx.reproducingIterationJumpCount, 0);
+
+			};
+			e.ReproFault += (ctx, it, sm, fault) =>
+			{
+				history.Add("ReproFault");
+
+				Assert.AreEqual(1, fault.Length);
+				Assert.AreEqual(it, ctx.reproducingInitialIteration);
+				Assert.AreEqual(0, ctx.reproducingIterationJumpCount);
+			};
+
+			e.ReproFailed += (ctx, it) =>
+			{
+				history.Add("ReproFailed");
+
+				Assert.AreEqual(it, ctx.reproducingInitialIteration);
+				Assert.Greater(ctx.reproducingIterationJumpCount, 0);
+			};
 
 			e.startFuzzing(dom, config);
 
