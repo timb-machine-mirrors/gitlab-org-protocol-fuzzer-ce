@@ -32,23 +32,22 @@
 // 04/07/2014: Lynn
 //  add information about Param and Call
 
-The _call_ action provide a method calling metaphor in Peach state models.
+The _call_ action provides a method-calling metaphor in Peach state models.
 
-Call actions support zero or multiple (user-defined and supplied) parameters along with capturing a resulting return value.  
+Call actions support zero or more (user-defined and supplied) parameters and a resulting return value.  
   
- * If there are no parameters, the _call_ action just performs the call.
- * If there are user-supplied parameters, the the  _call_ action may use them as part of the fuzzing data. 
+ * If the method has no parameters, the _call_ action performs the call.
+ * If the methond has user-supplied parameters, the _call_ action includes the parameters as items to fuzz. 
+ * If the method has a return value, the _call_ action can captures the return value and cracks the data into the provided _DataModel_.
 
 .The Method _call_ action Metaphor
 ****
-The _call_ action is useful when fuzzing targets interact with the method metaphor.
-In these instances the interesting data to fuzz is typically the parameters being sent as part of the call.
-Examples of interactions that use a method-call metaphor include Microsoft COM/DCOM, Web Services, and RPC.
+The _call_ action is useful when fuzzing targets interact with the method metaphor. In these instances, the interesting fuzzing 
+data is typically in the calling parameters. Examples of interactions that use a method-call metaphor include Microsoft COM/DCOM, 
+Web Services, and RPC.
 ****
 
-When using a _call_ action, any data sent via parameters is considered output and is fuzzed accordingly.
-
-As with the xref:Action_output[_output_] action, a single data model can be provided for each parameter along with zero or more xref:Data[Data] sets.
+As with the xref:Action_output[_output_] action, a single data model can represennt a single parameter along with zero or more xref:Data[Data] sets.
 If the resulting return value is captured, it is considered input and will be cracked into the provided DataModel.
 
 // 02/27/2014: Mike -- I don't think we do this currently. Only get/setProperty. Need to verify.
@@ -56,16 +55,17 @@ If the resulting return value is captured, it is considered input and will be cr
 // .Interacting with Publishers
 // ****
 // Some Publishers may also expose special methods that can be called to set values on the Publisher that could be interesting to set.
-// If a Publisher supports this type of interaction it will be documented with the specific Publisher.
+// If a Publisher supports this type of interaction, the documentation for the Publisher will contain this information.
 // 
 // An example of this usage is provided in the examples section.
 // ****
 
 .Interacting with Agents and Monitors
 ****
-Peach supports a specialized use of _call_ actions to interact with xref:Agent[Agents] and xref:Monitors[Monitors]. 
-A special Publisher called _Peach.Agent_ can be used that causes the call to be sent to all configured Agents.
-If a monitor supports interaction via the _call_ action it will be documented with that monitor.
+Peach supports a specialized use of the _call_ action to interact with xref:Agent[Agents] and xref:Monitors[Monitors]. 
+A special Publisher called _Peach.Agent_ sends the _call_ action to to all configured Agents. In turn, each Agent forwards 
+the _call_ action to its associated monitors. If a monitor supports interaction via the _call_ action, 
+documentation for that monitor will describe the interaction associated with _call_.
 
 An instance of this usage is provided in the examples section.
 ****
@@ -135,7 +135,7 @@ xref:Param[Param]::
   Argument to be passed with the call.
   Zero or more Param elements can be provided.
   Param is considered an action that outputs data and as such the data will be fuzzed by default.
-  Each parameters contains a single xref:DataModel[DataModel] as a child element and zero or more xref:Data[Data sets].
+  Each parameter contains a single xref:DataModel[DataModel] as a child element and zero or more xref:Data[Data sets].
   
 xref:Result[Result]:: 
   Captures result of the call Action.
@@ -147,15 +147,15 @@ xref:Result[Result]::
 
 .Call action using Com Publisher
 ================================
-In this example (which requires a QuickTime movie), the name of the video file will be fuzzed, not the video file itself.
-
+This example fuzzes the name of a video file, not the contents of the video file. Also, this example requires 
+a QuickTime movie file to run.
 
 . Start QuickTime
-. Verify QuickTime move with the file name "video.mov" exists in current folder
-. Save example to "example.xml"
-. Run "Peach.Core.ComContainer.exe"
-. Run "Peach.exe -1 --debug example.xml"
-. You should see the Quicktime movie start to play
+. Verify that a QuickTime movie with the filename "video.mov" exists in current folder.
+. Save example to "example.xml".
+. Run "Peach.Core.ComContainer.exe".
+. Run "Peach.exe -1 --debug example.xml".
+. You should see the Quicktime movie start to play.
 
 [source,xml]
 ----
@@ -208,17 +208,17 @@ In this example (which requires a QuickTime movie), the name of the video file w
 
 .Interacting with Agents and Monitors
 ================================
-This example controls when the WindowsDebugger monitor will launch a target executable under a debugger.
-This is a typical configuration for file fuzzing.
+This example controls when the WindowsDebugger monitor launches a target executable (notepad.exe) under a debugger.
+This configuration is common with file fuzzing.
 
-Notice the use of the special _Peach.Agent_ publisher name.
-This will cause the _call_ action to be sent out to any Agents which will then send to each of there Monitors.
-The method call will end up being handled by the WindowsDebugger monitor, causing it to launch _notepad.exe_.
-For file fuzzing we must make sure the target is launched only after we write out the new fuzzed file.
+Note the special _Peach.Agent_ publisher name.
+This Publisher causes the _call_ action to be sent to all Agents. In turn, each Agent will forward the _call_ action to its associated Monitors.
+The method call will be handled by the WindowsDebugger monitor, causing it to launch _notepad.exe_.
+For file fuzzing, ensure the target is launched *after* writing out the new fuzzed file.
 
-This example requires a Windows XP or newer machine with Windows Debugging Tools installed.
+This example requires a machine running the Windows(R) Operating system, version XP or newer, with the Windows Debugging Tools installed.
 
-. Save example Pit as "example.xml"
+. Save the example Pit as "example.xml"
 . Run "Peach.exe --range 1,10 --debug example.xml"
 . You should see _notepad.exe_ open and close several times.
 

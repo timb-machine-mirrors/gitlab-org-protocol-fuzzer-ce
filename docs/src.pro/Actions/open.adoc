@@ -1,6 +1,6 @@
 <<<
 [[Action_open]]
-== open and connect
+== open, connect
 
 // 01/30/2014: Seth & Mike: Outlined
 //  * Talk about open being implicit, when
@@ -27,16 +27,20 @@
 // 03/05/2014: Lynn: 
 //  Edited text 
 
-The _open_ (or _connect_) action will cause the associated publisher to open its resource.
+The _open_ (or _connect_) action causes the associated publisher to open its resource. 
+The _open_ action is an implicit Peach action that, in general, should not be declared 
+in the xref:StateModel[StateModel]. The _open_ Action occurs at the start of each iteration.
 
-* For the xref:Publishers_File[File publisher], this will open the file handle.
-* For the xref:Publishers_Tcp[TCP publisher] it will initiate the network connection.
+Each Publisher is an I/O adapter and performs the _open_ Action according to its resource needs, as in the following examples: 
 
-Open is an implicit action that occurs by default at the start of each iteration. 
+* The xref:Publishers_File[File publisher] opens a file handle.
+* The xref:Publishers_Tcp[TCP publisher] initiates a network connection.
 
-The only time you need to explicitly call the _open_ action is when the default behavior needs to be changed (for example, when listening for an initial incoming UDP packet because unlike the xref:Action_accept[_accept_] action used with TCP, UDP does not block while accepting incoming packets).
+The time to declare the _open_ action in the StateModel is when the default behavior needs to change. For example, 
 
-NOTE: _connect_ is a pseudonym for _open_. They can be used interchangeably.
+//The only time you need to explicitly call the _open_ action is when the default behavior needs to be changed (for example, when listening for an initial incoming UDP packet because unlike the //xref:Action_accept[_accept_] action used with TCP, UDP does not block while accepting incoming packets).
+
+NOTE: _connect_ is an alias for _open_. Both names can be used interchangeably.
 
 .Default Order of Actions
 ****

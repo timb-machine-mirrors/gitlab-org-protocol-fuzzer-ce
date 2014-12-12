@@ -54,7 +54,7 @@ The following is the default Actions order when fuzzing:
 
 _Required:_
 
-type:: Action type, must be set to "stop"
+type:: Action type, must be set to "start"
 
 _Optional:_
 
