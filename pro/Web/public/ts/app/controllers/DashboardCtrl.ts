@@ -32,7 +32,7 @@ module Peach {
 		public Faults: Models.IFaultSummary[] = [];
 
 		public get ShowSelectPit(): boolean {
-			return !this.pitService.Pit;
+			return !this.Job && !this.pitService.Pit;
 		}
 
 		public get ShowNeedsConfig(): boolean {
