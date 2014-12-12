@@ -204,6 +204,9 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 		public static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out] byte[] buffer, UInt32 size, out uint lpNumberOfBytesRead);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
+		public static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out] IntPtr lpBuffer, UInt32 size, out uint lpNumberOfBytesRead);
+
+		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, uint nSize, out uint lpNumberOfBytesWritten);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
