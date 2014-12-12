@@ -386,25 +386,38 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 			var hProc = openHandles[DebugEv.dwProcessId];
 			var DebugString = DebugEv.u.DebugString;
 
-			int len = DebugString.nDebugStringLength;
+			uint len = DebugString.nDebugStringLength;
 			if (DebugString.fUnicode != 0)
 				len *= 2;
 
-			byte[] buf = new byte[len];
-			uint lenRead;
+			var lpBuf = Marshal.AllocHGlobal((int)len);
 
-			if (!UnsafeMethods.ReadProcessMemory(hProc, DebugString.lpDebugStringData, buf, (uint)len, out lenRead))
+			try
 			{
-				var ex = new Win32Exception(Marshal.GetLastWin32Error());
-				logger.Trace("  Failed to read debug string.  {0}.", ex.Message);
-			}
-			else
-			{
-				var encoding = DebugString.fUnicode != 0 ? Encoding.Unicode : Encoding.ISOLatin1;
-				string str = encoding.GetString(buf, 0, (int)lenRead);
-				logger.Trace("  {0}", str);
+				// For some reason, need to call thru to a function to pass in a copy of
+				// the IntPtr because ReadProcessMemory sets it to NULL.
+				if (!ReadProcessMemory(hProc, DebugString.lpDebugStringData, lpBuf, ref len))
+				{
+					var ex = new Win32Exception(Marshal.GetLastWin32Error());
+					logger.Trace("  Failed to read debug string.  {0}.", ex.Message);
+				}
+				else
+				{
+					string str;
 
+					if (DebugString.fUnicode != 0)
+						str = Marshal.PtrToStringUni(lpBuf, (int)len);
+					else
+						str = Marshal.PtrToStringAnsi(lpBuf, (int)len);
+
+					logger.Trace("  {0}", str);
+				}
 			}
+			finally
+			{
+				Marshal.FreeHGlobal(lpBuf);
+			}
+
 			return DBG_CONTINUE;
 		}
 
@@ -499,6 +512,18 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 			}
 
 			return DBG_EXCEPTION_NOT_HANDLED;
+		}
+
+		static bool ReadProcessMemory(IntPtr hProc, IntPtr lpBaseAddress, IntPtr lpBuffer, ref uint len)
+		{
+			uint lenIn = len;
+			uint lenOut = 0;
+
+			if (!UnsafeMethods.ReadProcessMemory(hProc, lpBaseAddress, lpBuffer, lenIn, out lenOut))
+				return false;
+
+			len = lenOut;
+			return true;
 		}
 
 		static string GetFileNameFromHandle(IntPtr hFile)
