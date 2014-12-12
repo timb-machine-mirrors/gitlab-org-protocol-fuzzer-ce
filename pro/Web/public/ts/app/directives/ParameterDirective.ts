@@ -8,17 +8,6 @@ module Peach {
 		public templateUrl = 'html/directives/parameter.html';
 		public controller = ParameterController;
 		public scope = { param: '=' };
-
-		//public link(
-		//	scope: ng.IScope,
-		//	element: ng.IAugmentedJQuery,
-		//	attrs: ng.IAttributes,
-		//	ctrl: ng.IFormController
-		//) {
-		//	if (!ctrl) {
-		//		return;
-		//	}
-		//}
 	}
 
 	export interface IParameterScope extends IFormScope {		

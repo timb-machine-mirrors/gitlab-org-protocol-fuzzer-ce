@@ -11,9 +11,10 @@ module Peach {
 		"ngResource",
 		"ngRoute",
 		"ngVis",
-		"ui.bootstrap",
 		"smart-table",
-		"treeControl"
+		"treeControl",
+		"ui.select", 
+		"ui.bootstrap"
 	]);
 
 	p.service('HttpErrorService', Services.HttpErrorService);

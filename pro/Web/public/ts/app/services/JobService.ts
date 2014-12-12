@@ -34,9 +34,8 @@ module Peach.Services {
 		}
 
 		public get CanStartJob(): boolean {
-			return (
-				(this.job === undefined && this.isKnownPit) ||
-				(this.job !== undefined && this.job.status === Models.JobStatus.Stopped)
+			return onlyIf(this.pitService.IsConfigured, () => 
+				_.isUndefined(this.job) || this.job.status === Models.JobStatus.Stopped
 			);
 		}
 
@@ -69,11 +68,21 @@ module Peach.Services {
 			var deferred = this.$q.defer<void>();
 			var promise = this.$http.get("/p/jobs");
 			promise.success((jobs: Models.IJob[]) => {
+				var hasPit = false;
 				if (jobs.length > 0) {
 					this.job = _.first(jobs);
+					hasPit = !_.isEmpty(this.job.pitUrl);
+					if (hasPit) {
+						var promise2 = this.pitService.SelectPit(this.job.pitUrl);
+						promise2.then(() => {
+							deferred.resolve();
+						});
+					}
 					this.startJobPoller();
 				}
-				deferred.resolve();
+				if (!hasPit) {
+					deferred.resolve();
+				}
 			});
 			promise.error(reason => this.onError(reason));
 			return deferred.promise;
@@ -113,20 +122,11 @@ module Peach.Services {
 			}
 		}
 
-		private get isKnownPit() {
-			return (
-				this.pitService.Pit !== undefined &&
-				this.pitService.Pit.pitUrl !== undefined &&
-				this.pitService.Pit.pitUrl.length > 0 &&
-				this.pitService.IsConfigured
-			);
-		}
-
 		private checkStatus(good: string[]): boolean {
 			return (
-				this.job !== undefined &&
+				this.job &&
 				_.contains(good, this.job.status) &&
-				this.isKnownPit
+				this.pitService.IsConfigured
 			);
 		}
 
@@ -134,6 +134,7 @@ module Peach.Services {
 			alert("Peach is busy with another task.\n" +
 				"Confirm that there aren't multiple browsers accessing the same instance of Peach.");
 			this.job = undefined;
+			this.$interval.cancel(this.poller);
 		}
 
 		private startJobPoller() {

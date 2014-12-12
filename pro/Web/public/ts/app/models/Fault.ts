@@ -25,6 +25,10 @@ module Peach.Models {
 		description: string;
 		seed: number;
 		files: IFaultFile[];
+
+		// range of search when fault was found
+		iterationStart: number;
+		iterationStop: number;
 	}
 
 	export interface IFaultFile {

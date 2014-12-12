@@ -31,13 +31,24 @@ module Peach {
 
 		public Faults: Models.IFaultSummary[] = [];
 
-		public get IsConfigured(): boolean {
-			return this.pitService.IsConfigured;
+		public get ShowSelectPit(): boolean {
+			return !this.pitService.Pit;
 		}
 
-		public get CanControlPit(): boolean {
-			var pit = this.pitService.Pit;
-			return pit && pit.pitUrl && pit.pitUrl.length > 0;
+		public get ShowNeedsConfig(): boolean {
+			return onlyIf(this.pitService.Pit, () => !this.pitService.IsConfigured);
+		}
+
+		public get ShowLimited(): boolean {
+			return onlyIf(this.Job, () => _.isEmpty(this.Job.pitUrl));
+		}
+
+		public get ShowReproducing(): boolean {
+			return onlyIf(this.Job, () => this.Job.mode === Models.JobMode.Reproducing);
+		}
+
+		public get ShowSearching(): boolean {
+			return onlyIf(this.Job, () => this.Job.mode === Models.JobMode.Searching);
 		}
 
 		public get Job(): Models.IJob {
