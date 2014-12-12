@@ -22,41 +22,43 @@
 // 03/05/2014: Lynn: 
 //  Edited text
 
-The _accept_ Action will block execution until an incoming connection is available, made, and accepted, or a time out is reached. This action is most common in situations where a target application initiates the communication and Peach acts as a server. 
+The _accept_ Action blocks execution until an incoming connection is available, made, and accepted; or a timeout occurs. This action is most common in situations where a target application initiates the communication and Peach acts as a server. 
 
-Not all xref:Publisher[Publishers] support the _accept_ action type; One that does is the xref:Publishers_TcpListener[TcpListener] Publisher.
+Not all xref:Publisher[Publishers] support the _accept_ action type. xref:Publishers_TcpListener[TcpListener] is an example of a Publisher that supports _accept_.
 
 Peach is single-threaded so it can't execute any other tasks (including scripts) while waiting for a target connection.
-Some Publishers use an _AcceptTimeout_ parameter to set a time duration to wait for a connection.
+
+Some Publishers use an _AcceptTimeout_ parameter to limit the wait for a connection.
 
 .Accept Timeout
 ****
-If the accept time out is reached prior to an incoming connection being accepted, Peach will behave as follows:
+Some Publishers use an _AcceptTimeout_ parameter to limit the wait for a connection. If the timeout occurs prior to accepting an incoming connection, Peach behaves as follows:
 
-xref:Iteration_record[record iteration]::
-  Peach will exception and stop. 
-  When things do not work correctly during a record iteration we assume that either the environment is not working correctly or the pit is not correct. 
-  In both cases fuzzing cannot continue causing Peach to stop.
+xref:Iteration_record[Timeout occurs during a record iteration]::
+  Peach will throw an exception and stop. The results of a record iteration are used as a standard for comparing with results of control iterations. 
+  When things do not work correctly during a record iteration, the environment is not working correctly or the pit is not correct. 
+  In either case, the fuzzing session cannot continue.
   
-xref:Iteration_control[control iteration]::
-  Peach will trigger a fault. Control iterations must be enabled for this state to be reached.
-  During control iterations, Peach assumes that any error results from the target entering an unwanted state.
-  Such transitions are considered faults and logged as faults.
+xref:Iteration_control[Timeout occurs during a control iteration]::
+  Peach will trigger a fault. Control iterations are used as checkpoints to verify that the target is operating correctly. 
+  The pit must enable Control iterations to reach this state.
+  During control iterations, Peach assumes any error results from the target entering an unwanted state.
+  Such transitions are considered faults and logged accordingly.
   
-xref:Iteration_fuzzing[fuzzing iteration]::
-  Peach will continue to next iteration.
-  During normal fuzzing iterations, Peach ignores odd behavior from the target unless it occurs on a control iteration (an iteration with out any mutations occurring).
+xref:Iteration_fuzzing[Timeout occurs during a fuzzing iteration]::
+  Peach will continue to the next iteration.
+  During normal fuzzing iterations, Peach ignores odd behavior from the target unless it occurs on a control iteration.
 ****
 
 .Default Order of Actions
 ****
 When fuzzing occurs, actions are performed in the following (default) order:
 
-. start - Implicit, once per session
-. open - Implicit, once per iteration
-. Explicit actions (like accept, input, and output)
-. close - Implicit, once per iteration
-. stop - Implicit, once per session
+. _start_ - Implicit, once per session
+. _open_ - Implicit, once per iteration
+. Explicit actions (like _accept_, _input_, and _output_)
+. _close_ - Implicit, once per iteration
+. _stop_ - Implicit, once per session
 ****
 
 === Syntax
@@ -85,20 +87,20 @@ type:: Action type, must be set to "accept"
 _Optional:_
 
 name:: Name used to identify the action
-publisher:: Name of the publisher that this action should be called on
-xref:Action_when[when]:: Only perform action if the expression provided evaluates to true
-xref:Action_onStart[onStart]:: Expression to run on start of an action.
-xref:Action_onComplete[onComplete]:: Expression to run on completion of an action
+publisher:: Name of the publisher to perform this action
+xref:Action_when[when]:: Perform this action if the provided expression evaluates to true
+xref:Action_onStart[onStart]:: Evaluate the expression at the start of an action
+xref:Action_onComplete[onComplete]:: Evaluate the expression upon completion of an action
 
 === Child Elements
 
-No child elements are supported by this element.
+None.
 
 === Examples
 
 .Ping-Pong Accept Example
 ==========================
-This is a simple example of using the accept action. Netcat (nc) is used in this example as the client.
+This is a simple example of using the _accept_ action. Netcat (nc) is used in this example as the client.
 
 [source,xml]
 ----
@@ -146,7 +148,11 @@ This is a simple example of using the accept action. Netcat (nc) is used in this
 </Peach>
 ----
 
-Output from this example. Once Peach is started, use the netcat command line found below to recreate output.
+Output from this example that the server produces. 
+
+Once Peach starts, type the following command line and press RETURN to recreate the output. Again, _nc_ is netcat.
+
+nc -vv 127.0.0.1 31337
 
 ----
 > peach -1 --debug example.xml
@@ -206,7 +212,9 @@ Peach.Core.Publishers.TcpListenerPublisher stop()
 ----
 <1> Peach will wait here for the incoming connection
 
-Netcat command line. Once running type "PING" return in all upper case. PONG will be sent back by Peach.
+Interaction from the client, including the Netcat command line. 
+
+Once Netcat is running, type "PING" in upper case and press RETURN. "PONG" will be sent back by Peach.
 
 ----
 > nc -vv 127.0.0.1 31337
