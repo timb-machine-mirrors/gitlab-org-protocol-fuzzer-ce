@@ -485,11 +485,13 @@ namespace Peach.Core
 					if (context.test.waitTime > 0)
 						Thread.Sleep(TimeSpan.FromSeconds(context.test.waitTime));
 
-					if (context.reproducingFault)
+					if (context.reproducingFault && context.test.faultWaitTime > 0)
 					{
 						// User can specify a time to wait between iterations
-						// when reproducing faults.
-						if (context.test.faultWaitTime > 0)
+						// when reproducing faults.  We only wait if we are at the end of
+						// a reproduction sequence or it is the initial search of the previous
+						// ten iterations.
+						if (context.reproducingInitialIteration == iterationCount || context.reproducingIterationJumpCount <= 10)
 							Thread.Sleep(TimeSpan.FromSeconds(context.test.faultWaitTime));
 					}
 
@@ -526,18 +528,10 @@ namespace Peach.Core
 
 						if (context.reproducingFault)
 						{
+							// Fault reproduced, so skip forward to were we left off.
 							lastReproFault = iterationCount;
 
-							// If we have moved less than 20 iterations, start fuzzing
-							// from here thinking we may have not really performed the
-							// next few iterations.
-
-							// Otherwise skip forward to were we left off.
-
-							if (context.reproducingInitialIteration - iterationCount > 20)
-							{
-								iterationCount = context.reproducingInitialIteration;
-							}
+							iterationCount = context.reproducingInitialIteration;
 
 							context.reproducingFault = false;
 							context.reproducingIterationJumpCount = 1;
@@ -550,7 +544,7 @@ namespace Peach.Core
 
 							context.reproducingFault = true;
 							context.reproducingInitialIteration = iterationCount;
-							context.reproducingIterationJumpCount = 1;
+							context.reproducingIterationJumpCount = 0;
 
 							logger.Debug("runTest: replaying iteration " + iterationCount);
 						}
@@ -568,28 +562,32 @@ namespace Peach.Core
 						}
 						else if (test.TargetLifetime == Test.Lifetime.Session)
 						{
-							uint maxJump = context.reproducingInitialIteration - lastReproFault - 1;
-
-							if (context.reproducingIterationJumpCount >= (maxJump*2) ||
-								context.reproducingIterationJumpCount > test.MaxBackSearch)
+							if (iterationCount == context.reproducingInitialIteration)
 							{
-								logger.Debug("runTest: Giving up reproducing fault, reached max backsearch.");
+								var maxJump = Math.Min(test.MaxBackSearch, context.reproducingInitialIteration - lastReproFault - 1);
 
-								context.reproducingFault = false;
-								iterationCount = context.reproducingInitialIteration;
+								if (context.reproducingIterationJumpCount >= maxJump)
+								{
+									logger.Debug("runTest: Giving up reproducing fault, reached max backsearch.");
 
-								OnReproFailed(iterationCount);
+									context.reproducingFault = false;
+									iterationCount = context.reproducingInitialIteration;
+
+									OnReproFailed(iterationCount);
+								}
+								else
+								{
+									if (context.reproducingIterationJumpCount == 0)
+										context.reproducingIterationJumpCount = 10;
+									else
+										context.reproducingIterationJumpCount *= 2;
+
+									var delta = Math.Min(maxJump, context.reproducingIterationJumpCount);
+									iterationCount = context.reproducingInitialIteration - delta - 1;
+
+									logger.Debug("runTest: Moving backwards {0} iterations to reproduce fault.", delta);
+								}
 							}
-							else
-							{
-								uint delta = Math.Min(maxJump, context.reproducingIterationJumpCount);
-								iterationCount = context.reproducingInitialIteration - delta - 1;
-
-								logger.Debug("runTest: Moving backwards {0} iterations to reproduce fault.", delta);
-							}
-
-							// Make next jump larger
-							context.reproducingIterationJumpCount *= context.reproducingSkipMultiple;
 						}
 					}
 
