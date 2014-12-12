@@ -304,6 +304,7 @@ namespace Peach.Pro.Test.Core
 				RangeStop = 10;
 
 				ControlIterations = 0;
+				SwitchCount = uint.MaxValue;
 
 				WaitTime = 0.0;
 				FaultWaitTime = 0.0;
@@ -312,6 +313,7 @@ namespace Peach.Pro.Test.Core
 			public uint RangeStart { get; set; }
 			public uint RangeStop { get; set; }
 
+			public uint SwitchCount { get; set; }
 			public uint ControlIterations { get; set; }
 
 			public double WaitTime { get; set; }
@@ -340,13 +342,19 @@ namespace Peach.Pro.Test.Core
 			var xml = @"
 <Peach>
 	<DataModel name='TheDataModel'>
-		<String value='Hello World'/>
+		<String name='str'/>
 	</DataModel>
 
 	<StateModel name='TheState' initialState='Initial'>
 		<State name='Initial'>
 			<Action type='output'>
 				<DataModel ref='TheDataModel'/>
+				<Data>
+					<Field name='str' value='Hello'/>
+				</Data>
+				<Data>
+					<Field name='str' value='World'/>
+				</Data>
 			</Action>
 		</State>
 	</StateModel>
@@ -362,9 +370,12 @@ namespace Peach.Pro.Test.Core
 		<Agent ref='LocalAgent'/>
 		<StateModel ref='TheState'/>
 		<Publisher class='Null'/>
+		<Strategy class='Random'>
+			<Param name='SwitchCount' value='{4}'/>
+		</Strategy>
 	</Test>
 </Peach>
-".Fmt(args.WaitTime, args.FaultWaitTime, args.ControlIterations, max);
+".Fmt(args.WaitTime, args.FaultWaitTime, args.ControlIterations, max, args.SwitchCount);
 
 			var dom = DataModelCollector.ParsePit(xml);
 
@@ -728,6 +739,38 @@ namespace Peach.Pro.Test.Core
 				Assert.GreaterOrEqual(_waitTimes[i], TimeSpan.FromMilliseconds(times[i] - 20));
 				Assert.LessOrEqual(_waitTimes[i], TimeSpan.FromMilliseconds(times[i] + 20));
 			}
+		}
+
+		[Test]
+		public void TestDataSetSwitch()
+		{
+			// /If jumping backwards results in a data set switch
+			// make sure it happens.
+
+			// Fuzz from 1 to 25
+			// Fault on iteration 23
+			// Reproduce on iteration 10
+			// SwitchCount is 15
+
+			// On fault replays iteration 23
+			// Jumps back 10, then jumps back 2 * 10
+			// Resumes on iteration 24
+
+			var act = Run(new Args { RangeStop = 25, Fault = "23", Repro = "7", SwitchCount = 15 });
+
+			const string exp = "R1 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 " +
+			                   // R16 -> switches to data set 2
+			                   "R16 16 17 18 19 20 21 22 23 ReproFault 23 " +
+			                   // R13 -> switches back to data set initially used
+			                   "R13 13 14 15 " +
+			                   // R16 -> switches to data set 2
+			                   "R16 16 17 18 19 20 21 22 23 " +
+			                   // R3 -> switches back to data set initially used
+			                   "R3 3 4 5 6 7 Fault " +
+			                   // R24 -> switches back to data set 2
+			                   "R24 24 25";
+
+			Assert.AreEqual(exp, act);
 		}
 	}
 }

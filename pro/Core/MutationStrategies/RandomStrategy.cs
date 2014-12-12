@@ -460,9 +460,9 @@ namespace Peach.Pro.Core.MutationStrategies
 
 		private void SeedRandomDataSet()
 		{
-			if (lastSwitchIteration != Iteration &&
-				Iteration == GetSwitchIteration() &&
-				dataSets.Where(d => d.Options.Count > 1).Any())
+			var switchIteration = GetSwitchIteration();
+
+			if (lastSwitchIteration != switchIteration && dataSets.Any(d => d.Options.Count > 1))
 			{
 				logger.Debug("Switch iteration, setting controlIteration and controlRecordingIteration.");
 
@@ -473,11 +473,11 @@ namespace Peach.Pro.Core.MutationStrategies
 
 			if (randomDataSet == null)
 			{
-				randomDataSet = new Random(this.Seed + GetSwitchIteration());
+				randomDataSet = new Random(this.Seed + switchIteration);
 
 				Context.controlIteration = true;
 				Context.controlRecordingIteration = true;
-				lastSwitchIteration = Iteration;
+				lastSwitchIteration = switchIteration;
 			}
 		}
 

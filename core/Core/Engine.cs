@@ -318,7 +318,7 @@ namespace Peach.Core
 
 			context.agentManager = new AgentManager(context);
 			context.reproducingFault = false;
-			context.reproducingIterationJumpCount = 1;
+			context.reproducingIterationJumpCount = 0;
 
 			if (context.config.userDefinedSeed && !test.strategy.UsesRandomSeed)
 			{
@@ -647,11 +647,11 @@ namespace Peach.Core
 				}
 				finally
 				{
-					if (!context.reproducingFault)
-					{
-						if (context.controlIteration)
-							lastControlIteration = iterationCount;
+					if (!context.reproducingFault && context.controlIteration)
+						lastControlIteration = iterationCount;
 
+					if (!context.reproducingFault || context.reproducingIterationJumpCount != 0)
+					{
 						context.controlIteration = false;
 						context.controlRecordingIteration = false;
 					}
