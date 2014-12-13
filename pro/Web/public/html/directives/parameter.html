@@ -1,37 +1,13 @@
 <div ng-form="form"
 		 class="form-group"
 		 ng-class="{'has-error': form.param.$invalid && form.param.$dirty}">
-	<label class="col-sm-3 control-label">
+	<label class="col-sm-4 control-label">
 		{{param.name}}
 	</label>
 	<div class="col-sm-6">
-		<div class="input-group">
-			<input type="text"
-						 class="form-control"
-						 ng-model="param.value"
-						 ng-required="vm.IsRequired"
-						 name="param"
-						 placeholder="{{param.defaultValue}}"
-						 typeahead="choice for choice in vm.Choices | filter: $viewValue"
-						 typeahead-editable="{{param.type !== 'bool' && param.type !== 'enum'}}" />
-			<span class="peach-field-info tooltip-info input-group-addon"
-						tooltip="{{param.description}}"
-						tooltip-placement="right"
-						tooltip-append-to-body="true">
-			</span>
-		</div>
-		<span class="help-block"
-					ng-show="form.param.$error.integer">
-			Not a number
-		</span>
-		<span class="help-block"
-					ng-show="form.param.$error.required && form.param.$dirty">
-			Required
-		</span>
-		<span class="help-block"
-			 ng-show="form.param.$error.editable">
-			Invalid value
-		</span>
+		<peach:parameter-input param="param"
+													 form="form">
+		</peach:parameter-input>
 	</div>
 	<span class="help-block"
 				ng-show="vm.IsRequired">

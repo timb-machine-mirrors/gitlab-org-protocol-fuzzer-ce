@@ -30,7 +30,7 @@
 		</accordion-heading>
 		<div class="form-group"
 				 ng-class="{'has-error': form.name.$invalid && form.name.$dirty}">
-			<label class="col-sm-3 control-label">
+			<label class="col-sm-4 control-label">
 				Name
 			</label>
 			<div class="col-sm-6">
@@ -54,7 +54,8 @@
 			</div>
 		</div>
 		<div ng-repeat="param in monitor.map">
-			<peach:parameter param="param">
+			<peach:parameter param="param"
+											 input-group="true">
 			</peach:parameter>
 		</div>
 	</accordion-group>

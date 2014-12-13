@@ -35,54 +35,28 @@
 				<table class="table table-striped table-hover table-bordered">
 					<thead>
 						<tr>
-							<th>Name</th>
-							<th>Key</th>
-							<th>Value</th>
-							<th class="center">Remove</th>
+							<th class="nowrap">Name</th>
+							<th class="nowrap">Key</th>
+							<th class="width-100">Value</th>
+							<th class="center nowrap">Remove</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr ng-repeat="param in vm.PitConfig.config"
 								ng-form="form">
-							<td class="align-middle">
-								<span>
-									{{param.name}}
-								</span>
-								<span class="peach-field-info tooltip-info pull-right"
-											style="margin-right: 10px"
-											tooltip="{{param.description}}"
-											tooltip-placement="right"
-											tooltip-append-to-body="true">
-								</span>
+							<td class="nowrap align-middle">
+								{{param.name}}
 							</td>
-							<td class="align-middle">
+							<td class="nowrap align-middle">
 								{{param.key}}
 							</td>
-							<td ng-class="{'has-error': form.param.$invalid && form.param.$dirty}">
-								<input type="text"
-											 class="form-control"
-											 ng-model="param.value"
-											 name="param"
-											 ng-required="!vm.CanRemove(param)"
-											 ng-readonly="vm.IsReadonly(param)"
-											 placeholder="{{param.defaultValue}}"
-											 tooltip="{{vm.ParamTooltip(param)}}"
-											 typeahead="choice for choice in vm.Choices(param) | filter: $viewValue"
-											 typeahead-editable="{{param.type !== 'bool' && param.type !== 'enum'}}" />
-								<span class="help-block"
-											ng-show="form.param.$error.integer">
-									Not a number
-								</span>
-								<span class="help-block"
-											ng-show="form.param.$error.required && form.param.$dirty">
-									Required
-								</span>
-								<span class="help-block"
-											ng-show="form.param.$error.editable">
-									Invalid value
-								</span>
+							<td class="width-100"
+									ng-class="{'has-error': form.param.$invalid && form.param.$dirty}">
+								<peach:parameter-input param="param"
+																			 form="form">
+								</peach:parameter-input>
 							</td>
-							<td class="center">
+							<td class="center nowrap align-middle">
 								<button class="btn btn-xs btn-cell"
 												ng-show="vm.CanRemove(param)"
 												ng-click="vm.OnRemove($index)">

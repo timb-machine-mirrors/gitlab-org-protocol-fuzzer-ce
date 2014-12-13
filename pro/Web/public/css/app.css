@@ -98,6 +98,25 @@ pre.peach-test-log {
 	content: "\f0de";
 }
 
+.nowrap {
+	white-space: nowrap;
+}
+
+.peach-fault-detail {
+	width: 100%;
+	table-layout: fixed;
+}
+
+.peach-fault-detail tr td:first-child {
+	white-space: nowrap;
+	width: 110px;
+}
+
+.peach-fault-detail pre {
+	min-height: 250px;
+	overflow: auto;
+}
+
 /* 
 	fix for ace.css
 	default seems to be relative

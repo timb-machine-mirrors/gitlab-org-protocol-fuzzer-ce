@@ -10,6 +10,16 @@ module Peach {
 		public scope = { param: '=' };
 	}
 
+	export class ParameterInputDirective implements ng.IDirective {
+		public restrict = 'E';
+		public templateUrl = 'html/directives/parameter-input.html';
+		public controller = ParameterController;
+		public scope = {
+			param: '=',
+			form: '='
+		};
+	}
+
 	export interface IParameterScope extends IFormScope {		
 		param: Models.IParameter;
 	}
@@ -31,8 +41,29 @@ module Peach {
 			return _.isUndefined(this.$scope.param.defaultValue);
 		}
 
+		public get IsReadonly() {
+			return this.$scope.param.type === 'system';
+		}
+
+		public get ParamTooltip() {
+			return this.IsReadonly ? this.$scope.param.value : '';
+		}
+
+		public get UseSelect(): boolean {
+			return this.$scope.param.type === 'enum' ||
+				this.$scope.param.type === 'bool';
+		}
+
 		public get Choices(): string[] {
-			return this.defines().concat(this.$scope.param.options);
+			var options = this.$scope.param.options || [];
+			return options.concat(this.defines());
+		}
+
+		public EnumGroups(item: string): string {
+			if (item.startsWith('##')) {
+				return 'Defines';
+			}
+			return 'Choices';
 		}
 
 		private defines(): string[] {
