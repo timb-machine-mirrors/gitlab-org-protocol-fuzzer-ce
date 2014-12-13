@@ -64,7 +64,9 @@
 											 ng-model="param.value"
 											 name="param"
 											 ng-required="!vm.CanRemove(param)"
+											 ng-readonly="vm.IsReadonly(param)"
 											 placeholder="{{param.defaultValue}}"
+											 tooltip="{{vm.ParamTooltip(param)}}"
 											 typeahead="choice for choice in vm.Choices(param) | filter: $viewValue"
 											 typeahead-editable="{{param.type !== 'bool' && param.type !== 'enum'}}" />
 								<span class="help-block"
