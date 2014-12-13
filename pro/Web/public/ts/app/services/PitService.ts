@@ -88,6 +88,10 @@ module Peach.Services {
 			return deferred.promise;
 		}
 
+		public ReloadPit() {
+			this.pit.$get({ id: this.PitId });
+		}
+
 		public CopyPit(pit: Models.IPit): ng.IPromise<Models.IPit> {
 			var request: Models.IPitCopy = {
 				libraryUrl: this.UserPitLibrary,
@@ -132,10 +136,6 @@ module Peach.Services {
 
 		public get IsConfigured(): boolean {
 			return onlyIf(this.Pit, () => this.latestVersion.configured) || false;
-		}
-
-		public set IsConfigured(value: boolean) {
-			onlyIf(this.Pit, () => { this.latestVersion.configured = value; });
 		}
 
 		private get latestVersion(): Models.IPitVersion {

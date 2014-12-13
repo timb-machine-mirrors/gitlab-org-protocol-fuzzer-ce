@@ -8,6 +8,7 @@ module Peach {
 
 	var p = angular.module("Peach", [
 		"angles",
+		"ngSanitize",
 		"ngResource",
 		"ngRoute",
 		"ngVis",
