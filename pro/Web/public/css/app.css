@@ -192,3 +192,7 @@ pre.peach-test-log {
 	margin: 0 5px 0 0;
 	border-top-color: black;
 }
+
+.ui-select-bootstrap > .ui-select-choices {
+	max-height: 400px;
+}
