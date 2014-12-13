@@ -37,6 +37,14 @@ module Peach {
 			return param.type === 'user';
 		}
 
+		public IsReadonly(param: Models.IParameter) {
+			return param.type === 'system';
+		}
+
+		public ParamTooltip(param: Models.IParameter) {
+			return this.IsReadonly(param) ? param.value : '';
+		}
+
 		public OnSave(): void {
 			this.PitConfig.$save({ id: this.pitService.PitId }, () => {
 				this.$scope.form.$dirty = false;

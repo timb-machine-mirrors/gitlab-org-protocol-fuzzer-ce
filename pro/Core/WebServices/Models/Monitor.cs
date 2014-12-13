@@ -15,7 +15,8 @@ namespace Peach.Pro.Core.WebServices.Models
 		Iface,
 		Enum,
 		Bool,
-		User
+		User,
+		System
 	}
 
 	/// <summary>

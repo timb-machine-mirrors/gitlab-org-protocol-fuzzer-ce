@@ -52,8 +52,6 @@ describe("Peach", () => {
 
 		describe('when a Pit is not selected', () => {
 			it("new", () => {
-				expect(_.isObject(undefined)).toBe(false);
-				expect(_.isObject(null)).toBe(false);
 				expect(_.isObject(ctrl)).toBe(true);
 				expect(ctrl.IsActive("/quickstart/intro")).toBe(false);
 			});
@@ -68,11 +66,13 @@ describe("Peach", () => {
 		});
 
 		describe('select a Pit that needs to be configured', () => {
-			var pit;
+			var pit: Peach.Models.IPit;
 			beforeEach(() => {
-				pit = {
-					name: 'My Pit'
-				}
+				pit = <Peach.Models.IPit> {
+					pitUrl: pitUrl,
+					name: 'My Pit',
+					versions: [{ configured: false }]
+				};
 
 				spyOpen.and.returnValue({
 					result: {
@@ -103,12 +103,11 @@ describe("Peach", () => {
 		});
 
 		describe('select a Pit that is already configured', () => {
-			console.log('no');
 			beforeEach(() => {
 				var pit = {
 					name: 'My Pit',
 					versions: [{ configured: true }]
-				}
+				};
 
 				spyOpen.and.returnValue({
 					result: {

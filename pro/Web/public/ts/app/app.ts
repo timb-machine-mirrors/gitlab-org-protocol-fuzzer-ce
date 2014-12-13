@@ -8,12 +8,14 @@ module Peach {
 
 	var p = angular.module("Peach", [
 		"angles",
+		"ngSanitize",
 		"ngResource",
 		"ngRoute",
 		"ngVis",
-		"ui.bootstrap",
 		"smart-table",
-		"treeControl"
+		"treeControl",
+		"ui.select", 
+		"ui.bootstrap"
 	]);
 
 	p.service('HttpErrorService', Services.HttpErrorService);

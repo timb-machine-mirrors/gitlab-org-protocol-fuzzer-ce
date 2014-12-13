@@ -119,3 +119,57 @@ pre.peach-test-log {
 	-ms-transform: translate(0, 0);
 	transform: translate(0, 0);
 }
+
+.ui-select-container .btn-group > .btn {
+	display: inline-block;
+	padding: 6px 12px;
+	font-size: 14px;
+	font-weight: normal;
+	line-height: 1.42857143;
+	text-align: center;
+	white-space: nowrap;
+	vertical-align: middle;
+	-ms-touch-action: manipulation;
+	touch-action: manipulation;
+	cursor: pointer;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	background-image: none;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	text-shadow: none !important;
+	margin: 0;
+}
+
+.ui-select-container .btn-group > .btn-default {
+	color: #333 !important;
+	background-color: #fff !important;
+	border-color: #ccc;
+}
+
+.ui-select-container .btn-group > .btn:first-child {
+	border-right: none;
+	width: 100%;
+}
+
+.ui-select-container .btn-group > .btn + .btn {
+	border-left: none;
+	position: absolute;
+	right: 0;
+	display: block;
+	width: 34px;
+	height: 34px;
+	text-align: center;
+}
+
+.ui-select-container .btn-group > .btn + .btn:active {
+	top: auto;
+	left: auto;
+}
+
+.ui-select-container .btn-group > .btn > .caret {
+	margin: 0 5px 0 0;
+	border-top-color: black;
+}

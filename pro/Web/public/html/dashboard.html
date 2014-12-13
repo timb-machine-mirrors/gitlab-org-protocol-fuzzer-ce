@@ -12,8 +12,18 @@
 				<div class="col-xs-12">
 					<div class="space-6"></div>
 
-					<div class="alert alert-warning"
-							 ng-show="!vm.IsConfigured">
+					<div class="alert alert-warning alert-dismissable"
+							 ng-show="vm.ShowSelectPit">
+						<button type="button"
+										class="close"
+										data-dismiss="alert">
+							<i class="icon-remove"></i>
+						</button>
+						<strong>Warning!</strong>
+						A Pit must be selected before continuing.
+					</div>
+					<div class="alert alert-warning alert-dismissable"
+							 ng-show="vm.ShowNeedsConfig">
 						<button type="button"
 										class="close"
 										data-dismiss="alert">
@@ -23,10 +33,10 @@
 						Pit must be configured before starting a Job.
 						<a href="#/quickstart/intro">Go to Pit Configuration now.</a>
 					</div>
-					<div class="alert alert-warning" 
-					     ng-show="!vm.CanControlPit">
-						<button type="button" 
-						        class="close" 
+					<div class="alert alert-warning alert-dismissable"
+							 ng-show="vm.ShowLimited">
+						<button type="button"
+										class="close"
 										data-dismiss="alert">
 							<i class="icon-remove"></i>
 						</button>
@@ -35,14 +45,22 @@
 						You will be limited to viewing Faults only.
 						To stop the currently running job, switch to the terminal window and close it or stop the process.
 					</div>
-					<div class="alert alert-success" 
-							 ng-show="vm.IsConfigured && vm.CanControlPit">
-						<button type="button" 
-						        class="close" 
+					<div class="alert alert-success alert-dismissable"
+							 ng-show="vm.CanStart">
+						<button type="button"
+										class="close"
 										data-dismiss="alert">
 							<i class="icon-remove"></i>
 						</button>
 						Your Pit is configured. Press the START button below to start a fuzzing job.
+					</div>
+					<div class="alert alert-info"
+							 ng-show="vm.ShowReproducing">
+						Fault detected, attempting to reproduce.
+					</div>
+					<div class="alert alert-info"
+							 ng-show="vm.ShowSearching">
+						Fault detected, searching test cases leading to fault. This could take a while.
 					</div>
 
 					<div class="col-sm-7 infobox-container">

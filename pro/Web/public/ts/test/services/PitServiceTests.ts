@@ -68,14 +68,7 @@ describe("Peach", () => {
 				expect(service.Name).toBe('(none)');
 			});
 
-			it("get IsConfigured is false", () => {
-				expect(service.IsConfigured).toBe(false);
-			});
-
-			it("set IsConfigured does nothing", () => {
-				expect(() => {
-					service.IsConfigured = true;
-				}).not.toThrow();
+			it("IsConfigured is false", () => {
 				expect(service.IsConfigured).toBe(false);
 			});
 		});
@@ -84,46 +77,12 @@ describe("Peach", () => {
 			var pitUrl = "/p/pits/PIT_GUID";
 			var pit;
 
-			describe('which has no versions', () => {
-				beforeEach(() => {
-					pit = {
-						name: 'My Pit'
-					}
-					$httpBackend.expectGET(pitUrl).respond(pit);
-					service.SelectPit(pitUrl);
-					$httpBackend.flush();
-				});
-
-				it("get Name is valid", () => {
-					expect(service.Name).toBe(pit.name);
-				});
-
-				it("get IsConfigured is false", () => {
-					expect(service.IsConfigured).toBe(false);
-				});
-
-				it("set IsConfigured should work", () => {
-					service.IsConfigured = false;
-					expect(service.IsConfigured).toBe(false);
-					service.IsConfigured = true;
-					expect(service.IsConfigured).toBe(true);
-				});
-
-				xit('has one version (do we really care?)', () => {
-					expect(service.Pit.versions.length).toBe(1);
-				});
-			});
-
 			describe('which is not configured', () => {
 				beforeEach(() => {
 					pit = {
 						name: 'My Pit',
-						versions: [
-							{
-								configured: false
-							}
-						]
-					}
+						versions: [{ configured: false }]
+					};
 					$httpBackend.expectGET(pitUrl).respond(pit);
 					service.SelectPit(pitUrl);
 					$httpBackend.flush();
@@ -135,13 +94,6 @@ describe("Peach", () => {
 
 				it("get IsConfigured is false", () => {
 					expect(service.IsConfigured).toBe(false);
-				});
-
-				it("set IsConfigured should work", () => {
-					service.IsConfigured = false;
-					expect(service.IsConfigured).toBe(false);
-					service.IsConfigured = true;
-					expect(service.IsConfigured).toBe(true);
 				});
 
 				it('has one version', () => {
@@ -154,7 +106,7 @@ describe("Peach", () => {
 					pit = {
 						name: 'My Pit',
 						versions: [{ configured: true }]
-					}
+					};
 					$httpBackend.expectGET(pitUrl).respond(pit);
 					service.SelectPit(pitUrl);
 					$httpBackend.flush();
@@ -165,13 +117,6 @@ describe("Peach", () => {
 				});
 
 				it("get IsConfigured is true", () => {
-					expect(service.IsConfigured).toBe(true);
-				});
-
-				it("set IsConfigured should work", () => {
-					service.IsConfigured = false;
-					expect(service.IsConfigured).toBe(false);
-					service.IsConfigured = true;
 					expect(service.IsConfigured).toBe(true);
 				});
 
@@ -187,11 +132,11 @@ describe("Peach", () => {
 						pit = {
 							name: 'My Pit',
 							locked: true
-						}
+						};
 						copy = {
 							name: 'Copied Pit',
 							locked: false
-						}
+						};
 
 						// fake out the CopyPitController
 						spyOpen.and.returnValue({
@@ -226,7 +171,7 @@ describe("Peach", () => {
 						pit = {
 							name: 'My Pit',
 							locked: true
-						}
+						};
 
 						// fake out the CopyPitController
 						spyOpen.and.returnValue({

@@ -140,6 +140,7 @@ namespace Peach.Pro.Core.WebServices
 				PackageFileUrl = "",
 
 				Status = Runner.Status,
+				Mode = Logger.Mode,
 				Name = Runner.Name,
 				Notes = "",
 				User = Environment.UserName,
@@ -151,7 +152,7 @@ namespace Peach.Pro.Core.WebServices
 				FaultCount = Logger.FaultCount,
 				Tags = new List<Tag>(),
 				Groups = new List<Group>(new[] { group }),
-				HasMetrics = Runner.HasMetrics
+				HasMetrics = Runner.HasMetrics,
 			};
 
 			if (Runner.Status == JobStatus.Stopped)

@@ -29,9 +29,10 @@
     "jquery": "2.1",
     "vis": "~3.7.0",
     "moment": "~2.8.4",
-    "chosen-build": "~1.1.0",
     "underscore": "~1.7.0",
     "angular-smart-table": "~1.4.5",
-    "pithy": "*"
+    "pithy": "*",
+    "angular-ui-select": "~0.9.4",
+    "angular-sanitize": "1.2"
   }
 }
