@@ -508,6 +508,7 @@ namespace Peach.Core
 							// can properly reference them.
 							context.reproducingInitialIteration = iterationCount;
 							context.reproducingIterationJumpCount = 0;
+							context.reproducingControlIteration = context.controlIteration;
 						}
 
 						foreach (Fault fault in context.faults)
@@ -539,10 +540,14 @@ namespace Peach.Core
 							// Fault reproduced, so skip forward to were we left off.
 							lastReproFault = iterationCount;
 
+							if (context.reproducingControlIteration)
+								--lastReproFault;
+
 							iterationCount = context.reproducingInitialIteration;
+							context.controlIteration = context.reproducingControlIteration;
 
 							context.reproducingFault = false;
-							context.reproducingIterationJumpCount = 1;
+							context.reproducingIterationJumpCount = 0;
 
 							logger.Debug("runTest: Reproduced fault, continuing fuzzing at iteration {0}", iterationCount);
 						}
@@ -565,10 +570,15 @@ namespace Peach.Core
 							iterationCount = context.reproducingInitialIteration;
 
 							OnReproFailed(iterationCount);
+
+							context.controlIteration = context.reproducingControlIteration;
+							context.reproducingControlIteration = false;
 						}
 						else if (test.TargetLifetime == Test.Lifetime.Session)
 						{
-							if (iterationCount == context.reproducingInitialIteration)
+							if ((context.test.controlIteration == 0 && iterationCount == context.reproducingInitialIteration) ||
+								(context.controlIteration && context.reproducingControlIteration && iterationCount == context.reproducingInitialIteration) ||
+								(context.controlIteration && !context.reproducingControlIteration && iterationCount > context.reproducingInitialIteration))
 							{
 								var maxJump = Math.Min(test.MaxBackSearch, context.reproducingInitialIteration - lastReproFault - 1);
 
@@ -580,6 +590,12 @@ namespace Peach.Core
 									iterationCount = context.reproducingInitialIteration;
 
 									OnReproFailed(iterationCount);
+
+									context.controlIteration = context.reproducingControlIteration;
+									context.reproducingInitialIteration = 0;
+									context.reproducingIterationJumpCount = 0;
+									context.reproducingControlIteration = false;
+
 								}
 								else
 								{
@@ -592,8 +608,48 @@ namespace Peach.Core
 									context.reproducingIterationJumpCount = delta;
 									iterationCount = context.reproducingInitialIteration - delta - 1;
 
+									context.controlIteration = false;
+									context.controlRecordingIteration = false;
+
 									logger.Debug("runTest: Moving backwards {0} iterations to reproduce fault.", delta);
 								}
+							}
+							else if (context.test.controlIteration > 0)
+							{
+								context.controlRecordingIteration = false;
+
+								if (context.reproducingIterationJumpCount <= 10)
+								{
+									// Do control after every one when we are jumping <= 10
+									if (!context.controlIteration)
+									{
+										context.controlIteration = true;
+										++iterationCount;
+									}
+									else
+									{
+										context.controlIteration = false;
+										--iterationCount;
+									}
+								}
+								else if (context.reproducingControlIteration && (iterationCount + 1) == context.reproducingInitialIteration)
+								{
+									context.controlIteration = true;
+									++iterationCount;
+								}
+								else if (!context.reproducingControlIteration && iterationCount == context.reproducingInitialIteration)
+								{
+									context.controlIteration = true;
+									++iterationCount;
+								}
+							}
+							else
+							{
+								if (context.controlIteration)
+									--iterationCount;
+
+								context.controlIteration = false;
+								context.controlRecordingIteration = false;
 							}
 						}
 					}
@@ -647,11 +703,11 @@ namespace Peach.Core
 				}
 				finally
 				{
-					if (!context.reproducingFault && context.controlIteration)
-						lastControlIteration = iterationCount;
-
-					if (!context.reproducingFault || context.reproducingIterationJumpCount != 0)
+					if (!context.reproducingFault)
 					{
+						if (context.controlIteration)
+							lastControlIteration = iterationCount;
+
 						context.controlIteration = false;
 						context.controlRecordingIteration = false;
 					}
