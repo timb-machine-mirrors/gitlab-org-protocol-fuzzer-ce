@@ -1,230 +1,222 @@
-using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
+using System.Globalization;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
-using Peach.Core.Analyzers;
+using Peach.Core;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Monitors
+namespace Peach.Pro.Test.Core.Monitors
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Category("Peach")]
 	class PingMonitorTests
 	{
-		class Params : Dictionary<string, string> { }
-
-		private string faultIteration;
-		private Fault[] faults;
-
-		[SetUp]
-		public void SetUp()
-		{
-			faultIteration = "0";
-			faults = null;
-		}
-
-		void _Fault(RunContext context, uint currentIteration, Dom.StateModel stateModel, Fault[] faults)
-		{
-			Assert.Null(this.faults);
-			this.faults = faults;
-		}
-
-		string MakeXml(Params parameters)
-		{
-			string fmt = "<Param name='{0}' value='{1}'/>";
-
-			string template = @"
-<Peach>
-	<DataModel name='TheDataModel'>
-		<String value='Hello' mutable='false'/>
-	</DataModel>
-
-	<StateModel name='TheState' initialState='Initial'>
-		<State name='Initial'>
-			<Action type='output'>
-				<DataModel ref='TheDataModel'/>
-			</Action>
-		</State>
-	</StateModel>
-
-	<Agent name='LocalAgent'>
-		<Monitor class='FaultingMonitor'>
-			<Param name='Iteration' value='{0}'/>
-		</Monitor>
-		<Monitor class='Ping'>
-{1}
-		</Monitor>
-	</Agent>
-
-	<Test name='Default' replayEnabled='false'>
-		<Agent ref='LocalAgent'/>
-		<StateModel ref='TheState'/>
-		<Publisher class='Null'/>
-		<Strategy class='RandomDeterministic'/>
-	</Test>
-</Peach>";
-
-			var items = parameters.Select(kv => string.Format(fmt, kv.Key, kv.Value));
-			var joined = string.Join(Environment.NewLine, items);
-			var ret = string.Format(template, faultIteration, joined);
-
-			return ret;
-		}
-
-		private void Run(Params parameters, bool shouldFault)
-		{
-			string xml = MakeXml(parameters);
-
-			faults = null;
-
-			PitParser parser = new PitParser();
-
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("StringCaseMutator");
-
-			RunConfiguration config = new RunConfiguration();
-
-			Engine e = new Engine(null);
-			e.Fault += _Fault;
-
-			if (!shouldFault)
-			{
-				e.startFuzzing(dom, config);
-				return;
-			}
-
-			try
-			{
-				e.startFuzzing(dom, config);
-				Assert.Fail("Should throw.");
-			}
-			catch (PeachException ex)
-			{
-				Assert.AreEqual("Fault detected on control iteration.", ex.Message);
-			}
-		}
-
 		[Test]
 		public void TestSuccess()
 		{
-			Run(new Params { { "Host", "127.0.0.1" } }, false);
-			Assert.Null(faults);
+			var runner = new MonitorRunner("Ping", new Dictionary<string, string>
+			{
+				{ "Host", "127.0.0.1" },
+			});
+
+			var faults = runner.Run();
+
+			Assert.AreEqual(0, faults.Length);
 		}
 
 		[Test]
 		public void TestFailure()
 		{
-			Run(new Params { { "Host", "234.5.6.7" } }, true);
-			Assert.NotNull(faults);
+			var runner = new MonitorRunner("Ping", new Dictionary<string, string>
+			{
+				{ "Host", "234.5.6.7" },
+			});
+
+			var faults = runner.Run();
+
 			Assert.AreEqual(1, faults.Length);
 			Assert.AreEqual("PingMonitor", faults[0].detectionSource);
 			Assert.AreEqual(FaultType.Fault, faults[0].type);
+			Assert.That(faults[0].description, Is.StringContaining("The ICMP echo Reply was not received within the allotted time."));
 		}
 
 		[Test]
 		public void TestFaultSuccess()
 		{
-			Run(new Params { { "Host", "234.5.6.7" }, { "FaultOnSuccess", "true" } }, false);
-			Assert.Null(faults);
+			var runner = new MonitorRunner("Ping", new Dictionary<string, string>
+			{
+				{ "Host", "234.5.6.7" },
+				{ "FaultOnSuccess", "true" },
+			});
+
+			var faults = runner.Run();
+
+			Assert.AreEqual(0, faults.Length);
 		}
 
 		[Test]
 		public void TestFaultFailure()
 		{
-			Run(new Params { { "Host", "127.0.0.1" }, { "FaultOnSuccess", "true" } }, true);
-			Assert.NotNull(faults);
+			var runner = new MonitorRunner("Ping", new Dictionary<string, string>
+			{
+				{ "Host", "127.0.0.1" },
+				{ "FaultOnSuccess", "true" },
+			});
+
+			var faults = runner.Run();
+
 			Assert.AreEqual(1, faults.Length);
 			Assert.AreEqual("PingMonitor", faults[0].detectionSource);
 			Assert.AreEqual(FaultType.Fault, faults[0].type);
-			Assert.True(faults[0].description.Contains("RoundTrip time"));
+			Assert.That(faults[0].description, Is.StringContaining("RoundTrip time"));
 		}
 
 		[Test]
 		public void TestSuccessData()
 		{
-			faultIteration = "C";
-			Run(new Params { { "Host", "127.0.0.1" } }, true);
-			Assert.NotNull(faults);
-			Assert.AreEqual(2, faults.Length);
-			Assert.AreEqual("FaultingMonitor", faults[0].detectionSource);
-			Assert.AreEqual(FaultType.Fault, faults[0].type);
-			Assert.AreEqual("PingMonitor", faults[1].detectionSource);
-			Assert.AreEqual(FaultType.Data, faults[1].type);
-			Assert.True(faults[1].description.Contains("RoundTrip time"));
+			var runner = new MonitorRunner("Ping", new Dictionary<string, string>
+			{
+				{ "Host", "127.0.0.1" },
+			})
+			{
+				DetectedFault = m =>
+				{
+					Assert.False(m.DetectedFault(), "Monitor should not detect fault");
+
+					// Trigger data collection
+					return true;
+				}
+			};
+
+			var faults = runner.Run();
+
+			Assert.AreEqual(1, faults.Length);
+			Assert.AreEqual("PingMonitor", faults[0].detectionSource);
+			Assert.AreEqual(FaultType.Data, faults[0].type);
+			Assert.That(faults[0].description, Is.StringContaining("RoundTrip time"));
 		}
 
 		[Test]
 		public void TestFaultSuccessData()
 		{
-			faultIteration = "C";
-			Run(new Params { { "Host", "234.5.6.7" }, { "FaultOnSuccess", "true" } }, true);
-			Assert.NotNull(faults);
-			Assert.AreEqual(2, faults.Length);
-			Assert.AreEqual("FaultingMonitor", faults[0].detectionSource);
-			Assert.AreEqual(FaultType.Fault, faults[0].type);
-			Assert.AreEqual("PingMonitor", faults[1].detectionSource);
-			Assert.AreEqual(FaultType.Data, faults[1].type);
-			Assert.False(faults[1].description.Contains("RoundTrip time"));
+			var runner = new MonitorRunner("Ping", new Dictionary<string, string>
+			{
+				{ "Host", "234.5.6.7" },
+				{ "FaultOnSuccess", "true" },
+			})
+			{
+				DetectedFault = m =>
+				{
+					Assert.False(m.DetectedFault(), "Monitor should not detect fault");
+
+					// Trigger data collection
+					return true;
+				}
+			};
+
+			var faults = runner.Run();
+
+			Assert.AreEqual(1, faults.Length);
+			Assert.AreEqual("PingMonitor", faults[0].detectionSource);
+			Assert.AreEqual(FaultType.Data, faults[0].type);
+			Assert.That(faults[0].description, Is.StringContaining("The ICMP echo Reply was not received within the allotted time."));
 		}
 
 		[Test]
 		public void TestBadHost()
 		{
-			// .host is a valid tld and some guy bought bad.host
-			Run(new Params { { "Host", "some.bad.host.fdshfdo" } }, true);
-			Assert.NotNull(faults);
+			// RFC6761 says .invalid is guranteed to be an invalid TLD
+			var runner = new MonitorRunner("Ping", new Dictionary<string, string>
+			{
+				{ "Host", "some.host.invalid" },
+			});
+
+			var faults = runner.Run();
+
 			Assert.AreEqual(1, faults.Length);
 			Assert.AreEqual("PingMonitor", faults[0].detectionSource);
 			Assert.AreEqual(FaultType.Fault, faults[0].type);
+
+			if (Platform.GetOS() == Platform.OS.Windows)
+				Assert.That(faults[0].description, Is.StringContaining("No such host is known"));
+			else
+				Assert.That(faults[0].description, Is.StringContaining("Could not resolve host"));
 		}
 
 		[Test]
-		public void TestTimeout()
+		public void TestBadHostSuccess()
 		{
-			int start, stop, diff;
+			// RFC6761 says .invalid is guranteed to be an invalid TLD
+			var runner = new MonitorRunner("Ping", new Dictionary<string, string>
+			{
+				{ "Host", "some.host.invalid" },
+				{ "FaultOnSuccess", "true" },
+			});
 
-			// Run once to ensure all static objects are initialized
-			Run(new Params { { "Host", "234.5.6.7" } }, true);
+			var faults = runner.Run();
 
-			start = Environment.TickCount;
-			Run(new Params { { "Host", "234.5.6.7" }, { "Timeout", "5000" } }, true);
-			stop = Environment.TickCount;
-
-			diff = stop - start;
-			Assert.Greater(diff, 4500);
-			Assert.Less(diff, 6000);
-
-			Assert.NotNull(faults);
 			Assert.AreEqual(1, faults.Length);
 			Assert.AreEqual("PingMonitor", faults[0].detectionSource);
 			Assert.AreEqual(FaultType.Fault, faults[0].type);
 
-			start = Environment.TickCount;
-			Run(new Params { { "Host", "234.5.6.7" }, { "Timeout", "1000" } }, true);
-			stop = Environment.TickCount;
+			if (Platform.GetOS() == Platform.OS.Windows)
+				Assert.That(faults[0].description, Is.StringContaining("No such host is known"));
+			else
+				Assert.That(faults[0].description, Is.StringContaining("Could not resolve host"));
+		}
 
-			diff = stop - start;
-			Assert.Greater(diff, 500);
-			Assert.Less(diff, 2000);
+		[TestCase(1000)]
+		[TestCase(2000)]
+		[TestCase(3000)]
+		public void TestTimeout(long timeout)
+		{
+			var runner = new MonitorRunner("Ping", new Dictionary<string, string>
+			{
+				{ "Host", "234.5.6.7" },
+				{ "Timeout", timeout.ToString(CultureInfo.InvariantCulture) },
+			})
+			{
+				DetectedFault = m =>
+				{
+					var sw = new Stopwatch();
 
-			Assert.NotNull(faults);
+					sw.Start();
+					Assert.True(m.DetectedFault(), "Monitor should not have detected fault");
+					sw.Stop();
+
+					var elapsed = sw.ElapsedMilliseconds;
+
+					Assert.Greater(elapsed, timeout - 250);
+					Assert.Less(elapsed, timeout + 250);
+
+					return true;
+				}
+			};
+
+			var faults = runner.Run();
+
 			Assert.AreEqual(1, faults.Length);
 			Assert.AreEqual("PingMonitor", faults[0].detectionSource);
 			Assert.AreEqual(FaultType.Fault, faults[0].type);
+			Assert.That(faults[0].description, Is.StringContaining("The ICMP echo Reply was not received within the allotted time."));
 		}
 
 		[Test]
 		public void TestData()
 		{
-			string data = new string('a', 70);
-			Run(new Params { { "Host", "127.0.0.1" }, { "FaultOnSuccess", "true" }, { "Data", data } }, true);
-			Assert.NotNull(faults);
+			var runner = new MonitorRunner("Ping", new Dictionary<string, string>
+			{
+				{ "Host", "127.0.0.1" },
+				{ "FaultOnSuccess", "true" },
+				{ "Data", new string('a', 70) },
+			});
+
+			var faults = runner.Run();
+
 			Assert.AreEqual(1, faults.Length);
 			Assert.AreEqual("PingMonitor", faults[0].detectionSource);
 			Assert.AreEqual(FaultType.Fault, faults[0].type);
-			Assert.True(faults[0].description.Contains("Buffer size: 70"));
+			Assert.That(faults[0].description, Is.StringContaining("Buffer size: 70"));
 		}
 	}
 }

@@ -27,8 +27,6 @@
 // $Id$
 
 using System;
-using System.Linq;
-using System.Collections.Generic;
 using System.Text;
 using System.Xml;
 
@@ -36,7 +34,6 @@ using Peach.Core.Analyzers;
 using Peach.Core.IO;
 using NLog;
 using System.Security;
-using System.Xml.Schema;
 using System.IO;
 
 namespace Peach.Core.Dom

@@ -30,11 +30,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
-namespace Peach.Core.Fixups
+namespace Peach.Pro.Core.Fixups
 {
 	[Description("XOR bytes of data.")]
 	[Fixup("Lrc", true)]
@@ -63,10 +63,10 @@ namespace Peach.Core.Fixups
 
 			lrc = (byte)(((lrc ^ 0xff) + 1) % 0xff);
 
-			if (parent is Dom.String)
+			if (parent is Peach.Core.Dom.String)
 				return new Variant(lrc.ToString());
 
-			if (parent is Dom.Number)
+			if (parent is Peach.Core.Dom.Number)
 				return new Variant((uint)lrc);
 
 			return new Variant(new BitStream(new byte[] { lrc }));

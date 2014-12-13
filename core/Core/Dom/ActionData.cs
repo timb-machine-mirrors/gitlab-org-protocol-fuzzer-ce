@@ -103,6 +103,12 @@ namespace Peach.Core.Dom
 			}
 		}
 
+		public ulong MaxOutputSize
+		{
+			get;
+			private set;
+		}
+
 		/// <summary>
 		/// Initialize dataModel to its original state.
 		/// If this is the first time through and a dataSet exists,
@@ -115,6 +121,9 @@ namespace Peach.Core.Dom
 			// If is the first time through we need to cache a clean data model
 			if (originalDataModel == null)
 			{
+				// Store off the max output size
+				MaxOutputSize = action.parent.parent.parent.context.test.maxOutputSize;
+
 				// Apply data samples
 				var option = allData.FirstOrDefault();
 				if (option != null)
@@ -149,8 +158,23 @@ namespace Peach.Core.Dom
 		/// <param name="option"></param>
 		public void Apply(Data option)
 		{
-			System.Diagnostics.Debug.Assert(sourceDataModel != null);
 			System.Diagnostics.Debug.Assert(allData.Contains(option));
+
+			if (sourceDataModel == null)
+			{
+				// The strategy is updating our data set
+				// before the first call to UpdateToOriginalDataModel
+				System.Diagnostics.Debug.Assert(originalDataModel == null);
+
+				// Store off the max output size
+				MaxOutputSize = action.parent.parent.parent.context.test.maxOutputSize;
+
+				// Cache the model before any cracking has ever occured
+				// since we can't crack into an model that has previously
+				// been cracked (eg: Placement won't work).
+				dataModel.actionData = null;
+				sourceDataModel = dataModel;
+			}
 
 			// Work in a clean copy of the original
 			var copy = sourceDataModel.Clone() as DataModel;

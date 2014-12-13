@@ -27,15 +27,15 @@
 // $Id$
 
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net;
-using System.Text;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using System.Linq;
 
-namespace Peach.Core.Transformers.Encode
+namespace Peach.Pro.Core.Transformers.Encode
 {
 	[Description("Encode on output from a dot notation string to a 4 byte octet representaiton.")]
 	[Transformer("Ipv4StringToOctet", true)]

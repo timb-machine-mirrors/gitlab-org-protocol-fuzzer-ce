@@ -1,11 +1,11 @@
-using Nancy;
-using Nancy.ModelBinding;
-using Peach.Enterprise.WebServices.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
+using Nancy;
+using Nancy.ModelBinding;
+using Peach.Pro.Core.WebServices.Models;
 
-namespace Peach.Enterprise.WebServices
+namespace Peach.Pro.Core.WebServices
 {
 	public class JobService : WebService
 	{
@@ -30,7 +30,7 @@ namespace Peach.Enterprise.WebServices
 
 		object CreateJob()
 		{
-			var job = this.Bind<Models.Job>();
+			var job = this.Bind<Job>();
 			if (string.IsNullOrEmpty(job.PitUrl))
 				return HttpStatusCode.BadRequest;
 
@@ -51,22 +51,22 @@ namespace Peach.Enterprise.WebServices
 
 		object PauseJob(string id)
 		{
-			return QueryJob(id, () => { return Runner.Pause() ? HttpStatusCode.OK : HttpStatusCode.Forbidden; });
+			return QueryJob(id, () => Runner.Pause() ? HttpStatusCode.OK : HttpStatusCode.Forbidden);
 		}
 
 		object ContinueJob(string id)
 		{
-			return QueryJob(id, () => { return Runner.Continue() ? HttpStatusCode.OK : HttpStatusCode.Forbidden; });
+			return QueryJob(id, () => Runner.Continue() ? HttpStatusCode.OK : HttpStatusCode.Forbidden);
 		}
 
 		object StopJob(string id)
 		{
-			return QueryJob(id, () => { return Runner.Stop() ? HttpStatusCode.OK : HttpStatusCode.Forbidden; });
+			return QueryJob(id, () => Runner.Stop() ? HttpStatusCode.OK : HttpStatusCode.Forbidden);
 		}
 
 		object KillJob(string id)
 		{
-			return QueryJob(id, () => { return Runner.Kill() ? HttpStatusCode.OK : HttpStatusCode.Forbidden; });
+			return QueryJob(id, () => Runner.Kill() ? HttpStatusCode.OK : HttpStatusCode.Forbidden);
 		}
 
 		object GetJobs()
@@ -82,22 +82,22 @@ namespace Peach.Enterprise.WebServices
 
 		object GetJob(string id)
 		{
-			return QueryJob(id, () => { return MakeJob(); });
+			return QueryJob(id, MakeJob);
 		}
 
 		object GetNodes(string id)
 		{
-			return QueryJob(id, () => { return new[] { NodeService.Prefix + "/" + NodeGuid }; });
+			return QueryJob(id, () => new[] { NodeService.Prefix + "/" + NodeGuid });
 		}
 
 		object GetFaults(string id)
 		{
-			return QueryJob(id, () => { return Logger.Faults; });
+			return QueryJob(id, () => Logger.Faults);
 		}
 
 		object GetVisualizer(string id)
 		{
-			return QueryJob(id, () => { return Logger.Visualizer; });
+			return QueryJob(id, () => Logger.Visualizer);
 		}
 
 		object QueryJob(string id, Func<object> query)
@@ -117,7 +117,7 @@ namespace Peach.Enterprise.WebServices
 		/// <returns>The resultant job record.</returns>
 		Job MakeJob()
 		{
-			System.Diagnostics.Debug.Assert(Runner != null);
+			Debug.Assert(Runner != null);
 
 			var elapsed = Runner.Runtime;
 
@@ -146,7 +146,6 @@ namespace Peach.Enterprise.WebServices
 				Seed = Runner.Seed,
 				IterationCount = Logger.CurrentIteration,
 				StartDate = Runner.StartDate,
-				StopDate = Runner.StopDate,
 				Runtime = (uint)elapsed.TotalSeconds,
 				Speed = (uint)((Logger.CurrentIteration - Logger.StartIteration) / elapsed.TotalHours),
 				FaultCount = Logger.FaultCount,
@@ -154,6 +153,9 @@ namespace Peach.Enterprise.WebServices
 				Groups = new List<Group>(new[] { group }),
 				HasMetrics = Runner.HasMetrics
 			};
+
+			if (Runner.Status == JobStatus.Stopped)
+				job.StopDate = Runner.StopDate;
 
 			return job;
 		}

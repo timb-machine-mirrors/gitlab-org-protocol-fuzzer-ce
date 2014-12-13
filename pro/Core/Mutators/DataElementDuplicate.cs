@@ -4,11 +4,11 @@
 
 using System;
 using System.IO;
-
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	/// <summary>
 	/// Duplicate an element upto N times using a guassian distribution. Default N is 50..
@@ -18,13 +18,16 @@ namespace Peach.Core.Mutators
 	[Hint("DataElementDuplicate-N", "Standard deviation of number of duplications")]
 	public class DataElementDuplicate : Mutator
 	{
+		static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+
 		uint variance;
 		double stddev;
 
 		public DataElementDuplicate(DataElement obj)
 			: base(obj)
 		{
-			variance = getN(obj, 50);
+			var limit = Utility.SizedHelpers.MaxDuplication(obj);
+			variance = getN(obj, (uint)Math.Min(50, limit));
 
 			// We generate 1/2 of a gaussian distribution so the
 			// standard deviation is 1/3 of the variance
@@ -33,7 +36,7 @@ namespace Peach.Core.Mutators
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			if (obj.isMutable && obj.parent != null && !(obj is Flag) && !(obj is XmlAttribute))
+			if (obj.isMutable && obj.parent != null && !(obj is Flag) && !(obj is XmlAttribute) && obj.Value.LengthBits > 0)
 				return true;
 
 			return false;
@@ -66,6 +69,14 @@ namespace Peach.Core.Mutators
 
 		void performMutation(DataElement obj, uint num)
 		{
+			var limit = Utility.SizedHelpers.MaxDuplication(obj);
+
+			if (num > limit)
+			{
+				logger.Trace("Skipping mutation, duplication by {0} would exceed max output size.", num);
+				return;
+			}
+
 			var idx = obj.parent.IndexOf(obj) + 1;
 			var value = new BitStream();
 			var src = obj.Value;

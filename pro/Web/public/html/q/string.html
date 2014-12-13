@@ -1,0 +1,74 @@
+﻿<div>
+	<div class="header blue"
+			 ng-show="vm.IsSetVars">
+		{{vm.Question.shortName || vm.Question.key}}
+	</div>
+	<label>
+		{{vm.Question.q}}
+		<span ng-switch="vm.Question.required">
+			<span ng-switch-when="false">(Optional)</span>
+		</span>
+	</label>
+	<div class="dropdown">
+		<input name="{{vm.Question.key}}"
+					 ng-model="vm.Question.value"
+					 type="text"
+					 class="dropdown-toggle"
+					 ng-required="vm.Question.required"
+					 style="width: 300px"
+					 ng-enter="vm.Next()" />
+		<ul class="dropdown-menu"
+				ng-show="vm.IsSetVars">
+			<li ng-repeat="default in vm.Question.defaults">
+				<div ng-click="vm.Question.value = default"
+						 style="width: 100%; cursor: pointer">
+					{{default}}
+				</div>
+			</li>
+		</ul>
+	</div>
+	<div class="space-6">
+	</div>
+	<table class="table table-striped table-hover table-bordered"
+				 ng-show="!vm.IsSetVars">
+		<caption>
+			Variables
+		</caption>
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Key</th>
+				<th>Value</th>
+				<th class="center">Insert</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="def in vm.Defines">
+				<td class="align-middle">
+					<span>
+						{{def.name}}
+					</span>
+					<span class="peach-field-info tooltip-info pull-right"
+								style="margin-right: 10px"
+								tooltip="{{def.description}}"
+								tooltip-placement="right"
+								tooltip-append-to-body="true">
+					</span>
+				</td>
+				<td class="align-middle">
+					{{def.key}}
+				</td>
+				<td>
+					{{def.value}}
+				</td>
+				<td class="center">
+					<button class="btn btn-xs btn-primary"
+									ng-click="vm.OnInsertDefine(def)">
+						<i class="glyphicon glyphicon-circle-arrow-up">
+						</i>
+					</button>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>

@@ -26,22 +26,13 @@
 
 // $Id$
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Threading;
-using System.Net.Sockets;
 using System.Net;
-
-using Peach.Core.Dom;
-using Peach.Core.Publishers;
+using System.Net.Sockets;
+using NLog;
 using Peach.Core;
 
-using NLog;
-
-namespace Peach.Pro.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	/// <summary>
 	/// Allows for input/output of raw IP packets.

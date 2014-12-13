@@ -28,19 +28,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections;
 using System.Linq;
 using System.Text;
-using System.Runtime.InteropServices;
-using System.Runtime;
 using System.Reflection;
-using System.Runtime.Serialization;
 using System.Xml;
 
 using Peach.Core.IO;
 using Peach.Core.Cracker;
 using System.Diagnostics;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 
 using NLog;
@@ -665,6 +660,8 @@ namespace Peach.Core.Dom
 				var sb = new StringBuilder();
 				var pos = stream.Position;
 
+				stream.Seek(0, SeekOrigin.Begin);
+
 				for (int i = 0; i < stream.Length; i++)
 					sb.Append(stream.ReadByte().ToString("x2"));
 
@@ -689,7 +686,10 @@ namespace Peach.Core.Dom
 		public void WritePitCommonChildren(XmlWriter pit)
 		{
 			foreach (Relation obj in relations)
-				obj.WritePit(pit);
+			{
+				if(obj.From == this)
+					obj.WritePit(pit);
+			}
 
 			if (fixup != null)
 				fixup.WritePit(pit);
@@ -723,7 +723,7 @@ namespace Peach.Core.Dom
 			if (constraint != null)
 				pit.WriteAttributeString("constraint", constraint);
 
-			if (hasLength && !(this is Number))
+			if (hasLength && !(this is Number) && !(this is Padding) && !(this is Flags) && !(this is Flag))
 			{
 				pit.WriteAttributeString("lengthType", lengthType.ToString().ToLower());
 				pit.WriteAttributeString("length", lengthType == LengthType.Bits ? lengthAsBits.ToString() : length.ToString());
@@ -747,6 +747,8 @@ namespace Peach.Core.Dom
 
 		protected void OnInvalidated(EventArgs e)
 		{
+			logger.Trace("OnInvalidated: {0}", name);
+
 			// Prevent infinite loops
 			if (_invalidated)
 				return;

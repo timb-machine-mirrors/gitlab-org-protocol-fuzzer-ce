@@ -1,19 +1,19 @@
-using System;
 using System.Linq;
-using Peach.Core;
 using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
-	class StringLengthVarianceTests
+	class StringLengthVarianceTests : DataModelCollector
 	{
 		[Test]
 		public void TestSupported()
 		{
 			var runner = new MutatorRunner("StringLengthVariance");
 
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 
 			Assert.True(runner.IsSupported(str));
 		}
@@ -23,7 +23,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringLengthVariance");
 
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 
 
 			// Default length +/- 50 with a min of 0, not invluding default
@@ -65,7 +65,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringLengthVariance");
 
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 
 			str.DefaultValue = new Variant(new string('A', 300));
 
@@ -84,6 +84,43 @@ namespace Peach.Core.Test.Mutators
 				// Are all ascii strings
 				Assert.AreEqual(asStr.Length, val.Length);
 			}
+		}
+
+		[Test]
+		public void TestMaxOutputSize()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str' value='Hello World' />
+	</DataModel>
+
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action> 
+		</State>
+	</StateModel>
+
+	<Test name='Default' maxOutputSize='50'>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+		<Strategy class='Sequential'/>
+		<Mutators mode='include'>
+			<Mutator class='StringLengthVariance' />
+		</Mutators>
+	</Test>
+</Peach>
+";
+
+			RunEngine(xml);
+
+			// Sizes 0 to 50, but not 11 is 50 mutations
+			Assert.AreEqual(50, mutatedDataModels.Count);
+
+			foreach (var m in mutatedDataModels)
+				Assert.LessOrEqual(m.Value.Length, 50);
 		}
 	}
 }

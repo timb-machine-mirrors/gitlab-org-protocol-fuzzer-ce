@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using Peach.Core;
 using Peach.Core.IO;
 
-namespace Peach.Core.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	/// <summary>
 	/// Helper class for creating stream based publishers.
@@ -21,8 +22,8 @@ namespace Peach.Core.Publishers
 		public int Timeout { get; set; }
 
 		protected int _sendLen = 0;
-		protected byte[] _sendBuf = new byte[1024];
-		protected byte[] _recvBuf = new byte[1024];
+		protected byte[] _sendBuf = new byte[0x14000]; // Buffer size Stream.CopyTo uses
+		protected byte[] _recvBuf = new byte[0x14000];
 		protected object _bufferLock = new object();
 		protected object _clientLock = new object();
 		protected string _clientName = null;
@@ -31,7 +32,7 @@ namespace Peach.Core.Publishers
 		protected MemoryStream _buffer = null;
 		protected bool _timeout = false;
 
-		public BufferedStreamPublisher(Dictionary<string, Variant> args)
+		protected BufferedStreamPublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
 		}
@@ -299,13 +300,17 @@ namespace Peach.Core.Publishers
 				Logger.Error("output: Error during send.  " + ex.Message);
 				throw new SoftException(ex);
 			}
-
 		}
 
 		public override void WantBytes(long count)
 		{
 			if (count == 0)
 				return;
+
+			//lock (_bufferLock)
+			//{
+			//	Logger.Debug("WantBytes({0}): Available: {1}", count, _buffer.Length - _buffer.Position);
+			//}
 
 			DateTime start = DateTime.Now;
 
@@ -328,6 +333,7 @@ namespace Peach.Core.Publishers
 
 					if ((DateTime.Now - start) >= TimeSpan.FromMilliseconds(Timeout))
 					{
+						Logger.Debug("WantBytes({0}): Timeout waiting for data", count);
 						_timeout = true;
 						return;
 					}

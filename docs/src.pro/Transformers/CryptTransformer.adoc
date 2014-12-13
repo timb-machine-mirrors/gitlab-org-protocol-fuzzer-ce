@@ -22,10 +22,10 @@
 [horizontal]
 Type:: Cryptography
 
-_CryptTransformer_ will perform a Unix crypt operation on the provided value in the parent xref:DataModel[DataModel].
-This is done using the first two bytes as the salt. 
+_Crypt_  transformer will perform a Unix crypt operation on the provided value in the parent xref:DataModel[DataModel].
+_Crypt_ uses the first two bytes of the data as the salt. 
 
-This xref:Transformer[Transformer] can only be applied to outgoing data because hashes are one-way operations.
+This xref:Transformer[Transformer] applies only to outgoing data because hashes are one-way operations.
 
 === Parameters
 

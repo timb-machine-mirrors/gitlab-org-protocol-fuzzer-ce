@@ -3,13 +3,11 @@
 //
 
 using System;
-using System.Text;
-
+using NLog;
+using Peach.Core;
 using Peach.Core.Dom;
 
-using NLog;
-
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("StringLengthEdgeCase")]
 	[Description("Produce Gaussian distributed string lengths around numerical edge cases.")]
@@ -33,7 +31,7 @@ namespace Peach.Core.Mutators
 		protected override void GetLimits(DataElement obj, out long min, out ulong max)
 		{
 			min = 0;
-			max = ushort.MaxValue;
+			max = (ulong)Utility.SizedHelpers.MaxSize(obj);
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
@@ -46,7 +44,14 @@ namespace Peach.Core.Mutators
 
 		protected override void performMutation(DataElement obj, long value)
 		{
-			Mutate(obj, value);
+			var limit = Utility.SizedHelpers.MaxSize(obj);
+			if (value > limit)
+			{
+				logger.Trace("Skipping mutation, expansion to {0} would exceed max output size.", value);
+				return;
+			}
+
+			Utility.SizedHelpers.ExpandStringTo(obj, value);
 		}
 
 		protected override void performMutation(DataElement obj, ulong value)
@@ -55,34 +60,5 @@ namespace Peach.Core.Mutators
 			throw new NotImplementedException();
 		}
 
-		internal static void Mutate(DataElement obj, long value)
-		{
-			var src = (string)obj.InternalValue;
-			var dst = ExpandTo(src, value);
-
-			obj.MutatedValue = new Variant(dst);
-			obj.mutationFlags = MutateOverride.Default;
-		}
-
-		private static string ExpandTo(string value, long length)
-		{
-			if (string.IsNullOrEmpty(value))
-			{
-				return new string('A', (int)length);
-			}
-			else if (value.Length >= length)
-			{
-				return value.Substring(0, (int)length);
-			}
-
-			var sb = new StringBuilder();
-
-			while (sb.Length + value.Length < length)
-				sb.Append(value);
-
-			sb.Append(value.Substring(0, (int)(length - sb.Length)));
-
-			return sb.ToString();
-		}
 	}
 }

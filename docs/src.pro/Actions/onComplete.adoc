@@ -16,7 +16,7 @@
 //  Edited text and corrected definition information
 
 The onComplete attribute is an expression that is evaluated after preforming an action.
-This expression can be used to increment a counter or preform other functions defined in separate files (like ones included with the xref:Import[Import] tag).
+This expression can be used to increment a counter or perform other functions defined in separate files, such as those brought into the model using the xref:Import[Import] tag.
 
 .Keeping State
 ****

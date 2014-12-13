@@ -1,11 +1,11 @@
-using Nancy;
-using Nancy.ModelBinding;
-using Peach.Enterprise.WebServices.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Nancy;
+using Nancy.ModelBinding;
+using Peach.Pro.Core.WebServices.Models;
 
-namespace Peach.Enterprise.WebServices
+namespace Peach.Pro.Core.WebServices
 {
 	public class PitService : WebService
 	{
@@ -16,7 +16,12 @@ namespace Peach.Enterprise.WebServices
 		{
 			Get[""] = _ => GetPits();
 			Get["/{id}"] = _ => GetPit(_.id);
+
 			Get["/{id}/config"] = _ => GetPitConfig(_.id);
+			Post["/{id}/config"] = _ => PostPitConfig(_.id);
+
+			Get["/{id}/agents"] = _ => GetPitAgents(_.id);
+			Post["/{id}/agents"] = _ => PostPitAgents(_.id);
 
 			Post[""] = _ => CopyPit();
 		}
@@ -40,8 +45,15 @@ namespace Peach.Enterprise.WebServices
 			var cfg = PitDatabase.GetConfigById(id);
 			if (cfg == null)
 				return HttpStatusCode.NotFound;
-
 			return cfg;
+		}
+
+		object GetPitAgents(string id)
+		{
+			var agents = PitDatabase.GetAgentsById(id);
+			if (agents == null)
+				return HttpStatusCode.NotFound;
+			return agents;
 		}
 
 		object CopyPit()
@@ -66,14 +78,42 @@ namespace Peach.Enterprise.WebServices
 			{
 				return HttpStatusCode.BadRequest;
 			}
-			catch (Exception)
-			{
-				throw;
-			}
 
 			var newPit = db.GetPitByUrl(newUrl);
 
 			return newPit;
+		}
+
+		object PostPitConfig(string id)
+		{
+			var pit = PitDatabase.GetPitById(id);
+			if (pit == null)
+				return HttpStatusCode.NotFound;
+
+			// Don't allow changing configuration values
+			// of locked pits
+			if (pit.Locked)
+				return HttpStatusCode.Forbidden;
+
+			var data = this.Bind<PitConfig>();
+			PitDatabase.SaveConfig(pit, data.Config);
+			return data;
+		}
+
+		object PostPitAgents(string id)
+		{
+			var pit = PitDatabase.GetPitById(id);
+			if (pit == null)
+				return HttpStatusCode.NotFound;
+	
+			// Don't allow changing configuration values
+			// of locked pits
+			if (pit.Locked)
+				return HttpStatusCode.Forbidden;
+
+			var data = this.Bind<PitAgents>();
+			PitDatabase.SaveAgents(pit, data.Agents);
+			return data;
 		}
 	}
 }

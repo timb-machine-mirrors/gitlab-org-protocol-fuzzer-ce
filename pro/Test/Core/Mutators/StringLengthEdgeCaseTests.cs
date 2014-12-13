@@ -1,19 +1,18 @@
-using System;
 using System.Linq;
-using Peach.Core;
 using NUnit.Framework;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
-	class StringLengthEdgeCaseTests
+	class StringLengthEdgeCaseTests : DataModelCollector
 	{
 		[Test]
 		public void TestSupported()
 		{
 			var runner = new MutatorRunner("StringLengthEdgeCase");
 
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 
 			Assert.True(runner.IsSupported(str));
 		}
@@ -23,7 +22,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringLengthEdgeCase");
 
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 
 			var m = runner.Sequential(str);
 
@@ -50,7 +49,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringLengthEdgeCase");
 
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 
 			var m = runner.Random(1000, str);
 			Assert.AreEqual(1000, m.Count());
@@ -67,6 +66,43 @@ namespace Peach.Core.Test.Mutators
 				// Are all ascii strings
 				Assert.AreEqual(asStr.Length, val.Length);
 			}
+		}
+
+		[Test]
+		public void TestMaxOutputSize()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str' value='Hello World' />
+	</DataModel>
+
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action> 
+		</State>
+	</StateModel>
+
+	<Test name='Default' maxOutputSize='50'>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+		<Strategy class='Sequential'/>
+		<Mutators mode='include'>
+			<Mutator class='StringLengthEdgeCase' />
+		</Mutators>
+	</Test>
+</Peach>
+";
+
+			RunEngine(xml);
+
+			// Sizes 0 to 50 is 51 mutations
+			Assert.AreEqual(51, mutatedDataModels.Count);
+
+			foreach (var m in mutatedDataModels)
+				Assert.LessOrEqual(m.Value.Length, 50);
 		}
 	}
 }

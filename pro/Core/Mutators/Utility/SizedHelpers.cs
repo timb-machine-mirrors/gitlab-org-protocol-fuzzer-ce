@@ -3,15 +3,13 @@
 //
 
 using System;
-using System.IO;
 using System.Linq;
-
-using Peach.Core.Dom;
-using Peach.Core.IO;
-
+using System.Text;
 using NLog;
+using Peach.Core;
+using Peach.Core.Dom;
 
-namespace Peach.Core.Mutators.Utility
+namespace Peach.Pro.Core.Mutators.Utility
 {
 	public static class SizedHelpers
 	{
@@ -51,130 +49,129 @@ namespace Peach.Core.Mutators.Utility
 			var data = objOf.Value;
 
 			if (sizeRelation.lengthType == LengthType.Bytes)
-				data = GrowBytes(data, length);
+				data = data.GrowTo(length);
 			else
-				data = GrowBits(data, length);
+				data = data.GrowToBits(length);
 
 			objOf.MutatedValue = new Variant(data);
 
 		}
 
-		static BitwiseStream GrowBytes(BitwiseStream data, long tgtLen)
+		// Artificially limit the maximum expansion to be 65k
+		// This is to work around OutOfMemoryExceptions when
+		// we try and do BitStream.GrowBy((uint/MaxValue / 4) - 1)
+		const long maxExpansion = ushort.MaxValue;
+
+		/// <summary>
+		/// Returns the maximum number of bytes the element can be
+		/// and still be under the limit of the MaxOutputSize attribute.
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public static long MaxSize(DataElement obj)
 		{
-			var dataLen = data.Length;
+			// For testing.  Figure out a way to not have this check in here
+			var root = obj.root as DataModel;
+			if (root == null)
+				return maxExpansion;
+			if (root.actionData == null)
+				return maxExpansion;
 
-			if (tgtLen <= 0)
-			{
-				// Return empty if size is negative
-				data = new BitStream();
-			}
-			else if (data.Length == 0)
-			{
-				// If objOf is a block, data is a BitStreamList
-				data = new BitStream();
+			var max = root.actionData.MaxOutputSize;
+			if (max == 0)
+				return maxExpansion;
 
-				// Fill with 'A' if we don't have any data
-				while (--tgtLen > 0)
-					data.WriteByte((byte)'A');
+			var used = (ulong)root.Value.LengthBits;
+			var size = (ulong)obj.Value.LengthBits;
+			var limit = ((8 * max) - used + size + 7) / 8;
 
-				// Ensure we are at the start of the stream
-				data.Seek(0, SeekOrigin.Begin);
-			}
-			else
-			{
-				// Loop data over and over until we get to our target length
-				var lst = new BitStreamList();
-
-				while (tgtLen > dataLen)
-				{
-					lst.Add(data);
-					tgtLen -= dataLen;
-				}
-
-				var buf = new byte[BitwiseStream.BlockCopySize];
-				var dst = new BitStream();
-
-				data.Seek(0, System.IO.SeekOrigin.Begin);
-
-				while (tgtLen > 0)
-				{
-					int len = (int)Math.Min(tgtLen, buf.Length);
-					len = data.Read(buf, 0, len);
-
-					if (len == 0)
-						data.Seek(0, System.IO.SeekOrigin.Begin);
-					else
-						dst.Write(buf, 0, len);
-
-					tgtLen -= len;
-				}
-
-				lst.Add(dst);
-
-				data = lst;
-			}
-
-			return data;
+			return (long)Math.Min(maxExpansion, limit);
 		}
 
-		static BitwiseStream GrowBits(BitwiseStream data, long tgtLen)
+		/// <summary>
+		/// Returns the maximum number of bytes the element can be expanded
+		/// by and still be under the limit of the MaxOutputSize attribute.
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public static long MaxExpansion(DataElement obj)
 		{
-			var dataLen = data.LengthBits;
+			// For testing.  Figure out a way to not have this check in here
+			var root = obj.root as DataModel;
+			if (root == null)
+				return maxExpansion;
+			if (root.actionData == null)
+				return maxExpansion;
 
-			if (tgtLen <= 0)
+			var max = root.actionData.MaxOutputSize;
+			if (max == 0)
+				return maxExpansion;
+
+			var used = (ulong)root.Value.LengthBits;
+			var limit = ((8 * max) - used + 7) / 8;
+
+			return (long)Math.Min(maxExpansion, limit);
+		}
+
+		/// <summary>
+		/// Returns the maximum number of times the element can be duplicated
+		/// by and still be under the limit of the MaxOutputSize attribute.
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public static long MaxDuplication(DataElement obj)
+		{
+			// For testing.  Figure out a way to not have this check in here
+			var root = obj.root as DataModel;
+			if (root == null)
+				return maxExpansion;
+			if (root.actionData == null)
+				return maxExpansion;
+
+			var max = root.actionData.MaxOutputSize;
+			if (max == 0)
+				return maxExpansion;
+
+			var used = (ulong)root.Value.LengthBits;
+			var size = (ulong)obj.Value.LengthBits;
+
+			if (size == 0)
+				return maxExpansion;
+
+			var avail = (8 * max) - used;
+			var ret = avail / size;
+
+			return (long)Math.Min(maxExpansion, ret);
+		}
+
+		public static void ExpandStringTo(DataElement obj, long value)
+		{
+			var src = (string)obj.InternalValue;
+			var dst = ExpandTo(src, value);
+
+			obj.MutatedValue = new Variant(dst);
+			obj.mutationFlags = MutateOverride.Default;
+		}
+
+		static string ExpandTo(string value, long length)
+		{
+			if (string.IsNullOrEmpty(value))
 			{
-				// Return empty if size is negative
-				data = new BitStream();
+				return new string('A', (int)length);
 			}
-			else if (data.LengthBits == 0)
+			else if (value.Length >= length)
 			{
-				// If objOf is a block, data is a BitStreamList
-				data = new BitStream();
-
-				// Fill with 'A' if we don't have any data
-				for (long i = data.LengthBits + 7 / 8; i > 0; --i)
-					data.WriteByte((byte)'A');
-
-				// Truncate to the correct bit length
-				data.SetLengthBits(tgtLen);
-
-				// Ensure we are at the start of the stream
-				data.SeekBits(0, SeekOrigin.Begin);
-			}
-			else
-			{
-				// Loop data over and over until we get to our target length
-				var lst = new BitStreamList();
-
-				while (tgtLen > dataLen)
-				{
-					lst.Add(data);
-					tgtLen -= dataLen;
-				}
-
-				var dst = new BitStream();
-
-				data.Seek(0, System.IO.SeekOrigin.Begin);
-
-				while (tgtLen > 0)
-				{
-					ulong bits;
-					int len = data.ReadBits(out bits, (int)Math.Min(tgtLen, 64));
-
-					if (len == 0)
-						data.Seek(0, System.IO.SeekOrigin.Begin);
-					else
-						dst.WriteBits(bits, len);
-
-					tgtLen -= len;
-				}
-
-				lst.Add(dst);
-
-				data = lst;
+				return value.Substring(0, (int)length);
 			}
 
-			return data;
+			var sb = new StringBuilder();
+
+			while (sb.Length + value.Length < length)
+				sb.Append(value);
+
+			sb.Append(value.Substring(0, (int)(length - sb.Length)));
+
+			return sb.ToString();
 		}
 	}
 }

@@ -29,12 +29,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
+using Peach.Core;
 using Peach.Core.Dom;
-using Peach.Core.Fixups.Libraries;
 using Peach.Core.IO;
+using Peach.Pro.Core.Fixups.Libraries;
 
-namespace Peach.Core.Fixups
+namespace Peach.Pro.Core.Fixups
 {
 	[Description("Standard CRC32 as defined by ISO 3309 applied to two elements.")]
 	[Fixup("Crc32Dual", true)]

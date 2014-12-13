@@ -1,14 +1,14 @@
-using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Dom;
-using NUnit.Framework;
-using System.Globalization;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test
+namespace Peach.Pro.Test.Core
 {
-	internal class StringMutatorTester
+	internal class StringMutatorTester : DataModelCollector
 	{
 		MutatorRunner runner;
 
@@ -20,6 +20,7 @@ namespace Peach.Core.Test
 			StringType.utf16,
 			StringType.utf16be,
 			StringType.utf32,
+			StringType.utf32be,
 			StringType.utf7,
 			StringType.utf8,
 		};
@@ -49,7 +50,7 @@ namespace Peach.Core.Test
 
 		protected void RunSupported()
 		{
-			var str = new Dom.String("String") { stringType = ValidEncodings.First() };
+			var str = new Peach.Core.Dom.String("String") { stringType = ValidEncodings.First() };
 
 			str.isMutable = false;
 			Assert.False(runner.IsSupported(str));
@@ -68,7 +69,7 @@ namespace Peach.Core.Test
 
 		protected void RunSequential()
 		{
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 
 			foreach (var enc in ValidEncodings)
 			{
@@ -105,7 +106,7 @@ namespace Peach.Core.Test
 
 		protected void RunRandom()
 		{
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 			str.DefaultValue = new Variant(new string('A', 100));
 
 			foreach (var enc in ValidEncodings)

@@ -28,22 +28,15 @@
 
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NUnit.Framework;
-using NUnit.Framework.Constraints;
-using Peach.Core;
-using Peach.Core.Dom;
-using Peach.Core.Analyzers;
-using Peach.Core.IO;
-using Peach.Core.Debuggers.WindowsSystem;
-using Peach.Core.Agent.Monitors.WindowsDebug;
-using System.Threading;
 using System.ServiceProcess;
 using NLog;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Pro.OS.Windows;
+using Peach.Pro.OS.Windows.Agent.Monitors.WindowsDebug;
+using Peach.Pro.OS.Windows.Debuggers.WindowsSystem;
 
-namespace Peach.Core.Test.Debuggers
+namespace Peach.Pro.Test.OS.Windows.Debuggers
 {
 	[TestFixture] [Category("Peach")]
 	class WinSystemTests
@@ -171,7 +164,7 @@ namespace Peach.Core.Test.Debuggers
 		[Test]
 		public void ServiceTest()
 		{
-			if (!Peach.Core.OS.Windows.Privilege.IsUserAdministrator())
+			if (!Privilege.IsUserAdministrator())
 				Assert.Ignore("User is not an administrator.");
 
 			if (!Environment.Is64BitProcess && Environment.Is64BitOperatingSystem)

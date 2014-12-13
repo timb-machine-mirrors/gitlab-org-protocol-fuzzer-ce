@@ -27,14 +27,7 @@
 // $Id$
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
 using System.Reflection;
-using System.Threading;
-
-using Peach.Core.Agent;
-using Peach.Core.Dom;
 
 namespace Peach.Core
 {
@@ -91,7 +84,7 @@ namespace Peach.Core
 		/// <summary>
 		/// Command line if any (used by logger)
 		/// </summary>
-		public string[] commandLine = null;
+		public string[] commandLine = new string[0];
 
 		/// <summary>
 		/// Date and time of run (used by logger)

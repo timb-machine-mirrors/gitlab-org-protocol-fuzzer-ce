@@ -1,8 +1,8 @@
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
-namespace Peach.Enterprise.WebServices.Models
+namespace Peach.Pro.Core.WebServices.Models
 {
 	public enum JobStatus
 	{
@@ -130,7 +130,7 @@ namespace Peach.Enterprise.WebServices.Models
 		/// <summary>
 		/// The date the job ended
 		/// </summary>
-		public DateTime StopDate { get; set; }
+		public DateTime? StopDate { get; set; }
 
 		/// <summary>
 		/// The number of seconds the job has been running for

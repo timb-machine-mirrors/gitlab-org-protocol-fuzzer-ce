@@ -1,18 +1,14 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-
-using NUnit.Framework;
-
-using Peach.Core;
-using System.Xml.Serialization;
-using System.Xml.Schema;
 using System.Xml;
-using System.Reflection;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Pro.Core;
+using Peach.Pro.Core.WebServices.Models;
+using File = System.IO.File;
 
-namespace Peach.Enterprise.Test
+namespace Peach.Pro.Test.Core
 {
 	[TestFixture] [Category("Peach")]
 	public class PitDefinesTests
@@ -60,20 +56,30 @@ namespace Peach.Enterprise.Test
 			string xml = @"<?xml version='1.0' encoding='utf-8'?>
 <PitDefines>
 	<All>
-		<String key='key0' value='value0' name='name0' description='description0'/>
-		<Ipv4 key='key1' value='value1' name='name1' description='description1'/>
-		<Ipv6 key='key2' value='value2' name='name2' description='description2'/>
-		<Iface key='key3' value='value3' name='name3' description='description3'/>
+		<String   key='key0' value='value0' name='name0' description='description0'/>
+		<Ipv4     key='key1' value='value1' name='name1' description='description1'/>
+		<Ipv6     key='key2' value='value2' name='name2' description='description2'/>
+		<Iface    key='key3' value='value3' name='name3' description='description3'/>
 		<Strategy key='key4' value='value4' name='name4' description='description4'/>
-		<Hwaddr key='key5' value='value5' name='name5' description='description5'/>
-		<Range key='key6' value='value6' name='name6' description='description5' min='0' max='100'/>
-		<Enum key='key6' value='value6' name='name6' description='description5' enumType='System.IO.FileAccess'/>
+		<Hwaddr   key='key5' value='value5' name='name5' description='description5'/>
+		<Range    key='key6' value='value6' name='name6' description='description6' min='0' max='100'/>
+		<Enum     key='key7' value='value7' name='name7' description='description7' enumType='System.IO.FileAccess'/>
+		<Define   key='key8' value='value8' name='name8' description='description8'/>
 	</All>
 </PitDefines>
 ";
 
 			var defs = PitDefines.Parse(new StringReader(xml));
 			Assert.NotNull(defs);
+			Assert.AreEqual(defs[0].ConfigType, ParameterType.String);
+			Assert.AreEqual(defs[1].ConfigType, ParameterType.Ipv4);
+			Assert.AreEqual(defs[2].ConfigType, ParameterType.Ipv6);
+			Assert.AreEqual(defs[3].ConfigType, ParameterType.Iface);
+			Assert.AreEqual(defs[4].ConfigType, ParameterType.Enum);
+			Assert.AreEqual(defs[5].ConfigType, ParameterType.Hwaddr);
+			Assert.AreEqual(defs[6].ConfigType, ParameterType.Range);
+			Assert.AreEqual(defs[7].ConfigType, ParameterType.Enum);
+			Assert.AreEqual(defs[8].ConfigType, ParameterType.User);
 		}
 
 		[Test]
@@ -158,9 +164,11 @@ namespace Peach.Enterprise.Test
 		[Test]
 		public void TestEvaluate()
 		{
-			var src = new List<KeyValuePair<string, string>>();
-			src.Add(new KeyValuePair<string, string>("SamplePath", "##PitLibraryPath##/Samples"));
-			src.Add(new KeyValuePair<string, string>("PitLibraryPath", "Peach/Pits"));
+			var src = new List<KeyValuePair<string, string>>
+			{
+				new KeyValuePair<string, string>("SamplePath", "##PitLibraryPath##/Samples"),
+				new KeyValuePair<string, string>("PitLibraryPath", "Peach/Pits")
+			};
 
 			var dst = PitDefines.Evaluate(src);
 
@@ -225,6 +233,4 @@ namespace Peach.Enterprise.Test
 			}
 		}
 	}
-
-
 }

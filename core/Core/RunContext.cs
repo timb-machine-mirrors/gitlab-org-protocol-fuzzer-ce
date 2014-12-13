@@ -27,12 +27,7 @@
 // $Id$
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-using System.Reflection;
-using System.Threading;
-
 using Peach.Core.Agent;
 using Peach.Core.Dom;
 
@@ -443,36 +438,14 @@ namespace Peach.Core
 		public bool reproducingFault = false;
 
 		/// <summary>
-		/// Number of iteration to search backwards trying to reproduce a fault.
-		/// </summary>
-		/// <remarks>
-		/// Many times, especially with network fuzzing, the iteration we detect a fault on is not the
-		/// correct iteration, or the fault requires multiple iterations to reproduce.
-		/// 
-		/// Peach will start reproducing at the current iteration count then start moving backwards
-		/// until we locate the iteration causing the crash, or reach our max back search value.
-		/// </remarks>
-		public uint reproducingMaxBacksearch = 100;
-
-		/// <summary>
 		/// The initial iteration we detected fault on
 		/// </summary>
 		public uint reproducingInitialIteration = 0;
 
 		/// <summary>
-		/// This value times current iteration change is next iteration change.
+		/// Did the fault we are trying to reproduce occur on a control iteration.
 		/// </summary>
-		/// <remarks>
-		/// Intial search process:
-		/// 
-		/// Move back 1
-		/// Move back 1 * reproducingSkipMultiple = N
-		/// Move back N * reproducingSkipMultiple = M
-		/// Move back M * reproducingSkipMultiple = O
-		/// Move back O * reproducingSkipMultiple ...
-		/// 
-		/// </remarks>
-		public uint reproducingSkipMultiple = 2;
+		public bool reproducingControlIteration = false;
 
 		/// <summary>
 		/// Number of iterations to jump.

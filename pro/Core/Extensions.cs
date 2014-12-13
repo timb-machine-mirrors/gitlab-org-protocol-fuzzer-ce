@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
+using Peach.Core;
+using Random = Peach.Core.Random;
 
-namespace Peach.Core
+namespace Peach.Pro.Core
 {
 	public static class Extensions
 	{

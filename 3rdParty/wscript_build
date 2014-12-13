@@ -21,6 +21,7 @@ excludes = {
 bld.read_nuget('packages.config', excl=excludes, mapping=mapping)
 
 bld.read_csshlib('EasyHook.dll', paths=['EasyHook-2.6'])
+bld.read_csshlib('LibUsbDotNet.dll', paths=['LibUsbDotNet'])
 
 bld.read_all_csshlibs('Telerik Reporting Q3 2013/Bin')
 bld.read_all_csshlibs('Telerik ASP.NET AJAX/Bin40')
@@ -40,6 +41,8 @@ subdirs = [
 	'Managed.AndroidDebugBridge',
 	'SyslogSharp-1.0.07',
 	'VMware-VIX-1.12.1-894247',
+	'SuperSocket',
+	'SuperWebSocket',
 ]
 
 bld.recurse(subdirs)

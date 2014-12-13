@@ -30,7 +30,8 @@ Params are common child-element for various xref:AgentsMonitors[Monitors], xref:
 </Fixup>
 
 <Monitor class="WindowsDebugger">
-    <Param name="CommandLine" value="CrashableServer.exe 127.0.0.1 4244" />
+  <Param name="Executable" value="CrashableServer.exe" />
+  <Param name="Arguments" value="127.0.0.1 4244" />
 </Monitor>
 ----
 
@@ -38,7 +39,7 @@ _Attributes:_
 
 _Required:_
 
-xref:name[name]:: Name of parameter
+xref:name[name]:: Name of parameter.
 xref:value[value]:: Default value.
 
 _Optional:_
@@ -75,9 +76,9 @@ _Required:_
 
 xref:name[name]:: Name of parameter
 
-_Optiona:_
+_Optional:_
 
-There are no optional attributes for this element.
+None.
 
 ==== Child Elements
 

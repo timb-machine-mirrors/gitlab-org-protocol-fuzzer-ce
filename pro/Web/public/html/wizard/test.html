@@ -1,0 +1,94 @@
+﻿<div class="page-content">
+	<div class="page-header">
+		<h1>
+			Quick Start &raquo; Test
+		</h1>
+	</div>
+	<p>
+		Once all of the configuration sections have been completed you
+		can test your definition to verify it works correctly.
+		This section will allow you to do just that, running a single iteration of the Pit,
+		viewing the output of the test and the detailed log messages.
+		If there is a problem with the configuration you can redo the configuration until it is correct.
+	</p>
+	<table>
+		<tr>
+			<td>Set Variables</td>
+			<td>
+				<span class="label label-success arrowed"
+				      ng-show="vm.IsComplete('setvars')">
+					Complete
+				</span>
+				<span class="label label-warning arrowed"
+				      ng-hide="vm.IsComplete('setvars')">
+					Not completed, default values will be used
+				</span>
+			</td>
+		</tr>
+		<tr>
+			<td>Fault Detection</td>
+			<td>
+				<span class="label label-success arrowed"
+							ng-show="vm.IsComplete('fault')">
+					Complete
+				</span>
+				<span class="label label-danger arrowed"
+							ng-hide="vm.IsComplete('fault')">
+					Fault Detection requires completion.
+					<a style="color: white" href="#/quickstart/fault">
+						<b>
+							Go to Fault Detection
+						</b>
+					</a>
+				</span>
+			</td>
+		</tr>
+		<tr>
+			<td>Data Collection</td>
+			<td>
+				<span class="label label-success arrowed"
+							ng-show="vm.IsComplete('data')">
+					Complete
+				</span>
+				<span class="label label-warning arrowed"
+							ng-hide="vm.IsComplete('data')">
+					No Data Collection will be performed
+				</span>
+			</td>
+		</tr>
+		<tr>
+			<td>Automation</td>
+			<td>
+				<span class="label label-success arrowed"
+							ng-show="vm.IsComplete('auto')">
+					Complete
+				</span>
+				<span class="label label-warning arrowed"
+							ng-hide="vm.IsComplete('auto')">
+					No Automation will be performed
+				</span>
+			</td>
+		</tr>
+	</table>
+	<div class="wizard-actions">
+		<span ng-show="vm.ShowTestPass">
+			Testing passed, press Continue
+		</span>
+		<span ng-show="vm.ShowTestFail">
+			Testing failed, please correct the errors described and return to this page to test again.
+		</span>
+		<button class="btn btn-success btn-sm"
+						ng-click="vm.OnNextTrack()"
+						ng-class="{disabled: !vm.CanContinue}">
+			Continue
+			<i class="icon-arrow-right icon-on-right"></i>
+		</button>
+		<button class="btn btn-warning btn-sm"
+						ng-click="vm.OnBeginTest()"
+						ng-class="{disabled: !vm.CanBeginTest}">
+			Begin Test
+		</button>
+	</div>
+	<peach:test>
+	</peach:test>
+</div>

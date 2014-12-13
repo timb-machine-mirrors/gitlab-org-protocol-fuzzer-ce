@@ -1,10 +1,9 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Peach.Core;
+using Peach.Core.Agent;
 
-namespace Peach.Core.Agent.Monitors
+namespace Peach.Pro.Core.Agent.Monitors
 {
 	/// <summary>
 	/// Save a file when a fault occurs.
@@ -13,13 +12,12 @@ namespace Peach.Core.Agent.Monitors
 	[Parameter("Filename", typeof(string), "File to save on fault")]
 	public class SaveFileMonitor : Monitor
 	{
-		string _fileName = null;
+		public string Filename { get; private set; }
 
 		public SaveFileMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
 			: base(agent, name, args)
 		{
-			if (args.ContainsKey("Filename"))
-				_fileName = (string)args["Filename"];
+			ParameterParser.Parse(this, args);
 		}
 
 		public override void StopMonitor()
@@ -50,11 +48,17 @@ namespace Peach.Core.Agent.Monitors
 
 		public override Fault GetMonitorData()
 		{
+			if (!File.Exists(Filename))
+				return null;
+
 			Fault fault = new Fault();
 			fault.type = FaultType.Data;
-			fault.title = "Save File \"" + _fileName + "\"";
+			fault.title = "Save File \"" + Filename + "\"";
 			fault.detectionSource = "SaveFileMonitor";
-			fault.collectedData.Add(new Fault.Data(Path.GetFileName(_fileName), File.ReadAllBytes(_fileName)));
+			fault.collectedData.Add(new Fault.Data(
+				Path.GetFileName(Filename),
+				File.ReadAllBytes(Filename)
+			));
 
 			return fault;
 		}

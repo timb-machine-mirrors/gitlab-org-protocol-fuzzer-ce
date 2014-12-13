@@ -1,10 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Net;
+using System.Net.Sockets;
 using System.Xml;
 
 namespace Peach.Core
 {
+	public static class SocketExtensions
+	{
+		public static void SendTo(this Socket socket, string msg, IPEndPoint remote)
+		{
+			socket.SendTo(Encoding.ASCII.GetBytes(msg), remote);
+		}
+
+		public static void Send(this Socket socket, string msg)
+		{
+			socket.Send(Encoding.ASCII.GetBytes(msg), SocketFlags.None);
+		}
+	}
+
+	public static class EnumerableExtensions
+	{
+		public static void ForEach<T>(this IEnumerable<T> sequence, Action<T> action)
+		{
+			foreach (var item in sequence)
+				action(item);
+		}
+	}
+
 	public static class ListExtensions
 	{
 		public static T First<T>(this List<T> list)
@@ -125,6 +148,32 @@ namespace Peach.Core
 		}
 
 		/// <summary>
+		/// Gets the value of an xml attribute as an unsigned int.
+		/// Throws an error if the attribute does not exist or
+		/// if the value can not be converted to an unsigned int.
+		/// </summary>
+		/// <param name="node">Xml node</param>
+		/// <param name="name">Name of the attribute</param>
+		/// <returns>Attribute value as an int</returns>
+		public static uint getAttrUInt32(this XmlNode node, string name)
+		{
+			return StringToUInt32(node, name, node.getAttrString(name));
+		}
+
+		/// <summary>
+		/// Gets the value of an xml attribute as a ulong.
+		/// Throws an error if the attribute does not exist or
+		/// if the value can not be converted to a ulong.
+		/// </summary>
+		/// <param name="node">Xml node</param>
+		/// <param name="name">Name of the attribute</param>
+		/// <returns>Attribute value as an int</returns>
+		public static ulong getAttrUInt64(this XmlNode node, string name)
+		{
+			return StringToUInt64(node, name, node.getAttrString(name));
+		}
+
+		/// <summary>
 		/// Gets the value of an xml attribute as a bool.
 		/// Throws an error if the attribute does not exist or
 		/// if the value can not be converted to a bool.
@@ -205,6 +254,24 @@ namespace Peach.Core
 		}
 
 		/// <summary>
+		/// Gets the value of an xml attribute as a ulong.
+		/// Throws an error if the attribute value can not be converted to a ulong.
+		/// Returns the defaultValue if the attribute is not set.
+		/// </summary>
+		/// <param name="node">Xml node</param>
+		/// <param name="name">Name of the attribute</param>
+		/// <param name="defaultValue">Value to use when the attribute is not set</param>
+		/// <returns>Attribute value as an int</returns>
+		public static ulong getAttr(this XmlNode node, string name, ulong defaultValue)
+		{
+			string value = node.getAttr(name, null);
+			if (value == null)
+				return defaultValue;
+			return StringToUInt64(node, name, value);
+
+		}
+
+		/// <summary>
 		/// Gets the value of an xml attribute as a char.
 		/// Throws an error if the attribute value can not be converted to a char.
 		/// Returns the defaultValue if the attribute is not set.
@@ -253,6 +320,22 @@ namespace Peach.Core
 			int ret;
 			if (!int.TryParse(value, out ret))
 				throw new PeachException(getError(node, name) + "  Could not convert value '" + value + "' to an integer.");
+			return ret;
+		}
+
+		private static uint StringToUInt32(XmlNode node, string name, string value)
+		{
+			uint ret;
+			if (!uint.TryParse(value, out ret))
+				throw new PeachException(getError(node, name) + "  Could not convert value '" + value + "' to a 32-bit unsigned integer.");
+			return ret;
+		}
+
+		private static ulong StringToUInt64(XmlNode node, string name, string value)
+		{
+			ulong ret;
+			if (!ulong.TryParse(value, out ret))
+				throw new PeachException(getError(node, name) + "  Could not convert value '" + value + "' to a 64-bit unsigned integer.");
 			return ret;
 		}
 

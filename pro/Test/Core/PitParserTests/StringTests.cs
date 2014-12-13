@@ -26,19 +26,14 @@
 
 // $Id$
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
 using Peach.Core.IO;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.PitParserTests
+namespace Peach.Pro.Test.Core.PitParserTests
 {
 	[TestFixture] [Category("Peach")]
 	public class StringTests
@@ -55,11 +50,11 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Dom.String str = dom.dataModels[0][0] as Dom.String;
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.String str = dom.dataModels[0][0] as Peach.Core.Dom.String;
 
 			Assert.AreNotEqual(null, str);
-			Assert.AreEqual(Dom.StringType.ascii, str.stringType);
+			Assert.AreEqual(Peach.Core.Dom.StringType.ascii, str.stringType);
 			Assert.AreEqual("abc", (string)str.DefaultValue);
 
 			BitwiseStream value = str.Value;
@@ -77,11 +72,11 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Dom.String str = dom.dataModels[0][0] as Dom.String;
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.String str = dom.dataModels[0][0] as Peach.Core.Dom.String;
 
 			Assert.AreNotEqual(null, str);
-			Assert.AreEqual(Dom.StringType.utf7, str.stringType);
+			Assert.AreEqual(Peach.Core.Dom.StringType.utf7, str.stringType);
 			Assert.AreEqual("abc", (string)str.DefaultValue);
 
 			BitwiseStream value = str.Value;
@@ -98,11 +93,11 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Dom.String str = dom.dataModels[0][0] as Dom.String;
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.String str = dom.dataModels[0][0] as Peach.Core.Dom.String;
 
 			Assert.AreNotEqual(null, str);
-			Assert.AreEqual(Dom.StringType.utf8, str.stringType);
+			Assert.AreEqual(Peach.Core.Dom.StringType.utf8, str.stringType);
 			Assert.AreEqual("abc", (string)str.DefaultValue);
 
 			BitwiseStream value = str.Value;
@@ -119,11 +114,11 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Dom.String str = dom.dataModels[0][0] as Dom.String;
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.String str = dom.dataModels[0][0] as Peach.Core.Dom.String;
 
 			Assert.AreNotEqual(null, str);
-			Assert.AreEqual(Dom.StringType.utf16, str.stringType);
+			Assert.AreEqual(Peach.Core.Dom.StringType.utf16, str.stringType);
 			Assert.AreEqual("abc", (string)str.DefaultValue);
 
 			BitwiseStream value = str.Value;
@@ -140,11 +135,11 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Dom.String str = dom.dataModels[0][0] as Dom.String;
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.String str = dom.dataModels[0][0] as Peach.Core.Dom.String;
 
 			Assert.AreNotEqual(null, str);
-			Assert.AreEqual(Dom.StringType.utf16be, str.stringType);
+			Assert.AreEqual(Peach.Core.Dom.StringType.utf16be, str.stringType);
 			Assert.AreEqual("abc", (string)str.DefaultValue);
 
 			BitwiseStream value = str.Value;
@@ -161,15 +156,36 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Dom.String str = dom.dataModels[0][0] as Dom.String;
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.String str = dom.dataModels[0][0] as Peach.Core.Dom.String;
 
 			Assert.AreNotEqual(null, str);
-			Assert.AreEqual(Dom.StringType.utf32, str.stringType);
+			Assert.AreEqual(Peach.Core.Dom.StringType.utf32, str.stringType);
 			Assert.AreEqual("abc", (string)str.DefaultValue);
 
 			BitwiseStream value = str.Value;
 			Assert.AreEqual(Encoding.UTF32.GetBytes("abc"), value.ToArray());
+		}
+
+		[Test]
+		public void Utf32BeTest()
+		{
+			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
+				"	<DataModel name=\"TheDataModel\">" +
+				"		<String name=\"TheString\" type=\"utf32be\" value=\"abc\"/>" +
+				"	</DataModel>" +
+				"</Peach>";
+
+			PitParser parser = new PitParser();
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.String str = dom.dataModels[0][0] as Peach.Core.Dom.String;
+
+			Assert.AreNotEqual(null, str);
+			Assert.AreEqual(Peach.Core.Dom.StringType.utf32be, str.stringType);
+			Assert.AreEqual("abc", (string)str.DefaultValue);
+
+			BitwiseStream value = str.Value;
+			Assert.AreEqual(Encoding.BigEndianUTF32.GetBytes("abc"), value.ToArray());
 		}
 
 		[Test]
@@ -182,11 +198,11 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Dom.String str = dom.dataModels[0][0] as Dom.String;
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.String str = dom.dataModels[0][0] as Peach.Core.Dom.String;
 
 			Assert.AreNotEqual(null, str);
-			Assert.AreEqual(Dom.StringType.ascii, str.stringType);
+			Assert.AreEqual(Peach.Core.Dom.StringType.ascii, str.stringType);
 			Assert.AreEqual(Variant.VariantType.String, str.DefaultValue.GetVariantType());
 			Assert.AreEqual("\n", (string)str.DefaultValue);
 		}
@@ -219,11 +235,11 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Dom.String str = dom.dataModels[0][0] as Dom.String;
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.String str = dom.dataModels[0][0] as Peach.Core.Dom.String;
 
 			Assert.AreNotEqual(null, str);
-			Assert.AreEqual(Dom.StringType.utf32, str.stringType);
+			Assert.AreEqual(Peach.Core.Dom.StringType.utf32, str.stringType);
 			Assert.AreEqual("Hello", (string)str.DefaultValue);
 
 			BitwiseStream value = str.Value;
@@ -241,11 +257,11 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Dom.String str = dom.dataModels[0][0] as Dom.String;
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.String str = dom.dataModels[0][0] as Peach.Core.Dom.String;
 
 			Assert.AreNotEqual(null, str);
-			Assert.AreEqual(Dom.StringType.utf32, str.stringType);
+			Assert.AreEqual(Peach.Core.Dom.StringType.utf32, str.stringType);
 			Assert.AreEqual(Variant.VariantType.String, str.DefaultValue.GetVariantType());
 			Assert.AreEqual("Hello", (string)str.DefaultValue);
 		}
@@ -265,8 +281,8 @@ namespace Peach.Core.Test.PitParserTests
 			string xml = string.Format(template, enc, lenType, len, padChar, nullTerm.ToString().ToLower(), value);
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Dom.String str = dom.dataModels[0][0] as Dom.String;
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.String str = dom.dataModels[0][0] as Peach.Core.Dom.String;
 			Assert.AreNotEqual(null, str);
 
 			Assert.AreEqual(expected, (string)str.DefaultValue);
@@ -333,11 +349,11 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Dom.String str = dom.dataModels[0][0] as Dom.String;
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.String str = dom.dataModels[0][0] as Peach.Core.Dom.String;
 
 			Assert.AreNotEqual(null, str);
-			Assert.AreEqual(Dom.StringType.ascii, str.stringType);
+			Assert.AreEqual(Peach.Core.Dom.StringType.ascii, str.stringType);
 			Assert.AreEqual(Variant.VariantType.String, str.DefaultValue.GetVariantType());
 			Assert.AreEqual("Hello\0\0\0\0\0", (string)str.DefaultValue);
 		}
@@ -352,11 +368,11 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Dom.String str = dom.dataModels[0][0] as Dom.String;
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.String str = dom.dataModels[0][0] as Peach.Core.Dom.String;
 
 			Assert.AreNotEqual(null, str);
-			Assert.AreEqual(Dom.StringType.ascii, str.stringType);
+			Assert.AreEqual(Peach.Core.Dom.StringType.ascii, str.stringType);
 			Assert.AreEqual(Variant.VariantType.String, str.DefaultValue.GetVariantType());
 			Assert.AreEqual("Helloaaaa\0", (string)str.DefaultValue);
 		}
@@ -404,11 +420,11 @@ namespace Peach.Core.Test.PitParserTests
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Dom.String str = dom.dataModels[0][0] as Dom.String;
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.String str = dom.dataModels[0][0] as Peach.Core.Dom.String;
 
 			Assert.AreNotEqual(null, str);
-			Assert.AreEqual(Dom.StringType.ascii, str.stringType);
+			Assert.AreEqual(Peach.Core.Dom.StringType.ascii, str.stringType);
 			Assert.AreEqual(Variant.VariantType.String, str.DefaultValue.GetVariantType());
 			Assert.AreEqual("Hello World", (string)str.DefaultValue);
 			Assert.AreEqual(Encoding.ASCII.GetBytes("Hello World\0"), str.Value.ToArray());
@@ -432,11 +448,11 @@ namespace Peach.Core.Test.PitParserTests
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Dom.String str1 = dom.dataModels[0][0] as Dom.String;
-			Dom.String str2 = dom.dataModels[0][1] as Dom.String;
-			Dom.String str3 = dom.dataModels[0][2] as Dom.String;
-			Dom.String str4 = dom.dataModels[0][3] as Dom.String;
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.String str1 = dom.dataModels[0][0] as Peach.Core.Dom.String;
+			Peach.Core.Dom.String str2 = dom.dataModels[0][1] as Peach.Core.Dom.String;
+			Peach.Core.Dom.String str3 = dom.dataModels[0][2] as Peach.Core.Dom.String;
+			Peach.Core.Dom.String str4 = dom.dataModels[0][3] as Peach.Core.Dom.String;
 
 			Assert.AreEqual("1\\t2\\r\\n", (string)str1.DefaultValue);
 			Assert.AreEqual("1\t2\r\n", (string)str2.DefaultValue);

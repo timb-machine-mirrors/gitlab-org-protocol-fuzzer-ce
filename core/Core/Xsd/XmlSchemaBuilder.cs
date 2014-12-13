@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
@@ -473,7 +472,9 @@ namespace Peach.Core.Xsd
 			if (doc == null)
 				return null;
 
-			var name = string.IsNullOrEmpty(suffix) ? type.FullName : string.Join(".", type.FullName, suffix);
+			// Member types have a '+' in their name, the docs use a '.'
+			var fullName = type.FullName.Replace('+', '.');
+			var name = string.IsNullOrEmpty(suffix) ? fullName : string.Join(".", fullName, suffix);
 			var query = string.Format("/doc/members/member[@name='{0}:{1}{2}']/summary", prefix, name, args);
 
 			var navi = doc.CreateNavigator();
@@ -667,11 +668,11 @@ namespace Peach.Core.Xsd
 			var restrictEnum = new XmlSchemaSimpleTypeRestriction();
 			restrictEnum.BaseTypeName = new XmlQualifiedName("string", XmlSchema.Namespace);
 
-			foreach (var item in ClassLoader.GetAllByAttribute<PluginAttribute>((t, a) => a.Type == pluginAttr.PluginType && a.IsDefault && !a.IsTest))
+			foreach (var item in ClassLoader.GetAllByAttribute<PluginAttribute>((t, a) => a.Type == pluginAttr.PluginType && a.IsDefault && !a.IsTest).OrderBy(a => a.Key.Name))
 			{
 				restrictEnum.Facets.Add(MakePluginFacet(item.Key, item.Value));
 
-				foreach (var pi in item.Value.GetProperties())
+				foreach (var pi in item.Value.GetProperties().OrderBy(p => p.Name))
 				{
 					var attrAttr = pi.GetAttributes<XmlAttributeAttribute>().FirstOrDefault();
 					if (attrAttr != null)
@@ -710,7 +711,7 @@ namespace Peach.Core.Xsd
 					}
 				}
 
-				foreach (var prop in item.Value.GetAttributes<ParameterAttribute>())
+				foreach (var prop in item.Value.GetAttributes<ParameterAttribute>().OrderBy(p => p.name))
 				{
 					var attr = MakeAttribute(prop.name, prop);
 					if (!addedAttrs.ContainsKey(attr.Name))
@@ -762,7 +763,7 @@ namespace Peach.Core.Xsd
 			var restrictEnum = new XmlSchemaSimpleTypeRestriction();
 			restrictEnum.BaseTypeName = new XmlQualifiedName("string", XmlSchema.Namespace);
 
-			foreach (var item in ClassLoader.GetAllByAttribute<PluginAttribute>((t, a) => a.Type == pluginAttr.PluginType && a.IsDefault && !a.IsTest))
+			foreach (var item in ClassLoader.GetAllByAttribute<PluginAttribute>((t, a) => a.Type == pluginAttr.PluginType && a.IsDefault && !a.IsTest).OrderBy(a => a.Key.Name))
 			{
 				restrictEnum.Facets.Add(MakePluginFacet(item.Key, item.Value));
 			}
@@ -845,7 +846,7 @@ namespace Peach.Core.Xsd
 
 			XmlSchemaGroupBase schemaParticle = new XmlSchemaSequence();
 
-			foreach (var pi in type.GetProperties())
+			foreach (var pi in type.GetProperties().OrderBy(p => p.Name))
 			{
 				if (pi.DeclaringType != type)
 					continue;
@@ -872,7 +873,7 @@ namespace Peach.Core.Xsd
 					continue;
 				}
 
-				var elemAttrs = pi.GetAttributes<XmlElementAttribute>();
+				var elemAttrs = pi.GetAttributes<XmlElementAttribute>().OrderBy(p => p.ElementName);
 
 				if (elemAttrs.Skip(1).Any())
 				{
@@ -926,7 +927,7 @@ namespace Peach.Core.Xsd
 			while (schemaParticle.Items.Count > 1)
 			{
 				var items = schemaParticle.Items.OfType<XmlSchemaParticle>();
-				if (!items.Where(i => i.MaxOccursString != "1").Any())
+				if (!items.Any(i => i.MaxOccursString != "1"))
 				{
 					// All maxOccurs are "1", check minOccurs...
 					var disinct = items.Select(a => a.MinOccursString).Distinct();
@@ -1024,13 +1025,7 @@ namespace Peach.Core.Xsd
 			if (type == typeof(bool))
 				return new XmlQualifiedName("boolean", XmlSchema.Namespace);
 
-			if (type == typeof(uint))
-				return new XmlQualifiedName("unsignedInt", XmlSchema.Namespace);
-
-			if (type == typeof(int))
-				return new XmlQualifiedName("int", XmlSchema.Namespace);
-
-			if (type == typeof(decimal))
+			if (type == typeof(double))
 				return new XmlQualifiedName("decimal", XmlSchema.Namespace);
 
 			if (type == typeof(Peach.Core.Dom.DataElement))
@@ -1050,9 +1045,9 @@ namespace Peach.Core.Xsd
 			attr.Name = name;
 			attr.Annotate(pi);
 
-			if (pi.PropertyType.IsEnum)
+			if (IsSimpleType(pi.PropertyType))
 			{
-				attr.SchemaType = GetEnumType(pi.PropertyType);
+				attr.SchemaType = GetSimpleType(pi.PropertyType);
 			}
 			else
 			{
@@ -1105,9 +1100,9 @@ namespace Peach.Core.Xsd
 			attr.Name = name;
 			attr.Annotate(paramAttr.description);
 
-			if (paramAttr.type.IsEnum)
+			if (IsSimpleType(paramAttr.type))
 			{
-				attr.SchemaType = GetEnumType(paramAttr.type);
+				attr.SchemaType = GetSimpleType(paramAttr.type);
 			}
 			else
 			{
@@ -1144,6 +1139,68 @@ namespace Peach.Core.Xsd
 
 			return attr;
 		}
+
+		bool IsSimpleType(Type type)
+		{
+			if (IsGenericType(type, typeof(Nullable<>)))
+				type = type.GetGenericArguments()[0];
+
+			if (type.IsEnum)
+				return true;
+
+			// Mono has issues with xs:int, xs:unsignedInt, xs:long, xs:unsignedLong
+			// So use xs:integer with min/max restrictions
+
+			if (type == typeof(uint))
+				return true;
+
+			if (type == typeof(int))
+				return true;
+
+			if (type == typeof(ulong)) // Linux doesn't recognize unsignedLong
+				return true;
+
+			if (type == typeof(long)) // Linux doesn't recognize long
+				return false;
+
+			return false;
+		}
+
+		private XmlSchemaSimpleType GetSimpleType(Type type)
+		{
+			if (IsGenericType(type, typeof(Nullable<>)))
+				type = type.GetGenericArguments()[0];
+
+			if (type.IsEnum)
+				return GetEnumType(type);
+
+			XmlSchemaSimpleType ret;
+			if (enumTypeCache.TryGetValue(type, out ret))
+				return ret;
+
+			var content = new XmlSchemaSimpleTypeRestriction()
+			{
+				BaseTypeName = new XmlQualifiedName("integer", XmlSchema.Namespace),
+			};
+
+			var minFacet = new XmlSchemaMinInclusiveFacet();
+			minFacet.Value = type.GetField("MinValue", BindingFlags.Static | BindingFlags.Public).GetValue(null).ToString();
+			content.Facets.Add(minFacet);
+
+			var maxFacet = new XmlSchemaMaxInclusiveFacet();
+			maxFacet.Value = type.GetField("MaxValue", BindingFlags.Static | BindingFlags.Public).GetValue(null).ToString();
+			content.Facets.Add(maxFacet);
+
+			ret = new XmlSchemaSimpleType()
+			{
+				Content = content,
+			};
+
+			enumTypeCache.Add(type, ret);
+
+			return ret;
+		}
+
 
 		XmlSchemaSimpleType GetEnumType(Type type)
 		{
@@ -1255,7 +1312,7 @@ namespace Peach.Core.Xsd
 		{
 			var ret = new List<XmlSchemaElement>();
 
-			foreach (var item in ClassLoader.GetAllByAttribute<PitParsableAttribute>((t,a) => a.topLevel))
+			foreach (var item in ClassLoader.GetAllByAttribute<PitParsableAttribute>((t, a) => a.topLevel).OrderBy(a => a.Key.xmlElementName))
 			{
 				var name = item.Key.xmlElementName;
 				var type = item.Value;
@@ -1292,7 +1349,7 @@ namespace Peach.Core.Xsd
 			schemaParticle.MinOccursString = "0";
 			schemaParticle.MaxOccursString = "unbounded";
 
-			foreach (var prop in type.GetAttributes<ParameterAttribute>())
+			foreach (var prop in type.GetAttributes<ParameterAttribute>().OrderBy(a => a.name))
 			{
 				var attr = MakeAttribute(prop.name, prop);
 				complexType.Attributes.Add(attr);
@@ -1302,7 +1359,7 @@ namespace Peach.Core.Xsd
 
 			if (deAttr.elementTypes.HasFlag(Peach.Core.Dom.DataElementTypes.DataElements))
 			{
-				foreach (var kv in ClassLoader.GetAllByAttribute<Peach.Core.Dom.DataElementAttribute>(null))
+				foreach (var kv in ClassLoader.GetAllByAttribute<Peach.Core.Dom.DataElementAttribute>(null).OrderBy(a => a.Key.elementName))
 				{
 					var parents = kv.Value.GetAttributes<Peach.Core.Dom.DataElementParentSupportedAttribute>();
 					if (parents.Any() && !parents.Any(a => a.elementName == name))
@@ -1313,7 +1370,7 @@ namespace Peach.Core.Xsd
 				}
 			}
 
-			foreach (var child in type.GetAttributes<Peach.Core.Dom.DataElementChildSupportedAttribute>())
+			foreach (var child in type.GetAttributes<Peach.Core.Dom.DataElementChildSupportedAttribute>().OrderBy(a => a.elementName))
 			{
 				var childType = ClassLoader.FindTypeByAttribute<Peach.Core.Dom.DataElementAttribute>((t, a) => a.elementName == child.elementName);
 				var elem = MakeDataElement(child.elementName, childType);

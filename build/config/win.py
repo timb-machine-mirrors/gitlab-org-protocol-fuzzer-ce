@@ -36,7 +36,7 @@ def prepare(conf):
 
 	env['EXTERNALS_x86'] = {
 		'pin' : {
-			'MSVC'      : [ 'msvc 10.0', 'wsdk 7.1' ], 
+			'MSVC_VER'  : [ '16.00.40219.01' ], 
 			'INCLUDES'  : [
 				j(pin, 'source', 'include', 'pin'),
 				j(pin, 'source', 'include', 'pin', 'gen'),
@@ -56,8 +56,8 @@ def prepare(conf):
 			'LINKFLAGS' : [ '/EXPORT:main', '/ENTRY:Ptrace_DllMainCRTStartup@12', '/BASE:0x55000000' ],
 		},
 		'com' : {
-			'HEADERS' : [ 'atlbase.h' ],
 			'DEFINES' : [ '_WINDLL' ],
+			'STLIB' : [ 'Ole32', 'OleAut32', 'Advapi32' ],
 		},
 		'network' : {
 			'HEADERS' : [ 'winsock2.h' ],
@@ -67,7 +67,7 @@ def prepare(conf):
 
 	env['EXTERNALS_x64'] = {
 		'pin' : {
-			'MSVC'      : [ 'msvc 10.0', 'wsdk 7.1' ], 
+			'MSVC_VER'  : [ '16.00.40219.01' ], 
 			'INCLUDES'  : [
 				j(pin, 'source', 'include', 'pin'),
 				j(pin, 'source', 'include', 'pin', 'gen'),
@@ -87,8 +87,8 @@ def prepare(conf):
 			'LINKFLAGS' : [ '/EXPORT:main', '/ENTRY:Ptrace_DllMainCRTStartup', '/BASE:0xC5000000' ],
 		},
 		'com' : {
-			'HEADERS' : [ 'atlbase.h' ],
 			'DEFINES' : [ '_WINDLL' ],
+			'STLIB' : [ 'Ole32', 'OleAut32', 'Advapi32' ],
 		},
 		'network' : {
 			'HEADERS' : [ 'winsock2.h' ],
@@ -110,8 +110,6 @@ def prepare(conf):
 	env['REFERENCE_ASSEMBLIES'] = j(pfiles, 'Reference Assemblies', 'Microsoft', 'Framework', '.NETFramework', env['TARGET_FRAMEWORK'])
 
 def configure(conf):
-	conf.ensure_version('CXX', ['16.00.40219.01', '17.00.61030', '18.00.21005.1', '18.00.30723'])
-
 	env = conf.env
 
 	# Ensure reference assembly folder exists
@@ -203,6 +201,7 @@ def configure(conf):
 		'/DEBUG',
 		'/INCREMENTAL:NO',
 		'/WX',
+		'/MACHINE:%s' % env.SUBARCH,
 	])
 
 	env['CSPLATFORM'] = env.SUBARCH

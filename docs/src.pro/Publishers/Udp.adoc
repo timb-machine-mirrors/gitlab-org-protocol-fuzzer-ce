@@ -47,12 +47,27 @@ MinMTU:: Minimum allowable MTU property value. Defaults to 1,280.
 xref:Action_output[output]:: Send a single UDP packet to remote host.
 xref:Action_input[input]:: Receive a single UDP packet from remote host.
 xref:Action_getProperty[getProperty]::
-	Get a property value.
-	+
-	This publisher supports two properties:
-	+
-	[horizontal]
-	LastRecvAddr;; The last receive address
++
+Get a property value.
++
+This publisher supports two properties:
++
+[horizontal]
+LastRecvAddr;; The last receive address
+Port;; Get the +Port+ parameter.
+MTU;; Get the +MTU+ of the interface
+SrcPort;; Get the +SrcPort+ parameter.
+
+xref:Action_setProperty[setProperty]::
++
+Set a property value.
++
+This publisher supports two properties:
++
+[horizontal]
+Port;; Change the +Port+ parameter.
+MTU;; Change the +MTU+ parameter.
+SrcPort;; Change the +SrcPort+ parameter.
 
 === Examples
 

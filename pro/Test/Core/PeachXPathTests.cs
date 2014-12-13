@@ -26,21 +26,15 @@
 
 // $Id$
 
-using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml.XPath;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using Peach.Core;
+using Peach.Core.Analyzers;
 using Peach.Core.Dom;
 using Peach.Core.Dom.XPath;
-using Peach.Core.Analyzers;
-using Peach.Core.IO;
 
-namespace Peach.Core.Test
+namespace Peach.Pro.Test.Core
 {
 	[TestFixture] [Category("Peach")]
 	class PeachXPathTests
@@ -69,7 +63,7 @@ namespace Peach.Core.Test
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			PeachXPathNavigator navi = new PeachXPathNavigator(dom);
 			XPathNodeIterator iter = navi.Select("//TheNumber");
 
@@ -111,7 +105,7 @@ namespace Peach.Core.Test
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var dataModel = dom.tests["Default"].stateModel.states["State1"].actions[0].dataModel;
 			DataElement findMe1 = ((DataElementContainer)((DataElementContainer)dataModel[1])[0])[0];
@@ -159,7 +153,7 @@ namespace Peach.Core.Test
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var dataModel = dom.tests["Default"].stateModel.states["State1"].actions[0].dataModel;
 			DataElement findMe = ((DataElementContainer)((DataElementContainer)dataModel[1])[0])[0];
@@ -204,7 +198,7 @@ namespace Peach.Core.Test
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var dataModel = dom.tests["Default"].stateModel.states["State1"].actions[0].dataModel;
 			DataElement findMe = ((DataElementContainer)((DataElementContainer)dataModel[1])[0])[0];
@@ -249,7 +243,7 @@ namespace Peach.Core.Test
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var dataModel = dom.tests["Default"].stateModel.states["State1"].actions[0].dataModel;
 			DataElement findMe = ((DataElementContainer)dataModel[3])[0];
@@ -294,7 +288,7 @@ namespace Peach.Core.Test
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var dataModel = dom.tests["Default"].stateModel.states["State1"].actions[0].dataModel;
 			DataElement findMe1 = ((DataElementContainer)((DataElementContainer)dataModel[1])[0])[0];
@@ -336,9 +330,9 @@ namespace Peach.Core.Test
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-			var action = dom.tests["Default"].stateModel.states["State1"].actions[0] as Dom.Actions.Call;
+			var action = dom.tests["Default"].stateModel.states["State1"].actions[0] as Peach.Core.Dom.Actions.Call;
 			DataElement findMe1 = action.parameters[0].dataModel[0];
 			DataElement findMe2 = action.parameters[1].dataModel[0]; 
 
@@ -375,9 +369,9 @@ namespace Peach.Core.Test
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-			var action = dom.tests["Default"].stateModel.states["State1"].actions[0] as Dom.Actions.Call;
+			var action = dom.tests["Default"].stateModel.states["State1"].actions[0] as Peach.Core.Dom.Actions.Call;
 			DataElement findMe1 = action.result.dataModel[0];
 			
 			PeachXPathNavigator navi = new PeachXPathNavigator(dom);
@@ -417,9 +411,9 @@ namespace Peach.Core.Test
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-			var action = dom.tests["Default"].stateModel.states["State1"].actions[0] as Dom.Actions.Call;
+			var action = dom.tests["Default"].stateModel.states["State1"].actions[0] as Peach.Core.Dom.Actions.Call;
 
 
 			PeachXPathNavigator navi = new PeachXPathNavigator(dom);

@@ -28,16 +28,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
-using IronPython;
 using IronPython.Hosting;
-using IronRuby;
-using IronRuby.Hosting;
 using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
 using Microsoft.Scripting.Math;
-using System.Reflection;
 using System.IO;
 using NLog;
 using Peach.Core.IO;

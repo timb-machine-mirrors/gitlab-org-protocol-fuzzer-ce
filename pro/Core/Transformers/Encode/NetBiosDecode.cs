@@ -29,11 +29,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
-namespace Peach.Core.Transformers.Encode
+namespace Peach.Pro.Core.Transformers.Encode
 {
     [Description("Deocode on output from binary representation of a NetBios name to a string.")]
     [Parameter("pad", typeof(bool), "Should the NetBios names be padded/trimmed to 32 bytes?", "false")]

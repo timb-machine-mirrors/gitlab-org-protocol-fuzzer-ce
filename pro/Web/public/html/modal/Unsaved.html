@@ -1,0 +1,22 @@
+﻿<form ng-submit="vm.OnSubmit()">
+	<div class="modal-header">
+		<h3 class="modal-title">
+			Unsaved Changes
+		</h3>
+	</div>
+	<div class="modal-body">
+		You have unsaved changes. Leave the page?
+	</div>
+	<div class="modal-footer">
+		<button type="reset"
+						class="btn btn-default"
+						ng-click="vm.OnCancel()">
+			Cancel
+		</button>
+		<button type="submit"
+						class="btn btn-primary"
+						autofocus>
+			Ignore Changes
+		</button>
+	</div>
+</form>

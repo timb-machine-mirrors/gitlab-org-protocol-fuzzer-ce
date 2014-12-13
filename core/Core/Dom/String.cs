@@ -27,21 +27,12 @@
 // $Id$
 
 using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Collections;
 using System.Text;
-using System.Runtime.InteropServices;
-using System.Runtime;
-using System.Reflection;
-using System.Runtime.Serialization;
 using System.Xml;
 
 using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
 using Peach.Core.IO;
-
-using NLog;
 
 namespace Peach.Core.Dom
 {
@@ -75,7 +66,12 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// Multibyte unicode characters encoded in UTF-32.
 		/// </summary>
-		utf32
+		utf32,
+
+		/// <summary>
+		/// Multibyte unicode characters encoded in UTF-32 nig endian.
+		/// </summary>
+		utf32be,
 	}
 	
 	/// <summary>

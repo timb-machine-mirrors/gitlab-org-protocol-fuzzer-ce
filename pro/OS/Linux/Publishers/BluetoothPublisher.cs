@@ -1,21 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Threading;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Microsoft.Win32.SafeHandles;
-
-using NLog;
-
 using Mono.Unix;
 using Mono.Unix.Native;
-
+using NLog;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.IO;
 
-namespace Peach.Core.Publishers
+namespace Peach.Pro.OS.Linux.Publishers
 {
 	[Publisher("Bluetooth", true)]
 	[Description("Bluetooth HCI Socket")]

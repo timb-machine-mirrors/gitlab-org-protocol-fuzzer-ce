@@ -28,7 +28,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 using System.Security.Cryptography;

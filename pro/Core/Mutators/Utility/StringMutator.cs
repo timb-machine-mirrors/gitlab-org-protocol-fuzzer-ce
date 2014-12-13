@@ -4,12 +4,11 @@
 
 using System;
 using System.Text;
-
+using NLog;
+using Peach.Core;
 using Peach.Core.Dom;
 
-using NLog;
-
-namespace Peach.Core.Mutators.Utility
+namespace Peach.Pro.Core.Mutators.Utility
 {
 	/// <summary>
 	/// Generate random strings using characters randomly selected
@@ -31,7 +30,7 @@ namespace Peach.Core.Mutators.Utility
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			var asStr = obj as Dom.String;
+			var asStr = obj as Peach.Core.Dom.String;
 			if (asStr != null && asStr.isMutable && asStr.stringType != StringType.ascii)
 				return true;
 
@@ -46,12 +45,11 @@ namespace Peach.Core.Mutators.Utility
 		protected override void GetLimits(DataElement obj, out bool signed, out long value, out long min, out long max)
 		{
 			var str = (string)obj.InternalValue;
-			var len = (long)str.Length;
 
 			signed = false;
 			min = 1;
-			max = ushort.MaxValue;
-			value = Math.Min(len, max);
+			max = Utility.SizedHelpers.MaxSize(obj);
+			value = Math.Min(str.Length, max);
 			value = Math.Max(min, value);
 		}
 
@@ -68,6 +66,13 @@ namespace Peach.Core.Mutators.Utility
 		protected override void performMutation(DataElement obj, long value)
 		{
 			System.Diagnostics.Debug.Assert(value <= int.MaxValue);
+
+			var limit = Utility.SizedHelpers.MaxSize(obj);
+			if (value > limit)
+			{
+				logger.Trace("Skipping mutation, expansion to {0} would exceed max output size.", value);
+				return;
+			}
 
 			var sb = new StringBuilder((int)value);
 

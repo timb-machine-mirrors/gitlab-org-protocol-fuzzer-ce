@@ -3,12 +3,12 @@
 //
 
 using System;
-
+using System.IO;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using System.IO;
 
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	/// <summary>
 	/// Flips bits on thepre-transformed value of non-container elements
@@ -90,12 +90,7 @@ namespace Peach.Core.Mutators
 			var data = getData(obj);
 
 			// Pick number from 1-6 (stddev = 5/3
-			int num;
-			do
-			{
-				num = (int)Math.Round(Math.Abs(context.Random.NextGaussian(0, 1.6666))) + 1;
-			}
-			while (num > 6);
+			var num = context.Random.PickSix();
 
 			// Pick num unique indices
 			var indices = context.Random.SortedPermutation(data.LengthBits, num);

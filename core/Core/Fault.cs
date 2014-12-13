@@ -85,6 +85,16 @@ namespace Peach.Core
 		public uint iteration = 0;
 
 		/// <summary>
+		/// Start iteration of search when fault was detected
+		/// </summary>
+		public uint iterationStart = 0;
+
+		/// <summary>
+		/// End iteration of search when fault was detected
+		/// </summary>
+		public uint iterationStop = 0;
+
+		/// <summary>
 		/// Is this a control iteration.
 		/// </summary>
 		public bool controlIteration = false;

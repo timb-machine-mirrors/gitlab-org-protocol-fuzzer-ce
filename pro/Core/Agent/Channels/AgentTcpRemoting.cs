@@ -29,23 +29,22 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
+using System.Net.Sockets;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
+using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
-using Peach.Core;
-using Peach.Core.Dom;
 using NLog;
+using Peach.Core;
 using Peach.Core.Agent;
-using System.Net.Sockets;
+using Peach.Core.Dom;
 using Peach.Core.IO;
-using System.IO;
-using System.Runtime.Remoting.Activation;
 
-namespace Peach.Core.Agent.Channels
+namespace Peach.Pro.Core.Agent.Channels
 {
 	#region TCP Agent Client
 
@@ -915,8 +914,7 @@ namespace Peach.Core.Agent.Channels
 		public void Run(Dictionary<string, string> args)
 		{
 #if !MONO
-			if (RemotingConfiguration.CustomErrorsMode != CustomErrorsModes.Off)
-				RemotingConfiguration.CustomErrorsMode = CustomErrorsModes.Off;
+			RemotingConfiguration.CustomErrorsMode = CustomErrorsModes.Off;
 #endif
 
 			int port = 9001;
@@ -928,10 +926,18 @@ namespace Peach.Core.Agent.Channels
 			var props = (IDictionary)new Hashtable();
 			props["port"] = port;
 			props["name"] = string.Empty;
+#if MONO
+			// Force remoting to use raw IP address instead of relying on DNS reverse lookups
+			// Found this during a debug session on Mac OS X/Mono.
+			props["useIpAddress"] = true;
+			props["machineName"] = string.Empty;
+#endif
 			//props["exclusiveAddressUse"] = false;
 
-			var serverProvider = new BinaryServerFormatterSinkProvider();
-			serverProvider.TypeFilterLevel = System.Runtime.Serialization.Formatters.TypeFilterLevel.Full;
+			var serverProvider = new BinaryServerFormatterSinkProvider
+			{
+				TypeFilterLevel = TypeFilterLevel.Full
+			};
 			var chan = new TcpChannel(props, null, serverProvider);
 
 			// register channel

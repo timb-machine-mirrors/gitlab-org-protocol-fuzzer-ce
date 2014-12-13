@@ -1,14 +1,11 @@
-using System;
-using NUnit.Framework;
-using Peach.Core.Test;
-using Peach.Core.Dom;
-using System.Collections.Generic;
-using Peach.Core.Cracker;
-using Peach.Core.Analyzers;
 using System.IO;
 using System.Linq;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Analyzers;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Analyzers
+namespace Peach.Pro.Test.Core.Analyzers
 {
 	public class AnalyzerTests : DataModelCollector
 	{
@@ -42,7 +39,7 @@ namespace Peach.Core.Test.Analyzers
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;

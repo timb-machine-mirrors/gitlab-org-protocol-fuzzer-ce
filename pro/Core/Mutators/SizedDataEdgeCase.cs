@@ -4,12 +4,11 @@
 
 using System;
 using System.Linq;
-
+using NLog;
+using Peach.Core;
 using Peach.Core.Dom;
 
-using NLog;
-
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("SizedDataEdgeCase")]
 	[Description("Change the length of sized data to numerical edge cases")]
@@ -40,16 +39,18 @@ namespace Peach.Core.Mutators
 
 		protected override void GetLimits(DataElement obj, out long min, out ulong max)
 		{
+			var other = obj.relations.From<SizeRelation>().First().Of;
+
 			min = 0;
-			max = ushort.MaxValue;
+			max = (ulong)Utility.SizedHelpers.MaxSize(other);
 
 			// If we are a number, make sure our max is not larger than max long
 			// since stream lengths are tracked as longs
-			var asNum = obj as Dom.Number;
+			var asNum = obj as Peach.Core.Dom.Number;
 			if (asNum != null)
 				max = Math.Min(max, asNum.MaxValue);
 			else
-				System.Diagnostics.Debug.Assert(obj is Dom.String);
+				System.Diagnostics.Debug.Assert(obj is Peach.Core.Dom.String);
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
@@ -63,6 +64,18 @@ namespace Peach.Core.Mutators
 
 		protected override void performMutation(DataElement obj, long value)
 		{
+			var rel = obj.relations.From<SizeRelation>().FirstOrDefault();
+
+			if (rel != null)
+			{
+				var limit = Utility.SizedHelpers.MaxSize(rel.Of);
+				if (value > limit)
+				{
+					logger.Trace("Skipping mutation, expansion to {0} would exceed max output size.", value);
+					return;
+				}
+			}
+
 			Utility.SizedHelpers.ExpandTo(obj, value, OverrideRelation);
 		}
 

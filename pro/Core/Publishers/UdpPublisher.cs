@@ -23,14 +23,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net.Sockets;
 using System.IO;
 using System.Net;
+using System.Net.Sockets;
 using NLog;
+using Peach.Core;
+using Peach.Core.IO;
 
-namespace Peach.Core.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	[Publisher("Udp", true)]
 	[Parameter("Host", typeof(string), "Hostname or IP address of remote host")]
@@ -69,6 +69,80 @@ namespace Peach.Core.Publishers
 
 			if (_remote.Port == 0)
 				throw new PeachException("Error sending a Udp packet to " + _remote.Address + ", the port was not specified.");
+		}
+
+		protected override Variant OnGetProperty(string property)
+		{
+			switch(property)
+			{
+				case "Port":
+					return new Variant(Port);
+				case "SrcPort":
+					return new Variant(SrcPort);
+			}
+
+			return base.OnGetProperty(property);
+		}
+
+		protected override void OnSetProperty(string property, Variant value)
+		{
+			ushort newPort;
+
+			switch(property)
+			{
+				case "Port":
+					newPort = UShortFromVariant(value);
+					Logger.Debug("Changing Port from {0} to {1}.\n", Port, newPort);
+
+					Port = newPort;
+					OnStop();
+					OnStart();
+					return;
+
+				case "SrcPort":
+					newPort = UShortFromVariant(value);
+					Logger.Debug("Changing SrcPort from {0} to {1}.\n", SrcPort, newPort);
+
+					SrcPort = newPort;
+					OnStop();
+					OnStart();
+					return;
+			}
+
+			base.OnSetProperty(property, value);
+		}
+
+		public ushort UShortFromVariant(Variant value)
+		{
+			ushort ret = 0;
+
+			if (value.GetVariantType() == Variant.VariantType.BitStream)
+			{
+				var bs = (BitwiseStream)value;
+				bs.SeekBits(0, SeekOrigin.Begin);
+				ulong bits;
+				int len = bs.ReadBits(out bits, 16);
+				ret = Endian.Little.GetUInt16(bits, len);
+			}
+			else if (value.GetVariantType() == Variant.VariantType.ByteString)
+			{
+				byte[] buf = (byte[])value;
+				int len = Math.Min(buf.Length * 8, 16);
+				ret = Endian.Little.GetUInt16(buf, len);
+			}
+			else
+			{
+				try
+				{
+					ret = ushort.Parse((string)value);
+				}
+				catch
+				{
+					throw new SoftException("Can't convert to int, 'value' is an unsupported type.");
+				}
+			}
+
+			return ret;
 		}
 	}
 }

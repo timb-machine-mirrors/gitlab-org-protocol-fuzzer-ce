@@ -72,8 +72,17 @@ xref:name[name]:: Name of the test, use "Default" for default test
 _Optional:_
 
 waitTime:: Time to wait in between each test case (Defaults to zero (0))
-faultWaitTime:: Time to wait for a fault to occur before starting next iteration (Defaults to 0)
+faultWaitTime:: Time to wait for a fault to occur before starting next iteration. (Defaults to 0)
 controlIteration:: How often should we perform control iterations.  (Defaults to 0)
+replayEnabled:: Should iterations be replayed when a fault occurs. Defaults to true.
+maxOutputSize::
++
+Set the maximum size of data that Peach will generate. This is on an Action by Action basis meaning
+if your StateModel has two actions, each of them can produce data upto maxOutputSize. Defaults to
+unlimited.
++
+When using Publishers that have a maximum output size, such as UDP, it's recommended this attribute
+be used to set maximum size to correspond with this limit.
 
 === Child Elements
 

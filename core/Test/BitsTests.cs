@@ -1,11 +1,10 @@
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
-using Peach.Core;
-using Peach.Core.IO;
 using NUnit.Framework;
+using Peach.Core.IO;
 
-namespace Peach
+namespace Peach.Core.Test
 {
 	public static class Bits
 	{

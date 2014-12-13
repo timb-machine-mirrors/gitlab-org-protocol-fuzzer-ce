@@ -1,12 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using NUnit.Framework;
-using Peach.Core.IO;
-
-using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.Analyzers;
 using System.Collections;

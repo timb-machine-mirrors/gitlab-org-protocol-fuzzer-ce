@@ -1,11 +1,9 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using Peach.Core;
-using Peach.Core.Mutators;
 using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class ArrayRandomizeOrderTests
@@ -15,8 +13,8 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("ArrayRandomizeOrder");
 
-			var array = new Dom.Array("Array");
-			array.OriginalElement = new Dom.String("Str");
+			var array = new Peach.Core.Dom.Array("Array");
+			array.OriginalElement = new Peach.Core.Dom.String("Str");
 			array.ExpandTo(0);
 
 			// Empty array can't be randomized
@@ -44,8 +42,8 @@ namespace Peach.Core.Test.Mutators
 
 			runner.SeedOverride = 1;
 
-			var array = new Dom.Array("Array");
-			array.OriginalElement = new Dom.String("Str");
+			var array = new Peach.Core.Dom.Array("Array");
+			array.OriginalElement = new Peach.Core.Dom.String("Str");
 			array.ExpandTo(3);
 
 			for (int i = 0; i < array.Count; ++i)
@@ -66,8 +64,8 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("ArrayRandomizeOrder");
 
-			var array = new Dom.Array("Array");
-			array.OriginalElement = new Dom.String("Str");
+			var array = new Peach.Core.Dom.Array("Array");
+			array.OriginalElement = new Peach.Core.Dom.String("Str");
 			array.ExpandTo(3);
 
 			for (int i = 0; i < array.Count; ++i)
@@ -88,8 +86,8 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("ArrayRandomizeOrder");
 
-			var array = new Dom.Array("Array");
-			array.OriginalElement = new Dom.String("Str");
+			var array = new Peach.Core.Dom.Array("Array");
+			array.OriginalElement = new Peach.Core.Dom.String("Str");
 			array.ExpandTo(200);
 
 			for (int i = 0; i < array.Count; ++i)
@@ -110,8 +108,8 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("ArrayRandomizeOrder");
 
-			var array = new Dom.Array("Array");
-			array.OriginalElement = new Dom.String("Str");
+			var array = new Peach.Core.Dom.Array("Array");
+			array.OriginalElement = new Peach.Core.Dom.String("Str");
 			array.ExpandTo(200);
 
 			for (int i = 0; i < array.Count; ++i)

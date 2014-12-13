@@ -1,0 +1,33 @@
+﻿<div class="page-content">
+	<div class="page-header">
+		<h1>Configuration &raquo; Test</h1>
+	</div>
+	<p>
+		Use this section to test that the specified configuration is valid before
+		launching a long running job. 
+		Click the Begin Test button to get started. 
+		The Test will execute a single control iteration and the output will display
+		any warnings or errors that require attention.
+		Detailed log messages are available to help diagnose issues that might arise.
+	</p>
+	<div class="wizard-actions">
+		<span ng-show="vm.ShowTestPass">
+			Testing passed, press Continue
+		</span>
+		<span ng-show="vm.ShowTestFail">
+			Testing failed, please correct the errors described and return to this page to test again.
+		</span>
+		<button class="btn btn-success btn-sm"
+						ng-click="vm.OnNextTrack()"
+						ng-class="{disabled: !vm.CanContinue}">
+			Continue
+			<i class="icon-arrow-right icon-on-right"></i>
+		</button>
+		<button class="btn btn-warning btn-sm"
+		        ng-click="vm.OnBeginTest()">
+			Begin Test
+		</button>
+	</div>
+	<peach:test>
+	</peach:test>
+</div>

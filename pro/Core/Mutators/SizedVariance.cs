@@ -2,14 +2,11 @@
 // Copyright (c) Deja vu Security
 //
 
-using System;
-using System.Linq;
-
+using NLog;
+using Peach.Core;
 using Peach.Core.Dom;
 
-using NLog;
-
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("SizedVariance")]
 	[Description("Change the length of sized data to count - N to count + N.")]

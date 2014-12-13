@@ -28,12 +28,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections;
-using System.Text;
-using System.Runtime.InteropServices;
-using System.Runtime;
-using System.Reflection;
-using System.Runtime.Serialization;
 using System.Xml;
 using System.Linq;
 
@@ -78,6 +72,7 @@ namespace Peach.Core.Dom
 
 		private bool expanded;
 
+		private BitwiseStream expandedValue;
 		private int? countOverride;
 
 		public int? CountOverride
@@ -85,6 +80,12 @@ namespace Peach.Core.Dom
 			set
 			{
 				countOverride = value;
+
+				if (Count == 0)
+					expandedValue = OriginalElement.Value;
+				else
+					expandedValue = this[Count - 1].Value;
+
 				Invalidate();
 			}
 		}
@@ -261,10 +262,41 @@ namespace Peach.Core.Dom
 			for (int i = 0; remain > 0 && i < Count; ++i, --remain)
 				stream.Add(this[i].Value);
 
-			var elem = Count == 0 ? OriginalElement : this[Count - 1];
+			if (remain == 0)
+				return new Variant(stream);
 
-			while (remain-- > 0)
-				stream.Add(elem.Value);
+			// If we are here, it is because of CountOverride being set!
+			System.Diagnostics.Debug.Assert(countOverride.HasValue);
+			System.Diagnostics.Debug.Assert(expandedValue != null);
+
+			var halves = new Stack<Tuple<long, bool>>();
+			halves.Push(null);
+
+			while (remain > 1)
+			{
+				bool carry = remain % 2 == 1;
+				remain /= 2;
+				halves.Push(new Tuple<long, bool>(remain, carry));
+			}
+
+			var value = expandedValue;
+			var toAdd = value;
+
+			var item = halves.Pop();
+
+			while (item != null)
+			{
+				var lst = new BitStreamList();
+				lst.Add(toAdd);
+				lst.Add(toAdd);
+				if (item.Item2)
+					lst.Add(value);
+
+				toAdd = lst;
+				item = halves.Pop();
+			}
+
+			stream.Add(toAdd);
 
 			return new Variant(stream);
 		}

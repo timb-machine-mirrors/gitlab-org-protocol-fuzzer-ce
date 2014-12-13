@@ -28,20 +28,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Threading;
-using System.Net.Sockets;
 using System.Net;
-using Peach.Core.Dom;
+using System.Net.Sockets;
 using NLog;
-
 using Peach.Core;
-using Peach.Core.Publishers;
-using Peach.Core.IO;
 
-namespace Peach.Pro.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	internal static class RawHelpers
 	{

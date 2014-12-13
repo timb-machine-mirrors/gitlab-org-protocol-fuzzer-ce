@@ -1,14 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Xml.XPath;
-
-using NLog;
-
-using Peach.Core;
-using Peach.Core.IO;
-using Peach.Core.Dom;
 
 namespace Peach.Core.Dom.XPath
 {
@@ -25,10 +18,6 @@ namespace Peach.Core.Dom.XPath
 	/// </remarks>
 	public class PeachXPathNavigator : XPathNavigator
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
-
-		protected List<object> moveToHistory = new List<object>();
-
 		/// <summary>
 		/// Attributes for each known type
 		/// </summary>
@@ -158,7 +147,7 @@ namespace Peach.Core.Dom.XPath
 
 		public override bool MoveTo(XPathNavigator other)
 		{
-			logger.Trace("MoveTo");
+			//logger.Trace("MoveTo");
 
 			var otherXpath = other as PeachXPathNavigator;
 			if(otherXpath == null)
@@ -174,7 +163,7 @@ namespace Peach.Core.Dom.XPath
 
 		public override bool MoveToFirstAttribute()
 		{
-			logger.Trace("MoveToFirstAttribute");
+			//logger.Trace("MoveToFirstAttribute");
 
 			iteratingAttributes = true;
 			attributeIndex = 0;
@@ -183,8 +172,17 @@ namespace Peach.Core.Dom.XPath
 
 		public override bool MoveToFirstChild()
 		{
-			logger.Trace("MoveToFirstChild(" + ((INamed)currentNode).name + ")");
+			//logger.Trace("MoveToFirstChild(" + ((INamed)currentNode).name + ")");
 
+			if (currentNode is Choice)
+			{
+				var container = currentNode as Choice;
+				if (container.choiceElements.Count == 0)
+					return false;
+
+				currentNode = container.choiceElements[0];
+				return true;
+			}
 			if (currentNode is DataElementContainer)
 			{
 				var container = currentNode as DataElementContainer;
@@ -259,21 +257,21 @@ namespace Peach.Core.Dom.XPath
 
 		public override bool MoveToFirstNamespace(XPathNamespaceScope namespaceScope)
 		{
-			logger.Trace("MoveToFirstNamespace");
+			//logger.Trace("MoveToFirstNamespace");
 
 			return false;
 		}
 
 		public override bool MoveToId(string id)
 		{
-			logger.Trace("MoveToId");
+			//logger.Trace("MoveToId");
 
 			return false;
 		}
 
 		public override bool MoveToNext()
 		{
-			logger.Trace("MoveToNext(" + ((INamed)currentNode).name + ")");
+			//logger.Trace("MoveToNext(" + ((INamed)currentNode).name + ")");
 
 			if (currentNodeType == PeachXPathNodeType.Root)
 				return false;
@@ -312,8 +310,26 @@ namespace Peach.Core.Dom.XPath
 				currentNodeType = PeachXPathNodeType.DataModel;
 				return true;
 			}
-			else if (currentNode is DataElement)
+
+			if (currentNode is DataElement)
 			{
+				var asChoice = parent as Choice;
+
+				if (asChoice != null)
+				{
+					var curr = (DataElement)currentNode;
+					var next = asChoice.choiceElements
+						.Select(kv => kv.Value)
+						.SkipWhile(e => e != curr)
+						.ElementAtOrDefault(1);
+
+					if (next == null)
+						return false;
+
+					currentNode = next;
+					return true;
+				}
+
 				if (parent is DataElementContainer)
 				{
 					var curr = currentNode as DataElement;
@@ -384,7 +400,7 @@ namespace Peach.Core.Dom.XPath
 
 		public override bool MoveToNextAttribute()
 		{
-			logger.Trace("MoveToNextAttribute");
+			//logger.Trace("MoveToNextAttribute");
 
 			if (GetCurrentNodeAttributeMatrix().Length <= (attributeIndex + 1))
 				return false;
@@ -407,14 +423,14 @@ namespace Peach.Core.Dom.XPath
 
 		public override bool MoveToNextNamespace(XPathNamespaceScope namespaceScope)
 		{
-			logger.Trace("MoveToNextNamespace");
+			//logger.Trace("MoveToNextNamespace");
 
 			return false;
 		}
 
 		public override bool MoveToParent()
 		{
-			logger.Trace("MoveToParent(" +currentNode.GetType() + ":" + ((INamed)currentNode).name + ")");
+			//logger.Trace("MoveToParent({0}:{1})", currentNode.GetType(), ((INamed)currentNode).name);
 
 			if (iteratingAttributes)
 			{
@@ -454,7 +470,7 @@ namespace Peach.Core.Dom.XPath
 
 		public override bool MoveToPrevious()
 		{
-			logger.Trace("MoveToPrevious");
+			//logger.Trace("MoveToPrevious");
 
 			throw new NotImplementedException();
 		}

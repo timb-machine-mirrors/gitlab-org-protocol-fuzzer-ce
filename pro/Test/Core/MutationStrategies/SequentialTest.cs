@@ -1,15 +1,11 @@
-﻿using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Text;
-using Peach.Core;
-using Peach.Core.Dom;
-using Peach.Core.Analyzers;
-using Peach.Core.IO;
+﻿using System.IO;
 using NUnit.Framework;
-using Peach.Core.MutationStrategies;
+using Peach.Core;
+using Peach.Core.Analyzers;
+using Peach.Core.Test;
+using Peach.Pro.Core.MutationStrategies;
 
-namespace Peach.Core.Test.MutationStrategies
+namespace Peach.Pro.Test.Core.MutationStrategies
 {
 	[TestFixture] [Category("Peach")]
 	class SequentialTest : DataModelCollector
@@ -253,7 +249,7 @@ namespace Peach.Core.Test.MutationStrategies
 			string xml = string.Format(template, tempFile);
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;

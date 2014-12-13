@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Random = Peach.Core.Random;
 
-namespace Peach.Core
+namespace Peach.Pro.Core
 {
 	/// <summary>
 	/// Computes the edge cases of numbers inside a given space.

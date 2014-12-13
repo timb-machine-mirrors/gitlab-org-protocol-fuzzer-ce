@@ -41,8 +41,7 @@ def configure(conf):
 
 	# Ensure fopub is initialized
 	test = conf.bldnode.make_node('docbook_test.xml')
-	pdf = test.change_ext('.pdf')
-	if not os.path.isfile(pdf.abspath()):
+	if not os.path.isfile(test.abspath()):
 		test.write('''<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <article lang="en">
@@ -64,7 +63,7 @@ def configure(conf):
 	]
 
 	conf.env['JAVA_OPTS'] = [
-		'-Xmx2024M',
+		'-Xmx3000M',
 	]
 
 	conf.env.append_value('SGML_CATALOG_FILES', [ j(pub, 'docbook-xml-4.5', 'catalog.xml') ])
@@ -77,7 +76,6 @@ def configure(conf):
 	]
 
 	docbook = j('docs', 'publishing', 'docbook-xsl-1.78.1')
-	conf.env['WEBHELP_ICO'] = j('docs', 'publishing', 'favicon.ico')
 	conf.env['WEBHELP_DIR'] = j(docbook, 'webhelp')
 	conf.env['WEBHELP_XSL'] = j(conf.path.abspath(), docbook, 'webhelp', 'xsl', 'webhelp.xsl')
 
@@ -209,13 +207,6 @@ def apply_webhelp(self):
 	if inst:
 		self.install_extras.append(inst)
 
-	# Install favicon to BINDIR
-	ico = root.find_resource(self.env.WEBHELP_ICO)
-	inst = self.bld.install_files('${BINDIR}/%s/docs' % self.name, ico, cwd = ico.parent, relative_trick = True, chmod = Utils.O644)
-	if inst:
-		self.install_extras.append(inst)
-
-
 @extension('.adoc')
 def adoc_hook(self, node):
 	xml = node.change_ext('.%d.xml' % self.idx)
@@ -262,12 +253,12 @@ class xmllint(Task):
 	before  = [ 'fopub', 'webhelp' ]
 	vars    = [ 'XMLLINT_OPTS' ]
 
-	def exec_command(self, *k, **kw):
+	def exec_command(self, cmd, **kw):
 		env = dict(self.env.env or os.environ)
 		env.update(SGML_CATALOG_FILES = ';'.join(self.env['SGML_CATALOG_FILES']))
 		kw['env'] = env
 
-		return super(xmllint, self).exec_command(*k, **kw)
+		return super(xmllint, self).exec_command(cmd, **kw)
 
 class pdfmerge(Task):
 	run_str = '${GS} ${GS_OPTS} -sOutputFile= ${TGT} ${SRC}'
@@ -286,7 +277,7 @@ class pdfmerge(Task):
 					carry = ''
 			cmd = lst
 
-		Task.exec_command(self, cmd, **kw)
+		return super(pdfmerge, self).exec_command(cmd, **kw)
 
 class webhelp(Task):
 	run_str = '${XSLTPROC} ${WEBHELP_XSL} ${SRC[0].abspath()}'
@@ -308,7 +299,7 @@ class webhelp(Task):
 
 		kw['cwd'] = self.cwd
 
-		Task.exec_command(self, cmd, **kw)
+		return super(webhelp, self).exec_command(cmd, **kw)
 
 @update_outputs
 class webindex(Task):
@@ -320,10 +311,13 @@ class webindex(Task):
 	def exec_command(self, cmd, **kw):
 		# Force 'cwd' to be output_dir
 		kw['cwd'] = self.generator.output_dir.abspath()
-		Task.exec_command(self, cmd, **kw)
+		ret = super(webindex, self).exec_command(cmd, **kw)
 
-		# gather the list of output files from webhelp and webindex
-		self.outputs = self.generator.output_dir.ant_glob('**/*', quiet=True)
+		if not ret:
+			# gather the list of output files from webhelp and webindex
+			self.outputs = self.generator.output_dir.ant_glob('**/*', quiet=True)
+
+		return ret
 
 class fopub(Task): 
 	run_str = '${FOPUB} ${SRC} ${FOPUB_OPTS}'
@@ -331,9 +325,9 @@ class fopub(Task):
 	vars    = [ 'FOPUB_OPTS', 'JAVA_OPTS' ]
 	after   = [ 'xmllint' ]
 
-	def exec_command(self, *k, **kw):
+	def exec_command(self, cmd, **kw):
 		env = dict(self.env.env or os.environ)
 		env.update(JAVA_OPTS = ' '.join(self.env['JAVA_OPTS']))
 		kw['env'] = env
 
-		return super(fopub, self).exec_command(*k, **kw)
+		return super(fopub, self).exec_command(cmd, **kw)

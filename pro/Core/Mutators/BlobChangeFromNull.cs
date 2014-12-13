@@ -2,13 +2,11 @@
 // Copyright (c) Deja vu Security
 //
 
-using System;
-using System.IO;
-
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	/// <summary>
 	/// Alter the blob by a random number of bytes between 1 and 100.

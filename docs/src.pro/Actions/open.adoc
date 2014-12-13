@@ -1,6 +1,6 @@
 <<<
 [[Action_open]]
-== open and connect
+== open, connect
 
 // 01/30/2014: Seth & Mike: Outlined
 //  * Talk about open being implicit, when
@@ -27,26 +27,27 @@
 // 03/05/2014: Lynn: 
 //  Edited text 
 
-The _open_ (or _connect_) action will cause the associated publisher to open its resource.
+The _open_ (or _connect_) action is an implicit action that causes the associated publisher to open its resource. 
+The _open_ Action executes by default at the start of each iteration.
 
-* For the xref:Publishers_File[File publisher], this will open the file handle.
-* For the xref:Publishers_Tcp[TCP publisher] it will initiate the network connection.
+Each Publisher is an I/O adapter and performs the _open_ Action according to its resource needs, as in the following examples: 
 
-Open is an implicit action that occurs by default at the start of each iteration. 
+* The xref:Publishers_File[File publisher] opens a file handle.
+* The xref:Publishers_Tcp[TCP publisher] initiates a network connection.
 
-The only time you need to explicitly call the _open_ action is when the default behavior needs to be changed (for example, when listening for an initial incoming UDP packet because unlike the xref:Action_accept[_accept_] action used with TCP, UDP does not block while accepting incoming packets).
+The only time to declare the _open_ action in the StateModel is when the default behavior needs to be modified.
 
-NOTE: _connect_ is a pseudonym for _open_. They can be used interchangeably.
+NOTE: _connect_ is an alias for _open_. Both names can be used interchangeably.
 
 .Default Order of Actions
 ****
 The following is the default order in which Actions are performed when fuzzing:
 
-. start - Implicit, once per session
-. open - Implicit, once per iteration
-. Explicit actions (accept, input, output, etc.)
-. close - Implicit, once per iteration
-. stop - Implicit, once per session
+. _start_ - Implicit, once per session
+. _open_ - Implicit, once per iteration
+. Explicit actions (_accept_, _input_, _output_, etc.)
+. _close_ - Implicit, once per iteration
+. _stop_ - Implicit, once per session
 ****
 
 === Syntax
@@ -90,20 +91,20 @@ type:: Action type, must be set to "open" or "connect"
 _Optional:_
 
 name:: Name used to identify the action
-publisher:: Name of the publisher that this action should be called on
-xref:Action_when[when]:: Only perform action if the expression provided evaluates to true
-xref:Action_onStart[onStart]:: Expression to run on start of an action
-xref:Action_onComplete[onComplete]:: Expression to run on completion of an action
+publisher:: Name of the publisher to perform this action
+xref:Action_when[when]:: Perform action if the provided expression evaluates to true
+xref:Action_onStart[onStart]:: Evaluate the expression at the start of an action
+xref:Action_onComplete[onComplete]:: Evaluate the expression upon completion of an action
 
 === Child Elements
 
-No child elements are supported by this element.
+None.
 
 === Examples
 
 .Implicit Use of _open_ Action
 ==========================
-This is an example of the default implicit behaviour of _open_.
+This is an example of the default implicit behaviour of _open_. Note the absence of any declaration for _open_.
 
 [source,xml]
 ----
@@ -142,7 +143,7 @@ This is an example of the default implicit behaviour of _open_.
 <!-- end -->
 ----
 
-When run the following output is generated.
+Output from executing the previous pit.
 
 ----
 > peach -1 --debug C:\temp\example.xml
@@ -171,7 +172,7 @@ Peach.Core.Publishers.FilePublisher stop()
 
 .Explicit Use of _open_ Action
 ==========================
-In this example _open_ and xref:Action_close[_close_] actions are used explicitly to perform two connections using the same publisher.
+In this example, the _open_ and xref:Action_close[_close_] actions are used explicitly to perform two connections using the same publisher.
 
 [source,xml]
 ----
@@ -224,7 +225,7 @@ In this example _open_ and xref:Action_close[_close_] actions are used explicitl
 </Peach>
 ----
 
-The netcat program can be used to simulate a listener. Netcat will get run twice, once per connection.
+The netcat program can be used to simulate a listener. Netcat will run twice, once per connection.
 
 ---------------------
 > nc -l 31337 ; echo "====" ; nc -l 31337
@@ -233,7 +234,7 @@ Connection #1
 Connection #2
 ---------------------
 
-When run the following output is generated.
+Output from this example. 
 
 ----
 > peach -1 --debug example.xml

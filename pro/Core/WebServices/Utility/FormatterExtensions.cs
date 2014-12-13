@@ -1,9 +1,7 @@
-using Nancy;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using Nancy;
 
-namespace Peach.Enterprise.WebServices.Utility
+namespace Peach.Pro.Core.WebServices.Utility
 {
 	public static class FormatterExtensions
 	{

@@ -1,16 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-
-using Peach.Core;
-using Peach.Core.IO;
-using Peach.Core.Dom;
-
-using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Crypto.Tls;
-using NLog;
+using Peach.Core;
+using Peach.Core.Dom;
+using Peach.Core.IO;
 
-namespace Peach.Enterprise.Transformers.Crypto
+namespace Peach.Pro.Core.Transformers.Crypto
 {
 	[Description("Tls Transformer")]
 	[Transformer("Tls", true, IsTest = true)]

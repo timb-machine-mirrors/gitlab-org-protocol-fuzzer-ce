@@ -424,6 +424,8 @@ class vsnode_cs_target(msvs.vsnode_project):
 
 		if isinstance(val, dict):
 			for cwd, items in val.iteritems():
+				if isinstance(cwd, str):
+					cwd = self.path.find_node(cwd)
 				self.collect_install2(lst, items, cwd)
 		else:
 			self.collect_install2(lst, val, self.tg.path)
@@ -449,12 +451,13 @@ class vsnode_cs_target(msvs.vsnode_project):
 				lst[x.abspath()] = source_file('Compile', self, x)
 
 		if hasattr(tg, 'tsc'):
-			srcs = tg.to_nodes(tg.tsc.inputs, [])
-			for x in srcs:
-				lst[x.abspath()] = source_file('TypeScriptCompile', self, x)
+			for tsc in tg.tsc:
+				srcs = tg.to_nodes(tsc.inputs, [])
+				for x in srcs:
+					lst[x.abspath()] = source_file('TypeScriptCompile', self, x)
 
-			for x in tg.tsc.tsc_deps[0]:
-				lst[x.abspath()] = source_file('TypeScriptCompile', self, x)				
+				for x in tsc.tsc_deps[0]:
+					lst[x.abspath()] = source_file('TypeScriptCompile', self, x)				
 
 		# extra sources if you want
 		srcs = tg.to_nodes(getattr(tg, 'ide_source', []))
@@ -611,7 +614,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 		platform = tg.env.CSPLATFORM
 		config = self.ctx.get_config(tg.bld, tg.env)
 
-		out_node = base.make_node(['bin', platform, config])
+		out_node = base.make_node(['bin', '%s_%s' % (config, platform)])
 
 		if getattr(tg, 'ide_aspnet', False):
 			out = 'bin'
@@ -676,7 +679,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 		p['AllowUnsafeBlocks'] = getattr(tg, 'unsafe', False)
 
 		if getattr(tg, 'tsc', False):
-			self.global_props['TypeScriptOutDir'] = 'app\\js'
+			self.global_props['TypeScriptOutFile'] = tg.tsc_out[0]
 
 		# Add ide_use task generator outputs as post build copy
 		# Using abspath since macros like $(ProjectDir) don't seem to work

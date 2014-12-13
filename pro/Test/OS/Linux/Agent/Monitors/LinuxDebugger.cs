@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NUnit.Framework;
-
-using Peach.Core.OS.Linux.Agent.Monitors;
-using System.Threading;
 using System.Reflection;
+using System.Threading;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Pro.OS.Linux.Agent.Monitors;
 
-namespace Peach.Core.Test.OS.Linux.Agent.Monitors
+namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 {
 	[TestFixture] [Category("Peach")]
 	public class LinuxDebuggerTests
@@ -34,7 +32,7 @@ namespace Peach.Core.Test.OS.Linux.Agent.Monitors
 			Assert.AreEqual(1, fault.collectedData.Count);
 			Assert.AreEqual("StackTrace.txt", fault.collectedData[0].Key);
 			Assert.Greater(fault.collectedData[0].Value.Length, 0);
-			Assert.True(fault.description.Contains("PossibleStackCorruption"));
+			Assert.That(fault.description, Is.StringContaining("PossibleStackCorruption"));
 			m.SessionFinished();
 			m.StopMonitor();
 		}

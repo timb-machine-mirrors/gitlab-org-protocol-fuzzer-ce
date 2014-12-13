@@ -1,7 +1,6 @@
-using System;
 using System.Collections.Generic;
 
-namespace Peach.Enterprise.WebServices.Models
+namespace Peach.Pro.Core.WebServices.Models
 {
 	/// <summary>
 	/// An arbitrary tag that is included with various models.

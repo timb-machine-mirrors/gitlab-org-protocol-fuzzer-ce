@@ -36,9 +36,6 @@ using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Threading;
-
-using Peach.Core.Publishers.Com;
-
 using NLog;
 
 namespace Peach.Core.ComContainer

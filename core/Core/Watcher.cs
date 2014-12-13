@@ -27,9 +27,7 @@
 // $Id$
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using Peach.Core.Dom;
 using Peach.Core.Agent;
 
@@ -42,23 +40,19 @@ namespace Peach.Core
 	[Serializable]
 	public abstract class Watcher
 	{
-		public Watcher()
-		{
-		}
-
 		public void Initialize(Engine engine, RunContext context)
 		{
-			engine.TestStarting += new Engine.TestStartingEventHandler(Engine_TestStarting);
-			engine.TestFinished += new Engine.TestFinishedEventHandler(Engine_TestFinished);
-			engine.TestError += new Engine.TestErrorEventHandler(Engine_TestError);
-			engine.TestWarning += new Engine.TestWarningEventHandler(Engine_TestWarning);
-			engine.IterationStarting += new Engine.IterationStartingEventHandler(Engine_IterationStarting);
-			engine.IterationFinished += new Engine.IterationFinishedEventHandler(Engine_IterationFinished);
-			engine.Fault += new Engine.FaultEventHandler(Engine_Fault);
-			engine.ReproFault += new Engine.ReproFaultEventHandler(Engine_ReproFault);
-			engine.ReproFailed += new Engine.ReproFailedEventHandler(Engine_ReproFailed);
-			engine.HaveCount += new Engine.HaveCountEventHandler(Engine_HaveCount);
-			engine.HaveParallel += new Engine.HaveParallelEventHandler(Engine_HaveParallel);
+			engine.TestStarting += Engine_TestStarting;
+			engine.TestFinished += Engine_TestFinished;
+			engine.TestError += Engine_TestError;
+			engine.TestWarning += Engine_TestWarning;
+			engine.IterationStarting += Engine_IterationStarting;
+			engine.IterationFinished += Engine_IterationFinished;
+			engine.Fault += Engine_Fault;
+			engine.ReproFault += Engine_ReproFault;
+			engine.ReproFailed += Engine_ReproFailed;
+			engine.HaveCount += Engine_HaveCount;
+			engine.HaveParallel += Engine_HaveParallel;
 
 			context.DataMutating += DataMutating;
 			context.StateMutating += StateMutating;

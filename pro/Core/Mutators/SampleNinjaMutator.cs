@@ -2,9 +2,6 @@
 // Copyright (c) Deja vu Security
 //
 
-using System;
-using System.IO;
-
 #if MONO
 using Mono.Data.Sqlite;
 
@@ -14,12 +11,13 @@ using SQLiteParameter = Mono.Data.Sqlite.SqliteParameter;
 #else
 using System.Data.SQLite;
 #endif
-
+using System;
+using System.IO;
+using NLog;
+using Peach.Core;
 using Peach.Core.Dom;
 
-using NLog;
-
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("SampleNinja")]
 	[Description("Will use existing samples to generate mutated files.")]

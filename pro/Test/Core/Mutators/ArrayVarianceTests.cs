@@ -1,9 +1,7 @@
-using System;
-using Peach.Core;
-using Peach.Core.Mutators;
 using NUnit.Framework;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class ArrayVarianceTests : DataModelCollector
@@ -20,8 +18,8 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("ArrayVariance");
 
-			var array = new Dom.Array("Array");
-			array.OriginalElement = new Dom.String("Str");
+			var array = new Peach.Core.Dom.Array("Array");
+			array.OriginalElement = new Peach.Core.Dom.String("Str");
 			array.ExpandTo(0);
 
 			// Empty array can be expanded
@@ -40,6 +38,42 @@ namespace Peach.Core.Test.Mutators
 
 			array.isMutable = false;
 			Assert.False(runner.IsSupported(array));
+		}
+
+		[Test]
+		public void TestMaxOutputSize()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str' value='Hello World' minOccurs='1' />
+	</DataModel>
+
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action> 
+		</State>
+	</StateModel>
+
+	<Test name='Default' maxOutputSize='1024'>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+		<Strategy class='Sequential'/>
+		<Mutators mode='include'>
+			<Mutator class='ArrayVariance' />
+		</Mutators>
+	</Test>
+</Peach>
+";
+
+			RunEngine(xml);
+
+			// Size is 11 bytes, max is 1024, default is 11 bytes
+			// (1024 - 11)/11 - 1 (skip 0) = 91
+			// plus 1 reduce for 92 mutations total
+			Assert.AreEqual(92, mutatedDataModels.Count);
 		}
 	}
 }

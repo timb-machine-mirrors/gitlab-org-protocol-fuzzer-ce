@@ -1,132 +1,37 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
-using NUnit.Framework;
-using NUnit.Framework.Constraints;
-using Peach.Core;
-using Peach.Core.Dom;
-using Peach.Core.Analyzers;
-using Peach.Core.IO;
-using Peach.Core.Agent;
-using System.Collections;
-using System.Net.NetworkInformation;
-using System.Net;
-using System.Net.Sockets;
 using System.Diagnostics;
-using System.Threading;
+using System.Globalization;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Monitors
+namespace Peach.Pro.Test.Core.Monitors
 {
 	[TestFixture] [Category("Peach")]
 	class MemoryMonitorTests
 	{
-		class Params : Dictionary<string, string> { }
-
-		int thisPid;
-		private string faultIteration;
-		private Fault[] faults;
+		string _thisPid;
 
 		[SetUp]
 		public void SetUp()
 		{
 			using (var p = Process.GetCurrentProcess())
 			{
-				thisPid = p.Id;
-			}
-
-			faultIteration = "0";
-			faults = null;
-		}
-
-		void _Fault(RunContext context, uint currentIteration, Dom.StateModel stateModel, Fault[] faults)
-		{
-			Assert.Null(this.faults);
-			this.faults = faults;
-		}
-
-		string MakeXml(Params parameters)
-		{
-			string fmt = "<Param name='{0}' value='{1}'/>";
-
-			string template = @"
-<Peach>
-	<DataModel name='TheDataModel'>
-		<String value='Hello' mutable='false'/>
-	</DataModel>
-
-	<StateModel name='TheState' initialState='Initial'>
-		<State name='Initial'>
-			<Action type='output'>
-				<DataModel ref='TheDataModel'/>
-			</Action>
-		</State>
-	</StateModel>
-
-	<Agent name='LocalAgent'>
-		<Monitor class='FaultingMonitor'>
-			<Param name='Iteration' value='{0}'/>
-		</Monitor>
-		<Monitor class='Memory'>
-{1}
-		</Monitor>
-	</Agent>
-
-	<Test name='Default' replayEnabled='false'>
-		<Agent ref='LocalAgent'/>
-		<StateModel ref='TheState'/>
-		<Publisher class='Null'/>
-		<Strategy class='RandomDeterministic'/>
-	</Test>
-</Peach>";
-
-			var items = parameters.Select(kv => string.Format(fmt, kv.Key, kv.Value));
-			var joined = string.Join(Environment.NewLine, items);
-			var ret = string.Format(template, faultIteration, joined);
-
-			return ret;
-		}
-
-		private void Run(Params parameters, bool shouldFault)
-		{
-			string xml = MakeXml(parameters);
-
-			PitParser parser = new PitParser();
-
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("StringCaseMutator");
-
-			RunConfiguration config = new RunConfiguration();
-
-			Engine e = new Engine(null);
-			e.Fault += _Fault;
-
-			if (!shouldFault)
-			{
-				e.startFuzzing(dom, config);
-				return;
-			}
-
-			try
-			{
-				e.startFuzzing(dom, config);
-				Assert.Fail("Should throw.");
-			}
-			catch (PeachException ex)
-			{
-				Assert.AreEqual("Fault detected on control iteration.", ex.Message);
+				_thisPid = p.Id.ToString(CultureInfo.InvariantCulture);
 			}
 		}
 
 		[Test]
 		public void TestBadPid()
 		{
-			Run(new Params { { "Pid", "2147483647" } }, true);
+			var runner = new MonitorRunner("Memory", new Dictionary<string,string>
+			{
+				{ "Pid", "2147483647" },
+			});
 
-			// verify values
+			var faults = runner.Run();
+
 			Assert.NotNull(faults);
 			Assert.AreEqual(1, faults.Length);
 			Assert.AreEqual("Unable to locate process with Pid 2147483647.", faults[0].title);
@@ -135,75 +40,124 @@ namespace Peach.Core.Test.Monitors
 		[Test]
 		public void TestBadProcName()
 		{
-			Run(new Params { { "ProcessName", "some_invalid_process" } }, true);
+			var runner = new MonitorRunner("Memory", new Dictionary<string, string>
+			{
+				{ "ProcessName", "some_invalid_process" },
+			});
 
-			// verify values
+			var faults = runner.Run();
+
 			Assert.NotNull(faults);
 			Assert.AreEqual(1, faults.Length);
 			Assert.AreEqual("Unable to locate process \"some_invalid_process\".", faults[0].title);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Could not start monitor \"Memory\".  Either pid or process name is required.")]
+		[Test]
 		public void TestNoParams()
 		{
-			Run(new Params(), false);
+			var ex = Assert.Throws<PeachException>(() =>
+				new MonitorRunner("Memory", new Dictionary<string, string>())
+			);
+
+			const string msg = "Could not start monitor \"Memory\".  Either pid or process name is required.";
+
+			Assert.AreEqual(msg, ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Could not start monitor \"Memory\".  Only specify pid or process name, not both.")]
+		[Test]
 		public void TestAllParams()
 		{
-			Run(new Params { { "Pid", "1" }, { "ProcessName", "name" } }, false);
+			var ex = Assert.Throws<PeachException>(() => 
+				new MonitorRunner("Memory", new Dictionary<string, string>
+				{
+					{ "Pid", "1" },
+					{ "ProcessName", "name" },
+				})
+			);
+
+			const string msg = "Could not start monitor \"Memory\".  Only specify pid or process name, not both.";
+
+			Assert.AreEqual(msg, ex.Message);
 		}
 
 		[Test]
 		public void TestNoFault()
 		{
 			// If no fault occurs, no data should be returned
-			Run(new Params { { "Pid", thisPid.ToString() } }, false);
 
-			// verify values
-			Assert.Null(faults);
+			var runner = new MonitorRunner("Memory", new Dictionary<string, string>
+			{
+				{ "Pid", _thisPid },
+			});
+
+			var faults = runner.Run();
+
+			Assert.AreEqual(0, faults.Length);
 		}
 
 		[Test]
 		public void TestFaultData()
 		{
-			// If fault occurs, monitor should always return data
-			faultIteration = "C";
+			// If a different fault occurs, monitor should always return data
 
-			Run(new Params { { "Pid", thisPid.ToString() } }, true);
+			var runner = new MonitorRunner("Memory", new Dictionary<string, string>
+			{
+				{ "Pid", _thisPid },
+			})
+			{
+				DetectedFault = m =>
+				{
+					Assert.False(m.DetectedFault(), "Memory monitor should not have detected fault");
 
-			// verify values
-			Assert.NotNull(faults);
-			Assert.AreEqual(2, faults.Length);
-			Assert.AreEqual("FaultingMonitor", faults[0].detectionSource);
-			Assert.AreEqual(FaultType.Fault, faults[0].type);
-			Assert.AreEqual("MemoryMonitor", faults[1].detectionSource);
-			Assert.AreEqual(FaultType.Data, faults[1].type);
+					// Cause GetMonitorData() to be called
+					return true;
+				}
+			};
+
+			var faults = runner.Run();
+
+			Assert.AreEqual(1, faults.Length);
+			Assert.AreEqual("MemoryMonitor", faults[0].detectionSource);
+			Assert.AreEqual(FaultType.Data, faults[0].type);
+
+			Console.WriteLine("{0}\n{1}\n", faults[0].title, faults[0].description);
 		}
 
 		[Test]
-		public void TestMemoryLimit()
+		public void TestFaultProcessId()
 		{
-			// If memory limit is exceeded, monitor should generate a fault
-			Run(new Params { { "Pid", thisPid.ToString() }, { "MemoryLimit", "1" } }, true);
+			// Verify can generate faults using process id
 
-			// verify values
-			Assert.NotNull(faults);
+			var runner = new MonitorRunner("Memory", new Dictionary<string, string>
+			{
+				{ "Pid", _thisPid },
+				{ "MemoryLimit", "1" },
+			});
+
+			var faults = runner.Run();
+
 			Assert.AreEqual(1, faults.Length);
 			Assert.AreEqual("MemoryMonitor", faults[0].detectionSource);
 			Assert.AreEqual(FaultType.Fault, faults[0].type);
+
+			Console.WriteLine("{0}\n{1}\n", faults[0].title, faults[0].description);
 		}
 
 		[Test]
-		public void TestProcessName()
+		public void TestFaultProcessName()
 		{
-			string proc = Platform.GetOS() == Platform.OS.Windows ? "explorer.exe" : "sshd";
+			// Verify can generate faults using process name
 
-			Run(new Params { { "ProcessName", proc }, { "MemoryLimit", "1" } }, true);
+			var proc = Platform.GetOS() == Platform.OS.Windows ? "explorer.exe" : "sshd";
 
-			// verify values
-			Assert.NotNull(faults);
+			var runner = new MonitorRunner("Memory", new Dictionary<string, string>
+			{
+				{ "ProcessName", proc },
+				{ "MemoryLimit", "1" },
+			});
+
+			var faults = runner.Run();
+
 			Assert.AreEqual(1, faults.Length);
 			Assert.AreEqual("MemoryMonitor", faults[0].detectionSource);
 			Assert.AreEqual(FaultType.Fault, faults[0].type);
