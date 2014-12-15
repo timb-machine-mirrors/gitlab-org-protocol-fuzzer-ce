@@ -15,8 +15,8 @@ module Peach {
 		constructor(
 			$scope: IViewModelScope,
 			$routeParams: ng.route.IRouteParamsService,
-			private jobService: Services.JobService,
-			private faultDetailResource: Models.IFaultDetailResource
+			private jobService: JobService,
+			private faultDetailResource: IFaultDetailResource
 		) {
 			$scope.vm = this;
 			this.bucket = $routeParams['bucket'];
@@ -36,11 +36,11 @@ module Peach {
 			this.Faults = _.clone(this.AllFaults);
 		}
 
-		public get Job(): Models.IJob {
+		public get Job(): IJob {
 			return this.jobService.Job;
 		}
 
-		public get AllFaults(): Models.IFaultSummary[] {
+		public get AllFaults(): IFaultSummary[] {
 			if (this.bucket === "all") {
 				return this.jobService.Faults;
 			}
@@ -48,9 +48,9 @@ module Peach {
 		}
 
 		private bucket: string;
-		private bucketFaults: Models.IFaultSummary[];
+		private bucketFaults: IFaultSummary[];
 
-		public Faults: Models.IFaultSummary[];
+		public Faults: IFaultSummary[];
 
 		public get IsFaultSelected(): boolean {
 			return !_.isUndefined(this.CurrentFault);
@@ -58,20 +58,20 @@ module Peach {
 
 		public Title: string = "All Faults";
 
-		public CurrentFault: Models.IFaultDetail;
+		public CurrentFault: IFaultDetail;
 
 		public IsDetailActive: boolean;
 
-		public OnFaultSelected(fault: Models.IFaultSummary) {
+		public OnFaultSelected(fault: IFaultSummary) {
 			var promise = this.faultDetailResource.get({ id: ExtractId('faults', fault.faultUrl) });
-			promise.$promise.then((detail: Models.IFaultDetail) => {
+			promise.$promise.then((detail: IFaultDetail) => {
 				this.CurrentFault = detail;
 				this.IsDetailActive = true;
 			});
 		}
 
 		private refreshBucketFaults() {
-			this.bucketFaults = _.filter(this.jobService.Faults, (fault: Models.IFaultSummary) => {
+			this.bucketFaults = _.filter(this.jobService.Faults, (fault: IFaultSummary) => {
 				return this.bucket === (fault.majorHash + '_' + fault.minorHash);
 			});
 		}

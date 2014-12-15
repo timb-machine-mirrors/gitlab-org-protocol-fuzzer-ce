@@ -21,7 +21,7 @@ module Peach {
 	}
 
 	export interface IParameterScope extends IFormScope {		
-		param: Models.IParameter;
+		param: IParameter;
 	}
 
 	export class ParameterController {
@@ -32,7 +32,7 @@ module Peach {
 
 		constructor(
 			private $scope: IParameterScope,
-			private pitService: Services.PitService
+			private pitService: PitService
 		) {
 			$scope.vm = this;
 		}

@@ -12,7 +12,7 @@ module Peach {
 		start: Date;
 		title?: string;
 		type?: string;
-		data?: Models.IBucketTimelineMetric
+		data?: IBucketTimelineMetric
 	}
 
 	export interface ITimelineOptions {
@@ -67,7 +67,7 @@ module Peach {
 			$routeParams: ng.route.IRouteParamsService,
 			private $http: ng.IHttpService,
 			private visDataSet,
-			private jobService: Services.JobService
+			private jobService: JobService
 		) {
 			$scope.vm = this;
 			this.metric = $routeParams['metric'];
@@ -80,20 +80,20 @@ module Peach {
 
 		private metric: string;
 
-		public MutatorData: Models.IMutatorMetric[] = [];
-		public AllMutatorData: Models.IMutatorMetric[] = [];
+		public MutatorData: IMutatorMetric[] = [];
+		public AllMutatorData: IMutatorMetric[] = [];
 
-		public ElementData: Models.IElementMetric[] = [];
-		public AllElementData: Models.IElementMetric[] = [];
+		public ElementData: IElementMetric[] = [];
+		public AllElementData: IElementMetric[] = [];
 
-		public DatasetData: Models.IDatasetMetric[] = [];
-		public AllDatasetData: Models.IDatasetMetric[] = [];
+		public DatasetData: IDatasetMetric[] = [];
+		public AllDatasetData: IDatasetMetric[] = [];
 
-		public StateData: Models.IStateMetric[] = [];
-		public AllStateData: Models.IStateMetric[] = [];
+		public StateData: IStateMetric[] = [];
+		public AllStateData: IStateMetric[] = [];
 
-		public BucketData: Models.IBucketMetric[] = [];
-		public AllBucketData: Models.IBucketMetric[] = [];
+		public BucketData: IBucketMetric[] = [];
+		public AllBucketData: IBucketMetric[] = [];
 
 		public MetricsFaultsOverTimeData: LinearChartData = {
 			labels: [],
@@ -167,8 +167,8 @@ module Peach {
 			var promise = this.getData();
 			switch (this.metric) {
 			case "bucketTimeline":
-				promise.success((data: Models.IBucketTimelineMetric[]) => {
-					var items = data.map((item: Models.IBucketTimelineMetric) => {
+				promise.success((data: IBucketTimelineMetric[]) => {
+					var items = data.map((item: IBucketTimelineMetric) => {
 						return <ITimelineItem> {
 							id: item.id,
 							content: "",
@@ -194,7 +194,7 @@ module Peach {
 				});
 				break;
 			case "faultTimeline":
-				promise.success((data: Models.IFaultTimelineMetric[]) => {
+				promise.success((data: IFaultTimelineMetric[]) => {
 					this.MetricsFaultsOverTimeData = {
 						labels: data.map(i => moment(i.date).format("M/D h a")),
 						datasets: [
@@ -214,31 +214,31 @@ module Peach {
 				break;
 			case "mutators":
 				this.MutatorData = _.clone(this.AllMutatorData);
-				promise.success((data: Models.IMutatorMetric[]) => {
+				promise.success((data: IMutatorMetric[]) => {
 					this.AllMutatorData = data;
 				});
 				break;
 			case "elements":
 				this.ElementData = _.clone(this.AllElementData);
-				promise.success((data: Models.IElementMetric[]) => {
+				promise.success((data: IElementMetric[]) => {
 					this.AllElementData = data;
 				});
 				break;
 			case "dataset":
 				this.DatasetData = _.clone(this.AllDatasetData);
-				promise.success((data: Models.IDatasetMetric[]) => {
+				promise.success((data: IDatasetMetric[]) => {
 					this.AllDatasetData = data;
 				});
 				break;
 			case "states":
 				this.StateData = _.clone(this.AllStateData);
-				promise.success((data: Models.IStateMetric[]) => {
+				promise.success((data: IStateMetric[]) => {
 					this.AllStateData = data;
 				});
 				break;
 			case "buckets":
 				this.BucketData = _.clone(this.AllBucketData);
-				promise.success((data: Models.IBucketMetric[]) => {
+				promise.success((data: IBucketMetric[]) => {
 					this.AllBucketData = data;
 				});
 				break;
