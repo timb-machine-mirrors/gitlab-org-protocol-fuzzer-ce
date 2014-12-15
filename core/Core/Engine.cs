@@ -514,6 +514,8 @@ namespace Peach.Core
 						foreach (Fault fault in context.faults)
 						{
 							fault.iteration = iterationCount;
+							fault.iterationStart = context.reproducingInitialIteration - context.reproducingIterationJumpCount;
+							fault.iterationStop = context.reproducingInitialIteration;
 							fault.controlIteration = context.controlIteration;
 							fault.controlRecordingIteration = context.controlRecordingIteration;
 						}
@@ -538,7 +540,7 @@ namespace Peach.Core
 						if (context.reproducingFault)
 						{
 							// Fault reproduced, so skip forward to were we left off.
-							lastReproFault = iterationCount;
+							lastReproFault = context.reproducingInitialIteration;
 
 							if (context.reproducingControlIteration)
 								--lastReproFault;
@@ -585,6 +587,13 @@ namespace Peach.Core
 								if (context.reproducingIterationJumpCount >= maxJump)
 								{
 									logger.Debug("runTest: Giving up reproducing fault, reached max backsearch.");
+
+									// Even if fault did not reproduce, don't search past that point
+									// in the future when reproducing new faults.
+									lastReproFault = context.reproducingInitialIteration;
+
+									if (context.reproducingControlIteration)
+										--lastReproFault;
 
 									context.reproducingFault = false;
 									iterationCount = context.reproducingInitialIteration;

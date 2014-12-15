@@ -28,8 +28,6 @@ Not all xref:Publisher[Publishers] support the _accept_ action type. xref:Publis
 
 Peach is single-threaded so it can't execute any other tasks (including scripts) while waiting for a target connection.
 
-Some Publishers use an _AcceptTimeout_ parameter to limit the wait for a connection.
-
 .Accept Timeout
 ****
 Some Publishers use an _AcceptTimeout_ parameter to limit the wait for a connection. If the timeout occurs prior to accepting an incoming connection, Peach behaves as follows:

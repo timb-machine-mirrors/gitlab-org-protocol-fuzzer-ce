@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Xml;
 using System.Xml.Schema;
@@ -13,6 +14,8 @@ namespace Peach.Pro.Core
 	public static class XmlTools
 	{
 		static Dictionary<Type, XmlSchema> schemas = new Dictionary<Type, XmlSchema>();
+
+		static Dictionary<string, XmlSchemaSimpleType> simpleTypes = MakeSimpleTypes();
 
 		public static XmlSchema GetSchema(Type type)
 		{
@@ -38,13 +41,7 @@ namespace Peach.Pro.Core
 
 				var asType = (XmlSchemaComplexType)obj;
 
-				foreach (XmlSchemaAttribute attr in asType.Attributes)
-				{
-					if (attr.DefaultValue == null)
-						attr.Use = XmlSchemaUse.Required;
-					else
-						attr.Use = XmlSchemaUse.Optional;
-				}
+				FixupAttributes(asType.Attributes);
 
 				if (asType.ContentModel != null)
 				{
@@ -56,13 +53,7 @@ namespace Peach.Pro.Core
 					if (content.IsMixed == false && asType.IsMixed == true)
 						content.IsMixed = true;
 
-					foreach (XmlSchemaAttribute attr in ext.Attributes)
-					{
-						if (attr.DefaultValue == null)
-							attr.Use = XmlSchemaUse.Required;
-						else
-							attr.Use = XmlSchemaUse.Optional;
-					}
+					FixupAttributes(ext.Attributes);
 				}	
 			}
 
@@ -87,6 +78,67 @@ namespace Peach.Pro.Core
 			schemas.Add(type, ret);
 
 			return ret;
+		}
+
+		private static Dictionary<string, XmlSchemaSimpleType> MakeSimpleTypes()
+		{
+			// Mono has issues with xs:int, xs:unsignedInt, xs:long, xs:unsignedLong
+			// So use xs:integer with min/max restrictions
+
+			var ret = new Dictionary<string, XmlSchemaSimpleType>();
+
+			ret["int"] = MakeSimpleType(typeof(int));
+			ret["unsignedInt"] = MakeSimpleType(typeof(uint));
+			ret["long"] = MakeSimpleType(typeof(long));
+			ret["unsignedLong"] = MakeSimpleType(typeof(ulong));
+
+			return ret;
+		}
+
+		private static XmlSchemaSimpleType MakeSimpleType(Type type)
+		{
+			var content = new XmlSchemaSimpleTypeRestriction()
+			{
+				BaseTypeName = new XmlQualifiedName("integer", XmlSchema.Namespace),
+			};
+
+			var minFacet = new XmlSchemaMinInclusiveFacet
+			{
+				Value = type.GetField("MinValue", BindingFlags.Static | BindingFlags.Public).GetValue(null).ToString()
+			};
+			content.Facets.Add(minFacet);
+
+			var maxFacet = new XmlSchemaMaxInclusiveFacet
+			{
+				Value = type.GetField("MaxValue", BindingFlags.Static | BindingFlags.Public).GetValue(null).ToString()
+			};
+			content.Facets.Add(maxFacet);
+
+			var ret = new XmlSchemaSimpleType()
+			{
+				Content = content,
+			};
+
+			return ret;
+		}
+
+		private static void FixupAttributes(XmlSchemaObjectCollection attributes)
+		{
+			foreach (var attr in attributes.Cast<XmlSchemaAttribute>())
+			{
+				attr.Use = attr.DefaultValue == null ? XmlSchemaUse.Required : XmlSchemaUse.Optional;
+
+				// If needed, replace numeric data types with xs:integer and min/max restrictions
+				XmlSchemaSimpleType simpleType;
+
+				if (attr.SchemaTypeName != null &&
+				    attr.SchemaTypeName.Namespace == XmlSchema.Namespace &&
+				    simpleTypes.TryGetValue(attr.SchemaTypeName.Name, out simpleType))
+				{
+					attr.SchemaTypeName = null;
+					attr.SchemaType = simpleType;
+				}
+			}
 		}
 
 		#region Reader

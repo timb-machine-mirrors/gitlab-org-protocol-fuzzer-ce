@@ -33,26 +33,26 @@
 // 03/05/2014: Lynn: 
 //  Edited text
 
-The _output_ action is used to write/send in data using a xref:Publisher[Publisher].
-_output_ Actions are associated with a xref:DataModel[DataModel] (provided as a child element) which produces the data to be sent.
+The _output_ action writes or sends data using a xref:Publisher[Publisher].
+_output_ Actions are associated with a xref:DataModel[DataModel] (specified as a child element) which produces the data to be sent.
 
 Along with a DataModel, data sets can be provided using the xref:Data[Data] element.
 Multiple Data elements can be provided which will be switched between during fuzzing depending on the fuzzing strategy used.
 _Output_ actions are fuzzed by Peach.
 
-When output is called, the fuzzer will implicitly call xref:Action_start[_start_] then xref:Action_open[_open_] if it has not already been called.
-If a Pit has multiple publishers defined, the _publisher_ attribute must be used to indicate which publisher should receive the write/send request.
-The exact behavior of an _output_ action is Publisher dependent. Review the documentation for the specific Publisher for the details on specific implementation actions. For example, calling output multiple times in a row on a stream publisher such as xref:Publishers_Tcp[TCP] will appear as one output, whereas multiple outputs in the xref:Publishers_Udp[UDP] publisher will send the data as separate UDP Packets.
+When output is called, the fuzzer implicitly calls xref:Action_start[_start_] then xref:Action_open[_open_], if they have not yet been called.
+If a Pit defines multiple publishers, the _publisher_ attribute specifies the publisher that will perform the write/send request.
+The exact behavior of an _output_ action is Publisher dependent. Review the documentation for a specific Publisher for details on its implementation actions. For example, calling output multiple times in succession on a stream publisher such as xref:Publishers_Tcp[TCP] appears in the logs as one output, whereas issuing multiple outputs in succession for the xref:Publishers_Udp[UDP] publisher will send the data as separate UDP Packets and list in the logs as separate calls.
 
 .Default Order of Actions
 ****
 The following is the default order in which Actions are performed when fuzzing:
 
-. start - Implicit, once per session
-. open - Implicit, once per iteration
-. Explicit actions (such as accept, input, and output)
-. close - Implicit, once per iteration
-. stop - Implicit, once per session
+. _start_ - Implicit, once per session
+. _open_ - Implicit, once per iteration
+. Explicit actions (such as _accept_, _input_, and _output_)
+. _close_ - Implicit, once per iteration
+. _stop_ - Implicit, once per session
 ****
 
 === Syntax
@@ -82,15 +82,15 @@ type:: Action type, must be set to "output"
 _Optional:_
 
 name:: Name used to identify the action
-publisher:: Name of the publisher that this action should be called on
-xref:Action_when[when]:: Only perform action if the expression provided evaluates to true
-xref:Action_onStart[onStart]:: Expression to run on start of an action.
-xref:Action_onComplete[onComplete]:: Expression to run on completion of an action
+publisher:: Name of the publisher to perform this action
+xref:Action_when[when]:: Perform the action if the provided expression evaluates to true
+xref:Action_onStart[onStart]:: Evaluate expression at the start of an action.
+xref:Action_onComplete[onComplete]:: Evaluate expression upon completion of an action
 
 === Child Elements
 
-xref:DataModel[DataModel]:: Reference to a DataModel from which fuzzed data will be produced
-xref:Data[Data]:: Set of initial data to be cracked into the above DataModel before fuzzing
+xref:DataModel[DataModel]:: Reference to a DataModel supplying data to fuzz
+xref:Data[Data]:: Set of initial data to crack into the above DataModel before fuzzing
 
 === Examples
 
@@ -99,12 +99,12 @@ xref:Data[Data]:: Set of initial data to be cracked into the above DataModel bef
 Example of using the _output_ action with multiple data sets to perform file fuzzing.
 This is a typical configuration for dumb file fuzzing.
 
-Notice the use of the special _Peach.Agent_ publisher name.
-This will cause the _call_ action to be sent out to any Agents which will then send to each of there Monitors.
-The method call will end up being handled by the WindowsDebugger monitor, causing it to launch _notepad.exe_.
-For file fuzzing we must make sure the target is launched only after we write out the new fuzzed file.
+Notice the special publisher _Peach.Agent_.
+This publisher sends the _call_ action to all Agents, who in turn, forward the _call_  to each of their associated Monitors.
+The method call will be handled by the WindowsDebugger monitor, causing it to launch _notepad.exe_.
+For file fuzzing, note that the target is launched after creating the new fuzzed file.
 
-This example requires a Windows XP or newer machine with Windows Debugging Tools installed.
+This example runs on the Windows(R) Operating System, version XP or newer, with Windows Debugging Tools installed.
 
 . Save example Pit as "example.xml"
 . Run "Peach.exe --range 1,10 --debug example.xml"
@@ -167,7 +167,7 @@ This example requires a Windows XP or newer machine with Windows Debugging Tools
 
 .Sending Output with TCP Publisher
 ==========================
-This is a simple example of using the _output_ action to send data. Netcat (nc) is used in this example as the client.
+This example uses the _output_ action to send data. Netcat (nc) is used in this example as the client.
 
 [source,xml]
 ----
@@ -216,7 +216,10 @@ This is a simple example of using the _output_ action to send data. Netcat (nc) 
 </Peach>
 ----
 
-Output from this example. Once Peach is started, use the netcat command line found below to recreate output.
+Output from this example. Once Peach is started, use the netcat command line to recreate output. Type the following command line and press RETURN to start netcat.
+
+nc -vv 127.0.0.1 31337
+
 
 ----
 > peach -1 --debug example.xml
@@ -289,7 +292,7 @@ PONG
 
 .Mulitple Publishers with _output_ Action
 ================================
-Example of using the _output_ action with multiple publishers to write two files out on every iteration.
+This example uses the _output_ action with multiple publishers to write two files out on every iteration.
 
 . Save example Pit as "example.xml"
 . Run "Peach.exe -1 --debug example.xml"
