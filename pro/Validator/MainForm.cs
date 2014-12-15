@@ -37,6 +37,8 @@ namespace PeachValidator
 
 			setTitle();
 			AddNewDefine("Peach.Pwd=" + Utilities.ExecutionDirectory);
+			AddNewDefine("Peach.Cwd=" + Environment.CurrentDirectory);
+
            var nconfig = new LoggingConfiguration();
             logTarget = new MemoryTarget();
             nconfig.AddTarget("console", logTarget);
@@ -239,10 +241,6 @@ namespace PeachValidator
 			PitFileName = ofd.FileName;
 			setTitle();
 
-			Environment.CurrentDirectory = Path.GetDirectoryName(Path.GetFullPath(PitFileName));
-			AddNewDefine("Peach.Cwd=" + Environment.CurrentDirectory);
-
-
 			Regex re = new Regex("##\\w+##");
 			if (File.Exists(PitFileName) && re.IsMatch(File.ReadAllText(PitFileName)))
 			{
@@ -299,9 +297,6 @@ namespace PeachValidator
 			try
 			{
 				var parser = new PitParser();
-
-			    if (!string.IsNullOrWhiteSpace(Path.GetDirectoryName(PitFileName)))
-					Directory.SetCurrentDirectory((DefinedValues["Peach.Cwd"]));
 
 				var dom = parser.asParser(_parserArgs, PitFileName);
 
