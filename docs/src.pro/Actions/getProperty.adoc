@@ -26,14 +26,14 @@
 // 03/05/2014: Lynn: 
 //  Edited text and corrected QuickTime information
 
-The _getProperty_ action retrieves the value of a property from an object that uses the property metaphor and stores the value in a DataModel. _getProperty_ actions specify a xref:DataModel[DataModel] to receive the retrieved data as a child element.
+The _getProperty_ Action retrieves the value of a property from an object that uses the property metaphor and stores the value in a DataModel. _getProperty_ Actions specify in a child element the xref:DataModel[DataModel] that will receive the retrieved data.
 
 _getProperty_ provides one half of a property metaphor in Peach state models. _getProperty_ actions are considered input actions. xref:Action_setProperty[_setProperty_] is the other half (output) of the property metaphor.
 
-The _getProperty_ action has two main uses:
+The _getProperty_ Action has two main uses:
 
-* when fuzzing targets such as Microsoft COM/DCOM objects that use the property metaphor.
-* when accessing properties in a Publisher that supports the property metaphor. Some Publishers (such as the UDP Publisher) support using properties to get or set values. An instance of this type of Publisher is in the examples section.
+* when fuzzing targets such as Microsoft COM/DCOM objects that use the property metaphor. The _getProperty_ Action instructs a Publisher to reteive the value of a specified property.
+* when accessing properties in a Publisher that supports the property metaphor. Some Publishers support using properties to get or set values, such as the UDP, RawV4, RawIPv4, and RawV6 Publishers) . An instance of this type of Publisher is in the examples section.
 
 NOTE: Properties exposed by publishers are described in the publisher documentation.
 
@@ -71,7 +71,7 @@ _Optional:_
 
 name:: Name used to identify the action
 property:: Name of the property to retrieve
-publisher:: Name of the publisher to perform this action
+publisher:: Name of the publisher to perform this action, or the Name publisher with the property to retrieve
 xref:Action_when[when]:: Perform this action if the provided expression evaluates to true
 xref:Action_onStart[onStart]:: Evaluate expression at the start of an action
 xref:Action_onComplete[onComplete]:: Evaluate expression upon completion of an action
