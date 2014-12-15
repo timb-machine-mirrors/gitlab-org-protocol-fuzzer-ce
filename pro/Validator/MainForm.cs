@@ -118,11 +118,18 @@ namespace PeachValidator
 					cracker.AnalyzerEvent += new AnalyzerEventHandler(cracker_AnalyzerEvent);
 					cracker.ExceptionHandleNodeEvent += new ExceptionHandleNodeEventHandler(cracker_ExceptionHandleNodeEvent);
 					//cracker.CrackData(dom.dataModels[dataModel], data);
-					cracker.CrackData(holder.MakeCrackModel(), data);
+					try
+					{
+						cracker.CrackData(holder.MakeCrackModel(), data);
+					}
+					catch (CrackingFailure ex)
+					{
+						throw new PeachException("Error cracking \"" + ex.element.fullName + "\".\n" + ex.Message);
+					}
 				}
-				catch (CrackingFailure ex)
+				catch (Exception ex)
 				{
-					MessageBox.Show("Error cracking \"" + ex.element.fullName + "\".\n" + ex.Message, "Error Cracking");
+					MessageBox.Show(ex.Message, "Error Cracking");
 
 					long endPos = -1;
 					foreach (var element in exceptions)
