@@ -16,8 +16,8 @@ module Peach {
 	}
 
 	export interface IMonitorScope extends IFormScope {
-		monitors: Models.IMonitor[];
-		monitor: Models.IMonitor;
+		monitors: IMonitor[];
+		monitor: IMonitor;
 		agentIndex: number;
 		monitorIndex: number;
 		isOpen: boolean;
@@ -31,7 +31,7 @@ module Peach {
 
 		constructor(
 			private $scope: IMonitorScope,
-			private pitService: Services.PitService
+			private pitService: PitService
 		) {
 			$scope.vm = this;
 			if ($scope.monitorIndex === ($scope.monitors.length - 1)) {

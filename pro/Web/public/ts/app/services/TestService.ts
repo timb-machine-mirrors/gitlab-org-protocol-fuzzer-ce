@@ -1,6 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach.Services {
+module Peach {
 	"use strict";
 
 	export var TEST_INTERVAL = 250;
@@ -21,8 +21,8 @@ module Peach.Services {
 			this.reset();
 		}
 
-		private testResult: Models.ITestResult;
-		public get TestResult(): Models.ITestResult {
+		private testResult: ITestResult;
+		public get TestResult(): ITestResult {
 			return this.testResult;
 		}
 
@@ -47,7 +47,7 @@ module Peach.Services {
 				params: { pitUrl: this.pitService.Pit.pitUrl }
 			});
 
-			promise.success((data: Models.ITestRef) => {
+			promise.success((data: ITestRef) => {
 				this.startTestPoller(data.testUrl);
 			});
 		}
@@ -55,9 +55,9 @@ module Peach.Services {
 		private startTestPoller(testUrl: string) {
 			var interval = this.$interval(() => {
 				var promise = this.$http.get(testUrl);
-				promise.success((data: Models.ITestResult) => {
+				promise.success((data: ITestResult) => {
 					this.testResult = data;
-					if (data.status !== Models.TestStatus.Active) {
+					if (data.status !== TestStatus.Active) {
 						this.$interval.cancel(interval);
 						this.pitService.ReloadPit();
 					}

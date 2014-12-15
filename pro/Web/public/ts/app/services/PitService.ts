@@ -1,6 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach.Services {
+module Peach {
 	"use strict";
 
 	export class PitService {
@@ -17,13 +17,13 @@ module Peach.Services {
 		constructor(
 			private $q: ng.IQService,
 			private $modal: ng.ui.bootstrap.IModalService,
-			private PitResource: Models.IPitResource,
-			private PitLibraryResource: Models.ILibraryResource,
-			private PitConfigResource: Models.IPitConfigResource,
-			private PitAgentsResource: Models.IPitAgentsResource
+			private PitResource: IPitResource,
+			private PitLibraryResource: ILibraryResource,
+			private PitConfigResource: IPitConfigResource,
+			private PitAgentsResource: IPitAgentsResource
 		) {
-			PitLibraryResource.query((libs: Models.ILibrary[]) => {
-				var userLibs = libs.filter((item: Models.ILibrary) => item.locked === false);
+			PitLibraryResource.query((libs: ILibrary[]) => {
+				var userLibs = libs.filter((item: ILibrary) => item.locked === false);
 				this.userPitLibrary = _.first(userLibs).libraryUrl;
 			});
 		}
@@ -33,24 +33,19 @@ module Peach.Services {
 			return this.userPitLibrary;
 		}
 
-		private pit: Models.IPit;
-		public get Pit(): Models.IPit {
+		private pit: IPit;
+		public get Pit(): IPit {
 			return this.pit;
 		}
 
-		private pitConfig: Models.IPitConfig;
-		public get PitConfig(): Models.IPitConfig {
+		private pitConfig: IPitConfig;
+		public get PitConfig(): IPitConfig {
 			return this.pitConfig;
 		}
 
-		private pitAgents: Models.IPitAgents;
-		public get PitAgents(): Models.IPitAgents {
+		private pitAgents: IPitAgents;
+		public get PitAgents(): IPitAgents {
 			return this.pitAgents;
-		}
-
-		private testResult: Models.ITestResult;
-		public get TestResult(): Models.ITestResult {
-			return this.testResult;
 		}
 
 		// MainController 
@@ -58,17 +53,17 @@ module Peach.Services {
 		//    -> SelectPit 
 		//       -> CopyPitController (modal)
 		//          -> CopyPit
-		public SelectPit(url: string): ng.IPromise<Models.IPit> {
-			var deferred = this.$q.defer<Models.IPit>();
+		public SelectPit(url: string): ng.IPromise<IPit> {
+			var deferred = this.$q.defer<IPit>();
 			var promise = this.PitResource.get({ id: ExtractId('pits', url) }).$promise;
-			promise.then((pit: Models.IPit) => {
+			promise.then((pit: IPit) => {
 				if (pit.locked) {
 					var modal = this.$modal.open({
 						templateUrl: "html/modal/CopyPit.html",
 						controller: CopyPitController,
 						resolve: { pit: () => pit }
 					});
-					modal.result.then((copied: Models.IPit) => {
+					modal.result.then((copied: IPit) => {
 						// only update the current Pit if successful
 						// a failed copy leaves the current Pit untouched
 						this.pit = copied;
@@ -92,8 +87,8 @@ module Peach.Services {
 			this.pit.$get({ id: this.PitId });
 		}
 
-		public CopyPit(pit: Models.IPit): ng.IPromise<Models.IPit> {
-			var request: Models.IPitCopy = {
+		public CopyPit(pit: IPit): ng.IPromise<IPit> {
+			var request: IPitCopy = {
 				libraryUrl: this.UserPitLibrary,
 				pit: pit
 			}
@@ -109,23 +104,23 @@ module Peach.Services {
 			return onlyIf(this.Pit, () => ExtractId('pits', this.pit.pitUrl));
 		}
 
-		public LoadPitConfig(): Models.IPitConfig {
+		public LoadPitConfig(): IPitConfig {
 			return onlyIf(this.Pit, () => {
-				return this.PitConfigResource.get({ id: this.PitId }, (data: Models.IPitConfig) => {
+				return this.PitConfigResource.get({ id: this.PitId }, (data: IPitConfig) => {
 					this.pitConfig = data;
 				});
 			});
 		}
 
-		public LoadPitAgents(): Models.IPitAgents {
+		public LoadPitAgents(): IPitAgents {
 			return onlyIf(this.Pit, () => {
-				return this.PitAgentsResource.get({ id: this.PitId }, (data: Models.IPitAgents) => {
+				return this.PitAgentsResource.get({ id: this.PitId }, (data: IPitAgents) => {
 					this.pitAgents = data;
 				});
 			});
 		}
 
-		public SavePitAgents(agents: Models.Agent[]) {
+		public SavePitAgents(agents: Agent[]) {
 			if (!this.pitAgents) {
 				this.pitAgents = new this.PitAgentsResource();
 			}
@@ -138,7 +133,7 @@ module Peach.Services {
 			return onlyIf(this.Pit, () => this.latestVersion.configured) || false;
 		}
 
-		private get latestVersion(): Models.IPitVersion {
+		private get latestVersion(): IPitVersion {
 			return _.last(this.Pit.versions);
 		}
 	}

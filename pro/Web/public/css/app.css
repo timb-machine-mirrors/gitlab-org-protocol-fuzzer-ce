@@ -173,6 +173,10 @@ pre.peach-test-log {
 	width: 100%;
 }
 
+.ui-select-container .btn-group > .btn:first-child:hover {
+	z-index: auto;
+}
+
 .ui-select-container .btn-group > .btn + .btn {
 	border-left: none;
 	position: absolute;

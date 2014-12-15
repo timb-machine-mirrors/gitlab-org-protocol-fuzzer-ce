@@ -7,7 +7,7 @@ describe("Peach", () => {
 
 	describe('Dashboard controller', () => {
 		var ctrl: Peach.DashboardController;
-		//var service: Peach.Services.PitService;
+		//var service: Peach.PitService;
 		var $modal: ng.ui.bootstrap.IModalService;
 		var service = {
 			IsConfigured: false,

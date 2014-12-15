@@ -1,6 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach.Models {
+module Peach {
 	"use strict";
 
 	export interface IJob {

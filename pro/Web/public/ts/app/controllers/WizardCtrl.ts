@@ -4,7 +4,7 @@ module Peach {
 	"use strict";
 
 	export class WizardController {
-		public Question: Models.IQuestion;
+		public Question: IQuestion;
 		public Step: number;
 
 		static $inject = [
@@ -18,9 +18,9 @@ module Peach {
 		constructor(
 			private $scope: IFormScope,
 			private $location: ng.ILocationService,
-			private pitService: Services.PitService,
-			private wizardService: Services.WizardService,
-			private jobService: Services.JobService
+			private pitService: PitService,
+			private wizardService: WizardService,
+			private jobService: JobService
 		) {
 			$scope.vm = this;
 			this.resetPrompts();
@@ -42,14 +42,14 @@ module Peach {
 			return this.Question.qref;
 		}
 
-		public get Defines(): Models.IParameter[] {
+		public get Defines(): IParameter[] {
 			return this.pitService.PitConfig.config;
 		}
 
 		public get FaultAgentDescription(): string {
 			var agent = this.wizardService.GetTrack("fault").agents[0];
 			var ret = '';
-			agent.monitors.forEach((item: Models.IMonitor) => {
+			agent.monitors.forEach((item: IMonitor) => {
 				if (!ret) {
 					ret += ' ';
 				}
@@ -58,11 +58,11 @@ module Peach {
 			return ret;
 		}
 
-		public get DataAgents(): Models.Agent[] {
+		public get DataAgents(): Agent[] {
 			return this.wizardService.GetTrack("data").agents;
 		}
 
-		public get AutoAgents(): Models.Agent[] {
+		public get AutoAgents(): Agent[] {
 			return this.wizardService.GetTrack("auto").agents;
 		}
 
@@ -97,12 +97,12 @@ module Peach {
 			} else {
 				var q = this.Question;
 
-				if (q.type === Models.QuestionTypes.Done) {
+				if (q.type === QuestionTypes.Done) {
 					this.OnNextTrack();
 					return;
 				}
 
-				if (q.type !== Models.QuestionTypes.Jump) {
+				if (q.type !== QuestionTypes.Jump) {
 					this.track.history.push(q.id);
 				}
 
@@ -113,7 +113,7 @@ module Peach {
 
 					this.Question = {
 						id: -1,
-						type: Models.QuestionTypes.Done,
+						type: QuestionTypes.Done,
 						qref: this.track.qref
 					};
 
@@ -130,7 +130,7 @@ module Peach {
 		}
 
 		public Back() {
-			if (this.Question.type === Models.QuestionTypes.Done) {
+			if (this.Question.type === QuestionTypes.Done) {
 				this.OnRestart();
 				return;
 			}
@@ -143,9 +143,9 @@ module Peach {
 
 			this.Question = this.track.GetQuestionById(previousId);
 
-			if (this.Question.type === Models.QuestionTypes.Intro) {
+			if (this.Question.type === QuestionTypes.Intro) {
 				this.Step = 1;
-			} else if (this.Question.type === Models.QuestionTypes.Done) {
+			} else if (this.Question.type === QuestionTypes.Done) {
 				this.Step = 3;
 			} else {
 				this.Step = 2;
@@ -177,16 +177,16 @@ module Peach {
 			this.OnNextTrack();
 		}
 
-		public OnInsertDefine(def: Models.IParameter) {
+		public OnInsertDefine(def: IParameter) {
 			if (_.isUndefined(this.Question.value)) {
 				this.Question.value = "";
 			}
 			this.Question.value += "##" + def.key + "##";
 		}
 
-		private getNextId(q: Models.IQuestion): number {
-			if (q.type === Models.QuestionTypes.Choice ||
-				q.type === Models.QuestionTypes.Jump) {
+		private getNextId(q: IQuestion): number {
+			if (q.type === QuestionTypes.Choice ||
+				q.type === QuestionTypes.Jump) {
 				// get next id from selected choice
 				var choice = _.find(q.choice, e => {
 					if (_.isUndefined(e.value) && !_.isUndefined(e.next)) {
@@ -214,13 +214,13 @@ module Peach {
 		private prepareQuestion() {
 			// special stuff to do based on the next question
 			switch (this.Question.type) {
-				case Models.QuestionTypes.Intro:
+				case QuestionTypes.Intro:
 					this.Step = 1;
 					break;
-				case Models.QuestionTypes.Jump:
+				case QuestionTypes.Jump:
 					this.Next();
 					break;
-				case Models.QuestionTypes.Choice:
+				case QuestionTypes.Choice:
 					// what to do when there's no value already set for a choice question
 					// if the first choice has a value, set default selection to first
 					// if the first choice doesn't have a value it's a un-keyed choice, set default to 0
@@ -234,12 +234,12 @@ module Peach {
 						}
 					}
 					break;
-				case Models.QuestionTypes.Range:
+				case QuestionTypes.Range:
 					if (_.isUndefined(this.Question.value)) {
 						this.Question.value = this.Question.rangeMin;
 					}
 					break;
-				case Models.QuestionTypes.Done:
+				case QuestionTypes.Done:
 					this.Step = 3;
 					break;
 				default:
@@ -247,7 +247,7 @@ module Peach {
 			}
 		}
 
-		private get track(): Models.ITrack {
+		private get track(): ITrack {
 			var re = new RegExp("/quickstart/([^/]+)");
 			var match = re.exec(this.$location.path());
 			if (match) {

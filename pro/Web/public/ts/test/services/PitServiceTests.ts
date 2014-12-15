@@ -39,7 +39,7 @@ describe("Peach", () => {
 	describe('PitService', () => {
 		var $httpBackend: ng.IHttpBackendService;
 		var $modal: ng.ui.bootstrap.IModalService;
-		var service: Peach.Services.PitService;
+		var service: Peach.PitService;
 		var spyOpen: jasmine.Spy;
 
 		beforeEach(inject(($injector: ng.auto.IInjectorService) => {
