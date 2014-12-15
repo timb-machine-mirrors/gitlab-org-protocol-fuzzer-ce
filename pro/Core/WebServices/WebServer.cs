@@ -267,15 +267,6 @@ namespace Peach.Pro.Core.WebServices
 		public WebServer(string pitLibraryPath)
 		{
 			Context = new WebContext(pitLibraryPath);
-
-			bootstrapper = new Bootstrapper(Context);
-			config = new HostConfiguration()
-			{
-				UrlReservations = new UrlReservations()
-				{
-					CreateAutomatically = true,
-				},
-			};
 		}
 
 		public void Start()
@@ -287,6 +278,19 @@ namespace Peach.Pro.Core.WebServices
 		{
 			while (host == null)
 			{
+				// Need to make a new Bootstrapper every time.
+				// If tmoHost.Start() fails, we don't want to
+				// reinitialize an already initialized bootstrapper!
+
+				bootstrapper = new Bootstrapper(Context);
+				config = new HostConfiguration()
+				{
+					UrlReservations = new UrlReservations()
+					{
+						CreateAutomatically = true,
+					},
+				};
+
 				try
 				{
 					var tmpUri = new Uri(string.Format("http://{0}:{1}", hostname, port++));
@@ -317,19 +321,18 @@ namespace Peach.Pro.Core.WebServices
 		public void Stop()
 		{
 			if (host != null)
-			{
 				host.Stop();
-				host = null;
-			}
+
+			host = null;
+			config = null;
+			bootstrapper = null;
+			Uri = null;
 		}
 
 		public void Dispose()
 		{
 			Stop();
 
-			config = null;
-			bootstrapper = null;
-			Uri = null;
 			Context = null;
 		}
 
