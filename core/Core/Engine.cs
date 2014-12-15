@@ -514,6 +514,8 @@ namespace Peach.Core
 						foreach (Fault fault in context.faults)
 						{
 							fault.iteration = iterationCount;
+							fault.iterationStart = context.reproducingInitialIteration - context.reproducingIterationJumpCount;
+							fault.iterationStop = context.reproducingInitialIteration;
 							fault.controlIteration = context.controlIteration;
 							fault.controlRecordingIteration = context.controlRecordingIteration;
 						}
