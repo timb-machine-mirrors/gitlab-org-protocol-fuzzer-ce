@@ -129,10 +129,7 @@ namespace PitTester
 			if (Logger.IsDebugEnabled)
 				Logger.Debug("\n\n" + Utilities.HexDump(actual, 0, actual.Length));
 
-			if (expected.Length != actual.Length)
-				throw new PeachException("Length mismatch in action {0}. Expected {1} bytes but got {2} bytes.".Fmt(testLogger.ActionName, expected.Length, actual.Length));
-
-			var skipList = new List<Tuple<string, long, long>>();
+		    var skipList = new List<Tuple<string, long, long>>();
 
 			foreach (var ignore in testLogger.Ignores)
 			{
@@ -163,33 +160,64 @@ namespace PitTester
 			foreach (var i in skipList)
 				Logger.Debug("Ignoring {0} from index {1} to {2}", i.Item1, i.Item2, i.Item3);
 
-		    for (int i = 0; i < actual.Length; ++i)
+		    var checkLength = actual.Length > expected.Length ? expected.Length : actual.Length;
+            for (var i = 0; i < checkLength; ++i)
 		    {
 		        var skip = skipList.Any(p => p.Item2 <= i && p.Item3 > i);
-		        if (!skip && expected[i] != actual[i])
+		        if (skip || expected[i] == actual[i]) continue;
+
+		        if (Logger.IsDebugEnabled)
 		        {
+		            Logger.Debug("vv Dumping DataModel vvvvvvvvvvvvvvvvv");
+		            long pos = 0;
+
+		            foreach (var item in dataModel.Walk())
+		            {
+		                Logger.Debug("0x{1:x}-0x{2:X}: {0}: {3}", 
+		                    item.fullName, 
+		                    pos,
+		                    pos + item.Value.Length,
+		                    Utilities.HexDump(item.Value));
+
+		                if(!(item is DataElementContainer))
+		                    pos += item.Value.Length;
+		            }
+		            Logger.Debug("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+                }
+
+		        throw new PeachException(
+		            "\nTest failed on action: {0}\n\tValues differ at offset 0x{3:x8}\n\tExpected: 0x{1:x2}\n\tBut was: 0x{2:x2}\n"
+		                .Fmt(testLogger.ActionName, expected[i], actual[i], i));
+		    }
+
+            // Perform length check after byte comparison. More usefull this way.
+            if (expected.Length != actual.Length)
+            {
+                if (Logger.IsDebugEnabled)
+                {
                     Logger.Debug("vv Dumping DataModel vvvvvvvvvvvvvvvvv");
                     long pos = 0;
 
                     foreach (var item in dataModel.Walk())
-		            {
-                        Logger.Debug("0x{1:x}-0x{2:X}: {0}: {3}", 
-                            item.fullName, 
+                    {
+                        Logger.Debug("0x{1:x}-0x{2:X}: {0}: {3}",
+                            item.fullName,
                             pos,
                             pos + item.Value.Length,
                             Utilities.HexDump(item.Value));
 
-                        if(!(item is DataElementContainer))
-    		                pos += item.Value.Length;
-		            }
+                        if (!(item is DataElementContainer))
+                            pos += item.Value.Length;
+                    }
                     Logger.Debug("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+                }
 
-		            throw new PeachException(
-		                "\nTest failed on action: {0}\n\tValues differ at offset 0x{3:x8}\n\tExpected: 0x{1:x2}\n\tBut was: 0x{2:x2}\n"
-		                    .Fmt(testLogger.ActionName, expected[i], actual[i], i));
-		        }
-		    }
-		}
+                throw new PeachException(
+                    "Length mismatch in action {0}. Expected {1} bytes but got {2} bytes.".Fmt(testLogger.ActionName,
+                        expected.Length, actual.Length));
+            }
+
+        }
 
 		protected override void OnOutput(BitwiseStream data)
 		{
