@@ -3,12 +3,14 @@
 		<h1>Configuration &raquo; Test</h1>
 	</div>
 	<p>
-		Use this section to test that the specified configuration is valid before
-		launching a long running job. 
-		Click the Begin Test button to get started. 
-		The Test will execute a single control iteration and the output will display
-		any warnings or errors that require attention.
-		Detailed log messages are available to help diagnose issues that might arise.
+		This section validates the configuration by executing one test iteration,
+		and exposes issues that would hinder a fuzzing session. The output will
+		display any warnings and errors that surface in the control iteration.
+		Detailed log messages are provided to help diagnose issues with the
+		configuration.
+	</p>
+	<p>
+		Click the Begin Test button to validate the configuration.
 	</p>
 	<div class="wizard-actions">
 		<span ng-show="vm.ShowTestPass">

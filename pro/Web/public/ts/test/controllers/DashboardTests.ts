@@ -10,7 +10,8 @@ describe("Peach", () => {
 		//var service: Peach.Services.PitService;
 		var $modal: ng.ui.bootstrap.IModalService;
 		var service = {
-			IsConfigured: false
+			IsConfigured: false,
+			Pit: {}
 		};
 
 		beforeEach(inject(($injector: ng.auto.IInjectorService) => {
@@ -27,7 +28,7 @@ describe("Peach", () => {
 
 		it("new", () => {
 			expect(_.isObject(ctrl)).toBe(true);
-			expect(ctrl.IsConfigured).toBe(false);
+			expect(ctrl.ShowNeedsConfig).toBe(true);
 		});
 	});
 });

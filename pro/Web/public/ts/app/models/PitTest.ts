@@ -20,4 +20,10 @@ module Peach.Models {
 		description: string;
 		resolve: string;
 	}
+
+	export class TestStatus {
+		public static Active: string = "active";
+		public static Pass: string = "pass";
+		public static Fail: string = "fail";
+	}
 }

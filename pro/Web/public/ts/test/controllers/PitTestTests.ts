@@ -17,10 +17,18 @@ describe("Peach", () => {
 		var pitService: Peach.Services.PitService;
 
 		var pitUrl = '/p/pits/PIT_GUID';
-		var pit = {
+
+		var pit = <Peach.Models.IPit> {
+			pitUrl: pitUrl,
 			name: 'My Pit',
-			pitUrl: pitUrl
-		}
+			versions: [
+				{
+					version: 0,
+					configured: false,
+					locked: false
+				}
+			]
+		};
 
 		beforeEach(inject(($injector: ng.auto.IInjectorService) => {
 			var $controller: ng.IControllerService;
@@ -30,7 +38,6 @@ describe("Peach", () => {
 			$location = $injector.get('$location');
 			$rootScope = $injector.get('$rootScope');
 			$controller = $injector.get('$controller');
-			$httpBackend = $injector.get('$httpBackend');
 			$interval = $injector.get('$interval');
 
 			$httpBackend.expectGET('/p/libraries').respond([
@@ -67,8 +74,9 @@ describe("Peach", () => {
 		});
 
 		it("can begin a test", () => {
+			var testUrl = '/p/my/test/url';
 			var ref: Peach.Models.ITestRef = {
-				testUrl: '/p/my/test/url'
+				testUrl: testUrl
 			};
 			$httpBackend.expectGET(new RegExp('/p/conf/wizard/test/start(.*)')).respond(ref);
 			ctrl.OnBeginTest();
@@ -80,7 +88,7 @@ describe("Peach", () => {
 				events: []
 			};
 
-			$httpBackend.expectGET(new RegExp('/p/my/test/url')).respond(result1);
+			$httpBackend.expectGET(new RegExp(testUrl)).respond(result1);
 			$interval.flush(Peach.Services.TEST_INTERVAL);
 			$httpBackend.flush();
 
@@ -89,8 +97,10 @@ describe("Peach", () => {
 				log: '',
 				events: []
 			};
+			pit.versions[0].configured = true;
 
-			$httpBackend.expectGET(new RegExp('/p/my/test/url')).respond(result2);
+			$httpBackend.expectGET(new RegExp(testUrl)).respond(result2);
+			$httpBackend.expectGET(pitUrl).respond(pit);
 			$interval.flush(Peach.Services.TEST_INTERVAL);
 			$httpBackend.flush();
 

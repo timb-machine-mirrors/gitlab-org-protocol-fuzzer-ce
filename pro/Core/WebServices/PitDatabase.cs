@@ -216,6 +216,12 @@ namespace Peach.Pro.Core.WebServices
 			list.Add(new KeyValuePair<string, string>(key, value));
 		}
 
+		/// <summary>
+		/// Parses the .config and returns the object required by the PitParser to execute a pit
+		/// </summary>
+		/// <param name="pitLibraryPath"></param>
+		/// <param name="pitConfig"></param>
+		/// <returns></returns>
 		public static List<KeyValuePair<string, string>> ParseConfig(string pitLibraryPath, string pitConfig)
 		{
 			var defs = new List<KeyValuePair<string, string>>();
@@ -298,11 +304,14 @@ namespace Peach.Pro.Core.WebServices
 			Load(libraryPath);
 		}
 
+		private string pitLibraryPath;
+
 		public event EventHandler<ValidationEventArgs> ValidationEventHandler;
 		public event EventHandler<LoadEventArgs> LoadEventHandler;
 
 		public void Load(string path)
 		{
+			pitLibraryPath = path;
 			roots = new Dictionary<string, LibraryRoot>();
 			entries = new Dictionary<string, Pit>();
 			libraries = new Dictionary<string, Library>();
@@ -445,7 +454,8 @@ namespace Peach.Pro.Core.WebServices
 			var reserved = new HashSet<string>();
 			foreach (var def in PitDefines.Parse(fileName))
 			{
-				if (def.ConfigType != ParameterType.User)
+				if (def.ConfigType != ParameterType.User &&
+					def.ConfigType != ParameterType.System)
 				{
 					var param = config.SingleOrDefault((x) => x.Key == def.Key);
 					if (param != null)
@@ -887,7 +897,33 @@ namespace Peach.Pro.Core.WebServices
 
 		public List<Parameter> MakeConfig(List<PitDefines.Define> defines)
 		{
-			var ret = new List<Parameter>();
+			var ret = new List<Parameter>()
+			{
+				new Parameter()
+				{
+					Type = ParameterType.System,
+					Key = "Peach.Pwd",
+					Name = "Peach Installation Directory",
+					Description = "Full path to Peach installation",
+					Value = Utilities.ExecutionDirectory,
+				},
+				new Parameter()
+				{
+					Type = ParameterType.System,
+					Key = "Peach.Cwd",
+					Name = "Peach Working Directory",
+					Description = "Full path to the current working directory",
+					Value = Environment.CurrentDirectory,
+				},
+				new Parameter()
+				{
+					Type = ParameterType.System,
+					Key = "PitLibraryPath",
+					Name = "Pit Library Path",
+					Description = "Path to root of Pit Library",
+					Value = pitLibraryPath,
+				}
+			};
 
 			foreach (var d in defines)
 			{
@@ -986,7 +1022,7 @@ namespace Peach.Pro.Core.WebServices
 					break;
 				case "Boolean":
 					p.Type = ParameterType.Bool;
-					p.Options = new List<string> {"true", "false"};
+					p.Options = new List<string> { "true", "false" };
 					break;
 				case "Enum":
 					p.Type = ParameterType.Enum;

@@ -443,19 +443,9 @@ namespace Peach.Core
 		public uint reproducingInitialIteration = 0;
 
 		/// <summary>
-		/// This value times current iteration change is next iteration change.
+		/// Did the fault we are trying to reproduce occur on a control iteration.
 		/// </summary>
-		/// <remarks>
-		/// Intial search process:
-		/// 
-		/// Move back 1
-		/// Move back 1 * reproducingSkipMultiple = N
-		/// Move back N * reproducingSkipMultiple = M
-		/// Move back M * reproducingSkipMultiple = O
-		/// Move back O * reproducingSkipMultiple ...
-		/// 
-		/// </remarks>
-		public uint reproducingSkipMultiple = 2;
+		public bool reproducingControlIteration = false;
 
 		/// <summary>
 		/// Number of iterations to jump.

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using Peach.Core;
@@ -408,11 +409,13 @@ namespace Peach.Pro.Test.Core
 				else
 					i = it.ToString(CultureInfo.InvariantCulture);
 
+				var j = "{0},{1}".Fmt(i, history.Count(h => h == i));
+
 				history.Add(i);
 
 				if (!ctx.reproducingFault && i == args.Fault)
 					ctx.agentManager.Message("Fault", new Variant("true"));
-				else if (ctx.reproducingFault && i == args.Repro)
+				else if (ctx.reproducingFault && (i == args.Repro || j == args.Repro))
 					ctx.agentManager.Message("Fault", new Variant("true"));
 				else if (i == args.Initial)
 					ctx.agentManager.Message("Fault", new Variant("true"));
@@ -769,6 +772,274 @@ namespace Peach.Pro.Test.Core
 			                   "R3 3 4 5 6 7 Fault " +
 			                   // R24 -> switches back to data set 2
 			                   "R24 24 25";
+
+			Assert.AreEqual(exp, act);
+		}
+
+		[Test]
+		public void TestControlFault()
+		{
+			// Fault on control and immediatley reproduce
+
+			// Fuzz from 1 to 10
+			// Fault on iteration C6
+			// Repro on iteration C6
+
+			var act = Run(new Args { Fault = "C6", Repro = "C6", ControlIterations = 5 });
+
+			const string exp = "R1 1 2 3 4 5 C6 ReproFault C6 Fault 6 7 8 9 10";
+
+			Assert.AreEqual(exp, act);
+		}
+
+		[Test]
+		public void TestControlFaultReproSearchEnd()
+		{
+			// Fault on control and reproduce after searching
+
+			// Fuzz from 1 to 10
+			// Fault on iteration C6
+			// Fail to repro initially
+			// Run 1 C2 2 C3 3 C4 4 C6 5 C6
+			// Repro on iteration C6
+
+			var act = Run(new Args { Fault = "C6", Repro = "C6,2", ControlIterations = 5 });
+
+			const string exp = "R1 1 2 3 4 5 C6 ReproFault C6 1 C2 2 C3 3 C4 4 C5 5 C6 Fault 6 7 8 9 10";
+
+			Assert.AreEqual(exp, act);
+		}
+
+		[Test]
+		public void TestControlFaultSearchMiddle()
+		{
+			// Fault on control and reproduce on non-control while searching prev 10
+
+			// Fuzz from 1 to 10
+			// Fault on iteration C6
+			// Fail to repro initially
+			// Run 1 C2 2 C3 3
+			// Repro on iteration 3
+			// Resume at 6 7 8 9 10
+
+			var act = Run(new Args { Fault = "C6", Repro = "3", ControlIterations = 5 });
+
+			const string exp = "R1 1 2 3 4 5 C6 ReproFault C6 1 C2 2 C3 3 Fault 6 7 8 9 10";
+
+			Assert.AreEqual(exp, act);
+		}
+
+		[Test]
+		public void TestControlFaultSearchControl()
+		{
+			// Fault on control and reproduce on control while searching prev 10
+
+			// Fuzz from 1 to 10
+			// Fault on iteration C6
+			// Fail to repro initially
+			// Run 1 C2 2 C3 3 C4
+			// Repro on iteration C4
+			// Resume at 6 7 8 9 10
+
+			var act = Run(new Args { Fault = "C6", Repro = "C4", ControlIterations = 5 });
+
+			const string exp = "R1 1 2 3 4 5 C6 ReproFault C6 1 C2 2 C3 3 C4 Fault 6 7 8 9 10";
+
+			Assert.AreEqual(exp, act);
+		}
+
+		[Test]
+		public void TestControlFaultNoRepro()
+		{
+			// Fault on control and never repro, verify control runs at correct times
+
+			// Fuzz from 1 to 10
+			// Fault on iteration C6
+			// Fail to repro 
+			// Run 1 C2 2 C3 3 C4 4 C5 5 C6
+			// Repro Fail
+			// Resume at 6 7 8 9 10
+
+			var act = Run(new Args { Fault = "C6", ControlIterations = 5 });
+
+			const string exp = "R1 1 2 3 4 5 C6 ReproFault C6 1 C2 2 C3 3 C4 4 C5 5 C6 ReproFailed 6 7 8 9 10";
+
+			Assert.AreEqual(exp, act);
+		}
+
+		[Test]
+		public void TestNonControlFaultNoRepro()
+		{
+			// Fault on control and never repro, verify control runs at correct times
+
+			// Fuzz from 1 to 10
+			// Fault on iteration 6
+			// Fail to repro 
+			// Run 1 C2 2 C3 3 C4 4 C5 5 C6 6 C7
+			// Repro Fail
+			// Resume at 7 8 9 10
+
+			var act = Run(new Args { Fault = "6", ControlIterations = 5 });
+
+			const string exp = "R1 1 2 3 4 5 C6 6 ReproFault 6 C7 1 C2 2 C3 3 C4 4 C5 5 C6 6 C7 ReproFailed 7 8 9 10";
+
+			Assert.AreEqual(exp, act);
+		}
+
+		[Test]
+		public void TestControlFaultBigSearchMiddle()
+		{
+			// Fault on control and reproduce while searching prev 20
+
+			// Fuzz from 1 to 25
+			// Fault on iteration C21
+			// Fail to repro 
+			// Run 11 C12 12 C13 13 C14 14 C15 15 C16 16 C17 17 C18 18 C19 19 C20 20 C21
+			// Run 1..13
+			// Repro on 13
+			// Resume at 21 22 23 24 25
+
+			var act = Run(new Args { RangeStop = 25, Fault = "C21", Repro = "13,2", ControlIterations = 5 });
+
+			var exp =
+				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 11 12 13 14 15 C16 16 17 18 19 20 C21 ReproFault " +
+				"C21 11 C12 12 C13 13 C14 14 C15 15 C16 16 C17 17 C18 18 C19 19 C20 20 C21 ";
+
+			for (var i = 1; i <= 13; ++i)
+				exp += "{0} ".Fmt(i);
+
+			exp += "Fault 21 22 23 24 25";
+
+			Assert.AreEqual(exp, act);
+		}
+
+		[Test]
+		public void TestNonControlFaultBigSearchMiddle()
+		{
+			// Fault on non-control and reproduce while searching prev 20
+
+			// Fuzz from 1 to 25
+			// Fault on iteration 21
+			// Fail to repro 
+			// Run 11 C12 12 C13 13 C14 14 C15 15 C16 16 C17 17 C18 18 C19 19 C20 20 C21
+			// Run 1..13
+			// Repro on 13
+			// Resume at 21 22 23 24 25
+
+			var act = Run(new Args { RangeStop = 25, Fault = "21", Repro = "13,2", ControlIterations = 5 });
+
+			var exp =
+				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 11 12 13 14 15 C16 16 17 18 19 20 C21 21 ReproFault " +
+				"21 C22 11 C12 12 C13 13 C14 14 C15 15 C16 16 C17 17 C18 18 C19 19 C20 20 C21 21 C22 ";
+
+			for (var i = 1; i <= 13; ++i)
+				exp += "{0} ".Fmt(i);
+
+			exp += "Fault 22 23 24 25";
+
+			Assert.AreEqual(exp, act);
+		}
+
+		[Test]
+		public void TestControlFaultBigNoRepro()
+		{
+			// Fault on control and never repro, verify control runs at correct times
+
+			// Fuzz from 1 to 30
+			// Fault on iteration C26
+			// Never reproduces
+			// Runs -10 with control after every iteration
+			// Runs 2*10 back with control after each search
+
+			// Resume at 26 27 28 29 30
+
+			var act = Run(new Args { RangeStop = 30, Fault = "C26", ControlIterations = 5 });
+
+			const string exp =
+				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 11 12 13 14 15 C16 16 17 18 19 20 " +
+				"C21 21 22 23 24 25 C26 ReproFault C26 " +
+				"16 C17 17 C18 18 C19 19 C20 20 C21 21 C22 22 C23 23 C24 24 C25 25 C26 " +
+				"6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 C26 " +
+				"1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 " +
+				"C26 ReproFailed 26 27 28 29 30";
+
+			Assert.AreEqual(exp, act);
+		}
+
+		[Test]
+		public void TestNonControlFaultBigNoRepro()
+		{
+			// Fault on non-control and never repro, verify control runs at correct times
+
+			// Fuzz from 1 to 30
+			// Fault on iteration 26
+			// Never reproduces
+			// Runs -10 with control after every iteration
+			// Runs 2*10 back with control after each search
+
+			// Resume at 27 28 29 30
+
+			var act = Run(new Args { RangeStop = 30, Fault = "26", ControlIterations = 5 });
+
+			const string exp =
+				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 11 12 13 14 15 C16 16 17 18 19 20 " +
+				"C21 21 22 23 24 25 C26 26 ReproFault 26 C27 " +
+				"16 C17 17 C18 18 C19 19 C20 20 C21 21 C22 22 C23 23 C24 24 C25 25 C26 26 C27 " +
+				"6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 C27 " +
+				"1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 C27 " +
+				"ReproFailed 27 28 29 30";
+
+			Assert.AreEqual(exp, act);
+		}
+
+		[Test]
+		public void TestNonControlNotPastControlFault()
+		{
+			// Fault on non-control and never repro, don't search past last control fault
+
+			// Fuzz from 1 to 30
+			// Fault and repro on C11
+			// Fault on iteration C26
+			// Never reproduces
+			// Runs -10 with control after every iteration
+			// Runs 2*10 back with control after each search but never runs C11
+
+			// Resume at 27 28 29 30
+
+			var act = Run(new Args { RangeStop = 30, Initial = "C11", Fault = "C26", ControlIterations = 5 });
+
+			const string exp =
+				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 ReproFault C11 Fault " +
+				"11 12 13 14 15 C16 16 17 18 19 20 C21 21 22 23 24 25 C26 ReproFault C26 " +
+				"16 C17 17 C18 18 C19 19 C20 20 C21 21 C22 22 C23 23 C24 24 C25 25 C26 " +
+				"11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 C26 " +
+				"ReproFailed 26 27 28 29 30";
+
+			Assert.AreEqual(exp, act);
+		}
+
+		[Test]
+		public void TestNonControlNotPastFault()
+		{
+			// Fault on non-control and never repro, don't search past last fault
+
+			// Fuzz from 1 to 30
+			// Fault and repro on 11
+			// Fault on iteration C26
+			// Never reproduces
+			// Runs -10 with control after every iteration
+			// Runs 2*10 back with control after each search but never runs 11
+
+			// Resume at 27 28 29 30
+
+			var act = Run(new Args { RangeStop = 30, Initial = "11", Fault = "C26", ControlIterations = 5 });
+
+			const string exp =
+				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 11 ReproFault 11 Fault " +
+				"12 13 14 15 C16 16 17 18 19 20 C21 21 22 23 24 25 C26 ReproFault C26 " +
+				"16 C17 17 C18 18 C19 19 C20 20 C21 21 C22 22 C23 23 C24 24 C25 25 C26 " +
+				"12 13 14 15 16 17 18 19 20 21 22 23 24 25 C26 " +
+				"ReproFailed 26 27 28 29 30";
 
 			Assert.AreEqual(exp, act);
 		}

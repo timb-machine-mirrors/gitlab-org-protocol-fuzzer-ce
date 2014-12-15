@@ -88,6 +88,10 @@ module Peach.Services {
 			return deferred.promise;
 		}
 
+		public ReloadPit() {
+			this.pit.$get({ id: this.PitId });
+		}
+
 		public CopyPit(pit: Models.IPit): ng.IPromise<Models.IPit> {
 			var request: Models.IPitCopy = {
 				libraryUrl: this.UserPitLibrary,
@@ -134,31 +138,8 @@ module Peach.Services {
 			return onlyIf(this.Pit, () => this.latestVersion.configured) || false;
 		}
 
-		public set IsConfigured(value: boolean) {
-			onlyIf(this.Pit, () => { this.latestVersion.configured = value; });
-		}
-
 		private get latestVersion(): Models.IPitVersion {
-			if (!this.hasVersion) {
-				this.addVersion();
-			}
 			return _.last(this.Pit.versions);
-		}
-
-		private addVersion() {
-			if (!_.isArray(this.Pit.versions)) {
-				this.Pit.versions = [];
-			}
-			var version: Models.IPitVersion = {
-				locked: false,
-				configured: false,
-				version: this.Pit.versions.length + 1
-			};
-			this.Pit.versions.push(version);
-		}
-
-		private get hasVersion(): boolean {
-			return (_.isArray(this.Pit.versions) && this.Pit.versions.length > 0);
 		}
 	}
 }

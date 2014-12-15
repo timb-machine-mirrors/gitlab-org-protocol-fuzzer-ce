@@ -183,9 +183,6 @@ namespace Peach.Pro.Test.Core.WebServices
 			var cfg1 = db.GetConfigByUrl(img.PitUrl);
 			Assert.NotNull(cfg1);
 
-			// Expect PitLibraryPath to be removed
-			Assert.AreEqual(1, cfg1.Config.Count);
-
 			var imgCopy = ent.First(e => e.Name == "IMG Copy");
 
 			var cfg2 = db.GetConfigByUrl(imgCopy.PitUrl);

@@ -57,11 +57,9 @@ module Peach.Services {
 				var promise = this.$http.get(testUrl);
 				promise.success((data: Models.ITestResult) => {
 					this.testResult = data;
-					if (data.status !== "active") {
+					if (data.status !== Models.TestStatus.Active) {
 						this.$interval.cancel(interval);
-						if (data.status === "pass") {
-							this.pitService.IsConfigured = true;
-						}
+						this.pitService.ReloadPit();
 					}
 				});
 			}, TEST_INTERVAL);

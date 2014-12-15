@@ -8,12 +8,14 @@ module Peach {
 
 	var p = angular.module("Peach", [
 		"angles",
+		"ngSanitize",
 		"ngResource",
 		"ngRoute",
 		"ngVis",
-		"ui.bootstrap",
 		"smart-table",
-		"treeControl"
+		"treeControl",
+		"ui.select", 
+		"ui.bootstrap"
 	]);
 
 	p.service('HttpErrorService', Services.HttpErrorService);
@@ -89,6 +91,7 @@ module Peach {
 	p.directive('peachAgent', () => new AgentDirective());
 	p.directive('peachMonitor', () => new MonitorDirective());
 	p.directive('peachParameter', () => new ParameterDirective());
+	p.directive('peachParameterInput', () => new ParameterInputDirective());
 	p.directive('peachTest', () => new TestDirective());
 	p.directive('peachUnsaved', [
 		'$modal', '$location', (

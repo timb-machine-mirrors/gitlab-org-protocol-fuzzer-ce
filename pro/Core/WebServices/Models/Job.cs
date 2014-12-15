@@ -6,13 +6,20 @@ namespace Peach.Pro.Core.WebServices.Models
 {
 	public enum JobStatus
 	{
-		Stopped = 1,
-		StartPending = 2,
-		StopPending = 3,
-		Running = 4,
-		ContinuePending = 5,
-		PausePending = 6,
-		Paused = 7,
+		Stopped,
+		StartPending,
+		StopPending,
+		Running,
+		ContinuePending,
+		PausePending,
+		Paused,
+	}
+
+	public enum JobMode
+	{
+		Fuzzing,
+		Searching,
+		Reproducing,
 	}
 
 	public class Job
@@ -96,6 +103,12 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// </summary>
 		[JsonConverter(typeof(CamelCaseStringEnumConverter))]
 		public JobStatus Status { get; set; }
+
+		/// <summary>
+		/// The mode that this job is operating under
+		/// </summary>
+		[JsonConverter(typeof (CamelCaseStringEnumConverter))]
+		public JobMode Mode { get; set; }
 
 		/// <summary>
 		/// Display name for the job
