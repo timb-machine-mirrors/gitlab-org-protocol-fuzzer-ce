@@ -19,7 +19,6 @@ namespace Peach.Pro.Test.Core.WebServices
 			string json = @"
 [
     {
-        ""agentUrl"": ""local://"",
         ""monitors"": [
             {
                 ""monitorClass"":""Pcap"",

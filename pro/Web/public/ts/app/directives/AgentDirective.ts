@@ -40,6 +40,12 @@ module Peach {
 
 		public AvailableMonitors: ng.resource.IResource<IMonitor>[];
 
+		public get Header(): string {
+			var url = this.$scope.agent.agentUrl || 'local://';
+			var name = this.$scope.agent.name ? '(' + this.$scope.agent.name + ')' : '';
+			return url + ' ' + name;
+		}
+
 		public get CanMoveUp(): boolean {
 			return this.$scope.agentIndex !== 0;
 		}

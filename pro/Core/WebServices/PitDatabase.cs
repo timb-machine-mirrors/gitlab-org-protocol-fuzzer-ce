@@ -648,7 +648,8 @@ namespace Peach.Pro.Core.WebServices
 					w = test.InsertBefore();
 					w.WriteStartElement("Agent", PeachElement.Namespace);
 					w.WriteAttributeString("name", agentName);
-					w.WriteAttributeString("location", item.AgentUrl);
+					if (!string.IsNullOrEmpty(item.AgentUrl))
+						w.WriteAttributeString("location", item.AgentUrl);
 
 					// AppendChild so the agents stay in order
 					using (var testWriter = test.AppendChild())
