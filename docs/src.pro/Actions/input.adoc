@@ -40,7 +40,7 @@ xref:Action_output[_output_] actions, or referenced in conditional expressions s
 as with the xref:Action_when[_when_] attribute.
 
 _input_ Actions are associated with a xref:DataModel[DataModel] (provided as a child element) which drives how much data will be requested.
-For stream-based publishers that can read forever (such as TCP), the DataModel must limit the amount of data read, such as setting a timeout value.
+For stream-based publishers that can read forever (such as TCP), the DataModel must prevent the potential of infinite data read operations, such as setting a timeout value.
 
 .Stream Publisher versus Datagram Publisher
 [options="header"]
