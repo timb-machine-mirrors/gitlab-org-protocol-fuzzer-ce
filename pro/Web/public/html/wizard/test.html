@@ -1,10 +1,20 @@
-﻿<div class="page-content">
+<div class="page-content">
 	<div class="page-header">
 		<h1>
 			Quick Start &raquo; Test
 		</h1>
 	</div>
 	<p>
+<!-- RAB 12/17/14. When all of the sections of the configuration are complete, 
+        you can validate the fuzzing definition for correctness. 
+
+        This section performs a test that runs a single iteration of the Pit, 
+        outputs the results of the test, and issues log messages as appropriate.
+        You can fine tune a configuration or address any problems that arise with
+        a configuration by re-visiting the appropriate section of the configuration, 
+        adjusting the settings that you want to edit, and re-run the test. 
+-->        
+        
 		Once all of the configuration sections have been completed you
 		can test your definition to verify it works correctly.
 		This section will allow you to do just that, running a single iteration of the Pit,
@@ -21,6 +31,11 @@
 				</span>
 				<span class="label label-warning arrowed"
 				      ng-hide="vm.IsComplete('setvars')">
+<!-- RAB 12/17/14.  Item is not complete, the default value will be used.
+
+NOTE TO FRANK: What's not complete?  It might seem intuitive on the screen, but
+               someone inevitably complains about opaqueness versus clarity...
+-->                
 					Not completed, default values will be used
 				</span>
 			</td>
