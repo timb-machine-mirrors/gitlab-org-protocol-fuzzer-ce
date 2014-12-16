@@ -15,7 +15,7 @@
 // 03/05/2014: Lynn: 
 //  Edited text and corrected definition information
 
-The onComplete attribute is an expression that is evaluated after preforming an action.
+The onComplete attribute is an expression that is evaluated after performing an action.
 This expression can be used to increment a counter or to perform other functions defined in separate files, such as those brought into the model using the xref:Import[Import] tag.
 
 .Keeping State
@@ -68,7 +68,7 @@ test:: Test instance
 
 .Display a Message from _onComplete_
 ==========================
-This example will print a message when the _onComplete_ expression is run.
+This example prints a message when the _onComplete_ expression is run.
 
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -133,7 +133,7 @@ Peach.Core.Publishers.FilePublisher stop()
 
 .Loop Using Iteration State Bag
 ==========================
-This example will use the iteration state bag to simulate a for loop.
+This example uses the iteration state bag to simulate a for loop.
 
 ----
 <?xml version="1.0" encoding="utf-8"?>
