@@ -7,6 +7,7 @@ module Peach {
 
 		static $inject = [
 			"$q",
+			"$window",
 			"$modal",
 			"PitResource",
 			"PitLibraryResource",
@@ -16,6 +17,7 @@ module Peach {
 
 		constructor(
 			private $q: ng.IQService,
+			private $window: ng.IWindowService,
 			private $modal: ng.ui.bootstrap.IModalService,
 			private PitResource: IPitResource,
 			private PitLibraryResource: ILibraryResource,
@@ -66,21 +68,26 @@ module Peach {
 					modal.result.then((copied: IPit) => {
 						// only update the current Pit if successful
 						// a failed copy leaves the current Pit untouched
-						this.pit = copied;
-						deferred.resolve(this.Pit);
+						this.setPit(copied);
+						deferred.resolve(this.pit);
 					});
 					modal.result.catch((reason) => {
 						deferred.reject(reason);
 					});
 				} else {
-					this.pit = pit;
-					deferred.resolve(this.Pit);
+					this.setPit(pit);
+					deferred.resolve(this.pit);
 				}
 			});
 			promise.catch((reason) => {
 				deferred.reject(reason);
 			});
 			return deferred.promise;
+		}
+
+		private setPit(pit: IPit) {
+			this.pit = pit;
+			this.$window.sessionStorage.setItem('pitId', this.PitId);
 		}
 
 		public ReloadPit() {
@@ -97,15 +104,15 @@ module Peach {
 		}
 
 		public get Name(): string {
-			return onlyIf(this.Pit, () => this.Pit.name) || '(none)';
+			return onlyIf(this.pit, () => this.pit.name) || '(none)';
 		}
 
 		public get PitId(): string {
-			return onlyIf(this.Pit, () => ExtractId('pits', this.pit.pitUrl));
+			return onlyIf(this.pit, () => ExtractId('pits', this.pit.pitUrl));
 		}
 
 		public LoadPitConfig(): IPitConfig {
-			return onlyIf(this.Pit, () => {
+			return onlyIf(this.pit, () => {
 				return this.PitConfigResource.get({ id: this.PitId }, (data: IPitConfig) => {
 					this.pitConfig = data;
 				});
@@ -113,7 +120,7 @@ module Peach {
 		}
 
 		public LoadPitAgents(): IPitAgents {
-			return onlyIf(this.Pit, () => {
+			return onlyIf(this.pit, () => {
 				return this.PitAgentsResource.get({ id: this.PitId }, (data: IPitAgents) => {
 					this.pitAgents = data;
 				});
@@ -130,11 +137,11 @@ module Peach {
 		}
 
 		public get IsConfigured(): boolean {
-			return onlyIf(this.Pit, () => this.latestVersion.configured) || false;
+			return onlyIf(this.pit, () => this.latestVersion.configured) || false;
 		}
 
 		private get latestVersion(): IPitVersion {
-			return _.last(this.Pit.versions);
+			return _.last(this.pit.versions);
 		}
 	}
 }

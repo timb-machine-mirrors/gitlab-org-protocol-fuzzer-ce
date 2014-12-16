@@ -2,7 +2,6 @@
 
 "use strict";
 
-
 interface String {
 	startsWith(str: string): boolean;
 }

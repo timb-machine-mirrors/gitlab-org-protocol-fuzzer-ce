@@ -9,6 +9,7 @@ module Peach {
 		channel: string;
 		defaultValue: any;
 		ctrl: ng.INgModelController;
+		ignore: string;
 	}
 
 	export class UniqueDirective implements ng.IDirective {
@@ -57,7 +58,8 @@ module Peach {
 		public require = 'ngModel';
 		public scope = {
 			channel: '@peachUniqueChannel',
-			defaultValue: '@peachUniqueDefault'
+			defaultValue: '@peachUniqueDefault',
+			ignore: '@peachUniqueIgnore'
 		};
 
 		public link: ng.IDirectiveLinkFn;
@@ -99,9 +101,10 @@ module Peach {
 			var isUnique;
 			var channel = this.getChannel(scope.channel);
 			_.forEach(channel, (item: IUniqueScope, id: string) => {
-				var itemUnique = this.computeUnique(item, item.ctrl.$viewValue);
+				var isDuplicate = this.isDuplicate(item, item.ctrl.$viewValue);
+				item.ctrl.$setValidity('unique', !isDuplicate);
 				if (id === scope.$id.toString()) {
-					isUnique = itemUnique;
+					isUnique = !isDuplicate;
 				}
 			});
 			return isUnique;
@@ -117,20 +120,28 @@ module Peach {
 			delete channel[scope.$id.toString()];
 			if (_.isEmpty(channel)) {
 				delete this.channels[scope.channel];
+			} else {
+				this.IsUnique(scope, null);
 			}
 		}
 
-		private computeUnique(scope: IUniqueScope, value: any): boolean {
+		private isDuplicate(scope: IUniqueScope, value: any): boolean {
+			var myValue = (value || scope.defaultValue);
+			if (scope.ignore) {
+				var reIgnore: RegExp = new RegExp(scope.ignore);
+				if (reIgnore.test(myValue)) {
+					return false;
+				}
+			} 
+
 			var channel = this.getChannel(scope.channel);
-			var isDuplicate = _.some(channel, (other: IUniqueScope, id: string) => {
+			return _.some(channel, (other: IUniqueScope, id: string) => {
 				if (scope.$id.toString() === id) {
 					return false;
 				}
 				var otherValue = other.ctrl.$viewValue;
-				return ((value || scope.defaultValue) === (otherValue || other.defaultValue));
+				return (myValue === (otherValue || other.defaultValue));
 			});
-			scope.ctrl.$setValidity('unique', !isDuplicate);
-			return !isDuplicate;
 		}
 
 		private getChannel(name: string): UniqueChannel {

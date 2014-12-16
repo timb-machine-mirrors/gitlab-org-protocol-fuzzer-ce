@@ -7,6 +7,7 @@ module Peach {
 
 		static $inject = [
 			"$scope",
+			"$window",
 			"$location",
 			"$modal",
 			"PitService",
@@ -16,6 +17,7 @@ module Peach {
 
 		constructor(
 			$scope: IViewModelScope,
+			private $window: ng.IWindowService,
 			private $location: ng.ILocationService,
 			private $modal: ng.ui.bootstrap.IModalService,
 			private pitService: PitService,
@@ -27,7 +29,7 @@ module Peach {
 			var promise = this.jobService.GetJobs();
 			promise.then(() => {
 				if (_.isUndefined(this.job)) {
-					var pitId = $location.search()['pit'];
+					var pitId = $location.search()['pit'] || $window.sessionStorage.getItem('pitId');
 					if (pitId) {
 						this.pitService.SelectPit('/p/pits/' + pitId);
 					} else if (!this.pitService.Pit) {

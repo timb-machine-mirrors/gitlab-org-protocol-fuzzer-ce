@@ -8,6 +8,7 @@ describe("Peach", () => {
 	describe('Main controller', () => {
 		var $httpBackend: ng.IHttpBackendService;
 		var $location: ng.ILocationService;
+		var $window: ng.IWindowService;
 		var ctrl: Peach.MainController;
 		var service: Peach.PitService;
 		var pitUrl = '/p/pits/PIT_GUID';
@@ -15,6 +16,9 @@ describe("Peach", () => {
 		var spyOpen: jasmine.Spy;
 
 		beforeEach(inject(($injector: ng.auto.IInjectorService) => {
+			$window = $injector.get('$window');
+			$window.sessionStorage.clear();
+
 			$modal = $injector.get('$modal');
 			spyOpen = spyOn($modal, 'open');
 
@@ -38,6 +42,7 @@ describe("Peach", () => {
 			$httpBackend.expectGET('/p/jobs').respond([]);
 			ctrl = $controller('Peach.MainController', {
 				$scope: $rootScope.$new(),
+				$window: $window,
 				$location: $location,
 				$modal: $modal,
 				PitService: service
@@ -105,6 +110,7 @@ describe("Peach", () => {
 		describe('select a Pit that is already configured', () => {
 			beforeEach(() => {
 				var pit = {
+					pitUrl: pitUrl,
 					name: 'My Pit',
 					versions: [{ configured: true }]
 				};

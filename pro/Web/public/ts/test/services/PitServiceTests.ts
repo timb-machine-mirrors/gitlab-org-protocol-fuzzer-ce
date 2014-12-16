@@ -80,6 +80,7 @@ describe("Peach", () => {
 			describe('which is not configured', () => {
 				beforeEach(() => {
 					pit = {
+						pitUrl: pitUrl,
 						name: 'My Pit',
 						versions: [{ configured: false }]
 					};
@@ -104,6 +105,7 @@ describe("Peach", () => {
 			describe('which is already configured', () => {
 				beforeEach(() => {
 					pit = {
+						pitUrl: pitUrl,
 						name: 'My Pit',
 						versions: [{ configured: true }]
 					};
@@ -130,10 +132,12 @@ describe("Peach", () => {
 					var copy;
 					beforeEach(() => {
 						pit = {
+							pitUrl: pitUrl,
 							name: 'My Pit',
 							locked: true
 						};
 						copy = {
+							pitUrl: pitUrl,
 							name: 'Copied Pit',
 							locked: false
 						};

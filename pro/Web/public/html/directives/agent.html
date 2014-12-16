@@ -92,7 +92,7 @@
 								 class="form-control"
 								 peach:unique-channel="agent.agentUrl"
 					       peach:unique-default="local://" 
-					       peach:unique-ignore="$local://.*^"/>
+					       peach:unique-ignore="^local://"/>
 				</div>
 				<span class="help-block"
 							ng-show="form.location.$error.unique">
