@@ -37,23 +37,26 @@
 // 03/05/2014: Lynn:
 //  Rewrote definition text
 
-Slurp is used to move data between two DataModels.
+Slurp moves data between two DataModels. The Slurp Action copies a data value from one non-container element in one DataModel to another non-container element in a separate DataModel. 
 
-* The input element is defined by xref:xpath[valueXpath]. The data model and the element in valueXpath were previously referenced by a prior input action.
-* The output element is defined by xref:xpath[setXpath].  The data model and the element in setXpath will be referenced by a future action. 
+A non-container element is an element that does not contain other elements. Number, string, and blob are types of non-container elements. In contrast, array, xref:Block[Block], xref:Choice[Choice], and xref:DataModel[DataModel]) are types of container elements.
 
-XML Path (XPath) language is used by valueXpath and setXpath to specify the data that are going to be moved. XPath is used to target a specific element for the setXpath and valueXpath parameters. This allows for a variety of ways to access elements in the Document Object Model (DOM).
+* The xref:xpath[valueXpath] attribute defines the input element. The data model and the element in valueXpath were previously referenced by a prior input action.
 
-A common use for slurp is during a protocol sequence where a sequence id or a challenge id needs to be sent back to the server (see the Challenge Response example below). Slurp will copy the data from one (valueXpath) action, input from the server, to the other (setXpath) action, output to the server.
+* The xref:xpath[setXpath] attribute defines the output element.  The data model and the element in setXpath will be referenced by a future action. 
 
-The Slurp action is limited to copying values only between two non-container elements (a container element is one which can contain other elements such as xref:Choice[Choice], xref:Block[Block], or xref:DataModel[DataModel]). Attempting to Slurp a container element will cause a Peach error.
-Other potential Slurp errors:
+The XML Path (XPath) language is used by valueXpath and setXpath to specify the data to move. XPath targets a specific element for the xref:xpath[valueXpath] and xref:xpath[setXpath] parameters. This allows a variety of ways to access these elements in the Document Object Model (DOM).
 
-* the setXpath parameter does not return any elements (has no content or non-existent path)
-* the valueXpath parameter does not return a single element (Only one element allowed; none doesn't work and neither does more than one. If you want to move more than one set of data, issue multiple slurp commands.)
-* the valueXpath and setXpath parameters return the same element
+A common use for slurp is during a protocol sequence where a sequence id or a challenge id needs to roundtrip from the server to the client and back to the server (see the Challenge Response example below). The _slurp_ Action copies the data received from the server (valueXpath attribute) into the response packet (setXpath attribute). When the response packet is populated, it is sent back to the server using another Action.
 
-Assigning a unique name to elements will make targeting those elements with the setXpath and valueXpath parameters much easier as XPath wild cards can be used. Using XPath wild cards with unique element names allows an element to be targeted with just its name instead of using the full path to the element. See the below examples for slurp actions with and without unique element names.
+Potential Slurp errors include the following:
+
+* Copying from a container element or copying to a container element (Copying is restricted to simple types, such as number, string, or blob.)
+* The valueXpath parameter does not return a single element (One element is required; no more; no less. If you need to move more than one set of data, issue multiple slurp commands.)
+* The valueXpath and setXpath parameters return the same element
+* The setXpath parameter does not return any elements (The element has no content or the path is non-existent.)
+
+Assigning unique names to elements simplifies targeting those elements with the valueXpath and setXpath attributes. Using XPath wildcards with unique element names allows an element to be targeted using its name instead of using the full path to the element. See the following examples for slurp actions with and without unique element names.
 
 .XPath Further Reading
 ****
@@ -101,15 +104,15 @@ type:: Action type, must be set to "slurp"
 _Optional:_
 
 name:: Name used to identify the action
-xref:xpath[valueXpath]:: Path to the source element defined using XPath notation. Must match a single element.
-xref:xpath[setXpath]:: Path to the destination element defined using XPath notation. Can match multiple elements on which to set the value.
-xref:Action_when[when]:: Only perform action if the expression provided evaluates to true
-xref:Action_onStart[onStart]:: Expression to run on start of an action.
-xref:Action_onComplete[onComplete]:: Expression to run on completion of an action
+xref:xpath[valueXpath]:: Path to the source element. Must evalutate to match a single element.
+xref:xpath[setXpath]:: Path to the destination element. Can match multiple elements on which to set the value.
+xref:Action_when[when]:: Perform action if the provided expression evaluates to true
+xref:Action_onStart[onStart]:: Evaluate expression to run at the start of an action
+xref:Action_onComplete[onComplete]:: Evaluate expression upon completion of an action
 
 === Child Elements
 
-No child-elements are supported by this element.
+None.
 
 === Examples
 
@@ -169,8 +172,8 @@ This example uses fully specified names in the xpath query to identify elements.
 
 .Unique Names
 ==========================
-This example uses unique names for the element we will be getting the value from and the element we are setting the value on.
-This will allow us to use the wildcard (//) xpath notation instead of providing a full name.
+This example uses unique names for the source element (input) and for the desintation element (output) involved in the slurp.
+Having unique names allows the simpler xpath notation that uses wildcards (//) instead of using a full name.
 
 [source,xml]
 ----
@@ -224,7 +227,7 @@ This will allow us to use the wildcard (//) xpath notation instead of providing 
 
 .Setting Multiple Elements
 ==========================
-This example set a value on multiple elements at once.
+This example copies a value to multiple elements at once.
 
 [source,xml]
 ----
@@ -291,7 +294,7 @@ This example set a value on multiple elements at once.
 
 .Challenge Response
 ==========================
-This example shows how to use slurp to get a challenge id from that server that will be sent with the next output.
+This example shows how to use slurp for roundtripping a challenge id just issued by a server in the next response packet to the server.
 
 [source,xml]
 ----
