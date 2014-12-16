@@ -11,20 +11,26 @@
 					<button type="button"
 									class="btn btn-xs btn-info"
 									ng-click="vm.OnMoveUp($event)"
-									ng-class="{disabled: !vm.CanMoveUp}">
+									ng-class="{disabled: !vm.CanMoveUp}"
+									tooltip="Move Agent Up"
+									tooltip-append-to-body="true">
 						<i class="glyphicon glyphicon-chevron-up">
 						</i>
 					</button>
 					<button type="button"
 									class="btn btn-xs btn-info"
 									ng-click="vm.OnMoveDown($event)"
-									ng-class="{disabled: !vm.CanMoveDown}">
+									ng-class="{disabled: !vm.CanMoveDown}"
+									tooltip="Move Agent Down"
+									tooltip-append-to-body="true">
 						<i class="glyphicon glyphicon-chevron-down">
 						</i>
 					</button>
 					<button type="button"
-									class="btn btn-xs btn-danger"
-									ng-click="vm.OnRemove($event)">
+					        class="btn btn-xs btn-danger"
+					        ng-click="vm.OnRemove($event)"
+					        tooltip="Remove Agent"
+					        tooltip-append-to-body="true">
 						<i class="glyphicon glyphicon-remove">
 						</i>
 					</button>
@@ -107,9 +113,7 @@
 									 theme="select2"
 									 class="peach-add-monitor"
 									 on-select="vm.OnAddMonitor($item)">
-					<i class="glyphicon glyphicon-plus">
-					</i>
-					<ui-select-match placeholder="Add a monitor ...">
+					<ui-select-match placeholder="Add a monitor...">
 					</ui-select-match>
 					<ui-select-choices repeat="monitor.monitorClass as monitor in vm.AvailableMonitors | filter: $select.search">
 						<div ng-bind-html="monitor.monitorClass | highlight: $select.search"></div>
