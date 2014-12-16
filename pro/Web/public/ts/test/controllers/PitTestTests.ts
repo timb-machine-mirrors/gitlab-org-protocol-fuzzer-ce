@@ -12,13 +12,13 @@ describe("Peach", () => {
 
 		var newController: () => Peach.PitTestController;
 		var ctrl: Peach.PitTestController;
-		var testService: Peach.Services.TestService;
-		var wizardService: Peach.Services.WizardService;
-		var pitService: Peach.Services.PitService;
+		var testService: Peach.TestService;
+		var wizardService: Peach.WizardService;
+		var pitService: Peach.PitService;
 
 		var pitUrl = '/p/pits/PIT_GUID';
 
-		var pit = <Peach.Models.IPit> {
+		var pit = <Peach.IPit> {
 			pitUrl: pitUrl,
 			name: 'My Pit',
 			versions: [
@@ -75,24 +75,24 @@ describe("Peach", () => {
 
 		it("can begin a test", () => {
 			var testUrl = '/p/my/test/url';
-			var ref: Peach.Models.ITestRef = {
+			var ref: Peach.ITestRef = {
 				testUrl: testUrl
 			};
 			$httpBackend.expectGET(new RegExp('/p/conf/wizard/test/start(.*)')).respond(ref);
 			ctrl.OnBeginTest();
 			$httpBackend.flush();
 
-			var result1: Peach.Models.ITestResult = {
+			var result1: Peach.ITestResult = {
 				status: 'active',
 				log: '',
 				events: []
 			};
 
 			$httpBackend.expectGET(new RegExp(testUrl)).respond(result1);
-			$interval.flush(Peach.Services.TEST_INTERVAL);
+			$interval.flush(Peach.TEST_INTERVAL);
 			$httpBackend.flush();
 
-			var result2: Peach.Models.ITestResult = {
+			var result2: Peach.ITestResult = {
 				status: 'pass',
 				log: '',
 				events: []
@@ -101,7 +101,7 @@ describe("Peach", () => {
 
 			$httpBackend.expectGET(new RegExp(testUrl)).respond(result2);
 			$httpBackend.expectGET(pitUrl).respond(pit);
-			$interval.flush(Peach.Services.TEST_INTERVAL);
+			$interval.flush(Peach.TEST_INTERVAL);
 			$httpBackend.flush();
 
 			expect(pitService.IsConfigured).toBe(true);

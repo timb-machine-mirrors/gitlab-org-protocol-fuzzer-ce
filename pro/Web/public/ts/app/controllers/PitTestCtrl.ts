@@ -15,8 +15,8 @@ module Peach {
 		constructor(
 			$scope: IViewModelScope,
 			private $location: ng.ILocationService,
-			private testService: Services.TestService,
-			private wizardService: Services.WizardService
+			private testService: TestService,
+			private wizardService: WizardService
 		) {
 			$scope.vm = this;
 			if ($location.path() === '/quickstart/test') {

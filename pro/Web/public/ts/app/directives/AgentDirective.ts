@@ -14,31 +14,47 @@ module Peach {
 		};
 	}
 
+	export interface ISelectable<T> {
+		selected: T;
+	}
+
 	export interface IAgentScope extends IFormScope {
-		agents: Models.Agent[];
-		agent: Models.Agent;
+		agents: Agent[];
+		agent: Agent;
 		agentIndex: number;
 		isOpen: boolean;
+		selectedMonitor: ISelectable<IMonitor>;
 	}
 
 	export class AgentController {
 		static $inject = [
 			"$scope",
+			"$timeout",
 			"PitService",
 			"AvailableMonitorsResource"
 		];
 
 		constructor(
 			private $scope: IAgentScope,
-			private pitService: Services.PitService,
-			availableMonitorsResource: Models.IMonitorResource
+			private $timeout: ng.ITimeoutService,
+			private pitService: PitService,
+			availableMonitorsResource: IMonitorResource
 		) {
 			$scope.vm = this;
 			$scope.isOpen = true;
+			$scope.selectedMonitor = {
+				selected: undefined
+			};
 			this.AvailableMonitors = availableMonitorsResource.query();
 		}
 
-		public AvailableMonitors: ng.resource.IResource<Models.IMonitor>[];
+		public AvailableMonitors: ng.resource.IResource<IMonitor>[];
+
+		public get Header(): string {
+			var url = this.$scope.agent.agentUrl || 'local://';
+			var name = this.$scope.agent.name ? '(' + this.$scope.agent.name + ')' : '';
+			return url + ' ' + name;
+		}
 
 		public get CanMoveUp(): boolean {
 			return this.$scope.agentIndex !== 0;
@@ -69,10 +85,13 @@ module Peach {
 			this.$scope.form.$setDirty();
 		}
 
-		public OnAddMonitor($event: ng.IAngularEvent, monitor: Models.IMonitor): void {
-			$event.preventDefault();
+		public OnAddMonitor(monitor: IMonitor): void {
 			this.$scope.agent.monitors.push(monitor);
 			this.$scope.form.$setDirty();
+
+			this.$timeout(() => {
+				this.$scope.selectedMonitor.selected = undefined;
+			});
 		}
 	}
 }

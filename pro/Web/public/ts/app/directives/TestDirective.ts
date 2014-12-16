@@ -18,12 +18,12 @@ module Peach {
 
 		constructor(
 			private $scope: IAgentScope,
-			private testService: Services.TestService
+			private testService: TestService
 		) {
 			$scope.vm = this;
 		}
 
-		public get TestEvents(): Models.ITestEvent[]{
+		public get TestEvents(): ITestEvent[]{
 			return this.testService.TestResult.events;
 		}
 
@@ -39,7 +39,7 @@ module Peach {
 			return this.testService.TestTime;
 		}
 
-		public StatusClass(row: Models.ITestEvent): any {
+		public StatusClass(row: ITestEvent): any {
 			return {
 				'icon-ok green': row.status === 'pass',
 				'icon-warning-sign orange': row.status === 'warn',

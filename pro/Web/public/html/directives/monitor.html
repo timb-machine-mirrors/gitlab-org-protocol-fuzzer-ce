@@ -9,19 +9,25 @@
 				{{monitor.monitorClass}} {{monitor.name ? '(' + monitor.name + ')' : ''}}
 				<span class="btn-group btn-group-xs pull-right">
 					<button class="btn btn-xs btn-info"
-									ng-click="vm.OnMoveUp($event)"
-									ng-class="{disabled: !vm.CanMoveUp}">
+					        ng-click="vm.OnMoveUp($event)"
+					        ng-class="{disabled: !vm.CanMoveUp}"
+					        tooltip="Move Monitor Up"
+					        tooltip-append-to-body="true">
 						<i class="glyphicon glyphicon-chevron-up">
 						</i>
 					</button>
 					<button class="btn btn-xs btn-info"
 									ng-click="vm.OnMoveDown($event)"
-									ng-class="{disabled: !vm.CanMoveDown}">
+									ng-class="{disabled: !vm.CanMoveDown}"
+									tooltip="Move Monitor Down"
+									tooltip-append-to-body="true">
 						<i class="glyphicon glyphicon-chevron-down">
 						</i>
 					</button>
 					<button class="btn btn-xs btn-danger"
-									ng-click="vm.OnRemove($event)">
+									ng-click="vm.OnRemove($event)"
+									tooltip="Remove Monitor"
+									tooltip-append-to-body="true">
 						<i class="glyphicon glyphicon-remove">
 						</i>
 					</button>
@@ -35,17 +41,17 @@
 			</label>
 			<div class="col-sm-6">
 				<div class="input-group">
+					<span class="peach-field-info tooltip-info input-group-addon"
+								tooltip="Friendly name for your monitor"
+								tooltip-placement="right"
+								tooltip-append-to-body="true">
+					</span>
 					<input name="name"
 								 ng-model="monitor.name"
 								 type="text"
 								 class="form-control"
 								 peach:unique-channel="agents[{{agentIndex}}].monitor.name"
 								 peach:unique-default="Monitor{{monitorIndex}}" />
-					<span class="peach-field-info tooltip-info input-group-addon"
-								tooltip="Friendly name for your monitor"
-								tooltip-placement="right"
-								tooltip-append-to-body="true">
-					</span>
 				</div>
 				<span class="help-block"
 							ng-show="form.name.$error.unique">

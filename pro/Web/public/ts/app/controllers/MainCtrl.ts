@@ -18,9 +18,9 @@ module Peach {
 			$scope: IViewModelScope,
 			private $location: ng.ILocationService,
 			private $modal: ng.ui.bootstrap.IModalService,
-			private pitService: Services.PitService,
-			private jobService: Services.JobService,
-			private wizardService: Services.WizardService
+			private pitService: PitService,
+			private jobService: JobService,
+			private wizardService: WizardService
 		) {
 			$scope.vm = this;
 
@@ -37,11 +37,11 @@ module Peach {
 			});
 		}
 
-		private get pit(): Models.IPit {
+		private get pit(): IPit {
 			return this.pitService.Pit;
 		}
 
-		private get job(): Models.IJob {
+		private get job(): IJob {
 			return this.jobService.Job;
 		}
 
@@ -99,13 +99,13 @@ module Peach {
 		public get CanSelectPit(): boolean {
 			return (
 				_.isUndefined(this.job) ||
-				this.job.status === Models.JobStatus.Stopped
+				this.job.status === JobStatus.Stopped
 			);
 		}
 
 		public get CanConfigurePit(): boolean {
 			return (
-				(this.job === undefined || this.job.status === Models.JobStatus.Stopped) &&
+				(this.job === undefined || this.job.status === JobStatus.Stopped) &&
 				(this.pit !== undefined && this.pit.pitUrl !== undefined && this.pit.pitUrl.length > 0)
 			);
 		}
@@ -133,7 +133,7 @@ module Peach {
 		private get isJobRunning() {
 			return (
 				!(_.isUndefined(this.job)) &&
-				this.job.status !== Models.JobStatus.Stopped
+				this.job.status !== JobStatus.Stopped
 			);
 		}
 	}

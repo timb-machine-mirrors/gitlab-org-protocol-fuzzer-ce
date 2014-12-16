@@ -18,7 +18,7 @@ module Peach {
 		"ui.bootstrap"
 	]);
 
-	p.service('HttpErrorService', Services.HttpErrorService);
+	p.service('HttpErrorService', HttpErrorService);
 	p.config([
 		'$httpProvider', ($httpProvider: ng.IHttpProvider) => {
 			$httpProvider.interceptors.push('HttpErrorService');
@@ -27,46 +27,46 @@ module Peach {
 
 	p.factory('PeachConfigResource', [
 		'$resource',
-		($resource: ng.resource.IResourceService): Models.IKeyValueResource => {
-			return <Models.IKeyValueResource> $resource(
+		($resource: ng.resource.IResourceService): IKeyValueResource => {
+			return <IKeyValueResource> $resource(
 				'/p/conf/wizard/state'
 			);
 		}
 	]);
 	p.factory('PitLibraryResource', [
 		'$resource',
-		($resource: ng.resource.IResourceService): Models.ILibraryResource => {
-			return <Models.ILibraryResource> $resource('/p/libraries');
+		($resource: ng.resource.IResourceService): ILibraryResource => {
+			return <ILibraryResource> $resource('/p/libraries');
 		}
 	]);
 	p.factory('PitResource', [
 		'$resource',
-		($resource: ng.resource.IResourceService): Models.IPitResource => {
-			return <Models.IPitResource> $resource(
+		($resource: ng.resource.IResourceService): IPitResource => {
+			return <IPitResource> $resource(
 				'/p/pits/:id', { id: '@id' }
 			);
 		}
 	]);
 	p.factory('PitConfigResource', [
 		'$resource',
-		($resource: ng.resource.IResourceService): Models.IPitConfigResource => {
-			return <Models.IPitConfigResource> $resource(
+		($resource: ng.resource.IResourceService): IPitConfigResource => {
+			return <IPitConfigResource> $resource(
 				'/p/pits/:id/config', { id: '@id' }
 			);
 		}
 	]);
 	p.factory('PitAgentsResource', [
 		'$resource',
-		($resource: ng.resource.IResourceService): Models.IPitAgentsResource => {
-			return <Models.IPitAgentsResource> $resource(
+		($resource: ng.resource.IResourceService): IPitAgentsResource => {
+			return <IPitAgentsResource> $resource(
 				'/p/pits/:id/agents', { id: '@id' }
 			);
 		}
 	]);
 	p.factory('AvailableMonitorsResource', [
 		'$resource',
-		($resource: ng.resource.IResourceService): Models.IMonitorResource => {
-			return <Models.IMonitorResource> $resource(
+		($resource: ng.resource.IResourceService): IMonitorResource => {
+			return <IMonitorResource> $resource(
 				'/p/conf/wizard/monitors', {}, {
 					query: { method: 'GET', isArray: true, cache: true }
 				}
@@ -75,17 +75,17 @@ module Peach {
 	]);
 	p.factory('FaultDetailResource', [
 		'$resource',
-		($resource: ng.resource.IResourceService): Models.IFaultDetailResource => {
-			return <Models.IFaultDetailResource> $resource(
+		($resource: ng.resource.IResourceService): IFaultDetailResource => {
+			return <IFaultDetailResource> $resource(
 				'/p/faults/:id', { id: '@id' }
 			);
 		}
 	]);
 
-	p.service('PitService', Services.PitService);
-	p.service('JobService', Services.JobService);
-	p.service('TestService', Services.TestService);
-	p.service('WizardService', Services.WizardService);
+	p.service('PitService', PitService);
+	p.service('JobService', JobService);
+	p.service('TestService', TestService);
+	p.service('WizardService', WizardService);
 	p.service('UniqueService', UniqueService);
 
 	p.directive('peachAgent', () => new AgentDirective());

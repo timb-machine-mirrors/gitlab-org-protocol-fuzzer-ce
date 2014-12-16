@@ -11,8 +11,8 @@ describe("Peach", () => {
 
 		var newController: () => Peach.WizardController;
 		var ctrl: Peach.WizardController;
-		var wizardService: Peach.Services.WizardService;
-		var pitService: Peach.Services.PitService;
+		var wizardService: Peach.WizardService;
+		var pitService: Peach.PitService;
 
 		var pitUrl = '/p/pits/PIT_GUID';
 		var pit = {
@@ -72,14 +72,14 @@ describe("Peach", () => {
 				it("starts clean", () => {
 					expect(_.isObject(ctrl)).toBe(true);
 					expect(ctrl.Question.id).toBe(0);
-					expect(ctrl.Question.type).toBe(Peach.Models.QuestionTypes.Intro);
+					expect(ctrl.Question.type).toBe(Peach.QuestionTypes.Intro);
 				});
 
 				it("Next() will move to done", () => {
 					$httpBackend.expectPOST(pitUrl + "/config").respond('OK');
 					ctrl.Next();
 					$httpBackend.flush();
-					expect(ctrl.Question.type).toBe(Peach.Models.QuestionTypes.Done);
+					expect(ctrl.Question.type).toBe(Peach.QuestionTypes.Done);
 				});
 
 				it("OnSubmit() moves to the next wizard", () => {
@@ -95,7 +95,7 @@ describe("Peach", () => {
 						{
 							pitUrl: pitUrl,
 							config: [
-								{ key: "Key", name: "Name", type: Peach.Models.QuestionTypes.String }
+								{ key: "Key", name: "Name", type: Peach.QuestionTypes.String }
 							]
 						}
 					);
@@ -106,23 +106,23 @@ describe("Peach", () => {
 				it("starts clean", () => {
 					expect(_.isObject(ctrl)).toBe(true);
 					expect(ctrl.Question.id).toBe(0);
-					expect(ctrl.Question.type).toBe(Peach.Models.QuestionTypes.Intro);
+					expect(ctrl.Question.type).toBe(Peach.QuestionTypes.Intro);
 				});
 
 				it("should walk thru wizard", () => {
 					ctrl.Next();
 					ctrl.Question.value = "Value";
-					expect(ctrl.Question.type).toBe(Peach.Models.QuestionTypes.String);
-					var data = <Peach.Models.IPitConfig> {
+					expect(ctrl.Question.type).toBe(Peach.QuestionTypes.String);
+					var data = <Peach.IPitConfig> {
 						pitUrl: pitUrl,
 						config: [
-							{ key: "Key", name: "Name", value: "Value" }
+							{ key: "Key", name: "Name", value: "Value", type: "string" }
 						]
 					};
 					$httpBackend.expectPOST(pitUrl + "/config", data).respond('OK');
 					ctrl.Next();
 					$httpBackend.flush();
-					expect(ctrl.Question.type).toBe(Peach.Models.QuestionTypes.Done);
+					expect(ctrl.Question.type).toBe(Peach.QuestionTypes.Done);
 				});
 			});
 		});
@@ -143,11 +143,11 @@ describe("Peach", () => {
 			it("starts clean", () => {
 				expect(_.isObject(ctrl)).toBe(true);
 				expect(ctrl.Question.id).toBe(0);
-				expect(ctrl.Question.type).toBe(Peach.Models.QuestionTypes.Intro);
+				expect(ctrl.Question.type).toBe(Peach.QuestionTypes.Intro);
 			});
 
 			it("should walk thru wizard", () => {
-				expect(ctrl.Question.type).toBe(Peach.Models.QuestionTypes.Intro);
+				expect(ctrl.Question.type).toBe(Peach.QuestionTypes.Intro);
 				ctrl.Next();
 
 				expect(ctrl.Question.key).toBe("AgentScheme");
@@ -187,9 +187,9 @@ describe("Peach", () => {
 				ctrl.Question.value = true;
 				ctrl.Next();
 
-				expect(ctrl.Question.type).toBe(Peach.Models.QuestionTypes.Done);
+				expect(ctrl.Question.type).toBe(Peach.QuestionTypes.Done);
 
-				var expected: Peach.Models.Agent[] = [
+				var expected: Peach.Agent[] = [
 					{
 						"name": "",
 						"agentUrl": "local://",
@@ -226,7 +226,7 @@ describe("Peach", () => {
 		});
 
 		describe("mocked 'data' track", () => {
-			var mockTemplate: Peach.Models.IWizardTemplate = {
+			var mockTemplate: Peach.IWizardTemplate = {
 				qa: [
 					{
 						id: 0,
@@ -309,11 +309,11 @@ describe("Peach", () => {
 			it("starts clean", () => {
 				expect(_.isObject(ctrl)).toBe(true);
 				expect(ctrl.Question.id).toBe(0);
-				expect(ctrl.Question.type).toBe(Peach.Models.QuestionTypes.Intro);
+				expect(ctrl.Question.type).toBe(Peach.QuestionTypes.Intro);
 			});
 
 			it("should walk thru wizard", () => {
-				expect(ctrl.Question.type).toBe(Peach.Models.QuestionTypes.Intro);
+				expect(ctrl.Question.type).toBe(Peach.QuestionTypes.Intro);
 				ctrl.Next();
 
 				expect(ctrl.Question.id).toBe(1);
@@ -328,9 +328,9 @@ describe("Peach", () => {
 				ctrl.Question.value = "FooValue";
 				ctrl.Next();
 
-				expect(ctrl.Question.type).toBe(Peach.Models.QuestionTypes.Done);
+				expect(ctrl.Question.type).toBe(Peach.QuestionTypes.Done);
 
-				var expected: Peach.Models.Agent[] = [
+				var expected: Peach.Agent[] = [
 					{
 						"name": "",
 						"agentUrl": "local://",
@@ -352,7 +352,7 @@ describe("Peach", () => {
 			});
 
 			it("should allow adding multiple agents", () => {
-				expect(ctrl.Question.type).toBe(Peach.Models.QuestionTypes.Intro);
+				expect(ctrl.Question.type).toBe(Peach.QuestionTypes.Intro);
 				ctrl.Next();
 
 				expect(ctrl.Question.id).toBe(1);
@@ -367,9 +367,9 @@ describe("Peach", () => {
 				ctrl.Question.value = "FooValue";
 				ctrl.Next();
 
-				expect(ctrl.Question.type).toBe(Peach.Models.QuestionTypes.Done);
+				expect(ctrl.Question.type).toBe(Peach.QuestionTypes.Done);
 
-				var expected1: Peach.Models.Agent[] = [
+				var expected1: Peach.Agent[] = [
 					{
 						"name": "",
 						"agentUrl": "local://",
@@ -390,7 +390,7 @@ describe("Peach", () => {
 				expect(JSON.stringify(actual)).toEqual(JSON.stringify(expected1));
 
 				ctrl.OnRestart();
-				expect(ctrl.Question.type).toBe(Peach.Models.QuestionTypes.Intro);
+				expect(ctrl.Question.type).toBe(Peach.QuestionTypes.Intro);
 				ctrl.Next();
 
 				expect(ctrl.Question.id).toBe(1);
@@ -409,9 +409,9 @@ describe("Peach", () => {
 				ctrl.Question.value = "BarValue";
 				ctrl.Next();
 
-				expect(ctrl.Question.type).toBe(Peach.Models.QuestionTypes.Done);
+				expect(ctrl.Question.type).toBe(Peach.QuestionTypes.Done);
 
-				var expected2: Peach.Models.Agent[] = [
+				var expected2: Peach.Agent[] = [
 					{
 						"name": "",
 						"agentUrl": "local://",

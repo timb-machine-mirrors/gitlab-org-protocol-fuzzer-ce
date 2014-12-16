@@ -12,7 +12,7 @@ describe("Peach", () => {
 		var $rootScope: ng.IRootScopeService;
 		var $scope;
 
-		var service: Peach.Services.PitService;
+		var service: Peach.PitService;
 		var ctrl: Peach.ConfigureVariablesController;
 		var pitUrl = '/p/pits/PIT_GUID';
 

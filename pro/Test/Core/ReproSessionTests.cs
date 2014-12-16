@@ -321,6 +321,7 @@ namespace Peach.Pro.Test.Core
 			public double FaultWaitTime { get; set; }
 
 			public string Initial { get; set; }
+			public string InitialRepro { get; set; }
 			public string Fault { get; set; }
 			public string Repro { get; set; }
 
@@ -413,11 +414,9 @@ namespace Peach.Pro.Test.Core
 
 				history.Add(i);
 
-				if (!ctx.reproducingFault && i == args.Fault)
+				if (!ctx.reproducingFault && (i == args.Fault || i == args.Initial))
 					ctx.agentManager.Message("Fault", new Variant("true"));
-				else if (ctx.reproducingFault && (i == args.Repro || j == args.Repro))
-					ctx.agentManager.Message("Fault", new Variant("true"));
-				else if (i == args.Initial)
+				else if (ctx.reproducingFault && (i == args.Repro || j == args.Repro || i == args.InitialRepro || j == args.InitialRepro))
 					ctx.agentManager.Message("Fault", new Variant("true"));
 			};
 
@@ -516,7 +515,7 @@ namespace Peach.Pro.Test.Core
 			// Jumps back to iteration 5 (last fault was 4) and reproduces on iteration 7
 			// Resumes on iteration 19
 
-			var act = Run(new Args { RangeStop = 20, Fault = "18", Repro = "7", Initial = "4" });
+			var act = Run(new Args { RangeStop = 20, Fault = "18", Repro = "7", Initial = "4", InitialRepro = "4" });
 
 			const string exp = "R1 1 2 3 4 ReproFault 4 Fault 5 6 7 8 9 10 11 12 13 14 15 16 17 18 " +
 				"ReproFault 18 8 9 10 11 12 13 14 15 16 17 18 5 6 7 Fault 19 20";
@@ -676,7 +675,7 @@ namespace Peach.Pro.Test.Core
 			foreach (var ts in _waitTimes)
 			{
 				Assert.GreaterOrEqual(ts, TimeSpan.FromMilliseconds(80));
-				Assert.LessOrEqual(ts, TimeSpan.FromMilliseconds(120));
+				Assert.LessOrEqual(ts, TimeSpan.FromMilliseconds(150));
 			}
 		}
 
@@ -740,7 +739,7 @@ namespace Peach.Pro.Test.Core
 			for (var i = 0; i < times.Count; ++i)
 			{
 				Assert.GreaterOrEqual(_waitTimes[i], TimeSpan.FromMilliseconds(times[i] - 20));
-				Assert.LessOrEqual(_waitTimes[i], TimeSpan.FromMilliseconds(times[i] + 20));
+				Assert.LessOrEqual(_waitTimes[i], TimeSpan.FromMilliseconds(times[i] + 50));
 			}
 		}
 
@@ -1006,7 +1005,7 @@ namespace Peach.Pro.Test.Core
 
 			// Resume at 27 28 29 30
 
-			var act = Run(new Args { RangeStop = 30, Initial = "C11", Fault = "C26", ControlIterations = 5 });
+			var act = Run(new Args { RangeStop = 30, Initial = "C11", InitialRepro = "C11", Fault = "C26", ControlIterations = 5 });
 
 			const string exp =
 				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 ReproFault C11 Fault " +
@@ -1032,7 +1031,7 @@ namespace Peach.Pro.Test.Core
 
 			// Resume at 27 28 29 30
 
-			var act = Run(new Args { RangeStop = 30, Initial = "11", Fault = "C26", ControlIterations = 5 });
+			var act = Run(new Args { RangeStop = 30, Initial = "11", InitialRepro = "11", Fault = "C26", ControlIterations = 5 });
 
 			const string exp =
 				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 11 ReproFault 11 Fault " +
@@ -1040,6 +1039,46 @@ namespace Peach.Pro.Test.Core
 				"16 C17 17 C18 18 C19 19 C20 20 C21 21 C22 22 C23 23 C24 24 C25 25 C26 " +
 				"12 13 14 15 16 17 18 19 20 21 22 23 24 25 C26 " +
 				"ReproFailed 26 27 28 29 30";
+
+			Assert.AreEqual(exp, act);
+		}
+
+		[Test]
+		public void TestNoSearchPastNonRepro()
+		{
+			// If a non-reproducable fault is detected, future backlog searches
+			// should not go prior to that iteration
+
+			// Fuzz 1 to 10
+			// Fault on iteration 2 and don't reproduce
+			// Fault on iteration 6, repro on 5
+			// should not run iteration 2 a 2nd time.
+
+			var act = Run(new Args { Initial = "2", Fault = "6", Repro = "5" });
+
+			const string exp = 
+				"R1 1 2 ReproFault 2 1 2 ReproFailed 3 4 5 6 ReproFault " +
+				"6 3 4 5 Fault 7 8 9 10";
+
+			Assert.AreEqual(exp, act);
+		}
+
+		[Test]
+		public void TestNoSearchPastInitialRepro()
+		{
+			// If a reproducable fault is detected, future backlog searches
+			// should not go prior to the initial iteration that caused the fault
+
+			// Fuzz 1 to 10
+			// Fault on iteration 3 and reproduce on iteration 2
+			// Fault on iteration 6, repro on 5
+			// should not run iteration 3 a 2nd time.
+
+			var act = Run(new Args { Initial = "3", InitialRepro = "2", Fault = "6", Repro = "5" });
+
+			const string exp =
+				"R1 1 2 3 ReproFault 3 1 2 Fault 4 5 6 ReproFault " +
+				"6 4 5 Fault 7 8 9 10";
 
 			Assert.AreEqual(exp, act);
 		}
