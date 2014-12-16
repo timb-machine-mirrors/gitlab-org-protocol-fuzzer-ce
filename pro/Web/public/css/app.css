@@ -141,11 +141,11 @@ pre.peach-test-log {
 
 .ui-select-container .btn-group > .btn {
 	display: inline-block;
-	padding: 6px 12px;
+	padding: 6px 4px;
 	font-size: 14px;
 	font-weight: normal;
 	line-height: 1.42857143;
-	text-align: center;
+	text-align: left;
 	white-space: nowrap;
 	vertical-align: middle;
 	-ms-touch-action: manipulation;
@@ -185,6 +185,7 @@ pre.peach-test-log {
 	width: 34px;
 	height: 34px;
 	text-align: center;
+	padding: 6px 12px;
 }
 
 .ui-select-container .btn-group > .btn + .btn:active {
@@ -200,3 +201,12 @@ pre.peach-test-log {
 .ui-select-bootstrap > .ui-select-choices {
 	max-height: 400px;
 }
+
+.peach-add-monitor {
+	width: 300px;
+}
+
+.peach-add-monitor .select2-results {
+	max-height: 600px;
+}
+

@@ -38,17 +38,17 @@
 			</label>
 			<div class="col-sm-6">
 				<div class="input-group">
+					<span class="peach-field-info tooltip-info input-group-addon"
+								tooltip="Friendly name for your agent"
+								tooltip-placement="right"
+								tooltip-append-to-body="true">
+					</span>
 					<input name="name"
 								 type="text"
 								 ng-model="agent.name"
 								 ng-required="true"
 								 class="form-control"
 								 peach:unique-channel="agent.name" />
-					<span class="peach-field-info tooltip-info input-group-addon"
-								tooltip="Friendly name for your agent"
-								tooltip-placement="right"
-								tooltip-append-to-body="true">
-					</span>
 				</div>
 				<span class="help-block"
 							ng-show="form.name.$error.required && form.name.$dirty">
@@ -61,9 +61,9 @@
 			</div>
 			<span class="help-block">
 				<span class="glyphicon glyphicon-star pointer"
-				      tooltip="Required"
-				      tooltip-placement="right"
-				      ng-class="{red: form.name.$error.required}">
+							tooltip="Required"
+							tooltip-placement="right"
+							ng-class="{red: form.name.$error.required}">
 				</span>
 			</span>
 		</div>
@@ -74,18 +74,19 @@
 			</label>
 			<div class="col-sm-6">
 				<div class="input-group">
+					<span class="peach-field-info tooltip-info input-group-addon"
+								tooltip="URL for the agent. Leave blank for a local agent."
+								tooltip-placement="right"
+								tooltip-append-to-body="true">
+					</span>
 					<input name="location"
 								 type="text"
 								 placeholder="local://"
 								 ng-model="agent.agentUrl"
 								 class="form-control"
 								 peach:unique-channel="agent.agentUrl"
-								 peach:unique-default="local://" />
-					<span class="peach-field-info tooltip-info input-group-addon"
-					      tooltip="URL for the agent. Leave blank for a local agent."
-					      tooltip-placement="right"
-					      tooltip-append-to-body="true">
-					</span>
+					       peach:unique-default="local://" 
+					       peach:unique-ignore="$local://.*^"/>
 				</div>
 				<span class="help-block"
 							ng-show="form.location.$error.unique">
@@ -95,31 +96,26 @@
 		</div>
 		<div class="clearfix"
 				 style="margin-bottom: 10px">
-			<div class="text-right">
+			<div class="pull-right">
 				<span ng-show="agent.monitors.length === 0"
 							class="red"
 							style="margin-right: 15px;">
-					You'll need a Monitor, click the "Add Monitor" button.
+					At least one monitor is required. Select a monitor on the right.
 				</span>
-				<div class="btn-group btn-group-xs"
-						 dropdown
-						 is-open="isDropdownOpen">
-					<button type="button"
-									dropdown-toggle
-									class="btn btn-xs btn-info dropdown-toggle">
-						Add Monitor &nbsp;
-						<i class="glyphicon glyphicon-plus">
-						</i>
-					</button>
-					<ul class="dropdown-menu dropdown-menu-right">
-						<li ng-repeat="monitor in vm.AvailableMonitors">
-							<a class="pointer"
-								 ng-click="vm.OnAddMonitor($event, monitor)">
-								{{monitor.monitorClass}}
-							</a>
-						</li>
-					</ul>
-				</div>
+				<ui-select ng-model="selectedMonitor.selected"
+									 reset-search-input="true"
+									 theme="select2"
+									 class="peach-add-monitor"
+									 on-select="vm.OnAddMonitor($item)">
+					<i class="glyphicon glyphicon-plus">
+					</i>
+					<ui-select-match placeholder="Add a monitor ...">
+					</ui-select-match>
+					<ui-select-choices repeat="monitor.monitorClass as monitor in vm.AvailableMonitors | filter: $select.search">
+						<div ng-bind-html="monitor.monitorClass | highlight: $select.search"></div>
+						<small style="white-space: normal">{{monitor.description}}</small>
+					</ui-select-choices>
+				</ui-select>
 			</div>
 		</div>
 		<accordion ng-repeat="monitor in agent.monitors track by $index">

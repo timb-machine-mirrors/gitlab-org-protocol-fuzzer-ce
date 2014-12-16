@@ -14,27 +14,37 @@ module Peach {
 		};
 	}
 
+	export interface ISelectable<T> {
+		selected: T;
+	}
+
 	export interface IAgentScope extends IFormScope {
 		agents: Agent[];
 		agent: Agent;
 		agentIndex: number;
 		isOpen: boolean;
+		selectedMonitor: ISelectable<IMonitor>;
 	}
 
 	export class AgentController {
 		static $inject = [
 			"$scope",
+			"$timeout",
 			"PitService",
 			"AvailableMonitorsResource"
 		];
 
 		constructor(
 			private $scope: IAgentScope,
+			private $timeout: ng.ITimeoutService,
 			private pitService: PitService,
 			availableMonitorsResource: IMonitorResource
 		) {
 			$scope.vm = this;
 			$scope.isOpen = true;
+			$scope.selectedMonitor = {
+				selected: undefined
+			};
 			this.AvailableMonitors = availableMonitorsResource.query();
 		}
 
@@ -75,10 +85,13 @@ module Peach {
 			this.$scope.form.$setDirty();
 		}
 
-		public OnAddMonitor($event: ng.IAngularEvent, monitor: IMonitor): void {
-			$event.preventDefault();
+		public OnAddMonitor(monitor: IMonitor): void {
 			this.$scope.agent.monitors.push(monitor);
 			this.$scope.form.$setDirty();
+
+			this.$timeout(() => {
+				this.$scope.selectedMonitor.selected = undefined;
+			});
 		}
 	}
 }

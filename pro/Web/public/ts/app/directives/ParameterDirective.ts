@@ -24,6 +24,12 @@ module Peach {
 		param: IParameter;
 	}
 
+	export interface IOption {
+		key: string;
+		description: string;
+		isDefault: boolean;
+	}
+
 	export class ParameterController {
 		static $inject = [
 			"$scope",
@@ -35,6 +41,7 @@ module Peach {
 			private pitService: PitService
 		) {
 			$scope.vm = this;
+			this.makeChoices();
 		}
 
 		public get IsRequired(): boolean {
@@ -54,21 +61,46 @@ module Peach {
 				this.$scope.param.type === 'bool';
 		}
 
-		public get Choices(): string[] {
-			var options = this.$scope.param.options || [];
-			return options.concat(this.defines());
-		}
+		public Choices: IOption[];
 
-		public EnumGroups(item: string): string {
-			if (item.startsWith('##')) {
+		public EnumGroups(item: IOption): string {
+			if (item.isDefault) {
+				return 'Default';
+			}
+			if (item.key.startsWith('##')) {
 				return 'Defines';
 			}
 			return 'Choices';
 		}
 
-		private defines(): string[] {
-			var names = _.pluck(this.pitService.PitConfig.config, 'key');
-			return _.map(names, x => '##' + x + '##');
+		public makeChoices() {
+			var options = this.$scope.param.options || [];
+			var tuples = [];
+
+			options.forEach(item => {
+				var option: IOption = {
+					key: item,
+					description: '',
+					isDefault: item === this.$scope.param.defaultValue
+				};
+
+				if (option.isDefault) {
+					tuples.unshift(option);
+				} else {
+					tuples.push(option);
+				}
+			});
+			this.Choices = tuples.concat(this.defines());
+		}
+
+		private defines(): IOption[] {
+			return _.map(this.pitService.PitConfig.config, param => {
+				return <IOption> {
+					key: '##' + param.key + '##',
+					description: param.description,
+					isDefault: false
+				};
+			});
 		}
 	}
 }

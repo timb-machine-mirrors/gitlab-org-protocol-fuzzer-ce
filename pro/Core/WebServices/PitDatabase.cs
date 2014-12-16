@@ -639,7 +639,8 @@ namespace Peach.Pro.Core.WebServices
 			foreach (var item in agents)
 			{
 				XmlWriter w;
-				if (!final.TryGetValue(item.AgentUrl, out w))
+				var agentKey = item.AgentUrl ?? "";
+				if (!final.TryGetValue(agentKey, out w))
 				{
 					var agentName = "Agent" + final.Count;
 					if (!string.IsNullOrEmpty(item.Name))
@@ -659,7 +660,7 @@ namespace Peach.Pro.Core.WebServices
 						testWriter.WriteEndElement();
 					}
 
-					final.Add(item.AgentUrl, w);
+					final.Add(agentKey, w);
 				}
 
 				foreach (var m in item.Monitors)
