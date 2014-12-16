@@ -128,6 +128,8 @@ module Peach {
 			modal.result.then(() => {
 				if (!this.pitService.IsConfigured) {
 					this.$location.path('/quickstart/intro');
+				} else {
+					this.$location.path('/');
 				}
 			});
 		}
