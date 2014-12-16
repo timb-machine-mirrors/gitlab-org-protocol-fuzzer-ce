@@ -37,6 +37,8 @@ namespace PeachValidator
 
 			setTitle();
 			AddNewDefine("Peach.Pwd=" + Utilities.ExecutionDirectory);
+			AddNewDefine("Peach.Cwd=" + Environment.CurrentDirectory);
+
            var nconfig = new LoggingConfiguration();
             logTarget = new MemoryTarget();
             nconfig.AddTarget("console", logTarget);
@@ -116,11 +118,18 @@ namespace PeachValidator
 					cracker.AnalyzerEvent += new AnalyzerEventHandler(cracker_AnalyzerEvent);
 					cracker.ExceptionHandleNodeEvent += new ExceptionHandleNodeEventHandler(cracker_ExceptionHandleNodeEvent);
 					//cracker.CrackData(dom.dataModels[dataModel], data);
-					cracker.CrackData(holder.MakeCrackModel(), data);
+					try
+					{
+						cracker.CrackData(holder.MakeCrackModel(), data);
+					}
+					catch (CrackingFailure ex)
+					{
+						throw new PeachException("Error cracking \"" + ex.element.fullName + "\".\n" + ex.Message);
+					}
 				}
-				catch (CrackingFailure ex)
+				catch (Exception ex)
 				{
-					MessageBox.Show("Error cracking \"" + ex.element.fullName + "\".\n" + ex.Message, "Error Cracking");
+					MessageBox.Show(ex.Message, "Error Cracking");
 
 					long endPos = -1;
 					foreach (var element in exceptions)
@@ -239,10 +248,6 @@ namespace PeachValidator
 			PitFileName = ofd.FileName;
 			setTitle();
 
-			Environment.CurrentDirectory = Path.GetDirectoryName(Path.GetFullPath(PitFileName));
-			AddNewDefine("Peach.Cwd=" + Environment.CurrentDirectory);
-
-
 			Regex re = new Regex("##\\w+##");
 			if (File.Exists(PitFileName) && re.IsMatch(File.ReadAllText(PitFileName)))
 			{
@@ -299,9 +304,6 @@ namespace PeachValidator
 			try
 			{
 				var parser = new PitParser();
-
-			    if (!string.IsNullOrWhiteSpace(Path.GetDirectoryName(PitFileName)))
-					Directory.SetCurrentDirectory((DefinedValues["Peach.Cwd"]));
 
 				var dom = parser.asParser(_parserArgs, PitFileName);
 
