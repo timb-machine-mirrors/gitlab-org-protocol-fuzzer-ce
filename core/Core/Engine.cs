@@ -369,6 +369,7 @@ namespace Peach.Core
 			uint lastReproFault = iterationStart - 1;
 			uint iterationCount = iterationStart;
 			bool firstRun = true;
+			bool controlAfterRepro = false;
 
 			// First iteration is always a control/recording iteration
 			context.controlIteration = true;
@@ -545,6 +546,7 @@ namespace Peach.Core
 							if (context.reproducingControlIteration)
 								--lastReproFault;
 
+							controlAfterRepro = false;
 							iterationCount = context.reproducingInitialIteration;
 							context.controlIteration = context.reproducingControlIteration;
 
@@ -558,6 +560,7 @@ namespace Peach.Core
 							logger.Debug("runTest: Attempting to reproduce fault.");
 
 							context.reproducingFault = true;
+							controlAfterRepro = false;
 
 							logger.Debug("runTest: replaying iteration " + iterationCount);
 						}
@@ -579,8 +582,7 @@ namespace Peach.Core
 						else if (test.TargetLifetime == Test.Lifetime.Session)
 						{
 							if ((context.test.controlIteration == 0 && iterationCount == context.reproducingInitialIteration) ||
-								(context.controlIteration && context.reproducingControlIteration && iterationCount == context.reproducingInitialIteration) ||
-								(context.controlIteration && !context.reproducingControlIteration && iterationCount > context.reproducingInitialIteration))
+								(context.controlIteration && iterationCount == context.reproducingInitialIteration && (context.reproducingControlIteration ^ controlAfterRepro)))
 							{
 								var maxJump = Math.Min(test.MaxBackSearch, context.reproducingInitialIteration - lastReproFault - 1);
 
@@ -597,6 +599,7 @@ namespace Peach.Core
 
 									context.reproducingFault = false;
 									iterationCount = context.reproducingInitialIteration;
+									controlAfterRepro = false;
 
 									OnReproFailed(iterationCount);
 
@@ -616,6 +619,7 @@ namespace Peach.Core
 									var delta = Math.Min(maxJump, context.reproducingIterationJumpCount);
 									context.reproducingIterationJumpCount = delta;
 									iterationCount = context.reproducingInitialIteration - delta - 1;
+									controlAfterRepro = false;
 
 									context.controlIteration = false;
 									context.controlRecordingIteration = false;
@@ -625,6 +629,7 @@ namespace Peach.Core
 							}
 							else if (context.test.controlIteration > 0)
 							{
+								controlAfterRepro = false;
 								context.controlRecordingIteration = false;
 
 								if (context.reproducingIterationJumpCount <= 10)
@@ -633,7 +638,11 @@ namespace Peach.Core
 									if (!context.controlIteration)
 									{
 										context.controlIteration = true;
-										++iterationCount;
+
+										if (iterationCount == context.reproducingInitialIteration)
+											controlAfterRepro = true;
+										else
+											++iterationCount;
 									}
 									else
 									{
@@ -649,7 +658,7 @@ namespace Peach.Core
 								else if (!context.reproducingControlIteration && iterationCount == context.reproducingInitialIteration)
 								{
 									context.controlIteration = true;
-									++iterationCount;
+									controlAfterRepro = true;
 								}
 							}
 							else

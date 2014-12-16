@@ -880,7 +880,7 @@ namespace Peach.Pro.Test.Core
 
 			var act = Run(new Args { Fault = "6", ControlIterations = 5 });
 
-			const string exp = "R1 1 2 3 4 5 C6 6 ReproFault 6 C7 1 C2 2 C3 3 C4 4 C5 5 C6 6 C7 ReproFailed 7 8 9 10";
+			const string exp = "R1 1 2 3 4 5 C6 6 ReproFault 6 C6 1 C2 2 C3 3 C4 4 C5 5 C6 6 C6 ReproFailed 7 8 9 10";
 
 			Assert.AreEqual(exp, act);
 		}
@@ -920,7 +920,7 @@ namespace Peach.Pro.Test.Core
 			// Fuzz from 1 to 25
 			// Fault on iteration 21
 			// Fail to repro 
-			// Run 11 C12 12 C13 13 C14 14 C15 15 C16 16 C17 17 C18 18 C19 19 C20 20 C21
+			// Run 11 C12 12 C13 13 C14 14 C15 15 C16 16 C17 17 C18 18 C19 19 C20 20 C20
 			// Run 1..13
 			// Repro on 13
 			// Resume at 21 22 23 24 25
@@ -929,7 +929,7 @@ namespace Peach.Pro.Test.Core
 
 			var exp =
 				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 11 12 13 14 15 C16 16 17 18 19 20 C21 21 ReproFault " +
-				"21 C22 11 C12 12 C13 13 C14 14 C15 15 C16 16 C17 17 C18 18 C19 19 C20 20 C21 21 C22 ";
+				"21 C21 11 C12 12 C13 13 C14 14 C15 15 C16 16 C17 17 C18 18 C19 19 C20 20 C21 21 C21 ";
 
 			for (var i = 1; i <= 13; ++i)
 				exp += "{0} ".Fmt(i);
@@ -975,6 +975,7 @@ namespace Peach.Pro.Test.Core
 			// Never reproduces
 			// Runs -10 with control after every iteration
 			// Runs 2*10 back with control after each search
+			// Control is always C26 incase iteration 27 requires a data set switch!
 
 			// Resume at 27 28 29 30
 
@@ -982,10 +983,10 @@ namespace Peach.Pro.Test.Core
 
 			const string exp =
 				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 11 12 13 14 15 C16 16 17 18 19 20 " +
-				"C21 21 22 23 24 25 C26 26 ReproFault 26 C27 " +
-				"16 C17 17 C18 18 C19 19 C20 20 C21 21 C22 22 C23 23 C24 24 C25 25 C26 26 C27 " +
-				"6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 C27 " +
-				"1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 C27 " +
+				"C21 21 22 23 24 25 C26 26 ReproFault 26 C26 " +
+				"16 C17 17 C18 18 C19 19 C20 20 C21 21 C22 22 C23 23 C24 24 C25 25 C26 26 C26 " +
+				"6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 C26 " +
+				"1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 C26 " +
 				"ReproFailed 27 28 29 30";
 
 			Assert.AreEqual(exp, act);
