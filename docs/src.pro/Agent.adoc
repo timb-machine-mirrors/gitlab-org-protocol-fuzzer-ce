@@ -6,17 +6,17 @@ Agents are processes that host Monitors locally or remotely.  Monitors collect i
 === Agent Channels
 
 Local::
-	Agent is hosted in the current Peach process. This is the default channel.
+	The agent is hosted in the current Peach process. This is the default channel.
 
 TCP Remoting::
-	Peach agent communicates using .NET TCP Remoting (RPC) protocol. The agent must be written using the Microsoft.NET framework. Peach can run as a TCP remoting agent using the +-a tcp+ arguments.
+	The Peach agent communicates using .NET TCP Remoting protocol. The agent must be written using the Microsoft.NET framework. Peach can run as a TCP remoting agent using the +-a tcp+ argument.
 
 REST JSON::
 	Agent protocol using REST style calls over HTTP. This channel is best suited for custom Peach agents. Example agents in C, C++, and Python are included in the Peach SDK.
  
 ==== Local Agent
 
-The peach runtime supports a local agent that runs in process.  Local Agent is the default agent unless another agent type is specified.
+The peach runtime supports a local agent that runs in process.  LocalAgent is the default agent unless another agent type is specified.
 
 .Configuring a remote agent
 [source,xml]
@@ -30,7 +30,7 @@ The peach runtime supports a local agent that runs in process.  Local Agent is t
 
 This agent lives in a separate process that can be located on remote machines.  Communication is performed over TCP Remoting, a form of RPC supported natively by the runtime.
 
-To use a remote agent, the agent process must be running first.
+To use a remote agent, the agent process must be running before launching Peach.
 
 .Configuring a remote agent
 [source,xml]
