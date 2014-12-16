@@ -1,4 +1,4 @@
-﻿<div class="page-content">
+<div class="page-content">
 	<div class="page-header">
 		<h1>
 			Dashboard
@@ -20,6 +20,7 @@
 							<i class="icon-remove"></i>
 						</button>
 						<strong>Warning!</strong>
+<!-- RAB12/17/14. Select a pit before continuing. -->                        
 						A Pit must be selected before continuing.
 					</div>
 					<div class="alert alert-warning alert-dismissable"
@@ -30,7 +31,9 @@
 							<i class="icon-remove"></i>
 						</button>
 						<strong>Warning!</strong>
-						Pit must be configured before starting a Job.
+<!-- RAB 12/17/14. Before starting a job, the pit must be configured for 
+                   the environment. -->
+                        Pit must be configured before starting a Job.
 						<a href="#/quickstart/intro">Go to Pit Configuration now.</a>
 					</div>
 					<div class="alert alert-warning alert-dismissable"
@@ -41,7 +44,15 @@
 							<i class="icon-remove"></i>
 						</button>
 						<strong>Note:</strong>
-						You are currently working with a Pit chosen from the command line.
+<!-- RAB 12/17/14. The current Pit was specified from the command line, which 
+                   limits activities to viewing faults that occur.
+
+                   Full functionality is reserved for Pits included in the Pit library.
+
+                   You can stop the current job by entering the window with the command line and by pressing CTRL+C, or by killing the process. Or, perhaps, let the job continue to completion.
+-->
+                        
+                        You are currently working with a Pit chosen from the command line.
 						You will be limited to viewing Faults only.
 						To stop the currently running job, switch to the terminal window and close it or stop the process.
 					</div>
@@ -52,7 +63,8 @@
 										data-dismiss="alert">
 							<i class="icon-remove"></i>
 						</button>
-						Your Pit is configured. Press the START button below to start a fuzzing job.
+<!-- RAB 12/17/14. The Pit is configured and ready for use. Click the START button below to begin fuzzing.-->
+                        Your Pit is configured. Press the START button below to start a fuzzing job.
 					</div>
 					<div class="alert alert-info"
 							 ng-show="vm.ShowReproducing">
@@ -60,7 +72,9 @@
 					</div>
 					<div class="alert alert-info"
 							 ng-show="vm.ShowSearching">
-						Fault detected, searching test cases leading to fault. This could take a while.
+<!-- RAB 12/17/14. Fault detected. Peach is searching test cases leading to the fault. This action could take a while to complete. 
+  -->
+                        Fault detected, searching test cases leading to fault. This could take a while.
 					</div>
 
 					<div class="col-sm-7 infobox-container">
