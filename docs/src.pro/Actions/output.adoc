@@ -100,7 +100,7 @@ Example of using the _output_ action with multiple data sets to perform file fuz
 This is a typical configuration for dumb file fuzzing.
 
 Notice the special publisher _Peach.Agent_.
-This publisher sends the _call_ action to all Agents, who in turn, forward the _call_  to each of their associated Monitors.
+This publisher sends the _call_ action to all Agents, who in turn, forward the _call_  to each associated Monitor.
 The method call will be handled by the WindowsDebugger monitor, causing it to launch _notepad.exe_.
 For file fuzzing, note that the target is launched after creating the new fuzzed file.
 
