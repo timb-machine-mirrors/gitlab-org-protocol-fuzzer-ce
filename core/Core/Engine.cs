@@ -611,18 +611,11 @@ to execute same as initial control.  Number of states is different. {0} != {1}",
 
 							if (context.reproducingFault)
 							{
-								lastReproFault = iterationCount;
+								lastReproFault = context.reproducingInitialIteration;
 
-								// If we have moved less than 20 iterations, start fuzzing
-								// from here thinking we may have not really performed the
-								// next few iterations.
+								// Always skip forward to were we left off.
 
-								// Otherwise skip forward to were we left off.
-
-								if (context.reproducingInitialIteration - iterationCount > 20)
-								{
-									iterationCount = (uint)context.reproducingInitialIteration;
-								}
+								iterationCount = (uint)context.reproducingInitialIteration;
 
 								context.reproducingFault = false;
 								context.reproducingIterationJumpCount = 1;
@@ -661,6 +654,7 @@ to execute same as initial control.  Number of states is different. {0} != {1}",
 
 								context.reproducingFault = false;
 								iterationCount = context.reproducingInitialIteration;
+								lastReproFault = context.reproducingInitialIteration;
 
 								OnReproFailed(context, iterationCount);
 							}

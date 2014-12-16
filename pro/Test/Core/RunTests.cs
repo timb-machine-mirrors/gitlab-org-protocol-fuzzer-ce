@@ -317,10 +317,6 @@ namespace Peach.Core.Test
 				5, // Initial replay
 				4,
 				3, // Repro
-				4,
-				5, // Trigger Replay
-				5,
-				4, // Repro failed
 				6, 7, 8, 9, 10, 11, 12 };
 
 			uint[] actual = iterationHistory.ToArray();
