@@ -86,7 +86,7 @@ module Peach {
 		}
 
 		public OnAddMonitor(monitor: IMonitor): void {
-			this.$scope.agent.monitors.push(monitor);
+			this.$scope.agent.monitors.push(angular.copy(monitor));
 			this.$scope.form.$setDirty();
 
 			this.$timeout(() => {
