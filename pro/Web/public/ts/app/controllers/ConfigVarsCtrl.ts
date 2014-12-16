@@ -4,7 +4,7 @@ module Peach {
 	"use strict";
 
 	export class ConfigureVariablesController {
-		public PitConfig: Models.IPitConfig;
+		public PitConfig: IPitConfig;
 
 		static $inject = [
 			"$scope",
@@ -15,7 +15,7 @@ module Peach {
 		constructor(
 			private $scope: IFormScope,
 			private $modal: ng.ui.bootstrap.IModalService,
-			private pitService: Services.PitService
+			private pitService: PitService
 		) {
 			$scope.vm = this;
 			this.PitConfig = pitService.LoadPitConfig();
@@ -33,7 +33,7 @@ module Peach {
 			return this.$scope.form.$dirty && !this.$scope.form.$invalid;
 		}
 
-		public CanRemove(param: Models.IParameter) {
+		public CanRemove(param: IParameter) {
 			return param.type === 'user';
 		}
 
@@ -49,7 +49,7 @@ module Peach {
 				controller: NewVarController
 			});
 
-			modal.result.then((param: Models.IParameter) => {
+			modal.result.then((param: IParameter) => {
 				this.PitConfig.config.push(param);
 				this.$scope.form.$setDirty();
 			});
@@ -60,7 +60,7 @@ module Peach {
 			this.$scope.form.$setDirty();
 		}
 
-		public Choices(param: Models.IParameter) {
+		public Choices(param: IParameter) {
 			return this.defines().concat(param.options);
 		}
 
@@ -80,7 +80,7 @@ module Peach {
 		constructor(
 			private $scope: IFormScope,
 			private $modalInstance: ng.ui.bootstrap.IModalServiceInstance,
-			private pitService: Services.PitService
+			private pitService: PitService
 		) {
 			$scope.vm = this;
 
@@ -95,7 +95,7 @@ module Peach {
 
 		private hasBlurred: boolean;
 
-		public Param: Models.IParameter;
+		public Param: IParameter;
 
 		public get ParamKeys(): string[] {
 			return _.pluck(this.pitService.PitConfig.config, 'key');

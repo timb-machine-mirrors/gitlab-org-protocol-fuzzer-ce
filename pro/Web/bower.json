@@ -33,6 +33,7 @@
     "angular-smart-table": "~1.4.5",
     "pithy": "*",
     "angular-ui-select": "~0.9.4",
-    "angular-sanitize": "1.2"
+    "angular-sanitize": "1.2",
+    "select2": "~3.4.5"
   }
 }

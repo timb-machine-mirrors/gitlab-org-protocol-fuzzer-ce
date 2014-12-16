@@ -9,7 +9,7 @@ describe("Peach", () => {
 		var $httpBackend: ng.IHttpBackendService;
 		var $location: ng.ILocationService;
 		var ctrl: Peach.MainController;
-		var service: Peach.Services.PitService;
+		var service: Peach.PitService;
 		var pitUrl = '/p/pits/PIT_GUID';
 		var $modal: ng.ui.bootstrap.IModalService;
 		var spyOpen: jasmine.Spy;
@@ -66,9 +66,9 @@ describe("Peach", () => {
 		});
 
 		describe('select a Pit that needs to be configured', () => {
-			var pit: Peach.Models.IPit;
+			var pit: Peach.IPit;
 			beforeEach(() => {
-				pit = <Peach.Models.IPit> {
+				pit = <Peach.IPit> {
 					pitUrl: pitUrl,
 					name: 'My Pit',
 					versions: [{ configured: false }]

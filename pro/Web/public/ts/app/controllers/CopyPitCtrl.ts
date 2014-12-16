@@ -16,8 +16,8 @@ module Peach {
 		constructor(
 			$scope: IViewModelScope,
 			private $modalInstance: ng.ui.bootstrap.IModalServiceInstance,
-			private pitService: Services.PitService,
-			public Pit: Models.IPit
+			private pitService: PitService,
+			public Pit: IPit
 		) {
 			$scope.vm = this;
 		}
@@ -26,9 +26,9 @@ module Peach {
 			this.Error = "";
 
 			var promise = this.pitService.CopyPit(this.Pit);
-			promise.then((pit: Models.IPit) => {
+			promise.then((pit: IPit) => {
 				this.$modalInstance.close(pit);
-			}, (response: ng.IHttpPromiseCallbackArg<Models.IPit>) => {
+			}, (response: ng.IHttpPromiseCallbackArg<IPit>) => {
 				switch (response.status) {
 				case 400:
 					this.Error = this.Pit.name + " already exists, please choose a new name.";

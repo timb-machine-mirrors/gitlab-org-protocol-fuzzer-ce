@@ -15,8 +15,8 @@ module Peach {
 		constructor(
 			$scope: IViewModelScope,
 			private $modal: ng.ui.bootstrap.IModalService,
-			private pitService: Services.PitService,
-			private jobService: Services.JobService
+			private pitService: PitService,
+			private jobService: JobService
 		) {
 			$scope.vm = this;
 
@@ -29,7 +29,7 @@ module Peach {
 			this.refreshFaults();
 		}
 
-		public Faults: Models.IFaultSummary[] = [];
+		public Faults: IFaultSummary[] = [];
 
 		public get ShowSelectPit(): boolean {
 			return !this.Job && !this.pitService.Pit;
@@ -44,14 +44,14 @@ module Peach {
 		}
 
 		public get ShowReproducing(): boolean {
-			return onlyIf(this.Job, () => this.Job.mode === Models.JobMode.Reproducing);
+			return onlyIf(this.Job, () => this.Job.mode === JobMode.Reproducing);
 		}
 
 		public get ShowSearching(): boolean {
-			return onlyIf(this.Job, () => this.Job.mode === Models.JobMode.Searching);
+			return onlyIf(this.Job, () => this.Job.mode === JobMode.Searching);
 		}
 
-		public get Job(): Models.IJob {
+		public get Job(): IJob {
 			return this.jobService.Job;
 		}
 
@@ -75,7 +75,7 @@ module Peach {
 			this.$modal.open({
 				templateUrl: "html/modal/StartJob.html",
 				controller: StartJobController
-			}).result.then((job: Models.IJob) => {
+			}).result.then((job: IJob) => {
 				this.jobService.StartJob(job);
 			});
 		}

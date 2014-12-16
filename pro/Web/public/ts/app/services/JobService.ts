@@ -1,6 +1,6 @@
 ﻿ /// <reference path="../reference.ts" />
 
-module Peach.Services {
+module Peach {
 	"use strict";
 
 	export var JOB_INTERVAL = 500;
@@ -23,37 +23,37 @@ module Peach.Services {
 
 		private poller: ng.IPromise<any>;
 
-		private job: Models.IJob;
-		public get Job(): Models.IJob {
+		private job: IJob;
+		public get Job(): IJob {
 			return this.job;
 		}
 
-		private faults: Models.IFaultSummary[] = [];
-		public get Faults(): Models.IFaultSummary[] {
+		private faults: IFaultSummary[] = [];
+		public get Faults(): IFaultSummary[] {
 			return this.faults;
 		}
 
 		public get CanStartJob(): boolean {
 			return onlyIf(this.pitService.IsConfigured, () => 
-				_.isUndefined(this.job) || this.job.status === Models.JobStatus.Stopped
+				_.isUndefined(this.job) || this.job.status === JobStatus.Stopped
 			);
 		}
 
 		public get CanContinueJob(): boolean {
-			return this.checkStatus([Models.JobStatus.Paused]);
+			return this.checkStatus([JobStatus.Paused]);
 		}
 
 		public get CanPauseJob(): boolean {
-			return this.checkStatus([Models.JobStatus.Running]);
+			return this.checkStatus([JobStatus.Running]);
 		}
 
 		public get CanStopJob(): boolean {
 			return this.checkStatus([
-				Models.JobStatus.Running,
-				Models.JobStatus.Paused,
-				Models.JobStatus.StartPending,
-				Models.JobStatus.PausePending,
-				Models.JobStatus.ContinuePending
+				JobStatus.Running,
+				JobStatus.Paused,
+				JobStatus.StartPending,
+				JobStatus.PausePending,
+				JobStatus.ContinuePending
 			]);
 		}
 
@@ -67,7 +67,7 @@ module Peach.Services {
 		public GetJobs(): ng.IPromise<void> {
 			var deferred = this.$q.defer<void>();
 			var promise = this.$http.get("/p/jobs");
-			promise.success((jobs: Models.IJob[]) => {
+			promise.success((jobs: IJob[]) => {
 				var hasPit = false;
 				if (jobs.length > 0) {
 					this.job = _.first(jobs);
@@ -88,7 +88,7 @@ module Peach.Services {
 			return deferred.promise;
 		}
 
-		public StartJob(job?: Models.IJob) {
+		public StartJob(job?: IJob) {
 			if (job === undefined) {
 				job = { pitUrl: this.pitService.Pit.pitUrl };
 			} else {
@@ -97,27 +97,27 @@ module Peach.Services {
 
 			if (this.CanStartJob) {
 				var promise = this.$http.post("/p/jobs", job);
-				promise.success((newJob: Models.IJob) => {
+				promise.success((newJob: IJob) => {
 					this.job = newJob;
 					this.startJobPoller();
 				});
 				promise.error(reason => this.onError(reason));
 			} else if (this.CanContinueJob) {
-				this.job.status = Models.JobStatus.ActionPending;
+				this.job.status = JobStatus.ActionPending;
 				this.$http.get(this.job.jobUrl + "/continue").error(reason => this.onError(reason));
 			}
 		}
 
 		public PauseJob() {
 			if (this.CanPauseJob) {
-				this.job.status = Models.JobStatus.ActionPending;
+				this.job.status = JobStatus.ActionPending;
 				this.$http.get(this.job.jobUrl + "/pause").error(reason => this.onError(reason));
 			}
 		}
 
 		public StopJob() {
 			if (this.CanStopJob) {
-				this.job.status = Models.JobStatus.ActionPending;
+				this.job.status = JobStatus.ActionPending;
 				this.$http.get(this.job.jobUrl + "/stop").error(reason => this.onError(reason));
 			}
 		}
@@ -144,9 +144,9 @@ module Peach.Services {
 
 			this.poller = this.$interval(() => {
 				var promise = this.$http.get(this.job.jobUrl);
-				promise.success((job: Models.IJob) => {
+				promise.success((job: IJob) => {
 					this.job = job;
-					if (job.status === Models.JobStatus.Stopped) {
+					if (job.status === JobStatus.Stopped) {
 						this.$interval.cancel(this.poller);
 						this.poller = undefined;
 					}
@@ -160,7 +160,7 @@ module Peach.Services {
 
 		private reloadFaults() {
 			var promise = this.$http.get(this.job.faultsUrl);
-			promise.success((faults: Models.IFaultSummary[]) => {
+			promise.success((faults: IFaultSummary[]) => {
 				this.faults = faults;
 			});
 			promise.error(reason => this.onError(reason));

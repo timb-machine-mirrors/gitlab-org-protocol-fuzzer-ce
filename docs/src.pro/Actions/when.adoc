@@ -13,8 +13,7 @@
 // 03/05/2014: Lynn: 
 //  Edited current text 
 
-The _when_ attribute is a Python boolean expression that is evaluated before preforming an action.
-If the Python expression evaluates to true, the action will be performed, otherwise the action is skipped.
+The _when_ attribute is a Python boolean expression that is evaluated before performing an action. If the expression evaluates to true, the action is performed; otherwise, the action is skipped.
 
 .Keeping State
 ****
@@ -25,7 +24,7 @@ A full example of using the iteration state bag is provided in the examples sect
 
 _Using the Session State:_
 
-This state stored in this state bag will last across iterations for the full fuzzing session.
+This state stored in this state bag will last across iterations for the entire fuzzing session.
 
 [source,python]
 ----
@@ -66,7 +65,7 @@ test:: Test instance
 
 .Conditional _changeState_ Based on _when_ Expression
 ==========================
-The following example will change it's behavior based on input received from the target client.
+The following example changes its behavior based on input received from the target client.
 
 [source,xml]
 ----
@@ -139,7 +138,7 @@ The following example will change it's behavior based on input received from the
 
 .Loop Using Iteration State Bag
 ==========================
-This example will use the iteration state bag to simulate a for loop.
+This example uses the iteration state bag to simulate a for loop.
 
 ----
 <?xml version="1.0" encoding="utf-8"?>

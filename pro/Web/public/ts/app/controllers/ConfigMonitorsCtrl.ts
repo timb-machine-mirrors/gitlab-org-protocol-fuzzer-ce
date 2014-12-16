@@ -4,7 +4,7 @@ module Peach {
 	"use strict";
 
 	export class ConfigureMonitorsController {
-		public Model: Models.IPitAgents;
+		public Model: IPitAgents;
 
 		static $inject = [
 			"$scope",
@@ -15,8 +15,8 @@ module Peach {
 		constructor(
 			private $scope: IFormScope,
 			private $timeout: ng.ITimeoutService,
-			private pitService: Services.PitService,
-			availableMonitorsResource : Models.IMonitorResource
+			private pitService: PitService,
+			availableMonitorsResource : IMonitorResource
 		) {
 			$scope.vm = this;
 			pitService.LoadPitConfig();
@@ -40,7 +40,7 @@ module Peach {
 		}
 
 		public AddAgent(): void {
-			this.Model.agents.push(new Models.Agent());
+			this.Model.agents.push(new Agent());
 			this.$scope.form.$setDirty();
 		}
 
