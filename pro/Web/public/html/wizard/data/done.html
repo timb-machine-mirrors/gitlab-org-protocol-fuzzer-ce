@@ -4,11 +4,8 @@
 	</div>
 	<div ng-switch="vm.DataAgents.length">
 		<div ng-switch-when="0">
-<!-- RAB 12/17/14. 
-            You elected not to perform Data Collection. Click Continue to set 
-            up Automation.
--->
-            You have elected to not perform Data Collection. Click Continue to move on to Automation.
+			You elected not to perform Data Collection.
+			Click Continue to set up Automation.
 		</div>
 		<div ng-switch-default>
 			<div ng-include="'html/wizard/data/table.html'">
