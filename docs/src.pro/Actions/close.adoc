@@ -187,7 +187,8 @@ And finally the target is launched using a _xref:Action_call[call]_ action with 
   
   <Agent name="LocalAgent">
     <Monitor class="WindowsDebugger">
-      <Param name="CommandLine" value="c:\windows\system32\notepad.exe fuzzfile.bin" />
+      <Param name="Executable" value="c:\windows\system32\notepad.exe />
+      <Param name="Arguments" value="fuzzfile.bin" />
       <Param name="StartOnCall" value="ScoobySnacks" />
     </Monitor>
     <Monitor class="PageHeap">

@@ -85,7 +85,6 @@ namespace Peach.Core.Test
 			public Runner(Type type, DataElement element)
 				: base(null)
 			{
-				Context = new RunContext() { config = new RunConfiguration() };
 				Element = element;
 
 				if (type != null)
@@ -93,6 +92,11 @@ namespace Peach.Core.Test
 					Mutator = (Mutator)Activator.CreateInstance(type, element);
 					Mutator.context = this;
 				}
+			}
+
+			public void Initialize()
+			{
+				Initialize(new RunContext() { config = new RunConfiguration() }, null);
 			}
 
 			public override bool UsesRandomSeed
@@ -135,6 +139,7 @@ namespace Peach.Core.Test
 		public MutatorRunner(string name)
 		{
 			runner = new Runner(null, null);
+			runner.Initialize();
 			type = ClassLoader.GetAllTypesByAttribute<MutatorAttribute>((t, a) => a.Name == name).FirstOrDefault();
 
 			if (type == null)
@@ -166,6 +171,7 @@ namespace Peach.Core.Test
 		public IEnumerable<Mutation> Sequential(DataElement element, System.Action cb)
 		{
 			var strategy = new Runner(type, element);
+			strategy.Initialize();
 
 			if (SeedOverride.HasValue)
 				strategy.Context.config.randomSeed = SeedOverride.Value;
@@ -191,6 +197,7 @@ namespace Peach.Core.Test
 		public IEnumerable<Mutation> Random(int count, DataElement element, System.Action cb)
 		{
 			var strategy = new Runner(type, element);
+			strategy.Initialize();
 
 			if (SeedOverride.HasValue)
 				strategy.Context.config.randomSeed = SeedOverride.Value;

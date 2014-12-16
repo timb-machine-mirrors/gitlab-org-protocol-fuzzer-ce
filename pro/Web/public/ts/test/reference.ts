@@ -8,5 +8,6 @@
 /// <reference path="controllers/MainTests.ts" />
 /// <reference path="controllers/PitTestTests.ts" />
 /// <reference path="controllers/WizardTests.ts" />
+/// <reference path="directives/UniqueDirectiveTests.ts" />
 /// <reference path="services/PitServiceTests.ts" />
 //grunt-end

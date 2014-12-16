@@ -10,3 +10,4 @@
 /// <reference path="angularjs/angular-mocks.d.ts" />
 /// <reference path="underscore/underscore.d.ts" />
 /// <reference path="chartjs/chart.d.ts" />
+/// <reference path="pithy/pithy.d.ts" />

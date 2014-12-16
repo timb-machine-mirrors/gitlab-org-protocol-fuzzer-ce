@@ -288,6 +288,19 @@ namespace Peach.Core
 		}
 
 		/// <summary>
+		/// Extension to the Type class. Return default plugin attribute
+		/// matching the specified type or null if not found
+		/// </summary>
+		/// <typeparam name="TAttr">Attribute type to find.</typeparam>
+		/// <param name="type">Type in which the search should run over.</param>
+		/// <returns>A generator which yields the attributes specified.</returns>
+		public static TAttr GetDefaultAttr<TAttr>(this Type type)
+			where TAttr : PluginAttribute
+		{
+			return GetCustomAttributes(type).OfType<TAttr>().FirstOrDefault(a => a.IsDefault);
+		}
+
+		/// <summary>
 		/// Extension to the Type class. Return all attributes matching the specified type.
 		/// </summary>
 		/// <typeparam name="TAttr">Attribute type to find.</typeparam>

@@ -111,6 +111,10 @@ namespace Peach.Pro.Core.Loggers
 		{
 			System.Diagnostics.Debug.Assert(reproFault != null);
 
+			// Update the searching ranges for the fault
+			reproFault.iterationStart = currentIteration - context.reproducingIterationJumpCount;
+			reproFault.iterationStop = currentIteration;
+
 			SaveFault(Category.NonReproducable, reproFault);
 			reproFault = null;
 		}
@@ -241,6 +245,8 @@ namespace Peach.Pro.Core.Loggers
 			ret.agentName = coreFault.agentName;
 			ret.exploitability = coreFault.exploitability;
 			ret.iteration = currentIteration;
+			ret.iterationStart = context.reproducingInitialIteration - context.reproducingIterationJumpCount;
+			ret.iterationStop = context.reproducingInitialIteration;
 			ret.majorHash = coreFault.majorHash;
 			ret.minorHash = coreFault.minorHash;
 			ret.title = coreFault.title;

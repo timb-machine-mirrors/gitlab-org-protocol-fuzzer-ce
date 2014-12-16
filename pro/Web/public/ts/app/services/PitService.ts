@@ -139,26 +139,7 @@ module Peach.Services {
 		}
 
 		private get latestVersion(): Models.IPitVersion {
-			if (!this.hasVersion) {
-				this.addVersion();
-			}
 			return _.last(this.Pit.versions);
-		}
-
-		private addVersion() {
-			if (!_.isArray(this.Pit.versions)) {
-				this.Pit.versions = [];
-			}
-			var version: Models.IPitVersion = {
-				locked: false,
-				configured: false,
-				version: this.Pit.versions.length + 1
-			};
-			this.Pit.versions.push(version);
-		}
-
-		private get hasVersion(): boolean {
-			return (_.isArray(this.Pit.versions) && this.Pit.versions.length > 0);
 		}
 	}
 }

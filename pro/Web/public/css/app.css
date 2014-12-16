@@ -1,4 +1,15 @@
-﻿.skin-1 .nav-list > li.disabled > a > .menu-text,
+﻿@font-face {
+	font-family: 'FontAwesome';
+	src: url('../lib/ace-bootstrap/fontawesome-webfont.eot?v=3.2.1');
+	src: url('../lib/ace-bootstrap/fontawesome-webfont.eot?#iefix&v=3.2.1') format('embedded-opentype'),
+		url('../lib/ace-bootstrap/fontawesome-webfont.woff?v=3.2.1') format('woff'),
+		url('../lib/ace-bootstrap/fontawesome-webfont.ttf?v=3.2.1') format('truetype'),
+		url('../lib/ace-bootstrap/fontawesome-webfont.svg#fontawesomeregular?v=3.2.1') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+.skin-1 .nav-list > li.disabled > a > .menu-text,
 .skin-1 .nav-list > li.disabled > a > i,
 .skin-1 .nav-list > li.disabled > a > .arrow {
 	color: #595D60;
@@ -86,6 +97,8 @@ pre.peach-test-log {
 .peach-table th.st-sort-ascent::after {
 	content: "\f0de";
 }
+
+
 
 /* 
 	fix for ace.css

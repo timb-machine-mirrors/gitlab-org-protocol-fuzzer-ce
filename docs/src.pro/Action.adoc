@@ -20,18 +20,31 @@
 // described scripting and showed an example of multiple publishers
 // fixed children and attributes
 
-Action elements are child elements of xref:State[State]. Actions are used to send commands to the xref:Publisher[Publisher].
+Action elements are part of the xref:StateModel[StateModel], and send commands to xref:Publisher[Publisher]. Within the StateModel, Action elements are child elements of xref:State[State].
 
-Action elements perform various operations in the xref:StateModel[StateModel].
+Action elements set up and manage state in a fuzzing session. They issue commands to set up and control the Peach environment. For example, the open action initializes a listener by initiating a network connection or opening a file handle. And, the close action releases resources at the end of a fuzzing iteration. 
 
-* Actions can send output, receive input, open a connection, and much more. Two examples are the open action initializing a listener and the close action freeing up resources.
-* Actions can also control the Peach environment by changing to another state in the xref:StateModel[StateModel], moving data between xref:DataModel[DataModels], and calling custom methods defined by xref:Agent[Agents].
+Action elements provide control over state changes, movement of data between data models, and calling custom methods defined by agents. For example, the changeState action initiates a transition to a new state in the StateModel.
 
-Many Actions are called by Peach implicitly (without explicitly declaring it within a State). Two examples are:
+Additionally, Action elements issue directives to Publishers to do things such as read input, send output, and access a property. 
 
-* The xref:Action_start[_start_] action that performs every iteration automatically  
-* The  xref:Action_open[_open_] action called before any outputs or inputs
+Four Actions elements are implicit—start, stop, open, and close. They execute automatically and do not need to be declared in the StateModel. 
 
+* The start and stop actions occur at the start and end of a fuzzing session. 
+* The open and close actions occur at the start and end of each iteration in a fuzzing session.
+
+Other actions require explicit declarations in order to execute. 
+
+.Default Order of Actions
+****
+The following is the default order in which Actions are performed when fuzzing:
+
+. start - Implicit, once per session
+. open - Implicit, once per iteration
+. Explicit actions (accept, input, output, etc.)
+. close - Implicit, once per iteration
+. stop - Implicit, once per session
+****
 
 === Syntax
 
@@ -51,9 +64,9 @@ Many Actions are called by Peach implicitly (without explicitly declaring it wit
 </StateModel>
 ----
 
-Complicated StateModels that have counters (or other advanced operations) use Action parameters that execute scripts at certain times (such as before the Action starts or once it has completed) .
+Complicated StateModels that have counters (or other advanced operations) use Action parameters that execute scripts at certain times (such as before the Action starts or once it has completed).
 
-Since Pits may contain multiple Publishers within a Test, many Actions have a parameter to explicitly declare which Publisher the command refers to.
+Since Pits may contain multiple Publishers within a Test, many Actions have a parameter to declare the Publisher that will carry out the the command.
 
 [source,xml]
 ----
@@ -103,29 +116,43 @@ Since Pits may contain multiple Publishers within a Test, many Actions have a pa
 
 _Required:_
 
-xref:name[name]:: Name of the action
-xref:Action_Types[type]:: Action type, see list of action types
+xref:name[name]:: Name of the action.
+xref:Action_Types[type]:: Action type. The following enumeration summarizes the available action types. Detailed descriptions of the actions follow the child elements.
+
+* xref:Accept[accept] - temporarily blocks execution.
+* xref:Call[call] - provides a method-calling metaphor.
+* xref:ChangeState[changeState] - transitions from one state to another within the xref:StateModel[StateModel].
+* xref:Close[close] - causes the associated Publisher to close.
+* xref:GetProperty[getProperty] - provides the retrieval function of a property metaphor (get function).
+* xref:Input[input] - reads input data using the Publisher.
+* xref:Open[open (or connect)] - causes the associated Publisher to open its resources.
+* xref:Output[output] - causes the associated Publisher to write data.
+* xref:SetProperty[setProperty] - provides the output function of a property metaphor (set function) that modifies the value of the property.
+* xref:Slurp[slurp] - copies a value from a data element in one DataModel to a data element in another DataModel. 
+* xref:Start[start] - causes a Publisher to initialize itself.
+* xref:Stop[stop] - causes a Publisher to perform final cleanup.
+
 
 _Required Based on Type:_
 
 xref:xpath[valueXpath]:: Path to the source element defined using XPath notation when type is +slurp+.
 xref:xpath[setXpath]:: Path to the destination element defined using XPath notation when type is +slurp+.
-xref:ref[ref]:: Reference of state to change to when type is +changeState+.
-property:: Name of property to get/set in the publisher when type is +setProperty+ or +getProperty+.
+xref:ref[ref]:: Reference of the state to change to when type is +changeState+.
+property:: Name of the property to get or set in the publisher when type is +setProperty+ or +getProperty+.
 
 _Optional:_
 
-publisher:: Name of the publisher that this action should be called on or Peach.Agent
-xref:Action_when[when]:: Only preform action if the expression provided evaluates to true
-xref:Action_onComplete[onComplete]:: Expression to run on completion of an action
-xref:Action_onStart[onStart]:: Expression to run on start of an action
+publisher:: Name of the publisher that this action should be called on, or Peach.Agent.
+xref:Action_onComplete[onComplete]:: Expression to evaluate when an action completes.
+xref:Action_onStart[onStart]:: Expression to evaluate at the start of an action.
+xref:Action_when[when]:: Perform the action if the provided expression evaluates to true.
 
 === Child Elements
 
-xref:DataModel[DataModel]:: Reference to a DataModel from which fuzzed data will be produced
-xref:Data[Data]:: Set of initial data to be cracked into the above DataModel before fuzzing
-xref:Param[Param]:: Argument to be passed with the call.  Will be fuzzed
-xref:Result[Result]:: Output of the call Action.  Cracked into a DataModel
+xref:DataModel[DataModel]:: Reference to a DataModel to fuzz.
+xref:Data[Data]:: Set of initial data to crack into the above DataModel before fuzzing.
+xref:Param[Param]:: Argument passed with the call.  Will be fuzzed.
+xref:Result[Result]:: Output of the call Action.  Cracked into a DataModel.
 
 [[Action_Types]]
 == Action Types

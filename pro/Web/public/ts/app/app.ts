@@ -11,9 +11,10 @@ module Peach {
 		"ngResource",
 		"ngRoute",
 		"ngVis",
-		"ui.bootstrap",
 		"smart-table",
-		"treeControl"
+		"treeControl",
+		"ui.select", 
+		"ui.bootstrap"
 	]);
 
 	p.service('HttpErrorService', Services.HttpErrorService);
@@ -84,6 +85,7 @@ module Peach {
 	p.service('JobService', Services.JobService);
 	p.service('TestService', Services.TestService);
 	p.service('WizardService', Services.WizardService);
+	p.service('UniqueService', UniqueService);
 
 	p.directive('peachAgent', () => new AgentDirective());
 	p.directive('peachMonitor', () => new MonitorDirective());
@@ -94,6 +96,11 @@ module Peach {
 			$modal: ng.ui.bootstrap.IModalService,
 			$location: ng.ILocationService
 		) => new UnsavedDirective($modal, $location)
+	]);
+	p.directive('peachUnique', () => new UniqueDirective());
+	p.directive('peachUniqueChannel', [
+		'UniqueService',
+		(service: UniqueService) => new UniqueChannelDirective(service)
 	]);
 
 	p.config([
@@ -201,33 +208,6 @@ module Peach {
 				});
 			}
 		};
-	});
-
-	p.directive('unique', () => {
-		return {
-			restrict: 'A',
-			require: 'ngModel',
-			link: (scope: ng.IScope, elm: ng.IAugmentedJQuery, attrs: ng.IAttributes, ctrl: ng.INgModelController) => {
-				var validate = value => {
-					var expression = attrs['unique'];
-					var list = scope.$eval(expression);
-					var unique = !_.contains(list, value);
-					ctrl.$setValidity('unique', unique);
-					return unique ? value : undefined;
-				};
-
-				var watch = attrs['uniqueWatch'];
-				if (watch) {
-					scope.$watch(watch, () => {
-						var model = attrs['ngModel'];
-						var value = scope.$eval(model);
-						validate(value);
-					});
-				}
-
-				ctrl.$parsers.unshift(validate);
-			}
-		}
 	});
 
 	function boundsValidate(

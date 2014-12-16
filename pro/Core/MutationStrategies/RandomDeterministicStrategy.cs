@@ -45,11 +45,6 @@ namespace Peach.Pro.Core.MutationStrategies
 		{
 		}
 
-		public override void Initialize(RunContext context, Engine engine)
-		{
-			base.Initialize(context, engine);
-		}
-
 		public override uint Iteration
 		{
 			get
@@ -60,7 +55,7 @@ namespace Peach.Pro.Core.MutationStrategies
 			{
 				_mapping = value;
 
-				if (!_context.controlIteration)
+				if (!Context.controlIteration)
 					base.Iteration = sequence.Get(value);
 				else
 					base.Iteration = value;

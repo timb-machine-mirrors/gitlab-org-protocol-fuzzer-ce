@@ -68,7 +68,7 @@ namespace Peach.Pro.Test.Core.Mutators
 		[Test]
 		public void TestSequentialOne()
 		{
-			var runner = new MutatorRunner("BlobChangeRandom");
+			var runner = new MutatorRunner("BlobChangeRandom") { SeedOverride = 0x31337 };
 			var src = new byte[1];
 			var m = runner.Sequential(new Blob() { DefaultValue = new Variant(src) });
 
