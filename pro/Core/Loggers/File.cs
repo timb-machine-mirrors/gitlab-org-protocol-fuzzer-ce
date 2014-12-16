@@ -84,9 +84,22 @@ namespace Peach.Core.Loggers
 
 		public enum Category { Faults, Reproducing, NonReproducable }
 
-		protected void SaveFault(Category category, Fault fault)
+		protected void SaveFault(RunContext ctx, Category category, Fault fault)
 		{
-			log.WriteLine("! Fault detected at iteration {0} : {1}", fault.iteration, DateTime.Now.ToString());
+			switch (category)
+			{
+				case Category.Faults:
+					log.WriteLine("! {0} at iteration {1} : {2}",
+						ctx.test.replayEnabled ? "Reproduced fault" : "Fault detected",
+						fault.iteration, DateTime.Now.ToString());
+					break;
+				case Category.NonReproducable:
+					log.WriteLine("! Non-reproducable fault detected at iteration {0} : {1}", fault.iteration, DateTime.Now.ToString());
+					break;
+				case Category.Reproducing:
+					log.WriteLine("! Fault detected at iteration {0}, trying to reprduce : {1}", fault.iteration, DateTime.Now.ToString());
+					break;
+			}
 
 			// root/category/bucket/iteration
 			var subDir = System.IO.Path.Combine(RootDir, category.ToString(), fault.folderName, fault.iteration.ToString());
@@ -108,14 +121,14 @@ namespace Peach.Core.Loggers
 			System.Diagnostics.Debug.Assert(reproFault == null);
 
 			reproFault = combineFaults(context, currentIteration, stateModel, faults);
-			SaveFault(Category.Reproducing, reproFault);
+			SaveFault(context, Category.Reproducing, reproFault);
 		}
 
 		protected override void Engine_ReproFailed(RunContext context, uint currentIteration)
 		{
 			System.Diagnostics.Debug.Assert(reproFault != null);
 
-			SaveFault(Category.NonReproducable, reproFault);
+			SaveFault(context, Category.NonReproducable, reproFault);
 			reproFault = null;
 		}
 
@@ -135,7 +148,7 @@ namespace Peach.Core.Loggers
 				reproFault = null;
 			}
 
-			SaveFault(Category.Faults, fault);
+			SaveFault(context, Category.Faults, fault);
 		}
 
 		// TODO: Figure out how to not do this!
@@ -261,7 +274,7 @@ namespace Peach.Core.Loggers
 			if (currentIteration != 1 && currentIteration % 100 != 0)
 				return;
 
-			if (totalIterations != null)
+			if (totalIterations.HasValue && totalIterations.Value < uint.MaxValue)
 			{
 				log.WriteLine(". Iteration {0} of {1} : {2}", currentIteration, (uint)totalIterations, DateTime.Now.ToString());
 				log.Flush();
