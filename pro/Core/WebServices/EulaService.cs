@@ -13,12 +13,14 @@ namespace Peach.Pro.Core.WebServices
 				if (License.EulaAccepted)
 					return Response.AsRedirect("/");
 
-				return View["Eula", new
+				var args = new
 				{
 					Rejected = false,
 					Version = License.Version.ToString(),
 					EulaText = License.EulaText()
-				}];
+				};
+
+				return View["Eula", args];
 			};
 
 			Post["/eula", ctx => Accepted(Eula(ctx))] = _ =>

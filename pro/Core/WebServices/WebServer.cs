@@ -171,6 +171,13 @@ namespace Peach.Pro.Core.WebServices
 				// Wrap all exceptions in an error response
 				return ErrorResponse.FromException(ex);
 			});
+
+			// Make default be utf-8
+			pipelines.AfterRequest.AddItemToEndOfPipeline(ctx =>
+			{
+				if (ctx.Response.ContentType == "text/html")
+					ctx.Response.ContentType = "text/html; charset=utf8";
+			});
 		}
 
 		protected override NancyInternalConfiguration InternalConfiguration

@@ -331,7 +331,7 @@ namespace Peach.Core
 		{
 			using (var stream = asm.GetManifestResourceStream(name))
 			{
-				using (var reader = new StreamReader(stream))
+				using (var reader = new StreamReader(stream, System.Text.Encoding.UTF8))
 				{
 					return reader.ReadToEnd();
 				}
