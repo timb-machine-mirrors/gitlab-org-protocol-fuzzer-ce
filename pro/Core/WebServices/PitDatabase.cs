@@ -454,10 +454,9 @@ namespace Peach.Pro.Core.WebServices
 			var reserved = new HashSet<string>();
 			foreach (var def in PitDefines.Parse(fileName))
 			{
-				if (def.ConfigType != ParameterType.User &&
-					def.ConfigType != ParameterType.System)
+				if (def.ConfigType != ParameterType.User)
 				{
-					var param = config.SingleOrDefault((x) => x.Key == def.Key);
+					var param = config.SingleOrDefault(x => x.Key == def.Key && x.Type != ParameterType.System);
 					if (param != null)
 					{
 						def.Value = param.Value;

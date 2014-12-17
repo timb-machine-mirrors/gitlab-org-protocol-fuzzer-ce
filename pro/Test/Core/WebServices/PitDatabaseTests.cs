@@ -8,7 +8,10 @@ using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Analyzers;
+using Peach.Pro.Core;
 using Peach.Pro.Core.WebServices;
+using Peach.Pro.Core.WebServices.Models;
+using File = System.IO.File;
 using Monitor = Peach.Pro.Core.WebServices.Models.Monitor;
 using TestStatus = Peach.Pro.Core.WebServices.Models.TestStatus;
 
@@ -99,6 +102,7 @@ namespace Peach.Pro.Test.Core.WebServices
   <All>
     <Strategy key='Strategy' value='Random' name='Mutation Strategy' description='The mutation strategy to use when fuzzing.' />
     <String key='PitLibraryPath' value='.' name='Pit Library Path' description='The path to the root of the pit library.' />
+    <String key='SomeMiscVariable' value='Foo' name='Misc Variable' description='Description goes here' />
   </All>
 </PitDefines>
 ";
@@ -348,6 +352,71 @@ namespace Peach.Pro.Test.Core.WebServices
 				Assert.AreEqual(TestStatus.Pass, ev.Status);
 			}
 		}
+
+		[Test]
+		public void TestGetPitConfig()
+		{
+			var pit = db.Entries.First();
+
+			var cfg = db.GetConfigByUrl(pit.PitUrl);
+
+			Assert.NotNull(cfg);
+			Assert.AreEqual(5, cfg.Config.Count);
+
+			// Always are 3 system types at the beginning!
+			Assert.AreEqual("Peach.Pwd", cfg.Config[0].Key);
+			Assert.AreEqual(ParameterType.System, cfg.Config[0].Type);
+			Assert.AreEqual("Peach.Cwd", cfg.Config[1].Key);
+			Assert.AreEqual(ParameterType.System, cfg.Config[1].Type);
+
+			// PitLibraryPath is special, and gets turned into a System type
+			// regardless of what is in the pit .config
+			Assert.AreEqual("PitLibraryPath", cfg.Config[2].Key);
+			Assert.AreNotEqual(".", cfg.Config[2].Value);
+			Assert.AreEqual(ParameterType.System, cfg.Config[2].Type);
+
+			Assert.AreEqual("Strategy", cfg.Config[3].Key);
+			Assert.AreEqual(ParameterType.Enum, cfg.Config[3].Type);
+
+			Assert.AreEqual("SomeMiscVariable", cfg.Config[4].Key);
+			Assert.AreEqual(ParameterType.String, cfg.Config[4].Type);
+		}
+
+		[Test]
+		public void TestSetPitConfig()
+		{
+			var pit = db.Entries.First();
+
+			var cfg = db.GetConfigByUrl(pit.PitUrl);
+
+
+			Assert.NotNull(cfg);
+			Assert.AreEqual(5, cfg.Config.Count);
+			Assert.AreEqual("SomeMiscVariable", cfg.Config[4].Key);
+			Assert.AreEqual(ParameterType.String, cfg.Config[4].Type);
+			Assert.AreNotEqual("Foo Bar Baz", cfg.Config[4].Value);
+			cfg.Config[4].Value = "Foo Bar Baz";
+
+			PitDatabase.SaveConfig(pit, cfg.Config);
+
+			var file = pit.Versions[0].Files[0].Name + ".config";
+			var defs = PitDefines.Parse(file);
+			Assert.NotNull(defs);
+
+			// Peach.Pwd and Peach.Cwd do not get saved
+			Assert.AreEqual(3, defs.Count);
+
+			Assert.AreEqual("Strategy", defs[0].Key);
+			Assert.AreEqual("Random", defs[0].Value);
+
+			Assert.AreEqual("SomeMiscVariable", defs[2].Key);
+			Assert.AreEqual("Foo Bar Baz", defs[2].Value);
+
+			// PitLibraryPath should NOT be updated, it is set automagically by the runtime
+			Assert.AreEqual("PitLibraryPath", defs[1].Key);
+			Assert.AreEqual(".", defs[1].Value);
+		}
+
 
 		[Test]
 		public void HasAgents()
