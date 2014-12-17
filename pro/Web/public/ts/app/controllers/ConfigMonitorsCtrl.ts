@@ -25,8 +25,10 @@ module Peach {
 			});
 		}
 
+		private isSaved: boolean = false;
+
 		public get ShowSaved(): boolean {
-			return !this.$scope.form.$dirty && !this.$scope.form.$pristine;
+			return !this.$scope.form.$dirty && this.isSaved;
 		}
 
 		public get ShowError(): boolean {
@@ -50,6 +52,7 @@ module Peach {
 
 		public Save(): void {
 			this.Model.$save({ id: this.pitService.PitId }, () => {
+				this.isSaved = true;
 				this.$scope.form.$setPristine();
 			});
 		}
