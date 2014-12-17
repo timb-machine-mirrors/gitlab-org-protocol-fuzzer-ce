@@ -5,37 +5,25 @@
 		</h1>
 	</div>
 	<p>
-<!-- RAB 12/17/14. When all of the sections of the configuration are complete, 
-        you can validate the fuzzing definition for correctness. 
+		When all of the sections of the configuration are complete,
+		you can validate the fuzzing definition for correctness.
 
-        This section performs a test that runs a single iteration of the Pit, 
-        outputs the results of the test, and issues log messages as appropriate.
-        You can fine tune a configuration or address any problems that arise with
-        a configuration by re-visiting the appropriate section of the configuration, 
-        adjusting the settings that you want to edit, and re-run the test. 
--->        
-        
-		Once all of the configuration sections have been completed you
-		can test your definition to verify it works correctly.
-		This section will allow you to do just that, running a single iteration of the Pit,
-		viewing the output of the test and the detailed log messages.
-		If there is a problem with the configuration you can redo the configuration until it is correct.
+		This section performs a test that runs a single iteration of the Pit,
+		outputs the results of the test, and issues log messages as appropriate.
+		You can fine tune a configuration or address any problems that arise with
+		a configuration by re-visiting the appropriate section of the configuration,
+		adjusting the settings that you want to edit, and re-run the test.
 	</p>
 	<table>
 		<tr>
 			<td>Set Variables</td>
 			<td>
 				<span class="label label-success arrowed"
-				      ng-show="vm.IsComplete('setvars')">
+							ng-show="vm.IsComplete('setvars')">
 					Complete
 				</span>
 				<span class="label label-warning arrowed"
-				      ng-hide="vm.IsComplete('setvars')">
-<!-- RAB 12/17/14.  Item is not complete, the default value will be used.
-
-NOTE TO FRANK: What's not complete?  It might seem intuitive on the screen, but
-               someone inevitably complains about opaqueness versus clarity...
--->                
+							ng-hide="vm.IsComplete('setvars')">
 					Not completed, default values will be used
 				</span>
 			</td>
@@ -90,12 +78,8 @@ NOTE TO FRANK: What's not complete?  It might seem intuitive on the screen, but
 			Testing passed, press Continue
 		</span>
 		<span ng-show="vm.ShowTestFail">
-            
-<!-- RAB 12/17/14. 
 			The Pit validation test failed. Please correct the errors and return
-            to this page to validate the updated Pit configuration.
--->            
-			Testing failed, please correct the errors described and return to this page to test again.
+			to this page to validate the updated Pit configuration.
 		</span>
 		<button class="btn btn-success btn-sm"
 						ng-click="vm.OnNextTrack()"
