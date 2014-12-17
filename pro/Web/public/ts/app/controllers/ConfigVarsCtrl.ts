@@ -4,7 +4,6 @@ module Peach {
 	"use strict";
 
 	export class ConfigureVariablesController {
-		public PitConfig: IPitConfig;
 
 		static $inject = [
 			"$scope",
@@ -21,8 +20,12 @@ module Peach {
 			this.PitConfig = pitService.LoadPitConfig();
 		}
 
+		private isSaved: boolean = false;
+
+		public PitConfig: IPitConfig;
+
 		public get ShowSaved() {
-			return !this.$scope.form.$dirty && !this.$scope.form.$pristine;
+			return !this.$scope.form.$dirty && this.isSaved;
 		}
 
 		public get ShowValidation() {
@@ -39,7 +42,8 @@ module Peach {
 
 		public OnSave(): void {
 			this.PitConfig.$save({ id: this.pitService.PitId }, () => {
-				this.$scope.form.$dirty = false;
+				this.isSaved = true;
+				this.$scope.form.$setPristine();
 			});
 		}
 
@@ -58,15 +62,6 @@ module Peach {
 		public OnRemove(index: number) {
 			this.PitConfig.config.splice(index, 1);
 			this.$scope.form.$setDirty();
-		}
-
-		public Choices(param: IParameter) {
-			return this.defines().concat(param.options);
-		}
-
-		private defines(): string[]{
-			var names = _.pluck(this.pitService.PitConfig.config, 'key');
-			return _.map(names, x => '##' + x + '##');
 		}
 	}
 

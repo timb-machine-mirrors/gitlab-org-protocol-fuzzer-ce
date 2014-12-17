@@ -91,14 +91,17 @@ describe("Peach", () => {
 			});
 
 			it("PitConfig can be saved", () => {
+				var dirty = true;
 				$scope['form'] = {
-					$dirty: true
+					$setPristine: () => {
+						dirty = false;
+					}
 				}
 
 				$httpBackend.expectPOST(pitUrl + '/config').respond({});
 				ctrl.OnSave();
 				$httpBackend.flush();
-				expect($scope['form'].$dirty).toBe(false);
+				expect(dirty).toBe(false);
 			});
 		});
 	});

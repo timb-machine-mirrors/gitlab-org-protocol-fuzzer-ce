@@ -8,13 +8,11 @@ module Peach {
 
 		static $inject = [
 			"$scope",
-			"$timeout",
 			"PitService"
 		];
 
 		constructor(
 			private $scope: IFormScope,
-			private $timeout: ng.ITimeoutService,
 			private pitService: PitService,
 			availableMonitorsResource : IMonitorResource
 		) {
