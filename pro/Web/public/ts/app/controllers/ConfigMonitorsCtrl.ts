@@ -19,8 +19,10 @@ module Peach {
 			availableMonitorsResource : IMonitorResource
 		) {
 			$scope.vm = this;
-			pitService.LoadPitConfig();
-			this.Model = pitService.LoadPitAgents();
+			var promise = pitService.LoadPitConfig().$promise;
+			promise.then(() => {
+				this.Model = pitService.LoadPitAgents();
+			});
 		}
 
 		public get ShowSaved(): boolean {
@@ -36,7 +38,9 @@ module Peach {
 		}
 
 		public get CanSave(): boolean {
-			return this.$scope.form.$dirty && !this.$scope.form.$invalid && this.numMonitors > 0;
+			return this.$scope.form.$dirty &&
+				!this.$scope.form.$invalid &&
+				this.isMonitorsValid;
 		}
 
 		public AddAgent(): void {
@@ -46,7 +50,7 @@ module Peach {
 
 		public Save(): void {
 			this.Model.$save({ id: this.pitService.PitId }, () => {
-				this.$scope.form.$dirty = false;
+				this.$scope.form.$setPristine();
 			});
 		}
 
@@ -57,11 +61,11 @@ module Peach {
 			return 0;
 		}
 
-		private get numMonitors(): number {
+		private get isMonitorsValid(): boolean {
 			if (this.Model && this.Model.$resolved && this.Model.agents.length) {
-				return _.first(this.Model.agents).monitors.length;
+				return _.every(this.Model.agents, agent => agent.monitors.length > 0);
 			}
-			return 0;
+			return false;
 		}
 	}
 }

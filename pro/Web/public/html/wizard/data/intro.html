@@ -1,7 +1,9 @@
-﻿<div>
+<div>
+
 	<p>
-		When a fault is detected, Peach Fuzzer Professional can log additional information to
-		assist in analyzing the fault to determine the root cause. This information can include:
+		When Peach Fuzzer detects a fault, the fuzzer can collect
+		and store additional information that can assist in performing root cause
+		analysis of the fault. The logged information can include the following:
 	</p>
 	<ul>
 		<li>Log files stored on disk or on remote machines via SSH</li>
@@ -10,31 +12,9 @@
 	</ul>
 	<p>
 		The Pit Data Collection section is optional.
-		If you don't produce this kind of data or if you choose not to capture it,
-		you may skip this section.
+		Skip this section if this kind of data is not produced or
+		you choose not to capture the data.
 	</p>
-
-	<p>
-		If you want to monitor more than one file,
-		you will need to repeat Pit Data Collection section process for each item
-		you would like to collect.
-	</p>
-
-	<p>You'll need the following information to complete the Pit Fault Detection section:</p>
-
-	<ul>
-		<li>
-			If the detection is done on a remote machine,
-			the remote machine's hostname/IP name and OS
-		</li>
-		<li>The kind of data collection (network capture, locally generated file, remote file)</li>
-		<li>Network device implement (network capture)</li>
-		<li>Output file name (locally generated file)</li>
-		<li>
-			User name, authentication type and and required information,
-			and files or folders to be downloaded (remote file)
-		</li>
-	</ul>
 
 	<div ng-switch="vm.DataAgents.length">
 		<div ng-switch-when="0"></div>
