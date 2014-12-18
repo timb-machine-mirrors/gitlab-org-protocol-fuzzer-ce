@@ -9,6 +9,7 @@ using Peach.Core.Agent;
 namespace Peach.Pro.Core.Agent.Monitors
 {
 	[Monitor("Socket", true)]
+	[Description("Waits for an incoming TCP or UDP connection")]
 	[Parameter("Host", typeof(IPAddress), "IP address of remote host", "")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default 3000)", "3000")]
 	[Parameter("Interface", typeof(IPAddress), "IP of interface to listen on", "")]

@@ -9,6 +9,7 @@ using Peach.Core.Agent;
 namespace Peach.Pro.Core.Agent.Monitors
 {
 	[Monitor("CleanupFolder", true)]
+	[Description("Remove folder contents created by a target during runtime")]
 	[Parameter("Folder", typeof(string), "The folder to cleanup.")]
 	public class CleanupFolderMonitor : Peach.Core.Agent.Monitor
 	{

@@ -9,6 +9,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 	/// Save a file when a fault occurs.
 	/// </summary>
 	[Monitor("SaveFile", true)]
+	[Description("Saves the specified file as part of the logged data when a fault occurs")]
 	[Parameter("Filename", typeof(string), "File to save on fault")]
 	public class SaveFileMonitor : Monitor
 	{

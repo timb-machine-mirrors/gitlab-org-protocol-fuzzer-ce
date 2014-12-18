@@ -12,6 +12,7 @@ using Encoding = Peach.Core.Encoding;
 namespace Peach.Pro.Core.Agent.Monitors
 {
 	[Monitor("Ping", true)]
+	[Description("Uses ICMP to verify whether a device is functional")]
 	[Parameter("Host", typeof(string), "Host to ping")]
 	[Parameter("Timeout", typeof(int), "Ping timeout in milliseconds", "1000")]
 	[Parameter("RetryCount", typeof(int), "Number of times to retry before issuing a fault", "0")]

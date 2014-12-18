@@ -45,6 +45,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 	[Monitor("WindowsDebuggerHybrid")]
 	[Monitor("WindowsDebugEngine")]
 	[Monitor("debugger.WindowsDebugEngine")]
+	[Description("Controls a Windows debugger instance")]
 	[Parameter("Executable", typeof(string), "Executable to launch", "")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
 	[Parameter("ProcessName", typeof(string), "Name of process to attach too.", "")]

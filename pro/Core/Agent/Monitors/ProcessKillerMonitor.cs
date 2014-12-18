@@ -8,6 +8,7 @@ using Peach.Core.Agent;
 namespace Peach.Pro.Core.Agent.Monitors
 {
 	[Monitor("ProcessKiller", true)]
+	[Description("Terminates the specified processes after each iteration")]
 	[Parameter("ProcessNames", typeof(string[]), "Comma seperated list of process to kill.")]
 	public class ProcessKillerMonitor : Peach.Core.Agent.Monitor
 	{

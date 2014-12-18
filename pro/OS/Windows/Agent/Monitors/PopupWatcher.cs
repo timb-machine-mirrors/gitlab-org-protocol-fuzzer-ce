@@ -38,6 +38,7 @@ using Monitor = Peach.Core.Agent.Monitor;
 namespace Peach.Pro.OS.Windows.Agent.Monitors
 {
 	[Monitor("PopupWatcher", true)]
+	[Description("Closes windows based on title")]
 	[Parameter("WindowNames", typeof(string[]), "Window names separated by a ','")]
 	[Parameter("Fault", typeof(bool), "Trigger fault when a window is found", "false")]
 	public class PopupWatcher : Monitor

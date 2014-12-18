@@ -42,6 +42,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 	/// </summary>
 	[Monitor("Process", true)]
 	[Monitor("process.Process")]
+	[Description("Controls a process during a fuzzing run")]
 	[Parameter("Executable", typeof(string), "Executable to launch")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
 	[Parameter("RestartOnEachTest", typeof(bool), "Restart process for each interation", "false")]
