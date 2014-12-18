@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Nancy;
 using Nancy.Bootstrapper;
 using Nancy.Conventions;
@@ -11,6 +12,7 @@ using Nancy.ViewEngines;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using Peach.Core;
 using Peach.Pro.Core.Runtime;
 using System;
 using System.Linq;
@@ -18,6 +20,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Threading;
+using HttpStatusCode = Nancy.HttpStatusCode;
 
 namespace Peach.Pro.Core.WebServices
 {
@@ -63,7 +66,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 		}
 
-		public void Handle(Nancy.HttpStatusCode statusCode, NancyContext context)
+		public void Handle(HttpStatusCode statusCode, NancyContext context)
 		{
 			var error = context.Response as ErrorResponse;
 
@@ -71,7 +74,7 @@ namespace Peach.Pro.Core.WebServices
 			{
 				// NotFoundResponse and 404s returned from routes are not
 				// contained in an ErrorResponse
-				System.Diagnostics.Debug.Assert(statusCode == Nancy.HttpStatusCode.NotFound);
+				Debug.Assert(statusCode == HttpStatusCode.NotFound);
 
 				error = ErrorResponse.FromMessage("The resource you have requested cannot be found.");
 				error.StatusCode = statusCode;
@@ -87,10 +90,10 @@ namespace Peach.Pro.Core.WebServices
 			}
 		}
 
-		public bool HandlesStatusCode(Nancy.HttpStatusCode statusCode, NancyContext context)
+		public bool HandlesStatusCode(HttpStatusCode statusCode, NancyContext context)
 		{
-			return statusCode == Nancy.HttpStatusCode.NotFound
-				|| statusCode == Nancy.HttpStatusCode.InternalServerError;
+			return statusCode == HttpStatusCode.NotFound
+				|| statusCode == HttpStatusCode.InternalServerError;
 		}
 	}
 
@@ -139,7 +142,7 @@ namespace Peach.Pro.Core.WebServices
 			);
 		}
 
-		protected override void RequestStartup(TinyIoCContainer container, Nancy.Bootstrapper.IPipelines pipelines, NancyContext context)
+		protected override void RequestStartup(TinyIoCContainer container, IPipelines pipelines, NancyContext context)
 		{
 			// NOTE: The pipelies do not get called when serving static content.
 			// Need to investigate disabling this if we want the back end to do
@@ -154,7 +157,7 @@ namespace Peach.Pro.Core.WebServices
 			// Ensure these get insterted after all default handlers
 			pipelines.BeforeRequest.AddItemToStartOfPipeline((ctx) =>
 			{
-				if (!Peach.Core.License.EulaAccepted)
+				if (!License.EulaAccepted)
 				{
 					if (ctx.Request.Path == "/favicon.ico")
 						return null;
@@ -166,11 +169,8 @@ namespace Peach.Pro.Core.WebServices
 				return null;
 			});
 
-			pipelines.OnError.AddItemToEndOfPipeline((ctx, ex) =>
-			{
-				// Wrap all exceptions in an error response
-				return ErrorResponse.FromException(ex);
-			});
+			// Wrap all exceptions in an error response
+			pipelines.OnError.AddItemToEndOfPipeline((ctx, ex) => ErrorResponse.FromException(ex));
 
 			// Make default be utf-8
 			pipelines.AfterRequest.AddItemToEndOfPipeline(ctx =>
@@ -194,7 +194,7 @@ namespace Peach.Pro.Core.WebServices
 			// Tell Nancy views are embedded resources
 			c.ViewLocationProvider = typeof(ResourceViewLocationProvider);
 
-			// Tell nancy to send all sttic content thru the request pipeline
+			// Tell nancy to send all static content thru the request pipeline
 			c.StaticContentProvider = typeof(DisabledStaticContentProvider);
 		}
 	}
@@ -213,7 +213,7 @@ namespace Peach.Pro.Core.WebServices
 			: base(error, new JsonNetSerializer(new CustomJsonSerializer()))
 		{
 			this.error = error;
-			this.StatusCode = Nancy.HttpStatusCode.InternalServerError;
+			StatusCode = HttpStatusCode.InternalServerError;
 		}
 
 		public string ErrorMessage
@@ -355,9 +355,9 @@ namespace Peach.Pro.Core.WebServices
 
 					try
 					{
-						if (!System.Diagnostics.Debugger.IsAttached)
+						if (!Debugger.IsAttached)
 						{
-							System.Diagnostics.Process.Start(svc.Uri.ToString());
+							Process.Start(svc.Uri.ToString());
 						}
 					}
 					catch

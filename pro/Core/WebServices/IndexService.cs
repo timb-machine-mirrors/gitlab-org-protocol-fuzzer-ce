@@ -9,7 +9,12 @@ namespace Peach.Pro.Core.WebServices
 			: base("")
 		{
 			// Default Views
-			Get["/"] = _ => new GenericFileResponse("public/index.html");
+			Get["/"] = _ =>
+			{
+				var response = new GenericFileResponse("public/index.html");
+				response.Headers.Add("Cache-Control", "no-cache, must-revalidate");
+				return response;
+			};
 			Get["/docs"] = _ => Response.AsRedirect("/docs/");
 		}
 	}
