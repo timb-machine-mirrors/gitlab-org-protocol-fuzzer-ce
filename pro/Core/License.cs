@@ -35,6 +35,25 @@ namespace Peach.Core
 		public static bool IsValid { get; private set; }
 		public static Feature Version { get; private set; }
 
+		static Configuration GetUserConfig()
+		{
+			var appConfig = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+			var userFile = new ExeConfigurationFileMap
+			{
+				ExeConfigFilename = Path.Combine(
+					Path.GetDirectoryName(appConfig.FilePath),
+					Path.GetFileNameWithoutExtension(appConfig.FilePath)
+				) + ".user.config"
+			};
+			return ConfigurationManager.OpenMappedExeConfiguration(userFile, ConfigurationUserLevel.None);
+		}
+
+		static string Get(this KeyValueConfigurationCollection settings, string key)
+		{
+			var item = settings[key];
+			return item != null ? item.Value : string.Empty;
+		}
+
 		public static bool EulaAccepted
 		{
 			get
@@ -43,7 +62,7 @@ namespace Peach.Core
 				{
 					if (!eulaAccepted.HasValue)
 					{
-						var str = ConfigurationManager.AppSettings.Get(EulaConfig);
+						var str = GetUserConfig().AppSettings.Settings.Get(EulaConfig);
 						bool val;
 
 						eulaAccepted = bool.TryParse(str, out val);
@@ -59,7 +78,7 @@ namespace Peach.Core
 					if (eulaAccepted.HasValue && eulaAccepted.Value == value)
 						return;
 
-					var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+					var config = GetUserConfig();
 					var settings = config.AppSettings.Settings;
 
 					if (settings[EulaConfig] == null)
