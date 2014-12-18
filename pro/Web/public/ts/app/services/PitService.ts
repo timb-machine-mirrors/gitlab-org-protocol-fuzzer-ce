@@ -30,6 +30,8 @@ module Peach {
 			});
 		}
 
+		private pendingPit: ng.IDeferred<IPit>;
+
 		private userPitLibrary: string;
 		public get UserPitLibrary(): string {
 			return this.userPitLibrary;
@@ -56,7 +58,7 @@ module Peach {
 		//       -> CopyPitController (modal)
 		//          -> CopyPit
 		public SelectPit(url: string): ng.IPromise<IPit> {
-			var deferred = this.$q.defer<IPit>();
+			this.pendingPit = this.$q.defer<IPit>();
 			var promise = this.PitResource.get({ id: ExtractId('pits', url) }).$promise;
 			promise.then((pit: IPit) => {
 				if (pit.locked) {
@@ -69,20 +71,20 @@ module Peach {
 						// only update the current Pit if successful
 						// a failed copy leaves the current Pit untouched
 						this.setPit(copied);
-						deferred.resolve(this.pit);
+						this.pendingPit.resolve(this.pit);
 					});
 					modal.result.catch((reason) => {
-						deferred.reject(reason);
+						this.pendingPit.reject(reason);
 					});
 				} else {
 					this.setPit(pit);
-					deferred.resolve(this.pit);
+					this.pendingPit.resolve(this.pit);
 				}
 			});
 			promise.catch((reason) => {
-				deferred.reject(reason);
+				this.pendingPit.reject(reason);
 			});
-			return deferred.promise;
+			return this.pendingPit.promise;
 		}
 
 		private setPit(pit: IPit) {
@@ -111,11 +113,29 @@ module Peach {
 			return onlyIf(this.pit, () => ExtractId('pits', this.pit.pitUrl));
 		}
 
-		public LoadPitConfig(): IPitConfig {
-			return onlyIf(this.pit, () => {
-				return this.PitConfigResource.get({ id: this.PitId }, (data: IPitConfig) => {
-					this.pitConfig = data;
+		public LoadPitConfig(): ng.IPromise<IPitConfig> {
+			if (this.pendingPit) {
+				var deferred = this.$q.defer<IPitConfig>();
+				this.pendingPit.promise.then(() => {
+					return this._loadPitConfig().$promise;
+				}).then((pitConfig: IPitConfig) => {
+					deferred.resolve(pitConfig);
+				}).catch(reason => {
+					deferred.reject(reason);
 				});
+				return deferred.promise;
+			}
+			if (!this.pit) {
+				var none = this.$q.defer<IPitConfig>();
+				none.reject('No pit selected');
+				return none.promise;
+			}
+			return this._loadPitConfig().$promise;
+		}
+
+		private _loadPitConfig(): IPitConfig {
+			return this.PitConfigResource.get({ id: this.PitId }, (data: IPitConfig) => {
+				this.pitConfig = data;
 			});
 		}
 

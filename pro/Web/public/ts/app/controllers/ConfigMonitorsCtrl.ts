@@ -17,7 +17,7 @@ module Peach {
 			availableMonitorsResource : IMonitorResource
 		) {
 			$scope.vm = this;
-			var promise = pitService.LoadPitConfig().$promise;
+			var promise = pitService.LoadPitConfig();
 			promise.then(() => {
 				this.Model = pitService.LoadPitAgents();
 			});

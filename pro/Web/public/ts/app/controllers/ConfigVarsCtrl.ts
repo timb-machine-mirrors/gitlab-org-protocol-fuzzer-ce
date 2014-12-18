@@ -17,7 +17,10 @@ module Peach {
 			private pitService: PitService
 		) {
 			$scope.vm = this;
-			this.PitConfig = pitService.LoadPitConfig();
+			var promise = pitService.LoadPitConfig();
+			promise.then((pitConfig: IPitConfig) => {
+				this.PitConfig = pitConfig;
+			});
 		}
 
 		private isSaved: boolean = false;

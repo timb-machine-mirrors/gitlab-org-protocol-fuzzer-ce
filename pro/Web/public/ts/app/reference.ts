@@ -17,7 +17,6 @@
 /// <reference path="controllers/MetricsCtrl.ts" />
 /// <reference path="controllers/PitLibraryCtrl.ts" />
 /// <reference path="controllers/PitTestCtrl.ts" />
-/// <reference path="controllers/ScratchCtrl.ts" />
 /// <reference path="controllers/StartJobCtrl.ts" />
 /// <reference path="controllers/WizardCtrl.ts" />
 /// <reference path="directives/AgentDirective.ts" />

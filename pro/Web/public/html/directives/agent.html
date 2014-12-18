@@ -117,7 +117,7 @@
 					</ui-select-match>
 					<ui-select-choices repeat="monitor.monitorClass as monitor in vm.AvailableMonitors | filter: $select.search">
 						<div ng-bind-html="monitor.monitorClass | highlight: $select.search"></div>
-						<small style="white-space: normal">{{monitor.description}}</small>
+						<small style="white-space: normal"><i>{{monitor.description}}</i></small>
 					</ui-select-choices>
 				</ui-select>
 			</div>

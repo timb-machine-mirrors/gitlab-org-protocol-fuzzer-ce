@@ -70,11 +70,6 @@ module.exports = (grunt) ->
 				src: ['public/ts/app/**/*.ts']
 				reference: 'public/ts/app/reference.ts'
 				out: 'public/js/app/app.js'
-			watch:
-				src: ['public/ts/app/**/*.ts']
-				reference: 'public/ts/app/reference.ts'
-				out: 'public/js/app/app.js'
-				watch: 'public/ts'
 			test:
 				src: ['public/ts/test/**/*.ts']
 				reference: 'public/ts/test/reference.ts'
@@ -102,28 +97,60 @@ module.exports = (grunt) ->
 					keepRunner: true
 
 		watch:
+			ts:
+				files: ['public/ts/**/*.ts']
+				tasks: ['compile-work']
+				options:
+					livereload: true
+			html:
+				files: ['public/**/*.html', '!public/tests.html']
+				options:
+					livereload: true
+			css:
+				files: ['public/**/*.css']
+				options:
+					livereload: true
 			test:
 				files: ['public/ts/**/*.ts']
 				tasks: ['compile-test', 'run-test']
 				options:
 					atBegin: true
 
+		focus:
+			app:
+				include: ['ts', 'html', 'css']			
+
 		connect:
 			options:
 				hostname: 'localhost'
 				port: 9000
 				base: 'public'
-				open: true
+				livereload: true
 			proxies: [
-				context: '/p/'
-				host: 'localhost'
-				port: 8888
+				{context: '/p/', host: 'localhost', port: 8888}
 			]
 			livereload:
 				options:
-					debug: true
 					middleware: (connect, options) -> 
 						[ proxy, connect.static(options.base[0]) ]
+
+		http:
+			accept_eula:
+				options:
+					url: 'http://localhost:8888/eula'
+					method: 'POST'
+					form:
+						accept: 'true'
+			reject_eula:
+				options:
+					url: 'http://localhost:8888/eula'
+					method: 'POST'
+					form:
+						accept: 'false'
+
+		open:
+			dev:
+				path: 'http://localhost:<%= connect.options.port%>'
 
 	grunt.loadNpmTasks 'grunt-bowercopy'
 	grunt.loadNpmTasks 'grunt-contrib-clean'
@@ -133,22 +160,41 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-contrib-watch'
 	grunt.loadNpmTasks 'grunt-contrib-connect'
 	grunt.loadNpmTasks 'grunt-connect-proxy'
+	grunt.loadNpmTasks 'grunt-focus'
+	grunt.loadNpmTasks 'grunt-http'
+	grunt.loadNpmTasks 'grunt-open'
 	grunt.loadNpmTasks 'grunt-ts'
 	grunt.loadNpmTasks 'grunt-tsd'
 
 	grunt.registerTask 'default', ['work']
 
-	grunt.registerTask 'init', ['clean', 'bowercopy', 'tsd', 'compile-work']
-
 	grunt.registerTask 'compile-work', ['ts:app']
 	grunt.registerTask 'compile-test', ['ts:test']
 
-	grunt.registerTask 'server', ['configureProxies', 'connect:livereload']
+	grunt.registerTask 'init', [
+		'clean'
+		'bowercopy'
+		'tsd'
+		'compile-work'
+	]
 
-	grunt.registerTask 'work-and-watch', ['ts:watch']
-	grunt.registerTask 'test-and-watch', ['watch:test']
+	grunt.registerTask 'server', [
+		'configureProxies'
+		'http:accept_eula'
+		'connect:livereload'
+	]
+
+	grunt.registerTask 'work', [
+		'clean:app'
+		'compile-work'
+		'server'
+		'open'
+		'focus:app'
+	]
+
+	grunt.registerTask 'test', [
+		'clean:app'
+		'watch:test'
+	]
 
 	grunt.registerTask 'run-test', ['jasmine:test']
-
-	grunt.registerTask 'work', ['clean:app', 'server', 'work-and-watch']
-	grunt.registerTask 'test', ['clean:app', 'test-and-watch']

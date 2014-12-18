@@ -39,6 +39,12 @@ module Peach {
 			}
 		}
 
+		public get Header(): string {
+			var monitor = this.$scope.monitor.monitorClass;
+			var name = this.$scope.monitor.name ? '(' + this.$scope.monitor.name + ')' : '';
+			return monitor + ' ' + name;
+		}
+
 		public get CanMoveUp(): boolean {
 			return this.$scope.monitorIndex !== 0;
 		}

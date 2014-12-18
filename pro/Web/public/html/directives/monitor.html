@@ -6,7 +6,7 @@
 					 ng-class="{'glyphicon-chevron-down': isOpen, 'glyphicon-chevron-right': !isOpen}">
 				</i>
 				&nbsp;
-				{{monitor.monitorClass}} {{monitor.name ? '(' + monitor.name + ')' : ''}}
+				{{vm.Header}}
 				<span class="btn-group btn-group-xs pull-right">
 					<button class="btn btn-xs btn-info"
 					        ng-click="vm.OnMoveUp($event)"

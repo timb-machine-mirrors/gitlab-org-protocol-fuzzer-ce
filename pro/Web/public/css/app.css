@@ -207,10 +207,9 @@ pre.peach-test-log {
 }
 
 .peach-add-monitor {
-	width: 300px;
+	width: 400px;
 }
 
 .peach-add-monitor .select2-results {
 	max-height: 600px;
 }
-

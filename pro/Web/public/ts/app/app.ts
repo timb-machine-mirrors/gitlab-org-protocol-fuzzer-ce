@@ -149,10 +149,6 @@ module Peach {
 					templateUrl: "html/cfg/test.html",
 					controller: PitTestController
 				})
-				.when("/scratch", {
-					templateUrl: "html/scratch.html",
-					controller: ScratchController
-				})
 				.otherwise({
 					redirectTo: "/"
 				});
