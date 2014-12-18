@@ -21,6 +21,8 @@ module Peach {
 			this.reset();
 		}
 
+		private isPending: boolean = false;
+
 		private testResult: ITestResult;
 		public get TestResult(): ITestResult {
 			return this.testResult;
@@ -31,18 +33,14 @@ module Peach {
 			return this.testTime;
 		}
 
-		private reset() {
-			this.testResult = {
-				status: "notrunning",
-				log: "",
-				events: []
-			};
-			this.testTime = moment().format("h:mm a");
+		public get CanBeginTest(): boolean {
+			return !this.isPending;
 		}
 
 		public BeginTest() {
 			this.reset();
 
+			this.isPending = true;
 			var promise = this.$http.get('/p/conf/wizard/test/start', {
 				params: { pitUrl: this.pitService.Pit.pitUrl }
 			});
@@ -50,6 +48,18 @@ module Peach {
 			promise.success((data: ITestRef) => {
 				this.startTestPoller(data.testUrl);
 			});
+			promise.catch(reason => {
+				this.setFailure(reason);
+			});
+		}
+
+		private reset() {
+			this.testResult = {
+				status: "",
+				log: "",
+				events: []
+			};
+			this.testTime = moment().format("h:mm a");
 		}
 
 		private startTestPoller(testUrl: string) {
@@ -58,11 +68,35 @@ module Peach {
 				promise.success((data: ITestResult) => {
 					this.testResult = data;
 					if (data.status !== TestStatus.Active) {
-						this.$interval.cancel(interval);
-						this.pitService.ReloadPit();
+						this.stopTestPoller(interval);
 					}
 				});
+				promise.catch(reason => {
+					this.stopTestPoller(interval);
+					this.setFailure(reason);
+				});
 			}, TEST_INTERVAL);
+		}
+
+		private stopTestPoller(interval: any) {
+			this.isPending = false;
+			this.$interval.cancel(interval);
+			this.pitService.ReloadPit();
+		}
+
+		private setFailure(response: ng.IHttpPromiseCallbackArg<IError>) {
+			this.isPending = false;
+			this.testResult.status = TestStatus.Fail;
+
+			var event: ITestEvent = {
+				id: this.testResult.events.length + 1,
+				status: TestStatus.Fail,
+				short: '',
+				description: 'Test execution failure.',
+				resolve: response.data.errorMessage
+			};
+
+			this.testResult.events.push(event);
 		}
 	}
 }

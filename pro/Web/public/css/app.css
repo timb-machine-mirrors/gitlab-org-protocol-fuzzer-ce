@@ -62,6 +62,10 @@ pre {
 	margin-right: 0;
 }
 
+.btn-sm .glyphicon {
+	margin-right: 0;
+}
+
 .peach-icon-cell {
 	width: 25px;
 }
