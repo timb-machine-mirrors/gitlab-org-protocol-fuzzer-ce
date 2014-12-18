@@ -28,20 +28,24 @@ module Peach {
 			return this.wizardService.GetTrack(step).isComplete;
 		}
 
+		public get CanWizardBeginTest(): boolean {
+			return this.CanBeginTest && this.IsComplete('fault');
+		}
+
 		public get CanBeginTest(): boolean {
-			return this.IsComplete('fault');
-		}
-
-		public get ShowTestPass(): boolean {
-			return this.testService.TestResult.status === 'pass';
-		}
-
-		public get ShowTestFail() {
-			return this.testService.TestResult.status === 'fail';
+			return this.testService.CanBeginTest;
 		}
 
 		public get CanContinue() {
-			return this.testService.TestResult.status === 'pass';
+			return this.testService.TestResult.status === TestStatus.Pass;
+		}
+
+		public get ShowTestPass(): boolean {
+			return this.testService.TestResult.status === TestStatus.Pass;
+		}
+
+		public get ShowTestFail() {
+			return this.testService.TestResult.status === TestStatus.Fail;
 		}
 
 		public OnBeginTest() {

@@ -23,7 +23,7 @@ module Peach {
 			$scope.vm = this;
 		}
 
-		public get TestEvents(): ITestEvent[]{
+		public get TestEvents(): ITestEvent[] {
 			return this.testService.TestResult.events;
 		}
 
@@ -41,9 +41,8 @@ module Peach {
 
 		public StatusClass(row: ITestEvent): any {
 			return {
-				'icon-ok green': row.status === 'pass',
-				'icon-warning-sign orange': row.status === 'warn',
-				'icon-remove red': row.status === 'fail'
+				'glyphicon glyphicon-ok green': row.status === TestStatus.Pass,
+				'glyphicon glyphicon-remove red': row.status === TestStatus.Fail
 			};
 		}
 	}

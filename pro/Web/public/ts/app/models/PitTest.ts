@@ -22,8 +22,8 @@ module Peach {
 	}
 
 	export class TestStatus {
-		public static Active: string = "active";
-		public static Pass: string = "pass";
-		public static Fail: string = "fail";
+		static Active: string = "active";
+		static Pass: string = "pass";
+		static Fail: string = "fail";
 	}
 }

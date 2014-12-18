@@ -84,12 +84,12 @@
 		<button class="btn btn-success btn-sm"
 						ng-click="vm.OnNextTrack()"
 						ng-class="{disabled: !vm.CanContinue}">
-			Continue
-			<i class="icon-arrow-right icon-on-right"></i>
+			Continue &nbsp;
+			<i class="glyphicon glyphicon-arrow-right"></i>
 		</button>
 		<button class="btn btn-warning btn-sm"
 						ng-click="vm.OnBeginTest()"
-						ng-class="{disabled: !vm.CanBeginTest}">
+						ng-class="{disabled: !vm.CanWizardBeginTest}">
 			Begin Test
 		</button>
 	</div>

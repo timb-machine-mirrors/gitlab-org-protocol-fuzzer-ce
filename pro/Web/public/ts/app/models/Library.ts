@@ -33,6 +33,10 @@ module Peach {
 		values: string[];
 	}
 
+	export interface IError {
+		errorMessage: string;
+	}
+
 	// resources
 	export interface ILibraryResource extends IResourceClass<ILibrary> { }
 }
