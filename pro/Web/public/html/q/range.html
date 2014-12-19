@@ -1,21 +1,39 @@
 ﻿<div>
 	<div class="header blue"
-			 ng-show="vm.IsSetVars">
-		{{vm.Question.shortName || vm.Question.key}}
+	     ng-show="vm.IsSetVars">
+		{{question.shortName || question.key}}
 	</div>
 	<label>
-		{{vm.Question.q}}
+		{{question.q}}
 		(value must be a number between
-		{{vm.Question.rangeMin}} and {{vm.Question.rangeMax}})
+		{{question.rangeMin}} and {{question.rangeMax}})
 	</label>
 	<div>
-		<input ng-model="vm.Question.value"
-					 ng-enter="vm.Next()"
-					 step="1"
-					 ng-min="vm.Question.rangeMin"
-					 ng-max="vm.Question.rangeMax"
-					 type="number"
-					 ng-required="vm.Question.required"
-					 integer />
+		<input name="question"
+		       ng-model="question.value"
+		       ng-enter="vm.Next()"
+		       step="1"
+		       peach:range
+		       peach:range-min="question.rangeMin"
+		       peach:range-max="question.rangeMax"
+		       type="text"
+		       ng-required="question.required"
+		       integer />
 	</div>
+</div>
+<div class="help-block"
+			ng-show="form.question.$error.integer">
+	Not an integer
+</div>
+<div class="help-block"
+		 ng-show="form.question.$error.rangeMin">
+	Value is less than minimum allowed ({{question.rangeMin}})
+</div>
+<div class="help-block"
+		 ng-show="form.question.$error.rangeMax">
+	Value is greater than maximum allowed ({{question.rangeMax}})
+</div>
+<div class="help-block"
+		 ng-show="form.question.$error.required">
+	Required
 </div>

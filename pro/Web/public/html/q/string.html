@@ -1,34 +1,27 @@
 ﻿<div>
 	<div class="header blue"
-			 ng-show="vm.IsSetVars">
-		{{vm.Question.shortName || vm.Question.key}}
+	     ng-show="vm.IsSetVars">
+		{{question.shortName || question.key}}
 	</div>
-	<label>
-		{{vm.Question.q}}
-		<span ng-switch="vm.Question.required">
-			<span ng-switch-when="false">(Optional)</span>
-		</span>
-	</label>
-	<div class="dropdown">
-		<input name="{{vm.Question.key}}"
-					 ng-model="vm.Question.value"
+	<div>
+		<label>
+			{{question.q}}
+			<span ng-if="!question.required">(Optional)</span>
+		</label>
+	</div>
+	<div class="col-sm-6 no-padding-left">
+		<input name="question"
+					 ng-model="question.value"
 					 type="text"
-					 class="dropdown-toggle"
-					 ng-required="vm.Question.required"
-					 style="width: 300px"
-					 ng-enter="vm.Next()" />
-		<ul class="dropdown-menu"
-				ng-show="vm.IsSetVars">
-			<li ng-repeat="default in vm.Question.defaults">
-				<div ng-click="vm.Question.value = default"
-						 style="width: 100%; cursor: pointer">
-					{{default}}
-				</div>
-			</li>
-		</ul>
+					 class="form-control"
+					 ng-required="question.required"
+		       ng-enter="vm.Next()" 
+					 autofocus />
 	</div>
-	<div class="space-6">
-	</div>
+	<span class="help-block"
+			 ng-show="form.question.$error.required">
+		Required
+	</span>
 	<table class="table table-striped table-hover table-bordered"
 				 ng-show="!vm.IsSetVars">
 		<caption>

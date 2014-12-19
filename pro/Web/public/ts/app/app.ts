@@ -3,11 +3,9 @@
 module Peach {
 	"use strict";
 
-	var INTEGER_REGEXP = /^\-?\d+$/;
-	var HEX_REGEXP = /^[0-9A-Fa-f]+$/;
-
 	var p = angular.module("Peach", [
 		"angles",
+		"angular-loading-bar",
 		"ngSanitize",
 		"ngResource",
 		"ngRoute",
@@ -88,8 +86,13 @@ module Peach {
 	p.service('WizardService', WizardService);
 	p.service('UniqueService', UniqueService);
 
+	p.directive("integer", () => new IntegerDirective());
+	p.directive("hexstring", () => new HexDirective());
+	p.directive('peachRange', () => new RangeDirective());
+
 	p.directive('peachAgent', () => new AgentDirective());
 	p.directive('peachMonitor', () => new MonitorDirective());
+	p.directive('peachQuestion', () => new QuestionDirective());
 	p.directive('peachParameter', () => new ParameterDirective());
 	p.directive('peachParameterInput', () => new ParameterInputDirective());
 	p.directive('peachTest', () => new TestDirective());
@@ -155,42 +158,6 @@ module Peach {
 		}
 	]);
 
-	function regexValidate(
-		name: string,
-		pattern: RegExp,
-		scope: ng.IScope,
-		elm: ng.IAugmentedJQuery,
-		attrs: ng.IAttributes,
-		ctrl: ng.INgModelController
-	) {
-		ctrl.$parsers.unshift(viewValue => {
-			var match = pattern.test(viewValue);
-			ctrl.$setValidity(name, match);
-			if (match) {
-				return viewValue;
-			}
-			return undefined;
-		});
-	}
-
-	p.directive("integer", () => {
-		return {
-			require: 'ngModel',
-			link: (scope: ng.IScope, elm: ng.IAugmentedJQuery, attrs: ng.IAttributes, ctrl: ng.INgModelController) => {
-				return regexValidate('integer', INTEGER_REGEXP, scope, elm, attrs, ctrl);
-			}
-		};
-	});
-
-	p.directive('hexstring', () => {
-		return {
-			require: 'ngModel',
-			link: (scope: ng.IScope, elm: ng.IAugmentedJQuery, attrs: ng.IAttributes, ctrl: ng.INgModelController) => {
-				return regexValidate('hexstring', HEX_REGEXP, scope, elm, attrs, ctrl);
-			}
-		};
-	});
-
 	p.directive('ngEnter', () => {
 		return {
 			restrict: 'A',
@@ -204,52 +171,6 @@ module Peach {
 						event.preventDefault();
 					}
 				});
-			}
-		};
-	});
-
-	function boundsValidate(
-		name: string,
-		scope: ng.IScope,
-		elm: ng.IAugmentedJQuery,
-		attrs: ng.IAttributes,
-		ctrl: ng.INgModelController
-	) {
-		var isMax = (name == 'ngMax');
-		scope.$watch(attrs[name], () => {
-			ctrl.$setViewValue(ctrl.$viewValue);
-		});
-		var validator = value => {
-			var bound = scope.$eval(attrs[name]) || 0;
-			if (!isEmpty(value) && ((isMax && value > bound) || (!isMax && value < bound))) {
-				ctrl.$setValidity(name, false);
-				return undefined;
-			} else {
-				ctrl.$setValidity(name, true);
-				return value;
-			}
-		};
-
-		ctrl.$parsers.push(validator);
-		ctrl.$formatters.push(validator);
-	}
-
-	p.directive('ngMin', () => {
-		return {
-			restrict: 'A',
-			require: 'ngModel',
-			link: (scope: ng.IScope, elm: ng.IAugmentedJQuery, attrs: ng.IAttributes, ctrl: ng.INgModelController) => {
-				boundsValidate('ngMin', scope, elm, attrs, ctrl);
-			}
-		};
-	});
-
-	p.directive('ngMax', () => {
-		return {
-			restrict: 'A',
-			require: 'ngModel',
-			link: (scope: ng.IScope, elm: ng.IAugmentedJQuery, attrs: ng.IAttributes, ctrl: ng.INgModelController) => {
-				boundsValidate('ngMax', scope, elm, attrs, ctrl);
 			}
 		};
 	});

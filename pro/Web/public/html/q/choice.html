@@ -1,18 +1,17 @@
 ﻿<div ng-enter="vm.Next()">
 	<div class="header blue"
 			 ng-show="vm.IsSetVars">
-		{{vm.Question.shortName || vm.Question.key}}
+		{{question.shortName || question.key}}
 	</div>
 	<label>
-		{{vm.Question.q}}
+		{{question.q}}
 	</label>
-	<div ng-repeat="choice in vm.Question.choice"
+	<div ng-repeat="choice in question.choice"
 			 class="radio">
-		<label for="choice{{$index+1}}">
+		<label>
 			<input type="radio"
-						 ng-model="vm.Question.value"
-						 ng-value="choice.value"
-						 id="choice{{$index+1}}" />
+						 ng-model="question.value"
+						 ng-value="choice.value" />
 			{{choice.a}}
 		</label>
 	</div>
