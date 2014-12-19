@@ -38,21 +38,16 @@ During the testing and building phase run the first iteration only.
 Peach.exe -1 pit_file.xml
 ----
 
-Reduce the pit to basic parts in order make sure the 
+Reduce the pit to basic parts in order make sure the following items are specified correctly:
 
-. Test
-.. References have the right names
-. Log Path
-.. Has a valid folder 
-. Publisher
-.. Can correctly talk to or output data
-. Agent
-.. Monitor setup is correct and had connectivity
-. State Machine
-.. References data and Models correctly
-. DataModel
+. Test - The references have the right names
+. Log Path - The folder path is valid
+. Publisher - The functionality works: communicating (network Publishe), sending or receiving data, or outputting data
+. Agent - The Monitor setup is correct and the Monitor has connectivity
+. State Machine - The references to the data models are correct
+. DataModel - Loads and displays the appropriate layout in the Peach Validator
 
-Add +--debug+ for more verbose output.
+The Peach debug argument (+--debug+ on the command line) provides verbose output that can help in debugging a Pit file.
 
 ----
 Peach.exe -1 --debug pit_file.xml

@@ -21,7 +21,7 @@ import:: Same as python import keyword. A file must exist with a +.py+ postfix.
 
 _Optional:_
 
-There are no optional attributes for this element.
+None.
 
 // == Examples
 // TODO Import examples
