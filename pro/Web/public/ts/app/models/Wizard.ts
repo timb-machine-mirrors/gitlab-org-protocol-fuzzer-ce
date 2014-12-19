@@ -5,14 +5,12 @@ module Peach {
 
 	export class QuestionTypes {
 		static String = "string";
-		static HexString = "hex";
-		static Number = "int";
+		static Hex = "hex";
 		static Range = "range";
-		static IPV4 = "ipv4";
-		static IPV6 = "ipv6";
-		static MACAddress = "hwaddr";
-		static NetworkInterface = "iface";
-		static OnCall = "oncall";
+		static Ipv4 = "ipv4";
+		static Ipv6 = "ipv6";
+		static HwAddress = "hwaddr";
+		static Iface = "iface";
 		static Choice = "choice";
 		static Jump = "jump";
 		static Intro = "intro";

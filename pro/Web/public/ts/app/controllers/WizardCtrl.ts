@@ -58,6 +58,8 @@ module Peach {
 			return ret;
 		}
 
+		public SelectedOptions = [];
+
 		public get DataAgents(): Agent[] {
 			return this.wizardService.GetTrack("data").agents;
 		}
@@ -153,7 +155,6 @@ module Peach {
 		}
 
 		public OnNextTrack() {
-			this.track.isComplete = true;
 			this.$location.path(this.track.next);
 		}
 

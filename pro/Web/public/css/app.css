@@ -170,6 +170,7 @@ pre.peach-test-log {
 	color: #333 !important;
 	background-color: #fff !important;
 	border-color: #ccc;
+	height: 34px;
 }
 
 .ui-select-container .btn-group > .btn:first-child {
