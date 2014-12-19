@@ -1,0 +1,20 @@
+<<<
+[[Mutators_StringUtf16BomLength]]
+== StringUtf16BomLength
+
+The _StringUtf16BomLength_ mutator produces test cases Unicode UTF-16 strings by altering an individual string in two ways:
+
+* Adjust the length of the string using the xref:StringLengthVariance[StringLengthVariance] mutator
+* Insert 1 to 6 Unicode Byte Ordering Marks (BOM code points) in arbitrary places in the string
+
+BOM code points are not considered characters, and using them can cause buffer length calculations to be incorrect.
+
+NOTE: StringUtf16BomLength does not run on data elements that specify the hint *Peach.TypeTransform=false*.
+
+=== Supported Elements
+
+ * xref:String[String]
+
+=== Hints
+
+None.
