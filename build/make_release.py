@@ -16,7 +16,7 @@ pits = [
 	{
 		'root' : 'pits/pro',
 		'incl' : '*',
-		'excl' : '_Common/Specs/* _Testing/* */.gitignore *.TODO *.adoc *.test *.pdf'
+		'excl' : 'Test/* _Common/Specs/* _Testing/* */.gitignore *.TODO *.adoc *.test *.pdf'
 	},
 ]
 
