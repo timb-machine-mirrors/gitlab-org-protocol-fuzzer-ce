@@ -5,9 +5,9 @@
 The _StringUtf8BomLength_ mutator produces test cases for Ascii and Unicode UTF-8 strings by altering an individual string in two ways:
 
 * Adjust the length of the string using the xref:StringLengthVariance[StringLengthVariance] mutator
-* Insert 1 to 6 Unicode Byte Ordering Marks (BOM code points) in arbitrary places in the string
+* Insert 1 to 6 Unicode Byte Ordering Marks (BOMs) in arbitrary places in the string
 
-BOM code points are not considered characters, and using them can cause buffer length calculations to be incorrect.
+BOMs are not considered characters, and using them can cause buffer length calculations to be incorrect.
 
 NOTE: StringUtf8BomLength does not run on data elements that specify the hint *Peach.TypeTransform=false*.
 
