@@ -5,6 +5,7 @@ module Peach {
 
 	var p = angular.module("Peach", [
 		"angles",
+		"angular-loading-bar",
 		"ngSanitize",
 		"ngResource",
 		"ngRoute",
