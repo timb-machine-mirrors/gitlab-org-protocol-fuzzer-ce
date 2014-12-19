@@ -48,7 +48,7 @@ xref:valueType[valueType]:: Format of value attribute.
 
 === Child Elements
 
-This element has no valid child elements.
+None.
 
 === _Param_ and the Call Action 
 
