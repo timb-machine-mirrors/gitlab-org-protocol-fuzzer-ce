@@ -222,7 +222,7 @@ namespace Peach.Core.IO
 					pos = 0;
 
 					// First time thru, we should always have at least 1 bit to read
-					System.Diagnostics.Debug.Assert((e.LengthBits - offset) > 0);
+					Debug.Assert((e.LengthBits - offset) > 0);
 				}
 
 				var toWrite = Math.Min(e.LengthBits - offset, needed);
@@ -266,7 +266,7 @@ namespace Peach.Core.IO
 
 		protected bool ScanUntil(string name, ref long position)
 		{
-			if (this.Name == name)
+			if (Name == name)
 				return true;
 
 			foreach (var item in this)
@@ -339,7 +339,6 @@ namespace Peach.Core.IO
 			int bits = 0;
 			int needed = count;
 			long pos = 0;
-			ulong tmp = 0;
 			byte glue = 0;
 
 			foreach (var item in this)
@@ -352,6 +351,7 @@ namespace Peach.Core.IO
 					item.PositionBits = PositionBits - pos;
 
 					// If we are not aligned reading into buffer, get back aligned
+					ulong tmp;
 					if (bits != 0)
 					{
 						int len = item.ReadBits(out tmp, 8 - bits);
