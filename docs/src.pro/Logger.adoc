@@ -27,4 +27,4 @@ Path:: The relative or absolute path to create log files
 
 _Optional:_
 
-There are no optional parameters for this element.
+None.
