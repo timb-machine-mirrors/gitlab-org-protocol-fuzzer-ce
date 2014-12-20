@@ -42,8 +42,8 @@ namespace PitTester
 				errors.AppendLine();
 			};
 
-			// Ignore user pits
-			AllPits = lib.Entries.Where(e => e.Locked).Select(p => new TestCase() { Pit = p }).ToList();
+			// Ignore user pits & category "Test"
+			AllPits = lib.Entries.Where(e => e.Locked && e.Tags.All(t => t.Name != "Category.Test")).Select(p => new TestCase() { Pit = p }).ToList();
 
 			LoadErrors = errors.ToString();
 		}
