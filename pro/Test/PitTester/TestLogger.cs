@@ -17,6 +17,7 @@ namespace PitTester
 		bool verify;
 		List<Tuple<Action, DataElement>> ignores;
 
+		public bool ExceptionOccurred { get { return !verify; } }
 		public string ActionName { get; private set; }
 
 		public TestLogger(TestData.Test testData, IEnumerable<string> xpathIgnore)
