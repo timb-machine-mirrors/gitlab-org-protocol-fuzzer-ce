@@ -20,6 +20,7 @@
 /// <reference path="controllers/StartJobCtrl.ts" />
 /// <reference path="controllers/WizardCtrl.ts" />
 /// <reference path="directives/AgentDirective.ts" />
+/// <reference path="directives/ComboboxDirective.ts" />
 /// <reference path="directives/MonitorDirective.ts" />
 /// <reference path="directives/ParameterDirective.ts" />
 /// <reference path="directives/QuestionDirective.ts" />
