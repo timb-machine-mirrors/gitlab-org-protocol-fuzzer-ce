@@ -245,7 +245,12 @@ namespace PeachValidator
 			if (ofd.ShowDialog() != System.Windows.Forms.DialogResult.OK)
 				return;
 
-			PitFileName = ofd.FileName;
+			SelectPit(ofd.FileName, true);
+		}
+
+		private void SelectPit(string fileName, bool getDefs)
+		{
+			PitFileName = fileName;
 			setTitle();
 
 			Regex re = new Regex("##\\w+##");
@@ -256,14 +261,19 @@ namespace PeachValidator
                 {
                     defs = PitParser.parseDefines(PitFileName + ".config");
                 }
+                else if (getDefs)
+                {
+	                var ofd = new OpenFileDialog();
+	                ofd.Title = "Select PIT defines file";
+
+	                if (ofd.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+		                return;
+
+	                defs = PitParser.parseDefines(ofd.FileName);
+                }
                 else
                 {
-                    ofd.Title = "Select PIT defines file";
-
-                    if (ofd.ShowDialog() != System.Windows.Forms.DialogResult.OK)
-                        return;
-
-                    defs = PitParser.parseDefines(ofd.FileName);
+                    defs = new List<KeyValuePair<string, string>>();
                 }
 
 				foreach (var kv in defs)
@@ -409,7 +419,9 @@ namespace PeachValidator
 		private void MainForm_Load(object sender, EventArgs e)
 		{
 			if (PitFileName != null)
-				toolStripButtonRefreshPit_Click(null, null);
+			{
+				SelectPit(PitFileName, false);
+			}
 
 			if (SampleFileName != null)
 			{

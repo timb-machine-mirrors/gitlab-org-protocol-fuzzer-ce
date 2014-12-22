@@ -416,6 +416,35 @@ namespace Peach.Core.Dom
 			return new DataElement[0];
 		}
 
+		/// <summary>
+		/// Is this element in scope in the data model.
+		/// </summary>
+		/// <returns></returns>
+		public bool InScope()
+		{
+			var e = this;
+			var p = e.parent;
+
+			while (p != null && p.InScope(e))
+			{
+				e = p;
+				p = e.parent;
+			}
+
+			return p == null;
+		}
+
+		/// <summary>
+		/// Is a child in the selected element scope for a given parent.
+		/// Default behavior is true: all cchildren are in scope.
+		/// </summary>
+		/// <param name="child"></param>
+		/// <returns></returns>
+		protected virtual bool InScope(DataElement child)
+		{
+			return true;
+		}
+
 		#region Find Element By Name
 
 		/// <summary>

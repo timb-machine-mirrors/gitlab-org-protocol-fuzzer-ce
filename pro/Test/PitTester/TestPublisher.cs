@@ -14,6 +14,7 @@ namespace PitTester
 	{
 		static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
+		bool datagram;
 		string name;
 		TestLogger testLogger;
 
@@ -53,7 +54,7 @@ namespace PitTester
 			if (testLogger.ExceptionOccurred)
 				return;
 
-			if (stream.Position != stream.Length)
+			if (!datagram && stream.Position != stream.Length)
 				throw new Exception(string.Format("Error, input stream has {0} unconsumed bytes from last input action.",
 					stream.Length - stream.Position));
 		}
@@ -84,6 +85,8 @@ namespace PitTester
 		protected override void OnInput()
 		{
 			var data = testLogger.Verify<TestData.Input>(name);
+
+			datagram = data.IsDatagram;
 
 			if (data.IsDatagram)
 			{

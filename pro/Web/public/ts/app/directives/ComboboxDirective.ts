@@ -21,8 +21,7 @@
 
 	export class ComboboxDirective implements ng.IDirective {
 		constructor(
-			private $document: ng.IDocumentService,
-			private $timeout: ng.ITimeoutService
+			private $document: ng.IDocumentService
 		) {
 			this.link = this._link.bind(this);
 		}
