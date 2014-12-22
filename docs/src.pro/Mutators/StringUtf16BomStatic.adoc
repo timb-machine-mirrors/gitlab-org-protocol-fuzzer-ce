@@ -10,6 +10,8 @@ The _StringUtf16BomStatic_ mutator produces test cases for Unicode UTF-16 string
 BOM are not considered characters, and injecting BOMs into a string that might be filtered could cause 
 the filtering not to work and the string would be accepted.
 
+BOM marks, whether for Big Endian-ness or for Little Endian-ness, are selected arbitrarily.
+
 //RAB - 12/19/14. Hiding for now because hint is currently internal.
 //NOTE: StringUtf16BomStatic does not run on data elements that specify the hint *Peach.TypeTransform=false*.
 //
