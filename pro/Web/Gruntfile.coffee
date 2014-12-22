@@ -20,9 +20,9 @@ module.exports = (grunt) ->
 					'public/lib/angular-ui-select' : 'angular-ui-select:main'
 					'public/lib/angular-ui-utils'  : 'angular-ui-utils:main'
 					'public/lib/jquery'            : 'jquery:main'
+					'public/lib/lodash'            : 'lodash:main'
 					'public/lib/moment'            : 'moment:main'
 					'public/lib/select2'           : 'select2:main'
-					'public/lib/underscore'        : 'underscore:main'
 
 			mainless:
 				options:

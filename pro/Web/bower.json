@@ -29,12 +29,12 @@
     "jquery": "2.1",
     "vis": "~3.7.0",
     "moment": "~2.8.4",
-    "underscore": "~1.7.0",
     "angular-smart-table": "~1.4.5",
     "pithy": "*",
     "angular-ui-select": "~0.9.4",
     "angular-sanitize": "1.2",
     "select2": "~3.4.5",
-    "angular-loading-bar": "~0.6.0"
+    "angular-loading-bar": "~0.6.0",
+    "lodash": "~2.4.1"
   }
 }

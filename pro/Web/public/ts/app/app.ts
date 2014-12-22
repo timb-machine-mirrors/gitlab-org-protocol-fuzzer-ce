@@ -107,6 +107,12 @@ module Peach {
 		'UniqueService',
 		(service: UniqueService) => new UniqueChannelDirective(service)
 	]);
+	p.directive('peachCombobox', [
+		'$document', '$timeout', (
+			$document: ng.IDocumentService,
+			$timeout: ng.ITimeoutService
+		) => new ComboboxDirective($document, $timeout)
+	]);
 
 	p.config([
 		"$routeProvider",

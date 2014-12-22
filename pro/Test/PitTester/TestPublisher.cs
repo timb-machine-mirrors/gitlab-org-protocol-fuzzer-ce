@@ -49,6 +49,10 @@ namespace PitTester
 		{
 			testLogger.Verify<TestData.Close>(name);
 
+			// Don't verify stream positions if previous error occurred
+			if (testLogger.ExceptionOccurred)
+				return;
+
 			if (stream.Position != stream.Length)
 				throw new Exception(string.Format("Error, input stream has {0} unconsumed bytes from last input action.",
 					stream.Length - stream.Position));

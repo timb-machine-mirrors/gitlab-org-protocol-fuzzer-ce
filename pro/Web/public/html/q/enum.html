@@ -1,15 +1,12 @@
-﻿<div ng-enter="vm.Next()">
-	<div class="header blue"
-			 ng-show="vm.IsSetVars">
-		{{question.shortName || question.key}}
-	</div>
-	<label>{{question.q}}</label>
-	<div class="row">
-		<div class="col-xs-8">
-			<select class="form-control"
-			        ng-model="question.value"
-			        ng-options="default for default in question.defaults">
-			</select>
-		</div>
+﻿<div class="header blue"
+		 ng-show="vm.IsSetVars">
+	{{question.shortName || question.key}}
+</div>
+<label>{{question.q}}</label>
+<div class="row">
+	<div class="col-sm-6">
+		<select class="form-control"
+						ng-model="question.value"
+						ng-options="default for default in question.defaults"></select>
 	</div>
 </div>

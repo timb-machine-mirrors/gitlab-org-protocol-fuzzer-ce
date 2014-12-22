@@ -37,7 +37,20 @@ module Peach {
 				return "";
 			}
 			if (_.isUndefined(this.Question.qref)) {
-				return 'html/q/' + this.Question.type + '.html';
+				var types = [
+					'hwaddr',
+					'iface',
+					'ipv4',
+					'ipv6'
+				];
+				var template = this.Question.type;
+				if (_.contains(types, template)) {
+					template = 'combo';
+				}
+				if (template === 'user') {
+					template = 'string';
+				}
+				return 'html/q/' + template + '.html';
 			}
 			return this.Question.qref;
 		}
