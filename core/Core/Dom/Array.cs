@@ -136,6 +136,11 @@ namespace Peach.Core.Dom
 			originalElement.WritePit(pit);
 		}
 
+		protected override bool InScope(DataElement child)
+		{
+			return child != OriginalElement;
+		}
+
 		protected override IEnumerable<DataElement> Children()
 		{
 			// If we have entries, just return them
