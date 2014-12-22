@@ -276,5 +276,73 @@ namespace Peach.Core.Test.StateModel
 			Assert.AreEqual("HelloWorld 2", val);
 		}
 
+		[Test]
+		public void SlurpInScopeChoice()
+		{
+			// Ensure that slurp will only get values for elected choice elements
+			// even if multiple elements of that name exist in non-selected
+			// or out of scope choice elements
+
+			string xml = @"
+<Peach>
+	<DataModel name='DM1'>
+		<String name='strDest' value='Hello'/>
+	</DataModel>
+
+	<DataModel name='DM2'>
+		<Choice name='q'>
+			<Block name='blk1'>
+				<String name='str'/>
+			</Block>
+			<Block name='blk2'>
+				<String name='str'/>
+			</Block>
+		</Choice>
+	</DataModel>
+
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action name='act1' type='output'>
+				<DataModel ref='DM2'/>
+				<Data>
+					<Field name='q.blk2.str' value='World' />
+				</Data>
+			</Action> 
+
+			<Action type='slurp' valueXpath='//act1//str' setXpath='//strDest' />
+
+			<Action type='output'>
+				<DataModel ref='DM1'/>
+			</Action> 
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<Strategy class='Random'/>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>
+";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+
+			var config = new RunConfiguration
+			{
+				singleIteration = true,
+				randomSeed = 1,
+				skipToIteration = 9,
+			};
+
+			var engine = new Engine(null);
+			engine.startFuzzing(dom, config);
+
+			var actionData = dom.tests[0].stateModel.states["initial"].actions[2].allData.First();
+			var dm = actionData.dataModel;
+			var val = Encoding.ASCII.GetString(dm.Value.ToArray());
+
+			Assert.AreEqual("World", val);
+		}
 	}
 }

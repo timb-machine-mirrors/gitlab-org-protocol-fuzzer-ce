@@ -357,6 +357,11 @@ namespace Peach.Core.Dom
 			}
 		}
 
+		protected override bool InScope(DataElement child)
+		{
+			return child == SelectedElement;
+		}
+
 		protected override IEnumerable<DataElement> Children()
 		{
 			// Return choices if we haven't chosen yet
