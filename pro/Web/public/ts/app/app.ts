@@ -108,10 +108,9 @@ module Peach {
 		(service: UniqueService) => new UniqueChannelDirective(service)
 	]);
 	p.directive('peachCombobox', [
-		'$document', '$timeout', (
-			$document: ng.IDocumentService,
-			$timeout: ng.ITimeoutService
-		) => new ComboboxDirective($document, $timeout)
+		'$document', (
+			$document: ng.IDocumentService
+		) => new ComboboxDirective($document)
 	]);
 
 	p.config([
@@ -163,23 +162,6 @@ module Peach {
 				});
 		}
 	]);
-
-	p.directive('ngEnter', () => {
-		return {
-			restrict: 'A',
-			link: (scope: ng.IScope, element: ng.IAugmentedJQuery, attrs: ng.IAttributes) => {
-				element.bind("keydown keypress", (event: JQueryEventObject) => {
-					if (event.which === 13) {
-						scope.$apply(() => {
-							scope.$eval(attrs['ngEnter']);
-						});
-
-						event.preventDefault();
-					}
-				});
-			}
-		};
-	});
 
 	p.filter('filesize', () => {
 		var units = [
