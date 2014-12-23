@@ -341,7 +341,8 @@ namespace Peach.Pro.Test.Core
 
 			// When Array.CountOverride is used, it duplicates the last element
 			// over and over, so there are really only 1 elements in the array...
-			Assert.AreEqual(1, count);
+			// xpath will navigate over the original element and all real array elements.
+			Assert.AreEqual(2, count);
 			Assert.AreEqual(1, array.Count);
 
 			array.CountOverride = 50;
