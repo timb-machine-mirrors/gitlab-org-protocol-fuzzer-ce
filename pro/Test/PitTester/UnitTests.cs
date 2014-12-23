@@ -210,6 +210,82 @@ namespace PitTester
 		}
 
 		[Test]
+		public void TestSlurpChoiceOfArrayOfChoice()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Choice name='c1' minOccurs='0'>
+			<String name='str' value=' ' />
+			<Block name='blk'>
+				<Choice name='c2'>
+					<String name='str' />
+					<Block name='inner'>
+						<String name='prefix' value='Hello' />
+						<String name='tgt' value='World' />
+					</Block>
+				</Choice>
+			</Block>
+		</Choice>
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+				<Data>
+					<Field name='c1[0].blk.c2.inner' value='' />
+					<Field name='c1[1].str' value=' ' />
+					<Field name='c1[2].blk.c2.inner.prefix' value='Foo' />
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='TheState'/>
+		<Publisher name='Pub' class='Null'/>
+	</Test>
+</Peach>
+";
+
+			const string test = @"
+<TestData>
+	<Slurp setXpath='//tgt' value='Hello' />
+
+	<Test name='Default'>
+		<Open   action='TheState.Initial.Action' publisher='Pub'/>
+		<Output action='TheState.Initial.Action' publisher='Pub'>
+<![CDATA[
+0000000: 4865 6c6c 6f48 656c 6c6f 2046 6f6f 4865  HelloHello FooHe
+0000010: 6c6c 6f                                  llo
+]]>
+		</Output>
+		<Close  action='TheState.Initial.Action' publisher='Pub'/>
+	</Test>
+</TestData>
+";
+
+			// Ensure we can run when there is an ignore that matches a de-selected choice
+			var pitFile = Path.GetTempFileName();
+			var pitTest = pitFile + ".test";
+
+			File.WriteAllText(pitFile, xml);
+			File.WriteAllText(pitTest, test);
+
+			try
+			{
+				PitTester.TestPit("", pitFile, true, null);
+			}
+			finally
+			{
+				File.Delete(pitFile);
+				File.Delete(pitTest);
+			}
+		}
+
+
+		[Test]
 		public void UnhandledException()
 		{
 			const string xml = @"

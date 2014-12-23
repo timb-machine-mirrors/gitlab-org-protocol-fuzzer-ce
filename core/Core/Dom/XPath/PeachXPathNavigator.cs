@@ -190,6 +190,25 @@ namespace Peach.Core.Dom.XPath
 				currentNode = container.choiceElements[0];
 				return true;
 			}
+
+			var asArray = currentNode as Array;
+			if (asArray != null)
+			{
+				if (asArray.OriginalElement != null)
+				{
+					currentNode = asArray.OriginalElement;
+					return true;
+				}
+
+				if (asArray.Count > 0)
+				{
+					currentNode = asArray[0];
+					return true;
+				}
+
+				return false;
+			}
+
 			if (currentNode is DataElementContainer)
 			{
 				var container = currentNode as DataElementContainer;
@@ -334,6 +353,13 @@ namespace Peach.Core.Dom.XPath
 						return false;
 
 					currentNode = next;
+					return true;
+				}
+
+				var asArray = parent as Array;
+				if (asArray != null && asArray.OriginalElement == currentNode && asArray.Count > 0)
+				{
+					currentNode = asArray[0];
 					return true;
 				}
 
