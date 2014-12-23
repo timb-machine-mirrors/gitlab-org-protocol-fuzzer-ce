@@ -38,7 +38,7 @@ namespace PitTester
 			try
 			{
 				if (index >= testData.Actions.Count)
-					throw new PeachException("Missing record in test data");
+					throw new SoftException("Missing record in test data");
 
 				var d = testData.Actions[index++];
 
@@ -46,14 +46,14 @@ namespace PitTester
 				if (typeof(T) != d.GetType())
 				{
 					var msg = "Encountered unexpected action type.\nAction Name: {0}\nExpected: {1}\nGot: {2}".Fmt(ActionName, typeof(T).Name, d.GetType().Name);
-					throw new PeachException(msg);
+					throw new SoftException(msg);
 				}
 
 				if (d.PublisherName != publisherName)
-					throw new PeachException("Publisher names didn't match. Expected {0} but got {1}".Fmt(publisherName, d.PublisherName));
+					throw new SoftException("Publisher names didn't match. Expected {0} but got {1}".Fmt(publisherName, d.PublisherName));
 
 				if (d.ActionName != ActionName)
-					throw new PeachException("Action names didn't match.\n\tExpected: {0}\n\tBut got: {1}\n".Fmt(ActionName, d.ActionName));
+					throw new SoftException("Action names didn't match.\n\tExpected: {0}\n\tBut got: {1}\n".Fmt(ActionName, d.ActionName));
 
 				return (T)d;
 			}
