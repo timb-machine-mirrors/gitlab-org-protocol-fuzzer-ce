@@ -386,6 +386,8 @@ OnOpen() and set this._client to the System.IO.Stream and call the StartClient()
 Second, if extra cleanup code is required other than simply closing the stream
 the developer needs to override ClientClose() and cleanup any additional resources acquired during OnOpen().
 
+
+
 An example of a File publisher deriving from StreamPublisher.
 
 [source,c#]
@@ -492,6 +494,31 @@ public class SerialPortPublisher : BufferedStreamPublisher
     }
 }
 ----
+
+Some Publishers use the Function view metaphor (call, setProperty, getProperty). For this type of Publisher, sharing information occurs by implementing properties of the publisher that other parts of the Peach can access. For example, the StateModel or a script could make use of the ports that a Publisher uses, as in the following example.
+
+NOTE: Remote agents can host Publishers; therefore, Publishers should not directly use the IterationStateStore bag.
+
+An example of a Serial publisher deriving from BufferedStreamPublisher.
+
+[source,c#]
+    protected override Variant OnGetProperty(string property)
+    {
+        switch(property)
+        {
+            case "Port": 
+                return new Variant(Port);
+           case "SrcPort":
+                return new Variant(SrcPort);
+        }
+        return base.OnGetProperty(property);
+    }
+
+The property is then accessible in the state model using the getproperty action, or using a script as in the following:
+
+[source,c#]
+Port = int(context.test.publishers[0].getProperty(‘Port’))
+
 
 <<<
 [[Extend_Transformer]]
