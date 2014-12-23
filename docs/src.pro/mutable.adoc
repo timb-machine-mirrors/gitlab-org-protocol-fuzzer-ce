@@ -9,7 +9,8 @@ Mutable is used to define if this element, block, or datatype should be fuzzed. 
 
 IMPORTANT: Even when an element is marked as non-mutable it may still be modified as the fuzzer fuzzes the other elements.  Marking an element as non-mutable will only disable the mutators that would have operated on that element.
 
-WARNING: Marking elements as non-mutable usually leads to missing faults.  Don't use this attribute unless you really know what your doing and know that the marked elements have already been fuzzed.
+WARNING: Marking elements as non-mutable usually leads to missing faults.  With that in mind, withold use use of this attribute unless: 1) You know that the marked elements have already been fuzzed, and 2) You are very familiar with the effects of this attribute (that is, you know what you are doing).
+ 
 
 === Examples ===
 
