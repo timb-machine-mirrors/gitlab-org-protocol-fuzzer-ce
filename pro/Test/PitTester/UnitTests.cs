@@ -276,7 +276,9 @@ namespace PitTester
 		<String name='str1' value='0'>
 			<Fixup class='SequenceRandom' />
 		</String>
-		<Number size='8' value='0' />
+		<Number name='num' size='8'>
+			<Fixup class='SequenceRandom' />
+		</Number>
 	</DataModel>
 
 	<StateModel name='TheState' initialState='Initial'>
@@ -299,7 +301,9 @@ namespace PitTester
 
 			const string test = @"
 <TestData>
+	<Slurp setXpath='//Act1/DM/num' valueType='hex' value='00'/>
 	<Slurp setXpath='//Act1/DM/str1' value='1234567890'/>
+	<Slurp setXpath='//Act2/DM/num' value='0'/>
 	<Slurp setXpath='//Act2/DM/str1' value='31337'/>
 
 	<Test name='Default'>
