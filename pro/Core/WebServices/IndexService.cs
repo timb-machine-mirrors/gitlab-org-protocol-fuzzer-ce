@@ -15,7 +15,7 @@ namespace Peach.Pro.Core.WebServices
 				response.Headers.Add("Cache-Control", "no-cache, must-revalidate");
 				return response;
 			};
-			Get["/docs"] = _ => Response.AsRedirect("/docs/");
+			Get["/docs"] = _ => Response.AsRedirect("/docs/index.html");
 		}
 	}
 }
