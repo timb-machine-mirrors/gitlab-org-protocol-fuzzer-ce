@@ -29,6 +29,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
@@ -216,7 +217,7 @@ namespace Peach.Pro.Core.Agent.Channels
 			{
 				get
 				{
-					return Exec<string>("Result get", () => { return proxy.Result; });
+					return Exec("Result get", () => { return proxy.Result; });
 				}
 			}
 
@@ -264,7 +265,7 @@ namespace Peach.Pro.Core.Agent.Channels
 
 			public Variant GetProperty(string property)
 			{
-				var bytes = Exec<byte[]>("GetProperty", () => { return proxy.GetProperty(property); });
+				var bytes = Exec("GetProperty", () => { return proxy.GetProperty(property); });
 
 				return FromBytes<Variant>(bytes);
 			}
@@ -293,7 +294,7 @@ namespace Peach.Pro.Core.Agent.Channels
 
 			public void Input()
 			{
-				var reset = Exec<bool>("Input", () => { return proxy.Input(); });
+				var reset = Exec("Input", () => { return proxy.Input(); });
 
 				if (reset)
 				{
@@ -334,7 +335,7 @@ namespace Peach.Pro.Core.Agent.Channels
 
 			private byte[] ReadBytes()
 			{
-				return Exec<byte[]>("ReadBytes", () => { return proxy.ReadBytes(); });
+				return Exec("ReadBytes", () => { return proxy.ReadBytes(); });
 			}
 
 			#endregion
@@ -434,10 +435,6 @@ namespace Peach.Pro.Core.Agent.Channels
 
 		private void CreateProxy()
 		{
-			// Perform client activation
-			//object[] attr = { new UrlAttribute(serviceUrl) };
-			//proxy = (AgentTcpRemote)Activator.CreateInstance(typeof(AgentTcpRemote), null, attr);
-
 			// Perform server activation
 			var server = (AgentServiceTcpRemote)Activator.GetObject(typeof(AgentServiceTcpRemote), serviceUrl);
 
@@ -456,7 +453,6 @@ namespace Peach.Pro.Core.Agent.Channels
 		private void CreateChannel()
 		{
 			var props = (IDictionary)new Hashtable();
-			props["port"] = 0;
 			props["timeout"] = (uint)remotingWaitTime;
 			props["connectionTimeout"] = (uint)remotingWaitTime;
 
@@ -534,7 +530,7 @@ namespace Peach.Pro.Core.Agent.Channels
 
 				try
 				{
-					Exec(() => { proxy.AgentConnect(); });
+					Exec(() => proxy.AgentConnect());
 				}
 				catch (Exception ex)
 				{
@@ -557,7 +553,7 @@ namespace Peach.Pro.Core.Agent.Channels
 		{
 			try
 			{
-				Exec(() => { proxy.AgentDisconnect(); });
+				Exec(() => proxy.AgentDisconnect());
 			}
 			finally
 			{
@@ -585,29 +581,29 @@ namespace Peach.Pro.Core.Agent.Channels
 			// Keep track of monitor info so we can recreate them if the proxy disappears
 			monitors.Add(new MonitorInfo() { Name = name, Class = cls, Args = asList });
 
-			Exec(() => { proxy.StartMonitor(name, cls, asList); });
+			Exec(() => proxy.StartMonitor(name, cls, asList));
 		}
 
 		protected override void OnStopAllMonitors()
 		{
-			Exec(() => { proxy.StopAllMonitors(); });
+			Exec(() => proxy.StopAllMonitors());
 		}
 
 		protected override void OnSessionStarting()
 		{
-			Exec(() => { proxy.SessionStarting(); });
+			Exec(() => proxy.SessionStarting());
 		}
 
 		protected override void OnSessionFinished()
 		{
-			Exec(() => { proxy.SessionFinished(); });
+			Exec(() => proxy.SessionFinished());
 		}
 
 		protected override void OnIterationStarting(uint iterationCount, bool isReproduction)
 		{
 			try
 			{
-				Exec(() => { proxy.IterationStarting(iterationCount, isReproduction); });
+				Exec(() => proxy.IterationStarting(iterationCount, isReproduction));
 			}
 			catch (RemotingException ex)
 			{
@@ -625,27 +621,27 @@ namespace Peach.Pro.Core.Agent.Channels
 
 		protected override bool OnIterationFinished()
 		{
-			return Exec<bool>(() => { return proxy.IterationFinished(); });
+			return Exec(() => proxy.IterationFinished());
 		}
 
 		protected override bool OnDetectedFault()
 		{
-			return Exec<bool>(() => { return proxy.DetectedFault(); });
+			return Exec(() => proxy.DetectedFault());
 		}
 
 		protected override Fault[] OnGetMonitorData()
 		{
-			return Exec<Fault[]>(() => { return proxy.GetMonitorData(); });
+			return Exec(() => proxy.GetMonitorData());
 		}
 
 		protected override bool OnMustStop()
 		{
-			return Exec<bool>(() => { return proxy.MustStop(); });
+			return Exec(() => proxy.MustStop());
 		}
 
 		protected override Variant OnMessage(string name, Variant data)
 		{
-			return Exec<Variant>(() => { return proxy.Message(name, data); });
+			return Exec(() => proxy.Message(name, data));
 		}
 
 		#endregion
@@ -926,19 +922,16 @@ namespace Peach.Pro.Core.Agent.Channels
 			var props = (IDictionary)new Hashtable();
 			props["port"] = port;
 			props["name"] = string.Empty;
-#if MONO
-			// Force remoting to use raw IP address instead of relying on DNS reverse lookups
-			// Found this during a debug session on Mac OS X/Mono.
-			props["useIpAddress"] = true;
-			props["machineName"] = string.Empty;
-#endif
-			//props["exclusiveAddressUse"] = false;
+
+			var agentBindIp = ConfigurationManager.AppSettings["AgentBindIp"];
+			if (!string.IsNullOrEmpty(agentBindIp))
+				props["bindTo"] = agentBindIp;
 
 			var serverProvider = new BinaryServerFormatterSinkProvider
 			{
 				TypeFilterLevel = TypeFilterLevel.Full
 			};
-			var chan = new TcpChannel(props, null, serverProvider);
+			var chan = new TcpServerChannel(props, serverProvider);
 
 			// register channel
 			ChannelServices.RegisterChannel(chan, false);
@@ -951,11 +944,7 @@ namespace Peach.Pro.Core.Agent.Channels
 				typeof(AgentServiceTcpRemote),
 				"PeachAgent", WellKnownObjectMode.Singleton);
 
-			// register remote object for client activation
-			//RemotingConfiguration.ApplicationName = "PeachAgent";
-			//RemotingConfiguration.RegisterActivatedServiceType(typeof(AgentTcpRemote));
-
-			//inform console
+			// inform console
 			Console.WriteLine(" -- Press ENTER to quit agent -- ");
 			Console.ReadLine();
 		}
