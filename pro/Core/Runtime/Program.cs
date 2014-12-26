@@ -414,34 +414,35 @@ namespace Peach.Pro.Core.Runtime
 		/// </summary>
 		protected virtual void Syntax()
 		{
-			string syntax = @"This is the Peach Runtime.  The Peach Runtime is one of the many ways
-to use Peach XML files.  Currently this runtime is still in development
+			string syntax =
+@"This is the Peach Runtime.  The Peach Runtime is one of the many ways
+to use Peach Pit files.  Currently this runtime is still in development
 but already exposes several abilities to the end-user such as performing
-simple fuzzer runs and performing parsing tests of Peach XML files.
+simple fuzzer runs and performing parsing tests of Peach Pit files.
 
 Please submit any bugs to https://forums.peachfuzzer.com.
 
 Syntax:
 
-  peach -a channel
-  peach -c peach_xml_file [test_name]
-  peach [--skipto #] peach_xml_flie [test_name]
-  peach -p 10,2 [--skipto #] peach_xml_file [test_name]
-  peach --range 100,200 peach_xml_file [test_name]
-  peach -t peach_xml_file
+  peach -a CHANNEL
+  peach -c PIT [TEST]
+  peach [--skipto #] PIT [TEST]
+  peach -p 10,2 [--skipto #] PIT [TEST]
+  peach --range 100,200 PIT [TEST]
+  peach -t PIT
 
   -1                         Perform a single iteration
-  -a,--agent                 Launch Peach Agent
+  -a,--agent CHANNEL         Launch Peach Agent
   -c,--count                 Count test cases
-  -t,--test xml_file         Validate a Peach XML file
+  -t,--test PIT              Validate a Peach Pit file
   -p,--parallel M,N          Parallel fuzzing.  Total of M machines, this
                              is machine N.
   --debug                    Enable debug messages. Usefull when debugging
-                             your Peach XML file.  Warning: Messages are very
+                             your Peach Pit file.  Warning: Messages are very
                              cryptic sometimes.
   --trace                    Enable even more verbose debug messages.
   --seed N                   Sets the seed used by the random number generator
-  --parseonly                Test parse a Peach XML file
+  --parseonly                Test parse a Peach Pit file
   --makexsd                  Generate peach.xsd
   --showenv                  Print a list of all DataElements, Fixups, Agents
                              Publishers and their associated parameters.
@@ -453,7 +454,7 @@ Syntax:
   -D/define=KEY=VALUE        Define a substitution value.  In your PIT you can
                              ##KEY## and it will be replaced for VALUE.
   --config=FILENAME          XML file containing defined values
-  --pits=PIT_LIBRARY_PATH    The path to the pit library.
+  --pits=PIT_LIBRARY_PATH    The path to the Pit library.
   --noweb                    Disable the Peach web interface.
 
 Peach Web Interface
@@ -465,30 +466,30 @@ Peach Web Interface
 
 Peach Agent
 
-  Syntax: peach -a channel
+  Syntax: peach -a CHANNEL
   
-  Starts up a Peach Agent instance on this current machine.  User must provide
+  Starts up a Peach Agent instance on the current machine.  User must provide
   a channel/protocol name (e.g. tcp).
 
-  Note: Local agents are started automatically.
+  Note: Local agents are implicitly started.
 
 Performing Fuzzing Run
 
-  Syntax: peach peach_xml_flie [test_name]
-  Syntax: peach --skipto 1234 peach_xml_flie [test_name]
-  Syntax: peach --range 100,200 peach_xml_flie [test_name]
+  Syntax: peach PIT [TEST]
+  Syntax: peach --skipto 1234 PIT [TEST]
+  Syntax: peach --range 100,200 PIT [TEST]
   
-  A fuzzing run is started by by specifying the Peach XML file and the
+  To start a fuzzing run, specify the Peach Pit file and optionally, the
   name of a test to perform.
   
-  If a run is interupted for some reason it can be restarted using the
-  --skipto parameter and providing the test # to start at.
+  The --skipto parameter is useful for resuming a run in case it was interrupted
+  for any reason.  This parameter accepts the test # to resume.
   
   Additionally a range of test cases can be specified using --range.
 
 Performing A Parellel Fuzzing Run
 
-  Syntax: peach -p 10,2 peach_xml_flie [test_name]
+  Syntax: peach -p 10,2 PIT [TEST]
 
   A parallel fuzzing run uses multiple machines to perform the same fuzzing
   which shortens the time required.  To run in parallel mode we will need
@@ -496,16 +497,16 @@ Performing A Parellel Fuzzing Run
   information is fed into Peach via the " + "\"-p\"" + @" command line argument in the
   format " + "\"total_machines,our_machine\"." + @"
 
-Validate Peach XML File
+Validate Peach Pit File
 
-  Syntax: peach -t peach_xml_file
+  Syntax: peach -t PIT
   
-  This will perform a parsing pass of the Peach XML file and display any
+  This will perform a parsing pass of the Peach Pit file and display any
   errors that are found.
 
-Debug Peach XML File
+Debug Peach Pit File
 
-  Syntax: peach -1 --debug peach_xml_file
+  Syntax: peach -1 --debug PIT
   
   This will perform a single iteration (-1) of your pit file while displaying
   alot of debugging information (--debug).  The debugging information was

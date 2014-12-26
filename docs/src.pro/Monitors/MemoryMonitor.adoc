@@ -2,7 +2,7 @@
 [[Monitors_MemoryMonitor]]
 == Memory Monitor
 
-The _Memory_ monitor checks the process memory usage and initiates a fault if it has gone over the set limit.  This can detect non-crashing extraneous memory usage.
+The _Memory_ monitor checks the process memory usage and initiates a fault when the memory usage exceeds a specified limit.  This monitor can detect non-crashing extraneous memory usage.
 
 === Parameters
 
@@ -16,7 +16,7 @@ MemoryLimit:: Fault when memory usage surpasses limit
 
 _Optional:_
 
-StopOnFault:: Stop fuzzing if a fault is triggered, defaults to false.
+StopOnFault:: Stop fuzzing if a fault is triggered, defaults to false
 
 === Examples
 
