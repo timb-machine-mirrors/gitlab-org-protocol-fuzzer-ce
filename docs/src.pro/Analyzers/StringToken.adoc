@@ -1,7 +1,11 @@
 [[Analyzers_StringToken]]
 == String Token Analyzer
 
-The String Token Analyzer creates a tokenized tree from an input string based on special characters and punctuation in the string. For example, the string "?key=value&key2=value" creates a tree similar to the following:
+The String Token Analyzer creates a tokenized tree from an input string based on special characters and punctuation in the string. For example, the string "?key=value&key2=value2" creates a tree similar to the following:
+
+.{nbsp}
+image::{images}/StringTokenAnalyzerParseExample.png["Parsing Sample", alt="Parsing Sample"]
+
 
 ----
               +---[key]
