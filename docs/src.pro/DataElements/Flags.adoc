@@ -2,9 +2,11 @@
 [[Flags]]
 == Flags
 
-The Flags element defines a set of bit sized flags. The Flags element is largely provided for backwards compatibility with older versions of Peach that did not support arbitrary sized xref:Number[Number] elements.
+The Flags element defines a set of bit-sized flags. 
 
 See also xref:Flag[Flag].
+
+NOTE: The _Flags_ element is largely provided for backwards compatibility with older versions of Peach that did not support arbitrarily-sized xref:Number[Number] elements.
 
 === Syntax
 
@@ -21,14 +23,14 @@ See also xref:Flag[Flag].
 
 _Required:_
 
-size:: Size of flag set in bits. Only 8-bit aligned values are supported: 8, 16, 24, 32, 64.
+size:: Size of the set of flags in bits. Only 8-bit aligned values are supported: 8, 16, 24, 32, 64.
 
 _Optional:_
 
 xref:name[name]:: Name of the element
 xref:endian[endian]:: Byte order of number. Defaults to _little_.
-xref:token[token]:: Is data element a token? Defaults to _false_.
-xref:mutable[mutable]:: Is data element changeable (should it be mutated), defaults to _true_.
+xref:token[token]:: Specifies whether this data element is a token. Defaults to _false_.
+xref:mutable[mutable]:: Specifies whether this data element should it be mutated. Defaults to _true_.
 xref:constraint[constraint]:: Scripting expression that evaluates to true or false. Defaults to none.
 xref:minOccurs[minOccurs]:: Minimum number of occurrences. Defaults to _1_.
 xref:maxOccurs[maxOccurs]:: Maximum number of occurrences. Defaults to _1_.
@@ -38,43 +40,43 @@ xref:occurs[occurs]:: Actual number of occurrences. Defaults to _1_.
 
 _Required:_
 
-There are no required attributes.
+None.
 
 _Optional:_
 
-xref:Analyzers[Analyzer]:: Analyze current element post cracking, can dynamically change model.
-xref:Fixup[Fixup]:: Dynamic transformations such as checksums and CRCs.
-xref:Flag[Flag]:: defines a specific bit field in a Flags container.
-xref:Hint[Hint]:: Provide information to mutators.
-xref:Placement[Placement]:: Relocate an element after it has been cracked.
-xref:Transformer[Transformer]:: Static transformations such as compression or encoding.
+xref:Analyzers[Analyzer]:: Analyzes current element post cracking, can dynamically change model.
+xref:Fixup[Fixup]:: Performs dynamic transformations such as checksums and CRCs.
+xref:Flag[Flag]:: Defines a specific bit field in a Flags container.
+xref:Hint[Hint]:: Provides information to mutators.
+xref:Placement[Placement]:: Relocates an element after it has been cracked.
+xref:Transformer[Transformer]:: Performs static transformations such as compression or encoding.
 
 === Mutators
 
-The following mutators will operate on this element type:
+The following mutators operate on this element type:
 
 
 _Enabled when element is marked as an array_
 
-xref:Mutators_ArrayNumericalEdgeCasesMutator[ArrayNumericalEdgeCasesMutator]:: This mutator will grow and shrink an array to counts based on numerical edge cases.
-xref:Mutators_ArrayRandomizeOrderMutator[ArrayRandomizeOrderMutator]:: This mutator will randomize the order of items in an array.
-xref:Mutators_ArrayReverseOrderMutator[ArrayReverseOrderMutator]:: This mutator will reverse the order of items in an array.
-xref:Mutators_ArrayVarianceMutator[ArrayVarianceMutator]:: This mutator will grow and shrink an array to a variance of counts based on the current size.
+xref:Mutators_ArrayNumericalEdgeCasesMutator[ArrayNumericalEdgeCasesMutator]:: This mutator grows and shrinks an array to counts based on numerical edge cases.
+xref:Mutators_ArrayRandomizeOrderMutator[ArrayRandomizeOrderMutator]:: This mutator randomizes the order of items in an array.
+xref:Mutators_ArrayReverseOrderMutator[ArrayReverseOrderMutator]:: This mutator reverses the order of items in an array.
+xref:Mutators_ArrayVarianceMutator[ArrayVarianceMutator]:: This mutator grows and shrinks an array to a variance of counts based on the current size.
 
 _Used for all data elements_
 
-xref:Mutators_DataElementBitFlipper[DataElementBitFlipper]:: This mutator will produce test cases by flipping bits in the output value.
-xref:Mutators_DataElementDuplicate[DataElementDuplicate]:: This mutator will duplicate data elements.
-xref:Mutators_DataElementRemove[DataElementRemove]:: This mutator will remove data elements.
-xref:Mutators_DataElementSwapNear[DataElementSwapNear]:: This mutator will swap data elements.
-xref:Mutators_SampleNinjaMutator[SampleNinjaMutator]:: This mutator will combine data elements from different data sets.
+xref:Mutators_DataElementBitFlipper[DataElementBitFlipper]:: This mutator produces test cases by flipping bits in the output value.
+xref:Mutators_DataElementDuplicate[DataElementDuplicate]:: This mutator duplicates data elements.
+xref:Mutators_DataElementRemove[DataElementRemove]:: This mutator removes data elements.
+xref:Mutators_DataElementSwapNear[DataElementSwapNear]:: This mutator swaps data elements.
+xref:Mutators_SampleNinjaMutator[SampleNinjaMutator]:: This mutator combines data elements from different data sets.
 
 _Enabled when element is part of a size relation_
 
-xref:Mutators_SizedDataEdgeCase[SizedDataEdgeCase]:: This mutator will cause the data portion of a relation to be sized as numerical edge cases.
-xref:Mutators_SizedDataVariance[SizedDataVariance]:: This mutator will cause the data portion of a relation to be sized as numerical variances.
-xref:Mutators_SizedEdgeCase[SizedEdgeCase]:: This mutator will change both sides of the relation (data and value) to match numerical edge cases.
-xref:Mutators_SizedVariance[SizedVariance]:: This mutator will change both sides of the relation (data and value) to match numerical variances of the current size.
+xref:Mutators_SizedDataEdgeCase[SizedDataEdgeCase]:: This mutator causes the data portion of a relation to be sized as numerical edge cases.
+xref:Mutators_SizedDataVariance[SizedDataVariance]:: This mutator causes the data portion of a relation to be sized as numerical variances.
+xref:Mutators_SizedEdgeCase[SizedEdgeCase]:: This mutator changes both sides of the relation (data and value) to match numerical edge cases.
+xref:Mutators_SizedVariance[SizedVariance]:: This mutator changes both sides of the relation (data and value) to match numerical variances of the current size.
 
 
 === Examples
