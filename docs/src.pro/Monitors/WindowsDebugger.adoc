@@ -17,16 +17,16 @@ The source code can be found in peach\Peach.Core.Test.OS.Windows\Agent\Monitors.
 _One of the following parameters is required:_
 
 Executable:: Executable to launch
-Arguments:: Command line arguments
-ProcessName:: Trigger fault when a window is found (optional, default false)
-KernelConnectionString:: Connection string for kernel debugging.
-Service:: Name of Windows Service to attach to.  Service will be started if stopped or crashes.
+Arguments:: Command-line arguments
+ProcessName:: Trigger a fault when a window is found (optional, default false)
+KernelConnectionString:: Connection string for kernel debugging
+Service:: Name of the Windows Service to attach with the _WindowsDebugger_ monitor. If the service is stopped or crashes, _WindowsDebugger_ will start the service.
  
 _Optional:_
  
 SymbolsPath:: Symbol path or server (optional, defaults to "SRV*http://msdl.microsoft.com/download/symbols")
 WinDbgPath:: Path to windbg install (optional, will attempt to locate)
-StartOnCall:: Debugger will not be attached until matching call is made from state model (optional)
+StartOnCall:: Debugger will not be attached until a matching call is made from state model (optional)
 IgnoreFirstChanceGuardPage:: Ignore first chance guard page faults.  These are sometimes false positives or anti-debugging faults. (optional, defaults to false)
 IgnoreSecondChanceGuardPage:: Ignore second chance guard page faults.  These are sometimes false positives or anti-debugging faults. (optional, defaults to false)
 NoCpuKill:: Don't use process CPU usage to terminate early. (optional, defaults to false)
