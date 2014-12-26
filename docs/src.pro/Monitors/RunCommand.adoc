@@ -203,7 +203,7 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 NOTE:
-<1> Command executed
+<1> Command executed.
 
 =========================================
 
@@ -287,7 +287,7 @@ Peach.Core.Agent.Monitors.RunCommand _Start(): Running command cmd.exe with argu
 [*] Test 'Default' finished.
 ----
 NOTE: 
-<1> Command executed
+<1> Command executed.
 =========================================
 
 .OnIterationStart Example
@@ -372,8 +372,8 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 NOTES:
-<1> Command executed
-<2> Command executed
+<1> Command executed.
+<2> Command executed.
 =========================================
 
 .OnIterationEnd Example
@@ -458,6 +458,6 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 NOTES:
-<1> Command executed
-<2> Command executed
+<1> Command executed.
+<2> Command executed.
 =========================================
