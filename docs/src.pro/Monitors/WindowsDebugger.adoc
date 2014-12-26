@@ -20,7 +20,7 @@ Executable:: Executable to launch
 Arguments:: Command-line arguments
 ProcessName:: Trigger a fault when a window is found (optional, default false)
 KernelConnectionString:: Connection string for kernel debugging
-Service:: Name of the Windows Service to attach with the _WindowsDebugger_ monitor. If the service is stopped or crashes, _WindowsDebugger_ will start the service.
+Service::  Name of Windows process or service to start if it stops or crashes. _WindowsDebugger_ attaches to this process or service
  
 _Optional:_
  
