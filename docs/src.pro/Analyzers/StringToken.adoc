@@ -6,21 +6,6 @@ The String Token Analyzer creates a tokenized tree from an input string based on
 .{nbsp}
 image::{images}/StringTokenAnalyzerParseExample.png["Parsing Sample", alt="Parsing Sample"]
 
-
-----
-              +---[key]
-              |
-       [?]---[=]
-       |      |
-       |      +---[value]
-Root --+
-       |      +---[key2]
-       |      |
-       [&]---[=]   
-              |
-              +---[value2]
-----
-
 The tree allows Peach to perform mutations that can expose bugs in parsers. 
 
 When run using the command line, the results of the generated model are saved to disk. Once saved, you can use and modify the results as needed.
