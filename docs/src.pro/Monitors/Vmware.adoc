@@ -2,21 +2,21 @@
 [[Monitors_Vmware]]
 == Vmware Monitor
 
-The _Vmware_ monitor can control a VMware virtual machine.  
+The _Vmware_ monitor can control a VMware virtual machine (VM).  
 
-_Vmware_ can start a virtual machine and (optional) reset to a snapshot on every iteration.  When a fault occurs, _Vmware_ will reset to the specified snapshot (if any exists).
+_Vmware_ can start a VM and, optionally, reset the VM to a snapshot configuration each iteration.  When a fault occurs, _Vmware_ resets the VM to the specified snapshot.
 
-TIP: When using with vSphere/ESXi, prefix the image name with the storage location in brackets.  Example: "[ha-datacenter/datastore1] guest/guest.vmx"
+TIP: When using with vSphere/ESXi, prefix the VM image name with the storage location in brackets.  For example, "[ha-datacenter/datastore1] guest/guest.vmx"
 
 === Parameters
 
 _Required:_
 
-Vmx:: Path to virtual machine
+Vmx:: Path to the virtual machine
 
 _Optional:_
 
-Host:: Name of host machine
+Host:: Name of the host machine
 Login:: Username for authentication on the remote machine
 Password:: Password for authentication on the remote machine
 HostType::
