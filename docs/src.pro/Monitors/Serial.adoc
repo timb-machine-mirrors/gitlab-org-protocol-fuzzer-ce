@@ -2,8 +2,11 @@
 [[Monitors_Serial]]
 == Serial Port Monitor
 
-The serial port monitor can be used for performing fault detection, data collection, and automation tasks based on the received input. The default
-usage of serial port monitor is data collection. The data received via the serial port is logged when a fault occurs. To perform fault detection, a regular expression can be provided through the FaultRegex parameter. When the regex matches, a fault will be thrown. For automation tasks, the WaitForRegex and WaitForWhen parameters can be used. The automation parameters will cause Peach to wait for matching input before continuing.
+The serial port monitor can be used to perform data collection, fault detection, and automation tasks based on the received input. 
+
+* The default usage of serial port monitor is data collection. The data received via the serial port is logged when a fault occurs. 
+* To perform fault detection, a regular expression can be provided through the FaultRegex parameter. When the regex matches, a fault will be thrown. 
+* For automation tasks, the WaitForRegex and WaitWhen parameters can be used. The automation parameters cause Peach to wait for matching input before continuing.
 
 Additionally, the serial port monitor supports multiple instances that utilize the same port. This allows for more complex automation configurations.
 
@@ -55,13 +58,13 @@ WaitWhen::
 When to wait. Defaults to OnStart.
 +
 [horizontal]
-OnCall;; When triggered by message from state machine.
+OnCall;; When triggered by a message from state machine.
 OnStart;; Once at the start of the fuzzing session.
-OnEnd;; Once at the end of our fuzzing session.
-OnIterationStart;; At the start of every iteration.
-OnIterationEnd;; At the end of every iteration.
+OnEnd;; Once at the end of the fuzzing session.
+OnIterationStart;; At the start of each iteration.
+OnIterationEnd;; At the end of each iteration.
 OnFault;; When a fault occurs.
-OnIterationStartAfterFault;; At the start of the next iteration after a fault was detected.
+OnIterationStartAfterFault;; When a fault occurs, wait until the start of the next iteration.
 
 === Examples
 
@@ -113,7 +116,7 @@ This example shows the Serial monitor configured to log the data received over C
 .Collect Serial Data on Fault
 =============================
 
-This example shows the Serial monitor configured to both log the received data, and also generate a fault when the text "ERROR" is received.
+This example shows the Serial monitor configured to log the received data and to generate a fault when the text "ERROR" is received.
 
 [source,xml]
 ----
@@ -159,7 +162,7 @@ This example shows the Serial monitor configured to both log the received data, 
 .Wait for Boot Message
 ======================
 
-This example might be used when fuzzing a network device such as a router. Peach is started once the router has booted and the Serial monitor is configured to detect error messages that are considered bad, and also to wait for the boot completed message after a fault is detected. A second monitor, IpPower9258 is configured to reboot the device after a fault is found.
+This example might be used when fuzzing a network device such as a router. Peach is started after the router has booted and the Serial monitor is configured to detect error messages that are considered bad, and also to wait for the boot completed message after a fault is detected. A second monitor, IpPower9258 is configured to reboot the device after a fault occurs.
 
 [source,xml]
 ----
@@ -217,7 +220,7 @@ This example might be used when fuzzing a network device such as a router. Peach
 .Multiple Serial Monitors with Same Port
 ========================================
 
-This example might be used when fuzzing a network device such as a router. Peach is started and waits for the device to boot using the first serial monitor. The second Serial monitor is configured to detect error messages that are considered bad, and also to wait for the boot completed message after a fault is detected. A second monitor, IpPower9258 is configured to reboot the device after a fault is found.
+This example might be used when fuzzing a network device such as a router. Peach is started and waits for the device to boot using the first serial monitor. The second Serial monitor is configured to detect error messages that are considered bad, and also to wait for the boot completed message after a fault is detected. A second monitor, IpPower9258 is configured to reboot the device after a fault occurs.
 
 [source,xml]
 ----
@@ -282,7 +285,7 @@ This example might be used when fuzzing a network device such as a router. Peach
 .Multiple Serial Monitors
 =========================
 
-This example hooks up to a console port and also a debug port on a device. The debug port is setup for data collection only, while the console port is setup for fault detection, data collection, and automation tasks.
+This example hooks up to a console port and also a debug port on a device. The debug port is set up for data collection. The console port is set up for fault detection, data collection, and automation tasks.
 
 [source,xml]
 ----
