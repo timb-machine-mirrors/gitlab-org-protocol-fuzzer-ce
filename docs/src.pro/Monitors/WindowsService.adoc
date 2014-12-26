@@ -8,11 +8,11 @@ The code can be found in peach\Peach.Core.OS.Windows\Agent\Monitors.
 
 === Parameters
 
-Service:: The name that identifies the service to the system. This can also be the display name for the service.
+Service:: The name that identifies the service to the system. This can be the display name for the service.
 MachineName:: The computer on which the service resides. (optional, defaults to local machine)
-FaultOnEarlyExit:: Fault if service exists early. (optional, defaults to false)
-Restart:: Name of Windows Service to attach to.  Service will be started if stopped or crashes.
-StartTimeout:: Name of Windows Service to attach to.  Service will be started if stopped or crashes.
+FaultOnEarlyExit:: Fault if service exits early. (optional, defaults to false)
+Restart:: Name of Windows Service to start if it stops or crashes. _WindowsService_ attaches to this service.
+StartTimeout:: Name of Windows Service to start if it times out, stops, or crashes. _WindowsService_ attaches to this service.
 
 === Examples
 

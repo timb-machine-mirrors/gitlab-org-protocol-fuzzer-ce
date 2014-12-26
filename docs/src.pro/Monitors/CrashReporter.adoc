@@ -3,7 +3,7 @@
 == CrashReporter Monitor (OS X)
 //needs better more fleshed out example pit
 
-The _CrashReporter_ monitor will collect information from crashes detected by OS X System Crash Reporter.
+The _CrashReporter_ monitor collects information from crashes detected by OS X System Crash Reporter.
 
 IMPORTANT: Make sure to disable the Apple crash report dialog window before fuzzing. 
 
@@ -19,7 +19,7 @@ When you are done fuzzing, enable the Apple crash report dialog window with the 
 
 _Required:_
 
-There are no required parameters for this monitor.
+None.
 
 _Optional:_
 

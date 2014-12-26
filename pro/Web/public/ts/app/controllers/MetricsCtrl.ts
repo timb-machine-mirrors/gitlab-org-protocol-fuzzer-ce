@@ -166,7 +166,7 @@ module Peach {
 		private initializeData(): void {
 			var promise = this.getData();
 			switch (this.metric) {
-			case "bucketTimeline":
+			case "bucket-timeline":
 				promise.success((data: IBucketTimelineMetric[]) => {
 					var items = data.map((item: IBucketTimelineMetric) => {
 						return <ITimelineItem> {
@@ -193,7 +193,7 @@ module Peach {
 					this.BucketTimelineData = this.visDataSet(items);
 				});
 				break;
-			case "faultTimeline":
+			case "fault-timeline":
 				promise.success((data: IFaultTimelineMetric[]) => {
 					this.MetricsFaultsOverTimeData = {
 						labels: data.map(i => moment(i.date).format("M/D h a")),

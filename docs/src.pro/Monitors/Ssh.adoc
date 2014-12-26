@@ -2,7 +2,7 @@
 [[Monitors_SshCommand]]
 == SshCommand Monitor
 
-The _SshCommand_ monitor connects to a remote host over SSH (Secure Shell) and waits for it's exit.
+The _SshCommand_ monitor connects to a remote host over SSH (Secure Shell) and waits for its exit.
 The output from the process is logged when a fault is detected.
 This monitor can operate as a fault detector, data collector, and automation module depending on configuration.
 All major forms of SSH authentication are supported.
@@ -15,43 +15,43 @@ If multiple _SshCommand_ monitors are configured against the same remote host, m
 
 This monitor can perform fault detection by matching output from the executed command with a regular expression.
 To configure this monitor to perform fault detection, set the +FaultOnMatch+ parameter to +true+ (this is the default), then provide a regular expression
-to match on with the +CheckValue+ parameter.
+to match the +CheckValue+ parameter.
 
 *Data Collection*
 
-The monitor will always collect the output from the executed command and report it for logging when a fault is detected.
+The monitor always collects the output from the executed command and reports it for logging when a fault is detected.
 
 *Automation*
 
-This monitor can be used to perform automation tasks by running commands on remote machines.
+This monitor can run commands on remote machines to perform automation tasks.
 
 === Parameters
 
 _Required:_
 
-Host:: Host to SSH too
+Host:: Remote Host for the SSH connection; the connection target
 Username:: Username for ssh
 Command:: Command to check for fault
 
 _Optional:_
 
-Password:: Password for SSH account, defaults to "".
-KeyPath:: Path to SSH key, defaults to "".
-CheckValue:: Regex to match command response, defaults to "".
-FaultOnMatch:: Trigger a fault if the regex matches, defaults to true.
+Password:: Password for SSH account, defaults to ""
+KeyPath:: Path to SSH key, defaults to ""
+CheckValue:: Regex to match command response, defaults to ""
+FaultOnMatch:: Trigger a fault if the regex matches, defaults to true
 When::
 +
-Period when the command should be run. Defaults to +OnCall+.
+Period when the command should be run. Defaults to +OnCall+
 +
 [horizontal]
-DetectFault;; Run command to check for faulting condition. Requires regex be set. Origional and default mode of operation.
-OnCall;; Trigger command to run from state model. Command is run when the _StartOnCall_ message is received.
-OnStart;; Run command when fuzzing session starts. Command will only be run once per session.
-OnEnd;; Run command when fuzzing session stops. Command will only be run once per session.
-OnIterationStart;; Run command at start of each iteration.
-OnIterationEnd;; Run command at end of each iteration.
-OnFault;; Run command when a fault occurs.
-OnIterationStartAfterFault;; Run command at start of first iteration after a fault occurs.
+DetectFault;; Run command to check for faulting condition. Requires regex be set. Origional and default mode of operation
+OnCall;; Trigger command to run from state model. Command is run when the _StartOnCall_ message is received
+OnStart;; Run command when fuzzing session starts. Command will only be run once per session
+OnEnd;; Run command when fuzzing session stops. Command will only be run once per session
+OnIterationStart;; Run command at start of each iteration
+OnIterationEnd;; Run command at end of each iteration
+OnFault;; Run command when a fault occurs
+OnIterationStartAfterFault;; Run command at start of the iteration that follows a fault detection
 
 StartOnCall:: Run when signaled by the state machine
 
@@ -59,7 +59,7 @@ StartOnCall:: Run when signaled by the state machine
 
 .Checking for core dump files
 ==========
-For this example we SSH into the target machine at the end of each iteration to check if any core files exist and fault if one does exist.
+For this example we connect to the target machine using SSH at the end of each iteration to check if any core files exist. If no core files exist, a fault occurs.
 
 To run this example, specify a valid Host, Username, and Password.
 
