@@ -30,11 +30,11 @@
 // 03/07/2014: Lynn
 //   * Added missing child elements and corrected spelling in comments
 
-A string containing ASCII or Unicode character. Strings can be null terminated, padded, with or without a fixed length.
+A string containing ASCII or Unicode characters. Strings can be null terminated, padded, with or without a fixed length.
 
-All strings are encoded prior to output with the default encoding 7-bit ASCII (aka Latin-1). A number of different Unicode encodings are also supported (see the _type_ attribute).
+All strings are encoded prior to output with the default 7-bit ASCII encoding (aka Latin-1). A number of different Unicode encodings are also supported (see the _type_ attribute).
 
-Strings are also used to hold numbers that will be in a string format. When strings contain a number, the numerical mutators will also be used to mutate the string.
+Strings can hold numbers that stored in a string format. When strings contain a number, Peach additionally uses  numerical mutators to mutate the strings.
 
 === Syntax
 
@@ -49,50 +49,50 @@ Strings are also used to hold numbers that will be in a string format. When stri
 
 _Required:_
 
-There are no required attributes.
+None.
 
 _Optional:_
 
 xref:name[name]:: Name of the string 
 
-xref:length[length]:: Length in characters of the string
-xref:lengthType[lengthType]:: Units of the length attribute (defaults to bytes)
+xref:length[length]:: Length, in characters, of the string.
+xref:lengthType[lengthType]:: Units of the length attribute. Valid values are bits-in multiples of 8, bytes, and chars. The default value is bytes.
 
 type::
-	Character encoding type, defaults to _ascii_. Valid options are: ASCII, utf7, utf8, utf16, utf16be, utf32.
+	Character encoding type, defaults to _ascii_. Valid options are: ascii, utf7, utf8, utf16, utf16be, utf32.
 	+
-	When strings are outputted they are first encoded. The default encoding is 7-bit ASCII, also known as latin-1. Most common Unicode encodings are supported.
+	Before strings are output, they are first encoded. The default encoding is 7-bit ascii, also known as latin-1. Most common Unicode encodings are supported.
 
 xref:value[value]:: The default value, defaults to _Peach_.
 xref:valueType[valueType]:: Value attribute format, defaults to string.
 
 nullTerminated::
-	Is this string null terminated, defaults to false.
+	Is this string null terminated. Valid values are true and false, defaults to false.
 	+
 	The _nullTerminated_ attribute indicates the produced string should be null terminated.
 	It should be noted that only the final value will have the null termination applied, if the value is accessed the internal value will not have the null attached.
 	+
-	When _nullTerminated_ attribute is provided the xref:String[String] must not specify a xref:length[length] as they are mutually exclusive.
+	When _nullTerminated_ attribute is provided, the xref:String[String] must not specify a xref:length[length] as they are mutually exclusive.
 
 padCharacter::
 	Character to pad string with to _length_, defaults to null (0x00).
 	+
-	If the _length_ attribute is provided but the value contained in the string is shorter than the length it will be padded.
+	If the _length_ attribute is provided and the value contained in the string is shorter than the length, the string will be padded.
 	This attribute allows controlling the character used to pad the string.
 
 xref:token[token]::
-	This element should be treated as a token when parsing, defaults to false.
+	This element should be treated as a token when parsing. Valid values are true and false, defaults to false.
 	+
-	This attribute is primarily used to assist in cracking of strings when consuming input into a model.
+	This attribute is primarily used to assist in cracking strings when consuming input in a model.
 
 xref:constraint[constraint]::
 	A constraint in the form of a scripting expression that is used during data cracking.
 	+
 	This attribute is used typically in conjunction with the xref:Choice[Choice] element, or to control array expansion. It is only executed during data cracking.
 	+
-	NOTE: This expression will not control of affect mutated values in anyway.
+	NOTE: This expression does not control or affect mutated values in anyway.
 
-xref:mutable[mutable]:: Is data element changeable? (should it be mutated?), defaults to false.
+xref:mutable[mutable]:: Is data element changeable? (should it be mutated?). Valid values are true and false, defaults to false.
 
 xref:minOccurs[minOccurs]:: The minimum number of times this block must occur, defaults to 1.
 xref:maxOccurs[maxOccurs]:: The maximum number of times this block can occur, defaults to 1.
@@ -100,49 +100,49 @@ xref:occurs[occurs]:: Actual number of occurrences, defaults to 1.
 
 === Child Elements
 
-xref:Analyzers[Analyzer]:: Attach an analyzer to this element
-xref:Fixup[Fixup]:: Dynamic transformations such as checksums and CRCs.
-xref:Hint[Hint]:: Provide information to mutators.
-xref:Placement[Placement]:: Relocate an element after it has been cracked.
-xref:Relation[Relation]:: Modeling of relationships in the data (such as comparisons)
-xref:Transformer[Transformer]:: Static transformations such as compression or encoding.
+xref:Analyzers[Analyzer]:: Attaches an analyzer to this element
+xref:Fixup[Fixup]:: Performs dynamic transformations such as checksums and CRCs.
+xref:Hint[Hint]:: Provides information to mutators.
+xref:Placement[Placement]:: Relocates an element after it has been cracked.
+xref:Relation[Relation]:: Identifies a type of relationship with another data element (such as count).
+xref:Transformer[Transformer]:: Performs static transformations such as compression or encoding.
 
 === Mutators
 
-The following mutators will operate on this element type:
+The following mutators operate on this element type:
 
 
 _Enabled when element is marked as an array_
 
-xref:Mutators_ArrayNumericalEdgeCasesMutator[ArrayNumericalEdgeCasesMutator]:: This mutator will grow and shrink an array to counts based on numerical edge cases.
-xref:Mutators_ArrayRandomizeOrderMutator[ArrayRandomizeOrderMutator]:: This mutator will randomize the order of items in an array.
-xref:Mutators_ArrayReverseOrderMutator[ArrayReverseOrderMutator]:: This mutator will reverse the order of items in an array.
-xref:Mutators_ArrayVarianceMutator[ArrayVarianceMutator]:: This mutator will grow and shrink an array to a variance of counts based on the current size.
+xref:Mutators_ArrayNumericalEdgeCasesMutator[ArrayNumericalEdgeCasesMutator]:: This mutator grows and shrinks an array to counts based on numerical edge cases.
+xref:Mutators_ArrayRandomizeOrderMutator[ArrayRandomizeOrderMutator]:: This mutator randomizes the order of items in an array.
+xref:Mutators_ArrayReverseOrderMutator[ArrayReverseOrderMutator]:: This mutator reverses the order of items in an array.
+xref:Mutators_ArrayVarianceMutator[ArrayVarianceMutator]:: This mutator grows and shrinks an array to a variance of counts based on the current size.
 
 _Used for all data elements_
 
-xref:Mutators_DataElementBitFlipper[DataElementBitFlipper]:: This mutator will produce test cases by flipping bits in the output value.
-xref:Mutators_DataElementDuplicate[DataElementDuplicate]:: This mutator will duplicate data elements.
-xref:Mutators_DataElementRemove[DataElementRemove]:: This mutator will remove data elements.
-xref:Mutators_DataElementSwapNear[DataElementSwapNear]:: This mutator will swap data elements.
-xref:Mutators_SampleNinjaMutator[SampleNinjaMutator]:: This mutator will combine data elements from different data sets.
+xref:Mutators_DataElementBitFlipper[DataElementBitFlipper]:: This mutator produces test cases by flipping bits in the output value.
+xref:Mutators_DataElementDuplicate[DataElementDuplicate]:: This mutator duplicates data elements.
+xref:Mutators_DataElementRemove[DataElementRemove]:: This mutator removes data elements.
+xref:Mutators_DataElementSwapNear[DataElementSwapNear]:: This mutator swaps data elements.
+xref:Mutators_SampleNinjaMutator[SampleNinjaMutator]:: This mutator combines data elements from different data sets.
 
 _Enabled when element is part of a size relation_
 
-xref:Mutators_SizedDataEdgeCase[SizedDataEdgeCase]:: This mutator will cause the data portion of a relation to be sized as numerical edge cases.
-xref:Mutators_SizedDataVariance[SizedDataVariance]:: This mutator will cause the data portion of a relation to be sized as numerical variances.
-xref:Mutators_SizedEdgeCase[SizedEdgeCase]:: This mutator will change both sides of the relation (data and value) to match numerical edge cases.
-xref:Mutators_SizedVariance[SizedVariance]:: This mutator will change both sides of the relation (data and value) to match numerical variances of the current size.
+xref:Mutators_SizedDataEdgeCase[SizedDataEdgeCase]:: This mutator causes the data portion of a relation to be sized as numerical edge cases.
+xref:Mutators_SizedDataVariance[SizedDataVariance]:: This mutator causes the data portion of a relation to be sized as numerical variances.
+xref:Mutators_SizedEdgeCase[SizedEdgeCase]:: This mutator changes both sides of the relation (data and value) to match numerical edge cases.
+xref:Mutators_SizedVariance[SizedVariance]:: This mutator changew both sides of the relation (data and value) to match numerical variances of the current size.
 
 _Specific to this element type_
 
-xref:Mutators_ExtraValues[ExtraValues]:: This mutator allows providing extra test case values on a per-data element basis.
-xref:Mutators_StringAsciiRandom[StringAsciiRandom]:: This mutator will generate strings with random ASCII characters.
-xref:Mutators_StringCaseLower[StringCaseLower]:: This mutator will generate a lower case version of the current value.
-xref:Mutators_StringCaseRandom[StringCaseRandom]:: This mutator will generate a randomized case version of the current value.
-xref:Mutators_StringCaseUpper[StringCaseUpper]:: This mutator will generate an upper case version of the current value.
-xref:Mutators_StringLengthEdgeCase[StringLengthEdgeCase]:: This mutator will generate strings with lengths based on numerical edge cases.
-xref:Mutators_StringLengthVariance[StringLengthVariance]:: This mutator will generate strings with lengths based on a variance around the current string length.
+xref:Mutators_ExtraValues[ExtraValues]:: This mutator provides extra test case values on a per-data element basis.
+xref:Mutators_StringAsciiRandom[StringAsciiRandom]:: This mutator generates strings with random ASCII characters.
+xref:Mutators_StringCaseLower[StringCaseLower]:: This mutator generates a lower case version of the current value.
+xref:Mutators_StringCaseRandom[StringCaseRandom]:: This mutator generates a randomized case version of the current value.
+xref:Mutators_StringCaseUpper[StringCaseUpper]:: This mutator generates an upper case version of the current value.
+xref:Mutators_StringLengthEdgeCase[StringLengthEdgeCase]:: This mutator generates strings with lengths based on numerical edge cases.
+xref:Mutators_StringLengthVariance[StringLengthVariance]:: This mutator generates strings with lengths based on a variance around the current string length.
 xref:Mutators_StringList[StringList]:: This mutator allows providing a list of strings to use as test cases on an element by element basis.
 xref:Mutators_StringStatic[StringStatic]:: This mutator generates test cases using a static set of strings.
 xref:Mutators_StringUnicodeAbstractCharacters[StringUnicodeAbstractCharacters]:: This mutator generates Unicode strings using abstract characters.
@@ -163,7 +163,7 @@ xref:Mutators_StringXmlW3C[StringXmlW3C]:: This mutator provides the W3C XML par
 .Simple ASCII String
 ====================
 
-This example will output a string with the default options. The string will consist of 7-bit ASCII characters.
+This example outputs a string with the default options. The string will consist of 7-bit ASCII characters.
 
 [source,xml]
 ----
@@ -224,7 +224,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 .String with UTF-16 Encoding
 ====================
 
-This example will output a string consisting of characters represented with the Unicode UTF-16 encoding. UTF-16 is a two-byte character encoding that supports latin and non-latin character sets. Also, UTF-16 is the WCHAR type on the Windows operating systems.
+This example outputs a string consisting of characters represented with the Unicode UTF-16 encoding. UTF-16 is a two-byte character encoding that supports latin and non-latin character sets. Also, UTF-16 is the WCHAR type on the Windows operating systems.
 
 [source,xml]
 ----
@@ -286,7 +286,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 .Null Terminated String
 ====================
 
-This example will output a string with null termination.
+This example outputsa a null-terminated string.
 
 [source,xml]
 ----
@@ -347,7 +347,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 .String Padded with Default Character
 ====================
 
-This example will output a string that is shorter than the required length. The string will receive one or more pad characters to reach its required length. The default pad character is null (0x00).
+This example outputs a string that is shorter than the required length. The string receives one or more pad characters to reach its required length. The default pad character is null (0x00).
 
 [source,xml]
 ----
@@ -409,7 +409,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 .String Padded with Specified Character
 ====================
 
-This example will output a string that is shorter than the required length. The string will receive one or more pad characters to reach its required length. Unlike the earlier example, we will define the pad character as '_', thus overriding the default pad character.
+This example output a string that is shorter than the required length. The string receivea one or more pad characters to reach its required length. Unlike the earlier example, we define the pad character as '_', thus overriding the default pad character.
 
 [source,xml]
 ----
@@ -471,7 +471,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 .String with Backslash Characters
 ====================
 
-This example will output a string that contains carriage return and line feed characters using the +\r+ and +\n+ notation. Also, the output string will  include a backslash character (+\+).
+This example outputs a string that contains carriage return and line feed characters using the +\r+ and +\n+ notation. Also, the output string includes a backslash character (+\+).
 
 [source,xml]
 ----
@@ -603,9 +603,9 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 .Using token Attribute to Crack Strings
 ====================
-In this example we will parse a simple text string using the _token_ attribute. This example uses two files, a file containing sample data called +string.txt+ and the pit file +example.xml+. The sample string we are going to parse consists of three parts: 1) the key, 2) the token separator, and 3) a value. Potentially, the key and value can be any arbitrary size, so cracking this sample string requires knowledge about the token separator. In our pit file, we will mark our token string with the _token_ attribute to indicate that the token must be present in the incoming data stream. This will allow the data cracker to figure out the length of both key and value.
+In this example, Peach parses a simple text string using the _token_ attribute. This example uses two files, a file containing sample data called +string.txt+ and the pit file +example.xml+. The sample string to parse consists of three parts: 1) the key, 2) the token separator, and 3) a value. Potentially, the key and value can be any arbitrary size, so cracking this sample string requires knowledge about the token separator. In the pit file, we mark our token string with the _token_ attribute to indicate that the token must be present in the incoming data stream. This allows the data cracker to figure out the length of both key and value.
 
-Peach will still fuzz elements marked as _token_.
+Peach still fuzzes elements marked as _token_.
 
 .string.txt
 ----
