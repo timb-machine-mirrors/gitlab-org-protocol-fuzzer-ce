@@ -18,9 +18,15 @@ namespace Peach.Pro.Core.Publishers
 	/// </summary>
 	public abstract class BufferedStreamPublisher : Publisher
 	{
-		public int SendTimeout { get; set; }
+		public int SendTimeout
+		{
+			get { return _sendTimeout; }
+			set { _sendTimeout = value; }
+		}
+
 		public int Timeout { get; set; }
 
+		protected int _sendTimeout = -1;
 		protected int _sendLen = 0;
 		protected byte[] _sendBuf = new byte[0x14000]; // Buffer size Stream.CopyTo uses
 		protected byte[] _recvBuf = new byte[0x14000];
@@ -289,7 +295,7 @@ namespace Peach.Pro.Core.Publishers
 						ar = ClientBeginWrite(_sendBuf, offset, length - offset, null, null);
 					}
 
-					if (SendTimeout == 0)
+					if (SendTimeout < 0)
 						ar.AsyncWaitHandle.WaitOne();
 					else if (!ar.AsyncWaitHandle.WaitOne(SendTimeout))
 						throw new TimeoutException();

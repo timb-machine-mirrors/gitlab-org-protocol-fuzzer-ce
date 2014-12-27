@@ -42,7 +42,7 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("Host", typeof(string), "Hostname or IP address of remote host")]
 	[Parameter("Port", typeof(ushort), "Local port to listen on")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait when receiving data (default 3000)", "3000")]
-	[Parameter("SendTimeout", typeof(int), "How many milliseconds to wait when sending data (default infinite)", "0")]
+	[Parameter("SendTimeout", typeof(int), "How many milliseconds to wait when sending data (default infinite)", "-1")]
 	[Parameter("ConnectTimeout", typeof(int), "Max milliseconds to wait for connection (default 10000)", "10000")]
 	public class TcpClientPublisher : TcpPublisher
 	{
