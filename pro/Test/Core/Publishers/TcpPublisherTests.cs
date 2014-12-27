@@ -528,7 +528,7 @@ namespace Peach.Pro.Test.Core.Publishers
 		<Publisher class=""TcpClient"">
 			<Param name=""Host"" value=""127.0.0.1""/>
 			<Param name=""Port"" value=""{0}""/>
-			<Param name=""SendTimeout"" value=""1""/>
+			<Param name=""SendTimeout"" value=""0""/>
 		</Publisher>
 	</Test>
 </Peach>".Fmt(((IPEndPoint)listener.LocalEndpoint).Port);
