@@ -1,3 +1,8 @@
+using System;
+using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -83,6 +88,44 @@ namespace Peach.Core.Test
 			}
 
 			process.Close();
+		}
+
+		/// <summary>
+		/// Get the name and IP address of the primary interface for the
+		/// specified address family.
+		/// If no interface can be found to satisfy the address family
+		/// then null is returned.
+		/// </summary>
+		/// <param name="af"></param>
+		/// <returns></returns>
+		public static Tuple<string, IPAddress> GetPrimaryIface(AddressFamily af)
+		{
+			IPAddress primaryIp;
+
+			// UDP connect to 1.1.1.1 to find the interface with the default route
+			// Using NetworkInterface.GetAllInterfaces() to find the default route
+			// doesn't work on all platforms. Also, OperationalStatus doesn't appear
+			// to work on OSX as it always returns Unknown so the socket trick
+			// is used to work around this.
+			using (var s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+			{
+				s.Connect(new IPAddress(0x01010101), 1);
+				primaryIp = ((IPEndPoint) s.LocalEndPoint).Address;
+			}
+
+			foreach (var adapter in NetworkInterface.GetAllNetworkInterfaces())
+			{
+				var addrs = adapter.GetIPProperties().UnicastAddresses;
+
+				if (addrs.Any(a => a.Address.Equals(primaryIp)))
+				{
+					var ip = addrs.FirstOrDefault(a => a.Address.AddressFamily == af);
+					if (ip != null)
+						return new Tuple<string, IPAddress>(adapter.Name, ip.Address);
+				}
+			}
+
+			return null;
 		}
 	}
 }
