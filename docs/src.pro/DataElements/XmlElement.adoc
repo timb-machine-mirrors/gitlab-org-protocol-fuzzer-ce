@@ -41,10 +41,24 @@ xref:name[name]:: Name of the data model
 xref:length[length]:: length of the data element. Default is null
 xref:lengthType[lengthType]:: Units of the length attribute. Default is bytes
 xref:constraint[constraint]:: Scripting expression that evaluates to true or false. Default is null
-xref:minOccurs[minOccurs]:: The minimum number of times this element must occur.
-xref:maxOccurs[maxOccurs]:: The maximum number of times this element can occur.
+
+xref:minOccurs[minOccurs]::
+	The minimum number of times this element must occur. Defaults to 1.  +
+	* Used to define arrays with variable size. Arrays defined by min/maxOccurs will generally have a relation
+	defined.
+	* Adding this attribute, even with a value of 1, converts the element to an array.
+
+xref:maxOccurs[maxOccurs]::
+	The maximum number of times this element can occur. Defaults to 1.  +
+	* Used to define arrays with static size.
+	* Adding this attribute, even with a value of 1, converts the element to an array.
+
+xref:occurs[occurs]::
+	Actual occurrences of element. Defaults to 1.  +
+	* Used to define arrays with static size.
+	* Adding this attribute, even with a value of 1, converts the element to an array.
+
 ns:: XML namespace
-xref:occurs[occurs]:: Actual number of occurrences. Default is 1
 xref:token[token]:: This element should be treated as a token when parsing, defaults to false.
 xref:mutable[mutable]:: Is data element changeable (should it be mutated), defaults to true.
 
