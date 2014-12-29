@@ -95,11 +95,21 @@ NOTE: This expression does not control or affect mutated values in anyway.
 
 xref:mutable[mutable]:: Should this data element be mutated (or, is it changeable)? Valid values are true and false, defaults to true.
 
-xref:minOccurs[minOccurs]:: The minimum number of times this string element must occur, defaults to 1. When given a value greater than 1, this attribute indicates an array of strings.
+xref:minOccurs[minOccurs]::
+	The minimum number of times this element must occur. Defaults to 1.  +
+	* Used to define arrays with variable size. Arrays defined by min/maxOccurs will generally have a relation
+	defined.
+	* Adding this attribute, even with a value of 1, converts the element to an array.
 
-xref:maxOccurs[maxOccurs]:: The maximum number of times this string element can occur, defaults to 1. When given a value greater than 1, this attribute indicates an array of strings.
+xref:maxOccurs[maxOccurs]::
+	The maximum number of times this element can occur. Defaults to 1.  +
+	* Used to define arrays with static size.
+	* Adding this attribute, even with a value of 1, converts the element to an array.
 
-xref:occurs[occurs]:: Actual number of occurrences, defaults to 1. When given a value greater than 1, this attribute indicates an array of strings.
+xref:occurs[occurs]::
+	Actual occurrences of element. Defaults to 1.  +
+	* Used to define arrays with static size.
+	* Adding this attribute, even with a value of 1, converts the element to an array.
 
 === Child Elements
 
