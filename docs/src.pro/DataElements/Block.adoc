@@ -39,9 +39,16 @@ xref:ref[ref]:: Reference to a [DataModel_DataModel]] to use as a template.
 xref:length[length]:: Data element length.
 xref:lengthType[lengthType]:: The unit of measure attribute for the Length attribute. Default is bytes.
 xref:constraint[constraint]:: Scripting expression that evaluates to true or false. Default is null.
-xref:minOccurs[minOccurs]:: The minimum number of times this block must occur.
-xref:maxOccurs[maxOccurs]:: The maximum number of times this block can occur.
-xref:occurs[occurs]:: The actual number of times this block occurs.
+xref:minOccurs[minOccurs]:: The minimum number of times this element must occur. Defaults to 1.  +
+	* Used to define arrays with variable size. Arrays defined by min/maxOccurs will generally have a relation
+	defined.
+	* Adding this attribute, even with a value of 1, converts the element to an array.
+xref:maxOccurs[maxOccurs]:: The maximum number of times this element can occur. Defaults to 1.  +
+	* Used to define arrays with static size.
+	* Adding this attribute, even with a value of 1, converts the element to an array.
+xref:occurs[occurs]:: Actual occurrences of element. Defaults to 1.  +
+	* Used to define arrays with static size.
+	* Adding this attribute, even with a value of 1, converts the element to an array.
 xref:mutable[mutable]:: Is data element changeable (should it be mutated), defaults to false.
 
 === Child Elements

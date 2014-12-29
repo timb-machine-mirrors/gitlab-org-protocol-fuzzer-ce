@@ -75,12 +75,22 @@ xref:constraint[constraint]::
 	A constraint in the form of a python expression. Used during data cracking.
 xref:mutable[mutable]::
 	Is data element changeable (should it be mutated during fuzzing). Valid values are true and false, defaults to true.
+
 xref:minOccurs[minOccurs]::
-	The minimum number of times this number must occur. Valid values are positive integers, defaults to 1.
+	The minimum number of times this element must occur. Defaults to 1.  +
+	* Used to define arrays with variable size. Arrays defined by min/maxOccurs will generally have a relation
+	defined.
+	* Adding this attribute, even with a value of 1, converts the element to an array.
+
 xref:maxOccurs[maxOccurs]::
-	The maximum number of times this number can occur. Valid values are positive integers. This attribute has no default value.
+	The maximum number of times this element can occur. +
+	* Used to define arrays with static size.
+	* Adding this attribute, even with a value of 1, converts the element to an array.
+
 xref:occurs[occurs]::
-	The actual number of times this number occurs. Valid values are positive integers, defaults to 1.
+	Actual occurrences of element. Defaults to 1.  +
+	* Used to define arrays with static size.
+	* Adding this attribute, even with a value of 1, converts the element to an array.
 
 === Child Elements
 
