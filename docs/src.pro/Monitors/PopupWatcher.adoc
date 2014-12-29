@@ -2,15 +2,15 @@
 [[Monitors_PopupWatcher]]
 == PopupWatcher Monitor (Windows)
 
-The _PopupWatcher_ monitor is able to close windows based on title. 
+The _PopupWatcher_ monitor closes pop-up windows based on title. 
 
-When _PopupWatcher_ encounters the pop-up window specified by WindowNames, it triggers a fault and closes the pop-up window.
+_PopupWatcher_ monitors the test target for a list of pop-up windows. When _PopupWatcher_ detects a pop-up window whose name matches an entry specified by +WindowNames+, this moniotr triggers a fault and closes the pop-up window.
 
 === Parameters
 
 _Required:_
 
-WindowNames:: Window names separated by a comma
+WindowNames:: Window names separated by a commas
 
 _Optional:_
 
@@ -20,7 +20,7 @@ Fault:: Trigger fault when a window is found (optional, default false)
 
 .Close Notepad
 ================
-For this example you must first open up notepad.exe.
+For this example, you must first launch notepad.exe, then start Peach.
 
 [source,xml]
 ----

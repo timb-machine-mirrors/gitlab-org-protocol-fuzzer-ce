@@ -4,7 +4,7 @@
 
 The _Padding_ element provides padding for variable-sized blocks or data models.
 
-When padding the data, value in the pad characters is always 0. This is not customizable.
+When padding the data, the value of the pad characters is always 0. This is not customizable.
 
 When cracking data into a model that contains the padding element, the pad data will be skipped.
 
@@ -29,15 +29,15 @@ _Optional:_
 
 xref:name[name]:: Element name.
 alignment:: Align to the specified bit boundary: 8, 16, 32, 64, etc. The default value is  8
-alignedTo:: Name of element to align the padding on, defaults to parent element.
+alignedTo:: Name of reference element for alignment, defaults to parent element.
 The alignment starts at the beginning of the reference element
 xref:mutable[mutable]:: Is the data element changeable (should it be mutated during fuzzing), defaults to true. Valid options true and false.
 
 === Child Elements
 
-xref:Fixup[Fixup]:: Dynamic transformations such as checksums and CRCs.
-xref:Hint[Hint]:: Provide information to mutators
-xref:Transformer[Transformer]:: Static transformations such as compression or encoding.
+xref:Fixup[Fixup]:: Performs dynamic transformations such as checksums and CRCs.
+xref:Hint[Hint]:: Provides information to mutators
+xref:Transformer[Transformer]:: Performs static transformations such as compression or encoding.
 
 === Mutators
 

@@ -8,7 +8,7 @@ The _Socket_ monitor waits for an incoming TCP or UDP connection. If a connectio
 
 _Required:_
 
-There are no required parameters for this monitor.
+None.
 
 _Optional:_
 
