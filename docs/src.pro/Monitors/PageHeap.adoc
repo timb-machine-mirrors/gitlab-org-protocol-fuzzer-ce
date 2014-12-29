@@ -2,7 +2,7 @@
 [[Monitors_PageHeap]]
 == PageHeap Monitor (Windows)
 
-The _PageHeap_ monitor will enable page heap debugging options for an executable.
+The _PageHeap_ monitor enables page heap debugging options for an executable.
 
 === Parameters
 

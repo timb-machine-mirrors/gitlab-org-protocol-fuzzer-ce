@@ -29,47 +29,47 @@ xref:ref[ref]:: Reference to another DataModel to use as a template.
 
 === Child Elements
 
-xref:Analyzers[Analyzer]:: Analyze current element post cracking, can dynamically change model.
-xref:Blob[Blob]:: Used to represent binary data (think array of bytes) to create simple dumb fuzzers in Peach.
-xref:Block[Block]:: Group one or more data elements together into a logical structure.
-xref:Choice[Choice]:: Indicate any of the sub-elements are valid but only one should be selected.
-xref:Fixup[Fixup]:: Dynamic transformations such as checksums and CRCs.
+xref:Analyzers[Analyzer]:: Analyzes current element post cracking, can dynamically change model.
+xref:Blob[Blob]:: Represents binary data (think array of bytes) to create simple dumb fuzzers in Peach.
+xref:Block[Block]:: Groups one or more data elements in a logical structure.
+xref:Choice[Choice]:: Indicates all of the sub-elements are valid; however, only one sub-element should be selected.
+xref:Fixup[Fixup]:: Are dynamic transformations such as checksums and CRCs.
 xref:Flags[Flags]:: Defines a set of bit sized flags.
-xref:Hint[Hint]:: Provide information to mutators.
+xref:Hint[Hint]:: Provides information to mutators.
 xref:Number[Number]:: Defines a binary number of arbitrary bit size.
-xref:Padding[Padding]:: Pad out variably sized blocks or data models.
-xref:Placement[Placement]:: Relocate an element after it has been cracked.
-xref:Stream[Stream]::  Group one or more data elements together into a logical structure.
-xref:Transformer[Transformer]:: Static transformations such as compression or encoding.
+xref:Padding[Padding]:: Pads variably sized blocks or data models to provide uniformity or consistency.
+xref:Placement[Placement]:: Relocates an element after it has been cracked.
+xref:Stream[Stream]::  Groups one or more data elements in a logical structure.
+xref:Transformer[Transformer]:: Performs static transformations such as compression or encoding.
 xref:XmlElement[XmlElement]:: Defines an XML element, the basic building block of XML documents.
 
 === Mutators
 
-The following mutators will operate on this element type:
+The following mutators operate on this element type:
 
 _Used for all data elements_
 
-xref:Mutators_DataElementBitFlipper[DataElementBitFlipper]:: This mutator will produce test cases by flipping bits in the output value.
-xref:Mutators_DataElementDuplicate[DataElementDuplicate]:: This mutator will duplicate data elements.
-xref:Mutators_DataElementRemove[DataElementRemove]:: This mutator will remove data elements.
-xref:Mutators_DataElementSwapNear[DataElementSwapNear]:: This mutator will swap data elements.
-xref:Mutators_SampleNinjaMutator[SampleNinjaMutator]:: This mutator will combine data elements from different data sets.
+xref:Mutators_DataElementBitFlipper[DataElementBitFlipper]:: This mutator produces test cases by flipping bits in the output value.
+xref:Mutators_DataElementDuplicate[DataElementDuplicate]:: This mutator duplicates data elements.
+xref:Mutators_DataElementRemove[DataElementRemove]:: This mutator removes data elements.
+xref:Mutators_DataElementSwapNear[DataElementSwapNear]:: This mutator swaps data elements.
+xref:Mutators_SampleNinjaMutator[SampleNinjaMutator]:: This mutator combines data elements from different data sets.
 
 _Enabled when element is part of a size relation_
 
-xref:Mutators_SizedDataEdgeCase[SizedDataEdgeCase]:: This mutator will cause the data portion of a relation to be sized as numerical edge cases.
-xref:Mutators_SizedDataVariance[SizedDataVariance]:: This mutator will cause the data portion of a relation to be sized as numerical variances.
-xref:Mutators_SizedEdgeCase[SizedEdgeCase]:: This mutator will change both sides of the relation (data and value) to match numerical edge cases.
-xref:Mutators_SizedVariance[SizedVariance]:: This mutator will change both sides of the relation (data and value) to match numerical variances of the current size.
+xref:Mutators_SizedDataEdgeCase[SizedDataEdgeCase]:: This mutator causes the data portion of a relation to be sized as numerical edge cases.
+xref:Mutators_SizedDataVariance[SizedDataVariance]:: This mutator causes the data portion of a relation to be sized as numerical variances.
+xref:Mutators_SizedEdgeCase[SizedEdgeCase]:: This mutator changes both sides of the relation (data and value) to match numerical edge cases.
+xref:Mutators_SizedVariance[SizedVariance]:: This mutator changes both sides of the relation (data and value) to match numerical variances of the current size.
 
 
 === Examples
 
 .DataModel Example
 ===========================
-Any number of DataModels can be specified in a Peach Pit file. However, each must each have a unique name. Break complex formats into smaller models by split them into logical parts. This makes DataModels easier to read, debug, and re-use.
+Any number of _DataModels_ can be specified in a Peach Pit file. However, each _DataModel_ must have a unique name. You can break down complex formats into smaller models by splitting them into logical parts. This makes DataModels easier to read, debug, and re-use.
 
-A DataModel named "HelloWorld" contains a single string and outputs "Hello world!"
+An example DataModel named "HelloWorld" contains a single string and outputs "Hello world!"
 
 [source,xml]
 ----
@@ -126,7 +126,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 [*] Test 'Default' finished.
 ----
 
-DataModels can reference other DataModels and inherit their child elements with the ref attribute.
+DataModels can reference other DataModels and inherit child elements with the ref attribute.
 
 [source,xml]
 ----
@@ -191,7 +191,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 .References (ref attribute)
 ===========================
 
-When a reference (ref attribute) is supplied, the contents of the referenced DataModel are copied to create the base of the new DataModel.  Any child elements in the new DataModel will override elements from that base with the same name. In this example the child model Customized contains a String named Key. It's value will overwrite the parent's String "Key" which has no value.
+When a reference (ref attribute) is supplied, the contents of the referenced DataModel are copied to create the base of the new DataModel.  Any child elements in the new DataModel override elements from that base with the same name. In this example, the child DataModel Customized contains a String named Key. The value from the child DataModel overwrites the String "Key" of the parent DataModel, which has no value.
 
 [source,xml]
 ----
