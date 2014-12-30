@@ -82,7 +82,19 @@ namespace Peach.Pro.Core.Loggers
 
 		protected void SaveFault(Category category, Fault fault)
 		{
-			log.WriteLine("! Fault detected at iteration {0} : {1}", fault.iteration, DateTime.Now.ToString());
+			switch (category)
+			{
+				case Category.Faults:
+					log.WriteLine("! Reproduced fault at iteration {0} : {1}",
+						fault.iteration, DateTime.Now.ToString());
+					break;
+				case Category.NonReproducable:
+					log.WriteLine("! Non-reproducable fault detected at iteration {0} : {1}", fault.iteration, DateTime.Now.ToString());
+					break;
+				case Category.Reproducing:
+					log.WriteLine("! Fault detected at iteration {0}, trying to reprduce : {1}", fault.iteration, DateTime.Now.ToString());
+					break;
+			}
 
 			// root/category/bucket/iteration
 			var subDir = System.IO.Path.Combine(RootDir, category.ToString(), fault.folderName, fault.iteration.ToString());
@@ -263,7 +275,7 @@ namespace Peach.Pro.Core.Loggers
 			if (currentIteration != 1 && currentIteration % 100 != 0)
 				return;
 
-			if (totalIterations != null)
+			if (totalIterations.HasValue && totalIterations.Value < uint.MaxValue)
 			{
 				log.WriteLine(". Iteration {0} of {1} : {2}", currentIteration, (uint)totalIterations, DateTime.Now.ToString());
 				log.Flush();
