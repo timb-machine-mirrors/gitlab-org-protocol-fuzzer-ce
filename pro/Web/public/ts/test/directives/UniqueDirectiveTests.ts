@@ -449,6 +449,17 @@ describe("Peach", () => {
 				$rootScope.$digest();
 				expect(_.pluck(scope.items, 'value')).toEqual(['value1', 'value2']);
 				expect(_.pluck(modelCtrls, '$valid')).toEqual([true, true]);
+
+				modelCtrls[0].$setViewValue('duplicate');
+				modelCtrls[1].$setViewValue('duplicate');
+				$rootScope.$digest();
+				expect(_.pluck(scope.items, 'value')).toEqual(['duplicate', 'duplicate']);
+				expect(_.pluck(modelCtrls, '$valid')).toEqual([false, false]);
+
+				Peach.ArrayItemDown(scope.items, 0);
+				$rootScope.$digest();
+				expect(_.pluck(scope.items, 'value')).toEqual(['duplicate', 'duplicate']);
+				expect(_.pluck(modelCtrls, '$valid')).toEqual([false, false]);
 			});
 		});
 	});
