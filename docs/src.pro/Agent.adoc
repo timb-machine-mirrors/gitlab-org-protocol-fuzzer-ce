@@ -3,6 +3,20 @@
 
 Agents are processes that host Monitors locally or remotely.  Monitors collect information and perform actions on behalf of the fuzzer.
 
+An agent, or one or more processes that an agent hosts--such as a monitor or a publisher,  might require access at a higher level than a user. 
+
+* Unix systems sometimes require an Agent to run with root privileges.
+* Linux systems sometimes require an Agent to run with root privileges. On Ubuntu Linux systems, the following command
+can be used as an alternative to running the process from root. This command allows packets through the firewall using port 9001 (the port for remote agents).
+
+----
+ sudo ufw allow 9001
+----
+
+* Windows systems sometimes require an Agent to run with administrative privileges. 
+
+The following monitors/processes require these heightened privileges: PageHeap, PCAP, 
+
 === Agent Channels
 
 Local::
@@ -18,7 +32,7 @@ REST JSON::
 
 The peach runtime supports a local agent that runs in process.  LocalAgent is the default agent unless another agent type is specified.
 
-.Configuring a remote agent
+.Configuring a local agent
 [source,xml]
 ----
 <Agent name="LocalAgent">
@@ -31,6 +45,8 @@ The peach runtime supports a local agent that runs in process.  LocalAgent is th
 This agent lives in a separate process that can be located on remote machines.  Communication is performed over TCP Remoting, a form of RPC supported natively by the runtime.
 
 To use a remote agent, the agent process must be running before launching Peach.
+
+TIP: The default port for remote agents is 9001.
 
 .Configuring a remote agent
 [source,xml]
