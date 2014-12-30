@@ -79,8 +79,8 @@ module Peach {
 				return value;
 			}
 
-			ctrl.$parsers.unshift(validate);
 			ctrl.$formatters.unshift(validate);
+			ctrl.$viewChangeListeners.unshift(() => validate(ctrl.$viewValue));
 
 			element.on('$destroy', () => {
 				this.service.Unregister(scope);
@@ -101,7 +101,7 @@ module Peach {
 			var isUnique;
 			var channel = this.getChannel(scope.channel);
 			_.forEach(channel, (item: IUniqueScope, id: string) => {
-				var isDuplicate = this.isDuplicate(item, item.ctrl.$viewValue);
+				var isDuplicate = this.isDuplicate(item, item.ctrl.$modelValue);
 				item.ctrl.$setValidity('unique', !isDuplicate);
 				if (id === scope.$id.toString()) {
 					isUnique = !isDuplicate;
@@ -139,7 +139,7 @@ module Peach {
 				if (scope.$id.toString() === id) {
 					return false;
 				}
-				var otherValue = other.ctrl.$viewValue;
+				var otherValue = other.ctrl.$modelValue;
 				return (myValue === (otherValue || other.defaultValue));
 			});
 		}
