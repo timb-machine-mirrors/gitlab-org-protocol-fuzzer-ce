@@ -303,9 +303,9 @@ namespace Peach.Core.Dom
 				{
 					final = encoding.GetString((byte[])value);
 				}
-				catch (DecoderFallbackException)
+				catch (DecoderFallbackException ex)
 				{
-					throw new PeachException("Error, " + debugName + " value contains invalid " + stringType + " bytes.");
+					throw new PeachException("Error, " + debugName + " value contains invalid " + stringType + " bytes.", ex);
 				}
 			}
 			if (value.GetVariantType() == Variant.VariantType.BitStream)
@@ -316,9 +316,9 @@ namespace Peach.Core.Dom
 					rdr.BaseStream.Seek(0, System.IO.SeekOrigin.Begin);
 					final = rdr.ReadString(encoding);
 				}
-				catch (DecoderFallbackException)
+				catch (DecoderFallbackException ex)
 				{
-					throw new PeachException("Error, " + debugName + " value contains invalid " + stringType + " bytes.");
+					throw new PeachException("Error, " + debugName + " value contains invalid " + stringType + " bytes.", ex);
 				}
 			}
 			else
@@ -327,9 +327,9 @@ namespace Peach.Core.Dom
 				{
 					encoding.GetBytes((string)value);
 				}
-				catch
+				catch (EncoderFallbackException ex)
 				{
-					throw new PeachException("Error, " + debugName + " value contains invalid " + stringType + " characters.");
+					throw new PeachException("Error, " + debugName + " value contains invalid " + stringType + " characters.", ex);
 				}
 
 				final = (string)value;
