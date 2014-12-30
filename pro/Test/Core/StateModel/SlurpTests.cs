@@ -408,7 +408,7 @@ namespace Peach.Core.Test.StateModel
 
 			Assert.AreEqual(new byte[0], val);
 
-			var array = dm[0] as Array;
+			var array = dm[0] as Dom.Array;
 			Assert.NotNull(array);
 			Assert.NotNull(array.OriginalElement);
 
