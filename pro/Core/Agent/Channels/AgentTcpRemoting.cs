@@ -44,6 +44,7 @@ using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using Peach.Pro.Core.Runtime;
 
 namespace Peach.Pro.Core.Agent.Channels
 {
@@ -372,7 +373,10 @@ namespace Peach.Pro.Core.Agent.Channels
 		public AgentClientTcpRemoting(string name, string url, string password)
 			: base(name, url, password)
 		{
-			serviceUrl = new Uri(new Uri(url), "/PeachAgent").ToString();
+			var uri = new Uri(new Uri(url), "/PeachAgent");
+			if (uri.IsDefaultPort)
+				uri = new Uri("{0}://{1}:{2}{3}".Fmt(uri.Scheme, uri.Host, AgentServerTcpRemoting.DefaultPort, uri.PathAndQuery));
+			serviceUrl = uri.ToString();
 		}
 
 		#endregion
@@ -905,6 +909,10 @@ namespace Peach.Pro.Core.Agent.Channels
 	[AgentServer("tcp")]
 	public class AgentServerTcpRemoting : IAgentServer
 	{
+		private const string portOption = "--port=";
+
+		public const ushort DefaultPort = 9001;
+
 		#region IAgentServer Members
 
 		public void Run(Dictionary<string, string> args)
