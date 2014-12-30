@@ -6,9 +6,9 @@
 //  - 03/06/2014: Lynn
 //  Edited comments
 
-A Blob footnote:[Blob stands for "binary large object" a term used by databases to represent a column of binary data.] is used to represent binary data (think array of bytes). Blobs are always sized in bytes, never bits.
+A Blob footnote:[Blob stands for "binary large object" a term used by databases to represent a column of binary data.] is used to represent binary data (think array of bytes). Blobs are sized in bytes.
 
-A Blob is always a child of a data element container such as xref:DataModel[DataModel] or xref:Block[Block]. Because their internal data format is unknown, Blobs will be dumb fuzzed (see list of applicable mutators below).
+A Blob is always a child of a data element container such as xref:DataModel[DataModel] or xref:Block[Block]. By definition, the internal contents of a Blob is unknown. Consequently, Blobs are dumb fuzzed, as the list of applicable mutators below indicates.
 
 Blobs can be used to create simple dumb fuzzers in Peach, see xref:Blob_Examples[examples].
 
@@ -29,7 +29,11 @@ _Optional:_
 
 xref:name[name]:: Element name
 xref:length[length]:: The length of data in this element.
-xref:lengthType[lengthType]:: Units of the length attribute. Defaults to "bytes".
+xref:lengthType[lengthType]:: Units of the length attribute. Defaults to "bytes". Can also be "chars", or "bits" where the number of bits is a multiplie of 8. 
+
+
+
+
 xref:value[value]:: Default value.
 xref:valueType[valueType]:: Format of value attribute.
 xref:occurs[occurs]::
@@ -65,7 +69,7 @@ xref:Transformer[Transformer]:: Performs static transformations such as compress
 
 === Mutators
 
-The following mutators will operate on this element type.
+The following mutators operate on this element type.
 
 
 _Enabled when element is marked as an array_
