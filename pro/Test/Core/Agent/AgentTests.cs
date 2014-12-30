@@ -418,6 +418,60 @@ namespace Peach.Pro.Test.Core.Agent
 			}
 		}
 
+		[Test]
+		public void TestNoTcpPort()
+		{
+			var xml = @"
+<Peach>
+	<DataModel name='TheDataModel'>
+		<String value='Hello'/>
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='TheDataModel'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Agent name='RemoteAgent' location='tcp://127.0.0.1'>
+		<Monitor class='{0}'>
+			<Param name='Executable' value='{1}'/>
+			<Param name='Arguments' value='127.0.0.1 0'/>
+			<Param name='RestartOnEachTest' value='true'/>
+			<Param name='FaultOnEarlyExit' value='true'/>
+		</Monitor>
+	</Agent>
+
+	<Test name='Default'>
+		<Agent ref='RemoteAgent'/>
+		<StateModel ref='TheState'/>
+		<Publisher class='Null'/>
+		<Strategy class='RandomDeterministic'/>
+	</Test>
+</Peach>".Fmt(PlatformMonitor, CrashableServer);
+
+			try
+			{
+				StartAgent();
+
+				var parser = new PitParser();
+				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+
+				var config = new RunConfiguration { singleIteration = true };
+
+				var e = new Engine(null);
+
+				e.startFuzzing(dom, config);
+			}
+			finally
+			{
+				if (process != null)
+					StopAgent();
+			}
+		}
+
 		[Monitor("LoggingMonitor", true, IsTest = true)]
 		public class LoggingMonitor : Monitor
 		{
