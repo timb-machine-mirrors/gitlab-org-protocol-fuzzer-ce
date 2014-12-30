@@ -321,7 +321,11 @@ namespace Peach.Pro.Core.Runtime
 			ConsoleWatcher.WriteInfoMark();
 			Console.WriteLine("Starting agent server");
 
-			agentServer.Run(new Dictionary<string, string>());
+			var args = new Dictionary<string, string>();
+			for (int i = 0; i < extra.Count; i++)
+				args[i.ToString()] = extra[i];
+
+			agentServer.Run(args);
 		}
 
 		/// <summary>
