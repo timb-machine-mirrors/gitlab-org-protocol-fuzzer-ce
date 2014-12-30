@@ -1,5 +1,5 @@
 [[ReproducingFaults]]
-== ReproducingFaults
+= Reproducing Faults
 
 A fault that occurs in a fuzzing session needs to be reproduced so that it can be investigated, understood, and  potentially corrected. 
 
