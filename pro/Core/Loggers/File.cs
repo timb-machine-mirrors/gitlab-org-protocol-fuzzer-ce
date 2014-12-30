@@ -80,13 +80,12 @@ namespace Peach.Pro.Core.Loggers
 
 		public enum Category { Faults, Reproducing, NonReproducable }
 
-		protected void SaveFault(RunContext ctx, Category category, Fault fault)
+		protected void SaveFault(Category category, Fault fault)
 		{
 			switch (category)
 			{
 				case Category.Faults:
-					log.WriteLine("! {0} at iteration {1} : {2}",
-						ctx.test.replayEnabled ? "Reproduced fault" : "Fault detected",
+					log.WriteLine("! Reproduced fault at iteration {0} : {1}",
 						fault.iteration, DateTime.Now.ToString());
 					break;
 				case Category.NonReproducable:
@@ -117,7 +116,7 @@ namespace Peach.Pro.Core.Loggers
 			System.Diagnostics.Debug.Assert(reproFault == null);
 
 			reproFault = combineFaults(context, currentIteration, stateModel, faults);
-			SaveFault(context, Category.Reproducing, reproFault);
+			SaveFault(Category.Reproducing, reproFault);
 		}
 
 		protected override void Engine_ReproFailed(RunContext context, uint currentIteration)
@@ -148,7 +147,7 @@ namespace Peach.Pro.Core.Loggers
 				reproFault = null;
 			}
 
-			SaveFault(context, Category.Faults, fault);
+			SaveFault(Category.Faults, fault);
 		}
 
 		// TODO: Figure out how to not do this!
