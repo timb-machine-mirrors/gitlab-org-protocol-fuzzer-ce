@@ -913,14 +913,21 @@ namespace Peach.Pro.Core.Agent.Channels
 			RemotingConfiguration.CustomErrorsMode = CustomErrorsModes.Off;
 #endif
 
-			int port = 9001;
+			var port = DefaultPort;
 
-			if (args.ContainsKey("port"))
-				port = int.Parse(args["port"]);
+			foreach (var kv in args)
+			{
+				if (kv.Value.StartsWith(portOption))
+				{
+					var opt = kv.Value.Substring(portOption.Length);
+					if (!ushort.TryParse(opt, out port))
+						throw new PeachException("An invalid option for --port was specified.  The value '{0}' is not a valid port number.".Fmt(opt));
+				}
+			}
 
 			// select channel to communicate
 			var props = (IDictionary)new Hashtable();
-			props["port"] = port;
+			props["port"] = (int)port;
 			props["name"] = string.Empty;
 
 			var agentBindIp = ConfigurationManager.AppSettings["AgentBindIp"];
@@ -945,6 +952,9 @@ namespace Peach.Pro.Core.Agent.Channels
 				"PeachAgent", WellKnownObjectMode.Singleton);
 
 			// inform console
+			ConsoleWatcher.WriteInfoMark();
+			Console.WriteLine("Listening for connections on port {0}", port);
+			Console.WriteLine();
 			Console.WriteLine(" -- Press ENTER to quit agent -- ");
 			Console.ReadLine();
 		}
