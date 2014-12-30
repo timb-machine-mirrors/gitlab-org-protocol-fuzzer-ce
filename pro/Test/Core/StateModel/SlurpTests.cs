@@ -14,7 +14,6 @@ using NUnit.Framework.Constraints;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.Analyzers;
-using Peach.Core.Dom;
 using Peach.Core.Test;
 
 namespace Peach.Core.Test.StateModel
