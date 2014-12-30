@@ -17,7 +17,7 @@ peach -t peach_xml_file
 === Parameters
 
 -1:: Perform a single iteration. Used in debugging and validation. The iteration performed will not have any mutations.
--a --agent _channel_:: Launch Peach as an agent process using specified _channel_ protocol. Default is +tcp+.
+-a --agent _channel_:: Launch Peach as an agent process using specified _channel_ protocol. This parameter requires a value for _channel_. If -a is not specified, channel 9001 is used.
 -c --count _pit_:: For deterministic strategies this will return a total iteration count.
 -t --test _pit_:: Perform XML validation of pit
 -p --parallel _M_,_N_:: Setup for parallel fuzzing. This is only useful for deterministic strategies. _M_ is the total number of instances that will be running. _N_ is the current instance.
