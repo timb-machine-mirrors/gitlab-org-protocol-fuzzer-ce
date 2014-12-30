@@ -74,10 +74,20 @@ _Optional:_
 waitTime:: Time to wait in between each test case (Defaults to zero (0))
 faultWaitTime:: Time to wait for a fault to occur before starting next iteration. (Defaults to 0)
 controlIteration:: How often should we perform control iterations.  (Defaults to 0)
-replayEnabled:: Should iterations be replayed when a fault occurs. Defaults to true.
+
+targetLifetime:: Specifies when the target restarts to a known, stable state. +
+* "session" indicates the original target is used throughout the entire fuzzing session. This is the default value.
+* "iteration" indicates the target restarts every iteration. This is common in file fuzzing.
+
+maxBackSearch::
++
+Sets the maximum number of iteration to include in the search to reproduce a fault. This attribute is used when _targetLifeTime_ is "session". The default value is 80. 
++
+For example, if the default value is used, the search potentially re-runs the 80 iterations that precede the most recent fault.
+
 maxOutputSize::
 +
-Set the maximum size of data that Peach will generate. This is on an Action by Action basis meaning
+Sets the maximum size of data that Peach will generate. This is on an Action by Action basis meaning
 if your StateModel has two actions, each of them can produce data upto maxOutputSize. Defaults to
 unlimited.
 +
