@@ -36,7 +36,9 @@ module Peach {
 		}
 
 		public get ShowReady(): boolean {
-			return onlyIf(this.pitService.Pit, () => this.pitService.IsConfigured);
+			return onlyIf(this.pitService.Pit, () =>
+				this.pitService.IsConfigured && this.CanStart
+			);
 		}
 
 		public get ShowNotConfigured(): boolean {
@@ -47,12 +49,16 @@ module Peach {
 			return onlyIf(this.Job, () => _.isEmpty(this.Job.pitUrl));
 		}
 
-		public get ShowReproducing(): boolean {
-			return onlyIf(this.Job, () => this.Job.mode === JobMode.Reproducing);
+		public get ShowStatus(): boolean {
+			return !_.isUndefined(this.Job);
 		}
 
-		public get ShowSearching(): boolean {
-			return onlyIf(this.Job, () => this.Job.mode === JobMode.Searching);
+		public get JobStatus(): string {
+			return onlyIf(this.Job, () => this.Job.status);
+		}
+
+		public get JobMode(): string {
+			return this.Job.mode;
 		}
 
 		public get Job(): IJob {
