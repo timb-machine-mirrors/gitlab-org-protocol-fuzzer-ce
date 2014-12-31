@@ -19,9 +19,17 @@ module Peach {
 			private $interval: ng.IIntervalService,
 			public pitService: PitService
 		) {
+			pitService.OnPitChanged(() => {
+				if (!this.isLoading) {
+					this.job = undefined;
+					this.faults = [];
+				}
+			});
 		}
 
 		private poller: ng.IPromise<any>;
+
+		private isLoading: boolean;
 
 		private job: IJob;
 		public get Job(): IJob {
@@ -31,6 +39,10 @@ module Peach {
 		private faults: IFaultSummary[] = [];
 		public get Faults(): IFaultSummary[] {
 			return this.faults;
+		}
+
+		public get IsRunning(): boolean {
+			return onlyIf(this.job, () => this.job.status === JobStatus.Running);
 		}
 
 		public get CanStart(): boolean {
@@ -73,9 +85,13 @@ module Peach {
 					this.job = _.first(jobs);
 					hasPit = !_.isEmpty(this.job.pitUrl);
 					if (hasPit) {
+						this.isLoading = true;
 						var promise2 = this.pitService.SelectPit(this.job.pitUrl);
 						promise2.then(() => {
 							deferred.resolve();
+						});
+						promise2.finally(() => {
+							this.isLoading = false;
 						});
 					}
 					this.startJobPoller();
@@ -133,8 +149,9 @@ module Peach {
 		}
 
 		private onError(response) {
-			alert("Peach is busy with another task.\n" +
-				"Confirm that there aren't multiple browsers accessing the same instance of Peach.");
+			//alert("Peach is busy with another task.\n" +
+			//	"Confirm that there aren't multiple browsers accessing the same instance of Peach.");
+			console.log('onError', response);
 			this.job = undefined;
 			this.$interval.cancel(this.poller);
 		}

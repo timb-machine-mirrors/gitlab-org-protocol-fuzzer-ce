@@ -11,6 +11,7 @@ module Peach {
 			"$location",
 			"$modal",
 			"PitService",
+			"TestService",
 			"JobService",
 			"WizardService"
 		];
@@ -21,6 +22,7 @@ module Peach {
 			private $location: ng.ILocationService,
 			private $modal: ng.ui.bootstrap.IModalService,
 			private pitService: PitService,
+			private testService: TestService,
 			private jobService: JobService,
 			private wizardService: WizardService
 		) {
@@ -47,6 +49,10 @@ module Peach {
 			return this.jobService.Job;
 		}
 
+		public get CanSelectPit(): boolean {
+			return !this.testService.IsPending && !this.jobService.IsRunning;
+		}
+
 		public IsActive(match): boolean {
 			return this.$location.path() === match;
 		}
@@ -64,15 +70,8 @@ module Peach {
 		}
 
 		public get JobRunningTooltip(): string {
-			if (this.isJobRunning) {
-				return "Disabled while running a Job";
-			}
-			return "";
-		}
-
-		public get JobNotRunningTooltip(): string {
-			if (!this.isJobRunning) {
-				return "Disabled while not running a Job";
+			if (this.jobService.IsRunning || this.testService.IsPending) {
+				return "Disabled while running a Job or a Test";
 			}
 			return "";
 		}
@@ -88,7 +87,7 @@ module Peach {
 			if (_.isUndefined(this.job)) {
 				return "No Job available";
 			}
-			if (this.isJobRunning && this.job.hasMetrics == false) {
+			if (this.jobService.IsRunning && this.job.hasMetrics == false) {
 				return "Metrics unavailable for this Job.";
 			}
 			return "";
@@ -96,13 +95,6 @@ module Peach {
 
 		public IsComplete(step: string) {
 			return this.wizardService.GetTrack(step).isComplete;
-		}
-
-		public get CanSelectPit(): boolean {
-			return (
-				_.isUndefined(this.job) ||
-				this.job.status === JobStatus.Stopped
-			);
 		}
 
 		public get CanConfigurePit(): boolean {
@@ -132,13 +124,6 @@ module Peach {
 					this.$location.path('/');
 				}
 			});
-		}
-
-		private get isJobRunning() {
-			return (
-				!(_.isUndefined(this.job)) &&
-				this.job.status !== JobStatus.Stopped
-			);
 		}
 	}
 }

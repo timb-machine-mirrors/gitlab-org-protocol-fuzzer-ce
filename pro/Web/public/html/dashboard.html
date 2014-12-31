@@ -5,57 +5,69 @@
 		</h1>
 	</div>
 
-	<div class="alert alert-warning alert-dismissable"
+	<div class="alert alert-warning"
 			 ng-show="vm.ShowSelectPit">
-		<button type="button"
-						class="close"
-						data-dismiss="alert">
-			<i class="icon-remove"></i>
-		</button>
 		<strong>Warning!</strong>
 		Select a Pit before continuing.
 	</div>
-	<div class="alert alert-warning alert-dismissable"
+	<div class="alert alert-warning"
 			 ng-show="vm.ShowNotConfigured">
-		<button type="button"
-						class="close"
-						data-dismiss="alert">
-			<i class="icon-remove"></i>
-		</button>
 		<strong>Warning!</strong>
 		The currently selected Pit should be configured for the environment.
 		<a href="#/quickstart/intro">Go to Pit Configuration now.</a>
 	</div>
-	<div class="alert alert-warning alert-dismissable"
-			 ng-show="vm.ShowLimited">
-		<button type="button"
-						class="close"
-						data-dismiss="alert">
-			<i class="icon-remove"></i>
-		</button>
+	<div class="alert alert-warning"
+	     ng-show="vm.ShowLimited">
 		<strong>Note:</strong>
 		The current Pit was specified from the command line,
 		which limits activities to viewing faults that occur.
 		You can stop the current job by stopping the Peach process responsible for this job.
 	</div>
-	<div class="alert alert-success alert-dismissable"
+	
+	<div class="alert alert-success"
 			 ng-show="vm.ShowReady">
-		<button type="button"
-						class="close"
-						data-dismiss="alert">
-			<i class="icon-remove"></i>
-		</button>
-		The Pit is configured and ready for use. Click the START button below to begin fuzzing.
+		The Pit is configured and ready for use. 
+		Click the START button below to begin fuzzing.
 	</div>
+
 	<div class="alert alert-info"
-			 ng-show="vm.ShowReproducing">
-		Fault detected, attempting to reproduce.
-	</div>
-	<div class="alert alert-info"
-			 ng-show="vm.ShowSearching">
-		Fault detected.
-		Peach is searching test cases leading to the fault.
-		This action could take a while to complete.
+			 ng-show="vm.ShowStatus"
+			 ng-switch="vm.JobStatus">
+		<span ng-switch-when="startPending">
+			Peach is starting...
+		</span>
+		<span ng-switch-when="running"
+		      ng-switch="vm.JobMode">
+			<span ng-switch-when="fuzzing">
+				Peach is currently fuzzing...
+			</span>
+			<span ng-switch-when="reproducing">
+				Fault detected, attempting to reproduce.
+			</span>
+			<span ng-switch-when="searching">
+				Fault detected.
+				Peach is searching test cases leading to the fault.
+				This action could take a while to complete.
+			</span>
+		</span>
+		<span ng-switch-when="pausePending">
+			Peach is pausing...
+		</span>
+		<span ng-switch-when="paused">
+			Peach is currently paused.
+		</span>
+		<span ng-switch-when="continuePending">
+			Peach is continuing...
+		</span>
+		<span ng-switch-when="stopPending">
+			Peach is stopping...
+		</span>
+		<span ng-switch-when="stopped">
+			Peach is currently stopped.
+		</span>
+		<span ng-switch-when="actionPending">
+			Peach is waiting for an action to complete...
+		</span>
 	</div>
 
 	<div class="row">
@@ -92,7 +104,7 @@
 						{{vm.Job.speed || ' '}}
 					</span>
 					<div class="infobox-content">
-						Iterations&#47;Hour
+						Iterations/Hour
 					</div>
 				</div>
 			</div>

@@ -52,6 +52,15 @@ module Peach {
 			return this.pitAgents;
 		}
 
+		private changeHandlers: Function[] = [];
+		public OnPitChanged(callback: Function) {
+			this.changeHandlers.push(callback);
+		}
+
+		private notifyOnPitChanged() {
+			this.changeHandlers.forEach(fn => fn());
+		}
+
 		// MainController 
 		// -> PitLibraryController (modal)
 		//    -> SelectPit 
@@ -89,7 +98,10 @@ module Peach {
 
 		private setPit(pit: IPit) {
 			this.pit = pit;
+			this.pitConfig = undefined;
+			this.pitAgents = undefined;
 			this.$window.sessionStorage.setItem('pitId', this.PitId);
+			this.notifyOnPitChanged();
 		}
 
 		public ReloadPit() {
