@@ -174,11 +174,11 @@ namespace Peach.Pro.Core.Runtime
 					{ "debug", v => config.debug = 1 },
 					{ "trace", v => config.debug = 2 },
 					{ "1", v => config.singleIteration = true},
-					{ "range=", v => ParseRange(v)},
+					{ "range=", v => ParseRange("range", v)},
 					{ "c|count", v => config.countOnly = true},
-					{ "skipto=", v => config.skipToIteration = Convert.ToUInt32(v)},
-					{ "seed=", v => config.randomSeed = Convert.ToUInt32(v)},
-					{ "p|parallel=", v => ParseParallel(v)},
+					{ "skipto=", v => config.skipToIteration = ParseUInt("skipToIteration", v)},
+					{ "seed=", v => config.randomSeed = ParseUInt("randomSeed", v)},
+					{ "p|parallel=", v => ParseParallel("parallel", v)},
 
 					// Defined values & .config files
 					{ "D|define=", v => AddNewDefine(v) },
@@ -321,7 +321,11 @@ namespace Peach.Pro.Core.Runtime
 			ConsoleWatcher.WriteInfoMark();
 			Console.WriteLine("Starting agent server");
 
-			agentServer.Run(new Dictionary<string, string>());
+			var args = new Dictionary<string, string>();
+			for (int i = 0; i < extra.Count; i++)
+				args[i.ToString()] = extra[i];
+
+			agentServer.Run(args);
 		}
 
 		/// <summary>
@@ -519,7 +523,19 @@ Debug Peach Pit File
 
 		#region Command line option parsing helpers
 
-		protected void ParseRange(string v)
+		protected uint ParseUInt(string arg, string v)
+		{
+			uint ret;
+
+			if (!uint.TryParse(v, out ret))
+				throw new PeachException(
+					"An invalid option for --{0} was specified.  The value '{1}' could not be converted to an unsigned integer.".Fmt(
+						arg, v));
+
+			return ret;
+		}
+
+		protected void ParseRange(string arg, string v)
 		{
 			string[] parts = v.Split(',');
 			if (parts.Length != 2)
@@ -549,7 +565,7 @@ Debug Peach Pit File
 			config.range = true;
 		}
 
-		protected void ParseParallel(string v)
+		protected void ParseParallel(string arg, string v)
 		{
 			string[] parts = v.Split(',');
 			if (parts.Length != 2)
@@ -657,20 +673,27 @@ Debug Peach Pit File
 
 		static void ShowDevices()
 		{
-			Console.WriteLine();
-			Console.WriteLine("The following devices are available on this machine:");
-			Console.WriteLine("----------------------------------------------------");
-			Console.WriteLine();
-
-			int i = 0;
-
 			var devices = CaptureDeviceList.Instance;
 
-			// Print out all available devices
-			foreach (ICaptureDevice dev in devices)
+			if (devices.Count == 0)
 			{
-				Console.WriteLine("Name: {0}\nDescription: {1}\n\n", dev.Name, dev.Description);
-				i++;
+				Console.WriteLine();
+				Console.WriteLine("No capture devices were found.  Ensure you have the proper");
+				Console.WriteLine("permissions for performing PCAP captures and try again.");
+				Console.WriteLine();
+			}
+			else
+			{
+				Console.WriteLine();
+				Console.WriteLine("The following devices are available on this machine:");
+				Console.WriteLine("----------------------------------------------------");
+				Console.WriteLine();
+
+				// Print out all available devices
+				foreach (var dev in devices)
+				{
+					Console.WriteLine("Name: {0}\nDescription: {1}\n\n", dev.Name, dev.Description);
+				}
 			}
 
 			throw new SyntaxException();
