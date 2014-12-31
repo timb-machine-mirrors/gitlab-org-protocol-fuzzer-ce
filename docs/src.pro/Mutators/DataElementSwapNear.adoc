@@ -12,4 +12,4 @@ NOTE: This mutator binds to any container data element (DataModel, Block, Choice
 
 === Hints
 
-None.
+This mutator does not support hints.
