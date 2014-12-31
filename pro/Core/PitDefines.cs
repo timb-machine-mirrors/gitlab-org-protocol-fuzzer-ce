@@ -147,7 +147,7 @@ namespace Peach.Pro.Core
 					return ClassLoader
 						.GetAllByAttribute<MutationStrategyAttribute>(null)
 						.Select(kv => kv.Key)
-						.Where(k => k.IsDefault)
+						.Where(k => k.IsDefault && !k.IsTest)
 						.Select(k => k.Name)
 						.ToArray();
 				}

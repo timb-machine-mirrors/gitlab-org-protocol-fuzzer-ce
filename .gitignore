@@ -57,3 +57,9 @@ _Resharper*
 *.lastbuildstate
 .depproj/
 /WebEssentials-Settings.json
+
+# These are ignored by asciidoctor-fopub subtree however
+# put them here too so the build/remote script won't try
+# and rsync the folders when doing a remote build
+/docs/publishing/asciidoctor-fopub/.gradle/
+/docs/publishing/asciidoctor-fopub/build/
