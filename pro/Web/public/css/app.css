@@ -63,6 +63,12 @@ pre {
 	margin-right: 0;
 }
 
+.btn-lg {
+	border-width: 3px;
+	line-height: 1.35;
+	padding: 7px 16px;
+}
+
 .peach-icon-cell {
 	width: 25px;
 }

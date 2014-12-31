@@ -35,7 +35,13 @@ module Peach {
 			return !this.Job && !this.pitService.Pit;
 		}
 
-		public get ShowNeedsConfig(): boolean {
+		public get ShowReady(): boolean {
+			return onlyIf(this.pitService.Pit, () =>
+				this.pitService.IsConfigured && this.CanStart
+			);
+		}
+
+		public get ShowNotConfigured(): boolean {
 			return onlyIf(this.pitService.Pit, () => !this.pitService.IsConfigured);
 		}
 
@@ -43,12 +49,16 @@ module Peach {
 			return onlyIf(this.Job, () => _.isEmpty(this.Job.pitUrl));
 		}
 
-		public get ShowReproducing(): boolean {
-			return onlyIf(this.Job, () => this.Job.mode === JobMode.Reproducing);
+		public get ShowStatus(): boolean {
+			return !_.isUndefined(this.Job);
 		}
 
-		public get ShowSearching(): boolean {
-			return onlyIf(this.Job, () => this.Job.mode === JobMode.Searching);
+		public get JobStatus(): string {
+			return onlyIf(this.Job, () => this.Job.status);
+		}
+
+		public get JobMode(): string {
+			return this.Job.mode;
 		}
 
 		public get Job(): IJob {
@@ -60,15 +70,15 @@ module Peach {
 		}
 
 		public get CanStart() {
-			return this.jobService.CanStartJob || this.jobService.CanContinueJob;
+			return this.jobService.CanStart || this.jobService.CanContinue;
 		}
 
 		public get CanPause() {
-			return this.jobService.CanPauseJob;
+			return this.jobService.CanPause;
 		}
 
 		public get CanStop() {
-			return this.jobService.CanStopJob;
+			return this.jobService.CanStop;
 		}
 
 		public StartWithOptions() {
