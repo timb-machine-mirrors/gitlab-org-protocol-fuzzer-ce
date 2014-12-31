@@ -293,7 +293,7 @@ use the source, luke!
 die 'zomg perl sucks';
       EOS
       output = render_embedded_string input
-      assert_xpath %(/*[@class="listingblock"]//pre[@class="highlight"]/code[@class="perl language-perl"][text()="die 'zomg perl sucks';"]), output, 1
+      assert_xpath %(/*[@class="listingblock"]//pre[@class="highlight"]/code[@class="language-perl"][@data-lang="perl"][text()="die 'zomg perl sucks';"]), output, 1
     end
 
     test 'literal paragraph terminates at block attribute list' do
@@ -511,7 +511,7 @@ Wise words from a wise person.
       test 'should only format and output text in first paragraph when doctype is inline' do
         input = "http://asciidoc.org[AsciiDoc] is a _lightweight_ markup language...\n\nignored"
         output = render_string input, :doctype => 'inline'
-        assert_equal '<a href="http://asciidoc.org">AsciiDoc</a> is a <em>lightweight</em> markup language&#8230;', output
+        assert_equal '<a href="http://asciidoc.org">AsciiDoc</a> is a <em>lightweight</em> markup language&#8230;&#8203;', output
       end
 
       test 'should output empty string if first block is not a paragraph' do

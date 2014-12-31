@@ -102,12 +102,15 @@ context 'Invoker' do
 
   test 'should display version and exit' do
     expected = %(Asciidoctor #{Asciidoctor::VERSION} [http://asciidoctor.org]\nRuntime Environment (#{RUBY_DESCRIPTION}))
-    actual = nil
-    redirect_streams do |out, err|
-      invoke_cli %w(--version)
-      actual = out.string.rstrip
+    ['--version', '-V'].each do |switch|
+      actual = nil
+      redirect_streams do |out, err|
+        invoke_cli [switch]
+        actual = out.string.rstrip
+      end
+      refute_nil actual
+      assert actual.start_with?(expected), %(Expected to print version when using #{switch} switch)
     end
-    assert_equal expected, actual
   end
 
   test 'should print warnings to stderr by default' do
@@ -146,7 +149,7 @@ context 'Invoker' do
   test 'should report error if input file does not exist' do
     redirect_streams do |out, err|
       invoker = invoke_cli [], 'missing_file.asciidoc'
-      assert_match(/input file .* missing/, err.string)
+      assert_match(/input file .* missing or cannot be read/, err.string)
       assert_equal 1, invoker.code
     end
   end
@@ -154,7 +157,7 @@ context 'Invoker' do
   test 'should treat extra arguments as files' do
     redirect_streams do |out, err|
       invoker = invoke_cli %w(-o /dev/null extra arguments sample.asciidoc), nil
-      assert_match(/input file .* missing/, err.string)
+      assert_match(/input file .* missing or cannot be read/, err.string)
       assert_equal 1, invoker.code
     end
   end

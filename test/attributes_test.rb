@@ -96,6 +96,34 @@ linus.torvalds@example.com
       assert_equal '', doc.attributes['release']
     end
 
+    test 'resolves attributes inside attribute value within header' do
+      input = <<-EOS
+= Document Title
+:big: big
+:bigfoot: {big}foot
+
+{bigfoot}
+      EOS
+
+      result = render_embedded_string input
+      assert result.include? 'bigfoot'
+    end
+
+    test 'resolves attributes and pass macro inside attribute value outside header' do
+      input = <<-EOS
+= Document Title
+
+content
+
+:big: pass:a,q[_big_]
+:bigfoot: {big}foot
+{bigfoot}
+      EOS
+
+      result = render_embedded_string input
+      assert result.include? '<em>big</em>foot'
+    end
+
     test 'resolves user-home attribute if safe mode is less than SERVER' do
       input = <<-EOS
 :imagesdir: {user-home}/etc/images
@@ -282,6 +310,37 @@ content
       assert_equal 'bar', (node.attr 'foo')
       node.set_attr 'foo', 'baz'
       assert_equal 'baz', (node.attr 'foo')
+    end
+
+    test 'verify toc attribute matrix' do
+      expected_data = <<-EOS
+#attributes                               |toc|toc-position|toc-placement|toc-class
+toc                                       |   |nil         |auto         |nil
+toc=header                                |   |nil         |auto         |nil
+toc=beeboo                                |   |nil         |auto         |nil
+toc=left                                  |   |left        |auto         |toc2
+toc2                                      |   |left        |auto         |toc2
+toc=right                                 |   |right       |auto         |toc2
+toc=preamble                              |   |content     |preamble     |nil
+toc=macro                                 |   |content     |macro        |nil
+toc toc-placement=macro toc-position=left |   |content     |macro        |nil
+toc toc-placement!                        |   |content     |macro        |nil
+      EOS
+
+      expected = expected_data.strip.lines.map {|l|
+        next if l.start_with? '#'
+        l.split('|').map {|e| (e = e.strip) == 'nil' ? nil : e }
+      }.compact
+
+      expected.each do |expect|
+        raw_attrs, toc, toc_position, toc_placement, toc_class = expect
+        attrs = Hash[*(raw_attrs.split ' ').map {|e| e.include?('=') ? e.split('=') : [e, ''] }.flatten]
+        doc = document_from_string '', :attributes => attrs
+        toc ? (assert doc.attr?('toc', toc)) : (assert !doc.attr?('toc')) 
+        toc_position ? (assert doc.attr?('toc-position', toc_position)) : (assert !doc.attr?('toc-position')) 
+        toc_placement ? (assert doc.attr?('toc-placement', toc_placement)) : (assert !doc.attr?('toc-placement')) 
+        toc_class ? (assert doc.attr?('toc-class', toc_class)) : (assert !doc.attr?('toc-class')) 
+      end
     end
   end
 
@@ -480,6 +539,15 @@ v1.0, 2010-01-01: First release!
 .Require the +{gem_name}+ gem
 To use {gem_name}, the first thing to do is to import it in your Ruby source file.
       EOS
+      output = render_embedded_string input, :attributes => {'compat-mode' => ''}
+      assert_xpath '//*[@class="title"]/code[text()="asciidoctor"]', output, 1
+
+      input = <<-EOS
+:gem_name: asciidoctor
+
+.Require the `{gem_name}` gem
+To use {gem_name}, the first thing to do is to import it in your Ruby source file.
+      EOS
       output = render_embedded_string input
       assert_xpath '//*[@class="title"]/code[text()="asciidoctor"]', output, 1
     end
@@ -497,6 +565,30 @@ Belly up to the {foo}.
       output = render_embedded_string input
       assert_xpath '//p[text()="Crossing the bar."]', output, 1
       assert_xpath '//p[text()="Belly up to the bar."]', output, 0
+    end
+
+    test 'should allow compat-mode to be set and unset in middle of document' do
+      input = <<-EOS
+:foo: bar
+
+[[paragraph-a]]
+`{foo}`
+
+:compat-mode!:
+
+[[paragraph-b]]
+`{foo}`
+
+:compat-mode:
+
+[[paragraph-c]]
+`{foo}`
+      EOS
+
+      result = render_embedded_string input, :attributes => {'compat-mode' => '@'}
+      assert_xpath '/*[@id="paragraph-a"]//code[text()="{foo}"]', result, 1
+      assert_xpath '/*[@id="paragraph-b"]//code[text()="bar"]', result, 1
+      assert_xpath '/*[@id="paragraph-c"]//code[text()="{foo}"]', result, 1
     end
 
     test 'does not disturb attribute-looking things escaped with backslash' do
@@ -724,6 +816,20 @@ after: {counter:mycounter}
   end
 
   context 'Block attributes' do
+    test 'parses attribute names as name token' do
+      input = <<-EOS
+[normal,foo="bar",_foo="_bar",foo1="bar1",foo-foo="bar-bar",foo.foo="bar.bar"]
+content
+      EOS
+
+      block = block_from_string input
+      assert_equal 'bar', block.attr('foo') 
+      assert_equal '_bar', block.attr('_foo') 
+      assert_equal 'bar1', block.attr('foo1') 
+      assert_equal 'bar-bar', block.attr('foo-foo') 
+      assert_equal 'bar.bar', block.attr('foo.foo') 
+    end
+
     test 'positional attributes assigned to block' do
       input = <<-EOS
 [quote, author, source]

@@ -16,6 +16,10 @@ context 'Document' do
       assert_equal 14, doc.blocks.size
       assert_equal :preamble, doc.blocks[0].context
       assert doc.blocks[1].context == :section
+
+      # verify compat-mode is set when atx-style doctitle is used
+      result = doc.blocks[0].convert
+      assert_xpath %q(//em[text()="Stuart Rackham"]), result, 1
     end
   end
 
@@ -73,21 +77,42 @@ context 'Document' do
       end
     end
 
-    test 'toc and numbered should be enabled by default for DocBook backend' do
-      doc = empty_document :backend => 'docbook', :parse => true
+    test 'toc and sectnums should be enabled by default for DocBook backend' do
+      doc = document_from_string 'content', :backend => 'docbook', :parse => true
       assert doc.attr?('toc')
-      assert doc.attr?('numbered')
+      assert doc.attr?('sectnums')
+      result = doc.convert
+      assert_match('<?asciidoc-toc?>', result)
+      assert_match('<?asciidoc-numbered?>', result)
     end
 
-    test 'should be able to disable toc and numbered in document header for DocBook backend' do
+    test 'maxdepth attribute should be set on asciidoc-toc and asciidoc-numbered processing instructions in DocBook backend' do
+      doc = document_from_string 'content', :backend => 'docbook', :parse => true, :attributes => {'toclevels' => '1', 'sectnumlevels' => '1' }
+      assert doc.attr?('toc')
+      assert doc.attr?('sectnums')
+      result = doc.convert
+      assert_match('<?asciidoc-toc maxdepth="1"?>', result)
+      assert_match('<?asciidoc-numbered maxdepth="1"?>', result)
+    end
+
+    test 'should be able to disable toc and sectnums in document header for DocBook backend' do
       input = <<-EOS
 = Document Title
 :toc!:
-:numbered!:
+:sectnums!:
       EOS
       doc = document_from_string input, :backend => 'docbook'
       assert !doc.attr?('toc')
-      assert !doc.attr?('numbered')
+      assert !doc.attr?('sectnums')
+    end
+
+    test 'should be able to disable section numbering using numbered attribute in document header for DocBook backend' do
+      input = <<-EOS
+= Document Title
+:numbered!:
+      EOS
+      doc = document_from_string input, :backend => 'docbook'
+      assert !doc.attr?('sectnums')
     end
   end
 
@@ -107,6 +132,16 @@ context 'Document' do
       assert_equal File.expand_path(sample_input_path), doc.attr('docfile')
       assert_equal File.expand_path(File.dirname(sample_input_path)), doc.attr('docdir')
     end
+
+    test 'should not load invalid file' do
+      sample_input_path = fixture_path('hello-asciidoctor.pdf')
+      exception = assert_raises ArgumentError do
+        Asciidoctor.load_file(sample_input_path, :safe => Asciidoctor::SafeMode::SAFE)
+      end
+      assert_match(/Failed to parse AsciiDoc source/, exception.message)
+      # verify we have the correct backtrace (should be in at least first 5 lines)
+      assert_match((RUBY_ENGINE == 'rbx' ? /parser\.rb/ : /helpers\.rb/), exception.backtrace[0..4].join("\n"))
+    end if RUBY_MIN_VERSION_1_9
 
     test 'should load input IO' do
       input = StringIO.new(<<-EOS)
@@ -149,12 +184,12 @@ preamble
 
     test 'should accept attributes as array' do
 	  # NOTE there's a tab character before idseparator
-      doc = Asciidoctor.load('text', :attributes => %w(toc numbered   source-highlighter=coderay idprefix	idseparator=-))
+      doc = Asciidoctor.load('text', :attributes => %w(toc sectnums   source-highlighter=coderay idprefix	idseparator=-))
       assert doc.attributes.is_a?(Hash)
       assert doc.attr?('toc')
       assert_equal '', doc.attr('toc')
-      assert doc.attr?('numbered')
-      assert_equal '', doc.attr('numbered')
+      assert doc.attr?('sectnums')
+      assert_equal '', doc.attr('sectnums')
       assert doc.attr?('source-highlighter')
       assert_equal 'coderay', doc.attr('source-highlighter')
       assert doc.attr?('idprefix')
@@ -170,12 +205,12 @@ preamble
 
     test 'should accept attributes as string' do
 	  # NOTE there's a tab character before idseparator
-      doc = Asciidoctor.load('text', :attributes => 'toc numbered  source-highlighter=coderay idprefix	idseparator=-')
+      doc = Asciidoctor.load('text', :attributes => 'toc sectnums  source-highlighter=coderay idprefix	idseparator=-')
       assert doc.attributes.is_a?(Hash)
       assert doc.attr?('toc')
       assert_equal '', doc.attr('toc')
-      assert doc.attr?('numbered')
-      assert_equal '', doc.attr('numbered')
+      assert doc.attr?('sectnums')
+      assert_equal '', doc.attr('sectnums')
       assert doc.attr?('source-highlighter')
       assert_equal 'coderay', doc.attr('source-highlighter')
       assert doc.attr?('idprefix')
@@ -333,19 +368,20 @@ paragraph
 
     test 'should accept attributes as array' do
       sample_input_path = fixture_path('sample.asciidoc')
-      output = Asciidoctor.convert_file sample_input_path, :attributes => %w(numbered idprefix idseparator=-), :to_file => false
+      output = Asciidoctor.convert_file sample_input_path, :attributes => %w(sectnums idprefix idseparator=-), :to_file => false
       assert_css '#section-a', output, 1
     end
 
     test 'should accept attributes as string' do
       sample_input_path = fixture_path('sample.asciidoc')
-      output = Asciidoctor.convert_file sample_input_path, :attributes => 'numbered idprefix idseparator=-', :to_file => false
+      output = Asciidoctor.convert_file sample_input_path, :attributes => 'sectnums idprefix idseparator=-', :to_file => false
       assert_css '#section-a', output, 1
     end
 
     test 'should link to default stylesheet by default when safe mode is SECURE or greater' do
       sample_input_path = fixture_path('basic.asciidoc')
       output = Asciidoctor.convert_file sample_input_path, :header_footer => true, :to_file => false
+      assert_css 'html:root > head > link[rel="stylesheet"][href^="https://fonts.googleapis.com"]', output, 1
       assert_css 'html:root > head > link[rel="stylesheet"][href="./asciidoctor.css"]', output, 1
     end
 
@@ -357,6 +393,7 @@ text
       EOS
 
       output = Asciidoctor.render(input, :safe => Asciidoctor::SafeMode::SERVER, :header_footer => true)
+      assert_css 'html:root > head > link[rel="stylesheet"][href^="https://fonts.googleapis.com"]', output, 1
       assert_css 'html:root > head > link[rel="stylesheet"][href="./asciidoctor.css"]', output, 0
       stylenode = xmlnodes_at_css 'html:root > head > style', output, 1
       styles = stylenode.first.content
@@ -373,6 +410,7 @@ text
       EOS
 
       output = Asciidoctor.render(input, :header_footer => true)
+      assert_css 'html:root > head > link[rel="stylesheet"][href^="https://fonts.googleapis.com"]', output, 1
       assert_css 'html:root > head > link[rel="stylesheet"][href="./asciidoctor.css"]', output, 1
     end
 
@@ -384,6 +422,7 @@ text
       EOS
 
       output = Asciidoctor.render(input, :header_footer => true, :attributes => {'linkcss!' => ''})
+      assert_css 'html:root > head > link[rel="stylesheet"][href^="https://fonts.googleapis.com"]', output, 1
       assert_css 'html:root > head > link[rel="stylesheet"][href="./asciidoctor.css"]', output, 1
     end
 
@@ -406,6 +445,7 @@ text
       EOS
 
       output = Asciidoctor.render(input, :header_footer => true, :attributes => {'stylesheet!' => ''})
+      assert_css 'html:root > head > link[rel="stylesheet"][href^="https://fonts.googleapis.com"]', output, 0
       assert_css 'html:root > head > link[rel="stylesheet"]', output, 0
     end
 
@@ -417,7 +457,11 @@ text
       EOS
 
       output = Asciidoctor.render(input, :header_footer => true, :attributes => {'stylesheet' => './custom.css'})
+      assert_css 'html:root > head > link[rel="stylesheet"][href^="https://fonts.googleapis.com"]', output, 0
       assert_css 'html:root > head > link[rel="stylesheet"][href="./custom.css"]', output, 1
+
+      output = Asciidoctor.render(input, :header_footer => true, :attributes => {'stylesheet' => 'file:///home/username/custom.css'})
+      assert_css 'html:root > head > link[rel="stylesheet"][href="file:///home/username/custom.css"]', output, 1
     end
 
     test 'should resolve custom stylesheet relative to stylesdir' do
@@ -611,6 +655,34 @@ text
       assert_css 'meta[http-equiv="imagetoolbar"]', output, 1
     end
 
+    test 'should include docinfo files for html backend with custom docinfodir' do
+      sample_input_path = fixture_path('basic.asciidoc')
+
+      output = Asciidoctor.convert_file sample_input_path, :to_file => false,
+                                        :header_footer => true, :safe => Asciidoctor::SafeMode::SERVER, :attributes => {'docinfo' => '', 'docinfodir' => 'custom-docinfodir'}
+      assert !output.empty?
+      assert_css 'script[src="bootstrap.js"]', output, 1
+      assert_css 'meta[name="robots"]', output, 0
+
+      output = Asciidoctor.convert_file sample_input_path, :to_file => false,
+                                        :header_footer => true, :safe => Asciidoctor::SafeMode::SERVER, :attributes => {'docinfo1' => '', 'docinfodir' => 'custom-docinfodir'}
+      assert !output.empty?
+      assert_css 'script[src="bootstrap.js"]', output, 0
+      assert_css 'meta[name="robots"]', output, 1
+
+      output = Asciidoctor.convert_file sample_input_path, :to_file => false,
+                                        :header_footer => true, :safe => Asciidoctor::SafeMode::SERVER, :attributes => {'docinfo2' => '', 'docinfodir' => './custom-docinfodir'}
+      assert !output.empty?
+      assert_css 'script[src="bootstrap.js"]', output, 1
+      assert_css 'meta[name="robots"]', output, 1
+
+      output = Asciidoctor.convert_file sample_input_path, :to_file => false,
+                                        :header_footer => true, :safe => Asciidoctor::SafeMode::SERVER, :attributes => {'docinfo2' => '', 'docinfodir' => 'custom-docinfodir/subfolder'}
+      assert !output.empty?
+      assert_css 'script[src="bootstrap.js"]', output, 0
+      assert_css 'meta[name="robots"]', output, 0
+    end
+
     test 'should include docinfo files for docbook backend' do
       sample_input_path = fixture_path('basic.asciidoc')
 
@@ -747,6 +819,16 @@ text
       assert_css 'productname', output, 0
       assert_css 'copyright', output, 0
     end
+
+    test 'should apply explicit substitutions to docinfo files' do
+      sample_input_path = fixture_path('subs.adoc')
+
+      output = Asciidoctor.convert_file sample_input_path, :to_file => false,
+                                        :header_footer => true, :safe => Asciidoctor::SafeMode::SERVER, :attributes => {'docinfo' => '', 'docinfosubs' => 'attributes,replacements', 'linkcss' => ''}
+      assert !output.empty?
+      assert_css 'script[src="bootstrap.3.2.0.min.js"]', output, 1
+      assert_xpath %(//meta[@name="copyright"][@content="#{entity 169} OpenDevise"]), output, 1
+    end
   end
 
   context 'MathJax' do
@@ -806,6 +888,22 @@ text
       assert_nil doc.name
       assert !doc.has_header?
       assert_nil doc.header
+    end
+
+    test 'document with subtitle' do
+      input = <<-EOS
+= Main Title: *Subtitle*
+Author Name
+
+content
+      EOS
+
+      doc = document_from_string input
+      title = doc.doctitle :partition => true, :sanitize => true
+      assert title.subtitle?
+      assert title.sanitized?
+      assert_equal 'Main Title', title.main
+      assert_equal 'Subtitle', title.subtitle
     end
 
     test 'document with doctitle defined as attribute entry' do
@@ -963,11 +1061,11 @@ more info...
       assert_xpath '//meta[@name="description"][@content="AsciiDoc user guide"]', output, 1
       assert_xpath '//meta[@name="keywords"][@content="asciidoc,documentation"]', output, 1
       assert_xpath '//meta[@name="copyright"][@content="Stuart Rackham"]', output, 1
-      assert_xpath '//*[@id="header"]/span[@id="author"][text() = "Stuart Rackham"]', output, 1
-      assert_xpath '//*[@id="header"]/span[@id="email"]/a[@href="mailto:founder@asciidoc.org"][text() = "founder@asciidoc.org"]', output, 1
-      assert_xpath '//*[@id="header"]/span[@id="revnumber"][text() = "version 8.6.8,"]', output, 1
-      assert_xpath '//*[@id="header"]/span[@id="revdate"][text() = "2012-07-12"]', output, 1
-      assert_xpath '//*[@id="header"]/span[@id="revremark"][text() = "See changelog."]', output, 1
+      assert_xpath '//*[@id="header"]/*[@class="details"]/span[@id="author"][text() = "Stuart Rackham"]', output, 1
+      assert_xpath '//*[@id="header"]/*[@class="details"]/span[@id="email"]/a[@href="mailto:founder@asciidoc.org"][text() = "founder@asciidoc.org"]', output, 1
+      assert_xpath '//*[@id="header"]/*[@class="details"]/span[@id="revnumber"][text() = "version 8.6.8,"]', output, 1
+      assert_xpath '//*[@id="header"]/*[@class="details"]/span[@id="revdate"][text() = "2012-07-12"]', output, 1
+      assert_xpath '//*[@id="header"]/*[@class="details"]/span[@id="revremark"][text() = "See changelog."]', output, 1
     end
 
     test 'should include revision history if revdate and revnumber is set' do
@@ -1400,6 +1498,36 @@ section body
       refute_match(RE_XMLNS_ATTRIBUTE, result)
     end
 
+    test 'docbook45 backend doctype manpage' do
+      input = <<-EOS
+= asciidoctor(1)
+
+== NAME
+
+asciidoctor - Process text
+
+== SYNOPSIS
+
+some text
+
+== First Section
+
+section body
+      EOS
+      result = render_string(input, :attributes => {'backend' => 'docbook45', 'doctype' => 'manpage'})
+      assert_xpath '/refentry', result, 1
+      assert_xpath '/refentry/refentryinfo/title[text() = "asciidoctor(1)"]', result, 1
+      assert_xpath '/refentry/refmeta/refentrytitle[text() = "asciidoctor"]', result, 1
+      assert_xpath '/refentry/refmeta/manvolnum[text() = "1"]', result, 1
+      assert_xpath '/refentry/refnamediv/refname[text() = "asciidoctor"]', result, 1
+      assert_xpath '/refentry/refnamediv/refpurpose[text() = "Process text"]', result, 1
+      assert_xpath '/refentry/refsynopsisdiv', result, 1
+      assert_xpath '/refentry/refsynopsisdiv/simpara[text() = "some text"]', result, 1
+      assert_xpath '/refentry/refsection', result, 1
+      assert_xpath '/refentry/refsection[@id = "_first_section"]/title[text() = "First Section"]', result, 1
+      assert_xpath '/refentry/refsection[@id = "_first_section"]/simpara[text() = "section body"]', result, 1
+    end
+
     test 'docbook45 backend doctype book' do
       input = <<-EOS
 = Title
@@ -1466,6 +1594,45 @@ section body
       assert_xpath '/xmlns:article/xmlns:simpara[text() = "preamble"]', result, 1
       assert_xpath '/xmlns:article/xmlns:section', result, 1
       section = xmlnodes_at_xpath('/xmlns:article/xmlns:section', result, 1).first
+      # nokogiri can't make up its mind
+      id_attr = section.attribute('id') || section.attribute('xml:id')
+      refute_nil id_attr
+      refute_nil id_attr.namespace
+      assert_equal 'xml', id_attr.namespace.prefix
+      assert_equal '_first_section', id_attr.value
+    end
+
+    test 'docbook5 backend doctype manpage' do
+      input = <<-EOS
+= asciidoctor(1)
+
+== NAME
+
+asciidoctor - Process text
+
+== SYNOPSIS
+
+some text
+
+== First Section
+
+section body
+      EOS
+      result = render_string(input, :keep_namespaces => true, :attributes => {'backend' => 'docbook5', 'doctype' => 'manpage'})
+      assert_xpath '/xmlns:refentry', result, 1
+      doc = xmlnodes_at_xpath('/xmlns:refentry', result, 1).first
+      assert_equal 'http://docbook.org/ns/docbook', doc.namespaces['xmlns']
+      assert_equal 'http://www.w3.org/1999/xlink', doc.namespaces['xmlns:xlink']
+      assert_xpath '/xmlns:refentry[@version="5.0"]', result, 1
+      assert_xpath '/xmlns:refentry/xmlns:info/xmlns:title[text() = "asciidoctor(1)"]', result, 1
+      assert_xpath '/xmlns:refentry/xmlns:refmeta/xmlns:refentrytitle[text() = "asciidoctor"]', result, 1
+      assert_xpath '/xmlns:refentry/xmlns:refmeta/xmlns:manvolnum[text() = "1"]', result, 1
+      assert_xpath '/xmlns:refentry/xmlns:refnamediv/xmlns:refname[text() = "asciidoctor"]', result, 1
+      assert_xpath '/xmlns:refentry/xmlns:refnamediv/xmlns:refpurpose[text() = "Process text"]', result, 1
+      assert_xpath '/xmlns:refentry/xmlns:refsynopsisdiv', result, 1
+      assert_xpath '/xmlns:refentry/xmlns:refsynopsisdiv/xmlns:simpara[text() = "some text"]', result, 1
+      assert_xpath '/xmlns:refentry/xmlns:refsection', result, 1
+      section = xmlnodes_at_xpath('/xmlns:refentry/xmlns:refsection', result, 1).first
       # nokogiri can't make up its mind
       id_attr = section.attribute('id') || section.attribute('xml:id')
       refute_nil id_attr

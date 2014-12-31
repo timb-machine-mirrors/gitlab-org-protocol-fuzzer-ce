@@ -19,7 +19,7 @@ begin
   require 'rake/testtask'
   Rake::TestTask.new(:test) do |test|
     prepare_test_env
-    puts "LANG: #{ENV['LANG']}"
+    puts %(LANG: #{ENV['LANG']}) if ENV.key? 'TRAVIS_BUILD_ID'
     test.libs << 'test'
     test.pattern = 'test/**/*_test.rb'
     test.verbose = true
@@ -52,6 +52,32 @@ begin
 rescue LoadError
 end
 
+def ci_setup_tasks
+  tasks = []
+  begin
+    require 'ci/reporter/rake/minitest'
+    tasks << 'ci:setup:minitest'
+    # FIXME reporter for Cucumber tests not activating
+    #require 'ci/reporter/rake/cucumber'
+    #tasks << 'ci:setup:cucumber'
+  rescue LoadError
+  end if ENV['SHIPPABLE'] && RUBY_VERSION >= '1.9.3'
+  tasks
+end
+
+desc 'Activates coverage and JUnit-style XML reports for tests'
+task :coverage => ci_setup_tasks do
+  # exclude coverage run for Ruby 1.8.7 or (disabled) if running on Travis CI
+  ENV['COVERAGE'] = 'true' if RUBY_VERSION >= '1.9.3' # && (ENV['SHIPPABLE'] || !ENV['TRAVIS_BUILD_ID'])
+  ENV['CI_REPORTS'] = 'shippable/testresults'
+  ENV['COVERAGE_REPORTS'] = 'shippable/codecoverage'
+end
+
+namespace :test do
+  desc 'Run unit and feature tests'
+  task :all => [:test,:features]
+end
+
 =begin
 begin
   require 'rdoc/task'
@@ -59,7 +85,7 @@ begin
     rdoc.rdoc_dir = 'rdoc'
     rdoc.title = "Asciidoctor #{Asciidoctor::VERSION}"
     rdoc.markup = 'tomdoc' if rdoc.respond_to?(:markup)
-    rdoc.rdoc_files.include('LICENSE', 'lib/**/*.rb')
+    rdoc.rdoc_files.include('LICENSE.adoc', 'lib/**/*.rb')
   end
 rescue LoadError
 end
@@ -88,7 +114,7 @@ begin
         lib/**/*.rb
         -
         CHANGELOG.adoc
-        LICENSE
+        LICENSE.adoc
     )
     # --no-highlight enabled to prevent verbatim blocks in AsciiDoc that begin with $ from being dropped
     # need to patch htmlify method to not attempt to syntax highlight blocks (or fix what's wrong)
@@ -103,6 +129,7 @@ begin
   # Enhance the release task to create an explicit commit for the release
   Rake::Task[:release].enhance [:commit_release]
 
+  # NOTE you don't need to push after updating version and committing locally
   task :commit_release do
     Bundler::GemHelper.new.send(:guard_clean)
     sh "git commit --allow-empty -a -m 'Release #{Asciidoctor::VERSION}'"

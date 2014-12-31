@@ -1,3 +1,4 @@
+# encoding: UTF-8
 module Asciidoctor
 class AbstractBlock < AbstractNode
   # Public: The types of content that this block can accomodate
@@ -24,7 +25,7 @@ class AbstractBlock < AbstractNode
   # Public: Gets/Sets the location in the AsciiDoc source where this block begins
   attr_accessor :source_location
 
-  def initialize(parent, context, opts = {})
+  def initialize parent, context, opts = {}
     super
     @content_model = :compound
     @subs = []
@@ -167,11 +168,14 @@ class AbstractBlock < AbstractNode
   #   # => 2
   #
   # Returns nothing.
-  def <<(block)
+  def << block
     # parent assignment pending refactor
     #block.parent = self
     @blocks << block
   end
+
+  # NOTE append alias required for adapting to a Java API
+  alias :append :<<
 
   # Public: Get the Array of child Section objects
   #

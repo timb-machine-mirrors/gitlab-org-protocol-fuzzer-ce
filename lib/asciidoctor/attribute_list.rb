@@ -1,3 +1,4 @@
+# encoding: UTF-8
 module Asciidoctor
 # Public: Handles parsing AsciiDoc attribute lists into a Hash of key/value
 # pairs. By default, attributes must each be separated by a comma and quotes
@@ -22,11 +23,19 @@ module Asciidoctor
 #
 class AttributeList
 
+  # FIXME Opal not inheriting constants from parent scope
+  # NOTE can't use ::RUBY_ENGINE_OPAL here either
+  if ::RUBY_ENGINE == 'opal'
+    CG_BLANK = '[ \\t]'
+    CC_WORD  = 'a-zA-Z0-9_'
+    CG_WORD  = '[a-zA-Z0-9_]'
+  end
+
   # Public: Regular expressions for detecting the boundary of a value
   BoundaryRxs = {
     '"' => /.*?[^\\](?=")/,
     '\'' => /.*?[^\\](?=')/,
-    ',' => /.*?(?=[ \t]*(,|$))/
+    ',' => /.*?(?=#{CG_BLANK}*(,|$))/
   }
 
   # Public: Regular expressions for unescaping quoted characters
@@ -35,16 +44,16 @@ class AttributeList
     '\'' => /\\'/
   }
 
-  # Public: A regular expression for an attribute name
+  # Public: A regular expression for an attribute name (approx. name token from XML)
   # TODO named attributes cannot contain dash characters
-  NameRx = /[A-Za-z:_][A-Za-z:_\-.]*/
+  NameRx = /#{CG_WORD}[#{CC_WORD}\-.]*/
 
-  BlankRx = /[ \t]+/
+  BlankRx = /#{CG_BLANK}+/
 
   # Public: Regular expressions for skipping blanks and delimiters
   SkipRxs = {
     :blank => BlankRx,
-    ',' => /[ \t]*(,|$)/
+    ',' => /#{CG_BLANK}*(,|$)/
   }
 
   def initialize source, block = nil, delimiter = ','
@@ -151,19 +160,18 @@ class AttributeList
     if value
       # example: options="opt1,opt2,opt3"
       # opts is an alias for options
-      resolved_value = case name
+      case name
       when 'options', 'opts'
         name = 'options'
-        value.split(',').each {|o| @attributes[%(#{o.strip}-option)] = '' }
-        value
+        value.tr(' ', '').split(',').each {|opt| @attributes[%(#{opt}-option)] = '' }
+        @attributes[name] = value
       when 'title'
-        value
+        @attributes[name] = value
       else
-        single_quoted_value && @block ? (@block.apply_normal_subs value) : value
+        @attributes[name] = single_quoted_value && !value.empty? && @block ? (@block.apply_normal_subs value) : value
       end
-      @attributes[name] = resolved_value
     else
-      resolved_name = single_quoted_value && @block ? (@block.apply_normal_subs name) : name
+      resolved_name = single_quoted_value && !name.empty? && @block ? (@block.apply_normal_subs name) : name
       if (pos_name = pos_attrs[index])
         @attributes[pos_name] = resolved_name
       end

@@ -1,3 +1,4 @@
+# encoding: UTF-8
 ASCIIDOCTOR_PROJECT_DIR = File.dirname File.dirname(__FILE__)
 Dir.chdir ASCIIDOCTOR_PROJECT_DIR
 
@@ -5,16 +6,17 @@ if RUBY_VERSION < '1.9'
   require 'rubygems'
 end
 
+require 'simplecov' if ENV['COVERAGE'] == 'true'
+
 require File.join(ASCIIDOCTOR_PROJECT_DIR, 'lib', 'asciidoctor')
 
 require 'minitest/autorun'
 require 'socket'
 require 'nokogiri'
+require 'tmpdir'
 
 autoload :FileUtils, 'fileutils'
 autoload :Pathname,  'pathname'
-
-ENV['SUPPRESS_DEBUG'] ||= 'true'
 
 RE_XMLNS_ATTRIBUTE = / xmlns="[^"]+"/
 RE_DOCTYPE = /\s*<!DOCTYPE (.*)/
@@ -36,7 +38,11 @@ class Minitest::Test
   end
 
   def empty_document options = {}
-    Asciidoctor::Document.new [], options
+    if options[:parse]
+      (Asciidoctor::Document.new [], options).parse
+    else
+      Asciidoctor::Document.new [], options
+    end
   end
 
   def empty_safe_document options = {}
@@ -154,7 +160,11 @@ class Minitest::Test
 
   def document_from_string(src, opts = {})
     assign_default_test_options opts
-    Asciidoctor::Document.new src.lines.entries, opts
+    if opts[:parse]
+      (Asciidoctor::Document.new src.lines.entries, opts).parse
+    else
+      Asciidoctor::Document.new src.lines.entries, opts
+    end
   end
 
   def block_from_string(src, opts = {})
@@ -270,7 +280,8 @@ class Minitest::Test
   end
 
   def resolve_localhost
-    RUBY_VERSION < '1.9' ? Socket.gethostname : Socket.ip_address_list.find {|addr| addr.ipv4? }.ip_address
+    (RUBY_VERSION < '1.9' || RUBY_ENGINE == 'rbx') ? Socket.gethostname :
+        Socket.ip_address_list.find {|addr| addr.ipv4? }.ip_address
   end
 
   def using_test_webserver host = resolve_localhost, port = 9876

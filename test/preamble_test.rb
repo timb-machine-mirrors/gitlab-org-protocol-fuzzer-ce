@@ -24,6 +24,39 @@ Section paragraph 1.
     assert_xpath '//*[@id="preamble"]/following-sibling::*//p', result, 1
   end
 
+  test 'title of preface is blank by default in DocBook output' do
+    input = <<-EOS
+= Document Title
+:doctype: book
+
+Preface content.
+
+== First Section
+
+Section content.
+    EOS
+    result = render_string input, :backend => :docbook
+    assert_xpath '//preface/title', result, 1
+    title_node = xmlnodes_at_xpath '//preface/title', result, 1
+    assert_equal '', title_node.text
+  end
+
+  test 'preface-title attribute is assigned as title of preface in DocBook output' do
+    input = <<-EOS
+= Document Title
+:doctype: book
+:preface-title: Preface
+
+Preface content.
+
+== First Section
+
+Section content.
+    EOS
+    result = render_string input, :backend => :docbook
+    assert_xpath '//preface/title[text()="Preface"]', result, 1
+  end
+
   test 'title and multi-paragraph preamble before section' do
     input = <<-EOS
 = Title
@@ -114,7 +147,7 @@ The axe came swinging.
       assert_equal 'book', d.doctype 
       output = d.render
       assert_xpath '//h1', output, 3
-      assert_xpath %{//*[@id="preamble"]//p[text() = "Back then#{[8230].pack('U*')}"]}, output, 1
+      assert_xpath %{//*[@id="preamble"]//p[text() = "Back then#{expand_entity 8230}#{expand_entity 8203}"]}, output, 1
   end
 
   test 'should render table of contents in preamble if toc-placement attribute value is preamble' do

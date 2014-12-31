@@ -7,11 +7,11 @@ end
 context 'Links' do
 
   test 'qualified url inline with text' do
-    assert_xpath "//a[@href='http://asciidoc.org'][text() = 'http://asciidoc.org']", render_string("The AsciiDoc project is located at http://asciidoc.org.")
+    assert_xpath "//a[@href='http://asciidoc.org'][@class='bare'][text() = 'http://asciidoc.org']", render_string("The AsciiDoc project is located at http://asciidoc.org.")
   end
 
   test 'qualified http url inline with hide-uri-scheme set' do
-    assert_xpath "//a[@href='http://asciidoc.org'][text() = 'asciidoc.org']", render_string("The AsciiDoc project is located at http://asciidoc.org.", :attributes => {'hide-uri-scheme' => ''})
+    assert_xpath "//a[@href='http://asciidoc.org'][@class='bare'][text() = 'asciidoc.org']", render_string("The AsciiDoc project is located at http://asciidoc.org.", :attributes => {'hide-uri-scheme' => ''})
   end
 
   test 'qualified file url inline with label' do
@@ -120,7 +120,11 @@ context 'Links' do
   end
 
   test 'link with quoted text should not be separated into attributes when linkattrs is set' do
-    assert_xpath '//a[@href="http://search.example.com"][text()="Google, Yahoo, Bing"]', render_embedded_string('http://search.example.com["Google, Yahoo, Bing"]', :attributes => {'linkattrs' => ''}), 1
+    assert_xpath '//a[@href="http://search.example.com"][text()="Google, Yahoo, Bing = Search Engines"]', render_embedded_string('http://search.example.com["Google, Yahoo, Bing = Search Engines"]', :attributes => {'linkattrs' => ''}), 1
+  end
+
+  test 'link with comma in text but no equal sign should not be separated into attributes when linkattrs is set' do
+    assert_xpath '//a[@href="http://search.example.com"][text()="Google, Yahoo, Bing"]', render_embedded_string('http://search.example.com[Google, Yahoo, Bing]', :attributes => {'linkattrs' => ''}), 1
   end
 
   test 'role and window attributes on link are processed when linkattrs is set' do

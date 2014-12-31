@@ -1,3 +1,4 @@
+# encoding: UTF-8
 module Asciidoctor
 # A utility class for working with the built-in stylesheets.
 #--
@@ -6,7 +7,7 @@ module Asciidoctor
 class Stylesheets
   DEFAULT_STYLESHEET_NAME = 'asciidoctor.css'
   #DEFAULT_CODERAY_STYLE = 'asciidoctor'
-  DEFAULT_PYGMENTS_STYLE = 'pastie'
+  DEFAULT_PYGMENTS_STYLE = 'default'
   STYLESHEETS_DATA_PATH = ::File.join DATA_PATH, 'stylesheets'
 
   @__instance__ = new
@@ -70,7 +71,7 @@ class Stylesheets
   # returns the [String] Pygments stylesheet data
   def pygments_stylesheet_data style = nil
     style ||= DEFAULT_PYGMENTS_STYLE
-    (@pygments_stylesheet_data ||= load_pygments)[style] ||= ::Pygments.css '.listingblock pre.highlight', :classprefix => 'tok-', :style => style
+    (@pygments_stylesheet_data ||= load_pygments)[style] ||= ::Pygments.css '.listingblock .pygments', :classprefix => 'tok-', :style => style
   end
 
   def embed_pygments_stylesheet style = nil

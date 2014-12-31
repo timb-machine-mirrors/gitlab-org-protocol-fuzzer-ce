@@ -57,9 +57,9 @@ context 'Options' do
   end
 
   test 'standard attribute assignment' do
-    options = Asciidoctor::Cli::Options.parse!(%w(-a imagesdir=images,icons test/fixtures/sample.asciidoc))
+    options = Asciidoctor::Cli::Options.parse!(%w(-a docinfosubs=attributes,replacements -a icons test/fixtures/sample.asciidoc))
 
-    assert_equal 'images', options[:attributes]['imagesdir']
+    assert_equal 'attributes,replacements', options[:attributes]['docinfosubs']
     assert_equal '', options[:attributes]['icons']
   end
 
@@ -74,6 +74,11 @@ context 'Options' do
     options = Asciidoctor::Cli::Options.parse!(%w(-a name=value=value test/fixtures/sample.asciidoc))
 
     assert_equal 'value=value', options[:attributes]['name']
+  end
+
+  test 'should allow safe mode to be specified' do
+    options = Asciidoctor::Cli::Options.parse!(%w(-S safe test/fixtures/sample.asciidoc))
+    assert_equal Asciidoctor::SafeMode::SAFE, options[:safe]
   end
 
   test 'should allow any backend to be specified' do
@@ -112,7 +117,7 @@ context 'Options' do
     assert_equal ['custom-backend', 'custom-backend-hacks'], options[:template_dirs]
   end
 
-  test '-r option requires specified libraries' do
+  test 'multiple -r flags requires specified libraries' do
     options = Asciidoctor::Cli::Options.new
     redirect_streams do |stdout, stderr|
       exitval = options.parse! %w(-r foobar -r foobaz test/fixtures/sample.asciidoc)
@@ -122,11 +127,36 @@ context 'Options' do
     end
   end
 
-  test '-I option appends directories to $LOAD_PATH' do
+  test '-r flag with multiple values requires specified libraries' do
+    options = Asciidoctor::Cli::Options.new
+    redirect_streams do |stdout, stderr|
+      exitval = options.parse! %w(-r foobar,foobaz test/fixtures/sample.asciidoc)
+      assert_match(%(asciidoctor: FAILED: 'foobar' could not be loaded), stderr.string)
+      assert_equal 1, exitval
+      assert_equal ['foobar', 'foobaz'], options[:requires]
+    end
+  end
+
+  test '-I option appends paths to $LOAD_PATH' do
     options = Asciidoctor::Cli::Options.new
     old_load_path = $LOAD_PATH.dup
     begin
       exitval = options.parse! %w(-I foobar -I foobaz test/fixtures/sample.asciidoc)
+      refute_equal 1, exitval
+      assert_equal old_load_path.size + 2, $LOAD_PATH.size
+      assert_equal File.expand_path('foobar'), $LOAD_PATH[0]
+      assert_equal File.expand_path('foobaz'), $LOAD_PATH[1]
+      assert_equal ['foobar', 'foobaz'], options[:load_paths]
+    ensure
+      ($LOAD_PATH.size - old_load_path.size).times { $LOAD_PATH.shift }
+    end
+  end
+
+  test '-I option appends multiple paths to $LOAD_PATH' do
+    options = Asciidoctor::Cli::Options.new
+    old_load_path = $LOAD_PATH.dup
+    begin
+      exitval = options.parse! %W(-I foobar#{File::PATH_SEPARATOR}foobaz test/fixtures/sample.asciidoc)
       refute_equal 1, exitval
       assert_equal old_load_path.size + 2, $LOAD_PATH.size
       assert_equal File.expand_path('foobar'), $LOAD_PATH[0]

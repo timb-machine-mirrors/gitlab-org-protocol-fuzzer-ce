@@ -1,3 +1,4 @@
+# encoding: UTF-8
 module Asciidoctor
   module Converter
     # A factory for instantiating converters that are used to convert a
@@ -43,6 +44,7 @@ module Asciidoctor
         # Returns the default [Factory] singleton instance
         def default initialize_singleton = true
           return @__default__ || new unless initialize_singleton
+          # FIXME this assignment is not thread_safe, may need to use a ::Threadsafe helper here
           @__default__ ||= begin
             require 'thread_safe'.to_s unless defined? ::ThreadSafe
             new ::ThreadSafe::Cache.new
@@ -77,6 +79,23 @@ module Asciidoctor
         # or nil if no match is found
         def resolve backend
           default.resolve backend
+        end
+
+        # Public: Lookup the converter for the specified backend in the global
+        # factory and instantiate it, forwarding the Hash of options to the
+        # constructor of the converter class.
+        #
+        # If the custom converter is not found, an attempt will be made to find
+        # and instantiate a built-in converter.
+        #
+        #
+        # backend - The String backend name
+        # opts - A Hash of options to pass to the converter
+        #
+        # Returns an instance of [Converter] for converting the specified backend or
+        # nil if no match is found.
+        def create backend, opts = {}
+          default.create backend, opts
         end
 
         # Public: Retrieve the global Hash of custom Converter classes keyed by backend.

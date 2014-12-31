@@ -1,3 +1,4 @@
+# encoding: UTF-8
 module Asciidoctor
 # Public: An abstract base class that provides state and methods for managing a
 # node of AsciiDoc content. The state and methods on this class are comment to
@@ -24,23 +25,24 @@ class AbstractNode
   # Public: Get the Hash of attributes for this node
   attr_reader :attributes
 
-  def initialize(parent, context, opts = {})
+  def initialize parent, context, opts = {}
     # document is a special case, should refer to itself
     if context == :document
-      @parent = nil
       @document = parent
     else
-      if (@parent = parent)
+      if parent
+        @parent = parent
         @document = parent.document
       else
+        @parent = nil
         @document = nil
       end
     end
     @context = context
     @node_name = context.to_s
     # QUESTION are we correct in duplicating the attributes (seems to be just as fast)
-    @attributes = opts.key?(:attributes) ? (opts[:attributes] || {}).dup : {}
-    @passthroughs = []
+    @attributes = (opts.key? :attributes) ? opts[:attributes].dup : {}
+    @passthroughs = {}
   end
 
   # Public: Associate this Block with a new parent Block
@@ -58,14 +60,18 @@ class AbstractNode
   #
   # Returns [Boolean]
   def inline?
+    # :nocov:
     raise ::NotImplementedError
+    # :nocov:
   end
 
   # Public: Returns whether this {AbstractNode} is an instance of {Block}
   #
   # Returns [Boolean]
   def block?
+    # :nocov:
     raise ::NotImplementedError
+    # :nocov:
   end
 
   # Public: Get the value of the specified attribute
@@ -189,10 +195,10 @@ class AbstractNode
 
   # Public: A convenience method that checks if the role attribute is specified
   def role?(expect = nil)
-    if expect.nil?
-      @attributes.has_key?('role') || @document.attributes.has_key?('role')
-    else
+    if expect
       expect == (@attributes['role'] || @document.attributes['role'])
+    else
+      @attributes.has_key?('role') || @document.attributes.has_key?('role')
     end
   end
 
@@ -271,11 +277,7 @@ class AbstractNode
   #
   # Returns A String reference for the target media
   def media_uri(target, asset_dir_key = 'imagesdir')
-    if is_uri? target
-      target
-    else
-      normalize_web_path target, (asset_dir_key ? @document.attr(asset_dir_key) : nil)
-    end
+    normalize_web_path target, (asset_dir_key ? @document.attr(asset_dir_key) : nil)
   end
 
   # Public: Construct a URI reference or data URI to the target image.
@@ -300,9 +302,9 @@ class AbstractNode
   def image_uri(target_image, asset_dir_key = 'imagesdir')
     if (doc = @document).safe < SafeMode::SECURE && doc.attr?('data-uri')
       if is_uri?(target_image) ||
-          (asset_dir_key && (images_base = doc.attr(asset_dir_key)) &&
-          is_uri?(images_base) && (target_image = normalize_web_path target_image, images_base))
-        if doc.attr? 'allow-uri-read'
+          (asset_dir_key && (images_base = doc.attr(asset_dir_key)) && is_uri?(images_base) &&
+          (target_image = normalize_web_path(target_image, images_base, false)))
+        if doc.attr?('allow-uri-read')
           generate_data_uri_from_uri target_image, doc.attr?('cache-uri')
         else
           target_image
@@ -310,8 +312,6 @@ class AbstractNode
       else
         generate_data_uri target_image, asset_dir_key
       end
-    elsif is_uri? target_image
-      target_image
     else
       normalize_web_path target_image, (asset_dir_key ? doc.attr(asset_dir_key) : nil)
     end
@@ -340,7 +340,8 @@ class AbstractNode
 
     unless ::File.readable? image_path
       warn %(asciidoctor: WARNING: image to embed not found or not readable: #{image_path})
-      return %(data:#{mimetype}:base64,)
+      # must enclose string following return in " for Opal
+      return "data:#{mimetype}:base64,"
       # uncomment to return 1 pixel white dot instead
       #return 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
     end
@@ -351,6 +352,7 @@ class AbstractNode
     else
       bindata = ::File.open(image_path, 'rb') {|file| file.read }
     end
+    # NOTE base64 is autoloaded by reference to ::Base64
     %(data:#{mimetype};base64,#{::Base64.encode64(bindata).delete EOL})
   end
  
@@ -367,7 +369,6 @@ class AbstractNode
   # Returns A data URI string built from Base64 encoded data read from the URI
   # and the mime type specified in the Content Type header.
   def generate_data_uri_from_uri image_uri, cache_uri = false
-    Helpers.require_library 'base64'
     if cache_uri
       # caching requires the open-uri-cached gem to be installed
       # processing will be automatically aborted if these libraries can't be opened
@@ -383,7 +384,8 @@ class AbstractNode
         mimetype = file.content_type 
         file.read
       }
-      %(data:#{mimetype};base64,#{Base64.encode64(bindata).delete EOL})
+      # NOTE base64 is autoloaded by reference to ::Base64
+      %(data:#{mimetype};base64,#{::Base64.encode64(bindata).delete EOL})
     rescue
       warn %(asciidoctor: WARNING: could not retrieve image data from URI: #{image_uri})
       image_uri
@@ -398,18 +400,27 @@ class AbstractNode
   # This method assumes that the path is safe to read. It checks
   # that the file is readable before attempting to read it.
   #
-  # path            - the String path from which to read the contents
-  # warn_on_failure - a Boolean that controls whether a warning is issued if
-  #                   the file cannot be read
+  # path - the String path from which to read the contents
+  # opts - a Hash of options to control processing (default: {})
+  #        * :warn_on_failure a Boolean that controls whether a warning
+  #          is issued if the file cannot be read (default: false)
+  #        * :normalize a Boolean that controls whether the lines
+  #          are normalized and coerced to UTF-8 (default: false)
   #
   # Returns the [String] content of the file at the specified path, or nil
   # if the file does not exist.
-  def read_asset(path, warn_on_failure = false)
+  def read_asset(path, opts = {})
+    # remap opts for backwards compatibility
+    opts = { :warn_on_failure => (opts != false) } unless ::Hash === opts
     if ::File.readable? path
-      # QUESTION should we use strip or rstrip instead of chomp here?
-      ::File.read(path).chomp
+      if opts[:normalize]
+        # QUESTION should we strip content?
+        Helpers.normalize_lines_from_string(::IO.read(path)) * EOL
+      else
+        ::IO.read(path)
+      end
     else
-      warn "asciidoctor: WARNING: file does not exist or cannot be read: #{path}" if warn_on_failure
+      warn %(asciidoctor: WARNING: file does not exist or cannot be read: #{path}) if opts[:warn_on_failure]
       nil
     end
   end
@@ -418,12 +429,17 @@ class AbstractNode
   #
   # See {PathResolver#web_path} for details.
   #
-  # target - the String target path
-  # start  - the String start (i.e, parent) path (optional, default: nil)
+  # target              - the String target path
+  # start               - the String start (i.e, parent) path (optional, default: nil)
+  # preserve_uri_target - a Boolean indicating whether target should be preserved if contains a URI (default: true)
   #
   # Returns the resolved [String] path 
-  def normalize_web_path(target, start = nil)
-    (@path_resolver ||= PathResolver.new).web_path(target, start)
+  def normalize_web_path(target, start = nil, preserve_uri_target = true)
+    if preserve_uri_target && is_uri?(target)
+      target
+    else
+      (@path_resolver ||= PathResolver.new).web_path target, start
+    end
   end
 
   # Public: Resolve and normalize a secure path from the target and start paths
@@ -451,14 +467,19 @@ class AbstractNode
   # Returns the [String] path resolved from the start and target paths, with any
   # parent references resolved and self references removed. If a jail is provided,
   # this path will be guaranteed to be contained within the jail.
-  def normalize_system_path(target, start = nil, jail = nil, opts = {})
-    if start.nil?
-      start = @document.base_dir
+  def normalize_system_path target, start = nil, jail = nil, opts = {}
+    path_resolver = (@path_resolver ||= PathResolver.new)
+    if (doc = @document).safe < SafeMode::SAFE
+      if start
+        start = ::File.join doc.base_dir, start unless path_resolver.is_root? start
+      else
+        start = doc.base_dir
+      end
+    else
+      start = doc.base_dir unless start
+      jail = doc.base_dir unless jail
     end
-    if jail.nil? && @document.safe >= SafeMode::SAFE
-      jail = @document.base_dir
-    end
-    (@path_resolver ||= PathResolver.new).system_path(target, start, jail, opts)
+    path_resolver.system_path target, start, jail, opts
   end
 
   # Public: Normalize the asset file or directory to a concrete and rinsed path

@@ -453,6 +453,17 @@ List
       assert_xpath '//ul/li', output, 3
     end
 
+    test 'indented unicode bullet elements using spaces' do
+      input = <<-EOS
+ • Foo
+ • Boo
+ • Blech
+      EOS
+      output = render_string input
+      assert_xpath '//ul', output, 1
+      assert_xpath '//ul/li', output, 3
+    end if ::RUBY_MIN_VERSION_1_9
+
     test 'indented asterisk elements using tabs' do
       input = <<-EOS
 \t*\tFoo
@@ -804,6 +815,27 @@ List
       assert_xpath '(((((//ul)[1]/li//ul)[1]/li//ul)[1]/li//ul)[1]/li//ul)[1]/li', output, 1
     end
 
+    test 'nested elements (5) with unicode bullet' do
+      input = <<-EOS
+List
+====
+
+• Foo
+•• Boo
+••• Snoo
+•••• Froo
+••••• Groo
+• Blech
+      EOS
+      output = render_string input
+      assert_xpath '//ul', output, 5
+      assert_xpath '(//ul)[1]/li', output, 2
+      assert_xpath '((//ul)[1]/li//ul)[1]/li', output, 1
+      assert_xpath '(((//ul)[1]/li//ul)[1]/li//ul)[1]/li', output, 1
+      assert_xpath '((((//ul)[1]/li//ul)[1]/li//ul)[1]/li//ul)[1]/li', output, 1
+      assert_xpath '(((((//ul)[1]/li//ul)[1]/li//ul)[1]/li//ul)[1]/li//ul)[1]/li', output, 1
+    end if ::RUBY_MIN_VERSION_1_9
+
     test "nested ordered elements (2)" do
       input = <<-EOS
 List
@@ -1056,7 +1088,7 @@ Lists
       assert_xpath '//ul/li[1]/p', output, 1
       assert_xpath '(//ul/li[1]/p/following-sibling::*)[1][@id="beck"][@class = "listingblock"]', output, 1
       assert_xpath '(//ul/li[1]/p/following-sibling::*)[1][@id="beck"]/div[@class="title"][starts-with(text(),"Read")]', output, 1
-      assert_xpath '(//ul/li[1]/p/following-sibling::*)[1][@id="beck"]//code[@class="ruby language-ruby"][starts-with(text(),"5.times")]', output, 1
+      assert_xpath '(//ul/li[1]/p/following-sibling::*)[1][@id="beck"]//code[@data-lang="ruby"][starts-with(text(),"5.times")]', output, 1
     end
 
     test 'trailing block attribute line attached by continuation should not create block' do
@@ -2652,6 +2684,25 @@ last question::
       text = xmlnodes_at_xpath '(//a)[1]/following-sibling::text()', output, 1
       assert text.text.start_with?('[taoup] ')
     end
+
+    test 'should render bibliography list with proper semantics to DocBook' do
+      input = <<-EOS
+[bibliography]
+- [[[taoup]]] Eric Steven Raymond. 'The Art of Unix
+  Programming'. Addison-Wesley. ISBN 0-13-142901-9.
+- [[[walsh-muellner]]] Norman Walsh & Leonard Muellner.
+  'DocBook - The Definitive Guide'. O'Reilly & Associates. 1999.
+  ISBN 1-56592-580-7.
+      EOS
+      output = render_embedded_string input, :backend => 'docbook'
+      assert_css 'bibliodiv', output, 1
+      assert_css 'bibliodiv > bibliomixed', output, 2
+      assert_css 'bibliodiv > bibliomixed > bibliomisc', output, 2
+      assert_css 'bibliodiv > bibliomixed:nth-child(1) > bibliomisc > anchor', output, 1
+      assert_css 'bibliodiv > bibliomixed:nth-child(1) > bibliomisc > anchor[xreflabel="[taoup]"]', output, 1
+      assert_css 'bibliodiv > bibliomixed:nth-child(2) > bibliomisc > anchor', output, 1
+      assert_css 'bibliodiv > bibliomixed:nth-child(2) > bibliomisc > anchor[xreflabel="[walsh-muellner]"]', output, 1
+    end
   end
 end
 
@@ -3971,30 +4022,56 @@ foo::
     assert_xpath '//ol/li/p[text()="Not pointing to a callout"]', output, 1
   end
 
-  test 'should remove leading line comment chars' do
+  test 'should remove line comment chars that precedes callout number' do
     input = <<-EOS
+[source,ruby]
 ----
 puts 'Hello, world!' # <1>
 ----
 <1> Ruby
 
+[source,groovy]
 ----
 println 'Hello, world!' // <1>
 ----
 <1> Groovy
 
+[source,clojure]
 ----
 (def hello (fn [] "Hello, world!")) ;; <1>
 (hello)
 ----
 <1> Clojure
+
+[source,haskell]
+----
+main = putStrLn "Hello, World!" -- <1>
+----
+<1> Haskell
+    EOS
+    [{}, {'source-highlighter' => 'coderay'}].each do |attributes|
+      output = render_embedded_string input, :attributes => attributes
+      assert_xpath '//b', output, 4
+      nodes = xmlnodes_at_css 'pre', output 
+      assert_equal %(puts 'Hello, world!' (1)), nodes[0].text
+      assert_equal %(println 'Hello, world!' (1)), nodes[1].text
+      assert_equal %((def hello (fn [] "Hello, world!")) (1)\n(hello)), nodes[2].text
+      assert_equal %(main = putStrLn "Hello, World!" (1)), nodes[3].text
+    end
+  end
+
+  test 'should allow line comment chars that precede callout number to be specified' do
+    input = <<-EOS
+[source,erlang,line-comment=%]
+----
+hello_world() -> io:fwrite("hello, world\n"). % <1>
+----
+<1> Erlang
     EOS
     output = render_embedded_string input
-    assert_xpath '//b', output, 3
+    assert_xpath '//b', output, 1
     nodes = xmlnodes_at_css 'pre', output 
-    assert_equal "puts 'Hello, world!' (1)", nodes[0].text
-    assert_equal "println 'Hello, world!' (1)", nodes[1].text
-    assert_equal %((def hello (fn [] "Hello, world!")) (1)\n(hello)), nodes[2].text
+    assert_equal %(hello_world() -> io:fwrite("hello, world\n"). (1)), nodes[0].text
   end
 
   test 'literal block with callouts' do
@@ -4074,7 +4151,7 @@ context 'Checklists' do
     input = <<-EOS
 - [ ] todo
 - [x] done
-- [] another todo
+- [ ] another todo
 - [*] another done
 - plain
     EOS

@@ -60,10 +60,21 @@ include::fixtures/encoding.asciidoc[tags=romé]
     assert_xpath "//br", render_string("Well this is +\njust fine and dandy, isn't it?"), 1
   end
 
-  test "single- and double-quoted text" do
-    rendered = render_string("``Where?,'' she said, flipping through her copy of `The New Yorker.'")
+  test 'single- and double-quoted text' do
+    rendered = render_embedded_string(%q(``Where?,'' she said, flipping through her copy of `The New Yorker.'), :attributes => {'compat-mode' => ''})
     assert_match(/&#8220;Where\?,&#8221;/, rendered)
     assert_match(/&#8216;The New Yorker.&#8217;/, rendered)
+
+    rendered = render_embedded_string(%q("`Where?,`" she said, flipping through her copy of '`The New Yorker.`'))
+    assert_match(/&#8220;Where\?,&#8221;/, rendered)
+    assert_match(/&#8216;The New Yorker.&#8217;/, rendered)
+  end
+
+  test 'multiple double-quoted text on a single line' do
+    assert_equal '&#8220;Our business is constantly changing&#8221; or &#8220;We need faster time to market.&#8221;',
+        render_embedded_string(%q(``Our business is constantly changing'' or ``We need faster time to market.''), :doctype => :inline, :attributes => {'compat-mode' => ''})
+    assert_equal '&#8220;Our business is constantly changing&#8221; or &#8220;We need faster time to market.&#8221;',
+        render_embedded_string(%q("`Our business is constantly changing`" or "`We need faster time to market.`"), :doctype => :inline)
   end
 
   test 'horizontal rule' do
@@ -177,12 +188,12 @@ This line is separated something that is not a horizontal rule...
 
   test 'emphasized text with single quote using apostrophe characters' do
     rsquo = [8217].pack 'U*'
-    assert_xpath %(//em[text()="Johnny#{rsquo}s"]), render_string(%q(It's 'Johnny's' phone), :attributes => {'compat-mode' => 'legacy'})
+    assert_xpath %(//em[text()="Johnny#{rsquo}s"]), render_string(%q(It's 'Johnny's' phone), :attributes => {'compat-mode' => ''})
     assert_xpath %(//p[text()="It#{rsquo}s 'Johnny#{rsquo}s' phone"]), render_string(%q(It's 'Johnny's' phone))
   end
 
   test 'emphasized text with escaped single quote using apostrophe characters' do
-    assert_xpath %(//em[text()="Johnny's"]), render_string(%q(It's 'Johnny\\'s' phone), :attributes => {'compat-mode' => 'legacy'})
+    assert_xpath %(//em[text()="Johnny's"]), render_string(%q(It's 'Johnny\\'s' phone), :attributes => {'compat-mode' => ''})
     assert_xpath %(//p[text()="It's 'Johnny's' phone"]), render_string(%q(It\\'s 'Johnny\\'s' phone))
   end
 
@@ -190,9 +201,9 @@ This line is separated something that is not a horizontal rule...
     assert_xpath "//p[contains(text(), \"Let's do it!\")]", render_string("Let\\'s do it!")
   end
 
-  test 'unescape escaped single quote emphasis in legacy mode only' do
-    assert_xpath %(//p[text()="A 'single quoted string' example"]), render_embedded_string(%(A \\'single quoted string' example), :attributes => {'compat-mode' => 'legacy'})
-    assert_xpath %(//p[text()="'single quoted string'"]), render_embedded_string(%(\\'single quoted string'), :attributes => {'compat-mode' => 'legacy'})
+  test 'unescape escaped single quote emphasis in compat mode only' do
+    assert_xpath %(//p[text()="A 'single quoted string' example"]), render_embedded_string(%(A \\'single quoted string' example), :attributes => {'compat-mode' => ''})
+    assert_xpath %(//p[text()="'single quoted string'"]), render_embedded_string(%(\\'single quoted string'), :attributes => {'compat-mode' => ''})
 
     assert_xpath %(//p[text()="A \\'single quoted string' example"]), render_embedded_string(%(A \\'single quoted string' example))
     assert_xpath %(//p[text()="\\'single quoted string'"]), render_embedded_string(%(\\'single quoted string'))
@@ -214,48 +225,74 @@ This line is separated something that is not a horizontal rule...
     refute_match(/#/, render_string("An #unquoted# word"))
   end
 
-  test "backtick-escaped text followed by single-quoted text" do
-    assert_match(/<code>foo<\/code>/, render_string(%Q(run `foo` 'dog')))
+  test 'backticks and straight quotes in text' do
+    backslash = '\\'
+    assert_equal %q(run <code>foo</code> <em>dog</em>), render_embedded_string(%q(run `foo` 'dog'), :doctype => :inline, :attributes => {'compat-mode' => ''})
+    assert_equal %q(run <code>foo</code> 'dog'), render_embedded_string(%q(run `foo` 'dog'), :doctype => :inline)
+    assert_equal %q(run `foo` 'dog'), render_embedded_string(%(run #{backslash}`foo` 'dog'), :doctype => :inline)
+    assert_equal %q(run &#8216;foo` 'dog&#8217;), render_embedded_string(%q(run '`foo` 'dog`'), :doctype => :inline)
+    assert_equal %q(run '`foo` 'dog`'), render_embedded_string(%(run #{backslash}'`foo` 'dog#{backslash}`'), :doctype => :inline)
+  end
+
+  test 'plus characters inside single plus passthrough' do
+    assert_xpath '//p[text()="+"]', render_embedded_string('+++')
+    assert_xpath '//p[text()="+="]', render_embedded_string('++=+')
+  end
+
+  test 'plus passthrough escapes entity reference' do
+    assert_match(/&amp;#44;/, render_embedded_string('+&#44;+'))
+    assert_match(/one&amp;#44;two/, render_embedded_string('one++&#44;++two'))
   end
 
   context "basic styling" do
     setup do
-      @rendered = render_string("A *BOLD* word.  An _italic_ word.  A +mono+ word.  ^superscript!^ and some ~subscript~.")
+      @rendered = render_string("A *BOLD* word.  An _italic_ word.  A `mono` word.  ^superscript!^ and some ~subscript~.")
     end
 
     test "strong" do
-      assert_xpath "//strong", @rendered
+      assert_xpath "//strong", @rendered, 1
     end
 
     test "italic" do
-      assert_xpath "//em", @rendered
+      assert_xpath "//em", @rendered, 1
     end
 
     test "monospaced" do
-      assert_xpath "//code", @rendered
+      assert_xpath "//code", @rendered, 1
     end
 
     test "superscript" do
-      assert_xpath "//sup", @rendered
+      assert_xpath "//sup", @rendered, 1
     end
 
     test "subscript" do
-      assert_xpath "//sub", @rendered
+      assert_xpath "//sub", @rendered, 1
     end
 
-    test "backticks" do
-      assert_xpath "//code", render_string("This is `totally cool`.")
+    test "passthrough" do
+      assert_xpath "//code", render_string("This is +passed through+."), 0
+      assert_xpath "//code", render_string("This is +passed through and monospaced+.", :attributes => {'compat-mode' => ''}), 1
     end
 
     test "nested styles" do
-      rendered = render_string("Winning *big _time_* in the +city *boyeeee*+.")
+      rendered = render_string("Winning *big _time_* in the +city *boyeeee*+.", :attributes => {'compat-mode' => ''})
+
+      assert_xpath "//strong/em", rendered
+      assert_xpath "//code/strong", rendered
+
+      rendered = render_string("Winning *big _time_* in the `city *boyeeee*`.")
 
       assert_xpath "//strong/em", rendered
       assert_xpath "//code/strong", rendered
     end
 
     test "unconstrained quotes" do
-      rendered_chars = render_string("**B**__I__++M++")
+      rendered_chars = render_string("**B**__I__++M++", :attributes => {'compat-mode' => ''})
+      assert_xpath "//strong", rendered_chars
+      assert_xpath "//em", rendered_chars
+      assert_xpath "//code", rendered_chars
+
+      rendered_chars = render_string("**B**__I__``M``")
       assert_xpath "//strong", rendered_chars
       assert_xpath "//em", rendered_chars
       assert_xpath "//code", rendered_chars

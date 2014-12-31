@@ -1,3 +1,4 @@
+# encoding: UTF-8
 RUBY_ENGINE = 'unknown' unless defined? RUBY_ENGINE
 RUBY_ENGINE_OPAL = (RUBY_ENGINE == 'opal')
 RUBY_ENGINE_JRUBY = (RUBY_ENGINE == 'jruby')
@@ -6,7 +7,7 @@ RUBY_MIN_VERSION_2 = (RUBY_VERSION >= '2')
 
 require 'set'
 
-# NOTE "RUBY_ENGINE == 'opal'" conditional blocks are filtered by the Opal preprocessor
+# NOTE RUBY_ENGINE == 'opal' conditional blocks are filtered by the Opal preprocessor
 if RUBY_ENGINE == 'opal'
   require 'encoding' # needed for String.bytes method
   require 'strscan'
@@ -98,7 +99,7 @@ module Asciidoctor
 
   # Flags to control compliance with the behavior of AsciiDoc
   module Compliance
-    @keys = [].to_set
+    @keys = ::Set.new
     class << self
       attr :keys
     end
@@ -106,7 +107,7 @@ module Asciidoctor
     # Defines a new compliance key and assigns an initial value.
     def self.define key, value
       if key == :keys || (self.respond_to? key)
-        raise ::ArgumentError, %(Illegal key name: #{key})
+        raise ::ArgumentError, %(illegal key name: #{key})
       end
       instance_variable_set %(@#{key}), value
       class << self; self; end.send :attr_accessor, key
@@ -156,7 +157,13 @@ module Asciidoctor
 
     # Asciidoctor will allow the id, role and options to be set
     # on blocks using a shorthand syntax (e.g., #idname.rolename%optionname)
+    # Compliance value: false
     define :shorthand_property_syntax, true
+
+    # Asciidoctor will start counting at the following number
+    # when creating a unique id when there is a conflict
+    # Compliance value: 2
+    define :unique_id_start_index, 2
 
     # Asciidoctor will recognize commonly-used Markdown syntax
     # to the degree it does not interfere with existing
@@ -175,7 +182,12 @@ module Asciidoctor
   DATA_PATH = ::File.join ROOT_PATH, 'data'
 
   # The user's home directory, as best we can determine it
-  USER_HOME = ::Dir.home rescue ::ENV['HOME'] || ::Dir.pwd
+  # NOTE not using infix rescue for performance reasons, see: https://github.com/jruby/jruby/issues/1816
+  begin
+    USER_HOME = ::Dir.home
+  rescue
+    USER_HOME = ::ENV['HOME'] || ::Dir.pwd
+  end
 
   # Flag to indicate whether encoding can be coerced to UTF-8
   # _All_ input data must be force encoded to UTF-8 if Encoding.default_external is *not* UTF-8
@@ -329,8 +341,8 @@ module Asciidoctor
   }
 
   # attributes which be changed within the content of the document (but not
-  # header) because it has semantic meaning; ex. numbered
-  FLEXIBLE_ATTRIBUTES = %w(numbered)
+  # header) because it has semantic meaning; ex. sectnums
+  FLEXIBLE_ATTRIBUTES = %w(sectnums)
 
   # A collection of regular expressions used by the parser.
   #
@@ -357,12 +369,14 @@ module Asciidoctor
       CG_BLANK = '[ \\t]'
       CC_EOL   = '(?=\\n|$)'
       CG_GRAPH = '[\\x21-\\x7E]' # non-blank character
+      CC_ALL   = '[\s\S]' # any character, including newlines (alternatively, [^])
       CC_WORD  = 'a-zA-Z0-9_'
       CG_WORD  = '[a-zA-Z0-9_]'
     # character classes for the Regexp engine in Ruby >= 2 (Ruby 1.9 supports \p{} but has problems w/ encoding)
     elsif ::RUBY_MIN_VERSION_2
       CC_ALPHA = CG_ALPHA = '\p{Alpha}'
       CC_ALNUM = CG_ALNUM = '\p{Alnum}'
+      CC_ALL   = '.'
       CG_BLANK = '\p{Blank}'
       CC_EOL   = '$'
       CG_GRAPH = '\p{Graph}'
@@ -371,6 +385,7 @@ module Asciidoctor
     else
       CC_ALPHA = '[:alpha:]'
       CG_ALPHA = '[[:alpha:]]'
+      CC_ALL   = '.'
       CC_ALNUM = '[:alnum:]'
       CG_ALNUM = '[[:alnum:]]'
       CG_BLANK = '[[:blank:]]'
@@ -455,13 +470,18 @@ module Asciidoctor
     #
     IncludeDirectiveRx = /^\\?include::([^\[]+)\[(.*?)\]$/
 
-    # Matches a tag directive in an include file.
+    # Matches a trailing tag directive in an include file.
     #
     # Examples
     #
-    #   tag::try-catch[]
-    #   end::try-catch[]
-    TagDirectiveRx = /(?:tag|end)::\S+\[\]/
+    #   // tag::try-catch[]
+    #   try {
+    #     someMethod();
+    #   catch (Exception e) {
+    #     log(e);
+    #   }
+    #   // end::try-catch[]
+    TagDirectiveRx = /\b(?:tag|end)::\S+\[\]$/
 
     ## Attribute entries and references
 
@@ -471,7 +491,7 @@ module Asciidoctor
     #
     #   :foo: bar
     #   :First Name: Dan
-    #   :numbered!:
+    #   :sectnums!:
     #   :!toc:
     #   :long-entry: Attribute value lines ending in ' +'
     #                are joined together as a single value,
@@ -629,7 +649,7 @@ module Asciidoctor
     ## Lists
 
     # Detects the start of any list item.
-    AnyListRx = /^(?:<?\d+>#{CG_BLANK}+#{CG_GRAPH}|#{CG_BLANK}*(?:-|(?:\*|\.){1,5}|\d+\.|[a-zA-Z]\.|[IVXivx]+\))#{CG_BLANK}+#{CG_GRAPH}|#{CG_BLANK}*.*?(?::{2,4}|;;)(?:#{CG_BLANK}+#{CG_GRAPH}|$))/
+    AnyListRx = /^(?:<?\d+>#{CG_BLANK}+#{CG_GRAPH}|#{CG_BLANK}*(?:-|(?:\*|\.|\u2022){1,5}|\d+\.|[a-zA-Z]\.|[IVXivx]+\))#{CG_BLANK}+#{CG_GRAPH}|#{CG_BLANK}*.*?(?::{2,4}|;;)(?:#{CG_BLANK}+#{CG_GRAPH}|$))/
 
     # Matches an unordered list item (one level for hyphens, up to 5 levels for asterisks).
     #
@@ -638,7 +658,8 @@ module Asciidoctor
     #   * Foo
     #   - Foo
     #
-    UnorderedListRx = /^#{CG_BLANK}*(-|\*{1,5})#{CG_BLANK}+(.*)$/
+    # NOTE we know trailing (.*) will match at least one character because we strip trailing spaces
+    UnorderedListRx = /^#{CG_BLANK}*(-|\*{1,5}|\u2022{1,5})#{CG_BLANK}+(.*)$/
 
     # Matches an ordered list item (explicit numbering or up to 5 consecutive dots).
     #
@@ -653,6 +674,7 @@ module Asciidoctor
     #   I. Foo (upperroman)
     #
     # NOTE leading space match is not always necessary, but is used for list reader
+    # NOTE we know trailing (.*) will match at least one character because we strip trailing spaces
     OrderedListRx = /^#{CG_BLANK}*(\.{1,5}|\d+\.|[a-zA-Z]\.|[IVXivx]+\))#{CG_BLANK}+(.*)$/
 
     # Matches the ordinals for each type of ordered list.
@@ -707,20 +729,24 @@ module Asciidoctor
     #
     #   <1> Foo
     #
+    # NOTE we know trailing (.*) will match at least one character because we strip trailing spaces
     CalloutListRx = /^<?(\d+)>#{CG_BLANK}+(.*)/
 
     # Matches a callout reference inside literal text.
     # 
     # Examples
-    #   <1> (optionally prefixed by //, # or ;; line comment chars)
+    #   <1> (optionally prefixed by //, #, -- or ;; line comment chars)
     #   <1> <2> (multiple callouts on one line)
     #   <!--1--> (for XML-based languages)
     #
-    # NOTE special characters are already be replaced at this point during conversion to an SGML format
-    CalloutConvertRx = /(?:(?:\/\/|#|;;) ?)?(\\)?&lt;!?(--|)(\d+)\2&gt;(?=(?: ?\\?&lt;!?\2\d+\2&gt;)*#{CC_EOL})/
-    # NOTE (con't) ...but not while scanning
+    # NOTE extract regexps are applied line-by-line, so we can use $ as end-of-line char
+    CalloutExtractRx = /(?:(?:\/\/|#|--|;;) ?)?(\\)?<!?(--|)(\d+)\2>(?=(?: ?\\?<!?\2\d+\2>)*$)/
+    CalloutExtractRxt = "(\\\\)?<()(\\d+)>(?=(?: ?\\\\?<\\d+>)*$)"
+    # NOTE special characters have not been replaced when scanning
     CalloutQuickScanRx = /\\?<!?(--|)(\d+)\1>(?=(?: ?\\?<!?\1\d+\1>)*#{CC_EOL})/
-    CalloutScanRx = /(?:(?:\/\/|#|;;) ?)?(\\)?<!?(--|)(\d+)\2>(?=(?: ?\\?<!?\2\d+\2>)*#{CC_EOL})/
+    # NOTE special characters have already been replaced when converting to an SGML format
+    CalloutSourceRx = /(?:(?:\/\/|#|--|;;) ?)?(\\)?&lt;!?(--|)(\d+)\2&gt;(?=(?: ?\\?&lt;!?\2\d+\2&gt;)*#{CC_EOL})/
+    CalloutSourceRxt = "(\\\\)?&lt;()(\\d+)&gt;(?=(?: ?\\\\?&lt;\\d+&gt;)*#{CC_EOL})"
 
     # A Hash of regexps for lists used for dynamic access.
     ListRxMap = {
@@ -814,7 +840,7 @@ module Asciidoctor
     #   footnoteref:[id,text]
     #   footnoteref:[id]
     #
-    FootnoteInlineMacroRx = /\\?(footnote(?:ref)?):\[(.*?[^\\])\]/m
+    FootnoteInlineMacroRx = /\\?(footnote(?:ref)?):\[(#{CC_ALL}*?[^\\])\]/m
 
     # Matches an image or icon inline macro.
     #
@@ -836,7 +862,7 @@ module Asciidoctor
     #   indexterm2:[Tigers]
     #   ((Tigers))
     #
-    IndextermInlineMacroRx = /\\?(?:(indexterm2?):\[(.*?[^\\])\]|\(\((.+?)\)\)(?!\)))/m
+    IndextermInlineMacroRx = /\\?(?:(indexterm2?):\[(#{CC_ALL}*?[^\\])\]|\(\((#{CC_ALL}+?)\)\)(?!\)))/m
 
     # Matches either the kbd or btn inline macro.
     #
@@ -886,7 +912,7 @@ module Asciidoctor
     #   asciimath:[x != 0]
     #   latexmath:[\sqrt{4} = 2]
     #
-    StemInlineMacroRx = /\\?(stem|(?:latex|ascii)math):([a-z,]*)\[(.*?[^\\])\]/m
+    StemInlineMacroRx = /\\?(stem|(?:latex|ascii)math):([a-z,]*)\[(#{CC_ALL}*?[^\\])\]/m
 
     # Matches a menu inline macro.
     #
@@ -906,13 +932,18 @@ module Asciidoctor
     #
     MenuInlineRx = /\\?"(#{CG_WORD}[^"]*?#{CG_BLANK}*&gt;#{CG_BLANK}*[^" \t][^"]*)"/
 
-    # Matches a passthrough literal value, which may span multiple lines.
+    # Matches an inline passthrough value, which may span multiple lines.
     #
     # Examples
     #
-    #   `text`
+    #   +text+
+    #   `text` (compat)
     #
-    PassInlineLiteralRx = /(^|[^`#{CC_WORD}])(?:\[([^\]]+?)\])?(\\?`([^`\s]|[^`\s].*?\S)`)(?![`#{CC_WORD}])/m
+    # NOTE we always capture the attributes so we know when to use compatible (i.e., legacy) behavior
+    PassInlineRx = {
+      false => ['+', '`', /(^|[^#{CC_WORD};:])(?:\[([^\]]+?)\])?(\\?(\+|`)(\S|\S#{CC_ALL}*?\S)\4)(?!#{CG_WORD})/m],
+      true  => ['`', nil, /(^|[^`#{CC_WORD}])(?:\[([^\]]+?)\])?(\\?(`)([^`\s]|[^`\s]#{CC_ALL}*?\S)\4)(?![`#{CC_WORD}])/m]
+    }
 
     # Matches several variants of the passthrough inline macro, which may span multiple lines.
     #
@@ -922,7 +953,7 @@ module Asciidoctor
     #   $$text$$
     #   pass:quotes[text]
     #
-    PassInlineMacroRx = /\\?(?:(\+{3}|\${2})(.*?)\1|pass:([a-z,]*)\[(.*?[^\\])\])/m
+    PassInlineMacroRx = /(?:(?:(\\?)\[([^\]]+?)\])?(\\{0,2})(\+{2,3}|\${2})(#{CC_ALL}*?)\4|(\\?)pass:([a-z,]*)\[(#{CC_ALL}*?[^\\])\])/m
 
     # Matches an xref (i.e., cross-reference) inline macro, which may span multiple lines.
     #
@@ -932,7 +963,7 @@ module Asciidoctor
     #   xref:id[reftext]
     #
     # NOTE special characters have already been escaped, hence the entity references
-    XrefInlineMacroRx = /\\?(?:&lt;&lt;([#{CC_WORD}":].*?)&gt;&gt;|xref:([#{CC_WORD}":].*?)\[(.*?)\])/m
+    XrefInlineMacroRx = /\\?(?:&lt;&lt;([#{CC_WORD}":]#{CC_ALL}*?)&gt;&gt;|xref:([#{CC_WORD}":]#{CC_ALL}*?)\[(#{CC_ALL}*?)\])/m
 
     ## Layout
 
@@ -944,11 +975,11 @@ module Asciidoctor
     #    +
     #   Foo +
     #
-    # NOTE: JavaScript only treats ^ and $ as line boundaries in multiline regexp
-    LineBreakRx = if RUBY_ENGINE == 'opal'
-      /^(.*)[ \t]\+$/m
+    if RUBY_ENGINE == 'opal'
+      # NOTE JavaScript only treats ^ and $ as line boundaries in multiline regexp; . won't match newlines
+      LineBreakRx = /^(.*)[ \t]\+$/m
     else
-      /^(.*)[[:blank:]]\+$/
+      LineBreakRx = /^(.*)[[:blank:]]\+$/
     end
 
     # Matches an AsciiDoc horizontal rule or AsciiDoc page break.
@@ -1011,7 +1042,7 @@ module Asciidoctor
     #   to take up multiple lines and I
     #   still want to be matched."
     #
-    DoubleQuotedMultiRx = /^("|)(.*)\1$/m
+    DoubleQuotedMultiRx = /^("|)(#{CC_ALL}*)\1$/m
 
     # Matches one or more consecutive digits at the end of a line.
     #
@@ -1038,6 +1069,10 @@ module Asciidoctor
     #
     SpaceDelimiterRx = /([^\\])#{CG_BLANK}+/
 
+    # Matches a + or - modifier in a subs list
+    #
+    SubModifierSniffRx = /[+-]/
+
     # Matches any character with multibyte support explicitly enabled (length of multibyte char = 1)
     #
     # NOTE If necessary to hide use of the language modifier (u) from JavaScript, use (Regexp.new '.', false, 'u')
@@ -1051,9 +1086,12 @@ module Asciidoctor
     # Examples
     #   http://domain
     #   https://domain
+    #   file:///path
     #   data:info
     #
-    UriSniffRx = %r{^#{CG_ALPHA}[#{CC_ALNUM}.+-]*:/{0,2}}
+    #   not c:/sample.adoc or c:\sample.adoc
+    #
+    UriSniffRx = %r{^#{CG_ALPHA}[#{CC_ALNUM}.+-]+:/{0,2}}
 
     # Detects the end of an implicit URI in the text
     #
@@ -1092,7 +1130,7 @@ module Asciidoctor
     # Matches parent directory references at the beginning of a path
     #LeadingParentDirsRx = /^(?:\.\.\/)*/
 
-    #StripLineWise = /\A(?:\s*\n)?(.*?)\s*\z/m
+    #StripLineWise = /\A(?:\s*\n)?(#{CC_ALL}*?)\s*\z/m
   #end
 
   INTRINSIC_ATTRIBUTES = {
@@ -1103,12 +1141,11 @@ module Asciidoctor
     'asterisk'   => '*',
     'tilde'      => '~',
     'plus'       => '&#43;',
-    'apostrophe' => '\'',
     'backslash'  => '\\',
     'backtick'   => '`',
+    'blank'      => '',
     'empty'      => '',
     'sp'         => ' ',
-    'space'      => ' ',
     'two-colons' => '::',
     'two-semicolons' => ';;',
     'nbsp'       => '&#160;',
@@ -1122,6 +1159,7 @@ module Asciidoctor
     'rdquo'      => '&#8221;',
     'wj'         => '&#8288;',
     'brvbar'     => '&#166;',
+    'cpp'        => 'C++',
     'amp'        => '&',
     'lt'         => '<',
     'gt'         => '>'
@@ -1131,47 +1169,66 @@ module Asciidoctor
   # constrained quotes:: must be bordered by non-word characters
   # NOTE these substitutions are processed in the order they appear here and
   # the order in which they are replaced is important
-  QUOTE_SUBS = { :default =>
-  [
+  quote_subs = [
     # **strong**
-    [:strong, :unconstrained, /\\?(?:\[([^\]]+?)\])?\*\*(.+?)\*\*/m],
+    [:strong, :unconstrained, /\\?(?:\[([^\]]+?)\])?\*\*(#{CC_ALL}+?)\*\*/m],
 
     # *strong*
-    [:strong, :constrained, /(^|[^#{CC_WORD};:}])(?:\[([^\]]+?)\])?\*(\S|\S.*?\S)\*(?!#{CG_WORD})/m],
+    [:strong, :constrained, /(^|[^#{CC_WORD};:}])(?:\[([^\]]+?)\])?\*(\S|\S#{CC_ALL}*?\S)\*(?!#{CG_WORD})/m],
 
-    # ``double-quoted''
-    [:double, :constrained, /(^|[^#{CC_WORD};:}])(?:\[([^\]]+?)\])?``(\S|\S.*?\S)''(?!#{CG_WORD})/m],
+    # "`double-quoted`"
+    [:double, :constrained, /(^|[^#{CC_WORD};:}])(?:\[([^\]]+?)\])?"`(\S|\S#{CC_ALL}*?\S)`"(?!#{CG_WORD})/m],
 
-    # `single-quoted'
-    [:single, :constrained, /(^|[^#{CC_WORD};:}])(?:\[([^\]]+?)\])?`(\S|\S.*?\S)'(?!#{CG_WORD})/m],
+    # '`single-quoted`'
+    [:single, :constrained, /(^|[^#{CC_WORD};:`}])(?:\[([^\]]+?)\])?'`(\S|\S#{CC_ALL}*?\S)`'(?!#{CG_WORD})/m],
 
-    # ++monospaced++
-    [:monospaced, :unconstrained, /\\?(?:\[([^\]]+?)\])?\+\+(.+?)\+\+/m],
+    # ``monospaced``
+    [:monospaced, :unconstrained, /\\?(?:\[([^\]]+?)\])?``(#{CC_ALL}+?)``/m],
 
-    # +monospaced+
-    [:monospaced, :constrained, /(^|[^#{CC_WORD};:}])(?:\[([^\]]+?)\])?\+(\S|\S.*?\S)\+(?!#{CG_WORD})/m],
+    # `monospaced`
+    [:monospaced, :constrained, /(^|[^#{CC_WORD};:"'`}])(?:\[([^\]]+?)\])?`(\S|\S#{CC_ALL}*?\S)`(?![#{CC_WORD}"'`])/m],
 
     # __emphasis__
-    [:emphasis, :unconstrained, /\\?(?:\[([^\]]+?)\])?__(.+?)__/m],
+    [:emphasis, :unconstrained, /\\?(?:\[([^\]]+?)\])?__(#{CC_ALL}+?)__/m],
 
     # _emphasis_
-    [:emphasis, :constrained, /(^|[^#{CC_WORD};:}])(?:\[([^\]]+?)\])?_(\S|\S.*?\S)_(?!#{CG_WORD})/m],
+    [:emphasis, :constrained, /(^|[^#{CC_WORD};:}])(?:\[([^\]]+?)\])?_(\S|\S#{CC_ALL}*?\S)_(?!#{CG_WORD})/m],
 
     # ##mark## (referred to in AsciiDoc Python as unquoted)
-    [:mark, :unconstrained, /\\?(?:\[([^\]]+?)\])?##(.+?)##/m],
+    [:mark, :unconstrained, /\\?(?:\[([^\]]+?)\])?##(#{CC_ALL}+?)##/m],
 
     # #mark# (referred to in AsciiDoc Python as unquoted)
-    [:mark, :constrained, /(^|[^#{CC_WORD};:}])(?:\[([^\]]+?)\])?#(\S|\S.*?\S)#(?!#{CG_WORD})/m],
+    [:mark, :constrained, /(^|[^#{CC_WORD}&;:}])(?:\[([^\]]+?)\])?#(\S|\S#{CC_ALL}*?\S)#(?!#{CG_WORD})/m],
 
     # ^superscript^
-    [:superscript, :unconstrained, /\\?(?:\[([^\]]+?)\])?\^(\S*?)\^/m],
+    [:superscript, :unconstrained, /\\?(?:\[([^\]]+?)\])?\^(\S+?)\^/],
 
     # ~subscript~
-    [:subscript, :unconstrained, /\\?(?:\[([^\]]+?)\])?~(\S*?)~/m]
-  ]}
+    [:subscript, :unconstrained, /\\?(?:\[([^\]]+?)\])?~(\S+?)~/]
+  ]
 
-  QUOTE_SUBS[:legacy] = QUOTE_SUBS[:default].dup.
-    insert(3, [:emphasis, :constrained, /(^|[^#{CC_WORD};:}])(?:\[([^\]]+?)\])?'(\S|\S.*?\S)'(?!#{CG_WORD})/m])
+  compat_quote_subs = quote_subs.dup
+  # ``quoted''
+  compat_quote_subs[2] = [:double, :constrained, /(^|[^#{CC_WORD};:}])(?:\[([^\]]+?)\])?``(\S|\S#{CC_ALL}*?\S)''(?!#{CG_WORD})/m]
+  # `quoted'
+  compat_quote_subs[3] = [:single, :constrained, /(^|[^#{CC_WORD};:}])(?:\[([^\]]+?)\])?`(\S|\S#{CC_ALL}*?\S)'(?!#{CG_WORD})/m]
+  # ++monospaced++
+  compat_quote_subs[4] = [:monospaced, :unconstrained, /\\?(?:\[([^\]]+?)\])?\+\+(#{CC_ALL}+?)\+\+/m]
+  # +monospaced+
+  compat_quote_subs[5] = [:monospaced, :constrained, /(^|[^#{CC_WORD};:}])(?:\[([^\]]+?)\])?\+(\S|\S#{CC_ALL}*?\S)\+(?!#{CG_WORD})/m]
+  # #unquoted#
+  #compat_quote_subs[8] = [:unquoted, *compat_quote_subs[8][1..-1]]
+  # ##unquoted##
+  #compat_quote_subs[9] = [:unquoted, *compat_quote_subs[9][1..-1]]
+  # 'emphasis'
+  compat_quote_subs.insert 3, [:emphasis, :constrained, /(^|[^#{CC_WORD};:}])(?:\[([^\]]+?)\])?'(\S|\S#{CC_ALL}*?\S)'(?!#{CG_WORD})/m]
+
+  QUOTE_SUBS = {
+    false => quote_subs,
+    true  => compat_quote_subs
+  }
+  quote_subs = nil
+  compat_quote_subs = nil
 
   # NOTE in Ruby 1.8.7, [^\\] does not match start of line,
   # so we need to match it explicitly
@@ -1184,11 +1241,12 @@ module Asciidoctor
     # (TM)
     [/\\?\(TM\)/, '&#8482;', :none],
     # foo -- bar
+    # FIXME this drops the endline if it appears at end of line
     [/(^|\n| |\\)--( |\n|$)/, '&#8201;&#8212;&#8201;', :none],
     # foo--bar
-    [/(#{CG_WORD})\\?--(?=#{CG_WORD})/, '&#8212;', :leading],
+    [/(#{CG_WORD})\\?--(?=#{CG_WORD})/, '&#8212;&#8203;', :leading],
     # ellipsis
-    [/\\?\.\.\./, '&#8230;', :leading],
+    [/\\?\.\.\./, '&#8230;&#8203;', :leading],
     # right single quote
     [/\\?`'/, '&#8217;', :none],
     # apostrophe (inside a word)
@@ -1227,15 +1285,15 @@ module Asciidoctor
 
     attributes = options[:attributes] = if !(attrs = options[:attributes])
       {}
-    elsif (attrs.is_a? ::Hash) || (::RUBY_ENGINE_JRUBY && (attrs.is_a? ::Java::JavaUtil::Map))
+    elsif ::Hash === attrs || (::RUBY_ENGINE_JRUBY && ::Java::JavaUtil::Map === attrs)
       attrs.dup
-    elsif attrs.is_a? ::Array
+    elsif ::Array === attrs
       attrs.inject({}) do |accum, entry|
         k, v = entry.split '=', 2
         accum[k] = v || ''
         accum
       end
-    elsif attrs.is_a? ::String
+    elsif ::String === attrs
       # convert non-escaped spaces into null character, so we split on the
       # correct spaces chars, and restore escaped spaces
       capture_1 = ::RUBY_ENGINE_OPAL ? '$1' : '\1'
@@ -1259,11 +1317,11 @@ module Asciidoctor
     end
 
     lines = nil
-    if input.is_a? ::File
-      lines = input.readlines
+    if ::File === input
+      # TODO cli checks if input path can be read and is file, but might want to add check to API
+      input_path = ::File.expand_path input.path
       input_mtime = input.mtime
-      input = ::File.new ::File.expand_path input.path
-      input_path = input.path
+      lines = input.readlines
       # hold off on setting infile and indir until we get a better sense of their purpose
       attributes['docfile'] = input_path
       attributes['docdir'] = ::File.dirname input_path
@@ -1274,14 +1332,17 @@ module Asciidoctor
     elsif input.respond_to? :readlines
       # NOTE tty, pipes & sockets can't be rewound, but can't be sniffed easily either
       # just fail the rewind operation silently to handle all cases
-      input.rewind rescue nil
+      begin
+        input.rewind
+      rescue
+      end
       lines = input.readlines
-    elsif input.is_a? ::String
+    elsif ::String === input
       lines = input.lines.entries
-    elsif input.is_a? ::Array
+    elsif ::Array === input
       lines = input.dup
     else
-      raise ::ArgumentError, %(Unsupported input type: #{input.class})
+      raise ::ArgumentError, %(unsupported input type: #{input.class})
     end
 
     if timings
@@ -1289,10 +1350,20 @@ module Asciidoctor
       timings.start :parse
     end
 
-    options[:parse] = true unless options.key? :parse
-    doc = Document.new lines, options
+    if options[:parse] == false
+      doc = Document.new lines, options
+    else
+      doc = (Document.new lines, options).parse
+    end
+
     timings.record :parse if timings
     doc
+  rescue => e
+    backtrace = e.backtrace
+    # revise exception message to include info about source file and rethrow from original location
+    e = e.exception(%(asciidoctor: FAILED: #{attributes['docfile'] || '<stdin>'}: Failed to parse AsciiDoc source, #{e.message}))
+    e.set_backtrace backtrace
+    raise e
   end
 
   # Public: Parse the contents of the AsciiDoc source file into an Asciidoctor::Document
@@ -1349,7 +1420,7 @@ module Asciidoctor
 
     case to_file
     when true, nil
-      write_to_same_dir = !to_dir && (input.is_a? ::File)
+      write_to_same_dir = !to_dir && ::File === input
       stream_output = false
       write_to_target = to_dir
       to_file = nil
@@ -1358,27 +1429,43 @@ module Asciidoctor
       stream_output = false
       write_to_target = false
       to_file = nil
+    when '/dev/null'
+      return self.load input, options
     else
       write_to_same_dir = false
       stream_output = to_file.respond_to? :write
       write_to_target = stream_output ? false : to_file
     end
 
-    if !options.key?(:header_footer) && (write_to_same_dir || write_to_target)
-      options[:header_footer] = true
+    unless options.key? :header_footer
+      options[:header_footer] = true if write_to_same_dir || write_to_target
+    end
+
+    # NOTE at least make intended target directory available, if there is one
+    if write_to_same_dir
+      input_path = ::File.expand_path input.path
+      options[:to_dir] = (outdir = ::File.dirname input_path)
+    elsif write_to_target
+      if to_dir
+        if to_file
+          options[:to_dir] = ::File.dirname ::File.expand_path(::File.join to_dir, to_file)
+        else
+          options[:to_dir] = ::File.expand_path to_dir
+        end
+      elsif to_file
+        options[:to_dir] = ::File.dirname ::File.expand_path to_file
+      end
+    else
+      options[:to_dir] = nil
     end
 
     doc = self.load input, options
 
-    if to_file == '/dev/null'
-      return doc
-    elsif write_to_same_dir
-      infile = ::File.expand_path input.path
-      outfile = ::File.join ::File.dirname(infile), %(#{doc.attributes['docname']}#{doc.attributes['outfilesuffix']})
-      if outfile == infile
-        raise ::IOError, 'Input file and output file are the same!'
+    if write_to_same_dir
+      outfile = ::File.join outdir, %(#{doc.attributes['docname']}#{doc.attributes['outfilesuffix']})
+      if outfile == input_path
+        raise ::IOError, %(input file and output file cannot be the same: #{outfile})
       end
-      outdir = ::File.dirname outfile
     elsif write_to_target
       working_dir = options.has_key?(:base_dir) ? ::File.expand_path(options[:base_dir]) : ::File.expand_path(::Dir.pwd)
       # QUESTION should the jail be the working_dir or doc.base_dir???
@@ -1412,15 +1499,12 @@ module Asciidoctor
     end
 
     timings.start :convert if timings
-    output = doc.convert
+    opts = outfile && !stream_output ? { 'outfile' => outfile, 'outdir' => outdir } : {}
+    output = doc.convert opts
     timings.record :convert if timings
 
     if outfile
       timings.start :write if timings
-      unless stream_output
-        doc.attributes['outfile'] = outfile
-        doc.attributes['outdir'] = outdir
-      end
       doc.write output, outfile
       timings.record :write if timings
 
@@ -1432,9 +1516,7 @@ module Asciidoctor
         copy_coderay_stylesheet = (doc.attr? 'source-highlighter', 'coderay') && (doc.attr 'coderay-css', 'class') == 'class'
         copy_pygments_stylesheet = (doc.attr? 'source-highlighter', 'pygments') && (doc.attr 'pygments-css', 'class') == 'class'
         if copy_asciidoctor_stylesheet || copy_user_stylesheet || copy_coderay_stylesheet || copy_pygments_stylesheet
-          outdir = doc.attr('outdir')
-          stylesoutdir = doc.normalize_system_path(doc.attr('stylesdir'), outdir,
-              doc.safe >= SafeMode::SAFE ? outdir : nil)
+          stylesoutdir = doc.normalize_system_path(doc.attr('stylesdir'), outdir, doc.safe >= SafeMode::SAFE ? outdir : nil)
           Helpers.mkdir_p stylesoutdir if mkdirs
 
           if copy_asciidoctor_stylesheet
@@ -1490,11 +1572,9 @@ module Asciidoctor
   end
 
   if RUBY_ENGINE == 'opal'
-    require 'asciidoctor/debug'
     require 'asciidoctor/version'
     require 'asciidoctor/timings'
   else
-    autoload :Debug,   'asciidoctor/debug'
     autoload :VERSION, 'asciidoctor/version'
     autoload :Timings, 'asciidoctor/timings'
   end

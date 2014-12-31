@@ -1,3 +1,4 @@
+# encoding: UTF-8
 module Asciidoctor
 # Public: Methods for parsing and converting AsciiDoc documents.
 #
@@ -31,6 +32,38 @@ class Document < AbstractBlock
 
     def save_to block_attributes
       (block_attributes[:attribute_entries] ||= []) << self
+    end
+  end
+
+  # Public Parsed and stores a partitioned title (i.e., title & subtitle).
+  class Title
+    attr_reader :main
+    attr_reader :subtitle
+    attr_reader :combined
+
+    def initialize val, opts = {}
+      # TODO separate sanitization by type (:cdata for HTML/XML, :plain for non-SGML, false for none)
+      if (@sanitized = opts[:sanitize]) && val.include?('<')
+        val = val.gsub(XmlSanitizeRx, '').tr_s(' ', ' ').strip
+      end
+      if (@combined = val).include? ': '
+        @main, _, @subtitle = val.rpartition ': '
+      else
+        @main = val
+        @subtitle = nil
+      end
+    end
+
+    def sanitized?
+      @sanitized
+    end
+
+    def subtitle?
+      !!@subtitle
+    end
+
+    def to_s
+      @combined
     end
   end
 
@@ -69,11 +102,14 @@ class Document < AbstractBlock
   # this level is not currently implemented (and therefore not enforced)!
   attr_reader :safe
 
-  # Public: Get the AsciiDoc compatibility mode (:default or :legacy)
+  # Public: Get the Boolean AsciiDoc compatibility mode
   #
-  # :legacy mode activates the following syntax changes:
+  # enabling this attribute activates the following syntax changes:
   # 
   #   * single quotes as constrained emphasis formatting marks
+  #   * single backticks parsed as inline literal, formatted as monospace
+  #   * single plus parsed as constrained, monospaced inline formatting
+  #   * double plus parsed as constrained, monospaced inline formatting
   #
   attr_reader :compat_mode
 
@@ -98,6 +134,9 @@ class Document < AbstractBlock
   # If the source is a string, defaults to the current directory.
   attr_reader :base_dir
 
+  # Public: Get the Hash of resolved options used to initialize this Document
+  attr_reader :options
+
   # Public: Get a reference to the parent Document of this nested document.
   attr_reader :parent_document
 
@@ -115,6 +154,8 @@ class Document < AbstractBlock
   # data    - The AsciiDoc source data as a String or String Array. (default: nil)
   # options - A Hash of options to control processing (e.g., safe mode value (:safe), backend (:backend),
   #           header/footer toggle (:header_footer), custom attributes (:attributes)). (default: {})
+  #
+  # Duplication of the options Hash is handled in the enclosing API.
   #
   # Examples
   #
@@ -174,15 +215,21 @@ class Document < AbstractBlock
       end
       @attribute_overrides = attr_overrides
       # safely resolve the safe mode from const, int or string
-      @safe = if !(safe_mode = options[:safe])
-        SafeMode::SECURE
-      elsif safe_mode.is_a? ::Fixnum
+      if !(safe_mode = options[:safe])
+        @safe = SafeMode::SECURE
+      elsif ::Fixnum === safe_mode
         # be permissive in case API user wants to define new levels
-        safe_mode
+        @safe = safe_mode
       else
-        SafeMode.const_get(safe_mode.to_s.upcase).to_i rescue SafeMode::SECURE.to_i
+        # NOTE: not using infix rescue for performance reasons, see https://github.com/jruby/jruby/issues/1816
+        begin
+          @safe = SafeMode.const_get(safe_mode.to_s.upcase)
+        rescue
+          @safe = SafeMode::SECURE
+        end
       end
-      @sourcemap = options.key?(:sourcemap) && options[:sourcemap] == true
+      @sourcemap = options[:sourcemap]
+      @compat_mode = false
       @converter = nil
       initialize_extensions = defined? ::Asciidoctor::Extensions
       @extensions = nil # initialize furthur down
@@ -194,7 +241,9 @@ class Document < AbstractBlock
     @callouts = Callouts.new
     @attributes_modified = ::Set.new
     @options = options
+    @docinfo_processor_extensions = {}
     header_footer = (options[:header_footer] ||= false)
+    options.freeze
 
     attrs = @attributes
     attrs['encoding'] = 'UTF-8'
@@ -207,7 +256,6 @@ class Document < AbstractBlock
     attrs['prewrap'] = ''
     attrs['attribute-undefined'] = Compliance.attribute_undefined
     attrs['attribute-missing'] = Compliance.attribute_missing
-    attrs['compat-mode'] = 'default'
     attrs['iconfont-remote'] = ''
 
     # language strings
@@ -223,6 +271,7 @@ class Document < AbstractBlock
     #attrs['listing-caption'] = 'Listing'
     attrs['table-caption'] = 'Table'
     attrs['toc-title'] = 'Table of Contents'
+    #attrs['preface-title'] = 'Preface'
     attrs['manname-title'] = 'NAME'
     attrs['untitled-label'] = 'Untitled'
     attrs['version-label'] = 'Version'
@@ -249,6 +298,9 @@ class Document < AbstractBlock
     end
 
     attr_overrides['user-home'] = USER_HOME
+
+    # legacy support for numbered attribute
+    attr_overrides['sectnums'] = attr_overrides.delete 'numbered' if attr_overrides.key? 'numbered'
 
     # if the base_dir option is specified, it overrides docdir as the root for relative paths
     # otherwise, the base_dir is the directory of the source file (docdir) or the current
@@ -303,7 +355,7 @@ class Document < AbstractBlock
       else
         # a value ending in @ indicates this attribute does not override
         # an attribute with the same key in the document souce
-        if (val.is_a? ::String) && (val.end_with? '@')
+        if ::String === val && (val.end_with? '@')
           val = val.chop
           verdict = true
         end
@@ -312,12 +364,7 @@ class Document < AbstractBlock
       verdict
     end
 
-    if (attrs['compat-mode'] == 'legacy')
-      @compat_mode = :legacy
-    else
-      attrs['compat-mode'] = 'default'
-      @compat_mode = :default
-    end
+    @compat_mode = true if attrs.key? 'compat-mode'
 
     if parent_doc
       # setup default doctype (backend is fixed)
@@ -346,7 +393,13 @@ class Document < AbstractBlock
       # dynamic intrinstic attribute values
       now = ::Time.now
       localdate = (attrs['localdate'] ||= now.strftime('%Y-%m-%d'))
-      localtime = (attrs['localtime'] ||= (now.strftime '%H:%M:%S %Z' rescue now.strftime '%H:%M:%S'))
+      unless (localtime = attrs['localtime'])
+        begin
+          localtime = attrs['localtime'] = now.strftime('%H:%M:%S %Z')
+        rescue
+          localtime = attrs['localtime'] = now.strftime('%H:%M:%S')
+        end
+      end
       attrs['localdatetime'] ||= %(#{localdate} #{localtime})
 
       # docdate, doctime and docdatetime should default to
@@ -359,20 +412,23 @@ class Document < AbstractBlock
       attrs['stylesdir'] ||= '.'
       attrs['iconsdir'] ||= ::File.join(attrs.fetch('imagesdir', './images'), 'icons')
 
-      @extensions = if initialize_extensions
-        registry = if (ext_registry = options[:extensions_registry])
-          if (ext_registry.is_a? Extensions::Registry) ||
-              (::RUBY_ENGINE_JRUBY && (ext_registry.is_a? ::AsciidoctorJ::Extensions::ExtensionRegistry))
-            ext_registry
+      if initialize_extensions
+        if (registry = options[:extensions_registry])
+          if Extensions::Registry === registry || (::RUBY_ENGINE_JRUBY &&
+              ::AsciidoctorJ::Extensions::ExtensionRegistry === registry)
+            # take it as it is
+          else
+            registry = Extensions::Registry.new
           end
-        elsif (ext_block = options[:extensions]).is_a? ::Proc
-          Extensions.build_registry(&ext_block)
+        elsif ::Proc === (ext_block = options[:extensions])
+          registry = Extensions.build_registry(&ext_block)
+        else
+          registry = Extensions::Registry.new
         end
-        (registry ||= Extensions::Registry.new).activate self
+        @extensions = registry.activate self
       end
 
       @reader = PreprocessorReader.new self, data, Reader::Cursor.new(attrs['docfile'], @base_dir)
-      parse if data && options[:parse]
     end
   end
 
@@ -388,31 +444,36 @@ class Document < AbstractBlock
   #
   # Returns this [Document]
   def parse data = nil
-    unless @parsed
+    if @parsed
+      self
+    else
+      doc = self
       # create reader if data is provided (used when data is not known at the time the Document object is created)
-      @reader = PreprocessorReader.new self, data, Reader::Cursor.new(@attributes['docfile'], @base_dir) if data
+      @reader = PreprocessorReader.new doc, data, Reader::Cursor.new(@attributes['docfile'], @base_dir) if data
 
       if (exts = @parent_document ? nil : @extensions) && exts.preprocessors?
         exts.preprocessors.each do |ext|
-          @reader = ext.process_method[self, @reader] || @reader
+          @reader = ext.process_method[doc, @reader] || @reader
         end
       end
 
       # Now parse the lines in the reader into blocks
-      Parser.parse @reader, self, :header_only => !!@options[:parse_header_only]
+      Parser.parse @reader, doc, :header_only => !!@options[:parse_header_only]
 
       # should we call rewind in some sort of post-parse function?
       @callouts.rewind
 
       if exts && exts.treeprocessors?
         exts.treeprocessors.each do |ext|
-          ext.process_method[self]
+          if (result = ext.process_method[doc]) && Document === result && result != doc
+            doc = result
+          end
         end
       end
 
       @parsed = true
+      doc
     end
-    self
   end
 
   # Public: Get the named counter and take the next number in the sequence.
@@ -456,7 +517,7 @@ class Document < AbstractBlock
   #
   # returns the next value in the sequence according to the current value's type
   def nextval(current)
-    if current.is_a?(::Integer)
+    if ::Integer === current
       current + 1
     else
       intval = current.to_i
@@ -471,7 +532,7 @@ class Document < AbstractBlock
   def register(type, value)
     case type
     when :ids
-      if value.is_a?(::Array)
+      if ::Array === value
         @references[:ids][value[0]] = (value[1] || '[' + value[0] + ']')
       else
         @references[:ids][value] = '[' + value + ']'
@@ -538,17 +599,37 @@ class Document < AbstractBlock
     @header.title = title
   end
 
-  # We need to be able to return some semblance of a title
-  def doctitle(opts = {})
-    if !(val = @attributes.fetch('title', '')).empty?
+  # Public: Resolves the primary title for the document
+  #
+  # Searches the locations to find the first non-empty
+  # value:
+  #
+  #  * document-level attribute named title
+  #  * header title (known as the document title)
+  #  * title of the first section
+  #  * document-level attribute named untitled-label (if :use_fallback option is set)
+  #
+  # If no value can be resolved, nil is returned.
+  #
+  # If the :partition attribute is specified, the value is parsed into an Document::Title object.
+  # If the :sanitize attribute is specified, XML elements are removed from the value.
+  #
+  # Returns the resolved title as a [Title] if the :partition option is passed or a [String] if not
+  # or nil if no value can be resolved.
+  def doctitle opts = {}
+    if !(val = @attributes['title'].nil_or_empty?)
       val = title
     elsif (sect = first_section) && sect.title?
       val = sect.title
+    elsif opts[:use_fallback] && (val = @attributes['untitled-label'])
+      # use val set in condition
     else
       return
     end
     
-    if opts[:sanitize] && val.include?('<')
+    if opts[:partition]
+      Title.new val, opts
+    elsif opts[:sanitize] && val.include?('<')
       val.gsub(XmlSanitizeRx, '').tr_s(' ', ' ').strip
     else
       val
@@ -621,68 +702,75 @@ class Document < AbstractBlock
   # Internal: Branch the attributes so that the original state can be restored
   # at a future time.
   def save_attributes
-    # enable toc and numbered by default in DocBook backend
+    # enable toc and sectnums (i.e., numbered) by default in DocBook backend
     # NOTE the attributes_modified should go away once we have a proper attribute storage & tracking facility
-    if @attributes['basebackend'] == 'docbook'
-      @attributes['toc'] = '' unless attribute_locked?('toc') || @attributes_modified.include?('toc')
-      @attributes['numbered'] = '' unless attribute_locked?('numbered') || @attributes_modified.include?('numbered')
+    if (attrs = @attributes)['basebackend'] == 'docbook'
+      attrs['toc'] = '' unless attribute_locked?('toc') || @attributes_modified.include?('toc')
+      attrs['sectnums'] = '' unless attribute_locked?('sectnums') || @attributes_modified.include?('sectnums')
     end
 
-    unless @attributes.key?('doctitle') || !(val = doctitle)
-      @attributes['doctitle'] = val
+    unless attrs.key?('doctitle') || !(val = doctitle)
+      attrs['doctitle'] = val
     end
 
     # css-signature cannot be updated after header attributes are processed
-    @id = @attributes['css-signature'] unless @id
+    @id = attrs['css-signature'] unless @id
 
-    toc_val = @attributes['toc']
-    toc2_val = @attributes['toc2']
-    toc_position_val = @attributes['toc-position']
+    toc_position_val = if (toc_val = (attrs.delete('toc2') ? 'left' : attrs['toc']))
+      # toc-placement allows us to separate position from using fitted slot vs macro
+      (toc_placement = attrs.fetch('toc-placement', 'macro')) && toc_placement != 'auto' ? toc_placement : attrs['toc-position']
+    else
+      nil
+    end
 
-    if (toc_val && (toc_val != '' || !toc_position_val.nil_or_empty?)) || toc2_val
+    if toc_val && (!toc_val.empty? || !toc_position_val.nil_or_empty?)
       default_toc_position = 'left'
+      # TODO rename toc2 to aside-toc
       default_toc_class = 'toc2'
-      position = [toc_position_val, toc2_val, toc_val].find {|pos| !pos.nil_or_empty? }
-      position = default_toc_position if !position && toc2_val
-      @attributes['toc'] = ''
+      if !toc_position_val.nil_or_empty?
+        position = toc_position_val
+      elsif !toc_val.empty?
+        position = toc_val
+      else
+        position = default_toc_position
+      end
+      attrs['toc'] = ''
+      attrs['toc-placement'] = 'auto'
       case position
       when 'left', '<', '&lt;'
-        @attributes['toc-position'] = 'left'
+        attrs['toc-position'] = 'left'
       when 'right', '>', '&gt;'
-        @attributes['toc-position'] = 'right'
+        attrs['toc-position'] = 'right'
       when 'top', '^'
-        @attributes['toc-position'] = 'top'
+        attrs['toc-position'] = 'top'
       when 'bottom', 'v'
-        @attributes['toc-position'] = 'bottom'
-      when 'preamble'
-        @attributes.delete 'toc2'
-        @attributes['toc-placement'] = 'preamble'
+        attrs['toc-position'] = 'bottom'
+      when 'preamble', 'macro'
+        attrs['toc-position'] = 'content'
+        attrs['toc-placement'] = position
         default_toc_class = nil
-        default_toc_position = nil
-      when 'default'
-        @attributes.delete 'toc2'
+      else
+        attrs.delete 'toc-position'
         default_toc_class = nil
-        default_toc_position = 'default'
       end
-      @attributes['toc-class'] ||= default_toc_class if default_toc_class
-      @attributes['toc-position'] ||= default_toc_position if default_toc_position
+      attrs['toc-class'] ||= default_toc_class if default_toc_class
     end
 
-    @compat_mode = if @attributes['compat-mode'] == 'legacy'
-      @attributes['source-language'] = @attributes['language'] if @attributes.has_key? 'language'
-      :legacy
+    if attrs.key? 'compat-mode'
+      attrs['source-language'] = attrs['language'] if attrs.has_key? 'language'
+      @compat_mode = true
     else
-      :default
+      @compat_mode = false
     end
 
-    @original_attributes = @attributes.dup
+    @original_attributes = attrs.dup
 
     # unfreeze "flexible" attributes
     unless nested?
       FLEXIBLE_ATTRIBUTES.each do |name|
         # turning a flexible attribute off should be permanent
         # (we may need more config if that's not always the case)
-        if @attribute_overrides.key?(name) && !@attribute_overrides[name].nil?
+        if @attribute_overrides.key?(name) && @attribute_overrides[name]
           @attribute_overrides.delete(name)
         end
       end
@@ -706,10 +794,13 @@ class Document < AbstractBlock
   def playback_attributes(block_attributes)
     if block_attributes.key? :attribute_entries
       block_attributes[:attribute_entries].each do |entry|
+        name = entry.name
         if entry.negate
-          @attributes.delete(entry.name)
+          @attributes.delete name
+          @compat_mode = false if name == 'compat-mode'
         else
-          @attributes[entry.name] = entry.value
+          @attributes[name] = entry.value
+          @compat_mode = true if name == 'compat-mode'
         end
       end
     end
@@ -824,7 +915,7 @@ class Document < AbstractBlock
       attrs['backend'] = new_backend
       attrs[%(backend-#{new_backend})] = ''
       # (re)initialize converter
-      if (@converter = create_converter).is_a? Converter::BackendInfo
+      if Converter::BackendInfo === (@converter = create_converter)
         new_basebackend = @converter.basebackend
         attrs['outfilesuffix'] = @converter.outfilesuffix unless attribute_locked? 'outfilesuffix'
         new_filetype = @converter.filetype
@@ -896,10 +987,10 @@ class Document < AbstractBlock
       converter_opts[:template_engine_options] = @options[:template_engine_options]
       converter_opts[:eruby] = @options[:eruby]
     end
-    converter_factory = if (converter = @options[:converter])
-      Converter::Factory.new ::Hash[backend, converter]
+    if (converter = @options[:converter])
+      converter_factory = Converter::Factory.new ::Hash[backend, converter]
     else
-      Converter::Factory.default false
+      converter_factory = Converter::Factory.default false
     end
     # QUESTION should we honor the convert_opts?
     # QUESTION should we pass through all options and attributes too?
@@ -914,6 +1005,11 @@ class Document < AbstractBlock
   def convert opts = {}
     parse unless @parsed
     restore_attributes
+    unless @safe >= SafeMode::SERVER || opts.empty?
+      # QUESTION should we store these on the Document object?
+      @attributes.delete 'outfile' unless (@attributes['outfile'] = opts['outfile'])
+      @attributes.delete 'outdir' unless (@attributes['outdir'] = opts['outdir'])
+    end
 
     # QUESTION should we add processors that execute before conversion begins?
     unless @converter
@@ -951,7 +1047,7 @@ class Document < AbstractBlock
   # If the converter responds to :write, delegate the work of writing the file
   # to that method. Otherwise, write the output the specified file.
   def write output, target
-    if @converter.is_a? Writer
+    if Writer === @converter
       @converter.write output, target
     else
       if target.respond_to? :write
@@ -990,59 +1086,82 @@ class Document < AbstractBlock
     super
   end
 
-  # Public: Read the docinfo file(s) for inclusion in the
-  # document template
+  # Public: Read the docinfo file(s) for inclusion in the document template
   #
   # If the docinfo1 attribute is set, read the docinfo.ext file. If the docinfo
   # attribute is set, read the doc-name.docinfo.ext file. If the docinfo2
   # attribute is set, read both files in that order.
   #
-  # pos - The Symbol position of the docinfo, either :header or :footer. (default: :header)
-  # ext - The extension of the docinfo file(s). If not set, the extension
-  #       will be determined based on the basebackend. (default: nil)
+  # location - The Symbol location of the docinfo, either :header or :footer. (default: :header)
+  # ext      - The extension of the docinfo file(s). If not set, the extension
+  #            will be determined based on the basebackend. (default: nil)
   #
   # returns The contents of the docinfo file(s)
-  def docinfo(pos = :header, ext = nil)
+  def docinfo(location = :header, ext = nil)
     if safe >= SafeMode::SECURE
       ''
     else
-      case pos
-      when :footer
-        qualifier = '-footer'
-      else
-        qualifier = nil
-      end
-      ext = @attributes['outfilesuffix'] if ext.nil?
+      qualifier = (location == :footer ? '-footer' : nil)
+      ext = @attributes['outfilesuffix'] unless ext
+      docinfodir = @attributes['docinfodir']
 
       content = nil
 
-      docinfo = @attributes.key?('docinfo')
-      docinfo1 = @attributes.key?('docinfo1')
-      docinfo2 = @attributes.key?('docinfo2')
-      docinfo_filename = "docinfo#{qualifier}#{ext}"
+      docinfo = @attributes.key? 'docinfo'
+      docinfo1 = @attributes.key? 'docinfo1'
+      docinfo2 = @attributes.key? 'docinfo2'
+      docinfo_filename = %(docinfo#{qualifier}#{ext})
       if docinfo1 || docinfo2
-        docinfo_path = normalize_system_path(docinfo_filename)
-        content = read_asset(docinfo_path)
-        unless content.nil?
-          # FIXME normalize these lines!
-          content.force_encoding ::Encoding::UTF_8 if FORCE_ENCODING
-          content = sub_attributes(content.split EOL) * EOL
+        docinfo_path = normalize_system_path(docinfo_filename, docinfodir)
+        # NOTE normalizing the lines is essential if we're performing substitutions
+        if (content = read_asset(docinfo_path, :normalize => true))
+          if (docinfosubs ||= resolve_docinfo_subs)
+            content = (docinfosubs == :attributes) ? sub_attributes(content) : apply_subs(content, docinfosubs)
+          end
         end
       end
 
       if (docinfo || docinfo2) && @attributes.key?('docname')
-        docinfo_path = normalize_system_path("#{@attributes['docname']}-#{docinfo_filename}")
-        content2 = read_asset(docinfo_path)
-        unless content2.nil?
-          # FIXME normalize these lines!
-          content2.force_encoding ::Encoding::UTF_8 if FORCE_ENCODING
-          content2 = sub_attributes(content2.split EOL) * EOL
-          content = content.nil? ? content2 : "#{content}#{EOL}#{content2}"
+        docinfo_path = normalize_system_path(%(#{@attributes['docname']}-#{docinfo_filename}), docinfodir)
+        # NOTE normalizing the lines is essential if we're performing substitutions
+        if (content2 = read_asset(docinfo_path, :normalize => true))
+          if (docinfosubs ||= resolve_docinfo_subs)
+            content2 = (docinfosubs == :attributes) ? sub_attributes(content2) : apply_subs(content2, docinfosubs)
+          end
+          content = content ? %(#{content}#{EOL}#{content2}) : content2
         end
       end
 
-      # to_s forces nil to empty string
-      content.to_s
+      # TODO allow document to control whether extension docinfo is contributed
+      if @extensions && docinfo_processors?(location)
+        contentx = @docinfo_processor_extensions[location].map {|candidate| candidate.process_method[self] }.compact * EOL
+        content = content ? %(#{content}#{EOL}#{contentx}) : contentx
+      end
+
+      # coerce to string (in case the value is nil)
+      %(#{content})
+    end
+  end
+
+  def resolve_docinfo_subs
+    if @attributes.key? 'docinfosubs'
+      subs = resolve_subs @attributes['docinfosubs'], :block, nil, 'docinfo'
+      subs.empty? ? nil : subs
+    else
+      :attributes
+    end
+  end
+
+  def docinfo_processors?(location = :header)
+    if @docinfo_processor_extensions.key?(location)
+      # false means we already performed a lookup and didn't find any
+      @docinfo_processor_extensions[location] != false
+    else
+      if @extensions && @document.extensions.docinfo_processors?(location)
+        !!(@docinfo_processor_extensions[location] = @document.extensions.docinfo_processors(location))
+      else
+        @docinfo_processor_extensions[location] = false
+      end
     end
   end
 

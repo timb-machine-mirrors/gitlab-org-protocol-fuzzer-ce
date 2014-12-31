@@ -114,6 +114,28 @@ text
       assert_equal '_some_section_2', doc.blocks[1].id
     end
 
+    # NOTE test cannot be run in parallel with other tests
+    test 'can set start index of synthetic ids' do
+      old_unique_id_start_index = Asciidoctor::Compliance.unique_id_start_index
+      begin
+        input = <<-EOS
+== Some section
+
+text
+
+== Some section
+
+text
+        EOS
+        Asciidoctor::Compliance.unique_id_start_index = 1
+        doc = document_from_string input
+        assert_equal '_some_section', doc.blocks[0].id
+        assert_equal '_some_section_1', doc.blocks[1].id
+      ensure
+        Asciidoctor::Compliance.unique_id_start_index = old_unique_id_start_index
+      end
+    end
+
     test 'should use specified id and reftext when registering section reference' do
       input = <<-EOS
 [[install,Install Procedure]]
@@ -733,6 +755,45 @@ content
       sect1_1 << sect1_1_1
       assert_equal '1,1,1,', sect1_1_1.sectnum(',')
       assert_equal '1:1:1', sect1_1_1.sectnum(':', false)
+    end
+
+    test 'should render section numbers when sectnums attribute is set' do
+      input = <<-EOS
+= Title
+:sectnums:
+
+== Section_1 
+
+text
+
+=== Section_1_1
+
+text
+
+==== Section_1_1_1
+
+text
+
+== Section_2
+
+text
+
+=== Section_2_1
+
+text
+
+=== Section_2_2
+
+text
+      EOS
+    
+      output = render_string input
+      assert_xpath '//h2[@id="_section_1"][starts-with(text(), "1. ")]', output, 1
+      assert_xpath '//h3[@id="_section_1_1"][starts-with(text(), "1.1. ")]', output, 1
+      assert_xpath '//h4[@id="_section_1_1_1"][starts-with(text(), "1.1.1. ")]', output, 1
+      assert_xpath '//h2[@id="_section_2"][starts-with(text(), "2. ")]', output, 1
+      assert_xpath '//h3[@id="_section_2_1"][starts-with(text(), "2.1. ")]', output, 1
+      assert_xpath '//h3[@id="_section_2_2"][starts-with(text(), "2.2. ")]', output, 1
     end
 
     test 'should render section numbers when numbered attribute is set' do
@@ -1821,10 +1882,10 @@ They couldn't believe their eyes when...
       assert_xpath '//*[@id="header"]//*[@id="toc"]/ul/li[1]/a[@href="#_section_one"][text()="1. Section One"]', output, 1
     end
 
-    test 'should set toc position if toc2 attribute is set to position' do
+    test 'should set toc position if toc attribute is set to position' do
       input = <<-EOS
 = Article
-:toc2: >
+:toc: >
 :numbered:
 
 == Section One
@@ -1981,7 +2042,7 @@ They couldn't believe their eyes when...
       input = <<-EOS
 = Article
 :toc:
-:toc-placement!:
+:toc-placement: macro
 
 Once upon a time...
 
@@ -2005,7 +2066,7 @@ They couldn't believe their eyes when...
       input = <<-EOS
 = Article
 :toc:
-:toc-placement!:
+:toc-placement: macro
 
 Once upon a time...
 
@@ -2025,7 +2086,7 @@ They couldn't believe their eyes when...
       assert_css '#preamble:root .paragraph + #toc', output, 1
     end
 
-    test 'should not assign toc id to more than one toc' do
+    test 'should not activate toc macro if toc-placement is not set' do
       input = <<-EOS
 = Article
 :toc:
@@ -2047,15 +2108,41 @@ They couldn't believe their eyes when...
 
       assert_css '#toc', output, 1
       assert_css '#toctitle', output, 1
-      assert_xpath '(//*[@class="toc"])[2][not(@id)]', output, 1
-      assert_xpath '(//*[@class="toc"])[2]/*[@class="title"][not(@id)]', output, 1
+      assert_css '.toc', output, 1
+      assert_css '#content .toc', output, 0
+    end
+
+    test 'should only output toc at toc macro if toc is macro' do
+      input = <<-EOS
+= Article
+:toc: macro
+
+Once upon a time...
+
+toc::[]
+
+== Section One
+
+It was a dark and stormy night...
+
+== Section Two
+
+They couldn't believe their eyes when...
+      EOS
+
+      output = render_string input
+
+      assert_css '#toc', output, 1
+      assert_css '#toctitle', output, 1
+      assert_css '.toc', output, 1
+      assert_css '#content .toc', output, 1
     end
 
     test 'should use global attributes for toc-title, toc-class and toclevels for toc macro' do
       input = <<-EOS
 = Article
 :toc:
-:toc-placement!:
+:toc-placement: macro
 :toc-title: Contents
 :toc-class: contents
 :toclevels: 1
@@ -2094,7 +2181,7 @@ Fin.
       input = <<-EOS
 = Article
 :toc:
-:toc-placement!:
+:toc-placement: macro
 :toc-title: Ignored
 :toc-class: ignored
 :toclevels: 5

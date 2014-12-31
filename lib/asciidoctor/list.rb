@@ -1,3 +1,4 @@
+# encoding: UTF-8
 module Asciidoctor
 # Public: Methods for managing AsciiDoc lists (ordered, unordered and labeled lists)
 class List < AbstractBlock
@@ -6,7 +7,7 @@ class List < AbstractBlock
   alias :items :blocks
   alias :items? :blocks?
 
-  def initialize(parent, context)
+  def initialize parent, context
     super
   end
 
@@ -44,8 +45,8 @@ class ListItem < AbstractBlock
   #
   # parent - The parent list block for this list item
   # text - the String text (default nil)
-  def initialize(parent, text = nil)
-    super(parent, :list_item)
+  def initialize parent, text = nil
+    super parent, :list_item
     @text = text
     @level = parent.level
   end

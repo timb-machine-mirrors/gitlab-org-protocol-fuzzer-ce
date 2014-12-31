@@ -613,6 +613,19 @@ include::fixtures/no-such-file.adoc[]
           flunk 'include directive should not raise exception on missing file'
         end
       end
+
+      # IMPORTANT this test needs to be run on Windows to verify proper behavior in Windows
+      test 'can resolve include directive with absolute path' do
+        include_path = ::File.join DIRNAME, 'fixtures', 'chapter-a.adoc'
+        input = <<-EOS
+include::#{include_path}[]
+        EOS
+        result = document_from_string input, :safe => :safe
+        assert_equal 'Chapter A', result.doctitle
+
+        result = document_from_string input, :safe => :unsafe, :base_dir => ::Dir.tmpdir
+        assert_equal 'Chapter A', result.doctitle
+      end
   
       test 'include directive can retrieve data from uri' do
         #url = 'http://echo.jsontest.com/name/asciidoctor'
@@ -706,6 +719,19 @@ include::fixtures/include-file.asciidoc[tags=snippetA;snippetB]
         assert_match(/snippetB content/, output)
         refute_match(/non-tagged content/, output)
         refute_match(/included content/, output)
+      end
+
+      test 'include directive supports tagged selection in XML file' do
+        input = <<-EOS
+[source,xml,indent=0]
+----
+include::fixtures/include-file.xml[tag=snippet]
+----
+        EOS
+  
+        output = render_string input, :safe => :safe, :header_footer => false, :base_dir => DIRNAME
+        assert_match('&lt;snippet&gt;content&lt;/snippet&gt;', output)
+        refute_match('root', output)
       end
 
       test 'include directive does not select tagged lines inside tagged selection' do

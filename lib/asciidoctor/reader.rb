@@ -1,3 +1,4 @@
+# encoding: UTF-8
 module Asciidoctor
 # Public: Methods for retrieving lines from AsciiDoc source files
 class Reader
@@ -577,8 +578,8 @@ class PreprocessorReader < Reader
       result.pop while (last = result[-1]) && last.empty?
     end
 
-    if (indent = opts.fetch(:indent, nil))
-      Parser.reset_block_indent! result, indent.to_i
+    if opts.key? :indent
+      Parser.reset_block_indent! result, opts[:indent].to_i
     end
 
     result
@@ -708,10 +709,10 @@ class PreprocessorReader < Reader
           @conditional_stack.pop
           @skipping = @conditional_stack.empty? ? false : @conditional_stack[-1][:skipping]
         else
-          warn "asciidoctor: ERROR: #{line_info}: mismatched macro: endif::#{target}[], expected endif::#{pair[:target]}[]"
+          warn %(asciidoctor: ERROR: #{line_info}: mismatched macro: endif::#{target}[], expected endif::#{pair[:target]}[])
         end
       else
-        warn "asciidoctor: ERROR: #{line_info}: unmatched macro: endif::#{target}[]"
+        warn %(asciidoctor: ERROR: #{line_info}: unmatched macro: endif::#{target}[])
       end
       return true
     end
@@ -858,7 +859,7 @@ class PreprocessorReader < Reader
         # include file is resolved relative to dir of current include, or base_dir if within original docfile
         include_file = @document.normalize_system_path(target, @dir, nil, :target_name => 'include file')
         unless ::File.file? include_file
-          warn "asciidoctor: WARNING: #{line_info}: include file not found: #{include_file}"
+          warn %(asciidoctor: WARNING: #{line_info}: include file not found: #{include_file})
           replace_line %(Unresolved directive in #{@path} - include::#{target}[#{raw_attributes}])
           return true
         end
@@ -891,11 +892,11 @@ class PreprocessorReader < Reader
         elsif attributes.has_key? 'tag'
           tags = [attributes['tag']].to_set
         elsif attributes.has_key? 'tags'
-          tags = attributes['tags'].split(DataDelimiterRx).uniq.to_set
+          tags = attributes['tags'].split(DataDelimiterRx).to_set
         end
       end
-      if !inc_lines.nil?
-        if !inc_lines.empty?
+      if inc_lines
+        unless inc_lines.empty?
           selected = []
           inc_line_offset = 0
           inc_lineno = 0
@@ -926,8 +927,8 @@ class PreprocessorReader < Reader
           # FIXME not accounting for skipped lines in reader line numbering
           push_include selected, include_file, path, inc_line_offset, attributes
         end
-      elsif !tags.nil?
-        if !tags.empty?
+      elsif tags
+        unless tags.empty?
           selected = []
           inc_line_offset = 0
           inc_lineno = 0
@@ -939,21 +940,24 @@ class PreprocessorReader < Reader
                 inc_lineno += 1
                 # must force encoding here since we're performing String operations on line
                 l.force_encoding(::Encoding::UTF_8) if FORCE_ENCODING
-                if !active_tag.nil?
-                  if l.include?("end::#{active_tag}[]")
+                l = l.rstrip
+                # tagged lines in XML may end with '-->'
+                tl = l.chomp('-->').rstrip
+                if active_tag
+                  if tl.end_with?(%(end::#{active_tag}[]))
                     active_tag = nil
                   else
-                    selected.push l unless TagDirectiveRx =~ l
+                    selected.push l unless tl.end_with?('[]') && TagDirectiveRx =~ tl
                     inc_line_offset = inc_lineno if inc_line_offset == 0
                   end
                 else
                   tags.each do |tag|
-                    if l.include?("tag::#{tag}[]")
+                    if tl.end_with?(%(tag::#{tag}[]))
                       active_tag = tag
                       tags_found << tag
                       break
                     end
-                  end
+                  end if tl.end_with?('[]') && TagDirectiveRx =~ tl
                 end
               end
             end
@@ -963,7 +967,7 @@ class PreprocessorReader < Reader
             return true
           end
           unless (missing_tags = tags.to_a - tags_found.to_a).empty?
-            warn "asciidoctor: WARNING: #{line_info}: tag#{missing_tags.size > 1 ? 's' : nil} '#{missing_tags * ','}' not found in include #{target_type}: #{include_file}"
+            warn %(asciidoctor: WARNING: #{line_info}: tag#{missing_tags.size > 1 ? 's' : nil} '#{missing_tags * ','}' not found in include #{target_type}: #{include_file})
           end
           advance
           # FIXME not accounting for skipped lines in reader line numbering
@@ -1184,13 +1188,11 @@ class PreprocessorReader < Reader
   end
 
   def include_processors?
-    if !@include_processor_extensions
+    if @include_processor_extensions.nil?
       if @document.extensions? && @document.extensions.include_processors?
-        @include_processor_extensions = @document.extensions.include_processors
-        true
+        !!(@include_processor_extensions = @document.extensions.include_processors)
       else
         @include_processor_extensions = false
-        false
       end
     else
       @include_processor_extensions != false

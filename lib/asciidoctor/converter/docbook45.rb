@@ -1,3 +1,4 @@
+# encoding: UTF-8
 require 'asciidoctor/converter/docbook5'
 
 module Asciidoctor
@@ -5,6 +6,17 @@ module Asciidoctor
   # consistent with the docbook45 backend from AsciiDoc Python.
   class Converter::DocBook45Converter < Converter::DocBook5Converter
     def admonition node
+      # address a bug in the DocBook 4.5 DTD
+      if node.parent.context == :example
+        %(<para>
+#{super}
+</para>)
+      else
+        super
+      end
+    end
+
+    def image node
       # address a bug in the DocBook 4.5 DTD
       if node.parent.context == :example
         %(<para>
@@ -81,6 +93,10 @@ module Asciidoctor
 
     def document_info_element doc, info_tag_prefix
       super doc, info_tag_prefix, true
+    end
+
+    def lang_attribute_name
+      'lang'
     end
 
     def document_ns_attributes doc

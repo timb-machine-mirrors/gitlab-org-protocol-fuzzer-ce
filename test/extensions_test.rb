@@ -14,6 +14,9 @@ end
 class SampleIncludeProcessor < Asciidoctor::Extensions::IncludeProcessor
 end
 
+class SampleDocinfoProcessor < Asciidoctor::Extensions::DocinfoProcessor
+end
+
 class SampleTreeprocessor < Asciidoctor::Extensions::Treeprocessor
 end
 
@@ -62,6 +65,17 @@ class ReplaceAuthorTreeprocessor < Asciidoctor::Extensions::Treeprocessor
   def process document
     document.attributes['firstname'] = 'Ghost'
     document.attributes['author'] = 'Ghost Writer'
+    document
+  end
+end
+
+class ReplaceTreeTreeprocessor < Asciidoctor::Extensions::Treeprocessor
+  def process document
+    if document.doctitle == 'Original Document'
+      Asciidoctor.load %(== Replacement Document\nReplacement Author\n\ncontent)
+    else
+      document
+    end
   end
 end
 
@@ -100,6 +114,21 @@ class TemperatureMacro < Asciidoctor::Extensions::InlineMacroProcessor; use_dsl
     else
       c
     end
+  end
+end
+
+class MetaRobotsDocinfoProcessor < Asciidoctor::Extensions::DocinfoProcessor
+  def process document
+    '<meta name="robots" content="index,follow">'
+  end
+end
+
+class MetaAppDocinfoProcessor < Asciidoctor::Extensions::DocinfoProcessor
+  use_dsl
+  at_location :header
+
+  def process document
+    '<meta name="application-name" content="Asciidoctor App">'
   end
 end
 
@@ -276,6 +305,19 @@ context 'Extensions' do
       assert extensions.first.process_method.is_a? ::Method
     end
 
+    test 'should instantiate docinfo processors' do
+      registry = Asciidoctor::Extensions::Registry.new
+      registry.docinfo_processor SampleDocinfoProcessor
+      registry.activate Asciidoctor::Document.new
+      assert registry.docinfo_processors?
+      assert registry.docinfo_processors?(:header)
+      extensions = registry.docinfo_processors
+      assert_equal 1, extensions.size
+      assert extensions.first.is_a? Asciidoctor::Extensions::ProcessorExtension
+      assert extensions.first.instance.is_a? SampleDocinfoProcessor
+      assert extensions.first.process_method.is_a? ::Method
+    end
+
     test 'should instantiate treeprocessors' do
       registry = Asciidoctor::Extensions::Registry.new
       registry.treeprocessor SampleTreeprocessor
@@ -415,7 +457,7 @@ last line
       # Safe Mode is not required here
       document = empty_document :base_dir => File.expand_path(File.dirname(__FILE__))
       document.extensions.include_processor do
-        process do |document, reader, target, attributes|
+        process do |doc, reader, target, attributes|
           # demonstrate that push_include normalizes endlines
           content = ["include target:: #{target}\n", "\n", "middle line\n"]
           reader.push_include content, target, target, 1, attributes
@@ -451,6 +493,26 @@ content
 
         doc = document_from_string input
         assert_equal 'Ghost Writer', doc.author
+      ensure
+        Asciidoctor::Extensions.unregister_all
+      end
+    end
+
+    test 'should allow treeprocessor to replace tree' do
+      input = <<-EOS
+= Original Document
+Doc Writer
+
+content
+      EOS
+
+      begin
+        Asciidoctor::Extensions.register do
+          treeprocessor ReplaceTreeTreeprocessor
+        end
+
+        doc = document_from_string input
+        assert_equal 'Replacement Document', doc.doctitle
       ensure
         Asciidoctor::Extensions.unregister_all
       end
@@ -579,6 +641,75 @@ content
         assert_equal 1, doc.blocks.size
         assert_equal 'title', doc.blocks[0].attributes['title']
         assert_equal 'value', doc.blocks[0].id
+      ensure
+        Asciidoctor::Extensions.unregister_all
+      end
+    end
+
+    test 'should add docinfo to document' do
+      input = <<-EOS
+= Document Title
+
+sample content
+      EOS
+
+      begin
+        Asciidoctor::Extensions.register do
+          docinfo_processor MetaRobotsDocinfoProcessor
+        end
+
+        doc = document_from_string input, :safe => :server
+        assert_equal '<meta name="robots" content="index,follow">', doc.docinfo
+      ensure
+        Asciidoctor::Extensions.unregister_all
+      end
+    end
+
+
+    test 'should add multiple docinfo to document' do
+      input = <<-EOS
+= Document Title
+
+sample content
+      EOS
+
+      begin
+        Asciidoctor::Extensions.register do
+          docinfo_processor MetaAppDocinfoProcessor
+          docinfo_processor MetaRobotsDocinfoProcessor, :position => :>>
+          docinfo_processor do
+            at_location :footer
+            process do |doc|
+              '<script><!-- analytics code --></script>'
+            end
+          end
+        end
+
+        doc = document_from_string input, :safe => :server
+        assert_equal '<meta name="robots" content="index,follow">
+<meta name="application-name" content="Asciidoctor App">', doc.docinfo(:header)
+        assert_equal '<script><!-- analytics code --></script>', doc.docinfo(:footer)
+      ensure
+        Asciidoctor::Extensions.unregister_all
+      end
+    end
+
+
+    test 'should append docinfo to document' do
+      begin
+        Asciidoctor::Extensions.register do
+          docinfo_processor MetaRobotsDocinfoProcessor
+        end
+        sample_input_path = fixture_path('basic.asciidoc')
+
+        output = Asciidoctor.convert_file sample_input_path, :to_file => false,
+                                          :header_footer => true,
+                                          :safe => Asciidoctor::SafeMode::SERVER,
+                                          :attributes => {'docinfo' => ''}
+        assert !output.empty?
+        assert_css 'script[src="modernizr.js"]', output, 1
+        assert_css 'meta[name="robots"]', output, 1
+        assert_css 'meta[http-equiv="imagetoolbar"]', output, 0
       ensure
         Asciidoctor::Extensions.unregister_all
       end

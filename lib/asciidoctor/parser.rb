@@ -1,3 +1,4 @@
+# encoding: UTF-8
 module Asciidoctor
 # Public: Methods to parse lines of AsciiDoc into an object hierarchy
 # representing the structure of the document. All methods are class methods and
@@ -52,19 +53,6 @@ class Parser
         new_section, block_attributes = next_section(reader, document, block_attributes)
         document << new_section if new_section
       end
-      # NOTE we could try to avoid creating a preamble in the first place, though
-      # that would require reworking assumptions in next_section since the preamble
-      # is treated like an untitled section
-      # NOTE logic relocated to end of next_section
-      #if Compliance.unwrap_standalone_preamble &&
-      #    document.blocks.size == 1 && (first_block = document.blocks[0]).context == :preamble &&
-      #    first_block.blocks? && (document.doctype != 'book' || first_block.blocks[0].style != 'abstract')
-      #  preamble = document.blocks.shift
-      #  while (child_block = preamble.blocks.shift)
-      #    child_block.parent = document
-      #    document << child_block
-      #  end
-      #end
     end
 
     document
@@ -106,11 +94,13 @@ class Parser
     # if so, add a header to the document and parse the header metadata
     if is_next_line_document_title?(reader, block_attributes)
       source_location = reader.cursor if document.sourcemap
-      document.id, _, doctitle, _, _ = parse_section_title(reader, document)
+      document.id, _, doctitle, _, single_line = parse_section_title(reader, document)
       unless assigned_doctitle
         document.title = doctitle
         assigned_doctitle = doctitle
       end
+      # default to compat-mode if document uses atx-style doctitle
+      document.set_attribute 'compat-mode', '' unless single_line
       document.header.source_location = source_location if source_location
       document.attributes['doctitle'] = section_title = doctitle
       # QUESTION: should the id assignment on Document be encapsulated in the Document class?
@@ -228,6 +218,9 @@ class Parser
       doctype = parent.doctype
       if has_header || (doctype == 'book' && attributes[1] != 'abstract')
         preamble = intro = Block.new(parent, :preamble, :content_model => :compound)
+        if doctype == 'book' && (parent.attr? 'preface-title')
+          preamble.title = parent.attr 'preface-title'
+        end
         parent << preamble
       end
       section = parent
@@ -821,20 +814,26 @@ class Parser
         when :listing, :fenced_code, :source
           if block_context == :fenced_code
             style = attributes['style'] = 'source'
-            language, linenums = this_line[3..-1].split(',', 2)
-            if language && !(language = language.strip).empty?
+            language, linenums = this_line[3..-1].tr(' ', '').split(',', 2)
+            if !language.nil_or_empty?
               attributes['language'] = language
-              attributes['linenums'] = '' if linenums && !linenums.strip.empty?
+              attributes['linenums'] = '' unless linenums.nil_or_empty?
             elsif (default_language = document.attributes['source-language'])
               attributes['language'] = default_language
+            end
+            if !attributes.key?('indent') && document.attributes.key?('source-indent')
+              attributes['indent'] = document.attributes['source-indent']
             end
             terminator = terminator[0..2]
           elsif block_context == :source
             AttributeList.rekey(attributes, [nil, 'language', 'linenums'])
-            unless attributes.has_key? 'language'
+            unless attributes.key? 'language'
               if (default_language = document.attributes['source-language'])
                 attributes['language'] = default_language
               end
+            end
+            if !attributes.key?('indent') && document.attributes.key?('source-indent')
+              attributes['indent'] = document.attributes['source-indent']
             end
           end
           block = build_block(:listing, :verbatim, terminator, parent, reader, attributes)
@@ -847,7 +846,13 @@ class Parser
 
         when :stem, :latexmath, :asciimath
           if block_context == :stem
-            attributes['style'] = (default_stem_syntax = document.attributes['stem']).nil_or_empty? ? 'asciimath' : default_stem_syntax
+            attributes['style'] = if (explicit_stem_syntax = attributes[2])
+              explicit_stem_syntax.include?('tex') ? 'latexmath' : 'asciimath'
+            elsif (default_stem_syntax = document.attributes['stem']).nil_or_empty?
+              'asciimath'
+            else
+              default_stem_syntax
+            end
           end
           block = build_block(:stem, :raw, terminator, parent, reader, attributes)
 
@@ -939,7 +944,7 @@ class Parser
 
       if block.sub? :callouts
         unless (catalog_callouts block.source, document)
-          # No need to look for callouts if they aren't there
+          # No need to sub callouts if they aren't there
           block.remove_sub :callouts
         end
       end
@@ -1066,8 +1071,8 @@ class Parser
       return lines
     end
 
-    if content_model == :verbatim && (indent = attributes['indent'])
-      reset_block_indent! lines, indent.to_i
+    if content_model == :verbatim && attributes.key?('indent') && (indent = attributes['indent'].to_i) >= 0
+      reset_block_indent! lines, indent
     end
 
     if (extension = options[:extension])
@@ -1136,7 +1141,6 @@ class Parser
     else
       list_block.level = 1
     end
-    #Debug.debug { "Created #{list_type} block: #{list_block}" }
 
     while reader.has_more_lines? && (match = ListRxMap[list_type].match(reader.peek_line))
       marker = resolve_list_marker(list_type, match[1])
@@ -1282,7 +1286,7 @@ class Parser
       text = match[2]
       checkbox = false
       if list_type == :ulist && text.start_with?('[')
-        if text.start_with?('[ ] ') || text.start_with?('[] ')
+        if text.start_with?('[ ] ')
           checkbox = true
           checked = false
           text = text[3..-1].lstrip
@@ -1556,7 +1560,7 @@ class Parser
     source_location = reader.cursor if document.sourcemap
     sect_id, sect_reftext, sect_title, sect_level, _ = parse_section_title(reader, document)
     attributes['reftext'] = sect_reftext if sect_reftext
-    section = Section.new parent, sect_level, document.attributes.has_key?('numbered')
+    section = Section.new parent, sect_level, document.attributes.has_key?('sectnums')
     section.source_location = source_location if source_location
     section.id = sect_id
     section.title = sect_title
@@ -1742,7 +1746,6 @@ class Parser
         end
       end
     elsif Compliance.underline_style_section_titles
-      
       if (line2 = reader.peek_line(true)) && SECTION_LEVELS.has_key?(line2.chr) && line2 =~ SetextSectionLineRx &&
         (name_match = SetextSectionTitleRx.match(line1)) &&
         # chomp so that a (non-visible) endline does not impact calculation
@@ -2096,19 +2099,26 @@ class Parser
     name = sanitize_attribute_name(name)
     accessible = true
     if doc
+      # alias numbered attribute to sectnums
+      if name == 'numbered'
+        name = 'sectnums'
       # support relative leveloffset values
-      if name == 'leveloffset' && value
-        case value[0..0]
-        when '+'
-          value = ((doc.attr 'leveloffset', 0).to_i + (value[1..-1] || 0).to_i).to_s
-        when '-'
-          value = ((doc.attr 'leveloffset', 0).to_i - (value[1..-1] || 0).to_i).to_s
+      elsif name == 'leveloffset'
+        if value
+          case value.chr
+          when '+'
+            value = ((doc.attr 'leveloffset', 0).to_i + (value[1..-1] || 0).to_i).to_s
+          when '-'
+            value = ((doc.attr 'leveloffset', 0).to_i - (value[1..-1] || 0).to_i).to_s
+          end
         end
       end
-      accessible = value.nil? ? doc.delete_attribute(name) : doc.set_attribute(name, value)
+      accessible = value ? doc.set_attribute(name, value) : doc.delete_attribute(name)
     end
 
     if accessible && attrs
+      # NOTE lookup resolved value (resolution occurs inside set_attribute)
+      value = doc.attributes[name] if value
       Document::AttributeEntry.new(name, value).save_to(attrs)
     end
 
@@ -2312,7 +2322,11 @@ class Parser
             parser_ctx.buffer = %(#{parser_ctx.buffer}#{m.pre_match})
           end
 
-          line = m.post_match
+          if (line = m.post_match) == ''
+            # hack to prevent dropping empty cell found at end of line (see issue #1106)
+            seen = false
+          end
+
           parser_ctx.close_cell
         else
           # no other delimiters to see here
@@ -2334,8 +2348,9 @@ class Parser
 
       skipped = table_reader.skip_blank_lines unless parser_ctx.cell_open?
 
-      if !table_reader.has_more_lines?
-        parser_ctx.close_cell true
+      unless table_reader.has_more_lines?
+        # NOTE may have already closed cell in csv or dsv table (see previous call to parser_ctx.close_cell(true))
+        parser_ctx.close_cell true if parser_ctx.cell_open?
       end
     end
 
@@ -2621,7 +2636,7 @@ class Parser
   #--
   # FIXME refactor gsub matchers into compiled regex
   def self.reset_block_indent!(lines, indent = 0)
-    return if !indent || lines.empty?
+    return unless indent && !lines.empty?
 
     tab_detected = false
     # TODO make tab size configurable

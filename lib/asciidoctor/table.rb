@@ -1,3 +1,4 @@
+# encoding: UTF-8
 module Asciidoctor
 # Public: Methods and constants for managing AsciiDoc table content in a document.
 # It supports all three of AsciiDoc's table formats: psv, dsv and csv.
@@ -67,8 +68,8 @@ class Table < AbstractBlock
   # Public: Boolean specifies whether this table has a header row
   attr_accessor :has_header_option
 
-  def initialize(parent, attributes)
-    super(parent, :table)
+  def initialize parent, attributes
+    super parent, :table
     @rows = Rows.new
     @columns = []
 
@@ -149,8 +150,8 @@ class Table::Column < AbstractNode
   # Public: Get/Set the Symbol style for this column.
   attr_accessor :style
 
-  def initialize(table, index, attributes = {})
-    super(table, :column)
+  def initialize table, index, attributes = {}
+    super table, :column
     @style = attributes['style']
     attributes['colnumber'] = index + 1
     attributes['width'] ||= 1
@@ -199,8 +200,8 @@ class Table::Cell < AbstractNode
   # Public: The internal Asciidoctor::Document for a cell that has the asciidoc style
   attr_reader :inner_document
 
-  def initialize(column, text, attributes = {}, cursor = nil)
-    super(column, :cell)
+  def initialize column, text, attributes = {}, cursor = nil
+    super column, :cell
     @text = text
     @style = nil
     @colspan = nil
@@ -486,7 +487,7 @@ class Table::ParserContext
       # TODO perhaps the col_count/linenum logic should be in end_of_row? (or a should_end_row? method)
       close_row if end_of_row? && (@col_count != -1 || @linenum > 0 || (eol && i == repeat))
     end
-    @open_cell = false
+    @cell_open = false
     nil
   end
 

@@ -1,3 +1,4 @@
+# encoding: UTF-8
 module Asciidoctor
   # A built-in {Converter} implementation that generates DocBook 5 output
   # similar to the docbook45 backend from AsciiDoc Python, but migrated to the
@@ -5,14 +6,28 @@ module Asciidoctor
   class Converter::DocBook5Converter < Converter::BuiltIn
     def document node
       result = []
-      root_tag_name = node.doctype
+      if (root_tag_name = node.doctype) == 'manpage'
+        root_tag_name = 'refentry'
+      end
       result << '<?xml version="1.0" encoding="UTF-8"?>'
       if (doctype_line = doctype_declaration root_tag_name)
         result << doctype_line
       end
-      result << '<?asciidoc-toc?>' if node.attr? 'toc'
-      result << '<?asciidoc-numbered?>' if node.attr? 'numbered'
-      lang_attribute = (node.attr? 'nolang') ? nil : %( lang="#{node.attr 'lang', 'en'}")
+      if node.attr? 'toc'
+        if node.attr? 'toclevels'
+          result << %(<?asciidoc-toc maxdepth="#{node.attr 'toclevels'}"?>)
+        else
+          result << '<?asciidoc-toc?>'
+        end
+      end
+      if node.attr? 'sectnums'
+        if node.attr? 'sectnumlevels'
+          result << %(<?asciidoc-numbered maxdepth="#{node.attr 'sectnumlevels'}"?>)
+        else
+          result << '<?asciidoc-numbered?>'
+        end
+      end
+      lang_attribute = (node.attr? 'nolang') ? nil : %( #{lang_attribute_name}="#{node.attr 'lang', 'en'}")
       result << %(<#{root_tag_name}#{document_ns_attributes node}#{lang_attribute}>)
       result << (document_info_element node, root_tag_name)
       result << node.content if node.blocks?
@@ -27,10 +42,18 @@ module Asciidoctor
     alias :embedded :content
 
     def section node
+      doctype = node.document.doctype
       tag_name = if node.special
         node.level <= 1 ? node.sectname : 'section'
       else
-        node.document.doctype == 'book' && node.level <= 1 ? (node.level == 0 ? 'part' : 'chapter') : 'section'
+        doctype == 'book' && node.level <= 1 ? (node.level == 0 ? 'part' : 'chapter') : 'section'
+      end
+      if doctype == 'manpage'
+        if tag_name == 'section'
+          tag_name = 'refsection'
+        elsif tag_name == 'synopsis'
+          tag_name = 'refsynopsisdiv'
+        end
       end
       %(<#{tag_name}#{common_attributes node.id, node.role, node.reftext}>
 <title>#{node.title}</title>
@@ -474,7 +497,7 @@ module Asciidoctor
       when :link
         %(<link xlink:href="#{node.target}">#{node.text}</link>)
       when :bibref
-        %(<anchor#{common_attributes target, nil, "[#{node.target}]"}/>[#{node.target}])
+        %(<anchor#{common_attributes node.target, nil, "[#{node.target}]"}/>[#{node.target}])
       else
         warn %(asciidoctor: WARNING: unknown anchor type: #{node.type.inspect})
       end
@@ -624,7 +647,7 @@ module Asciidoctor
       info_tag_prefix = '' unless use_info_tag_prefix
       result = []
       result << %(<#{info_tag_prefix}info>)
-      result << (doc.header? ? (document_title_tags doc.header.title) : %(<title>#{doc.attr 'untitled-label'}</title>)) unless doc.notitle
+      result << document_title_tags(doc.doctitle :partition => true, :use_fallback => true) unless doc.notitle
       result << %(<date>#{(doc.attr? 'revdate') ? (doc.attr 'revdate') : (doc.attr 'docdate')}</date>)
       if doc.has_header?
         if doc.attr? 'author'
@@ -656,6 +679,17 @@ module Asciidoctor
       end
       result << %(</#{info_tag_prefix}info>)
 
+      if doc.doctype == 'manpage'
+        result << '<refmeta>'
+        result << %(<refentrytitle>#{doc.attr 'mantitle'}</refentrytitle>) if doc.attr? 'mantitle'
+        result << %(<manvolnum>#{doc.attr 'manvolnum'}</manvolnum>) if doc.attr? 'manvolnum'
+        result << '</refmeta>'
+        result << '<refnamediv>'
+        result << %(<refname>#{doc.attr 'manname'}</refname>) if doc.attr? 'manname'
+        result << %(<refpurpose>#{doc.attr 'manpurpose'}</refpurpose>) if doc.attr? 'manpurpose'
+        result << '</refnamediv>'
+      end
+
       result * EOL
     end
 
@@ -663,12 +697,14 @@ module Asciidoctor
       ' xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" version="5.0"'
     end
 
-    # FIXME this splitting should handled in the AST!
+    def lang_attribute_name
+      'xml:lang'
+    end
+
     def document_title_tags title
-      if title.include? ': '
-        title, _, subtitle = title.rpartition ': '
-        %(<title>#{title}</title>
-<subtitle>#{subtitle}</subtitle>)
+      if title.subtitle?
+        %(<title>#{title.main}</title>
+<subtitle>#{title.subtitle}</subtitle>)
       else
         %(<title>#{title}</title>)
       end
