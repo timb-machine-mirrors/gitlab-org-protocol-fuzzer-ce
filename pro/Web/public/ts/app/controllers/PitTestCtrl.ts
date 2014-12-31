@@ -8,6 +8,7 @@ module Peach {
 		static $inject = [
 			"$scope",
 			"$location",
+			"PitService",
 			"TestService",
 			"WizardService"
 		];
@@ -15,6 +16,7 @@ module Peach {
 		constructor(
 			$scope: IViewModelScope,
 			private $location: ng.ILocationService,
+			private pitService: PitService,
 			private testService: TestService,
 			private wizardService: WizardService
 		) {
@@ -40,6 +42,14 @@ module Peach {
 			return this.testService.TestResult.status === TestStatus.Pass;
 		}
 
+		public get ShowNotConfigured(): boolean {
+			return !this.pitService.IsConfigured;
+		}
+
+		public get ShowTestPending(): boolean {
+			return this.testService.IsPending;
+		}
+
 		public get ShowTestPass(): boolean {
 			return this.testService.TestResult.status === TestStatus.Pass;
 		}
@@ -56,6 +66,10 @@ module Peach {
 		public OnNextTrack() {
 			this.wizardService.GetTrack("test").isComplete = true;
 			this.$location.path("/quickstart/done");
+		}
+
+		public OnDashboard() {
+			this.$location.path('/');
 		}
 	}
 }

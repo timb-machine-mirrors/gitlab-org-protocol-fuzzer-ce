@@ -19,9 +19,13 @@ module Peach {
 			public pitService: PitService
 		) {
 			this.reset();
+			pitService.OnPitChanged(() => this.reset());
 		}
 
 		private isPending: boolean = false;
+		public get IsPending(): boolean {
+			return this.isPending;
+		}
 
 		private testResult: ITestResult;
 		public get TestResult(): ITestResult {

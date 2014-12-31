@@ -19,9 +19,17 @@ module Peach {
 			private $interval: ng.IIntervalService,
 			public pitService: PitService
 		) {
+			pitService.OnPitChanged(() => {
+				if (!this.isLoading) {
+					this.job = undefined;
+					this.faults = [];
+				}
+			});
 		}
 
 		private poller: ng.IPromise<any>;
+
+		private isLoading: boolean;
 
 		private job: IJob;
 		public get Job(): IJob {
@@ -33,21 +41,25 @@ module Peach {
 			return this.faults;
 		}
 
-		public get CanStartJob(): boolean {
-			return onlyIf(this.pitService.IsConfigured, () => 
+		public get IsRunning(): boolean {
+			return onlyIf(this.job, () => this.job.status === JobStatus.Running);
+		}
+
+		public get CanStart(): boolean {
+			return onlyIf(this.pitService.IsSelected, () => 
 				_.isUndefined(this.job) || this.job.status === JobStatus.Stopped
 			);
 		}
 
-		public get CanContinueJob(): boolean {
+		public get CanContinue(): boolean {
 			return this.checkStatus([JobStatus.Paused]);
 		}
 
-		public get CanPauseJob(): boolean {
+		public get CanPause(): boolean {
 			return this.checkStatus([JobStatus.Running]);
 		}
 
-		public get CanStopJob(): boolean {
+		public get CanStop(): boolean {
 			return this.checkStatus([
 				JobStatus.Running,
 				JobStatus.Paused,
@@ -73,9 +85,13 @@ module Peach {
 					this.job = _.first(jobs);
 					hasPit = !_.isEmpty(this.job.pitUrl);
 					if (hasPit) {
+						this.isLoading = true;
 						var promise2 = this.pitService.SelectPit(this.job.pitUrl);
 						promise2.then(() => {
 							deferred.resolve();
+						});
+						promise2.finally(() => {
+							this.isLoading = false;
 						});
 					}
 					this.startJobPoller();
@@ -95,28 +111,30 @@ module Peach {
 				job.pitUrl = this.pitService.Pit.pitUrl;
 			}
 
-			if (this.CanStartJob) {
+			if (this.CanStart) {
 				var promise = this.$http.post("/p/jobs", job);
 				promise.success((newJob: IJob) => {
 					this.job = newJob;
 					this.startJobPoller();
 				});
 				promise.error(reason => this.onError(reason));
-			} else if (this.CanContinueJob) {
+			} else if (this.CanContinue) {
 				this.job.status = JobStatus.ActionPending;
-				this.$http.get(this.job.jobUrl + "/continue").error(reason => this.onError(reason));
+				this.$http.get(this.job.jobUrl + "/continue")
+					.success(() => this.startJobPoller())
+					.error(reason => this.onError(reason));
 			}
 		}
 
 		public PauseJob() {
-			if (this.CanPauseJob) {
+			if (this.CanPause) {
 				this.job.status = JobStatus.ActionPending;
 				this.$http.get(this.job.jobUrl + "/pause").error(reason => this.onError(reason));
 			}
 		}
 
 		public StopJob() {
-			if (this.CanStopJob) {
+			if (this.CanStop) {
 				this.job.status = JobStatus.ActionPending;
 				this.$http.get(this.job.jobUrl + "/stop").error(reason => this.onError(reason));
 			}
@@ -126,13 +144,14 @@ module Peach {
 			return (
 				this.job &&
 				_.contains(good, this.job.status) &&
-				this.pitService.IsConfigured
+				this.pitService.IsSelected	
 			);
 		}
 
 		private onError(response) {
-			alert("Peach is busy with another task.\n" +
-				"Confirm that there aren't multiple browsers accessing the same instance of Peach.");
+			//alert("Peach is busy with another task.\n" +
+			//	"Confirm that there aren't multiple browsers accessing the same instance of Peach.");
+			console.log('onError', response);
 			this.job = undefined;
 			this.$interval.cancel(this.poller);
 		}
@@ -146,7 +165,8 @@ module Peach {
 				var promise = this.$http.get(this.job.jobUrl);
 				promise.success((job: IJob) => {
 					this.job = job;
-					if (job.status === JobStatus.Stopped) {
+					if (job.status === JobStatus.Stopped ||
+						job.status === JobStatus.Paused) {
 						this.$interval.cancel(this.poller);
 						this.poller = undefined;
 					}
