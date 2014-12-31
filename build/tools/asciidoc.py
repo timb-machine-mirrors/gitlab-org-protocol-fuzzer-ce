@@ -18,26 +18,25 @@ def configure(conf):
 	conf.find_program('asciidoctor', path_list = [ j(pub, 'asciidoctor', 'bin') ], exts = '')
 	conf.find_program('fopub', path_list = [ fopub ])
 
+	# Use ghostscript 9.15 binary from www.ghostscript.com
+	# so bookmarks are preserved when merging pdf files
+	# see doc.py for download locations
+
+	gs_path = []
+	gs_prog = 'gs-915-linux_x86_64'
+
+	if Utils.unversioned_sys_platform() == 'win32':
+		gs_prog = 'gswin64c'
+		for p in [ 'ProgramFiles', 'ProgramFiles(x86)', 'ProgramW6432' ]:
+			gs_path.append(j(os.environ.get(p), 'gs', 'gs9.15', 'bin'))
+
 	try:
-		conf.find_program('gs')
+		conf.find_program(gs_prog, var='GS', path_list=gs_path)
 		v.append_value('supported_features', 'gs')
 	except Exception, e:
-		if Utils.unversioned_sys_platform() == 'win32':
-			# look for ghostscript windows install
-			gs = []
-			for p in [ 'ProgramFiles', 'ProgramFiles(x86)', 'ProgramW6432' ]:
-				gs.append(j(os.environ.get(p), 'gs', 'gs9.15', 'bin'))
-			try:
-				conf.find_program('gswin64c', var='GS', path_list = gs)
-				v.append_value('supported_features', 'gs')
-			except:
-				v.append_value('missing_features', 'gs')
-				if Logs.verbose > 0:
-					Logs.warn('Ghostscript is not available: %s' % (e))
-		else:
-			v.append_value('missing_features', 'gs')
-			if Logs.verbose > 0:
-				Logs.warn('Ghostscript is not available: %s' % (e))
+		v.append_value('missing_features', 'gs')
+		if Logs.verbose > 0:
+			Logs.warn('Ghostscript is not available: %s' % (e))
 
 	# Ensure fopub is initialized
 	test = conf.bldnode.make_node('docbook_test.xml')
