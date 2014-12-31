@@ -223,10 +223,17 @@ def adoc_hook(self, node):
 re_xi = re.compile('''^(include|image)::([^.]*.(adoc|png))\[''', re.M)
 
 def asciidoc_scan(self):
-	p = self.inputs[0].parent
+	depnodes = []
+
+	root = self.inputs[0]
+	p = root.parent
+
+	docinfo = p.find_resource('%s-docinfo.xml' % os.path.splitext(root.name)[0])
+	if docinfo:
+		depnodes.append(docinfo)
+
 	node_lst = [self.inputs[0]]
 	seen = []
-	depnodes = []
 	while node_lst:
 		nd = node_lst.pop(0)
 		if nd in seen: continue
