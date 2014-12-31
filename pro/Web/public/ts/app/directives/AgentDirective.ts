@@ -64,6 +64,10 @@ module Peach {
 			return this.$scope.agentIndex !== (this.$scope.agents.length - 1);
 		}
 
+		public get ShowMissingMonitors(): boolean {
+			return this.$scope.agent.monitors.length === 0;
+		}
+
 		public OnMoveUp($event: ng.IAngularEvent): void {
 			$event.preventDefault();
 			$event.stopPropagation();

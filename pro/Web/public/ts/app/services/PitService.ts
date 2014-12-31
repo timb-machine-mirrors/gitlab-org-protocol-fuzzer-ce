@@ -160,6 +160,10 @@ module Peach {
 			return onlyIf(this.pit, () => this.latestVersion.configured) || false;
 		}
 
+		public get IsSelected(): boolean {
+			return !_.isUndefined(this.pit);
+		}
+
 		private get latestVersion(): IPitVersion {
 			return _.last(this.pit.versions);
 		}
