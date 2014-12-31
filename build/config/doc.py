@@ -14,6 +14,7 @@ For Ubuntu 14.04 x64:
  * ruby1.9.1 perl xsltproc libxml2-utils ghostscript
  * Oracle JDK 1.8
  * http://www.webupd8.org/2012/09/install-oracle-java-8-in-ubuntu-via-ppa.html
+ * wget http://downloads.ghostscript.com/public/binaries/ghostscript-9.15-linux-x86_64.tgz
 '''
 
 host_plat = [ 'win32', 'linux', 'darwin' ]
