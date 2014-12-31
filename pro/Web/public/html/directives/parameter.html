@@ -1,6 +1,6 @@
 <div ng-form="form"
 		 class="form-group"
-		 ng-class="{'has-error': form.param.$invalid && form.param.$dirty}">
+		 ng-class="{'has-error': form.param.$invalid}">
 	<label class="col-sm-4 control-label">
 		{{param.name}}
 	</label>
@@ -12,9 +12,10 @@
 	<span class="help-block"
 				ng-show="vm.IsRequired">
 		<span class="glyphicon glyphicon-star pointer"
-					tooltip="Required"
-					tooltip-placement="right"
-					ng-class="{red: form.param.$error.required}">
+		      tooltip="Required"
+		      tooltip-placement="right"
+		      ng-class="{red: form.param.$error.required}">
 		</span>
+		Required
 	</span>
 </div>

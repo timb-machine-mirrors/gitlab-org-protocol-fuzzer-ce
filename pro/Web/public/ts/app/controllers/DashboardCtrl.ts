@@ -35,7 +35,11 @@ module Peach {
 			return !this.Job && !this.pitService.Pit;
 		}
 
-		public get ShowNeedsConfig(): boolean {
+		public get ShowReady(): boolean {
+			return onlyIf(this.pitService.Pit, () => this.pitService.IsConfigured);
+		}
+
+		public get ShowNotConfigured(): boolean {
 			return onlyIf(this.pitService.Pit, () => !this.pitService.IsConfigured);
 		}
 
@@ -60,15 +64,15 @@ module Peach {
 		}
 
 		public get CanStart() {
-			return this.jobService.CanStartJob || this.jobService.CanContinueJob;
+			return this.jobService.CanStart || this.jobService.CanContinue;
 		}
 
 		public get CanPause() {
-			return this.jobService.CanPauseJob;
+			return this.jobService.CanPause;
 		}
 
 		public get CanStop() {
-			return this.jobService.CanStopJob;
+			return this.jobService.CanStop;
 		}
 
 		public StartWithOptions() {

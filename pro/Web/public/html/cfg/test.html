@@ -2,6 +2,33 @@
 	<div class="page-header">
 		<h1>Configuration &raquo; Test</h1>
 	</div>
+
+	<div class="alert alert-warning alert-dismissable"
+			 ng-show="vm.ShowNotConfigured">
+		<button type="button"
+						class="close"
+						data-dismiss="alert">
+			<i class="icon-remove"></i>
+		</button>
+		<strong>Warning!</strong>
+		The current Pit is not fully configured.
+	</div>
+
+	<div class="alert alert-info"
+			 ng-show="vm.ShowTestPending">
+		Testing is in progress.
+	</div>
+
+	<div class="alert alert-success"
+			 ng-show="vm.ShowTestPass">
+		Testing passed, click Continue.
+	</div>
+
+	<div class="alert alert-danger"
+			 ng-show="vm.ShowTestFail">
+		Testing failed, please correct the errors described and return to this page to test again.
+	</div>
+
 	<p>
 		This section validates the configuration by executing one test iteration,
 		and exposes issues that would hinder a fuzzing session. The output will
@@ -12,15 +39,10 @@
 	<p>
 		Click the Begin Test button to validate the configuration.
 	</p>
+
 	<div class="wizard-actions">
-		<span ng-show="vm.ShowTestPass">
-			Testing passed, press Continue
-		</span>
-		<span ng-show="vm.ShowTestFail">
-			Testing failed, please correct the errors described and return to this page to test again.
-		</span>
 		<button class="btn btn-success btn-sm"
-						ng-click="vm.OnNextTrack()"
+						ng-click="vm.OnDashboard()"
 						ng-class="{disabled: !vm.CanContinue}">
 			Continue &nbsp;
 			<i class="glyphicon glyphicon-arrow-right"></i>

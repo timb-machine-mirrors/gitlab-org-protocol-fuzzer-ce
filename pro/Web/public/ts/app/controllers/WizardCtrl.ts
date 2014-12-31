@@ -183,7 +183,7 @@ module Peach {
 		}
 
 		public get CanStartJob() {
-			return this.jobService.CanStartJob;
+			return this.jobService.CanStart;
 		}
 
 		public StartJob() {

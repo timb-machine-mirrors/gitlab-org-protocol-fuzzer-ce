@@ -33,14 +33,12 @@ module Peach {
 			return this.$scope.form.$invalid && this.$scope.form.$dirty;
 		}
 
-		public get ShowIntro(): boolean {
+		public get ShowMissingAgents(): boolean {
 			return this.numAgents === 0;
 		}
 
 		public get CanSave(): boolean {
-			return this.$scope.form.$dirty &&
-				!this.$scope.form.$invalid &&
-				this.isMonitorsValid;
+			return this.$scope.form.$dirty && !this.$scope.form.$invalid;
 		}
 
 		public AddAgent(): void {

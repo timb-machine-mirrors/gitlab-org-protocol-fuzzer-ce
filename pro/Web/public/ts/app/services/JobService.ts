@@ -33,21 +33,21 @@ module Peach {
 			return this.faults;
 		}
 
-		public get CanStartJob(): boolean {
-			return onlyIf(this.pitService.IsConfigured, () => 
+		public get CanStart(): boolean {
+			return onlyIf(this.pitService.IsSelected, () => 
 				_.isUndefined(this.job) || this.job.status === JobStatus.Stopped
 			);
 		}
 
-		public get CanContinueJob(): boolean {
+		public get CanContinue(): boolean {
 			return this.checkStatus([JobStatus.Paused]);
 		}
 
-		public get CanPauseJob(): boolean {
+		public get CanPause(): boolean {
 			return this.checkStatus([JobStatus.Running]);
 		}
 
-		public get CanStopJob(): boolean {
+		public get CanStop(): boolean {
 			return this.checkStatus([
 				JobStatus.Running,
 				JobStatus.Paused,
@@ -95,28 +95,30 @@ module Peach {
 				job.pitUrl = this.pitService.Pit.pitUrl;
 			}
 
-			if (this.CanStartJob) {
+			if (this.CanStart) {
 				var promise = this.$http.post("/p/jobs", job);
 				promise.success((newJob: IJob) => {
 					this.job = newJob;
 					this.startJobPoller();
 				});
 				promise.error(reason => this.onError(reason));
-			} else if (this.CanContinueJob) {
+			} else if (this.CanContinue) {
 				this.job.status = JobStatus.ActionPending;
-				this.$http.get(this.job.jobUrl + "/continue").error(reason => this.onError(reason));
+				this.$http.get(this.job.jobUrl + "/continue")
+					.success(() => this.startJobPoller())
+					.error(reason => this.onError(reason));
 			}
 		}
 
 		public PauseJob() {
-			if (this.CanPauseJob) {
+			if (this.CanPause) {
 				this.job.status = JobStatus.ActionPending;
 				this.$http.get(this.job.jobUrl + "/pause").error(reason => this.onError(reason));
 			}
 		}
 
 		public StopJob() {
-			if (this.CanStopJob) {
+			if (this.CanStop) {
 				this.job.status = JobStatus.ActionPending;
 				this.$http.get(this.job.jobUrl + "/stop").error(reason => this.onError(reason));
 			}
@@ -126,7 +128,7 @@ module Peach {
 			return (
 				this.job &&
 				_.contains(good, this.job.status) &&
-				this.pitService.IsConfigured
+				this.pitService.IsSelected	
 			);
 		}
 
@@ -146,7 +148,8 @@ module Peach {
 				var promise = this.$http.get(this.job.jobUrl);
 				promise.success((job: IJob) => {
 					this.job = job;
-					if (job.status === JobStatus.Stopped) {
+					if (job.status === JobStatus.Stopped ||
+						job.status === JobStatus.Paused) {
 						this.$interval.cancel(this.poller);
 						this.poller = undefined;
 					}
