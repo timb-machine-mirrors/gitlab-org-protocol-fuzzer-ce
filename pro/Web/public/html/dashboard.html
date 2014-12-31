@@ -5,211 +5,214 @@
 		</h1>
 	</div>
 
+	<div class="alert alert-warning"
+			 ng-show="vm.ShowSelectPit">
+		<strong>Warning!</strong>
+		Select a Pit before continuing.
+	</div>
+	<div class="alert alert-warning"
+			 ng-show="vm.ShowNotConfigured">
+		<strong>Warning!</strong>
+		The currently selected Pit should be configured for the environment.
+		<a href="#/quickstart/intro">Go to Pit Configuration now.</a>
+	</div>
+	<div class="alert alert-warning"
+	     ng-show="vm.ShowLimited">
+		<strong>Note:</strong>
+		The current Pit was specified from the command line,
+		which limits activities to viewing faults that occur.
+		You can stop the current job by stopping the Peach process responsible for this job.
+	</div>
+	
+	<div class="alert alert-success"
+			 ng-show="vm.ShowReady">
+		The Pit is configured and ready for use. 
+		Click the START button below to begin fuzzing.
+	</div>
+
+	<div class="alert alert-info"
+			 ng-show="vm.ShowStatus"
+			 ng-switch="vm.JobStatus">
+		<span ng-switch-when="startPending">
+			Peach is starting...
+		</span>
+		<span ng-switch-when="running"
+		      ng-switch="vm.JobMode">
+			<span ng-switch-when="fuzzing">
+				Peach is currently fuzzing...
+			</span>
+			<span ng-switch-when="reproducing">
+				Fault detected, attempting to reproduce.
+			</span>
+			<span ng-switch-when="searching">
+				Fault detected.
+				Peach is searching test cases leading to the fault.
+				This action could take a while to complete.
+			</span>
+		</span>
+		<span ng-switch-when="pausePending">
+			Peach is pausing...
+		</span>
+		<span ng-switch-when="paused">
+			Peach is currently paused.
+		</span>
+		<span ng-switch-when="continuePending">
+			Peach is continuing...
+		</span>
+		<span ng-switch-when="stopPending">
+			Peach is stopping...
+		</span>
+		<span ng-switch-when="stopped">
+			Peach is currently stopped.
+		</span>
+		<span ng-switch-when="actionPending">
+			Peach is waiting for an action to complete...
+		</span>
+	</div>
+
 	<div class="row">
-		<div class="col-xs-12">
+		<div class="col-md-2">
+		</div>
 
-			<div class="row">
-				<div class="col-xs-12">
-					<div class="space-6"></div>
-
-					<div class="alert alert-warning alert-dismissable"
-							 ng-show="vm.ShowSelectPit">
-						<button type="button"
-										class="close"
-										data-dismiss="alert">
-							<i class="icon-remove"></i>
-						</button>
-						<strong>Warning!</strong>
-						Select a Pit before continuing.
+		<div class="col-md-8 infobox-container">
+			<div class="infobox infobox-blue">
+				<div class="infobox-data">
+					<span class="infobox-data-number">
+						{{(vm.Job.startDate | date:'M/d/yy h:mma') || ' '}}
+					</span>
+					<div class="infobox-content">
+						Started
 					</div>
-					<div class="alert alert-warning alert-dismissable"
-							 ng-show="vm.ShowNeedsConfig">
-						<button type="button"
-										class="close"
-										data-dismiss="alert">
-							<i class="icon-remove"></i>
-						</button>
-						<strong>Warning!</strong>
-						Before starting a job, the currently selected Pit must be configured for the environment.
-						<a href="#/quickstart/intro">Go to Pit Configuration now.</a>
-					</div>
-					<div class="alert alert-warning alert-dismissable"
-							 ng-show="vm.ShowLimited">
-						<button type="button"
-										class="close"
-										data-dismiss="alert">
-							<i class="icon-remove"></i>
-						</button>
-						<strong>Note:</strong>
-						The current Pit was specified from the command line,
-						which limits activities to viewing faults that occur.
-						You can stop the current job by stopping the Peach process responsible for this job.
-					</div>
-					<div class="alert alert-success alert-dismissable"
-							 ng-show="vm.CanStart">
-						<button type="button"
-										class="close"
-										data-dismiss="alert">
-							<i class="icon-remove"></i>
-						</button>
-						The Pit is configured and ready for use. Click the START button below to begin fuzzing.
-					</div>
-					<div class="alert alert-info"
-							 ng-show="vm.ShowReproducing">
-						Fault detected, attempting to reproduce.
-					</div>
-					<div class="alert alert-info"
-							 ng-show="vm.ShowSearching">
-						Fault detected.
-						Peach is searching test cases leading to the fault.
-						This action could take a while to complete.
-					</div>
-
-					<div class="col-sm-7 infobox-container">
-						<div class="infobox infobox-blue  ">
-							<div class="infobox-data">
-								<span class="infobox-data-number">
-									{{(vm.Job.startDate | date:'M/d/yy h:mma') || ' '}}
-								</span>
-								<div class="infobox-content">
-									Started
-								</div>
-							</div>
-						</div>
-
-						<div class="infobox infobox-blue  ">
-							<div class="infobox-data">
-								<span class="infobox-data-number">
-									{{vm.RunningTime || ' '}}
-								</span>
-								<div class="infobox-content">
-									Running Time
-								</div>
-							</div>
-
-						</div>
-
-						<div class="infobox infobox-blue  ">
-							<div class="infobox-data">
-								<span class="infobox-data-number">
-									{{vm.Job.speed || ' '}}
-								</span>
-								<div class="infobox-content">
-									Iterations&#47;Hour
-								</div>
-							</div>
-						</div>
-
-						<div class="infobox infobox-blue  ">
-							<div class="infobox-data">
-								<span class="infobox-data-number">
-									{{vm.Job.seed || ' '}}
-								</span>
-								<div class="infobox-content">
-									Seed
-								</div>
-							</div>
-						</div>
-
-						<div class="infobox infobox-blue  ">
-							<div class="infobox-data">
-								<span class="infobox-data-number">
-									{{vm.Job.iterationCount || ' '}}
-								</span>
-								<div class="infobox-content">
-									Total Iterations
-								</div>
-							</div>
-						</div>
-
-						<div class="infobox infobox-red  ">
-							<div class="infobox-data">
-								<span class="infobox-data-number">
-									{{vm.Job.faultCount}}
-								</span>
-								<div class="infobox-content">
-									Total Faults
-								</div>
-							</div>
-						</div>
-
-						<div class="space-6"></div>
-
-					</div>
-					<div class="vspace-sm"></div>
-
 				</div>
 			</div>
 
-			<div class="row">
-				<div class="col-sm-7"
-						 style="text-align: center">
-					<div class="btn-group">
-						<button class="btn btn-lg btn-primary"
-										ng-click="vm.Start()"
-										ng-class="{disabled: !vm.CanStart}">
-							START
-						</button>
-						<button class="btn btn-lg btn-primary dropdown-toggle"
-										data-toggle="dropdown"
-										ng-class="{disabled: !vm.CanStart}">
-							<i class="icon-caret-down"></i>
-						</button>
-						<ul class="dropdown-menu dropdown-success">
-							<li>
-								<a ng-click="vm.Start()">
-									Start Now
-								</a>
-							</li>
-							<li>
-								<a ng-click="vm.StartWithOptions()">
-									Start with options
-								</a>
-							</li>
-						</ul>
+			<div class="infobox infobox-blue">
+				<div class="infobox-data">
+					<span class="infobox-data-number">
+						{{vm.RunningTime || ' '}}
+					</span>
+					<div class="infobox-content">
+						Running Time
 					</div>
+				</div>
 
-					<button class="btn btn-lg btn-danger"
-									ng-click="vm.Stop()"
-									ng-class="{disabled: !vm.CanStop}">
-						STOP
-					</button>
+			</div>
 
-					<button class="btn btn-lg btn-default"
-									ng-click="vm.Pause()"
-									ng-class="{disabled: !vm.CanPause}">
-						PAUSE
-					</button>
+			<div class="infobox infobox-blue">
+				<div class="infobox-data">
+					<span class="infobox-data-number">
+						{{vm.Job.speed || ' '}}
+					</span>
+					<div class="infobox-content">
+						Iterations/Hour
+					</div>
 				</div>
 			</div>
 
-			<hr />
+			<div class="infobox infobox-blue">
+				<div class="infobox-data">
+					<span class="infobox-data-number">
+						{{vm.Job.seed || ' '}}
+					</span>
+					<div class="infobox-content">
+						Seed
+					</div>
+				</div>
+			</div>
 
-			<h4>Recent Faults</h4>
-			<table st-table="vm.Faults"
-						 class="table table-striped table-bordered table-hover peach-table">
-				<thead>
-					<tr>
-						<th>#</th>
-						<th>When</th>
-						<th>Monitor</th>
-						<th>Risk</th>
-						<th>Major Hash</th>
-						<th>Minor Hash</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr ng-repeat="row in vm.Faults">
-						<td>{{row.iteration}}</td>
-						<td>{{row.timeStamp | date:'M/d/yy h:mm a'}}</td>
-						<td>{{row.source}}</td>
-						<td>{{row.exploitability}}</td>
-						<td>{{row.majorHash}}</td>
-						<td>{{row.minorHash}}</td>
-					</tr>
-				</tbody>
-			</table>
+			<div class="infobox infobox-blue">
+				<div class="infobox-data">
+					<span class="infobox-data-number">
+						{{vm.Job.iterationCount || ' '}}
+					</span>
+					<div class="infobox-content">
+						Total Iterations
+					</div>
+				</div>
+			</div>
 
+			<div class="infobox infobox-red">
+				<div class="infobox-data">
+					<span class="infobox-data-number">
+						{{vm.Job.faultCount}}
+					</span>
+					<div class="infobox-content">
+						Total Faults
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-2">
 		</div>
 	</div>
+
+	<div class="space-6"></div>
+
+	<div class="row text-center">
+		<div class="btn-group">
+			<button class="btn btn-lg btn-primary"
+							ng-click="vm.Start()"
+							ng-class="{disabled: !vm.CanStart}">
+				START
+			</button>
+			<button class="btn btn-lg btn-primary dropdown-toggle"
+							data-toggle="dropdown"
+							ng-class="{disabled: !vm.CanStart}">
+				<i class="icon-caret-down"></i>
+			</button>
+			<ul class="dropdown-menu dropdown-success">
+				<li>
+					<a ng-click="vm.Start()">
+						Start Now
+					</a>
+				</li>
+				<li>
+					<a ng-click="vm.StartWithOptions()">
+						Start with options
+					</a>
+				</li>
+			</ul>
+		</div>
+
+		<button class="btn btn-lg btn-danger"
+						ng-click="vm.Stop()"
+						ng-class="{disabled: !vm.CanStop}">
+			STOP
+		</button>
+
+		<button class="btn btn-lg btn-default"
+						ng-click="vm.Pause()"
+						ng-class="{disabled: !vm.CanPause}">
+			PAUSE
+		</button>
+	</div>
+
+	<hr />
+
+	<h4>Recent Faults</h4>
+	<table st-table="vm.Faults"
+				 class="table table-striped table-bordered table-hover peach-table">
+		<thead>
+			<tr>
+				<th>#</th>
+				<th>When</th>
+				<th>Monitor</th>
+				<th>Risk</th>
+				<th>Major Hash</th>
+				<th>Minor Hash</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="row in vm.Faults">
+				<td>{{row.iteration}}</td>
+				<td>{{row.timeStamp | date:'M/d/yy h:mm a'}}</td>
+				<td>{{row.source}}</td>
+				<td>{{row.exploitability}}</td>
+				<td>{{row.majorHash}}</td>
+				<td>{{row.minorHash}}</td>
+			</tr>
+		</tbody>
+	</table>
+
 </div>
