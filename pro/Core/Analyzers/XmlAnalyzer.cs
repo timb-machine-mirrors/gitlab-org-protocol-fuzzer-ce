@@ -30,6 +30,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+using System.Xml.Schema;
 using Peach.Core;
 using Peach.Core.Cracker;
 using Peach.Core.Dom;
@@ -111,7 +112,14 @@ namespace Peach.Pro.Core.Analyzers
 					if (stream.Length == 0)
 						return;
 
-					doc.Load(stream);
+					var rdr = XmlReader.Create(stream, new XmlReaderSettings
+					{
+						DtdProcessing = DtdProcessing.Ignore,
+						ValidationFlags = XmlSchemaValidationFlags.None,
+						XmlResolver = null,
+					});
+
+					doc.Load(rdr);
 				}
 				catch
 				{
