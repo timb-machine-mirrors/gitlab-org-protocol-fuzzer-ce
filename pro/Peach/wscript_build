@@ -34,6 +34,12 @@ peach_pro = [
 	'Peach.Pro.OS.Linux.dll',
 	'Peach.Pro.OS.OSX.dll',
 
+	# Include sample programs so sample pits work
+	'CrashableServer',
+	'CrashingFileConsumer',
+	'CrashingProgram',
+	'ComTest',
+
 	# Linux core file monitor
 	'PeachLinuxCrashHandler.exe',
 
