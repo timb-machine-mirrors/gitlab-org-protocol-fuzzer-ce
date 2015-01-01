@@ -9,6 +9,7 @@ xref:Agent[Agents] are special Peach processes that can be run locally or remote
 |Monitor    |Linux|OSX|Windows
 |xref:Monitors_Android[Android Monitor]|X|X|X
 |xref:Monitors_AndroidEmulator[Android Emulator Monitor]|X|X|X
+|xref:Monitors_ButtonClicker[Windows ButtonClicker Monitor]|||X
 |xref:Monitors_CanaKitRelay[CanaKit Relay Monitor]|X|X|X
 |xref:Monitors_CleanupFolder[Cleanup Folder Monitor]|X|X|X
 |xref:Monitors_CleanupRegistry[Cleanup Registry Monitor]|||X
@@ -42,6 +43,8 @@ xref:Agent[Agents] are special Peach processes that can be run locally or remote
 include::Monitors/Android.adoc[]
 
 include::Monitors/AndroidEmulator.adoc[]
+
+include::Monitors/ButtonClicker.adoc[]
 
 include::Monitors/CanaKitRelay.adoc[]
 
