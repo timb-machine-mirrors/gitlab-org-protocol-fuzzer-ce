@@ -18,6 +18,8 @@ NOTE: This mutator replaces the ValidValues mutator from previous versions of Pe
 
 ExtraValues:: Specify a semicolon-seperated list of the values to use in new test cases.
 
+WARNING: The former hint name _ValidValues_, is deprecated in favor of _ExtraValues_.
+
 === Examples
 
 .Providing Extra Values for a String

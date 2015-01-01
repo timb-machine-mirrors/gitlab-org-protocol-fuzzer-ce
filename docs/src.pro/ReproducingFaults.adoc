@@ -1,7 +1,7 @@
 [[ReproducingFaults]]
 == Reproducing Faults
 
-A fault that occurs in a fuzzing session needs to be reproduced so that it can be investigated, understood, and  potentially corrected. 
+A fault that occurs in a fuzzing session needs to be reproduced so that it can be investigated, understood, and  mitigated. 
 
 Peach Pro has the following features that aid in recreating faults that occur during fuzzing:
 
@@ -10,10 +10,11 @@ Peach Pro has the following features that aid in recreating faults that occur du
 
 :leveloffset: 1
 == Replay the Fuzzing Session
-This legacy behavior is present in the current edition of Peach Pro. You need the following items to implement this approach:
+This legacy behavior is present in the current edition of Peach Pro. It's primary use is for a developer to investigate a fault and to understand what is happening in the fault.
+You need the following items to implement this approach:
 
 * The exact version of peach
-* The pit used in the fuzzing session (the DataModel and the StateModel must be identical to that used in the fuzzing session)
+* The pit used in the fuzzing session (the DataModel and the StateModel must be identical to those used in the fuzzing session)
 * The seed value used in the fuzzing session
 * The iteration that caused the fault
 
@@ -24,19 +25,22 @@ If the command line does not specify an iteration range or a starting iteration,
 :leveloffset: 1
 == Let Peach Search to Reproduce the Fault
 
-This is new behavior. The idea is to automate the search. The following steps describe the major elements of the search:
+This is new behavior. When Peach detects a fault, it attempts to reproduce the fault. The idea is to automate the search to detmermine whether a fault consistently reproduces. The following steps describe the major elements of the search:
 
-. Replay the last iteration run (the most recent test). The typically is where the fault surfaces. +
-If the fault reproduces, the system logs the information and the search finishes. Otherwise, continue with step 2.
+. Replay the last iteration, the most recent test. This typically is where the fault surfaces. +
+If the fault reproduces, the system logs the information and the search finishes. +
+If the test target restarts with each fuzzing iteration, the search finishes because the test started in a known, clean state.
+Otherwise, continue with step 2.
 . Replay the last 10 iterations, running them in the same sequence as in the fuzzing session. +
 If the fault reproduces, the system logs the information and the search finishes. Otherwise, continue with step 3.
 . Double the number of iterations, and run them in the same sequence as in the fuzzing session. +
-If the fault reproduces, the system logs the information and the search finishes. If not, continue the search, each time doubling reaching further into the test iterations. The criteria for stopping follows: +
-* reproducing the fault
-* encountering a critical point in the data, the search to recreate the fault encountered another fualt that peach found and logged during the test session
-* encountering a user-specified limit for the search
+If the fault reproduces, the system logs the information and the search finishes. If not, continue the search, each time doubling the number of iterations to run. The criteria for stopping follows: +
+* reproduce the fault
+* encounter a critical point in the data; the effort to recreate the fault encountered another fault that peach found and logged during the test session
+* encounter a user-specified limit for the search
 
-Using a search limit of 200, the following sets of iterations would run until the limit is reached: +
+Using a search limit of 200, the following sets of iterations would run until the limit is reached: 
+
 * 1 iteration +
 * 10 iterations +
 * 20 iterations +
@@ -49,7 +53,6 @@ All told, a maximum of 511 iterations would run (1 + 10 + 20 + ... + 200) withou
 
 Some additional considerations about automated fault reproduction include the following:
 
-* If the test target restarts each iteration during fuzzing, the automated recreation feature runs the most recent iteration of the test to try to recreate the fault.
 * Control iterations are treated as in a normal fuzzing session. That is, the results of a control iteration serves as a standard of comparison for the results of record iterations. Also, the requency of performaing a control iteration is determined by the _controlIteration_ attribute of the _Test_ element.
 * Record iterations are still compared to control iterations. If the results of a record iteration matches the results of a control iteration, all is well and good, and processing advances to the next iterations. If the results of a record iteration do not match the results of a control iteration, the results are logged and the search to reproduce the fault ends.
 
