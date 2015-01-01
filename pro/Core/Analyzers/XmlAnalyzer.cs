@@ -151,7 +151,7 @@ namespace Peach.Pro.Core.Analyzers
 
 		protected void handleXmlNode(Peach.Core.Dom.XmlElement elem, XmlNode node, StringType type)
 		{
-			if (node is XmlComment || node is XmlDeclaration)
+			if (node is XmlComment || node is XmlDeclaration || node is XmlEntity || node is XmlDocumentType)
 				return;
 
 			elem.elementName = node.Name;
