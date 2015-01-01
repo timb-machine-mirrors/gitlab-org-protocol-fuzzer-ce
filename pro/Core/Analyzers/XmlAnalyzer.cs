@@ -115,7 +115,14 @@ namespace Peach.Core.Analyzers
 					if (stream.Length == 0)
 						return;
 
-					doc.Load(stream);
+					var rdr = XmlReader.Create(stream, new XmlReaderSettings
+					{
+						DtdProcessing = DtdProcessing.Ignore,
+						ValidationFlags = XmlSchemaValidationFlags.None,
+						XmlResolver = null,
+					});
+
+					doc.Load(rdr);
 				}
 				catch
 				{
