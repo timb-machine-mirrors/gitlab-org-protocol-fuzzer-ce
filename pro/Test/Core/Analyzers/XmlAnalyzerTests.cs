@@ -360,7 +360,55 @@ namespace Peach.Pro.Test.Core.Analyzers
 			Assert.AreEqual(count, dataModels.Count);
 			Assert.Less(same, 10);
 		}
-	}
+
+		[Test]
+		public void IgnoreDtd()
+		{
+			var payload = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+<!DOCTYPE plist PUBLIC ""-//Apple Computer//DTD PLIST 1.0//EN""
+    ""http://www.applefoobaddomain.com/DTDs/PropertyList-1.0.dtd"">
+<plist version=""1.0""/>
+";
+
+			string tmp = Path.GetTempFileName();
+
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String>
+			<Analyzer class='Xml'/>
+		</String>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+				<Data fileName='{0}'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<Strategy class='Sequential'/>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>
+".Fmt(tmp);
+
+			File.WriteAllText(tmp, payload);
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var config = new RunConfiguration() { singleIteration = true };
+			var e = new Engine(null);
+
+			e.startFuzzing(dom, config);
+		}
+
+
+    }
 }
 
 // end
