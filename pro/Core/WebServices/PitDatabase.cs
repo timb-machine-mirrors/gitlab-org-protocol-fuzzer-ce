@@ -44,7 +44,13 @@ namespace Peach.Pro.Core.WebServices
 
 		public class TestElement : ChildElement
 		{
-			public class AgentReferenceElement
+			public class AgentReferenceElement : ChildElement
+			{
+				[XmlAttribute("ref")]
+				public string Ref { get; set; }
+			}
+
+			public class StateModelReferenceElement : ChildElement
 			{
 				[XmlAttribute("ref")]
 				public string Ref { get; set; }
@@ -52,14 +58,25 @@ namespace Peach.Pro.Core.WebServices
 
 			public TestElement()
 			{
-				AgentRefs = new List<AgentReferenceElement>();
+				Children = new List<ChildElement>();
 			}
 
 			[XmlAttribute("name")]
 			public string Name { get; set; }
 
 			[XmlElement("Agent", typeof(AgentReferenceElement))]
-			public List<AgentReferenceElement> AgentRefs { get; set; }
+			[XmlElement("StateModel", typeof(StateModelReferenceElement))]
+			public List<ChildElement> Children { get; set; }
+
+			public IEnumerable<AgentReferenceElement> AgentRefs
+			{
+				get { return Children.OfType<AgentReferenceElement>(); }
+			}
+
+			public IEnumerable<StateModelReferenceElement> StateModelRefs
+			{
+				get { return Children.OfType<StateModelReferenceElement>(); }
+			}
 		}
 
 		public class AgentElement : ChildElement
@@ -104,6 +121,46 @@ namespace Peach.Pro.Core.WebServices
 			public string Source { get; set; }
 		}
 
+		public class StateModelElement : ChildElement
+		{
+			public class StateElement
+			{
+				public class ActionElement
+				{
+					[XmlAttribute("type")]
+					public string Type { get; set; }
+
+					[XmlAttribute("method")]
+					public string Method { get; set; }
+
+					[XmlAttribute("publisher")]
+					public string Publisher { get; set; }
+				}
+
+				public StateElement()
+				{
+					Actions = new List<ActionElement>();
+				}
+
+				[XmlElement("Action", typeof(ActionElement))]
+				public List<ActionElement> Actions { get; set; }
+			}
+
+			public StateModelElement()
+			{
+				States = new List<StateElement>();
+			}
+
+			[XmlAttribute("name")]
+			public string Name { get; set; }
+
+			[XmlAttribute("initialState")]
+			public string InitialState { get; set; }
+
+			[XmlElement("State", typeof(StateElement))]
+			public List<StateElement> States { get; set; }
+		}
+
 		[XmlAttribute("author")]
 		[DefaultValue("")]
 		public string Author { get; set; }
@@ -119,6 +176,7 @@ namespace Peach.Pro.Core.WebServices
 		[XmlElement("Include", typeof(IncludeElement))]
 		[XmlElement("Test", typeof(TestElement))]
 		[XmlElement("Agent", typeof(AgentElement))]
+		[XmlElement("StateModel", typeof(StateModelElement))]
 		public List<ChildElement> Children { get; set; }
 	}
 
@@ -251,7 +309,7 @@ namespace Peach.Pro.Core.WebServices
 
 			foreach (var kv in ClassLoader.GetAllByAttribute<MonitorAttribute>((t, a) => a.IsDefault))
 			{
-				var m = MakeMonitor(kv.Key, kv.Value);
+				var m = MakeMonitor(kv.Key, kv.Value, null);
 
 				ret.Add(m);
 			}
@@ -261,7 +319,32 @@ namespace Peach.Pro.Core.WebServices
 			return ret;
 		}
 
-		internal Monitor MakeMonitor(MonitorAttribute attr, Type type)
+		/// <summary>
+		/// Get the list of all available monitors that can be used with the specified pit guid.
+		/// </summary>
+		/// <param name="guid">Pit guid.</param>
+		/// <returns>Monitor list.</returns>
+		public List<Monitor> GetAllMonitors(string guid)
+		{
+			var pit = GetPitDetailById(guid);
+			if (pit == null)
+				return null;
+
+			var ret = new List<Monitor>();
+
+			foreach (var kv in ClassLoader.GetAllByAttribute<MonitorAttribute>((t, a) => a.IsDefault))
+			{
+				var m = MakeMonitor(kv.Key, kv.Value, pit.CallMethods);
+
+				ret.Add(m);
+			}
+
+			ret.Sort(MonitorSorter);
+
+			return ret;
+		}
+
+		internal Monitor MakeMonitor(MonitorAttribute attr, Type type, List<string> calls)
 		{
 			var os = "";
 			if (attr.OS == Platform.OS.Unix)
@@ -285,7 +368,12 @@ namespace Peach.Pro.Core.WebServices
 
 			foreach (var p in type.GetAttributes<ParameterAttribute>())
 			{
-				m.Map.Add(ParameterAttrToModel(attr.Name, p));
+				var model = ParameterAttrToModel(attr.Name, p);
+
+				if (model.Type == ParameterType.String && model.Name.Contains("OnCall"))
+					model.Options = calls;
+
+				m.Map.Add(model);
 			}
 
 			m.Map.Sort(ParameterSorter);
@@ -294,7 +382,7 @@ namespace Peach.Pro.Core.WebServices
 
 		public PitDatabase()
 		{
-			entries = new Dictionary<string, Pit>();
+			entries = new Dictionary<string, PitDetail>();
 			libraries = new Dictionary<string, Library>();
 			interfaces = null;
 		}
@@ -313,7 +401,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 			pitLibraryPath = path;
 			roots = new Dictionary<string, LibraryRoot>();
-			entries = new Dictionary<string, Pit>();
+			entries = new Dictionary<string, PitDetail>();
 			libraries = new Dictionary<string, Library>();
 			interfaces = null;
 
@@ -500,17 +588,16 @@ namespace Peach.Pro.Core.WebServices
 
 		public PitAgents GetAgentsByUrl(string url)
 		{
-			var pit = GetPitByUrl(url);
+			var pit = GetPitDetailByUrl(url);
 			if (pit == null)
 				return null;
 
-			var doc = Parse(pit.Versions[0].Files[0].Name);
 			var ret = new PitAgents
 			{
 				PitUrl = url,
 				Agents = new List<Models.Agent>(),
 			};
-			foreach (var agent in doc.Children.OfType<PeachElement.AgentElement>())
+			foreach (var agent in pit.Agents)
 			{
 				var a = new Models.Agent
 				{
@@ -812,7 +899,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 			get
 			{
-				return entries.Values;
+				return entries.Select(kv => kv.Value.Pit);
 			}
 		}
 
@@ -843,14 +930,18 @@ namespace Peach.Pro.Core.WebServices
 
 		public Pit GetPitById(string guid)
 		{
-			return GetPitByUrl(PitService.Prefix + "/" + guid);
+			var detail = GetPitDetailById(guid);
+			if (detail == null)
+				return null;
+			return detail.Pit;
 		}
 
 		public Pit GetPitByUrl(string url)
 		{
-			Pit pit;
-			entries.TryGetValue(url, out pit);
-			return pit;
+			var detail = GetPitDetailByUrl(url);
+			if (detail == null)
+				return null;
+			return detail.Pit;
 		}
 
 		public Library GetLibraryById(string guid)
@@ -1046,6 +1137,18 @@ namespace Peach.Pro.Core.WebServices
 			return p;
 		}
 
+		private PitDetail GetPitDetailById(string guid)
+		{
+			return GetPitDetailByUrl(PitService.Prefix + "/" + guid);	
+		}
+
+		private PitDetail GetPitDetailByUrl(string url)
+		{
+			PitDetail pit;
+			entries.TryGetValue(url, out pit);
+			return pit;
+		}
+
 		private static bool IsRequired(Parameter param)
 		{
 			return param.DefaultValue == null;
@@ -1054,7 +1157,7 @@ namespace Peach.Pro.Core.WebServices
 		private static bool IsConfigured(PeachElement elem)
 		{
 			// Pit is 'configured' if there is a <Test> with an <Agent ref='xxx'/> child
-			return elem.Children.OfType<PeachElement.TestElement>().Any(e => e.AgentRefs.Count > 0);
+			return elem.Children.OfType<PeachElement.TestElement>().Any(e => e.AgentRefs.Any());
 		}
 
 		private Pit AddEntry(LibraryVersion lib, string pitLibraryPath, string fileName)
@@ -1084,7 +1187,19 @@ namespace Peach.Pro.Core.WebServices
 				Timestamp = value.Timestamp
 			};
 
-			AddAllFiles(ver.Files, pitLibraryPath, fileName, contents);
+			var detail = new PitDetail
+			{
+				Pit = value,
+				StateModel =
+					contents.Children.OfType<PeachElement.TestElement>()
+						.SelectMany(t => t.StateModelRefs)
+						.Select(s => s.Ref)
+						.FirstOrDefault(),
+				CallMethods = new List<string>(),
+				Agents = contents.Children.OfType<PeachElement.AgentElement>().ToList(),
+			};
+
+			AddAllFiles(detail, ver.Files, pitLibraryPath, fileName, contents, "");
 
 			value.Versions.Add(ver);
 
@@ -1098,7 +1213,7 @@ namespace Peach.Pro.Core.WebServices
 			value.Tags.Add(tag);
 			value.Peaches.Add(Version);
 
-			entries.Add(value.PitUrl, value);
+			entries.Add(value.PitUrl, detail);
 
 			lib.Pits.Add(new LibraryPit
 			{
@@ -1111,7 +1226,7 @@ namespace Peach.Pro.Core.WebServices
 			return value;
 		}
 
-		private static void AddAllFiles(ICollection<PitFile> list, string pitLibraryPath, string fileName, PeachElement contents)
+		private static void AddAllFiles(PitDetail pit, ICollection<PitFile> list, string pitLibraryPath, string fileName, PeachElement contents, string ns)
 		{
 			list.Add(new PitFile
 			{
@@ -1119,26 +1234,35 @@ namespace Peach.Pro.Core.WebServices
 				FileUrl = "",
 			});
 
-			foreach (var child in contents.Children)
+			foreach (var sm in contents.Children.OfType<PeachElement.StateModelElement>())
 			{
-				var inc = child as PeachElement.IncludeElement;
-				if (inc != null)
+				var name = string.IsNullOrEmpty(ns) ? sm.Name : ns + ":" + sm.Name;
+				if (pit.StateModel == name)
 				{
-					var otherName = inc.Source;
-
-					if (!otherName.StartsWith("file:"))
-						continue;
-
-					otherName = otherName.Replace("file:", "");
-					otherName = otherName.Replace("##PitLibraryPath##", pitLibraryPath);
-
-					// Normalize the path
-					otherName = Path.Combine(Path.GetDirectoryName(otherName) ?? "", Path.GetFileName(otherName));
-
-					var other = Parse(otherName);
-
-					AddAllFiles(list, pitLibraryPath, otherName, other);
+					pit.CallMethods.AddRange(
+						sm.States.SelectMany(s => s.Actions)
+							.Where(a => a.Type == "call" && a.Publisher == "Peach.Agent")
+							.Select(a => a.Method));
 				}
+			}
+
+			foreach (var inc in contents.Children.OfType<PeachElement.IncludeElement>())
+			{
+				var otherName = inc.Source;
+
+				if (!otherName.StartsWith("file:"))
+					continue;
+
+				otherName = otherName.Replace("file:", "");
+				otherName = otherName.Replace("##PitLibraryPath##", pitLibraryPath);
+
+				// Normalize the path
+				otherName = Path.Combine(Path.GetDirectoryName(otherName) ?? "", Path.GetFileName(otherName));
+
+				var other = Parse(otherName);
+
+				var newNs = string.IsNullOrEmpty(ns) ? inc.Ns : ns + ":" + inc.Ns;
+				AddAllFiles(pit, list, pitLibraryPath, otherName, other, newNs);
 			}
 		}
 
@@ -1148,8 +1272,16 @@ namespace Peach.Pro.Core.WebServices
 			public string SubDir { get; set; }
 		}
 
+		class PitDetail
+		{
+			public Pit Pit { get; set; }
+			public string StateModel { get; set; }
+			public List<string> CallMethods { get; set; }
+			public List<PeachElement.AgentElement> Agents { get; set; }
+		}
+
 		private Dictionary<string, LibraryRoot> roots;
-		private Dictionary<string, Pit> entries;
+		private Dictionary<string, PitDetail> entries;
 		private Dictionary<string, Library> libraries;
 		private List<NetworkInterface> interfaces;
 	}

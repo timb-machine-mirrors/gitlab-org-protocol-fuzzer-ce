@@ -484,7 +484,7 @@ namespace Peach.Pro.Test.Core.WebServices
 				OS = Platform.OS.Unix
 			};
 
-			var monitor = db.MakeMonitor(attr, typeof(string));
+			var monitor = db.MakeMonitor(attr, typeof(string), null);
 			Assert.IsTrue(error);
 			Assert.AreEqual("", monitor.OS);
 		}
