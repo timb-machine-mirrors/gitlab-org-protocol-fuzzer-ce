@@ -29,10 +29,7 @@ _Optional:_
 
 xref:name[name]:: Element name
 xref:length[length]:: The length of data in this element.
-xref:lengthType[lengthType]:: Units of the length attribute. Defaults to "bytes". Can also be "chars", or "bits" where the number of bits is a multiplie of 8. 
-
-
-
+xref:lengthType[lengthType]:: Units of the length attribute. Defaults to "bytes". Can also be "chars", or "bits" where the number of bits is a multiple of 8. 
 
 xref:value[value]:: Default value.
 xref:valueType[valueType]:: Format of value attribute.
