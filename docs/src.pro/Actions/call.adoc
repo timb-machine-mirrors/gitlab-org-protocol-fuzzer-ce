@@ -63,7 +63,7 @@ documentation for that monitor will describe the interaction associated with _ca
 
 An instance of using the _call_ action to interact with xref:Agent[Agents] and xref:Monitors[Monitors] is provided in the examples section.
 
-NOTE: Peach has two pre-defined methods for the _call_ action that some monitors use for iteration-based interaction: +
+NOTE: Pits in the Peach Pit Library have two pre-defined methods for the _call_ action that some monitors use for iteration-based interaction: +
 * _StartIterationEvent_ performs actions at the start of each iteration +
 * _ExitIterationEvent_ performs actions at the end of each iteration
 
