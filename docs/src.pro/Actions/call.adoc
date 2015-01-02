@@ -32,7 +32,10 @@
 // 04/07/2014: Lynn
 //  add information about Param and Call
 
-The _call_ action provides a method-calling metaphor in Peach state models.
+The _call_ action provides a method-calling metaphor in Peach state models. The _call_ action is useful 
+when fuzzing targets interact with the method metaphor. In these instances, the interesting fuzzing data 
+is typically in the calling parameters. Examples of interactions that use a method-call metaphor 
+include Microsoft COM/DCOM, Web Services, and RPC.
 
 Call actions support zero or more (user-defined and supplied) parameters and a resulting return value.  
   
@@ -40,19 +43,10 @@ Call actions support zero or more (user-defined and supplied) parameters and a r
  * If the methond has user-supplied parameters, the _call_ action includes the parameters as items to fuzz. 
  * If the method has a return value, the _call_ action can captures the return value and cracks the data into the provided _DataModel_.
 
-.The Method _call_ action Metaphor
-****
-The _call_ action is useful when fuzzing targets interact with the method metaphor. In these instances, the interesting fuzzing 
-data is typically in the calling parameters. Examples of interactions that use a method-call metaphor include Microsoft COM/DCOM, 
-Web Services, and RPC.
-****
+As with the xref:Action_output[_output_] action, a single data model can represent a single parameter along with zero or more xref:Data[Data] sets.
+If the resulting return value is captured, it is considered input and will be cracked in the provided DataModel.
 
-As with the xref:Action_output[_output_] action, a single data model can represennt a single parameter along with zero or more xref:Data[Data] sets.
-If the resulting return value is captured, it is considered input and will be cracked into the provided DataModel.
-
-// 02/27/2014: Mike -- I don't think we do this currently. Only get/setProperty. Need to verify.
-//
-// .Interacting with Publishers
+.Interacting with Publishers
 // ****
 // Some Publishers may also expose special methods that can be called to set values on the Publisher that could be interesting to set.
 // If a Publisher supports this type of interaction, the documentation for the Publisher will contain this information.
@@ -67,7 +61,12 @@ A special Publisher called _Peach.Agent_ sends the _call_ action to to all confi
 the _call_ action to its associated monitors. If a monitor supports interaction via the _call_ action, 
 documentation for that monitor will describe the interaction associated with _call_.
 
-An instance of this usage is provided in the examples section.
+An instance of using the _call_ action to interact with xref:Agent[Agents] and xref:Monitors[Monitors] is provided in the examples section.
+
+NOTE: Peach has two pre-defined methods for the _call_ action that some monitors use for iteration-based interaction: +
+* _StartIterationEvent_ performs actions at the start of each iteration +
+* _ExitIterationEvent_ performs actions at the end of each iteration
+
 ****
 
 ._Param_ and the _call_ action 
