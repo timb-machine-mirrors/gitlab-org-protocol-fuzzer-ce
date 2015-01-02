@@ -25,7 +25,9 @@ namespace Peach.Core.Mutators
 			var min = Math.Max(-(double)obj.InternalValue - 10, double.MinValue);
 			var maxRange = Math.Min(Math.Abs((double)obj.InternalValue) + 100, double.MaxValue / 3);
 
-			if (obj.lengthAsBits == 32)
+			var asDouble = obj as Peach.Core.Dom.Double;
+
+			if (asDouble != null && obj.lengthAsBits == 32)
 			{
 				max = Math.Min((double)obj.InternalValue + 10, float.MaxValue);
 				min = Math.Max(-(double)obj.InternalValue - 10, float.MinValue);
