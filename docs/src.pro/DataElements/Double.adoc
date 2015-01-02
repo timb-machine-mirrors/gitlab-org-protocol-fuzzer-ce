@@ -314,21 +314,21 @@ is `"hex"`:
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
 
-	<DataModel name="NumberExample6">
+	<DataModel name="DoubleExample5">
 		<Double name="abcd" valueType="hex" value="ABCDEF01ABCDEF01" size="64" endian="little" />
 	</DataModel>
 
-	<DataModel name="NumberExample7">
+	<DataModel name="DoubleExample6">
 		<Double name="abcd" valueType="hex" value="ABCDEF01ABCDEF01" size="64" endian="big" />
 	</DataModel>
 
 	<StateModel name="TheState" initialState="Initial">
 		<State name="Initial">
 			<Action type="output">
-				<DataModel ref="NumberExample6"/>
+				<DataModel ref="DoubleExample5"/>
 			</Action>
 			<Action type="output">
-				<DataModel ref="NumberExample7"/>
+				<DataModel ref="DoubleExample6"/>
 			</Action>
 		</State>
 	</StateModel>
