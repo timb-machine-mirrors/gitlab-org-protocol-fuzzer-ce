@@ -558,17 +558,16 @@ namespace Peach.Pro.Core.WebServices
 
 		public PitAgents GetAgentsByUrl(string url)
 		{
-			var pit = GetPitByUrl(url);
+			var pit = (PitDetail)GetPitByUrl(url);
 			if (pit == null)
 				return null;
 
-			var doc = Parse(pit.Versions[0].Files[0].Name);
 			var ret = new PitAgents
 			{
 				PitUrl = url,
 				Agents = new List<Models.Agent>(),
 			};
-			foreach (var agent in doc.Children.OfType<PeachElement.AgentElement>())
+			foreach (var agent in pit.Agents)
 			{
 				var a = new Models.Agent
 				{
@@ -1132,6 +1131,7 @@ namespace Peach.Pro.Core.WebServices
 				Timestamp = File.GetLastWriteTime(fileName),
 				StateModel = contents.Children.OfType<PeachElement.TestElement>().SelectMany(t => t.StateModelRefs).Select(s => s.Ref).FirstOrDefault(),
 				CallMethods = new List<string>(),
+				Agents = contents.Children.OfType<PeachElement.AgentElement>().ToList(),
 			};
 
 			var ver = new PitVersion
@@ -1221,6 +1221,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 			public string StateModel { get; set; }
 			public List<string> CallMethods { get; set; }
+			public List<PeachElement.AgentElement> Agents { get; set; }
 		}
 
 		private Dictionary<string, LibraryRoot> roots;
