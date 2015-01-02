@@ -16,6 +16,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 			Get[""] = _ => GetPits();
 			Get["/{id}"] = _ => GetPit(_.id);
+			Get["/{id}/monitors"] = _ => GetPitMonitors(_.id);
 
 			Get["/{id}/config"] = _ => GetPitConfig(_.id);
 			Post["/{id}/config"] = _ => PostPitConfig(_.id);
@@ -54,6 +55,14 @@ namespace Peach.Pro.Core.WebServices
 			if (agents == null)
 				return HttpStatusCode.NotFound;
 			return agents;
+		}
+
+		object GetPitMonitors(string id)
+		{
+			var monitors = PitDatabase.GetAllMonitors(id);
+			if (monitors == null)
+				return HttpStatusCode.NotFound;
+			return monitors;
 		}
 
 		object CopyPit()
