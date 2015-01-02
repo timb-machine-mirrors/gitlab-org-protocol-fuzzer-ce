@@ -309,7 +309,7 @@ namespace Peach.Pro.Core.WebServices
 
 			foreach (var kv in ClassLoader.GetAllByAttribute<MonitorAttribute>((t, a) => a.IsDefault))
 			{
-				var m = MakeMonitor(kv.Key, kv.Value);
+				var m = MakeMonitor(kv.Key, kv.Value, null);
 
 				ret.Add(m);
 			}
@@ -319,7 +319,32 @@ namespace Peach.Pro.Core.WebServices
 			return ret;
 		}
 
-		internal Monitor MakeMonitor(MonitorAttribute attr, Type type)
+		/// <summary>
+		/// Get the list of all available monitors that can be used with the specified pit guid.
+		/// </summary>
+		/// <param name="guid">Pit guid.</param>
+		/// <returns>Monitor list.</returns>
+		public List<Monitor> GetAllMonitors(string guid)
+		{
+			var pit = GetPitDetailById(guid);
+			if (pit == null)
+				return null;
+
+			var ret = new List<Monitor>();
+
+			foreach (var kv in ClassLoader.GetAllByAttribute<MonitorAttribute>((t, a) => a.IsDefault))
+			{
+				var m = MakeMonitor(kv.Key, kv.Value, pit.CallMethods);
+
+				ret.Add(m);
+			}
+
+			ret.Sort(MonitorSorter);
+
+			return ret;
+		}
+
+		internal Monitor MakeMonitor(MonitorAttribute attr, Type type, List<string> calls)
 		{
 			var os = "";
 			if (attr.OS == Platform.OS.Unix)
@@ -343,7 +368,12 @@ namespace Peach.Pro.Core.WebServices
 
 			foreach (var p in type.GetAttributes<ParameterAttribute>())
 			{
-				m.Map.Add(ParameterAttrToModel(attr.Name, p));
+				var model = ParameterAttrToModel(attr.Name, p);
+
+				if (model.Type == ParameterType.String && model.Name.Contains("OnCall"))
+					model.Options = calls;
+
+				m.Map.Add(model);
 			}
 
 			m.Map.Sort(ParameterSorter);
@@ -869,7 +899,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 			get
 			{
-				return entries.Values;
+				return entries.Select(kv => kv.Value.Pit);
 			}
 		}
 
@@ -900,12 +930,18 @@ namespace Peach.Pro.Core.WebServices
 
 		public Pit GetPitById(string guid)
 		{
-			return GetPitDetailById(guid);
+			var detail = GetPitDetailById(guid);
+			if (detail == null)
+				return null;
+			return detail.Pit;
 		}
 
 		public Pit GetPitByUrl(string url)
 		{
-			return GetPitDetailByUrl(url);
+			var detail = GetPitDetailByUrl(url);
+			if (detail == null)
+				return null;
+			return detail.Pit;
 		}
 
 		public Library GetLibraryById(string guid)
@@ -1128,7 +1164,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 			var contents = Parse(fileName);
 			var guid = MakeGuid(fileName);
-			var value = new PitDetail
+			var value = new Pit
 			{
 				PitUrl = PitService.Prefix + "/" + guid,
 				Name = Path.GetFileNameWithoutExtension(fileName),
@@ -1139,9 +1175,6 @@ namespace Peach.Pro.Core.WebServices
 				Peaches = new List<PeachVersion>(),
 				User = contents.Author,
 				Timestamp = File.GetLastWriteTime(fileName),
-				StateModel = contents.Children.OfType<PeachElement.TestElement>().SelectMany(t => t.StateModelRefs).Select(s => s.Ref).FirstOrDefault(),
-				CallMethods = new List<string>(),
-				Agents = contents.Children.OfType<PeachElement.AgentElement>().ToList(),
 			};
 
 			var ver = new PitVersion
@@ -1154,7 +1187,19 @@ namespace Peach.Pro.Core.WebServices
 				Timestamp = value.Timestamp
 			};
 
-			AddAllFiles(value, ver.Files, pitLibraryPath, fileName, contents, "");
+			var detail = new PitDetail
+			{
+				Pit = value,
+				StateModel =
+					contents.Children.OfType<PeachElement.TestElement>()
+						.SelectMany(t => t.StateModelRefs)
+						.Select(s => s.Ref)
+						.FirstOrDefault(),
+				CallMethods = new List<string>(),
+				Agents = contents.Children.OfType<PeachElement.AgentElement>().ToList(),
+			};
+
+			AddAllFiles(detail, ver.Files, pitLibraryPath, fileName, contents, "");
 
 			value.Versions.Add(ver);
 
@@ -1168,7 +1213,7 @@ namespace Peach.Pro.Core.WebServices
 			value.Tags.Add(tag);
 			value.Peaches.Add(Version);
 
-			entries.Add(value.PitUrl, value);
+			entries.Add(value.PitUrl, detail);
 
 			lib.Pits.Add(new LibraryPit
 			{
@@ -1227,8 +1272,9 @@ namespace Peach.Pro.Core.WebServices
 			public string SubDir { get; set; }
 		}
 
-		class PitDetail : Pit
+		class PitDetail
 		{
+			public Pit Pit { get; set; }
 			public string StateModel { get; set; }
 			public List<string> CallMethods { get; set; }
 			public List<PeachElement.AgentElement> Agents { get; set; }
