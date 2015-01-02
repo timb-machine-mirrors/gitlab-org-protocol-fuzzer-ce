@@ -81,14 +81,14 @@ targetLifetime:: Specifies when the target restarts to a known, stable state. +
 
 maxBackSearch::
 +
-Sets the maximum number of iteration to include in the search to reproduce a fault. This attribute is used when _targetLifeTime_ is "session". The default value is 80. 
+Sets the maximum number of iterations to include in the search to reproduce a fault. This attribute is used when _targetLifeTime_ is "session". The default value is 80. 
 +
 For example, if the default value is used, the search potentially re-runs the 80 iterations that precede the most recent fault.
 
 maxOutputSize::
 +
 Sets the maximum size of data that Peach will generate. This is on an Action by Action basis meaning
-if your StateModel has two actions, each of them can produce data upto maxOutputSize. Defaults to
+if your StateModel has two actions, each of them can produce data upto maxOutputSize. The default value is
 unlimited.
 +
 When using Publishers that have a maximum output size, such as UDP, it's recommended this attribute
