@@ -15,7 +15,8 @@ using Peach.Core.IO;
 
 namespace Peach.Enterprise.Dom
 {
-	[DataElement("Bool")]
+	[DataElement("Bool", DataElementTypes.Hint)]
+	[DataElementChildSupported("Placement")]
 	[PitParsable("Bool")]
 	[Parameter("name", typeof(string), "Name of element", "")]
 	[Parameter("mutable", typeof(bool), "Is element mutable", "true")]
