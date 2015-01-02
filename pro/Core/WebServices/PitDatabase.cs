@@ -44,7 +44,13 @@ namespace Peach.Pro.Core.WebServices
 
 		public class TestElement : ChildElement
 		{
-			public class AgentReferenceElement
+			public class AgentReferenceElement : ChildElement
+			{
+				[XmlAttribute("ref")]
+				public string Ref { get; set; }
+			}
+
+			public class StateModelReferenceElement : ChildElement
 			{
 				[XmlAttribute("ref")]
 				public string Ref { get; set; }
@@ -52,14 +58,25 @@ namespace Peach.Pro.Core.WebServices
 
 			public TestElement()
 			{
-				AgentRefs = new List<AgentReferenceElement>();
+				Children = new List<ChildElement>();
 			}
 
 			[XmlAttribute("name")]
 			public string Name { get; set; }
 
 			[XmlElement("Agent", typeof(AgentReferenceElement))]
-			public List<AgentReferenceElement> AgentRefs { get; set; }
+			[XmlElement("StateModel", typeof(StateModelReferenceElement))]
+			public List<ChildElement> Children { get; set; }
+
+			public IEnumerable<AgentReferenceElement> AgentRefs
+			{
+				get { return Children.OfType<AgentReferenceElement>(); }
+			}
+
+			public IEnumerable<StateModelReferenceElement> StateModelRefs
+			{
+				get { return Children.OfType<StateModelReferenceElement>(); }
+			}
 		}
 
 		public class AgentElement : ChildElement
@@ -104,6 +121,46 @@ namespace Peach.Pro.Core.WebServices
 			public string Source { get; set; }
 		}
 
+		public class StateModelElement : ChildElement
+		{
+			public class StateElement
+			{
+				public class ActionElement
+				{
+					[XmlAttribute("type")]
+					public string Type { get; set; }
+
+					[XmlAttribute("method")]
+					public string Method { get; set; }
+
+					[XmlAttribute("publisher")]
+					public string Publisher { get; set; }
+				}
+
+				public StateElement()
+				{
+					Actions = new List<ActionElement>();
+				}
+
+				[XmlElement("Action", typeof(ActionElement))]
+				public List<ActionElement> Actions { get; set; }
+			}
+
+			public StateModelElement()
+			{
+				States = new List<StateElement>();
+			}
+
+			[XmlAttribute("name")]
+			public string Name { get; set; }
+
+			[XmlAttribute("initialState")]
+			public string InitialState { get; set; }
+
+			[XmlElement("State", typeof(StateElement))]
+			public List<StateElement> States { get; set; }
+		}
+
 		[XmlAttribute("author")]
 		[DefaultValue("")]
 		public string Author { get; set; }
@@ -119,6 +176,7 @@ namespace Peach.Pro.Core.WebServices
 		[XmlElement("Include", typeof(IncludeElement))]
 		[XmlElement("Test", typeof(TestElement))]
 		[XmlElement("Agent", typeof(AgentElement))]
+		[XmlElement("StateModel", typeof(StateModelElement))]
 		public List<ChildElement> Children { get; set; }
 	}
 
@@ -294,7 +352,7 @@ namespace Peach.Pro.Core.WebServices
 
 		public PitDatabase()
 		{
-			entries = new Dictionary<string, Pit>();
+			entries = new Dictionary<string, PitDetail>();
 			libraries = new Dictionary<string, Library>();
 			interfaces = null;
 		}
@@ -313,7 +371,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 			pitLibraryPath = path;
 			roots = new Dictionary<string, LibraryRoot>();
-			entries = new Dictionary<string, Pit>();
+			entries = new Dictionary<string, PitDetail>();
 			libraries = new Dictionary<string, Library>();
 			interfaces = null;
 
@@ -848,7 +906,7 @@ namespace Peach.Pro.Core.WebServices
 
 		public Pit GetPitByUrl(string url)
 		{
-			Pit pit;
+			PitDetail pit;
 			entries.TryGetValue(url, out pit);
 			return pit;
 		}
@@ -1054,14 +1112,14 @@ namespace Peach.Pro.Core.WebServices
 		private static bool IsConfigured(PeachElement elem)
 		{
 			// Pit is 'configured' if there is a <Test> with an <Agent ref='xxx'/> child
-			return elem.Children.OfType<PeachElement.TestElement>().Any(e => e.AgentRefs.Count > 0);
+			return elem.Children.OfType<PeachElement.TestElement>().Any(e => e.AgentRefs.Any());
 		}
 
 		private Pit AddEntry(LibraryVersion lib, string pitLibraryPath, string fileName)
 		{
 			var contents = Parse(fileName);
 			var guid = MakeGuid(fileName);
-			var value = new Pit
+			var value = new PitDetail
 			{
 				PitUrl = PitService.Prefix + "/" + guid,
 				Name = Path.GetFileNameWithoutExtension(fileName),
@@ -1072,6 +1130,8 @@ namespace Peach.Pro.Core.WebServices
 				Peaches = new List<PeachVersion>(),
 				User = contents.Author,
 				Timestamp = File.GetLastWriteTime(fileName),
+				StateModel = contents.Children.OfType<PeachElement.TestElement>().SelectMany(t => t.StateModelRefs).Select(s => s.Ref).FirstOrDefault(),
+				CallMethods = new List<string>(),
 			};
 
 			var ver = new PitVersion
@@ -1084,7 +1144,7 @@ namespace Peach.Pro.Core.WebServices
 				Timestamp = value.Timestamp
 			};
 
-			AddAllFiles(ver.Files, pitLibraryPath, fileName, contents);
+			AddAllFiles(value, ver.Files, pitLibraryPath, fileName, contents, "");
 
 			value.Versions.Add(ver);
 
@@ -1111,7 +1171,7 @@ namespace Peach.Pro.Core.WebServices
 			return value;
 		}
 
-		private static void AddAllFiles(ICollection<PitFile> list, string pitLibraryPath, string fileName, PeachElement contents)
+		private static void AddAllFiles(PitDetail pit, ICollection<PitFile> list, string pitLibraryPath, string fileName, PeachElement contents, string ns)
 		{
 			list.Add(new PitFile
 			{
@@ -1119,26 +1179,35 @@ namespace Peach.Pro.Core.WebServices
 				FileUrl = "",
 			});
 
-			foreach (var child in contents.Children)
+			foreach (var sm in contents.Children.OfType<PeachElement.StateModelElement>())
 			{
-				var inc = child as PeachElement.IncludeElement;
-				if (inc != null)
+				var name = string.IsNullOrEmpty(ns) ? sm.Name : ns + ":" + sm.Name;
+				if (pit.StateModel == name)
 				{
-					var otherName = inc.Source;
-
-					if (!otherName.StartsWith("file:"))
-						continue;
-
-					otherName = otherName.Replace("file:", "");
-					otherName = otherName.Replace("##PitLibraryPath##", pitLibraryPath);
-
-					// Normalize the path
-					otherName = Path.Combine(Path.GetDirectoryName(otherName) ?? "", Path.GetFileName(otherName));
-
-					var other = Parse(otherName);
-
-					AddAllFiles(list, pitLibraryPath, otherName, other);
+					pit.CallMethods.AddRange(
+						sm.States.SelectMany(s => s.Actions)
+							.Where(a => a.Type == "call" && a.Publisher == "Peach.Agent")
+							.Select(a => a.Method));
 				}
+			}
+
+			foreach (var inc in contents.Children.OfType<PeachElement.IncludeElement>())
+			{
+				var otherName = inc.Source;
+
+				if (!otherName.StartsWith("file:"))
+					continue;
+
+				otherName = otherName.Replace("file:", "");
+				otherName = otherName.Replace("##PitLibraryPath##", pitLibraryPath);
+
+				// Normalize the path
+				otherName = Path.Combine(Path.GetDirectoryName(otherName) ?? "", Path.GetFileName(otherName));
+
+				var other = Parse(otherName);
+
+				var newNs = string.IsNullOrEmpty(ns) ? inc.Ns : ns + ":" + inc.Ns;
+				AddAllFiles(pit, list, pitLibraryPath, otherName, other, newNs);
 			}
 		}
 
@@ -1148,8 +1217,14 @@ namespace Peach.Pro.Core.WebServices
 			public string SubDir { get; set; }
 		}
 
+		class PitDetail : Pit
+		{
+			public string StateModel { get; set; }
+			public List<string> CallMethods { get; set; }
+		}
+
 		private Dictionary<string, LibraryRoot> roots;
-		private Dictionary<string, Pit> entries;
+		private Dictionary<string, PitDetail> entries;
 		private Dictionary<string, Library> libraries;
 		private List<NetworkInterface> interfaces;
 	}
