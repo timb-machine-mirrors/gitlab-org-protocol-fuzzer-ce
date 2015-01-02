@@ -129,14 +129,18 @@ module Peach {
 		public PauseJob() {
 			if (this.CanPause) {
 				this.job.status = JobStatus.ActionPending;
-				this.$http.get(this.job.jobUrl + "/pause").error(reason => this.onError(reason));
+				this.$http.get(this.job.jobUrl + "/pause")
+					.success(() => this.startJobPoller())
+					.error(reason => this.onError(reason));
 			}
 		}
 
 		public StopJob() {
 			if (this.CanStop) {
 				this.job.status = JobStatus.ActionPending;
-				this.$http.get(this.job.jobUrl + "/stop").error(reason => this.onError(reason));
+				this.$http.get(this.job.jobUrl + "/stop")
+					.success(() => this.startJobPoller())
+					.error(reason => this.onError(reason));
 			}
 		}
 
