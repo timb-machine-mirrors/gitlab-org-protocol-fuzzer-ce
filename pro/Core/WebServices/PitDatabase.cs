@@ -558,7 +558,7 @@ namespace Peach.Pro.Core.WebServices
 
 		public PitAgents GetAgentsByUrl(string url)
 		{
-			var pit = (PitDetail)GetPitByUrl(url);
+			var pit = GetPitDetailByUrl(url);
 			if (pit == null)
 				return null;
 
@@ -900,14 +900,12 @@ namespace Peach.Pro.Core.WebServices
 
 		public Pit GetPitById(string guid)
 		{
-			return GetPitByUrl(PitService.Prefix + "/" + guid);
+			return GetPitDetailById(guid);
 		}
 
 		public Pit GetPitByUrl(string url)
 		{
-			PitDetail pit;
-			entries.TryGetValue(url, out pit);
-			return pit;
+			return GetPitDetailByUrl(url);
 		}
 
 		public Library GetLibraryById(string guid)
@@ -1101,6 +1099,18 @@ namespace Peach.Pro.Core.WebServices
 			}
 
 			return p;
+		}
+
+		private PitDetail GetPitDetailById(string guid)
+		{
+			return GetPitDetailByUrl(PitService.Prefix + "/" + guid);	
+		}
+
+		private PitDetail GetPitDetailByUrl(string url)
+		{
+			PitDetail pit;
+			entries.TryGetValue(url, out pit);
+			return pit;
 		}
 
 		private static bool IsRequired(Parameter param)
