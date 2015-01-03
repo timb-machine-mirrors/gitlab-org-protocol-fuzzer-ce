@@ -27,7 +27,7 @@ size:: Size of the set of flags in bits. Only 8-bit aligned values are supported
 
 _Optional:_
 
-xref:name[name]:: Name of the element
+xref:name[name]:: Name of the element.
 xref:endian[endian]:: Byte order of number. Defaults to _little_.
 xref:token[token]:: Specifies whether this data element is a token. Defaults to _false_.
 xref:mutable[mutable]:: Specifies whether this data element should it be mutated. Defaults to _true_.
