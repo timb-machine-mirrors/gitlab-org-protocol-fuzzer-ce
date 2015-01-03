@@ -6,7 +6,7 @@
 //  - 03/06/2014: Lynn
 //   Added and edited child elements
 
-Choice elements act like a switch statement in programming languages.
+The Choice element acts like a switch statement in programming languages.
 
 The Choice element is a child element of xref:DataModel[DataModel] or xref:Block[Block].  Choice elements are expected to have valid sub-elements; Peach will select a sub-element to fuzz.
 
@@ -60,7 +60,7 @@ xref:occurs[occurs]::
 === Child Elements
 
 xref:Analyzers[Analyzer]:: Analyze current element post cracking, can dynamically change model.
-xref:Blob[Blob]:: Represents binary data (think array of bytes) to create simple dumb fuzzers in Peach.
+xref:Blob[Blob]:: Represents binary data (array of bytes) to create simple dumb fuzzers in Peach.
 xref:Block[Block]:: Group one or more data elements in a logical structure.
 xref:Choice[Choice]:: Indicate all of the sub-elements are valid; however, only one sub-element should be selected.
 xref:Fixup[Fixup]:: Are dynamic transformations such as checksums and CRCs.
@@ -116,7 +116,7 @@ If the first 8 bits are 3, the remaining data is treated as a 8 byte string.
 
 When fuzzing, Peach chooses one of the three types and fuzzes the output as an 8 bit number followed by the corresponding type.
 
-Peach attempt to fill all three types. You can use data sets to specify which choice to make at different stages in the state model.
+Peach attempts to fill all three types. You can use data sets to specify which choice to make at different stages in the state model.
 
 [source,xml]
 ----
@@ -224,7 +224,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 .An Array of Choices
 ==========================
-The first example is good for making a single choice but what if there are many Type1, Type2, and Type3 blocks following one another? An array is the form to use. To declase the _Choice_ as an array, set the minOccurs, maxOccurs, or occurs atribute to specify that the choice should be repeated.
+The first example is good for making a single choice but what if there are many Type1, Type2, and Type3 blocks following one another? An array is the form to use. To declare the _Choice_ as an array, set the minOccurs, maxOccurs, or occurs atribute to specify that the choice should be repeated.
 
 This example attempts to crack at least 3 different choices and no more than 6.
 
