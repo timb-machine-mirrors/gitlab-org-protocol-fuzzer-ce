@@ -421,7 +421,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 .String Padded with Specified Character
 ====================
 
-This example output a string that is shorter than the required length. The string receivea one or more pad characters to reach its required length. Unlike the earlier example, we define the pad character as '_', thus overriding the default pad character.
+This example output a string that is shorter than the required length. The string receives one or more pad characters to reach its required length. Unlike the earlier example, we define the pad character as '_', thus overriding the default pad character.
 
 [source,xml]
 ----
@@ -615,7 +615,9 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 .Using token Attribute to Crack Strings
 ====================
-In this example, Peach parses a simple text string using the _token_ attribute. This example uses two files, a file containing sample data called +string.txt+ and the pit file +example.xml+. The sample string to parse consists of three parts: 1) the key, 2) the token separator, and 3) a value. Potentially, the key and value can be any arbitrary size, so cracking this sample string requires knowledge about the token separator. In the pit file, the string that is used as a token includes the _token_ attribute to indicate that the token must be present in the incoming data stream. This allows the data cracker to figure out the length of both the key and the value.
+In this example, Peach parses a simple text string using the _token_ attribute. This example uses two files, a file containing sample data called +string.txt+ and the pit file +example.xml+. The sample string to parse consists of three parts: 1)the key, 2)the token separator, and 3)a value. 
+
+Potentially, the key and value can be any arbitrary size, so cracking this sample string requires knowledge about the token separator. In the pit file, the string that is used as a token includes the _token_ attribute to indicate that the token must be present in the incoming data stream. This allows the data cracker to figure out the length of both the key and the value.
 
 TIP: Peach fuzzes elements marked as _token_.
 
