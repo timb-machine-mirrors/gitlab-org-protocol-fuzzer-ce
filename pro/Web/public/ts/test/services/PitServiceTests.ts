@@ -23,16 +23,6 @@ describe('startsWith', () => {
 	});
 });
 
-describe('isEmpty', () => {
-	it("0         -> !isEmpty", () => expect(Peach.isEmpty(0)).toBe(false));
-	it("{}        -> !isEmpty", () => expect(Peach.isEmpty({})).toBe(false));
-	it("[]        -> !isEmpty", () => expect(Peach.isEmpty([])).toBe(false));
-	it("''        -> isEmpty", () => expect(Peach.isEmpty('')).toBe(true));
-	it("null      -> isEmpty", () => expect(Peach.isEmpty(null)).toBe(true));
-	it("undefined -> isEmpty", () => expect(Peach.isEmpty(undefined)).toBe(true));
-	it("{} (_)    -> isEmpty", () => expect(_.isEmpty({})).toBe(true));
-});
-
 describe("Peach", () => {
 	beforeEach(module('Peach'));
 
