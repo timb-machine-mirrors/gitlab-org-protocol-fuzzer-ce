@@ -351,7 +351,6 @@ JOIN states     AS s ON s.id = ei.state
 JOIN actions    AS a ON a.id = ei.action
 JOIN parameters AS p ON p.id = ei.parameter
 JOIN datasets   AS d ON d.id = ei.dataset
-WHERE ef.faultcount > 0
 ORDER BY ef.faultcount DESC;
 
 CREATE VIEW view_datasets_iterations AS
@@ -381,6 +380,5 @@ LEFT JOIN view_datasets_faults as df ON
 	df.dataset = di.dataset
 JOIN datasets AS d ON 
 	d.id = di.dataset
-WHERE df.faultcount > 0
 ORDER BY df.bucketcount DESC
 LIMIT 20;
