@@ -33,13 +33,13 @@
 //  03/06/2014: Lynn
 //   * Added missing child elements, fixed child element formatting, and corrected spelling in comments
 
-The Number element defines a binary number of any arbitrary bit size from 1 to 64. Binary numbers are packed into a byte representation with a byte order of little- or big-endian.
+The Number element defines a binary number of any arbitrary bit size from 1 to 64. Binary numbers are packed into a byte representation with a byte order of little-endian or big-endian.
 
-The Number element should not be used for character based numbers. For character (also known as ASCII) numbers, use a String element.
+The Number element should not be used for character-based numbers, or ASCII numbers. Instead, use a xref:String[String] element.
 
 The Number element is a child element of xref:DataModel[DataModel], xref:Block[Block], or xref:Choice[Choice].
 
-NOTE: While Peach supports unaligned data structures, using unaligned data incurs a performance penalty. The penalty stems from bit slicing occurs behind the scenes.
+NOTE: While Peach supports unaligned data structures, using unaligned data incurs a performance penalty. The penalty stems from bit slicing that occurs behind the scenes.
 
 TIP: In Peach, two attributes are commonly used to indicate size or length of an element, _size_ and _length_. The _size_ attribute always refers to the number of bits in an element. In contrast, the _length_ attribute refers to the number of bytes of an element.
 
@@ -68,7 +68,7 @@ xref:valueType[valueType]::
 xref:token[token]::
 	This element is treated as a token when parsing. Valid values are true and false, defaults to false.
 xref:endian[endian]::
-	Byte order of the number. Valid options are big, little, and network. Network is an alias for big. The default value is little (little-endian).
+	Byte order of the number. Valid options are big, little, and network. Network is an alias for big. The default value is little.
 xref:signed[signed]::
 	The number is signed or unsigned. Valid values are true and false, defaults to true.
 xref:constraint[constraint]::
@@ -141,7 +141,7 @@ xref:Mutators_NumberVariance[NumberVariance]:: This mutator produces values near
 
 .Size
 ==========================
-Produce a 32-bit (4-byte) number with a default value of 5:
+Produce a 32-bit (4-byte) number with a default value of 5.
 
 [source,xml]
 ----
@@ -273,7 +273,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 .Byte Alignment
 ==========================
-While many data structures are byte aligned, some are not. This example arbitrarily defines sizes that don't 
+While many data structures are byte aligned, some are not. This example arbitrarily defines sizes that do not 
 fall on byte boundaries.
 
 [source,xml]
@@ -334,7 +334,7 @@ Peach.Core.Publishers.ConsolePublisher close()
 Peach.Core.Engine runTest: context.config.singleIteration == true
 Peach.Core.Publishers.ConsolePublisher stop()
 ----
-<1> Two numbers are compacted in to one byte
+<1> Two numbers are compacted into one byte.
 
 The first number is three bits with the value `"2"`. This number
 becomes the first three bits of the byte. The remaining five bits are
