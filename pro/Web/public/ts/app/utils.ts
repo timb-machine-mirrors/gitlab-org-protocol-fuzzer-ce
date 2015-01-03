@@ -27,10 +27,6 @@ module Peach {
 		form: ng.IFormController;
 	}
 
-	export function isEmpty(value) {
-		return _.isUndefined(value) || value === '' || value === null || value !== value;
-	}
-
 	export function startsWith(str: string, pattern: string): boolean {
 		return str.slice(0, pattern.length) === pattern;
 	}

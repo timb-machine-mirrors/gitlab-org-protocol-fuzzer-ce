@@ -17,16 +17,16 @@
 		<a href="#/quickstart/intro">Go to Pit Configuration now.</a>
 	</div>
 	<div class="alert alert-warning"
-	     ng-show="vm.ShowLimited">
+			 ng-show="vm.ShowLimited">
 		<strong>Note:</strong>
 		The current Pit was specified from the command line,
 		which limits activities to viewing faults that occur.
 		You can stop the current job by stopping the Peach process responsible for this job.
 	</div>
-	
+
 	<div class="alert alert-success"
 			 ng-show="vm.ShowReady">
-		The Pit is configured and ready for use. 
+		The Pit is configured and ready for use.
 		Click the START button below to begin fuzzing.
 	</div>
 
@@ -37,7 +37,7 @@
 			Peach is starting...
 		</span>
 		<span ng-switch-when="running"
-		      ng-switch="vm.JobMode">
+					ng-switch="vm.JobMode">
 			<span ng-switch-when="fuzzing">
 				Peach is currently fuzzing...
 			</span>
@@ -151,24 +151,28 @@
 
 	<div class="row text-center">
 		<div class="btn-group">
-			<button class="btn btn-lg btn-primary"
+			<button type="button"
+							class="btn btn-lg btn-primary"
 							ng-click="vm.Start()"
 							ng-class="{disabled: !vm.CanStart}">
 				START
 			</button>
-			<button class="btn btn-lg btn-primary dropdown-toggle"
+			<button type="button"
+							class="btn btn-lg btn-primary dropdown-toggle"
 							data-toggle="dropdown"
 							ng-class="{disabled: !vm.CanStart}">
 				<i class="icon-caret-down"></i>
 			</button>
-			<ul class="dropdown-menu dropdown-success">
+			<ul class="dropdown-menu">
 				<li>
-					<a ng-click="vm.Start()">
+					<a class="pointer"
+						 ng-click="vm.Start()">
 						Start Now
 					</a>
 				</li>
 				<li>
-					<a ng-click="vm.StartWithOptions()">
+					<a class="pointer"
+						 ng-click="vm.StartWithOptions()">
 						Start with options
 					</a>
 				</li>
