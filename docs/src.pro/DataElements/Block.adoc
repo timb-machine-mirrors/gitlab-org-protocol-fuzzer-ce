@@ -10,9 +10,9 @@
 // 04/09/2014: Lynn
 // Added String as a Child element
 
-_Blocks_ are container elements that group data elements into a logical structure. For example, a _string_ element, a _number_ element, and a _blob_ element can exist in the same _block_. _Blocks_ can contain other blocks, or nest, as deeply as needed.
+_Blocks_ are container elements that group data elements in a logical structure. For example, a _string_ element, a _number_ element, and a _blob_ element can exist in the same _block_. _Blocks_ can contain other blocks, or nest, as deeply as needed.
 
-_Blocks_ and xref:DataModel[DataModels] are very similar; both can be used as the template for other Blocks or xref:DataModel[DataModels]. The only difference is the positions of these elements.
+_Blocks_ and xref:DataModel[DataModels] are very similar; both can be used as the template for other Blocks or xref:DataModel[DataModels]. The only difference is the positioning of these elements.
 
 * A _DataModel_ is a top level element 
 * A _Block_ is a child element of xref:DataModel[DataModel] 
@@ -35,7 +35,7 @@ None.
 _Optional:_
 
 xref:name[name]:: Name of the block.
-xref:ref[ref]:: Reference to a [DataModel_DataModel]] to use as a template.
+xref:ref[ref]:: Reference to a xref:DataModel[DataModel] to use as a template.
 xref:length[length]:: Data element length.
 xref:lengthType[lengthType]:: The unit of measure attribute for the Length attribute. Default is bytes.
 xref:constraint[constraint]:: Scripting expression that evaluates to true or false. Default is null.
@@ -54,7 +54,7 @@ xref:mutable[mutable]:: Is data element changeable (should it be mutated), defau
 === Child Elements
 
 xref:Analyzers[Analyzer]:: Analyzes current element post cracking, can dynamically change model.
-xref:Blob[Blob]:: Represents binary data (think array of bytes) to create simple dumb fuzzers in Peach.
+xref:Blob[Blob]:: Represents binary data (array of bytes) to create simple dumb fuzzers in Peach.
 xref:Block[Block]:: Groups one or more data elements in a logical structure.
 xref:Choice[Choice]:: Indicates that all of the sub-elements are valid; but, only one sub-element should be selected.
 xref:Fixup[Fixup]:: Are dynamic transformations such as checksums and CRCs.
@@ -457,9 +457,9 @@ Peach.Core.Publishers.ConsolePublisher stop()
 [*] Test 'Default' finished.
 ----
 
-Two key things happened here. When parsed, the Customized Block replaces its structure with the DataModel of Template. Adding the string values of ":" and "\r\n".
+Two key things happened here. When parsed, the Customized Block replaced its structure with the DataModel of Template, adding the string values of ":" and "\r\n".
 
-At the same time, the "Customized" block overwrote the values of the String elements for Key and Value. Replacing them with "Content-Length" and 55. The final DataModel would be parsed as so. <1>
+At the same time, the "Customized" block overwrote the values of the String elements for Key and Value, replacing them with "Content-Length" and 55. The final DataModel would be parsed as so. <1>
 
 [source,xml]
 ----
