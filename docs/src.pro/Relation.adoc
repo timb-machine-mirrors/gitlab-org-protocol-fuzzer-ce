@@ -13,12 +13,12 @@
 
 // - 03/25/2014: Lynn: Major editing
 
-Peach allows data relationship modeling.  There are three Relation types: Size, Count and Offset.
+Peach allows data relationship modeling and provides three types of Relations: Size, Count and Offset.
 
-There are two required Relation attributes:
+Each Relation element has two required attributes:
 
-type::  Which relationship is being modeled (Size, Count, Offset)
-of:: Name of the relationship element in the data model  
+type::  Declares whether the relationship to model (Size, Count, Offset).
+of:: Names the relationship element in the data model.
 
 [[Relations_Size]]
 === Size-of Relation
