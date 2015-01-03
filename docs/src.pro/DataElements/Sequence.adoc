@@ -1,12 +1,8 @@
-#TODO Updated defination of a sequence.
-
 <<<
 [[Sequence]]
 == Sequence
 
-Sequence elements are used to group one or more data elements such as xref:Number[Number] or xref:String[String] together into a logical structure. Sequences can be thought of as arrays that can contain more than a single data type.
-
-They are most useful when used within a Json element as they are used to represent JSON arrays.
+Sequence elements are used to construct an array with all its elements predefined. A Sequence is able to contain multiple data types at once. Unlike regular arrays in Peach, the size of the Sequence it determined by the number of elements within the sequence not the minOccurs attribute. Adding the minOccurs attribute to a Sequence will make an array of Sequences. 
 
 === Syntax
 
@@ -51,7 +47,7 @@ xref:Null[Null]:: Defines a null value element.
 xref:Number[Number]:: Defines a binary number of arbitrary bit size.
 xref:Padding[Padding]:: Pad out variably sized blocks or data models.
 xref:Placement[Placement]:: Relocate an element after it has been cracked.
-xref:Sequence[Sequence]:: Groups one or more datalements together into a logical structure.
+xref:Sequence[Sequence]:: Groups one or more data elements together into a logical structure.
 xref:Stream[Stream]::  Group one or more data elements together into a logical structure.
 xref:Transformer[Transformer]:: Static transformations such as compression or encoding.
 xref:XmlElement[XmlElement]:: Defines an XML element, the basic building block of XML documents.
@@ -352,6 +348,77 @@ Peach.Core.Publishers.ConsolePublisher start()
 Peach.Core.Publishers.ConsolePublisher open()
 Peach.Core.Publishers.ConsolePublisher output(4 bytes)
 00000000   31 32 33 34                                        1234
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
+----
+==========================
+
+.Altering Sequence Values using Data Fields
+==========================
+Sequences values can be altered from the state model using data fields.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach /peach/peach.xsd">
+	<DataModel name="SequenceExample">
+		<Sequence name="MySeq">
+			<String name="val1" value="Old"/>
+			<String name="val2" value="OLDER"/>
+		</Sequence>
+	</DataModel>
+
+	<StateModel name="TheState" initialState="Initial">
+		<State name="Initial">
+			<Action type="output">
+				<DataModel ref="SequenceExample"/>
+				<Data>
+					<Field name="MySeq[0]" value="Updated Value for val1"/>
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Agent name="TheAgent" />
+
+	<Test name="Default">
+		<Agent ref="TheAgent"/>
+
+		<StateModel ref="TheState"/>
+
+		<Publisher class="ConsoleHex"/>
+
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
+	</Test>
+</Peach>
+----
+
+Output from this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 24392.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.StateModel Run(): Changing to state "Initial".
+Peach.Core.Dom.Action Run(Action): Output
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(27 bytes)
+00000000   55 70 64 61 74 65 64 20  56 61 6C 75 65 20 66 6F   Updated Value fo
+00000010   72 20 76 61 6C 31 4F 4C  44 45 52                  r val1OLDER
 Peach.Core.Publishers.ConsolePublisher close()
 Peach.Core.Engine runTest: context.config.singleIteration == true
 Peach.Core.Publishers.ConsolePublisher stop()

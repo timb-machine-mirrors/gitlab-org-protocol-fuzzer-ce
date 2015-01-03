@@ -53,7 +53,7 @@ xref:Null[Null]:: Defines a null value element.
 xref:Number[Number]:: Defines a binary number of arbitrary bit size.
 xref:Padding[Padding]:: Pad out variably sized blocks or data models.
 xref:Placement[Placement]:: Relocate an element after it has been cracked.
-xref:Sequence[Sequence]:: Groups one or more datalements together into a logical structure.
+xref:Sequence[Sequence]:: Groups one or more data elements together into a logical structure.
 xref:Stream[Stream]::  Group one or more data elements together into a logical structure.
 xref:Transformer[Transformer]:: Static transformations such as compression or encoding.
 xref:XmlElement[XmlElement]:: Defines an XML element, the basic building block of XML documents.
