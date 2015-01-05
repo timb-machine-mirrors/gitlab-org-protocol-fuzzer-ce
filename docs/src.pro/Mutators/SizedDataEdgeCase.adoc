@@ -6,7 +6,7 @@ This mutator produces test cases for elements that are part of a size relationsh
 
 Test cases are generated using a Gaussian distribution around numerical edge cases. Edge cases for integers are defined as boundaries between signed/unsigned representations and bit boundaries (0, 8, 16, 32, 64).
 
-Values used in the test cases will never require more storage than the maximum size the size provider can handle. For example, values used for a signed 16-bit integer will never exceed 32,767.
+Values used in the test cases never require more storage than the maximum size the size provider can handle. For example, values used for a signed 16-bit integer do not exceed 32,767.
 
 NOTE: This mutator is similar to the xref:Mutators_NumberEdgeCase[NumberEdgeCase] Mutator.
 

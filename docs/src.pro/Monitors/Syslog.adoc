@@ -2,7 +2,7 @@
 [[Monitors_Syslog]]
 == Syslog Monitor
 
-The _Syslog_ monitor listens on a specified port for incoming syslog messages. This monitor is capable of performing data collection and fault detection. The default operation is data collection. Fault detection can be enabled by setting the FaultRegex parameter. If the FaultRegex matches an incoming syslog message, a fault will be generated.
+The _Syslog_ monitor listens on a specified port for incoming syslog messages. This monitor is capable of performing data collection and fault detection. The default operation is data collection. Fault detection can be enabled by setting the FaultRegex parameter. If the FaultRegex matches an incoming syslog message, a fault is generated.
 
 === Parameters
 
