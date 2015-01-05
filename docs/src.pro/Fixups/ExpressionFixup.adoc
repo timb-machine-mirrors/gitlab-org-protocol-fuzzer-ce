@@ -14,11 +14,11 @@
 // Make unit test for all three cases !!!
 
 
-The _Expression_ will evaluate a scripting expression that produces the new value for our element.
+The _Expression_ evaluates a scripting expression that produces the new value for our element.
 
 === Parameters
 
-xref:ref[ref]:: Reference to the data element whose value is used in the given expression
+xref:ref[ref]:: Reference to the input data element used in the given expression.
 expression:: Scripting expression to evaluate.  Must return a string or integer value.
 
 === Scripting Variables
