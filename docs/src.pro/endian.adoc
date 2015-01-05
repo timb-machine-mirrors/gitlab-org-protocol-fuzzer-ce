@@ -20,7 +20,7 @@ For more information about endianness see http://en.wikipedia.org/wiki/Endian[th
 ----
 
 
-Will produce the bytes in the following order. 
+Produces the bytes in the following order. 
 
 ----
  AB CD 
@@ -35,7 +35,7 @@ Will produce the bytes in the following order.
 ----
 
 
-Will produce the bytes in the following order. 
+Produces the bytes in the following order. 
 
 ----
  CD AB 
