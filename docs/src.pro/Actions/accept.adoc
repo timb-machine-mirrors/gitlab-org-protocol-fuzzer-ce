@@ -26,26 +26,26 @@ The _accept_ Action blocks execution until an incoming connection is available, 
 
 Not all xref:Publisher[Publishers] support the _accept_ action type. xref:Publishers_TcpListener[TcpListener] is an example of a Publisher that supports _accept_.
 
-Peach is single-threaded so it can't execute any other tasks (including scripts) while waiting for a target connection.
+Peach is single-threaded so it can't execute any other task (including scripts) while waiting for a target connection.
 
 .Accept Timeout
 ****
 Some Publishers use an _AcceptTimeout_ parameter to limit the wait for a connection. If the timeout occurs prior to accepting an incoming connection, Peach behaves as follows:
 
 xref:Iteration_record[Timeout occurs during a record iteration]::
-  Peach will throw an exception and stop. The results of a record iteration are used as a standard for comparing with results of control iterations. 
+  Peach throws an exception and stops. The results of a record iteration are used as a standard for comparing with results of control iterations. 
   When things do not work correctly during a record iteration, the environment is not working correctly or the pit is not correct. 
   In either case, the fuzzing session cannot continue.
   
 xref:Iteration_control[Timeout occurs during a control iteration]::
-  Peach will trigger a fault. Control iterations are used as checkpoints to verify that the target is operating correctly. 
+  Peach triggers a fault. Control iterations are used as checkpoints to verify that the target is operating correctly. 
   The pit must enable Control iterations to reach this state.
   During control iterations, Peach assumes any error results from the target entering an unwanted state.
   Such transitions are considered faults and logged accordingly.
   
 xref:Iteration_fuzzing[Timeout occurs during a fuzzing iteration]::
-  Peach will continue to the next iteration.
-  During normal fuzzing iterations, Peach ignores odd behavior from the target unless it occurs on a control iteration.
+  Peach continues to the next iteration.
+  During normal fuzzing iterations, Peach ignores odd behavior from the target unless it occurs during a control iteration.
 ****
 
 .Default Order of Actions
@@ -208,7 +208,7 @@ Peach.Core.Publishers.TcpListenerPublisher stop()
 
 [*] Test 'Default' finished.
 ----
-<1> Peach will wait here for the incoming connection
+<1> Peach waits here for the incoming connection.
 
 Interaction from the client, including the Netcat command line. 
 
