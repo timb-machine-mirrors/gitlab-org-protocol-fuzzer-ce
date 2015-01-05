@@ -43,7 +43,7 @@ xref:constraint[constraint]:: Scripting expression that evaluates to true or fal
 
 xref:minOccurs[minOccurs]::
 	The minimum number of times this element must occur. Defaults to 1.  +
-	* Used to define arrays with variable size. Arrays defined by min/maxOccurs will generally have a relation
+	* Used to define arrays with variable size. Arrays defined by min/maxOccurs generally have a relation
 	defined.
 	* Adding this attribute, even with a value of 1, converts the element to an array.
 
@@ -108,7 +108,7 @@ xref:Mutators_ChoiceSwitch[ChoiceSwitch]:: This mutator produces test cases by a
 
 .Basic Example
 ==========================
-A basic Choice block. This choice example will crack or consume data of type 1, 2, and 3. Much like a regular switch statement, a decision needs to be made on a token.
+A basic Choice block. This choice example cracks or consumes data of type 1, 2, and 3. Much like a regular switch statement, a decision needs to be made on a token.
 
 If the first 8 bits are 1, the remaining data is treated as a 32 bit number.
 If the first 8 bits are 2, the remaining data is treated as a 255 bytes of binary data.
