@@ -23,12 +23,12 @@
 // 03/05/2014: Lynn: 
 //  Edited text and corrected Apple QuickTime information
 
-The _setProperty_ Action allows Peach to modify values of properties in the target or to modify properties of a Publisher while fuzzing. _setProperty_ Actions specify the xref:DataModel[DataModel] property in the target that will receive fuzzing.
+The _setProperty_ Action allows Peach to modify values of properties in the target or to modify properties of a Publisher while fuzzing. _setProperty_ Actions specify the xref:DataModel[DataModel] property in the target that receives fuzzing.
 
 _setProperty_ provides one half of a property metaphor in Peach state models. _setProperty_ actions are considered output actions. xref:Action_getProperty[_getProperty_] is the other half (input) of the property metaphor.
 
 Properties that are modified receive fuzzing in the same way an output action would be. 
-For example, a test target such as a COM object will have a property set and mutated by Peach (see the following example). 
+For example, a test target, such as a COM object, can have a property set and mutated by Peach, as in the following example. 
 
 The second use, setting and mutating a property in a publisher, is fuzzing the MTU attribute of the RawEther Publisher. Some Publishers support the use of properties.
 
