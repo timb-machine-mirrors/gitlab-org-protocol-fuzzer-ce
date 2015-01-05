@@ -68,7 +68,7 @@ None.
 
 .Action changeState Example
 ==========================
-The following example will change behavior based on input received from the target client.
+The following example changes behavior based on input received from the target client.
 
 [source,xml]
 ----
