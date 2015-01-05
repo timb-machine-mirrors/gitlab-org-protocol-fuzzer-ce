@@ -21,7 +21,7 @@
 
 Peach has pluggable mutation strategies to deal with two common situations: 
 
-* Peach usually fuzzes DataModels using a top-down, sequential method.  While this guarantees that every data element will get fuzzed with each test case, this may not be the best solution for larger, complex systems which can produce millions of test case variations.  
+* Peach usually fuzzes DataModels using a top-down, sequential method.  While this guarantees that every data element is fuzzed with each test case, this may not be the best solution for larger, complex systems which can produce millions of test case variations.  
 
 * Peach needs a mechanism to allow you to easily change how fuzzing is performed. This helps you determine the best fuzzing methods and strategies for your situation.
 
@@ -42,11 +42,11 @@ Peach supplies three user-extensible mutation strategies:
 
 Random is the default fuzzing strategy.  
 
-This strategy will select up to _MaxFieldsToMutate_ elements to mutate at a time.  For each selected element, one of it's corresponding mutators is selected at random. 
+This strategy selects one or more elements to mutate at a time. For each selected element, one of its corresponding mutators is selected at random. The _MaxFieldsToMutate_ sets the maximum number of elements that simultaneously receive muations.
 
-NOTE: Peach derives the randomness of these selections from a randomly generated seed number. 
+NOTE: Peach derives the randomness of these selections from a randomly-generated seed number. 
 
-An identical test run can be repeated by passing the same *seed* value with the Peach _--seed_ command line option.  This is useful for replaying fuzzing iterations to reproduce a previous Fault.
+An identical test run can be repeated by passing the same *seed* value with the Peach _--seed_ command line option.  This option is useful for replaying fuzzing iterations to reproduce a previous Fault.
 
 This strategy is most useful for larger data models or for use after performing a sequential fuzzing run.
 
@@ -55,8 +55,8 @@ IMPORTANT: The random strategy can have an infinite number of fuzzing iterations
 
 ==== Parameters
 
-MaxFieldsToMutate:: Maximum fields to mutate at once. default="6"
-SwitchCount:: Number of iterations to perform before switching xref:Data[Data] sets. default="200"
+MaxFieldsToMutate:: Maximum fields to mutate at once. The default value is 6.
+SwitchCount:: Number of iterations to perform before switching xref:Data[Data] sets. The default value is 200.
 
 *Examples*
 
@@ -78,7 +78,7 @@ SwitchCount:: Number of iterations to perform before switching xref:Data[Data] s
 
 === Sequential
 
-If you select the sequential strategy, Peach will fuzz each element in the DataModel in order, one at a time. Peach will start from the top of the DataModel and apply all valid mutation to each data element until all possible mutations have been exhausted.  
+If you select the sequential strategy, Peach fuzzes each element in the DataModel in order, one at a time. Peach starts from the top of the DataModel and applies all valid mutation to each data element until all possible mutations have been used.  
 
 The sequential strategy has a finite number of fuzzing iterations.  
 
@@ -96,4 +96,4 @@ TIP: The seed for this strategy is not configurable and is always 31337.
 
 === RandomDeterministic
 
-This fuzzing strategy is deterministic (has a start and end).  It is similar to the Sequential strategy except the order of mutations has been shuffled. There is still a finite number of iterations and, if run to completion, will run every iteration that is generation with the Sequential strategy.  Similarly to the Random strategy the seed value can be used to repeat a previous test run with identical fuzzing.
+This fuzzing strategy is deterministic (has a start and end).  It is similar to the Sequential strategy except the order of mutations has been shuffled. There is still a finite number of iterations and, if run to completion, runs every iteration that is generated with the Sequential strategy.  Similar to the Random strategy, the seed value provides consistent repeatability and is used used to repeat a previous test run with identical fuzzing.
