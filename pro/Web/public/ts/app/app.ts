@@ -198,6 +198,12 @@ module Peach {
 		};
 	});
 
+	p.filter('peachParameterName', () => {
+		return (value: string): string => {
+			return value.substr(0).replace(/[A-Z]/g, ' $&');
+		};
+	});
+
 	export function Startup() {
 		window.onerror = (message, url, lineNo) => {
 			console.log('Error: ' + message + '\n' + 'Line Number: ' + lineNo);
