@@ -39,12 +39,12 @@ module Peach {
 			if (scope.min) {
 				this.boundsValidate('rangeMin', ctrl,
 					(value: number) => (value >= scope.min())
-					);
+				);
 			}
 			if (scope.max) {
 				this.boundsValidate('rangeMax', ctrl,
 					(value: number) => (value <= scope.max())
-					);
+				);
 			}
 		}
 
@@ -54,7 +54,7 @@ module Peach {
 			predicate: IBoundPredicate
 		) {
 			var validator = value => {
-				var isValid = (isEmpty(value) || predicate(value));
+				var isValid = (_.isEmpty(value) || predicate(value));
 				ctrl.$setValidity(name, isValid);
 				return value;
 			};
@@ -69,13 +69,13 @@ module Peach {
 		pattern: RegExp,
 		ctrl: ng.INgModelController
 	) {
-		var validate = value => {
-			var match = pattern.test(value);
-			ctrl.$setValidity(name, match);
+		var validator = value => {
+			var isValid = (_.isEmpty(value) || pattern.test(value));
+			ctrl.$setValidity(name, isValid);
 			return value;
 		};
-		ctrl.$parsers.unshift(validate);
-		ctrl.$formatters.unshift(validate);
+		ctrl.$parsers.unshift(validator);
+		ctrl.$formatters.unshift(validator);
 	}
 
 	export class IntegerDirective implements ng.IDirective {
@@ -100,7 +100,7 @@ module Peach {
 
 	export class HexDirective implements ng.IDirective {
 		constructor(
-			) {
+		) {
 			this.link = this._link.bind(this);
 		}
 
