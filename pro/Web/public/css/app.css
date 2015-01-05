@@ -224,6 +224,28 @@ pre.peach-test-log {
 	max-height: 600px;
 }
 
+.peach-add-monitor .ui-select-choices-row-inner div {
+	/*font-family: monospace;*/
+}
+
+.peach-add-monitor .ui-select-choices-row-inner small {
+	display: inline-block;
+	white-space: normal;
+	padding-left: 5px;
+	font-style: italic;
+}
+
+.peach-parameter .ui-select-choices-row-inner div {
+	/*font-family: monospace;*/	
+}
+
+.peach-parameter .ui-select-choices-row-inner small {
+	display: inline-block;
+	white-space: normal;
+	padding-left: 5px;
+	font-style: italic;
+}
+
 #loading-bar .bar {
 	background: orange;
 }
