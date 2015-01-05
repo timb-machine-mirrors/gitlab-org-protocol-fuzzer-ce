@@ -78,7 +78,7 @@ xref:mutable[mutable]::
 
 xref:minOccurs[minOccurs]::
 	The minimum number of times this element must occur. Defaults to 1.  +
-	* Used to define arrays with variable size. Arrays defined by min/maxOccurs will generally have a relation
+	* Used to define arrays with variable size. Arrays defined by min/maxOccurs generally have a relation
 	defined.
 	* Adding this attribute, even with a value of 1, converts the element to an array.
 
@@ -689,14 +689,13 @@ Peach.Core.Publishers.ConsolePublisher stop()
 <2> The value 1000, having been defined in hex as 0x03e8
 
 Notice that the `valueType` of `"string"` represents a number. This
-number may be changed by endianness. Observe that the numeric value
+number may be changed by endian-ness. Observe that the numeric value
 was entered as 0x03e8, but Peach output the bytes 0xE8 and 0x03. The
 value was converted to little endian before being output.
 
-To assign a value as if copied directly from a hex editor we can use
-the `"hex"` `valueType`. Values entered in `"hex"` will be output
-exactly as input regardless of endianness as exampled in the section
-on the `endian` attribute above.
+To assign a value as if copied directly from a hex editor we can use 
+the `"hex"` `valueType`. Values entered in `"hex"` are output exactly as input 
+regardless of endian-ness, as shown in the previous example that exercises  the `endian` attribute.
 
 [source,xml]
 ----
