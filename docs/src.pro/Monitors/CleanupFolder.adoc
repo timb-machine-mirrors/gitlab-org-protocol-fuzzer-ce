@@ -20,7 +20,7 @@ None.
 
 .Remove contents of a folder
 ==============================
-Run this example from the folder specified using the _folder_ parameter. During each iteration, the file +fuzzed.txt+ will be created by the File publisher. At the end of each iteration, +fuzzed.txt+ will be deleted by the CleanupFolder monitor.
+Run this example from the folder specified using the _folder_ parameter. During each iteration, the file +fuzzed.txt+ is created by the File publisher. At the end of each iteration, +fuzzed.txt+ is deleted by the CleanupFolder monitor.
 
 [source,xml]
 ----

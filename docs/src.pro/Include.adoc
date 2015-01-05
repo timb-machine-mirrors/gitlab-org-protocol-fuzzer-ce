@@ -28,7 +28,7 @@ There are no optional attributes for this element.
 
 .Basic Include Example
 ======================
-This example will include and use a data model defined in a separate file.
+This example uses the Include element to use a data model defined in another file.
 
 [source,xml]
 .example_include.xml

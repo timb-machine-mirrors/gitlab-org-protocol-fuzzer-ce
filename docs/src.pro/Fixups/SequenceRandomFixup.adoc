@@ -15,13 +15,13 @@
 // - 02/18/2014: Mick
 // Added full examples
 
-The _SequenceRandom_ will produce a random integer each iteration.
+The _SequenceRandom_ fixup produces a random integer each iteration.
 This is useful when a field must be a unique value every iteration.
 
 This checksum can be used when fuzzing protocols that contain a nonce or pseudo-random sequence number.
-The RNG uses the same seed as Peach so values produced are reproducible by setting the seed via command line.
+The RNG uses the same seed as Peach, so values produced are reproducible by setting the seed via the command line.
 
-NOTE: SequenceRandom does not protect against duplicate values occurring.
+NOTE: SequenceRandom does not protect duplicate values from occurring.
 
 === Parent Elements
 
