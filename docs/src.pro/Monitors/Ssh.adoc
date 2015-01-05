@@ -7,9 +7,9 @@ The output from the process is logged when a fault is detected.
 This monitor can operate as a fault detector, data collector, and automation module depending on configuration.
 All major forms of SSH authentication are supported.
 
-To increase the speeed of operation, the monitor will hold open the SSH connection to the remote machine.
-This removes the cost of authenticating ever time the command is executed.
-If multiple _SshCommand_ monitors are configured against the same remote host, multiple SSH connections will be created and held open.
+To increase the speeed of operation, the monitor holds open the SSH connection to the remote machine.
+This removes the cost of authenticating every time the command is executed.
+If multiple _SshCommand_ monitors are configured against the same remote host, multiple SSH connections are created and held open.
 
 *Fault Detection*
 
@@ -29,31 +29,31 @@ This monitor can run commands on remote machines to perform automation tasks.
 
 _Required:_
 
-Host:: Remote Host for the SSH connection; the connection target
-Username:: Username for ssh
-Command:: Command to check for fault
+Host:: Remote Host for the SSH connection; the connection target.
+Username:: Username for ssh.
+Command:: Command to check for fault.
 
 _Optional:_
 
-Password:: Password for SSH account, defaults to ""
-KeyPath:: Path to SSH key, defaults to ""
-CheckValue:: Regex to match command response, defaults to ""
-FaultOnMatch:: Trigger a fault if the regex matches, defaults to true
+Password:: Password for SSH account, defaults to "".
+KeyPath:: Path to SSH key, defaults to "".
+CheckValue:: Regex to match command response, defaults to "".
+FaultOnMatch:: Trigger a fault if the regex matches, defaults to true.
 When::
 +
 Period when the command should be run. Defaults to +OnCall+
 +
 [horizontal]
-DetectFault;; Run command to check for faulting condition. Requires regex be set. Origional and default mode of operation
-OnCall;; Trigger command to run from state model. Command is run when the _StartOnCall_ message is received
-OnStart;; Run command when fuzzing session starts. Command will only be run once per session
-OnEnd;; Run command when fuzzing session stops. Command will only be run once per session
-OnIterationStart;; Run command at start of each iteration
-OnIterationEnd;; Run command at end of each iteration
-OnFault;; Run command when a fault occurs
-OnIterationStartAfterFault;; Run command at start of the iteration that follows a fault detection
+DetectFault;; Run command to check for faulting condition. Requires regex be set. Origional and default mode of operation.
+OnCall;; Trigger command to run from state model. Command runs when the _StartOnCall_ message is received.
+OnStart;; Run command when fuzzing session starts. Command runs once per session.
+OnEnd;; Run command when fuzzing session stops. Command runs run once per session.
+OnIterationStart;; Run command at start of each iteration.
+OnIterationEnd;; Run command at end of each iteration.
+OnFault;; Run command when a fault occurs.
+OnIterationStartAfterFault;; Run command at start of the iteration that follows a fault detection.
 
-StartOnCall:: Run when signaled by the state machine
+StartOnCall:: Run when signaled by the state machine.
 
 === Examples
 
