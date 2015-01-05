@@ -26,7 +26,7 @@
 // 03/05/2014: Lynn: 
 //  Edited text and corrected QuickTime information
 
-The _getProperty_ Action retrieves the value of a property from an object that uses the property metaphor and stores the value in a DataModel. _getProperty_ Actions specify in a child element the xref:DataModel[DataModel] that will receive the retrieved data.
+The _getProperty_ Action retrieves the value of a property from an object that uses the property metaphor and stores the value in a DataModel. _getProperty_ Actions specify in a child element the xref:DataModel[DataModel] that receives the retrieved data.
 
 _getProperty_ provides one half of a property metaphor in Peach state models. _getProperty_ actions are considered input actions. xref:Action_setProperty[_setProperty_] is the other half (output) of the property metaphor.
 
