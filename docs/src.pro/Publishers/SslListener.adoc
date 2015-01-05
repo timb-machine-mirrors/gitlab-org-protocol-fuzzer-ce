@@ -17,7 +17,7 @@ Since it is easy to confuse _Ssl_ and _SslListner_, here's the difference:
 * The _Ssl_ Publisher connects out(ward)
 * The _SslListner_ Publisher accepts (inward) connections
 
-The SslListener is similar to the TcpListener because both will accept connections over a TCP port and block until a connection has been established.
+The SslListener is similar to the TcpListener because both accept connections over a TCP port and block until a connection has been established.
 
 === Syntax
 
