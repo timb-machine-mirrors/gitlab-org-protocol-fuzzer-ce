@@ -225,7 +225,7 @@ In this example, the _open_ and xref:Action_close[_close_] actions are used expl
 </Peach>
 ----
 
-The netcat program can be used to simulate a listener. Netcat will run twice, once per connection.
+The netcat program can be used to simulate a listener. Netcat runs twice, once per connection.
 
 ---------------------
 > nc -l 31337 ; echo "====" ; nc -l 31337
