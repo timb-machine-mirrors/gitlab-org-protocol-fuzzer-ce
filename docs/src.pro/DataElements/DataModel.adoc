@@ -269,7 +269,7 @@ each.Core.Publishers.ConsolePublisher stop()
 <2> The output of "Customized" is "Content-Length: 100\r\n"
 ----
 
-When parsed into a DataModel, Customized will look like the combination of both data models.
+When parsed into a DataModel, Customized looks like a combination of both data models.
 
 [source,xml]
 ----
