@@ -6,7 +6,7 @@
 // - 02/14/2014: Jordyn
 // Added full example
 
-The _Console_ publisher will output data to standard out.
+The _Console_ publisher outputs data to standard out.
 
 === Syntax
 
