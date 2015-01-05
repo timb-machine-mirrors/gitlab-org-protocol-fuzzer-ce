@@ -34,15 +34,15 @@
 //  Edited text
 
 The _output_ action writes or sends data using a xref:Publisher[Publisher].
-_output_ Actions are associated with a xref:DataModel[DataModel] (specified as a child element) which produces the data to be sent.
+_output_ Actions are associated with a xref:DataModel[DataModel] (specified as a child element) that produces the data to be sent.
 
 Along with a DataModel, data sets can be provided using the xref:Data[Data] element.
-Multiple Data elements can be provided which will be switched between during fuzzing depending on the fuzzing strategy used.
+Multiple Data elements can be provided that are switched between during fuzzing depending on the fuzzing strategy used.
 _Output_ actions are fuzzed by Peach.
 
 When output is called, the fuzzer implicitly calls xref:Action_start[_start_] then xref:Action_open[_open_], if they have not yet been called.
-If a Pit defines multiple publishers, the _publisher_ attribute specifies the publisher that will perform the write/send request.
-The exact behavior of an _output_ action is Publisher dependent. Review the documentation for a specific Publisher for details on its implementation actions. For example, calling output multiple times in succession on a stream publisher such as xref:Publishers_Tcp[TCP] appears in the logs as one output, whereas issuing multiple outputs in succession for the xref:Publishers_Udp[UDP] publisher will send the data as separate UDP Packets and list in the logs as separate calls.
+If a Pit defines multiple publishers, the _publisher_ attribute specifies the publisher that performs the write/send request.
+The exact behavior of an _output_ action is Publisher dependent. Review the documentation for a specific Publisher for details on its implementation actions. For example, calling output multiple times in succession on a stream publisher such as xref:Publishers_Tcp[TCP] appears in the logs as one output, whereas issuing multiple outputs in succession for the xref:Publishers_Udp[UDP] publisher sends the data as separate UDP Packets and lists in the logs as separate calls.
 
 .Default Order of Actions
 ****
@@ -101,7 +101,7 @@ This is a typical configuration for dumb file fuzzing.
 
 Notice the special publisher _Peach.Agent_.
 This publisher sends the _call_ action to all Agents, who in turn, forward the _call_  to each associated Monitor.
-The method call will be handled by the WindowsDebugger monitor, causing it to launch _notepad.exe_.
+The method call is handled by the WindowsDebugger monitor, causing it to launch _notepad.exe_.
 For file fuzzing, note that the target is launched after creating the new fuzzed file.
 
 This example runs on the Windows(R) Operating System, version XP or newer, with Windows Debugging Tools installed.
@@ -280,7 +280,7 @@ Peach.Core.Publishers.TcpListenerPublisher stop()
 <1> Data received by TCP publisher
 <2> Debugging output from the data cracker
 
-Netcat command line. Once running type "PING" return in all upper case. PONG will be sent back by Peach.
+Netcat command line. Once Netcat is running, type "PING" in upper case letters and press RETURN. Peach responds with "PONG".
 
 ----
 > nc -vv 127.0.0.1 31337
