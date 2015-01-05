@@ -24,7 +24,7 @@ The _start_ action causes a xref:Publisher[Publisher] to perform the initializat
 
 _start_ is an implicit Peach action that should not be declared in the xref:StateModel[StateModel] unless a change is needed in the default behavior.
 
-*NOTE:* Including the _start_ or _stop_ action in the StateModel will cause the action to run every iteration instead of once per session. This declaration should be avoided unless specifically required.
+*NOTE:* Including the _start_ or _stop_ action in the StateModel causes the action to run every iteration instead of once per session. This declaration should be avoided unless specifically required.
 
 Not all xref:Publisher[Publishers] make use of _start_ and _stop_.
 
