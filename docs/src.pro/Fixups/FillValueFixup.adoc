@@ -19,7 +19,11 @@
 // - 02/21/2014: Mick
 // Parent elements changed to match format
 
-The _FillValue_ is used to fill a value with sequential numbers with the first number being the value of the start parameter and the end of the range being the value of the stop parameter. If the range of numbers is less than the size of the referenced element the sequence will repeat after it has reached the end of the given range. This is used when fuzzing the IPsec protocol, as the required padding in the encrypted portion of the data requires padding that is sequential numbers.
+The _FillValue_ is used to fill a data element with sequential numbers. The first number of the sequence is the value of the start parameter, and the end of the sequence is the value of the stop parameter. 
+
+If the range specified by the start and stop parameters is less than the size of the referenced element, the sequence repeats after reaching the last value in the range. 
+
+This fixup is used when fuzzing the IPsec protocol, as the required padding in the encrypted portion of the data requires padding that is sequential numbers.
 
 === Parent Elements
 
@@ -29,9 +33,9 @@ xref:Padding[Padding]
 
 === Parameters
 
-xref:ref[ref]:: Reference to data element the sequence will be added to
-start:: Inclusive start fill value
-stop:: Inclusive stop fill value
+xref:ref[ref]:: Reference to the data element that receives the sequence of values.
+start:: Inclusive start fill value.
+stop:: Inclusive stop fill value.
 
 === Examples
 
