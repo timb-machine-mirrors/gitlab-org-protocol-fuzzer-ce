@@ -39,7 +39,7 @@ This parameter consists of a comma-separated list of mappings. Each mapping cons
 
 When the regular expression matches the file name in the zip archive, Peach uses the corresponding DataModel on the file contents.
 
-For example, to use the data model +TextModel+ for all files ending in +.txt+ the parameter's value will be +/.txt$/TextModel/+.
+For example, to use the data model +TextModel+ for all files ending in +.txt+, set the value of the parameter to +/.txt$/TextModel/+.
 
 
 ==== Examples
