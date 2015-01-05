@@ -4,8 +4,8 @@ module Peach {
 	"use strict";
 
 	var p = angular.module("Peach", [
-		"angles",
 		"angular-loading-bar",
+		"chart.js",
 		"ngSanitize",
 		"ngResource",
 		"ngRoute",

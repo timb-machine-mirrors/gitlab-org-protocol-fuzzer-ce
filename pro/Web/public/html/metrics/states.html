@@ -18,6 +18,13 @@
 		</tr>
 	</thead>
 	<tbody>
+		<tr>
+			<td class="text-center"
+					colspan="2"
+					ng-if="vm.AllStateData.length === 0">
+				No data is available
+			</td>
+		</tr>
 		<tr ng-repeat="row in vm.StateData">
 			<td>{{row.state}}</td>
 			<td>{{row.executionCount}}</td>
