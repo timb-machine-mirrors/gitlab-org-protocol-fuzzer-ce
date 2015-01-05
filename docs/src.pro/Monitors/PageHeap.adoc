@@ -12,7 +12,7 @@ Executable:: Executable name (no path)
 
 _Optional:_
 
-WinDbgPath:: Path to windbg install. Optional, will attempt to locate if not provided.
+WinDbgPath:: Path to windbg install. If not provided, Peach attempts to locate the directory.
 
 === Examples
 
