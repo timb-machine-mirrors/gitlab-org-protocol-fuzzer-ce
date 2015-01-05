@@ -39,7 +39,7 @@ xref:constraint[constraint]:: Scripting expression that evaluates to true or fal
 
 xref:minOccurs[minOccurs]::
 	The minimum number of times this element must occur. Defaults to 1.  +
-	* Used to define arrays with variable size. Arrays defined by min/maxOccurs will generally have a relation
+	* Used to define arrays with variable size. Arrays defined by min/maxOccurs generally have a relation
 	defined.
 	* Adding this attribute, even with a value of 1, converts the element to an array.
 
