@@ -66,7 +66,7 @@ The following is the default order in which Actions are performed when fuzzing:
 
 Complicated StateModels that have counters (or other advanced operations) use Action parameters that execute scripts at certain times (such as before the Action starts or once it has completed).
 
-Since Pits can contain multiple Publishers within a Test, many Actions have a parameter to declare the Publisher that will carry out the the command.
+Since Pits can contain multiple Publishers within a Test, many Actions have a parameter to declare the specific Publisher that carries out the the command.
 
 [source,xml]
 ----
