@@ -17,7 +17,7 @@
 // - 03/26/2014 Lynn
 //Corrected the fixup name 
 
-The _UDPChecksum_  will produce an internet checksum as defined in RFC 1071. This checksum is primarily used when fuzzing the UDPv4 and UDPv6 Protocols.
+The _UDPChecksum_ fixup produces an checksum as defined in RFC 1071. This checksum is primarily used when fuzzing the UDPv4 and UDPv6 Protocols.
 
 A discussion on how to apply UDPChecksum can be found in RFC 793 for IPv4 and RFC 2460 for IPv6.
 
@@ -29,7 +29,7 @@ xref:String[String]
 
 === Parameters
 
-xref:ref[ref]:: Reference to data element on which the checksum will be performed.
+xref:ref[ref]:: Reference to the input data element used in the checksum calculation.
 src:: Source IP Address. IP address of the local machine.
 dst:: Destination IP Address. IP address of the remote machine.
 
