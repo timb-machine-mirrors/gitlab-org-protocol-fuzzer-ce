@@ -8,7 +8,7 @@ The captured data pcap file is compatible with Wireshark and tcpdump.
 
 .List Network Interfaces
 ****
-The command line option +--showdevices+ will make Peach print out a list of all available network interfaces. 
+The command line option +--showdevices+ causes Peach to generate a list of all available network interfaces. 
 
 On Windows platforms, you can use the device name and the more descriptive names shown by +ipconfig+.
 
@@ -64,7 +64,7 @@ Filter:: PCAP style filter string (optional)
 
 .Capture output to CrashableServer on port 4244
 ==================
-This example will run CrashableServer.exe and capture all network traffic using the pcap monitor when a fault occurs. 
+This example runs CrashableServer.exe and capture all network traffic using the pcap monitor when a fault occurs. 
 
 To run this example, point to the CrashableServer location (normally the Peach directory).
 
@@ -170,6 +170,6 @@ Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
 [*] Test 'Default' finished.
 ----
 
-Running this example for a few iterations will produce a crash. When Peach is logging the fault, a pcap file will be created inside of the fault record.
+Running this example for a few iterations will produce a crash. When Peach is logging the fault, a pcap file is created inside the fault record.
 
 ==================

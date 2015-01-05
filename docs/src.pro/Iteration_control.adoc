@@ -10,7 +10,7 @@ An example of a long running target is a network service that is started once at
 
 NOTE: Control iterations must be explicitly enabled in the pit file.
 
-Control iterations work in conjunction with xref:Iteration_record[record iterations]. The state model execution sequence is recorded during a record iteration. A control iteration will perform an iteration (with no mutations occurring) and compare the execution sequence with the recorded sequence. If the two do not match, a fault will be generated. For example, if 10 actions occur on the record iteration and only 6 occur on the control, Peach assumes that the target is in a bad state and generates a fault since the bad state is likely interesting (as a denial of service vulnerability) from a security standpoint. And when a fault is triggered, actions can be taken to restart the system.
+Control iterations work in conjunction with xref:Iteration_record[record iterations]. The state model execution sequence is recorded during a record iteration. A control iteration will perform an iteration with no mutations occurring and compare the execution sequence with the recorded sequence. If the two do not match, a fault will be generated. For example, if 10 actions occur on the record iteration and only 6 occur on the control, Peach assumes that the target is in a bad state and generates a fault since the bad state is likely interesting (as a denial of service vulnerability) from a security standpoint. And when a fault is triggered, actions can be taken to restart the system.
 
 // TODO insert visual images from slide deck
 
