@@ -25,14 +25,18 @@
 // 03/04/2014: Lynn: 
 //  Edited text 
 
-The _close_ Action will cause the associated publisher to close its resource.
+The _close_ Action causes the associated publisher to close its resource.
 
-* For the xref:Publishers_File[File Publisher], this will close the file handle.
-* For the xref:Publishers_Tcp[TCP Publisher] it will close the network connection.
+* For the xref:Publishers_File[File Publisher], this action closes the file handle.
+* For the xref:Publishers_Tcp[TCP Publisher], this action closes the network connection.
 
 Close is an implicit action that occurs by default at the end of each iteration. 
 
-The only time you need to explicitly call the _close_ action is when the default behavior needs to be changed (for example, during file fuzzing when the data will be written using an xref:Action_output[_output_] Action and closed using a _close_ Action; and the target application launched using a xref:Action_call[_call_] Action). 
+The only time you need to explicitly call the _close_ action is when the default behavior needs to be changed. For example, during file fuzzing, the target application is launched after closing:
+
+. the xref:Action_output[_output_] Action intiates writing the data
+. the _close_ Action closes the target
+. the target application subsequently launches using the xref:Action_call[_call_] Action
 
 .Default Order of Actions
 ****
