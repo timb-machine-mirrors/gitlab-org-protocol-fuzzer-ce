@@ -44,7 +44,7 @@ Call actions support zero or more (user-defined and supplied) parameters and a r
  * If the method has a return value, the _call_ action can captures the return value and cracks the data into the provided _DataModel_.
 
 As with the xref:Action_output[_output_] action, a single data model can represent a single parameter along with zero or more xref:Data[Data] sets.
-If the resulting return value is captured, it is considered input and will be cracked in the provided DataModel.
+If the resulting return value is captured, Peach considers it input and cracks the return value in the provided DataModel.
 
 .Interacting with Publishers
 // ****
@@ -133,7 +133,7 @@ xref:Action_onComplete[onComplete]:: Expression to run on completion of an actio
 xref:Param[Param]::
   Argument to be passed with the call.
   Zero or more Param elements can be provided.
-  Param is considered an action that outputs data and as such the data will be fuzzed by default.
+  Param is considered an action that outputs data and as such, Peach fuzzes output data by default.
   Each parameter contains a single xref:DataModel[DataModel] as a child element and zero or more xref:Data[Data sets].
   
 xref:Result[Result]:: 
@@ -211,7 +211,7 @@ This example controls when the WindowsDebugger monitor launches a target executa
 This configuration is common with file fuzzing.
 
 Note the special _Peach.Agent_ publisher name.
-This Publisher causes the _call_ action to be sent to all Agents. In turn, each Agent will forward the _call_ action to its associated Monitors.
+This Publisher causes the _call_ action to be sent to all Agents. In turn, each Agent forwards the _call_ action to its associated Monitors.
 The method call will be handled by the WindowsDebugger monitor, causing it to launch _notepad.exe_.
 For file fuzzing, ensure the target is launched *after* writing out the new fuzzed file.
 
