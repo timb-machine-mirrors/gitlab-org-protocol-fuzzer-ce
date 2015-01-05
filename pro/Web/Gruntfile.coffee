@@ -9,7 +9,6 @@ module.exports = (grunt) ->
 		bowercopy:
 			libs:
 				files:
-					'public/lib/angles'            : 'angles:main'
 					'public/lib/angular'           : 'angular:main'
 					'public/lib/angular-bootstrap' : 'angular-bootstrap:main'
 					'public/lib/angular-loading-bar' : 'angular-loading-bar:main'
@@ -33,6 +32,10 @@ module.exports = (grunt) ->
 						'ace-bootstrap/fonts/*'
 						'ace-bootstrap/js/*'
 					]
+					'angular-chart'               : [
+						'angular-chart.js/dist/angular-chart.css'
+						'angular-chart.js/angular-chart.js'
+					]
 					'angular-smart-table/smart-table.js' : 'angular-smart-table/dist/smart-table.debug.js'
 					'angular-tree-control/css'    : 'angular-tree-control/css/*'
 					'angular-tree-control/images' : 'angular-tree-control/images/*'
@@ -40,7 +43,7 @@ module.exports = (grunt) ->
 					'bootstrap/css'               : 'bootstrap/dist/css/bootstrap.css'
 					'bootstrap/fonts'             : 'bootstrap/dist/fonts/*'
 					'bootstrap/js'                : 'bootstrap/dist/js/bootstrap.js'
-					'chartjs'                     : 'chartjs/Chart.js'
+					'chartjs'                     : 'Chart.js/Chart.js'
 					'pithy'                       : 'pithy/lib/pithy.js'
 					'vis/img'                     : 'vis/dist/img/*'
 					'vis/vis.css'                 : 'vis/dist/vis.css'
@@ -85,6 +88,7 @@ module.exports = (grunt) ->
 				src: [
 					# ordered libraries
 					'public/lib/jquery/jquery.js'
+					'public/lib/chartjs/Chart.js'
 					'public/lib/angular/angular.js'
 					# unordered libraries
 					'public/lib/**/*.js'
