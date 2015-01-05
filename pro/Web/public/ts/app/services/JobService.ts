@@ -148,7 +148,7 @@ module Peach {
 			return (
 				this.job &&
 				_.contains(good, this.job.status) &&
-				this.pitService.IsSelected	
+				this.pitService.IsSelected
 			);
 		}
 
