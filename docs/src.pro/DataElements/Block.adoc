@@ -40,7 +40,7 @@ xref:length[length]:: Data element length.
 xref:lengthType[lengthType]:: The unit of measure attribute for the Length attribute. Default is bytes.
 xref:constraint[constraint]:: Scripting expression that evaluates to true or false. Default is null.
 xref:minOccurs[minOccurs]:: The minimum number of times this element must occur. Defaults to 1.  +
-	* Used to define arrays with variable size. Arrays defined by min/maxOccurs will generally have a relation
+	* Used to define arrays with variable size. Arrays defined by min/maxOccurs generally have a relation
 	defined.
 	* Adding this attribute, even with a value of 1, converts the element to an array.
 xref:maxOccurs[maxOccurs]:: The maximum number of times this element can occur. Defaults to 1.  +
@@ -69,7 +69,7 @@ xref:XmlElement[XmlElement]:: Defines an XML element, the basic building block o
 
 === Mutators
 
-The following mutators will operate on this element type:
+The following mutators operate on this element type:
 
 
 _Enabled when element is marked as an array_
@@ -99,7 +99,7 @@ xref:Mutators_SizedVariance[SizedVariance]:: This mutator changes both sides of 
 
 .Empty Block
 ==========================
-The simplest block is an empty block. This definition will produce no output.
+The simplest block is an empty block. This definition produces no output.
 
 [source,xml]
 ----
@@ -302,7 +302,9 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 .Referencing A Block
 ==========================
-A reference (ref attribute) supplied the contents of the reference are copied to create the base of the new Block.  Any child elements in the Block will override elements that already exist with the same name.
+A Block can use a reference definition from another container element to form its base definition. In this example, the Block _MyName_ gets its base defintion from the DataModel named _OtherDataModel_. All child elements declared in _MyName_ become part of the block.
+
+NOTE: If a declared child element and a child element from the referenced contain have the same name, the definition of the declared child element is used. In other words, if a naming collision occurs, the declared child element definition overrides the defintion from the referenced container element.
 
 [source,xml]
 ----
@@ -338,7 +340,7 @@ A reference (ref attribute) supplied the contents of the reference are copied to
 </Peach>
 ----
 
-The Block "MyName" will be overwritten with the referenced block "OtherDataModel". When parsed, the resulting data structure will look like this. <1>
+The Block "MyName" is defined using the referenced block "OtherDataModel". When parsed, the resulting data structure will look like this. <1>
 
 [source,xml]
 ----
