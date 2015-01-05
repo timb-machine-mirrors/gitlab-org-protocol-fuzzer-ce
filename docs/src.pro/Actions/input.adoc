@@ -34,12 +34,12 @@
 The _input_ Action receives or reads in data using a xref:Publisher[Publisher].
 
 The most common use for _input_ actions is to receive data that will be fuzzed.
-Once received and xref:Cracking[cracked] into a data model, the data can be copied to
-// Once received and cracked into a data model the data can be copied to
-xref:Action_output[_output_] actions, or referenced in conditional expressions such 
-as with the xref:Action_when[_when_] attribute.
+Once received and xref:Cracking[cracked] into a data model, the data is available for other uses, such as:
 
-_input_ Actions are associated with a xref:DataModel[DataModel] (provided as a child element) which drives how much data will be requested.
+* copying in xref:Action_output[_output_] actions
+* using in conditional expressions, such as with the xref:Action_when[_when_] attribute.
+
+_input_ Actions are associated with a xref:DataModel[DataModel] (provided as a child element) that drives the amount of requested data.
 For stream-based publishers that can read forever (such as TCP), the DataModel must prevent the potential of infinite data read operations, such as setting a timeout value.
 
 .Stream Publisher versus Datagram Publisher
@@ -53,22 +53,22 @@ For stream-based publishers that can read forever (such as TCP), the DataModel m
 ****
 
 With a stream based publisher, the number of underlying packets received is not important; the data is accessed as a continual stream of incoming data. This does not apply to non-stream based publishers such as the datagram protocol xref:Publishers_Udp[UDP]. Non-stream based publishers need to know the number of underlying packets received.
-In UDP, each input and output action will receive or send a single datagram. When cracking the UDP data into a DataModel only the data in the single packet can be used. There is an implicit length to the data that is not present in xref:Publishers_Tcp[TCP].
+In UDP, each input and output action receives or sends a single datagram. When cracking the UDP data into a DataModel only the data in the single packet can be used. There is an implicit length to the data that is not present in xref:Publishers_Tcp[TCP].
 
 
 ****
 
 .Input Timeout
 ****
-If the input time out is reached prior to all incoming data being received, Peach will behave as follows:
+If the input time out is reached prior to all incoming data being received, Peach behaves as follows:
 
 xref:Iteration_record[Timeout during a record iteration]::
 When a record iteration generates errors, Peach assumes the environment is not working correctly or the pit is incorrect.   In both cases, fuzzing cannot continue.
-Peach will throw an exception and stop.
+Peach throws an exception and stops.
 
 xref:Iteration_control[Timeout during a control iteration]::
 Control iterations must be enabled to reach for this state.
-Control iterations assume that any error is the result of the target entering an unwanted state. Peach will trigger a fault.
+Control iterations assume that any error is the result of the target entering an unwanted state. Peach triggers a fault.
 
 xref:Iteration_fuzzing[Timeout during a fuzzing iteration]::
 Peach continues fuzzing with the  next iteration. 
@@ -236,7 +236,7 @@ Peach.Core.Publishers.TcpListenerPublisher stop()
 <1> Data received by TCP publisher
 <2> Debugging output from the data cracker
 
-Netcat command line. Once running type "PING" return in all upper case. PONG will be sent back by Peach.
+Netcat command line. Once Netcat is running, type "PING" in upper case letters and press RETURN. Peach responds with "PONG".
 
 ----
 > nc -vv 127.0.0.1 31337
