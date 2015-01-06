@@ -49,7 +49,7 @@ xpath:: Provide an xpath query to select elements to include.
 
 .Include via xpath
 ====================
-This example will exclude all data elements, then include specific ones.
+This example excludes all data elements, then includes specific ones.
 
 [source,xml]
 ----
