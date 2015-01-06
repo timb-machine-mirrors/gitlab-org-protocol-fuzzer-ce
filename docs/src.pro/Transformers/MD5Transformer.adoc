@@ -36,7 +36,7 @@ No Attributes are supported by this transformer.
 
 === Actions Supported
 
-xref:Action_output[output]:: On output this transformer will hash the outgoing data.
+xref:Action_output[output]:: On output, this transformer hashes the outgoing data.
 
 === Examples
 
