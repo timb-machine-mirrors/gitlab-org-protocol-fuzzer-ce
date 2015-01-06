@@ -13,7 +13,7 @@ OSX will be configured to use CrashWrangler to monitor +Safari+ for exceptions a
 
 === Configure the Agent and Monitor
 
-First lets locate the commented out +Agent+ element in the template file, it will look something like this:
+First, lets locate the commented out +Agent+ element in the template file, it looks something like this:
 
 [source,xml]
 ----
@@ -22,7 +22,7 @@ First lets locate the commented out +Agent+ element in the template file, it wil
 ----
 
 We are going to uncomment this section and remove the "location" attribute.
-When no "location" attribute is present, Peach will automatically start a local Peach Agent.
+When no "location" attribute is present, Peach automatically starts a local Peach Agent.
 We will configure three agents, one for Windows, one for Linux and one for OSX.
 The Windows agent will be comprised of two monitors: WindowsDebugger and PageHeap.
 The Linux agent will also be comprised of one monitor: LinuxDebugger.
@@ -133,9 +133,9 @@ Leaving us with this:
 
 === Configure Fuzzing Strategy
 
-Since we are dumb fuzzing with multiple files we will want to change the default fuzzing strategy Peach uses to one more suited to our needs.  The best fuzzing strategy for dumb fuzzing is the random strategy.  We can configure it by adding a +Strategy+ element to our +Test+ section.
+Since we are dumb fuzzing with multiple files, we want to change the default fuzzing strategy Peach uses to one more suited to our needs.  The best fuzzing strategy for dumb fuzzing is the random strategy.  We can configure it by adding a +Strategy+ element to our +Test+ section.
 
-We will add this:
+We add this:
 
 [source,xml]
 ----
@@ -163,7 +163,7 @@ Leaving us with this:
 
 === Configure Logging
 
-Now that we are using monitors that can detect faults we will want to configure a logging mechanism to capture the results of our fuzzer run.
+Now that we are using monitors that can detect faults, we want to configure a logging mechanism to capture the results of our fuzzer run.
 
 Todo this add the following to the +Test+ element at the bottom of our XML file:
 
@@ -200,7 +200,7 @@ So it looks like this:
 
 == Running Fuzzer
 
-Now lets actually kick off our fuzzer for real!  Every 200 or so iterations the strategy will switch to a different sample file.
+Now lets actually kick off our fuzzer for real!  Every 200 or so iterations, the strategy will switch to a different sample file.
 
 ----
 peach png.xml
