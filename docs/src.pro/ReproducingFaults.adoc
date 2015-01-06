@@ -64,7 +64,7 @@ First, if you use a Pit from the current Peach Pit library, the appropriate auto
 If you need to change the setting or if you are defining your own pit, the _Test_ element in the pit has two attributes that apply to Automated Fault Reproduction: _targetLifetime_ and _maxBackSearch_.
 
 * _targetLifetime_ is an enumeration that indicates when the test target restarts. +
-*session* means that the target restarts at the start of a session; and, when a fault occurs, Peach will perform the search to recreate the fault, going back several iterations as needed. +
+*session* means that the target restarts at the start of a session; and, when a fault occurs, Peach performs the search to recreate the fault, going back several iterations as needed. +
 *iteration* means that the target restarts each iteration and that the search consists of re-running the current iteration.
 * _maxBackSearch_ indicates the maximum number of iterations to include in the search to to reproduce the fault. The default value is 80. In the previous example, the search reaces into the fuzzing session a maximum of 200 iterations that precede the fault in question.
 
