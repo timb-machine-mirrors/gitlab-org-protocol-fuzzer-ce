@@ -3,11 +3,11 @@
 
 The last thing we need todo before we can try out our nifty fuzzer is to configure a xref:Publisher[Publisher].
 xref:Publisher[Publisher]s are I_O connectors that implement the plumbing between actions like _output_, _input_, and _call_.
-For our file fuzzer we will use the xref:Publisher[Publisher] called xref:Publishers_File[File].
-This publisher will allow us to write out a file and then launch a process using the _call_ action like we setup in last section.
+For our file fuzzer, we will use the xref:Publisher[Publisher] called xref:Publishers_File[File].
+This publisher allows us to write out a file and then launch a process using the _call_ action like we setup in last section.
 
 Configuring our publisher is easy, just locate the following XML near the bottom of the +wav.xml+ file,
-it will be a child of xref:Test[Test].
+it is a child of xref:Test[Test].
 
 [source,xml]
 ----
@@ -16,7 +16,7 @@ it will be a child of xref:Test[Test].
 ----
 
 
-Now, this publisher takes a single parameter called _FileName_ that will contain the file name of the fuzzed file.
+Now, this publisher takes a single parameter called _FileName_ that contains the file name of the fuzzed file.
 This should be the same as the file name we specified in the _call_ action (+fuzzed.wav+).
 
 [source,xml]
