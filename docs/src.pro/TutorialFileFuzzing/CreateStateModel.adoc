@@ -4,7 +4,7 @@
 Now that you have created the data models we can create the state model.
 For file fuzzing the state model is very simple.
 All we want to do is write out the file and launch the target process.
-We will do this using three actions:
+We can do this using three actions:
 
  * output -- Write the file
  * close -- Close the file
