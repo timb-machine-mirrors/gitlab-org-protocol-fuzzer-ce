@@ -50,7 +50,9 @@ module Peach {
 		}
 
 		public get CanSelectPit(): boolean {
-			return !this.testService.IsPending && !this.jobService.IsRunning;
+			return !this.testService.IsPending
+				&& !this.jobService.IsRunning
+				&& !this.jobService.IsPaused;
 		}
 
 		public IsActive(match): boolean {
@@ -87,7 +89,7 @@ module Peach {
 			if (_.isUndefined(this.job)) {
 				return "No Job available";
 			}
-			if (this.jobService.IsRunning && this.job.hasMetrics == false) {
+			if (this.jobService.IsRunning && !this.job.hasMetrics) {
 				return "Metrics unavailable for this Job.";
 			}
 			return "";
@@ -99,8 +101,8 @@ module Peach {
 
 		public get CanConfigurePit(): boolean {
 			return (
-				(this.job === undefined || this.job.status === JobStatus.Stopped) &&
-				(this.pit !== undefined && this.pit.pitUrl !== undefined && this.pit.pitUrl.length > 0)
+				(_.isUndefined(this.job) || this.job.status === JobStatus.Stopped) &&
+				(!_.isUndefined(this.pit) && !_.isEmpty(this.pit.pitUrl) && this.pit.pitUrl.length > 0)
 			);
 		}
 

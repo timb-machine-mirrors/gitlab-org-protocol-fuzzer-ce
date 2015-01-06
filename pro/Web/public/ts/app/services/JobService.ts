@@ -45,6 +45,10 @@ module Peach {
 			return onlyIf(this.job, () => this.job.status === JobStatus.Running);
 		}
 
+		public get IsPaused(): boolean {
+			return onlyIf(this.job, () => this.job.status === JobStatus.Paused);
+		}
+
 		public get CanStart(): boolean {
 			return onlyIf(this.pitService.IsSelected, () => 
 				_.isUndefined(this.job) || this.job.status === JobStatus.Stopped
