@@ -31,11 +31,12 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 	{
 		private class CaptureStream : IDisposable
 		{
+			private static readonly byte[] TruncatedMsg = Encoding.UTF8.GetBytes("{0}{0}--- TRUNCATED ---{0}".Fmt(Environment.NewLine));
+			private const int BlockSize = 1024 * 1024;
+			private static readonly NLog.Logger Logger = logger;
+
 			private class BufferedReader : Stream
 			{
-				private static readonly byte[] TruncatedMsg = Encoding.UTF8.GetBytes("{0}{0}--- TRUNCATED ---{0}".Fmt(Environment.NewLine));
-				private const int BlockSize = 1024 * 1024;
-
 				private readonly CaptureStream _parent;
 				private readonly byte[] _buffer;
 
@@ -177,7 +178,6 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 				}
 			}
 
-			private static readonly NLog.Logger Logger = logger;
 			private readonly string _name;
 			private readonly FileStream _file;
 			private readonly Stream _stream;
@@ -199,7 +199,11 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 				// Open up stdout/stderr from the gdb process
 				_stream = strm(owner._procHandler).BaseStream;
 
-				_fileThread = new Thread(LogAndSaveToFile) { Name = _name };
+				// Only try reading stdout/stderr as text if trace logging is enabled
+				if (Logger.IsTraceEnabled)
+					_fileThread = new Thread(LogAndSaveToFile) { Name = _name };
+				else
+					_fileThread = new Thread(SaveToFile) { Name = _name };
 
 				_fileThread.Start();
 			}
@@ -231,6 +235,73 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 				_stopEvent.Dispose();
 
 				Log("{0} <<< Dispose", _name);
+			}
+
+			private void SaveToFile()
+			{
+				Log("{0} >>> SaveToFile", _name);
+
+				var buf = new byte[BlockSize];
+				var len = 0;
+
+				AsyncCallback cb = delegate(IAsyncResult ar)
+				{
+					Log("{0} >>> OnReadComplete", _name);
+
+					try
+					{
+						len = _stream.EndRead(ar);
+
+						if (!_disposed)
+						{
+							// Read completed!
+							Log("{0} <<< OnReadComplete ({1})", _name, len);
+
+							_readEvent.Set();
+						}
+						else
+						{
+							// CaptureStream was stopped...
+							Log("{0} <<< OnReadComplete (Stopped)", _name);
+						}
+					}
+					catch (ObjectDisposedException)
+					{
+						// Stream was closed...
+						Log("{0} <<< OnReadComplete (Closed)", _name);
+					}
+				};
+
+				while (true)
+				{
+					Log("{0} >>> Read", _name);
+
+					_stream.BeginRead(buf, 0, buf.Length, cb, null);
+
+					var idx = WaitHandle.WaitAny(new WaitHandle[] { _stopEvent, _readEvent });
+
+					if (idx == 0)
+					{
+						Log("{0} <<< Read (Stopping)", _name);
+
+						// Log truncated message to disk
+						_file.Write(TruncatedMsg, 0, TruncatedMsg.Length);
+						break;
+					}
+
+					if (len == 0)
+					{
+						Log("{0} Read (EOF)", _name);
+						break;
+					}
+
+					Log("{0} <<< Read ({1})", _name, len);
+
+					// Log the data to disk
+					_file.Write(buf, 0, len);
+				}
+
+				Log("{0} <<< SaveToFile", _name);
 			}
 
 			private void LogAndSaveToFile()
