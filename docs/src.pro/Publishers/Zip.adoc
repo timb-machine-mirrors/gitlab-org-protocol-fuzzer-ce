@@ -2,7 +2,7 @@
 [[Publishers_Zip]]
 == Zip Publisher
 
-The _Zip_ publisher will open a zip file for writing.
+The _Zip_ publisher opens a zip file for writing.
 The Zip publisher enumerates all Stream data elements in the DataModel and creates a zip entry for each stream.
 
 === Syntax
