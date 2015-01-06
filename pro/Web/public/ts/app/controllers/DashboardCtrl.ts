@@ -36,7 +36,7 @@ module Peach {
 		}
 
 		public get ShowReady(): boolean {
-			return onlyIf(this.pitService.Pit, () =>
+			return onlyIf([this.pitService.Pit, !this.jobService.Job], () =>
 				this.pitService.IsConfigured && this.CanStart
 			);
 		}
