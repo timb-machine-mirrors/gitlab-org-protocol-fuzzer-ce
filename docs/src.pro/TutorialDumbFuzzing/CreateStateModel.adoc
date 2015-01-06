@@ -1,7 +1,7 @@
 [[TutorialDumbFuzzing_CreateStateModel]]
 == Create State Model
 
-Now that you have created the data model we can create the state model.  For file fuzzing the state model is very simple.  All we want to do is write out the file and launch the target process.  We will do this using three actions:
+Now that you have created the data model we can create the state model.  For file fuzzing, the state model is very simple.  All we want to do is write out the file and launch the target process.  We can do this using three actions:
 
  * output -- Write the file
  * close -- Close the file
@@ -33,9 +33,9 @@ Go ahead and locate the state model in the +png.xml+ file called _TheState_.  We
 
 Read more about: xref:StateModel[StateModel], xref:State[State], xref:Action[Action], xref:DataModel[DataModel], xref:Data[Data]
 
-The final "call" action you will notice we have configured an attribute called "publisher" with the value "Peach.Agent".
-This attribute will cause this action to send a "call" message to any configured Agent (see the next page) with the message "LaunchViewer".
-This is how the debugger monitor will know to launch the process.
+In the final "call" action, notice that we have configured an attribute called "publisher" with the value "Peach.Agent".
+This attribute causes this action to send a "call" message to any configured Agent (see the next page) with the message "LaunchViewer".
+This is how the debugger monitor knows to launch the process.
 
 Sweet!  We are all set!  Next we just need to configure our debugger and publishers!
 
