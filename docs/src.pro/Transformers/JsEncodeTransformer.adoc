@@ -22,10 +22,12 @@
 [horizontal]
 Type:: Encoder/Decoder
 
-_JsEncode_ will produce a JavaScript encoded result of the value in the parent xref:DataModel[DataModel].
-All the characters will be encoded.
+_JsEncode_ produces a JavaScript-encoded result of the value in the parent xref:DataModel[DataModel].
+All characters are encoded.
 
-This xref:Transformer[Transformer] will only encode the output and not decode any input.
+This xref:Transformer[Transformer] only encodes the output. _JsEncode_ does not decode any input.
+
+The _JsEncode_ algorithm filters alphabetic characters (A-Z, a-z), numerals (0-9), spaces, commas, and periods to pass through the transformer unaltered. Other characters are filtered and have formatting applied to them. 
 
 === Parameters
 
@@ -37,13 +39,13 @@ No Attributes are supported by this transformer.
 
 === Actions Supported
 
-xref:Action_output[output]:: On output this transformer will JS encode the outgoing data.
+xref:Action_output[output]:: On output, this transformer encodes the value using the _JsEncode_ algorithm to the outgoing data.
 
 === Examples
 
 .Simple Encode Example
 ==========================
-This example uses JsEncode on an inline value and writes the transformed value to the console.
+This example uses _JsEncode_ on an inline value and writes the transformed value to the console.
 
 [source,xml]
 ----

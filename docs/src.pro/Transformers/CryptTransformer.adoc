@@ -22,7 +22,7 @@
 [horizontal]
 Type:: Cryptography
 
-_Crypt_  transformer will perform a Unix crypt operation on the provided value in the parent xref:DataModel[DataModel].
+_Crypt_  transformer performs a Unix crypt operation on the provided value in the parent xref:DataModel[DataModel].
 _Crypt_ uses the first two bytes of the data as the salt. 
 
 This xref:Transformer[Transformer] applies only to outgoing data because hashes are one-way operations.
@@ -37,7 +37,7 @@ No Attributes are supported by this transformer.
 
 === Actions Supported
 
-xref:Action_output[output]:: On output this transformer will hash the outgoing data.
+xref:Action_output[output]:: On output, this transformer hashes the outgoing data.
 
 === Examples
 

@@ -22,7 +22,7 @@
 [horizontal]
 Type:: Cryptography
 
-_Sha1_ will produce a SHA1 hash of the value in the parent xref:DataModel[DataModel].
+_Sha1_ produces an SHA1 hash of the value in the parent xref:DataModel[DataModel].
 
 This xref:Transformer[Transformer] can only be applied to outgoing data because hashes are one-way operations.
 
@@ -36,7 +36,7 @@ No Attributes are supported by this transformer.
 
 === Actions Supported
 
-xref:Action_output[output]:: On output this transformer will hash the outgoing data.
+xref:Action_output[output]:: On output, this transformer hashes the outgoing data.
 
 === Examples
 

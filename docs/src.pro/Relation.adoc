@@ -61,12 +61,9 @@ In this example, we provide two python expressions that allow us to modify the s
 <String name="TheValue" />
 ----
 
-expressionGet:: The result of this python expression is used internally to determine how many bytes the xref:String[String] _TheValue_ reads. If Peach picks up 10 it will internally store a 5 and in turn Peach will read 5 bytes into the string.
+expressionGet:: The result of this python expression is used internally to determine how many bytes the xref:String[String] _TheValue_ reads. If Peach picks up 10, it internally stores a 5 and in turn Peach will read 5 bytes into the string.
 
-expressionSet:: Produces a value for the publisher.  In the prior example, +size+ stored for _TheValue_ will be "5" (length of _TheValue_) so the value which Peach outputs via a Publisher will be "5*2" or 10.
-
-
-
+expressionSet:: Produces a value for the publisher.  In the prior example, +size+ stored for _TheValue_ is "5" (length of _TheValue_), so the value which Peach outputs via a Publisher will be "5*2" or 10.
 
 [[Relations_Count]]
 === Count-of Relation
@@ -112,7 +109,7 @@ In this example, we provide two python expressions that allow us to modify the c
 
 expressionGet:: This value is used internally and ends up determining how many items xref:String[String] expands to. Because of the +maxOccurs=1024+ restriction on recurring strings, the max value that Peach should encounter while trying to crack in the +CountIndicator+ element is 2048.
 
-expressionSet:: Sets the value that is produced.  In the prior example, +count+ will be determined based on how many xref:String[String] elements are read in.
+expressionSet:: Sets the value that is produced.  In the prior example, +count+ is based on how many xref:String[String] elements are read.
 
 
 
@@ -248,7 +245,7 @@ In this example we provide two python expressions that allow us to modify the of
 
 expressionGet:: This value is used internally and determines the starting point of +Target+ when cracking. data.  In the preceeding example, if the value of the number +num+ is 20, the string +Target+ will begin at 10 bytes from the beginning of the data model.
 
-expressionSet:: Sets the value that is produced.  In the preceding example +offset+ will be determined based on the distance in bytes from the start of the data model to the beginning of the string +Target+.
+expressionSet:: Sets the value that is produced.  In the preceding example, +offset+ is based on the distance in bytes from the start of the data model to the beginning of the string +Target+.
 
 *Offset Relation with Placement*
 
