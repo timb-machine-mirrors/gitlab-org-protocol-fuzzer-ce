@@ -22,7 +22,7 @@
 [horizontal]
 Type:: Cryptography
 
-_HMAC_ will produce HMAC on the value in the parent xref:DataModel[DataModel] as described in RFC 2104.
+_HMAC_ produces an HMAC hash on the value in the parent xref:DataModel[DataModel] as described in RFC 2104.
 
 This xref:Transformer[Transformer] can only be applied to outgoing data because hashes are one-way operations.
 
@@ -36,7 +36,7 @@ No attributes are supported by this transformer.
 
 === Actions Supported
 
-xref:Action_output[output]:: On output this transformer will hash the outgoing data.
+xref:Action_output[output]:: On output, this transformer hashes the outgoing data.
 
 === Examples
 
