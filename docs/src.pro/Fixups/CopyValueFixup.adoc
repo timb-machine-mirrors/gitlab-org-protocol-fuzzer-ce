@@ -15,8 +15,8 @@
 // Added parent types
 // Added full example
 
-The _CopyValue_ will copy reference element (ref) value into ours.
-This is useful for situations where two element must be identical for redundancy checks
+The _CopyValue_ copies the reference element (ref) value into ours.
+This is useful for situations where two elements must be identical for redundancy checks.
 
 === Parent Elements
 
@@ -27,7 +27,7 @@ xref:Block[Block]
 
 === Parameters
 
-xref:ref[ref]:: Reference to data element which contains the value that will be copied.
+xref:ref[ref]:: Reference to the source data element, containing the value to copy.
 
 === Examples
 
@@ -139,6 +139,6 @@ Peach.Core.Publishers.ConsolePublisher stop()
 [*] Test 'Default' finished.
 ----
 
-<1> The CopyValue fixup has copied the first block into the second block.
+<1> The CopyValue fixup copied the first block into the second block.
 
 ======================

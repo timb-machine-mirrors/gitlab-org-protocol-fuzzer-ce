@@ -13,12 +13,12 @@ The Sample Ninja mutation engine swaps elements between sample files to generate
 === Process
 
  . Generate a sample ninja database using the PeachSampleNinja.exe command line tool
- . The Sample Ninja Mutator will automatically use the database the next time Peach is run
+ . The Sample Ninja Mutator automatically uses the database the next time Peach is run
  . As new sample files are added, re-run Sample Ninja to add the new files.
 
 === Creating Sample Ninja Database
 
-To generate a new sample ninja database you will need a pit file (fuzzing definition), the name 
+To generate a new sample ninja database, you need a pit file (fuzzing definition), the name 
 of the data model that can crack the sample files and a folder of sample files.  These three items
 are passed as command line arguments to the PeachSampleNinja.exe command line tool.
 

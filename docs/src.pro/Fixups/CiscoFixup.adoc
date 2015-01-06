@@ -18,7 +18,7 @@
 _CiscoCdpChecksum_ is a Custom Peach algorithm to fix  Cisco's one-off error in their CRC implementation (known feature).
 It is defined in RFC1071.
 It can be found in the Open source CRCTool Library.
-This is used when fuzzing protocols that perform the Cisco implementation of CRC.
+This fixup is used when fuzzing protocols perform the Cisco implementation of CRC.
 
 === Parent Elements
 
@@ -27,7 +27,7 @@ xref:String[String]
 
 === Parameters
 
-xref:ref[ref]:: Reference to data element which the CRC calculation will be performed on.
+xref:ref[ref]:: Reference to the input data element used in the CRC calculation.
 
 === Examples
 

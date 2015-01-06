@@ -75,7 +75,7 @@ xref:Action_setProperty[setProperty]::
 	This publisher supports one property:
 	+
 	[horizontal]
-	MTU;; Set the current MTU value. The value will be ignored if not with in set range.
+	MTU;; Set the current MTU value. The value is ignored if it is not within the set range.
 
 === Examples
 

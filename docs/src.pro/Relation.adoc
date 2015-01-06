@@ -33,7 +33,7 @@ The Size relationship type specifies "X is the size of Y."
 
 The Number element is the byte count of the relationship element. Unicode characters may be multi-byte and the Number value reflects the additional size.
 
-In this example, the value of the number element will indicate the size of the string element named _TheValue_ in bytes. 
+In this example, the value of the number element indicates the size of the string element named _TheValue_ in bytes. 
 
 [source,xml]
 ----
@@ -51,7 +51,7 @@ For the Size relation, expressionGet and expressionSet use the two variables, +s
 
 Expression gets and sets should be each others mathematical inverse. The Get input and Set output should be the same. 
 
-In this example we will provide two python expressions that allow us to modify the size when it is get or set:
+In this example, we provide two python expressions that allow us to modify the size when it is get or set:
 
 [source,xml]
 ----
@@ -81,7 +81,7 @@ The Count relationship type specifies "X is the count of Y." It only applies to 
 The Number element is the byte count of the relationship array. 
 Because Count applies to arrays, specify either xref:minOccurs[minOccurs] or xref:maxOccurs[maxOccurs] after the String name.
 
-In this example the number will indicate the count of the array _Strings_.
+In this example the number indicates the count of the array _Strings_.
 
 [source,xml]
 ----
@@ -100,7 +100,7 @@ For the Count-of relation, expressionGet and expressionSet use the two variables
 
 Expression gets and sets should be each others mathematical inverse. The Get input and Set output should be the same. 
 
-In this example we will provide two python expressions that allow us to modify the count when it is set or get. 
+In this example, we provide two python expressions that allow us to modify the count when it is set or get. 
 
 [source,xml]
 ----
@@ -110,9 +110,9 @@ In this example we will provide two python expressions that allow us to modify t
 <String name="TheValue" nullTerminated="true" maxOccurs="1024" />
 ----
 
-expressionGet:: This value is used internally and will end up determining how many items xref:String[String] will expand to. Because of the +maxOccurs=1024+ restriction on recurring strings, the max value that Peach should encounter while trying to crack in the +CountIndicator+ element is 2048.
+expressionGet:: This value is used internally and ends up determining how many items xref:String[String] expands to. Because of the +maxOccurs=1024+ restriction on recurring strings, the max value that Peach should encounter while trying to crack in the +CountIndicator+ element is 2048.
 
-expressionSet:: Sets the value that will be produced.  In the prior example, +count+ will be determined based on how many xref:String[String] elements are read in.
+expressionSet:: Sets the value that is produced.  In the prior example, +count+ will be determined based on how many xref:String[String] elements are read in.
 
 
 
@@ -185,9 +185,9 @@ Here we have a series of elements which are ASCII representations of numeric val
 
 A relative offset is the offset from the data element the relation is attached to.  
 
-If there is data that represents the distance (in bytes) to somewhere in target element, use the relative offset when you model your data. Peach will automatically calculate the location so you know exact where it is. 
+If there is data that represents the distance (in bytes) to somewhere in target element, use the relative offset when you model your data. Peach automatically calculates the location so you know exact where it is. 
 
-In this example, when determining the offset of _StringData_, Peach will add/subtract the position of _OffsetToString_ to its value as needed to determine the correct offset.
+In this example, when determining the offset of _StringData_, Peach adds or subtracts the position of _OffsetToString_ to its value as needed to determine the correct offset.
 
 [source,xml]
 ----
@@ -205,9 +205,9 @@ In this example, when determining the offset of _StringData_, Peach will add/sub
 
 Offsets can also relate to another element.  This is used when an element contains the offset to another element from the start of a structure.  
 
-If there is data that represents the distance (in bytes) to another target element, use relativeTo Offset when you model your data. Peach will automatically calculate the location so you know exact where it is. This keeps the relationship intact when fuzzing.
+If there is data that represents the distance (in bytes) to another target element, use relativeTo Offset when you model your data. Peach automatically calculates the location so you know exact where it is. This keeps the relationship intact when fuzzing.
 
-In the following example the offset of _StringData_ will be calculated by adding the value of _OffsetToString_ to the position of _Structure_.
+In the following example the offset of _StringData_ is calculated by adding the value of _OffsetToString_ to the position of _Structure_.
 
 [source,xml]
 ----
@@ -231,7 +231,7 @@ For the Offset relations, expressionGet and expressionSet use the two variables,
 
 Expression gets and sets should be each other's mathematical inverse. The Get input and Set output should be the same. 
 
-In this example we will provide two python expressions that allow us to modify the offset when it is set or get. 
+In this example we provide two python expressions that allow us to modify the offset when it is set or get. 
 
 [source,xml]
 ----
@@ -246,13 +246,13 @@ In this example we will provide two python expressions that allow us to modify t
 </DataModel>
 ----
 
-expressionGet:: This value is used internally and will determine the starting point of +Target+ when cracking. data.  In the preceeding example, if the value of the number +num+ is 20, the string +Target+ will begin at 10 bytes from the beginning of the data model.
+expressionGet:: This value is used internally and determines the starting point of +Target+ when cracking. data.  In the preceeding example, if the value of the number +num+ is 20, the string +Target+ will begin at 10 bytes from the beginning of the data model.
 
-expressionSet:: Sets the value that will be produced.  In the preceding example +offset+ will be determined based on the distance in bytes from the start of the data model to the beginning of the string +Target+.
+expressionSet:: Sets the value that is produced.  In the preceding example +offset+ will be determined based on the distance in bytes from the start of the data model to the beginning of the string +Target+.
 
 *Offset Relation with Placement*
 
-In this model we will use a typical pattern where an array of offsets gives us the location of another element. We will use the xref:Placement[Placement] element to move the created _Data_ strings to after our block called _Chunks_.
+In this model we use a typical pattern where an array of offsets gives us the location of another element. We use the xref:Placement[Placement] element to move the created _Data_ strings to after our block called _Chunks_.
 
 *NOTE:* Placement only works when parsing data into a DataModel.  See xref:Placement[Placement] for more information.
 

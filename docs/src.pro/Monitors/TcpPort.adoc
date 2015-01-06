@@ -24,7 +24,7 @@ Action::
 Action to take (Automation, Data, Fault). Defaults to _Automation_.
 +
 [horizontal]
-Automation;; Wait for the port to reach a specified state. The _When_ parameter determines when the monitor will wait. The maximum waiting time can be configured by setting the _Timeout_ parameter.
+Automation;; Wait for the port to reach a specified state. The _When_ parameter determines when the monitor waits. The maximum waiting time can be configured by setting the _Timeout_ parameter.
 Data;; On a fault, report the state of fault at end of the current iteration.
 Fault;; At end of the current iteration, generate a fault if the port is in a specified state.
 
@@ -57,7 +57,7 @@ Timeout:: Length of time to wait for an incoming connection to be established. S
 
 .Wait for the port to be open
 ===============================
-In this example, the call action will cause Peach to wait until the remote port is in an open state. No timeout interval is provided, so Peach will wait forever.
+In this example, the call action causes Peach to wait until the remote port is in an open state. No timeout interval is provided, so Peach will wait forever.
 
 [source,xml]
 ----
@@ -105,7 +105,7 @@ In this example, the call action will cause Peach to wait until the remote port 
 
 .Wait for the port to be closed
 ===============================
-In this example, the call action will cause Peach to wait until the remote port is in a closed state. Since no timeout is provided, Peach will wait forever.
+In this example, the call action causes Peach to wait until the remote port is in a closed state. Since no timeout is provided, Peach will wait forever.
 
 [source,xml]
 ----
@@ -155,7 +155,7 @@ In this example, the call action will cause Peach to wait until the remote port 
 
 .Fault if the port closed
 ===============================
-In this example, Peach will fault if the port is in the closed state at the end of an iteration.
+In this example, Peach faults if the port is in the closed state at the end of an iteration.
 
 [source,xml]
 ----
@@ -204,7 +204,7 @@ In this example, Peach will fault if the port is in the closed state at the end 
 
 .Report the port state on fault
 ===============================
-In this example, if a fault is triggered by another monitor, the TcpPort monitor will report the state of the port when the fault occured.
+In this example, if a fault is triggered by another monitor, the TcpPort monitor reports the state of the port when the fault occurred.
 
 [source,xml]
 ----

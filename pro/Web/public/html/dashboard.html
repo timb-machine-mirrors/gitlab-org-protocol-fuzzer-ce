@@ -208,6 +208,13 @@
 			</tr>
 		</thead>
 		<tbody>
+			<tr>
+				<td class="text-center"
+						colspan="6"
+						ng-if="vm.Faults.length === 0">
+					No data is available
+				</td>
+			</tr>
 			<tr ng-repeat="row in vm.Faults">
 				<td>{{row.iteration}}</td>
 				<td>{{row.timeStamp | date:'M/d/yy h:mm a'}}</td>

@@ -6,7 +6,7 @@ The _Padding_ element provides padding for variable-sized blocks or data models.
 
 When padding the data, the value of the pad characters is always 0. This is not customizable.
 
-When cracking data into a model that contains the padding element, the pad data will be skipped.
+When cracking data into a model that contains the padding element, the pad data is skipped.
 
 === Syntax
 

@@ -19,7 +19,7 @@
 
 State elements reside in xref:StateModel[StateModels]. Each state element contains a logical Peach work unit.
 
-Each xref:StateModel[StateModel] must contain at least one state element. If you wish to model complex protocols or systems, you will need multiple state elements within your xref:StateModel[StateModel].
+Each xref:StateModel[StateModel] must contain at least one state element. If you wish to model complex protocols or systems, use multiple state elements within your xref:StateModel[StateModel].
 
 === Syntax
 

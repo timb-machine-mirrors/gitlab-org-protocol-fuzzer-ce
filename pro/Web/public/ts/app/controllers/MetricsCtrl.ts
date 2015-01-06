@@ -95,47 +95,13 @@ module Peach {
 		public BucketData: IBucketMetric[] = [];
 		public AllBucketData: IBucketMetric[] = [];
 
-		public MetricsFaultsOverTimeData: LinearChartData = {
-			labels: [],
-			datasets: []
-		};
+		public FaultsOverTimeLabels: string[] = [
+			moment(Date.now()).format("M/D h a")
+		];
 
-		public MetricsFaultsOverTime: ITimelineOptions = {
-			responsive: true,
-			showTooltips: true,
-			tooltipEvents: ["mousemove", "touchstart", "touchmove"],
-			tooltipFillColor: "rgba(0,0,0,0.8)",
-			tooltipFontFamily: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
-			tooltipFontSize: 14,
-			tooltipFontStyle: "normal",
-			tooltipFontColor: "#fff",
-			tooltipTitleFontFamily: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
-			tooltipTitleFontSize: 14,
-			tooltipTitleFontStyle: "bold",
-			tooltipTitleFontColor: "#fff",
-			tooltipYPadding: 6,
-			tooltipXPadding: 6,
-			tooltipCaretSize: 8,
-			tooltipCornerRadius: 6,
-			tooltipXOffset: 10,
-			tooltipTemplate: "<%if (label){%><%=label%>: <%}%><%= value %>",
-			multiTooltipTemplate: "<%= value %>",
-			showScale: true,
-			scaleOverride: false,
-			scaleStartValue: 0,
-			scaleShowGridLines: true,
-			scaleGridLineColor: "rgba(0,0,0,.05)",
-			scaleGridLineWidth: 1,
-			bezierCurve: true,
-			bezierCurveTension: 0.4,
-			pointDot: true,
-			pointDotRadius: 4,
-			pointDotStrokeWidth: 1,
-			pointHitDetectionRadius: 20,
-			datasetStroke: true,
-			datasetStrokeWidth: 2,
-			datasetFill: true
-		};
+		public FaultsOverTimeData: number[][] = [
+			[0]
+		];
 
 		public BucketTimelineData = {
 			single: true,
@@ -195,21 +161,13 @@ module Peach {
 				break;
 			case "fault-timeline":
 				promise.success((data: IFaultTimelineMetric[]) => {
-					this.MetricsFaultsOverTimeData = {
-						labels: data.map(i => moment(i.date).format("M/D h a")),
-						datasets: [
-							{
-								label: "My First dataset",
-								fillColor: "rgba(0,0,220,0.2)",
-								strokeColor: "rgba(220,220,220,1)",
-								pointColor: "rgba(220,220,220,1)",
-								pointStrokeColor: "#fff",
-								pointHighlightFill: "#fff",
-								pointHighlightStroke: "rgba(220,220,220,1)",
-								data: data.map(i => i.faultCount)
-							}
-						]
-					};
+					if (data.length === 0) {
+						this.FaultsOverTimeLabels = [moment(Date.now()).format("M/D h a")];
+						this.FaultsOverTimeData = [[0]];
+					} else {
+						this.FaultsOverTimeLabels = data.map(x => moment(x.date).format("M/D h a")),
+						this.FaultsOverTimeData = [_.pluck(data, 'faultCount')];
+					}
 				});
 				break;
 			case "mutators":

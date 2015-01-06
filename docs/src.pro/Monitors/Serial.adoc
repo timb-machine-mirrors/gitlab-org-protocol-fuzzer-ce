@@ -5,7 +5,7 @@
 The serial port monitor can be used to perform data collection, fault detection, and automation tasks based on the received input. 
 
 * The default usage of serial port monitor is data collection. The data received via the serial port is logged when a fault occurs. 
-* To perform fault detection, a regular expression can be provided through the FaultRegex parameter. When the regex matches, a fault will be thrown. 
+* To perform fault detection, a regular expression can be provided through the FaultRegex parameter. When the regex matches, a fault is thrown. 
 * For automation tasks, the WaitForRegex and WaitWhen parameters can be used. The automation parameters cause Peach to wait for matching input before continuing.
 
 Additionally, the serial port monitor supports multiple instances that utilize the same port. This allows for more complex automation configurations.

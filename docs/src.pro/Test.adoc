@@ -19,13 +19,13 @@
 // Reviewed 04/07/2014: Lynn
 // Major edits 
 
-The Test element defines the tests that Peach will run during this fuzzing session. Peach requires at least one Test element for fuzzing to occur.
+The Test element defines the tests that Peach runs during this fuzzing session. Peach requires at least one Test element for fuzzing to occur.
 
 Test configures a specific fuzzing occurrence that combines a StateModel with a Publisher and other configuration options (such as including/excluding elements from being mutated, Agents, and fuzzing strategies).
 
 One pit can contain multiple Test elements; simply provide the test element names on the Peach command line. 
 
-NOTE: When running Peach, the Test element named "Default" will be run if a test name is not provided on the command line.
+NOTE: When running Peach, the Test element named "Default" is used if a test name is not provided on the command line.
 
 === Syntax
 
@@ -87,7 +87,7 @@ For example, if the default value is used, the search potentially re-runs the 80
 
 maxOutputSize::
 +
-Sets the maximum size of data that Peach will generate. This is on an Action by Action basis meaning
+Sets the maximum size of data that Peach generates. This is on an Action by Action basis meaning
 if your StateModel has two actions, each of them can produce data upto maxOutputSize. The default value is
 unlimited.
 +
