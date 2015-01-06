@@ -60,8 +60,8 @@ xref:Mutators_ArrayVarianceMutator[ArrayVarianceMutator]:: This mutator grows an
 _Used for all data elements_
 
 xref:Mutators_DataElementBitFlipper[DataElementBitFlipper]:: This mutator produces test cases by flipping bits in the output value.
-xref:Mutators_DataElementDuplicate[DataElementDuplicate]:: This mutator will duplicate data elements.
-xref:Mutators_DataElementRemove[DataElementRemove]:: This mutator will remove data elements.
+xref:Mutators_DataElementDuplicate[DataElementDuplicate]:: This mutator duplicates data elements.
+xref:Mutators_DataElementRemove[DataElementRemove]:: This mutator removes data elements.
 xref:Mutators_DataElementSwapNear[DataElementSwapNear]:: This mutator swaps data elements.
 xref:Mutators_SampleNinjaMutator[SampleNinjaMutator]:: This mutator combines data elements from different data sets.
 

@@ -71,14 +71,14 @@ Specifies whether this string is null terminated. Valid values are true and fals
 
 The _nullTerminated_ attribute indicates the produced string should be null terminated. +
 
-NOTE: Only the final value will have the null terminator applied. If the value is accessed, the internal value will not have the null attached.
+NOTE: Only the final value has the null terminator applied. If the value is accessed, the internal value will not have the null attached.
 
 NOTE: When the _nullTerminated_ attribute is provided, the xref:String[String] must not specify a xref:length[length]; these two attributes are mutually exclusive.
 
 padCharacter::
 	Character to pad string with to _length_, defaults to null (0x00).
 	+
-	If the _length_ attribute is provided and the value contained in the string is shorter than the length, the string will be padded.
+	If the _length_ attribute is provided and the value contained in the string is shorter than the length, the string is padded to fill the length.
 	This attribute allows controlling the character used to pad the string.
 
 xref:token[token]::
@@ -97,7 +97,7 @@ xref:mutable[mutable]:: Should this data element be mutated (or, is it changeabl
 
 xref:minOccurs[minOccurs]::
 	The minimum number of times this element must occur. Defaults to 1.  +
-	* Used to define arrays with variable size. Arrays defined by min/maxOccurs will generally have a relation
+	* Used to define arrays with variable size. Arrays defined by min/maxOccurs generally have a relation
 	defined.
 	* Adding this attribute, even with a value of 1, converts the element to an array.
 

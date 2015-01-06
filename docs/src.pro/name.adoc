@@ -52,7 +52,7 @@ The following example does not provide names for all values which is also okay (
 
 _Incorrect:_
 
-The following has duplicate names at the same document level.  This will cause an error.
+The following has duplicate names at the same document level.  This causes an error.
 
 [source,xml]
 ----

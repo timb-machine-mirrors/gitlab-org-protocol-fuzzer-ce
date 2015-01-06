@@ -25,7 +25,7 @@
 // Parent elements changed to match format
 
 
-The _Hmac_ fixup will hash the _ref_ element's value using the one of the defined HMAC algorithms.This is used fuzzing IPsec protocol implementations.
+The _Hmac_ fixup hashes the _ref_ element's value using the one of the defined HMAC algorithms.This is used fuzzing IPsec protocol implementations.
 
 === Parent Elements
 
@@ -34,9 +34,9 @@ xref:Blob[Blob]
 
 === Parameters
 
-xref:ref[ref]:: Reference to data element which the HMAC calculation will be performed on
-Key:: Key to use for HMAC
-HMAC:: Hash algorithm to use (HMACSHA1 HMACMD5, HMACRIPEMD160, HMACSHA256, HMACSHA384, HMACSHA512, MACTripleDES)
+xref:ref[ref]:: Reference to the input data element used in the HMAC calculation.
+Key:: Key to use for HMAC.
+HMAC:: Hash algorithm to use (HMACSHA1 HMACMD5, HMACRIPEMD160, HMACSHA256, HMACSHA384, HMACSHA512, MACTripleDES).
 xref:length[Length]:: Length in bytes to return from HMAC, the default value is 0 and returns all bytes. Allows all or a portion of the calculated hash to be returned to the element.
 
 === Examples

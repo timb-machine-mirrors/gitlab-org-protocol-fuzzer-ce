@@ -16,12 +16,12 @@
 // Added description
 
 
-_Script_ is a proxy that allow you to write fixups in a scripting language like Python or Ruby.
+_Script_ is a proxy that allow you to write fixups in a scripting language such as Python or Ruby.
 
 The class parameter is required for python fixups. It has two arguments:
   
-self:: a python construct inherent in the language 
-element:: the data element being "fixed up"
+self:: a python construct inherent in the language.
+element:: the data element that the script "fixed up".
 
 The class parameter's returned argument must match the Fixup parent's DataElement type.
 
@@ -31,8 +31,8 @@ Parent type must match the DataElement type returned by the Fixup.
 
 === Parameters
 
-xref:ref[ref]:: Reference to data element which the calculation will be performed on
-class:: Reference to Python class to call
+xref:ref[ref]:: Reference to the input data element used in the script.
+class:: Reference to the Python class to call.
 
 === Examples
 

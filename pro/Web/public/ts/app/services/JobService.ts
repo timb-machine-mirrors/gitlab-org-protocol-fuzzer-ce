@@ -3,7 +3,7 @@
 module Peach {
 	"use strict";
 
-	export var JOB_INTERVAL = 500;
+	export var JOB_INTERVAL = 1000;
 
 	export class JobService {
 		static $inject = [

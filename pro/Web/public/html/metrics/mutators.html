@@ -27,6 +27,13 @@
 		</tr>
 	</thead>
 	<tbody>
+		<tr>
+			<td class="text-center"
+					colspan="5"
+					ng-if="vm.AllMutatorData.length === 0">
+				No data is available
+			</td>
+		</tr>
 		<tr ng-repeat="row in vm.MutatorData">
 			<td>{{row.mutator}}</td>
 			<td>{{row.elementCount}}</td>

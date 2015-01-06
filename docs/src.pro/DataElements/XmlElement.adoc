@@ -5,7 +5,7 @@
 // * Complex values
 // * How to use with relations
 
-Defines an XML element, the basic building block of XML documents. The _XmlElement_ is used to fuzz the content of an XML document, but not the XML parser.  All the output produced from _XmlElement_ and xref:XmlAttribute[XmlAttribute] will be well formed.
+Defines an XML element, the basic building block of XML documents. The _XmlElement_ is used to fuzz the content of an XML document, but not the XML parser.  All the output produced from _XmlElement_ and xref:XmlAttribute[XmlAttribute] are well formed.
 
 NOTE: The _XmlElement_ and the _XmlAttribute_ elements do not support cracking of data. If you need to crack XML content into _XmlElement_ and _XmlAttribute_ components, use an xref:Analyzers_Xml[XmlAnalyzer] attached to a String element.
 
@@ -44,7 +44,7 @@ xref:constraint[constraint]:: Scripting expression that evaluates to true or fal
 
 xref:minOccurs[minOccurs]::
 	The minimum number of times this element must occur. Defaults to 1.  +
-	* Used to define arrays with variable size. Arrays defined by min/maxOccurs will generally have a relation
+	* Used to define arrays with variable size. Arrays defined by min/maxOccurs generally have a relation
 	defined.
 	* Adding this attribute, even with a value of 1, converts the element to an array.
 

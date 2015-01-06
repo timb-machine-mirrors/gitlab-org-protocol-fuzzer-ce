@@ -107,7 +107,7 @@ Peach.Core.Agent.Monitors.Process _Stop(): Killing process
 [*] Test 'Default' finished.
 ----
 
-When running this example, notepad will open when the session starts and close when the session finishes.
+When running this example, notepad opens when the session starts and closes when the session finishes.
 
 =================
 
@@ -189,7 +189,7 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 
-When running this example, notepad will repeatedly open and close.
+When running this example, notepad repeatedly opens and closes.
 
 =================
 
@@ -262,7 +262,7 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 
-When running this example, notepad will repeatedly open and close.
+When running this example, notepad repeatedly opens and closes.
 
 =================
 

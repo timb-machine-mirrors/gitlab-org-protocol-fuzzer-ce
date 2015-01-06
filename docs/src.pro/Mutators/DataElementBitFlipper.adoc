@@ -14,7 +14,7 @@ This mutator can attach to the following data elements:
 
 * Data elements that are not containers.
 
-The lone exception: a data element that will not perform a type transformation on itself is unsupported. A type transformation occurs when an element packs or encodes its data in another format. A type transformation can occur with elements whose parent elements have types such as XmlElement or XmlAttribute. A couple of type transformation examples follow:
+The lone exception: a data element that does not perform a type transformation on itself is unsupported. A type transformation occurs when an element packs or encodes its data in another format. A type transformation can occur with elements whose parent elements have types such as XmlElement or XmlAttribute. A couple of type transformation examples follow:
 
 * A Number element that packs its value into a binary format 
 

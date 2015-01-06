@@ -4,8 +4,8 @@ module Peach {
 	"use strict";
 
 	var p = angular.module("Peach", [
-		"angles",
 		"angular-loading-bar",
+		"chart.js",
 		"ngSanitize",
 		"ngResource",
 		"ngRoute",
@@ -195,6 +195,12 @@ module Peach {
 
 			var value = bytes.toFixed(precision);
 			return (value.match(/\.0*$/) ? value.substr(0, value.indexOf('.')) : value) + ' ' + units[unit];
+		};
+	});
+
+	p.filter('peachParameterName', () => {
+		return (value: string): string => {
+			return value.substr(0).replace(/[A-Z]/g, ' $&');
 		};
 	});
 

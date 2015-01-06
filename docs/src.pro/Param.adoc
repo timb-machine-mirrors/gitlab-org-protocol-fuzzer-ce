@@ -54,7 +54,7 @@ None.
 
 Param  can also be an argument to the xref:Action_call[call] Action. Call actions can have an array of parameters (defined by param) used in different ways by the Publisher.
 
-In this example, the element is solely a container for a DataModel and Data. The Data described in Param will be fuzzed by Peach.
+In this example, the element is solely a container for a DataModel and Data. The Data described in Param is fuzzed by Peach.
 
 ==== Syntax
 
@@ -82,5 +82,5 @@ None.
 
 ==== Child Elements
 
-xref:DataModel[DataModel]:: Reference to a DataModel from which fuzzed data will be produced
-xref:Data[Data]:: Set of initial data to be cracked into the above DataModel before fuzzing
+xref:DataModel[DataModel]:: Reference to a DataModel that acts as a source for fuzzed data.
+xref:Data[Data]:: Set of initial data to be cracked into the above DataModel before fuzzing.
