@@ -2,16 +2,16 @@
 == Agent and Monitor
 
 Now we are ready to configure our agent and monitors.
-Agents are special Peach processes that can be run locally or remote.
+Agents are special Peach processes that can run locally or remote.
 These processes host one or more monitors that can perform such actions as attaching debuggers,
 watching memory consumption, etc.
-For this tutorial we are going to configure Microsoft WinDbg to monitor +mplayer.exe+ for exceptions
+For this tutorial, we are going to configure Microsoft WinDbg to monitor +mplayer.exe+ for exceptions
 and other common issues.
-Additionally we will enable the HEAP debugging for the target process.
+Additionally, we will enable the HEAP debugging for the target process.
 
 === Configure the Agent and Monitor
 
-First lets locate the commented out +<Agent>+ element in the template file, it will look something like this:
+First lets locate the commented out +<Agent>+ element in the template file, it looks something like this:
 
 [source,xml]
 ----
@@ -20,7 +20,7 @@ First lets locate the commented out +<Agent>+ element in the template file, it w
 ----
 
 We are going to uncomment this section and remove the "location" attribute.
-When no "location" attribute is present, Peach will automatically start a local Peach Agent.
+When no "location" attribute is present, Peach automatically starts a local Peach Agent.
 We will configure three agents, one for Windows, one for Linux and one for OSX.
 The Windows agent will be comprised of two monitors: WindowsDebugger and PageHeap.
 The Linux agent will also be comprised of one monitor: LinuxDebugger.
@@ -137,10 +137,10 @@ Read more about: xref:Test[Test]
 
 === Configure Logging
 
-Now that we are using monitors that can detect faults we will want to configure a logging mechanism
+Now that we are using monitors that can detect faults, we want to configure a logging mechanism
 to capture the results of our fuzzer run.
 
-Todo this add the following to the +<Test>+ element at the bottom of our XML file:
+To do this, add the following to the +<Test>+ element at the bottom of our XML file:
 
 [source,xml]
 ----
