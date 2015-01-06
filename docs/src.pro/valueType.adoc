@@ -20,8 +20,8 @@ Valid values are +string+, +hex+, and +literal+.
 string::
 	String is the default _valueType_. + 
 	The value provided is a string value.
-	String value will be converted into the appropriate data element type.
-	The _Number_ element expects numerical values while _String_ and _Blob_ will take any values.
+	String value is converted into the appropriate data element type.
+	The _Number_ element expects numerical values while _String_ and _Blob_ accept any values.
 
 hex::
   The value specified as a stream of hex bytes. + 
