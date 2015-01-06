@@ -8,7 +8,7 @@ By default, Peach fuzzes all data elements.  Exclude prevents Peach from fuzzing
 
 The Exclude and xref:Test_Include[Include] elements allows for excluding or including various data elements from mutation. 
 
-NOTE: Even though a data element is excluded it may appear to still be fuzzed. This is due to other elements being fuzzed. However, the excluded element will not have any specific mutations performed directly to it.
+NOTE: Even though a data element is excluded it may appear to still be fuzzed. This is due to other elements being fuzzed. However, the excluded element does not have any specific mutations performed directly to it.
 
 .XPath Further Reading
 ****
@@ -49,7 +49,7 @@ xpath:: Provide an xpath query to select elements to exclude.
 
 .Exclude via xpath
 ====================
-This example will select elements to exclude based on an xpath.
+This example selects elements to exclude based on an xpath.
 
 [source,xml]
 ----
@@ -91,7 +91,7 @@ This example will select elements to exclude based on an xpath.
 
 .Exclude and Include
 ====================
-This example will exclude all data elements, then include specific ones.
+This example excludes all data elements, then includesS specific ones.
 
 [source,xml]
 ----
