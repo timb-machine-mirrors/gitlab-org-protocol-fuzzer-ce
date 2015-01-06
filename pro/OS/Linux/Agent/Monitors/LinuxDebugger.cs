@@ -33,13 +33,44 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 		{
 			private class BufferedReader : Stream
 			{
+				private static readonly byte[] TruncatedMsg = Encoding.UTF8.GetBytes("{0}{0}--- TRUNCATED ---{0}".Fmt(Environment.NewLine));
 				private const int BlockSize = 1024 * 1024;
 
 				private readonly CaptureStream _parent;
 				private readonly byte[] _buffer;
+
 				private int _position;
 				private int _length;
 				private bool _closed;
+
+				private void OnReadComplete(IAsyncResult ar)
+				{
+					Log("{0} >>> OnReadComplete", _parent._name);
+
+					try
+					{
+						var len = _parent._stream.EndRead(ar);
+
+						if (!_parent._disposed)
+						{
+							// Read completed!
+							Log("{0} <<< OnReadComplete ({1})", _parent._name, len);
+
+							_length = len;
+							_parent._readEvent.Set();
+						}
+						else
+						{
+							// CaptureStream was stopped...
+							Log("{0} <<< OnReadComplete (Stopped)", _parent._name);
+						}
+					}
+					catch (ObjectDisposedException)
+					{
+						// Stream was closed...
+						Log("{0} <<< OnReadComplete (Closed)", _parent._name);
+					}
+				}
 
 				public BufferedReader(CaptureStream parent)
 				{
@@ -54,29 +85,40 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 				{
 					if (_length == _position && !_closed)
 					{
-						try
-						{
-							// Read the next block of data from the process
-							_length = _parent._stream.Read(_buffer, 0, _buffer.Length);
+						Log("{0} >>> Read", _parent._name);
 
-							if (_length == 0)
-								Log("{0} Read Zero Bytes!", _parent._name);
-						}
-						catch (ObjectDisposedException)
+						// Read the next block of data from the process
+						Debug.Assert(!_parent._disposed);
+
+						_parent._stream.BeginRead(_buffer, 0, _buffer.Length, OnReadComplete, null);
+
+						var idx = WaitHandle.WaitAny(new[] {_parent._stopEvent, _parent._readEvent});
+
+						if (idx == 0)
 						{
-							// File was closed in Stop() before we read all of the data
-							var msg = Encoding.UTF8.GetBytes("{0}{0}--- TRUNCATED ---{0}".Fmt(Environment.NewLine));
-							Debug.Assert(msg.Length <= _buffer.Length);
-							_length = Math.Min(msg.Length, _buffer.Length);
-							Buffer.BlockCopy(msg, 0, _buffer, 0, _length);
+							Log("{0} <<< Read (Stopping)", _parent._name);
+
+							// Log truncated message to disk
+							_parent._file.Write(TruncatedMsg, 0, TruncatedMsg.Length);
+
+							_length = 0;
 							_closed = true;
+						}
+						else if (_length == 0)
+						{
+							Log("{0} Read (EOF)", _parent._name);
+							_closed = true;
+						}
+						else
+						{
+							Log("{0} <<< Read ({1})", _parent._name, _length);
+
+							// Log the data to disk
+							_parent._file.Write(_buffer, 0, _length);
 						}
 
 						_position = 0;
 
-
-						// Log the data to disk
-						_parent._file.Write(_buffer, 0, _length);
 					}
 
 					var ret = Math.Min(count, _length - _position);
@@ -140,6 +182,9 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 			private readonly FileStream _file;
 			private readonly Stream _stream;
 			private readonly Thread _fileThread;
+			private readonly AutoResetEvent _readEvent;
+			private readonly AutoResetEvent _stopEvent;
+			private bool _disposed;
 
 			public CaptureStream(LinuxDebugger owner, string fileName, Func<Process, StreamReader> strm)
 			{
@@ -147,6 +192,9 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 
 				_file = File.Open(fullPath, FileMode.Create, FileAccess.Write);
 				_name = "[{0}:{1}]".Fmt(owner._procHandler.Id, Path.GetFileNameWithoutExtension(fileName));
+
+				_readEvent = new AutoResetEvent(false);
+				_stopEvent = new AutoResetEvent(false);
 
 				// Open up stdout/stderr from the gdb process
 				_stream = strm(owner._procHandler).BaseStream;
@@ -160,9 +208,11 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 			{
 				Log("{0} >>> Dispose", _name);
 
-				// Close the stdout/stderr stream 1st
-				// This will cause _fileThread to exit if it already hasn't
-				_stream.Close();
+				_disposed = true;
+
+				// Set the stop event first so we will log "TRUNCATED"
+				// if a read is pending.
+				_stopEvent.Set();
 
 				Log("{0} >>> Joining File Thread", _name);
 
@@ -170,9 +220,15 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 
 				Log("{0} <<< Joining File Thread", _name);
 
+				// Close the stdout/stderr stream after setting the stop event
+				_stream.Close();
+
 				// Close the stdout/stderr log file last so _fileThread
 				// can write out all of its data to it
 				_file.Close();
+
+				_readEvent.Dispose();
+				_stopEvent.Dispose();
 
 				Log("{0} <<< Dispose", _name);
 			}
@@ -201,13 +257,15 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 
 						foreach (var line in queue.GetConsumingEnumerable())
 						{
-							Logger.Debug("{0} {1}", _name, line);
+							Logger.Trace("{0} {1}", _name, line);
 
 							if (queue.IsAddingCompleted)
 								break;
 						}
 
-						if (queue.Count > 0)
+						// If the thread stops after a call to Dispose()
+						// tell the user that the data was truncated
+						if (_disposed || queue.Count > 0)
 							Logger.Trace("{0} --- LOGGING TRUNCATED ---", _name);
 
 						Log("{0} <<< Log Writer Thread", _name);
@@ -243,7 +301,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 				Log("{0} <<< LogAndSaveToFile", _name);
 			}
 
-			[Conditional("DEBUG")]
+			[Conditional("DISABLED")]
 			private static void Log(string fmt, params object[] args)
 			{
 				Logger.Trace(fmt, args);
@@ -379,7 +437,7 @@ quit
 				throw new PeachException("Could not start debugger '" + GdbPath + "'.  " + ex.Message + ".", ex);
 			}
 
-			logger.Debug("[{0}] gdb {1}{2}{3}",
+			logger.Trace("[{0}] gdb {1}{2}{3}",
 				_procHandler.Id,
 				Executable,
 				string.IsNullOrEmpty(Arguments) ? "" : " ",
