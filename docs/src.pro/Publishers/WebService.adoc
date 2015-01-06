@@ -12,7 +12,7 @@
 
 The _WebService_ publisher is able to call SOAP and WCF based web services.  
 
-_WebService_ will attempt to locate a service definition, or you can provide one.
+_WebService_ attempts to locate a service definition, or you can provide one.
 
 === Syntax
 
