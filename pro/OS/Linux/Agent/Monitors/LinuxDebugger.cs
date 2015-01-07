@@ -437,6 +437,7 @@ quit
 		Process _procCommand;
 		Fault _fault = null;
 		bool _messageExit = false;
+		bool _secondStart = false;
 		string _exploitable = null;
 		string _tmpPath = null;
 		string _gdbCmd = null;
@@ -716,6 +717,10 @@ quit
 
 			if (RestartOnEachTest)
 				_Stop();
+			else if (!_secondStart)
+				return;
+
+			_secondStart = true;
 
 			if (!_IsRunning() && StartOnCall == null)
 				_Start();
