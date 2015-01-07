@@ -2,7 +2,7 @@
 == Creating Wave Data Models
 
 Now we are going to dive right in.
-Lets start by making a copy of +template.xml+ (found in your Peach folder) to +wav.xml+.
+Let's start by making a copy of +template.xml+ (found in your Peach folder) to +wav.xml+.
 This will hold all of the information about our WAV fuzzer.
 You will also want a sample WAV file, grab link:http://www-mmsp.ece.mcgill.ca/documents/AudioFormats/WAVE/Samples/AFsp/M1F1-int32WE-AFsp.wav[this one].
 
@@ -54,7 +54,7 @@ We can make that the default by adding this XML to our PIT:
 
 === Creating the Wav DataModel
 
-Okay, head over to your +wav.xml+ file and lets start writing some XML!
+Okay, head over to your +wav.xml+ file and let's start writing some XML!
 Locate the xref:DataModel[DataModel] called _TheDataModel_ is should look something like this:
 
 [source,xml]
@@ -93,7 +93,7 @@ Otherwise, we can continue and define the _Chunk_ DataModel.
 === Chunk DataModel
 
 The _Chunk_ data model should be the first data model in the Peach Pit file,
-so lets add it in above the _Wav_ data model as follows:
+so let's add it in above the _Wav_ data model as follows:
 
 [source,xml]
 ----
@@ -248,7 +248,7 @@ Peach does not require that all elements have names, only those that are being r
 This chunk it a bit different.
 The wave list chunk is comprised of a silent chunk and data chunks, alternating in a list.
 So, before we can complete the wave list chunk, we will need to define the silent chunk.
-Lets do that now.
+Let's do that now.
 
 The silent chunk of easy, it's just a 4-byte unsigned integer. The data model looks like this:
 
@@ -303,7 +303,7 @@ The array is comprised of the following:
  * Block start: 4-byte unsigned integer offset to sample of first channel
  * Sample offset: 4-byte unsigned integer offset to sample byte of first channel
 
-We don't have to worry about the fact the last 3 numbers are offsets.  The data is already parsed in the wave list chunk, we just need to read them in.  So lets build the XML!
+We don't have to worry about the fact the last 3 numbers are offsets.  The data is already parsed in the wave list chunk, we just need to read them in.  So let's build the XML!
 
 [source,xml]
 ----
@@ -361,7 +361,7 @@ Notice in this XML, that we setup a relationship between _NumberOfSegments_ and 
 This chunk is an array of label chunks, name chunks, and text chunks.
 We will not know in what order they will appear, so we will need to support them in any order.
 This is actually be fairly easy, but first we need to define each of the tree chunks before we define our data list chunk.
-Lets do that now.
+Let's do that now.
 
 ==== Label Chunk
 
@@ -521,7 +521,7 @@ The values they can have include both negative to positive numbers.
 == Finishing the Wav Model ==
 
 Time to wrap this modeling up!
-Lets head down to the _Wav_ chunk. The last time we touched, it looked like this:
+Let's head down to the _Wav_ chunk. The last time we touched, it looked like this:
 
 [source,xml]
 ----
