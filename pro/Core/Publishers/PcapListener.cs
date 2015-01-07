@@ -25,7 +25,7 @@ namespace Peach.Pro.Core.Publishers
 		/// <summary>
 		/// Queue of received packets. This is a thread safe queue.
 		/// </summary>
-		public ConcurrentQueue<RawCapture> PacketQueue = null;
+		public BlockingCollection<RawCapture> PacketQueue = new BlockingCollection<RawCapture>();
 
 		public PcapListener(System.Net.NetworkInformation.PhysicalAddress macAddress)
 		{
@@ -121,7 +121,7 @@ namespace Peach.Pro.Core.Publishers
 		public void Start(string filter, int timeout)
 		{
 			Logger.Debug("Starting capture (filter: {0}, timeout: {1})", filter, timeout);
-			PacketQueue = new ConcurrentQueue<RawCapture>();
+			PacketQueue = new BlockingCollection<RawCapture>();
 
 			_device.Open(DeviceMode.Promiscuous, timeout);
 
@@ -153,13 +153,22 @@ namespace Peach.Pro.Core.Publishers
 		/// </summary>
 		public void Clear()
 		{
-			PacketQueue = new ConcurrentQueue<RawCapture>();
+			var cnt = 0;
+
+			while (PacketQueue.Count > 0)
+			{
+				RawCapture item;
+				PacketQueue.TryTake(out item);
+				++cnt;
+			}
+
+			Logger.Debug("Cleared {0} packets from queue", cnt);
 		}
 
 		void _device_OnPacketArrival(object sender, CaptureEventArgs e)
 		{
-			PacketQueue.Enqueue(e.Packet);
 			Logger.Debug("Queuing packet");
+			PacketQueue.Add(e.Packet);
 		}
 
 		/// <summary>
