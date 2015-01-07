@@ -4,7 +4,7 @@
 
 // 01/30/2014: Seth & Mike: Outlined
 //  * not supported by all publishers
-//  * Mapps to accessing properties ala COM/DCOM, Java (obj.prop = foo)
+//  * Maps to accessing properties, such as COM/DCOM, Java (obj.prop = foo)
 //  * Read operation (input)
 //  * Return value parsed into data model
 //  * How to debug parsing
@@ -32,7 +32,7 @@ _getProperty_ provides one half of a property metaphor in Peach state models. _g
 
 The _getProperty_ Action has two main uses:
 
-* when fuzzing targets such as Microsoft COM/DCOM objects that use the property metaphor. The _getProperty_ Action instructs a Publisher to reteive the value of a specified property.
+* when fuzzing targets such as Microsoft COM/DCOM objects that use the property metaphor. The _getProperty_ Action instructs a Publisher to retrieve the value of a specified property.
 * when accessing properties in a Publisher that supports the property metaphor. Some Publishers support using properties to get or set values, such as the UDP, RawV4, RawIPv4, and RawV6 Publishers) . An instance of this type of Publisher is in the examples section.
 
 NOTE: Properties exposed by publishers are described in the publisher documentation.
