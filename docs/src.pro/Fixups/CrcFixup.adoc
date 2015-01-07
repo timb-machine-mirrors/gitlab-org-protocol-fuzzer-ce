@@ -5,7 +5,7 @@
 //  - 02/18/2014: Seth & Adam: Outlined
 // Expand description to include use case "This is used when fuzzing {0} protocols"
 // Give full pit to run using hex publisher, test works
-// Exampel 1 crc ref on block that contains crc
+// Example 1 CRC ref on block that contains CRC
 // List Parent element types
 // Number, String
 
