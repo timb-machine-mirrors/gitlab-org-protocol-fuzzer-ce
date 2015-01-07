@@ -104,7 +104,7 @@ None.
 
 .Implicit Use of _open_ Action
 ==========================
-This is an example of the default implicit behaviour of _open_. Note the absence of any declaration for _open_.
+This is an example of the default implicit behavior of _open_. Note the absence of any declaration for _open_.
 
 [source,xml]
 ----
