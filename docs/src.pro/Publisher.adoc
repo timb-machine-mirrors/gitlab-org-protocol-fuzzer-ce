@@ -3,7 +3,7 @@
 
 // Reviewed:
 //  - 02/20/2014: Seth & Mike: Outlined
-// * Multible Publishers
+// * Multiple Publishers
 // * Types of actions implemented by publishers
 // * Stream vs. Stream with end (Tcp vs. File)
 // * Stream vs. Call based (Tcp vs. Com)
@@ -11,13 +11,13 @@
 // * List all action types we utilize
 
 //Updated:
-//  - 03/04/2014: Lynn: Added additional Publishers and the note about changState
+//  - 03/04/2014: Lynn: Added additional Publishers and the note about changeState
 
 //Updated:
 //  - 03/04/2014: Josh: Added...
 // Syntax
 // Examples:
-// * Multible Publishers
+// * Multiple Publishers
 // * Types of actions implemented by publishers
 // * Stream vs. Stream with end (Tcp vs. File)
 // * Stream vs. Call based (Tcp vs. Com)
@@ -33,7 +33,7 @@ Publishers support both stream and call based operations.
 
 When the fuzzer is running, all xref:Action[Actions] (except xref:Action_changeState[changeState] and xref:Action_slurp[slurp]) use a publisher to perform the action. 
 
-Different publishers support a different set of Action types.  For example, the xref:Publishers_File[File] publisher supports input for reading from a file, output for writing to a file, but does not support xref:Action_accept[accept] or xref:Action_call[call]. This differs from the xref:Publishers_Com[COM] publisher which supports xref:Action_call[call], but not xref:Action_input[input], xref:Action_output[ouput], or xref:Action_accept[accept]. 
+Different publishers support a different set of Action types.  For example, the xref:Publishers_File[File] publisher supports input for reading from a file, output for writing to a file, but does not support xref:Action_accept[accept] or xref:Action_call[call]. This differs from the xref:Publishers_Com[COM] publisher which supports xref:Action_call[call], but not xref:Action_input[input], xref:Action_output[output], or xref:Action_accept[accept]. 
 
 All fuzzing definitions must use at least one Publisher and (optionally) can use multiple Publishers.  When using multiple Publishers, each Action must specify which Publisher it is referencing by including the Publisher's +name+ attribute in the Action's +publisher+ attribute. If the +publisher+ attribute is missing, the Action is performed using the first Publisher defined in the Test.
 
