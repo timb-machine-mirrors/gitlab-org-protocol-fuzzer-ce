@@ -3,118 +3,92 @@
 module Peach {
 	"use strict";
 
-	interface IBoundScope extends ng.IScope {
+	export interface IBoundScope extends ng.IScope {
 		min: IBoundFunction;
 		max: IBoundFunction;
 	}
 
-	interface IBoundFunction {
+	export interface IBoundFunction {
 		(): number;
 	}
 
-	interface IBoundPredicate {
-		(value: number): boolean;
+	interface IValidatePredicate {
+		(value: any): boolean;
 	}
 
-	export class RangeDirective implements ng.IDirective {
-		constructor(
-		) {
-			this.link = this._link.bind(this);
-		}
+	function predicateValidation(
+		name: string,
+		ctrl: ng.INgModelController,
+		predicate: IValidatePredicate
+	) {
+		var validator = value => {
+			var isValid = (_.isEmpty(value) || predicate(value));
+			ctrl.$setValidity(name, isValid);
+			return value;
+		};
 
-		public restrict = 'A';
-		public require = 'ngModel';
-		public scope = {
+		ctrl.$parsers.push(validator);
+		ctrl.$formatters.push(validator);
+	}
+
+	export var RangeDirective: IDirective = {
+		ComponentID: Constants.Directives.Range,
+		restrict: 'A',
+		require: Constants.Angular.ngModel,
+		scope: {
 			min: '&peachRangeMin',
 			max: '&peachRangeMax'
-		};
-		public link;
-
-		private _link(
+		},
+		link: (
 			scope: IBoundScope,
 			element: ng.IAugmentedJQuery,
 			attrs: ng.IAttributes,
 			ctrl: ng.INgModelController
-		) {
+		) => {
 			if (scope.min) {
-				this.boundsValidate('rangeMin', ctrl,
+				predicateValidation('rangeMin', ctrl,
 					(value: number) => (value >= scope.min())
 				);
 			}
 			if (scope.max) {
-				this.boundsValidate('rangeMax', ctrl,
+				predicateValidation('rangeMax', ctrl,
 					(value: number) => (value <= scope.max())
 				);
 			}
 		}
-
-		private boundsValidate(
-			name: string,
-			ctrl: ng.INgModelController,
-			predicate: IBoundPredicate
-		) {
-			var validator = value => {
-				var isValid = (_.isEmpty(value) || predicate(value));
-				ctrl.$setValidity(name, isValid);
-				return value;
-			};
-
-			ctrl.$parsers.push(validator);
-			ctrl.$formatters.push(validator);
-		}
 	}
 
-	function regexValidate(
-		name: string,
-		pattern: RegExp,
-		ctrl: ng.INgModelController
-	) {
-		var validator = value => {
-			var isValid = (_.isEmpty(value) || pattern.test(value));
-			ctrl.$setValidity(name, isValid);
-			return value;
-		};
-		ctrl.$parsers.unshift(validator);
-		ctrl.$formatters.unshift(validator);
-	}
-
-	export class IntegerDirective implements ng.IDirective {
-		constructor(
-		) {
-			this.link = this._link.bind(this);
-		}
-
-		public restrict = 'A';
-		public require = 'ngModel';
-		public link;
-
-		private _link(
+	export var IntegerDirective: ng.IDirective = {
+		ComponentID: Constants.Directives.Integer,
+		restrict: 'A',
+		require: Constants.Angular.ngModel,
+		link: (
 			scope: ng.IScope,
 			element: ng.IAugmentedJQuery,
 			attrs: ng.IAttributes,
 			ctrl: ng.INgModelController
-		) {
-			regexValidate('integer', /^\-?\d+$/, ctrl);
+		) => {
+			var pattern = /^\-?\d+$/;
+			predicateValidation(Constants.Directives.Integer, ctrl,
+				(value: string) => pattern.test(value)
+			);
 		}
 	}
 
-	export class HexDirective implements ng.IDirective {
-		constructor(
-		) {
-			this.link = this._link.bind(this);
-		}
-
-		public restrict = 'A';
-		public require = 'ngModel';
-		public link;
-
-		private _link(
+	export var HexDirective: ng.IDirective = {
+		ComponentID: Constants.Directives.HexString,
+		restrict: 'A',
+		require: Constants.Angular.ngModel,
+		link: (
 			scope: ng.IScope,
 			element: ng.IAugmentedJQuery,
 			attrs: ng.IAttributes,
 			ctrl: ng.INgModelController
-		) {
-			regexValidate('hexstring', /^[0-9A-Fa-f]+$/, ctrl);
+		) => {
+			var pattern = /^[0-9A-Fa-f]+$/;
+			predicateValidation(Constants.Directives.HexString, ctrl,
+				(value: string) => pattern.test(value)
+			);
 		}
 	}
 }

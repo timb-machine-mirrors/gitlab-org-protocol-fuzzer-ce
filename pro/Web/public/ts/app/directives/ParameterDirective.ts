@@ -3,21 +3,23 @@
 module Peach {
 	"use strict";
 
-	export class ParameterDirective implements ng.IDirective {
-		public restrict = 'E';
-		public templateUrl = 'html/directives/parameter.html';
-		public controller = ParameterController;
-		public scope = { param: '=' };
+	export var ParameterDirective: IDirective = {
+		ComponentID: Constants.Directives.Parameter,
+		restrict: 'E',
+		templateUrl: 'html/directives/parameter.html',
+		controller: Constants.Controllers.Parameter,
+		scope: { param: '=' }
 	}
 
-	export class ParameterInputDirective implements ng.IDirective {
-		public restrict = 'E';
-		public templateUrl = 'html/directives/parameter-input.html';
-		public controller = ParameterController;
-		public scope = {
+	export var ParameterInputDirective: IDirective = {
+		ComponentID: Constants.Directives.ParameterInput,
+		restrict: 'E',
+		templateUrl: 'html/directives/parameter-input.html',
+		controller: Constants.Controllers.Parameter,
+		scope: {
 			param: '=',
 			form: '='
-		};
+		}
 	}
 
 	export interface IParameterScope extends IFormScope {		
@@ -26,14 +28,15 @@ module Peach {
 
 	export interface IOption {
 		key: string;
+		text: string;
 		description: string;
-		isDefault: boolean;
+		group: string;
 	}
 
 	export class ParameterController {
 		static $inject = [
-			"$scope",
-			"PitService"
+			Constants.Angular.$scope,
+			Constants.Services.Pit
 		];
 
 		constructor(
@@ -56,35 +59,41 @@ module Peach {
 			return this.IsReadonly ? this.$scope.param.value : '';
 		}
 
-		public get UseSelect(): boolean {
-			return this.$scope.param.type === 'enum' ||
-				this.$scope.param.type === 'bool';
+		public get WidgetType(): string {
+			switch (this.$scope.param.type) {
+				case 'enum':
+				case 'bool':
+				case 'call':
+					return 'select';
+				default:
+					return 'string';
+			}
 		}
 
 		public Choices: IOption[];
 
-		public EnumGroups(item: IOption): string {
-			if (item.isDefault) {
-				return 'Default';
+		private makeChoices() {
+			var options: string[];
+			var group: string;
+			if (this.$scope.param.type === 'call') {
+				options = this.pitService.PitCalls || [];
+				options = [''].concat(options);
+				group = 'Calls';
+			} else {
+				options = this.$scope.param.options || [];
+				group = 'Choices';
 			}
-			if (item.key.startsWith('##')) {
-				return 'Defines';
-			}
-			return 'Choices';
-		}
-
-		public makeChoices() {
-			var options = this.$scope.param.options || [];
 			var tuples = [];
 
 			options.forEach(item => {
 				var option: IOption = {
 					key: item,
+					text: item || '<i>Undefined</i>',
 					description: '',
-					isDefault: item === this.$scope.param.defaultValue
+					group: group
 				};
-
-				if (option.isDefault) {
+				if (item === this.$scope.param.defaultValue) {
+					option.group = 'Default';
 					tuples.unshift(option);
 				} else {
 					tuples.push(option);
@@ -95,10 +104,12 @@ module Peach {
 
 		private defines(): IOption[] {
 			return _.map(this.pitService.PitConfig.config, param => {
+				var key = '##' + param.key + '##'; 
 				return <IOption> {
-					key: '##' + param.key + '##',
+					key: key,
+					text: key,
 					description: param.description,
-					isDefault: false
+					group: 'Defines'
 				};
 			});
 		}

@@ -6,10 +6,10 @@ module Peach {
 	export class DashboardController {
 
 		static $inject = [
-			"$scope",
-			"$modal",
-			"PitService",
-			"JobService"
+			Constants.Angular.$scope,
+			Constants.Angular.$modal,
+			Constants.Services.Pit,
+			Constants.Services.Job
 		];
 
 		constructor(

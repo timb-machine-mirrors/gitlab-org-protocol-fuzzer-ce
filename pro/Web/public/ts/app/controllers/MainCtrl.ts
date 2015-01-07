@@ -6,14 +6,14 @@ module Peach {
 	export class MainController {
 
 		static $inject = [
-			"$scope",
-			"$window",
-			"$location",
-			"$modal",
-			"PitService",
-			"TestService",
-			"JobService",
-			"WizardService"
+			Constants.Angular.$scope,
+			Constants.Angular.$window,
+			Constants.Angular.$location,
+			Constants.Angular.$modal,
+			Constants.Services.Pit,
+			Constants.Services.Test,
+			Constants.Services.Job,
+			Constants.Services.Wizard
 		];
 
 		constructor(

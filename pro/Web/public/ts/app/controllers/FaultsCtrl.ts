@@ -6,9 +6,9 @@ module Peach {
 	export class FaultsController {
 
 		static $inject = [
-			"$scope",
-			"$routeParams",
-			"JobService",
+			Constants.Angular.$scope,
+			Constants.Angular.$routeParams,
+			Constants.Services.Job,
 			"FaultDetailResource"
 		];
 

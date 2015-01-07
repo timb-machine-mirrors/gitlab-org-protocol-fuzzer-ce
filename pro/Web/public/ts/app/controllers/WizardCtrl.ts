@@ -8,11 +8,11 @@ module Peach {
 		public Step: number;
 
 		static $inject = [
-			"$scope",
-			"$location",
-			"PitService",
-			"WizardService",
-			"JobService"
+			Constants.Angular.$scope,
+			Constants.Angular.$location,
+			Constants.Services.Pit,
+			Constants.Services.Wizard,
+			Constants.Services.Job
 		];
 
 		constructor(

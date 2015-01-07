@@ -3,15 +3,16 @@
 module Peach {
 	"use strict";
 
-	export class AgentDirective implements ng.IDirective {
-		public restrict = 'E';
-		public templateUrl = 'html/directives/agent.html';
-		public controller = AgentController;
-		public scope = {
+	export var AgentDirective: IDirective = {
+		ComponentID: Constants.Directives.Agent,
+		restrict: 'E',
+		templateUrl: 'html/directives/agent.html',
+		controller: Constants.Controllers.Agent,
+		scope: {
 			agents: '=',
 			agent: '=',
 			agentIndex: '='
-		};
+		}
 	}
 
 	export interface ISelectable<T> {
@@ -28,9 +29,9 @@ module Peach {
 
 	export class AgentController {
 		static $inject = [
-			"$scope",
-			"$timeout",
-			"PitService",
+			Constants.Angular.$scope,
+			Constants.Angular.$timeout,
+			Constants.Services.Pit,
 			"AvailableMonitorsResource"
 		];
 

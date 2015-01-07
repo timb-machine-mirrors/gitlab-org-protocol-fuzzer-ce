@@ -7,8 +7,8 @@ module Peach {
 		public Model: IPitAgents;
 
 		static $inject = [
-			"$scope",
-			"PitService"
+			Constants.Angular.$scope,
+			Constants.Services.Pit
 		];
 
 		constructor(
@@ -19,7 +19,13 @@ module Peach {
 			$scope.vm = this;
 			var promise = pitService.LoadPitConfig();
 			promise.then(() => {
-				this.Model = pitService.LoadPitAgents();
+				var promise2 = pitService.LoadPitAgents();
+				promise2.then((agents: IPitAgents) => {
+					var promise3 = pitService.LoadPitCalls();
+					promise3.then(() => {
+						this.Model = agents;
+					});
+				});
 			});
 		}
 

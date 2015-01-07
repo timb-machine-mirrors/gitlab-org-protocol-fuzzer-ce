@@ -7,10 +7,10 @@ module Peach {
 
 	export class JobService {
 		static $inject = [
-			"$q",
-			"$http",
-			"$interval",
-			"PitService"
+			Constants.Angular.$q,
+			Constants.Angular.$http,
+			Constants.Angular.$interval,
+			Constants.Services.Pit
 		];
 
 		constructor(
