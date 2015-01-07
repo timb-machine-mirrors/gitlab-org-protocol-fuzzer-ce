@@ -110,19 +110,20 @@ namespace Peach.Pro.Core.Publishers
 		/// </summary>
 		public void Start()
 		{
-			Start("");
+			Start("", 1000);
 		}
 
 		/// <summary>
 		/// Start capturing packets
 		/// </summary>
 		/// <param name="filter">Capture filter. Follows the libpcap format.</param>
-		public void Start(string filter)
+		/// <param name="timeout">pcap_open_live to_ms parameter.</param>
+		public void Start(string filter, int timeout)
 		{
-			Logger.Debug("Starting capture");
+			Logger.Debug("Starting capture (filter: {0}, timeout: {1})", filter, timeout);
 			PacketQueue = new ConcurrentQueue<RawCapture>();
 
-			_device.Open(DeviceMode.Promiscuous);
+			_device.Open(DeviceMode.Promiscuous, timeout);
 
 			_device.Filter = filter;
 
