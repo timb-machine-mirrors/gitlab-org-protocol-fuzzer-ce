@@ -351,9 +351,14 @@ namespace Peach.Pro.Core.Loggers
 
 		protected override void Engine_TestError(RunContext context, Exception e)
 		{
-			log.WriteLine("! Test error:");
-			log.WriteLine(e);
-			log.Flush();
+			// Happens if we can't open the log during TestStarting()
+			// because of permission issues
+			if (log != null)
+			{
+				log.WriteLine("! Test error:");
+				log.WriteLine(e);
+				log.Flush();
+			}
 		}
 
 		protected override void Engine_TestFinished(RunContext context)
