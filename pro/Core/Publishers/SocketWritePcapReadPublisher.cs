@@ -5,6 +5,8 @@ using System.Threading;
 using NLog;
 using Peach.Core;
 
+#if DISABLED
+
 namespace Peach.Pro.Core.Publishers
 {
 	/// <summary>
@@ -79,3 +81,5 @@ namespace Peach.Pro.Core.Publishers
 		}
 	}
 }
+
+#endif
