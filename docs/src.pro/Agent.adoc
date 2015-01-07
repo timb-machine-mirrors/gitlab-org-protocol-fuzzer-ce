@@ -72,7 +72,7 @@ c:\peach3> peach.exe -a tcp
 
 There is a bug in the Microsoft.NET remoting framework that causes the default IP address of the network adapter to be used, even when communication occurs over a secondary interface.
 
-When running a Peach Agent on a machine that has muliple network interfaces, the interface can be explicitly bound to the appropriate network adapter IP address using a configuration setting. This configuration setting is only required for the Peach Agent process.
+When running a Peach Agent on a machine that has multiple network interfaces, the interface can be explicitly bound to the appropriate network adapter IP address using a configuration setting. This configuration setting is only required for the Peach Agent process.
 
 The following XML can be added to the +Peach.exe.config+ file inside of the _configuration_ element:
 
