@@ -18,14 +18,14 @@ You need the following items to implement this approach:
 * The seed value used in the fuzzing session
 * The iteration that caused the fault
 
-With this information, you can re-run the appropriate part of the fuzzing session. For an example, see example 9 listed in the the xref:Program_Peach[The Peach Command Line Interface].
+With this information, you can re-run the appropriate part of the fuzzing session. For an example, see example 9 listed in the xref:Program_Peach[The Peach Command Line Interface].
 
 If the command line does not specify an iteration range or a starting iteration, the entire fuzzing session runs. This is reasonable for small sessions and for faults that occur near the beginning of a fuzzing session. 
 
 :leveloffset: 1
 == Let Peach Search to Reproduce the Fault
 
-This is new behavior. When Peach detects a fault, it attempts to reproduce the fault. The idea is to automate the search to detmermine whether a fault consistently reproduces. The following steps describe the major elements of the search:
+This is new behavior. When Peach detects a fault, it attempts to reproduce the fault. The idea is to automate the search to determine whether a fault consistently reproduces. The following steps describe the major elements of the search:
 
 . Replay the last iteration, the most recent test. This typically is where the fault surfaces. +
 If the fault reproduces, the system logs the information and the search finishes. +
@@ -53,7 +53,7 @@ All told, a maximum of 511 iterations would run (1 + 10 + 20 + ... + 200) withou
 
 Some additional considerations about automated fault reproduction include the following:
 
-* Control iterations are treated as in a normal fuzzing session. That is, the results of a control iteration serves as a standard of comparison for the results of record iterations. Also, the requency of performaing a control iteration is determined by the _controlIteration_ attribute of the _Test_ element.
+* Control iterations are treated as in a normal fuzzing session. That is, the results of a control iteration serves as a standard of comparison for the results of record iterations. Also, the frequency of performing a control iteration is determined by the _controlIteration_ attribute of the _Test_ element.
 * Record iterations are still compared to control iterations. If the results of a record iteration matches the results of a control iteration, all is well and good, and processing advances to the next iterations. If the results of a record iteration do not match the results of a control iteration, the results are logged and the search to reproduce the fault ends.
 
 :leveloffset: 1
@@ -66,7 +66,7 @@ If you need to change the setting or if you are defining your own pit, the _Test
 * _targetLifetime_ is an enumeration that indicates when the test target restarts. +
 *session* means that the target restarts at the start of a session; and, when a fault occurs, Peach performs the search to recreate the fault, going back several iterations as needed. +
 *iteration* means that the target restarts each iteration and that the search consists of re-running the current iteration.
-* _maxBackSearch_ indicates the maximum number of iterations to include in the search to to reproduce the fault. The default value is 80. In the previous example, the search reaces into the fuzzing session a maximum of 200 iterations that precede the fault in question.
+* _maxBackSearch_ indicates the maximum number of iterations to include in the search to reproduce the fault. The default value is 80. In the previous example, the search reaches into the fuzzing session a maximum of 200 iterations that precede the fault in question.
 
 TIP: If the test target restarts every iteration (as in file fuzzing), set _targetLifetime_ to "iteration".
 
