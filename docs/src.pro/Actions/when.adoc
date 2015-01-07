@@ -13,7 +13,7 @@
 // 03/05/2014: Lynn: 
 //  Edited current text 
 
-The _when_ attribute is a Python boolean expression that is evaluated before performing an action. If the expression evaluates to true, the action is performed; otherwise, the action is skipped.
+The _when_ attribute is a Python Boolean expression that is evaluated before performing an action. If the expression evaluates to true, the action is performed; otherwise, the action is skipped.
 
 .Keeping State
 ****
