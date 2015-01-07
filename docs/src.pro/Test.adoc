@@ -88,7 +88,7 @@ For example, if the default value is used, the search potentially re-runs the 80
 maxOutputSize::
 +
 Sets the maximum size of data that Peach generates. This is on an Action by Action basis meaning
-if your StateModel has two actions, each of them can produce data upto maxOutputSize. The default value is
+if your StateModel has two actions, each of them can produce data up to maxOutputSize. The default value is
 unlimited.
 +
 When using Publishers that have a maximum output size, such as UDP, it's recommended this attribute
