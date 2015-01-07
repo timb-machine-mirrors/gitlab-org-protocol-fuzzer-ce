@@ -8,7 +8,7 @@
 // * What are they used for
 // * cross link to things that take params
 // * examples
-//  * Different thigns using param
+//  * Different things using param
 //  * valueType
 
 // Reviewed:
@@ -52,7 +52,7 @@ None.
 
 === _Param_ and the Call Action 
 
-Param  can also be an argument to the xref:Action_call[call] Action. Call actions can have an array of parameters (defined by param) used in different ways by the Publisher.
+Param can also be an argument to the xref:Action_call[call] Action. Call actions can have an array of parameters (defined by Param) used in different ways by the Publisher.
 
 In this example, the element is solely a container for a DataModel and Data. The Data described in Param is fuzzed by Peach.
 
