@@ -190,7 +190,19 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 			{
 				var fullPath = Path.Combine(owner._tmpPath, fileName);
 
-				_file = File.Open(fullPath, FileMode.Create, FileAccess.Write);
+				try
+				{
+					_file = File.Open(fullPath, FileMode.Create, FileAccess.Write);
+				}
+				catch (Exception ex)
+				{
+					throw new SoftException(
+						"Could not create log file for capturing {0} of {1}".Fmt(
+							Path.GetFileNameWithoutExtension(fileName),
+							owner.Executable
+						), ex);
+				}
+
 				_name = "[{0}:{1}]".Fmt(owner._procHandler.Id, Path.GetFileNameWithoutExtension(fileName));
 
 				_readEvent = new AutoResetEvent(false);
