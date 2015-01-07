@@ -28,7 +28,7 @@ Action elements provide control over state changes, movement of data between dat
 
 Additionally, Action elements issue directives to Publishers to do things such as read input, send output, and access a property. 
 
-Four Actions elements are implicit—_start_, _stop_, _open_, and _close_. They execute automatically and do not need to be declared in the StateModel. 
+Four Actions elements are implicit: _start_, _stop_, _open_, and _close_. They execute automatically and do not need to be declared in the StateModel. 
 
 * The _start_ and _stop_ actions occur at the start and end of a fuzzing session. 
 * The _open_ and _close_ actions occur at the start and end of each iteration in a fuzzing session.
@@ -66,7 +66,7 @@ The following is the default order in which Actions are performed when fuzzing:
 
 Complicated StateModels that have counters (or other advanced operations) use Action parameters that execute scripts at certain times (such as before the Action starts or once it has completed).
 
-Since Pits can contain multiple Publishers within a Test, many Actions have a parameter to declare the specific Publisher that carries out the the command.
+Since Pits can contain multiple Publishers within a Test, many Actions have a parameter to declare the specific Publisher that carries out the command.
 
 [source,xml]
 ----
