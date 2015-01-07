@@ -81,7 +81,7 @@ This example selects elements to exclude based on an xpath.
 
 	<Test name="Default">
 		<StateModel ref="TheStateModel" />
-		<Publisher class="ConsoleHex"/>
+		<Publisher class="ConsoleHex"/>S
 
 		<Exclude xpath="//NotThese"  />
 	</Test>
