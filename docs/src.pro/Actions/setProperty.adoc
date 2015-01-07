@@ -92,7 +92,7 @@ This example requires a machine with the Windows Operating System, version XP or
 . Save example to "example.xml"
 . Run "Peach.Core.ComContainer.exe"
 . Run "Peach.exe -1 --debug example.xml"
-. You should see the Quicktime movie start to play
+. You should see the QuickTime movie start to play
 
 [source,xml]
 ----
