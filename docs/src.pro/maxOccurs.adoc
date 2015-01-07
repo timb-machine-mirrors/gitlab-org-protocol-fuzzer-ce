@@ -1,7 +1,7 @@
 [[maxOccurs]]
 
 // 03/28/2014 Lynn
-// Corrected all the places where it mistakingly said minOccurs. Other sentence edits.
+// Corrected all the places where it mistakenly said minOccurs. Other sentence edits.
 
 == Maximum Occurrence Attribute
 
