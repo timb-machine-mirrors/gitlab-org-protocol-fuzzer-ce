@@ -113,7 +113,7 @@ name:: Name used to identify the action
 publisher:: Name of the publisher to perform this action
 xref:Action_when[when]:: Perform action if the provided expression evaluates to true
 xref:Action_onStart[onStart]:: Evaluate expression at the start of an action.
-xref:Action_onComplete[onComplete]:: Evalute expression upon completion of an action
+xref:Action_onComplete[onComplete]:: Evaluate expression upon completion of an action
 
 === Child Elements
 
