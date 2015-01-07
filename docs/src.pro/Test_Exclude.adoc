@@ -91,7 +91,7 @@ This example selects elements to exclude based on an xpath.
 
 .Exclude and Include
 ====================
-This example excludes all data elements, then includesS specific ones.
+This example excludes all data elements, then includes specific ones.
 
 [source,xml]
 ----
