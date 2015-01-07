@@ -290,7 +290,7 @@ PONG
 ----
 ==========================
 
-.Mulitple Publishers with _output_ Action
+.Multiple Publishers with _output_ Action
 ================================
 This example uses the _output_ action with multiple publishers to write two files out on every iteration.
 
