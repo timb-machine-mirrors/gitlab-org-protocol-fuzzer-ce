@@ -1,7 +1,7 @@
 [[TutorialDumbFuzzing_CreateDataModel]]
 == Creating Data Models
 
-Now we are going to dive right in.  Lets start by making a copy of +template.xml+ (found in your Peach folder) to +png.xml+.  This will hold all of the information about our PNG dumb fuzzer.  Also, You want several samples PNG files; start with 10.
+Now we are going to dive right in.  Let's start by making a copy of +template.xml+ (found in your Peach folder) to +png.xml+.  This will hold all of the information about our PNG dumb fuzzer.  Also, You want several samples PNG files; start with 10.
 
 Go ahead and load up +png.xml+ into your XML editor.
 
