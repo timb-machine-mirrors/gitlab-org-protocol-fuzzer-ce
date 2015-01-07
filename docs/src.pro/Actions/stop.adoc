@@ -106,7 +106,7 @@ The output follows the example pit.
       </Action>
 
       <!-- Close action is implicitly called on every iteration by Peach.
-           It will cause the Publisher to close it's connection to the remote
+           It will cause the Publisher to close its connection to the remote
            host if it's still open. -->
 
       <!-- This action is implicitly called once per fuzzing session. It will perform any
@@ -129,7 +129,7 @@ The output follows the example pit.
 </Peach>
 ----
 
-Output showing the default behaviour of the sample pit with implicit usagae for _start_ and _stop_. The _start_ action is called once at the beginning of the fuzzing session and the _stop_ action is called once at the end of the fuzzing session.
+Output showing the default behavior of the sample pit with implicit usage for _start_ and _stop_. The _start_ action is called once at the beginning of the fuzzing session and the _stop_ action is called once at the end of the fuzzing session.
 
 ----
 > peach --range 1,3 --seed 51405 example.xml
@@ -290,7 +290,7 @@ The declaration causes _start_ and _stop_ to execute on every iteration, as indi
       </Action>
 
       <!-- This action is called on every iteration. It will cause the
-           Tcp Publisher to close it's connection to the remote host if it's
+           Tcp Publisher to close its connection to the remote host if it's
            still open. -->
       <Action type="close" />
 
