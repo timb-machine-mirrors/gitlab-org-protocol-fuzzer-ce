@@ -103,7 +103,7 @@ The output follows the Pit definition.
       </Action>
 
       <!-- Close action is implicitly called on every iteration by Peach.
-           It will cause the Publisher to close it's connection to the remote
+           It will cause the Publisher to close its connection to the remote
            host if it's still open. -->
 
       <!-- This action is implicitly called once per fuzzing session. It will perform any
@@ -256,7 +256,7 @@ Peach.Core.Publishers.TcpClientPublisher stop()                              <2>
 .Explicit calling of start
 ==========================
 The Example Pit shows explicit declaration of the _start_ and _stop_ actions.
-The _start_ and _stop_ declaractions cause them to be called every iteration, as seen in the output listing.
+The _start_ and _stop_ declarations cause them to be called every iteration, as seen in the output listing.
 
 [source,xml]
 ----
@@ -287,7 +287,7 @@ The _start_ and _stop_ declaractions cause them to be called every iteration, as
       </Action>
 
       <!-- This action is called on every iteration. It will cause the
-           Tcp Publisher to close it's connection to the remote host if it's
+           Tcp Publisher to close its connection to the remote host if it's
            still open. -->
       <Action type="close" />
 
