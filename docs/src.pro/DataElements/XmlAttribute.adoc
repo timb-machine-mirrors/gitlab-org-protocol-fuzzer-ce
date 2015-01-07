@@ -55,7 +55,7 @@ ns:: XML namespace.
 
 xref:Blob[Blob]:: Used to represent binary data (array of bytes) to create simple dumb fuzzers in Peach.
 xref:Block[Block]:: Groups one or more data elements in a logical structure.
-xref:Choice[Choice]:: Indicates all sub-elements are valid; hwoever, one sub-element should be selected.
+xref:Choice[Choice]:: Indicates all sub-elements are valid; however, one sub-element should be selected.
 xref:Fixup[Fixup]:: Performs dynamic transformations such as checksums and CRCs.
 xref:Flags[Flags]:: Defines a set of bit sized flags.
 xref:Hint[Hint]:: Provides information to mutators.
