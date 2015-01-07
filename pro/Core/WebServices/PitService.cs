@@ -16,7 +16,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 			Get[""] = _ => GetPits();
 			Get["/{id}"] = _ => GetPit(_.id);
-			Get["/{id}/monitors"] = _ => GetPitMonitors(_.id);
+			Get["/{id}/calls"] = _ => GetPitCalls(_.id);
 
 			Get["/{id}/config"] = _ => GetPitConfig(_.id);
 			Post["/{id}/config"] = _ => PostPitConfig(_.id);
@@ -57,12 +57,12 @@ namespace Peach.Pro.Core.WebServices
 			return agents;
 		}
 
-		object GetPitMonitors(string id)
+		object GetPitCalls(string id)
 		{
-			var monitors = PitDatabase.GetAllMonitors(id);
-			if (monitors == null)
+			var calls = PitDatabase.GetCalls(id);
+			if (calls == null)
 				return HttpStatusCode.NotFound;
-			return monitors;
+			return calls;
 		}
 
 		object CopyPit()

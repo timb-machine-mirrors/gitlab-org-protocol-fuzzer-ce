@@ -2,6 +2,9 @@
 /// <reference path="../def/reference.ts" />
 
 /** Manual references (ordered) */
+/// <reference path="utils.ts" />
+/// <reference path="ng.ts" />
+/// <reference path="const.ts" />
 /// <reference path="wizards/auto.ts" />
 /// <reference path="wizards/data.ts" />
 /// <reference path="wizards/fault.ts" />
@@ -42,7 +45,6 @@
 /// <reference path="services/PitService.ts" />
 /// <reference path="services/TestService.ts" />
 /// <reference path="services/WizardService.ts" />
-/// <reference path="utils.ts" />
 //grunt-end
 
 /** Angular module dependencies
