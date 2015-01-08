@@ -34,15 +34,15 @@ The xref:Transformer[Transformer] can bidirectionally encode data as well as dec
 
 === Parameters
 
-No Parameters are supported by this element.
+None.
 
 === Attributes
 
-No Attributes are supported by this transformer.
+None.
 
 === Actions Supported
 
-xref:Action_input[input]:: On input, HtmlEncode decodes HTML-encoded character sequences to single-character  represenations for incoming data.
+xref:Action_input[input]:: On input, HtmlEncode decodes HTML-encoded character sequences to single-character  representations for incoming data.
 xref:Action_output[output]:: On output, HtmlEncode encodes characters to their HTML-encoded character sequences for outgoing data.
 
 === Examples
