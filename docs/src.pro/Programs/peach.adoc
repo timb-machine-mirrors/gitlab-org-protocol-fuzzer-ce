@@ -25,7 +25,7 @@ peach -t peach_xml_file
 --trace:: Enable verbose trace messages. Primarily used when reporting potential bugs in Peach.
 --seed _SEED_:: Use a specific seed for fuzzing run. This should only be used when reproducing results.
 --parseonly:: Perform a simple parsing of the pit file, then exit.
---makexsd:: Generate XML Schema file (peach.xsd). This file is used for pit file validation and also intellisense in XML editors. The XSD only needs to be generated if custom extensions are added to Peach.
+--makexsd:: Generate XML Schema file (peach.xsd). This file is used for pit file validation and also intelliSense in XML editors. The XSD only needs to be generated if custom extensions are added to Peach.
 --showenv:: Display a list of all elements found along with parameters and basic documentation.
 --showdevices:: Show a list of network devices found on the system.
 --analyzer:: Run an analyzer from command line (if supported by analyzer)
@@ -174,7 +174,7 @@ The following command line starts a Peach agent using the _tcp_ channel protocol
 
 .Regenerating the Peach Schema File
 ======================
-The Peach schema file, _peach.xsd_, provides intellisense in supported editors (like Visual Studio and oxYgen XML Editor). When adding extensions to Peach, generate a new schema file that includes these extensions.
+The Peach schema file, _peach.xsd_, provides intelliSense in supported editors (like Visual Studio and oXygen XML Editor). When adding extensions to Peach, generate a new schema file that includes these extensions.
 
 ----
 > peach --makexsd

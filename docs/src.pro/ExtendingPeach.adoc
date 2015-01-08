@@ -44,7 +44,7 @@ Peach plugins use ParameterAttribute to define all of their supported configurat
 ParameterParser.Parse() uses the arguments dictionary to automatically populate all plugin properties.
 
  * When populating the properties, type conversion converts the string specified in the pit to the concrete type defined in the plugin.
- * When performing automatic type conversion, the ParameterParser supports System.Enum as well as any type that implements IConvertable.
+ * When performing automatic type conversion, the ParameterParser supports System.Enum as well as any type that implements IConvertible.
 
 This method uses reflection to:
 
@@ -171,7 +171,7 @@ public class MyMonitor : Peach.Core.Monitor
 
 Fixups compute a value based on other elements.  
 
-Since their values are based on other elements, fixups track whenever a referenced element changes so they can recompute their value. For example, the Crc32 fixup needs to know whenever the referenced element changes, so that a new crc can be computed. 
+Since their values are based on other elements, fixups track whenever a referenced element changes so they can recompute their values. For example, the Crc32 fixup needs to know whenever the referenced element changes, so that a new CRC can be computed. 
 
 Fixup implementations tell the base Fixup class which parameters are other data elements by passing their data element parameters' names as arguments to their base class constructor.
 
@@ -238,7 +238,7 @@ This is an example of the fixupImpl function of a Crc fixup.
 ----
 protected override Variant fixupImpl()
 {
-	// Get the element we need to compute the crc of
+	// Get the element we need to compute the CRC of
 	var elem = this.elements["ref"];
 	// Get the stream of data for the target element
 	var data = elem.Value;
@@ -250,7 +250,7 @@ protected override Variant fixupImpl()
 	CRCTool crcTool = new CRCTool();
 	crcTool.Init(CRCTool.CRCCode.CRC32);
 
-	// Return the crc of data as a uint
+	// Return the CRC of data as a uint
 	return new Variant((uint)crcTool.crctablefast(data));
 }
 ----
@@ -299,7 +299,7 @@ Each monitor must filter for their desired messages, ignoring all unexpected mes
 
 The DetectedFault and GetMonitorData functions are used to report faults back to Peach.
 At the end of each iteration, the Peach engine calls DetectedFault() on every monitor.
-If any one monitor reports that a fault occurred, Peach calls GetMonitorData() on every monitor.
+If any Smonitor reports that a fault occurred, Peach calls GetMonitorData() on every monitor.
 The GetMonitorData function returns a Fault record, and the type of the record can be either Fault or Data.
 
 Fault Detection:
@@ -400,7 +400,7 @@ An example of a File publisher deriving from StreamPublisher.
 [Publisher("file.FileReader")]
 [Parameter("FileName", typeof(string), "Name of file to open for reading/writing")]
 [Parameter("Overwrite", typeof(bool), "Replace existing file? [true/false, default true]", "true")]
-[Parameter("Append", typeof(bool), "Append to end of file [true/false, default flase]", "false")]
+[Parameter("Append", typeof(bool), "Append to end of file [true/false, default false]", "false")]
 public class FilePublisher : StreamPublisher
 {
 	private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
@@ -441,7 +441,7 @@ An example of a Serial publisher deriving from BufferedStreamPublisher.
 [Parameter("Baudrate", typeof(int), "The serial baud rate.")]
 [Parameter("Parity", typeof(Parity), "The parity-checking protocol.")]
 [Parameter("DataBits", typeof(int), "Standard length of data bits per byte.")]
-[Parameter("StopBits", typeof(StopBits), "The standard number of stopbits per byte.")]
+[Parameter("StopBits", typeof(StopBits), "The standard number of stop bits per byte.")]
 public class SerialPortPublisher : BufferedStreamPublisher
 {
     private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
@@ -516,7 +516,7 @@ An example of a Serial publisher deriving from BufferedStreamPublisher.
         return base.OnGetProperty(property);
     }
 
-The property is then accessible in the state model using the getproperty action, or using a script as in the following:
+The property is then accessible in the state model using the getProperty action, or using a script as in the following:
 
 [source,c#]
 Port = int(context.test.publishers[0].getProperty(‘Port’))

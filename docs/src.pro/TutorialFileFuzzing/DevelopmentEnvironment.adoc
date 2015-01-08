@@ -5,7 +5,7 @@ Before we start building our Peach fuzzer let's first take a moment to talk abou
 
 === XML Editor
 
-A good XML editor is definitely a must.  A good free XML editor for Windows is http://www.microsoft.com/Express/[Microsoft Visual Studio Express] edition.  If you already have an XML editor that supports intellisense via XML Schema, you're all set.
+A good XML editor is definitely a must.  A good free XML editor for Windows is http://www.microsoft.com/Express/[Microsoft Visual Studio Express] edition.  If you already have an XML editor that supports intelliSense via XML Schema, you're all set.
 
 === Latest Peach
 

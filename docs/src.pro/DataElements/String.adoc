@@ -15,7 +15,7 @@
 //   * numerical strings
 //   * constraint not used in look a heads for unsized elements, only token can be
 //   * Numerical string
-//    * Relation ship on from size
+//    * Relationship on from size
 //    * Hint no longer matters (automatically added/removed)
 //    * Done every time default value is set (value=, slurp, etc.)
 //   * Escaping special characters \t, \n, \r, \\
@@ -144,7 +144,7 @@ _Enabled when element is part of a size relation_
 xref:Mutators_SizedDataEdgeCase[SizedDataEdgeCase]:: This mutator causes the data portion of a relation to be sized as numerical edge cases.
 xref:Mutators_SizedDataVariance[SizedDataVariance]:: This mutator causes the data portion of a relation to be sized as numerical variances.
 xref:Mutators_SizedEdgeCase[SizedEdgeCase]:: This mutator changes both sides of the relation (data and value) to match numerical edge cases.
-xref:Mutators_SizedVariance[SizedVariance]:: This mutator changew both sides of the relation (data and value) to match numerical variances of the current size.
+xref:Mutators_SizedVariance[SizedVariance]:: This mutator changes both sides of the relation (data and value) to match numerical variances of the current size.
 
 _Specific to this element type_
 
@@ -236,7 +236,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 .String with UTF-16 Encoding
 ====================
 
-This example outputs a string consisting of characters represented with Unicode UTF-16 encoding. UTF-16 is a two-byte character encoding that supports latin and non-latin character sets. Also, UTF-16 is the WCHAR type on the Windows operating systems.
+This example outputs a string consisting of characters represented with Unicode UTF-16 encoding. UTF-16 is a two-byte character encoding that supports Latin and non-Latin character sets. Also, UTF-16 is the WCHAR type on the Windows operating systems.
 
 [source,xml]
 ----
@@ -298,7 +298,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 .Null Terminated String
 ====================
 
-This example outputsa a null-terminated string.
+This example outputs a null-terminated string.
 
 [source,xml]
 ----

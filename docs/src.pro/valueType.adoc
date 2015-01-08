@@ -29,7 +29,7 @@ hex::
 
 literal::
 	Specify a python or ruby statement that evaluates to the wanted value. + 
-	The evaluation occurs only once when the Pit is parsed into an internal dom tree.
+	The evaluation occurs only once when the Pit is parsed into an internal DOM tree.
 	
 WARNING: Literal should *NOT* be used in place of a xref:Relation[Relation] or a xref:Fixup[Fixup]. Literals are only to be used for quick one-time expressions.
 

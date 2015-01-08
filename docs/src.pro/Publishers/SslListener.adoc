@@ -44,7 +44,7 @@ _Optional:_
 
 AcceptTimeout:: How many milliseconds to wait for a connection. Defaults to 3000.
 CheckCertRevocation:: Check revocation of certificate. Defaults to false.
-ClientCertRequired:: Require client to auth via certificate. Defaults to false.
+ClientCertRequired:: Require client to authenticate via certificate. Defaults to false.
 ServerCertPass:: Password for cert file. Defaults to none.
 Timeout:: How many milliseconds to wait for data. Defaults to 3000.
 

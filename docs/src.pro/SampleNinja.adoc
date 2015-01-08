@@ -2,7 +2,7 @@
 == Sample Ninja
 
 // 01/30/2014: Seth & Mike: Outlined
-//  * Unittest please! - Peter
+//  * Unit test please! - Peter
 //  * Review current docs - Peter
 //  * Target elements wrong
 //  * Hint is wrong

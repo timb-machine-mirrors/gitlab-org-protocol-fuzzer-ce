@@ -42,7 +42,7 @@ Reduce the pit to basic parts in order make sure the following items are specifi
 
 . Test - The references have the right names
 . Log Path - The folder path is valid
-. Publisher - The functionality works: communicating (network Publishe), sending or receiving data, or outputting data
+. Publisher - The functionality works: communicating (network Publisher), sending or receiving data, or outputting data
 . Agent - The Monitor setup is correct and the Monitor has connectivity
 . State Machine - The references to the data models are correct
 . DataModel - Loads and displays the appropriate layout in the Peach Validator

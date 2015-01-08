@@ -101,7 +101,7 @@ xref:Mutators_SizedVariance[SizedVariance]:: This mutator changes both sides of 
 
 _Specific to this element type_
 
-xref:Mutators_ChoiceSwitch[ChoiceSwitch]:: This mutator produces test cases by aribtrarily changing the selected sub-element of a Choice.
+xref:Mutators_ChoiceSwitch[ChoiceSwitch]:: This mutator produces test cases by arbitrarily changing the selected sub-element of a Choice.
 
 
 === Examples
@@ -224,7 +224,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 .An Array of Choices
 ==========================
-The first example is good for making a single choice but what if there are many Type1, Type2, and Type3 blocks following one another? An array is the form to use. To declare the _Choice_ as an array, set the minOccurs, maxOccurs, or occurs atribute to specify that the choice should be repeated.
+The first example is good for making a single choice but what if there are many Type1, Type2, and Type3 blocks following one another? An array is the form to use. To declare the _Choice_ as an array, set the minOccurs, maxOccurs, or occurs attribute to specify that the choice should be repeated.
 
 This example attempts to crack at least 3 different choices and no more than 6.
 

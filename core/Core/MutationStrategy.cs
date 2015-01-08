@@ -29,7 +29,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-
+using System.Threading;
 using Peach.Core.Dom;
 
 namespace Peach.Core
@@ -177,10 +177,16 @@ namespace Peach.Core
 			}
 			catch (TargetInvocationException ex)
 			{
-				if (ex.InnerException != null)
-					throw ex.InnerException;
-				else
+				var baseEx = ex.GetBaseException();
+				if (baseEx is ThreadAbortException)
+					throw baseEx;
+
+				var inner = ex.InnerException;
+				if (inner == null)
 					throw;
+
+				var outer = (Exception)Activator.CreateInstance(inner.GetType(), inner.Message, inner);
+				throw outer;
 			}
 		}
 
@@ -194,10 +200,16 @@ namespace Peach.Core
 			}
 			catch (TargetInvocationException ex)
 			{
-				if (ex.InnerException != null)
-					throw ex.InnerException;
-				else
+				var baseEx = ex.GetBaseException();
+				if (baseEx is ThreadAbortException)
+					throw baseEx;
+
+				var inner = ex.InnerException;
+				if (inner == null)
 					throw;
+
+				var outer = (Exception)Activator.CreateInstance(inner.GetType(), inner.Message, inner);
+				throw outer;
 			}
 		}
 

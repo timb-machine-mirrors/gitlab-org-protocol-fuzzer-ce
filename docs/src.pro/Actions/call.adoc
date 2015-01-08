@@ -40,7 +40,7 @@ include Microsoft COM/DCOM, Web Services, and RPC.
 Call actions support zero or more (user-defined and supplied) parameters and a resulting return value.  
   
  * If the method has no parameters, the _call_ action performs the call.
- * If the methond has user-supplied parameters, the _call_ action includes the parameters as items to fuzz. 
+ * If the method has user-supplied parameters, the _call_ action includes the parameters as items to fuzz. 
  * If the method has a return value, the _call_ action can captures the return value and cracks the data into the provided _DataModel_.
 
 As with the xref:Action_output[_output_] action, a single data model can represent a single parameter along with zero or more xref:Data[Data] sets.
@@ -57,7 +57,7 @@ If the resulting return value is captured, Peach considers it input and cracks t
 .Interacting with Agents and Monitors
 ****
 Peach supports a specialized use of the _call_ action to interact with xref:Agent[Agents] and xref:Monitors[Monitors]. 
-A special Publisher called _Peach.Agent_ sends the _call_ action to to all configured Agents. In turn, each Agent forwards 
+A special Publisher called _Peach.Agent_ sends the _call_ action to all configured Agents. In turn, each Agent forwards 
 the _call_ action to its associated monitors. If a monitor supports interaction via the _call_ action, 
 documentation for that monitor will describe the interaction associated with _call_.
 
@@ -154,7 +154,7 @@ a QuickTime movie file to run.
 . Save example to "example.xml".
 . Run "Peach.Core.ComContainer.exe".
 . Run "Peach.exe -1 --debug example.xml".
-. You should see the Quicktime movie start to play.
+. You should see the QuickTime movie start to play.
 
 [source,xml]
 ----

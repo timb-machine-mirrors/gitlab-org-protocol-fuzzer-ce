@@ -195,7 +195,7 @@ This example might be used when fuzzing a network device such as a router. Peach
     <Monitor class="Serial">
       <Param name="Port" value="COM1" />
       <Param name="FaultRegex" value="ERROR" />
-      <Param name="WaitRegex" value="Bootup completed" />
+      <Param name="WaitRegex" value="Boot up completed" />
       <Param name="WaitWhen" value="OnIterationAfterFault" />
     </Monitor>
   </Agent>
@@ -252,14 +252,14 @@ This example might be used when fuzzing a network device such as a router. Peach
     <!-- Waits at the start of fuzzing for message -->
     <Monitor class="Serial">
       <Param name="Port" value="COM1" />
-      <Param name="WaitForRegex" value="Bootup completed" />
+      <Param name="WaitForRegex" value="Boot up completed" />
     </Monitor>
     
     <!-- Fault when "ERROR" is found, and also wait for boot message after fault. -->
     <Monitor class="Serial">
       <Param name="Port" value="COM1" />
       <Param name="FaultRegex" value="ERROR" />
-      <Param name="WaitRegex" value="Bootup completed" />
+      <Param name="WaitRegex" value="Boot up completed" />
       <Param name="WaitWhen" value="OnIterationAfterFault" />
     </Monitor>
   </Agent>
@@ -318,7 +318,7 @@ This example hooks up to a console port and also a debug port on a device. The d
     <Monitor class="Serial">
       <Param name="Port" value="COM1" />
       <Param name="FaultRegex" value="ERROR" />
-      <Param name="WaitRegex" value="Bootup completed" />
+      <Param name="WaitRegex" value="Boot up completed" />
       <Param name="WaitWhen" value="OnIterationAfterFault" />
     </Monitor>
     
