@@ -41,6 +41,10 @@ module Peach {
 			return !this.isPending;
 		}
 
+		public get IsAvailable(): boolean {
+			return !_.isEmpty(this.testTime);
+		}
+
 		public BeginTest() {
 			this.reset();
 
@@ -48,6 +52,8 @@ module Peach {
 			var promise = this.$http.get('/p/conf/wizard/test/start', {
 				params: { pitUrl: this.pitService.Pit.pitUrl }
 			});
+
+			this.testTime = moment().format("h:mm a");
 
 			promise.success((data: ITestRef) => {
 				this.startTestPoller(data.testUrl);
@@ -58,12 +64,12 @@ module Peach {
 		}
 
 		private reset() {
+			this.testTime = "";
 			this.testResult = {
 				status: "",
 				log: "",
 				events: []
 			};
-			this.testTime = moment().format("h:mm a");
 		}
 
 		private startTestPoller(testUrl: string) {

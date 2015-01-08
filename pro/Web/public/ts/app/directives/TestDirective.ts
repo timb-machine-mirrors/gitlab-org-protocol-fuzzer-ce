@@ -24,6 +24,10 @@ module Peach {
 			$scope.vm = this;
 		}
 
+		public get IsAvailable(): boolean {
+			return this.testService.IsAvailable;
+		}
+
 		public get TestEvents(): ITestEvent[] {
 			return this.testService.TestResult.events;
 		}

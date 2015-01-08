@@ -75,7 +75,7 @@ xref:Action_call[call]::
 Call actions are used to perform REST calls.
 
 The method attribute contains both the HTTP method (GET, POST, etc.) and the URL.
-The URL portion of the method attribute can contain parameter subsitution tokens. 
+The URL portion of the method attribute can contain parameter substitution tokens. 
 These tokens are replaced with the parameters provided. 
 One additional parameter can be provided that is used for the body of the request.
 +
@@ -91,7 +91,7 @@ This example places a call that expects to receive two parameters: +GET /invoice
 .Calling Rest Services
 [source,xml]
 ----
-TODO -- Call public rest api (google?)
+TODO -- Call public rest API (google?)
 ----
 
 ///////////////////////////

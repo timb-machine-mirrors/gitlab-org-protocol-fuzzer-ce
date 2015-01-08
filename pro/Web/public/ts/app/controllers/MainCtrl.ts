@@ -49,18 +49,12 @@ module Peach {
 			return this.jobService.Job;
 		}
 
-		public get CanSelectPit(): boolean {
-			return !this.testService.IsPending
-				&& !this.jobService.IsRunning
-				&& !this.jobService.IsPaused;
-		}
-
 		public IsActive(match): boolean {
 			return this.$location.path() === match;
 		}
 
-		public get PitName(): string {
-			return this.pitService.Name;
+		public get SelectPitPrompt(): string {
+			return _.isUndefined(this.pit) ? "Select a Pit" : this.pit.name;
 		}
 
 		public get FaultCount(): any {
@@ -72,7 +66,7 @@ module Peach {
 		}
 
 		public get JobRunningTooltip(): string {
-			if (this.jobService.IsRunning || this.testService.IsPending) {
+			if (!this.CanSelectPit) {
 				return "Disabled while running a Job or a Test";
 			}
 			return "";
@@ -97,6 +91,12 @@ module Peach {
 
 		public IsComplete(step: string) {
 			return this.wizardService.GetTrack(step).isComplete;
+		}
+
+		public get CanSelectPit(): boolean {
+			return !this.testService.IsPending
+				&& !this.jobService.IsRunning
+				&& !this.jobService.IsPaused;
 		}
 
 		public get CanConfigurePit(): boolean {
