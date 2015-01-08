@@ -47,7 +47,7 @@ For this example, you must first launch notepad.exe, then start Peach.
   </Agent>
 
   <Test name="Default">
-    <StateModel ref="State"/>
+    <StateModel ref="State"/>S
 
     <Agent ref="Local" />
 
