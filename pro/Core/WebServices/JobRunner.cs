@@ -33,6 +33,7 @@ namespace Peach.Pro.Core.WebServices
 		public uint RangeStart { get; private set; }
 		public uint RangeStop { get; private set; }
 		public bool HasMetrics { get; private set; }
+		public string Result { get; private set; }
 
 		public TimeSpan Runtime
 		{
@@ -104,6 +105,8 @@ namespace Peach.Pro.Core.WebServices
 			}
 
 			th.Join();
+
+			Result = "User requested job termination.";
 
 			return true;
 		}
@@ -271,6 +274,7 @@ namespace Peach.Pro.Core.WebServices
 			catch (Exception ex)
 			{
 				logger.Debug("Unhandled exception when running job:\n{0}", ex);
+				Result = ex.Message;
 			}
 			finally
 			{
@@ -281,6 +285,14 @@ namespace Peach.Pro.Core.WebServices
 					pauseEvent.Dispose();
 					pauseEvent = null;
 					thread = null;
+
+					if (!string.IsNullOrEmpty(Result))
+					{
+						if (Status == JobStatus.StopPending)
+							Result = "The job has stopped due to a user request.";
+						else
+							Result = "The job ran to completion.";
+					}
 
 					Status = JobStatus.Stopped;
 					StopDate = DateTime.UtcNow;

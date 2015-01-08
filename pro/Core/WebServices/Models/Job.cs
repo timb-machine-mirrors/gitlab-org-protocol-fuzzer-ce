@@ -116,6 +116,18 @@ namespace Peach.Pro.Core.WebServices.Models
 		public string Name { get; set; }
 
 		/// <summary>
+		/// The result of the job.
+		/// Only set when the Status is Stopped.
+		/// Otherwise is null and omitted from the JSON.
+		/// </summary>
+		/// <example>
+		/// "Job ran to completion."
+		/// "User initiated stop."
+		/// "Some random error occured."
+		/// </example>
+		public string Result { get; set; }
+
+		/// <summary>
 		/// Fuzzing notes associated with the job
 		/// </summary>
 		public string Notes { get; set; }
