@@ -74,7 +74,7 @@ Protocol::
 	ETH_P_PPP_SES;; PPPoE Session Messages
 	ETH_P_MPLS_UC;; Multiprotocol Label Switching (MPLS) Unicast Traffic
 	ETH_P_MPLS_MC;; MPLS Multicast Traffic
-	ETH_P_ATMMPOA;; MuliProtocol Encapsulation Over ATM
+	ETH_P_ATMMPOA;; MultiProtocol Encapsulation Over ATM
 	ETH_P_LINK_CTL;; HomePNA (formerly HPNA), WLan Link Local Tunnel
 	ETH_P_ATMFATE;; Frame based ATM Transport over Ethernet
 	ETH_P_PAE;; Port Access Entity (IEEE 802.1X)
@@ -126,7 +126,7 @@ xref:Action_start[start]:: Implicit Action to start the Publisher.
 xref:Action_stop[stop]:: Implicit Action to stop the Publisher.
 xref:Action_open[open]:: Open and initialize the socket.
 xref:Action_close[close]:: Close and clean up the socket.
-xref:Action_output[output]:: Writes data through ouput to the open socket.
+xref:Action_output[output]:: Writes data through output to the open socket.
 xref:Action_input[input]:: Reads data through input from the open socket.
 
 === Examples
