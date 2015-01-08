@@ -19,4 +19,4 @@ the filtering not to work and the string would be accepted.
 
 === Hints
 
-None.
+This mutator does not support any hints.
