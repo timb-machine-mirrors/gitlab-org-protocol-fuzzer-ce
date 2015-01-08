@@ -28,11 +28,11 @@ The xref:Transformer[Transformer] can bidirectionally transform this data from h
 
 === Parameters
 
-No Parameters are supported by this transformer.
+None.
 
 === Attributes
 
-No attributes are supported by this transformer.
+None.
 
 === Actions Supported
 
