@@ -309,10 +309,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				_WaitForExit(false);
 				_StopDebugger();
 			}
-			else
-			{
-				logger.Debug("Unknown msg: " + name + " data: " + (string)data);
-			}
 
 			return null;
 		}
