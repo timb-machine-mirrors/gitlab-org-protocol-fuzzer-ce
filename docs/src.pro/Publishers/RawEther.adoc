@@ -118,7 +118,7 @@ MinMTU:: Minimum packet size to transmit. The smallest value is 1280, which is t
 MaxMTU:: maximum packet size to transmit. The largest value is 131070, which is the default value.
 Filter::
     Filters the received frames using a libpcap-style filter string. For more information
-    about libpcap syle filters, see http://www.tcpdump.org/manpages/pcap-filter.7.html[this page].
+    about libpcap style filters, see http://www.tcpdump.org/manpages/pcap-filter.7.html[this page].
 
 === Actions
 
