@@ -19,16 +19,13 @@ _Optional:_
 Host:: Name of the host machine
 Login:: Username for authentication on the remote machine
 Password:: Password for authentication on the remote machine
-HostType::
-	Type of remote host, defaults to _Default_
-	+
-	[horizontal]
-	Default;; Default
-	VIServer;; vCenter Server, ESX/ESXi hosts, VMWare Server 2.0
-	Workstation;; VMWare Workstation
-	WorkstationShared;;  VMWare Workstation (Shared Mode)
-	Player;; VMWare Player
-	Server;; VMWare Server 1.0.x
+HostType:: Type of remote host, defaults to _Default_  +
+	*VIServer* - vCenter Server, ESX/ESXi hosts, VMWare Server 2.0  +
+	*Workstation* - VMWare Workstation  +
+	*WorkstationShared* -  VMWare Workstation (Shared Mode)  +
+	*Player* - VMWare Player  +
+	*Server* - VMWare Server 1.0.x  +
+    *Default* - Default
 
 HostPort::
 	TCP/IP port on the remote host
