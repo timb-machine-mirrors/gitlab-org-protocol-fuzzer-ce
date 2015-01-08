@@ -80,6 +80,8 @@ module Peach {
 		rangeStop?: number;
 
 		hasMetrics?: boolean;
+
+		result?: string;
 	}
 
 	export class JobStatus {
