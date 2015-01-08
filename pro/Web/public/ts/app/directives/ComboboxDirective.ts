@@ -94,7 +94,6 @@
 
 			// view -> model
 			this.$model.$viewChangeListeners.unshift(() => {
-				console.log('onViewChanged', this.$scope.$id);
 				this.setSelected(this.$model.$viewValue);
 			});
 
