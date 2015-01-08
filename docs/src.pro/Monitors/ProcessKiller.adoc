@@ -10,7 +10,7 @@ _Required:_
 
 ProcessNames:: 
     Comma separated list of the processes to kill. Note that the process name is usually the executable
-    with out the +.exe+. For example, +notepad.exe+ will be +Notepad+ or +notepad+. For the Windows
+    without the +.exe+. For example, +notepad.exe+ will be +Notepad+ or +notepad+. For the Windows
     operating systems, the process name can be found by using the +tasklist.exe+ command.
 
 _Optional:_

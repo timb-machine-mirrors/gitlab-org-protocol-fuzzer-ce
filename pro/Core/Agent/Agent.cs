@@ -30,9 +30,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
+using Monitor = Peach.Core.Agent.Monitor;
 
 namespace Peach.Pro.Core.Agent
 {
@@ -75,6 +77,10 @@ namespace Peach.Pro.Core.Agent
 			}
 			catch (TargetInvocationException ex)
 			{
+				var baseEx = ex.GetBaseException();
+				if (baseEx is ThreadAbortException)
+					throw baseEx;
+
 				throw new PeachException("Could not start publisher \"" + cls + "\".  " + ex.InnerException.Message, ex);
 			}
 		}
@@ -116,6 +122,10 @@ namespace Peach.Pro.Core.Agent
 			}
 			catch (TargetInvocationException ex)
 			{
+				var baseEx = ex.GetBaseException();
+				if (baseEx is ThreadAbortException)
+					throw baseEx;
+
 				throw new PeachException("Could not start monitor \"" + cls + "\".  " + ex.InnerException.Message, ex);
 			}
 		}

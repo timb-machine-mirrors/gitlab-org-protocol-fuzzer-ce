@@ -1,7 +1,7 @@
 [[TutorialFileFuzzing_ConfigurePublisher]]
 === Configure Publisher
 
-The last thing we need todo before we can try out our nifty fuzzer is to configure a xref:Publisher[Publisher].
+The last thing we need to do before we can try out our nifty fuzzer is to configure a xref:Publisher[Publisher].
 xref:Publisher[Publisher]s are I_O connectors that implement the plumbing between actions like _output_, _input_, and _call_.
 For our file fuzzer, we will use the xref:Publisher[Publisher] called xref:Publishers_File[File].
 This publisher allows us to write out a file and then launch a process using the _call_ action like we setup in last section.
@@ -26,7 +26,7 @@ This should be the same as the file name we specified in the _call_ action (+fuz
 </Publisher>
 ----
 
-=== Whats Next?
+=== What's Next?
 
 Now we need a way to detect when our target crashes and also run our target.
 We will also want to collect some information like a stack trace to look at later on.

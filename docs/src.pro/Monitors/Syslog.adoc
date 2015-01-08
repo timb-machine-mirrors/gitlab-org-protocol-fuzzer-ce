@@ -23,7 +23,7 @@ Parameter that specifies when to start monitoring. Choose from the following set
 +
 [horizontal]
 OnCall;; Monitoring begins upon receipt of a message from the state machine.
-OnStart;; Monitroing occurs once at the start of the fuzzing session. This is the default setting.
+OnStart;; Monitoring occurs once at the start of the fuzzing session. This is the default setting.
 OnEnd;; Monitoring occurs once at the end of the fuzzing session.
 OnIterationStart;; Monitoring occurs at the start of every iteration.
 OnIterationEnd;; Monitoring occurs at the end of every iteration.

@@ -53,7 +53,7 @@ IgnoreCertErrors:: Allow HTTPS regardless of cert status. Defaults to false.
 === Actions
 
 xref:Action_call[call]::
-	Special method names used to fuzz the querystring or a specific header.
+	Special method names used to fuzz the query string or a specific header.
 	+
 	[horizontal]
 	Query;; Specify as the method name for a call action, the first parameter is the query string
