@@ -51,6 +51,8 @@ namespace Peach.Pro.Core.Runtime
 		////    return new Program(args).exitCode;
 		////}
 
+		public static Thread CurrentThread = Thread.CurrentThread;
+
 		public static ConsoleColor DefaultForground = Console.ForegroundColor;
 
 		public static void LoadPlatformAssembly()
@@ -730,10 +732,16 @@ Debug Peach Pit File
 
 		protected static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
 		{
+			e.Cancel = true;
+
+			if (CurrentThread == null)
+				return;
+
 			Console.WriteLine();
 			Console.WriteLine(" --- Ctrl+C Detected --- ");
 
-			e.Cancel = true;
+			var th = CurrentThread;
+			CurrentThread = null;
 
 			// Need to call Environment.Exit from outside this event handler
 			// to ensure the finalizers get called...
@@ -742,6 +750,19 @@ Debug Peach Pit File
 			{
 				Environment.Exit(0);
 			}).Start();
+
+			System.Diagnostics.Debug.Assert(th != null);
+
+			// TODO: Eventually move to use Thread.Abort() since it will properly cleanup!
+
+			// Don't use a lambda here because we don't want it to get jitted
+			// in the ctrl-c handler
+			// new Thread(StopperThread).Start(th);
+		}
+
+		private static void StopperThread(object param)
+		{
+			((Thread)param).Abort();
 		}
 	}
 }
