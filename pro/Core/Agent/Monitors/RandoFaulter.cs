@@ -1,8 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 using Peach.Core;
 using Peach.Core.Agent;
 
-namespace Peach.Pro.Test.Core.Monitors
+namespace Peach.Pro.Core.Agent.Monitors
 {
 	[Monitor("RandoFaulter", true, IsTest = true)]
 	[Description("Generate random faults for metrics testing")]
@@ -33,7 +36,20 @@ namespace Peach.Pro.Test.Core.Monitors
 
 		string[] severity = { "EXPLOITABLE", "PROBABLY EXPLOITABLE", "PROBABLY NOT EXPLOITABLE", "UNKNOWN" };
 
-		private static byte[] snmpv2cPacket = TestBase.LoadResource("snmpv2c.pcap").ToArray();
+		private static byte[] snmpv2cPacket = LoadResource("snmpv2c.pcap").ToArray();
+
+		public static MemoryStream LoadResource(string name)
+		{
+			var asm = Assembly.GetExecutingAssembly();
+			var fullName = "Peach.Pro.Core.Resources." + name;
+			using (var stream = asm.GetManifestResourceStream(fullName))
+			{
+				Debug.Assert(stream != null);
+				var ms = new MemoryStream();
+				stream.CopyTo(ms);
+				return ms;
+			}
+		}
 
 		public RandoFaulter(IAgent agent, string name, Dictionary<string, Variant> args)
 			: base(agent, name, args)

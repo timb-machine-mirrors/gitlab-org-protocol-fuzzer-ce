@@ -33,6 +33,7 @@ namespace Peach.Pro.Core.WebServices
 		public uint RangeStart { get; private set; }
 		public uint RangeStop { get; private set; }
 		public bool HasMetrics { get; private set; }
+		public string Result { get; private set; }
 
 		public TimeSpan Runtime
 		{
@@ -271,6 +272,7 @@ namespace Peach.Pro.Core.WebServices
 			catch (Exception ex)
 			{
 				logger.Debug("Unhandled exception when running job:\n{0}", ex);
+				Result = ex.Message;
 			}
 			finally
 			{
