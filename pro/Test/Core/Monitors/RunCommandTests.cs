@@ -76,7 +76,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		private void VerifyLines(IEnumerable<string> expected)
 		{
 			var lines = File.ReadAllLines(_outputFile).Select(s => s.Trim());
-			Assert.That(expected, Is.EquivalentTo(lines));
+			Assert.That(expected, Is.EqualTo(lines));
 		}
 
 		private void VerifyCall(int index)
