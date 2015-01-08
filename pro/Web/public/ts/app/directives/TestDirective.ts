@@ -3,17 +3,18 @@
 module Peach {
 	"use strict";
 
-	export class TestDirective implements ng.IDirective {
-		public restrict = 'E';
-		public templateUrl = 'html/directives/test.html';
-		public controller = TestController;
-		public scope = {};
+	export var TestDirective: IDirective = {
+		ComponentID: Constants.Directives.Test,
+		restrict: 'E',
+		templateUrl: 'html/directives/test.html',
+		controller: Constants.Controllers.Test,
+		scope: {}
 	}
 
 	export class TestController {
 		static $inject = [
-			"$scope",
-			"TestService"
+			Constants.Angular.$scope,
+			Constants.Services.Test
 		];
 
 		constructor(

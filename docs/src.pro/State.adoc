@@ -14,7 +14,7 @@
 //   * State to state transition
 
 // 2/17/2014: Mick
-//  talked about intial state and changin states
+//  talked about initial state and changing states
 //  added example
 
 State elements reside in xref:StateModel[StateModels]. Each state element contains a logical Peach work unit.
@@ -46,7 +46,7 @@ Actions are performed sequentially from top to bottom.
 
 Multiple state elements may not be performed in the order in which they appear in the xref:StateModel[StateModel]. This is most common in fuzzing scenarios where input is received and the response is determined by what was in the input.
 
-* The 'intitalState' attribute in the xref:StateModel[StateModel] declaration determines which is the first state element to be executed. 
+* The 'intitialState' attribute in the xref:StateModel[StateModel] declaration determines which is the first state element to be executed. 
 * Peach transitions into a new State after a 'changeState' action.
 
 If the same action elements execute in the order occurs every time, we recommend keeping all the actions in one state element.
@@ -64,7 +64,7 @@ xref:State_onComplete[onComplete]:: Scripting statement run after explicit actio
 
 === Child Elements
 
-xref:Action[Action]:: One ore more Actions are required.
+xref:Action[Action]:: One or more Actions are required.
 
 === Examples
 

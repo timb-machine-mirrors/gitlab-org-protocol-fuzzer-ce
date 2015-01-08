@@ -38,7 +38,7 @@ OnStart;; Monitoring occurs once at the start of the fuzzing session.
 OnEnd;; Monitoring occurs once at the end of the fuzzing session.
 OnIterationStart;; Monitoring occurs at the start of each iteration.
 OnIterationEnd;; Monitoring occurs at the end of each iteration.
-OnFault;; Monitoring occurs immediatelly following a fault.
+OnFault;; Monitoring occurs immediately following a fault.
 OnIterationStartAfterFault;; Monitoring occurs following a fault. Note that after the fault occurs, the current iteration completes. Then, at the start of the next iteration, monitoring begins.
 
 WaitOnCall:: Call message to start monitoring. This parameter only applies to the _OnCall_ setting.
@@ -130,7 +130,7 @@ In this example, the call action causes Peach to wait until the remote port is i
 	<Monitor class="TcpPort">
         <Param name="Host" value="192.168.133.4" />
         <Param name="Port" value="502" />
-        <param name="State" value="Closed" />
+        <Param name="State" value="Closed" />
         <Param name="WaitOnCall" value="WaitForPort" />
 	</Monitor>
   </Agent>
@@ -179,7 +179,7 @@ In this example, Peach faults if the port is in the closed state at the end of a
         <Param name="Host" value="192.168.133.4" />
         <Param name="Port" value="502" />
         <Param name="Action" value="Fault" />
-        <param name="State" value="Closed" />
+        <Param name="State" value="Closed" />
 	</Monitor>
   </Agent>
 

@@ -1,14 +1,16 @@
 ﻿module Peach {
 	"use strict";
 
-	interface IComboboxScope extends ng.IScope {
-		vm: ComboboxDirective;
+	export interface IComboboxScope extends ng.IScope {
+		vm: ComboboxController;
 		data: any;
 		options: string[];
 		showOptions: boolean;
 		placeholder: string;
 		selected: string;
 		highlighted?: number;
+		$model: ng.INgModelController;
+		$element: ng.IAugmentedJQuery;
 	}
 
 	var KEY = {
@@ -19,38 +21,52 @@
 		DOWN: 40
 	};
 
-	export class ComboboxDirective implements ng.IDirective {
-		constructor(
-			private $document: ng.IDocumentService
-		) {
-			this.link = this._link.bind(this);
-		}
-
-		public restrict = 'E';
-		public require = 'ngModel';
-		public replace = true;
-		public templateUrl = 'html/directives/combobox.html';
-		public scope = {
+	export var ComboboxDirective: IDirective = {
+		ComponentID: Constants.Directives.Combobox,
+		restrict: 'E',
+		require: [Constants.Directives.Combobox, Constants.Angular.ngModel],
+		replace: true,
+		controller: Constants.Controllers.Combobox,
+		controllerAs: 'vm',
+		templateUrl: 'html/directives/combobox.html',
+		scope: {
 			data: '=',
 			placeholder: '&'
-		};
-		public link: ng.IDirectiveLinkFn;
+		},
+		link: (
+			scope: IComboboxScope,
+			element: ng.IAugmentedJQuery,
+			attrs: ng.IAttributes,
+			ctrls: any
+		) => {
+			var ctrl: ComboboxController = ctrls[0];
+			ctrl.Link(element, attrs, ctrls[1]);
+		}
+	}
 
-		private $scope: IComboboxScope;
+	export class ComboboxController {
+		static $inject = [
+			Constants.Angular.$scope,
+			Constants.Angular.$document
+		];
+
+		constructor(
+			private $scope: IComboboxScope,
+			private $document: ng.IDocumentService
+		) {
+		}
+
 		private $element: ng.IAugmentedJQuery;
 		private $model: ng.INgModelController;
 
-		private _link(
-			scope: IComboboxScope,
+		public Link(
 			element: ng.IAugmentedJQuery,
 			attrs: ng.IAttributes,
 			ctrl: ng.INgModelController
 		) {
-			this.$scope = scope;
 			this.$element = element;
 			this.$model = ctrl;
 
-			this.$scope.vm = this;
 			this.$scope.showOptions = false;
 			this.$scope.options = [];
 			this.$scope.highlighted = null;
@@ -65,7 +81,8 @@
 			// Listen for the input value to change and handle any side effects
 			this.$scope.$watch('selected', (newVal) => {
 				if (this.$model.$viewValue !== newVal) {
-					this.filterOptions(newVal);
+					this.$model.$setViewValue(newVal);
+					this.buildOptions(newVal);
 				}
 			});
 
@@ -77,6 +94,7 @@
 
 			// view -> model
 			this.$model.$viewChangeListeners.unshift(() => {
+				console.log('onViewChanged', this.$scope.$id);
 				this.setSelected(this.$model.$viewValue);
 			});
 
@@ -156,11 +174,6 @@
 
 		private setSelected(value: string) {
 			this.$scope.selected = value;
-		}
-
-		private filterOptions(text: string) {
-			this.$model.$setViewValue(text);
-			this.buildOptions(text);
 		}
 
 		private hideOptions(event) {

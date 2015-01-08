@@ -6,11 +6,11 @@ module Peach {
 	export class PitTestController {
 
 		static $inject = [
-			"$scope",
-			"$location",
-			"PitService",
-			"TestService",
-			"WizardService"
+			Constants.Angular.$scope,
+			Constants.Angular.$location,
+			Constants.Services.Pit,
+			Constants.Services.Test,
+			Constants.Services.Wizard
 		];
 
 		constructor(

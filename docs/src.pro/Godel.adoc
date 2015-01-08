@@ -16,7 +16,7 @@ Godel elements support three scripting expressions:
 
 . 'inv' - An invariant expression that evaluates both at the start and at the finish of the appropriate level of the StateModel (StateModel, State, or Action) 
 . 'pre' - An expression evaluates at start of the appropriate level of the StateModel
-. 'post' - A expression that is evaluated upon completion of of the approprate level of the StateModel 
+. 'post' - A expression that is evaluated upon completion of the appropriate level of the StateModel 
 
 === Syntax
 

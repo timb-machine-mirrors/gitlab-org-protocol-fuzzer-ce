@@ -55,11 +55,11 @@ module Peach {
 
 	export class MetricsController {
 		static $inject = [
-			"$scope",
-			"$routeParams",
-			"$http",
+			Constants.Angular.$scope,
+			Constants.Angular.$routeParams,
+			Constants.Angular.$http,
 			"visDataSet",
-			"JobService"
+			Constants.Services.Job
 		];
 
 		constructor(

@@ -13,7 +13,7 @@ OSX will be configured to use CrashWrangler to monitor +Safari+ for exceptions a
 
 === Configure the Agent and Monitor
 
-First, lets locate the commented out +Agent+ element in the template file, it looks something like this:
+First, let's locate the commented out +Agent+ element in the template file, it looks something like this:
 
 [source,xml]
 ----
@@ -165,7 +165,7 @@ Leaving us with this:
 
 Now that we are using monitors that can detect faults, we want to configure a logging mechanism to capture the results of our fuzzer run.
 
-Todo this add the following to the +Test+ element at the bottom of our XML file:
+Add the following to the +Test+ element at the bottom of our XML file:
 
 [source,xml]
 ----
@@ -200,13 +200,13 @@ So it looks like this:
 
 == Running Fuzzer
 
-Now lets actually kick off our fuzzer for real!  Every 200 or so iterations, the strategy will switch to a different sample file.
+Now, let's actually kick off our fuzzer for real!  Every 200 or so iterations, the strategy will switch to a different sample file.
 
 ----
 peach png.xml
 ----
 
-=== Whats Next?
+=== What's Next?
 
 From here you will want to:
 

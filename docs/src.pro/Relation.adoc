@@ -49,7 +49,7 @@ Gets are applied during the cracking process and Sets are applied during the pub
 
 For the Size relation, expressionGet and expressionSet use the two variables, +self+ and +size+.  Self refers to the parent element and size is an integer. 
 
-Expression gets and sets should be each others mathematical inverse. The Get input and Set output should be the same. 
+The expressionGet and expressionSet operations should be mathematically inverse operations. The input value for expressionGet and the output value of expressionSet should be identical. 
 
 In this example, we provide two python expressions that allow us to modify the size when it is get or set:
 
@@ -95,7 +95,7 @@ Gets are applied during the cracking process and Sets are applied during the pub
 
 For the Count-of relation, expressionGet and expressionSet use the two variables, +self+ and +count+.  Self refers to the parent element and count is an integer. 
 
-Expression gets and sets should be each others mathematical inverse. The Get input and Set output should be the same. 
+The expressionGet and expressionSet operations should be mathematically inverse operations. The input value for expressionGet and the output value of expressionSet should be identical. 
 
 In this example, we provide two python expressions that allow us to modify the count when it is set or get. 
 
@@ -243,7 +243,7 @@ In this example we provide two python expressions that allow us to modify the of
 </DataModel>
 ----
 
-expressionGet:: This value is used internally and determines the starting point of +Target+ when cracking. data.  In the preceeding example, if the value of the number +num+ is 20, the string +Target+ will begin at 10 bytes from the beginning of the data model.
+expressionGet:: This value is used internally and determines the starting point of +Target+ when cracking. data.  In the preceding example, if the value of the number +num+ is 20, the string +Target+ will begin at 10 bytes from the beginning of the data model.
 
 expressionSet:: Sets the value that is produced.  In the preceding example, +offset+ is based on the distance in bytes from the start of the data model to the beginning of the string +Target+.
 

@@ -6,7 +6,7 @@
 //  * Adds a module path for python
 //  * Examples (better than we currently have :))
 
-The _PythonPath_ top level element adds a path to the Python module search path list. It extends Peach and includes custom code locations.
+The _PythonPath_ top-level element adds a path to the Python module search path list. It extends Peach and includes custom code locations.
 
 === Syntax
 
@@ -19,8 +19,8 @@ The _PythonPath_ top level element adds a path to the Python module search path 
 
 _Required:_
 
-path:: The path to add
+path:: The path to add.
 
 _Optional:_
 
-No optional attributes are supported by this element.
+None.

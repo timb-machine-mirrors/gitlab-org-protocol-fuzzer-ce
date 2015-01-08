@@ -3,16 +3,17 @@
 module Peach {
 	"use strict";
 
-	export class MonitorDirective implements ng.IDirective {
-		public restrict = 'E';
-		public templateUrl = 'html/directives/monitor.html';
-		public controller = MonitorController;
-		public scope = {
+	export var MonitorDirective: IDirective = {
+		ComponentID: Constants.Directives.Monitor,
+		restrict: 'E',
+		templateUrl: 'html/directives/monitor.html',
+		controller: Constants.Controllers.Monitor,
+		scope: {
 			monitors: '=',
 			monitor: '=',
 			agentIndex: '=',
 			monitorIndex: '='
-		};
+		}
 	}
 
 	export interface IMonitorScope extends IFormScope {
@@ -25,8 +26,8 @@ module Peach {
 
 	export class MonitorController {
 		static $inject = [
-			"$scope",
-			"PitService"
+			Constants.Angular.$scope,
+			Constants.Services.Pit
 		];
 
 		constructor(

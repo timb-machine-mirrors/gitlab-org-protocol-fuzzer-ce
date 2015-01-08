@@ -3,6 +3,31 @@
 module Peach {
 	"use strict";
 
+	function getComponentName(name: string, component: IComponent): string {
+		var id = component.ComponentID;
+		return _.isUndefined(id) ? name : id;
+	}
+
+	function registerModule(ns, app: ng.IModule) {
+		_.forOwn(ns, (component, key: string) => {
+			var name = getComponentName(key, component);
+			if (key.endsWith('Controller')) {
+				//console.log('Registering controller', name, key);
+				app.controller(name, component);
+			}
+			if (key.endsWith('Directive')) {
+				//console.log('Registering directive', name, key);
+				app.directive(name, () => {
+					return component;
+				});
+			}
+			if (key.endsWith('Service')) {
+				//console.log('Registering service', name, key);
+				app.service(name, component);
+			}
+		});
+	}
+
 	var p = angular.module("Peach", [
 		"angular-loading-bar",
 		"chart.js",
@@ -16,15 +41,15 @@ module Peach {
 		"ui.bootstrap"
 	]);
 
-	p.service('HttpErrorService', HttpErrorService);
 	p.config([
-		'$httpProvider', ($httpProvider: ng.IHttpProvider) => {
-			$httpProvider.interceptors.push('HttpErrorService');
+		Constants.Angular.$httpProvider,
+		($httpProvider: ng.IHttpProvider) => {
+			$httpProvider.interceptors.push(Constants.Services.HttpError);
 		}
 	]);
 
 	p.factory('PeachConfigResource', [
-		'$resource',
+		Constants.Angular.$resource,
 		($resource: ng.resource.IResourceService): IKeyValueResource => {
 			return <IKeyValueResource> $resource(
 				'/p/conf/wizard/state'
@@ -32,13 +57,13 @@ module Peach {
 		}
 	]);
 	p.factory('PitLibraryResource', [
-		'$resource',
+		Constants.Angular.$resource,
 		($resource: ng.resource.IResourceService): ILibraryResource => {
 			return <ILibraryResource> $resource('/p/libraries');
 		}
 	]);
 	p.factory('PitResource', [
-		'$resource',
+		Constants.Angular.$resource,
 		($resource: ng.resource.IResourceService): IPitResource => {
 			return <IPitResource> $resource(
 				'/p/pits/:id', { id: '@id' }
@@ -46,7 +71,7 @@ module Peach {
 		}
 	]);
 	p.factory('PitConfigResource', [
-		'$resource',
+		Constants.Angular.$resource,
 		($resource: ng.resource.IResourceService): IPitConfigResource => {
 			return <IPitConfigResource> $resource(
 				'/p/pits/:id/config', { id: '@id' }
@@ -54,7 +79,7 @@ module Peach {
 		}
 	]);
 	p.factory('PitAgentsResource', [
-		'$resource',
+		Constants.Angular.$resource,
 		($resource: ng.resource.IResourceService): IPitAgentsResource => {
 			return <IPitAgentsResource> $resource(
 				'/p/pits/:id/agents', { id: '@id' }
@@ -62,7 +87,7 @@ module Peach {
 		}
 	]);
 	p.factory('AvailableMonitorsResource', [
-		'$resource',
+		Constants.Angular.$resource,
 		($resource: ng.resource.IResourceService): IMonitorResource => {
 			return <IMonitorResource> $resource(
 				'/p/conf/wizard/monitors', {}, {
@@ -72,7 +97,7 @@ module Peach {
 		}
 	]);
 	p.factory('FaultDetailResource', [
-		'$resource',
+		Constants.Angular.$resource,
 		($resource: ng.resource.IResourceService): IFaultDetailResource => {
 			return <IFaultDetailResource> $resource(
 				'/p/faults/:id', { id: '@id' }
@@ -80,41 +105,10 @@ module Peach {
 		}
 	]);
 
-	p.service('PitService', PitService);
-	p.service('JobService', JobService);
-	p.service('TestService', TestService);
-	p.service('WizardService', WizardService);
-	p.service('UniqueService', UniqueService);
-
-	p.directive("integer", () => new IntegerDirective());
-	p.directive("hexstring", () => new HexDirective());
-	p.directive('peachRange', () => new RangeDirective());
-
-	p.directive('peachAgent', () => new AgentDirective());
-	p.directive('peachMonitor', () => new MonitorDirective());
-	p.directive('peachQuestion', () => new QuestionDirective());
-	p.directive('peachParameter', () => new ParameterDirective());
-	p.directive('peachParameterInput', () => new ParameterInputDirective());
-	p.directive('peachTest', () => new TestDirective());
-	p.directive('peachUnsaved', [
-		'$modal', '$location', (
-			$modal: ng.ui.bootstrap.IModalService,
-			$location: ng.ILocationService
-		) => new UnsavedDirective($modal, $location)
-	]);
-	p.directive('peachUnique', () => new UniqueDirective());
-	p.directive('peachUniqueChannel', [
-		'UniqueService',
-		(service: UniqueService) => new UniqueChannelDirective(service)
-	]);
-	p.directive('peachCombobox', [
-		'$document', (
-			$document: ng.IDocumentService
-		) => new ComboboxDirective($document)
-	]);
+	registerModule(Peach, p);
 
 	p.config([
-		"$routeProvider",
+		Constants.Angular.$routeProvider,
 		($routeProvider: ng.route.IRouteProvider) => {
 			$routeProvider
 				.when("/", {

@@ -34,7 +34,7 @@ Close is an implicit action that occurs by default at the end of each iteration.
 
 The only time you need to explicitly call the _close_ action is when the default behavior needs to be changed. For example, during file fuzzing, the target application is launched after closing:
 
-. the xref:Action_output[_output_] Action intiates writing the data
+. the xref:Action_output[_output_] Action initiates writing the data
 . the _close_ Action closes the target
 . the target application subsequently launches using the xref:Action_call[_call_] Action
 

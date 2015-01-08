@@ -6,9 +6,10 @@ module Peach {
 	export class PitService {
 
 		static $inject = [
-			"$q",
-			"$window",
-			"$modal",
+			Constants.Angular.$q,
+			Constants.Angular.$window,
+			Constants.Angular.$modal,
+			Constants.Angular.$http,
 			"PitResource",
 			"PitLibraryResource",
 			"PitConfigResource",
@@ -19,6 +20,7 @@ module Peach {
 			private $q: ng.IQService,
 			private $window: ng.IWindowService,
 			private $modal: ng.ui.bootstrap.IModalService,
+			private $http: ng.IHttpService,
 			private PitResource: IPitResource,
 			private PitLibraryResource: ILibraryResource,
 			private PitConfigResource: IPitConfigResource,
@@ -50,6 +52,11 @@ module Peach {
 		private pitAgents: IPitAgents;
 		public get PitAgents(): IPitAgents {
 			return this.pitAgents;
+		}
+
+		private pitCalls: string[] = [];
+		public get PitCalls(): string[] {
+			return this.pitCalls;
 		}
 
 		private changeHandlers: Function[] = [];
@@ -151,11 +158,22 @@ module Peach {
 			});
 		}
 
-		public LoadPitAgents(): IPitAgents {
+		public LoadPitAgents(): ng.IPromise<IPitAgents> {
 			return onlyIf(this.pit, () => {
 				return this.PitAgentsResource.get({ id: this.PitId }, (data: IPitAgents) => {
 					this.pitAgents = data;
+				}).$promise;
+			});
+		}
+
+		public LoadPitCalls(): ng.IPromise<string[]> {
+			return onlyIf(this.pit, () => {
+				var url = this.pit.pitUrl + '/calls';
+				var promise = this.$http.get<string[]>(url);
+				promise.success((calls: string[]) => {
+					this.pitCalls = calls;
 				});
+				return promise;
 			});
 		}
 

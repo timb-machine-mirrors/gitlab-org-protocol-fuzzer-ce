@@ -16,7 +16,8 @@ namespace Peach.Pro.Core.WebServices.Models
 		Enum,
 		Bool,
 		User,
-		System
+		System,
+		Call,
 	}
 
 	/// <summary>

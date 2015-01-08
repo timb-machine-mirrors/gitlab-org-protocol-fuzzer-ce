@@ -6,9 +6,9 @@ module Peach {
 	export class ConfigureVariablesController {
 
 		static $inject = [
-			"$scope",
-			"$modal",
-			"PitService"
+			Constants.Angular.$scope,
+			Constants.Angular.$modal,
+			Constants.Services.Pit
 		];
 
 		constructor(
@@ -70,9 +70,9 @@ module Peach {
 
 	export class NewVarController {
 		static $inject = [
-			"$scope",
-			"$modalInstance",
-			"PitService"
+			Constants.Angular.$scope,
+			Constants.Angular.$modalInstance,
+			Constants.Services.Pit
 		];
 
 		constructor(
