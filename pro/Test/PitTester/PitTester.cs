@@ -289,6 +289,30 @@ namespace PitTester
 				if (it.Count != expexted)
 					errors.AppendLine("Number of <Test> elements is " + it.Count + " but should be " + expexted + ".");
 
+				while (it.MoveNext())
+				{
+					var maxSize = it.Current.GetAttribute("maxOutputSize", string.Empty);
+					if (string.IsNullOrEmpty(maxSize))
+						errors.AppendLine("<Test> element is missing maxOutputSize attribute.");
+
+					var lifetime = it.Current.GetAttribute("targetLifetime", string.Empty);
+					if (string.IsNullOrEmpty(lifetime))
+						errors.AppendLine("<Test> element is missing targetLifetime attribute.");
+
+					var parts = fileName.Split(Path.DirectorySeparatorChar);
+					var fileFuzzing = new[] {"Image", "Video", "Application"};
+					if (parts.Any(fileFuzzing.Contains) || parts.Last().Contains("Client"))
+					{
+						if (lifetime != "iteration")
+							errors.AppendLine("<Test> element has incorrect targetLifetime attribute. Expected 'iteration' but found '{0}'.".Fmt(lifetime));
+					}
+					else
+					{
+						if (lifetime != "session")
+							errors.AppendLine("<Test> element has incorrect targetLifetime attribute. Expected 'session' but found '{0}'.".Fmt(lifetime));
+					}
+				}
+
 				var sm = nav.Select("/p:Peach/p:StateModel", nsMgr);
 				while (sm.MoveNext())
 				{
