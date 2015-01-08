@@ -712,15 +712,16 @@ quit
 
 		public override void IterationStarting(uint iterationCount, bool isReproduction)
 		{
+			var firstStart = !_secondStart;
+
 			_fault = null;
 			_messageExit = false;
+			_secondStart = true;
 
 			if (RestartOnEachTest)
 				_Stop();
-			else if (!_secondStart)
+			else if (firstStart)
 				return;
-
-			_secondStart = true;
 
 			if (!_IsRunning() && StartOnCall == null)
 				_Start();
