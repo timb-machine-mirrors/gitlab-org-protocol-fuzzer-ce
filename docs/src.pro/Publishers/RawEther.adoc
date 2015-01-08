@@ -38,11 +38,8 @@ Interface:: Name of interface to bind too
 _Optional:_
 
 Protocol::
-	Ethernet protocol to use. Default is ETH_P_ALL.
-	+
-	_Supported Ethernet Protocol Enum Values:_
-	+
-	[horizontal]
+	Ethernet protocol to use. Default is ETH_P_ALL.  +
+	_Supported Ethernet Protocol Enum Values:_  +
 	ETH_P_LOOP;; Ethernet Loopback packet
 	ETH_P_PUP;; Xerox PARC Universal Packet (Pup)
 	ETH_P_PUPAT;; Xerox Pup Address Translation

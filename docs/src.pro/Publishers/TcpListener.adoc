@@ -41,13 +41,6 @@ AcceptTimeout:: How long to wait in milliseconds for a new connection. Defaults 
 xref:Action_accept[accept]:: Wait for incoming connection
 xref:Action_output[output]:: Send data to remote host
 xref:Action_input[input]:: Receive data from remote host
-xref:Action_getProperty[getProperty]::
-	Get a property value.
-	+
-	This publisher supports two properties:
-	+
-	[horizontal]
-	LastRecvAddr;; The last receive address
 
 === Examples
 
