@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
+using System.Threading;
 using System.Xml;
 
 using Peach.Core.IO;
@@ -859,7 +860,16 @@ namespace Peach.Core.Dom
 				}
 				catch (TargetInvocationException ex)
 				{
-					throw ex.InnerException;
+					var baseEx = ex.GetBaseException();
+					if (baseEx is ThreadAbortException)
+						throw baseEx;
+
+					var inner = ex.InnerException;
+					if (inner == null)
+						throw;
+
+					var outer = (Exception)Activator.CreateInstance(inner.GetType(), inner.Message, inner);
+					throw outer;
 				}
 			}
 

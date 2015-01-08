@@ -190,7 +190,19 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 			{
 				var fullPath = Path.Combine(owner._tmpPath, fileName);
 
-				_file = File.Open(fullPath, FileMode.Create, FileAccess.Write);
+				try
+				{
+					_file = File.Open(fullPath, FileMode.Create, FileAccess.Write);
+				}
+				catch (Exception ex)
+				{
+					throw new SoftException(
+						"Could not create log file for capturing {0} of {1}".Fmt(
+							Path.GetFileNameWithoutExtension(fileName),
+							owner.Executable
+						), ex);
+				}
+
 				_name = "[{0}:{1}]".Fmt(owner._procHandler.Id, Path.GetFileNameWithoutExtension(fileName));
 
 				_readEvent = new AutoResetEvent(false);
@@ -425,6 +437,7 @@ quit
 		Process _procCommand;
 		Fault _fault = null;
 		bool _messageExit = false;
+		bool _secondStart = false;
 		string _exploitable = null;
 		string _tmpPath = null;
 		string _gdbCmd = null;
@@ -704,6 +717,10 @@ quit
 
 			if (RestartOnEachTest)
 				_Stop();
+			else if (!_secondStart)
+				return;
+
+			_secondStart = true;
 
 			if (!_IsRunning() && StartOnCall == null)
 				_Start();
