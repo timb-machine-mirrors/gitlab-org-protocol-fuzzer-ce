@@ -156,7 +156,10 @@ namespace Peach.Pro.Core.WebServices
 			};
 
 			if (Runner.Status == JobStatus.Stopped)
+			{
 				job.StopDate = Runner.StopDate;
+				job.Result = Runner.Result;
+			}
 
 			return job;
 		}
