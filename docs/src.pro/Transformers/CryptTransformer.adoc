@@ -29,11 +29,11 @@ This xref:Transformer[Transformer] applies only to outgoing data because hashes 
 
 === Parameters
 
-No Parameters are supported by this transformer.
+None.
 
 === Attributes
 
-No Attributes are supported by this transformer.
+None.
 
 === Actions Supported
 
