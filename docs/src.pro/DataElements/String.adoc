@@ -69,7 +69,7 @@ xref:valueType[valueType]:: Format of the _value_ attribute, defaults to string.
 nullTerminated::
 Specifies whether this string is null terminated. Valid values are true and false, defaults to false. 
 
-The _nullTerminated_ attribute indicates the produced string should be null terminated. +
+The _nullTerminated_ attribute indicates the produced string should be null terminated.
 
 NOTE: Only the final value has the null terminator applied. If the value is accessed, the internal value will not have the null attached.
 
