@@ -43,7 +43,7 @@ None.
 === Actions Supported
 
 xref:Action_input[input]:: On input, this transformer decodes incoming data using the NetBios decoding algorithm.
-xref:Action_output[output]:: On output, this transfomer encodes outgoing data using the NetBios encoding algorithm.     
+xref:Action_output[output]:: On output, this transformer encodes outgoing data using the NetBios encoding algorithm.     
 
 === Examples
 
