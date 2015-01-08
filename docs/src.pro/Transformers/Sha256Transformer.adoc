@@ -28,7 +28,7 @@ This xref:Transformer[Transformer] can only be applied to outgoing data because 
 
 === Parameters
 
-No Parameters are supported by this transformer.
+None.
 
 === Actions Supported
 
