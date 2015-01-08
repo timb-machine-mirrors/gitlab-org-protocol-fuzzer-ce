@@ -7,7 +7,7 @@ The _RunCommand_ monitor launches a specified command to perform a utility funct
 * Search for a specific exit code from the launched utility, and when found, the monitor generates a fault.
 * Search the output of the launched utility, and when a specific expression occurs, the _RunCommand_ monitor generates a fault.
 
-The _RunCommand_ monitor provideds parameters (_When_ and _StartOnCall_) to specify when to launch the utility command.
+The _RunCommand_ monitor provides parameters (_When_ and _StartOnCall_) to specify when to launch the utility command.
 
 === Parameters
 
@@ -37,7 +37,7 @@ StartOnCall:: Launch the command when the monitor receives a specified message f
 FaultOnNonZeroExit:: Generate a fault if the exit code is non-zero. The default value is false.
 FaultOnRegex:: Generate a fault if the regular expression matches the command output. This feature is turned off by default. To use this feature, provide a valid regular expression using the Microsoft .NET syntax.
 
-AddressSanitizer:: Enable support for the Google AddressSanitizer (ASan). This feature is turned off (set to fales) by default.
+AddressSanitizer:: Enable support for the Google AddressSanitizer (ASan). This feature is turned off (set to false) by default.
 Timeout:: Maximum time period, in seconds, for the process to run. Generate a fault if process runs longer than the specified value. You can turn off this feature by specifying -1 for the time period. The default value also is -1.
 
 === Examples
