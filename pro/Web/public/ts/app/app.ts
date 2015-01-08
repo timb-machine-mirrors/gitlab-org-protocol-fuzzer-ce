@@ -216,9 +216,6 @@ module Peach {
 
 		function initialize() {
 			jQuery($ => {
-				// shows tooltips
-				$('[data-rel=tooltip]').tooltip();
-
 				// handles disabling of navbar items
 				$("ul.nav-list").on('click', 'li.disabled', false);
 			});
