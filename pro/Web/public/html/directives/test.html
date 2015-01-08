@@ -18,6 +18,13 @@
 						</tr>
 					</thead>
 					<tbody>
+						<tr>
+							<td class="text-center"
+									colspan="2"
+									ng-if="vm.TestEvents.length === 0">
+								No data is available
+							</td>
+						</tr>
 						<tr ng-repeat="row in vm.TestEvents">
 							<td class="peach-icon-cell">
 								<i ng-class="vm.StatusClass(row)"></i>

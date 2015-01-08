@@ -61,8 +61,8 @@ describe("Peach", () => {
 				expect(ctrl.IsActive("/quickstart/intro")).toBe(false);
 			});
 
-			it("get PitName is (none)", () => {
-				expect(ctrl.PitName).toBe('(none)');
+			it("SelectPitPrompt is 'Select a Pit'", () => {
+				expect(ctrl.SelectPitPrompt).toBe('Select a Pit');
 			});
 
 			it("should not start the wizard", () => {
@@ -98,7 +98,7 @@ describe("Peach", () => {
 			it("should load the pit", () => {
 				expect($modal.open).toHaveBeenCalled();
 				expect(_.isObject(service.Pit)).toBe(true);
-				expect(ctrl.PitName).toBe(pit.name);
+				expect(ctrl.SelectPitPrompt).toBe(pit.name);
 			});
 
 			it("should start the wizard", () => {

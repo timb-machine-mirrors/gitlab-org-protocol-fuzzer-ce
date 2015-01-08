@@ -45,44 +45,28 @@
 <body class="skin-1"
 			ng-controller="Peach.MainController">
 
-	<div class="navbar navbar-default" 
+	<div class="navbar navbar-default"
 			 id="navbar">
 
-		<div class="navbar-container" 
+		<div class="navbar-container"
 				 id="navbar-container">
 			<div class="navbar-header pull-left">
-				<small>
-					<img src="img/peachlogo.png" height="50" />
-				</small>
+				<a href="#">
+					<img src="img/peachlogo.png" />
+				</a>
 			</div>
 
-			<div class="navbar-header pull-right" 
-					 id="breadcrumbs">
-				<ul class="nav ace-nav" 
-						style="background: none">
-					<li data-original-title="{{vm.JobRunningTooltip}}"
-							class="tooltip-warning"
-							data-rel="tooltip"
-							data-placement="left">
-						<a data-toggle="dropdown"
-							 class="dropdown-toggle"
-							 style="background-color: transparent; font-size: 20px; cursor: pointer"
-							 ng-class="{disabled: !vm.CanSelectPit}">
-							<span>
-								{{vm.PitName}}
-							</span>
-
-							<i class="icon-caret-down"></i>
-						</a>
-
-						<ul class="user-menu pull-right dropdown-menu dropdown-light-blue dropdown-caret dropdown-close">
-							<li>
-								<a ng-click="vm.OnSelectPit()" 
-									 style="cursor: pointer">
-									Select another Pit
-								</a>
-							</li>
-						</ul>
+			<div class="navbar-header pull-right">
+				<ul class="nav ace-nav">
+					<li class="tooltip-warning"
+							tooltip="{{vm.JobRunningTooltip}}"
+							tooltip-placement="left">
+						<button type="button"
+										class="btn btn-primary"
+										ng-class="{disabled: !vm.CanSelectPit}"
+										ng-click="vm.OnSelectPit()">
+							{{vm.SelectPitPrompt}}
+						</button>
 					</li>
 				</ul>
 
@@ -100,7 +84,7 @@
 			<div class="sidebar" id="sidebar">
 
 				<ul class="nav nav-list">
-					
+
 					<li ng-class="{active: vm.IsActive('/')}">
 						<a href="#/">
 							<i class="icon-dashboard"></i>
@@ -110,25 +94,23 @@
 						</a>
 					</li>
 
-					<li ng-class="{active: vm.IsActive('/faults/all'), disabled: !vm.CanViewFaults}"
-							data-original-title="{{vm.FaultsUnavailableTooltip}}"
-							class="tooltip-warning"
-							data-rel="tooltip"
-							data-placement="right">
+					<li class="tooltip-warning"
+							ng-class="{active: vm.IsActive('/faults/all'), disabled: !vm.CanViewFaults}"
+							tooltip="{{vm.FaultsUnavailableTooltip}}"
+							tooltip-placement="right">
 						<a href="#/faults/all">
 							<i class="icon-fire"></i>
 							<span class="menu-text">
 								Faults
-								<span class="badge badge-primary ">{{vm.FaultCount}}</span>
+								<span class="badge badge-primary">{{vm.FaultCount}}</span>
 							</span>
 						</a>
 					</li>
 
-					<li data-original-title="{{vm.MetricsUnavailableTooltip}}"
-					    class="tooltip-warning"
-					    data-rel="tooltip"
-					    data-placement="right"
-					    ng-class="{active: vm.IsActive('/metrics'), disabled: !vm.CanViewMetrics}">
+					<li class="tooltip-warning"
+							ng-class="{active: vm.IsActive('/metrics'), disabled: !vm.CanViewMetrics}"
+							tooltip="{{vm.MetricsUnavailableTooltip}}"
+							tooltip-placement="right">
 						<a href="#"
 							 class="dropdown-toggle"
 							 ng-class="{disabled: !vm.CanViewMetrics}">
@@ -139,8 +121,7 @@
 							<b class="arrow icon-angle-down"></b>
 						</a>
 
-						<ul class="submenu"
-								style="display:none">
+						<ul class="submenu">
 
 							<li ng-class="{active: vm.IsActive('/metrics/bucket-timeline')}">
 								<a href="#/metrics/bucket-timeline">
@@ -196,10 +177,9 @@
 					</li>
 
 					<li class="tooltip-warning"
-							data-original-title="{{vm.JobRunningTooltip}}"
-							data-rel="tooltip"
-							data-placement="right"
-							ng-class="{disabled: !vm.CanConfigurePit}">
+							ng-class="{disabled: !vm.CanConfigurePit}"
+							tooltip="{{vm.JobRunningTooltip}}"
+							tooltip-placement="right">
 						<a class="dropdown-toggle"
 							 href="#"
 							 ng-class="{disabled: !vm.CanConfigurePit}">
@@ -207,7 +187,7 @@
 							<span class="menu-text">Quick Start</span>
 							<b class="arrow icon-angle-down"></b>
 						</a>
-						<ul class="submenu" style="display: none;">
+						<ul class="submenu">
 							<li ng-class="{active: vm.IsActive('/quickstart/intro'), disabled: !vm.CanConfigurePit}">
 								<a href="#/quickstart/intro">
 									<i class="icon-double-angle-right"></i>
@@ -261,10 +241,9 @@
 					</li>
 
 					<li class="tooltip-warning"
-							data-original-title="{{vm.JobRunningTooltip}}"
-							data-rel="tooltip"
-							data-placement="right"
-							ng-class="{disabled: !vm.CanConfigurePit}">
+							ng-class="{disabled: !vm.CanConfigurePit}"
+							tooltip="{{vm.JobRunningTooltip}}"
+							tooltip-placement="right">
 						<a class="dropdown-toggle"
 							 href="#"
 							 ng-class="{disabled: !vm.CanConfigurePit}">
@@ -272,7 +251,7 @@
 							<span class="menu-text">Configuration</span>
 							<b class="arrow icon-angle-down"></b>
 						</a>
-						<ul class="submenu" style="display: none;">
+						<ul class="submenu">
 							<li ng-class="{active: vm.IsActive('/cfg/variables'), disabled: !vm.CanConfigurePit}">
 								<a href="#/cfg/variables">
 									<i class="icon-double-angle-right"></i>
@@ -295,8 +274,8 @@
 					</li>
 
 					<li>
-						<a href="/docs" 
-						   target="_blank">
+						<a href="/docs"
+							 target="_blank">
 							<i class="icon-book"></i>
 							<span class="menu-text">
 								Documentation
@@ -305,8 +284,8 @@
 					</li>
 
 					<li>
-						<a href="https://forums.peachfuzzer.com" 
-						   target="_blank">
+						<a href="https://forums.peachfuzzer.com"
+							 target="_blank">
 							<i class="icon-bookmark"></i>
 							<span class="menu-text">
 								Forums
@@ -316,7 +295,7 @@
 
 				</ul>
 
-				<div class="sidebar-collapse" 
+				<div class="sidebar-collapse"
 						 id="sidebar-collapse">
 					<i class="icon-double-angle-left"
 						 data-icon1="icon-double-angle-left"
