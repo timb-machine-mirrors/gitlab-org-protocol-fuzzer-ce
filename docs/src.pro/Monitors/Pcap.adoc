@@ -33,8 +33,7 @@ Description: Network adapter 'TAP-Win32 Adapter OAS' on local host
 
 
 Name: rpcap://\Device\NPF_{43F18B7C-42B6-4F5C-A70B-1E66C619B58C}
-Description: Network adapter 'Intel(R) 82579LM Gigabit Network Connection' on lo
-cal host
+Description: Network adapter 'Intel(R) 82579LM Gigabit Network Connection' on local host
 
 
 Name: rpcap://\Device\NPF_{44E8AB1D-1FD1-4A15-83BA-9432D8E004DE}
