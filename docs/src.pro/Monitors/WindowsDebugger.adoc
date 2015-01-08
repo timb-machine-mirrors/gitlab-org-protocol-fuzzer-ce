@@ -30,7 +30,7 @@ StartOnCall:: Debugger defers attaching until a matching call is made from state
 IgnoreFirstChanceGuardPage:: Ignore first chance guard page faults.  These are sometimes false positives or anti-debugging faults. (optional, defaults to false).
 IgnoreSecondChanceGuardPage:: Ignore second chance guard page faults.  These are sometimes false positives or anti-debugging faults. (optional, defaults to false).
 NoCpuKill:: Don't use process CPU usage to terminate early. (optional, defaults to false).
-FaultOnEarlyExit:: Trigger fault if process exists (optional, defaults to false).
+FaultOnEarlyExit:: Trigger fault if process exits (optional, defaults to false).
 WaitForExitOnCall:: Wait for process to exit on state model call and fault if timeout is reached (optional).
 WaitForExitTimeout:: Wait for exit timeout value in milliseconds (-1 is infinite) (optional, defaults to 10000).
 RestartOnEachTest:: Restart process for each iteration (optional, defaults to false).
