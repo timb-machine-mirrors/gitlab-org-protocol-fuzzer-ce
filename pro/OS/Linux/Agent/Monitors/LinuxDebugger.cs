@@ -712,15 +712,16 @@ quit
 
 		public override void IterationStarting(uint iterationCount, bool isReproduction)
 		{
+			var firstStart = !_secondStart;
+
 			_fault = null;
 			_messageExit = false;
+			_secondStart = true;
 
 			if (RestartOnEachTest)
 				_Stop();
-			else if (!_secondStart)
+			else if (firstStart)
 				return;
-
-			_secondStart = true;
 
 			if (!_IsRunning() && StartOnCall == null)
 				_Start();
@@ -829,8 +830,6 @@ quit
 
 		public override Variant Message(string name, Variant data)
 		{
-			logger.Debug("Message(" + name + ", " + (string)data + ")");
-
 			if (name == "Action.Call" && ((string)data) == StartOnCall)
 			{
 				_Stop();
@@ -841,10 +840,6 @@ quit
 				_messageExit = true;
 				_WaitForExit(false);
 				_Stop();
-			}
-			else
-			{
-				logger.Debug("Unknown msg: " + name + " data: " + (string)data);
 			}
 
 			return null;
