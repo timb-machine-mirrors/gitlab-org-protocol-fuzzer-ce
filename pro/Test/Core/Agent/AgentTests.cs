@@ -276,7 +276,7 @@ namespace Peach.Pro.Test.Core.Agent
 "SessionFinished", "StopMonitor"
 				};
 
-				Assert.That(contents, Is.EquivalentTo(expected));
+				Assert.That(contents, Is.EqualTo(expected));
 			}
 			finally
 			{
@@ -619,7 +619,7 @@ namespace Peach.Pro.Test.Core.Agent
 				"Local1.mon1.StopMonitor",
 			};
 
-			Assert.That(history, Is.EquivalentTo(expected));
+			Assert.That(history, Is.EqualTo(expected));
 
 		}
 
@@ -866,7 +866,7 @@ namespace Peach.Pro.Test.Core.Agent
 					"OnStop",
 				};
 
-				Assert.That(contents, Is.EquivalentTo(expected));
+				Assert.That(contents, Is.EqualTo(expected));
 
 				var st = dom.tests[0].stateModel.states[0];
 				//var act = st.actions["call"] as Dom.Actions.Call;

@@ -255,6 +255,9 @@ namespace Peach.Core
 
 					RunTest();
 				}
+				catch (ThreadAbortException)
+				{
+				}
 				catch (Exception ex)
 				{
 					OnTestError(ex);
@@ -286,26 +289,36 @@ namespace Peach.Core
 
 		protected void EndTest()
 		{
-			foreach (var kv in _context.test.publishers)
+			try
 			{
-				try
+				foreach (var kv in _context.test.publishers)
 				{
-					kv.Value.stop();
-				}
-				catch (Exception ex)
-				{
-					logger.Trace("EndTest: Ignoring exception stopping publisher '{0}': {1}", kv.Key, ex.Message);
+					try
+					{
+						kv.Value.stop();
+					}
+					catch (Exception ex)
+					{
+						logger.Trace("EndTest: Ignoring exception stopping publisher '{0}': {1}", kv.Key, ex.Message);
+					}
 				}
 			}
+			finally
+			{
+				// This finally clause needs to be here so that agent shutdown
+				// happens when the engine is stopped...
 
-			_context.agentManager.SessionFinished();
-			_context.agentManager.StopAllMonitors();
-			_context.agentManager.Shutdown();
-			_context.agentManager = null;
+				logger.Debug("EndTest: Stoping all agents and monitors");
 
-			_context.test.strategy.Finalize(_context, this);
+				_context.agentManager.SessionFinished();
+				_context.agentManager.StopAllMonitors();
+				_context.agentManager.Shutdown();
+				_context.agentManager = null;
 
-			OnTestFinished();
+				_context.test.strategy.Finalize(_context, this);
+
+				OnTestFinished();
+			}
 		}
 
 		/// <summary>
@@ -758,6 +771,10 @@ namespace Peach.Core
 						throw;
 					}
 					catch (PeachException)
+					{
+						throw;
+					}
+					catch (ThreadAbortException)
 					{
 						throw;
 					}
