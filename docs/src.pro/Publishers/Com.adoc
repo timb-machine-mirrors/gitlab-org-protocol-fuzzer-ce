@@ -6,7 +6,7 @@
 //  - 02/13/2014: Seth & Adam: Outlined
 // Identify limitations (setprop/getprop only works with number and string *need to check*)
 // Verify parameters
-// Show setProperty/getPropery fuzzing
+// Show setProperty/getProperty fuzzing
 // show call usage
 
 // Updates:
