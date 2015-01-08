@@ -31,6 +31,7 @@
 	</div>
 
 	<div class="alert alert-info"
+			 ng-class="vm.StatusClass"
 			 ng-show="vm.ShowStatus"
 			 ng-switch="vm.JobStatus">
 		<span ng-switch-when="startPending">
@@ -63,7 +64,12 @@
 			Peach is stopping...
 		</span>
 		<span ng-switch-when="stopped">
-			Peach is currently stopped.
+			<span ng-if="vm.Job.result">
+				{{vm.Job.result}}
+			</span>
+			<span ng-if="!vm.Job.result">
+				Peach is currently stopped.
+			</span>
 		</span>
 		<span ng-switch-when="actionPending">
 			Peach is waiting for an action to complete...

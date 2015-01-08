@@ -2,7 +2,7 @@
 [[Mutators_StringUtf8BomLength]]
 == StringUtf8BomLength
 
-The _StringUtf8BomLength_ mutator produces test cases for Ascii and Unicode UTF-8 strings by altering an individual string in two ways:
+The _StringUtf8BomLength_ mutator produces test cases for ASCII and Unicode UTF-8 strings by altering an individual string in two ways:
 
 * Adjust the length of the string using the xref:StringLengthVariance[StringLengthVariance] mutator
 * Insert 1 to 6 Unicode Byte Ordering Marks (BOMs) in arbitrary places in the string
@@ -18,4 +18,4 @@ BOMs are not considered characters, and using them can cause buffer length calcu
 
 === Hints
 
-None.
+This mutator does not support any hints.
