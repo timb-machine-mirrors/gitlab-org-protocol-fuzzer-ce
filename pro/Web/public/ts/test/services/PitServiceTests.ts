@@ -54,10 +54,6 @@ describe("Peach", () => {
 		});
 
 		describe('when a Pit is not selected', () => {
-			it("get Name is (none)", () => {
-				expect(service.Name).toBe('(none)');
-			});
-
 			it("IsConfigured is false", () => {
 				expect(service.IsConfigured).toBe(false);
 			});
@@ -79,10 +75,6 @@ describe("Peach", () => {
 					$httpBackend.flush();
 				});
 
-				it("get Name is valid", () => {
-					expect(service.Name).toBe(pit.name);
-				});
-
 				it("get IsConfigured is false", () => {
 					expect(service.IsConfigured).toBe(false);
 				});
@@ -102,10 +94,6 @@ describe("Peach", () => {
 					$httpBackend.expectGET(pitUrl).respond(pit);
 					service.SelectPit(pitUrl);
 					$httpBackend.flush();
-				});
-
-				it("get Name is valid", () => {
-					expect(service.Name).toBe(pit.name);
 				});
 
 				it("get IsConfigured is true", () => {
@@ -151,10 +139,6 @@ describe("Peach", () => {
 						$httpBackend.flush();
 					});
 
-					it("get Name is valid", () => {
-						expect(service.Name).toBe(copy.name);
-					});
-
 					it("Pit is not selected", () => {
 						expect(_.isObject(service.Pit)).toBe(true);
 					});
@@ -180,10 +164,6 @@ describe("Peach", () => {
 						$httpBackend.expectGET(pitUrl).respond(pit);
 						service.SelectPit(pitUrl);
 						$httpBackend.flush();
-					});
-
-					it("get Name is valid", () => {
-						expect(service.Name).toBe('(none)');
 					});
 
 					it("Pit is not selected", () => {

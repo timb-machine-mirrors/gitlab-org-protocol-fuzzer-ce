@@ -124,10 +124,6 @@ module Peach {
 			return result.$save();
 		}
 
-		public get Name(): string {
-			return onlyIf(this.pit, () => this.pit.name) || '(none)';
-		}
-
 		public get PitId(): string {
 			return onlyIf(this.pit, () => ExtractId('pits', this.pit.pitUrl));
 		}

@@ -1,4 +1,5 @@
-﻿<div class="row">
+﻿<div class="row"
+		 ng-if="vm.IsAvailable">
 	<div class="col-xs-12">
 		<hr />
 		<h3>
@@ -18,6 +19,13 @@
 						</tr>
 					</thead>
 					<tbody>
+						<tr>
+							<td class="text-center"
+									colspan="2"
+									ng-if="vm.TestEvents.length === 0">
+								No data is available
+							</td>
+						</tr>
 						<tr ng-repeat="row in vm.TestEvents">
 							<td class="peach-icon-cell">
 								<i ng-class="vm.StatusClass(row)"></i>
@@ -26,8 +34,8 @@
 								<span>
 									{{row.description}}
 								</span>
-								<span class="red" 
-								      ng-show="row.resolve">
+								<span class="red"
+											ng-show="row.resolve">
 									<br />
 									{{row.resolve}}
 								</span>

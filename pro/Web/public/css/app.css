@@ -13,6 +13,16 @@
 	cursor: not-allowed;
 }
 
+.skin-1 .navbar-header .nav > li > a {
+	background-color: transparent;
+	font-size: 20px;
+	cursor: pointer;
+}
+
+.skin-1 .navbar-header img {
+	height: 50px;
+}
+
 a.disabled {
 	cursor: not-allowed;
 }
