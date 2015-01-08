@@ -76,8 +76,7 @@ NOTE: Only the final value has the null terminator applied. If the value is acce
 NOTE: When the _nullTerminated_ attribute is provided, the xref:String[String] must not specify a xref:length[length]; these two attributes are mutually exclusive.
 
 padCharacter::
-	Character to pad string with to _length_, defaults to null (0x00).
-	+
+	Character to use as padding at the end of the string, defaults to null (0x00). +
 	If the _length_ attribute is provided and the value contained in the string is shorter than the length, the string is padded to fill the length.
 	This attribute allows controlling the character used to pad the string.
 
