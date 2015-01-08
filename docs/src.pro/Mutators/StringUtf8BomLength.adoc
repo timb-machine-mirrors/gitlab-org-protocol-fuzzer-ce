@@ -18,4 +18,4 @@ BOMs are not considered characters, and using them can cause buffer length calcu
 
 === Hints
 
-None.
+This mutator does not support any hints.
