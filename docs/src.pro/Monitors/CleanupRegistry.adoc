@@ -9,15 +9,12 @@ The _CleanupRegistry_ monitor removes a specified registry key, or removes the c
 _Required:_
 
 Key::
-	Registry key to remove. +
-		The following key prefixes are used:
-	+
-	[horizontal]
-	HKCU\\;; Current user
-	HKCC\\;; Current configuration
-	HKLM\\;; Local machine
-	HKPD\\;; Performance data
-	HKU\\;; Users
+	Registry key to remove. The following key prefixes are used:  +
+    *HKCU* - Current user  +
+	*HKCC* - Current configuration  +
+	*HKLM* - Local machine  +
+	*HKPD* - Performance data  +
+	*HKU* - Users
 
 _Optional:_
 
