@@ -746,8 +746,8 @@ quit
 			var hash = reHash.Match(output);
 			if (hash.Success)
 			{
-				_fault.majorHash = hash.Groups[1].Value;
-				_fault.minorHash = hash.Groups[2].Value;
+				_fault.majorHash = hash.Groups[1].Value.Substring(0, 8).ToUpper();
+				_fault.minorHash = hash.Groups[2].Value.Substring(0, 8).ToUpper();
 			}
 
 			var exp = reClassification.Match(output);
