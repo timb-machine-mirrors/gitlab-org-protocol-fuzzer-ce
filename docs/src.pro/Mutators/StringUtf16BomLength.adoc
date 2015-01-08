@@ -20,4 +20,4 @@ BOM marks, whether for Big Endian-ness or for Little Endian-ness, are selected a
 
 === Hints
 
-None.
+This mutator does not support any hints.

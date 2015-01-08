@@ -28,17 +28,17 @@ The xref:Transformer[Transformer] can bidirectionally compress data as well as d
 
 === Parameters
 
-No Parameters are supported by this transformer.
+None.
 
 === Attributes
 
 _Required:_
 
-There are no required attributes.
+None.
 
 _Optional:_
 
-There are no optional attributes.
+None.
 
 === Actions Supported
 

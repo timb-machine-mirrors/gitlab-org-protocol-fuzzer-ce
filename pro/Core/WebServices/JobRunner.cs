@@ -106,8 +106,6 @@ namespace Peach.Pro.Core.WebServices
 
 			th.Join();
 
-			Result = "User requested job termination.";
-
 			return true;
 		}
 
@@ -285,14 +283,6 @@ namespace Peach.Pro.Core.WebServices
 					pauseEvent.Dispose();
 					pauseEvent = null;
 					thread = null;
-
-					if (!string.IsNullOrEmpty(Result))
-					{
-						if (Status == JobStatus.StopPending)
-							Result = "The job has stopped due to a user request.";
-						else
-							Result = "The job ran to completion.";
-					}
 
 					Status = JobStatus.Stopped;
 					StopDate = DateTime.UtcNow;

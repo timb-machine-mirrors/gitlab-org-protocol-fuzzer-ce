@@ -27,17 +27,17 @@ The xref:Transformer[Transformer] can bidirectionally compress data as well as d
 
 === Parameters
 
-No Parameters are supported by this element.
+None.
 
 === Attributes
 
 _Required:_
 
-There are no required attributes.
+None.
 
 _Optional:_
 
-There are no optional attributes.
+None.
 
 === Actions Supported
 
@@ -80,7 +80,7 @@ This example uses GzipCompress to compress a value, write the value to the conso
 
 			<Action type="close" publisher="FilePubWrite" />
 
-			<!-- Read and comcompress file and slurp output to console -->
+			<!-- Read and compress file and slurp output to console -->
 			<Action type="input" publisher="FilePubRead" >
 				<DataModel name="InputModel" ref="Ex1" />
 			</Action>

@@ -31,11 +31,11 @@ The _JsEncode_ algorithm filters alphabetic characters (A-Z, a-z), numerals (0-9
 
 === Parameters
 
-No Parameters are supported by this element.
+None.
 
 === Attributes
 
-No Attributes are supported by this transformer.
+None.
 
 === Actions Supported
 

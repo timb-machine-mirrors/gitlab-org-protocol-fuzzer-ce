@@ -28,11 +28,11 @@ The xref:Transformer[Transformer] can bidirectionally encrypt and decrypt data.
 
 === Parameters
 
-No Parameters are supported by this transformer.
+None.
 
 === Attributes
 
-No Attributes are supported by this transformer.
+None.
 
 === Actions Supported
 

@@ -2,7 +2,7 @@
 [[Mutators_ExtraValues]]
 == ExtraValues
 
-This mutator allows the user to supply additional values to use in new test cases. Each additional value generates its own test case. The additional values are tested “as is”; that is they are not altered.
+This mutator allows the user to supply additional values to use in new test cases. Each additional value generates its own test case. The additional values are tested "as is"; that is they are not altered.
 
 If the _ExtraValues_ hint is mandatory. If the hint is not provided, this mutator is not used.
 
@@ -14,7 +14,7 @@ If the _ExtraValues_ hint is mandatory. If the hint is not provided, this mutato
 
 === Hints
 
-ExtraValues:: Specify a semicolon-seperated list of the values to use in new test cases.
+ExtraValues:: Specify a semicolon-separated list of the values to use in new test cases.
 
 WARNING: The former hint name _ValidValues_, is deprecated in favor of _ExtraValues_.
 
