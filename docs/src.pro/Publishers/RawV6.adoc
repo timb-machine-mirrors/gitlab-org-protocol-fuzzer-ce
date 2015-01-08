@@ -7,7 +7,7 @@
 // Params are good
 // give full put to run for example
 // Mention that recv includes ip header send does not
-// Give full enumeration of ethernet protocols supported
+// Give full enumeration of Ethernet protocols supported
 // Talk about mtu setProperty for fuzzing mtu
 // Updated:
 // - 02/18/2014: Jordyn
@@ -50,7 +50,7 @@ MaxMTU:: Maximum allowable MTU property value. Defaults to 131,070.
 MinMTU:: Minimum allowable MTU property value. Defaults to 1,280.
 Filter::
     Filter received frames using a libpcap style filter string. For more information
-    about libpcap syle filters see http://www.tcpdump.org/manpages/pcap-filter.7.html[this page].
+    about libpcap style filters see http://www.tcpdump.org/manpages/pcap-filter.7.html[this page].
 
 === Actions
 
