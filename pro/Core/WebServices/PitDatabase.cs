@@ -320,28 +320,17 @@ namespace Peach.Pro.Core.WebServices
 		}
 
 		/// <summary>
-		/// Get the list of all available monitors that can be used with the specified pit guid.
+		/// Get the list of all available calls that can be used with the specified pit guid.
 		/// </summary>
 		/// <param name="guid">Pit guid.</param>
-		/// <returns>Monitor list.</returns>
-		public List<Monitor> GetAllMonitors(string guid)
+		/// <returns>List of calls</returns>
+		public List<string> GetCalls(string guid)
 		{
 			var pit = GetPitDetailById(guid);
 			if (pit == null)
 				return null;
 
-			var ret = new List<Monitor>();
-
-			foreach (var kv in ClassLoader.GetAllByAttribute<MonitorAttribute>((t, a) => a.IsDefault))
-			{
-				var m = MakeMonitor(kv.Key, kv.Value, pit.CallMethods);
-
-				ret.Add(m);
-			}
-
-			ret.Sort(MonitorSorter);
-
-			return ret;
+			return pit.CallMethods;
 		}
 
 		internal Monitor MakeMonitor(MonitorAttribute attr, Type type, List<string> calls)
@@ -371,7 +360,7 @@ namespace Peach.Pro.Core.WebServices
 				var model = ParameterAttrToModel(attr.Name, p);
 
 				if (model.Type == ParameterType.String && model.Name.Contains("OnCall"))
-					model.Options = calls;
+					model.Type = ParameterType.Call;
 
 				m.Map.Add(model);
 			}
@@ -632,7 +621,6 @@ namespace Peach.Pro.Core.WebServices
 								Type = ParameterType.String,
 							});
 						}
-
 					}
 					else
 					{
@@ -1133,6 +1121,9 @@ namespace Peach.Pro.Core.WebServices
 
 					break;
 			}
+
+			if (attr.name.Contains("OnCall"))
+				p.Type = ParameterType.Call;
 
 			return p;
 		}

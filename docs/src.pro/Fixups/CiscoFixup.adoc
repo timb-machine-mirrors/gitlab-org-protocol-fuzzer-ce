@@ -118,6 +118,6 @@ Peach.Core.Publishers.ConsolePublisher stop()
 ----
 
 <1> Output without CiscoFixup. Last two bytes are zero.
-<2> Output with CiscoFixup. Last two bytes are a valid crc for the packet.
+<2> Output with CiscoFixup. Last two bytes are a valid CRC for the packet.
 
 ======================

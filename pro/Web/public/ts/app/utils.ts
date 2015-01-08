@@ -4,13 +4,24 @@
 
 interface String {
 	startsWith(str: string): boolean;
+	endsWith(str: string): boolean;
 }
 
-String.prototype.startsWith = function(pattern: string): boolean {
-	return Peach.startsWith(this, pattern);
+String.prototype.startsWith = function (prefix: string): boolean {
+	return this.slice(0, prefix.length) === prefix;
+}
+
+String.prototype.endsWith = function (suffix: string): boolean {
+	return this.indexOf(suffix, this.length - suffix.length) !== -1;
 }
 
 module Peach {
+	export interface IComponent {
+		ComponentID: string;
+	}
+
+	export interface IDirective extends ng.IDirective, IComponent {
+	}
 
 	export interface ITab {
 		title: string;
@@ -25,10 +36,6 @@ module Peach {
 
 	export interface IFormScope extends IViewModelScope {
 		form: ng.IFormController;
-	}
-
-	export function startsWith(str: string, pattern: string): boolean {
-		return str.slice(0, pattern.length) === pattern;
 	}
 
 	export function onlyIf<T>(preds: any, fn: () => T): T {

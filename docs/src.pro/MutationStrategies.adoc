@@ -42,7 +42,7 @@ Peach supplies three user-extensible mutation strategies:
 
 Random is the default fuzzing strategy.  
 
-This strategy selects one or more elements to mutate at a time. For each selected element, one of its corresponding mutators is selected at random. The _MaxFieldsToMutate_ sets the maximum number of elements that simultaneously receive muations.
+This strategy selects one or more elements to mutate at a time. For each selected element, one of its corresponding mutators is selected at random. The _MaxFieldsToMutate_ sets the maximum number of elements that simultaneously receive mutations.
 
 NOTE: Peach derives the randomness of these selections from a randomly-generated seed number. 
 
@@ -96,4 +96,4 @@ TIP: The seed for this strategy is not configurable and is always 31337.
 
 === RandomDeterministic
 
-This fuzzing strategy is deterministic (has a start and end).  It is similar to the Sequential strategy except the order of mutations has been shuffled. There is still a finite number of iterations and, if run to completion, runs every iteration that is generated with the Sequential strategy.  Similar to the Random strategy, the seed value provides consistent repeatability and is used used to repeat a previous test run with identical fuzzing.
+This fuzzing strategy is deterministic (has a start and end).  It is similar to the Sequential strategy except the order of mutations has been shuffled. There is still a finite number of iterations and, if run to completion, runs every iteration that is generated with the Sequential strategy.  Similar to the Random strategy, the seed value provides consistent repeatability and is used to repeat a previous test run with identical fuzzing.

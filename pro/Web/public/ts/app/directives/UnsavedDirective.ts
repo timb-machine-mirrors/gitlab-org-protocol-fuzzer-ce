@@ -3,27 +3,43 @@
 module Peach {
 	"use strict";
 
-	export class UnsavedDirective implements ng.IDirective {
-		constructor(
-			private $modal: ng.ui.bootstrap.IModalService,
-			private $location: ng.ILocationService
-		) {
-			this.link = this._link.bind(this);
-		}
+	interface IUnsavedScope extends ng.IScope {
+		ctrl: UnsavedController;
+	}
 
-		public restrict = 'A';
-		public require = '^form';
-		public scope = {};
-
-		public link;
-
-		public _link(
-			scope: ng.IScope,
+	export var UnsavedDirective: IDirective = {
+		ComponentID: Constants.Directives.Unsaved,
+		restrict: 'A',
+		require: ['^form'],
+		controller: Constants.Controllers.Unsaved,
+		controllerAs: 'ctrl',
+		scope: {},
+		link: (
+			scope: IUnsavedScope,
 			element: ng.IAugmentedJQuery,
 			attrs: ng.IAttributes,
 			form: ng.IFormController
+		) => {
+			scope.ctrl.Link(form);
+		}
+	}
+
+	export class UnsavedController {
+		static $inject = [
+			Constants.Angular.$scope,
+			Constants.Angular.$modal,
+			Constants.Angular.$location
+		];	
+
+		constructor(
+			private $scope: ng.IScope,
+			private $modal: ng.ui.bootstrap.IModalService,
+			private $location: ng.ILocationService
 		) {
-			var onRouteChangeOff = scope.$root.$on('$locationChangeStart', (
+		}
+
+		public Link(form: ng.IFormController) {
+			var onRouteChangeOff = this.$scope.$root.$on('$locationChangeStart', (
 				event: ng.IAngularEvent,
 				newUrl: string
 			) => {
@@ -54,8 +70,8 @@ module Peach {
 	class UnsavedModalController {
 
 		static $inject = [
-			"$scope",
-			"$modalInstance"
+			Constants.Angular.$scope,
+			Constants.Angular.$modalInstance
 		];
 
 		constructor(

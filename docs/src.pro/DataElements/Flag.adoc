@@ -32,7 +32,7 @@ _Optional:_
 
 xref:name[name]:: Name of the element.
 xref:value[value]:: The default value contained within the element.
-xref:valueType[valueType]:: The format in which the default value is expressed. (i.e hex, string, or literal).
+xref:valueType[valueType]:: The format in which the default value is expressed. (i.e. hex, string, or literal).
 xref:token[token]:: Is data element a token? Default is false.
 xref:mutable[mutable]:: Is data element changeable (should it be mutated), defaults to true.
 

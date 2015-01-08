@@ -8,20 +8,21 @@ module Peach {
 		watch: string;
 		channel: string;
 		defaultValue: any;
-		ctrl: ng.INgModelController;
+		ctrl: UniqueChannelController;
+		ngModel: ng.INgModelController;
 		ignore: string;
 	}
 
-	export class UniqueDirective implements ng.IDirective {
-		public restrict = 'A';
-		public require = 'ngModel';
-		public scope = {
-			unique: '&peachUnique',
+	export var UniqueDirective: IDirective = {
+		ComponentID: Constants.Directives.Unique,
+		restrict: 'A',
+		require: Constants.Angular.ngModel,
+		scope: {
+			unique: '&' + Constants.Directives.Unique,
 			watch: '@peachUniqueWatch',
 			defaultValue: '@peachUniqueDefault'
-		};
-
-		public link(
+		},
+		link(
 			scope: IUniqueScope,
 			element: ng.IAugmentedJQuery,
 			attrs: ng.IAttributes,
@@ -47,35 +48,48 @@ module Peach {
 		}
 	}
 
-	export class UniqueChannelDirective implements ng.IDirective {
-		constructor(
-			private service: UniqueService
-		) {
-			this.link = this._link.bind(this);
-		}
-
-		public restrict = 'A';
-		public require = 'ngModel';
-		public scope = {
-			channel: '@peachUniqueChannel',
+	export var UniqueChannelDirective: IDirective = {
+		ComponentID: Constants.Directives.UniqueChannel,
+		restrict: 'A',
+		require: Constants.Angular.ngModel,
+		controller: Constants.Controllers.UniqueChannel,
+		controllerAs: 'ctrl',
+		scope: {
+			channel: '@' + Constants.Directives.UniqueChannel,
 			defaultValue: '@peachUniqueDefault',
 			ignore: '@peachUniqueIgnore'
-		};
+		},
 
-		public link: ng.IDirectiveLinkFn;
-
-		private _link(
+		link: (
 			scope: IUniqueScope,
 			element: ng.IAugmentedJQuery,
 			attrs: ng.IAttributes,
 			ctrl: ng.INgModelController
-		) {
-			scope.ctrl = ctrl;
+		) => {
+			scope.ctrl.Link(element, attrs, ctrl);
+		}
+	}
 
-			this.service.Register(scope);
+	export class UniqueChannelController {
+		static $inject = [Constants.Angular.$scope, Constants.Services.Unique];
+
+		constructor(
+			private $scope: IUniqueScope,
+			private service: UniqueService
+		) {
+		}
+
+		public Link(
+			element: ng.IAugmentedJQuery,
+			attrs: ng.IAttributes,
+			ctrl: ng.INgModelController
+		) {
+			this.$scope.ngModel = ctrl;
+
+			this.service.Register(this.$scope);
 
 			var validate = value => {
-				this.service.IsUnique(scope, value);
+				this.service.IsUnique(this.$scope, value);
 				return value;
 			}
 
@@ -83,7 +97,7 @@ module Peach {
 			ctrl.$viewChangeListeners.unshift(() => validate(ctrl.$viewValue));
 
 			element.on('$destroy', () => {
-				this.service.Unregister(scope);
+				this.service.Unregister(this.$scope);
 			});
 		}
 	}
@@ -101,8 +115,8 @@ module Peach {
 			var isUnique;
 			var channel = this.getChannel(scope.channel);
 			_.forEach(channel, (item: IUniqueScope, id: string) => {
-				var isDuplicate = this.isDuplicate(item, item.ctrl.$modelValue);
-				item.ctrl.$setValidity('unique', !isDuplicate);
+				var isDuplicate = this.isDuplicate(item, item.ngModel.$modelValue);
+				item.ngModel.$setValidity('unique', !isDuplicate);
 				if (id === scope.$id.toString()) {
 					isUnique = !isDuplicate;
 				}
@@ -139,7 +153,7 @@ module Peach {
 				if (scope.$id.toString() === id) {
 					return false;
 				}
-				var otherValue = other.ctrl.$modelValue;
+				var otherValue = other.ngModel.$modelValue;
 				return (myValue === (otherValue || other.defaultValue));
 			});
 		}

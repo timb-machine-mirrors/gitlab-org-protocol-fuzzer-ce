@@ -8,9 +8,9 @@ module Peach {
 	export class TestService {
 
 		static $inject = [
-			"$http",
-			"$interval",
-			"PitService"
+			Constants.Angular.$http,
+			Constants.Angular.$interval,
+			Constants.Services.Pit
 		];
 
 		constructor(

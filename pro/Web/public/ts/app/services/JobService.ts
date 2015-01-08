@@ -7,10 +7,10 @@ module Peach {
 
 	export class JobService {
 		static $inject = [
-			"$q",
-			"$http",
-			"$interval",
-			"PitService"
+			Constants.Angular.$q,
+			Constants.Angular.$http,
+			Constants.Angular.$interval,
+			Constants.Services.Pit
 		];
 
 		constructor(
@@ -43,6 +43,10 @@ module Peach {
 
 		public get IsRunning(): boolean {
 			return onlyIf(this.job, () => this.job.status === JobStatus.Running);
+		}
+
+		public get IsPaused(): boolean {
+			return onlyIf(this.job, () => this.job.status === JobStatus.Paused);
 		}
 
 		public get CanStart(): boolean {

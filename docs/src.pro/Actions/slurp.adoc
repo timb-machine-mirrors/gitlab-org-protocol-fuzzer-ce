@@ -104,7 +104,7 @@ type:: Action type, must be set to "slurp"
 _Optional:_
 
 name:: Name used to identify the action
-xref:xpath[valueXpath]:: Path to the source element. Must evalutate to match a single element.
+xref:xpath[valueXpath]:: Path to the source element. Must evaluate to match a single element.
 xref:xpath[setXpath]:: Path to the destination element. Can match multiple elements on which to set the value.
 xref:Action_when[when]:: Perform action if the provided expression evaluates to true
 xref:Action_onStart[onStart]:: Evaluate expression to run at the start of an action
@@ -172,7 +172,7 @@ This example uses fully specified names in the xpath query to identify elements.
 
 .Unique Names
 ==========================
-This example uses unique names for the source element (input) and for the desintation element (output) involved in the slurp.
+This example uses unique names for the source element (input) and for the destination element (output) involved in the slurp.
 Having unique names allows the simpler xpath notation that uses wildcards (//) instead of using a full name.
 
 [source,xml]
