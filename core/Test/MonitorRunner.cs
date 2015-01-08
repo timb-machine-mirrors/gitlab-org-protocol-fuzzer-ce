@@ -221,7 +221,7 @@ namespace Peach.Core.Test
 					// Once DetectedFault is called on every monitor we can get monitor data.
 					ret.AddRange(Forward.Select(m =>
 					{
-						var f = m.GetMonitorData();
+						var f = GetMonitorData(m);
 						if (f != null)
 						{
 							// Agent normally does this, so set the monitor class & name
