@@ -25,7 +25,7 @@ NoCpuKill:: Disable process killing by CPU usage, Defaults to false.
 CwLogFile:: CrashWrangler Log file, defaults to +cw.log+.
 CwLockFile:: CrashWrangler Lock file, defaults to +cw.lock+.
 CwPidFile:: CrashWrangler PID file, defaults to +cw.pid+.
-FaultOnEarlyExit:: Trigger fault if process exists, defaults to false.
+FaultOnEarlyExit:: Trigger fault if process exits, defaults to false.
 WaitForExitOnCall:: Wait for process to exit on state model call and fault if timeout is reached, defaults to none.
 WaitForExitTimeout:: Wait for exit timeout value in milliseconds, -1 is infinite, defaults to 10000.
 RestartOnEachTest:: Restart process for each iteration, defaults to false.
