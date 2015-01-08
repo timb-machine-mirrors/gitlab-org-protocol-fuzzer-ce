@@ -34,7 +34,7 @@ IV:: User provided initialization vector that is used as the first block for the
 
 _Optional:_
 
-There are no optional parameters.
+None.
 
 === Actions Supported
 
