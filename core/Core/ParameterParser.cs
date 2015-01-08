@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Net;
 using System.Collections;
+using System.Threading;
 
 namespace Peach.Core
 {
@@ -207,11 +208,16 @@ namespace Peach.Core
 			}
 			catch (TargetInvocationException ex)
 			{
-				throw ex.InnerException;
-			}
-			catch (Exception)
-			{
-				throw;
+				var baseEx = ex.GetBaseException();
+				if (baseEx is ThreadAbortException)
+					throw baseEx;
+
+				var inner = ex.InnerException;
+				if (inner == null)
+					throw;
+
+				var outer = (Exception)Activator.CreateInstance(inner.GetType(), inner.Message, inner);
+				throw outer;
 			}
 		}
 

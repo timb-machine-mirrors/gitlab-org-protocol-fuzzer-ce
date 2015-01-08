@@ -29,6 +29,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using IronPython.Hosting;
 using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
@@ -243,7 +244,7 @@ namespace Peach.Core
 
 				if (!_scriptCache.TryGetValue(code, out compiled))
 				{
-				var source = scope.Engine.CreateScriptSourceFromString(code, SourceCodeKind.Expression);
+					var source = scope.Engine.CreateScriptSourceFromString(code, SourceCodeKind.Expression);
 					compiled = source.Compile(_errorListener);
 
 					if (cache)
@@ -252,9 +253,9 @@ namespace Peach.Core
 
 				var obj = compiled.Execute(scope);
 
-				if (obj != null && obj.GetType() == typeof(BigInteger))
+				if (obj != null && obj.GetType() == typeof (BigInteger))
 				{
-					BigInteger bint = (BigInteger)obj;
+					BigInteger bint = (BigInteger) obj;
 
 					int i32;
 					uint ui32;
@@ -275,6 +276,10 @@ namespace Peach.Core
 				}
 
 				return obj;
+			}
+			catch (ThreadAbortException)
+			{
+				throw;
 			}
 			catch (Exception ex)
 			{
