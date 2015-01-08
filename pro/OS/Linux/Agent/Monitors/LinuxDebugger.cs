@@ -830,8 +830,6 @@ quit
 
 		public override Variant Message(string name, Variant data)
 		{
-			logger.Debug("Message(" + name + ", " + (string)data + ")");
-
 			if (name == "Action.Call" && ((string)data) == StartOnCall)
 			{
 				_Stop();
@@ -842,10 +840,6 @@ quit
 				_messageExit = true;
 				_WaitForExit(false);
 				_Stop();
-			}
-			else
-			{
-				logger.Debug("Unknown msg: " + name + " data: " + (string)data);
 			}
 
 			return null;
