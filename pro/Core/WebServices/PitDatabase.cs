@@ -309,6 +309,11 @@ namespace Peach.Pro.Core.WebServices
 
 			foreach (var kv in ClassLoader.GetAllByAttribute<MonitorAttribute>((t, a) => a.IsDefault))
 			{
+#if !DEBUG
+				if (kv.Key.IsTest)
+					continue;
+#endif
+
 				var m = MakeMonitor(kv.Key, kv.Value, null);
 
 				ret.Add(m);
