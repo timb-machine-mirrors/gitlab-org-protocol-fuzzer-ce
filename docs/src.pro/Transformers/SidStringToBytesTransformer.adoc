@@ -28,11 +28,11 @@ This xref:Transformer[Transformer] can bidirectionally encode data as well as de
 
 === Parameters
 
-No Parameters are supported by this transformer.
+None.
 
 === Attributes
 
-No attributes are supported by this transformer.
+None.
 
 === Actions Supported
 
