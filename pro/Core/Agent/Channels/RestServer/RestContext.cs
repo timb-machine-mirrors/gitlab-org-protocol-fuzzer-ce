@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Peach.Core.Agent;
 
-using Peach.Core.Agent;
-
-namespace Peach.Core.Agent.Channels.RestServer
+namespace Peach.Pro.Core.Agent.Channels.RestServer
 {
 	/// <summary>
 	/// The context that is passed to each RestService instance.

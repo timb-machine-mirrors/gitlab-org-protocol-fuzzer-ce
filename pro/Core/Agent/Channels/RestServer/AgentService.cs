@@ -1,18 +1,12 @@
-﻿using Nancy;
-using Nancy.ModelBinding;
-
-using Peach.Core.Agent;
-using Peach.Core.Agent.Monitors;
-
-using Newtonsoft.Json;
-
-using System;
-using System.IO;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
+using Nancy;
+using Newtonsoft.Json;
+using Peach.Core;
+using Peach.Core.Dom;
 
-namespace Peach.Core.Agent.Channels.RestServer
+namespace Peach.Pro.Core.Agent.Channels.RestServer
 {
 	public class AgentService : RestService
 	{
@@ -348,10 +342,10 @@ namespace Peach.Core.Agent.Channels.RestServer
 			return HttpStatusCode.OK;
 		}
 
-		Dom.DataModel CreateDm(byte[] data)
+		Peach.Core.Dom.DataModel CreateDm(byte[] data)
 		{
-			var dm = new Dom.DataModel();
-			dm.Add(new Dom.Blob());
+			var dm = new Peach.Core.Dom.DataModel();
+			dm.Add(new Peach.Core.Dom.Blob());
 
 			dm[0].DefaultValue = new Variant(data);
 
@@ -363,11 +357,11 @@ namespace Peach.Core.Agent.Channels.RestServer
 			var call = JsonConvert.DeserializeObject<RestProxyPublisher.OnCallRequest>(
 				StreamToString(Request.Body));
 
-			List<Dom.ActionParameter> args = new List<Dom.ActionParameter>();
+			List<ActionParameter> args = new List<ActionParameter>();
 
 			foreach (var arg in call.args)
 			{
-				args.Add( new Dom.ActionParameter(arg.name)
+				args.Add( new Peach.Core.Dom.ActionParameter(arg.name)
 				{
 					type = arg.type,
 					dataModel = CreateDm(arg.data)

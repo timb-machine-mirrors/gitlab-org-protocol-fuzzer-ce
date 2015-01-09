@@ -1,29 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-
+using System.Net;
+using System.Net.Sockets;
+using System.Reflection;
+using System.Threading;
 using Nancy;
 using Nancy.Bootstrapper;
 using Nancy.Conventions;
 using Nancy.ErrorHandling;
 using Nancy.Hosting.Self;
-using Nancy.Responses;
 using Nancy.Responses.Negotiation;
 using Nancy.Serialization.JsonNet;
 using Nancy.TinyIoc;
 using Nancy.ViewEngines;
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using Peach.Core.Agent;
+using Peach.Pro.Core.Runtime;
 
-using System.Net;
-using System.Net.Sockets;
-using System.Reflection;
-using System.Threading;
-
-namespace Peach.Core.Agent.Channels.RestServer
+namespace Peach.Pro.Core.Agent.Channels.RestServer
 {
 	[AgentServer("http")]
 	public class AgentServerRest : IAgentServer
@@ -43,7 +40,7 @@ namespace Peach.Core.Agent.Channels.RestServer
 					svc.Context.Dispatcher.Start();
 					svc.Start("localhost", int.Parse(port));
 
-					Peach.Core.Runtime.ConsoleWatcher.WriteInfoMark();
+					ConsoleWatcher.WriteInfoMark();
 					Console.WriteLine("Press Ctrl-C to exit.");
 
 					try
@@ -89,7 +86,7 @@ namespace Peach.Core.Agent.Channels.RestServer
 		{
 			var enumerable = context.Request.Headers.Accept;
 
-			var ranges = enumerable.OrderByDescending(o => o.Item2).Select(o => MediaRange.FromString(o.Item1)).ToList();
+			var ranges = enumerable.OrderByDescending(o => o.Item2).Select(o => new MediaRange(o.Item1)).ToList();
 			foreach (var item in ranges)
 			{
 				if (item.Matches("application/json"))
