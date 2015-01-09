@@ -140,7 +140,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// The random seed being used by the fuzzing job
 		/// </summary>
-		public uint Seed { get; set; }
+		public uint? Seed { get; set; }
 
 		/// <summary>
 		/// How many iterations of fuzzing have been completed

@@ -109,15 +109,22 @@ namespace Peach.Pro.Core.WebServices
 			return true;
 		}
 
-		public static JobRunner Run(WebLogger webLogger, string pitLibraryPath, string pitFile, string pitUrl, uint seed, uint rangeStart, uint rangeStop)
+		public static JobRunner Run(
+			WebLogger webLogger,
+			string pitLibraryPath,
+			string pitFile,
+			string pitUrl,
+			uint? seed,
+			uint rangeStart,
+			uint rangeStop)
 		{
 			var config = new RunConfiguration()
-			{ 
+			{
 				pitFile = pitFile,
 			};
 
-			if (seed > 0)
-				config.randomSeed = seed;
+			if (seed.HasValue)
+				config.randomSeed = seed.Value;
 
 			if (rangeStart > 0)
 			{
@@ -125,7 +132,7 @@ namespace Peach.Pro.Core.WebServices
 				config.rangeStart = rangeStart;
 			}
 
-			if(rangeStop > 0)
+			if (rangeStop > 0)
 			{
 				config.range = true;
 				config.rangeStop = rangeStop;
