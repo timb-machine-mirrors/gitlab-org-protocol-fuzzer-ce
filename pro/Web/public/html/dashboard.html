@@ -84,7 +84,7 @@
 			<div class="infobox infobox-blue">
 				<div class="infobox-data">
 					<span class="infobox-data-number">
-						{{(vm.Job.startDate | date:'M/d/yy h:mma') || ' '}}
+						{{(vm.Job.startDate | date:'M/d/yy h:mma') || '---'}}
 					</span>
 					<div class="infobox-content">
 						Started
@@ -95,7 +95,7 @@
 			<div class="infobox infobox-blue">
 				<div class="infobox-data">
 					<span class="infobox-data-number">
-						{{vm.RunningTime || ' '}}
+						{{vm.ValueAlt(vm.RunningTime, '---')}}
 					</span>
 					<div class="infobox-content">
 						Running Time
@@ -107,7 +107,7 @@
 			<div class="infobox infobox-blue">
 				<div class="infobox-data">
 					<span class="infobox-data-number">
-						{{vm.Job.speed || ' '}}
+						{{vm.ValueAlt(vm.Job.speed, '---')}}
 					</span>
 					<div class="infobox-content">
 						Iterations/Hour
@@ -118,7 +118,7 @@
 			<div class="infobox infobox-blue">
 				<div class="infobox-data">
 					<span class="infobox-data-number">
-						{{vm.Job.seed || ' '}}
+						{{vm.ValueAlt(vm.Job.seed, '---')}}
 					</span>
 					<div class="infobox-content">
 						Seed
@@ -129,7 +129,7 @@
 			<div class="infobox infobox-blue">
 				<div class="infobox-data">
 					<span class="infobox-data-number">
-						{{vm.Job.iterationCount || ' '}}
+						{{vm.ValueAlt(vm.Job.iterationCount, '---')}}
 					</span>
 					<div class="infobox-content">
 						Total Iterations
@@ -140,7 +140,7 @@
 			<div class="infobox infobox-red">
 				<div class="infobox-data">
 					<span class="infobox-data-number">
-						{{vm.Job.faultCount}}
+						{{vm.ValueAlt(vm.Job.faultCount, '---')}}
 					</span>
 					<div class="infobox-content">
 						Total Faults

@@ -75,7 +75,7 @@ module Peach {
 
 		public get RunningTime(): string {
 			if (this.job === undefined) {
-				return "";
+				return undefined;
 			}
 			return moment(new Date(0, 0, 0, 0, 0, this.job.runtime)).format("H:mm:ss");
 		}
