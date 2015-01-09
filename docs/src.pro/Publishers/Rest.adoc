@@ -81,7 +81,7 @@ One additional parameter can be provided that is used for the body of the reques
 
 * The format of the method attribute is: +METHOD URL+
 * This example places a call that expects to receive a single parameter: +GET /product/{0}+
-* This example places a call that expects to receive two parameters: +GET /invoices?start_date={0}&end_date={1}
+* This example places a call that expects to receive two parameters: +GET /invoices?start_date={0}&end_date={1}+
 
 ///////////////////////////
 === Examples
