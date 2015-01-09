@@ -126,16 +126,15 @@ namespace Peach.Pro.Core.WebServices
 			if (seed.HasValue)
 				config.randomSeed = seed.Value;
 
-			if (rangeStart > 0)
-			{
-				config.range = true;
-				config.rangeStart = rangeStart;
-			}
-
 			if (rangeStop > 0)
 			{
 				config.range = true;
+				config.rangeStart = rangeStart;
 				config.rangeStop = rangeStop;
+			}
+			else if (rangeStart > 0)
+			{
+				config.skipToIteration = rangeStart;
 			}
 
 			var ret = new JobRunner()
