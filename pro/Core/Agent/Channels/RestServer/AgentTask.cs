@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
+﻿using System.Threading;
 
-namespace Peach.Core.Agent.Channels.RestServer
+namespace Peach.Pro.Core.Agent.Channels.RestServer
 {
 	/// <summary>
 	/// Agent task running from dispatch thread.

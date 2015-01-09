@@ -29,34 +29,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Text;
-using System.Web;
-
-using Nancy;
-using Nancy.Bootstrapper;
-using Nancy.Conventions;
-using Nancy.ErrorHandling;
-using Nancy.Hosting.Self;
-using Nancy.Responses;
-using Nancy.Responses.Negotiation;
-using Nancy.Serialization.JsonNet;
-using Nancy.TinyIoc;
-using Nancy.ViewEngines;
-
-using Newtonsoft;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
-
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
-
-namespace Peach.Core.Agent.Channels
+namespace Peach.Pro.Core.Agent.Channels
 {
 	#region RestProxyPublisher
 

@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Concurrent;
 using System.Threading;
 
-namespace Peach.Core.Agent.Channels.RestServer
+namespace Peach.Pro.Core.Agent.Channels.RestServer
 {
 	/// <summary>
 	/// Thread for performing Agent calls. This allows Agent interface to be single threaded.
