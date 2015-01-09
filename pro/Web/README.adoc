@@ -1,9 +1,7 @@
 # Peach.Pro.Web
 
-TypeScript files (*.ts) are checked in under app\ts.
-
-When the project is built, the TypeScript files are translated to JavaScript and 
-placed in app\js, though are not checked in.
+Project layout is based off of angular-ts-seed:
+https://github.com/jeffmay/angular-ts-seed
 
 To maintain project dependencies, npm and bower are used.
 

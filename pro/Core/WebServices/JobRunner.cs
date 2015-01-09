@@ -231,31 +231,26 @@ namespace Peach.Pro.Core.WebServices
 				var parser = new Godel.Core.GodelPitParser();
 				var dom = parser.asParser(args, config.pitFile);
 
-
-				#region add MetricsLogger to all tests if it doesn't exist
-				var metricsargs = new Dictionary<string, Peach.Core.Variant>();
-				metricsargs.Add("Path", new Peach.Core.Variant("jobtmp/" + this.Guid));
-				var metricslogger = new Loggers.MetricsLogger(metricsargs);
-
 				foreach (var test in dom.tests)
 				{
-					bool found = false;
-					foreach (var logger in test.loggers)
-					{
-						if (logger.GetType() == typeof(Loggers.MetricsLogger))
-						{
-							found = true;
-							break;
-						}
-					}
+					// If test has metrics logger, do nothing
+					var metricsLogger = test.loggers.OfType<MetricsLogger>().FirstOrDefault();
+					if (metricsLogger != null)
+						continue;
 
-					if (!found)
+					// If test does not have a file logger, do nothing
+					var fileLogger = test.loggers.OfType<FileLogger>().FirstOrDefault();
+					if (fileLogger == null)
+						continue;
+
+					// Add metrics logger with same path as file logger
+					metricsLogger = new MetricsLogger(new Dictionary<string, Variant>
 					{
-						test.loggers.Add(metricslogger);
-					}
+						{ "Path", new Variant(fileLogger.Path) }
+					});
+
+					test.loggers.Add(metricsLogger);
 				}
-				#endregion
-
 
 				var engine = new Engine(webLogger);
 
