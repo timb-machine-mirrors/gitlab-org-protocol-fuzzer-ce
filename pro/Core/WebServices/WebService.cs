@@ -70,7 +70,8 @@ namespace Peach.Pro.Core.WebServices
 		{
 			get
 			{
-				return (Runner != null && Runner.Status != Models.JobStatus.Stopped) || (Tester != null && Tester.Status == Models.TestStatus.Active);
+				return (Runner != null && Runner.Status != Models.JobStatus.Stopped) 
+					|| (Tester != null && Tester.Status == Models.TestStatus.Active);
 			}
 		}
 

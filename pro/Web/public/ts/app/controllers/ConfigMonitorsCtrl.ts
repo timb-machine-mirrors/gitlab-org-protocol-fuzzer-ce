@@ -65,12 +65,5 @@ module Peach {
 			}
 			return 0;
 		}
-
-		private get isMonitorsValid(): boolean {
-			if (this.Model && this.Model.$resolved && this.Model.agents.length) {
-				return _.every(this.Model.agents, agent => agent.monitors.length > 0);
-			}
-			return false;
-		}
 	}
 }
