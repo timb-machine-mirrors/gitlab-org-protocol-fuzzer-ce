@@ -39,9 +39,22 @@ namespace Peach.Pro.Core.WebServices
 			Tester = new PitTester(PitLibraryPath, pitFile);
 		}
 
-		public void StartJob(string pitFile, string pitUrl, uint seed, uint rangeStart, uint rangeStop)
+		public void StartJob(
+			string pitFile,
+			string pitUrl,
+			uint? seed,
+			uint rangeStart,
+			uint rangeStop)
 		{
-			Runner = JobRunner.Run(Logger, PitLibraryPath, pitFile, pitUrl, seed, rangeStart, rangeStop);
+			Runner = JobRunner.Run(
+				Logger,
+				PitLibraryPath,
+				pitFile,
+				pitUrl,
+				seed,
+				rangeStart,
+				rangeStop
+			);
 		}
 
 		public void AttachJob(Peach.Core.Dom.Dom dom, RunConfiguration config)
