@@ -6,7 +6,7 @@
 //  - 03/06/2014: Lynn
 //  Edited comments
 
-A Blob footnote:[Blob stands for "binary large object" a term used by databases to represent a column of binary data.] is used to represent binary data (think array of bytes). Blobs are sized in bytes.
+A Blob footnote:[Blob stands for "binary large object" a term used by databases to represent a column of binary data.] is used to represent binary data (array of bytes). Blobs are sized in bytes.
 
 A Blob is always a child of a data element container such as xref:DataModel[DataModel] or xref:Block[Block]. By definition, the internal contents of a Blob is unknown. Consequently, Blobs are dumb fuzzed, as the list of applicable mutators below indicates.
 
