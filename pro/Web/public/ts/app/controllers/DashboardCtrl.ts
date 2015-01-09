@@ -102,12 +102,19 @@ module Peach {
 			this.jobService.StopJob();
 		}
 
-		public get StatusClass(): any {
-			if (_.isUndefined(this.Job.result)) {
-				return { 'alert-info': true };
-			}
-			return { 'alert-danger': true };
-		}
+        public get StatusClass(): any {
+            if (!_.isUndefined(this.Job) && !_.isUndefined(this.Job.result)) {
+                return { 'alert-danger': true };
+            }
+            return { 'alert-info': true };
+        }
+
+        public ValueAlt(value, alt) {
+            if (_.isUndefined(value)) {
+                return alt;
+            }
+            return value;
+        }
 
 		private refreshFaults() {
 			this.Faults = _.last(this.jobService.Faults, 10).reverse();
