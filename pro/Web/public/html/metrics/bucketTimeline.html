@@ -1,0 +1,25 @@
+﻿<div class="page-header">
+	<h1>
+		Metrics &raquo; Bucket Timeline
+	</h1>
+</div>
+<vis ng-transclude>
+	<time-line data="vm.BucketTimelineData" 
+	           options="vm.BucketTimelineOptions">
+	</time-line>
+</vis>
+<script type="text/ng-template"
+				id="bucketTimelineItem.html">
+	<div>
+		<a ng-click="event.stopPropagation()"
+			 href="#/faults/{{item.data.label}}"
+			 style="background: transparent">
+			{{item.data.label}}
+		</a>
+		<br />
+		Faults: {{item.data.faultCount}}
+		<br />
+		1st Iteration: {{item.data.iteration}}
+		<br />
+	</div>
+</script>

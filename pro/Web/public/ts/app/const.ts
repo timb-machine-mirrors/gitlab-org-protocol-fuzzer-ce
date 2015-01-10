@@ -1,20 +1,24 @@
 ﻿module Peach.Constants {
-	 "use strict";
+	"use strict";
 
-	 export module Directives {
-		 export var Agent = 'peachAgent';
-		 export var Combobox = 'peachCombobox';
-		 export var Monitor = 'peachMonitor';
-		 export var Parameter = 'peachParameter';
-		 export var ParameterInput = 'peachParameterInput';
-		 export var Question = 'peachQuestion';
-		 export var Test = 'peachTest';
-		 export var Unique = 'peachUnique';
-		 export var UniqueChannel = 'peachUniqueChannel';
-		 export var Unsaved = 'peachUnsaved';
-		 export var Range = 'peachRange';
-		 export var Integer = 'integer';
-		 export var HexString = 'hexstring';
+	export module Vendor {
+		export var VisDataSet = 'visDataSet';
+	}
+
+	export module Directives {
+		export var Agent = 'peachAgent';
+		export var Combobox = 'peachCombobox';
+		export var Monitor = 'peachMonitor';
+		export var Parameter = 'peachParameter';
+		export var ParameterInput = 'peachParameterInput';
+		export var Question = 'peachQuestion';
+		export var Test = 'peachTest';
+		export var Unique = 'peachUnique';
+		export var UniqueChannel = 'peachUniqueChannel';
+		export var Unsaved = 'peachUnsaved';
+		export var Range = 'peachRange';
+		export var Integer = 'integer';
+		export var HexString = 'hexstring';
 	}
 
 	export module Controllers {
@@ -28,20 +32,20 @@
 		export var Combobox = 'ComboboxController';
 	}
 
-	 export module Services {
-		 export var Pit = 'PitService';
-		 export var Unique = 'UniqueService';
-		 export var HttpError = 'HttpErrorService';
-		 export var Job = 'JobService';
-		 export var Test = 'TestService';
-		 export var Wizard = 'WizardService';
+	export module Services {
+		export var Pit = 'PitService';
+		export var Unique = 'UniqueService';
+		export var HttpError = 'HttpErrorService';
+		export var Job = 'JobService';
+		export var Test = 'TestService';
+		export var Wizard = 'WizardService';
 	}
 
 	export module Urls {
-		export var PeachMonitors = '/p/conf/wizard/monitors';
 		export var Libraries = '/p/libraries';
 		export var Pits = '/p/pits';
 		export var Jobs = '/p/jobs';
+		export var PeachMonitors = '/p/conf/wizard/monitors';
 		export var TestStart = '/p/conf/wizard/test/start';
 	}
 
@@ -56,10 +60,24 @@
 		export var Done = 'done';
 	}
 
+	export module Metrics {
+		export var BucketTimeline = 'bucketTimeline';
+		export var FaultTimeline = 'faultTimeline';
+		export var Mutators = 'mutators';
+		export var Elements = 'elements';
+		export var Dataset = 'dataset';
+		export var States = 'states';
+		export var Buckets = 'buckets';
+	}
+
 	export module Templates {
 		export var Dashboard = 'html/dashboard.html';
 		export var Faults = 'html/faults.html';
 		export var Metrics = 'html/metrics.html';
+		export function Metric(metric: string): string {
+			return 'html/metrics/' + metric + '.html';
+		}
+		export var BucketTimelineItem = 'bucketTimelineItem.html';
 		export module Modal {
 			export var CopyPit = 'html/modal/CopyPit.html';
 			export var PitLibrary = 'html/modal/PitLibrary.html';
@@ -72,10 +90,10 @@
 			export var Intro = 'html/wizard/intro.html';
 			export var Test = 'html/wizard/test.html';
 			export var Done = 'html/wizard/done.html';
-			export function TrackIntro(track: string) {
+			export function TrackIntro(track: string): string {
 				return 'html/wizard/' + track + '/intro.html';
 			}
-			export function TrackDone(track: string) {
+			export function TrackDone(track: string): string {
 				return 'html/wizard/' + track + '/intro.html';
 			}
 		}

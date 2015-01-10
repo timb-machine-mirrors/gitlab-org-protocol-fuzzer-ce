@@ -128,7 +128,7 @@ module Peach {
 				promise.error(reason => this.onError(reason));
 			} else if (this.CanContinue) {
 				this.job.status = JobStatus.ActionPending;
-				this.$http.get(this.job.jobUrl + "/continue")
+				this.$http.get(this.job.commands.continueUrl)
 					.success(() => this.startJobPoller())
 					.error(reason => this.onError(reason));
 			}
@@ -137,7 +137,7 @@ module Peach {
 		public PauseJob() {
 			if (this.CanPause) {
 				this.job.status = JobStatus.ActionPending;
-				this.$http.get(this.job.jobUrl + "/pause")
+				this.$http.get(this.job.commands.pauseUrl)
 					.success(() => this.startJobPoller())
 					.error(reason => this.onError(reason));
 			}
@@ -146,7 +146,7 @@ module Peach {
 		public StopJob() {
 			if (this.CanStop) {
 				this.job.status = JobStatus.ActionPending;
-				this.$http.get(this.job.jobUrl + "/stop")
+				this.$http.get(this.job.commands.stopUrl)
 					.success(() => this.startJobPoller())
 					.error(reason => this.onError(reason));
 			}

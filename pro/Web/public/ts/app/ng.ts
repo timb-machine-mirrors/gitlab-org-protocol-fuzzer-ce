@@ -10,6 +10,9 @@ module Peach.Constants.Angular {
 	export var $modalInstance = '$modalInstance';
 	export var $timeout = '$timeout';
 	export var $q = '$q';
+	export var $compile = '$compile';
+	export var $interpolate = '$interpolate';
+	export var $templateCache = '$templateCache';
 	export var $http = '$http';
 	export var $httpProvider = '$httpProvider';
 	export var $interval = '$interval';
