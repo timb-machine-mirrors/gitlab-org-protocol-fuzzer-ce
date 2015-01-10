@@ -41,17 +41,24 @@ namespace Peach.Core.Dom
 
 		public void Resolve()
 		{
+			// Optimistic resolution called by PitParser, don't log if binding fails...
+			Resolve(false);
+		}
+
+		private void Resolve(bool log)
+		{
 			if (of == null && OfName != null)
 			{
 				var elem = From.find(OfName);
 
 				if (elem == null)
 				{
-					logger.Error("Error, unable to resolve binding '" + OfName + "' attached to '" + From.fullName + "'.");
+					if (log)
+						logger.Debug("Unable to resolve binding '" + OfName + "' attached to '" + From.fullName + "'.");
 				}
 				else if (From.CommonParent(elem) is Choice)
 				{
-					logger.Error("Error, binding '" + OfName + "' attached to '" + From.fullName + "' cannot share a common parent that is of type 'Choice'.");
+					logger.Error("Binding '" + OfName + "' attached to '" + From.fullName + "' cannot share a common parent that is of type 'Choice'.");
 				}
 				else
 				{
@@ -91,8 +98,9 @@ namespace Peach.Core.Dom
 		{
 			get
 			{
+				// Resolution needed because someone asked for Of, log if not found...
 				if (of == null)
-					Resolve();
+					Resolve(true);
 
 				return of;
 			}
