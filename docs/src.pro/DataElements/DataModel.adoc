@@ -30,7 +30,7 @@ xref:ref[ref]:: Reference to another DataModel to use as a template.
 === Child Elements
 
 xref:Analyzers[Analyzer]:: Analyzes current element post cracking, can dynamically change model.
-xref:Blob[Blob]:: Represents binary data (think array of bytes) to create simple dumb fuzzers in Peach.
+xref:Blob[Blob]:: Represents binary data (array of bytes) to create simple dumb fuzzers in Peach.
 xref:Block[Block]:: Groups one or more data elements in a logical structure.
 xref:Choice[Choice]:: Indicates all of the sub-elements are valid; however, only one sub-element should be selected.
 xref:Fixup[Fixup]:: Are dynamic transformations such as checksums and CRCs.
