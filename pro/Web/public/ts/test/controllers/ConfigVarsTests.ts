@@ -23,11 +23,7 @@ describe("Peach", () => {
 			$scope = $rootScope.$new();
 
 			$httpBackend = $injector.get('$httpBackend');
-			$httpBackend.expectGET('/p/libraries').respond([
-				{ libraryUrl: '', locked: false }
-			]);
 			service = $injector.get('PitService');
-			$httpBackend.flush();
 		}));
 
 		afterEach(() => {
@@ -49,7 +45,7 @@ describe("Peach", () => {
 			});
 
 			it("PitConfig is undefined", () => {
-				expect(ctrl.PitConfig).toBeUndefined();
+				expect(ctrl.Config).toBeUndefined();
 			});
 		});
 
@@ -58,20 +54,16 @@ describe("Peach", () => {
 			beforeEach(() => {
 				pit = {
 					name: 'My Pit',
-					pitUrl: pitUrl
-				}
+					pitUrl: pitUrl,
+					config: [
+						{ key: 'Key', name: 'Name', value: 'Value' }
+					]
+				};
 
 				$httpBackend.expectGET(pitUrl).respond(pit);
 				var promise = service.SelectPit(pitUrl);
 				promise.then(() => {
-					$httpBackend.expectGET(pitUrl + '/config').respond(
-						{
-							pitUrl: pitUrl,
-							config: [
-								{ key: 'Key', name: 'Name', value: 'Value' }
-							]
-						}
-					);
+					$httpBackend.expectGET(pitUrl).respond(pit);
 					ctrl = $controller('Peach.ConfigureVariablesController', {
 						$scope: $scope,
 						$modal: $modal,
@@ -86,8 +78,7 @@ describe("Peach", () => {
 			});
 
 			it("PitConfig is valid", () => {
-				expect(_.isObject(ctrl.PitConfig)).toBe(true);
-				expect(ctrl.PitConfig.pitUrl).toBe(pitUrl);
+				expect(_.isObject(ctrl.Config)).toBe(true);
 			});
 
 			it("PitConfig can be saved", () => {
@@ -96,9 +87,9 @@ describe("Peach", () => {
 					$setPristine: () => {
 						dirty = false;
 					}
-				}
+				};
 
-				$httpBackend.expectPOST(pitUrl + '/config').respond({});
+				$httpBackend.expectPOST(pitUrl).respond(pit);
 				ctrl.OnSave();
 				$httpBackend.flush();
 				expect(dirty).toBe(false);

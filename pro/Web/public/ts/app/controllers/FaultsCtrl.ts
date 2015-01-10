@@ -9,14 +9,12 @@ module Peach {
 			Constants.Angular.$scope,
 			Constants.Angular.$routeParams,
 			Constants.Services.Job,
-			"FaultDetailResource"
 		];
 
 		constructor(
 			$scope: IViewModelScope,
 			$routeParams: ng.route.IRouteParamsService,
-			private jobService: JobService,
-			private faultDetailResource: IFaultDetailResource
+			private jobService: JobService
 		) {
 			$scope.vm = this;
 			this.bucket = $routeParams['bucket'];
@@ -63,8 +61,7 @@ module Peach {
 		public IsDetailActive: boolean;
 
 		public OnFaultSelected(fault: IFaultSummary) {
-			var promise = this.faultDetailResource.get({ id: ExtractId('faults', fault.faultUrl) });
-			promise.$promise.then((detail: IFaultDetail) => {
+			this.jobService.LoadFault(fault.faultUrl).then((detail: IFaultDetail) => {
 				this.CurrentFault = detail;
 				this.IsDetailActive = true;
 			});

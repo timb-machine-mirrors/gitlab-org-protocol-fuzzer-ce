@@ -17,15 +17,15 @@ module Peach {
 			private pitService: PitService
 		) {
 			$scope.vm = this;
-			var promise = pitService.LoadPitConfig();
-			promise.then((pitConfig: IPitConfig) => {
-				this.PitConfig = pitConfig;
+			var promise = pitService.ReloadPit();
+			promise.then((pit: IPit) => {
+				this.Config = pit.config;
 			});
 		}
 
 		private isSaved: boolean = false;
 
-		public PitConfig: IPitConfig;
+		public Config: IParameter[];
 
 		public get ShowSaved() {
 			return !this.$scope.form.$dirty && this.isSaved;
@@ -44,7 +44,8 @@ module Peach {
 		}
 
 		public OnSave(): void {
-			this.PitConfig.$save({ id: this.pitService.PitId }, () => {
+			var promise = this.pitService.SaveConfig(this.Config);
+			promise.then(() => {
 				this.isSaved = true;
 				this.$scope.form.$setPristine();
 			});
@@ -52,18 +53,18 @@ module Peach {
 
 		public OnAdd() {
 			var modal = this.$modal.open({
-				templateUrl: "html/modal/NewVar.html",
+				templateUrl: Constants.Templates.Modal.NewVar,
 				controller: NewVarController
 			});
 
 			modal.result.then((param: IParameter) => {
-				this.PitConfig.config.push(param);
+				this.Config.push(param);
 				this.$scope.form.$setDirty();
 			});
 		}
 
 		public OnRemove(index: number) {
-			this.PitConfig.config.splice(index, 1);
+			this.Config.splice(index, 1);
 			this.$scope.form.$setDirty();
 		}
 	}
@@ -96,7 +97,7 @@ module Peach {
 		public Param: IParameter;
 
 		public get ParamKeys(): string[] {
-			return _.pluck(this.pitService.PitConfig.config, 'key');
+			return _.pluck(this.pitService.Pit.config, 'key');
 		}
 		
 		public Cancel() {

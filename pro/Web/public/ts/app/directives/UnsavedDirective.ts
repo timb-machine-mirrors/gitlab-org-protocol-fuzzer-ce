@@ -43,14 +43,13 @@ module Peach {
 				event: ng.IAngularEvent,
 				newUrl: string
 			) => {
-
 				if (!form.$dirty) {
 					onRouteChangeOff();
 					return;
 				}
 
 				var modal = this.$modal.open({
-					templateUrl: "html/modal/Unsaved.html",
+					templateUrl: Constants.Templates.Modal.Unsaved,
 					controller: UnsavedModalController
 				});
 				modal.result.then((result) => {

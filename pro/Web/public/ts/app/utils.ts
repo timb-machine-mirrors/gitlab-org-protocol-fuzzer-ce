@@ -48,12 +48,6 @@ module Peach {
 		return undefined;
 	}
 
-	export function ExtractId(part: string, url: string): string {
-		var pattern = '/p/' + part + '/([^/]+).*';
-		var re = new RegExp(pattern);
-		return re.exec(url)[1];
-	}
-
 	export function ArrayItemUp<T>(array: T[], i: number): T[] {
 		if (i > 0) {
 			var x = array[i - 1];
@@ -70,5 +64,16 @@ module Peach {
 			array[i] = x;
 		}
 		return array;
+	}
+
+	export function StripHttpPromise<T>(q$: ng.IQService, promise: ng.IHttpPromise<T>): ng.IPromise<T> {
+		var deferred = q$.defer<T>();
+		promise.success((data: T) => {
+			deferred.resolve(data);
+		});
+		promise.error(reason => {
+			deferred.reject(reason);
+		});
+		return deferred.promise;
 	}
 }

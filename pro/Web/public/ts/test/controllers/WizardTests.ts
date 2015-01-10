@@ -17,8 +17,10 @@ describe("Peach", () => {
 		var pitUrl = '/p/pits/PIT_GUID';
 		var pit = {
 			name: 'My Pit',
-			pitUrl: pitUrl
-		}
+			pitUrl: pitUrl,
+			peachConfig: [{ key: "LocalOS", value: "windows" }],
+			config: []
+		};
 
 		beforeEach(inject(($injector: ng.auto.IInjectorService) => {
 			var $controller: ng.IControllerService;
@@ -30,9 +32,6 @@ describe("Peach", () => {
 			$controller = $injector.get('$controller');
 			$httpBackend = $injector.get('$httpBackend');
 
-			$httpBackend.expectGET('/p/libraries').respond([
-				{ libraryUrl: '', locked: false }
-			]);
 			pitService = $injector.get('PitService');
 			wizardService = $injector.get('WizardService');
 
@@ -55,16 +54,11 @@ describe("Peach", () => {
 			$httpBackend.verifyNoOutstandingRequest();
 		});
 
-		describe("'setvars' track", () => {
+		describe("'vars' track", () => {
 			describe("without variables to configure", () => {
 				beforeEach(() => {
-					$location.path("/quickstart/setvars");
-					$httpBackend.expectGET(pitUrl + '/config').respond(
-						{
-							pitUrl: pitUrl,
-							config: []
-						}
-					);
+					$location.path(Peach.Constants.Routes.WizardPrefix + Peach.Constants.Tracks.Vars);
+					$httpBackend.expectGET(pitUrl).respond(pit);
 					ctrl = newController();
 					$httpBackend.flush();
 				});
@@ -76,7 +70,7 @@ describe("Peach", () => {
 				});
 
 				it("Next() will move to done", () => {
-					$httpBackend.expectPOST(pitUrl + "/config").respond('OK');
+					$httpBackend.expectPOST(pitUrl).respond(pit);
 					ctrl.Next();
 					$httpBackend.flush();
 					expect(ctrl.Question.type).toBe(Peach.QuestionTypes.Done);
@@ -84,21 +78,17 @@ describe("Peach", () => {
 
 				it("OnSubmit() moves to the next wizard", () => {
 					ctrl.OnNextTrack();
-					expect($location.path()).toBe("/quickstart/fault");
+					expect($location.path()).toBe(Peach.Constants.Routes.WizardPrefix + Peach.Constants.Tracks.Fault);
 				});
 			});
 
 			describe("with variables to configure", () => {
 				beforeEach(() => {
-					$location.path("/quickstart/setvars");
-					$httpBackend.expectGET(pitUrl + '/config').respond(
-						{
-							pitUrl: pitUrl,
-							config: [
-								{ key: "Key", name: "Name", type: Peach.QuestionTypes.String }
-							]
-						}
-					);
+					pit.config = [
+						{ key: "Key", name: "Name", type: Peach.QuestionTypes.String }
+					];
+					$location.path(Peach.Constants.Routes.WizardPrefix + Peach.Constants.Tracks.Vars);
+					$httpBackend.expectGET(pitUrl).respond(pit);
 					ctrl = newController();
 					$httpBackend.flush();
 				});
@@ -113,13 +103,11 @@ describe("Peach", () => {
 					ctrl.Next();
 					ctrl.Question.value = "Value";
 					expect(ctrl.Question.type).toBe(Peach.QuestionTypes.String);
-					var data = <Peach.IPitConfig> {
-						pitUrl: pitUrl,
-						config: [
-							{ key: "Key", name: "Name", value: "Value", type: "string" }
-						]
-					};
-					$httpBackend.expectPOST(pitUrl + "/config", data).respond('OK');
+					var post = angular.copy(pit);
+					post.config = [
+						{ key: "Key", name: "Name", value: "Value", type: "string" }
+					];
+					$httpBackend.expectPOST(pitUrl, post).respond(post);
 					ctrl.Next();
 					$httpBackend.flush();
 					expect(ctrl.Question.type).toBe(Peach.QuestionTypes.Done);
@@ -129,13 +117,8 @@ describe("Peach", () => {
 
 		describe("'fault' track", () => {
 			beforeEach(() => {
-				$location.path("/quickstart/fault");
-				$httpBackend.expectGET('/p/conf/wizard/state').respond([
-					{ key: "LocalOS", value: "windows" }
-				]);
-				$httpBackend.expectGET(pitUrl + '/config').respond(
-					{ pitUrl: pitUrl, config: [] }
-				);
+				$location.path(Peach.Constants.Routes.WizardPrefix + Peach.Constants.Tracks.Fault);
+				$httpBackend.expectGET(pitUrl).respond(pit);
 				ctrl = newController();
 				$httpBackend.flush();
 			});
@@ -290,13 +273,8 @@ describe("Peach", () => {
 
 			beforeEach(() => {
 				wizardService.SetTrackTemplate("data", mockTemplate);
-				$location.path("/quickstart/data");
-				$httpBackend.expectGET('/p/conf/wizard/state').respond([
-					{ key: "LocalOS", value: "windows" }
-				]);
-				$httpBackend.expectGET(pitUrl + '/config').respond(
-					{ pitUrl: pitUrl, config: [] }
-				);
+				$location.path(Peach.Constants.Routes.WizardPrefix + Peach.Constants.Tracks.Data);
+				$httpBackend.expectGET(pitUrl).respond(pit);
 				ctrl = newController();
 				$httpBackend.flush();
 			});

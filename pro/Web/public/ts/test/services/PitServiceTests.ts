@@ -37,11 +37,7 @@ describe("Peach", () => {
 			spyOpen = spyOn($modal, 'open');
 
 			$httpBackend = $injector.get('$httpBackend');
-			$httpBackend.expectGET('/p/libraries').respond([
-				{ libraryUrl: '/p/libraries/LIB_GUID', locked: false }
-			]);
 			service = $injector.get('PitService');
-			$httpBackend.flush();
 		}));
 
 		afterEach(() => {

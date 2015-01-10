@@ -23,11 +23,7 @@ describe("Peach", () => {
 			spyOpen = spyOn($modal, 'open');
 
 			$httpBackend = $injector.get('$httpBackend');
-			$httpBackend.expectGET('/p/libraries').respond([
-				{ libraryUrl: '', locked: false }
-			]);
 			service = $injector.get('PitService');
-			$httpBackend.flush();
 
 			var $rootScope = <ng.IRootScopeService> $injector.get('$rootScope');
 			var $controller = <ng.IControllerService> $injector.get('$controller');

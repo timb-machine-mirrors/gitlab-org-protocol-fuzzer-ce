@@ -15,7 +15,7 @@ module Peach {
 		minorHash: string;
 	}
 
-	export interface IFaultDetail extends IFaultSummary, ng.resource.IResource<IFaultDetail> {
+	export interface IFaultDetail extends IFaultSummary {
 		nodeUrl: string;
 		targetUrl: string;
 		targetConfigUrl: string;
@@ -37,6 +37,4 @@ module Peach {
 		fileUrl: string;
 		size: number;
 	}
-
-	export interface IFaultDetailResource extends ng.resource.IResourceClass<IFaultDetail> { }
 }

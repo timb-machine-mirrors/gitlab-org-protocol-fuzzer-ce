@@ -6,7 +6,7 @@ module Peach {
 	export var TestDirective: IDirective = {
 		ComponentID: Constants.Directives.Test,
 		restrict: 'E',
-		templateUrl: 'html/directives/test.html',
+		templateUrl: Constants.Templates.Directives.Test,
 		controller: Constants.Controllers.Test,
 		scope: {}
 	}
