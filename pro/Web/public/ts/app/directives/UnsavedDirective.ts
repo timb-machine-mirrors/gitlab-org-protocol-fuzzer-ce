@@ -10,7 +10,7 @@ module Peach {
 	export var UnsavedDirective: IDirective = {
 		ComponentID: Constants.Directives.Unsaved,
 		restrict: 'A',
-		require: ['^form'],
+		require: '^form',
 		controller: Constants.Controllers.Unsaved,
 		controllerAs: 'ctrl',
 		scope: {},
