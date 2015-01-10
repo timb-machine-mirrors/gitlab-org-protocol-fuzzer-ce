@@ -40,9 +40,6 @@ describe("Peach", () => {
 			$controller = $injector.get('$controller');
 			$interval = $injector.get('$interval');
 
-			$httpBackend.expectGET('/p/libraries').respond([
-				{ libraryUrl: '', locked: false }
-			]);
 			pitService = $injector.get('PitService');
 			wizardService = $injector.get('WizardService');
 			testService = $injector.get('TestService');

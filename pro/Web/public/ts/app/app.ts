@@ -32,7 +32,6 @@ module Peach {
 		"angular-loading-bar",
 		"chart.js",
 		"ngSanitize",
-		"ngResource",
 		"ngRoute",
 		"ngVis",
 		"smart-table",
@@ -48,111 +47,54 @@ module Peach {
 		}
 	]);
 
-	p.factory('PeachConfigResource', [
-		Constants.Angular.$resource,
-		($resource: ng.resource.IResourceService): IKeyValueResource => {
-			return <IKeyValueResource> $resource(
-				'/p/conf/wizard/state'
-			);
-		}
-	]);
-	p.factory('PitLibraryResource', [
-		Constants.Angular.$resource,
-		($resource: ng.resource.IResourceService): ILibraryResource => {
-			return <ILibraryResource> $resource('/p/libraries');
-		}
-	]);
-	p.factory('PitResource', [
-		Constants.Angular.$resource,
-		($resource: ng.resource.IResourceService): IPitResource => {
-			return <IPitResource> $resource(
-				'/p/pits/:id', { id: '@id' }
-			);
-		}
-	]);
-	p.factory('PitConfigResource', [
-		Constants.Angular.$resource,
-		($resource: ng.resource.IResourceService): IPitConfigResource => {
-			return <IPitConfigResource> $resource(
-				'/p/pits/:id/config', { id: '@id' }
-			);
-		}
-	]);
-	p.factory('PitAgentsResource', [
-		Constants.Angular.$resource,
-		($resource: ng.resource.IResourceService): IPitAgentsResource => {
-			return <IPitAgentsResource> $resource(
-				'/p/pits/:id/agents', { id: '@id' }
-			);
-		}
-	]);
-	p.factory('AvailableMonitorsResource', [
-		Constants.Angular.$resource,
-		($resource: ng.resource.IResourceService): IMonitorResource => {
-			return <IMonitorResource> $resource(
-				'/p/conf/wizard/monitors', {}, {
-					query: { method: 'GET', isArray: true, cache: true }
-				}
-			);
-		}
-	]);
-	p.factory('FaultDetailResource', [
-		Constants.Angular.$resource,
-		($resource: ng.resource.IResourceService): IFaultDetailResource => {
-			return <IFaultDetailResource> $resource(
-				'/p/faults/:id', { id: '@id' }
-			);
-		}
-	]);
-
 	registerModule(Peach, p);
 
 	p.config([
 		Constants.Angular.$routeProvider,
 		($routeProvider: ng.route.IRouteProvider) => {
 			$routeProvider
-				.when("/", {
-					templateUrl: "html/dashboard.html",
+				.when(Constants.Routes.Home, {
+					templateUrl: Constants.Templates.Dashboard,
 					controller: DashboardController
 				})
-				.when("/faults/:bucket", {
-					templateUrl: "html/faults.html",
+				.when(Constants.Routes.Faults, {
+					templateUrl: Constants.Templates.Faults,
 					controller: FaultsController
 				})
-				.when("/metrics/:metric", {
-					templateUrl: "html/metrics.html",
+				.when(Constants.Routes.Metrics, {
+					templateUrl: Constants.Templates.Metrics,
 					controller: MetricsController
 				})
-				.when("/quickstart/intro", {
-					templateUrl: "html/wizard/intro.html",
+				.when(Constants.Routes.WizardPrefix + Constants.Tracks.Intro, {
+					templateUrl: Constants.Templates.Wizard.Intro,
 					controller: WizardController
 				})
-				.when("/quickstart/done", {
-					templateUrl: "html/wizard/done.html",
+				.when(Constants.Routes.WizardPrefix + Constants.Tracks.Done, {
+					templateUrl: Constants.Templates.Wizard.Done,
 					controller: WizardController
 				})
-				.when("/quickstart/test", {
-					templateUrl: "html/wizard/test.html",
+				.when(Constants.Routes.WizardPrefix + Constants.Tracks.Test, {
+					templateUrl: Constants.Templates.Wizard.Test,
 					controller: PitTestController
 				})
-				.when("/quickstart/:step", {
-					templateUrl: "html/wizard.html",
+				.when(Constants.Routes.WizardStep, {
+					templateUrl: Constants.Templates.Wizard.Step,
 					controller: WizardController
 				})
-				.when("/cfg/monitors", {
-					templateUrl: "html/cfg/monitoring.html",
+				.when(Constants.Routes.ConfigMonitoring, {
+					templateUrl: Constants.Templates.Config.Monitoring,
 					controller: ConfigureMonitorsController
 				})
-				.when("/cfg/variables", {
-					templateUrl: "html/cfg/variables.html",
+				.when(Constants.Routes.ConfigVariables, {
+					templateUrl: Constants.Templates.Config.Variables,
 					controller: ConfigureVariablesController
 				})
-				.when("/cfg/test", {
-					templateUrl: "html/cfg/test.html",
+				.when(Constants.Routes.ConfigTest, {
+					templateUrl: Constants.Templates.Config.Test,
 					controller: PitTestController
 				})
 				.otherwise({
-					redirectTo: "/"
+					redirectTo: Constants.Routes.Home
 				});
 		}
 	]);

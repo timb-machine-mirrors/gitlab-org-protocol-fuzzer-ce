@@ -6,7 +6,7 @@ module Peach {
 	export var MonitorDirective: IDirective = {
 		ComponentID: Constants.Directives.Monitor,
 		restrict: 'E',
-		templateUrl: 'html/directives/monitor.html',
+		templateUrl: Constants.Templates.Directives.Monitor,
 		controller: Constants.Controllers.Monitor,
 		scope: {
 			monitors: '=',

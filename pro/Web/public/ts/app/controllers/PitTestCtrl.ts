@@ -21,8 +21,8 @@ module Peach {
 			private wizardService: WizardService
 		) {
 			$scope.vm = this;
-			if ($location.path() === '/quickstart/test') {
-				this.wizardService.GetTrack('test').Begin();
+			if ($location.path() === Constants.Routes.WizardPrefix + Constants.Tracks.Test) {
+				this.wizardService.GetTrack(Constants.Tracks.Test).Begin();
 			}
 		}
 
@@ -31,7 +31,7 @@ module Peach {
 		}
 
 		public get CanWizardBeginTest(): boolean {
-			return this.CanBeginTest && this.IsComplete('fault');
+			return this.CanBeginTest && this.IsComplete(Constants.Tracks.Fault);
 		}
 
 		public get CanBeginTest(): boolean {
@@ -59,17 +59,17 @@ module Peach {
 		}
 
 		public OnBeginTest() {
-			this.wizardService.GetTrack("test").isComplete = false;
+			this.wizardService.GetTrack(Constants.Tracks.Test).isComplete = false;
 			this.testService.BeginTest();
 		}
 
 		public OnNextTrack() {
-			this.wizardService.GetTrack("test").isComplete = true;
-			this.$location.path("/quickstart/done");
+			this.wizardService.GetTrack(Constants.Tracks.Test).isComplete = true;
+			this.$location.path(Constants.Routes.WizardPrefix + Constants.Tracks.Done);
 		}
 
 		public OnDashboard() {
-			this.$location.path('/');
+			this.$location.path(Constants.Routes.Home);
 		}
 	}
 }

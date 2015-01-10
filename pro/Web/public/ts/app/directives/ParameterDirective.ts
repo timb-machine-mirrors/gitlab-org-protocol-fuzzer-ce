@@ -6,7 +6,7 @@ module Peach {
 	export var ParameterDirective: IDirective = {
 		ComponentID: Constants.Directives.Parameter,
 		restrict: 'E',
-		templateUrl: 'html/directives/parameter.html',
+		templateUrl: Constants.Templates.Directives.Parameter,
 		controller: Constants.Controllers.Parameter,
 		scope: { param: '=' }
 	}
@@ -14,7 +14,7 @@ module Peach {
 	export var ParameterInputDirective: IDirective = {
 		ComponentID: Constants.Directives.ParameterInput,
 		restrict: 'E',
-		templateUrl: 'html/directives/parameter-input.html',
+		templateUrl: Constants.Templates.Directives.ParameterInput,
 		controller: Constants.Controllers.Parameter,
 		scope: {
 			param: '=',
@@ -76,7 +76,7 @@ module Peach {
 			var options: string[];
 			var group: string;
 			if (this.$scope.param.type === 'call') {
-				options = this.pitService.PitCalls || [];
+				options = this.pitService.Pit.calls || [];
 				options = [''].concat(options);
 				group = 'Calls';
 			} else {
@@ -103,7 +103,7 @@ module Peach {
 		}
 
 		private defines(): IOption[] {
-			return _.map(this.pitService.PitConfig.config, param => {
+			return _.map(this.pitService.Pit.config, param => {
 				var key = '##' + param.key + '##'; 
 				return <IOption> {
 					key: key,

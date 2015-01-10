@@ -49,7 +49,7 @@ module Peach {
 			this.reset();
 
 			this.isPending = true;
-			var promise = this.$http.get('/p/conf/wizard/test/start', {
+			var promise = this.$http.get(Constants.Urls.TestStart, {
 				params: { pitUrl: this.pitService.Pit.pitUrl }
 			});
 

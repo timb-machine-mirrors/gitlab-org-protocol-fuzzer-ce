@@ -56,11 +56,11 @@ module Peach {
 		}
 
 		public get Defines(): IParameter[] {
-			return this.pitService.PitConfig.config;
+			return this.pitService.Pit.config;
 		}
 
 		public get FaultAgentDescription(): string {
-			var agent = this.wizardService.GetTrack("fault").agents[0];
+			var agent = this.wizardService.GetTrack(Constants.Tracks.Fault).agents[0];
 			var ret = '';
 			agent.monitors.forEach((item: IMonitor) => {
 				if (!ret) {
@@ -74,11 +74,11 @@ module Peach {
 		public SelectedOptions = [];
 
 		public get DataAgents(): Agent[] {
-			return this.wizardService.GetTrack("data").agents;
+			return this.wizardService.GetTrack(Constants.Tracks.Data).agents;
 		}
 
 		public get AutoAgents(): Agent[] {
-			return this.wizardService.GetTrack("auto").agents;
+			return this.wizardService.GetTrack(Constants.Tracks.Auto).agents;
 		}
 
 		public get Title(): string {
@@ -86,11 +86,12 @@ module Peach {
 		}
 
 		public get IsTestComplete(): boolean {
-			return this.wizardService.GetTrack("test").isComplete;
+			return this.wizardService.GetTrack(Constants.Tracks.Test).isComplete;
 		}
 
 		public get IsSetVars(): boolean {
-			return this.$location.path() === '/quickstart/setvars';
+			return this.$location.path() ===
+				(Constants.Routes.WizardPrefix + Constants.Tracks.Vars);
 		}
 
 		public NextPrompt: string;
@@ -267,7 +268,7 @@ module Peach {
 			if (match) {
 				return this.wizardService.GetTrack(match[1]);
 			}
-			return this.wizardService.GetTrack("null");;
+			return this.wizardService.GetTrack(Constants.Tracks.Default);;
 		}
 
 		private resetPrompts() {

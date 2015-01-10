@@ -41,8 +41,8 @@
 		</div>
 		<div class="row">
 			<div class="col-xs-12">
-				<accordion ng-repeat="agent in vm.Model.agents track by $index">
-					<peach:agent agents="vm.Model.agents"
+				<accordion ng-repeat="agent in vm.Agents track by $index">
+					<peach:agent agents="vm.Agents"
 											 agent="agent"
 											 agent-index="$index">
 					</peach:agent>

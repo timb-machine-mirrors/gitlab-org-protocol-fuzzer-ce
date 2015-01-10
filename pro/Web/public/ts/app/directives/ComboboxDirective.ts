@@ -28,7 +28,7 @@
 		replace: true,
 		controller: Constants.Controllers.Combobox,
 		controllerAs: 'vm',
-		templateUrl: 'html/directives/combobox.html',
+		templateUrl: Constants.Templates.Directives.Combobox,
 		scope: {
 			data: '=',
 			placeholder: '&'

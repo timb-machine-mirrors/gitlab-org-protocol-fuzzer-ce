@@ -191,7 +191,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var cfg2 = db.GetConfigByUrl(imgCopy.PitUrl);
 			Assert.NotNull(cfg2);
-			Assert.AreEqual(0, cfg2.Config.Count);
+			Assert.AreEqual(0, cfg2.Count);
 		}
 
 		[Test]
@@ -361,25 +361,25 @@ namespace Peach.Pro.Test.Core.WebServices
 			var cfg = db.GetConfigByUrl(pit.PitUrl);
 
 			Assert.NotNull(cfg);
-			Assert.AreEqual(5, cfg.Config.Count);
+			Assert.AreEqual(5, cfg.Count);
 
 			// Always are 3 system types at the beginning!
-			Assert.AreEqual("Peach.Pwd", cfg.Config[0].Key);
-			Assert.AreEqual(ParameterType.System, cfg.Config[0].Type);
-			Assert.AreEqual("Peach.Cwd", cfg.Config[1].Key);
-			Assert.AreEqual(ParameterType.System, cfg.Config[1].Type);
+			Assert.AreEqual("Peach.Pwd", cfg[0].Key);
+			Assert.AreEqual(ParameterType.System, cfg[0].Type);
+			Assert.AreEqual("Peach.Cwd", cfg[1].Key);
+			Assert.AreEqual(ParameterType.System, cfg[1].Type);
 
 			// PitLibraryPath is special, and gets turned into a System type
 			// regardless of what is in the pit .config
-			Assert.AreEqual("PitLibraryPath", cfg.Config[2].Key);
-			Assert.AreNotEqual(".", cfg.Config[2].Value);
-			Assert.AreEqual(ParameterType.System, cfg.Config[2].Type);
+			Assert.AreEqual("PitLibraryPath", cfg[2].Key);
+			Assert.AreNotEqual(".", cfg[2].Value);
+			Assert.AreEqual(ParameterType.System, cfg[2].Type);
 
-			Assert.AreEqual("Strategy", cfg.Config[3].Key);
-			Assert.AreEqual(ParameterType.Enum, cfg.Config[3].Type);
+			Assert.AreEqual("Strategy", cfg[3].Key);
+			Assert.AreEqual(ParameterType.Enum, cfg[3].Type);
 
-			Assert.AreEqual("SomeMiscVariable", cfg.Config[4].Key);
-			Assert.AreEqual(ParameterType.String, cfg.Config[4].Type);
+			Assert.AreEqual("SomeMiscVariable", cfg[4].Key);
+			Assert.AreEqual(ParameterType.String, cfg[4].Type);
 		}
 
 		[Test]
@@ -391,13 +391,13 @@ namespace Peach.Pro.Test.Core.WebServices
 
 
 			Assert.NotNull(cfg);
-			Assert.AreEqual(5, cfg.Config.Count);
-			Assert.AreEqual("SomeMiscVariable", cfg.Config[4].Key);
-			Assert.AreEqual(ParameterType.String, cfg.Config[4].Type);
-			Assert.AreNotEqual("Foo Bar Baz", cfg.Config[4].Value);
-			cfg.Config[4].Value = "Foo Bar Baz";
+			Assert.AreEqual(5, cfg.Count);
+			Assert.AreEqual("SomeMiscVariable", cfg[4].Key);
+			Assert.AreEqual(ParameterType.String, cfg[4].Type);
+			Assert.AreNotEqual("Foo Bar Baz", cfg[4].Value);
+			cfg[4].Value = "Foo Bar Baz";
 
-			PitDatabase.SaveConfig(pit, cfg.Config);
+			PitDatabase.SaveConfig(pit, cfg);
 
 			var file = pit.Versions[0].Files[0].Name + ".config";
 			var defs = PitDefines.Parse(file);

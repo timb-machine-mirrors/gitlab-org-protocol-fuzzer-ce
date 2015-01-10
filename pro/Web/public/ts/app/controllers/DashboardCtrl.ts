@@ -83,7 +83,7 @@ module Peach {
 
 		public StartWithOptions() {
 			this.$modal.open({
-				templateUrl: "html/modal/StartJob.html",
+				templateUrl: Constants.Templates.Modal.StartJob,
 				controller: StartJobController
 			}).result.then((job: IJob) => {
 				this.jobService.StartJob(job);

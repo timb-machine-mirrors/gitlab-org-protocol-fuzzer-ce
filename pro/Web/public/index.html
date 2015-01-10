@@ -32,7 +32,6 @@
 	<script src="lib/angular-bootstrap/ui-bootstrap-tpls.js"></script>
 	<script src="lib/angular-chart/angular-chart.js"></script>
 	<script src="lib/angular-loading-bar/loading-bar.js"></script>
-	<script src="lib/angular-resource/angular-resource.js"></script>
 	<script src="lib/angular-route/angular-route.js"></script>
 	<script src="lib/angular-sanitize/angular-sanitize.js"></script>
 	<script src="lib/angular-smart-table/smart-table.js"></script>
@@ -195,10 +194,10 @@
 									Introduction
 								</a>
 							</li>
-							<li ng-class="{active: vm.IsActive('/quickstart/setvars'), disabled: !vm.CanConfigurePit}">
-								<a href="#/quickstart/setvars">
+							<li ng-class="{active: vm.IsActive('/quickstart/vars'), disabled: !vm.CanConfigurePit}">
+								<a href="#/quickstart/vars">
 									<i class="icon-double-angle-right"></i>
-									<i ng-class="{'icon-ok-sign green': vm.IsComplete('setvars')}"></i>
+									<i ng-class="{'icon-ok-sign green': vm.IsComplete('vars')}"></i>
 									Set Variables
 								</a>
 							</li>

@@ -6,7 +6,7 @@ module Peach {
 	export var AgentDirective: IDirective = {
 		ComponentID: Constants.Directives.Agent,
 		restrict: 'E',
-		templateUrl: 'html/directives/agent.html',
+		templateUrl: Constants.Templates.Directives.Agent,
 		controller: Constants.Controllers.Agent,
 		scope: {
 			agents: '=',
@@ -31,25 +31,25 @@ module Peach {
 		static $inject = [
 			Constants.Angular.$scope,
 			Constants.Angular.$timeout,
-			Constants.Services.Pit,
-			"AvailableMonitorsResource"
+			Constants.Services.Pit
 		];
 
 		constructor(
 			private $scope: IAgentScope,
 			private $timeout: ng.ITimeoutService,
-			private pitService: PitService,
-			availableMonitorsResource: IMonitorResource
+			private pitService: PitService
 		) {
 			$scope.vm = this;
 			$scope.isOpen = true;
 			$scope.selectedMonitor = {
 				selected: undefined
 			};
-			this.AvailableMonitors = availableMonitorsResource.query();
+			pitService.LoadPeachMonitors().then((monitors: IMonitor[]) => {
+				this.PeachMonitors = monitors;
+			});
 		}
 
-		public AvailableMonitors: ng.resource.IResource<IMonitor>[];
+		public PeachMonitors: IMonitor[];
 
 		public get Header(): string {
 			var url = this.$scope.agent.agentUrl || 'local://';

@@ -41,6 +41,10 @@ module Peach {
 			return this.faults;
 		}
 
+		public LoadFault(url: string): ng.IPromise<IFaultDetail> {
+			return StripHttpPromise(this.$q, this.$http.get(url));
+		}
+
 		public get IsRunning(): boolean {
 			return onlyIf(this.job, () => this.job.status === JobStatus.Running);
 		}
@@ -82,7 +86,7 @@ module Peach {
 
 		public GetJobs(): ng.IPromise<void> {
 			var deferred = this.$q.defer<void>();
-			var promise = this.$http.get("/p/jobs");
+			var promise = this.$http.get(Constants.Urls.Jobs);
 			promise.success((jobs: IJob[]) => {
 				var hasPit = false;
 				if (jobs.length > 0) {
@@ -116,7 +120,7 @@ module Peach {
 			}
 
 			if (this.CanStart) {
-				var promise = this.$http.post("/p/jobs", job);
+				var promise = this.$http.post(Constants.Urls.Jobs, job);
 				promise.success((newJob: IJob) => {
 					this.job = newJob;
 					this.startJobPoller();

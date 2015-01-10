@@ -11,9 +11,6 @@
     "jquery/jquery.d.ts": {
       "commit": "5898d809e04403dfe5c62c0ec1713d10c54126f7"
     },
-    "angularjs/angular-resource.d.ts": {
-      "commit": "2544abac24320d3f0edb67d256dcee8faf0e6f14"
-    },
     "angular-ui-bootstrap/angular-ui-bootstrap.d.ts": {
       "commit": "2544abac24320d3f0edb67d256dcee8faf0e6f14"
     },

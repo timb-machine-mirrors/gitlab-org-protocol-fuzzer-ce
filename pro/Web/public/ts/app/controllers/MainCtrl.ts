@@ -7,7 +7,6 @@ module Peach {
 
 		static $inject = [
 			Constants.Angular.$scope,
-			Constants.Angular.$window,
 			Constants.Angular.$location,
 			Constants.Angular.$modal,
 			Constants.Services.Pit,
@@ -18,7 +17,6 @@ module Peach {
 
 		constructor(
 			$scope: IViewModelScope,
-			private $window: ng.IWindowService,
 			private $location: ng.ILocationService,
 			private $modal: ng.ui.bootstrap.IModalService,
 			private pitService: PitService,
@@ -31,10 +29,7 @@ module Peach {
 			var promise = this.jobService.GetJobs();
 			promise.then(() => {
 				if (_.isUndefined(this.job)) {
-					var pitId = $location.search()['pit'] || $window.sessionStorage.getItem('pitId');
-					if (pitId) {
-						this.pitService.SelectPit('/p/pits/' + pitId);
-					} else if (!this.pitService.Pit) {
+					if (!this.pitService.RestorePit()) {
 						this.OnSelectPit();
 					}
 				}
@@ -116,14 +111,14 @@ module Peach {
 
 		public OnSelectPit() {
 			var modal = this.$modal.open({
-				templateUrl: "html/modal/PitLibrary.html",
+				templateUrl: Constants.Templates.Modal.PitLibrary,
 				controller: PitLibraryController
 			});
 			modal.result.then(() => {
 				if (!this.pitService.IsConfigured) {
-					this.$location.path('/quickstart/intro');
+					this.$location.path(Constants.Routes.WizardPrefix + Constants.Tracks.Intro);
 				} else {
-					this.$location.path('/');
+					this.$location.path(Constants.Routes.Home);
 				}
 			});
 		}
