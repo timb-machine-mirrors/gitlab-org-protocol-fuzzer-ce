@@ -33,7 +33,7 @@ describe("Peach", () => {
 
 		describe("when a Pit is not selected", () => {
 			beforeEach(() => {
-				ctrl = $controller('Peach.ConfigureVariablesController', {
+				ctrl = $controller('ConfigureVariablesController', {
 					$scope: $scope,
 					$modal: $modal,
 					PitService: service
@@ -64,7 +64,7 @@ describe("Peach", () => {
 				var promise = service.SelectPit(pitUrl);
 				promise.then(() => {
 					$httpBackend.expectGET(pitUrl).respond(pit);
-					ctrl = $controller('Peach.ConfigureVariablesController', {
+					ctrl = $controller('ConfigureVariablesController', {
 						$scope: $scope,
 						$modal: $modal,
 						PitService: service
