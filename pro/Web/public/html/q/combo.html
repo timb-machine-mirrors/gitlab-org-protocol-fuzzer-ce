@@ -17,8 +17,8 @@
 									data="question.defaults"
 									class="col-sm-6">
 	</peach:combobox>
-	<span class="help-block"
-				ng-show="form.question.$error.required">
-		Required
-	</span>
 </div>
+<span class="help-block"
+			ng-messages="form.question.$error"
+			ng-messages-include="html/messages.html">
+</span>

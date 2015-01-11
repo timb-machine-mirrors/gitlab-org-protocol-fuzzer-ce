@@ -26,8 +26,8 @@
 							 autofocus
 							 required />
 				<span class="help-block"
-							ng-show="form.name.$error.required">
-					Required
+							ng-messages="form.name.$error"
+							ng-messages-include="html/messages.html">
 				</span>
 			</div>
 		</div>

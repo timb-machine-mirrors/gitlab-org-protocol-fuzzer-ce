@@ -13,6 +13,7 @@ module.exports = (grunt) ->
 					'public/lib/angular-bootstrap' : 'angular-bootstrap:main'
 					'public/lib/angular-loading-bar' : 'angular-loading-bar:main'
 					'public/lib/angular-mocks'     : 'angular-mocks:main'
+					'public/lib/angular-messages'  : 'angular-messages:main'
 					'public/lib/angular-route'     : 'angular-route:main'
 					'public/lib/angular-sanitize'  : 'angular-sanitize:main'
 					'public/lib/angular-ui-select' : 'angular-ui-select:main'

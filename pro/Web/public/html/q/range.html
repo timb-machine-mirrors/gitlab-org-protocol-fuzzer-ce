@@ -27,19 +27,7 @@
 					 integer />
 	</div>
 </div>
-<div class="help-block"
-		 ng-show="form.question.$error.integer">
-	Not an integer
-</div>
-<div class="help-block"
-		 ng-show="form.question.$error.rangeMin">
-	Value is less than minimum allowed ({{question.rangeMin}})
-</div>
-<div class="help-block"
-		 ng-show="form.question.$error.rangeMax">
-	Value is greater than maximum allowed ({{question.rangeMax}})
-</div>
-<div class="help-block"
-		 ng-show="form.question.$error.required">
-	Required
-</div>
+<span class="help-block"
+			ng-messages="form.question.$error"
+			ng-messages-include="html/messages.html">
+</span>

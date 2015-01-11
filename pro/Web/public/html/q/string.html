@@ -19,11 +19,11 @@
 					 ng-required="question.required"
 					 autofocus />
 	</div>
-	<span class="help-block"
-				ng-show="form.question.$error.required">
-		Required
-	</span>
 </div>
+<span class="help-block"
+			ng-messages="form.question.$error"
+			ng-messages-include="html/messages.html">
+</span>
 <table class="table table-striped table-hover table-bordered"
 			 ng-show="!vm.IsSetVars">
 	<caption>

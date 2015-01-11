@@ -24,8 +24,8 @@
 							 ng-change="vm.OnNameChanged()"
 							 ng-blur="vm.OnNameBlur()" />
 				<span class="help-block"
-							ng-show="form.name.$error.required">
-					Required
+							ng-messages="form.name.$error"
+							ng-messages-include="html/messages.html">
 				</span>
 			</div>
 		</div>
@@ -45,12 +45,8 @@
 							 peach:unique="vm.ParamKeys"
 							 peach:unique-watch="vm.Param.name" />
 				<span class="help-block"
-							ng-show="form.key.$error.required">
-					Required
-				</span>
-				<span class="help-block"
-							ng-show="form.key.$error.unique">
-					A unique key must be provided
+							ng-messages="form.key.$error"
+							ng-messages-include="html/messages.html">
 				</span>
 			</div>
 		</div>

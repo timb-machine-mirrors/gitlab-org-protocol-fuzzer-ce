@@ -31,6 +31,7 @@ module Peach {
 	var p = angular.module("Peach", [
 		"angular-loading-bar",
 		"chart.js",
+		"ngMessages",
 		"ngSanitize",
 		"ngRoute",
 		"ngVis",

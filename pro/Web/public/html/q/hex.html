@@ -18,8 +18,8 @@
 	                class="col-sm-6"
 									hexstring>
 	</peach:combobox>
-	<span class="help-block"
-				ng-show="form.question.$error.required">
-		Required
-	</span>
 </div>
+<span class="help-block"
+			ng-messages="form.question.$error"
+			ng-messages-include="html/messages.html">
+</span>
