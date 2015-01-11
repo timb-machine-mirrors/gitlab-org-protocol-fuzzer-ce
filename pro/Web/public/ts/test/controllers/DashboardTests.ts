@@ -19,7 +19,7 @@ describe("Peach", () => {
 			var $rootScope = <ng.IRootScopeService> $injector.get('$rootScope');
 			var $controller = <ng.IControllerService> $injector.get('$controller');
 
-			ctrl = $controller('Peach.DashboardController', {
+			ctrl = $controller('DashboardController', {
 				$scope: $rootScope.$new(),
 				$modal: $modal,
 				PitService: service

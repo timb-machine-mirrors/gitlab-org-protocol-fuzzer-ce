@@ -36,7 +36,7 @@ describe("Peach", () => {
 			});
 
 			$httpBackend.expectGET('/p/jobs').respond([]);
-			ctrl = $controller('Peach.MainController', {
+			ctrl = $controller('MainController', {
 				$scope: $rootScope.$new(),
 				$window: $window,
 				$location: $location,

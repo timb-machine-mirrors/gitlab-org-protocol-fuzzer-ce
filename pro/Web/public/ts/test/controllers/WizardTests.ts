@@ -40,7 +40,7 @@ describe("Peach", () => {
 			$httpBackend.flush();
 
 			newController = () => {
-				return $controller('Peach.WizardController', {
+				return $controller('WizardController', {
 					$scope: $rootScope.$new(),
 					$location: $location,
 					PitService: pitService,

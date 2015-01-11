@@ -49,7 +49,7 @@ describe("Peach", () => {
 			$httpBackend.flush();
 
 			newController = () => {
-				return $controller('Peach.PitTestController', {
+				return $controller('PitTestController', {
 					$scope: $rootScope.$new(),
 					$location: $location,
 					TestService: testService,
