@@ -21,14 +21,12 @@ module Peach {
 		ctrl: ng.INgModelController,
 		predicate: IValidatePredicate
 	) {
-		var validator = value => {
-			var isValid = (_.isEmpty(value) || predicate(value));
-			ctrl.$setValidity(name, isValid);
-			return value;
+		ctrl.$validators[name] = (modelValue, viewValue) => {
+			var value = modelValue || viewValue;
+			return _.isUndefined(value)
+				|| (_.isString(value) && _.isEmpty(value))
+				|| predicate(value);
 		};
-
-		ctrl.$parsers.push(validator);
-		ctrl.$formatters.push(validator);
 	}
 
 	export var RangeDirective: IDirective = {
@@ -45,16 +43,16 @@ module Peach {
 			attrs: ng.IAttributes,
 			ctrl: ng.INgModelController
 		) => {
-			if (scope.min) {
-				predicateValidation('rangeMin', ctrl,
-					(value: number) => (value >= scope.min())
-				);
-			}
-			if (scope.max) {
-				predicateValidation('rangeMax', ctrl,
-					(value: number) => (value <= scope.max())
-				);
-			}
+			predicateValidation('rangeMin', ctrl, (value: string) => {
+				var int = parseInt(value);
+				var min = scope.min();
+				return _.isUndefined(min) || (!_.isNaN(int) && int >= min);
+			});
+			predicateValidation('rangeMax', ctrl, (value: string) => {
+				var int = parseInt(value);
+				var max = scope.max();
+				return _.isUndefined(max) || (!_.isNaN(int) && int <= max);
+			});
 		}
 	}
 
@@ -68,7 +66,7 @@ module Peach {
 			attrs: ng.IAttributes,
 			ctrl: ng.INgModelController
 		) => {
-			var pattern = /^\-?\d+$/;
+			var pattern = /^(\-|\+)?\d+$/;
 			predicateValidation(Constants.Directives.Integer, ctrl,
 				(value: string) => pattern.test(value)
 			);
