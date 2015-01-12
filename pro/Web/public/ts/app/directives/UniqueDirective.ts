@@ -28,20 +28,17 @@ module Peach {
 			attrs: ng.IAttributes,
 			ctrl: ng.INgModelController
 		) {
-			var validate = value => {
+			var validate = (modelValue, viewValue) => {
 				var collection = scope.unique();
-				var isUnique = !_.contains(collection, value || scope.defaultValue);
-				ctrl.$setValidity('unique', isUnique);
-				return value;
+				return !_.contains(collection, viewValue || scope.defaultValue);
 			};
 
-			ctrl.$parsers.unshift(validate);
-			ctrl.$formatters.unshift(validate);
+			ctrl.$validators['unique'] = validate;
 
 			if (scope.watch) {
 				scope.$watch(scope.watch, (newVal, oldVal) => {
 					if (newVal !== oldVal) {
-						validate(ctrl.$viewValue);
+						ctrl.$setValidity('unique', validate(ctrl.$modelValue, ctrl.$viewValue));
 					}
 				});
 			}

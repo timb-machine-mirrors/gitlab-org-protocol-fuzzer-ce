@@ -63,7 +63,7 @@ describe("Peach", () => {
 			it("invalidates duplicate values", () => {
 				modelCtrl.$setViewValue('duplicate');
 				scope.$digest();
-				expect(scope.model).toEqual('duplicate');
+				expect(scope.model).toEqual(undefined);
 				expect(modelCtrl.$valid).toBe(false);
 			});
 		});
@@ -94,14 +94,14 @@ describe("Peach", () => {
 			it("invalidates duplicate values", () => {
 				modelCtrl.$setViewValue('duplicate');
 				scope.$digest();
-				expect(scope.model).toEqual('duplicate');
+				expect(scope.model).toEqual(undefined);
 				expect(modelCtrl.$valid).toBe(false);
 			});
 
 			it("uses default value for comparison", () => {
 				modelCtrl.$setViewValue('');
 				scope.$digest();
-				expect(scope.model).toEqual('');
+				expect(scope.model).toEqual(undefined);
 				expect(modelCtrl.$valid).toBe(false);
 			});
 		});
