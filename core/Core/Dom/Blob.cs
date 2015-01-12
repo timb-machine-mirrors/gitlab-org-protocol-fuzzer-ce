@@ -117,6 +117,18 @@ namespace Peach.Core.Dom
 			WritePitCommonChildren(pit);
 			pit.WriteEndElement();
 		}
+
+		protected override Variant GenerateDefaultValue()
+		{
+			// Return a read-only slice of the DefaultValue
+			// This way every data element has a different object
+			// for its InternalValue, even multiple data elements
+			// use the same DefaultValue object.
+
+			var bs = (BitwiseStream)DefaultValue;
+			bs.SeekBits(0, SeekOrigin.Begin);
+			return new Variant(bs.SliceBits(bs.LengthBits));
+		}
 	}
 }
 
