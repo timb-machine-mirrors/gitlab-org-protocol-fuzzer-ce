@@ -256,6 +256,10 @@ namespace Peach.Core
 	/// </summary>
 	public class Utilities
 	{
+		// Ensure trailing slash is stripped from ExecutionDirectory
+		private static readonly string PeachDirectory =
+			AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
+
 		/// <summary>
 		/// Configure NLog.
 		/// </summary>
@@ -319,7 +323,7 @@ namespace Peach.Core
 
 		public static string ExecutionDirectory
 		{
-			get { return AppDomain.CurrentDomain.BaseDirectory; }
+			get { return PeachDirectory; }
 		}
 
 		public static string GetAppResourcePath(string resource)
