@@ -1,3 +1,4 @@
+using System.Globalization;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.Dom.XPath;
@@ -11,6 +12,7 @@ using System.Xml;
 using System.Xml.XPath;
 using Peach.Pro.Core;
 using Peach.Pro.Core.Fixups;
+using Peach.Pro.Core.MutationStrategies;
 using Peach.Pro.Core.WebServices;
 
 namespace PitTester
@@ -116,6 +118,29 @@ namespace PitTester
 					while (iter.MoveNext());
 
 					//ApplySlurp(dom, slurp);
+				}
+			}
+
+			// See #214
+			// If there are is any action that has more than one data set
+			// that use <Field> and the random strategy is
+			// in use, turn off data set switching...
+			var noSwitch = dom.tests
+				.Select(t => t.stateModel)
+				.SelectMany(sm => sm.states)
+				.SelectMany(s => s.actions)
+				.SelectMany(a => a.allData)
+				.Select(ad => ad.dataSets)
+				.Any(ds => ds.SelectMany(d => d).OfType<DataField>().Count() > 1);
+
+			if (noSwitch)
+			{
+				foreach (var t in dom.tests.Where(t => t.strategy is RandomStrategy))
+				{
+					t.strategy = new RandomStrategy(new Dictionary<string, Variant>
+					{
+						{ "SwitchCount", new Variant(int.MaxValue.ToString(CultureInfo.InvariantCulture)) },
+					});
 				}
 			}
 
