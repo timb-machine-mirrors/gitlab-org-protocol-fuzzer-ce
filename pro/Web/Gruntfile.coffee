@@ -17,7 +17,6 @@ module.exports = (grunt) ->
 					'public/lib/angular-sanitize'  : 'angular-sanitize:main'
 					'public/lib/angular-ui-router' : 'angular-ui-router:main'
 					'public/lib/angular-ui-select' : 'angular-ui-select:main'
-					'public/lib/angular-ui-utils'  : 'angular-ui-utils:main'
 					'public/lib/jquery'            : 'jquery:main'
 					'public/lib/lodash'            : 'lodash:main'
 					'public/lib/moment'            : 'moment:main'
