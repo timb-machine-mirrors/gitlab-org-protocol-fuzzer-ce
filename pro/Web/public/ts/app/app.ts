@@ -66,10 +66,21 @@ module Peach {
 					controllerAs: 'vm'
 				})
 				.state(C.States.Faults, {
-					url: '/faults',
+					url: '/faults/:bucket',
 					templateUrl: C.Templates.Faults,
 					controller: FaultsController,
-					controllerAs: 'vm'
+					controllerAs: 'vm',
+					params: { bucket: 'all' }
+				})
+				.state(C.States.FaultsDetail, {
+					url: '/{id:int}',
+					views: {
+						'@': {
+							templateUrl: C.Templates.FaultsDetail,
+							controller: FaultsDetailController,
+							controllerAs: 'vm'
+						}
+					}
 				})
 				.state(C.States.Metrics, {
 					url: '/metrics/:metric',

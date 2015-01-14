@@ -11,7 +11,6 @@
 		export var Monitor = 'peachMonitor';
 		export var Parameter = 'peachParameter';
 		export var ParameterInput = 'peachParameterInput';
-		export var Question = 'peachQuestion';
 		export var Test = 'peachTest';
 		export var Unique = 'peachUnique';
 		export var UniqueChannel = 'peachUniqueChannel';
@@ -19,9 +18,6 @@
 		export var Range = 'peachRange';
 		export var Integer = 'integer';
 		export var HexString = 'hexstring';
-		export var MenuItem = 'peachMenuItem';
-		export var MenuContent = 'peachMenuContent';
-		export var MenuTransclude = 'peachMenuTransclude';
 	}
 
 	export module Controllers {
@@ -33,7 +29,6 @@
 		export var Parameter = 'ParameterController';
 		export var Test = 'TestController';
 		export var Combobox = 'ComboboxController';
-		export var MenuItem = 'MenuItemController';
 	}
 
 	export module Services {
@@ -76,6 +71,7 @@
 	export module Templates {
 		export var Dashboard = 'html/dashboard.html';
 		export var Faults = 'html/faults.html';
+		export var FaultsDetail = 'html/faults/detail.html';
 		export var Metrics = 'html/metrics.html';
 		export var MetricPage = 'html/metrics/:metric.html';
 		export var BucketTimelineItem = 'bucketTimelineItem.html';
@@ -109,14 +105,13 @@
 			export var Question = 'html/directives/question.html';
 			export var Combobox = 'html/directives/combobox.html';
 			export var Test = 'html/directives/test.html';
-			export var MenuItem = 'html/directives/menu-item.html';
-			export var MenuContent = 'html/directives/menu-content.html';
 		}
 	}
 
 	export module States {
 		export var Home = 'home';
 		export var Faults = 'faults';
+		export var FaultsDetail = 'faults.detail';
 		export var Metrics = 'metrics';
 
 		export var Wizard = 'wizard';

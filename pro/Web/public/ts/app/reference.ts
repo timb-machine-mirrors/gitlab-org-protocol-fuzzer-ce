@@ -26,7 +26,6 @@
 /// <reference path="directives/ComboboxDirective.ts" />
 /// <reference path="directives/MonitorDirective.ts" />
 /// <reference path="directives/ParameterDirective.ts" />
-/// <reference path="directives/SidebarDirective.ts" />
 /// <reference path="directives/TestDirective.ts" />
 /// <reference path="directives/UniqueDirective.ts" />
 /// <reference path="directives/UnsavedDirective.ts" />

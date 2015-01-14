@@ -41,8 +41,14 @@ module Peach {
 			return this.faults;
 		}
 
-		public LoadFault(url: string): ng.IPromise<IFaultDetail> {
-			return StripHttpPromise(this.$q, this.$http.get(url));
+		public LoadFaultDetail(id: string): ng.IPromise<IFaultDetail> {
+			var fault = _.find(this.faults, { iteration: id });
+			if (_.isUndefined(fault)) {
+				var defer = this.$q.defer<IFaultDetail>();
+				defer.reject();
+				return defer.promise;
+			}
+			return StripHttpPromise(this.$q, this.$http.get(fault.faultUrl));
 		}
 
 		public get IsRunning(): boolean {

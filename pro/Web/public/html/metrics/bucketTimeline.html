@@ -11,9 +11,7 @@
 <script type="text/ng-template"
 				id="bucketTimelineItem.html">
 	<div>
-		<a ng-click="event.stopPropagation()"
-			 ui-sref="faults.bucket({id: {{item.data.label}})"
-			 style="background: transparent">
+		<a href="{{item.data.href}}">
 			{{item.data.label}}
 		</a>
 		<br />

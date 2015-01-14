@@ -221,7 +221,9 @@
 					No data is available
 				</td>
 			</tr>
-			<tr ng-repeat="row in vm.Faults">
+			<tr ng-repeat="row in vm.Faults"
+					ng-click="vm.OnFaultSelected(row)"
+					class="pointer">
 				<td>{{row.iteration}}</td>
 				<td>{{row.timeStamp | date:'M/d/yy h:mm a'}}</td>
 				<td>{{row.source}}</td>
