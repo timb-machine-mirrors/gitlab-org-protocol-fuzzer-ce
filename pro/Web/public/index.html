@@ -11,7 +11,6 @@
 	<link rel="stylesheet" href="lib/select2/select2.css" />
 	<link rel="stylesheet" href="lib/ace-bootstrap/ace-fonts.css" />
 	<link rel="stylesheet" href="lib/ace-bootstrap/ace.css" />
-	<link rel="stylesheet" href="lib/ace-bootstrap/ace-rtl.css" />
 	<link rel="stylesheet" href="lib/ace-bootstrap/ace-skins.css" />
 	<link rel="stylesheet" href="lib/angular-chart/angular-chart.css" />
 	<link rel="stylesheet" href="lib/angular-loading-bar/loading-bar.css" />
@@ -45,19 +44,18 @@
 <body class="skin-1"
 			ng-controller="MainController">
 
-	<div class="navbar navbar-default"
-			 id="navbar">
+	<div class="navbar navbar-default">
 
 		<div class="navbar-container"
 				 id="navbar-container">
-			<div class="navbar-header pull-left">
+			<div class="navbar-header">
 				<a ui-sref="home">
 					<img src="img/peachlogo.png" />
 				</a>
 			</div>
 
 			<div class="navbar-header pull-right">
-				<ul class="nav ace-nav">
+				<ul class="nav">
 					<li class="tooltip-warning"
 							tooltip="{{vm.JobRunningTooltip}}"
 							tooltip-placement="left"
@@ -75,7 +73,7 @@
 		</div>
 	</div>
 
-	<div class="main-container" id="main-container">
+	<div class="main-container">
 
 		<div class="main-container-inner">
 			<a class="menu-toggler" 
