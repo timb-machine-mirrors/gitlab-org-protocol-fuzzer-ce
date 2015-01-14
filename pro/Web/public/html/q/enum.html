@@ -1,12 +1,12 @@
 ﻿<div class="header blue"
 		 ng-show="vm.IsSetVars">
-	{{question.shortName || question.key}}
+	{{Question.shortName || Question.key}}
 </div>
-<label>{{question.q}}</label>
+<label>{{Question.q}}</label>
 <div class="row">
 	<div class="col-sm-6">
 		<select class="form-control"
-						ng-model="question.value"
-						ng-options="default for default in question.defaults"></select>
+						ng-model="Question.value"
+						ng-options="default for default in Question.defaults"></select>
 	</div>
 </div>

@@ -6,18 +6,18 @@ module Peach {
 	export class MainController {
 
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Angular.$location,
-			Constants.Angular.$modal,
-			Constants.Services.Pit,
-			Constants.Services.Test,
-			Constants.Services.Job,
-			Constants.Services.Wizard
+			C.Angular.$scope,
+			C.Angular.$state,
+			C.Angular.$modal,
+			C.Services.Pit,
+			C.Services.Test,
+			C.Services.Job,
+			C.Services.Wizard
 		];
 
 		constructor(
 			$scope: IViewModelScope,
-			private $location: ng.ILocationService,
+			private $state: ng.ui.IStateService,
 			private $modal: ng.ui.bootstrap.IModalService,
 			private pitService: PitService,
 			private testService: TestService,
@@ -25,6 +25,16 @@ module Peach {
 			private wizardService: WizardService
 		) {
 			$scope.vm = this;
+
+			$scope.$root.$on(C.Angular.$stateChangeSuccess, () => {
+				this.subMenus.forEach(item => {
+					if ($state.includes(item.state)) {
+						item.collapsed = false;
+					} else {
+						item.collapsed = true;
+					}
+				});
+			});
 
 			var promise = this.jobService.GetJobs();
 			promise.then(() => {
@@ -44,8 +54,64 @@ module Peach {
 			return this.jobService.Job;
 		}
 
-		public IsActive(match): boolean {
-			return this.$location.path() === match;
+		public Metrics = [
+			{ id: C.Metrics.BucketTimeline, name: 'Bucket Timeline' },
+			{ id: C.Metrics.FaultTimeline, name: 'Faults Over Time' },
+			{ id: C.Metrics.Mutators, name: 'Mutators' },
+			{ id: C.Metrics.Elements, name: 'Elements' },
+			{ id: C.Metrics.States, name: 'States' },
+			{ id: C.Metrics.Dataset, name: 'Datasets' },
+			{ id: C.Metrics.Buckets, name: 'Buckets' }
+		];
+
+		// TODO: use WizardService definition of tracks
+		public WizardTracks = [
+			{ id: C.Tracks.Intro, name: 'Introduction', state: C.States.WizardTrack },
+			{ id: C.Tracks.Vars, name: 'Set Variables', state: C.States.WizardTrackIntro },
+			{ id: C.Tracks.Fault, name: 'Fault Detection', state: C.States.WizardTrackIntro },
+			{ id: C.Tracks.Data, name: 'Data Collection', state: C.States.WizardTrackIntro },
+			{ id: C.Tracks.Auto, name: 'Automation', state: C.States.WizardTrackIntro },
+			{ id: C.Tracks.Test, name: 'Test', state: C.States.WizardTrack }
+		];
+
+		public ConfigSteps = [
+			{ id: C.States.ConfigVariables, name: 'Variables' },
+			{ id: C.States.ConfigMonitoring, name: 'Monitoring' },
+			{ id: C.States.ConfigTest, name: 'Test' }
+		];
+
+		public OnItemClick(event: ng.IAngularEvent, enabled) {
+			if (!enabled) {
+				event.preventDefault();
+				event.stopPropagation();
+			}
+		}
+
+		private subMenus = [
+			{ state: C.States.Metrics, collapsed: true },
+			{ state: C.States.Wizard, collapsed: true },
+			{ state: C.States.Config, collapsed: true }
+		];
+
+		private getSubMenu(state) {
+			return _.find(this.subMenus, { state: state });
+		}
+
+		public IsCollapsed(state): boolean {
+			return this.getSubMenu(state).collapsed;
+		}
+
+		public OnSubClick(event: ng.IAngularEvent, state, enabled) {
+			event.preventDefault();
+			if (enabled) {
+				this.subMenus.forEach(item => {
+					if (item.state === state) {
+						item.collapsed = !item.collapsed;
+					} else {
+						item.collapsed = true;
+					}
+				});
+			}
 		}
 
 		public get SelectPitPrompt(): string {
@@ -111,16 +177,49 @@ module Peach {
 
 		public OnSelectPit() {
 			var modal = this.$modal.open({
-				templateUrl: Constants.Templates.Modal.PitLibrary,
+				templateUrl: C.Templates.Modal.PitLibrary,
 				controller: PitLibraryController
 			});
 			modal.result.then(() => {
 				if (!this.pitService.IsConfigured) {
-					this.$location.path(Constants.Routes.WizardPrefix + Constants.Tracks.Intro);
+					this.$state.go(C.States.WizardTrack, { track: C.Tracks.Intro });
 				} else {
-					this.$location.path(Constants.Routes.Home);
+					this.$state.go(C.States.Home);
 				}
 			});
+		}
+
+		private showSidebar: boolean = false;
+		private isMenuMin: boolean = false;
+
+		public get IsMenuMinimized(): boolean {
+			return this.isMenuMin;
+		}
+
+		public OnToggleSidebar() {
+			this.isMenuMin = !this.isMenuMin;
+		}
+
+		public get SidebarCollapseClass() {
+			return this.IsMenuMinimized ?
+				'icon-double-angle-right' : 'icon-double-angle-left';
+		}
+
+		public get SidebarClass() {
+			return {
+				'menu-min': this.IsMenuMinimized,
+				'display': this.showSidebar
+			};
+		}
+
+		public get MenuTogglerClass() {
+			return {
+				'display': this.showSidebar
+			};
+		}
+
+		public OnMenuToggle() {
+			this.showSidebar = !this.showSidebar;
 		}
 	}
 }

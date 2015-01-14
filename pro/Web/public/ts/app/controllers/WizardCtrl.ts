@@ -3,64 +3,122 @@
 module Peach {
 	"use strict";
 
-	export class WizardController {
-		public Question: IQuestion;
-		public Step: number;
+	export interface IWizardScope extends IFormScope {
+		trackId: any;
+		track: ITrack;
+		Title: string;
+		Question: IQuestion;
+		Step: number;
+		OnNextTrack: Function;
+		NextPrompt: string;
+		BackPrompt: string;
+		Defines: IParameter[];
+	}
 
+	enum WizardStep {
+		Intro = 1,
+		QA,
+		Review
+	}
+
+	export class WizardBaseController {
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Angular.$location,
-			Constants.Services.Pit,
-			Constants.Services.Wizard,
-			Constants.Services.Job
+			C.Angular.$scope,
+			C.Angular.$state,
+			C.Services.Wizard
 		];
 
 		constructor(
-			private $scope: IFormScope,
-			private $location: ng.ILocationService,
-			private pitService: PitService,
-			private wizardService: WizardService,
-			private jobService: JobService
+			private $scope: IWizardScope,
+			private $state: ng.ui.IStateService,
+			wizardService: WizardService
 		) {
-			$scope.vm = this;
+			$scope.trackId = this.$state.params['track'];
+			$scope.track = wizardService.GetTrack($scope.trackId);
+			$scope.Title = $scope.track.title;
+			$scope.OnNextTrack = () => this.OnNextTrack();
+		}
+
+		public OnNextTrack() {
+			var next = this.$scope.track.next;
+			this.$state.go(next.state, next.params);
+		}
+	}
+
+	export class WizardController {
+		static $inject = [
+			C.Angular.$scope,
+			C.Angular.$state,
+			C.Services.Pit,
+			C.Services.Wizard
+		];
+
+		constructor(
+			private $scope: IWizardScope,
+			private $state: ng.ui.IStateService,
+			private pitService: PitService,
+			private wizardService: WizardService
+		) {
+			var id = this.$state.params['id'];
+			this.init(id);
+		}
+
+		private gotoIntro() {
+			this.$state.go(
+				C.States.WizardTrackIntro,
+				{ track: this.$scope.trackId, id: 0 }
+			);
+			_.defer(() => {
+				this.init(0);
+			});
+		}
+
+		private init(id: number) {
 			this.resetPrompts();
-			var promise = this.track.Begin();
-			if (promise) {
-				promise.then(() => {
-					this.Next();
-				});
+
+			if (id === 0) {
+				if (this.$state.is(C.States.WizardTrackIntro)) {
+					this.$scope.Step = WizardStep.Intro;
+					var promise = this.$scope.track.Begin();
+					if (promise) {
+						promise.then(() => {
+							this.loadQuestion(0);
+						});
+					}
+				}
+				else if (this.$state.is(C.States.WizardTrackReview)) {
+					if (!this.$scope.track.IsValid()) {
+						this.gotoIntro();
+						return;
+					}
+					this.$scope.Step = WizardStep.Review;
+					this.$scope.track.Finish();
+					this.$scope.Question = {
+						id: -1,
+						type: QuestionTypes.Done
+					};
+
+					this.$scope.Defines = this.pitService.Pit.config;
+					this.$scope.NextPrompt = this.$scope.track.nextPrompt;
+					this.$scope.BackPrompt = this.$scope.track.backPrompt;
+				}
+			} else {
+				this.$scope.Step = WizardStep.QA;
+				this.loadQuestion(id);
 			}
 		}
 
-		public get IncludeUrl(): string {
-			if (_.isUndefined(this.Question)) {
-				return "";
+		private loadQuestion(id: number) {
+			this.$scope.Question = this.$scope.track.GetQuestionById(id);
+			if (this.$scope.Question) {
+				this.prepareQuestion();
+			} else {
+				this.gotoIntro();
 			}
-			if (_.isUndefined(this.Question.qref)) {
-				var types = [
-					'hwaddr',
-					'iface',
-					'ipv4',
-					'ipv6'
-				];
-				var template = this.Question.type;
-				if (_.contains(types, template)) {
-					template = 'combo';
-				}
-				if (template === 'user') {
-					template = 'string';
-				}
-				return 'html/q/' + template + '.html';
-			}
-			return this.Question.qref;
-		}
-
-		public get Defines(): IParameter[] {
-			return this.pitService.Pit.config;
 		}
 
 		public get FaultAgentDescription(): string {
-			var agent = this.wizardService.GetTrack(Constants.Tracks.Fault).agents[0];
+			var agent = this.wizardService.GetTrack(C.Tracks.Fault).agents[0];
 			var ret = '';
 			agent.monitors.forEach((item: IMonitor) => {
 				if (!ret) {
@@ -71,132 +129,89 @@ module Peach {
 			return ret;
 		}
 
-		public SelectedOptions = [];
-
 		public get DataAgents(): Agent[] {
-			return this.wizardService.GetTrack(Constants.Tracks.Data).agents;
+			return this.wizardService.GetTrack(C.Tracks.Data).agents;
 		}
 
 		public get AutoAgents(): Agent[] {
-			return this.wizardService.GetTrack(Constants.Tracks.Auto).agents;
-		}
-
-		public get Title(): string {
-			return this.track.title;
+			return this.wizardService.GetTrack(C.Tracks.Auto).agents;
 		}
 
 		public get IsTestComplete(): boolean {
-			return this.wizardService.GetTrack(Constants.Tracks.Test).isComplete;
+			return this.wizardService.GetTrack(C.Tracks.Test).isComplete;
 		}
-
-		public get IsSetVars(): boolean {
-			return this.$location.path() ===
-				(Constants.Routes.WizardPrefix + Constants.Tracks.Vars);
-		}
-
-		public NextPrompt: string;
 
 		public get CanMoveNext(): boolean {
-			return !this.$scope.form.$invalid;
+			return this.$scope.Question && !this.$scope.form.$invalid;
 		}
 
-		public BackPrompt: string;
-
 		public get CanMoveBack(): boolean {
-			return this.track.history.length > 0;
+			return this.$scope.track.history.length > 0;
 		}
 
 		public Next() {
-			if (_.isUndefined(this.Question)) {
-				// if we're not on a question, get the first available
-				this.Question = this.track.GetQuestionById(0);
-			} else {
-				var q = this.Question;
-
-				if (q.type === QuestionTypes.Done) {
-					this.OnNextTrack();
-					return;
-				}
-
-				if (q.type !== QuestionTypes.Jump) {
-					this.track.history.push(q.id);
-				}
-
-				var nextId = this.getNextId(q);
-				if (_.isUndefined(nextId)) {
-					// no more questions, this track is complete
-					this.track.Finish();
-
-					this.Question = {
-						id: -1,
-						type: QuestionTypes.Done,
-						qref: this.track.qref
-					};
-
-					this.NextPrompt = this.track.nextPrompt;
-					this.BackPrompt = this.track.backPrompt;
-				} else {
-					this.Question = this.track.GetQuestionById(nextId);
-				}
+			if (this.$scope.Question.type === QuestionTypes.Done) {
+				this.$scope.OnNextTrack();
+				return;
 			}
 
-			this.Step = 2;
+			if (this.$scope.Question.type !== QuestionTypes.Jump) {
+				this.$scope.track.history.push(this.$scope.Question.id);
+			}
 
-			this.prepareQuestion();
+			var nextId = this.getNextId(this.$scope.Question);
+
+			if (_.isUndefined(nextId)) {
+				// no more questions, this track is complete
+				this.$state.go(
+					C.States.WizardTrackReview,
+					{ track: this.$scope.trackId, id: 0 }
+				);
+			} else {
+				this.$state.go(
+					C.States.WizardTrackQuestion,
+					{ track: this.$scope.trackId, id: nextId }
+				);
+			}
 		}
 
 		public Back() {
-			if (this.Question.type === QuestionTypes.Done) {
+			if (this.$scope.Question.type === QuestionTypes.Done) {
 				this.OnRestart();
 				return;
 			}
 
-			// pop the history and get the question
 			var previousId = 0;
-			if (this.track.history.length > 0) {
-				previousId = this.track.history.pop();
+			if (this.$scope.track.history.length > 0) {
+				previousId = this.$scope.track.history.pop();
 			}
 
-			this.Question = this.track.GetQuestionById(previousId);
-
-			if (this.Question.type === QuestionTypes.Intro) {
-				this.Step = 1;
-			} else if (this.Question.type === QuestionTypes.Done) {
-				this.Step = 3;
+			if (previousId === 0) {
+				this.$state.go(
+					C.States.WizardTrackIntro,
+					{ track: this.$scope.trackId, id: 0 }
+				);
 			} else {
-				this.Step = 2;
+				this.$state.go(
+					C.States.WizardTrackQuestion,
+					{ track: this.$scope.trackId, id: previousId }
+				);
 			}
-		}
-
-		public OnNextTrack() {
-			this.$location.path(this.track.next);
 		}
 
 		public OnRestart() {
-			this.track.Restart();
-			this.resetPrompts();
-			this.Question = undefined;
-			this.Next();
+			this.$scope.track.Restart();
+			this.$state.go(
+				C.States.WizardTrackIntro,
+				{ track: this.$scope.trackId, id: 0 }
+			);
+			_.defer(() => {
+				this.init(0);
+			});
 		}
 
 		public OnRemoveAgent(index: number) {
-			this.track.agents.splice(index, 1);
-		}
-
-		public get CanStartJob() {
-			return this.jobService.CanStart;
-		}
-
-		public StartJob() {
-			this.jobService.StartJob();
-			this.OnNextTrack();
-		}
-
-		public OnInsertDefine(def: IParameter) {
-			if (_.isUndefined(this.Question.value)) {
-				this.Question.value = "";
-			}
-			this.Question.value += "##" + def.key + "##";
+			this.$scope.track.agents.splice(index, 1);
 		}
 
 		private getNextId(q: IQuestion): number {
@@ -227,11 +242,10 @@ module Peach {
 		}
 
 		private prepareQuestion() {
+			this.$scope.Defines = this.pitService.Pit.config;
+
 			// special stuff to do based on the next question
-			switch (this.Question.type) {
-				case QuestionTypes.Intro:
-					this.Step = 1;
-					break;
+			switch (this.$scope.Question.type) {
 				case QuestionTypes.Jump:
 					this.Next();
 					break;
@@ -240,40 +254,76 @@ module Peach {
 					// if the first choice has a value, set default selection to first
 					// if the first choice doesn't have a value it's a un-keyed choice, set default to 0
 					// look at q-choice.html to see how its binding works
-					if (_.isUndefined(this.Question.value)) {
-						var first = _.first(this.Question.choice);
+					if (_.isUndefined(this.$scope.Question.value)) {
+						var first = _.first(this.$scope.Question.choice);
 						if (_.isUndefined(first.value)) {
-							this.Question.value = first.next;
+							this.$scope.Question.value = first.next;
 						} else {
-							this.Question.value = first.value;
+							this.$scope.Question.value = first.value;
 						}
 					}
 					break;
 				case QuestionTypes.Range:
-					if (_.isUndefined(this.Question.value)) {
-						this.Question.value = this.Question.rangeMin;
+					if (_.isUndefined(this.$scope.Question.value)) {
+						this.$scope.Question.value = this.$scope.Question.rangeMin;
 					}
-					break;
-				case QuestionTypes.Done:
-					this.Step = 3;
 					break;
 				default:
 					break;
 			}
 		}
 
-		private get track(): ITrack {
-			var re = new RegExp("/quickstart/([^/]+)");
-			var match = re.exec(this.$location.path());
-			if (match) {
-				return this.wizardService.GetTrack(match[1]);
-			}
-			return this.wizardService.GetTrack(Constants.Tracks.Default);;
+		private resetPrompts() {
+			this.$scope.NextPrompt = "Next";
+			this.$scope.BackPrompt = "Back";
+		}
+	}
+
+	export class WizardTrackQuestionController {
+		static $inject = [
+			C.Angular.$scope,
+			C.Angular.$state
+		];
+
+		constructor(
+			private $scope: IWizardScope,
+			private $state: ng.ui.IStateService,
+			private pitService: PitService
+		) {
 		}
 
-		private resetPrompts() {
-			this.NextPrompt = "Next";
-			this.BackPrompt = "Back";
+		public get IncludeUrl(): string {
+			if (_.isUndefined(this.$scope.Question)) {
+				return "";
+			}
+			var types = [
+				QuestionTypes.HwAddress,
+				QuestionTypes.Iface,
+				QuestionTypes.Ipv4,
+				QuestionTypes.Ipv6
+			];
+			var template = this.$scope.Question.type;
+			if (_.contains(types, template)) {
+				template = 'combo';
+			}
+			if (template === 'user') {
+				template = 'string';
+			}
+			return C.Templates.Wizard.QuestionType.replace(':type', template);
+		}
+
+		public get IsSetVars(): boolean {
+			return this.$state.includes(
+				C.States.WizardTrack,
+				{ track: C.Tracks.Vars }
+			);
+		}
+
+		public OnInsertDefine(def: IParameter) {
+			if (_.isUndefined(this.$scope.Question.value)) {
+				this.$scope.Question.value = "";
+			}
+			this.$scope.Question.value += "##" + def.key + "##";
 		}
 	}
 }

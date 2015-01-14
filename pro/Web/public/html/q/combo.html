@@ -1,20 +1,20 @@
 ﻿<div class="header blue"
 		 ng-show="vm.IsSetVars">
-	{{question.shortName || question.key}}
+	{{Question.shortName || Question.key}}
 </div>
 <div>
 	<label>
-		{{question.q}}
+		{{Question.q}}
 	</label>
 </div>
-<p ng-if="!question.required">
+<p ng-if="!Question.required">
 	(Optional)
 </p>
 <div class="row">
 	<peach:combobox name="question"
-									ng-model="question.value"
-									ng-required="question.required"
-									data="question.defaults"
+									ng-model="Question.value"
+									ng-required="Question.required"
+									data="Question.defaults"
 									class="col-sm-6">
 	</peach:combobox>
 </div>

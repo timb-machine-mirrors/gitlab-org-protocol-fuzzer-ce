@@ -7,10 +7,10 @@ module Peach {
 
 	export class JobService {
 		static $inject = [
-			Constants.Angular.$q,
-			Constants.Angular.$http,
-			Constants.Angular.$interval,
-			Constants.Services.Pit
+			C.Angular.$q,
+			C.Angular.$http,
+			C.Angular.$interval,
+			C.Services.Pit
 		];
 
 		constructor(
@@ -86,7 +86,7 @@ module Peach {
 
 		public GetJobs(): ng.IPromise<void> {
 			var deferred = this.$q.defer<void>();
-			var promise = this.$http.get(Constants.Urls.Jobs);
+			var promise = this.$http.get(C.Api.Jobs);
 			promise.success((jobs: IJob[]) => {
 				var hasPit = false;
 				if (jobs.length > 0) {
@@ -120,7 +120,7 @@ module Peach {
 			}
 
 			if (this.CanStart) {
-				var promise = this.$http.post(Constants.Urls.Jobs, job);
+				var promise = this.$http.post(C.Api.Jobs, job);
 				promise.success((newJob: IJob) => {
 					this.job = newJob;
 					this.startJobPoller();

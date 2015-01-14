@@ -55,19 +55,19 @@ module Peach {
 
 	export class MetricsController {
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Angular.$routeParams,
-			Constants.Angular.$http,
-			Constants.Angular.$interpolate,
-			Constants.Angular.$templateCache,
-			Constants.Angular.$timeout,
-			Constants.Vendor.VisDataSet,
-			Constants.Services.Job
+			C.Angular.$scope,
+			C.Angular.$stateParams,
+			C.Angular.$http,
+			C.Angular.$interpolate,
+			C.Angular.$templateCache,
+			C.Angular.$timeout,
+			C.Vendor.VisDataSet,
+			C.Services.Job
 		];
 
 		constructor(
 			private $scope: IViewModelScope,
-			$routeParams: ng.route.IRouteParamsService,
+			$stateParams: ng.ui.IStateParamsService,
 			private $http: ng.IHttpService,
 			private $interpolate: ng.IInterpolateService,
 			private $templateCache: ng.ITemplateCacheService,
@@ -75,13 +75,8 @@ module Peach {
 			private visDataSet,
 			private jobService: JobService
 		) {
-			$scope.vm = this;
-			this.metric = $routeParams['metric'];
+			this.metric = $stateParams['metric'];
 			this.initializeData();
-		}
-
-		public get IncludeUrl(): string {
-			return Constants.Templates.Metric(this.metric);
 		}
 
 		private metric: string;
@@ -122,7 +117,7 @@ module Peach {
 				if (item.content) {
 					return item.content;
 				}
-				var html = this.$templateCache.get(Constants.Templates.BucketTimelineItem);
+				var html = this.$templateCache.get(C.Templates.BucketTimelineItem);
 				return this.$interpolate(html)({ item: item });
 			}
 		}
@@ -130,7 +125,7 @@ module Peach {
 		private initializeData(): void {
 			var promise = this.getData();
 			switch (this.metric) {
-			case Constants.Metrics.BucketTimeline:
+			case C.Metrics.BucketTimeline:
 				promise.success((data: IBucketTimelineMetric[]) => {
 					var items = data.map((item: IBucketTimelineMetric) => {
 						return <ITimelineItem> {
@@ -159,7 +154,7 @@ module Peach {
 					}, 100);
 				});
 				break;
-			case Constants.Metrics.FaultTimeline:
+			case C.Metrics.FaultTimeline:
 				promise.success((data: IFaultTimelineMetric[]) => {
 					if (data.length === 0) {
 						this.FaultsOverTimeLabels = [moment(Date.now()).format("M/D h a")];
@@ -170,31 +165,31 @@ module Peach {
 					}
 				});
 				break;
-			case Constants.Metrics.Mutators:
+			case C.Metrics.Mutators:
 				this.MutatorData = _.clone(this.AllMutatorData);
 				promise.success((data: IMutatorMetric[]) => {
 					this.AllMutatorData = data;
 				});
 				break;
-			case Constants.Metrics.Elements:
+			case C.Metrics.Elements:
 				this.ElementData = _.clone(this.AllElementData);
 				promise.success((data: IElementMetric[]) => {
 					this.AllElementData = data;
 				});
 				break;
-			case Constants.Metrics.Dataset:
+			case C.Metrics.Dataset:
 				this.DatasetData = _.clone(this.AllDatasetData);
 				promise.success((data: IDatasetMetric[]) => {
 					this.AllDatasetData = data;
 				});
 				break;
-			case Constants.Metrics.States:
+			case C.Metrics.States:
 				this.StateData = _.clone(this.AllStateData);
 				promise.success((data: IStateMetric[]) => {
 					this.AllStateData = data;
 				});
 				break;
-			case Constants.Metrics.Buckets:
+			case C.Metrics.Buckets:
 				this.BucketData = _.clone(this.AllBucketData);
 				promise.success((data: IBucketMetric[]) => {
 					this.AllBucketData = data;

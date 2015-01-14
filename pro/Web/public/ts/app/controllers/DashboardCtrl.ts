@@ -6,10 +6,10 @@ module Peach {
 	export class DashboardController {
 
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Angular.$modal,
-			Constants.Services.Pit,
-			Constants.Services.Job
+			C.Angular.$scope,
+			C.Angular.$modal,
+			C.Services.Pit,
+			C.Services.Job
 		];
 
 		constructor(
@@ -18,8 +18,6 @@ module Peach {
 			private pitService: PitService,
 			private jobService: JobService
 		) {
-			$scope.vm = this;
-
 			$scope.$watch('vm.jobService.Faults.length', (newVal, oldVal) => {
 				if (newVal !== oldVal) {
 					this.refreshFaults();
@@ -83,7 +81,7 @@ module Peach {
 
 		public StartWithOptions() {
 			this.$modal.open({
-				templateUrl: Constants.Templates.Modal.StartJob,
+				templateUrl: C.Templates.Modal.StartJob,
 				controller: StartJobController
 			}).result.then((job: IJob) => {
 				this.jobService.StartJob(job);

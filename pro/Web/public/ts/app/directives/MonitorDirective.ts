@@ -4,10 +4,10 @@ module Peach {
 	"use strict";
 
 	export var MonitorDirective: IDirective = {
-		ComponentID: Constants.Directives.Monitor,
+		ComponentID: C.Directives.Monitor,
 		restrict: 'E',
-		templateUrl: Constants.Templates.Directives.Monitor,
-		controller: Constants.Controllers.Monitor,
+		templateUrl: C.Templates.Directives.Monitor,
+		controller: C.Controllers.Monitor,
 		scope: {
 			monitors: '=',
 			monitor: '=',
@@ -26,8 +26,8 @@ module Peach {
 
 	export class MonitorController {
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Services.Pit
+			C.Angular.$scope,
+			C.Services.Pit
 		];
 
 		constructor(

@@ -7,9 +7,9 @@ module Peach {
 		public Error: string = "";
 
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Angular.$modalInstance,
-			Constants.Services.Pit,
+			C.Angular.$scope,
+			C.Angular.$modalInstance,
+			C.Services.Pit,
 			"pit"
 		];
 

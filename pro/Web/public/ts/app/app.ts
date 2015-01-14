@@ -33,70 +33,122 @@ module Peach {
 		"chart.js",
 		"ngMessages",
 		"ngSanitize",
-		"ngRoute",
 		"ngVis",
 		"smart-table",
 		"treeControl",
-		"ui.select", 
-		"ui.bootstrap"
-	]);
-
-	p.config([
-		Constants.Angular.$httpProvider,
-		($httpProvider: ng.IHttpProvider) => {
-			$httpProvider.interceptors.push(Constants.Services.HttpError);
-		}
+		"ui.bootstrap",
+		"ui.select",
+		"ui.router"
 	]);
 
 	registerModule(Peach, p);
 
 	p.config([
-		Constants.Angular.$routeProvider,
-		($routeProvider: ng.route.IRouteProvider) => {
-			$routeProvider
-				.when(Constants.Routes.Home, {
-					templateUrl: Constants.Templates.Dashboard,
-					controller: DashboardController
+		C.Angular.$httpProvider,
+		($httpProvider: ng.IHttpProvider) => {
+			$httpProvider.interceptors.push(C.Services.HttpError);
+		}
+	]);
+
+	p.config([
+		C.Angular.$stateProvider,
+		C.Angular.$urlRouterProvider, (
+			$stateProvider: ng.ui.IStateProvider,
+			$urlRouterProvider: ng.ui.IUrlRouterProvider
+		) => {
+			$urlRouterProvider.otherwise('/');
+
+			$stateProvider
+				.state(C.States.Home, {
+					url: '/',
+					templateUrl: C.Templates.Dashboard,
+					controller: DashboardController,
+					controllerAs: 'vm'
 				})
-				.when(Constants.Routes.Faults, {
-					templateUrl: Constants.Templates.Faults,
-					controller: FaultsController
+				.state(C.States.Faults, {
+					url: '/faults',
+					templateUrl: C.Templates.Faults,
+					controller: FaultsController,
+					controllerAs: 'vm'
 				})
-				.when(Constants.Routes.Metrics, {
-					templateUrl: Constants.Templates.Metrics,
-					controller: MetricsController
+				.state(C.States.Metrics, {
+					url: '/metrics/:metric',
+					templateUrl: params =>
+						C.Templates.MetricPage.replace(':metric', params.metric),
+					controller: MetricsController,
+					controllerAs: 'vm'
 				})
-				.when(Constants.Routes.WizardPrefix + Constants.Tracks.Intro, {
-					templateUrl: Constants.Templates.Wizard.Intro,
-					controller: WizardController
+				.state(C.States.Wizard, {
+					abstract: true,
+					url: '/quickstart/:track',
+					templateUrl: C.Templates.Wizard.Base,
+					controller: WizardBaseController,
+					controllerAs: 'vm'
 				})
-				.when(Constants.Routes.WizardPrefix + Constants.Tracks.Done, {
-					templateUrl: Constants.Templates.Wizard.Done,
-					controller: WizardController
+				.state(C.States.WizardTrack, {
+					url: '/{id:int}',
+					templateUrl: params => {
+						switch (params.track) {
+							case C.Tracks.Intro:
+								return C.Templates.Wizard.Intro;
+							case C.Tracks.Test:
+								return C.Templates.Wizard.Test;
+						}
+						return C.Templates.Wizard.Track;
+					},
+					controllerProvider: ($stateParams): any => {
+						switch ($stateParams.track) {
+							case C.Tracks.Intro:
+								return WizardBaseController;
+							case C.Tracks.Test:
+								return PitTestController;
+						}
+						return WizardController;
+					},
+					controllerAs: 'vm',
+					params: {
+						id: { value: 0, squash: true }
+					}
 				})
-				.when(Constants.Routes.WizardPrefix + Constants.Tracks.Test, {
-					templateUrl: Constants.Templates.Wizard.Test,
-					controller: PitTestController
+				.state(C.States.WizardTrackIntro, {
+					url: '/intro',
+					templateUrl: params =>
+						C.Templates.Wizard.TrackIntro.replace(':track', params.track)
 				})
-				.when(Constants.Routes.WizardStep, {
-					templateUrl: Constants.Templates.Wizard.Step,
-					controller: WizardController
+				.state(C.States.WizardTrackQuestion, {
+					templateUrl: C.Templates.Wizard.Question,
+					controller: WizardTrackQuestionController,
+					controllerAs: 'vm'
 				})
-				.when(Constants.Routes.ConfigMonitoring, {
-					templateUrl: Constants.Templates.Config.Monitoring,
-					controller: ConfigureMonitorsController
+				.state(C.States.WizardTrackReview, {
+					url: '/review',
+					templateUrl: params =>
+						C.Templates.Wizard.TrackDone.replace(':track', params.track)
 				})
-				.when(Constants.Routes.ConfigVariables, {
-					templateUrl: Constants.Templates.Config.Variables,
-					controller: ConfigureVariablesController
+				.state(C.States.Config, {
+					abstract: true,
+					url: '/config',
+					template: '<div ui-view></div>'
 				})
-				.when(Constants.Routes.ConfigTest, {
-					templateUrl: Constants.Templates.Config.Test,
-					controller: PitTestController
+				.state(C.States.ConfigVariables, {
+					url: '/variables',
+					templateUrl: C.Templates.Config.Variables,
+					controller: ConfigureVariablesController,
+					controllerAs: 'vm'
 				})
-				.otherwise({
-					redirectTo: Constants.Routes.Home
-				});
+				.state(C.States.ConfigMonitoring, {
+					url: '/monitoring',
+					templateUrl: C.Templates.Config.Monitoring,
+					controller: ConfigureMonitorsController,
+					controllerAs: 'vm'
+				})
+				.state(C.States.ConfigTest, {
+					url: '/test',
+					templateUrl: C.Templates.Config.Test,
+					controller: PitTestController,
+					controllerAs: 'vm'
+				})
+			;
 		}
 	]);
 
@@ -152,7 +204,7 @@ module Peach {
 			alert(
 				"This application requires an HTML 5 and ECMAScript 5 capable browser. " +
 				"Please upgrade your browser to a more recent version."
-			);
+				);
 		} else {
 			initialize();
 		}

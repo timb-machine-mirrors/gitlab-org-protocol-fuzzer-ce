@@ -4,24 +4,24 @@ module Peach {
 	"use strict";
 
 	export var TestDirective: IDirective = {
-		ComponentID: Constants.Directives.Test,
+		ComponentID: C.Directives.Test,
 		restrict: 'E',
-		templateUrl: Constants.Templates.Directives.Test,
-		controller: Constants.Controllers.Test,
+		templateUrl: C.Templates.Directives.Test,
+		controller: C.Controllers.Test,
+		controllerAs: 'vm',
 		scope: {}
 	}
 
 	export class TestController {
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Services.Test
+			C.Angular.$scope,
+			C.Services.Test
 		];
 
 		constructor(
 			private $scope: IAgentScope,
 			private testService: TestService
 		) {
-			$scope.vm = this;
 		}
 
 		public get IsAvailable(): boolean {
@@ -42,6 +42,18 @@ module Peach {
 
 		public get TestTime(): string {
 			return this.testService.TestTime;
+		}
+
+		public get ShowTestPending(): boolean {
+			return this.testService.IsPending;
+		}
+
+		public get ShowTestPass(): boolean {
+			return this.testService.TestResult.status === TestStatus.Pass;
+		}
+
+		public get ShowTestFail() {
+			return this.testService.TestResult.status === TestStatus.Fail;
 		}
 
 		public StatusClass(row: ITestEvent): any {

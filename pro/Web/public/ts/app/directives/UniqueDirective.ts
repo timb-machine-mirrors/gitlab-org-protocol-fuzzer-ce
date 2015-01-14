@@ -14,20 +14,20 @@ module Peach {
 	}
 
 	export var UniqueDirective: IDirective = {
-		ComponentID: Constants.Directives.Unique,
+		ComponentID: C.Directives.Unique,
 		restrict: 'A',
-		require: Constants.Angular.ngModel,
+		require: C.Angular.ngModel,
 		scope: {
-			unique: '&' + Constants.Directives.Unique,
+			unique: '&' + C.Directives.Unique,
 			watch: '@peachUniqueWatch',
 			defaultValue: '@peachUniqueDefault'
 		},
-		link(
+		link: (
 			scope: IUniqueScope,
 			element: ng.IAugmentedJQuery,
 			attrs: ng.IAttributes,
 			ctrl: ng.INgModelController
-		) {
+		) => {
 			var validate = (modelValue, viewValue) => {
 				var collection = scope.unique();
 				return !_.contains(collection, viewValue || scope.defaultValue);
@@ -46,13 +46,13 @@ module Peach {
 	}
 
 	export var UniqueChannelDirective: IDirective = {
-		ComponentID: Constants.Directives.UniqueChannel,
+		ComponentID: C.Directives.UniqueChannel,
 		restrict: 'A',
-		require: Constants.Angular.ngModel,
-		controller: Constants.Controllers.UniqueChannel,
+		require: C.Angular.ngModel,
+		controller: C.Controllers.UniqueChannel,
 		controllerAs: 'ctrl',
 		scope: {
-			channel: '@' + Constants.Directives.UniqueChannel,
+			channel: '@' + C.Directives.UniqueChannel,
 			defaultValue: '@peachUniqueDefault',
 			ignore: '@peachUniqueIgnore'
 		},
@@ -68,7 +68,7 @@ module Peach {
 	}
 
 	export class UniqueChannelController {
-		static $inject = [Constants.Angular.$scope, Constants.Services.Unique];
+		static $inject = [C.Angular.$scope, C.Services.Unique];
 
 		constructor(
 			private $scope: IUniqueScope,

@@ -19,6 +19,8 @@
 	<link rel="stylesheet" href="lib/angular-ui-select/select.css" />
 	<link rel="stylesheet" href="lib/vis/vis.css" />
 	<link rel="stylesheet" href="css/app.css" />
+	<link rel="stylesheet" href="css/combobox.css" />
+	<link rel="stylesheet" href="css/ui-select.css" />
 
 	<script src="lib/lodash/lodash.compat.js"></script>
 	<script src="lib/jquery/jquery.js"></script>
@@ -26,17 +28,15 @@
 	<script src="lib/vis/vis.js"></script>
 	<script src="lib/moment/moment.js"></script>
 	<script src="lib/bootstrap/js/bootstrap.js"></script>
-	<script src="lib/ace-bootstrap/ace.js"></script>
-	<script src="lib/ace-bootstrap/ace-extra.js"></script>
 	<script src="lib/angular/angular.js"></script>
 	<script src="lib/angular-bootstrap/ui-bootstrap-tpls.js"></script>
 	<script src="lib/angular-chart/angular-chart.js"></script>
 	<script src="lib/angular-loading-bar/loading-bar.js"></script>
 	<script src="lib/angular-messages/angular-messages.js"></script>
-	<script src="lib/angular-route/angular-route.js"></script>
 	<script src="lib/angular-sanitize/angular-sanitize.js"></script>
 	<script src="lib/angular-smart-table/smart-table.js"></script>
 	<script src="lib/angular-tree-control/js/angular-tree-control.js"></script>
+	<script src="lib/angular-ui-router/angular-ui-router.js"></script>
 	<script src="lib/angular-ui-select/select.js"></script>
 	<script src="js/angular-vis.js"></script>
 
@@ -51,7 +51,7 @@
 		<div class="navbar-container"
 				 id="navbar-container">
 			<div class="navbar-header pull-left">
-				<a href="#">
+				<a ui-sref="home">
 					<img src="img/peachlogo.png" />
 				</a>
 			</div>
@@ -60,7 +60,8 @@
 				<ul class="nav ace-nav">
 					<li class="tooltip-warning"
 							tooltip="{{vm.JobRunningTooltip}}"
-							tooltip-placement="left">
+							tooltip-placement="left"
+							ng-cloak>
 						<button type="button"
 										class="btn btn-primary"
 										ng-class="{disabled: !vm.CanSelectPit}"
@@ -77,16 +78,20 @@
 	<div class="main-container" id="main-container">
 
 		<div class="main-container-inner">
-			<a class="menu-toggler" id="menu-toggler" href="#">
+			<a class="menu-toggler" 
+				 href="#"
+				 ng-click="vm.OnMenuToggle()"
+				 ng-class="vm.MenuTogglerClass">
 				<span class="menu-text"></span>
 			</a>
 
-			<div class="sidebar" id="sidebar">
+			<div class="sidebar"
+					 ng-class="vm.SidebarClass">
+				<ul class="nav nav-list"
+						ng-cloak>
 
-				<ul class="nav nav-list">
-
-					<li ng-class="{active: vm.IsActive('/')}">
-						<a href="#/">
+					<li ui-sref-active="active">
+						<a ui-sref="home">
 							<i class="icon-dashboard"></i>
 							<span class="menu-text">
 								Dashboard
@@ -94,11 +99,12 @@
 						</a>
 					</li>
 
-					<li class="tooltip-warning"
-							ng-class="{active: vm.IsActive('/faults/all'), disabled: !vm.CanViewFaults}"
+					<li ui-sref-active="active"
+							ng-class="{disabled: !vm.CanViewFaults}"
 							tooltip="{{vm.FaultsUnavailableTooltip}}"
 							tooltip-placement="right">
-						<a href="#/faults/all">
+						<a ui-sref="faults"
+							 ng-click="vm.OnItemClick($event, vm.CanViewFaults)">
 							<i class="icon-fire"></i>
 							<span class="menu-text">
 								Faults
@@ -107,13 +113,12 @@
 						</a>
 					</li>
 
-					<li class="tooltip-warning"
-							ng-class="{active: vm.IsActive('/metrics'), disabled: !vm.CanViewMetrics}"
+					<li ui-sref-active="active"
+							ng-class="{disabled: !vm.CanViewMetrics}"
 							tooltip="{{vm.MetricsUnavailableTooltip}}"
 							tooltip-placement="right">
 						<a href="#"
-							 class="dropdown-toggle"
-							 ng-class="{disabled: !vm.CanViewMetrics}">
+							 ng-click="vm.OnSubClick($event, 'metrics', vm.CanViewMetrics)">
 							<i class="icon-signal"></i>
 							<span class="menu-text">
 								Metrics
@@ -121,153 +126,70 @@
 							<b class="arrow icon-angle-down"></b>
 						</a>
 
-						<ul class="submenu">
-
-							<li ng-class="{active: vm.IsActive('/metrics/bucketTimeline')}">
-								<a href="#/metrics/bucketTimeline">
+						<ul class="submenu"
+								collapse="vm.IsCollapsed('metrics')">
+							<li ui-sref-active="active"
+									ng-repeat="item in vm.Metrics">
+								<a ui-sref="metrics({metric: item.id})">
 									<i class="icon-double-angle-right"></i>
 									<span class="menu-text">
-										Bucket Timeline
+										{{item.name}}
 									</span>
 								</a>
 							</li>
+						</ul>
+					</li>
 
-							<li ng-class="{active: vm.IsActive('/metrics/faultTimeline')}">
-								<a href="#/metrics/faultTimeline">
-									<i class="icon-double-angle-right"></i>
-									<span class="menu-text">Faults Over Time</span>
-								</a>
-							</li>
+					<li ui-sref-active="active"
+							ng-class="{disabled: !vm.CanConfigurePit}"
+							tooltip="{{vm.JobRunningTooltip}}"
+							tooltip-placement="right">
+						<a href="#"
+							 ng-click="vm.OnSubClick($event, 'wizard', vm.CanConfigurePit)">
+							<i class="icon-desktop"></i>
+							<span class="menu-text">
+								Quick Start
+							</span>
+							<b class="arrow icon-angle-down"></b>
+						</a>
 
-							<li ng-class="{active: vm.IsActive('/metrics/mutators')}">
-								<a href="#/metrics/mutators">
+						<ul class="submenu"
+								collapse="vm.IsCollapsed('wizard')">
+							<li ui-sref-active="active"
+									ng-repeat="item in vm.WizardTracks">
+								<a ui-sref="{{item.state}}({track: item.id, id: 0})">
 									<i class="icon-double-angle-right"></i>
-									<span class="menu-text">Mutators</span>
-								</a>
-							</li>
-
-							<li ng-class="{active: vm.IsActive('/metrics/elements')}">
-								<a href="#/metrics/elements">
-									<i class="icon-double-angle-right"></i>
-									<span class="menu-text">Elements</span>
-								</a>
-							</li>
-
-							<li ng-class="{active: vm.IsActive('/metrics/states')}">
-								<a href="#/metrics/states">
-									<i class="icon-double-angle-right"></i>
-									<span class="menu-text">States</span>
-								</a>
-							</li>
-
-							<li ng-class="{active: vm.IsActive('/metrics/dataset')}">
-								<a href="#/metrics/dataset">
-									<i class="icon-double-angle-right"></i>
-									<span class="menu-text">Datasets</span>
-								</a>
-							</li>
-
-							<li ng-class="{active: vm.IsActive('/metrics/buckets')}">
-								<a href="#/metrics/buckets">
-									<i class="icon-double-angle-right"></i>
-									<span class="menu-text">Buckets</span>
+									<span class="menu-text">
+										<i ng-class="{'icon-ok-sign green': vm.IsComplete(item.id)}"></i>
+										{{item.name}}
+									</span>
 								</a>
 							</li>
 						</ul>
 					</li>
 
-					<li class="tooltip-warning"
+					<li ui-sref-active="active"
 							ng-class="{disabled: !vm.CanConfigurePit}"
 							tooltip="{{vm.JobRunningTooltip}}"
 							tooltip-placement="right">
-						<a class="dropdown-toggle"
-							 href="#"
-							 ng-class="{disabled: !vm.CanConfigurePit}">
+						<a href="#"
+							 ng-click="vm.OnSubClick($event, 'config', vm.CanConfigurePit)">
 							<i class="icon-desktop"></i>
-							<span class="menu-text">Quick Start</span>
+							<span class="menu-text">
+								Configuration
+							</span>
 							<b class="arrow icon-angle-down"></b>
 						</a>
-						<ul class="submenu">
-							<li ng-class="{active: vm.IsActive('/quickstart/intro'), disabled: !vm.CanConfigurePit}">
-								<a href="#/quickstart/intro">
-									<i class="icon-double-angle-right"></i>
-									<i ng-class="{'icon-ok-sign green': vm.IsComplete('intro')}"></i>
-									Introduction
-								</a>
-							</li>
-							<li ng-class="{active: vm.IsActive('/quickstart/vars'), disabled: !vm.CanConfigurePit}">
-								<a href="#/quickstart/vars">
-									<i class="icon-double-angle-right"></i>
-									<i ng-class="{'icon-ok-sign green': vm.IsComplete('vars')}"></i>
-									Set Variables
-								</a>
-							</li>
-							<li ng-class="{active: vm.IsActive('/quickstart/fault'), disabled: !vm.CanConfigurePit}">
-								<a href="#/quickstart/fault">
-									<i class="icon-double-angle-right"></i>
-									<i ng-class="{'icon-ok-sign green': vm.IsComplete('fault')}"></i>
-									Fault Detection
-								</a>
-							</li>
-							<li ng-class="{active: vm.IsActive('/quickstart/data'), disabled: !vm.CanConfigurePit}">
-								<a href="#/quickstart/data">
-									<i class="icon-double-angle-right"></i>
-									<i ng-class="{'icon-ok-sign green': vm.IsComplete('data')}"></i>
-									Data Collection
-								</a>
-							</li>
-							<li ng-class="{active: vm.IsActive('/quickstart/auto'), disabled: !vm.CanConfigurePit}">
-								<a href="#/quickstart/auto">
-									<i class="icon-double-angle-right"></i>
-									<i ng-class="{'icon-ok-sign green': vm.IsComplete('auto')}"></i>
-									Automation
-								</a>
-							</li>
-							<li ng-class="{active: vm.IsActive('/quickstart/test'), disabled: !vm.CanConfigurePit}">
-								<a href="#/quickstart/test">
-									<i class="icon-double-angle-right"></i>
-									<i ng-class="{'icon-ok-sign green': vm.IsComplete('test')}"></i>
-									Test
-								</a>
-							</li>
-							<li ng-class="{active: vm.IsActive('/quickstart/done'), disabled: !vm.CanConfigurePit}">
-								<a href="#/quickstart/done">
-									<i class="icon-double-angle-right"></i>
-									<i ng-class="{'icon-ok-sign green': vm.IsComplete('done')}"></i>
-									Done
-								</a>
-							</li>
-						</ul>
-					</li>
 
-					<li class="tooltip-warning"
-							ng-class="{disabled: !vm.CanConfigurePit}"
-							tooltip="{{vm.JobRunningTooltip}}"
-							tooltip-placement="right">
-						<a class="dropdown-toggle"
-							 href="#"
-							 ng-class="{disabled: !vm.CanConfigurePit}">
-							<i class="icon-desktop"></i>
-							<span class="menu-text">Configuration</span>
-							<b class="arrow icon-angle-down"></b>
-						</a>
-						<ul class="submenu">
-							<li ng-class="{active: vm.IsActive('/cfg/variables'), disabled: !vm.CanConfigurePit}">
-								<a href="#/cfg/variables">
+						<ul class="submenu"
+								collapse="vm.IsCollapsed('config')">
+							<li ui-sref-active="active"
+									ng-repeat="item in vm.ConfigSteps">
+								<a ui-sref="{{item.id}}">
 									<i class="icon-double-angle-right"></i>
-									Variables
-								</a>
-							</li>
-							<li ng-class="{active: vm.IsActive('/cfg/monitors'), disabled: !vm.CanConfigurePit}">
-								<a href="#/cfg/monitors">
-									<i class="icon-double-angle-right"></i>
-									Monitoring
-								</a>
-							</li>
-							<li ng-class="{active: vm.IsActive('/cfg/test'), disabled: !vm.CanConfigurePit}">
-								<a href="#/cfg/test">
-									<i class="icon-double-angle-right"></i>
-									Test
+									<span class="menu-text">
+										{{item.name}}
+									</span>
 								</a>
 							</li>
 						</ul>
@@ -296,18 +218,16 @@
 				</ul>
 
 				<div class="sidebar-collapse"
-						 id="sidebar-collapse">
-					<i class="icon-double-angle-left"
-						 data-icon1="icon-double-angle-left"
-						 data-icon2="icon-double-angle-right"></i>
+						 ng-click="vm.OnToggleSidebar()">
+					<i ng-class="vm.SidebarCollapseClass">
+					</i>
 				</div>
-
 			</div>
 
-			<div class="main-content" ng-view>
+			<div class="main-content"
+					 ui-view>
 
 			</div>
-
 		</div>
 	</div>
 

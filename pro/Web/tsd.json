@@ -6,18 +6,15 @@
   "bundle": "public/ts/def/reference.ts",
   "installed": {
     "angularjs/angular.d.ts": {
-      "commit": "5898d809e04403dfe5c62c0ec1713d10c54126f7"
+      "commit": "0605ebbdbdd8183c70b4a14e1e34ecb3f2b446bf"
     },
     "jquery/jquery.d.ts": {
-      "commit": "5898d809e04403dfe5c62c0ec1713d10c54126f7"
+      "commit": "0605ebbdbdd8183c70b4a14e1e34ecb3f2b446bf"
     },
     "angular-ui-bootstrap/angular-ui-bootstrap.d.ts": {
       "commit": "2544abac24320d3f0edb67d256dcee8faf0e6f14"
     },
     "moment/moment.d.ts": {
-      "commit": "2544abac24320d3f0edb67d256dcee8faf0e6f14"
-    },
-    "angularjs/angular-route.d.ts": {
       "commit": "2544abac24320d3f0edb67d256dcee8faf0e6f14"
     },
     "jasmine/jasmine.d.ts": {
@@ -31,6 +28,9 @@
     },
     "lodash/lodash.d.ts": {
       "commit": "aaf45c99861ea0e5838f076627609058a85e6b4b"
+    },
+    "angular-ui/angular-ui-router.d.ts": {
+      "commit": "0605ebbdbdd8183c70b4a14e1e34ecb3f2b446bf"
     }
   }
 }

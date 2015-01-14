@@ -14,7 +14,7 @@
 			 ng-show="vm.ShowNotConfigured">
 		<strong>Warning!</strong>
 		The currently selected Pit should be configured for the environment.
-		<a href="#/quickstart/intro">Go to Pit Configuration now.</a>
+		<a ui-sref="wizard({track: intro})">Go to Pit Configuration now.</a>
 	</div>
 	<div class="alert alert-warning"
 			 ng-show="vm.ShowLimited">
