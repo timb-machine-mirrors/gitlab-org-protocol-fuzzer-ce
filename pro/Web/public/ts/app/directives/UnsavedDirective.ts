@@ -8,10 +8,10 @@ module Peach {
 	}
 
 	export var UnsavedDirective: IDirective = {
-		ComponentID: Constants.Directives.Unsaved,
+		ComponentID: C.Directives.Unsaved,
 		restrict: 'A',
 		require: '^form',
-		controller: Constants.Controllers.Unsaved,
+		controller: C.Controllers.Unsaved,
 		controllerAs: 'ctrl',
 		scope: {},
 		link: (
@@ -26,42 +26,43 @@ module Peach {
 
 	export class UnsavedController {
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Angular.$modal,
-			Constants.Angular.$location
+			C.Angular.$scope,
+			C.Angular.$modal,
+			C.Angular.$state
 		];	
 
 		constructor(
 			private $scope: ng.IScope,
 			private $modal: ng.ui.bootstrap.IModalService,
-			private $location: ng.ILocationService
+			private $state: ng.ui.IStateService
 		) {
 		}
 
 		public Link(form: ng.IFormController) {
-			var onRouteChangeOff = this.$scope.$root.$on('$locationChangeStart', (
+			var onRouteChangeOff = this.$scope.$root.$on(C.Angular.$stateChangeStart, (
 				event: ng.IAngularEvent,
-				newUrl: string
+				toState: ng.ui.IState,
+				toParams: any,
+				fromState: ng.ui.IState,
+				fromParams: any
 			) => {
 				if (!form.$dirty) {
 					onRouteChangeOff();
 					return;
 				}
 
+				event.preventDefault();
+
 				var modal = this.$modal.open({
-					templateUrl: Constants.Templates.Modal.Unsaved,
+					templateUrl: C.Templates.Modal.Unsaved,
 					controller: UnsavedModalController
 				});
 				modal.result.then((result) => {
 					if (result === 'ok') {
 						onRouteChangeOff();
-
-						var path = newUrl.substr(newUrl.indexOf('#') + 1);
-						this.$location.path(path);
+						this.$state.transitionTo(toState.name, toParams);
 					}
 				});
-
-				event.preventDefault();
 			});
 		}
 	}
@@ -69,8 +70,8 @@ module Peach {
 	class UnsavedModalController {
 
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Angular.$modalInstance
+			C.Angular.$scope,
+			C.Angular.$modalInstance
 		];
 
 		constructor(

@@ -3,35 +3,73 @@
 module Peach {
 	"use strict";
 
+	export interface ITrackTestItem {
+		track: string;
+		title: string;
+		message: string;
+		link?: string;
+		fail?: boolean;
+	}
+
+
+	var TestTracks: ITrackTestItem[] = [
+		{
+			track: C.Tracks.Vars,
+			title: 'Set Variables',
+			message: 'Not completed, default values will be used.'
+		},
+		{
+			track: C.Tracks.Fault,
+			title: 'Fault Detection',
+			message: 'Fault Detection requires completion.',
+			link: 'Go to Fault Detection',
+			fail: true
+		},
+		{
+			track: C.Tracks.Data,
+			title: 'Data Collection',
+			message: 'No Data Collection will be performed.'
+		},
+		{
+			track: C.Tracks.Auto,
+			title: 'Automation',
+			message: 'No Automation will be performed.'
+		}
+	];
+
 	export class PitTestController {
 
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Angular.$location,
-			Constants.Services.Pit,
-			Constants.Services.Test,
-			Constants.Services.Wizard
+			C.Angular.$scope,
+			C.Angular.$state,
+			C.Services.Pit,
+			C.Services.Test,
+			C.Services.Wizard
 		];
 
 		constructor(
 			$scope: IViewModelScope,
-			private $location: ng.ILocationService,
+			private $state: ng.ui.IStateService,
 			private pitService: PitService,
 			private testService: TestService,
 			private wizardService: WizardService
 		) {
-			$scope.vm = this;
-			if ($location.path() === Constants.Routes.WizardPrefix + Constants.Tracks.Test) {
-				this.wizardService.GetTrack(Constants.Tracks.Test).Begin();
-			}
+			this.track = this.wizardService.GetTrack(C.Tracks.Test);
 		}
 
-		public IsComplete(step: string) {
-			return this.wizardService.GetTrack(step).isComplete;
+		private track: ITrack;
+		public Tracks: ITrackTestItem[] = TestTracks;
+
+		private get isWizard(): boolean {
+			return this.$state.is(C.States.WizardTrack, { track: C.Tracks.Test });
+		}
+
+		public get ShowNotConfigured(): boolean {
+			return !this.pitService.IsConfigured;
 		}
 
 		public get CanWizardBeginTest(): boolean {
-			return this.CanBeginTest && this.IsComplete(Constants.Tracks.Fault);
+			return this.CanBeginTest && this.IsComplete(C.Tracks.Fault);
 		}
 
 		public get CanBeginTest(): boolean {
@@ -42,34 +80,45 @@ module Peach {
 			return this.testService.TestResult.status === TestStatus.Pass;
 		}
 
-		public get ShowNotConfigured(): boolean {
-			return !this.pitService.IsConfigured;
+		public IsComplete(track: string): boolean {
+			return this.wizardService.GetTrack(track).isComplete;
 		}
 
-		public get ShowTestPending(): boolean {
-			return this.testService.IsPending;
+		public TrackStatus(item: ITrackTestItem) {
+			return this.IsComplete(item.track) ?
+				'label-success' : item.fail ?
+					'label-danger' : 'label-warning';
 		}
 
-		public get ShowTestPass(): boolean {
-			return this.testService.TestResult.status === TestStatus.Pass;
+		public TrackMessage(item: ITrackTestItem) {
+			return this.IsComplete(item.track) ? 'Complete' : item.message;
 		}
 
-		public get ShowTestFail() {
-			return this.testService.TestResult.status === TestStatus.Fail;
+		public TrackLink(item: ITrackTestItem) {
+			return this.IsComplete(item.track) ? false : _.isString(item.link);
 		}
 
 		public OnBeginTest() {
-			this.wizardService.GetTrack(Constants.Tracks.Test).isComplete = false;
-			this.testService.BeginTest();
+			var agents = [
+				this.wizardService.GetTrack(C.Tracks.Fault).agents,
+				this.wizardService.GetTrack(C.Tracks.Data).agents,
+				this.wizardService.GetTrack(C.Tracks.Auto).agents
+			];
+
+			this.track.isComplete = false;
+			var promise = this.pitService.SaveAgents(_.flatten<Agent>(agents));
+			promise.then(() => {
+				var promise2 = this.testService.BeginTest();
+				promise2.then(() => {
+					if (this.isWizard) {
+						this.track.isComplete = true;
+					}
+				});
+			});
 		}
 
 		public OnNextTrack() {
-			this.wizardService.GetTrack(Constants.Tracks.Test).isComplete = true;
-			this.$location.path(Constants.Routes.WizardPrefix + Constants.Tracks.Done);
-		}
-
-		public OnDashboard() {
-			this.$location.path(Constants.Routes.Home);
+			this.$state.go(C.States.Home);
 		}
 	}
 }

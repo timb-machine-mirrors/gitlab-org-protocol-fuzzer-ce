@@ -6,9 +6,9 @@ module Peach {
 	export class ConfigureVariablesController {
 
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Angular.$modal,
-			Constants.Services.Pit
+			C.Angular.$scope,
+			C.Angular.$modal,
+			C.Services.Pit
 		];
 
 		constructor(
@@ -16,7 +16,6 @@ module Peach {
 			private $modal: ng.ui.bootstrap.IModalService,
 			private pitService: PitService
 		) {
-			$scope.vm = this;
 			var promise = pitService.ReloadPit();
 			promise.then((pit: IPit) => {
 				this.Config = pit.config;
@@ -53,7 +52,7 @@ module Peach {
 
 		public OnAdd() {
 			var modal = this.$modal.open({
-				templateUrl: Constants.Templates.Modal.NewVar,
+				templateUrl: C.Templates.Modal.NewVar,
 				controller: NewVarController
 			});
 
@@ -71,9 +70,9 @@ module Peach {
 
 	export class NewVarController {
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Angular.$modalInstance,
-			Constants.Services.Pit
+			C.Angular.$scope,
+			C.Angular.$modalInstance,
+			C.Services.Pit
 		];
 
 		constructor(

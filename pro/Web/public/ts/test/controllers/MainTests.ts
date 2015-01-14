@@ -3,45 +3,49 @@
 'use strict';
 
 describe("Peach", () => {
+	var C = Peach.C;
 	beforeEach(module('Peach'));
 
 	describe('Main controller', () => {
 		var $httpBackend: ng.IHttpBackendService;
-		var $location: ng.ILocationService;
-		var $window: ng.IWindowService;
+		var $modal: ng.ui.bootstrap.IModalService;
+		var $state: ng.ui.IStateService;
 		var ctrl: Peach.MainController;
 		var service: Peach.PitService;
 		var pitUrl = '/p/pits/PIT_GUID';
-		var $modal: ng.ui.bootstrap.IModalService;
 		var spyOpen: jasmine.Spy;
 
 		beforeEach(inject(($injector: ng.auto.IInjectorService) => {
-			$window = $injector.get('$window');
+			var $controller: ng.IControllerService;
+			var $rootScope: ng.IRootScopeService;
+			var $templateCache: ng.ITemplateCacheService;
+			var $window: ng.IWindowService;
+
+			$controller = $injector.get(C.Angular.$controller);
+			$httpBackend = $injector.get(C.Angular.$httpBackend);
+			$modal = $injector.get(C.Angular.$modal);
+			$rootScope = $injector.get(C.Angular.$rootScope);
+			$state = $injector.get(C.Angular.$state);
+			$templateCache = $injector.get(C.Angular.$templateCache);
+			$window = $injector.get(C.Angular.$window);
+			service = $injector.get(C.Services.Pit);
+
 			$window.sessionStorage.clear();
 
-			$modal = $injector.get('$modal');
 			spyOpen = spyOn($modal, 'open');
-
-			$httpBackend = $injector.get('$httpBackend');
-			service = $injector.get('PitService');
-
-			var $rootScope = <ng.IRootScopeService> $injector.get('$rootScope');
-			var $controller = <ng.IControllerService> $injector.get('$controller');
-			$location = $injector.get('$location');
-
 			spyOpen.and.returnValue({
 				result: {
 					then: () => { }
 				}
 			});
 
-			$httpBackend.expectGET('/p/jobs').respond([]);
+			$templateCache.put(C.Templates.Dashboard, '');
+			$templateCache.put(C.Templates.Wizard.Base, '');
+			$templateCache.put(C.Templates.Wizard.Intro, '');
+
+			$httpBackend.expectGET(C.Api.Jobs).respond([]);
 			ctrl = $controller('MainController', {
-				$scope: $rootScope.$new(),
-				$window: $window,
-				$location: $location,
-				$modal: $modal,
-				PitService: service
+				$scope: $rootScope.$new()
 			});
 			$httpBackend.flush();
 		}));
@@ -54,7 +58,7 @@ describe("Peach", () => {
 		describe('when a Pit is not selected', () => {
 			it("new", () => {
 				expect(_.isObject(ctrl)).toBe(true);
-				expect(ctrl.IsActive("/quickstart/intro")).toBe(false);
+				expect($state.is(C.States.Home)).toBe(true);
 			});
 
 			it("SelectPitPrompt is 'Select a Pit'", () => {
@@ -62,7 +66,7 @@ describe("Peach", () => {
 			});
 
 			it("should not start the wizard", () => {
-				expect(ctrl.IsActive("/quickstart/intro")).toBe(false);
+				expect($state.is(C.States.Wizard, { step: C.Tracks.Intro })).toBe(false);
 			});
 		});
 
@@ -98,8 +102,7 @@ describe("Peach", () => {
 			});
 
 			it("should start the wizard", () => {
-				expect($location.path()).toBe("/quickstart/intro");
-				expect(ctrl.IsActive("/quickstart/intro")).toBe(true);
+				expect($state.is(C.States.WizardTrack, { track: C.Tracks.Intro })).toBe(true);
 			});
 		});
 
@@ -133,8 +136,7 @@ describe("Peach", () => {
 			});
 
 			it("should not start the wizard", () => {
-				expect($location.path()).not.toBe("/quickstart/intro");
-				expect(ctrl.IsActive("/quickstart/intro")).toBe(false);
+				expect($state.is(C.States.Wizard, { step: C.Tracks.Intro })).toBe(false);
 			});
 		});
 	});

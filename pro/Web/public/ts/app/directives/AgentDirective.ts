@@ -4,10 +4,10 @@ module Peach {
 	"use strict";
 
 	export var AgentDirective: IDirective = {
-		ComponentID: Constants.Directives.Agent,
+		ComponentID: C.Directives.Agent,
 		restrict: 'E',
-		templateUrl: Constants.Templates.Directives.Agent,
-		controller: Constants.Controllers.Agent,
+		templateUrl: C.Templates.Directives.Agent,
+		controller: C.Controllers.Agent,
 		scope: {
 			agents: '=',
 			agent: '=',
@@ -29,9 +29,9 @@ module Peach {
 
 	export class AgentController {
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Angular.$timeout,
-			Constants.Services.Pit
+			C.Angular.$scope,
+			C.Angular.$timeout,
+			C.Services.Pit
 		];
 
 		constructor(

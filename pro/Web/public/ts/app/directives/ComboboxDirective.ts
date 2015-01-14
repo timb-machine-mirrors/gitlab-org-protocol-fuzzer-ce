@@ -22,13 +22,13 @@
 	};
 
 	export var ComboboxDirective: IDirective = {
-		ComponentID: Constants.Directives.Combobox,
+		ComponentID: C.Directives.Combobox,
 		restrict: 'E',
-		require: [Constants.Directives.Combobox, Constants.Angular.ngModel],
+		require: [C.Directives.Combobox, C.Angular.ngModel],
 		replace: true,
-		controller: Constants.Controllers.Combobox,
+		controller: C.Controllers.Combobox,
 		controllerAs: 'vm',
-		templateUrl: Constants.Templates.Directives.Combobox,
+		templateUrl: C.Templates.Directives.Combobox,
 		scope: {
 			data: '=',
 			placeholder: '&'
@@ -46,8 +46,8 @@
 
 	export class ComboboxController {
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Angular.$document
+			C.Angular.$scope,
+			C.Angular.$document
 		];
 
 		constructor(

@@ -6,10 +6,10 @@ module Peach {
 	export class PitService {
 
 		static $inject = [
-			Constants.Angular.$q,
-			Constants.Angular.$window,
-			Constants.Angular.$modal,
-			Constants.Angular.$http
+			C.Angular.$q,
+			C.Angular.$window,
+			C.Angular.$modal,
+			C.Angular.$http
 		];
 
 		constructor(
@@ -42,7 +42,7 @@ module Peach {
 		}
 
 		public LoadLibrary(): ng.IPromise<ILibrary[]> {
-			var promise = this.$http.get(Constants.Urls.Libraries);
+			var promise = this.$http.get(C.Api.Libraries);
 			promise.success((libs: ILibrary[]) => {
 				this.userPitLibrary = _.chain(libs)
 					.reject('locked')
@@ -53,7 +53,7 @@ module Peach {
 		}
 
 		public LoadPeachMonitors(): ng.IPromise<IMonitor[]> {
-			var promise = this.$http.get(Constants.Urls.PeachMonitors);
+			var promise = this.$http.get(C.Api.PeachMonitors);
 			return StripHttpPromise(this.$q, promise);
 		}
 
@@ -68,7 +68,7 @@ module Peach {
 			promise.success((pit: IPit) => {
 				if (pit.locked) {
 					var modal = this.$modal.open({
-						templateUrl: Constants.Templates.Modal.CopyPit,
+						templateUrl: C.Templates.Modal.CopyPit,
 						controller: CopyPitController,
 						resolve: { pit: () => pit }
 					});
@@ -139,7 +139,7 @@ module Peach {
 				libraryUrl: this.UserPitLibrary,
 				pit: pit
 			}
-			var promise = this.$http.post(Constants.Urls.Pits, request);
+			var promise = this.$http.post(C.Api.Pits, request);
 			return StripHttpPromise(this.$q, promise);
 		}
 

@@ -6,18 +6,18 @@ module Peach {
 	export class FaultsController {
 
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Angular.$routeParams,
-			Constants.Services.Job,
+			C.Angular.$scope,
+			//Constants.Angular.$routeParams,
+			C.Services.Job,
 		];
 
 		constructor(
 			$scope: IViewModelScope,
-			$routeParams: ng.route.IRouteParamsService,
+			//$routeParams: ng.route.IRouteParamsService,
 			private jobService: JobService
 		) {
-			$scope.vm = this;
-			this.bucket = $routeParams['bucket'];
+			//this.bucket = $routeParams['bucket'];
+			this.bucket = 'all';
 			if (this.bucket === "all") {
 				this.Title = "All Faults";
 			} else {

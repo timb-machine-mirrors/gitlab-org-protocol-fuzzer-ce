@@ -4,18 +4,18 @@ module Peach {
 	"use strict";
 
 	export var ParameterDirective: IDirective = {
-		ComponentID: Constants.Directives.Parameter,
+		ComponentID: C.Directives.Parameter,
 		restrict: 'E',
-		templateUrl: Constants.Templates.Directives.Parameter,
-		controller: Constants.Controllers.Parameter,
+		templateUrl: C.Templates.Directives.Parameter,
+		controller: C.Controllers.Parameter,
 		scope: { param: '=' }
 	}
 
 	export var ParameterInputDirective: IDirective = {
-		ComponentID: Constants.Directives.ParameterInput,
+		ComponentID: C.Directives.ParameterInput,
 		restrict: 'E',
-		templateUrl: Constants.Templates.Directives.ParameterInput,
-		controller: Constants.Controllers.Parameter,
+		templateUrl: C.Templates.Directives.ParameterInput,
+		controller: C.Controllers.Parameter,
 		scope: {
 			param: '=',
 			form: '='
@@ -35,8 +35,8 @@ module Peach {
 
 	export class ParameterController {
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Services.Pit
+			C.Angular.$scope,
+			C.Services.Pit
 		];
 
 		constructor(

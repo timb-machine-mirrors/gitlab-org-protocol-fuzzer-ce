@@ -30,9 +30,9 @@ module Peach {
 	}
 
 	export var RangeDirective: IDirective = {
-		ComponentID: Constants.Directives.Range,
+		ComponentID: C.Directives.Range,
 		restrict: 'A',
-		require: Constants.Angular.ngModel,
+		require: C.Angular.ngModel,
 		scope: {
 			min: '&peachRangeMin',
 			max: '&peachRangeMax'
@@ -57,9 +57,9 @@ module Peach {
 	}
 
 	export var IntegerDirective: ng.IDirective = {
-		ComponentID: Constants.Directives.Integer,
+		ComponentID: C.Directives.Integer,
 		restrict: 'A',
-		require: Constants.Angular.ngModel,
+		require: C.Angular.ngModel,
 		link: (
 			scope: ng.IScope,
 			element: ng.IAugmentedJQuery,
@@ -67,16 +67,16 @@ module Peach {
 			ctrl: ng.INgModelController
 		) => {
 			var pattern = /^(\-|\+)?\d+$/;
-			predicateValidation(Constants.Directives.Integer, ctrl,
+			predicateValidation(C.Directives.Integer, ctrl,
 				(value: string) => pattern.test(value)
 			);
 		}
 	}
 
 	export var HexDirective: ng.IDirective = {
-		ComponentID: Constants.Directives.HexString,
+		ComponentID: C.Directives.HexString,
 		restrict: 'A',
-		require: Constants.Angular.ngModel,
+		require: C.Angular.ngModel,
 		link: (
 			scope: ng.IScope,
 			element: ng.IAugmentedJQuery,
@@ -84,7 +84,7 @@ module Peach {
 			ctrl: ng.INgModelController
 		) => {
 			var pattern = /^[0-9A-Fa-f]+$/;
-			predicateValidation(Constants.Directives.HexString, ctrl,
+			predicateValidation(C.Directives.HexString, ctrl,
 				(value: string) => pattern.test(value)
 			);
 		}

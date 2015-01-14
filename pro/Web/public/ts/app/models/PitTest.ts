@@ -16,14 +16,14 @@ module Peach {
 	export interface ITestEvent {
 		id: number;
 		status: string;
-		short: string;
+		short?: string;
 		description: string;
 		resolve: string;
 	}
 
-	export class TestStatus {
-		static Active: string = "active";
-		static Pass: string = "pass";
-		static Fail: string = "fail";
+	export module TestStatus {
+		export var Active = "active";
+		export var Pass = "pass";
+		export var Fail = "fail";
 	}
 }

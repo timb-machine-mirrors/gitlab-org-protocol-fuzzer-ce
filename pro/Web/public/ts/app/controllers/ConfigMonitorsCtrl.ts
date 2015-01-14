@@ -7,15 +7,14 @@ module Peach {
 		public Agents: Agent[];
 
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Services.Pit
+			C.Angular.$scope,
+			C.Services.Pit
 		];
 
 		constructor(
 			private $scope: IFormScope,
 			private pitService: PitService
 		) {
-			$scope.vm = this;
 			var promise = pitService.ReloadPit();
 			promise.then((pit: IPit) => {
 				this.Agents = pit.agents;

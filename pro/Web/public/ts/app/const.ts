@@ -1,4 +1,4 @@
-﻿module Peach.Constants {
+﻿module Peach.C {
 	"use strict";
 
 	export module Vendor {
@@ -19,6 +19,9 @@
 		export var Range = 'peachRange';
 		export var Integer = 'integer';
 		export var HexString = 'hexstring';
+		export var MenuItem = 'peachMenuItem';
+		export var MenuContent = 'peachMenuContent';
+		export var MenuTransclude = 'peachMenuTransclude';
 	}
 
 	export module Controllers {
@@ -30,6 +33,7 @@
 		export var Parameter = 'ParameterController';
 		export var Test = 'TestController';
 		export var Combobox = 'ComboboxController';
+		export var MenuItem = 'MenuItemController';
 	}
 
 	export module Services {
@@ -41,7 +45,7 @@
 		export var Wizard = 'WizardService';
 	}
 
-	export module Urls {
+	export module Api {
 		export var Libraries = '/p/libraries';
 		export var Pits = '/p/pits';
 		export var Jobs = '/p/jobs';
@@ -57,7 +61,6 @@
 		export var Data = 'data';
 		export var Auto = 'auto';
 		export var Test = 'test';
-		export var Done = 'done';
 	}
 
 	export module Metrics {
@@ -74,9 +77,7 @@
 		export var Dashboard = 'html/dashboard.html';
 		export var Faults = 'html/faults.html';
 		export var Metrics = 'html/metrics.html';
-		export function Metric(metric: string): string {
-			return 'html/metrics/' + metric + '.html';
-		}
+		export var MetricPage = 'html/metrics/:metric.html';
 		export var BucketTimelineItem = 'bucketTimelineItem.html';
 		export module Modal {
 			export var CopyPit = 'html/modal/CopyPit.html';
@@ -86,16 +87,14 @@
 			export var Unsaved = 'html/modal/Unsaved.html';
 		}
 		export module Wizard {
-			export var Step = "html/wizard.html";
+			export var Base = "html/wizard.html";
 			export var Intro = 'html/wizard/intro.html';
+			export var Track = 'html/wizard/track.html';
+			export var TrackIntro = 'html/wizard/:track/intro.html';
+			export var Question = 'html/wizard/question.html';
+			export var TrackDone = 'html/wizard/:track/done.html';
 			export var Test = 'html/wizard/test.html';
-			export var Done = 'html/wizard/done.html';
-			export function TrackIntro(track: string): string {
-				return 'html/wizard/' + track + '/intro.html';
-			}
-			export function TrackDone(track: string): string {
-				return 'html/wizard/' + track + '/intro.html';
-			}
+			export var QuestionType = 'html/q/:type.html';
 		}
 		export module Config {
 			export var Variables = 'html/cfg/variables.html';
@@ -110,17 +109,25 @@
 			export var Question = 'html/directives/question.html';
 			export var Combobox = 'html/directives/combobox.html';
 			export var Test = 'html/directives/test.html';
+			export var MenuItem = 'html/directives/menu-item.html';
+			export var MenuContent = 'html/directives/menu-content.html';
 		}
 	}
 
-	export module Routes {
-		export var Home = '/';
-		export var Faults = '/faults/:bucket';
-		export var Metrics = '/metrics/:metric';
-		export var WizardPrefix = '/quickstart/';
-		export var WizardStep = WizardPrefix + ':step';
-		export var ConfigMonitoring = '/cfg/monitors';
-		export var ConfigVariables = '/cfg/variables';
-		export var ConfigTest = '/cfg/test';
+	export module States {
+		export var Home = 'home';
+		export var Faults = 'faults';
+		export var Metrics = 'metrics';
+
+		export var Wizard = 'wizard';
+		export var WizardTrack = 'wizard.track';
+		export var WizardTrackIntro = 'wizard.track.intro';
+		export var WizardTrackQuestion = 'wizard.track.question';
+		export var WizardTrackReview = 'wizard.track.review';
+
+		export var Config = 'config';
+		export var ConfigVariables = 'config.variables';
+		export var ConfigMonitoring = 'config.monitoring';
+		export var ConfigTest = 'config.test';
 	}
 }
