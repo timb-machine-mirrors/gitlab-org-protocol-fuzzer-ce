@@ -403,5 +403,81 @@ namespace Peach.Pro.Test.Core.StateModel
 
 			Assert.AreEqual("EOL", array.OriginalElement.InternalValue.BitsToString());
 		}
+
+		[Test]
+		public void SlurpElementPositions()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='Token'>
+		<Blob name='source' value='hello' />
+	</DataModel>
+
+	<DataModel name='Data'>
+		<Block name='blk1'>
+			<Blob name='target' />
+		</Block>
+		<Block name='blk2'>
+			<Blob name='target' />
+		</Block>
+	</DataModel>
+
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel ref='Token'/>
+			</Action> 
+
+			<Action type='slurp' valueXpath='//source' setXpath='//target' />
+
+			<Action type='output'>
+				<DataModel ref='Data'/>
+			</Action> 
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<Strategy class='Random'/>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>
+";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+
+			var config = new RunConfiguration
+			{
+				singleIteration = true,
+			};
+
+			var engine = new Engine(null);
+			engine.startFuzzing(dom, config);
+
+			var actionData = dom.tests[0].stateModel.states["initial"].actions[2].allData.First();
+			var dm = actionData.dataModel;
+			var val = dm.Value.ToArray();
+			var exp = Encoding.ASCII.GetBytes("hellohello");
+
+			Assert.AreEqual(exp, val);
+
+			// Ensure that when slurping a single element to multiple targets
+			// that the targets maintain their proper element names in the
+			// final bitstream list.
+
+			var pos = dm.Value.ElementNames();
+
+			var names = new[]
+			{
+				"Data",
+				"Data.blk1",
+				"Data.blk1.target",
+				"Data.blk2",
+				"Data.blk2.target",
+			};
+
+			Assert.That(pos, Is.EqualTo(names));
+		}
 	}
 }
