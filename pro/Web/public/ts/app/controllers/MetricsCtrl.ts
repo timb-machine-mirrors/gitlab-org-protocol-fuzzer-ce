@@ -56,6 +56,7 @@ module Peach {
 	export class MetricsController {
 		static $inject = [
 			C.Angular.$scope,
+			C.Angular.$state,
 			C.Angular.$stateParams,
 			C.Angular.$http,
 			C.Angular.$interpolate,
@@ -67,6 +68,7 @@ module Peach {
 
 		constructor(
 			private $scope: IViewModelScope,
+			private $state: ng.ui.IStateService,
 			$stateParams: ng.ui.IStateParamsService,
 			private $http: ng.IHttpService,
 			private $interpolate: ng.IInterpolateService,
@@ -128,6 +130,7 @@ module Peach {
 			case C.Metrics.BucketTimeline:
 				promise.success((data: IBucketTimelineMetric[]) => {
 					var items = data.map((item: IBucketTimelineMetric) => {
+						item.href = this.$state.href(C.States.Faults, { bucket: item.label });
 						return <ITimelineItem> {
 							id: item.id,
 							content: undefined,

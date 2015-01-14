@@ -103,7 +103,7 @@
 							ng-class="{disabled: !vm.CanViewFaults}"
 							tooltip="{{vm.FaultsUnavailableTooltip}}"
 							tooltip-placement="right">
-						<a ui-sref="faults"
+						<a ui-sref="faults({bucket: 'all'})"
 							 ng-click="vm.OnItemClick($event, vm.CanViewFaults)">
 							<i class="icon-fire"></i>
 							<span class="menu-text">
