@@ -55,12 +55,12 @@ module Peach {
 			this.pendingResult = this.$q.defer<any>();
 			this.isPending = true;
 
-			var promise = this.$http.get(C.Api.TestStart, {
-				params: { pitUrl: this.pitService.Pit.pitUrl }
-			});
-
 			this.testTime = moment().format("h:mm a");
 
+			var request: ITestRequest = {
+				pitUrl: this.pitService.Pit.pitUrl
+			};
+			var promise = this.$http.post(C.Api.TestStart, request);
 			promise.success((data: ITestRef) => {
 				this.startTestPoller(data.testUrl);
 			});

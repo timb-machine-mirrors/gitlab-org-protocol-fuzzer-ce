@@ -29,7 +29,6 @@ module.exports = (grunt) ->
 					'ace-bootstrap'               : [
 						'ace-bootstrap/css/*'
 						'ace-bootstrap/fonts/*'
-						'ace-bootstrap/js/*'
 					]
 					'angular-chart'               : [
 						'angular-chart.js/dist/angular-chart.css'
@@ -77,28 +76,27 @@ module.exports = (grunt) ->
 				src: ['public/ts/test/**/*.ts']
 				reference: 'public/ts/test/reference.ts'
 				out: 'public/js/test/test.js'
-				options:
-					sourceRoot: ''
-					amdloader: 'public/js/loader.js'
 
 		jasmine:
 			test:
 				host: 'http://localhost:9999/'
 				src: [
-					# ordered libraries
-					'public/lib/jquery/jquery.js'
-					'public/lib/chartjs/Chart.js'
-					'public/lib/angular/angular.js'
-					# unordered libraries
-					'public/lib/**/*.js'
-					# extra stuff
-					'public/js/angular-vis.js'
-					# local code
 					'public/js/test/test.js'
 				]
 				options:
 					outfile: 'public/tests.html'
 					keepRunner: true
+					vendor: [
+						# ordered libraries
+						'public/lib/jquery/jquery.js'
+						'public/lib/chartjs/Chart.js'
+						'public/lib/angular/angular.js'
+						# unordered libraries
+						'public/lib/**/*.js'
+						# extra stuff
+						'public/js/angular-vis.js'
+						'node_modules/jasmine-custom-message/jasmine-custom-message.js'
+					]
 
 		watch:
 			ts:

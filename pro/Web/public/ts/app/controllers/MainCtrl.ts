@@ -66,12 +66,12 @@ module Peach {
 
 		// TODO: use WizardService definition of tracks
 		public WizardTracks = [
-			{ id: C.Tracks.Intro, name: 'Introduction', state: C.States.WizardTrack },
-			{ id: C.Tracks.Vars, name: 'Set Variables', state: C.States.WizardTrackIntro },
-			{ id: C.Tracks.Fault, name: 'Fault Detection', state: C.States.WizardTrackIntro },
-			{ id: C.Tracks.Data, name: 'Data Collection', state: C.States.WizardTrackIntro },
-			{ id: C.Tracks.Auto, name: 'Automation', state: C.States.WizardTrackIntro },
-			{ id: C.Tracks.Test, name: 'Test', state: C.States.WizardTrack }
+			{ id: C.Tracks.Intro, name: 'Introduction', state: C.States.Wizard },
+			{ id: C.Tracks.Vars, name: 'Set Variables', state: C.States.WizardIntro },
+			{ id: C.Tracks.Fault, name: 'Fault Detection', state: C.States.WizardIntro },
+			{ id: C.Tracks.Data, name: 'Data Collection', state: C.States.WizardIntro },
+			{ id: C.Tracks.Auto, name: 'Automation', state: C.States.WizardIntro },
+			{ id: C.Tracks.Test, name: 'Test', state: C.States.Wizard }
 		];
 
 		public ConfigSteps = [
@@ -182,7 +182,7 @@ module Peach {
 			});
 			modal.result.then(() => {
 				if (!this.pitService.IsConfigured) {
-					this.$state.go(C.States.WizardTrack, { track: C.Tracks.Intro });
+					this.$state.go(C.States.Wizard, { track: C.Tracks.Intro });
 				} else {
 					this.$state.go(C.States.Home);
 				}

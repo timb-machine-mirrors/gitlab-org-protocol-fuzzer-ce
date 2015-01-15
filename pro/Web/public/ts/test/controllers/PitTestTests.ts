@@ -3,21 +3,16 @@
 'use strict';
 
 describe("Peach", () => {
+	var C = Peach.C;
 	beforeEach(module('Peach'));
 
 	describe('PitTestController', () => {
 		var $httpBackend: ng.IHttpBackendService;
-		var $location: ng.ILocationService;
 		var $interval: ng.IIntervalService;
-
-		var newController: () => Peach.PitTestController;
 		var ctrl: Peach.PitTestController;
-		var testService: Peach.TestService;
-		var wizardService: Peach.WizardService;
 		var pitService: Peach.PitService;
 
 		var pitUrl = '/p/pits/PIT_GUID';
-
 		var pit = <Peach.IPit> {
 			pitUrl: pitUrl,
 			name: 'My Pit',
@@ -33,31 +28,24 @@ describe("Peach", () => {
 		beforeEach(inject(($injector: ng.auto.IInjectorService) => {
 			var $controller: ng.IControllerService;
 			var $rootScope: ng.IRootScopeService;
+			var $templateCache: ng.ITemplateCacheService;
 
-			$httpBackend = $injector.get('$httpBackend');
-			$location = $injector.get('$location');
-			$rootScope = $injector.get('$rootScope');
-			$controller = $injector.get('$controller');
-			$interval = $injector.get('$interval');
+			$httpBackend = $injector.get(C.Angular.$httpBackend);
+			$rootScope = $injector.get(C.Angular.$rootScope);
+			$controller = $injector.get(C.Angular.$controller);
+			$interval = $injector.get(C.Angular.$interval);
+			$templateCache = $injector.get(C.Angular.$templateCache);
+			pitService = $injector.get(C.Services.Pit);
 
-			pitService = $injector.get('PitService');
-			wizardService = $injector.get('WizardService');
-			testService = $injector.get('TestService');
+			$templateCache.put(C.Templates.Dashboard, '');
 
 			$httpBackend.expectGET(pitUrl).respond(pit);
 			pitService.SelectPit(pitUrl);
 			$httpBackend.flush();
 
-			newController = () => {
-				return $controller('PitTestController', {
-					$scope: $rootScope.$new(),
-					$location: $location,
-					TestService: testService,
-					WizardService: wizardService
-				});
-			}
-
-			ctrl = newController();
+			ctrl = $controller('PitTestController', {
+				$scope: $rootScope.$new()
+			});
 		}));
 
 		afterEach(() => {
@@ -67,15 +55,17 @@ describe("Peach", () => {
 
 		it("new", () => {
 			expect(_.isObject(ctrl)).toBe(true);
-			expect(ctrl.IsComplete("fault")).toBeFalsy();
 		});
 
 		it("can begin a test", () => {
 			var testUrl = '/p/my/test/url';
+			var req: Peach.ITestRequest = {
+				pitUrl: pitUrl
+			};
 			var ref: Peach.ITestRef = {
 				testUrl: testUrl
 			};
-			$httpBackend.expectGET(new RegExp('/p/conf/wizard/test/start(.*)')).respond(ref);
+			$httpBackend.expectPOST(Peach.C.Api.TestStart, req).respond(ref);
 			ctrl.OnBeginTest();
 			$httpBackend.flush();
 
@@ -85,9 +75,12 @@ describe("Peach", () => {
 				events: []
 			};
 
-			$httpBackend.expectGET(new RegExp(testUrl)).respond(result1);
+			$httpBackend.expectGET(testUrl).respond(result1);
 			$interval.flush(Peach.TEST_INTERVAL);
 			$httpBackend.flush();
+
+			expect(ctrl.CanBeginTest).toBe(false);
+			expect(ctrl.CanContinue).toBe(false);
 
 			var result2: Peach.ITestResult = {
 				status: 'pass',
@@ -96,12 +89,12 @@ describe("Peach", () => {
 			};
 			pit.versions[0].configured = true;
 
-			$httpBackend.expectGET(new RegExp(testUrl)).respond(result2);
-			$httpBackend.expectGET(pitUrl).respond(pit);
+			$httpBackend.expectGET(testUrl).respond(result2);
 			$interval.flush(Peach.TEST_INTERVAL);
 			$httpBackend.flush();
 
-			expect(pitService.IsConfigured).toBe(true);
+			expect(ctrl.CanBeginTest).toBe(true);
+			expect(ctrl.CanContinue).toBe(true);
 		});
 	});
 });

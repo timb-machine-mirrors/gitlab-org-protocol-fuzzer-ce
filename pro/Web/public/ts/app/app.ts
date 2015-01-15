@@ -90,14 +90,7 @@ module Peach {
 					controllerAs: 'vm'
 				})
 				.state(C.States.Wizard, {
-					abstract: true,
-					url: '/quickstart/:track',
-					templateUrl: C.Templates.Wizard.Base,
-					controller: WizardBaseController,
-					controllerAs: 'vm'
-				})
-				.state(C.States.WizardTrack, {
-					url: '/{id:int}',
+					url: '/quickstart/:track/{id:int}',
 					templateUrl: params => {
 						switch (params.track) {
 							case C.Tracks.Intro:
@@ -109,8 +102,6 @@ module Peach {
 					},
 					controllerProvider: ($stateParams): any => {
 						switch ($stateParams.track) {
-							case C.Tracks.Intro:
-								return WizardBaseController;
 							case C.Tracks.Test:
 								return PitTestController;
 						}
@@ -121,17 +112,17 @@ module Peach {
 						id: { value: 0, squash: true }
 					}
 				})
-				.state(C.States.WizardTrackIntro, {
+				.state(C.States.WizardIntro, {
 					url: '/intro',
 					templateUrl: params =>
 						C.Templates.Wizard.TrackIntro.replace(':track', params.track)
 				})
-				.state(C.States.WizardTrackQuestion, {
+				.state(C.States.WizardQuestion, {
 					templateUrl: C.Templates.Wizard.Question,
-					controller: WizardTrackQuestionController,
+					controller: WizardQuestionController,
 					controllerAs: 'vm'
 				})
-				.state(C.States.WizardTrackReview, {
+				.state(C.States.WizardReview, {
 					url: '/review',
 					templateUrl: params =>
 						C.Templates.Wizard.TrackDone.replace(':track', params.track)

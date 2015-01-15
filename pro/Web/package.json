@@ -1,7 +1,6 @@
 {
   "name": "Peach",
   "author": "Deja Vu Security",
-  "version": "3.4.0",
   "private": true,
   "repository": {
     "type": "git",
