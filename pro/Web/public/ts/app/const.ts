@@ -1,4 +1,6 @@
-﻿module Peach.C {
+﻿/// <reference path="reference.ts" />
+
+module Peach.C {
 	"use strict";
 
 	export module Vendor {
@@ -7,6 +9,7 @@
 
 	export module Directives {
 		export var Agent = 'peachAgent';
+		export var AutoFocus = 'peachAutoFocus';
 		export var Combobox = 'peachCombobox';
 		export var Monitor = 'peachMonitor';
 		export var Parameter = 'peachParameter';

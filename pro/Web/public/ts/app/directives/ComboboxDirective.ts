@@ -1,4 +1,6 @@
-﻿module Peach {
+﻿/// <reference path="../reference.ts" />
+
+module Peach {
 	"use strict";
 
 	export interface IComboboxScope extends ng.IScope {

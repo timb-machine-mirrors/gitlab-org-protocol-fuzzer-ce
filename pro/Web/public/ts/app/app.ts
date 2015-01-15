@@ -206,16 +206,7 @@ module Peach {
 			alert(
 				"This application requires an HTML 5 and ECMAScript 5 capable browser. " +
 				"Please upgrade your browser to a more recent version."
-				);
-		} else {
-			initialize();
-		}
-
-		function initialize() {
-			jQuery($ => {
-				// handles disabling of navbar items
-				$("ul.nav-list").on('click', 'li.disabled', false);
-			});
+			);
 		}
 
 		function getHtmlVer() {
