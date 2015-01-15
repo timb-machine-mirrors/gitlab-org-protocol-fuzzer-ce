@@ -73,9 +73,8 @@ module Peach.C {
 
 	export module Templates {
 		export var Dashboard = 'html/dashboard.html';
-		export var Faults = 'html/faults.html';
+		export var Faults = 'html/faults/summary.html';
 		export var FaultsDetail = 'html/faults/detail.html';
-		export var Metrics = 'html/metrics.html';
 		export var MetricPage = 'html/metrics/:metric.html';
 		export var BucketTimelineItem = 'bucketTimelineItem.html';
 		export module Modal {
