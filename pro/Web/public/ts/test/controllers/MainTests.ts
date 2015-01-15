@@ -40,7 +40,6 @@ describe("Peach", () => {
 			});
 
 			$templateCache.put(C.Templates.Dashboard, '');
-			$templateCache.put(C.Templates.Wizard.Base, '');
 			$templateCache.put(C.Templates.Wizard.Intro, '');
 
 			$httpBackend.expectGET(C.Api.Jobs).respond([]);
@@ -102,7 +101,7 @@ describe("Peach", () => {
 			});
 
 			it("should start the wizard", () => {
-				expect($state.is(C.States.WizardTrack, { track: C.Tracks.Intro })).toBe(true);
+				expect($state.is(C.States.Wizard, { track: C.Tracks.Intro })).toBe(true);
 			});
 		});
 

@@ -83,7 +83,6 @@
 			export var Unsaved = 'html/modal/Unsaved.html';
 		}
 		export module Wizard {
-			export var Base = "html/wizard.html";
 			export var Intro = 'html/wizard/intro.html';
 			export var Track = 'html/wizard/track.html';
 			export var TrackIntro = 'html/wizard/:track/intro.html';
@@ -115,10 +114,9 @@
 		export var Metrics = 'metrics';
 
 		export var Wizard = 'wizard';
-		export var WizardTrack = 'wizard.track';
-		export var WizardTrackIntro = 'wizard.track.intro';
-		export var WizardTrackQuestion = 'wizard.track.question';
-		export var WizardTrackReview = 'wizard.track.review';
+		export var WizardIntro = 'wizard.intro';
+		export var WizardQuestion = 'wizard.question';
+		export var WizardReview = 'wizard.review';
 
 		export var Config = 'config';
 		export var ConfigVariables = 'config.variables';

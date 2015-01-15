@@ -1,4 +1,6 @@
-<div>
+<div class="page-content">
+	<div ng-include="'html/wizard/header.html'">
+	</div>
 	<p>
 		When all of the sections of the configuration are complete,
 		you can validate the fuzzing definition for correctness.
@@ -19,7 +21,7 @@
 			<span class="label arrowed"
 						ng-class="vm.TrackStatus(item)">
 				{{vm.TrackMessage(item)}}
-				<a ui-sref="wizard.track.intro({track: item.track})"
+				<a ui-sref="wizard.intro({track: item.track})"
 					 ng-show="vm.TrackLink(item)"
 					 style="color: white">
 					<b>

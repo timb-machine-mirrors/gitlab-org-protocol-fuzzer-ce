@@ -1,45 +1,49 @@
-﻿<form name="form">
-	<div class="panel panel-default">
-		<div class="panel-heading">
-			<span>
-				<button type="button"
-								class="btn btn-sm btn-default"
-								ng-click="vm.Back()"
-								ng-class="{disabled: !vm.CanMoveBack}">
-					<i class="icon-arrow-left"></i>
-					{{BackPrompt}}
-				</button>
-			</span>
-			<span class="pull-right">
-				<button type="submit"
-								class="btn btn-sm btn-success"
-								ng-click="vm.Next()"
-								ng-class="{disabled: !vm.CanMoveNext}">
-					{{NextPrompt}}
-					<i class="icon-arrow-right icon-on-right"></i>
-				</button>
-			</span>
-		</div>
-		<div class="panel-body">
-			<div data-target="#step-container">
-				<ul class="wizard-steps">
-					<li ng-class="{active: Step == 1, complete: Step > 1}">
-						<span class="step">1</span>
-						<span class="title">Introduction</span>
-					</li>
-					<li ng-class="{active: Step == 2, complete: Step > 2}">
-						<span class="step">2</span>
-						<span class="title">Questions &amp; Answers</span>
-					</li>
-					<li ng-class="{active: Step == 3}">
-						<span class="step">3</span>
-						<span class="title">Review</span>
-					</li>
-				</ul>
-			</div>
-			<hr />
-			<div ui-view>
-			</div>
-		</div>
+﻿<div class="page-content">
+	<div ng-include="'html/wizard/header.html'">
 	</div>
-</form>
+	<form name="form">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<span>
+					<button type="button"
+									class="btn btn-sm btn-default"
+									ng-click="vm.Back()"
+									ng-class="{disabled: !vm.CanMoveBack}">
+						<i class="icon-arrow-left"></i>
+						{{BackPrompt}}
+					</button>
+				</span>
+				<span class="pull-right">
+					<button type="submit"
+									class="btn btn-sm btn-success"
+									ng-click="vm.Next()"
+									ng-class="{disabled: !vm.CanMoveNext}">
+						{{NextPrompt}}
+						<i class="icon-arrow-right icon-on-right"></i>
+					</button>
+				</span>
+			</div>
+			<div class="panel-body">
+				<div data-target="#step-container">
+					<ul class="wizard-steps">
+						<li ng-class="{active: Step == 1, complete: Step > 1}">
+							<span class="step">1</span>
+							<span class="title">Introduction</span>
+						</li>
+						<li ng-class="{active: Step == 2, complete: Step > 2}">
+							<span class="step">2</span>
+							<span class="title">Questions &amp; Answers</span>
+						</li>
+						<li ng-class="{active: Step == 3}">
+							<span class="step">3</span>
+							<span class="title">Review</span>
+						</li>
+					</ul>
+				</div>
+				<hr />
+				<div ui-view>
+				</div>
+			</div>
+		</div>
+	</form>
+</div>

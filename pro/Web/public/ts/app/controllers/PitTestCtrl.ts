@@ -59,9 +59,10 @@ module Peach {
 
 		private track: ITrack;
 		public Tracks: ITrackTestItem[] = TestTracks;
+		public Title = 'Test';
 
 		private get isWizard(): boolean {
-			return this.$state.is(C.States.WizardTrack, { track: C.Tracks.Test });
+			return this.$state.is(C.States.Wizard, { track: C.Tracks.Test });
 		}
 
 		public get ShowNotConfigured(): boolean {
@@ -99,21 +100,28 @@ module Peach {
 		}
 
 		public OnBeginTest() {
-			var agents = [
-				this.wizardService.GetTrack(C.Tracks.Fault).agents,
-				this.wizardService.GetTrack(C.Tracks.Data).agents,
-				this.wizardService.GetTrack(C.Tracks.Auto).agents
-			];
-
-			this.track.isComplete = false;
-			var promise = this.pitService.SaveAgents(_.flatten<Agent>(agents));
-			promise.then(() => {
-				var promise2 = this.testService.BeginTest();
-				promise2.then(() => {
-					if (this.isWizard) {
-						this.track.isComplete = true;
-					}
+			if (this.isWizard) {
+				this.track.isComplete = false;
+				var agents = [
+					this.wizardService.GetTrack(C.Tracks.Fault).agents,
+					this.wizardService.GetTrack(C.Tracks.Data).agents,
+					this.wizardService.GetTrack(C.Tracks.Auto).agents
+				];
+				var promise = this.pitService.SaveAgents(_.flatten<Agent>(agents));
+				promise.then(() => {
+					this.startTest();
 				});
+			} else {
+				this.startTest();
+			}
+		}
+
+		private startTest() {
+			var promise = this.testService.BeginTest();
+			promise.then(() => {
+				if (this.isWizard) {
+					this.track.isComplete = true;
+				}
 			});
 		}
 
