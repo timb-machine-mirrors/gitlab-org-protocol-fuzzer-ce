@@ -472,8 +472,8 @@ quit
 			var target = "gdb/exploitable/exploitable.py";
 
 			var dirs = new List<string> {
-				Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-				Directory.GetCurrentDirectory(),
+				Utilities.ExecutionDirectory,
+				Environment.CurrentDirectory,
 			};
 
 			string path = Environment.GetEnvironmentVariable("PATH");
