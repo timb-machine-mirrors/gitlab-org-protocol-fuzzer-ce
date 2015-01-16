@@ -1,5 +1,13 @@
 /** Library references (unordered) */
-/// <reference path="../def/reference.ts" />
+/// <reference path="def/angular-ui-bootstrap/angular-ui-bootstrap.d.ts" />
+/// <reference path="def/angular-ui/angular-ui-router.d.ts" />
+/// <reference path="def/angularjs/angular-mocks.d.ts" />
+/// <reference path="def/angularjs/angular.d.ts" />
+/// <reference path="def/chartjs/chart.d.ts" />
+/// <reference path="def/jquery/jquery.d.ts" />
+/// <reference path="def/lodash/lodash.d.ts" />
+/// <reference path="def/moment/moment.d.ts" />
+/// <reference path="def/pithy/pithy.d.ts" />
 
 /** Manual references (ordered) */
 /// <reference path="utils.ts" />
@@ -22,6 +30,7 @@
 /// <reference path="controllers/PitTestCtrl.ts" />
 /// <reference path="controllers/StartJobCtrl.ts" />
 /// <reference path="controllers/WizardCtrl.ts" />
+/// <reference path="def/reference.ts" />
 /// <reference path="directives/AgentDirective.ts" />
 /// <reference path="directives/AutoFocusDirective.ts" />
 /// <reference path="directives/ComboboxDirective.ts" />

@@ -1,5 +1,8 @@
 /** Load app references */
-/// <reference path="../app/reference.ts" />
+/// <reference path="../../app/reference.ts" />
+
+/** Library references */
+/// <reference path="../def/jasmine/jasmine.d.ts" />
 
 /** Unordered deps */
 //grunt-start

@@ -31,14 +31,14 @@ module.exports = (grunt) ->
 						'ace-bootstrap/fonts/*'
 					]
 					'angular-chart'               : [
-						'angular-chart.js/dist/angular-chart.css'
+						'angular-chart.js/dist/angular-chart.css*'
 						'angular-chart.js/angular-chart.js'
 					]
 					'angular-smart-table/smart-table.js' : 'angular-smart-table/dist/smart-table.debug.js'
 					'angular-tree-control/css'    : 'angular-tree-control/css/*'
 					'angular-tree-control/images' : 'angular-tree-control/images/*'
 					'angular-tree-control/js'     : 'angular-tree-control/angular-tree-control.js'
-					'bootstrap/css'               : 'bootstrap/dist/css/bootstrap.css'
+					'bootstrap/css'               : 'bootstrap/dist/css/bootstrap.css*'
 					'bootstrap/fonts'             : 'bootstrap/dist/fonts/*'
 					'bootstrap/js'                : 'bootstrap/dist/js/bootstrap.js'
 					'chartjs'                     : 'Chart.js/Chart.js'
@@ -57,31 +57,39 @@ module.exports = (grunt) ->
 			]
 
 		tsd:
-			refresh: 
+			app: 
 				options:
 					command: 'reinstall'
-					config: 'tsd.json'
+					config: 'tsd-app.json'
+			test:
+				options:
+					command: 'reinstall'
+					config: 'tsd-test.json'
 
 		ts:
 			options:
 				module: 'commonjs'
 				sourceMap: true
-				sourceRoot: '/ts/app'
+				sourceRoot: '/ts'
 				removeComments: false
 			app:
 				src: ['public/ts/app/**/*.ts']
 				reference: 'public/ts/app/reference.ts'
 				out: 'public/js/app/app.js'
-			test:
-				src: ['public/ts/test/**/*.ts']
-				reference: 'public/ts/test/reference.ts'
-				out: 'public/js/test/test.js'
+			unit:
+				src: ['public/ts/test/unit/**/*.ts']
+				reference: 'public/ts/test/unit/reference.ts'
+				out: 'public/js/test/unit.js'
+			e2e:
+				src: ['public/ts/test/e2e/**/*.ts']
+				reference: 'public/ts/test/e2e/reference.ts'
+				out: 'public/js/test/e2e.js'
 
 		jasmine:
 			test:
 				host: 'http://localhost:9999/'
 				src: [
-					'public/js/test/test.js'
+					'public/js/test/unit.js'
 				]
 				options:
 					outfile: 'public/tests.html'
@@ -98,10 +106,20 @@ module.exports = (grunt) ->
 						'node_modules/jasmine-custom-message/jasmine-custom-message.js'
 					]
 
+		protractor:
+			options:
+				configFile: 'protractor.conf.js'
+			run:
+				options:
+					keepAlive: false
+			continuous:
+				options:
+					keepAlive: true
+
 		watch:
 			ts:
-				files: ['public/ts/**/*.ts']
-				tasks: ['compile-work']
+				files: ['public/ts/app/**/*.ts']
+				tasks: ['ts:app']
 				options:
 					livereload: true
 			html:
@@ -112,29 +130,38 @@ module.exports = (grunt) ->
 				files: ['public/**/*.css']
 				options:
 					livereload: true
-			test:
-				files: ['public/ts/**/*.ts']
-				tasks: ['compile-test', 'run-test']
+			unit:
+				files: ['public/ts/app/**/*.ts', 'public/ts/test/unit/**/*.ts']
+				tasks: ['ts:unit', 'jasmine:test']
+				options:
+					atBegin: true
+			e2e:
+				files: ['public/ts/app/**/*.ts', 'public/ts/test/e2e/**/*.ts']
+				tasks: ['ts:e2e', 'protractor:continuous']
 				options:
 					atBegin: true
 
 		focus:
 			app:
-				include: ['ts', 'html', 'css']			
+				include: ['ts', 'html', 'css']
 
 		connect:
 			options:
 				hostname: 'localhost'
 				port: 9000
 				base: 'public'
-				livereload: true
+				middleware: (connect, options) -> 
+					[ proxy, connect.static(options.base[0]) ]
 			proxies: [
 				{context: '/p/', host: 'localhost', port: 8888}
 			]
 			livereload:
 				options:
-					middleware: (connect, options) -> 
-						[ proxy, connect.static(options.base[0]) ]
+					livereload: true
+			test:
+				options:
+					port: 9001
+					livereload: false
 
 		http:
 			accept_eula:
@@ -165,19 +192,19 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-focus'
 	grunt.loadNpmTasks 'grunt-http'
 	grunt.loadNpmTasks 'grunt-open'
+	grunt.loadNpmTasks 'grunt-protractor-runner'
 	grunt.loadNpmTasks 'grunt-ts'
 	grunt.loadNpmTasks 'grunt-tsd'
 
 	grunt.registerTask 'default', ['work']
 
-	grunt.registerTask 'compile-work', ['ts:app']
-	grunt.registerTask 'compile-test', ['ts:test']
+	grunt.registerTask 'compile', ['ts:app']
 
 	grunt.registerTask 'init', [
 		'clean'
 		'bowercopy'
 		'tsd'
-		'compile-work'
+		'ts:app'
 	]
 
 	grunt.registerTask 'server', [
@@ -188,15 +215,23 @@ module.exports = (grunt) ->
 
 	grunt.registerTask 'work', [
 		'clean:app'
-		'compile-work'
+		'ts:app'
 		'server'
 		'open'
 		'focus:app'
 	]
 
-	grunt.registerTask 'test', [
-		'clean:app'
-		'watch:test'
+	grunt.registerTask 'unit', [
+		'watch:unit'
+	]
+
+	grunt.registerTask 'e2e', [
+		'ts:app'
+		'ts:e2e'
+		'configureProxies'
+		'http:accept_eula'
+		'connect:test'
+		'watch:e2e'
 	]
 
 	grunt.registerTask 'run-test', ['jasmine:test']
