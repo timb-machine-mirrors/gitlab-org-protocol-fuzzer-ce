@@ -9,8 +9,11 @@ content = [
 	'bower.json',
 	'Gruntfile.coffee',
 	'package.json',
+	'protractor.conf.js',
 	'README.adoc',
-	'tsd.json',
+	'tsd-app.json',
+	'tsd-test.json',
+	'tslint.json',
 ] + bld.path.ant_glob('public/ts/test/**/*.ts')
 
 public = bld.path.ant_glob('public/**/*', excl = [
