@@ -650,7 +650,6 @@ quit
 					{
 						logger.Debug("FAULT, WaitForExit ran out of time!");
 						_fault = MakeFault("ProcessFailedToExit", "Process did not exit in " + WaitForExitTimeout + "ms");
-						this.Agent.QueryMonitors("CanaKitRelay_Reset");
 					}
 				}
 				else

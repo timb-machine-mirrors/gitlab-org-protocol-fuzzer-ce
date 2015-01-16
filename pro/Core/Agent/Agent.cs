@@ -271,31 +271,6 @@ namespace Peach.Pro.Core.Agent
 
 		#endregion
 
-		/// <summary>
-		/// Send an information request (query) to all local monitors.
-		/// </summary>
-		/// <remarks>
-		/// Agents may expose information that other monitors can query.  For example a
-		/// debugger monitor may expose a "QueryPid" to get the current process id.  This
-		/// information could be useful to a window closing monitor that monitors windows created
-		/// by the process id and closes them if needed.
-		/// </remarks>
-		/// <param name="query">Query to send to each monitor</param>
-		/// <returns>Query response or null</returns>
-		public object QueryMonitors(string query)
-		{
-			logger.Trace("QueryMonitors: {0}", query);
-
-			foreach (var mon in monitors)
-			{
-				var ret = mon.ProcessQueryMonitors(query);
-				if (ret != null)
-					return ret;
-			}
-
-			return null;
-		}
-
 		private static Dictionary<string, Variant> AsDict(IEnumerable<KeyValuePair<string, Variant>> sequence)
 		{
 			var ret = new Dictionary<string, Variant>();

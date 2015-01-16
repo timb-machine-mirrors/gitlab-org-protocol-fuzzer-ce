@@ -11,13 +11,6 @@ namespace Peach.Core.Test
 	{
 		class Agent : IAgent
 		{
-			private readonly MonitorRunner _runner;
-
-			public Agent(MonitorRunner runner)
-			{
-				_runner = runner;
-			}
-
 			public void AgentConnect()
 			{
 				throw new NotImplementedException();
@@ -76,13 +69,6 @@ namespace Peach.Core.Test
 			public Variant Message(string name, Variant data)
 			{
 				throw new NotImplementedException();
-			}
-
-			public object QueryMonitors(string query)
-			{
-				return _runner.Forward
-					.Select(mon => mon.ProcessQueryMonitors(query))
-					.FirstOrDefault(r => r != null);
 			}
 		}
 
@@ -151,7 +137,7 @@ namespace Peach.Core.Test
 
 		public MonitorRunner()
 		{
-			_agent = new Agent(this);
+			_agent = new Agent();
 			_monitors = new List<Monitor>();
 
 			SessionStarting = m => m.SessionStarting();
