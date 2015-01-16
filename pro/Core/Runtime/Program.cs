@@ -36,6 +36,7 @@ using Peach.Core.Agent;
 using Peach.Core.Analyzers;
 using Peach.Core.Runtime;
 using SharpPcap;
+using Version = System.Version;
 
 namespace Peach.Pro.Core.Runtime
 {
@@ -86,6 +87,84 @@ namespace Peach.Pro.Core.Runtime
 			{
 				throw new PeachException(string.Format("Error, could not load platform assembly '{0}'.  {1}", osAssembly, ex.Message), ex);
 			}
+		}
+
+		private static Version ParseMonoVersion(string str)
+		{
+			// Example version string:
+			// 3.2.8 (Debian 3.2.8+dfsg-4ubuntu1)
+
+			var idx = str.IndexOf(' ');
+			if (idx < 0)
+				return null;
+
+			var part = str.Substring(0, idx);
+
+			Version ret;
+			Version.TryParse(part, out ret);
+
+			return ret;
+		}
+
+		public static bool VerifyCompatibility()
+		{
+			var type = Type.GetType("Mono.Runtime");
+
+			// If we are not on mono, no checks need to be performed.
+			if (type == null)
+				return true;
+
+			try
+			{
+				Console.ForegroundColor = DefaultForground;
+				Console.ResetColor();
+			}
+			catch
+			{
+				var term = Environment.GetEnvironmentVariable("TERM");
+
+				if (term == null)
+					Console.WriteLine("An incompatible terminal type was detected.");
+				else
+					Console.WriteLine("An incompatible terminal type '{0}' was detected.", term);
+
+				Console.WriteLine("Change your terminal type to 'linux', 'xterm' or 'rxvt' and try again.");
+				return false;
+			}
+
+			var minVer = new Version(2, 10, 8);
+
+			var mi = type.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static);
+
+			if (mi == null)
+			{
+				Console.WriteLine("Unable to locate the version of mono installed.");
+			}
+			else
+			{
+				var str = mi.Invoke(null, null) as string;
+
+				if (str == null)
+				{
+					Console.WriteLine("Unable to query the version of mono installed.");
+				}
+				else
+				{
+					var ver = ParseMonoVersion(str);
+
+					if (ver == null || ver < minVer)
+					{
+						Console.WriteLine("The installed mono version {0} is not supported.", str);
+					}
+					else
+					{
+						return true;
+					}
+				}
+			}
+
+			Console.WriteLine("Ensure mono version {0} or newer is installed and try again.", minVer);
+			return false;
 		}
 
 		/// <summary>
@@ -140,6 +219,9 @@ namespace Peach.Pro.Core.Runtime
 
 		public Program(string[] args)
 		{
+			if (!VerifyCompatibility())
+				return;
+
 			AssertWriter.Register();
 
 			config.commandLine = args;
