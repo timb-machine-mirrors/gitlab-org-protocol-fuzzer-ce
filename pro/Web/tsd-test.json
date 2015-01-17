@@ -13,6 +13,9 @@
     },
     "angular-protractor/angular-protractor.d.ts": {
       "commit": "2cc4331067a81e2ae6bc4590e7b33bf286c8f28f"
+    },
+    "node/node.d.ts": {
+      "commit": "4994f46d8601b68989ac8f4aa47564b3d8e01423"
     }
   }
 }

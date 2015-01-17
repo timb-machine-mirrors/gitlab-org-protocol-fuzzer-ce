@@ -27,8 +27,8 @@ module Peach {
 	export interface IPitCopy {
 		// Url of the destination Pit Library
 		libraryUrl: string;
-
-		// Pit record. Use only pitUrl, name, and description
-		pit: IPit;
+		pitUrl: string;
+		name: string;
+		description: string;
 	}
 }

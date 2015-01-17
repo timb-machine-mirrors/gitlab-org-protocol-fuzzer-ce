@@ -101,9 +101,9 @@ namespace Peach.Pro.Core.WebServices
 			{
 				newUrl = PitDatabase.CopyPit(
 					data.LibraryUrl, 
-					data.Pit.PitUrl, 
-					data.Pit.Name, 
-					data.Pit.Description
+					data.PitUrl, 
+					data.Name, 
+					data.Description
 				);
 			}
 			catch (KeyNotFoundException)

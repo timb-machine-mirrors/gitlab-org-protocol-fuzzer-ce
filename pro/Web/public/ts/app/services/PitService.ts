@@ -44,8 +44,8 @@ module Peach {
 		public LoadLibrary(): ng.IPromise<ILibrary[]> {
 			var promise = this.$http.get(C.Api.Libraries);
 			promise.success((libs: ILibrary[]) => {
-				this.userPitLibrary = _.chain(libs)
-					.reject('locked')
+				this.userPitLibrary = _(libs)
+					.reject({ locked: true })
 					.first()
 					.libraryUrl;
 			});
@@ -70,7 +70,7 @@ module Peach {
 					var modal = this.$modal.open({
 						templateUrl: C.Templates.Modal.CopyPit,
 						controller: CopyPitController,
-						resolve: { pit: () => pit }
+						resolve: { Pit: () => pit }
 					});
 					modal.result.then((copied: IPit) => {
 						// only update the current Pit if successful
@@ -134,13 +134,14 @@ module Peach {
 			return StripHttpPromise(this.$q, promise);
 		}
 
-		public CopyPit(pit: IPit): ng.IPromise<IPit> {
+		public CopyPit(pit: IPit): ng.IHttpPromise<IPit> {
 			var request: IPitCopy = {
 				libraryUrl: this.UserPitLibrary,
-				pit: pit
+				pitUrl: pit.pitUrl,
+				name: pit.name,
+				description: pit.description
 			}
-			var promise = this.$http.post(C.Api.Pits, request);
-			return StripHttpPromise(this.$q, promise);
+			return this.$http.post(C.Api.Pits, request);
 		}
 
 		public SaveConfig(config: IParameter[]): ng.IPromise<IPit> {

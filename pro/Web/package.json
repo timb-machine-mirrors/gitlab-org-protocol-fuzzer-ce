@@ -21,6 +21,7 @@
     "grunt-http": "^1.5.0",
     "grunt-open": "^0.2.3",
     "grunt-protractor-runner": "^1.1.4",
+    "grunt-run": "^0.3.0",
     "grunt-ts": "^1.12.1",
     "grunt-tsd": "^0.1.0",
     "protractor": "^1.6.1",

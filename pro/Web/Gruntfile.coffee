@@ -1,7 +1,18 @@
 'use strict'
 
 module.exports = (grunt) ->
+	path = require('path')
 	proxy = require('grunt-connect-proxy/lib/utils').proxyRequest
+
+	variant = grunt.option('variant') || 'win_debug_x64'
+	repo = '../..'
+	e2e = '.e2e'
+	waf_bindir = path.join(repo, 'output', variant, 'bin')
+	vs_bindir = path.join(repo, '.depproj', 'bin', variant)
+	peach_args = [ '--nobrowser',  '--pits', path.resolve(e2e) ]
+	e2e_specs = [
+		'public/js/test/e2e.js'
+	]
 
 	grunt.initConfig
 		pkg: grunt.file.readJSON 'package.json'
@@ -54,6 +65,9 @@ module.exports = (grunt) ->
 			]
 			lib: [
 				'public/lib'
+			]
+			e2e: [
+				e2e
 			]
 
 		tsd:
@@ -109,13 +123,18 @@ module.exports = (grunt) ->
 		protractor:
 			options:
 				configFile: 'protractor.conf.js'
-			run:
+			waf:
 				options:
 					keepAlive: false
-			continuous:
+					args:
+						baseUrl: 'http://localhost:8888/'
+						specs: e2e_specs
+			vs:
 				options:
 					keepAlive: true
-
+					args:
+						baseUrl: 'http://localhost:9001/'
+						specs: e2e_specs
 		watch:
 			ts:
 				files: ['public/ts/app/**/*.ts']
@@ -137,7 +156,7 @@ module.exports = (grunt) ->
 					atBegin: true
 			e2e:
 				files: ['public/ts/app/**/*.ts', 'public/ts/test/e2e/**/*.ts']
-				tasks: ['ts:e2e', 'protractor:continuous']
+				tasks: ['e2e-cycle']
 				options:
 					atBegin: true
 
@@ -180,25 +199,57 @@ module.exports = (grunt) ->
 		open:
 			dev:
 				path: 'http://localhost:<%= connect.options.port%>'
+		
+		copy:
+			pits: 
+				files: [
+					{
+						expand: true
+						cwd: path.join(repo, 'pits', 'pro')
+						src: ['Test/*']
+						dest: e2e
+					}
+				]
+			eula_vs:
+				src: 'eula.config'
+				dest: path.join(vs_bindir, 'Peach.exe.user.config')
+			eula_waf:
+				src: 'eula.config'
+				dest: path.join(waf_bindir, 'Peach.exe.user.config')
+				
+		run:
+			options:
+				failOnError: true
+				wait: false
+				ready: /Web site running/
+			waf:
+				cmd: 'Peach.exe'
+				args: peach_args
+				options:
+					cwd: waf_bindir
+			vs:
+				cmd: 'Peach.exe'
+				args: peach_args
+				options:
+					cwd: vs_bindir
 
 	grunt.loadNpmTasks 'grunt-bowercopy'
 	grunt.loadNpmTasks 'grunt-contrib-clean'
+	grunt.loadNpmTasks 'grunt-contrib-connect'
 	grunt.loadNpmTasks 'grunt-contrib-copy'
 	grunt.loadNpmTasks 'grunt-contrib-jasmine'
+	grunt.loadNpmTasks 'grunt-connect-proxy'
 	grunt.loadNpmTasks 'grunt-contrib-uglify'
 	grunt.loadNpmTasks 'grunt-contrib-watch'
-	grunt.loadNpmTasks 'grunt-contrib-connect'
-	grunt.loadNpmTasks 'grunt-connect-proxy'
 	grunt.loadNpmTasks 'grunt-focus'
 	grunt.loadNpmTasks 'grunt-http'
 	grunt.loadNpmTasks 'grunt-open'
 	grunt.loadNpmTasks 'grunt-protractor-runner'
+	grunt.loadNpmTasks 'grunt-run'
 	grunt.loadNpmTasks 'grunt-ts'
 	grunt.loadNpmTasks 'grunt-tsd'
 
 	grunt.registerTask 'default', ['work']
-
-	grunt.registerTask 'compile', ['ts:app']
 
 	grunt.registerTask 'init', [
 		'clean'
@@ -225,13 +276,34 @@ module.exports = (grunt) ->
 		'watch:unit'
 	]
 
-	grunt.registerTask 'e2e', [
+	grunt.registerTask 'test', [
+		'jasmine:test'
+	]
+
+	grunt.registerTask 'prepare-e2e', [
 		'ts:app'
 		'ts:e2e'
+		'clean:e2e'
+		'copy:pits'
+		'copy:eula_vs'
+	]
+
+	grunt.registerTask 'e2e-cycle', [
+		'prepare-e2e'
+		'run:vs'
+		'protractor:vs'
+		'stop:vs'
+	]
+
+	grunt.registerTask 'e2e-dev', [
 		'configureProxies'
-		'http:accept_eula'
 		'connect:test'
 		'watch:e2e'
 	]
 
-	grunt.registerTask 'run-test', ['jasmine:test']
+	grunt.registerTask 'e2e', [
+		'prepare-e2e'
+		'run:waf'
+		'protractor:waf'
+		'stop:waf'
+	]

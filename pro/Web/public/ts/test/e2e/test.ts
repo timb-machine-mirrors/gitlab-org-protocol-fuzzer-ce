@@ -2,50 +2,52 @@
 
 'use strict';
 
-describe('Peach dashboard', () => {
-	
+var RandofaulterPath = ['Peach Pro Library 2014 Q4', 'Test', 'randofaulter'];
+
+describe('Dashboard |', () => {
+	var page = new Dashboard();
+
 	beforeEach(() => {
-		browser.get('/');
+		page.Get();
 	});
 
 	it('should have a title', () => {
 		expect(browser.getTitle()).toBe('Peach Fuzzer');
 	});
 
-	function getTreeNode(tree: protractor.ElementFinder, byText) {
-		var nodes = tree.all(by.css('li div'));
-		return nodes.filter((element, index) => {
-			return element.getText().then(text => {
-				return text === byText;
-			});
-		}).first();
-	}
+	describe('Select Pit modal dialog |', () => {
+		it('should continue to dashboard once a Pit is selected', () => {
+			expect(page.SelectPit.getText()).toBe('Select a Pit');
 
-	it('should continue to dashboard once a Pit is selected', () => {
-		var selectButton = $('.navbar .nav li');
-		expect(selectButton.getText()).toBe('Select a Pit');
+			var selectPitModal = new SelectPit();
+			expect(selectPitModal.IsPresent).toBe(true);
+			expect(selectPitModal.CanSubmit).toBe(false);
 
-		var modal = $('.modal-dialog');
-		expect(modal.isPresent()).toBe(true);
+			selectPitModal.SelectNodes(RandofaulterPath);
 
-		var submit = modal.$('button[type=submit]');
-		expect(submit.isEnabled()).toBe(false);
+			selectPitModal.Submit();
 
-		var tree = $('div[treecontrol]');
-		expect(tree.isPresent()).toBe(true);
+			var copyPitModal = new CopyPit();
+			expect(copyPitModal.IsPresent).toBe(true);
+			expect(copyPitModal.CanSubmit).toBe(true);
+			copyPitModal.Submit();
 
-		getTreeNode(tree, 'User Library').click();
-		expect(submit.isEnabled()).toBe(false);
+			expect(copyPitModal.IsPresent).toBe(false);
+			expect(selectPitModal.IsPresent).toBe(false);
 
-		getTreeNode(tree, 'Test').click();
-		expect(submit.isEnabled()).toBe(false);
+			expect(page.SelectPit.getText()).toBe('randofaulter');
+		});
+	});
+});
 
-		getTreeNode(tree, 'randofaulter').click();
-		expect(submit.isEnabled()).toBe(true);
+describe('Configure >> Monitoring |', () => {
+	beforeEach(() => {
+		//SelectPitHelper(RandofaulterPath);
+	});
 
-		submit.click();
-		expect(modal.isPresent()).toBe(false);
-
-		expect(selectButton.getText()).toBe('randofaulter');
+	it('can add agents', () => {
+		var page = new CfgMonitors();
+		page.Go();
+		expect(page.CanSave).toBe(true);
 	});
 });
