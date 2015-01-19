@@ -7,11 +7,42 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using Peach.Core.IO;
 
 namespace Peach.Core.Test
 {
 	public static class Helpers
 	{
+		public static string[] ElementNames(this BitwiseStream root)
+		{
+			var ret = new List<string>();
+
+			var elem = root;
+
+			var toVisit = new List<BitwiseStream> { null };
+
+			while (elem != null)
+			{
+				ret.Add(elem.Name);
+
+				var asList = elem as BitStreamList;
+				int index;
+
+				if (asList != null)
+				{
+					index = toVisit.Count;
+					foreach (var item in asList)
+						toVisit.Insert(index, item);
+				}
+
+				index = toVisit.Count - 1;
+				elem = toVisit[index];
+				toVisit.RemoveAt(index);
+			}
+
+			return ret.ToArray();
+		}
+
 		public static Dictionary<T, int> Total<T>(this IEnumerable<T> seq)
 		{
 			var dict = new Dictionary<T, int>();
