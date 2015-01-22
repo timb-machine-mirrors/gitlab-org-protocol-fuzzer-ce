@@ -472,8 +472,8 @@ quit
 			var target = "gdb/exploitable/exploitable.py";
 
 			var dirs = new List<string> {
-				Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-				Directory.GetCurrentDirectory(),
+				Utilities.ExecutionDirectory,
+				Environment.CurrentDirectory,
 			};
 
 			string path = Environment.GetEnvironmentVariable("PATH");
@@ -650,7 +650,6 @@ quit
 					{
 						logger.Debug("FAULT, WaitForExit ran out of time!");
 						_fault = MakeFault("ProcessFailedToExit", "Process did not exit in " + WaitForExitTimeout + "ms");
-						this.Agent.QueryMonitors("CanaKitRelay_Reset");
 					}
 				}
 				else

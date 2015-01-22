@@ -19,6 +19,5 @@ namespace Peach.Core.Agent
 		Fault[] GetMonitorData();
 		bool MustStop();
 		Variant Message(string name, Variant data);
-		object QueryMonitors(string query);
 	}
 }

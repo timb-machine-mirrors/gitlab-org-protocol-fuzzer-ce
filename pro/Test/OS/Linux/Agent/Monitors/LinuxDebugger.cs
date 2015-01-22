@@ -14,7 +14,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		[Test]
 		public void TestFault()
 		{
-			var self = Assembly.GetExecutingAssembly().Location;
+			var self = Utilities.ExecutionDirectory;
 
 			var args = new Dictionary<string, Variant>();
 			args["Executable"] = new Variant("CrashingFileConsumer");
