@@ -50,8 +50,6 @@ namespace Peach.Core.Agent
 			agents = new OwnedCollection<AgentManager,AgentClient>(this);
 
 			Context = context;
-
-			context.CollectFaults += OnCollectFaults;
 		}
 
 		public void AgentConnect(Dom.Agent agentDef)
@@ -97,13 +95,13 @@ namespace Peach.Core.Agent
 			return agents[name];
 		}
 
-		void OnCollectFaults(RunContext context)
+		public void CollectFaults()
 		{
 			// If the engine has recorded faults or any monitor detected a fault,
 			// gather data from all monitors.
 			// NOTE: We must test DetectedFault() first, as monitors expect this
 			// call to occur before any call to GetMonitorData()
-			if (DetectedFault() || context.faults.Count > 0)
+			if (DetectedFault() || Context.faults.Count > 0)
 			{
 				logger.Debug("Fault detected.  Collecting monitor data.");
 
@@ -119,7 +117,7 @@ namespace Peach.Core.Agent
 							continue;
 
 						fault.agentName = item.Key.Name;
-						context.faults.Add(fault);
+						Context.faults.Add(fault);
 					}
 				}
 			}

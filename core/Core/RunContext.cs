@@ -41,24 +41,6 @@ namespace Peach.Core
 	{
 		#region Events
 
-		#region Fault Collection
-
-		public delegate void CollectFaultsHandler(RunContext context);
-
-		/// <summary>
-		/// This event is triggered after an interation has occured to allow
-		/// collection of faults into RunContext.faults collection.
-		/// </summary>
-		public event CollectFaultsHandler CollectFaults;
-
-		public void OnCollectFaults()
-		{
-			if (CollectFaults != null)
-				CollectFaults(this);
-		}
-
-		#endregion
-
 		#region Mutation Events
 
 		public delegate void DataMutationEventHandler(RunContext context, ActionData actionData, DataElement element, Mutator mutator);
