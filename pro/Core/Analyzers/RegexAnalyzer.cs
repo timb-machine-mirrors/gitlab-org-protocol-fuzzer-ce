@@ -87,7 +87,7 @@ namespace Peach.Pro.Core.Analyzers
             var sorted = new SortedDictionary<int, Peach.Core.Dom.String>();
 
             // Create the Block element that will contain the matched strings
-            var block = new Block(parent.name);
+			var block = new Block(parent.Name);
 
             // The order of groups does not always match order from string
             // we will add them into a sorted dictionary to order them correctly
@@ -105,7 +105,7 @@ namespace Peach.Pro.Core.Analyzers
                 block.Add(sorted[item]);
 
             // Replace our current element (String) with the Block of matched strings
-            parent.parent[parent.name] = block;
+			parent.parent[parent.Name] = block;
         }
     }
 }

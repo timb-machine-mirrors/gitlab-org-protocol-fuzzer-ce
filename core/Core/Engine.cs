@@ -764,7 +764,7 @@ namespace Peach.Core
 						//       in turn.  We do this incase the first agent starts
 						//       a virtual machine that contains the second agent.
 						ctx.agentManager.AgentConnect(agent);
-						ctx.agentManager.GetAgent(agent.name).SessionStarting();
+						ctx.agentManager.GetAgent(agent.Name).SessionStarting();
 					}
 					catch (SoftException)
 					{
@@ -843,13 +843,13 @@ namespace Peach.Core
 
 				if (missedStates.Count == 1)
 				{
-					sb.AppendFormat("State '{0}' was not performed.", missedStates[0].name);
+					sb.AppendFormat("State '{0}' was not performed.", missedStates[0].Name);
 				}
 				else
 				{
 					sb.AppendLine("The following states were not performed:");
 					foreach (var s in missedStates)
-						sb.AppendLine("\t'{0}'".Fmt(s.name));
+						sb.AppendLine("\t'{0}'".Fmt(s.Name));
 				}
 
 				var desc = sb.ToString();
@@ -870,13 +870,13 @@ namespace Peach.Core
 
 				if (missedActions.Count == 1)
 				{
-					sb.AppendFormat("Action '{0}.{1}' was not performed.", missedActions[0].parent.name, missedActions[0].name);
+					sb.AppendFormat("Action '{0}.{1}' was not performed.", missedActions[0].parent.Name, missedActions[0].Name);
 				}
 				else
 				{
 					sb.AppendLine("The following actions were not performed:");
 					foreach (var a in missedActions)
-						sb.AppendLine("\t'{0}.{1}'".Fmt(a.parent.name, a.name));
+						sb.AppendLine("\t'{0}.{1}'".Fmt(a.parent.Name, a.Name));
 				}
 
 				var desc = sb.ToString();

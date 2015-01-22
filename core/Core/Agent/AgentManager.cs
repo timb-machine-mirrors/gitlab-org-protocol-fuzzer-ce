@@ -56,18 +56,18 @@ namespace Peach.Core.Agent
 
 		public void AgentConnect(Dom.Agent agentDef)
 		{
-			logger.Trace("AgentConnect: {0}", agentDef.name);
+			logger.Trace("AgentConnect: {0}", agentDef.Name);
 
 			AgentClient agent;
 
-			if (!agents.TryGetValue(agentDef.name, out agent))
+			if (!agents.TryGetValue(agentDef.Name, out agent))
 			{
 				var uri = new Uri(agentDef.location);
 				var type = ClassLoader.FindTypeByAttribute<AgentAttribute>((x, y) => y.protocol == uri.Scheme);
 				if (type == null)
 					throw new PeachException("Error, unable to locate agent that supports the '" + uri.Scheme + "' protocol.");
 
-				agent = Activator.CreateInstance(type, agentDef.name, agentDef.location, agentDef.password) as AgentClient;
+				agent = Activator.CreateInstance(type, agentDef.Name, agentDef.location, agentDef.password) as AgentClient;
 
 				agents.Add(agent);
 			}
@@ -87,8 +87,8 @@ namespace Peach.Core.Agent
 
 			foreach (var mon in agentDef.monitors)
 			{
-				logger.Trace("StartMonitor: {0} {1} {2}", agentDef.name, mon.name, mon.cls);
-				agent.StartMonitor(mon.name, mon.cls, mon.parameters);
+				logger.Trace("StartMonitor: {0} {1} {2}", agentDef.Name, mon.Name, mon.cls);
+				agent.StartMonitor(mon.Name, mon.cls, mon.parameters);
 			}
 		}
 
@@ -118,7 +118,7 @@ namespace Peach.Core.Agent
 						if (fault == null)
 							continue;
 
-						fault.agentName = item.Key.name;
+						fault.agentName = item.Key.Name;
 						context.faults.Add(fault);
 					}
 				}
