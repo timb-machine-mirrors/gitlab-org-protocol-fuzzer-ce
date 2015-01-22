@@ -29,6 +29,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Peach.Core.Dom;
 
 namespace Peach.Core.Agent
 {
@@ -37,7 +38,7 @@ namespace Peach.Core.Agent
 	/// able to report detected faults and gather information
 	/// that is usefull when a fualt is detected.
 	/// </summary>
-	public abstract class Monitor
+	public abstract class Monitor : INamed
 	{
 		protected Monitor(IAgent agent, string name, Dictionary<string, Variant> args)
 		{
@@ -57,6 +58,7 @@ namespace Peach.Core.Agent
 			OnIterationStartAfterFault
 		};
 
+		public string name { get { return Name; } }
 
 		/// <summary>
 		/// The name of this monitor.
