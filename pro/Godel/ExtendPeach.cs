@@ -66,48 +66,48 @@ namespace Godel.Core
 			// Keep a copy of the original for 'pre' variable in the post 
 			OriginalStateModel = ObjectCopier.Clone((StateModel)model);
 
-			var expr = GetExpr(model.name);
+			var expr = GetExpr(model.Name);
 			if (expr != null)
 				expr.Pre(model);
 		}
 
 		protected override void StateModelFinished(RunContext context, Peach.Core.Dom.StateModel model)
 		{
-			var expr = GetExpr(model.name);
+			var expr = GetExpr(model.Name);
 			if (expr != null)
 				expr.Post(model, OriginalStateModel);
 		}
 
 		protected override void StateStarting(RunContext context, Peach.Core.Dom.State state)
 		{
-			var expr = GetExpr(state.parent.name, state.name);
+			var expr = GetExpr(state.parent.Name, state.Name);
 			if (expr != null)
 				expr.Pre(state);
 		}
 
 		protected override void StateFinished(RunContext context, Peach.Core.Dom.State state)
 		{
-			var expr = GetExpr(state.parent.name, state.name);
+			var expr = GetExpr(state.parent.Name, state.Name);
 			if (expr != null)
 			{
-				var pre = OriginalStateModel.states[state.name];
+				var pre = OriginalStateModel.states[state.Name];
 				expr.Post(state, pre);
 			}
 		}
 
 		protected override void ActionStarting(RunContext context, Peach.Core.Dom.Action action)
 		{
-			var expr = GetExpr(action.parent.parent.name, action.parent.name, action.name);
+			var expr = GetExpr(action.parent.parent.Name, action.parent.Name, action.Name);
 			if (expr != null)
 				expr.Pre(action);
 		}
 
 		protected override void ActionFinished(RunContext context, Peach.Core.Dom.Action action)
 		{
-			var expr = GetExpr(action.parent.parent.name, action.parent.name, action.name);
+			var expr = GetExpr(action.parent.parent.Name, action.parent.Name, action.Name);
 			if (expr != null)
 			{
-				var pre = OriginalStateModel.states[action.parent.name].actions[action.name];
+				var pre = OriginalStateModel.states[action.parent.Name].actions[action.Name];
 				expr.Post(action, pre);
 			}
 		}

@@ -12,11 +12,18 @@ namespace Godel.Core
 	[Serializable]
 	public class GodelContext : INamed
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
 		public string debugName { get; set; }
 		public string type { get; set; }
-		public string name { get; set; }
+		public string Name { get; set; }
 		public string refName { get; set; }
 		public bool? controlOnly { get; set; }
 		public string inv { get; set; }

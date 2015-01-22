@@ -193,7 +193,7 @@ namespace Peach.Pro.Core.MutationStrategies
 					catch (PeachException ex)
 					{
 						logger.Debug(ex.Message);
-						logger.Debug("Unable to apply data '{0}', ignoring.", opt.name);
+						logger.Debug("Unable to apply data '{0}', ignoring.", opt.Name);
 					}
 				}
 			}

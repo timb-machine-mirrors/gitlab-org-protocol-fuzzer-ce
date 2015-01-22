@@ -60,7 +60,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			cracker.CrackData(dom.dataModels[0], data);
 
 			Assert.IsTrue(dom.dataModels[0][0] is Choice);
-			Assert.AreEqual("Blob5", ((Choice)dom.dataModels[0][0])[0].name);
+			Assert.AreEqual("Blob5", ((Choice)dom.dataModels[0][0])[0].Name);
 			Assert.AreEqual(new byte[] { 1, 2, 3, 4, 5 }, ((DataElementContainer)dom.dataModels[0][0])[0].DefaultValue.BitsToArray());
 		}
 
@@ -85,7 +85,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			cracker.CrackData(dom.dataModels[0], data);
 
 			Assert.IsTrue(dom.dataModels[0][0] is Choice);
-			Assert.AreEqual("Blob10", ((Choice)dom.dataModels[0][0])[0].name);
+			Assert.AreEqual("Blob10", ((Choice)dom.dataModels[0][0])[0].Name);
 			Assert.AreEqual(new byte[] { 1, 2, 3, 4, 5 }, ((DataElementContainer)dom.dataModels[0][0])[0].DefaultValue.BitsToArray());
 		}
 
@@ -193,7 +193,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			Assert.AreEqual(1, dom1.dataModels[0].Count);
 			var choice1 = dom1.dataModels[0][0] as Peach.Core.Dom.Choice;
 			Assert.NotNull(choice1);
-			Assert.AreEqual("choice", choice1.SelectedElement.name);
+			Assert.AreEqual("choice", choice1.SelectedElement.Name);
 
 			var dom2 = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			var data2 = Bits.Fmt("{0}", "Hello");
@@ -202,7 +202,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			Assert.AreEqual(1, dom2.dataModels[0].Count);
 			var choice2 = dom2.dataModels[0][0] as Peach.Core.Dom.Choice;
 			Assert.NotNull(choice2);
-			Assert.AreEqual("unsized", choice2.SelectedElement.name);
+			Assert.AreEqual("unsized", choice2.SelectedElement.Name);
 		}
 	}
 }

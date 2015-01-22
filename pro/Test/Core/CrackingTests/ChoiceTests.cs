@@ -61,7 +61,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			cracker.CrackData(dom.dataModels[0], data);
 
 			Assert.IsTrue(dom.dataModels[0][0] is Choice);
-			Assert.AreEqual("Blob5", ((Choice)dom.dataModels[0][0])[0].name);
+			Assert.AreEqual("Blob5", ((Choice)dom.dataModels[0][0])[0].Name);
 			Assert.AreEqual(new byte[] { 1, 2, 3, 4, 5 }, ((DataElementContainer)dom.dataModels[0][0])[0].DefaultValue.BitsToArray());
 		}
 
@@ -577,7 +577,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 
 			Peach.Core.Dom.Choice c = (Peach.Core.Dom.Choice)dom.dataModels[0][0];
 			var selected = c.SelectedElement as Peach.Core.Dom.Block;
-			Assert.AreEqual("C2", selected.name);
+			Assert.AreEqual("C2", selected.Name);
 			Assert.AreEqual(1, selected[0].DefaultValue.BitsToArray().Length);
 			Assert.AreEqual(4, selected[1].DefaultValue.BitsToArray().Length);
 		}
@@ -617,7 +617,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			Assert.NotNull(c);
 			var selected = c.SelectedElement as Peach.Core.Dom.Block;
 			Assert.NotNull(selected);
-			Assert.AreEqual("C1", selected.name);
+			Assert.AreEqual("C1", selected.Name);
 			Assert.AreEqual(2, selected.Count);
 			var array = selected[1] as Peach.Core.Dom.Array;
 			Assert.NotNull(array);

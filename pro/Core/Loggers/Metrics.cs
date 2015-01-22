@@ -415,7 +415,7 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 
 		protected override void StateStarting(RunContext context, Peach.Core.Dom.State state)
 		{
-			sample.State = state.name;
+			sample.State = state.Name;
 
 			var dom = state.parent.parent;
 
@@ -425,15 +425,15 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 
 		protected override void ActionStarting(RunContext context, Peach.Core.Dom.Action action)
 		{
-			sample.Action = action.name;
+			sample.Action = action.Name;
 		}
 
 		protected override void DataMutating(RunContext context, Peach.Core.Dom.ActionData actionData, Peach.Core.Dom.DataElement element, Mutator mutator)
 		{
-			sample.DataSet = actionData.selectedData != null ? actionData.selectedData.name : "";
-			sample.Parameter = actionData.name ?? "";
+			sample.DataSet = actionData.selectedData != null ? actionData.selectedData.Name : "";
+			sample.Parameter = actionData.Name ?? "";
 			sample.Element = element.fullName;
-			sample.Mutator = mutator.name;
+			sample.Mutator = mutator.Name;
 
 			samples.Add(ObjectCopier.Clone(sample));
 

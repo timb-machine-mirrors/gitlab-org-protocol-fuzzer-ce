@@ -37,6 +37,13 @@ namespace Peach.Core.Agent
 	/// </summary>
 	public abstract class AgentClient : INamed, IOwned<AgentManager>
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
 		protected abstract NLog.Logger Logger { get; }
 
 		/// <summary>
@@ -47,14 +54,14 @@ namespace Peach.Core.Agent
 		/// <param name="password">Agent Password</param>
 		public AgentClient(string name, string url, string password)
 		{
-			this.name = name;
+			Name = name;
 			this.url = url;
 			this.password = password;
 		}
 
 		#region Public Agent Functions
 
-		public string name { get; private set; }
+		public string Name { get; private set; }
 		public string url { get; private set; }
 		public string password { get; private set; }
 
@@ -65,7 +72,7 @@ namespace Peach.Core.Agent
 		/// </summary>
 		public void AgentConnect()
 		{
-			Logger.Trace("AgentConnect: {0}", name);
+			Logger.Trace("AgentConnect: {0}", Name);
 			parent.Context.OnAgentConnect(this);
 
 			OnAgentConnect();
@@ -76,7 +83,7 @@ namespace Peach.Core.Agent
 		/// </summary>
 		public void AgentDisconnect()
 		{
-			Logger.Trace("AgentDisconnect: {0}", name);
+			Logger.Trace("AgentDisconnect: {0}", Name);
 			parent.Context.OnAgentDisconnect(this);
 
 			OnAgentDisconnect();
@@ -90,7 +97,7 @@ namespace Peach.Core.Agent
 		/// <returns>Instance of remote publisher</returns>
 		public IPublisher CreatePublisher(string cls, Dictionary<string, Variant> args)
 		{
-			Logger.Trace("CreatePublisher: {0} {1}", name, cls);
+			Logger.Trace("CreatePublisher: {0} {1}", Name, cls);
 			parent.Context.OnCreatePublisher(this, cls, args);
 
 			return OnCreatePublisher(cls, args);
@@ -104,7 +111,7 @@ namespace Peach.Core.Agent
 		/// <param name="args">Arguments</param>
 		public void StartMonitor(string name, string cls, Dictionary<string, Variant> args)
 		{
-			Logger.Trace("StartMonitor: {0} {1} {2}", this.name, name, cls);
+			Logger.Trace("StartMonitor: {0} {1} {2}", Name, name, cls);
 			parent.Context.OnStartMonitor(this, name, cls, args);
 
 			OnStartMonitor(name, cls, args);
@@ -115,7 +122,7 @@ namespace Peach.Core.Agent
 		/// </summary>
 		public void StopAllMonitors()
 		{
-			Logger.Trace("StopAllMonitors: {0}", name);
+			Logger.Trace("StopAllMonitors: {0}", Name);
 			parent.Context.OnStopAllMonitors(this);
 
 			OnStopAllMonitors();
@@ -126,7 +133,7 @@ namespace Peach.Core.Agent
 		/// </summary>
 		public void SessionStarting()
 		{
-			Logger.Trace("SessionStarting: {0}", name);
+			Logger.Trace("SessionStarting: {0}", Name);
 			parent.Context.OnSessionStarting(this);
 
 			OnSessionStarting();
@@ -137,7 +144,7 @@ namespace Peach.Core.Agent
 		/// </summary>
 		public void SessionFinished()
 		{
-			Logger.Trace("SessionFinished: {0}", name);
+			Logger.Trace("SessionFinished: {0}", Name);
 			parent.Context.OnSessionFinished(this);
 
 			OnSessionFinished();
@@ -150,7 +157,7 @@ namespace Peach.Core.Agent
 		/// <param name="isReproduction">Are we re-running an iteration</param>
 		public void IterationStarting(uint iterationCount, bool isReproduction)
 		{
-			Logger.Trace("IterationStarting: {0} {1} {2}", name, iterationCount, isReproduction);
+			Logger.Trace("IterationStarting: {0} {1} {2}", Name, iterationCount, isReproduction);
 			parent.Context.OnIterationStarting(this);
 
 			OnIterationStarting(iterationCount, isReproduction);
@@ -162,7 +169,7 @@ namespace Peach.Core.Agent
 		/// <returns>Returns true to indicate iteration should be re-run, else false.</returns>
 		public bool IterationFinished()
 		{
-			Logger.Trace("IterationFinished: {0}", name);
+			Logger.Trace("IterationFinished: {0}", Name);
 			parent.Context.OnIterationFinished(this);
 
 			return OnIterationFinished();
@@ -174,7 +181,7 @@ namespace Peach.Core.Agent
 		/// <returns>True if a fault was detected, else false.</returns>
 		public bool DetectedFault()
 		{
-			Logger.Trace("DetectedFault: {0}", name);
+			Logger.Trace("DetectedFault: {0}", Name);
 			parent.Context.OnDetectedFault(this);
 
 			return OnDetectedFault();
@@ -186,13 +193,13 @@ namespace Peach.Core.Agent
 		/// <returns>Returns array of Fault instances</returns>
 		public Fault[] GetMonitorData()
 		{
-			Logger.Trace("GetMonitorData: {0}", name);
+			Logger.Trace("GetMonitorData: {0}", Name);
 			parent.Context.OnGetMonitorData(this);
 
 			var ret = OnGetMonitorData();
 
 			foreach (var item in ret)
-				item.agentName = name;
+				item.agentName = Name;
 
 			return ret;
 		}
@@ -203,7 +210,7 @@ namespace Peach.Core.Agent
 		/// <returns>True if session must stop, else false.</returns>
 		public bool MustStop()
 		{
-			Logger.Trace("MustStop: {0}", name);
+			Logger.Trace("MustStop: {0}", Name);
 			parent.Context.OnMustStop(this);
 
 			return OnMustStop();
@@ -217,7 +224,7 @@ namespace Peach.Core.Agent
 		/// <returns>Returns data as Variant or null.</returns>
 		public Variant Message(string name, Variant data)
 		{
-			Logger.Trace("Message: {0} {1}", this.name, name);
+			Logger.Trace("Message: {0} {1}", this.Name, name);
 			parent.Context.OnMessage(this, name, data);
 
 			return OnMessage(name, data);

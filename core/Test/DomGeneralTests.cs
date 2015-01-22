@@ -331,29 +331,29 @@ namespace Peach.Core.Test
 			var d = dom.dataModels[0].find("D");
 			Assert.NotNull(d);
 
-			var iter1 = e.EnumerateElementsUpTree().Select(a => a.name).ToList();
-			var iter2 = e.EnumerateUpTree().Select(a => a.name).ToList();
+			var iter1 = e.EnumerateElementsUpTree().Select(a => a.Name).ToList();
+			var iter2 = e.EnumerateUpTree().Select(a => a.Name).ToList();
 
 			var eEnum = "C,E,A,D,L,B,G,K,I,H,J,F";
 			Assert.AreEqual(eEnum, string.Join(",", iter1));
 			Assert.AreEqual(eEnum, string.Join(",", iter2));
 
-			var iter3 = d.EnumerateElementsUpTree().Select(a => a.name).ToList();
-			var iter4 = d.EnumerateUpTree().Select(a => a.name).ToList();
+			var iter3 = d.EnumerateElementsUpTree().Select(a => a.Name).ToList();
+			var iter4 = d.EnumerateUpTree().Select(a => a.Name).ToList();
 
 			var dEnum = "C,E,A,D,L,B,G,K,I,H,J,F";
 			Assert.AreEqual(dEnum, string.Join(",", iter3));
 			Assert.AreEqual(dEnum, string.Join(",", iter4));
 
-			var iter5 = dom.dataModels[0].EnumerateAllElements().Select(a => a.name).ToList();
-			var iter6 = dom.dataModels[0].EnumerateAll().Select(a => a.name).ToList();
+			var iter5 = dom.dataModels[0].EnumerateAllElements().Select(a => a.Name).ToList();
+			var iter6 = dom.dataModels[0].EnumerateAll().Select(a => a.Name).ToList();
 
 			var rootAll = "B,G,A,D,L,C,E,K,I,H,J";
 			Assert.AreEqual(rootAll, string.Join(",", iter5));
 			Assert.AreEqual(rootAll, string.Join(",", iter6));
 
-			var iter7 = dom.dataModels[0].EnumerateElementsUpTree().Select(a => a.name).ToList();
-			var iter8 = dom.dataModels[0].EnumerateUpTree().Select(a => a.name).ToList();
+			var iter7 = dom.dataModels[0].EnumerateElementsUpTree().Select(a => a.Name).ToList();
+			var iter8 = dom.dataModels[0].EnumerateUpTree().Select(a => a.Name).ToList();
 
 			var rootEnum = "B,G,A,D,L,C,E,K,I,H,J,F";
 			Assert.AreEqual(rootEnum, string.Join(",", iter7));
