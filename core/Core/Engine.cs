@@ -43,13 +43,18 @@ namespace Peach.Core
 	/// </summary>
 	public class Engine
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and should not be used.")]
+		public RunContext context { get { return _context; } }
+
+		#endregion
+
 		static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
 		private readonly Watcher _watcher;
 		private readonly RunContext _context;
 
-		[Obsolete("This property is obsolete.")]
-		public RunContext context { get { return _context; } }
 		//public Dom.Dom dom { get { return runContext.dom; } }
 		//public Test test  { get { return runContext.test; } }
 
