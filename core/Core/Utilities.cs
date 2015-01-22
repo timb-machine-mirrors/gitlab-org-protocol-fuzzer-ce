@@ -321,9 +321,22 @@ namespace Peach.Core
 				program, path != null ? " in specified" : ", please specify using", parameter));
 		}
 
+		/// <summary>
+		/// The location on disk where peach is executing from.
+		/// Does not include the trailing slash in the directory name.
+		/// </summary>
 		public static string ExecutionDirectory
 		{
 			get { return PeachDirectory; }
+		}
+
+		/// <summary>
+		/// Returns the name of the currently running executable.
+		/// Equavilant to argv[0] in C/C++.
+		/// </summary>
+		public static string ExecutableName
+		{
+			get { return AppDomain.CurrentDomain.FriendlyName; }
 		}
 
 		public static string GetAppResourcePath(string resource)

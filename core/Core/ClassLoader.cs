@@ -141,8 +141,8 @@ namespace Peach.Core
 		static string[] GetSearchPath()
 		{
 			var ret = new List<string> {
-				Directory.GetCurrentDirectory(),
-				Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+				Environment.CurrentDirectory,
+				Utilities.ExecutionDirectory,
 			};
 
 			return ret.Distinct().ToArray();
