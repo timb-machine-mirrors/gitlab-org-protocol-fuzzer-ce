@@ -515,7 +515,7 @@ namespace Peach.Core
 					}
 
 					// Collect any faults that were found
-					context.OnCollectFaults();
+					context.agentManager.CollectFaults();
 
 					if (context.faults.Count > 0)
 					{
