@@ -41,7 +41,6 @@ namespace Peach.Core.Agent
 	{
 		protected Monitor(IAgent agent, string name, Dictionary<string, Variant> args)
 		{
-			Agent = agent;
 			Name = name;
 			Class = GetType().GetAttributes<MonitorAttribute>(null).First().Name;
 		}
@@ -58,10 +57,6 @@ namespace Peach.Core.Agent
 			OnIterationStartAfterFault
 		};
 
-		/// <summary>
-		/// The agent that is running this monitor.
-		/// </summary>
-		public IAgent Agent { get; private set; }
 
 		/// <summary>
 		/// The name of this monitor.
