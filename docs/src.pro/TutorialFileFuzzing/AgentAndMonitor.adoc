@@ -172,7 +172,7 @@ So it looks like this:
 
 Read more about: xref:Test[Test], xref:Logger[Logger], xref:Loggers_File[File Logger]
 
-=== Testing Fuzzer
+=== Testing the Fuzzer
 
 Let's go ahead and run the fuzzer!
 Open up a command window and navigate to the location of +wav.xml+.
@@ -191,7 +191,7 @@ File parsed without errors.
 Hopefully you got this output and no problems were found.
 If a problem was found go back through the prior sections and try and identify the problem.
 
-=== Running Fuzzer
+=== Running the Fuzzer
 
 Now let's actually kick off our fuzzer for real!
 

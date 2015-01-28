@@ -26,7 +26,7 @@ This section covers the most common types of extensions to Peach.
 
 <<<
 [[Extend_Plugins]]
-=== Peach Plugins
+=== Peach Plug-ins
 
 If your target has something in its data model that Peach does not support (like a custom checksum algorithm or a custom data format), you may need to extend Peach's functionality by using Peach plugins. 
 
