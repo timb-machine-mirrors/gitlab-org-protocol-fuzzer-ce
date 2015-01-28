@@ -221,11 +221,10 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void NoDeviceTest()
 		{
-			var runner = new MonitorRunner("Pcap", new Dictionary<string, string>());
+			var ex = Assert.Throws<PeachException>(() =>
+				new MonitorRunner("Pcap", new Dictionary<string, string>()));
 
-			var ex = Assert.Throws<PeachException>(() => runner.Run());
-
-			Assert.AreEqual("Error, PcapMonitor requires a device name.", ex.Message);
+			Assert.AreEqual("Could not start monitor \"Pcap\".  Monitor 'Pcap' is missing required parameter 'Device'.", ex.Message);
 		}
 
 		[Test]

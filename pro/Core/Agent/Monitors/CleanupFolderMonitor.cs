@@ -15,10 +15,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 	{
 		public string Folder { get; private set; }
 
-		public CleanupFolderMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public CleanupFolderMonitor(string name)
+			: base(name)
 		{
-			ParameterParser.Parse(this, args);
 		}
 
 		public override void StopMonitor()

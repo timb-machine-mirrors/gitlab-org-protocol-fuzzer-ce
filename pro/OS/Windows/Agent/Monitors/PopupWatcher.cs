@@ -76,10 +76,9 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		long workerCount = 0;
 		Fault _fault = null;
 
-		public PopupWatcher(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public PopupWatcher(string name)
+			: base(name)
 		{
-			ParameterParser.Parse(this, args);
 		}
 
 		bool EnumHandler(IntPtr hWnd, IntPtr lParam)

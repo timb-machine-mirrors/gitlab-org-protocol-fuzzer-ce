@@ -97,9 +97,15 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		Thread _ipcHeartBeatThread = null;
 		System.Threading.Mutex _ipcHeartBeatMutex = null;
 
-		public WindowsDebuggerHybrid(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public WindowsDebuggerHybrid(string name)
+			: base(name)
 		{
+		}
+
+		public override void StartMonitor(Dictionary<string, string> args)
+		{
+			// TODO: base.StartMonitor(args)
+
 			//var color = Console.ForegroundColor;
 			if (!Environment.Is64BitProcess && Environment.Is64BitOperatingSystem)
 			{

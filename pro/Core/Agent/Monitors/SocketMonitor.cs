@@ -36,10 +36,14 @@ namespace Peach.Pro.Core.Agent.Monitors
 		private Fault _fault = null;
 		private bool _multicast = false;
 
-		public SocketMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public SocketMonitor(string name)
+			: base(name)
 		{
-			ParameterParser.Parse(this, args);
+		}
+
+		public override void StartMonitor(Dictionary<string, string> args)
+		{
+			base.StartMonitor(args);
 
 			if (Host != null)
 			{

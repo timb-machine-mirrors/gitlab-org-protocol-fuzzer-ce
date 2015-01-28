@@ -30,10 +30,9 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		public string WindowText { get; private set; }
 		public string ButtonName { get; private set; }
 
-		public ButtonClicker(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public ButtonClicker(string name)
+			: base(name)
 		{
-			ParameterParser.Parse(this, args);
 		}
 
 #if !MONO

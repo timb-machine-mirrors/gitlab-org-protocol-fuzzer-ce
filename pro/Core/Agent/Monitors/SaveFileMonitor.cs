@@ -15,10 +15,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 	{
 		public string Filename { get; private set; }
 
-		public SaveFileMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public SaveFileMonitor(string name)
+			: base(name)
 		{
-			ParameterParser.Parse(this, args);
 		}
 
 		public override void StopMonitor()

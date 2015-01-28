@@ -117,16 +117,17 @@ namespace Peach.Pro.Core.Agent
 
 			try
 			{
-				var mon = (Monitor)Activator.CreateInstance(type, (IAgent)this, name, args);
+				var mon = (Monitor)Activator.CreateInstance(type, name);
+				mon.StartMonitor(args.ToDictionary(kv => kv.Key, kv => (string)kv.Value));
 				monitors.Add(mon);
 			}
-			catch (TargetInvocationException ex)
+			catch (Exception ex)
 			{
 				var baseEx = ex.GetBaseException();
 				if (baseEx is ThreadAbortException)
 					throw baseEx;
 
-				throw new PeachException("Could not start monitor \"" + cls + "\".  " + ex.InnerException.Message, ex);
+				throw new PeachException("Could not start monitor \"" + cls + "\".  " + ex.Message, ex);
 			}
 		}
 

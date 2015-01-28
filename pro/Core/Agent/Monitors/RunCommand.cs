@@ -47,10 +47,14 @@ namespace Peach.Pro.Core.Agent.Monitors
 		private Fault _fault = null;
 		private bool _lastWasFault = false;
 
-		public RunCommand(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public RunCommand(string name)
+			: base(name)
 		{
-			ParameterParser.Parse(this, args);
+		}
+
+		public override void StartMonitor(Dictionary<string, string> args)
+		{
+			base.StartMonitor(args);
 
 			if (!string.IsNullOrWhiteSpace(FaultOnRegex))
 				_faulOnRegex = new Regex(FaultOnRegex);
