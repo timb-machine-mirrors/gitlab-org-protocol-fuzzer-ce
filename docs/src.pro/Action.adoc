@@ -117,7 +117,7 @@ Since Pits can contain multiple Publishers within a Test, many Actions have a pa
 _Required:_
 
 xref:name[name]:: Name of the action.
-xref:Action_Types[type]:: Action type. The following enumeration summarizes the available action types. Detailed descriptions of the actions follow the child elements.
+type:: Action type. The following enumeration summarizes the available action types. Detailed descriptions of the actions follow the child elements.
 
 * xref:Action_accept[accept] - temporarily blocks execution.
 * xref:Action_call[call] - provides a method-calling metaphor.
@@ -154,22 +154,8 @@ xref:Data[Data]:: Set of initial data to crack into the DataModel before fuzzing
 xref:Param[Param]:: Argument passed with the call. The argument will be fuzzed.
 xref:Result[Result]:: Output of the call Action.  The result will be cracked into a DataModel.
 
-[[Action_Types]]
-== Action Types
-
-include::Actions/start.adoc[start]
-include::Actions/stop.adoc[stop]
-include::Actions/open.adoc[open]
-include::Actions/close.adoc[close]
-include::Actions/accept.adoc[accept]
-include::Actions/input.adoc[input]
-include::Actions/output.adoc[output]
-include::Actions/call.adoc[call]
-include::Actions/getProperty.adoc[getProperty]
-include::Actions/setProperty.adoc[setProperty]
-include::Actions/slurp.adoc[slurp]
-include::Actions/changeState.adoc[changeState]
-
+// 01/27/2015 RAB - This is vestigal and will be removed from User Guide and Developer Guide.
+// 
 // When already exists in v3/when.txt
 //=== when
 //
