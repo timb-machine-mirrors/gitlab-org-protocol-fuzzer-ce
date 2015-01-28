@@ -24,7 +24,7 @@ A PIT is NOT valid unless...
  * Monitoring is enabled
  * Monitoring has been tested and fault on a demo/test fault 
 
-=== What to do if the pit doesn't parse
+=== What to do if the Pit Doesn't Parse
 
 ----
 Peach.exe -t pit_file.xml 

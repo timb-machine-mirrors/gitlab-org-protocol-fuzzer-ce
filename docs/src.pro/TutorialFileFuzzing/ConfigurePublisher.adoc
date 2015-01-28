@@ -1,5 +1,6 @@
 [[TutorialFileFuzzing_ConfigurePublisher]]
-=== Configure Publisher
+
+== Configure Publisher
 
 The last thing we need to do before we can try out our nifty fuzzer is to configure a xref:Publisher[Publisher].
 xref:Publisher[Publisher]s are I_O connectors that implement the plumbing between actions like _output_, _input_, and _call_.
