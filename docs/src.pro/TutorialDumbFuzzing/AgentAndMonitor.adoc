@@ -198,7 +198,7 @@ So it looks like this:
 </Test>
 ----
 
-== Running Fuzzer
+== Running the Fuzzer
 
 Now, let's actually kick off our fuzzer for real!  Every 200 or so iterations, the strategy will switch to a different sample file.
 
