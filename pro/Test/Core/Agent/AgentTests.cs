@@ -108,10 +108,9 @@ namespace Peach.Pro.Test.Core.Agent
 				return false;
 			}
 
-			public override Variant Message(string name, Variant data)
+			public override void Message(string msg)
 			{
-				Log("Message {0}", name);
-				return null;
+				Log("Message {0}", msg);
 			}
 		}
 
@@ -534,10 +533,9 @@ namespace Peach.Pro.Test.Core.Agent
 				return false;
 			}
 
-			public override Variant Message(string name, Variant data)
+			public override void Message(string msg)
 			{
-				history.Add(Name + ".Message." + name + "." + (string)data);
-				return null;
+				history.Add(Name + ".Message." + msg);
 			}
 		}
 
@@ -606,10 +604,10 @@ namespace Peach.Pro.Test.Core.Agent
 				"Local1.mon2.IterationStarting",
 				"Local2.mon1.IterationStarting",
 				"Local2.mon2.IterationStarting",
-				"Local1.mon1.Message.Action.Call.Foo",
-				"Local1.mon2.Message.Action.Call.Foo",
-				"Local2.mon1.Message.Action.Call.Foo",
-				"Local2.mon2.Message.Action.Call.Foo",
+				"Local1.mon1.Message.Foo",
+				"Local1.mon2.Message.Foo",
+				"Local2.mon1.Message.Foo",
+				"Local2.mon2.Message.Foo",
 				"Local2.mon2.IterationFinished",
 				"Local2.mon1.IterationFinished",
 				"Local1.mon2.IterationFinished",

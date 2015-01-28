@@ -236,8 +236,8 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			w.SessionStarting();
 			w.IterationStarting(1, false);
 
-			w.Message("Action.Call", new Variant("foo"));
-			w.Message("Action.Call", new Variant("bar"));
+			w.Message("foo");
+			w.Message("bar");
 
 			w.IterationFinished();
 
@@ -266,7 +266,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			w.SessionStarting();
 			w.IterationStarting(1, false);
 
-			w.Message("Action.Call", new Variant("foo"));
+			w.Message("foo");
 
 			System.Threading.Thread.Sleep(1000);
 
@@ -300,7 +300,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			w.SessionStarting();
 			w.IterationStarting(1, false);
 
-			w.Message("Action.Call", new Variant("foo"));
+			w.Message("foo");
 
 			w.IterationFinished();
 

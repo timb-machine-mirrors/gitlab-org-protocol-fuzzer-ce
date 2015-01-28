@@ -170,28 +170,10 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			return fault;
 		}
 
-		public override bool MustStop()
-		{
-			return false;
-		}
-
-		public override void StopMonitor()
-		{
-		}
-
 		public override void SessionStarting()
 		{
 			// Skip past any old messages in the log
 			GetCrashLogs();
-		}
-
-		public override void SessionFinished()
-		{
-		}
-
-		public override Variant Message(string name, Variant data)
-		{
-			return null;
 		}
 
 #region ASL P/Invokes

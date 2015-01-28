@@ -146,7 +146,7 @@ namespace Peach.Core
 		#region Agent Events
 
 		public delegate void AgentEventHandler(RunContext context, AgentClient agent);
-		public delegate void MessageEventHandler(RunContext context, AgentClient agent, string name, Variant data);
+		public delegate void MessageEventHandler(RunContext context, AgentClient agent, string msg);
 		public delegate void CreatePublisherEventHandler(RunContext context, AgentClient agent, string cls, Dictionary<string, Variant> args);
 		public delegate void StartMonitorEventHandler(RunContext context, AgentClient agent, string name, string cls, Dictionary<string, Variant> args);
 
@@ -248,10 +248,10 @@ namespace Peach.Core
 
 		public event MessageEventHandler Message;
 
-		public void OnMessage(AgentClient agent, string name, Variant data)
+		public void OnMessage(AgentClient agent, string msg)
 		{
 			if (Message != null)
-				Message(this, agent, name, data);
+				Message(this, agent, msg);
 		}
 
 		#endregion

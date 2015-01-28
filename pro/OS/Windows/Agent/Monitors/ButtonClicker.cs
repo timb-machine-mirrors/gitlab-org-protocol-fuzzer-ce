@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using NLog;
 using Peach.Core;
@@ -18,17 +17,18 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 	{
 		[return: MarshalAs(UnmanagedType.Bool)]
 		[DllImport("user32.dll", SetLastError = true)]
-		static extern bool PostMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
+		static extern bool PostMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
 
 		[DllImport("user32.dll", SetLastError = true)]
 		public static extern IntPtr SetActiveWindow(IntPtr hWnd);
 
+		// ReSharper disable once InconsistentNaming
 		const int BM_CLICK = 0x00F5;
 
-		protected static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		protected static NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		public string WindowText { get; private set; }
-		public string ButtonName { get; private set; }
+		public string WindowText { get; set; }
+		public string ButtonName { get; set; }
 
 		public ButtonClicker(string name)
 			: base(name)
@@ -57,15 +57,15 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		{
 			try
 			{
-				var elem = sender as AutomationElement;
+				var elem = (AutomationElement)sender;
 
 				try
 				{
-					logger.Trace("Automation event fired: {0}", elem.Current.Name);
+					Logger.Trace("Automation event fired: {0}", elem.Current.Name);
 				}
 				catch (ElementNotAvailableException)
 				{
-					logger.Trace("Automation event fired: <Element Not Available>");
+					Logger.Trace("Automation event fired: <Element Not Available>");
 					return;
 				}
 
@@ -89,15 +89,15 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				var hWnd = new IntPtr(btn.Current.NativeWindowHandle);
 				PostMessage(hWnd, BM_CLICK, IntPtr.Zero, IntPtr.Zero);
 
-				logger.Debug("Clicked button '{0}' on window containing text '{1}'.", ButtonName, WindowText);
+				Logger.Debug("Clicked button '{0}' on window containing text '{1}'.", ButtonName, WindowText);
 			}
 			catch (Exception ex)
 			{
-				logger.Trace("Exception clicking button '{0}' on window containing text '{1}'. {2}", ButtonName, WindowText, ex);
+				Logger.Trace("Exception clicking button '{0}' on window containing text '{1}'. {2}", ButtonName, WindowText, ex);
 			}
 		}
 
-		public override void StopMonitor()
+		public override void SessionFinished()
 		{
 			Automation.RemoveAllEventHandlers();
 		}
@@ -110,46 +110,12 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				TreeScope.Descendants,
 				OnPopup);
 		}
-
 #else
-		public override void StopMonitor()
-		{
-		}
-
 		public override void SessionStarting()
 		{
 			throw new PeachException("The ButtonClicker monitor is not supported on mono.");
 		}
 #endif
-
-		public override void SessionFinished()
-		{
-			StopMonitor();
-		}
-
-		public override bool DetectedFault()
-		{
-			return false;
-		}
-
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
-		{
-		}
-
-		public override Fault GetMonitorData()
-		{
-			return null;
-		}
-
-		public override bool MustStop()
-		{
-			return false;
-		}
-
-		public override Variant Message(string name, Variant data)
-		{
-			return null;
-		}
 	}
 }
 

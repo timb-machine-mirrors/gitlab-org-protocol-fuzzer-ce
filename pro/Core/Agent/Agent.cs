@@ -250,20 +250,12 @@ namespace Peach.Pro.Core.Agent
 			return mustStop;
 		}
 
-		public Variant Message(string name, Variant data)
+		public void Message(string msg)
 		{
-			logger.Trace("Message: {0}", name);
-
-			Variant ret = null;
+			logger.Trace("Message: {0}", msg);
 
 			foreach (var monitor in monitors)
-			{
-				var tmp = monitor.Message(name, data);
-				if (tmp != null)
-					ret = tmp;
-			}
-
-			return ret;
+				monitor.Message(msg);
 		}
 
 		#endregion

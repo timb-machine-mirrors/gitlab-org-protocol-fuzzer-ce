@@ -134,7 +134,15 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			}
 		}
 
-		public override void StopMonitor()
+		public override void SessionStarting()
+		{
+			_event = new ManualResetEvent(false);
+
+			_worker = new Thread(Work);
+			_worker.Start();
+		}
+
+		public override void SessionFinished()
 		{
 			if (_worker != null)
 			{
@@ -146,21 +154,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				_event.Close();
 				_event = null;
 			}
-		}
-
-		public override void SessionStarting()
-		{
-			StopMonitor();
-
-			_event = new ManualResetEvent(false);
-
-			_worker = new Thread(new ThreadStart(Work));
-			_worker.Start();
-		}
-
-		public override void SessionFinished()
-		{
-			StopMonitor();
 		}
 
 		public override bool DetectedFault()
@@ -206,16 +199,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		public override Fault GetMonitorData()
 		{
 			return _fault;
-		}
-
-		public override bool MustStop()
-		{
-			return false;
-		}
-
-		public override Variant Message(string name, Variant data)
-		{
-			return null;
 		}
 	}
 }

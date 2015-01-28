@@ -178,16 +178,6 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			return fault;
 		}
 
-		public override bool MustStop()
-		{
-			return false;
-		}
-
-		public override void StopMonitor()
-		{
-			_StopProcess();
-		}
-
 		public override void SessionStarting()
 		{
 			ExecHandler = Utilities.FindProgram(
@@ -223,23 +213,19 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			}
 		}
 
-		public override Variant Message(string name, Variant data)
+		public override void Message(string msg)
 		{
-			if (name == "Action.Call" && ((string)data) == StartOnCall)
+			if (msg == StartOnCall)
 			{
 				_StopProcess();
 				_StartProcess();
-				return null;
 			}
-
-			if (name == "Action.Call" && ((string)data) == WaitForExitOnCall)
+			else if (msg == WaitForExitOnCall)
 			{
 				_messageExit = true;
 				_WaitForExit(false);
 				_StopProcess();
 			}
-
-			return null;
 		}
 
 		private ulong _GetTotalCputime(Process p)

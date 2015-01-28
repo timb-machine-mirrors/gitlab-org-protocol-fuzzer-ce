@@ -262,26 +262,20 @@ namespace Peach.Core.Agent
 			return ret;
 		}
 
-		public virtual Variant Message(string name, Variant data)
+		public virtual void Message(string msg)
 		{
-			logger.Debug("Message: {0} => {1}", name, data.ToString());
-
-			Variant ret = null;
+			logger.Debug("Message: {0}", msg);
 
 			foreach (var agent in agents)
 			{
 				Guard("Message", () =>
 				{
-					var tmp = agent.Message(name, data);
-					if (tmp != null)
-						ret = tmp;
+					agent.Message(msg);
 				});
 			}
-
-			return ret;
 		}
 
-		private static void Guard(string what, System.Action action)
+		private static void Guard(string what, Action action)
 		{
 			try
 			{

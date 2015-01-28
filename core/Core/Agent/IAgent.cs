@@ -18,6 +18,6 @@ namespace Peach.Core.Agent
 		bool DetectedFault();
 		Fault[] GetMonitorData();
 		bool MustStop();
-		Variant Message(string name, Variant data);
+		void Message(string msg);
 	}
 }

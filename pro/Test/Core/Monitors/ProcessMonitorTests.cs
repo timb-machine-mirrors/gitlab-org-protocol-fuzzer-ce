@@ -85,7 +85,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			var p = new ProcessMonitor(null);
 			p.StartMonitor(args);
 
-			p.Message("Action.Call", new Variant("foo"));
+			p.Message("foo");
 			System.Threading.Thread.Sleep(1000);
 
 			var before = DateTime.Now;
@@ -116,7 +116,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			var p = new ProcessMonitor(null);
 			p.StartMonitor(args);
 
-			p.Message("Action.Call", new Variant("foo"));
+			p.Message("foo");
 			System.Threading.Thread.Sleep(1000);
 
 			var before = DateTime.Now;
@@ -148,8 +148,8 @@ namespace Peach.Pro.Test.Core.Monitors
 			var p = new ProcessMonitor(null);
 			p.StartMonitor(args);
 
-			p.Message("Action.Call", new Variant("foo"));
-			p.Message("Action.Call", new Variant("bar"));
+			p.Message("foo");
+			p.Message("bar");
 
 			p.IterationFinished();
 
@@ -175,8 +175,8 @@ namespace Peach.Pro.Test.Core.Monitors
 			var p = new ProcessMonitor(null);
 			p.StartMonitor(args);
 
-			p.Message("Action.Call", new Variant("foo"));
-			p.Message("Action.Call", new Variant("bar"));
+			p.Message("foo");
+			p.Message("bar");
 
 			p.IterationFinished();
 
@@ -267,8 +267,8 @@ namespace Peach.Pro.Test.Core.Monitors
 			p.SessionStarting();
 			p.IterationStarting(1, false);
 
-			p.Message("Action.Call", new Variant("foo"));
-			p.Message("Action.Call", new Variant("bar"));
+			p.Message("foo");
+			p.Message("bar");
 
 			p.IterationFinished();
 
@@ -296,7 +296,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			p.SessionStarting();
 			p.IterationStarting(1, false);
 
-			p.Message("Action.Call", new Variant("foo"));
+			p.Message("foo");
 
 			System.Threading.Thread.Sleep(1000);
 
@@ -331,7 +331,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			p.SessionStarting();
 			p.IterationStarting(1, false);
 
-			p.Message("Action.Call", new Variant("foo"));
+			p.Message("foo");
 
 			p.IterationFinished();
 

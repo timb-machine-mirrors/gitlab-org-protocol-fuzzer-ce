@@ -144,12 +144,10 @@ namespace Peach.Core.Agent
 		/// <summary>
 		/// Send a message to the monitor and possibly get data back.
 		/// </summary>
-		/// <param name="name">Message name</param>
-		/// <param name="data">Message data</param>
+		/// <param name="msg">Message name</param>
 		/// <returns>Returns data or null.</returns>
-		public virtual Variant Message(string name, Variant data)
+		public virtual void Message(string msg)
 		{
-			return null;
 		}
 
 		/// <summary>
