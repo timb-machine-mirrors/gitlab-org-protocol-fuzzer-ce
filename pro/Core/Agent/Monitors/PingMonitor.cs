@@ -78,7 +78,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 		public override void SessionStarting() { }
 		public override void SessionFinished() { }
 		public override void IterationStarting(uint iterationCount, bool isReproduction) { }
-		public override bool IterationFinished() { return false; }
 		public override bool MustStop() { return false; }
 		public override Variant Message(string name, Variant data) { return null; }
 

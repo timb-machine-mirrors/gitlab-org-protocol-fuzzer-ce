@@ -332,7 +332,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				_StartDebugger();
 		}
 
-		public override bool IterationFinished()
+		public override void IterationFinished()
 		{
 			if (!_stopMessage && _faultOnEarlyExit && !_IsDebuggerRunning())
 			{
@@ -348,8 +348,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			{
 				_StopDebugger();
 			}
-
-			return false;
 		}
 
 		public override bool DetectedFault()

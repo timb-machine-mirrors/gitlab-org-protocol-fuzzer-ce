@@ -79,10 +79,9 @@ namespace Peach.Pro.Test.Core.Agent
 				Log("IterationStarting {0} {1}", iterationCount, isReproduction.ToString().ToLower());
 			}
 
-			public override bool IterationFinished()
+			public override void IterationFinished()
 			{
 				Log("IterationFinished");
-				return false;
 			}
 
 			public override bool DetectedFault()
@@ -501,10 +500,9 @@ namespace Peach.Pro.Test.Core.Agent
 				history.Add(Name + ".IterationStarting");
 			}
 
-			public override bool IterationFinished()
+			public override void IterationFinished()
 			{
 				history.Add(Name + ".IterationFinished");
-				return false;
 			}
 
 			public override bool DetectedFault()

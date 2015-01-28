@@ -198,21 +198,17 @@ namespace Peach.Core.Agent
 			}
 		}
 
-		public virtual bool IterationFinished()
+		public virtual void IterationFinished()
 		{
 			logger.Trace("IterationFinished");
-
-			var ret = false;
 
 			foreach (var agent in agents.Reverse())
 			{
 				Guard("IterationFinished", () =>
 				{
-					ret |= agent.IterationFinished();
+					agent.IterationFinished();
 				});
 			}
-
-			return ret;
 		}
 
 		public virtual bool DetectedFault()

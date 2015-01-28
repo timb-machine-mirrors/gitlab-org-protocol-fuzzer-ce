@@ -75,11 +75,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 			currentIteration = iterationCount;
 		}
 
-		public override bool IterationFinished()
-		{
-			return true;
-		}
-
 		public override bool DetectedFault()
 		{
 			// Avoid faulting on first iteration

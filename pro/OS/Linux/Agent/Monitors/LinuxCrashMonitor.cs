@@ -183,11 +183,6 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 		{
 		}
 
-		public override bool  IterationFinished()
-		{
-			return false; // !?
-		}
-
 		public override bool  DetectedFault()
 		{
 			Thread.Sleep (250);

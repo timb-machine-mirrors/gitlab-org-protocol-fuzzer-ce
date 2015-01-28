@@ -135,11 +135,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		{
 		}
 
-		public override bool IterationFinished()
-		{
-			return false;
-		}
-
 		public override Fault GetMonitorData()
 		{
             return null;

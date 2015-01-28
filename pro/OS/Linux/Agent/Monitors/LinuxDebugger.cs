@@ -807,7 +807,7 @@ quit
 			Directory.Delete(_tmpPath, true);
 		}
 
-		public override bool IterationFinished()
+		public override void IterationFinished()
 		{
 			if (!_messageExit && FaultOnEarlyExit && !_IsRunning())
 			{
@@ -823,8 +823,6 @@ quit
 			{
 				_Stop();
 			}
-
-			return true;
 		}
 
 		public override Variant Message(string name, Variant data)

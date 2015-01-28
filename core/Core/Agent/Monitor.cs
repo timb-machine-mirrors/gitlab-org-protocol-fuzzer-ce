@@ -99,7 +99,9 @@ namespace Peach.Core.Agent
 		/// Iteration has completed.
 		/// </summary>
 		/// <returns>Returns true to indicate iteration should be re-run, else false.</returns>
-		public abstract bool IterationFinished();
+		public virtual void IterationFinished()
+		{
+		}
 
 		/// <summary>
 		/// Was a fault detected during current iteration?

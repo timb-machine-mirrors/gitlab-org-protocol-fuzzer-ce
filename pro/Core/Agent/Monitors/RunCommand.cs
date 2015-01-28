@@ -186,12 +186,10 @@ namespace Peach.Pro.Core.Agent.Monitors
 				_Start();
 		}
 
-		public override bool IterationFinished()
+		public override void IterationFinished()
 		{
 			if (_When == When.OnIterationEnd)
 				_Start();
-
-			return true;
 		}
 
 		public override Variant Message(string name, Variant data)

@@ -227,7 +227,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			_StopProcess();
 		}
 
-		public override bool IterationFinished()
+		public override void IterationFinished()
 		{
 			if (!_messageExit && _faultOnEarlyExit && !_IsProcessRunning())
 			{
@@ -243,8 +243,6 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			{
 				_StopProcess();
 			}
-
-			return false;
 		}
 
 		public override Variant Message(string name, Variant data)
