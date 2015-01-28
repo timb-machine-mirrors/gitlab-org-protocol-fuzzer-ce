@@ -161,18 +161,19 @@ namespace Peach.Core.Test
 			var type = ClassLoader.FindTypeByAttribute<MonitorAttribute>((x, y) => y.Name == monitorClass);
 			Assert.NotNull(type, "Unable to locate monitor '{0}'".Fmt(monitorClass));
 
-			var asDict = parameters.ToDictionary(t => t.Key, t => new Variant(t.Value));
-
 			try
 			{
-				_monitors.Add((Monitor)Activator.CreateInstance(type, _agent, monitorName, asDict));
+				var mon = (Monitor)Activator.CreateInstance(type, monitorName);
+				mon.StartMonitor(parameters);
+
+				_monitors.Add(mon);
 			}
-			catch (TargetInvocationException ex)
+			catch (Exception ex)
 			{
 				// This here so the test runner works the same way the AgentManager does.
 				// This allows tests to assert on the same exceptions that would occur
 				// in the real world.
-				throw new PeachException("Could not start monitor \"" + monitorClass + "\".  " + ex.InnerException.Message, ex);
+				throw new PeachException("Could not start monitor \"" + monitorClass + "\".  " + ex.Message, ex);
 			}
 		}
 

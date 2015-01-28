@@ -51,10 +51,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 			}
 		}
 
-		public RandoFaulter(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public RandoFaulter(string name)
+			: base(name)
 		{
-			ParameterParser.Parse(this, args);
 		}
 
 		public override void StopMonitor()

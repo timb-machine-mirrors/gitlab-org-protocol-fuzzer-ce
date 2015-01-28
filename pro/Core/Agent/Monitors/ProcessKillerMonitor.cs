@@ -14,10 +14,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 	{
 		public string[] ProcessNames { get; private set; }
 
-		public ProcessKillerMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public ProcessKillerMonitor(string name)
+			: base(name)
 		{
-			ParameterParser.Parse(this, args);
 		}
 
 		public override void StopMonitor()

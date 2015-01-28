@@ -43,32 +43,34 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 	[Parameter("WinDbgPath", typeof(string), "Path to WinDbg install.  If not provided we will try and locate it.", "")]
 	public class PageHeap : Monitor
 	{
-		string _executable = null;
-		string _winDbgPath = null;
+		public string Executable { get; private set; }
+		public string WinDbgPath { get; private set; }
+
 		string _gflags = "gflags.exe";
 		string _gflagsArgsEnable = "/p /enable \"{0}\" /full";
 		string _gflagsArgsDisable = "/p /disable \"{0}\"";
 
-		public PageHeap(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public PageHeap(string name)
+			: base(name)
 		{
-			_executable = Path.GetFileName((string)args["Executable"]);
-			
-			if(args.ContainsKey("WinDbgPath"))
-				_winDbgPath = (string)args["WinDbgPath"];
-			else
-			{
-				_winDbgPath = WindowsDebuggerHybrid.FindWinDbg();
-				if (_winDbgPath == null)
-					throw new PeachException("Error, unable to locate WinDbg, please specify using 'WinDbgPath' parameter.");
-			}
+		}
+
+		public override void StartMonitor(Dictionary<string, string> args)
+		{
+			base.StartMonitor(args);
+
+			if (WinDbgPath == null)
+				WinDbgPath = WindowsDebuggerHybrid.FindWinDbg();
+
+			if (WinDbgPath == null)
+				throw new PeachException("Error, unable to locate WinDbg, please specify using 'WinDbgPath' parameter.");
 		}
 
 		protected void Enable()
 		{
 			var startInfo = new ProcessStartInfo();
-			startInfo.FileName = Path.Combine(_winDbgPath, _gflags);
-			startInfo.Arguments = string.Format(_gflagsArgsEnable, _executable);
+			startInfo.FileName = Path.Combine(WinDbgPath, _gflags);
+			startInfo.Arguments = string.Format(_gflagsArgsEnable, Executable);
 			startInfo.CreateNoWindow = true;
 			startInfo.UseShellExecute = false;
 
@@ -90,8 +92,8 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		protected void Disable()
 		{
 			var startInfo = new ProcessStartInfo();
-			startInfo.FileName = Path.Combine(_winDbgPath, _gflags);
-			startInfo.Arguments = string.Format(_gflagsArgsDisable, _executable);
+			startInfo.FileName = Path.Combine(WinDbgPath, _gflags);
+			startInfo.Arguments = string.Format(_gflagsArgsDisable, Executable);
 			startInfo.CreateNoWindow = true;
 			startInfo.UseShellExecute = false;
 

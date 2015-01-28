@@ -42,34 +42,37 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		string _key = null;
-		bool _childrenOnly = false;
-		RegistryKey _root = null;
+		public string Key { get; private set; }
+		public bool ChildrenOnly { get; private set; }
+		public RegistryKey Root { get; private set; }
 
-		public CleanupRegistry(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public CleanupRegistry(string name)
+			: base(name)
 		{
-			_key = (string)args["Key"];
+		}
 
-			if (args.ContainsKey("ChildrenOnly") && ((string)args["ChildrenOnly"]).ToLower() == "true")
-				_childrenOnly = true;
+		public override void StartMonitor(Dictionary<string, string> args)
+		{
+			base.StartMonitor(args);
 
-			if (_key.StartsWith("HKCU\\"))
-				_root = Registry.CurrentUser;
-			else if (_key.StartsWith("HKCC\\"))
-				_root = Registry.CurrentConfig;
-			else if (_key.StartsWith("HKLM\\"))
-				_root = Registry.LocalMachine;
-			else if (_key.StartsWith("HKPD\\"))
-				_root = Registry.PerformanceData;
-			else if (_key.StartsWith("HKU\\"))
-				_root = Registry.Users;
+			if (Key.StartsWith("HKCU\\"))
+				Root = Registry.CurrentUser;
+
+			if (Key.StartsWith("HKCU\\"))
+				Root = Registry.CurrentUser;
+			else if (Key.StartsWith("HKCC\\"))
+				Root = Registry.CurrentConfig;
+			else if (Key.StartsWith("HKLM\\"))
+				Root = Registry.LocalMachine;
+			else if (Key.StartsWith("HKPD\\"))
+				Root = Registry.PerformanceData;
+			else if (Key.StartsWith("HKU\\"))
+				Root = Registry.Users;
 			else
 				throw new PeachException("Error, CleanupRegistry monitor Key parameter must be prefixed with HKCU, HKCC, HKLM, HKPD, or HKU.");
 
-			_key = _key.Substring(_key.IndexOf("\\") + 1);
+			Key = Key.Substring(Key.IndexOf("\\", System.StringComparison.Ordinal) + 1);
 		}
-
 
 		public override void StopMonitor()
 		{
@@ -85,14 +88,14 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 		public override void IterationStarting(uint iterationCount, bool isReproduction)
 		{
-			if (!_childrenOnly)
+			if (!ChildrenOnly)
 			{
-				logger.Debug("Removing key: " + _key);
-				_root.DeleteSubKeyTree(_key, false);
+				logger.Debug("Removing key: " + Key);
+				Root.DeleteSubKeyTree(Key, false);
 				return;
 			}
 
-			var key = _root.OpenSubKey(_key, true);
+			var key = Root.OpenSubKey(Key, true);
 			if (key == null)
 				return;
 

@@ -19,6 +19,33 @@ namespace Peach.Core
 		/// <typeparam name="T">Class type</typeparam>
 		/// <param name="obj">Instance of class T</param>
 		/// <param name="args">Dictionary of arguments</param>
+		public static void Parse<T>(T obj, Dictionary<string, string> args) where T : class
+		{
+			foreach (var item in GetProperties(obj))
+			{
+				var attr = item.Key;
+				var prop = item.Value;
+
+				string value;
+
+				if (args.TryGetValue(attr.name, out value))
+					ApplyProperty(obj, prop, attr, (string)value);
+				else if (!attr.required)
+					ApplyProperty(obj, prop, attr, attr.defaultValue);
+				else if (attr.required)
+					RaiseError(obj.GetType(), "is missing required parameter '{0}'.", attr.name);
+			}
+		}
+
+		/// <summary>
+		/// Parses a dictionary of arguments, similiar to python kwargs.
+		/// For each parameter attribute on 'T', the appropriate property
+		/// on 'obj' will be set. Eg, given integer parameter 'option1':
+		/// obj.option1 = int.Parse(args["option1"])
+		/// </summary>
+		/// <typeparam name="T">Class type</typeparam>
+		/// <param name="obj">Instance of class T</param>
+		/// <param name="args">Dictionary of arguments</param>
 		public static void Parse<T>(T obj, Dictionary<string, Variant> args) where T: class
 		{
 			foreach (var item in GetProperties(obj))

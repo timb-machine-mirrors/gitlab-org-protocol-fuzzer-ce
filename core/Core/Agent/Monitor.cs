@@ -39,7 +39,7 @@ namespace Peach.Core.Agent
 	/// </summary>
 	public abstract class Monitor
 	{
-		protected Monitor(IAgent agent, string name, Dictionary<string, Variant> args)
+		protected Monitor(string name)
 		{
 			Name = name;
 			Class = GetType().GetAttributes<MonitorAttribute>(null).First().Name;
@@ -66,6 +66,15 @@ namespace Peach.Core.Agent
 		/// The class of this monitor.
 		/// </summary>
 		public string Class { get; private set; }
+
+		/// <summary>
+		/// Start the monitor instance.
+		/// If an exception is thrown, StopMonitor will not be called.
+		/// </summary>
+		public virtual void StartMonitor(Dictionary<string, string> args)
+		{
+			ParameterParser.Parse(this, args);
+		}
 
 		/// <summary>
 		/// Stop the monitor instance.

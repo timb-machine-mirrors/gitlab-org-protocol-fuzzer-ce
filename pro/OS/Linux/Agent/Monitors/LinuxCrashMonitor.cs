@@ -46,8 +46,6 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 	{
 		protected string corePattern = "|{0} {1} -p=%p -u=%u -g=%g -s=%s -t=%t -h=%h -e=%e";
 		protected string monoExecutable = "/usr/bin/mono";
-		protected string executable = null;
-		protected string logFolder = "/var/peachcrash";
 		protected string origionalCorePattern = null;
 		protected string origionalSuidDumpable = null;
 		protected string linuxCrashHandlerExe = "PeachLinuxCrashHandler.exe";
@@ -56,14 +54,12 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 		protected string data = null;
 		protected List<string> startingFiles = new List<string>();
 
-		public LinuxCrashMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public string LogFolder { get; private set; }
+		public string Executable { get; private set; }
+
+		public LinuxCrashMonitor(string name)
+			: base(name)
 		{
-			if (args.ContainsKey("Executable"))
-				executable = (string)args["Executable"];
-			
-			if (args.ContainsKey("LogFolder"))
-				logFolder = (string)args["LogFolder"];
 		}
 
 		public override void  StopMonitor()
@@ -128,12 +124,12 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 			else
 				origionalSuidDumpable = null;
 
-			if (Directory.Exists(logFolder))
+			if (Directory.Exists(LogFolder))
 				DeleteLogFolder();
 
 			try
 			{
-				Directory.CreateDirectory(logFolder);
+				Directory.CreateDirectory(LogFolder);
 			}
 			catch (Exception ex)
 			{
@@ -171,7 +167,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 		{
 			try
 			{
-				Directory.Delete(logFolder, true);
+				Directory.Delete(LogFolder, true);
 			}
 			catch (Exception ex)
 			{
@@ -187,11 +183,11 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 		{
 			Thread.Sleep (250);
 			
-			foreach (var file in Directory.GetFiles(logFolder))
+			foreach (var file in Directory.GetFiles(LogFolder))
 			{
-				if (executable != null)
+				if (Executable != null)
 				{
-					if (file.IndexOf(executable) != -1)
+					if (file.IndexOf(Executable) != -1)
 					{
 						return true;
 					}
@@ -210,21 +206,21 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 			fault.folderName = "LinuxCrashMonitor";
 			fault.type = FaultType.Fault;
 
-			if (executable != null)
-				fault.description = string.Format("LinuxCrashMonitor_{0} ({1})", Name, executable);
+			if (Executable != null)
+				fault.description = string.Format("LinuxCrashMonitor_{0} ({1})", Name, Executable);
 			else
 				fault.description = string.Format("LinuxCrashMonitor_{0}", Name);
 
-			foreach (var file in Directory.GetFiles(logFolder))
+			foreach (var file in Directory.GetFiles(LogFolder))
 			{
 				if(startingFiles.Contains(file))
 					continue;
 
 				try
 				{
-					if (executable != null)
+					if (Executable != null)
 					{
-						if (file.IndexOf(executable) != -1)
+						if (file.IndexOf(Executable) != -1)
 						{
 							fault.collectedData.Add(new Fault.Data(Path.GetFileName(file), File.ReadAllBytes(file)));
 							File.Delete(file);

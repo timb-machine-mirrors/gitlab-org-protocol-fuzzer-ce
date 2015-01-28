@@ -44,8 +44,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Parameter("Filter", typeof(string), "PCAP Style filter", "")]
 	public class PcapMonitor : Monitor
 	{
-		protected string _deviceName;
-		protected string _filter = "";
 		protected string _tempFileName = Path.GetTempFileName();
 		protected object _lock = new object();
 		protected int _numPackets = 0;
@@ -53,13 +51,12 @@ namespace Peach.Pro.Core.Agent.Monitors
 		protected LibPcapLiveDevice _device = null;
 		protected CaptureFileWriterDevice _writer = null;
 
-		public PcapMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public string Device { get; private set; }
+		public string Filter { get; private set; }
+
+		public PcapMonitor(string name)
+			: base(name)
 		{
-			if (args.ContainsKey("Device"))
-				_deviceName = (string)args["Device"];
-			if (args.ContainsKey("Filter"))
-				_filter = (string)args["Filter"];
 		}
 
 		private void _OnPacketArrival(object sender, CaptureEventArgs packet)
@@ -97,7 +94,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		public override void SessionStarting()
 		{
-			if (_deviceName == null)
+			if (Device == null)
 				throw new PeachException("Error, PcapMonitor requires a device name.");
 
 			// Retrieve all capture devices
@@ -113,7 +110,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			{
 				var dev = item as LibPcapLiveDevice;
 				System.Diagnostics.Debug.Assert(dev != null);
-				if (dev.Interface.FriendlyName == _deviceName)
+				if (dev.Interface.FriendlyName == Device)
 				{
 					_device = dev;
 					break;
@@ -130,7 +127,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 					if (!string.IsNullOrEmpty(dev.Interface.FriendlyName))
 						Console.WriteLine(" " + dev.Interface.FriendlyName);
 				}
-				throw new PeachException("Error, PcapMonitor was unable to locate device '" + _deviceName + "'.");
+				throw new PeachException("Error, PcapMonitor was unable to locate device '" + Device + "'.");
 			}
 
 			_device.OnPacketArrival += _OnPacketArrival;
@@ -138,11 +135,11 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 			try
 			{
-				_device.Filter = _filter;
+				_device.Filter = Filter;
 			}
 			catch (PcapException ex)
 			{
-				throw new PeachException("Error, PcapMonitor was unable to set the filter '" + _filter + "'.", ex);
+				throw new PeachException("Error, PcapMonitor was unable to set the filter '" + Filter + "'.", ex);
 			}
 
 			_device.StartCapture();

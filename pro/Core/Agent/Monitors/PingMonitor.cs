@@ -54,10 +54,14 @@ namespace Peach.Pro.Core.Agent.Monitors
 			}
 		}
 
-		public PingMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public PingMonitor(string name)
+			: base(name)
 		{
-			ParameterParser.Parse(this, args);
+		}
+
+		public override void StartMonitor(Dictionary<string, string> args)
+		{
+			base.StartMonitor(args);
 
 			if (!hasPermissions)
 				throw new PeachException("Unable to open ICMP socket.  Ensure user has appropriate permissions.");

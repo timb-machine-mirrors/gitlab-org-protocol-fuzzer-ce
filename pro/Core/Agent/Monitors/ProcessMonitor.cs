@@ -68,10 +68,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 		public string WaitForExitOnCall { get; private set; }
 		public int WaitForExitTimeout { get; private set; }
 
-		public ProcessMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public ProcessMonitor(string name)
+			: base(name)
 		{
-			ParameterParser.Parse(this, args);
 		}
 
 		void _LogOutput(string prefix, Func<StreamReader> stream)

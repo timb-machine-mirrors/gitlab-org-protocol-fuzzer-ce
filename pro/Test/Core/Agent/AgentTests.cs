@@ -41,22 +41,28 @@ namespace Peach.Pro.Test.Core.Agent
 		public Process process;
 
 		[Monitor("TestLogFunctions", true, IsTest = true)]
+		[Parameter("FileName", typeof(string), "File to log to")]
 		public class TestLogMonitor : Monitor
 		{
-			readonly string fileName;
+			public string FileName { get; set; }
 
 			void Log(string msg, params object[] args)
 			{
-				using (var writer = new StreamWriter(fileName, true))
+				using (var writer = new StreamWriter(FileName, true))
 				{
 					writer.WriteLine(msg, args);
 				}
 			}
 
-			public TestLogMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
-				: base(agent, name, args)
+			public TestLogMonitor(string name)
+				: base(name)
 			{
-				fileName = (string)args["FileName"];
+			}
+
+			public override void StartMonitor(Dictionary<string, string> args)
+			{
+				base.StartMonitor(args);
+				Log("StartMonitor");
 			}
 
 			public override void StopMonitor()
@@ -260,15 +266,15 @@ namespace Peach.Pro.Test.Core.Agent
 				var contents = File.ReadAllLines(tmp);
 				var expected = new[] {
 // Iteration 83 (Control & Record)
-"SessionStarting", "IterationStarting 83 false", "IterationFinished", "DetectedFault", "MustStop", 
+"StartMonitor", "SessionStarting", "IterationStarting 83 false", "IterationFinished", "DetectedFault", "MustStop", 
 // Iteration 83 - Agent is killed (IterationFinished is a hack to kill CrashableServer)
 "IterationStarting 83 false", "IterationFinished", 
 // Agent is restarted & fault is not detected
-"SessionStarting", "IterationStarting 84 false", "IterationFinished", "DetectedFault", "MustStop", 
+"StartMonitor", "SessionStarting", "IterationStarting 84 false", "IterationFinished", "DetectedFault", "MustStop", 
 // Agent is killed
 "IterationStarting 85 false", "IterationFinished", 
 // Agent is restarted & fault is detected
-"SessionStarting", "IterationStarting 86 false", "IterationFinished", "DetectedFault", "GetMonitorData", "MustStop",
+"StartMonitor", "SessionStarting", "IterationStarting 86 false", "IterationFinished", "DetectedFault", "GetMonitorData", "MustStop",
 // Reproduction occurs & fault is detected
 "IterationStarting 86 true", "IterationFinished", "DetectedFault", "GetMonitorData", "MustStop",
 // Fussing stops
@@ -474,10 +480,15 @@ namespace Peach.Pro.Test.Core.Agent
 		[Monitor("LoggingMonitor", true, IsTest = true)]
 		public class LoggingMonitor : Monitor
 		{
-			public LoggingMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
-				: base(agent, name, args)
+			public LoggingMonitor(string name)
+				: base(name)
 			{
 				history.Add(Name + ".LoggingMonitor");
+			}
+
+			public override void StartMonitor(Dictionary<string, string> args)
+			{
+				history.Add(Name + ".StartMonitor");
 			}
 
 			public override void StopMonitor()
@@ -580,11 +591,15 @@ namespace Peach.Pro.Test.Core.Agent
 			string[] expected =
 			{
 				"Local1.mon1.LoggingMonitor",
+				"Local1.mon1.StartMonitor",
 				"Local1.mon2.LoggingMonitor",
+				"Local1.mon2.StartMonitor",
 				"Local1.mon1.SessionStarting",
 				"Local1.mon2.SessionStarting",
 				"Local2.mon1.LoggingMonitor",
+				"Local2.mon1.StartMonitor",
 				"Local2.mon2.LoggingMonitor",
+				"Local2.mon2.StartMonitor",
 				"Local2.mon1.SessionStarting",
 				"Local2.mon2.SessionStarting",
 				"Local1.mon1.IterationStarting",

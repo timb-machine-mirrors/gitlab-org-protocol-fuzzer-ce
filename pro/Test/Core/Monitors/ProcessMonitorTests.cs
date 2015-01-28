@@ -73,18 +73,19 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestStartOnCall()
 		{
-			Variant foo = new Variant("foo");
+			var args = new Dictionary<string, string>
+			{
+				{ "Executable", "CrashableServer" },
+				{ "Arguments", "127.0.0.1 {0}".Fmt(TestBase.MakePort(60000, 61000)) },
+				{ "StartOnCall", "foo" },
+				{"WaitForExitTimeout", "2000" },
+				{ "NoCpuKill", "true" },
+			};
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashableServer");
-			args["Arguments"] = new Variant("127.0.0.1 {0}".Fmt(TestBase.MakePort(60000, 61000)));
-			args["StartOnCall"] = foo;
-			args["WaitForExitTimeout"] = new Variant("2000");
-			args["NoCpuKill"] = new Variant("true");
+			var p = new ProcessMonitor(null);
+			p.StartMonitor(args);
 
-			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
-
-			p.Message("Action.Call", foo);
+			p.Message("Action.Call", new Variant("foo"));
 			System.Threading.Thread.Sleep(1000);
 
 			var before = DateTime.Now;
@@ -105,16 +106,17 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestCpuKill()
 		{
-			Variant foo = new Variant("foo");
+			var args = new Dictionary<string, string>
+			{
+				{ "Executable", "CrashableServer" },
+				{ "Arguments", "127.0.0.1 {0}".Fmt(TestBase.MakePort(61000, 62000)) },
+				{ "StartOnCall", "foo" },
+			};
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashableServer");
-			args["Arguments"] = new Variant("127.0.0.1 {0}".Fmt(TestBase.MakePort(61000, 62000)));
-			args["StartOnCall"] = foo;
+			var p = new ProcessMonitor(null);
+			p.StartMonitor(args);
 
-			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
-
-			p.Message("Action.Call", foo);
+			p.Message("Action.Call", new Variant("foo"));
 			System.Threading.Thread.Sleep(1000);
 
 			var before = DateTime.Now;
@@ -135,19 +137,19 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestExitOnCallNoFault()
 		{
-			Variant foo = new Variant("foo");
-			Variant bar = new Variant("bar");
+			var args = new Dictionary<string, string>
+			{
+				{ "Executable", "CrashingFileConsumer" },
+				{ "StartOnCall", "foo" },
+				{ "WaitForExitOnCall", "bar" },
+				{ "NoCpuKill", "true" },
+			};
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashingFileConsumer");
-			args["StartOnCall"] = foo;
-			args["WaitForExitOnCall"] = bar;
-			args["NoCpuKill"] = new Variant("true");
+			var p = new ProcessMonitor(null);
+			p.StartMonitor(args);
 
-			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
-
-			p.Message("Action.Call", foo);
-			p.Message("Action.Call", bar);
+			p.Message("Action.Call", new Variant("foo"));
+			p.Message("Action.Call", new Variant("bar"));
 
 			p.IterationFinished();
 
@@ -160,21 +162,21 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestExitOnCallFault()
 		{
-			Variant foo = new Variant("foo");
-			Variant bar = new Variant("bar");
+			var args = new Dictionary<string, string>
+			{
+				{ "Executable", "CrashableServer" },
+				{ "Arguments", "127.0.0.1 {0}".Fmt(TestBase.MakePort(62000, 63000)) },
+				{ "StartOnCall", "foo" },
+				{ "WaitForExitOnCall", "bar" },
+				{ "WaitForExitTimeout", "2000" },
+				{ "NoCpuKill", "true" },
+			};
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashableServer");
-			args["Arguments"] = new Variant("127.0.0.1 {0}".Fmt(TestBase.MakePort(62000, 63000)));
-			args["StartOnCall"] = foo;
-			args["WaitForExitOnCall"] = bar;
-			args["WaitForExitTimeout"] = new Variant("2000");
-			args["NoCpuKill"] = new Variant("true");
+			var p = new ProcessMonitor(null);
+			p.StartMonitor(args);
 
-			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
-
-			p.Message("Action.Call", foo);
-			p.Message("Action.Call", bar);
+			p.Message("Action.Call", new Variant("foo"));
+			p.Message("Action.Call", new Variant("bar"));
 
 			p.IterationFinished();
 
@@ -190,12 +192,16 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestExitTime()
 		{
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashableServer");
-			args["Arguments"] = new Variant("127.0.0.1 {0}".Fmt(TestBase.MakePort(63000, 64000)));
-			args["RestartOnEachTest"] = new Variant("true");
+			var args = new Dictionary<string, string>
+			{
+				{ "Executable", "CrashableServer" },
+				{ "Arguments", "127.0.0.1 {0}".Fmt(TestBase.MakePort(63000, 64000)) },
+				{ "RestartOnEachTest", "true" },
+			};
 
-			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
+			var p = new ProcessMonitor(null);
+			p.StartMonitor(args);
+
 			p.SessionStarting();
 			p.IterationStarting(1, false);
 
@@ -217,11 +223,15 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestExitEarlyFault()
 		{
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashingFileConsumer");
-			args["FaultOnEarlyExit"] = new Variant("true");
+			var args = new Dictionary<string, string>
+			{
+				{ "Executable", "CrashingFileConsumer" },
+				{ "FaultOnEarlyExit", "true" },
+			};
 
-			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
+			var p = new ProcessMonitor(null);
+			p.StartMonitor(args);
+
 			p.SessionStarting();
 			p.IterationStarting(1, false);
 
@@ -241,23 +251,24 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestExitEarlyFault1()
 		{
-			Variant foo = new Variant("foo");
-			Variant bar = new Variant("bar");
-
 			// FaultOnEarlyExit doesn't fault when stop message is sent
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashingFileConsumer");
-			args["StartOnCall"] = foo;
-			args["WaitForExitOnCall"] = bar;
-			args["FaultOnEarlyExit"] = new Variant("true");
+			var args = new Dictionary<string, string>
+			{
+				{ "Executable", "CrashingFileConsumer" },
+				{ "StartOnCall", "foo" },
+				{ "WaitForExitOnCall", "bar" },
+				{ "FaultOnEarlyExit", "true" },
+			};
 
-			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
+			var p = new ProcessMonitor(null);
+			p.StartMonitor(args);
+
 			p.SessionStarting();
 			p.IterationStarting(1, false);
 
-			p.Message("Action.Call", foo);
-			p.Message("Action.Call", bar);
+			p.Message("Action.Call", new Variant("foo"));
+			p.Message("Action.Call", new Variant("bar"));
 
 			p.IterationFinished();
 
@@ -270,20 +281,22 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestExitEarlyFault2()
 		{
-			Variant foo = new Variant("foo");
-
 			// FaultOnEarlyExit faults when StartOnCall is used and stop message is not sent
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashingFileConsumer");
-			args["StartOnCall"] = foo;
-			args["FaultOnEarlyExit"] = new Variant("true");
+			var args = new Dictionary<string, string>
+			{
+				{ "Executable", "CrashingFileConsumer" },
+				{ "StartOnCall", "foo" },
+				{ "FaultOnEarlyExit", "true" },
+			};
 
-			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
+			var p = new ProcessMonitor(null);
+			p.StartMonitor(args);
+
 			p.SessionStarting();
 			p.IterationStarting(1, false);
 
-			p.Message("Action.Call", foo);
+			p.Message("Action.Call", new Variant("foo"));
 
 			System.Threading.Thread.Sleep(1000);
 
@@ -302,21 +315,23 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestExitEarlyFault3()
 		{
-			Variant foo = new Variant("foo");
-
 			// FaultOnEarlyExit doesn't fault when StartOnCall is used
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashableServer");
-			args["Arguments"] = new Variant("127.0.0.1 {0}".Fmt(TestBase.MakePort(63000, 64000)));
-			args["StartOnCall"] = foo;
-			args["FaultOnEarlyExit"] = new Variant("true");
+			var args = new Dictionary<string, string>
+			{
+				{ "Executable", "CrashableServer" },
+				{ "Arguments", "127.0.0.1 {0}".Fmt(TestBase.MakePort(63000, 64000)) },
+				{ "StartOnCall", "foo" },
+				{ "FaultOnEarlyExit", "true" },
+			};
 
-			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
+			var p = new ProcessMonitor(null);
+			p.StartMonitor(args);
+
 			p.SessionStarting();
 			p.IterationStarting(1, false);
 
-			p.Message("Action.Call", foo);
+			p.Message("Action.Call", new Variant("foo"));
 
 			p.IterationFinished();
 
@@ -331,13 +346,17 @@ namespace Peach.Pro.Test.Core.Monitors
 		{
 			// FaultOnEarlyExit doesn't fault when restart every iteration is true
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashableServer");
-			args["Arguments"] = new Variant("127.0.0.1 {0}".Fmt(TestBase.MakePort(63000, 64000)));
-			args["RestartOnEachTest"] = new Variant("true");
-			args["FaultOnEarlyExit"] = new Variant("true");
+			var args = new Dictionary<string, string>
+			{
+				{ "Executable", "CrashableServer" },
+				{ "Arguments", "127.0.0.1 {0}".Fmt(TestBase.MakePort(63000, 64000)) },
+				{ "RestartOnEachTest", "true" },
+				{ "FaultOnEarlyExit", "true" },
+			};
 
-			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
+			var p = new ProcessMonitor(null);
+			p.StartMonitor(args);
+
 			p.SessionStarting();
 			p.IterationStarting(1, false);
 
