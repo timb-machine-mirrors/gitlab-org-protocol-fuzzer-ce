@@ -214,9 +214,14 @@ namespace Peach.Pro.Core.Publishers
 			if (credentials != null)
 				request.Credentials = credentials;
 
-			foreach (var header in Headers.Keys)
-				if(!string.IsNullOrWhiteSpace(header))
-					request.Headers[header] = Headers[header];
+
+			foreach (var kv in Headers)
+			{
+				if (0 == string.Compare("Content-Type", kv.Key, StringComparison.OrdinalIgnoreCase))
+					request.ContentType = kv.Value;
+				else if (!string.IsNullOrWhiteSpace(kv.Key))
+					request.Headers[kv.Key] = kv.Value;
+			}
 
 			if (data != null)
 			{

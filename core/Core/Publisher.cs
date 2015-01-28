@@ -334,6 +334,8 @@ namespace Peach.Core
 		public void output(BitwiseStream data)
 		{
 			data = data.PadBits();
+			data.Seek(0, SeekOrigin.Begin);
+
 			Logger.Debug("output({0} bytes)", data.Length);
 			OnOutput(data);
 		}
