@@ -11,31 +11,27 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Monitor("CleanupFolder", true)]
 	[Description("Remove folder contents created by a target during runtime")]
 	[Parameter("Folder", typeof(string), "The folder to cleanup.")]
-	public class CleanupFolderMonitor : Peach.Core.Agent.Monitor
+	public class CleanupFolderMonitor : Monitor
 	{
-		public string Folder { get; private set; }
+		static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
+
+		List<string> _folderListing;
+
+		public string Folder { get; set; }
 
 		public CleanupFolderMonitor(string name)
 			: base(name)
 		{
 		}
 
-		public override void StopMonitor()
-		{
-		}
-
 		public override void SessionStarting()
 		{
-			folderListing = GetListing();
-		}
-
-		public override void SessionFinished()
-		{
+			_folderListing = GetListing();
 		}
 
 		public override void IterationStarting(uint iterationCount, bool isReproduction)
 		{
-			var toDel = GetListing().Except(folderListing);
+			var toDel = GetListing().Except(_folderListing);
 
 			foreach (var item in toDel)
 			{
@@ -49,34 +45,10 @@ namespace Peach.Pro.Core.Agent.Monitors
 				}
 				catch (Exception ex)
 				{
-					logger.Debug("Could not delete '{0}'. {1}", item, ex.Message);
+					Logger.Debug("Could not delete '{0}'. {1}", item, ex.Message);
 				}
 			}
 		}
-
-		public override bool DetectedFault()
-		{
-			return false;
-		}
-
-		public override Fault GetMonitorData()
-		{
-			return null;
-		}
-
-		public override bool MustStop()
-		{
-			return false;
-		}
-
-		public override Variant Message(string name, Variant data)
-		{
-			return null;
-		}
-
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
-
-		List<string> folderListing;
 
 		List<string> GetListing()
 		{
@@ -86,7 +58,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			}
 			catch (Exception ex)
 			{
-				logger.Debug("Could not list contents of folder '{0}'. {1}", Folder, ex.Message);
+				Logger.Debug("Could not list contents of folder '{0}'. {1}", Folder, ex.Message);
 				return new List<string>();
 			}
 		}

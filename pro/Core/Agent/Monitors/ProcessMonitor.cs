@@ -27,7 +27,8 @@
 // $Id$
 
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using NLog;
@@ -53,27 +54,27 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Parameter("WaitForExitTimeout", typeof(int), "Wait for exit timeout value in milliseconds (-1 is infinite)", "10000")]
 	public class ProcessMonitor : Monitor
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		System.Diagnostics.Process _process = null;
-		Fault _fault = null;
-		bool _messageExit = false;
+		Process _process;
+		Fault _fault;
+		bool _messageExit;
 
-		public string Executable { get; private set; }
-		public string Arguments { get; private set; }
-		public bool RestartOnEachTest { get; private set; }
-		public bool FaultOnEarlyExit { get; private set; }
-		public bool NoCpuKill { get; private set; }
-		public string StartOnCall { get; private set; }
-		public string WaitForExitOnCall { get; private set; }
-		public int WaitForExitTimeout { get; private set; }
+		public string Executable { get; set; }
+		public string Arguments { get; set; }
+		public bool RestartOnEachTest { get; set; }
+		public bool FaultOnEarlyExit { get; set; }
+		public bool NoCpuKill { get; set; }
+		public string StartOnCall { get; set; }
+		public string WaitForExitOnCall { get; set; }
+		public int WaitForExitTimeout { get; set; }
 
 		public ProcessMonitor(string name)
 			: base(name)
 		{
 		}
 
-		void _LogOutput(string prefix, Func<StreamReader> stream)
+		private static void _LogOutput(string prefix, Func<StreamReader> stream)
 		{
 			var t = new Thread(new ThreadStart(delegate
 			{
@@ -85,15 +86,13 @@ namespace Peach.Pro.Core.Agent.Monitors
 						{
 							var line = sr.ReadLine();
 
-							if (!string.IsNullOrEmpty(line) && logger.IsDebugEnabled)
-								logger.Debug("{0}: {1}", prefix, line);
+							if (!string.IsNullOrEmpty(line) && Logger.IsDebugEnabled)
+								Logger.Debug("{0}: {1}", prefix, line);
 						}
 					}
 				}
+				// ReSharper disable once EmptyGeneralCatchClause
 				catch
-				{
-				}
-				finally
 				{
 				}
 			}));
@@ -108,16 +107,21 @@ namespace Peach.Pro.Core.Agent.Monitors
 				if (_process != null)
 					_process.Close();
 
-				_process = new System.Diagnostics.Process();
-				_process.StartInfo.FileName = Executable;
-				_process.StartInfo.UseShellExecute = false;
-				_process.StartInfo.RedirectStandardError = true;
-				_process.StartInfo.RedirectStandardOutput = true;
+				_process = new Process
+				{
+					StartInfo =
+					{
+						FileName = Executable,
+						UseShellExecute = false,
+						RedirectStandardError = true,
+						RedirectStandardOutput = true
+					}
+				};
 
 				if (!string.IsNullOrEmpty(Arguments))
 					_process.StartInfo.Arguments = Arguments;
 
-				logger.Debug("_Start(): Starting process");
+				Logger.Debug("_Start(): Starting process");
 
 				try
 				{
@@ -125,8 +129,8 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 					var prefix = "{0} (0x{1:X})".Fmt(Path.GetFileName(Executable), _process.Id);
 
-					_LogOutput(prefix, () => { return _process.StandardError; });
-					_LogOutput(prefix, () => { return _process.StandardOutput; });
+					_LogOutput(prefix, () => _process.StandardError);
+					_LogOutput(prefix, () => _process.StandardOutput);
 				}
 				catch (Exception ex)
 				{
@@ -136,17 +140,20 @@ namespace Peach.Pro.Core.Agent.Monitors
 			}
 			else
 			{
-				logger.Trace("_Start(): Process already running, ignore");
+				Logger.Trace("_Start(): Process already running, ignore");
 			}
 		}
 
 		void _Stop()
 		{
-			logger.Trace("_Stop()");
+			Logger.Trace("_Stop()");
 
-			for (int i = 0; i < 100 && _IsRunning(); i++)
+			for (var i = 0; i < 100 && _IsRunning(); i++)
 			{
-				logger.Debug("_Stop(): Killing process");
+				Logger.Debug("_Stop(): Killing process");
+
+				Debug.Assert(_process != null);
+
 				try
 				{
 					_process.Kill();
@@ -156,19 +163,19 @@ namespace Peach.Pro.Core.Agent.Monitors
 				}
 				catch (Exception ex)
 				{
-					logger.Error("_Stop(): {0}", ex.Message);
+					Logger.Error("_Stop(): {0}", ex.Message);
 				}
 			}
 
 			if (_process != null)
 			{
-				logger.Debug("_Stop(): Closing process handle");
+				Logger.Debug("_Stop(): Closing process handle");
 				_process.Close();
 				_process = null;
 			}
 			else
 			{
-				logger.Trace("_Stop(): _process == null, done!");
+				Logger.Trace("_Stop(): _process == null, done!");
 			}
 		}
 
@@ -181,19 +188,20 @@ namespace Peach.Pro.Core.Agent.Monitors
 			{
 				const int pollInterval = 200;
 				ulong lastTime = 0;
-				int i = 0;
 
 				try
 				{
+					int i;
+
 					for (i = 0; i < WaitForExitTimeout; i += pollInterval)
 					{
 						var pi = ProcessInfo.Instance.Snapshot(_process);
 
-						logger.Trace("CpuKill: OldTicks={0} NewTicks={1}", lastTime, pi.TotalProcessorTicks);
+						Logger.Trace("CpuKill: OldTicks={0} NewTicks={1}", lastTime, pi.TotalProcessorTicks);
 
 						if (i != 0 && lastTime == pi.TotalProcessorTicks)
 						{
-							logger.Debug("Cpu is idle, stopping process.");
+							Logger.Debug("Cpu is idle, stopping process.");
 							break;
 						}
 
@@ -202,24 +210,25 @@ namespace Peach.Pro.Core.Agent.Monitors
 					}
 
 					if (i >= WaitForExitTimeout)
-						logger.Debug("Timed out waiting for cpu idle, stopping process.");
+						Logger.Debug("Timed out waiting for cpu idle, stopping process.");
 				}
 				catch (Exception ex)
 				{
-					logger.Debug("Error querying cpu time: {0}", ex.Message);
+					Logger.Debug("Error querying cpu time: {0}", ex.Message);
 				}
 
 				_Stop();
 			}
 			else
 			{
-				logger.Debug("WaitForExit({0})", WaitForExitTimeout == -1 ? "INFINITE" : WaitForExitTimeout.ToString());
+				Logger.Debug("WaitForExit({0})", WaitForExitTimeout == -1
+					? "INFINITE" : WaitForExitTimeout.ToString(CultureInfo.InvariantCulture));
 
 				if (!_process.WaitForExit(WaitForExitTimeout))
 				{
 					if (!useCpuKill)
 					{
-						logger.Debug("FAULT, WaitForExit ran out of time!");
+						Logger.Debug("FAULT, WaitForExit ran out of time!");
 						_fault = MakeFault("ProcessFailedToExit", "Process did not exit in " + WaitForExitTimeout + "ms");
 					}
 				}
@@ -233,7 +242,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		Fault MakeFault(string folder, string reason)
 		{
-			return new Fault()
+			return new Fault
 			{
 				type = FaultType.Fault,
 				detectionSource = "ProcessMonitor",
@@ -263,16 +272,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 		public override Fault GetMonitorData()
 		{
 			return _fault;
-		}
-
-		public override bool MustStop()
-		{
-			return false;
-		}
-
-		public override void StopMonitor()
-		{
-			_Stop();
 		}
 
 		public override void SessionStarting()

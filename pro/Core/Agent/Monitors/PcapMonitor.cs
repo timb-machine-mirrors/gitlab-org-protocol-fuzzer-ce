@@ -184,14 +184,8 @@ namespace Peach.Pro.Core.Agent.Monitors
 			}
 		}
 
-		public override bool DetectedFault()
-		{
-			return false;
-		}
-
 		public override Fault GetMonitorData()
 		{
-			
 			var fault = new Fault
 			{
 				detectionSource = "PcapMonitor",
@@ -203,16 +197,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 			fault.collectedData.Add(new Fault.Data("NetworkCapture.pcap", File.ReadAllBytes(_writer.Name)));
 
 			return fault;
-		}
-
-		public override bool MustStop()
-		{
-			return false;
-		}
-
-		public override Variant Message(string name, Variant data)
-		{
-			return null;
 		}
 	}
 }

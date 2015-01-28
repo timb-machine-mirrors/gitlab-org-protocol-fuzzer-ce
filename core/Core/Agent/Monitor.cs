@@ -45,7 +45,7 @@ namespace Peach.Core.Agent
 			Class = GetType().GetAttributes<MonitorAttribute>(null).First().Name;
 		}
 
-		public enum When
+		public enum MonitorWhen
 		{
 			DetectFault,
 			OnCall,
@@ -79,24 +79,32 @@ namespace Peach.Core.Agent
 		/// <summary>
 		/// Stop the monitor instance.
 		/// </summary>
-		public abstract void StopMonitor();
+		public virtual void StopMonitor()
+		{
+		}
 
 		/// <summary>
 		/// Starting a fuzzing session.  A session includes a number of test iterations.
 		/// </summary>
-		public abstract void SessionStarting();
+		public virtual void SessionStarting()
+		{
+		}
 
 		/// <summary>
 		/// Finished a fuzzing session.
 		/// </summary>
-		public abstract void SessionFinished();
+		public virtual void SessionFinished()
+		{
+		}
 
 		/// <summary>
 		/// Starting a new iteration
 		/// </summary>
 		/// <param name="iterationCount">Iteration count</param>
 		/// <param name="isReproduction">Are we re-running an iteration</param>
-		public abstract void IterationStarting(uint iterationCount, bool isReproduction);
+		public virtual void IterationStarting(uint iterationCount, bool isReproduction)
+		{
+		}
 
 		/// <summary>
 		/// Iteration has completed.
@@ -110,19 +118,28 @@ namespace Peach.Core.Agent
 		/// Was a fault detected during current iteration?
 		/// </summary>
 		/// <returns>True if a fault was detected, else false.</returns>
-		public abstract bool DetectedFault();
+		public virtual bool DetectedFault()
+		{
+			return false;
+		}
 
 		/// <summary>
 		/// Return a Fault instance
 		/// </summary>
 		/// <returns></returns>
-		public abstract Fault GetMonitorData();
+		public virtual Fault GetMonitorData()
+		{
+			return null;
+		}
 
 		/// <summary>
 		/// Can the fuzzing session continue, or must we stop?
 		/// </summary>
 		/// <returns>True if session must stop, else false.</returns>
-		public abstract bool MustStop();
+		public virtual bool MustStop()
+		{
+			return false;
+		}
 
 		/// <summary>
 		/// Send a message to the monitor and possibly get data back.
@@ -130,7 +147,10 @@ namespace Peach.Core.Agent
 		/// <param name="name">Message name</param>
 		/// <param name="data">Message data</param>
 		/// <returns>Returns data or null.</returns>
-		public abstract Variant Message(string name, Variant data);
+		public virtual Variant Message(string name, Variant data)
+		{
+			return null;
+		}
 
 		/// <summary>
 		/// An event handler that can be used by monitor implementations
