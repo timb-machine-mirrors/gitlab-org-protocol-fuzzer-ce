@@ -34,6 +34,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 
 using NLog;
+using Peach.Core.IO;
 
 namespace Peach.Core.Dom
 {
@@ -243,9 +244,10 @@ namespace Peach.Core.Dom
 		}
 
 		/// <summary>
-		/// All Data (DataModels &amp; DataSets) used for input (cracking) by this action.
+		/// Raw data used for input (cracking) by this action.
+		/// This can include data where cracking failed.
 		/// </summary>
-		public virtual IEnumerable<ActionData> inputData
+		public virtual IEnumerable<BitwiseStream> inputData
 		{
 			get
 			{
@@ -347,13 +349,16 @@ namespace Peach.Core.Dom
 				foreach (var item in outputData)
 					parent.parent.SaveData(item.outputName, item.dataModel.Value);
 
-				OnRun(publisher, context);
-
-				// Save input data
-				foreach (var item in inputData)
-					parent.parent.SaveData(item.inputName, item.dataModel.Value);
-
-				// onComplete script run from finally.
+				try
+				{
+					OnRun(publisher, context);
+				}
+				finally
+				{
+					// Save input data
+					foreach (var item in inputData)
+						parent.parent.SaveData(item.Name, item);
+				}
 			}
 			catch (ActionChangeStateException)
 			{
