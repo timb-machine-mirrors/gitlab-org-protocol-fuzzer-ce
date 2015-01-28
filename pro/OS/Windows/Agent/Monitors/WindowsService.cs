@@ -211,11 +211,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			StartService();
 		}
 
-		public override bool IterationFinished()
-		{
-			return false;
-		}
-
 		public override bool DetectedFault()
 		{
 			if (_fault != null)

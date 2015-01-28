@@ -69,7 +69,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 		{
 		}
 
-		public override bool IterationFinished()
+		public override void IterationFinished()
 		{
 			_fault = new Fault();
 			_fault.detectionSource = "SocketMonitor";
@@ -88,8 +88,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 				_fault.description = "No connections recorded.";
 				_fault.type = FaultOnSuccess ? FaultType.Fault : FaultType.Data;
 			}
-			
-			return false;
 		}
 
 		public override void StopMonitor()

@@ -36,12 +36,10 @@ namespace Peach.Pro.Core.Agent.Monitors
 		{
 		}
 
-		public override bool IterationFinished()
+		public override void IterationFinished()
 		{
 			foreach (var item in ProcessNames)
 				Kill(item);
-
-			return false;
 		}
 
 		public override bool DetectedFault()

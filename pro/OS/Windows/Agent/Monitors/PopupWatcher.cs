@@ -175,7 +175,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			Interlocked.Exchange(ref workerCount, 0);
 		}
 
-		public override bool IterationFinished()
+		public override void IterationFinished()
 		{
 			_fault = null;
 
@@ -202,8 +202,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 				_closedWindows.Clear();
 			}
-
-			return false;
 		}
 
 		public override Fault GetMonitorData()

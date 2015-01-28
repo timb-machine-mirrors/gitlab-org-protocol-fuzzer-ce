@@ -167,12 +167,12 @@ namespace Peach.Core.Agent
 		/// Iteration has completed.
 		/// </summary>
 		/// <returns>Returns true to indicate iteration should be re-run, else false.</returns>
-		public bool IterationFinished()
+		public void IterationFinished()
 		{
 			Logger.Trace("IterationFinished: {0}", Name);
 			parent.Context.OnIterationFinished(this);
 
-			return OnIterationFinished();
+			OnIterationFinished();
 		}
 
 		/// <summary>
@@ -295,7 +295,7 @@ namespace Peach.Core.Agent
 		/// Iteration has completed.
 		/// </summary>
 		/// <returns>Returns true to indicate iteration should be re-run, else false.</returns>
-		protected abstract bool OnIterationFinished();
+		protected abstract void OnIterationFinished();
 
 		/// <summary>
 		/// Was a fault detected during current iteration?

@@ -175,21 +175,17 @@ namespace Peach.Pro.Core.Agent
 			}
 		}
 
-		public bool IterationFinished()
+		public void IterationFinished()
 		{
 			logger.Trace("IterationFinished");
-
-			var replay = false;
 
 			foreach (var mon in monitors.Reverse<Monitor>())
 			{
 				Guard(mon, "IterationFinished", () =>
 				{
-					replay |= mon.IterationFinished();
+					mon.IterationFinished();
 				});
 			}
-
-			return replay;
 		}
 
 		public bool DetectedFault()

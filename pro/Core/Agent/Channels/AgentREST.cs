@@ -655,10 +655,9 @@ namespace Peach.Pro.Core.Agent.Channels
 			Send("IterationStarting?iterationCount=" + iterationCount.ToString() + "&" + "isReproduction=" + isReproduction.ToString());
 		}
 
-		protected override bool OnIterationFinished()
+		protected override void OnIterationFinished()
 		{
-			var json = Send("IterationFinished");
-			return ParseResponse(json);
+			Send("IterationFinished");
 		}
 
 		protected override bool OnDetectedFault()

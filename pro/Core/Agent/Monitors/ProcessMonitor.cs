@@ -287,7 +287,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			_Stop();
 		}
 
-		public override bool IterationFinished()
+		public override void IterationFinished()
 		{
 			if (!_messageExit && FaultOnEarlyExit && !_IsRunning())
 			{
@@ -303,8 +303,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 			{
 				_Stop();
 			}
-
-			return true;
 		}
 
 		public override Variant Message(string name, Variant data)

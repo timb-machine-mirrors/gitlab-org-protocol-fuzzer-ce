@@ -55,11 +55,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 			}
 		}
 
-		public override bool IterationFinished()
-		{
-			return false;
-		}
-
 		public override bool DetectedFault()
 		{
 			return false;

@@ -176,7 +176,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			}
 		}
 
-		public override bool IterationFinished()
+		public override void IterationFinished()
 		{
 			lock (_lock)
 			{
@@ -185,7 +185,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 					_writer.Close();
 				}
 			}
-			return false;
 		}
 
 		public override bool DetectedFault()

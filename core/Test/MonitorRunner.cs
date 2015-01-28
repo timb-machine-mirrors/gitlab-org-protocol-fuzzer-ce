@@ -46,7 +46,7 @@ namespace Peach.Core.Test
 				throw new NotImplementedException();
 			}
 
-			public bool IterationFinished()
+			public void IterationFinished()
 			{
 				throw new NotImplementedException();
 			}

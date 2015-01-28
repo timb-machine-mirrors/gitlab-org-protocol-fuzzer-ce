@@ -185,11 +185,6 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 		{
 		}
 
-		public override bool IterationFinished()
-		{
-			return true;
-		}
-
 		public override Variant Message(string name, Variant data)
 		{
 			return null;

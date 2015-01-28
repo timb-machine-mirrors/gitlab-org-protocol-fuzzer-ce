@@ -14,7 +14,7 @@ namespace Peach.Core.Agent
 		void SessionStarting();
 		void SessionFinished();
 		void IterationStarting(uint iterationCount, bool isReproduction);
-		bool IterationFinished();
+		void IterationFinished();
 		bool DetectedFault();
 		Fault[] GetMonitorData();
 		bool MustStop();

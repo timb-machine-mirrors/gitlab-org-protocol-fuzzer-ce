@@ -623,9 +623,9 @@ namespace Peach.Pro.Core.Agent.Channels
 			}
 		}
 
-		protected override bool OnIterationFinished()
+		protected override void OnIterationFinished()
 		{
-			return Exec(() => proxy.IterationFinished());
+			Exec(() => proxy.IterationFinished());
 		}
 
 		protected override bool OnDetectedFault()
@@ -851,10 +851,10 @@ namespace Peach.Pro.Core.Agent.Channels
 			agent.IterationStarting(iterationCount, isReproduction);
 		}
 
-		public bool IterationFinished()
+		public void IterationFinished()
 		{
 			logger.Trace("IterationFinished");
-			return agent.IterationFinished();
+			agent.IterationFinished();
 		}
 
 		public bool DetectedFault()
