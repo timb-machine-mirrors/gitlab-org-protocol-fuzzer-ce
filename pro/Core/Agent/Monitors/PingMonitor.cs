@@ -6,7 +6,6 @@ using System.Text;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
-using ASCIIEncoding = Peach.Core.ASCIIEncoding;
 using Encoding = Peach.Core.Encoding;
 
 namespace Peach.Pro.Core.Agent.Monitors
@@ -18,18 +17,19 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Parameter("RetryCount", typeof(int), "Number of times to retry before issuing a fault", "0")]
 	[Parameter("Data", typeof(string), "Data to send", "")]
 	[Parameter("FaultOnSuccess", typeof(bool), "Fault if ping is successful", "false")]
-	public class PingMonitor : Peach.Core.Agent.Monitor
+	public class PingMonitor : Monitor
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
+		private static readonly bool HasPermissions = CheckPermissions();
 
-		public string Host { get; private set; }
-		public int Timeout { get; private set; }
-		public int RetryCount { get; private set; }
-		public string Data { get; private set; }
-		public bool FaultOnSuccess { get; private set; }
+		public string Host { get; set; }
+		public int Timeout { get; set; }
+		public int RetryCount { get; set; }
+		public string Data { get; set; }
+		public bool FaultOnSuccess { get; set; }
 
-		private Fault _fault = null;
-		private static bool hasPermissions = CheckPermissions();
+		private Fault _fault;
+
 
 		private static bool CheckPermissions()
 		{
@@ -43,7 +43,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 			try
 			{
-				using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.Icmp))
+				using (new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.Icmp))
 				{
 					return true;
 				}
@@ -63,7 +63,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 		{
 			base.StartMonitor(args);
 
-			if (!hasPermissions)
+			if (!HasPermissions)
 				throw new PeachException("Unable to open ICMP socket.  Ensure user has appropriate permissions.");
 
 			if (Platform.GetOS() != Platform.OS.Windows)
@@ -72,48 +72,44 @@ namespace Peach.Pro.Core.Agent.Monitors
 				// This means the only payload we can expect to receive is 72 bytes
 				// 100 bytes total - 20 byte IP - 8 byte ICMP
 				const int maxLen = 100 - 20 - 8;
-				int len = Encoding.ASCII.GetByteCount(Data ?? "");
+				var len = Encoding.ASCII.GetByteCount(Data ?? "");
 				if (len > maxLen)
 					throw new PeachException("Error, the value of parameter 'Data' is longer than the maximum length of " + maxLen + ".");
 			}
 		}
 
-		public override void StopMonitor() { }
-		public override void SessionStarting() { }
-		public override void SessionFinished() { }
-		public override void IterationStarting(uint iterationCount, bool isReproduction) { }
-		public override bool MustStop() { return false; }
-		public override Variant Message(string name, Variant data) { return null; }
-
 		public override bool DetectedFault()
 		{
-			_fault = new Fault();
-			_fault.type = FaultType.Fault;
-			_fault.detectionSource = "PingMonitor";
+			_fault = new Fault
+			{
+				type = FaultType.Fault,
+				detectionSource = "PingMonitor"
+			};
+
 			try
 			{
 				using (var ping = new Ping())
 				{
-					PingReply reply = null;
-					int count = 0;
+					PingReply reply;
+					var count = 0;
 					do
 					{
 						count++;
-						logger.Trace("DetectedFault(): Checking for fault, attempt #{0} to ping {1}", count, Host);
-						if (string.IsNullOrEmpty(Data))
-							reply = ping.Send(Host, Timeout);
-						else
-							reply = ping.Send(Host, Timeout, ASCIIEncoding.ASCII.GetBytes(Data));
-					} while (RetryCount >= count && reply.Status != IPStatus.Success);
+						Logger.Trace("DetectedFault(): Checking for fault, attempt #{0} to ping {1}", count, Host);
+						reply = string.IsNullOrEmpty(Data)
+							? ping.Send(Host, Timeout)
+							: ping.Send(Host, Timeout, Encoding.ASCII.GetBytes(Data));
+					}
+					while (RetryCount >= count && (reply == null || reply.Status != IPStatus.Success));
 
-					if (reply.Status == IPStatus.Success)
+					if (reply != null && reply.Status == IPStatus.Success)
 					{
-						logger.Debug("DetectedFault(): {0} replied after {1}ms", Host, Timeout);
+						Logger.Debug("DetectedFault(): {0} replied after {1}ms", Host, Timeout);
 						_fault.type = FaultOnSuccess ? FaultType.Fault : FaultType.Data;
 					}
 					else
 					{
-						logger.Debug("DetectedFault(): {0} timed out after {1}ms", Host, Timeout);
+						Logger.Debug("DetectedFault(): {0} timed out after {1}ms", Host, Timeout);
 						_fault.type = FaultOnSuccess ? FaultType.Data : FaultType.Fault;
 
 					}
@@ -155,8 +151,8 @@ namespace Peach.Pro.Core.Agent.Monitors
 			switch (reply.Status)
 			{
 				case IPStatus.Success:
-					StringBuilder sb = new StringBuilder();
-					sb.AppendFormat("Address: {0}", reply.Address.ToString());
+					var sb = new StringBuilder();
+					sb.AppendFormat("Address: {0}", reply.Address);
 					sb.AppendLine();
 					sb.AppendFormat("RoundTrip time: {0}", reply.RoundtripTime);
 					sb.AppendLine();
@@ -215,7 +211,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 					return "The ICMP echo request failed because the source address and destination address that are specified in an ICMP echo message are not in the same scope. This is typically caused by a router forwarding a packet using an interface that is outside the scope of the source address. Address scopes (link-local, site-local, and global scope) determine where on the network an address is valid.";
 				default:
 					throw new ArgumentException();
-			};
+			}
 		}
 	}
 }
