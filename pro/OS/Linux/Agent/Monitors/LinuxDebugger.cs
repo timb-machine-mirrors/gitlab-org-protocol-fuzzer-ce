@@ -778,16 +778,6 @@ quit
 			return _fault;
 		}
 
-		public override bool MustStop()
-		{
-			return false;
-		}
-
-		public override void StopMonitor()
-		{
-			_Stop();
-		}
-
 		public override void SessionStarting()
 		{
 			_tmpPath = MakeTempDir();
@@ -829,21 +819,19 @@ quit
 			}
 		}
 
-		public override Variant Message(string name, Variant data)
+		public override void Message(string msg)
 		{
-			if (name == "Action.Call" && ((string)data) == StartOnCall)
+			if (msg == StartOnCall)
 			{
 				_Stop();
 				_Start();
 			}
-			else if (name == "Action.Call" && ((string)data) == WaitForExitOnCall)
+			else if (msg == WaitForExitOnCall)
 			{
 				_messageExit = true;
 				_WaitForExit(false);
 				_Stop();
 			}
-
-			return null;
 		}
 	}
 }

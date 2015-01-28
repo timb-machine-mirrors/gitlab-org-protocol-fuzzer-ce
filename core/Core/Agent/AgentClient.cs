@@ -219,15 +219,13 @@ namespace Peach.Core.Agent
 		/// <summary>
 		/// Send a message to all monitors.
 		/// </summary>
-		/// <param name="name">Message Name</param>
-		/// <param name="data">Message data</param>
-		/// <returns>Returns data as Variant or null.</returns>
-		public Variant Message(string name, Variant data)
+		/// <param name="msg">Message</param>
+		public void Message(string msg)
 		{
-			Logger.Trace("Message: {0} {1}", this.Name, name);
-			parent.Context.OnMessage(this, name, data);
+			Logger.Trace("Message: {0} {1}", Name, msg);
+			parent.Context.OnMessage(this, msg);
 
-			return OnMessage(name, data);
+			OnMessage(msg);
 		}
 
 		#endregion
@@ -318,10 +316,9 @@ namespace Peach.Core.Agent
 		/// <summary>
 		/// Send a message to all monitors.
 		/// </summary>
-		/// <param name="name">Message Name</param>
-		/// <param name="data">Message data</param>
+		/// <param name="msg">Message</param>
 		/// <returns>Returns data as Variant or null.</returns>
-		protected abstract Variant OnMessage(string name, Variant data);
+		protected abstract void OnMessage(string msg);
 
 		#endregion
 

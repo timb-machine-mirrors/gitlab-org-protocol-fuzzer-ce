@@ -643,9 +643,9 @@ namespace Peach.Pro.Core.Agent.Channels
 			return Exec(() => proxy.MustStop());
 		}
 
-		protected override Variant OnMessage(string name, Variant data)
+		protected override void OnMessage(string msg)
 		{
-			return Exec(() => proxy.Message(name, data));
+			Exec(() => proxy.Message(msg));
 		}
 
 		#endregion
@@ -875,10 +875,10 @@ namespace Peach.Pro.Core.Agent.Channels
 			return agent.MustStop();
 		}
 
-		public Variant Message(string name, Variant data)
+		public void Message(string msg)
 		{
-			logger.Trace("Message: {0}", name);
-			return agent.Message(name, data);
+			logger.Trace("Message: {0}", msg);
+			agent.Message(msg);
 		}
 	}
 

@@ -688,7 +688,7 @@ namespace Peach.Pro.Core.Agent.Channels
 			return ParseResponse(json);
 		}
 
-		protected override Variant OnMessage(string name, Variant data)
+		protected override void OnMessage(string msg)
 		{
 			throw new NotImplementedException();
 		}

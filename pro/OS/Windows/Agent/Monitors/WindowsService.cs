@@ -182,14 +182,11 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 		public override void StopMonitor()
 		{
-		}
-
-		public override void SessionStarting()
-		{
-		}
-
-		public override void SessionFinished()
-		{
+			if (_sc != null)
+			{
+				_sc.Close();
+				_sc = null;
+			}
 		}
 
 		public override void IterationStarting(uint iterationCount, bool isReproduction)
@@ -238,16 +235,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			};
 
 			_fault.collectedData.Add(new Fault.Data("WindowsService.txt", Encoding.UTF8.GetBytes(_fault.description)));
-		}
-
-		public override bool MustStop()
-		{
-			return false;
-		}
-
-		public override Variant Message(string name, Variant data)
-		{
-			return null;
 		}
 	}
 }

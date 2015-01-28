@@ -40,11 +40,11 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 	[Parameter("ChildrenOnly", typeof(bool), "Only cleanup sub-keys. (defaults to false)", "false")]
 	public class CleanupRegistry : Monitor
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		public string Key { get; private set; }
-		public bool ChildrenOnly { get; private set; }
-		public RegistryKey Root { get; private set; }
+		public string Key { get; set; }
+		public bool ChildrenOnly { get; set; }
+		public RegistryKey Root { get; set; }
 
 		public CleanupRegistry(string name)
 			: base(name)
@@ -54,9 +54,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		public override void StartMonitor(Dictionary<string, string> args)
 		{
 			base.StartMonitor(args);
-
-			if (Key.StartsWith("HKCU\\"))
-				Root = Registry.CurrentUser;
 
 			if (Key.StartsWith("HKCU\\"))
 				Root = Registry.CurrentUser;
@@ -74,23 +71,11 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			Key = Key.Substring(Key.IndexOf("\\", System.StringComparison.Ordinal) + 1);
 		}
 
-		public override void StopMonitor()
-		{
-		}
-
-		public override void SessionStarting()
-		{
-		}
-
-		public override void SessionFinished()
-		{
-		}
-
 		public override void IterationStarting(uint iterationCount, bool isReproduction)
 		{
 			if (!ChildrenOnly)
 			{
-				logger.Debug("Removing key: " + Key);
+				Logger.Debug("Removing key: " + Key);
 				Root.DeleteSubKeyTree(Key, false);
 				return;
 			}
@@ -101,29 +86,9 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 			foreach (var subkey in key.GetSubKeyNames())
 			{
-				logger.Debug("Removing subkey: " + subkey);
+				Logger.Debug("Removing subkey: " + subkey);
 				key.DeleteSubKeyTree(subkey, false);
 			}
-		}
-
-		public override bool DetectedFault()
-		{
-			return false;
-		}
-
-		public override Fault GetMonitorData()
-		{
-			return null;
-		}
-
-		public override bool MustStop()
-		{
-			return false;
-		}
-
-		public override Variant Message(string name, Variant data)
-		{
-			return null;
 		}
 	}
 }

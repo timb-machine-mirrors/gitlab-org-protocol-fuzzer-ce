@@ -82,9 +82,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 			return fault;
 		}
 
-		public override Variant Message(string name, Variant data)
+		public override void Message(string msg)
 		{
-			switch (((string)data).ToLower())
+			switch (msg.ToLower())
 			{
 				case "true":
 					_isControl = true;
@@ -93,7 +93,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 					_isControl = false;
 					break;
 			}
-			return null;
 		}
 
 		private string[] GetBuckets()

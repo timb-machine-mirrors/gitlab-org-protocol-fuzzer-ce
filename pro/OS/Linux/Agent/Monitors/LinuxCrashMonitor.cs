@@ -175,10 +175,6 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 			}
 		}
 
-		public override void  IterationStarting(uint iterationCount, bool isReproduction)
-		{
-		}
-
 		public override bool  DetectedFault()
 		{
 			Thread.Sleep (250);
@@ -241,16 +237,6 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 			}
 
 			return fault;
-		}
-
-		public override bool  MustStop()
-		{
-			return false;
-		}
-
-		public override Variant Message(string name, Variant data)
-		{
-			return null;
 		}
 
 		#region Ulimit

@@ -112,7 +112,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			m.SessionStarting();
 			m.IterationStarting(1, false);
 
-			m.Message("Action.Call", new Variant("Foo"));
+			m.Message("Foo");
 			Thread.Sleep(1000);
 
 			var before = DateTime.Now;
@@ -144,7 +144,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			m.SessionStarting();
 			m.IterationStarting(1, false);
 
-			m.Message("Action.Call", new Variant("Foo"));
+			m.Message("Foo");
 			Thread.Sleep(1000);
 
 			var sw = new System.Diagnostics.Stopwatch();
@@ -177,7 +177,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			m.SessionStarting();
 			m.IterationStarting(1, false);
 
-			m.Message("Action.Call", new Variant("Foo"));
+			m.Message("Foo");
 			Thread.Sleep(1000);
 
 			var sw = new System.Diagnostics.Stopwatch();

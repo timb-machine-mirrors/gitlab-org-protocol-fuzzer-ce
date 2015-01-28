@@ -66,7 +66,7 @@ namespace Peach.Core.Test
 				throw new NotImplementedException();
 			}
 
-			public Variant Message(string name, Variant data)
+			public void Message(string msg)
 			{
 				throw new NotImplementedException();
 			}

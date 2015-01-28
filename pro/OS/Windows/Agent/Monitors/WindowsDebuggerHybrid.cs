@@ -283,21 +283,19 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			return null;
 		}
 
-		public override Variant Message(string name, Variant data)
+		public override void Message(string msg)
 		{
-			if (name == "Action.Call" && ((string)data) == _startOnCall)
+			if (msg == _startOnCall)
 			{
 				_StopDebugger();
 				_StartDebugger();
 			}
-			else if (name == "Action.Call" && ((string)data) == _waitForExitOnCall)
+			else if (msg == _waitForExitOnCall)
 			{
 				_stopMessage = true;
 				_WaitForExit(false);
 				_StopDebugger();
 			}
-
-			return null;
 		}
 
 		public override void StopMonitor()

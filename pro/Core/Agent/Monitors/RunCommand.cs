@@ -180,12 +180,10 @@ namespace Peach.Pro.Core.Agent.Monitors
 				_Start();
 		}
 
-		public override Variant Message(string name, Variant data)
+		public override void Message(string msg)
 		{
-			if (name == "Action.Call" && ((string)data) == StartOnCall && When == MonitorWhen.OnCall)
+			if (msg == StartOnCall && When == MonitorWhen.OnCall)
 				_Start();
-
-			return null;
 		}
 	}
 }

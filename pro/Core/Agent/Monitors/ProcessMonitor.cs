@@ -303,23 +303,19 @@ namespace Peach.Pro.Core.Agent.Monitors
 			}
 		}
 
-		public override Variant Message(string name, Variant data)
+		public override void Message(string msg)
 		{
-			if (name == "Action.Call" && ((string)data) == StartOnCall)
+			if (msg == StartOnCall)
 			{
 				_Stop();
 				_Start();
 			}
-			else if (name == "Action.Call" && ((string)data) == WaitForExitOnCall)
+			else if (msg == WaitForExitOnCall)
 			{
 				_messageExit = true; 
 				_WaitForExit(false);
 				_Stop();
 			}
-
-			return null;
 		}
 	}
 }
-
-// end
