@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Peach.Core.IO;
 using Peach.Core.Cracker;
 using System.Collections.Generic;
@@ -12,6 +13,8 @@ namespace Peach.Core.Dom.Actions
 	[Serializable]
 	public class Call : Action
 	{
+		private BitStream _result;
+
 		public Call()
 		{
 			parameters = new NamedCollection<ActionParameter>("Param");
@@ -47,12 +50,10 @@ namespace Peach.Core.Dom.Actions
 
 				if (result != null)
 					yield return result;
-
-				yield break;
 			}
 		}
 
-		public override IEnumerable<ActionData> inputData
+		public override IEnumerable<BitwiseStream> inputData
 		{
 			get
 			{
@@ -60,16 +61,13 @@ namespace Peach.Core.Dom.Actions
 				// Out and InOut params to a method
 				// are data inputs
 
-				foreach (var item in parameters)
+				foreach (var item in parameters.Where(item => item.type != ActionParameter.Type.In))
 				{
-					if (item.type != ActionParameter.Type.In)
-						yield return item;
+					yield return new BitStream(item.dataModel.Value) { Name = item.inputName };
 				}
 
 				if (result != null)
-					yield return result;
-
-				yield break;
+					yield return _result;
 			}
 		}
 
@@ -84,41 +82,48 @@ namespace Peach.Core.Dom.Actions
 			}
 		}
 
-		protected override void OnRun(Publisher publisher, RunContext context)
+		protected override void OnRun(Publisher pub, RunContext context)
 		{
+			_result = null;
+
 			Variant ret = null;
 
 			// Are we sending to Agents?
-			if (this.publisher == "Peach.Agent")
-				ret = context.agentManager.Message("Action.Call", new Variant(method));
+			if (publisher == "Peach.Agent")
+			{
+				context.agentManager.Message(method);
+			}
 			else
 			{
-				publisher.start();
-				ret = publisher.call(method, parameters.ToList());
+				pub.start();
+				ret = pub.call(method, parameters.ToList());
 			}
 
-			if (result != null && ret != null)
+			if (result == null || ret == null)
+				return;
+
+			try
 			{
-				BitStream data;
+				_result = (BitStream)ret;
+				_result.Name = result.inputName;
+			}
+			catch (NotSupportedException)
+			{
+				throw new PeachException("Error, unable to convert result from method '" + method + "' to a BitStream");
+			}
 
-				try
-				{
-					data = (BitStream)ret;
-				}
-				catch (NotSupportedException)
-				{
-					throw new PeachException("Error, unable to convert result from method '" + method + "' to a BitStream");
-				}
-
-				try
-				{
-					var cracker = new DataCracker();
-					cracker.CrackData(result.dataModel, data);
-				}
-				catch (CrackingFailure ex)
-				{
-					throw new SoftException(ex);
-				}
+			try
+			{
+				var cracker = new DataCracker();
+				cracker.CrackData(result.dataModel, _result);
+			}
+			catch (CrackingFailure ex)
+			{
+				throw new SoftException(ex);
+			}
+			finally
+			{
+				_result.Seek(0, SeekOrigin.Begin);
 			}
 		}
 	}

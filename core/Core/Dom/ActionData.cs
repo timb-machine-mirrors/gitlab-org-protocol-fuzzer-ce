@@ -11,6 +11,13 @@ namespace Peach.Core.Dom
 	[Serializable]
 	public class ActionData : INamed
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
 		/// <summary>
 		/// Currently unused.  Exists for schema generation.
 		/// </summary>
@@ -71,9 +78,9 @@ namespace Peach.Core.Dom
 		/// Non-null when actions have multiple data models
 		/// (Action.Call) and null otherwise (Input/Output/SetProperty/GetProperty).
 		/// </remarks>
-		[XmlAttribute]
+		[XmlAttribute("name")]
 		[DefaultValue(null)]
-		public string name { get; protected set; }
+		public string Name { get; protected set; }
 
 		/// <summary>
 		/// Full name of this record when viewed as input data
@@ -82,10 +89,10 @@ namespace Peach.Core.Dom
 		{
 			get
 			{
-				if (name == null)
-					return string.Format("{0}.{1}", action.parent.name, action.name);
+				if (Name == null)
+					return string.Format("{0}.{1}", action.parent.Name, action.Name);
 				else
-					return string.Format("{0}.{1}.{2}", action.parent.name, action.name, name);
+					return string.Format("{0}.{1}.{2}", action.parent.Name, action.Name, Name);
 			}
 		}
 
@@ -96,10 +103,10 @@ namespace Peach.Core.Dom
 		{
 			get
 			{
-				if (name == null)
-					return string.Format("{0}.{1}", action.parent.name, action.name);
+				if (Name == null)
+					return string.Format("{0}.{1}", action.parent.Name, action.Name);
 				else
-					return string.Format("{0}.{1}.{2}", action.parent.name, action.name, name);
+					return string.Format("{0}.{1}.{2}", action.parent.Name, action.Name, Name);
 			}
 		}
 
@@ -243,10 +250,10 @@ namespace Peach.Core.Dom
 		{
 			get
 			{
-				if (string.IsNullOrEmpty(name))
-					return string.Join(".", action.parent.name, action.name, dataModel.name);
+				if (string.IsNullOrEmpty(Name))
+					return string.Join(".", action.parent.Name, action.Name, dataModel.Name);
 				else
-					return string.Join(".", action.parent.name, action.name, name, dataModel.name);
+					return string.Join(".", action.parent.Name, action.Name, Name, dataModel.Name);
 			}
 		}
 	}

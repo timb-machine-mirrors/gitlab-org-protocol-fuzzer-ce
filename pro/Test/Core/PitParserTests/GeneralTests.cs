@@ -89,7 +89,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			Assert.AreEqual(1, dom.dataModels["TheDataModel"].Count);
 			Assert.AreEqual(1, ((DataElementContainer)dom.dataModels["TheDataModel"][0]).Count);
 
-			Assert.AreEqual("TheString", ((DataElementContainer)dom.dataModels["TheDataModel"][0])[0].name);
+			Assert.AreEqual("TheString", ((DataElementContainer)dom.dataModels["TheDataModel"][0])[0].Name);
 			Assert.AreEqual("World", (string)((DataElementContainer)dom.dataModels["TheDataModel"][0])[0].DefaultValue);
 		}
 
@@ -653,13 +653,13 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			Assert.AreEqual(1, dom.tests[1].agents.Count);
 			Assert.AreEqual(2, dom.tests[2].agents.Count);
 
-			Assert.AreEqual("foo:SomeAgent", dom.tests[1].agents[0].name);
+			Assert.AreEqual("foo:SomeAgent", dom.tests[1].agents[0].Name);
 			Assert.AreEqual(Platform.OS.None, dom.tests[1].agents[0].platform);
 
-			Assert.AreEqual("foo:SomeAgent", dom.tests[2].agents[0].name);
+			Assert.AreEqual("foo:SomeAgent", dom.tests[2].agents[0].Name);
 			Assert.AreEqual(Platform.OS.All, dom.tests[2].agents[0].platform);
 
-			Assert.AreEqual("foo:bar:ThirdAgent", dom.tests[2].agents[1].name);
+			Assert.AreEqual("foo:bar:ThirdAgent", dom.tests[2].agents[1].Name);
 			Assert.AreEqual(Platform.OS.All, dom.tests[2].agents[1].platform);
 
 		}

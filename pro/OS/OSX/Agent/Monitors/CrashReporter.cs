@@ -50,16 +50,20 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 	public class CrashReporter : Monitor, IDisposable
 	{
 		private Regex _regex = new Regex("Saved crash report for (.*)\\[\\d+\\] version .*? to (.*)");
-		private string _processName = null;
 		private string _lastTime = "0";
 		private IntPtr _asl = IntPtr.Zero;
 		private string[] _crashLogs = null;
 
-		public CrashReporter(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public string ProcessName { get; private set; }
+
+		public CrashReporter(string name)
+			: base(name)
 		{
-			if (args.ContainsKey("ProcessName"))
-				this._processName = (string)args["ProcessName"];
+		}
+
+		public override void StartMonitor(Dictionary<string, string> args)
+		{
+			base.StartMonitor(args);
 
 			this._asl = asl_new(asl_type.ASL_TYPE_QUERY);
 			if (this._asl == IntPtr.Zero)
@@ -116,7 +120,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 					Match match = this._regex.Match(value);
 					if (match.Success)
 					{
-						if (this._processName == null || match.Groups[1].Value == this._processName)
+						if (ProcessName == null || match.Groups[1].Value == ProcessName)
 							ret.Add(match.Groups[2].Value);
 					}
 				}
@@ -155,7 +159,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			fault.detectionSource = "CrashReporter";
 			fault.folderName = "CrashReporter";
 			fault.type = FaultType.Fault;
-			fault.description = _processName + " crash report.";
+			fault.description = ProcessName + " crash report.";
 
 			foreach (string file in _crashLogs)
 			{
@@ -166,33 +170,10 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			return fault;
 		}
 
-		public override bool MustStop()
-		{
-			return false;
-		}
-
-		public override void StopMonitor()
-		{
-		}
-
 		public override void SessionStarting()
 		{
 			// Skip past any old messages in the log
 			GetCrashLogs();
-		}
-
-		public override void SessionFinished()
-		{
-		}
-
-		public override bool IterationFinished()
-		{
-			return true;
-		}
-
-		public override Variant Message(string name, Variant data)
-		{
-			return null;
 		}
 
 #region ASL P/Invokes

@@ -33,10 +33,17 @@ namespace Peach.Core.Dom
 {
 	public class Dom : INamed, IPitSerializable
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
 		/// <summary>
 		/// The namespace of this Dom.
 		/// </summary>
-		public string name { get; set; }
+		public string Name { get; set; }
 
 		public string fileName { get; set; }
 		public string version { get; set; }
@@ -57,7 +64,7 @@ namespace Peach.Core.Dom
 
 		public Dom()
 		{
-			name = "";
+			Name = "";
 			fileName = "";
 			version = "";
 			author = "";
@@ -111,7 +118,7 @@ namespace Peach.Core.Dom
 			foreach (var obj in this.ns)
 			{
 				pit.WriteStartElement("Include");
-				pit.WriteAttributeString("ns", obj.name);
+				pit.WriteAttributeString("ns", obj.Name);
 				pit.WriteAttributeString("src", obj.fileName);
 				pit.WriteEndElement();
 			}
@@ -204,7 +211,7 @@ namespace Peach.Core.Dom
 
 			foreach (DataModel model in dom.dataModels)
 			{
-				if (model.name == name)
+				if (model.Name == name)
 					return model;
 			}
 

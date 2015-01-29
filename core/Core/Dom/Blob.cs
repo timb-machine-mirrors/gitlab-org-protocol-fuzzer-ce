@@ -111,7 +111,7 @@ namespace Peach.Core.Dom
 		public override void WritePit(XmlWriter pit)
 		{
 			pit.WriteStartElement("Blob");
-			pit.WriteAttributeString("name", name);
+			pit.WriteAttributeString("name", Name);
 			WritePitCommonAttributes(pit);
 			WritePitCommonValue(pit);
 			WritePitCommonChildren(pit);

@@ -195,11 +195,14 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 		[Test]
 		public void TestExitEarlyFault()
 		{
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashingFileConsumer.exe");
-			args["FaultOnEarlyExit"] = new Variant("true");
+			var args = new Dictionary<string, string>
+			{
+				{ "Executable", "CrashingFileConsumer.exe" },
+				{ "FaultOnEarlyExit", "true" },
+			};
 
-			var w = new WindowsDebuggerHybrid(null, "name", args);
+			var w = new WindowsDebuggerHybrid(null);
+			w.StartMonitor(args);
 			w.IterationStarting(1, false);
 
 			System.Threading.Thread.Sleep(1000);
@@ -218,23 +221,23 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 		[Test]
 		public void TestExitEarlyFault1()
 		{
-			Variant foo = new Variant("foo");
-			Variant bar = new Variant("bar");
-
 			// FaultOnEarlyExit doesn't fault when stop message is sent
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashingFileConsumer.exe");
-			args["StartOnCall"] = foo;
-			args["WaitForExitOnCall"] = bar;
-			args["FaultOnEarlyExit"] = new Variant("true");
+			var args = new Dictionary<string, string>
+			{
+				{ "Executable", "CrashingFileConsumer.exe" },
+				{ "StartOnCall", "foo" },
+				{ "WaitForExitOnCall", "bar" },
+				{ "FaultOnEarlyExit", "true" },
+			};
 
-			var w = new WindowsDebuggerHybrid(null, "name", args);
+			var w = new WindowsDebuggerHybrid(null);
+			w.StartMonitor(args);
 			w.SessionStarting();
 			w.IterationStarting(1, false);
 
-			w.Message("Action.Call", foo);
-			w.Message("Action.Call", bar);
+			w.Message("foo");
+			w.Message("bar");
 
 			w.IterationFinished();
 
@@ -251,16 +254,19 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 
 			// FaultOnEarlyExit faults when StartOnCall is used and stop message is not sent
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashingFileConsumer.exe");
-			args["StartOnCall"] = foo;
-			args["FaultOnEarlyExit"] = new Variant("true");
+			var args = new Dictionary<string, string>
+			{
+				{ "Executable", "CrashingFileConsumer.exe" },
+				{ "StartOnCall", "foo" },
+				{ "FaultOnEarlyExit", "true" },
+			};
 
-			var w = new WindowsDebuggerHybrid(null, "name", args);
+			var w = new WindowsDebuggerHybrid(null);
+			w.StartMonitor(args);
 			w.SessionStarting();
 			w.IterationStarting(1, false);
 
-			w.Message("Action.Call", foo);
+			w.Message("foo");
 
 			System.Threading.Thread.Sleep(1000);
 
@@ -279,21 +285,22 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 		[Test]
 		public void TestExitEarlyFault3()
 		{
-			Variant foo = new Variant("foo");
-
 			// FaultOnEarlyExit doesn't fault when StartOnCall is used
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashableServer.exe");
-			args["Arguments"] = new Variant("127.0.0.1 6789");
-			args["StartOnCall"] = foo;
-			args["FaultOnEarlyExit"] = new Variant("true");
+			var args = new Dictionary<string, string>
+			{
+				{ "Executable", "CrashableServer.exe" },
+				{ "Arguments", "127.0.0.1 6789" },
+				{ "StartOnCall", "foo" },
+				{ "FaultOnEarlyExit", "true" },
+			};
 
-			var w = new WindowsDebuggerHybrid(null, "name", args);
+			var w = new WindowsDebuggerHybrid(null);
+			w.StartMonitor(args);
 			w.SessionStarting();
 			w.IterationStarting(1, false);
 
-			w.Message("Action.Call", foo);
+			w.Message("foo");
 
 			w.IterationFinished();
 
@@ -308,13 +315,16 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 		{
 			// FaultOnEarlyExit doesn't fault when restart every iteration is true
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashableServer.exe");
-			args["Arguments"] = new Variant("127.0.0.1 6789");
-			args["RestartOnEachTest"] = new Variant("true");
-			args["FaultOnEarlyExit"] = new Variant("true");
+			var args = new Dictionary<string, string>
+			{
+				{ "Executable", "CrashableServer.exe" },
+				{ "Arguments", "127.0.0.1 6789" },
+				{ "RestartOnEachTest", "true" },
+				{ "FaultOnEarlyExit", "true" },
+			};
 
-			var w = new WindowsDebuggerHybrid(null, "name", args);
+			var w = new WindowsDebuggerHybrid(null);
+			w.StartMonitor(args);
 			w.SessionStarting();
 			w.IterationStarting(1, false);
 

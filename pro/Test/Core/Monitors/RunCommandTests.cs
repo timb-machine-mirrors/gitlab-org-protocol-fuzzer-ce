@@ -284,9 +284,9 @@ namespace Peach.Pro.Test.Core.Monitors
 
 				// Called for each monitor, but each monitor just listens to
 				// the specific message, so send every message to every monitor
-				m.Message("Action.Call", new Variant("CallOne"));
-				m.Message("Action.Call", new Variant("CallTwo"));
-				m.Message("Action.Call", new Variant("CallThree"));
+				m.Message("CallOne");
+				m.Message("CallTwo");
+				m.Message("CallThree");
 
 				VerifyCall(idx);
 			};

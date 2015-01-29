@@ -83,37 +83,37 @@ namespace Godel.Tests
 
 			Assert.AreEqual(6, sm.godel.Count);
 
-			Assert.AreEqual(sm.godel[0].name, "SM.Initial.Action");
+			Assert.AreEqual(sm.godel[0].Name, "SM.Initial.Action");
 			Assert.AreEqual(sm.godel[0].controlOnly, true);
 			Assert.AreEqual(sm.godel[0].inv, "1 == 1");
 			Assert.AreEqual(sm.godel[0].pre, "2 == 2");
 			Assert.AreEqual(sm.godel[0].post, "4 == 4");
 
-			Assert.AreEqual(sm.godel[1].name, "SM.Initial.Action_1");
+			Assert.AreEqual(sm.godel[1].Name, "SM.Initial.Action_1");
 			Assert.AreEqual(sm.godel[1].controlOnly, false);
 			Assert.AreEqual(sm.godel[1].inv, "True == True");
 			Assert.AreEqual(sm.godel[1].pre, null);
 			Assert.AreEqual(sm.godel[1].post, null);
 
-			Assert.AreEqual(sm.godel[2].name, "SM.Initial.Action_2");
+			Assert.AreEqual(sm.godel[2].Name, "SM.Initial.Action_2");
 			Assert.AreEqual(sm.godel[2].controlOnly, false);
 			Assert.AreEqual(sm.godel[2].inv, "1 == 1");
 			Assert.AreEqual(sm.godel[2].pre, "2 == 2");
 			Assert.AreEqual(sm.godel[2].post, "6 == 6");
 
-			Assert.AreEqual(sm.godel[3].name, "SM.Initial.Action_3");
+			Assert.AreEqual(sm.godel[3].Name, "SM.Initial.Action_3");
 			Assert.AreEqual(sm.godel[3].controlOnly, false);
 			Assert.AreEqual(sm.godel[3].inv, "1 == 1");
 			Assert.AreEqual(sm.godel[3].pre, "2 == 2");
 			Assert.AreEqual(sm.godel[3].post, "4 == 4");
 
-			Assert.AreEqual(sm.godel[4].name, "SM.Initial");
+			Assert.AreEqual(sm.godel[4].Name, "SM.Initial");
 			Assert.AreEqual(sm.godel[4].controlOnly, false);
 			Assert.AreEqual(sm.godel[4].inv, "1 == 1");
 			Assert.AreEqual(sm.godel[4].pre, "2 == 2");
 			Assert.AreEqual(sm.godel[4].post, "3 == 3");
 
-			Assert.AreEqual(sm.godel[5].name, "SM");
+			Assert.AreEqual(sm.godel[5].Name, "SM");
 			Assert.AreEqual(sm.godel[5].controlOnly, false);
 			Assert.AreEqual(sm.godel[5].inv, "1 == 1");
 			Assert.AreEqual(sm.godel[5].pre, "5 == 5");

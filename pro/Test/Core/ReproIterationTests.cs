@@ -88,7 +88,7 @@ namespace Peach.Pro.Test.Core
 				if (faultIter.StartsWith("C"))
 				{
 					if (ctx.controlIteration && it == int.Parse(faultIter.Substring(1)) && (!ctx.reproducingFault || repro))
-						ctx.agentManager.Message("Fault", new Variant("true"));
+						ctx.agentManager.Message("Fault");
 				}
 			};
 

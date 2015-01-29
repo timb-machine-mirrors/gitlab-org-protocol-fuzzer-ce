@@ -258,7 +258,7 @@ namespace Peach.Pro.Test.Core.StateModel
 			engine.startFuzzing(dom, config);
 
 			var actionData = dom.tests[0].stateModel.states["initial"].actions[2].allData.First();
-			Assert.AreEqual("Field2", actionData.selectedData.name);
+			Assert.AreEqual("Field2", actionData.selectedData.Name);
 			var dm = actionData.dataModel;
 			var val = Encoding.ASCII.GetString(dm.Value.ToArray());
 

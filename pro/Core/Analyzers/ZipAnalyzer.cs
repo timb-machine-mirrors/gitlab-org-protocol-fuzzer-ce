@@ -77,7 +77,7 @@ namespace Peach.Pro.Core.Analyzers
 
 			try
 			{
-				var block = new Block(blob.name);
+				var block = new Block(blob.Name);
 
 				using (var zip = ZipFile.Read(data))
 				{
@@ -113,7 +113,7 @@ namespace Peach.Pro.Core.Analyzers
 					}
 				}
 
-				root[blob.name] = block;
+				root[blob.Name] = block;
 			}
 			catch (PeachException)
 			{
@@ -136,7 +136,7 @@ namespace Peach.Pro.Core.Analyzers
 					if (other == null)
 						throw new PeachException("Error, Could not resolve ref'd data model.");
 
-					logger.Debug("Resolved entry '{0}' to data model '{1}'.", fileName, other.name);
+					logger.Debug("Resolved entry '{0}' to data model '{1}'.", fileName, other.Name);
 
 					return (DataElementContainer)other.Clone("Content");
 

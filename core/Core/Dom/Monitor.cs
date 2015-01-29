@@ -40,8 +40,15 @@ namespace Peach.Core.Dom
 	[Serializable]
 	public class Monitor : INamed
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
 		public string cls;
-		public string name { get; set; }
+		public string Name { get; set; }
 		public Dictionary<string, Variant> parameters = new Dictionary<string, Variant>();
 	}
 

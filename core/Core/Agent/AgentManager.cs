@@ -50,24 +50,22 @@ namespace Peach.Core.Agent
 			agents = new OwnedCollection<AgentManager,AgentClient>(this);
 
 			Context = context;
-
-			context.CollectFaults += OnCollectFaults;
 		}
 
 		public void AgentConnect(Dom.Agent agentDef)
 		{
-			logger.Trace("AgentConnect: {0}", agentDef.name);
+			logger.Trace("AgentConnect: {0}", agentDef.Name);
 
 			AgentClient agent;
 
-			if (!agents.TryGetValue(agentDef.name, out agent))
+			if (!agents.TryGetValue(agentDef.Name, out agent))
 			{
 				var uri = new Uri(agentDef.location);
 				var type = ClassLoader.FindTypeByAttribute<AgentAttribute>((x, y) => y.protocol == uri.Scheme);
 				if (type == null)
 					throw new PeachException("Error, unable to locate agent that supports the '" + uri.Scheme + "' protocol.");
 
-				agent = Activator.CreateInstance(type, agentDef.name, agentDef.location, agentDef.password) as AgentClient;
+				agent = Activator.CreateInstance(type, agentDef.Name, agentDef.location, agentDef.password) as AgentClient;
 
 				agents.Add(agent);
 			}
@@ -87,8 +85,8 @@ namespace Peach.Core.Agent
 
 			foreach (var mon in agentDef.monitors)
 			{
-				logger.Trace("StartMonitor: {0} {1} {2}", agentDef.name, mon.name, mon.cls);
-				agent.StartMonitor(mon.name, mon.cls, mon.parameters);
+				logger.Trace("StartMonitor: {0} {1} {2}", agentDef.Name, mon.Name, mon.cls);
+				agent.StartMonitor(mon.Name, mon.cls, mon.parameters);
 			}
 		}
 
@@ -97,13 +95,13 @@ namespace Peach.Core.Agent
 			return agents[name];
 		}
 
-		void OnCollectFaults(RunContext context)
+		public void CollectFaults()
 		{
 			// If the engine has recorded faults or any monitor detected a fault,
 			// gather data from all monitors.
 			// NOTE: We must test DetectedFault() first, as monitors expect this
 			// call to occur before any call to GetMonitorData()
-			if (DetectedFault() || context.faults.Count > 0)
+			if (DetectedFault() || Context.faults.Count > 0)
 			{
 				logger.Debug("Fault detected.  Collecting monitor data.");
 
@@ -118,8 +116,8 @@ namespace Peach.Core.Agent
 						if (fault == null)
 							continue;
 
-						fault.agentName = item.Key.name;
-						context.faults.Add(fault);
+						fault.agentName = item.Key.Name;
+						Context.faults.Add(fault);
 					}
 				}
 			}
@@ -200,21 +198,17 @@ namespace Peach.Core.Agent
 			}
 		}
 
-		public virtual bool IterationFinished()
+		public virtual void IterationFinished()
 		{
 			logger.Trace("IterationFinished");
-
-			var ret = false;
 
 			foreach (var agent in agents.Reverse())
 			{
 				Guard("IterationFinished", () =>
 				{
-					ret |= agent.IterationFinished();
+					agent.IterationFinished();
 				});
 			}
-
-			return ret;
 		}
 
 		public virtual bool DetectedFault()
@@ -268,26 +262,20 @@ namespace Peach.Core.Agent
 			return ret;
 		}
 
-		public virtual Variant Message(string name, Variant data)
+		public virtual void Message(string msg)
 		{
-			logger.Debug("Message: {0} => {1}", name, data.ToString());
-
-			Variant ret = null;
+			logger.Debug("Message: {0}", msg);
 
 			foreach (var agent in agents)
 			{
 				Guard("Message", () =>
 				{
-					var tmp = agent.Message(name, data);
-					if (tmp != null)
-						ret = tmp;
+					agent.Message(msg);
 				});
 			}
-
-			return ret;
 		}
 
-		private static void Guard(string what, System.Action action)
+		private static void Guard(string what, Action action)
 		{
 			try
 			{
