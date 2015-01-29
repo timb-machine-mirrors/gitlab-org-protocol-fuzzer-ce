@@ -40,6 +40,13 @@ namespace Peach.Core.Dom
 	// TODO: Old XSD defines <PythonPath> and <Import> children
 	public class Agent : INamed
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
 		public Agent()
 		{
 			platform = Platform.OS.All;
@@ -49,8 +56,8 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// Name of agent. May not contain spaces or periods (.).
 		/// </summary>
-		[XmlAttribute]
-		public string name { get; set; }
+		[XmlAttribute("name")]
+		public string Name { get; set; }
 
 		/// <summary>
 		/// Specify location of agent. Value is "&lt;channel%gt;://&lt;hostname&gt;" where

@@ -302,7 +302,7 @@ namespace Peach.Pro.Core.Agent.Channels
 			for (int cnt = 0; cnt < args.Count; cnt++)
 			{
 				request.args[cnt] = new OnCallArgument();
-				request.args[cnt].name = args[cnt].name;
+				request.args[cnt].name = args[cnt].Name;
 				request.args[cnt].type = args[cnt].type;
 				request.args[cnt].data = new byte[args[cnt].dataModel.Value.Length];
 				args[cnt].dataModel.Value.Read(request.args[cnt].data, 0, (int)args[cnt].dataModel.Value.Length);
@@ -656,10 +656,9 @@ namespace Peach.Pro.Core.Agent.Channels
 			Send("IterationStarting?iterationCount=" + iterationCount.ToString() + "&" + "isReproduction=" + isReproduction.ToString());
 		}
 
-		protected override bool OnIterationFinished()
+		protected override void OnIterationFinished()
 		{
-			var json = Send("IterationFinished");
-			return ParseResponse(json);
+			Send("IterationFinished");
 		}
 
 		protected override bool OnDetectedFault()
@@ -690,7 +689,7 @@ namespace Peach.Pro.Core.Agent.Channels
 			return ParseResponse(json);
 		}
 
-		protected override Variant OnMessage(string name, Variant data)
+		protected override void OnMessage(string msg)
 		{
 			throw new NotImplementedException();
 		}

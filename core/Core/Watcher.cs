@@ -156,7 +156,7 @@ namespace Peach.Core
 		{
 		}
 
-		protected virtual void Agent_Message(RunContext context, AgentClient agent, string name, Variant data)
+		protected virtual void Agent_Message(RunContext context, AgentClient agent, string msg)
 		{
 		}
 

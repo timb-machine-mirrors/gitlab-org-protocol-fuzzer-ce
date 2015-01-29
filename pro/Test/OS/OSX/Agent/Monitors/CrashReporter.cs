@@ -20,7 +20,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			// ProcessName argument not provided to the monitor
 			// When no crashing program is run, the monitor should not detect a fault
 
-			var args = new Dictionary<string, Variant>();
+			var args = new Dictionary<string, string>();
 			const string peach = "";
 			const bool shouldFault = false;
 
@@ -33,7 +33,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			// ProcessName argument not provided to the monitor
 			// When crashing program is run, the monitor should detect a fault
 
-			var args = new Dictionary<string, Variant>();
+			var args = new Dictionary<string, string>();
 			const string peach = "qwertyuiopasdfghjklzxcvbnm";
 			const bool shouldFault = true;
 
@@ -54,8 +54,10 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			// Correct ProcessName argument is provided to the monitor
 			// When crashing program is run, the monitor should detect a fault
 
-			var args = new Dictionary<string, Variant>();
-			args["ProcessName"] = new Variant("CrashingProgram");
+			var args = new Dictionary<string, string>
+			{
+				{ "ProcessName", "CrashingProgram" },
+			};
 			const string peach = "qwertyuiopasdfghjklzxcvbnm";
 			const bool shouldFault = true;
 
@@ -76,17 +78,20 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			// Incorrect ProcessName argument is provided to the monitor
 			// When crashing program is run, the monitor should not detect a fault
 
-			var args = new Dictionary<string, Variant>();
-			args["ProcessName"] = new Variant("WrongCrashingProgram");
+			var args = new Dictionary<string, string>
+			{
+				{ "ProcessName", "WrongCrashingProgram" },
+			};
 			const string peach = "qwertyuiopasdfghjklzxcvbnm";
 			const bool shouldFault = false;
 
 			RunProcess(peach, CrashingProcess, shouldFault, args);
 		}
 
-		private static Fault RunProcess(string peach, string process, bool shouldFault, Dictionary<string, Variant> args)
+		private static Fault RunProcess(string peach, string process, bool shouldFault, Dictionary<string, string> args)
 		{
-			var reporter = new CrashReporter(null, "name", args);
+			var reporter = new CrashReporter(null);
+			reporter.StartMonitor(args);
 			reporter.SessionStarting();
 			reporter.IterationStarting(0, false);
 			if (process != null)

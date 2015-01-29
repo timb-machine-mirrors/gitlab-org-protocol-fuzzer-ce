@@ -1,8 +1,4 @@
-<<<
 [[Data]]
-
-// Update - 04/04/2014
-//  Lynn: Major edits
 
 == Data
 

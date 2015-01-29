@@ -76,10 +76,9 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		long workerCount = 0;
 		Fault _fault = null;
 
-		public PopupWatcher(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public PopupWatcher(string name)
+			: base(name)
 		{
-			ParameterParser.Parse(this, args);
 		}
 
 		bool EnumHandler(IntPtr hWnd, IntPtr lParam)
@@ -135,7 +134,15 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			}
 		}
 
-		public override void StopMonitor()
+		public override void SessionStarting()
+		{
+			_event = new ManualResetEvent(false);
+
+			_worker = new Thread(Work);
+			_worker.Start();
+		}
+
+		public override void SessionFinished()
 		{
 			if (_worker != null)
 			{
@@ -149,21 +156,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			}
 		}
 
-		public override void SessionStarting()
-		{
-			StopMonitor();
-
-			_event = new ManualResetEvent(false);
-
-			_worker = new Thread(new ThreadStart(Work));
-			_worker.Start();
-		}
-
-		public override void SessionFinished()
-		{
-			StopMonitor();
-		}
-
 		public override bool DetectedFault()
 		{
 			return _fault != null && _fault.type == FaultType.Fault;
@@ -175,7 +167,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			Interlocked.Exchange(ref workerCount, 0);
 		}
 
-		public override bool IterationFinished()
+		public override void IterationFinished()
 		{
 			_fault = null;
 
@@ -202,23 +194,11 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 				_closedWindows.Clear();
 			}
-
-			return false;
 		}
 
 		public override Fault GetMonitorData()
 		{
 			return _fault;
-		}
-
-		public override bool MustStop()
-		{
-			return false;
-		}
-
-		public override Variant Message(string name, Variant data)
-		{
-			return null;
 		}
 	}
 }

@@ -415,9 +415,9 @@ namespace Peach.Pro.Test.Core
 				history.Add(i);
 
 				if (!ctx.reproducingFault && (i == args.Fault || i == args.Initial))
-					ctx.agentManager.Message("Fault", new Variant("true"));
+					ctx.agentManager.Message("Fault");
 				else if (ctx.reproducingFault && (i == args.Repro || j == args.Repro || i == args.InitialRepro || j == args.InitialRepro))
-					ctx.agentManager.Message("Fault", new Variant("true"));
+					ctx.agentManager.Message("Fault");
 			};
 
 			e.IterationFinished += (ctx, it) => sw.Restart();

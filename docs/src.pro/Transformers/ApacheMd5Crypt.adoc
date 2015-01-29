@@ -1,6 +1,6 @@
 <<<
 [[Transformers_ApacheMd5Crypt]]
-=== ApacheMd5Crypt
+== ApacheMd5Crypt
 
 // Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined

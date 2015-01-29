@@ -48,7 +48,9 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 		[Test]
 		public void TestNoWindow()
 		{
-			var ex = Assert.Throws<PeachException>(() => new PopupWatcher(null, null, new Dictionary<string, Variant>()));
+			var mon = new PopupWatcher(null);
+			var ex = Assert.Throws<PeachException>(() =>
+				mon.StartMonitor(new Dictionary<string, string>()));
 			Assert.AreEqual("Monitor 'PopupWatcher' is missing required parameter 'WindowNames'.", ex.Message);
 		}
 

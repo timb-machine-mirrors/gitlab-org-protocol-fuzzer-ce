@@ -113,6 +113,13 @@ namespace Peach.Core.Dom
 	/// </summary>
 	public class Test : INamed, IOwned<Dom>
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
 		/// <summary>
 		/// Defines the lifetime of the fuzzing target.
 		/// </summary>
@@ -136,8 +143,8 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// Name of test case.
 		/// </summary>
-		[XmlAttribute]
-		public string name { get; set; }
+		[XmlAttribute("name")]
+		public string Name { get; set; }
 
 		/// <summary>
 		/// Description of test case.

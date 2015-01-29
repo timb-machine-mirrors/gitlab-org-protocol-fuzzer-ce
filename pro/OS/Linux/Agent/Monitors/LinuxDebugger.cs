@@ -459,10 +459,14 @@ quit
 		public string WaitForExitOnCall { get; private set; }
 		public int WaitForExitTimeout { get; private set; }
 
-		public LinuxDebugger(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public LinuxDebugger(string name)
+			: base(name)
 		{
-			ParameterParser.Parse(this, args);
+		}
+
+		public override void StartMonitor(Dictionary<string, string> args)
+		{
+			base.StartMonitor(args);
 
 			_exploitable = FindExploitable();
 		}
@@ -774,16 +778,6 @@ quit
 			return _fault;
 		}
 
-		public override bool MustStop()
-		{
-			return false;
-		}
-
-		public override void StopMonitor()
-		{
-			_Stop();
-		}
-
 		public override void SessionStarting()
 		{
 			_tmpPath = MakeTempDir();
@@ -807,7 +801,7 @@ quit
 			Directory.Delete(_tmpPath, true);
 		}
 
-		public override bool IterationFinished()
+		public override void IterationFinished()
 		{
 			if (!_messageExit && FaultOnEarlyExit && !_IsRunning())
 			{
@@ -823,25 +817,21 @@ quit
 			{
 				_Stop();
 			}
-
-			return true;
 		}
 
-		public override Variant Message(string name, Variant data)
+		public override void Message(string msg)
 		{
-			if (name == "Action.Call" && ((string)data) == StartOnCall)
+			if (msg == StartOnCall)
 			{
 				_Stop();
 				_Start();
 			}
-			else if (name == "Action.Call" && ((string)data) == WaitForExitOnCall)
+			else if (msg == WaitForExitOnCall)
 			{
 				_messageExit = true;
 				_WaitForExit(false);
 				_Stop();
 			}
-
-			return null;
 		}
 	}
 }

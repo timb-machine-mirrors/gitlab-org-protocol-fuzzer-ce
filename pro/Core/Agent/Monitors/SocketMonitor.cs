@@ -16,30 +16,35 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Parameter("Protocol", typeof(Proto), "Protocol type to listen for", "tcp")]
 	[Parameter("Port", typeof(ushort), "Port to listen on", "8080")]
 	[Parameter("FaultOnSuccess", typeof(bool), "Fault if no connection is recorded", "false")]
-	public class SocketMonitor : Peach.Core.Agent.Monitor
+	public class SocketMonitor : Monitor
 	{
 		public enum Proto { Udp = ProtocolType.Udp, Tcp = ProtocolType.Tcp }
 
-		public IPAddress    Host           { get; private set; }
-		public int          Timeout        { get; private set; }
-		public IPAddress    Interface      { get; private set; }
-		public Proto        Protocol       { get; private set; }
-		public ushort       Port           { get; private set; }
-		public int          Backlog        { get; private set; }
-		public bool         FaultOnSuccess { get; private set; }
+		public IPAddress    Host           { get; set; }
+		public int          Timeout        { get; set; }
+		public IPAddress    Interface      { get; set; }
+		public Proto        Protocol       { get; set; }
+		public ushort       Port           { get; set; }
+		public int          Backlog        { get; set; }
+		public bool         FaultOnSuccess { get; set; }
 
 		private const int TcpBlockSize = 1024;
 		private const int MaxDgramSize = 65000;
-		private MemoryStream _recvBuffer = new MemoryStream();
 
-		private Socket _socket = null;
-		private Fault _fault = null;
-		private bool _multicast = false;
+		private readonly MemoryStream _recvBuffer = new MemoryStream();
 
-		public SocketMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		private Socket _socket;
+		private Fault _fault;
+		private bool _multicast;
+
+		public SocketMonitor(string name)
+			: base(name)
 		{
-			ParameterParser.Parse(this, args);
+		}
+
+		public override void StartMonitor(Dictionary<string, string> args)
+		{
+			base.StartMonitor(args);
 
 			if (Host != null)
 			{
@@ -51,32 +56,22 @@ namespace Peach.Pro.Core.Agent.Monitors
 				if (_multicast && Protocol != Proto.Udp)
 					throw new PeachException("Multicast hosts are not supported with the tcp protocol.");
 			}
+
+			OpenSocket();
 		}
 
 		#region Monitor Interface
 
-		public override void SessionStarting()
+		public override void IterationFinished()
 		{
-			OpenSocket();
-		}
+			_fault = new Fault
+			{
+				detectionSource = "SocketMonitor",
+				folderName = "SocketMonitor",
+				title = "Monitoring " + _socket.LocalEndPoint
+			};
 
-		public override void SessionFinished()
-		{
-			StopMonitor();
-		}
-
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
-		{
-		}
-
-		public override bool IterationFinished()
-		{
-			_fault = new Fault();
-			_fault.detectionSource = "SocketMonitor";
-			_fault.folderName = "SocketMonitor";
-			_fault.title = "Monitoring " + _socket.LocalEndPoint.ToString();
-
-			Tuple<IPEndPoint, byte[]> data = ReadSocket();
+			var data = ReadSocket();
 			if (data != null)
 			{
 				_fault.description = string.Format("Received {0} bytes from '{1}'.", data.Item2.Length, data.Item1);
@@ -88,23 +83,11 @@ namespace Peach.Pro.Core.Agent.Monitors
 				_fault.description = "No connections recorded.";
 				_fault.type = FaultOnSuccess ? FaultType.Fault : FaultType.Data;
 			}
-			
-			return false;
 		}
 
 		public override void StopMonitor()
 		{
 			CloseSocket();
-		}
-
-		public override bool MustStop()
-		{
-			return false;
-		}
-
-		public override Variant Message(string name, Variant data)
-		{
-			return null;
 		}
 
 		public override bool DetectedFault()

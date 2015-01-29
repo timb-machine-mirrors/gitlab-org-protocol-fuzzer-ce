@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text.RegularExpressions;
 using NLog;
 using Peach.Core;
@@ -13,7 +12,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Description("Launches the specified command to perform a utility function")]
 	[Parameter("Command", typeof(string), "Command line command to run")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
-	[Parameter("When", typeof(When), "Period _When the command should be ran (OnCall, OnStart, OnEnd, OnIterationStart, OnIterationEnd, OnFault, OnIterationStartAfterFault)", "OnCall")]
+	[Parameter("When", typeof(MonitorWhen), "Period _When the command should be ran (OnCall, OnStart, OnEnd, OnIterationStart, OnIterationEnd, OnFault, OnIterationStartAfterFault)", "OnCall")]
 	[Parameter("StartOnCall", typeof(string), "Run when signaled by the state machine", "")]
 	[Parameter("FaultOnExitCode", typeof(bool), "Fault when FaultExitCode matches exit code", "false")]
 	[Parameter("FaultExitCode", typeof(int), "Exit code to fault on", "1")]
@@ -23,34 +22,37 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Parameter("Timeout", typeof(int), "Fault if process takes more than Timeout seconds where -1 is infinite timeout ", "-1")]
 	public class RunCommand  : Monitor
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		public string Command { get; private set; }
-		public string Arguments { get; private set; }
-		public string StartOnCall { get; private set; }
-		public When _When { get; private set; }
-		public string CheckValue { get; protected set; }
-		public int Timeout { get; private set; }
-		public bool FaultOnNonZeroExit { get; protected set; }
-		public int FaultExitCode { get; protected set; }
-		public bool FaultOnExitCode { get; protected set; }
-		public string FaultOnRegex { get; protected set; }
-		public bool AddressSanitizer { get; protected set; }
+		public string Command { get; set; }
+		public string Arguments { get; set; }
+		public string StartOnCall { get; set; }
+		public MonitorWhen When { get; set; }
+		public string CheckValue { get; set; }
+		public int Timeout { get; set; }
+		public bool FaultOnNonZeroExit { get; set; }
+		public int FaultExitCode { get; set; }
+		public bool FaultOnExitCode { get; set; }
+		public string FaultOnRegex { get; set; }
+		public bool AddressSanitizer { get; set; }
 
-		readonly Regex asanMatch = new Regex(@"==\d+==ERROR: AddressSanitizer:");
-		readonly Regex asanBucket = new Regex(@"==\d+==ERROR: AddressSanitizer: ([^\s]+) on address ([0-9a-z]+) at pc ([0-9a-z]+)");
-		readonly Regex asanMessage = new Regex(@"(==\d+==ERROR: AddressSanitizer:.*==\d+==ABORTING)");
-		readonly Regex asanTitle = new Regex(@"==\d+==ERROR: AddressSanitizer: ([^\r\n]+)");
+		static readonly Regex AsanMatch = new Regex(@"==\d+==ERROR: AddressSanitizer:");
+		static readonly Regex AsanBucket = new Regex(@"==\d+==ERROR: AddressSanitizer: ([^\s]+) on address ([0-9a-z]+) at pc ([0-9a-z]+)");
+		static readonly Regex AsanMessage = new Regex(@"(==\d+==ERROR: AddressSanitizer:.*==\d+==ABORTING)");
+		static readonly Regex AsanTitle = new Regex(@"==\d+==ERROR: AddressSanitizer: ([^\r\n]+)");
 
-		Regex _faulOnRegex = null;
+		private Regex _faulOnRegex;
+		private Fault _fault;
+		private bool _lastWasFault;
 
-		private Fault _fault = null;
-		private bool _lastWasFault = false;
-
-		public RunCommand(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public RunCommand(string name)
+			: base(name)
 		{
-			ParameterParser.Parse(this, args);
+		}
+
+		public override void StartMonitor(Dictionary<string, string> args)
+		{
+			base.StartMonitor(args);
 
 			if (!string.IsNullOrWhiteSpace(FaultOnRegex))
 				_faulOnRegex = new Regex(FaultOnRegex);
@@ -60,14 +62,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 		{
 			_fault = null;
 
-			var startInfo = new ProcessStartInfo();
-			startInfo.FileName = Command;
-			startInfo.UseShellExecute = false;
-			startInfo.Arguments = Arguments;
-			startInfo.RedirectStandardOutput = true;
-			startInfo.RedirectStandardError = true;
-
-			logger.Debug("_Start(): Running command " + Command + " with arguments " + Arguments);
+			Logger.Debug("_Start(): Running command " + Command + " with arguments " + Arguments);
 
 			try
 			{
@@ -76,9 +71,12 @@ namespace Peach.Pro.Core.Agent.Monitors
 				var stdout = p.StdOut.ToString();
 				var stderr = p.StdErr.ToString();
 
-				_fault = new Fault();
-				_fault.detectionSource = "RunCommand";
-				_fault.folderName = "RunCommand";
+				_fault = new Fault
+				{
+					detectionSource = "RunCommand",
+					folderName = "RunCommand"
+				};
+
 				_fault.collectedData.Add(new Fault.Data("stdout", System.Text.Encoding.ASCII.GetBytes(stdout)));
 				_fault.collectedData.Add(new Fault.Data("stderr", System.Text.Encoding.ASCII.GetBytes(stderr)));
 
@@ -110,20 +108,20 @@ namespace Peach.Pro.Core.Agent.Monitors
 						_fault.type = FaultType.Fault;
 					}
 				}
-				else if (AddressSanitizer && asanMatch.IsMatch(stderr))
+				else if (AddressSanitizer && AsanMatch.IsMatch(stderr))
 				{
 					_fault.type = FaultType.Fault;
 					_fault.folderName = null;
 
-					var match = asanBucket.Match(stderr);
+					var match = AsanBucket.Match(stderr);
 					_fault.exploitability = match.Groups[1].Value;
 					_fault.majorHash = match.Groups[3].Value;
 					_fault.minorHash = match.Groups[2].Value;
 
-					match = asanTitle.Match(stderr);
+					match = AsanTitle.Match(stderr);
 					_fault.title = match.Groups[1].Value;
 
-					match = asanMessage.Match(stderr);
+					match = AsanMessage.Match(stderr);
 					_fault.description = stderr.Substring(match.Groups[1].Index, match.Groups[1].Length);
 				}
 				else
@@ -144,7 +142,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			bool lastWasFault = _lastWasFault;
 			_lastWasFault = false;
 
-			if (_When == When.OnIterationStart || (lastWasFault && _When == When.OnIterationStartAfterFault))
+			if (When == MonitorWhen.OnIterationStart || (lastWasFault && When == MonitorWhen.OnIterationStartAfterFault))
 				_Start();
 		}
 
@@ -158,48 +156,34 @@ namespace Peach.Pro.Core.Agent.Monitors
 			// Some monitor triggered a fault
 			_lastWasFault = true;
 
-			if (_When == When.OnFault)
+			if (When == MonitorWhen.OnFault)
 				_Start();
 
 			return _fault;
 		}
 
-		public override bool MustStop()
-		{
-			return false;
-		}
-
-		public override void StopMonitor()
-		{
-			return;
-		}
-
 		public override void SessionStarting()
 		{
-			if (_When == When.OnStart)
+			if (When == MonitorWhen.OnStart)
 				_Start();
 		}
 
 		public override void SessionFinished()
 		{
-			if (_When == When.OnEnd)
+			if (When == MonitorWhen.OnEnd)
 				_Start();
 		}
 
-		public override bool IterationFinished()
+		public override void IterationFinished()
 		{
-			if (_When == When.OnIterationEnd)
+			if (When == MonitorWhen.OnIterationEnd)
 				_Start();
-
-			return true;
 		}
 
-		public override Variant Message(string name, Variant data)
+		public override void Message(string msg)
 		{
-			if (name == "Action.Call" && ((string)data) == StartOnCall && _When == When.OnCall)
+			if (msg == StartOnCall && When == MonitorWhen.OnCall)
 				_Start();
-
-			return null;
 		}
 	}
 }

@@ -97,9 +97,15 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		Thread _ipcHeartBeatThread = null;
 		System.Threading.Mutex _ipcHeartBeatMutex = null;
 
-		public WindowsDebuggerHybrid(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public WindowsDebuggerHybrid(string name)
+			: base(name)
 		{
+		}
+
+		public override void StartMonitor(Dictionary<string, string> args)
+		{
+			// TODO: base.StartMonitor(args)
+
 			//var color = Console.ForegroundColor;
 			if (!Environment.Is64BitProcess && Environment.Is64BitOperatingSystem)
 			{
@@ -277,21 +283,19 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			return null;
 		}
 
-		public override Variant Message(string name, Variant data)
+		public override void Message(string msg)
 		{
-			if (name == "Action.Call" && ((string)data) == _startOnCall)
+			if (msg == _startOnCall)
 			{
 				_StopDebugger();
 				_StartDebugger();
 			}
-			else if (name == "Action.Call" && ((string)data) == _waitForExitOnCall)
+			else if (msg == _waitForExitOnCall)
 			{
 				_stopMessage = true;
 				_WaitForExit(false);
 				_StopDebugger();
 			}
-
-			return null;
 		}
 
 		public override void StopMonitor()
@@ -332,7 +336,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				_StartDebugger();
 		}
 
-		public override bool IterationFinished()
+		public override void IterationFinished()
 		{
 			if (!_stopMessage && _faultOnEarlyExit && !_IsDebuggerRunning())
 			{
@@ -348,8 +352,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			{
 				_StopDebugger();
 			}
-
-			return false;
 		}
 
 		public override bool DetectedFault()

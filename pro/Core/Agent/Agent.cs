@@ -117,16 +117,17 @@ namespace Peach.Pro.Core.Agent
 
 			try
 			{
-				var mon = (Monitor)Activator.CreateInstance(type, (IAgent)this, name, args);
+				var mon = (Monitor)Activator.CreateInstance(type, name);
+				mon.StartMonitor(args.ToDictionary(kv => kv.Key, kv => (string)kv.Value));
 				monitors.Add(mon);
 			}
-			catch (TargetInvocationException ex)
+			catch (Exception ex)
 			{
 				var baseEx = ex.GetBaseException();
 				if (baseEx is ThreadAbortException)
 					throw baseEx;
 
-				throw new PeachException("Could not start monitor \"" + cls + "\".  " + ex.InnerException.Message, ex);
+				throw new PeachException("Could not start monitor \"" + cls + "\".  " + ex.Message, ex);
 			}
 		}
 
@@ -175,21 +176,17 @@ namespace Peach.Pro.Core.Agent
 			}
 		}
 
-		public bool IterationFinished()
+		public void IterationFinished()
 		{
 			logger.Trace("IterationFinished");
-
-			var replay = false;
 
 			foreach (var mon in monitors.Reverse<Monitor>())
 			{
 				Guard(mon, "IterationFinished", () =>
 				{
-					replay |= mon.IterationFinished();
+					mon.IterationFinished();
 				});
 			}
-
-			return replay;
 		}
 
 		public bool DetectedFault()
@@ -253,20 +250,12 @@ namespace Peach.Pro.Core.Agent
 			return mustStop;
 		}
 
-		public Variant Message(string name, Variant data)
+		public void Message(string msg)
 		{
-			logger.Trace("Message: {0}", name);
-
-			Variant ret = null;
+			logger.Trace("Message: {0}", msg);
 
 			foreach (var monitor in monitors)
-			{
-				var tmp = monitor.Message(name, data);
-				if (tmp != null)
-					ret = tmp;
-			}
-
-			return ret;
+				monitor.Message(msg);
 		}
 
 		#endregion

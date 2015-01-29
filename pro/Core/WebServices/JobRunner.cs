@@ -172,7 +172,7 @@ namespace Peach.Pro.Core.WebServices
 				Status = JobStatus.Running,
 				PitUrl = string.Empty,
 				HasMetrics = dom.tests
-					.Where(t => t.name == config.runName)
+					.Where(t => t.Name == config.runName)
 					.SelectMany(t => t.loggers)
 					.Where(l => l is MetricsLogger)
 					.Any(),
