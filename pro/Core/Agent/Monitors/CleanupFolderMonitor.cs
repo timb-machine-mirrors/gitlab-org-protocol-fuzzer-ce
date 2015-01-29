@@ -29,7 +29,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			_folderListing = GetListing();
 		}
 
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
+		public override void IterationStarting(IterationStartingArgs args)
 		{
 			var toDel = GetListing().Except(_folderListing);
 

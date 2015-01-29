@@ -43,7 +43,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		private Regex _faulOnRegex;
 		private Fault _fault;
-		private bool _lastWasFault;
 
 		public RunCommand(string name)
 			: base(name)
@@ -136,13 +135,10 @@ namespace Peach.Pro.Core.Agent.Monitors
 			}
 		}
 
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
+		public override void IterationStarting(IterationStartingArgs args)
 		{
-			// Sync _lastWasFault incase _Start() throws
-			bool lastWasFault = _lastWasFault;
-			_lastWasFault = false;
-
-			if (When == MonitorWhen.OnIterationStart || (lastWasFault && When == MonitorWhen.OnIterationStartAfterFault))
+			if (When == MonitorWhen.OnIterationStart ||
+				(args.LastWasFault && When == MonitorWhen.OnIterationStartAfterFault))
 				_Start();
 		}
 
@@ -153,9 +149,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		public override Fault GetMonitorData()
 		{
-			// Some monitor triggered a fault
-			_lastWasFault = true;
-
 			if (When == MonitorWhen.OnFault)
 				_Start();
 

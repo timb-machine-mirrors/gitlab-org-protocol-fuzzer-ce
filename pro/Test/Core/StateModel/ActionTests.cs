@@ -405,8 +405,8 @@ namespace Peach.Pro.Test.Core.StateModel
 			string xml = @"
 <Peach>
 	<Agent name='myAgent'>
-		<Monitor name='mon' class='FaultingMonitor'/>
-		<Monitor name='mon' class='FaultingMonitor'/>
+		<Monitor name='mon' class='Null'/>
+		<Monitor name='mon' class='Null'/>
 	</Agent>
 </Peach>
 ";
@@ -523,15 +523,15 @@ namespace Peach.Pro.Test.Core.StateModel
 	</DataModel>
 
 	<Agent name='MyAgent'>
-		<Monitor class='FaultingMonitor'/>
-		<Monitor class='FaultingMonitor'/>
-		<Monitor class='FaultingMonitor'/>
+		<Monitor class='Null'/>
+		<Monitor class='Null'/>
+		<Monitor class='Null'/>
 	</Agent>
 
 	<Agent name='MyAgent2'>
-		<Monitor class='FaultingMonitor'/>
-		<Monitor class='FaultingMonitor'/>
-		<Monitor class='FaultingMonitor'/>
+		<Monitor class='Null'/>
+		<Monitor class='Null'/>
+		<Monitor class='Null'/>
 	</Agent>
 
 	<StateModel name='SM' initialState='Initial'>

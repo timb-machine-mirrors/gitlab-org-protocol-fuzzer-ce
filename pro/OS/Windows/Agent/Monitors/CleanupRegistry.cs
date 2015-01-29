@@ -71,7 +71,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			Key = Key.Substring(Key.IndexOf("\\", System.StringComparison.Ordinal) + 1);
 		}
 
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
+		public override void IterationStarting(IterationStartingArgs args)
 		{
 			if (!ChildrenOnly)
 			{

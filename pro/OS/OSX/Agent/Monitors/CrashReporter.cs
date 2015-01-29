@@ -131,7 +131,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			return ret.ToArray();
 		}
 
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
+		public override void IterationStarting(IterationStartingArgs args)
 		{
 			this._crashLogs = null;
 		}

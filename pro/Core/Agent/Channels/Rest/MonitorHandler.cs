@@ -150,11 +150,16 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			private RouteResponse OnIterationStarting(HttpListenerRequest req)
 			{
-				var args = req.FromJson<IterationStartingRequest>();
+				var json = req.FromJson<IterationStartingRequest>();
+				var args = new IterationStartingArgs
+				{
+					IsReproduction = json.IsReproduction,
+					LastWasFault = json.LastWasFault
+				};
 
 				foreach (var mon in _monitors)
 				{
-					mon.IterationStarting(args.Iteration, args.IsReproduction);
+					mon.IterationStarting(args);
 				}
 
 				return RouteResponse.Success();

@@ -9,69 +9,6 @@ namespace Peach.Core.Test
 {
 	public class MonitorRunner
 	{
-		class Agent : IAgent
-		{
-			public void AgentConnect()
-			{
-				throw new NotImplementedException();
-			}
-
-			public void AgentDisconnect()
-			{
-				throw new NotImplementedException();
-			}
-
-			public void StartMonitor(string name, string cls, IEnumerable<KeyValuePair<string, Variant>> args)
-			{
-				throw new NotImplementedException();
-			}
-
-			public void StopAllMonitors()
-			{
-				throw new NotImplementedException();
-			}
-
-			public void SessionStarting()
-			{
-				throw new NotImplementedException();
-			}
-
-			public void SessionFinished()
-			{
-				throw new NotImplementedException();
-			}
-
-			public void IterationStarting(uint iterationCount, bool isReproduction)
-			{
-				throw new NotImplementedException();
-			}
-
-			public void IterationFinished()
-			{
-				throw new NotImplementedException();
-			}
-
-			public bool DetectedFault()
-			{
-				throw new NotImplementedException();
-			}
-
-			public Fault[] GetMonitorData()
-			{
-				throw new NotImplementedException();
-			}
-
-			public bool MustStop()
-			{
-				throw new NotImplementedException();
-			}
-
-			public void Message(string msg)
-			{
-				throw new NotImplementedException();
-			}
-		}
-
 		/// <summary>
 		/// Controls the SessionStarting behaviour for each monitor.
 		/// The default is m => m.SessionStarting()
@@ -80,9 +17,9 @@ namespace Peach.Core.Test
 
 		/// <summary>
 		/// Controls the IterationStarting behaviour for each monitor.
-		/// The default is (m, it, repro) => m.IterationFinished(it, repro)
+		/// The default is (m, args) => m.IterationFinished(repro, args)
 		/// </summary>
-		public Action<Monitor, uint, bool> IterationStarting { get; set; }
+		public Action<Monitor, IterationStartingArgs> IterationStarting { get; set; }
 
 		/// <summary>
 		/// Controls the Message behaviour for each monitor.
@@ -137,11 +74,10 @@ namespace Peach.Core.Test
 
 		public MonitorRunner()
 		{
-			_agent = new Agent();
 			_monitors = new List<Monitor>();
 
 			SessionStarting = m => m.SessionStarting();
-			IterationStarting = (m, it, repro) => m.IterationStarting(it, repro);
+			IterationStarting = (m, args) => m.IterationStarting(args);
 			Message = m => { };
 			IterationFinished = m => m.IterationFinished();
 			DetectedFault = m => m.DetectedFault();
@@ -188,14 +124,21 @@ namespace Peach.Core.Test
 			// Only difference is this doesn't eat any exceptions.
 
 			var ret = new List<Fault>();
+			var lastWasFault = false;
 
 			Forward.ForEach(m => SessionStarting(m));
 
 			for (uint i = 1; i <= iterations; ++i)
 			{
-				var it = i; // Capture variable for IterationStarting closure
+				var args = new IterationStartingArgs
+				{
+					IsReproduction = false,
+					LastWasFault = lastWasFault
+				};
 
-				Forward.ForEach(m => IterationStarting(m, it, false));
+				lastWasFault = false;
+
+				Forward.ForEach(m => IterationStarting(m, args));
 
 				Forward.ForEach(m => Message(m));
 
@@ -205,6 +148,8 @@ namespace Peach.Core.Test
 				// This is part of the monitor api contract.
 				if (Forward.Count(DetectedFault) > 0)
 				{
+					lastWasFault = true;
+
 					// Once DetectedFault is called on every monitor we can get monitor data.
 					ret.AddRange(Forward.Select(m =>
 					{
@@ -238,8 +183,6 @@ namespace Peach.Core.Test
 		private IEnumerable<Monitor> Reverse { get { return Forward.Reverse(); } }
 
 		private readonly List<Monitor> _monitors;
-
-		private readonly Agent _agent;
 	}
 	
 }

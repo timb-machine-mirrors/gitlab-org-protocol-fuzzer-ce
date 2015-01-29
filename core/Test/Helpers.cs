@@ -121,6 +121,17 @@ namespace Peach.Core.Test
 			process.Close();
 		}
 
+		public static void InjectFault(this RunContext ctx)
+		{
+			ctx.faults.Add(new Fault
+			{
+				type = FaultType.Fault,
+				detectionSource = "UnitTest",
+				folderName = "UnitTest",
+				title = "UnitTest"
+			});
+		}
+
 		/// <summary>
 		/// Get the name and IP address of the primary interface for the
 		/// specified address family.

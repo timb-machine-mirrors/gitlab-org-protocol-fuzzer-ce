@@ -30,7 +30,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 		private static readonly byte[] Snmpv2CPacket = LoadResource("snmpv2c.pcap").ToArray();
 		private static readonly string[] Severity = { "EXPLOITABLE", "PROBABLY EXPLOITABLE", "PROBABLY NOT EXPLOITABLE", "UNKNOWN" };
 
-		uint _currentIteration;
+		uint _startCount;
 		bool _isControl;
 		readonly List<string> _majors = new List<string>();
 		readonly Dictionary<string, List<string>> _minors = new Dictionary<string, List<string>>();
@@ -40,15 +40,15 @@ namespace Peach.Pro.Core.Agent.Monitors
 		{
 		}
 
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
+		public override void IterationStarting(IterationStartingArgs args)
 		{
-			_currentIteration = iterationCount;
+			++_startCount;
 		}
 
 		public override bool DetectedFault()
 		{
-			// Avoid faulting on first iteration
-			if (_currentIteration < 2)
+			// Avoid faulting on first run of the monitor
+			if (_startCount < 2)
 				return false;
 			 
 			if (!_isControl && _rnd.Next() % Fault == 0)
