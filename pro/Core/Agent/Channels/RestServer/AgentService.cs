@@ -200,7 +200,8 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 			{
 				Task = _ =>
 				{
-					return this.context.Agent.IterationFinished();
+					context.Agent.IterationFinished();
+					return null;
 				}
 			};
 
@@ -278,7 +279,8 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 			{
 				Task = _ =>
 				{
-					return this.context.Agent.Message(Request.Query.name, new Variant(Request.Query.data));
+					this.context.Agent.Message(Request.Query.data);
+					return null;
 				}
 			};
 

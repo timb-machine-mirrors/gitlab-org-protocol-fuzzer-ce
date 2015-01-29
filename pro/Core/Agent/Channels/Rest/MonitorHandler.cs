@@ -48,10 +48,17 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		class Context : INamed, IDisposable
 		{
+			#region Obsolete Functions
+
+			[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+			public string name { get { return Name; } }
+
+			#endregion
+
 			private readonly MonitorHandler _handler;
 			private readonly NamedCollection<Monitor> _monitors;
 
-			public string name { get { return Url; } }
+			public string Name { get { return Url; } }
 
 			public string Url { get; private set; }
 
@@ -178,11 +185,10 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			private RouteResponse OnMessage(HttpListenerRequest req)
 			{
 				var msg = req.Url.Segments[req.Url.Segments.Length - 1];
-				var data = new Variant(msg);
 
 				foreach (var mon in _monitors)
 				{
-					mon.Message("Action.Call", data);
+					mon.Message(msg);
 				}
 
 				return RouteResponse.Success();
