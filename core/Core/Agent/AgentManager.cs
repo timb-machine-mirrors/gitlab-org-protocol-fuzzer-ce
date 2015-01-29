@@ -41,13 +41,13 @@ namespace Peach.Core.Agent
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		OwnedCollection<AgentManager, AgentClient> agents;
+		readonly OwnedCollection<AgentManager, AgentClient> _agents;
 
 		public RunContext Context { get; private set; }
 
 		public AgentManager(RunContext context)
 		{
-			agents = new OwnedCollection<AgentManager,AgentClient>(this);
+			_agents = new OwnedCollection<AgentManager,AgentClient>(this);
 
 			Context = context;
 		}
@@ -58,7 +58,7 @@ namespace Peach.Core.Agent
 
 			AgentClient agent;
 
-			if (!agents.TryGetValue(agentDef.Name, out agent))
+			if (!_agents.TryGetValue(agentDef.Name, out agent))
 			{
 				var uri = new Uri(agentDef.location);
 				var type = ClassLoader.FindTypeByAttribute<AgentAttribute>((x, y) => y.protocol == uri.Scheme);
@@ -67,7 +67,7 @@ namespace Peach.Core.Agent
 
 				agent = Activator.CreateInstance(type, agentDef.Name, agentDef.location, agentDef.password) as AgentClient;
 
-				agents.Add(agent);
+				_agents.Add(agent);
 			}
 
 			try
@@ -79,7 +79,7 @@ namespace Peach.Core.Agent
 				// Remove from our collection so exception
 				// cleanup code doesn't cause a new exception
 				// to be raised.
-				agents.Remove(agent);
+				_agents.Remove(agent);
 				throw;
 			}
 
@@ -92,7 +92,7 @@ namespace Peach.Core.Agent
 
 		public AgentClient GetAgent(string name)
 		{
-			return agents[name];
+			return _agents[name];
 		}
 
 		public void CollectFaults()
@@ -130,7 +130,7 @@ namespace Peach.Core.Agent
 			logger.Trace("CreatePublisher: {0} {1}", agentName, cls);
 
 			AgentClient agent;
-			if (!agents.TryGetValue(agentName, out agent))
+			if (!_agents.TryGetValue(agentName, out agent))
 				throw new KeyNotFoundException("Could not find agent named '" + agentName + "'.");
 
 			return agent.CreatePublisher(cls, args);
@@ -140,7 +140,7 @@ namespace Peach.Core.Agent
 		{
 			logger.Trace("StopAllMonitors");
 
-			foreach (var agent in agents.Reverse())
+			foreach (var agent in _agents.Reverse())
 			{
 				Guard("StopAllMonitors", () =>
 				{
@@ -153,7 +153,7 @@ namespace Peach.Core.Agent
 		{
 			logger.Trace("Shutdown");
 
-			foreach (var agent in agents.Reverse())
+			foreach (var agent in _agents.Reverse())
 			{
 				Guard("Shutdown", () =>
 				{
@@ -166,7 +166,7 @@ namespace Peach.Core.Agent
 		{
 			logger.Trace("SessionStarting");
 
-			foreach (var agent in agents)
+			foreach (var agent in _agents)
 			{
 				agent.SessionStarting();
 			}
@@ -176,7 +176,7 @@ namespace Peach.Core.Agent
 		{
 			logger.Trace("SessionFinished");
 
-			foreach (var agent in agents.Reverse())
+			foreach (var agent in _agents.Reverse())
 			{
 				Guard("SessionFinished", () =>
 				{
@@ -185,15 +185,21 @@ namespace Peach.Core.Agent
 			}
 		}
 
-		public virtual void IterationStarting(uint iterationCount, bool isReproduction)
+		public virtual void IterationStarting(bool isReproduction, bool lastWasFault)
 		{
 			logger.Trace("IterationStarting");
 
-			foreach (var agent in agents)
+			var args = new IterationStartingArgs
+			{
+				IsReproduction = isReproduction,
+				LastWasFault = lastWasFault
+			};
+
+			foreach (var agent in _agents)
 			{
 				Guard("IterationStarting", () =>
 				{
-					agent.IterationStarting(iterationCount, isReproduction);
+					agent.IterationStarting(args);
 				});
 			}
 		}
@@ -202,7 +208,7 @@ namespace Peach.Core.Agent
 		{
 			logger.Trace("IterationFinished");
 
-			foreach (var agent in agents.Reverse())
+			foreach (var agent in _agents.Reverse())
 			{
 				Guard("IterationFinished", () =>
 				{
@@ -215,7 +221,7 @@ namespace Peach.Core.Agent
 		{
 			var ret = false;
 
-			foreach (var agent in agents)
+			foreach (var agent in _agents)
 			{
 				Guard("DetectedFault", () =>
 				{
@@ -234,7 +240,7 @@ namespace Peach.Core.Agent
 
 			var faults = new Dictionary<AgentClient, Fault[]>();
 
-			foreach (var agent in agents)
+			foreach (var agent in _agents)
 			{
 				Guard("GetMonitorData", () =>
 				{
@@ -249,7 +255,7 @@ namespace Peach.Core.Agent
 		{
 			var ret = false;
 
-			foreach (var agent in agents)
+			foreach (var agent in _agents)
 			{
 				Guard("MustStop", () =>
 				{
@@ -266,7 +272,7 @@ namespace Peach.Core.Agent
 		{
 			logger.Debug("Message: {0}", msg);
 
-			foreach (var agent in agents)
+			foreach (var agent in _agents)
 			{
 				Guard("Message", () =>
 				{

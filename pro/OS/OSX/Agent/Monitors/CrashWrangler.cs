@@ -110,7 +110,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			base.StartMonitor(args);
 		}
 
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
+		public override void IterationStarting(IterationStartingArgs args)
 		{
 			_detectedFault = null;
 			_faultExitFail = false;

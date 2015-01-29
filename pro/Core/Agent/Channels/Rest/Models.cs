@@ -23,9 +23,6 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 	internal class IterationStartingRequest
 	{
-		[JsonProperty("iteration")]
-		public uint Iteration { get; set; }
-
 		[JsonProperty("isReproduction")]
 		public bool IsReproduction { get; set; }
 

@@ -93,7 +93,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			var reporter = new CrashReporter(null);
 			reporter.StartMonitor(args);
 			reporter.SessionStarting();
-			reporter.IterationStarting(0, false);
+			reporter.IterationStarting(null);
 			if (process != null)
 			{
 				using (var p = new System.Diagnostics.Process())

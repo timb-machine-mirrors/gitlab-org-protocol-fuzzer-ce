@@ -162,7 +162,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		}
 
 
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
+		public override void IterationStarting(IterationStartingArgs args)
 		{
 			Interlocked.Exchange(ref workerCount, 0);
 		}

@@ -516,33 +516,24 @@ namespace Peach.Pro.Test.Core.PitParserTests
 	</StateModel>
 
 	<Agent name='TheAgent'>
-		<Monitor class='FaultingMonitor'>
-			<Param name='Iteration' value='2'/>
-		</Monitor>
+		<Monitor class='Null' />
 	</Agent>
 
 	<Test name='Default'>
 		<StateModel ref='TheState'/>
 		<Publisher class='Null'/>
 		<Agent ref='TheAgent' platform='{0}'/>
-		<Mutators mode='include'>
-			<Mutator class='StringCaseMutator'/>
-		</Mutators>
-		<Strategy class='RandomDeterministic'/>
 	</Test>
 </Peach>";
 			xml = string.Format(xml, Platform.GetOS() == Platform.OS.Windows ? "linux" : "windows");
 
-			PitParser parser = new PitParser();
+			var dom = DataModelCollector.ParsePit(xml);
+			var config = new RunConfiguration() { singleIteration = true };
+			var e = new Engine(null);
 
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
-			RunConfiguration config = new RunConfiguration();
-
-			Engine e = new Engine(null);
-			e.Fault += delegate(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faultData)
+			e.TestStarting += ctx =>
 			{
-				Assert.Fail("Fault should not be detected!");
+				ctx.AgentConnect += (c, a) => Assert.Fail("AgentConnect should never be called!");
 			};
 
 			e.startFuzzing(dom, config);

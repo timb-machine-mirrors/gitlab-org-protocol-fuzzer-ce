@@ -203,7 +203,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			p.StartMonitor(args);
 
 			p.SessionStarting();
-			p.IterationStarting(1, false);
+			p.IterationStarting(null);
 
 			var before = DateTime.Now;
 			p.IterationFinished();
@@ -233,7 +233,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			p.StartMonitor(args);
 
 			p.SessionStarting();
-			p.IterationStarting(1, false);
+			p.IterationStarting(null);
 
 			System.Threading.Thread.Sleep(1000);
 
@@ -265,7 +265,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			p.StartMonitor(args);
 
 			p.SessionStarting();
-			p.IterationStarting(1, false);
+			p.IterationStarting(null);
 
 			p.Message("foo");
 			p.Message("bar");
@@ -294,7 +294,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			p.StartMonitor(args);
 
 			p.SessionStarting();
-			p.IterationStarting(1, false);
+			p.IterationStarting(null);
 
 			p.Message("foo");
 
@@ -329,7 +329,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			p.StartMonitor(args);
 
 			p.SessionStarting();
-			p.IterationStarting(1, false);
+			p.IterationStarting(null);
 
 			p.Message("foo");
 
@@ -358,7 +358,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			p.StartMonitor(args);
 
 			p.SessionStarting();
-			p.IterationStarting(1, false);
+			p.IterationStarting(null);
 
 			p.IterationFinished();
 

@@ -494,7 +494,7 @@ namespace Peach.Pro.Core.Agent.Channels
 			}
 		}
 
-		private void ReconnectProxy(uint iterationCount, bool isReproduction)
+		private void ReconnectProxy(IterationStartingArgs args)
 		{
 			logger.Debug("ReconnectProxy: Attempting to reconnect");
 
@@ -508,7 +508,7 @@ namespace Peach.Pro.Core.Agent.Channels
 					proxy.StartMonitor(item.Name, item.Class, item.Args);
 
 				proxy.SessionStarting();
-				proxy.IterationStarting(iterationCount, isReproduction);
+				proxy.IterationStarting(args.IsReproduction, args.LastWasFault);
 
 				// ReconnectProxy is only called via IterationStart()
 				// IterationStart is called on the agents before the current
@@ -603,23 +603,23 @@ namespace Peach.Pro.Core.Agent.Channels
 			Exec(() => proxy.SessionFinished());
 		}
 
-		protected override void OnIterationStarting(uint iterationCount, bool isReproduction)
+		protected override void OnIterationStarting(IterationStartingArgs args)
 		{
 			try
 			{
-				Exec(() => proxy.IterationStarting(iterationCount, isReproduction));
+				Exec(() => proxy.IterationStarting(args.IsReproduction, args.LastWasFault));
 			}
 			catch (RemotingException ex)
 			{
 				logger.Debug("IterationStarting: {0}", ex.Message);
 
-				ReconnectProxy(iterationCount, isReproduction);
+				ReconnectProxy(args);
 			}
 			catch (SocketException ex)
 			{
 				logger.Debug("IterationStarting: {0}", ex.Message);
 
-				ReconnectProxy(iterationCount, isReproduction);
+				ReconnectProxy(args);
 			}
 		}
 
@@ -797,88 +797,90 @@ namespace Peach.Pro.Core.Agent.Channels
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		Agent agent = new Agent();
-
-		public AgentTcpRemote()
-		{
-		}
+		private readonly Agent _agent = new Agent();
 
 		public PublisherTcpRemote CreatePublisher(string cls, IEnumerable<KeyValuePair<string, Variant>> args)
 		{
 			logger.Trace("CreatePublisher: {0}", cls);
-			return new PublisherTcpRemote(agent.CreatePublisher(cls, args));
+			return new PublisherTcpRemote(_agent.CreatePublisher(cls, args.ToDictionary(i => i.Key, i => i.Value)));
 		}
 
 		public void AgentConnect()
 		{
 			logger.Trace("AgentConnect");
-			agent.AgentConnect();
+			_agent.AgentConnect();
 		}
 
 		public void AgentDisconnect()
 		{
 			logger.Trace("AgentDisconnect");
-			agent.AgentDisconnect();
+			_agent.AgentDisconnect();
 		}
 
 		public void StartMonitor(string name, string cls, IEnumerable<KeyValuePair<string, Variant>> args)
 		{
 			logger.Trace("StartMonitor: {0} {1}", name, cls);
-			agent.StartMonitor(name, cls, args);
+			_agent.StartMonitor(name, cls, args.ToDictionary(i => i.Key, i => i.Value));
 		}
 
 		public void StopAllMonitors()
 		{
 			logger.Trace("StopAllMonitors");
-			agent.StopAllMonitors();
+			_agent.StopAllMonitors();
 		}
 
 		public void SessionStarting()
 		{
 			logger.Trace("SessionStarting");
-			agent.SessionStarting();
+			_agent.SessionStarting();
 		}
 
 		public void SessionFinished()
 		{
 			logger.Trace("SessionFinished");
-			agent.SessionFinished();
+			_agent.SessionFinished();
 		}
 
-		public void IterationStarting(uint iterationCount, bool isReproduction)
+		public void IterationStarting(bool isReproduction, bool lastWasFault)
 		{
-			logger.Trace("IterationStarting: {0} {1}", iterationCount, isReproduction);
-			agent.IterationStarting(iterationCount, isReproduction);
+			logger.Trace("IterationStarting {0} {1}", isReproduction, lastWasFault);
+			var args = new IterationStartingArgs
+			{
+				IsReproduction = isReproduction,
+				LastWasFault = lastWasFault
+			};
+
+			_agent.IterationStarting(args);
 		}
 
 		public void IterationFinished()
 		{
 			logger.Trace("IterationFinished");
-			agent.IterationFinished();
+			_agent.IterationFinished();
 		}
 
 		public bool DetectedFault()
 		{
 			logger.Trace("DetectedFault");
-			return agent.DetectedFault();
+			return _agent.DetectedFault();
 		}
 
 		public Fault[] GetMonitorData()
 		{
 			logger.Trace("GetMonitorData");
-			return agent.GetMonitorData();
+			return _agent.GetMonitorData();
 		}
 
 		public bool MustStop()
 		{
 			logger.Trace("MustStop");
-			return agent.MustStop();
+			return _agent.MustStop();
 		}
 
 		public void Message(string msg)
 		{
 			logger.Trace("Message: {0}", msg);
-			agent.Message(msg);
+			_agent.Message(msg);
 		}
 	}
 

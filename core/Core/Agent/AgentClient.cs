@@ -153,14 +153,13 @@ namespace Peach.Core.Agent
 		/// <summary>
 		/// Starting a new iteration
 		/// </summary>
-		/// <param name="iterationCount">Iteration count</param>
-		/// <param name="isReproduction">Are we re-running an iteration</param>
-		public void IterationStarting(uint iterationCount, bool isReproduction)
+		/// <param name="args">Metadata about the type of iteration</param>
+		public void IterationStarting(IterationStartingArgs args)
 		{
-			Logger.Trace("IterationStarting: {0} {1} {2}", Name, iterationCount, isReproduction);
+			Logger.Trace("IterationStarting: {0} {1} {2}", Name, args.IsReproduction, args.LastWasFault);
 			parent.Context.OnIterationStarting(this);
 
-			OnIterationStarting(iterationCount, isReproduction);
+			OnIterationStarting(args);
 		}
 
 		/// <summary>
@@ -286,9 +285,8 @@ namespace Peach.Core.Agent
 		/// <summary>
 		/// Starting a new iteration
 		/// </summary>
-		/// <param name="iterationCount">Iteration count</param>
-		/// <param name="isReproduction">Are we re-running an iteration</param>
-		protected abstract void OnIterationStarting(uint iterationCount, bool isReproduction);
+		/// <param name="args">Metadata about the type of iteration</param>
+		protected abstract void OnIterationStarting(IterationStartingArgs args);
 		/// <summary>
 		/// Iteration has completed.
 		/// </summary>

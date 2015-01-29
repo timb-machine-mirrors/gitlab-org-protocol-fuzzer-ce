@@ -4,6 +4,7 @@ using System.IO;
 using Nancy;
 using Newtonsoft.Json;
 using Peach.Core;
+using Peach.Core.Agent;
 using Peach.Core.Dom;
 
 namespace Peach.Pro.Core.Agent.Channels.RestServer
@@ -180,8 +181,10 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 				{
 					Console.Error.WriteLine(">>IterationStarting");
 					this.context.Agent.IterationStarting(
-						uint.Parse(Request.Query.iterationCount), 
-						Request.Query.isReproduction.ToString().ToLower() == "true");
+						new IterationStartingArgs
+						{
+							IsReproduction = Request.Query.isReproduction.ToString().ToLower() == "true"
+						});
 					Console.Error.WriteLine("<<IterationStarting");
 					return null;
 				}

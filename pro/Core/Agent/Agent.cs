@@ -42,7 +42,7 @@ namespace Peach.Pro.Core.Agent
 	/// Agent logic.  This class is typically
 	/// called from the server side of agent channels.
 	/// </summary>
-	public class Agent : IAgent
+	public class Agent
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -50,17 +50,7 @@ namespace Peach.Pro.Core.Agent
 
 		public string name { get; private set; }
 
-		public Agent()
-		{
-		}
-
 		#region Publisher Helpers
-
-		public Publisher CreatePublisher(string cls, IEnumerable<KeyValuePair<string, Variant>> args)
-		{
-			var newArgs = AsDict(args);
-			return CreatePublisher(cls, newArgs);
-		}
 
 		public Publisher CreatePublisher(string cls, Dictionary<string, Variant> args)
 		{
@@ -83,12 +73,6 @@ namespace Peach.Pro.Core.Agent
 
 				throw new PeachException("Could not start publisher \"" + cls + "\".  " + ex.InnerException.Message, ex);
 			}
-		}
-
-		public void StartMonitor(string name, string cls, IEnumerable<KeyValuePair<string, Variant>> args)
-		{
-			var newArgs = AsDict(args);
-			StartMonitor(name, cls, newArgs);
 		}
 
 		#endregion
@@ -166,13 +150,13 @@ namespace Peach.Pro.Core.Agent
 			}
 		}
 
-		public void IterationStarting(uint iterationCount, bool isReproduction)
+		public void IterationStarting(IterationStartingArgs args)
 		{
-			logger.Trace("IterationStarting: {0} {1}", iterationCount, isReproduction);
+			logger.Trace("IterationStarting: {0} {1}", args.IsReproduction, args.LastWasFault);
 
 			foreach (var mon in monitors)
 			{
-				mon.IterationStarting(iterationCount, isReproduction);
+				mon.IterationStarting(args);
 			}
 		}
 
@@ -259,16 +243,6 @@ namespace Peach.Pro.Core.Agent
 		}
 
 		#endregion
-
-		private static Dictionary<string, Variant> AsDict(IEnumerable<KeyValuePair<string, Variant>> sequence)
-		{
-			var ret = new Dictionary<string, Variant>();
-
-			foreach (var item in sequence)
-				ret.Add(item.Key, item.Value);
-
-			return ret;
-		}
 
 		private static void Guard(Monitor mon, string what, System.Action action)
 		{

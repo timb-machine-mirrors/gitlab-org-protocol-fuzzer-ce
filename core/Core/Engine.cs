@@ -457,7 +457,7 @@ namespace Peach.Core
 								logger.Debug("runTest: Performing control iteration.");
 						}
 
-						context.agentManager.IterationStarting(iterationCount, context.reproducingFault);
+						context.agentManager.IterationStarting(context.reproducingFault, context.FaultOnPreviousIteration);
 
 						test.stateModel.Run(context);
 					}

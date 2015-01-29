@@ -164,7 +164,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			}
 		}
 
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
+		public override void IterationStarting(IterationStartingArgs args)
 		{
 			lock (_lock)
 			{

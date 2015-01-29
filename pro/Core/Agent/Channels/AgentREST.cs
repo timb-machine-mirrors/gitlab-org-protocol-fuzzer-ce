@@ -651,9 +651,9 @@ namespace Peach.Pro.Core.Agent.Channels
 			Send("SessionFinished");
 		}
 
-		protected override void OnIterationStarting(uint iterationCount, bool isReproduction)
+		protected override void OnIterationStarting(IterationStartingArgs args)
 		{
-			Send("IterationStarting?iterationCount=" + iterationCount.ToString() + "&" + "isReproduction=" + isReproduction.ToString());
+			Send("IterationStarting?iterationCount=0&" + "isReproduction=" + args.IsReproduction);
 		}
 
 		protected override void OnIterationFinished()

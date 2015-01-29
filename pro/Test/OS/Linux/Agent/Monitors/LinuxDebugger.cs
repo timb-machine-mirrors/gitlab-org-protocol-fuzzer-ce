@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
@@ -24,7 +23,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			var m = new LinuxDebugger(null);
 			m.StartMonitor(args);
 			m.SessionStarting();
-			m.IterationStarting(1, false);
+			m.IterationStarting(null);
 			Thread.Sleep(5000);
 			m.IterationFinished();
 			Assert.AreEqual(true, m.DetectedFault());
@@ -49,7 +48,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			var m = new LinuxDebugger(null);
 			m.StartMonitor(args);
 			m.SessionStarting();
-			m.IterationStarting(1, false);
+			m.IterationStarting(null);
 			Thread.Sleep(5000);
 			m.IterationFinished();
 			Assert.AreEqual(false, m.DetectedFault());
@@ -93,7 +92,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			}
 			catch (PeachException ex)
 			{
-				var exp = "Could not start debugger 'MissingGdb'.";
+				const string exp = "Could not start debugger 'MissingGdb'.";
 				var act = ex.Message.Substring(0, exp.Length);
 				Assert.AreEqual(exp, act);
 			}
@@ -110,7 +109,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			var m = new LinuxDebugger(null);
 			m.StartMonitor(args);
 			m.SessionStarting();
-			m.IterationStarting(1, false);
+			m.IterationStarting(null);
 
 			m.Message("Foo");
 			Thread.Sleep(1000);
@@ -142,7 +141,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			var m = new LinuxDebugger(null);
 			m.StartMonitor(args);
 			m.SessionStarting();
-			m.IterationStarting(1, false);
+			m.IterationStarting(null);
 
 			m.Message("Foo");
 			Thread.Sleep(1000);
@@ -175,7 +174,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			var m = new LinuxDebugger(null);
 			m.StartMonitor(args);
 			m.SessionStarting();
-			m.IterationStarting(1, false);
+			m.IterationStarting(null);
 
 			m.Message("Foo");
 			Thread.Sleep(1000);

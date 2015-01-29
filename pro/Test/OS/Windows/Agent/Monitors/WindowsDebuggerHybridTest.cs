@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
 using Peach.Core;
+using Peach.Core.Agent;
 using Peach.Core.Analyzers;
 using Peach.Pro.OS.Windows.Agent.Monitors;
 
@@ -203,7 +204,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 
 			var w = new WindowsDebuggerHybrid(null);
 			w.StartMonitor(args);
-			w.IterationStarting(1, false);
+			w.IterationStarting(new IterationStartingArgs());
 
 			System.Threading.Thread.Sleep(1000);
 
@@ -234,7 +235,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			var w = new WindowsDebuggerHybrid(null);
 			w.StartMonitor(args);
 			w.SessionStarting();
-			w.IterationStarting(1, false);
+			w.IterationStarting(new IterationStartingArgs());
 
 			w.Message("foo");
 			w.Message("bar");
@@ -264,7 +265,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			var w = new WindowsDebuggerHybrid(null);
 			w.StartMonitor(args);
 			w.SessionStarting();
-			w.IterationStarting(1, false);
+			w.IterationStarting(new IterationStartingArgs());
 
 			w.Message("foo");
 
@@ -298,7 +299,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			var w = new WindowsDebuggerHybrid(null);
 			w.StartMonitor(args);
 			w.SessionStarting();
-			w.IterationStarting(1, false);
+			w.IterationStarting(new IterationStartingArgs());
 
 			w.Message("foo");
 
@@ -326,7 +327,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			var w = new WindowsDebuggerHybrid(null);
 			w.StartMonitor(args);
 			w.SessionStarting();
-			w.IterationStarting(1, false);
+			w.IterationStarting(new IterationStartingArgs());
 
 			w.IterationFinished();
 

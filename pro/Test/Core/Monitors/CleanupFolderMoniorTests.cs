@@ -81,13 +81,13 @@ namespace Peach.Pro.Test.Core.Monitors
 				{ "Folder", tmp },
 			});
 
-			runner.IterationStarting += (m, it, repro) =>
+			runner.IterationStarting += (m, args) =>
 			{
 				Directory.CreateDirectory(dir2);
 				File.Create(file2).Close();
 				File.Create(dir2File).Close();
 
-				m.IterationStarting(it, repro);
+				m.IterationStarting(args);
 
 				Assert.False(Directory.Exists(dir2), "Directory '{0}' should not exist".Fmt(dir2));
 				Assert.False(File.Exists(file2), "File '{0}' should not exist".Fmt(file2));

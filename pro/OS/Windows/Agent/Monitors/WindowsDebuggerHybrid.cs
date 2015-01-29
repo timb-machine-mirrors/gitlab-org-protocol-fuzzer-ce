@@ -325,9 +325,9 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			_FinishDebugger();
 		}
 
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
+		public override void IterationStarting(IterationStartingArgs args)
 		{
-			_replay = isReproduction;
+			_replay = args.IsReproduction;
 			_waitForExitFailed = false;
 			_earlyExitFault = false;
 			_stopMessage = false;

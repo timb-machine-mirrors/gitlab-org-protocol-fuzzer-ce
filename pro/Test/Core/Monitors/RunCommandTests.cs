@@ -164,11 +164,11 @@ namespace Peach.Pro.Test.Core.Monitors
 		{
 			var runner = MakeWhen("OnIterationStart");
 
-			runner.IterationStarting = (m, it, repro) =>
+			runner.IterationStarting = (m, args) =>
 			{
 				Verify("");
 
-				m.IterationStarting(it, repro);
+				m.IterationStarting(args);
 
 				Verify("OnIterationStart");
 			};
@@ -231,6 +231,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		public void TestIterAfterFault()
 		{
 			var runner = MakeWhen("OnIterationStartAfterFault");
+			var it = 0;
 
 			runner.DetectedFault = m =>
 			{
@@ -240,14 +241,14 @@ namespace Peach.Pro.Test.Core.Monitors
 				return true;
 			};
 
-			runner.IterationStarting = (m, it, repro) =>
+			runner.IterationStarting = (m, args) =>
 			{
 				Verify("");
 
-				m.IterationStarting(it, repro);
+				m.IterationStarting(args);
 
 				// We fault on every iteration, so iteration two is the first iteration after fault
-				var exp = it == 2 ? "OnIterationStartAfterFault" : "";
+				var exp = ++it == 2 ? "OnIterationStartAfterFault" : "";
 
 				Verify(exp);
 			};

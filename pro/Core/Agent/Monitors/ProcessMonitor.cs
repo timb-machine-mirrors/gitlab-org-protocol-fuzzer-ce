@@ -252,7 +252,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			};
 		}
 
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
+		public override void IterationStarting(IterationStartingArgs args)
 		{
 			_fault = null;
 			_messageExit = false;

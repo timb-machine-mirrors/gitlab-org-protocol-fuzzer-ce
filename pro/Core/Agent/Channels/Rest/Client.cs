@@ -85,7 +85,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			throw new NotImplementedException();
 		}
 
-		protected override void OnIterationStarting(uint iterationCount, bool isReproduction)
+		protected override void OnIterationStarting(IterationStartingArgs args)
 		{
 			// If any previous call failed, we need to reconnect
 			if (_agentUrl == null)
@@ -99,9 +99,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			var req = new IterationStartingRequest
 			{
-				Iteration = iterationCount,
-				IsReproduction = isReproduction,
-				LastWasFault = false,
+				IsReproduction = args.IsReproduction,
+				LastWasFault = args.LastWasFault,
 			};
 
 			Send("PUT", "/IterationStarting", req);

@@ -29,7 +29,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Peach.Core.Dom;
 
 namespace Peach.Core.Agent
 {
@@ -108,16 +107,14 @@ namespace Peach.Core.Agent
 		/// <summary>
 		/// Starting a new iteration
 		/// </summary>
-		/// <param name="iterationCount">Iteration count</param>
-		/// <param name="isReproduction">Are we re-running an iteration</param>
-		public virtual void IterationStarting(uint iterationCount, bool isReproduction)
+		/// <param name="args">Information about the current iteration</param>
+		public virtual void IterationStarting(IterationStartingArgs args)
 		{
 		}
 
 		/// <summary>
 		/// Iteration has completed.
 		/// </summary>
-		/// <returns>Returns true to indicate iteration should be re-run, else false.</returns>
 		public virtual void IterationFinished()
 		{
 		}
@@ -153,7 +150,6 @@ namespace Peach.Core.Agent
 		/// Send a message to the monitor and possibly get data back.
 		/// </summary>
 		/// <param name="msg">Message name</param>
-		/// <returns>Returns data or null.</returns>
 		public virtual void Message(string msg)
 		{
 		}

@@ -713,7 +713,7 @@ quit
 			return dir.ToString();
 		}
 
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
+		public override void IterationStarting(IterationStartingArgs args)
 		{
 			var firstStart = !_secondStart;
 
