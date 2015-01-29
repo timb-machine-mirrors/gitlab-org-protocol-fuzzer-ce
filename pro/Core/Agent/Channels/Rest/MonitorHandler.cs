@@ -112,26 +112,14 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					if (type == null)
 						throw new PeachException("Couldn't load monitor");
 
-					try
+					var mon = (Monitor) Activator.CreateInstance(type, new object[] {key});
+					mon.StartMonitor(item.Args);
+					foreach (var kv in item.Args.Where(kv => kv.Key.EndsWith("OnCall")))
 					{
-						var args = item.Args.ToDictionary(kv => kv.Key, kv => new Variant(kv.Value));
-						var mon = (Monitor) Activator.CreateInstance(type, new object[] {null, key, args});
-
-						foreach (var kv in item.Args.Where(kv => kv.Key.EndsWith("OnCall")))
-						{
-							calls.Add(kv.Value);
-						}
-
-						_monitors.Add(mon);
+						calls.Add(kv.Value);
 					}
-					catch (TargetInvocationException ex)
-					{
-						var newEx = (Exception)Activator.CreateInstance(
-							ex.InnerException.GetType(),
-							new object[] { ex.InnerException.Message, ex });
 
-						throw newEx;
-					}
+					_monitors.Add(mon);
 				}
 
 				foreach (var item in _monitors)
