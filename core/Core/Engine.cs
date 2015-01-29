@@ -439,6 +439,9 @@ namespace Peach.Core
 						break;
 					}
 
+					// Record if the last iteration had a fault
+					context.FaultOnPreviousIteration = context.faults.Count > 0;
+
 					// Make sure we are not hanging on to old faults.
 					context.faults.Clear();
 
