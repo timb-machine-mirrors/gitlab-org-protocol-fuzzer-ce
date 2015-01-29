@@ -371,6 +371,11 @@ namespace Peach.Core
 		#region Faults
 
 		/// <summary>
+		/// Was there a fault detected on the previous iteration.
+		/// </summary>
+		public bool FaultOnPreviousIteration { get; set; }
+
+		/// <summary>
         /// Faults for current iteration of fuzzing.  This collection
         /// is cleared after each iteration.
         /// </summary>
