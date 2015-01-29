@@ -1,0 +1,19 @@
+
+=== Additional Resources
+
+More information about Peach can be found on our http://peachfuzzer.com[website] and the https://forums.peachfuzzer.com[user forums].
+
+[[Peach_Forums]]
+=== Peach Forums
+
+There are two sets of forums for Peach, the community forums and the professional forums. Both forums are hosted at https://forums.peachfuzzer.com.
+
+{product} users should access the private forums to receive support for the commercial versions of Peach. Responses on the commercial forums are prioritized over the public community forums.
+
+To access the {product} forums, follow these steps:
+
+. Register an account on the forums site.
+. Send an email to peach@dejavusecurity.com with your license email and forum username.
+. Your account will be granted access to the commercial forums within 24 business hours.
+
+Forums are monitored by the Deja vu Security team, but there is no guarantee of response time.
