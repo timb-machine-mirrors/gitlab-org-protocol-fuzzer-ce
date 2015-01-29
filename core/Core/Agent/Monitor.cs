@@ -40,6 +40,13 @@ namespace Peach.Core.Agent
 	/// </summary>
 	public abstract class Monitor : INamed
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
 		protected Monitor(string name)
 		{
 			Name = name;

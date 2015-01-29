@@ -107,12 +107,10 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			Send("PUT", "/IterationStarting", req);
 		}
 
-		protected override bool OnIterationFinished()
+		protected override void OnIterationFinished()
 		{
 			if (_connectResp.Messages.Contains("/IterationFinished"))
 				Send("PUT", "/IterationFinished", null);
-
-			return true;
 		}
 
 		protected override bool OnDetectedFault()
@@ -145,15 +143,12 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			return _mustStop;
 		}
 
-		protected override Variant OnMessage(string msg, Variant data)
+		protected override void OnMessage(string msg)
 		{
-			var path = "/Message/{0}".Fmt(data);
+			var path = "/Message/{0}".Fmt(msg);
 
 			if (_connectResp.Messages.Contains(path))
 				Send("PUT", path, null);
-
-			// Return value is ignored by callers
-			return null;
 		}
 
 		private Fault MakeFault(FaultResponse.Record f)
@@ -161,7 +156,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			var ret = new Fault
 			{
 				type = FaultType.Data,
-				agentName = name,
+				agentName = Name,
 				monitorName = f.MonitorName,
 				detectionSource = f.DetectionSource,
 				collectedData = f.Data.Select(d => new Fault.Data
