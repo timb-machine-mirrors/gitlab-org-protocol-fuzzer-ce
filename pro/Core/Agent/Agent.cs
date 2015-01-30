@@ -44,17 +44,15 @@ namespace Peach.Pro.Core.Agent
 	/// </summary>
 	public class Agent
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		List<Monitor> monitors = new List<Monitor>();
-
-		public string name { get; private set; }
+		private readonly List<Monitor> _monitors = new List<Monitor>();
 
 		#region Publisher Helpers
 
-		public Publisher CreatePublisher(string cls, Dictionary<string, Variant> args)
+		public Publisher CreatePublisher(string name, string cls, Dictionary<string, string> args)
 		{
-			logger.Trace("CreatePublisher: {0}", cls);
+			Logger.Trace("CreatePublisher: {0} {1}", name, cls);
 
 			var type = ClassLoader.FindTypeByAttribute<PublisherAttribute>((x, y) => y.Name == cls);
 			if (type == null)
@@ -62,7 +60,8 @@ namespace Peach.Pro.Core.Agent
 
 			try
 			{
-				var pub = (Publisher)Activator.CreateInstance(type, args);
+				var parms = args.ToDictionary(i => i.Key, i => new Variant(i.Value));
+				var pub = (Publisher)Activator.CreateInstance(type, parms);
 				return pub;
 			}
 			catch (TargetInvocationException ex)
@@ -81,19 +80,19 @@ namespace Peach.Pro.Core.Agent
 
 		public void AgentConnect()
 		{
-			logger.Trace("AgentConnect");
+			Logger.Trace("AgentConnect");
 		}
 
 		public void AgentDisconnect()
 		{
-			logger.Trace("AgentDisconnect");
+			Logger.Trace("AgentDisconnect");
 
 			StopAllMonitors();
 		}
 
-		public void StartMonitor(string name, string cls, Dictionary<string, Variant> args)
+		public void StartMonitor(string name, string cls, Dictionary<string, string> args)
 		{
-			logger.Debug("StartMonitor: {0} {1}", name, cls);
+			Logger.Debug("StartMonitor: {0} {1}", name, cls);
 
 			var type = ClassLoader.FindTypeByAttribute<MonitorAttribute>((x, y) => y.Name == cls);
 			if (type == null)
@@ -102,8 +101,8 @@ namespace Peach.Pro.Core.Agent
 			try
 			{
 				var mon = (Monitor)Activator.CreateInstance(type, name);
-				mon.StartMonitor(args.ToDictionary(kv => kv.Key, kv => (string)kv.Value));
-				monitors.Add(mon);
+				mon.StartMonitor(args);
+				_monitors.Add(mon);
 			}
 			catch (Exception ex)
 			{
@@ -117,44 +116,38 @@ namespace Peach.Pro.Core.Agent
 
 		public void StopAllMonitors()
 		{
-			logger.Trace("StopAllMonitors");
+			Logger.Trace("StopAllMonitors");
 
-			foreach (var mon in monitors.Reverse<Monitor>())
+			foreach (var mon in _monitors.Reverse<Monitor>())
 			{
-				Guard(mon, "StopMonitor", () =>
-				{
-					mon.StopMonitor();
-				});
+				Guard(mon, "StopMonitor", m => m.StopMonitor());
 			}
 
-			monitors.Clear();
+			_monitors.Clear();
 		}
 
 		public void SessionStarting()
 		{
-			foreach (var mon in monitors)
+			foreach (var mon in _monitors)
 			{
-				logger.Debug("SessionStarting: {0}", mon.Name);
+				Logger.Debug("SessionStarting");
 				mon.SessionStarting();
 			}
 		}
 
 		public void SessionFinished()
 		{
-			foreach (var mon in monitors.Reverse<Monitor>())
+			foreach (var mon in _monitors.Reverse<Monitor>())
 			{
-				Guard(mon, "SessionFinished", () =>
-				{
-					mon.SessionFinished();
-				});
+				Guard(mon, "SessionFinished", m => m.SessionFinished());
 			}
 		}
 
 		public void IterationStarting(IterationStartingArgs args)
 		{
-			logger.Trace("IterationStarting: {0} {1}", args.IsReproduction, args.LastWasFault);
+			Logger.Trace("IterationStarting: {0} {1}", args.IsReproduction, args.LastWasFault);
 
-			foreach (var mon in monitors)
+			foreach (var mon in _monitors)
 			{
 				mon.IterationStarting(args);
 			}
@@ -162,73 +155,62 @@ namespace Peach.Pro.Core.Agent
 
 		public void IterationFinished()
 		{
-			logger.Trace("IterationFinished");
+			Logger.Trace("IterationFinished");
 
-			foreach (var mon in monitors.Reverse<Monitor>())
+			foreach (var mon in _monitors.Reverse<Monitor>())
 			{
-				Guard(mon, "IterationFinished", () =>
-				{
-					mon.IterationFinished();
-				});
+				Guard(mon, "IterationFinished", m => m.IterationFinished());
 			}
 		}
 
 		public bool DetectedFault()
 		{
-			logger.Trace("DetectedFault");
+			Logger.Trace("DetectedFault");
 
 			var detectedFault = false;
 
-			foreach (var mon in monitors)
+			foreach (var mon in _monitors)
 			{
-				Guard(mon, "DetectedFault", () =>
-				{
-					detectedFault |= mon.DetectedFault();
-				});
+				Guard(mon, "DetectedFault", m => detectedFault |= m.DetectedFault());
 			}
 
 			return detectedFault;
 		}
 
-		public Fault[] GetMonitorData()
+		public List<Fault> GetMonitorData()
 		{
-			logger.Trace("GetMonitorData");
+			Logger.Trace("GetMonitorData");
 
 			var faults = new List<Fault>();
 
-			foreach (var mon in monitors)
+			foreach (var mon in _monitors)
 			{
-				Guard(mon, "GetMonitorData", () =>
+				Guard(mon, "GetMonitorData", m =>
 				{
-					var fault = mon.GetMonitorData();
+					var fault = m.GetMonitorData();
 
-					if (fault != null)
-					{
-						fault.monitorName = mon.Name;
+					if (fault == null)
+						return;
 
-						if (string.IsNullOrEmpty(fault.detectionSource))
-							fault.detectionSource = mon.Class;
+					fault.monitorName = m.Name;
+					fault.detectionSource = fault.detectionSource ?? m.Class;
 
-						faults.Add(fault);
-					}
+					faults.Add(fault);
 				});
 			}
 
-			return faults.ToArray();
+			return faults;
 		}
 
 		public bool MustStop()
 		{
-			logger.Trace("MustStop");
+			Logger.Trace("MustStop");
 
 			var mustStop = false;
 
-			foreach (var mon in monitors)
+			foreach (var mon in _monitors)
 			{
-				Guard(mon, "MustStop", () =>
-				{
-					mustStop |= mon.MustStop();
-				});
+				Guard(mon, "MustStop", m => mustStop |= m.MustStop());
 			}
 
 			return mustStop;
@@ -236,26 +218,26 @@ namespace Peach.Pro.Core.Agent
 
 		public void Message(string msg)
 		{
-			logger.Trace("Message: {0}", msg);
+			Logger.Trace("Message: {0}", msg);
 
-			foreach (var monitor in monitors)
+			foreach (var monitor in _monitors)
 				monitor.Message(msg);
 		}
 
 		#endregion
 
-		private static void Guard(Monitor mon, string what, System.Action action)
+		private static void Guard(Monitor mon, string what, Action<Monitor> action)
 		{
 			try
 			{
-				action();
+				action(mon);
 			}
 			catch (Exception ex)
 			{
-				logger.Warn("Ignoring {0} calling '{1}' on {2} monitor {3}: {4}",
+				Logger.Warn("Ignoring {0} calling '{1}' on {2} monitor {3}: {4}",
 					ex.GetType().Name, what, mon.Class, mon.Name, ex.Message);
 
-				logger.Trace("\n{0}", ex);
+				Logger.Trace("\n{0}", ex);
 			}
 		}
 	}

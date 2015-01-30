@@ -66,17 +66,10 @@ namespace Peach.Pro.Core.Agent.Channels
 			public string errorString { get; set; }
 		}
 
-		public RestProxyPublisher(Dictionary<string, Variant> args)
-			: base(args)
+		public RestProxyPublisher(Dictionary<string, string> args)
+			: base(new Dictionary<string, Variant>())
 		{
-			this.Args = new Dictionary<string, string>();
-
-			foreach (var kv in args)
-			{
-				// Note: Cast to string rather than ToString()
-				// since ToString can include debugging information.
-				this.Args.Add(kv.Key, (string)kv.Value);
-			}
+			Args = args;
 		}
 
 		public string Send(string query)
@@ -482,7 +475,7 @@ namespace Peach.Pro.Core.Agent.Channels
 		public Dictionary<string, string> args { get; set; }
 	}
 
-	[Agent("http", true)]
+	[Agent("http")]
 	public class AgentClientRest : AgentClient
 	{
 		#region Publisher Proxy
@@ -491,7 +484,7 @@ namespace Peach.Pro.Core.Agent.Channels
 		{
 			RestProxyPublisher publisher;
 
-			public PublisherProxy(string serviceUrl, string cls, Dictionary<string, Variant> args)
+			public PublisherProxy(string serviceUrl, string cls, Dictionary<string, string> args)
 			{
 				publisher = new RestProxyPublisher(args)
 				{
@@ -596,11 +589,9 @@ namespace Peach.Pro.Core.Agent.Channels
 
 		#region Private Members
 
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		protected override NLog.Logger Logger { get { return logger; } }
-
-		string serviceUrl;
+		readonly string _serviceUrl;
 
 		#endregion
 
@@ -609,65 +600,65 @@ namespace Peach.Pro.Core.Agent.Channels
 		public AgentClientRest(string name, string uri, string password)
 			: base(name, uri, password)
 		{
-			serviceUrl = new Uri(new Uri(url), "/Agent").ToString();
+			_serviceUrl = new Uri(new Uri(uri), "/Agent").ToString();
 		}
 
 		#endregion
 
 		#region AgentClient Overrides
 
-		protected override void OnAgentConnect()
+		public override void AgentConnect()
 		{
 			Send("AgentConnect");
 		}
 
-		protected override void OnAgentDisconnect()
+		public override void AgentDisconnect()
 		{
 			Send("AgentDisconnect");
 		}
 
-		protected override IPublisher OnCreatePublisher(string cls, Dictionary<string, Variant> args)
+		public override IPublisher CreatePublisher(string pubName, string cls, Dictionary<string, string> args)
 		{
-			return new PublisherProxy(serviceUrl, cls, args);
+			return new PublisherProxy(_serviceUrl, cls, args);
 		}
 
-		protected override void OnStartMonitor(string name, string cls, Dictionary<string, Variant> args)
+		public override void StartMonitor(string monName, string cls, Dictionary<string, string> args)
 		{
-			Send("StartMonitor?name=" + name + "&cls=" + cls, args);
+			Send("StartMonitor?name=" + monName + "&cls=" + cls, args);
 		}
 
-		protected override void OnStopAllMonitors()
+		public override void StopAllMonitors()
 		{
 			Send("StopAllMonitors");
 		}
 
-		protected override void OnSessionStarting()
+		public override void SessionStarting()
 		{
 			Send("SessionStarting");
 		}
 
-		protected override void OnSessionFinished()
+		public override void SessionFinished()
 		{
 			Send("SessionFinished");
 		}
 
-		protected override void OnIterationStarting(IterationStartingArgs args)
+		public override void IterationStarting(IterationStartingArgs args)
 		{
 			Send("IterationStarting?iterationCount=0&" + "isReproduction=" + args.IsReproduction);
 		}
 
-		protected override void OnIterationFinished()
+		public override void IterationFinished()
 		{
 			Send("IterationFinished");
 		}
 
-		protected override bool OnDetectedFault()
+		public override bool DetectedFault()
 		{
 			var json = Send("DetectedFault");
 			return ParseResponse(json);
 		}
 
-		protected override Fault[] OnGetMonitorData()
+		public override IEnumerable<Fault> GetMonitorData()
 		{
 			try
 			{
@@ -678,18 +669,18 @@ namespace Peach.Pro.Core.Agent.Channels
 			}
 			catch (Exception e)
 			{
-				logger.Debug(e.ToString());
+				Logger.Debug(e.ToString());
 				throw new PeachException("Failed to get Monitor Data", e);
 			}
 		}
 
-		protected override bool OnMustStop()
+		public override bool MustStop()
 		{
 			var json = Send("MustStop");
 			return ParseResponse(json);
 		}
 
-		protected override void OnMessage(string msg)
+		public override void Message(string msg)
 		{
 			throw new NotImplementedException();
 		}
@@ -722,19 +713,9 @@ namespace Peach.Pro.Core.Agent.Channels
 			return Send(query, "");
 		}
 
-		string Send(string query, Dictionary<string, Variant> args)
+		string Send(string query, Dictionary<string, string> args)
 		{
-			var newArg = new Dictionary<string, string>();
-
-			foreach (var kv in args)
-			{
-				// Note: Cast rather than call .ToString() since
-				// ToString() can include debugging information
-				newArg.Add(kv.Key, (string)kv.Value);
-			}
-
-			var request = new JsonArgsRequest();
-			request.args = newArg;
+			var request = new JsonArgsRequest { args = args };
 
 			return Send(query, JsonConvert.SerializeObject(request));
 		}
@@ -744,16 +725,16 @@ namespace Peach.Pro.Core.Agent.Channels
 			try
 			{
 
-				var httpWebRequest = (HttpWebRequest)WebRequest.Create(serviceUrl + "/" + query);
+				var httpWebRequest = (HttpWebRequest)WebRequest.Create(_serviceUrl + "/" + query);
 				httpWebRequest.ContentType = "text/json";
 				if (string.IsNullOrEmpty(json))
 				{
-					logger.Debug("Send: GET {0}", serviceUrl + "/" + query);
+					Logger.Debug("Send: GET {0}", _serviceUrl + "/" + query);
 					httpWebRequest.Method = "GET";
 				}
 				else
 				{
-					logger.Debug("Send: POST {0}", serviceUrl + "/" + query);
+					Logger.Debug("Send: POST {0}", _serviceUrl + "/" + query);
 					httpWebRequest.Method = "POST";
 					using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
 					{
@@ -761,11 +742,11 @@ namespace Peach.Pro.Core.Agent.Channels
 					}
 				}
 				var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-				logger.Debug("Send: Got response");
+				Logger.Debug("Send: Got response");
 
 				if (httpResponse.GetResponseStream() != null)
 				{
-					logger.Debug("Send: Readoing to end of stream");
+					Logger.Debug("Send: Readoing to end of stream");
 					using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
 					{
 						return streamReader.ReadToEnd();
@@ -773,13 +754,13 @@ namespace Peach.Pro.Core.Agent.Channels
 				}
 				else
 				{
-					logger.Debug("Send: No stream data");
+					Logger.Debug("Send: No stream data");
 					return "";
 				}
 			}
 			catch (Exception e)
 			{
-				logger.Debug("Send Failed: {0}", serviceUrl + "/" + query);
+				Logger.Debug("Send Failed: {0}", _serviceUrl + "/" + query);
 
 				throw new PeachException("Failure communicating with REST Agent", e);
 			}
@@ -787,6 +768,5 @@ namespace Peach.Pro.Core.Agent.Channels
 
 		#endregion
 	}
-
 }
 // end

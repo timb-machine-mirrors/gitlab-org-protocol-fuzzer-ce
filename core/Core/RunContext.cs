@@ -147,8 +147,7 @@ namespace Peach.Core
 
 		public delegate void AgentEventHandler(RunContext context, AgentClient agent);
 		public delegate void MessageEventHandler(RunContext context, AgentClient agent, string msg);
-		public delegate void CreatePublisherEventHandler(RunContext context, AgentClient agent, string cls, Dictionary<string, Variant> args);
-		public delegate void StartMonitorEventHandler(RunContext context, AgentClient agent, string name, string cls, Dictionary<string, Variant> args);
+		public delegate void CreateEventHandler(RunContext context, AgentClient agent, string name, string cls);
 
 		public event AgentEventHandler AgentConnect;
 
@@ -166,20 +165,20 @@ namespace Peach.Core
 				AgentDisconnect(this, agent);
 		}
 
-		public event CreatePublisherEventHandler CreatePublisher;
+		public event CreateEventHandler CreatePublisher;
 
-		public void OnCreatePublisher(AgentClient agent, string cls, Dictionary<string, Variant> args)
+		public void OnCreatePublisher(AgentClient agent, string name, string cls)
 		{
 			if (CreatePublisher != null)
-				CreatePublisher(this, agent, cls, args);
+				CreatePublisher(this, agent, name, cls);
 		}
 
-		public event StartMonitorEventHandler StartMonitor;
+		public event CreateEventHandler StartMonitor;
 
-		public void OnStartMonitor(AgentClient agent, string name, string cls, Dictionary<string, Variant> args)
+		public void OnStartMonitor(AgentClient agent, string name, string cls)
 		{
 			if (StartMonitor != null)
-				StartMonitor(this, agent, name, cls, args);
+				StartMonitor(this, agent, name, cls);
 		}
 
 		public event AgentEventHandler StopAllMonitors;

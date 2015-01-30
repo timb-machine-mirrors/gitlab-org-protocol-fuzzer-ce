@@ -98,17 +98,12 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 			try
 			{
 				var args = JsonConvert.DeserializeObject<StartMonitorRequest>(StreamToString(Request.Body)).args;
-				var pargs = new Dictionary<string, Variant>();
-				foreach (var item in args)
-				{
-					pargs[item.Key] = new Variant(item.Value);
-				}
 
 				var task = new AgentTask()
 				{
 					Task = _ =>
 					{
-						context.Agent.StartMonitor(Request.Query.name, Request.Query.cls, pargs);
+						context.Agent.StartMonitor(Request.Query.name, Request.Query.cls, args);
 						return null;
 					}
 				};

@@ -116,11 +116,11 @@ namespace Peach.Core
 		{
 		}
 
-		protected virtual void Agent_CreatePublisher(RunContext context, AgentClient agent, string cls, Dictionary<string, Variant> args)
+		protected virtual void Agent_CreatePublisher(RunContext context, AgentClient agent, string name, string cls)
 		{
 		}
 
-		protected virtual void Agent_StartMonitor(RunContext context, AgentClient agent, string name, string cls, Dictionary<string, Variant> args)
+		protected virtual void Agent_StartMonitor(RunContext context, AgentClient agent, string name, string cls)
 		{
 		}
 

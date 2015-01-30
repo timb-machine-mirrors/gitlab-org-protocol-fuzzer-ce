@@ -28,14 +28,13 @@
 
 using System;
 using System.Collections.Generic;
-using Peach.Core.Dom;
 
 namespace Peach.Core.Agent
 {
 	/// <summary>
 	/// Abstract base class for all Agent servers.
 	/// </summary>
-	public abstract class AgentClient : INamed, IOwned<AgentManager>
+	public abstract class AgentClient : INamed
 	{
 		#region Obsolete Functions
 
@@ -44,64 +43,52 @@ namespace Peach.Core.Agent
 
 		#endregion
 
-		protected abstract NLog.Logger Logger { get; }
-
 		/// <summary>
 		/// Construct an agent client
 		/// </summary>
 		/// <param name="name">Name of agent</param>
 		/// <param name="url">Agent URL</param>
 		/// <param name="password">Agent Password</param>
-		public AgentClient(string name, string url, string password)
+		protected AgentClient(string name, string url, string password)
 		{
 			Name = name;
-			this.url = url;
-			this.password = password;
+			Url = url;
+			Password = password;
 		}
 
-		#region Public Agent Functions
-
+		/// <summary>
+		/// Agent name
+		/// </summary>
 		public string Name { get; private set; }
-		public string url { get; private set; }
-		public string password { get; private set; }
 
-		public AgentManager parent { get; set; }
+		/// <summary>
+		/// Agent URL
+		/// </summary>
+		public string Url { get; private set; }
+
+		/// <summary>
+		/// Agent password
+		/// </summary>
+		public string Password { get; private set; }
 
 		/// <summary>
 		/// Connect to agent
 		/// </summary>
-		public void AgentConnect()
-		{
-			Logger.Trace("AgentConnect: {0}", Name);
-			parent.Context.OnAgentConnect(this);
-
-			OnAgentConnect();
-		}
+		public abstract void AgentConnect();
 
 		/// <summary>
 		/// Disconnect from agent
 		/// </summary>
-		public void AgentDisconnect()
-		{
-			Logger.Trace("AgentDisconnect: {0}", Name);
-			parent.Context.OnAgentDisconnect(this);
-
-			OnAgentDisconnect();
-		}
+		public abstract void AgentDisconnect();
 
 		/// <summary>
 		/// Creates a publisher on the remote agent
 		/// </summary>
+		/// <param name="name">Name for publisher instance</param>
 		/// <param name="cls">Class of publisher to create</param>
 		/// <param name="args">Arguments for publisher</param>
 		/// <returns>Instance of remote publisher</returns>
-		public IPublisher CreatePublisher(string cls, Dictionary<string, Variant> args)
-		{
-			Logger.Trace("CreatePublisher: {0} {1}", Name, cls);
-			parent.Context.OnCreatePublisher(this, cls, args);
-
-			return OnCreatePublisher(cls, args);
-		}
+		public abstract IPublisher CreatePublisher(string name, string cls, Dictionary<string, string> args);
 
 		/// <summary>
 		/// Start a specific monitor
@@ -109,232 +96,66 @@ namespace Peach.Core.Agent
 		/// <param name="name">Name for monitor instance</param>
 		/// <param name="cls">Class of monitor to start</param>
 		/// <param name="args">Arguments</param>
-		public void StartMonitor(string name, string cls, Dictionary<string, Variant> args)
-		{
-			Logger.Trace("StartMonitor: {0} {1} {2}", Name, name, cls);
-			parent.Context.OnStartMonitor(this, name, cls, args);
-
-			OnStartMonitor(name, cls, args);
-		}
+		public abstract void StartMonitor(string name, string cls, Dictionary<string, string> args);
 
 		/// <summary>
 		/// Stop all monitors currently running
 		/// </summary>
-		public void StopAllMonitors()
-		{
-			Logger.Trace("StopAllMonitors: {0}", Name);
-			parent.Context.OnStopAllMonitors(this);
-
-			OnStopAllMonitors();
-		}
+		public abstract void StopAllMonitors();
 
 		/// <summary>
 		/// Starting a fuzzing session.  A session includes a number of test iterations.
 		/// </summary>
-		public void SessionStarting()
-		{
-			Logger.Trace("SessionStarting: {0}", Name);
-			parent.Context.OnSessionStarting(this);
-
-			OnSessionStarting();
-		}
+		public abstract void SessionStarting();
 
 		/// <summary>
 		/// Finished a fuzzing session.
 		/// </summary>
-		public void SessionFinished()
-		{
-			Logger.Trace("SessionFinished: {0}", Name);
-			parent.Context.OnSessionFinished(this);
-
-			OnSessionFinished();
-		}
+		public abstract void SessionFinished();
 
 		/// <summary>
 		/// Starting a new iteration
 		/// </summary>
 		/// <param name="args">Metadata about the type of iteration</param>
-		public void IterationStarting(IterationStartingArgs args)
-		{
-			Logger.Trace("IterationStarting: {0} {1} {2}", Name, args.IsReproduction, args.LastWasFault);
-			parent.Context.OnIterationStarting(this);
-
-			OnIterationStarting(args);
-		}
+		public abstract void IterationStarting(IterationStartingArgs args);
 
 		/// <summary>
 		/// Iteration has completed.
 		/// </summary>
 		/// <returns>Returns true to indicate iteration should be re-run, else false.</returns>
-		public void IterationFinished()
-		{
-			Logger.Trace("IterationFinished: {0}", Name);
-			parent.Context.OnIterationFinished(this);
-
-			OnIterationFinished();
-		}
+		public abstract void IterationFinished();
 
 		/// <summary>
 		/// Was a fault detected during current iteration?
 		/// </summary>
 		/// <returns>True if a fault was detected, else false.</returns>
-		public bool DetectedFault()
-		{
-			Logger.Trace("DetectedFault: {0}", Name);
-			parent.Context.OnDetectedFault(this);
-
-			return OnDetectedFault();
-		}
+		public abstract bool DetectedFault();
 
 		/// <summary>
 		/// Get the fault information
 		/// </summary>
 		/// <returns>Returns array of Fault instances</returns>
-		public Fault[] GetMonitorData()
-		{
-			Logger.Trace("GetMonitorData: {0}", Name);
-			parent.Context.OnGetMonitorData(this);
-
-			var ret = OnGetMonitorData();
-
-			foreach (var item in ret)
-				item.agentName = Name;
-
-			return ret;
-		}
+		public abstract IEnumerable<Fault> GetMonitorData();
 
 		/// <summary>
 		/// Can the fuzzing session continue, or must we stop?
 		/// </summary>
 		/// <returns>True if session must stop, else false.</returns>
-		public bool MustStop()
-		{
-			Logger.Trace("MustStop: {0}", Name);
-			parent.Context.OnMustStop(this);
-
-			return OnMustStop();
-		}
+		public abstract bool MustStop();
 
 		/// <summary>
 		/// Send a message to all monitors.
 		/// </summary>
 		/// <param name="msg">Message</param>
-		public void Message(string msg)
-		{
-			Logger.Trace("Message: {0} {1}", Name, msg);
-			parent.Context.OnMessage(this, msg);
-
-			OnMessage(msg);
-		}
-
-		#endregion
-
-		#region Abstract Interface
-
-		#region Agent Control
-
-		/// <summary>
-		/// Connect to agent
-		/// </summary>
-		protected abstract void OnAgentConnect();
-
-		/// <summary>
-		/// Disconnect from agent
-		/// </summary>
-		protected abstract void OnAgentDisconnect();
-
-		#endregion
-
-		#region Publisher Functions
-
-		/// <summary>
-		/// Creates a publisher on the remote agent
-		/// </summary>
-		/// <param name="cls">Class of publisher to create</param>
-		/// <param name="args">Arguments for publisher</param>
-		/// <returns>Instance of remote publisher</returns>
-		protected abstract IPublisher OnCreatePublisher(string cls, Dictionary<string, Variant> args);
-
-		#endregion
-
-		#region Monitor Functions
-
-		/// <summary>
-		/// Start a specific monitor
-		/// </summary>
-		/// <param name="name">Name for monitor instance</param>
-		/// <param name="cls">Class of monitor to start</param>
-		/// <param name="args">Arguments</param>
-		protected abstract void OnStartMonitor(string name, string cls, Dictionary<string, Variant> args);
-
-		/// <summary>
-		/// Stop all monitors currently running
-		/// </summary>
-		protected abstract void OnStopAllMonitors();
-
-		/// <summary>
-		/// Starting a fuzzing session.  A session includes a number of test iterations.
-		/// </summary>
-		protected abstract void OnSessionStarting();
-
-		/// <summary>
-		/// Finished a fuzzing session.
-		/// </summary>
-		protected abstract void OnSessionFinished();
-
-		/// <summary>
-		/// Starting a new iteration
-		/// </summary>
-		/// <param name="args">Metadata about the type of iteration</param>
-		protected abstract void OnIterationStarting(IterationStartingArgs args);
-		/// <summary>
-		/// Iteration has completed.
-		/// </summary>
-		/// <returns>Returns true to indicate iteration should be re-run, else false.</returns>
-		protected abstract void OnIterationFinished();
-
-		/// <summary>
-		/// Was a fault detected during current iteration?
-		/// </summary>
-		/// <returns>True if a fault was detected, else false.</returns>
-		protected abstract bool OnDetectedFault();
-
-		/// <summary>
-		/// Get the fault information
-		/// </summary>
-		/// <returns>Returns array of Fault instances</returns>
-		protected abstract Fault[] OnGetMonitorData();
-
-		/// <summary>
-		/// Can the fuzzing session continue, or must we stop?
-		/// </summary>
-		/// <returns>True if session must stop, else false.</returns>
-		protected abstract bool OnMustStop();
-
-		/// <summary>
-		/// Send a message to all monitors.
-		/// </summary>
-		/// <param name="msg">Message</param>
-		/// <returns>Returns data as Variant or null.</returns>
-		protected abstract void OnMessage(string msg);
-
-		#endregion
-
-		#endregion
+		public abstract void Message(string msg);
 	}
 
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-	public class AgentAttribute : Attribute
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+	public class AgentAttribute : PluginAttribute
 	{
-		public string protocol;
-		public bool isDefault;
-
-		public AgentAttribute(string protocol, bool isDefault = false)
+		public AgentAttribute(string name)
+			: base(typeof(AgentClient), name, true)
 		{
-			this.protocol = protocol;
-			this.isDefault = isDefault;
 		}
 	}
-
-
 }

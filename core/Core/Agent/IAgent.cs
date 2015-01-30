@@ -13,7 +13,7 @@ namespace Peach.Core.Agent
 
 		void AgentConnect();
 		void AgentDisconnect();
-		void StartMonitor(string name, string cls, IEnumerable<KeyValuePair<string, Variant>> args);
+		void StartMonitor(string name, string cls, IEnumerable<KeyValuePair<string, string>> args);
 		void StopAllMonitors();
 		void SessionStarting();
 		void SessionFinished();
