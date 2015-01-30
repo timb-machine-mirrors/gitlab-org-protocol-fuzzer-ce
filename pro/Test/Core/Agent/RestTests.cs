@@ -96,18 +96,15 @@ namespace Peach.Pro.Test.Core.Agent
 
 			try
 			{
-				var cli = new Client(null, uri.ToString(), null)
-				{
-					parent = new AgentManager(new RunContext()),
-				};
+				var cli = new Client(null, uri.ToString(), null);
 
 				cli.AgentConnect();
-				cli.StartMonitor("mon", "TcpPort", new Dictionary<string, Variant>
+				cli.StartMonitor("mon", "TcpPort", new Dictionary<string, string>
 				{
-					{"Host", new Variant("localhost")},
-					{"Port", new Variant("1")},
-					{"WaitOnCall", new Variant("MyWaitMessage")},
-					{"When", new Variant("OnCall")},
+					{"Host", "localhost" },
+					{"Port", "1" },
+					{"WaitOnCall", "MyWaitMessage" },
+					{"When", "OnCall" },
 				});
 				cli.SessionStarting();
 				cli.SessionFinished();

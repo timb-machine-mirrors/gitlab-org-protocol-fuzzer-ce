@@ -315,9 +315,7 @@ namespace Peach.Core
 
 				logger.Debug("EndTest: Stoping all agents and monitors");
 
-				_context.agentManager.SessionFinished();
-				_context.agentManager.StopAllMonitors();
-				_context.agentManager.Shutdown();
+				_context.agentManager.Dispose();
 				_context.agentManager = null;
 
 				_context.test.strategy.Finalize(_context, this);
@@ -768,11 +766,11 @@ namespace Peach.Core
 				{
 					try
 					{
-						// Note: We want to perfrom SessionStarting on each agent
-						//       in turn.  We do this incase the first agent starts
-						//       a virtual machine that contains the second agent.
-						ctx.agentManager.AgentConnect(agent);
-						ctx.agentManager.GetAgent(agent.Name).SessionStarting();
+						// AgentConnect will do three things:
+						// 1) Connect to the agent
+						// 2) Call StartMonitor on each monitor
+						// 3) Call SessionStarting on each monitor
+						ctx.agentManager.Connect(agent);
 					}
 					catch (SoftException)
 					{

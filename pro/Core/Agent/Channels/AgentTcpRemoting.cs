@@ -50,7 +50,7 @@ namespace Peach.Pro.Core.Agent.Channels
 {
 	#region TCP Agent Client
 
-	[Agent("tcp", true)]
+	[Agent("tcp")]
 	public class AgentClientTcpRemoting : AgentClient
 	{
 		#region Publisher Proxy
@@ -150,9 +150,11 @@ namespace Peach.Pro.Core.Agent.Channels
 
 			#region Public Members
 
+			public string name { get; private set; }
+
 			public string cls { get; private set; }
 
-			public List<KeyValuePair<string, Variant>> args { get; private set; }
+			public List<KeyValuePair<string, string>> args { get; private set; }
 
 			public PublisherTcpRemote proxy
 			{
@@ -185,8 +187,9 @@ namespace Peach.Pro.Core.Agent.Channels
 
 			#region Constructor
 
-			public PublisherProxy(string cls, Dictionary<string, Variant> args)
+			public PublisherProxy(string name, string cls, Dictionary<string, string> args)
 			{
+				this.name = name;
 				this.cls = cls;
 				this.args = args.ToList();
 				this.stream = new MemoryStream();
@@ -348,13 +351,11 @@ namespace Peach.Pro.Core.Agent.Channels
 
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		protected override NLog.Logger Logger { get { return logger; } }
-
 		class MonitorInfo
 		{
 			public string Name { get; set; }
 			public string Class { get; set; }
-			public List<KeyValuePair<string, Variant>> Args { get; set; }
+			public List<KeyValuePair<string, string>> Args { get; set; }
 		}
 
 		List<MonitorInfo> monitors = new List<MonitorInfo>();
@@ -515,7 +516,7 @@ namespace Peach.Pro.Core.Agent.Channels
 				// Iteration/IsControlIteration is set on the publishers
 				// Therefore we just need to recreate the publisher proxy
 				foreach (var item in publishers)
-					item.proxy = proxy.CreatePublisher(item.cls, item.args);
+					item.proxy = proxy.CreatePublisher(item.name, item.cls, item.args);
 			});
 		}
 
@@ -523,7 +524,7 @@ namespace Peach.Pro.Core.Agent.Channels
 
 		#region AgentClient Overrides
 
-		protected override void OnAgentConnect()
+		public override void AgentConnect()
 		{
 			System.Diagnostics.Debug.Assert(channel == null);
 
@@ -553,7 +554,7 @@ namespace Peach.Pro.Core.Agent.Channels
 			}
 		}
 
-		protected override void OnAgentDisconnect()
+		public override void AgentDisconnect()
 		{
 			try
 			{
@@ -566,44 +567,44 @@ namespace Peach.Pro.Core.Agent.Channels
 			}
 		}
 
-		protected override IPublisher OnCreatePublisher(string cls, Dictionary<string, Variant> args)
+		public override IPublisher CreatePublisher(string pubName, string cls, Dictionary<string, string> args)
 		{
-			var pub = new PublisherProxy(cls, args);
+			var pub = new PublisherProxy(pubName, cls, args);
 
 			publishers.Add(pub);
 
-			Exec(() => { pub.proxy = proxy.CreatePublisher(pub.cls, pub.args); });
+			Exec(() => { pub.proxy = proxy.CreatePublisher(pub.name, pub.cls, pub.args); });
 
 			return pub;
 		}
 
-		protected override void OnStartMonitor(string name, string cls, Dictionary<string, Variant> args)
+		public override void StartMonitor(string monName, string cls, Dictionary<string, string> args)
 		{
 			// Remote 'args' as a List to support mono/microsoft interoperability
 			var asList = args.ToList();
 
 			// Keep track of monitor info so we can recreate them if the proxy disappears
-			monitors.Add(new MonitorInfo() { Name = name, Class = cls, Args = asList });
+			monitors.Add(new MonitorInfo { Name = monName, Class = cls, Args = asList });
 
-			Exec(() => proxy.StartMonitor(name, cls, asList));
+			Exec(() => proxy.StartMonitor(monName, cls, asList));
 		}
 
-		protected override void OnStopAllMonitors()
+		public override void StopAllMonitors()
 		{
 			Exec(() => proxy.StopAllMonitors());
 		}
 
-		protected override void OnSessionStarting()
+		public override void SessionStarting()
 		{
 			Exec(() => proxy.SessionStarting());
 		}
 
-		protected override void OnSessionFinished()
+		public override void SessionFinished()
 		{
 			Exec(() => proxy.SessionFinished());
 		}
 
-		protected override void OnIterationStarting(IterationStartingArgs args)
+		public override void IterationStarting(IterationStartingArgs args)
 		{
 			try
 			{
@@ -623,27 +624,27 @@ namespace Peach.Pro.Core.Agent.Channels
 			}
 		}
 
-		protected override void OnIterationFinished()
+		public override void IterationFinished()
 		{
 			Exec(() => proxy.IterationFinished());
 		}
 
-		protected override bool OnDetectedFault()
+		public override bool DetectedFault()
 		{
 			return Exec(() => proxy.DetectedFault());
 		}
 
-		protected override Fault[] OnGetMonitorData()
+		public override IEnumerable<Fault> GetMonitorData()
 		{
 			return Exec(() => proxy.GetMonitorData());
 		}
 
-		protected override bool OnMustStop()
+		public override bool MustStop()
 		{
 			return Exec(() => proxy.MustStop());
 		}
 
-		protected override void OnMessage(string msg)
+		public override void Message(string msg)
 		{
 			Exec(() => proxy.Message(msg));
 		}
@@ -799,10 +800,10 @@ namespace Peach.Pro.Core.Agent.Channels
 
 		private readonly Agent _agent = new Agent();
 
-		public PublisherTcpRemote CreatePublisher(string cls, IEnumerable<KeyValuePair<string, Variant>> args)
+		public PublisherTcpRemote CreatePublisher(string name, string cls, IEnumerable<KeyValuePair<string, string>> args)
 		{
 			logger.Trace("CreatePublisher: {0}", cls);
-			return new PublisherTcpRemote(_agent.CreatePublisher(cls, args.ToDictionary(i => i.Key, i => i.Value)));
+			return new PublisherTcpRemote(_agent.CreatePublisher(name, cls, args.ToDictionary(i => i.Key, i => i.Value)));
 		}
 
 		public void AgentConnect()
@@ -817,7 +818,7 @@ namespace Peach.Pro.Core.Agent.Channels
 			_agent.AgentDisconnect();
 		}
 
-		public void StartMonitor(string name, string cls, IEnumerable<KeyValuePair<string, Variant>> args)
+		public void StartMonitor(string name, string cls, IEnumerable<KeyValuePair<string, string>> args)
 		{
 			logger.Trace("StartMonitor: {0} {1}", name, cls);
 			_agent.StartMonitor(name, cls, args.ToDictionary(i => i.Key, i => i.Value));
@@ -868,7 +869,7 @@ namespace Peach.Pro.Core.Agent.Channels
 		public Fault[] GetMonitorData()
 		{
 			logger.Trace("GetMonitorData");
-			return _agent.GetMonitorData();
+			return _agent.GetMonitorData().ToArray();
 		}
 
 		public bool MustStop()

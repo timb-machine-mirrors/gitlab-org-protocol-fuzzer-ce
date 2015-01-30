@@ -396,7 +396,7 @@ namespace Peach.Pro.Core.Runtime
 		/// <param name="agent"></param>
 		protected virtual void OnRunAgent(string agent)
 		{
-			var agentType = ClassLoader.FindTypeByAttribute<AgentServerAttribute>((x, y) => y.name == agent);
+			var agentType = ClassLoader.FindTypeByAttribute<AgentServerAttribute>((x, y) => y.Name == agent);
 			if (agentType == null)
 				throw new PeachException("Error, unable to locate agent server for protocol '" + agent + "'.\n");
 

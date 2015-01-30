@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
 using Logger = NLog.Logger;
@@ -11,7 +12,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 	[Agent("json")]
 	public class Client : AgentClient
 	{
-		private static readonly Logger ClassLogger = NLog.LogManager.GetCurrentClassLogger();
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
 		private readonly Uri _baseUrl;
 
@@ -31,12 +32,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			_baseUrl = new Uri("http://{0}:{1}".Fmt(_baseUrl.Host, _baseUrl.Port));
 		}
 
-		protected override Logger Logger
-		{
-			get { return ClassLogger; }
-		}
-
-		protected override void OnAgentConnect()
+		public override void AgentConnect()
 		{
 			_connectReq = new ConnectRequest
 			{
@@ -44,17 +40,17 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			};
 		}
 
-		protected override void OnStartMonitor(string mon, string cls, Dictionary<string, Variant> args)
+		public override void StartMonitor(string monName, string cls, Dictionary<string, string> args)
 		{
 			_connectReq.Monitors.Add(new ConnectRequest.Monitor
 			{
-				Name = mon,
+				Name = monName,
 				Class = cls,
-				Args = args.ToDictionary(kv => kv.Key, kv => (string)kv.Value),
+				Args = args
 			});
 		}
 
-		protected override void OnSessionStarting()
+		public override void SessionStarting()
 		{
 			// Send the initial POST to the base url
 			_agentUrl = new Uri(_baseUrl, "/p/agent");
@@ -62,7 +58,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			_agentUrl = new Uri(_baseUrl, _connectResp.Url);
 		}
 
-		protected override void OnSessionFinished()
+		public override void SessionFinished()
 		{
 			Send("DELETE", "", null);
 
@@ -70,26 +66,26 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			_agentUrl = null;
 		}
 
-		protected override void OnStopAllMonitors()
+		public override void StopAllMonitors()
 		{
 			// OnSessionFinished does StopAllMonitors
 		}
 
-		protected override void OnAgentDisconnect()
+		public override void AgentDisconnect()
 		{
 			// OnSessionFinished does AgentDisconnect
 		}
 
-		protected override IPublisher OnCreatePublisher(string cls, Dictionary<string, Variant> args)
+		public override IPublisher CreatePublisher(string pubName, string cls, Dictionary<string, string> args)
 		{
 			throw new NotImplementedException();
 		}
 
-		protected override void OnIterationStarting(IterationStartingArgs args)
+		public override void IterationStarting(IterationStartingArgs args)
 		{
 			// If any previous call failed, we need to reconnect
 			if (_agentUrl == null)
-				OnSessionStarting();
+				SessionStarting();
 
 			// Reset any state from a previous call to GetMoniorData
 			_mustStop = false;
@@ -106,13 +102,13 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			Send("PUT", "/IterationStarting", req);
 		}
 
-		protected override void OnIterationFinished()
+		public override void IterationFinished()
 		{
 			if (_connectResp.Messages.Contains("/IterationFinished"))
 				Send("PUT", "/IterationFinished", null);
 		}
 
-		protected override bool OnDetectedFault()
+		public override bool DetectedFault()
 		{
 			if (!_connectResp.Messages.Contains("/DetectedFault"))
 				return false;
@@ -122,7 +118,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			return resp.Value;
 		}
 
-		protected override Fault[] OnGetMonitorData()
+		public override IEnumerable<Fault> GetMonitorData()
 		{
 			if (!_connectResp.Messages.Contains("/GetMonitorData"))
 				return null;
@@ -132,17 +128,17 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			if (resp.Faults == null)
 				return null;
 
-			var ret = resp.Faults.Select(MakeFault).ToArray();
+			var ret = resp.Faults.Select(MakeFault);
 
 			return ret;
 		}
 
-		protected override bool OnMustStop()
+		public override bool MustStop()
 		{
 			return _mustStop;
 		}
 
-		protected override void OnMessage(string msg)
+		public override void Message(string msg)
 		{
 			var path = "/Message/{0}".Fmt(msg);
 
@@ -197,7 +193,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		{
 			if (_agentUrl == null)
 			{
-				Logger.Debug("Agent server '{0}' is offline, ignoring '{1}' command.", url, path);
+				Logger.Debug("Agent server '{0}' is offline, ignoring '{1}' command.", Url, path);
 				return default(T);
 			}
 
