@@ -19,7 +19,6 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		private ConnectRequest _connectReq;
 		private ConnectResponse _connectResp;
 		private Uri _agentUrl;
-		private bool _mustStop;
 
 		public Client(string name, string uri, string password)
 			: base(name, uri, password)
@@ -87,9 +86,6 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			if (_agentUrl == null)
 				SessionStarting();
 
-			// Reset any state from a previous call to GetMoniorData
-			_mustStop = false;
-
 			if (!_connectResp.Messages.Contains("/IterationStarting"))
 				return;
 
@@ -118,7 +114,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			return resp.Value;
 		}
 
-		public override IEnumerable<Fault> GetMonitorData()
+		public override IEnumerable<MonitorData> GetMonitorData()
 		{
 			if (!_connectResp.Messages.Contains("/GetMonitorData"))
 				return null;
@@ -133,11 +129,6 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			return ret;
 		}
 
-		public override bool MustStop()
-		{
-			return _mustStop;
-		}
-
 		public override void Message(string msg)
 		{
 			var path = "/Message/{0}".Fmt(msg);
@@ -146,31 +137,27 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				Send("PUT", path, null);
 		}
 
-		private Fault MakeFault(FaultResponse.Record f)
+		private MonitorData MakeFault(FaultResponse.Record f)
 		{
-			var ret = new Fault
+			var ret = new MonitorData
 			{
-				type = FaultType.Data,
-				agentName = Name,
-				monitorName = f.MonitorName,
-				detectionSource = f.DetectionSource,
-				collectedData = f.Data.Select(d => new Fault.Data
-				{
-					Key = d.Key,
-					Value = d.Value,
-				}).ToList(),
+				AgentName = Name,
+				DetectionSource = f.DetectionSource,
+				MonitorName = f.MonitorName,
+				Data = f.Data.ToDictionary(i => i.Key, i => i.Value),
 			};
 
 			if (f.Fault != null)
 			{
-				ret.type = FaultType.Fault;
-				ret.title = f.Fault.Title;
-				ret.description = f.Fault.Description;
-				ret.majorHash = f.Fault.MajorHash;
-				ret.minorHash = f.Fault.MinorHash;
-				ret.exploitability =f.Fault.Risk;
-
-				_mustStop |= f.Fault.MustStop;
+				ret.Fault = new MonitorData.Info
+				{
+					Title = f.Fault.Title,
+					Description = f.Fault.Description,
+					MajorHash = f.Fault.MajorHash,
+					MinorHash = f.Fault.MinorHash,
+					Risk = f.Fault.Risk,
+					MustStop = f.Fault.MustStop,
+				};
 			}
 
 			return ret;

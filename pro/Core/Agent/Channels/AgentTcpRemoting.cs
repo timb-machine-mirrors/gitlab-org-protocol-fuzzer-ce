@@ -634,14 +634,9 @@ namespace Peach.Pro.Core.Agent.Channels
 			return Exec(() => proxy.DetectedFault());
 		}
 
-		public override IEnumerable<Fault> GetMonitorData()
+		public override IEnumerable<MonitorData> GetMonitorData()
 		{
-			return Exec(() => proxy.GetMonitorData());
-		}
-
-		public override bool MustStop()
-		{
-			return Exec(() => proxy.MustStop());
+			return Exec(() => proxy.GetMonitorData().Select(FromRemoteData));
 		}
 
 		public override void Message(string msg)
@@ -650,6 +645,32 @@ namespace Peach.Pro.Core.Agent.Channels
 		}
 
 		#endregion
+
+		private MonitorData FromRemoteData(RemoteData data)
+		{
+			var ret = new MonitorData
+			{
+				AgentName = Name,
+				MonitorName = data.MonitorName,
+				DetectionSource = data.DetectionSource,
+				Data = data.Data.ToDictionary(i => i.Key, i => i.Value),
+			};
+
+			if (data.Fault != null)
+			{
+				ret.Fault = new MonitorData.Info
+				{
+					Title = data.Fault.Title,
+					Description = data.Fault.Description,
+					MajorHash = data.Fault.MajorHash,
+					MinorHash = data.Fault.MinorHash,
+					Risk = data.Fault.Risk,
+					MustStop = data.Fault.MustStop,
+				};
+			}
+
+			return ret;
+		}
 	}
 
 	#endregion
@@ -791,10 +812,30 @@ namespace Peach.Pro.Core.Agent.Channels
 
 	#region Agent Remoting Object
 
+	[Serializable]
+	internal class RemoteData
+	{
+		[Serializable]
+		internal class Info
+		{
+			public string Title { get; set; }
+			public string Description { get; set; }
+			public string MajorHash { get; set; }
+			public string MinorHash { get; set; }
+			public string Risk { get; set; }
+			public bool MustStop { get; set; }
+		}
+
+		public string MonitorName { get; set; }
+		public string DetectionSource { get; set; }
+		public Info Fault { get; set; }
+		public List<KeyValuePair<string, byte[]>> Data { get; set; }
+	}
+
 	/// <summary>
 	/// Implement agent service running over .NET TCP remoting
 	/// </summary>
-	internal class AgentTcpRemote : MarshalByRefObject, IAgent
+	internal class AgentTcpRemote : MarshalByRefObject
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -866,22 +907,41 @@ namespace Peach.Pro.Core.Agent.Channels
 			return _agent.DetectedFault();
 		}
 
-		public Fault[] GetMonitorData()
+		public RemoteData[] GetMonitorData()
 		{
 			logger.Trace("GetMonitorData");
-			return _agent.GetMonitorData().ToArray();
-		}
-
-		public bool MustStop()
-		{
-			logger.Trace("MustStop");
-			return _agent.MustStop();
+			return _agent.GetMonitorData().Select(ToRemoteData).ToArray();
 		}
 
 		public void Message(string msg)
 		{
 			logger.Trace("Message: {0}", msg);
 			_agent.Message(msg);
+		}
+
+		private static RemoteData ToRemoteData(MonitorData data)
+		{
+			var ret = new RemoteData
+			{
+				MonitorName = data.MonitorName,
+				DetectionSource = data.DetectionSource,
+				Data = data.Data.ToList(),
+			};
+
+			if (data.Fault != null)
+			{
+				ret.Fault = new RemoteData.Info
+				{
+					Title = data.Fault.Title,
+					Description = data.Fault.Description,
+					MajorHash = data.Fault.MajorHash,
+					MinorHash = data.Fault.MinorHash,
+					Risk = data.Fault.Risk,
+					MustStop = data.Fault.MustStop,
+				};
+			}
+
+			return ret;
 		}
 	}
 

@@ -135,13 +135,7 @@ namespace Peach.Core.Agent
 		/// Get the fault information
 		/// </summary>
 		/// <returns>Returns array of Fault instances</returns>
-		public abstract IEnumerable<Fault> GetMonitorData();
-
-		/// <summary>
-		/// Can the fuzzing session continue, or must we stop?
-		/// </summary>
-		/// <returns>True if session must stop, else false.</returns>
-		public abstract bool MustStop();
+		public abstract IEnumerable<MonitorData> GetMonitorData();
 
 		/// <summary>
 		/// Send a message to all monitors.

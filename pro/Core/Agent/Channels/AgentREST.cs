@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using Newtonsoft.Json;
 using NLog;
@@ -658,26 +659,25 @@ namespace Peach.Pro.Core.Agent.Channels
 			return ParseResponse(json);
 		}
 
-		public override IEnumerable<Fault> GetMonitorData()
+		public override IEnumerable<MonitorData> GetMonitorData()
 		{
 			try
 			{
 				var json = Send("GetMonitorData");
 				var response = JsonConvert.DeserializeObject<JsonFaultResponse>(json);
 
-				return response.Results;
+				var ret = response.Results.Select(AsMonitorData).ToList();
+				foreach (var item in ret.Where(item => item.Fault != null))
+				{
+					item.Fault.MustStop = ParseResponse(Send("MustStop"));
+				}
+				return ret;
 			}
 			catch (Exception e)
 			{
 				Logger.Debug(e.ToString());
 				throw new PeachException("Failed to get Monitor Data", e);
 			}
-		}
-
-		public override bool MustStop()
-		{
-			var json = Send("MustStop");
-			return ParseResponse(json);
 		}
 
 		public override void Message(string msg)
@@ -688,6 +688,32 @@ namespace Peach.Pro.Core.Agent.Channels
 		#endregion
 
 		#region Private Helpers
+
+		private MonitorData AsMonitorData(Fault f)
+		{
+			var ret = new MonitorData
+			{
+				AgentName = Name,
+				DetectionSource = f.detectionSource,
+				MonitorName = f.monitorName,
+				Data = f.collectedData.ToDictionary(i => i.Key, i => i.Value),
+			};
+
+			if (f.type == FaultType.Fault)
+			{
+				ret.Fault = new MonitorData.Info
+				{
+					Title = f.title,
+					Description = f.description,
+					MajorHash = f.majorHash,
+					MinorHash = f.minorHash,
+					Risk = f.exploitability,
+					MustStop = f.mustStop,
+				};
+			}
+
+			return ret;
+		}
 
 		bool ParseResponse(string json)
 		{

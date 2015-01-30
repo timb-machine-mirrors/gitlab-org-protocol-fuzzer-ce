@@ -237,14 +237,6 @@ namespace Peach.Core
 				GetMonitorData(this, agent);
 		}
 
-		public event AgentEventHandler MustStop;
-
-		public void OnMustStop(AgentClient agent)
-		{
-			if (MustStop != null)
-				MustStop(this, agent);
-		}
-
 		public event MessageEventHandler Message;
 
 		public void OnMessage(AgentClient agent, string msg)

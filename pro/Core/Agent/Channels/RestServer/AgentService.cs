@@ -31,7 +31,6 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 			Get["/DetectedFault"] = _ => DetectedFault();
 			Get["/GetMonitorData"] = _ => GetMonitorData();
 
-			Get["/MustStop"] = _ => MustStop();
 			Get["/Message"] = _ => Message();
 
 			// PUBLISHER ///////
@@ -249,25 +248,6 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 			return Response.AsJson(new JsonFaultResponse()
 			{
 				Results = (Fault[])task.Result
-			});
-		}
-
-		object MustStop()
-		{
-			var task = new AgentTask()
-			{
-				Task = _ =>
-				{
-					return this.context.Agent.MustStop();
-				}
-			};
-
-			context.Dispatcher.QueueTask(task);
-			task.Completed.WaitOne();
-
-			return Response.AsJson(new JsonResponse()
-			{
-				Status = task.Result.ToString()
 			});
 		}
 

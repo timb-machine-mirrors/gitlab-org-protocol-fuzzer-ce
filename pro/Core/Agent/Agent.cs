@@ -76,7 +76,7 @@ namespace Peach.Pro.Core.Agent
 
 		#endregion
 
-		#region IAgent Members
+		#region Agent Members
 
 		public void AgentConnect()
 		{
@@ -177,43 +177,29 @@ namespace Peach.Pro.Core.Agent
 			return detectedFault;
 		}
 
-		public List<Fault> GetMonitorData()
+		public List<MonitorData> GetMonitorData()
 		{
 			Logger.Trace("GetMonitorData");
 
-			var faults = new List<Fault>();
+			var ret = new List<MonitorData>();
 
 			foreach (var mon in _monitors)
 			{
 				Guard(mon, "GetMonitorData", m =>
 				{
-					var fault = m.GetMonitorData();
+					var data = m.GetNewMonitorData();
 
-					if (fault == null)
+					if (data == null)
 						return;
 
-					fault.monitorName = m.Name;
-					fault.detectionSource = fault.detectionSource ?? m.Class;
+					data.MonitorName = m.Name;
+					data.DetectionSource = data.DetectionSource ?? m.Class;
 
-					faults.Add(fault);
+					ret.Add(data);
 				});
 			}
 
-			return faults;
-		}
-
-		public bool MustStop()
-		{
-			Logger.Trace("MustStop");
-
-			var mustStop = false;
-
-			foreach (var mon in _monitors)
-			{
-				Guard(mon, "MustStop", m => mustStop |= m.MustStop());
-			}
-
-			return mustStop;
+			return ret;
 		}
 
 		public void Message(string msg)
