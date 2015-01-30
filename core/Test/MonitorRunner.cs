@@ -10,6 +10,12 @@ namespace Peach.Core.Test
 	public class MonitorRunner
 	{
 		/// <summary>
+		/// Controls the StartMonitor behaviour for each monitor.
+		/// The default is (m, args) => m.StartMonitor(args)
+		/// </summary>
+		public Action<Monitor, Dictionary<string, string>> StartMonitor { get; set; }
+
+		/// <summary>
 		/// Controls the SessionStarting behaviour for each monitor.
 		/// The default is m => m.SessionStarting()
 		/// </summary>
@@ -74,8 +80,9 @@ namespace Peach.Core.Test
 
 		public MonitorRunner()
 		{
-			_monitors = new List<Monitor>();
+			_monitors = new List<Holder>();
 
+			StartMonitor = (m, args) => m.StartMonitor(args);
 			SessionStarting = m => m.SessionStarting();
 			IterationStarting = (m, args) => m.IterationStarting(args);
 			Message = m => { };
@@ -99,10 +106,13 @@ namespace Peach.Core.Test
 
 			try
 			{
-				var mon = (Monitor)Activator.CreateInstance(type, monitorName);
-				mon.StartMonitor(parameters);
+				var item = new Holder
+				{
+					Monitor = (Monitor) Activator.CreateInstance(type, monitorName),
+					Args = parameters
+				};
 
-				_monitors.Add(mon);
+				_monitors.Add(item);
 			}
 			catch (Exception ex)
 			{
@@ -125,6 +135,8 @@ namespace Peach.Core.Test
 
 			var ret = new List<Fault>();
 			var lastWasFault = false;
+
+			_monitors.ForEach(i => StartMonitor(i.Monitor, i.Args));
 
 			Forward.ForEach(m => SessionStarting(m));
 
@@ -178,11 +190,17 @@ namespace Peach.Core.Test
 			return ret.ToArray();
 		}
 
-		private IEnumerable<Monitor> Forward { get { return _monitors; } }
+		private IEnumerable<Monitor> Forward { get { return _monitors.Select(i => i.Monitor); } }
 
 		private IEnumerable<Monitor> Reverse { get { return Forward.Reverse(); } }
 
-		private readonly List<Monitor> _monitors;
+		class Holder
+		{
+			public Monitor Monitor { get; set; }
+			public Dictionary<string, string> Args { get; set; }
+		}
+
+		private readonly List<Holder> _monitors;
 	}
 	
 }
