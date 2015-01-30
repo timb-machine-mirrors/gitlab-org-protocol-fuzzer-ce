@@ -3,8 +3,15 @@
 
 More information about Peach can be found on our http://peachfuzzer.com[website] and the https://forums.peachfuzzer.com[user forums].
 
+=== Bug Reporting Guidelines
+
+Support for Peach Fuzzer is available in two ways:
+
+ * The Peach Forums site
+ * Using the Peach ticketing system to open a support ticket
+
 [[Peach_Forums]]
-=== Peach Forums
+==== Peach Forums
 
 There are two sets of forums for Peach, the community forums and the professional forums. Both forums are hosted at https://forums.peachfuzzer.com.
 
@@ -17,3 +24,15 @@ To access the {product} forums, follow these steps:
 . Your account will be granted access to the commercial forums within 24 business hours.
 
 Forums are monitored by the Deja vu Security team, but there is no guarantee of response time.
+
+==== Support Tickets
+
+You can open a support ticket by sending an email to _support@dejavusecurity.com_. You will receive an initial response within 24 business hours of opening the ticket. Peach support is available Monday through Friday. Peach support is not currently available on weekends or holidays.
+
+When opening a ticket, please provide the following information in your email:
+
+ * Operating system(s) in use by Peach and any agents
+ * Exact version of Peach being used. This is available from the console output and in the _status.txt_ log file
+ * Detailed description of the issue and expected behavior
+ * Console output using the _--trace_ argument
+ * (if possible) the full Pit file and configuration files
