@@ -75,7 +75,6 @@ namespace Peach.Core
 			context.IterationFinished += Agent_IterationFinished;
 			context.DetectedFault += Agent_DetectedFault;
 			context.GetMonitorData += Agent_GetMonitorData;
-			context.MustStop += Agent_MustStop;
 			context.Message += Agent_Message;
 		}
 
@@ -102,7 +101,6 @@ namespace Peach.Core
 			context.IterationFinished -= Agent_IterationFinished;
 			context.DetectedFault -= Agent_DetectedFault;
 			context.GetMonitorData -= Agent_GetMonitorData;
-			context.MustStop -= Agent_MustStop;
 			context.Message -= Agent_Message;
 		}
 
@@ -149,10 +147,6 @@ namespace Peach.Core
 		}
 
 		protected virtual void Agent_GetMonitorData(RunContext context, AgentClient agent)
-		{
-		}
-
-		protected virtual void Agent_MustStop(RunContext context, AgentClient agent)
 		{
 		}
 

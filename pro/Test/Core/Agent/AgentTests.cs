@@ -181,17 +181,17 @@ namespace Peach.Pro.Test.Core.Agent
 				var contents = File.ReadAllLines(tmp);
 				var expected = new[] {
 // Iteration 83 (Control & Record)
-"M.StartMonitor", "M.SessionStarting", "M.IterationStarting False False", "M.IterationFinished", "M.DetectedFault", "M.MustStop", 
+"M.StartMonitor", "M.SessionStarting", "M.IterationStarting False False", "M.IterationFinished", "M.DetectedFault", 
 // Iteration 83 - Agent is killed (IterationFinished is a hack to kill CrashableServer)
 "M.IterationStarting False False", "M.IterationFinished", 
 // Agent is restarted & fault is not detected
-"M.StartMonitor", "M.SessionStarting", "M.IterationStarting False False", "M.IterationFinished", "M.DetectedFault", "M.MustStop", 
+"M.StartMonitor", "M.SessionStarting", "M.IterationStarting False False", "M.IterationFinished", "M.DetectedFault",
 // Agent is killed
 "M.IterationStarting False False", "M.IterationFinished", 
 // Agent is restarted & fault is detected
-"M.StartMonitor", "M.SessionStarting", "M.IterationStarting False False", "M.IterationFinished", "M.DetectedFault", "M.GetMonitorData", "M.MustStop",
+"M.StartMonitor", "M.SessionStarting", "M.IterationStarting False False", "M.IterationFinished", "M.DetectedFault", "M.GetMonitorData",
 // Reproduction occurs & fault is detected
-"M.IterationStarting True True", "M.IterationFinished", "M.DetectedFault", "M.GetMonitorData", "M.MustStop",
+"M.IterationStarting True True", "M.IterationFinished", "M.DetectedFault", "M.GetMonitorData",
 // Fussing stops
 "M.SessionFinished", "M.StopMonitor"
 				};
@@ -483,10 +483,6 @@ namespace Peach.Pro.Test.Core.Agent
 				"Local1.mon2.DetectedFault",
 				"Local2.mon1.DetectedFault",
 				"Local2.mon2.DetectedFault",
-				"Local1.mon1.MustStop",
-				"Local1.mon2.MustStop",
-				"Local2.mon1.MustStop",
-				"Local2.mon2.MustStop",
 				"Local2.mon2.SessionFinished",
 				"Local2.mon1.SessionFinished",
 				"Local1.mon2.SessionFinished",

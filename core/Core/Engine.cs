@@ -691,7 +691,7 @@ namespace Peach.Core
 						}
 					}
 
-					if (context.agentManager.MustStop())
+					if (context.faults.Any(f => f.mustStop))
 					{
 						logger.Debug("runTest: agents say we must stop!");
 

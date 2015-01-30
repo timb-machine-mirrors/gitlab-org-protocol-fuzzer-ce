@@ -169,22 +169,6 @@ namespace Peach.Core.Agent
 			}
 		}
 
-		public bool MustStop()
-		{
-			var ret = false;
-
-			foreach (var agent in _agents)
-			{
-				Logger.Trace("MustStop: {0}", agent.Name);
-				Context.OnMustStop(agent);
-				Guard(agent, "MustStop", a => ret |= a.MustStop());
-			}
-
-			Logger.Trace("MustStop: {0}", ret);
-
-			return ret;
-		}
-
 		public void Message(string msg)
 		{
 			foreach (var agent in _agents)
@@ -217,8 +201,34 @@ namespace Peach.Core.Agent
 			{
 				Logger.Trace("GetMonitorData {0}", agent.Name);
 				Context.OnGetMonitorData(agent);
-				Guard(agent, "GetMonitorData", a => Context.faults.AddRange(a.GetMonitorData()));
+				Guard(agent, "GetMonitorData", a => Context.faults.AddRange(a.GetMonitorData().Select(AsFault)));
 			}
+		}
+
+		private static Fault AsFault(MonitorData data)
+		{
+			var ret = new Fault
+			{
+				agentName = data.AgentName,
+				monitorName = data.MonitorName,
+				detectionSource = data.DetectionSource,
+				type = FaultType.Data,
+			};
+
+			ret.collectedData.AddRange(data.Data.Select(d => new Fault.Data {Key = d.Key, Value = d.Value}));
+
+			if (data.Fault != null)
+			{
+				ret.type = FaultType.Fault;
+				ret.title = data.Fault.Title;
+				ret.description = data.Fault.Description;
+				ret.majorHash = data.Fault.MajorHash;
+				ret.minorHash = data.Fault.MinorHash;
+				ret.exploitability = data.Fault.Risk;
+				ret.mustStop = data.Fault.MustStop;
+			}
+
+			return ret;
 		}
 
 		private static void Guard(AgentClient agent, string what, Action<AgentClient> action)

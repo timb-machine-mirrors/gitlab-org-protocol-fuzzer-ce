@@ -44,11 +44,6 @@ namespace Peach.Core.Agent
 			public bool MustStop { get; set; }
 		}
 
-		public MonitorData()
-		{
-			Data = new Dictionary<string, byte[]>();
-		}
-
 		/// <summary>
 		/// The name of the agent that hosts the monitor
 		/// that produced this data.
