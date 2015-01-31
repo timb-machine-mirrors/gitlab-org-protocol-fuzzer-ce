@@ -215,7 +215,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			{
 				Verify("");
 
-				var ret = m.GetMonitorData();
+				var ret = m.GetNewMonitorData();
 
 				Verify("OnFault");
 

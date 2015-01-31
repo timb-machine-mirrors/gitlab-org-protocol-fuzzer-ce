@@ -144,6 +144,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				AgentName = Name,
 				DetectionSource = f.DetectionSource,
 				MonitorName = f.MonitorName,
+				Title = f.Title,
 				Data = f.Data.ToDictionary(i => i.Key, i => i.Value),
 			};
 
@@ -151,7 +152,6 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			{
 				ret.Fault = new MonitorData.Info
 				{
-					Title = f.Fault.Title,
 					Description = f.Fault.Description,
 					MajorHash = f.Fault.MajorHash,
 					MinorHash = f.Fault.MinorHash,

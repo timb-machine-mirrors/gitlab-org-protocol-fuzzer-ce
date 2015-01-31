@@ -51,7 +51,7 @@ namespace Peach.Core.Test
 		/// Controls the GetMonitorData behaviour for each monitor.
 		/// The default is m => m.GetMonitorData()
 		/// </summary>
-		public Func<Monitor, Fault> GetMonitorData { get; set; }
+		public Func<Monitor, MonitorData> GetMonitorData { get; set; }
 
 		/// <summary>
 		/// Controls the MustStop behaviour for each monitor.
@@ -88,7 +88,7 @@ namespace Peach.Core.Test
 			Message = m => { };
 			IterationFinished = m => m.IterationFinished();
 			DetectedFault = m => m.DetectedFault();
-			GetMonitorData = m => m.GetMonitorData();
+			GetMonitorData = m => m.GetNewMonitorData();
 			MustStop = m => m.MustStop();
 			SessionFinished = m => m.SessionFinished();
 			StopMonitor = m => m.StopMonitor();
@@ -123,17 +123,17 @@ namespace Peach.Core.Test
 			}
 		}
 
-		public Fault[] Run()
+		public MonitorData[] Run()
 		{
 			return Run(1);
 		}
 
-		public Fault[] Run(int iterations)
+		public MonitorData[] Run(int iterations)
 		{
 			// Runs the monitor in the exact same way the AgentManager would.
 			// Only difference is this doesn't eat any exceptions.
 
-			var ret = new List<Fault>();
+			var ret = new List<MonitorData>();
 			var lastWasFault = false;
 
 			_monitors.ForEach(i => StartMonitor(i.Monitor, i.Args));
@@ -169,12 +169,8 @@ namespace Peach.Core.Test
 						if (f != null)
 						{
 							// Agent normally does this, so set the monitor class & name
-							if (string.IsNullOrEmpty(f.detectionSource))
-								f.detectionSource = m.Class;
-							if (string.IsNullOrEmpty(f.monitorName))
-								f.monitorName = m.Name;
-
-							f.iteration = i;
+							f.DetectionSource = f.DetectionSource ?? m.Class;
+							f.MonitorName = m.Name;
 						}
 						return f;
 					}).Where(f => f != null));

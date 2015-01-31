@@ -653,6 +653,7 @@ namespace Peach.Pro.Core.Agent.Channels
 				AgentName = Name,
 				MonitorName = data.MonitorName,
 				DetectionSource = data.DetectionSource,
+				Title = data.Title,
 				Data = data.Data.ToDictionary(i => i.Key, i => i.Value),
 			};
 
@@ -660,7 +661,6 @@ namespace Peach.Pro.Core.Agent.Channels
 			{
 				ret.Fault = new MonitorData.Info
 				{
-					Title = data.Fault.Title,
 					Description = data.Fault.Description,
 					MajorHash = data.Fault.MajorHash,
 					MinorHash = data.Fault.MinorHash,
@@ -818,7 +818,6 @@ namespace Peach.Pro.Core.Agent.Channels
 		[Serializable]
 		internal class Info
 		{
-			public string Title { get; set; }
 			public string Description { get; set; }
 			public string MajorHash { get; set; }
 			public string MinorHash { get; set; }
@@ -828,6 +827,7 @@ namespace Peach.Pro.Core.Agent.Channels
 
 		public string MonitorName { get; set; }
 		public string DetectionSource { get; set; }
+		public string Title { get; set; }
 		public Info Fault { get; set; }
 		public List<KeyValuePair<string, byte[]>> Data { get; set; }
 	}
@@ -925,6 +925,7 @@ namespace Peach.Pro.Core.Agent.Channels
 			{
 				MonitorName = data.MonitorName,
 				DetectionSource = data.DetectionSource,
+				Title = data.Title,
 				Data = data.Data.ToList(),
 			};
 
@@ -932,7 +933,6 @@ namespace Peach.Pro.Core.Agent.Channels
 			{
 				ret.Fault = new RemoteData.Info
 				{
-					Title = data.Fault.Title,
 					Description = data.Fault.Description,
 					MajorHash = data.Fault.MajorHash,
 					MinorHash = data.Fault.MinorHash,

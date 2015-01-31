@@ -14,13 +14,11 @@ namespace Peach.Core.Agent
 		public class Info
 		{
 			/// <summary>
-			/// A one line title of the fault.
-			/// </summary>
-			public string Title { get; set; }
-
-			/// <summary>
 			/// A multi line description of the fault.
 			/// </summary>
+			/// <remarks>
+			/// Saved as "AgentName.MonitorName.DetectionSource.Description.txt"
+			/// </remarks>
 			public string Description { get; set; }
 
 			/// <summary>
@@ -75,6 +73,14 @@ namespace Peach.Core.Agent
 		public string DetectionSource { get; set; }
 
 		/// <summary>
+		/// A short title of the finding.
+		/// </summary>
+		/// <remarks>
+		/// Saved as "AgentName.MonitorName.DetectionSource.txt"
+		/// </remarks>
+		public string Title { get; set; }
+
+		/// <summary>
 		/// If the monitor data is a fault, this field should
 		/// be set with the appropriate information.
 		/// </summary>
@@ -83,6 +89,11 @@ namespace Peach.Core.Agent
 		/// <summary>
 		/// A collection of arbitrary data recorded by the monitor.
 		/// </summary>
+		/// <remarks>
+		/// Extra data to keep with teh fault.
+		/// For each Key,Value pair, Value will be saved as
+		/// "AgentName.MonitorName.DetectionSource.Key"
+		/// </remarks>
 		public Dictionary<string, byte[]> Data { get; set; }
 	}
 }

@@ -51,9 +51,6 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		{
 			public class FaultDetail
 			{
-				[JsonProperty("title")]
-				public string Title { get; set; }
-
 				[JsonProperty("description")]
 				public string Description { get; set; }
 
@@ -90,6 +87,9 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			[JsonProperty("detectionSource")]
 			public string DetectionSource { get; set; }
+
+			[JsonProperty("title")]
+			public string Title { get; set; }
 
 			[JsonProperty("fault")]
 			public FaultDetail Fault { get; set; }

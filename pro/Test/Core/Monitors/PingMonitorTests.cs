@@ -35,9 +35,13 @@ namespace Peach.Pro.Test.Core.Monitors
 			var faults = runner.Run();
 
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("PingMonitor", faults[0].detectionSource);
-			Assert.AreEqual(FaultType.Fault, faults[0].type);
-			Assert.That(faults[0].description, Is.StringContaining("The ICMP echo Reply was not received within the allotted time."));
+			Assert.AreEqual("Ping", faults[0].DetectionSource);
+			Assert.That(faults[0].Title, Is.StringContaining("The ICMP echo Reply was not received within the allotted time."));
+			Assert.NotNull(faults[0].Fault);
+			Assert.AreEqual("Ping", faults[0].Fault.MajorHash);
+			Assert.AreEqual("Failure", faults[0].Fault.MinorHash);
+			Assert.NotNull(faults[0].Data);
+			Assert.AreEqual(0, faults[0].Data.Count);
 		}
 
 		[Test]
@@ -66,9 +70,13 @@ namespace Peach.Pro.Test.Core.Monitors
 			var faults = runner.Run();
 
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("PingMonitor", faults[0].detectionSource);
-			Assert.AreEqual(FaultType.Fault, faults[0].type);
-			Assert.That(faults[0].description, Is.StringContaining("RoundTrip time"));
+			Assert.AreEqual("Ping", faults[0].DetectionSource);
+			Assert.That(faults[0].Title, Is.StringContaining("Reply from 127.0.0.1: bytes=32 time="));
+			Assert.NotNull(faults[0].Fault);
+			Assert.AreEqual("Ping", faults[0].Fault.MajorHash);
+			Assert.AreEqual("Success", faults[0].Fault.MinorHash);
+			Assert.NotNull(faults[0].Data);
+			Assert.AreEqual(0, faults[0].Data.Count);
 		}
 
 		[Test]
@@ -91,9 +99,11 @@ namespace Peach.Pro.Test.Core.Monitors
 			var faults = runner.Run();
 
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("PingMonitor", faults[0].detectionSource);
-			Assert.AreEqual(FaultType.Data, faults[0].type);
-			Assert.That(faults[0].description, Is.StringContaining("RoundTrip time"));
+			Assert.AreEqual("Ping", faults[0].DetectionSource);
+			Assert.That(faults[0].Title, Is.StringContaining("Reply from 127.0.0.1: bytes=32 time="));
+			Assert.Null(faults[0].Fault);
+			Assert.NotNull(faults[0].Data);
+			Assert.AreEqual(0, faults[0].Data.Count);
 		}
 
 		[Test]
@@ -117,9 +127,11 @@ namespace Peach.Pro.Test.Core.Monitors
 			var faults = runner.Run();
 
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("PingMonitor", faults[0].detectionSource);
-			Assert.AreEqual(FaultType.Data, faults[0].type);
-			Assert.That(faults[0].description, Is.StringContaining("The ICMP echo Reply was not received within the allotted time."));
+			Assert.AreEqual("Ping", faults[0].DetectionSource);
+			Assert.That(faults[0].Title, Is.StringContaining("The ICMP echo Reply was not received within the allotted time."));
+			Assert.Null(faults[0].Fault);
+			Assert.NotNull(faults[0].Data);
+			Assert.AreEqual(0, faults[0].Data.Count);
 		}
 
 		[Test]
@@ -134,10 +146,13 @@ namespace Peach.Pro.Test.Core.Monitors
 			var faults = runner.Run();
 
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("PingMonitor", faults[0].detectionSource);
-			Assert.AreEqual(FaultType.Fault, faults[0].type);
-
-			StringAssert.IsMatch("(Could not resolve host)|(No such host is known)", faults[0].description);
+			Assert.AreEqual("Ping", faults[0].DetectionSource);
+			Assert.NotNull(faults[0].Fault);
+			Assert.AreEqual("Ping", faults[0].Fault.MajorHash);
+			Assert.AreEqual("Exception", faults[0].Fault.MinorHash);
+			Assert.NotNull(faults[0].Data);
+			Assert.AreEqual(0, faults[0].Data.Count);
+			StringAssert.IsMatch("(Could not resolve host)|(No such host is known)", faults[0].Title);
 		}
 
 		[Test]
@@ -153,10 +168,13 @@ namespace Peach.Pro.Test.Core.Monitors
 			var faults = runner.Run();
 
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("PingMonitor", faults[0].detectionSource);
-			Assert.AreEqual(FaultType.Fault, faults[0].type);
-
-			StringAssert.IsMatch("(Could not resolve host)|(No such host is known)", faults[0].description);
+			Assert.AreEqual("Ping", faults[0].DetectionSource);
+			Assert.NotNull(faults[0].Fault);
+			Assert.AreEqual("Ping", faults[0].Fault.MajorHash);
+			Assert.AreEqual("Exception", faults[0].Fault.MinorHash);
+			Assert.NotNull(faults[0].Data);
+			Assert.AreEqual(0, faults[0].Data.Count);
+			StringAssert.IsMatch("(Could not resolve host)|(No such host is known)", faults[0].Title);
 		}
 
 		[TestCase(1000)]
@@ -189,10 +207,13 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			var faults = runner.Run();
 
+
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("PingMonitor", faults[0].detectionSource);
-			Assert.AreEqual(FaultType.Fault, faults[0].type);
-			Assert.That(faults[0].description, Is.StringContaining("The ICMP echo Reply was not received within the allotted time."));
+			Assert.AreEqual("Ping", faults[0].DetectionSource);
+			Assert.That(faults[0].Title, Is.StringContaining("The ICMP echo Reply was not received within the allotted time."));
+			Assert.Null(faults[0].Fault);
+			Assert.NotNull(faults[0].Data);
+			Assert.AreEqual(0, faults[0].Data.Count);
 		}
 
 		[Test]
@@ -208,9 +229,13 @@ namespace Peach.Pro.Test.Core.Monitors
 			var faults = runner.Run();
 
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("PingMonitor", faults[0].detectionSource);
-			Assert.AreEqual(FaultType.Fault, faults[0].type);
-			Assert.That(faults[0].description, Is.StringContaining("Buffer size: 70"));
+			Assert.AreEqual("Ping", faults[0].DetectionSource);
+			Assert.That(faults[0].Title, Is.StringContaining("Reply from 127.0.0.1: bytes=32 time="));
+			Assert.NotNull(faults[0].Fault);
+			Assert.AreEqual("Ping", faults[0].Fault.MajorHash);
+			Assert.AreEqual("Success", faults[0].Fault.MinorHash);
+			Assert.NotNull(faults[0].Data);
+			Assert.AreEqual(0, faults[0].Data.Count);
 		}
 	}
 }

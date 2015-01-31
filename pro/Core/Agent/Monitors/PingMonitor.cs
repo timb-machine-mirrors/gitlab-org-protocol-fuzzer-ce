@@ -151,18 +151,8 @@ namespace Peach.Pro.Core.Agent.Monitors
 			switch (reply.Status)
 			{
 				case IPStatus.Success:
-					var sb = new StringBuilder();
-					sb.AppendFormat("Address: {0}", reply.Address);
-					sb.AppendLine();
-					sb.AppendFormat("RoundTrip time: {0}", reply.RoundtripTime);
-					sb.AppendLine();
-					sb.AppendFormat("Time to live: {0}", reply.Options.Ttl);
-					sb.AppendLine();
-					sb.AppendFormat("Don't fragment: {0}", reply.Options.DontFragment);
-					sb.AppendLine();
-					sb.AppendFormat("Buffer size: {0}", reply.Buffer.Length);
-					sb.AppendLine();
-					return sb.ToString();
+					return "Reply from {0}: bytes={1} time={2}ms TTL={3}".Fmt(
+						reply.Address, reply.Buffer.Length, reply.RoundtripTime,reply.Options.Ttl);
 				case IPStatus.Unknown:
 					return "The ICMP echo request failed for an unknown reason.";
 				case IPStatus.DestinationNetworkUnreachable:

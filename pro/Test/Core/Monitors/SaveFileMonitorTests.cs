@@ -86,15 +86,19 @@ namespace Peach.Pro.Test.Core.Monitors
 				}
 			};
 
+			var fileName = Path.GetFileName(_file);
+			Assert.NotNull(fileName);
+
 			var faults = runner.Run();
 
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual(FaultType.Data, faults[0].type);
-			Assert.AreEqual("SaveFileMonitor", faults[0].detectionSource);
-			Assert.That(faults[0].title, Is.StringContaining(_file));
-			Assert.AreEqual(1, faults[0].collectedData.Count);
-			Assert.AreEqual(Path.GetFileName(_file), faults[0].collectedData[0].Key);
-			Assert.AreEqual(_fileContents, faults[0].collectedData[0].Value);
+			Assert.Null(faults[0].Fault);
+			Assert.AreEqual("SaveFile", faults[0].DetectionSource);
+			Assert.AreEqual("", faults[0].Title);
+			Assert.NotNull(faults[0].Data);
+			Assert.AreEqual(1, faults[0].Data.Count);
+			Assert.True(faults[0].Data.ContainsKey(fileName));
+			Assert.AreEqual(_fileContents, faults[0].Data[fileName]);
 		}
 
 		[Test]

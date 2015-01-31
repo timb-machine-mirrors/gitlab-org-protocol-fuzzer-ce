@@ -139,13 +139,13 @@ namespace Peach.Core.Agent
 				MonitorName = Name,
 				DetectionSource = fault.detectionSource ?? Class,
 				Data = fault.collectedData.ToDictionary(i => i.Key, i => i.Value),
+				Title = fault.title,
 			};
 
 			if (fault.type == FaultType.Fault)
 			{
 				ret.Fault = new MonitorData.Info
 				{
-					Title = fault.title,
 					Description = fault.description,
 					MajorHash = fault.majorHash,
 					MinorHash = fault.minorHash,
