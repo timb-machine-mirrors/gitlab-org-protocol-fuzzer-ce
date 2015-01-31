@@ -34,7 +34,8 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			Assert.NotNull(faults);
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("Unable to locate process with Pid 2147483647.", faults[0].title);
+			Assert.NotNull(faults[0].Fault);
+			Assert.AreEqual("Unable to locate process with Pid 2147483647.", faults[0].Title);
 		}
 
 		[Test]
@@ -49,7 +50,8 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			Assert.NotNull(faults);
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("Unable to locate process \"some_invalid_process\".", faults[0].title);
+			Assert.NotNull(faults[0].Fault);
+			Assert.AreEqual("Unable to locate process \"some_invalid_process\".", faults[0].Title);
 		}
 
 		[Test]
@@ -117,10 +119,10 @@ namespace Peach.Pro.Test.Core.Monitors
 			var faults = runner.Run();
 
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("MemoryMonitor", faults[0].detectionSource);
-			Assert.AreEqual(FaultType.Data, faults[0].type);
+			Assert.NotNull(faults[0].Fault);
+			Assert.AreEqual("MemoryMonitor", faults[0].DetectionSource);
 
-			Console.WriteLine("{0}\n{1}\n", faults[0].title, faults[0].description);
+			Console.WriteLine("{0}\n{1}\n", faults[0].Title, faults[0].Fault.Description);
 		}
 
 		[Test]
@@ -137,10 +139,10 @@ namespace Peach.Pro.Test.Core.Monitors
 			var faults = runner.Run();
 
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("MemoryMonitor", faults[0].detectionSource);
-			Assert.AreEqual(FaultType.Fault, faults[0].type);
+			Assert.NotNull(faults[0].Fault);
+			Assert.AreEqual("MemoryMonitor", faults[0].DetectionSource);
 
-			Console.WriteLine("{0}\n{1}\n", faults[0].title, faults[0].description);
+			Console.WriteLine("{0}\n{1}\n", faults[0].Title, faults[0].Fault.Description);
 		}
 
 		[Test]
@@ -159,10 +161,10 @@ namespace Peach.Pro.Test.Core.Monitors
 			var faults = runner.Run();
 
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("MemoryMonitor", faults[0].detectionSource);
-			Assert.AreEqual(FaultType.Fault, faults[0].type);
+			Assert.NotNull(faults[0].Fault);
+			Assert.AreEqual("MemoryMonitor", faults[0].DetectionSource);
 
-			Console.WriteLine("{0}\n{1}\n", faults[0].title, faults[0].description);
+			Console.WriteLine("{0}\n{1}\n", faults[0].Title, faults[0].Fault.Description);
 		}
 	}
 }

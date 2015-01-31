@@ -213,6 +213,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					{
 						MonitorName = mon.Name,
 						DetectionSource = mon.Class,
+						Title = fault.title,
 						Data = new List<FaultResponse.Record.FaultData>()
 					};
 
@@ -229,7 +230,6 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					{
 						item.Fault = new FaultResponse.Record.FaultDetail
 						{
-							Title = fault.title,
 							Description = fault.description,
 							MajorHash = fault.majorHash,
 							MinorHash = fault.minorHash,

@@ -212,6 +212,7 @@ namespace Peach.Core.Agent
 				agentName = data.AgentName,
 				monitorName = data.MonitorName,
 				detectionSource = data.DetectionSource,
+				title = data.Title,
 				type = FaultType.Data,
 			};
 
@@ -220,7 +221,6 @@ namespace Peach.Core.Agent
 			if (data.Fault != null)
 			{
 				ret.type = FaultType.Fault;
-				ret.title = data.Fault.Title;
 				ret.description = data.Fault.Description;
 				ret.majorHash = data.Fault.MajorHash;
 				ret.minorHash = data.Fault.MinorHash;

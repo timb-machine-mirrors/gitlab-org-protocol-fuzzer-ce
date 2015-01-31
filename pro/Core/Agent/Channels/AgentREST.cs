@@ -696,6 +696,7 @@ namespace Peach.Pro.Core.Agent.Channels
 				AgentName = Name,
 				DetectionSource = f.detectionSource,
 				MonitorName = f.monitorName,
+				Title = f.title,
 				Data = f.collectedData.ToDictionary(i => i.Key, i => i.Value),
 			};
 
@@ -703,7 +704,6 @@ namespace Peach.Pro.Core.Agent.Channels
 			{
 				ret.Fault = new MonitorData.Info
 				{
-					Title = f.title,
 					Description = f.description,
 					MajorHash = f.majorHash,
 					MinorHash = f.minorHash,
