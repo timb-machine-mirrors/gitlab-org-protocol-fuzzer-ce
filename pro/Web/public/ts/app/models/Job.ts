@@ -3,10 +3,23 @@
 module Peach {
 	"use strict";
 
+	export interface IJobCommands {
+		stopUrl: string;
+		continueUrl: string;
+		pauseUrl: string;
+		killUrl: string;
+	}
+
+	export interface IJobMetrics {
+		[name: string]: string;
+	}
+
 	export interface IJob {
 		// URL to configured pit
 		// /p/pits/ID
 		pitUrl: string;
+
+		commands?: IJobCommands;
 
 		jobUrl?: string;
 
@@ -36,6 +49,8 @@ module Peach {
 		// grid fs url to package
 		// "/p/files/...",
 		packageFileUrl?: string;
+
+		metrics?: IJobMetrics;
 
 		// display name for job
 		// "0123456789AB"

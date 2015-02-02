@@ -1,7 +1,24 @@
 ﻿<div class="row"
 		 ng-if="vm.IsAvailable">
-	<div class="col-xs-12">
-		<hr />
+
+	<hr />
+
+	<div class="col-md-12">
+		<div class="alert alert-info"
+				 ng-show="vm.ShowTestPending">
+			Testing is in progress.
+		</div>
+
+		<div class="alert alert-success"
+				 ng-show="vm.ShowTestPass">
+			Testing passed, click Continue.
+		</div>
+
+		<div class="alert alert-danger"
+				 ng-show="vm.ShowTestFail">
+			Testing failed, please correct the errors described and return to this page to test again.
+		</div>
+
 		<h3>
 			Test Output
 			<span ng-switch="vm.TestTime.length">

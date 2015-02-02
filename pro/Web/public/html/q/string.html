@@ -1,29 +1,29 @@
 ﻿<div class="header blue"
 		 ng-show="vm.IsSetVars">
-	{{question.shortName || question.key}}
+	{{Question.shortName || Question.key}}
 </div>
 <div>
 	<label>
-		{{question.q}}
+		{{Question.q}}
 	</label>
 </div>
-<p ng-if="!question.required">
+<p ng-if="!Question.required">
 	(Optional)
 </p>
 <div class="row">
 	<div class="col-sm-6">
 		<input name="question"
-					 ng-model="question.value"
+					 ng-model="Question.value"
 					 type="text"
 					 class="form-control"
-					 ng-required="question.required"
-					 autofocus />
+					 ng-required="Question.required"
+					 peach:auto-focus />
 	</div>
-	<span class="help-block"
-				ng-show="form.question.$error.required">
-		Required
-	</span>
 </div>
+<span class="help-block"
+			ng-messages="form.question.$error"
+			ng-messages-include="html/messages.html">
+</span>
 <table class="table table-striped table-hover table-bordered"
 			 ng-show="!vm.IsSetVars">
 	<caption>
@@ -38,7 +38,7 @@
 		</tr>
 	</thead>
 	<tbody>
-		<tr ng-repeat="def in vm.Defines">
+		<tr ng-repeat="def in Defines">
 			<td class="align-middle">
 				<span>
 					{{def.name}}

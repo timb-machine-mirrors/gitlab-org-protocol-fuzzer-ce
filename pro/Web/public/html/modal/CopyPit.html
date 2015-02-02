@@ -23,11 +23,11 @@
 							 type="text"
 							 class="form-control"
 							 tabindex="1"
-							 autofocus
+							 peach:auto-focus
 							 required />
 				<span class="help-block"
-							ng-show="form.name.$error.required">
-					Required
+							ng-messages="form.name.$error"
+							ng-messages-include="html/messages.html">
 				</span>
 			</div>
 		</div>
