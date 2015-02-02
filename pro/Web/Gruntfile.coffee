@@ -1,7 +1,18 @@
 'use strict'
 
 module.exports = (grunt) ->
+	path = require('path')
 	proxy = require('grunt-connect-proxy/lib/utils').proxyRequest
+
+	variant = grunt.option('variant') || 'win_debug_x64'
+	repo = '../..'
+	e2e = '.e2e'
+	waf_bindir = path.join(repo, 'output', variant, 'bin')
+	vs_bindir = path.join(repo, '.depproj', 'bin', variant)
+	peach_args = [ '--nobrowser',  '--pits', path.resolve(e2e) ]
+	e2e_specs = [
+		'public/js/test/e2e.js'
+	]
 
 	grunt.initConfig
 		pkg: grunt.file.readJSON 'package.json'
@@ -13,11 +24,10 @@ module.exports = (grunt) ->
 					'public/lib/angular-bootstrap' : 'angular-bootstrap:main'
 					'public/lib/angular-loading-bar' : 'angular-loading-bar:main'
 					'public/lib/angular-mocks'     : 'angular-mocks:main'
-					'public/lib/angular-resource'  : 'angular-resource:main'
-					'public/lib/angular-route'     : 'angular-route:main'
+					'public/lib/angular-messages'  : 'angular-messages:main'
 					'public/lib/angular-sanitize'  : 'angular-sanitize:main'
+					'public/lib/angular-ui-router' : 'angular-ui-router:main'
 					'public/lib/angular-ui-select' : 'angular-ui-select:main'
-					'public/lib/angular-ui-utils'  : 'angular-ui-utils:main'
 					'public/lib/jquery'            : 'jquery:main'
 					'public/lib/lodash'            : 'lodash:main'
 					'public/lib/moment'            : 'moment:main'
@@ -30,17 +40,16 @@ module.exports = (grunt) ->
 					'ace-bootstrap'               : [
 						'ace-bootstrap/css/*'
 						'ace-bootstrap/fonts/*'
-						'ace-bootstrap/js/*'
 					]
 					'angular-chart'               : [
-						'angular-chart.js/dist/angular-chart.css'
+						'angular-chart.js/dist/angular-chart.css*'
 						'angular-chart.js/angular-chart.js'
 					]
 					'angular-smart-table/smart-table.js' : 'angular-smart-table/dist/smart-table.debug.js'
 					'angular-tree-control/css'    : 'angular-tree-control/css/*'
 					'angular-tree-control/images' : 'angular-tree-control/images/*'
 					'angular-tree-control/js'     : 'angular-tree-control/angular-tree-control.js'
-					'bootstrap/css'               : 'bootstrap/dist/css/bootstrap.css'
+					'bootstrap/css'               : 'bootstrap/dist/css/bootstrap.css*'
 					'bootstrap/fonts'             : 'bootstrap/dist/fonts/*'
 					'bootstrap/js'                : 'bootstrap/dist/js/bootstrap.js'
 					'chartjs'                     : 'Chart.js/Chart.js'
@@ -57,54 +66,79 @@ module.exports = (grunt) ->
 			lib: [
 				'public/lib'
 			]
+			e2e: [
+				e2e
+			]
 
 		tsd:
-			refresh: 
+			app: 
 				options:
 					command: 'reinstall'
-					config: 'tsd.json'
+					config: 'tsd-app.json'
+			test:
+				options:
+					command: 'reinstall'
+					config: 'tsd-test.json'
 
 		ts:
 			options:
 				module: 'commonjs'
 				sourceMap: true
-				sourceRoot: '/ts/app'
+				sourceRoot: '/ts'
 				removeComments: false
 			app:
 				src: ['public/ts/app/**/*.ts']
 				reference: 'public/ts/app/reference.ts'
 				out: 'public/js/app/app.js'
-			test:
-				src: ['public/ts/test/**/*.ts']
-				reference: 'public/ts/test/reference.ts'
-				out: 'public/js/test/test.js'
-				options:
-					sourceRoot: ''
-					amdloader: 'public/js/loader.js'
+			unit:
+				src: ['public/ts/test/unit/**/*.ts']
+				reference: 'public/ts/test/unit/reference.ts'
+				out: 'public/js/test/unit.js'
+			e2e:
+				src: ['public/ts/test/e2e/**/*.ts']
+				reference: 'public/ts/test/e2e/reference.ts'
+				out: 'public/js/test/e2e.js'
 
 		jasmine:
 			test:
 				host: 'http://localhost:9999/'
 				src: [
-					# ordered libraries
-					'public/lib/jquery/jquery.js'
-					'public/lib/chartjs/Chart.js'
-					'public/lib/angular/angular.js'
-					# unordered libraries
-					'public/lib/**/*.js'
-					# extra stuff
-					'public/js/angular-vis.js'
-					# local code
-					'public/js/test/test.js'
+					'public/js/test/unit.js'
 				]
 				options:
 					outfile: 'public/tests.html'
 					keepRunner: true
+					vendor: [
+						# ordered libraries
+						'public/lib/jquery/jquery.js'
+						'public/lib/chartjs/Chart.js'
+						'public/lib/angular/angular.js'
+						# unordered libraries
+						'public/lib/**/*.js'
+						# extra stuff
+						'public/js/angular-vis.js'
+						'node_modules/jasmine-custom-message/jasmine-custom-message.js'
+					]
 
+		protractor:
+			options:
+				configFile: 'protractor.conf.js'
+			waf:
+				options:
+					keepAlive: false
+					args:
+						baseUrl: 'http://localhost:8888/'
+						specs: e2e_specs
+			vs:
+				options:
+					keepAlive: true
+					args:
+						baseUrl: 'http://localhost:9001/'
+						specs: e2e_specs
 		watch:
 			ts:
-				files: ['public/ts/**/*.ts']
-				tasks: ['compile-work']
+				files: ['public/ts/app/**/*.ts']
+				tasks: ['ts:app']
 				options:
 					livereload: true
 			html:
@@ -115,29 +149,38 @@ module.exports = (grunt) ->
 				files: ['public/**/*.css']
 				options:
 					livereload: true
-			test:
-				files: ['public/ts/**/*.ts']
-				tasks: ['compile-test', 'run-test']
+			unit:
+				files: ['public/ts/app/**/*.ts', 'public/ts/test/unit/**/*.ts']
+				tasks: ['ts:unit', 'jasmine:test']
+				options:
+					atBegin: true
+			e2e:
+				files: ['public/ts/app/**/*.ts', 'public/ts/test/e2e/**/*.ts']
+				tasks: ['e2e-cycle']
 				options:
 					atBegin: true
 
 		focus:
 			app:
-				include: ['ts', 'html', 'css']			
+				include: ['ts', 'html', 'css']
 
 		connect:
 			options:
 				hostname: 'localhost'
 				port: 9000
 				base: 'public'
-				livereload: true
+				middleware: (connect, options) -> 
+					[ proxy, connect.static(options.base[0]) ]
 			proxies: [
 				{context: '/p/', host: 'localhost', port: 8888}
 			]
 			livereload:
 				options:
-					middleware: (connect, options) -> 
-						[ proxy, connect.static(options.base[0]) ]
+					livereload: true
+			test:
+				options:
+					port: 9001
+					livereload: false
 
 		http:
 			accept_eula:
@@ -156,31 +199,63 @@ module.exports = (grunt) ->
 		open:
 			dev:
 				path: 'http://localhost:<%= connect.options.port%>'
+		
+		copy:
+			pits: 
+				files: [
+					{
+						expand: true
+						cwd: path.join(repo, 'pits', 'pro')
+						src: ['Test/*']
+						dest: e2e
+					}
+				]
+			eula_vs:
+				src: 'eula.config'
+				dest: path.join(vs_bindir, 'Peach.exe.user.config')
+			eula_waf:
+				src: 'eula.config'
+				dest: path.join(waf_bindir, 'Peach.exe.user.config')
+				
+		run:
+			options:
+				failOnError: true
+				wait: false
+				ready: /Web site running/
+			waf:
+				cmd: 'Peach.exe'
+				args: peach_args
+				options:
+					cwd: waf_bindir
+			vs:
+				cmd: 'Peach.exe'
+				args: peach_args
+				options:
+					cwd: vs_bindir
 
 	grunt.loadNpmTasks 'grunt-bowercopy'
 	grunt.loadNpmTasks 'grunt-contrib-clean'
+	grunt.loadNpmTasks 'grunt-contrib-connect'
 	grunt.loadNpmTasks 'grunt-contrib-copy'
 	grunt.loadNpmTasks 'grunt-contrib-jasmine'
+	grunt.loadNpmTasks 'grunt-connect-proxy'
 	grunt.loadNpmTasks 'grunt-contrib-uglify'
 	grunt.loadNpmTasks 'grunt-contrib-watch'
-	grunt.loadNpmTasks 'grunt-contrib-connect'
-	grunt.loadNpmTasks 'grunt-connect-proxy'
 	grunt.loadNpmTasks 'grunt-focus'
 	grunt.loadNpmTasks 'grunt-http'
 	grunt.loadNpmTasks 'grunt-open'
+	grunt.loadNpmTasks 'grunt-protractor-runner'
+	grunt.loadNpmTasks 'grunt-run'
 	grunt.loadNpmTasks 'grunt-ts'
 	grunt.loadNpmTasks 'grunt-tsd'
 
 	grunt.registerTask 'default', ['work']
 
-	grunt.registerTask 'compile-work', ['ts:app']
-	grunt.registerTask 'compile-test', ['ts:test']
-
 	grunt.registerTask 'init', [
 		'clean'
 		'bowercopy'
 		'tsd'
-		'compile-work'
+		'ts:app'
 	]
 
 	grunt.registerTask 'server', [
@@ -191,15 +266,44 @@ module.exports = (grunt) ->
 
 	grunt.registerTask 'work', [
 		'clean:app'
-		'compile-work'
+		'ts:app'
 		'server'
 		'open'
 		'focus:app'
 	]
 
-	grunt.registerTask 'test', [
-		'clean:app'
-		'watch:test'
+	grunt.registerTask 'unit', [
+		'watch:unit'
 	]
 
-	grunt.registerTask 'run-test', ['jasmine:test']
+	grunt.registerTask 'test', [
+		'jasmine:test'
+	]
+
+	grunt.registerTask 'prepare-e2e', [
+		'ts:app'
+		'ts:e2e'
+		'clean:e2e'
+		'copy:pits'
+		'copy:eula_vs'
+	]
+
+	grunt.registerTask 'e2e-cycle', [
+		'prepare-e2e'
+		'run:vs'
+		'protractor:vs'
+		'stop:vs'
+	]
+
+	grunt.registerTask 'e2e-dev', [
+		'configureProxies'
+		'connect:test'
+		'watch:e2e'
+	]
+
+	grunt.registerTask 'e2e', [
+		'prepare-e2e'
+		'run:waf'
+		'protractor:waf'
+		'stop:waf'
+	]

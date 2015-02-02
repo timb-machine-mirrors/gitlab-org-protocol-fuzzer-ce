@@ -21,20 +21,18 @@ module Peach {
 		ctrl: ng.INgModelController,
 		predicate: IValidatePredicate
 	) {
-		var validator = value => {
-			var isValid = (_.isEmpty(value) || predicate(value));
-			ctrl.$setValidity(name, isValid);
-			return value;
+		ctrl.$validators[name] = (modelValue, viewValue) => {
+			var value = modelValue || viewValue;
+			return _.isUndefined(value)
+				|| (_.isString(value) && _.isEmpty(value))
+				|| predicate(value);
 		};
-
-		ctrl.$parsers.push(validator);
-		ctrl.$formatters.push(validator);
 	}
 
 	export var RangeDirective: IDirective = {
-		ComponentID: Constants.Directives.Range,
+		ComponentID: C.Directives.Range,
 		restrict: 'A',
-		require: Constants.Angular.ngModel,
+		require: C.Angular.ngModel,
 		scope: {
 			min: '&peachRangeMin',
 			max: '&peachRangeMax'
@@ -45,40 +43,40 @@ module Peach {
 			attrs: ng.IAttributes,
 			ctrl: ng.INgModelController
 		) => {
-			if (scope.min) {
-				predicateValidation('rangeMin', ctrl,
-					(value: number) => (value >= scope.min())
-				);
-			}
-			if (scope.max) {
-				predicateValidation('rangeMax', ctrl,
-					(value: number) => (value <= scope.max())
-				);
-			}
+			predicateValidation('rangeMin', ctrl, (value: string) => {
+				var int = parseInt(value);
+				var min = scope.min();
+				return _.isUndefined(min) || (!_.isNaN(int) && int >= min);
+			});
+			predicateValidation('rangeMax', ctrl, (value: string) => {
+				var int = parseInt(value);
+				var max = scope.max();
+				return _.isUndefined(max) || (!_.isNaN(int) && int <= max);
+			});
 		}
 	}
 
 	export var IntegerDirective: ng.IDirective = {
-		ComponentID: Constants.Directives.Integer,
+		ComponentID: C.Directives.Integer,
 		restrict: 'A',
-		require: Constants.Angular.ngModel,
+		require: C.Angular.ngModel,
 		link: (
 			scope: ng.IScope,
 			element: ng.IAugmentedJQuery,
 			attrs: ng.IAttributes,
 			ctrl: ng.INgModelController
 		) => {
-			var pattern = /^\-?\d+$/;
-			predicateValidation(Constants.Directives.Integer, ctrl,
+			var pattern = /^(\-|\+)?\d+$/;
+			predicateValidation(C.Directives.Integer, ctrl,
 				(value: string) => pattern.test(value)
 			);
 		}
 	}
 
 	export var HexDirective: ng.IDirective = {
-		ComponentID: Constants.Directives.HexString,
+		ComponentID: C.Directives.HexString,
 		restrict: 'A',
-		require: Constants.Angular.ngModel,
+		require: C.Angular.ngModel,
 		link: (
 			scope: ng.IScope,
 			element: ng.IAugmentedJQuery,
@@ -86,7 +84,7 @@ module Peach {
 			ctrl: ng.INgModelController
 		) => {
 			var pattern = /^[0-9A-Fa-f]+$/;
-			predicateValidation(Constants.Directives.HexString, ctrl,
+			predicateValidation(C.Directives.HexString, ctrl,
 				(value: string) => pattern.test(value)
 			);
 		}

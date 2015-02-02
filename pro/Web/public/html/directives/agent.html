@@ -27,10 +27,10 @@
 						</i>
 					</button>
 					<button type="button"
-					        class="btn btn-xs btn-danger"
-					        ng-click="vm.OnRemove($event)"
-					        tooltip="Remove Agent"
-					        tooltip-append-to-body="true">
+									class="btn btn-xs btn-danger"
+									ng-click="vm.OnRemove($event)"
+									tooltip="Remove Agent"
+									tooltip-append-to-body="true">
 						<i class="glyphicon glyphicon-remove">
 						</i>
 					</button>
@@ -57,43 +57,35 @@
 								 peach:unique-channel="agent.name" />
 				</div>
 				<span class="help-block"
-							ng-show="form.name.$error.unique">
-					A unique name must be provided
+							ng-messages="form.name.$error"
+							ng-messages-include="html/messages.html">
 				</span>
 			</div>
-			<span class="help-block">
-				<span class="glyphicon glyphicon-star pointer"
-				      tooltip="Required"
-				      tooltip-placement="right"
-				      ng-class="{red: form.name.$error.required}">
-				</span>
-				Required
-			</span>
 		</div>
 		<div class="form-group"
-		     ng-class="{'has-error': form.location.$invalid}">
+				 ng-class="{'has-error': form.location.$invalid}">
 			<label class="col-sm-3 control-label">
 				Location
 			</label>
 			<div class="col-sm-6">
 				<div class="input-group">
 					<span class="peach-field-info tooltip-info input-group-addon"
-					      tooltip="URL for the agent. Leave blank for a local agent."
-					      tooltip-placement="right"
-					      tooltip-append-to-body="true">
+								tooltip="URL for the agent. Leave blank for a local agent."
+								tooltip-placement="right"
+								tooltip-append-to-body="true">
 					</span>
 					<input name="location"
-					       type="text"
-					       placeholder="local://"
-					       ng-model="agent.agentUrl"
-					       class="form-control"
-					       peach:unique-channel="agent.agentUrl"
-					       peach:unique-default="local://" 
-					       peach:unique-ignore="^local://"/>
+								 type="text"
+								 placeholder="local://"
+								 ng-model="agent.agentUrl"
+								 class="form-control"
+								 peach:unique-channel="agent.agentUrl"
+								 peach:unique-default="local://"
+								 peach:unique-ignore="^local://" />
 				</div>
 				<span class="help-block"
-				      ng-show="form.location.$error.unique">
-					A unique location must be provided
+							ng-messages="form.location.$error"
+							ng-messages-include="html/messages.html">
 				</span>
 			</div>
 		</div>
@@ -114,7 +106,7 @@
 									 on-select="vm.OnAddMonitor($item)">
 					<ui-select-match placeholder="Add a monitor...">
 					</ui-select-match>
-					<ui-select-choices repeat="monitor.monitorClass as monitor in vm.AvailableMonitors | filter: $select.search">
+					<ui-select-choices repeat="monitor.monitorClass as monitor in vm.PeachMonitors | filter: $select.search">
 						<div ng-bind-html="monitor.monitorClass | highlight: $select.search"></div>
 						<small ng-if="monitor.description">{{monitor.description}}</small>
 					</ui-select-choices>

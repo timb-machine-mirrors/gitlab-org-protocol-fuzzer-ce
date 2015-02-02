@@ -4,10 +4,10 @@ module Peach {
 	"use strict";
 
 	export var AgentDirective: IDirective = {
-		ComponentID: Constants.Directives.Agent,
+		ComponentID: C.Directives.Agent,
 		restrict: 'E',
-		templateUrl: 'html/directives/agent.html',
-		controller: Constants.Controllers.Agent,
+		templateUrl: C.Templates.Directives.Agent,
+		controller: C.Controllers.Agent,
 		scope: {
 			agents: '=',
 			agent: '=',
@@ -29,27 +29,27 @@ module Peach {
 
 	export class AgentController {
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Angular.$timeout,
-			Constants.Services.Pit,
-			"AvailableMonitorsResource"
+			C.Angular.$scope,
+			C.Angular.$timeout,
+			C.Services.Pit
 		];
 
 		constructor(
 			private $scope: IAgentScope,
 			private $timeout: ng.ITimeoutService,
-			private pitService: PitService,
-			availableMonitorsResource: IMonitorResource
+			private pitService: PitService
 		) {
 			$scope.vm = this;
 			$scope.isOpen = true;
 			$scope.selectedMonitor = {
 				selected: undefined
 			};
-			this.AvailableMonitors = availableMonitorsResource.query();
+			pitService.LoadPeachMonitors().then((monitors: IMonitor[]) => {
+				this.PeachMonitors = monitors;
+			});
 		}
 
-		public AvailableMonitors: ng.resource.IResource<IMonitor>[];
+		public PeachMonitors: IMonitor[];
 
 		public get Header(): string {
 			var url = this.$scope.agent.agentUrl || 'local://';

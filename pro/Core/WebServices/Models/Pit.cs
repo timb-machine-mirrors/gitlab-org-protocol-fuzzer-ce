@@ -40,5 +40,15 @@ namespace Peach.Pro.Core.WebServices.Models
 		public string User { get; set; }
 
 		public DateTime Timestamp { get; set; }
+
+		#region Details
+		public List<KeyValuePair<string, string>> PeachConfig { get; set; }
+
+		public List<Parameter> Config { get; set; }
+	
+		public List<Agent> Agents { get; set; }
+		
+		public List<string> Calls { get; set; }
+		#endregion
 	}
 }

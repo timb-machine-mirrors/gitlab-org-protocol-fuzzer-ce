@@ -4,18 +4,18 @@ module Peach {
 	"use strict";
 
 	export var ParameterDirective: IDirective = {
-		ComponentID: Constants.Directives.Parameter,
+		ComponentID: C.Directives.Parameter,
 		restrict: 'E',
-		templateUrl: 'html/directives/parameter.html',
-		controller: Constants.Controllers.Parameter,
+		templateUrl: C.Templates.Directives.Parameter,
+		controller: C.Controllers.Parameter,
 		scope: { param: '=' }
 	}
 
 	export var ParameterInputDirective: IDirective = {
-		ComponentID: Constants.Directives.ParameterInput,
+		ComponentID: C.Directives.ParameterInput,
 		restrict: 'E',
-		templateUrl: 'html/directives/parameter-input.html',
-		controller: Constants.Controllers.Parameter,
+		templateUrl: C.Templates.Directives.ParameterInput,
+		controller: C.Controllers.Parameter,
 		scope: {
 			param: '=',
 			form: '='
@@ -35,8 +35,8 @@ module Peach {
 
 	export class ParameterController {
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Services.Pit
+			C.Angular.$scope,
+			C.Services.Pit
 		];
 
 		constructor(
@@ -76,7 +76,7 @@ module Peach {
 			var options: string[];
 			var group: string;
 			if (this.$scope.param.type === 'call') {
-				options = this.pitService.PitCalls || [];
+				options = this.pitService.Pit.calls || [];
 				options = [''].concat(options);
 				group = 'Calls';
 			} else {
@@ -103,7 +103,7 @@ module Peach {
 		}
 
 		private defines(): IOption[] {
-			return _.map(this.pitService.PitConfig.config, param => {
+			return _.map(this.pitService.Pit.config, param => {
 				var key = '##' + param.key + '##'; 
 				return <IOption> {
 					key: key,
