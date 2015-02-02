@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using Peach.Core;
 using Peach.Core.Agent;
 
@@ -19,24 +20,21 @@ namespace Peach.Pro.Core.Agent.Monitors
 		{
 		}
 
-		public override Fault GetMonitorData()
+		public override MonitorData GetNewMonitorData()
 		{
 			if (!File.Exists(Filename))
 				return null;
 
-			var fault = new Fault
+			var ret = new MonitorData
 			{
-				type = FaultType.Data,
-				title = "Save File \"" + Filename + "\"",
-				detectionSource = "SaveFileMonitor"
+				Title = "Save File \"{0}\".".Fmt(Filename),
+				Data = new Dictionary<string,byte[]>
+				{
+					{ Path.GetFileName(Filename), File.ReadAllBytes(Filename) }
+				}
 			};
 
-			fault.collectedData.Add(new Fault.Data(
-				Path.GetFileName(Filename),
-				File.ReadAllBytes(Filename)
-			));
-
-			return fault;
+			return ret;
 		}
 	}
 }

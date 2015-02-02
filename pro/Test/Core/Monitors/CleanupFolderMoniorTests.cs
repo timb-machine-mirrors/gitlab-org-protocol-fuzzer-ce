@@ -9,35 +9,35 @@ namespace Peach.Pro.Test.Core.Monitors
 	[TestFixture] [Category("Peach")]
 	class CleanupFolderMonitorTests
 	{
-		string tmp;
-		string dir1;
-		string file1;
-		string dir1File;
+		string _tmp;
+		string _dir1;
+		string _file1;
+		string _dir1File;
 
 		[SetUp]
 		public void SetUp()
 		{
-			tmp = Path.GetTempFileName();
-			dir1 = Path.Combine(tmp, "sub");
-			file1 = Path.Combine(tmp, "file");
-			dir1File = Path.Combine(dir1, "file");
+			_tmp = Path.GetTempFileName();
+			_dir1 = Path.Combine(_tmp, "sub");
+			_file1 = Path.Combine(_tmp, "file");
+			_dir1File = Path.Combine(_dir1, "file");
 
-			File.Delete(tmp);
-			Directory.CreateDirectory(tmp);
-			Directory.CreateDirectory(dir1);
-			File.Create(file1).Close();
-			File.Create(dir1File).Close();
+			File.Delete(_tmp);
+			Directory.CreateDirectory(_tmp);
+			Directory.CreateDirectory(_dir1);
+			File.Create(_file1).Close();
+			File.Create(_dir1File).Close();
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
-			Assert.True(Directory.Exists(tmp), "Temp directory '{0}' should exist".Fmt(tmp));
-			Assert.True(Directory.Exists(dir1), "Directory '{0}' should exist".Fmt(dir1));
-			Assert.True(File.Exists(file1), "File '{0}' should exist".Fmt(file1));
-			Assert.True(File.Exists(dir1File), "File '{0}' should exist".Fmt(dir1File));
+			Assert.True(Directory.Exists(_tmp), "Temp directory '{0}' should exist".Fmt(_tmp));
+			Assert.True(Directory.Exists(_dir1), "Directory '{0}' should exist".Fmt(_dir1));
+			Assert.True(File.Exists(_file1), "File '{0}' should exist".Fmt(_file1));
+			Assert.True(File.Exists(_dir1File), "File '{0}' should exist".Fmt(_dir1File));
 
-			Directory.Delete(tmp, true);
+			Directory.Delete(_tmp, true);
 		}
 
 		[Test]
@@ -61,7 +61,7 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			var runner = new MonitorRunner("CleanupFolder", new Dictionary<string, string>
 			{
-				{ "Folder", tmp },
+				{ "Folder", _tmp },
 			});
 
 			var faults = runner.Run();
@@ -72,13 +72,13 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestPreserveExisting()
 		{
-			var dir2 = Path.Combine(tmp, "newsub");
-			var file2 = Path.Combine(tmp, "newfile");
+			var dir2 = Path.Combine(_tmp, "newsub");
+			var file2 = Path.Combine(_tmp, "newfile");
 			var dir2File = Path.Combine(dir2, "newfile");
 
 			var runner = new MonitorRunner("CleanupFolder", new Dictionary<string, string>
 			{
-				{ "Folder", tmp },
+				{ "Folder", _tmp },
 			});
 
 			runner.IterationStarting += (m, args) =>

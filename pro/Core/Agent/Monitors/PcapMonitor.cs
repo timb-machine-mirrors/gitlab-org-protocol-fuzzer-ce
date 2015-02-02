@@ -29,6 +29,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Peach.Core;
 using Peach.Core.Agent;
 using SharpPcap;
@@ -44,15 +45,15 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Parameter("Filter", typeof(string), "PCAP Style filter", "")]
 	public class PcapMonitor : Monitor
 	{
-		protected string _tempFileName = Path.GetTempFileName();
-		protected object _lock = new object();
-		protected int _numPackets = 0;
+		private readonly string _tempFileName = Path.GetTempFileName();
+		private readonly object _lock = new object();
+		private int _numPackets;
 
-		protected LibPcapLiveDevice _device = null;
-		protected CaptureFileWriterDevice _writer = null;
+		private LibPcapLiveDevice _device;
+		private CaptureFileWriterDevice _writer;
 
-		public string Device { get; private set; }
-		public string Filter { get; private set; }
+		public string Device { get; set; }
+		public string Filter { get; set; }
 
 		public PcapMonitor(string name)
 			: base(name)
@@ -64,7 +65,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			lock (_lock)
 			{
 				// _writer can be null if a packet arrives before the 1st iteration
-				if (_writer != null && _writer.Opened)
+				if (_writer != null)
 				{
 					_writer.Write(packet.Packet);
 					_numPackets += 1;
@@ -83,6 +84,18 @@ namespace Peach.Pro.Core.Agent.Monitors
 			catch (DllNotFoundException ex)
 			{
 				throw new PeachException("Error, PcapMonitor was unable to get the device list.  Ensure libpcap is installed and try again.", ex);
+			}
+		}
+
+		private void _CloseWriter()
+		{
+			lock (_lock)
+			{
+				if (_writer != null)
+				{
+					_writer.Close();
+					_writer = null;
+				}
 			}
 		}
 
@@ -120,10 +133,8 @@ namespace Peach.Pro.Core.Agent.Monitors
 			if (_device == null)
 			{
 				Console.WriteLine("Found the following pcap devices: ");
-				foreach (var item in devices)
+				foreach (var dev in devices.OfType<LibPcapLiveDevice>())
 				{
-					var dev = item as LibPcapLiveDevice;
-					System.Diagnostics.Debug.Assert(dev != null);
 					if (!string.IsNullOrEmpty(dev.Interface.FriendlyName))
 						Console.WriteLine(" " + dev.Interface.FriendlyName);
 				}
@@ -147,10 +158,10 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		public override void SessionFinished()
 		{
+			_CloseWriter();
+
 			if (_device != null)
 			{
-				IterationFinished();
-
 				try
 				{
 					_device.StopCapture();
@@ -168,37 +179,28 @@ namespace Peach.Pro.Core.Agent.Monitors
 		{
 			lock (_lock)
 			{
+				if (_writer != null)
+					_writer.Close();
+
 				_writer = new CaptureFileWriterDevice(_device, _tempFileName);
 				_numPackets = 0;
 			}
 		}
 
-		public override void IterationFinished()
+		public override MonitorData GetNewMonitorData()
 		{
-			lock (_lock)
-			{
-				if (_writer != null)
-				{
-					_writer.Close();
-				}
-			}
-		}
+			_CloseWriter();
 
-		public override Fault GetMonitorData()
-		{
-			var fault = new Fault
+			var ret = new MonitorData
 			{
-				detectionSource = "PcapMonitor",
-				folderName = "PcapMonitor",
-				type = FaultType.Data,
-				title = "Collected " + _numPackets + " packets."
+				Title = "Collected {0} packet{1}.".Fmt(_numPackets, _numPackets == 1 ? "" : "s"),
+				Data = new Dictionary<string, byte[]>
+				{
+					{ "pcap", File.ReadAllBytes(_tempFileName) }
+				}
 			};
 
-			fault.collectedData.Add(new Fault.Data("NetworkCapture.pcap", File.ReadAllBytes(_writer.Name)));
-
-			return fault;
+			return ret;
 		}
 	}
 }
-
-// end
