@@ -27,6 +27,7 @@
 // $Id$
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -57,7 +58,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
 		Process _process;
-		Fault _fault;
+		MonitorData _data;
 		bool _messageExit;
 
 		public string Executable { get; set; }
@@ -229,7 +230,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 					if (!useCpuKill)
 					{
 						Logger.Debug("FAULT, WaitForExit ran out of time!");
-						_fault = MakeFault("ProcessFailedToExit", "Process did not exit in " + WaitForExitTimeout + "ms");
+						_data = MakeFault("FailedToExit", "Process {1} did not exit in {1}ms.".Fmt(Executable, WaitForExitTimeout));
 					}
 				}
 			}
@@ -240,21 +241,24 @@ namespace Peach.Pro.Core.Agent.Monitors
 			return _process != null && !_process.HasExited;
 		}
 
-		Fault MakeFault(string folder, string reason)
+		MonitorData MakeFault(string majorHash, string title)
 		{
-			return new Fault
+			return new MonitorData
 			{
-				type = FaultType.Fault,
-				detectionSource = "ProcessMonitor",
-				title = reason,
-				description = "{0}: {1} {2}".Fmt(reason, Executable, Arguments),
-				folderName = folder,
+				Title = title,
+				Data = new Dictionary<string, byte[]>(),
+				Fault = new MonitorData.Info
+				{
+					MajorHash = majorHash,
+					MinorHash = null,
+					Risk = null,
+				}
 			};
 		}
 
 		public override void IterationStarting(IterationStartingArgs args)
 		{
-			_fault = null;
+			_data = null;
 			_messageExit = false;
 
 			if (RestartOnEachTest)
@@ -266,12 +270,12 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		public override bool DetectedFault()
 		{
-			return _fault != null;
+			return _data != null;
 		}
 
-		public override Fault GetMonitorData()
+		public override MonitorData GetNewMonitorData()
 		{
-			return _fault;
+			return _data;
 		}
 
 		public override void SessionStarting()
@@ -289,7 +293,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 		{
 			if (!_messageExit && FaultOnEarlyExit && !_IsRunning())
 			{
-				_fault = MakeFault("ProcessExitedEarly", "Process exited early");
+				_data = MakeFault("ExitedEarly", "Process '{0}' exited early".Fmt(Executable));
 				_Stop();
 			}
 			else  if (StartOnCall != null)

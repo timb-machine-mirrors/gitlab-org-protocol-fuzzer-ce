@@ -150,7 +150,6 @@ namespace Peach.Core.Agent
 					MajorHash = fault.majorHash,
 					MinorHash = fault.minorHash,
 					Risk = fault.exploitability,
-					MustStop = MustStop(),
 				};
 			}
 
@@ -164,15 +163,6 @@ namespace Peach.Core.Agent
 		public virtual Fault GetMonitorData()
 		{
 			return null;
-		}
-
-		/// <summary>
-		/// Can the fuzzing session continue, or must we stop?
-		/// </summary>
-		/// <returns>True if session must stop, else false.</returns>
-		public virtual bool MustStop()
-		{
-			return false;
 		}
 
 		/// <summary>

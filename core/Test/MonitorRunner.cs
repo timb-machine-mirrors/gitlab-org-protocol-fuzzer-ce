@@ -54,12 +54,6 @@ namespace Peach.Core.Test
 		public Func<Monitor, MonitorData> GetMonitorData { get; set; }
 
 		/// <summary>
-		/// Controls the MustStop behaviour for each monitor.
-		/// The default is m => m.MustStop()
-		/// </summary>
-		public Func<Monitor, bool> MustStop { get; set; }
-
-		/// <summary>
 		/// Controls the SessionFinished behaviour for each monitor.
 		/// The default is m => m.IterationFinished()
 		/// </summary>
@@ -89,7 +83,6 @@ namespace Peach.Core.Test
 			IterationFinished = m => m.IterationFinished();
 			DetectedFault = m => m.DetectedFault();
 			GetMonitorData = m => m.GetNewMonitorData();
-			MustStop = m => m.MustStop();
 			SessionFinished = m => m.SessionFinished();
 			StopMonitor = m => m.StopMonitor();
 		}
@@ -178,8 +171,6 @@ namespace Peach.Core.Test
 						return f;
 					}).Where(f => f != null));
 				}
-
-				Reverse.ForEach(m => MustStop(m));
 			}
 
 			Reverse.ForEach(m => SessionFinished(m));

@@ -205,7 +205,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 				foreach (var mon in _monitors)
 				{
-					var fault = mon.GetMonitorData();
+					var fault = mon.GetNewMonitorData();
 					if (fault == null)
 						continue;
 
@@ -213,28 +213,28 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					{
 						MonitorName = mon.Name,
 						DetectionSource = mon.Class,
-						Title = fault.title,
+						Title = fault.Title,
 						Data = new List<FaultResponse.Record.FaultData>()
 					};
 
-					foreach (var data in fault.collectedData)
+					foreach (var kv in fault.Data)
 					{
 						item.Data.Add(new FaultResponse.Record.FaultData
 						{
-							Key = data.Key,
-							Value = data.Value,
+							Key = kv.Key,
+							Value = kv.Value,
 						});
 					}
 
-					if (fault.type == FaultType.Fault)
+					if (fault.Fault != null)
 					{
 						item.Fault = new FaultResponse.Record.FaultDetail
 						{
-							Description = fault.description,
-							MajorHash = fault.majorHash,
-							MinorHash = fault.minorHash,
-							Risk = fault.exploitability,
-							MustStop = mon.MustStop(),
+							Description = fault.Fault.Description,
+							MajorHash = fault.Fault.MajorHash,
+							MinorHash = fault.Fault.MinorHash,
+							Risk = fault.Fault.Risk,
+							MustStop = fault.Fault.MustStop
 						};
 					}
 

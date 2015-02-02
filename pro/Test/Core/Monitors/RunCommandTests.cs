@@ -104,9 +104,8 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestNoArgs()
 		{
-			var ex = Assert.Throws<PeachException>(() =>
-				new MonitorRunner("RunCommand", new Dictionary<string, string>())
-			);
+			var runner = new MonitorRunner("RunCommand", new Dictionary<string, string>());
+			var ex = Assert.Throws<PeachException>(() => runner.Run());
 
 			const string msg = "Could not start monitor \"RunCommand\".  Monitor 'RunCommand' is missing required parameter 'Command'.";
 			Assert.AreEqual(msg, ex.Message);
@@ -115,7 +114,8 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestNoWhen()
 		{
-			var ex = Assert.Throws<PeachException>(() => MakeWhen(""));
+			var runner = MakeWhen("");
+			var ex = Assert.Throws<PeachException>(() => runner.Run());
 
 			const string msg = "Could not start monitor \"RunCommand\".  Monitor 'RunCommand' could not set value type parameter 'When' to 'null'.";
 			Assert.AreEqual(msg, ex.Message);

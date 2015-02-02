@@ -42,7 +42,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 		static readonly Regex AsanTitle = new Regex(@"==\d+==ERROR: AddressSanitizer: ([^\r\n]+)");
 
 		private Regex _faulOnRegex;
-		private Fault _fault;
+		private MonitorData _data;
 
 		public RunCommand(string name)
 			: base(name)
@@ -59,7 +59,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		void _Start()
 		{
-			_fault = null;
+			_data = null;
 
 			Logger.Debug("_Start(): Running command " + Command + " with arguments " + Arguments);
 
@@ -70,63 +70,56 @@ namespace Peach.Pro.Core.Agent.Monitors
 				var stdout = p.StdOut.ToString();
 				var stderr = p.StdErr.ToString();
 
-				_fault = new Fault
+				_data = new MonitorData
 				{
-					detectionSource = "RunCommand",
-					folderName = "RunCommand"
+					Data = new Dictionary<string, byte[]>()
 				};
 
-				_fault.collectedData.Add(new Fault.Data("stdout", System.Text.Encoding.ASCII.GetBytes(stdout)));
-				_fault.collectedData.Add(new Fault.Data("stderr", System.Text.Encoding.ASCII.GetBytes(stderr)));
+				_data.Data.Add("stdout", Encoding.UTF8.GetBytes(stdout));
+				_data.Data.Add("stderr", Encoding.UTF8.GetBytes(stderr));
 
 				if (p.Timeout)
 				{
-					_fault.title = _fault.description = "Process failed to exit in allotted time.";
-					_fault.type = FaultType.Fault;
+					_data.Title = "Process failed to exit in allotted time.";
+					_data.Fault = new MonitorData.Info();
 				}
 				else if (FaultOnExitCode && p.ExitCode == FaultExitCode)
 				{
-					_fault.title = _fault.description = "Process exited with code {0}.".Fmt(p.ExitCode);
-					_fault.type = FaultType.Fault;
+					_data.Title = "Process exited with code {0}.".Fmt(p.ExitCode);
+					_data.Fault = new MonitorData.Info();
 				}
 				else if (FaultOnNonZeroExit && p.ExitCode != 0)
 				{
-					_fault.title = _fault.description = "Process exited with code {0}.".Fmt(p.ExitCode);
-					_fault.type = FaultType.Fault;
+					_data.Title = "Process exited with code {0}.".Fmt(p.ExitCode);
+					_data.Fault = new MonitorData.Info();
 				}
 				else if (_faulOnRegex != null)
 				{
 					if (_faulOnRegex.Match(stdout).Success)
 					{
-						_fault.title = _fault.description = "Process output matched FaulOnRegex \"{0}\".".Fmt(FaultOnRegex);
-						_fault.type = FaultType.Fault;
+						_data.Title = "Process stdout matched FaulOnRegex \"{0}\".".Fmt(FaultOnRegex);
+						_data.Fault = new MonitorData.Info();
 					}
 					else if (_faulOnRegex.Match(stderr).Success)
 					{
-						_fault.title = _fault.description = "Process error output matched FaulOnRegex \"{0}\".".Fmt(FaultOnRegex);
-						_fault.type = FaultType.Fault;
+						_data.Title = "Process stderr matched FaulOnRegex \"{0}\".".Fmt(FaultOnRegex);
+						_data.Fault = new MonitorData.Info();
 					}
 				}
 				else if (AddressSanitizer && AsanMatch.IsMatch(stderr))
 				{
-					_fault.type = FaultType.Fault;
-					_fault.folderName = null;
+					var title = AsanTitle.Match(stderr);
+					var bucket = AsanBucket.Match(stderr);
+					var desc = AsanMessage.Match(stderr);
 
-					var match = AsanBucket.Match(stderr);
-					_fault.exploitability = match.Groups[1].Value;
-					_fault.majorHash = match.Groups[3].Value;
-					_fault.minorHash = match.Groups[2].Value;
-
-					match = AsanTitle.Match(stderr);
-					_fault.title = match.Groups[1].Value;
-
-					match = AsanMessage.Match(stderr);
-					_fault.description = stderr.Substring(match.Groups[1].Index, match.Groups[1].Length);
-				}
-				else
-				{
-					_fault.description = stdout;
-					_fault.type = FaultType.Data;
+					_data.Title = title.Groups[1].Value;
+					_data.Fault = new MonitorData.Info
+					{
+						Description = stderr.Substring(desc.Groups[1].Index, desc.Groups[1].Length),
+						MajorHash = bucket.Groups[3].Value,
+						MinorHash = bucket.Groups[2].Value,
+						Risk = bucket.Groups[1].Value,
+					};
 				}
 			}
 			catch (Exception ex)
@@ -144,15 +137,15 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		public override bool DetectedFault()
 		{
-			return _fault != null && _fault.type == FaultType.Fault;
+			return _data != null && _data.Fault != null;
 		}
 
-		public override Fault GetMonitorData()
+		public override MonitorData GetNewMonitorData()
 		{
 			if (When == MonitorWhen.OnFault)
 				_Start();
 
-			return _fault;
+			return _data;
 		}
 
 		public override void SessionStarting()

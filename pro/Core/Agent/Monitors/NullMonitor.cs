@@ -73,13 +73,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 			return null;
 		}
 
-		public override bool MustStop()
-		{
-			Log("{0}.MustStop", Name);
-
-			return false;
-		}
-
 		public override void Message(string msg)
 		{
 			Log("{0}.Message {1}", Name, msg);
