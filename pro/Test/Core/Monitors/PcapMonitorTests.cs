@@ -26,7 +26,6 @@
 
 // $Id$
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -177,9 +176,9 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			Assert.AreEqual(1, faults.Length);
 			Assert.Null(faults[0].Fault);
-			Assert.AreEqual("PcapMonitor", faults[0].DetectionSource);
+			Assert.AreEqual("Pcap", faults[0].DetectionSource);
 			Assert.AreEqual(1, faults[0].Data.Count);
-			Assert.True(faults[0].Data.ContainsKey("NetworkCapture.pcap"));
+			Assert.True(faults[0].Data.ContainsKey("pcap"));
 
 			const string begin = "Collected ";
 			Assert.That(faults[0].Title, Is.StringStarting(begin));
@@ -222,8 +221,9 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void NoDeviceTest()
 		{
-			var ex = Assert.Throws<PeachException>(() =>
-				new MonitorRunner("Pcap", new Dictionary<string, string>()));
+			var runner = new MonitorRunner("Pcap", new Dictionary<string, string>());
+
+			var ex = Assert.Throws<PeachException>(() => runner.Run());
 
 			Assert.AreEqual("Could not start monitor \"Pcap\".  Monitor 'Pcap' is missing required parameter 'Device'.", ex.Message);
 		}
@@ -318,14 +318,13 @@ namespace Peach.Pro.Test.Core.Monitors
 			{
 				var f = faults[i];
 
-				Assert.AreEqual("PcapMonitor", f.DetectionSource);
+				Assert.AreEqual("Mon_{0}".Fmt(i), f.MonitorName);
+				Assert.AreEqual("Pcap", f.DetectionSource);
 				Assert.Null(f.Fault);
 				Assert.AreEqual(1, f.Data.Count);
-				Assert.True(f.Data.ContainsKey("NetworkCapture.pcap"));
+				Assert.True(f.Data.ContainsKey("pcap"));
 
-				var msg = "Collected {0} packets.".Fmt(i == count ? 0 : 1);
-
-				Assert.AreEqual(msg, f.Title);
+				Assert.AreEqual(i == count ? "Collected 0 packets." : "Collected 1 packet.", f.Title);
 			}
 		}
 	}

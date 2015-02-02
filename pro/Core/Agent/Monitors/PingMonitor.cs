@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Text;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
@@ -28,7 +28,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 		public string Data { get; set; }
 		public bool FaultOnSuccess { get; set; }
 
-		private Fault _fault;
+		private MonitorData _data;
 
 
 		private static bool CheckPermissions()
@@ -80,10 +80,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		public override bool DetectedFault()
 		{
-			_fault = new Fault
+			_data = new MonitorData
 			{
-				type = FaultType.Fault,
-				detectionSource = "PingMonitor"
+				Data = new Dictionary<string, byte[]>()
 			};
 
 			try
@@ -98,52 +97,48 @@ namespace Peach.Pro.Core.Agent.Monitors
 						Logger.Trace("DetectedFault(): Checking for fault, attempt #{0} to ping {1}", count, Host);
 						reply = string.IsNullOrEmpty(Data)
 							? ping.Send(Host, Timeout)
-							: ping.Send(Host, Timeout, Encoding.ASCII.GetBytes(Data));
+							: ping.Send(Host, Timeout, Encoding.UTF8.GetBytes(Data));
+						Debug.Assert(reply != null);
 					}
-					while (RetryCount >= count && (reply == null || reply.Status != IPStatus.Success));
+					while (RetryCount >= count && reply.Status != IPStatus.Success);
 
-					if (reply != null && reply.Status == IPStatus.Success)
-					{
-						Logger.Debug("DetectedFault(): {0} replied after {1}ms", Host, Timeout);
-						_fault.type = FaultOnSuccess ? FaultType.Fault : FaultType.Data;
-					}
-					else
-					{
-						Logger.Debug("DetectedFault(): {0} timed out after {1}ms", Host, Timeout);
-						_fault.type = FaultOnSuccess ? FaultType.Data : FaultType.Fault;
+					Logger.Debug("DetectedFault(): {0} {1} {2}ms",
+						Host,
+						reply.Status == IPStatus.Success ? "replied" : "timed out",
+						Timeout);
 
-					}
+					if (reply.Status != IPStatus.Success ^ FaultOnSuccess)
+						_data.Fault = new MonitorData.Info();
 
-					_fault.title = "Ping Reply";
-					_fault.description = MakeDescription(reply);
+					_data.Title = MakeDescription(reply);
 				}
 			}
 			catch (Exception ex)
 			{
-				_fault.title = "Exception";
-
 				if (ex is PingException)
 				{
 					var se = ex.InnerException as SocketException;
 
-					//  An MX record is returned but no A record—indicating the host itself exists, but is not directly reachable.
+					// An MX record is returned but no A record—indicating the host
+					// itself exists, but is not directly reachable.
 					if (se != null && se.SocketErrorCode == SocketError.NoData)
-						_fault.description = new SocketException((int)SocketError.HostNotFound).Message;
+						ex = new SocketException((int)SocketError.HostNotFound);
 					else
-						_fault.description = ex.InnerException.Message;
+						ex = ex.InnerException;
 				}
-				else
-				{
-					_fault.description = ex.Message;
-				}
+
+				_data.Title = ex.Message;
+
+				if (!FaultOnSuccess)
+					_data.Fault = new MonitorData.Info();
 			}
 
-			return _fault.type == FaultType.Fault;
+			return _data.Fault != null;
 		}
 
-		public override Fault GetMonitorData()
+		public override MonitorData GetNewMonitorData()
 		{
-			return _fault;
+			return _data;
 		}
 
 		static string MakeDescription(PingReply reply)
@@ -161,8 +156,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 					return "The ICMP echo request failed because the destination computer is not reachable.";
 				case IPStatus.DestinationProhibited:
 					return "The ICMP echo request failed because contact with the destination computer is administratively prohibited.";
-				//case IPStatus.DestinationProtocolUnreachable:
-				//	return "The ICMP echo request failed because the destination computer that is specified in an ICMP echo message is not reachable, because it does not support the packet's protocol.";
 				case IPStatus.DestinationPortUnreachable:
 					return "The ICMP echo request failed because the port on the destination computer is not available.";
 				case IPStatus.NoResources:
@@ -174,7 +167,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 				case IPStatus.PacketTooBig:
 					return "The ICMP echo request failed because the packet containing the request is larger than the maximum transmission unit (MTU) of a node (router or gateway) located between the source and destination. The MTU defines the maximum size of a transmittable packet.";
 				case IPStatus.TimedOut:
-					return "The ICMP echo Reply was not received within the allotted time.";
+					return "The ICMP echo reply was not received within the allotted time.";
 				case IPStatus.BadRoute:
 					return "The ICMP echo request failed because there is no valid route between the source and destination computers.";
 				case IPStatus.TtlExpired:

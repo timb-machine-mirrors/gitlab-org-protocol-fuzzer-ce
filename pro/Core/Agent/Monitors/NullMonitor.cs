@@ -66,7 +66,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			return false;
 		}
 
-		public override Fault GetMonitorData()
+		public override MonitorData GetNewMonitorData()
 		{
 			Log("{0}.GetMonitorData", Name);
 
