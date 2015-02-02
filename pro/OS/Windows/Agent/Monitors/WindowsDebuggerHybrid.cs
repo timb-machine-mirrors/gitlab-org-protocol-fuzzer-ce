@@ -433,11 +433,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			return _fault;
 		}
 
-		public override bool MustStop()
-		{
-			return false;
-		}
-
 		protected Fault GetEarlyExitFault()
 		{
 			return GetGeneralFault("ProcessExitedEarly", "Process exited early");
