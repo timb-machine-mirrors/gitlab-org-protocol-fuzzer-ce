@@ -50,7 +50,6 @@ deps = [
 
 	'Managed.Adb.dll',
 	'BouncyCastle.Crypto.dll',
-	'Syslog.Server.dll',
 	'aardvark_net.dll',
 	'LibUsbDotNet.dll',
 ]
