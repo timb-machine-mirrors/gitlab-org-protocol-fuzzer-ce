@@ -27,14 +27,15 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			Thread.Sleep(5000);
 			m.IterationFinished();
 			Assert.AreEqual(true, m.DetectedFault());
-			Fault fault = m.GetMonitorData();
+			var fault = m.GetNewMonitorData();
 			Assert.NotNull(fault);
-			Assert.AreEqual(3, fault.collectedData.Count);
-			Assert.AreEqual("StackTrace.txt", fault.collectedData[0].Key);
-			Assert.AreEqual("stdout.log", fault.collectedData[1].Key);
-			Assert.AreEqual("stderr.log", fault.collectedData[2].Key);
-			Assert.Greater(fault.collectedData[0].Value.Length, 0);
-			Assert.That(fault.description, Is.StringContaining("PossibleStackCorruption"));
+			Assert.NotNull(fault.Fault);
+			Assert.AreEqual(3, fault.Data.Count);
+			Assert.True(fault.Data.ContainsKey("StackTrace.txt"), "Fault should contain StackTrace.txt");
+			Assert.True(fault.Data.ContainsKey("stdout.log"), "Fault should contain stdout.log");
+			Assert.True(fault.Data.ContainsKey("stderr.log"), "Fault should contain stderr.log");
+			Assert.Greater(fault.Data["StackTrace.txt"].Length, 0);
+			Assert.That(fault.Fault.Description, Is.StringContaining("PossibleStackCorruption"));
 			m.SessionFinished();
 			m.StopMonitor();
 		}

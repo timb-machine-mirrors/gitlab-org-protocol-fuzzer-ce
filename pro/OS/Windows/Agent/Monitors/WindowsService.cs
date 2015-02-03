@@ -31,7 +31,6 @@ using System.ServiceProcess;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
-using Encoding = Peach.Core.Encoding;
 
 namespace Peach.Pro.OS.Windows.Agent.Monitors
 {
@@ -53,7 +52,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		public int StartTimeout { get; set; }
 
 		ServiceController _sc;
-		Fault _fault;
+		MonitorData _data;
 
 		public WindowsService(string name)
 			: base(name)
@@ -191,7 +190,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 		public override void IterationStarting(IterationStartingArgs args)
 		{
-			_fault = null;
+			_data = null;
 
 			if (Restart)
 				StopService();
@@ -201,40 +200,33 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 		public override bool DetectedFault()
 		{
-			if (_fault != null)
-				return true;
-
-			_sc.Refresh();
-
-			if (FaultOnEarlyExit && _sc.Status != ServiceControllerStatus.Running)
+			if (_data == null)
 			{
-				Logger.Info("DetectedFault() - Fault detected, process exited early");
-				MakeFault();
+				_sc.Refresh();
+
+				if (FaultOnEarlyExit && _sc.Status != ServiceControllerStatus.Running)
+				{
+					Logger.Info("DetectedFault() - Fault detected, process exited early");
+
+					_data = new MonitorData
+					{
+						Title = MachineName == null
+							? "The windows service '{0}' stopped early.".Fmt(Service)
+							: "The windows service '{0}' on machine '{1}' stopped early.".Fmt(Service, MachineName),
+						Data = new Dictionary<string, byte[]>(),
+						Fault = new MonitorData.Info()
+					};
+				}
 			}
 
-			return _fault != null;
+			return _data != null;
 		}
 
-		public override Fault GetMonitorData()
+		public override MonitorData GetNewMonitorData()
 		{
 			// Wil be called if a different monitor records a fault
 			// so don't assume the service has stopped early.
-			return _fault;
-		}
-
-		private void MakeFault()
-		{
-			_fault = new Fault
-			{
-				type = FaultType.Fault,
-				folderName = "WindowsService",
-				detectionSource = "WindowsService",
-				description = MachineName == null
-					? "The windows service '{0}' stopped early.".Fmt(Service)
-					: "The windows service '{0}' on machine '{1}' stopped early.".Fmt(Service, MachineName)
-			};
-
-			_fault.collectedData.Add(new Fault.Data("WindowsService.txt", Encoding.UTF8.GetBytes(_fault.description)));
+			return _data;
 		}
 	}
 }

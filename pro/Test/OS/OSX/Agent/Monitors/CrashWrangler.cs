@@ -191,9 +191,10 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			w.IterationFinished();
 
 			Assert.AreEqual(true, w.DetectedFault());
-			var f = w.GetMonitorData();
+			var f = w.GetNewMonitorData();
 			Assert.NotNull(f);
-			Assert.AreEqual("ProcessFailedToExit", f.folderName);
+			Assert.NotNull(f.Fault);
+			Assert.AreEqual("FailedToExit", f.Fault.MajorHash);
 
 			w.SessionFinished();
 			w.StopMonitor();
@@ -248,9 +249,10 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			w.IterationFinished();
 
 			Assert.AreEqual(true, w.DetectedFault());
-			var f = w.GetMonitorData();
+			var f = w.GetNewMonitorData();
 			Assert.NotNull(f);
-			Assert.AreEqual("ProcessExitedEarly", f.folderName);
+			Assert.NotNull(f.Fault);
+			Assert.AreEqual("ExitedEarly", f.Fault.MajorHash);
 
 			w.SessionFinished();
 			w.StopMonitor();
@@ -311,9 +313,10 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			w.IterationFinished();
 
 			Assert.AreEqual(true, w.DetectedFault());
-			var f = w.GetMonitorData();
+			var f = w.GetNewMonitorData();
 			Assert.NotNull(f);
-			Assert.AreEqual("ProcessExitedEarly", f.folderName);
+			Assert.NotNull(f.Fault);
+			Assert.AreEqual("ExitedEarly", f.Fault.MajorHash);
 
 
 			w.SessionFinished();
@@ -391,11 +394,11 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			Thread.Sleep(1000);
 			w.IterationFinished();
 			Assert.AreEqual(true, w.DetectedFault());
-			var fault = w.GetMonitorData();
+			var fault = w.GetNewMonitorData();
 			Assert.NotNull(fault);
-			Assert.AreEqual(1, fault.collectedData.Count);
-			Assert.AreEqual("StackTrace.txt", fault.collectedData[0].Key);
-			Assert.Greater(fault.collectedData[0].Value.Length, 0);
+			Assert.NotNull(fault.Fault);
+			Assert.False(string.IsNullOrEmpty(fault.Fault.Description));
+			Assert.AreEqual(0, fault.Data.Count);
 			w.SessionFinished();
 			w.StopMonitor();
 		}

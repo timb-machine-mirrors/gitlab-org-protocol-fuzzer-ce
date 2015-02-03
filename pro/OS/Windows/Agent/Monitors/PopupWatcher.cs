@@ -28,11 +28,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using Peach.Core;
 using Peach.Core.Agent;
+using Encoding = Peach.Core.Encoding;
 using Monitor = Peach.Core.Agent.Monitor;
 
 namespace Peach.Pro.OS.Windows.Agent.Monitors
@@ -43,8 +46,8 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 	[Parameter("Fault", typeof(bool), "Trigger fault when a window is found", "false")]
 	public class PopupWatcher : Monitor
 	{
-		public string[] WindowNames { get; private set; }
-		public bool Fault { get; private set; }
+		public string[] WindowNames { get; set; }
+		public bool Fault { get; set; }
 
 		#region P/Invokes
 
@@ -61,20 +64,21 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
 		static extern int PostMessage(IntPtr hWnd, UInt32 msg, IntPtr wParam, IntPtr lParam);
 		[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-		static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+		static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
+		// ReSharper disable once InconsistentNaming
 		private const uint WM_CLOSE = 0x0010;
 
 		#endregion
 
-		Thread _worker = null;
-		ManualResetEvent _event = null;
+		readonly SortedSet<string> _closedWindows = new SortedSet<string>();
+		readonly object _lock = new object();
 
-		SortedSet<string> _closedWindows = new SortedSet<string>();
-		object _lock = new object();
-		bool _continue = true;
-		long workerCount = 0;
-		Fault _fault = null;
+		Thread _worker;
+		ManualResetEvent _event;
+		bool _continue;
+		long _workerCount;
+		MonitorData _data;
 
 		public PopupWatcher(string name)
 			: base(name)
@@ -83,33 +87,33 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 		bool EnumHandler(IntPtr hWnd, IntPtr lParam)
 		{
-			int nLength = GetWindowTextLength(hWnd);
+			var nLength = GetWindowTextLength(hWnd);
 			if (nLength == 0)
 				return _continue;
 
-			StringBuilder strbTitle = new StringBuilder(nLength + 1);
+			var strbTitle = new StringBuilder(nLength + 1);
 			nLength = GetWindowText(hWnd, strbTitle, strbTitle.Capacity);
 			if (nLength == 0)
 				return _continue;
 
-			string strTitle = strbTitle.ToString();
+			var strTitle = strbTitle.ToString();
 
-			foreach (string windowName in WindowNames)
+			Debug.Assert(WindowNames != null);
+			Debug.Assert(WindowNames.Length > 0);
+
+			if (WindowNames.Any(n => strTitle.IndexOf(n, StringComparison.Ordinal) > -1))
 			{
-				if (strTitle.IndexOf(windowName) > -1)
+				PostMessage(hWnd, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
+				SendMessage(hWnd, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
+
+				lock (_lock)
 				{
-					PostMessage(hWnd, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
-					SendMessage(hWnd, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
-
-					lock (_lock)
-					{
-						_closedWindows.Add(strTitle);
-						OnInternalEvent(EventArgs.Empty);
-					}
-
-					_continue &= WindowNames.Length > 1;
-					return _continue;
+					_closedWindows.Add(strTitle);
+					OnInternalEvent(EventArgs.Empty);
 				}
+
+				_continue &= WindowNames.Length > 1;
+				return _continue;
 			}
 
 			// Recursively check child windows
@@ -130,12 +134,15 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				EnumWindows(EnumHandler, IntPtr.Zero);
 
 				// Increment counter
-				Interlocked.Increment(ref workerCount);
+				Interlocked.Increment(ref _workerCount);
 			}
 		}
 
 		public override void SessionStarting()
 		{
+			if (WindowNames == null || WindowNames.Length == 0)
+				return;
+
 			_event = new ManualResetEvent(false);
 
 			_worker = new Thread(Work);
@@ -158,47 +165,55 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 		public override bool DetectedFault()
 		{
-			return _fault != null && _fault.type == FaultType.Fault;
+			return _data != null && _data.Fault != null;
 		}
 
 
 		public override void IterationStarting(IterationStartingArgs args)
 		{
-			Interlocked.Exchange(ref workerCount, 0);
+			Interlocked.Exchange(ref _workerCount, 0);
 		}
 
 		public override void IterationFinished()
 		{
-			_fault = null;
+			_data = null;
 
 			// Wait for the window closer thread to fire once more
-			var start = Interlocked.Read(ref workerCount);
+			var start = Interlocked.Read(ref _workerCount);
 			var cnt = 0;
 
 			do
 			{
 				Thread.Sleep(100);
 			}
-			while (start == Interlocked.Read(ref workerCount) && cnt++ < 10);
+			while (start == Interlocked.Read(ref _workerCount) && cnt++ < 10);
 
 			lock (_lock)
 			{
 				if (_closedWindows.Count > 0)
 				{
-					_fault = new Fault();
-					_fault.detectionSource = "PopupWatcher";
-					_fault.type = Fault ? FaultType.Fault : FaultType.Data;
-					_fault.title = string.Format("Closed {0} popup window{1}.", _closedWindows.Count, _closedWindows.Count > 1 ? "s" : "");
-					_fault.description = "Window Titles:" + Environment.NewLine + string.Join(Environment.NewLine, _closedWindows);
-				}
+					_data = new MonitorData
+					{
+						Title = "Closed {0} popup window{1}.".Fmt(_closedWindows.Count, _closedWindows.Count > 1 ? "s" : ""),
+						Data = new Dictionary<string, byte[]>()
+					};
 
-				_closedWindows.Clear();
+					var eol = Environment.NewLine;
+					var desc = "Window Titles:{0}{1}".Fmt(eol, string.Join(eol, _closedWindows));
+
+					if (Fault)
+						_data.Fault = new MonitorData.Info { Description = desc };
+					else
+						_data.Data.Add("ClosedWindows.txt", Encoding.UTF8.GetBytes(desc));
+
+					_closedWindows.Clear();
+				}
 			}
 		}
 
-		public override Fault GetMonitorData()
+		public override MonitorData GetNewMonitorData()
 		{
-			return _fault;
+			return _data;
 		}
 	}
 }

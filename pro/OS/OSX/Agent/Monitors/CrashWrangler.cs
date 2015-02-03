@@ -141,39 +141,39 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			return _detectedFault.Value;
 		}
 
-		public override Fault GetMonitorData()
+		public override MonitorData GetNewMonitorData()
 		{
 			if (!DetectedFault())
 				return null;
 
-			Fault fault = new Fault();
-			fault.detectionSource = "CrashWrangler";
-			fault.type = FaultType.Fault;
+			var fault = new MonitorData
+			{
+				Data = new Dictionary<string, byte[]>(),
+				Fault = new MonitorData.Info(),
+			};
 
 			if (File.Exists(CwLogFile))
 			{
-				fault.description = File.ReadAllText(CwLogFile);
-				fault.collectedData.Add(new Fault.Data("StackTrace.txt", File.ReadAllBytes(CwLogFile)));
+				fault.Fault.Description = File.ReadAllText(CwLogFile);
 
-				var s = new Summary(fault.description);
+				var s = new Summary(fault.Fault.Description);
 
-				fault.majorHash = s.majorHash;
-				fault.minorHash = s.minorHash;
-				fault.title = s.title;
-				fault.exploitability = s.exploitable;
-
+				fault.Title = s.Title;
+				fault.Fault.MajorHash = s.MajorHash;
+				fault.Fault.MinorHash = s.MinorHash;
+				fault.Fault.Risk = s.Exploitable;
 			}
 			else if (!_faultExitFail)
 			{
-				fault.title = "Process exited early";
-				fault.description = "Process exited early: " + Executable + " " + Arguments;
-				fault.folderName = "ProcessExitedEarly";
+				fault.Title = "Process exited early.";
+				fault.Fault.Description = "{0} {1} {2}".Fmt(fault.Title, Executable, Arguments);
+				fault.Fault.MajorHash = "ExitedEarly";
 			}
 			else
 			{
-				fault.title = "Process did not exit in " + WaitForExitTimeout + "ms";
-				fault.description = fault.title + ": " + Executable + " " + Arguments;
-				fault.folderName = "ProcessFailedToExit";
+				fault.Title = "Process did not exit in " + WaitForExitTimeout + "ms.";
+				fault.Fault.Description = "{0} {1} {2}".Fmt(fault.Title, Executable, Arguments);
+				fault.Fault.MajorHash = "FailedToExit";
 			}
 			return fault;
 		}
@@ -282,10 +282,12 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			if (File.Exists(CwLockFile))
 				File.Delete(CwLockFile);
 
-			var si = new ProcessStartInfo();
-			si.FileName = ExecHandler;
-			si.Arguments = "\"" + Executable + "\"" + (Arguments.Length == 0 ? "" : " ") + Arguments;
-			si.UseShellExecute = false;
+			var si = new ProcessStartInfo
+			{
+				FileName = ExecHandler,
+				Arguments = "\"" + Executable + "\"" + (Arguments.Length == 0 ? "" : " ") + Arguments,
+				UseShellExecute = false
+			};
 
 			foreach (DictionaryEntry de in Environment.GetEnvironmentVariables())
 				si.EnvironmentVariables[de.Key.ToString()] = de.Value.ToString();
@@ -302,8 +304,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			if (ExploitableReads)
 				si.EnvironmentVariables["CW_EXPLOITABLE_READS"] = "1";
 
-			_procHandler = new Process();
-			_procHandler.StartInfo = si;
+			_procHandler = new Process { StartInfo = si };
 
 			try
 			{
@@ -312,7 +313,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			catch (Win32Exception ex)
 			{
 
-				string err = GetLastError(ex.NativeErrorCode);
+				var err = GetLastError(ex.NativeErrorCode);
 				throw new PeachException(string.Format("CrashWrangler: Could not start handler \"{0}\" - {1}", ExecHandler, err), ex);
 			}
 
@@ -320,8 +321,8 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			while (!File.Exists(CwPidFile) && !_procHandler.HasExited)
 				Thread.Sleep(250);
 
-			string strPid = File.ReadAllText(CwPidFile);
-			int pid = Convert.ToInt32(strPid);
+			var strPid = File.ReadAllText(CwPidFile);
+			var pid = Convert.ToInt32(strPid);
 
 			try
 			{
@@ -397,7 +398,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 		private void _WaitForExit(bool useCpuKill)
 		{
 			const int pollInterval = 200;
-			int i = 0;
+			int i;
 
 			if (!_IsProcessRunning())
 				return;
@@ -450,8 +451,8 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 
 		private static string GetLastError(int err)
 		{
-			IntPtr ptr = strerror(err);
-			string ret = Marshal.PtrToStringAnsi(ptr);
+			var ptr = strerror(err);
+			var ret = Marshal.PtrToStringAnsi(ptr);
 			return ret;
 		}
 
@@ -460,12 +461,12 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 
 		class Summary
 		{
-			public string majorHash { get; private set; }
-			public string minorHash { get; private set; }
-			public string title { get; private set; }
-			public string exploitable { get; private set; }
+			public string MajorHash { get; private set; }
+			public string MinorHash { get; private set; }
+			public string Title { get; private set; }
+			public string Exploitable { get; private set; }
 
-			private static readonly string[] system_modules =
+			private static readonly string[] SystemModules =
 			{
 				"libSystem.B.dylib",
 				"libsystem_kernel.dylib",
@@ -477,10 +478,10 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 				"libgmalloc.dylib",
 				"libc++abi.dylib",
 				"modified_gmalloc.dylib", // Apple internal dylib
-				"???",                    // For when it doesn't exist in a known module
+				"???"                     // For when it doesn't exist in a known module
 			};
 
-			private static readonly string[] offset_functions = 
+			private static readonly string[] OffsetFunctions = 
 			{
 				"__memcpy",
 				"__longcopy",
@@ -493,30 +494,30 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 				"memmove",
 				"bcopy",
 				"bzero",
-				"memset_pattern",
+				"memset_pattern" 
 			};
 
-			private const int major_depth = 5;
+			private const int MajorDepth = 5;
 
 			public Summary(string log)
 			{
-				string is_exploitable = null;
-				string access_type = null;
-				string exception = null;
+				var isExploitable = string.Empty;
+				var accessType = string.Empty;
+				var exception = string.Empty;
 
-				exploitable = "UNKNOWN";
+				Exploitable = "UNKNOWN";
 
 				var reProp = new Regex(@"^(((?<key>\w+)=(?<value>[^:]+):)+)$", RegexOptions.Multiline);
 				var mProp = reProp.Match(log);
 				if (mProp.Success)
 				{
-					var ti = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo;
+					var ti = Thread.CurrentThread.CurrentCulture.TextInfo;
 					var keys = mProp.Groups["key"].Captures;
 					var vals = mProp.Groups["value"].Captures;
 
-					System.Diagnostics.Debug.Assert(keys.Count == vals.Count);
+					Debug.Assert(keys.Count == vals.Count);
 
-					for (int i = 0; i < keys.Count; ++i)
+					for (var i = 0; i < keys.Count; ++i)
 					{
 						var key = keys[i].Value;
 						var val = vals[i].Value;
@@ -524,36 +525,36 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 						switch (key)
 						{
 							case "is_exploitable":
-								is_exploitable = val.ToLower();
+								isExploitable = val.ToLower();
 								break;
 							case "exception":
-								exception = string.Join("", val.ToLower().Split('_').Where(a => a != "exc").Select(a => ti.ToTitleCase(a)).ToArray());
+								exception = string.Join("", val.ToLower().Split('_').Where(a => a != "exc").Select(ti.ToTitleCase).ToArray());
 								break;
 							case "access_type":
-								access_type = ti.ToTitleCase(val.ToLower());
+								accessType = ti.ToTitleCase(val.ToLower());
 								break;
 						}
 					}
 				}
 
-				title = string.Format("{0}{1}", access_type, exception);
+				Title = string.Format("{0}{1}", accessType, exception);
 
-				if (is_exploitable == null)
-					exploitable = "UNKNOWN";
-				else if (is_exploitable == "yes")
-					exploitable = "EXPLOITABLE";
+				if (string.IsNullOrEmpty(isExploitable))
+					Exploitable = "UNKNOWN";
+				else if (isExploitable == "yes")
+					Exploitable = "EXPLOITABLE";
 				else
-					exploitable = "NOT_EXPLOITABLE";
+					Exploitable = "NOT_EXPLOITABLE";
 
-				Regex reTid = new Regex(@"^Crashed Thread:\s+(\d+)", RegexOptions.Multiline);
-				Match mTid = reTid.Match(log);
+				var reTid = new Regex(@"^Crashed Thread:\s+(\d+)", RegexOptions.Multiline);
+				var mTid = reTid.Match(log);
 				if (!mTid.Success)
 					return;
 
-				string tid = mTid.Groups[1].Value;
-				string strReAddr = @"^Thread " + tid + @" Crashed:.*\n((\d+\s+(?<file>\S*)\s+(?<addr>0x[0-9,a-f,A-F]+)\s(?<func>.+)\n)+)";
-				Regex reAddr = new Regex(strReAddr, RegexOptions.Multiline);
-				Match mAddr = reAddr.Match(log);
+				var tid = mTid.Groups[1].Value;
+				var strReAddr = @"^Thread " + tid + @" Crashed:.*\n((\d+\s+(?<file>\S*)\s+(?<addr>0x[0-9,a-f,A-F]+)\s(?<func>.+)\n)+)";
+				var reAddr = new Regex(strReAddr, RegexOptions.Multiline);
+				var mAddr = reAddr.Match(log);
 				if (!mAddr.Success)
 					return;
 
@@ -561,29 +562,29 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 				var addrs = mAddr.Groups["addr"].Captures;
 				var names = mAddr.Groups["func"].Captures;
 
-				string maj = "";
-				string min = "";
-				int cnt = 0;
+				var maj = "";
+				var min = "";
+				var cnt = 0;
 
-				for (int i = 0; i < files.Count; ++i)
+				for (var i = 0; i < files.Count; ++i)
 				{
 					var file = files[i].Value;
 					var addr = addrs[i].Value;
 					var name = names[i].Value;
 
 					// Ignore certian system modules
-					if (system_modules.Contains(file))
+					if (SystemModules.Contains(file))
 						continue;
 
 					// When generating a signature, remove offsets for common functions
-					string other = offset_functions.Where(a => name.StartsWith(a)).FirstOrDefault();
+					var other = OffsetFunctions.FirstOrDefault(name.StartsWith);
 					if (other != null)
 						addr = other;
 
-					string sig = (cnt == 0 ? "" : ",") + addr;
+					var sig = (cnt == 0 ? "" : ",") + addr;
 					min += sig;
 
-					if (++cnt <= major_depth)
+					if (++cnt <= MajorDepth)
 						maj += sig;
 				}
 
@@ -594,18 +595,18 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 					min = mProp.Value;
 				}
 
-				majorHash = Md5(maj);
-				minorHash = Md5(min);
+				MajorHash = Md5(maj);
+				MinorHash = Md5(min);
 			}
 
 			private static string Md5(string input)
 			{
 				using (var md5 = new System.Security.Cryptography.MD5CryptoServiceProvider())
 				{
-					byte[] buf = Encoding.UTF8.GetBytes(input);
-					byte[] final = md5.ComputeHash(buf);
+					var buf = Encoding.UTF8.GetBytes(input);
+					var final = md5.ComputeHash(buf);
 					var sb = new StringBuilder();
-					foreach (byte b in final)
+					foreach (var b in final)
 						sb.Append(b.ToString("X2"));
 					return sb.ToString();
 				}

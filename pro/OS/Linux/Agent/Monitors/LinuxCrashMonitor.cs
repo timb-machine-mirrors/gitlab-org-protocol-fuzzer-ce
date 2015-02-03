@@ -29,6 +29,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -195,17 +196,22 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 			return false;
 		}
 
-		public override Fault GetMonitorData()
+		public override MonitorData GetNewMonitorData()
 		{
-			Fault fault = new Fault();
-			fault.detectionSource = "LinuxCrashMonitor";
-			fault.folderName = "LinuxCrashMonitor";
-			fault.type = FaultType.Fault;
+			var title = string.IsNullOrEmpty(Executable)
+				? "Crash dump found."
+				: "{0} crash dump found.".Fmt(Executable);
 
-			if (Executable != null)
-				fault.description = string.Format("LinuxCrashMonitor_{0} ({1})", Name, Executable);
-			else
-				fault.description = string.Format("LinuxCrashMonitor_{0}", Name);
+			var ret = new MonitorData
+			{
+				Title = title,
+				Data = new Dictionary<string,byte[]>(),
+				Fault = new MonitorData.Info
+				{
+					MajorHash = "CORE",
+					MinorHash = Executable
+				}
+			};
 
 			foreach (var file in Directory.GetFiles(LogFolder))
 			{
@@ -218,7 +224,9 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 					{
 						if (file.IndexOf(Executable) != -1)
 						{
-							fault.collectedData.Add(new Fault.Data(Path.GetFileName(file), File.ReadAllBytes(file)));
+							var key = Path.GetFileName(file);
+							Debug.Assert(key != null);
+							ret.Data.Add(key, File.ReadAllBytes(file));
 							File.Delete(file);
 							break;
 						}
@@ -226,7 +234,9 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 					else
 					{
 						// Support multiple crash files
-						fault.collectedData.Add(new Fault.Data(Path.GetFileName(file), File.ReadAllBytes(file)));
+						var key = Path.GetFileName(file);
+						Debug.Assert(key != null);
+						ret.Data.Add(key, File.ReadAllBytes(file));
 						File.Delete(file);
 					}
 				}
@@ -236,7 +246,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 				}
 			}
 
-			return fault;
+			return ret;
 		}
 
 		#region Ulimit

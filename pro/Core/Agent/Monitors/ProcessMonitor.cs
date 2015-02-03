@@ -230,7 +230,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 					if (!useCpuKill)
 					{
 						Logger.Debug("FAULT, WaitForExit ran out of time!");
-						_data = MakeFault("FailedToExit", "Process {1} did not exit in {1}ms.".Fmt(Executable, WaitForExitTimeout));
+						_data = MakeFault("FailedToExit", "Process '{0}' did not exit in {1}ms.".Fmt(Executable, WaitForExitTimeout));
 					}
 				}
 			}
@@ -293,7 +293,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 		{
 			if (!_messageExit && FaultOnEarlyExit && !_IsRunning())
 			{
-				_data = MakeFault("ExitedEarly", "Process '{0}' exited early".Fmt(Executable));
+				_data = MakeFault("ExitedEarly", "Process '{0}' exited early.".Fmt(Executable));
 				_Stop();
 			}
 			else  if (StartOnCall != null)
