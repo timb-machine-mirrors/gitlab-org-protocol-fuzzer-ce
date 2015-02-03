@@ -273,7 +273,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			return _data != null;
 		}
 
-		public override MonitorData GetNewMonitorData()
+		public override MonitorData GetMonitorData()
 		{
 			return _data;
 		}

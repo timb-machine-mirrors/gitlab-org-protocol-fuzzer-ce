@@ -82,7 +82,7 @@ namespace Peach.Core.Test
 			Message = m => { };
 			IterationFinished = m => m.IterationFinished();
 			DetectedFault = m => m.DetectedFault();
-			GetMonitorData = m => m.GetNewMonitorData();
+			GetMonitorData = m => m.GetMonitorData();
 			SessionFinished = m => m.SessionFinished();
 			StopMonitor = m => m.StopMonitor();
 		}

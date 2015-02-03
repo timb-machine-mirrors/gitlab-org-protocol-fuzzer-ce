@@ -187,7 +187,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			}
 		}
 
-		public override MonitorData GetNewMonitorData()
+		public override MonitorData GetMonitorData()
 		{
 			_CloseWriter();
 

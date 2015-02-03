@@ -147,7 +147,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			return _crashLogs.Length > 0;
 		}
 
-		public override MonitorData GetNewMonitorData()
+		public override MonitorData GetMonitorData()
 		{
 			if (!DetectedFault())
 				return null;

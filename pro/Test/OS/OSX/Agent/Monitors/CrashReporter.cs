@@ -111,7 +111,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			Thread.Sleep(2000);
 			reporter.IterationFinished();
 			Assert.AreEqual(shouldFault, reporter.DetectedFault());
-			var fault = reporter.GetNewMonitorData();
+			var fault = reporter.GetMonitorData();
 			reporter.StopMonitor();
 			return fault;
 		}

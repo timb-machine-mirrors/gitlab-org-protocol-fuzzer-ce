@@ -20,7 +20,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 		{
 		}
 
-		public override MonitorData GetNewMonitorData()
+		public override MonitorData GetMonitorData()
 		{
 			if (!File.Exists(Filename))
 				return null;

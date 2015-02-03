@@ -778,7 +778,7 @@ quit
 			return true;
 		}
 
-		public override MonitorData GetNewMonitorData()
+		public override MonitorData GetMonitorData()
 		{
 			return _fault;
 		}

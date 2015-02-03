@@ -196,7 +196,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 			return false;
 		}
 
-		public override MonitorData GetNewMonitorData()
+		public override MonitorData GetMonitorData()
 		{
 			var title = string.IsNullOrEmpty(Executable)
 				? "Crash dump found."

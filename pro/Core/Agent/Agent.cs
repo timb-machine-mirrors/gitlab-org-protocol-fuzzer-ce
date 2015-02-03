@@ -187,7 +187,7 @@ namespace Peach.Pro.Core.Agent
 			{
 				Guard(mon, "GetMonitorData", m =>
 				{
-					var data = m.GetNewMonitorData();
+					var data = m.GetMonitorData();
 
 					if (data == null)
 						return;

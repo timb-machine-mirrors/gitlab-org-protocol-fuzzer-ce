@@ -205,7 +205,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 				foreach (var mon in _monitors)
 				{
-					var fault = mon.GetNewMonitorData();
+					var fault = mon.GetMonitorData();
 					if (fault == null)
 						continue;
 
