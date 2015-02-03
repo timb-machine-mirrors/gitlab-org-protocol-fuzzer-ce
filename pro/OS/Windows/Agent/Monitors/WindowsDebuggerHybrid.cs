@@ -30,6 +30,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using NLog;
@@ -90,7 +91,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		bool _stopMessage = false;
 		bool _hybrid = true;
 		bool _replay = false;
-		Fault _fault = null;
+		MonitorData _fault = null;
 
 		DebuggerInstance _debugger = null;
 		SystemDebuggerInstance _systemDebugger = null;
@@ -363,7 +364,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			if (_systemDebugger != null && _systemDebugger.caughtException)
 			{
 				logger.Info("DetectedFault - Using system debugger, caught exception");
-				_fault = _systemDebugger.crashInfo;
+				_fault = GetDebuggerFault(_systemDebugger.crashInfo);
 
 				_systemDebugger.StopDebugger();
 				_systemDebugger = null;
@@ -380,7 +381,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 					{
 						// Kill off our debugger process and re-create
 						_debuggerProcessUsage = _debuggerProcessUsageMax;
-						_fault = _debugger.crashInfo;
+						_fault = GetDebuggerFault(_debugger.crashInfo);
 						break;
 					}
 
@@ -403,7 +404,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			{
 				// Kill off our debugger process and re-create
 				_debuggerProcessUsage = _debuggerProcessUsageMax;
-				_fault = _debugger.crashInfo;
+				_fault = GetDebuggerFault(_debugger.crashInfo);
 			}
 			else if (_earlyExitFault)
 			{
@@ -413,7 +414,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			else if (_waitForExitFailed)
 			{
 				logger.Info("DetectedFault() - Fault detected, WaitForExitOnCall failed");
-				_fault = GetGeneralFault("ProcessFailedToExit", "Process did not exit in " + _waitForExitTimeout + "ms");
+				_fault = GetGeneralFault("FailedToExit", "Process did not exit in " + _waitForExitTimeout + "ms.");
 			}
 
 			if(_fault == null)
@@ -422,7 +423,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			return _fault != null;
 		}
 
-		public override Fault GetMonitorData()
+		public override MonitorData GetNewMonitorData()
 		{
 			if (_fault != null && _hybrid)
 			{
@@ -433,29 +434,52 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			return _fault;
 		}
 
-		protected Fault GetEarlyExitFault()
+		protected MonitorData GetEarlyExitFault()
 		{
-			return GetGeneralFault("ProcessExitedEarly", "Process exited early");
+			return GetGeneralFault("ExitedEarly", "Process exited early.");
 		}
 
-		protected Fault GetGeneralFault(string folder, string reason)
+		protected MonitorData GetDebuggerFault(Fault f)
 		{
-			var fault = new Fault();
-			fault.type = FaultType.Fault;
-			fault.detectionSource = _systemDebugger != null ? "SystemDebugger" : "WindowsDebugEngine";
-			fault.title = reason;
-			fault.description = reason + ": ";
+			return new MonitorData
+			{
+				DetectionSource = _systemDebugger != null ? "SystemDebugger" : "WindowsDebugEngine",
+				Title = f.title,
+				Data = f.collectedData.ToDictionary(i => i.Key, i => i.Value),
+				Fault = new MonitorData.Info
+				{
+					Description = f.description,
+					MajorHash = f.majorHash,
+					MinorHash = f.minorHash,
+					Risk = f.exploitability,
+				}
+			};
+		}
+
+		protected MonitorData GetGeneralFault(string type, string reason)
+		{
+			var desc = reason + ": ";
 
 			if (_processName != null)
-				fault.description += _processName;
+				desc += _processName;
 			else if (_commandLine != null)
-				fault.description += _commandLine;
+				desc += _commandLine;
 			else if (_kernelConnectionString != null)
-				fault.description += _kernelConnectionString;
+				desc += _kernelConnectionString;
 			else if (_service != null)
-				fault.description += _service;
+				desc += _service;
 
-			fault.folderName = folder;
+			var fault = new MonitorData
+			{
+				DetectionSource = _systemDebugger != null ? "SystemDebugger" : "WindowsDebugEngine",
+				Title = reason,
+				Data = new Dictionary<string, byte[]>(),
+				Fault = new MonitorData.Info
+				{
+					Description = desc,
+					MajorHash = reason,
+				}
+			};
 
 			return fault;
 		}

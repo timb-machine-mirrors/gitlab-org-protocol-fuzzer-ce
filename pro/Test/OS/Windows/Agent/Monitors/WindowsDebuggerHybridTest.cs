@@ -211,9 +211,10 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			w.IterationFinished();
 
 			Assert.AreEqual(true, w.DetectedFault());
-			Fault f = w.GetMonitorData();
+			var f = w.GetNewMonitorData();
 			Assert.NotNull(f);
-			Assert.AreEqual("ProcessExitedEarly", f.folderName);
+			Assert.NotNull(f.Fault);
+			Assert.AreEqual("ExitedEarly", f.Fault.MajorHash);
 
 			w.SessionFinished();
 			w.StopMonitor();
@@ -274,10 +275,10 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			w.IterationFinished();
 
 			Assert.AreEqual(true, w.DetectedFault());
-			Fault f = w.GetMonitorData();
+			var f = w.GetNewMonitorData();
 			Assert.NotNull(f);
-			Assert.AreEqual("ProcessExitedEarly", f.folderName);
-
+			Assert.NotNull(f.Fault);
+			Assert.AreEqual("ExitedEarly", f.Fault.MajorHash);
 
 			w.SessionFinished();
 			w.StopMonitor();
