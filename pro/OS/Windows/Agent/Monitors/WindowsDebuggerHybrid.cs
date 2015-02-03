@@ -423,7 +423,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			return _fault != null;
 		}
 
-		public override MonitorData GetNewMonitorData()
+		public override MonitorData GetMonitorData()
 		{
 			if (_fault != null && _hybrid)
 			{

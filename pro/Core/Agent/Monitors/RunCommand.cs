@@ -140,7 +140,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			return _data != null && _data.Fault != null;
 		}
 
-		public override MonitorData GetNewMonitorData()
+		public override MonitorData GetMonitorData()
 		{
 			if (When == MonitorWhen.OnFault)
 				_Start();

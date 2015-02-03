@@ -128,39 +128,11 @@ namespace Peach.Core.Agent
 			return false;
 		}
 
-		public virtual MonitorData GetNewMonitorData()
-		{
-			var fault = GetMonitorData();
-			if (fault == null)
-				return null;
-
-			var ret = new MonitorData
-			{
-				MonitorName = Name,
-				DetectionSource = fault.detectionSource ?? Class,
-				Data = fault.collectedData.ToDictionary(i => i.Key, i => i.Value),
-				Title = fault.title,
-			};
-
-			if (fault.type == FaultType.Fault)
-			{
-				ret.Fault = new MonitorData.Info
-				{
-					Description = fault.description,
-					MajorHash = fault.majorHash,
-					MinorHash = fault.minorHash,
-					Risk = fault.exploitability,
-				};
-			}
-
-			return ret;
-		}
-
 		/// <summary>
-		/// Return a Fault instance
+		/// Return data from the monitor.
 		/// </summary>
 		/// <returns></returns>
-		public virtual Fault GetMonitorData()
+		public virtual MonitorData GetMonitorData()
 		{
 			return null;
 		}

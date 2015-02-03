@@ -222,7 +222,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			return _data != null;
 		}
 
-		public override MonitorData GetNewMonitorData()
+		public override MonitorData GetMonitorData()
 		{
 			// Wil be called if a different monitor records a fault
 			// so don't assume the service has stopped early.

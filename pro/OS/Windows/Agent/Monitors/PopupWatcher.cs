@@ -211,7 +211,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			}
 		}
 
-		public override MonitorData GetNewMonitorData()
+		public override MonitorData GetMonitorData()
 		{
 			return _data;
 		}

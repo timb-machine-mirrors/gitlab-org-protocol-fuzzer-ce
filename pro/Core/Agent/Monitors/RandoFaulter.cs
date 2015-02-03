@@ -57,7 +57,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			return false;
 		}
 
-		public override MonitorData GetNewMonitorData()
+		public override MonitorData GetMonitorData()
 		{
 			var buckets = GetBuckets();
 

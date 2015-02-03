@@ -27,7 +27,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			Thread.Sleep(5000);
 			m.IterationFinished();
 			Assert.AreEqual(true, m.DetectedFault());
-			var fault = m.GetNewMonitorData();
+			var fault = m.GetMonitorData();
 			Assert.NotNull(fault);
 			Assert.NotNull(fault.Fault);
 			Assert.AreEqual(3, fault.Data.Count);

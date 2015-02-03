@@ -191,7 +191,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			w.IterationFinished();
 
 			Assert.AreEqual(true, w.DetectedFault());
-			var f = w.GetNewMonitorData();
+			var f = w.GetMonitorData();
 			Assert.NotNull(f);
 			Assert.NotNull(f.Fault);
 			Assert.AreEqual("FailedToExit", f.Fault.MajorHash);
@@ -249,7 +249,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			w.IterationFinished();
 
 			Assert.AreEqual(true, w.DetectedFault());
-			var f = w.GetNewMonitorData();
+			var f = w.GetMonitorData();
 			Assert.NotNull(f);
 			Assert.NotNull(f.Fault);
 			Assert.AreEqual("ExitedEarly", f.Fault.MajorHash);
@@ -313,7 +313,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			w.IterationFinished();
 
 			Assert.AreEqual(true, w.DetectedFault());
-			var f = w.GetNewMonitorData();
+			var f = w.GetMonitorData();
 			Assert.NotNull(f);
 			Assert.NotNull(f.Fault);
 			Assert.AreEqual("ExitedEarly", f.Fault.MajorHash);
@@ -394,7 +394,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			Thread.Sleep(1000);
 			w.IterationFinished();
 			Assert.AreEqual(true, w.DetectedFault());
-			var fault = w.GetNewMonitorData();
+			var fault = w.GetMonitorData();
 			Assert.NotNull(fault);
 			Assert.NotNull(fault.Fault);
 			Assert.False(string.IsNullOrEmpty(fault.Fault.Description));
