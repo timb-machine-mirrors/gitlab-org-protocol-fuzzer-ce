@@ -477,7 +477,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				Fault = new MonitorData.Info
 				{
 					Description = desc,
-					MajorHash = reason,
+					MajorHash = type,
 				}
 			};
 
