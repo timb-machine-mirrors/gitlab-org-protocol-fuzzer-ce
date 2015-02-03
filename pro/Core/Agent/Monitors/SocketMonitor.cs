@@ -16,30 +16,35 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Parameter("Protocol", typeof(Proto), "Protocol type to listen for", "tcp")]
 	[Parameter("Port", typeof(ushort), "Port to listen on", "8080")]
 	[Parameter("FaultOnSuccess", typeof(bool), "Fault if no connection is recorded", "false")]
-	public class SocketMonitor : Peach.Core.Agent.Monitor
+	public class SocketMonitor : Monitor
 	{
 		public enum Proto { Udp = ProtocolType.Udp, Tcp = ProtocolType.Tcp }
 
-		public IPAddress    Host           { get; private set; }
-		public int          Timeout        { get; private set; }
-		public IPAddress    Interface      { get; private set; }
-		public Proto        Protocol       { get; private set; }
-		public ushort       Port           { get; private set; }
-		public int          Backlog        { get; private set; }
-		public bool         FaultOnSuccess { get; private set; }
+		public IPAddress    Host           { get; set; }
+		public int          Timeout        { get; set; }
+		public IPAddress    Interface      { get; set; }
+		public Proto        Protocol       { get; set; }
+		public ushort       Port           { get; set; }
+		public int          Backlog        { get; set; }
+		public bool         FaultOnSuccess { get; set; }
 
 		private const int TcpBlockSize = 1024;
 		private const int MaxDgramSize = 65000;
-		private MemoryStream _recvBuffer = new MemoryStream();
 
-		private Socket _socket = null;
-		private Fault _fault = null;
-		private bool _multicast = false;
+		private readonly MemoryStream _recvBuffer = new MemoryStream();
 
-		public SocketMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		private Socket _socket;
+		private MonitorData _data;
+		private bool _multicast;
+
+		public SocketMonitor(string name)
+			: base(name)
 		{
-			ParameterParser.Parse(this, args);
+		}
+
+		public override void StartMonitor(Dictionary<string, string> args)
+		{
+			base.StartMonitor(args);
 
 			if (Host != null)
 			{
@@ -51,45 +56,36 @@ namespace Peach.Pro.Core.Agent.Monitors
 				if (_multicast && Protocol != Proto.Udp)
 					throw new PeachException("Multicast hosts are not supported with the tcp protocol.");
 			}
+
+			OpenSocket();
 		}
 
 		#region Monitor Interface
 
-		public override void SessionStarting()
+		public override void IterationFinished()
 		{
-			OpenSocket();
-		}
+			_data = new MonitorData
+			{
+				Data = new Dictionary<string, byte[]>()
+			};
 
-		public override void SessionFinished()
-		{
-			StopMonitor();
-		}
-
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
-		{
-		}
-
-		public override bool IterationFinished()
-		{
-			_fault = new Fault();
-			_fault.detectionSource = "SocketMonitor";
-			_fault.folderName = "SocketMonitor";
-			_fault.title = "Monitoring " + _socket.LocalEndPoint.ToString();
-
-			Tuple<IPEndPoint, byte[]> data = ReadSocket();
+			var data = ReadSocket();
 			if (data != null)
 			{
-				_fault.description = string.Format("Received {0} bytes from '{1}'.", data.Item2.Length, data.Item1);
-				_fault.type = FaultOnSuccess ? FaultType.Data : FaultType.Fault;
-				_fault.collectedData.Add(new Fault.Data("Response", data.Item2));
+				_data.Title = "Received {0} bytes from '{1}'.".Fmt(data.Item2.Length, data.Item1);
+				_data.Data.Add("Response.bin", data.Item2);
+
+				if (!FaultOnSuccess)
+					_data.Fault = new MonitorData.Info();
 			}
 			else
 			{
-				_fault.description = "No connections recorded.";
-				_fault.type = FaultOnSuccess ? FaultType.Fault : FaultType.Data;
+				var ep = _multicast ? "{0}:{1}".Fmt(Host, Port) : _socket.LocalEndPoint.ToString();
+				_data.Title = "Monitoring {0}, no connections recorded.".Fmt(ep);
+
+				if (FaultOnSuccess)
+					_data.Fault = new MonitorData.Info();
 			}
-			
-			return false;
 		}
 
 		public override void StopMonitor()
@@ -97,24 +93,14 @@ namespace Peach.Pro.Core.Agent.Monitors
 			CloseSocket();
 		}
 
-		public override bool MustStop()
-		{
-			return false;
-		}
-
-		public override Variant Message(string name, Variant data)
-		{
-			return null;
-		}
-
 		public override bool DetectedFault()
 		{
-			return _fault.type == FaultType.Fault;
+			return _data.Fault != null;
 		}
 
-		public override Fault GetMonitorData()
+		public override MonitorData GetMonitorData()
 		{
-			return _fault;
+			return _data;
 		}
 
 		#endregion
@@ -125,7 +111,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 		{
 			System.Diagnostics.Debug.Assert(_socket == null);
 
-			IPAddress local = GetLocalIp();
+			var local = GetLocalIp();
 			_socket = new Socket(local.AddressFamily, Protocol == Proto.Tcp ? SocketType.Stream : SocketType.Dgram, (ProtocolType)Protocol);
 
 			if (_multicast)
@@ -139,6 +125,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 				if (Platform.GetOS() == Platform.OS.Windows)
 				{
 					// Multicast needs to bind to INADDR_ANY on windows
+					// ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
 					if (Host.AddressFamily == AddressFamily.InterNetwork)
 						_socket.Bind(new IPEndPoint(IPAddress.Any, Port));
 					else
@@ -182,6 +169,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			_recvBuffer.Seek(0, SeekOrigin.Begin);
 			_recvBuffer.SetLength(0);
 
+			// ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
 			if (Protocol == Proto.Udp)
 				ep = WaitForData(_socket, 1, MaxDgramSize, Recv);
 			else
@@ -197,13 +185,13 @@ namespace Peach.Pro.Core.Agent.Monitors
 		private IPEndPoint WaitForData(Socket s, int maxReads, int blockSize, IoFunc read)
 		{
 			IPEndPoint ret = null;
-			int now = Environment.TickCount;
-			int expire = now + Timeout;
-			int cnt = 0;
+			var now = Environment.TickCount;
+			var expire = now + Timeout;
+			var cnt = 0;
 
 			while ((maxReads < 0 || cnt < maxReads) && now <= expire)
 			{
-				int remain = expire - now;
+				var remain = expire - now;
 
 				var fds = new List<Socket> { s };
 				Socket.Select(fds, null, null, (remain) * 1000);
@@ -211,7 +199,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 				if (fds.Count == 0)
 					return null;
 
-				long len = _recvBuffer.Length;
+				var len = _recvBuffer.Length;
 
 				var ep = read(s, blockSize);
 
@@ -234,16 +222,17 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		private IPEndPoint Accept(Socket s, int blockSize)
 		{
-			using (Socket client = _socket.Accept())
+			using (var client = _socket.Accept())
 			{
-				IPEndPoint remoteEP = (IPEndPoint)client.RemoteEndPoint;
+				var remoteEp = (IPEndPoint)client.RemoteEndPoint;
 
-				if (Host != null && !Host.Equals(remoteEP.Address))
+				if (Host != null && !Host.Equals(remoteEp.Address))
 				{
 					try
 					{
 						client.Shutdown(SocketShutdown.Both);
 					}
+					// ReSharper disable once EmptyGeneralCatchClause
 					catch
 					{
 					}
@@ -251,19 +240,20 @@ namespace Peach.Pro.Core.Agent.Monitors
 					return null;
 				}
 
-					try
-					{
-						// Indicate we have nothing to send
-						client.Shutdown(SocketShutdown.Send);
-					}
-					catch
-					{
-					}
+				try
+				{
+					// Indicate we have nothing to send
+					client.Shutdown(SocketShutdown.Send);
+				}
+				// ReSharper disable once EmptyGeneralCatchClause
+				catch
+				{
+				}
 
 				// Read client data
 				WaitForData(client, -1, TcpBlockSize, Recv);
 
-				return remoteEP;
+				return remoteEp;
 			}
 		}
 
@@ -273,35 +263,35 @@ namespace Peach.Pro.Core.Agent.Monitors
 			_recvBuffer.WriteByte(0);
 			_recvBuffer.Seek(-blockSize, SeekOrigin.Current);
 
-			int pos = (int)_recvBuffer.Position;
-			byte[] buf = _recvBuffer.GetBuffer();
+			var pos = (int)_recvBuffer.Position;
+			var buf = _recvBuffer.GetBuffer();
 
-			EndPoint remoteEP;
+			EndPoint remoteEp;
 			int len;
 
 			if (s.SocketType == SocketType.Stream)
 			{
-				remoteEP = new IPEndPoint(Host ?? IPAddress.Any, 0);
+				remoteEp = new IPEndPoint(Host ?? IPAddress.Any, 0);
 				len = s.Receive(buf, pos, blockSize, SocketFlags.None);
 			}
 			else
 			{
-				remoteEP = new IPEndPoint(_socket.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, 0);
-				len = s.ReceiveFrom(buf, pos, blockSize, SocketFlags.None, ref remoteEP);
+				remoteEp = new IPEndPoint(_socket.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, 0);
+				len = s.ReceiveFrom(buf, pos, blockSize, SocketFlags.None, ref remoteEp);
 			}
 
-			if (!_multicast && Host != null && !Host.Equals(((IPEndPoint)remoteEP).Address))
+			if (!_multicast && Host != null && !Host.Equals(((IPEndPoint)remoteEp).Address))
 				return null;
 
 			_recvBuffer.SetLength(_recvBuffer.Position + len);
 			_recvBuffer.Seek(0, SeekOrigin.End);
 
-			return (IPEndPoint)remoteEP;
+			return (IPEndPoint)remoteEp;
 		}
 
 		private IPAddress GetLocalIp()
 		{
-			IPAddress local = Interface;
+			var local = Interface;
 
 			if (local == null)
 			{
@@ -315,12 +305,12 @@ namespace Peach.Pro.Core.Agent.Monitors
 					// the interface with the "best" multicast route
 					if (Host.AddressFamily == AddressFamily.InterNetwork)
 						return IPAddress.Any;
-					else
-						return IPAddress.IPv6Any;
+
+					return IPAddress.IPv6Any;
 				}
 				else
 				{
-					using (var s = new Socket(Host.AddressFamily, SocketType.Dgram, System.Net.Sockets.ProtocolType.Udp))
+					using (var s = new Socket(Host.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
 					{
 						s.Connect(Host, 1);
 						local = ((IPEndPoint)s.LocalEndPoint).Address;

@@ -61,7 +61,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			DataCracker cracker = new DataCracker();
 			cracker.CrackData(dom.dataModels[0], data);
 
-			Assert.AreEqual("Data", dom.dataModels[0][1].name);
+			Assert.AreEqual("Data", dom.dataModels[0][1].Name);
 			Assert.AreEqual("Hello World", dom.dataModels[0][1].DefaultValue.BitsToString());
 		}
 
@@ -87,7 +87,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			DataCracker cracker = new DataCracker();
 			cracker.CrackData(dom.dataModels[0], data);
 
-			Assert.AreEqual("Data", dom.dataModels[0][1].name);
+			Assert.AreEqual("Data", dom.dataModels[0][1].Name);
 			Assert.AreEqual("Hello World", dom.dataModels[0][1].DefaultValue.BitsToString());
 		}
 
@@ -113,7 +113,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			DataCracker cracker = new DataCracker();
 			cracker.CrackData(dom.dataModels[0], data);
 
-			Assert.AreEqual("Data_1", dom.dataModels[0][1].name);
+			Assert.AreEqual("Data_1", dom.dataModels[0][1].Name);
 			Assert.AreEqual("Hello World", dom.dataModels[0][1].DefaultValue.BitsToString());
 		}
 
@@ -311,16 +311,16 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			cracker.CrackData(dom.dataModels[0], data);
 
 			Assert.AreEqual(3, dom.dataModels[0].Count);
-			Assert.AreEqual("Block1", dom.dataModels[0][0].name);
-			Assert.AreEqual("Data_1", dom.dataModels[0][1].name);
-			Assert.AreEqual("Data", dom.dataModels[0][2].name);
+			Assert.AreEqual("Block1", dom.dataModels[0][0].Name);
+			Assert.AreEqual("Data_1", dom.dataModels[0][1].Name);
+			Assert.AreEqual("Data", dom.dataModels[0][2].Name);
 
 
 			var Block1 = dom.dataModels[0][0] as DataElementContainer;
 			Assert.NotNull(Block1);
 
 			Assert.AreEqual(1, Block1.Count);
-			Assert.AreEqual("TheString", Block1[0].name);
+			Assert.AreEqual("TheString", Block1[0].Name);
 
 			Assert.AreEqual(1, Block1[0].relations.Count);
 			Assert.AreEqual("Data_1", Block1[0].relations[0].OfName);
@@ -420,11 +420,11 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			cracker.CrackData(dom.dataModels[0], data);
 
 			Assert.AreEqual(5, dom.dataModels[0].Count);
-			Assert.AreEqual("Block0", dom.dataModels[0][0].name);
-			Assert.AreEqual("Block1", dom.dataModels[0][1].name);
-			Assert.AreEqual("Data", dom.dataModels[0][2].name);
-			Assert.AreEqual("Data_1", dom.dataModels[0][3].name);
-			Assert.AreEqual("Placement", dom.dataModels[0][4].name);
+			Assert.AreEqual("Block0", dom.dataModels[0][0].Name);
+			Assert.AreEqual("Block1", dom.dataModels[0][1].Name);
+			Assert.AreEqual("Data", dom.dataModels[0][2].Name);
+			Assert.AreEqual("Data_1", dom.dataModels[0][3].Name);
+			Assert.AreEqual("Placement", dom.dataModels[0][4].Name);
 
 			var block0 = dom.dataModels[0][0] as DataElementContainer;
 			var block1 = dom.dataModels[0][1] as DataElementContainer;
@@ -432,10 +432,10 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			Assert.NotNull(block1);
 			Assert.AreEqual(2, block0.Count);
 			Assert.AreEqual(2, block1.Count);
-			Assert.AreEqual("TheCRC", block0[0].name);
-			Assert.AreEqual("TheString", block0[1].name);
-			Assert.AreEqual("TheCRC", block0[0].name);
-			Assert.AreEqual("TheString", block0[1].name);
+			Assert.AreEqual("TheCRC", block0[0].Name);
+			Assert.AreEqual("TheString", block0[1].Name);
+			Assert.AreEqual("TheCRC", block0[0].Name);
+			Assert.AreEqual("TheString", block0[1].Name);
 
 			var fixup0 = block0[0].fixup;
 			var fixup1 = block1[0].fixup;
@@ -628,29 +628,29 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			DataCracker cracker = new DataCracker();
 			cracker.CrackData(dom.dataModels[0], data);
 
-			Assert.AreEqual("Offset1", dom.dataModels[0][0].name);
+			Assert.AreEqual("Offset1", dom.dataModels[0][0].Name);
 			Assert.AreEqual(3, (int)dom.dataModels[0][0].DefaultValue);
 
 			var Blob1 = (Peach.Core.Dom.Blob)dom.dataModels[0][1];
-			Assert.AreEqual("Data", Blob1.name);
+			Assert.AreEqual("Data", Blob1.Name);
 			Assert.AreEqual(new byte[] { 0x41, 0x41 }, Blob1.DefaultValue.BitsToArray());
 
 			var Block1 = (Peach.Core.Dom.Block)dom.dataModels[0][2];
-			Assert.AreEqual("Block1", Block1.name);
+			Assert.AreEqual("Block1", Block1.Name);
 
 			Assert.AreEqual(1, Block1.Count);
 			Assert.AreEqual(4, (int)Block1[0].DefaultValue);
 
 			var PlaceHolder = (Peach.Core.Dom.Block)dom.dataModels[0][3];
-			Assert.AreEqual("PlaceHolder", PlaceHolder.name);
+			Assert.AreEqual("PlaceHolder", PlaceHolder.Name);
 			Assert.AreEqual(0, PlaceHolder.Count);
 
 			var Block2 = (Peach.Core.Dom.Block)dom.dataModels[0][4];
-			Assert.AreEqual("Block2", Block2.name);
+			Assert.AreEqual("Block2", Block2.Name);
 			Assert.AreEqual(1, Block2.Count);
 
 			var DataPlaced = (Peach.Core.Dom.Blob)Block2[0];
-			Assert.AreEqual("DataPlaced", DataPlaced.name);
+			Assert.AreEqual("DataPlaced", DataPlaced.Name);
 			Assert.AreEqual(new byte[] { 0x42 }, DataPlaced.DefaultValue.BitsToArray());
 		}
 
@@ -693,29 +693,29 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			DataCracker cracker = new DataCracker();
 			cracker.CrackData(dom.dataModels[0], data);
 
-			Assert.AreEqual("Offset1", dom.dataModels[0][0].name);
+			Assert.AreEqual("Offset1", dom.dataModels[0][0].Name);
 			Assert.AreEqual(3, (int)dom.dataModels[0][0].DefaultValue);
 
 			var Blob1 = (Peach.Core.Dom.Blob)dom.dataModels[0][1];
-			Assert.AreEqual("Data", Blob1.name);
+			Assert.AreEqual("Data", Blob1.Name);
 			Assert.AreEqual(new byte[] { 0x41, 0x41 }, Blob1.DefaultValue.BitsToArray());
 
 			var Block1 = (Peach.Core.Dom.Block)dom.dataModels[0][2];
-			Assert.AreEqual("Block1", Block1.name);
+			Assert.AreEqual("Block1", Block1.Name);
 
 			Assert.AreEqual(1, Block1.Count);
 			Assert.AreEqual(4, (int)Block1[0].DefaultValue);
 
 			var PlaceHolder = (Peach.Core.Dom.Block)dom.dataModels[0][3];
-			Assert.AreEqual("PlaceHolder", PlaceHolder.name);
+			Assert.AreEqual("PlaceHolder", PlaceHolder.Name);
 			Assert.AreEqual(0, PlaceHolder.Count);
 
 			var Block2 = (Peach.Core.Dom.Block)dom.dataModels[0][4];
-			Assert.AreEqual("Block2", Block2.name);
+			Assert.AreEqual("Block2", Block2.Name);
 			Assert.AreEqual(1, Block2.Count);
 
 			var DataPlaced = (Peach.Core.Dom.Blob)Block2[0];
-			Assert.AreEqual("DataPlaced", DataPlaced.name);
+			Assert.AreEqual("DataPlaced", DataPlaced.Name);
 			Assert.AreEqual(new byte[] { 0x42 }, DataPlaced.DefaultValue.BitsToArray());
 		}
 

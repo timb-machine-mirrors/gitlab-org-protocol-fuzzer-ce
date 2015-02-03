@@ -98,7 +98,7 @@ namespace Peach.Core.Test
 		protected override void DataMutating(RunContext context, ActionData actionData, DataElement element, Mutator mutator)
 		{
 			int len = strategies.Count;
-			string item = mutator.name + " | " + element.fullName;
+			string item = mutator.Name + " | " + element.fullName;
 			allStrategies.Add(item);
 			if (len == 0 || strategies[len - 1] != item)
 				strategies.Add(item);

@@ -82,7 +82,7 @@ namespace Peach.Pro.Test.Core.Analyzers
             bs.Seek(0, SeekOrigin.Begin);
 
             Assert.IsTrue(dom.dataModels["TheDataModel"][0] is Block);
-            Assert.AreEqual("TheBlob", dom.dataModels["TheDataModel"][0].name);
+			Assert.AreEqual("TheBlob", dom.dataModels["TheDataModel"][0].Name);
             Assert.AreEqual(bs.ToArray(), dom.dataModels["TheDataModel"].Value.ToArray());
 
             var block = dom.dataModels["TheDataModel"][0] as Block;

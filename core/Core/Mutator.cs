@@ -73,6 +73,13 @@ namespace Peach.Core
 	/// </remarks>
 	public abstract class Mutator : IWeighted, INamed
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
 		/// <summary>
 		/// Is this mutator able to affect the state model?
 		/// </summary>
@@ -110,7 +117,7 @@ namespace Peach.Core
 		/// <summary>
 		/// The name of the mutator
 		/// </summary>
-		public virtual string name
+		public virtual string Name
 		{
 			get
 			{

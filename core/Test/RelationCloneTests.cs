@@ -62,7 +62,7 @@ namespace Peach.Core.Test
 			Assert.AreEqual(5, dom.dataModels.Count);
 			var final = dom.dataModels[4];
 
-			Assert.AreEqual("Final", final.name);
+			Assert.AreEqual("Final", final.Name);
 
 			var fromElem = final.find("Final.blk1.Length");
 			var ofElem = final.find("Final.blk1.Payload.Data");
@@ -171,21 +171,21 @@ namespace Peach.Core.Test
 			Dom.Array array = dom.dataModels[0][1] as Dom.Array;
 
 			Assert.NotNull(array);
-			Assert.AreEqual("Length", array.name);
+			Assert.AreEqual("Length", array.Name);
 			Assert.AreEqual(0, array.Count);
 			Assert.AreEqual(0, array.relations.Count);
 			Assert.NotNull(array.OriginalElement);
-			Assert.AreEqual("Length", array.OriginalElement.name);
+			Assert.AreEqual("Length", array.OriginalElement.Name);
 			Assert.AreEqual(1, array.OriginalElement.relations.Count);
 			Assert.AreEqual(1, array.OriginalElement.relations[0].Of.relations.Count);
 
 			Dom.Array clone = array.Clone("NewLength") as Dom.Array;
 			Assert.NotNull(clone);
-			Assert.AreEqual("NewLength", clone.name);
+			Assert.AreEqual("NewLength", clone.Name);
 			Assert.AreEqual(0, clone.Count);
 			Assert.AreEqual(0, clone.relations.Count);
 			Assert.NotNull(clone.OriginalElement);
-			Assert.AreEqual("NewLength", clone.OriginalElement.name);
+			Assert.AreEqual("NewLength", clone.OriginalElement.Name);
 			Assert.AreEqual(1, clone.OriginalElement.relations.Count);
 			Assert.AreEqual("Data", clone.OriginalElement.relations[0].OfName);
 			Assert.AreEqual("NewLength", clone.OriginalElement.relations[0].FromName);

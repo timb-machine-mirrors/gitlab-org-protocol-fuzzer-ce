@@ -69,7 +69,7 @@ namespace Peach.Pro.Core.Mutators
 			{
 				var newState = context.Random.Choice(_model.states);
 
-				logger.Trace("changeState: Swap {0} for {1}.", nextState.name, newState.name);
+				logger.Trace("changeState: Swap {0} for {1}.", nextState.Name, newState.Name);
 				return newState;
 			}
 

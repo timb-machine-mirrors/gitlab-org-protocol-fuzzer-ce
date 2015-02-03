@@ -83,7 +83,7 @@ namespace Peach.Core.Dom
 						name == null ? "" : "'" + name + "' ", refName, refObj.debugName, node.OuterXml));
 				
 				if (string.IsNullOrEmpty(name))
-					name = new Block().name;
+					name = new Block().Name;
 
 				block = refObj.Clone(name) as Block;
 				block.parent = parent;
@@ -107,7 +107,7 @@ namespace Peach.Core.Dom
 		{
 			pit.WriteStartElement(elementType);
 
-			pit.WriteAttributeString("name", name);
+			pit.WriteAttributeString("name", Name);
 			if(referenceName != null)
 				pit.WriteAttributeString("ref", referenceName);
 
