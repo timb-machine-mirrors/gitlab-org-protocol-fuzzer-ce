@@ -295,15 +295,15 @@ namespace PeachValidator
                 ns += ":";
 
             foreach (var otherNs in dom.ns)
-                addDataModels(otherNs, ns + dom.name);
+				addDataModels(otherNs, ns + dom.Name);
 
-			var name = dom.name;
+			var name = dom.Name;
 
 			if (!string.IsNullOrEmpty(name))
 				name += ":";
 
             foreach (var dm in dom.dataModels)
-                toolStripComboBoxDataModel.Items.Add(new DataModelHolder(dm, ns + name +dm.name));
+				toolStripComboBoxDataModel.Items.Add(new DataModelHolder(dm, ns + name + dm.Name));
         }
 
 		private void toolStripButtonRefreshPit_Click(object sender, EventArgs e)

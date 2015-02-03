@@ -29,6 +29,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -47,76 +48,76 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 	[Monitor("osx.CrashReporter")]
 	[Description("Collect information from crashes detected by OS X System Crash Reporter")]
 	[Parameter("ProcessName", typeof(string), "Process name to watch for (defaults to all)", "")]
-	public class CrashReporter : Monitor, IDisposable
+	public class CrashReporter : Monitor
 	{
-		private Regex _regex = new Regex("Saved crash report for (.*)\\[\\d+\\] version .*? to (.*)");
-		private string _processName = null;
-		private string _lastTime = "0";
-		private IntPtr _asl = IntPtr.Zero;
-		private string[] _crashLogs = null;
+		private static readonly Regex CrashRegex = new Regex("Saved crash report for (.*)\\[\\d+\\] version .*? to (.*)");
 
-		public CrashReporter(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		private string _lastTime;
+		private IntPtr _asl;
+		private string[] _crashLogs;
+
+		public string ProcessName { get; set; }
+
+		public CrashReporter(string name)
+			: base(name)
 		{
-			if (args.ContainsKey("ProcessName"))
-				this._processName = (string)args["ProcessName"];
+		}
 
-			this._asl = asl_new(asl_type.ASL_TYPE_QUERY);
-			if (this._asl == IntPtr.Zero)
+		public override void StartMonitor(Dictionary<string, string> args)
+		{
+			base.StartMonitor(args);
+
+			_asl = asl_new(asl_type.ASL_TYPE_QUERY);
+			if (_asl == IntPtr.Zero)
 				throw new PeachException("Couldn't open ASL handle.");
 		}
 
-		~CrashReporter()
+		public override void StopMonitor()
 		{
-			Dispose();
-		}
-		
-		public void Dispose()
-		{
-			if (this._asl != IntPtr.Zero)
+			if (_asl != IntPtr.Zero)
 			{
-				asl_free(this._asl);
-				this._asl = IntPtr.Zero;
-				GC.SuppressFinalize(this);
+				asl_free(_asl);
+				_asl = IntPtr.Zero;
 			}
 		}
 
 		private string[] GetCrashLogs()
 		{
-			List<string> ret = new List<string>();
-			int err;
-			
-			err = asl_set_query(this._asl, ASL_KEY_SENDER, "ReportCrash", asl_query_op.ASL_QUERY_OP_EQUAL);
+			var ret = new List<string>();
+
+			var err = asl_set_query(_asl, ASL_KEY_SENDER, "ReportCrash", asl_query_op.ASL_QUERY_OP_EQUAL);
 			if (err != 0)
 				throw new Exception();
 			
-			err = asl_set_query(this._asl, ASL_KEY_TIME, this._lastTime, asl_query_op.ASL_QUERY_OP_GREATER);
+			err = asl_set_query(_asl, ASL_KEY_TIME, _lastTime, asl_query_op.ASL_QUERY_OP_GREATER);
 			if (err != 0)
 				throw new Exception();
 			
-			IntPtr response = asl_search(IntPtr.Zero, this._asl);
+			var response = asl_search(IntPtr.Zero, _asl);
 			if (response != IntPtr.Zero)
 			{
 				IntPtr msg;
 				
 				while (IntPtr.Zero != (msg = aslresponse_next(response)))
 				{
-					IntPtr time = asl_get(msg, "Time");
-					IntPtr message = asl_get(msg, "Message");
+					var time = asl_get(msg, "Time");
+					var message = asl_get(msg, "Message");
 					
-					// TODO: Log
 					if (time == IntPtr.Zero || message == IntPtr.Zero)
 						continue;
 					
 					//Saved crash report for CrashingProgram\[22774\] version ??? (???) to /path/to/crash.crash
 					
-					this._lastTime = Marshal.PtrToStringAnsi(time);
-					string value = Marshal.PtrToStringAnsi(message);
-					
-					Match match = this._regex.Match(value);
+					_lastTime = Marshal.PtrToStringAnsi(time);
+					var value = Marshal.PtrToStringAnsi(message);
+
+					Debug.Assert(value != null);
+
+					var match = CrashRegex.Match(value);
+
 					if (match.Success)
 					{
-						if (this._processName == null || match.Groups[1].Value == this._processName)
+						if (ProcessName == null || match.Groups[1].Value == ProcessName)
 							ret.Add(match.Groups[2].Value);
 					}
 				}
@@ -127,75 +128,63 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			return ret.ToArray();
 		}
 
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
+		public override void IterationStarting(IterationStartingArgs args)
 		{
-			this._crashLogs = null;
+			_crashLogs = null;
 		}
 
 		public override bool DetectedFault()
 		{
 			// Method will get called multiple times
 			// we only want to pause the first time.
-			if (this._crashLogs == null)
+			if (_crashLogs == null)
 			{
 				// Wait for CrashReporter to report!
 				Thread.Sleep(500);
-				this._crashLogs = GetCrashLogs();
+				_crashLogs = GetCrashLogs();
 			}
 
-			return this._crashLogs.Length > 0;
+			return _crashLogs.Length > 0;
 		}
 
-		public override Fault GetMonitorData()
+		public override MonitorData GetMonitorData()
 		{
 			if (!DetectedFault())
 				return null;
 
-			Fault fault = new Fault();
-			fault.detectionSource = "CrashReporter";
-			fault.folderName = "CrashReporter";
-			fault.type = FaultType.Fault;
-			fault.description = _processName + " crash report.";
+			var title = string.IsNullOrEmpty(ProcessName)
+				? "Crash report."
+				: "{0} crash report.".Fmt(ProcessName);
 
-			foreach (string file in _crashLogs)
+			var ret = new MonitorData
 			{
-				string key = Path.GetFileName(file);
-				fault.collectedData.Add(new Fault.Data(key, File.ReadAllBytes(file)));
+				Title = title,
+				Fault = new MonitorData.Info(),
+				Data = new Dictionary<string, byte[]>()
+			};
+
+			foreach (var file in _crashLogs)
+			{
+				var key = Path.GetFileName(file);
+				Debug.Assert(key != null);
+				ret.Data.Add(key, File.ReadAllBytes(file));
 			}
 
-			return fault;
-		}
-
-		public override bool MustStop()
-		{
-			return false;
-		}
-
-		public override void StopMonitor()
-		{
+			return ret;
 		}
 
 		public override void SessionStarting()
 		{
+			_lastTime = "0";
+
 			// Skip past any old messages in the log
 			GetCrashLogs();
 		}
 
-		public override void SessionFinished()
-		{
-		}
-
-		public override bool IterationFinished()
-		{
-			return true;
-		}
-
-		public override Variant Message(string name, Variant data)
-		{
-			return null;
-		}
-
 #region ASL P/Invokes
+		// ReSharper disable InconsistentNaming
+		// ReSharper disable UnusedMember.Local
+
 		private enum asl_type : uint
 		{
 			ASL_TYPE_MSG = 0,
@@ -270,8 +259,9 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 		[DllImport("libc")]
 		//const char *asl_get(aslmsg msg, const char *key);
 		private static extern IntPtr asl_get(IntPtr msg, [MarshalAs(UnmanagedType.LPTStr)] string key);
+
+		// ReSharper restore UnusedMember.Local
+		// ReSharper restore InconsistentNaming
 #endregion
 	}
 }
-
-// end

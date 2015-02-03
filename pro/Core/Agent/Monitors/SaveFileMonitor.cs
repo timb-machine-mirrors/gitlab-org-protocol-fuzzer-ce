@@ -13,65 +13,28 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Parameter("Filename", typeof(string), "File to save on fault")]
 	public class SaveFileMonitor : Monitor
 	{
-		public string Filename { get; private set; }
+		public string Filename { get; set; }
 
-		public SaveFileMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
-		{
-			ParameterParser.Parse(this, args);
-		}
-
-		public override void StopMonitor()
+		public SaveFileMonitor(string name)
+			: base(name)
 		{
 		}
 
-		public override void SessionStarting()
-		{
-		}
-
-		public override void SessionFinished()
-		{
-		}
-
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
-		{
-		}
-
-		public override bool IterationFinished()
-		{
-			return false;
-		}
-
-		public override bool DetectedFault()
-		{
-			return false;
-		}
-
-		public override Fault GetMonitorData()
+		public override MonitorData GetMonitorData()
 		{
 			if (!File.Exists(Filename))
 				return null;
 
-			Fault fault = new Fault();
-			fault.type = FaultType.Data;
-			fault.title = "Save File \"" + Filename + "\"";
-			fault.detectionSource = "SaveFileMonitor";
-			fault.collectedData.Add(new Fault.Data(
-				Path.GetFileName(Filename),
-				File.ReadAllBytes(Filename)
-			));
+			var ret = new MonitorData
+			{
+				Title = "Save File \"{0}\".".Fmt(Filename),
+				Data = new Dictionary<string,byte[]>
+				{
+					{ Path.GetFileName(Filename), File.ReadAllBytes(Filename) }
+				}
+			};
 
-			return fault;
-		}
-
-		public override bool MustStop()
-		{
-			return false;
-		}
-
-		public override Variant Message(string name, Variant data)
-		{
-			return null;
+			return ret;
 		}
 	}
 }

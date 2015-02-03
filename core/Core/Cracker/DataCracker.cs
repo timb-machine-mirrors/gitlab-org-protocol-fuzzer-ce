@@ -303,7 +303,7 @@ namespace Peach.Core.Cracker
 					throw new CrackingFailure("Exception in analyzer on '" + elem.fullName + "': " + ex.Message, elem, data, ex);
 				}
 
-				var de = parent[elem.name];
+				var de = parent[elem.Name];
 				var pos = _sizedElements[elem];
 				positions[elem] = new Position() { begin = 0, end = pos.end - pos.begin };
 				addElements(de, data, positions, pos.begin);

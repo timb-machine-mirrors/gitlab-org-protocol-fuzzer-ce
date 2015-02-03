@@ -61,6 +61,13 @@ namespace Peach.Core.Dom
 	[Serializable]
 	public abstract class Action : INamed
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
 		protected static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
 		[NonSerialized]
@@ -118,9 +125,9 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// Name of this action
 		/// </summary>
-		[XmlAttribute]
+		[XmlAttribute("name")]
 		[DefaultValue(null)]
-		public string name { get; set; }
+		public string Name { get; set; }
 
 		/// <summary>
 		/// Name of publisher to use
@@ -264,7 +271,7 @@ namespace Peach.Core.Dom
 			// Log entry later if marked with when.
 			// this will make the debug output look nicer.
 			if(when == null)
-				logger.Debug("Run({0}): {1}", name, GetType().Name);
+				logger.Debug("Run({0}): {1}", Name, GetType().Name);
 
 			// Setup scope for any scripting expressions
 			scope["context"] = context;
@@ -284,17 +291,17 @@ namespace Peach.Core.Dom
 				object value = parent.parent.parent.Python.Eval(when, scope);
 				if (!(value is bool))
 				{
-					logger.Warn("Run({0}): {1}: When return is not boolean, skipping. Returned: {2}", name, GetType().Name, value);
+					logger.Warn("Run({0}): {1}: When return is not boolean, skipping. Returned: {2}", Name, GetType().Name, value);
 					return;
 				}
 
 				if (!(bool)value)
 				{
-					logger.Debug("Run({0}): {1}: Skipping, when returned false", name, GetType().Name);
+					logger.Debug("Run({0}): {1}: Skipping, when returned false", Name, GetType().Name);
 					return;
 				}
 
-				logger.Debug("Run({0}): {1}", name, GetType().Name);
+				logger.Debug("Run({0}): {1}", Name, GetType().Name);
 			}
 
 			Publisher publisher = null;
@@ -303,7 +310,7 @@ namespace Peach.Core.Dom
 				if (!context.test.publishers.ContainsKey(this.publisher))
 				{
 					logger.Debug("Run: Publisher '{0}' not found!", this.publisher);
-					throw new PeachException("Error, Action '" + name + "' couldn't find publisher named '" + this.publisher + "'.");
+					throw new PeachException("Error, Action '" + Name + "' couldn't find publisher named '" + this.publisher + "'.");
 				}
 
 				publisher = context.test.publishers[this.publisher];

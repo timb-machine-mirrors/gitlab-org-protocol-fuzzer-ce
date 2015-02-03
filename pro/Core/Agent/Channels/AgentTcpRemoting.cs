@@ -50,7 +50,7 @@ namespace Peach.Pro.Core.Agent.Channels
 {
 	#region TCP Agent Client
 
-	[Agent("tcp", true)]
+	[Agent("tcp")]
 	public class AgentClientTcpRemoting : AgentClient
 	{
 		#region Publisher Proxy
@@ -150,9 +150,11 @@ namespace Peach.Pro.Core.Agent.Channels
 
 			#region Public Members
 
+			public string name { get; private set; }
+
 			public string cls { get; private set; }
 
-			public List<KeyValuePair<string, Variant>> args { get; private set; }
+			public List<KeyValuePair<string, string>> args { get; private set; }
 
 			public PublisherTcpRemote proxy
 			{
@@ -185,8 +187,9 @@ namespace Peach.Pro.Core.Agent.Channels
 
 			#region Constructor
 
-			public PublisherProxy(string cls, Dictionary<string, Variant> args)
+			public PublisherProxy(string name, string cls, Dictionary<string, string> args)
 			{
+				this.name = name;
 				this.cls = cls;
 				this.args = args.ToList();
 				this.stream = new MemoryStream();
@@ -348,13 +351,11 @@ namespace Peach.Pro.Core.Agent.Channels
 
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		protected override NLog.Logger Logger { get { return logger; } }
-
 		class MonitorInfo
 		{
 			public string Name { get; set; }
 			public string Class { get; set; }
-			public List<KeyValuePair<string, Variant>> Args { get; set; }
+			public List<KeyValuePair<string, string>> Args { get; set; }
 		}
 
 		List<MonitorInfo> monitors = new List<MonitorInfo>();
@@ -494,7 +495,7 @@ namespace Peach.Pro.Core.Agent.Channels
 			}
 		}
 
-		private void ReconnectProxy(uint iterationCount, bool isReproduction)
+		private void ReconnectProxy(IterationStartingArgs args)
 		{
 			logger.Debug("ReconnectProxy: Attempting to reconnect");
 
@@ -508,14 +509,14 @@ namespace Peach.Pro.Core.Agent.Channels
 					proxy.StartMonitor(item.Name, item.Class, item.Args);
 
 				proxy.SessionStarting();
-				proxy.IterationStarting(iterationCount, isReproduction);
+				proxy.IterationStarting(args.IsReproduction, args.LastWasFault);
 
 				// ReconnectProxy is only called via IterationStart()
 				// IterationStart is called on the agents before the current
 				// Iteration/IsControlIteration is set on the publishers
 				// Therefore we just need to recreate the publisher proxy
 				foreach (var item in publishers)
-					item.proxy = proxy.CreatePublisher(item.cls, item.args);
+					item.proxy = proxy.CreatePublisher(item.name, item.cls, item.args);
 			});
 		}
 
@@ -523,7 +524,7 @@ namespace Peach.Pro.Core.Agent.Channels
 
 		#region AgentClient Overrides
 
-		protected override void OnAgentConnect()
+		public override void AgentConnect()
 		{
 			System.Diagnostics.Debug.Assert(channel == null);
 
@@ -553,7 +554,7 @@ namespace Peach.Pro.Core.Agent.Channels
 			}
 		}
 
-		protected override void OnAgentDisconnect()
+		public override void AgentDisconnect()
 		{
 			try
 			{
@@ -566,89 +567,110 @@ namespace Peach.Pro.Core.Agent.Channels
 			}
 		}
 
-		protected override IPublisher OnCreatePublisher(string cls, Dictionary<string, Variant> args)
+		public override IPublisher CreatePublisher(string pubName, string cls, Dictionary<string, string> args)
 		{
-			var pub = new PublisherProxy(cls, args);
+			var pub = new PublisherProxy(pubName, cls, args);
 
 			publishers.Add(pub);
 
-			Exec(() => { pub.proxy = proxy.CreatePublisher(pub.cls, pub.args); });
+			Exec(() => { pub.proxy = proxy.CreatePublisher(pub.name, pub.cls, pub.args); });
 
 			return pub;
 		}
 
-		protected override void OnStartMonitor(string name, string cls, Dictionary<string, Variant> args)
+		public override void StartMonitor(string monName, string cls, Dictionary<string, string> args)
 		{
 			// Remote 'args' as a List to support mono/microsoft interoperability
 			var asList = args.ToList();
 
 			// Keep track of monitor info so we can recreate them if the proxy disappears
-			monitors.Add(new MonitorInfo() { Name = name, Class = cls, Args = asList });
+			monitors.Add(new MonitorInfo { Name = monName, Class = cls, Args = asList });
 
-			Exec(() => proxy.StartMonitor(name, cls, asList));
+			Exec(() => proxy.StartMonitor(monName, cls, asList));
 		}
 
-		protected override void OnStopAllMonitors()
+		public override void StopAllMonitors()
 		{
 			Exec(() => proxy.StopAllMonitors());
 		}
 
-		protected override void OnSessionStarting()
+		public override void SessionStarting()
 		{
 			Exec(() => proxy.SessionStarting());
 		}
 
-		protected override void OnSessionFinished()
+		public override void SessionFinished()
 		{
 			Exec(() => proxy.SessionFinished());
 		}
 
-		protected override void OnIterationStarting(uint iterationCount, bool isReproduction)
+		public override void IterationStarting(IterationStartingArgs args)
 		{
 			try
 			{
-				Exec(() => proxy.IterationStarting(iterationCount, isReproduction));
+				Exec(() => proxy.IterationStarting(args.IsReproduction, args.LastWasFault));
 			}
 			catch (RemotingException ex)
 			{
 				logger.Debug("IterationStarting: {0}", ex.Message);
 
-				ReconnectProxy(iterationCount, isReproduction);
+				ReconnectProxy(args);
 			}
 			catch (SocketException ex)
 			{
 				logger.Debug("IterationStarting: {0}", ex.Message);
 
-				ReconnectProxy(iterationCount, isReproduction);
+				ReconnectProxy(args);
 			}
 		}
 
-		protected override bool OnIterationFinished()
+		public override void IterationFinished()
 		{
-			return Exec(() => proxy.IterationFinished());
+			Exec(() => proxy.IterationFinished());
 		}
 
-		protected override bool OnDetectedFault()
+		public override bool DetectedFault()
 		{
 			return Exec(() => proxy.DetectedFault());
 		}
 
-		protected override Fault[] OnGetMonitorData()
+		public override IEnumerable<MonitorData> GetMonitorData()
 		{
-			return Exec(() => proxy.GetMonitorData());
+			return Exec(() => proxy.GetMonitorData().Select(FromRemoteData));
 		}
 
-		protected override bool OnMustStop()
+		public override void Message(string msg)
 		{
-			return Exec(() => proxy.MustStop());
-		}
-
-		protected override Variant OnMessage(string name, Variant data)
-		{
-			return Exec(() => proxy.Message(name, data));
+			Exec(() => proxy.Message(msg));
 		}
 
 		#endregion
+
+		private MonitorData FromRemoteData(RemoteData data)
+		{
+			var ret = new MonitorData
+			{
+				AgentName = Name,
+				MonitorName = data.MonitorName,
+				DetectionSource = data.DetectionSource,
+				Title = data.Title,
+				Data = data.Data.ToDictionary(i => i.Key, i => i.Value),
+			};
+
+			if (data.Fault != null)
+			{
+				ret.Fault = new MonitorData.Info
+				{
+					Description = data.Fault.Description,
+					MajorHash = data.Fault.MajorHash,
+					MinorHash = data.Fault.MinorHash,
+					Risk = data.Fault.Risk,
+					MustStop = data.Fault.MustStop,
+				};
+			}
+
+			return ret;
+		}
 	}
 
 	#endregion
@@ -790,101 +812,136 @@ namespace Peach.Pro.Core.Agent.Channels
 
 	#region Agent Remoting Object
 
+	[Serializable]
+	internal class RemoteData
+	{
+		[Serializable]
+		internal class Info
+		{
+			public string Description { get; set; }
+			public string MajorHash { get; set; }
+			public string MinorHash { get; set; }
+			public string Risk { get; set; }
+			public bool MustStop { get; set; }
+		}
+
+		public string MonitorName { get; set; }
+		public string DetectionSource { get; set; }
+		public string Title { get; set; }
+		public Info Fault { get; set; }
+		public List<KeyValuePair<string, byte[]>> Data { get; set; }
+	}
+
 	/// <summary>
 	/// Implement agent service running over .NET TCP remoting
 	/// </summary>
-	internal class AgentTcpRemote : MarshalByRefObject, IAgent
+	internal class AgentTcpRemote : MarshalByRefObject
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		Agent agent = new Agent();
+		private readonly Agent _agent = new Agent();
 
-		public AgentTcpRemote()
-		{
-		}
-
-		public PublisherTcpRemote CreatePublisher(string cls, IEnumerable<KeyValuePair<string, Variant>> args)
+		public PublisherTcpRemote CreatePublisher(string name, string cls, IEnumerable<KeyValuePair<string, string>> args)
 		{
 			logger.Trace("CreatePublisher: {0}", cls);
-			return new PublisherTcpRemote(agent.CreatePublisher(cls, args));
+			return new PublisherTcpRemote(_agent.CreatePublisher(name, cls, args.ToDictionary(i => i.Key, i => i.Value)));
 		}
 
 		public void AgentConnect()
 		{
 			logger.Trace("AgentConnect");
-			agent.AgentConnect();
+			_agent.AgentConnect();
 		}
 
 		public void AgentDisconnect()
 		{
 			logger.Trace("AgentDisconnect");
-			agent.AgentDisconnect();
+			_agent.AgentDisconnect();
 		}
 
-		public void StartMonitor(string name, string cls, IEnumerable<KeyValuePair<string, Variant>> args)
+		public void StartMonitor(string name, string cls, IEnumerable<KeyValuePair<string, string>> args)
 		{
 			logger.Trace("StartMonitor: {0} {1}", name, cls);
-			agent.StartMonitor(name, cls, args);
+			_agent.StartMonitor(name, cls, args.ToDictionary(i => i.Key, i => i.Value));
 		}
 
 		public void StopAllMonitors()
 		{
 			logger.Trace("StopAllMonitors");
-			agent.StopAllMonitors();
+			_agent.StopAllMonitors();
 		}
 
 		public void SessionStarting()
 		{
 			logger.Trace("SessionStarting");
-			agent.SessionStarting();
+			_agent.SessionStarting();
 		}
 
 		public void SessionFinished()
 		{
 			logger.Trace("SessionFinished");
-			agent.SessionFinished();
+			_agent.SessionFinished();
 		}
 
-		public void IterationStarting(uint iterationCount, bool isReproduction)
+		public void IterationStarting(bool isReproduction, bool lastWasFault)
 		{
-			logger.Trace("IterationStarting: {0} {1}", iterationCount, isReproduction);
-			agent.IterationStarting(iterationCount, isReproduction);
+			logger.Trace("IterationStarting {0} {1}", isReproduction, lastWasFault);
+			var args = new IterationStartingArgs
+			{
+				IsReproduction = isReproduction,
+				LastWasFault = lastWasFault
+			};
+
+			_agent.IterationStarting(args);
 		}
 
-		public bool IterationFinished()
+		public void IterationFinished()
 		{
 			logger.Trace("IterationFinished");
-			return agent.IterationFinished();
+			_agent.IterationFinished();
 		}
 
 		public bool DetectedFault()
 		{
 			logger.Trace("DetectedFault");
-			return agent.DetectedFault();
+			return _agent.DetectedFault();
 		}
 
-		public Fault[] GetMonitorData()
+		public RemoteData[] GetMonitorData()
 		{
 			logger.Trace("GetMonitorData");
-			return agent.GetMonitorData();
+			return _agent.GetMonitorData().Select(ToRemoteData).ToArray();
 		}
 
-		public bool MustStop()
+		public void Message(string msg)
 		{
-			logger.Trace("MustStop");
-			return agent.MustStop();
+			logger.Trace("Message: {0}", msg);
+			_agent.Message(msg);
 		}
 
-		public Variant Message(string name, Variant data)
+		private static RemoteData ToRemoteData(MonitorData data)
 		{
-			logger.Trace("Message: {0}", name);
-			return agent.Message(name, data);
-		}
+			var ret = new RemoteData
+			{
+				MonitorName = data.MonitorName,
+				DetectionSource = data.DetectionSource,
+				Title = data.Title,
+				Data = data.Data.ToList(),
+			};
 
-		public object QueryMonitors(string query)
-		{
-			logger.Trace("QueryMonitors: {0}", query);
-			return agent.QueryMonitors(query);
+			if (data.Fault != null)
+			{
+				ret.Fault = new RemoteData.Info
+				{
+					Description = data.Fault.Description,
+					MajorHash = data.Fault.MajorHash,
+					MinorHash = data.Fault.MinorHash,
+					Risk = data.Fault.Risk,
+					MustStop = data.Fault.MustStop,
+				};
+			}
+
+			return ret;
 		}
 	}
 

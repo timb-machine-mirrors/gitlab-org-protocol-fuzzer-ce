@@ -30,6 +30,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using NLog;
@@ -90,16 +91,22 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		bool _stopMessage = false;
 		bool _hybrid = true;
 		bool _replay = false;
-		Fault _fault = null;
+		MonitorData _fault = null;
 
 		DebuggerInstance _debugger = null;
 		SystemDebuggerInstance _systemDebugger = null;
 		Thread _ipcHeartBeatThread = null;
 		System.Threading.Mutex _ipcHeartBeatMutex = null;
 
-		public WindowsDebuggerHybrid(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public WindowsDebuggerHybrid(string name)
+			: base(name)
 		{
+		}
+
+		public override void StartMonitor(Dictionary<string, string> args)
+		{
+			// TODO: base.StartMonitor(args)
+
 			//var color = Console.ForegroundColor;
 			if (!Environment.Is64BitProcess && Environment.Is64BitOperatingSystem)
 			{
@@ -228,25 +235,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			}
 		}
 
-		public override object ProcessQueryMonitors(string query)
-		{
-			switch (query)
-			{
-				case "QueryPid":
-					if (_kernelConnectionString != null)
-						return null;
-
-					if (_debugger != null)
-						return _debugger.ProcessId;
-					else if (_systemDebugger != null)
-						return _systemDebugger.ProcessId;
-					else
-						return null;
-			}
-
-			return null;
-		}
-
 		public static string FindWinDbg()
 		{
 			// Lets try a few common places before failing.
@@ -296,21 +284,19 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			return null;
 		}
 
-		public override Variant Message(string name, Variant data)
+		public override void Message(string msg)
 		{
-			if (name == "Action.Call" && ((string)data) == _startOnCall)
+			if (msg == _startOnCall)
 			{
 				_StopDebugger();
 				_StartDebugger();
 			}
-			else if (name == "Action.Call" && ((string)data) == _waitForExitOnCall)
+			else if (msg == _waitForExitOnCall)
 			{
 				_stopMessage = true;
 				_WaitForExit(false);
 				_StopDebugger();
 			}
-
-			return null;
 		}
 
 		public override void StopMonitor()
@@ -340,9 +326,9 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			_FinishDebugger();
 		}
 
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
+		public override void IterationStarting(IterationStartingArgs args)
 		{
-			_replay = isReproduction;
+			_replay = args.IsReproduction;
 			_waitForExitFailed = false;
 			_earlyExitFault = false;
 			_stopMessage = false;
@@ -351,7 +337,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				_StartDebugger();
 		}
 
-		public override bool IterationFinished()
+		public override void IterationFinished()
 		{
 			if (!_stopMessage && _faultOnEarlyExit && !_IsDebuggerRunning())
 			{
@@ -367,8 +353,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			{
 				_StopDebugger();
 			}
-
-			return false;
 		}
 
 		public override bool DetectedFault()
@@ -380,7 +364,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			if (_systemDebugger != null && _systemDebugger.caughtException)
 			{
 				logger.Info("DetectedFault - Using system debugger, caught exception");
-				_fault = _systemDebugger.crashInfo;
+				_fault = GetDebuggerFault(_systemDebugger.crashInfo);
 
 				_systemDebugger.StopDebugger();
 				_systemDebugger = null;
@@ -397,7 +381,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 					{
 						// Kill off our debugger process and re-create
 						_debuggerProcessUsage = _debuggerProcessUsageMax;
-						_fault = _debugger.crashInfo;
+						_fault = GetDebuggerFault(_debugger.crashInfo);
 						break;
 					}
 
@@ -420,7 +404,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			{
 				// Kill off our debugger process and re-create
 				_debuggerProcessUsage = _debuggerProcessUsageMax;
-				_fault = _debugger.crashInfo;
+				_fault = GetDebuggerFault(_debugger.crashInfo);
 			}
 			else if (_earlyExitFault)
 			{
@@ -430,7 +414,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			else if (_waitForExitFailed)
 			{
 				logger.Info("DetectedFault() - Fault detected, WaitForExitOnCall failed");
-				_fault = GetGeneralFault("ProcessFailedToExit", "Process did not exit in " + _waitForExitTimeout + "ms");
+				_fault = GetGeneralFault("FailedToExit", "Process did not exit in " + _waitForExitTimeout + "ms.");
 			}
 
 			if(_fault == null)
@@ -439,7 +423,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			return _fault != null;
 		}
 
-		public override Fault GetMonitorData()
+		public override MonitorData GetMonitorData()
 		{
 			if (_fault != null && _hybrid)
 			{
@@ -450,34 +434,52 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			return _fault;
 		}
 
-		public override bool MustStop()
+		protected MonitorData GetEarlyExitFault()
 		{
-			return false;
+			return GetGeneralFault("ExitedEarly", "Process exited early.");
 		}
 
-		protected Fault GetEarlyExitFault()
+		protected MonitorData GetDebuggerFault(Fault f)
 		{
-			return GetGeneralFault("ProcessExitedEarly", "Process exited early");
+			return new MonitorData
+			{
+				DetectionSource = _systemDebugger != null ? "SystemDebugger" : "WindowsDebugEngine",
+				Title = f.title,
+				Data = f.collectedData.ToDictionary(i => i.Key, i => i.Value),
+				Fault = new MonitorData.Info
+				{
+					Description = f.description,
+					MajorHash = f.majorHash,
+					MinorHash = f.minorHash,
+					Risk = f.exploitability,
+				}
+			};
 		}
 
-		protected Fault GetGeneralFault(string folder, string reason)
+		protected MonitorData GetGeneralFault(string type, string reason)
 		{
-			var fault = new Fault();
-			fault.type = FaultType.Fault;
-			fault.detectionSource = _systemDebugger != null ? "SystemDebugger" : "WindowsDebugEngine";
-			fault.title = reason;
-			fault.description = reason + ": ";
+			var desc = reason + ": ";
 
 			if (_processName != null)
-				fault.description += _processName;
+				desc += _processName;
 			else if (_commandLine != null)
-				fault.description += _commandLine;
+				desc += _commandLine;
 			else if (_kernelConnectionString != null)
-				fault.description += _kernelConnectionString;
+				desc += _kernelConnectionString;
 			else if (_service != null)
-				fault.description += _service;
+				desc += _service;
 
-			fault.folderName = folder;
+			var fault = new MonitorData
+			{
+				DetectionSource = _systemDebugger != null ? "SystemDebugger" : "WindowsDebugEngine",
+				Title = reason,
+				Data = new Dictionary<string, byte[]>(),
+				Fault = new MonitorData.Info
+				{
+					Description = desc,
+					MajorHash = reason,
+				}
+			};
 
 			return fault;
 		}

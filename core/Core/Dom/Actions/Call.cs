@@ -86,11 +86,13 @@ namespace Peach.Core.Dom.Actions
 		{
 			_result = null;
 
-			Variant ret;
+			Variant ret = null;
 
 			// Are we sending to Agents?
 			if (publisher == "Peach.Agent")
-				ret = context.agentManager.Message("Action.Call", new Variant(method));
+			{
+				context.agentManager.Message(method);
+			}
 			else
 			{
 				pub.start();

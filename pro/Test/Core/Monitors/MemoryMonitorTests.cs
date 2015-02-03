@@ -1,9 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using NUnit.Framework;
 using Peach.Core;
+using Peach.Core.Agent;
 using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Monitors
@@ -34,7 +34,8 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			Assert.NotNull(faults);
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("Unable to locate process with Pid 2147483647.", faults[0].title);
+			Assert.NotNull(faults[0].Fault);
+			Assert.AreEqual("Unable to locate process with Pid 2147483647.", faults[0].Title);
 		}
 
 		[Test]
@@ -49,15 +50,16 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			Assert.NotNull(faults);
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("Unable to locate process \"some_invalid_process\".", faults[0].title);
+			Assert.NotNull(faults[0].Fault);
+			Assert.AreEqual("Unable to locate process \"some_invalid_process\".", faults[0].Title);
 		}
 
 		[Test]
 		public void TestNoParams()
 		{
-			var ex = Assert.Throws<PeachException>(() =>
-				new MonitorRunner("Memory", new Dictionary<string, string>())
-			);
+			var runner = new MonitorRunner("Memory", new Dictionary<string, string>());
+
+			var ex = Assert.Throws<PeachException>(() => runner.Run());
 
 			const string msg = "Could not start monitor \"Memory\".  Either pid or process name is required.";
 
@@ -67,13 +69,13 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestAllParams()
 		{
-			var ex = Assert.Throws<PeachException>(() => 
-				new MonitorRunner("Memory", new Dictionary<string, string>
-				{
-					{ "Pid", "1" },
-					{ "ProcessName", "name" },
-				})
-			);
+			var runner = new MonitorRunner("Memory", new Dictionary<string, string>
+			{
+				{ "Pid", "1" },
+				{ "ProcessName", "name" },
+			});
+
+			var ex = Assert.Throws<PeachException>(() => runner.Run());
 
 			const string msg = "Could not start monitor \"Memory\".  Only specify pid or process name, not both.";
 
@@ -116,11 +118,7 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			var faults = runner.Run();
 
-			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("MemoryMonitor", faults[0].detectionSource);
-			Assert.AreEqual(FaultType.Data, faults[0].type);
-
-			Console.WriteLine("{0}\n{1}\n", faults[0].title, faults[0].description);
+			Verify(faults, false);
 		}
 
 		[Test]
@@ -137,10 +135,8 @@ namespace Peach.Pro.Test.Core.Monitors
 			var faults = runner.Run();
 
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("MemoryMonitor", faults[0].detectionSource);
-			Assert.AreEqual(FaultType.Fault, faults[0].type);
 
-			Console.WriteLine("{0}\n{1}\n", faults[0].title, faults[0].description);
+			Verify(faults, true);
 		}
 
 		[Test]
@@ -148,7 +144,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		{
 			// Verify can generate faults using process name
 
-			var proc = Platform.GetOS() == Platform.OS.Windows ? "explorer.exe" : "sshd";
+			var proc = Platform.GetOS() == Platform.OS.Windows ? "explorer" : "sshd";
 
 			var runner = new MonitorRunner("Memory", new Dictionary<string, string>
 			{
@@ -158,11 +154,49 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			var faults = runner.Run();
 
-			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("MemoryMonitor", faults[0].detectionSource);
-			Assert.AreEqual(FaultType.Fault, faults[0].type);
+			Verify(faults, true);
+		}
 
-			Console.WriteLine("{0}\n{1}\n", faults[0].title, faults[0].description);
+		static void Verify(MonitorData[] faults, bool isFault)
+		{
+			Assert.AreEqual(1, faults.Length);
+			Assert.AreEqual("Memory", faults[0].DetectionSource);
+
+			if (!isFault)
+			{
+				Assert.Null(faults[0].Fault);
+
+				StringAssert.IsMatch("\\w+ \\(pid: \\d+\\) memory usage", faults[0].Title);
+				Assert.NotNull(faults[0].Data);
+				Assert.True(faults[0].Data.ContainsKey("Usage.txt"));
+
+				var usage = Encoding.UTF8.GetString(faults[0].Data["Usage.txt"]);
+
+				StringAssert.Contains("PrivateMemorySize", usage);
+				StringAssert.Contains("WorkingSet", usage);
+				StringAssert.Contains("PeakWorkingSet", usage);
+				StringAssert.Contains("VirtualMemorySize", usage);
+				StringAssert.Contains("PeakVirtualMemorySize", usage);
+			}
+			else
+			{
+				Assert.NotNull(faults[0].Fault);
+				Assert.AreEqual("Memory", faults[0].DetectionSource);
+				StringAssert.IsMatch("\\w+ \\(pid: \\d+\\) exceeded memory limit", faults[0].Title);
+				Assert.NotNull(faults[0].Data);
+				Assert.AreEqual(0, faults[0].Data.Count);
+				Assert.Null(faults[0].Fault.MajorHash);
+				Assert.Null(faults[0].Fault.MinorHash);
+				Assert.Null(faults[0].Fault.Risk);
+
+				var usage = faults[0].Fault.Description;
+
+				StringAssert.Contains("PrivateMemorySize", usage);
+				StringAssert.Contains("WorkingSet", usage);
+				StringAssert.Contains("PeakWorkingSet", usage);
+				StringAssert.Contains("VirtualMemorySize", usage);
+				StringAssert.Contains("PeakVirtualMemorySize", usage);
+			}
 		}
 	}
 }

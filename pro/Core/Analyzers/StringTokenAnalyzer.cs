@@ -131,8 +131,8 @@ namespace Peach.Pro.Core.Analyzers
 			{
 				this.positions = positions;
 
-				Peach.Core.Dom.Block block = new Block(str.name);
-				str.parent[str.name] = block;
+				Peach.Core.Dom.Block block = new Block(str.Name);
+				str.parent[str.Name] = block;
 				block.Add(str);
 
 				// Mark the position of the block
@@ -189,11 +189,11 @@ namespace Peach.Pro.Core.Analyzers
 				tokenString.DefaultValue = new Variant(token.ToString());
 				postString.DefaultValue = new Variant(str.Substring(tokenIndex + 1));
 
-				var block = new Peach.Core.Dom.Block(el.name);
+				var block = new Peach.Core.Dom.Block(el.Name);
 				block.Add(preString);
 				block.Add(tokenString);
 				block.Add(postString);
-				el.parent[el.name] = block;
+				el.parent[el.Name] = block;
 
 				if (positions != null)
 				{

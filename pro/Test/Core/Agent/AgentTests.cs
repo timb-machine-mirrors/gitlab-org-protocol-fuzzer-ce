@@ -40,100 +40,21 @@ namespace Peach.Pro.Test.Core.Agent
 
 		public Process process;
 
-		[Monitor("TestLogFunctions", true, IsTest = true)]
-		public class TestLogMonitor : Monitor
+		class AgentKillerPublisher : Publisher
 		{
-			readonly string fileName;
-
-			void Log(string msg, params object[] args)
-			{
-				using (var writer = new StreamWriter(fileName, true))
-				{
-					writer.WriteLine(msg, args);
-				}
-			}
-
-			public TestLogMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
-				: base(agent, name, args)
-			{
-				fileName = (string)args["FileName"];
-			}
-
-			public override void StopMonitor()
-			{
-				Log("StopMonitor");
-			}
-
-			public override void SessionStarting()
-			{
-				Log("SessionStarting");
-			}
-
-			public override void SessionFinished()
-			{
-				Log("SessionFinished");
-			}
-
-			public override void IterationStarting(uint iterationCount, bool isReproduction)
-			{
-				Log("IterationStarting {0} {1}", iterationCount, isReproduction.ToString().ToLower());
-			}
-
-			public override bool IterationFinished()
-			{
-				Log("IterationFinished");
-				return false;
-			}
-
-			public override bool DetectedFault()
-			{
-				Log("DetectedFault");
-				return false;
-			}
-
-			public override Fault GetMonitorData()
-			{
-				Log("GetMonitorData");
-				return null;
-			}
-
-			public override bool MustStop()
-			{
-				Log("MustStop");
-				return false;
-			}
-
-			public override Variant Message(string name, Variant data)
-			{
-				Log("Message {0}", name);
-				return null;
-			}
-		}
-
-		[Publisher("AgentKiller", true, IsTest = true)]
-		public class AgentKillerPublisher : Publisher
-		{
-			public AgentTests owner;
+			private readonly AgentTests _owner;
 
 			static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-			public AgentKillerPublisher(Dictionary<string, Variant> args)
-				: base(args)
+			public AgentKillerPublisher(AgentTests owner)
+				: base(new Dictionary<string, Variant>())
 			{
+				_owner = owner;
 			}
 
 			protected override Logger Logger
 			{
 				get { return logger; }
-			}
-
-			protected RunContext Context
-			{
-				get
-				{
-					var dom = Test.parent;
-					return dom.context;
-				}
 			}
 
 			protected override void OnOpen()
@@ -143,10 +64,10 @@ namespace Peach.Pro.Test.Core.Agent
 				if (!IsControlIteration && (Iteration % 2) == 1)
 				{
 					// Lame hack to make sure CrashableServer gets stopped
-					Context.agentManager.IterationFinished();
+					Test.parent.context.agentManager.IterationFinished();
 
-					owner.StopAgent();
-					owner.StartAgent();
+					_owner.StopAgent();
+					_owner.StartAgent();
 				}
 			}
 		}
@@ -218,8 +139,8 @@ namespace Peach.Pro.Test.Core.Agent
 			<Param name='RestartOnEachTest' value='true'/>
 			<Param name='FaultOnEarlyExit' value='true'/>
 		</Monitor>
-		<Monitor class='TestLogFunctions'>
-			<Param name='FileName' value='{3}'/>
+		<Monitor name='M' class='Null'>
+			<Param name='LogFile' value='{3}'/>
 		</Monitor>
 	</Agent>
 
@@ -232,7 +153,7 @@ namespace Peach.Pro.Test.Core.Agent
 			<Param name='Host' value='127.0.0.1' />
 			<Param name='Port' value='{2}' />
 		</Publisher>
-		<Publisher name='Killer' class='AgentKiller'/>
+		<Publisher name='Killer' class='Null'/>
 		<Strategy class='Sequential'/>
 		<Mutators mode='include'>
 			<Mutator class='StringStatic' />
@@ -247,8 +168,7 @@ namespace Peach.Pro.Test.Core.Agent
 				var parser = new PitParser();
 				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
-				var pub = (AgentKillerPublisher)dom.tests[0].publishers[1];
-				pub.owner = this;
+				dom.tests[0].publishers[1] = new AgentKillerPublisher(this);
 
 				var config = new RunConfiguration { range = true, rangeStart = 83, rangeStop = 86 };
 
@@ -261,19 +181,19 @@ namespace Peach.Pro.Test.Core.Agent
 				var contents = File.ReadAllLines(tmp);
 				var expected = new[] {
 // Iteration 83 (Control & Record)
-"SessionStarting", "IterationStarting 83 false", "IterationFinished", "DetectedFault", "MustStop", 
+"M.StartMonitor", "M.SessionStarting", "M.IterationStarting False False", "M.IterationFinished", "M.DetectedFault", 
 // Iteration 83 - Agent is killed (IterationFinished is a hack to kill CrashableServer)
-"IterationStarting 83 false", "IterationFinished", 
+"M.IterationStarting False False", "M.IterationFinished", 
 // Agent is restarted & fault is not detected
-"SessionStarting", "IterationStarting 84 false", "IterationFinished", "DetectedFault", "MustStop", 
+"M.StartMonitor", "M.SessionStarting", "M.IterationStarting False False", "M.IterationFinished", "M.DetectedFault",
 // Agent is killed
-"IterationStarting 85 false", "IterationFinished", 
+"M.IterationStarting False False", "M.IterationFinished", 
 // Agent is restarted & fault is detected
-"SessionStarting", "IterationStarting 86 false", "IterationFinished", "DetectedFault", "GetMonitorData", "MustStop",
+"M.StartMonitor", "M.SessionStarting", "M.IterationStarting False False", "M.IterationFinished", "M.DetectedFault", "M.GetMonitorData",
 // Reproduction occurs & fault is detected
-"IterationStarting 86 true", "IterationFinished", "DetectedFault", "GetMonitorData", "MustStop",
+"M.IterationStarting True True", "M.IterationFinished", "M.DetectedFault", "M.GetMonitorData",
 // Fussing stops
-"SessionFinished", "StopMonitor"
+"M.SessionFinished", "M.StopMonitor"
 				};
 
 				Assert.That(contents, Is.EqualTo(expected));
@@ -472,72 +392,12 @@ namespace Peach.Pro.Test.Core.Agent
 			}
 		}
 
-		[Monitor("LoggingMonitor", true, IsTest = true)]
-		public class LoggingMonitor : Monitor
-		{
-			public LoggingMonitor(IAgent agent, string name, Dictionary<string, Variant> args)
-				: base(agent, name, args)
-			{
-				history.Add(Name + ".LoggingMonitor");
-			}
-
-			public override void StopMonitor()
-			{
-				history.Add(Name + ".StopMonitor");
-			}
-
-			public override void SessionStarting()
-			{
-				history.Add(Name + ".SessionStarting");
-			}
-
-			public override void SessionFinished()
-			{
-				history.Add(Name + ".SessionFinished");
-			}
-
-			public override void IterationStarting(uint iterationCount, bool isReproduction)
-			{
-				history.Add(Name + ".IterationStarting");
-			}
-
-			public override bool IterationFinished()
-			{
-				history.Add(Name + ".IterationFinished");
-				return false;
-			}
-
-			public override bool DetectedFault()
-			{
-				history.Add(Name + ".DetectedFault");
-				return false;
-			}
-
-			public override Fault GetMonitorData()
-			{
-				history.Add(Name + ".GetMonitorData");
-				return null;
-			}
-
-			public override bool MustStop()
-			{
-				history.Add(Name + ".MustStop");
-				return false;
-			}
-
-			public override Variant Message(string name, Variant data)
-			{
-				history.Add(Name + ".Message." + name + "." + (string)data);
-				return null;
-			}
-		}
-
-		static readonly List<string> history = new List<string>();
-
 		[Test]
 		public void TestAgentOrder()
 		{
-			const string xml = @"
+			var tmp = Path.GetTempFileName();
+
+			const string template = @"
 <Peach>
 	<DataModel name='TheDataModel'>
 		<String value='Hello'/>
@@ -553,13 +413,21 @@ namespace Peach.Pro.Test.Core.Agent
 	</StateModel>
 
 	<Agent name='Local1'>
-		<Monitor name='Local1.mon1' class='LoggingMonitor'/>
-		<Monitor name='Local1.mon2' class='LoggingMonitor'/>
+		<Monitor name='Local1.mon1' class='Null'>
+			<Param name='LogFile' value='{0}' />
+		</Monitor>
+		<Monitor name='Local1.mon2' class='Null'>
+			<Param name='LogFile' value='{0}' />
+		</Monitor>
 	</Agent>
 
 	<Agent name='Local2'>
-		<Monitor name='Local2.mon1' class='LoggingMonitor'/>
-		<Monitor name='Local2.mon2' class='LoggingMonitor'/>
+		<Monitor name='Local2.mon1' class='Null'>
+			<Param name='LogFile' value='{0}' />
+		</Monitor>
+		<Monitor name='Local2.mon2' class='Null'>
+			<Param name='LogFile' value='{0}' />
+		</Monitor>
 	</Agent>
 
 	<Test name='Default'>
@@ -571,32 +439,42 @@ namespace Peach.Pro.Test.Core.Agent
 	</Test>
 </Peach>";
 
-			var parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			string[] actual;
 
-			var config = new RunConfiguration {singleIteration = true};
+			try
+			{
+				var xml = template.Fmt(tmp);
+				var dom = DataModelCollector.ParsePit(xml);
+				var config = new RunConfiguration {singleIteration = true};
+				var e = new Engine(null);
 
-			var e = new Engine(null);
-			e.startFuzzing(dom, config);
+				e.startFuzzing(dom, config);
+
+				actual = File.ReadAllLines(tmp);
+			}
+			finally
+			{
+				File.Delete(tmp);
+			}
 
 			string[] expected =
 			{
-				"Local1.mon1.LoggingMonitor",
-				"Local1.mon2.LoggingMonitor",
+				"Local1.mon1.StartMonitor",
+				"Local1.mon2.StartMonitor",
 				"Local1.mon1.SessionStarting",
 				"Local1.mon2.SessionStarting",
-				"Local2.mon1.LoggingMonitor",
-				"Local2.mon2.LoggingMonitor",
+				"Local2.mon1.StartMonitor",
+				"Local2.mon2.StartMonitor",
 				"Local2.mon1.SessionStarting",
 				"Local2.mon2.SessionStarting",
-				"Local1.mon1.IterationStarting",
-				"Local1.mon2.IterationStarting",
-				"Local2.mon1.IterationStarting",
-				"Local2.mon2.IterationStarting",
-				"Local1.mon1.Message.Action.Call.Foo",
-				"Local1.mon2.Message.Action.Call.Foo",
-				"Local2.mon1.Message.Action.Call.Foo",
-				"Local2.mon2.Message.Action.Call.Foo",
+				"Local1.mon1.IterationStarting False False",
+				"Local1.mon2.IterationStarting False False",
+				"Local2.mon1.IterationStarting False False",
+				"Local2.mon2.IterationStarting False False",
+				"Local1.mon1.Message Foo",
+				"Local1.mon2.Message Foo",
+				"Local2.mon1.Message Foo",
+				"Local2.mon2.Message Foo",
 				"Local2.mon2.IterationFinished",
 				"Local2.mon1.IterationFinished",
 				"Local1.mon2.IterationFinished",
@@ -605,10 +483,6 @@ namespace Peach.Pro.Test.Core.Agent
 				"Local1.mon2.DetectedFault",
 				"Local2.mon1.DetectedFault",
 				"Local2.mon2.DetectedFault",
-				"Local1.mon1.MustStop",
-				"Local1.mon2.MustStop",
-				"Local2.mon1.MustStop",
-				"Local2.mon2.MustStop",
 				"Local2.mon2.SessionFinished",
 				"Local2.mon1.SessionFinished",
 				"Local1.mon2.SessionFinished",
@@ -619,8 +493,7 @@ namespace Peach.Pro.Test.Core.Agent
 				"Local1.mon1.StopMonitor",
 			};
 
-			Assert.That(history, Is.EqualTo(expected));
-
+			Assert.That(actual, Is.EqualTo(expected));
 		}
 
 		[Publisher("TestRemoteFile", true, IsTest = true)]

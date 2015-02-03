@@ -235,17 +235,17 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 			Assert.NotNull(array);
 			Assert.AreEqual(0, array.Count);
-			Assert.AreEqual("Data", array.name);
+			Assert.AreEqual("Data", array.Name);
 			Assert.NotNull(array.OriginalElement);
-			Assert.AreEqual("Data", array.OriginalElement.name);
+			Assert.AreEqual("Data", array.OriginalElement.Name);
 
 			var clone = array.Clone("NewData") as Peach.Core.Dom.Array;
 
 			Assert.NotNull(clone);
 			Assert.AreEqual(0, clone.Count);
-			Assert.AreEqual("NewData", clone.name);
+			Assert.AreEqual("NewData", clone.Name);
 			Assert.NotNull(clone.OriginalElement);
-			Assert.AreEqual("NewData", clone.OriginalElement.name);
+			Assert.AreEqual("NewData", clone.OriginalElement.Name);
 
 			// Array expansion doesn't happen until .Value is called
 			var val = clone.Value;
@@ -254,7 +254,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			Assert.AreEqual(100, clone.Count);
 			for (int i = 0; i < clone.Count; ++i)
 			{
-				Assert.AreEqual("NewData_" + i.ToString(), clone[i].name);
+				Assert.AreEqual("NewData_" + i.ToString(), clone[i].Name);
 			}
 		}
 

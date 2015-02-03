@@ -60,7 +60,7 @@ namespace PitTester
 
 				test.agents.Clear();
 
-				var data = testData.Tests.Where(t => t.Name == test.name).First();
+				var data = testData.Tests.Where(t => t.Name == test.Name).First();
 
 				var logger = new TestLogger(data, testData.Ignores.Select(i => i.Xpath));
 
