@@ -27,6 +27,7 @@ xref:Agent[Agents] are special Peach processes that can be run locally or remote
 |xref:Monitors_ProcessKiller[Process Killer Monitor]|X|X|X
 |xref:Monitors_RunCommand[Run Command Monitor]|X|X|X
 |xref:Monitors_SaveFile[Save File Monitor]|X|X|X
+|xref:Monitors_Serial[Serial Port Monitor]|X|X|X
 |xref:Monitors_Socket[Socket Listener Monitor]|X|X|X
 |xref:Monitors_SshCommand[SSH Command Monitor]|X|X|X
 |xref:Monitors_SshDownloader[SSH Downloader Monitor]|X|X|X
