@@ -252,8 +252,6 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 		[Test]
 		public void TestExitEarlyFault2()
 		{
-			Variant foo = new Variant("foo");
-
 			// FaultOnEarlyExit faults when StartOnCall is used and stop message is not sent
 
 			var args = new Dictionary<string, string>
