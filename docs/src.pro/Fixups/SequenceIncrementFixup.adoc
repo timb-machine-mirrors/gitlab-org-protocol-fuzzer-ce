@@ -37,7 +37,8 @@ xref:String[String]
 
 === Parameters
 
-Offset:: Sets the initial value each iteration to Offset * (Iteration - 1). Default is null.
+Group:: Designates a group name that bundles a single fixup to multiple data elements. The result coordinates the incrementing process with the members of the group.  The default value is "".
+Offset:: Sets the initial value each iteration to Offset * (Iteration - 1). The default value is null.
 Once:: Increment the value once per iteration. The default value is false.
 
 === Examples
@@ -273,3 +274,59 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 ----
 ===============================
+
+==================================
+
+.Group
+==================================
+The group parameter coordinates the incrementing process among the data elements that specify a fixup with a common group name, as in the following DataModel.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+    <DataModel name='DM'>
+		<Number name='num' size='16'>
+			<Fixup class='SequenceIncrementFixup'>
+				<Param name='Group' value='mygroup'/>
+			</Fixup>
+		</Number>
+		<Number name='num2' size='16'>
+			<Fixup class='SequenceIncrementFixup'>
+				<Param name='Group' value='mygroup'/>
+			</Fixup>
+		</Number>
+	</DataModel>
+
+    <StateModel name="TheState" initialState="initial">
+        <State name="initial">
+          <Action type="output">
+            <DataModel ref="Packet" />
+          </Action>
+        </State>
+    </StateModel>
+
+    <Test name="Default">
+      <StateModel ref="TheState"/>
+
+      <Publisher class="ConsoleHex" />
+
+      <Logger class="File">
+        <Param name="Path" value="logs"/>
+      </Logger>
+    </Test>
+</Peach>
+----
+
+In this example, data elements "num" and "num3" each have a fixup defined with the Group parameter set to "mygroup". This means that both data elements use the same fixup. When fuzzing occurs, the fixup initially assigns the value 1 to num. The next data item, "num2", uses this fixup as well and receives the value 2. 
+
+On the second fuzzing iteration, num and num2 receive the values 3 and 4 from the fixup, respecively.
+
+Now, to contrast this behavior, if the Group parameter is not specified, num uses one fixup that has a starting value of 1; num2 also uses a fixup, albeit a different fixup, that has a starting value of 1. When fuzzing occurs, the fixup associated to num assigns the value 1 to num. The other fixup, associated to num2, assigns the value 1 to num2.
+
+On the second fuzzing iteration, num and num2 receive the next values from their fixups. For num, this value is 2. For num2, the value from the second fixup is 2 as well.
+
+==================================
