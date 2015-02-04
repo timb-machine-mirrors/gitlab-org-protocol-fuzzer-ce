@@ -6,7 +6,12 @@ The _ButtonClicker_ monitor provides mouse click events for popup windows during
 
 The intent of this monitor is to keep a fuzzing session active, regardless of whether popup windows display during fuzzing. 
 
-For example, if an application crashes and restarts, it might display a popup window asking whether to recover a document that was open when the crash occurred. The _ButtonClicker_ monitor could provide a button click in response to the popup window either that would result in discarding the file in question or in recovering the file.
+For example, if an application crashes and needs to restart or has troublle starting, it might display a popup window asking to start with a specific set of featues that could aid in troubleshooting the cause of failure. A sample popup window consistent with this situation follows:
+
+.{nbsp}
+image::{images}/PopupWindowExample.png[]
+
+Here, the _ButtonClicker_ monitor provides a mouse click event in response to the popup window. The response allows fuzzing to continue instead of waiting for a user to respond to the question raised by the popup window.
 
 === Parameters
 
@@ -21,7 +26,31 @@ None.
 
 === Examples
 
-.Basic Usage Example
+ifdef::peachug[]
+
+.Basic Usage Example +
+
+This parameter example is from a setup that uses the ButtonClicker monitor. The monitor will respond to the pop-up window that displays when restarting the application after a crash.
+
+The ButtonClicker monitor uses the following parameter settings to click the "No" button in the pop-up window :
+
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter    |Value
+|WindowText   |Do you want to start in safe mode?
+|ButtonName   |No
+|==========================================================
+
+
+endif::peachug[]
+
+
+ifndef::peachug[]
+
+.Basic Usage Example +
+
+This example uses the ButtonClicker monitor to respond to a question from a pop-up window that displays when restarting an application after a crash.
+
 =======================
 [source,xml]
 ----
@@ -61,4 +90,7 @@ None.
   </Test>
 </Peach>
 ----
+
 =======================
+
+endif::peachug[]

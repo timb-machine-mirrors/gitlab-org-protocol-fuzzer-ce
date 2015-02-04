@@ -18,9 +18,60 @@ None.
 
 === Examples
 
-.Remove contents of a folder
+ifdef::peachug[]
+
+.Remove contents of a folder +
+
 ==============================
-Run this example from the folder specified using the _folder_ parameter. During each iteration, the file +fuzzed.txt+ is created by the File publisher. At the end of each iteration, +fuzzed.txt+ is deleted by the CleanupFolder monitor.
+This parameter example is from a setup that uses the CleanupFolder monitor to remove a fuzzed file created by the File publisher. At the beginning of each test iteration, the File publisher creates a fuzzed file; at the end of each test iteration, the CleanupFolder monitor deletes all files from the specified folder.
+
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter    |Value
+|Folder   |C:\\cleanme
+|==========================================================
+
+
+Output from the setup for this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Deja vu Security
+
+[*] Test 'Default' starting with random seed 43073.
+Peach.Core.Agent.Agent StartMonitor: Monitor CleanupFolder
+Peach.Core.Agent.Agent SessionStarting: Monitor
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(4 bytes)
+00000000   69 7A 00 00                                        iz??
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+Peach.Core.Agent.Agent SessionFinished: Monitor
+
+[*] Test 'Default' finished.
+----
+==============================
+
+endif::peachug[]
+
+
+ifndef::peachug[]
+
+.Remove contents of a folder +
+
+==============================
+Run this example from the folder specified using the _folder_ parameter. 
+
+During each iteration, the file +fuzzed.txt+ is created by the File publisher. At the end of each iteration, +fuzzed.txt+ is deleted by the CleanupFolder monitor.
 
 [source,xml]
 ----
@@ -41,6 +92,7 @@ Run this example from the folder specified using the _folder_ parameter. During 
       <Action type="output" publisher="FilePub">
           <DataModel ref="TheDataModel"/>
       </Action>
+
     </State>
   </StateModel>
 
@@ -96,3 +148,5 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 ==============================
+
+endif::peachug[]
