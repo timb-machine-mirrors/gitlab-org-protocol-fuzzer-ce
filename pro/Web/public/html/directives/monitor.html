@@ -54,8 +54,8 @@
 								 peach:unique-default="Monitor{{monitorIndex}}" />
 				</div>
 				<span class="help-block"
-							ng-show="form.name.$error.unique">
-					A unique name must be provided
+							ng-messages="form.name.$error"
+							ng-messages-include="html/messages.html">
 				</span>
 			</div>
 		</div>

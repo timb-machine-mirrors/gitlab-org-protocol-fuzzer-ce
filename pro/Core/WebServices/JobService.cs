@@ -139,6 +139,26 @@ namespace Peach.Pro.Core.WebServices
 				ReportUrl = "",
 				PackageFileUrl = "",
 
+				Commands = new JobCommands
+				{
+					StopUrl = Prefix + "/" + Runner.Guid + "/stop",
+					ContinueUrl = Prefix + "/" + Runner.Guid + "/continue",
+					PauseUrl = Prefix + "/" + Runner.Guid + "/pause",
+					KillUrl = Prefix + "/" + Runner.Guid + "/kill",
+				},
+
+				Metrics = new JobMetrics
+				{
+					BucketTimeline = Prefix + "/" + Runner.Guid + "/metrics/bucketTimeline",
+					FaultTimeline = Prefix + "/" + Runner.Guid + "/metrics/faultTimeline",
+					Mutators = Prefix + "/" + Runner.Guid + "/metrics/mutators",
+					Elements = Prefix + "/" + Runner.Guid + "/metrics/elements",
+					States = Prefix + "/" + Runner.Guid + "/metrics/states",
+					Dataset = Prefix + "/" + Runner.Guid + "/metrics/dataset",
+					Buckets = Prefix + "/" + Runner.Guid + "/metrics/buckets",
+					Iterations = Prefix + "/" + Runner.Guid + "/metrics/iterations",
+				},
+
 				Status = Runner.Status,
 				Mode = Logger.Mode,
 				Name = Runner.Name,

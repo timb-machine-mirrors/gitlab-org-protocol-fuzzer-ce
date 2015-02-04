@@ -3,64 +3,117 @@
 module Peach {
 	"use strict";
 
-	export class WizardController {
-		public Question: IQuestion;
-		public Step: number;
+	export interface IWizardScope extends IFormScope {
+		Question: IQuestion;
+		Step: number;
+		NextPrompt: string;
+		BackPrompt: string;
+		Defines: IParameter[];
+	}
 
+	enum WizardStep {
+		Intro = 1,
+		QA,
+		Review
+	}
+
+	export class WizardController {
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Angular.$location,
-			Constants.Services.Pit,
-			Constants.Services.Wizard,
-			Constants.Services.Job
+			C.Angular.$scope,
+			C.Angular.$state,
+			C.Services.Pit,
+			C.Services.Wizard
 		];
 
 		constructor(
-			private $scope: IFormScope,
-			private $location: ng.ILocationService,
+			private $scope: IWizardScope,
+			private $state: ng.ui.IStateService,
 			private pitService: PitService,
-			private wizardService: WizardService,
-			private jobService: JobService
+			private wizardService: WizardService
 		) {
-			$scope.vm = this;
+			this.trackId = this.$state.params['track'];
+			this.track = wizardService.GetTrack(this.trackId);
+			this.Title = this.track.title;
+
+			if (this.trackId !== C.Tracks.Intro) {
+				var id = this.$state.params['id'];
+				this.init(id);
+			}
+		}
+
+		private trackId: string;
+		private track: ITrack;
+		public Title: string;
+
+		public OnNextTrack() {
+			var next = this.track.next;
+			this.$state.go(next.state, next.params);
+		}
+
+		private gotoIntro() {
+			// since the all the params might be the same,
+			// we need to force the controller to reinitialize with reload: true.
+			this.$state.go(
+				C.States.WizardIntro,
+				{ track: this.trackId, id: 0 },
+				{ reload: true }
+			);
+		}
+
+		private init(id: number) {
 			this.resetPrompts();
+
+			if (id === 0) {
+				if (this.$state.is(C.States.WizardIntro)) {
+					this.initIntro();
+				}
+				else if (this.$state.is(C.States.WizardReview)) {
+					this.initReview();
+				}
+			} else {
+				this.$scope.Step = WizardStep.QA;
+				this.loadQuestion(id);
+			}
+		}
+
+		private initIntro() {
+			this.$scope.Step = WizardStep.Intro;
 			var promise = this.track.Begin();
 			if (promise) {
 				promise.then(() => {
-					this.Next();
+					this.loadQuestion(0);
 				});
 			}
 		}
 
-		public get IncludeUrl(): string {
-			if (_.isUndefined(this.Question)) {
-				return "";
+		private initReview() {
+			if (!this.track.IsValid()) {
+				this.gotoIntro();
+				return;
 			}
-			if (_.isUndefined(this.Question.qref)) {
-				var types = [
-					'hwaddr',
-					'iface',
-					'ipv4',
-					'ipv6'
-				];
-				var template = this.Question.type;
-				if (_.contains(types, template)) {
-					template = 'combo';
-				}
-				if (template === 'user') {
-					template = 'string';
-				}
-				return 'html/q/' + template + '.html';
-			}
-			return this.Question.qref;
+			this.$scope.Step = WizardStep.Review;
+			this.track.Finish();
+			this.$scope.Question = {
+				id: -1,
+				type: QuestionTypes.Done
+			};
+
+			this.$scope.Defines = this.pitService.Pit.config;
+			this.$scope.NextPrompt = this.track.nextPrompt;
+			this.$scope.BackPrompt = this.track.backPrompt;
 		}
 
-		public get Defines(): IParameter[] {
-			return this.pitService.PitConfig.config;
+		private loadQuestion(id: number) {
+			this.$scope.Question = this.track.GetQuestionById(id);
+			if (this.$scope.Question) {
+				this.prepareQuestion();
+			} else {
+				this.gotoIntro();
+			}
 		}
 
 		public get FaultAgentDescription(): string {
-			var agent = this.wizardService.GetTrack("fault").agents[0];
+			var agent = this.wizardService.GetTrack(C.Tracks.Fault).agents[0];
 			var ret = '';
 			agent.monitors.forEach((item: IMonitor) => {
 				if (!ret) {
@@ -71,131 +124,76 @@ module Peach {
 			return ret;
 		}
 
-		public SelectedOptions = [];
-
-		public get DataAgents(): Agent[] {
-			return this.wizardService.GetTrack("data").agents;
-		}
-
-		public get AutoAgents(): Agent[] {
-			return this.wizardService.GetTrack("auto").agents;
-		}
-
-		public get Title(): string {
-			return this.track.title;
+		public get Agents(): Agent[] {
+			return this.track.agents;
 		}
 
 		public get IsTestComplete(): boolean {
-			return this.wizardService.GetTrack("test").isComplete;
+			return this.wizardService.GetTrack(C.Tracks.Test).isComplete;
 		}
-
-		public get IsSetVars(): boolean {
-			return this.$location.path() === '/quickstart/setvars';
-		}
-
-		public NextPrompt: string;
 
 		public get CanMoveNext(): boolean {
-			return !this.$scope.form.$invalid;
+			return this.$scope.Question && !this.$scope.form.$invalid;
 		}
-
-		public BackPrompt: string;
 
 		public get CanMoveBack(): boolean {
 			return this.track.history.length > 0;
 		}
 
 		public Next() {
-			if (_.isUndefined(this.Question)) {
-				// if we're not on a question, get the first available
-				this.Question = this.track.GetQuestionById(0);
-			} else {
-				var q = this.Question;
-
-				if (q.type === QuestionTypes.Done) {
-					this.OnNextTrack();
-					return;
-				}
-
-				if (q.type !== QuestionTypes.Jump) {
-					this.track.history.push(q.id);
-				}
-
-				var nextId = this.getNextId(q);
-				if (_.isUndefined(nextId)) {
-					// no more questions, this track is complete
-					this.track.Finish();
-
-					this.Question = {
-						id: -1,
-						type: QuestionTypes.Done,
-						qref: this.track.qref
-					};
-
-					this.NextPrompt = this.track.nextPrompt;
-					this.BackPrompt = this.track.backPrompt;
-				} else {
-					this.Question = this.track.GetQuestionById(nextId);
-				}
+			if (this.$scope.Question.type === QuestionTypes.Done) {
+				this.OnNextTrack();
+				return;
 			}
 
-			this.Step = 2;
+			if (this.$scope.Question.type !== QuestionTypes.Jump) {
+				this.track.history.push(this.$scope.Question.id);
+			}
 
-			this.prepareQuestion();
+			var nextId = this.getNextId(this.$scope.Question);
+
+			if (_.isUndefined(nextId)) {
+				// no more questions, this track is complete
+				this.$state.go(
+					C.States.WizardReview,
+					{ track: this.trackId, id: 0 }
+				);
+			} else {
+				this.$state.go(
+					C.States.WizardQuestion,
+					{ track: this.trackId, id: nextId }
+				);
+			}
 		}
 
 		public Back() {
-			if (this.Question.type === QuestionTypes.Done) {
+			if (this.$scope.Question.type === QuestionTypes.Done) {
 				this.OnRestart();
 				return;
 			}
 
-			// pop the history and get the question
 			var previousId = 0;
 			if (this.track.history.length > 0) {
 				previousId = this.track.history.pop();
 			}
 
-			this.Question = this.track.GetQuestionById(previousId);
-
-			if (this.Question.type === QuestionTypes.Intro) {
-				this.Step = 1;
-			} else if (this.Question.type === QuestionTypes.Done) {
-				this.Step = 3;
+			if (previousId === 0) {
+				this.gotoIntro();
 			} else {
-				this.Step = 2;
+				this.$state.go(
+					C.States.WizardQuestion,
+					{ track: this.trackId, id: previousId }
+				);
 			}
-		}
-
-		public OnNextTrack() {
-			this.$location.path(this.track.next);
 		}
 
 		public OnRestart() {
 			this.track.Restart();
-			this.resetPrompts();
-			this.Question = undefined;
-			this.Next();
+			this.gotoIntro();
 		}
 
 		public OnRemoveAgent(index: number) {
 			this.track.agents.splice(index, 1);
-		}
-
-		public get CanStartJob() {
-			return this.jobService.CanStart;
-		}
-
-		public StartJob() {
-			this.jobService.StartJob();
-			this.OnNextTrack();
-		}
-
-		public OnInsertDefine(def: IParameter) {
-			if (_.isUndefined(this.Question.value)) {
-				this.Question.value = "";
-			}
-			this.Question.value += "##" + def.key + "##";
 		}
 
 		private getNextId(q: IQuestion): number {
@@ -226,11 +224,10 @@ module Peach {
 		}
 
 		private prepareQuestion() {
+			this.$scope.Defines = this.pitService.Pit.config;
+
 			// special stuff to do based on the next question
-			switch (this.Question.type) {
-				case QuestionTypes.Intro:
-					this.Step = 1;
-					break;
+			switch (this.$scope.Question.type) {
 				case QuestionTypes.Jump:
 					this.Next();
 					break;
@@ -239,40 +236,75 @@ module Peach {
 					// if the first choice has a value, set default selection to first
 					// if the first choice doesn't have a value it's a un-keyed choice, set default to 0
 					// look at q-choice.html to see how its binding works
-					if (_.isUndefined(this.Question.value)) {
-						var first = _.first(this.Question.choice);
+					if (_.isUndefined(this.$scope.Question.value)) {
+						var first = _.first(this.$scope.Question.choice);
 						if (_.isUndefined(first.value)) {
-							this.Question.value = first.next;
+							this.$scope.Question.value = first.next;
 						} else {
-							this.Question.value = first.value;
+							this.$scope.Question.value = first.value;
 						}
 					}
 					break;
 				case QuestionTypes.Range:
-					if (_.isUndefined(this.Question.value)) {
-						this.Question.value = this.Question.rangeMin;
+					if (_.isUndefined(this.$scope.Question.value)) {
+						this.$scope.Question.value = this.$scope.Question.rangeMin;
 					}
-					break;
-				case QuestionTypes.Done:
-					this.Step = 3;
 					break;
 				default:
 					break;
 			}
 		}
 
-		private get track(): ITrack {
-			var re = new RegExp("/quickstart/([^/]+)");
-			var match = re.exec(this.$location.path());
-			if (match) {
-				return this.wizardService.GetTrack(match[1]);
-			}
-			return this.wizardService.GetTrack("null");;
+		private resetPrompts() {
+			this.$scope.NextPrompt = "Next";
+			this.$scope.BackPrompt = "Back";
+		}
+	}
+
+	export class WizardQuestionController {
+		static $inject = [
+			C.Angular.$scope,
+			C.Angular.$state
+		];
+
+		constructor(
+			private $scope: IWizardScope,
+			private $state: ng.ui.IStateService
+		) {
 		}
 
-		private resetPrompts() {
-			this.NextPrompt = "Next";
-			this.BackPrompt = "Back";
+		public get IncludeUrl(): string {
+			if (_.isUndefined(this.$scope.Question)) {
+				return "";
+			}
+			var types = [
+				QuestionTypes.HwAddress,
+				QuestionTypes.Iface,
+				QuestionTypes.Ipv4,
+				QuestionTypes.Ipv6
+			];
+			var template = this.$scope.Question.type;
+			if (_.contains(types, template)) {
+				template = 'combo';
+			}
+			if (template === 'user') {
+				template = 'string';
+			}
+			return C.Templates.Wizard.QuestionType.replace(':type', template);
+		}
+
+		public get IsSetVars(): boolean {
+			return this.$state.includes(
+				C.States.Wizard,
+				{ track: C.Tracks.Vars }
+			);
+		}
+
+		public OnInsertDefine(def: IParameter) {
+			if (_.isUndefined(this.$scope.Question.value)) {
+				this.$scope.Question.value = "";
+			}
+			this.$scope.Question.value += "##" + def.key + "##";
 		}
 	}
 }

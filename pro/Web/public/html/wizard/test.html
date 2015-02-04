@@ -1,78 +1,37 @@
 <div class="page-content">
-	<div class="page-header">
-		<h1>
-			Quick Start &raquo; Test
-		</h1>
+	<div ng-include="'html/wizard/header.html'">
 	</div>
 	<p>
 		When all of the sections of the configuration are complete,
 		you can validate the fuzzing definition for correctness.
-
+	</p>
+	<p>
 		This section performs a test that runs a single iteration of the Pit,
 		outputs the results of the test, and issues log messages as appropriate.
 		You can fine tune a configuration or address any problems that arise with
 		a configuration by re-visiting the appropriate section of the configuration,
 		adjusting the settings that you want to edit, and re-run the test.
 	</p>
-	<table>
-		<tr>
-			<td>Set Variables</td>
-			<td>
-				<span class="label label-success arrowed"
-							ng-show="vm.IsComplete('setvars')">
-					Complete
-				</span>
-				<span class="label label-warning arrowed"
-							ng-hide="vm.IsComplete('setvars')">
-					Not completed, default values will be used
-				</span>
-			</td>
-		</tr>
-		<tr>
-			<td>Fault Detection</td>
-			<td>
-				<span class="label label-success arrowed"
-							ng-show="vm.IsComplete('fault')">
-					Complete
-				</span>
-				<span class="label label-danger arrowed"
-							ng-hide="vm.IsComplete('fault')">
-					Fault Detection requires completion.
-					<a style="color: white" href="#/quickstart/fault">
-						<b>
-							Go to Fault Detection
-						</b>
-					</a>
-				</span>
-			</td>
-		</tr>
-		<tr>
-			<td>Data Collection</td>
-			<td>
-				<span class="label label-success arrowed"
-							ng-show="vm.IsComplete('data')">
-					Complete
-				</span>
-				<span class="label label-warning arrowed"
-							ng-hide="vm.IsComplete('data')">
-					No Data Collection will be performed
-				</span>
-			</td>
-		</tr>
-		<tr>
-			<td>Automation</td>
-			<td>
-				<span class="label label-success arrowed"
-							ng-show="vm.IsComplete('auto')">
-					Complete
-				</span>
-				<span class="label label-warning arrowed"
-							ng-hide="vm.IsComplete('auto')">
-					No Automation will be performed
-				</span>
-			</td>
-		</tr>
-	</table>
+
+	<dl class="dl-horizontal">
+		<dt ng-repeat-start="item in vm.Tracks">
+			{{item.title}}
+		</dt>
+		<dd ng-repeat-end>
+			<span class="label arrowed"
+						ng-class="vm.TrackStatus(item)">
+				{{vm.TrackMessage(item)}}
+				<a ui-sref="wizard.intro({track: item.track})"
+					 ng-show="vm.TrackLink(item)"
+					 style="color: white">
+					<b>
+						{{item.link}}
+					</b>
+				</a>
+			</span>
+		</dd>
+	</dl>
+
 	<div class="wizard-actions">
 		<span ng-show="vm.ShowTestPass">
 			Testing passed, press Continue

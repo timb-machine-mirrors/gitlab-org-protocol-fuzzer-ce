@@ -70,7 +70,7 @@ xref:token[token]::
 xref:endian[endian]::
 	Byte order of the number. Valid options are big, little, and network. Network is an alias for big. The default value is little.
 xref:signed[signed]::
-	The number is signed or unsigned. Valid values are true and false, defaults to true.
+	The number is signed or unsigned. Valid values are true and false, defaults to false.
 xref:constraint[constraint]::
 	A constraint in the form of a python expression. Used during data cracking.
 xref:mutable[mutable]::

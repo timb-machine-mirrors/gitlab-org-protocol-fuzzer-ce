@@ -3,18 +3,18 @@
 module Peach {
 	"use strict";
 
-	export class QuestionTypes {
-		static String = "string";
-		static Hex = "hex";
-		static Range = "range";
-		static Ipv4 = "ipv4";
-		static Ipv6 = "ipv6";
-		static HwAddress = "hwaddr";
-		static Iface = "iface";
-		static Choice = "choice";
-		static Jump = "jump";
-		static Intro = "intro";
-		static Done = "done";
+	export module QuestionTypes {
+		export var String = "string";
+		export var Hex = "hex";
+		export var Range = "range";
+		export var Ipv4 = "ipv4";
+		export var Ipv6 = "ipv6";
+		export var HwAddress = "hwaddr";
+		export var Iface = "iface";
+		export var Choice = "choice";
+		export var Jump = "jump";
+		export var Intro = "intro";
+		export var Done = "done";
 	}
 
 	export interface IChoice {
@@ -29,7 +29,6 @@ module Peach {
 
 		q?: string;
 		key?: string;
-		qref?: string;
 		choice?: IChoice[];
 		shortName?: string;
 		next?: number;
@@ -48,11 +47,10 @@ module Peach {
 	export interface ITrack {
 		// readonly
 		title: string;
-		qref?: string;
-		next?: string;
+		next?: ITrackNext;
 		nextPrompt?: string;
 		backPrompt?: string;
-		template?: IWizardTemplate; 
+		template?: IWizardTemplate;
 
 		// dynamic values
 		isComplete?: boolean;
@@ -66,5 +64,12 @@ module Peach {
 		GetQuestionById(id: number): IQuestion;
 		GetQuestionByKey(key: string): IQuestion;
 		GetValueByKey(key: string): any;
+
+		IsValid(): boolean;
+	}
+
+	export interface ITrackNext {
+		state: string;
+		params?: any;
 	}
 }

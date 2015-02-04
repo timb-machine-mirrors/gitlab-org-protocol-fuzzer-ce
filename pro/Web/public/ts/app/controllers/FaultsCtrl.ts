@@ -3,30 +3,67 @@
 module Peach {
 	"use strict";
 
-	export class FaultsController {
+	function FaultsTitleParts($stateParams) {
+		var parts = [];
+		var bucket = $stateParams.bucket;
+		if (bucket === "all") {
+			parts.push('All');
+		} else {
+			parts.push('Bucket: ' + bucket);
+		}
 
+		if ($stateParams.id) {
+			parts.push('Iteration: ' + $stateParams.id);
+		}
+		return parts;
+	}
+
+	export class FaultsDetailController {
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Angular.$routeParams,
-			Constants.Services.Job,
-			"FaultDetailResource"
+			C.Angular.$scope,
+			C.Angular.$state,
+			C.Angular.$stateParams,
+			C.Services.Job
 		];
 
 		constructor(
 			$scope: IViewModelScope,
-			$routeParams: ng.route.IRouteParamsService,
-			private jobService: JobService,
-			private faultDetailResource: IFaultDetailResource
+			$state: ng.ui.IStateService,
+			$stateParams,
+			jobService: JobService
 		) {
-			$scope.vm = this;
-			this.bucket = $routeParams['bucket'];
-			if (this.bucket === "all") {
-				this.Title = "All Faults";
-			} else {
-				this.Title = "Faults For " + this.bucket;
-				this.refreshBucketFaults();
+			this.Title = FaultsTitleParts($stateParams);
+			var promise = jobService.LoadFaultDetail($stateParams.id);
+			promise.then((detail: IFaultDetail) => {
+				this.Fault = detail;
+			}, () => {
+				$state.go(C.States.Home);
+			});
+		}
 
-				$scope.$watch('vm.jobService.Faults.length', (newVal, oldVal) => {
+		public Title: string[];
+		public Fault: IFaultDetail;
+	}
+
+	export class FaultsController {
+		static $inject = [
+			C.Angular.$scope,
+			C.Angular.$state,
+			C.Angular.$stateParams,
+			C.Services.Job
+		];
+
+		constructor(
+			$scope: IViewModelScope,
+			private $state: ng.ui.IStateService,
+			$stateParams,
+			private jobService: JobService
+		) {
+			this.bucket = $stateParams.bucket;
+			this.Title = FaultsTitleParts($stateParams)[0];
+			if (this.bucket !== "all") {
+				this.refreshBucketFaults();
+				$scope.$watch(() => jobService.Faults.length, (newVal, oldVal) => {
 					if (newVal !== oldVal) {
 						this.refreshBucketFaults();
 					}
@@ -36,9 +73,11 @@ module Peach {
 			this.Faults = _.clone(this.AllFaults);
 		}
 
-		public get Job(): IJob {
-			return this.jobService.Job;
-		}
+		private bucket: string;
+		private bucketFaults: IFaultSummary[];
+
+		public Faults: IFaultSummary[];
+		public Title: string;
 
 		public get AllFaults(): IFaultSummary[] {
 			if (this.bucket === "all") {
@@ -47,27 +86,12 @@ module Peach {
 			return this.bucketFaults;
 		}
 
-		private bucket: string;
-		private bucketFaults: IFaultSummary[];
-
-		public Faults: IFaultSummary[];
-
-		public get IsFaultSelected(): boolean {
-			return !_.isUndefined(this.CurrentFault);
-		}
-
-		public Title: string = "All Faults";
-
-		public CurrentFault: IFaultDetail;
-
-		public IsDetailActive: boolean;
-
 		public OnFaultSelected(fault: IFaultSummary) {
-			var promise = this.faultDetailResource.get({ id: ExtractId('faults', fault.faultUrl) });
-			promise.$promise.then((detail: IFaultDetail) => {
-				this.CurrentFault = detail;
-				this.IsDetailActive = true;
-			});
+			var params = {
+				bucket: this.bucket,
+				id: fault.iteration
+			};
+			this.$state.go(C.States.FaultsDetail, params);
 		}
 
 		private refreshBucketFaults() {

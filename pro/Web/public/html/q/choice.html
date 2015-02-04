@@ -1,15 +1,15 @@
 ﻿<div class="header blue"
 		 ng-show="vm.IsSetVars">
-	{{question.shortName || question.key}}
+	{{Question.shortName || Question.key}}
 </div>
 <label>
-	{{question.q}}
+	{{Question.q}}
 </label>
-<div ng-repeat="choice in question.choice"
+<div ng-repeat="choice in Question.choice"
 		 class="radio">
 	<label>
 		<input type="radio"
-					 ng-model="question.value"
+					 ng-model="Question.value"
 					 ng-value="choice.value" />
 		{{choice.a}}
 	</label>
