@@ -3,10 +3,7 @@
 module Peach {
 	"use strict";
 
-	import IResourceClass = ng.resource.IResourceClass;
-	import IResource = ng.resource.IResource;
-
-	export interface ILibrary extends IResource<ILibrary> {
+	export interface ILibrary {
 		libraryUrl: string;
 		name: string;
 		description: string;
@@ -36,7 +33,4 @@ module Peach {
 	export interface IError {
 		errorMessage: string;
 	}
-
-	// resources
-	export interface ILibraryResource extends IResourceClass<ILibrary> { }
 }

@@ -1,0 +1,172 @@
+﻿/// <reference path="../reference.ts" />
+
+'use strict';
+
+describe('startsWith', () => {
+	it("'abc' startsWith 'a' is true", () => {
+		expect('abc'.startsWith('a')).toBe(true);
+	});
+	it("'abc' startsWith 'ab' is true", () => {
+		expect('abc'.startsWith('ab')).toBe(true);
+	});
+	it("'abc' startsWith 'abc' is true", () => {
+		expect('abc'.startsWith('abc')).toBe(true);
+	});
+	it("'abc' startsWith 'abcd' is false", () => {
+		expect('abc'.startsWith('abcd')).toBe(false);
+	});
+	it("'abc' startsWith 'b' is false", () => {
+		expect('abc'.startsWith('b')).toBe(false);
+	});
+	it("'abc' startsWith '' is true", () => {
+		expect('abc'.startsWith('')).toBe(true);
+	});
+});
+
+describe("Peach", () => {
+	beforeEach(module('Peach'));
+
+	describe('PitService', () => {
+		var $httpBackend: ng.IHttpBackendService;
+		var $modal: ng.ui.bootstrap.IModalService;
+		var service: Peach.PitService;
+		var spyOpen: jasmine.Spy;
+
+		beforeEach(inject(($injector: ng.auto.IInjectorService) => {
+			$modal = $injector.get('$modal');
+			spyOpen = spyOn($modal, 'open');
+
+			$httpBackend = $injector.get('$httpBackend');
+			service = $injector.get('PitService');
+		}));
+
+		afterEach(() => {
+			$httpBackend.verifyNoOutstandingExpectation();
+			$httpBackend.verifyNoOutstandingRequest();
+		});
+
+		it("new", () => {
+			expect(_.isObject(service)).toBe(true);
+		});
+
+		describe('when a Pit is not selected', () => {
+			it("IsConfigured is false", () => {
+				expect(service.IsConfigured).toBe(false);
+			});
+		});
+
+		describe('when a Pit is selected', () => {
+			var pitUrl = "/p/pits/PIT_GUID";
+			var pit;
+
+			describe('which is not configured', () => {
+				beforeEach(() => {
+					pit = {
+						pitUrl: pitUrl,
+						name: 'My Pit',
+						versions: [{ configured: false }]
+					};
+					$httpBackend.expectGET(pitUrl).respond(pit);
+					service.SelectPit(pitUrl);
+					$httpBackend.flush();
+				});
+
+				it("get IsConfigured is false", () => {
+					expect(service.IsConfigured).toBe(false);
+				});
+
+				it('has one version', () => {
+					expect(service.Pit.versions.length).toBe(1);
+				});
+			});
+
+			describe('which is already configured', () => {
+				beforeEach(() => {
+					pit = {
+						pitUrl: pitUrl,
+						name: 'My Pit',
+						versions: [{ configured: true }]
+					};
+					$httpBackend.expectGET(pitUrl).respond(pit);
+					service.SelectPit(pitUrl);
+					$httpBackend.flush();
+				});
+
+				it("get IsConfigured is true", () => {
+					expect(service.IsConfigured).toBe(true);
+				});
+
+				it('has one version', () => {
+					expect(service.Pit.versions.length).toBe(1);
+				});
+			});
+
+			describe('which is locked', () => {
+				describe('CopyPit is successful', () => {
+					var copy;
+					beforeEach(() => {
+						pit = {
+							pitUrl: pitUrl,
+							name: 'My Pit',
+							locked: true
+						};
+						copy = {
+							pitUrl: pitUrl,
+							name: 'Copied Pit',
+							locked: false
+						};
+
+						// fake out the CopyPitController
+						spyOpen.and.returnValue({
+							result: {
+								then: (callback) => {
+									var promise = service.CopyPit(copy);
+									promise.then((x) => {
+										callback(x);
+									});
+								},
+								catch: () => {}
+							}
+						});
+
+						$httpBackend.expectGET(pitUrl).respond(pit);
+						$httpBackend.expectPOST("/p/pits").respond(copy);
+						service.SelectPit(pitUrl);
+						$httpBackend.flush();
+					});
+
+					it("Pit is not selected", () => {
+						expect(_.isObject(service.Pit)).toBe(true);
+					});
+				});
+
+				describe('CopyPit is cancelled', () => {
+					beforeEach(() => {
+						pit = {
+							name: 'My Pit',
+							locked: true
+						};
+
+						// fake out the CopyPitController
+						spyOpen.and.returnValue({
+							result: {
+								then: () => { },
+								catch: (callback) => {
+									callback();
+								}
+							}
+						});
+
+						$httpBackend.expectGET(pitUrl).respond(pit);
+						service.SelectPit(pitUrl);
+						$httpBackend.flush();
+					});
+
+					it("Pit is not selected", () => {
+						expect(service.Pit).toBeUndefined();
+					});
+				});
+			});
+		});
+	});
+});

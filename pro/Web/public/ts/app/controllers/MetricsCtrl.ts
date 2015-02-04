@@ -55,27 +55,30 @@ module Peach {
 
 	export class MetricsController {
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Angular.$routeParams,
-			Constants.Angular.$http,
-			"visDataSet",
-			Constants.Services.Job
+			C.Angular.$scope,
+			C.Angular.$state,
+			C.Angular.$stateParams,
+			C.Angular.$http,
+			C.Angular.$interpolate,
+			C.Angular.$templateCache,
+			C.Angular.$timeout,
+			C.Vendor.VisDataSet,
+			C.Services.Job
 		];
 
 		constructor(
-			$scope: IViewModelScope,
-			$routeParams: ng.route.IRouteParamsService,
+			private $scope: IViewModelScope,
+			private $state: ng.ui.IStateService,
+			$stateParams: ng.ui.IStateParamsService,
 			private $http: ng.IHttpService,
+			private $interpolate: ng.IInterpolateService,
+			private $templateCache: ng.ITemplateCacheService,
+			private $timeout: ng.ITimeoutService,
 			private visDataSet,
 			private jobService: JobService
 		) {
-			$scope.vm = this;
-			this.metric = $routeParams['metric'];
+			this.metric = $stateParams['metric'];
 			this.initializeData();
-		}
-
-		public get IncludeUrl(): string {
-			return 'html/metrics/' + this.metric + '.html';
 		}
 
 		private metric: string;
@@ -116,28 +119,21 @@ module Peach {
 				if (item.content) {
 					return item.content;
 				}
-				return "<div>" +
-						"<a ng-click='event.stopPropagation()' " +
-						"href='#/faults/" + item.data.label + "' " +
-						"style='background: transparent'>" +
-							item.data.label +
-						"</a>" +
-						"<br />" +
-						"Faults: " + item.data.faultCount + "<br />" +
-						"1st Iteration: " + item.data.iteration + "<br />" +
-					"</div>";
+				var html = this.$templateCache.get(C.Templates.BucketTimelineItem);
+				return this.$interpolate(html)({ item: item });
 			}
 		}
 
 		private initializeData(): void {
 			var promise = this.getData();
 			switch (this.metric) {
-			case "bucket-timeline":
+			case C.Metrics.BucketTimeline:
 				promise.success((data: IBucketTimelineMetric[]) => {
 					var items = data.map((item: IBucketTimelineMetric) => {
+						item.href = this.$state.href(C.States.Faults, { bucket: item.label });
 						return <ITimelineItem> {
 							id: item.id,
-							content: "",
+							content: undefined,
 							start: item.time,
 							data: item
 						};
@@ -156,10 +152,12 @@ module Peach {
 							start: this.jobService.Job.stopDate
 						});
 					}
-					this.BucketTimelineData = this.visDataSet(items);
+					this.$timeout(() => {
+						this.BucketTimelineData = this.visDataSet(items);
+					}, 100);
 				});
 				break;
-			case "fault-timeline":
+			case C.Metrics.FaultTimeline:
 				promise.success((data: IFaultTimelineMetric[]) => {
 					if (data.length === 0) {
 						this.FaultsOverTimeLabels = [moment(Date.now()).format("M/D h a")];
@@ -170,31 +168,31 @@ module Peach {
 					}
 				});
 				break;
-			case "mutators":
+			case C.Metrics.Mutators:
 				this.MutatorData = _.clone(this.AllMutatorData);
 				promise.success((data: IMutatorMetric[]) => {
 					this.AllMutatorData = data;
 				});
 				break;
-			case "elements":
+			case C.Metrics.Elements:
 				this.ElementData = _.clone(this.AllElementData);
 				promise.success((data: IElementMetric[]) => {
 					this.AllElementData = data;
 				});
 				break;
-			case "dataset":
+			case C.Metrics.Dataset:
 				this.DatasetData = _.clone(this.AllDatasetData);
 				promise.success((data: IDatasetMetric[]) => {
 					this.AllDatasetData = data;
 				});
 				break;
-			case "states":
+			case C.Metrics.States:
 				this.StateData = _.clone(this.AllStateData);
 				promise.success((data: IStateMetric[]) => {
 					this.AllStateData = data;
 				});
 				break;
-			case "buckets":
+			case C.Metrics.Buckets:
 				this.BucketData = _.clone(this.AllBucketData);
 				promise.success((data: IBucketMetric[]) => {
 					this.AllBucketData = data;
@@ -204,11 +202,7 @@ module Peach {
 		}
 
 		private getData<T>(): ng.IHttpPromise<T> {
-			return this.$http.get(this.makeUrl(this.metric));
-		}
-
-		private makeUrl(part: string): string {
-			return this.jobService.Job.jobUrl + "/metrics/" + part;
+			return this.$http.get(this.jobService.Job.metrics[this.metric]);
 		}
 	}
 }

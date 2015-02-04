@@ -7,10 +7,10 @@ module Peach {
 		public Error: string = "";
 
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Angular.$modalInstance,
-			Constants.Services.Pit,
-			"pit"
+			C.Angular.$scope,
+			C.Angular.$modalInstance,
+			C.Services.Pit,
+			"Pit"
 		];
 
 		constructor(
@@ -26,8 +26,8 @@ module Peach {
 			this.Error = "";
 
 			var promise = this.pitService.CopyPit(this.Pit);
-			promise.then((pit: IPit) => {
-				this.$modalInstance.close(pit);
+			promise.then((response: ng.IHttpPromiseCallbackArg<IPit>) => {
+				this.$modalInstance.close(response.data);
 			}, (response: ng.IHttpPromiseCallbackArg<IPit>) => {
 				switch (response.status) {
 				case 400:

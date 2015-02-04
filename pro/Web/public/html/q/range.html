@@ -1,45 +1,34 @@
 ﻿<div class="header blue"
      ng-show="vm.IsSetVars">
-	{{question.shortName || question.key}}
+	{{Question.shortName || Question.key}}
 </div>
 <div>
 	<label>
-		{{question.q}}
+		{{Question.q}}
 	</label>
 </div>
-<p ng-if="!question.required">
+<p ng-if="!Question.required">
 	(Optional)
 </p>
 <p>
-	Value must be an integer between {{question.rangeMin}} and {{question.rangeMax}}
+	Value must be an integer between {{Question.rangeMin}} and {{Question.rangeMax}}
 </p>
 <div class="row">
 	<div class="col-sm-6">
 		<input name="question"
-					 ng-model="question.value"
+					 ng-model="Question.value"
 					 class="form-control"
 					 step="1"
+					 peach:auto-focus
 					 peach:range
-					 peach:range-min="question.rangeMin"
-					 peach:range-max="question.rangeMax"
+					 peach:range-min="Question.rangeMin"
+					 peach:range-max="Question.rangeMax"
 					 type="text"
-					 ng-required="question.required"
+					 ng-required="Question.required"
 					 integer />
 	</div>
 </div>
-<div class="help-block"
-		 ng-show="form.question.$error.integer">
-	Not an integer
-</div>
-<div class="help-block"
-		 ng-show="form.question.$error.rangeMin">
-	Value is less than minimum allowed ({{question.rangeMin}})
-</div>
-<div class="help-block"
-		 ng-show="form.question.$error.rangeMax">
-	Value is greater than maximum allowed ({{question.rangeMax}})
-</div>
-<div class="help-block"
-		 ng-show="form.question.$error.required">
-	Required
-</div>
+<span class="help-block"
+			ng-messages="form.question.$error"
+			ng-messages-include="html/messages.html">
+</span>

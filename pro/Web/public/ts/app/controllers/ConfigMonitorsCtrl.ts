@@ -4,28 +4,20 @@ module Peach {
 	"use strict";
 
 	export class ConfigureMonitorsController {
-		public Model: IPitAgents;
+		public Agents: Agent[];
 
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Services.Pit
+			C.Angular.$scope,
+			C.Services.Pit
 		];
 
 		constructor(
 			private $scope: IFormScope,
-			private pitService: PitService,
-			availableMonitorsResource : IMonitorResource
+			private pitService: PitService
 		) {
-			$scope.vm = this;
-			var promise = pitService.LoadPitConfig();
-			promise.then(() => {
-				var promise2 = pitService.LoadPitAgents();
-				promise2.then((agents: IPitAgents) => {
-					var promise3 = pitService.LoadPitCalls();
-					promise3.then(() => {
-						this.Model = agents;
-					});
-				});
+			var promise = pitService.ReloadPit();
+			promise.then((pit: IPit) => {
+				this.Agents = pit.agents;
 			});
 		}
 
@@ -48,29 +40,20 @@ module Peach {
 		}
 
 		public AddAgent(): void {
-			this.Model.agents.push(new Agent());
+			this.Agents.push(new Agent());
 			this.$scope.form.$setDirty();
 		}
 
 		public Save(): void {
-			this.Model.$save({ id: this.pitService.PitId }, () => {
+			var promise = this.pitService.SaveAgents(this.Agents);
+			promise.then(() => {
 				this.isSaved = true;
 				this.$scope.form.$setPristine();
 			});
 		}
 
 		private get numAgents(): number {
-			if (this.Model && this.Model.$resolved) {
-				return this.Model.agents.length;
-			}
-			return 0;
-		}
-
-		private get isMonitorsValid(): boolean {
-			if (this.Model && this.Model.$resolved && this.Model.agents.length) {
-				return _.every(this.Model.agents, agent => agent.monitors.length > 0);
-			}
-			return false;
+			return (this.Agents && this.Agents.length) || 0;
 		}
 	}
 }

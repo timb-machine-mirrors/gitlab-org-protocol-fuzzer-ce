@@ -14,7 +14,14 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr ng-repeat="param in vm.Defines">
+						<tr>
+							<td class="text-center"
+									colspan="3"
+									ng-if="Defines.length === 0">
+								No variables are defined
+							</td>
+						</tr>
+						<tr ng-repeat="param in Defines">
 							<td>{{param.name}}</td>
 							<td>{{param.key}}</td>
 							<td>{{param.value}}</td>
@@ -25,4 +32,3 @@
 		</div>
 	</div>
 </div>
-

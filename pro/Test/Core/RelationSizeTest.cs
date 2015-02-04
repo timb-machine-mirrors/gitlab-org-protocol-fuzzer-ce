@@ -929,6 +929,46 @@ namespace Peach.Pro.Test.Core
 			byte[] actual = dom.dataModels[0].Value.ToArray();
 			Assert.AreEqual(Encoding.ASCII.GetBytes("\x30Hello"), actual);
 		}
+
+		[Test]
+		public void OfModelRefInChoice()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='RequestModel'>
+		<Number name='Size' size='16' endian='big' signed='false'>
+			<Relation type='size' of='RequestModel' />
+		</Number>
+		<Blob name='Value' value='Hello'/>
+	</DataModel>
+
+	<DataModel name='TheRequest'>
+		<Number name='MessageSize' endian='big' size='16' signed='false'>
+			<Relation type='size' of='Message' />
+		</Number>
+
+		<Block name='Message'>
+			<Blob name='Header' value='**' />
+			<Choice name='Command'>
+				<Block name='Request' ref='RequestModel' />
+			</Choice>
+		</Block>
+	</DataModel>
+</Peach>
+";
+
+			var dom = ParsePit(xml);
+
+			var final = dom.dataModels[1].Value.ToArray();
+			var expected = Encoding.ASCII.GetBytes("\x00\x09**\x00\x07Hello");
+			Assert.AreEqual(expected, final);
+
+			var req = dom.dataModels[1].find("TheRequest.Message.Command.Request.Size");
+
+			Assert.NotNull(req);
+			Assert.AreEqual(1, req.relations.Count);
+			Assert.AreEqual("TheRequest.Message.Command.Request", req.relations[0].Of.fullName);
+		}
 	}
 }
 
