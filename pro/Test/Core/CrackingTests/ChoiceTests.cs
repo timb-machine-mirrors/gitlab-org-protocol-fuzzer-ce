@@ -271,6 +271,62 @@ namespace Peach.Pro.Test.Core.CrackingTests
 		}
 
 		[Test]
+		public void ChoiceFieldSelection()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='Template'>
+		<Choice name='c'>
+			<Blob name='empty' />
+			<Blob name='blob' value='blob' />
+			<String name='str' value='string' />
+			<Number name='num' value='48' size='8' />
+			<Block name='block'>
+				<String name='str' value='block' />
+			</Block>
+		</Choice>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel name='DM'>
+					<Block name='b1' ref='Template' />
+					<Block name='b2' ref='Template' />
+					<Block name='b3' ref='Template' />
+					<Block name='b4' ref='Template' />
+					<Block name='b5' ref='Template' />
+				</DataModel>
+				<Data>
+					<Field name='b1.c.empty' value='' />
+					<Field name='b2.c.blob' value='' />
+					<Field name='b3.c.str' value='' />
+					<Field name='b4.c.num' value='' />
+					<Field name='b5.c.block' value='' />
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM' />
+		<Publisher class='Null'/>
+	</Test>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var cfg = new RunConfiguration { singleIteration = true };
+			var e = new Engine(null);
+
+			e.startFuzzing(dom, cfg);
+
+			var final = dom.tests[0].stateModel.states[0].actions[0].dataModel.Value.ToArray();
+			var asStr = Encoding.ASCII.GetString(final);
+
+			Assert.AreEqual("blobstring0block", asStr);
+		}
+
+		[Test]
 		public void ChoiceSizeRelationsParent()
 		{
 			string xml = @"
