@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using NLog;
@@ -86,7 +87,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			if (_agentUrl == null)
 				SessionStarting();
 
-			if (!_connectResp.Messages.Contains("/IterationStarting"))
+			if (!_connectResp.Messages.Contains("IterationStarting"))
 				return;
 
 			var req = new IterationStartingRequest
@@ -100,13 +101,13 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		public override void IterationFinished()
 		{
-			if (_connectResp.Messages.Contains("/IterationFinished"))
+			if (_connectResp.Messages.Contains("IterationFinished"))
 				Send("PUT", "/IterationFinished", null);
 		}
 
 		public override bool DetectedFault()
 		{
-			if (!_connectResp.Messages.Contains("/DetectedFault"))
+			if (!_connectResp.Messages.Contains("DetectedFault"))
 				return false;
 
 			var resp = Send<BoolResponse>("GET", "/DetectedFault", null);
@@ -116,13 +117,13 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		public override IEnumerable<MonitorData> GetMonitorData()
 		{
-			if (!_connectResp.Messages.Contains("/GetMonitorData"))
-				return null;
+			if (!_connectResp.Messages.Contains("GetMonitorData"))
+				return new MonitorData[0];
 
 			var resp = Send<FaultResponse>("GET", "/GetMonitorData", null);
 
 			if (resp.Faults == null)
-				return null;
+				return new MonitorData[0];
 
 			var ret = resp.Faults.Select(MakeFault);
 
@@ -131,7 +132,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		public override void Message(string msg)
 		{
-			var path = "/Message/{0}".Fmt(msg);
+			var path = "Message/{0}".Fmt(msg);
 
 			if (_connectResp.Messages.Contains(path))
 				Send("PUT", path, null);
@@ -145,7 +146,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				DetectionSource = f.DetectionSource,
 				MonitorName = f.MonitorName,
 				Title = f.Title,
-				Data = f.Data.ToDictionary(i => i.Key, i => i.Value),
+				Data = f.Data.ToDictionary(i => i.Key, DownloadFile),
 			};
 
 			if (f.Fault != null)
@@ -163,14 +164,35 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			return ret;
 		}
 
+		private byte[] DownloadFile(FaultResponse.Record.FaultData data)
+		{
+			Logger.Trace("Downloading {0} byte file '{1}'.", data.Size, data.Key);
+
+			return Execute("GET", data.Url, null, resp =>
+			{
+				using (var strm = resp.GetResponseStream())
+				{
+					if (strm == null)
+						return new byte[0];
+
+					var ms = new MemoryStream();
+					strm.CopyTo(ms);
+
+					return ms.ToArray();
+				}
+			});
+		}
+
 		private void Send(string method, string path, object request)
 		{
-			Execute(method, path, request, resp => resp.Consume());
+			var uri = _agentUrl.PathAndQuery + path;
+			Execute(method, uri, request, resp => resp.Consume());
 		}
 
 		private T Send<T>(string method, string path, object request)
 		{
-			return Execute(method, path, request, req => req.FromJson<T>());
+			var uri = _agentUrl.PathAndQuery + path;
+			return Execute(method, uri, request, req => req.FromJson<T>());
 		}
 
 		private T Execute<T>(string method,

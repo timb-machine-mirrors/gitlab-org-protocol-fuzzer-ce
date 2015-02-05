@@ -8,7 +8,6 @@ namespace Peach.Core.Agent
 	{
 		uint Iteration { set; }
 		bool IsControlIteration { set; }
-		string Result { get; }
 		Stream Stream { get; }
 
 		void Start();
