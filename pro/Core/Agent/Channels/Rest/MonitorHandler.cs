@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -57,6 +58,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			private readonly MonitorHandler _handler;
 			private readonly NamedCollection<Monitor> _monitors;
+			private readonly Dictionary<string, Stream> _data;
 
 			public string Name { get { return Url; } }
 
@@ -68,6 +70,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			{
 				_handler = handler;
 				_monitors = new NamedCollection<Monitor>();
+				_data = new Dictionary<string, Stream>();
 
 				Url = "/pa/agent/" + Guid.NewGuid();
 				Messages = new List<string>();
@@ -77,6 +80,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			public void Dispose()
 			{
+				FlushCachedMonitorData();
+
 				foreach (var mon in _monitors.Reverse())
 				{
 					mon.SessionFinished();
@@ -91,7 +96,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 				foreach (var msg in Messages)
 				{
-					_handler._routes.Remove(Url + msg);
+					_handler._routes.Remove(Url + "/" + msg);
 				}
 
 				_handler._routes.Remove(Url);
@@ -129,10 +134,10 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 				Messages.AddRange(new[]
 				{
-					"/IterationStarting",
-					"/IterationFinished",
-					"/DetectedFault",
-					"/GetMonitorData"
+					"IterationStarting",
+					"IterationFinished",
+					"DetectedFault",
+					"GetMonitorData"
 				});
 
 				_handler._routes.Add(Url, "DELETE", OnAgentDisconnect);
@@ -143,13 +148,15 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 				foreach (var item in calls)
 				{
-					Messages.Add("/Message/" + item);
+					Messages.Add("Message/" + item);
 					_handler._routes.Add(Url + "/Message/" + item, "PUT", OnMessage);
 				}
 			}
 
 			private RouteResponse OnIterationStarting(HttpListenerRequest req)
 			{
+				FlushCachedMonitorData();
+
 				var json = req.FromJson<IterationStartingRequest>();
 				var args = new IterationStartingArgs
 				{
@@ -222,7 +229,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 						item.Data.Add(new FaultResponse.Record.FaultData
 						{
 							Key = kv.Key,
-							Value = kv.Value,
+							Size = kv.Value.Length,
+							Url = CacheMonitorData(kv.Value),
 						});
 					}
 
@@ -249,6 +257,25 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				Dispose();
 
 				return RouteResponse.Success();
+			}
+
+			private void FlushCachedMonitorData()
+			{
+				foreach (var kv in _data)
+					_handler._routes.Remove(kv.Key);
+
+				_data.Clear();
+			}
+
+			private string CacheMonitorData(byte[] data)
+			{
+				var url = "/pa/file/" + Guid.NewGuid();
+				var stream = new MemoryStream(data);
+
+				_data.Add(url, stream);
+				_handler._routes.Add(url, "GET", req => RouteResponse.AsStream(stream));
+
+				return url;
 			}
 		}
 	}

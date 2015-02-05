@@ -94,14 +94,6 @@ namespace Peach.Core
 			set { _isControlIteration = value; }
 		}
 
-		/// <summary>
-		/// Get the result value (if any).
-		/// </summary>
-		public virtual string Result
-		{
-			get { return null; }
-		}
-
 		#endregion
 
 		#region Implementation Functions
