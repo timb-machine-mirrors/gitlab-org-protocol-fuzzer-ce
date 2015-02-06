@@ -176,72 +176,14 @@ namespace Peach.Pro.Core.Agent.Channels
 			public uint iteration { get; set; }
 		}
 
-		public override uint Iteration
-		{
-			get
-			{
-				return base.Iteration;
-			}
-
-			set
-			{
-				base.Iteration = value;
-
-				IterationRequest request = new IterationRequest();
-				request.iteration = value;
-
-				Send("Set_Iteration", JsonConvert.SerializeObject(request));
-			}
-		}
-
 		[Serializable]
 		public class IsControlIterationRequest
 		{
 			public bool isControlIteration { get; set; }
 		}
 
-		public override bool IsControlIteration
-		{
-			get
-			{
-				return base.IsControlIteration;
-			}
-			set
-			{
-				base.IsControlIteration = value;
-
-				var request = new IsControlIterationRequest();
-				request.isControlIteration = value;
-
-				Send("Set_IsControlIteration", JsonConvert.SerializeObject(request));
-			}
-		}
-
-		[Serializable]
-		public class ResultRequest
-		{
-			public string result { get; set; }
-		}
-
-		[Serializable]
-		public class ResultResponse : RestProxyPublisherResponse
-		{
-			public string result { get; set; }
-		}
-
-		public override string Result
-		{
-			get
-			{
-				return JsonConvert.DeserializeObject<ResultRequest>(Send("Get_Result")).result;
-			}
-		}
-
 		protected override void OnStart()
 		{
-			IsControlIteration = IsControlIteration;
-			Iteration = Iteration;
-
 			Send("start");
 		}
 
@@ -252,6 +194,12 @@ namespace Peach.Pro.Core.Agent.Channels
 
 		protected override void OnOpen()
 		{
+			var req1 = new IterationRequest { iteration = Iteration };
+			Send("Set_Iteration", JsonConvert.SerializeObject(req1));
+
+			var req2 = new IsControlIterationRequest { isControlIteration = IsControlIteration };
+			Send("Set_IsControlIteration", JsonConvert.SerializeObject(req2));
+
 			Send("open");
 		}
 
@@ -492,35 +440,13 @@ namespace Peach.Pro.Core.Agent.Channels
 					Url = serviceUrl,
 					Class = cls,
 				};
+
+				publisher.start();
 			}
 
 			#region IPublisher
 
-			public uint Iteration
-			{
-				set
-				{
-					publisher.Iteration = value;
-				}
-			}
-
-			public bool IsControlIteration
-			{
-				set
-				{
-					publisher.IsControlIteration = value;
-				}
-			}
-
-			public string Result
-			{
-				get
-				{
-					return publisher.Result;
-				}
-			}
-
-			public Stream Stream
+			public Stream InputStream
 			{
 				get
 				{
@@ -528,18 +454,16 @@ namespace Peach.Pro.Core.Agent.Channels
 				}
 			}
 
-			public void Start()
-			{
-				publisher.start();
-			}
-
-			public void Stop()
+			public void Dispose()
 			{
 				publisher.stop();
+				publisher = null;
 			}
 
-			public void Open()
+			public void Open(uint iteration, bool isControlIteration)
 			{
+				publisher.Iteration = iteration;
+				publisher.IsControlIteration = isControlIteration;
 				publisher.open();
 			}
 
@@ -568,7 +492,7 @@ namespace Peach.Pro.Core.Agent.Channels
 				return publisher.getProperty(property);
 			}
 
-			public void Output(DataModel data)
+			public void Output(BitwiseStream data)
 			{
 				publisher.output(data);
 			}

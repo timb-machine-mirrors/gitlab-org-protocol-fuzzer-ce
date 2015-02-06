@@ -49,49 +49,51 @@ namespace Peach.Core
 	/// for more complex operations such as writing to the registry and
 	/// then calling an RPC method.
 	/// </remarks>
-	public abstract class Publisher : Stream
+	public abstract class Publisher : Stream, INamed
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
 		protected abstract NLog.Logger Logger { get; }
 
 		#region Private Members
 
-		[NonSerialized]
-		private Test _test;
-
 		private bool _hasStarted;
 		private bool _isOpen;
-		private uint _iteration;
-		private bool _isControlIteration;
 
 		#endregion
 
 		#region Properties
 
 		/// <summary>
-		/// The top level test object.
+		/// The name of the publisher.
 		/// </summary>
-		public virtual Test Test
+		public string Name
 		{
-			get { return _test; }
-			set { _test = value; }
+			get;
+			set;
 		}
 
 		/// <summary>
 		/// Gets/sets the current fuzzing iteration.
 		/// </summary>
-		public virtual uint Iteration
+		public uint Iteration
 		{
-			get { return _iteration; }
-			set { _iteration = value; }
+			get;
+			set;
 		}
 
 		/// <summary>
 		/// Gets/sets if the current iteration is a control iteration.
 		/// </summary>
-		public virtual bool IsControlIteration
+		public bool IsControlIteration
 		{
-			get { return _isControlIteration; }
-			set { _isControlIteration = value; }
+			get;
+			set;
 		}
 
 		#endregion

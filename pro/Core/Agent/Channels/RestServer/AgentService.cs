@@ -280,7 +280,7 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 		{
 			var iter = JsonConvert.DeserializeObject<RestProxyPublisher.IterationRequest>(StreamToString(Request.Body));
 
-			context.Publisher.Iteration = iter.iteration;
+			context.Iteration = iter.iteration;
 			return HttpStatusCode.OK;
 		}
 
@@ -288,25 +288,24 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 		{
 			var contrl = JsonConvert.DeserializeObject<RestProxyPublisher.IsControlIterationRequest>(StreamToString(Request.Body));
 
-			context.Publisher.IsControlIteration = contrl.isControlIteration;
+			context.IsControlIteration = contrl.isControlIteration;
 			return HttpStatusCode.OK;
 		}
 
 		object PublisherStart()
 		{
-			context.Publisher.Start();
 			return HttpStatusCode.OK;
 		}
 
 		object PublisherStop()
 		{
-			context.Publisher.Stop();
+			context.Publisher.Dispose();
 			return HttpStatusCode.OK;
 		}
 
 		object PublisherOpen()
 		{
-			context.Publisher.Open();
+			context.Publisher.Open(context.Iteration, context.IsControlIteration);
 			return HttpStatusCode.OK;
 		}
 
@@ -374,9 +373,9 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 
 		object PublisherOutput()
 		{
-			var req = JsonConvert.DeserializeObject<RestProxyPublisher.OnOutputRequest>(StreamToString(Request.Body));
+			//var req = JsonConvert.DeserializeObject<RestProxyPublisher.OnOutputRequest>(StreamToString(Request.Body));
 
-			context.Publisher.Output(CreateDm(req.data));
+			//context.Publisher.Output(CreateDm(req.data));
 			return HttpStatusCode.OK;
 		}
 
@@ -401,7 +400,7 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 			var req = JsonConvert.DeserializeObject<RestProxyPublisher.ReadRequest>(StreamToString(Request.Body));
 
 			byte [] buff = new byte[req.count];
-			int count = context.Publisher.Stream.Read(buff, req.offset, req.count);
+			int count = context.Publisher.InputStream.Read(buff, req.offset, req.count);
 
 			return new RestProxyPublisher.ReadResponse()
 			{
@@ -414,7 +413,7 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 		{
 			return new RestProxyPublisher.ReadByteResponse()
 			{
-				data = context.Publisher.Stream.ReadByte()
+				data = context.Publisher.InputStream.ReadByte()
 			};
 		}
 

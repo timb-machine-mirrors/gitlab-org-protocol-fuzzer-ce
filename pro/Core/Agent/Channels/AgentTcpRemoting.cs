@@ -141,8 +141,6 @@ namespace Peach.Pro.Core.Agent.Channels
 
 			#region Private Members
 
-			uint iteration;
-			bool isControlIteration;
 			PublisherTcpRemote remotePub;
 			MemoryStream stream;
 
@@ -164,17 +162,10 @@ namespace Peach.Pro.Core.Agent.Channels
 				}
 				set
 				{
-					if (remotePub != null)
-					{
-						// Proxy changed due to reconnect.
-						// Don't have to Exec() this in a worker thread
-						// since its called from a worker thread inside
-						// of AgentClientTcpRemoting
-						value.Iteration = iteration;
-						value.IsControlIteration = isControlIteration;
-						value.Start();
-					}
-
+					// Proxy initialized or changed due to reconnect.
+					// Don't have to Exec() this in a worker thread
+					// since its called from a worker thread inside
+					// of AgentClientTcpRemoting
 					remotePub = value;
 
 					// Reset the stream since we have a new remote publisher
@@ -193,56 +184,26 @@ namespace Peach.Pro.Core.Agent.Channels
 				this.cls = cls;
 				this.args = args.ToList();
 				this.stream = new MemoryStream();
+
 			}
 
 			#endregion
 
 			#region IPublisher
 
-			public uint Iteration
-			{
-				set
-				{
-					iteration = value;
-					Exec("Iteration set", () => { proxy.Iteration = value; });
-				}
-			}
-
-			public bool IsControlIteration
-			{
-				set
-				{
-					isControlIteration = value;
-					Exec("IsControlIteration set", () => { proxy.IsControlIteration = value; });
-				}
-			}
-
-			public string Result
-			{
-				get
-				{
-					return Exec("Result get", () => { return proxy.Result; });
-				}
-			}
-
-			public Stream Stream
+			public Stream InputStream
 			{
 				get { return stream; }
 			}
 
-			public void Start()
+			public void Dispose()
 			{
-				Exec("Start", () => { proxy.Start(); });
+				Exec("Stop", () => { proxy.Dispose(); });
 			}
 
-			public void Stop()
+			public void Open(uint iteration, bool isControlIteration)
 			{
-				Exec("Stop", () => { proxy.Stop(); });
-			}
-
-			public void Open()
-			{
-				Exec("Open", () => { proxy.Open(); });
+				Exec("Open", () => { proxy.Open(iteration, isControlIteration); });
 			}
 
 			public void Close()
@@ -274,11 +235,9 @@ namespace Peach.Pro.Core.Agent.Channels
 				return FromBytes<Variant>(bytes);
 			}
 
-			public void Output(DataModel dataModel)
+			public void Output(BitwiseStream data)
 			{
 				Exec("BeginOutput", () => { proxy.BeginOutput(); });
-
-				var data = dataModel.Value.PadBits();
 
 				var total = data.Length;
 				var len = Math.Min(total - data.Position, 1024 * 1024);
@@ -327,6 +286,8 @@ namespace Peach.Pro.Core.Agent.Channels
 			{
 				var pos = stream.Position;
 				var buf = ReadBytes();
+
+				stream.Seek(0, SeekOrigin.End);
 
 				while (buf.Length > 0)
 				{
@@ -679,7 +640,7 @@ namespace Peach.Pro.Core.Agent.Channels
 
 	#region Publisher Remoting Object
 
-	internal class PublisherTcpRemote  : MarshalByRefObject
+	internal class PublisherTcpRemote  : MarshalByRefObject, IDisposable
 	{
 		#region Serialization Helpers
 
@@ -713,35 +674,20 @@ namespace Peach.Pro.Core.Agent.Channels
 		public PublisherTcpRemote(Publisher pub)
 		{
 			this.pub = pub;
+
+			this.pub.start();
 		}
 
-		public uint Iteration
-		{
-			set { pub.Iteration = value; }
-		}
-
-		public bool IsControlIteration
-		{
-			set { pub.IsControlIteration = value; }
-		}
-
-		public string Result
-		{
-			get { return pub.Result; }
-		}
-
-		public void Start()
-		{
-			pub.start();
-		}
-
-		public void Stop()
+		public void Dispose()
 		{
 			pub.stop();
+			pub = null;
 		}
 
-		public void Open()
+		public void Open(uint iteration, bool isControlIteration)
 		{
+			pub.Iteration = iteration;
+			pub.IsControlIteration = isControlIteration;
 			pub.open();
 		}
 
