@@ -135,7 +135,7 @@ namespace Peach.Core.Dom
 		{
 			try
 			{
-				foreach (Publisher publisher in context.test.publishers.Values)
+				foreach (var publisher in context.test.publishers)
 				{
 					publisher.Iteration = context.test.strategy.Iteration;
 					publisher.IsControlIteration = context.controlIteration;
@@ -192,7 +192,7 @@ namespace Peach.Core.Dom
 			}
 			finally
 			{
-				foreach (Publisher publisher in context.test.publishers.Values)
+				foreach (var publisher in context.test.publishers)
 					publisher.close();
 
 				context.OnStateModelFinished(this);

@@ -1,24 +1,22 @@
+using System;
 using Peach.Core.Dom;
 using System.Collections.Generic;
 using System.IO;
+using Peach.Core.IO;
 
 namespace Peach.Core.Agent
 {
-	public interface IPublisher
+	public interface IPublisher : IDisposable
 	{
-		uint Iteration { set; }
-		bool IsControlIteration { set; }
-		Stream Stream { get; }
+		Stream InputStream { get; }
 
-		void Start();
-		void Stop();
-		void Open();
+		void Open(uint iteration, bool isControlIteration);
 		void Close();
 		void Accept();
 		Variant Call(string method, List<ActionParameter> args);
 		void SetProperty(string property, Variant value);
 		Variant GetProperty(string property);
-		void Output(DataModel data);
+		void Output(BitwiseStream data);
 		void Input();
 		void WantBytes(long count);
 	}

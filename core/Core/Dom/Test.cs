@@ -279,7 +279,7 @@ namespace Peach.Core.Dom
 		public StateModel stateModel = null;
 
 		[NonSerialized]
-		public OrderedDictionary<string, Publisher> publishers = new OrderedDictionary<string, Publisher>();
+		public NamedCollection<Publisher> publishers = new NamedCollection<Publisher>();
 
 		[NonSerialized]
 		public NamedCollection<Agent> agents = new NamedCollection<Agent>();
@@ -303,8 +303,6 @@ namespace Peach.Core.Dom
 
 		public Test()
 		{
-			publishers.AddEvent += new AddEventHandler<string, Publisher>(publishers_AddEvent);
-
 			waitTime = 0;
 			faultWaitTime = 2;
 			maxOutputSize = 1073741824; // 1024 * 1024 * 1024 (1Gb)
@@ -316,16 +314,6 @@ namespace Peach.Core.Dom
 			agentRef = new List<AgentRef>();
 			pubs = new List<Publisher>();
 		}
-
-		#region OrderedDictionary AddEvent Handlers
-
-		void publishers_AddEvent(OrderedDictionary<string, Publisher> sender, string key, Publisher value)
-		{
-			value.Test = this;
-		}
-
-		#endregion
-
 
 		public void markMutableElements()
 		{

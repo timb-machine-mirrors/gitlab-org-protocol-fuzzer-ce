@@ -67,8 +67,12 @@ namespace PitTester
 				test.loggers.Clear();
 				test.loggers.Add(logger);
 
-				foreach (var key in test.publishers.Keys)
-					test.publishers[key] = new TestPublisher(key, logger);
+				for (var i = 0; i < test.publishers.Count; ++i)
+				{
+					var oldPub = test.publishers[i];
+					var newPub = new TestPublisher(logger) { Name = oldPub.Name };
+					test.publishers[i] = newPub;
+				}
 			}
 
 			var fixupOverrides = new Dictionary<string, Variant>();

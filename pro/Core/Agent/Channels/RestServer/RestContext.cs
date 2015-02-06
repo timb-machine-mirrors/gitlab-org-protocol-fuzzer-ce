@@ -15,6 +15,8 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 
 		public Agent Agent = new Agent();
 		public IPublisher Publisher;
+		public uint Iteration;
+		public bool IsControlIteration;
 		public AgentDispatcher Dispatcher = new AgentDispatcher();
 	}
 }
