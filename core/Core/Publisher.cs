@@ -28,6 +28,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using Peach.Core.Dom;
 using Peach.Core.IO;
@@ -160,7 +161,7 @@ namespace Peach.Core
 		/// <param name="method">Name of method to call</param>
 		/// <param name="args">Arguments to pass</param>
 		/// <returns>Returns resulting data</returns>
-		protected virtual Variant OnCall(string method, List<ActionParameter> args)
+		protected virtual Variant OnCall(string method, List<BitwiseStream> args)
 		{
 			throw new PeachException("Error, action 'call' not supported by publisher");
 		}
@@ -293,9 +294,9 @@ namespace Peach.Core
 		/// <param name="method">Name of method to call</param>
 		/// <param name="args">Arguments to pass</param>
 		/// <returns>Returns resulting data</returns>
-		public Variant call(string method, List<ActionParameter> args)
+		public Variant call(string method, List<BitwiseStream> args)
 		{
-			Logger.Debug("call({0}, {1})", method, args);
+			Logger.Debug("call({0}, Arg Count: {1})", method, args.Count);
 			return OnCall(method, args);
 		}
 
@@ -359,6 +360,17 @@ namespace Peach.Core
 		public virtual void output(DataModel dataModel)
 		{
 			output(dataModel.Value);
+		}
+
+		/// <summary>
+		/// Call a method on the Publishers resource
+		/// </summary>
+		/// <param name="method">Name of method to call</param>
+		/// <param name="args">Arguments to pass</param>
+		/// <returns>Returns resulting data</returns>
+		public virtual Variant call(string method, List<ActionParameter> args)
+		{
+			return call(method, args.Select(i => i.dataModel.Value).ToList());
 		}
 
 		#endregion

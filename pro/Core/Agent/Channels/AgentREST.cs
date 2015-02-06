@@ -234,7 +234,7 @@ namespace Peach.Pro.Core.Agent.Channels
 			public byte[] value { get; set; }
 		}
 
-		protected override Variant OnCall(string method, List<ActionParameter> args)
+		protected override Variant OnCall(string method, List<BitwiseStream> args)
 		{
 			var request = new OnCallRequest();
 
@@ -245,9 +245,8 @@ namespace Peach.Pro.Core.Agent.Channels
 			{
 				request.args[cnt] = new OnCallArgument();
 				request.args[cnt].name = args[cnt].Name;
-				request.args[cnt].type = args[cnt].type;
-				request.args[cnt].data = new byte[args[cnt].dataModel.Value.Length];
-				args[cnt].dataModel.Value.Read(request.args[cnt].data, 0, (int)args[cnt].dataModel.Value.Length);
+				request.args[cnt].data = new byte[args[cnt].Length];
+				args[cnt].Read(request.args[cnt].data, 0, (int)args[cnt].Length);
 			}
 
 			var json = Send("call", JsonConvert.SerializeObject(request));
@@ -477,7 +476,7 @@ namespace Peach.Pro.Core.Agent.Channels
 				publisher.accept();
 			}
 
-			public Variant Call(string method, List<ActionParameter> args)
+			public Variant Call(string method, List<BitwiseStream> args)
 			{
 				return publisher.call(method, args);
 			}

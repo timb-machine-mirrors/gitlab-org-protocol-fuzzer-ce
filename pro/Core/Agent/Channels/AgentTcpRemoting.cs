@@ -216,7 +216,7 @@ namespace Peach.Pro.Core.Agent.Channels
 				Exec("Accept", () => { proxy.Accept(); });
 			}
 
-			public Variant Call(string method, List<ActionParameter> args)
+			public Variant Call(string method, List<BitwiseStream> args)
 			{
 				throw new NotSupportedException();
 			}

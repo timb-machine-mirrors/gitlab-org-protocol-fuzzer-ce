@@ -74,9 +74,9 @@ namespace Peach.Core.Agent
 			_publisher.Accept();
 		}
 
-		protected override Variant OnCall(string method, List<ActionParameter> args)
+		protected override Variant OnCall(string method, List<BitwiseStream> args)
 		{
-			throw new NotSupportedException();
+			return _publisher.Call(method, args);
 		}
 
 		protected override void OnSetProperty(string property, Variant value)

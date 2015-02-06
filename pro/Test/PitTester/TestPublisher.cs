@@ -62,22 +62,27 @@ namespace PitTester
 			_logger.Verify<TestData.Accept>(Name);
 		}
 
-		protected override Variant OnCall(string method, List<ActionParameter> args)
+		public override Variant call(string method, List<ActionParameter> args)
 		{
-			_logger.Verify<TestData.Call>(Name);
+			throw new NotImplementedException();
+		}
+
+		protected override Variant OnCall(string method, List<BitwiseStream> args)
+		{
+			// Handled with the override for output()
 			throw new NotSupportedException();
 		}
 
 		protected override void OnSetProperty(string property, Variant value)
 		{
 			_logger.Verify<TestData.SetProperty>(Name);
-			//throw new NotSupportedException();
 		}
 
 		protected override Variant OnGetProperty(string property)
 		{
 			_logger.Verify<TestData.GetProperty>(Name);
-			throw new NotSupportedException();
+
+			throw new NotImplementedException();
 		}
 
 		protected override void OnInput()
