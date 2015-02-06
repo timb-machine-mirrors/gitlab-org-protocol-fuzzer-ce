@@ -35,7 +35,7 @@ namespace Peach.Core.Agent
 	/// <summary>
 	/// Monitors are hosted by agent processes and are
 	/// able to report detected faults and gather information
-	/// that is usefull when a fualt is detected.
+	/// that is useful when a fault is detected.
 	/// </summary>
 	public abstract class Monitor : INamed
 	{

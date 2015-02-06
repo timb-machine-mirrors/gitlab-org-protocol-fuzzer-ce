@@ -130,7 +130,7 @@ namespace Peach.Core.Test
 					// This here so the test runner works the same way the AgentManager does.
 					// This allows tests to assert on the same exceptions that would occur
 					// in the real world.
-					throw new PeachException("Could not start monitor \"{0}\".  {1}".Fmt(i.Monitor.Class, ex.Message));
+					throw new PeachException("Could not start monitor \"{0}\".  {1}".Fmt(i.Monitor.Class, ex.Message), ex);
 				}
 			});
 
