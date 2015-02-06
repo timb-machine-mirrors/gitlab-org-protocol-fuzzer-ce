@@ -109,14 +109,13 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				return;
 			}
 
-			var json = RouteResponse.ToJson(obj);
-			var buf = System.Text.Encoding.UTF8.GetBytes(json);
+			var json = RouteResponse.AsJson(obj);
 
-			req.ContentType = "application/json;charset=utf-8";
-			req.ContentLength = buf.Length;
+			req.ContentType = json.ContentType;
+			req.ContentLength = json.Content.Length;
 
 			using (var strm = req.GetRequestStream())
-				strm.Write(buf, 0, buf.Length);
+				json.Content.CopyTo(strm);
 		}
 	}
 }

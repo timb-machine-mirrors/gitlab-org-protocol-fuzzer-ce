@@ -12,23 +12,21 @@ namespace PitTester
 {
 	public class TestPublisher : StreamPublisher
 	{
-		static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+		static readonly NLog.Logger ClassLogger = NLog.LogManager.GetCurrentClassLogger();
 
-		bool datagram;
-		string name;
-		TestLogger testLogger;
+		bool _datagram;
+		readonly TestLogger _logger;
 
-		public TestPublisher(string name, TestLogger testLogger)
+		public TestPublisher(TestLogger logger)
 			: base(new Dictionary<string, Variant>())
 		{
-			this.name = name;
-			this.testLogger = testLogger;
-			this.stream = new MemoryStream();
+			_logger = logger;
+			stream = new MemoryStream();
 		}
 
 		protected override NLog.Logger Logger
 		{
-			get { return logger; }
+			get { return ClassLogger; }
 		}
 
 		protected override void OnStart()
@@ -43,50 +41,55 @@ namespace PitTester
 
 		protected override void OnOpen()
 		{
-			testLogger.Verify<TestData.Open>(name);
+			_logger.Verify<TestData.Open>(Name);
 		}
 
 		protected override void OnClose()
 		{
-			testLogger.Verify<TestData.Close>(name);
+			_logger.Verify<TestData.Close>(Name);
 
 			// Don't verify stream positions if previous error occurred
-			if (testLogger.ExceptionOccurred)
+			if (_logger.ExceptionOccurred)
 				return;
 
-			if (!datagram && stream.Position != stream.Length)
+			if (!_datagram && stream.Position != stream.Length)
 				throw new Exception(string.Format("Error, input stream has {0} unconsumed bytes from last input action.",
 					stream.Length - stream.Position));
 		}
 
 		protected override void OnAccept()
 		{
-			testLogger.Verify<TestData.Accept>(name);
+			_logger.Verify<TestData.Accept>(Name);
 		}
 
-		protected override Variant OnCall(string method, List<ActionParameter> args)
+		public override Variant call(string method, List<ActionParameter> args)
 		{
-			testLogger.Verify<TestData.Call>(name);
+			throw new NotImplementedException();
+		}
+
+		protected override Variant OnCall(string method, List<BitwiseStream> args)
+		{
+			// Handled with the override for output()
 			throw new NotSupportedException();
 		}
 
 		protected override void OnSetProperty(string property, Variant value)
 		{
-			testLogger.Verify<TestData.SetProperty>(name);
-			//throw new NotSupportedException();
+			_logger.Verify<TestData.SetProperty>(Name);
 		}
 
 		protected override Variant OnGetProperty(string property)
 		{
-			testLogger.Verify<TestData.GetProperty>(name);
-			throw new NotSupportedException();
+			_logger.Verify<TestData.GetProperty>(Name);
+
+			throw new NotImplementedException();
 		}
 
 		protected override void OnInput()
 		{
-			var data = testLogger.Verify<TestData.Input>(name);
+			var data = _logger.Verify<TestData.Input>(Name);
 
-			datagram = data.IsDatagram;
+			_datagram = data.IsDatagram;
 
 			if (data.IsDatagram)
 			{
@@ -116,11 +119,11 @@ namespace PitTester
 
 		public override void output(DataModel dataModel)
 		{
-			var data = testLogger.Verify<TestData.Output>(name);
+			var data = _logger.Verify<TestData.Output>(Name);
 			var expected = data.Payload;
 
 			// Only check outputs on non-fuzzing iterations
-			if (!this.Test.parent.context.controlIteration)
+			if (!IsControlIteration)
 				return;
 
 			// Ensure we end on a byte boundary
@@ -129,7 +132,7 @@ namespace PitTester
 			var actual = new BitReader(bs).ReadBytes((int)bs.Length);
 
 			// If this data model has a file data set, compare to that
-			var dataSet = dataModel.actionData.selectedData as Peach.Core.Dom.DataFile;
+			var dataSet = dataModel.actionData.selectedData as DataFile;
 			if (dataSet != null)
 				expected = File.ReadAllBytes(dataSet.FileName);
 
@@ -138,7 +141,7 @@ namespace PitTester
 
 		    var skipList = new List<Tuple<string, long, long>>();
 
-			foreach (var ignore in testLogger.Ignores)
+			foreach (var ignore in _logger.Ignores)
 			{
 				var act = ignore.Item1;
 				var elem = ignore.Item2;
@@ -150,7 +153,7 @@ namespace PitTester
 				if (tgt == null)
 				{
 					// Can happen when we ignore non-selected choice elements
-					logger.Debug("Couldn't locate {0} in model on action {1} for ignoring.", elem, testLogger.ActionName);
+					Logger.Debug("Couldn't locate {0} in model on action {1} for ignoring.", elem, _logger.ActionName);
 					continue;
 				}
 
@@ -159,7 +162,7 @@ namespace PitTester
 				long pos;
 				var lst = (BitStreamList)dataModel.Value;
 				if (!lst.TryGetPosition(elem.fullName, out pos))
-					throw new PeachException("Error, Couldn't locate position of {0} in model on action {1} for ignoring.".Fmt(elem, testLogger.ActionName));
+					throw new PeachException("Error, Couldn't locate position of {0} in model on action {1} for ignoring.".Fmt(elem, _logger.ActionName));
 
 				skipList.Add(new Tuple<string, long, long>(elem.fullName, pos / 8, (pos / 8) + (tgt.Value.LengthBits + 7) / 8));
 			}
@@ -194,7 +197,7 @@ namespace PitTester
 
 		        throw new PeachException(
 		            "\nTest failed on action: {0}\n\tValues differ at offset 0x{3:x8}\n\tExpected: 0x{1:x2}\n\tBut was: 0x{2:x2}\n"
-		                .Fmt(testLogger.ActionName, expected[i], actual[i], i));
+						.Fmt(_logger.ActionName, expected[i], actual[i], i));
 		    }
 
             // Perform length check after byte comparison. More usefull this way.
@@ -220,7 +223,7 @@ namespace PitTester
                 }
 
                 throw new PeachException(
-                    "Length mismatch in action {0}. Expected {1} bytes but got {2} bytes.".Fmt(testLogger.ActionName,
+					"Length mismatch in action {0}. Expected {1} bytes but got {2} bytes.".Fmt(_logger.ActionName,
                         expected.Length, actual.Length));
             }
 

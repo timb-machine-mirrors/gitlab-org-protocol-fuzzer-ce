@@ -85,16 +85,12 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			}
 			else
 			{
-				var enc = System.Text.Encoding.UTF8;
-				var buf = enc.GetBytes(response.Content);
-
-				ctx.Response.ContentType = "application/json;charset=utf-8";
-				ctx.Response.ContentEncoding = enc;
-				ctx.Response.ContentLength64 = buf.Length;
+				ctx.Response.ContentType = response.ContentType;
+				ctx.Response.ContentLength64 = response.Content.Length;
 
 				using (var stream = ctx.Response.OutputStream)
 				{
-					stream.Write(buf, 0, buf.Length);
+					response.Content.CopyTo(stream);
 				}
 			}
 		}

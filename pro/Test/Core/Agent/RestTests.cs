@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
@@ -11,111 +13,148 @@ namespace Peach.Pro.Test.Core.Agent
 	[TestFixture]
 	class RestTests
 	{
-		[Test]
-		public void ServerRuns()
+		/*
+		 * 1) Ensure proper cleanup happens if StartMonitor & SessionStarting throw!
+		 * 2) Ensure IterationStarting is always called when previous iteration had a fault!
+		 *    This is needed to clean up /pa/file/{id} resources from GetMonitorData.
+		 */
+
+		private void StartServer()
 		{
-			Uri uri = null;
-			Exception error = null;
+			_event = new AutoResetEvent(false);
 
-			var evt = new AutoResetEvent(false);
-			var server = new Server();
+			_server = new Server();
 
-			server.Started += (s, e) =>
-			{
-				uri = server.Uri;
-				evt.Set();
-			};
+			_server.Started += (s, e) => _event.Set();
 
-			var th = new Thread(() =>
+			_thread = new Thread(() =>
 			{
 				try
 				{
-					server.Run(10000, 10100);
+					_server.Run(10000, 10100);
 				}
 				catch (Exception ex)
 				{
-					error = ex;
-					evt.Set();
+					_error = ex;
+					_event.Set();
 				}
 			});
 
-			th.Start();
+			_thread.Start();
+			_event.WaitOne();
 
-			evt.WaitOne();
-			evt.Dispose();
-			server.Stop();
-			th.Join();
+			// Trigger faulire if we couldn't start
+			if (_error != null)
+				TearDown();
 
-			if (error != null)
-				throw new PeachException(error.Message, error);
+			Assert.NotNull(_server.Uri);
+		}
 
-			Assert.NotNull(uri);
+		private Exception _error;
+		private AutoResetEvent _event;
+		private Thread _thread;
+		private Server _server;
+
+		[TearDown]
+		public void TearDown()
+		{
+			if (_server != null)
+			{
+				_server.Stop();
+				_server = null;
+			}
+
+			if (_thread != null)
+			{
+				_thread.Join();
+				_thread = null;
+			}
+
+			if (_event != null)
+			{
+				_event.Dispose();
+				_event = null;
+			}
+
+			var err = _error;
+			_error = null;
+
+			if (err != null)
+				throw new PeachException(err.Message, err);
+		}
+
+
+		[Test]
+		public void ServerRuns()
+		{
+			StartServer();
+
+			Assert.NotNull(_server);
+			Assert.NotNull(_server.Uri);
 		}
 
 		[Test]
 		public void ClientConnect()
 		{
-			Uri uri = null;
-			Exception error = null;
+			StartServer();
 
-			var evt = new AutoResetEvent(false);
-			var server = new Server();
+			var cli = new Client(null, _server.Uri.ToString(), null);
 
-			server.Started += (s, e) =>
+			cli.AgentConnect();
+			cli.StartMonitor("mon", "TcpPort", new Dictionary<string, string>
 			{
-				uri = server.Uri;
-				evt.Set();
-			};
-
-			var th = new Thread(() =>
-			{
-				try
-				{
-					server.Run(10000, 10100);
-				}
-				catch (Exception ex)
-				{
-					error = ex;
-					evt.Set();
-				}
+				{"Host", "localhost" },
+				{"Port", "1" },
+				{"WaitOnCall", "MyWaitMessage" },
+				{"When", "OnCall" },
 			});
+			cli.SessionStarting();
+			cli.SessionFinished();
+			cli.StopAllMonitors();
+			cli.AgentDisconnect();
+		}
 
-			th.Start();
+		[Test]
+		public void GetMonitorData()
+		{
+			StartServer();
 
-			evt.WaitOne();
+			var tmp = Path.GetTempFileName();
+			var name = Path.GetFileName(tmp);
 
-			if (error != null)
-			{
-				server.Stop();
-				th.Join();
-				evt.Dispose();
-				throw new PeachException(error.Message, error);
-			}
+			Assert.NotNull(name);
 
-			Assert.NotNull(uri);
+			File.WriteAllText(tmp, "Hello World");
 
 			try
 			{
-				var cli = new Client(null, uri.ToString(), null);
+				var cli = new Client("cli", _server.Uri.ToString(), null);
 
 				cli.AgentConnect();
-				cli.StartMonitor("mon", "TcpPort", new Dictionary<string, string>
+				cli.StartMonitor("mon", "SaveFile", new Dictionary<string, string>
 				{
-					{"Host", "localhost" },
-					{"Port", "1" },
-					{"WaitOnCall", "MyWaitMessage" },
-					{"When", "OnCall" },
+					{"Filename", tmp },
 				});
 				cli.SessionStarting();
+
+				var f = cli.GetMonitorData().ToList();
+
+				Assert.AreEqual(1, f.Count);
+				Assert.AreEqual("SaveFile", f[0].DetectionSource);
+				Assert.AreEqual("mon", f[0].MonitorName);
+				Assert.AreEqual("cli", f[0].AgentName);
+				Assert.Null(f[0].Fault);
+				Assert.NotNull(f[0].Data);
+				Assert.True(f[0].Data.ContainsKey(name));
+				Assert.AreEqual("Hello World", Encoding.UTF8.GetString(f[0].Data[name]));
+
 				cli.SessionFinished();
 				cli.StopAllMonitors();
 				cli.AgentDisconnect();
 			}
 			finally
 			{
-				server.Stop();
-				th.Join();
-				evt.Dispose();
+				File.Delete(tmp);
 			}
 		}
 	}

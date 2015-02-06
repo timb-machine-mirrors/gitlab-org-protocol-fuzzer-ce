@@ -296,16 +296,20 @@ namespace Peach.Core
 		{
 			try
 			{
-				foreach (var kv in _context.test.publishers)
+				foreach (var pub in _context.test.publishers)
 				{
 					try
 					{
-						kv.Value.stop();
+						pub.stop();
 					}
 					catch (Exception ex)
 					{
-						logger.Trace("EndTest: Ignoring exception stopping publisher '{0}': {1}", kv.Key, ex.Message);
+						logger.Trace("EndTest: Ignoring exception stopping publisher '{0}': {1}", pub.Name, ex.Message);
 					}
+
+					var asRemote = pub as RemotePublisher;
+					if (asRemote != null)
+						asRemote.AgentManager = null;
 				}
 			}
 			finally
@@ -793,6 +797,11 @@ namespace Peach.Core
 						throw new PeachException("General Agent Failure: " + ex.Message, ex);
 					}
 				}
+			}
+
+			foreach (var pub in ctx.test.publishers.OfType<RemotePublisher>())
+			{
+				pub.AgentManager = ctx.agentManager;
 			}
 		}
 

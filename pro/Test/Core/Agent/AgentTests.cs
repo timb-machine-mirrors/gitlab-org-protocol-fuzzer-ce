@@ -43,13 +43,15 @@ namespace Peach.Pro.Test.Core.Agent
 		class AgentKillerPublisher : Publisher
 		{
 			private readonly AgentTests _owner;
+			private readonly RunContext _context;
 
 			static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-			public AgentKillerPublisher(AgentTests owner)
+			public AgentKillerPublisher(AgentTests owner, RunContext context)
 				: base(new Dictionary<string, Variant>())
 			{
 				_owner = owner;
+				_context = context;
 			}
 
 			protected override Logger Logger
@@ -64,7 +66,7 @@ namespace Peach.Pro.Test.Core.Agent
 				if (!IsControlIteration && (Iteration % 2) == 1)
 				{
 					// Lame hack to make sure CrashableServer gets stopped
-					Test.parent.context.agentManager.IterationFinished();
+					_context.agentManager.IterationFinished();
 
 					_owner.StopAgent();
 					_owner.StartAgent();
@@ -153,7 +155,6 @@ namespace Peach.Pro.Test.Core.Agent
 			<Param name='Host' value='127.0.0.1' />
 			<Param name='Port' value='{2}' />
 		</Publisher>
-		<Publisher name='Killer' class='Null'/>
 		<Strategy class='Sequential'/>
 		<Mutators mode='include'>
 			<Mutator class='StringStatic' />
@@ -167,13 +168,17 @@ namespace Peach.Pro.Test.Core.Agent
 
 				var parser = new PitParser();
 				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
-
-				dom.tests[0].publishers[1] = new AgentKillerPublisher(this);
-
 				var config = new RunConfiguration { range = true, rangeStart = 83, rangeStop = 86 };
-
 				var e = new Engine(null);
+
+				e.TestStarting += ctx =>
+				{
+					var pub = new AgentKillerPublisher(this, ctx) { Name = "Killer" };
+					ctx.test.publishers.Add(pub);
+				};
+
 				e.Fault += e_Fault;
+
 				e.startFuzzing(dom, config);
 
 				Assert.Greater(faults.Count, 0);
@@ -505,6 +510,8 @@ namespace Peach.Pro.Test.Core.Agent
 
 			public string FileName { get; set; }
 
+			static readonly byte[] data = Encoding.ASCII.GetBytes("0123456789");
+
 			public TestRemoteFilePublisher(Dictionary<string, Variant> args)
 				: base(args)
 			{
@@ -532,11 +539,16 @@ namespace Peach.Pro.Test.Core.Agent
 			protected override void OnOpen()
 			{
 				Log("OnOpen");
+
+				stream = new MemoryStream();
 			}
 
 			protected override void OnClose()
 			{
 				Log("OnClose");
+
+				stream.Dispose();
+				stream = null;
 			}
 
 			protected override void OnAccept()
@@ -548,16 +560,23 @@ namespace Peach.Pro.Test.Core.Agent
 			{
 				Log("OnInput");
 
-				// Write some bytes!
-				stream = new MemoryStream();
-				var data = Encoding.ASCII.GetBytes("Returning Data");
-				stream.Write(data, 0, data.Length);
+				// Write some bytes
+				stream.Write(data, 0, 5);
 				stream.Seek(0, SeekOrigin.Begin);
 			}
 
 			public override void WantBytes(long count)
 			{
 				Log("WantBytes {0}", count);
+
+				var pos = stream.Position;
+
+				for (var i = 0; i < count; ++i)
+				{
+					stream.WriteByte(data[stream.Length % data.Length]);
+				}
+
+				stream.Position = pos;
 			}
 
 			public override int Read(byte[] buffer, int offset, int count)
@@ -603,13 +622,13 @@ namespace Peach.Pro.Test.Core.Agent
 				Log("SetProperty {0} {1} {2}", property, value.GetVariantType(), value.ToString());
 			}
 
-			protected override Variant OnCall(string method, List<ActionParameter> args)
+			protected override Variant OnCall(string method, List<BitwiseStream> args)
 			{
 				var sb = new StringBuilder();
 
 				for (var i = 0; i < args.Count; ++i)
 				{
-					sb.AppendFormat("Param{0}: {1}", i + 1, Encoding.ASCII.GetString(args[i].dataModel.Value.ToArray()));
+					sb.AppendFormat("Param {0}: {1}", args[i].Name, Encoding.ASCII.GetString(args[i].ToArray()));
 					if (i < (args.Count - 1))
 						sb.AppendLine();
 				}
@@ -627,6 +646,10 @@ namespace Peach.Pro.Test.Core.Agent
 
 			var xml = @"
 <Peach>
+	<DataModel name='Input'>
+		<String length='10'/>
+	</DataModel>
+
 	<DataModel name='Param1'>
 		<Number size='8' value='0x7c'/>
 	</DataModel>
@@ -655,7 +678,7 @@ namespace Peach.Pro.Test.Core.Agent
 			<Action type='accept'/>
 
 			<Action name='input' type='input'>
-				<DataModel ref='Param2'/>
+				<DataModel ref='Input'/>
 			</Action>
 
 			<Action type='setProperty' property='int'>
@@ -728,7 +751,10 @@ namespace Peach.Pro.Test.Core.Agent
 					"OnOutput 5/40",
 					"OnAccept",
 					"OnInput",
-					"Read, Want: 14, Got: 14",
+					"Read, Want: 5, Got: 5",
+					"Read, Want: 0, Got: 0",
+					"WantBytes 5",
+					"Read, Want: 5, Got: 5",
 					"Read, Want: 0, Got: 0",
 					"SetProperty int BitStream 7c",
 					"GetProperty: int",
@@ -751,7 +777,7 @@ namespace Peach.Pro.Test.Core.Agent
 				//Assert.AreEqual("Success", (string)act.result.dataModel[1].DefaultValue);
 
 				var inp = st.actions["input"];
-				Assert.AreEqual("Returning Data", inp.dataModel.InternalValue.BitsToString());
+				Assert.AreEqual("0123456789", inp.dataModel.InternalValue.BitsToString());
 			}
 			finally
 			{
