@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Dom;
+using Peach.Core.IO;
 
 namespace Peach.Pro.Core.Agent.Channels.RestServer
 {
@@ -280,7 +281,7 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 		{
 			var iter = JsonConvert.DeserializeObject<RestProxyPublisher.IterationRequest>(StreamToString(Request.Body));
 
-			context.Publisher.Iteration = iter.iteration;
+			context.Iteration = iter.iteration;
 			return HttpStatusCode.OK;
 		}
 
@@ -288,25 +289,24 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 		{
 			var contrl = JsonConvert.DeserializeObject<RestProxyPublisher.IsControlIterationRequest>(StreamToString(Request.Body));
 
-			context.Publisher.IsControlIteration = contrl.isControlIteration;
+			context.IsControlIteration = contrl.isControlIteration;
 			return HttpStatusCode.OK;
 		}
 
 		object PublisherStart()
 		{
-			context.Publisher.Start();
 			return HttpStatusCode.OK;
 		}
 
 		object PublisherStop()
 		{
-			context.Publisher.Stop();
+			context.Publisher.Dispose();
 			return HttpStatusCode.OK;
 		}
 
 		object PublisherOpen()
 		{
-			context.Publisher.Open();
+			context.Publisher.Open(context.Iteration, context.IsControlIteration);
 			return HttpStatusCode.OK;
 		}
 
@@ -337,15 +337,11 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 			var call = JsonConvert.DeserializeObject<RestProxyPublisher.OnCallRequest>(
 				StreamToString(Request.Body));
 
-			List<ActionParameter> args = new List<ActionParameter>();
+			var args = new List<BitwiseStream>();
 
 			foreach (var arg in call.args)
 			{
-				args.Add( new Peach.Core.Dom.ActionParameter(arg.name)
-				{
-					type = arg.type,
-					dataModel = CreateDm(arg.data)
-				});
+				args.Add(new BitStream(arg.data) { Name = arg.name });
 			}
 
 			return new RestProxyPublisher.OnCallResponse()
@@ -374,9 +370,9 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 
 		object PublisherOutput()
 		{
-			var req = JsonConvert.DeserializeObject<RestProxyPublisher.OnOutputRequest>(StreamToString(Request.Body));
+			//var req = JsonConvert.DeserializeObject<RestProxyPublisher.OnOutputRequest>(StreamToString(Request.Body));
 
-			context.Publisher.Output(CreateDm(req.data));
+			//context.Publisher.Output(CreateDm(req.data));
 			return HttpStatusCode.OK;
 		}
 
@@ -401,7 +397,7 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 			var req = JsonConvert.DeserializeObject<RestProxyPublisher.ReadRequest>(StreamToString(Request.Body));
 
 			byte [] buff = new byte[req.count];
-			int count = context.Publisher.Stream.Read(buff, req.offset, req.count);
+			int count = context.Publisher.InputStream.Read(buff, req.offset, req.count);
 
 			return new RestProxyPublisher.ReadResponse()
 			{
@@ -414,7 +410,7 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 		{
 			return new RestProxyPublisher.ReadByteResponse()
 			{
-				data = context.Publisher.Stream.ReadByte()
+				data = context.Publisher.InputStream.ReadByte()
 			};
 		}
 

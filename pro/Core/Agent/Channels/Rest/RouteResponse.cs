@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net;
 using Newtonsoft.Json;
 using Peach.Core;
@@ -7,7 +8,9 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 {
 	internal class RouteResponse
 	{
-		public string Content { get; set; }
+		public string ContentType { get; set; }
+
+		public Stream Content { get; set; }
 
 		public HttpStatusCode StatusCode { get; set; }
 
@@ -49,9 +52,29 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		public static RouteResponse AsJson(object obj, HttpStatusCode code = HttpStatusCode.OK)
 		{
+			var json = JsonConvert.SerializeObject(obj);
+			var stream = new MemoryStream();
+			var writer = new StreamWriter(stream, System.Text.Encoding.UTF8);
+
+			writer.Write(json);
+			writer.Flush();
+
+			stream.Seek(0, SeekOrigin.Begin);
+
 			return new RouteResponse
 			{
-				Content = ToJson(obj),
+				ContentType = "application/json;charset=utf-8",
+				Content = stream,
+				StatusCode = code,
+			};
+		}
+
+		public static RouteResponse AsStream(Stream stream)
+		{
+			return new RouteResponse
+			{
+				ContentType = "application/octet-stream",
+				Content = stream,
 				StatusCode = HttpStatusCode.OK,
 			};
 		}
@@ -68,16 +91,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				? HttpStatusCode.ServiceUnavailable
 				: HttpStatusCode.InternalServerError;
 
-			return new RouteResponse
-			{
-				Content = ToJson(resp),
-				StatusCode = code,
-			};
-		}
-
-		public static string ToJson(object obj)
-		{
-			return JsonConvert.SerializeObject(obj);
+			return AsJson(resp, code);
 		}
 	}
 }

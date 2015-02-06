@@ -26,7 +26,7 @@ namespace Peach.Pro.Core.Publishers
 				throw new PeachException("Output size '{0}' is larger than max of '{1}'.".Fmt(data.Length, MaxOutputSize));
 		}
 
-		protected override Variant OnCall(string method, List<ActionParameter> args)
+		protected override Variant OnCall(string method, List<BitwiseStream> args)
 		{
 			return null;
 		}
