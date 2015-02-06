@@ -622,13 +622,13 @@ namespace Peach.Pro.Test.Core.Agent
 				Log("SetProperty {0} {1} {2}", property, value.GetVariantType(), value.ToString());
 			}
 
-			protected override Variant OnCall(string method, List<ActionParameter> args)
+			protected override Variant OnCall(string method, List<BitwiseStream> args)
 			{
 				var sb = new StringBuilder();
 
 				for (var i = 0; i < args.Count; ++i)
 				{
-					sb.AppendFormat("Param{0}: {1}", i + 1, Encoding.ASCII.GetString(args[i].dataModel.Value.ToArray()));
+					sb.AppendFormat("Param {0}: {1}", args[i].Name, Encoding.ASCII.GetString(args[i].ToArray()));
 					if (i < (args.Count - 1))
 						sb.AppendLine();
 				}

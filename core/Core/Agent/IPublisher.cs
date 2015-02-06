@@ -13,7 +13,7 @@ namespace Peach.Core.Agent
 		void Open(uint iteration, bool isControlIteration);
 		void Close();
 		void Accept();
-		Variant Call(string method, List<ActionParameter> args);
+		Variant Call(string method, List<BitwiseStream> args);
 		void SetProperty(string property, Variant value);
 		Variant GetProperty(string property);
 		void Output(BitwiseStream data);

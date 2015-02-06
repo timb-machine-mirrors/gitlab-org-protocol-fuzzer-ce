@@ -114,7 +114,13 @@ namespace Peach.Pro.OS.Windows.Publishers
 			}
 		}
 
-		protected override Variant OnCall(string method, List<ActionParameter> args)
+		protected override Variant OnCall(string method, List<BitwiseStream> args)
+		{
+			// This publisher only supports calling with ActionParameters
+			throw new NotSupportedException();
+		}
+
+		public override Variant call(string method, List<ActionParameter> args)
 		{
 			try
 			{

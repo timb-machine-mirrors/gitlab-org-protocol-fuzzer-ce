@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Dom;
+using Peach.Core.IO;
 
 namespace Peach.Pro.Core.Agent.Channels.RestServer
 {
@@ -336,15 +337,11 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 			var call = JsonConvert.DeserializeObject<RestProxyPublisher.OnCallRequest>(
 				StreamToString(Request.Body));
 
-			List<ActionParameter> args = new List<ActionParameter>();
+			var args = new List<BitwiseStream>();
 
 			foreach (var arg in call.args)
 			{
-				args.Add( new Peach.Core.Dom.ActionParameter(arg.name)
-				{
-					type = arg.type,
-					dataModel = CreateDm(arg.data)
-				});
+				args.Add(new BitStream(arg.data) { Name = arg.name });
 			}
 
 			return new RestProxyPublisher.OnCallResponse()
