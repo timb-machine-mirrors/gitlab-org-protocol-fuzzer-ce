@@ -63,3 +63,6 @@ _Resharper*
 # and rsync the folders when doing a remote build
 /docs/publishing/asciidoctor-fopub/.gradle/
 /docs/publishing/asciidoctor-fopub/build/
+
+/Cereal/[Bb]in
+/Cereal/[Oo]bj

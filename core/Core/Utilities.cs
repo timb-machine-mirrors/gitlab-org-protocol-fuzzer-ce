@@ -663,6 +663,7 @@ namespace Peach.Core
 				}
 				catch (Exception ex)
 				{
+					Console.WriteLine("Retry.Execute> Exception: {0}", ex);
 					if (count++ == retryCount)
 						throw ex;
 					Thread.Sleep(retryDelay);
