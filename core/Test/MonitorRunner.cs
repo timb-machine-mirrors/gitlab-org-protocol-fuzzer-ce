@@ -134,48 +134,53 @@ namespace Peach.Core.Test
 				}
 			});
 
-			Forward.ForEach(m => SessionStarting(m));
-
-			for (uint i = 1; i <= iterations; ++i)
+			try
 			{
-				var args = new IterationStartingArgs
+				Forward.ForEach(m => SessionStarting(m));
+
+				for (uint i = 1; i <= iterations; ++i)
 				{
-					IsReproduction = false,
-					LastWasFault = lastWasFault
-				};
-
-				lastWasFault = false;
-
-				Forward.ForEach(m => IterationStarting(m, args));
-
-				Forward.ForEach(m => Message(m));
-
-				Reverse.ForEach(IterationFinished);
-
-				// Note: Use Count() > 0 so we call DetectedFault on every monitor.
-				// This is part of the monitor api contract.
-				if (Forward.Count(DetectedFault) > 0)
-				{
-					lastWasFault = true;
-
-					// Once DetectedFault is called on every monitor we can get monitor data.
-					ret.AddRange(Forward.Select(m =>
+					var args = new IterationStartingArgs
 					{
-						var f = GetMonitorData(m);
-						if (f != null)
+						IsReproduction = false,
+						LastWasFault = lastWasFault
+					};
+
+					lastWasFault = false;
+
+					Forward.ForEach(m => IterationStarting(m, args));
+
+					Forward.ForEach(m => Message(m));
+
+					Reverse.ForEach(IterationFinished);
+
+					// Note: Use Count() > 0 so we call DetectedFault on every monitor.
+					// This is part of the monitor api contract.
+					if (Forward.Count(DetectedFault) > 0)
+					{
+						lastWasFault = true;
+
+						// Once DetectedFault is called on every monitor we can get monitor data.
+						ret.AddRange(Forward.Select(m =>
 						{
-							// Agent normally does this, so set the monitor class & name
-							f.DetectionSource = f.DetectionSource ?? m.Class;
-							f.MonitorName = m.Name;
-						}
-						return f;
-					}).Where(f => f != null));
+							var f = GetMonitorData(m);
+							if (f != null)
+							{
+								// Agent normally does this, so set the monitor class & name
+								f.DetectionSource = f.DetectionSource ?? m.Class;
+								f.MonitorName = m.Name;
+							}
+							return f;
+						}).Where(f => f != null));
+					}
 				}
+
+				Reverse.ForEach(m => SessionFinished(m));
 			}
-
-			Reverse.ForEach(m => SessionFinished(m));
-
-			Reverse.ForEach(m => StopMonitor(m));
+			finally
+			{
+				Reverse.ForEach(m => StopMonitor(m));
+			}
 
 			return ret.ToArray();
 		}
