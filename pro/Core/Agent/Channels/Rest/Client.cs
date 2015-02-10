@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
+using Peach.Core.IO;
 using Logger = NLog.Logger;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
@@ -13,13 +15,169 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 	[Agent("json")]
 	public class Client : AgentClient
 	{
+		class PublisherProxy : IPublisher
+		{
+			readonly Client _client;
+			readonly PublisherRequest _createReq;
+
+			Uri _publisherUri;
+
+			public PublisherProxy(Client client, string name, string cls, Dictionary<string, string> args)
+			{
+				_client = client;
+				_createReq = new PublisherRequest
+				{
+					Name = name,
+					Class = cls,
+					Args = args,
+				};
+
+				InputStream = new MemoryStream();
+
+				Connect();
+
+				_client._publishers.Add(this);
+			}
+
+			public void Dispose()
+			{
+				Send("DELETE", "", null);
+
+				InputStream.Dispose();
+				InputStream = null;
+
+				_client._publishers.Remove(this);
+			}
+
+			public Stream InputStream
+			{
+				get;
+				private set;
+			}
+
+			public void Connect()
+			{
+				_publisherUri = _client._baseUrl;
+				var resp = Send<PublisherResponse>("POST", "/pa/publisher", _createReq);
+				_publisherUri = new Uri(_client._baseUrl, resp.Url);
+
+				InputStream.Position = 0;
+				InputStream.SetLength(0);
+			}
+
+			public void Open(uint iteration, bool isControlIteration)
+			{
+				var req = new PublisherOpenRequest
+				{
+					Iteration = iteration,
+					IsControlIteration = isControlIteration,
+				};
+
+				Send("PUT", "/open", req);
+			}
+
+			public void Close()
+			{
+				Send("PUT", "/close", null);
+			}
+
+			public void Accept()
+			{
+				Send("PUT", "/accept", null);
+			}
+
+			public Variant Call(string method, List<BitwiseStream> args)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void SetProperty(string property, Variant value)
+			{
+				var req = value.ToModel<SetPropertyRequest>();
+				req.Property = property;
+				Send("PUT", "/property", req);
+			}
+
+			public Variant GetProperty(string property)
+			{
+				var req = new GetPropertyRequest { Property = property };
+				var resp = Send<VariantMessage>("GET", "/property", req);
+				return resp.ToVariant();
+			}
+
+			public void Output(BitwiseStream data)
+			{
+				var uri = new Uri(_publisherUri, _publisherUri.PathAndQuery + "/output");
+				var request = RouteResponse.AsStream(data);
+				_client.Execute("PUT", uri, request, SendStream, resp => resp.Consume());
+			}
+
+			public void Input()
+			{
+				var resp = Send<BoolResponse>("PUT", "/input", null);
+				if (resp.Value)
+				{
+					InputStream.Position = 0;
+					InputStream.SetLength(0);
+				}
+
+				ReadInputData("");
+			}
+
+			public void WantBytes(long count)
+			{
+				ReadInputData("?offset={0}&count={1}".Fmt(InputStream.Length, count));
+			}
+
+			private void Send(string method, string path, object request)
+			{
+				var uri = new Uri(_publisherUri, _publisherUri.PathAndQuery + path);
+				_client.Execute(method, uri, request, SendJson, resp => resp.Consume());
+			}
+
+			private T Send<T>(string method, string path, object request)
+			{
+				var uri = new Uri(_publisherUri, _publisherUri.PathAndQuery + path);
+				return _client.Execute(method, uri, request, SendJson, req => req.FromJson<T>());
+			}
+
+			private void ReadInputData(string query)
+			{
+				var uri = new Uri(_publisherUri, _publisherUri.PathAndQuery + "/data" + query);
+
+				_client.Execute("PUT", uri, (object)null, null, resp =>
+				{
+					var pos = InputStream.Position;
+
+					try
+					{
+						InputStream.Seek(0, SeekOrigin.End);
+
+						using (var strm = resp.GetResponseStream())
+						{
+							if (strm != null)
+								strm.CopyTo(InputStream);
+						}
+					}
+					finally
+					{
+						InputStream.Seek(pos, SeekOrigin.Begin);
+					}
+
+					return (object)null;
+				});
+			}
+		}
+
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
 		private readonly Uri _baseUrl;
+		private readonly List<PublisherProxy> _publishers;
 
 		private ConnectRequest _connectReq;
 		private ConnectResponse _connectResp;
-		private Uri _agentUrl;
+		private Uri _agentUri;
+		private bool _online;
 
 		public Client(string name, string uri, string password)
 			: base(name, uri, password)
@@ -30,6 +188,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				_baseUrl = new Uri("{0}://{1}:{2}".Fmt(_baseUrl.Scheme, _baseUrl.Host, Server.DefaultPort));
 
 			_baseUrl = new Uri("http://{0}:{1}".Fmt(_baseUrl.Host, _baseUrl.Port));
+
+			_publishers = new List<PublisherProxy>();
 		}
 
 		public override void AgentConnect()
@@ -52,10 +212,19 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		public override void SessionStarting()
 		{
-			// Send the initial POST to the base url
-			_agentUrl = new Uri(_baseUrl, "/p/agent");
-			_connectResp = Send<ConnectResponse>("POST", "", _connectReq);
-			_agentUrl = new Uri(_baseUrl, _connectResp.Url);
+			_online = true;
+
+			if (_connectReq.Monitors.Count > 0)
+			{
+				// Send the initial POST to the base url
+				_agentUri = new Uri(_baseUrl, "/p/agent");
+				_connectResp = Send<ConnectResponse>("POST", "", _connectReq);
+				_agentUri = new Uri(_baseUrl, _connectResp.Url);
+			}
+
+			// If we are reconnecting, ensure all the publishers are recreated
+			foreach (var pub in _publishers)
+				pub.Connect();
 		}
 
 		public override void SessionFinished()
@@ -63,7 +232,6 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			Send("DELETE", "", null);
 
 			_connectResp = null;
-			_agentUrl = null;
 		}
 
 		public override void StopAllMonitors()
@@ -78,13 +246,13 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		public override IPublisher CreatePublisher(string pubName, string cls, Dictionary<string, string> args)
 		{
-			throw new NotImplementedException();
+			return new PublisherProxy(this, pubName, cls, args);
 		}
 
 		public override void IterationStarting(IterationStartingArgs args)
 		{
 			// If any previous call failed, we need to reconnect
-			if (_agentUrl == null)
+			if (!_online)
 				SessionStarting();
 
 			if (!_connectResp.Messages.Contains("IterationStarting"))
@@ -168,7 +336,9 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		{
 			Logger.Trace("Downloading {0} byte file '{1}'.", data.Size, data.Key);
 
-			return Execute("GET", data.Url, null, resp =>
+			var uri = new Uri(_baseUrl, data.Url);
+
+			return Execute("GET", uri, (object)null, null, resp =>
 			{
 				using (var strm = resp.GetResponseStream())
 				{
@@ -185,41 +355,67 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		private void Send(string method, string path, object request)
 		{
-			var uri = _agentUrl.PathAndQuery + path;
-			Execute(method, uri, request, resp => resp.Consume());
+			var uri = new Uri(_agentUri, _agentUri.PathAndQuery + path);
+			Execute(method, uri, request, SendJson, resp => resp.Consume());
 		}
 
 		private T Send<T>(string method, string path, object request)
 		{
-			var uri = _agentUrl.PathAndQuery + path;
-			return Execute(method, uri, request, req => req.FromJson<T>());
+			var uri = new Uri(_agentUri, _agentUri.PathAndQuery + path);
+			return Execute(method, uri, request, SendJson, req => req.FromJson<T>());
 		}
 
-		private T Execute<T>(string method,
-			string path,
-			object request,
-			Func<HttpWebResponse, T> decode)
+		private static void SendJson(HttpWebRequest req, object obj)
 		{
-			if (_agentUrl == null)
+			if (req.Method == "GET")
 			{
-				Logger.Debug("Agent server '{0}' is offline, ignoring '{1}' command.", Url, path);
-				return default(T);
+				Debug.Assert(obj == null);
+				return;
 			}
 
-			var uri = new Uri(_agentUrl, path);
+			var json = RouteResponse.AsJson(obj);
+
+			SendStream(req, json);
+		}
+
+		private static void SendStream(HttpWebRequest req, RouteResponse obj)
+		{
+			req.ContentType = obj.ContentType;
+			req.ContentLength = obj.Content.Length;
+
+			using (var strm = req.GetRequestStream())
+				obj.Content.CopyTo(strm);
+		}
+
+		private TOut Execute<TOut,TIn>(string method,
+			Uri uri,
+			TIn request,
+			Action<HttpWebRequest, TIn> encode,
+			Func<HttpWebResponse, TOut> decode)
+		{
+			if (!_online)
+			{
+				Logger.Debug("Agent server '{0}' is offline, ignoring command '{3} {4}'.",
+					Url, method, uri.PathAndQuery);
+				return default(TOut);
+			}
 
 			Logger.Trace("{0} {1}", method, uri);
 
 			try
 			{
-				var req = (HttpWebRequest) WebRequest.Create(uri);
+				var req = (HttpWebRequest)WebRequest.Create(uri);
 
 				req.Method = method;
-				req.SendJson(request);
 
-				using (var resp = (HttpWebResponse) req.GetResponse())
+				if (request.Equals(default(TIn)))
+					req.ContentLength = 0;
+				else
+					encode(req, request);
+
+				using (var resp = (HttpWebResponse)req.GetResponse())
 				{
-					Logger.Trace(">>> {0} {1}", (int) resp.StatusCode, resp.StatusDescription);
+					Logger.Trace(">>> {0} {1}", (int)resp.StatusCode, resp.StatusDescription);
 
 					return decode(resp);
 				}
@@ -230,27 +426,27 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				{
 					Logger.Debug(ex.Message);
 
-					// Clear the agent url to trigger a future reconnect
-					_agentUrl = null;
+					// Mark offline to trigger a future reconnect
+					_online = false;
 
 					throw;
 				}
 
 				using (var resp = (HttpWebResponse)ex.Response)
 				{
-					Logger.Trace("<<< {0} {1}", (int) resp.StatusCode, resp.StatusDescription);
+					Logger.Trace("<<< {0} {1}", (int)resp.StatusCode, resp.StatusDescription);
 
 					// If we get a 500 or 503, this means the command we ran
 					// failed to complete, but our agentUrl is still valid
 					// so we don't want to clear the agent url
 
 					if (resp.StatusCode != HttpStatusCode.InternalServerError &&
-					    resp.StatusCode != HttpStatusCode.ServiceUnavailable)
+						resp.StatusCode != HttpStatusCode.ServiceUnavailable)
 					{
 						Logger.Debug(ex.Message);
 
-						// Clear the agent url to trigger a future reconnect
-						_agentUrl = null;
+						// Mark offline to trigger a future reconnect
+						_online = false;
 
 						// Consume all bytes sent to us in the response
 						resp.Consume();
