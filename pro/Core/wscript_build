@@ -9,6 +9,7 @@ deps = [
 	'System.Data.dll',
 	'System.Data.DataSetExtensions.dll',
 	'System.Drawing.dll',
+	'System.Numerics.dll',
 	'System.Web.dll',
 	'System.Web.Services.dll',
 	'System.Configuration.dll',

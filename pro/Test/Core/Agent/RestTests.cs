@@ -6,6 +6,8 @@ using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Agent;
+using Peach.Core.IO;
+using Peach.Core.Test;
 using Peach.Pro.Core.Agent.Channels.Rest;
 
 namespace Peach.Pro.Test.Core.Agent
@@ -156,6 +158,79 @@ namespace Peach.Pro.Test.Core.Agent
 			{
 				File.Delete(tmp);
 			}
+		}
+
+		static string ToJsonString(Variant v)
+		{
+			// Encode a variant as a json message.
+			// Use RouteResponse.AsJson so we run the same code as the agent client.
+			var model = v.ToModel<VariantMessage>();
+			var response = RouteResponse.AsJson(model);
+			var rdr = new StreamReader(response.Content);
+			var str = rdr.ReadToEnd();
+
+			return str;
+		}
+
+		static Variant FromJsonString(string s)
+		{
+			var sr = new StringReader(s);
+			var model = sr.JsonDecode<VariantMessage>();
+			var ret = model.ToVariant();
+
+			return ret;
+		}
+
+		[Test]
+		public void TestVariants()
+		{
+			var s = ToJsonString(new Variant(100));
+			Assert.AreEqual("{\"type\":\"integer\",\"value\":100}", s);
+			var v = FromJsonString(s);
+			Assert.AreEqual(Variant.VariantType.Int, v.GetVariantType());
+			Assert.AreEqual(100, (int)v);
+
+			s = ToJsonString(new Variant(long.MinValue));
+			Assert.AreEqual("{\"type\":\"integer\",\"value\":-9223372036854775808}", s);
+			v = FromJsonString(s);
+			Assert.AreEqual(Variant.VariantType.Long, v.GetVariantType());
+			Assert.AreEqual(long.MinValue, (long)v);
+
+			s = ToJsonString(new Variant(long.MaxValue));
+			Assert.AreEqual("{\"type\":\"integer\",\"value\":9223372036854775807}", s);
+			v = FromJsonString(s);
+			Assert.AreEqual(Variant.VariantType.Long, v.GetVariantType());
+			Assert.AreEqual(long.MaxValue, (long)v);
+
+			s = ToJsonString(new Variant(ulong.MaxValue));
+			Assert.AreEqual("{\"type\":\"integer\",\"value\":18446744073709551615}", s);
+			v = FromJsonString(s);
+			Assert.AreEqual(Variant.VariantType.ULong, v.GetVariantType());
+			Assert.AreEqual(ulong.MaxValue, (ulong)v);
+
+			s = ToJsonString(new Variant(1.1));
+			Assert.AreEqual("{\"type\":\"double\",\"value\":1.1}", s);
+			v = FromJsonString(s);
+			Assert.AreEqual(Variant.VariantType.Double, v.GetVariantType());
+			Assert.AreEqual(1.1, (double)v);
+
+			s = ToJsonString(new Variant("hello"));
+			Assert.AreEqual("{\"type\":\"string\",\"value\":\"hello\"}", s);
+			v = FromJsonString(s);
+			Assert.AreEqual(Variant.VariantType.String, v.GetVariantType());
+			Assert.AreEqual("hello", (string)v);
+
+			s = ToJsonString(new Variant(Encoding.UTF8.GetBytes("byte array")));
+			Assert.AreEqual("{\"type\":\"bytes\",\"value\":\"Ynl0ZSBhcnJheQ==\"}", s);
+			v = FromJsonString(s);
+			Assert.AreEqual(Variant.VariantType.BitStream, v.GetVariantType());
+			Assert.AreEqual(Encoding.ASCII.GetBytes("byte array"), ((BitwiseStream)v).ToArray());
+
+			s = ToJsonString(new Variant(new BitStream(Encoding.UTF8.GetBytes("bitstream"))));
+			Assert.AreEqual("{\"type\":\"bytes\",\"value\":\"Yml0c3RyZWFt\"}", s);
+			v = FromJsonString(s);
+			Assert.AreEqual(Variant.VariantType.BitStream, v.GetVariantType());
+			Assert.AreEqual(Encoding.ASCII.GetBytes("bitstream"), ((BitwiseStream)v).ToArray());
 		}
 	}
 }
