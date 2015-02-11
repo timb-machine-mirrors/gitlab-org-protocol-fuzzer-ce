@@ -49,18 +49,50 @@ namespace Peach.Core
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 	public abstract class PluginAttribute : Attribute
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Internal property.")]
+		public bool IsTest
+		{
+			get { return Internal; }
+			set { Internal = value; }
+		}
+
+		#endregion
+
+		/// <summary>
+		/// The name of the plugin.
+		/// </summary>
 		public string Name { get; private set; }
+
+		/// <summary>
+		/// The type of the plugin.
+		/// </summary>
 		public Type Type { get; private set; }
+
+		/// <summary>
+		/// Is this the default name for the plugin.
+		/// For plugins with multiple names, the default name will be used in the schema.
+		/// </summary>
 		public bool IsDefault { get; private set; }
-		public bool IsTest { get; set; }
+
+		/// <summary>
+		/// Is this an internal plugin.
+		/// Internal plugins are omitted from schema generation.
+		/// </summary>
+		public bool Internal { get; set; }
+
+		/// <summary>
+		/// The operating systems that support this plugin.
+		/// </summary>
 		public Platform.OS OS { get; set; }
 
 		protected PluginAttribute(Type type, string name, bool isDefault)
 		{
-			this.Name = name;
-			this.Type = type;
-			this.IsDefault = isDefault;
-			this.OS = Platform.OS.All;
+			Name = name;
+			Type = type;
+			IsDefault = isDefault;
+			OS = Platform.OS.All;
 		}
 	}
 

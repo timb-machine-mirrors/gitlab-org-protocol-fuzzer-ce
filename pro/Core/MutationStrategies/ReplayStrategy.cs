@@ -11,7 +11,7 @@ using Peach.Core.IO;
 
 namespace Peach.Pro.Core.MutationStrategies
 {
-	[MutationStrategy("Replay", true, IsTest = true)]
+	[MutationStrategy("Replay", true, Internal = true)]
 	[Description("Replay an existing set of data sets")]
 	public class ReplayStrategy : MutationStrategy
 	{

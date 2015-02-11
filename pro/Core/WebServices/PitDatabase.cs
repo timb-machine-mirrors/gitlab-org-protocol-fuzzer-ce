@@ -309,7 +309,7 @@ namespace Peach.Pro.Core.WebServices
 			foreach (var kv in ClassLoader.GetAllByAttribute<MonitorAttribute>())
 			{
 #if !DEBUG
-				if (kv.Key.IsTest)
+				if (kv.Key.Internal)
 					continue;
 #endif
 
