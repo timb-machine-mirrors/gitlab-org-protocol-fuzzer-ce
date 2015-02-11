@@ -98,9 +98,9 @@ namespace Peach.Core
 			var pluginsByName = new SortedDictionary<string, Type>();
 			var plugins = new SortedDictionary<Type, SortedDictionary<Type, SortedSet<PluginAttribute>>>(new TypeComparer());
 
-			foreach (var type in ClassLoader.GetAllByAttribute<Peach.Core.PluginAttribute>(null))
+			foreach (var type in ClassLoader.GetAllByAttribute<PluginAttribute>())
 			{
-				if (type.Key.IsTest)
+				if (type.Key.Internal)
 					continue;
 
 				var pluginType = type.Key.Type;

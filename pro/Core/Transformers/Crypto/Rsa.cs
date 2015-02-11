@@ -13,7 +13,7 @@ using Peach.Core.IO;
 
 namespace Peach.Pro.Core.Transformers.Crypto
 {
-	[Transformer("Rsa", true, IsTest = true)]
+	[Transformer("Rsa", true, Internal = true)]
 	[Description("RSA encryption and decryption")]
 	[Parameter("PublicKey", typeof(HexString), "Public key modulus", "")]
 	[Parameter("PublicExponent", typeof(HexString), "Public key exponent", "010001")]
