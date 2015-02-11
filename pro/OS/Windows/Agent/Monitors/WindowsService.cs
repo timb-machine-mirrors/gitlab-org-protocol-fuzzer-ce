@@ -62,11 +62,11 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		public override void StartMonitor(Dictionary<string, string> args)
 		{
 			string val;
-			if (args.TryGetValue("StringTimout", out val) && !args.ContainsKey("StringTimeout"))
+			if (args.TryGetValue("StartTimout", out val) && !args.ContainsKey("StartTimeout"))
 			{
-				Logger.Info("The parameter 'StringTimout' on the monitor 'WindowsService' is deprecated.  Use the parameter 'StringTimeout' instead.");
-				args["StringTimeout"] = val;
-				args.Remove("StringTimout");
+				Logger.Info("The parameter 'StartTimout' on the monitor 'WindowsService' is deprecated.  Use the parameter 'StartTimeout' instead.");
+				args["StartTimeout"] = val;
+				args.Remove("StartTimout");
 			}
 
 			base.StartMonitor(args);
