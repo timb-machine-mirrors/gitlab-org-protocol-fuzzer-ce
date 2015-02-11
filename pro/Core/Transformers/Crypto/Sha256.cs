@@ -1,4 +1,3 @@
-﻿
 //
 // Copyright (c) Michael Eddington
 //
@@ -59,5 +58,3 @@ namespace Peach.Pro.Core.Transformers.Crypto
 		}
 	}
 }
-
-// end

@@ -1,4 +1,3 @@
-﻿
 //
 // Copyright (c) Michael Eddington
 //
@@ -76,5 +75,3 @@ namespace Peach.Pro.Core.Transformers.Encode
         }
     }
 }
-
-// end
