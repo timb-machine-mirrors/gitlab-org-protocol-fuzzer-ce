@@ -2,6 +2,7 @@
 
 deps = [
 	'System.Runtime.Remoting.dll',
+	'System.Runtime.Serialization.dll',
 	'System.dll',
 	'System.Management.dll',
 	'System.Xml.dll',
