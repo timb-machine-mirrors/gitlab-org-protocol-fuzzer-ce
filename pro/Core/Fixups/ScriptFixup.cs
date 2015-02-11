@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using NLog;
 using Peach.Core;
 using Peach.Core.Dom;

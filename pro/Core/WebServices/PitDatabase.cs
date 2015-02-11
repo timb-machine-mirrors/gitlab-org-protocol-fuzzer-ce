@@ -17,7 +17,6 @@ using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Dom;
 using Peach.Pro.Core.WebServices.Models;
-using DescriptionAttribute = Peach.Core.DescriptionAttribute;
 using Encoding = System.Text.Encoding;
 using File = System.IO.File;
 using Monitor = Peach.Pro.Core.WebServices.Models.Monitor;

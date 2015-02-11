@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ServiceProcess;
 using NLog;
 using Peach.Core;
