@@ -164,7 +164,7 @@ namespace Peach.Pro.Test.Core.Agent
 		{
 			// Encode a variant as a json message.
 			// Use RouteResponse.AsJson so we run the same code as the agent client.
-			var model = v.ToModel<VariantMessage>();
+			var model = v.ToModel<CallResponse>();
 			var response = RouteResponse.AsJson(model);
 			var rdr = new StreamReader(response.Content);
 			var str = rdr.ReadToEnd();
@@ -175,9 +175,8 @@ namespace Peach.Pro.Test.Core.Agent
 		static Variant FromJsonString(string s)
 		{
 			var sr = new StringReader(s);
-			var model = sr.JsonDecode<VariantMessage>();
+			var model = sr.JsonDecode<CallResponse>();
 			var ret = model.ToVariant();
-
 			return ret;
 		}
 
@@ -231,6 +230,260 @@ namespace Peach.Pro.Test.Core.Agent
 			v = FromJsonString(s);
 			Assert.AreEqual(Variant.VariantType.BitStream, v.GetVariantType());
 			Assert.AreEqual(Encoding.ASCII.GetBytes("bitstream"), ((BitwiseStream)v).ToArray());
+
+			s = ToJsonString(null);
+			Assert.AreEqual("null", s);
+			v = FromJsonString(s);
+			Assert.Null(v);
+
+			v = FromJsonString("");
+			Assert.Null(v);
+		}
+
+		[Test]
+		public void CreatePublisher()
+		{
+			StartServer();
+
+			var cli = new Client(null, _server.Uri.ToString(), null);
+
+			cli.AgentConnect();
+
+			var pub = cli.CreatePublisher("pub", "Null", new Dictionary<string, string>());
+
+			try
+			{
+				pub.Open(100, false);
+				pub.Close();
+			}
+			finally
+			{
+				pub.Dispose();
+			}
+
+			cli.AgentDisconnect();
+		}
+
+		[Test]
+		public void PublisherWantBytes()
+		{
+			Func<Stream, string> asStr = strm => Encoding.ASCII.GetString(((MemoryStream)strm).ToArray());
+
+			StartServer();
+
+			var tmp = Path.GetTempFileName();
+
+			try
+			{
+				File.WriteAllText(tmp, "Hello World");
+
+				var cli = new Client(null, _server.Uri.ToString(), null);
+
+				cli.AgentConnect();
+
+				var pub = cli.CreatePublisher("pub", "File", new Dictionary<string, string>
+				{
+					{ "FileName", tmp },
+					{ "Overwrite", "false" },
+				});
+
+				try
+				{
+					pub.Open(100, false);
+
+					Assert.NotNull(pub.InputStream);
+					Assert.AreEqual(0, pub.InputStream.Length);
+					Assert.AreEqual(0, pub.InputStream.Position);
+
+					// Input will consume all available bytes
+					pub.Input();
+
+					Assert.AreEqual(11, pub.InputStream.Length);
+					Assert.AreEqual(0, pub.InputStream.Position);
+					Assert.AreEqual("Hello World", asStr(pub.InputStream));
+
+					// Input should not consume any more bytes
+					pub.Input();
+
+					Assert.AreEqual(11, pub.InputStream.Length);
+					Assert.AreEqual(0, pub.InputStream.Position);
+					Assert.AreEqual("Hello World", asStr(pub.InputStream));
+
+					// Truncate the local copy
+					pub.InputStream.SetLength(5);
+					pub.InputStream.Seek(4, SeekOrigin.Begin);
+					Assert.AreEqual("Hello", asStr(pub.InputStream));
+
+					// Wanting 1 byte should not trigger getting anymore
+					pub.WantBytes(1);
+
+					Assert.AreEqual(5, pub.InputStream.Length);
+					Assert.AreEqual(4, pub.InputStream.Position);
+					Assert.AreEqual("Hello", asStr(pub.InputStream));
+
+					// Wanting 2 bytes will cause us to get the rest of the data
+					pub.WantBytes(2);
+
+					Assert.AreEqual(11, pub.InputStream.Length);
+					Assert.AreEqual(4, pub.InputStream.Position);
+					Assert.AreEqual("Hello World", asStr(pub.InputStream));
+
+					// Truncate the local copy
+					pub.InputStream.SetLength(5);
+					pub.InputStream.Seek(4, SeekOrigin.Begin);
+					Assert.AreEqual("Hello", asStr(pub.InputStream));
+
+					// Input should get the rest of the bytes and not update Position
+					pub.Input();
+
+					Assert.AreEqual(11, pub.InputStream.Length);
+					Assert.AreEqual(4, pub.InputStream.Position);
+					Assert.AreEqual("Hello World", asStr(pub.InputStream));
+
+					pub.Close();
+				}
+				finally
+				{
+					pub.Dispose();
+				}
+
+				cli.AgentDisconnect();
+			}
+			finally
+			{
+				File.Delete(tmp);
+			}
+		}
+
+		[Test]
+		public void Output()
+		{
+			StartServer();
+
+			var tmp = Path.GetTempFileName();
+
+			try
+			{
+				var cli = new Client(null, _server.Uri.ToString(), null);
+
+				cli.AgentConnect();
+
+				var pub = cli.CreatePublisher("pub", "File", new Dictionary<string, string>
+				{
+					{ "FileName", tmp },
+				});
+
+				try
+				{
+					pub.Open(100, false);
+					pub.Output(new BitStream(Encoding.ASCII.GetBytes("Hello")));
+					pub.Close();
+
+					Assert.AreEqual("Hello", File.ReadAllText(tmp));
+
+					pub.Open(101, false);
+					pub.Output(new BitStream(Encoding.ASCII.GetBytes("Hello")));
+					pub.Output(new BitStream(Encoding.ASCII.GetBytes("World")));
+					pub.Close();
+
+					Assert.AreEqual("HelloWorld", File.ReadAllText(tmp));
+
+
+					pub.Open(102, false);
+					pub.Output(new BitStream(Encoding.ASCII.GetBytes("Hello")));
+					pub.Close();
+
+					Assert.AreEqual("Hello", File.ReadAllText(tmp));
+				}
+				finally
+				{
+					pub.Dispose();
+				}
+
+				cli.AgentDisconnect();
+			}
+			finally
+			{
+				File.Delete(tmp);
+			}
+		}
+
+
+		[Test]
+		public void Call()
+		{
+			StartServer();
+
+			var tmp = Path.GetTempFileName();
+
+			var args = new List<BitwiseStream>
+			{
+				new BitStream(Encoding.ASCII.GetBytes("Hello")) { Name = "One" },
+				new BitStream(Encoding.ASCII.GetBytes("World")) { Name = "Two" },
+			};
+
+			try
+			{
+				var cli = new Client(null, _server.Uri.ToString(), null);
+
+				cli.AgentConnect();
+
+				var pub = cli.CreatePublisher("pub", "TestRemoteFile", new Dictionary<string, string>
+				{
+					{ "FileName", tmp },
+				});
+
+				try
+				{
+					pub.Open(100, false);
+
+					var v1 = pub.Call("null", args);
+
+					Assert.Null(v1, "Call method should return null");
+
+					args.Add(new BitStream(Encoding.ASCII.GetBytes("!")) { Name = "Three" });
+
+					var v2 = pub.Call("foo", args);
+
+					Assert.NotNull(v2, "Call method should not return null");
+
+					var asStr = v2.BitsToString();
+
+					Assert.AreEqual("\x07Success", asStr);
+
+					pub.Close();
+
+				}
+				finally
+				{
+					pub.Dispose();
+				}
+
+				cli.AgentDisconnect();
+
+				var contents = File.ReadAllLines(tmp);
+
+				var expected = new[] {
+					"OnStart",
+					"OnOpen",
+					"Call: null",
+					" Param 'One': Hello",
+					" Param 'Two': World",
+					"Call: foo",
+					" Param 'One': Hello",
+					" Param 'Two': World",
+					" Param 'Three': !",
+					"OnClose",
+					"OnStop"
+				};
+
+				Assert.That(contents, Is.EqualTo(expected));
+
+			}
+			finally
+			{
+				File.Delete(tmp);
+			}
 		}
 	}
 }

@@ -137,7 +137,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		public bool IsControlIteration { get; set; }
 	}
 
-	internal class VariantMessage
+	internal abstract class VariantMessage
 	{
 		public enum ValueType
 		{
@@ -171,5 +171,31 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 	{
 		[JsonProperty("property")]
 		public string Property { get; set; }
+	}
+
+	internal class GetPropertyResponse : VariantMessage
+	{
+	}
+
+	internal class CallRequest
+	{
+		public class Param
+		{
+			[JsonProperty("name")]
+			public string Name { get; set; }
+
+			[JsonProperty("value")]
+			public byte[] Value { get; set; }
+		}
+
+		[JsonProperty("method")]
+		public string Method { get; set; }
+
+		[JsonProperty("args")]
+		public List<Param> Args { get; set; }
+	}
+
+	internal class CallResponse : VariantMessage
+	{
 	}
 }
