@@ -34,9 +34,9 @@ using Peach.Core.IO;
 
 namespace Peach.Pro.Core.Publishers
 {
-	[Publisher("Console", true)]
-	[Publisher("Stdout")]
-	[Publisher("stdout.Stdout")]
+	[Publisher("Console")]
+	[Alias("Stdout")]
+	[Alias("stdout.Stdout")]
 	public class ConsolePublisher : Publisher
 	{
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();

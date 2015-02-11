@@ -13,7 +13,7 @@ using Peach.Core.IO;
 
 namespace Peach.Pro.OS.Linux.Publishers
 {
-	[Publisher("Bluetooth", true)]
+	[Publisher("Bluetooth")]
 	[Description("Bluetooth HCI Socket")]
 	[Parameter("Interface", typeof(string), "Name of interface to bind to")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default 3000)", "10000")]

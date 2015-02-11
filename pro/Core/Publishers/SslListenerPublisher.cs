@@ -10,7 +10,7 @@ using Peach.Core;
 
 namespace Peach.Pro.Core.Publishers
 {
-	[Publisher("SslListener", true)]
+	[Publisher("SslListener")]
 	[Parameter("Interface", typeof(IPAddress), "IP of interface to bind to")]
 	[Parameter("Port", typeof(ushort), "Local port to listen on")]
 	[Parameter("ServerCertPath", typeof(string), "Path to server certificate file")]

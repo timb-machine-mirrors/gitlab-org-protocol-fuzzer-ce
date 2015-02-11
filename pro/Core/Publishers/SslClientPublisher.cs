@@ -11,7 +11,7 @@ using Peach.Core;
 
 namespace Peach.Pro.Core.Publishers
 {
-	[Publisher("Ssl", true)]
+	[Publisher("Ssl")]
 	[Parameter("Host", typeof(string), "Hostname to connect to")]
 	[Parameter("Port", typeof(ushort), "Port to connect to")]
 	[Parameter("VerifyServer", typeof(bool), "Verify the server certificate", "false")]

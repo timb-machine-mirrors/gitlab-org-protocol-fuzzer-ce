@@ -39,8 +39,8 @@ using Peach.Pro.OS.Windows.Publishers.Com;
 
 namespace Peach.Pro.OS.Windows.Publishers
 {
-	[Publisher("Com", true)]
-	[Publisher("com.Com")]
+	[Publisher("Com")]
+	[Alias("com.Com")]
 	[Parameter("clsid", typeof(string), "COM CLSID of object")]
 	public class ComPublisher : Publisher
 	{

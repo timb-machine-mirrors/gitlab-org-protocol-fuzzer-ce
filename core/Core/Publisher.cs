@@ -435,11 +435,18 @@ namespace Peach.Core
 	/// Used to indicate a class is a valid Publisher and 
 	/// provide it's invoking name used in the Pit XML file.
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 	public class PublisherAttribute : PluginAttribute
 	{
-		public PublisherAttribute(string name, bool isDefault = false)
-			: base(typeof(Publisher), name, isDefault)
+		// ReSharper disable once UnusedParameter.Local
+		[Obsolete("This constructor is obsolete. Use the constructor without the isDefault argument.")]
+		public PublisherAttribute(string name, bool isDefault)
+			: base(typeof(Publisher), name, true)
+		{
+		}
+
+		public PublisherAttribute(string name)
+			: base(typeof(Publisher), name, true)
 		{
 		}
 	}

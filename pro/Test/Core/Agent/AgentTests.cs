@@ -498,7 +498,7 @@ namespace Peach.Pro.Test.Core.Agent
 			Assert.That(actual, Is.EqualTo(expected));
 		}
 
-		[Publisher("TestRemoteFile", true, IsTest = true)]
+		[Publisher("TestRemoteFile", IsTest = true)]
 		[Parameter("FileName", typeof(string), "Name of file to open for reading/writing")]
 		public class TestRemoteFilePublisher : StreamPublisher
 		{
