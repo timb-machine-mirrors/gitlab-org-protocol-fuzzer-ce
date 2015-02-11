@@ -33,6 +33,14 @@ namespace Peach.Core
 {
 	public static class Usage
 	{
+		private class PluginAlias : PluginAttribute
+		{
+			public PluginAlias(Type type, string name)
+				: base(type, name, false)
+			{
+			}
+		}
+
 		private class TypeComparer : IComparer<Type>
 		{
 			public int Compare(Type x, Type y)
@@ -117,6 +125,9 @@ namespace Peach.Core
 
 				bool added = attrs.Add(type.Key);
 				System.Diagnostics.Debug.Assert(added);
+
+				foreach (var a in type.Value.GetAttributes<AliasAttribute>())
+					attrs.Add(new PluginAlias(type.Value, a.Name));
 			}
 
 			Console.WriteLine("----- Data Elements --------------------------------------------");

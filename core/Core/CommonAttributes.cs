@@ -72,7 +72,7 @@ namespace Peach.Core
 		}
 	}
 
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 	public abstract class PluginAttribute : Attribute
 	{
 		public string Name { get; private set; }
@@ -111,6 +111,17 @@ namespace Peach.Core
 			ElementName = pluginType.Name;
 			AttributeName = attributeName;
 			PluginType = pluginType;
+		}
+	}
+
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
+	public class AliasAttribute : Attribute
+	{
+		public string Name { get; set; }
+
+		public AliasAttribute(string name)
+		{
+			Name = name;
 		}
 	}
 }

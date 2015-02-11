@@ -36,7 +36,7 @@ using Monitor = Peach.Core.Agent.Monitor;
 
 namespace Peach.Pro.OS.Windows.Agent.Monitors
 {
-	[Monitor("PageHeap", true)]
+	[Monitor("PageHeap")]
 	[Description("Enables page heap debugging options for an executable")]
 	[Parameter("Executable", typeof(string), "Name of executable to enable")]
 	[Parameter("WinDbgPath", typeof(string), "Path to WinDbg install.  If not provided we will try and locate it.", "")]

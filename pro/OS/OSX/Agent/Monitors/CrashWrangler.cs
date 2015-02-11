@@ -49,8 +49,8 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 	/// Monitor will use OS X's built in CrashReporter (similar to watson)
 	/// to detect and report crashes.
 	/// </summary>
-	[Monitor("CrashWrangler", true)]
-	[Monitor("osx.CrashWrangler")]
+	[Monitor("CrashWrangler")]
+	[Alias("osx.CrashWrangler")]
 	[Core.Description("Launch a process and monitor it for crashes")]
 	[Parameter("Executable", typeof(string), "Executable to launch")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]

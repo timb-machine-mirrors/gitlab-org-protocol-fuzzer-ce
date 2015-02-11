@@ -42,10 +42,10 @@ using Random = Peach.Core.Random;
 
 namespace Peach.Pro.OS.Windows.Agent.Monitors
 {
-	[Monitor("WindowsDebugger", true)]
-	[Monitor("WindowsDebuggerHybrid")]
-	[Monitor("WindowsDebugEngine")]
-	[Monitor("debugger.WindowsDebugEngine")]
+	[Monitor("WindowsDebugger")]
+	[Alias("WindowsDebuggerHybrid")]
+	[Alias("WindowsDebugEngine")]
+	[Alias("debugger.WindowsDebugEngine")]
 	[Description("Controls a Windows debugger instance")]
 	[Parameter("Executable", typeof(string), "Executable to launch", "")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
