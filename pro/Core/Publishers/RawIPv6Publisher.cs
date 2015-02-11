@@ -40,9 +40,9 @@ namespace Peach.Pro.Core.Publishers
 	/// This publisher does not expect an IP header in the output buffer.
 	/// The IP header is always included in the input buffer.
 	/// </summary>
-	[Publisher("RawV6", true)]
-	[Publisher("Raw6")]
-	[Publisher("raw.Raw6")]
+	[Publisher("RawV6")]
+	[Alias("Raw6")]
+	[Alias("raw.Raw6")]
 	[Parameter("Host", typeof(string), "Hostname or IP address of remote host")]
 	[Parameter("Interface", typeof(IPAddress), "IP of interface to bind to", "")]
 	[Parameter("Protocol", typeof(byte), "IP protocol to use")]

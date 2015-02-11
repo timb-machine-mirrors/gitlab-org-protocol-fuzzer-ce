@@ -1908,9 +1908,9 @@ namespace Peach.Core.Analyzers
 			var cls = node.getAttrString("class");
 			var arg = handleParams(node);
 
-			var type = ClassLoader.FindTypeByAttribute<A>((x, y) => y.Name == cls);
+			var type = ClassLoader.FindPluginByName<A>(cls);
 			if (type == null)
-				throw new PeachException(string.Format("Error, unable to locate {0} named '{1}', FindTypeByAttribute returned null.", pluginType, cls));
+				throw new PeachException(string.Format("Error, unable to locate {0} '{1}'.", pluginType, cls));
 
 			validateParameterAttributes<A>(type, pluginType, cls, arg);
 
@@ -1945,19 +1945,6 @@ namespace Peach.Core.Analyzers
 		protected void validateParameterAttributes<A>(Type type, string pluginType, string name, IDictionary<string, Variant> xmlParameters) where A : PluginAttribute
 		{
 			var objParams = type.GetAttributes<ParameterAttribute>(null);
-
-			var inherit = type.GetAttributes<InheritParameterAttribute>(null).FirstOrDefault();
-			if (inherit != null)
-			{
-				string otherClass = (string)xmlParameters[inherit.parameter];
-
-				var otherType = ClassLoader.FindTypeByAttribute<A>((x, y) => y.Name == otherClass);
-				if (otherType == null)
-					return;
-
-				var otherParams = otherType.GetAttributes<ParameterAttribute>(null);
-				objParams = otherParams.Concat(objParams);
-			}
 
 			var missing = objParams.Where(a => a.required && !xmlParameters.ContainsKey(a.name)).Select(a => a.name).FirstOrDefault();
 			if (missing != null)

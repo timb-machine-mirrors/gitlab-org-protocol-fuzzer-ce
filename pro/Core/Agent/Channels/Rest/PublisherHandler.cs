@@ -30,9 +30,9 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 				Url = "/p/publisher/" + Guid.NewGuid();
 
-				var type = ClassLoader.FindTypeByAttribute<PublisherAttribute>((x, y) => y.Name == req.Class);
+				var type = ClassLoader.FindPluginByName<PublisherAttribute>(req.Class);
 				if (type == null)
-					throw new PeachException(string.Format("Error, unable to locate Publisher named '{0}', FindTypeByAttribute returned null.", req.Class));
+					throw new PeachException("Error, unable to locate Publisher '{0}'.".Fmt(req.Class));
 
 				_publisher = (Publisher)Activator.CreateInstance(type, req.Args.ToDictionary(i => i.Key, i => new Variant(i.Value)));
 				_publisher.Name = req.Name;
