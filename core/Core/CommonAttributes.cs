@@ -61,17 +61,6 @@ namespace Peach.Core
 		}
 	}
 
-	[AttributeUsage(AttributeTargets.All, AllowMultiple = false, Inherited = false)]
-	public class DescriptionAttribute : Attribute
-	{
-		public string Description { get; private set; }
-
-		public DescriptionAttribute(string description)
-		{
-			this.Description = description;
-		}
-	}
-
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 	public abstract class PluginAttribute : Attribute
 	{

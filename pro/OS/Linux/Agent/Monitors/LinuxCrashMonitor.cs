@@ -39,7 +39,7 @@ using Peach.Core.Agent;
 namespace Peach.Pro.OS.Linux.Agent.Monitors
 {
 	[Monitor("LinuxCrashMonitor")]
-	[Peach.Core.Description("Detect when a process crashes and collect there resulting core file")]
+	[Description("Detect when a process crashes and collect there resulting core file")]
 	[Parameter("Executable", typeof(string), "Target executable used to filter crashes.", "")]
 	[Parameter("LogFolder", typeof(string), "Folder with log files. Defaults to /var/peachcrash", "/var/peachcrash")]
 	[Parameter("Mono", typeof(string), "Full path and executable for mono runtime. Defaults to /usr/bin/mono.", "/usr/bin/mono")]

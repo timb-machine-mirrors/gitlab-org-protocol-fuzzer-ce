@@ -30,6 +30,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Pro.Core.Fixups.Libraries;

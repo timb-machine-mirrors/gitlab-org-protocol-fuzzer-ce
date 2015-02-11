@@ -3,6 +3,7 @@
 //
 
 using System;
+using System.ComponentModel;
 using System.Linq;
 using Peach.Core;
 using Peach.Core.Dom;
@@ -12,7 +13,7 @@ namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("StringUtf8ExtraBytes")]
 	[Description("Encode string as UTF-8 with overlong encodings.")]
-	public partial class StringUtf8ExtraBytes : Mutator
+	public class StringUtf8ExtraBytes : Mutator
 	{
 		int total;
 

@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using Ionic.BZip2;
 using Peach.Core;

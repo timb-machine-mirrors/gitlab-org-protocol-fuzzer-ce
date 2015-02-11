@@ -27,6 +27,7 @@
 // $Id$
 
 using System.Collections.Generic;
+using System.ComponentModel;
 using Microsoft.Win32;
 using NLog;
 using Peach.Core;
