@@ -38,7 +38,8 @@ using Monitor = Peach.Core.Agent.Monitor;
 
 namespace Peach.Pro.Core.Agent.Monitors
 {
-	[Monitor("Pcap")]
+	[Monitor("NetworkCapture")]
+	[Alias("Pcap")]
 	[Alias("network.PcapMonitor")]
 	[Description("Performs a network capture during the fuzzing iteration")]
 	[Parameter("Device", typeof(string), "Device name for capturing on")]
