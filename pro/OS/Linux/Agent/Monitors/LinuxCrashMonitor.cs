@@ -38,7 +38,7 @@ using Peach.Core.Agent;
 
 namespace Peach.Pro.OS.Linux.Agent.Monitors
 {
-	[Monitor("LinuxCrashMonitor", true)]
+	[Monitor("LinuxCrashMonitor")]
 	[Peach.Core.Description("Detect when a process crashes and collect there resulting core file")]
 	[Parameter("Executable", typeof(string), "Target executable used to filter crashes.", "")]
 	[Parameter("LogFolder", typeof(string), "Folder with log files. Defaults to /var/peachcrash", "/var/peachcrash")]

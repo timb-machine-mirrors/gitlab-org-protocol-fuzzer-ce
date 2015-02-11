@@ -94,7 +94,7 @@ namespace Peach.Pro.Core.Agent
 		{
 			Logger.Debug("StartMonitor: {0} {1}", name, cls);
 
-			var type = ClassLoader.FindTypeByAttribute<MonitorAttribute>((x, y) => y.Name == cls);
+			var type = ClassLoader.FindPluginByName<MonitorAttribute>(cls);
 			if (type == null)
 				throw new PeachException("Error, unable to locate Monitor '" + cls + "'");
 

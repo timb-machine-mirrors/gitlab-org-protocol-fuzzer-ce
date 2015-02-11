@@ -109,7 +109,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				{
 					var cls = item.Class;
 					var key = item.Name ?? _monitors.UniqueName();
-					var type = ClassLoader.FindTypeByAttribute<MonitorAttribute>((t, a) => a.Name == cls);
+					var type = ClassLoader.FindPluginByName<MonitorAttribute>(cls);
 
 					if (type == null)
 						throw new PeachException("Couldn't load monitor");

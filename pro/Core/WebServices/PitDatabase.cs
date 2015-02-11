@@ -307,7 +307,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 			var ret = new List<Monitor>();
 
-			foreach (var kv in ClassLoader.GetAllByAttribute<MonitorAttribute>((t, a) => a.IsDefault))
+			foreach (var kv in ClassLoader.GetAllByAttribute<MonitorAttribute>())
 			{
 #if !DEBUG
 				if (kv.Key.IsTest)
@@ -611,10 +611,7 @@ namespace Peach.Pro.Core.WebServices
 					};
 
 					var monitor1 = monitor;
-					var type = ClassLoader.GetAllByAttribute<MonitorAttribute>(
-						(t, attr) => attr.Name == monitor1.Class)
-							.Select(kv => kv.Value)
-							.FirstOrDefault();
+					var type = ClassLoader.FindPluginByName<MonitorAttribute>(monitor1.Class);
 					if (type == null)
 					{
 						// No plugin found, make up some reasonable content

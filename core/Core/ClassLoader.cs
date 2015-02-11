@@ -406,6 +406,22 @@ namespace Peach.Core
 		}
 
 		/// <summary>
+		/// Finds the first type that matches the specified query.
+		/// </summary>
+		/// <typeparam name="TAttr">PluginAttribute type to find.</typeparam>
+		/// <param name="name">The name of the plugin to search for.</param>
+		/// <returns>Returns the Type found or null if not found.</returns>
+		public static Type FindPluginByName<TAttr>(string name)
+			where TAttr : PluginAttribute
+		{
+			return GetAllByAttribute<TAttr>(
+				(t, a) =>
+					a.Name == name ||
+					t.GetAttributes<AliasAttribute>().Any(x => x.Name == name))
+				.FirstOrDefault().Value;
+		}
+
+		/// <summary>
 		/// Find and create and instance of class by parent type and 
 		/// name.
 		/// </summary>
