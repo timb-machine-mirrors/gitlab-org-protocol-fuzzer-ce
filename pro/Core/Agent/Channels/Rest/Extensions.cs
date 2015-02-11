@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -91,6 +92,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				}
 			}
 		}
+
 		public static object Consume(this HttpWebResponse resp)
 		{
 			using (var strm = resp.GetResponseStream())
@@ -105,8 +107,37 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			return null;
 		}
 
+		/// <summary>
+		/// Try and get a integer value from the query string.
+		/// Fails if the value for the key is not a number or negative.
+		/// If the key is not found, the value is set to the default value.
+		/// The default value is allowed to be negative.
+		/// </summary>
+		/// <param name="query">Query string</param>
+		/// <param name="key">Key to look for</param>
+		/// <param name="value">Where to store the parsed value</param>
+		/// <param name="defaultValue">Default value if the key is not found</param>
+		/// <returns>True if key is not found or key is a valid positive long number.</returns>
+		public static bool TryGetValue(this NameValueCollection query, string key, out long value, long defaultValue)
+		{
+			var asStr = query[key];
+			if (asStr != null)
+			{
+				if (!long.TryParse(asStr, out value))
+					return false;
+
+				return value >= 0;
+			}
+
+			value = defaultValue;
+			return true;
+		}
+
 		public static T ToModel<T>(this Variant v) where T : VariantMessage, new()
 		{
+			if (v == null)
+				return null;
+
 			var ret = new T();
 
 			var type = v.GetVariantType();
@@ -162,6 +193,9 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		public static Variant ToVariant(this VariantMessage msg)
 		{
+			if (msg == null)
+				return null;
+
 			switch (msg.Type)
 			{
 				//case VariantMessage.ValueType.Bool:

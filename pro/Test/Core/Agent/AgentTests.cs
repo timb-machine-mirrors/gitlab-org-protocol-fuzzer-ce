@@ -6,15 +6,12 @@ using System.Text;
 using NLog;
 using NUnit.Framework;
 using Peach.Core;
-using Peach.Core.Agent;
 using Peach.Core.Analyzers;
-using Peach.Core.Dom;
 using Peach.Core.IO;
 using Peach.Core.Test;
 using Peach.Pro.Core.Publishers;
 using Encoding = Peach.Core.Encoding;
 using Logger = NLog.Logger;
-using Monitor = Peach.Core.Agent.Monitor;
 
 namespace Peach.Pro.Test.Core.Agent
 {
@@ -22,30 +19,30 @@ namespace Peach.Pro.Test.Core.Agent
 	[Category("Peach")]
 	public class AgentTests
 	{
-		SingleInstance si;
+		SingleInstance _si;
 
 		[SetUp]
 		public void SetUp()
 		{
-			si = SingleInstance.CreateInstance("Peach.Core.Test.Agent.AgentTests");
-			si.Lock();
+			_si = SingleInstance.CreateInstance("Peach.Core.Test.Agent.AgentTests");
+			_si.Lock();
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
-			si.Dispose();
-			si = null;
+			_si.Dispose();
+			_si = null;
 		}
 
-		public Process process;
+		Process _process;
 
 		class AgentKillerPublisher : Publisher
 		{
 			private readonly AgentTests _owner;
 			private readonly RunContext _context;
 
-			static readonly Logger logger = LogManager.GetCurrentClassLogger();
+			static readonly Logger ClassLogger = LogManager.GetCurrentClassLogger();
 
 			public AgentKillerPublisher(AgentTests owner, RunContext context)
 				: base(new Dictionary<string, Variant>())
@@ -56,7 +53,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 			protected override Logger Logger
 			{
-				get { return logger; }
+				get { return ClassLogger; }
 			}
 
 			protected override void OnOpen()
@@ -76,13 +73,13 @@ namespace Peach.Pro.Test.Core.Agent
 
 		public void StartAgent()
 		{
-			process = Helpers.StartAgent();
+			_process = Helpers.StartAgent();
 		}
 
 		public void StopAgent()
 		{
-			Helpers.StopAgent(process);
-			process = null;
+			Helpers.StopAgent(_process);
+			_process = null;
 		}
 
 		static string CrashableServer
@@ -181,7 +178,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 				e.startFuzzing(dom, config);
 
-				Assert.Greater(faults.Count, 0);
+				Assert.Greater(_faults.Count, 0);
 
 				var contents = File.ReadAllLines(tmp);
 				var expected = new[] {
@@ -205,18 +202,18 @@ namespace Peach.Pro.Test.Core.Agent
 			}
 			finally
 			{
-				if (process != null)
+				if (_process != null)
 					StopAgent();
 
 				File.Delete(tmp);
 			}
 		}
 
-		readonly Dictionary<uint, Fault[]> faults = new Dictionary<uint, Fault[]>();
+		readonly Dictionary<uint, Fault[]> _faults = new Dictionary<uint, Fault[]>();
 
 		void e_Fault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faultData)
 		{
-			faults[currentIteration] = faultData;
+			_faults[currentIteration] = faultData;
 		}
 
 		[Test]
@@ -277,11 +274,11 @@ namespace Peach.Pro.Test.Core.Agent
 				e.Fault += e_Fault;
 				e.startFuzzing(dom, config);
 
-				Assert.Greater(faults.Count, 0);
+				Assert.Greater(_faults.Count, 0);
 			}
 			finally
 			{
-				if (process != null)
+				if (_process != null)
 					StopAgent();
 			}
 		}
@@ -338,7 +335,7 @@ namespace Peach.Pro.Test.Core.Agent
 			}
 			finally
 			{
-				if (process != null)
+				if (_process != null)
 					StopAgent();
 			}
 		}
@@ -392,7 +389,7 @@ namespace Peach.Pro.Test.Core.Agent
 			}
 			finally
 			{
-				if (process != null)
+				if (_process != null)
 					StopAgent();
 			}
 		}
@@ -495,7 +492,7 @@ namespace Peach.Pro.Test.Core.Agent
 				"Local2.mon2.StopMonitor",
 				"Local2.mon1.StopMonitor",
 				"Local1.mon2.StopMonitor",
-				"Local1.mon1.StopMonitor",
+				"Local1.mon1.StopMonitor"
 			};
 
 			Assert.That(actual, Is.EqualTo(expected));
@@ -505,12 +502,12 @@ namespace Peach.Pro.Test.Core.Agent
 		[Parameter("FileName", typeof(string), "Name of file to open for reading/writing")]
 		public class TestRemoteFilePublisher : StreamPublisher
 		{
-			private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-			protected override Logger Logger { get { return logger; } }
+			private static readonly Logger ClassLogger = LogManager.GetCurrentClassLogger();
+			protected override Logger Logger { get { return ClassLogger; } }
 
 			public string FileName { get; set; }
 
-			static readonly byte[] data = Encoding.ASCII.GetBytes("0123456789");
+			static readonly byte[] Data = Encoding.ASCII.GetBytes("0123456789");
 
 			public TestRemoteFilePublisher(Dictionary<string, Variant> args)
 				: base(args)
@@ -561,7 +558,7 @@ namespace Peach.Pro.Test.Core.Agent
 				Log("OnInput");
 
 				// Write some bytes
-				stream.Write(data, 0, 5);
+				stream.Write(Data, 0, 5);
 				stream.Seek(0, SeekOrigin.Begin);
 			}
 
@@ -573,7 +570,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 				for (var i = 0; i < count; ++i)
 				{
-					stream.WriteByte(data[stream.Length % data.Length]);
+					stream.WriteByte(Data[stream.Length % Data.Length]);
 				}
 
 				stream.Position = pos;
@@ -601,8 +598,12 @@ namespace Peach.Pro.Test.Core.Agent
 
 				switch (property)
 				{
+					case "long":
+						return new Variant(long.MinValue);
+					case "ulong":
+						return new Variant(ulong.MaxValue);
 					case "int":
-						return new Variant((int)100);
+						return new Variant(100);
 					case "string":
 						return new Variant("This is a string");
 					case "bytes":
@@ -626,14 +627,20 @@ namespace Peach.Pro.Test.Core.Agent
 			{
 				var sb = new StringBuilder();
 
+				sb.AppendFormat("Call: {0}", method);
+				sb.AppendLine();
+
 				for (var i = 0; i < args.Count; ++i)
 				{
-					sb.AppendFormat("Param {0}: {1}", args[i].Name, Encoding.ASCII.GetString(args[i].ToArray()));
+					sb.AppendFormat(" Param '{0}': {1}", args[i].Name, Encoding.ASCII.GetString(args[i].ToArray()));
 					if (i < (args.Count - 1))
 						sb.AppendLine();
 				}
 
 				Log(sb.ToString());
+
+				if (method == "null")
+					return null;
 
 				return new Variant(Bits.Fmt("{0:L8}{1}", 7, "Success"));
 			}
@@ -762,7 +769,7 @@ namespace Peach.Pro.Test.Core.Agent
 					"GetProperty: bytes",
 					"GetProperty: bits",
 					"OnClose",
-					"OnStop",
+					"OnStop"
 				};
 
 				Assert.That(contents, Is.EqualTo(expected));
@@ -781,7 +788,7 @@ namespace Peach.Pro.Test.Core.Agent
 			}
 			finally
 			{
-				if (process != null)
+				if (_process != null)
 					StopAgent();
 			}
 		}

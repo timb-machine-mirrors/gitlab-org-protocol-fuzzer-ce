@@ -57,12 +57,9 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			public void Connect()
 			{
-				_publisherUri = _client._baseUrl;
-				var resp = Send<PublisherResponse>("POST", "/pa/publisher", _createReq);
+				_publisherUri = new Uri(_client._baseUrl, "/p/publisher");
+				var resp = Send<PublisherResponse>("POST", "", _createReq);
 				_publisherUri = new Uri(_client._baseUrl, resp.Url);
-
-				InputStream.Position = 0;
-				InputStream.SetLength(0);
 			}
 
 			public void Open(uint iteration, bool isControlIteration)
@@ -74,6 +71,9 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				};
 
 				Send("PUT", "/open", req);
+
+				InputStream.Position = 0;
+				InputStream.SetLength(0);
 			}
 
 			public void Close()
@@ -88,7 +88,29 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			public Variant Call(string method, List<BitwiseStream> args)
 			{
-				throw new NotImplementedException();
+				var req = new CallRequest
+				{
+					Method = method,
+					Args = new List<CallRequest.Param>()
+				};
+
+				foreach (var arg in args)
+				{
+					var param = new CallRequest.Param
+					{
+						Name = arg.Name,
+						Value = new byte[arg.Length]
+					};
+
+					arg.Seek(0, SeekOrigin.Begin);
+					arg.Read(param.Value, 0, param.Value.Length);
+
+					req.Args.Add(param);
+				}
+
+				var resp = Send<CallResponse>("PUT", "/call", req);
+
+				return resp.ToVariant();
 			}
 
 			public void SetProperty(string property, Variant value)
@@ -121,12 +143,18 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					InputStream.SetLength(0);
 				}
 
-				ReadInputData("");
+				// Read all input bytes starting at offset 'Length'
+				// so we don't re-download bytes we have already gotten.
+
+				ReadInputData("?offset={0}".Fmt(InputStream.Length));
 			}
 
 			public void WantBytes(long count)
 			{
-				ReadInputData("?offset={0}&count={1}".Fmt(InputStream.Length, count));
+				var needed = count - InputStream.Length + InputStream.Position;
+
+				if (needed > 0)
+					ReadInputData("?offset={0}&count={1}".Fmt(InputStream.Length, needed));
 			}
 
 			private void Send(string method, string path, object request)
@@ -145,7 +173,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			{
 				var uri = new Uri(_publisherUri, _publisherUri.PathAndQuery + "/data" + query);
 
-				_client.Execute("PUT", uri, (object)null, null, resp =>
+				_client.Execute("GET", uri, (object)null, null, resp =>
 				{
 					var pos = InputStream.Position;
 
@@ -177,7 +205,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		private ConnectRequest _connectReq;
 		private ConnectResponse _connectResp;
 		private Uri _agentUri;
-		private bool _online;
+		private bool _offline;
 
 		public Client(string name, string uri, string password)
 			: base(name, uri, password)
@@ -194,6 +222,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		public override void AgentConnect()
 		{
+			_offline = false;
+
 			_connectReq = new ConnectRequest
 			{
 				Monitors = new List<ConnectRequest.Monitor>(),
@@ -212,7 +242,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		public override void SessionStarting()
 		{
-			_online = true;
+			_offline = false;
 
 			if (_connectReq.Monitors.Count > 0)
 			{
@@ -232,6 +262,9 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			Send("DELETE", "", null);
 
 			_connectResp = null;
+
+			// Leave the publishers around a they will get cleaned up
+			// when stop() is called on the RemotePublisher
 		}
 
 		public override void StopAllMonitors()
@@ -252,7 +285,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		public override void IterationStarting(IterationStartingArgs args)
 		{
 			// If any previous call failed, we need to reconnect
-			if (!_online)
+			if (_offline)
 				SessionStarting();
 
 			if (!_connectResp.Messages.Contains("IterationStarting"))
@@ -393,7 +426,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			Action<HttpWebRequest, TIn> encode,
 			Func<HttpWebResponse, TOut> decode)
 		{
-			if (!_online)
+			if (_offline)
 			{
 				Logger.Debug("Agent server '{0}' is offline, ignoring command '{3} {4}'.",
 					Url, method, uri.PathAndQuery);
@@ -408,7 +441,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 				req.Method = method;
 
-				if (request.Equals(default(TIn)))
+				if (Equals(request, default(TIn)))
 					req.ContentLength = 0;
 				else
 					encode(req, request);
@@ -427,7 +460,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					Logger.Debug(ex.Message);
 
 					// Mark offline to trigger a future reconnect
-					_online = false;
+					_offline = true;
 
 					throw;
 				}
@@ -446,7 +479,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 						Logger.Debug(ex.Message);
 
 						// Mark offline to trigger a future reconnect
-						_online = false;
+						_offline = true;
 
 						// Consume all bytes sent to us in the response
 						resp.Consume();
