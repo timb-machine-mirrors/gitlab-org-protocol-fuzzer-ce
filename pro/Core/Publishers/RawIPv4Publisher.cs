@@ -63,9 +63,9 @@ namespace Peach.Pro.Core.Publishers
 	/// Mac raw sockets don't support TCP or UDP receptions.
 	/// See the "b. FreeBSD" section at: http://sock-raw.org/papers/sock_raw
 	/// </remarks>
-	[Publisher("RawV4", true)]
-	[Publisher("Raw")]
-	[Publisher("raw.Raw")]
+	[Publisher("RawV4")]
+	[Alias("Raw")]
+	[Alias("raw.Raw")]
 	[Parameter("Host", typeof(string), "Hostname or IP address of remote host")]
 	[Parameter("Interface", typeof(IPAddress), "IP of interface to bind to", "")]
 	[Parameter("Protocol", typeof(byte), "IP protocol to use")]
@@ -115,9 +115,9 @@ namespace Peach.Pro.Core.Publishers
 	/// Mac raw sockets don't support TCP or UDP receptions.
 	/// See the "b. FreeBSD" section at: http://sock-raw.org/papers/sock_raw
 	/// </remarks>
-	[Publisher("RawIPv4", true)]
-	[Publisher("RawIp")]
-	[Publisher("raw.RawIp")]
+	[Publisher("RawIPv4")]
+	[Alias("RawIp")]
+	[Alias("raw.RawIp")]
 	[Parameter("Host", typeof(string), "Hostname or IP address of remote host")]
 	[Parameter("Interface", typeof(IPAddress), "IP of interface to bind to", "")]
 	[Parameter("Protocol", typeof(byte), "IP protocol to use")]

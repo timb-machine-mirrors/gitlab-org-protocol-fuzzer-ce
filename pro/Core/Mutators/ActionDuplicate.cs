@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using Peach.Core;
 using Peach.Core.Dom;
 

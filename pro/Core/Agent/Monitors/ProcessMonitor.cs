@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -42,8 +43,8 @@ namespace Peach.Pro.Core.Agent.Monitors
 	/// <summary>
 	/// Start a process
 	/// </summary>
-	[Monitor("Process", true)]
-	[Monitor("process.Process")]
+	[Monitor("Process")]
+	[Alias("process.Process")]
 	[Description("Controls a process during a fuzzing run")]
 	[Parameter("Executable", typeof(string), "Executable to launch")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]

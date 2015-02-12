@@ -2,6 +2,7 @@
 // Copyright (c) Deja vu Security
 //
 
+using System.ComponentModel;
 using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
@@ -9,6 +10,7 @@ using Peach.Core.Dom;
 namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("NumberVariance")]
+	[Description("Produce Gaussian distributed numbers around a numerical value.")]
 	public class NumberVariance : Utility.IntegerVariance
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();

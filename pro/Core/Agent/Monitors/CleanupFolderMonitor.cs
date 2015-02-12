@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using NLog;
@@ -8,7 +9,7 @@ using Peach.Core.Agent;
 
 namespace Peach.Pro.Core.Agent.Monitors
 {
-	[Monitor("CleanupFolder", true)]
+	[Monitor("CleanupFolder")]
 	[Description("Remove folder contents created by a target during runtime")]
 	[Parameter("Folder", typeof(string), "The folder to cleanup.")]
 	public class CleanupFolderMonitor : Monitor

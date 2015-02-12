@@ -1,4 +1,3 @@
-﻿
 //
 // Copyright (c) Michael Eddington
 //
@@ -28,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
@@ -75,5 +75,3 @@ namespace Peach.Pro.Core.Transformers.Encode
         }
     }
 }
-
-// end

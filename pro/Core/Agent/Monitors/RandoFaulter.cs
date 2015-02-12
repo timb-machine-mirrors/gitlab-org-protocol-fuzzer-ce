@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -7,7 +8,7 @@ using Peach.Core.Agent;
 
 namespace Peach.Pro.Core.Agent.Monitors
 {
-	[Monitor("RandoFaulter", true, IsTest = true)]
+	[Monitor("RandoFaulter", Internal = true)]
 	[Description("Generate random faults for metrics testing")]
 	[Parameter("Fault", typeof(int), "How often to fault", "10")]
 	[Parameter("NewMajor", typeof(int), "How often to generate a new major", "5")]

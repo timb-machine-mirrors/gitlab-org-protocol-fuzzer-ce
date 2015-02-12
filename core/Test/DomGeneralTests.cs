@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using Peach.Core.Dom;
-using NLog;
 using System.IO;
 using Peach.Core.Analyzers;
 
@@ -13,14 +12,15 @@ namespace Peach.Core.Test
 	[TestFixture] [Category("Peach")]
 	class DomGeneralTests
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
-
 		[Test]
 		public void Find()
 		{
-			DataModel dm = new DataModel("root");
-			dm.Add(new Block("block1"));
-			dm.Add(new Block("block2"));
+			var dm = new DataModel("root")
+			{
+				new Block("block1"),
+				new Block("block2")
+			};
+
 			((DataElementContainer)dm[0]).Add(new Block("block1_1"));
 			((DataElementContainer)dm[0]).Add(new Block("block1_2"));
 			((DataElementContainer)dm[1]).Add(new Block("block2_1"));
@@ -40,6 +40,14 @@ namespace Peach.Core.Test
 			Assert.NotNull(dm.find("string1_1_1").find("string2_1_2"));
 		}
 
+		static IEnumerable<string> GetPluginNames(PluginAttribute attr, Type type)
+		{
+			yield return string.Format("{0} '{1}'", attr.Type.Name, attr.Name);
+
+			foreach (var alias in type.GetAttributes<AliasAttribute>())
+				yield return string.Format("{0} '{1}'", attr.Type.Name, alias.Name);
+		}
+
 		[Test]
 		public void PluginAttributes()
 		{
@@ -55,7 +63,7 @@ namespace Peach.Core.Test
 			var pluginsByType = new Dictionary<Type, List<PluginAttribute>>();
 			var pluginsByName = new Dictionary<string, KeyValuePair<PluginAttribute, Type>>();
 
-			foreach (var kv in ClassLoader.GetAllByAttribute<Peach.Core.PluginAttribute>(null))
+			foreach (var kv in ClassLoader.GetAllByAttribute<PluginAttribute>(null))
 			{
 				var attr = kv.Key;
 				var type = kv.Value;
@@ -65,29 +73,30 @@ namespace Peach.Core.Test
 
 				pluginsByType[type].Add(attr);
 
-				string pluginName = string.Format("{0} '{1}'", attr.Type.Name, attr.Name);
-
-				// Verify #4 (no name collisions)
-				if (pluginsByName.ContainsKey(pluginName))
+				foreach (var pluginName in GetPluginNames(attr, type))
 				{
-					var old = pluginsByName[pluginName];
-
-					errors.AppendLine();
-
-					if (old.Value == kv.Value)
+					// Verify #4 (no name collisions)
+					if (pluginsByName.ContainsKey(pluginName))
 					{
-						errors.AppendFormat("{0} declared more than once in assembly '{1}' class '{2}'.",
-							pluginName, kv.Value.Assembly.Location, kv.Value.FullName);
+						var old = pluginsByName[pluginName];
+
+						errors.AppendLine();
+
+						if (old.Value == kv.Value)
+						{
+							errors.AppendFormat("{0} declared more than once in assembly '{1}' class '{2}'.",
+								pluginName, kv.Value.Assembly.Location, kv.Value.FullName);
+						}
+						else
+						{
+							errors.AppendFormat("{0} declared in assembly '{1}' class '{2}' and in assembly {3} and class '{4}'.",
+								pluginName, kv.Value.Assembly.Location, kv.Value.FullName, old.Value.Assembly.Location, old.Value.FullName);
+						}
 					}
 					else
 					{
-						errors.AppendFormat("{0} declared in assembly '{1}' class '{2}' and in assembly {3} and class '{4}'.",
-							pluginName, kv.Value.Assembly.Location, kv.Value.FullName, old.Value.Assembly.Location, old.Value.FullName);
+						pluginsByName.Add(pluginName, kv);
 					}
-				}
-				else
-				{
-					pluginsByName.Add(pluginName, kv);
 				}
 			}
 
@@ -101,8 +110,8 @@ namespace Peach.Core.Test
 				if (pluginTypes.Count != 1)
 				{
 					errors.AppendLine();
-					errors.AppendFormat("Plugin declared in assembly '{1}' class '{2}' has multiple types: '{3}'",
-						attrs[0].Type.Name, type.Assembly.Location, type.FullName, string.Join("', '", pluginTypes));
+					errors.AppendFormat("Plugin declared in assembly '{0}' class '{1}' has multiple types: '{2}'",
+						type.Assembly.Location, type.FullName, string.Join("', '", pluginTypes));
 				}
 
 				// Verify #1 (ensure there is a single default)
@@ -141,13 +150,9 @@ namespace Peach.Core.Test
 
 			}
 
-			string msg = errors.ToString();
+			var msg = errors.ToString();
 
-			if (!string.IsNullOrEmpty(msg))
-			{
-				logger.Debug(msg);
-				Assert.Null(msg);
-			}
+			StringAssert.IsMatch("$^", msg);
 		}
 
 		[Test]
@@ -201,13 +206,9 @@ namespace Peach.Core.Test
 				}
 			}
 
-			string msg = errors.ToString();
+			var msg = errors.ToString();
 
-			if (!string.IsNullOrEmpty(msg))
-			{
-				logger.Debug(msg);
-				Assert.Null(msg);
-			}
+			StringAssert.IsMatch("$^", msg);
 		}
 
 		[Test]
@@ -299,7 +300,7 @@ namespace Peach.Core.Test
 			L   C   E   H   J
 			*/
 
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<DataModel name='F'>
 		<Block name='B'>
@@ -323,7 +324,7 @@ namespace Peach.Core.Test
 ";
 
 			var parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
 			var e = dom.dataModels[0].find("E");
 			Assert.NotNull(e);
@@ -334,28 +335,28 @@ namespace Peach.Core.Test
 			var iter1 = e.EnumerateElementsUpTree().Select(a => a.Name).ToList();
 			var iter2 = e.EnumerateUpTree().Select(a => a.Name).ToList();
 
-			var eEnum = "C,E,A,D,L,B,G,K,I,H,J,F";
+			const string eEnum = "C,E,A,D,L,B,G,K,I,H,J,F";
 			Assert.AreEqual(eEnum, string.Join(",", iter1));
 			Assert.AreEqual(eEnum, string.Join(",", iter2));
 
 			var iter3 = d.EnumerateElementsUpTree().Select(a => a.Name).ToList();
 			var iter4 = d.EnumerateUpTree().Select(a => a.Name).ToList();
 
-			var dEnum = "C,E,A,D,L,B,G,K,I,H,J,F";
+			const string dEnum = "C,E,A,D,L,B,G,K,I,H,J,F";
 			Assert.AreEqual(dEnum, string.Join(",", iter3));
 			Assert.AreEqual(dEnum, string.Join(",", iter4));
 
 			var iter5 = dom.dataModels[0].EnumerateAllElements().Select(a => a.Name).ToList();
 			var iter6 = dom.dataModels[0].EnumerateAll().Select(a => a.Name).ToList();
 
-			var rootAll = "B,G,A,D,L,C,E,K,I,H,J";
+			const string rootAll = "B,G,A,D,L,C,E,K,I,H,J";
 			Assert.AreEqual(rootAll, string.Join(",", iter5));
 			Assert.AreEqual(rootAll, string.Join(",", iter6));
 
 			var iter7 = dom.dataModels[0].EnumerateElementsUpTree().Select(a => a.Name).ToList();
 			var iter8 = dom.dataModels[0].EnumerateUpTree().Select(a => a.Name).ToList();
 
-			var rootEnum = "B,G,A,D,L,C,E,K,I,H,J,F";
+			const string rootEnum = "B,G,A,D,L,C,E,K,I,H,J,F";
 			Assert.AreEqual(rootEnum, string.Join(",", iter7));
 			Assert.AreEqual(rootEnum, string.Join(",", iter8));
 		}

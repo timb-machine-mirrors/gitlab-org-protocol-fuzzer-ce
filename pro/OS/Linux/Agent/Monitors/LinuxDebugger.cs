@@ -16,8 +16,8 @@ using Encoding = Peach.Core.Encoding;
 
 namespace Peach.Pro.OS.Linux.Agent.Monitors
 {
-	[Monitor("LinuxDebugger", true)]
-	[Peach.Core.Description("Uses GDB to launch an executable, monitoring it for exceptions")]
+	[Monitor("LinuxDebugger")]
+	[Description("Uses GDB to launch an executable, monitoring it for exceptions")]
 	[Parameter("Executable", typeof(string), "Executable to launch")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
 	[Parameter("GdbPath", typeof(string), "Path to gdb", "/usr/bin/gdb")]

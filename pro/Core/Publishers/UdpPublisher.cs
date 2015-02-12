@@ -32,7 +32,7 @@ using Peach.Core.IO;
 
 namespace Peach.Pro.Core.Publishers
 {
-	[Publisher("Udp", true)]
+	[Publisher("Udp")]
 	[Parameter("Host", typeof(string), "Hostname or IP address of remote host")]
 	[Parameter("Port", typeof(ushort), "Destination port number", "0")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default 3000)", "3000")]

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Reflection;
 using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Crypto.Engines;
@@ -13,7 +14,7 @@ using Peach.Core.IO;
 namespace Peach.Pro.Core.Fixups
 {
 	[Description("Tls")]
-	[Fixup("Tls", true, IsTest=true)]
+	[Fixup("Tls", true, Internal = true)]
 	[Serializable]
 	public class TlsFixup : VolatileFixup
 	{

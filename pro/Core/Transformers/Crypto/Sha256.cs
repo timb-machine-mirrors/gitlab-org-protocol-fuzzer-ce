@@ -1,4 +1,3 @@
-﻿
 //
 // Copyright (c) Michael Eddington
 //
@@ -28,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Security.Cryptography;
 using Peach.Core;
 using Peach.Core.Dom;
@@ -58,5 +58,3 @@ namespace Peach.Pro.Core.Transformers.Crypto
 		}
 	}
 }
-
-// end

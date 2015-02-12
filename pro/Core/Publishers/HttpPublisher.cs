@@ -39,7 +39,7 @@ using Encoding = Peach.Core.Encoding;
 
 namespace Peach.Pro.Core.Publishers
 {
-	[Publisher("Http", true)]
+	[Publisher("Http")]
 	[Parameter("Method", typeof(string), "Method type")]
 	[Parameter("Url", typeof(string), "Url")]
 	[Parameter("BaseUrl", typeof(string), "Optional BaseUrl for authentication", "")]

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text.RegularExpressions;
 using NLog;
 using Peach.Core;
@@ -8,7 +9,7 @@ using Monitor = Peach.Core.Agent.Monitor;
 
 namespace Peach.Pro.Core.Agent.Monitors
 {
-	[Monitor("RunCommand", true)]
+	[Monitor("RunCommand")]
 	[Description("Launches the specified command to perform a utility function")]
 	[Parameter("Command", typeof(string), "Command line command to run")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]

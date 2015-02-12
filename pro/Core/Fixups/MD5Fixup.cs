@@ -30,6 +30,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Security.Cryptography;
 using Peach.Core;
 using Peach.Core.Dom;

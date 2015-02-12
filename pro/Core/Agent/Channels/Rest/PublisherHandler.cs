@@ -1,0 +1,227 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Net;
+using Peach.Core;
+using Peach.Core.IO;
+
+namespace Peach.Pro.Core.Agent.Channels.Rest
+{
+	internal class PublisherHandler : IDisposable
+	{
+		class Context : INamed, IDisposable
+		{
+			#region Obsolete Functions
+
+			[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+			public string name { get { return Name; } }
+
+			#endregion
+
+			private readonly PublisherHandler _handler;
+			private readonly Publisher _publisher;
+
+			public string Name { get { return _publisher.Name; } }
+			public string Url { get; private set; }
+
+			public Context(PublisherHandler handler, PublisherRequest req)
+			{
+				_handler = handler;
+
+				Url = "/p/publisher/" + Guid.NewGuid();
+
+				var type = ClassLoader.FindPluginByName<PublisherAttribute>(req.Class);
+				if (type == null)
+					throw new PeachException("Error, unable to locate Publisher '{0}'.".Fmt(req.Class));
+
+				_publisher = (Publisher)Activator.CreateInstance(type, req.Args.ToDictionary(i => i.Key, i => new Variant(i.Value)));
+				_publisher.Name = req.Name;
+				_publisher.start();
+
+				_handler._routes.Add(Url, "DELETE", OnDelete);
+				_handler._routes.Add(Url + "/open", "PUT", OnOpen);
+				_handler._routes.Add(Url + "/close", "PUT", OnClose);
+				_handler._routes.Add(Url + "/accept", "PUT", OnAccept);
+				_handler._routes.Add(Url + "/output", "PUT", OnOutput);
+				_handler._routes.Add(Url + "/input", "PUT", OnInput);
+				_handler._routes.Add(Url + "/call", "PUT", OnCall);
+				_handler._routes.Add(Url + "/property", "PUT", OnSetProperty);
+				_handler._routes.Add(Url + "/property", "GET", OnGetProperty);
+				_handler._routes.Add(Url + "/data", "GET", OnWantBytes);
+			}
+
+			public void Dispose()
+			{
+				_publisher.close();
+				_publisher.stop();
+
+				_handler._routes.Remove(Url);
+				_handler._routes.Remove(Url + "/open");
+				_handler._routes.Remove(Url + "/close");
+				_handler._routes.Remove(Url + "/accept");
+				_handler._routes.Remove(Url + "/output");
+				_handler._routes.Remove(Url + "/input");
+				_handler._routes.Remove(Url + "/call");
+				_handler._routes.Remove(Url + "/property");
+				_handler._routes.Remove(Url + "/data");
+
+				_handler._contexts.Remove(this);
+			}
+
+			private RouteResponse OnDelete(HttpListenerRequest req)
+			{
+				Dispose();
+
+				return RouteResponse.Success();
+			}
+
+			private RouteResponse OnOpen(HttpListenerRequest req)
+			{
+				var args = req.FromJson<PublisherOpenRequest>();
+
+				_publisher.Iteration = args.Iteration;
+				_publisher.IsControlIteration = args.IsControlIteration;
+				_publisher.open();
+
+				return RouteResponse.Success();
+			}
+
+			private RouteResponse OnClose(HttpListenerRequest req)
+			{
+				_publisher.close();
+
+				return RouteResponse.Success();
+			}
+
+			private RouteResponse OnAccept(HttpListenerRequest req)
+			{
+				_publisher.accept();
+
+				return RouteResponse.Success();
+			}
+
+			private RouteResponse OnOutput(HttpListenerRequest req)
+			{
+				using (var strm = req.InputStream)
+				{
+					var bs = new BitStream();
+					strm.CopyTo(bs);
+					bs.Seek(0, SeekOrigin.Begin);
+					_publisher.output(bs);
+				}
+
+				return RouteResponse.Success();
+			}
+
+			private RouteResponse OnInput(HttpListenerRequest req)
+			{
+				_publisher.input();
+
+				var resp = new BoolResponse { Value = _publisher.Position == 0 };
+
+				return RouteResponse.AsJson(resp);
+			}
+
+			private RouteResponse OnCall(HttpListenerRequest req)
+			{
+				var json = req.FromJson<CallRequest>();
+
+				var args = json.Args
+					.Select(i => new BitStream(i.Value) { Name = i.Name })
+					.ToList<BitwiseStream>();
+
+				var ret = _publisher.call(json.Method, args);
+
+				var resp = ret.ToModel<CallResponse>();
+
+				return RouteResponse.AsJson(resp);
+			}
+
+			private RouteResponse OnSetProperty(HttpListenerRequest req)
+			{
+				var args = req.FromJson<SetPropertyRequest>();
+				var value = args.ToVariant();
+
+				_publisher.setProperty(args.Property, value);
+
+				return RouteResponse.Success();
+			}
+
+			private RouteResponse OnGetProperty(HttpListenerRequest req)
+			{
+				var args = req.FromJson<GetPropertyRequest>();
+				var value = _publisher.getProperty(args.Property);
+				var resp = value.ToModel<GetPropertyResponse>();
+
+				return RouteResponse.AsJson(resp);
+			}
+
+			private RouteResponse OnWantBytes(HttpListenerRequest req)
+			{
+				// These can acquire a lock, so cache the length
+				var len = _publisher.Length;
+
+				long offset;
+				if (!req.QueryString.TryGetValue("offset", out offset, 0))
+					return RouteResponse.BadRequest();
+
+				long count;
+				if (!req.QueryString.TryGetValue("count", out count, len - offset))
+					return RouteResponse.BadRequest();
+
+				var needed = count - len + offset;
+
+				if (needed > 0)
+				{
+					// WantBytes is based off publisher Position
+					_publisher.WantBytes(count - _publisher.Position + offset);
+
+					// Recheck Length since WantBytes can change it
+					len = _publisher.Length;
+				}
+
+				if (offset >= len)
+					return RouteResponse.Success();
+
+				// Set position so the stream returned starts at the proper offset
+				_publisher.Position = offset;
+
+				return RouteResponse.AsStream(_publisher);
+
+			}
+		}
+
+		private readonly NamedCollection<Context> _contexts;
+		private readonly RouteHandler _routes;
+
+		public PublisherHandler(RouteHandler routes)
+		{
+
+			_contexts = new NamedCollection<Context>();
+			_routes = routes;
+			_routes.Add("/p/publisher", "POST", OnCreatePublisher);
+		}
+
+		public void Dispose()
+		{
+			while (_contexts.Count > 0)
+			{
+				_contexts[0].Dispose();
+			}
+		}
+
+		private RouteResponse OnCreatePublisher(HttpListenerRequest req)
+		{
+			var ctx = new Context(this, req.FromJson<PublisherRequest>());
+
+			_contexts.Add(ctx);
+
+			var resp = new PublisherResponse
+			{
+				Url = ctx.Url,
+			};
+
+			return RouteResponse.AsJson(resp, HttpStatusCode.Created);
+		}
+	}	
+}
