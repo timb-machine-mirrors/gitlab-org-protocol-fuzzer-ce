@@ -279,7 +279,7 @@ namespace Peach.Core.Dom
 		public StateModel stateModel = null;
 
 		[NonSerialized]
-		public NamedCollection<Publisher> publishers = new NamedCollection<Publisher>();
+		public NamedCollection<Publisher> publishers = new NamedCollection<Publisher>("Pub");
 
 		[NonSerialized]
 		public NamedCollection<Agent> agents = new NamedCollection<Agent>();

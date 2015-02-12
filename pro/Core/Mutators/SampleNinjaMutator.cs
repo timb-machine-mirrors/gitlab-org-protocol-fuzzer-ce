@@ -12,6 +12,7 @@ using SQLiteParameter = Mono.Data.Sqlite.SqliteParameter;
 using System.Data.SQLite;
 #endif
 using System;
+using System.ComponentModel;
 using System.IO;
 using NLog;
 using Peach.Core;

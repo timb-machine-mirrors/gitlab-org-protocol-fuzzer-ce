@@ -10,7 +10,7 @@ using Peach.Core.IO;
 
 namespace Peach.Pro.Core.Publishers
 {
-	[Publisher("Zip", true)]
+	[Publisher("Zip")]
 	[Parameter("FileName", typeof(string), "Name of file to open for reading/writing")]
 	public class ZipPublisher : Publisher
 	{

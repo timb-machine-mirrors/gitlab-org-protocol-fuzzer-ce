@@ -29,6 +29,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -44,8 +45,8 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 	/// Monitor will use OS X's built in CrashReporter (similar to watson)
 	/// to detect and report crashes.
 	/// </summary>
-	[Monitor("CrashReporter", true)]
-	[Monitor("osx.CrashReporter")]
+	[Monitor("CrashReporter")]
+	[Alias("osx.CrashReporter")]
 	[Description("Collect information from crashes detected by OS X System Crash Reporter")]
 	[Parameter("ProcessName", typeof(string), "Process name to watch for (defaults to all)", "")]
 	public class CrashReporter : Monitor

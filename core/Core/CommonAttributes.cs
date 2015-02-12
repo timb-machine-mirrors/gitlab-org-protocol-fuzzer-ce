@@ -1,22 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Peach.Core
 {
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-	public class InheritParameterAttribute : Attribute
-	{
-		public string parameter { get; private set; }
-
-		/// <summary>
-		/// Inherit parameters from a different plugin.
-		/// </summary>
-		/// <param name="parameter">The name of the parameter on the decorated object that contains the name of the object to inherit parameters from.</param>
-		public InheritParameterAttribute(string parameter)
-		{
-			this.parameter = parameter;
-		}
-	}
-
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
 	public class ParameterAttribute : Attribute
 	{
@@ -61,32 +47,53 @@ namespace Peach.Core
 		}
 	}
 
-	[AttributeUsage(AttributeTargets.All, AllowMultiple = false, Inherited = false)]
-	public class DescriptionAttribute : Attribute
-	{
-		public string Description { get; private set; }
-
-		public DescriptionAttribute(string description)
-		{
-			this.Description = description;
-		}
-	}
-
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 	public abstract class PluginAttribute : Attribute
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Internal property.")]
+		public bool IsTest
+		{
+			get { return Internal; }
+			set { Internal = value; }
+		}
+
+		#endregion
+
+		/// <summary>
+		/// The name of the plugin.
+		/// </summary>
 		public string Name { get; private set; }
+
+		/// <summary>
+		/// The type of the plugin.
+		/// </summary>
 		public Type Type { get; private set; }
+
+		/// <summary>
+		/// Is this the default name for the plugin.
+		/// For plugins with multiple names, the default name will be used in the schema.
+		/// </summary>
 		public bool IsDefault { get; private set; }
-		public bool IsTest { get; set; }
+
+		/// <summary>
+		/// Is this an internal plugin.
+		/// Internal plugins are omitted from schema generation.
+		/// </summary>
+		public bool Internal { get; set; }
+
+		/// <summary>
+		/// The operating systems that support this plugin.
+		/// </summary>
 		public Platform.OS OS { get; set; }
 
 		protected PluginAttribute(Type type, string name, bool isDefault)
 		{
-			this.Name = name;
-			this.Type = type;
-			this.IsDefault = isDefault;
-			this.OS = Platform.OS.All;
+			Name = name;
+			Type = type;
+			IsDefault = isDefault;
+			OS = Platform.OS.All;
 		}
 	}
 
@@ -111,6 +118,17 @@ namespace Peach.Core
 			ElementName = pluginType.Name;
 			AttributeName = attributeName;
 			PluginType = pluginType;
+		}
+	}
+
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
+	public class AliasAttribute : Attribute
+	{
+		public string Name { get; set; }
+
+		public AliasAttribute(string name)
+		{
+			Name = name;
 		}
 	}
 }
