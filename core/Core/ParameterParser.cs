@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Net;
 using System.Collections;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace Peach.Core
@@ -29,7 +30,7 @@ namespace Peach.Core
 				string value;
 
 				if (args.TryGetValue(attr.name, out value))
-					ApplyProperty(obj, prop, attr, (string)value);
+					ApplyProperty(obj, prop, attr, value);
 				else if (!attr.required)
 					ApplyProperty(obj, prop, attr, attr.defaultValue);
 				else if (attr.required)
@@ -85,6 +86,7 @@ namespace Peach.Core
 
 		public static IEnumerable<KeyValuePair<string, string>> Get<T>(T obj) where T : class
 		{
+			// ReSharper disable once LoopCanBeConvertedToQuery
 			foreach (var item in GetProperties(obj))
 			{
 				var attr = item.Key;
@@ -99,14 +101,15 @@ namespace Peach.Core
 
 		private static IEnumerable<KeyValuePair<ParameterAttribute, PropertyInfo>> GetProperties<T>(T obj) where T : class
 		{
-			Type type = obj.GetType();
+			var type = obj.GetType();
 
 			foreach (var attr in obj.GetType().GetAttributes<ParameterAttribute>(null))
 			{
-				BindingFlags bindingAttr = BindingFlags.Public | BindingFlags.Instance;
-				var prop = obj.GetType().GetProperty(attr.name, bindingAttr, null, attr.type, new Type[0], null);
-				if (prop == null)
-					prop = obj.GetType().GetProperty("_" + attr.name, bindingAttr, null, attr.type, new Type[0], null);
+				const BindingFlags bindingAttr = BindingFlags.Public | BindingFlags.Instance;
+
+				var prop = obj.GetType().GetProperty(attr.name, bindingAttr, null, attr.type, new Type[0], null)
+					?? obj.GetType().GetProperty("_" + attr.name, bindingAttr, null, attr.type, new Type[0], null);
+
 				if (prop == null)
 					RaiseError(type, "has no property for parameter '{0}'.", attr.name);
 				else if (!prop.CanWrite)
@@ -126,11 +129,11 @@ namespace Peach.Core
 				if (destType.GetArrayRank() != 1)
 					throw new NotSupportedException();
 
-				string[] parts = value.Split(new char[]{','}, StringSplitOptions.RemoveEmptyEntries);
-				IList array = Activator.CreateInstance(destType, new object[] { parts.Length }) as IList;
-				Type elemType = destType.GetElementType();
+				var parts = value.Split(new[]{','}, StringSplitOptions.RemoveEmptyEntries);
+				var array = (IList)Activator.CreateInstance(destType, new object[] { parts.Length });
+				var elemType = destType.GetElementType();
 
-				for (int i = 0; i < parts.Length; ++i)
+				for (var i = 0; i < parts.Length; ++i)
 				{
 					array[i] = FromString(pluginType, elemType, name, parts[i]);
 				}
@@ -138,7 +141,7 @@ namespace Peach.Core
 				return array;
 			}
 
-			bool nullable = !destType.IsValueType;
+			var nullable = !destType.IsValueType;
 
 			if (destType.IsGenericType && destType.GetGenericTypeDefinition() == typeof(Nullable<>))
 			{
@@ -157,6 +160,8 @@ namespace Peach.Core
 				{
 					if (destType == typeof(IPAddress))
 						val = IPAddress.Parse(value);
+					else if (destType == typeof(Regex))
+						val = ParseRegex(value);
 					else if (destType.IsEnum)
 						val = Enum.Parse(destType, value, true);
 					else
@@ -173,9 +178,9 @@ namespace Peach.Core
 
 		private static void ApplyProperty<T>(T obj, PropertyInfo prop, ParameterAttribute attr, string value) where T : class
 		{
-			Type type = obj.GetType();
+			var type = obj.GetType();
 
-			object val = FromString(type, attr, value);
+			var val = FromString(type, attr, value);
 
 			prop.SetValue(obj, val, null);
 		}
@@ -191,7 +196,13 @@ namespace Peach.Core
 			}
 
 			// Look for a static Parse(string) on destType
-			MethodInfo method = destType.GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, Type.DefaultBinder, new Type[] { typeof(string) }, null);
+			var method = destType.GetMethod(
+				"Parse",
+				BindingFlags.Public | BindingFlags.Static,
+				Type.DefaultBinder,
+				new[] { typeof(string) },
+				null);
+
 			if (method != null)
 			{
 				if (method.ReturnType != destType)
@@ -202,9 +213,9 @@ namespace Peach.Core
 			{
 				// Find a converter on this type with the signature:
 				// static void Parse(string str, out "type" val)
-				BindingFlags bindingAttr = BindingFlags.Public | BindingFlags.Static;
-				Type[] types = new Type[] { typeof(string), destType.MakeByRefType() };
-				Type level = ownerType;
+				const BindingFlags bindingAttr = BindingFlags.Public | BindingFlags.Static;
+				var types = new[] { typeof(string), destType.MakeByRefType() };
+				var level = ownerType;
 
 				do
 				{
@@ -222,16 +233,12 @@ namespace Peach.Core
 
 			try
 			{
-				if (method.ReturnType == typeof(void))
-				{
-					object[] parameters = new object[] { value, null };
-					method.Invoke(null, parameters);
-					return parameters[1];
-				}
-				else
-				{
-					return method.Invoke(null, new object[] { value });
-				}
+				if (method.ReturnType != typeof(void))
+					return method.Invoke(null, new object[] {value});
+
+				var parameters = new object[] { value, null };
+				method.Invoke(null, parameters);
+				return parameters[1];
 			}
 			catch (TargetInvocationException ex)
 			{
@@ -248,18 +255,31 @@ namespace Peach.Core
 			}
 		}
 
-		private static void RaiseError(Type type, string fmt, params string[] args)
+		private static Regex ParseRegex(string regex)
+		{
+			try
+			{
+				return new Regex(regex, RegexOptions.Multiline);
+			}
+			catch (Exception ex)
+			{
+				throw new ArgumentException("The value '{0}' is not a valid regular expression.".Fmt(regex), ex);
+			}
+		}
+
+		private static void RaiseError(Type type, string fmt, params object[] args)
 		{
 			RaiseError(null, type, fmt, args);
 		}
 
-		private static void RaiseError(Exception ex, Type type, string fmt, params string[] args)
+		private static void RaiseError(Exception ex, Type type, string fmt, params object[] args)
 		{
-			var attrs = type.GetAttributes<PluginAttribute>(null);
-			var attr = attrs.FirstOrDefault(a => a.IsDefault == true);
-			if (attr == null) attr = attrs.First();
+			var attr = type.GetAttributes<PluginAttribute>().OrderBy(a => a.IsDefault).FirstOrDefault();
 
-			string msg = string.Format("{0} '{1}' {2}", attr.Type.Name, attr.Name, string.Format(fmt, args));
+			var cls = attr != null ? attr.Type.Name : "Class"; 
+			var name = attr != null ? attr.Name : type.Name; 
+
+			var msg = string.Format("{0} '{1}' {2}", cls, name, string.Format(fmt, args));
 			throw new PeachException(msg, ex);
 		}
 

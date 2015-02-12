@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Text.RegularExpressions;
 using NLog;
 using NUnit.Framework;
 using Peach.Core;
@@ -494,6 +495,36 @@ namespace Peach.Pro.Test.Core.Publishers
 			args["arg"] = new Variant("Hello");
 
 			ParameterParser.Parse(obj, args);
+		}
+
+		[Publisher("Regex")]
+		[Parameter("Expr", typeof(Regex), "desc", "")]
+		class RegexPlugin : MyBaseClass
+		{
+			public Regex Expr { get; set; }
+		}
+
+		[Test]
+		public void TestRegex()
+		{
+			var obj = new RegexPlugin();
+			ParameterParser.Parse(obj, new Dictionary<string, string>());
+			Assert.Null(obj.Expr);
+
+			ParameterParser.Parse(obj, new Dictionary<string, string>
+			{
+				{ "Expr" , "\\s+" }
+			});
+			Assert.NotNull(obj.Expr);
+
+			var ex = Assert.Throws<PeachException>(() =>
+				ParameterParser.Parse(obj, new Dictionary<string, string>
+				{
+					{ "Expr" , "(" }
+				})
+			);
+
+			Assert.AreEqual("Publisher 'Regex' could not set parameter 'Expr'.  The value '(' is not a valid regular expression.", ex.Message);
 		}
 	}
 }
