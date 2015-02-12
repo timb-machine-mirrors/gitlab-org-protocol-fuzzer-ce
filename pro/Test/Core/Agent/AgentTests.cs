@@ -646,12 +646,7 @@ namespace Peach.Pro.Test.Core.Agent
 			}
 		}
 
-		[Test]
-		public void TestRemotePublisher()
-		{
-			var tmp = Path.GetTempFileName();
-
-			var xml = @"
+		const string RemotePublisherXml = @"
 <Peach>
 	<DataModel name='Input'>
 		<String length='10'/>
@@ -730,14 +725,92 @@ namespace Peach.Pro.Test.Core.Agent
 	<Test name='Default'>
 		<Agent ref='RemoteAgent'/>
 		<StateModel ref='TheState'/>
+{0}
+		<Strategy class='RandomDeterministic'/>
+	</Test>
+</Peach>";
+
+		[Test]
+		public void TestRemotePublisher()
+		{
+			var tmp = Path.GetTempFileName();
+
+			var pub = @"
 		<Publisher class='Remote'>
 			<Param name='Class' value='TestRemoteFile'/>
 			<Param name='Agent' value='RemoteAgent'/>
 			<Param name='FileName' value='{0}'/>
 		</Publisher>
-		<Strategy class='RandomDeterministic'/>
-	</Test>
-</Peach>".Fmt(tmp);
+".Fmt(tmp);
+
+			var xml = RemotePublisherXml.Fmt(pub);
+
+			try
+			{
+				StartAgent();
+
+				var parser = new PitParser();
+				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+
+				var config = new RunConfiguration { singleIteration = true };
+
+				var e = new Engine(null);
+				e.startFuzzing(dom, config);
+
+				var contents = File.ReadAllLines(tmp);
+				var expected = new[] {
+					"OnStart",
+					"OnOpen",
+					"OnOutput 5/40",
+					"OnAccept",
+					"OnInput",
+					"Read, Want: 5, Got: 5",
+					"Read, Want: 0, Got: 0",
+					"WantBytes 5",
+					"Read, Want: 5, Got: 5",
+					"Read, Want: 0, Got: 0",
+					"SetProperty int BitStream 7c",
+					"GetProperty: int",
+					"GetProperty: string",
+					"GetProperty: bytes",
+					"GetProperty: bits",
+					"OnClose",
+					"OnStop"
+				};
+
+				Assert.That(contents, Is.EqualTo(expected));
+
+				var st = dom.tests[0].stateModel.states[0];
+				//var act = st.actions["call"] as Dom.Actions.Call;
+				//Assert.NotNull(act);
+				//Assert.NotNull(act.result);
+				//Assert.NotNull(act.result.dataModel);
+				//Assert.AreEqual(2, act.result.dataModel.Count);
+				//Assert.AreEqual(7, (int)act.result.dataModel[0].DefaultValue);
+				//Assert.AreEqual("Success", (string)act.result.dataModel[1].DefaultValue);
+
+				var inp = st.actions["input"];
+				Assert.AreEqual("0123456789", inp.dataModel.InternalValue.BitsToString());
+			}
+			finally
+			{
+				if (_process != null)
+					StopAgent();
+			}
+		}
+
+		[Test]
+		public void TestNewRemotePublisher()
+		{
+			var tmp = Path.GetTempFileName();
+
+			var pub = @"
+		<Publisher class='TestRemoteFile' agent='RemoteAgent'>
+			<Param name='FileName' value='{0}'/>
+		</Publisher>
+".Fmt(tmp);
+
+			var xml = RemotePublisherXml.Fmt(pub);
 
 			try
 			{
