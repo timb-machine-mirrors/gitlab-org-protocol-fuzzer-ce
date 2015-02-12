@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -10,7 +11,7 @@ using Encoding = Peach.Core.Encoding;
 
 namespace Peach.Pro.Core.Agent.Monitors
 {
-	[Monitor("Ping", true)]
+	[Monitor("Ping")]
 	[Description("Uses ICMP to verify whether a device is functional")]
 	[Parameter("Host", typeof(string), "Host to ping")]
 	[Parameter("Timeout", typeof(int), "Ping timeout in milliseconds", "1000")]

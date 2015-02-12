@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using NLog;
 using Org.BouncyCastle.Crypto.Encodings;
 using Org.BouncyCastle.Crypto.Engines;
@@ -12,7 +13,7 @@ using Peach.Core.IO;
 
 namespace Peach.Pro.Core.Transformers.Crypto
 {
-	[Transformer("Rsa", true, IsTest = true)]
+	[Transformer("Rsa", true, Internal = true)]
 	[Description("RSA encryption and decryption")]
 	[Parameter("PublicKey", typeof(HexString), "Public key modulus", "")]
 	[Parameter("PublicExponent", typeof(HexString), "Public key exponent", "010001")]

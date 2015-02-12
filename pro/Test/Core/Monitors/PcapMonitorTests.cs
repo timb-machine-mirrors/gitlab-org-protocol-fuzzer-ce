@@ -113,6 +113,21 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void BasicTest()
 		{
+			var runner = new MonitorRunner("NetworkCapture", new Dictionary<string, string>
+			{
+				{ "Device", _iface },
+			});
+
+			var faults = runner.Run();
+
+			Assert.AreEqual(0, faults.Length);
+		}
+
+		[Test]
+		public void AliasTest()
+		{
+			// Ensure we can still run the monitor via its aliased name
+
 			var runner = new MonitorRunner("Pcap", new Dictionary<string, string>
 			{
 				{ "Device", _iface },
@@ -129,7 +144,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			const int max = 10;
 			var num = 0;
 
-			var runner = new MonitorRunner("Pcap", new Dictionary<string, string>
+			var runner = new MonitorRunner("NetworkCapture", new Dictionary<string, string>
 			{
 				{ "Device", _iface },
 			})
@@ -176,7 +191,7 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			Assert.AreEqual(1, faults.Length);
 			Assert.Null(faults[0].Fault);
-			Assert.AreEqual("Pcap", faults[0].DetectionSource);
+			Assert.AreEqual("NetworkCapture", faults[0].DetectionSource);
 			Assert.AreEqual(1, faults[0].Data.Count);
 			Assert.True(faults[0].Data.ContainsKey("pcap"));
 
@@ -195,7 +210,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void MultipleIterationsTest()
 		{
-			var runner = new MonitorRunner("Pcap", new Dictionary<string, string>
+			var runner = new MonitorRunner("NetworkCapture", new Dictionary<string, string>
 			{
 				{ "Device", _iface },
 			});
@@ -208,7 +223,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void BadDeviceTest()
 		{
-			var runner = new MonitorRunner("Pcap", new Dictionary<string, string>
+			var runner = new MonitorRunner("NetworkCapture", new Dictionary<string, string>
 			{
 				{ "Device", "Some Unknown Device" },
 			});
@@ -221,17 +236,17 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void NoDeviceTest()
 		{
-			var runner = new MonitorRunner("Pcap", new Dictionary<string, string>());
+			var runner = new MonitorRunner("NetworkCapture", new Dictionary<string, string>());
 
 			var ex = Assert.Throws<PeachException>(() => runner.Run());
 
-			Assert.AreEqual("Could not start monitor \"Pcap\".  Monitor 'Pcap' is missing required parameter 'Device'.", ex.Message);
+			Assert.AreEqual("Could not start monitor \"NetworkCapture\".  Monitor 'NetworkCapture' is missing required parameter 'Device'.", ex.Message);
 		}
 
 		[Test]
 		public void BadFilterTest()
 		{
-			var runner = new MonitorRunner("Pcap", new Dictionary<string, string>
+			var runner = new MonitorRunner("NetworkCapture", new Dictionary<string, string>
 			{
 				{ "Device", _iface },
 				{ "Filter", "Bad filter string" },
@@ -295,7 +310,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			// Skew by one so we don't conflict with DataCollection test port
 			for (var i = 0; i <= count; ++i)
 			{
-				runner.Add("Pcap", new Dictionary<string, string>
+				runner.Add("NetworkCapture", new Dictionary<string, string>
 				{
 					{ "Device", _iface },
 					{ "Filter", "udp and dst port " + (_remoteEp.Port + 1 + i) },
@@ -319,7 +334,7 @@ namespace Peach.Pro.Test.Core.Monitors
 				var f = faults[i];
 
 				Assert.AreEqual("Mon_{0}".Fmt(i), f.MonitorName);
-				Assert.AreEqual("Pcap", f.DetectionSource);
+				Assert.AreEqual("NetworkCapture", f.DetectionSource);
 				Assert.Null(f.Fault);
 				Assert.AreEqual(1, f.Data.Count);
 				Assert.True(f.Data.ContainsKey("pcap"));

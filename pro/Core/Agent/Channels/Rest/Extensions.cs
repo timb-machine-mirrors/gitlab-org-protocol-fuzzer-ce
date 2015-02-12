@@ -1,8 +1,13 @@
+using System;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Numerics;
 using System.Reflection;
 using Newtonsoft.Json;
+using Peach.Core;
+using Peach.Core.IO;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
@@ -71,12 +76,19 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 				using (var sr = new StreamReader(strm, enc))
 				{
-					using (var rdr = new JsonTextReader(sr))
-					{
-						var serializer = new JsonSerializer();
-						var ret = serializer.Deserialize<T>(rdr);
-						return ret;
-					}
+					return JsonDecode<T>(sr);
+				}
+			}
+		}
+
+		public static T JsonDecode<T>(this TextReader stream)
+		{
+			{
+				using (var rdr = new JsonTextReader(stream))
+				{
+					var serializer = new JsonSerializer();
+					var ret = serializer.Deserialize<T>(rdr);
+					return ret;
 				}
 			}
 		}
@@ -95,27 +107,125 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			return null;
 		}
 
-		public static void SendJson(this HttpWebRequest req, object obj)
+		/// <summary>
+		/// Try and get a integer value from the query string.
+		/// Fails if the value for the key is not a number or negative.
+		/// If the key is not found, the value is set to the default value.
+		/// The default value is allowed to be negative.
+		/// </summary>
+		/// <param name="query">Query string</param>
+		/// <param name="key">Key to look for</param>
+		/// <param name="value">Where to store the parsed value</param>
+		/// <param name="defaultValue">Default value if the key is not found</param>
+		/// <returns>True if key is not found or key is a valid positive long number.</returns>
+		public static bool TryGetValue(this NameValueCollection query, string key, out long value, long defaultValue)
 		{
-			if (req.Method == "GET")
+			var asStr = query[key];
+			if (asStr != null)
 			{
-				Debug.Assert(obj == null);
-				return;
+				if (!long.TryParse(asStr, out value))
+					return false;
+
+				return value >= 0;
 			}
 
-			if (obj == null)
+			value = defaultValue;
+			return true;
+		}
+
+		public static T ToModel<T>(this Variant v) where T : VariantMessage, new()
+		{
+			if (v == null)
+				return null;
+
+			var ret = new T();
+
+			var type = v.GetVariantType();
+
+			switch (type)
 			{
-				req.ContentLength = 0;
-				return;
+				case Variant.VariantType.BitStream:
+					var bs = (BitwiseStream)v;
+					var buf = new byte[bs.Length];
+					var pos = bs.PositionBits;
+
+					bs.SeekBits(0, SeekOrigin.Begin);
+					bs.Read(buf, 0, buf.Length);
+					bs.SeekBits(pos, SeekOrigin.Begin);
+
+					ret.Type = VariantMessage.ValueType.Bytes;
+					ret.Value = buf;
+					break;
+				case Variant.VariantType.Boolean:
+					ret.Type = VariantMessage.ValueType.Bool;
+					ret.Value = (bool)v;
+					break;
+				case Variant.VariantType.ByteString:
+					ret.Type = VariantMessage.ValueType.Bytes;
+					ret.Value = (byte[])v;
+					break;
+				case Variant.VariantType.Double:
+					ret.Type = VariantMessage.ValueType.Double;
+					ret.Value = (double)v;
+					break;
+				case Variant.VariantType.Int:
+					ret.Type = VariantMessage.ValueType.Integer;
+					ret.Value = (int)v;
+					break;
+				case Variant.VariantType.Long:
+					ret.Type = VariantMessage.ValueType.Integer;
+					ret.Value = (long)v;
+					break;
+				case Variant.VariantType.String:
+					ret.Type = VariantMessage.ValueType.String;
+					ret.Value = (string)v;
+					break;
+				case Variant.VariantType.ULong:
+					ret.Type = VariantMessage.ValueType.Integer;
+					ret.Value = (ulong)v;
+					break;
+				default:
+					throw new NotSupportedException("Unable to convert variant type '{0}' to JSON.".Fmt(type));
 			}
 
-			var json = RouteResponse.AsJson(obj);
+			return ret;
+		}
 
-			req.ContentType = json.ContentType;
-			req.ContentLength = json.Content.Length;
+		public static Variant ToVariant(this VariantMessage msg)
+		{
+			if (msg == null)
+				return null;
 
-			using (var strm = req.GetRequestStream())
-				json.Content.CopyTo(strm);
+			switch (msg.Type)
+			{
+				//case VariantMessage.ValueType.Bool:
+				//	return new Variant(Convert.ToBoolean(msg.Value));
+				case VariantMessage.ValueType.Bytes:
+					return new Variant(Convert.FromBase64String((string)msg.Value));
+				case VariantMessage.ValueType.Double:
+					return new Variant(Convert.ToDouble(msg.Value));
+				case VariantMessage.ValueType.String:
+					return new Variant(Convert.ToString(msg.Value));
+				case VariantMessage.ValueType.Integer:
+					if (msg.Value is BigInteger)
+					{
+						var bi = (BigInteger)msg.Value;
+						if (bi < long.MinValue)
+							throw new NotSupportedException("Unable to convert JSON integer value to a variant, the value is less than the minimum value of a long.");
+						if (bi > ulong.MaxValue)
+							throw new NotSupportedException("Unable to convert JSON integer value to a variant, the value is greater than the maximum value of an unsigned long.");
+						return new Variant((ulong)bi);
+					}
+
+					var asLong = (long)msg.Value;
+
+					if (asLong < int.MinValue || asLong > int.MaxValue)
+						return new Variant(asLong);
+
+					return new Variant((int)asLong);
+				default:
+					throw new NotSupportedException("Unable to convert JSON value type '{0}' to a variant.".Fmt(msg.Type));
+			}
 		}
 	}
 }

@@ -49,7 +49,7 @@ namespace Peach.Core.Agent
 		protected Monitor(string name)
 		{
 			Name = name;
-			Class = GetType().GetAttributes<MonitorAttribute>(null).First().Name;
+			Class = GetType().GetAttributes<MonitorAttribute>().First().Name;
 		}
 
 		public enum MonitorWhen
@@ -168,14 +168,19 @@ namespace Peach.Core.Agent
 		}
 	}
 
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 	public class MonitorAttribute : PluginAttribute
 	{
-		public MonitorAttribute(string name, bool isDefault = false)
-			: base(typeof(Monitor), name, isDefault)
+		// ReSharper disable once UnusedParameter.Local
+		[Obsolete("This constructor is obsolete. Use the constructor without the isDefault argument.")]
+		public MonitorAttribute(string name, bool isDefault)
+			: base(typeof(Monitor), name, true)
+		{
+		}
+
+		public MonitorAttribute(string name)
+			: base(typeof(Monitor), name, true)
 		{
 		}
 	}
 }
-
-// end

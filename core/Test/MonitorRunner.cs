@@ -94,7 +94,7 @@ namespace Peach.Core.Test
 
 		public void Add(string monitorName, string monitorClass, Dictionary<string, string> parameters)
 		{
-			var type = ClassLoader.FindTypeByAttribute<MonitorAttribute>((x, y) => y.Name == monitorClass);
+			var type = ClassLoader.FindPluginByName<MonitorAttribute>(monitorClass);
 			Assert.NotNull(type, "Unable to locate monitor '{0}'".Fmt(monitorClass));
 
 			var item = new Holder

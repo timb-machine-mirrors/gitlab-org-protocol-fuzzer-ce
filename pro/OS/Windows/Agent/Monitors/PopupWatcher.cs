@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -40,7 +41,7 @@ using Monitor = Peach.Core.Agent.Monitor;
 
 namespace Peach.Pro.OS.Windows.Agent.Monitors
 {
-	[Monitor("PopupWatcher", true)]
+	[Monitor("PopupWatcher")]
 	[Description("Closes windows based on title")]
 	[Parameter("WindowNames", typeof(string[]), "Window names separated by a ','")]
 	[Parameter("Fault", typeof(bool), "Trigger fault when a window is found", "false")]

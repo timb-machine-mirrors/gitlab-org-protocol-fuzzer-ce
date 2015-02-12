@@ -139,7 +139,10 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			{
 				using (new MonitorHandler(_listener.Routes))
 				{
-					_listener.Start();
+					using (new PublisherHandler(_listener.Routes))
+					{
+						_listener.Start();
+					}
 				}
 			}
 			finally
