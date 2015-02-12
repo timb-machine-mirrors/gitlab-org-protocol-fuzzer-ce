@@ -107,7 +107,15 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					var bs = new BitStream();
 					strm.CopyTo(bs);
 					bs.Seek(0, SeekOrigin.Begin);
-					_publisher.output(bs);
+
+					try
+					{
+						_publisher.output(bs);
+					}
+					catch (NotSupportedException ex)
+					{
+						RaiseNotSupported(ex, "output");
+					}
 				}
 
 				return RouteResponse.Success();
@@ -130,7 +138,16 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					.Select(i => new BitStream(i.Value) { Name = i.Name })
 					.ToList<BitwiseStream>();
 
-				var ret = _publisher.call(json.Method, args);
+				Variant ret = null;
+
+				try
+				{
+					ret = _publisher.call(json.Method, args);
+				}
+				catch (NotSupportedException ex)
+				{
+					RaiseNotSupported(ex, "call");
+				}
 
 				var resp = ret.ToModel<CallResponse>();
 
@@ -187,7 +204,17 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				_publisher.Position = offset;
 
 				return RouteResponse.AsStream(_publisher);
+			}
 
+			private void RaiseNotSupported(Exception ex, string action)
+			{
+				var type = _publisher.GetType();
+				var cls = type
+					.GetAttributes<PublisherAttribute>()
+					.Select(a => a.Name)
+					.FirstOrDefault() ?? type.Name;
+
+				throw new PeachException("The {0} publisher does not support {1} actions when run on remote agents.".Fmt(cls, action), ex);
 			}
 		}
 

@@ -116,7 +116,9 @@ namespace Peach.Pro.OS.Windows.Publishers
 
 		protected override Variant OnCall(string method, List<BitwiseStream> args)
 		{
-			// This publisher only supports calling with ActionParameters
+			// This publisher only supports calling with ActionParameters.
+			// This function is never called when the publisher is run locally.
+			// This exception is needed so the agent generates a nice error message.
 			throw new NotSupportedException();
 		}
 

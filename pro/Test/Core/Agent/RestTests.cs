@@ -485,5 +485,84 @@ namespace Peach.Pro.Test.Core.Agent
 				File.Delete(tmp);
 			}
 		}
+
+		[Test]
+		public void NotSupportedOutput()
+		{
+			// Ensure a nice not supported error comes across for publishers
+			// that don't support remote output.
+
+			StartServer();
+
+			var tmp = Path.GetTempFileName();
+
+			try
+			{
+				var cli = new Client(null, _server.Uri.ToString(), null);
+
+				cli.AgentConnect();
+
+				var pub = cli.CreatePublisher("pub", "Zip", new Dictionary<string, string>
+				{
+					{ "FileName", tmp },
+				});
+
+				try
+				{
+					pub.Open(100, false);
+
+					var ex = Assert.Throws<PeachException>(() =>
+						pub.Output(new BitStream(Encoding.ASCII.GetBytes("Hello"))));
+
+					Assert.AreEqual("The Zip publisher does not support output actions when run on remote agents.", ex.Message);
+				}
+				finally
+				{
+					pub.Dispose();
+				}
+
+				cli.AgentDisconnect();
+			}
+			finally
+			{
+				File.Delete(tmp);
+			}
+		}
+
+		[Test]
+		public void NotSupportedCall()
+		{
+			// Ensure a nice not supported error comes across for publishers
+			// that don't support remote call.
+
+			StartServer();
+
+			var cli = new Client(null, _server.Uri.ToString(), null);
+
+			cli.AgentConnect();
+
+			var pub = cli.CreatePublisher("pub", "Rest", new Dictionary<string, string>());
+
+			try
+			{
+				pub.Open(100, false);
+
+				const string method = "GET http://foo.com/{0}";
+				var args = new List<BitwiseStream>
+				{
+					new BitStream(Encoding.ASCII.GetBytes("Hello"))
+				};
+
+				var ex = Assert.Throws<PeachException>(() =>pub.Call(method, args));
+
+				Assert.AreEqual("The Rest publisher does not support call actions when run on remote agents.", ex.Message);
+			}
+			finally
+			{
+				pub.Dispose();
+			}
+
+			cli.AgentDisconnect();
+		}
 	}
 }
