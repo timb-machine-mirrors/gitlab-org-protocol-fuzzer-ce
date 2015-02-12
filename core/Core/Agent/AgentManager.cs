@@ -58,7 +58,7 @@ namespace Peach.Core.Agent
 			if (!_agents.TryGetValue(agentDef.Name, out agent))
 			{
 				var uri = new Uri(agentDef.location);
-				var type = ClassLoader.FindTypeByAttribute<AgentAttribute>((x, y) => y.Name == uri.Scheme);
+				var type = ClassLoader.FindPluginByName<AgentAttribute>(uri.Scheme);
 				if (type == null)
 					throw new PeachException("Error, unable to locate agent that supports the '" + uri.Scheme + "' protocol.");
 

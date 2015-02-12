@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -35,7 +36,7 @@ using SuperWebSocket;
 
 namespace Peach.Pro.Core.Publishers
 {
-	[Publisher("WebSocket", true)]
+	[Publisher("WebSocket")]
 	[Description("WebSocket Publisher")]
 	[Parameter("Port", typeof(int), "Port to listen for connections on", "8080")]
 	[Parameter("Template", typeof(string), "Data template for publishing")]

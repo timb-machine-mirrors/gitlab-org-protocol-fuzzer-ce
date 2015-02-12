@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Reflection;
 using Peach.Core;
 using Peach.Core.Agent;
-using Peach.Core.Dom;
 using Monitor = Peach.Core.Agent.Monitor;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
@@ -18,7 +16,6 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		public MonitorHandler(RouteHandler routes)
 		{
-
 			_contexts = new NamedCollection<Context>();
 			_routes = routes;
 			_routes.Add("/p/agent", "POST", OnAgentConnect);
@@ -112,7 +109,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				{
 					var cls = item.Class;
 					var key = item.Name ?? _monitors.UniqueName();
-					var type = ClassLoader.FindTypeByAttribute<MonitorAttribute>((t, a) => a.Name == cls);
+					var type = ClassLoader.FindPluginByName<MonitorAttribute>(cls);
 
 					if (type == null)
 						throw new PeachException("Couldn't load monitor");

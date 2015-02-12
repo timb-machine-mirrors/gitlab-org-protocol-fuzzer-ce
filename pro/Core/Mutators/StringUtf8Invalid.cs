@@ -3,6 +3,7 @@
 //
 
 using System;
+using System.ComponentModel;
 using System.Linq;
 using Peach.Core;
 using Peach.Core.Dom;
@@ -12,7 +13,7 @@ namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("StringUtf8Invalid")]
 	[Description("Encode string as invalid UTF-8.")]
-	public partial class StringUtf8Invalid : Mutator
+	public class StringUtf8Invalid : Mutator
 	{
 		int total;
 

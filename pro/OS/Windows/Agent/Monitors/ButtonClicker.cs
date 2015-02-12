@@ -10,7 +10,7 @@ using System.Windows.Automation;
 
 namespace Peach.Pro.OS.Windows.Agent.Monitors
 {
-	[Monitor("ButtonClicker", true)]
+	[Monitor("ButtonClicker")]
 	[Parameter("WindowText", typeof(string), "Text to search for")]
 	[Parameter("ButtonName", typeof(string), "Name of button to click")]
 	public class ButtonClicker : Monitor

@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
@@ -106,5 +108,94 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		[JsonProperty("stackTrace")]
 		public string StackTrace { get; set; }
+	}
+
+	internal class PublisherRequest
+	{
+		[JsonProperty("name")]
+		public string Name { get; set; }
+
+		[JsonProperty("class")]
+		public string Class { get; set; }
+
+		[JsonProperty("args")]
+		public Dictionary<string, string> Args { get; set; }
+	}
+
+	internal class PublisherResponse
+	{
+		[JsonProperty("url")]
+		public string Url { get; set; }
+	}
+
+	internal class PublisherOpenRequest
+	{
+		[JsonProperty("iteration")]
+		public uint Iteration { get; set; }
+
+		[JsonProperty("isControlIteration")]
+		public bool IsControlIteration { get; set; }
+	}
+
+	internal abstract class VariantMessage
+	{
+		public enum ValueType
+		{
+			[EnumMember(Value = "integer")]
+			Integer,
+			[EnumMember(Value = "string")]
+			String,
+			[EnumMember(Value = "bytes")]
+			Bytes,
+			[EnumMember(Value = "bool")]
+			Bool,
+			[EnumMember(Value = "double")]
+			Double,
+		}
+
+		[JsonConverter(typeof(StringEnumConverter))]
+		[JsonProperty("type")]
+		public ValueType Type { get; set; }
+
+		[JsonProperty("value")]
+		public object Value { get; set; }
+	}
+
+	internal class SetPropertyRequest : VariantMessage
+	{
+		[JsonProperty("property")]
+		public string Property { get; set; }
+	}
+
+	internal class GetPropertyRequest
+	{
+		[JsonProperty("property")]
+		public string Property { get; set; }
+	}
+
+	internal class GetPropertyResponse : VariantMessage
+	{
+	}
+
+	internal class CallRequest
+	{
+		public class Param
+		{
+			[JsonProperty("name")]
+			public string Name { get; set; }
+
+			[JsonProperty("value")]
+			public byte[] Value { get; set; }
+		}
+
+		[JsonProperty("method")]
+		public string Method { get; set; }
+
+		[JsonProperty("args")]
+		public List<Param> Args { get; set; }
+	}
+
+	internal class CallResponse : VariantMessage
+	{
 	}
 }

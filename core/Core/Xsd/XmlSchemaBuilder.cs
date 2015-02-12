@@ -670,7 +670,7 @@ namespace Peach.Core.Xsd
 			var restrictEnum = new XmlSchemaSimpleTypeRestriction();
 			restrictEnum.BaseTypeName = new XmlQualifiedName("string", XmlSchema.Namespace);
 
-			foreach (var item in ClassLoader.GetAllByAttribute<PluginAttribute>((t, a) => a.Type == pluginAttr.PluginType && a.IsDefault && !a.IsTest).OrderBy(a => a.Key.Name))
+			foreach (var item in GetAllPlugins(pluginAttr))
 			{
 				restrictEnum.Facets.Add(MakePluginFacet(item.Key, item.Value));
 
@@ -754,6 +754,16 @@ namespace Peach.Core.Xsd
 				complexType.Attributes.Add(nameAttr);
 			}
 
+			if (pluginAttr.PluginType == typeof(Publisher))
+			{
+				var agentAttr = new XmlSchemaAttribute();
+				agentAttr.Name = "agent";
+				agentAttr.Annotate("The name of the agent that should host this publisher.");
+				agentAttr.Use = XmlSchemaUse.Optional;
+
+				complexType.Attributes.Add(agentAttr);
+			}
+
 			var typeAttr = new XmlSchemaAttribute();
 			typeAttr.Name = pluginAttr.AttributeName;
 			typeAttr.Use = XmlSchemaUse.Required;
@@ -765,7 +775,7 @@ namespace Peach.Core.Xsd
 			var restrictEnum = new XmlSchemaSimpleTypeRestriction();
 			restrictEnum.BaseTypeName = new XmlQualifiedName("string", XmlSchema.Namespace);
 
-			foreach (var item in ClassLoader.GetAllByAttribute<PluginAttribute>((t, a) => a.Type == pluginAttr.PluginType && a.IsDefault && !a.IsTest).OrderBy(a => a.Key.Name))
+			foreach (var item in GetAllPlugins(pluginAttr))
 			{
 				restrictEnum.Facets.Add(MakePluginFacet(item.Key, item.Value));
 			}
@@ -820,6 +830,11 @@ namespace Peach.Core.Xsd
 			schemaParticle.Items.Add(schemaElem);
 
 			complexType.Particle = schemaParticle;
+		}
+
+		private static IEnumerable<KeyValuePair<PluginAttribute, Type>> GetAllPlugins(PluginElementAttribute pluginAttr)
+		{
+			return ClassLoader.GetAllByAttribute<PluginAttribute>((t, a) => a.Type == pluginAttr.PluginType && a.IsDefault && !a.Internal).OrderBy(a => a.Key.Name);
 		}
 
 		private XmlSchemaObject MakePluginFacet(PluginAttribute pluginAttribute, Type type)

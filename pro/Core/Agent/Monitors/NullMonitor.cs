@@ -5,7 +5,7 @@ using Peach.Core.Agent;
 
 namespace Peach.Pro.Core.Agent.Monitors
 {
-	[Monitor("Null", true)]
+	[Monitor("Null")]
 	[Parameter("LogFile", typeof(string), "Log monitor events to the specified file.", "")]
 	public class NullMonitor : Monitor
 	{

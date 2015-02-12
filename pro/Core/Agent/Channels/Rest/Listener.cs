@@ -85,8 +85,11 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			}
 			else
 			{
+				// Leave the stream at the position it was given to us at
+				// so we can return data starting at an offset.
+
 				ctx.Response.ContentType = response.ContentType;
-				ctx.Response.ContentLength64 = response.Content.Length;
+				ctx.Response.ContentLength64 = response.Content.Length - response.Content.Position;
 
 				using (var stream = ctx.Response.OutputStream)
 				{

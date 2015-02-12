@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using Peach.Core;
@@ -38,8 +39,9 @@ using Monitor = Peach.Core.Agent.Monitor;
 
 namespace Peach.Pro.Core.Agent.Monitors
 {
-	[Monitor("Pcap", true)]
-	[Monitor("network.PcapMonitor")]
+	[Monitor("NetworkCapture")]
+	[Alias("Pcap")]
+	[Alias("network.PcapMonitor")]
 	[Description("Performs a network capture during the fuzzing iteration")]
 	[Parameter("Device", typeof(string), "Device name for capturing on")]
 	[Parameter("Filter", typeof(string), "PCAP Style filter", "")]
