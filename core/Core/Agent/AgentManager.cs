@@ -247,7 +247,7 @@ namespace Peach.Core.Agent
 			}
 			catch (Exception ex)
 			{
-				Logger.Warn("Ignoring {0} calling '{1}': {2}", ex.GetType().Name, what, ex.Message);
+				Logger.Warn("Ignoring {0} calling '{1}' on '{2}': {3}", ex.GetType().Name, what, agent.Name, ex.Message);
 			}
 		}
 	}

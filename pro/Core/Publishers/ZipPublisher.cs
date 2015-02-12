@@ -86,6 +86,8 @@ namespace Peach.Pro.Core.Publishers
 		protected override void OnOutput(BitwiseStream data)
 		{
 			// This publisher only supports output of data models
+			// This function is never called when the publisher is run locally.
+			// This exception is needed so the agent generates a nice error message.
 			throw new NotSupportedException();
 		}
 
