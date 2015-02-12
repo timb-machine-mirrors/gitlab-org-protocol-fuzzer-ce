@@ -754,6 +754,16 @@ namespace Peach.Core.Xsd
 				complexType.Attributes.Add(nameAttr);
 			}
 
+			if (pluginAttr.PluginType == typeof(Publisher))
+			{
+				var agentAttr = new XmlSchemaAttribute();
+				agentAttr.Name = "agent";
+				agentAttr.Annotate("The name of the agent that should host this publisher.");
+				agentAttr.Use = XmlSchemaUse.Optional;
+
+				complexType.Attributes.Add(agentAttr);
+			}
+
 			var typeAttr = new XmlSchemaAttribute();
 			typeAttr.Name = pluginAttr.AttributeName;
 			typeAttr.Use = XmlSchemaUse.Required;
