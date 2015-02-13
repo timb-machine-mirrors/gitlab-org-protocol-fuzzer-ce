@@ -41,8 +41,6 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				}
 				catch (TargetInvocationException ex)
 				{
-					var baseEx = ex.GetBaseException();
-
 					throw new PeachException("Could not start publisher \"" + req.Class + "\".  " + ex.InnerException.Message, ex);
 				}
 
