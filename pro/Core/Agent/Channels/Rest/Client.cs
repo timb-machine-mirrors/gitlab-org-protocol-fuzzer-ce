@@ -265,6 +265,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		private readonly Uri _baseUrl;
 		private readonly List<PublisherProxy> _publishers;
+		private readonly CookieContainer _cookies;
 
 		private ConnectRequest _connectReq;
 		private ConnectResponse _connectResp;
@@ -287,6 +288,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			_baseUrl = new Uri("http://{0}:{1}".Fmt(_baseUrl.Host, _baseUrl.Port));
 
 			_publishers = new List<PublisherProxy>();
+			_cookies = new CookieContainer();
 		}
 
 		public override void AgentConnect()
@@ -543,6 +545,15 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			try
 			{
 				var req = (HttpWebRequest)WebRequest.Create(uri);
+
+				// This should enable connection reuse.
+				// The container doesn't need to actually have any cookies in it
+				req.CookieContainer = _cookies;
+
+				// For POST we don't need to expect 100 CONTINUE responses
+				req.ServicePoint.Expect100Continue = false;
+				req.Timeout = 60000;
+				req.KeepAlive = true;
 
 				req.Method = method;
 
