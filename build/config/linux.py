@@ -45,6 +45,8 @@ def prepare(conf):
 
 	pin = j(conf.get_peach_dir(), '3rdParty', 'pin', env['PIN_VER'])
 
+	env['NATIVE_DLLS'] = {}
+
 	env['EXTERNALS'] = {
 		'pin' : {
 			'INCLUDES'  : [

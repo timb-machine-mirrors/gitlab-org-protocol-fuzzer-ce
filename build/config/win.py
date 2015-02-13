@@ -27,6 +27,8 @@ def prepare(conf):
 	env = conf.env
 	j = os.path.join
 
+	env['NATIVE_DLLS'] = {}
+
 	env['MSVC_VERSIONS'] = ['msvc 10.0', 'wsdk 7.1', 'msvc 11.0', 'msvc 12.0']
 	env['MSVC_TARGETS']  = 'x64' in env.SUBARCH and [ 'x64', 'x86_amd64' ] or [ 'x86' ]
 
