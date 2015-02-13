@@ -57,7 +57,7 @@ namespace Peach.Core.Test
 			return dict;
 		}
 
-		public static Process StartAgent()
+		public static Process StartAgent(string protocol)
 		{
 			var startEvent = new ManualResetEvent(false);
 			var process = new Process();
@@ -66,12 +66,12 @@ namespace Peach.Core.Test
 			if (Platform.GetOS() == Platform.OS.Windows)
 			{
 				process.StartInfo.FileName = peach;
-				process.StartInfo.Arguments = "-a tcp";
+				process.StartInfo.Arguments = "-a " + protocol;
 			}
 			else
 			{
 				process.StartInfo.FileName = "mono";
-				process.StartInfo.Arguments = "--debug {0} -a tcp".Fmt(peach);
+				process.StartInfo.Arguments = "--debug {0} -a {1}".Fmt(peach, protocol);
 			}
 
 			process.StartInfo.CreateNoWindow = true;
@@ -85,8 +85,12 @@ namespace Peach.Core.Test
 					return;
 
 				output.Add(e.Data);
-				if (e.Data.Contains("Press ENTER to quit agent"))
+
+				if (e.Data.Contains("Press ENTER to quit agent") ||
+					e.Data.Contains("Press Ctrl-C to exit."))
+				{
 					startEvent.Set();
+				}
 			};
 
 			try

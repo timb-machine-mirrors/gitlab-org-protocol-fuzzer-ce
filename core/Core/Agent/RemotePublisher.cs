@@ -101,9 +101,7 @@ namespace Peach.Core.Agent
 
 		public override void WantBytes(long count)
 		{
-			count -= Length - Position;
-			if (count > 0)
-				_publisher.WantBytes(count);
+			_publisher.WantBytes(count);
 		}
 
 		#region Input Stream

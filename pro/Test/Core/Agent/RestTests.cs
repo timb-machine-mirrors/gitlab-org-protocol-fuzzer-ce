@@ -564,5 +564,30 @@ namespace Peach.Pro.Test.Core.Agent
 
 			cli.AgentDisconnect();
 		}
+
+		[Test]
+		public void PublisherError()
+		{
+			// Ensure a nice not supported error comes across for publishers
+			// that can't be constructed
+
+			StartServer();
+
+			var cli = new Client(null, _server.Uri.ToString(), null);
+
+			cli.AgentConnect();
+
+			var ex = Assert.Throws<PeachException>(() =>
+				cli.CreatePublisher("pub", "Tcp", new Dictionary<string, string>
+				{
+					{ "Host", "localost" },
+					{ "Port", "badport" }
+				}));
+
+			StringAssert.IsMatch("Could not start publisher \"Tcp\".", ex.Message);
+			StringAssert.IsMatch("Publisher 'Tcp' could not set parameter 'Port'.", ex.Message);
+
+			cli.AgentDisconnect();
+		}
 	}
 }

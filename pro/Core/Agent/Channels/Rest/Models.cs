@@ -163,14 +163,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 	internal class SetPropertyRequest : VariantMessage
 	{
-		[JsonProperty("property")]
-		public string Property { get; set; }
-	}
-
-	internal class GetPropertyRequest
-	{
-		[JsonProperty("property")]
-		public string Property { get; set; }
+		[JsonProperty("name")]
+		public string Name { get; set; }
 	}
 
 	internal class GetPropertyResponse : VariantMessage

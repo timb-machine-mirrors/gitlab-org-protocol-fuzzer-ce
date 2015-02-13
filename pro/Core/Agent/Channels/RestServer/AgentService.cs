@@ -8,6 +8,8 @@ using Peach.Core.Agent;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
+#if DISABLED
+
 namespace Peach.Pro.Core.Agent.Channels.RestServer
 {
 	public class AgentService : RestService
@@ -419,3 +421,4 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 		#endregion
 	}
 }
+#endif

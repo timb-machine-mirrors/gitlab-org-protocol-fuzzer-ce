@@ -1,5 +1,7 @@
 ﻿using Peach.Core.Agent;
 
+#if DISABLED
+
 namespace Peach.Pro.Core.Agent.Channels.RestServer
 {
 	/// <summary>
@@ -20,3 +22,4 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 		public AgentDispatcher Dispatcher = new AgentDispatcher();
 	}
 }
+#endif

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using Peach.Core;
 using Peach.Core.IO;
 
@@ -32,9 +33,19 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 				var type = ClassLoader.FindPluginByName<PublisherAttribute>(req.Class);
 				if (type == null)
-					throw new PeachException("Error, unable to locate Publisher '{0}'.".Fmt(req.Class));
+					throw new PeachException("Error, unable to locate publisher '{0}'.".Fmt(req.Class));
 
-				_publisher = (Publisher)Activator.CreateInstance(type, req.Args.ToDictionary(i => i.Key, i => new Variant(i.Value)));
+				try
+				{
+					_publisher = (Publisher)Activator.CreateInstance(type, req.Args.ToDictionary(i => i.Key, i => new Variant(i.Value)));
+				}
+				catch (TargetInvocationException ex)
+				{
+					var baseEx = ex.GetBaseException();
+
+					throw new PeachException("Could not start publisher \"" + req.Class + "\".  " + ex.InnerException.Message, ex);
+				}
+
 				_publisher.Name = req.Name;
 				_publisher.start();
 
@@ -159,15 +170,18 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				var args = req.FromJson<SetPropertyRequest>();
 				var value = args.ToVariant();
 
-				_publisher.setProperty(args.Property, value);
+				_publisher.setProperty(args.Name, value);
 
 				return RouteResponse.Success();
 			}
 
 			private RouteResponse OnGetProperty(HttpListenerRequest req)
 			{
-				var args = req.FromJson<GetPropertyRequest>();
-				var value = _publisher.getProperty(args.Property);
+				var property = req.QueryString["name"];
+				if (string.IsNullOrEmpty(property))
+					return RouteResponse.BadRequest();
+
+				var value = _publisher.getProperty(property);
 				var resp = value.ToModel<GetPropertyResponse>();
 
 				return RouteResponse.AsJson(resp);

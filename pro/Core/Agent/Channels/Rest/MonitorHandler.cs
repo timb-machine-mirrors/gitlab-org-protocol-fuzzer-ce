@@ -3,14 +3,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
+using Logger = NLog.Logger;
 using Monitor = Peach.Core.Agent.Monitor;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
 	internal class MonitorHandler : IDisposable
 	{
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
 		private readonly NamedCollection<Context> _contexts;
 		private readonly RouteHandler _routes;
 
@@ -81,12 +85,28 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 				foreach (var mon in _monitors.Reverse())
 				{
-					mon.SessionFinished();
+					try
+					{
+						mon.SessionFinished();
+					}
+					catch (Exception ex)
+					{
+						Logger.Debug("Ignoring session finished exception on {0} monitor '{1}'.", mon.Class, mon.Name);
+						Logger.Debug(ex.Message);
+					}
 				}
 
 				foreach (var mon in _monitors.Reverse())
 				{
-					mon.StopMonitor();
+					try
+					{
+						mon.StopMonitor();
+					}
+					catch (Exception ex)
+					{
+						Logger.Debug("Ignoring stop exception on {0} monitor '{1}'.", mon.Class, mon.Name);
+						Logger.Debug(ex.Message);
+					}
 				}
 
 				_monitors.Clear();
@@ -103,30 +123,41 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			private void CreateMonitors(ConnectRequest req)
 			{
+				// Add DELETE first so if we fail to start we can just call Dispose()
+				_handler._routes.Add(Url, "DELETE", OnAgentDisconnect);
+
 				var calls = new HashSet<string>();
 
-				foreach (var item in req.Monitors)
+				try
 				{
-					var cls = item.Class;
-					var key = item.Name ?? _monitors.UniqueName();
-					var type = ClassLoader.FindPluginByName<MonitorAttribute>(cls);
-
-					if (type == null)
-						throw new PeachException("Couldn't load monitor");
-
-					var mon = (Monitor) Activator.CreateInstance(type, new object[] {key});
-					mon.StartMonitor(item.Args);
-					foreach (var kv in item.Args.Where(kv => kv.Key.EndsWith("OnCall")))
+					foreach (var item in req.Monitors)
 					{
-						calls.Add(kv.Value);
+						var cls = item.Class;
+						var key = item.Name ?? _monitors.UniqueName();
+						var type = ClassLoader.FindPluginByName<MonitorAttribute>(cls);
+
+						if (type == null)
+							throw new PeachException("Error, unable to locate monitor '{0}'.".Fmt(cls)); 
+
+						var mon = (Monitor)Activator.CreateInstance(type, new object[] { key });
+						mon.StartMonitor(item.Args);
+
+						foreach (var kv in item.Args.Where(kv => kv.Key.EndsWith("OnCall")))
+							calls.Add(kv.Value);
+
+						_monitors.Add(mon);
 					}
 
-					_monitors.Add(mon);
+					foreach (var item in _monitors)
+					{
+						item.SessionStarting();
+					}
 				}
-
-				foreach (var item in _monitors)
+				catch
 				{
-					item.SessionStarting();
+					Dispose();
+
+					throw;
 				}
 
 				Messages.AddRange(new[]
@@ -137,7 +168,6 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					"GetMonitorData"
 				});
 
-				_handler._routes.Add(Url, "DELETE", OnAgentDisconnect);
 				_handler._routes.Add(Url + "/IterationStarting", "PUT", OnIterationStarting);
 				_handler._routes.Add(Url + "/IterationFinished", "PUT", OnIterationFinished);
 				_handler._routes.Add(Url + "/DetectedFault", "GET", DetectedFault);
