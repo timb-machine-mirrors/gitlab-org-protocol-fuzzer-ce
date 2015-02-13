@@ -487,7 +487,6 @@ class vsnode_cs_target(msvs.vsnode_project):
 		srcs = getattr(tg, 'embed_asm', [])
 		for x in srcs:
 			r = embed_asm(self, x)
-			print 'embed_asm', x, r.node.abspath()
 			self.embed_asm[r.node.abspath()] = r
 
 		# Process ide_content attribute
@@ -926,7 +925,6 @@ class idegen(msvs.msvs_generator):
 		from_new = new_keys.difference(in_both)
 
 		for key in from_old:
-			print 'from_old', left.name, variant, key
 			# Items in from_old need to be removed from source_list
 			# and tracked per variant
 			item = lhs.pop(key)
@@ -936,7 +934,6 @@ class idegen(msvs.msvs_generator):
 				setattr(other_prop, attr, v)
 
 		for key in from_new:
-			print 'from_new', right.name, variant, key
 			# Item's in from_new need to be tracked per variant
 			v = getattr(prop, attr, [])
 			v.append(rhs[key])
