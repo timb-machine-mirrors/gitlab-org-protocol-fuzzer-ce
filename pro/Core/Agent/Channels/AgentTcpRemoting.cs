@@ -273,6 +273,10 @@ namespace Peach.Pro.Core.Agent.Channels
 
 			public void WantBytes(long count)
 			{
+				count -= (InputStream.Length - InputStream.Position);
+				if (count <= 0)
+					return;
+
 				Exec("WantBytes", () => { proxy.WantBytes(count); });
 
 				ReadAllBytes();

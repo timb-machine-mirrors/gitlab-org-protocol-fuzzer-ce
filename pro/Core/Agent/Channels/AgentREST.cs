@@ -25,6 +25,8 @@
 
 // $Id$
 
+#if DISABLED
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -719,3 +721,4 @@ namespace Peach.Pro.Core.Agent.Channels
 	}
 }
 // end
+#endif

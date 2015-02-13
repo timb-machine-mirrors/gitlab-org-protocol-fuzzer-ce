@@ -7,7 +7,7 @@ using Peach.Pro.Core.Runtime;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
-	[AgentServer("json")]
+	[AgentServer("http")]
 	public class Server : IAgentServer
 	{
 		public const ushort DefaultPort = 9001;
