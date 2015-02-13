@@ -58,6 +58,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			#endregion
 
 			private readonly MonitorHandler _handler;
+			private readonly HashSet<string> _calls;
 			private readonly NamedCollection<Monitor> _monitors;
 			private readonly Dictionary<string, Stream> _data;
 
@@ -70,13 +71,32 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			public Context(MonitorHandler handler, ConnectRequest req)
 			{
 				_handler = handler;
+				_calls = new HashSet<string>();
 				_monitors = new NamedCollection<Monitor>();
 				_data = new Dictionary<string, Stream>();
 
 				Url = "/pa/agent/" + Guid.NewGuid();
 				Messages = new List<string>();
 
-				CreateMonitors(req);
+				_handler._routes.Add(Url, "DELETE", OnAgentDisconnect);
+				_handler._routes.Add(Url, "POST", OnStartMonitor);
+
+				if (req == null || req.Monitors == null || req.Monitors.Count == 0)
+					return;
+
+				try
+				{
+					foreach (var item in req.Monitors)
+						AddMonitor(item);
+
+					OnSessionStarting(null);
+				}
+				catch
+				{
+					Dispose();
+
+					throw;
+				}
 			}
 
 			public void Dispose()
@@ -91,7 +111,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					}
 					catch (Exception ex)
 					{
-						Logger.Debug("Ignoring session finished exception on {0} monitor '{1}'.", mon.Class, mon.Name);
+						Logger.Debug("Ignoring session finished exception on {0} monitor '{1}'.",
+							mon.Class, mon.Name);
 						Logger.Debug(ex.Message);
 					}
 				}
@@ -104,7 +125,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					}
 					catch (Exception ex)
 					{
-						Logger.Debug("Ignoring stop exception on {0} monitor '{1}'.", mon.Class, mon.Name);
+						Logger.Debug("Ignoring stop exception on {0} monitor '{1}'.",
+							mon.Class, mon.Name);
 						Logger.Debug(ex.Message);
 					}
 				}
@@ -121,63 +143,74 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				_handler._contexts.Remove(this);
 			}
 
-			private void CreateMonitors(ConnectRequest req)
+			private void AddMonitor(MonitorRequest item)
 			{
-				// Add DELETE first so if we fail to start we can just call Dispose()
-				_handler._routes.Add(Url, "DELETE", OnAgentDisconnect);
+				var cls = item.Class;
+				var key = item.Name ?? _monitors.UniqueName();
+				var type = ClassLoader.FindPluginByName<MonitorAttribute>(cls);
 
-				var calls = new HashSet<string>();
+				if (type == null)
+					throw new PeachException("Error, unable to locate monitor '{0}'.".Fmt(cls)); 
 
-				try
+				var mon = (Monitor)Activator.CreateInstance(type, new object[] { key });
+
+				mon.StartMonitor(item.Args);
+
+				if (_monitors.Count == 0)
 				{
-					foreach (var item in req.Monitors)
+					// If this is the first monitor, add the common messages
+					Messages.AddRange(new[]
 					{
-						var cls = item.Class;
-						var key = item.Name ?? _monitors.UniqueName();
-						var type = ClassLoader.FindPluginByName<MonitorAttribute>(cls);
+						"SessionStarting",
+						"IterationStarting",
+						"IterationFinished",
+						"DetectedFault",
+						"GetMonitorData"
+					});
 
-						if (type == null)
-							throw new PeachException("Error, unable to locate monitor '{0}'.".Fmt(cls)); 
+					_handler._routes.Add(Url + "/SessionStarting", "PUT", OnSessionStarting);
+					_handler._routes.Add(Url + "/IterationStarting", "PUT", OnIterationStarting);
+					_handler._routes.Add(Url + "/IterationFinished", "PUT", OnIterationFinished);
+					_handler._routes.Add(Url + "/DetectedFault", "GET", DetectedFault);
+					_handler._routes.Add(Url + "/GetMonitorData", "GET", GetMonitorData);
+				}
 
-						var mon = (Monitor)Activator.CreateInstance(type, new object[] { key });
-						mon.StartMonitor(item.Args);
-
-						foreach (var kv in item.Args.Where(kv => kv.Key.EndsWith("OnCall")))
-							calls.Add(kv.Value);
-
-						_monitors.Add(mon);
-					}
-
-					foreach (var item in _monitors)
+				// Add any OnCall messages specific to this monitor
+				foreach (var kv in item.Args.Where(kv => kv.Key.EndsWith("OnCall")))
+				{
+					if (_calls.Add(kv.Value))
 					{
-						item.SessionStarting();
+						Messages.Add("Message/" + kv.Value);
+						_handler._routes.Add(Url + "/Message/" + kv.Value, "PUT", OnMessage);
 					}
 				}
-				catch
-				{
-					Dispose();
 
-					throw;
+				_monitors.Add(mon);
+			}
+
+			private RouteResponse OnSessionStarting(HttpListenerRequest req)
+			{
+				foreach (var mon in _monitors)
+				{
+					mon.SessionStarting();
 				}
 
-				Messages.AddRange(new[]
-				{
-					"IterationStarting",
-					"IterationFinished",
-					"DetectedFault",
-					"GetMonitorData"
-				});
+				return RouteResponse.Success();
+			}
 
-				_handler._routes.Add(Url + "/IterationStarting", "PUT", OnIterationStarting);
-				_handler._routes.Add(Url + "/IterationFinished", "PUT", OnIterationFinished);
-				_handler._routes.Add(Url + "/DetectedFault", "GET", DetectedFault);
-				_handler._routes.Add(Url + "/GetMonitorData", "GET", GetMonitorData);
+			private RouteResponse OnStartMonitor(HttpListenerRequest req)
+			{
+				var mon = req.FromJson<MonitorRequest>();
 
-				foreach (var item in calls)
+				AddMonitor(mon);
+
+				var resp = new ConnectResponse
 				{
-					Messages.Add("Message/" + item);
-					_handler._routes.Add(Url + "/Message/" + item, "PUT", OnMessage);
-				}
+					Url = Url,
+					Messages = Messages,
+				};
+
+				return RouteResponse.AsJson(resp, HttpStatusCode.Created);
 			}
 
 			private RouteResponse OnIterationStarting(HttpListenerRequest req)
