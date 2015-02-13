@@ -5,22 +5,22 @@ using Newtonsoft.Json.Converters;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
+	public class MonitorRequest
+	{
+		[JsonProperty("name")]
+		public string Name { get; set; }
+
+		[JsonProperty("class")]
+		public string Class { get; set; }
+
+		[JsonProperty("args")]
+		public Dictionary<string, string> Args { get; set; }
+	}
+
 	internal class ConnectRequest
 	{
-		public class Monitor
-		{
-			[JsonProperty("name")]
-			public string Name { get; set; }
-
-			[JsonProperty("class")]
-			public string Class { get; set; }
-
-			[JsonProperty("args")]
-			public Dictionary<string, string> Args { get; set; }
-		}
-
 		[JsonProperty("monitors")]
-		public List<Monitor> Monitors { get; set; }
+		public List<MonitorRequest> Monitors { get; set; }
 	}
 
 	internal class IterationStartingRequest

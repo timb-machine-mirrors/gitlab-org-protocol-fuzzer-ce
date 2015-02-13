@@ -15,6 +15,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 	[Agent("http")]
 	public class Client : AgentClient
 	{
+		#region Publisher Proxy
+
 		class PublisherProxy : IPublisher
 		{
 			readonly Client _client;
@@ -257,6 +259,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			}
 		}
 
+		#endregion
+
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
 		private readonly Uri _baseUrl;
@@ -273,7 +277,12 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			_baseUrl = new Uri(uri);
 
 			if (_baseUrl.IsDefaultPort)
-				_baseUrl = new Uri("{0}://{1}:{2}".Fmt(_baseUrl.Scheme, _baseUrl.Host, Server.DefaultPort));
+			{
+				_baseUrl = new Uri("{0}://{1}:{2}".Fmt(
+					_baseUrl.Scheme,
+					_baseUrl.Host,
+					Server.DefaultPort));
+			}
 
 			_baseUrl = new Uri("http://{0}:{1}".Fmt(_baseUrl.Host, _baseUrl.Port));
 
@@ -282,57 +291,42 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		public override void AgentConnect()
 		{
-			_offline = false;
-
+			// Initialize our monitors to be empty and populate
+			// them with calls to StartMonitor()
 			_connectReq = new ConnectRequest
 			{
-				Monitors = new List<ConnectRequest.Monitor>(),
+				Monitors = new List<MonitorRequest>(),
 			};
+
+			ReconnectAgent();
 		}
 
 		public override void StartMonitor(string monName, string cls, Dictionary<string, string> args)
 		{
-			_connectReq.Monitors.Add(new ConnectRequest.Monitor
+			var mon = new MonitorRequest
 			{
 				Name = monName,
 				Class = cls,
 				Args = args
-			});
+			};
+
+			// Save off this monitor for future reconnects
+			_connectReq.Monitors.Add(mon);
+
+			// Tell the agent to start this single monitor and
+			// update our connect response with the supported mesages
+			_connectResp = Send<ConnectResponse>("POST", "", mon);
 		}
 
 		public override void SessionStarting()
 		{
-			_offline = false;
-			_connectResp = new ConnectResponse { Messages = new List<string>() };
-
-			if (_connectReq.Monitors.Count > 0)
-			{
-				try
-				{
-					// Send the initial POST to the base url
-					_agentUri = new Uri(_baseUrl, "/p/agent");
-					_connectResp = Send<ConnectResponse>("POST", "", _connectReq);
-					_agentUri = new Uri(_baseUrl, _connectResp.Url);
-				}
-				catch
-				{
-					_agentUri = null;
-
-					throw;
-				}
-			}
-
-			// If we are reconnecting, ensure all the publishers are recreated
-			foreach (var pub in _publishers)
-				pub.Connect();
+			if (_connectResp.Messages.Contains("SessionStarting"))
+				Send("PUT", "/SessionStarting", null);
 		}
 
 		public override void SessionFinished()
 		{
-			if (_agentUri != null)
-				Send("DELETE", "", null);
-
-			_connectResp = null;
+			// AgentDisconnect calls DELETE which does SessionFinished
 
 			// Leave the publishers around a they will get cleaned up
 			// when stop() is called on the RemotePublisher
@@ -340,12 +334,16 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		public override void StopAllMonitors()
 		{
-			// OnSessionFinished does StopAllMonitors
+			// AgentDisconnect calls DELETE which does StopAllMonitors
 		}
 
 		public override void AgentDisconnect()
 		{
-			// OnSessionFinished does AgentDisconnect
+			// If reconnect failed, we won't have an agent uri
+			if (_agentUri != null)
+				Send("DELETE", "", null);
+
+			_connectResp = null;
 		}
 
 		public override IPublisher CreatePublisher(string pubName, string cls, Dictionary<string, string> args)
@@ -357,7 +355,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		{
 			// If any previous call failed, we need to reconnect
 			if (_offline)
-				SessionStarting();
+				ReconnectAgent();
 
 			if (!_connectResp.Messages.Contains("IterationStarting"))
 				return;
@@ -410,6 +408,13 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				Send("PUT", path, null);
 		}
 
+		internal void SimulateDisconnect()
+		{
+			Send("DELETE", "", null);
+
+			_offline = true;
+		}
+
 		private MonitorData MakeFault(FaultResponse.Record f)
 		{
 			var ret = new MonitorData
@@ -455,6 +460,35 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					return ms.ToArray();
 				}
 			});
+		}
+
+		private void ReconnectAgent()
+		{
+			Logger.Debug("Restarting all monitors on remote agent {0}", _baseUrl);
+
+			_offline = false;
+
+			try
+			{
+				// Send the initial POST to the base url
+				_agentUri = new Uri(_baseUrl, "/p/agent");
+				_connectResp = Send<ConnectResponse>("POST", "", _connectReq);
+				_agentUri = new Uri(_baseUrl, _connectResp.Url);
+			}
+			catch
+			{
+				_agentUri = null;
+
+				throw;
+			}
+
+			Logger.Debug("Restarting all publishers on remote agent {0}", _baseUrl);
+
+			// If we are reconnecting, ensure all the publishers are recreated
+			foreach (var pub in _publishers)
+				pub.Connect();
+
+			Logger.Debug("Successfully restored connection to remote agent {0}", _baseUrl);
 		}
 
 		private void Send(string method, string path, object request)
