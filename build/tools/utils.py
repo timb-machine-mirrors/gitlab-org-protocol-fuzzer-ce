@@ -177,6 +177,13 @@ def cs_resource(self):
 		final = base + '.' + name
 		self.env.append_value('CSFLAGS', '/resource:%s,%s' % (x.abspath(), final))
 
+	# add external assemblies as embedded resources
+	asms = getattr(self, 'embed_asm', [])
+	for name in asms:
+		node = self.env.NATIVE_DLLS[name]
+		final = '%s.Resources.Assemblies.%s' % (base, name)
+		self.env.append_value('CSFLAGS', '/resource:%s,%s' % (node.abspath(), final))
+
 	# win32 icon support
 	icon = getattr(self, 'icon', None)
 	if icon:
