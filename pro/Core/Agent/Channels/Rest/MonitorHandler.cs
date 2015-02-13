@@ -22,7 +22,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		{
 			_contexts = new NamedCollection<Context>();
 			_routes = routes;
-			_routes.Add("/p/agent", "POST", OnAgentConnect);
+			_routes.Add(Server.MonitorPath, "POST", OnAgentConnect);
 		}
 
 		public void Dispose()
@@ -75,7 +75,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				_monitors = new NamedCollection<Monitor>();
 				_data = new Dictionary<string, Stream>();
 
-				Url = "/pa/agent/" + Guid.NewGuid();
+				Url = Server.MonitorPath + "/" + Guid.NewGuid();
 				Messages = new List<string>();
 
 				_handler._routes.Add(Url, "DELETE", OnAgentDisconnect);
@@ -329,7 +329,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			private string CacheMonitorData(byte[] data)
 			{
-				var url = "/pa/file/" + Guid.NewGuid();
+				var url = Server.FilePath + "/" + Guid.NewGuid();
 				var stream = new MemoryStream(data);
 
 				_data.Add(url, stream);

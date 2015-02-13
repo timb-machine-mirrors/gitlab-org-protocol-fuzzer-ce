@@ -29,7 +29,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			{
 				_handler = handler;
 
-				Url = "/p/publisher/" + Guid.NewGuid();
+				Url = Server.PublisherPath + "/" + Guid.NewGuid();
 
 				var type = ClassLoader.FindPluginByName<PublisherAttribute>(req.Class);
 				if (type == null)
@@ -238,7 +238,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			_contexts = new NamedCollection<Context>();
 			_routes = routes;
-			_routes.Add("/p/publisher", "POST", OnCreatePublisher);
+			_routes.Add(Server.PublisherPath, "POST", OnCreatePublisher);
 		}
 
 		public void Dispose()

@@ -59,7 +59,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			public void Connect()
 			{
-				_publisherUri = new Uri(_client._baseUrl, "/p/publisher");
+				_publisherUri = new Uri(_client._baseUrl, Server.PublisherPath);
 				var resp = Send<PublisherResponse>("POST", "", _createReq);
 				_publisherUri = new Uri(_client._baseUrl, resp.Url);
 			}
@@ -473,7 +473,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			try
 			{
 				// Send the initial POST to the base url
-				_agentUri = new Uri(_baseUrl, "/p/agent");
+				_agentUri = new Uri(_baseUrl, Server.MonitorPath);
 				_connectResp = Send<ConnectResponse>("POST", "", _connectReq);
 				_agentUri = new Uri(_baseUrl, _connectResp.Url);
 			}
