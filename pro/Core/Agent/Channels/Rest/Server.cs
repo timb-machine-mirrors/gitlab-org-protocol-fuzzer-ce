@@ -10,6 +10,10 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 	[AgentServer("http")]
 	public class Server : IAgentServer
 	{
+		internal const string PublisherPath = "/pa/publisher";
+		internal const string MonitorPath = "/pa/agent";
+		internal const string FilePath = "/pa/file";
+
 		public const ushort DefaultPort = 9001;
 
 		private const string PortOption = "--port=";
