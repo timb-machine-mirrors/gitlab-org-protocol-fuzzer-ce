@@ -27,22 +27,18 @@
 // $Id$
 
 using System;
-using System.IO;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
 using System.Linq;
-
-using Peach.Core;
-using Peach.Core.Agent;
-using Peach.Core.Dom;
-
-using NLog;
-using Peach.Core.IO;
-
 using Newtonsoft.Json;
+using NLog;
+using Peach.Core;
+using Peach.Core.Dom;
+using Peach.Core.IO;
+using Encoding = Peach.Core.Encoding;
+using Logger = Peach.Core.Logger;
 
-namespace Peach.Core.Loggers
+namespace Peach.Pro.Core.Loggers
 {
 	/// <summary>
 	/// Standard file system logger.
@@ -86,7 +82,19 @@ namespace Peach.Core.Loggers
 
 		protected void SaveFault(Category category, Fault fault)
 		{
-			log.WriteLine("! Fault detected at iteration {0} : {1}", fault.iteration, DateTime.Now.ToString());
+			switch (category)
+			{
+				case Category.Faults:
+					log.WriteLine("! Reproduced fault at iteration {0} : {1}",
+						fault.iteration, DateTime.Now.ToString());
+					break;
+				case Category.NonReproducable:
+					log.WriteLine("! Non-reproducable fault detected at iteration {0} : {1}", fault.iteration, DateTime.Now.ToString());
+					break;
+				case Category.Reproducing:
+					log.WriteLine("! Fault detected at iteration {0}, trying to reprduce : {1}", fault.iteration, DateTime.Now.ToString());
+					break;
+			}
 
 			// root/category/bucket/iteration
 			var subDir = System.IO.Path.Combine(RootDir, category.ToString(), fault.folderName, fault.iteration.ToString());
@@ -114,6 +122,10 @@ namespace Peach.Core.Loggers
 		protected override void Engine_ReproFailed(RunContext context, uint currentIteration)
 		{
 			System.Diagnostics.Debug.Assert(reproFault != null);
+
+			// Update the searching ranges for the fault
+			reproFault.iterationStart = context.reproducingInitialIteration - context.reproducingIterationJumpCount;
+			reproFault.iterationStop = reproFault.iteration;
 
 			SaveFault(Category.NonReproducable, reproFault);
 			reproFault = null;
@@ -245,6 +257,8 @@ namespace Peach.Core.Loggers
 			ret.agentName = coreFault.agentName;
 			ret.exploitability = coreFault.exploitability;
 			ret.iteration = currentIteration;
+			ret.iterationStart = coreFault.iterationStart;
+			ret.iterationStop = coreFault.iterationStop;
 			ret.majorHash = coreFault.majorHash;
 			ret.minorHash = coreFault.minorHash;
 			ret.title = coreFault.title;
@@ -261,7 +275,7 @@ namespace Peach.Core.Loggers
 			if (currentIteration != 1 && currentIteration % 100 != 0)
 				return;
 
-			if (totalIterations != null)
+			if (totalIterations.HasValue && totalIterations.Value < uint.MaxValue)
 			{
 				log.WriteLine(". Iteration {0} of {1} : {2}", currentIteration, (uint)totalIterations, DateTime.Now.ToString());
 				log.Flush();
@@ -283,7 +297,7 @@ namespace Peach.Core.Loggers
 				});
 		}
 
-		protected override void ActionStarting(RunContext context, Dom.Action action)
+		protected override void ActionStarting(RunContext context, Peach.Core.Dom.Action action)
 		{
 			var rec = new Fault.Action()
 			{
@@ -309,7 +323,7 @@ namespace Peach.Core.Loggers
 			states.Last().actions.Add(rec);
 		}
 
-		protected override void ActionFinished(RunContext context, Dom.Action action)
+		protected override void ActionFinished(RunContext context, Peach.Core.Dom.Action action)
 		{
 			var rec = states.Last().actions.Last();
 			if (rec.models == null)
@@ -337,9 +351,14 @@ namespace Peach.Core.Loggers
 
 		protected override void Engine_TestError(RunContext context, Exception e)
 		{
-			log.WriteLine("! Test error:");
-			log.WriteLine(e);
-			log.Flush();
+			// Happens if we can't open the log during TestStarting()
+			// because of permission issues
+			if (log != null)
+			{
+				log.WriteLine("! Test error:");
+				log.WriteLine(e);
+				log.Flush();
+			}
 		}
 
 		protected override void Engine_TestFinished(RunContext context)

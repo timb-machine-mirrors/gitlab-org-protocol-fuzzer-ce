@@ -1,9 +1,8 @@
+using System.Globalization;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.Dom.XPath;
 using Peach.Core.IO;
-using Peach.Enterprise;
-using Peach.Enterprise.WebServices;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,6 +10,10 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.XPath;
+using Peach.Pro.Core;
+using Peach.Pro.Core.Fixups;
+using Peach.Pro.Core.MutationStrategies;
+using Peach.Pro.Core.WebServices;
 
 namespace PitTester
 {
@@ -68,6 +71,8 @@ namespace PitTester
 					test.publishers[key] = new TestPublisher(key, logger);
 			}
 
+			var fixupOverrides = new Dictionary<string, Variant>();
+
 			if (testData.Slurps.Count > 0)
 			{
 				var doc = new XmlDocument();
@@ -95,12 +100,47 @@ namespace PitTester
 
 						setElement.DefaultValue = blob.DefaultValue;
 
+						if (setElement.fixup is VolatileFixup)
+						{
+							var dm = setElement.root as DataModel;
+							if (dm != null && dm.actionData != null)
+							{
+								// If the element is under an action, and has a volatile fixup
+								// store off the value for overriding during TestStarting
+								var key = "Peach.VolatileOverride.{0}.{1}".Fmt(dm.actionData.outputName, setElement.fullName);
+								fixupOverrides[key] = blob.DefaultValue;
+							}
+						}
+
 						if (blob.DefaultValue.GetVariantType() == Variant.VariantType.BitStream)
 							((BitwiseStream)blob.DefaultValue).Position = 0;
 					}
 					while (iter.MoveNext());
 
 					//ApplySlurp(dom, slurp);
+				}
+			}
+
+			// See #214
+			// If there are is any action that has more than one data set
+			// that use <Field> and the random strategy is
+			// in use, turn off data set switching...
+			var noSwitch = dom.tests
+				.Select(t => t.stateModel)
+				.SelectMany(sm => sm.states)
+				.SelectMany(s => s.actions)
+				.SelectMany(a => a.allData)
+				.Select(ad => ad.dataSets)
+				.Any(ds => ds.SelectMany(d => d).OfType<DataField>().Count() > 1);
+
+			if (noSwitch)
+			{
+				foreach (var t in dom.tests.Where(t => t.strategy is RandomStrategy))
+				{
+					t.strategy = new RandomStrategy(new Dictionary<string, Variant>
+					{
+						{ "SwitchCount", new Variant(int.MaxValue.ToString(CultureInfo.InvariantCulture)) },
+					});
 				}
 			}
 
@@ -126,7 +166,17 @@ namespace PitTester
 			}
 
 
+			uint num = 0;
 			var e = new Engine(null);
+			e.IterationStarting += (ctx, it, tot) => num = it;
+
+			e.TestStarting += ctx =>
+			{
+				foreach (var kv in fixupOverrides)
+					ctx.stateStore.Add(kv.Key, kv.Value);
+			};
+
+			e.IterationStarting += (ctx, it, tot) => num = it;
 
 			try
 			{
@@ -135,7 +185,7 @@ namespace PitTester
 			catch (Exception ex)
 			{
 				var msg = "Encountered an unhandled exception on iteration {0}, seed {1}.\n{2}".Fmt(
-					e.context.currentIteration,
+					num,
 					config.randomSeed,
 					ex.Message);
 				throw new PeachException(msg, ex);
@@ -264,6 +314,30 @@ namespace PitTester
 				if (it.Count != expexted)
 					errors.AppendLine("Number of <Test> elements is " + it.Count + " but should be " + expexted + ".");
 
+				while (it.MoveNext())
+				{
+					var maxSize = it.Current.GetAttribute("maxOutputSize", string.Empty);
+					if (string.IsNullOrEmpty(maxSize))
+						errors.AppendLine("<Test> element is missing maxOutputSize attribute.");
+
+					var lifetime = it.Current.GetAttribute("targetLifetime", string.Empty);
+					if (string.IsNullOrEmpty(lifetime))
+						errors.AppendLine("<Test> element is missing targetLifetime attribute.");
+
+					var parts = fileName.Split(Path.DirectorySeparatorChar);
+					var fileFuzzing = new[] {"Image", "Video", "Application"};
+					if (parts.Any(fileFuzzing.Contains) || parts.Last().Contains("Client"))
+					{
+						if (lifetime != "iteration")
+							errors.AppendLine("<Test> element has incorrect targetLifetime attribute. Expected 'iteration' but found '{0}'.".Fmt(lifetime));
+					}
+					else
+					{
+						if (lifetime != "session")
+							errors.AppendLine("<Test> element has incorrect targetLifetime attribute. Expected 'session' but found '{0}'.".Fmt(lifetime));
+					}
+				}
+
 				var sm = nav.Select("/p:Peach/p:StateModel", nsMgr);
 				while (sm.MoveNext())
 				{
@@ -281,7 +355,7 @@ namespace PitTester
 							gotStart = true;
 						else if (meth == "ExitIterationEvent")
 							gotEnd = true;
-						else
+						else if (!gotStart && !ShouldSkipStart(actions))
 							errors.AppendLine(string.Format("StateModel '{0}' has an unexpected call action.  Method is '{1}' and should be 'StartIterationEvent' or 'EndIterationEvent'.", smName, meth));
 					}
 
@@ -315,14 +389,10 @@ namespace PitTester
 				throw new ApplicationException(errors.ToString());
 		}
 
-		static string GetRelativePath(string basePath, string fullPath)
+		private static bool ShouldSkipStart(XPathNodeIterator actions)
 		{
-			if (basePath.LastOrDefault() != Path.DirectorySeparatorChar)
-				basePath += Path.DirectorySeparatorChar;
-
-			var relPath = fullPath.Substring(basePath.Length);
-
-			return relPath;
+			var preceding = actions.Current.SelectSingleNode("preceding-sibling::comment()");
+			return (preceding != null && preceding.Value.Contains("PitTester: Skip_StartIterationEvent"));
 		}
 	}
 }

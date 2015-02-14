@@ -5,7 +5,7 @@
 //  - 02/18/2014: Seth & Adam: Outlined
 // Expand description to include use case "This is used when fuzzing {0} protocols"
 // Give full pit to run using hex publisher, test works
-// Exampel 1 crc ref on block that contains crc
+// Example 1 CRC ref on block that contains CRC
 // List Parent element types
 // Number, String
 
@@ -15,7 +15,7 @@
 // Added parent types
 // Added full example
 
-The _Crc_ will produce a CRC using data from the reference element.
+The _Crc_ produces a CRC using data from the reference element.
 It is defined in ISO 3309.
 This is used when fuzzing CRC checksum protocols.
 
@@ -26,7 +26,7 @@ xref:String[String]
 
 === Parameters
 
-xref:ref[ref]:: Reference to data element which the CRC calculation will be performed on
+xref:ref[ref]:: Reference to the input data element used in the CRC calculation.
 type:: Type of CRC to run [CRC32, CRC16, CRC_CCITT]. Defaults to CRC32.
 
 === Examples

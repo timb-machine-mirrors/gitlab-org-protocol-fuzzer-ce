@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Peach.Core;
 
-namespace Peach.Core
+namespace Peach.Pro.Core
 {
 	class WeightedListDebugView<T> where T : IWeighted
 	{

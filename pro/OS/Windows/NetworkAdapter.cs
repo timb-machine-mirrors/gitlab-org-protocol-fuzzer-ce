@@ -1,14 +1,15 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Management;
 using System.Net.NetworkInformation;
+using Peach.Core;
 
-namespace Peach.Core
+namespace Peach.Pro.OS.Windows
 {
 	[PlatformImpl(Platform.OS.Windows)]
 	public class NetworkAdapterImpl : NetworkAdapter
 	{
+		const uint DefaultMtu = 1500;
+
 		uint? index;
 		ManagementObject obj;
 
@@ -80,8 +81,9 @@ namespace Peach.Core
 
 				object mtu = obj["MTU"];
 
+				// null means the interface is using the default mtu
 				if (mtu == null)
-					return null;
+					return DefaultMtu;
 
 				return (uint)mtu;
 			}
@@ -98,7 +100,8 @@ namespace Peach.Core
 					return;
 				}
 
-				if (value.HasValue)
+				// If mtu is default, set it back to null
+				if (value.HasValue && value.Value != DefaultMtu)
 					obj.SetPropertyValue("MTU", (uint)value);
 				else
 					obj.SetPropertyValue("MTU", null);

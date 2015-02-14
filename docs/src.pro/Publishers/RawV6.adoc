@@ -7,7 +7,7 @@
 // Params are good
 // give full put to run for example
 // Mention that recv includes ip header send does not
-// Give full enumeration of ethernet protocols supported
+// Give full enumeration of Ethernet protocols supported
 // Talk about mtu setProperty for fuzzing mtu
 // Updated:
 // - 02/18/2014: Jordyn
@@ -50,7 +50,7 @@ MaxMTU:: Maximum allowable MTU property value. Defaults to 131,070.
 MinMTU:: Minimum allowable MTU property value. Defaults to 1,280.
 Filter::
     Filter received frames using a libpcap style filter string. For more information
-    about libpcap syle filters see http://www.tcpdump.org/manpages/pcap-filter.7.html[this page].
+    about libpcap style filters see http://www.tcpdump.org/manpages/pcap-filter.7.html[this page].
 
 === Actions
 
@@ -61,21 +61,13 @@ xref:Action_close[close]:: Close and clean up the socket.
 xref:Action_output[output]:: Data sent via output is written to the open socket.
 xref:Action_input[input]:: Data received via input is read from the open socket.
 xref:Action_getProperty[getProperty]::
-	Get a property value.
-	+
-	This publisher supports two properties:
-	+
-	[horizontal]
-	MTU;; The current MTU value
-	LastRecvAddr;; The last receive address
+	Get a property value. This publisher supports two properties:  +
+	*MTU*;; The current MTU value  +
+	*LastRecvAddr*;; The last receive address
 
 xref:Action_setProperty[setProperty]:: 
-	Set a property value. This can be used to fuzz properties exposed by the publisher.
-	+
-	This publisher supports one property:
-	+
-	[horizontal]
-	MTU;; Set the current MTU value. The value will be ignored if not with in set range.
+	Set a property value. This can be used to fuzz properties exposed by the publisher. This publisher supports one property:  +
+	*MTU*;; Set the current MTU value. The value is ignored if it is not within the set range.
 
 === Examples
 

@@ -11,9 +11,10 @@ using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.Analyzers;
 using Peach.Core.IO;
-using Peach.Enterprise.Dom;
+using Peach.Core.Test;
+using Peach.Pro.Core.Dom;
 
-namespace Peach.Pro.Test.PitParserTests
+namespace Peach.Pro.Test.Core.PitParserTests
 {
 	[TestFixture]
 	[Category("Peach")]

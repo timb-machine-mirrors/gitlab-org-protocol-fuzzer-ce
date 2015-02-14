@@ -27,18 +27,17 @@
 // $Id$
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Collections.Generic;
 using System.Text;
-using System.Threading;
-
+using NLog;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using Encoding = Peach.Core.Encoding;
 
-using NLog;
-
-namespace Peach.Core.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	[Publisher("Http", true)]
 	[Parameter("Method", typeof(string), "Method type")]
@@ -215,9 +214,14 @@ namespace Peach.Core.Publishers
 			if (credentials != null)
 				request.Credentials = credentials;
 
-			foreach (var header in Headers.Keys)
-				if(!string.IsNullOrWhiteSpace(header))
-					request.Headers[header] = Headers[header];
+
+			foreach (var kv in Headers)
+			{
+				if (0 == string.Compare("Content-Type", kv.Key, StringComparison.OrdinalIgnoreCase))
+					request.ContentType = kv.Value;
+				else if (!string.IsNullOrWhiteSpace(kv.Key))
+					request.Headers[kv.Key] = kv.Value;
+			}
 
 			if (data != null)
 			{

@@ -1,0 +1,68 @@
+﻿<ng-form name="form">
+	<accordion-group is-open="isOpen">
+		<accordion-heading>
+			<span style="line-height: 22px; text-decoration: none;">
+				<i class="glyphicon"
+					 ng-class="{'glyphicon-chevron-down': isOpen, 'glyphicon-chevron-right': !isOpen}">
+				</i>
+				&nbsp;
+				{{vm.Header}}
+				<span class="btn-group btn-group-xs pull-right">
+					<button class="btn btn-xs btn-info"
+					        ng-click="vm.OnMoveUp($event)"
+					        ng-class="{disabled: !vm.CanMoveUp}"
+					        tooltip="Move Monitor Up"
+					        tooltip-append-to-body="true">
+						<i class="glyphicon glyphicon-chevron-up">
+						</i>
+					</button>
+					<button class="btn btn-xs btn-info"
+									ng-click="vm.OnMoveDown($event)"
+									ng-class="{disabled: !vm.CanMoveDown}"
+									tooltip="Move Monitor Down"
+									tooltip-append-to-body="true">
+						<i class="glyphicon glyphicon-chevron-down">
+						</i>
+					</button>
+					<button class="btn btn-xs btn-danger"
+									ng-click="vm.OnRemove($event)"
+									tooltip="Remove Monitor"
+									tooltip-append-to-body="true">
+						<i class="glyphicon glyphicon-remove">
+						</i>
+					</button>
+				</span>
+			</span>
+		</accordion-heading>
+		<div class="form-group"
+				 ng-class="{'has-error': form.name.$invalid}">
+			<label class="col-sm-4 control-label">
+				Name
+			</label>
+			<div class="col-sm-6">
+				<div class="input-group">
+					<span class="peach-field-info tooltip-info input-group-addon"
+								tooltip="Friendly name for your monitor"
+								tooltip-placement="right"
+								tooltip-append-to-body="true">
+					</span>
+					<input name="name"
+								 ng-model="monitor.name"
+								 type="text"
+								 class="form-control"
+								 peach:unique-channel="agents[{{agentIndex}}].monitor.name"
+								 peach:unique-default="Monitor{{monitorIndex}}" />
+				</div>
+				<span class="help-block"
+							ng-messages="form.name.$error"
+							ng-messages-include="html/messages.html">
+				</span>
+			</div>
+		</div>
+		<div ng-repeat="param in monitor.map">
+			<peach:parameter param="param"
+											 input-group="true">
+			</peach:parameter>
+		</div>
+	</accordion-group>
+</ng-form>

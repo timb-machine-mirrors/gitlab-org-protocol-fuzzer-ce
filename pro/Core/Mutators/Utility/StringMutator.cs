@@ -4,12 +4,11 @@
 
 using System;
 using System.Text;
-
+using NLog;
+using Peach.Core;
 using Peach.Core.Dom;
 
-using NLog;
-
-namespace Peach.Core.Mutators.Utility
+namespace Peach.Pro.Core.Mutators.Utility
 {
 	/// <summary>
 	/// Generate random strings using characters randomly selected
@@ -31,7 +30,7 @@ namespace Peach.Core.Mutators.Utility
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			var asStr = obj as Dom.String;
+			var asStr = obj as Peach.Core.Dom.String;
 			if (asStr != null && asStr.isMutable && asStr.stringType != StringType.ascii)
 				return true;
 

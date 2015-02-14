@@ -5,7 +5,7 @@
 //  - 01/30/2014: Seth & Mike: Outlined
 
 // * Use examples from slides to walk through what ref does.
-// * Perhaps this is more terse then long description in booky part.
+// * Perhaps this is more terse than the long description in the booky part.
 // * Examples with output
 // * Ref datamodel
 // * Ref block
@@ -17,7 +17,7 @@
 // * What about new element that was not in original parent (goes at end)
 // * How we find elements by name (should include as this will be references from several places)
 // * If no name attribute, will get the datamodel's name or a unique derivative
-// * Replacing an element looses fixups, relations, transformers.
+// * Replacing an element loses fixups, relations, transformers.
 
 The ref attribute specifies a reference to another element by either a name or class structure.  References can be relative or fully qualified. 
 

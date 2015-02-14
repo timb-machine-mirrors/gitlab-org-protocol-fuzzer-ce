@@ -16,29 +16,29 @@ peach -t peach_xml_file
 
 === Parameters
 
--1:: Perform a single iteration. Used in debugging and validation. The iteration performed will not have any mutations.
--a --agent _channel_:: Launch Peach as an agent process using specified _channel_ protocol. Default is +tcp+.
--c --count _pit_:: For deterministic strategies this will return a total iteration count.
+-1:: Perform a single iteration. Used in debugging and validation. The iteration performed does not have any mutations.
+-a --agent _channel_:: Launch Peach as an agent process using specified _channel_ protocol. This parameter requires a value for _channel_. If -a is not specified, channel 9001 is used.
+-c --count _pit_:: For deterministic strategies, this returns a total iteration count.
 -t --test _pit_:: Perform XML validation of pit
--p --parallel _M_,_N_:: Setup for parallel fuzzing. This is only useful for deterministic strategies. _M_ is the total number of instances that will be running. _N_ is the current instance.
+-p --parallel _M_,_N_:: Setup for parallel fuzzing. This is only useful for deterministic strategies. _M_ is the total number of running instances. _N_ is the current instance.
 --debug:: Enable debug messages. This is used to validate cracking and debugging of pit files.
 --trace:: Enable verbose trace messages. Primarily used when reporting potential bugs in Peach.
 --seed _SEED_:: Use a specific seed for fuzzing run. This should only be used when reproducing results.
 --parseonly:: Perform a simple parsing of the pit file, then exit.
---makexsd:: Generate XML Schema file (peach.xsd). This file is used for pit file validation and also intellisense in XML editors. The XSD only needs to be generated if custom extensions are added to Peach.
+--makexsd:: Generate XML Schema file (peach.xsd). This file is used for pit file validation and also intelliSense in XML editors. The XSD only needs to be generated if custom extensions are added to Peach.
 --showenv:: Display a list of all elements found along with parameters and basic documentation.
 --showdevices:: Show a list of network devices found on the system.
 --analyzer:: Run an analyzer from command line (if supported by analyzer)
 --skipto _N_:: Skip to a specific iteration number. _N_ is the iteration to skip to.
 --range _START_,_STOP_:: Perform a specific range of iterations. _START_ is starting iteration, _STOP_ is iteration to stop at.
--D --define=_KEY_=_VALUE_:: Define a config value that will get replaced in the pit. This will override values loaded from the default config file (.config).
+-D --define=_KEY_=_VALUE_:: Define a config value that is replaced in the pit. This overrides values loaded from the default config file (.config).
 --config=_CONFIG_:: Specify a configuration file to use. _CONFIG_ is the configuration file.
 
 === Examples
 
 .Running a Pit
 ======================
-This example shows how to run a fuzzing definition. The following command line will launch Peach and fuzz using +pit.xml+ (and if it exists, +pit.xml.config+) as the configuration file.
+This example shows how to run a fuzzing definition. The following command line launches Peach and fuzzes using +pit.xml+ (and if it exists, +pit.xml.config+) as the configuration file.
 
 ----
 > peach pit.xml
@@ -49,7 +49,7 @@ This example shows how to run a fuzzing definition. The following command line w
 ======================
 When testing a definition, we recommend running a single non-mutating iteration with debug output. 
 
-The following command line will launch Peach and fuzz using +pit.xml+ (and if it exists, +pit.xml.config+) as the configuration file. The command line will combine the +-1+ and +--debug+ arguments to run a single iteration; the debugging information  will be included in the output. Even more verbose output can be enabled by using +--trace+ instead of +--debug+.
+The following command line launches Peach and fuzzes using +pit.xml+ (and if it exists, +pit.xml.config+) as the configuration file. The command line combines the +-1+ and +--debug+ arguments to run a single iteration; the debugging information is included in the output. Even more verbose output can be enabled by using +--trace+ instead of +--debug+.
 
 ----
 > peach -1 --debug samples\DebuggerWindows.xml
@@ -141,7 +141,7 @@ Pit File: samples\DebuggerWindows.xml
 <1> Version of Peach used. Must match when reproducing.
 <2> Seed used. Must match when reproducing.
 
-We can use the first command line to skip directly to a specific iteration and start fuzzing. This will let you run a series of iterations starting from a certain point. 
+We can use the first command line to skip directly to a specific iteration and start fuzzing. This lets you run a series of iterations starting from a certain point. 
 
 TIP: The +--seed+ argument matches the value from the +status.txt+ file.
 
@@ -160,7 +160,7 @@ We can use the second command line to perform either a specific iteration or a s
 ======================
 Agents are long running processes used by the Peach engine core during a fuzzing session. 
 
-The following will start a Peach agent using the _tcp_ channel protocol:
+The following command line starts a Peach agent using the _tcp_ channel protocol:
 
 ----
 > peach -a tcp
@@ -174,12 +174,12 @@ The following will start a Peach agent using the _tcp_ channel protocol:
 
 .Regenerating the Peach Schema File
 ======================
-The Peach schema file, _peach.xsd_, provides intellisense in supported editors (like Visual Studio and oxYgen XML Editor). When adding extensions to Peach, generate a new schema file that includes these extensions.
+The Peach schema file, _peach.xsd_, provides intelliSense in supported editors (like Visual Studio and oXygen XML Editor). When adding extensions to Peach, generate a new schema file that includes these extensions.
 
 ----
 > peach --makexsd
 ----
 
-The output of this command will be a new _peach.xsd_ file that contains any custom extensions.
+The output of this command is a new _peach.xsd_ file that contains any custom extensions.
 
 ======================

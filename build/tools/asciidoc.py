@@ -18,31 +18,29 @@ def configure(conf):
 	conf.find_program('asciidoctor', path_list = [ j(pub, 'asciidoctor', 'bin') ], exts = '')
 	conf.find_program('fopub', path_list = [ fopub ])
 
+	# Use ghostscript 9.15 binary from www.ghostscript.com
+	# so bookmarks are preserved when merging pdf files
+	# see doc.py for download locations
+
+	gs_path = []
+	gs_prog = 'gs-915-linux_x86_64'
+
+	if Utils.unversioned_sys_platform() == 'win32':
+		gs_prog = 'gswin64c'
+		for p in [ 'ProgramFiles', 'ProgramFiles(x86)', 'ProgramW6432' ]:
+			gs_path.append(j(os.environ.get(p), 'gs', 'gs9.15', 'bin'))
+
 	try:
-		conf.find_program('gs')
+		conf.find_program(gs_prog, var='GS', path_list=gs_path)
 		v.append_value('supported_features', 'gs')
 	except Exception, e:
-		if Utils.unversioned_sys_platform() == 'win32':
-			# look for ghostscript windows install
-			gs = []
-			for p in [ 'ProgramFiles', 'ProgramFiles(x86)', 'ProgramW6432' ]:
-				gs.append(j(os.environ.get(p), 'gs', 'gs9.15', 'bin'))
-			try:
-				conf.find_program('gswin64c', var='GS', path_list = gs)
-				v.append_value('supported_features', 'gs')
-			except:
-				v.append_value('missing_features', 'gs')
-				if Logs.verbose > 0:
-					Logs.warn('Ghostscript is not available: %s' % (e))
-		else:
-			v.append_value('missing_features', 'gs')
-			if Logs.verbose > 0:
-				Logs.warn('Ghostscript is not available: %s' % (e))
+		v.append_value('missing_features', 'gs')
+		if Logs.verbose > 0:
+			Logs.warn('Ghostscript is not available: %s' % (e))
 
 	# Ensure fopub is initialized
 	test = conf.bldnode.make_node('docbook_test.xml')
-	pdf = test.change_ext('.pdf')
-	if not os.path.isfile(pdf.abspath()):
+	if not os.path.isfile(test.abspath()):
 		test.write('''<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <article lang="en">
@@ -77,7 +75,6 @@ def configure(conf):
 	]
 
 	docbook = j('docs', 'publishing', 'docbook-xsl-1.78.1')
-	conf.env['WEBHELP_ICO'] = j('docs', 'publishing', 'favicon.ico')
 	conf.env['WEBHELP_DIR'] = j(docbook, 'webhelp')
 	conf.env['WEBHELP_XSL'] = j(conf.path.abspath(), docbook, 'webhelp', 'xsl', 'webhelp.xsl')
 
@@ -209,13 +206,6 @@ def apply_webhelp(self):
 	if inst:
 		self.install_extras.append(inst)
 
-	# Install favicon to BINDIR
-	ico = root.find_resource(self.env.WEBHELP_ICO)
-	inst = self.bld.install_files('${BINDIR}/%s/docs' % self.name, ico, cwd = ico.parent, relative_trick = True, chmod = Utils.O644)
-	if inst:
-		self.install_extras.append(inst)
-
-
 @extension('.adoc')
 def adoc_hook(self, node):
 	xml = node.change_ext('.%d.xml' % self.idx)
@@ -232,10 +222,17 @@ def adoc_hook(self, node):
 re_xi = re.compile('''^(include|image)::([^.]*.(adoc|png))\[''', re.M)
 
 def asciidoc_scan(self):
-	p = self.inputs[0].parent
+	depnodes = []
+
+	root = self.inputs[0]
+	p = root.parent
+
+	docinfo = p.find_resource('%s-docinfo.xml' % os.path.splitext(root.name)[0])
+	if docinfo:
+		depnodes.append(docinfo)
+
 	node_lst = [self.inputs[0]]
 	seen = []
-	depnodes = []
 	while node_lst:
 		nd = node_lst.pop(0)
 		if nd in seen: continue

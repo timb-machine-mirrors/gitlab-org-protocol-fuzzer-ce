@@ -27,12 +27,10 @@
 // $Id$
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Runtime.InteropServices;
+using System.Text;
 
-namespace Peach.Core.Debuggers.WindowsSystem
+namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 {
 	/// <summary>
 	/// Contains definitions for marshaled method calls and related
@@ -204,6 +202,9 @@ namespace Peach.Core.Debuggers.WindowsSystem
 
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out] byte[] buffer, UInt32 size, out uint lpNumberOfBytesRead);
+
+		[DllImport("kernel32.dll", SetLastError = true)]
+		public static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out] IntPtr lpBuffer, UInt32 size, out uint lpNumberOfBytesRead);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, uint nSize, out uint lpNumberOfBytesWritten);

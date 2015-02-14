@@ -27,20 +27,10 @@
 // $Id$
 
 using System;
-using System.Collections.Generic;
-using System.Collections;
-using System.Text;
-using System.Runtime.InteropServices;
-using System.Runtime;
-using System.Reflection;
-using System.Runtime.Serialization;
 using System.Xml;
 
 using Peach.Core.Analyzers;
 using Peach.Core.IO;
-using Peach.Core.Cracker;
-
-using NLog;
 using System.Globalization;
 
 namespace Peach.Core.Dom
@@ -253,16 +243,25 @@ namespace Peach.Core.Dom
 
 		private dynamic SanitizeStream(BitwiseStream bs)
 		{
-			if (bs.LengthBits < lengthAsBits || (bs.LengthBits + 7) / 8 != (lengthAsBits + 7) / 8)
-				throw new PeachException(string.Format("Error, {0} value has an incorrect length for a {1}-bit {2} number, expected {3} bytes.", debugName, lengthAsBits, Signed ? "signed" : "unsigned", (lengthAsBits + 7) / 8));
+			var pos = bs.PositionBits;
 
-			ulong extra;
-			bs.ReadBits(out extra, (int)(bs.LengthBits - lengthAsBits));
+			try
+			{
+				if (bs.LengthBits < lengthAsBits || (bs.LengthBits + 7) / 8 != (lengthAsBits + 7) / 8)
+					throw new PeachException(string.Format("Error, {0} value has an incorrect length for a {1}-bit {2} number, expected {3} bytes.", debugName, lengthAsBits, Signed ? "signed" : "unsigned", (lengthAsBits + 7) / 8));
 
-			if (extra != 0)
-				throw new PeachException(string.Format("Error, {0} value has an invalid bytes for a {1}-bit {2} number.", debugName, lengthAsBits, Signed ? "signed" : "unsigned"));
+				ulong extra;
+				bs.ReadBits(out extra, (int)(bs.LengthBits - lengthAsBits));
 
-			return FromBitstream(bs);
+				if (extra != 0)
+					throw new PeachException(string.Format("Error, {0} value has an invalid bytes for a {1}-bit {2} number.", debugName, lengthAsBits, Signed ? "signed" : "unsigned"));
+
+				return FromBitstream(bs);
+			}
+			finally
+			{
+				bs.PositionBits = pos;
+			}
 		}
 
 		private dynamic FromBitstream(BitwiseStream bs)

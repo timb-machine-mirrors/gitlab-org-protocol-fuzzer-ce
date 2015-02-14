@@ -2,13 +2,10 @@
 // Copyright (c) Deja vu Security
 //
 
-using System;
-
+using Peach.Core;
 using Peach.Core.Dom;
 
-using NLog;
-
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("ArrayReverseOrder")]
 	[Description("Reverse the order of the array")]
@@ -21,7 +18,7 @@ namespace Peach.Core.Mutators
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			var asSeq = obj as Dom.Sequence;
+			var asSeq = obj as Peach.Core.Dom.Sequence;
 
 			if (asSeq != null && asSeq.isMutable && asSeq.Count > 1)
 				return true;
@@ -45,15 +42,15 @@ namespace Peach.Core.Mutators
 
 		public override void sequentialMutation(DataElement obj)
 		{
-            performMutation((Dom.Sequence)obj);
+			performMutation((Peach.Core.Dom.Sequence)obj);
 		}
 
 		public override void randomMutation(DataElement obj)
 		{
-            performMutation((Dom.Sequence)obj);
+			performMutation((Peach.Core.Dom.Sequence)obj);
 		}
 
-        void performMutation(Dom.Sequence obj)
+        void performMutation(Peach.Core.Dom.Sequence obj)
 		{
 			obj.mutationFlags = MutateOverride.Default;
 

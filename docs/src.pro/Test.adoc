@@ -19,13 +19,13 @@
 // Reviewed 04/07/2014: Lynn
 // Major edits 
 
-The Test element defines the tests that Peach will run during this fuzzing session. Peach requires at least one Test element for fuzzing to occur.
+The Test element defines the tests that Peach runs during this fuzzing session. Peach requires at least one Test element for fuzzing to occur.
 
 Test configures a specific fuzzing occurrence that combines a StateModel with a Publisher and other configuration options (such as including/excluding elements from being mutated, Agents, and fuzzing strategies).
 
 One pit can contain multiple Test elements; simply provide the test element names on the Peach command line. 
 
-NOTE: When running Peach, the Test element named "Default" will be run if a test name is not provided on the command line.
+NOTE: When running Peach, the Test element named "Default" is used if a test name is not provided on the command line.
 
 === Syntax
 
@@ -74,11 +74,21 @@ _Optional:_
 waitTime:: Time to wait in between each test case (Defaults to zero (0))
 faultWaitTime:: Time to wait for a fault to occur before starting next iteration. (Defaults to 0)
 controlIteration:: How often should we perform control iterations.  (Defaults to 0)
-replayEnabled:: Should iterations be replayed when a fault occurs. Defaults to true.
+
+targetLifetime:: Specifies when the target restarts to a known, stable state. +
+* "session" indicates the original target is used throughout the entire fuzzing session. This is the default value.
+* "iteration" indicates the target restarts every iteration. This is common in file fuzzing.
+
+maxBackSearch::
++
+Sets the maximum number of iterations to include in the search to reproduce a fault. This attribute is used when _targetLifeTime_ is "session". The default value is 80. 
++
+For example, if the default value is used, the search potentially re-runs the 80 iterations that precede the most recent fault.
+
 maxOutputSize::
 +
-Set the maximum size of data that Peach will generate. This is on an Action by Action basis meaning
-if your StateModel has two actions, each of them can produce data upto maxOutputSize. Defaults to
+Sets the maximum size of data that Peach generates. This is on an Action by Action basis meaning
+if your StateModel has two actions, each of them can produce data up to maxOutputSize. The default value is
 unlimited.
 +
 When using Publishers that have a maximum output size, such as UDP, it's recommended this attribute
@@ -98,3 +108,5 @@ _Optional:_
  * xref:Test_Exclude[Exclude]
  * xref:MutationStrategies[Strategy]
  * xref:Logger[Logger]
+ * xref:Test_Mutators[Mutators]
+ 

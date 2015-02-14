@@ -1,0 +1,174 @@
+﻿@font-face {
+	font-family: 'FontAwesome';
+	src: url('../lib/ace-bootstrap/fontawesome-webfont.eot?v=3.2.1');
+	src: url('../lib/ace-bootstrap/fontawesome-webfont.eot?#iefix&v=3.2.1') format('embedded-opentype'), url('../lib/ace-bootstrap/fontawesome-webfont.woff?v=3.2.1') format('woff'), url('../lib/ace-bootstrap/fontawesome-webfont.ttf?v=3.2.1') format('truetype'), url('../lib/ace-bootstrap/fontawesome-webfont.svg#fontawesomeregular?v=3.2.1') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+.skin-1 .nav-list > li.disabled > a > .menu-text,
+.skin-1 .nav-list > li.disabled > a > i,
+.skin-1 .nav-list > li.disabled > a > .arrow {
+	color: #595D60;
+	cursor: not-allowed;
+}
+
+.skin-1 .navbar-header img {
+	height: 50px;
+}
+
+.nav-list > li .submenu {
+	display: block;
+}
+
+a.disabled {
+	cursor: not-allowed;
+}
+
+.timeline.vis .box.item {
+	cursor: pointer;
+}
+
+pre {
+	word-wrap: normal;
+	overflow: auto;
+}
+
+.peach-field-info:before {
+	content: "\f059";
+}
+
+.peach-field-info {
+	font-family: FontAwesome2;
+	cursor: pointer;
+}
+
+.pointer {
+	cursor: pointer;
+}
+
+.accordion-toggle:hover {
+	text-decoration: none;
+}
+
+.accordion-toggle:focus {
+	outline: none;
+	cursor: pointer;
+}
+
+.btn-cell {
+	line-height: 24px;
+	background-color: transparent !important;
+	border-color: transparent !important;
+	color: red !important;
+}
+
+.btn-xs .glyphicon {
+	margin-right: 0;
+}
+
+.btn-sm .glyphicon {
+	margin-right: 0;
+}
+
+.btn-lg {
+	border-width: 3px;
+	line-height: 1.35;
+	padding: 7px 16px;
+}
+
+.peach-icon-cell {
+	width: 25px;
+}
+
+pre.peach-test-log {
+	min-height: 300px;
+}
+
+.pagination > li {
+	cursor: pointer;
+}
+
+.peach-table th[st-sort] {
+	cursor: pointer;
+}
+
+.peach-table th[st-sort]::after {
+	content: "\f0dc";
+	display: inline-block;
+	color: #555;
+	font-family: FontAwesome2;
+	font-size: 13px;
+	font-weight: normal;
+	float: right;
+	margin-right: 4px;
+	position: relative;
+}
+
+.peach-table th.st-sort-descent::after {
+	content: "\f0dd";
+}
+
+.peach-table th.st-sort-ascent::after {
+	content: "\f0de";
+}
+
+.nowrap {
+	white-space: nowrap;
+}
+
+.peach-fault-detail {
+	width: 100%;
+	table-layout: fixed;
+}
+
+.peach-fault-detail tr td:first-child {
+	white-space: nowrap;
+	min-width: 110px;
+	width: 200px;
+}
+
+.peach-fault-detail tr td {
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+
+.peach-fault-detail pre {
+	min-height: 250px;
+	overflow: auto;
+}
+
+/* 
+	fix for ace.css
+	default seems to be relative
+	this can cause main-content form-groups to flow below the bottom of the sidebar
+*/
+.sidebar {
+	position: absolute;
+}
+
+/* fix for backdrop, for some reason this is missing */
+.modal-backdrop {
+	bottom: 0;
+}
+
+/* turn off animation, this can screw with autofocus */
+.modal.fade .modal-dialog,
+.modal.in .modal-dialog {
+	-webkit-transform: translate(0, 0);
+	-ms-transform: translate(0, 0);
+	transform: translate(0, 0);
+}
+
+
+.peach-add-monitor {
+	width: 400px;
+}
+
+.peach-add-monitor .select2-results {
+	max-height: 600px;
+}
+
+#loading-bar .bar {
+	background: orange;
+}

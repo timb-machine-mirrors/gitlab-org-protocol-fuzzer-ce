@@ -38,11 +38,8 @@ Interface:: Name of interface to bind too
 _Optional:_
 
 Protocol::
-	Ethernet protocol to use. Default is ETH_P_ALL.
-	+
-	_Supported Ethernet Protocol Enum Values:_
-	+
-	[horizontal]
+	Ethernet protocol to use. Default is ETH_P_ALL.  +
+	_Supported Ethernet Protocol Enum Values:_  +
 	ETH_P_LOOP;; Ethernet Loopback packet
 	ETH_P_PUP;; Xerox PARC Universal Packet (Pup)
 	ETH_P_PUPAT;; Xerox Pup Address Translation
@@ -74,7 +71,7 @@ Protocol::
 	ETH_P_PPP_SES;; PPPoE Session Messages
 	ETH_P_MPLS_UC;; Multiprotocol Label Switching (MPLS) Unicast Traffic
 	ETH_P_MPLS_MC;; MPLS Multicast Traffic
-	ETH_P_ATMMPOA;; MuliProtocol Encapsulation Over ATM
+	ETH_P_ATMMPOA;; MultiProtocol Encapsulation Over ATM
 	ETH_P_LINK_CTL;; HomePNA (formerly HPNA), WLan Link Local Tunnel
 	ETH_P_ATMFATE;; Frame based ATM Transport over Ethernet
 	ETH_P_PAE;; Port Access Entity (IEEE 802.1X)
@@ -118,7 +115,7 @@ MinMTU:: Minimum packet size to transmit. The smallest value is 1280, which is t
 MaxMTU:: maximum packet size to transmit. The largest value is 131070, which is the default value.
 Filter::
     Filters the received frames using a libpcap-style filter string. For more information
-    about libpcap syle filters, see http://www.tcpdump.org/manpages/pcap-filter.7.html[this page].
+    about libpcap style filters, see http://www.tcpdump.org/manpages/pcap-filter.7.html[this page].
 
 === Actions
 
@@ -126,7 +123,7 @@ xref:Action_start[start]:: Implicit Action to start the Publisher.
 xref:Action_stop[stop]:: Implicit Action to stop the Publisher.
 xref:Action_open[open]:: Open and initialize the socket.
 xref:Action_close[close]:: Close and clean up the socket.
-xref:Action_output[output]:: Writes data through ouput to the open socket.
+xref:Action_output[output]:: Writes data through output to the open socket.
 xref:Action_input[input]:: Reads data through input from the open socket.
 
 === Examples

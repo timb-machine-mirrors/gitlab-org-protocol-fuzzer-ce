@@ -28,15 +28,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.IO;
+using System.Reflection;
+using System.Threading;
+using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Analyzers;
-
+using Peach.Core.Runtime;
 using SharpPcap;
-using System.Threading;
+using Version = System.Version;
 
-namespace Peach.Core.Runtime
+namespace Peach.Pro.Core.Runtime
 {
 	/// <summary>
 	/// Command line interface for Peach 3.  Mostly backwards compatable with
@@ -49,6 +51,8 @@ namespace Peach.Core.Runtime
 		////{
 		////    return new Program(args).exitCode;
 		////}
+
+		public static Thread CurrentThread = Thread.CurrentThread;
 
 		public static ConsoleColor DefaultForground = Console.ForegroundColor;
 
@@ -85,6 +89,84 @@ namespace Peach.Core.Runtime
 			}
 		}
 
+		private static Version ParseMonoVersion(string str)
+		{
+			// Example version string:
+			// 3.2.8 (Debian 3.2.8+dfsg-4ubuntu1)
+
+			var idx = str.IndexOf(' ');
+			if (idx < 0)
+				return null;
+
+			var part = str.Substring(0, idx);
+
+			Version ret;
+			Version.TryParse(part, out ret);
+
+			return ret;
+		}
+
+		public static bool VerifyCompatibility()
+		{
+			var type = Type.GetType("Mono.Runtime");
+
+			// If we are not on mono, no checks need to be performed.
+			if (type == null)
+				return true;
+
+			try
+			{
+				Console.ForegroundColor = DefaultForground;
+				Console.ResetColor();
+			}
+			catch
+			{
+				var term = Environment.GetEnvironmentVariable("TERM");
+
+				if (term == null)
+					Console.WriteLine("An incompatible terminal type was detected.");
+				else
+					Console.WriteLine("An incompatible terminal type '{0}' was detected.", term);
+
+				Console.WriteLine("Change your terminal type to 'linux', 'xterm' or 'rxvt' and try again.");
+				return false;
+			}
+
+			var minVer = new Version(2, 10, 8);
+
+			var mi = type.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static);
+
+			if (mi == null)
+			{
+				Console.WriteLine("Unable to locate the version of mono installed.");
+			}
+			else
+			{
+				var str = mi.Invoke(null, null) as string;
+
+				if (str == null)
+				{
+					Console.WriteLine("Unable to query the version of mono installed.");
+				}
+				else
+				{
+					var ver = ParseMonoVersion(str);
+
+					if (ver == null || ver < minVer)
+					{
+						Console.WriteLine("The installed mono version {0} is not supported.", str);
+					}
+					else
+					{
+						return true;
+					}
+				}
+			}
+
+			Console.WriteLine("Ensure mono version {0} or newer is installed and try again.", minVer);
+			return false;
+		}
+
 		/// <summary>
 		/// The list of .config files to be parsed for defines
 		/// </summary>
@@ -98,7 +180,7 @@ namespace Peach.Core.Runtime
 		/// <summary>
 		/// The result of parsing the pit file
 		/// </summary>
-		protected Dom.Dom dom = null;
+		protected Peach.Core.Dom.Dom dom = null;
 
 		/// <summary>
 		/// Configuration options for the engine
@@ -137,7 +219,10 @@ namespace Peach.Core.Runtime
 
 		public Program(string[] args)
 		{
-			Peach.Core.AssertWriter.Register();
+			if (!VerifyCompatibility())
+				return;
+
+			AssertWriter.Register();
 
 			config.commandLine = args;
 
@@ -173,11 +258,11 @@ namespace Peach.Core.Runtime
 					{ "debug", v => config.debug = 1 },
 					{ "trace", v => config.debug = 2 },
 					{ "1", v => config.singleIteration = true},
-					{ "range=", v => ParseRange(v)},
+					{ "range=", v => ParseRange("range", v)},
 					{ "c|count", v => config.countOnly = true},
-					{ "skipto=", v => config.skipToIteration = Convert.ToUInt32(v)},
-					{ "seed=", v => config.randomSeed = Convert.ToUInt32(v)},
-					{ "p|parallel=", v => ParseParallel(v)},
+					{ "skipto=", v => config.skipToIteration = ParseUInt("skipToIteration", v)},
+					{ "seed=", v => config.randomSeed = ParseUInt("randomSeed", v)},
+					{ "p|parallel=", v => ParseParallel("parallel", v)},
 
 					// Defined values & .config files
 					{ "D|define=", v => AddNewDefine(v) },
@@ -320,7 +405,11 @@ namespace Peach.Core.Runtime
 			ConsoleWatcher.WriteInfoMark();
 			Console.WriteLine("Starting agent server");
 
-			agentServer.Run(new Dictionary<string, string>());
+			var args = new Dictionary<string, string>();
+			for (int i = 0; i < extra.Count; i++)
+				args[i.ToString()] = extra[i];
+
+			agentServer.Run(args);
 		}
 
 		/// <summary>
@@ -413,36 +502,37 @@ namespace Peach.Core.Runtime
 		/// </summary>
 		protected virtual void Syntax()
 		{
-			string syntax = @"This is the Peach Runtime.  The Peach Runtime is one of the many ways
-to use Peach XML files.  Currently this runtime is still in development
+			string syntax =
+@"This is the Peach Runtime.  The Peach Runtime is one of the many ways
+to use Peach Pit files.  Currently this runtime is still in development
 but already exposes several abilities to the end-user such as performing
-simple fuzzer runs and performing parsing tests of Peach XML files.
+simple fuzzer runs and performing parsing tests of Peach Pit files.
 
 Please submit any bugs to https://forums.peachfuzzer.com.
 
 Syntax:
 
-  peach -a channel
-  peach -c peach_xml_file [test_name]
-  peach [--skipto #] peach_xml_flie [test_name]
-  peach -p 10,2 [--skipto #] peach_xml_file [test_name]
-  peach --range 100,200 peach_xml_file [test_name]
-  peach -t peach_xml_file
+  peach -a CHANNEL
+  peach -c PIT [TEST]
+  peach [--skipto #] PIT [TEST]
+  peach -p 10,2 [--skipto #] PIT [TEST]
+  peach --range 100,200 PIT [TEST]
+  peach -t PIT
 
   -1                         Perform a single iteration
-  -a,--agent                 Launch Peach Agent
+  -a,--agent CHANNEL         Launch Peach Agent
   -c,--count                 Count test cases
-  -t,--test xml_file         Validate a Peach XML file
+  -t,--test PIT              Validate a Peach Pit file
   -p,--parallel M,N          Parallel fuzzing.  Total of M machines, this
                              is machine N.
   --debug                    Enable debug messages. Usefull when debugging
-                             your Peach XML file.  Warning: Messages are very
+                             your Peach Pit file.  Warning: Messages are very
                              cryptic sometimes.
   --trace                    Enable even more verbose debug messages.
   --seed N                   Sets the seed used by the random number generator
-  --parseonly                Test parse a Peach XML file
+  --parseonly                Test parse a Peach Pit file
   --makexsd                  Generate peach.xsd
-  --showenv                  Print a list of all DataElements, Fixups, Monitors
+  --showenv                  Print a list of all DataElements, Fixups, Agents
                              Publishers and their associated parameters.
   --showdevices              Display the list of PCAP devices
   --analyzer                 Launch Peach Analyzer
@@ -452,7 +542,7 @@ Syntax:
   -D/define=KEY=VALUE        Define a substitution value.  In your PIT you can
                              ##KEY## and it will be replaced for VALUE.
   --config=FILENAME          XML file containing defined values
-  --pits=PIT_LIBRARY_PATH    The path to the pit library.
+  --pits=PIT_LIBRARY_PATH    The path to the Pit library.
   --noweb                    Disable the Peach web interface.
 
 Peach Web Interface
@@ -464,30 +554,30 @@ Peach Web Interface
 
 Peach Agent
 
-  Syntax: peach -a channel
+  Syntax: peach -a CHANNEL
   
-  Starts up a Peach Agent instance on this current machine.  User must provide
+  Starts up a Peach Agent instance on the current machine.  User must provide
   a channel/protocol name (e.g. tcp).
 
-  Note: Local agents are started automatically.
+  Note: Local agents are implicitly started.
 
 Performing Fuzzing Run
 
-  Syntax: peach peach_xml_flie [test_name]
-  Syntax: peach --skipto 1234 peach_xml_flie [test_name]
-  Syntax: peach --range 100,200 peach_xml_flie [test_name]
+  Syntax: peach PIT [TEST]
+  Syntax: peach --skipto 1234 PIT [TEST]
+  Syntax: peach --range 100,200 PIT [TEST]
   
-  A fuzzing run is started by by specifying the Peach XML file and the
+  To start a fuzzing run, specify the Peach Pit file and optionally, the
   name of a test to perform.
   
-  If a run is interupted for some reason it can be restarted using the
-  --skipto parameter and providing the test # to start at.
+  The --skipto parameter is useful for resuming a run in case it was interrupted
+  for any reason.  This parameter accepts the test # to resume.
   
   Additionally a range of test cases can be specified using --range.
 
 Performing A Parellel Fuzzing Run
 
-  Syntax: peach -p 10,2 peach_xml_flie [test_name]
+  Syntax: peach -p 10,2 PIT [TEST]
 
   A parallel fuzzing run uses multiple machines to perform the same fuzzing
   which shortens the time required.  To run in parallel mode we will need
@@ -495,16 +585,16 @@ Performing A Parellel Fuzzing Run
   information is fed into Peach via the " + "\"-p\"" + @" command line argument in the
   format " + "\"total_machines,our_machine\"." + @"
 
-Validate Peach XML File
+Validate Peach Pit File
 
-  Syntax: peach -t peach_xml_file
+  Syntax: peach -t PIT
   
-  This will perform a parsing pass of the Peach XML file and display any
+  This will perform a parsing pass of the Peach Pit file and display any
   errors that are found.
 
-Debug Peach XML File
+Debug Peach Pit File
 
-  Syntax: peach -1 --debug peach_xml_file
+  Syntax: peach -1 --debug PIT
   
   This will perform a single iteration (-1) of your pit file while displaying
   alot of debugging information (--debug).  The debugging information was
@@ -517,7 +607,19 @@ Debug Peach XML File
 
 		#region Command line option parsing helpers
 
-		protected void ParseRange(string v)
+		protected uint ParseUInt(string arg, string v)
+		{
+			uint ret;
+
+			if (!uint.TryParse(v, out ret))
+				throw new PeachException(
+					"An invalid option for --{0} was specified.  The value '{1}' could not be converted to an unsigned integer.".Fmt(
+						arg, v));
+
+			return ret;
+		}
+
+		protected void ParseRange(string arg, string v)
 		{
 			string[] parts = v.Split(',');
 			if (parts.Length != 2)
@@ -547,7 +649,7 @@ Debug Peach XML File
 			config.range = true;
 		}
 
-		protected void ParseParallel(string v)
+		protected void ParseParallel(string arg, string v)
 		{
 			string[] parts = v.Split(',');
 			if (parts.Length != 2)
@@ -655,20 +757,27 @@ Debug Peach XML File
 
 		static void ShowDevices()
 		{
-			Console.WriteLine();
-			Console.WriteLine("The following devices are available on this machine:");
-			Console.WriteLine("----------------------------------------------------");
-			Console.WriteLine();
-
-			int i = 0;
-
 			var devices = CaptureDeviceList.Instance;
 
-			// Print out all available devices
-			foreach (ICaptureDevice dev in devices)
+			if (devices.Count == 0)
 			{
-				Console.WriteLine("Name: {0}\nDescription: {1}\n\n", dev.Name, dev.Description);
-				i++;
+				Console.WriteLine();
+				Console.WriteLine("No capture devices were found.  Ensure you have the proper");
+				Console.WriteLine("permissions for performing PCAP captures and try again.");
+				Console.WriteLine();
+			}
+			else
+			{
+				Console.WriteLine();
+				Console.WriteLine("The following devices are available on this machine:");
+				Console.WriteLine("----------------------------------------------------");
+				Console.WriteLine();
+
+				// Print out all available devices
+				foreach (var dev in devices)
+				{
+					Console.WriteLine("Name: {0}\nDescription: {1}\n\n", dev.Name, dev.Description);
+				}
 			}
 
 			throw new SyntaxException();
@@ -688,7 +797,7 @@ Debug Peach XML File
 
 				using (var stream = new FileStream("peach.xsd", FileMode.Create, FileAccess.Write))
 				{
-					Xsd.SchemaBuilder.Generate(typeof(Xsd.Dom), stream);
+					Peach.Core.Xsd.SchemaBuilder.Generate(typeof(Peach.Core.Xsd.Dom), stream);
 
 					Console.WriteLine("Successfully generated {0}", stream.Name);
 				}
@@ -705,10 +814,16 @@ Debug Peach XML File
 
 		protected static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
 		{
+			e.Cancel = true;
+
+			if (CurrentThread == null)
+				return;
+
 			Console.WriteLine();
 			Console.WriteLine(" --- Ctrl+C Detected --- ");
 
-			e.Cancel = true;
+			var th = CurrentThread;
+			CurrentThread = null;
 
 			// Need to call Environment.Exit from outside this event handler
 			// to ensure the finalizers get called...
@@ -717,6 +832,19 @@ Debug Peach XML File
 			{
 				Environment.Exit(0);
 			}).Start();
+
+			System.Diagnostics.Debug.Assert(th != null);
+
+			// TODO: Eventually move to use Thread.Abort() since it will properly cleanup!
+
+			// Don't use a lambda here because we don't want it to get jitted
+			// in the ctrl-c handler
+			// new Thread(StopperThread).Start(th);
+		}
+
+		private static void StopperThread(object param)
+		{
+			((Thread)param).Abort();
 		}
 	}
 }

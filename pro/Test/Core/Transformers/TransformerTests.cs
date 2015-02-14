@@ -1,15 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Transformers
+namespace Peach.Pro.Test.Core.Transformers
 {
 	[TestFixture] [Category("Peach")]
 	class TransformerTests
@@ -71,7 +67,7 @@ namespace Peach.Core.Test.Transformers
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var actual = dom.dataModels[0].Value.ToArray();
 			var expected = Encoding.ASCII.GetBytes("7f000001"); // 127.0.0.1

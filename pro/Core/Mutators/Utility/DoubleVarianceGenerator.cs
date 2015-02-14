@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Peach.Core
+using Random = Peach.Core.Random;
+
+namespace Peach.Pro.Core.Mutators.Utility
 {
 	/// <summary>
 	/// Generates a normal distribution of double precision numbers

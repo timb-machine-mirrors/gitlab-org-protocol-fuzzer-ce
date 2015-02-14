@@ -9,9 +9,9 @@ using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
 using Peach.Core.Dom;
 using Peach.Core.Test;
-using Peach.Enterprise.Dom;
+using Peach.Pro.Core.Dom;
 
-namespace Peach.Enterprise.Test.Dom
+namespace Peach.Pro.Test.Dom
 {
 	class BoolTests : DataModelCollector
 	{

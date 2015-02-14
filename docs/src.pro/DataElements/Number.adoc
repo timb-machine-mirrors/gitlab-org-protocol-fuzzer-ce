@@ -33,21 +33,21 @@
 //  03/06/2014: Lynn
 //   * Added missing child elements, fixed child element formatting, and corrected spelling in comments
 
-The Number element defines a binary number of any arbitrary bit size from 1 to 64. Binary numbers are packed into a byte representation with a byte order of little or big endian.
+The Number element defines a binary number of any arbitrary bit size from 1 to 64. Binary numbers are packed into a byte representation with a byte order of little-endian or big-endian.
 
-The Number element should not be used for character based numbers. For character (also known as ASCII) numbers, use a String element.
+The Number element should not be used for character-based numbers, or ASCII numbers. Instead, use a xref:String[String] element.
 
 The Number element is a child element of xref:DataModel[DataModel], xref:Block[Block], or xref:Choice[Choice].
 
-NOTE: While Peach supports unaligned data structures, using unaligned data will incur a performance penalty. This is due to the bit slicing that must be performed behind the seen.
+NOTE: While Peach supports unaligned data structures, using unaligned data incurs a performance penalty. The penalty stems from bit slicing that occurs behind the scenes.
 
-TIP: In Peach two attributes are commonly used to indicate the size or length of an element, _length_ and _size_. The _size_ attribute is always a bit size while _length_ is byte or character.
+TIP: In Peach, two attributes are commonly used to indicate size or length of an element, _size_ and _length_. The _size_ attribute always refers to the number of bits in an element. In contrast, the _length_ attribute refers to the number of bytes of an element.
 
 === Syntax
 
 [source,xml]
 ----
-<Number name="Length" size="32" endian="big" signed="false" />
+<Number name="Almonds" size="32" endian="big" signed="false" />
 ----
 
 === Attributes
@@ -64,84 +64,84 @@ xref:name[name]::
 xref:value[value]::
 	The default value to assign to the number.
 xref:valueType[valueType]::
-	The representation of the value.
-	Valid options are string and hex.
+	The representation of the value. Valid options are string and hex.
 xref:token[token]::
-	This element is treated as a token when parsing, defaults to false. Valid options true and false.
+	This element is treated as a token when parsing. Valid values are true and false, defaults to false.
 xref:endian[endian]::
-	Byte order of the number, defaults to little. Valid options are big, little, and network.
-	Network is the same as big.
+	Byte order of the number. Valid options are big, little, and network. Network is an alias for big. The default value is little.
 xref:signed[signed]::
-	The number is signed or unsigned, defaults to true.
-	Valid options are true and false.
+	The number is signed or unsigned. Valid values are true and false, defaults to false.
 xref:constraint[constraint]::
-	A constraint in the form of a python expression.
-	Used during data cracking.
+	A constraint in the form of a python expression. Used during data cracking.
 xref:mutable[mutable]::
-	Is data element changeable (should it be mutated during fuzzing), defaults to true.
-	Valid options true and false.
+	Is data element changeable (should it be mutated during fuzzing). Valid values are true and false, defaults to true.
+
 xref:minOccurs[minOccurs]::
-	The minimum number of times this number must occur.
-	Defaults to 1.
-	Valid options are a positive integer value.
+	The minimum number of times this element must occur. Defaults to 1.  +
+	* Used to define arrays with variable size. Arrays defined by min/maxOccurs generally have a relation
+	defined.
+	* Adding this attribute, even with a value of 1, converts the element to an array.
+
 xref:maxOccurs[maxOccurs]::
-	The maximum number of times this number can occur.
-	No default.
-	Valid options are a positive integer value.
+	The maximum number of times this element can occur. +
+	* Used to define arrays with static size.
+	* Adding this attribute, even with a value of 1, converts the element to an array.
+
 xref:occurs[occurs]::
-	The actual number of times this number occurs.
-	Defaults to 1.
+	Actual occurrences of element. Defaults to 1.  +
+	* Used to define arrays with static size.
+	* Adding this attribute, even with a value of 1, converts the element to an array.
 
 === Child Elements
 
-xref:Analyzers[Analyzer]:: Analyze current element post cracking, can dynamically change model.
-xref:Fixup[Fixup]:: Dynamic transformations such as checksums and CRCs.
-xref:Hint[Hint]:: Provide information to mutators.
-xref:Placement[Placement]:: Relocate an element after it has been cracked.
-xref:Relation[Relation]:: Modeling of relationships in the data (such as comparisons)
-xref:Transformer[Transformer]:: Static transformations such as compression or encoding.
+xref:Analyzers[Analyzer]:: Analyzes current element post cracking, can dynamically change model.
+xref:Fixup[Fixup]:: Performs dynamic transformations such as checksums and CRCs.
+xref:Hint[Hint]:: Provides information to mutators.
+xref:Placement[Placement]:: Relocates an element after it has been cracked.
+xref:Relation[Relation]:: Identifies a type of relationship with another data element (such as count).
+xref:Transformer[Transformer]:: Performs static transformations such as compression or encoding.
 
 === Mutators
 
-The following mutators will operate on this element type:
+The following mutators operate on this element type:
 
 
 _Enabled when element is marked as an array_
 
-xref:Mutators_ArrayNumericalEdgeCasesMutator[ArrayNumericalEdgeCasesMutator]:: This mutator will grow and shrink an array to counts based on numerical edge cases.
-xref:Mutators_ArrayRandomizeOrderMutator[ArrayRandomizeOrderMutator]:: This mutator will randomize the order of items in an array.
-xref:Mutators_ArrayReverseOrderMutator[ArrayReverseOrderMutator]:: This mutator will reverse the order of items in an array.
-xref:Mutators_ArrayVarianceMutator[ArrayVarianceMutator]:: This mutator will grow and shrink an array to a variance of counts based on the current size.
+xref:Mutators_ArrayNumericalEdgeCasesMutator[ArrayNumericalEdgeCasesMutator]:: This mutator grows and shrinks an array to counts based on numerical edge cases.
+xref:Mutators_ArrayRandomizeOrderMutator[ArrayRandomizeOrderMutator]:: This mutator randomizes the order of items in an array.
+xref:Mutators_ArrayReverseOrderMutator[ArrayReverseOrderMutator]:: This mutator reverses the order of items in an array.
+xref:Mutators_ArrayVarianceMutator[ArrayVarianceMutator]:: This mutator grows and shrinks an array to a variance of counts based on the current size.
 
 _Used for all data elements_
 
-xref:Mutators_DataElementBitFlipper[DataElementBitFlipper]:: This mutator will produce test cases by flipping bits in the output value.
-xref:Mutators_DataElementDuplicate[DataElementDuplicate]:: This mutator will duplicate data elements.
-xref:Mutators_DataElementRemove[DataElementRemove]:: This mutator will remove data elements.
-xref:Mutators_DataElementSwapNear[DataElementSwapNear]:: This mutator will swap data elements.
-xref:Mutators_SampleNinjaMutator[SampleNinjaMutator]:: This mutator will combine data elements from different data sets.
+xref:Mutators_DataElementBitFlipper[DataElementBitFlipper]:: This mutator produces test cases by flipping bits in the output value.
+xref:Mutators_DataElementDuplicate[DataElementDuplicate]:: This mutator duplicates data elements.
+xref:Mutators_DataElementRemove[DataElementRemove]:: This mutator removes data elements.
+xref:Mutators_DataElementSwapNear[DataElementSwapNear]:: This mutator swaps data elements.
+xref:Mutators_SampleNinjaMutator[SampleNinjaMutator]:: This mutator combines data elements from different data sets.
 
 _Enabled when element is part of a size relation_
 
-xref:Mutators_SizedDataEdgeCase[SizedDataEdgeCase]:: This mutator will cause the data portion of a relation to be sized as numerical edge cases.
-xref:Mutators_SizedDataVariance[SizedDataVariance]:: This mutator will cause the data portion of a relation to be sized as numerical variances.
-xref:Mutators_SizedEdgeCase[SizedEdgeCase]:: This mutator will change both sides of the relation (data and value) to match numerical edge cases.
-xref:Mutators_SizedVariance[SizedVariance]:: This mutator will change both sides of the relation (data and value) to match numerical variances of the current size.
+xref:Mutators_SizedDataEdgeCase[SizedDataEdgeCase]:: This mutator causes the data portion of a relation to be sized as numerical edge cases.
+xref:Mutators_SizedDataVariance[SizedDataVariance]:: This mutator causes the data portion of a relation to be sized as numerical variances.
+xref:Mutators_SizedEdgeCase[SizedEdgeCase]:: This mutator changes both sides of the relation (data and value) to match numerical edge cases.
+xref:Mutators_SizedVariance[SizedVariance]:: This mutator changes both sides of the relation (data and value) to match numerical variances of the current size.
 
 _Specific to this element type_
 
-xref:Mutators_ExtraValues[ExtraValues]:: This mutator allows providing extra test case values on a per-data element basis.
+xref:Mutators_ExtraValues[ExtraValues]:: This mutator provides extra test case values on a per-data element basis.
 
-xref:Mutators_NumberEdgeCase[NumberEdgeCase]:: This mutator will produce numerical edge cases for integer values.
-xref:Mutators_NumberRandom[NumberRandom]:: This mutator will produce random values from the available numerical space.
-xref:Mutators_NumberVariance[NumberVariance]:: This mutator will produce values near the current value of a number.
+xref:Mutators_NumberEdgeCase[NumberEdgeCase]:: This mutator produces numerical edge cases for integer values.
+xref:Mutators_NumberRandom[NumberRandom]:: This mutator produces random values from the available numerical space.
+xref:Mutators_NumberVariance[NumberVariance]:: This mutator produces values near the current value of a number.
 
 
 === Examples
 
 .Size
 ==========================
-Produce 32 bit (4 byte) number with a default value of 5:
+Produce a 32-bit (4-byte) number with a default value of 5.
 
 [source,xml]
 ----
@@ -202,9 +202,9 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 [*] Test 'Default' finished.
 ----
-<1> The 32 bit little endian value 5
+<1> The 32-bit, little-endian value is 5.
 
-To only use 16 bits (two byte) change the size to 16.
+Change the previous example to use a 16-bit (two-byte) number by adjusting the size to 16.
 
 [source,xml]
 ----
@@ -268,15 +268,13 @@ Peach.Core.Publishers.ConsolePublisher stop()
 ----
 <1> The 16 bit little endian value 5
 
-*NOTE:* Numbers use the `size` attribute which is, by default, the size in
-*bits*. `Number` elements do not accept `length` attribute used by other elements.
+*NOTE:* Numbers use the `size` attribute which specifies the number of *bits*. _Number_ elements do not accept the `length` attribute used by other elements.
 ==========================
 
 .Byte Alignment
 ==========================
-While many data structures are byte aligned, many are not. It's
-possible to arbitrarily define sizes that don't fall on byte
-boundaries.
+While many data structures are byte aligned, some are not. This example arbitrarily defines sizes that do not 
+fall on byte boundaries.
 
 [source,xml]
 ----
@@ -336,7 +334,7 @@ Peach.Core.Publishers.ConsolePublisher close()
 Peach.Core.Engine runTest: context.config.singleIteration == true
 Peach.Core.Publishers.ConsolePublisher stop()
 ----
-<1> Two numbers are compacted in to one byte
+<1> Two numbers are compacted into one byte.
 
 The first number is three bits with the value `"2"`. This number
 becomes the first three bits of the byte. The remaining five bits are
@@ -359,15 +357,15 @@ Input parsing is simply the inverse.
 >>> input_byte & (-1 + (2**offset))
 12																			<2>
 ----
-<1> The first byte is bitshifted the size of the second.
-<2> Masking off the first number we get the second.
+<1> The first byte is bit-shifted using the size of the second.
+<2> By masking off the first number, we get the second.
 ==========================
 
 
 .Endian
 ==========================
 
-To change the endianness of the number set the endian attribute. Endianness defines in which order the bytes are the least or most significant.
+To change the endian-ness of the number, set the endian attribute. Endian-ness defines the order of the least-significant or most-significant bytes. 
 
 [source,xml]
 ----
@@ -444,7 +442,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 <1> Little endian outputs the bytes in the order  CD AB
 <2> Big endian outputs the bytes in the order  AB CD
 
-Note, however, that endianness doesn't have any impact on output if the `valuType`
+Note, however, that endian-ness doesn't have any impact on output if the `valueType`
 is `"hex"`:
 
 [source,xml]
@@ -519,12 +517,11 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 [*] Test 'Default' finished.
 ----
-<1> For little we see the expected output
-<2> For big endian, nothing changes
+<1> For little endian, the expected output displays.
+<2> For big endian, nothing changes.
 
-When the attribute `valueType` is set to `"hex"` this indicates that
-the ordering is exactly as specified. The `endian` attribute still
-impacts mutation and input parsing.
+When the attribute `valueType` is set to `"hex"`, the ordering is exactly as specified. 
+The `endian` attribute still impacts mutation and input parsing.
 ==========================
 
 
@@ -611,10 +608,9 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 .Value Type
 ==========================
-The valueType defines how to interpret the value attribute. Valid options are string and hex. The default is string.
+The valueType defines how to interpret the value attribute. Valid options are '"string"' and '"hex"'. The default value is 'string'.
 
-To assign a value of 1000 to MyValue we can explicitly use the default
-`valueType` of `"string"`. Using the `"string"` type we can assign
+To assign a value of 1000 to MyValue, use the default `valueType` of `"string"`. The `"string"` type supports 
 both decimal and hexadecimal values.
 
 [source,xml]
@@ -692,15 +688,14 @@ Peach.Core.Publishers.ConsolePublisher stop()
 <1> The value 1000
 <2> The value 1000, having been defined in hex as 0x03e8
 
-Notice that the `valuteType` of `"string"` represents a number. This
-number may be changed by endianness. Observe that the numeric value
+Notice that the `valueType` of `"string"` represents a number. This
+number may be changed by endian-ness. Observe that the numeric value
 was entered as 0x03e8, but Peach output the bytes 0xE8 and 0x03. The
 value was converted to little endian before being output.
 
-To assign a value as if copied directly from a hex editor we can use
-the `"hex"` `valueType`. Values entered in `"hex"` will be output
-exactly as input regardless of endianness as exampled in the section
-on the `endian` attribute above.
+To assign a value as if copied directly from a hex editor we can use 
+the `"hex"` `valueType`. Values entered in `"hex"` are output exactly as input 
+regardless of endian-ness, as shown in the previous example that exercises  the `endian` attribute.
 
 [source,xml]
 ----
@@ -762,5 +757,5 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 [*] Test 'Default' finished.
 ----
-<1> The value 43981
+<1> The value is 43981.
 ==========================

@@ -4,7 +4,7 @@
 
 // TODO Example needs fleshed out more
 
-The _SaveFile_ monitor will save a specified file as part of the logged data when a fault occurs. 
+The _SaveFile_ monitor saves a specified file as part of the logged data when a fault occurs. 
 
 _SaveFile_ can collect application specific logs.
 
@@ -16,7 +16,7 @@ Filename:: File to save on fault.
 
 _Optional:_
 
-There are no optional parameters for this monitor.
+None.
 
 === Examples
 

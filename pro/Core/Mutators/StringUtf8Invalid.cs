@@ -4,11 +4,11 @@
 
 using System;
 using System.Linq;
-
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("StringUtf8Invalid")]
 	[Description("Encode string as invalid UTF-8.")]
@@ -27,7 +27,7 @@ namespace Peach.Core.Mutators
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			var asStr = obj as Dom.String;
+			var asStr = obj as Peach.Core.Dom.String;
 
 			// Make sure we are a mutable string and Peach.TypeTransform hint is not false
 			if (asStr == null || !asStr.isMutable || !getTypeTransformHint(obj) || ((string)asStr.InternalValue).Length == 0)

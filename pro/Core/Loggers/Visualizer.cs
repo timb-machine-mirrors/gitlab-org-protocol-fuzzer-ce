@@ -1,22 +1,15 @@
 ﻿using System;
-using System.IO;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-using System.Linq;
-
-using Peach.Core;
-using Peach.Core.Agent;
-using Peach.Core.Dom;
-
-using NLog;
-using Peach.Core.IO;
-
-using Newtonsoft.Json;
+using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
+using System.Text;
+using Newtonsoft.Json;
+using Peach.Core;
+using Peach.Core.Dom;
+using Peach.Core.IO;
 
-namespace Peach.Enterprise.Loggers
+namespace Peach.Pro.Core.Loggers
 {
 	[Logger("Visualizer", true)]
 	public class VisualizerLogger :Peach.Core.Logger
@@ -60,7 +53,7 @@ namespace Peach.Enterprise.Loggers
 		/// <summary>
 		/// Collection of data models from Action_Finished event.
 		/// </summary>
-		protected override void ActionFinished(RunContext context, Core.Dom.Action action)
+		protected override void ActionFinished(RunContext context, Peach.Core.Dom.Action action)
 		{
 			// TODO - Handle parameters
 			lock (mutext)

@@ -1,11 +1,10 @@
-using System;
 using System.Linq;
-
-using Peach.Core.Dom;
-
 using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Dom;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class BlobChangeToNullTests

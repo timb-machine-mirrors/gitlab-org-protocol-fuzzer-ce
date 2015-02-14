@@ -11,8 +11,8 @@ xref:name[name]:: Name of the DataModel element
 
 _Optional:_
 
-xref:value[value]:: The value to set
-xref:valueType[valueType]:: The format in which the default value is expressed. (i.e hex, string, or literal)
+xref:value[value]:: The value to set.
+xref:valueType[valueType]:: The format in which the default value is expressed (i.e. hex, string, or literal).
 
 === Examples
 

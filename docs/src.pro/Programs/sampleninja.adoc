@@ -1,7 +1,7 @@
 [[Program_PeachSampleNinja]]
 == Sample Ninja
 
-Sample Ninja reads sample files used in fuzzing, runs them through the Peach data crackers (which applies the sample files to the data models), and places them into a database. During fuzzing, a sample ninja mutator will mix-and-match file sections to create a new file.
+Sample Ninja reads sample files used in fuzzing, runs them through the Peach data crackers (which applies the sample files to the data models), and places them into a database. During fuzzing, a sample ninja mutator mixes-and-matches file sections to create a new file.
 
 IMPORTANT: Sample Ninja is not available in the Peach Community version.
 
@@ -10,10 +10,10 @@ The Sample Ninja command line tool produces and maintains the Sample Ninja datab
 To fuzz using Sample Ninja:
 
 * Generate a sample ninja database using the PeachSampleNinja.exe command line tool
-* The Sample Ninja Mutator will automatically use the database the next time Peach is run
+* The Sample Ninja Mutator automatically uses the database the next time Peach is run
 * As new sample files are added, re-run Sample Ninja to add the new files.
 
-The generated database will be "pitfile.ninja", so if your pit file is "png.xml" you will get "png.xml.ninja".
+The generated database is "pitfile.ninja", so if your pit file is "png.xml", the generated database file is "png.xml.ninja".
 
 === Syntax
 
@@ -65,7 +65,7 @@ Generated database:
 03/20/2014  03:52 PM         9,651,200 PNG_Data.xml.ninja
 ----
 
-This command will generate +png.xml.ninja+.
+This command generates +png.xml.ninja+.
 =================
 
 .Adding new Samples to Ninja Database

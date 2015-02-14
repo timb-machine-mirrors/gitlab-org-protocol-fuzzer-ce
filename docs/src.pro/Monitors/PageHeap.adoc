@@ -2,7 +2,7 @@
 [[Monitors_PageHeap]]
 == PageHeap Monitor (Windows)
 
-The _PageHeap_ monitor will enable page heap debugging options for an executable.
+The _PageHeap_ monitor enables page heap debugging options for an executable.
 
 === Parameters
 
@@ -12,7 +12,7 @@ Executable:: Executable name (no path)
 
 _Optional:_
 
-WinDbgPath:: Path to windbg install. Optional, will attempt to locate if not provided.
+WinDbgPath:: Path to windbg install. If not provided, Peach attempts to locate the directory.
 
 === Examples
 
@@ -40,7 +40,8 @@ WinDbgPath:: Path to windbg install. Optional, will attempt to locate if not pro
 
   <Agent name="Local">
     <Monitor class="WindowsDebugger">
-        <Param name="CommandLine" value="notepad.exe fuzzed.txt"/>
+        <Param name="Executable" value="notepad.exe"/>
+        <Param name="Arguments" value="fuzzed.txt"/>
         <Param name="StartOnCall" value="launchProgram"/>
     </Monitor>
     <Monitor class="PageHeap">

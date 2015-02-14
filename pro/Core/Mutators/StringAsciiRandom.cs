@@ -2,11 +2,10 @@
 // Copyright (c) Deja vu Security
 //
 
-using System;
-
+using Peach.Core;
 using Peach.Core.Dom;
 
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("StringAsciiRandom")]
 	[Description("Produce random strings using the ascii character set.")]
@@ -25,7 +24,7 @@ namespace Peach.Core.Mutators
 		public new static bool supportedDataElement(DataElement obj)
 		{
 			// Override so we attach to all strings, not just unicode
-			if (obj is Dom.String && obj.isMutable)
+			if (obj is Peach.Core.Dom.String && obj.isMutable)
 				return true;
 
 			return false;

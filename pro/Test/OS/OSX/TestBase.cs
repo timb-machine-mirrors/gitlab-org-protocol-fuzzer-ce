@@ -1,53 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
-using System.IO;
-using NLog;
-using NLog.Targets;
+﻿using NLog;
 using NLog.Config;
+using NLog.Targets;
 using NUnit.Framework;
 using Peach.Core;
-using System.Runtime.InteropServices;
 
-namespace Peach
+namespace Peach.Pro.Test.OS.OSX
 {
 	[SetUpFixture]
 	class TestBase
 	{
-		SingleInstance si;
+		SingleInstance _si;
 
 		[SetUp]
 		public void Initialize()
 		{
 			// NUnit [Platform] attribute doesn't differentiate MacOSX/Linux
-			if (Peach.Core.Platform.GetOS() != Peach.Core.Platform.OS.OSX)
+			if (Platform.GetOS() != Platform.OS.OSX)
 				Assert.Ignore("Only supported on MacOSX");
 
-			ColoredConsoleTarget consoleTarget = new ColoredConsoleTarget();
-			consoleTarget.Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}";
+			var consoleTarget = new ColoredConsoleTarget
+			{
+				Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}"
+			};
 
-			LoggingConfiguration config = new LoggingConfiguration();
+			var config = new LoggingConfiguration();
 			config.AddTarget("console", consoleTarget);
 
-			LoggingRule rule = new LoggingRule("*", LogLevel.Debug, consoleTarget);
+			var rule = new LoggingRule("*", LogLevel.Debug, consoleTarget);
 			config.LoggingRules.Add(rule);
 
 			LogManager.Configuration = config;
 
 			// Ensure only 1 instance of the platform tests runs at a time
-			si = SingleInstance.CreateInstance("Peach.Pro.Test.OS.OSX.dll");
-			si.Lock();
+			_si = SingleInstance.CreateInstance("Peach.Pro.Test.OS.OSX.dll");
+			_si.Lock();
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
-			if (si != null)
+			if (_si != null)
 			{
-				si.Dispose();
-				si = null;
+				_si.Dispose();
+				_si = null;
 			}
 		}
 	}

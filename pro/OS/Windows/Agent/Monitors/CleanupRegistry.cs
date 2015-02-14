@@ -26,18 +26,16 @@
 
 // $Id$
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.ServiceProcess;
 using Microsoft.Win32;
-using Peach.Core.Agent;
 using NLog;
+using Peach.Core;
+using Peach.Core.Agent;
 
-namespace Peach.Core.OS.Windows.Agent.Monitors
+namespace Peach.Pro.OS.Windows.Agent.Monitors
 {
 	[Monitor("CleanupRegistry", true)]
+	[Description("Remove a registry key or a key's children")]
 	[Parameter("Key", typeof(string), "Registry key to remove.")]
 	[Parameter("ChildrenOnly", typeof(bool), "Only cleanup sub-keys. (defaults to false)", "false")]
 	public class CleanupRegistry : Monitor

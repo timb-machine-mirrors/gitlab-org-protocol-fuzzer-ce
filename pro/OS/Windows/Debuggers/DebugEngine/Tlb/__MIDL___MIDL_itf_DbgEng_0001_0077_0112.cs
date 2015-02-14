@@ -1,8 +1,6 @@
-namespace Peach.Core.Debuggers.DebugEngine.Tlb
+namespace Peach.Pro.OS.Windows.Debuggers.DebugEngine.Tlb
 {
-    using System;
-
-    public enum __MIDL___MIDL_itf_DbgEng_0001_0077_0112
+	public enum __MIDL___MIDL_itf_DbgEng_0001_0077_0112
     {
         DEBUG_DATA_SharedUserData = 0x186a8
     }

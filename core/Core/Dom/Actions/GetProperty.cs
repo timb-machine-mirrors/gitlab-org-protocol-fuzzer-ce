@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.ComponentModel;
+using Peach.Core.IO;
 
 namespace Peach.Core.Dom.Actions
 {
@@ -29,11 +30,11 @@ namespace Peach.Core.Dom.Actions
 			}
 		}
 
-		public override IEnumerable<ActionData> inputData
+		public override IEnumerable<BitwiseStream> inputData
 		{
 			get
 			{
-				yield return data;
+				yield break;
 			}
 		}
 

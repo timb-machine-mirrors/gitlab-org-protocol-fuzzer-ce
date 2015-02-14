@@ -1,23 +1,15 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.IO;
-using System.Threading;
-using System.Net.Sockets;
-using System.Net.Security; 
-using System.Security.Cryptography.X509Certificates;
-
-
-using Peach.Core.Dom;
-
-using NLog;
 using System.Diagnostics;
-using Peach.Core.IO;
+using System.Net;
+using System.Net.Security;
+using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using NLog;
+using Peach.Core;
 
-namespace Peach.Core.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	[Publisher("Ssl", true)]
     [Parameter("Host", typeof(string), "Hostname to connect to")]

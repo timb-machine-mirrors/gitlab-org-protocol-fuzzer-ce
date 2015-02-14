@@ -30,11 +30,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Security.Cryptography;
+using Peach.Core;
 using Peach.Core.Dom;
 
-namespace Peach.Core.Fixups
+namespace Peach.Pro.Core.Fixups
 {
 	[Description("Standard SHA384 checksum.")]
 	[Fixup("Sha384", true)]

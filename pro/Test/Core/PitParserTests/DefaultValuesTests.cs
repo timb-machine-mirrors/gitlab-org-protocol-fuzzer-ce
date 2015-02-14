@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
-
-using Peach.Core.Dom;
+using Peach.Core;
 using Peach.Core.Analyzers;
 
-namespace Peach.Core.Test.PitParserTests
+namespace Peach.Pro.Test.Core.PitParserTests
 {
 	[TestFixture] [Category("Peach")]
 	class DefaultValuesTests
@@ -55,7 +52,7 @@ namespace Peach.Core.Test.PitParserTests
 				}
 			}
 
-			Dom.Dom dom = Analyzer.defaultParser.asParser(parserArgs, pitFile);
+			Peach.Core.Dom.Dom dom = Analyzer.defaultParser.asParser(parserArgs, pitFile);
 			dom.evaulateDataModelAnalyzers();
 
 			Assert.AreEqual(1, dom.dataModels.Count);
@@ -126,7 +123,7 @@ namespace Peach.Core.Test.PitParserTests
 			args[PitParser.DEFINED_VALUES] = defines;
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(args, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(args, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			Assert.NotNull(dom);
 		}
 	}

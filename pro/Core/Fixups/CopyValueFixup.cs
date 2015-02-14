@@ -29,11 +29,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
+using Peach.Core;
 using Peach.Core.Dom;
-using Peach.Core.Fixups.Libraries;
 
-namespace Peach.Core.Fixups
+namespace Peach.Pro.Core.Fixups
 {
 	[Description("Fixup used in testing.  Will copy another elements value into us.")]
 	[Fixup("CopyValue", true)]

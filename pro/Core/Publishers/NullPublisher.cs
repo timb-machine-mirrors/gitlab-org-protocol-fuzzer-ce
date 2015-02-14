@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
+﻿using System.Collections.Generic;
 using NLog;
+using Peach.Core;
+using Peach.Core.Dom;
 using Peach.Core.IO;
 
-namespace Peach.Core.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	[Publisher("Null", true)]
 	[Parameter("MaxOutputSize", typeof(uint?), "Error if output surpasses limit.", "")]
@@ -28,7 +26,7 @@ namespace Peach.Core.Publishers
 				throw new PeachException("Output size '{0}' is larger than max of '{1}'.".Fmt(data.Length, MaxOutputSize));
 		}
 
-		protected override Variant OnCall(string method, List<Dom.ActionParameter> args)
+		protected override Variant OnCall(string method, List<ActionParameter> args)
 		{
 			return null;
 		}

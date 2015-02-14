@@ -1,8 +1,6 @@
-namespace Peach.Core.Debuggers.DebugEngine.Tlb
+namespace Peach.Pro.OS.Windows.Debuggers.DebugEngine.Tlb
 {
-    using System;
-
-    public enum __MIDL___MIDL_itf_DbgEng_0001_0077_0081
+	public enum __MIDL___MIDL_itf_DbgEng_0001_0077_0081
     {
         DEBUG_DATA_MmTotalCommitLimitMaximumAddr = 0x260
     }

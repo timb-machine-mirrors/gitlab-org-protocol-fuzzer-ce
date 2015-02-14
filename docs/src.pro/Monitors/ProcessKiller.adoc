@@ -2,20 +2,20 @@
 [[Monitors_ProcessKiller]]
 == ProcessKiller Monitor
 
-The _ProcessKiller_ monitor will kill (terminate) specified processes after each iteration.
+The _ProcessKiller_ monitor kills (terminates) specified processes after each iteration.
 
 === Parameters
 
 _Required:_
 
 ProcessNames:: 
-    Comma separated list of process to kill. Note that the process name is usually the executable
-    with out the +.exe+. For example, +notepad.exe+ will be +Notepad+ or +notepad+. For Windows
-    operating systems the process name can be found by using the +tasklist.exe+ command.
+    Comma separated list of the processes to kill. Note that the process name is usually the executable
+    without the +.exe+. For example, +notepad.exe+ will be +Notepad+ or +notepad+. For the Windows
+    operating systems, the process name can be found by using the +tasklist.exe+ command.
 
 _Optional:_
 
-There are no optional parameters for this monitor.
+None.
 
 === Examples
 
@@ -88,6 +88,6 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 
-In this example, whenever the process notepad.exe is running it will be killed.
+In this example, peach kills the +notepad+ process whenever it runs.
 
 ========================

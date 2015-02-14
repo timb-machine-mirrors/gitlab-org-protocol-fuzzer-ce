@@ -26,19 +26,14 @@
 
 // $Id$
 
-using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
-using Peach.Core.IO;
+using Peach.Core.Dom;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test
+namespace Peach.Pro.Test.Core
 {
 	[TestFixture] [Category("Peach")]
 	class RelationCountTests
@@ -56,7 +51,7 @@ namespace Peach.Core.Test
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			Assert.NotNull(dom.dataModels[0].Value);
 
@@ -64,11 +59,11 @@ namespace Peach.Core.Test
 
 			Assert.AreEqual(1, (int)num.InternalValue);
 
-			Dom.Array array = dom.dataModels[0][1] as Dom.Array;
+			Peach.Core.Dom.Array array = dom.dataModels[0][1] as Peach.Core.Dom.Array;
 			array.OriginalElement = array[0];
 
-			array.Add(new Dom.String("Child2") { DefaultValue = new Variant("2") });
-			array.Add(new Dom.String("Child3") { DefaultValue = new Variant("3") });
+			array.Add(new Peach.Core.Dom.String("Child2") { DefaultValue = new Variant("2") });
+			array.Add(new Peach.Core.Dom.String("Child3") { DefaultValue = new Variant("3") });
 
 			Assert.AreEqual(3, (int)num.InternalValue);
 			Assert.AreEqual("123", ASCIIEncoding.ASCII.GetString(array.Value.ToArray()));
@@ -87,7 +82,7 @@ namespace Peach.Core.Test
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var val = dom.dataModels[0].Value;
 			Assert.NotNull(val);
@@ -96,11 +91,11 @@ namespace Peach.Core.Test
 
 			Number num = dom.dataModels[0][0] as Number;
 
-			Dom.Array array = dom.dataModels[0][1] as Dom.Array;
+			Peach.Core.Dom.Array array = dom.dataModels[0][1] as Peach.Core.Dom.Array;
 			array.OriginalElement = array[0];
 
-			array.Add(new Dom.String("Child2") { DefaultValue = new Variant("2") });
-			array.Add(new Dom.String("Child3") { DefaultValue = new Variant("3") });
+			array.Add(new Peach.Core.Dom.String("Child2") { DefaultValue = new Variant("2") });
+			array.Add(new Peach.Core.Dom.String("Child3") { DefaultValue = new Variant("3") });
 
 			Assert.AreEqual(4, (int)num.InternalValue);
 			Assert.AreEqual("123", ASCIIEncoding.ASCII.GetString(array.Value.ToArray()));

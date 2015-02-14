@@ -4,7 +4,7 @@
 
 == Record Iteration
 
-The record iteration is used to validate a Peach pit is operating correctly. During a record iteration, no mutations are made so we expect the state model will execute with no errors.
+The record iteration is used to validate that a Peach pit is operating correctly. During a record iteration, no mutations are made so we expect the state model will execute with no errors.
 
 Every time Peach starts, it performs a record iteration to record and evaluate the information it receives for this fuzzing session. The following information is recorded for use during later iterations:
 
@@ -14,8 +14,8 @@ Every time Peach starts, it performs a record iteration to record and evaluate t
 * Data flows, to compare with the xref:Iteration_control[control iterations]
 * States and actions flows
 
-If xref:Iteration_control[control iterations] have been configured, the control iterations will verify the fuzzer was able to execute the same set of actions as in the record iteration to determine if the target is still operational.
+If xref:Iteration_control[control iterations] have been configured, the control iterations verify that the fuzzer executes the same set of actions as in the record iteration to determine if the target is still operational.
 
-When running Peach with one test, you will actually see two iterations performed--a record iteration along with a single fuzzing iteration.
+When running Peach with one test, you will actually see two iterations performed--a record iteration and a single fuzzing iteration.
 
 See also xref:Iteration_control[control iterations] and xref:Iteration_fuzzing[fuzzing iterations].

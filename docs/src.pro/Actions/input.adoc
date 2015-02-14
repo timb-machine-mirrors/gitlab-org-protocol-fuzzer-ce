@@ -31,16 +31,16 @@
 // 03/05/2014: Lynn:
 //  Edited text and created the stream/datagram table
 
-The _input_ Action is used to receive/read in data using a xref:Publisher[Publisher].
+The _input_ Action receives or reads in data using a xref:Publisher[Publisher].
 
 The most common use for _input_ actions is to receive data that will be fuzzed.
-// Once received and xref:Cracking[cracked] into a data model, the data can be copied to
-Once received and cracked into a data model the data can be copied to
-xref:Action_output[_output_] actions, or referenced in conditional expressions such as with the
-xref:Action_when[_when_] attribute.
+Once received and xref:Cracking[cracked] into a data model, the data is available for other uses, such as:
 
-_input_ Actions are associated with a xref:DataModel[DataModel] (provided as a child element) which drives how much data will be requested.
-For stream-based publishers that can read forever (such as TCP) the DataModel must limit the amount of data read. When creating protocols where this might happen, specify some way to prevent this.
+* copying in xref:Action_output[_output_] actions
+* using in conditional expressions, such as with the xref:Action_when[_when_] attribute.
+
+_input_ Actions are associated with a xref:DataModel[DataModel] (provided as a child element) that drives the amount of requested data.
+For stream-based publishers that can read forever (such as TCP), the DataModel must prevent the potential of infinite data read operations, such as setting a timeout value.
 
 .Stream Publisher versus Datagram Publisher
 [options="header"]
@@ -53,38 +53,37 @@ For stream-based publishers that can read forever (such as TCP) the DataModel mu
 ****
 
 With a stream based publisher, the number of underlying packets received is not important; the data is accessed as a continual stream of incoming data. This does not apply to non-stream based publishers such as the datagram protocol xref:Publishers_Udp[UDP]. Non-stream based publishers need to know the number of underlying packets received.
-In UDP, each input and output action will receive or send a single datagram. When cracking the UDP data into a DataModel only the data in the single packet can be used. There is an implicit length to the data that is not present in xref:Publishers_Tcp[TCP].
+In UDP, each input and output action receives or sends a single datagram. When cracking the UDP data into a DataModel only the data in the single packet can be used. There is an implicit length to the data that is not present in xref:Publishers_Tcp[TCP].
 
 
 ****
 
 .Input Timeout
 ****
-If the input time out is reached prior to all incoming data being received, Peach will behave as follows:
+If the input time out is reached prior to all incoming data being received, Peach behaves as follows:
 
-xref:Iteration_record[record iteration]::
-When a record iteration generates errors, Peach assumes either the environment is not working correctly or the pit is incorrect.   In both cases fuzzing cannot continue, causing Peach to stop.
-Peach will exception and stop.
+xref:Iteration_record[Timeout during a record iteration]::
+When a record iteration generates errors, Peach assumes the environment is not working correctly or the pit is incorrect.   In both cases, fuzzing cannot continue.
+Peach throws an exception and stops.
 
-xref:Iteration_control[control iteration]::
-Control iterations must be enabled for this state to be reached.
-Control iterations assume that any error is the result of the target entering an unwanted state. Such transitions are considered faults and logged as such.
-Peach will trigger a fault.
+xref:Iteration_control[Timeout during a control iteration]::
+Control iterations must be enabled to reach for this state.
+Control iterations assume that any error is the result of the target entering an unwanted state. Peach triggers a fault.
 
-xref:Iteration_fuzzing[fuzzing iteration]::
-Peach will continue to next iteration.
-During normal fuzzing iterations, Peach assumes fuzzing will cause odd behaviours from the target which will be ignored unless they occur on a control iteration (an iteration without any mutations occurring).
+xref:Iteration_fuzzing[Timeout during a fuzzing iteration]::
+Peach continues fuzzing with the  next iteration. 
+During normal fuzzing iterations, Peach assumes fuzzing causes odd behaviors from the target that are ignored, unless they occur during a control iteration.
 ****
 
 .Default Order of Actions
 ****
 The following is the default order in which Actions are performed when fuzzing:
 
-. start - Implicit, once per session
-. open - Implicit, once per iteration
-. Explicit actions (such as accept, input, and output)
-. close - Implicit, once per iteration
-. stop - Implicit, once per session
+. _start_ - Implicit, once per session
+. _open_ - Implicit, once per iteration
+. Explicit actions (such as _accept_, _input_, and _output_)
+. _close_ - Implicit, once per iteration
+. _stop_ - Implicit, once per session
 ****
 
 === Syntax
@@ -111,21 +110,21 @@ type:: Action type, must be set to "input"
 _Optional:_
 
 name:: Name used to identify the action
-publisher:: Name of the publisher that this action should be called on
-xref:Action_when[when]:: Only perform action if the expression provided evaluates to true
-xref:Action_onStart[onStart]:: Expression to run on start of an action.
-xref:Action_onComplete[onComplete]:: Expression to run on completion of an action
+publisher:: Name of the publisher to perform this action
+xref:Action_when[when]:: Perform action if the provided expression evaluates to true
+xref:Action_onStart[onStart]:: Evaluate expression at the start of an action.
+xref:Action_onComplete[onComplete]:: Evaluate expression upon completion of an action
 
 === Child Elements
 
 // TODO xref:DataModel[DataModel]:: Reference to a DataModel into which input data will be xref:Cracking[cracked]
-xref:DataModel[DataModel]:: Reference to a DataModel into which input data will be cracked
+xref:DataModel[DataModel]:: Reference to a DataModel that will receive cracked input data
 
 === Examples
 
 .Receiving Input from TCP Publisher
 ==========================
-This is a simple example of using the input action to receive data. Netcat (nc) is used in this example as the client.
+This is a simple example of using the _input_ action to receive data. Netcat (nc) is used in this example as the client.
 
 [source,xml]
 ----
@@ -174,7 +173,9 @@ This is a simple example of using the input action to receive data. Netcat (nc) 
 </Peach>
 ----
 
-Output from this example. Once Peach is started, use the netcat command line found below to recreate output.
+Output from this example. Once Peach is started, use the netcat command (nc) to recreate output. Type the following command line and press RETURN to continue.
+
+   nc -vv 127.0.0.1 31337
 
 ----
 > peach -1 --debug example.xml
@@ -235,7 +236,7 @@ Peach.Core.Publishers.TcpListenerPublisher stop()
 <1> Data received by TCP publisher
 <2> Debugging output from the data cracker
 
-Netcat command line. Once running type "PING" return in all upper case. PONG will be sent back by Peach.
+Netcat command line. Once Netcat is running, type "PING" in upper case letters and press RETURN. Peach responds with "PONG".
 
 ----
 > nc -vv 127.0.0.1 31337

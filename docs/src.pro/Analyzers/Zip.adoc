@@ -8,7 +8,7 @@ The name of the stream element corresponds to the name of the file in the zip ar
 The content of a stream element corresponds to the content of the file in the zip archive.
 
 The Zip Analyzer allows the content of each file in the zip archive to map to a xref:DataModel[DataModel].
-Using a file and the corresponding data model, Peach can further decompose the contents of a file in a zip archive instead of just treating the contents as an xref:Blob[Blob].
+Using a file and the corresponding data model, Peach can further decompose the contents of a file in a zip archive instead of just treating the contents as a xref:Blob[Blob].
 The +Map+ parameter of this element defines the mappings for the streams in the zip files and the associated  data models.
 
 You can attach this analyzer to a blob.
@@ -39,7 +39,7 @@ This parameter consists of a comma-separated list of mappings. Each mapping cons
 
 When the regular expression matches the file name in the zip archive, Peach uses the corresponding DataModel on the file contents.
 
-For example, to use the data model +TextModel+ for all files ending in +.txt+ the parameter's value will be +/.txt$/TextModel/+.
+For example, to use the data model +TextModel+ for all files ending in +.txt+, set the value of the parameter to +/.txt$/TextModel/+.
 
 
 ==== Examples

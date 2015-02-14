@@ -28,7 +28,7 @@ Since it is easy to confuse _Ssl_ and _SslListner_, here's the difference:
 Host:: Hostname to connect to.
 Port:: Port to connect to.
 ConnectTimeout:: Max milliseconds to wait for connection (default 10000). default="10000"
-Sni:: Sni to use for SSL connection. Will use Host by default. default=""
+Sni:: Sni to use for SSL connection. Uses Host by default. default=""
 Timeout:: How many milliseconds to wait for data (default 3000). default="3000"
 VerifyServer:: Verify the server certificate. default="false"
 

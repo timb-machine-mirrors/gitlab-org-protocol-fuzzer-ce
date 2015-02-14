@@ -19,9 +19,9 @@
 
 Result is a child of the xref:Action_call[call] Action.
 
-Methods run with a call Action often have useful data returned.
+Methods run with a call Action often return useful data. 
 Result allows cracking this returned data into a DataModel.
-This data can then be slurped into other DataModels and reused for various purposes.
+This data can then be slurped into other DataModels and re-used for various purposes.
 
 === Syntax
 
@@ -40,6 +40,6 @@ xref:name[name]:: Name of parameter [optional]
 
 _Valid Child Elements:_
 
-xref:DataModel[DataModel]:: Reference to a DataModel into which input data will be cracked
+xref:DataModel[DataModel]:: Reference to a DataModel to contain the cracked data.
 
 // TODO Needs more content (it's pretty sparse) including an example

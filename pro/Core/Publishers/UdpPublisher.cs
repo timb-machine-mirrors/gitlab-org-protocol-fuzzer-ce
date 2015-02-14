@@ -23,16 +23,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net.Sockets;
 using System.IO;
 using System.Net;
+using System.Net.Sockets;
 using NLog;
-
+using Peach.Core;
 using Peach.Core.IO;
 
-namespace Peach.Core.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	[Publisher("Udp", true)]
 	[Parameter("Host", typeof(string), "Hostname or IP address of remote host")]

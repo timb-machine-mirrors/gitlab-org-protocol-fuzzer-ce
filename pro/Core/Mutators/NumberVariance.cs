@@ -2,13 +2,11 @@
 // Copyright (c) Deja vu Security
 //
 
-using System;
-
+using NLog;
+using Peach.Core;
 using Peach.Core.Dom;
 
-using NLog;
-
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("NumberVariance")]
 	public class NumberVariance : Utility.IntegerVariance
@@ -30,7 +28,7 @@ namespace Peach.Core.Mutators
 
 		protected override void GetLimits(DataElement obj, out bool signed, out long value, out long min, out long max)
 		{
-			var asNum = obj as Dom.Number;
+			var asNum = obj as Peach.Core.Dom.Number;
 			if (asNum != null)
 			{
 				signed = asNum.Signed;
@@ -40,7 +38,7 @@ namespace Peach.Core.Mutators
 			}
 			else
 			{
-				System.Diagnostics.Debug.Assert(obj is Dom.String);
+				System.Diagnostics.Debug.Assert(obj is Peach.Core.Dom.String);
 
 				signed = true;
 				min = long.MinValue;
@@ -51,10 +49,10 @@ namespace Peach.Core.Mutators
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			if (obj is Dom.String && obj.isMutable)
+			if (obj is Peach.Core.Dom.String && obj.isMutable)
 				return obj.Hints.ContainsKey("NumericalString");
 
-			return obj is Dom.Number && obj.isMutable;
+			return obj is Peach.Core.Dom.Number && obj.isMutable;
 		}
 
 		protected override void performMutation(DataElement obj, long value)

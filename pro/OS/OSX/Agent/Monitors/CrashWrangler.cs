@@ -73,6 +73,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 	/// </summary>
 	[Monitor("CrashWrangler", true)]
 	[Monitor("osx.CrashWrangler")]
+	[Core.Description("Launch a process and monitor it for crashes")]
 	[Parameter("Command", typeof(string), "Executable to launch")]
 	[Parameter("Executable", typeof(string), "Executable to launch")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]

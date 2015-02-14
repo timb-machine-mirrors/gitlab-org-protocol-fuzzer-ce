@@ -1,33 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
-using System.IO;
-using NLog;
-using NLog.Targets;
+﻿using NLog;
 using NLog.Config;
+using NLog.Targets;
 using NUnit.Framework;
+using Peach.Core;
 
-namespace Peach
+namespace Peach.Pro.Test.OS.Linux
 {
 	[SetUpFixture]
-	public class TestBase
+	class TestBase
 	{
 		[SetUp]
 		public void Initialize()
 		{
 			// NUnit [Platform] attribute doesn't differentiate MacOSX/Linux
-			if (Peach.Core.Platform.GetOS() != Peach.Core.Platform.OS.Linux)
+			if (Platform.GetOS() != Platform.OS.Linux)
 				Assert.Ignore("Only supported on Linux");
 
-			var consoleTarget = new ConsoleTarget();
-			consoleTarget.Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}";
+			var consoleTarget = new ConsoleTarget
+			{
+				Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}"
+			};
 
-			LoggingConfiguration config = new LoggingConfiguration();
+			var config = new LoggingConfiguration();
 			config.AddTarget("console", consoleTarget);
 
-			LoggingRule rule = new LoggingRule("*", LogLevel.Debug, consoleTarget);
+			var rule = new LoggingRule("*", LogLevel.Debug, consoleTarget);
 			config.LoggingRules.Add(rule);
 
 			LogManager.Configuration = config;

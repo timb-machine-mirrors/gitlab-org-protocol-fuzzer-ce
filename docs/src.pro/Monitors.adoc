@@ -9,6 +9,7 @@ xref:Agent[Agents] are special Peach processes that can be run locally or remote
 |Monitor    |Linux|OSX|Windows
 |xref:Monitors_Android[Android Monitor]|X|X|X
 |xref:Monitors_AndroidEmulator[Android Emulator Monitor]|X|X|X
+|xref:Monitors_ButtonClicker[Windows ButtonClicker Monitor]|||X
 |xref:Monitors_CanaKitRelay[CanaKit Relay Monitor]|X|X|X
 |xref:Monitors_CleanupFolder[Cleanup Folder Monitor]|X|X|X
 |xref:Monitors_CleanupRegistry[Cleanup Registry Monitor]|||X
@@ -26,6 +27,7 @@ xref:Agent[Agents] are special Peach processes that can be run locally or remote
 |xref:Monitors_ProcessKiller[Process Killer Monitor]|X|X|X
 |xref:Monitors_RunCommand[Run Command Monitor]|X|X|X
 |xref:Monitors_SaveFile[Save File Monitor]|X|X|X
+|xref:Monitors_Serial[Serial Port Monitor]|X|X|X
 |xref:Monitors_Socket[Socket Listener Monitor]|X|X|X
 |xref:Monitors_SshCommand[SSH Command Monitor]|X|X|X
 |xref:Monitors_SshDownloader[SSH Downloader Monitor]|X|X|X
@@ -36,63 +38,3 @@ xref:Agent[Agents] are special Peach processes that can be run locally or remote
 |xref:Monitors_WindowsService[Windows Service Monitor]|||X
 |==========================================================
 
-
-:leveloffset: 2
-
-include::Monitors/Android.adoc[]
-
-include::Monitors/AndroidEmulator.adoc[]
-
-include::Monitors/CanaKitRelay.adoc[]
-
-include::Monitors/CleanupFolder.adoc[]
-
-include::Monitors/CleanupRegistry.adoc[]
-
-include::Monitors/CrashReporter.adoc[]
-
-include::Monitors/CrashWrangler.adoc[]
-
-include::Monitors/IpPower9258.adoc[]
-
-include::Monitors/LinuxCrash.adoc[]
-
-include::Monitors/LinuxDebugger.adoc[]
-
-include::Monitors/MemoryMonitor.adoc[]
-
-include::Monitors/PageHeap.adoc[]
-
-include::Monitors/Pcap.adoc[]
-
-include::Monitors/Ping.adoc[]
-
-include::Monitors/PopupWatcher.adoc[]
-
-include::Monitors/Process.adoc[]
-
-include::Monitors/ProcessKiller.adoc[]
-
-include::Monitors/RunCommand.adoc[]
-
-include::Monitors/SaveFile.adoc[]
-
-include::Monitors/Serial.adoc[]
-
-include::Monitors/Socket.adoc[]
-
-include::Monitors/Ssh.adoc[]
-
-include::Monitors/SshDownloader.adoc[]
-
-include::Monitors/Syslog.adoc[]
-
-include::Monitors/TcpPort.adoc[]
-
-include::Monitors/Vmware.adoc[]
-
-include::Monitors/WindowsDebugger.adoc[]
-
-include::Monitors/WindowsService.adoc[]
-
-:leveloffset: 0

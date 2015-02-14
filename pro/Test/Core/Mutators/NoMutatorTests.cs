@@ -1,8 +1,7 @@
-using System;
-
 using NUnit.Framework;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture] [Category("Peach")]
 	class NoutatorTests : DataModelCollector

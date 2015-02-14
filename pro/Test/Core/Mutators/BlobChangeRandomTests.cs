@@ -1,11 +1,10 @@
-using System;
 using System.Linq;
-
-using Peach.Core.Dom;
-
 using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Dom;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class BlobChangeRandomTests
@@ -55,7 +54,7 @@ namespace Peach.Core.Test.Mutators
 		[Test]
 		public void TestSequential()
 		{
-			var runner = new MutatorRunner("BlobChangeRandom");
+			var runner = new MutatorRunner("BlobChangeRandom") { SeedOverride = 0x31337 };
 			var src = new byte[10];
 			var m = runner.Sequential(new Blob() { DefaultValue = new Variant(src) });
 
@@ -69,7 +68,7 @@ namespace Peach.Core.Test.Mutators
 		[Test]
 		public void TestSequentialOne()
 		{
-			var runner = new MutatorRunner("BlobChangeRandom");
+			var runner = new MutatorRunner("BlobChangeRandom") { SeedOverride = 0x31337 };
 			var src = new byte[1];
 			var m = runner.Sequential(new Blob() { DefaultValue = new Variant(src) });
 

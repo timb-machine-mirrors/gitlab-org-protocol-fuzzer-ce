@@ -28,14 +28,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Peach.Core.Dom;
-using System.Reflection;
 using System.Linq;
-
+using System.Reflection;
 using NLog;
+using Peach.Core;
+using Peach.Core.Dom;
 
-namespace Peach.Core.MutationStrategies
+namespace Peach.Pro.Core.MutationStrategies
 {
 	[MutationStrategy("Sequential", true)]
 	[Serializable]
@@ -55,7 +54,7 @@ namespace Peach.Core.MutationStrategies
 		private List<Type> _mutators = null;
 		private uint _count = 1;
 		private uint _iteration = 1;
-		Dom.Action _currentAction;
+		Peach.Core.Dom.Action _currentAction;
 		State _currentState;
 
 		public Sequential(Dictionary<string, Variant> args)
@@ -148,7 +147,7 @@ namespace Peach.Core.MutationStrategies
 		{
 			System.Diagnostics.Debug.Assert(value > 0);
 
-			if (_context.controlIteration && _context.controlRecordingIteration)
+			if (Context.controlIteration && Context.controlRecordingIteration)
 			{
 				return;
 			}
@@ -184,7 +183,7 @@ namespace Peach.Core.MutationStrategies
 			}
 		}
 
-		private void ActionStarting(RunContext context, Dom.Action action)
+		private void ActionStarting(RunContext context, Peach.Core.Dom.Action action)
 		{
 			_currentAction = action;
 
@@ -192,10 +191,10 @@ namespace Peach.Core.MutationStrategies
 			if (!action.outputData.Any())
 				return;
 
-			if (!_context.controlIteration)
+			if (!Context.controlIteration)
 				MutateDataModel(action);
 
-			else if(_context.controlIteration && _context.controlRecordingIteration)
+			else if (Context.controlIteration && Context.controlRecordingIteration)
 				RecordDataModel(action);
 		}
 
@@ -242,10 +241,10 @@ namespace Peach.Core.MutationStrategies
 			}
 		}
 
-		private void RecordDataModel(Core.Dom.Action action)
+		private void RecordDataModel(Peach.Core.Dom.Action action)
 		{
 			// ParseDataModel should only be called during iteration 0
-			System.Diagnostics.Debug.Assert(_context.controlIteration && _context.controlRecordingIteration);
+			System.Diagnostics.Debug.Assert(Context.controlIteration && Context.controlRecordingIteration);
 
 			foreach (var item in action.outputData)
 			{
@@ -261,7 +260,7 @@ namespace Peach.Core.MutationStrategies
 		/// <returns></returns>
 		public override State MutateChangingState(State state)
 		{
-			if (_context.controlIteration)
+			if (Context.controlIteration)
 				return state;
 
 			var key = "Run_{0}.{1}".Fmt(state.runCount, state.name);
@@ -296,12 +295,12 @@ namespace Peach.Core.MutationStrategies
 			}
 		}
 
-		private void MutateDataModel(Core.Dom.Action action)
+		private void MutateDataModel(Peach.Core.Dom.Action action)
 		{
 			// MutateDataModel should only be called after ParseDataModel
 			System.Diagnostics.Debug.Assert(_count >= 1);
 			System.Diagnostics.Debug.Assert(_iteration > 0);
-			System.Diagnostics.Debug.Assert(!_context.controlIteration);
+			System.Diagnostics.Debug.Assert(!Context.controlIteration);
 
 			foreach (var item in action.outputData)
 			{

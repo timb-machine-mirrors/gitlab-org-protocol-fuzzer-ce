@@ -10,7 +10,7 @@
 // - 02/14/2014: Jordyn
 // Added full example
 
-The _ConsoleHex_ publisher will output data to standard out.  The data will be displayed in hex format.
+The _ConsoleHex_ publisher outputs data to standard out.  The data is displayed in hex format.
 
 === Syntax
 

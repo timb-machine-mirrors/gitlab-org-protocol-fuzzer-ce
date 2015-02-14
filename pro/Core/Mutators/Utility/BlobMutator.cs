@@ -3,12 +3,12 @@
 //
 
 using System;
-
+using System.Diagnostics;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using System.Diagnostics;
 
-namespace Peach.Core.Mutators.Utility
+namespace Peach.Pro.Core.Mutators.Utility
 {
 	/// <summary>
 	/// Generate integer edge cases. The numbers produced are distributed 
@@ -56,7 +56,7 @@ namespace Peach.Core.Mutators.Utility
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			if (obj is Dom.Blob && obj.isMutable)
+			if (obj is Peach.Core.Dom.Blob && obj.isMutable)
 				return true;
 
 			return false;
@@ -64,7 +64,7 @@ namespace Peach.Core.Mutators.Utility
 
 		protected static bool supportedNonEmptyDataElement(DataElement obj)
 		{
-			if (obj is Dom.Blob && obj.isMutable)
+			if (obj is Peach.Core.Dom.Blob && obj.isMutable)
 				return ((BitwiseStream)obj.InternalValue).Length > 0;
 
 			return false;

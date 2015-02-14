@@ -1,8 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
-using System.Reflection;
 using System.Linq;
-using System.IO;
 using System.Xml.Serialization;
 
 namespace Peach.Core
@@ -65,6 +63,7 @@ namespace Peach.Core
 	/// </summary>
 	public static class Platform
 	{
+		[Flags]
 		public enum OS
 		{
 			[XmlEnum("none")]

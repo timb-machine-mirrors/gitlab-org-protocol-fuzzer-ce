@@ -1,5 +1,4 @@
 using System;
-using System.Xml;
 using System.Collections.Generic;
 using Peach.Core.Dom.XPath;
 using System.Xml.Serialization;
@@ -37,14 +36,23 @@ namespace Peach.Core.Dom.Actions
 			var resolver = new PeachXmlNamespaceResolver();
 			var navi = new PeachXPathNavigator(context.dom);
 			var iter = navi.Select(valueXpath, resolver);
-			if (!iter.MoveNext())
+
+			var elems = new List<DataElement>();
+
+			while (iter.MoveNext())
+			{
+				var valueElement = ((PeachXPathNavigator)iter.Current).currentNode as DataElement;
+				if (valueElement == null)
+					throw new SoftException("Error, slurp valueXpath did not return a Data Element. [" + valueXpath + "]");
+
+				if (valueElement.InScope())
+					elems.Add(valueElement);
+			}
+
+			if (elems.Count == 0)
 				throw new SoftException("Error, slurp valueXpath returned no values. [" + valueXpath + "]");
 
-			var valueElement = ((PeachXPathNavigator)iter.Current).currentNode as DataElement;
-			if (valueElement == null)
-				throw new SoftException("Error, slurp valueXpath did not return a Data Element. [" + valueXpath + "]");
-
-			if (iter.MoveNext())
+			if (elems.Count != 1)
 				throw new SoftException("Error, slurp valueXpath returned multiple values. [" + valueXpath + "]");
 
 			iter = navi.Select(setXpath, resolver);
@@ -58,8 +66,8 @@ namespace Peach.Core.Dom.Actions
 				if (setElement == null)
 					throw new PeachException("Error, slurp setXpath did not return a Data Element. [" + valueXpath + "]");
 
-				logger.Debug("Slurp, setting {0} from {1}", setElement.fullName, valueElement.fullName);
-				setElement.DefaultValue = valueElement.DefaultValue;
+				logger.Debug("Slurp, setting {0} from {1}", setElement.fullName, elems[0].fullName);
+				setElement.DefaultValue = elems[0].DefaultValue;
 			}
 			while (iter.MoveNext());
 		}

@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.IO;
+using Peach.Core;
+using Peach.Core.Agent;
 
-namespace Peach.Core.Agent.Monitors
+namespace Peach.Pro.Core.Agent.Monitors
 {
 	[Monitor("Socket", true)]
+	[Description("Waits for an incoming TCP or UDP connection")]
 	[Parameter("Host", typeof(IPAddress), "IP address of remote host", "")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default 3000)", "3000")]
 	[Parameter("Interface", typeof(IPAddress), "IP of interface to listen on", "")]
@@ -155,6 +158,9 @@ namespace Peach.Core.Agent.Monitors
 			{
 				_socket.Bind(new IPEndPoint(local, Port));
 			}
+
+			// Allow for ephemeral ports
+			Port = (ushort)((IPEndPoint)_socket.LocalEndPoint).Port;
 
 			if (Protocol == Proto.Tcp)
 				_socket.Listen(Backlog);

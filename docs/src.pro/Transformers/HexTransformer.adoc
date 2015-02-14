@@ -28,16 +28,16 @@ The xref:Transformer[Transformer] can bidirectionally transform this data from h
 
 === Parameters
 
-No Parameters are supported by this transformer.
+None.
 
 === Attributes
 
-No attributes are supported by this transformer.
+None.
 
 === Actions Supported
 
-xref:Action_input[input]:: On input, HexTransformer will convert a hex string into ASCII for the incoming data.
-xref:Action_output[output]:: On output, HexTransformer will convert ASCII into a hex string for the outgoing data.
+xref:Action_input[input]:: On input, HexTransformer converts a hex string into ASCII for the incoming data.
+xref:Action_output[output]:: On output, HexTransformer converts ASCII into a hex string for the outgoing data.
 
 === Examples
 

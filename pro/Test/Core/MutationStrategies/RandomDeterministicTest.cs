@@ -1,14 +1,7 @@
-﻿using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Text;
-using Peach.Core;
-using Peach.Core.Dom;
-using Peach.Core.Analyzers;
-using Peach.Core.IO;
-using NUnit.Framework;
+﻿using NUnit.Framework;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.MutationStrategies
+namespace Peach.Pro.Test.Core.MutationStrategies
 {
 	[TestFixture] [Category("Peach")]
 	class RandomDeterministicTest : DataModelCollector

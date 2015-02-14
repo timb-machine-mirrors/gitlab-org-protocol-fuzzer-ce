@@ -28,15 +28,16 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.ServiceProcess;
-using Peach.Core.Agent;
 using NLog;
+using Peach.Core;
+using Peach.Core.Agent;
+using Encoding = Peach.Core.Encoding;
 
-namespace Peach.Core.OS.Windows.Agent.Monitors
+namespace Peach.Pro.OS.Windows.Agent.Monitors
 {
 	[Monitor("WindowsService", true)]
+	[Description("Controls a Windows service")]
 	[Parameter("Service", typeof(string), "The name that identifies the service to the system. This can also be the display name for the service.")]
 	[Parameter("MachineName", typeof(string), "The computer on which the service resides. (optional, defaults to local machine)", "")]
 	[Parameter("FaultOnEarlyExit", typeof(bool), "Fault if service exists early. (defaults to false)", "false")]

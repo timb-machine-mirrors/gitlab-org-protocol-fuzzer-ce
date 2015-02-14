@@ -27,19 +27,16 @@
 // $Id$
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using System.Xml.Schema;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Reflection;
-
+using Peach.Core;
+using Peach.Core.Cracker;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using Peach.Core.Cracker;
 
-namespace Peach.Core.Analyzers
+namespace Peach.Pro.Core.Analyzers
 {
 	[Analyzer("Xml", true)]
 	[Analyzer("XmlAnalyzer")]
@@ -101,7 +98,7 @@ namespace Peach.Core.Analyzers
 
 		public override void asDataElement(DataElement parent, Dictionary<DataElement, Position> positions)
 		{
-			var strElement = parent as Dom.String;
+			var strElement = parent as Peach.Core.Dom.String;
 			if (strElement == null)
 				throw new PeachException("Error, XmlAnalyzer analyzer only operates on String elements!");
 
@@ -115,7 +112,14 @@ namespace Peach.Core.Analyzers
 					if (stream.Length == 0)
 						return;
 
-					doc.Load(stream);
+					var rdr = XmlReader.Create(stream, new XmlReaderSettings
+					{
+						DtdProcessing = DtdProcessing.Ignore,
+						ValidationFlags = XmlSchemaValidationFlags.None,
+						XmlResolver = null,
+					});
+
+					doc.Load(rdr);
 				}
 				catch
 				{
@@ -127,7 +131,7 @@ namespace Peach.Core.Analyzers
 				throw new PeachException("Error, XmlAnalyzer failed to analyze element '" + parent.name + "'.  " + ex.Message, ex);
 			}
 
-			var elem = new Dom.XmlElement(strElement.name);
+			var elem = new Peach.Core.Dom.XmlElement(strElement.name);
 
 			foreach (XmlNode node in doc.ChildNodes)
 			{
@@ -145,9 +149,9 @@ namespace Peach.Core.Analyzers
 			parent.parent[parent.name] = elem;
 		}
 
-		protected void handleXmlNode(Dom.XmlElement elem, XmlNode node, StringType type)
+		protected void handleXmlNode(Peach.Core.Dom.XmlElement elem, XmlNode node, StringType type)
 		{
-			if (node is XmlComment || node is XmlDeclaration)
+			if (node is XmlComment || node is XmlDeclaration || node is XmlEntity || node is XmlDocumentType)
 				return;
 
 			elem.elementName = node.Name;
@@ -157,7 +161,7 @@ namespace Peach.Core.Analyzers
 			{
 				var strElem = makeString("value", attr.Value, type);
 				var attrName = elem.UniqueName(attr.Name.Replace(':', '_'));
-				var attrElem = new Dom.XmlAttribute(attrName)
+				var attrElem = new Peach.Core.Dom.XmlAttribute(attrName)
 				{
 					attributeName = attr.Name,
 					ns = attr.NamespaceURI,
@@ -177,7 +181,7 @@ namespace Peach.Core.Analyzers
 				else if (!child.Name.StartsWith("#"))
 				{
 					var childName = elem.UniqueName(child.Name.Replace(':', '_'));
-					var childElem = new Dom.XmlElement(childName);
+					var childElem = new Peach.Core.Dom.XmlElement(childName);
 
 					elem.Add(childElem);
 
@@ -186,15 +190,15 @@ namespace Peach.Core.Analyzers
 			}
 		}
 
-		private static Dom.String makeString(string name, string value, StringType type)
+		private static Peach.Core.Dom.String makeString(string name, string value, StringType type)
 		{
-			var str = new Dom.String(name)
+			var str = new Peach.Core.Dom.String(name)
 			{
 				stringType = type,
 				DefaultValue = new Variant(value),
 			};
 
-			var hint = new Dom.Hint("Peach.TypeTransform", "false");
+			var hint = new Peach.Core.Dom.Hint("Peach.TypeTransform", "false");
 			str.Hints.Add(hint.Name, hint);
 
 			return str;

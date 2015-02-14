@@ -26,18 +26,7 @@
 
 // $Id$
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Peach.Core.Debuggers.DebugEngine.Tlb;
-using System.Runtime.InteropServices;
-using System.Runtime;
-using System.Reflection;
-using System.Runtime.InteropServices.ComTypes;
-using System.Diagnostics;
-
-namespace Peach.Core.Debuggers.DebugEngine
+namespace Peach.Pro.OS.Windows.Debuggers.DebugEngine
 {
 	public class Const
 	{

@@ -22,22 +22,22 @@
 [horizontal]
 Type:: Cryptography
 
-_UnixMd5Crypt_ will produce an MD5 crypt operation on the provided value in the parent xref:DataModel[DataModel].
+_UnixMd5Crypt_ produces an MD5 crypt operation on the provided value in the parent xref:DataModel[DataModel].
 This is done using the first two bytes as the salt and prepending the value "$1".
 
 This xref:Transformer[Transformer] can only be applied to outgoing data because hashes are one-way operations.
 
 === Parameters
 
-No Parameters are supported by this transformer.
+None.
 
 === Attributes
 
-No Attributes are supported by this transformer.
+None.
 
 === Actions Supported
 
-xref:Action_output[output]:: On output this transformer will hash the outgoing data.
+xref:Action_output[output]:: On output, this transformer hashes the outgoing data.
 
 === Examples
 

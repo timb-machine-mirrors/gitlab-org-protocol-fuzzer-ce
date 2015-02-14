@@ -13,6 +13,6 @@ To use Peach Validator:
 . Once you select the data model, it is displayed in the lower half of the window.
 . A sample file can be loaded and cracked by using the right-most file-open icon in the toolbar.
 
-Once the file is loaded it will automatically be cracked into the model. As elements are selected in the lower half of the screen, the byte range will be shown in the hex view on top.
+Once the file is loaded, it is automatically cracked into the model. As elements are selected in the lower half of the screen, the byte range is shown in the hex view on top.
 
 // TODO - Expand on peach validator docs. Add images.

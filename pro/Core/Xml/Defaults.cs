@@ -26,13 +26,11 @@
 // $Id$
 
 using System;
-using System.IO;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
 using System.Xml;
 
-namespace Peach.Core.Xml
+namespace Peach.Pro.Core.Xml
 {
 	/// <summary>
 	/// Process sample files to determin data types

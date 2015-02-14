@@ -1,7 +1,6 @@
-using System;
-using System.IO;
+using Peach.Core;
 
-namespace Peach.Core
+namespace Peach.Pro.OS.OSX
 {
 	[PlatformImpl(Platform.OS.OSX)]
 	public class FileInfoImpl : IFileInfo

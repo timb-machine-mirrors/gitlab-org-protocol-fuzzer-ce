@@ -1,11 +1,11 @@
-using Nancy;
-using Nancy.ModelBinding;
-using Peach.Enterprise.WebServices.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
+using Nancy;
+using Nancy.ModelBinding;
+using Peach.Pro.Core.WebServices.Models;
 
-namespace Peach.Enterprise.WebServices
+namespace Peach.Pro.Core.WebServices
 {
 	public class JobService : WebService
 	{
@@ -30,7 +30,7 @@ namespace Peach.Enterprise.WebServices
 
 		object CreateJob()
 		{
-			var job = this.Bind<Models.Job>();
+			var job = this.Bind<Job>();
 			if (string.IsNullOrEmpty(job.PitUrl))
 				return HttpStatusCode.BadRequest;
 
@@ -51,22 +51,22 @@ namespace Peach.Enterprise.WebServices
 
 		object PauseJob(string id)
 		{
-			return QueryJob(id, () => { return Runner.Pause() ? HttpStatusCode.OK : HttpStatusCode.Forbidden; });
+			return QueryJob(id, () => Runner.Pause() ? HttpStatusCode.OK : HttpStatusCode.Forbidden);
 		}
 
 		object ContinueJob(string id)
 		{
-			return QueryJob(id, () => { return Runner.Continue() ? HttpStatusCode.OK : HttpStatusCode.Forbidden; });
+			return QueryJob(id, () => Runner.Continue() ? HttpStatusCode.OK : HttpStatusCode.Forbidden);
 		}
 
 		object StopJob(string id)
 		{
-			return QueryJob(id, () => { return Runner.Stop() ? HttpStatusCode.OK : HttpStatusCode.Forbidden; });
+			return QueryJob(id, () => Runner.Stop() ? HttpStatusCode.OK : HttpStatusCode.Forbidden);
 		}
 
 		object KillJob(string id)
 		{
-			return QueryJob(id, () => { return Runner.Kill() ? HttpStatusCode.OK : HttpStatusCode.Forbidden; });
+			return QueryJob(id, () => Runner.Kill() ? HttpStatusCode.OK : HttpStatusCode.Forbidden);
 		}
 
 		object GetJobs()
@@ -82,22 +82,22 @@ namespace Peach.Enterprise.WebServices
 
 		object GetJob(string id)
 		{
-			return QueryJob(id, () => { return MakeJob(); });
+			return QueryJob(id, MakeJob);
 		}
 
 		object GetNodes(string id)
 		{
-			return QueryJob(id, () => { return new[] { NodeService.Prefix + "/" + NodeGuid }; });
+			return QueryJob(id, () => new[] { NodeService.Prefix + "/" + NodeGuid });
 		}
 
 		object GetFaults(string id)
 		{
-			return QueryJob(id, () => { return Logger.Faults; });
+			return QueryJob(id, () => Logger.Faults);
 		}
 
 		object GetVisualizer(string id)
 		{
-			return QueryJob(id, () => { return Logger.Visualizer; });
+			return QueryJob(id, () => Logger.Visualizer);
 		}
 
 		object QueryJob(string id, Func<object> query)
@@ -117,7 +117,7 @@ namespace Peach.Enterprise.WebServices
 		/// <returns>The resultant job record.</returns>
 		Job MakeJob()
 		{
-			System.Diagnostics.Debug.Assert(Runner != null);
+			Debug.Assert(Runner != null);
 
 			var elapsed = Runner.Runtime;
 
@@ -139,21 +139,47 @@ namespace Peach.Enterprise.WebServices
 				ReportUrl = "",
 				PackageFileUrl = "",
 
+				Commands = new JobCommands
+				{
+					StopUrl = Prefix + "/" + Runner.Guid + "/stop",
+					ContinueUrl = Prefix + "/" + Runner.Guid + "/continue",
+					PauseUrl = Prefix + "/" + Runner.Guid + "/pause",
+					KillUrl = Prefix + "/" + Runner.Guid + "/kill",
+				},
+
+				Metrics = new JobMetrics
+				{
+					BucketTimeline = Prefix + "/" + Runner.Guid + "/metrics/bucketTimeline",
+					FaultTimeline = Prefix + "/" + Runner.Guid + "/metrics/faultTimeline",
+					Mutators = Prefix + "/" + Runner.Guid + "/metrics/mutators",
+					Elements = Prefix + "/" + Runner.Guid + "/metrics/elements",
+					States = Prefix + "/" + Runner.Guid + "/metrics/states",
+					Dataset = Prefix + "/" + Runner.Guid + "/metrics/dataset",
+					Buckets = Prefix + "/" + Runner.Guid + "/metrics/buckets",
+					Iterations = Prefix + "/" + Runner.Guid + "/metrics/iterations",
+				},
+
 				Status = Runner.Status,
+				Mode = Logger.Mode,
 				Name = Runner.Name,
 				Notes = "",
 				User = Environment.UserName,
 				Seed = Runner.Seed,
 				IterationCount = Logger.CurrentIteration,
 				StartDate = Runner.StartDate,
-				StopDate = Runner.StopDate,
 				Runtime = (uint)elapsed.TotalSeconds,
 				Speed = (uint)((Logger.CurrentIteration - Logger.StartIteration) / elapsed.TotalHours),
 				FaultCount = Logger.FaultCount,
 				Tags = new List<Tag>(),
 				Groups = new List<Group>(new[] { group }),
-				HasMetrics = Runner.HasMetrics
+				HasMetrics = Runner.HasMetrics,
 			};
+
+			if (Runner.Status == JobStatus.Stopped)
+			{
+				job.StopDate = Runner.StopDate;
+				job.Result = Runner.Result;
+			}
 
 			return job;
 		}

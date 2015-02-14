@@ -28,12 +28,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections;
-using System.Text;
-using System.Runtime.InteropServices;
-using System.Runtime;
-using System.Reflection;
-using System.Runtime.Serialization;
 using System.Xml;
 
 using Peach.Core.Analyzers;
@@ -357,6 +351,11 @@ namespace Peach.Core.Dom
 			}
 		}
 
+		protected override bool InScope(DataElement child)
+		{
+			return child == SelectedElement;
+		}
+
 		protected override IEnumerable<DataElement> Children()
 		{
 			// Return choices if we haven't chosen yet
@@ -381,7 +380,7 @@ namespace Peach.Core.Dom
 			if (SelectedElement == null)
 				SelectDefault();
 
-			return new Variant(SelectedElement.Value);
+			return new Variant(new BitStreamList(new BitwiseStream[] { SelectedElement.Value }));
 		}
 	}
 }

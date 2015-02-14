@@ -3,12 +3,11 @@
 //
 
 using System;
-
+using NLog;
+using Peach.Core;
 using Peach.Core.Dom;
 
-using NLog;
-
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("ArrayEdgeCase")]
 	[Description("Change the length of arrays to integer edge cases")]
@@ -31,14 +30,14 @@ namespace Peach.Core.Mutators
 
 		protected override void GetLimits(DataElement obj, out long min, out ulong max)
 		{
-			var asSeq = (Dom.Sequence)obj;
+			var asSeq = (Peach.Core.Dom.Sequence)obj;
 			min = ushort.MinValue;
             max = (ulong)Utility.SizedHelpers.MaxDuplication(TargetElement(asSeq));
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-            if (obj is Dom.Sequence && obj.isMutable && TargetElement(obj as Dom.Sequence) != null)
+            if (obj is Peach.Core.Dom.Sequence && obj.isMutable && TargetElement(obj as Peach.Core.Dom.Sequence) != null)
 				return true;
 
 			return false;
@@ -46,14 +45,14 @@ namespace Peach.Core.Mutators
 
 		protected override void performMutation(DataElement obj, long num)
 		{
-            var objasSeq = (Dom.Sequence)obj;
+			var objasSeq = (Peach.Core.Dom.Sequence)obj;
 
-            var targetElem = TargetElement(objasSeq);
-            if (targetElem == null)
-            {
-                logger.Trace("Skipping mutation, the sequence currently has no elements.");
-                return;
-            }
+			var targetElem = TargetElement(objasSeq);
+			if (targetElem == null)
+			{
+				logger.Trace("Skipping mutation, the sequence currently has no elements.");
+				return;
+			}
 
 			if (num > 0)
 			{
@@ -93,16 +92,16 @@ namespace Peach.Core.Mutators
 			throw new NotImplementedException();
 		}
 
-        static DataElement TargetElement(Dom.Sequence asSeq)
+		static DataElement TargetElement(Peach.Core.Dom.Sequence asSeq)
 		{
 			if (asSeq.Count > 0)
-			    return asSeq[asSeq.Count - 1];
-				
-            var asArray = asSeq as Dom.Array;
-            if (asArray != null)
-                return ((Dom.Array)asArray).OriginalElement;
+				return asSeq[asSeq.Count - 1];
 
-            return null;
+			var asArray = asSeq as Peach.Core.Dom.Array;
+			if (asArray != null)
+				return ((Peach.Core.Dom.Array)asArray).OriginalElement;
+
+			return null;
 		}
 	}
 }

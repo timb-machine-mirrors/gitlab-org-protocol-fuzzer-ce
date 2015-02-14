@@ -1,7 +1,7 @@
 [[TutorialFileFuzzing]]
 == Tutorial: File Fuzzing
 
-Welcome to the file fuzzing tutorial, part of the Peach Quickstart.  In this tutorial we are going to build a wave (.wav) file fuzzer.  Wave files are based on the RIFF file format.  This format is not overly complex and will show off several features of Peach.  The target of this fuzzer is http://www.mplayerhq.hu/[mplayer], an open-source, cross-platform, command line media player.
+Welcome to the file fuzzing tutorial, part of the Peach Quickstart.  In this tutorial, we are going to build a wave (.wav) file fuzzer.  Wave files are based on the RIFF file format.  This format is not overly complex and will show off several features of Peach.  The target of this fuzzer is http://www.mplayerhq.hu/[mplayer], an open-source, cross-platform, command line media player.
 
 === Tutorial Outline
 
@@ -12,15 +12,3 @@ Welcome to the file fuzzing tutorial, part of the Peach Quickstart.  In this tut
  . xref:TutorialFileFuzzing_AgentAndMonitor[Adding an agent and monitor]
  . xref:TutorialFileFuzzing_OptimizeTesting[Optimizing test count]
  . xref:TutorialFileFuzzing_RunningInParallel[Running in parallel]
-
-:leveloffset: 1
-
-include::TutorialFileFuzzing/DevelopmentEnvironment.adoc[]
-include::TutorialFileFuzzing/CreateDataModel.adoc[]
-include::TutorialFileFuzzing/CreateStateModel.adoc[]
-include::TutorialFileFuzzing/ConfigurePublisher.adoc[]
-include::TutorialFileFuzzing/AgentAndMonitor.adoc[]
-include::TutorialFileFuzzing/OptimizeTesting.adoc[]
-include::TutorialFileFuzzing/RunningInParallel.adoc[]
-
-:leveloffset: 0

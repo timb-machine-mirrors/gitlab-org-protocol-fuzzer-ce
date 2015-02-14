@@ -27,14 +27,11 @@
 // $Id$
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.IO;
 using System.Reflection;
-using System.Text;
 using NLog;
-using Peach.Core;
 using System.Collections;
 using System.Threading;
 

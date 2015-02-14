@@ -1,23 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.IO;
 using System.Linq;
-using System.Text;
-using System.IO;
-
-using NLog;
-using NLog.Targets;
-using NLog.Config;
-
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
-
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
-using Peach.Core.Cracker;
-using Peach.Core.IO;
+using Peach.Core.Dom;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.StateModel
+namespace Peach.Pro.Test.Core.StateModel
 {
 	[TestFixture] [Category("Peach")]
 	class SlurpTests
@@ -60,7 +49,7 @@ namespace Peach.Core.Test.StateModel
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
@@ -113,7 +102,7 @@ namespace Peach.Core.Test.StateModel
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
@@ -276,5 +265,219 @@ namespace Peach.Core.Test.StateModel
 			Assert.AreEqual("HelloWorld 2", val);
 		}
 
+		[Test]
+		public void SlurpInScopeChoice()
+		{
+			// Ensure that slurp will only get values for elected choice elements
+			// even if multiple elements of that name exist in non-selected
+			// or out of scope choice elements
+
+			string xml = @"
+<Peach>
+	<DataModel name='DM1'>
+		<String name='strDest' value='Hello'/>
+	</DataModel>
+
+	<DataModel name='DM2'>
+		<Choice name='q'>
+			<Block name='blk1'>
+				<String name='str'/>
+			</Block>
+			<Block name='blk2'>
+				<String name='str'/>
+			</Block>
+		</Choice>
+	</DataModel>
+
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action name='act1' type='output'>
+				<DataModel ref='DM2'/>
+				<Data>
+					<Field name='q.blk2.str' value='World' />
+				</Data>
+			</Action> 
+
+			<Action type='slurp' valueXpath='//act1//str' setXpath='//strDest' />
+
+			<Action type='output'>
+				<DataModel ref='DM1'/>
+			</Action> 
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<Strategy class='Random'/>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>
+";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+
+			var config = new RunConfiguration
+			{
+				singleIteration = true,
+				randomSeed = 1,
+				skipToIteration = 9,
+			};
+
+			var engine = new Engine(null);
+			engine.startFuzzing(dom, config);
+
+			var actionData = dom.tests[0].stateModel.states["initial"].actions[2].allData.First();
+			var dm = actionData.dataModel;
+			var val = Encoding.ASCII.GetString(dm.Value.ToArray());
+
+			Assert.AreEqual("World", val);
+		}
+
+		[Test]
+		public void SlurpArrayZeroOccurs()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='Token'>
+		<String name='token'/>
+	</DataModel>
+
+	<DataModel name='Data'>
+		<Block minOccurs='0'>
+			<String/>
+			<String name='key' token='true' />
+		</Block>
+	</DataModel>
+
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel ref='Token'/>
+				<Data>
+					<Field name='token' value='EOL'/>
+				</Data>
+			</Action> 
+
+			<Action type='slurp' valueXpath='//token' setXpath='//key' />
+
+			<Action type='output'>
+				<DataModel ref='Data'/>
+			</Action> 
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<Strategy class='Random'/>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>
+";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+
+			var config = new RunConfiguration
+			{
+				singleIteration = true,
+			};
+
+			var engine = new Engine(null);
+			engine.startFuzzing(dom, config);
+
+			var actionData = dom.tests[0].stateModel.states["initial"].actions[2].allData.First();
+			var dm = actionData.dataModel;
+			var val = dm.Value.ToArray();
+
+			// In this example, the data model is zero sized (array count is 0)
+			// but array.OriginalElement should have its value set via slurp
+			// so that expansions, or using the model for input w/token=true
+			// will honor the slurped value.
+
+			Assert.AreEqual(new byte[0], val);
+
+			var array = dm[0] as Array;
+			Assert.NotNull(array);
+			Assert.NotNull(array.OriginalElement);
+
+			Assert.AreEqual("EOL", array.OriginalElement.InternalValue.BitsToString());
+		}
+
+		[Test]
+		public void SlurpElementPositions()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='Token'>
+		<Blob name='source' value='hello' />
+	</DataModel>
+
+	<DataModel name='Data'>
+		<Block name='blk1'>
+			<Blob name='target' />
+		</Block>
+		<Block name='blk2'>
+			<Blob name='target' />
+		</Block>
+	</DataModel>
+
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel ref='Token'/>
+			</Action> 
+
+			<Action type='slurp' valueXpath='//source' setXpath='//target' />
+
+			<Action type='output'>
+				<DataModel ref='Data'/>
+			</Action> 
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<Strategy class='Random'/>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>
+";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+
+			var config = new RunConfiguration
+			{
+				singleIteration = true,
+			};
+
+			var engine = new Engine(null);
+			engine.startFuzzing(dom, config);
+
+			var actionData = dom.tests[0].stateModel.states["initial"].actions[2].allData.First();
+			var dm = actionData.dataModel;
+			var val = dm.Value.ToArray();
+			var exp = Encoding.ASCII.GetBytes("hellohello");
+
+			Assert.AreEqual(exp, val);
+
+			// Ensure that when slurping a single element to multiple targets
+			// that the targets maintain their proper element names in the
+			// final bitstream list.
+
+			var pos = dm.Value.ElementNames();
+
+			var names = new[]
+			{
+				"Data",
+				"Data.blk1",
+				"Data.blk1.target",
+				"Data.blk2",
+				"Data.blk2.target",
+			};
+
+			Assert.That(pos, Is.EqualTo(names));
+		}
 	}
 }

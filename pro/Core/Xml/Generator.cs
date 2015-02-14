@@ -27,15 +27,14 @@
 // $Id$
 
 using System;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.Text;
 using System.Xml;
+using Random = Peach.Core.Random;
 
 // TODO - Consume sample XML files to determin attribute and node data types
 // TODO - Once we know data types, use Peach engine to produce values as well
 
-namespace Peach.Core.Xml
+namespace Peach.Pro.Core.Xml
 {
 	/// <summary>
 	/// Generate XML documents based on Element definitions.

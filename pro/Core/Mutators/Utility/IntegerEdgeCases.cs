@@ -3,13 +3,10 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-
 using Peach.Core;
 using Peach.Core.Dom;
 
-namespace Peach.Core.Mutators.Utility
+namespace Peach.Pro.Core.Mutators.Utility
 {
 	/// <summary>
 	/// Generate integer edge cases. The numbers produced are distributed 
