@@ -27,24 +27,19 @@
 // $Id$
 
 using System;
+using System.Diagnostics;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Runtime.InteropServices;
-using System.Runtime;
-using System.Reflection;
-using System.Runtime.InteropServices.ComTypes;
-using System.Diagnostics;
 using System.Threading;
-
-using Peach.Core.Dom;
-using Peach.Core.Debuggers.DebugEngine.Tlb;
-
 using NLog;
+using Peach.Core;
+using Peach.Pro.OS.Windows.Debuggers.DebugEngine.Tlb;
+using Encoding = Peach.Core.Encoding;
 
-namespace Peach.Core.Debuggers.DebugEngine
+namespace Peach.Pro.OS.Windows.Debuggers.DebugEngine
 {
 	public class WindowsDebugEngine : IDisposable
 	{
@@ -423,16 +418,14 @@ namespace Peach.Core.Debuggers.DebugEngine
 				if (IntPtr.Size == 4)
 				{
 					// 32bit
-					string path = Assembly.GetExecutingAssembly().Location;
-					path = Path.GetDirectoryName(path);
+					string path = Utilities.ExecutionDirectory;
 					path = Path.Combine(path, "Debuggers\\DebugEngine\\msec86.dll");
 					_engine.dbgControl.Execute((uint)Const.DEBUG_OUTCTL_THIS_CLIENT, ".load " + path, (uint)Const.DEBUG_EXECUTE_ECHO);
 				}
 				else
 				{
 					// 64bit
-					string path = Assembly.GetExecutingAssembly().Location;
-					path = Path.GetDirectoryName(path);
+					string path = Utilities.ExecutionDirectory;
 					path = Path.Combine(path, "Debuggers\\DebugEngine\\msec64.dll");
 					_engine.dbgControl.Execute((uint)Const.DEBUG_OUTCTL_THIS_CLIENT, ".load " + path, (uint)Const.DEBUG_EXECUTE_ECHO);
 				}

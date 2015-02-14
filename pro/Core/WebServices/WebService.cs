@@ -1,7 +1,7 @@
-using Nancy;
 using System;
+using Nancy;
 
-namespace Peach.Enterprise.WebServices
+namespace Peach.Pro.Core.WebServices
 {
 	public abstract class WebService : NancyModule
 	{
@@ -70,7 +70,8 @@ namespace Peach.Enterprise.WebServices
 		{
 			get
 			{
-				return (Runner != null && Runner.Status != Models.JobStatus.Stopped) || (Tester != null && Tester.Status == Models.TestStatus.Active);
+				return (Runner != null && Runner.Status != Models.JobStatus.Stopped) 
+					|| (Tester != null && Tester.Status == Models.TestStatus.Active);
 			}
 		}
 
@@ -79,7 +80,7 @@ namespace Peach.Enterprise.WebServices
 			context.StartTest(pit.Versions[0].Files[0].Name);
 		}
 
-		protected void StartJob(Models.Pit pit, uint seed, uint rangeStart, uint rangeStop)
+		protected void StartJob(Models.Pit pit, uint? seed, uint rangeStart, uint rangeStop)
 		{
 			context.StartJob(pit.Versions[0].Files[0].Name, pit.PitUrl, seed, rangeStart, rangeStop);
 		}

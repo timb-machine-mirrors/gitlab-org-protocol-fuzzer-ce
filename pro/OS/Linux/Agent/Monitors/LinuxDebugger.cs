@@ -1,26 +1,23 @@
 using System;
-using System.IO;
-using System.Diagnostics;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Reflection;
-
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
+using Encoding = Peach.Core.Encoding;
 
-using NLog;
-using System.Runtime.InteropServices;
-using System.ComponentModel;
-using System.Collections;
-using System.Text.RegularExpressions;
-
-using Native =  Mono.Unix.Native;
-using Mono.Unix;
-
-namespace Peach.Core.OS.Linux.Agent.Monitors
+namespace Peach.Pro.OS.Linux.Agent.Monitors
 {
 	[Monitor("LinuxDebugger", true)]
+	[Peach.Core.Description("Uses GDB to launch an executable, monitoring it for exceptions")]
 	[Parameter("Executable", typeof(string), "Executable to launch")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
 	[Parameter("GdbPath", typeof(string), "Path to gdb", "/usr/bin/gdb")]
@@ -32,6 +29,368 @@ namespace Peach.Core.OS.Linux.Agent.Monitors
 	[Parameter("WaitForExitTimeout", typeof(int), "Wait for exit timeout value in milliseconds (-1 is infinite)", "10000")]
 	public class LinuxDebugger : Peach.Core.Agent.Monitor
 	{
+		private class CaptureStream : IDisposable
+		{
+			private static readonly byte[] TruncatedMsg = Encoding.UTF8.GetBytes("{0}{0}--- TRUNCATED ---{0}".Fmt(Environment.NewLine));
+			private const int BlockSize = 1024 * 1024;
+			private static readonly NLog.Logger Logger = logger;
+
+			private class BufferedReader : Stream
+			{
+				private readonly CaptureStream _parent;
+				private readonly byte[] _buffer;
+
+				private int _position;
+				private int _length;
+				private bool _closed;
+
+				private void OnReadComplete(IAsyncResult ar)
+				{
+					Log("{0} >>> OnReadComplete", _parent._name);
+
+					try
+					{
+						var len = _parent._stream.EndRead(ar);
+
+						if (!_parent._disposed)
+						{
+							// Read completed!
+							Log("{0} <<< OnReadComplete ({1})", _parent._name, len);
+
+							_length = len;
+							_parent._readEvent.Set();
+						}
+						else
+						{
+							// CaptureStream was stopped...
+							Log("{0} <<< OnReadComplete (Stopped)", _parent._name);
+						}
+					}
+					catch (ObjectDisposedException)
+					{
+						// Stream was closed...
+						Log("{0} <<< OnReadComplete (Closed)", _parent._name);
+					}
+				}
+
+				public BufferedReader(CaptureStream parent)
+				{
+					_parent = parent;
+					_buffer = new byte[BlockSize];
+					_position = 0;
+					_length = 0;
+					_closed = false;
+				}
+
+				public override int Read(byte[] buffer, int offset, int count)
+				{
+					if (_length == _position && !_closed)
+					{
+						Log("{0} >>> Read", _parent._name);
+
+						// Read the next block of data from the process
+						Debug.Assert(!_parent._disposed);
+
+						_parent._stream.BeginRead(_buffer, 0, _buffer.Length, OnReadComplete, null);
+
+						var idx = WaitHandle.WaitAny(new[] {_parent._stopEvent, _parent._readEvent});
+
+						if (idx == 0)
+						{
+							Log("{0} <<< Read (Stopping)", _parent._name);
+
+							// Log truncated message to disk
+							_parent._file.Write(TruncatedMsg, 0, TruncatedMsg.Length);
+
+							_length = 0;
+							_closed = true;
+						}
+						else if (_length == 0)
+						{
+							Log("{0} Read (EOF)", _parent._name);
+							_closed = true;
+						}
+						else
+						{
+							Log("{0} <<< Read ({1})", _parent._name, _length);
+
+							// Log the data to disk
+							_parent._file.Write(_buffer, 0, _length);
+						}
+
+						_position = 0;
+
+					}
+
+					var ret = Math.Min(count, _length - _position);
+
+					Buffer.BlockCopy(_buffer, _position, buffer, offset, ret);
+
+					_position += ret;
+
+					return ret;
+				}
+
+				public override void Flush()
+				{
+					throw new NotImplementedException();
+				}
+
+				public override long Seek(long offset, SeekOrigin origin)
+				{
+					throw new NotImplementedException();
+				}
+
+				public override void SetLength(long value)
+				{
+					throw new NotImplementedException();
+				}
+
+				public override void Write(byte[] buffer, int offset, int count)
+				{
+					throw new NotImplementedException();
+				}
+
+				public override bool CanRead
+				{
+					get { return true; }
+				}
+
+				public override bool CanSeek
+				{
+					get { return false; }
+				}
+
+				public override bool CanWrite
+				{
+					get { return false; }
+				}
+
+				public override long Length
+				{
+					get { throw new NotImplementedException(); }
+				}
+
+				public override long Position
+				{
+					get { throw new NotImplementedException(); }
+					set { throw new NotImplementedException(); }
+				}
+			}
+
+			private readonly string _name;
+			private readonly FileStream _file;
+			private readonly Stream _stream;
+			private readonly Thread _fileThread;
+			private readonly AutoResetEvent _readEvent;
+			private readonly AutoResetEvent _stopEvent;
+			private bool _disposed;
+
+			public CaptureStream(LinuxDebugger owner, string fileName, Func<Process, StreamReader> strm)
+			{
+				var fullPath = Path.Combine(owner._tmpPath, fileName);
+
+				try
+				{
+					_file = File.Open(fullPath, FileMode.Create, FileAccess.Write);
+				}
+				catch (Exception ex)
+				{
+					throw new SoftException(
+						"Could not create log file for capturing {0} of {1}".Fmt(
+							Path.GetFileNameWithoutExtension(fileName),
+							owner.Executable
+						), ex);
+				}
+
+				_name = "[{0}:{1}]".Fmt(owner._procHandler.Id, Path.GetFileNameWithoutExtension(fileName));
+
+				_readEvent = new AutoResetEvent(false);
+				_stopEvent = new AutoResetEvent(false);
+
+				// Open up stdout/stderr from the gdb process
+				_stream = strm(owner._procHandler).BaseStream;
+
+				// Only try reading stdout/stderr as text if trace logging is enabled
+				if (Logger.IsTraceEnabled)
+					_fileThread = new Thread(LogAndSaveToFile) { Name = _name };
+				else
+					_fileThread = new Thread(SaveToFile) { Name = _name };
+
+				_fileThread.Start();
+			}
+
+			public void Dispose()
+			{
+				Log("{0} >>> Dispose", _name);
+
+				_disposed = true;
+
+				// Set the stop event first so we will log "TRUNCATED"
+				// if a read is pending.
+				_stopEvent.Set();
+
+				Log("{0} >>> Joining File Thread", _name);
+
+				_fileThread.Join();
+
+				Log("{0} <<< Joining File Thread", _name);
+
+				// Close the stdout/stderr stream after setting the stop event
+				_stream.Close();
+
+				// Close the stdout/stderr log file last so _fileThread
+				// can write out all of its data to it
+				_file.Close();
+
+				_readEvent.Dispose();
+				_stopEvent.Dispose();
+
+				Log("{0} <<< Dispose", _name);
+			}
+
+			private void SaveToFile()
+			{
+				Log("{0} >>> SaveToFile", _name);
+
+				var buf = new byte[BlockSize];
+				var len = 0;
+
+				AsyncCallback cb = delegate(IAsyncResult ar)
+				{
+					Log("{0} >>> OnReadComplete", _name);
+
+					try
+					{
+						len = _stream.EndRead(ar);
+
+						if (!_disposed)
+						{
+							// Read completed!
+							Log("{0} <<< OnReadComplete ({1})", _name, len);
+
+							_readEvent.Set();
+						}
+						else
+						{
+							// CaptureStream was stopped...
+							Log("{0} <<< OnReadComplete (Stopped)", _name);
+						}
+					}
+					catch (ObjectDisposedException)
+					{
+						// Stream was closed...
+						Log("{0} <<< OnReadComplete (Closed)", _name);
+					}
+				};
+
+				while (true)
+				{
+					Log("{0} >>> Read", _name);
+
+					_stream.BeginRead(buf, 0, buf.Length, cb, null);
+
+					var idx = WaitHandle.WaitAny(new WaitHandle[] { _stopEvent, _readEvent });
+
+					if (idx == 0)
+					{
+						Log("{0} <<< Read (Stopping)", _name);
+
+						// Log truncated message to disk
+						_file.Write(TruncatedMsg, 0, TruncatedMsg.Length);
+						break;
+					}
+
+					if (len == 0)
+					{
+						Log("{0} Read (EOF)", _name);
+						break;
+					}
+
+					Log("{0} <<< Read ({1})", _name, len);
+
+					// Log the data to disk
+					_file.Write(buf, 0, len);
+				}
+
+				Log("{0} <<< SaveToFile", _name);
+			}
+
+			private void LogAndSaveToFile()
+			{
+				Log("{0} >>> LogAndSaveToFile", _name);
+
+				// Build a stream reader on top of a buffered reader on top of stdout/stderr
+				// When ReadLine() is called on the stream reader, it will in turn call
+				// Read() on the BufferedReader.  This will cause a read of up to 1M
+				// from stdout/stderr and log that data to a file.  The BufferedReader will
+				// then return byte at a time to the StreamReader, which will translate the
+				// bytes into individual lines of text for subsequent trace logging.
+
+				// NOTE: We don't need to close the StreamReader or BufferedReader since
+				// the actual underlying stdout/stderr handle will be closed in Dispose()
+
+				var rdr = new StreamReader(new BufferedReader(this), new System.Text.UTF8Encoding());
+
+				using (var queue = new BlockingCollection<string>())
+				{
+					var writer = new Thread(() =>
+					{
+						Log("{0} >>> Log Writer Thread", _name);
+
+						foreach (var line in queue.GetConsumingEnumerable())
+						{
+							Logger.Trace("{0} {1}", _name, line);
+
+							if (queue.IsAddingCompleted)
+								break;
+						}
+
+						// If the thread stops after a call to Dispose()
+						// tell the user that the data was truncated
+						if (_disposed || queue.Count > 0)
+							Logger.Trace("{0} --- LOGGING TRUNCATED ---", _name);
+
+						Log("{0} <<< Log Writer Thread", _name);
+					})
+					{
+						Name = "{0} Logger".Fmt(_name),
+					};
+
+					writer.Start();
+
+					while (!rdr.EndOfStream)
+					{
+						var line = rdr.ReadLine();
+						if (!string.IsNullOrEmpty(line))
+						{
+							Log("{0} QUEUE {1}", _name, line);
+							queue.Add(line);
+						}
+					}
+
+					Log("{0} >>> Completing Queue", _name);
+
+					queue.CompleteAdding();
+
+					Log("{0} <<< Completing Queue", _name);
+					Log("{0} >>> Join Log Writer", _name);
+
+					writer.Join();
+
+					Log("{0} <<< Join Log Writer", _name);
+				}
+
+				Log("{0} <<< LogAndSaveToFile", _name);
+			}
+
+			[Conditional("DISABLED")]
+			private static void Log(string fmt, params object[] args)
+			{
+				Logger.Trace(fmt, args);
+			}
+		}
+
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
 		static readonly string template = @"
@@ -48,14 +407,19 @@ define log_if_crash
 end
 
 handle all nostop noprint
-handle SIGSEGV EXC_BAD_ACCESS EXC_BAD_INSTRUCTION EXC_ARITHMETIC stop print
+handle SIGSEGV SIGFPE SIGABRT EXC_BAD_ACCESS EXC_BAD_INSTRUCTION EXC_ARITHMETIC stop print
 
 file {1}
 set args {2}
 
 python
 def on_start(evt):
-    with open('{4}', 'w') as f: f.write(str(gdb.inferiors()[0].pid))
+    import tempfile, os
+    h,tempfilename = tempfile.mkstemp()
+    os.close(h)
+    with open(tempfilename, 'w') as f:
+        f.write(str(gdb.inferiors()[0].pid))
+    os.renames(tempfilename,'{4}')
     gdb.events.cont.disconnect(on_start)
 gdb.events.cont.connect(on_start)
 end
@@ -65,10 +429,15 @@ log_if_crash
 quit
 ";
 
+
+
+		CaptureStream _stdout;
+		CaptureStream _stderr;
 		Process _procHandler;
 		Process _procCommand;
 		Fault _fault = null;
 		bool _messageExit = false;
+		bool _secondStart = false;
 		string _exploitable = null;
 		string _tmpPath = null;
 		string _gdbCmd = null;
@@ -127,6 +496,9 @@ quit
 			si.FileName = GdbPath;
 			si.Arguments = "-batch -n -x " + _gdbCmd;
 			si.UseShellExecute = false;
+			si.RedirectStandardInput = true;
+			si.RedirectStandardOutput = true;
+			si.RedirectStandardError = true;
 
 			_procHandler = new System.Diagnostics.Process();
 			_procHandler.StartInfo = si;
@@ -148,6 +520,19 @@ quit
 				_procHandler = null;
 				throw new PeachException("Could not start debugger '" + GdbPath + "'.  " + ex.Message + ".", ex);
 			}
+
+			logger.Trace("[{0}] gdb {1}{2}{3}",
+				_procHandler.Id,
+				Executable,
+				string.IsNullOrEmpty(Arguments) ? "" : " ",
+				Arguments);
+
+			// Close stdin so all reads return zero
+			_procHandler.StandardInput.Close();
+
+			// Start capturing stdout and stderr
+			_stdout = new CaptureStream(this, "stdout.log", p => p.StandardOutput);
+			_stderr = new CaptureStream(this, "stderr.log", p => p.StandardError);
 
 			// Wait for pid file to exist, open it up and read it
 			while (!File.Exists(_gdbPid) && !_procHandler.HasExited)
@@ -181,12 +566,12 @@ quit
 				if (!_procCommand.HasExited)
 				{
 					logger.Debug("_Stop(): Stopping process");
-					Native.Syscall.kill(_procCommand.Id, Native.Signum.SIGTERM);
+					Mono.Unix.Native.Syscall.kill(_procCommand.Id, Mono.Unix.Native.Signum.SIGTERM);
 
 					if (!WaitForExit(_procCommand, 500))
 					{
 						logger.Debug("_Stop(): Killing process");
-						Native.Syscall.kill(_procCommand.Id, Native.Signum.SIGKILL);
+						Mono.Unix.Native.Syscall.kill(_procCommand.Id, Mono.Unix.Native.Signum.SIGKILL);
 
 						WaitForExit(_procCommand, -1);
 					}
@@ -206,6 +591,12 @@ quit
 			logger.Debug("_Stop(): Closing gdb");
 			_procHandler.Close();
 			_procHandler = null;
+
+			_stdout.Dispose();
+			_stdout = null;
+
+			_stderr.Dispose();
+			_stderr = null;
 		}
 
 		void _WaitForExit(bool useCpuKill)
@@ -291,7 +682,7 @@ quit
 
 		Fault MakeFault(string folder, string reason)
 		{
-			return new Fault()
+			var ret = new Fault
 			{
 				type = FaultType.Fault,
 				detectionSource = "LinuxDebugger",
@@ -299,6 +690,11 @@ quit
 				description = "{0}: {1} {2}".Fmt(reason, Executable, Arguments),
 				folderName = folder,
 			};
+
+			ret.collectedData.Add(new Fault.Data("stdout.log", File.ReadAllBytes(Path.Combine(_tmpPath, "stdout.log"))));
+			ret.collectedData.Add(new Fault.Data("stderr.log", File.ReadAllBytes(Path.Combine(_tmpPath, "stderr.log"))));
+
+			return ret;
 		}
 
 		[DllImport("libc", CharSet = CharSet.Ansi, SetLastError = true)]
@@ -316,11 +712,16 @@ quit
 
 		public override void IterationStarting(uint iterationCount, bool isReproduction)
 		{
+			var firstStart = !_secondStart;
+
 			_fault = null;
 			_messageExit = false;
+			_secondStart = true;
 
 			if (RestartOnEachTest)
 				_Stop();
+			else if (firstStart)
+				return;
 
 			if (!_IsRunning() && StartOnCall == null)
 				_Start();
@@ -345,8 +746,8 @@ quit
 			var hash = reHash.Match(output);
 			if (hash.Success)
 			{
-				_fault.majorHash = hash.Groups[1].Value;
-				_fault.minorHash = hash.Groups[2].Value;
+				_fault.majorHash = hash.Groups[1].Value.Substring(0, 8).ToUpper();
+				_fault.minorHash = hash.Groups[2].Value.Substring(0, 8).ToUpper();
 			}
 
 			var exp = reClassification.Match(output);
@@ -362,6 +763,8 @@ quit
 				_fault.title += ", " + other.Groups[1].Value;
 
 			_fault.collectedData.Add(new Fault.Data("StackTrace.txt", bytes));
+			_fault.collectedData.Add(new Fault.Data("stdout.log", File.ReadAllBytes(Path.Combine(_tmpPath, "stdout.log"))));
+			_fault.collectedData.Add(new Fault.Data("stderr.log", File.ReadAllBytes(Path.Combine(_tmpPath, "stderr.log"))));
 			_fault.description = output;
 
 			return true;
@@ -409,8 +812,8 @@ quit
 		{
 			if (!_messageExit && FaultOnEarlyExit && !_IsRunning())
 			{
+				_Stop(); // Stop 1st so stdout/stderr logs are closed
 				_fault = MakeFault("ProcessExitedEarly", "Process exited early");
-				_Stop();
 			}
 			else if (StartOnCall != null)
 			{
@@ -427,8 +830,6 @@ quit
 
 		public override Variant Message(string name, Variant data)
 		{
-			logger.Debug("Message(" + name + ", " + (string)data + ")");
-
 			if (name == "Action.Call" && ((string)data) == StartOnCall)
 			{
 				_Stop();
@@ -439,10 +840,6 @@ quit
 				_messageExit = true;
 				_WaitForExit(false);
 				_Stop();
-			}
-			else
-			{
-				logger.Debug("Unknown msg: " + name + " data: " + (string)data);
 			}
 
 			return null;

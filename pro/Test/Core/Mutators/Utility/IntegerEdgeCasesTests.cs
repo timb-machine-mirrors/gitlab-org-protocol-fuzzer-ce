@@ -1,12 +1,12 @@
-using NUnit.Framework;
-using Peach.Core.Dom;
-using Peach.Core.Mutators.Utility;
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Text;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Dom;
+using Peach.Pro.Core.Mutators.Utility;
 
-namespace Peach.Core.Test.Mutators.Utility
+namespace Peach.Pro.Test.Core.Mutators.Utility
 {
 	[TestFixture]
 	class IntegerEdgeCasesTests
@@ -20,9 +20,8 @@ namespace Peach.Core.Test.Mutators.Utility
 				public Strategy()
 					: base(null)
 				{
-					_context = new RunContext() { config = new RunConfiguration() };
-
 				}
+
 				public override bool UsesRandomSeed
 				{
 					get { return false; }
@@ -59,6 +58,20 @@ namespace Peach.Core.Test.Mutators.Utility
 				: base(obj)
 			{
 				this.context = new Strategy();
+				this.context.Initialize(new RunContext() { config = new RunConfiguration() }, null);
+			}
+
+			public Tester(Number obj, uint seed)
+				: base(obj)
+			{
+				this.context = new Strategy();
+				this.context.Initialize(new RunContext
+				{
+					config = new RunConfiguration
+					{
+						randomSeed = seed
+					}
+				}, null);
 			}
 
 			static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
@@ -76,12 +89,12 @@ namespace Peach.Core.Test.Mutators.Utility
 				max = num.MaxValue;
 			}
 
-			protected override void performMutation(Dom.DataElement obj, long value)
+			protected override void performMutation(Peach.Core.Dom.DataElement obj, long value)
 			{
 				LongMutation(value);
 			}
 
-			protected override void performMutation(Dom.DataElement obj, ulong value)
+			protected override void performMutation(Peach.Core.Dom.DataElement obj, ulong value)
 			{
 				ULongMutation(value);
 			}
@@ -123,7 +136,7 @@ namespace Peach.Core.Test.Mutators.Utility
 		{
 			var num = new Number("num") { length = size, Signed = signed };
 
-			var tester = new Tester(num);
+			var tester = new Tester(num, 1);
 			var blob = new Blob();
 
 			Assert.AreEqual(count, tester.count);

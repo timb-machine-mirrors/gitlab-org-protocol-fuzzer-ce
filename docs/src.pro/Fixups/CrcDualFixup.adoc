@@ -15,7 +15,7 @@
 // Added parent types
 // Added full example
 
-The _CrcDual_ will produce a CRC using data from two elements.
+The _CrcDual_ produces a CRC using data from two elements.
 It is defined in ISO 3309 and can be found in the Open source CRCTool Library.
 This is used when fuzzing protocols that perform the CRC checksum on two elements.
 
@@ -26,8 +26,8 @@ xref:String[String]
 
 === Parameters
 
-xref:ref[ref1]:: Reference to first element which the CRC calculation will be performed on
-xref:ref[ref2]:: Reference to second element which the CRC calculation will be performed on
+xref:ref[ref1]:: Reference to first input element used in the CRC calculation.
+xref:ref[ref2]:: Reference to second element used in the CRC calculation.
 type:: Type of CRC to run [CRC32, CRC16, CRC_CCITT]. Defaults to CRC32.
 
 === Examples

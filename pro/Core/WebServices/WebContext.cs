@@ -1,7 +1,7 @@
-using Peach.Core;
 using System;
+using Peach.Core;
 
-namespace Peach.Enterprise.WebServices
+namespace Peach.Pro.Core.WebServices
 {
 	/// <summary>
 	/// The context that is passed to each WebService instance.
@@ -39,9 +39,22 @@ namespace Peach.Enterprise.WebServices
 			Tester = new PitTester(PitLibraryPath, pitFile);
 		}
 
-		public void StartJob(string pitFile, string pitUrl, uint seed, uint rangeStart, uint rangeStop)
+		public void StartJob(
+			string pitFile,
+			string pitUrl,
+			uint? seed,
+			uint rangeStart,
+			uint rangeStop)
 		{
-			Runner = JobRunner.Run(Logger, PitLibraryPath, pitFile, pitUrl, seed, rangeStart, rangeStop);
+			Runner = JobRunner.Run(
+				Logger,
+				PitLibraryPath,
+				pitFile,
+				pitUrl,
+				seed,
+				rangeStart,
+				rangeStop
+			);
 		}
 
 		public void AttachJob(Peach.Core.Dom.Dom dom, RunConfiguration config)

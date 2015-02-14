@@ -28,12 +28,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections;
-using System.Text;
-using System.Runtime.InteropServices;
-using System.Runtime;
-using System.Reflection;
-using System.Runtime.Serialization;
 using System.Xml;
 using System.Linq;
 
@@ -138,6 +132,11 @@ namespace Peach.Core.Dom
 		public override void WritePit(XmlWriter pit)
 		{
 			originalElement.WritePit(pit);
+		}
+
+		protected override bool InScope(DataElement child)
+		{
+			return child != OriginalElement;
 		}
 
 		protected override IEnumerable<DataElement> Children()

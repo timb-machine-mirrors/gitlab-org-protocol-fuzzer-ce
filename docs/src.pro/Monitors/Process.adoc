@@ -20,12 +20,12 @@ Executable:: Executable to launch
 _Optional:_
 
 Arguments:: Command line arguments
-RestartOnEachTest:: Restart process on each iteration, defaults to false.
-FaultOnEarlyExit:: Trigger fault if process exits, defaults to false.
-NoCpuKill:: Disable process killing when CPU usage nears zero, defaults to false.
+RestartOnEachTest:: Restart process on each iteration, defaults to false
+FaultOnEarlyExit:: Trigger fault if process exits, defaults to false
+NoCpuKill:: Disable process killing when the CPU usage nears zero, defaults to false
 StartOnCall:: Start process on a call action from the xref:StateModel[StateModel] (this value and the method value must match)
 WaitForExitOnCall:: Wait for process to exit on state model call (this value and the method value must match)
-WaitForExitTimeout:: Wait timeout value.  Triggers fault when timeout hit. Defaults to 10000. Use -1 for infinite.
+WaitForExitTimeout:: Wait timeout value.  Triggers fault when timeout hit. Defaults to 10000. Use -1 for infinite, no timeout
 
 === Examples
 
@@ -107,7 +107,7 @@ Peach.Core.Agent.Monitors.Process _Stop(): Killing process
 [*] Test 'Default' finished.
 ----
 
-When running this example, notepad will open at session starting and close at session finished.
+When running this example, notepad opens when the session starts and closes when the session finishes.
 
 =================
 
@@ -189,7 +189,7 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 
-When running this example, notepad will repeatedly open and close.
+When running this example, notepad repeatedly opens and closes.
 
 =================
 
@@ -262,13 +262,13 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 
-When running this example, notepad will repeatedly open and close.
+When running this example, notepad repeatedly opens and closes.
 
 =================
 
 .Wait for process to exit in state model
 =================
-For this example to complete you must close notepad when it opens.
+For this example to complete, you must close notepad when it opens.
 
 [source,xml]
 ----

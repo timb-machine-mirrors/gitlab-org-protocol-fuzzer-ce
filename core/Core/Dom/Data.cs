@@ -262,6 +262,9 @@ namespace Peach.Core.Dom
 				}
 			}
 
+			if (elem.parent is Choice && string.IsNullOrEmpty(value.ToString()))
+				return;
+
 			if (!(elem is DataElementContainer))
 			{
 				if (value.GetVariantType() == Variant.VariantType.BitStream)

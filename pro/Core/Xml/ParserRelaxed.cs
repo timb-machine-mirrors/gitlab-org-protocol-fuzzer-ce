@@ -27,14 +27,8 @@
 // $Id$
 
 using System;
-using System.Diagnostics;
-using System.IO;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Xml;
 
-namespace Peach.Core.Xml
+namespace Peach.Pro.Core.Xml
 {
 	public class ParserRelaxed : Parser
 	{

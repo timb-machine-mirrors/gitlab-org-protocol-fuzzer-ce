@@ -3,16 +3,13 @@
 //
 
 using System;
-using System.IO;
 using System.Linq;
-
-using Peach.Core.Dom;
-using Peach.Core.IO;
-
-using NLog;
 using System.Text;
+using NLog;
+using Peach.Core;
+using Peach.Core.Dom;
 
-namespace Peach.Core.Mutators.Utility
+namespace Peach.Pro.Core.Mutators.Utility
 {
 	public static class SizedHelpers
 	{

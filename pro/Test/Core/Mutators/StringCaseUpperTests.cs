@@ -1,13 +1,11 @@
-using System;
 using System.Linq;
-
+using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using Peach.Core.Test;
 
-using NUnit.Framework;
-
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class StringCaseUpperTests
@@ -17,7 +15,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringCaseUpper");
 
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 
 			// Empty string, not supported
 			str.DefaultValue = new Variant("");
@@ -45,7 +43,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringCaseUpper");
 
-			var str = new Dom.String("String") { DefaultValue = new Variant("Hello") };
+			var str = new Peach.Core.Dom.String("String") { DefaultValue = new Variant("Hello") };
 
 			var m = runner.Sequential(str);
 
@@ -62,7 +60,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringCaseUpper");
 
-			var str = new Dom.String("String") { DefaultValue = new Variant("Hello") };
+			var str = new Peach.Core.Dom.String("String") { DefaultValue = new Variant("Hello") };
 
 			var m = runner.Random(100, str);
 

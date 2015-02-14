@@ -1,9 +1,7 @@
-using System;
-using Peach.Core;
-using Peach.Core.Mutators;
 using NUnit.Framework;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class ArrayEdgeCaseTests : DataModelCollector
@@ -19,8 +17,8 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("ArrayEdgeCase");
 
-			var array = new Dom.Array("Array");
-			array.OriginalElement = new Dom.String("Str");
+			var array = new Peach.Core.Dom.Array("Array");
+			array.OriginalElement = new Peach.Core.Dom.String("Str");
 			array.ExpandTo(0);
 
 			// Empty array can be expanded
@@ -46,17 +44,17 @@ namespace Peach.Core.Test.Mutators
         {
             var runner = new MutatorRunner("ArrayEdgeCase");
 
-            var array = new Dom.Sequence("Sequence");
+            var array = new Peach.Core.Dom.Sequence("Sequence");
             
             // Empty array can be expanded
             Assert.False(runner.IsSupported(array));
 
             // Single element array can be expanded
-            array.Add(new Dom.String("Str"));
+            array.Add(new Peach.Core.Dom.String("Str"));
             Assert.True(runner.IsSupported(array));
 
             // Anything > 1 element is expandable
-            array.Add(new Dom.String("Str2"));
+            array.Add(new Peach.Core.Dom.String("Str2"));
             Assert.True(runner.IsSupported(array));
 
             array.isMutable = false;

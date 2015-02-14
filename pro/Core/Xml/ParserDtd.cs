@@ -29,11 +29,9 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Peach.Core.Xml
+namespace Peach.Pro.Core.Xml
 {
 	/// <summary>
 	/// DTD Xml Schema parser.  Converts a DTD specification into

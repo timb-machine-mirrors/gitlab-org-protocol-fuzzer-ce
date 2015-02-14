@@ -43,11 +43,11 @@ output file::
 
 _Required:_
 
-There are no required attributes.
+None
 
 _Optional:_
 
-There are no optional attributes.
+None
 
 === Examples
 

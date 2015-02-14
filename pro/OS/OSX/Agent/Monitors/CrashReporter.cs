@@ -45,6 +45,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 	/// </summary>
 	[Monitor("CrashReporter", true)]
 	[Monitor("osx.CrashReporter")]
+	[Description("Collect information from crashes detected by OS X System Crash Reporter")]
 	[Parameter("ProcessName", typeof(string), "Process name to watch for (defaults to all)", "")]
 	public class CrashReporter : Monitor, IDisposable
 	{

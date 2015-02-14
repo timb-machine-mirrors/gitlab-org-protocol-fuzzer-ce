@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using NLog;
+using Peach.Core;
 
-namespace Peach.Core.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	[Publisher("TcpListener", true)]
 	[Publisher("tcp.TcpListener")]
 	[Parameter("Interface", typeof(IPAddress), "IP of interface to bind to")]
 	[Parameter("Port", typeof(ushort), "Local port to listen on")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait when receiving data (default 3000)", "3000")]
-	[Parameter("SendTimeout", typeof(int), "How many milliseconds to wait when sending data (default infinite)", "0")]
+	[Parameter("SendTimeout", typeof(int), "How many milliseconds to wait when sending data (default infinite)", "-1")]
 	[Parameter("AcceptTimeout", typeof(int), "How many milliseconds to wait for a connection (default 3000)", "3000")]
 	public class TcpListenerPublisher : TcpPublisher
 	{

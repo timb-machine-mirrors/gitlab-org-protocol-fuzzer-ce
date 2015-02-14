@@ -1,22 +1,16 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
-using System.Reflection;
+using System.IO;
 using System.Linq;
-
-using Peach.Core;
-using Peach.Core.IO;
-using Peach.Core.Dom;
-using Peach.Core.Cracker;
-
 using NLog;
+using Peach.Core;
+using Peach.Core.Dom;
+using Peach.Core.IO;
 
-namespace Peach.Enterprise.MutationStrategies
+namespace Peach.Pro.Core.MutationStrategies
 {
-	[DefaultMutationStrategy]
-	[MutationStrategy("Replay", true)]
+	[MutationStrategy("Replay", true, IsTest = true)]
 	[Description("Replay an existing set of data sets")]
 	public class ReplayStrategy : MutationStrategy
 	{
@@ -141,7 +135,7 @@ namespace Peach.Enterprise.MutationStrategies
 			}
 		}
 
-		void ActionStarting(RunContext ctx, Core.Dom.Action action)
+		void ActionStarting(RunContext ctx, Peach.Core.Dom.Action action)
 		{
 			// Is this a supported action?
 			if (!(action.outputData.Any()))
@@ -205,7 +199,7 @@ namespace Peach.Enterprise.MutationStrategies
 			}
 		}
 
-		private void RecordDataSet(Core.Dom.Action action)
+		private void RecordDataSet(Peach.Core.Dom.Action action)
 		{
 			foreach (var item in action.outputData)
 			{

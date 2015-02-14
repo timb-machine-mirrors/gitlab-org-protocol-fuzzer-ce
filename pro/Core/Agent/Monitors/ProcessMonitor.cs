@@ -27,23 +27,22 @@
 // $Id$
 
 using System;
-using System.IO;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
 using System.Threading;
-
-using Peach.Core.Dom;
-
 using NLog;
+using Peach.Core;
+using Peach.Core.Agent;
+using Monitor = Peach.Core.Agent.Monitor;
 
-namespace Peach.Core.Agent.Monitors
+namespace Peach.Pro.Core.Agent.Monitors
 {
 	/// <summary>
 	/// Start a process
 	/// </summary>
 	[Monitor("Process", true)]
 	[Monitor("process.Process")]
+	[Description("Controls a process during a fuzzing run")]
 	[Parameter("Executable", typeof(string), "Executable to launch")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
 	[Parameter("RestartOnEachTest", typeof(bool), "Restart process for each interation", "false")]

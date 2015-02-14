@@ -4,10 +4,10 @@
 
 using System;
 using System.Collections.Generic;
-
+using Peach.Core;
 using Peach.Core.Dom;
 
-namespace Peach.Core.Mutators.Utility
+namespace Peach.Pro.Core.Mutators.Utility
 {
 	public abstract class IntegerVariance : Mutator
 	{

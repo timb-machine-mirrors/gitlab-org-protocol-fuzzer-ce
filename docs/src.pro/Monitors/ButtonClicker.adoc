@@ -1,0 +1,64 @@
+<<<
+[[Monitors_ButtonClicker]]
+== ButtonClicker Monitor
+
+The _ButtonClicker_ monitor provides mouse click events for popup windows during fuzzing. This monitor runs in the Windows environment. 
+
+The intent of this monitor is to keep a fuzzing session active, regardless of whether popup windows display during fuzzing. 
+
+For example, if an application crashes and restarts, it might display a popup window asking whether to recover a document that was open when the crash occurred. The _ButtonClicker_ monitor could provide a button click in response to the popup window either that would result in discarding the file in question or in recovering the file.
+
+=== Parameters
+
+_Required:_
+
+WindowText:: Text to find in the popup window. Peach performs a string search to determine whether matching text occurs in the popup window.
+ButtonName:: Label displayed to the user that is on or near the button that will receive the click.
+
+_Optional:_
+
+None.
+
+=== Examples
+
+.Basic Usage Example
+=======================
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <Number size="32" signed="false" value="31337" />
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial" >
+    <State name="Initial">
+      <Action type="output">
+          <DataModel ref="TheDataModel"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Agent name="Local">
+    <Monitor class="ButtonClicker">
+      <Param name="WindowText" value="Do you want to start in safe mode?" />
+      <Param name="ButtonName" value="No" />
+    </Monitor>
+  </Agent>
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+
+    <Agent ref="Local" />
+
+    <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
+----
+=======================

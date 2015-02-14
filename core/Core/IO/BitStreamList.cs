@@ -14,6 +14,7 @@ namespace Peach.Core.IO
 
 		private IList<BitwiseStream> _streams;
 		private long _position;
+		private long _length;
 
 		#endregion
 
@@ -29,9 +30,10 @@ namespace Peach.Core.IO
 			_streams = new List<BitwiseStream>(capacity);
 		}
 
-		public BitStreamList(IEnumerable<BitStream> collection)
+		public BitStreamList(IEnumerable<BitwiseStream> collection)
 		{
 			_streams = new List<BitwiseStream>(collection);
+			_streams.ForEach(s => _length += s.LengthBits);
 		}
 
 		#endregion
@@ -54,7 +56,7 @@ namespace Peach.Core.IO
 
 		public override long LengthBits
 		{
-			get { return this.Sum(a => a.LengthBits); }
+			get { return _length; }
 		}
 
 		public override long PositionBits
@@ -222,7 +224,7 @@ namespace Peach.Core.IO
 					pos = 0;
 
 					// First time thru, we should always have at least 1 bit to read
-					System.Diagnostics.Debug.Assert((e.LengthBits - offset) > 0);
+					Debug.Assert((e.LengthBits - offset) > 0);
 				}
 
 				var toWrite = Math.Min(e.LengthBits - offset, needed);
@@ -266,7 +268,7 @@ namespace Peach.Core.IO
 
 		protected bool ScanUntil(string name, ref long position)
 		{
-			if (this.Name == name)
+			if (Name == name)
 				return true;
 
 			foreach (var item in this)
@@ -339,7 +341,6 @@ namespace Peach.Core.IO
 			int bits = 0;
 			int needed = count;
 			long pos = 0;
-			ulong tmp = 0;
 			byte glue = 0;
 
 			foreach (var item in this)
@@ -352,6 +353,7 @@ namespace Peach.Core.IO
 					item.PositionBits = PositionBits - pos;
 
 					// If we are not aligned reading into buffer, get back aligned
+					ulong tmp;
 					if (bits != 0)
 					{
 						int len = item.ReadBits(out tmp, 8 - bits);
@@ -431,10 +433,13 @@ namespace Peach.Core.IO
 		public void Insert(int index, BitwiseStream item)
 		{
 			_streams.Insert(index, item);
+			_length += item.LengthBits;
 		}
 
 		public void RemoveAt(int index)
 		{
+			_length -= _streams[index].LengthBits;
+			Debug.Assert(_length >= 0);
 			_streams.RemoveAt(index);
 		}
 
@@ -446,18 +451,24 @@ namespace Peach.Core.IO
 			}
 			set
 			{
+				_length -= _streams[index].LengthBits;
+				Debug.Assert(_length >= 0);
+
 				_streams[index] = value;
+				_length += value.LengthBits;
 			}
 		}
 
 		public void Add(BitwiseStream item)
 		{
 			_streams.Add(item);
+			_length += item.LengthBits;
 		}
 
 		public void Clear()
 		{
 			_streams.Clear();
+			_length = 0;
 		}
 
 		public bool Contains(BitwiseStream item)
@@ -482,7 +493,12 @@ namespace Peach.Core.IO
 
 		public bool Remove(BitwiseStream item)
 		{
-			return _streams.Remove(item);
+			if (!_streams.Remove(item))
+				return false;
+
+			_length -= item.LengthBits;
+			Debug.Assert(_length >= 0);
+			return true;
 		}
 
 		public IEnumerator<BitwiseStream> GetEnumerator()

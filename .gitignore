@@ -56,8 +56,10 @@ _Resharper*
 *.sln
 *.lastbuildstate
 .depproj/
+/WebEssentials-Settings.json
 
-# Nodejs and angular stuff, mostly for testing
-# package, bower, and karma configs can pull it all down
-/Peach.Enterprise.Web.TS/bower_components
-/Peach.Enterprise.Web.TS/node_modules
+# These are ignored by asciidoctor-fopub subtree however
+# put them here too so the build/remote script won't try
+# and rsync the folders when doing a remote build
+/docs/publishing/asciidoctor-fopub/.gradle/
+/docs/publishing/asciidoctor-fopub/build/

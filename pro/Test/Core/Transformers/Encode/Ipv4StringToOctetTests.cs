@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
+﻿using System.IO;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
-using Peach.Core.IO;
 using Peach.Core.Cracker;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Transformers.Encode
+namespace Peach.Pro.Test.Core.Transformers.Encode
 {
     [TestFixture] [Category("Peach")]
     class Ipv4StringToOctetTests : DataModelCollector
@@ -45,7 +40,7 @@ namespace Peach.Core.Test.Transformers.Encode
 
             PitParser parser = new PitParser();
 
-            Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+            Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
             RunConfiguration config = new RunConfiguration();
             config.singleIteration = true;
@@ -89,7 +84,7 @@ namespace Peach.Core.Test.Transformers.Encode
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
@@ -111,7 +106,7 @@ namespace Peach.Core.Test.Transformers.Encode
 						 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}", new byte[] { 0xC0, 0xA8, 0x01, 0x01 });
 
@@ -137,7 +132,7 @@ namespace Peach.Core.Test.Transformers.Encode
 						</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}{1}", new byte[] { 0xC0, 0xA8, 0x01, 0x01 }, "Hello");
 
@@ -161,7 +156,7 @@ namespace Peach.Core.Test.Transformers.Encode
 						</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}", new byte[] { 0x3F, 0xFE, 0x19 });
 
@@ -182,7 +177,7 @@ namespace Peach.Core.Test.Transformers.Encode
 						</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var data = Bits.Fmt("{0}", new byte[] { 0x3F, 0xFE, 0x19, 0x3F, 0xFE, 0x19, 0xFF });
 

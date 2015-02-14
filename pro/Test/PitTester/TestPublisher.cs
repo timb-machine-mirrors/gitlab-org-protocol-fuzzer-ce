@@ -6,7 +6,7 @@ using System.Linq;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using Peach.Core.Publishers;
+using Peach.Pro.Core.Publishers;
 
 namespace PitTester
 {
@@ -14,6 +14,7 @@ namespace PitTester
 	{
 		static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
+		bool datagram;
 		string name;
 		TestLogger testLogger;
 
@@ -49,7 +50,11 @@ namespace PitTester
 		{
 			testLogger.Verify<TestData.Close>(name);
 
-			if (stream.Position != stream.Length)
+			// Don't verify stream positions if previous error occurred
+			if (testLogger.ExceptionOccurred)
+				return;
+
+			if (!datagram && stream.Position != stream.Length)
 				throw new Exception(string.Format("Error, input stream has {0} unconsumed bytes from last input action.",
 					stream.Length - stream.Position));
 		}
@@ -80,6 +85,8 @@ namespace PitTester
 		protected override void OnInput()
 		{
 			var data = testLogger.Verify<TestData.Input>(name);
+
+			datagram = data.IsDatagram;
 
 			if (data.IsDatagram)
 			{
@@ -129,10 +136,7 @@ namespace PitTester
 			if (Logger.IsDebugEnabled)
 				Logger.Debug("\n\n" + Utilities.HexDump(actual, 0, actual.Length));
 
-			if (expected.Length != actual.Length)
-				throw new PeachException("Length mismatch in action {0}. Expected {1} bytes but got {2} bytes.".Fmt(testLogger.ActionName, expected.Length, actual.Length));
-
-			var skipList = new List<Tuple<long, long>>();
+		    var skipList = new List<Tuple<string, long, long>>();
 
 			foreach (var ignore in testLogger.Ignores)
 			{
@@ -144,25 +148,83 @@ namespace PitTester
 
 				var tgt = dataModel.find(elem.fullName);
 				if (tgt == null)
-					throw new PeachException("Error, couldn't locate {0} in model on action {1} for ignoring.".Fmt(elem, testLogger.ActionName));
+				{
+					// Can happen when we ignore non-selected choice elements
+					logger.Debug("Couldn't locate {0} in model on action {1} for ignoring.", elem, testLogger.ActionName);
+					continue;
+				}
+
+				// If we found the data element in the model, we expect to find its position
 
 				long pos;
-				var lst = dataModel.Value as BitStreamList;
+				var lst = (BitStreamList)dataModel.Value;
 				if (!lst.TryGetPosition(elem.fullName, out pos))
-					throw new PeachException("Error, couldn't locate position of {0} in model on action {1} for ignoring.".Fmt(elem, testLogger.ActionName));
+					throw new PeachException("Error, Couldn't locate position of {0} in model on action {1} for ignoring.".Fmt(elem, testLogger.ActionName));
 
-				skipList.Add(new Tuple<long, long>(pos / 8, (pos / 8) + (tgt.Value.LengthBits + 7) / 8));
+				skipList.Add(new Tuple<string, long, long>(elem.fullName, pos / 8, (pos / 8) + (tgt.Value.LengthBits + 7) / 8));
 			}
 
-			if (skipList.Any())
-				Logger.Debug("Ignoring bytyes {0}", string.Join(", ", skipList.Select(i => "{0}:{1}".Fmt(i.Item1, i.Item2))));
-			for (int i = 0; i < actual.Length; ++i)
-			{
-				var skip = skipList.Where(p => p.Item1 <= i && p.Item2 > i).Any();
-				if (!skip && expected[i] != actual[i])
-					throw new PeachException("\nTest failed on action: {0}\n\tValues differ at offset 0x{3:x8}\n\tExpected: 0x{1:x2}\n\tBut was: 0x{2:x2}\n".Fmt(testLogger.ActionName, expected[i], actual[i], i));
-			}
-		}
+			foreach (var i in skipList)
+				Logger.Debug("Ignoring {0} from index {1} to {2}", i.Item1, i.Item2, i.Item3);
+
+		    var checkLength = actual.Length > expected.Length ? expected.Length : actual.Length;
+            for (var i = 0; i < checkLength; ++i)
+		    {
+		        var skip = skipList.Any(p => p.Item2 <= i && p.Item3 > i);
+		        if (skip || expected[i] == actual[i]) continue;
+
+		        if (Logger.IsDebugEnabled)
+		        {
+		            Logger.Debug("vv Dumping DataModel vvvvvvvvvvvvvvvvv");
+		            long pos = 0;
+
+		            foreach (var item in dataModel.Walk())
+		            {
+		                Logger.Debug("0x{1:x}-0x{2:X}: {0}: {3}", 
+		                    item.fullName, 
+		                    pos,
+		                    pos + item.Value.Length,
+		                    Utilities.HexDump(item.Value));
+
+		                if(!(item is DataElementContainer))
+		                    pos += item.Value.Length;
+		            }
+		            Logger.Debug("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+                }
+
+		        throw new PeachException(
+		            "\nTest failed on action: {0}\n\tValues differ at offset 0x{3:x8}\n\tExpected: 0x{1:x2}\n\tBut was: 0x{2:x2}\n"
+		                .Fmt(testLogger.ActionName, expected[i], actual[i], i));
+		    }
+
+            // Perform length check after byte comparison. More usefull this way.
+            if (expected.Length != actual.Length)
+            {
+                if (Logger.IsDebugEnabled)
+                {
+                    Logger.Debug("vv Dumping DataModel vvvvvvvvvvvvvvvvv");
+                    long pos = 0;
+
+                    foreach (var item in dataModel.Walk())
+                    {
+                        Logger.Debug("0x{1:x}-0x{2:X}: {0}: {3}",
+                            item.fullName,
+                            pos,
+                            pos + item.Value.Length,
+                            Utilities.HexDump(item.Value));
+
+                        if (!(item is DataElementContainer))
+                            pos += item.Value.Length;
+                    }
+                    Logger.Debug("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+                }
+
+                throw new PeachException(
+                    "Length mismatch in action {0}. Expected {1} bytes but got {2} bytes.".Fmt(testLogger.ActionName,
+                        expected.Length, actual.Length));
+            }
+
+        }
 
 		protected override void OnOutput(BitwiseStream data)
 		{

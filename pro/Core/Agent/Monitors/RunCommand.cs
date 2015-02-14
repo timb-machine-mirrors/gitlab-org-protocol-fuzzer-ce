@@ -1,19 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Diagnostics;
-using System.Threading;
-using System.IO;
 using System.Text.RegularExpressions;
-
-using Peach.Core.Dom;
-
 using NLog;
+using Peach.Core;
+using Peach.Core.Agent;
+using Monitor = Peach.Core.Agent.Monitor;
 
-namespace Peach.Core.Agent.Monitors
+namespace Peach.Pro.Core.Agent.Monitors
 {
 	[Monitor("RunCommand", true)]
+	[Description("Launches the specified command to perform a utility function")]
 	[Parameter("Command", typeof(string), "Command line command to run")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
 	[Parameter("When", typeof(When), "Period _When the command should be ran (OnCall, OnStart, OnEnd, OnIterationStart, OnIterationEnd, OnFault, OnIterationStartAfterFault)", "OnCall")]

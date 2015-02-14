@@ -1,18 +1,72 @@
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
-namespace Peach.Enterprise.WebServices.Models
+namespace Peach.Pro.Core.WebServices.Models
 {
 	public enum JobStatus
 	{
-		Stopped = 1,
-		StartPending = 2,
-		StopPending = 3,
-		Running = 4,
-		ContinuePending = 5,
-		PausePending = 6,
-		Paused = 7,
+		Stopped,
+		StartPending,
+		StopPending,
+		Running,
+		ContinuePending,
+		PausePending,
+		Paused,
+	}
+
+	public enum JobMode
+	{
+		Fuzzing,
+		Searching,
+		Reproducing,
+	}
+
+	public class JobCommands
+	{
+		/// <summary>
+		/// The URL used to stop this job.
+		/// </summary>
+		/// <example>
+		/// "/p/jobs/{id}/stop"
+		/// </example>
+		public string StopUrl { get; set; }
+
+		/// <summary>
+		/// The URL used to continue this job.
+		/// </summary>
+		/// <example>
+		/// "/p/jobs/{id}/continue"
+		/// </example>
+		public string ContinueUrl { get; set; }
+
+		/// <summary>
+		/// The URL used to pause this job.
+		/// </summary>
+		/// <example>
+		/// "/p/jobs/{id}/pause"
+		/// </example>
+		public string PauseUrl { get; set; }
+
+		/// <summary>
+		/// The URL used to kill this job.
+		/// </summary>
+		/// <example>
+		/// "/p/jobs/{id}/kill"
+		/// </example>
+		public string KillUrl { get; set; }
+	}
+
+	public class JobMetrics
+	{
+		public string BucketTimeline { get; set; }
+		public string FaultTimeline { get; set; }
+		public string Mutators { get; set; }
+		public string Elements { get; set; }
+		public string Dataset { get; set; }
+		public string States { get; set; }
+		public string Buckets { get; set; }
+		public string Iterations { get; set; }
 	}
 
 	public class Job
@@ -24,6 +78,11 @@ namespace Peach.Enterprise.WebServices.Models
 		/// "/p/jobs/{id}"
 		/// </example>
 		public string JobUrl { get; set; }
+
+		/// <summary>
+		/// URLs used to control a running job.
+		/// </summary>
+		public JobCommands Commands;
 
 		/// <summary>
 		/// The URL of faults from job
@@ -92,15 +151,38 @@ namespace Peach.Enterprise.WebServices.Models
 		public string PackageFileUrl { get; set; }
 
 		/// <summary>
+		/// URLs to associated metrics
+		/// </summary>
+		public JobMetrics Metrics { get; set; }
+
+		/// <summary>
 		/// The status of this job record
 		/// </summary>
 		[JsonConverter(typeof(CamelCaseStringEnumConverter))]
 		public JobStatus Status { get; set; }
 
 		/// <summary>
+		/// The mode that this job is operating under
+		/// </summary>
+		[JsonConverter(typeof (CamelCaseStringEnumConverter))]
+		public JobMode Mode { get; set; }
+
+		/// <summary>
 		/// Display name for the job
 		/// </summary>
 		public string Name { get; set; }
+
+		/// <summary>
+		/// The result of the job.
+		/// Only set when the Status is Stopped.
+		/// Otherwise is null and omitted from the JSON.
+		/// </summary>
+		/// <example>
+		/// "Job ran to completion."
+		/// "User initiated stop."
+		/// "Some random error occured."
+		/// </example>
+		public string Result { get; set; }
 
 		/// <summary>
 		/// Fuzzing notes associated with the job
@@ -115,7 +197,7 @@ namespace Peach.Enterprise.WebServices.Models
 		/// <summary>
 		/// The random seed being used by the fuzzing job
 		/// </summary>
-		public uint Seed { get; set; }
+		public uint? Seed { get; set; }
 
 		/// <summary>
 		/// How many iterations of fuzzing have been completed
@@ -130,7 +212,7 @@ namespace Peach.Enterprise.WebServices.Models
 		/// <summary>
 		/// The date the job ended
 		/// </summary>
-		public DateTime StopDate { get; set; }
+		public DateTime? StopDate { get; set; }
 
 		/// <summary>
 		/// The number of seconds the job has been running for

@@ -1,9 +1,8 @@
-using System;
 using System.Collections.Generic;
-using Peach.Core.Dom;
 using NUnit.Framework;
+using Peach.Core.Dom;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class StringUnicodeInvalidTests : StringMutatorTester

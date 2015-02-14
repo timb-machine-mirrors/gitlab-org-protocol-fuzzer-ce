@@ -2,11 +2,10 @@
 // Copyright (c) Deja vu Security
 //
 
-using System;
-
+using Peach.Core;
 using Peach.Core.Dom;
 
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("StringStatic")]
 	[Description("Perform common string mutations")]
@@ -19,7 +18,7 @@ namespace Peach.Core.Mutators
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			if (obj is Dom.String && obj.isMutable)
+			if (obj is Peach.Core.Dom.String && obj.isMutable)
 				return true;
 
 			return false;

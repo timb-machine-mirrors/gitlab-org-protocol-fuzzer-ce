@@ -9,7 +9,7 @@ All extensions follow the same paradigm:
 . Decorate the class with the appropriate plugin attribute.
 . Compile the class into an assembly and place the assembly in the Peach directory.
 --
-When Peach runs, it will automatically reflect all assemblies to get the list of xref:Fixup[Fixups], xref:Transformer[Transformers], xref:Publisher[Publishers], and xref:Monitors[Monitors].
+When Peach runs, it will automatically reflect all assemblies to generate the list of xref:Fixup[Fixups], xref:Transformer[Transformers], xref:Publisher[Publishers], and xref:Monitors[Monitors].
 
 // TODO - Analyzer
 // TODO - Logger
@@ -22,11 +22,11 @@ When Peach runs, it will automatically reflect all assemblies to get the list of
 --
 Peach allows you to write custom agents, loggers, analyzers, and strategies. 
 
-This section will cover the most common types of extensions to Peach.
+This section covers the most common types of extensions to Peach.
 
 <<<
 [[Extend_Plugins]]
-=== Peach Plugins
+=== Peach Plug-ins
 
 If your target has something in its data model that Peach does not support (like a custom checksum algorithm or a custom data format), you may need to extend Peach's functionality by using Peach plugins. 
 
@@ -44,7 +44,7 @@ Peach plugins use ParameterAttribute to define all of their supported configurat
 ParameterParser.Parse() uses the arguments dictionary to automatically populate all plugin properties.
 
  * When populating the properties, type conversion converts the string specified in the pit to the concrete type defined in the plugin.
- * When performing automatic type conversion, the ParameterParser supports System.Enum as well as any type that implements IConvertable.
+ * When performing automatic type conversion, the ParameterParser supports System.Enum as well as any type that implements IConvertible.
 
 This method uses reflection to:
 
@@ -171,18 +171,19 @@ public class MyMonitor : Peach.Core.Monitor
 
 Fixups compute a value based on other elements.  
 
-Since their values are based on other elements, fixups track whenever a referenced element changes so they can recompute their value 
-(for example, the Crc32 fixup needs to know whenever the referenced element changes so that a new crc can be computed). Fixup implementations tell the base Fixup class which parameters are other data elements by passing their data element parameters' names as arguments to their base class constructor.
+Since their values are based on other elements, fixups track whenever a referenced element changes so they can recompute their values. For example, the Crc32 fixup needs to know whenever the referenced element changes, so that a new CRC can be computed. 
+
+Fixup implementations tell the base Fixup class which parameters are other data elements by passing their data element parameters' names as arguments to their base class constructor.
 
 Each fixup implementation needs to implement a single function: fixupImpl().
 This function returns the result of the fixup computation.
 
 It is important to maintain the element type information when returning results from a fixup.
-Data element type returned by the fixup should match the data element type of the resulting field (the only exception is a string can be the resulting field when the fixup element inputs a number).
+The data element type returned by the fixup should match the data element type of the resulting field; the only exception is a string that can be the resulting field when the fixup element inputs a number.
 
 If the fixup evaluates to an integer, an int type should be returned.  Similarly, if the fixup evaluates to a string, a string type should be returned. This allows Peach to perform proper byte encoding when creating the final value for a data element.
 
-Because the Crc fixup returns its value in an unsigned integer type, Peach will output the bytes in the endianness defined on the parent data element.
+Because the Crc fixup returns its value in an unsigned integer type, Peach outputs the bytes in the endian-ness defined on the parent data element.
 
 Inside of fixupImpl(), the resolved data element references are obtained through the dictionary 'this.elements'.
 The key to this dictionary is the name of the parameter (eg: 'ref') and the value is the appropriate data element.
@@ -237,7 +238,7 @@ This is an example of the fixupImpl function of a Crc fixup.
 ----
 protected override Variant fixupImpl()
 {
-	// Get the element we need to compute the crc of
+	// Get the element we need to compute the CRC of
 	var elem = this.elements["ref"];
 	// Get the stream of data for the target element
 	var data = elem.Value;
@@ -249,7 +250,7 @@ protected override Variant fixupImpl()
 	CRCTool crcTool = new CRCTool();
 	crcTool.Init(CRCTool.CRCCode.CRC32);
 
-	// Return the crc of data as a uint
+	// Return the CRC of data as a uint
 	return new Variant((uint)crcTool.crctablefast(data));
 }
 ----
@@ -273,9 +274,9 @@ Custom monitors must implement the following functions:
 
 The SessionStarting and SessionFinished functions are called once per fuzzing session.
 These functions are responsible for any initialization and cleanup required by the monitor.
-Monitors can run remotely and there can be multiple monitors in a Peach pit.
+Monitors can run remotely and multiple monitors can be defined in a Peach pit.
 It is possible that calling SessionStarting on the first monitor
-triggers some behavior on the target that allows subsequent monitors to be able to start without erroring.
+triggers some behavior on the target that allows subsequent monitors to be able to start without error.
 This means things like parameter validation and initialization should occur in the SessionStarting function
 as opposed to the monitor's constructor.
 
@@ -291,13 +292,14 @@ This functionality is primarily used for state synchronization.
 It allows the monitor to pause the execution of the StateModel at a specific point until some desired event happens.
 For example, a custom monitor could use the Message function to wait until a proprietary embedded device
 has rebooted and is ready to accept input data.
+
 It is important to note that call actions on the "Peach.Agent" publisher results in the Message function
 being called on every monitor.
 Each monitor must filter for their desired messages, ignoring all unexpected message calls by returning null.
 
 The DetectedFault and GetMonitorData functions are used to report faults back to Peach.
-At the end of each iteration the Peach engine calls DetectedFault() on every monitor.
-If any one monitor reports that a fault occurred, Peach calls GetMonitorData() on every monitor.
+At the end of each iteration, the Peach engine calls DetectedFault() on every monitor.
+If any Smonitor reports that a fault occurred, Peach calls GetMonitorData() on every monitor.
 The GetMonitorData function returns a Fault record, and the type of the record can be either Fault or Data.
 
 Fault Detection:
@@ -308,14 +310,14 @@ Fault Detection:
  * Returned fault can be +fault+ or +data+
  ** Debugger stack trace is +fault+
  ** Pcap is +data+
- * Faults can include hash for bucketing information
+ * Faults can include a hash for bucketing information
 
 Monitor best practices:
 
  * Indicate errors with SoftExceptions()
  * Keep monitors simple
  * Prefer multiple small monitors
- * Agent/Monitor order in pit is honored by Peach
+ * Agent/Monitor order within a pit is honored by Peach
  ** Starting functions are called in order
  ** Finished functions are called in reverse order
  * Avoid one large complicated monitor
@@ -356,10 +358,10 @@ The list of user overridable functions are:
 
 The OnStart and OnStop functions are used to perform initialization and teardown.
 These functions are normally called once per test.
-The Peach engine will automatically call stop on all publishers when the test
+The Peach engine automatically calls stop on all publishers when the test
 completes.  The OnOpen and OnClose functions are used to control access to the underlying resource.
 These functions are normally called once per iteration.
-The Peach engine will automatically call close on all publishers when each iteration completes.
+The Peach engine automatically calls close on all publishers when each iteration completes.
 
 The OnOutput function is used to write all the provided data to the underlying resource.
 The data is provided in a stream, and it is best to write the data to the resource block at a time
@@ -386,6 +388,8 @@ OnOpen() and set this._client to the System.IO.Stream and call the StartClient()
 Second, if extra cleanup code is required other than simply closing the stream
 the developer needs to override ClientClose() and cleanup any additional resources acquired during OnOpen().
 
+
+
 An example of a File publisher deriving from StreamPublisher.
 
 [source,c#]
@@ -396,7 +400,7 @@ An example of a File publisher deriving from StreamPublisher.
 [Publisher("file.FileReader")]
 [Parameter("FileName", typeof(string), "Name of file to open for reading/writing")]
 [Parameter("Overwrite", typeof(bool), "Replace existing file? [true/false, default true]", "true")]
-[Parameter("Append", typeof(bool), "Append to end of file [true/false, default flase]", "false")]
+[Parameter("Append", typeof(bool), "Append to end of file [true/false, default false]", "false")]
 public class FilePublisher : StreamPublisher
 {
 	private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
@@ -437,7 +441,7 @@ An example of a Serial publisher deriving from BufferedStreamPublisher.
 [Parameter("Baudrate", typeof(int), "The serial baud rate.")]
 [Parameter("Parity", typeof(Parity), "The parity-checking protocol.")]
 [Parameter("DataBits", typeof(int), "Standard length of data bits per byte.")]
-[Parameter("StopBits", typeof(StopBits), "The standard number of stopbits per byte.")]
+[Parameter("StopBits", typeof(StopBits), "The standard number of stop bits per byte.")]
 public class SerialPortPublisher : BufferedStreamPublisher
 {
     private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
@@ -492,6 +496,31 @@ public class SerialPortPublisher : BufferedStreamPublisher
     }
 }
 ----
+
+Some Publishers use the Function view metaphor (call, setProperty, getProperty). For this type of Publisher, sharing information occurs by implementing properties of the publisher that other parts of the Peach can access. For example, the StateModel or a script could make use of the ports that a Publisher uses, as in the following example.
+
+NOTE: Remote agents can host Publishers; therefore, Publishers should not directly use the IterationStateStore bag.
+
+An example of a Serial publisher deriving from BufferedStreamPublisher.
+
+[source,c#]
+    protected override Variant OnGetProperty(string property)
+    {
+        switch(property)
+        {
+            case "Port": 
+                return new Variant(Port);
+           case "SrcPort":
+                return new Variant(SrcPort);
+        }
+        return base.OnGetProperty(property);
+    }
+
+The property is then accessible in the state model using the getProperty action, or using a script as in the following:
+
+[source,c#]
+Port = int(context.test.publishers[0].getProperty(‘Port’))
+
 
 <<<
 [[Extend_Transformer]]
@@ -620,78 +649,13 @@ public new static bool supportedDataElement(DataElement obj)
 }
 ----
 
-When the Peach engine determines that a mutator is capable of mutating a data element, an instance of the mutator class is created for each supported data element.
-Once Peach creates all of the mutator instances, each mutator needs to provide the number of mutations that can be performed.
-The supported mutation count is provided with the 'count' property.
-
-Each mutator implements two functions for performing the actual mutation: sequentialMutation and randomMutation.
-These functions correspond to the type of mutation strategy defined in the Peach pit.
-When Peach is configured to use the Random strategy, the randomMutation function will be called to perform mutations.
-When Peach is configured to use the Sequential strategy, the mutator's 'mutation' attribute will be set to the desired value (between 0 and count) and the sequentialMutation function will be called to perform mutations.
-
-When picking random numbers inside the mutator, it is important to use the random number generator provided by the mutation strategy.
-Mutators access the random number generator with the 'this.context.Random' variable.
-The mutation strategy guarantees that the random number generator is different across different fuzzing iterations.
-Additionally, the mutation strategy guarantees the random number generator is identical for the same iterations.
-This allows Peach to produce identical mutations when replaying the same fuzz iteration to reproduce faults or when re-running a test of the same seed at a future date.
-
-An example of a string mutator that mutates string elements with the values "Hello", "World" or "Hello World".
-
-[source,c#]
-----
-[Mutator("StringMutator")]
-[Description("Replace strings with hello world")]
-public class HelloWorldMutator : Peach.Core.Mutator
-{
-	uint pos = 0;
-	static string[] values = new string[] { "Hello", "World", "Hello World" };
-
-	public StringMutator(DataElement obj)
-	{
-		pos = 0;
-		name = "HelloWorldMutator";
-	}
-
-	public new static bool supportedDataElement(DataElement obj)
-	{
-		if (obj is Dom.String && obj.isMutable)
-			return true;
-
-		return false;
-	}
-
-	public override int count
-	{
-		get { return values.Length; }
-	}
-
-	public override uint mutation
-	{
-		get { return pos; }
-		set { pos = value; }
-	}
-
-	public override void sequentialMutation(DataElement obj)
-	{
-		obj.mutationFlags = MutateOverride.Default;
-		obj.MutatedValue = new Variant(values[pos]);
-	}
-
-	public override void randomMutation(DataElement obj)
-	{
-		obj.mutationFlags = MutateOverride.Default;
-		obj.MutatedValue = new Variant(this.context.Random.Choice<string>(values));
-	}
-}
-----
-
 <<<
 [[Extend_Agent]]
 === Agent
 
 Custom agents are useful when the target system does not support a .NET runtime (like Mono) or the device is too slow (speed is a common problem for embedded devices that require running a native agent in C/C++).
 
-Agents in Peach communicate over protocols called channels.  While you can develop custom channel protocols, an exiting channel usually creates a custom Peach agent. Agents can be written in any language; To make it easy to author your own, Peach comes with some example implementations designed for languages like as Python and C++. The REST based protocol (which transmits data in JSON messages) is the easiest channel protocol to use with custom agents.
+Agents in Peach communicate over protocols called channels.  While you can develop custom channel protocols, an existing channel usually creates a custom Peach agent. Agents can be written in any language; To make it easy to author your own, Peach comes with some example implementations designed for languages like as Python and C++. The REST based protocol (which transmits data in JSON messages) is the easiest channel protocol to use with custom agents.
 
 When you write a custom publisher, we recommend you start with one of the examples in the SDK and extend it to meet your requirements. The examples in the SDK already implement the agent channel protocol with stub methods ready to be implemented. If this is not an option, the following example channel sessions can be used as documentation for the protocol. The second example includes the use of a remote publisher.
 
@@ -704,7 +668,8 @@ This example shows a complete agent session using the REST JSON agent channel (p
 ----
 <Agent name="TheAgent" location="http://127.0.0.1:9980">
 	<Monitor class="WindowsDebugger">
-		<Param name="CommandLine" value="mspaint.exe fuzzed.png" />
+		<Param name="Executable" value="mspaint.exe" />
+		<Param name="Arguments" value="fuzzed.png" />
 		<Param name="WinDbgPath" value="C:\Program Files (x86)\Debugging Tools for Windows (x86)" />
 		<Param name="StartOnCall" value="ScoobySnacks"/>
 	</Monitor>
@@ -731,7 +696,7 @@ GET /Agent/AgentConnect
 << { "Status":"true" }
 
 POST /Agent/StartMonitor?name=Monitor_0&cls=WindowsDebugger
->> {"args":{"CommandLine":"mspaint.exe fuzzed.png","WinDbgPath":"C:\\Program Files (x86)\\Debugging Tools for Windows (x86)","StartOnCall":"ScoobySnacks"}}
+>> {"args":{"Executable":"mspaint.exe,"Arguments":"fuzzed.png","WinDbgPath":"C:\\Program Files (x86)\\Debugging Tools for Windows (x86)","StartOnCall":"ScoobySnacks"}}
 << { "Status":"true" }
 
 POST /Agent/StartMonitor?name=Monitor_1&cls=PageHeap
@@ -828,7 +793,8 @@ This example shows the channel messages when a remote publisher is in use.
 ----
 <Agent name="TheAgent" location="http://127.0.0.1:9980">
 	<Monitor class="WindowsDebugger">
-		<Param name="CommandLine" value="mspaint.exe fuzzed.png" />
+		<Param name="Executable" value="mspaint.exe" />
+		<Param name="Arguments" value="fuzzed.png" />
 		<Param name="WinDbgPath" value="C:\Program Files (x86)\Debugging Tools for Windows (x86)" />
 		<Param name="StartOnCall" value="ScoobySnacks"/>
 	</Monitor>
@@ -857,7 +823,7 @@ GET /Agent/AgentConnect
 << { "Status":"true" }
 
 POST /Agent/StartMonitor?name=Monitor_0&cls=WindowsDebugger
->> {"args":{"CommandLine":"mspaint.exe fuzzed.png","WinDbgPath":"C:\\Program Files (x86)\\Debugging Tools for Windows (x86)","StartOnCall":"ScoobySnacks"}}
+>> {"args":{"Executable":"mspaint.exe","Arguments":"fuzzed.png","WinDbgPath":"C:\\Program Files (x86)\\Debugging Tools for Windows (x86)","StartOnCall":"ScoobySnacks"}}
 << { "Status":"true" }
 
 POST /Agent/StartMonitor?name=Monitor_1&cls=PageHeap

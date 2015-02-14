@@ -27,20 +27,18 @@
 // $Id$
 
 using System;
-using System.IO;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-
-using Peach.Core.Dom;
-using Peach.Core.Agent;
-using System.Runtime.InteropServices;
 using System.ComponentModel;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Threading;
+using Peach.Core;
+using Peach.Core.Agent;
 
-namespace Peach.Core.OS.Linux.Agent.Monitors
+namespace Peach.Pro.OS.Linux.Agent.Monitors
 {
 	[Monitor("LinuxCrashMonitor", true)]
+	[Peach.Core.Description("Detect when a process crashes and collect there resulting core file")]
 	[Parameter("Executable", typeof(string), "Target executable used to filter crashes.", "")]
 	[Parameter("LogFolder", typeof(string), "Folder with log files. Defaults to /var/peachcrash", "/var/peachcrash")]
 	[Parameter("Mono", typeof(string), "Full path and executable for mono runtime. Defaults to /usr/bin/mono.", "/usr/bin/mono")]

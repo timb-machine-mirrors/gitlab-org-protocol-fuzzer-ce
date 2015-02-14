@@ -1,13 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
-using System.Text;
 using System.Net.Sockets;
+using System.Text;
 using NLog;
+using Peach.Core;
+using Peach.Core.Agent;
+using ASCIIEncoding = Peach.Core.ASCIIEncoding;
+using Encoding = Peach.Core.Encoding;
 
-namespace Peach.Core.Agent.Monitors
+namespace Peach.Pro.Core.Agent.Monitors
 {
 	[Monitor("Ping", true)]
+	[Description("Uses ICMP to verify whether a device is functional")]
 	[Parameter("Host", typeof(string), "Host to ping")]
 	[Parameter("Timeout", typeof(int), "Ping timeout in milliseconds", "1000")]
 	[Parameter("RetryCount", typeof(int), "Number of times to retry before issuing a fault", "0")]
@@ -119,9 +124,19 @@ namespace Peach.Core.Agent.Monitors
 				_fault.title = "Exception";
 
 				if (ex is PingException)
-					_fault.description = ex.InnerException.Message;
+				{
+					var se = ex.InnerException as SocketException;
+
+					//  An MX record is returned but no A record—indicating the host itself exists, but is not directly reachable.
+					if (se != null && se.SocketErrorCode == SocketError.NoData)
+						_fault.description = new SocketException((int)SocketError.HostNotFound).Message;
+					else
+						_fault.description = ex.InnerException.Message;
+				}
 				else
+				{
 					_fault.description = ex.Message;
+				}
 			}
 
 			return _fault.type == FaultType.Fault;

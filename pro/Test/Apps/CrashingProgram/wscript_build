@@ -3,7 +3,7 @@
 app = bld(
 	features = 'cxx cxxprogram debug',
 	source = 'CrashingProgram.cpp',
-	target='CrashingProgram',
+	target = 'CrashingProgram',
 )
 
 if 'msvc' == app.env.CC_NAME:

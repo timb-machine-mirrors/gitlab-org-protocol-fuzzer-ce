@@ -14,7 +14,7 @@ Avd:: Android virtual device.
 
 _Optional:_
 
-EmulatorPath:: Directory containing the emulator. Will attempt to find automatically if not provided.
+EmulatorPath:: Directory containing the emulator. If not provided, Peach attempts to find the directory automatically.
 Headless:: If true, runs the emulator with -no-window. Defaults to false.
 RestartAfterFault:: Restart emulator after a fault. Defaults to true.
 RestartEveryIteration:: Restart emulator on every iteration. Defaults to false.

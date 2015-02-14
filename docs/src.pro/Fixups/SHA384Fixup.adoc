@@ -13,7 +13,7 @@
 // - 02/18/2014: Mick
 // Added full examples
 
-Performs a SHA-384 hash of _ref_ element's value and places it in the parent element. This is used when fuzzing protocols that hash data with SHA-384.
+Performs an SHA-384 hash of value of the reference element and places the result in the parent element. This is used when fuzzing protocols that hash data with SHA-384.
 
 The SHA384 algorithm is defined in US Federal Information Processing Standard (FIPS) PUB 180-4 and is implemented in .Net Framework Implementation - System.Security.Cryptography.
 
@@ -24,7 +24,7 @@ xref:Blob[Blob]
 
 === Parameters
 
-xref:ref[ref]:: Reference to element whose value will be hashed
+xref:ref[ref]:: Reference to the input data element used in the hash calculation.
 
 === Examples
 

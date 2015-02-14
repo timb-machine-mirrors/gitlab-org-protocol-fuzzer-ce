@@ -27,14 +27,14 @@
 // $Id$
 
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
-using System.Text;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
-namespace Peach.Core.Transformers.Encode
+namespace Peach.Pro.Core.Transformers.Encode
 {
 	[Description("Encode on output from a colon notation ipv6 address into a 16 byte octect representation.")]
 	[Transformer("Ipv6StringToOctet", true)]

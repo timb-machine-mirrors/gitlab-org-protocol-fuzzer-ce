@@ -1,17 +1,12 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
+using Peach.Core;
 using Peach.Core.Analyzers;
-using Peach.Pro.Test;
-using Proc = System.Diagnostics.Process;
-using Peach.Core.Agent.Monitors;
-using TheAgent = Peach.Core.Agent.Agent;
+using Peach.Pro.Core.Agent.Monitors;
 
-namespace Peach.Core.Test.Monitors
+namespace Peach.Pro.Test.Core.Monitors
 {
 	[TestFixture] [Category("Peach")]
 	class ProcessMonitorTests
@@ -56,7 +51,7 @@ namespace Peach.Core.Test.Monitors
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
 			dom.tests[0].includedMutators.Add("StringCaseMutator");
 
@@ -87,7 +82,7 @@ namespace Peach.Core.Test.Monitors
 			args["WaitForExitTimeout"] = new Variant("2000");
 			args["NoCpuKill"] = new Variant("true");
 
-			ProcessMonitor p = new ProcessMonitor(new TheAgent(), "name", args);
+			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
 
 			p.Message("Action.Call", foo);
 			System.Threading.Thread.Sleep(1000);
@@ -117,7 +112,7 @@ namespace Peach.Core.Test.Monitors
 			args["Arguments"] = new Variant("127.0.0.1 {0}".Fmt(TestBase.MakePort(61000, 62000)));
 			args["StartOnCall"] = foo;
 
-			ProcessMonitor p = new ProcessMonitor(new TheAgent(), "name", args);
+			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
 
 			p.Message("Action.Call", foo);
 			System.Threading.Thread.Sleep(1000);
@@ -149,7 +144,7 @@ namespace Peach.Core.Test.Monitors
 			args["WaitForExitOnCall"] = bar;
 			args["NoCpuKill"] = new Variant("true");
 
-			ProcessMonitor p = new ProcessMonitor(new TheAgent(), "name", args);
+			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
 
 			p.Message("Action.Call", foo);
 			p.Message("Action.Call", bar);
@@ -176,7 +171,7 @@ namespace Peach.Core.Test.Monitors
 			args["WaitForExitTimeout"] = new Variant("2000");
 			args["NoCpuKill"] = new Variant("true");
 
-			ProcessMonitor p = new ProcessMonitor(new TheAgent(), "name", args);
+			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
 
 			p.Message("Action.Call", foo);
 			p.Message("Action.Call", bar);
@@ -200,7 +195,7 @@ namespace Peach.Core.Test.Monitors
 			args["Arguments"] = new Variant("127.0.0.1 {0}".Fmt(TestBase.MakePort(63000, 64000)));
 			args["RestartOnEachTest"] = new Variant("true");
 
-			ProcessMonitor p = new ProcessMonitor(new TheAgent(), "name", args);
+			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
 			p.SessionStarting();
 			p.IterationStarting(1, false);
 
@@ -226,7 +221,7 @@ namespace Peach.Core.Test.Monitors
 			args["Executable"] = new Variant("CrashingFileConsumer");
 			args["FaultOnEarlyExit"] = new Variant("true");
 
-			ProcessMonitor p = new ProcessMonitor(new TheAgent(), "name", args);
+			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
 			p.SessionStarting();
 			p.IterationStarting(1, false);
 
@@ -257,7 +252,7 @@ namespace Peach.Core.Test.Monitors
 			args["WaitForExitOnCall"] = bar;
 			args["FaultOnEarlyExit"] = new Variant("true");
 
-			ProcessMonitor p = new ProcessMonitor(new TheAgent(), "name", args);
+			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
 			p.SessionStarting();
 			p.IterationStarting(1, false);
 
@@ -284,7 +279,7 @@ namespace Peach.Core.Test.Monitors
 			args["StartOnCall"] = foo;
 			args["FaultOnEarlyExit"] = new Variant("true");
 
-			ProcessMonitor p = new ProcessMonitor(new TheAgent(), "name", args);
+			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
 			p.SessionStarting();
 			p.IterationStarting(1, false);
 
@@ -317,7 +312,7 @@ namespace Peach.Core.Test.Monitors
 			args["StartOnCall"] = foo;
 			args["FaultOnEarlyExit"] = new Variant("true");
 
-			ProcessMonitor p = new ProcessMonitor(new TheAgent(), "name", args);
+			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
 			p.SessionStarting();
 			p.IterationStarting(1, false);
 
@@ -342,7 +337,7 @@ namespace Peach.Core.Test.Monitors
 			args["RestartOnEachTest"] = new Variant("true");
 			args["FaultOnEarlyExit"] = new Variant("true");
 
-			ProcessMonitor p = new ProcessMonitor(new TheAgent(), "name", args);
+			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
 			p.SessionStarting();
 			p.IterationStarting(1, false);
 

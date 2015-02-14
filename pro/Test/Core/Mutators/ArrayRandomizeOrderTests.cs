@@ -1,11 +1,9 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using Peach.Core;
-using Peach.Core.Mutators;
 using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class ArrayRandomizeOrderTests
@@ -15,8 +13,8 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("ArrayRandomizeOrder");
 
-			var array = new Dom.Array("Array");
-			array.OriginalElement = new Dom.String("Str");
+			var array = new Peach.Core.Dom.Array("Array");
+			array.OriginalElement = new Peach.Core.Dom.String("Str");
 			array.ExpandTo(0);
 
 			// Empty array can't be randomized
@@ -42,20 +40,20 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("ArrayRandomizeOrder");
 
-			var array = new Dom.Sequence("Seq");
+			var array = new Peach.Core.Dom.Sequence("Seq");
 
 			// Empty array can't be randomized
 			Assert.False(runner.IsSupported(array));
 
 			// Single element array can't be randomized
-			array.Add(new Dom.String());
+			array.Add(new Peach.Core.Dom.String());
 			Assert.False(runner.IsSupported(array));
 
 			// Anything > 1 element is randomizable
-			array.Add(new Dom.String());
+			array.Add(new Peach.Core.Dom.String());
 			Assert.True(runner.IsSupported(array));
 
-			array.Add(new Dom.String());
+			array.Add(new Peach.Core.Dom.String());
 			Assert.True(runner.IsSupported(array));
 
 			array.isMutable = false;
@@ -69,8 +67,8 @@ namespace Peach.Core.Test.Mutators
 
 			runner.SeedOverride = 1;
 
-			var array = new Dom.Array("Array");
-			array.OriginalElement = new Dom.String("Str");
+			var array = new Peach.Core.Dom.Array("Array");
+			array.OriginalElement = new Peach.Core.Dom.String("Str");
 			array.ExpandTo(3);
 
 			for (int i = 0; i < array.Count; ++i)
@@ -93,10 +91,10 @@ namespace Peach.Core.Test.Mutators
 
 			runner.SeedOverride = 1;
 
-			var seq = new Dom.Sequence("Seq");
-			seq.Add(new Dom.String());
-			seq.Add(new Dom.String());
-			seq.Add(new Dom.String());
+			var seq = new Peach.Core.Dom.Sequence("Seq");
+			seq.Add(new Peach.Core.Dom.String());
+			seq.Add(new Peach.Core.Dom.String());
+			seq.Add(new Peach.Core.Dom.String());
 
 			for (int i = 0; i < seq.Count; ++i)
 				seq[i].DefaultValue = new Variant(i.ToString());
@@ -116,8 +114,8 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("ArrayRandomizeOrder");
 
-			var array = new Dom.Array("Array");
-			array.OriginalElement = new Dom.String("Str");
+			var array = new Peach.Core.Dom.Array("Array");
+			array.OriginalElement = new Peach.Core.Dom.String("Str");
 			array.ExpandTo(3);
 
 			for (int i = 0; i < array.Count; ++i)
@@ -138,10 +136,10 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("ArrayRandomizeOrder");
 
-			var seq = new Dom.Sequence("Seq");
-			seq.Add(new Dom.String());
-			seq.Add(new Dom.String());
-			seq.Add(new Dom.String());
+			var seq = new Peach.Core.Dom.Sequence("Seq");
+			seq.Add(new Peach.Core.Dom.String());
+			seq.Add(new Peach.Core.Dom.String());
+			seq.Add(new Peach.Core.Dom.String());
 
 			for (int i = 0; i < seq.Count; ++i)
 				seq[i].DefaultValue = new Variant(i.ToString());
@@ -161,8 +159,8 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("ArrayRandomizeOrder");
 
-			var array = new Dom.Array("Array");
-			array.OriginalElement = new Dom.String("Str");
+			var array = new Peach.Core.Dom.Array("Array");
+			array.OriginalElement = new Peach.Core.Dom.String("Str");
 			array.ExpandTo(200);
 
 			for (int i = 0; i < array.Count; ++i)
@@ -183,11 +181,11 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("ArrayRandomizeOrder");
 
-			var seq = new Dom.Sequence("Seq");
+			var seq = new Peach.Core.Dom.Sequence("Seq");
 
 			for (int i = 0; i < 200; ++i)
 			{
-				seq.Add(new Dom.String());
+				seq.Add(new Peach.Core.Dom.String());
 			}
 
 			for (int i = 0; i < seq.Count; ++i)
@@ -208,8 +206,8 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("ArrayRandomizeOrder");
 
-			var array = new Dom.Array("Array");
-			array.OriginalElement = new Dom.String("Str");
+			var array = new Peach.Core.Dom.Array("Array");
+			array.OriginalElement = new Peach.Core.Dom.String("Str");
 			array.ExpandTo(200);
 
 			for (int i = 0; i < array.Count; ++i)
@@ -230,11 +228,11 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("ArrayRandomizeOrder");
 
-			var seq = new Dom.Sequence("Seq");
+			var seq = new Peach.Core.Dom.Sequence("Seq");
 
 			for (int i = 0; i < 200; ++i)
 			{
-				seq.Add(new Dom.String());
+				seq.Add(new Peach.Core.Dom.String());
 			}
 
 			for (int i = 0; i < seq.Count; ++i)

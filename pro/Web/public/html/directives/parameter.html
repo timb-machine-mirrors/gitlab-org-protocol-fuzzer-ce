@@ -1,0 +1,12 @@
+<div ng-form="form"
+		 class="form-group"
+		 ng-class="{'has-error': form.param.$invalid}">
+	<label class="col-sm-4 control-label">
+		{{param.name | peachParameterName}}
+	</label>
+	<div class="col-sm-6">
+		<peach:parameter-input param="param"
+													 form="form">
+		</peach:parameter-input>
+	</div>
+</div>

@@ -2,11 +2,11 @@
 [[Padding]]
 == Padding
 
-The _Padding_ element is used to pad out variably sized blocks or data models.
+The _Padding_ element provides padding for variable-sized blocks or data models.
 
-When padding out the data, padding is always 0. This is not customizable.
+When padding the data, the value of the pad characters is always 0. This is not customizable.
 
-When cracking data into a model that contains the padding element, the pad data will be skipped.
+When cracking data into a model that contains the padding element, the pad data is skipped.
 
 === Syntax
 
@@ -23,54 +23,54 @@ When cracking data into a model that contains the padding element, the pad data 
 
 _Required:_
 
-There are no required attributes.
+None.
 
 _Optional:_
 
 xref:name[name]:: Element name.
-alignment:: Align to this bit boundary (e.g. 8, 16, etc.) (defaults to 8)
-alignedTo:: Name of element to base our padding on, defaults to parent element
-xref:mutable[mutable]:: Is data element changeable (should it be mutated during fuzzing), defaults to true. Valid options true and false.
+alignment:: Align to the specified bit boundary: 8, 16, 32, 64, etc. The default value is  8
+alignedTo:: Name of reference element for alignment, defaults to parent element.
+The alignment starts at the beginning of the reference element
+xref:mutable[mutable]:: Is the data element changeable (should it be mutated during fuzzing), defaults to true. Valid options true and false.
 
 === Child Elements
 
-xref:Fixup[Fixup]:: Dynamic transformations such as checksums and CRCs.
-xref:Hint[Hint]:: Provide information to mutators
-xref:Transformer[Transformer]:: Static transformations such as compression or encoding.
+xref:Fixup[Fixup]:: Performs dynamic transformations such as checksums and CRCs.
+xref:Hint[Hint]:: Provides information to mutators
+xref:Transformer[Transformer]:: Performs static transformations such as compression or encoding.
 
 === Mutators
 
-The following mutators will operate on this element type:
+The following mutators can operate on this element type:
 
+_Enabled when the data element is marked as an array_
 
-_Enabled when element is marked as an array_
-
-xref:Mutators_ArrayNumericalEdgeCasesMutator[ArrayNumericalEdgeCasesMutator]:: This mutator will grow and shrink an array to counts based on numerical edge cases.
-xref:Mutators_ArrayRandomizeOrderMutator[ArrayRandomizeOrderMutator]:: This mutator will randomize the order of items in an array.
-xref:Mutators_ArrayReverseOrderMutator[ArrayReverseOrderMutator]:: This mutator will reverse the order of items in an array.
-xref:Mutators_ArrayVarianceMutator[ArrayVarianceMutator]:: This mutator will grow and shrink an array to a variance of counts based on the current size.
+xref:Mutators_ArrayNumericalEdgeCasesMutator[ArrayNumericalEdgeCasesMutator]:: This mutator grows and shrinks an array to counts based on numerical edge cases.
+xref:Mutators_ArrayRandomizeOrderMutator[ArrayRandomizeOrderMutator]:: This mutator randomizes the order of items in an array.
+xref:Mutators_ArrayReverseOrderMutator[ArrayReverseOrderMutator]:: This mutator reverses the sequence of items in an array.
+xref:Mutators_ArrayVarianceMutator[ArrayVarianceMutator]:: This mutator grows and shrinks an array to a variance of counts based on the current size.
 
 _Used for all data elements_
 
-xref:Mutators_DataElementBitFlipper[DataElementBitFlipper]:: This mutator will produce test cases by flipping bits in the output value.
-xref:Mutators_DataElementDuplicate[DataElementDuplicate]:: This mutator will duplicate data elements.
-xref:Mutators_DataElementRemove[DataElementRemove]:: This mutator will remove data elements.
-xref:Mutators_DataElementSwapNear[DataElementSwapNear]:: This mutator will swap data elements.
-xref:Mutators_SampleNinjaMutator[SampleNinjaMutator]:: This mutator will combine data elements from different data sets.
+xref:Mutators_DataElementBitFlipper[DataElementBitFlipper]:: This mutator produces test cases by flipping bits in the output value.
+xref:Mutators_DataElementDuplicate[DataElementDuplicate]:: This mutator duplicates data elements.
+xref:Mutators_DataElementRemove[DataElementRemove]:: This mutator removes data elements.
+xref:Mutators_DataElementSwapNear[DataElementSwapNear]:: This mutator swaps data elements.
+xref:Mutators_SampleNinjaMutator[SampleNinjaMutator]:: This mutator combines data elements from different data sets.
 
-_Enabled when element is part of a size relation_
+_Enabled when the data element is part of a size relation_
 
-xref:Mutators_SizedDataEdgeCase[SizedDataEdgeCase]:: This mutator will cause the data portion of a relation to be sized as numerical edge cases.
-xref:Mutators_SizedDataVariance[SizedDataVariance]:: This mutator will cause the data portion of a relation to be sized as numerical variances.
-xref:Mutators_SizedEdgeCase[SizedEdgeCase]:: This mutator will change both sides of the relation (data and value) to match numerical edge cases.
-xref:Mutators_SizedVariance[SizedVariance]:: This mutator will change both sides of the relation (data and value) to match numerical variances of the current size.
+xref:Mutators_SizedDataEdgeCase[SizedDataEdgeCase]:: This mutator causes the data portion of a relation to be sized as numerical edge cases.
+xref:Mutators_SizedDataVariance[SizedDataVariance]:: This mutator causes the data portion of a relation to be sized as numerical variances.
+xref:Mutators_SizedEdgeCase[SizedEdgeCase]:: This mutator changes both sides of the relation (data and value) to match numerical edge cases.
+xref:Mutators_SizedVariance[SizedVariance]:: This mutator changes both sides of the relation (data and value) to match numerical variances of the current size.
 
 
 === Examples
 
 .Padding with Default Options
 =============================
-
+This example demonstrates the default case of padding. The AlignTo attribute aligns pad characters along 8-bit boundaries.
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -132,7 +132,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 .Padding Aligned to 32 bit Boundary
 =============================
-
+This example aligns the pad  data to a 32-bit boundary.
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -194,7 +194,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 .Padding Separated from Unaligned Value
 =============================
-
+This example demonstrates padding with unaligned data preceding and following the padding.
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>

@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Text;
-using System.IO;
-using System.Security.Cryptography;
+﻿using System.IO;
 using Peach.Core.IO;
 
-namespace Peach.Core.Fixups.Libraries
+namespace Peach.Pro.Core.Fixups.Libraries
 {
     /// <summary>
 	/// Tool to calculate and add CRC codes to a string

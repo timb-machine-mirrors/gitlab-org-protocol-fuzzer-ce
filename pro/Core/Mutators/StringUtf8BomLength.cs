@@ -2,11 +2,10 @@
 // Copyright (c) Deja vu Security
 //
 
-using System;
-
+using Peach.Core;
 using Peach.Core.Dom;
 
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	/// <summary>
 	/// Uses StringLengthVariance and injects BOM characters randomly into the strings.
@@ -45,7 +44,7 @@ namespace Peach.Core.Mutators
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			var asStr = obj as Dom.String;
+			var asStr = obj as Peach.Core.Dom.String;
 
 			// Make sure we are a mutable string and Peach.TypeTransform hint is not false
 			if (asStr == null || !asStr.isMutable || !getTypeTransformHint(asStr))

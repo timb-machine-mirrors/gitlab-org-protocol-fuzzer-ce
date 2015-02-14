@@ -4,11 +4,11 @@
 
 The _IpPower9258_ monitor controls an IP Power 9258 Network Power Controller (or Switch). This allows devices plugged into the IP Power 9258 switch to be powered on/off during fuzzing. 
 
-NOTE: IP Power 9258 is the only networked power switch that Peach supports. If you wish to fuzz another networked power controller or switch, you will need to write your own monitor.
-
 Each _IpPower9258_ monitor switches an individual port. To control multiple ports, use multiple _IpPower9258_ monitors. 
 
-You can purchase "IP Power 9258" Remote Network (or Network AC) Power Controllers (or switches) from a variety on online retailers. 
+TIP: You can purchase "IP Power 9258" Remote Network (or Network AC) Power Controllers (or switches) from a variety of online retailers. 
+
+NOTE: IP Power 9258 is the only networked power switch that Peach supports. If you wish to fuzz another networked power controller or switch, you will need to write your own monitor.
 
 === Parameters
 
@@ -21,8 +21,8 @@ Port:: Port to reset (1..4)
 
 _Optional:_
 
-ResetEveryIteration:: Reset power on every iteration, default false.
-PowerOnOffPause:: Pause in milliseconds between power off/power on, default is 500.
+ResetEveryIteration:: Reset power on every iteration, default false
+PowerOnOffPause:: Pause in milliseconds between power off/power on, default is 500
 
 === Examples
 

@@ -4,20 +4,20 @@
 
 == State onStart Attribute
 
-The _onStart_ attribute is a python scripting statement that is evaluated prior to preforming the actions in a xref:State[State] model.
-The scripting statement can be used to increment a counter or preform other functions defined in separate files included with the xref:Import[Import] element.
+The _onStart_ attribute is a python scripting statement that is evaluated prior to performing the actions in a xref:State[State] model.
+The scripting statement can be used to increment a counter or to perform other functions defined in separate files included with the xref:Import[Import] element.
 
 TIP:  _xref:State_onComplete[onComplete]_ is the sibling attribute.
 
 .Keeping State
 ****
-State bags are defined as _Dictionary<string, object>_ in C#. If you use one of two state bags exposed through the RunContext instance, you can store state during the lifetime of the current iteration or the fuzzing session.
+State bags are defined as _Dictionary<string, object>_ in C#. If you use one of two state bags exposed through the RunContext instance, you can store state during the lifetime of the current iteration or for the entire fuzzing session.
 
-A full example of using the iteration state bag is provided in the below examples.
+A full example of using the iteration state bag is provided in the examples section.
 
 _Using the Session State:_
 
-This state stored in this state bag will last across iterations for the full fuzzing session.
+This state stored in this state bag persists for the entire fuzzing session, from the point of creation to the end of the session.
 
 [source,python]
 ----
@@ -26,7 +26,7 @@ context.stateStore['my_counter'] = 0
 
 _Using the Iteration State:_
 
-The state stored in this state bag will last only for the current iteration.
+The state stored in this state bag exists for the current iteration.
 
 [source,python]
 ----
@@ -59,7 +59,7 @@ test:: Test instance
 
 .Display a Message from _onStart_
 ==========================
-This example will print a message when the _onStart_ statement is run.
+This example prints a message when the _onStart_ statement is run.
 
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -126,7 +126,7 @@ Peach.Core.Publishers.FilePublisher stop()
 
 .Loop Using Iteration State Bag
 ==========================
-This example will use the iteration state bag to simulate a for loop.
+This example uses the iteration state bag to simulate a for loop.
 
 ----
 <?xml version="1.0" encoding="utf-8"?>

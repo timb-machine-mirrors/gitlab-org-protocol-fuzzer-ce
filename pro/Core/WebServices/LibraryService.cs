@@ -1,10 +1,7 @@
-using Nancy;
-using Peach.Enterprise.WebServices.Models;
-using System;
-using System.Collections.Generic;
 using System.Linq;
+using Nancy;
 
-namespace Peach.Enterprise.WebServices
+namespace Peach.Pro.Core.WebServices
 {
 	public class LibraryService : WebService
 	{

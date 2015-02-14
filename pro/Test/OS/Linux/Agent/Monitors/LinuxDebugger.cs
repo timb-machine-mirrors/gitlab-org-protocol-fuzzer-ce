@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
-using Peach.Core.OS.Linux.Agent.Monitors;
+using Peach.Pro.OS.Linux.Agent.Monitors;
 
 namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 {
@@ -29,8 +29,10 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			Assert.AreEqual(true, m.DetectedFault());
 			Fault fault = m.GetMonitorData();
 			Assert.NotNull(fault);
-			Assert.AreEqual(1, fault.collectedData.Count);
+			Assert.AreEqual(3, fault.collectedData.Count);
 			Assert.AreEqual("StackTrace.txt", fault.collectedData[0].Key);
+			Assert.AreEqual("stdout.log", fault.collectedData[1].Key);
+			Assert.AreEqual("stderr.log", fault.collectedData[2].Key);
 			Assert.Greater(fault.collectedData[0].Value.Length, 0);
 			Assert.That(fault.description, Is.StringContaining("PossibleStackCorruption"));
 			m.SessionFinished();

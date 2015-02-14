@@ -6,9 +6,9 @@
 //  - 03/06/2014: Lynn
 //  Edited comments
 
-A Blob footnote:[Blob stands for "binary large object" a term used by databases to represent a column of binary data.] is used to represent binary data (think array of bytes). Blobs are always sized in bytes, never bits.
+A Blob footnote:[Blob stands for "binary large object" a term used by databases to represent a column of binary data.] is used to represent binary data (array of bytes). Blobs are sized in bytes.
 
-A Blob is always a child of a data element container such as xref:DataModel[DataModel] or xref:Block[Block]. Because their internal data format is unknown, Blobs will be dumb fuzzed (see list of applicable mutators below).
+A Blob is always a child of a data element container such as xref:DataModel[DataModel] or xref:Block[Block]. By definition, the internal contents of a Blob is unknown. Consequently, Blobs are dumb fuzzed, as the list of applicable mutators below indicates.
 
 Blobs can be used to create simple dumb fuzzers in Peach, see xref:Blob_Examples[examples].
 
@@ -29,29 +29,25 @@ _Optional:_
 
 xref:name[name]:: Element name
 xref:length[length]:: The length of data in this element.
-xref:lengthType[lengthType]:: Units of the length attribute. Defaults to "bytes".
+xref:lengthType[lengthType]:: Units of the length attribute. Defaults to "bytes". Can also be "chars", or "bits" where the number of bits is a multiple of 8. 
+
 xref:value[value]:: Default value.
 xref:valueType[valueType]:: Format of value attribute.
 xref:occurs[occurs]::
-	Actual occurrences of element. Defaults to 1.
-
-	- Used to define arrays with a static size.
-	- Adding this attribute, even with a value of 1, will
-	convert it to an array.
-
+	Actual occurrences of element. Defaults to 1.  +
+	* Used to define arrays with static size.
+	* Adding this attribute, even with a value of 1, converts the element to an array.
 
 xref:minOccurs[minOccurs]::
-	The minimum number of times this blob must occur. Defaults to 1.
-
-	- Used to define arrays with a variable size. Arrays defined by min/maxOccurs will generally have a relation
+	The minimum number of times this blob must occur. Defaults to 1.  +
+	* Used to define arrays with variable size. Arrays defined by min/maxOccurs generally have a relation
 	defined.
-	- Adding this attribute, even with a value of 1, will convert an element to an array.
+	* Adding this attribute, even with a value of 1, converts the element to an array.
 
 xref:maxOccurs[maxOccurs]::
-	The maximum number of times this blob can occur. Defaults to 1.
-
-	- Used to define arrays with a static size.
-	- Adding this attribute, even with a value of 1, will convert it to an array.
+	The maximum number of times this blob can occur. Defaults to 1.  +
+	* Used to define arrays with static size.
+	* Adding this attribute, even with a value of 1, converts the element to an array.
 
 xref:constraint[constraint]::
 	A constraint in the form of an expression.  Used during data cracking.
@@ -62,50 +58,50 @@ xref:token[token]::
 
 === Child Elements
 
-xref:Analyzers[Analyzer]:: Analyze current element post cracking, can dynamically change model.
-xref:Fixup[Fixup]:: Dynamic transformations such as checksums and CRCs.
-xref:Hint[Hint]:: Provide information to mutators.
-xref:Placement[Placement]:: Relocate an element after it has been cracked.
-xref:Transformer[Transformer]:: Static transformations such as compression or encoding.
+xref:Analyzers[Analyzer]:: Analyzes current element post cracking, can dynamically change model.
+xref:Fixup[Fixup]:: Performs dynamic transformations such as checksums and CRCs.
+xref:Hint[Hint]:: Provides information to mutators.
+xref:Placement[Placement]:: Relocates an element after it has been cracked.
+xref:Transformer[Transformer]:: Performs static transformations such as compression or encoding.
 
 === Mutators
 
-The following mutators will operate on this element type.
+The following mutators operate on this element type.
 
 
 _Enabled when element is marked as an array_
 
-xref:Mutators_ArrayNumericalEdgeCasesMutator[ArrayNumericalEdgeCasesMutator]:: This mutator will grow and shrink an array to counts based on numerical edge cases.
-xref:Mutators_ArrayRandomizeOrderMutator[ArrayRandomizeOrderMutator]:: This mutator will randomize the order of items in an array.
-xref:Mutators_ArrayReverseOrderMutator[ArrayReverseOrderMutator]:: This mutator will reverse the order of items in an array.
-xref:Mutators_ArrayVarianceMutator[ArrayVarianceMutator]:: This mutator will grow and shrink an array to a variance of counts based on the current size.
+xref:Mutators_ArrayNumericalEdgeCasesMutator[ArrayNumericalEdgeCasesMutator]:: This mutator grows and shrinks an array to counts based on numerical edge cases.
+xref:Mutators_ArrayRandomizeOrderMutator[ArrayRandomizeOrderMutator]:: This mutator randomizes the order of items in an array.
+xref:Mutators_ArrayReverseOrderMutator[ArrayReverseOrderMutator]:: This mutator reverses the order of items in an array.
+xref:Mutators_ArrayVarianceMutator[ArrayVarianceMutator]:: This mutator grows and shrinks an array to a variance of counts based on the current size.
 
 _Used for all data elements_
 
-xref:Mutators_DataElementBitFlipper[DataElementBitFlipper]:: This mutator will produce test cases by flipping bits in the output value.
-xref:Mutators_DataElementDuplicate[DataElementDuplicate]:: This mutator will duplicate data elements.
-xref:Mutators_DataElementRemove[DataElementRemove]:: This mutator will remove data elements.
-xref:Mutators_DataElementSwapNear[DataElementSwapNear]:: This mutator will swap data elements.
-xref:Mutators_SampleNinjaMutator[SampleNinjaMutator]:: This mutator will combine data elements from different data sets.
+xref:Mutators_DataElementBitFlipper[DataElementBitFlipper]:: This mutator produces test cases by flipping bits in the output value.
+xref:Mutators_DataElementDuplicate[DataElementDuplicate]:: This mutator duplicates data elements.
+xref:Mutators_DataElementRemove[DataElementRemove]:: This mutator removes data elements.
+xref:Mutators_DataElementSwapNear[DataElementSwapNear]:: This mutator swaps data elements.
+xref:Mutators_SampleNinjaMutator[SampleNinjaMutator]:: This mutator combines data elements from different data sets.
 
 _Enabled when element is part of a size relation_
 
-xref:Mutators_SizedDataEdgeCase[SizedDataEdgeCase]:: This mutator will cause the data portion of a relation to be sized as numerical edge cases.
-xref:Mutators_SizedDataVariance[SizedDataVariance]:: This mutator will cause the data portion of a relation to be sized as numerical variances.
-xref:Mutators_SizedEdgeCase[SizedEdgeCase]:: This mutator will change both sides of the relation (data and value) to match numerical edge cases.
-xref:Mutators_SizedVariance[SizedVariance]:: This mutator will change both sides of the relation (data and value) to match numerical variances of the current size.
+xref:Mutators_SizedDataEdgeCase[SizedDataEdgeCase]:: This mutator causes the data portion of a relation to be sized as numerical edge cases.
+xref:Mutators_SizedDataVariance[SizedDataVariance]:: This mutator causes the data portion of a relation to be sized as numerical variances.
+xref:Mutators_SizedEdgeCase[SizedEdgeCase]:: This mutator changes both sides of the relation (data and value) to match numerical edge cases.
+xref:Mutators_SizedVariance[SizedVariance]:: This mutator changes both sides of the relation (data and value) to match numerical variances of the current size.
 
 _Specific to this element type_
 
-xref:Mutators_BlobChangeFromNull[BlobChangeFromNull]:: This mutator will produce test cases in which null bytes in a xref:Blob[Blob] element are changed to a non-null value.
-xref:Mutators_BlobChangeRandom[BlobChangeRandom]:: This mutator will produce test cases by changing random selections of bytes to random value.
-xref:Mutators_BlobChangeSpecial[BlobChangeSpecial]:: This mutator will produce test cases by changing random selections of bytes to one of 0x00, 0x01, 0xFE, 0xFF.
-xref:Mutators_BlobChangeToNull[BlobChangeToNull]:: This mutator will produce test cases by changing a random number of bytes to 0x00.
-xref:Mutators_BlobExpandSingleIncrementing[BlobExpandSingleIncrementing]:: This mutator will produce test cases by expanding the size of the blob using incrementing values.
-xref:Mutators_BlobExpandAllRandom[BlobExpandAllRandom]:: This mutator will produce test cases by expanding the size of the blob using random values.
-xref:Mutators_BlobExpandSingleRandom[BlobExpandSingleRandom]:: This mutator will produce test cases by expanding the size of the blob using a single random byte (repeated as needed).
-xref:Mutators_BlobExpandZero[BlobExpandZero]:: This mutator will produce test cases by expanding the blob using null values.
-xref:Mutators_BlobReduce[BlobReduce]:: This mutator will produce test cases by reducing the size of the blob by a random amount.
+xref:Mutators_BlobChangeFromNull[BlobChangeFromNull]:: This mutator produces test cases in which null bytes in a xref:Blob[Blob] element are changed to a non-null value.
+xref:Mutators_BlobChangeRandom[BlobChangeRandom]:: This mutator produces test cases by changing random selections of bytes to random value.
+xref:Mutators_BlobChangeSpecial[BlobChangeSpecial]:: This mutator produces test cases by changing random selections of bytes to one of 0x00, 0x01, 0xFE, 0xFF.
+xref:Mutators_BlobChangeToNull[BlobChangeToNull]:: This mutator produces test cases by changing a random number of bytes to 0x00.
+xref:Mutators_BlobExpandSingleIncrementing[BlobExpandSingleIncrementing]:: This mutator produces test cases by expanding the size of the blob using incrementing values.
+xref:Mutators_BlobExpandAllRandom[BlobExpandAllRandom]:: This mutator produces test cases by expanding the size of the blob using random values.
+xref:Mutators_BlobExpandSingleRandom[BlobExpandSingleRandom]:: This mutator produces test cases by expanding the size of the blob using a single random byte (repeated as needed).
+xref:Mutators_BlobExpandZero[BlobExpandZero]:: This mutator produces test cases by expanding the blob using null values.
+xref:Mutators_BlobReduce[BlobReduce]:: This mutator produces test cases by reducing the size of the blob by a random amount.
 xref:Mutators_ExtraValues[ExtraValues]:: This mutator allows providing extra test case values on a per-data element basis.
 
 
@@ -114,7 +110,7 @@ xref:Mutators_ExtraValues[ExtraValues]:: This mutator allows providing extra tes
 
 .Dumb file fuzzing
 ==========================
-This is an example of dumb file fuzzing. The data from _sample.png_ will be cracked into our Blob. This is considered dumb fuzzing because the data model does not fully describe the structure of the data being fuzzed.
+This is an example of dumb file fuzzing. Peach cracks the data from _sample.png_ into a Blob. This is considered dumb fuzzing because the data model does not fully describe the structure of the data being fuzzed.
 
 [source,xml]
 ----
@@ -151,7 +147,8 @@ This is an example of dumb file fuzzing. The data from _sample.png_ will be crac
 
 			<!-- The command line to run.  Notice the filename provided matched up
 				to what is provided below in the Publisher configuration -->
-			<Param name="CommandLine" value="c:\windows\system32\mspaint.exe fuzzfile.bin" />
+			<Param name="Executable" value="c:\windows\system32\mspaint.exe" />
+			<Param name="Arguments" value="fuzzfile.bin" />
 
 			<!-- This parameter will cause the debugger to wait for an action-call in
 				the state model with a method="ScoobySnacks" before running

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Peach.Core.Mutators
+﻿namespace Peach.Pro.Core.Mutators
 {
 	public partial class StringStatic
 	{

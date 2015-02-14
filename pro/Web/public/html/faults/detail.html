@@ -1,0 +1,88 @@
+﻿<div class="page-content">
+	<div class="page-header">
+		<h1>
+			Faults &raquo; {{vm.Title[0]}} &raquo; {{vm.Title[1]}}
+		</h1>
+	</div>
+	<div class="row">
+		<div class="col-xs-12">
+			<table class="peach-fault-detail">
+				<tr>
+					<td>Iteration</td>
+					<td>{{vm.Fault.iteration}}</td>
+				</tr>
+				<tr ng-show="vm.Fault.iterationStart !== vm.Fault.iterationStop">
+					<td>Iteration Range</td>
+					<td>{{vm.Fault.iterationStart}} - {{vm.Fault.iterationStop}}</td>
+				</tr>
+				<tr>
+					<td>Reproducable</td>
+					<td>{{vm.Fault.reproducable ? 'Yes' : 'No'}}</td>
+				</tr>
+				<tr>
+					<td>Title</td>
+					<td>{{vm.Fault.title}}</td>
+				</tr>
+				<tr>
+					<td>When</td>
+					<td>{{vm.Fault.timeStamp | date:'M/d/yy h:mm a'}}</td>
+				</tr>
+				<tr>
+					<td>Source</td>
+					<td>{{vm.Fault.source}}</td>
+				</tr>
+				<tr>
+					<td>Risk</td>
+					<td>{{vm.Fault.exploitability}}</td>
+				</tr>
+				<tr>
+					<td>Major Hash</td>
+					<td>{{vm.Fault.majorHash}}</td>
+				</tr>
+				<tr>
+					<td>Minor Hash</td>
+					<td>{{vm.Fault.minorHash}}</td>
+				</tr>
+				<tr>
+					<td class="align-top">Generated Files</td>
+					<td>
+						<table class="table table-hover table-bordered">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>Size</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>
+										<a href="{{vm.Fault.faultUrl}}/archive/fault.zip">
+											Full Archive
+										</a>
+									</td>
+									<td></td>
+								</tr>
+								<tr ng-repeat="file in vm.Fault.files">
+									<td>
+										<a href="{{file.fileUrl}}/{{file.name}}">
+											{{file.fullName}}
+										</a>
+									</td>
+									<td>
+										{{file.size | filesize:2}}
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td class="align-top">Description</td>
+					<td>
+						<pre>{{vm.Fault.description}}</pre>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</div>

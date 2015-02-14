@@ -27,22 +27,16 @@
 // $Id$
 
 using System;
-using System.IO;
-using System.Xml;
-using System.Xml.Schema;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
-using System.Reflection;
-
+using NLog;
+using Peach.Core;
+using Peach.Core.Cracker;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using Peach.Core.Cracker;
 
-using NLog;
-
-namespace Peach.Core.Analyzers
+namespace Peach.Pro.Core.Analyzers
 {
     [Analyzer("Binary", true)]
     [Analyzer("BinaryAnalyzer")]
@@ -78,10 +72,10 @@ namespace Peach.Core.Analyzers
 
         public override void asDataElement(DataElement parent, Dictionary<DataElement, Position> positions)
         {
-            if (!(parent is Dom.Blob))
+            if (!(parent is Peach.Core.Dom.Blob))
                 throw new PeachException("Error, Binary analyzer only operates on Blob elements!");
 
-            var blob = parent as Dom.Blob;
+            var blob = parent as Peach.Core.Dom.Blob;
             var data = blob.Value;
 
             if (data.Length == 0)
@@ -116,7 +110,7 @@ namespace Peach.Core.Analyzers
                         bs.Seek(-chars, SeekOrigin.End);
 
                         var bits = bs.SliceBits(bs.LengthBits - bs.PositionBits);
-                        var str = new Dom.String();
+                        var str = new Peach.Core.Dom.String();
                         str.DefaultValue = new Variant(bits);
                         bs.Seek(-chars, SeekOrigin.End);
                         bs.SetLength(bs.Position);

@@ -9,7 +9,7 @@
 // - 02/14/2014: Jordyn
 // Added full example
 
-The _File_ publisher will open a file for reading or writing.
+The _File_ publisher opens a file for reading or writing.
 
 === Syntax
 

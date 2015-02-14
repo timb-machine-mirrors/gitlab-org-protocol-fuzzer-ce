@@ -27,10 +27,10 @@
 // $Id$
 
 using System;
-using System.Collections.Generic;
 using System.Text;
+using Random = Peach.Core.Random;
 
-namespace Peach.Core.Transformers.Crypto
+namespace Peach.Pro.Core.Transformers.Crypto
 {
     /// <summary>
     /// Provides the Unix crypt() encryption algorithm.

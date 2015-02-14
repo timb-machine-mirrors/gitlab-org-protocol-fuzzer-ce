@@ -8,7 +8,7 @@ using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Test;
 
-namespace Peach.Pro.Test.Publishers
+namespace Peach.Pro.Test.Core.Publishers
 {
 	class SimpleTcpClient
 	{
@@ -204,7 +204,8 @@ namespace Peach.Pro.Test.Publishers
 	}
 
 
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Category("Peach")]
 	class TcpPublisherTests : DataModelCollector
 	{
 		public string template = @"
@@ -265,7 +266,7 @@ namespace Peach.Pro.Test.Publishers
 			var parser = new PitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
-			var config = new RunConfiguration {singleIteration = true};
+			var config = new RunConfiguration { singleIteration = true };
 
 			var e = new Engine(this);
 			e.startFuzzing(dom, config);
@@ -312,7 +313,7 @@ namespace Peach.Pro.Test.Publishers
 			var parser = new PitParser();
 			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-			var config = new RunConfiguration {singleIteration = true};
+			var config = new RunConfiguration { singleIteration = true };
 
 			var e = new Engine(this);
 			e.startFuzzing(dom, config);
@@ -356,7 +357,7 @@ namespace Peach.Pro.Test.Publishers
 			var parser = new PitParser();
 			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-			var config = new RunConfiguration {singleIteration = true};
+			var config = new RunConfiguration { singleIteration = true };
 
 			var e = new Engine(this);
 
@@ -418,7 +419,7 @@ namespace Peach.Pro.Test.Publishers
 
 			var parser = new PitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
-			var config = new RunConfiguration {singleIteration = true};
+			var config = new RunConfiguration { singleIteration = true };
 			var e = new Engine(this);
 
 			var sw = new Stopwatch();
@@ -490,7 +491,7 @@ namespace Peach.Pro.Test.Publishers
 
 				var parser = new PitParser();
 				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
-				var config = new RunConfiguration {singleIteration = true};
+				var config = new RunConfiguration { singleIteration = true };
 				var e = new Engine(this);
 
 				e.startFuzzing(dom, config);
@@ -527,30 +528,22 @@ namespace Peach.Pro.Test.Publishers
 		<Publisher class=""TcpClient"">
 			<Param name=""Host"" value=""127.0.0.1""/>
 			<Param name=""Port"" value=""{0}""/>
-			<Param name=""SendTimeout"" value=""1""/>
+			<Param name=""SendTimeout"" value=""0""/>
 		</Publisher>
 	</Test>
 </Peach>".Fmt(((IPEndPoint)listener.LocalEndpoint).Port);
 
-			try
+			var ex = Assert.Throws<PeachException>(() =>
 			{
 				var parser = new PitParser();
 				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
-				var config = new RunConfiguration {singleIteration = true};
+				var config = new RunConfiguration { singleIteration = true };
 				var e = new Engine(this);
 
 				e.startFuzzing(dom, config);
-
-				Assert.Fail("Should throw!");
-			}
-			catch (PeachException ex)
-			{
-				StringAssert.Contains("The operation has timed", ex.Message);
-			}
-			finally
-			{
-				listener.Stop();
-			}
+			});
+			listener.Stop();
+			StringAssert.Contains("The operation has timed", ex.Message);
 		}
 	}
 }

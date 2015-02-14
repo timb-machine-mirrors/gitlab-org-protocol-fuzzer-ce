@@ -28,21 +28,15 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Web;
-
-using Newtonsoft;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using NLog;
-
 using Peach.Core;
+using Peach.Core.Agent;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
-namespace Peach.Core.Agent.Channels
+namespace Peach.Pro.Core.Agent.Channels
 {
 	#region RestProxyPublisher
 

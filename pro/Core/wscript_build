@@ -7,11 +7,14 @@ deps = [
 	'System.Xml.dll',
 	'System.Core.dll',
 	'System.Data.dll',
+	'System.Data.DataSetExtensions.dll',
 	'System.Drawing.dll',
 	'System.Numerics.dll',
 	'System.Web.dll',
 	'System.Web.Services.dll',
 	'System.Configuration.dll',
+
+	'Portable.Licensing.dll',
 
 	'NLog.dll',
 	'SharpPcap.dll',
@@ -50,6 +53,7 @@ deps = [
 	'BouncyCastle.Crypto.dll',
 	'Syslog.Server.dll',
 	'aardvark_net.dll',
+	'LibUsbDotNet.dll',
 ]
 
 if bld.env.TARGET == 'win':
@@ -61,12 +65,16 @@ else:
 		'Mono.Data.Sqlite.dll',
 	])
 
+content = [
+]
+
 bld(
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
-	resource = bld.path.ant_glob('xmltests.zip NamedSequences.txt WebServices/*.sshtml'),
+	resource = bld.path.ant_glob('Resources/**/* WebServices/Views/**/*'),
 	content = 'IronPython.StdLib',
+	ide_content = 'WebServices/Models/Model.cd',
 	name = 'Peach.Pro.dll',
-	namespace = 'Peach.Core',
+	namespace = 'Peach.Pro.Core',
 )

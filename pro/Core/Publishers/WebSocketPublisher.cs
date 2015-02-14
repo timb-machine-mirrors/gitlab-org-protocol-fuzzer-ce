@@ -22,22 +22,18 @@
 //
 
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Text;
 using System.Threading;
-
-using NLog;
-using SuperWebSocket;
 using Newtonsoft.Json.Linq;
-using SuperSocket.SocketBase;
-
+using NLog;
 using Peach.Core;
 using Peach.Core.IO;
-using Peach.Core.Publishers;
+using SuperSocket.SocketBase;
+using SuperWebSocket;
 
-namespace Peach.Core.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	[Publisher("WebSocket", true)]
 	[Description("WebSocket Publisher")]

@@ -24,7 +24,7 @@ The _size_ attribute is always specified in BITS and typically deals with xref:N
 
 === Examples ===
 
-This will create an 8 bit number with a default value of 42. 
+This example creates an 8-bit number with a default value of 42. 
 
 [source,xml]
 ----

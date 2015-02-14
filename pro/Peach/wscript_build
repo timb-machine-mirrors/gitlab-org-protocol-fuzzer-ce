@@ -9,7 +9,6 @@ deps = [
 	'System.dll',
 	'System.Core.dll',
 	'System.Xml.dll',
-	'Portable.Licensing.dll',
 ]
 
 app = bld(
@@ -34,6 +33,12 @@ peach_pro = [
 	'Peach.Pro.OS.Windows.dll',
 	'Peach.Pro.OS.Linux.dll',
 	'Peach.Pro.OS.OSX.dll',
+
+	# Include sample programs so sample pits work
+	'CrashableServer',
+	'CrashingFileConsumer',
+	'CrashingProgram',
+	'ComTest',
 
 	# Linux core file monitor
 	'PeachLinuxCrashHandler.exe',

@@ -3,7 +3,7 @@
 
 Specify the byte order of a field.  
 
-For more information about endianness see http://en.wikipedia.org/wiki/Endian[the Endian Wikipedia article].
+For more information about endian-ness see http://en.wikipedia.org/wiki/Endian[the Endian Wikipedia article].
 
 *Valid Values:*
 
@@ -20,7 +20,7 @@ For more information about endianness see http://en.wikipedia.org/wiki/Endian[th
 ----
 
 
-Will produce the bytes in the following order. 
+Produces the bytes in the following order. 
 
 ----
  AB CD 
@@ -35,7 +35,7 @@ Will produce the bytes in the following order.
 ----
 
 
-Will produce the bytes in the following order. 
+Produces the bytes in the following order. 
 
 ----
  CD AB 

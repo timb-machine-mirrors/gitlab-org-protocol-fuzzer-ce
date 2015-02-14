@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
+﻿using System.Collections.Generic;
 using Peach.Core;
 
-namespace Peach.Enterprise.Loggers
+namespace Peach.Pro.Core.Loggers
 {
 	public abstract class BasePythonLogger :Logger
 	{

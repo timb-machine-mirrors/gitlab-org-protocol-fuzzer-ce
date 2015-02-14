@@ -24,11 +24,11 @@
 // - 02/18/2014: Mick
 // Added full examples
 
-_SequenceIncrement_ will increment each iteration starting at 1.
-This is useful when a field must be a unique or sequential value every iteration.
+_SequenceIncrement_ increments each iteration starting at 1.
+This fixup is useful when a field must be a unique value, or a sequenced value every iteration.
 
-This checksum can be used when fuzzing protocols that contain a incrementing sequence numbers.
-The Fixup will produce numbers valid for the DataElement it modifies and is constrained to their size.
+This checksum can be used when fuzzing protocols that contain an increasing numerical sequence.
+The Fixup produces valid numbers for the data element it modifies and is constrained to the size of the data element.
 
 === Parent Elements
 
@@ -38,7 +38,7 @@ xref:String[String]
 === Parameters
 
 Offset:: Sets the initial value each iteration to Offset * (Iteration - 1). Default is null.
-Once:: Only increment the value once per iteration. Default is false.
+Once:: Increment the value once per iteration. The default value is false.
 
 === Examples
 

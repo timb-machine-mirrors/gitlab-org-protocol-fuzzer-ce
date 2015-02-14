@@ -27,19 +27,17 @@
 // $Id$
 
 using System;
-using System.Xml;
-using System.Xml.Schema;
 using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.IO;
-using System.Reflection;
+using System.Linq;
+using System.Xml;
+using Peach.Core;
+using Peach.Core.Cracker;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using Peach.Core.Cracker;
-using System.Linq;
+using Encoding = Peach.Core.Encoding;
 
-namespace Peach.Core.Analyzers
+namespace Peach.Pro.Core.Analyzers
 {
 	[Analyzer("StringToken", true)]
 	[Analyzer("StringTokenAnalyzer")]
@@ -117,10 +115,10 @@ namespace Peach.Core.Analyzers
 			if (args != null && args.ContainsKey("Tokens"))
 				tokens = (string)args["Tokens"];
 
-			if (!(parent is Dom.String))
+			if (!(parent is Peach.Core.Dom.String))
 				throw new PeachException("Error, StringToken analyzer only operates on String elements!");
 
-			var str = parent as Dom.String;
+			var str = parent as Peach.Core.Dom.String;
 			encodingType = str.stringType;
 			encoding = Encoding.GetEncoding(encodingType.ToString());
 
@@ -133,7 +131,7 @@ namespace Peach.Core.Analyzers
 			{
 				this.positions = positions;
 
-				Dom.Block block = new Block(str.name);
+				Peach.Core.Dom.Block block = new Block(str.name);
 				str.parent[str.name] = block;
 				block.Add(str);
 
@@ -166,9 +164,9 @@ namespace Peach.Core.Analyzers
 		/// <param name="offset"></param>
 		protected void splitOnToken(DataElement el, char token, ref long offset)
 		{
-			if (el is Dom.String)
+			if (el is Peach.Core.Dom.String)
 			{
-				var strEl = (Dom.String)el;
+				var strEl = (Peach.Core.Dom.String)el;
 				var str = (string) el.DefaultValue;
 				var tokenIndex = str.IndexOf(token);
 
@@ -179,9 +177,9 @@ namespace Peach.Core.Analyzers
 					return;
 				}
 
-				var preString = new Dom.String() { stringType = strEl.stringType };
-				var tokenString = new Dom.String() { stringType = strEl.stringType };
-				var postString = new Dom.String() { stringType = strEl.stringType };
+				var preString = new Peach.Core.Dom.String() { stringType = strEl.stringType };
+				var tokenString = new Peach.Core.Dom.String() { stringType = strEl.stringType };
+				var postString = new Peach.Core.Dom.String() { stringType = strEl.stringType };
 
 				preString.stringType = encodingType;
 				tokenString.stringType = encodingType;
@@ -191,7 +189,7 @@ namespace Peach.Core.Analyzers
 				tokenString.DefaultValue = new Variant(token.ToString());
 				postString.DefaultValue = new Variant(str.Substring(tokenIndex + 1));
 
-				var block = new Dom.Block(el.name);
+				var block = new Peach.Core.Dom.Block(el.name);
 				block.Add(preString);
 				block.Add(tokenString);
 				block.Add(postString);
@@ -219,7 +217,7 @@ namespace Peach.Core.Analyzers
 
 				splitOnToken(postString, token, ref offset);
 			}
-			else if (el is Dom.Block)
+			else if (el is Peach.Core.Dom.Block)
 			{
 				List<DataElement> children = new List<DataElement>();
 

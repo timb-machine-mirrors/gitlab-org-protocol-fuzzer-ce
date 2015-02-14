@@ -1,13 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
-
-using Peach.Core;
 
 namespace Peach.Core.Test
 {

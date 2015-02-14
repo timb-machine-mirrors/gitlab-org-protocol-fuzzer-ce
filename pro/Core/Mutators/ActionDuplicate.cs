@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using NLog;
-
 using Peach.Core;
 using Peach.Core.Dom;
 
-namespace Peach.Enterprise.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("ActionDuplicate")]
 	[Description("Causes Actions to be repeated. Will not repeat actions with publisher of Peach.Agent.")]
@@ -61,17 +55,17 @@ namespace Peach.Enterprise.Mutators
 			}
 		}
 
-		public override void sequentialMutation(Core.Dom.DataElement obj)
+		public override void sequentialMutation(Peach.Core.Dom.DataElement obj)
 		{
 			throw new NotImplementedException();
 		}
 
-		public override void randomMutation(Core.Dom.DataElement obj)
+		public override void randomMutation(Peach.Core.Dom.DataElement obj)
 		{
 			throw new NotImplementedException();
 		}
 
-		public override void sequentialMutation(Core.Dom.StateModel obj)
+		public override void sequentialMutation(Peach.Core.Dom.StateModel obj)
 		{
 			int actionIndex = (int)_mutation / _n;
 			var duplicate = context.Random.Next(_n + 1);
@@ -91,10 +85,10 @@ namespace Peach.Enterprise.Mutators
 			}
 		}
 
-		Core.Dom.Action _targetAction = null;
+		Peach.Core.Dom.Action _targetAction = null;
 		int _targetDuplicate = -1;
 
-		public override void randomMutation(Core.Dom.StateModel obj)
+		public override void randomMutation(Peach.Core.Dom.StateModel obj)
 		{
 			do
 			{
@@ -116,28 +110,28 @@ namespace Peach.Enterprise.Mutators
 			while (!SupportedActionType(_targetAction));
 		}
 
-		bool SupportedActionType(Core.Dom.Action action)
+		bool SupportedActionType(Peach.Core.Dom.Action action)
 		{
-			if (action is Core.Dom.Actions.Call)
+			if (action is Peach.Core.Dom.Actions.Call)
 				return true;
-			if (action is Core.Dom.Actions.GetProperty)
+			if (action is Peach.Core.Dom.Actions.GetProperty)
 				return true;
-			if (action is Core.Dom.Actions.Output)
+			if (action is Peach.Core.Dom.Actions.Output)
 				return true;
-			if (action is Core.Dom.Actions.SetProperty)
+			if (action is Peach.Core.Dom.Actions.SetProperty)
 				return true;
 
 			return false;
 		}
 
-		public override Core.Dom.State changeState(State currentState, Core.Dom.Action currentAction, State nextState)
+		public override Peach.Core.Dom.State changeState(State currentState, Peach.Core.Dom.Action currentAction, State nextState)
 		{
 			return nextState;
 		}
 
 		bool _isDuplicating = false;
 
-		public override Core.Dom.Action nextAction(State state, Core.Dom.Action lastAction, Core.Dom.Action nextAction)
+		public override Peach.Core.Dom.Action nextAction(State state, Peach.Core.Dom.Action lastAction, Peach.Core.Dom.Action nextAction)
 		{
 			if (nextAction != _targetAction && !_isDuplicating)
 				return nextAction;

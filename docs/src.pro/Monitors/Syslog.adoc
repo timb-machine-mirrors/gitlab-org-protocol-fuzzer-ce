@@ -2,7 +2,7 @@
 [[Monitors_Syslog]]
 == Syslog Monitor
 
-The syslog monitor listens on a specified port for incoming syslog messages. This monitor is capable of performing data collection and fault detection. The default operation is data collection. Fault detection can be enabled by setting the FaultRegex parameter. If the FaultRegex matches an incoming syslog message, a fault will be generated.
+The _Syslog_ monitor listens on a specified port for incoming syslog messages. This monitor is capable of performing data collection and fault detection. The default operation is data collection. Fault detection can be enabled by setting the FaultRegex parameter. If the FaultRegex matches an incoming syslog message, a fault is generated.
 
 === Parameters
 
@@ -23,7 +23,7 @@ Parameter that specifies when to start monitoring. Choose from the following set
 +
 [horizontal]
 OnCall;; Monitoring begins upon receipt of a message from the state machine.
-OnStart;; Monitroing occurs once at the start of the fuzzing session. This is the default setting.
+OnStart;; Monitoring occurs once at the start of the fuzzing session. This is the default setting.
 OnEnd;; Monitoring occurs once at the end of the fuzzing session.
 OnIterationStart;; Monitoring occurs at the start of every iteration.
 OnIterationEnd;; Monitoring occurs at the end of every iteration.
@@ -35,7 +35,7 @@ OnIterationStartAfterFault;; Monitoring occurs following a fault. Note that afte
 .Collect Syslog Messages
 ========================
 
-This example shows the Syslog monitor listening on the default port for incoming messages. When a fault occurs all messages will be saved.
+This example shows the _Syslog_ monitor listening on the default port for incoming messages. When a fault occurs, all messages are saved.
 
 [source,xml]
 ----
@@ -78,7 +78,7 @@ This example shows the Syslog monitor listening on the default port for incoming
 .Fault on Syslog Message
 ========================
 
-This example shows the Syslog monitor listening on the default port for incoming messages. The FaultRegex expression is compared against each incoming message; when a match occurs, the monitor generates a fault and saves the syslog data.
+This example shows the _Syslog_ monitor listening on the default port for incoming messages. _Syslog_ compares the  expression with each incoming message; when a match occurs, the monitor generates a fault and saves the syslog data.
 
 [source,xml]
 ----

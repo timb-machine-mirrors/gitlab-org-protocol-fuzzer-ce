@@ -1,24 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.IO;
-
 using NLog;
-using NLog.Targets;
-using NLog.Config;
-
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
-
 using Peach.Core;
-using Peach.Core.IO;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
-using Peach.Core.Cracker;
-using Peach.Core.Publishers;
+using Peach.Core.Test;
+using Peach.Pro.Core.Publishers;
 
-namespace Peach.Core.Test.StateModel
+namespace Peach.Pro.Test.Core.StateModel
 {
 	class MemoryStreamPublisher : StreamPublisher
 	{
@@ -60,7 +49,7 @@ namespace Peach.Core.Test.StateModel
 				"</Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			MemoryStream stream = new MemoryStream();
 			dom.tests[0].publishers[0] = new MemoryStreamPublisher(stream);
@@ -132,7 +121,7 @@ namespace Peach.Core.Test.StateModel
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
 			dom.tests[0].includedMutators.Add("StringStatic");
 
@@ -226,7 +215,7 @@ namespace Peach.Core.Test.StateModel
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
 			dom.tests[0].includedMutators.Add("StringStatic");
 
@@ -297,7 +286,7 @@ namespace Peach.Core.Test.StateModel
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.range = true;

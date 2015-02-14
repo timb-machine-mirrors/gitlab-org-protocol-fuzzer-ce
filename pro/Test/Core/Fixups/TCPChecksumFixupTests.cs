@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
+﻿using System.IO;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
+using Peach.Core.Test;
+using Peach.Pro.Core.Fixups.Libraries;
 
-namespace Peach.Core.Test.Fixups
+namespace Peach.Pro.Test.Core.Fixups
 {
 	[TestFixture] [Category("Peach")]
 	class TCPChecksumFixupTests : DataModelCollector
@@ -47,7 +44,7 @@ namespace Peach.Core.Test.Fixups
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
@@ -96,7 +93,7 @@ namespace Peach.Core.Test.Fixups
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;
@@ -142,7 +139,7 @@ namespace Peach.Core.Test.Fixups
 
 			PitParser parser = new PitParser();
 
-			Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 			var val = dom.dataModels[0].Value;
 			val = dom.dataModels[0][1].Value;
@@ -153,6 +150,27 @@ namespace Peach.Core.Test.Fixups
 
 		}
 
+		[Test]
+		public void SimpleChecksum()
+		{
+			var buf = Encoding.ASCII.GetBytes("Hello World");
+
+			var csum = new InternetChecksum();
+
+			csum.Update(buf, 0, buf.Length);
+
+			var final1 = csum.Final();
+
+			csum = new InternetChecksum();
+
+			csum.Update(buf, 0, 4);
+			csum.Update(buf, 4, buf.Length - 4);
+
+			var final2 = csum.Final();
+
+			// Should get the same checksum regardless of incremental updates
+			Assert.AreEqual(final1, final2);
+		}
 	}
 }
 

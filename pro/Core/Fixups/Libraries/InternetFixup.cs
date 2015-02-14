@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Net;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
-namespace Peach.Core.Fixups.Libraries
+namespace Peach.Pro.Core.Fixups.Libraries
 {
 	/// <summary>
 	/// Computes the checksum in Host order for an array of bytes
@@ -27,12 +26,13 @@ namespace Peach.Core.Fixups.Libraries
 
 		public virtual void Update(byte[] buf, int offset, int count)
 		{
-			int i = offset;
-			for (; i < count - 1; i += 2)
+			var end = offset + count;
+			var i = offset;
+			for (; i < end - 1; i += 2)
 				sum += (uint)((buf[i] << 8) + buf[i + 1]);
 
-			if (i != count)
-				sum += (uint)(buf[count - 1] << 8);
+			if (i != end)
+				sum += (uint)(buf[end - 1] << 8);
 		}
 
 		public virtual ushort Final()

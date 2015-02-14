@@ -10,13 +10,13 @@ using Peach.Core.Agent;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using Peach.Core.Publishers;
 using Peach.Core.Test;
+using Peach.Pro.Core.Publishers;
 using Encoding = Peach.Core.Encoding;
 using Logger = NLog.Logger;
 using Monitor = Peach.Core.Agent.Monitor;
 
-namespace Peach.Pro.Test.Agent
+namespace Peach.Pro.Test.Core.Agent
 {
 	[TestFixture]
 	[Category("Peach")]
@@ -223,7 +223,7 @@ namespace Peach.Pro.Test.Agent
 		</Monitor>
 	</Agent>
 
-	<Test name='Default' replayEnabled='false'>
+	<Test name='Default' targetLifetime='iteration'>
 		<Agent ref='RemoteAgent'/>
 		<StateModel ref='TheState'/>
 		<Publisher name='Remote' class='Remote'>
@@ -270,11 +270,13 @@ namespace Peach.Pro.Test.Agent
 "IterationStarting 85 false", "IterationFinished", 
 // Agent is restarted & fault is detected
 "SessionStarting", "IterationStarting 86 false", "IterationFinished", "DetectedFault", "GetMonitorData", "MustStop",
+// Reproduction occurs & fault is detected
+"IterationStarting 86 true", "IterationFinished", "DetectedFault", "GetMonitorData", "MustStop",
 // Fussing stops
 "SessionFinished", "StopMonitor"
 				};
 
-				Assert.AreEqual(expected, contents);
+				Assert.That(contents, Is.EqualTo(expected));
 			}
 			finally
 			{
@@ -287,7 +289,7 @@ namespace Peach.Pro.Test.Agent
 
 		readonly Dictionary<uint, Fault[]> faults = new Dictionary<uint, Fault[]>();
 
-		void e_Fault(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faultData)
+		void e_Fault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faultData)
 		{
 			faults[currentIteration] = faultData;
 		}
@@ -322,7 +324,7 @@ namespace Peach.Pro.Test.Agent
 		</Monitor>
 	</Agent>
 
-	<Test name='Default' replayEnabled='false'>
+	<Test name='Default' targetLifetime='iteration'>
 		<Agent ref='RemoteAgent'/>
 		<StateModel ref='TheState'/>
 		<Publisher name='Remote' class='Remote'>
@@ -362,12 +364,6 @@ namespace Peach.Pro.Test.Agent
 		[Test]
 		public void TestBadProcess()
 		{
-			var error = "System debugger could not start process 'MissingProgram'.";
-			if (Platform.GetOS() != Platform.OS.Windows)
-			{
-				error = "Could not start process 'MissingProgram'.";
-			}
-
 			var xml = @"
 <Peach>
 	<DataModel name='TheDataModel'>
@@ -388,7 +384,7 @@ namespace Peach.Pro.Test.Agent
 		</Monitor>
 	</Agent>
 
-	<Test name='Default' replayEnabled='false'>
+	<Test name='Default'>
 		<Agent ref='RemoteAgent'/>
 		<StateModel ref='TheState'/>
 		<Publisher class='Null'/>
@@ -407,15 +403,67 @@ namespace Peach.Pro.Test.Agent
 
 				var e = new Engine(null);
 
-				try
-				{
-					e.startFuzzing(dom, config);
-					Assert.Fail("Should throw!");
-				}
-				catch (PeachException pe)
-				{
-					Assert.True(pe.Message.StartsWith(error), "Expected: {0}\nBut was: {1}", error, pe.Message);
-				}
+				var ex = Assert.Throws<PeachException>(() => e.startFuzzing(dom, config));
+
+				var msg = Platform.GetOS() != Platform.OS.Windows
+					? "Could not start process 'MissingProgram'."
+					: "System debugger could not start process 'MissingProgram'.";
+
+				Assert.That(ex.Message, Is.StringStarting(msg));
+			}
+			finally
+			{
+				if (process != null)
+					StopAgent();
+			}
+		}
+
+		[Test]
+		public void TestNoTcpPort()
+		{
+			var xml = @"
+<Peach>
+	<DataModel name='TheDataModel'>
+		<String value='Hello'/>
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='TheDataModel'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Agent name='RemoteAgent' location='tcp://127.0.0.1'>
+		<Monitor class='{0}'>
+			<Param name='Executable' value='{1}'/>
+			<Param name='Arguments' value='127.0.0.1 0'/>
+			<Param name='RestartOnEachTest' value='true'/>
+			<Param name='FaultOnEarlyExit' value='true'/>
+		</Monitor>
+	</Agent>
+
+	<Test name='Default'>
+		<Agent ref='RemoteAgent'/>
+		<StateModel ref='TheState'/>
+		<Publisher class='Null'/>
+		<Strategy class='RandomDeterministic'/>
+	</Test>
+</Peach>".Fmt(PlatformMonitor, CrashableServer);
+
+			try
+			{
+				StartAgent();
+
+				var parser = new PitParser();
+				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+
+				var config = new RunConfiguration { singleIteration = true };
+
+				var e = new Engine(null);
+
+				e.startFuzzing(dom, config);
 			}
 			finally
 			{
@@ -514,7 +562,7 @@ namespace Peach.Pro.Test.Agent
 		<Monitor name='Local2.mon2' class='LoggingMonitor'/>
 	</Agent>
 
-	<Test name='Default' replayEnabled='false'>
+	<Test name='Default'>
 		<Agent ref='Local1'/>
 		<Agent ref='Local2'/>
 		<StateModel ref='TheState'/>
@@ -571,7 +619,7 @@ namespace Peach.Pro.Test.Agent
 				"Local1.mon1.StopMonitor",
 			};
 
-			Assert.AreEqual(expected, history.ToArray());
+			Assert.That(history, Is.EqualTo(expected));
 
 		}
 
@@ -776,7 +824,7 @@ namespace Peach.Pro.Test.Agent
 
 	<Agent name='RemoteAgent' location='tcp://127.0.0.1:9001'/>
 
-	<Test name='Default' replayEnabled='false'>
+	<Test name='Default'>
 		<Agent ref='RemoteAgent'/>
 		<StateModel ref='TheState'/>
 		<Publisher class='Remote'>
@@ -818,7 +866,7 @@ namespace Peach.Pro.Test.Agent
 					"OnStop",
 				};
 
-				Assert.AreEqual(expected, contents);
+				Assert.That(contents, Is.EqualTo(expected));
 
 				var st = dom.tests[0].stateModel.states[0];
 				//var act = st.actions["call"] as Dom.Actions.Call;

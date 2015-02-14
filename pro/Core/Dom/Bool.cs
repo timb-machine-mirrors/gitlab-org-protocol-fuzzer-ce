@@ -12,8 +12,9 @@ using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using Peach.Pro.Core.Dom;
 
-namespace Peach.Enterprise.Dom
+namespace Peach.Pro.Core.Dom
 {
 	[DataElement("Bool", DataElementTypes.Hint)]
 	[DataElementChildSupported("Placement")]

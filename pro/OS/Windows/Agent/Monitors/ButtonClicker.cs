@@ -1,21 +1,15 @@
-
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Reflection;
-using System.Linq;
+using System.Runtime.InteropServices;
+using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
-using NLog;
-using System.Runtime.InteropServices;
 
 #if !MONO
-
 using System.Windows.Automation;
-
 #endif
 
-namespace Peach.Enterprise.Agent.Monitors
+namespace Peach.Pro.OS.Windows.Agent.Monitors
 {
 	[Monitor("ButtonClicker", true)]
 	[Parameter("WindowText", typeof(string), "Text to search for")]
@@ -43,7 +37,6 @@ namespace Peach.Enterprise.Agent.Monitors
 		}
 
 #if !MONO
-
 		static AutomationElement Find(AutomationElement elem, Condition cond, string text)
 		{
 			foreach (AutomationElement item in elem.FindAll(TreeScope.Children, cond))
@@ -120,7 +113,6 @@ namespace Peach.Enterprise.Agent.Monitors
 		}
 
 #else
-
 		public override void StopMonitor()
 		{
 		}
@@ -129,7 +121,6 @@ namespace Peach.Enterprise.Agent.Monitors
 		{
 			throw new PeachException("The ButtonClicker monitor is not supported on mono.");
 		}
-
 #endif
 
 		public override void SessionFinished()
@@ -141,7 +132,6 @@ namespace Peach.Enterprise.Agent.Monitors
 		{
 			return false;
 		}
-
 
 		public override void IterationStarting(uint iterationCount, bool isReproduction)
 		{

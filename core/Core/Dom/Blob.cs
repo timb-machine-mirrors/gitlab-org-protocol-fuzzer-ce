@@ -28,20 +28,10 @@
 
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Collections;
-using System.Text;
-using System.Runtime.InteropServices;
-using System.Runtime;
-using System.Reflection;
-using System.Runtime.Serialization;
 using System.Xml;
 
 using Peach.Core.Analyzers;
 using Peach.Core.IO;
-using Peach.Core.Cracker;
-
-using NLog;
 
 namespace Peach.Core.Dom
 {
@@ -126,6 +116,18 @@ namespace Peach.Core.Dom
 			WritePitCommonValue(pit);
 			WritePitCommonChildren(pit);
 			pit.WriteEndElement();
+		}
+
+		protected override Variant GenerateDefaultValue()
+		{
+			// Return a read-only slice of the DefaultValue
+			// This way every data element has a different object
+			// for its InternalValue, even multiple data elements
+			// use the same DefaultValue object.
+
+			var bs = (BitwiseStream)DefaultValue;
+			bs.SeekBits(0, SeekOrigin.Begin);
+			return new Variant(bs.SliceBits(bs.LengthBits));
 		}
 	}
 }

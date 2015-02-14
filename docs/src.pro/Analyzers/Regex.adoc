@@ -40,7 +40,7 @@ None.
 === Parameters
 
 Regex::
-    Regular expression. Only groups will be kept. Group names will be used to name specific 
+    Regular expression. Only groups are kept. Group names are used to name specific 
     elements and cannot be duplicated.
 
 === Examples

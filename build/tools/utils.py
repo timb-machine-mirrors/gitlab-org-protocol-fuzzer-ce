@@ -53,13 +53,15 @@ def do_install(self, inst_to, attr, chmod):
 	val = getattr(self, attr, [])
 
 	if isinstance(val, dict):
-		for cwd,items in val.iteritems():
+		for cwd, items in val.iteritems():
+			if isinstance(cwd, str):
+				cwd = self.path.find_node(cwd)
 			do_install2(self, inst_to, cwd, items, chmod)
 	else:
 		do_install2(self, inst_to, self.path, val, chmod)
 
 def do_install2(self, inst_to, cwd, items, chmod):
-	extras = self.to_nodes(Utils.to_list(items), path=cwd)
+	extras = self.to_nodes(items, path=cwd)
 
 	if extras:
 		if not inst_to:
@@ -251,8 +253,7 @@ def read_all_csshlibs(self, subdir):
 		self.read_csshlib(x.name, paths=[x.parent.path_from(self.path)])
 
 @conf
-def ensure_version(self, tool, ver_exp):
-	ver_exp = Utils.to_list(ver_exp)
+def get_version(self, tool):
 	env = self.env
 	environ = dict(self.environ)
 	environ.update(PATH = ';'.join(env['PATH']))
@@ -264,13 +265,20 @@ def ensure_version(self, tool, ver_exp):
 	if not m:
 		m = ver_re.match(err)
 	if not m:
-		raise Errors.WafError("Could not verify version of %s" % (exe))
-	ver = m.group(1)
+		return None
+	return m.group(1)
+	
+@conf
+def ensure_version(self, tool, ver_exp):
+	ver = self.get_version(tool)
+	ver_exp = Utils.to_list(ver_exp)
+	if not ver:
+		raise Errors.WafError("Could not verify version of %s" % (tool))
 	found = False
 	for v in ver_exp:
 		found = ver.startswith(v) or found
 	if not found:
-		raise Errors.WafError("Requires %s %s but found version %s" % (exe, ver_exp, ver))
+		raise Errors.WafError("Requires %s %s but found version %s" % (tool, ver_exp, ver))
 
 @feature('emit')
 @before_method('process_rule')

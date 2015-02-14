@@ -1,159 +1,122 @@
-﻿using NUnit.Framework;
-using Peach.Core;
-using Peach.Core.Agent.Monitors;
-using Peach.Core.Analyzers;
-using Peach.Core.Dom;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
+using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Test;
 
-namespace Peach.Pro.Test.Monitors
+namespace Peach.Pro.Test.Core.Monitors
 {
 	[TestFixture]
 	[Category("Peach")]
 	class SaveFileMonitorTests
 	{
-		private Fault[] faults;
-
-		[Test]
-		[ExpectedException(typeof(PeachException), ExpectedMessage =
-			"Monitor 'SaveFile' is missing required parameter 'Filename'."
-		)]
-		public void TestNoParams()
-		{
-			new SaveFileMonitor(null, "", new Dictionary<string, Variant>());
-		}
-
-		[Test]
-		public void TestCreate()
-		{
-			new SaveFileMonitor(null, "", new Dictionary<string, Variant>
-				{
-					{ "Filename", new Variant("c:\\some\\file") },
-				}
-			);
-		}
-
-		class Params : Dictionary<string, string> { }
-
-		void OnFault(
-			RunContext context,
-			uint currentIteration,
-			StateModel stateModel,
-			Fault[] faults)
-		{
-			Assert.Null(this.faults);
-			this.faults = faults;
-		}
-
-		string MakeXml(Params parameters, bool fault)
-		{
-			string fmt = "<Param name='{0}' value='{1}'/>";
-
-			string template = @"
-<Peach>
-	<DataModel name='TheDataModel'>
-		<String value='Hello'/>
-	</DataModel>
-
-	<StateModel name='TheState' initialState='Initial'>
-		<State name='Initial'>
-			<Action type='output'>
-				<DataModel ref='TheDataModel'/>
-			</Action>
-		</State>
-	</StateModel>
-
-	<Agent name='LocalAgent'>
-		<Monitor class='SaveFile'>
-{0}
-		</Monitor>
-{1}
-	</Agent>
-
-	<Test name='Default' replayEnabled='false'>
-		<Agent ref='LocalAgent'/>
-		<StateModel ref='TheState'/>
-		<Publisher class='Null'/>
-		<Strategy class='RandomDeterministic'/>
-	</Test>
-</Peach>";
-
-			string faultSection = @"
-		<Monitor class='FaultingMonitor'>
-			<Param name='Iteration' value='C'/>
-		</Monitor>
-";
-			var items = parameters.Select(kv => string.Format(fmt, kv.Key, kv.Value));
-			var joined = string.Join(Environment.NewLine, items);
-			var ret = string.Format(template, joined, fault ? faultSection : "");
-
-			return ret;
-		}
-
-		private void Run(Params parameters, bool fault)
-		{
-			string xml = MakeXml(parameters, fault);
-
-			PitParser parser = new PitParser();
-
-			Dom dom = parser.asParser(null, new MemoryStream(
-				Peach.Core.ASCIIEncoding.ASCII.GetBytes(xml)
-			));
-			dom.tests[0].includedMutators = new List<string> { "StringCaseMutator" };
-
-			RunConfiguration config = new RunConfiguration();
-
-			Engine e = new Engine(null);
-			e.Fault += OnFault;
-			e.startFuzzing(dom, config);
-		}
+		private string _file;
+		private byte[] _fileContents;
 
 		[SetUp]
-		public void Init()
+		public void SetUp()
 		{
-			faults = null;
+			_fileContents = Encoding.ASCII.GetBytes("Hello World");
+			_file = Path.GetTempFileName();
+
+			File.WriteAllBytes(_file, _fileContents);
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			File.Delete(_file);
+
+			_file = null;
+			_fileContents = null;
 		}
 
 		[Test]
-		public void TestNoFaults()
+		public void TestNoParams()
 		{
-			Run(new Params {
-				{ "Filename", "Peach.Pro.Test.xml" },
-			}, false);
-
-			// verify values
-			Assert.Null(faults);
-		}
-
-		[Test]
-		public void TestFaults()
-		{
-			var filename = "Peach.Pro.Test.xml";
-			Assert.That(() =>
-				{
-					Run(new Params {
-						{ "Filename", filename },
-					}, true);
-				}, 
-				Throws.TypeOf<PeachException>()
-					.And.Message.EqualTo("Fault detected on control iteration.")
+			var ex = Assert.Throws<PeachException>(() =>
+				new MonitorRunner("SaveFile", new Dictionary<string, string>())
 			);
 
-			Assert.AreEqual(2, faults.Length);
-			bool foundFault = false;
-			foreach (var fault in faults)
+			const string msg = "Could not start monitor \"SaveFile\".  Monitor 'SaveFile' is missing required parameter 'Filename'.";
+
+			Assert.AreEqual(msg, ex.Message);
+		}
+
+		[Test]
+		public void TestNoFaultValidFile()
+		{
+			var runner = new MonitorRunner("SaveFile", new Dictionary<string, string>
 			{
-				if (fault.detectionSource == "SaveFileMonitor")
+				{ "Filename", _file },
+			});
+
+			var faults = runner.Run();
+
+			Assert.AreEqual(0, faults.Length);
+		}
+
+		[Test]
+		public void TestNoFaultInvalidFile()
+		{
+			var runner = new MonitorRunner("SaveFile", new Dictionary<string, string>
+			{
+				{ "Filename", "some_invalid_file" },
+			});
+
+			var faults = runner.Run();
+
+			Assert.AreEqual(0, faults.Length);
+		}
+
+		[Test]
+		public void TestFaultValidFile()
+		{
+			var runner = new MonitorRunner("SaveFile", new Dictionary<string, string>
+			{
+				{ "Filename", _file },
+			})
+			{
+				DetectedFault = m =>
 				{
-					foundFault = true;
-					Assert.AreEqual(1, fault.collectedData.Count);
-					Assert.AreEqual(filename, fault.collectedData[0].Key);
+					Assert.False(m.DetectedFault(), "Monitor should not have detected a fault.");
+
+					// Trigger GetMonitorData
+					return true;
 				}
-			}
-			Assert.True(foundFault);
+			};
+
+			var faults = runner.Run();
+
+			Assert.AreEqual(1, faults.Length);
+			Assert.AreEqual(FaultType.Data, faults[0].type);
+			Assert.AreEqual("SaveFileMonitor", faults[0].detectionSource);
+			Assert.That(faults[0].title, Is.StringContaining(_file));
+			Assert.AreEqual(1, faults[0].collectedData.Count);
+			Assert.AreEqual(Path.GetFileName(_file), faults[0].collectedData[0].Key);
+			Assert.AreEqual(_fileContents, faults[0].collectedData[0].Value);
+		}
+
+		[Test]
+		public void TestFaultInvalidFile()
+		{
+			var runner = new MonitorRunner("SaveFile", new Dictionary<string, string>
+			{
+				{ "Filename", "some_invalid_file" },
+			})
+			{
+				DetectedFault = m =>
+				{
+					Assert.False(m.DetectedFault(), "Monitor should not have detected a fault.");
+
+					// Trigger GetMonitorData
+					return true;
+				}
+			};
+
+			var faults = runner.Run();
+
+			Assert.AreEqual(0, faults.Length);
 		}
 	}
 }

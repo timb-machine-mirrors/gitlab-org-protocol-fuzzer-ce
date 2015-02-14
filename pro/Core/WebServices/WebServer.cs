@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Nancy;
 using Nancy.Bootstrapper;
 using Nancy.Conventions;
@@ -11,14 +12,17 @@ using Nancy.ViewEngines;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using Peach.Core;
+using Peach.Pro.Core.Runtime;
 using System;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Threading;
+using HttpStatusCode = Nancy.HttpStatusCode;
 
-namespace Peach.Enterprise.WebServices
+namespace Peach.Pro.Core.WebServices
 {
 	internal class CustomJsonSerializer : JsonSerializer
 	{
@@ -62,7 +66,7 @@ namespace Peach.Enterprise.WebServices
 		{
 		}
 
-		public void Handle(Nancy.HttpStatusCode statusCode, NancyContext context)
+		public void Handle(HttpStatusCode statusCode, NancyContext context)
 		{
 			var error = context.Response as ErrorResponse;
 
@@ -70,7 +74,7 @@ namespace Peach.Enterprise.WebServices
 			{
 				// NotFoundResponse and 404s returned from routes are not
 				// contained in an ErrorResponse
-				System.Diagnostics.Debug.Assert(statusCode == Nancy.HttpStatusCode.NotFound);
+				Debug.Assert(statusCode == HttpStatusCode.NotFound);
 
 				error = ErrorResponse.FromMessage("The resource you have requested cannot be found.");
 				error.StatusCode = statusCode;
@@ -86,10 +90,10 @@ namespace Peach.Enterprise.WebServices
 			}
 		}
 
-		public bool HandlesStatusCode(Nancy.HttpStatusCode statusCode, NancyContext context)
+		public bool HandlesStatusCode(HttpStatusCode statusCode, NancyContext context)
 		{
-			return statusCode == Nancy.HttpStatusCode.NotFound
-				|| statusCode == Nancy.HttpStatusCode.InternalServerError;
+			return statusCode == HttpStatusCode.NotFound
+				|| statusCode == HttpStatusCode.InternalServerError;
 		}
 	}
 
@@ -101,7 +105,7 @@ namespace Peach.Enterprise.WebServices
 		{
 			// Do this here since RootNamespaces is static, and
 			// ConfigureApplicationContainer can be called more than once.
-			ResourceViewLocationProvider.RootNamespaces.Add(Assembly.GetExecutingAssembly(), "Peach.Core.WebServices");
+			ResourceViewLocationProvider.RootNamespaces.Add(Assembly.GetExecutingAssembly(), "Peach.Pro.Core.WebServices.Views");
 		}
 
 		public Bootstrapper(WebContext context)
@@ -125,39 +129,73 @@ namespace Peach.Enterprise.WebServices
 			container.Register<ResourceViewLocationProvider>();
 		}
 
-		protected override void ConfigureRequestContainer(TinyIoCContainer container, NancyContext context)
-		{
-			base.ConfigureRequestContainer(container, context);
-		}
-
 		protected override void ConfigureConventions(NancyConventions nancyConventions)
 		{
 			base.ConfigureConventions(nancyConventions);
 
 			// Need to go before the default '/Content' handler in nancy
-			nancyConventions.StaticContentsConventions.Insert(0, StaticContentConventionBuilder.AddDirectory("/", @"web"));
-			nancyConventions.StaticContentsConventions.Insert(0, StaticContentConventionBuilder.AddDirectory("/docs", @"webhelp/docs"));
-
+			nancyConventions.StaticContentsConventions.Insert(0,
+				StaticContentConventionBuilder.AddDirectory("/", @"public")
+			);
+			nancyConventions.StaticContentsConventions.Insert(0,
+				StaticContentConventionBuilder.AddDirectory("/docs", @"webhelp/docs")
+			);
 		}
 
-		protected override void RequestStartup(TinyIoCContainer container, Nancy.Bootstrapper.IPipelines pipelines, NancyContext context)
+		protected override void RequestStartup(TinyIoCContainer container, IPipelines pipelines, NancyContext context)
 		{
-			pipelines.OnError.AddItemToEndOfPipeline((ctx, ex) =>
-			{
-				// Wrap all exceptions in an error response
-				return ErrorResponse.FromException(ex);
-			});
+			// NOTE: The pipelies do not get called when serving static content.
+			// Need to investigate disabling this if we want the back end to do
+			// global redirects to the EULA.
+			// https://github.com/NancyFx/Nancy/pull/982
 
 			base.RequestStartup(container, pipelines, context);
+
+			// Enable static content
+			StaticContent.Enable(pipelines);
+
+			// Ensure these get insterted after all default handlers
+			pipelines.BeforeRequest.AddItemToStartOfPipeline((ctx) =>
+			{
+				if (!License.EulaAccepted)
+				{
+					if (ctx.Request.Path == "/favicon.ico")
+						return null;
+
+					if (ctx.Request.Path != "/eula")
+						return new RedirectResponse("/eula");
+				}
+
+				return null;
+			});
+
+			// Wrap all exceptions in an error response
+			pipelines.OnError.AddItemToEndOfPipeline((ctx, ex) => ErrorResponse.FromException(ex));
+
+			// Make default be utf-8
+			pipelines.AfterRequest.AddItemToEndOfPipeline(ctx =>
+			{
+				if (ctx.Response.ContentType == "text/html")
+					ctx.Response.ContentType = "text/html; charset=utf8";
+			});
 		}
 
 		protected override NancyInternalConfiguration InternalConfiguration
 		{
 			get
 			{
-				// Tell Nancy views are embedded resources
-				return NancyInternalConfiguration.WithOverrides(c => c.ViewLocationProvider = typeof(ResourceViewLocationProvider));
+				// Allow overriding default nancy configuration
+				return NancyInternalConfiguration.WithOverrides(OnConfigurationBuilder);
 			}
+		}
+
+		void OnConfigurationBuilder(NancyInternalConfiguration c)
+		{
+			// Tell Nancy views are embedded resources
+			c.ViewLocationProvider = typeof(ResourceViewLocationProvider);
+
+			// Tell nancy to send all static content thru the request pipeline
+			c.StaticContentProvider = typeof(DisabledStaticContentProvider);
 		}
 	}
 
@@ -175,7 +213,7 @@ namespace Peach.Enterprise.WebServices
 			: base(error, new JsonNetSerializer(new CustomJsonSerializer()))
 		{
 			this.error = error;
-			this.StatusCode = Nancy.HttpStatusCode.InternalServerError;
+			StatusCode = HttpStatusCode.InternalServerError;
 		}
 
 		public string ErrorMessage
@@ -236,15 +274,6 @@ namespace Peach.Enterprise.WebServices
 		public WebServer(string pitLibraryPath)
 		{
 			Context = new WebContext(pitLibraryPath);
-
-			bootstrapper = new Bootstrapper(Context);
-			config = new HostConfiguration()
-			{
-				UrlReservations = new UrlReservations()
-				{
-					CreateAutomatically = true,
-				},
-			};
 		}
 
 		public void Start()
@@ -256,6 +285,19 @@ namespace Peach.Enterprise.WebServices
 		{
 			while (host == null)
 			{
+				// Need to make a new Bootstrapper every time.
+				// If tmoHost.Start() fails, we don't want to
+				// reinitialize an already initialized bootstrapper!
+
+				bootstrapper = new Bootstrapper(Context);
+				config = new HostConfiguration()
+				{
+					UrlReservations = new UrlReservations()
+					{
+						CreateAutomatically = true,
+					},
+				};
+
 				try
 				{
 					var tmpUri = new Uri(string.Format("http://{0}:{1}", hostname, port++));
@@ -286,23 +328,22 @@ namespace Peach.Enterprise.WebServices
 		public void Stop()
 		{
 			if (host != null)
-			{
 				host.Stop();
-				host = null;
-			}
+
+			host = null;
+			config = null;
+			bootstrapper = null;
+			Uri = null;
 		}
 
 		public void Dispose()
 		{
 			Stop();
 
-			config = null;
-			bootstrapper = null;
-			Uri = null;
 			Context = null;
 		}
 
-		public static int Run(string pitLibraryPath)
+		public static int Run(string pitLibraryPath, bool shouldStartBrowser)
 		{
 			using (var evt = new AutoResetEvent(false))
 			{
@@ -314,19 +355,19 @@ namespace Peach.Enterprise.WebServices
 
 					try
 					{
-						if (!System.Diagnostics.Debugger.IsAttached)
+						if (!Debugger.IsAttached && shouldStartBrowser)
 						{
-							System.Diagnostics.Process.Start(svc.Uri.ToString());
+							Process.Start(svc.Uri.ToString());
 						}
 					}
 					catch
 					{
 					}
 
-					Core.Runtime.ConsoleWatcher.WriteInfoMark();
+					ConsoleWatcher.WriteInfoMark();
 					Console.WriteLine("Web site running at: {0}", svc.Uri);
 
-					Peach.Core.Runtime.ConsoleWatcher.WriteInfoMark();
+					ConsoleWatcher.WriteInfoMark();
 					Console.WriteLine("Press Ctrl-C to exit.");
 
 					try

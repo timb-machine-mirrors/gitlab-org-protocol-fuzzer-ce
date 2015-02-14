@@ -2,11 +2,10 @@
 // Copyright (c) Deja vu Security
 //
 
-using System;
-
+using Peach.Core;
 using Peach.Core.Dom;
 
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	/// <summary>
 	/// Generate string with random unicode characters in them from plane 2 (0x20000 - 0x2ffff).

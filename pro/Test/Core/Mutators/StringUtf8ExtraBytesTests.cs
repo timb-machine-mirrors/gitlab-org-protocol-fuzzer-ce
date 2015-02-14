@@ -1,10 +1,10 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using Peach.Core.Dom;
 using NUnit.Framework;
+using Peach.Core;
+using Peach.Core.Dom;
+using Peach.Core.Test;
 
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class StringUtf8ExtraBytesTests
@@ -14,7 +14,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringUtf8ExtraBytes");
 
-			var str = new Dom.String("String");
+			var str = new Peach.Core.Dom.String("String");
 			Assert.False(runner.IsSupported(str));
 
 			str.DefaultValue = new Variant("hello");
@@ -50,7 +50,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringUtf8ExtraBytes");
 
-			var str = new Dom.String("String") { DefaultValue = new Variant("Hello") };
+			var str = new Peach.Core.Dom.String("String") { DefaultValue = new Variant("Hello") };
 
 			var m = runner.Sequential(str);
 
@@ -71,7 +71,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("StringUtf8ExtraBytes");
 
-			var str = new Dom.String("String") { DefaultValue = new Variant("Hello") };
+			var str = new Peach.Core.Dom.String("String") { DefaultValue = new Variant("Hello") };
 
 			var m = runner.Random(500, str);
 

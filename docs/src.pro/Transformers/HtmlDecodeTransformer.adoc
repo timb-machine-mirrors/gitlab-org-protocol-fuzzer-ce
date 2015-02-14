@@ -27,23 +27,23 @@
 [horizontal]
 Type:: Encoder/Decoder
 
-_HtmlDecode_ will decode any HTML/XML encoded characters in the string in the parent xref:DataModel[DataModel].
-Only the characters < & ' and " will be decoded.
+_HtmlDecode_ decodes any HTML/XML-encoded characters in the string in the parent xref:DataModel[DataModel].
+The following characters are decoded: less than (<), ampersand (&), apostrophe ('), and quotation mark (").
 
 The xref:Transformer[Transformer] can bidirectionally encode data as well as decode data.
 
 === Parameters
 
-No Parameters are supported by this element.
+None.
 
 === Attributes
 
-No Attributes are supported by this transformer.
+None.
 
 === Actions Supported
 
-xref:Action_input[input]:: On input this transformer will HTML encode certain characters for the incoming data.
-xref:Action_output[output]:: On output this transformer will decode HTML encoded characters for the outgoing data.
+xref:Action_input[input]:: On input, this transformer encodes characters to their HTML-encoded character sequences for incoming data.
+xref:Action_output[output]:: On output, this transformer decodes HTML-encoded character sequences to single-character representations for outgoing data.
 
 === Examples
 

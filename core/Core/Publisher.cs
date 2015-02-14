@@ -29,15 +29,8 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Text;
-using System.Linq;
 using Peach.Core.Dom;
-using Peach;
 using Peach.Core.IO;
-using System.Reflection;
-using NLog;
-using Action = Peach.Core.Dom.Action;
-using System.Net;
 
 namespace Peach.Core
 {
@@ -341,6 +334,8 @@ namespace Peach.Core
 		public void output(BitwiseStream data)
 		{
 			data = data.PadBits();
+			data.Seek(0, SeekOrigin.Begin);
+
 			Logger.Debug("output({0} bytes)", data.Length);
 			OnOutput(data);
 		}

@@ -8,15 +8,15 @@ If any of the Godel scripting expressions evaluates to false, Peach generates a 
 
 A single Godel element can be placed as a child of xref:StateModel[StateModel], xref:State[State] or xref:Action[Action]:
 
-* When a Godel element is a child of xref:StateModel[StateModel], the expressions are evaluated when the StateModel starts and finishes.
-* When a Godel element is a child of xref:State[State], the expressions are evaluated when the State starts and finishes.
-* When a Godel element is a child of xref:Action[Action], the expressions are evaluated when the Action starts and finishes.
+* When a Godel element is a child of xref:StateModel[StateModel], the expression evaluates when the StateModel starts and when the StateModel finishes.
+* When a Godel element is a child of xref:State[State], the expression evaluates when the State starts and when the State finishes.
+* When a Godel element is a child of xref:Action[Action], the expression evaluate when the Action starts and finishes.
 
 Godel elements support three scripting expressions:
 
-. 'inv' - An invariant expression that is evaluated at both start and finish
-. 'pre' - An expression that is evaluated at start
-. 'post' - A expression that is evaluated at finish
+. 'inv' - An invariant expression that evaluates both at the start and at the finish of the appropriate level of the StateModel (StateModel, State, or Action) 
+. 'pre' - An expression evaluates at start of the appropriate level of the StateModel
+. 'post' - A expression that is evaluated upon completion of the appropriate level of the StateModel 
 
 === Syntax
 
@@ -29,7 +29,7 @@ Godel elements support three scripting expressions:
 
 _Required:_
 
-There are no required attributes.
+None.
 
 _Optional:_
 
@@ -53,11 +53,11 @@ When evaluating the 'post' scripting expressions, an additional variable 'pre' i
 
 * The 'pre' variable is a reference to the previous self from when the parent element started.
 +
-For example, when a 'post' expression is placed on an Action, this expression can access to the action as it was prior to completing with the 'pre' variable.
+For example, when a 'post' expression is placed on an Action, this expression can access the action as it was prior to completing with the 'pre' variable.
 
 === Examples
 
-The following example shows using a simple Godel pre-condition on StateModel, State and Action
+The following example uses a simple Godel pre-condition on StateModel, State and Action
 
 [source,xml]
 ----

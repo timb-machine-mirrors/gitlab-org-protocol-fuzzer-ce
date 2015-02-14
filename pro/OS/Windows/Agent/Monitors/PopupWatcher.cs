@@ -28,14 +28,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
+using Peach.Core;
+using Peach.Core.Agent;
+using Monitor = Peach.Core.Agent.Monitor;
 
-namespace Peach.Core.Agent.Monitors
+namespace Peach.Pro.OS.Windows.Agent.Monitors
 {
 	[Monitor("PopupWatcher", true)]
+	[Description("Closes windows based on title")]
 	[Parameter("WindowNames", typeof(string[]), "Window names separated by a ','")]
 	[Parameter("Fault", typeof(bool), "Trigger fault when a window is found", "false")]
 	public class PopupWatcher : Monitor
@@ -102,9 +105,10 @@ namespace Peach.Core.Agent.Monitors
 					lock (_lock)
 					{
 						_closedWindows.Add(strTitle);
+						OnInternalEvent(EventArgs.Empty);
 					}
 
-					_continue = false;
+					_continue &= WindowNames.Length > 1;
 					return _continue;
 				}
 			}

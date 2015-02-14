@@ -11,7 +11,7 @@ using Peach.Core.Cracker;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 using Peach.Core.Test;
-using Peach.Enterprise.Dom;
+using Peach.Pro.Core.Dom;
 
 namespace Peach.Enterprise.Test.CrackingTests
 {

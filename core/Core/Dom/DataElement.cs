@@ -28,19 +28,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections;
 using System.Linq;
 using System.Text;
-using System.Runtime.InteropServices;
-using System.Runtime;
 using System.Reflection;
-using System.Runtime.Serialization;
+using System.Threading;
 using System.Xml;
 
 using Peach.Core.IO;
 using Peach.Core.Cracker;
 using System.Diagnostics;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 
 using NLog;
@@ -419,6 +415,35 @@ namespace Peach.Core.Dom
 		protected virtual IEnumerable<DataElement> Children()
 		{
 			return new DataElement[0];
+		}
+
+		/// <summary>
+		/// Is this element in scope in the data model.
+		/// </summary>
+		/// <returns></returns>
+		public bool InScope()
+		{
+			var e = this;
+			var p = e.parent;
+
+			while (p != null && p.InScope(e))
+			{
+				e = p;
+				p = e.parent;
+			}
+
+			return p == null;
+		}
+
+		/// <summary>
+		/// Is a child in the selected element scope for a given parent.
+		/// Default behavior is true: all cchildren are in scope.
+		/// </summary>
+		/// <param name="child"></param>
+		/// <returns></returns>
+		protected virtual bool InScope(DataElement child)
+		{
+			return true;
 		}
 
 		#region Find Element By Name
@@ -835,7 +860,16 @@ namespace Peach.Core.Dom
 				}
 				catch (TargetInvocationException ex)
 				{
-					throw ex.InnerException;
+					var baseEx = ex.GetBaseException();
+					if (baseEx is ThreadAbortException)
+						throw baseEx;
+
+					var inner = ex.InnerException;
+					if (inner == null)
+						throw;
+
+					var outer = (Exception)Activator.CreateInstance(inner.GetType(), inner.Message, inner);
+					throw outer;
 				}
 			}
 

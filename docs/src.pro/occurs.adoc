@@ -30,7 +30,7 @@ The _occurs_ value (for the specified data element) is the exact number of eleme
 </Block>
 ----
 
-Will produce the output:  
+Produces the output:  
 
 ---- 
 AAAAA

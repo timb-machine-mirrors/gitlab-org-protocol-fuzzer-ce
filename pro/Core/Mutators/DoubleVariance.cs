@@ -5,8 +5,9 @@ using System.Text;
 
 using Peach.Core;
 using Peach.Core.Dom;
+using Peach.Pro.Core.Mutators.Utility;
 
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	//Hide this mutator as its not fully tested
 	[Mutator("DoubleVariance")]
@@ -49,7 +50,7 @@ namespace Peach.Core.Mutators
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			if (obj is Dom.String && obj.isMutable)
+			if (obj is Peach.Core.Dom.String && obj.isMutable)
 				return obj.Hints.ContainsKey("NumericalString");
 
 			var asDouble = obj as Peach.Core.Dom.Double;

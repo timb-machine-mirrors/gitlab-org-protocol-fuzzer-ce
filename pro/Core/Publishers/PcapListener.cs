@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
-using System.Text;
+using System.Net;
+using System.Net.NetworkInformation;
+using NLog;
+using PacketDotNet;
+using Peach.Core;
 using SharpPcap;
 using SharpPcap.LibPcap;
-using SharpPcap.WinPcap;
-using PacketDotNet;
-using NLog;
 
-using Peach.Core;
-
-namespace Peach.Pro.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	/// <summary>
 	/// Listen and queue incoming packets for use by Publisher
@@ -30,82 +28,78 @@ namespace Peach.Pro.Publishers
 		/// <summary>
 		/// Queue of received packets. This is a thread safe queue.
 		/// </summary>
-		public ConcurrentQueue<RawCapture> PacketQueue = null;
+		public BlockingCollection<RawCapture> PacketQueue = new BlockingCollection<RawCapture>();
 
-		public PcapListener(System.Net.NetworkInformation.PhysicalAddress macAddress)
+		public PcapListener(PhysicalAddress macAddress)
 		{
-			var devices = CaptureDeviceList.Instance;
+			var devices = CaptureDeviceList.Instance.OfType<LibPcapLiveDevice>();
 
 			foreach (var device in devices)
 			{
-				device.Open();
-				if (device.MacAddress.ToString() == macAddress.ToString())
-				{
-					_device = device;
-					break;
-				}
-				device.Close();
+				if (!device.Interface.MacAddress.Equals(macAddress))
+					continue;
+
+				_device = device;
+				break;
 			}
 
 			if (_device == null)
-				throw new ArgumentException("Unable to locate network device with mac '"+macAddress.ToString()+"'.");
+				throw new ArgumentException("Unable to locate network device with mac '{0}'.".Fmt(macAddress));
 
 			_device.OnPacketArrival += _device_OnPacketArrival;
 		}
 
 		public PcapListener(string deviceName)
 		{
-			var devices = CaptureDeviceList.Instance;
+			var devices = CaptureDeviceList.Instance.OfType<LibPcapLiveDevice>();
 
 			foreach (var device in devices)
 			{
-				if (device.Name == deviceName)
-				{
-					_device = device;
-					break;
-				}
+				if (device.Interface.FriendlyName != deviceName)
+					continue;
+
+				_device = device;
+				break;
 			}
 
 			if (_device == null)
-				throw new ArgumentException("Unable to locate network device '"+deviceName+"'.");
+				throw new ArgumentException("Unable to locate network device '{0}'.".Fmt(deviceName));
 		}
 
-		public PcapListener(System.Net.IPAddress Interface)
+		public PcapListener(IPAddress Interface)
 		{
-			//var globalip = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();
-			System.Net.NetworkInformation.PhysicalAddress macAddress = null;
+			PhysicalAddress macAddress = null;
 
-			foreach (var adapter in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
+			foreach (var adapter in NetworkInterface.GetAllNetworkInterfaces())
 			{
-				if (adapter.Supports(System.Net.NetworkInformation.NetworkInterfaceComponent.IPv4) == false)
+				if (!adapter.Supports(NetworkInterfaceComponent.IPv4))
 					continue;
 
-				if (adapter.GetIPProperties().UnicastAddresses.Where(v => v.Address.ToString() == Interface.ToString()).Count() > 0)
-				{
-					macAddress = adapter.GetPhysicalAddress();
-					break;
-				}
+				var addrs = adapter.GetIPProperties().UnicastAddresses;
+
+				if (!addrs.Any(a => a.Address.Equals(Interface)))
+					continue;
+
+				macAddress = adapter.GetPhysicalAddress();
+				break;
 			}
 
 			if (macAddress == null)
-				throw new PeachException(string.Format("Unable to locate adapter for interface '{0}'.", Interface));
+				throw new PeachException("Unable to locate adapter for interface '{0}'.".Fmt(Interface));
 
-			var devices = CaptureDeviceList.Instance;
+			var devices = CaptureDeviceList.Instance.OfType<LibPcapLiveDevice>();
 
 			foreach (var device in devices)
 			{
-				device.Open();
-				if (device.MacAddress.ToString() == macAddress.ToString())
-				{
-					_device = device;
-					break;
-				}
-				device.Close();
+				if (!device.Interface.MacAddress.Equals(macAddress))
+					continue;
+
+				_device = device;
+				break;
 			}
 
 			if (_device == null)
-				throw new ArgumentException(string.Format("Unable to locate network device with mac '{0}'.",
-					macAddress.ToString()));
+				throw new ArgumentException("Unable to locate network device with mac '{0}'.".Fmt(macAddress));
 
 			_device.OnPacketArrival += _device_OnPacketArrival;
 		}
@@ -115,19 +109,20 @@ namespace Peach.Pro.Publishers
 		/// </summary>
 		public void Start()
 		{
-			Start("");
+			Start("", 1000);
 		}
 
 		/// <summary>
 		/// Start capturing packets
 		/// </summary>
 		/// <param name="filter">Capture filter. Follows the libpcap format.</param>
-		public void Start(string filter)
+		/// <param name="timeout">pcap_open_live to_ms parameter.</param>
+		public void Start(string filter, int timeout)
 		{
-			Logger.Debug("Starting capture");
-			PacketQueue = new ConcurrentQueue<RawCapture>();
+			Logger.Debug("Starting capture (filter: {0}, timeout: {1})", filter, timeout);
+			PacketQueue = new BlockingCollection<RawCapture>();
 
-			_device.Open(DeviceMode.Promiscuous);
+			_device.Open(DeviceMode.Promiscuous, timeout);
 
 			_device.Filter = filter;
 
@@ -157,13 +152,22 @@ namespace Peach.Pro.Publishers
 		/// </summary>
 		public void Clear()
 		{
-			PacketQueue = new ConcurrentQueue<RawCapture>();
+			var cnt = 0;
+
+			while (PacketQueue.Count > 0)
+			{
+				RawCapture item;
+				PacketQueue.TryTake(out item);
+				++cnt;
+			}
+
+			Logger.Debug("Cleared {0} packets from queue", cnt);
 		}
 
 		void _device_OnPacketArrival(object sender, CaptureEventArgs e)
 		{
-			PacketQueue.Enqueue(e.Packet);
 			Logger.Debug("Queuing packet");
+			PacketQueue.Add(e.Packet);
 		}
 
 		/// <summary>

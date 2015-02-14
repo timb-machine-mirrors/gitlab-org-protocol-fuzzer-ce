@@ -20,24 +20,23 @@
 // 03/05/2014: Lynn: 
 //  Edited and corrected definition text 
 
-The start action causes a xref:Publisher[Publisher] to perform the initialization that would usually occur at the start of a fuzzing session. 
+The _start_ action causes a xref:Publisher[Publisher] to perform the initialization that usually occurs at the start of a fuzzing session. _start_ normally occurs once per fuzzing session, at the start of session. Another Action element, xref:Action_stop[_stop_], also normally occurs once per fuzzing session, at the end of the session. 
 
-Including the _start_ or _stop_ action in the StateModel will cause them to run on every iteration instead of once per session. This should be avoided unless specifically required.
+_start_ is an implicit Peach action that should not be declared in the xref:StateModel[StateModel] unless a change is needed in the default behavior.
 
-_start_ normally occurs once at the start of the fuzzing session, and xref:Action_stop[_stop_] normally occur once at the end of the fuzzing session. Since start is one of the implicit Peach actions, it does not need to be included in the xref:StateModel[StateModel] unless there is a change in the default behavior.
+*NOTE:* Including the _start_ or _stop_ action in the StateModel causes the action to run every iteration instead of once per session. This declaration should be avoided unless specifically required.
 
-
-Not all xref:Publisher[Publishers] make use of start and stop.
+Not all xref:Publisher[Publishers] make use of _start_ and _stop_.
 
 .Default Order of Actions
 ****
 The following is the default Actions order when fuzzing:
 
-. start - Implicit, once per session
-. open - Implicit, once per iteration
-. Explicit actions (such as accept, input and output)
-. close - Implicit, once per iteration
-. stop - Implicit, once per session
+. _start_ - Implicit, once per session
+. _open_ - Implicit, once per iteration
+. Explicit actions (such as _accept_, _input_ and _output_)
+. _close_ - Implicit, once per iteration
+. _stop_ - Implicit, once per session
 ****
 
 === Syntax
@@ -55,27 +54,27 @@ The following is the default Actions order when fuzzing:
 
 _Required:_
 
-type:: Action type, must be set to "stop"
+type:: Action type, must be set to "start"
 
 _Optional:_
 
 name:: Name used to identify the action
-publisher:: Name of the publisher that this action should be called on
-xref:Action_when[when]:: Only perform action if the expression provided evaluates to true
-xref:Action_onStart[onStart]:: Expression to run on start of an action.
-xref:Action_onComplete[onComplete]:: Expression to run on completion of an action
+publisher:: Name of the publisher to perform this action
+xref:Action_when[when]:: Only perform the action if the provided expression evaluates to true
+xref:Action_onStart[onStart]:: Expression to run at the start of an action.
+xref:Action_onComplete[onComplete]:: Expression to run at the completion of an action
 
 === Child Elements
 
-No child-elements are supported by this element.
+None.
 
 === Examples
 
 .Default behavior
 ==========================
-Example Pit shows normal (default) behavior.
-We do not need to include the _stop_ or _start_ actions.
-The output is shown after the example.
+The Example Pit shows normal (default) behavior.
+Declarations for _start_ and _stop_ are unnecessary and not included.
+The output follows the Pit definition.
 
 [source,xml]
 ----
@@ -104,7 +103,7 @@ The output is shown after the example.
       </Action>
 
       <!-- Close action is implicitly called on every iteration by Peach.
-           It will cause the Publisher to close it's connection to the remote
+           It will cause the Publisher to close its connection to the remote
            host if it's still open. -->
 
       <!-- This action is implicitly called once per fuzzing session. It will perform any
@@ -127,7 +126,7 @@ The output is shown after the example.
 </Peach>
 ----
 
-Output showing the default behavior of the sample pit where the start action is called once at the beginning of the fuzzing session and the stop action is called once at the end of the fuzzing session.
+Output showing the default behavior of the sample pit where the _start_ action is called once at the beginning of the fuzzing session and the _stop_ action is called once at the end of the fuzzing session.
 
 ----
 > peach --range 1,3 --seed 51405 example.xml
@@ -249,15 +248,15 @@ Peach.Core.Publishers.TcpClientPublisher stop()                              <2>
 
 [*] Test 'Default' finished.
 ----
-<1> Start action at beginning of fuzzing session
-<2> Stop action at end of fuzzing session
+<1> _Start_ action at beginning of fuzzing session
+<2> _Stop_ action at end of fuzzing session
 
 ==========================
 
 .Explicit calling of start
 ==========================
-Example Pit showing explicit calling of the _start_ and _stop_ action.
-This will cause _start_ and _stop_ to be called on every iteration as seen in the output listing.
+The Example Pit shows explicit declaration of the _start_ and _stop_ actions.
+The _start_ and _stop_ declarations cause them to be called every iteration, as seen in the output listing.
 
 [source,xml]
 ----
@@ -288,7 +287,7 @@ This will cause _start_ and _stop_ to be called on every iteration as seen in th
       </Action>
 
       <!-- This action is called on every iteration. It will cause the
-           Tcp Publisher to close it's connection to the remote host if it's
+           Tcp Publisher to close its connection to the remote host if it's
            still open. -->
       <Action type="close" />
 
@@ -313,7 +312,7 @@ This will cause _start_ and _stop_ to be called on every iteration as seen in th
 </Peach>
 ----
 
-In the output below the start action is called at the beginning of every iteration followed by a stop action at the end of every iteration.
+In the following output, the _start_ action executes at the beginning of every iteration and the _stop_ action follows at the end of every iteration.
 
 ----
 > peach --range 1,3 --seed 51405 example.xml
@@ -462,13 +461,13 @@ Peach.Core.Publishers.TcpClientPublisher Closing connection to 127.0.0.1:31337
 Peach.Core.Dom.Action ActionType.Stop
 Peach.Core.Publishers.TcpClientPublisher stop()                              <8>
 ----
-<1> Start action at beginning of iteration
-<2> Stop action at end of iteration
-<3> Start action at beginning of iteration
-<4> Stop action at end of iteration
-<5> Start action at beginning of iteration
-<6> Stop action at end of iteration
-<7> Start action at beginning of iteration
-<8> Stop action at end of iteration
+<1> _Start_ action at beginning of iteration
+<2> _Stop_ action at end of iteration
+<3> _Start_ action at beginning of iteration
+<4> _Stop_ action at end of iteration
+<5> _Start_ action at beginning of iteration
+<6> _Stop_ action at end of iteration
+<7> _Start_ action at beginning of iteration
+<8> _Stop_ action at end of iteration
 
 ==========================

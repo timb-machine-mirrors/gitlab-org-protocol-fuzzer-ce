@@ -30,10 +30,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-
+using System.Threading;
 using NLog;
+using Peach.Core;
+using Peach.Core.Agent;
+using Monitor = Peach.Core.Agent.Monitor;
 
-namespace Peach.Core.Agent
+namespace Peach.Pro.Core.Agent
 {
 	/// <summary>
 	/// Agent logic.  This class is typically
@@ -74,6 +77,10 @@ namespace Peach.Core.Agent
 			}
 			catch (TargetInvocationException ex)
 			{
+				var baseEx = ex.GetBaseException();
+				if (baseEx is ThreadAbortException)
+					throw baseEx;
+
 				throw new PeachException("Could not start publisher \"" + cls + "\".  " + ex.InnerException.Message, ex);
 			}
 		}
@@ -115,9 +122,12 @@ namespace Peach.Core.Agent
 			}
 			catch (TargetInvocationException ex)
 			{
+				var baseEx = ex.GetBaseException();
+				if (baseEx is ThreadAbortException)
+					throw baseEx;
+
 				throw new PeachException("Could not start monitor \"" + cls + "\".  " + ex.InnerException.Message, ex);
 			}
-
 		}
 
 		public void StopAllMonitors()
@@ -265,7 +275,7 @@ namespace Peach.Core.Agent
 		/// Send an information request (query) to all local monitors.
 		/// </summary>
 		/// <remarks>
-		/// Monitors may expose information that other monitors can query.  For example a
+		/// Agents may expose information that other monitors can query.  For example a
 		/// debugger monitor may expose a "QueryPid" to get the current process id.  This
 		/// information could be useful to a window closing monitor that monitors windows created
 		/// by the process id and closes them if needed.

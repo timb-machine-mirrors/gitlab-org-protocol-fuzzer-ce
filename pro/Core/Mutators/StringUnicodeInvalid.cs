@@ -2,11 +2,10 @@
 // Copyright (c) Deja vu Security
 //
 
-using System;
-
+using Peach.Core;
 using Peach.Core.Dom;
 
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	/// <summary>
 	/// Generate string with random invalid unicode characters (0xd800 - 0xdbff).

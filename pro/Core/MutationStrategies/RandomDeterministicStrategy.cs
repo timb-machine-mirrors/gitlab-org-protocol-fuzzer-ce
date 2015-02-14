@@ -28,11 +28,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Peach.Core.Dom;
-using System.Reflection;
+using Peach.Core;
+using Random = Peach.Core.Random;
 
-namespace Peach.Core.MutationStrategies
+namespace Peach.Pro.Core.MutationStrategies
 {
 	[MutationStrategy("RandomDeterministic", true)]
 	[Serializable]
@@ -46,11 +45,6 @@ namespace Peach.Core.MutationStrategies
 		{
 		}
 
-		public override void Initialize(RunContext context, Engine engine)
-		{
-			base.Initialize(context, engine);
-		}
-
 		public override uint Iteration
 		{
 			get
@@ -61,7 +55,7 @@ namespace Peach.Core.MutationStrategies
 			{
 				_mapping = value;
 
-				if (!_context.controlIteration)
+				if (!Context.controlIteration)
 					base.Iteration = sequence.Get(value);
 				else
 					base.Iteration = value;

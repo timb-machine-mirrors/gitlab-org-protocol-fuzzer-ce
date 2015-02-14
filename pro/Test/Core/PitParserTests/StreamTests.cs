@@ -1,10 +1,9 @@
-using System;
 using System.IO;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
 
-namespace Peach.Enterprise.Test.PitParserTests
+namespace Peach.Pro.Test.Core.PitParserTests
 {
 	[TestFixture] [Category("Peach")]
 	class StreamTests

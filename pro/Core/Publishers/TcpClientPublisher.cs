@@ -28,18 +28,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Threading;
-using System.Net.Sockets;
-
-using Peach.Core.Dom;
-
-using NLog;
 using System.Diagnostics;
+using System.Net.Sockets;
+using System.Threading;
+using NLog;
+using Peach.Core;
 
-namespace Peach.Core.Publishers
+namespace Peach.Pro.Core.Publishers
 {
 	[Publisher("Tcp", true)]
 	[Publisher("TcpClient")]
@@ -47,7 +42,7 @@ namespace Peach.Core.Publishers
 	[Parameter("Host", typeof(string), "Hostname or IP address of remote host")]
 	[Parameter("Port", typeof(ushort), "Local port to listen on")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait when receiving data (default 3000)", "3000")]
-	[Parameter("SendTimeout", typeof(int), "How many milliseconds to wait when sending data (default infinite)", "0")]
+	[Parameter("SendTimeout", typeof(int), "How many milliseconds to wait when sending data (default infinite)", "-1")]
 	[Parameter("ConnectTimeout", typeof(int), "Max milliseconds to wait for connection (default 10000)", "10000")]
 	public class TcpClientPublisher : TcpPublisher
 	{
