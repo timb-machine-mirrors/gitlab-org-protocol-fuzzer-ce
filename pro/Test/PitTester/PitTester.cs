@@ -100,7 +100,7 @@ namespace PitTester
 
 						setElement.DefaultValue = blob.DefaultValue;
 
-						if (setElement.fixup is VolatileFixup)
+						if (setElement.fixup is Peach.Core.Fixups.VolatileFixup)
 						{
 							var dm = setElement.root as DataModel;
 							if (dm != null && dm.actionData != null)

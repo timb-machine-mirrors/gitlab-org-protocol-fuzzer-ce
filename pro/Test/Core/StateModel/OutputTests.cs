@@ -9,7 +9,7 @@ using Peach.Pro.Core.Publishers;
 
 namespace Peach.Pro.Test.Core.StateModel
 {
-	class MemoryStreamPublisher : StreamPublisher
+	class MemoryStreamPublisher : Peach.Core.Publishers.StreamPublisher
 	{
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
