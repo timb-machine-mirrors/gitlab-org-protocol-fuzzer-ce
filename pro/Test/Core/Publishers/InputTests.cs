@@ -10,7 +10,7 @@ using Peach.Pro.Core.Publishers;
 namespace Peach.Pro.Test.Core.Publishers
 {
 	// Only returns input bytes when asked
-	class BytePublisher : StreamPublisher
+	class BytePublisher : Peach.Core.Publishers.StreamPublisher
 	{
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }

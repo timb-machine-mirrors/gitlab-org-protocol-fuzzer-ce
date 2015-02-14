@@ -40,7 +40,7 @@ namespace Peach.Pro.Core.Fixups
 	[Fixup("SequenceRandomFixup")]
 	[Fixup("sequence.SequenceRandomFixup")]
 	[Serializable]
-	public class SequenceRandomFixup : VolatileFixup
+	public class SequenceRandomFixup : Peach.Core.Fixups.VolatileFixup
 	{
 		public SequenceRandomFixup(DataElement parent, Dictionary<string, Variant> args)
 			: base(parent, args)
