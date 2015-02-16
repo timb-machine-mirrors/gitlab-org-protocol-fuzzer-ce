@@ -492,7 +492,7 @@ namespace Peach.Core
 						logger.Debug(ex.StackTrace);
 						logger.Debug("runTest: Warning: Iteration ended due to out of memory exception.  Continuing to next iteration.");
 
-						throw new SoftException("Out of memory");
+						throw new SoftException("Out of memory", ex);
 					}
 					finally
 					{
