@@ -1,18 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
+﻿using System.IO;
 
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.Analyzers;
-using Peach.Core.IO;
 using Peach.Core.Test;
-using Peach.Pro.Core.Dom;
 
 namespace Peach.Pro.Test.Core.PitParserTests
 {
@@ -23,34 +15,36 @@ namespace Peach.Pro.Test.Core.PitParserTests
 		[Test]
 		public void DoubleDefaults()
 		{
-			string xml = @"<?xml version='1.0' encoding='utf-8'?>
-                <Peach>
-                	<DataModel name='TheDataModel'>
-                		<Double size='64' />
-                	</DataModel>
-                </Peach>";
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+				<Peach>
+					<DataModel name='TheDataModel'>
+						<Double size='64' />
+					</DataModel>
+				</Peach>";
 
 			var parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(Peach.Core.ASCIIEncoding.ASCII.GetBytes(xml)));
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 			var num = dom.dataModels[0][0] as Peach.Core.Dom.Double;
 
-			Assert.IsTrue(num.LittleEndian);
+			Assert.IsTrue(num != null && num.LittleEndian);
 			Assert.AreEqual(0.0, (double)num.DefaultValue);
 		}
 
 		[Test]
 		public void DoubleValues()
 		{
-			string xml = @"<?xml version='1.0' encoding='utf-8'?>
-                <Peach>
-                	<DataModel name='TheDataModel'>
-                		<Double name='DoubleMe' size='64' />
-                	</DataModel>
-                </Peach>";
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+				<Peach>
+					<DataModel name='TheDataModel'>
+						<Double name='DoubleMe' size='64' />
+					</DataModel>
+				</Peach>";
 
 			var parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(Peach.Core.ASCIIEncoding.ASCII.GetBytes(xml)));
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 			var num = dom.dataModels[0][0] as Peach.Core.Dom.Double;
+
+			Assert.IsTrue(num != null);
 
 			Assert.AreEqual(0.0, (double)num.DefaultValue);
 
@@ -100,70 +94,72 @@ namespace Peach.Pro.Test.Core.PitParserTests
 		[Test]
 		public void ValueTypeTest()
 		{
-			string xml = @"<?xml version='1.0' encoding='utf-8'?>
-                <Peach>
-                	<DataModel name='TheDataModel'>
-                		<Double size='64' valueType='hex' value='0000000000e06f40' />
-                	</DataModel>
-                </Peach>";
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+				<Peach>
+					<DataModel name='TheDataModel'>
+						<Double size='64' valueType='hex' value='0000000000e06f40' />
+					</DataModel>
+				</Peach>";
 
 			var parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(Peach.Core.ASCIIEncoding.ASCII.GetBytes(xml)));
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 			var num = dom.dataModels[0][0] as Peach.Core.Dom.Double;
 
-			Assert.IsTrue(num.LittleEndian);
+			Assert.IsTrue(num != null && num.LittleEndian);
 			Assert.AreEqual(255.0, (double)num.DefaultValue);
 		}
 
 		[Test]
 		public void ValueTest1()
 		{
-			string xml = @"<?xml version='1.0' encoding='utf-8'?>
-                <Peach>
-                	<DataModel name='TheDataModel'>
-                		<Double size='64' value='Infinity' />
-                	</DataModel>
-                </Peach>";
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+				<Peach>
+					<DataModel name='TheDataModel'>
+						<Double size='64' value='Infinity' />
+					</DataModel>
+				</Peach>";
 
 			var parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(Peach.Core.ASCIIEncoding.ASCII.GetBytes(xml)));
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 			var num = dom.dataModels[0][0] as Peach.Core.Dom.Double;
 
-			Assert.IsTrue(num.LittleEndian);
+			Assert.IsTrue(num != null && num.LittleEndian);
 			Assert.AreEqual(double.PositiveInfinity, (double)num.DefaultValue);
 		}
 
 		[Test]
 		public void ValueTest2()
 		{
-			string xml = @"<?xml version='1.0' encoding='utf-8'?>
-                <Peach>
-                	<DataModel name='TheDataModel'>
-                		<Double size='64' value='1' />
-                	</DataModel>
-                </Peach>";
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+				<Peach>
+					<DataModel name='TheDataModel'>
+						<Double size='64' value='1' />
+					</DataModel>
+				</Peach>";
 
 			var parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(Peach.Core.ASCIIEncoding.ASCII.GetBytes(xml)));
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 			var num = dom.dataModels[0][0] as Peach.Core.Dom.Double;
 
-			Assert.IsTrue(num.LittleEndian);
+			Assert.IsTrue(num != null && num.LittleEndian);
 			Assert.AreEqual(1.0, (double)num.DefaultValue);
 		}
 
 		[Test]
 		public void ValueTest3()
 		{
-			string xml = @"<?xml version='1.0' encoding='utf-8'?>
-                <Peach>
-                	<DataModel name='TheDataModel'>
-                		<Double size='64' value='255' />
-                	</DataModel>
-                </Peach>";
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+				<Peach>
+					<DataModel name='TheDataModel'>
+						<Double size='64' value='255' />
+					</DataModel>
+				</Peach>";
 
 			var parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(Peach.Core.ASCIIEncoding.ASCII.GetBytes(xml)));
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 			var num = dom.dataModels[0][0] as Peach.Core.Dom.Double;
+
+			Assert.IsTrue(num != null);
 
 			var val = num.Value.ToArray();
 
@@ -176,16 +172,18 @@ namespace Peach.Pro.Test.Core.PitParserTests
 		[Test]
 		public void ValueTest4()
 		{
-			string xml = @"<?xml version='1.0' encoding='utf-8'?>
-                <Peach>
-                	<DataModel name='TheDataModel'>
-                		<Double size='64' endian='big' value='255' />
-                	</DataModel>
-                </Peach>";
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+				<Peach>
+					<DataModel name='TheDataModel'>
+						<Double size='64' endian='big' value='255' />
+					</DataModel>
+				</Peach>";
 
 			var parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(Peach.Core.ASCIIEncoding.ASCII.GetBytes(xml)));
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 			var num = dom.dataModels[0][0] as Peach.Core.Dom.Double;
+
+			Assert.IsTrue(num != null);
 
 			var val = num.Value.ToArray();
 
@@ -198,16 +196,18 @@ namespace Peach.Pro.Test.Core.PitParserTests
 		[Test, ExpectedException("Peach.Core.PeachException", ExpectedMessage = "Error, Double 'TheDataModel.DataElement_0' value '1.79769313486232E+308' is greater than the maximum 32-bit double.")]
 		public void ValueTest5()
 		{
-			string xml = @"<?xml version='1.0' encoding='utf-8'?>
-                <Peach>
-                	<DataModel name='TheDataModel'>
-                		<Double size='32' endian='big' value='255' />
-                	</DataModel>
-                </Peach>";
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+				<Peach>
+					<DataModel name='TheDataModel'>
+						<Double size='32' endian='big' value='255' />
+					</DataModel>
+				</Peach>";
 
 			var parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(Peach.Core.ASCIIEncoding.ASCII.GetBytes(xml)));
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 			var num = dom.dataModels[0][0] as Peach.Core.Dom.Double;
+
+			Assert.IsTrue(num != null);
 
 			num.DefaultValue = new Variant(double.MaxValue);
 
@@ -217,16 +217,18 @@ namespace Peach.Pro.Test.Core.PitParserTests
 		[Test]
 		public void ValueTest6()
 		{
-			string xml = @"<?xml version='1.0' encoding='utf-8'?>
-                <Peach>
-                	<DataModel name='TheDataModel'>
-                		<Double size='32' endian='big' value='255' />
-                	</DataModel>
-                </Peach>";
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+				<Peach>
+					<DataModel name='TheDataModel'>
+						<Double size='32' endian='big' value='255' />
+					</DataModel>
+				</Peach>";
 
 			var parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(Peach.Core.ASCIIEncoding.ASCII.GetBytes(xml)));
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 			var num = dom.dataModels[0][0] as Peach.Core.Dom.Double;
+
+			Assert.IsTrue(num != null);
 
 			num.DefaultValue = new Variant(float.MaxValue);
 
@@ -236,18 +238,18 @@ namespace Peach.Pro.Test.Core.PitParserTests
 		[Test]
 		public void ValueTest7()
 		{
-			string xml = @"<?xml version='1.0' encoding='utf-8'?>
-                <Peach>
-                	<DataModel name='TheDataModel'>
-                		<Double size='32' value='255' />
-                	</DataModel>
-                </Peach>";
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+				<Peach>
+					<DataModel name='TheDataModel'>
+						<Double size='32' value='255' />
+					</DataModel>
+				</Peach>";
 
 			var parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(Peach.Core.ASCIIEncoding.ASCII.GetBytes(xml)));
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 			var num = dom.dataModels[0][0] as Peach.Core.Dom.Double;
 
-
+			Assert.IsTrue(num != null);
 			Assert.AreEqual(4, num.Value.ToArray().Length);
 			Assert.AreEqual(255.0, (float)((double)num.DefaultValue));
 		}
@@ -255,16 +257,18 @@ namespace Peach.Pro.Test.Core.PitParserTests
 		[Test]
 		public void ValueTest8()
 		{
-			string xml = @"<?xml version='1.0' encoding='utf-8'?>
-                <Peach>
-                	<DataModel name='TheDataModel'>
-                		<Double size='64' endian='big' value='255' />
-                	</DataModel>
-                </Peach>";
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+				<Peach>
+					<DataModel name='TheDataModel'>
+						<Double size='64' endian='big' value='255' />
+					</DataModel>
+				</Peach>";
 
 			var parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(Peach.Core.ASCIIEncoding.ASCII.GetBytes(xml)));
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 			var num = dom.dataModels[0][0] as Peach.Core.Dom.Double;
+
+			Assert.IsTrue(num != null);
 
 			var val = num.Value.ToArray();
 
@@ -274,5 +278,5 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			Assert.AreEqual(expected, val);
 			Assert.AreEqual(8, val.Length);
 		}
-	}
+		}
 }

@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-using NUnit.Framework;
-
-using Peach.Core.Analyzers;
-using Peach.Core.Cracker;
+﻿using NUnit.Framework;
 using Peach.Core.Dom;
 using Peach.Core.Test;
 using Peach.Pro.Core.Dom;
 
-namespace Peach.Pro.Test.Dom
+namespace Peach.Pro.Test.Core.Dom
 {
+	[TestFixture]
 	class BoolTests : DataModelCollector
 	{
 		[Test]

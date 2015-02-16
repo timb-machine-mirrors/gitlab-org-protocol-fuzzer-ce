@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
+﻿using System.Linq;
+using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Dom;
+using Peach.Core.Test;
 
-using NUnit.Framework;
-
-namespace Peach.Core.Test.Mutators
+namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	class DoubleVarianceTests
@@ -20,18 +16,18 @@ namespace Peach.Core.Test.Mutators
 
 			Assert.False(runner.IsSupported(new Blob()));
 
-			Assert.True(runner.IsSupported(new Peach.Core.Dom.Double() { length = 64 }));
-			Assert.True(runner.IsSupported(new Peach.Core.Dom.Double() { length = 32 }));
-			Assert.False(runner.IsSupported(new Peach.Core.Dom.Double() { DefaultValue = new Variant("NaN") }));
-			Assert.False(runner.IsSupported(new Peach.Core.Dom.Double() { DefaultValue = new Variant("Infinity") }));
-			Assert.False(runner.IsSupported(new Peach.Core.Dom.Double() { DefaultValue = new Variant("-Infinity") }));
+			Assert.True(runner.IsSupported(new Double() { length = 64 }));
+			Assert.True(runner.IsSupported(new Double() { length = 32 }));
+			Assert.False(runner.IsSupported(new Double() { DefaultValue = new Variant("NaN") }));
+			Assert.False(runner.IsSupported(new Double() { DefaultValue = new Variant("Infinity") }));
+			Assert.False(runner.IsSupported(new Double() { DefaultValue = new Variant("-Infinity") }));
 
-			Assert.True(runner.IsSupported(new Dom.String() { DefaultValue = new Variant("0") }));
-			Assert.True(runner.IsSupported(new Dom.String() { DefaultValue = new Variant("100") }));
-			Assert.True(runner.IsSupported(new Dom.String() { DefaultValue = new Variant("-100") }));
-			Assert.False(runner.IsSupported(new Dom.String() { DefaultValue = new Variant("NaN") }));
-			Assert.False(runner.IsSupported(new Dom.String() { DefaultValue = new Variant("Infinity") }));
-			Assert.False(runner.IsSupported(new Dom.String() { DefaultValue = new Variant("-Infinity") }));
+			Assert.True(runner.IsSupported(new String() { DefaultValue = new Variant("0") }));
+			Assert.True(runner.IsSupported(new String() { DefaultValue = new Variant("100") }));
+			Assert.True(runner.IsSupported(new String() { DefaultValue = new Variant("-100") }));
+			Assert.False(runner.IsSupported(new String() { DefaultValue = new Variant("NaN") }));
+			Assert.False(runner.IsSupported(new String() { DefaultValue = new Variant("Infinity") }));
+			Assert.False(runner.IsSupported(new String() { DefaultValue = new Variant("-Infinity") }));
 		}
 
 		[Test]
@@ -39,7 +35,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("DoubleVariance");
 
-			var dble = new Dom.Double("Double") { DefaultValue = new Variant(20) };
+			var dble = new Double("Double") { DefaultValue = new Variant(20) };
 
 			var m = runner.Random(500, dble);
 
@@ -51,7 +47,7 @@ namespace Peach.Core.Test.Mutators
 		{
 			var runner = new MutatorRunner("DoubleVariance");
 
-			var dble = new Dom.Double("Double") { DefaultValue = new Variant(float.MinValue), length = 32 };
+			var dble = new Double("Double") { DefaultValue = new Variant(float.MinValue), length = 32 };
 
 			var m = runner.Random(500, dble);
 

@@ -1,18 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Xml;
 
 using NLog;
 
 using Peach.Core;
 using Peach.Core.Analyzers;
-using Peach.Core.Cracker;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using Peach.Pro.Core.Dom;
+// ReSharper disable DoNotCallOverridableMethodsInConstructor
 
 namespace Peach.Pro.Core.Dom
 {
@@ -29,19 +24,19 @@ namespace Peach.Pro.Core.Dom
 	[Serializable]
 	public class Bool : Number
 	{
-		protected static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		protected static NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
 		public Bool()
 		{
-			this.lengthType = LengthType.Bits;
-			this.length = 1;
+			lengthType = LengthType.Bits;
+			length = 1;
 		}
 
 		public Bool(string name)
 			: base(name)
 		{
-			this.lengthType = LengthType.Bits;
-			this.length = 1;
+			lengthType = LengthType.Bits;
+			length = 1;
 		}
 
 		public static new DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
@@ -49,7 +44,7 @@ namespace Peach.Pro.Core.Dom
 			if (node.Name != "Bool")
 				return null;
 
-			var elem = DataElement.Generate<Bool>(node, parent);
+			var elem = Generate<Bool>(node, parent);
 
 			context.handleCommonDataElementAttributes(node, elem);
 			context.handleCommonDataElementChildren(node, elem);
@@ -69,11 +64,6 @@ namespace Peach.Pro.Core.Dom
 			WritePitCommonChildren(pit);
 
 			pit.WriteEndElement();
-		}
-
-		protected override Variant GenerateInternalValue()
-		{
-			return base.GenerateInternalValue();
 		}
 
 		protected override BitwiseStream InternalValueToBitStream()

@@ -13,8 +13,10 @@ namespace Peach.Pro.Test.Core.Mutators
 		{
 			var runner = new MutatorRunner("ArrayRandomizeOrder");
 
-			var array = new Peach.Core.Dom.Array("Array");
-			array.OriginalElement = new Peach.Core.Dom.String("Str");
+			var array = new Peach.Core.Dom.Array("Array")
+			{
+				OriginalElement = new Peach.Core.Dom.String("Str")
+			};
 			array.ExpandTo(0);
 
 			// Empty array can't be randomized
@@ -63,15 +65,19 @@ namespace Peach.Pro.Test.Core.Mutators
 		[Test]
 		public void TestSmallSequential()
 		{
-			var runner = new MutatorRunner("ArrayRandomizeOrder");
+			var runner = new MutatorRunner("ArrayRandomizeOrder")
+			{
+				SeedOverride = 1
+			};
 
-			runner.SeedOverride = 1;
 
-			var array = new Peach.Core.Dom.Array("Array");
-			array.OriginalElement = new Peach.Core.Dom.String("Str");
+			var array = new Peach.Core.Dom.Array("Array")
+			{
+				OriginalElement = new Peach.Core.Dom.String("Str")
+			};
 			array.ExpandTo(3);
 
-			for (int i = 0; i < array.Count; ++i)
+			for (var i = 0; i < array.Count; ++i)
 				array[i].DefaultValue = new Variant(i.ToString());
 
 			// 3 elements, has 6 permutations

@@ -1,17 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-using NUnit.Framework;
-
-using Peach.Core.Analyzers;
-using Peach.Core.Cracker;
-using Peach.Core.Dom;
+﻿using NUnit.Framework;
 using Peach.Core.Test;
 
-namespace Peach.Pro.Test.Dom
+namespace Peach.Pro.Test.Core.Dom
 {
+	[TestFixture]
 	class DoubleTests : DataModelCollector
 	{
 		[Test]
@@ -21,7 +13,7 @@ namespace Peach.Pro.Test.Dom
 			var db = new Peach.Core.Dom.Double();
 
 			var actual = (double)db.InternalValue;
-			var expected = 0.0;
+			const double expected = 0.0;
 			Assert.AreEqual(expected, actual);
 			Assert.AreEqual(64, db.length);
 		}
@@ -30,11 +22,13 @@ namespace Peach.Pro.Test.Dom
 		[Category("Peach")]
 		public void SimpleInteralValueTest2()
 		{
-			var db = new Peach.Core.Dom.Double();
-			db.length = 32;
+			var db = new Peach.Core.Dom.Double
+			{
+				length = 32
+			};
 
 			var actual = (double)db.InternalValue;
-			var expected = 0.0;
+			const double expected = 0.0;
 			Assert.AreEqual(expected, actual);
 			Assert.AreEqual(32, db.length);
 		}
@@ -43,12 +37,13 @@ namespace Peach.Pro.Test.Dom
 		[Category("Peach")]
 		public void SimpleInteralValueTest3()
 		{
-			var db = new Peach.Core.Dom.Double();
-			db.length = 32;
-			db.DefaultValue = new Peach.Core.Variant(1.0E+3);
+			var db = new Peach.Core.Dom.Double
+			{
+				length = 32, DefaultValue = new Peach.Core.Variant(1.0E+3)
+			};
 
 			var actual = (double)db.InternalValue;
-			var expected = 1000.0;
+			const double expected = 1000.0;
 			Assert.AreEqual(expected, actual);
 			Assert.AreEqual(32, db.length);
 		}
@@ -57,13 +52,15 @@ namespace Peach.Pro.Test.Dom
 		[Category("Peach")]
 		public void SimpleInteralValueTest4()
 		{
-			var db = new Peach.Core.Dom.Double();
-			db.length = 64;
-			db.LittleEndian = false;
-			db.DefaultValue = new Peach.Core.Variant(1.0);
+			var db = new Peach.Core.Dom.Double
+			{
+				length = 64, 
+				LittleEndian = false, 
+				DefaultValue = new Peach.Core.Variant(1.0)
+			};
 
 			var actual = (double)db.InternalValue;
-			var expected = 1.0;
+			const double expected = 1.0;
 			Assert.AreEqual(expected, actual);
 			Assert.AreEqual(64, db.length);
 		}

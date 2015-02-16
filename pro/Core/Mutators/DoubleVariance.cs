@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Pro.Core.Mutators.Utility;
+using Double = Peach.Core.Dom.Double;
+using String = Peach.Core.Dom.String;
 
 namespace Peach.Pro.Core.Mutators
 {
@@ -14,9 +12,9 @@ namespace Peach.Pro.Core.Mutators
 	[Description("Produce random number in range of underlying element.")]
 	public class DoubleVariance : Mutator
 	{
-		const int maxCount = 5000; // Maximum count is 5000
+		const int MaxCount = 5000; // Maximum count is 5000
 
-		DoubleVarianceGenerator gen;
+		readonly DoubleVarianceGenerator _gen;
 
 		public DoubleVariance(DataElement obj)
 			: base(obj)
@@ -26,7 +24,7 @@ namespace Peach.Pro.Core.Mutators
 			var min = Math.Max(-(double)obj.InternalValue - 10, double.MinValue);
 			var maxRange = Math.Min(Math.Abs((double)obj.InternalValue) + 100, double.MaxValue / 3);
 
-			var asDouble = obj as Peach.Core.Dom.Double;
+			var asDouble = obj as Double;
 
 			if (asDouble != null && obj.lengthAsBits == 32)
 			{
@@ -45,20 +43,19 @@ namespace Peach.Pro.Core.Mutators
 				min = tmp;
 			}
 
-			gen = new DoubleVarianceGenerator((double)obj.InternalValue, min, max, maxRange);
+			_gen = new DoubleVarianceGenerator((double)obj.InternalValue, min, max, maxRange);
 		}
 
+		// ReSharper disable once InconsistentNaming
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			if (obj is Peach.Core.Dom.String && obj.isMutable)
+			if (obj is String && obj.isMutable)
 				return obj.Hints.ContainsKey("NumericalString");
 
-			var asDouble = obj as Peach.Core.Dom.Double;
+			var asDouble = obj as Double;
 			if (asDouble != null)
 			{
-				bool supported = true;
-
-				supported = supported && !double.IsNaN((double)asDouble.DefaultValue);
+				var supported = !double.IsNaN((double)asDouble.DefaultValue);
 				supported = supported && !double.IsInfinity((double)asDouble.DefaultValue);
 				
 				return obj.isMutable && supported;
@@ -71,7 +68,7 @@ namespace Peach.Pro.Core.Mutators
 		{
 			get
 			{
-				return maxCount;
+				return MaxCount;
 			}
 		}
 
@@ -88,7 +85,7 @@ namespace Peach.Pro.Core.Mutators
 
 		public override void randomMutation(DataElement obj)
 		{
-			obj.MutatedValue = new Variant(gen.Next(context.Random));
+			obj.MutatedValue = new Variant(_gen.Next(context.Random));
 			obj.mutationFlags = MutateOverride.Default;
 		}
 	}
