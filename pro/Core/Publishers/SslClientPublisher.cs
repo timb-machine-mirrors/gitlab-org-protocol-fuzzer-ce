@@ -18,7 +18,7 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data (default 3000)", "3000")]
 	[Parameter("ConnectTimeout", typeof(int), "Max milliseconds to wait for connection (default 10000)", "10000")]
 	[Parameter("Sni", typeof(string), "Sni to use for SSL connection. Will use Host by default", "")]
-	public class SslClientPublisher : BufferedStreamPublisher
+	public class SslClientPublisher : Peach.Core.Publishers.BufferedStreamPublisher
 	{
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }

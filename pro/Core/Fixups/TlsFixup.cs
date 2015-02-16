@@ -16,7 +16,7 @@ namespace Peach.Pro.Core.Fixups
 	[Description("Tls")]
 	[Fixup("Tls", true, Internal = true)]
 	[Serializable]
-	public class TlsFixup : VolatileFixup
+	public class TlsFixup : Peach.Core.Fixups.VolatileFixup
 	{
 		#region Static Helpers For PRF()
 
