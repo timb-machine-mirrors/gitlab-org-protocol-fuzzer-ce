@@ -1,52 +1,60 @@
 ﻿using System;
-
+using System.Diagnostics;
+using System.Globalization;
+using Peach.Core;
 using Peach.Core.Dom;
+using Double = Peach.Core.Dom.Double;
+using String = Peach.Core.Dom.String;
 
-using NLog;
-
-namespace Peach.Core.Mutators
+namespace Peach.Pro.Core.Mutators
 {
 	//Hide this mutator as its not fully tested
 	[Mutator("DoubleRandom")]
 	[Description("Produce random number in range of underlying element.")]
 	public class DoubleRandom : Mutator
 	{
-		const int maxCount = 5000; // Maximum count is 5000
+		const int MaxCount = 5000; // Maximum count is 5000
 
-		Func<Variant> gen;
+		readonly Func<Variant> _gen;
 
 		public DoubleRandom(DataElement obj)
 			: base(obj)
 		{
-			var asNum = obj as Peach.Core.Dom.Double;
+			var asNum = obj as Double;
 
 			if (asNum == null)
 			{
-				System.Diagnostics.Debug.Assert(obj is Dom.String);
+				Debug.Assert(obj is String);
 
-				gen = () => new Variant(BitConverter.Int64BitsToDouble(context.Random.NextInt64()).ToString());
+				_gen = () => new Variant(BitConverter.Int64BitsToDouble(context.Random.NextInt64()).ToString(CultureInfo.InvariantCulture));
 			}
-			else if (asNum.lengthAsBits == 32)
-				gen = () => new Variant(BitConverter.ToSingle(BitConverter.GetBytes(context.Random.NextInt32()), 0));
-			else if (asNum.lengthAsBits == 64)
-				gen = () => new Variant(BitConverter.Int64BitsToDouble(context.Random.NextInt64()));
-			else
-				throw new NotSupportedException();
+			else switch (asNum.lengthAsBits)
+			{
+				case 32:
+					_gen = () => new Variant(BitConverter.ToSingle(BitConverter.GetBytes(context.Random.NextInt32()), 0));
+					break;
+				case 64:
+					_gen = () => new Variant(BitConverter.Int64BitsToDouble(context.Random.NextInt64()));
+					break;
+				default:
+					throw new NotSupportedException();
+			}
 		}
 
+		// ReSharper disable once InconsistentNaming
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			if (obj is Dom.String && obj.isMutable)
+			if (obj is String && obj.isMutable)
 				return obj.Hints.ContainsKey("NumericalString");
 
-			return obj is Peach.Core.Dom.Double && obj.isMutable && (obj.lengthAsBits == 64 || obj.lengthAsBits == 32);
+			return obj is Double && obj.isMutable && (obj.lengthAsBits == 64 || obj.lengthAsBits == 32);
 		}
 
 		public override int count
 		{
 			get
 			{
-				return maxCount;
+				return MaxCount;
 			}
 		}
 
@@ -64,7 +72,7 @@ namespace Peach.Core.Mutators
 
 		public override void randomMutation(DataElement obj)
 		{
-			obj.MutatedValue = gen();
+			obj.MutatedValue = _gen();
 			obj.mutationFlags = MutateOverride.Default;
 		}
 	}

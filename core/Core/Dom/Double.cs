@@ -1,19 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Xml;
-
-using NLog;
-
-using Peach.Core;
 using Peach.Core.Analyzers;
-using Peach.Core.Cracker;
-using Peach.Core.Dom;
 using Peach.Core.IO;
-
+// ReSharper disable DoNotCallOverridableMethodsInConstructor
+// ReSharper disable CompareOfFloatsByEqualityOperator
 
 namespace Peach.Core.Dom
 {
@@ -23,7 +15,7 @@ namespace Peach.Core.Dom
 	[Parameter("size", typeof(uint), "Size in bits")]
 	[Parameter("endian", typeof(EndianType), "Byte order of number", "little")]
 	[Parameter("mutable", typeof(bool), "Is element mutable", "true")]
-	[Parameter("valueType", typeof(Peach.Core.Dom.ValueType), "Format of value attribute", "string")]
+	[Parameter("valueType", typeof(ValueType), "Format of value attribute", "string")]
 	[Parameter("value", typeof(string), "Default value", "")]
 	[Parameter("constraint", typeof(string), "Scripting expression that evaluates to true or false", "")]
 	[Parameter("minOccurs", typeof(int), "Minimum occurances", "1")]
@@ -32,13 +24,12 @@ namespace Peach.Core.Dom
 	[Serializable]
 	public class Double : DataElement
 	{
-		protected double _max = double.MaxValue;
-		protected double _min = double.MinValue;
-		protected bool _isLittleEndian = true;
-		protected Endian _endian = Endian.Little;
+		protected double Max = double.MaxValue;
+		protected double Min = double.MinValue;
+		protected bool IsLittleEndian = true;
+		protected Endian Endian = Endian.Little;
 
 		public Double()
-			: base()
 		{
 			lengthType = LengthType.Bits;
 			length = 64;
@@ -58,11 +49,11 @@ namespace Peach.Core.Dom
 			if (node.Name != "Double")
 				return null;
 
-			var num = DataElement.Generate<Double>(node, parent);
+			var num = Generate<Double>(node, parent);
 
 			if (node.hasAttr("size"))
 			{
-				int size = node.getAttrInt("size");
+				var size = node.getAttrInt("size");
 
 				if (size != 32 && size != 64)
 					throw new PeachException(string.Format("Error, unsupported size '{0}' for {1}.", size, num.debugName));
@@ -144,13 +135,13 @@ namespace Peach.Core.Dom
 
 				if (value == 32)
 				{
-					_min = float.MinValue;
-					_max = float.MaxValue;
+					Min = float.MinValue;
+					Max = float.MaxValue;
 				}
 				else
 				{
-					_min = double.MinValue;
-					_max = double.MaxValue;
+					Min = double.MinValue;
+					Max = double.MaxValue;
 				}
 
 
@@ -184,8 +175,8 @@ namespace Peach.Core.Dom
 
 		private double SanitizeString(string str)
 		{
-			string conv = str;
-			NumberStyles style = NumberStyles.AllowLeadingSign;
+			var conv = str;
+			var style = NumberStyles.AllowLeadingSign;
 
 			if (str.StartsWith("0x", StringComparison.InvariantCultureIgnoreCase))
 			{
@@ -194,7 +185,7 @@ namespace Peach.Core.Dom
 
 				ulong val;
 				if (ulong.TryParse(conv, style, CultureInfo.InvariantCulture, out val))
-					return (double)val;
+					return val;
 
 				throw new PeachException(string.Format("Error, {0} value '{1}' could not be converted to a {2}-bit double.", debugName, str, lengthAsBits));
 			}
@@ -216,18 +207,18 @@ namespace Peach.Core.Dom
 		private double SanitizeStream(BitwiseStream bs)
 		{
 			if (bs.LengthBits < lengthAsBits || (bs.LengthBits + 7) / 8 != (lengthAsBits + 7) / 8)
-				throw new PeachException(string.Format("Error, {0} value has an incorrect length for a {1}-bit double, expected {3} bytes.", debugName, lengthAsBits, (lengthAsBits + 7) / 8));
+				throw new PeachException(string.Format("Error, {0} value has an incorrect length for a {1}-bit double, expected {2} bytes.", debugName, lengthAsBits, (lengthAsBits + 7) / 8));
 
 			return FromBitstream(bs);
 		}
 
 		private double FromBitstream(BitwiseStream bs)
 		{
-			byte[] b = new byte[length / 8];
-			int len = bs.Read(b, 0, b.Length);
-			System.Diagnostics.Debug.Assert(len == lengthAsBits / 8);
+			var b = new byte[length / 8];
+			var len = bs.Read(b, 0, b.Length);
+			Debug.Assert(len == lengthAsBits / 8);
 
-			if (BitConverter.IsLittleEndian != _isLittleEndian)
+			if (BitConverter.IsLittleEndian != IsLittleEndian)
 				System.Array.Reverse(b);
 
 			return BitConverter.ToDouble(b, 0);
@@ -237,17 +228,17 @@ namespace Peach.Core.Dom
 		{
 			var value = GetNumber(variant);
 
-			if ((double)value < MinValue && (double)value != double.NegativeInfinity)
+			if (value < MinValue && value != double.NegativeInfinity)
 				throw new PeachException(string.Format("Error, {0} value '{1}' is less than the minimum {2}-bit double.", debugName, value, lengthAsBits));
-			if ((double)value > MaxValue && (double)value != double.PositiveInfinity)
+			if (value > MaxValue && value != double.PositiveInfinity)
 				throw new PeachException(string.Format("Error, {0} value '{1}' is greater than the maximum {2}-bit double.", debugName, value, lengthAsBits));
 
-			return new Variant((double)value);
+			return new Variant(value);
 		}
 
 		private double GetNumber(Variant variant)
 		{
-			double value = 0;
+			double value;
 
 			switch (variant.GetVariantType())
 			{
@@ -281,13 +272,13 @@ namespace Peach.Core.Dom
 
 		public bool LittleEndian
 		{
-			get { return _isLittleEndian; }
+			get { return IsLittleEndian; }
 			set
 			{
-				if (_isLittleEndian != value)
+				if (IsLittleEndian != value)
 				{
-					_isLittleEndian = value;
-					_endian = value ? Endian.Little : Endian.Big;
+					IsLittleEndian = value;
+					Endian = value ? Endian.Little : Endian.Big;
 					Invalidate();
 				}
 			}
@@ -295,41 +286,36 @@ namespace Peach.Core.Dom
 
 		public double MaxValue
 		{
-			get { return _max; }
+			get { return Max; }
 		}
 
 		public double MinValue
 		{
-			get { return _min; }
+			get { return Min; }
 		}
 
 		protected override BitwiseStream InternalValueToBitStream()
 		{
 			var value = GetNumber(InternalValue);
 
-			if (value > 0 && (double)value > MaxValue && (double)value != double.PositiveInfinity)
+			if (value > 0 && value > MaxValue && value != double.PositiveInfinity)
 			{
-				string msg = string.Format("Error, {0} value '{1}' is greater than the maximum {2}-bit number.", debugName, value, lengthAsBits);
+				var msg = string.Format("Error, {0} value '{1}' is greater than the maximum {2}-bit number.", debugName, value, lengthAsBits);
 				var inner = new OverflowException(msg);
 				throw new SoftException(inner);
 			}
 
-			if (value < 0 && (double)value < MinValue && (double)value != double.NegativeInfinity)
+			if (value < 0 && value < MinValue && value != double.NegativeInfinity)
 			{
-				string msg = string.Format("Error, {0} value '{1}' is less than the minimum {2}-bit number.", debugName, value, lengthAsBits);
+				var msg = string.Format("Error, {0} value '{1}' is less than the minimum {2}-bit number.", debugName, value, lengthAsBits);
 				var inner = new OverflowException(msg);
 				throw new SoftException(inner);
 			}
 
-			byte[] b;
-			if (length == 32)
-				b = BitConverter.GetBytes((float)value);
-			else
-				b = BitConverter.GetBytes((double)value);
+			var b = length == 32 ? BitConverter.GetBytes((float)value) : BitConverter.GetBytes(value);
 
-			if (BitConverter.IsLittleEndian != _isLittleEndian)
+			if (BitConverter.IsLittleEndian != IsLittleEndian)
 				System.Array.Reverse(b);
-
 
 			var bs = new BitStream();
 			bs.Write(b, 0, b.Length);

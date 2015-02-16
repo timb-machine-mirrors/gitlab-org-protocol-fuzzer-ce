@@ -17,8 +17,10 @@ namespace Peach.Pro.Test.Core.Mutators
 		{
 			var runner = new MutatorRunner("ArrayEdgeCase");
 
-			var array = new Peach.Core.Dom.Array("Array");
-			array.OriginalElement = new Peach.Core.Dom.String("Str");
+			var array = new Peach.Core.Dom.Array("Array")
+			{
+				OriginalElement = new Peach.Core.Dom.String("Str")
+			};
 			array.ExpandTo(0);
 
 			// Empty array can be expanded
@@ -64,7 +66,7 @@ namespace Peach.Pro.Test.Core.Mutators
 		[Test]
 		public void TestMaxOutputSize()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<DataModel name='DM'>
 		<String name='str' value='Hello World' minOccurs='1' />
@@ -100,7 +102,7 @@ namespace Peach.Pro.Test.Core.Mutators
         [Test]
         public void SequenceTestMaxOutputSize()
         {
-            string xml = @"
+            const string xml = @"
 <Peach>
 	<DataModel name='DM'>
         <Sequence name='seq'>
