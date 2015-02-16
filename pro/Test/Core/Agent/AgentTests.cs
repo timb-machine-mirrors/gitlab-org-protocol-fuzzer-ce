@@ -498,7 +498,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 		[Publisher("TestRemoteFile", Internal = true)]
 		[Parameter("FileName", typeof(string), "Name of file to open for reading/writing")]
-		public class TestRemoteFilePublisher : StreamPublisher
+		public class TestRemoteFilePublisher : Peach.Core.Publishers.StreamPublisher
 		{
 			private static readonly Logger ClassLogger = LogManager.GetCurrentClassLogger();
 			protected override Logger Logger { get { return ClassLogger; } }
