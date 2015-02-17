@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Text.RegularExpressions;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
-using Monitor = Peach.Core.Agent.Monitor;
+using Monitor = Peach.Core.Agent.Monitor2;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Agent.Monitors
 {

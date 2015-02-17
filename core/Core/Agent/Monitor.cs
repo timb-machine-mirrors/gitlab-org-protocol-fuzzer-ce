@@ -32,27 +32,18 @@ using System.Linq;
 
 namespace Peach.Core.Agent
 {
-	/// <summary>
-	/// Monitors are hosted by agent processes and are
-	/// able to report detected faults and gather information
-	/// that is usefull when a fualt is detected.
-	/// </summary>
-	public abstract class Monitor : INamed
+	[Obsolete("This base class has been deprecated. Monitors should now derive from Peach.Core.Agent.Monitor2.")]
+	public abstract class Monitor : IMonitor
 	{
-		#region Obsolete Functions
-
-		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
-		public string name { get { return Name; } }
-
-		#endregion
-
-		protected Monitor(string name)
+		protected Monitor(IAgent agent, string name, Dictionary<string, Variant> args)
 		{
+			Agent = agent;
 			Name = name;
 			Class = GetType().GetAttributes<MonitorAttribute>().First().Name;
 		}
 
-		public enum MonitorWhen
+		[Obsolete("This enum is deprecated. Please use Peach.Core.Agent.Monitor2.MonitorWhen instead.")]
+		public enum When
 		{
 			DetectFault,
 			OnCall,
@@ -65,6 +56,11 @@ namespace Peach.Core.Agent
 		};
 
 		/// <summary>
+		/// The agent that is running this monitor.
+		/// </summary>
+		public IAgent Agent { get; private set; }
+
+		/// <summary>
 		/// The name of this monitor.
 		/// </summary>
 		public string Name { get; private set; }
@@ -75,112 +71,162 @@ namespace Peach.Core.Agent
 		public string Class { get; private set; }
 
 		/// <summary>
-		/// Start the monitor instance.
-		/// If an exception is thrown, StopMonitor will not be called.
-		/// </summary>
-		public virtual void StartMonitor(Dictionary<string, string> args)
-		{
-			ParameterParser.Parse(this, args);
-		}
-
-		/// <summary>
 		/// Stop the monitor instance.
 		/// </summary>
-		public virtual void StopMonitor()
-		{
-		}
+		public abstract void StopMonitor();
 
 		/// <summary>
 		/// Starting a fuzzing session.  A session includes a number of test iterations.
 		/// </summary>
-		public virtual void SessionStarting()
-		{
-		}
+		public abstract void SessionStarting();
 
 		/// <summary>
 		/// Finished a fuzzing session.
 		/// </summary>
-		public virtual void SessionFinished()
-		{
-		}
+		public abstract void SessionFinished();
 
 		/// <summary>
 		/// Starting a new iteration
 		/// </summary>
-		/// <param name="args">Information about the current iteration</param>
-		public virtual void IterationStarting(IterationStartingArgs args)
-		{
-		}
+		/// <param name="iterationCount">Iteration count</param>
+		/// <param name="isReproduction">Are we re-running an iteration</param>
+		public abstract void IterationStarting(uint iterationCount, bool isReproduction);
 
 		/// <summary>
 		/// Iteration has completed.
 		/// </summary>
-		public virtual void IterationFinished()
-		{
-		}
+		/// <returns>Returns true to indicate iteration should be re-run, else false.</returns>
+		public abstract bool IterationFinished();
 
 		/// <summary>
 		/// Was a fault detected during current iteration?
 		/// </summary>
 		/// <returns>True if a fault was detected, else false.</returns>
-		public virtual bool DetectedFault()
-		{
-			return false;
-		}
+		public abstract bool DetectedFault();
 
 		/// <summary>
-		/// Return data from the monitor.
+		/// Return a Fault instance
 		/// </summary>
 		/// <returns></returns>
-		public virtual MonitorData GetMonitorData()
-		{
-			return null;
-		}
+		public abstract Fault GetMonitorData();
+
+		/// <summary>
+		/// Can the fuzzing session continue, or must we stop?
+		/// </summary>
+		/// <returns>True if session must stop, else false.</returns>
+		public abstract bool MustStop();
 
 		/// <summary>
 		/// Send a message to the monitor and possibly get data back.
 		/// </summary>
-		/// <param name="msg">Message name</param>
-		public virtual void Message(string msg)
-		{
-		}
+		/// <param name="name">Message name</param>
+		/// <param name="data">Message data</param>
+		/// <returns>Returns data or null.</returns>
+		public abstract Variant Message(string name, Variant data);
 
 		/// <summary>
-		/// An event handler that can be used by monitor implementations
-		/// to alert others about interesting events occuring.
-		/// The peach core does not make use of this event.
+		/// Process query from another monitor.
 		/// </summary>
 		/// <remarks>
-		/// This event handler is completly ignroed by the peach core.
-		/// It can be useful for writing tests against monitors so the
-		/// testing framework can get notified when interesting things happen.
+		/// This method is used to respond to an information request
+		/// from another monitor.  Debugger monitors may expose specific
+		/// queryies such as "QueryPid" to get the running processes PID.
 		/// </remarks>
-		public event EventHandler InternalEvent;
-
-		/// <summary>
-		/// Raises the InternalEvent event.
-		/// </summary>
-		/// <param name="args">Arbitrary arguments to pass to event subscribers.</param>
-		protected void OnInternalEvent(EventArgs args)
+		/// <param name="query">Query</param>
+		/// <returns>Non-null response indicates query was handled.</returns>
+		public virtual object ProcessQueryMonitors(string query)
 		{
-			if (InternalEvent != null)
-				InternalEvent(this, args);
-		}
-	}
-
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-	public class MonitorAttribute : PluginAttribute
-	{
-		// ReSharper disable once UnusedParameter.Local
-		[Obsolete("This constructor is obsolete. Use the constructor without the isDefault argument.")]
-		public MonitorAttribute(string name, bool isDefault)
-			: base(typeof(Monitor), name, true)
-		{
+			return null;
 		}
 
-		public MonitorAttribute(string name)
-			: base(typeof(Monitor), name, true)
+		string INamed.name
 		{
+			get { return Name; }
+		}
+
+		string INamed.Name
+		{
+			get { return Name; }
+		}
+
+		string IMonitor.Class
+		{
+			get { return Class; }
+		}
+
+		void IMonitor.StartMonitor(Dictionary<string, string> args)
+		{
+		}
+
+		void IMonitor.StopMonitor()
+		{
+			StopMonitor();
+		}
+
+		void IMonitor.SessionStarting()
+		{
+			SessionStarting();
+		}
+
+		void IMonitor.SessionFinished()
+		{
+			SessionFinished();
+		}
+
+		void IMonitor.IterationStarting(IterationStartingArgs args)
+		{
+			IterationStarting(0, args.IsReproduction);
+		}
+
+		void IMonitor.IterationFinished()
+		{
+			IterationFinished();
+		}
+
+		bool IMonitor.DetectedFault()
+		{
+			return DetectedFault();
+		}
+
+		MonitorData IMonitor.GetMonitorData()
+		{
+			var fault = GetMonitorData();
+			if (fault == null)
+				return null;
+
+			var ret = new MonitorData
+			{
+				DetectionSource = fault.detectionSource,
+				Title = fault.title,
+				Data = fault.collectedData.ToDictionary(i => i.Key, i => i.Value),
+			};
+
+			if (fault.type == FaultType.Fault)
+			{
+				ret.Fault = new MonitorData.Info
+				{
+					Description = fault.detectionSource,
+					MajorHash = fault.majorHash,
+					MinorHash = fault.minorHash,
+					Risk = fault.exploitability,
+					MustStop = MustStop(),
+				};
+			}
+
+			return ret;
+		}
+
+		void IMonitor.Message(string msg)
+		{
+			Message("Action.Call", new Variant(msg));
+		}
+
+		event EventHandler IMonitor.InternalEvent
+		{
+			add {}
+			remove {}
 		}
 	}
 }
+
+// end

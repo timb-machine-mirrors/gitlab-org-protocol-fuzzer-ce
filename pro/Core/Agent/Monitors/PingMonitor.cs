@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -8,6 +7,8 @@ using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
 using Encoding = Peach.Core.Encoding;
+using Monitor = Peach.Core.Agent.Monitor2;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Agent.Monitors
 {

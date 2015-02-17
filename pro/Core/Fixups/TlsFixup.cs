@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Reflection;
 using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Crypto.Engines;
@@ -10,6 +9,7 @@ using Org.BouncyCastle.Security;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Fixups
 {

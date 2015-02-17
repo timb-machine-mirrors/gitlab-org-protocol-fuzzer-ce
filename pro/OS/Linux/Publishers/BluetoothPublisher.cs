@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -10,6 +9,7 @@ using Mono.Unix.Native;
 using NLog;
 using Peach.Core;
 using Peach.Core.IO;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.OS.Linux.Publishers
 {

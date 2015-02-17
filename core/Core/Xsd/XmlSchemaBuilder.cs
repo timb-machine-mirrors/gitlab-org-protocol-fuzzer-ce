@@ -847,7 +847,7 @@ namespace Peach.Core.Xsd
 			if (pluginAttribute.Type == typeof(Peach.Core.Dom.Action))
 				facet.Value = Char.ToLowerInvariant(facet.Value[0]) + facet.Value.Substring(1);
 
-			var descAttr = type.GetAttributes<DescriptionAttribute>().FirstOrDefault();
+			var descAttr = type.GetAttributes<System.ComponentModel.DescriptionAttribute>().FirstOrDefault();
 			if (descAttr != null)
 				facet.Annotate(descAttr.Description);
 			else
