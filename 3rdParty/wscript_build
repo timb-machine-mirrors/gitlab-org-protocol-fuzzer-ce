@@ -39,7 +39,7 @@ subdirs = [
 	'Portable.Licensing',
 	'TotalPhase-5.13',
 	'Managed.AndroidDebugBridge',
-	'VMware-VIX-1.12.1-894247',
+	'VMware-VIX-1.13.0-1295980',
 	'SuperSocket',
 	'SuperWebSocket',
 ]

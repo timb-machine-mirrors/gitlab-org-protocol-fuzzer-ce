@@ -2,6 +2,9 @@ import os.path, re
 from waflib.TaskGen import feature, before_method, after_method, taskgen_method
 from waflib.Configure import conf
 from waflib import Utils, Logs, Task, Context, Errors
+from waflib.Tools import ccroot
+
+ccroot.lib_patterns['resource'] = ['%s']
 
 @taskgen_method
 def install_files(self, dest, files, env=None, chmod=Utils.O644, relative_trick=False, cwd=None, add=True, postpone=True):
@@ -177,12 +180,15 @@ def cs_resource(self):
 		final = base + '.' + name
 		self.env.append_value('CSFLAGS', '/resource:%s,%s' % (x.abspath(), final))
 
-	# add external assemblies as embedded resources
-	asms = getattr(self, 'embed_asm', [])
-	for name in asms:
-		node = self.env.NATIVE_DLLS[name]
-		final = '%s.Resources.Assemblies.%s' % (base, name)
-		self.env.append_value('CSFLAGS', '/resource:%s,%s' % (node.abspath(), final))
+	embeds = self.to_list(getattr(self, 'embed', []))
+	get = self.bld.get_tgen_by_name
+	for x in embeds:
+		y = get(x)
+		y.post()
+		tsk = getattr(y, 'link_task', None)
+		self.cs_task.dep_nodes.extend(tsk.outputs) # dependency
+		final = '%s.Resources.%s' % (base, x)
+		self.env.append_value('CSFLAGS', '/resource:%s,%s' % (tsk.outputs[0].abspath(), final))
 
 	# win32 icon support
 	icon = getattr(self, 'icon', None)
@@ -304,3 +310,33 @@ class emit(Task.Task):
 	def run(self):
 		text = self.env['EMIT_SOURCE']
 		self.outputs[0].write(text)
+
+class fake_resource(Task.Task):
+	"""
+	Task used for reading a foreign resource and adding the dependency on it
+	"""
+	color   = 'YELLOW'
+	inst_to = None
+
+	def runnable_status(self):
+		for x in self.outputs:
+			x.sig = Utils.h_file(x.abspath())
+		return Task.SKIP_ME
+
+@conf
+def read_resource(self, name, paths=[]):
+	"""
+	Read an external resource and register it for the *use* system::
+
+		def build(bld):
+			bld.read_external_resource('some_resource.ext', paths=[bld.env.mypath])
+			bld(features='cs', source='Hi.cs', bintype='exe', gen='hi.exe', use='some_resource.ext')
+
+	:param name: Name of the resource
+	:type name: string
+	:param paths: Folders in which the resource may be found
+	:type paths: list of string
+	:return: A task generator having the feature *fake_lib* which will call :py:func:`waflib.Tools.ccroot.process_lib`
+	:rtype: :py:class:`waflib.TaskGen.task_gen`
+	"""
+	return self(name=name, features='fake_lib', lib_paths=paths, lib_type='resource')
