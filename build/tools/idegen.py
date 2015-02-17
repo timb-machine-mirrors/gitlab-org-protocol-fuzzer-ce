@@ -491,7 +491,6 @@ class vsnode_cs_target(msvs.vsnode_project):
 			y.post()
 			tsk = getattr(y, 'link_task', None)
 			r = embed_resource(self, x, tsk)
-			print 'embed', x, r.node.abspath()
 			self.embeds[r.node.abspath()] = r
 
 		# Process ide_content attribute
