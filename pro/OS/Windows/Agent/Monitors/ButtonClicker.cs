@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
+using Monitor = Peach.Core.Agent.Monitor2;
 
 #if !MONO
 using System.Windows.Automation;

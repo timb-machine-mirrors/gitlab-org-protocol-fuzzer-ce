@@ -1,5 +1,4 @@
 using System;
-using Peach.Core.Dom;
 using System.Collections.Generic;
 using System.IO;
 using Peach.Core.IO;

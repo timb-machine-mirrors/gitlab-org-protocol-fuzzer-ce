@@ -6,8 +6,8 @@ using System.Net;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
+using Peach.Core.Agent.Channels;
 using Logger = NLog.Logger;
-using Monitor = Peach.Core.Agent.Monitor;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
@@ -59,7 +59,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			private readonly MonitorHandler _handler;
 			private readonly HashSet<string> _calls;
-			private readonly NamedCollection<Monitor> _monitors;
+			private readonly NamedCollection<IMonitor> _monitors;
 			private readonly Dictionary<string, Stream> _data;
 
 			public string Name { get { return Url; } }
@@ -72,7 +72,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			{
 				_handler = handler;
 				_calls = new HashSet<string>();
-				_monitors = new NamedCollection<Monitor>();
+				_monitors = new NamedCollection<IMonitor>();
 				_data = new Dictionary<string, Stream>();
 
 				Url = Server.MonitorPath + "/" + Guid.NewGuid();
@@ -145,16 +145,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			private void AddMonitor(MonitorRequest item)
 			{
-				var cls = item.Class;
 				var key = item.Name ?? _monitors.UniqueName();
-				var type = ClassLoader.FindPluginByName<MonitorAttribute>(cls);
-
-				if (type == null)
-					throw new PeachException("Error, unable to locate monitor '{0}'.".Fmt(cls)); 
-
-				var mon = (Monitor)Activator.CreateInstance(type, new object[] { key });
-
-				mon.StartMonitor(item.Args);
+				var mon = AgentLocal.ActivateMonitor(key, item.Class, item.Args);
 
 				if (_monitors.Count == 0)
 				{

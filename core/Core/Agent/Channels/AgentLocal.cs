@@ -124,7 +124,7 @@ namespace Peach.Core.Agent.Channels
 
 		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		private readonly List<Monitor> _monitors = new List<Monitor>();
+		private readonly List<IMonitor> _monitors = new List<IMonitor>();
 
 		public AgentLocal(string name, string uri, string password)
 			: base(name, uri, password)
@@ -143,6 +143,8 @@ namespace Peach.Core.Agent.Channels
 
 		public override IPublisher CreatePublisher(string pubName, string cls, Dictionary<string, string> args)
 		{
+			Logger.Debug("CreatePublisher: {0} {1}", pubName, cls);
+
 			return new PublisherProxy(ActivatePublisher(pubName, cls, args));
 		}
 
@@ -150,31 +152,14 @@ namespace Peach.Core.Agent.Channels
 		{
 			Logger.Debug("StartMonitor: {0} {1}", monitorName, cls);
 
-			var type = ClassLoader.FindPluginByName<MonitorAttribute>(cls);
-			if (type == null)
-				throw new PeachException("Error, unable to locate Monitor '" + cls + "'");
-
-			try
-			{
-				var mon = (Monitor)Activator.CreateInstance(type, monitorName);
-				mon.StartMonitor(args);
-				_monitors.Add(mon);
-			}
-			catch (Exception ex)
-			{
-				var baseEx = ex.GetBaseException();
-				if (baseEx is ThreadAbortException)
-					throw baseEx;
-
-				throw new PeachException("Could not start monitor \"" + cls + "\".  " + ex.Message, ex);
-			}
+			_monitors.Add(ActivateMonitor(monitorName, cls, args));
 		}
 
 		public override void StopAllMonitors()
 		{
 			Logger.Trace("StopAllMonitors");
 
-			foreach (var mon in _monitors.Reverse<Monitor>())
+			foreach (var mon in _monitors.Reverse<IMonitor>())
 			{
 				Guard(mon, "StopMonitor", m => m.StopMonitor());
 			}
@@ -193,7 +178,7 @@ namespace Peach.Core.Agent.Channels
 
 		public override void SessionFinished()
 		{
-			foreach (var mon in _monitors.Reverse<Monitor>())
+			foreach (var mon in _monitors.Reverse<IMonitor>())
 			{
 				Guard(mon, "SessionFinished", m => m.SessionFinished());
 			}
@@ -213,7 +198,7 @@ namespace Peach.Core.Agent.Channels
 		{
 			Logger.Trace("IterationFinished");
 
-			foreach (var mon in _monitors.Reverse<Monitor>())
+			foreach (var mon in _monitors.Reverse<IMonitor>())
 			{
 				Guard(mon, "IterationFinished", m => m.IterationFinished());
 			}
@@ -278,6 +263,7 @@ namespace Peach.Core.Agent.Channels
 			{
 				var parms = args.ToDictionary(i => i.Key, i => new Variant(i.Value));
 				var pub = (Publisher)Activator.CreateInstance(type, parms);
+				pub.Name = name;
 				return pub;
 			}
 			catch (TargetInvocationException ex)
@@ -290,7 +276,58 @@ namespace Peach.Core.Agent.Channels
 			}
 		}
 
-		private static void Guard(Monitor mon, string what, Action<Monitor> action)
+		public static IMonitor ActivateMonitor(string name, string cls, Dictionary<string, string> args)
+		{
+			Logger.Trace("ActivateMonitor: {0} {1}", name, cls);
+
+			var type = ClassLoader.FindPluginByName<MonitorAttribute>(cls);
+			if (type == null)
+				throw new PeachException("Error, unable to locate monitor '{0}'.".Fmt(cls));
+
+			IMonitor mon;
+
+			try
+			{
+				mon = (IMonitor)Activator.CreateInstance(type, new object[] { name });
+			}
+			catch (MissingMethodException)
+			{
+				try
+				{
+					mon = (IMonitor)Activator.CreateInstance(type, new object[]
+					{
+						null,
+						name,
+						args.ToDictionary(kv => kv.Key, kv => new Variant(kv.Value))
+					});
+				}
+				catch (TargetInvocationException ex)
+				{
+					var baseEx = ex.GetBaseException();
+					if (baseEx is ThreadAbortException)
+						throw baseEx;
+
+					throw new PeachException("Could not start monitor \"" + cls + "\".  " + ex.InnerException.Message, ex);
+				}
+			}
+
+			try
+			{
+				mon.StartMonitor(args);
+			}
+			catch (ThreadAbortException)
+			{
+				throw;
+			}
+			catch (Exception ex)
+			{
+				throw new PeachException("Could not start monitor \"" + cls + "\".  " + ex.Message, ex);
+			}
+
+			return mon;
+		}
+
+		private static void Guard(IMonitor mon, string what, Action<IMonitor> action)
 		{
 			try
 			{

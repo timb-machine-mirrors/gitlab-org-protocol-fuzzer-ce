@@ -37,8 +37,9 @@ using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Pro.OS.Windows.Agent.Monitors.WindowsDebug;
-using Monitor = Peach.Core.Agent.Monitor;
+using Monitor = Peach.Core.Agent.Monitor2;
 using Random = Peach.Core.Random;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.OS.Windows.Agent.Monitors
 {

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using NUnit.Framework;
 using Peach.Core.Agent;
 
@@ -13,19 +12,19 @@ namespace Peach.Core.Test
 		/// Controls the StartMonitor behaviour for each monitor.
 		/// The default is (m, args) => m.StartMonitor(args)
 		/// </summary>
-		public Action<Monitor, Dictionary<string, string>> StartMonitor { get; set; }
+		public Action<IMonitor, Dictionary<string, string>> StartMonitor { get; set; }
 
 		/// <summary>
 		/// Controls the SessionStarting behaviour for each monitor.
 		/// The default is m => m.SessionStarting()
 		/// </summary>
-		public Action<Monitor> SessionStarting { get; set; }
+		public Action<IMonitor> SessionStarting { get; set; }
 
 		/// <summary>
 		/// Controls the IterationStarting behaviour for each monitor.
 		/// The default is (m, args) => m.IterationFinished(repro, args)
 		/// </summary>
-		public Action<Monitor, IterationStartingArgs> IterationStarting { get; set; }
+		public Action<IMonitor, IterationStartingArgs> IterationStarting { get; set; }
 
 		/// <summary>
 		/// Controls the Message behaviour for each monitor.
@@ -33,37 +32,37 @@ namespace Peach.Core.Test
 		/// To test sending messages to monitors, tests can have
 		/// implementations that do m => m.Message("Action.Call", new Variant("ScoobySnacks")
 		/// </summary>
-		public Action<Monitor> Message { get; set; }
+		public Action<IMonitor> Message { get; set; }
 
 		/// <summary>
 		/// Controls the IterationFinished behaviour for each monitor.
 		/// The default is m => m.IterationFinished()
 		/// </summary>
-		public Action<Monitor> IterationFinished { get; set; }
+		public Action<IMonitor> IterationFinished { get; set; }
 
 		/// <summary>
 		/// Controls the DetectedFault behaviour for each monitor.
 		/// The default is m => m.DetectedFault()
 		/// </summary>
-		public Func<Monitor, bool> DetectedFault { get; set; }
+		public Func<IMonitor, bool> DetectedFault { get; set; }
 
 		/// <summary>
 		/// Controls the GetMonitorData behaviour for each monitor.
 		/// The default is m => m.GetMonitorData()
 		/// </summary>
-		public Func<Monitor, MonitorData> GetMonitorData { get; set; }
+		public Func<IMonitor, MonitorData> GetMonitorData { get; set; }
 
 		/// <summary>
 		/// Controls the SessionFinished behaviour for each monitor.
 		/// The default is m => m.IterationFinished()
 		/// </summary>
-		public Action<Monitor> SessionFinished { get; set; }
+		public Action<IMonitor> SessionFinished { get; set; }
 
 		/// <summary>
 		/// Controls the StopMonitor behaviour for each monitor.
 		/// The default is m => m.StopMonitor()
 		/// </summary>
-		public Action<Monitor> StopMonitor { get; set; }
+		public Action<IMonitor> StopMonitor { get; set; }
 
 
 		public MonitorRunner(string monitorClass, Dictionary<string, string> parameters)
@@ -99,7 +98,7 @@ namespace Peach.Core.Test
 
 			var item = new Holder
 			{
-				Monitor = (Monitor) Activator.CreateInstance(type, monitorName),
+				Monitor = (IMonitor)Activator.CreateInstance(type, monitorName),
 				Args = parameters
 			};
 
@@ -180,13 +179,13 @@ namespace Peach.Core.Test
 			return ret.ToArray();
 		}
 
-		private IEnumerable<Monitor> Forward { get { return _monitors.Select(i => i.Monitor); } }
+		private IEnumerable<IMonitor> Forward { get { return _monitors.Select(i => i.Monitor); } }
 
-		private IEnumerable<Monitor> Reverse { get { return Forward.Reverse(); } }
+		private IEnumerable<IMonitor> Reverse { get { return Forward.Reverse(); } }
 
 		class Holder
 		{
-			public Monitor Monitor { get; set; }
+			public IMonitor Monitor { get; set; }
 			public Dictionary<string, string> Args { get; set; }
 		}
 

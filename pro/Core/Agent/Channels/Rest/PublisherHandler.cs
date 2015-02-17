@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Reflection;
 using Peach.Core;
+using Peach.Core.Agent.Channels;
 using Peach.Core.IO;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
@@ -31,20 +31,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 				Url = Server.PublisherPath + "/" + Guid.NewGuid();
 
-				var type = ClassLoader.FindPluginByName<PublisherAttribute>(req.Class);
-				if (type == null)
-					throw new PeachException("Error, unable to locate publisher '{0}'.".Fmt(req.Class));
-
-				try
-				{
-					_publisher = (Publisher)Activator.CreateInstance(type, req.Args.ToDictionary(i => i.Key, i => new Variant(i.Value)));
-				}
-				catch (TargetInvocationException ex)
-				{
-					throw new PeachException("Could not start publisher \"" + req.Class + "\".  " + ex.InnerException.Message, ex);
-				}
-
-				_publisher.Name = req.Name;
+				_publisher = AgentLocal.ActivatePublisher(req.Name, req.Class, req.Args);
 				_publisher.start();
 
 				_handler._routes.Add(Url, "DELETE", OnDelete);
