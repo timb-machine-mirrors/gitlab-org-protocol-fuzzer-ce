@@ -65,12 +65,17 @@ else:
 		'Mono.Data.Sqlite.dll',
 	])
 
+if bld.env.TARGET in ['win', 'osx']:
+	embed = 'Vix.dll'
+else:
+	embed = ''
+
 bld(
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
 	resource = bld.path.ant_glob('Resources/**/* WebServices/Views/**/*'),
-	embed_asm = [ 'Vix' ],
+	embed = embed,
 	content = 'IronPython.StdLib',
 	ide_content = 'WebServices/Models/Model.cd',
 	name = 'Peach.Pro.dll',

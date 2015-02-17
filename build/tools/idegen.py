@@ -242,13 +242,13 @@ class source_file(object):
 		if proj_path != rel_path:
 			self.attrs['Link'] = proj_path
 
-class embed_asm(object):
-	def __init__(self, ctx, name):
-		self.node = ctx.tg.env.NATIVE_DLLS[name]
+class embed_resource(object):
+	def __init__(self, ctx, name, tsk):
+		self.node = tsk.outputs[0]
 		self.name = self.node.path_from(ctx.tg.path)
 		self.how = 'EmbeddedResource'
 		self.attrs = OrderedDict()
-		self.attrs['Link'] = 'Resources\\Assemblies\\' + name
+		self.attrs['Link'] = 'Resources\\' + name
 
 class vsnode_target(msvs.vsnode_target):
 	def __init__(self, ctx, tg):
@@ -362,7 +362,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 		self.globals      = OrderedDict()
 		self.properties   = OrderedDict()
 		self.references   = OrderedDict() # Name -> HintPath
-		self.embed_asm    = OrderedDict() # Abspath -> Record
+		self.embeds       = OrderedDict() # Abspath -> Record
 		self.source_files = OrderedDict() # Abspath -> Record
 		self.global_props = OrderedDict()
 		self.project_refs = [] # uuid
@@ -484,10 +484,15 @@ class vsnode_cs_target(msvs.vsnode_project):
 			lst[x.abspath()] = r
 
 		# Process embedded assemblies
-		srcs = getattr(tg, 'embed_asm', [])
+		srcs = tg.to_list(getattr(tg, 'embed', []))
+		get = tg.bld.get_tgen_by_name
 		for x in srcs:
-			r = embed_asm(self, x)
-			self.embed_asm[r.node.abspath()] = r
+			y = get(x)
+			y.post()
+			tsk = getattr(y, 'link_task', None)
+			r = embed_resource(self, x, tsk)
+			print 'embed', x, r.node.abspath()
+			self.embeds[r.node.abspath()] = r
 
 		# Process ide_content attribute
 		srcs = tg.to_nodes(getattr(tg, 'ide_content', []))
@@ -731,6 +736,9 @@ class vsnode_cs_target2012(vsnode_cs_target):
 			'''<Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />'''
 		)
 
+def copyattr(obj, src, dst):
+	setattr(obj, dst, getattr(obj, src, []))
+
 class idegen(msvs.msvs_generator):
 	'''generates a visual studio 2010 solution'''
 
@@ -913,7 +921,7 @@ class idegen(msvs.msvs_generator):
 
 			p.build_properties = props
 
-	def check_conditionals(self, left, right, attr, prop, variant):
+	def check_conditionals(self, left, right, attr, prop):
 		lhs = getattr(left, attr)
 		rhs = getattr(right, attr)
 
@@ -938,9 +946,6 @@ class idegen(msvs.msvs_generator):
 			v = getattr(prop, attr, [])
 			v.append(rhs[key])
 			setattr(prop, attr, v)
-
-	def copy_attrs(self, obj, src, dst):
-		setattr(obj, dst, getattr(obj, src, []))
 
 	def flatten_projects(self):
 		ret = OrderedDict()
@@ -980,15 +985,15 @@ class idegen(msvs.msvs_generator):
 					if main != p:
 						main.source_files = OrderedDict(main.source_files.items() + p.source_files.items())
 
-					# MonoDevelop doesn't let us do conditions on a per
-					# source basis. Condition only works on PropertyGroup
-					# and Reference elements.
-					if main != p:
-						self.check_conditionals(main, p, 'references', prop, variant)
-						self.check_conditionals(main, p, 'embed_asm', prop, variant)
+						# MonoDevelop doesn't let us do conditions on a per
+						# source basis. Condition only works on PropertyGroup
+						# and Reference elements.
+						self.check_conditionals(main, p, 'references', prop)
+						self.check_conditionals(main, p, 'embeds', prop)
 						for other_prop in main.build_properties:
-							self.copy_attrs(other_prop, 'embed_asm', 'source_files')
-						self.copy_attrs(prop, 'embed_asm', 'source_files')
+							copyattr(other_prop, 'embeds', 'source_files')
+						copyattr(prop, 'embeds', 'source_files')
+
 				elif isinstance(p, vsnode_web_target):
 					prop = msvs.build_property()
 					prop.platform_tgt = env.CSPLATFORM

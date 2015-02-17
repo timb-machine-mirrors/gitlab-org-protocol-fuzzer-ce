@@ -356,6 +356,18 @@ namespace Peach.Core
 			}
 		}
 
+		public static void ExtractEmbeddedResource(Assembly asm, string name, string target)
+		{
+			var path = Path.Combine(ExecutionDirectory, target);
+			using (var sout = new FileStream(path, FileMode.Create))
+			{
+				using (var sin = asm.GetManifestResourceStream(name))
+				{
+					sin.CopyTo(sout);
+				}
+			}
+		}
+
 		public static string FormatAsPrettyHex(byte[] data, int startPos = 0, int length = -1)
 		{
 			var sb = new StringBuilder();
@@ -638,36 +650,6 @@ namespace Peach.Core
 			if (bytes > 1024)
 				return (bytes / 1024.0).ToString("0.###") + " Kbytes";
 			return bytes + " Bytes";
-		}
-	}
-
-	public class Retry
-	{
-		public static readonly TimeSpan DefaultRetryDelay = TimeSpan.FromSeconds(0.5);
-		public const int DefaultRetryCount = 3;
-
-		public static void Execute(Action fn, int retryCount = DefaultRetryCount)
-		{
-			Execute(fn, DefaultRetryDelay, retryCount);
-		}
-
-		public static void Execute(Action fn, TimeSpan retryDelay, int retryCount = DefaultRetryCount)
-		{
-			int count = 0;
-			while (true)
-			{
-				try
-				{
-					fn();
-					break;
-				}
-				catch (Exception ex)
-				{
-					if (count++ == retryCount)
-						throw ex;
-					Thread.Sleep(retryDelay);
-				}
-			}
 		}
 	}
 }
