@@ -28,71 +28,127 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using NLog;
-using Peach.Core;
-using Peach.Core.Agent;
-using Monitor = Peach.Core.Agent.Monitor;
+using Peach.Core.IO;
 
-namespace Peach.Pro.Core.Agent
+namespace Peach.Core.Agent.Channels
 {
 	/// <summary>
-	/// Agent logic.  This class is typically
-	/// called from the server side of agent channels.
+	/// This is an agent that runs in the local
+	/// process, instead of a remote process.  This
+	/// is much faster for things like file fuzzing.
 	/// </summary>
-	public class Agent
+	[Agent("local")]
+	public class AgentLocal : AgentClient
 	{
-		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
+		#region Publisher Proxy
 
-		private readonly List<Monitor> _monitors = new List<Monitor>();
-
-		#region Publisher Helpers
-
-		public Publisher CreatePublisher(string name, string cls, Dictionary<string, string> args)
+		class PublisherProxy : IPublisher
 		{
-			Logger.Trace("CreatePublisher: {0} {1}", name, cls);
+			private Publisher _publisher;
 
-			var type = ClassLoader.FindPluginByName<PublisherAttribute>(cls);
-			if (type == null)
-				throw new PeachException("Error, unable to locate Pubilsher '" + cls + "'");
-
-			try
+			public PublisherProxy(Publisher publisher)
 			{
-				var parms = args.ToDictionary(i => i.Key, i => new Variant(i.Value));
-				var pub = (Publisher)Activator.CreateInstance(type, parms);
-				return pub;
+				_publisher = publisher;
+				_publisher.start();
 			}
-			catch (TargetInvocationException ex)
-			{
-				var baseEx = ex.GetBaseException();
-				if (baseEx is ThreadAbortException)
-					throw baseEx;
 
-				throw new PeachException("Could not start publisher \"" + cls + "\".  " + ex.InnerException.Message, ex);
+			#region IPublisher
+
+			public Stream InputStream
+			{
+				get { return _publisher; }
 			}
+
+			public void Dispose()
+			{
+				_publisher.stop();
+				_publisher = null;
+			}
+
+			public void Open(uint iteration, bool isControlIteration)
+			{
+				_publisher.Iteration = iteration;
+				_publisher.IsControlIteration = isControlIteration;
+				_publisher.open();
+			}
+
+			public void Close()
+			{
+				_publisher.close();
+			}
+
+			public void Accept()
+			{
+				_publisher.accept();
+			}
+
+			public Variant Call(string method, List<BitwiseStream> args)
+			{
+				return _publisher.call(method, args);
+			}
+
+			public void SetProperty(string property, Variant value)
+			{
+				_publisher.setProperty(property, value);
+			}
+
+			public Variant GetProperty(string property)
+			{
+				return _publisher.getProperty(property);
+			}
+
+			public void Output(BitwiseStream data)
+			{
+				_publisher.output(data);
+			}
+
+			public void Input()
+			{
+				_publisher.input();
+			}
+
+			public void WantBytes(long count)
+			{
+				_publisher.WantBytes(count);
+			}
+
+			#endregion
 		}
 
 		#endregion
 
-		#region Agent Members
+		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		public void AgentConnect()
+		private readonly List<Monitor> _monitors = new List<Monitor>();
+
+		public AgentLocal(string name, string uri, string password)
+			: base(name, uri, password)
+		{
+		}
+
+		public override void AgentConnect()
 		{
 			Logger.Trace("AgentConnect");
 		}
 
-		public void AgentDisconnect()
+		public override void AgentDisconnect()
 		{
 			Logger.Trace("AgentDisconnect");
-
-			StopAllMonitors();
 		}
 
-		public void StartMonitor(string name, string cls, Dictionary<string, string> args)
+		public override IPublisher CreatePublisher(string pubName, string cls, Dictionary<string, string> args)
 		{
-			Logger.Debug("StartMonitor: {0} {1}", name, cls);
+			return new PublisherProxy(ActivatePublisher(pubName, cls, args));
+		}
+
+		public override void StartMonitor(string monitorName, string cls, Dictionary<string, string> args)
+		{
+			Logger.Debug("StartMonitor: {0} {1}", monitorName, cls);
 
 			var type = ClassLoader.FindPluginByName<MonitorAttribute>(cls);
 			if (type == null)
@@ -100,7 +156,7 @@ namespace Peach.Pro.Core.Agent
 
 			try
 			{
-				var mon = (Monitor)Activator.CreateInstance(type, name);
+				var mon = (Monitor)Activator.CreateInstance(type, monitorName);
 				mon.StartMonitor(args);
 				_monitors.Add(mon);
 			}
@@ -114,7 +170,7 @@ namespace Peach.Pro.Core.Agent
 			}
 		}
 
-		public void StopAllMonitors()
+		public override void StopAllMonitors()
 		{
 			Logger.Trace("StopAllMonitors");
 
@@ -126,7 +182,7 @@ namespace Peach.Pro.Core.Agent
 			_monitors.Clear();
 		}
 
-		public void SessionStarting()
+		public override void SessionStarting()
 		{
 			foreach (var mon in _monitors)
 			{
@@ -135,7 +191,7 @@ namespace Peach.Pro.Core.Agent
 			}
 		}
 
-		public void SessionFinished()
+		public override void SessionFinished()
 		{
 			foreach (var mon in _monitors.Reverse<Monitor>())
 			{
@@ -143,7 +199,7 @@ namespace Peach.Pro.Core.Agent
 			}
 		}
 
-		public void IterationStarting(IterationStartingArgs args)
+		public override void IterationStarting(IterationStartingArgs args)
 		{
 			Logger.Trace("IterationStarting: {0} {1}", args.IsReproduction, args.LastWasFault);
 
@@ -153,7 +209,7 @@ namespace Peach.Pro.Core.Agent
 			}
 		}
 
-		public void IterationFinished()
+		public override void IterationFinished()
 		{
 			Logger.Trace("IterationFinished");
 
@@ -163,7 +219,7 @@ namespace Peach.Pro.Core.Agent
 			}
 		}
 
-		public bool DetectedFault()
+		public override bool DetectedFault()
 		{
 			Logger.Trace("DetectedFault");
 
@@ -177,7 +233,7 @@ namespace Peach.Pro.Core.Agent
 			return detectedFault;
 		}
 
-		public List<MonitorData> GetMonitorData()
+		public override IEnumerable<MonitorData> GetMonitorData()
 		{
 			Logger.Trace("GetMonitorData");
 
@@ -202,7 +258,7 @@ namespace Peach.Pro.Core.Agent
 			return ret;
 		}
 
-		public void Message(string msg)
+		public override void Message(string msg)
 		{
 			Logger.Trace("Message: {0}", msg);
 
@@ -210,7 +266,29 @@ namespace Peach.Pro.Core.Agent
 				monitor.Message(msg);
 		}
 
-		#endregion
+		public static Publisher ActivatePublisher(string name, string cls, Dictionary<string, string> args)
+		{
+			Logger.Trace("ActivatePublisher: {0} {1}", name, cls);
+
+			var type = ClassLoader.FindPluginByName<PublisherAttribute>(cls);
+			if (type == null)
+				throw new PeachException("Error, unable to locate publisher '" + cls + "'");
+
+			try
+			{
+				var parms = args.ToDictionary(i => i.Key, i => new Variant(i.Value));
+				var pub = (Publisher)Activator.CreateInstance(type, parms);
+				return pub;
+			}
+			catch (TargetInvocationException ex)
+			{
+				var baseEx = ex.GetBaseException();
+				if (baseEx is ThreadAbortException)
+					throw baseEx;
+
+				throw new PeachException("Could not start publisher \"" + cls + "\".  " + ex.InnerException.Message, ex);
+			}
+		}
 
 		private static void Guard(Monitor mon, string what, Action<Monitor> action)
 		{
