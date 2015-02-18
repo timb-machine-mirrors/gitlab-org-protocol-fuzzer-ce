@@ -1,3 +1,7 @@
+//
+// Copyright (c) Deja vu Security
+//
+
 using System;
 using System.IO;
 using System.Linq;

@@ -1,3 +1,7 @@
+//
+// Copyright (c) Deja vu Security
+//
+
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
