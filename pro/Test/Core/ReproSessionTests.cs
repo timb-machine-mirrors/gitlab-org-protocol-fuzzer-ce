@@ -301,7 +301,6 @@ namespace Peach.Pro.Test.Core
 		{
 			public Args()
 			{
-				RangeStart = 0;
 				RangeStop = 10;
 
 				ControlIterations = 0;
@@ -311,7 +310,6 @@ namespace Peach.Pro.Test.Core
 				FaultWaitTime = 0.0;
 			}
 
-			public uint RangeStart { get; set; }
 			public uint RangeStop { get; set; }
 
 			public uint SwitchCount { get; set; }
@@ -324,6 +322,8 @@ namespace Peach.Pro.Test.Core
 			public string InitialRepro { get; set; }
 			public string Fault { get; set; }
 			public string Repro { get; set; }
+
+			public bool FaultOnControl { get; set; }
 
 			public uint? MaxBackSearch { get; set; }
 		}
@@ -384,7 +384,7 @@ namespace Peach.Pro.Test.Core
 			var config = new RunConfiguration
 			{
 				range = true,
-				rangeStart = args.RangeStart,
+				rangeStart = 0,
 				rangeStop = args.RangeStop,
 			};
 
@@ -448,7 +448,15 @@ namespace Peach.Pro.Test.Core
 				Assert.Greater(ctx.reproducingIterationJumpCount, 0);
 			};
 
-			e.startFuzzing(dom, config);
+			if (args.FaultOnControl)
+			{
+				var ex = Assert.Throws<PeachException>(() =>  e.startFuzzing(dom, config));
+				Assert.AreEqual("Fault detected on control iteration.", ex.Message);
+			}
+			else
+			{
+				e.startFuzzing(dom, config);
+			}
 
 			return string.Join(" ", history);
 		}
@@ -783,10 +791,11 @@ namespace Peach.Pro.Test.Core
 			// Fuzz from 1 to 10
 			// Fault on iteration C6
 			// Repro on iteration C6
+			// Stop fuzzing after repro
 
-			var act = Run(new Args { Fault = "C6", Repro = "C6", ControlIterations = 5 });
+			var act = Run(new Args { Fault = "C6", Repro = "C6", ControlIterations = 5, FaultOnControl = true });
 
-			const string exp = "R1 1 2 3 4 5 C6 ReproFault C6 Fault 6 7 8 9 10";
+			const string exp = "R1 1 2 3 4 5 C6 ReproFault C6 Fault";
 
 			Assert.AreEqual(exp, act);
 		}
@@ -998,7 +1007,7 @@ namespace Peach.Pro.Test.Core
 			// Fault on non-control and never repro, don't search past last control fault
 
 			// Fuzz from 1 to 30
-			// Fault and repro on C11
+			// Fault and repro after searching on C11
 			// Fault on iteration C26
 			// Never reproduces
 			// Runs -10 with control after every iteration
@@ -1006,10 +1015,11 @@ namespace Peach.Pro.Test.Core
 
 			// Resume at 27 28 29 30
 
-			var act = Run(new Args { RangeStop = 30, Initial = "C11", InitialRepro = "C11", Fault = "C26", ControlIterations = 5 });
+			var act = Run(new Args { RangeStop = 30, Initial = "C11", InitialRepro = "C11,2", Fault = "C26", ControlIterations = 5 });
 
 			const string exp =
-				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 ReproFault C11 Fault " +
+				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 ReproFault C11 " +
+				"1 C2 2 C3 3 C4 4 C5 5 C6 6 C7 7 C8 8 C9 9 C10 10 C11 Fault " +
 				"11 12 13 14 15 C16 16 17 18 19 20 C21 21 22 23 24 25 C26 ReproFault C26 " +
 				"16 C17 17 C18 18 C19 19 C20 20 C21 21 C22 22 C23 23 C24 24 C25 25 C26 " +
 				"11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 C26 " +
