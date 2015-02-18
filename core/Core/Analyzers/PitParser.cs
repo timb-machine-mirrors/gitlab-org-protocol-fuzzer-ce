@@ -1627,8 +1627,14 @@ namespace Peach.Core.Analyzers
 						if (!dupes.Add(name))
 							throw new PeachException("Error, Data element has multiple entries for field '" + name + "'.");
 
+						DataElement tmp;
+
+						if (child.getAttr("valueType", "").ToLower() == "hex")
+							tmp = new Blob();
+						else
+							tmp = new Dom.String { stringType = StringType.utf8 };
+
 						// Hack to call common value parsing code.
-						Blob tmp = new Blob();
 						handleCommonDataElementValue(child, tmp);
 
 						fieldData.Fields.Remove(name);

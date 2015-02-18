@@ -12,7 +12,7 @@ namespace Peach.Core.Test
 	{
 		public static Dom.Dom ParsePit(string xml)
 		{
-			return new PitParser().asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			return new PitParser().asParser(null, new MemoryStream(Encoding.UTF8.GetBytes(xml)));
 		}
 
 		protected void RunEngine(string xml)
