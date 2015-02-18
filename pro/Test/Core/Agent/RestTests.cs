@@ -148,7 +148,7 @@ namespace Peach.Pro.Test.Core.Agent
 				Assert.Null(f[0].Fault);
 				Assert.NotNull(f[0].Data);
 				Assert.True(f[0].Data.ContainsKey(name));
-				Assert.AreEqual("Hello World", Encoding.UTF8.GetString(f[0].Data[name]));
+				Assert.AreEqual("Hello World", f[0].Data[name].AsString());
 
 				cli.SessionFinished();
 				cli.StopAllMonitors();

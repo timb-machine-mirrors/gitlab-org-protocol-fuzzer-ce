@@ -75,7 +75,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				public string Key { get; set; }
 
 				[JsonProperty("size")]
-				public int Size { get; set; }
+				public long Size { get; set; }
 
 				[JsonProperty("url")]
 				public string Url { get; set; }

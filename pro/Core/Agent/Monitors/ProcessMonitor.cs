@@ -247,7 +247,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			return new MonitorData
 			{
 				Title = title,
-				Data = new Dictionary<string, byte[]>(),
+				Data = new Dictionary<string, Stream>(),
 				Fault = new MonitorData.Info
 				{
 					MajorHash = majorHash,

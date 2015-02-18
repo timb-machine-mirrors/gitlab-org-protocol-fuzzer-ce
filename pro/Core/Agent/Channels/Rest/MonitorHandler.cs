@@ -319,10 +319,9 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				_data.Clear();
 			}
 
-			private string CacheMonitorData(byte[] data)
+			private string CacheMonitorData(Stream stream)
 			{
 				var url = Server.FilePath + "/" + Guid.NewGuid();
-				var stream = new MemoryStream(data);
 
 				_data.Add(url, stream);
 				_handler._routes.Add(url, "GET", req => RouteResponse.AsStream(stream));

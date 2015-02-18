@@ -207,7 +207,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 			var ret = new MonitorData
 			{
 				Title = title,
-				Data = new Dictionary<string,byte[]>(),
+				Data = new Dictionary<string, Stream>(),
 				Fault = new MonitorData.Info
 				{
 					MajorHash = "CORE",
@@ -228,7 +228,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 						{
 							var key = Path.GetFileName(file);
 							Debug.Assert(key != null);
-							ret.Data.Add(key, File.ReadAllBytes(file));
+							ret.Data.Add(key, new MemoryStream(File.ReadAllBytes(file)));
 							File.Delete(file);
 							break;
 						}
@@ -238,7 +238,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 						// Support multiple crash files
 						var key = Path.GetFileName(file);
 						Debug.Assert(key != null);
-						ret.Data.Add(key, File.ReadAllBytes(file));
+						ret.Data.Add(key, new MemoryStream(File.ReadAllBytes(file)));
 						File.Delete(file);
 					}
 				}

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 
 namespace Peach.Core.Agent
 {
@@ -93,7 +94,11 @@ namespace Peach.Core.Agent
 		/// Extra data to keep with teh fault.
 		/// For each Key,Value pair, Value will be saved as
 		/// "AgentName.MonitorName.DetectionSource.Key"
+		/// Ownership of the stream is the responsibility of the monitor.
+		/// The stream needs to be returned from GetMonitorData and
+		/// remain open until the next call to IterationStarting or
+		/// a call to SessionFinished.
 		/// </remarks>
-		public Dictionary<string, byte[]> Data { get; set; }
+		public Dictionary<string, Stream> Data { get; set; }
 	}
 }
