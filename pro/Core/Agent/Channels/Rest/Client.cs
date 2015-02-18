@@ -1,3 +1,7 @@
+//
+// Copyright (c) Deja vu Security
+//
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,9 +16,11 @@ using Logger = NLog.Logger;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
-	[Agent("json")]
+	[Agent("http")]
 	public class Client : AgentClient
 	{
+		#region Publisher Proxy
+
 		class PublisherProxy : IPublisher
 		{
 			readonly Client _client;
@@ -57,7 +63,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			public void Connect()
 			{
-				_publisherUri = new Uri(_client._baseUrl, "/p/publisher");
+				_publisherUri = new Uri(_client._baseUrl, Server.PublisherPath);
 				var resp = Send<PublisherResponse>("POST", "", _createReq);
 				_publisherUri = new Uri(_client._baseUrl, resp.Url);
 			}
@@ -70,7 +76,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					IsControlIteration = isControlIteration,
 				};
 
-				Send("PUT", "/open", req);
+				Guard("Open", () => Send("PUT", "/open", req));
 
 				InputStream.Position = 0;
 				InputStream.SetLength(0);
@@ -78,12 +84,12 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			public void Close()
 			{
-				Send("PUT", "/close", null);
+				Guard("Close", () => Send("PUT", "/close", null));
 			}
 
 			public void Accept()
 			{
-				Send("PUT", "/accept", null);
+				Guard("Accept", () => Send("PUT", "/accept", null));
 			}
 
 			public Variant Call(string method, List<BitwiseStream> args)
@@ -108,45 +114,59 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					req.Args.Add(param);
 				}
 
-				var resp = Send<CallResponse>("PUT", "/call", req);
-
-				return resp.ToVariant();
+				return Guard("Call", () =>
+				{
+					var resp = Send<CallResponse>("PUT", "/call", req);
+					var ret = resp.ToVariant();
+					return ret;
+				});
 			}
 
-			public void SetProperty(string property, Variant value)
+			public void SetProperty(string name, Variant value)
 			{
-				var req = value.ToModel<SetPropertyRequest>();
-				req.Property = property;
-				Send("PUT", "/property", req);
+				Guard("SetProperty", () =>
+				{
+					var req = value.ToModel<SetPropertyRequest>();
+					req.Name = name;
+					Send("PUT", "/property", req);
+				});
 			}
 
-			public Variant GetProperty(string property)
+			public Variant GetProperty(string name)
 			{
-				var req = new GetPropertyRequest { Property = property };
-				var resp = Send<VariantMessage>("GET", "/property", req);
-				return resp.ToVariant();
+				return Guard("GetProperty", () =>
+				{
+					var resp = Send<GetPropertyResponse>("GET", "/property?name=" + name, null);
+					return resp.ToVariant();
+				});
 			}
 
 			public void Output(BitwiseStream data)
 			{
-				var uri = new Uri(_publisherUri, _publisherUri.PathAndQuery + "/output");
-				var request = RouteResponse.AsStream(data);
-				_client.Execute("PUT", uri, request, SendStream, resp => resp.Consume());
+				Guard("Output", () =>
+				{
+					var uri = new Uri(_publisherUri, _publisherUri.PathAndQuery + "/output");
+					var request = RouteResponse.AsStream(data);
+					_client.Execute("PUT", uri, request, SendStream, resp => resp.Consume());
+				});
 			}
 
 			public void Input()
 			{
-				var resp = Send<BoolResponse>("PUT", "/input", null);
-				if (resp.Value)
+				Guard("Input", () =>
 				{
-					InputStream.Position = 0;
-					InputStream.SetLength(0);
-				}
+					var resp = Send<BoolResponse>("PUT", "/input", null);
+					if (resp.Value)
+					{
+						InputStream.Position = 0;
+						InputStream.SetLength(0);
+					}
 
-				// Read all input bytes starting at offset 'Length'
-				// so we don't re-download bytes we have already gotten.
+					// Read all input bytes starting at offset 'Length'
+					// so we don't re-download bytes we have already gotten.
 
-				ReadInputData("?offset={0}".Fmt(InputStream.Length));
+					ReadInputData("?offset={0}".Fmt(InputStream.Length));
+				});
 			}
 
 			public void WantBytes(long count)
@@ -154,7 +174,10 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				var needed = count - InputStream.Length + InputStream.Position;
 
 				if (needed > 0)
-					ReadInputData("?offset={0}&count={1}".Fmt(InputStream.Length, needed));
+				{
+					var query = "?offset={0}&count={1}".Fmt(InputStream.Length, needed);
+					Guard("WantBytes", () => ReadInputData(query));
+				}
 			}
 
 			private void Send(string method, string path, object request)
@@ -195,12 +218,58 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					return (object)null;
 				});
 			}
+
+			private void Guard(string what, Action action)
+			{
+				Guard<object>(what, () => { action(); return null; });
+			}
+
+			private T Guard<T>(string what, Func<T> action)
+			{
+				try
+				{
+					return action();
+				}
+				catch (PeachException)
+				{
+					throw;
+				}
+				catch (SoftException)
+				{
+					throw;
+				}
+				catch (WebException ex)
+				{
+					Logger.Debug("Ignoring {0} calling '{1}' on remote {2} publisher '{3}'.",
+						ex.Status,
+						what,
+						_createReq.Class,
+						_createReq.Name);
+
+					Logger.Debug(ex.Message);
+				}
+				catch (Exception ex)
+				{
+					Logger.Warn("Ignoring {0} calling '{1}' on remote {2} publisher '{3}'.",
+						ex.GetType().Name,
+						what,
+						_createReq.Class,
+						_createReq.Name);
+
+					Logger.Debug(ex.Message);
+				}
+
+				return default(T);
+			}
 		}
+
+		#endregion
 
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
 		private readonly Uri _baseUrl;
 		private readonly List<PublisherProxy> _publishers;
+		private readonly CookieContainer _cookies;
 
 		private ConnectRequest _connectReq;
 		private ConnectResponse _connectResp;
@@ -213,55 +282,57 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			_baseUrl = new Uri(uri);
 
 			if (_baseUrl.IsDefaultPort)
-				_baseUrl = new Uri("{0}://{1}:{2}".Fmt(_baseUrl.Scheme, _baseUrl.Host, Server.DefaultPort));
+			{
+				_baseUrl = new Uri("{0}://{1}:{2}".Fmt(
+					_baseUrl.Scheme,
+					_baseUrl.Host,
+					Server.DefaultPort));
+			}
 
 			_baseUrl = new Uri("http://{0}:{1}".Fmt(_baseUrl.Host, _baseUrl.Port));
 
 			_publishers = new List<PublisherProxy>();
+			_cookies = new CookieContainer();
 		}
 
 		public override void AgentConnect()
 		{
-			_offline = false;
-
+			// Initialize our monitors to be empty and populate
+			// them with calls to StartMonitor()
 			_connectReq = new ConnectRequest
 			{
-				Monitors = new List<ConnectRequest.Monitor>(),
+				Monitors = new List<MonitorRequest>(),
 			};
+
+			ReconnectAgent();
 		}
 
 		public override void StartMonitor(string monName, string cls, Dictionary<string, string> args)
 		{
-			_connectReq.Monitors.Add(new ConnectRequest.Monitor
+			var mon = new MonitorRequest
 			{
 				Name = monName,
 				Class = cls,
 				Args = args
-			});
+			};
+
+			// Save off this monitor for future reconnects
+			_connectReq.Monitors.Add(mon);
+
+			// Tell the agent to start this single monitor and
+			// update our connect response with the supported mesages
+			_connectResp = Send<ConnectResponse>("POST", "", mon);
 		}
 
 		public override void SessionStarting()
 		{
-			_offline = false;
-
-			if (_connectReq.Monitors.Count > 0)
-			{
-				// Send the initial POST to the base url
-				_agentUri = new Uri(_baseUrl, "/p/agent");
-				_connectResp = Send<ConnectResponse>("POST", "", _connectReq);
-				_agentUri = new Uri(_baseUrl, _connectResp.Url);
-			}
-
-			// If we are reconnecting, ensure all the publishers are recreated
-			foreach (var pub in _publishers)
-				pub.Connect();
+			if (_connectResp.Messages.Contains("SessionStarting"))
+				Send("PUT", "/SessionStarting", null);
 		}
 
 		public override void SessionFinished()
 		{
-			Send("DELETE", "", null);
-
-			_connectResp = null;
+			// AgentDisconnect calls DELETE which does SessionFinished
 
 			// Leave the publishers around a they will get cleaned up
 			// when stop() is called on the RemotePublisher
@@ -269,12 +340,16 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		public override void StopAllMonitors()
 		{
-			// OnSessionFinished does StopAllMonitors
+			// AgentDisconnect calls DELETE which does StopAllMonitors
 		}
 
 		public override void AgentDisconnect()
 		{
-			// OnSessionFinished does AgentDisconnect
+			// If reconnect failed, we won't have an agent uri
+			if (_agentUri != null)
+				Send("DELETE", "", null);
+
+			_connectResp = null;
 		}
 
 		public override IPublisher CreatePublisher(string pubName, string cls, Dictionary<string, string> args)
@@ -286,7 +361,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		{
 			// If any previous call failed, we need to reconnect
 			if (_offline)
-				SessionStarting();
+				ReconnectAgent();
 
 			if (!_connectResp.Messages.Contains("IterationStarting"))
 				return;
@@ -313,7 +388,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			var resp = Send<BoolResponse>("GET", "/DetectedFault", null);
 
-			return resp.Value;
+			return resp != null && resp.Value;
 		}
 
 		public override IEnumerable<MonitorData> GetMonitorData()
@@ -323,7 +398,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			var resp = Send<FaultResponse>("GET", "/GetMonitorData", null);
 
-			if (resp.Faults == null)
+			if (resp == null || resp.Faults == null)
 				return new MonitorData[0];
 
 			var ret = resp.Faults.Select(MakeFault);
@@ -337,6 +412,13 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			if (_connectResp.Messages.Contains(path))
 				Send("PUT", path, null);
+		}
+
+		internal void SimulateDisconnect()
+		{
+			Send("DELETE", "", null);
+
+			_offline = true;
 		}
 
 		private MonitorData MakeFault(FaultResponse.Record f)
@@ -365,7 +447,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			return ret;
 		}
 
-		private byte[] DownloadFile(FaultResponse.Record.FaultData data)
+		private Stream DownloadFile(FaultResponse.Record.FaultData data)
 		{
 			Logger.Trace("Downloading {0} byte file '{1}'.", data.Size, data.Key);
 
@@ -375,15 +457,43 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			{
 				using (var strm = resp.GetResponseStream())
 				{
-					if (strm == null)
-						return new byte[0];
-
 					var ms = new MemoryStream();
-					strm.CopyTo(ms);
 
-					return ms.ToArray();
+					if (strm != null)
+						strm.CopyTo(ms);
+
+					return ms;
 				}
 			});
+		}
+
+		private void ReconnectAgent()
+		{
+			Logger.Debug("Restarting all monitors on remote agent {0}", _baseUrl);
+
+			_offline = false;
+
+			try
+			{
+				// Send the initial POST to the base url
+				_agentUri = new Uri(_baseUrl, Server.MonitorPath);
+				_connectResp = Send<ConnectResponse>("POST", "", _connectReq);
+				_agentUri = new Uri(_baseUrl, _connectResp.Url);
+			}
+			catch
+			{
+				_agentUri = null;
+
+				throw;
+			}
+
+			Logger.Debug("Restarting all publishers on remote agent {0}", _baseUrl);
+
+			// If we are reconnecting, ensure all the publishers are recreated
+			foreach (var pub in _publishers)
+				pub.Connect();
+
+			Logger.Debug("Successfully restored connection to remote agent {0}", _baseUrl);
 		}
 
 		private void Send(string method, string path, object request)
@@ -438,6 +548,15 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			try
 			{
 				var req = (HttpWebRequest)WebRequest.Create(uri);
+
+				// This should enable connection reuse.
+				// The container doesn't need to actually have any cookies in it
+				req.CookieContainer = _cookies;
+
+				// For POST we don't need to expect 100 CONTINUE responses
+				req.ServicePoint.Expect100Continue = false;
+				req.Timeout = 60000;
+				req.KeepAlive = true;
 
 				req.Method = method;
 

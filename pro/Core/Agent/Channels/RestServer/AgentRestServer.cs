@@ -20,6 +20,8 @@ using Newtonsoft.Json.Serialization;
 using Peach.Core.Agent;
 using Peach.Pro.Core.Runtime;
 
+#if DISABLED
+
 namespace Peach.Pro.Core.Agent.Channels.RestServer
 {
 	[AgentServer("http")]
@@ -351,3 +353,4 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 		}
 	}
 }
+#endif

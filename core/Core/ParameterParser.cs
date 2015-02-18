@@ -276,8 +276,17 @@ namespace Peach.Core
 		{
 			var attr = type.GetAttributes<PluginAttribute>().OrderBy(a => a.IsDefault).FirstOrDefault();
 
-			var cls = attr != null ? attr.Type.Name : "Class"; 
-			var name = attr != null ? attr.Name : type.Name; 
+			var cls = "Class";
+			var name = type.Name;
+
+			if (attr != null)
+			{
+				name = attr.Name;
+				cls = attr.Type.Name;
+
+				if (attr.Type.IsInterface && cls.StartsWith("I"))
+					cls = cls.Substring(1);
+			}
 
 			var msg = string.Format("{0} '{1}' {2}", cls, name, string.Format(fmt, args));
 			throw new PeachException(msg, ex);

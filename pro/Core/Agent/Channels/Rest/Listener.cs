@@ -1,15 +1,23 @@
+//
+// Copyright (c) Deja vu Security
+//
+
 using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Security.Principal;
 using System.Threading;
+using NLog;
 using Peach.Core;
+using Logger = NLog.Logger;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
 	internal class Listener : IDisposable
 	{
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
 		private const string EveryoneAccount = "Everyone";
 		private const int AccessDenied = 5;
 
@@ -71,6 +79,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		private void ProcessContext(HttpListenerContext ctx)
 		{
+			Logger.Trace(">>> {0} {1}", ctx.Request.HttpMethod, ctx.Request.RawUrl);
+
 			var response = Routes.Dispatch(ctx.Request);
 
 			ctx.Response.StatusCode = (int)response.StatusCode;
@@ -96,6 +106,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					response.Content.CopyTo(stream);
 				}
 			}
+
+			Logger.Trace("<<< {0} {1}", (int)response.StatusCode, response.StatusCode);
 		}
 
 		private static string GetAccountName()

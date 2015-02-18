@@ -101,7 +101,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			Assert.AreEqual(1, faults[0].Data.Count);
 			Assert.True(faults[0].Data.ContainsKey("ClosedWindows.txt"), "Should contain 'ClosedWindows.txt'");
 
-			var data = Encoding.UTF8.GetString(faults[0].Data["ClosedWindows.txt"]);
+			var data = faults[0].Data["ClosedWindows.txt"].AsString();
 			Assert.AreEqual("Window Titles:{0}{1}".Fmt(Environment.NewLine, windowName), data);
 		}
 
@@ -163,7 +163,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			Assert.AreEqual(1, faults[0].Data.Count);
 			Assert.True(faults[0].Data.ContainsKey("ClosedWindows.txt"), "Should contain 'ClosedWindows.txt'");
 
-			var data = Encoding.UTF8.GetString(faults[0].Data["ClosedWindows.txt"]);
+			var data = faults[0].Data["ClosedWindows.txt"].AsString();
 
 			StringAssert.Contains(windowName1, data);
 			StringAssert.Contains(windowName2, data);

@@ -1,8 +1,13 @@
+//
+// Copyright (c) Deja vu Security
+//
+
 using System;
 using System.IO;
 using System.Linq;
 using System.Net;
 using Peach.Core;
+using Peach.Core.Agent.Channels;
 using Peach.Core.IO;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
@@ -28,14 +33,9 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			{
 				_handler = handler;
 
-				Url = "/p/publisher/" + Guid.NewGuid();
+				Url = Server.PublisherPath + "/" + Guid.NewGuid();
 
-				var type = ClassLoader.FindPluginByName<PublisherAttribute>(req.Class);
-				if (type == null)
-					throw new PeachException("Error, unable to locate Publisher '{0}'.".Fmt(req.Class));
-
-				_publisher = (Publisher)Activator.CreateInstance(type, req.Args.ToDictionary(i => i.Key, i => new Variant(i.Value)));
-				_publisher.Name = req.Name;
+				_publisher = AgentLocal.ActivatePublisher(req.Name, req.Class, req.Args);
 				_publisher.start();
 
 				_handler._routes.Add(Url, "DELETE", OnDelete);
@@ -107,7 +107,15 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					var bs = new BitStream();
 					strm.CopyTo(bs);
 					bs.Seek(0, SeekOrigin.Begin);
-					_publisher.output(bs);
+
+					try
+					{
+						_publisher.output(bs);
+					}
+					catch (NotSupportedException ex)
+					{
+						RaiseNotSupported(ex, "output");
+					}
 				}
 
 				return RouteResponse.Success();
@@ -130,7 +138,16 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					.Select(i => new BitStream(i.Value) { Name = i.Name })
 					.ToList<BitwiseStream>();
 
-				var ret = _publisher.call(json.Method, args);
+				Variant ret = null;
+
+				try
+				{
+					ret = _publisher.call(json.Method, args);
+				}
+				catch (NotSupportedException ex)
+				{
+					RaiseNotSupported(ex, "call");
+				}
 
 				var resp = ret.ToModel<CallResponse>();
 
@@ -142,15 +159,18 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				var args = req.FromJson<SetPropertyRequest>();
 				var value = args.ToVariant();
 
-				_publisher.setProperty(args.Property, value);
+				_publisher.setProperty(args.Name, value);
 
 				return RouteResponse.Success();
 			}
 
 			private RouteResponse OnGetProperty(HttpListenerRequest req)
 			{
-				var args = req.FromJson<GetPropertyRequest>();
-				var value = _publisher.getProperty(args.Property);
+				var property = req.QueryString["name"];
+				if (string.IsNullOrEmpty(property))
+					return RouteResponse.BadRequest();
+
+				var value = _publisher.getProperty(property);
 				var resp = value.ToModel<GetPropertyResponse>();
 
 				return RouteResponse.AsJson(resp);
@@ -187,7 +207,17 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				_publisher.Position = offset;
 
 				return RouteResponse.AsStream(_publisher);
+			}
 
+			private void RaiseNotSupported(Exception ex, string action)
+			{
+				var type = _publisher.GetType();
+				var cls = type
+					.GetAttributes<PublisherAttribute>()
+					.Select(a => a.Name)
+					.FirstOrDefault() ?? type.Name;
+
+				throw new PeachException("The {0} publisher does not support {1} actions when run on remote agents.".Fmt(cls, action), ex);
 			}
 		}
 
@@ -199,7 +229,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			_contexts = new NamedCollection<Context>();
 			_routes = routes;
-			_routes.Add("/p/publisher", "POST", OnCreatePublisher);
+			_routes.Add(Server.PublisherPath, "POST", OnCreatePublisher);
 		}
 
 		public void Dispose()

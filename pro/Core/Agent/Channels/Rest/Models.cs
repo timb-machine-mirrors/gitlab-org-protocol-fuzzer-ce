@@ -1,3 +1,7 @@
+//
+// Copyright (c) Deja vu Security
+//
+
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
@@ -5,22 +9,22 @@ using Newtonsoft.Json.Converters;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
+	public class MonitorRequest
+	{
+		[JsonProperty("name")]
+		public string Name { get; set; }
+
+		[JsonProperty("class")]
+		public string Class { get; set; }
+
+		[JsonProperty("args")]
+		public Dictionary<string, string> Args { get; set; }
+	}
+
 	internal class ConnectRequest
 	{
-		public class Monitor
-		{
-			[JsonProperty("name")]
-			public string Name { get; set; }
-
-			[JsonProperty("class")]
-			public string Class { get; set; }
-
-			[JsonProperty("args")]
-			public Dictionary<string, string> Args { get; set; }
-		}
-
 		[JsonProperty("monitors")]
-		public List<Monitor> Monitors { get; set; }
+		public List<MonitorRequest> Monitors { get; set; }
 	}
 
 	internal class IterationStartingRequest
@@ -75,7 +79,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				public string Key { get; set; }
 
 				[JsonProperty("size")]
-				public int Size { get; set; }
+				public long Size { get; set; }
 
 				[JsonProperty("url")]
 				public string Url { get; set; }
@@ -163,14 +167,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 	internal class SetPropertyRequest : VariantMessage
 	{
-		[JsonProperty("property")]
-		public string Property { get; set; }
-	}
-
-	internal class GetPropertyRequest
-	{
-		[JsonProperty("property")]
-		public string Property { get; set; }
+		[JsonProperty("name")]
+		public string Name { get; set; }
 	}
 
 	internal class GetPropertyResponse : VariantMessage

@@ -12,11 +12,11 @@ using SQLiteParameter = Mono.Data.Sqlite.SqliteParameter;
 using System.Data.SQLite;
 #endif
 using System;
-using System.ComponentModel;
 using System.IO;
 using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Mutators
 {

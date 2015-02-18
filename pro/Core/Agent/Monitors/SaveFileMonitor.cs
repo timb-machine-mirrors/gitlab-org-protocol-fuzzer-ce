@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using Peach.Core;
 using Peach.Core.Agent;
+using Monitor = Peach.Core.Agent.Monitor2;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Agent.Monitors
 {
@@ -29,9 +30,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 			var ret = new MonitorData
 			{
 				Title = "Save File \"{0}\".".Fmt(Filename),
-				Data = new Dictionary<string,byte[]>
+				Data = new Dictionary<string, Stream>
 				{
-					{ Path.GetFileName(Filename), File.ReadAllBytes(Filename) }
+					{ Path.GetFileName(Filename), new MemoryStream(File.ReadAllBytes(Filename)) }
 				}
 			};
 

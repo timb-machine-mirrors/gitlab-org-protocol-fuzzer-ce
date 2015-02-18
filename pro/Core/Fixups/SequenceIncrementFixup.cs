@@ -29,9 +29,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using Peach.Core;
 using Peach.Core.Dom;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Fixups
 {
@@ -43,7 +43,7 @@ namespace Peach.Pro.Core.Fixups
 	[Parameter("Once", typeof(bool), "Only increment once per iteration", "false")]
 	[Parameter("Group", typeof(string), "Name of group to increment", "")]
 	[Serializable]
-	public class SequenceIncrementFixup : VolatileFixup
+	public class SequenceIncrementFixup : Peach.Core.Fixups.VolatileFixup
 	{
 		public uint? Offset { get; private set; }
 		public bool Once { get; private set; }

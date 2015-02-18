@@ -23,7 +23,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -33,6 +32,7 @@ using Peach.Core;
 using Peach.Core.IO;
 using SuperSocket.SocketBase;
 using SuperWebSocket;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Publishers
 {

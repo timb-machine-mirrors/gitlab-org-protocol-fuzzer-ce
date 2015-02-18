@@ -29,6 +29,7 @@
 using System;
 using System.Xml.Serialization;
 using System.ComponentModel;
+using Peach.Core.Agent;
 
 namespace Peach.Core.Dom
 {
@@ -84,7 +85,7 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// List of monitors Agent should spin up.
 		/// </summary>
-		[PluginElement("class", typeof(Peach.Core.Agent.Monitor), Named = true)]
+		[PluginElement("class", typeof(IMonitor), Named = true)]
 		[DefaultValue(null)]
 		public NamedCollection<Monitor> monitors { get; set; }
 	}

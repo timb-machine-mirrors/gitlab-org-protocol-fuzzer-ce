@@ -1,16 +1,24 @@
+//
+// Copyright (c) Deja vu Security
+//
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
-using Monitor = Peach.Core.Agent.Monitor;
+using Peach.Core.Agent.Channels;
+using Logger = NLog.Logger;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
 	internal class MonitorHandler : IDisposable
 	{
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
 		private readonly NamedCollection<Context> _contexts;
 		private readonly RouteHandler _routes;
 
@@ -18,7 +26,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		{
 			_contexts = new NamedCollection<Context>();
 			_routes = routes;
-			_routes.Add("/p/agent", "POST", OnAgentConnect);
+			_routes.Add(Server.MonitorPath, "POST", OnAgentConnect);
 		}
 
 		public void Dispose()
@@ -54,7 +62,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			#endregion
 
 			private readonly MonitorHandler _handler;
-			private readonly NamedCollection<Monitor> _monitors;
+			private readonly HashSet<string> _calls;
+			private readonly NamedCollection<IMonitor> _monitors;
 			private readonly Dictionary<string, Stream> _data;
 
 			public string Name { get { return Url; } }
@@ -66,13 +75,32 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			public Context(MonitorHandler handler, ConnectRequest req)
 			{
 				_handler = handler;
-				_monitors = new NamedCollection<Monitor>();
+				_calls = new HashSet<string>();
+				_monitors = new NamedCollection<IMonitor>();
 				_data = new Dictionary<string, Stream>();
 
-				Url = "/pa/agent/" + Guid.NewGuid();
+				Url = Server.MonitorPath + "/" + Guid.NewGuid();
 				Messages = new List<string>();
 
-				CreateMonitors(req);
+				_handler._routes.Add(Url, "DELETE", OnAgentDisconnect);
+				_handler._routes.Add(Url, "POST", OnStartMonitor);
+
+				if (req == null || req.Monitors == null || req.Monitors.Count == 0)
+					return;
+
+				try
+				{
+					foreach (var item in req.Monitors)
+						AddMonitor(item);
+
+					OnSessionStarting(null);
+				}
+				catch
+				{
+					Dispose();
+
+					throw;
+				}
 			}
 
 			public void Dispose()
@@ -81,12 +109,30 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 				foreach (var mon in _monitors.Reverse())
 				{
-					mon.SessionFinished();
+					try
+					{
+						mon.SessionFinished();
+					}
+					catch (Exception ex)
+					{
+						Logger.Debug("Ignoring session finished exception on {0} monitor '{1}'.",
+							mon.Class, mon.Name);
+						Logger.Debug(ex.Message);
+					}
 				}
 
 				foreach (var mon in _monitors.Reverse())
 				{
-					mon.StopMonitor();
+					try
+					{
+						mon.StopMonitor();
+					}
+					catch (Exception ex)
+					{
+						Logger.Debug("Ignoring stop exception on {0} monitor '{1}'.",
+							mon.Class, mon.Name);
+						Logger.Debug(ex.Message);
+					}
 				}
 
 				_monitors.Clear();
@@ -101,53 +147,66 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				_handler._contexts.Remove(this);
 			}
 
-			private void CreateMonitors(ConnectRequest req)
+			private void AddMonitor(MonitorRequest item)
 			{
-				var calls = new HashSet<string>();
+				var key = item.Name ?? _monitors.UniqueName();
+				var mon = AgentLocal.ActivateMonitor(key, item.Class, item.Args);
 
-				foreach (var item in req.Monitors)
+				if (_monitors.Count == 0)
 				{
-					var cls = item.Class;
-					var key = item.Name ?? _monitors.UniqueName();
-					var type = ClassLoader.FindPluginByName<MonitorAttribute>(cls);
-
-					if (type == null)
-						throw new PeachException("Couldn't load monitor");
-
-					var mon = (Monitor) Activator.CreateInstance(type, new object[] {key});
-					mon.StartMonitor(item.Args);
-					foreach (var kv in item.Args.Where(kv => kv.Key.EndsWith("OnCall")))
+					// If this is the first monitor, add the common messages
+					Messages.AddRange(new[]
 					{
-						calls.Add(kv.Value);
+						"SessionStarting",
+						"IterationStarting",
+						"IterationFinished",
+						"DetectedFault",
+						"GetMonitorData"
+					});
+
+					_handler._routes.Add(Url + "/SessionStarting", "PUT", OnSessionStarting);
+					_handler._routes.Add(Url + "/IterationStarting", "PUT", OnIterationStarting);
+					_handler._routes.Add(Url + "/IterationFinished", "PUT", OnIterationFinished);
+					_handler._routes.Add(Url + "/DetectedFault", "GET", DetectedFault);
+					_handler._routes.Add(Url + "/GetMonitorData", "GET", GetMonitorData);
+				}
+
+				// Add any OnCall messages specific to this monitor
+				foreach (var kv in item.Args.Where(kv => kv.Key.EndsWith("OnCall")))
+				{
+					if (_calls.Add(kv.Value))
+					{
+						Messages.Add("Message/" + kv.Value);
+						_handler._routes.Add(Url + "/Message/" + kv.Value, "PUT", OnMessage);
 					}
-
-					_monitors.Add(mon);
 				}
 
-				foreach (var item in _monitors)
+				_monitors.Add(mon);
+			}
+
+			private RouteResponse OnSessionStarting(HttpListenerRequest req)
+			{
+				foreach (var mon in _monitors)
 				{
-					item.SessionStarting();
+					mon.SessionStarting();
 				}
 
-				Messages.AddRange(new[]
-				{
-					"IterationStarting",
-					"IterationFinished",
-					"DetectedFault",
-					"GetMonitorData"
-				});
+				return RouteResponse.Success();
+			}
 
-				_handler._routes.Add(Url, "DELETE", OnAgentDisconnect);
-				_handler._routes.Add(Url + "/IterationStarting", "PUT", OnIterationStarting);
-				_handler._routes.Add(Url + "/IterationFinished", "PUT", OnIterationFinished);
-				_handler._routes.Add(Url + "/DetectedFault", "GET", DetectedFault);
-				_handler._routes.Add(Url + "/GetMonitorData", "GET", GetMonitorData);
+			private RouteResponse OnStartMonitor(HttpListenerRequest req)
+			{
+				var mon = req.FromJson<MonitorRequest>();
 
-				foreach (var item in calls)
+				AddMonitor(mon);
+
+				var resp = new ConnectResponse
 				{
-					Messages.Add("Message/" + item);
-					_handler._routes.Add(Url + "/Message/" + item, "PUT", OnMessage);
-				}
+					Url = Url,
+					Messages = Messages,
+				};
+
+				return RouteResponse.AsJson(resp, HttpStatusCode.Created);
 			}
 
 			private RouteResponse OnIterationStarting(HttpListenerRequest req)
@@ -264,10 +323,9 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				_data.Clear();
 			}
 
-			private string CacheMonitorData(byte[] data)
+			private string CacheMonitorData(Stream stream)
 			{
-				var url = "/pa/file/" + Guid.NewGuid();
-				var stream = new MemoryStream(data);
+				var url = Server.FilePath + "/" + Guid.NewGuid();
 
 				_data.Add(url, stream);
 				_handler._routes.Add(url, "GET", req => RouteResponse.AsStream(stream));

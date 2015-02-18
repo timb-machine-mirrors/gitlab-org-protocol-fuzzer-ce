@@ -10,7 +10,7 @@ using Peach.Pro.Core.Publishers;
 
 namespace PitTester
 {
-	public class TestPublisher : StreamPublisher
+	public class TestPublisher : Peach.Core.Publishers.StreamPublisher
 	{
 		static readonly NLog.Logger ClassLogger = NLog.LogManager.GetCurrentClassLogger();
 

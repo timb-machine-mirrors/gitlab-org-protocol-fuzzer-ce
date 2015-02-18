@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using Peach.Core.Dom;
+using Peach.Core.Agent;
 using Peach.Core.Xsd;
 using System.Xml.Serialization;
 
@@ -9,7 +9,7 @@ namespace Peach.Core.Test
 	[XmlRoot("Foo")]
 	public class TestElement
 	{
-		[PluginElement("class", typeof(Peach.Core.Agent.Monitor))]
+		[PluginElement("class", typeof(IMonitor))]
 		public NamedCollection<Peach.Core.Dom.Monitor> Monitors { get; set; }
 	}
 

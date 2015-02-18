@@ -28,7 +28,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -36,7 +35,8 @@ using System.Threading;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
-using Monitor = Peach.Core.Agent.Monitor;
+using Monitor = Peach.Core.Agent.Monitor2;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Agent.Monitors
 {
@@ -247,7 +247,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			return new MonitorData
 			{
 				Title = title,
-				Data = new Dictionary<string, byte[]>(),
+				Data = new Dictionary<string, Stream>(),
 				Fault = new MonitorData.Info
 				{
 					MajorHash = majorHash,

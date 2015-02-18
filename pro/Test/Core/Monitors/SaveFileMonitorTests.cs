@@ -97,7 +97,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			Assert.NotNull(faults[0].Data);
 			Assert.AreEqual(1, faults[0].Data.Count);
 			Assert.True(faults[0].Data.ContainsKey(fileName));
-			Assert.AreEqual(_fileContents, faults[0].Data[fileName]);
+			Assert.AreEqual("Hello World", faults[0].Data[fileName].AsString());
 		}
 
 		[Test]

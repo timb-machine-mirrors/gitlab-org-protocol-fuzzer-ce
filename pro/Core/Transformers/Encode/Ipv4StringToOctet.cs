@@ -28,13 +28,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Transformers.Encode
 {
