@@ -49,7 +49,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Parameter("Executable", typeof(string), "Executable to launch")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
 	[Parameter("RestartOnEachTest", typeof(bool), "Restart process for each interation", "false")]
-	[Parameter("FaultOnEarlyExit", typeof(bool), "Trigger fault if process exists", "false")]
+	[Parameter("FaultOnEarlyExit", typeof(bool), "Trigger fault if process exits", "false")]
 	[Parameter("NoCpuKill", typeof(bool), "Disable process killing when CPU usage nears zero", "false")]
 	[Parameter("StartOnCall", typeof(string), "Start command on state model call", "")]
 	[Parameter("WaitForExitOnCall", typeof(string), "Wait for process to exit on state model call and fault if timeout is reached", "")]
