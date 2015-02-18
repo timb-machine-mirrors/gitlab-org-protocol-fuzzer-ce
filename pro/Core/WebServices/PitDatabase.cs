@@ -17,7 +17,6 @@ using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Dom;
 using Peach.Pro.Core.WebServices.Models;
-using DescriptionAttribute = Peach.Core.DescriptionAttribute;
 using Encoding = System.Text.Encoding;
 using File = System.IO.File;
 using Monitor = Peach.Pro.Core.WebServices.Models.Monitor;
@@ -307,10 +306,10 @@ namespace Peach.Pro.Core.WebServices
 		{
 			var ret = new List<Monitor>();
 
-			foreach (var kv in ClassLoader.GetAllByAttribute<MonitorAttribute>((t, a) => a.IsDefault))
+			foreach (var kv in ClassLoader.GetAllByAttribute<MonitorAttribute>())
 			{
 #if !DEBUG
-				if (kv.Key.IsTest)
+				if (kv.Key.Internal)
 					continue;
 #endif
 
@@ -359,7 +358,7 @@ namespace Peach.Pro.Core.WebServices
 
 			var m = new Monitor
 			{
-				Description = type.GetAttributes<DescriptionAttribute>().Select(a => a.Description).FirstOrDefault() ?? "",
+				Description = type.GetAttributes<System.ComponentModel.DescriptionAttribute>().Select(a => a.Description).FirstOrDefault() ?? "",
 				MonitorClass = attr.Name,
 				Map = new List<Parameter>(),
 				OS = os,
@@ -611,10 +610,7 @@ namespace Peach.Pro.Core.WebServices
 					};
 
 					var monitor1 = monitor;
-					var type = ClassLoader.GetAllByAttribute<MonitorAttribute>(
-						(t, attr) => attr.Name == monitor1.Class)
-							.Select(kv => kv.Value)
-							.FirstOrDefault();
+					var type = ClassLoader.FindPluginByName<MonitorAttribute>(monitor1.Class);
 					if (type == null)
 					{
 						// No plugin found, make up some reasonable content
@@ -630,7 +626,7 @@ namespace Peach.Pro.Core.WebServices
 					}
 					else
 					{
-						m.Description = type.GetAttributes<DescriptionAttribute>()
+						m.Description = type.GetAttributes<System.ComponentModel.DescriptionAttribute>()
 							.Select(d => d.Description)
 							.FirstOrDefault() ?? "";
 

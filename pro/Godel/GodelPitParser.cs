@@ -68,7 +68,7 @@ namespace Godel.Core
 						godel = new GodelContext();
 					}
 
-					godel.name = child.getAttrString("name");
+					godel.Name = child.getAttrString("name");
 					godel.refName = child.getAttr("ref", godel.refName);
 					godel.controlOnly = child.getAttr("controlOnly", godel.controlOnly.GetValueOrDefault());
 					godel.inv = child.getAttr("inv", godel.inv);
@@ -81,7 +81,7 @@ namespace Godel.Core
 					}
 					catch (ArgumentException ex)
 					{
-						throw new PeachException("Error, a top level <Godel> element named '{0}' already exists.".Fmt(godel.name), ex);
+						throw new PeachException("Error, a top level <Godel> element named '{0}' already exists.".Fmt(godel.Name), ex);
 					}
 				}
 			}
@@ -122,13 +122,13 @@ namespace Godel.Core
 
 				foreach (var item in sm.godel)
 				{
-					var idx = item.name.IndexOf('.');
+					var idx = item.Name.IndexOf('.');
 					if (idx < 0)
-						item.name = sm.name;
+						item.Name = sm.Name;
 					else
-						item.name = sm.name + item.name.Substring(item.name.IndexOf('.'));
+						item.Name = sm.Name + item.Name.Substring(item.Name.IndexOf('.'));
 
-					item.debugName = "{0} '{1}'".Fmt(item.type, item.name);
+					item.debugName = "{0} '{1}'".Fmt(item.type, item.Name);
 
 					newList.Add(item);
 				}
@@ -148,7 +148,7 @@ namespace Godel.Core
 			{
 				debugName = "{0} '{1}'".Fmt(node.ParentNode.Name, fullName),
 				type = node.ParentNode.Name,
-				name = fullName,
+				Name = fullName,
 				refName = node.getAttr("ref", null),
 				inv = node.getAttr("inv", null),
 				pre = node.getAttr("pre", null),
@@ -176,7 +176,7 @@ namespace Godel.Core
 			{
 				if (child.Name == "Godel")
 				{
-					var fullName = string.Join(".", action.parent.parent.name, action.parent.name, action.name);
+					var fullName = string.Join(".", action.parent.parent.Name, action.parent.Name, action.Name);
 					deferParse((StateModel)parent.parent, fullName, child);
 				}
 			}
@@ -192,7 +192,7 @@ namespace Godel.Core
 			{
 				if (child.Name == "Godel")
 				{
-					var fullName = string.Join(".", state.parent.name, state.name);
+					var fullName = string.Join(".", state.parent.Name, state.Name);
 					deferParse((StateModel)parent, fullName, child);
 				}
 			}
@@ -207,7 +207,7 @@ namespace Godel.Core
 			foreach (XmlNode child in node)
 			{
 				if (child.Name == "Godel")
-					deferParse((StateModel)stateModel, stateModel.name, child);
+					deferParse((StateModel)stateModel, stateModel.Name, child);
 			}
 
 			return stateModel;

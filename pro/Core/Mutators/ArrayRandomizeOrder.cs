@@ -5,6 +5,7 @@
 using System;
 using Peach.Core;
 using Peach.Core.Dom;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Mutators
 {

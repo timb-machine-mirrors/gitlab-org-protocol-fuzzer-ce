@@ -144,7 +144,7 @@ namespace Peach.Pro.Core.Runtime
 		{
 			Console.Write("\n");
 			WriteErrorMark();
-			Console.WriteLine("Test '" + context.test.name + "' error: " + e.Message);
+			Console.WriteLine("Test '" + context.test.Name + "' error: " + e.Message);
 		}
 
 		protected override void Engine_TestWarning(RunContext context, string msg)
@@ -158,7 +158,7 @@ namespace Peach.Pro.Core.Runtime
 		{
 			Console.Write("\n");
 			WriteInfoMark();
-			Console.WriteLine("Test '" + context.test.name + "' finished.");
+			Console.WriteLine("Test '" + context.test.Name + "' finished.");
 		}
 
 		protected override void Engine_TestStarting(RunContext context)
@@ -172,7 +172,7 @@ namespace Peach.Pro.Core.Runtime
 			}
 
 			WriteInfoMark();
-			Console.WriteLine("Test '" + context.test.name + "' starting with random seed " + context.config.randomSeed + ".");
+			Console.WriteLine("Test '" + context.test.Name + "' starting with random seed " + context.config.randomSeed + ".");
 		}
 
 		protected override void DataMutating(RunContext context, ActionData actionData, DataElement element, Mutator mutator)
@@ -180,15 +180,15 @@ namespace Peach.Pro.Core.Runtime
 			WriteInfoMark();
 			Console.WriteLine("Fuzzing: {0}", element.fullName);
 			WriteInfoMark();
-			Console.WriteLine("Mutator: {0}", mutator.name);
+			Console.WriteLine("Mutator: {0}", mutator.Name);
 		}
 
 		protected override void StateMutating(RunContext context, State state, Mutator mutator)
 		{
 			WriteInfoMark();
-			Console.WriteLine("Fuzzing State: {0}", state.name);
+			Console.WriteLine("Fuzzing State: {0}", state.Name);
 			WriteInfoMark();
-			Console.WriteLine("Mutator: {0}", mutator.name);
+			Console.WriteLine("Mutator: {0}", mutator.Name);
 		}
 
 		public static void WriteInfoMark()

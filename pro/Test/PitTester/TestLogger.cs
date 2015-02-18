@@ -131,7 +131,7 @@ namespace PitTester
 		{
 			this.action = action;
 
-			ActionName = string.Join(".", new[] { action.parent.parent.name, action.parent.name, action.name });
+			ActionName = string.Join(".", new[] { action.parent.parent.Name, action.parent.Name, action.Name });
 		}
 
 		protected override void ActionFinished(RunContext context, Action action)

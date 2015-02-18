@@ -36,9 +36,9 @@ using Peach.Core;
 
 namespace Peach.Pro.Core.Publishers
 {
-	[Publisher("Tcp", true)]
-	[Publisher("TcpClient")]
-	[Publisher("tcp.Tcp")]
+	[Publisher("Tcp")]
+	[Alias("TcpClient")]
+	[Alias("tcp.Tcp")]
 	[Parameter("Host", typeof(string), "Hostname or IP address of remote host")]
 	[Parameter("Port", typeof(ushort), "Local port to listen on")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait when receiving data (default 3000)", "3000")]

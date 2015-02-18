@@ -42,13 +42,12 @@ namespace Peach.Core.Agent
 	/// <summary>
 	/// Indicate class is an Agent Server.
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-	public class AgentServerAttribute : Attribute
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+	public class AgentServerAttribute : PluginAttribute
 	{
-		public string name;
 		public AgentServerAttribute(string name)
+			: base(typeof(IAgentServer), name, true)
 		{
-			this.name = name;
 		}
 	}
 }

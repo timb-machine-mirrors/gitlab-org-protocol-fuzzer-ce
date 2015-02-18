@@ -141,8 +141,8 @@ namespace Peach.Core
 		static string[] GetSearchPath()
 		{
 			var ret = new List<string> {
-				Directory.GetCurrentDirectory(),
-				Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+				Environment.CurrentDirectory,
+				Utilities.ExecutionDirectory,
 			};
 
 			return ret.Distinct().ToArray();
@@ -403,6 +403,22 @@ namespace Peach.Core
 			where A : Attribute
 		{
 			return GetAllByAttribute<A>(predicate).FirstOrDefault().Value;
+		}
+
+		/// <summary>
+		/// Finds the first type that matches the specified query.
+		/// </summary>
+		/// <typeparam name="TAttr">PluginAttribute type to find.</typeparam>
+		/// <param name="name">The name of the plugin to search for.</param>
+		/// <returns>Returns the Type found or null if not found.</returns>
+		public static Type FindPluginByName<TAttr>(string name)
+			where TAttr : PluginAttribute
+		{
+			return GetAllByAttribute<TAttr>(
+				(t, a) =>
+					a.Name == name ||
+					t.GetAttributes<AliasAttribute>().Any(x => x.Name == name))
+				.FirstOrDefault().Value;
 		}
 
 		/// <summary>
