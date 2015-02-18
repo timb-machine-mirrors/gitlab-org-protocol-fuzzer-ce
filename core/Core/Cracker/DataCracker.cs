@@ -665,16 +665,29 @@ namespace Peach.Core.Cracker
 		{
 			while (true)
 			{
-				long start = data.PositionBits;
-				long end = data.IndexOf(token, start + offset);
+				var pos = data.PositionBits;
+				var start = pos + offset;
 
-				if (end >= 0)
-					return end - start;
+				if (start < data.LengthBits)
+				{
+					var end = data.IndexOf(token, start);
 
-				long dataLen = data.Length;
-				data.WantBytes(token.Length);
+					if (end >= 0)
+						return end - pos;
+				}
 
-				if (dataLen == data.Length)
+
+				// The minimum to ask for is offset + tokenLength;
+				// Ask for 1 more than actually needed
+				// If no new data arrives, give up but as long as more
+				// data keeps coming in we will keep scanning
+
+				var len = data.Length;
+				var minLen = ((offset + 7) / 8) + token.Length;
+				var want = Math.Max(len - data.Position, minLen) + 1;
+
+				data.WantBytes(want);
+				if (len == data.Length)
 					return null;
 			}
 		}
