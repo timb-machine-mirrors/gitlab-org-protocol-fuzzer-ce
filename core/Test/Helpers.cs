@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -55,6 +56,13 @@ namespace Peach.Core.Test
 			}
 
 			return dict;
+		}
+
+		public static string AsString(this Stream stream)
+		{
+			stream.Seek(0, SeekOrigin.Begin);
+
+			return new StreamReader(stream).ReadToEnd();
 		}
 
 		public static Process StartAgent(string protocol)

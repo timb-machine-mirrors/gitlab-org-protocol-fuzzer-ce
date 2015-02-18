@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 using NLog;
 using Peach.Core;
@@ -73,11 +74,11 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 				_data = new MonitorData
 				{
-					Data = new Dictionary<string, byte[]>()
+					Data = new Dictionary<string, Stream>()
 				};
 
-				_data.Data.Add("stdout", Encoding.UTF8.GetBytes(stdout));
-				_data.Data.Add("stderr", Encoding.UTF8.GetBytes(stderr));
+				_data.Data.Add("stdout", new MemoryStream(Encoding.UTF8.GetBytes(stdout)));
+				_data.Data.Add("stderr", new MemoryStream(Encoding.UTF8.GetBytes(stderr)));
 
 				if (p.Timeout)
 				{

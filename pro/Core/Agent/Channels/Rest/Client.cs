@@ -443,7 +443,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			return ret;
 		}
 
-		private byte[] DownloadFile(FaultResponse.Record.FaultData data)
+		private Stream DownloadFile(FaultResponse.Record.FaultData data)
 		{
 			Logger.Trace("Downloading {0} byte file '{1}'.", data.Size, data.Key);
 
@@ -453,13 +453,12 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			{
 				using (var strm = resp.GetResponseStream())
 				{
-					if (strm == null)
-						return new byte[0];
-
 					var ms = new MemoryStream();
-					strm.CopyTo(ms);
 
-					return ms.ToArray();
+					if (strm != null)
+						strm.CopyTo(ms);
+
+					return ms;
 				}
 			});
 		}

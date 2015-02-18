@@ -196,9 +196,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 			var ret = new MonitorData
 			{
 				Title = "Collected {0} packet{1}.".Fmt(_numPackets, _numPackets == 1 ? "" : "s"),
-				Data = new Dictionary<string, byte[]>
+				Data = new Dictionary<string, Stream>
 				{
-					{ "pcap", File.ReadAllBytes(_tempFileName) }
+					{ "pcap", new MemoryStream(File.ReadAllBytes(_tempFileName)) }
 				}
 			};
 

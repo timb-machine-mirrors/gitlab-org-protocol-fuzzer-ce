@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using NLog;
 
@@ -216,7 +217,7 @@ namespace Peach.Core.Agent
 				type = FaultType.Data,
 			};
 
-			ret.collectedData.AddRange(data.Data.Select(d => new Fault.Data {Key = d.Key, Value = d.Value}));
+			ret.collectedData.AddRange(data.Data.Select(d => new Fault.Data {Key = d.Key, Value = ToByteArray(d.Value)}));
 
 			if (data.Fault != null)
 			{
@@ -229,6 +230,16 @@ namespace Peach.Core.Agent
 			}
 
 			return ret;
+		}
+
+		private static byte[] ToByteArray(Stream strm)
+		{
+			var buf = new byte[strm.Length];
+
+			strm.Seek(0, SeekOrigin.Begin);
+			strm.Read(buf, 0, buf.Length);
+
+			return buf;
 		}
 
 		private static void Guard(AgentClient agent, string what, Action<AgentClient> action)

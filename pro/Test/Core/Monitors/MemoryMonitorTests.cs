@@ -170,7 +170,7 @@ namespace Peach.Pro.Test.Core.Monitors
 				Assert.NotNull(faults[0].Data);
 				Assert.True(faults[0].Data.ContainsKey("Usage.txt"));
 
-				var usage = Encoding.UTF8.GetString(faults[0].Data["Usage.txt"]);
+				var usage = faults[0].Data["Usage.txt"].AsString();
 
 				StringAssert.Contains("PrivateMemorySize", usage);
 				StringAssert.Contains("WorkingSet", usage);

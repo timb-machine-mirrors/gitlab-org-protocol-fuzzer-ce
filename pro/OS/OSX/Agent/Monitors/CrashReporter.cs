@@ -161,14 +161,14 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			{
 				Title = title,
 				Fault = new MonitorData.Info(),
-				Data = new Dictionary<string, byte[]>()
+				Data = new Dictionary<string, Stream>()
 			};
 
 			foreach (var file in _crashLogs)
 			{
 				var key = Path.GetFileName(file);
 				Debug.Assert(key != null);
-				ret.Data.Add(key, File.ReadAllBytes(file));
+				ret.Data.Add(key, new MemoryStream(File.ReadAllBytes(file)));
 			}
 
 			return ret;

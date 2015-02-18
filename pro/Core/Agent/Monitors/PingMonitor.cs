@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using NLog;
@@ -84,7 +85,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 		{
 			_data = new MonitorData
 			{
-				Data = new Dictionary<string, byte[]>()
+				Data = new Dictionary<string, Stream>()
 			};
 
 			try

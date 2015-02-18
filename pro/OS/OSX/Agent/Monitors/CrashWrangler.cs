@@ -149,7 +149,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 
 			var fault = new MonitorData
 			{
-				Data = new Dictionary<string, byte[]>(),
+				Data = new Dictionary<string, Stream>(),
 				Fault = new MonitorData.Info(),
 			};
 

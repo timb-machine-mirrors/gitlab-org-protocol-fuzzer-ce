@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Peach.Core.Agent
@@ -198,7 +199,10 @@ namespace Peach.Core.Agent
 			{
 				DetectionSource = fault.detectionSource,
 				Title = fault.title,
-				Data = fault.collectedData.ToDictionary(i => i.Key, i => i.Value),
+				Data = fault.collectedData.ToDictionary(
+					i => i.Key,
+					i => (Stream)new MemoryStream(i.Value)
+				),
 			};
 
 			if (fault.type == FaultType.Fault)

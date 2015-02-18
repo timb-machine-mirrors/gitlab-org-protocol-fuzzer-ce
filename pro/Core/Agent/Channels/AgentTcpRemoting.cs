@@ -622,7 +622,10 @@ namespace Peach.Pro.Core.Agent.Channels
 				MonitorName = data.MonitorName,
 				DetectionSource = data.DetectionSource,
 				Title = data.Title,
-				Data = data.Data.ToDictionary(i => i.Key, i => i.Value),
+				Data = data.Data.ToDictionary(
+					i => i.Key,
+					i => (Stream)new MemoryStream(i.Value)
+				),
 			};
 
 			if (data.Fault != null)
@@ -864,7 +867,7 @@ namespace Peach.Pro.Core.Agent.Channels
 				MonitorName = data.MonitorName,
 				DetectionSource = data.DetectionSource,
 				Title = data.Title,
-				Data = data.Data.ToList(),
+				Data = data.Data.Select(ToByteArray).ToList(),
 			};
 
 			if (data.Fault != null)
@@ -880,6 +883,16 @@ namespace Peach.Pro.Core.Agent.Channels
 			}
 
 			return ret;
+		}
+
+		private static KeyValuePair<string, byte[]> ToByteArray(KeyValuePair<string, Stream> kv)
+		{
+			var buf = new byte[kv.Value.Length];
+
+			kv.Value.Seek(0, SeekOrigin.Begin);
+			kv.Value.Read(buf, 0, buf.Length);
+
+			return new KeyValuePair<string, byte[]>(kv.Key, buf);
 		}
 	}
 

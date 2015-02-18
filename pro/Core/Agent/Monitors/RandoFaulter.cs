@@ -29,7 +29,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 		public MonitorWhen When { get; set; }
 
 		private const string Fmt = "X8";
-		private static readonly byte[] Snmpv2CPacket = LoadResource("snmpv2c.pcap").ToArray();
+		private static readonly MemoryStream Snmpv2CPacket = LoadResource("snmpv2c.pcap");
 		private static readonly string[] Severity = { "EXPLOITABLE", "PROBABLY EXPLOITABLE", "PROBABLY NOT EXPLOITABLE", "UNKNOWN" };
 
 		uint _startCount;
@@ -73,7 +73,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 					MinorHash = buckets[1],
 					Risk = Severity[_rnd.Next(Severity.Length)],
 				},
-				Data = new Dictionary<string,byte[]>
+				Data = new Dictionary<string, Stream>
 				{
 					{ "NetworkCapture1.pcap", Snmpv2CPacket },
 					{ "NetworkCapture2.pcapng", Snmpv2CPacket },
