@@ -148,7 +148,7 @@ namespace Peach.Pro.Test.Core.Agent
 				Assert.Null(f[0].Fault);
 				Assert.NotNull(f[0].Data);
 				Assert.True(f[0].Data.ContainsKey(name));
-				Assert.AreEqual("Hello World", Encoding.UTF8.GetString(f[0].Data[name]));
+				Assert.AreEqual("Hello World", f[0].Data[name].AsString());
 
 				cli.SessionFinished();
 				cli.StopAllMonitors();
@@ -484,6 +484,218 @@ namespace Peach.Pro.Test.Core.Agent
 			{
 				File.Delete(tmp);
 			}
+		}
+
+		[Test]
+		public void NotSupportedOutput()
+		{
+			// Ensure a nice not supported error comes across for publishers
+			// that don't support remote output.
+
+			StartServer();
+
+			var tmp = Path.GetTempFileName();
+
+			try
+			{
+				var cli = new Client(null, _server.Uri.ToString(), null);
+
+				cli.AgentConnect();
+
+				var pub = cli.CreatePublisher("pub", "Zip", new Dictionary<string, string>
+				{
+					{ "FileName", tmp },
+				});
+
+				try
+				{
+					pub.Open(100, false);
+
+					var ex = Assert.Throws<PeachException>(() =>
+						pub.Output(new BitStream(Encoding.ASCII.GetBytes("Hello"))));
+
+					Assert.AreEqual("The Zip publisher does not support output actions when run on remote agents.", ex.Message);
+				}
+				finally
+				{
+					pub.Dispose();
+				}
+
+				cli.AgentDisconnect();
+			}
+			finally
+			{
+				File.Delete(tmp);
+			}
+		}
+
+		[Test]
+		public void NotSupportedCall()
+		{
+			// Ensure a nice not supported error comes across for publishers
+			// that don't support remote call.
+
+			StartServer();
+
+			var cli = new Client(null, _server.Uri.ToString(), null);
+
+			cli.AgentConnect();
+
+			var pub = cli.CreatePublisher("pub", "Rest", new Dictionary<string, string>());
+
+			try
+			{
+				pub.Open(100, false);
+
+				const string method = "GET http://foo.com/{0}";
+				var args = new List<BitwiseStream>
+				{
+					new BitStream(Encoding.ASCII.GetBytes("Hello"))
+				};
+
+				var ex = Assert.Throws<PeachException>(() =>pub.Call(method, args));
+
+				Assert.AreEqual("The Rest publisher does not support call actions when run on remote agents.", ex.Message);
+			}
+			finally
+			{
+				pub.Dispose();
+			}
+
+			cli.AgentDisconnect();
+		}
+
+		[Test]
+		public void FastReconnect()
+		{
+			// If an error happens during fuzzing and the agent server goes away.
+			// The agent client should automatically reconnect on the
+			// next IterationStarting()
+
+			StartServer();
+
+			var tmp = Path.GetTempFileName();
+
+			try
+			{
+				var cli = new Client(null, _server.Uri.ToString(), null);
+
+				cli.AgentConnect();
+				cli.StartMonitor("mon1", "Null", new Dictionary<string, string>
+				{
+					{ "LogFile", tmp },
+				});
+				cli.StartMonitor("mon2", "Null", new Dictionary<string, string>
+				{
+					{ "LogFile", tmp },
+				});
+				cli.SessionStarting();
+
+				cli.IterationStarting(new IterationStartingArgs());
+				cli.IterationFinished();
+
+				var actual = File.ReadAllLines(tmp);
+				var expected = new List<string>
+				{
+					"mon1.StartMonitor",
+					"mon2.StartMonitor",
+					"mon1.SessionStarting",
+					"mon2.SessionStarting",
+					"mon1.IterationStarting False False",
+					"mon2.IterationStarting False False",
+					"mon2.IterationFinished",
+					"mon1.IterationFinished",
+				};
+
+				Assert.That(actual, Is.EqualTo(expected));
+
+				// Simulate disconnect will gracefully shut down the remote monitors
+				// But leave the client in a state that simulates a disconnect
+				cli.SimulateDisconnect();
+
+				actual = File.ReadAllLines(tmp);
+				expected.AddRange(new[]
+				{
+					"mon2.SessionFinished",
+					"mon1.SessionFinished",
+					"mon2.StopMonitor",
+					"mon1.StopMonitor"
+				});
+
+				Assert.That(actual, Is.EqualTo(expected));
+
+				Assert.False(cli.DetectedFault(), "Should not detect a fault");
+				var data1 = cli.GetMonitorData();
+				Assert.AreEqual(0, data1.Count(), "Should not have monitor data");
+
+				// DetectedFault and GetMonitorData will not get remoted
+				actual = File.ReadAllLines(tmp);
+				Assert.That(actual, Is.EqualTo(expected));
+
+				// The next call to iteration starting will trigger a reconnect
+
+				cli.IterationStarting(new IterationStartingArgs());
+				cli.IterationFinished();
+				Assert.False(cli.DetectedFault(), "Should not detect a fault");
+				var data2 = cli.GetMonitorData();
+				Assert.AreEqual(0, data2.Count(), "Should not have monitor data");
+				cli.SessionFinished();
+				cli.StopAllMonitors();
+				cli.AgentDisconnect();
+
+				actual = File.ReadAllLines(tmp);
+				expected.AddRange(new[]
+				{
+
+					"mon1.StartMonitor",
+					"mon2.StartMonitor",
+					"mon1.SessionStarting",
+					"mon2.SessionStarting",
+					"mon1.IterationStarting False False",
+					"mon2.IterationStarting False False",
+					"mon2.IterationFinished",
+					"mon1.IterationFinished",
+					"mon1.DetectedFault",
+					"mon2.DetectedFault",
+					"mon1.GetMonitorData",
+					"mon2.GetMonitorData",
+					"mon2.SessionFinished",
+					"mon1.SessionFinished",
+					"mon2.StopMonitor",
+					"mon1.StopMonitor"
+				});
+
+				Assert.That(actual, Is.EqualTo(expected));
+			}
+			finally
+			{
+				File.Delete(tmp);
+			}
+		}
+
+		[Test]
+		public void PublisherError()
+		{
+			// Ensure a nice not supported error comes across for publishers
+			// that can't be constructed
+
+			StartServer();
+
+			var cli = new Client(null, _server.Uri.ToString(), null);
+
+			cli.AgentConnect();
+
+			var ex = Assert.Throws<PeachException>(() =>
+				cli.CreatePublisher("pub", "Tcp", new Dictionary<string, string>
+				{
+					{ "Host", "localost" },
+					{ "Port", "badport" }
+				}));
+
+			StringAssert.IsMatch("Could not start publisher \"Tcp\".", ex.Message);
+			StringAssert.IsMatch("Publisher 'Tcp' could not set parameter 'Port'.", ex.Message);
+
+			cli.AgentDisconnect();
 		}
 	}
 }

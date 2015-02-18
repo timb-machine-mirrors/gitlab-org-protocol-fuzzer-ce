@@ -28,14 +28,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using Peach.Core;
 using Peach.Core.Agent;
 using SharpPcap;
 using SharpPcap.LibPcap;
-using Monitor = Peach.Core.Agent.Monitor;
+using Monitor = Peach.Core.Agent.Monitor2;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Agent.Monitors
 {
@@ -196,9 +196,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 			var ret = new MonitorData
 			{
 				Title = "Collected {0} packet{1}.".Fmt(_numPackets, _numPackets == 1 ? "" : "s"),
-				Data = new Dictionary<string, byte[]>
+				Data = new Dictionary<string, Stream>
 				{
-					{ "pcap", File.ReadAllBytes(_tempFileName) }
+					{ "pcap", new MemoryStream(File.ReadAllBytes(_tempFileName)) }
 				}
 			};
 

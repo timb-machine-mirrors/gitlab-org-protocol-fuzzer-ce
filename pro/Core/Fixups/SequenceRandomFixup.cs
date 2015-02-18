@@ -29,10 +29,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using Peach.Core;
 using Peach.Core.Dom;
 using Random = Peach.Core.Random;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Fixups
 {
@@ -41,7 +41,7 @@ namespace Peach.Pro.Core.Fixups
 	[Fixup("SequenceRandomFixup")]
 	[Fixup("sequence.SequenceRandomFixup")]
 	[Serializable]
-	public class SequenceRandomFixup : VolatileFixup
+	public class SequenceRandomFixup : Peach.Core.Fixups.VolatileFixup
 	{
 		public SequenceRandomFixup(DataElement parent, Dictionary<string, Variant> args)
 			: base(parent, args)

@@ -35,6 +35,8 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Peach.Core;
 using Peach.Core.Agent;
+using Monitor = Peach.Core.Agent.Monitor2;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.OS.Linux.Agent.Monitors
 {
@@ -43,7 +45,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 	[Parameter("Executable", typeof(string), "Target executable used to filter crashes.", "")]
 	[Parameter("LogFolder", typeof(string), "Folder with log files. Defaults to /var/peachcrash", "/var/peachcrash")]
 	[Parameter("Mono", typeof(string), "Full path and executable for mono runtime. Defaults to /usr/bin/mono.", "/usr/bin/mono")]
-	public class LinuxCrashMonitor : Peach.Core.Agent.Monitor
+	public class LinuxCrashMonitor : Monitor
 	{
 		protected string corePattern = "|{0} {1} -p=%p -u=%u -g=%g -s=%s -t=%t -h=%h -e=%e";
 		protected string monoExecutable = "/usr/bin/mono";
@@ -205,7 +207,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 			var ret = new MonitorData
 			{
 				Title = title,
-				Data = new Dictionary<string,byte[]>(),
+				Data = new Dictionary<string, Stream>(),
 				Fault = new MonitorData.Info
 				{
 					MajorHash = "CORE",
@@ -226,7 +228,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 						{
 							var key = Path.GetFileName(file);
 							Debug.Assert(key != null);
-							ret.Data.Add(key, File.ReadAllBytes(file));
+							ret.Data.Add(key, new MemoryStream(File.ReadAllBytes(file)));
 							File.Delete(file);
 							break;
 						}
@@ -236,7 +238,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 						// Support multiple crash files
 						var key = Path.GetFileName(file);
 						Debug.Assert(key != null);
-						ret.Data.Add(key, File.ReadAllBytes(file));
+						ret.Data.Add(key, new MemoryStream(File.ReadAllBytes(file)));
 						File.Delete(file);
 					}
 				}

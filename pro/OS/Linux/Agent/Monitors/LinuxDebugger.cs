@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -13,6 +12,8 @@ using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
 using Encoding = Peach.Core.Encoding;
+using Monitor = Peach.Core.Agent.Monitor2;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.OS.Linux.Agent.Monitors
 {
@@ -27,7 +28,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 	[Parameter("StartOnCall", typeof(string), "Start command on state model call", "")]
 	[Parameter("WaitForExitOnCall", typeof(string), "Wait for process to exit on state model call and fault if timeout is reached", "")]
 	[Parameter("WaitForExitTimeout", typeof(int), "Wait for exit timeout value in milliseconds (-1 is infinite)", "10000")]
-	public class LinuxDebugger : Peach.Core.Agent.Monitor
+	public class LinuxDebugger : Monitor
 	{
 		private class CaptureStream : IDisposable
 		{
@@ -688,10 +689,10 @@ quit
 			var ret = new MonitorData
 			{
 				Title = reason,
-				Data = new Dictionary<string, byte[]>
+				Data = new Dictionary<string, Stream>
 				{
-					{ "stdout.log", File.ReadAllBytes(Path.Combine(_tmpPath, "stdout.log")) },
-					{ "stderr.log", File.ReadAllBytes(Path.Combine(_tmpPath, "stderr.log")) }
+					{ "stdout.log", new MemoryStream(File.ReadAllBytes(Path.Combine(_tmpPath, "stdout.log"))) },
+					{ "stderr.log", new MemoryStream(File.ReadAllBytes(Path.Combine(_tmpPath, "stderr.log"))) }
 				},
 				Fault = new MonitorData.Info
 				{
@@ -747,7 +748,7 @@ quit
 
 			_fault = new MonitorData
 			{
-				Data = new Dictionary<string, byte[]>(),
+				Data = new Dictionary<string, Stream>(),
 				Fault = new MonitorData.Info()
 			};
 
@@ -770,9 +771,9 @@ quit
 			if (other.Success)
 				_fault.Title += ", " + other.Groups[1].Value;
 
-			_fault.Data.Add("StackTrace.txt", bytes);
-			_fault.Data.Add("stdout.log", File.ReadAllBytes(Path.Combine(_tmpPath, "stdout.log")));
-			_fault.Data.Add("stderr.log", File.ReadAllBytes(Path.Combine(_tmpPath, "stderr.log")));
+			_fault.Data.Add("StackTrace.txt", new MemoryStream(bytes));
+			_fault.Data.Add("stdout.log", new MemoryStream(File.ReadAllBytes(Path.Combine(_tmpPath, "stdout.log"))));
+			_fault.Data.Add("stderr.log", new MemoryStream(File.ReadAllBytes(Path.Combine(_tmpPath, "stderr.log"))));
 			_fault.Fault.Description = output;
 
 			return true;

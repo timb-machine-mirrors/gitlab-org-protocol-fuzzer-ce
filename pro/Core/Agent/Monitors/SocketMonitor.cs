@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using Peach.Core;
 using Peach.Core.Agent;
+using Monitor = Peach.Core.Agent.Monitor2;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Agent.Monitors
 {
@@ -67,14 +68,14 @@ namespace Peach.Pro.Core.Agent.Monitors
 		{
 			_data = new MonitorData
 			{
-				Data = new Dictionary<string, byte[]>()
+				Data = new Dictionary<string, Stream>()
 			};
 
 			var data = ReadSocket();
 			if (data != null)
 			{
 				_data.Title = "Received {0} bytes from '{1}'.".Fmt(data.Item2.Length, data.Item1);
-				_data.Data.Add("Response.bin", data.Item2);
+				_data.Data.Add("Response.bin", new MemoryStream(data.Item2));
 
 				if (!FaultOnSuccess)
 					_data.Fault = new MonitorData.Info();

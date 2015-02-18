@@ -13,13 +13,13 @@ namespace Peach.Pro.Core.Publishers
 	[Publisher("SslListener")]
 	[Parameter("Interface", typeof(IPAddress), "IP of interface to bind to")]
 	[Parameter("Port", typeof(ushort), "Local port to listen on")]
-	[Parameter("ServerCertPath", typeof(string), "Path to server certificate file")]
-	[Parameter("ServerCertPass", typeof(string), "Password for cert file", "")]
-	[Parameter("ClientCertRequired", typeof(bool), "Require client to auth via certificate", "false")]
-	[Parameter("CheckCertRevocation", typeof(bool), "Check revocation of certificate", "false")]
+    [Parameter("ServerCertPath", typeof(string), "Path to server certificate file")]
+    [Parameter("ServerCertPass", typeof(string), "Password for cert file","")]
+    [Parameter("ClientCertRequired", typeof(bool), "Require client to auth via certificate", "false")]
+    [Parameter("CheckCertRevocation", typeof(bool), "Check revocation of certificate", "false")] 
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data (default 3000)", "3000")]
 	[Parameter("AcceptTimeout", typeof(int), "How many milliseconds to wait for a connection (default 3000)", "3000")]
-	public class SslListenerPublisher : BufferedStreamPublisher
+	public class SslListenerPublisher : Peach.Core.Publishers.BufferedStreamPublisher 
 	{
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }

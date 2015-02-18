@@ -358,7 +358,7 @@ namespace Peach.Pro.Core.WebServices
 
 			var m = new Monitor
 			{
-				Description = type.GetAttributes<DescriptionAttribute>().Select(a => a.Description).FirstOrDefault() ?? "",
+				Description = type.GetAttributes<System.ComponentModel.DescriptionAttribute>().Select(a => a.Description).FirstOrDefault() ?? "",
 				MonitorClass = attr.Name,
 				Map = new List<Parameter>(),
 				OS = os,
@@ -626,7 +626,7 @@ namespace Peach.Pro.Core.WebServices
 					}
 					else
 					{
-						m.Description = type.GetAttributes<DescriptionAttribute>()
+						m.Description = type.GetAttributes<System.ComponentModel.DescriptionAttribute>()
 							.Select(d => d.Description)
 							.FirstOrDefault() ?? "";
 

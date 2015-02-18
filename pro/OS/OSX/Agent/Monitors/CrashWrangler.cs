@@ -40,7 +40,8 @@ using System.Threading;
 using Peach.Core;
 using Peach.Core.Agent;
 using Encoding = Peach.Core.Encoding;
-using Monitor = Peach.Core.Agent.Monitor;
+using Monitor = Peach.Core.Agent.Monitor2;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 using NLog;
 
 namespace Peach.Pro.OS.OSX.Agent.Monitors
@@ -148,7 +149,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 
 			var fault = new MonitorData
 			{
-				Data = new Dictionary<string, byte[]>(),
+				Data = new Dictionary<string, Stream>(),
 				Fault = new MonitorData.Info(),
 			};
 

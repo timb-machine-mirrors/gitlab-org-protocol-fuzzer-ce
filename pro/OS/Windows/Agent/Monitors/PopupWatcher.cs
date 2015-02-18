@@ -28,8 +28,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -37,7 +37,8 @@ using System.Threading;
 using Peach.Core;
 using Peach.Core.Agent;
 using Encoding = Peach.Core.Encoding;
-using Monitor = Peach.Core.Agent.Monitor;
+using Monitor = Peach.Core.Agent.Monitor2;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.OS.Windows.Agent.Monitors
 {
@@ -196,7 +197,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 					_data = new MonitorData
 					{
 						Title = "Closed {0} popup window{1}.".Fmt(_closedWindows.Count, _closedWindows.Count > 1 ? "s" : ""),
-						Data = new Dictionary<string, byte[]>()
+						Data = new Dictionary<string, Stream>()
 					};
 
 					var eol = Environment.NewLine;
@@ -205,7 +206,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 					if (Fault)
 						_data.Fault = new MonitorData.Info { Description = desc };
 					else
-						_data.Data.Add("ClosedWindows.txt", Encoding.UTF8.GetBytes(desc));
+						_data.Data.Add("ClosedWindows.txt", new MemoryStream(Encoding.UTF8.GetBytes(desc)));
 
 					_closedWindows.Clear();
 				}

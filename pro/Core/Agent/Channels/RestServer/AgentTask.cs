@@ -1,5 +1,7 @@
 ﻿using System.Threading;
 
+#if DISABLED
+
 namespace Peach.Pro.Core.Agent.Channels.RestServer
 {
 	/// <summary>
@@ -30,3 +32,4 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 		public TaskDelegate Task = null;
 	}
 }
+#endif

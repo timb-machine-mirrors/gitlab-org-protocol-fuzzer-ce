@@ -47,6 +47,16 @@ namespace Peach.Core
 		}
 	}
 
+	[Obsolete("This attribute is obsolete and has been replaced by the System.ComponentModel.DescriptionAttribute class.")]
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+	public class DescriptionAttribute : System.ComponentModel.DescriptionAttribute
+	{
+		public DescriptionAttribute(string description)
+			: base(description)
+		{
+		}
+	}
+
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 	public abstract class PluginAttribute : Attribute
 	{

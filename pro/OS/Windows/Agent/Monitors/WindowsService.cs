@@ -27,11 +27,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.IO;
 using System.ServiceProcess;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
+using Monitor = Peach.Core.Agent.Monitor2;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.OS.Windows.Agent.Monitors
 {
@@ -214,7 +216,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 						Title = MachineName == null
 							? "The windows service '{0}' stopped early.".Fmt(Service)
 							: "The windows service '{0}' on machine '{1}' stopped early.".Fmt(Service, MachineName),
-						Data = new Dictionary<string, byte[]>(),
+						Data = new Dictionary<string, Stream>(),
 						Fault = new MonitorData.Info()
 					};
 				}

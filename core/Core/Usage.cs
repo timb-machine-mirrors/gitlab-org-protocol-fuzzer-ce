@@ -161,7 +161,7 @@ namespace Peach.Core
 
 					Console.WriteLine();
 
-					var desc = plugin.Key.GetAttributes<DescriptionAttribute>(null).FirstOrDefault();
+					var desc = plugin.Key.GetAttributes<System.ComponentModel.DescriptionAttribute>(null).FirstOrDefault();
 					if (desc != null)
 						Console.WriteLine("    [{0}]", desc.Description);
 

@@ -37,8 +37,9 @@ using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Pro.OS.Windows.Agent.Monitors.WindowsDebug;
-using Monitor = Peach.Core.Agent.Monitor;
+using Monitor = Peach.Core.Agent.Monitor2;
 using Random = Peach.Core.Random;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.OS.Windows.Agent.Monitors
 {
@@ -445,7 +446,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			{
 				DetectionSource = _systemDebugger != null ? "SystemDebugger" : "WindowsDebugEngine",
 				Title = f.title,
-				Data = f.collectedData.ToDictionary(i => i.Key, i => i.Value),
+				Data = f.collectedData.ToDictionary(i => i.Key, i => (Stream)new MemoryStream(i.Value)),
 				Fault = new MonitorData.Info
 				{
 					Description = f.description,
@@ -473,7 +474,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			{
 				DetectionSource = _systemDebugger != null ? "SystemDebugger" : "WindowsDebugEngine",
 				Title = reason,
-				Data = new Dictionary<string, byte[]>(),
+				Data = new Dictionary<string, Stream>(),
 				Fault = new MonitorData.Info
 				{
 					Description = desc,

@@ -20,6 +20,7 @@ namespace Peach.Pro.Test.Core.Agent
 	public class AgentTests
 	{
 		SingleInstance _si;
+		Process _process;
 
 		[SetUp]
 		public void SetUp()
@@ -35,19 +36,19 @@ namespace Peach.Pro.Test.Core.Agent
 			_si = null;
 		}
 
-		Process _process;
-
 		class AgentKillerPublisher : Publisher
 		{
 			private readonly AgentTests _owner;
+			private readonly string _protocol;
 			private readonly RunContext _context;
 
 			static readonly Logger ClassLogger = LogManager.GetCurrentClassLogger();
 
-			public AgentKillerPublisher(AgentTests owner, RunContext context)
+			public AgentKillerPublisher(AgentTests owner, string protocol, RunContext context)
 				: base(new Dictionary<string, Variant>())
 			{
 				_owner = owner;
+				_protocol = protocol;
 				_context = context;
 			}
 
@@ -66,31 +67,30 @@ namespace Peach.Pro.Test.Core.Agent
 					_context.agentManager.IterationFinished();
 
 					_owner.StopAgent();
-					_owner.StartAgent();
+					_owner.StartAgent(_protocol);
 				}
 			}
 		}
 
-		public void StartAgent()
+		void StartAgent(string protocol)
 		{
-			_process = Helpers.StartAgent();
+			_process = Helpers.StartAgent(protocol);
 		}
 
-		public void StopAgent()
+		void StopAgent()
 		{
-			Helpers.StopAgent(_process);
-			_process = null;
+			if (_process != null)
+			{
+				Helpers.StopAgent(_process);
+				_process = null;
+			}
 		}
 
 		static string CrashableServer
 		{
 			get
 			{
-				var ext = "";
-				if (Platform.GetOS() == Platform.OS.Windows)
-				{
-					ext = ".exe";
-				}
+				var ext = Platform.GetOS() == Platform.OS.Windows ? ".exe" : "";
 				return Utilities.GetAppResourcePath("CrashableServer") + ext;
 			}
 		}
@@ -99,18 +99,24 @@ namespace Peach.Pro.Test.Core.Agent
 		{
 			get
 			{
-				if (Platform.GetOS() != Platform.OS.Windows) return "Process";
+				if (Platform.GetOS() != Platform.OS.Windows)
+					return "Process";
 				if (!Environment.Is64BitProcess && Environment.Is64BitOperatingSystem)
-					Assert.Ignore("Cannot run the 32bit version of this test on a 64bit operating system.");
-
+					return "Process";
 				if (Environment.Is64BitProcess && !Environment.Is64BitOperatingSystem)
-					Assert.Ignore("Cannot run the 64bit version of this test on a 32bit operating system.");
+					return "Process";
+
 				return "WindowsDebugger";
 			}
 		}
 
+		public static string[] ChannelNames
+		{
+			get { return new[] {"tcp", "http"}; }
+		}
+
 		[Test]
-		public void TestReconnect()
+		public void TestReconnect([ValueSource("ChannelNames")]string protocol)
 		{
 			var port = TestBase.MakePort(20000, 21000);
 			var tmp = Path.GetTempFileName();
@@ -131,15 +137,15 @@ namespace Peach.Pro.Test.Core.Agent
 		</State>
 	</StateModel>
 
-	<Agent name='RemoteAgent' location='tcp://127.0.0.1:9001'>
-		<Monitor class='{0}'>
-			<Param name='Executable' value='{1}'/>
-			<Param name='Arguments' value='127.0.0.1 {2}'/>
+	<Agent name='RemoteAgent' location='{0}://127.0.0.1:9001'>
+		<Monitor class='{1}'>
+			<Param name='Executable' value='{2}'/>
+			<Param name='Arguments' value='127.0.0.1 {3}'/>
 			<Param name='RestartOnEachTest' value='true'/>
 			<Param name='FaultOnEarlyExit' value='true'/>
 		</Monitor>
 		<Monitor name='M' class='Null'>
-			<Param name='LogFile' value='{3}'/>
+			<Param name='LogFile' value='{4}'/>
 		</Monitor>
 	</Agent>
 
@@ -150,18 +156,18 @@ namespace Peach.Pro.Test.Core.Agent
 			<Param name='Agent' value='RemoteAgent' />
 			<Param name='Class' value='Tcp'/>
 			<Param name='Host' value='127.0.0.1' />
-			<Param name='Port' value='{2}' />
+			<Param name='Port' value='{3}' />
 		</Publisher>
 		<Strategy class='Sequential'/>
 		<Mutators mode='include'>
 			<Mutator class='StringStatic' />
 		</Mutators>
 	</Test>
-</Peach>".Fmt(PlatformMonitor, CrashableServer, port, tmp);
+</Peach>".Fmt(protocol, PlatformMonitor, CrashableServer, port, tmp);
 
 			try
 			{
-				StartAgent();
+				StartAgent(protocol);
 
 				var parser = new PitParser();
 				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
@@ -170,7 +176,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 				e.TestStarting += ctx =>
 				{
-					var pub = new AgentKillerPublisher(this, ctx) { Name = "Killer" };
+					var pub = new AgentKillerPublisher(this, protocol, ctx) { Name = "Killer" };
 					ctx.test.publishers.Add(pub);
 				};
 
@@ -202,8 +208,7 @@ namespace Peach.Pro.Test.Core.Agent
 			}
 			finally
 			{
-				if (_process != null)
-					StopAgent();
+				StopAgent();
 
 				File.Delete(tmp);
 			}
@@ -217,7 +222,7 @@ namespace Peach.Pro.Test.Core.Agent
 		}
 
 		[Test]
-		public void TestSoftException()
+		public void TestSoftException([ValueSource("ChannelNames")]string protocol)
 		{
 			var port = TestBase.MakePort(20000, 21000);
 
@@ -238,10 +243,10 @@ namespace Peach.Pro.Test.Core.Agent
 		</State>
 	</StateModel>
 
-	<Agent name='RemoteAgent' location='tcp://127.0.0.1:9001'>
-		<Monitor class='{0}'>
-			<Param name='Executable' value='{1}'/>
-			<Param name='Arguments' value='127.0.0.1 {2}'/>
+	<Agent name='RemoteAgent' location='{0}://127.0.0.1:9001'>
+		<Monitor class='{1}'>
+			<Param name='Executable' value='{2}'/>
+			<Param name='Arguments' value='127.0.0.1 {3}'/>
 			<Param name='FaultOnEarlyExit' value='true'/>
 		</Monitor>
 	</Agent>
@@ -253,18 +258,18 @@ namespace Peach.Pro.Test.Core.Agent
 			<Param name='Agent' value='RemoteAgent' />
 			<Param name='Class' value='Tcp'/>
 			<Param name='Host' value='127.0.0.1' />
-			<Param name='Port' value='{2}' />
+			<Param name='Port' value='{3}' />
 		</Publisher>
 		<Strategy class='Sequential'/>
 		<Mutators mode='include'>
 			<Mutator class='StringStatic' />
 		</Mutators>
 	</Test>
-</Peach>".Fmt(PlatformMonitor, CrashableServer, port);
+</Peach>".Fmt(protocol, PlatformMonitor, CrashableServer, port);
 
 			try
 			{
-				StartAgent();
+				StartAgent(protocol);
 
 				var parser = new PitParser();
 				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
@@ -278,13 +283,12 @@ namespace Peach.Pro.Test.Core.Agent
 			}
 			finally
 			{
-				if (_process != null)
-					StopAgent();
+				StopAgent();
 			}
 		}
 
 		[Test]
-		public void TestBadProcess()
+		public void TestBadProcess([ValueSource("ChannelNames")]string protocol)
 		{
 			var xml = @"
 <Peach>
@@ -300,8 +304,8 @@ namespace Peach.Pro.Test.Core.Agent
 		</State>
 	</StateModel>
 
-	<Agent name='RemoteAgent' location='tcp://127.0.0.1:9001'>
-		<Monitor class='{0}'>
+	<Agent name='RemoteAgent' location='{0}://127.0.0.1:9001'>
+		<Monitor class='{1}'>
 			<Param name='Executable' value='MissingProgram'/>
 		</Monitor>
 	</Agent>
@@ -310,24 +314,20 @@ namespace Peach.Pro.Test.Core.Agent
 		<Agent ref='RemoteAgent'/>
 		<StateModel ref='TheState'/>
 		<Publisher class='Null'/>
-		<Strategy class='RandomDeterministic'/>
 	</Test>
-</Peach>".Fmt(PlatformMonitor);
+</Peach>".Fmt(protocol, PlatformMonitor);
 
 			try
 			{
-				StartAgent();
+				StartAgent(protocol);
 
-				var parser = new PitParser();
-				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
-
-				var config = new RunConfiguration();
-
+				var dom = DataModelCollector.ParsePit(xml);
+				var cfg = new RunConfiguration();
 				var e = new Engine(null);
 
-				var ex = Assert.Throws<PeachException>(() => e.startFuzzing(dom, config));
+				var ex = Assert.Throws<PeachException>(() => e.startFuzzing(dom, cfg));
 
-				var msg = Platform.GetOS() != Platform.OS.Windows
+				var msg = PlatformMonitor == "Process"
 					? "Could not start process 'MissingProgram'."
 					: "System debugger could not start process 'MissingProgram'.";
 
@@ -335,13 +335,12 @@ namespace Peach.Pro.Test.Core.Agent
 			}
 			finally
 			{
-				if (_process != null)
-					StopAgent();
+				StopAgent();
 			}
 		}
 
 		[Test]
-		public void TestNoTcpPort()
+		public void TestDefaultPort([ValueSource("ChannelNames")]string protocol)
 		{
 			var xml = @"
 <Peach>
@@ -357,9 +356,9 @@ namespace Peach.Pro.Test.Core.Agent
 		</State>
 	</StateModel>
 
-	<Agent name='RemoteAgent' location='tcp://127.0.0.1'>
-		<Monitor class='{0}'>
-			<Param name='Executable' value='{1}'/>
+	<Agent name='RemoteAgent' location='{0}://127.0.0.1'>
+		<Monitor class='{1}'>
+			<Param name='Executable' value='{2}'/>
 			<Param name='Arguments' value='127.0.0.1 0'/>
 			<Param name='RestartOnEachTest' value='true'/>
 			<Param name='FaultOnEarlyExit' value='true'/>
@@ -372,11 +371,11 @@ namespace Peach.Pro.Test.Core.Agent
 		<Publisher class='Null'/>
 		<Strategy class='RandomDeterministic'/>
 	</Test>
-</Peach>".Fmt(PlatformMonitor, CrashableServer);
+</Peach>".Fmt(protocol, PlatformMonitor, CrashableServer);
 
 			try
 			{
-				StartAgent();
+				StartAgent(protocol);
 
 				var parser = new PitParser();
 				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
@@ -389,8 +388,7 @@ namespace Peach.Pro.Test.Core.Agent
 			}
 			finally
 			{
-				if (_process != null)
-					StopAgent();
+				StopAgent();
 			}
 		}
 
@@ -500,7 +498,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 		[Publisher("TestRemoteFile", Internal = true)]
 		[Parameter("FileName", typeof(string), "Name of file to open for reading/writing")]
-		public class TestRemoteFilePublisher : StreamPublisher
+		public class TestRemoteFilePublisher : Peach.Core.Publishers.StreamPublisher
 		{
 			private static readonly Logger ClassLogger = LogManager.GetCurrentClassLogger();
 			protected override Logger Logger { get { return ClassLogger; } }
@@ -720,18 +718,18 @@ namespace Peach.Pro.Test.Core.Agent
 		</State>
 	</StateModel>
 
-	<Agent name='RemoteAgent' location='tcp://127.0.0.1:9001'/>
+	<Agent name='RemoteAgent' location='{0}://127.0.0.1:9001'/>
 
 	<Test name='Default'>
 		<Agent ref='RemoteAgent'/>
 		<StateModel ref='TheState'/>
-{0}
+{1}
 		<Strategy class='RandomDeterministic'/>
 	</Test>
 </Peach>";
 
 		[Test]
-		public void TestRemotePublisher()
+		public void TestRemotePublisher([ValueSource("ChannelNames")]string protocol)
 		{
 			var tmp = Path.GetTempFileName();
 
@@ -743,11 +741,11 @@ namespace Peach.Pro.Test.Core.Agent
 		</Publisher>
 ".Fmt(tmp);
 
-			var xml = RemotePublisherXml.Fmt(pub);
+			var xml = RemotePublisherXml.Fmt(protocol, pub);
 
 			try
 			{
-				StartAgent();
+				StartAgent(protocol);
 
 				var parser = new PitParser();
 				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
@@ -757,50 +755,16 @@ namespace Peach.Pro.Test.Core.Agent
 				var e = new Engine(null);
 				e.startFuzzing(dom, config);
 
-				var contents = File.ReadAllLines(tmp);
-				var expected = new[] {
-					"OnStart",
-					"OnOpen",
-					"OnOutput 5/40",
-					"OnAccept",
-					"OnInput",
-					"Read, Want: 5, Got: 5",
-					"Read, Want: 0, Got: 0",
-					"WantBytes 5",
-					"Read, Want: 5, Got: 5",
-					"Read, Want: 0, Got: 0",
-					"SetProperty int BitStream 7c",
-					"GetProperty: int",
-					"GetProperty: string",
-					"GetProperty: bytes",
-					"GetProperty: bits",
-					"OnClose",
-					"OnStop"
-				};
-
-				Assert.That(contents, Is.EqualTo(expected));
-
-				var st = dom.tests[0].stateModel.states[0];
-				//var act = st.actions["call"] as Dom.Actions.Call;
-				//Assert.NotNull(act);
-				//Assert.NotNull(act.result);
-				//Assert.NotNull(act.result.dataModel);
-				//Assert.AreEqual(2, act.result.dataModel.Count);
-				//Assert.AreEqual(7, (int)act.result.dataModel[0].DefaultValue);
-				//Assert.AreEqual("Success", (string)act.result.dataModel[1].DefaultValue);
-
-				var inp = st.actions["input"];
-				Assert.AreEqual("0123456789", inp.dataModel.InternalValue.BitsToString());
+				Verify(tmp, dom);
 			}
 			finally
 			{
-				if (_process != null)
-					StopAgent();
+				StopAgent();
 			}
 		}
 
 		[Test]
-		public void TestNewRemotePublisher()
+		public void TestNewRemotePublisher([ValueSource("ChannelNames")]string protocol)
 		{
 			var tmp = Path.GetTempFileName();
 
@@ -810,11 +774,11 @@ namespace Peach.Pro.Test.Core.Agent
 		</Publisher>
 ".Fmt(tmp);
 
-			var xml = RemotePublisherXml.Fmt(pub);
+			var xml = RemotePublisherXml.Fmt(protocol, pub);
 
 			try
 			{
-				StartAgent();
+				StartAgent(protocol);
 
 				var parser = new PitParser();
 				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
@@ -824,18 +788,29 @@ namespace Peach.Pro.Test.Core.Agent
 				var e = new Engine(null);
 				e.startFuzzing(dom, config);
 
-				var contents = File.ReadAllLines(tmp);
-				var expected = new[] {
+				Verify(tmp, dom);
+			}
+			finally
+			{
+				if (_process != null)
+					StopAgent();
+			}
+		}
+
+		private static void Verify(string tmp, Peach.Core.Dom.Dom dom)
+		{
+			var contents = File.ReadAllLines(tmp);
+			var expected = new[] {
 					"OnStart",
 					"OnOpen",
 					"OnOutput 5/40",
 					"OnAccept",
 					"OnInput",
-					"Read, Want: 5, Got: 5",
-					"Read, Want: 0, Got: 0",
+					"Read, Want: \\d+, Got: 5",
+					"Read, Want: \\d+, Got: 0",
 					"WantBytes 5",
-					"Read, Want: 5, Got: 5",
-					"Read, Want: 0, Got: 0",
+					"Read, Want: \\d+, Got: 5",
+					"Read, Want: \\d+, Got: 0",
 					"SetProperty int BitStream 7c",
 					"GetProperty: int",
 					"GetProperty: string",
@@ -845,25 +820,30 @@ namespace Peach.Pro.Test.Core.Agent
 					"OnStop"
 				};
 
-				Assert.That(contents, Is.EqualTo(expected));
-
-				var st = dom.tests[0].stateModel.states[0];
-				//var act = st.actions["call"] as Dom.Actions.Call;
-				//Assert.NotNull(act);
-				//Assert.NotNull(act.result);
-				//Assert.NotNull(act.result.dataModel);
-				//Assert.AreEqual(2, act.result.dataModel.Count);
-				//Assert.AreEqual(7, (int)act.result.dataModel[0].DefaultValue);
-				//Assert.AreEqual("Success", (string)act.result.dataModel[1].DefaultValue);
-
-				var inp = st.actions["input"];
-				Assert.AreEqual("0123456789", inp.dataModel.InternalValue.BitsToString());
-			}
-			finally
+			if (contents.Length != expected.Length)
 			{
-				if (_process != null)
-					StopAgent();
+				// Generate nice nunit failure message
+				Assert.That(contents, Is.EqualTo(expected));
 			}
+			else
+			{
+				for (int i = 0; i < expected.Length; ++i)
+				{
+					StringAssert.IsMatch(expected[i], contents[i]);
+				}
+			}
+
+			var st = dom.tests[0].stateModel.states[0];
+			//var act = st.actions["call"] as Dom.Actions.Call;
+			//Assert.NotNull(act);
+			//Assert.NotNull(act.result);
+			//Assert.NotNull(act.result.dataModel);
+			//Assert.AreEqual(2, act.result.dataModel.Count);
+			//Assert.AreEqual(7, (int)act.result.dataModel[0].DefaultValue);
+			//Assert.AreEqual("Success", (string)act.result.dataModel[1].DefaultValue);
+
+			var inp = st.actions["input"];
+			Assert.AreEqual("0123456789", inp.dataModel.InternalValue.BitsToString());
 		}
 	}
 }
