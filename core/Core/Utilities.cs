@@ -37,6 +37,7 @@ using System.Text;
 using NLog;
 using NLog.Targets;
 using NLog.Config;
+using System.Threading;
 
 namespace Peach.Core
 {
@@ -355,6 +356,18 @@ namespace Peach.Core
 			}
 		}
 
+		public static void ExtractEmbeddedResource(Assembly asm, string name, string target)
+		{
+			var path = Path.Combine(ExecutionDirectory, target);
+			using (var sout = new FileStream(path, FileMode.Create))
+			{
+				using (var sin = asm.GetManifestResourceStream(name))
+				{
+					sin.CopyTo(sout);
+				}
+			}
+		}
+
 		public static string FormatAsPrettyHex(byte[] data, int startPos = 0, int length = -1)
 		{
 			var sb = new StringBuilder();
@@ -640,5 +653,3 @@ namespace Peach.Core
 		}
 	}
 }
-
-// end

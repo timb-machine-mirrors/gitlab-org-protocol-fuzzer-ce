@@ -1,15 +1,14 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
-using Peach.Pro.Core.Agent.Monitors;
 
 namespace Peach.Pro.Test.Core.Monitors
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Category("Peach")]
 	class ProcessMonitorTests
 	{
 		[Test]
@@ -43,7 +42,7 @@ namespace Peach.Pro.Test.Core.Monitors
 					m.Message("foo");
 					Thread.Sleep(500);
 				},
-			IterationFinished = m =>
+				IterationFinished = m =>
 				{
 					sw.Start();
 					m.IterationFinished();
