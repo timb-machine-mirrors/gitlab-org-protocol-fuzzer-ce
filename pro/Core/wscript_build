@@ -65,7 +65,7 @@ else:
 		'Mono.Data.Sqlite.dll',
 	])
 
-if bld.env.TARGET in ['win', 'osx']:
+if bld.env.TARGET in ['win']:
 	embed = 'Vix.dll'
 else:
 	embed = ''
