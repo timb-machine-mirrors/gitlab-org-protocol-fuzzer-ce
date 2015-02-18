@@ -217,14 +217,14 @@ namespace Peach.Core.Dom
 			if(sb == null)
 				sb = new StringBuilder();
 
-			stringPrintLineWithIndent(sb, name + ": " + GetType().Name, indent);
+			stringPrintLineWithIndent(sb, Name + ": " + GetType().Name, indent);
 
 			foreach (DataElement child in this)
 			{
 				if (child is DataElementContainer)
 					((DataElementContainer)child).prettyPrint(sb, indent + 1);
 				else
-					stringPrintLineWithIndent(sb, child.name + ": " + child.GetType().Name, indent);
+					stringPrintLineWithIndent(sb, child.Name + ": " + child.GetType().Name, indent);
 			}
 
 			return sb.ToString();
@@ -263,10 +263,10 @@ namespace Peach.Core.Dom
 
 				var oldElem = _childrenList[index];
 
-				_childrenDict.Remove(oldElem.name);
+				_childrenDict.Remove(oldElem.Name);
 				_childrenList.RemoveAt(index);
 
-				_childrenDict.Add(value.name, value);
+				_childrenDict.Add(value.Name, value);
 				_childrenList.Insert(index, value);
 
 				OnSetItem(oldElem, value);
@@ -289,7 +289,7 @@ namespace Peach.Core.Dom
 				}
 				else
 				{
-					if (key != value.name)
+					if (key != value.Name)
 						throw new ArgumentException("Key must be the same as the DataElement name.");
 
 					Add(value);
@@ -299,7 +299,7 @@ namespace Peach.Core.Dom
 
 		public virtual void ApplyReference(DataElement newElem)
 		{
-			this[newElem.name] = newElem;
+			this[newElem.Name] = newElem;
 		}
 
 		public void SwapElements(int first, int second)
@@ -343,7 +343,7 @@ namespace Peach.Core.Dom
 		public void Insert(int index, DataElement item)
 		{
 			// Add throws if key already exists
-			_childrenDict.Add(item.name, item);
+			_childrenDict.Add(item.Name, item);
 			_childrenList.Insert(index, item);
 
 			OnInsertItem(item);
@@ -356,7 +356,7 @@ namespace Peach.Core.Dom
 
 			System.Diagnostics.Debug.Assert(item.parent == this);
 
-			bool removed = _childrenDict.Remove(item.name);
+			bool removed = _childrenDict.Remove(item.Name);
 			_childrenList.RemoveAt(index);
 			System.Diagnostics.Debug.Assert(removed);
 
@@ -372,7 +372,7 @@ namespace Peach.Core.Dom
 			try
 			{
 			// Add throws if key already exists
-			_childrenDict.Add(item.name, item);
+				_childrenDict.Add(item.Name, item);
 			_childrenList.Add(item);
 			}
 			catch (System.ArgumentException ex)
@@ -381,7 +381,7 @@ namespace Peach.Core.Dom
 				{
 					throw new PeachException(string.Format(
 						"Error: Detected duplicate child name of '{0}' on element '{1}'.",
-						item.name, this.fullName));
+						item.Name, this.fullName));
 				}
 
 				throw;

@@ -370,7 +370,7 @@ namespace Peach.Pro.Core.Runtime
 		/// <param name="analyzer"></param>
 		protected virtual void OnRunAnalyzer(string analyzer)
 		{
-			var analyzerType = ClassLoader.FindTypeByAttribute<AnalyzerAttribute>((x, y) => y.Name == analyzer);
+			var analyzerType = ClassLoader.FindPluginByName<AnalyzerAttribute>(analyzer);
 			if (analyzerType == null)
 				throw new PeachException("Error, unable to locate analyzer called '" + analyzer + "'.\n");
 
@@ -396,7 +396,7 @@ namespace Peach.Pro.Core.Runtime
 		/// <param name="agent"></param>
 		protected virtual void OnRunAgent(string agent)
 		{
-			var agentType = ClassLoader.FindTypeByAttribute<AgentServerAttribute>((x, y) => y.name == agent);
+			var agentType = ClassLoader.FindPluginByName<AgentServerAttribute>(agent);
 			if (agentType == null)
 				throw new PeachException("Error, unable to locate agent server for protocol '" + agent + "'.\n");
 

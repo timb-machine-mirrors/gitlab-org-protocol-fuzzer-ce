@@ -110,7 +110,7 @@ namespace Peach.Core
 			var fileName = "Peach.license";
 			var peachDir = Platform.GetOS() == Platform.OS.Windows ? "Peach" : "peach";
 			var appData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
-			var asmDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+			var asmDir = Utilities.ExecutionDirectory;
 
 			try
 			{

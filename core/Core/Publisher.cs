@@ -28,6 +28,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using Peach.Core.Dom;
 using Peach.Core.IO;
@@ -49,57 +50,51 @@ namespace Peach.Core
 	/// for more complex operations such as writing to the registry and
 	/// then calling an RPC method.
 	/// </remarks>
-	public abstract class Publisher : Stream
+	public abstract class Publisher : Stream, INamed
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
 		protected abstract NLog.Logger Logger { get; }
 
 		#region Private Members
 
-		[NonSerialized]
-		private Test _test;
-
 		private bool _hasStarted;
 		private bool _isOpen;
-		private uint _iteration;
-		private bool _isControlIteration;
 
 		#endregion
 
 		#region Properties
 
 		/// <summary>
-		/// The top level test object.
+		/// The name of the publisher.
 		/// </summary>
-		public virtual Test Test
+		public string Name
 		{
-			get { return _test; }
-			set { _test = value; }
+			get;
+			set;
 		}
 
 		/// <summary>
 		/// Gets/sets the current fuzzing iteration.
 		/// </summary>
-		public virtual uint Iteration
+		public uint Iteration
 		{
-			get { return _iteration; }
-			set { _iteration = value; }
+			get;
+			set;
 		}
 
 		/// <summary>
 		/// Gets/sets if the current iteration is a control iteration.
 		/// </summary>
-		public virtual bool IsControlIteration
+		public bool IsControlIteration
 		{
-			get { return _isControlIteration; }
-			set { _isControlIteration = value; }
-		}
-
-		/// <summary>
-		/// Get the result value (if any).
-		/// </summary>
-		public virtual string Result
-		{
-			get { return null; }
+			get;
+			set;
 		}
 
 		#endregion
@@ -166,7 +161,7 @@ namespace Peach.Core
 		/// <param name="method">Name of method to call</param>
 		/// <param name="args">Arguments to pass</param>
 		/// <returns>Returns resulting data</returns>
-		protected virtual Variant OnCall(string method, List<ActionParameter> args)
+		protected virtual Variant OnCall(string method, List<BitwiseStream> args)
 		{
 			throw new PeachException("Error, action 'call' not supported by publisher");
 		}
@@ -299,9 +294,9 @@ namespace Peach.Core
 		/// <param name="method">Name of method to call</param>
 		/// <param name="args">Arguments to pass</param>
 		/// <returns>Returns resulting data</returns>
-		public Variant call(string method, List<ActionParameter> args)
+		public Variant call(string method, List<BitwiseStream> args)
 		{
-			Logger.Debug("call({0}, {1})", method, args);
+			Logger.Debug("call({0}, Arg Count: {1})", method, args.Count);
 			return OnCall(method, args);
 		}
 
@@ -367,6 +362,17 @@ namespace Peach.Core
 			output(dataModel.Value);
 		}
 
+		/// <summary>
+		/// Call a method on the Publishers resource
+		/// </summary>
+		/// <param name="method">Name of method to call</param>
+		/// <param name="args">Arguments to pass</param>
+		/// <returns>Returns resulting data</returns>
+		public virtual Variant call(string method, List<ActionParameter> args)
+		{
+			return call(method, args.Select(i => i.dataModel.Value).ToList());
+		}
+
 		#endregion
 
 		#region Stream
@@ -429,11 +435,18 @@ namespace Peach.Core
 	/// Used to indicate a class is a valid Publisher and 
 	/// provide it's invoking name used in the Pit XML file.
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 	public class PublisherAttribute : PluginAttribute
 	{
-		public PublisherAttribute(string name, bool isDefault = false)
-			: base(typeof(Publisher), name, isDefault)
+		// ReSharper disable once UnusedParameter.Local
+		[Obsolete("This constructor is obsolete. Use the constructor without the isDefault argument.")]
+		public PublisherAttribute(string name, bool isDefault)
+			: base(typeof(Publisher), name, true)
+		{
+		}
+
+		public PublisherAttribute(string name)
+			: base(typeof(Publisher), name, true)
 		{
 		}
 	}

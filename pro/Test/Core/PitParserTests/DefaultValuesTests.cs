@@ -60,13 +60,13 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 			if (defaultArgs)
 			{
-				Assert.AreEqual("TheDataModel", dom.dataModels[0].name);
-				Assert.AreEqual("SomeString", dom.dataModels[0][0].name);
+				Assert.AreEqual("TheDataModel", dom.dataModels[0].Name);
+				Assert.AreEqual("SomeString", dom.dataModels[0][0].Name);
 			}
 			else
 			{
-				Assert.AreEqual("##VAR1##", dom.dataModels[0].name);
-				Assert.AreEqual("##VAR2##", dom.dataModels[0][0].name);
+				Assert.AreEqual("##VAR1##", dom.dataModels[0].Name);
+				Assert.AreEqual("##VAR2##", dom.dataModels[0][0].Name);
 			}
 		}
 

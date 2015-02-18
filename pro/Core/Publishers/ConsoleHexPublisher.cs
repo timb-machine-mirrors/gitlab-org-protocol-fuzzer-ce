@@ -4,9 +4,9 @@ using Peach.Core.IO;
 
 namespace Peach.Pro.Core.Publishers
 {
-	[Publisher("ConsoleHex", true)]
-	[Publisher("StdoutHex")]
-	[Publisher("stdout.StdoutHex")]
+	[Publisher("ConsoleHex")]
+	[Alias("StdoutHex")]
+	[Alias("stdout.StdoutHex")]
 	[Parameter("BytesPerLine", typeof(int), "How many bytes per row of text", "16")]
 	public class ConsoleHexPublisher : ConsolePublisher
 	{

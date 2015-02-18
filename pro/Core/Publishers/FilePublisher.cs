@@ -34,10 +34,10 @@ using Peach.Core.IO;
 
 namespace Peach.Pro.Core.Publishers
 {
-	[Publisher("File", true)]
-	[Publisher("FileStream")]
-	[Publisher("file.FileWriter")]
-	[Publisher("file.FileReader")]
+	[Publisher("File")]
+	[Alias("FileStream")]
+	[Alias("file.FileWriter")]
+	[Alias("file.FileReader")]
 	[Parameter("FileName", typeof(string), "Name of file to open for reading/writing")]
 	[Parameter("Overwrite", typeof(bool), "Replace existing file? [true/false, default true]", "true")]
 	[Parameter("Append", typeof(bool), "Append to end of file [true/false, default flase]", "false")]

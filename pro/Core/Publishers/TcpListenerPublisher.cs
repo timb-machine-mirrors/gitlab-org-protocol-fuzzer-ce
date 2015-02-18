@@ -7,8 +7,8 @@ using Peach.Core;
 
 namespace Peach.Pro.Core.Publishers
 {
-	[Publisher("TcpListener", true)]
-	[Publisher("tcp.TcpListener")]
+	[Publisher("TcpListener")]
+	[Alias("tcp.TcpListener")]
 	[Parameter("Interface", typeof(IPAddress), "IP of interface to bind to")]
 	[Parameter("Port", typeof(ushort), "Local port to listen on")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait when receiving data (default 3000)", "3000")]

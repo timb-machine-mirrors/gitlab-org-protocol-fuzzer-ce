@@ -43,13 +43,18 @@ namespace Peach.Core
 	/// </summary>
 	public class Engine
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and should not be used.")]
+		public RunContext context { get { return _context; } }
+
+		#endregion
+
 		static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
 		private readonly Watcher _watcher;
 		private readonly RunContext _context;
 
-		[Obsolete("This property is obsolete.")]
-		public RunContext context { get { return _context; } }
 		//public Dom.Dom dom { get { return runContext.dom; } }
 		//public Test test  { get { return runContext.test; } }
 
@@ -291,16 +296,20 @@ namespace Peach.Core
 		{
 			try
 			{
-				foreach (var kv in _context.test.publishers)
+				foreach (var pub in _context.test.publishers)
 				{
 					try
 					{
-						kv.Value.stop();
+						pub.stop();
 					}
 					catch (Exception ex)
 					{
-						logger.Trace("EndTest: Ignoring exception stopping publisher '{0}': {1}", kv.Key, ex.Message);
+						logger.Trace("EndTest: Ignoring exception stopping publisher '{0}': {1}", pub.Name, ex.Message);
 					}
+
+					var asRemote = pub as RemotePublisher;
+					if (asRemote != null)
+						asRemote.AgentManager = null;
 				}
 			}
 			finally
@@ -310,9 +319,7 @@ namespace Peach.Core
 
 				logger.Debug("EndTest: Stoping all agents and monitors");
 
-				_context.agentManager.SessionFinished();
-				_context.agentManager.StopAllMonitors();
-				_context.agentManager.Shutdown();
+				_context.agentManager.Dispose();
 				_context.agentManager = null;
 
 				_context.test.strategy.Finalize(_context, this);
@@ -434,6 +441,9 @@ namespace Peach.Core
 						break;
 					}
 
+					// Record if the last iteration had a fault
+					context.FaultOnPreviousIteration = context.faults.Count > 0;
+
 					// Make sure we are not hanging on to old faults.
 					context.faults.Clear();
 
@@ -449,7 +459,7 @@ namespace Peach.Core
 								logger.Debug("runTest: Performing control iteration.");
 						}
 
-						context.agentManager.IterationStarting(iterationCount, context.reproducingFault);
+						context.agentManager.IterationStarting(context.reproducingFault, context.FaultOnPreviousIteration);
 
 						test.stateModel.Run(context);
 					}
@@ -510,7 +520,7 @@ namespace Peach.Core
 					}
 
 					// Collect any faults that were found
-					context.OnCollectFaults();
+					context.agentManager.CollectFaults();
 
 					if (context.faults.Count > 0)
 					{
@@ -685,7 +695,7 @@ namespace Peach.Core
 						}
 					}
 
-					if (context.agentManager.MustStop())
+					if (context.faults.Any(f => f.mustStop))
 					{
 						logger.Debug("runTest: agents say we must stop!");
 
@@ -760,11 +770,11 @@ namespace Peach.Core
 				{
 					try
 					{
-						// Note: We want to perfrom SessionStarting on each agent
-						//       in turn.  We do this incase the first agent starts
-						//       a virtual machine that contains the second agent.
-						ctx.agentManager.AgentConnect(agent);
-						ctx.agentManager.GetAgent(agent.name).SessionStarting();
+						// AgentConnect will do three things:
+						// 1) Connect to the agent
+						// 2) Call StartMonitor on each monitor
+						// 3) Call SessionStarting on each monitor
+						ctx.agentManager.Connect(agent);
 					}
 					catch (SoftException)
 					{
@@ -787,6 +797,11 @@ namespace Peach.Core
 						throw new PeachException("General Agent Failure: " + ex.Message, ex);
 					}
 				}
+			}
+
+			foreach (var pub in ctx.test.publishers.OfType<RemotePublisher>())
+			{
+				pub.AgentManager = ctx.agentManager;
 			}
 		}
 
@@ -843,13 +858,13 @@ namespace Peach.Core
 
 				if (missedStates.Count == 1)
 				{
-					sb.AppendFormat("State '{0}' was not performed.", missedStates[0].name);
+					sb.AppendFormat("State '{0}' was not performed.", missedStates[0].Name);
 				}
 				else
 				{
 					sb.AppendLine("The following states were not performed:");
 					foreach (var s in missedStates)
-						sb.AppendLine("\t'{0}'".Fmt(s.name));
+						sb.AppendLine("\t'{0}'".Fmt(s.Name));
 				}
 
 				var desc = sb.ToString();
@@ -870,13 +885,13 @@ namespace Peach.Core
 
 				if (missedActions.Count == 1)
 				{
-					sb.AppendFormat("Action '{0}.{1}' was not performed.", missedActions[0].parent.name, missedActions[0].name);
+					sb.AppendFormat("Action '{0}.{1}' was not performed.", missedActions[0].parent.Name, missedActions[0].Name);
 				}
 				else
 				{
 					sb.AppendLine("The following actions were not performed:");
 					foreach (var a in missedActions)
-						sb.AppendLine("\t'{0}.{1}'".Fmt(a.parent.name, a.name));
+						sb.AppendLine("\t'{0}.{1}'".Fmt(a.parent.Name, a.Name));
 				}
 
 				var desc = sb.ToString();

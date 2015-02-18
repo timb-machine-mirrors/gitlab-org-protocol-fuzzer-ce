@@ -50,7 +50,7 @@ namespace Peach.Pro.Test.Core.StateModel
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(1, actions.Count);
-			Assert.AreEqual("Action1", actions[0].name);
+			Assert.AreEqual("Action1", actions[0].Name);
 		}
 
 		[Test]
@@ -93,9 +93,9 @@ namespace Peach.Pro.Test.Core.StateModel
 			e.startFuzzing(dom, config);
 
 			Assert.AreEqual(8, actions.Count);
-			Assert.AreEqual("Action1", actions[0].name);
+			Assert.AreEqual("Action1", actions[0].Name);
 			for (int i = 1; i < actions.Count; ++i)
-				Assert.AreEqual("Action2", actions[i].name);
+				Assert.AreEqual("Action2", actions[i].Name);
 		}
 	}
 }

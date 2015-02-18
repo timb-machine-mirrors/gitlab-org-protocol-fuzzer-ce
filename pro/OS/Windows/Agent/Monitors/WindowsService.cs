@@ -1,5 +1,4 @@
-﻿
-//
+﻿//
 // Copyright (c) Michael Eddington
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
@@ -28,143 +27,150 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.ServiceProcess;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
-using Encoding = Peach.Core.Encoding;
+using Monitor = Peach.Core.Agent.Monitor2;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.OS.Windows.Agent.Monitors
 {
-	[Monitor("WindowsService", true)]
+	[Monitor("WindowsService")]
 	[Description("Controls a Windows service")]
 	[Parameter("Service", typeof(string), "The name that identifies the service to the system. This can also be the display name for the service.")]
 	[Parameter("MachineName", typeof(string), "The computer on which the service resides. (optional, defaults to local machine)", "")]
 	[Parameter("FaultOnEarlyExit", typeof(bool), "Fault if service exists early. (defaults to false)", "false")]
 	[Parameter("Restart", typeof(bool), "Restart service on every iteration. (defaults to false)", "false")]
-	[Parameter("StartTimout", typeof(int), "Time in minutes to wait for service start. (defaults to 1 minute)", "1")]
+	[Parameter("StartTimeout", typeof(int), "Time in minutes to wait for service start. (defaults to 1 minute)", "1")]
 	public class WindowsService : Monitor
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
-		string _service = null;
-		string _machineName = null;
-		int _startTimeout = 1;
-		bool _faultOnEarlyExit = false;
-		bool _restart = false;
-		ServiceController _serviceController = null;
-		Fault _fault = null;
+		static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		public WindowsService(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public string Service { get; set; }
+		public string MachineName { get; set; }
+		public bool FaultOnEarlyExit { get; set; }
+		public bool Restart { get; set; }
+		public int StartTimeout { get; set; }
+
+		ServiceController _sc;
+		MonitorData _data;
+
+		public WindowsService(string name)
+			: base(name)
 		{
-			_service = (string)args["Service"];
+		}
 
-			if (args.ContainsKey("MachineName"))
-				_machineName = (string)args["MachineName"];
-
-			if (args.ContainsKey("StartTimeout"))
-				_startTimeout = int.Parse((string)args["StartTimeout"]);
-
-			if (args.ContainsKey("FaultOnEarlyExit") && ((string)args["FaultOnEarlyExit"]).ToLower() == "true")
-				_faultOnEarlyExit = true;
-
-			if (args.ContainsKey("Restart") && ((string)args["Restart"]).ToLower() == "true")
-				_restart = true;
-
-			if (_machineName == null)
+		public override void StartMonitor(Dictionary<string, string> args)
+		{
+			string val;
+			if (args.TryGetValue("StringTimout", out val) && !args.ContainsKey("StringTimeout"))
 			{
-				_serviceController = new ServiceController(_service);
-				if (_serviceController == null)
-					throw new PeachException("WindowsService monitor was unable to connect to [" + _service + "].");
+				Logger.Info("The parameter 'StringTimout' on the monitor 'WindowsService' is deprecated.  Use the parameter 'StringTimeout' instead.");
+				args["StringTimeout"] = val;
+				args.Remove("StringTimout");
+			}
+
+			base.StartMonitor(args);
+
+			if (string.IsNullOrEmpty(MachineName))
+			{
+				_sc = new ServiceController(Service);
+				if (_sc == null)
+					throw new PeachException("WindowsService monitor was unable to connect to service '{0}'.".Fmt(Service));
 			}
 			else
 			{
-				_serviceController = new ServiceController(_service, _machineName);
-				if (_serviceController == null)
-					throw new PeachException("WindowsService monitor was unable to connect to [" + _service + "] on computer ["+ _machineName + "].");
+				_sc = new ServiceController(Service, MachineName);
+				if (_sc == null)
+					throw new PeachException("WindowsService monitor was unable to connect to service '{0}' on computer '{1}'.".Fmt(Service, MachineName));
 			}
 		}
 
-		protected void StartService()
+		private void ControlService(string what, Action action)
 		{
+			if (MachineName == null)
+				Logger.Debug("Attempting to {0} service {0}", what, Service);
+			else
+				Logger.Debug("Attempting to {0} service {1} on machine {2}", what, Service, MachineName);
+
 			try
 			{
-				if (_machineName == null)
-					logger.Debug("StartService(" + _service + ")");
-				else
-					logger.Debug("StartService(" + _service + ", " + _machineName + ")");
+				_sc.Refresh();
 
-				_serviceController.Refresh();
-				switch (_serviceController.Status)
+				action();
+
+			}
+			catch (System.ServiceProcess.TimeoutException ex)
+			{
+				var pe = new PeachException(
+					"WindowsService monitor was unable to {0} service '{1}'{2}.".Fmt(
+						what,
+						Service,
+						MachineName == null ? "" : "on machine '{0}'".Fmt(MachineName)),
+					ex);
+
+				Logger.Debug(pe.Message);
+				throw pe;
+			}
+		}
+
+		private void StartService()
+		{
+			ControlService("start", () =>
+			{
+				switch (_sc.Status)
 				{
 					case ServiceControllerStatus.ContinuePending:
 						break;
 					case ServiceControllerStatus.Paused:
-						_serviceController.Continue();
+						_sc.Continue();
 						break;
 					case ServiceControllerStatus.PausePending:
-						_serviceController.WaitForStatus(ServiceControllerStatus.Paused, new TimeSpan(0, _startTimeout, 0));
-						_serviceController.Continue();
+						_sc.WaitForStatus(ServiceControllerStatus.Paused, TimeSpan.FromMilliseconds(StartTimeout));
+						_sc.Continue();
 						break;
 					case ServiceControllerStatus.Running:
 						break;
 					case ServiceControllerStatus.StartPending:
 						break;
 					case ServiceControllerStatus.Stopped:
-						_serviceController.Start();
+						_sc.Start();
 						break;
 					case ServiceControllerStatus.StopPending:
-						_serviceController.WaitForStatus(ServiceControllerStatus.Stopped, new TimeSpan(0, _startTimeout, 0));
-						_serviceController.Start();
+						_sc.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromMilliseconds(StartTimeout));
+						_sc.Start();
 						break;
 				}
 
-				_serviceController.WaitForStatus(ServiceControllerStatus.Running, new TimeSpan(0, _startTimeout, 0));
-			}
-			catch (System.ServiceProcess.TimeoutException ex)
-			{
-				if (_machineName == null)
-				{
-					logger.Debug("StartService: Timeout starting service [" + _service + "].");
-					throw new PeachException("Error, WindowsService monitor was unable to start service [" + _service + "].", ex);
-				}
-				else
-				{
-					logger.Debug("StartService: Timeout starting service [" + _service + "] on computer ["+ _machineName +"].");
-					throw new PeachException("Error, WindowsService monitor was unable to start service [" + _service + "] on computer [" + _machineName + "].", ex);
-				}
-			}
+				_sc.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromMilliseconds(StartTimeout));
+			});
 		}
 
 		protected void StopService()
 		{
-			try
+			ControlService("stop", () =>
 			{
-				if(_machineName == null)
-					logger.Debug("StopService(" + _service + ")");
-				else
-					logger.Debug("StopService(" + _service + ", "+_machineName+")");
-
-				_serviceController.Refresh();
-				switch (_serviceController.Status)
+				switch (_sc.Status)
 				{
 					case ServiceControllerStatus.ContinuePending:
-						_serviceController.WaitForStatus(ServiceControllerStatus.Running, new TimeSpan(0, _startTimeout, 0));
-						_serviceController.Stop();
+						_sc.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromMilliseconds(StartTimeout));
+						_sc.Stop();
 						break;
 					case ServiceControllerStatus.Paused:
-						_serviceController.Stop();
+						_sc.Stop();
 						break;
 					case ServiceControllerStatus.PausePending:
-						_serviceController.WaitForStatus(ServiceControllerStatus.Paused, new TimeSpan(0, _startTimeout, 0));
-						_serviceController.Stop();
+						_sc.WaitForStatus(ServiceControllerStatus.Paused, TimeSpan.FromMilliseconds(StartTimeout));
+						_sc.Stop();
 						break;
 					case ServiceControllerStatus.Running:
-						_serviceController.Stop();
+						_sc.Stop();
 						break;
 					case ServiceControllerStatus.StartPending:
-						_serviceController.WaitForStatus(ServiceControllerStatus.Running, new TimeSpan(0, _startTimeout, 0));
-						_serviceController.Stop();
+						_sc.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromMilliseconds(StartTimeout));
+						_sc.Stop();
 						break;
 					case ServiceControllerStatus.Stopped:
 						break;
@@ -172,93 +178,58 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 						break;
 				}
 
-				_serviceController.WaitForStatus(ServiceControllerStatus.Stopped, new TimeSpan(0, _startTimeout, 0));
-			}
-			catch (System.ServiceProcess.TimeoutException ex)
-			{
-				if (_machineName == null)
-				{
-					logger.Debug("StartService: Timeout stopping service [" + _service + "].");
-					throw new PeachException("Error, WindowsService monitor was unable to stop service [" + _service + "].", ex);
-				}
-				else
-				{
-					logger.Debug("StartService: Timeout stopping service [" + _service + "] on computer [" + _machineName + "].");
-					throw new PeachException("Error, WindowsService monitor was unable to stop service [" + _service + "] on computer [" + _machineName + "].", ex);
-				}
-			}
+				_sc.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromMilliseconds(StartTimeout));
+			});
 		}
 
 		public override void StopMonitor()
 		{
+			if (_sc != null)
+			{
+				_sc.Close();
+				_sc = null;
+			}
 		}
 
-		public override void SessionStarting()
+		public override void IterationStarting(IterationStartingArgs args)
 		{
-		}
+			_data = null;
 
-		public override void SessionFinished()
-		{
-		}
-
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
-		{
-			_fault = null;
-
-			if (_restart)
+			if (Restart)
 				StopService();
 
 			StartService();
 		}
 
-		public override bool IterationFinished()
-		{
-			return false;
-		}
-
 		public override bool DetectedFault()
 		{
-			if (_fault != null)
-				return true;
-
-			_serviceController.Refresh();
-			if (_faultOnEarlyExit && _serviceController.Status != ServiceControllerStatus.Running)
+			if (_data == null)
 			{
-				logger.Info("DetectedFault() - Fault detected, process exited early");
-				MakeFault();
-				return true;
+				_sc.Refresh();
+
+				if (FaultOnEarlyExit && _sc.Status != ServiceControllerStatus.Running)
+				{
+					Logger.Info("DetectedFault() - Fault detected, process exited early");
+
+					_data = new MonitorData
+					{
+						Title = MachineName == null
+							? "The windows service '{0}' stopped early.".Fmt(Service)
+							: "The windows service '{0}' on machine '{1}' stopped early.".Fmt(Service, MachineName),
+						Data = new Dictionary<string, Stream>(),
+						Fault = new MonitorData.Info()
+					};
+				}
 			}
-			return false;
+
+			return _data != null;
 		}
 
-		public override Fault GetMonitorData()
+		public override MonitorData GetMonitorData()
 		{
 			// Wil be called if a different monitor records a fault
 			// so don't assume the service has stopped early.
-			return _fault;
-		}
-
-		private void MakeFault()
-		{
-			_fault = new Fault();
-			_fault.type = FaultType.Fault;
-			_fault.folderName = "WindowsService";
-			_fault.detectionSource = "WindowsService";
-			if(_machineName == null)
-				_fault.description = "The windows service [" + _service + "] stopped early.";
-			else
-				_fault.description = "The windows service [" + _service + "] on computer ["+ _machineName+"] stopped early.";
-			_fault.collectedData.Add(new Fault.Data("WindowsService.txt", Encoding.UTF8.GetBytes(_fault.description)));
-		}
-
-		public override bool MustStop()
-		{
-			return false;
-		}
-
-		public override Variant Message(string name, Variant data)
-		{
-			return null;
+			return _data;
 		}
 	}
 }
