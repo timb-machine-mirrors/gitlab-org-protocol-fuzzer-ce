@@ -4,6 +4,7 @@ using Peach.Core.Dom;
 using Peach.Pro.Core.Mutators.Utility;
 using Double = Peach.Core.Dom.Double;
 using String = Peach.Core.Dom.String;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Mutators
 {

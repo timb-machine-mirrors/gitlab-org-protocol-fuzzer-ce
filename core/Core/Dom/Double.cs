@@ -98,7 +98,7 @@ namespace Peach.Core.Dom
 		{
 			pit.WriteStartElement("Double");
 
-			pit.WriteAttributeString("name", name);
+			pit.WriteAttributeString("name", Name);
 
 			pit.WriteAttributeString("size", lengthAsBits.ToString());
 
