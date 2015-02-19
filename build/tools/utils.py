@@ -197,7 +197,9 @@ def cs_resource(self):
 	if cfg:
 		setattr(self, 'app_config', cfg)
 		inst_to = getattr(self, 'install_path', '${BINDIR}')
-		self.bld.install_as('%s/%s.config' % (inst_to, self.gen), cfg, env=self.env, chmod=Utils.O644)
+
+		# use the taskgen method to collect installed dependencies for zips & msis
+		self.install_as('%s/%s.config' % (inst_to, self.gen), cfg, env=self.env, chmod=Utils.O644)
 
 target_framework_template = '''using System;
 using System.Reflection;
