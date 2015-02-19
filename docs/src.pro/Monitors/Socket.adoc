@@ -21,8 +21,33 @@ FaultOnSuccess:: Fault if no connection is recorded, defaults to false.
 
 === Examples
 
+ifdef::peachug[]
+
+.Listen for Incoming Connection
+====================
+
+This parameter example is from a setup that listens for a connection request on port 53.
+
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter    |Value
+|Port         |53
+|==========================================================
+====================
+
+endif::peachug[]
+
+
+ifndef::peachug[]
+
+
 .Listen for Incoming Connection
 ===============================
+
+This example listens for a connection request on port 53. 
+
+NOTE: If you want to run this example and generate a fault after starting Peach, you can use NetCat or a similar appplication to  generate a fault. 
+
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
@@ -89,10 +114,12 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 
-To simulator this monitor faulting after starting Peach, run the following command:
+To simulator this monitor faulting after starting Peach, run the following NetCat command:
 
 ----
 nc -vv 127.0.0.1 53
 ----
 
 ===============================
+
+endif::peachug[]

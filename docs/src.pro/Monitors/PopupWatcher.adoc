@@ -4,19 +4,97 @@
 
 The _PopupWatcher_ monitor closes pop-up windows based on title. 
 
-_PopupWatcher_ monitors the test target for a list of pop-up windows. When _PopupWatcher_ detects a pop-up window whose name matches an entry specified by +WindowNames+, this monitor triggers a fault and closes the pop-up window.
+_PopupWatcher_ monitors the test target for a list of windows. When _PopupWatcher_ detects a 
+window whose name matches an entry specified by +WindowNames+, this monitor triggers a fault and closes 
+the pop-up window.
+
+NOTE: Some applications re-use a pop-up window for many purposes. The window has one title, but the 
+main area of the window can display several different messages depending on the context in the application. 
+If you're interested in monitoring a pop-up window based on content rather than the window title, consider 
+using the xref:Monitors_ButtonClicker[ButtonClicker] monitor. 
 
 === Parameters
 
 _Required:_
 
-WindowNames:: Window names separated by a commas
+WindowNames:: One or more Window names separated by commas. 
+
+TIP: The comma-delimited list should not contain any white space characters.
 
 _Optional:_
 
-Fault:: Trigger fault when a window is found (optional, default false)
+Fault:: Trigger a fault when a window is found, default false.
 
 === Examples
+
+ifdef::peachug[]
+
+.Close Notepad
+====================
+
+This parameter example is from a setup that closes Notepad and Paint.
+
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter    |Value
+|WindowNames  |Notepad,Calculator
+|Fault        |true
+|==========================================================
+====================
+
+This example consists of a serires of steps that you can execute to watch Peach close the windows for 
+the Notepad and Calculator applications. Because seeing PopupWatcher monitor in action is the point of the exercise, 
+we can grab and run almost any Pit, then select the PopupWatcher as the monitor for the Pit, and watch 
+it work. In this case, we're going to choose to fuzz an image file, a BMP, in the mspaint application. 
+
+You can watch Peach close the Notepad and the Calculator applications by performing the following steps:
+
+*Step 1*: Start the Notepad and the Calculator applications. +
+
+. From the Windows menu, launch the Notepad and the Calculator applications. They are both Windows Accessories.
+
+*Step 2*: Start the Peach Web interface. +
+
+. From the Windows menu, right-click on command prompt, then click "Run as Administrator" 
+  from the shortcut menu. +
+. In the command-line window, navigate to the Peach directory. +
+. Type "peach" and press RETURN to start the Peach Web interface.
+
+*Step 3*: Select the Pit using the Peach Web Interface.
+
+. Select the BMP pit from the Peach Pro Library, the Images group. 
+. Name the copy of the BMP pit, such as 12_BMP. 
+
+*Step 4*: Name the sample file and its path.
+
+. From the Configuration menu on the left of the panel, click "Variables".
+. Name the Seed File. For simplicity, select a file in your Pictures folder.
+. Name the path of your Pictures folder.
+. Save the variables.
+
+*Step 5*: Add the agent and monitor.
+
+. From the Configuration menu on the left of the panel, click "Monitoring".
+. Click "Add Agent".
+. Supply the agent name, "LocalAgent".
+
+. click "Add a monitor ..."
+. Select "PopupWatcher" from the list.
+. Name the monitor, such as "MyPopup".
+. Supply the window title to watch, "Notepad,Calculator".
+. click "Save".
+
+*Step 6*: Run the Pit +
+
+. Click the Dashboard menu.
+. From the Web dashboard, click Start.
+
+*Result*: The PopupMonitor closes Notepad and Calculator, causing the application windows to disappear.
+
+endif::peachug[]
+
+
+ifndef::peachug[]
 
 .Close Notepad
 ================
@@ -158,3 +236,5 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 ================
+
+endif::peachug[]

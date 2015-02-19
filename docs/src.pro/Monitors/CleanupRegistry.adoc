@@ -2,7 +2,8 @@
 [[Monitors_CleanupRegistry]]
 == CleanupRegistry Monitor (Windows)
 
-The _CleanupRegistry_ monitor removes a specified registry key, or removes the child keys of a specified registry key.
+The _CleanupRegistry_ monitor removes a specified registry key, or removes the child keys of a specified 
+registry key. Cleanup occurs at the start of a fuzzing session and before every iteration.
 
 === Parameters
 
@@ -26,8 +27,8 @@ NOTE: This parameter prunes the registry beneath the specified key, removing all
 
 ifdef::peachug[]
 
-.Clean up after office +
-This parameter example is from a setup that uses the CleanupRegistry monitor to remove a specified key from the Windows Registry. As shown in the fuzzing output, the registry key is removed at the beginning of a fuzzing session as part of the control iteration.
+.Cleanup for Office +
+This parameter example is from a setup that uses the CleanupRegistry monitor to remove a specified key from the Windows Registry.
 
 ==================================================
 
@@ -37,39 +38,17 @@ This parameter example is from a setup that uses the CleanupRegistry monitor to 
 |Key   |HKLM\SOFTWARE\Office13\Recovery
 |==========================================================
 
-Output for this example.
+The following image shows the portion of the registry that contains the key to delete.
 
-----
->peach -1 --debug example.xml
+.{nbsp}
+image::{images}/Monitor_CleanupRegistry2.png[]
 
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Deja vu Security
+This monitor deleted the key. The following image shows the same area of the registry after fuzzing and using the CleanupRegistry monitor.
 
-[*] Test 'Default' starting with random seed 28078.
-Peach.Core.Agent.Agent StartMonitor: Monitor CleanupRegistry
-Peach.Core.Agent.Agent SessionStarting: Monitor
-
-[R1,-,-] Performing iteration
-Peach.Core.Engine runTest: Performing recording iteration.
-Peach.Core.OS.Windows.Agent.Monitors.CleanupRegistry Removing key: SOFTWARE\Office13\Recovery <1>
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
-Peach.Core.Dom.Action ActionType.Output
-Peach.Core.Publishers.ConsolePublisher start()
-Peach.Core.Publishers.ConsolePublisher open()
-Peach.Core.Publishers.ConsolePublisher output(4 bytes)
-00000000   69 7A 00 00                                        iz??
-Peach.Core.Publishers.ConsolePublisher close()
-Peach.Core.Engine runTest: context.config.singleIteration == true
-Peach.Core.Publishers.ConsolePublisher stop()
-Peach.Core.Agent.Agent SessionFinished: Monitor
-
-[*] Test 'Default' finished.
-----
-
-<1> Deleting the registry key
+.{nbsp}
+image::{images}/Monitor_CleanupRegistry3.png[]
 
 ==================================================
-
 
 endif::peachug[]
 
@@ -77,7 +56,7 @@ endif::peachug[]
 ifndef::peachug[]
 
 
-.Clean up after office +
+.Cleanup for office +
 This uses the CleanupRegistry monitor to remove a specified key from the Windows Registry at the beginning of a fuzzing session as part of the control iteration.
 
 ========================
