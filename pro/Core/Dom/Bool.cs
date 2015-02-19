@@ -57,7 +57,7 @@ namespace Peach.Pro.Core.Dom
 		{
 			pit.WriteStartElement("Bool");
 
-			pit.WriteAttributeString("name", name);
+			pit.WriteAttributeString("name", Name);
 
 			WritePitCommonAttributes(pit);
 			WritePitCommonValue(pit);

@@ -258,7 +258,7 @@ namespace Peach.Core.Dom
 		{
 			pit.WriteStartElement("String");
 
-			pit.WriteAttributeString("name", name);
+			pit.WriteAttributeString("name", Name);
 
 			if(padCharacter != '\0')
 				pit.WriteAttributeString("padCharacter", padCharacter.ToString());

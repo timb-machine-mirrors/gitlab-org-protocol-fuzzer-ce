@@ -89,7 +89,7 @@ namespace Peach.Core.Dom
 						name == null ? "" : "'" + name + "' ", refName, refObj.debugName, node.OuterXml));
 
 				if (string.IsNullOrEmpty(name))
-					name = new Sequence().name;
+					name = new Sequence().Name;
 
 				sequence = refObj.Clone(name) as Sequence;
 				if (sequence != null)
