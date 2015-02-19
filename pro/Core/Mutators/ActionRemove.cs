@@ -1,7 +1,12 @@
-﻿using System;
+﻿//
+// Copyright (c) Deja vu Security
+//
+
+using System;
 using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Mutators
 {

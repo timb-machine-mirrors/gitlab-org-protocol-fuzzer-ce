@@ -1,329 +1,264 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Diagnostics;
+using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
-using Peach.Core.Analyzers;
-using Peach.Pro.Core.Agent.Monitors;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Monitors
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Category("Peach")]
 	class ProcessMonitorTests
 	{
-		string MakeXml(string folder)
-		{
-			string template = @"
-<Peach>
-	<DataModel name='TheDataModel'>
-		<String value='Hello' mutable='false'/>
-	</DataModel>
-
-	<StateModel name='TheState' initialState='Initial'>
-		<State name='Initial'>
-			<Action type='output'>
-				<DataModel ref='TheDataModel'/>
-			</Action>
-		</State>
-	</StateModel>
-
-	<Agent name='LocalAgent'>
-		<Monitor class='Process'>
-			<Param name='Executable' value='{0}'/>
-		</Monitor>
-	</Agent>
-
-	<Test name='Default' replayEnabled='false'>
-		<Agent ref='LocalAgent'/>
-		<StateModel ref='TheState'/>
-		<Publisher class='Null'/>
-		<Strategy class='RandomDeterministic'/>
-	</Test>
-</Peach>";
-
-			var ret = string.Format(template, folder);
-			return ret;
-		}
-
-		void Run(string proccessNames, Engine.IterationStartingEventHandler OnIterStart = null)
-		{
-			string xml = MakeXml(proccessNames);
-
-			PitParser parser = new PitParser();
-
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("StringCaseMutator");
-
-			RunConfiguration config = new RunConfiguration();
-
-			Engine e = new Engine(null);
-			if (OnIterStart != null)
-				e.IterationStarting += OnIterStart;
-			e.startFuzzing(dom, config);
-		}
-
-		[Test, ExpectedException(typeof(PeachException))]
+		[Test]
 		public void TestBadProcss()
 		{
-			// Specify a process name that is not running
-			Run("some_invalid_process");
+			var runner = new MonitorRunner("Process", new Dictionary<string, string>
+			{
+				{ "Executable", "some_invalid_process" }
+			});
+
+			var ex = Assert.Throws<PeachException>(() => runner.Run());
+			StringAssert.StartsWith("Could not start process 'some_invalid_process'.", ex.Message);
 		}
 
 		[Test]
 		public void TestStartOnCall()
 		{
-			Variant foo = new Variant("foo");
+			var sw = new Stopwatch();
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashableServer");
-			args["Arguments"] = new Variant("127.0.0.1 {0}".Fmt(TestBase.MakePort(60000, 61000)));
-			args["StartOnCall"] = foo;
-			args["WaitForExitTimeout"] = new Variant("2000");
-			args["NoCpuKill"] = new Variant("true");
+			var runner = new MonitorRunner("Process", new Dictionary<string, string>
+			{
+				{ "Executable", "CrashableServer" },
+				{ "Arguments", "127.0.0.1 0" },
+				{ "StartOnCall", "foo" },
+				{ "WaitForExitTimeout", "2000" },
+				{ "NoCpuKill", "true" },
+			})
+			{
+				Message = m =>
+				{
+					m.Message("foo");
+					Thread.Sleep(500);
+				},
+				IterationFinished = m =>
+				{
+					sw.Start();
+					m.IterationFinished();
+					sw.Stop();
+				}
+			};
 
-			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
+			var faults = runner.Run();
+			Assert.AreEqual(0, faults.Length);
 
-			p.Message("Action.Call", foo);
-			System.Threading.Thread.Sleep(1000);
-
-			var before = DateTime.Now;
-			p.IterationFinished();
-			var after = DateTime.Now;
-
-			var span = (after - before);
-
-			Assert.AreEqual(false, p.DetectedFault());
-
-			p.SessionFinished();
-			p.StopMonitor();
-
-			Assert.GreaterOrEqual(span.TotalSeconds, 1.9);
-			Assert.LessOrEqual(span.TotalSeconds, 2.1);
+			Assert.GreaterOrEqual(sw.Elapsed.TotalSeconds, 1.9);
+			Assert.LessOrEqual(sw.Elapsed.TotalSeconds, 2.1);
 		}
 
 		[Test]
 		public void TestCpuKill()
 		{
-			Variant foo = new Variant("foo");
+			var sw = new Stopwatch();
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashableServer");
-			args["Arguments"] = new Variant("127.0.0.1 {0}".Fmt(TestBase.MakePort(61000, 62000)));
-			args["StartOnCall"] = foo;
+			var runner = new MonitorRunner("Process", new Dictionary<string, string>
+			{
+				{ "Executable", "CrashableServer" },
+				{ "Arguments", "127.0.0.1 0" },
+				{ "StartOnCall", "foo" },
+			})
+			{
+				Message = m =>
+				{
+					m.Message("foo");
+					Thread.Sleep(500);
+				},
+				IterationFinished = m =>
+				{
+					sw.Start();
+					m.IterationFinished();
+					sw.Stop();
+				}
+			};
 
-			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
+			var faults = runner.Run();
+			Assert.AreEqual(0, faults.Length);
 
-			p.Message("Action.Call", foo);
-			System.Threading.Thread.Sleep(1000);
-
-			var before = DateTime.Now;
-			p.IterationFinished();
-			var after = DateTime.Now;
-
-			var span = (after - before);
-
-			Assert.AreEqual(false, p.DetectedFault());
-
-			p.SessionFinished();
-			p.StopMonitor();
-
-			Assert.GreaterOrEqual(span.TotalSeconds, 0.0);
-			Assert.LessOrEqual(span.TotalSeconds, 0.5);
+			Assert.GreaterOrEqual(sw.Elapsed.TotalSeconds, 0.0);
+			Assert.LessOrEqual(sw.Elapsed.TotalSeconds, 0.5);
 		}
 
 		[Test]
 		public void TestExitOnCallNoFault()
 		{
-			Variant foo = new Variant("foo");
-			Variant bar = new Variant("bar");
+			var runner = new MonitorRunner("Process", new Dictionary<string, string>
+			{
+				{ "Executable", "CrashingFileConsumer" },
+				{ "StartOnCall", "foo" },
+				{ "WaitForExitOnCall", "bar" },
+				{ "NoCpuKill", "true" },
+			})
+			{
+				Message = m =>
+				{
+					m.Message("foo");
+					m.Message("bar");
+				},
+			};
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashingFileConsumer");
-			args["StartOnCall"] = foo;
-			args["WaitForExitOnCall"] = bar;
-			args["NoCpuKill"] = new Variant("true");
+			var faults = runner.Run();
 
-			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
-
-			p.Message("Action.Call", foo);
-			p.Message("Action.Call", bar);
-
-			p.IterationFinished();
-
-			Assert.AreEqual(false, p.DetectedFault());
-
-			p.SessionFinished();
-			p.StopMonitor();
+			Assert.AreEqual(0, faults.Length);
 		}
 
 		[Test]
 		public void TestExitOnCallFault()
 		{
-			Variant foo = new Variant("foo");
-			Variant bar = new Variant("bar");
+			var runner = new MonitorRunner("Process", new Dictionary<string, string>
+			{
+				{ "Executable", "CrashableServer" },
+				{ "Arguments", "127.0.0.1 0" },
+				{ "StartOnCall", "foo" },
+				{ "WaitForExitOnCall", "bar" },
+				{ "WaitForExitTimeout", "2000" },
+				{ "NoCpuKill", "true" },
+			})
+			{
+				Message = m =>
+				{
+					m.Message("foo");
+					m.Message("bar");
+				},
+			};
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashableServer");
-			args["Arguments"] = new Variant("127.0.0.1 {0}".Fmt(TestBase.MakePort(62000, 63000)));
-			args["StartOnCall"] = foo;
-			args["WaitForExitOnCall"] = bar;
-			args["WaitForExitTimeout"] = new Variant("2000");
-			args["NoCpuKill"] = new Variant("true");
+			var faults = runner.Run();
 
-			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
-
-			p.Message("Action.Call", foo);
-			p.Message("Action.Call", bar);
-
-			p.IterationFinished();
-
-			Assert.AreEqual(true, p.DetectedFault());
-			Fault f = p.GetMonitorData();
-			Assert.NotNull(f);
-			Assert.AreEqual("ProcessFailedToExit", f.folderName);
-
-			p.SessionFinished();
-			p.StopMonitor();
+			Assert.AreEqual(1, faults.Length);
+			Assert.AreEqual("Process 'CrashableServer' did not exit in 2000ms.", faults[0].Title);
+			Assert.NotNull(faults[0].Fault);
+			Assert.AreEqual("FailedToExit", faults[0].Fault.MajorHash);
 		}
 
 		[Test]
 		public void TestExitTime()
 		{
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashableServer");
-			args["Arguments"] = new Variant("127.0.0.1 {0}".Fmt(TestBase.MakePort(63000, 64000)));
-			args["RestartOnEachTest"] = new Variant("true");
+			var sw = new Stopwatch();
 
-			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
-			p.SessionStarting();
-			p.IterationStarting(1, false);
+			var runner = new MonitorRunner("Process", new Dictionary<string, string>
+			{
+				{ "Executable", "CrashableServer" },
+				{ "Arguments", "127.0.0.1 0" },
+				{ "RestartOnEachTest", "true" },
+			})
+			{
+				IterationFinished = m =>
+				{
+					sw.Start();
+					m.IterationFinished();
+					sw.Stop();
+				}
+			};
 
-			var before = DateTime.Now;
-			p.IterationFinished();
-			var after = DateTime.Now;
+			var faults = runner.Run();
+			Assert.AreEqual(0, faults.Length);
 
-			var span = (after - before);
-
-			Assert.AreEqual(false, p.DetectedFault());
-
-			p.SessionFinished();
-			p.StopMonitor();
-
-			Assert.GreaterOrEqual(span.TotalSeconds, 0.0);
-			Assert.LessOrEqual(span.TotalSeconds, 0.1);
+			Assert.GreaterOrEqual(sw.Elapsed.TotalSeconds, 0.0);
+			Assert.LessOrEqual(sw.Elapsed.TotalSeconds, 0.1);
 		}
 
 		[Test]
 		public void TestExitEarlyFault()
 		{
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashingFileConsumer");
-			args["FaultOnEarlyExit"] = new Variant("true");
+			var runner = new MonitorRunner("Process", new Dictionary<string, string>
+			{
+				{ "Executable", "CrashingFileConsumer" },
+				{ "FaultOnEarlyExit", "true" },
+			})
+			{
+				Message = m => Thread.Sleep(1000),
+			};
 
-			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
-			p.SessionStarting();
-			p.IterationStarting(1, false);
+			var faults = runner.Run();
 
-			System.Threading.Thread.Sleep(1000);
-
-			p.IterationFinished();
-
-			Assert.AreEqual(true, p.DetectedFault());
-			Fault f = p.GetMonitorData();
-			Assert.NotNull(f);
-			Assert.AreEqual("ProcessExitedEarly", f.folderName);
-
-			p.SessionFinished();
-			p.StopMonitor();
+			Assert.AreEqual(1, faults.Length);
+			Assert.AreEqual("Process 'CrashingFileConsumer' exited early.", faults[0].Title);
+			Assert.NotNull(faults[0].Fault);
+			Assert.AreEqual("ExitedEarly", faults[0].Fault.MajorHash);
 		}
 
 		[Test]
 		public void TestExitEarlyFault1()
 		{
-			Variant foo = new Variant("foo");
-			Variant bar = new Variant("bar");
-
 			// FaultOnEarlyExit doesn't fault when stop message is sent
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashingFileConsumer");
-			args["StartOnCall"] = foo;
-			args["WaitForExitOnCall"] = bar;
-			args["FaultOnEarlyExit"] = new Variant("true");
+			var runner = new MonitorRunner("Process", new Dictionary<string, string>
+			{
+				{ "Executable", "CrashingFileConsumer" },
+				{ "StartOnCall", "foo" },
+				{ "WaitForExitOnCall", "bar" },
+				{ "FaultOnEarlyExit", "true" },
+			})
+			{
+				Message = m =>
+				{
+					m.Message("foo");
+					m.Message("bar");
+				},
+			};
 
-			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
-			p.SessionStarting();
-			p.IterationStarting(1, false);
+			var faults = runner.Run();
 
-			p.Message("Action.Call", foo);
-			p.Message("Action.Call", bar);
-
-			p.IterationFinished();
-
-			Assert.AreEqual(false, p.DetectedFault());
-
-			p.SessionFinished();
-			p.StopMonitor();
+			Assert.AreEqual(0, faults.Length);
 		}
 
 		[Test]
 		public void TestExitEarlyFault2()
 		{
-			Variant foo = new Variant("foo");
+			// FaultOnEarlyExit faults when WaitForExitOnCall is used and stop message is not sent
 
-			// FaultOnEarlyExit faults when StartOnCall is used and stop message is not sent
+			var runner = new MonitorRunner("Process", new Dictionary<string, string>
+			{
+				{ "Executable", "CrashingFileConsumer" },
+				{ "StartOnCall", "foo" },
+				{ "WaitForExitOnCall", "bar" },
+				{ "FaultOnEarlyExit", "true" },
+			})
+			{
+				Message = m =>
+				{
+					m.Message("foo");
+					Thread.Sleep(1000);
+				},
+			};
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashingFileConsumer");
-			args["StartOnCall"] = foo;
-			args["FaultOnEarlyExit"] = new Variant("true");
+			var faults = runner.Run();
 
-			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
-			p.SessionStarting();
-			p.IterationStarting(1, false);
-
-			p.Message("Action.Call", foo);
-
-			System.Threading.Thread.Sleep(1000);
-
-			p.IterationFinished();
-
-			Assert.AreEqual(true, p.DetectedFault());
-			Fault f = p.GetMonitorData();
-			Assert.NotNull(f);
-			Assert.AreEqual("ProcessExitedEarly", f.folderName);
-
-
-			p.SessionFinished();
-			p.StopMonitor();
+			Assert.AreEqual(1, faults.Length);
+			Assert.AreEqual("Process 'CrashingFileConsumer' exited early.", faults[0].Title);
+			Assert.NotNull(faults[0].Fault);
+			Assert.AreEqual("ExitedEarly", faults[0].Fault.MajorHash);
 		}
 
 		[Test]
 		public void TestExitEarlyFault3()
 		{
-			Variant foo = new Variant("foo");
-
 			// FaultOnEarlyExit doesn't fault when StartOnCall is used
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashableServer");
-			args["Arguments"] = new Variant("127.0.0.1 {0}".Fmt(TestBase.MakePort(63000, 64000)));
-			args["StartOnCall"] = foo;
-			args["FaultOnEarlyExit"] = new Variant("true");
+			var runner = new MonitorRunner("Process", new Dictionary<string, string>
+			{
+				{ "Executable", "CrashableServer" },
+				{ "Arguments", "127.0.0.1 0" },
+				{ "StartOnCall", "foo" },
+				{ "FaultOnEarlyExit", "true" },
+			})
+			{
+				Message = m => m.Message("foo"),
+			};
 
-			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
-			p.SessionStarting();
-			p.IterationStarting(1, false);
+			var faults = runner.Run();
 
-			p.Message("Action.Call", foo);
-
-			p.IterationFinished();
-
-			Assert.AreEqual(false, p.DetectedFault());
-			
-			p.SessionFinished();
-			p.StopMonitor();
+			Assert.AreEqual(0, faults.Length);
 		}
 
 		[Test]
@@ -331,22 +266,17 @@ namespace Peach.Pro.Test.Core.Monitors
 		{
 			// FaultOnEarlyExit doesn't fault when restart every iteration is true
 
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashableServer");
-			args["Arguments"] = new Variant("127.0.0.1 {0}".Fmt(TestBase.MakePort(63000, 64000)));
-			args["RestartOnEachTest"] = new Variant("true");
-			args["FaultOnEarlyExit"] = new Variant("true");
+			var runner = new MonitorRunner("Process", new Dictionary<string, string>
+			{
+				{ "Executable", "CrashableServer" },
+				{ "Arguments", "127.0.0.1 0" },
+				{ "RestartOnEachTest", "true" },
+				{ "FaultOnEarlyExit", "true" },
+			});
 
-			ProcessMonitor p = new ProcessMonitor(new Pro.Core.Agent.Agent(), "name", args);
-			p.SessionStarting();
-			p.IterationStarting(1, false);
+			var faults = runner.Run();
 
-			p.IterationFinished();
-
-			Assert.AreEqual(false, p.DetectedFault());
-
-			p.SessionFinished();
-			p.StopMonitor();
+			Assert.AreEqual(0, faults.Length);
 		}
 	}
 }

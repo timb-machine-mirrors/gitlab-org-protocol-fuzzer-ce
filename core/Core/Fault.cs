@@ -79,6 +79,8 @@ namespace Peach.Core
 			public List<Action> actions { get; set; }
 		}
 
+		public bool mustStop = false;
+
 		/// <summary>
 		/// Iteration fault was detected on
 		/// </summary>

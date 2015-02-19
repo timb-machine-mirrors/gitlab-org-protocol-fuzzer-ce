@@ -41,24 +41,6 @@ namespace Peach.Core
 	{
 		#region Events
 
-		#region Fault Collection
-
-		public delegate void CollectFaultsHandler(RunContext context);
-
-		/// <summary>
-		/// This event is triggered after an interation has occured to allow
-		/// collection of faults into RunContext.faults collection.
-		/// </summary>
-		public event CollectFaultsHandler CollectFaults;
-
-		public void OnCollectFaults()
-		{
-			if (CollectFaults != null)
-				CollectFaults(this);
-		}
-
-		#endregion
-
 		#region Mutation Events
 
 		public delegate void DataMutationEventHandler(RunContext context, ActionData actionData, DataElement element, Mutator mutator);
@@ -164,9 +146,8 @@ namespace Peach.Core
 		#region Agent Events
 
 		public delegate void AgentEventHandler(RunContext context, AgentClient agent);
-		public delegate void MessageEventHandler(RunContext context, AgentClient agent, string name, Variant data);
-		public delegate void CreatePublisherEventHandler(RunContext context, AgentClient agent, string cls, Dictionary<string, Variant> args);
-		public delegate void StartMonitorEventHandler(RunContext context, AgentClient agent, string name, string cls, Dictionary<string, Variant> args);
+		public delegate void MessageEventHandler(RunContext context, AgentClient agent, string msg);
+		public delegate void CreateEventHandler(RunContext context, AgentClient agent, string name, string cls);
 
 		public event AgentEventHandler AgentConnect;
 
@@ -184,20 +165,20 @@ namespace Peach.Core
 				AgentDisconnect(this, agent);
 		}
 
-		public event CreatePublisherEventHandler CreatePublisher;
+		public event CreateEventHandler CreatePublisher;
 
-		public void OnCreatePublisher(AgentClient agent, string cls, Dictionary<string, Variant> args)
+		public void OnCreatePublisher(AgentClient agent, string name, string cls)
 		{
 			if (CreatePublisher != null)
-				CreatePublisher(this, agent, cls, args);
+				CreatePublisher(this, agent, name, cls);
 		}
 
-		public event StartMonitorEventHandler StartMonitor;
+		public event CreateEventHandler StartMonitor;
 
-		public void OnStartMonitor(AgentClient agent, string name, string cls, Dictionary<string, Variant> args)
+		public void OnStartMonitor(AgentClient agent, string name, string cls)
 		{
 			if (StartMonitor != null)
-				StartMonitor(this, agent, name, cls, args);
+				StartMonitor(this, agent, name, cls);
 		}
 
 		public event AgentEventHandler StopAllMonitors;
@@ -256,20 +237,12 @@ namespace Peach.Core
 				GetMonitorData(this, agent);
 		}
 
-		public event AgentEventHandler MustStop;
-
-		public void OnMustStop(AgentClient agent)
-		{
-			if (MustStop != null)
-				MustStop(this, agent);
-		}
-
 		public event MessageEventHandler Message;
 
-		public void OnMessage(AgentClient agent, string name, Variant data)
+		public void OnMessage(AgentClient agent, string msg)
 		{
 			if (Message != null)
-				Message(this, agent, name, data);
+				Message(this, agent, msg);
 		}
 
 		#endregion
@@ -387,6 +360,11 @@ namespace Peach.Core
 		#endregion
 
 		#region Faults
+
+		/// <summary>
+		/// Was there a fault detected on the previous iteration.
+		/// </summary>
+		public bool FaultOnPreviousIteration { get; set; }
 
 		/// <summary>
         /// Faults for current iteration of fuzzing.  This collection

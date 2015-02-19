@@ -33,7 +33,7 @@ namespace Peach.Pro.Core.Loggers
 		{
 			lock (mutext)
 			{
-				fuzzedElements.Add(new Tuple<string, string>(element.fullName, mutator.name));
+				fuzzedElements.Add(new Tuple<string, string>(element.fullName, mutator.Name));
 			}
 		}
 
@@ -151,7 +151,7 @@ namespace Peach.Pro.Core.Loggers
 						jsonWriter.WriteEndObject();
 						
 						jsonWriter.WriteStartObject();
-						DataModelToJson(item.dataModel.name, item.dataModel, jsonWriter);
+						DataModelToJson(item.dataModel.Name, item.dataModel, jsonWriter);
 						jsonWriter.WriteEndObject();
 					}
 
@@ -181,12 +181,12 @@ namespace Peach.Pro.Core.Loggers
 				var cont = item as DataElementContainer;
 				if (cont != null)
 				{
-					DataModelToJson(item.name, cont, writer);
+					DataModelToJson(item.Name, cont, writer);
 				}
 				else
 				{
 					writer.WritePropertyName("name");
-					writer.WriteValue(item.name);
+					writer.WriteValue(item.Name);
 					writer.WritePropertyName("type");
 					writer.WriteValue(item.elementType);
 					

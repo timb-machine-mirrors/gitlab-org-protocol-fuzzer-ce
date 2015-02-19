@@ -7,10 +7,11 @@ using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.MutationStrategies
 {
-	[MutationStrategy("Replay", true, IsTest = true)]
+	[MutationStrategy("Replay", true, Internal = true)]
 	[Description("Replay an existing set of data sets")]
 	public class ReplayStrategy : MutationStrategy
 	{
@@ -193,7 +194,7 @@ namespace Peach.Pro.Core.MutationStrategies
 					catch (PeachException ex)
 					{
 						logger.Debug(ex.Message);
-						logger.Debug("Unable to apply data '{0}', ignoring.", opt.name);
+						logger.Debug("Unable to apply data '{0}', ignoring.", opt.Name);
 					}
 				}
 			}

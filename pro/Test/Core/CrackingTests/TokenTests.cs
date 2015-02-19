@@ -26,13 +26,17 @@
 
 // $Id$
 
+using System;
 using System.IO;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
 using Peach.Core.Dom;
+using Peach.Core.IO;
+using Peach.Core.Publishers;
 using Peach.Core.Test;
+using Logger = NLog.Logger;
 
 namespace Peach.Pro.Test.Core.CrackingTests
 {
@@ -1101,7 +1105,94 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			Assert.AreEqual("\r\n", (string)blk2[3].DefaultValue);
 
 		}
+
+		class DeferredPublisher : StreamPublisher
+		{
+			static readonly Logger ClassLogger = NLog.LogManager.GetCurrentClassLogger();
+
+			readonly byte[] _sourceData;
+
+			public DeferredPublisher(byte[] sourceData)
+				: base(new System.Collections.Generic.Dictionary<string,Variant>())
+			{
+				stream = new MemoryStream();
+				_sourceData = sourceData;
+			}
+
+			protected override Logger Logger
+			{
+				get { return ClassLogger; }
+			}
+
+			public override void WantBytes(long count)
+			{
+				var pos = stream.Position;
+				var have = stream.Length - pos;
+				var avail = _sourceData.Length - stream.Length;
+
+				if (have >= count)
+					return;
+
+				var get = Math.Min(count - have, avail);
+
+				stream.Position = stream.Length;
+				stream.Write(_sourceData, (int)stream.Length, (int)get);
+				stream.Position = pos;
+			}
+		}
+
+		[Test]
+		public void WantBytesForToken()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Number size='32'/>
+		<String />
+		<Number size='32'/>
+		<Number value='0' size='32' token='true'/>
+	</DataModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+
+			const string src = "1234HelloWorld5678\x00\x00\x00\x00";
+
+			var data = new BitStream(new DeferredPublisher(Encoding.ASCII.GetBytes(src)));
+
+			var cracker = new DataCracker();
+			cracker.CrackData(dom.dataModels[0], data);
+
+			var elem = dom.dataModels[0][1] as Peach.Core.Dom.String;
+			Assert.NotNull(elem);
+			Assert.AreEqual("HelloWorld", (string)elem.DefaultValue);
+		}
+
+		[Test]
+		public void WantBytesForTokenTooShort()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Number size='32'/>
+		<String />
+		<Number size='32'/>
+		<Number value='0' size='32' token='true'/>
+	</DataModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+
+			const string src = "1234He";
+
+			var data = new BitStream(new DeferredPublisher(Encoding.ASCII.GetBytes(src)));
+
+			var cracker = new DataCracker();
+
+			Assert.Throws<CrackingFailure>(() =>  cracker.CrackData(dom.dataModels[0], data));
+		}
 	}
 }
 
 // end
+

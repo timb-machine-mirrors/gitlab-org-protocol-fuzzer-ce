@@ -26,6 +26,7 @@
 // $Id$
 
 using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Collections.Generic;
 
@@ -33,6 +34,14 @@ namespace Peach.Core
 {
 	public static class Usage
 	{
+		private class PluginAlias : PluginAttribute
+		{
+			public PluginAlias(Type type, string name)
+				: base(type, name, false)
+			{
+			}
+		}
+
 		private class TypeComparer : IComparer<Type>
 		{
 			public int Compare(Type x, Type y)
@@ -89,9 +98,9 @@ namespace Peach.Core
 			var pluginsByName = new SortedDictionary<string, Type>();
 			var plugins = new SortedDictionary<Type, SortedDictionary<Type, SortedSet<PluginAttribute>>>(new TypeComparer());
 
-			foreach (var type in ClassLoader.GetAllByAttribute<Peach.Core.PluginAttribute>(null))
+			foreach (var type in ClassLoader.GetAllByAttribute<PluginAttribute>())
 			{
-				if (type.Key.IsTest)
+				if (type.Key.Internal)
 					continue;
 
 				var pluginType = type.Key.Type;
@@ -117,6 +126,9 @@ namespace Peach.Core
 
 				bool added = attrs.Add(type.Key);
 				System.Diagnostics.Debug.Assert(added);
+
+				foreach (var a in type.Value.GetAttributes<AliasAttribute>())
+					attrs.Add(new PluginAlias(type.Value, a.Name));
 			}
 
 			Console.WriteLine("----- Data Elements --------------------------------------------");
@@ -149,7 +161,7 @@ namespace Peach.Core
 
 					Console.WriteLine();
 
-					var desc = plugin.Key.GetAttributes<DescriptionAttribute>(null).FirstOrDefault();
+					var desc = plugin.Key.GetAttributes<System.ComponentModel.DescriptionAttribute>(null).FirstOrDefault();
 					if (desc != null)
 						Console.WriteLine("    [{0}]", desc.Description);
 

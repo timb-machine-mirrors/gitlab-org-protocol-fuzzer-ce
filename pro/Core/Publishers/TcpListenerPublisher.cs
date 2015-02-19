@@ -7,8 +7,8 @@ using Peach.Core;
 
 namespace Peach.Pro.Core.Publishers
 {
-	[Publisher("TcpListener", true)]
-	[Publisher("tcp.TcpListener")]
+	[Publisher("TcpListener")]
+	[Alias("tcp.TcpListener")]
 	[Parameter("Interface", typeof(IPAddress), "IP of interface to bind to")]
 	[Parameter("Port", typeof(ushort), "Local port to listen on")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait when receiving data (default 3000)", "3000")]
@@ -67,7 +67,7 @@ namespace Peach.Pro.Core.Publishers
 			{
 				var ar = _listener.BeginAcceptTcpClient(null, null);
 				if (!ar.AsyncWaitHandle.WaitOne(TimeSpan.FromMilliseconds(AcceptTimeout)))
-					throw new TimeoutException();
+					throw new TimeoutException("Timed out waiting for an incoming connection on interface {0} port {1}.".Fmt(Interface, Port));
 				_tcp = _listener.EndAcceptTcpClient(ar);
 			}
 			catch (Exception ex)

@@ -229,7 +229,7 @@ namespace Peach.Core.Dom
 
 			StringType stringType;
 			if (!Enum.TryParse<StringType>(type, true, out stringType))
-				throw new PeachException("Error, unknown String type '" + type + "' on element '" + str.name + "'.");
+				throw new PeachException("Error, unknown String type '" + type + "' on element '" + str.Name + "'.");
 
 			str.stringType = stringType;
 
@@ -409,13 +409,13 @@ namespace Peach.Core.Dom
 		{
 			if (actual > desired)
 				throw new PeachException(string.Format("Error, value of {3} string '{0}' is longer than the specified length of {1} {2}.",
-					name, lengthType == LengthType.Bits ? desired * 8 : desired, lengthType.ToString().ToLower(), stringType));
+					Name, lengthType == LengthType.Bits ? desired * 8 : desired, lengthType.ToString().ToLower(), stringType));
 
 			if (actual == desired)
 			{
 				if (nullTerm && !value.EndsWith("\0"))
 					throw new PeachException(string.Format("Error, adding null terminator to {3} string '{0}' makes it longer than the specified length of {1} {2}.",
-						name, lengthType == LengthType.Bits ? desired * 8 : desired, lengthType.ToString().ToLower(), stringType));
+						Name, lengthType == LengthType.Bits ? desired * 8 : desired, lengthType.ToString().ToLower(), stringType));
 
 				return false;
 			}
