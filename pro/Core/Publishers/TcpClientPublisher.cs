@@ -76,7 +76,7 @@ namespace Peach.Pro.Core.Publishers
 
 					var ar = _tcp.BeginConnect(Host, Port, null, null);
 					if (!ar.AsyncWaitHandle.WaitOne(TimeSpan.FromMilliseconds(timeout)))
-						throw new TimeoutException();
+						throw new TimeoutException("Timed out connecting to remote host {0} port {1}.".Fmt(Host, Port));
 					_tcp.EndConnect(ar);
 				}
 				catch (Exception ex)

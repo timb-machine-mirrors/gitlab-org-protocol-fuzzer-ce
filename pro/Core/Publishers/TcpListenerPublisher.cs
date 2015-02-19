@@ -67,7 +67,7 @@ namespace Peach.Pro.Core.Publishers
 			{
 				var ar = _listener.BeginAcceptTcpClient(null, null);
 				if (!ar.AsyncWaitHandle.WaitOne(TimeSpan.FromMilliseconds(AcceptTimeout)))
-					throw new TimeoutException();
+					throw new TimeoutException("Timed out waiting for an incoming connection on interface {0} port {1}.".Fmt(Interface, Port));
 				_tcp = _listener.EndAcceptTcpClient(ar);
 			}
 			catch (Exception ex)
