@@ -31,8 +31,6 @@ using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
 using NLog;
-using System.Security;
-using System.Security.Policy;
 
 namespace Peach.Core
 {
@@ -179,25 +177,33 @@ namespace Peach.Core
 
 		static Assembly Load(string fullPath)
 		{
+			// Do this so we get a consistent error message across versions of .NET and mono.
 			if (!File.Exists(fullPath))
 				throw new FileNotFoundException("The file \"" + fullPath + "\" does not exist.");
 
-			try
-			{
-				// Always try and load the assembly first. It will succeed regardless of security
-				// zone if it is directly referenced or loadFromRemoteSources is true.
-				var asm = Assembly.LoadFrom(fullPath);
-				return asm;
-			}
-			catch (Exception ex)
-			{
-				// http://mikehadlow.blogspot.com/2011/07/detecting-and-changing-files-internet.html
-				var zone = Zone.CreateFromUrl(fullPath);
-				if (zone.SecurityZone > SecurityZone.MyComputer)
-					throw new SecurityException("The assembly is part of the " + zone.SecurityZone + " Security Zone and loading has been blocked.", ex);
+			/*
+			 * Assembly.LoadFrom can fail if the security zone of the assembly is
+			 * not MyComputer (0).  The call will succeed regardless of security zone
+			 * if the assembly was directly linked to the program.
+			 * 
+			 * Instead of trying to catch this error from Assembly.LoadFrom and
+			 * rewrite the appropriate ADS (AssemblyName.dll:Zone.Identifier) with the
+			 * contents "[ZoneTransfer]\r\nZoneId=0\r\n" it is far easier to have each
+			 * program have an entry in their app.config that enables loading
+			 * of untrusted assemblies.
+			 * 
+			 * Put the following in the app.config:
+			 * 
+			 * <configuration>
+			 *   <runtime>
+			 *     <loadFromRemoteSources enabled="true"/>
+			 *   </runtime>
+			 * </configuration>
+			 * 
+			 * and the zone security settings will be ignored by the .NET runtime.
+			 */
 
-				throw;
-			}
+			return Assembly.LoadFrom(fullPath);
 		}
 
 		static bool TryLoad(string fullPath)
