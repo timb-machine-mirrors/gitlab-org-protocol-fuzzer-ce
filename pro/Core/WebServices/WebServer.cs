@@ -138,7 +138,7 @@ namespace Peach.Pro.Core.WebServices
 				StaticContentConventionBuilder.AddDirectory("/", @"public")
 			);
 			nancyConventions.StaticContentsConventions.Insert(0,
-				StaticContentConventionBuilder.AddDirectory("/docs", @"webhelp/docs")
+				StaticContentConventionBuilder.AddDirectory("/docs", @"docs/webhelp")
 			);
 		}
 
