@@ -7,6 +7,7 @@ using System.IO;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Mutators
 {
@@ -86,7 +87,7 @@ namespace Peach.Pro.Core.Mutators
 			value.SeekBits(0, SeekOrigin.Begin);
 
 			var mutatedValue = new Variant(value);
-			var baseName = obj.parent.UniqueName(obj.name);
+			var baseName = obj.parent.UniqueName(obj.Name);
 
 			for (int i = 0; i < num; ++i)
 			{

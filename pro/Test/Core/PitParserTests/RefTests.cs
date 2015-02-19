@@ -55,9 +55,9 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 			Assert.AreEqual(3, dom.dataModels[0].Count);
 			Assert.AreEqual(3, dom.dataModels[1].Count);
-			Assert.AreEqual("Str1", dom.dataModels[1][0].name);
-			Assert.AreEqual("Str2", dom.dataModels[1][1].name);
-			Assert.AreEqual("Str3", dom.dataModels[1][2].name);
+			Assert.AreEqual("Str1", dom.dataModels[1][0].Name);
+			Assert.AreEqual("Str2", dom.dataModels[1][1].Name);
+			Assert.AreEqual("Str3", dom.dataModels[1][2].Name);
 		}
 
 		[Test]
@@ -80,11 +80,11 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 			Assert.AreEqual(3, dom.dataModels[0].Count);
 			Assert.AreEqual(5, dom.dataModels[1].Count);
-			Assert.AreEqual("Str1", dom.dataModels[1][0].name);
-			Assert.AreEqual("Str2", dom.dataModels[1][1].name);
-			Assert.AreEqual("Str3", dom.dataModels[1][2].name);
-			Assert.AreEqual("Str4", dom.dataModels[1][3].name);
-			Assert.AreEqual("Str5", dom.dataModels[1][4].name);
+			Assert.AreEqual("Str1", dom.dataModels[1][0].Name);
+			Assert.AreEqual("Str2", dom.dataModels[1][1].Name);
+			Assert.AreEqual("Str3", dom.dataModels[1][2].Name);
+			Assert.AreEqual("Str4", dom.dataModels[1][3].Name);
+			Assert.AreEqual("Str5", dom.dataModels[1][4].Name);
 		}
 
 		[Test]
@@ -107,9 +107,9 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 			Assert.AreEqual(3, ((Block)dom.dataModels[0][0]).Count);
 			Assert.AreEqual(3, ((Block)dom.dataModels[0][1]).Count);
-			Assert.AreEqual("Str1", ((Block)dom.dataModels[0][1])[0].name);
-			Assert.AreEqual("Str2", ((Block)dom.dataModels[0][1])[1].name);
-			Assert.AreEqual("Str3", ((Block)dom.dataModels[0][1])[2].name);
+			Assert.AreEqual("Str1", ((Block)dom.dataModels[0][1])[0].Name);
+			Assert.AreEqual("Str2", ((Block)dom.dataModels[0][1])[1].Name);
+			Assert.AreEqual("Str3", ((Block)dom.dataModels[0][1])[2].Name);
 		}
 
 		[Test]
@@ -134,11 +134,11 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 			Assert.AreEqual(3, ((Block)dom.dataModels[0][0]).Count);
 			Assert.AreEqual(5, ((Block)dom.dataModels[0][1]).Count);
-			Assert.AreEqual("Str1", ((Block)dom.dataModels[0][1])[0].name);
-			Assert.AreEqual("Str2", ((Block)dom.dataModels[0][1])[1].name);
-			Assert.AreEqual("Str3", ((Block)dom.dataModels[0][1])[2].name);
-			Assert.AreEqual("Str4", ((Block)dom.dataModels[0][1])[3].name);
-			Assert.AreEqual("Str5", ((Block)dom.dataModels[0][1])[4].name);
+			Assert.AreEqual("Str1", ((Block)dom.dataModels[0][1])[0].Name);
+			Assert.AreEqual("Str2", ((Block)dom.dataModels[0][1])[1].Name);
+			Assert.AreEqual("Str3", ((Block)dom.dataModels[0][1])[2].Name);
+			Assert.AreEqual("Str4", ((Block)dom.dataModels[0][1])[3].Name);
+			Assert.AreEqual("Str5", ((Block)dom.dataModels[0][1])[4].Name);
 		}
 
 		[Test]
@@ -164,9 +164,9 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 			Assert.AreEqual(3, ((Block)dom.dataModels[0][0]).Count);
 			Assert.AreEqual(3, ((Block)dom.dataModels[0][1]).Count);
-			Assert.AreEqual("Str1", ((Block)dom.dataModels[0][1])[0].name);
-			Assert.AreEqual("Str2", ((Block)dom.dataModels[0][1])[1].name);
-			Assert.AreEqual("Str3", ((Block)dom.dataModels[0][1])[2].name);
+			Assert.AreEqual("Str1", ((Block)dom.dataModels[0][1])[0].Name);
+			Assert.AreEqual("Str2", ((Block)dom.dataModels[0][1])[1].Name);
+			Assert.AreEqual("Str3", ((Block)dom.dataModels[0][1])[2].Name);
 		}
 
 		[Test]
@@ -196,9 +196,9 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			Assert.AreEqual(2, ((Block)dom.dataModels[0][0]).Count);
 			Assert.AreEqual(2, ((Block)dom.dataModels[0][1]).Count);
 			Assert.AreEqual(2, ((Block)((Block)dom.dataModels[0][1])[0]).Count);
-			Assert.AreEqual("Str1", ((Block)((Block)dom.dataModels[0][1])[0])[0].name);
-			Assert.AreEqual("Str2", ((Block)((Block)dom.dataModels[0][1])[0])[1].name);
-			Assert.AreEqual("Str3", ((Block)dom.dataModels[0][1])[1].name);
+			Assert.AreEqual("Str1", ((Block)((Block)dom.dataModels[0][1])[0])[0].Name);
+			Assert.AreEqual("Str2", ((Block)((Block)dom.dataModels[0][1])[0])[1].Name);
+			Assert.AreEqual("Str3", ((Block)dom.dataModels[0][1])[1].Name);
 		}
 
 		[Test]
@@ -221,9 +221,9 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			Assert.AreEqual(3, dom.dataModels[0].Count);
 			Assert.AreEqual(1, dom.dataModels[1].Count);
 			Assert.AreEqual(3, ((Block)dom.dataModels[1][0]).Count);
-			Assert.AreEqual("Str1", ((Block)dom.dataModels[1][0])[0].name);
-			Assert.AreEqual("Str2", ((Block)dom.dataModels[1][0])[1].name);
-			Assert.AreEqual("Str3", ((Block)dom.dataModels[1][0])[2].name);
+			Assert.AreEqual("Str1", ((Block)dom.dataModels[1][0])[0].Name);
+			Assert.AreEqual("Str2", ((Block)dom.dataModels[1][0])[1].Name);
+			Assert.AreEqual("Str3", ((Block)dom.dataModels[1][0])[2].Name);
 		}
 
 		[Test]
@@ -250,9 +250,9 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 			Block ReferencedBlock = ((Block)BlockArray.OriginalElement);
 			Assert.AreEqual(3, ReferencedBlock.Count);
-			Assert.AreEqual("Str1", ReferencedBlock[0].name);
-			Assert.AreEqual("Str2", ReferencedBlock[1].name);
-			Assert.AreEqual("Str3", ReferencedBlock[2].name);
+			Assert.AreEqual("Str1", ReferencedBlock[0].Name);
+			Assert.AreEqual("Str2", ReferencedBlock[1].Name);
+			Assert.AreEqual("Str3", ReferencedBlock[2].Name);
 		}
 
 	}

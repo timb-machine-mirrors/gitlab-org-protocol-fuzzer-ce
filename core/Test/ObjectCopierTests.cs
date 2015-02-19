@@ -165,7 +165,7 @@ namespace Peach.Core.Test
 			for (int count = 0; count < elem.Count; count++)
 			{
 				var countItem = elem[count];
-				var dictItem = elem[countItem.name];
+				var dictItem = elem[countItem.Name];
 
 				Assert.AreEqual(countItem.GetHashCode(), dictItem.GetHashCode(), countItem.fullName);
 

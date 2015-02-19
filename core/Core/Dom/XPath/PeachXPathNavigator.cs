@@ -141,7 +141,7 @@ namespace Peach.Core.Dom.XPath
 				if (iteratingAttributes)
 					return GetCurrentNodeAttributeMatrix().ElementAt(attributeIndex);
 
-				return ((INamed)currentNode).name.Split(':').Last();
+				return ((INamed)currentNode).Name.Split(':').Last();
 			}
 		}
 
@@ -503,7 +503,7 @@ namespace Peach.Core.Dom.XPath
 
 		public override string Name
 		{
-			get { return ((INamed)currentNode).name; }
+			get { return ((INamed)currentNode).Name; }
 		}
 
 		public override System.Xml.XmlNameTable NameTable
@@ -518,7 +518,7 @@ namespace Peach.Core.Dom.XPath
 				if (iteratingAttributes)
 					return string.Empty;
 
-				var parts = ((INamed)currentNode).name.Split(':');
+				var parts = ((INamed)currentNode).Name.Split(':');
 				return parts.Length > 1 ? parts[0] : string.Empty;
 			}
 		}
@@ -555,7 +555,7 @@ namespace Peach.Core.Dom.XPath
 				string attr = LocalName;
 
 				if (attr == "name")
-					return ((INamed)currentNode).name;
+					return ((INamed)currentNode).Name;
 
 				if (currentNode is DataElement)
 				{

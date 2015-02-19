@@ -2,6 +2,7 @@
 
 deps = [
 	'System.Runtime.Remoting.dll',
+	'System.Runtime.Serialization.dll',
 	'System.dll',
 	'System.Management.dll',
 	'System.Xml.dll',
@@ -51,7 +52,6 @@ deps = [
 
 	'Managed.Adb.dll',
 	'BouncyCastle.Crypto.dll',
-	'Syslog.Server.dll',
 	'aardvark_net.dll',
 	'LibUsbDotNet.dll',
 ]
@@ -65,14 +65,17 @@ else:
 		'Mono.Data.Sqlite.dll',
 	])
 
-content = [
-]
+if bld.env.TARGET in ['win']:
+	embed = 'Vix.dll'
+else:
+	embed = ''
 
 bld(
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
 	resource = bld.path.ant_glob('Resources/**/* WebServices/Views/**/*'),
+	embed = embed,
 	content = 'IronPython.StdLib',
 	ide_content = 'WebServices/Models/Model.cd',
 	name = 'Peach.Pro.dll',

@@ -12,7 +12,7 @@ namespace Peach.Core.Test
 	{
 		public static Dom.Dom ParsePit(string xml)
 		{
-			return new PitParser().asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			return new PitParser().asParser(null, new MemoryStream(Encoding.UTF8.GetBytes(xml)));
 		}
 
 		protected void RunEngine(string xml)
@@ -98,7 +98,7 @@ namespace Peach.Core.Test
 		protected override void DataMutating(RunContext context, ActionData actionData, DataElement element, Mutator mutator)
 		{
 			int len = strategies.Count;
-			string item = mutator.name + " | " + element.fullName;
+			string item = mutator.Name + " | " + element.fullName;
 			allStrategies.Add(item);
 			if (len == 0 || strategies[len - 1] != item)
 				strategies.Add(item);

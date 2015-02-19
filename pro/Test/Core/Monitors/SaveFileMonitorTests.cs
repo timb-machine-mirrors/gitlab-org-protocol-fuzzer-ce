@@ -34,9 +34,8 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestNoParams()
 		{
-			var ex = Assert.Throws<PeachException>(() =>
-				new MonitorRunner("SaveFile", new Dictionary<string, string>())
-			);
+			var runner = new MonitorRunner("SaveFile", new Dictionary<string, string>());
+			var ex = Assert.Throws<PeachException>(() => runner.Run());
 
 			const string msg = "Could not start monitor \"SaveFile\".  Monitor 'SaveFile' is missing required parameter 'Filename'.";
 
@@ -86,15 +85,19 @@ namespace Peach.Pro.Test.Core.Monitors
 				}
 			};
 
+			var fileName = Path.GetFileName(_file);
+			Assert.NotNull(fileName);
+
 			var faults = runner.Run();
 
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual(FaultType.Data, faults[0].type);
-			Assert.AreEqual("SaveFileMonitor", faults[0].detectionSource);
-			Assert.That(faults[0].title, Is.StringContaining(_file));
-			Assert.AreEqual(1, faults[0].collectedData.Count);
-			Assert.AreEqual(Path.GetFileName(_file), faults[0].collectedData[0].Key);
-			Assert.AreEqual(_fileContents, faults[0].collectedData[0].Value);
+			Assert.Null(faults[0].Fault);
+			Assert.AreEqual("SaveFile", faults[0].DetectionSource);
+			Assert.AreEqual("Save File \"{0}\".".Fmt(_file), faults[0].Title);
+			Assert.NotNull(faults[0].Data);
+			Assert.AreEqual(1, faults[0].Data.Count);
+			Assert.True(faults[0].Data.ContainsKey(fileName));
+			Assert.AreEqual("Hello World", faults[0].Data[fileName].AsString());
 		}
 
 		[Test]

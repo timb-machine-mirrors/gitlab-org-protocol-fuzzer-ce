@@ -113,6 +113,13 @@ namespace Peach.Core.Dom
 	/// </summary>
 	public class Test : INamed, IOwned<Dom>
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
 		/// <summary>
 		/// Defines the lifetime of the fuzzing target.
 		/// </summary>
@@ -136,8 +143,8 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// Name of test case.
 		/// </summary>
-		[XmlAttribute]
-		public string name { get; set; }
+		[XmlAttribute("name")]
+		public string Name { get; set; }
 
 		/// <summary>
 		/// Description of test case.
@@ -272,7 +279,7 @@ namespace Peach.Core.Dom
 		public StateModel stateModel = null;
 
 		[NonSerialized]
-		public OrderedDictionary<string, Publisher> publishers = new OrderedDictionary<string, Publisher>();
+		public NamedCollection<Publisher> publishers = new NamedCollection<Publisher>("Pub");
 
 		[NonSerialized]
 		public NamedCollection<Agent> agents = new NamedCollection<Agent>();
@@ -296,8 +303,6 @@ namespace Peach.Core.Dom
 
 		public Test()
 		{
-			publishers.AddEvent += new AddEventHandler<string, Publisher>(publishers_AddEvent);
-
 			waitTime = 0;
 			faultWaitTime = 2;
 			maxOutputSize = 1073741824; // 1024 * 1024 * 1024 (1Gb)
@@ -309,16 +314,6 @@ namespace Peach.Core.Dom
 			agentRef = new List<AgentRef>();
 			pubs = new List<Publisher>();
 		}
-
-		#region OrderedDictionary AddEvent Handlers
-
-		void publishers_AddEvent(OrderedDictionary<string, Publisher> sender, string key, Publisher value)
-		{
-			value.Test = this;
-		}
-
-		#endregion
-
 
 		public void markMutableElements()
 		{

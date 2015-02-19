@@ -19,21 +19,21 @@ namespace Peach.Pro.Test.Core.StateModel
 		{
 		}
 
-		protected override Variant OnCall(string method, List<ActionParameter> args)
+		public override Variant call(string method, List<ActionParameter> args)
 		{
-			Assert.AreEqual(args[0].name, "Named Param 1");
+			Assert.AreEqual(args[0].Name, "Named Param 1");
 			Assert.AreEqual(args[0].type, ActionParameter.Type.In);
 			Assert.AreEqual("Param1", (string)args[0].dataModel[0].InternalValue);
 
-			Assert.AreEqual(args[1].name, "Named Param 2");
+			Assert.AreEqual(args[1].Name, "Named Param 2");
 			Assert.AreEqual(args[1].type, ActionParameter.Type.Out);
 			Assert.AreEqual("Hello", (string)args[1].dataModel[0].InternalValue);
 
-			Assert.AreEqual(args[2].name, "Param");
+			Assert.AreEqual(args[2].Name, "Param");
 			Assert.AreEqual(args[2].type, ActionParameter.Type.InOut);
 			Assert.AreEqual("Param3", (string)args[2].dataModel[0].InternalValue);
 
-			Assert.AreEqual(args[3].name, "Param_1");
+			Assert.AreEqual(args[3].Name, "Param_1");
 			Assert.AreEqual(args[3].type, ActionParameter.Type.In);
 			Assert.AreEqual("Param4", (string)args[3].dataModel[0].InternalValue);
 
@@ -405,8 +405,8 @@ namespace Peach.Pro.Test.Core.StateModel
 			string xml = @"
 <Peach>
 	<Agent name='myAgent'>
-		<Monitor name='mon' class='FaultingMonitor'/>
-		<Monitor name='mon' class='FaultingMonitor'/>
+		<Monitor name='mon' class='Null'/>
+		<Monitor name='mon' class='Null'/>
 	</Agent>
 </Peach>
 ";
@@ -523,15 +523,15 @@ namespace Peach.Pro.Test.Core.StateModel
 	</DataModel>
 
 	<Agent name='MyAgent'>
-		<Monitor class='FaultingMonitor'/>
-		<Monitor class='FaultingMonitor'/>
-		<Monitor class='FaultingMonitor'/>
+		<Monitor class='Null'/>
+		<Monitor class='Null'/>
+		<Monitor class='Null'/>
 	</Agent>
 
 	<Agent name='MyAgent2'>
-		<Monitor class='FaultingMonitor'/>
-		<Monitor class='FaultingMonitor'/>
-		<Monitor class='FaultingMonitor'/>
+		<Monitor class='Null'/>
+		<Monitor class='Null'/>
+		<Monitor class='Null'/>
 	</Agent>
 
 	<StateModel name='SM' initialState='Initial'>
@@ -652,9 +652,9 @@ namespace Peach.Pro.Test.Core.StateModel
 			foreach (var agent in dom.agents)
 			{
 				Assert.AreEqual(3, agent.monitors.Count);
-				Assert.AreEqual("Monitor", agent.monitors[0].name);
-				Assert.AreEqual("Monitor_1", agent.monitors[1].name);
-				Assert.AreEqual("Monitor_2", agent.monitors[2].name);
+				Assert.AreEqual("Monitor", agent.monitors[0].Name);
+				Assert.AreEqual("Monitor_1", agent.monitors[1].Name);
+				Assert.AreEqual("Monitor_2", agent.monitors[2].Name);
 			}
 
 			Assert.AreEqual(3, dom.tests[0].publishers.Count);
@@ -667,31 +667,31 @@ namespace Peach.Pro.Test.Core.StateModel
 			foreach (var state in dom.tests[0].stateModel.states)
 			{
 				Assert.AreEqual(2, state.actions.Count);
-				Assert.AreEqual("Action", state.actions[0].name);
-				Assert.AreEqual("Action_1", state.actions[1].name);
+				Assert.AreEqual("Action", state.actions[0].Name);
+				Assert.AreEqual("Action_1", state.actions[1].Name);
 
 				foreach (var action in state.actions)
 				{
 					var actionData = action.allData.ToList();
 					Assert.AreEqual(3, actionData.Count);
-					Assert.AreEqual("Param", actionData[0].name);
-					Assert.AreEqual("Param_1", actionData[1].name);
-					Assert.AreEqual("Param_2", actionData[2].name);
+					Assert.AreEqual("Param", actionData[0].Name);
+					Assert.AreEqual("Param_1", actionData[1].Name);
+					Assert.AreEqual("Param_2", actionData[2].Name);
 
 					foreach (var item in actionData)
 					{
 						Assert.AreEqual(4, item.dataSets.Count);
-						Assert.AreEqual("Data", item.dataSets[0].name);
-						Assert.AreEqual("Data_1", item.dataSets[1].name);
-						Assert.AreEqual("Data_2", item.dataSets[2].name);
-						Assert.AreEqual("Data_3", item.dataSets[3].name);
+						Assert.AreEqual("Data", item.dataSets[0].Name);
+						Assert.AreEqual("Data_1", item.dataSets[1].Name);
+						Assert.AreEqual("Data_2", item.dataSets[2].Name);
+						Assert.AreEqual("Data_3", item.dataSets[3].Name);
 
 						var data = item.allData.ToList();
 						Assert.AreEqual(4, item.dataSets.Count);
-						Assert.AreEqual("Data/" + tmpName, data[0].name);
-						Assert.AreEqual("Data_1/" + tmpName, data[1].name);
-						Assert.AreEqual("Data_2/" + tmpName, data[2].name);
-						Assert.AreEqual("Data_3", data[3].name);
+						Assert.AreEqual("Data/" + tmpName, data[0].Name);
+						Assert.AreEqual("Data_1/" + tmpName, data[1].Name);
+						Assert.AreEqual("Data_2/" + tmpName, data[2].Name);
+						Assert.AreEqual("Data_3", data[3].Name);
 					}
 				}
 

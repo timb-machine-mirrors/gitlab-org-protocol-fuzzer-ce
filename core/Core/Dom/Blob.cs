@@ -108,10 +108,45 @@ namespace Peach.Core.Dom
 			return blob;
 		}
 
+		public override Variant DefaultValue
+		{
+			get
+			{
+				return base.DefaultValue;
+			}
+			set
+			{
+				base.DefaultValue = Sanitize(value);
+			}
+		}
+
+		private Variant Sanitize(Variant value)
+		{
+			var type = value.GetVariantType();
+
+			if (type == Variant.VariantType.BitStream)
+				return value;
+
+			var asStr = (string)value;
+
+			if (type != Variant.VariantType.String)
+				throw new PeachException(string.Format("Error, {0} {1} value '{2}' could not be converted to a BitStream.", debugName, type.ToString().ToLower(), asStr));
+
+			// ReSharper disable once LoopCanBeConvertedToQuery
+			// ReSharper disable once ForCanBeConvertedToForeach
+			for (var i = 0; i < asStr.Length; ++i)
+			{
+				if (asStr[i] > 0xff)
+					throw new PeachException(string.Format("Error, {0} {1} value '{2}' contains unicode characters and could not be converted to a BitStream.", debugName, type.ToString().ToLower(), asStr));
+			}
+
+			return value;
+		}
+
 		public override void WritePit(XmlWriter pit)
 		{
 			pit.WriteStartElement("Blob");
-			pit.WriteAttributeString("name", name);
+			pit.WriteAttributeString("name", Name);
 			WritePitCommonAttributes(pit);
 			WritePitCommonValue(pit);
 			WritePitCommonChildren(pit);
@@ -125,9 +160,15 @@ namespace Peach.Core.Dom
 			// for its InternalValue, even multiple data elements
 			// use the same DefaultValue object.
 
-			var bs = (BitwiseStream)DefaultValue;
-			bs.SeekBits(0, SeekOrigin.Begin);
-			return new Variant(bs.SliceBits(bs.LengthBits));
+			if (DefaultValue.GetVariantType() == Variant.VariantType.BitStream)
+			{
+				var bs = (BitwiseStream)DefaultValue;
+				bs.SeekBits(0, SeekOrigin.Begin);
+				return new Variant(bs.SliceBits(bs.LengthBits));
+			}
+
+			System.Diagnostics.Debug.Assert(DefaultValue.GetVariantType() == Variant.VariantType.String);
+			return new Variant(Encoding.ISOLatin1.GetBytes((string)DefaultValue));
 		}
 	}
 }

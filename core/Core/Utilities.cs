@@ -37,6 +37,7 @@ using System.Text;
 using NLog;
 using NLog.Targets;
 using NLog.Config;
+using System.Threading;
 
 namespace Peach.Core
 {
@@ -321,9 +322,22 @@ namespace Peach.Core
 				program, path != null ? " in specified" : ", please specify using", parameter));
 		}
 
+		/// <summary>
+		/// The location on disk where peach is executing from.
+		/// Does not include the trailing slash in the directory name.
+		/// </summary>
 		public static string ExecutionDirectory
 		{
 			get { return PeachDirectory; }
+		}
+
+		/// <summary>
+		/// Returns the name of the currently running executable.
+		/// Equavilant to argv[0] in C/C++.
+		/// </summary>
+		public static string ExecutableName
+		{
+			get { return AppDomain.CurrentDomain.FriendlyName; }
 		}
 
 		public static string GetAppResourcePath(string resource)
@@ -338,6 +352,18 @@ namespace Peach.Core
 				using (var reader = new StreamReader(stream, System.Text.Encoding.UTF8))
 				{
 					return reader.ReadToEnd();
+				}
+			}
+		}
+
+		public static void ExtractEmbeddedResource(Assembly asm, string name, string target)
+		{
+			var path = Path.Combine(ExecutionDirectory, target);
+			using (var sout = new FileStream(path, FileMode.Create))
+			{
+				using (var sin = asm.GetManifestResourceStream(name))
+				{
+					sin.CopyTo(sout);
 				}
 			}
 		}
@@ -627,5 +653,3 @@ namespace Peach.Core
 		}
 	}
 }
-
-// end

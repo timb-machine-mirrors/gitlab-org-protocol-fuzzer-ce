@@ -183,6 +183,13 @@ namespace Peach.Core.Dom
 	[DebuggerDisplay("{debugName}")]
 	public abstract class DataElement : INamed, IOwned<DataElementContainer>, IPitSerializable
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
 		/// <summary>
 		/// This exists so the ParameterParser can parse 'ref' parameters.
 		/// </summary>
@@ -204,7 +211,7 @@ namespace Peach.Core.Dom
 
 				rename = new List<DataElement>();
 
-				if (root.name != name)
+				if (root.Name != name)
 					rename.Add(root);
 			}
 
@@ -254,7 +261,7 @@ namespace Peach.Core.Dom
 		{
 			// If we have a parent, we need a CloneContext
 			if (this.parent != null)
-				return Clone(name);
+				return Clone(Name);
 
 			// Slight optimization for cloning. No CloneContext is needed since
 			// we are cloning the whole dom w/o renaming the root.  This means
@@ -271,15 +278,15 @@ namespace Peach.Core.Dom
 		{
 			var ret = ObjectCopier.Clone(this, new CloneContext(this, name));
 
-			if (this.name != name)
+			if (this.Name != name)
 			{
 				if (ret.parent == null)
-					ret.fullName = ret.name;
+					ret.fullName = ret.Name;
 				else
-					ret.fullName = ret.parent.fullName + "." + ret.name;
+					ret.fullName = ret.parent.fullName + "." + ret.Name;
 
 				foreach (var item in ret.PreOrderTraverse().Skip(1))
-					item.fullName = item.parent.fullName + "." + item.name;
+					item.fullName = item.parent.fullName + "." + item.Name;
 			}
 
 			return ret;
@@ -473,7 +480,7 @@ namespace Peach.Core.Dom
 			{
 				int index = 0;
 
-				if (item.name != parts[index++])
+				if (item.Name != parts[index++])
 					continue;
 
 				var candidate = item;
@@ -498,14 +505,14 @@ namespace Peach.Core.Dom
 			var parts = name.Split(new[] { '.' });
 
 			// EnumerateUpTree doesn't check this first, so do that
-			if (parts.Length == 1 && parts[0] == this.name)
+			if (parts.Length == 1 && parts[0] == Name)
 				return this;
 
 			foreach (var item in EnumerateUpTree())
 			{
 				int index = 0;
 
-				if (item.name != parts[index++])
+				if (item.Name != parts[index++])
 					continue;
 
 				var candidate = item;
@@ -572,7 +579,7 @@ namespace Peach.Core.Dom
 
 		private string _name;
 
-		public string name
+		public string Name
 		{
 			get { return _name; }
 		}
@@ -777,7 +784,7 @@ namespace Peach.Core.Dom
 
 		protected void OnInvalidated(EventArgs e)
 		{
-			logger.Trace("OnInvalidated: {0}", name);
+			logger.Trace("OnInvalidated: {0}", Name);
 
 			// Prevent infinite loops
 			if (_invalidated)
@@ -988,18 +995,18 @@ namespace Peach.Core.Dom
 				if (parent == null)
 				{
 					root = this;
-					fullName = name;
+					fullName = Name;
 				}
 				else
 				{
 					root = parent.root;
-					fullName = parent.fullName + "." + name;
+					fullName = parent.fullName + "." + Name;
 				}
 
 				foreach (var item in PreOrderTraverse().Skip(1))
 				{
 					item.root = root;
-					item.fullName = item.parent.fullName + "." + item.name;
+					item.fullName = item.parent.fullName + "." + item.Name;
 				}
 			}
 		}
@@ -1691,7 +1698,7 @@ namespace Peach.Core.Dom
 			}
 			else
 			{
-				var newName = newParent.UniqueName(name);
+				var newName = newParent.UniqueName(Name);
 				newElem = Clone(newName);
 			}
 
