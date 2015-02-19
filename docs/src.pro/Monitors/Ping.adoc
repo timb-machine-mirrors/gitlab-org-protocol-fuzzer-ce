@@ -2,27 +2,54 @@
 [[Monitors_Ping]]
 == Ping Monitor
 
-The _Ping_ monitor can verify whether a device is functioning. 
+The _Ping_ monitor verifies whether a device is functioning by sending a packet to a target location, 
+and waiting for a response from the device. _Ping_ continues to monitor until either a _Timeout_ occurs 
+or it receives a response from the device at the target location. 
 
-_Ping_ continues to monitor until either a _Timeout_ occurs or it receives a host response. 
+_Ping_ can validate that a target is still up or is waiting to restart. This is useful when fuzzing 
+embedded devices that do not have easily discernible crashes.
 
-_Ping_ can validate that a target is still up or waiting to restart. This is useful when fuzzing embedded devices that do not have easily discernible crashes.
+Also, by using the FaultOnSuccess parameter, you can use _Ping_ can verify whether a a new device at 
+a specific address becomes available, or that a nonfunctioning device starts to function. For example, 
+if you are fuzzing a device that programmatically turns other computers on, you can use _Ping_ with 
+*FaultOnSuccess=true* to determine whether the computers are off (an uninteresting result) or on 
+(an interesting result). 
 
-Also, _Ping_ can verify whether a device has started to function that normally is not functioning. For example, if  you are fuzzing a device that programmatically turns other computers on, you can use _Ping_ with FaultOnSuccess to determine whether the computers are off (uninteresting result) or on (interesting result). 
+The Peach command line option +--showdevices+ causes Peach to generate a list of all available network interfaces. For a sample device listing, see the the xref:Monitors_Pcap[Pcap Network] monitor.
 
 === Parameters
 
 _Required:_
 
-Host:: Host name or IP address to ping
+Host:: Host name or IP address to ping.
 
 _Optional:_
 
-Timeout:: Timeout in milliseconds, defaults to 1,000
-Data:: Data to send in ping packet
-FaultOnSuccess:: Fault if ping is successful, defaults to false
+Data:: Data to send in the ping packet.
+FaultOnSuccess:: Fault if ping is successful, defaults to false.
+Timeout:: Timeout value expressed in milliseconds, defaults to 1,000.
 
 === Examples
+
+ifdef::peachug[]
+
+.Ping Host
+====================
+
+This parameter example is from a setup that pings the Deja vu Security website.
+
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter    |Value
+|Host         |www.dejavusecurity.com
+|Timeout      |10000
+|==========================================================
+====================
+
+endif::peachug[]
+
+
+ifndef::peachug[]
 
 .Ping Host
 ==============
@@ -103,3 +130,5 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 ==============
+
+endif::peachug[]

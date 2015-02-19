@@ -4,7 +4,7 @@
 
 The _AndroidEmulator_ handles setup and tear-down for Android Virtual Devices (AVDs) running within the Android Emulator. 
 
-This requires the http://developer.android.com/tools/help/emulator.html[Android Emulator] and http://developer.android.com/sdk/index.html[Android Platform Tools].
+This monitor requires the http://developer.android.com/tools/help/emulator.html[Android Emulator] and http://developer.android.com/sdk/index.html[Android Platform Tools].
 
 === Parameters
 
@@ -14,7 +14,8 @@ Avd:: Android virtual device.
 
 _Optional:_
 
-EmulatorPath:: Directory containing the emulator. If not provided, Peach attempts to find the directory automatically.
+EmulatorPath:: Directory containing the emulator. If not provided, Peach searches the directories in the PATH variable 
+for the installed emulator.
 Headless:: If true, runs the emulator with -no-window. Defaults to false.
 RestartAfterFault:: Restart emulator after a fault. Defaults to true.
 RestartEveryIteration:: Restart emulator on every iteration. Defaults to false.
@@ -23,6 +24,49 @@ StartTimeout:: How many seconds to wait for emulator to start running. Defaults 
 StopTimeout:: How many seconds to wait for emulator to exit. Defaults to 30.
 
 === Examples
+
+ifdef::peachug[]
+
+.Basic Usage Example +
+====================
+
+This parameter example is from a setup that the BadBehaviorActivity, sending random taps to generate different types of exceptions and crashes. The setup is for a virtual device that uses the Android Emulator Monitor, as well as the Android monitor.
+
+If you want to run the Android emulator, set your AdbPath to the directory containing the adb (Android Debug Bridge) 
+platform-tools directory and point the EmulatorPath in the Android Emulator Monitor to the adb tools directory.
+
+The Avd parameter in the Android Emulator Monitor must also be the name of a valid AVD (Android Virtual Device). 
+Use the following steps to create a new AVD:
+
+. Open the 'android.bat' file located in the adb SDK tools directory. 
+. From the GUI that opens, click on 'Tools' in the menu bar, then 'Manage AVDs...'. 
+. From the window that opens, click 'New...' and create a new AVD.
+
++Android Monitor (App) Parameters+
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter        |Value
+|ApplicationName  |com.android.development
+|ActivityName     |.BadBehaviorActivity
+|AdbPath          |C:\adt-bundle-windows-x86_64-20131030\sdk\platform-tools
+|DeviceMonitor    |Emu
+|==========================================================
+
+
++Android Emulator (Emu) Monitor Parameters+
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter        |Value
+|Avd              |Nexus4
+|EmulatorPath     |C:\adt-bundle-windows-x86_64-20131030\sdk\tools
+|==========================================================
+
+====================
+
+endif::peachug[]
+
+
+ifndef::peachug[]
 
 .Basic Usage Example
 =======================
@@ -141,3 +185,5 @@ Peach.Enterprise.Agent.Monitors.AndroidEmulator Emulator 'emulator-5554' exited
 [*] Test 'Default' finished.
 ----
 =======================
+
+endif::peachug[]

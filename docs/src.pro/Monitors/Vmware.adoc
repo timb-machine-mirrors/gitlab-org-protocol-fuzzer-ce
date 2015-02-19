@@ -39,6 +39,42 @@ WaitTimeout:: How many seconds to wait for guest tools. Defaults to 600.
 
 === Examples
 
+ifdef::peachug[]
+
+.Start Virtual Machine  +
+====================
+
+This parameter example is from a setup that programmatically starts a VM.
+
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter     |Value
+|Vmx           |D:\VirtualMachines\OfficeWebTest\OfficeWebTest.vmx
+|HostType      |Workstation
+|SnapshotName  |Fuzzing
+|==========================================================
+====================
+
+
+.Start Virtual Machine hosted on ESXi  +
+====================
+
+This parameter example is from a setup that programmatically starts a VM.
+
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter     |Value
+|Vmx           |[ha-datacenter/datastore1] guest/guest.vmx
+|SnapshotName  |Fuzzing
+|==========================================================
+====================
+
+endif::peachug[]
+
+
+ifndef::peachug[]
+
+
 .Start Virtual Machine
 ======================
 [source,xml]
@@ -65,3 +101,5 @@ WaitTimeout:: How many seconds to wait for guest tools. Defaults to 600.
 </Agent>
 ----
 ======================
+
+endif::peachug[]
