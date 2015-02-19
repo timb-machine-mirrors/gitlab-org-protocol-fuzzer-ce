@@ -545,24 +545,33 @@ namespace Peach.Core
 						}
 
 						if (context.reproducingFault)
+						{
+							// Notify loggers first
 							OnFault(iterationCount, test.stateModel, context.faults.ToArray());
-						else
-							OnReproFault(iterationCount, test.stateModel, context.faults.ToArray());
 
-						if (context.controlRecordingIteration && context.reproducingFault)
-						{
-							logger.Debug("runTest: Fault detected on control iteration");
-							throw new PeachException("Fault detected on control iteration.");
-						}
+							if (context.controlRecordingIteration)
+							{
+								logger.Debug("runTest: Fault detected on control record iteration");
+								throw new PeachException("Fault detected on control record iteration.");
+							}
 
-						if (context.controlIteration && context.reproducingFault && test.TargetLifetime == Test.Lifetime.Iteration)
-						{
-							logger.Debug("runTest: Fault detected on control iteration");
-							throw new PeachException("Fault detected on control iteration.");
-						}
+							// If the lifetime is Iteration and it reproduced on a control iteration
+							// we need to stop fuzzing.
+							if (context.controlIteration && test.TargetLifetime == Test.Lifetime.Iteration)
+							{
+								logger.Debug("runTest: Fault detected on control iteration");
+								throw new PeachException("Fault detected on control iteration.");
+							}
 
-						if (context.reproducingFault)
-						{
+							// If the lifetime is Session the fault was detected on a control iteration
+							// and we reproduced it on the very first try, we need to stop fuzzing
+							if (context.controlIteration && test.TargetLifetime == Test.Lifetime.Session && context.reproducingControlIteration && context.reproducingIterationJumpCount == 0)
+							{
+								logger.Debug("runTest: Fault detected on control iteration");
+								throw new PeachException("Fault detected on control iteration.");
+							}
+
+
 							// Fault reproduced, so skip forward to were we left off.
 							lastReproFault = context.reproducingInitialIteration;
 
@@ -580,6 +589,9 @@ namespace Peach.Core
 						}
 						else
 						{
+							// Notify loggers first
+							OnReproFault(iterationCount, test.stateModel, context.faults.ToArray());
+
 							logger.Debug("runTest: Attempting to reproduce fault.");
 
 							context.reproducingFault = true;
