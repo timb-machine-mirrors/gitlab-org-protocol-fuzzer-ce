@@ -18,6 +18,11 @@ bld(
 	name = 'webhelp',
 )
 
+bld(
+	features = 'doxygen',
+	doxyfile = 'apidocs/apidocs.conf',
+	name = 'apidocs',
+)
 
 class join_usage(Task):
 	re_data = re.compile('^include::(.*_DataSheet.adoc)', re.M)
