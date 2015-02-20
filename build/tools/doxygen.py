@@ -47,6 +47,22 @@ def parse_doxy(txt):
 
 	return tbl
 
+def inst_runnable_status(self):
+	for t in self.run_after:
+		if not t.hasrun:
+			return Task.ASK_LATER
+
+	if not self.inputs:
+		# Get the list of files to install
+		# Set self.path doxygens output_dir
+		self.path = self.doxy_tsk.output_dir
+		self.source = self.inputs = self.path.ant_glob('**/*', quiet=True)
+
+	ret = Task.Task.runnable_status(self)
+	if ret == Task.SKIP_ME:
+		return Task.RUN_ME
+	return ret
+
 class doxygen(Task.Task):
 	vars  = ['DOXYGEN', 'DOXYFLAGS']
 	run_str = '${DOXYGEN} ${SRC}'
@@ -207,6 +223,19 @@ def process_doxy(self):
 
 	# the task instance
 	dsk = self.create_task('doxygen', node)
+
+	inst = self.bld.install_files('${BINDIR}', [], cwd = node.parent, relative_trick = True, chmod = Utils.O644)
+
+	if inst:
+		inst.doxy_tsk = dsk
+		inst.set_run_after(dsk)
+		inst.runnable_status = lambda inst=inst: inst_runnable_status(inst)
+
+		# Store inst task in install_extras for packaging
+		try:
+			self.install_extras.append(inst)
+		except AttributeError:
+			self.install_extras = [inst]
 
 	if getattr(self, 'doxy_tar', None):
 		tsk = self.create_task('tar')
