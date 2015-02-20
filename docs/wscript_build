@@ -90,7 +90,7 @@ pits.create_task('join_usage', srcs, library)
 
 srcs_trial = [
 	bld.path.find_or_declare('src.pro/library.adoc'),
-	bld.path.find_dir('../pits/pro/Image').find_or_declare('PNG_Usage.adoc'),
+	bld.path.find_dir('../pits/pro/Image').find_or_declare('Png_Usage.adoc'),
 	bld.path.find_dir('../pits/pro/Net').find_or_declare('SNMP_Usage.adoc'),
 ]
 

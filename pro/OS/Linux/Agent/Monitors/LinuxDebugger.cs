@@ -92,7 +92,20 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 						// Read the next block of data from the process
 						Debug.Assert(!_parent._disposed);
 
-						_parent._stream.BeginRead(_buffer, 0, _buffer.Length, OnReadComplete, null);
+						try
+						{
+							_parent._stream.BeginRead(_buffer, 0, _buffer.Length, OnReadComplete, null);
+						}
+						catch (NotSupportedException)
+						{
+							Log("{0} Read (NotSupportedException)", _parent._name);
+
+							_length = 0;
+							_position = 0;
+							_closed = true;
+
+							return 0;
+						}
 
 						var idx = WaitHandle.WaitAny(new[] {_parent._stopEvent, _parent._readEvent});
 
@@ -289,7 +302,15 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 				{
 					Log("{0} >>> Read", _name);
 
-					_stream.BeginRead(buf, 0, buf.Length, cb, null);
+					try
+					{
+						_stream.BeginRead(buf, 0, buf.Length, cb, null);
+					}
+					catch (NotSupportedException)
+					{
+						Log("{0} Read (NotSupportedException)", _name);
+						break;
+					}
 
 					var idx = WaitHandle.WaitAny(new WaitHandle[] { _stopEvent, _readEvent });
 
