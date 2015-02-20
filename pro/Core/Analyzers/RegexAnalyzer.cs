@@ -77,9 +77,12 @@ namespace Peach.Pro.Core.Analyzers
             if (!(parent is Peach.Core.Dom.String))
                 throw new SoftException("Error, Regex analyzer can only be used with String elements. Element '" + parent.fullName + "' is a '" + parent.elementType + "'.");
 
+            var data = (string)parent.DefaultValue;
+			if (string.IsNullOrEmpty(data) && positions == null)
+				return;
+
             var regex = new System.Text.RegularExpressions.Regex(Regex, RegexOptions.Singleline);
 
-            var data = (string)parent.DefaultValue;
             var match = regex.Match(data);
             if (!match.Success)
                 throw new SoftException("The Regex analyzer failed to match.");
