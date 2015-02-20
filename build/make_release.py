@@ -10,9 +10,16 @@ docfile  = os.path.join(outdir, 'doc', 'archive.zip')
 pitfile  = 'peach-pits-%(buildtag)s.zip'
 pittrial = 'peach-pits-%(buildtag)s-trial.zip'
 
-peach_docs = [ 'Peach_Professional.pdf', 'webhelp/*' ]
-pit_docs   = [ 'Pit_Library.pdf' ]
-trial_docs = [ 'Pit_Library_Trial.pdf' ]
+peach_docs = {
+	'docs/' : [ 'Peach_Professional.pdf', 'webhelp/*' ],
+	'sdk/'  : [ 'apidocs/*' ],
+}
+pit_docs   = {
+	''      : [ 'Pit_Library.pdf' ],
+}
+trial_docs = {
+	''      : [ 'Pit_Library_Trial.pdf' ],
+}
 
 pits = [
 	{
@@ -156,9 +163,9 @@ def update_pkg(pkg, docs):
 	docdir = os.path.dirname(docfile)
 
 	with zipfile.ZipFile(pkg, 'a', compression=zipfile.ZIP_DEFLATED) as z:
-		for i in docs:
+		for b,i in docs:
 			src = os.path.join(docdir, i)
-			dst = 'docs/' + i # DONT USE os.path.join
+			dst = b + i
 
 			mode = os.stat(src).st_mode
 
@@ -196,18 +203,27 @@ def make_pits(dest, library, docs):
 				zi = z.getinfo(f)
 				zi.external_attr = mode << 16L
 
-		for f in docs:
+		for b,f in docs:
 			src = os.path.join(docdir, f)
+			dst = b+f
 			mode = os.stat(src).st_mode
 
-			print ' + %s (%s)' % (f, oct(mode))
+			print ' + %s (%s)' % (dst, oct(mode))
 
-			z.write(src, f)
+			z.write(src, dst)
 
-			zi = z.getinfo(f)
+			zi = z.getinfo(dst)
 			zi.external_attr = mode << 16L
 
 	sha1sum(dest)
+
+def filter_docs(files, filters):
+	ret = []
+	for f in files:
+		for k,v in filters.iteritems():
+			if matches(f, v):
+				ret.append((k,f))
+	return ret
 
 if __name__ == "__main__":
 	p = argparse.ArgumentParser(description = 'make release zips')
@@ -228,16 +244,16 @@ if __name__ == "__main__":
 	pkgs = extract_pkg()
 	docs = extract_doc()
 
-	toAdd = [ x for x in docs if matches(x, peach_docs)]
+	toAdd = filter_docs(docs, peach_docs)
 
 	for x in pkgs:
 		update_pkg(x, toAdd)
 
-	toAdd = [x for x in docs if matches(x, pit_docs)]
+	toAdd = filter_docs(docs, pit_docs)
 
 	make_pits(os.path.join(reldir, pitfile), pits, toAdd)
 
-	toAdd = [x for x in docs if matches(x, trial_docs)]
+	toAdd = filter_docs(docs, trial_docs)
 
 	make_pits(os.path.join(reldir, pittrial), pits_trial, toAdd)
 
