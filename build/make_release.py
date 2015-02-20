@@ -8,14 +8,31 @@ reldir   = os.path.join(outdir, 'release')
 archive  = 'archive.zip'
 docfile  = os.path.join(outdir, 'doc', 'archive.zip')
 pitfile  = 'peach-pits-%(buildtag)s.zip'
+pittrial = 'peach-pits-%(buildtag)s-trial.zip'
 
-peach_docs = [ 'Peach_Professional.pdf', 'webhelp/*' ]
-pit_docs   = [ 'Pit_Library.pdf' ]
+peach_docs = {
+	'docs/' : [ 'Peach_Professional.pdf', 'webhelp/*' ],
+	'sdk/'  : [ 'apidocs/*' ],
+}
+pit_docs   = {
+	''      : [ 'Pit_Library.pdf' ],
+}
+trial_docs = {
+	''      : [ 'Pit_Library_Trial.pdf' ],
+}
 
 pits = [
 	{
 		'root' : 'pits/pro',
 		'incl' : '*',
+		'excl' : 'Test/* _Common/Specs/* _Testing/* */.gitignore *.TODO *.adoc *.test *.pdf'
+	},
+]
+
+pits_trial = [
+	{
+		'root' : 'pits/pro',
+		'incl' : 'Net/SNMP* Image/PNG* _Common/Samples/Image/*.png _Common/Models/Image/PNG* _Common/Models/Net/SNMP* ',
 		'excl' : 'Test/* _Common/Specs/* _Testing/* */.gitignore *.TODO *.adoc *.test *.pdf'
 	},
 ]
@@ -146,21 +163,22 @@ def update_pkg(pkg, docs):
 	docdir = os.path.dirname(docfile)
 
 	with zipfile.ZipFile(pkg, 'a', compression=zipfile.ZIP_DEFLATED) as z:
-		for i in docs:
-			
+		for b,i in docs:
 			src = os.path.join(docdir, i)
+			dst = b + i
+
 			mode = os.stat(src).st_mode
 
-			#print ' + %s (%s)' % (i, oct(mode))
+			#print ' + %s (%s)' % (dst, oct(mode))
 
-			z.write(src, i)
+			z.write(src, dst)
 
-			zi = z.getinfo(i)
+			zi = z.getinfo(dst)
 			zi.external_attr = mode << 16L
 
 	sha1sum(pkg)
 
-def make_pits(dest, docs):
+def make_pits(dest, library, docs):
 	# Make pits zip and include docs in it
 
 	print ''
@@ -170,10 +188,13 @@ def make_pits(dest, docs):
 	docdir = os.path.dirname(docfile)
 
 	with zipfile.ZipFile(dest, 'w', compression=zipfile.ZIP_DEFLATED) as z:
-		for i in pits:
+		for i in library:
 			for f in glob(i['root'], i['incl'], i['excl']):
 				src = os.path.join(i['root'], f)
 				mode = os.stat(src).st_mode
+
+				# zip files need '/' as path delimeter
+				f = f.replace('\\', '/')
 
 				print ' + %s (%s)' % (f, oct(mode))
 
@@ -182,18 +203,27 @@ def make_pits(dest, docs):
 				zi = z.getinfo(f)
 				zi.external_attr = mode << 16L
 
-		for f in docs:
+		for b,f in docs:
 			src = os.path.join(docdir, f)
+			dst = b+f
 			mode = os.stat(src).st_mode
 
-			print ' + %s (%s)' % (f, oct(mode))
+			print ' + %s (%s)' % (dst, oct(mode))
 
-			z.write(src, f)
+			z.write(src, dst)
 
-			zi = z.getinfo(f)
+			zi = z.getinfo(dst)
 			zi.external_attr = mode << 16L
 
 	sha1sum(dest)
+
+def filter_docs(files, filters):
+	ret = []
+	for f in files:
+		for k,v in filters.iteritems():
+			if matches(f, v):
+				ret.append((k,f))
+	return ret
 
 if __name__ == "__main__":
 	p = argparse.ArgumentParser(description = 'make release zips')
@@ -203,6 +233,7 @@ if __name__ == "__main__":
 	c = p.parse_args()
 	buildtag = c.buildtag
 	pitfile = pitfile % c.__dict__
+	pittrial = pittrial % c.__dict__
 
 	if os.path.isdir(reldir):
 		shutil.rmtree(reldir)
@@ -213,14 +244,18 @@ if __name__ == "__main__":
 	pkgs = extract_pkg()
 	docs = extract_doc()
 
-	toAdd = [ x for x in docs if matches(x, peach_docs)]
+	toAdd = filter_docs(docs, peach_docs)
 
 	for x in pkgs:
 		update_pkg(x, toAdd)
 
-	toAdd = [x for x in docs if matches(x, pit_docs)]
+	toAdd = filter_docs(docs, pit_docs)
 
-	make_pits(os.path.join(reldir, pitfile), toAdd)
+	make_pits(os.path.join(reldir, pitfile), pits, toAdd)
+
+	toAdd = filter_docs(docs, trial_docs)
+
+	make_pits(os.path.join(reldir, pittrial), pits_trial, toAdd)
 
 	d = datetime.datetime.now()
 
@@ -234,6 +269,7 @@ if __name__ == "__main__":
 		o = Object()
 		o.files = [ x for x in names if 'release' in x and r['filter'](x)]
 		o.pits = pitfile
+		o.trial = pittrial
 		o.product = r['product']
 		o.build = buildtag
 		o.nightly = c.nightly
@@ -254,10 +290,11 @@ if __name__ == "__main__":
 			shutil.copy(src, dst)
 			shutil.copy(src + '.sha1', dst + '.sha1')
 
-		src = os.path.join(reldir, pitfile)
-		dst = os.path.join(path, pitfile)
-		shutil.copy(src, dst)
-		shutil.copy(src + '.sha1', dst + '.sha1')
+		for f in [ pitfile, pittrial ]:
+			src = os.path.join(reldir, f)
+			dst = os.path.join(path, f)
+			shutil.copy(src, dst)
+			shutil.copy(src + '.sha1', dst + '.sha1')
 
 		# Make all zip
 		dst = os.path.join(path, r['all'] % c.__dict__)
@@ -275,7 +312,7 @@ if __name__ == "__main__":
 			print j
 			f.write(j)
 
-	for x in pkgs + [ os.path.join(reldir, pitfile) ]:
+	for x in pkgs + [ os.path.join(reldir, pitfile), os.path.join(reldir, pittrial) ]:
 		try:
 			os.unlink(x)
 			os.unlink(x + '.sha1')
