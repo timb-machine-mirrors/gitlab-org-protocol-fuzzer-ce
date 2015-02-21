@@ -105,40 +105,69 @@ namespace Peach.Core
 			return Utilities.LoadStringResource(Assembly.GetExecutingAssembly(), res);
 		}
 
-		static string Read()
+		class LicFile
 		{
-			var fileName = "Peach.license";
+			public string FileName { get; set; }
+			public string Contents { get; set; }
+			public Exception Exception { get; set; }
+		}
+
+		static LicFile Read(string path)
+		{
+			var ret = new LicFile { FileName = path };
+
+			try
+			{
+				ret.Contents = File.ReadAllText(path);
+			}
+			catch (FileNotFoundException ex)
+			{
+				ret.Exception = ex;
+			}
+			catch (DirectoryNotFoundException ex)
+			{
+				ret.Exception = ex;
+			}
+
+			return ret;
+		}
+
+		static LicFile Read()
+		{
+			const string fileName = "Peach.license";
 			var peachDir = Platform.GetOS() == Platform.OS.Windows ? "Peach" : "peach";
 			var appData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
 			var asmDir = Utilities.ExecutionDirectory;
 
-			try
-			{
-				// Try common application data first
-				// Windows - C:\ProgramData\Peach\Peach.license
-				// Unix - /usr/share/peach/Peach.license
-				var path = Path.Combine(appData, peachDir, fileName);
+			// Try location of peach.exe first
+			var local = Path.Combine(asmDir, fileName);
+			var localLic = Read(local);
 
-				return File.ReadAllText(path);
-			}
-			catch (FileNotFoundException)
-			{
-			}
-			catch (DirectoryNotFoundException)
-			{
-			}
+			if (localLic.Exception == null)
+				return localLic;
 
-			// Look in same place as peach assembly 2nd
-			return File.ReadAllText(Path.Combine(asmDir, fileName));
+			// Try common application data second
+			// Windows - C:\ProgramData\Peach\Peach.license
+			// Unix - /usr/share/peach/Peach.license
+			var global = Path.Combine(appData, peachDir, fileName);
+			var globalLic = Read(global);
+
+			if (globalLic.Exception == null)
+				return globalLic;
+
+			// Rethrow local exception since that is technically the first error
+			var inner = localLic.Exception;
+			var ex = (Exception)Activator.CreateInstance(inner.GetType(), inner.Message, inner);
+			throw ex;
 		}
 
 		static void Verify()
 		{
 			try
 			{
-				var publicKey = "MIIBKjCB4wYHKoZIzj0CATCB1wIBATAsBgcqhkjOPQEBAiEA/////wAAAAEAAAAAAAAAAAAAAAD///////////////8wWwQg/////wAAAAEAAAAAAAAAAAAAAAD///////////////wEIFrGNdiqOpPns+u9VXaYhrxlHQawzFOw9jvOPD4n0mBLAxUAxJ02CIbnBJNqZnjhE50mt4GffpAEIQNrF9Hy4SxCR/i85uVjpEDydwN9gS3rM6D0oTlF2JjClgIhAP////8AAAAA//////////+85vqtpxeehPO5ysL8YyVRAgEBA0IABBXgmINzW2CILco6ktkgF2gITUHUoQbu3r9HJSqsBuSGHHrkZ2HWgwZlmkUjTSWrUdZXeTMzhiM3AhlF2ldHvNI=";
+				const string publicKey = "MIIBKjCB4wYHKoZIzj0CATCB1wIBATAsBgcqhkjOPQEBAiEA/////wAAAAEAAAAAAAAAAAAAAAD///////////////8wWwQg/////wAAAAEAAAAAAAAAAAAAAAD///////////////wEIFrGNdiqOpPns+u9VXaYhrxlHQawzFOw9jvOPD4n0mBLAxUAxJ02CIbnBJNqZnjhE50mt4GffpAEIQNrF9Hy4SxCR/i85uVjpEDydwN9gS3rM6D0oTlF2JjClgIhAP////8AAAAA//////////+85vqtpxeehPO5ysL8YyVRAgEBA0IABBXgmINzW2CILco6ktkgF2gITUHUoQbu3r9HJSqsBuSGHHrkZ2HWgwZlmkUjTSWrUdZXeTMzhiM3AhlF2ldHvNI=";
 				var xml = Read();
-				var license = Portable.Licensing.License.Load(xml);
+				var license = Portable.Licensing.License.Load(xml.Contents);
 
 				var failures = license.Validate()
 					.ExpirationDate()
@@ -149,21 +178,26 @@ namespace Peach.Core
 					.AssertValidLicense()
 					.ToList();
 
-				foreach (var failure in failures)
+				IsValid = failures.Count == 0;
+
+				if (!IsValid)
 				{
-					Console.WriteLine("{0}  {1}", failure.Message, failure.HowToResolve);
+					Console.WriteLine("License file '{0}' failed to verify.", xml.FileName);
+
+					foreach (var failure in failures)
+					{
+						Console.WriteLine("{0}  {1}", failure.Message, failure.HowToResolve);
+					}
 				}
 
-				IsValid = !failures.Any();
-
-				var ver = Enum.GetNames(typeof(Feature)).Where(n => license.ProductFeatures.Contains(n)).FirstOrDefault();
+				var ver = Enum.GetNames(typeof(Feature)).FirstOrDefault(n => license.ProductFeatures.Contains(n));
 				if (string.IsNullOrEmpty(ver))
 					ver = "Unknown";
 
 				Version = (Feature)Enum.Parse(typeof(Feature), ver);
 
 				if (Version == Feature.Unknown)
-					throw new NotSupportedException("No supported features were found.");
+					throw new NotSupportedException("No supported features were found in '{0}'.".Fmt(xml.FileName));
 			}
 			catch (Exception ex)
 			{
