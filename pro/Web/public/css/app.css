@@ -315,3 +315,14 @@ pre.peach-test-log {
 .combobox .options .option:last-child {
 	border-bottom: none;
 }
+
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+display: none !important;
+}
+
+noscript {
+	text-align: center;
+	padding: 30px;
+	display: block;
+	font-size: large;
+}
