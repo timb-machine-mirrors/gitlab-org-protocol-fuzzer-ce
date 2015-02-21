@@ -61,7 +61,7 @@
 					<li class="tooltip-warning"
 							tooltip="{{vm.JobRunningTooltip}}"
 							tooltip-placement="left">
-						<button type="button"
+						<button ng-cloak type="button"
 										class="btn btn-primary"
 										ng-class="{disabled: !vm.CanSelectPit}"
 										ng-click="vm.OnSelectPit()">
@@ -102,7 +102,7 @@
 							<i class="icon-fire"></i>
 							<span class="menu-text">
 								Faults
-								<span class="badge badge-primary">{{vm.FaultCount}}</span>
+								<span ng-cloak class="badge badge-primary">{{vm.FaultCount}}</span>
 							</span>
 						</a>
 					</li>
@@ -306,6 +306,7 @@
 
 			<div class="main-content" ng-view>
 
+				<noscript>JavaScript is required.</noscript>
 			</div>
 
 		</div>
