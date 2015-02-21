@@ -150,7 +150,7 @@ namespace PitTester
 				if (tgt == null)
 				{
 					// Can happen when we ignore non-selected choice elements
-					logger.Debug("Couldn't locate {0} in model on action {1} for ignoring.", elem, testLogger.ActionName);
+					logger.Debug("Couldn't locate {0} in model on action {1} for ignoring.", elem.debugName, testLogger.ActionName);
 					continue;
 				}
 
