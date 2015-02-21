@@ -751,6 +751,9 @@ namespace Peach.Core.Dom
 		/// <param name="pit"></param>
 		public void WritePitCommonAttributes(XmlWriter pit)
 		{
+			if (!Name.StartsWith("DataElement_"))
+				pit.WriteAttributeString("name", Name);
+
 			if (isToken)
 				pit.WriteAttributeString("token", "true");
 
