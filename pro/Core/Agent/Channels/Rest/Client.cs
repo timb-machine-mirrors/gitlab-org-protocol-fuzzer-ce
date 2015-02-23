@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
@@ -529,6 +530,10 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			req.ContentType = obj.ContentType;
 			req.ContentLength = obj.Content.Length;
 
+			// Ensure we are at the begining so any retries
+			// will send all the data
+			obj.Content.Seek(0, SeekOrigin.Begin);
+
 			using (var strm = req.GetRequestStream())
 				obj.Content.CopyTo(strm);
 		}
@@ -541,39 +546,14 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		{
 			if (_offline)
 			{
-				Logger.Debug("Agent server '{0}' is offline, ignoring command '{3} {4}'.",
-					Url, method, uri.PathAndQuery);
+				Logger.Debug("Agent server '{0}' is offline", uri);
+				Logger.Debug("Ignoring command '{0} {1}'", method, uri.PathAndQuery);
 				return default(TOut);
 			}
 
-			Logger.Trace("{0} {1}", method, uri);
-
 			try
 			{
-				var req = (HttpWebRequest)WebRequest.Create(uri);
-
-				// This should enable connection reuse.
-				// The container doesn't need to actually have any cookies in it
-				req.CookieContainer = _cookies;
-
-				// For POST we don't need to expect 100 CONTINUE responses
-				req.ServicePoint.Expect100Continue = false;
-				req.Timeout = 60000;
-				req.KeepAlive = true;
-
-				req.Method = method;
-
-				if (Equals(request, default(TIn)))
-					req.ContentLength = 0;
-				else
-					encode(req, request);
-
-				using (var resp = (HttpWebResponse)req.GetResponse())
-				{
-					Logger.Trace(">>> {0} {1}", (int)resp.StatusCode, resp.StatusDescription);
-
-					return decode(resp);
-				}
+				return ExecuteInner(method, uri, request, encode, decode);
 			}
 			catch (WebException ex)
 			{
@@ -628,6 +608,78 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				Logger.Trace(ex);
 
 				throw;
+			}
+		}
+
+		private TOut ExecuteInner<TOut, TIn>(string method,
+			Uri uri,
+			TIn request,
+			Action<HttpWebRequest, TIn> encode,
+			Func<HttpWebResponse, TOut> decode)
+		{
+			var retryCount = 10;
+
+			while (true)
+			{
+				Logger.Trace(">>> {0} {1}", method, uri);
+
+				try
+				{
+					var req = (HttpWebRequest)WebRequest.Create(uri);
+
+					// This should enable connection reuse.
+					// The container doesn't need to actually have any cookies in it
+					req.CookieContainer = _cookies;
+
+					// For POST we don't need to expect 100 CONTINUE responses
+					req.ServicePoint.Expect100Continue = false;
+					req.Timeout = 60000;
+					req.KeepAlive = true;
+
+					req.Method = method;
+
+					if (Equals(request, default(TIn)))
+						req.ContentLength = 0;
+					else
+						encode(req, request);
+
+					using (var resp = (HttpWebResponse)req.GetResponse())
+					{
+						Logger.Trace("<<< {0} {1}", (int)resp.StatusCode, resp.StatusDescription);
+
+						return decode(resp);
+					}
+				}
+				catch (WebException ex)
+				{
+					if (ex.Status == WebExceptionStatus.ReceiveFailure && retryCount --> 0)
+					{
+						Logger.Trace("Receive failure, trying again!");
+						continue;
+					}
+
+					throw;
+				}
+				catch (SocketException ex)
+				{
+					if (ex.SocketErrorCode == SocketError.Shutdown && retryCount --> 0)
+					{
+						Logger.Trace("Socket shutdown, trying again!");
+						continue;
+					}
+
+					throw;
+				}
+				catch (ObjectDisposedException)
+				{
+					if (retryCount --> 0)
+					{
+						Logger.Trace("Socket disposed, trying again!");
+						continue;
+					}
+
+					throw;
+				}
 			}
 		}
 	}
