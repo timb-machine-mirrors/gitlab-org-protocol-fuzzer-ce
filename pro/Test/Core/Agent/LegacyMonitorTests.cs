@@ -130,7 +130,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 			var pe = Assert.Throws<PeachException>(() =>  e.startFuzzing(dom, cfg));
 
-			Assert.AreEqual("Fault detected on control iteration.", pe.Message);
+			Assert.AreEqual("Fault detected on control record iteration.", pe.Message);
 			Assert.AreEqual(1, faults.Count);
 			Assert.AreEqual(FaultType.Fault, faults[0].type);
 			Assert.That(faults[0].title, Is.StringStarting("Process output matched FaulOnRegex"));
