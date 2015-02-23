@@ -216,9 +216,10 @@ namespace Peach.Pro.Test.Core
 			}
 
 
-			public WantBytesPub(string name, Dictionary<string, Variant> args)
-				: base(args)
+			public WantBytesPub()
+				: base(new Dictionary<string, Variant>())
 			{
+				Name = "Pub";
 				stream = new MemoryStream();
 			}
 
@@ -257,7 +258,7 @@ namespace Peach.Pro.Test.Core
 
 			PitParser parser = new PitParser();
 			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			dom.tests[0].publishers[0] = new WantBytesPub("", new Dictionary<string, Variant>());
+			dom.tests[0].publishers[0] = new WantBytesPub();
 
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;

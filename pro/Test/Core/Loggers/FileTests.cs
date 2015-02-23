@@ -20,6 +20,7 @@ namespace Peach.Pro.Test.Core.Loggers
 			public ExceptionalPublisher(RunContext context, Dictionary<string, Variant> args)
 				: base(args)
 			{
+				Name = "Pub";
 				_context = context;
 			}
 

@@ -20,6 +20,7 @@ namespace Peach.Pro.Test.Core.Publishers
 		public BytePublisher()
 			: base(new Dictionary<string, Variant>())
 		{
+			Name = "Pub";
 			data = new MemoryStream(Encoding.ASCII.GetBytes("Hello World And More Stuff"));
 		}
 
