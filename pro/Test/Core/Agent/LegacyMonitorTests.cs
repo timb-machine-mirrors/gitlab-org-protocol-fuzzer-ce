@@ -18,13 +18,15 @@ namespace Peach.Pro.Test.Core.Agent
 	[Category("Peach")]
 	class LegacyMonitorTests
 	{
+		static readonly string Target = Platform.GetOS() == Platform.OS.Windows ? "ipconfig" : "ifconfig";
+
 		[Test]
 		public void VerifyNormal()
 		{
 			// Ensure monitors that derive from Peach.Core.Agent.Monitor work
 			// as expected even though the api has been deprecated.
 
-			const string xml = @"
+			var xml = @"
 <Peach>
 	<StateModel name='SM' initialState='Initial'>
 		<State name='Initial'>
@@ -36,7 +38,7 @@ namespace Peach.Pro.Test.Core.Agent
 		<Monitor class='LegacyRunCommand'>
 			<Param name='StartOnCall' value='Foo' />
 			<Param name='When' value='OnCall' />
-			<Param name='Command' value='ipconfig' />
+			<Param name='Command' value='{0}' />
 		</Monitor>
 	</Agent>
 
@@ -46,7 +48,7 @@ namespace Peach.Pro.Test.Core.Agent
 		<Publisher class='Null' />
 	</Test>
 </Peach>
-";
+".Fmt(Target);
 
 			var dom = DataModelCollector.ParsePit(xml);
 			var cfg = new RunConfiguration { singleIteration = true };
@@ -96,7 +98,7 @@ namespace Peach.Pro.Test.Core.Agent
 			// Ensure monitors that derive from Peach.Core.Agent.Monitor work
 			// as expected even though the api has been deprecated.
 
-			const string xml = @"
+			var xml = @"
 <Peach>
 	<StateModel name='SM' initialState='Initial'>
 		<State name='Initial'>
@@ -108,7 +110,7 @@ namespace Peach.Pro.Test.Core.Agent
 		<Monitor class='LegacyRunCommand'>
 			<Param name='StartOnCall' value='Foo' />
 			<Param name='When' value='OnCall' />
-			<Param name='Command' value='ipconfig' />
+			<Param name='Command' value='{0}' />
 			<Param name='FaultOnRegex' value='.*' />
 		</Monitor>
 	</Agent>
@@ -119,7 +121,7 @@ namespace Peach.Pro.Test.Core.Agent
 		<Publisher class='Null' />
 	</Test>
 </Peach>
-";
+".Fmt(Target);
 
 			var dom = DataModelCollector.ParsePit(xml);
 			var cfg = new RunConfiguration { singleIteration = true };
@@ -130,7 +132,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 			var pe = Assert.Throws<PeachException>(() =>  e.startFuzzing(dom, cfg));
 
-			Assert.AreEqual("Fault detected on control iteration.", pe.Message);
+			Assert.AreEqual("Fault detected on control record iteration.", pe.Message);
 			Assert.AreEqual(1, faults.Count);
 			Assert.AreEqual(FaultType.Fault, faults[0].type);
 			Assert.That(faults[0].title, Is.StringStarting("Process output matched FaulOnRegex"));

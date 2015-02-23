@@ -44,6 +44,9 @@ namespace Peach.Core
 
 		protected override string GetKeyForItem(T item)
 		{
+			if (item.Name == null)
+				throw new ArgumentNullException();
+
 			return item.Name;
 		}
 
