@@ -46,6 +46,13 @@ namespace Peach.Core.Dom
 	[Serializable]
 	public class StateModel : INamed, IOwned<Dom>
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
 		[NonSerialized]
 		private Dom _parent;
 
@@ -83,7 +90,7 @@ namespace Peach.Core.Dom
 		/// The name of this state model.
 		/// </summary>
 		[XmlAttribute("name")]
-		public string name { get; set; }
+		public string Name { get; set; }
 
 		/// <summary>
 		/// Name of the state to execute first.
@@ -128,7 +135,7 @@ namespace Peach.Core.Dom
 		{
 			try
 			{
-				foreach (Publisher publisher in context.test.publishers.Values)
+				foreach (var publisher in context.test.publishers)
 				{
 					publisher.Iteration = context.test.strategy.Iteration;
 					publisher.IsControlIteration = context.controlIteration;
@@ -149,10 +156,10 @@ namespace Peach.Core.Dom
 				var newState = context.test.strategy.MutateChangingState(currentState);
 
 				if (newState == currentState)
-					logger.Debug("Run(): Changing to state \"{0}\".", newState.name);
+					logger.Debug("Run(): Changing to state \"{0}\".", newState.Name);
 				else
 					logger.Debug("Run(): Changing state mutated.  Switching to \"{0}\" instead of \"{1}\".",
-						newState.name, currentState);
+						newState.Name, currentState);
 
 				currentState = newState;
 
@@ -169,10 +176,10 @@ namespace Peach.Core.Dom
 						newState = context.test.strategy.MutateChangingState(ase.changeToState);
 						
 						if(newState == ase.changeToState)
-							logger.Debug("Run(): Changing to state \"{0}\".", newState.name);
+							logger.Debug("Run(): Changing to state \"{0}\".", newState.Name);
 						else
-							logger.Debug("Run(): Changing state mutated.  Switching to \"{0}\" instead of \"{1}\".", 
-								newState.name, ase.changeToState);
+							logger.Debug("Run(): Changing state mutated.  Switching to \"{0}\" instead of \"{1}\".",
+								newState.Name, ase.changeToState);
 
 						context.OnStateChanging(currentState, newState);
 						currentState = newState;
@@ -185,7 +192,7 @@ namespace Peach.Core.Dom
 			}
 			finally
 			{
-				foreach (Publisher publisher in context.test.publishers.Values)
+				foreach (var publisher in context.test.publishers)
 					publisher.close();
 
 				context.OnStateModelFinished(this);

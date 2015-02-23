@@ -9,11 +9,12 @@ using Org.BouncyCastle.Security;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Fixups
 {
 	[Description("Tls")]
-	[Fixup("Tls", true, IsTest=true)]
+	[Fixup("Tls", true, Internal = true)]
 	[Serializable]
 	public class TlsFixup : Peach.Core.Fixups.VolatileFixup
 	{

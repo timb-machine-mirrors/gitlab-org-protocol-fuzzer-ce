@@ -43,23 +43,51 @@ When::
 +
 Period when the command should be run. Defaults to +OnCall+
 +
-[horizontal]
-DetectFault;; Run command to check for faulting condition. Requires regex be set. Original and default mode of operation.
-OnCall;; Trigger command to run from state model. Command runs when the _StartOnCall_ message is received.
-OnStart;; Run command when fuzzing session starts. Command runs once per session.
-OnEnd;; Run command when fuzzing session stops. Command runs run once per session.
-OnIterationStart;; Run command at start of each iteration.
-OnIterationEnd;; Run command at end of each iteration.
-OnFault;; Run command when a fault occurs.
-OnIterationStartAfterFault;; Run command at start of the iteration that follows a fault detection.
+// [horizontal]   - commented out because labels and descriptions overlap on some entries.
+DetectFault::: Run command to check for faulting condition. Requires regex be set. Original and default mode of operation.
+OnCall::: Trigger command to run from state model. Command runs when the _StartOnCall_ message is received.
+OnStart::: Run command when fuzzing session starts. Command runs once per session.
+OnEnd::: Run command when fuzzing session stops. Command runs run once per session.
+OnIterationStart::: Run command at start of each iteration.
+OnIterationEnd::: Run command at end of each iteration.
+OnFault::: Run command when a fault occurs.
+OnIterationStartAfterFault::: Run command at start of the iteration that follows a fault detection.
 
 StartOnCall:: Run when signaled by the state machine.
 
 === Examples
 
+ifdef::peachug[]
+
+.Check for core dump files +
+====================
+
+This parameter example is from a setup that connects to the target machine using SSH at the end of each iteration 
+to check core files. If no core files exist, a fault occurs.
+
+To run this example, specify a valid Host, Username, and Password.
+
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter     |Value
+|Host          |my.target.com
+|Username      |tester
+|Password      |Password!
+|Command       |ls /var/cores/*.core
+|CheckValue    |target.*?.core
+|FaultOnMatch  |true
+|==========================================================
+====================
+
+endif::peachug[]
+
+
+ifndef::peachug[]
+
+
 .Checking for core dump files
 ==========
-For this example we connect to the target machine using SSH at the end of each iteration to check if any core files exist. If no core files exist, a fault occurs.
+This example connects to the target Linux machine using SSH at the end of each iteration to check if any core files exist. If no core files exist, a fault occurs.
 
 To run this example, specify a valid Host, Username, and Password.
 
@@ -136,3 +164,5 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 To verify that Peach is checking for a file on the remote machine, create a file named target.testing.core in /var/cores. When Peach logs in and finds that file, a fault occurs.
 
 ==========
+
+endif::peachug[]

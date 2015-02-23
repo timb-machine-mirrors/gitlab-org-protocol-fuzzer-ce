@@ -20,6 +20,7 @@ namespace Peach.Pro.Test.Core.Loggers
 			public ExceptionalPublisher(RunContext context, Dictionary<string, Variant> args)
 				: base(args)
 			{
+				Name = "Pub";
 				_context = context;
 			}
 
@@ -28,7 +29,7 @@ namespace Peach.Pro.Test.Core.Loggers
 				if (data == null) throw new ArgumentNullException("data");
 			}
 
-			protected override Variant OnCall(string method, List<ActionParameter> args)
+			protected override Variant OnCall(string method, List<BitwiseStream> args)
 			{
 				if (_context.controlIteration && !_context.controlRecordingIteration)
 				{

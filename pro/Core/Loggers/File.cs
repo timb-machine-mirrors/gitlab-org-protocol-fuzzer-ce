@@ -292,7 +292,7 @@ namespace Peach.Pro.Core.Loggers
 			states.Add(
 				new Fault.State()
 				{
-					name = state.name,
+					name = state.Name,
 					actions = new List<Fault.Action>()
 				});
 		}
@@ -301,7 +301,7 @@ namespace Peach.Pro.Core.Loggers
 		{
 			var rec = new Fault.Action()
 			{
-				name = action.name,
+				name = action.Name,
 				type = action.type,
 				models = new List<Fault.Model>()
 			};
@@ -310,9 +310,9 @@ namespace Peach.Pro.Core.Loggers
 			{
 				rec.models.Add(new Fault.Model()
 				{
-					name = data.dataModel.name,
-					parameter = data.name ?? "",
-					dataSet = data.selectedData != null ? data.selectedData.name : "",
+					name = data.dataModel.Name,
+					parameter = data.Name ?? "",
+					dataSet = data.selectedData != null ? data.selectedData.Name : "",
 					mutations = new List<Fault.Mutation>(),
 				});
 			}
@@ -340,13 +340,13 @@ namespace Peach.Pro.Core.Loggers
 		{
 			var rec = states.Last().actions.Last();
 
-			var tgtName = data.dataModel.name;
-			var tgtParam = data.name ?? "";
-			var tgtDataSet = data.selectedData != null ? data.selectedData.name : "";
+			var tgtName = data.dataModel.Name;
+			var tgtParam = data.Name ?? "";
+			var tgtDataSet = data.selectedData != null ? data.selectedData.Name : "";
 			var model = rec.models.Where(m => m.name == tgtName && m.parameter == tgtParam && m.dataSet == tgtDataSet).FirstOrDefault();
 			System.Diagnostics.Debug.Assert(model != null);
 
-			model.mutations.Add(new Fault.Mutation() { element = element.fullName, mutator = mutator.name });
+			model.mutations.Add(new Fault.Mutation() { element = element.fullName, mutator = mutator.Name });
 		}
 
 		protected override void Engine_TestError(RunContext context, Exception e)
@@ -365,7 +365,7 @@ namespace Peach.Pro.Core.Loggers
 		{
 			if (log != null)
 			{
-				log.WriteLine(". Test finished: " + context.test.name);
+				log.WriteLine(". Test finished: " + context.test.Name);
 				log.Flush();
 				log.Close();
 				log.Dispose();
@@ -397,7 +397,7 @@ namespace Peach.Pro.Core.Loggers
 
 			log.WriteLine("Command line: " + string.Join(" ", context.config.commandLine));
 			log.WriteLine("Pit File: " + context.config.pitFile);
-			log.WriteLine(". Test starting: " + context.test.name);
+			log.WriteLine(". Test starting: " + context.test.Name);
 			log.WriteLine("");
 
 			log.Flush();

@@ -21,16 +21,35 @@ WaitWhen::
 +
 Parameter that specifies when to start monitoring. Choose from the following settings:
 +
-[horizontal]
-OnCall;; Monitoring begins upon receipt of a message from the state machine.
-OnStart;; Monitoring occurs once at the start of the fuzzing session. This is the default setting.
-OnEnd;; Monitoring occurs once at the end of the fuzzing session.
-OnIterationStart;; Monitoring occurs at the start of every iteration.
-OnIterationEnd;; Monitoring occurs at the end of every iteration.
-OnFault;; Monitoring occurs immediately following a fault.
-OnIterationStartAfterFault;; Monitoring occurs following a fault. Note that after the fault occurs, the current iteration completes. Then, at the start of the next iteration, monitoring begins.
+// [horizontal] - labels and descriptions overlappint. Removing
+OnCall::: Monitoring begins upon receipt of a message from the state machine.
+OnStart::: Monitoring occurs once at the start of the fuzzing session. This is the default setting.
+OnEnd::: Monitoring occurs once at the end of the fuzzing session.
+OnIterationStart::: Monitoring occurs at the start of every iteration.
+OnIterationEnd::: Monitoring occurs at the end of every iteration.
+OnFault::: Monitoring occurs immediately following a fault.
+OnIterationStartAfterFault::: Monitoring occurs following a fault. Note that after the fault occurs, the current iteration completes. Then, at the start of the next iteration, monitoring begins.
 
 === Examples
+
+ifdef::peachug[]
+
+.Collect Syslog Messages +
+====================
+
+This parameter example is from a setup that uses the _Syslog_ monitor to listen on the default port for incoming messages. When a fault occurs, all messages are saved. Default values are used; no values are specified. So, a table isn't needed for this example.
+
+
+// [cols="2,4" options="header",halign="center"] 
+// |==========================================================
+// |Parameter    |Value
+// |==========================================================
+====================
+
+endif::peachug[]
+
+
+ifndef::peachug[]
 
 .Collect Syslog Messages
 ========================
@@ -117,3 +136,5 @@ This example shows the _Syslog_ monitor listening on the default port for incomi
 ----
 
 ========================
+
+endif::peachug[]

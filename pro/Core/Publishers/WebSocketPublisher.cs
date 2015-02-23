@@ -32,10 +32,11 @@ using Peach.Core;
 using Peach.Core.IO;
 using SuperSocket.SocketBase;
 using SuperWebSocket;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Publishers
 {
-	[Publisher("WebSocket", true)]
+	[Publisher("WebSocket")]
 	[Description("WebSocket Publisher")]
 	[Parameter("Port", typeof(int), "Port to listen for connections on", "8080")]
 	[Parameter("Template", typeof(string), "Data template for publishing")]

@@ -39,7 +39,7 @@ using Encoding = Peach.Core.Encoding;
 
 namespace Peach.Pro.Core.Publishers
 {
-	[Publisher("Http", true)]
+	[Publisher("Http")]
 	[Parameter("Method", typeof(string), "Method type")]
 	[Parameter("Url", typeof(string), "Url")]
 	[Parameter("BaseUrl", typeof(string), "Optional BaseUrl for authentication", "")]
@@ -114,17 +114,17 @@ namespace Peach.Pro.Core.Publishers
 			}
 		}
 
-		protected override Variant OnCall(string method, List<ActionParameter> args)
+		protected override Variant OnCall(string method, List<BitwiseStream> args)
 		{
 
 			switch (method)
 			{
 				case "Query":
-					Query = ReadString(args[0].dataModel.Value);
+					Query = ReadString(args[0]);
 					break;
 				case "Header":
-					var key = CleanHeaderValue(ReadString(args[0].dataModel.Value));
-					var value =  CleanHeaderValue(ReadString(args[1].dataModel.Value));
+					var key = CleanHeaderValue(ReadString(args[0]));
+					var value =  CleanHeaderValue(ReadString(args[1]));
 					Headers[key] = value;
 					break;
 			}

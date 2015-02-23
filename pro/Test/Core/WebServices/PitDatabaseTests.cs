@@ -594,7 +594,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			Assert.AreEqual(3, dom.tests[0].agents.Count);
 
-			Assert.AreEqual("Agent0", dom.tests[0].agents[0].name);
+			Assert.AreEqual("Agent0", dom.tests[0].agents[0].Name);
 			Assert.AreEqual("local://", dom.tests[0].agents[0].location);
 			Assert.AreEqual(3, dom.tests[0].agents[0].monitors.Count);
 
@@ -602,14 +602,14 @@ namespace Peach.Pro.Test.Core.WebServices
 			VerifyMonitor(monitors[0].Monitors[1], dom.tests[0].agents[0].monitors[1]);
 			VerifyMonitor(monitors[2].Monitors[0], dom.tests[0].agents[0].monitors[2]);
 
-			Assert.AreEqual("Agent1", dom.tests[0].agents[1].name);
+			Assert.AreEqual("Agent1", dom.tests[0].agents[1].Name);
 			Assert.AreEqual("tcp://remotehostname", dom.tests[0].agents[1].location);
 			Assert.AreEqual(2, dom.tests[0].agents[1].monitors.Count);
 
 			VerifyMonitor(monitors[1].Monitors[0], dom.tests[0].agents[1].monitors[0]);
 			VerifyMonitor(monitors[4].Monitors[0], dom.tests[0].agents[1].monitors[1]);
 
-			Assert.AreEqual("Agent2", dom.tests[0].agents[2].name);
+			Assert.AreEqual("Agent2", dom.tests[0].agents[2].Name);
 			Assert.AreEqual("tcp://remotehostname2", dom.tests[0].agents[2].location);
 			Assert.AreEqual(1, dom.tests[0].agents[2].monitors.Count);
 
@@ -677,7 +677,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			Assert.AreEqual(1, dom.tests[0].agents.Count);
 
-			Assert.AreEqual("Agent0", dom.tests[0].agents[0].name);
+			Assert.AreEqual("Agent0", dom.tests[0].agents[0].Name);
 			Assert.AreEqual("local://", dom.tests[0].agents[0].location);
 			Assert.AreEqual(3, dom.tests[0].agents[0].monitors.Count);
 

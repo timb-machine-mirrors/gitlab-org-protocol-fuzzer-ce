@@ -36,9 +36,9 @@ using Peach.Core;
 
 namespace Peach.Pro.Core.Publishers
 {
-	[Publisher("Tcp", true)]
-	[Publisher("TcpClient")]
-	[Publisher("tcp.Tcp")]
+	[Publisher("Tcp")]
+	[Alias("TcpClient")]
+	[Alias("tcp.Tcp")]
 	[Parameter("Host", typeof(string), "Hostname or IP address of remote host")]
 	[Parameter("Port", typeof(ushort), "Local port to listen on")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait when receiving data (default 3000)", "3000")]
@@ -76,7 +76,7 @@ namespace Peach.Pro.Core.Publishers
 
 					var ar = _tcp.BeginConnect(Host, Port, null, null);
 					if (!ar.AsyncWaitHandle.WaitOne(TimeSpan.FromMilliseconds(timeout)))
-						throw new TimeoutException();
+						throw new TimeoutException("Timed out connecting to remote host {0} port {1}.".Fmt(Host, Port));
 					_tcp.EndConnect(ar);
 				}
 				catch (Exception ex)

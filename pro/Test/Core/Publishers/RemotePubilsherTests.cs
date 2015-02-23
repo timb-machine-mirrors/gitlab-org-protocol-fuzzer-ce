@@ -55,7 +55,7 @@ namespace Peach.Pro.Test.Core.Publishers
 		</State>
 	</StateModel>
 
-	<Agent name=""LocalAgent"" location=""tcp://127.0.0.1:9001"">
+	<Agent name=""LocalAgent"" location=""{0}://127.0.0.1:9001"">
 	</Agent>
 
 	<Test name=""Default"">
@@ -86,7 +86,7 @@ namespace Peach.Pro.Test.Core.Publishers
 		</State>
 	</StateModel>
 
-	<Agent name=""LocalAgent"" location=""tcp://127.0.0.1:9001"">
+	<Agent name=""LocalAgent"" location=""{0}://127.0.0.1:9001"">
 	</Agent>
 
 	<Test name=""Default"">
@@ -96,8 +96,8 @@ namespace Peach.Pro.Test.Core.Publishers
 			<Param name=""Agent"" value=""LocalAgent""/>
 			<Param name=""Class"" value=""Udp""/>
 			<Param name=""Host"" value=""127.0.0.1""/>
-			<Param name=""SrcPort"" value=""{0}""/>
-			<Param name=""Port"" value=""{0}""/>
+			<Param name=""SrcPort"" value=""{1}""/>
+			<Param name=""Port"" value=""{1}""/>
 		</Publisher>
 	</Test>
 </Peach>";
@@ -133,9 +133,9 @@ namespace Peach.Pro.Test.Core.Publishers
 			Assert.AreEqual("Hello", output[0]);
 		}
 
-		public void RunRemote(string xml)
+		public void RunRemote(string protocol, string xml)
 		{
-			var process = Helpers.StartAgent();
+			var process = Helpers.StartAgent(protocol);
 
 			try
 			{
@@ -153,20 +153,28 @@ namespace Peach.Pro.Test.Core.Publishers
 			}
 		}
 
+		public static string[] ChannelNames
+		{
+			get { return new[] { "tcp", "http" }; }
+		}
+
 		[Test]
-		public void TestRaw()
+		public void TestRaw([ValueSource("ChannelNames")]string protocol)
 		{
 			if (Platform.GetOS() != Platform.OS.Linux)
 				Assert.Ignore("Only supported on Linux");
 
-			RunRemote(raw_eth);
+			RunRemote(protocol, raw_eth.Fmt(protocol));
 		}
 
 		[Test]
-		public void TestUdp()
+		public void TestUdp([ValueSource("ChannelNames")]string protocol)
 		{
+			if (Platform.GetOS() == Platform.OS.OSX && protocol == "tcp")
+				Assert.Ignore(".NET remoting doesn't work inside nunit on osx");
+
 			var port = TestBase.MakePort(12000, 13000);
-			RunRemote(udp.Fmt(port));
+			RunRemote(protocol, udp.Fmt(protocol, port));
 		}
 	}
 }

@@ -4,7 +4,7 @@
 
 The _Pcap_ monitor performs a network capture during the fuzzing iteration. The captured data is discarded and re-captured on each iteration. If a fault occurs, the captured data is logged as a pcap file and returned with the fault data. 
 
-The captured data pcap file is compatible with Wireshark and tcpdump.
+The pcap file containing captured data is compatible with Wireshark and tcpdump.
 
 .List Network Interfaces
 ****
@@ -60,6 +60,40 @@ _Optional:_
 Filter:: PCAP style filter string (optional)
 
 === Examples
+
+ifdef::peachug[]
+
+.Capture output to CrashableServer on port 4244
+====================
+
+This parameter example is from a setup that captures all network traffic using the pcap monitor when a fault occurs. When running the fuzzing definition for this example, a crash occurs after few iterations. When Peach logs the fault, a pcap file is created inside the fault record.
+
+*Pcap monitor settings*
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter    |Value
+|Device       |Local Area Connection
+|Filter       |port 4244
+|==========================================================
+
+The setup for this example uses asecond monitor, the xref:Monitors_WindowsDebugger[Windows Debugger] monitor, to launch the CrashableServer executable, normally located in the Peach directory. The following table lists the parameters for that monitor.
+
+*Windows Debugger monitor settings*
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter    |Value
+|Executable   |CrashableServer.exe
+|Arguments    |127.0.0.1 4244
+|==========================================================
+
+
+====================
+
+endif::peachug[]
+
+
+ifndef::peachug[]
+
 
 .Capture output to CrashableServer on port 4244
 ==================
@@ -172,3 +206,5 @@ Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
 Running this example for a few iterations will produce a crash. When Peach is logging the fault, a pcap file is created inside the fault record.
 
 ==================
+
+endif::peachug[]

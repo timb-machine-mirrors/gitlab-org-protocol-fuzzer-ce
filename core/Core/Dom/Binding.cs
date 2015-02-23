@@ -18,7 +18,7 @@ namespace Peach.Core.Dom
 				throw new ArgumentNullException("parent");
 
 			From = parent;
-			FromName = parent.name;
+			FromName = parent.Name;
 
 			parent.relations.Add(this);
 		}
@@ -114,7 +114,7 @@ namespace Peach.Core.Dom
 
 				Clear();
 
-				OfName = value.name;
+				OfName = value.Name;
 
 				SetOf(value);
 			}

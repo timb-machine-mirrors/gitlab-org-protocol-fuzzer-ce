@@ -81,7 +81,7 @@ namespace Peach.Pro.Core.Analyzers
             if (data.Length == 0)
                 return;
 
-            var block = new Block(blob.name);
+			var block = new Block(blob.Name);
             var bs = new BitStream();
             long chars = 0;
 
@@ -154,7 +154,7 @@ namespace Peach.Pro.Core.Analyzers
                 logger.Debug("Created {0} data elements from binary data.", count);
             }
 
-            parent.parent[parent.name] = block;
+			parent.parent[parent.Name] = block;
             if (positions != null)
                 positions[block] = new Position(0, data.LengthBits);
         }

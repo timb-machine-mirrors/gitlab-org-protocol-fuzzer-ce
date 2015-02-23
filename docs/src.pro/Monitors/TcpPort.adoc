@@ -19,8 +19,7 @@ Port:: Port number to monitor
 
 _Optional:_
 
-Action::
-+
+Action::  +
 Action to take (Automation, Data, Fault). Defaults to _Automation_.
 +
 [horizontal]
@@ -28,8 +27,7 @@ Automation;; Wait for the port to reach a specified state. The _When_ parameter 
 Data;; On a fault, report the state of fault at end of the current iteration.
 Fault;; At end of the current iteration, generate a fault if the port is in a specified state.
 
-When::
-+
+When::  +
 Event that specifies when to perform monitoring. The default setting is _OnCall_. The following settings are defined:
 +
 [horizontal]
@@ -43,8 +41,7 @@ OnIterationStartAfterFault;; Monitoring occurs following a fault. Note that afte
 
 WaitOnCall:: Call message to start monitoring. This parameter only applies to the _OnCall_ setting.
 
-State:: 
-+
+State::  +
 Port state to monitor. The default value is _Open_.
 +
 [horizontal]
@@ -54,6 +51,77 @@ Closed;; The port is not available.
 Timeout:: Length of time to wait for an incoming connection to be established. Specify values in milliseconds, or specify -1 to not use a timeout interval. 
 
 === Examples
+
+ifdef::peachug[]
+
+.Wait for a Port to Open  +
+====================
+
+This parameter example is from a setup that causes Peach to wait until the remote port is in an open state. No timeout interval is provided, so Peach will wait forever.
+
+
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter    |Value
+|Host         |192.168.133.4
+|Port         |502
+|WaitOnCall   |WaitForPort
+|==========================================================
+====================
+
+
+.Wait for a Port to Close  +
+====================
+
+This parameter example is from a setup that causes Peach to wait until the remote port closes. No timeout interval is provided, so 
+Peach will wait forever.
+
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter    |Value
+|Host         |192.168.133.4
+|Port         |502
+|State        |Closed
+|WaitOnCall   |WaitForPort
+|==========================================================
+====================
+
+
+.Fault if the Port is Closed  +
+====================
+
+This parameter example is from a setup that inspects the state of the remote port at the end of an iteration. If the port is closed
+at the end of an iteration, Peach generates a fault.
+
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter    |Value
+|Host         |192.168.133.4
+|Port         |502
+|Action       |Fault
+|State        |Closed
+|==========================================================
+====================
+
+
+.Report the Port State on Fault  +
+====================
+
+This parameter example is from a setup that uses the TcpPort monitor for data collection. If another monitor detects or generates a // fault during fuzzing, the TcpPort monitor reports the state of the port when the fault occurs.
+
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter    |Value
+|Host         |192.168.133.4
+|Port         |502
+|Action       |Data
+|==========================================================
+====================
+
+endif::peachug[]
+
+
+ifndef::peachug[]
 
 .Wait for the port to be open
 ===============================
@@ -255,3 +323,5 @@ In this example, if a fault is triggered by another monitor, the TcpPort monitor
 ----
 
 ===============================
+
+endif::peachug[]

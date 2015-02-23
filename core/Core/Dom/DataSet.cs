@@ -37,7 +37,14 @@ namespace Peach.Core.Dom
 	[Serializable]
 	public class DataSet : List<Data>, INamed
 	{
-		public string name
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
+		public string Name
 		{
 			get;
 			set;

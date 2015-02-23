@@ -37,10 +37,11 @@ using System.Reflection;
 using System.Linq;
 
 using NLog;
-
+using Peach.Core.Agent;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 using System.Net;
+using Monitor = Peach.Core.Dom.Monitor;
 
 namespace Peach.Core.Analyzers
 {
@@ -351,7 +352,7 @@ namespace Peach.Core.Analyzers
 			for (int i = 0; i < indent; i++)
 				sIndent += "  ";
 
-			Console.WriteLine(sIndent + string.Format("{0}: {1}", elem.GetHashCode(), elem.name));
+			Console.WriteLine(sIndent + string.Format("{0}: {1}", elem.GetHashCode(), elem.Name));
 
 			var cont = elem as DataElementContainer;
 
@@ -404,7 +405,7 @@ namespace Peach.Core.Analyzers
 						}
 
 						var newDom = asParser(args, fileName);
-						newDom.name = ns;
+						newDom.Name = ns;
 						dom.ns.Add(newDom);
 
 						foreach (var item in newDom.Python.Paths)
@@ -502,7 +503,7 @@ namespace Peach.Core.Analyzers
 					{
 						var entry = dataModelPitParsable.Where(kv => kv.Value == dm.GetType()).Select(kv => kv.Key).FirstOrDefault();
 						var name = entry != null ? "<" + entry + ">" : "Data Model";
-						throw new PeachException("Error, a " + name + " element named '" + dm.name + "' already exists.");
+						throw new PeachException("Error, a " + name + " element named '" + dm.Name + "' already exists.");
 					}
 
 					// Resolve relations in the data model
@@ -526,7 +527,7 @@ namespace Peach.Core.Analyzers
 					}
 					catch (ArgumentException)
 					{
-						throw new PeachException("Error, a <Data> element named '" + data.name + "' already exists.");
+						throw new PeachException("Error, a <Data> element named '" + data.Name + "' already exists.");
 					}
 				}
 			}
@@ -545,7 +546,7 @@ namespace Peach.Core.Analyzers
 					}
 					catch (ArgumentException)
 					{
-						throw new PeachException("Error, a <StateModel> element named '" + sm.name + "' already exists.");
+						throw new PeachException("Error, a <StateModel> element named '" + sm.Name + "' already exists.");
 					}
 				}
 
@@ -559,7 +560,7 @@ namespace Peach.Core.Analyzers
 					}
 					catch (ArgumentException)
 					{
-						throw new PeachException("Error, a <Agent> element named '" + agent.name + "' already exists.");
+						throw new PeachException("Error, a <Agent> element named '" + agent.Name + "' already exists.");
 					}
 				}
 			}
@@ -578,7 +579,7 @@ namespace Peach.Core.Analyzers
 					}
 					catch (ArgumentException)
 					{
-						throw new PeachException("Error, a <Test> element named '" + test.name + "' already exists.");
+						throw new PeachException("Error, a <Test> element named '" + test.Name + "' already exists.");
 					}
 				}
 			}
@@ -650,7 +651,7 @@ namespace Peach.Core.Analyzers
 		{
 			Dom.Agent agent = new Dom.Agent();
 
-			agent.name = node.getAttrString("name");
+			agent.Name = node.getAttrString("name");
 			agent.location = node.getAttr("location", null);
 			agent.password = node.getAttr("password", null);
 
@@ -664,7 +665,7 @@ namespace Peach.Core.Analyzers
 					Dom.Monitor monitor = new Monitor();
 
 					monitor.cls = child.getAttrString("class");
-					monitor.name = child.getAttr("name", agent.monitors.UniqueName());
+					monitor.Name = child.getAttr("name", agent.monitors.UniqueName());
 					monitor.parameters = handleParams(child);
 
 					try
@@ -673,7 +674,7 @@ namespace Peach.Core.Analyzers
 					}
 					catch (ArgumentException)
 					{
-						throw new PeachException("Error, a <Monitor> element named '{0}' already exists in agent '{1}'.".Fmt(monitor.name, agent.name));
+						throw new PeachException("Error, a <Monitor> element named '{0}' already exists in agent '{1}'.".Fmt(monitor.Name, agent.Name));
 					}
 				}
 			}
@@ -822,7 +823,7 @@ namespace Peach.Core.Analyzers
 					element.lengthType = LengthType.Chars;
 					break;
 				default:
-					throw new PeachException("Error, parsing lengthType on '" + element.name +
+					throw new PeachException("Error, parsing lengthType on '" + element.Name +
 						"', unknown value: '" + strLenType + "'.");
 			}
 
@@ -836,7 +837,7 @@ namespace Peach.Core.Analyzers
 				}
 				catch (Exception e)
 				{
-					throw new PeachException("Error, setting length on element '" + element.name + "'.  " + e.Message, e);
+					throw new PeachException("Error, setting length on element '" + element.Name + "'.  " + e.Message, e);
 				}
 			}
 		}
@@ -930,7 +931,7 @@ namespace Peach.Core.Analyzers
 				if (child.hasAttr("minOccurs") || child.hasAttr("maxOccurs") || child.hasAttr("occurs"))
 				{
 					// Ensure the array has the same name as the 1st element
-					((System.Xml.XmlElement)child).SetAttribute("name", elem.name);
+					((System.Xml.XmlElement)child).SetAttribute("name", elem.Name);
 
 					var array = Dom.Array.PitParser(this, child, element) as Dom.Array;
 
@@ -1088,7 +1089,7 @@ namespace Peach.Core.Analyzers
 		protected void handleFixup(XmlNode node, DataElement element)
 		{
 			if (element.fixup != null)
-				throw new PeachException("Error, multiple fixups defined on element '" + element.name + "'.");
+				throw new PeachException("Error, multiple fixups defined on element '" + element.Name + "'.");
 
 			element.fixup = handlePlugin<Fixup, FixupAttribute>(node, element, true);
 		}
@@ -1096,7 +1097,7 @@ namespace Peach.Core.Analyzers
 		protected void handleAnalyzer(XmlNode node, DataElement element)
 		{
 			if (element.analyzer != null)
-				throw new PeachException("Error, multiple analyzers are defined on element '" + element.name + "'.");
+				throw new PeachException("Error, multiple analyzers are defined on element '" + element.Name + "'.");
 
 			element.analyzer = handlePlugin<Analyzer, AnalyzerAttribute>(node, element, false);
 		}
@@ -1104,7 +1105,7 @@ namespace Peach.Core.Analyzers
 		protected void handleTransformer(XmlNode node, DataElement element)
 		{
 			if (element.transformer != null)
-				throw new PeachException("Error, multiple transformers are defined on element '" + element.name + "'.");
+				throw new PeachException("Error, multiple transformers are defined on element '" + element.Name + "'.");
 
 			element.transformer = handlePlugin<Transformer, TransformerAttribute>(node, element, true);
 
@@ -1118,7 +1119,7 @@ namespace Peach.Core.Analyzers
 				if (child.Name == "Transformer")
 				{
 					if (transformer.anotherTransformer != null)
-						throw new PeachException("Error, multiple nested transformers are defined on element '" + element.name + "'.");
+						throw new PeachException("Error, multiple nested transformers are defined on element '" + element.Name + "'.");
 
 					transformer.anotherTransformer = handlePlugin<Transformer, TransformerAttribute>(child, element, true);
 
@@ -1143,7 +1144,7 @@ namespace Peach.Core.Analyzers
 			else if (node.hasAttr("before"))
 				args["before"] = new Variant(node.getAttrString("before"));
 			else
-				throw new PeachException("Error, Placement on element \"" + element.name + "\" is missing 'after' or 'before' attribute.");
+				throw new PeachException("Error, Placement on element \"" + element.Name + "\" is missing 'after' or 'before' attribute.");
 
 			Placement placement = new Placement(args);
 			element.placement = placement;
@@ -1169,7 +1170,7 @@ namespace Peach.Core.Analyzers
 						var strType = node.getAttr("lengthType", rel.lengthType.ToString());
 						LengthType lenType;
 						if (!Enum.TryParse(strType, true, out lenType))
-							throw new PeachException("Error, size relation on element '" + parent.name + "' has invalid lengthType '" + strType + "'.");
+							throw new PeachException("Error, size relation on element '" + parent.Name + "' has invalid lengthType '" + strType + "'.");
 
 						rel.lengthType = lenType;
 					}
@@ -1214,7 +1215,7 @@ namespace Peach.Core.Analyzers
 					break;
 
 				default:
-					throw new PeachException("Error, element '" + parent.name + "' has unknown relation type '" + value + "'.");
+					throw new PeachException("Error, element '" + parent.Name + "' has unknown relation type '" + value + "'.");
 			}
 		}
 
@@ -1227,7 +1228,7 @@ namespace Peach.Core.Analyzers
 			string name = node.getAttrString("name");
 			string initialState = node.getAttrString("initialState");
 			StateModel stateModel = CreateStateModel();
-			stateModel.name = name;
+			stateModel.Name = name;
 			stateModel.parent = parent;
 
 			foreach (XmlNode child in node.ChildNodes)
@@ -1242,10 +1243,10 @@ namespace Peach.Core.Analyzers
 					}
 					catch (ArgumentException)
 					{
-						throw new PeachException("Error, a <State> element named '" + state.name + "' already exists in state model '" + stateModel.name + "'.");
+						throw new PeachException("Error, a <State> element named '" + state.Name + "' already exists in state model '" + stateModel.Name + "'.");
 					}
 
-					if (state.name == initialState)
+					if (state.Name == initialState)
 						stateModel.initialState = state;
 				}
 			}
@@ -1264,7 +1265,7 @@ namespace Peach.Core.Analyzers
 		{
 			State state = new State();
 			state.parent = parent;
-			state.name = node.getAttr("name", parent.states.UniqueName());
+			state.Name = node.getAttr("name", parent.states.UniqueName());
 			state.onStart = node.getAttr("onStart", null);
 			state.onComplete = node.getAttr("onComplete", null);
 
@@ -1280,7 +1281,7 @@ namespace Peach.Core.Analyzers
 					}
 					catch (ArgumentException)
 					{
-						throw new PeachException("Error, a <Action> element named '" + action.name + "' already exists in state '" + state.parent.name + "." + state.name + "'.");
+						throw new PeachException("Error, a <Action> element named '" + action.Name + "' already exists in state '" + state.parent.Name + "." + state.Name + "'.");
 					}
 				}
 			}
@@ -1297,9 +1298,9 @@ namespace Peach.Core.Analyzers
 			foreach (var attr in badAttrs)
 				if (node.hasAttr(attr))
 					throw new PeachException("Error, action '{0}.{1}.{2}' has invalid attribute '{3}'.".Fmt(
-						action.parent.parent.name,
-						action.parent.name,
-						action.name,
+						action.parent.parent.Name,
+						action.parent.Name,
+						action.Name,
 						attr));
 		}
 
@@ -1310,9 +1311,9 @@ namespace Peach.Core.Analyzers
 			if (!Enum.TryParse(strType, true, out type))
 				throw new PeachException("Error, type attribute '{0}' on <Param> child of action '{1}.{2}.{3}' is invalid.".Fmt(
 					strType,
-					action.parent.parent.name,
-					action.parent.name,
-					action.name));
+					action.parent.parent.Name,
+					action.parent.Name,
+					action.Name));
 
 			var name = node.getAttr("name", action.parameters.UniqueName());
 			var data = new ActionParameter(name)
@@ -1331,10 +1332,10 @@ namespace Peach.Core.Analyzers
 			catch (ArgumentException)
 			{
 				throw new PeachException("Error, a <Param> element named '{0}' already exists in action '{1}.{2}.{3}'.".Fmt(
-					data.name,
-					action.parent.parent.name,
-					action.parent.name,
-					action.name));
+					data.Name,
+					action.parent.parent.Name,
+					action.parent.Name,
+					action.Name));
 			}
 		}
 
@@ -1447,9 +1448,9 @@ namespace Peach.Core.Analyzers
 					if (!hasData)
 						throw new PeachException("Error, {0}action '{1}.{2}.{3}' has unsupported child element <Data>.".Fmt(
 							type,
-							data.action.parent.parent.name,
-							data.action.parent.name,
-							data.action.name));
+							data.action.parent.parent.Name,
+							data.action.parent.Name,
+							data.action.Name));
 
 					var item = handleData(child, dom, data.dataSets.UniqueName());
 
@@ -1460,11 +1461,11 @@ namespace Peach.Core.Analyzers
 					catch (ArgumentException)
 					{
 						throw new PeachException("Error, a <Data> element named '{0}' already exists in {1}action '{2}.{3}.{4}'.".Fmt(
-							item.name,
+							item.Name,
 							type,
-							data.action.parent.parent.name,
-							data.action.parent.name,
-							data.action.name));
+							data.action.parent.parent.Name,
+							data.action.parent.Name,
+							data.action.Name));
 					}
 				}
 			}
@@ -1472,9 +1473,9 @@ namespace Peach.Core.Analyzers
 			if (data.dataModel == null)
 				throw new PeachException("Error, {0}action '{1}.{2}.{3}' is missing required child element <DataModel>.".Fmt(
 					type,
-					data.action.parent.parent.name,
-					data.action.parent.name,
-					data.action.name));
+					data.action.parent.parent.Name,
+					data.action.parent.Name,
+					data.action.Name));
 		}
 
 		protected virtual Dom.Action handleAction(XmlNode node, State parent)
@@ -1482,13 +1483,13 @@ namespace Peach.Core.Analyzers
 			var strType = node.getAttrString("type");
 			var type = ClassLoader.FindTypeByAttribute<ActionAttribute>((t, a) => 0 == string.Compare(a.Name, strType, true));
 			if (type == null)
-				throw new PeachException("Error, state '" + parent.name + "' has an invalid action type '" + strType + "'.");
+				throw new PeachException("Error, state '" + parent.Name + "' has an invalid action type '" + strType + "'.");
 
 			var name = node.getAttr("name", parent.actions.UniqueName());
 
 			var action = (Dom.Action)Activator.CreateInstance(type);
 
-			action.name = name;
+			action.Name = name;
 			action.parent = parent;
 			action.when = node.getAttr("when",null);
 			action.publisher = node.getAttr("publisher", null);
@@ -1536,7 +1537,7 @@ namespace Peach.Core.Analyzers
 				dataSet = new DataSet();
 			}
 
-			dataSet.name = node.getAttr("name", uniqueName);
+			dataSet.Name = node.getAttr("name", uniqueName);
 
 			if (node.hasAttr("fileName"))
 			{
@@ -1627,8 +1628,14 @@ namespace Peach.Core.Analyzers
 						if (!dupes.Add(name))
 							throw new PeachException("Error, Data element has multiple entries for field '" + name + "'.");
 
+						DataElement tmp;
+
+						if (child.getAttr("valueType", "string").ToLower() == "string")
+							tmp = new Dom.String { stringType = StringType.utf8 };
+						else
+							tmp = new Blob();
+
 						// Hack to call common value parsing code.
-						Blob tmp = new Blob();
 						handleCommonDataElementValue(child, tmp);
 
 						fieldData.Fields.Remove(name);
@@ -1668,7 +1675,7 @@ namespace Peach.Core.Analyzers
 			Test test = new Test();
 			test.parent = parent;
 
-			test.name = node.getAttrString("name");
+			test.Name = node.getAttrString("name");
 
 			if (node.hasAttr("waitTime"))
 				test.waitTime = double.Parse(node.getAttrString("waitTime"));
@@ -1700,7 +1707,7 @@ namespace Peach.Core.Analyzers
 						test.TargetLifetime = Test.Lifetime.Iteration;
 						break;
 					default:
-						throw new PeachException("Error, Test '{1}' attribute targetLifetime has invalid value '{0}'.".Fmt(lifetime, test.name));
+						throw new PeachException("Error, Test '{1}' attribute targetLifetime has invalid value '{0}'.".Fmt(lifetime, test.Name));
 				}
 			}
 
@@ -1755,14 +1762,14 @@ namespace Peach.Core.Analyzers
 					var agent = parent.getRef<Dom.Agent>(refName, a => a.agents);
 					if (agent == null)
 						throw new PeachException("Error, could not locate Agent named '" +
-							refName + "' for Test '" + test.name + "'.");
+							refName + "' for Test '" + test.Name + "'.");
 
 					// Make a copy to ensure the platform attribute doesn't
 					// cross test boundaries and update the name just incase
 					// it is in a different namespace
 					agent = ObjectCopier.Clone(agent);
 
-					agent.name = refName;
+					agent.Name = refName;
 
 					var platform = child.getAttr("platform", null);
 					if (platform != null)
@@ -1801,34 +1808,61 @@ namespace Peach.Core.Analyzers
 					test.stateModel = parent.getRef<Dom.StateModel>(strRef, a => a.stateModels);
 					if (test.stateModel == null)
 						throw new PeachException("Error, could not locate StateModel named '" +
-							strRef + "' for Test '" + test.name + "'.");
+							strRef + "' for Test '" + test.Name + "'.");
 
-					test.stateModel.name = strRef;
+					test.stateModel.Name = strRef;
 					test.stateModel.parent = test.parent;
 				}
 
 				// Publisher
 				if (child.Name == "Publisher")
 				{
+					var cls = child.getAttrString("class");
+					var agent = child.getAttr("agent", null);
 
-					string name = child.getAttr("name", null);
-					if (name == null)
+					Publisher pub;
+
+					if (agent == null && cls != "Remote")
 					{
-						int i = 0;
-						name = "Pub";
-						while (test.publishers.ContainsKey(name))
-							name = "Pub_" + (++i).ToString();
+						pub = handlePlugin<Publisher, PublisherAttribute>(child, null, false);
 					}
+					else
+					{
+						var arg = handleParams(child);
 
-					var pub = handlePlugin<Publisher, PublisherAttribute>(child, null, false);
+						if (cls == "Remote")
+						{
+							Variant val;
+							if (!arg.TryGetValue("Agent", out val))
+								throw new PeachException("Publisher 'RemotePublisher' is missing required parameter 'Agent'.");
+
+							agent = (string)val;
+							arg.Remove("Agent");
+
+							if (!arg.TryGetValue("Class", out val))
+								throw new PeachException("Publisher 'RemotePublisher' is missing required parameter 'Class'.");
+
+							cls = (string)val;
+							arg.Remove("Class");
+						}
+
+						pub = new RemotePublisher
+						{
+							Agent = agent,
+							Class = cls,
+							Args = arg.ToDictionary(i => i.Key, i => (string)i.Value)
+						};
+					}
+					
+					pub.Name = child.getAttr("name", null) ?? test.publishers.UniqueName();
 
 					try
 					{
-						test.publishers.Add(name, pub);
+						test.publishers.Add(pub);
 					}
 					catch (ArgumentException)
 					{
-						throw new PeachException("Error, a <Publisher> element named '{0}' already exists in test '{1}'.".Fmt(name, test.name));
+						throw new PeachException("Error, a <Publisher> element named '{0}' already exists in test '{1}'.".Fmt(pub.Name, test.Name));
 					}
 				}
 
@@ -1854,9 +1888,9 @@ namespace Peach.Core.Analyzers
 			}
 
 			if (test.stateModel == null)
-				throw new PeachException("Test '" + test.name + "' missing StateModel element.");
+				throw new PeachException("Test '" + test.Name + "' missing StateModel element.");
 			if (test.publishers.Count == 0)
-				throw new PeachException("Test '" + test.name + "' missing Publisher element.");
+				throw new PeachException("Test '" + test.Name + "' missing Publisher element.");
 
 			if (test.strategy == null)
 			{
@@ -1880,9 +1914,9 @@ namespace Peach.Core.Analyzers
 			var cls = node.getAttrString("class");
 			var arg = handleParams(node);
 
-			var type = ClassLoader.FindTypeByAttribute<A>((x, y) => y.Name == cls);
+			var type = ClassLoader.FindPluginByName<A>(cls);
 			if (type == null)
-				throw new PeachException(string.Format("Error, unable to locate {0} named '{1}', FindTypeByAttribute returned null.", pluginType, cls));
+				throw new PeachException(string.Format("Error, unable to locate {0} '{1}'.", pluginType, cls));
 
 			validateParameterAttributes<A>(type, pluginType, cls, arg);
 
@@ -1917,19 +1951,6 @@ namespace Peach.Core.Analyzers
 		protected void validateParameterAttributes<A>(Type type, string pluginType, string name, IDictionary<string, Variant> xmlParameters) where A : PluginAttribute
 		{
 			var objParams = type.GetAttributes<ParameterAttribute>(null);
-
-			var inherit = type.GetAttributes<InheritParameterAttribute>(null).FirstOrDefault();
-			if (inherit != null)
-			{
-				string otherClass = (string)xmlParameters[inherit.parameter];
-
-				var otherType = ClassLoader.FindTypeByAttribute<A>((x, y) => y.Name == otherClass);
-				if (otherType == null)
-					return;
-
-				var otherParams = otherType.GetAttributes<ParameterAttribute>(null);
-				objParams = otherParams.Concat(objParams);
-			}
 
 			var missing = objParams.Where(a => a.required && !xmlParameters.ContainsKey(a.name)).Select(a => a.name).FirstOrDefault();
 			if (missing != null)

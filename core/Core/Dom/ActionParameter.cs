@@ -10,7 +10,7 @@ namespace Peach.Core.Dom
 	{
 		public ActionParameter(string name)
 		{
-			this.name = name;
+			Name = name;
 		}
 
 		/// <summary>

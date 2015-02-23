@@ -45,6 +45,13 @@ namespace Peach.Core.Dom
 	[Serializable]
 	public class State : INamed
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
 		[NonSerialized]
 		private StateModel _parent;
 
@@ -66,9 +73,9 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// The name of this state.
 		/// </summary>
-		[XmlAttribute]
+		[XmlAttribute("name")]
 		[DefaultValue(null)]
-		public string name { get; set; }
+		public string Name { get; set; }
 
 		/// <summary>
 		/// Expression to run when state is starting

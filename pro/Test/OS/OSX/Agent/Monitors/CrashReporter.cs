@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
+using Peach.Core.Agent;
 using Peach.Pro.OS.OSX.Agent.Monitors;
 
 namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
@@ -20,7 +21,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			// ProcessName argument not provided to the monitor
 			// When no crashing program is run, the monitor should not detect a fault
 
-			var args = new Dictionary<string, Variant>();
+			var args = new Dictionary<string, string>();
 			const string peach = "";
 			const bool shouldFault = false;
 
@@ -33,15 +34,16 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			// ProcessName argument not provided to the monitor
 			// When crashing program is run, the monitor should detect a fault
 
-			var args = new Dictionary<string, Variant>();
+			var args = new Dictionary<string, string>();
 			const string peach = "qwertyuiopasdfghjklzxcvbnm";
 			const bool shouldFault = true;
 
 			var fault = RunProcess(peach, CrashingProcess, shouldFault, args);
 
 			Assert.NotNull(fault);
-			Assert.Greater(fault.collectedData.Count, 0);
-			foreach (var item in fault.collectedData)
+			Assert.NotNull(fault.Fault);
+			Assert.Greater(fault.Data.Count, 0);
+			foreach (var item in fault.Data)
 			{
 				Assert.NotNull(item.Key);
 				Assert.Greater(item.Value.Length, 0);
@@ -54,16 +56,19 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			// Correct ProcessName argument is provided to the monitor
 			// When crashing program is run, the monitor should detect a fault
 
-			var args = new Dictionary<string, Variant>();
-			args["ProcessName"] = new Variant("CrashingProgram");
+			var args = new Dictionary<string, string>
+			{
+				{ "ProcessName", "CrashingProgram" },
+			};
 			const string peach = "qwertyuiopasdfghjklzxcvbnm";
 			const bool shouldFault = true;
 
 			var fault = RunProcess(peach, CrashingProcess, shouldFault, args);
 
 			Assert.NotNull(fault);
-			Assert.Greater(fault.collectedData.Count, 0);
-			foreach (var item in fault.collectedData)
+			Assert.NotNull(fault.Fault);
+			Assert.Greater(fault.Data.Count, 0);
+			foreach (var item in fault.Data)
 			{
 				Assert.NotNull(item.Key);
 				Assert.Greater(item.Value.Length, 0);
@@ -76,19 +81,22 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			// Incorrect ProcessName argument is provided to the monitor
 			// When crashing program is run, the monitor should not detect a fault
 
-			var args = new Dictionary<string, Variant>();
-			args["ProcessName"] = new Variant("WrongCrashingProgram");
+			var args = new Dictionary<string, string>
+			{
+				{ "ProcessName", "WrongCrashingProgram" },
+			};
 			const string peach = "qwertyuiopasdfghjklzxcvbnm";
 			const bool shouldFault = false;
 
 			RunProcess(peach, CrashingProcess, shouldFault, args);
 		}
 
-		private static Fault RunProcess(string peach, string process, bool shouldFault, Dictionary<string, Variant> args)
+		private static MonitorData RunProcess(string peach, string process, bool shouldFault, Dictionary<string, string> args)
 		{
-			var reporter = new CrashReporter(null, "name", args);
+			var reporter = new CrashReporter(null);
+			reporter.StartMonitor(args);
 			reporter.SessionStarting();
-			reporter.IterationStarting(0, false);
+			reporter.IterationStarting(null);
 			if (process != null)
 			{
 				using (var p = new System.Diagnostics.Process())
