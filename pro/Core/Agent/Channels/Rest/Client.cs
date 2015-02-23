@@ -304,7 +304,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				Monitors = new List<MonitorRequest>(),
 			};
 
-			ReconnectAgent();
+			ReconnectAgent(false);
 		}
 
 		public override void StartMonitor(string monName, string cls, Dictionary<string, string> args)
@@ -361,7 +361,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		{
 			// If any previous call failed, we need to reconnect
 			if (_offline)
-				ReconnectAgent();
+				ReconnectAgent(true);
 
 			if (!_connectResp.Messages.Contains("IterationStarting"))
 				return;
@@ -467,9 +467,10 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			});
 		}
 
-		private void ReconnectAgent()
+		private void ReconnectAgent(bool log)
 		{
-			Logger.Debug("Restarting all monitors on remote agent {0}", _baseUrl);
+			if (log)
+				Logger.Debug("Restarting all monitors on remote agent {0}", _baseUrl);
 
 			_offline = false;
 
@@ -487,13 +488,15 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				throw;
 			}
 
-			Logger.Debug("Restarting all publishers on remote agent {0}", _baseUrl);
+			if (log)
+				Logger.Debug("Restarting all publishers on remote agent {0}", _baseUrl);
 
 			// If we are reconnecting, ensure all the publishers are recreated
 			foreach (var pub in _publishers)
 				pub.Connect();
 
-			Logger.Debug("Successfully restored connection to remote agent {0}", _baseUrl);
+			if (log)
+				Logger.Debug("Successfully restored connection to remote agent {0}", _baseUrl);
 		}
 
 		private void Send(string method, string path, object request)
