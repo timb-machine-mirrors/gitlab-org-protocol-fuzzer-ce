@@ -194,7 +194,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 ==================================
 
 .Non Default Once
-===============================
+==================================
 Three outputs with Once set to true. Each action outputs the same incremented number.
 
 [source,xml]
@@ -273,8 +273,6 @@ Peach.Core.Engine runTest: context.config.singleIteration == true
 Peach.Core.Publishers.ConsolePublisher stop()
 
 ----
-===============================
-
 ==================================
 
 .Group
@@ -328,5 +326,4 @@ On the second fuzzing iteration, num and num2 receive the values 3 and 4 from th
 Now, to contrast this behavior, if the Group parameter is not specified, num uses one fixup that has a starting value of 1; num2 also uses a fixup, albeit a different fixup, that has a starting value of 1. When fuzzing occurs, the fixup associated to num assigns the value 1 to num. The other fixup, associated to num2, assigns the value 1 to num2.
 
 On the second fuzzing iteration, num and num2 receive the next values from their fixups. For num, this value is 2. For num2, the value from the second fixup is 2 as well.
-
 ==================================
