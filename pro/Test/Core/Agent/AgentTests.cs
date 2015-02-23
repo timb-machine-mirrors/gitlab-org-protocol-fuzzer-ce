@@ -118,6 +118,9 @@ namespace Peach.Pro.Test.Core.Agent
 		[Test]
 		public void TestReconnect([ValueSource("ChannelNames")]string protocol)
 		{
+			if (Platform.GetOS() == Platform.OS.OSX && protocol == "tcp")
+				Assert.Ignore(".NET remoting doesn't work inside nunit on osx");
+
 			var port = TestBase.MakePort(20000, 21000);
 			var tmp = Path.GetTempFileName();
 
@@ -224,6 +227,9 @@ namespace Peach.Pro.Test.Core.Agent
 		[Test]
 		public void TestSoftException([ValueSource("ChannelNames")]string protocol)
 		{
+			if (Platform.GetOS() == Platform.OS.OSX && protocol == "tcp")
+				Assert.Ignore(".NET remoting doesn't work inside nunit on osx");
+
 			var port = TestBase.MakePort(20000, 21000);
 
 			var xml = @"
@@ -290,6 +296,9 @@ namespace Peach.Pro.Test.Core.Agent
 		[Test]
 		public void TestBadProcess([ValueSource("ChannelNames")]string protocol)
 		{
+			if (Platform.GetOS() == Platform.OS.OSX && protocol == "tcp")
+				Assert.Ignore(".NET remoting doesn't work inside nunit on osx");
+
 			var xml = @"
 <Peach>
 	<DataModel name='TheDataModel'>
@@ -731,6 +740,9 @@ namespace Peach.Pro.Test.Core.Agent
 		[Test]
 		public void TestRemotePublisher([ValueSource("ChannelNames")]string protocol)
 		{
+			if (Platform.GetOS() == Platform.OS.OSX && protocol == "tcp")
+				Assert.Ignore(".NET remoting doesn't work inside nunit on osx");
+
 			var tmp = Path.GetTempFileName();
 
 			var pub = @"

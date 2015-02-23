@@ -2,9 +2,9 @@
 [[Monitors_CleanupFolder]]
 == CleanupFolder Monitor
 
-The _CleanupFolder_ monitor removes the contents created by a target during runtime. The assets are removed prior to every iteration.
+The _CleanupFolder_ monitor removes from a specified directory the content created by a target during runtime. Cleanup occurs at the start of a fuzzing session and before every iteration.
 
-When beginning a fuzzing run, Peach creates a list of contents in the directory and removes any new files created.  _CleanupFolder_ cleans up after target execution so your hard drives are not filled with temporary, recovery, and scratch files.
+When beginning a fuzzing run, Peach creates a list of contents in the specified directory and removes any new files and new subdirectories created.  As part of the setup before each iteration, _CleanupFolder_ cleans so that the hard drives are not cluttered with temporary, recovery, and scratch files.
 
 === Parameters
 
@@ -18,9 +18,45 @@ None.
 
 === Examples
 
-.Remove contents of a folder
+ifdef::peachug[]
+
+.Remove contents of a folder +
+
 ==============================
-Run this example from the folder specified using the _folder_ parameter. During each iteration, the file +fuzzed.txt+ is created by the File publisher. At the end of each iteration, +fuzzed.txt+ is deleted by the CleanupFolder monitor.
+This parameter example is from a setup that uses the CleanupFolder monitor to remove a fuzzed file created by the File publisher. The directory, clean2, is empty at the start of each fuzzing run. Before each iteration, the CleanupFolder monitor deletes all files from the specified folder. During each iteration, the File publisher creates a fuzzed file.
+
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter    |Value
+|Folder   |C:\\cleanme
+|==========================================================
+
+The following image shows the output from a file fuzzing session that uses _CleanupFolder_. The session duration is 3 iterations.
+
+.{nbsp}
+image::{images}/Monitor_CleanupFolder2.png[]
+
+
+The following image shows the output from a file fuzzing session that does _not_ use _CleanupFolder_, but is otherwise identical to the previous setup.
+
+.{nbsp}
+image::{images}/Monitor_CleanupFolder3.png[]
+
+
+NOTE: The FilePerIteration publisher, that generates a new filename for each fuzzed file, produced the fuzzed output files for both of the previous images.
+==============================
+
+endif::peachug[]
+
+
+ifndef::peachug[]
+
+.Remove contents of a folder +
+
+==============================
+Run this example from the folder specified using the _folder_ parameter. 
+
+During each iteration, the file +fuzzed.txt+ is created by the File publisher. At the end of each iteration, +fuzzed.txt+ is deleted by the CleanupFolder monitor.
 
 [source,xml]
 ----
@@ -41,6 +77,7 @@ Run this example from the folder specified using the _folder_ parameter. During 
       <Action type="output" publisher="FilePub">
           <DataModel ref="TheDataModel"/>
       </Action>
+
     </State>
   </StateModel>
 
@@ -96,3 +133,5 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 ==============================
+
+endif::peachug[]

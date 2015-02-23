@@ -106,7 +106,7 @@
 							<i class="icon-fire"></i>
 							<span class="menu-text">
 								Faults
-								<span class="badge badge-primary">{{vm.FaultCount}}</span>
+								<span ng-cloak class="badge badge-primary">{{vm.FaultCount}}</span>
 							</span>
 						</a>
 					</li>
@@ -225,6 +225,7 @@
 			<div class="main-content"
 					 ui-view>
 
+				<noscript>JavaScript is required.</noscript>
 			</div>
 		</div>
 	</div>

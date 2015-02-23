@@ -8,17 +8,38 @@ The _Memory_ monitor checks the process memory usage and initiates a fault when 
 
 _Required:_
 
-Must use _MemoryLimit_ and either _Pid_ or _ProcessName_.
+Must use _MemoryLimit_, and either _Pid_ or _ProcessName_.
 
-Pid:: Process ID to monitor
-ProcessName:: Name of process to monitor
 MemoryLimit:: Fault when memory usage surpasses limit
+Pid:: Process ID to monitor
+ProcessName:: Name of the process to monitor
+
 
 _Optional:_
 
-StopOnFault:: Stop fuzzing if a fault is triggered, defaults to false
+StopOnFault:: Stop fuzzing if a fault is triggered, defaults to false.
 
 === Examples
+
+ifdef::peachug[]
+
+.Monitor memory usage of Notepad
+====================
+
+This parameter example is from a setup that monitors memory usage of Notepad.
+
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter    |Value
+|MemoryLimit  |10000000
+|ProcessName  |Notepad
+|==========================================================
+====================
+
+endif::peachug[]
+
+
+ifndef::peachug[]
 
 .Monitor memory via PID
 ========================
@@ -88,3 +109,5 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 [*] Test 'Default' finished.
 ----
 ========================
+
+endif::peachug[]

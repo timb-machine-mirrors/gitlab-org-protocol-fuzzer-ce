@@ -12,6 +12,7 @@ namespace Peach.Pro.Test.Core.Publishers
 		public TestPublisher()
 			: base(new Dictionary<string,Variant>())
 		{
+			Name = "Pub";
 			this.stream = new MemoryStream();
 			this.BytesPerLine = 16;
 		}
