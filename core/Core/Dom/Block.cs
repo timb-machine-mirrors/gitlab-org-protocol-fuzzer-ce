@@ -107,7 +107,6 @@ namespace Peach.Core.Dom
 		{
 			pit.WriteStartElement(elementType);
 
-			pit.WriteAttributeString("name", Name);
 			if(referenceName != null)
 				pit.WriteAttributeString("ref", referenceName);
 

@@ -2,57 +2,131 @@
 [[Monitors_Android]]
 == Android Monitor
 
-The _Android_ monitor monitors both targeted Android applications and the state of the Android OS. 
-
-Two expected use cases are:
+The _Android_ monitor monitors both targeted Android applications and the state of the Android OS. Two expected 
+use cases are:
 
 * Maintaining state while fuzzing native code
-* Launching and monitor Android Java applications. 
+* Launching and monitoring Android Java applications. 
 
-This monitor can target both emulated and physical notes. 
+This monitor can target both emulated and physical devices. The _Android_ monitor requires
+http://developer.android.com/sdk/index.html[Android Platform Tools] and either an emulator or a physical Android device.
 
-The _Android_ monitor requires http://developer.android.com/sdk/index.html[Android Platform Tools] and either an emulator or a physical Android device.
+[NOTE]
+======================
+Connecting to a physical device requires the device serial number. You can obtain this easily from a connected device by using the following adb command: "adb{nbsp}devices". The result is a list of devices that adb found. The information for each device consists 
+of two parts: the device number and the connection status between adb and the device. The list includes physical and 
+virtual devices.
+
+For more information about debugging Android devices, see the following:
+
+* http://developer.android.com/tools/help/adb.html[Android Debug Bridge].
+* http://www.howtogeek.com/125769/how-to-install-and-use-abd-the-android-debug-bridge-utility/[How To Install and Use ADB, the Android Debug Bridge Utility]
+======================
 
 === Parameters
 
 _Required:_
 
-ApplicationName:: Android Application.
+ApplicationName:: Name of the Android application.
 
 _Optional:_
 
-ActivityName:: Application Activity.
-AdbPath:: Directory Path to Adb.
-ClearAppData:: Remove Application data and cache on every iteration. Defaults to false.
-ClearAppDataOnFault:: Remove Application data and cache on fault iterations. Defaults to false.
-CommandTimeout:: Max seconds to wait for adb command to complete (default 10). Defaults to 10.
-ConnectTimeout:: Max seconds to wait for adb connection (default 5). Defaults to 5.
-DeviceMonitor:: Android monitor to get device serial from.
-DeviceSerial:: The serial of the device to monitor.
-FaultRegex:: Regex to determine if a log entry triggers a fault. Defaults to `(^E/ActivityMonitor)|(^E/AndroidRuntime)|(^F/.*)`.
-FaultWaitTime:: Milliseconds to wait when checking for a fault. Defaults to 0.
-IgnoreRegex:: Regex to ignore potential false positive fault matches. Defaults to none.
-MustStopRegex:: Trigger a fault and stop fuzzing when regex matches. Defaults to none.
-ReadyTimeout:: Max seconds to wait for device to be ready. Defaults to 600.
-RebootEveryN:: Reboot device every N iterations.
-RebootOnFault:: Reboot device on fault. Defaults to false.
-RestartEveryIteration:: Restart Application on Every Iteration. Defaults to false.
-StartOnCall:: Start the application when notified by the state machine.
-WaitForReadyOnCall:: Waits for the device to be ready when notified by the state machine.
+ActivityName:: Name of the application activity, defaults to "".
+AdbPath:: Directory path to adb, defaults to "".
+ClearAppData:: Removes the application data and cache every iteration, defaults to false.
+ClearAppDataOnFault:: Removes the application data and cache on faulting iterations, defaults to false.
+CommandTimeout:: Sets the maximum number of seconds to wait for the adb command to complete, defaults to 10 seconds.
+ConnectTimeout:: Sets the maximum number of seconds to wait to establish an adb connection, defaults to 5 seconds.
+DeviceMonitor:: Identifies the Android monitor that supplies the device serial number, defaults to "". Used when monitoring a virtual device.
+DeviceSerial:: The serial number of the device to monitor, defaults to "". Used when monitoring a physical device. 
+FaultRegex:: Specifies a regex; when matched from a log entry, triggers a fault. The default regeex 
+is '(\^E/ActivityMonitor)|(^E/AndroidRuntime)|(^F/.*)'.
+FaultWaitTime:: Sets the time period, in milliseconds, to wait when checking for a fault, defaults to 0 ms.
+IgnoreRegex:: Specifies a regex; when matched, the monitor ignores potential false positive faults, defaults to "".
+MustStopRegex:: Specifies a regex; when a match occurs, the monitor triggers a fault and stops fuzzing, defaults to "".
+ReadyTimeout:: Sets the maximum number of seconds to wait for the device to reach readiness--able to respond to inputs, defaults to 600 seconds.
+RebootEveryN:: Specifies the number of iterations between successive device reboots, defaults to 0.
+RebootOnFault:: Reboots the device when a fault occurs, defaults to false.
+RestartEveryIteration:: Restarts the application every iteration, defaults to false.
+StartOnCall:: Starts the application when notified by the state machine. The string value used here must match the Call Action statement of the state model. The default string is "".
+WaitForReadyOnCall:: Waits for the device to be ready when notified by the state machine. The string used here must match the corresponding Call Action statement of the state model. the default string is "".
 
 === Examples
 
-.Basic Usage Example
+ifdef::peachug[]
+
+.Basic Usage with a Physical Device  +
+====================
+
+This parameter example is from a setup that the BadBehaviorActivity, sending random taps to generate different types of exceptions and crashes. The setup is for a physical Android device.
+
++Android Monitor (App) Parameters+
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter        |Value
+|ApplicationName  |com.android.development
+|ActivityName     |.BadBehaviorActivity
+|AdbPath          |C:\adt-bundle-windows-x86_64-20131030\sdk\platform-tools
+|DeviceSerial     |emulator-5554
+|==========================================================
+
+====================
+
+
+.Basic Usage with a Virtual Device +
+====================
+
+This parameter example is from a setup that the BadBehaviorActivity, sending random taps to generate different types of exceptions and crashes. The setup is for a virtual Android device, and uses the Android monitor, as well as the Andtroid Emulator monitor.
+
+If you want to run the Android emulator, set your AdbPath to the directory containing the adb (Android Debug Bridge) 
+platform-tools directory and point the EmulatorPath in the Android Emulator Monitor to the adb tools directory.
+
+The Avd parameter in the Android Emulator Monitor must also be the name of a valid AVD (Android Virtual Device). 
+Use the following steps to create a new AVD:
+
+. Open the 'android.bat' file located in the adb SDK tools directory. 
+. From the GUI that opens, click on 'Tools' in the menu bar, then 'Manage AVDs...'. 
+. From the window that opens, click 'New...' and create a new AVD.
+
+_Android Monitor (App) Parameters_
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter        |Value
+|ApplicationName  |com.android.development
+|ActivityName     |.BadBehaviorActivity
+|AdbPath          |C:\adt-bundle-windows-x86_64-20131030\sdk\platform-tools
+|DeviceMonitor    |Emu
+|==========================================================
+
+
+_Android Emulator (Emu) Monitor Parameters_
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter        |Value
+|Avd              |Nexus4
+|EmulatorPath     |C:\adt-bundle-windows-x86_64-20131030\sdk\tools
+|==========================================================
+
+====================
+
+
+endif::peachug[]
+
+
+ifndef::peachug[]
+
+
+.Basic Usage Example +
 ======================
-This example runs the BadBehaviorActivity, sending random taps
+This example runs the BadBehaviorActivity, sending random taps to generate different types of exceptions and crashes.
 
 To run the Android emulator, set your AdbPath to the directory containing the adb (Android Debug Bridge) platform-tools directory and point the EmulatorPath to the adb tools directory.
 
 The Avd parameter must also be the name of a valid AVD (Android Virtual Device). To create a new AVD:
 
 . Open the 'android.bat' file located in the adb SDK tools directory. 
-. From the GUI that opens up click on 'Tools' in the menu bar then 'Manage AVDs...'. 
-. From the window that opens up click 'New...' and create a new AVD.
+. From the GUI that opens, click on 'Tools' in the menu bar, then 'Manage AVDs...'. 
+. From the window that opens, click 'New...' and create a new AVD.
 
 [source,xml]
 ----
@@ -159,3 +233,5 @@ Peach.Enterprise.Agent.Monitors.AndroidEmulator Emulator 'emulator-5554' exited
 [*] Test 'Default' finished.
 ----
 ======================
+
+endif::peachug[]
