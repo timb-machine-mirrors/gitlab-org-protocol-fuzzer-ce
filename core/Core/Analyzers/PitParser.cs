@@ -1630,10 +1630,10 @@ namespace Peach.Core.Analyzers
 
 						DataElement tmp;
 
-						if (child.getAttr("valueType", "").ToLower() == "hex")
-							tmp = new Blob();
-						else
+						if (child.getAttr("valueType", "string").ToLower() == "string")
 							tmp = new Dom.String { stringType = StringType.utf8 };
+						else
+							tmp = new Blob();
 
 						// Hack to call common value parsing code.
 						handleCommonDataElementValue(child, tmp);
