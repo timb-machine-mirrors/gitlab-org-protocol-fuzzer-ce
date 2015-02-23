@@ -138,7 +138,7 @@ namespace Peach.Pro.Core.WebServices
 				StaticContentConventionBuilder.AddDirectory("/", @"public")
 			);
 			nancyConventions.StaticContentsConventions.Insert(0,
-				StaticContentConventionBuilder.AddDirectory("/docs", @"webhelp/docs")
+				StaticContentConventionBuilder.AddDirectory("/docs", @"docs/webhelp")
 			);
 		}
 
@@ -343,7 +343,7 @@ namespace Peach.Pro.Core.WebServices
 			Context = null;
 		}
 
-		public static int Run(string pitLibraryPath)
+		public static int Run(string pitLibraryPath, bool shouldStartBrowser)
 		{
 			using (var evt = new AutoResetEvent(false))
 			{
@@ -355,7 +355,7 @@ namespace Peach.Pro.Core.WebServices
 
 					try
 					{
-						if (!Debugger.IsAttached)
+						if (!Debugger.IsAttached && shouldStartBrowser)
 						{
 							Process.Start(svc.Uri.ToString());
 						}

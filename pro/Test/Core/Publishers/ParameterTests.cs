@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Text.RegularExpressions;
 using NLog;
 using NUnit.Framework;
 using Peach.Core;
@@ -26,8 +27,8 @@ namespace Peach.Pro.Test.Core.Publishers
 			public int req1 { get; set; }
 		}
 
-		[Publisher("testA1")]
-		[Publisher("testA1.default", true)]
+		[Publisher("testA1.default")]
+		[Alias("testA1")]
 		[Parameter("req1", typeof(int), "desc")]
 		class PubDefaultName : Publisher
 		{
@@ -40,7 +41,7 @@ namespace Peach.Pro.Test.Core.Publishers
 			public int req1 { get; set; }
 		}
 
-		[Publisher("testA2.default", true)]
+		[Publisher("testA2.default")]
 		[Parameter("req1", typeof(int), "desc")]
 		class PubMissingParam : Publisher
 		{
@@ -296,7 +297,7 @@ namespace Peach.Pro.Test.Core.Publishers
 			new GetPub(args);
 		}
 
-		[Publisher("NullPlugin", true)]
+		[Publisher("NullPlugin")]
 		[Parameter("custom", typeof(CustomType), "desc", "")]
 		[Parameter("str", typeof(string), "desc", "")]
 		[Parameter("num", typeof(int), "desc", "")]
@@ -327,7 +328,7 @@ namespace Peach.Pro.Test.Core.Publishers
 			Assert.Throws<PeachException>(delegate() { ParameterParser.Parse(obj, onlyStr); });
 		}
 
-		[Publisher("NullablePlugin", true)]
+		[Publisher("NullablePlugin")]
 		[Parameter("num1", typeof(int?), "desc")]
 		[Parameter("num2", typeof(int?), "desc", "")]
 		[Parameter("num3", typeof(int?), "desc", "")]
@@ -358,7 +359,7 @@ namespace Peach.Pro.Test.Core.Publishers
 			Assert.AreEqual(20, obj.num2.Value);
 		}
 
-		[Publisher("ArrayPlugin", true)]
+		[Publisher("ArrayPlugin")]
 		[Parameter("num1", typeof(int[]), "desc", "")]
 		[Parameter("num2", typeof(int[]), "desc", "")]
 		[Parameter("str", typeof(string[]), "desc", "")]
@@ -399,7 +400,7 @@ namespace Peach.Pro.Test.Core.Publishers
 			Assert.AreEqual("string three", obj.str[2]);
 		}
 
-		[Publisher("RefPlugin", true)]
+		[Publisher("RefPlugin")]
 		[Parameter("ref", typeof(string), "desc")]
 		class RefPlugin
 		{
@@ -439,7 +440,7 @@ namespace Peach.Pro.Test.Core.Publishers
 			}
 		}
 
-		[Publisher("InheritPlugin", true)]
+		[Publisher("InheritPlugin")]
 		[Parameter("arg", typeof(MyCustomType), "desc")]
 		class InheritPlugin : MyBaseClass
 		{
@@ -460,7 +461,7 @@ namespace Peach.Pro.Test.Core.Publishers
 			Assert.AreEqual("description of my custom type", obj.arg.val);
 		}
 
-		[Publisher("HexString", true)]
+		[Publisher("HexString")]
 		[Parameter("arg", typeof(HexString), "desc")]
 		class HexPlugin
 		{
@@ -494,6 +495,36 @@ namespace Peach.Pro.Test.Core.Publishers
 			args["arg"] = new Variant("Hello");
 
 			ParameterParser.Parse(obj, args);
+		}
+
+		[Publisher("Regex")]
+		[Parameter("Expr", typeof(Regex), "desc", "")]
+		class RegexPlugin : MyBaseClass
+		{
+			public Regex Expr { get; set; }
+		}
+
+		[Test]
+		public void TestRegex()
+		{
+			var obj = new RegexPlugin();
+			ParameterParser.Parse(obj, new Dictionary<string, string>());
+			Assert.Null(obj.Expr);
+
+			ParameterParser.Parse(obj, new Dictionary<string, string>
+			{
+				{ "Expr" , "\\s+" }
+			});
+			Assert.NotNull(obj.Expr);
+
+			var ex = Assert.Throws<PeachException>(() =>
+				ParameterParser.Parse(obj, new Dictionary<string, string>
+				{
+					{ "Expr" , "(" }
+				})
+			);
+
+			Assert.AreEqual("Publisher 'Regex' could not set parameter 'Expr'.  The value '(' is not a valid regular expression.", ex.Message);
 		}
 	}
 }

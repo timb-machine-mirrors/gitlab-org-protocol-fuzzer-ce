@@ -89,7 +89,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			Assert.AreEqual(1, dom.dataModels["TheDataModel"].Count);
 			Assert.AreEqual(1, ((DataElementContainer)dom.dataModels["TheDataModel"][0]).Count);
 
-			Assert.AreEqual("TheString", ((DataElementContainer)dom.dataModels["TheDataModel"][0])[0].name);
+			Assert.AreEqual("TheString", ((DataElementContainer)dom.dataModels["TheDataModel"][0])[0].Name);
 			Assert.AreEqual("World", (string)((DataElementContainer)dom.dataModels["TheDataModel"][0])[0].DefaultValue);
 		}
 
@@ -516,33 +516,24 @@ namespace Peach.Pro.Test.Core.PitParserTests
 	</StateModel>
 
 	<Agent name='TheAgent'>
-		<Monitor class='FaultingMonitor'>
-			<Param name='Iteration' value='2'/>
-		</Monitor>
+		<Monitor class='Null' />
 	</Agent>
 
 	<Test name='Default'>
 		<StateModel ref='TheState'/>
 		<Publisher class='Null'/>
 		<Agent ref='TheAgent' platform='{0}'/>
-		<Mutators mode='include'>
-			<Mutator class='StringCaseMutator'/>
-		</Mutators>
-		<Strategy class='RandomDeterministic'/>
 	</Test>
 </Peach>";
 			xml = string.Format(xml, Platform.GetOS() == Platform.OS.Windows ? "linux" : "windows");
 
-			PitParser parser = new PitParser();
+			var dom = DataModelCollector.ParsePit(xml);
+			var config = new RunConfiguration() { singleIteration = true };
+			var e = new Engine(null);
 
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
-			RunConfiguration config = new RunConfiguration();
-
-			Engine e = new Engine(null);
-			e.Fault += delegate(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faultData)
+			e.TestStarting += ctx =>
 			{
-				Assert.Fail("Fault should not be detected!");
+				ctx.AgentConnect += (c, a) => Assert.Fail("AgentConnect should never be called!");
 			};
 
 			e.startFuzzing(dom, config);
@@ -653,13 +644,13 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			Assert.AreEqual(1, dom.tests[1].agents.Count);
 			Assert.AreEqual(2, dom.tests[2].agents.Count);
 
-			Assert.AreEqual("foo:SomeAgent", dom.tests[1].agents[0].name);
+			Assert.AreEqual("foo:SomeAgent", dom.tests[1].agents[0].Name);
 			Assert.AreEqual(Platform.OS.None, dom.tests[1].agents[0].platform);
 
-			Assert.AreEqual("foo:SomeAgent", dom.tests[2].agents[0].name);
+			Assert.AreEqual("foo:SomeAgent", dom.tests[2].agents[0].Name);
 			Assert.AreEqual(Platform.OS.All, dom.tests[2].agents[0].platform);
 
-			Assert.AreEqual("foo:bar:ThirdAgent", dom.tests[2].agents[1].name);
+			Assert.AreEqual("foo:bar:ThirdAgent", dom.tests[2].agents[1].Name);
 			Assert.AreEqual(Platform.OS.All, dom.tests[2].agents[1].platform);
 
 		}

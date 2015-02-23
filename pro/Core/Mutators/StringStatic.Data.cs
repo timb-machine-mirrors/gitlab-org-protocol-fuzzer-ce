@@ -1,4 +1,8 @@
-﻿namespace Peach.Pro.Core.Mutators
+﻿//
+// Copyright (c) Deja vu Security
+//
+
+namespace Peach.Pro.Core.Mutators
 {
 	public partial class StringStatic
 	{

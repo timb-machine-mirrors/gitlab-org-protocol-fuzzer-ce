@@ -8,21 +8,25 @@ module Peach {
 	export class TestService {
 
 		static $inject = [
-			Constants.Angular.$http,
-			Constants.Angular.$interval,
-			Constants.Services.Pit
+			C.Angular.$q,
+			C.Angular.$http,
+			C.Angular.$interval,
+			C.Services.Pit
 		];
 
 		constructor(
+			private $q: ng.IQService,
 			private $http: ng.IHttpService,
 			private $interval: ng.IIntervalService,
-			public pitService: PitService
+			private pitService: PitService
 		) {
 			this.reset();
 			pitService.OnPitChanged(() => this.reset());
 		}
 
+		private pendingResult: ng.IDeferred<any>;
 		private isPending: boolean = false;
+
 		public get IsPending(): boolean {
 			return this.isPending;
 		}
@@ -45,22 +49,27 @@ module Peach {
 			return !_.isEmpty(this.testTime);
 		}
 
-		public BeginTest() {
+		public BeginTest(): ng.IPromise<any> {
 			this.reset();
 
+			this.pendingResult = this.$q.defer<any>();
 			this.isPending = true;
-			var promise = this.$http.get('/p/conf/wizard/test/start', {
-				params: { pitUrl: this.pitService.Pit.pitUrl }
-			});
 
 			this.testTime = moment().format("h:mm a");
 
+			var request: ITestRequest = {
+				pitUrl: this.pitService.Pit.pitUrl
+			};
+			var promise = this.$http.post(C.Api.TestStart, request);
 			promise.success((data: ITestRef) => {
 				this.startTestPoller(data.testUrl);
 			});
 			promise.catch(reason => {
 				this.setFailure(reason);
+				this.pendingResult.reject();
 			});
+
+			return this.pendingResult.promise;
 		}
 
 		private reset() {
@@ -79,11 +88,18 @@ module Peach {
 					this.testResult = data;
 					if (data.status !== TestStatus.Active) {
 						this.stopTestPoller(interval);
+						var pass = (data.status === TestStatus.Pass);
+						if (pass) {
+							this.pendingResult.resolve();
+						} else {
+							this.pendingResult.reject();
+						}
 					}
 				});
-				promise.catch(reason => {
+				promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
 					this.stopTestPoller(interval);
-					this.setFailure(reason);
+					this.setFailure(reason.data.errorMessage);
+					this.pendingResult.reject();
 				});
 			}, TEST_INTERVAL);
 		}
@@ -91,19 +107,16 @@ module Peach {
 		private stopTestPoller(interval: any) {
 			this.isPending = false;
 			this.$interval.cancel(interval);
-			this.pitService.ReloadPit();
 		}
 
-		private setFailure(response: ng.IHttpPromiseCallbackArg<IError>) {
-			this.isPending = false;
+		private setFailure(reason) {
 			this.testResult.status = TestStatus.Fail;
 
 			var event: ITestEvent = {
 				id: this.testResult.events.length + 1,
 				status: TestStatus.Fail,
-				short: '',
 				description: 'Test execution failure.',
-				resolve: response.data.errorMessage
+				resolve: reason
 			};
 
 			this.testResult.events.push(event);

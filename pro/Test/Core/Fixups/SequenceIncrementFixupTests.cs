@@ -942,14 +942,7 @@ namespace Peach.Pro.Test.Core.Fixups
 		</State>
 	</StateModel>
 
-	<Agent name='LocalAgent'>
-		<Monitor class='FaultingMonitor'>
-			<Param name='Iteration' value='2'/>
-		</Monitor>
-	</Agent>
-
 	<Test name='Default' faultWaitTime='0' targetLifetime='iteration'>
-		<Agent ref='LocalAgent'/>
 		<StateModel ref='TheState'/>
 		<Publisher class='Null'/>
 	</Test>
@@ -1010,14 +1003,7 @@ namespace Peach.Pro.Test.Core.Fixups
 		</State>
 	</StateModel>
 
-	<Agent name='LocalAgent'>
-		<Monitor class='FaultingMonitor'>
-			<Param name='Iteration' value='2'/>
-		</Monitor>
-	</Agent>
-
 	<Test name='Default' faultWaitTime='0' targetLifetime='iteration'>
-		<Agent ref='LocalAgent'/>
 		<StateModel ref='TheState'/>
 		<Publisher class='Null'/>
 	</Test>
@@ -1054,6 +1040,9 @@ namespace Peach.Pro.Test.Core.Fixups
 
 		void IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
 		{
+			if (currentIteration == 2)
+				context.InjectFault();
+
 			iterationHistory.Add(currentIteration);
 		}
 

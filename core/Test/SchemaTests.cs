@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using Peach.Core.Dom;
+using Peach.Core.Agent;
 using Peach.Core.Xsd;
 using System.Xml.Serialization;
 
@@ -9,14 +9,21 @@ namespace Peach.Core.Test
 	[XmlRoot("Foo")]
 	public class TestElement
 	{
-		[PluginElement("class", typeof(Peach.Core.Agent.Monitor))]
+		[PluginElement("class", typeof(IMonitor))]
 		public NamedCollection<Peach.Core.Dom.Monitor> Monitors { get; set; }
 	}
 
-	public class TestObject : Peach.Core.Dom.INamed
+	public class TestObject : INamed
 	{
-		[XmlAttribute]
-		public string name { get; set; }
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
+		[XmlAttribute("name")]
+		public string Name { get; set; }
 	}
 
 	[XmlRoot("IntRoot")]
@@ -143,8 +150,8 @@ namespace Peach.Core.Test
 		{
 			var obj = new ComplexObjext();
 			obj.Objects = new NamedCollection<TestObject>();
-			obj.Objects.Add(new TestObject() { name = "Foo" });
-			obj.Objects.Add(new TestObject() { name = "Bar" });
+			obj.Objects.Add(new TestObject() { Name = "Foo" });
+			obj.Objects.Add(new TestObject() { Name = "Bar" });
 			obj.def = obj.Objects[0];
 
 			Serialize(obj);

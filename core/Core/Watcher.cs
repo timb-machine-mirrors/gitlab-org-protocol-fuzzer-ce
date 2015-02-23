@@ -75,7 +75,6 @@ namespace Peach.Core
 			context.IterationFinished += Agent_IterationFinished;
 			context.DetectedFault += Agent_DetectedFault;
 			context.GetMonitorData += Agent_GetMonitorData;
-			context.MustStop += Agent_MustStop;
 			context.Message += Agent_Message;
 		}
 
@@ -102,7 +101,6 @@ namespace Peach.Core
 			context.IterationFinished -= Agent_IterationFinished;
 			context.DetectedFault -= Agent_DetectedFault;
 			context.GetMonitorData -= Agent_GetMonitorData;
-			context.MustStop -= Agent_MustStop;
 			context.Message -= Agent_Message;
 		}
 
@@ -116,11 +114,11 @@ namespace Peach.Core
 		{
 		}
 
-		protected virtual void Agent_CreatePublisher(RunContext context, AgentClient agent, string cls, Dictionary<string, Variant> args)
+		protected virtual void Agent_CreatePublisher(RunContext context, AgentClient agent, string name, string cls)
 		{
 		}
 
-		protected virtual void Agent_StartMonitor(RunContext context, AgentClient agent, string name, string cls, Dictionary<string, Variant> args)
+		protected virtual void Agent_StartMonitor(RunContext context, AgentClient agent, string name, string cls)
 		{
 		}
 
@@ -152,11 +150,7 @@ namespace Peach.Core
 		{
 		}
 
-		protected virtual void Agent_MustStop(RunContext context, AgentClient agent)
-		{
-		}
-
-		protected virtual void Agent_Message(RunContext context, AgentClient agent, string name, Variant data)
+		protected virtual void Agent_Message(RunContext context, AgentClient agent, string msg)
 		{
 		}
 

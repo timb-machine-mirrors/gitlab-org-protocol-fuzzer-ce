@@ -170,7 +170,12 @@ def apply_webhelp(self):
 
 		xsl = self.create_task('webhelp', xml)
 		idx = self.create_task('webindex', xml)
-		inst = self.bld.install_files('${BINDIR}/%s' % self.name, [], cwd = self.output_dir, relative_trick = True, chmod = Utils.O644)
+
+		# docbook-xsl will puts all docs in a 'docs' subfolder
+		# so include this in our cwd so it is stripped in the BINDIR
+		cwd = self.output_dir.find_or_declare('docs/file').parent
+
+		inst = self.bld.install_files('${BINDIR}/%s' % self.name, [], cwd = cwd, relative_trick = True, chmod = Utils.O644)
 
 		if inst:
 			inst.set_run_after(idx)
@@ -193,16 +198,16 @@ def apply_webhelp(self):
 			raise Errors.WafError("image directory not found: %r in %r" % (images, self))
 		adoc.env.append_value('ASCIIDOCTOR_OPTS', [ '-a', 'images=images' ])
 
-	# Install images to bin directory
-	inst = self.bld.install_files('${BINDIR}/%s/docs/images' % self.name, img.ant_glob('**/*'), cwd = img, relative_trick = True, chmod = Utils.O644)
-	if inst:
-		self.install_extras.append(inst)
+		# Install images to bin directory
+		inst = self.bld.install_files('${BINDIR}/%s/images' % self.name, img.ant_glob('**/*'), cwd = img, relative_trick = True, chmod = Utils.O644)
+		if inst:
+			self.install_extras.append(inst)
 
 	root = self.bld.launch_node()
 
 	# Install template files to BINDIR
 	template = root.find_dir(os.path.join(self.env.WEBHELP_DIR, 'template'))
-	inst = self.bld.install_files('${BINDIR}/%s/docs' % self.name, template.ant_glob('**/*', excl='favicon.ico'), cwd = template, relative_trick = True, chmod = Utils.O644)
+	inst = self.bld.install_files('${BINDIR}/%s' % self.name, template.ant_glob('**/*', excl='favicon.ico'), cwd = template, relative_trick = True, chmod = Utils.O644)
 	if inst:
 		self.install_extras.append(inst)
 

@@ -14,6 +14,7 @@ module Peach {
 		iteration: number;
 		time: Date;
 		faultCount: number;
+		href: string;
 	}
 
 	export interface IMutatorMetric {

@@ -17,7 +17,6 @@ using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Dom;
 using Peach.Pro.Core.WebServices.Models;
-using DescriptionAttribute = Peach.Core.DescriptionAttribute;
 using Encoding = System.Text.Encoding;
 using File = System.IO.File;
 using Monitor = Peach.Pro.Core.WebServices.Models.Monitor;
@@ -307,10 +306,10 @@ namespace Peach.Pro.Core.WebServices
 		{
 			var ret = new List<Monitor>();
 
-			foreach (var kv in ClassLoader.GetAllByAttribute<MonitorAttribute>((t, a) => a.IsDefault))
+			foreach (var kv in ClassLoader.GetAllByAttribute<MonitorAttribute>())
 			{
 #if !DEBUG
-				if (kv.Key.IsTest)
+				if (kv.Key.Internal)
 					continue;
 #endif
 
@@ -329,9 +328,14 @@ namespace Peach.Pro.Core.WebServices
 		/// </summary>
 		/// <param name="guid">Pit guid.</param>
 		/// <returns>List of calls</returns>
-		public List<string> GetCalls(string guid)
+		public List<string> GetCallsById(string guid)
 		{
-			var pit = GetPitDetailById(guid);
+			return GetCallsByUrl(PitService.Prefix + "/" + guid);
+		}
+
+		public List<string> GetCallsByUrl(string url)
+		{
+			var pit = GetPitDetailByUrl(url);
 			if (pit == null)
 				return null;
 
@@ -354,7 +358,7 @@ namespace Peach.Pro.Core.WebServices
 
 			var m = new Monitor
 			{
-				Description = type.GetAttributes<DescriptionAttribute>().Select(a => a.Description).FirstOrDefault() ?? "",
+				Description = type.GetAttributes<System.ComponentModel.DescriptionAttribute>().Select(a => a.Description).FirstOrDefault() ?? "",
 				MonitorClass = attr.Name,
 				Map = new List<Parameter>(),
 				OS = os,
@@ -575,22 +579,18 @@ namespace Peach.Pro.Core.WebServices
 			XmlTools.Serialize(fileName, final);
 		}
 
-		public PitAgents GetAgentsById(string guid)
+		public List<Models.Agent> GetAgentsById(string guid)
 		{
 			return GetAgentsByUrl(PitService.Prefix + "/" + guid);
 		}
 
-		public PitAgents GetAgentsByUrl(string url)
+		public List<Models.Agent> GetAgentsByUrl(string url)
 		{
 			var pit = GetPitDetailByUrl(url);
 			if (pit == null)
 				return null;
 
-			var ret = new PitAgents
-			{
-				PitUrl = url,
-				Agents = new List<Models.Agent>(),
-			};
+			var ret = new List<Models.Agent>();
 			foreach (var agent in pit.Agents)
 			{
 				var a = new Models.Agent
@@ -610,10 +610,7 @@ namespace Peach.Pro.Core.WebServices
 					};
 
 					var monitor1 = monitor;
-					var type = ClassLoader.GetAllByAttribute<MonitorAttribute>(
-						(t, attr) => attr.Name == monitor1.Class)
-							.Select(kv => kv.Value)
-							.FirstOrDefault();
+					var type = ClassLoader.FindPluginByName<MonitorAttribute>(monitor1.Class);
 					if (type == null)
 					{
 						// No plugin found, make up some reasonable content
@@ -629,7 +626,7 @@ namespace Peach.Pro.Core.WebServices
 					}
 					else
 					{
-						m.Description = type.GetAttributes<DescriptionAttribute>()
+						m.Description = type.GetAttributes<System.ComponentModel.DescriptionAttribute>()
 							.Select(d => d.Description)
 							.FirstOrDefault() ?? "";
 
@@ -650,7 +647,7 @@ namespace Peach.Pro.Core.WebServices
 
 					a.Monitors.Add(m);
 				}
-				ret.Agents.Add(a);
+				ret.Add(a);
 			}
 
 			return ret;
@@ -949,12 +946,12 @@ namespace Peach.Pro.Core.WebServices
 			return library;
 		}
 
-		public PitConfig GetConfigById(string guid)
+		public List<Parameter> GetConfigById(string guid)
 		{
 			return GetConfigByUrl(PitService.Prefix + "/" + guid);
 		}
 
-		public PitConfig GetConfigByUrl(string url)
+		public List<Parameter> GetConfigByUrl(string url)
 		{
 			var pit = GetPitByUrl(url);
 			if (pit == null)
@@ -962,22 +959,13 @@ namespace Peach.Pro.Core.WebServices
 
 			var fileName = pit.Versions[0].Files[0].Name + ".config";
 
-			var ret = new PitConfig
-			{
-				PitUrl = pit.PitUrl,
-			};
-
 			// ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
 			if (!File.Exists(fileName))
 			{
-				ret.Config = new List<Parameter>();
-			}
-			else
-			{
-				ret.Config = MakeConfig(PitDefines.Parse(fileName));
+				return new List<Parameter>();
 			}
 
-			return ret;
+			return MakeConfig(PitDefines.Parse(fileName));
 		}
 
 		public List<Parameter> MakeConfig(List<PitDefines.Define> defines)

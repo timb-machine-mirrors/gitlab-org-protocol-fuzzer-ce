@@ -92,7 +92,7 @@ namespace Peach.Pro.Core.Dom
 						name == null ? "" : "'" + name + "' ", refName, refObj.debugName, node.OuterXml));
 
 				if (string.IsNullOrEmpty(name))
-					name = new Stream().name;
+					name = new Stream().Name;
 
 				stream = refObj.Clone(name) as Stream;
 				stream.parent = parent;

@@ -13,14 +13,12 @@
 	cursor: not-allowed;
 }
 
-.skin-1 .navbar-header .nav > li > a {
-	background-color: transparent;
-	font-size: 20px;
-	cursor: pointer;
-}
-
 .skin-1 .navbar-header img {
 	height: 50px;
+}
+
+.nav-list > li .submenu {
+	display: block;
 }
 
 a.disabled {
@@ -162,76 +160,6 @@ pre.peach-test-log {
 	transform: translate(0, 0);
 }
 
-.ui-select-container .btn-group > .btn {
-	display: inline-block;
-	padding: 6px 4px;
-	font-size: 14px;
-	font-weight: normal;
-	line-height: 1.42857143;
-	text-align: left;
-	white-space: nowrap;
-	vertical-align: middle;
-	-ms-touch-action: manipulation;
-	touch-action: manipulation;
-	cursor: pointer;
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
-	background-image: none;
-	border: 1px solid transparent;
-	border-radius: 4px;
-	text-shadow: none !important;
-	margin: 0;
-}
-
-.ui-select-container .btn-group > .btn-default {
-	color: #333 !important;
-	background-color: #fff !important;
-	border-color: #ccc;
-	height: 34px;
-}
-
-.ui-select-container .btn-group > .btn:first-child {
-	border-right: none;
-	width: 100%;
-}
-
-.ui-select-container .btn-group > .btn:first-child:hover {
-	z-index: auto;
-}
-
-.ui-select-container .btn-group > .btn + .btn {
-	border-left: none;
-	position: absolute;
-	right: 0;
-	display: block;
-	width: 34px;
-	height: 34px;
-	text-align: center;
-	padding: 6px 12px;
-}
-
-.ui-select-container .btn-group > .btn + .btn:active {
-	top: auto;
-	left: auto;
-}
-
-.ui-select-container .btn-group > .btn > .caret {
-	margin: 0 5px 0 0;
-	border-top-color: black;
-}
-
-.ui-select-bootstrap > .ui-select-choices {
-	max-height: 400px;
-}
-
-.ui-select-choices-row-inner small {
-	display: inline-block;
-	white-space: normal;
-	padding-left: 5px;
-	font-style: italic;
-}
 
 .peach-add-monitor {
 	width: 400px;
@@ -245,73 +173,13 @@ pre.peach-test-log {
 	background: orange;
 }
 
-
-/* peach:combobox styles */
-.combobox div {
-	position: relative;
-	display: inline-block;
-	width: 100%;
-	margin: 0;
-	padding: 0;
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+display: none !important;
 }
 
-.combobox input {
-	margin: 0;
-	width: 100%;
-}
-
-.combobox .open {
-	display: inline-block;
-	position: absolute;
-	margin-top: 0;
-	top: 0;
-	right: 0;
+noscript {
 	text-align: center;
-	padding: 6px 6px;
-	font-size: 0;
-}
-
-.open.disabled {
-	color: #ccc;
-}
-
-.combobox .open:before {
-	display: inline-block;
-	content: "";
-	width: 0;
-	height: 0;
-	margin-left: 2px;
-	margin-top: 7px;
-	border-top: 6px solid;
-	border-right: 4px solid transparent;
-	border-left: 4px solid transparent;
-}
-
-.combobox .options {
-	position: absolute;
-	width: 100%;
-	top: 100%;
-	z-index: 9999;
-	padding: 0;
-	margin: -1px 0;
-	border: 1px solid #ccc;
-	background: #fff;
-	list-style-type: none;
-	max-height: 240px;
-	overflow: auto;
-}
-
-.combobox .options .option {
-	border-bottom: 1px solid #eee;
-	margin: 0;
-	padding: 3px 6px;
-	cursor: default;
-}
-
-.combobox .options .option:hover, .combobox .options .option.highlighted {
-	background-color: #f5f5f5;
-}
-
-.combobox .options .option:last-child {
-	border-bottom: none;
+	padding: 30px;
+	display: block;
+	font-size: large;
 }

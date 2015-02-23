@@ -48,7 +48,9 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 		[Test]
 		public void TestNoWindow()
 		{
-			var ex = Assert.Throws<PeachException>(() => new PopupWatcher(null, null, new Dictionary<string, Variant>()));
+			var mon = new PopupWatcher(null);
+			var ex = Assert.Throws<PeachException>(() =>
+				mon.StartMonitor(new Dictionary<string, string>()));
 			Assert.AreEqual("Monitor 'PopupWatcher' is missing required parameter 'WindowNames'.", ex.Message);
 		}
 
@@ -92,10 +94,15 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			var faults = runner.Run();
 
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("PopupWatcher", faults[0].detectionSource);
-			Assert.AreEqual("Closed 1 popup window.", faults[0].title);
-			Assert.AreEqual(FaultType.Data, faults[0].type);
-			Assert.True(faults[0].description.Contains(windowName));
+			Assert.AreEqual("PopupWatcher", faults[0].DetectionSource);
+			Assert.AreEqual("Closed 1 popup window.", faults[0].Title);
+			Assert.Null(faults[0].Fault, "Should not have faulted");
+			Assert.NotNull(faults[0].Data);
+			Assert.AreEqual(1, faults[0].Data.Count);
+			Assert.True(faults[0].Data.ContainsKey("ClosedWindows.txt"), "Should contain 'ClosedWindows.txt'");
+
+			var data = faults[0].Data["ClosedWindows.txt"].AsString();
+			Assert.AreEqual("Window Titles:{0}{1}".Fmt(Environment.NewLine, windowName), data);
 		}
 
 		[Test]
@@ -149,11 +156,17 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			var faults = runner.Run();
 
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("PopupWatcher", faults[0].detectionSource);
-			Assert.AreEqual("Closed 2 popup windows.", faults[0].title);
-			Assert.AreEqual(FaultType.Data, faults[0].type);
-			StringAssert.Contains(windowName1, faults[0].description);
-			StringAssert.Contains(windowName2, faults[0].description);
+			Assert.AreEqual("PopupWatcher", faults[0].DetectionSource);
+			Assert.AreEqual("Closed 2 popup windows.", faults[0].Title);
+			Assert.Null(faults[0].Fault, "Should not have faulted");
+			Assert.NotNull(faults[0].Data);
+			Assert.AreEqual(1, faults[0].Data.Count);
+			Assert.True(faults[0].Data.ContainsKey("ClosedWindows.txt"), "Should contain 'ClosedWindows.txt'");
+
+			var data = faults[0].Data["ClosedWindows.txt"].AsString();
+
+			StringAssert.Contains(windowName1, data);
+			StringAssert.Contains(windowName2, data);
 		}
 
 		[Test]
@@ -190,10 +203,13 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			var faults = runner.Run();
 
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("PopupWatcher", faults[0].detectionSource);
-			Assert.AreEqual("Closed 1 popup window.", faults[0].title);
-			Assert.AreEqual(FaultType.Fault, faults[0].type);
-			Assert.True(faults[0].description.Contains(windowName));
+			Assert.AreEqual("PopupWatcher", faults[0].DetectionSource);
+			Assert.AreEqual("Closed 1 popup window.", faults[0].Title);
+			Assert.NotNull(faults[0].Fault, "Should have faulted");
+			Assert.NotNull(faults[0].Data);
+			Assert.AreEqual(0, faults[0].Data.Count);
+
+			Assert.AreEqual("Window Titles:{0}{1}".Fmt(Environment.NewLine, windowName), faults[0].Fault.Description);
 		}
 	}
 }

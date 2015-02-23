@@ -4,11 +4,12 @@ using Org.BouncyCastle.Crypto.Tls;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Transformers.Crypto
 {
 	[Description("Tls Transformer")]
-	[Transformer("Tls", true, IsTest = true)]
+	[Transformer("Tls", true, Internal = true)]
 	[Parameter("ContentType", typeof(byte), "Type of message to encrypt/decrypt")]
 	[Serializable]
 	public class Tls : Transformer

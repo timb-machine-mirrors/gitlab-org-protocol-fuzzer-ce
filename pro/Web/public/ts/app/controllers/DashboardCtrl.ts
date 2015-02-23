@@ -6,21 +6,21 @@ module Peach {
 	export class DashboardController {
 
 		static $inject = [
-			Constants.Angular.$scope,
-			Constants.Angular.$modal,
-			Constants.Services.Pit,
-			Constants.Services.Job
+			C.Angular.$scope,
+			C.Angular.$state,
+			C.Angular.$modal,
+			C.Services.Pit,
+			C.Services.Job
 		];
 
 		constructor(
 			$scope: IViewModelScope,
+			private $state: ng.ui.IStateService,
 			private $modal: ng.ui.bootstrap.IModalService,
 			private pitService: PitService,
 			private jobService: JobService
 		) {
-			$scope.vm = this;
-
-			$scope.$watch('vm.jobService.Faults.length', (newVal, oldVal) => {
+			$scope.$watch(() => jobService.Faults.length, (newVal, oldVal) => {
 				if (newVal !== oldVal) {
 					this.refreshFaults();
 				}
@@ -83,7 +83,7 @@ module Peach {
 
 		public StartWithOptions() {
 			this.$modal.open({
-				templateUrl: "html/modal/StartJob.html",
+				templateUrl: C.Templates.Modal.StartJob,
 				controller: StartJobController
 			}).result.then((job: IJob) => {
 				this.jobService.StartJob(job);
@@ -104,16 +104,21 @@ module Peach {
 
 		public get StatusClass(): any {
 			if (!_.isUndefined(this.Job) && !_.isUndefined(this.Job.result)) {
-				return { 'alert-danger': true };
+				return 'alert-danger';
 			}
-			return { 'alert-info': true };
+			return 'alert-info';
 		}
 
 		public ValueAlt(value, alt) {
-			if (_.isUndefined(value)) {
-				return alt;
-			}
-			return value;
+			return _.isUndefined(value) ? alt : value;
+		}
+
+		public OnFaultSelected(fault: IFaultSummary) {
+			var params = {
+				bucket: 'all',
+				id: fault.iteration
+			};
+			this.$state.go(C.States.FaultsDetail, params);
 		}
 
 		private refreshFaults() {

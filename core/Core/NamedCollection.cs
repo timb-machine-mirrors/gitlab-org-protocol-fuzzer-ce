@@ -1,6 +1,5 @@
 using System;
 using System.Collections.ObjectModel;
-using Peach.Core.Dom;
 
 namespace Peach.Core
 {
@@ -11,7 +10,7 @@ namespace Peach.Core
 	/// </summary>
 	/// <typeparam name="TKey"></typeparam>
 	/// <typeparam name="TValue"></typeparam>
-	public interface ITryGetValue<TKey, TValue>
+	public interface ITryGetValue<in TKey, TValue>
 	{
 		bool TryGetValue(TKey key, out TValue value);
 	}
@@ -24,14 +23,14 @@ namespace Peach.Core
 	[Serializable]
 	public class NamedCollection<T> : KeyedCollection<string, T>, ITryGetValue<string, T> where T : INamed
 	{
-		private string baseName;
+		private readonly string _baseName;
 
 		/// <summary>
 		/// Uses typeof(T).Name as the base name when generating unique names.
 		/// </summary>
 		public NamedCollection()
 		{
-			this.baseName = typeof(T).Name;
+			_baseName = typeof(T).Name;
 		}
 
 		/// <summary>
@@ -40,12 +39,12 @@ namespace Peach.Core
 		/// <param name="baseName"></param>
 		public NamedCollection(string baseName)
 		{
-			this.baseName = baseName;
+			_baseName = baseName;
 		}
 
 		protected override string GetKeyForItem(T item)
 		{
-			return item.name;
+			return item.Name;
 		}
 
 		public bool TryGetValue(string key, out T value)
@@ -68,10 +67,10 @@ namespace Peach.Core
 		/// <returns></returns>
 		public string UniqueName()
 		{
-			var name = baseName;
+			var name = _baseName;
 
-			for (int i = 1; Contains(name); ++i)
-				name = string.Format("{0}_{1}", baseName, i);
+			for (var i = 1; Contains(name); ++i)
+				name = string.Format("{0}_{1}", _baseName, i);
 
 			return name;
 		}

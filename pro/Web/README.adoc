@@ -14,6 +14,7 @@ Then run the following commands from this directory:
 mkdir %HOME%\AppData\Roaming\npm
 npm install -g grunt-cli
 npm install -g bower
+npm install
 bower install
 ```
 
@@ -25,7 +26,7 @@ This one is for unit test.
 grunt test
 ```
 
-This one generates the production code and hosts a proxy server. 
+This one generates the app code and hosts a proxy server. 
 It should automatically launch your web browser.
 Before launching this command, make sure the Peach server is running first 
 (I usually use Ctrl-F5 in Visual Studio for this).
@@ -45,5 +46,15 @@ To add a new package (in this case `angular`):
 ```
 bower install angular -S
 tsd query angular -rosa install
+```
+
+Next we want to arrange for grunt to copy over assets from the bower package 
+into the `public/lib` directory.
+This requires an update to the `bowercopy` section in `Gruntfile.coffee`.
+Have a look at this for more details:
+https://www.npmjs.com/package/grunt-bowercopy
+
+With the `Gruntfile.coffee` file updated, you can now run:
+```
 grunt init
 ```

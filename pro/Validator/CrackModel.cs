@@ -146,7 +146,7 @@ namespace PeachValidator
 
 		public string Name
 		{
-			get { return DataElement.name; }
+			get { return DataElement.Name; }
 		}
 
 		public string IconName
