@@ -897,8 +897,8 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 
 			for (int i = 0; i < actions.Count; ++i)
 			{
-				Assert.AreEqual(actions[i].name, oldActions[i].name);
-				Assert.AreEqual(actions[i].dataModel.name, oldActions[i].dataModel.name);
+				Assert.AreEqual(actions[i].Name, oldActions[i].Name);
+				Assert.AreEqual(actions[i].dataModel.Name, oldActions[i].dataModel.Name);
 				var oldDataModel = oldActions[i].dataModel;
 				var dataModel = actions[i].dataModel;
 

@@ -1,16 +1,30 @@
-using Peach.Core.Dom;
+using System;
 using NUnit.Framework;
 
 namespace Peach.Core.Test
 {
 	class Parent : INamed
 	{
-		public string name { get; set; }
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
+		public string Name { get; set; }
 	}
 
 	class Child : INamed, IOwned<Parent>
 	{
-		public string name { get; set; }
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
+		public string Name { get; set; }
 		public Parent parent { get; set; }
 	}
 
@@ -20,9 +34,9 @@ namespace Peach.Core.Test
 		[Test]
 		public void TestAdd()
 		{
-			var p = new Parent() { name = "parent" };
-			var c1 = new Child() { name = "child1" };
-			var c2 = new Child() { name = "child2" };
+			var p = new Parent() { Name = "parent" };
+			var c1 = new Child() { Name = "child1" };
+			var c2 = new Child() { Name = "child2" };
 
 			var items = new OwnedCollection<Parent, Child>(p);
 

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -13,11 +12,13 @@ using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
 using Encoding = Peach.Core.Encoding;
+using Monitor = Peach.Core.Agent.Monitor2;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.OS.Linux.Agent.Monitors
 {
-	[Monitor("LinuxDebugger", true)]
-	[Peach.Core.Description("Uses GDB to launch an executable, monitoring it for exceptions")]
+	[Monitor("LinuxDebugger")]
+	[Description("Uses GDB to launch an executable, monitoring it for exceptions")]
 	[Parameter("Executable", typeof(string), "Executable to launch")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
 	[Parameter("GdbPath", typeof(string), "Path to gdb", "/usr/bin/gdb")]
@@ -27,7 +28,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 	[Parameter("StartOnCall", typeof(string), "Start command on state model call", "")]
 	[Parameter("WaitForExitOnCall", typeof(string), "Wait for process to exit on state model call and fault if timeout is reached", "")]
 	[Parameter("WaitForExitTimeout", typeof(int), "Wait for exit timeout value in milliseconds (-1 is infinite)", "10000")]
-	public class LinuxDebugger : Peach.Core.Agent.Monitor
+	public class LinuxDebugger : Monitor
 	{
 		private class CaptureStream : IDisposable
 		{
@@ -91,7 +92,20 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 						// Read the next block of data from the process
 						Debug.Assert(!_parent._disposed);
 
-						_parent._stream.BeginRead(_buffer, 0, _buffer.Length, OnReadComplete, null);
+						try
+						{
+							_parent._stream.BeginRead(_buffer, 0, _buffer.Length, OnReadComplete, null);
+						}
+						catch (NotSupportedException)
+						{
+							Log("{0} Read (NotSupportedException)", _parent._name);
+
+							_length = 0;
+							_position = 0;
+							_closed = true;
+
+							return 0;
+						}
 
 						var idx = WaitHandle.WaitAny(new[] {_parent._stopEvent, _parent._readEvent});
 
@@ -288,7 +302,15 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 				{
 					Log("{0} >>> Read", _name);
 
-					_stream.BeginRead(buf, 0, buf.Length, cb, null);
+					try
+					{
+						_stream.BeginRead(buf, 0, buf.Length, cb, null);
+					}
+					catch (NotSupportedException)
+					{
+						Log("{0} Read (NotSupportedException)", _name);
+						break;
+					}
 
 					var idx = WaitHandle.WaitAny(new WaitHandle[] { _stopEvent, _readEvent });
 
@@ -435,7 +457,7 @@ quit
 		CaptureStream _stderr;
 		Process _procHandler;
 		Process _procCommand;
-		Fault _fault = null;
+		MonitorData _fault;
 		bool _messageExit = false;
 		bool _secondStart = false;
 		string _exploitable = null;
@@ -459,10 +481,14 @@ quit
 		public string WaitForExitOnCall { get; private set; }
 		public int WaitForExitTimeout { get; private set; }
 
-		public LinuxDebugger(IAgent agent, string name, Dictionary<string, Variant> args)
-			: base(agent, name, args)
+		public LinuxDebugger(string name)
+			: base(name)
 		{
-			ParameterParser.Parse(this, args);
+		}
+
+		public override void StartMonitor(Dictionary<string, string> args)
+		{
+			base.StartMonitor(args);
 
 			_exploitable = FindExploitable();
 		}
@@ -472,8 +498,8 @@ quit
 			var target = "gdb/exploitable/exploitable.py";
 
 			var dirs = new List<string> {
-				Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-				Directory.GetCurrentDirectory(),
+				Utilities.ExecutionDirectory,
+				Environment.CurrentDirectory,
 			};
 
 			string path = Environment.GetEnvironmentVariable("PATH");
@@ -649,8 +675,7 @@ quit
 					if (!useCpuKill)
 					{
 						logger.Debug("FAULT, WaitForExit ran out of time!");
-						_fault = MakeFault("ProcessFailedToExit", "Process did not exit in " + WaitForExitTimeout + "ms");
-						this.Agent.QueryMonitors("CanaKitRelay_Reset");
+						_fault = MakeFault("FailedToExit", "Process did not exit in " + WaitForExitTimeout + "ms.");
 					}
 				}
 				else
@@ -680,19 +705,22 @@ quit
 			return _procCommand != null && !_procCommand.HasExited;
 		}
 
-		Fault MakeFault(string folder, string reason)
+		MonitorData MakeFault(string type, string reason)
 		{
-			var ret = new Fault
+			var ret = new MonitorData
 			{
-				type = FaultType.Fault,
-				detectionSource = "LinuxDebugger",
-				title = reason,
-				description = "{0}: {1} {2}".Fmt(reason, Executable, Arguments),
-				folderName = folder,
+				Title = reason,
+				Data = new Dictionary<string, Stream>
+				{
+					{ "stdout.log", new MemoryStream(File.ReadAllBytes(Path.Combine(_tmpPath, "stdout.log"))) },
+					{ "stderr.log", new MemoryStream(File.ReadAllBytes(Path.Combine(_tmpPath, "stderr.log"))) }
+				},
+				Fault = new MonitorData.Info
+				{
+					Description = "{0} {1} {2}".Fmt(reason, Executable, Arguments),
+					MajorHash = type,
+				}
 			};
-
-			ret.collectedData.Add(new Fault.Data("stdout.log", File.ReadAllBytes(Path.Combine(_tmpPath, "stdout.log"))));
-			ret.collectedData.Add(new Fault.Data("stderr.log", File.ReadAllBytes(Path.Combine(_tmpPath, "stderr.log"))));
 
 			return ret;
 		}
@@ -710,7 +738,7 @@ quit
 			return dir.ToString();
 		}
 
-		public override void IterationStarting(uint iterationCount, bool isReproduction)
+		public override void IterationStarting(IterationStartingArgs args)
 		{
 			var firstStart = !_secondStart;
 
@@ -739,50 +767,42 @@ quit
 			byte[] bytes = File.ReadAllBytes(_gdbLog);
 			string output = Encoding.UTF8.GetString(bytes);
 
-			_fault = new Fault();
-			_fault.type = FaultType.Fault;
-			_fault.detectionSource = "LinuxDebugger";
+			_fault = new MonitorData
+			{
+				Data = new Dictionary<string, Stream>(),
+				Fault = new MonitorData.Info()
+			};
 
 			var hash = reHash.Match(output);
 			if (hash.Success)
 			{
-				_fault.majorHash = hash.Groups[1].Value.Substring(0, 8).ToUpper();
-				_fault.minorHash = hash.Groups[2].Value.Substring(0, 8).ToUpper();
+				_fault.Fault.MajorHash = hash.Groups[1].Value.Substring(0, 8).ToUpper();
+				_fault.Fault.MinorHash = hash.Groups[2].Value.Substring(0, 8).ToUpper();
 			}
 
 			var exp = reClassification.Match(output);
 			if (exp.Success)
-				_fault.exploitability = exp.Groups[1].Value;
+				_fault.Fault.Risk = exp.Groups[1].Value;
 
 			var desc = reDescription.Match(output);
 			if (desc.Success)
-				_fault.title = desc.Groups[1].Value;
+				_fault.Title = desc.Groups[1].Value;
 
 			var other = reOther.Match(output);
 			if (other.Success)
-				_fault.title += ", " + other.Groups[1].Value;
+				_fault.Title += ", " + other.Groups[1].Value;
 
-			_fault.collectedData.Add(new Fault.Data("StackTrace.txt", bytes));
-			_fault.collectedData.Add(new Fault.Data("stdout.log", File.ReadAllBytes(Path.Combine(_tmpPath, "stdout.log"))));
-			_fault.collectedData.Add(new Fault.Data("stderr.log", File.ReadAllBytes(Path.Combine(_tmpPath, "stderr.log"))));
-			_fault.description = output;
+			_fault.Data.Add("StackTrace.txt", new MemoryStream(bytes));
+			_fault.Data.Add("stdout.log", new MemoryStream(File.ReadAllBytes(Path.Combine(_tmpPath, "stdout.log"))));
+			_fault.Data.Add("stderr.log", new MemoryStream(File.ReadAllBytes(Path.Combine(_tmpPath, "stderr.log"))));
+			_fault.Fault.Description = output;
 
 			return true;
 		}
 
-		public override Fault GetMonitorData()
+		public override MonitorData GetMonitorData()
 		{
 			return _fault;
-		}
-
-		public override bool MustStop()
-		{
-			return false;
-		}
-
-		public override void StopMonitor()
-		{
-			_Stop();
 		}
 
 		public override void SessionStarting()
@@ -808,12 +828,12 @@ quit
 			Directory.Delete(_tmpPath, true);
 		}
 
-		public override bool IterationFinished()
+		public override void IterationFinished()
 		{
 			if (!_messageExit && FaultOnEarlyExit && !_IsRunning())
 			{
 				_Stop(); // Stop 1st so stdout/stderr logs are closed
-				_fault = MakeFault("ProcessExitedEarly", "Process exited early");
+				_fault = MakeFault("ExitedEarly", "Process exited early.");
 			}
 			else if (StartOnCall != null)
 			{
@@ -824,25 +844,21 @@ quit
 			{
 				_Stop();
 			}
-
-			return true;
 		}
 
-		public override Variant Message(string name, Variant data)
+		public override void Message(string msg)
 		{
-			if (name == "Action.Call" && ((string)data) == StartOnCall)
+			if (msg == StartOnCall)
 			{
 				_Stop();
 				_Start();
 			}
-			else if (name == "Action.Call" && ((string)data) == WaitForExitOnCall)
+			else if (msg == WaitForExitOnCall)
 			{
 				_messageExit = true;
 				_WaitForExit(false);
 				_Stop();
 			}
-
-			return null;
 		}
 	}
 }

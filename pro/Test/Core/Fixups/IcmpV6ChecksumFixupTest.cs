@@ -98,7 +98,7 @@ namespace Peach.Pro.Test.Core.Fixups
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
 			var csum = ((Block)dom.dataModels[0][0])[2];
-			Assert.AreEqual("csum", csum.name);
+			Assert.AreEqual("csum", csum.Name);
 
 			var val = csum.InternalValue;
 			Assert.AreEqual(0x68bd, (int)val);

@@ -128,10 +128,10 @@ namespace Peach.Pro.Core.Analyzers
 			}
 			catch (Exception ex)
 			{
-				throw new PeachException("Error, XmlAnalyzer failed to analyze element '" + parent.name + "'.  " + ex.Message, ex);
+				throw new PeachException("Error, XmlAnalyzer failed to analyze element '" + parent.Name + "'.  " + ex.Message, ex);
 			}
 
-			var elem = new Peach.Core.Dom.XmlElement(strElement.name);
+			var elem = new Peach.Core.Dom.XmlElement(strElement.Name);
 
 			foreach (XmlNode node in doc.ChildNodes)
 			{
@@ -146,7 +146,7 @@ namespace Peach.Pro.Core.Analyzers
 				elem.standalone = decl.Standalone;
 			}
 
-			parent.parent[parent.name] = elem;
+			parent.parent[parent.Name] = elem;
 		}
 
 		protected void handleXmlNode(Peach.Core.Dom.XmlElement elem, XmlNode node, StringType type)

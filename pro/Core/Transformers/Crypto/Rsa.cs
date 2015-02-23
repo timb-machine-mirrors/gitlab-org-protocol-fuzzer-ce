@@ -9,10 +9,11 @@ using Org.BouncyCastle.Security;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Transformers.Crypto
 {
-	[Transformer("Rsa", true, IsTest = true)]
+	[Transformer("Rsa", true, Internal = true)]
 	[Description("RSA encryption and decryption")]
 	[Parameter("PublicKey", typeof(HexString), "Public key modulus", "")]
 	[Parameter("PublicExponent", typeof(HexString), "Public key exponent", "010001")]

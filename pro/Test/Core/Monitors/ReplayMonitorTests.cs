@@ -18,7 +18,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		[TestCase(false)]
 		public void Run(bool controlIteration)
 		{
-			var xml = @"
+			const string xml = @"
 <Peach>
 	<DataModel name='TheDataModel'>
 		<String name='str1' value='Hello, World!' />
@@ -33,14 +33,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		</State>
 	</StateModel>
 
-	<Agent name='LocalAgent'>
-		<Monitor class='FaultingMonitor'>
-			<Param name='Iteration' value='{0}'/>
-		</Monitor>
-	</Agent>
-
 	<Test name='Default' targetLifetime='iteration' faultWaitTime='0.0'>
-		<Agent ref='LocalAgent' />
 		<StateModel ref='TheState' />
 		<Publisher class='Null' />
 		<Strategy class='RandomDeterministic' />
@@ -51,11 +44,17 @@ namespace Peach.Pro.Test.Core.Monitors
 		<Strategy class='RandomDeterministic' />
 	</Test>
 </Peach>
-".Fmt(controlIteration ? "C" : "");
+";
 
 			var dom = DataModelCollector.ParsePit(xml);
 			var cfg = new RunConfiguration();
 			var e = new Engine(null);
+
+			e.IterationStarting += (ctx, it, tot) =>
+			{
+				if (controlIteration || !ctx.controlIteration)
+					ctx.InjectFault();
+			};
 
 			e.ReproFault += (ctx, it, sm, faults) =>
 			{
@@ -91,7 +90,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			{
 				var ex = Assert.Throws<PeachException>(() => e.startFuzzing(dom, cfg));
 
-				Assert.AreEqual("Fault detected on control iteration.", ex.Message);
+				Assert.AreEqual("Fault detected on control record iteration.", ex.Message);
 
 				expectedFaults = 1;
 			}
@@ -115,8 +114,8 @@ namespace Peach.Pro.Test.Core.Monitors
 				Assert.AreEqual(initial.title, repro.title);
 				Assert.AreEqual(initial.iteration, repro.iteration);
 
-				// Two pieces of data: FaultingMonitor and sm.dataActions
-				Assert.AreEqual(2, initial.collectedData.Count);
+				// One piece of data: sm.dataActions
+				Assert.AreEqual(1, initial.collectedData.Count);
 				Assert.AreEqual(initial.collectedData.Count, repro.collectedData.Count);
 
 				for (var j = 0; j < initial.collectedData.Count; ++j)

@@ -132,7 +132,7 @@ namespace Peach.Core.Dom
 							if (child.isToken)
 							{
 								logger.Trace("BuildCache: Adding '{0}' as token offset: {1}", child.fullName, offset);
-								_choiceCache[elem.name] = new ChoiceCache() { Offset = offset, Token = child.Value };
+								_choiceCache[elem.Name] = new ChoiceCache() { Offset = offset, Token = child.Value };
 								break;
 							}
 
@@ -144,7 +144,7 @@ namespace Peach.Core.Dom
 						}
 					}
 					else if (elem.isToken)
-						_choiceCache[elem.name] = new ChoiceCache() { Offset = 0, Token = elem.Value };
+						_choiceCache[elem.Name] = new ChoiceCache() { Offset = 0, Token = elem.Value };
 				}
 				catch
 				{
@@ -237,7 +237,7 @@ namespace Peach.Core.Dom
 				// Skip any cache entries, already tried them
 				// Except if our cache choice failed to parse. Then 
 				// try all options.
-				if(!isTryAfterFailure && _choiceCache.ContainsKey(child.name))
+				if (!isTryAfterFailure && _choiceCache.ContainsKey(child.Name))
 					continue;
 
 				try
@@ -292,7 +292,7 @@ namespace Peach.Core.Dom
 			// Move children to choiceElements collection
 			foreach (DataElement elem in choice)
 			{
-				choice.choiceElements.Add(elem.name, elem);
+				choice.choiceElements.Add(elem.Name, elem);
 				elem.parent = choice;
 			}
 
@@ -323,13 +323,13 @@ namespace Peach.Core.Dom
 		{
 			DataElement oldChoice;
 
-			if (choiceElements.TryGetValue(newElem.name, out oldChoice))
+			if (choiceElements.TryGetValue(newElem.Name, out oldChoice))
 			{
 				oldChoice.parent = null;
 				newElem.UpdateBindings(oldChoice);
 			}
 
-			choiceElements[newElem.name] = newElem;
+			choiceElements[newElem.Name] = newElem;
 			newElem.parent = this;
 		}
 

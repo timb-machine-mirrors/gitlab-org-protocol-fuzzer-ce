@@ -66,7 +66,7 @@ namespace Peach.Pro.Test.Core
 			Assert.AreEqual(2, dom.dataModels.Count);
 
 			var dm = dom.dataModels[1];
-			Assert.AreEqual("TheDataModel", dm.name);
+			Assert.AreEqual("TheDataModel", dm.Name);
 
 			// "1234   12    4    test"
 			var expected = new byte[] { 49, 50, 51, 52, 0, 0, 0, 12, 0, 0, 0, 4, 116, 101, 115, 116 };
@@ -103,7 +103,7 @@ namespace Peach.Pro.Test.Core
 			Assert.AreEqual(2, dom.dataModels.Count);
 
 			var dm = dom.dataModels[1];
-			Assert.AreEqual("TheDataModel", dm.name);
+			Assert.AreEqual("TheDataModel", dm.Name);
 
 			// "1234   12    4    test"
 			var expected = new byte[] { 49, 50, 51, 52, 0, 0, 0, 12, 0, 0, 0, 4, 116, 101, 115, 116 };
@@ -134,7 +134,7 @@ namespace Peach.Pro.Test.Core
 			Assert.AreEqual(1, dom.dataModels.Count);
 
 			var dm = dom.dataModels[0];
-			Assert.AreEqual("TheDataModel", dm.name);
+			Assert.AreEqual("TheDataModel", dm.Name);
 
 			var expected = new byte[] { 8, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF };
 			var actual = dm.Value.ToArray();
@@ -170,7 +170,7 @@ namespace Peach.Pro.Test.Core
 			Assert.AreEqual(2, dom.dataModels.Count);
 
 			var dm = dom.dataModels[1];
-			Assert.AreEqual("TheDataModel", dm.name);
+			Assert.AreEqual("TheDataModel", dm.Name);
 
 			// "1234   12    4    test"
 			var expected = new byte[] { 49, 50, 51, 52, 0, 0, 0, 12, 0, 0, 0, 4, 116, 101, 115, 116 };
@@ -207,7 +207,7 @@ namespace Peach.Pro.Test.Core
 			Assert.AreEqual(2, dom.dataModels.Count);
 
 			var dm = dom.dataModels[1];
-			Assert.AreEqual("TheDataModel", dm.name);
+			Assert.AreEqual("TheDataModel", dm.Name);
 
 			// "1234   12    4    test"
 			var expected = new byte[] { 49, 50, 51, 52, 0, 0, 0, 8, 0, 0, 0, 4, 116, 101, 115, 116 };
@@ -248,7 +248,7 @@ namespace Peach.Pro.Test.Core
 			Assert.AreEqual(3, dom.dataModels.Count);
 
 			var dm = dom.dataModels[2];
-			Assert.AreEqual("TheDataModel", dm.name);
+			Assert.AreEqual("TheDataModel", dm.Name);
 
 			// "1234   12    4    test"
 			var expected = new byte[] { 49, 50, 51, 52, 0, 0, 0, 8, 0, 0, 0, 4, 116, 101, 115, 116 };
@@ -312,7 +312,7 @@ namespace Peach.Pro.Test.Core
 			Assert.AreEqual(2, dom.dataModels.Count);
 
 			var dm = dom.dataModels[1];
-			Assert.AreEqual("TheDataModel", dm.name);
+			Assert.AreEqual("TheDataModel", dm.Name);
 
 			// "1234   12    4    test"
 			var expected = new byte[] {

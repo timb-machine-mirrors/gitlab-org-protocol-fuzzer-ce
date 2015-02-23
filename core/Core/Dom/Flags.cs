@@ -112,7 +112,7 @@ namespace Peach.Core.Dom
 			int size;
 
 			if (!int.TryParse(strSize, out size))
-				throw new PeachException("Error, " + flags.name + " size attribute is not valid number.");
+				throw new PeachException("Error, " + flags.Name + " size attribute is not valid number.");
 
 			if (size < 1 || size > 64)
 				throw new PeachException(string.Format("Error, unsupported size '{0}' for {1}.", size, flags.debugName));

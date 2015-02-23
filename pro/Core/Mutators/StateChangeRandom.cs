@@ -1,7 +1,12 @@
-﻿using System;
+﻿//
+// Copyright (c) Deja vu Security
+//
+
+using System;
 using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Mutators
 {
@@ -69,7 +74,7 @@ namespace Peach.Pro.Core.Mutators
 			{
 				var newState = context.Random.Choice(_model.states);
 
-				logger.Trace("changeState: Swap {0} for {1}.", nextState.name, newState.name);
+				logger.Trace("changeState: Swap {0} for {1}.", nextState.Name, newState.Name);
 				return newState;
 			}
 

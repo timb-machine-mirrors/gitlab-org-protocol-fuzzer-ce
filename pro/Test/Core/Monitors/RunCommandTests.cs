@@ -104,9 +104,8 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestNoArgs()
 		{
-			var ex = Assert.Throws<PeachException>(() =>
-				new MonitorRunner("RunCommand", new Dictionary<string, string>())
-			);
+			var runner = new MonitorRunner("RunCommand", new Dictionary<string, string>());
+			var ex = Assert.Throws<PeachException>(() => runner.Run());
 
 			const string msg = "Could not start monitor \"RunCommand\".  Monitor 'RunCommand' is missing required parameter 'Command'.";
 			Assert.AreEqual(msg, ex.Message);
@@ -115,7 +114,8 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestNoWhen()
 		{
-			var ex = Assert.Throws<PeachException>(() => MakeWhen(""));
+			var runner = MakeWhen("");
+			var ex = Assert.Throws<PeachException>(() => runner.Run());
 
 			const string msg = "Could not start monitor \"RunCommand\".  Monitor 'RunCommand' could not set value type parameter 'When' to 'null'.";
 			Assert.AreEqual(msg, ex.Message);
@@ -164,11 +164,11 @@ namespace Peach.Pro.Test.Core.Monitors
 		{
 			var runner = MakeWhen("OnIterationStart");
 
-			runner.IterationStarting = (m, it, repro) =>
+			runner.IterationStarting = (m, args) =>
 			{
 				Verify("");
 
-				m.IterationStarting(it, repro);
+				m.IterationStarting(args);
 
 				Verify("OnIterationStart");
 			};
@@ -231,6 +231,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		public void TestIterAfterFault()
 		{
 			var runner = MakeWhen("OnIterationStartAfterFault");
+			var it = 0;
 
 			runner.DetectedFault = m =>
 			{
@@ -240,14 +241,14 @@ namespace Peach.Pro.Test.Core.Monitors
 				return true;
 			};
 
-			runner.IterationStarting = (m, it, repro) =>
+			runner.IterationStarting = (m, args) =>
 			{
 				Verify("");
 
-				m.IterationStarting(it, repro);
+				m.IterationStarting(args);
 
 				// We fault on every iteration, so iteration two is the first iteration after fault
-				var exp = it == 2 ? "OnIterationStartAfterFault" : "";
+				var exp = ++it == 2 ? "OnIterationStartAfterFault" : "";
 
 				Verify(exp);
 			};
@@ -284,9 +285,9 @@ namespace Peach.Pro.Test.Core.Monitors
 
 				// Called for each monitor, but each monitor just listens to
 				// the specific message, so send every message to every monitor
-				m.Message("Action.Call", new Variant("CallOne"));
-				m.Message("Action.Call", new Variant("CallTwo"));
-				m.Message("Action.Call", new Variant("CallThree"));
+				m.Message("CallOne");
+				m.Message("CallTwo");
+				m.Message("CallThree");
 
 				VerifyCall(idx);
 			};

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
@@ -42,14 +43,10 @@ namespace Peach.Pro.Test.Core
 		</State>
 	</StateModel>
 
-	<Agent name='LocalAgent'>
-		<Monitor class='FaultingMonitor'>
-			<Param name='Iteration' value='{0}'/>
-			<Param name='Repro' value='{1}'/>
-		</Monitor>
-	</Agent>
+	<!-- Need an agent to measure time between iteration finished and detected fault -->
+	<Agent name='LocalAgent' />
 
-	<Test name='Default' targetLifetime='iteration' controlIteration='{2}' waitTime='{3}' faultWaitTime='{4}'>
+	<Test name='Default' targetLifetime='iteration' controlIteration='{0}' waitTime='{1}' faultWaitTime='{2}'>
 		<Agent ref='LocalAgent'/>
 		<StateModel ref='TheState'/>
 		<Publisher class='Null'/>
@@ -61,7 +58,7 @@ namespace Peach.Pro.Test.Core
 			_faultHistory.Clear();
 			_waitTimes.Clear();
 
-			var xml = string.Format(template, faultIter, repro ? faultIter : "0", controlIter, waitTime, faultWaitTime);
+			var xml = string.Format(template, controlIter, waitTime, faultWaitTime);
 
 			var dom = DataModelCollector.ParsePit(xml);
 
@@ -88,7 +85,12 @@ namespace Peach.Pro.Test.Core
 				if (faultIter.StartsWith("C"))
 				{
 					if (ctx.controlIteration && it == int.Parse(faultIter.Substring(1)) && (!ctx.reproducingFault || repro))
-						ctx.agentManager.Message("Fault", new Variant("true"));
+						ctx.InjectFault();
+				}
+				else if (faultIter == it.ToString(CultureInfo.InvariantCulture))
+				{
+					if (repro || !ctx.reproducingFault)
+						ctx.InjectFault();
 				}
 			};
 

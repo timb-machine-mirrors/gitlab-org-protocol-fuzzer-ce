@@ -17,6 +17,7 @@ namespace Peach.Pro.Test.Core.StateModel
 		public MemoryStreamPublisher(MemoryStream stream)
 			: base(new Dictionary<string, Variant>())
 		{
+			Name = "Pub";
 			this.stream = stream;
 		}
 	}

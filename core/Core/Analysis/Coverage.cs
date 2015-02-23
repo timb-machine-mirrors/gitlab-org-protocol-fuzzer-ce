@@ -75,7 +75,7 @@ namespace Peach.Core.Analysis
 			if (!arguments.Contains("%s"))
 				throw new ArgumentException("Error, arguments must contain a '%s'.");
 
-			var pwd = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+			var pwd = Utilities.ExecutionDirectory;
 
 			switch (Platform.GetOS())
 			{
