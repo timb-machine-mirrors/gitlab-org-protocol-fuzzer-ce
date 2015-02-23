@@ -7,10 +7,10 @@ module Peach {
 
 	export class JobService {
 		static $inject = [
-			Constants.Angular.$q,
-			Constants.Angular.$http,
-			Constants.Angular.$interval,
-			Constants.Services.Pit
+			C.Angular.$q,
+			C.Angular.$http,
+			C.Angular.$interval,
+			C.Services.Pit
 		];
 
 		constructor(
@@ -39,6 +39,16 @@ module Peach {
 		private faults: IFaultSummary[] = [];
 		public get Faults(): IFaultSummary[] {
 			return this.faults;
+		}
+
+		public LoadFaultDetail(id: string): ng.IPromise<IFaultDetail> {
+			var fault = _.find(this.faults, { iteration: id });
+			if (_.isUndefined(fault)) {
+				var defer = this.$q.defer<IFaultDetail>();
+				defer.reject();
+				return defer.promise;
+			}
+			return StripHttpPromise(this.$q, this.$http.get(fault.faultUrl));
 		}
 
 		public get IsRunning(): boolean {
@@ -82,7 +92,7 @@ module Peach {
 
 		public GetJobs(): ng.IPromise<void> {
 			var deferred = this.$q.defer<void>();
-			var promise = this.$http.get("/p/jobs");
+			var promise = this.$http.get(C.Api.Jobs);
 			promise.success((jobs: IJob[]) => {
 				var hasPit = false;
 				if (jobs.length > 0) {
@@ -116,7 +126,7 @@ module Peach {
 			}
 
 			if (this.CanStart) {
-				var promise = this.$http.post("/p/jobs", job);
+				var promise = this.$http.post(C.Api.Jobs, job);
 				promise.success((newJob: IJob) => {
 					this.job = newJob;
 					this.startJobPoller();
@@ -124,7 +134,7 @@ module Peach {
 				promise.error(reason => this.onError(reason));
 			} else if (this.CanContinue) {
 				this.job.status = JobStatus.ActionPending;
-				this.$http.get(this.job.jobUrl + "/continue")
+				this.$http.get(this.job.commands.continueUrl)
 					.success(() => this.startJobPoller())
 					.error(reason => this.onError(reason));
 			}
@@ -133,7 +143,7 @@ module Peach {
 		public PauseJob() {
 			if (this.CanPause) {
 				this.job.status = JobStatus.ActionPending;
-				this.$http.get(this.job.jobUrl + "/pause")
+				this.$http.get(this.job.commands.pauseUrl)
 					.success(() => this.startJobPoller())
 					.error(reason => this.onError(reason));
 			}
@@ -142,7 +152,7 @@ module Peach {
 		public StopJob() {
 			if (this.CanStop) {
 				this.job.status = JobStatus.ActionPending;
-				this.$http.get(this.job.jobUrl + "/stop")
+				this.$http.get(this.job.commands.stopUrl)
 					.success(() => this.startJobPoller())
 					.error(reason => this.onError(reason));
 			}

@@ -60,15 +60,19 @@ namespace PitTester
 
 				test.agents.Clear();
 
-				var data = testData.Tests.Where(t => t.Name == test.name).First();
+				var data = testData.Tests.Where(t => t.Name == test.Name).First();
 
 				var logger = new TestLogger(data, testData.Ignores.Select(i => i.Xpath));
 
 				test.loggers.Clear();
 				test.loggers.Add(logger);
 
-				foreach (var key in test.publishers.Keys)
-					test.publishers[key] = new TestPublisher(key, logger);
+				for (var i = 0; i < test.publishers.Count; ++i)
+				{
+					var oldPub = test.publishers[i];
+					var newPub = new TestPublisher(logger) { Name = oldPub.Name };
+					test.publishers[i] = newPub;
+				}
 			}
 
 			var fixupOverrides = new Dictionary<string, Variant>();
@@ -100,7 +104,7 @@ namespace PitTester
 
 						setElement.DefaultValue = blob.DefaultValue;
 
-						if (setElement.fixup is VolatileFixup)
+						if (setElement.fixup is Peach.Core.Fixups.VolatileFixup)
 						{
 							var dm = setElement.root as DataModel;
 							if (dm != null && dm.actionData != null)

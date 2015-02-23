@@ -13,295 +13,10 @@ namespace Peach.Pro.Test.Core
 	[TestFixture, Category("Peach")]
 	class ReproSessionTests
 	{
-#if DISABLED
-		private static uint[] RunTest(uint start, string faultIter, uint maxSearch = 100, string reproIter = "0")
-		{
-			const string template = @"
-<Peach>
-	<DataModel name='TheDataModel'>
-		<String value='Hello World'/>
-		<String value='Hello World'/>
-		<String value='Hello World'/>
-		<String value='Hello World'/>
-	</DataModel>
-
-	<StateModel name='TheState' initialState='Initial'>
-		<State name='Initial'>
-			<Action type='output'>
-				<DataModel ref='TheDataModel'/>
-			</Action>
-		</State>
-	</StateModel>
-
-	<Agent name='LocalAgent'>
-		<Monitor class='FaultingMonitor'>
-			<Param name='Iteration' value='{0}'/>
-			<Param name='Repro' value='{1}'/>
-		</Monitor>
-	</Agent>
-
-	<Test name='Default' faultWaitTime='0' targetLifetime='session' maxBackSearch='{2}'>
-		<Agent ref='LocalAgent'/>
-		<StateModel ref='TheState'/>
-		<Publisher class='Null'/>
-	</Test>
-</Peach>";
-
-			var xml = string.Format(template, faultIter, reproIter, maxSearch);
-
-			var dom = DataModelCollector.ParsePit(xml);
-
-			var config = new RunConfiguration
-			{
-				range = true,
-				rangeStart = start,
-				rangeStop = 12,
-			};
-
-			var e = new Engine(null);
-
-			var iterationHistory = new List<uint>();
-
-			e.IterationStarting += (ctx, it, tot) => iterationHistory.Add(it);
-			e.startFuzzing(dom, config);
-
-			return iterationHistory.ToArray();
-		}
-
-		[Test]
-		public void TestFirstSearch()
-		{
-			var actual = RunTest(0, "1");
-
-			var expected = new uint[] {
-				1,  // Control
-				1,
-				1,  // Initial replay
-				2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-
-			Assert.AreEqual(expected, actual);
-		}
-
-		[Test]
-		public void TestSecondSearch()
-		{
-			var actual = RunTest(0, "2");
-
-			var expected = new uint[] {
-				1,  // Control
-				1, 2,
-				2,  // Initial replay
-				1,  // Move back 1
-				3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-
-			Assert.AreEqual(expected, actual);
-		}
-
-		[Test]
-		public void TestMiddleSearch()
-		{
-			var actual = RunTest(1, "10");
-
-			var expected = new uint[] {
-				1,  // Control
-				1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-				10, // Initial replay
-				9,  // Move back 1
-				8,  // Move back 2
-				6,  // Move back 4
-				2,  // Move back 8
-				1,  // Move back to beginning
-				11, 12 };
-
-			Assert.AreEqual(expected, actual);
-		}
-
-		[Test]
-		public void TestRangeSearch()
-		{
-			var actual = RunTest(6, "10");
-
-			var expected = new uint[] {
-				6,  // Control
-				6, 7, 8, 9, 10,
-				10, // Initial replay
-				9,  // Move back 1
-				8,  // Move back 2
-				6,  // Move back 4
-				11, 12 };
-
-			Assert.AreEqual(expected, actual);
-		}
-
-		[Test]
-		public void TestRangeBegin()
-		{
-			var actual = RunTest(6, "6");
-
-			var expected = new uint[] {
-				6, // Control
-				6, // Trigger replay
-				6, // Only replay
-				7, 8, 9, 10, 11, 12 };
-
-			Assert.AreEqual(expected, actual);
-		}
-
-		[Test]
-		public void TestRangeMaxEqual()
-		{
-			var actual = RunTest(1, "10", 4);
-
-			var expected = new uint[] {
-				1,  // Control
-				1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-				10, // Initial replay
-				9,  // Move back 1
-				8,  // Move back 2
-				6,  // Move back 4
-				11, 12 };
-
-			Assert.AreEqual(expected, actual);
-		}
-
-		[Test]
-		public void TestRangeMaxLess()
-		{
-			var actual = RunTest(1, "10", 5);
-
-			var expected = new uint[] {
-				1,  // Control
-				1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-				10, // Initial replay
-				9,  // Move back 1
-				8,  // Move back 2
-				6,  // Move back 4
-				11, 12 };
-
-			Assert.AreEqual(expected, actual);
-		}
-
-		[Test]
-		public void TestRangeNotPastFaultOne()
-		{
-			var actual = RunTest(1, "3,4", 100, "3");
-
-			var expected = new uint[] {
-				1,  // Control
-				1, 2,
-				3, // Trigger replay
-				3, // Repro
-				4,
-				4, // Initial Replay
-				5, 6, 7, 8, 9, 10, 11, 12 };
-
-			Assert.AreEqual(expected, actual);
-		}
-
-		[Test]
-		public void TestRangeNotPastFault()
-		{
-			var actual = RunTest(1, "3,10", 100, "3");
-
-			var expected = new uint[] {
-				1,  // Control
-				1, 2,
-				3, // Trigger replay
-				3, // Repro
-				4, 5, 6, 7, 8, 9, 10,
-				10, // Initial replay
-				9,  // Move back 1
-				8,  // Move back 2
-				6,  // Move back 4
-				4,  // Move back 6
-				11, 12 };
-
-			Assert.AreEqual(expected, actual);
-		}
-
-		[Test]
-		public void TestRangeNotPastFault2()
-		{
-			var actual = RunTest(1, "5", 100, "3");
-
-			var expected = new uint[] {
-				1,  // Control
-				1, 2, 3, 4,
-				5, // Trigger replay
-				5, // Initial replay
-				4,
-				3, // Repro
-				4,
-				5, // Trigger Replay
-				5,
-				4, // Repro failed
-				6, 7, 8, 9, 10, 11, 12 };
-
-			Assert.AreEqual(expected, actual);
-		}
-
-		private static void RunWaitTime(string waitTime, double min, double max)
-		{
-			var xml = @"
-<Peach>
-	<DataModel name='TheDataModel'>
-		<Blob name='blob1'/>
-	</DataModel>
-
-	<StateModel name='TheState' initialState='Initial'>
-		<State name='Initial'>
-			<Action type='output'>
-				<DataModel ref='TheDataModel'/>
-			</Action>
-		</State>
-	</StateModel>
-
-	<Test name='Default' waitTime='{0}'>
-		<StateModel ref='TheState'/>
-		<Publisher class='Null'/>
-	</Test>
-</Peach>
-".Fmt(waitTime);
-
-			var ticks = new List<int>();
-
-			var dom = DataModelCollector.ParsePit(xml);
-
-			var config = new RunConfiguration
-			{
-				range = true,
-				rangeStart = 1,
-				rangeStop = 2
-			};
-
-			var e = new Engine(null);
-			e.IterationStarting += (ctx, it, tot) => ticks.Add(Environment.TickCount);
-			e.startFuzzing(dom, config);
-
-			// verify values
-			// Measure the first fuzzing iteration since a control iteration
-			// will loose time for determining element mutability.
-			Assert.AreEqual(3, ticks.Count);
-
-			var delta = (ticks[2] - ticks[1]) / 1000.0;
-
-			Assert.GreaterOrEqual(delta, min);
-			Assert.LessOrEqual(delta, max);
-		}
-
-		[Test]
-		public void TestWaitTimeOld()
-		{
-			RunWaitTime("2", 1.9, 2.1);
-			RunWaitTime("0.1", 0.09, 0.11);
-		}
-#endif
-
 		class Args
 		{
 			public Args()
 			{
-				RangeStart = 0;
 				RangeStop = 10;
 
 				ControlIterations = 0;
@@ -311,7 +26,6 @@ namespace Peach.Pro.Test.Core
 				FaultWaitTime = 0.0;
 			}
 
-			public uint RangeStart { get; set; }
 			public uint RangeStop { get; set; }
 
 			public uint SwitchCount { get; set; }
@@ -324,6 +38,8 @@ namespace Peach.Pro.Test.Core
 			public string InitialRepro { get; set; }
 			public string Fault { get; set; }
 			public string Repro { get; set; }
+
+			public bool FaultOnControl { get; set; }
 
 			public uint? MaxBackSearch { get; set; }
 		}
@@ -361,12 +77,8 @@ namespace Peach.Pro.Test.Core
 		</State>
 	</StateModel>
 
-	<Agent name='LocalAgent'>
-		<Monitor class='FaultingMonitor'>
-			<Param name='Iteration' value='0'/>
-			<Param name='Repro' value='0'/>
-		</Monitor>
-	</Agent>
+	<!-- Need an agent to measure time between iteration finished and detected fault -->
+	<Agent name='LocalAgent' />
 
 	<Test name='Default' waitTime='{0}' faultWaitTime='{1}' controlIteration='{2}' {3}>
 		<Agent ref='LocalAgent'/>
@@ -384,7 +96,7 @@ namespace Peach.Pro.Test.Core
 			var config = new RunConfiguration
 			{
 				range = true,
-				rangeStart = args.RangeStart,
+				rangeStart = 0,
 				rangeStop = args.RangeStop,
 			};
 
@@ -415,9 +127,9 @@ namespace Peach.Pro.Test.Core
 				history.Add(i);
 
 				if (!ctx.reproducingFault && (i == args.Fault || i == args.Initial))
-					ctx.agentManager.Message("Fault", new Variant("true"));
+					ctx.InjectFault();
 				else if (ctx.reproducingFault && (i == args.Repro || j == args.Repro || i == args.InitialRepro || j == args.InitialRepro))
-					ctx.agentManager.Message("Fault", new Variant("true"));
+					ctx.InjectFault();
 			};
 
 			e.IterationFinished += (ctx, it) => sw.Restart();
@@ -448,7 +160,15 @@ namespace Peach.Pro.Test.Core
 				Assert.Greater(ctx.reproducingIterationJumpCount, 0);
 			};
 
-			e.startFuzzing(dom, config);
+			if (args.FaultOnControl)
+			{
+				var ex = Assert.Throws<PeachException>(() =>  e.startFuzzing(dom, config));
+				Assert.AreEqual("Fault detected on control iteration.", ex.Message);
+			}
+			else
+			{
+				e.startFuzzing(dom, config);
+			}
 
 			return string.Join(" ", history);
 		}
@@ -783,10 +503,11 @@ namespace Peach.Pro.Test.Core
 			// Fuzz from 1 to 10
 			// Fault on iteration C6
 			// Repro on iteration C6
+			// Stop fuzzing after repro
 
-			var act = Run(new Args { Fault = "C6", Repro = "C6", ControlIterations = 5 });
+			var act = Run(new Args { Fault = "C6", Repro = "C6", ControlIterations = 5, FaultOnControl = true });
 
-			const string exp = "R1 1 2 3 4 5 C6 ReproFault C6 Fault 6 7 8 9 10";
+			const string exp = "R1 1 2 3 4 5 C6 ReproFault C6 Fault";
 
 			Assert.AreEqual(exp, act);
 		}
@@ -998,7 +719,7 @@ namespace Peach.Pro.Test.Core
 			// Fault on non-control and never repro, don't search past last control fault
 
 			// Fuzz from 1 to 30
-			// Fault and repro on C11
+			// Fault and repro after searching on C11
 			// Fault on iteration C26
 			// Never reproduces
 			// Runs -10 with control after every iteration
@@ -1006,10 +727,11 @@ namespace Peach.Pro.Test.Core
 
 			// Resume at 27 28 29 30
 
-			var act = Run(new Args { RangeStop = 30, Initial = "C11", InitialRepro = "C11", Fault = "C26", ControlIterations = 5 });
+			var act = Run(new Args { RangeStop = 30, Initial = "C11", InitialRepro = "C11,2", Fault = "C26", ControlIterations = 5 });
 
 			const string exp =
-				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 ReproFault C11 Fault " +
+				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 ReproFault C11 " +
+				"1 C2 2 C3 3 C4 4 C5 5 C6 6 C7 7 C8 8 C9 9 C10 10 C11 Fault " +
 				"11 12 13 14 15 C16 16 17 18 19 20 C21 21 22 23 24 25 C26 ReproFault C26 " +
 				"16 C17 17 C18 18 C19 19 C20 20 C21 21 C22 22 C23 23 C24 24 C25 25 C26 " +
 				"11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 C26 " +

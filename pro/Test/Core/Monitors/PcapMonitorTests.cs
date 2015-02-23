@@ -26,7 +26,6 @@
 
 // $Id$
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -35,6 +34,7 @@ using System.Net.Sockets;
 using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
+using Peach.Core.Agent;
 using Peach.Core.Test;
 using SharpPcap;
 using SharpPcap.LibPcap;
@@ -113,6 +113,21 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void BasicTest()
 		{
+			var runner = new MonitorRunner("NetworkCapture", new Dictionary<string, string>
+			{
+				{ "Device", _iface },
+			});
+
+			var faults = runner.Run();
+
+			Assert.AreEqual(0, faults.Length);
+		}
+
+		[Test]
+		public void AliasTest()
+		{
+			// Ensure we can still run the monitor via its aliased name
+
 			var runner = new MonitorRunner("Pcap", new Dictionary<string, string>
 			{
 				{ "Device", _iface },
@@ -129,7 +144,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			const int max = 10;
 			var num = 0;
 
-			var runner = new MonitorRunner("Pcap", new Dictionary<string, string>
+			var runner = new MonitorRunner("NetworkCapture", new Dictionary<string, string>
 			{
 				{ "Device", _iface },
 			})
@@ -165,7 +180,7 @@ namespace Peach.Pro.Test.Core.Monitors
 				},
 			};
 
-			Fault[] faults;
+			MonitorData[] faults;
 
 			using (var si = SingleInstance.CreateInstance("Peach.Pro.Test.Core.Monitors.PcapMonitorTests.DataCollection"))
 			{
@@ -175,18 +190,18 @@ namespace Peach.Pro.Test.Core.Monitors
 			}
 
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual(FaultType.Data, faults[0].type);
-			Assert.AreEqual("PcapMonitor", faults[0].detectionSource);
-			Assert.AreEqual(1, faults[0].collectedData.Count);
-			Assert.AreEqual("NetworkCapture.pcap", faults[0].collectedData[0].Key);
+			Assert.Null(faults[0].Fault);
+			Assert.AreEqual("NetworkCapture", faults[0].DetectionSource);
+			Assert.AreEqual(1, faults[0].Data.Count);
+			Assert.True(faults[0].Data.ContainsKey("pcap"));
 
 			const string begin = "Collected ";
-			Assert.That(faults[0].description, Is.StringStarting(begin));
+			Assert.That(faults[0].Title, Is.StringStarting(begin));
 
 			const string end = " packets.";
-			Assert.That(faults[0].description, Is.StringEnding(end));
+			Assert.That(faults[0].Title, Is.StringEnding(end));
 
-			var str = faults[0].description.Substring(begin.Length, faults[0].description.Length - begin.Length - end.Length);
+			var str = faults[0].Title.Substring(begin.Length, faults[0].Title.Length - begin.Length - end.Length);
 			var cnt = int.Parse(str);
 
 			Assert.GreaterOrEqual(cnt, max, "Captured {0} packets, expected at least 10".Fmt(cnt));
@@ -195,7 +210,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void MultipleIterationsTest()
 		{
-			var runner = new MonitorRunner("Pcap", new Dictionary<string, string>
+			var runner = new MonitorRunner("NetworkCapture", new Dictionary<string, string>
 			{
 				{ "Device", _iface },
 			});
@@ -208,7 +223,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void BadDeviceTest()
 		{
-			var runner = new MonitorRunner("Pcap", new Dictionary<string, string>
+			var runner = new MonitorRunner("NetworkCapture", new Dictionary<string, string>
 			{
 				{ "Device", "Some Unknown Device" },
 			});
@@ -221,17 +236,17 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void NoDeviceTest()
 		{
-			var runner = new MonitorRunner("Pcap", new Dictionary<string, string>());
+			var runner = new MonitorRunner("NetworkCapture", new Dictionary<string, string>());
 
 			var ex = Assert.Throws<PeachException>(() => runner.Run());
 
-			Assert.AreEqual("Error, PcapMonitor requires a device name.", ex.Message);
+			Assert.AreEqual("Could not start monitor \"NetworkCapture\".  Monitor 'NetworkCapture' is missing required parameter 'Device'.", ex.Message);
 		}
 
 		[Test]
 		public void BadFilterTest()
 		{
-			var runner = new MonitorRunner("Pcap", new Dictionary<string, string>
+			var runner = new MonitorRunner("NetworkCapture", new Dictionary<string, string>
 			{
 				{ "Device", _iface },
 				{ "Filter", "Bad filter string" },
@@ -295,14 +310,14 @@ namespace Peach.Pro.Test.Core.Monitors
 			// Skew by one so we don't conflict with DataCollection test port
 			for (var i = 0; i <= count; ++i)
 			{
-				runner.Add("Pcap", new Dictionary<string, string>()
+				runner.Add("NetworkCapture", new Dictionary<string, string>
 				{
 					{ "Device", _iface },
 					{ "Filter", "udp and dst port " + (_remoteEp.Port + 1 + i) },
 				});
 			}
 
-			Fault[] faults;
+			MonitorData[] faults;
 
 			using (var si = SingleInstance.CreateInstance("Peach.Pro.Test.Core.Monitors.PcapMonitorTests.MultipleMonitorsTest"))
 			{
@@ -318,21 +333,14 @@ namespace Peach.Pro.Test.Core.Monitors
 			{
 				var f = faults[i];
 
-				Assert.AreEqual(FaultType.Data, f.type);
-				Assert.AreEqual("PcapMonitor", f.detectionSource);
-				Assert.AreEqual(1, f.collectedData.Count);
-				Assert.AreEqual("NetworkCapture.pcap", f.collectedData[0].Key);
+				Assert.AreEqual("Mon_{0}".Fmt(i), f.MonitorName);
+				Assert.AreEqual("NetworkCapture", f.DetectionSource);
+				Assert.Null(f.Fault);
+				Assert.AreEqual(1, f.Data.Count);
+				Assert.True(f.Data.ContainsKey("pcap"));
 
-				var msg = "Collected {0} packets.".Fmt(i == count ? 0 : 1);
-
-				Assert.AreEqual(msg, f.description);
+				Assert.AreEqual(i == count ? "Collected 0 packets." : "Collected 1 packet.", f.Title);
 			}
-
-
-			Assert.AreEqual(FaultType.Data, faults[0].type);
-			Assert.AreEqual("PcapMonitor", faults[0].detectionSource);
-			Assert.AreEqual(1, faults[0].collectedData.Count);
-			Assert.AreEqual("NetworkCapture.pcap", faults[0].collectedData[0].Key);
 		}
 	}
 }

@@ -6,6 +6,7 @@ using System.Xml;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Analyzers
 {
@@ -77,9 +78,12 @@ namespace Peach.Pro.Core.Analyzers
             if (!(parent is Peach.Core.Dom.String))
                 throw new SoftException("Error, Regex analyzer can only be used with String elements. Element '" + parent.fullName + "' is a '" + parent.elementType + "'.");
 
+            var data = (string)parent.DefaultValue;
+			if (string.IsNullOrEmpty(data) && positions == null)
+				return;
+
             var regex = new System.Text.RegularExpressions.Regex(Regex, RegexOptions.Singleline);
 
-            var data = (string)parent.DefaultValue;
             var match = regex.Match(data);
             if (!match.Success)
                 throw new SoftException("The Regex analyzer failed to match.");
@@ -87,7 +91,7 @@ namespace Peach.Pro.Core.Analyzers
             var sorted = new SortedDictionary<int, Peach.Core.Dom.String>();
 
             // Create the Block element that will contain the matched strings
-            var block = new Block(parent.name);
+			var block = new Block(parent.Name);
 
             // The order of groups does not always match order from string
             // we will add them into a sorted dictionary to order them correctly
@@ -105,7 +109,7 @@ namespace Peach.Pro.Core.Analyzers
                 block.Add(sorted[item]);
 
             // Replace our current element (String) with the Block of matched strings
-            parent.parent[parent.name] = block;
+			parent.parent[parent.Name] = block;
         }
     }
 }

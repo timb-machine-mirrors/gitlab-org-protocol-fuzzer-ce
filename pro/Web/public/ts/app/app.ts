@@ -31,129 +31,126 @@ module Peach {
 	var p = angular.module("Peach", [
 		"angular-loading-bar",
 		"chart.js",
+		"ngMessages",
 		"ngSanitize",
-		"ngResource",
-		"ngRoute",
 		"ngVis",
 		"smart-table",
 		"treeControl",
-		"ui.select", 
-		"ui.bootstrap"
-	]);
-
-	p.config([
-		Constants.Angular.$httpProvider,
-		($httpProvider: ng.IHttpProvider) => {
-			$httpProvider.interceptors.push(Constants.Services.HttpError);
-		}
-	]);
-
-	p.factory('PeachConfigResource', [
-		Constants.Angular.$resource,
-		($resource: ng.resource.IResourceService): IKeyValueResource => {
-			return <IKeyValueResource> $resource(
-				'/p/conf/wizard/state'
-			);
-		}
-	]);
-	p.factory('PitLibraryResource', [
-		Constants.Angular.$resource,
-		($resource: ng.resource.IResourceService): ILibraryResource => {
-			return <ILibraryResource> $resource('/p/libraries');
-		}
-	]);
-	p.factory('PitResource', [
-		Constants.Angular.$resource,
-		($resource: ng.resource.IResourceService): IPitResource => {
-			return <IPitResource> $resource(
-				'/p/pits/:id', { id: '@id' }
-			);
-		}
-	]);
-	p.factory('PitConfigResource', [
-		Constants.Angular.$resource,
-		($resource: ng.resource.IResourceService): IPitConfigResource => {
-			return <IPitConfigResource> $resource(
-				'/p/pits/:id/config', { id: '@id' }
-			);
-		}
-	]);
-	p.factory('PitAgentsResource', [
-		Constants.Angular.$resource,
-		($resource: ng.resource.IResourceService): IPitAgentsResource => {
-			return <IPitAgentsResource> $resource(
-				'/p/pits/:id/agents', { id: '@id' }
-			);
-		}
-	]);
-	p.factory('AvailableMonitorsResource', [
-		Constants.Angular.$resource,
-		($resource: ng.resource.IResourceService): IMonitorResource => {
-			return <IMonitorResource> $resource(
-				'/p/conf/wizard/monitors', {}, {
-					query: { method: 'GET', isArray: true, cache: true }
-				}
-			);
-		}
-	]);
-	p.factory('FaultDetailResource', [
-		Constants.Angular.$resource,
-		($resource: ng.resource.IResourceService): IFaultDetailResource => {
-			return <IFaultDetailResource> $resource(
-				'/p/faults/:id', { id: '@id' }
-			);
-		}
+		"ui.bootstrap",
+		"ui.select",
+		"ui.router"
 	]);
 
 	registerModule(Peach, p);
 
 	p.config([
-		Constants.Angular.$routeProvider,
-		($routeProvider: ng.route.IRouteProvider) => {
-			$routeProvider
-				.when("/", {
-					templateUrl: "html/dashboard.html",
-					controller: DashboardController
+		C.Angular.$httpProvider,
+		($httpProvider: ng.IHttpProvider) => {
+			$httpProvider.interceptors.push(C.Services.HttpError);
+		}
+	]);
+
+	p.config([
+		C.Angular.$stateProvider,
+		C.Angular.$urlRouterProvider, (
+			$stateProvider: ng.ui.IStateProvider,
+			$urlRouterProvider: ng.ui.IUrlRouterProvider
+		) => {
+			$urlRouterProvider.otherwise('/');
+
+			$stateProvider
+				.state(C.States.Home, {
+					url: '/',
+					templateUrl: C.Templates.Dashboard,
+					controller: DashboardController,
+					controllerAs: 'vm'
 				})
-				.when("/faults/:bucket", {
-					templateUrl: "html/faults.html",
-					controller: FaultsController
+				.state(C.States.Faults, {
+					url: '/faults/:bucket',
+					templateUrl: C.Templates.Faults,
+					controller: FaultsController,
+					controllerAs: 'vm',
+					params: { bucket: 'all' }
 				})
-				.when("/metrics/:metric", {
-					templateUrl: "html/metrics.html",
-					controller: MetricsController
+				.state(C.States.FaultsDetail, {
+					url: '/{id:int}',
+					views: {
+						'@': {
+							templateUrl: C.Templates.FaultsDetail,
+							controller: FaultsDetailController,
+							controllerAs: 'vm'
+						}
+					}
 				})
-				.when("/quickstart/intro", {
-					templateUrl: "html/wizard/intro.html",
-					controller: WizardController
+				.state(C.States.Metrics, {
+					url: '/metrics/:metric',
+					templateUrl: params =>
+						C.Templates.MetricPage.replace(':metric', params.metric),
+					controller: MetricsController,
+					controllerAs: 'vm'
 				})
-				.when("/quickstart/done", {
-					templateUrl: "html/wizard/done.html",
-					controller: WizardController
+				.state(C.States.Wizard, {
+					url: '/quickstart/:track/{id:int}',
+					templateUrl: params => {
+						switch (params.track) {
+							case C.Tracks.Intro:
+								return C.Templates.Wizard.Intro;
+							case C.Tracks.Test:
+								return C.Templates.Wizard.Test;
+						}
+						return C.Templates.Wizard.Track;
+					},
+					controllerProvider: ($stateParams): any => {
+						switch ($stateParams.track) {
+							case C.Tracks.Test:
+								return PitTestController;
+						}
+						return WizardController;
+					},
+					controllerAs: 'vm',
+					params: {
+						id: { value: 0, squash: true }
+					}
 				})
-				.when("/quickstart/test", {
-					templateUrl: "html/wizard/test.html",
-					controller: PitTestController
+				.state(C.States.WizardIntro, {
+					url: '/intro',
+					templateUrl: params =>
+						C.Templates.Wizard.TrackIntro.replace(':track', params.track)
 				})
-				.when("/quickstart/:step", {
-					templateUrl: "html/wizard.html",
-					controller: WizardController
+				.state(C.States.WizardQuestion, {
+					templateUrl: C.Templates.Wizard.Question,
+					controller: WizardQuestionController,
+					controllerAs: 'vm'
 				})
-				.when("/cfg/monitors", {
-					templateUrl: "html/cfg/monitoring.html",
-					controller: ConfigureMonitorsController
+				.state(C.States.WizardReview, {
+					url: '/review',
+					templateUrl: params =>
+						C.Templates.Wizard.TrackDone.replace(':track', params.track)
 				})
-				.when("/cfg/variables", {
-					templateUrl: "html/cfg/variables.html",
-					controller: ConfigureVariablesController
+				.state(C.States.Config, {
+					abstract: true,
+					url: '/config',
+					template: '<div ui-view></div>'
 				})
-				.when("/cfg/test", {
-					templateUrl: "html/cfg/test.html",
-					controller: PitTestController
+				.state(C.States.ConfigVariables, {
+					url: '/variables',
+					templateUrl: C.Templates.Config.Variables,
+					controller: ConfigureVariablesController,
+					controllerAs: 'vm'
 				})
-				.otherwise({
-					redirectTo: "/"
-				});
+				.state(C.States.ConfigMonitoring, {
+					url: '/monitoring',
+					templateUrl: C.Templates.Config.Monitoring,
+					controller: ConfigureMonitorsController,
+					controllerAs: 'vm'
+				})
+				.state(C.States.ConfigTest, {
+					url: '/test',
+					templateUrl: C.Templates.Config.Test,
+					controller: PitTestController,
+					controllerAs: 'vm'
+				})
+			;
 		}
 	]);
 
@@ -210,15 +207,6 @@ module Peach {
 				"This application requires an HTML 5 and ECMAScript 5 capable browser. " +
 				"Please upgrade your browser to a more recent version."
 			);
-		} else {
-			initialize();
-		}
-
-		function initialize() {
-			jQuery($ => {
-				// handles disabling of navbar items
-				$("ul.nav-list").on('click', 'li.disabled', false);
-			});
 		}
 
 		function getHtmlVer() {

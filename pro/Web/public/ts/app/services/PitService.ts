@@ -6,30 +6,18 @@ module Peach {
 	export class PitService {
 
 		static $inject = [
-			Constants.Angular.$q,
-			Constants.Angular.$window,
-			Constants.Angular.$modal,
-			Constants.Angular.$http,
-			"PitResource",
-			"PitLibraryResource",
-			"PitConfigResource",
-			"PitAgentsResource"
+			C.Angular.$q,
+			C.Angular.$window,
+			C.Angular.$modal,
+			C.Angular.$http
 		];
 
 		constructor(
 			private $q: ng.IQService,
 			private $window: ng.IWindowService,
 			private $modal: ng.ui.bootstrap.IModalService,
-			private $http: ng.IHttpService,
-			private PitResource: IPitResource,
-			private PitLibraryResource: ILibraryResource,
-			private PitConfigResource: IPitConfigResource,
-			private PitAgentsResource: IPitAgentsResource
+			private $http: ng.IHttpService
 		) {
-			PitLibraryResource.query((libs: ILibrary[]) => {
-				var userLibs = libs.filter((item: ILibrary) => item.locked === false);
-				this.userPitLibrary = _.first(userLibs).libraryUrl;
-			});
 		}
 
 		private pendingPit: ng.IDeferred<IPit>;
@@ -44,21 +32,6 @@ module Peach {
 			return this.pit;
 		}
 
-		private pitConfig: IPitConfig;
-		public get PitConfig(): IPitConfig {
-			return this.pitConfig;
-		}
-
-		private pitAgents: IPitAgents;
-		public get PitAgents(): IPitAgents {
-			return this.pitAgents;
-		}
-
-		private pitCalls: string[] = [];
-		public get PitCalls(): string[] {
-			return this.pitCalls;
-		}
-
 		private changeHandlers: Function[] = [];
 		public OnPitChanged(callback: Function) {
 			this.changeHandlers.push(callback);
@@ -68,6 +41,22 @@ module Peach {
 			this.changeHandlers.forEach(fn => fn());
 		}
 
+		public LoadLibrary(): ng.IPromise<ILibrary[]> {
+			var promise = this.$http.get(C.Api.Libraries);
+			promise.success((libs: ILibrary[]) => {
+				this.userPitLibrary = _(libs)
+					.reject({ locked: true })
+					.first()
+					.libraryUrl;
+			});
+			return StripHttpPromise(this.$q, promise);
+		}
+
+		public LoadPeachMonitors(): ng.IPromise<IMonitor[]> {
+			var promise = this.$http.get(C.Api.PeachMonitors);
+			return StripHttpPromise(this.$q, promise);
+		}
+
 		// MainController 
 		// -> PitLibraryController (modal)
 		//    -> SelectPit 
@@ -75,111 +64,94 @@ module Peach {
 		//          -> CopyPit
 		public SelectPit(url: string): ng.IPromise<IPit> {
 			this.pendingPit = this.$q.defer<IPit>();
-			var promise = this.PitResource.get({ id: ExtractId('pits', url) }).$promise;
-			promise.then((pit: IPit) => {
+			var promise = this.$http.get(url);
+			promise.success((pit: IPit) => {
 				if (pit.locked) {
 					var modal = this.$modal.open({
-						templateUrl: "html/modal/CopyPit.html",
+						templateUrl: C.Templates.Modal.CopyPit,
 						controller: CopyPitController,
-						resolve: { pit: () => pit }
+						resolve: { Pit: () => pit }
 					});
 					modal.result.then((copied: IPit) => {
 						// only update the current Pit if successful
 						// a failed copy leaves the current Pit untouched
-						this.setPit(copied);
+						this.changePit(copied);
 						this.pendingPit.resolve(this.pit);
 					});
 					modal.result.catch((reason) => {
 						this.pendingPit.reject(reason);
 					});
 				} else {
-					this.setPit(pit);
+					this.changePit(pit);
 					this.pendingPit.resolve(this.pit);
 				}
 			});
-			promise.catch((reason) => {
+			promise.error(reason => {
 				this.pendingPit.reject(reason);
 			});
 			return this.pendingPit.promise;
 		}
 
-		private setPit(pit: IPit) {
+		private changePit(pit: IPit) {
 			this.pit = pit;
-			this.pitConfig = undefined;
-			this.pitAgents = undefined;
-			this.$window.sessionStorage.setItem('pitId', this.PitId);
+			this.$window.sessionStorage.setItem('pitUrl', pit.pitUrl);
 			this.notifyOnPitChanged();
 		}
 
-		public ReloadPit() {
-			this.pit.$get({ id: this.PitId });
+		public RestorePit(): boolean {
+			var pitUrl = this.$window.sessionStorage.getItem('pitUrl');
+			if (_.isString(pitUrl)) {
+				this.SelectPit(pitUrl);
+				return true;
+			}
+			return false;
 		}
 
-		public CopyPit(pit: IPit): ng.IPromise<IPit> {
+		public ReloadPit(): ng.IPromise<IPit> {
+			if (_.isUndefined(this.pit)) {
+				if (this.pendingPit) {
+					return this.pendingPit.promise;
+				}
+				return this.$q.reject('no pit selected');
+			}
+
+			var promise = this.$http.get(this.pit.pitUrl);
+			promise.success((pit: IPit) => {
+				this.pit = pit;
+			});
+			return StripHttpPromise(this.$q, promise);
+		}
+
+		public SavePit(): ng.IPromise<IPit> {
+			if (_.isUndefined(this.pit)) {
+				return this.$q.reject('no pit selected');
+			}
+
+			var promise = this.$http.post(this.pit.pitUrl, this.pit);
+			promise.success((pit: IPit) => {
+				this.pit = pit;
+			});
+			return StripHttpPromise(this.$q, promise);
+		}
+
+		public CopyPit(pit: IPit): ng.IHttpPromise<IPit> {
 			var request: IPitCopy = {
 				libraryUrl: this.UserPitLibrary,
-				pit: pit
+				pitUrl: pit.pitUrl,
+				name: pit.name,
+				description: pit.description
 			}
-			var result = new this.PitResource(request);
-			return result.$save();
+			return this.$http.post(C.Api.Pits, request);
 		}
 
-		public get PitId(): string {
-			return onlyIf(this.pit, () => ExtractId('pits', this.pit.pitUrl));
+		public SaveConfig(config: IParameter[]): ng.IPromise<IPit> {
+			this.pit.config = config;
+			return this.SavePit();
 		}
 
-		public LoadPitConfig(): ng.IPromise<IPitConfig> {
-			if (this.pendingPit) {
-				var deferred = this.$q.defer<IPitConfig>();
-				this.pendingPit.promise.then(() => {
-					return this._loadPitConfig().$promise;
-				}).then((pitConfig: IPitConfig) => {
-					deferred.resolve(pitConfig);
-				}).catch(reason => {
-					deferred.reject(reason);
-				});
-				return deferred.promise;
-			}
-			if (!this.pit) {
-				var none = this.$q.defer<IPitConfig>();
-				none.reject('No pit selected');
-				return none.promise;
-			}
-			return this._loadPitConfig().$promise;
-		}
-
-		private _loadPitConfig(): IPitConfig {
-			return this.PitConfigResource.get({ id: this.PitId }, (data: IPitConfig) => {
-				this.pitConfig = data;
-			});
-		}
-
-		public LoadPitAgents(): ng.IPromise<IPitAgents> {
-			return onlyIf(this.pit, () => {
-				return this.PitAgentsResource.get({ id: this.PitId }, (data: IPitAgents) => {
-					this.pitAgents = data;
-				}).$promise;
-			});
-		}
-
-		public LoadPitCalls(): ng.IPromise<string[]> {
-			return onlyIf(this.pit, () => {
-				var url = this.pit.pitUrl + '/calls';
-				var promise = this.$http.get<string[]>(url);
-				promise.success((calls: string[]) => {
-					this.pitCalls = calls;
-				});
-				return promise;
-			});
-		}
-
-		public SavePitAgents(agents: Agent[]) {
-			if (!this.pitAgents) {
-				this.pitAgents = new this.PitAgentsResource();
-			}
-			this.pitAgents.agents = agents;
-			this.pitAgents.pitUrl = this.pit.pitUrl;
-			this.pitAgents.$save({ id: this.PitId });
+		public SaveAgents(agents: Agent[]): ng.IPromise<IPit> {
+			this.pit.agents = agents;
+			return this.SavePit();
 		}
 
 		public get IsConfigured(): boolean {

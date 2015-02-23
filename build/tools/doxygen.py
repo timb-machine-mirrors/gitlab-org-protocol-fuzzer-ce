@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 from fnmatch import fnmatchcase
-import os, os.path, re, stat
+import os, os.path, re, stat, tempfile
 from waflib import Task, Utils, Node, Logs
 from waflib.TaskGen import feature
 
@@ -44,8 +44,24 @@ def parse_doxy(txt):
 		else:
 			tmp = x.split('=')
 			tbl[tmp[0].strip()] = '='.join(tmp[1:]).strip()
-	print tbl
+
 	return tbl
+
+def inst_runnable_status(self):
+	for t in self.run_after:
+		if not t.hasrun:
+			return Task.ASK_LATER
+
+	if not self.inputs:
+		# Get the list of files to install
+		# Set self.path doxygens output_dir
+		self.path = self.doxy_tsk.output_dir
+		self.source = self.inputs = self.path.ant_glob('**/*', quiet=True)
+
+	ret = Task.Task.runnable_status(self)
+	if ret == Task.SKIP_ME:
+		return Task.RUN_ME
+	return ret
 
 class doxygen(Task.Task):
 	vars  = ['DOXYGEN', 'DOXYFLAGS']
@@ -67,8 +83,6 @@ class doxygen(Task.Task):
 		if not getattr(self, 'pars', None):
 			txt = self.inputs[0].read()
 			self.pars = parse_doxy(txt)
-			if not self.pars.get('OUTPUT_DIRECTORY'):
-				self.pars['OUTPUT_DIRECTORY'] = self.inputs[0].parent.get_bld().abspath()
 
 			# Override with any parameters passed to the task generator
 			if getattr(self.generator, 'pars', None):
@@ -88,12 +102,34 @@ class doxygen(Task.Task):
 						self.generator.bld.fatal('Could not find the doxygen input %r' % i)
 					self.doxy_inputs.append(node)
 
+			self.doxy_extras = getattr(self, 'doxy_extras', [])
+			for key in [ 'PROJECT_LOGO', 'HTML_EXTRA_STYLESHEET', 'HTML_EXTRA_FILES']:
+				items = []
+				for i in self.pars.get(key, '').split():
+					if os.path.isabs(i):
+						node = self.generator.bld.root.find_node(i)
+					else:
+						node = self.inputs[0].parent.find_node(i)
+					if not node:
+						self.generator.bld.fatal('Could not find the doxygen %s %r' % (key, i))
+					self.doxy_extras.append(node)
+					items.append(node)
+				self.pars[key] = ' '.join([x.abspath() for x in items])
+
 		if not getattr(self, 'output_dir', None):
 			bld = self.generator.bld
 			# First try to find an absolute path, then find or declare a relative path
-			self.output_dir = bld.root.find_dir(self.pars['OUTPUT_DIRECTORY'])
+
+			i = self.pars.get('OUTPUT_DIRECTORY', None)
+			if not i:
+				self.output_dir = self.inputs[0].parent.get_bld()
+			else:
+				self.output_dir = bld.root.find_dir(i)
+
 			if not self.output_dir:
-				self.output_dir = bld.path.find_or_declare(self.pars['OUTPUT_DIRECTORY'])
+				self.output_dir = bld.path.find_or_declare(i)
+
+			self.pars['OUTPUT_DIRECTORY'] = self.output_dir.abspath()
 
 		self.signature()
 		return Task.Task.runnable_status(self)
@@ -116,29 +152,39 @@ class doxygen(Task.Task):
 					nodes.append(m)
 			else:
 				nodes.append(node)
-		print 'SCAN-------------------------------'
-		print nodes
+
+		print self.doxy_extras
+		nodes.extend(self.doxy_extras)
+
 		return (nodes, names)
 
-	def run_foo(self):
+	def exec_command(self, cmd, **kw):
 		dct = self.pars.copy()
 		# TODO will break if paths have spaces
 		dct['INPUT'] = ' '.join([x.abspath() for x in self.doxy_inputs])
 		code = '\n'.join(['%s = %s' % (x, dct[x]) for x in self.pars])
 		code = code.encode() # for python 3
-		#fmt = DOXY_STR % (self.inputs[0].parent.abspath())
-		cmd = Utils.subst_vars(DOXY_STR, self.env)
-		env = self.env.env or None
-		print 'Executing: %s' % cmd
-		proc = Utils.subprocess.Popen(cmd, shell=True, stdin=Utils.subprocess.PIPE, env=env, cwd=self.generator.bld.path.get_bld().abspath())
-		proc.communicate(code)
-		return proc.returncode
+
+		try:
+			(fd, tmp) = tempfile.mkstemp()
+			os.write(fd, code)
+			os.close(fd)
+			cmd = [ cmd[0], tmp ]
+			ret = super(doxygen, self).exec_command(cmd, **kw)
+		finally:
+			try:
+				os.remove(tmp)
+			except OSError:
+				pass # anti-virus and indexers can keep the files open -_-
+
+		return ret
 
 	def post_run(self):
 		nodes = self.output_dir.ant_glob('**/*', quiet=True)
 		for x in nodes:
 			x.sig = Utils.h_file(x.abspath())
 		self.outputs += nodes
+		#print self.outputs
 		return Task.Task.post_run(self)
 
 class tar(Task.Task):
@@ -177,6 +223,19 @@ def process_doxy(self):
 
 	# the task instance
 	dsk = self.create_task('doxygen', node)
+
+	inst = self.bld.install_files('${BINDIR}', [], cwd = node.parent, relative_trick = True, chmod = Utils.O644)
+
+	if inst:
+		inst.doxy_tsk = dsk
+		inst.set_run_after(dsk)
+		inst.runnable_status = lambda inst=inst: inst_runnable_status(inst)
+
+		# Store inst task in install_extras for packaging
+		try:
+			self.install_extras.append(inst)
+		except AttributeError:
+			self.install_extras = [inst]
 
 	if getattr(self, 'doxy_tar', None):
 		tsk = self.create_task('tar')

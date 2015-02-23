@@ -39,8 +39,8 @@ using Peach.Pro.OS.Windows.Publishers.Com;
 
 namespace Peach.Pro.OS.Windows.Publishers
 {
-	[Publisher("Com", true)]
-	[Publisher("com.Com")]
+	[Publisher("Com")]
+	[Alias("com.Com")]
 	[Parameter("clsid", typeof(string), "COM CLSID of object")]
 	public class ComPublisher : Publisher
 	{
@@ -114,7 +114,15 @@ namespace Peach.Pro.OS.Windows.Publishers
 			}
 		}
 
-		protected override Variant OnCall(string method, List<ActionParameter> args)
+		protected override Variant OnCall(string method, List<BitwiseStream> args)
+		{
+			// This publisher only supports calling with ActionParameters.
+			// This function is never called when the publisher is run locally.
+			// This exception is needed so the agent generates a nice error message.
+			throw new NotSupportedException();
+		}
+
+		public override Variant call(string method, List<ActionParameter> args)
 		{
 			try
 			{

@@ -59,9 +59,16 @@ namespace Peach.Core.Dom
 	[Serializable]
 	public class DataFile : Data
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
 		public DataFile(DataSet dataSet, string fileName)
 		{
-			name = "{0}/{1}".Fmt(dataSet.name, Path.GetFileName(fileName));
+			Name = "{0}/{1}".Fmt(dataSet.Name, Path.GetFileName(fileName));
 			FileName = fileName;
 		}
 
@@ -95,7 +102,7 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		public string name
+		public string Name
 		{
 			get;
 			private set;
@@ -120,6 +127,13 @@ namespace Peach.Core.Dom
 	[Serializable]
 	public class DataField : Data
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
 		[Serializable]
 		public class Field
 		{
@@ -138,11 +152,11 @@ namespace Peach.Core.Dom
 
 		public DataField(DataSet dataSet)
 		{
-			name = dataSet.name;
+			Name = dataSet.Name;
 			Fields = new FieldCollection();
 		}
 
-		public string name
+		public string Name
 		{
 			get;
 			private set;
@@ -245,6 +259,9 @@ namespace Peach.Core.Dom
 					container = elem as DataElementContainer;
 				}
 			}
+
+			if (elem.parent is Choice && string.IsNullOrEmpty(value.ToString()))
+				return;
 
 			if (!(elem is DataElementContainer))
 			{

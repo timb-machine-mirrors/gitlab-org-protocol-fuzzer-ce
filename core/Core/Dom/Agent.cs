@@ -29,6 +29,7 @@
 using System;
 using System.Xml.Serialization;
 using System.ComponentModel;
+using Peach.Core.Agent;
 
 namespace Peach.Core.Dom
 {
@@ -40,6 +41,13 @@ namespace Peach.Core.Dom
 	// TODO: Old XSD defines <PythonPath> and <Import> children
 	public class Agent : INamed
 	{
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
 		public Agent()
 		{
 			platform = Platform.OS.All;
@@ -49,8 +57,8 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// Name of agent. May not contain spaces or periods (.).
 		/// </summary>
-		[XmlAttribute]
-		public string name { get; set; }
+		[XmlAttribute("name")]
+		public string Name { get; set; }
 
 		/// <summary>
 		/// Specify location of agent. Value is "&lt;channel%gt;://&lt;hostname&gt;" where
@@ -77,7 +85,7 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// List of monitors Agent should spin up.
 		/// </summary>
-		[PluginElement("class", typeof(Peach.Core.Agent.Monitor), Named = true)]
+		[PluginElement("class", typeof(IMonitor), Named = true)]
 		[DefaultValue(null)]
 		public NamedCollection<Monitor> monitors { get; set; }
 	}

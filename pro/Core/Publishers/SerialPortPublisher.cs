@@ -6,7 +6,7 @@ using Peach.Core;
 
 namespace Peach.Pro.Core.Publishers
 {
-	[Publisher("SerialPort", true)]
+	[Publisher("SerialPort")]
 	[Parameter("PortName", typeof(string), "Com interface for the device to connect to")]
 	[Parameter("Baudrate", typeof(int), "The serial baud rate.")]
 	[Parameter("Parity", typeof(Parity), "The parity-checking protocol.")]
@@ -16,7 +16,7 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("DtrEnable", typeof(bool), "Enables the Data Terminal Ready (DTR) signal during serial communication.", "false")]
 	[Parameter("RtsEnable", typeof(bool), "Enables the Request To Transmit (RTS) signal during serial communication.", "false")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data (default 3000)", "3000")]
-	public class SerialPortPublisher : BufferedStreamPublisher
+	public class SerialPortPublisher : Peach.Core.Publishers.BufferedStreamPublisher
 	{
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }

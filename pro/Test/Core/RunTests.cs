@@ -206,7 +206,7 @@ namespace Peach.Pro.Test.Core
 
 		}
 
-		internal class WantBytesPub : StreamPublisher
+		internal class WantBytesPub : Peach.Core.Publishers.StreamPublisher
 		{
 			static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 

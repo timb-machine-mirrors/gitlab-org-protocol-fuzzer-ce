@@ -14,6 +14,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 		Uri webUri;
 		string pitLibraryPath;
 		bool noweb;
+		bool nobrowser;
 
 		public Program(string[] args)
 			: base(args)
@@ -24,6 +25,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 		{
 			options.Add("pits=", v => pitLibraryPath = v);
 			options.Add("noweb", v => noweb = true);
+			options.Add("nobrowser", v => nobrowser = true);
 		}
 
 		/// <summary>
@@ -99,7 +101,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 				// Ensure pit library exists
 				var pits = FindPitLibrary();
 
-				WebServer.Run(pits);
+				WebServer.Run(pits, !nobrowser);
 			}
 		}
 

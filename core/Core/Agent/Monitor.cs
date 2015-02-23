@@ -28,24 +28,22 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Peach.Core.Agent
 {
-	/// <summary>
-	/// Monitors are hosted by agent processes and are
-	/// able to report detected faults and gather information
-	/// that is usefull when a fualt is detected.
-	/// </summary>
-	public abstract class Monitor
+	[Obsolete("This base class has been deprecated. Monitors should now derive from Peach.Core.Agent.Monitor2.")]
+	public abstract class Monitor : IMonitor
 	{
 		protected Monitor(IAgent agent, string name, Dictionary<string, Variant> args)
 		{
 			Agent = agent;
 			Name = name;
-			Class = GetType().GetAttributes<MonitorAttribute>(null).First().Name;
+			Class = GetType().GetAttributes<MonitorAttribute>().First().Name;
 		}
 
+		[Obsolete("This enum is deprecated. Please use Peach.Core.Agent.Monitor2.MonitorWhen instead.")]
 		public enum When
 		{
 			DetectFault,
@@ -142,35 +140,95 @@ namespace Peach.Core.Agent
 			return null;
 		}
 
-		/// <summary>
-		/// An event handler that can be used by monitor implementations
-		/// to alert others about interesting events occuring.
-		/// The peach core does not make use of this event.
-		/// </summary>
-		/// <remarks>
-		/// This event handler is completly ignroed by the peach core.
-		/// It can be useful for writing tests against monitors so the
-		/// testing framework can get notified when interesting things happen.
-		/// </remarks>
-		public event EventHandler InternalEvent;
-
-		/// <summary>
-		/// Raises the InternalEvent event.
-		/// </summary>
-		/// <param name="args">Arbitrary arguments to pass to event subscribers.</param>
-		protected void OnInternalEvent(EventArgs args)
+		string INamed.name
 		{
-			if (InternalEvent != null)
-				InternalEvent(this, args);
+			get { return Name; }
 		}
-	}
 
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
-	public class MonitorAttribute : PluginAttribute
-	{
-		public MonitorAttribute(string name, bool isDefault = false)
-			: base(typeof(Monitor), name, isDefault)
+		string INamed.Name
 		{
+			get { return Name; }
+		}
+
+		string IMonitor.Class
+		{
+			get { return Class; }
+		}
+
+		void IMonitor.StartMonitor(Dictionary<string, string> args)
+		{
+		}
+
+		void IMonitor.StopMonitor()
+		{
+			StopMonitor();
+		}
+
+		void IMonitor.SessionStarting()
+		{
+			SessionStarting();
+		}
+
+		void IMonitor.SessionFinished()
+		{
+			SessionFinished();
+		}
+
+		void IMonitor.IterationStarting(IterationStartingArgs args)
+		{
+			IterationStarting(0, args.IsReproduction);
+		}
+
+		void IMonitor.IterationFinished()
+		{
+			IterationFinished();
+		}
+
+		bool IMonitor.DetectedFault()
+		{
+			return DetectedFault();
+		}
+
+		MonitorData IMonitor.GetMonitorData()
+		{
+			var fault = GetMonitorData();
+			if (fault == null)
+				return null;
+
+			var ret = new MonitorData
+			{
+				DetectionSource = fault.detectionSource,
+				Title = fault.title,
+				Data = fault.collectedData.ToDictionary(
+					i => i.Key,
+					i => (Stream)new MemoryStream(i.Value)
+				),
+			};
+
+			if (fault.type == FaultType.Fault)
+			{
+				ret.Fault = new MonitorData.Info
+				{
+					Description = fault.detectionSource,
+					MajorHash = fault.majorHash,
+					MinorHash = fault.minorHash,
+					Risk = fault.exploitability,
+					MustStop = MustStop(),
+				};
+			}
+
+			return ret;
+		}
+
+		void IMonitor.Message(string msg)
+		{
+			Message("Action.Call", new Variant(msg));
+		}
+
+		event EventHandler IMonitor.InternalEvent
+		{
+			add {}
+			remove {}
 		}
 	}
 }

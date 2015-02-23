@@ -52,6 +52,13 @@ namespace Peach.Pro.Core.MutationStrategies
 		[DebuggerDisplay("{InstanceName} {ElementName} Mutators = {Mutators.Count}")]
 		protected class MutableItem : INamed, IWeighted
 		{
+			#region Obsolete Functions
+
+			[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+			public string name { get { return Name; } }
+
+			#endregion
+
 			public MutableItem(string instanceName, string elementName)
 				: this(instanceName, elementName, new Mutator[0])
 			{
@@ -64,7 +71,7 @@ namespace Peach.Pro.Core.MutationStrategies
 				Mutators = new WeightedList<Mutator>(mutators);
 			}
 
-			public string name { get { return InstanceName; } }
+			public string Name { get { return InstanceName; } }
 			public string InstanceName { get; private set; }
 			public string ElementName { get; private set; }
 			public WeightedList<Mutator> Mutators { get; private set; }
@@ -118,6 +125,13 @@ namespace Peach.Pro.Core.MutationStrategies
 		[DebuggerDisplay("{name} - {Opions.Count} Options")]
 		protected class DataSetTracker : INamed
 		{
+			#region Obsolete Functions
+
+			[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+			public string name { get { return Name; } }
+
+			#endregion
+
 			public DataSetTracker(string ModelName, List<Data> Options)
 			{
 				this.ModelName = ModelName;
@@ -125,7 +139,7 @@ namespace Peach.Pro.Core.MutationStrategies
 				this.Iteration = 1;
 			}
 
-			public string name { get { return ModelName; } }
+			public string Name { get { return ModelName; } }
 			public string ModelName { get; private set; }
 			public List<Data> Options { get; private set; }
 			public uint Iteration { get; set; }
@@ -384,7 +398,7 @@ namespace Peach.Pro.Core.MutationStrategies
 				if (stateMutators.Count > 0)
 				{
 					mutableItems.Add(new MutationScope("StateModel", new[] {
-						new MutableItem(context.test.stateModel.name, "", stateMutators),
+						new MutableItem(context.test.stateModel.Name, "", stateMutators),
 					}));
 				}
 
@@ -406,7 +420,7 @@ namespace Peach.Pro.Core.MutationStrategies
 				// All state mutations are in the same scope.
 				// When state model mutation is selected, there should only
 				// be a single picked mutation.
-				var m = mutations.Where(i => i.InstanceName == stateModel.name).FirstOrDefault();
+				var m = mutations.Where(i => i.InstanceName == stateModel.Name).FirstOrDefault();
 
 				if (m != null)
 				{
@@ -441,7 +455,7 @@ namespace Peach.Pro.Core.MutationStrategies
 
 			if (context.controlIteration && Context.controlRecordingIteration)
 			{
-				var name = "Run_{0}.{1}".Fmt(state.runCount, state.name);
+				var name = "Run_{0}.{1}".Fmt(state.runCount, state.Name);
 				var scope = new MutationScope(name);
 				mutationScopeState.Add(scope);
 			}
@@ -554,7 +568,7 @@ namespace Peach.Pro.Core.MutationStrategies
 				catch (PeachException ex)
 				{
 					logger.Debug(ex.Message);
-					logger.Debug("Unable to apply data '{0}', removing from sample list.", opt.name);
+					logger.Debug("Unable to apply data '{0}', removing from sample list.", opt.Name);
 
 					// Mark data set as ignored.
 					// This is so skip-to will still be deterministic
@@ -572,7 +586,7 @@ namespace Peach.Pro.Core.MutationStrategies
 		{
 			var scopeState = mutationScopeState.Last();
 
-			var name = "Run_{0}.{1}.{2}".Fmt(action.parent.runCount, action.parent.name, action.name);
+			var name = "Run_{0}.{1}.{2}".Fmt(action.parent.runCount, action.parent.Name, action.Name);
 			var scopeAction = new MutationScope(name);
 
 			foreach (var item in action.outputData)
@@ -621,7 +635,7 @@ namespace Peach.Pro.Core.MutationStrategies
 					var mutator = Random.WeightedChoice(item.Mutators);
 					Context.OnDataMutating(data, elem, mutator);
 					logger.Debug("Action_Starting: Fuzzing: {0}", item.ElementName);
-					logger.Debug("Action_Starting: Mutator: {0}", mutator.name);
+					logger.Debug("Action_Starting: Mutator: {0}", mutator.Name);
 					mutator.randomMutation(elem);
 				}
 				else
@@ -650,8 +664,8 @@ namespace Peach.Pro.Core.MutationStrategies
 
 				Context.OnStateMutating(nextState, stateModelMutation);
 
-				logger.Debug("MutateChangingState: Fuzzing state change: {0}", nextState.name);
-				logger.Debug("MutateChangingState: Mutator: {0}", stateModelMutation.name);
+				logger.Debug("MutateChangingState: Fuzzing state change: {0}", nextState.Name);
+				logger.Debug("MutateChangingState: Mutator: {0}", stateModelMutation.Name);
 
 				return stateModelMutation.changeState(currentState, currentAction, nextState);
 			}

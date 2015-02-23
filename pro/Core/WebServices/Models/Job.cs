@@ -22,6 +22,53 @@ namespace Peach.Pro.Core.WebServices.Models
 		Reproducing,
 	}
 
+	public class JobCommands
+	{
+		/// <summary>
+		/// The URL used to stop this job.
+		/// </summary>
+		/// <example>
+		/// "/p/jobs/{id}/stop"
+		/// </example>
+		public string StopUrl { get; set; }
+
+		/// <summary>
+		/// The URL used to continue this job.
+		/// </summary>
+		/// <example>
+		/// "/p/jobs/{id}/continue"
+		/// </example>
+		public string ContinueUrl { get; set; }
+
+		/// <summary>
+		/// The URL used to pause this job.
+		/// </summary>
+		/// <example>
+		/// "/p/jobs/{id}/pause"
+		/// </example>
+		public string PauseUrl { get; set; }
+
+		/// <summary>
+		/// The URL used to kill this job.
+		/// </summary>
+		/// <example>
+		/// "/p/jobs/{id}/kill"
+		/// </example>
+		public string KillUrl { get; set; }
+	}
+
+	public class JobMetrics
+	{
+		public string BucketTimeline { get; set; }
+		public string FaultTimeline { get; set; }
+		public string Mutators { get; set; }
+		public string Elements { get; set; }
+		public string Dataset { get; set; }
+		public string States { get; set; }
+		public string Buckets { get; set; }
+		public string Iterations { get; set; }
+	}
+
 	public class Job
 	{
 		/// <summary>
@@ -31,6 +78,11 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// "/p/jobs/{id}"
 		/// </example>
 		public string JobUrl { get; set; }
+
+		/// <summary>
+		/// URLs used to control a running job.
+		/// </summary>
+		public JobCommands Commands;
 
 		/// <summary>
 		/// The URL of faults from job
@@ -97,6 +149,11 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// "/p/files/{id}"
 		/// </example>
 		public string PackageFileUrl { get; set; }
+
+		/// <summary>
+		/// URLs to associated metrics
+		/// </summary>
+		public JobMetrics Metrics { get; set; }
 
 		/// <summary>
 		/// The status of this job record

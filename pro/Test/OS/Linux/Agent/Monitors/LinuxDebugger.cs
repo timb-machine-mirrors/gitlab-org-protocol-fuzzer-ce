@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
@@ -14,27 +13,29 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		[Test]
 		public void TestFault()
 		{
-			var self = Assembly.GetExecutingAssembly().Location;
+			var self = Utilities.ExecutionDirectory;
 
-			var args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashingFileConsumer");
-			args["Arguments"] = new Variant(self);
-			args["RestartOnEachTest"] = new Variant("true");
+			var args = new Dictionary<string, string>();
+			args["Executable"] = "CrashingFileConsumer";
+			args["Arguments"] = self;
+			args["RestartOnEachTest"] = "true";
 
-			var m = new LinuxDebugger(null, null, args);
+			var m = new LinuxDebugger(null);
+			m.StartMonitor(args);
 			m.SessionStarting();
-			m.IterationStarting(1, false);
+			m.IterationStarting(null);
 			Thread.Sleep(5000);
 			m.IterationFinished();
 			Assert.AreEqual(true, m.DetectedFault());
-			Fault fault = m.GetMonitorData();
+			var fault = m.GetMonitorData();
 			Assert.NotNull(fault);
-			Assert.AreEqual(3, fault.collectedData.Count);
-			Assert.AreEqual("StackTrace.txt", fault.collectedData[0].Key);
-			Assert.AreEqual("stdout.log", fault.collectedData[1].Key);
-			Assert.AreEqual("stderr.log", fault.collectedData[2].Key);
-			Assert.Greater(fault.collectedData[0].Value.Length, 0);
-			Assert.That(fault.description, Is.StringContaining("PossibleStackCorruption"));
+			Assert.NotNull(fault.Fault);
+			Assert.AreEqual(3, fault.Data.Count);
+			Assert.True(fault.Data.ContainsKey("StackTrace.txt"), "Fault should contain StackTrace.txt");
+			Assert.True(fault.Data.ContainsKey("stdout.log"), "Fault should contain stdout.log");
+			Assert.True(fault.Data.ContainsKey("stderr.log"), "Fault should contain stderr.log");
+			Assert.Greater(fault.Data["StackTrace.txt"].Length, 0);
+			Assert.That(fault.Fault.Description, Is.StringContaining("PossibleStackCorruption"));
 			m.SessionFinished();
 			m.StopMonitor();
 		}
@@ -42,12 +43,13 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		[Test]
 		public void TestNoFault()
 		{
-			var args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashingFileConsumer");
+			var args = new Dictionary<string, string>();
+			args["Executable"] = "CrashingFileConsumer";
 
-			var m = new LinuxDebugger(null, null, args);
+			var m = new LinuxDebugger(null);
+			m.StartMonitor(args);
 			m.SessionStarting();
-			m.IterationStarting(1, false);
+			m.IterationStarting(null);
 			Thread.Sleep(5000);
 			m.IterationFinished();
 			Assert.AreEqual(false, m.DetectedFault());
@@ -58,10 +60,11 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		[Test]
 		public void TestMissingProgram()
 		{
-			var args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("MissingProgram");
+			var args = new Dictionary<string, string>();
+			args["Executable"] = "MissingProgram";
 
-			var m = new LinuxDebugger(null, null, args);
+			var m = new LinuxDebugger(null);
+			m.StartMonitor(args);
 			try
 			{
 				m.SessionStarting();
@@ -76,11 +79,12 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		[Test]
 		public void TestMissingGdb()
 		{
-			var args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("MissingProgram");
-			args["GdbPath"] = new Variant("MissingGdb");
+			var args = new Dictionary<string, string>();
+			args["Executable"] = "MissingProgram";
+			args["GdbPath"] = "MissingGdb";
 
-			var m = new LinuxDebugger(null, null, args);
+			var m = new LinuxDebugger(null);
+			m.StartMonitor(args);
 
 			try
 			{
@@ -89,7 +93,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			}
 			catch (PeachException ex)
 			{
-				var exp = "Could not start debugger 'MissingGdb'.";
+				const string exp = "Could not start debugger 'MissingGdb'.";
 				var act = ex.Message.Substring(0, exp.Length);
 				Assert.AreEqual(exp, act);
 			}
@@ -98,16 +102,17 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		[Test]
 		public void TestCpuKill()
 		{
-			var args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashableServer");
-			args["Arguments"] = new Variant("127.0.0.1 12346");
-			args["StartOnCall"] = new Variant("Foo");
+			var args = new Dictionary<string, string>();
+			args["Executable"] = "CrashableServer";
+			args["Arguments"] = "127.0.0.1 12346";
+			args["StartOnCall"] = "Foo";
 
-			var m = new LinuxDebugger(null, null, args);
+			var m = new LinuxDebugger(null);
+			m.StartMonitor(args);
 			m.SessionStarting();
-			m.IterationStarting(1, false);
+			m.IterationStarting(null);
 
-			m.Message("Action.Call", new Variant("Foo"));
+			m.Message("Foo");
 			Thread.Sleep(1000);
 
 			var before = DateTime.Now;
@@ -128,17 +133,18 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		[Test]
 		public void TestNoCpuKill()
 		{
-			var args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashableServer");
-			args["Arguments"] = new Variant("127.0.0.1 0 5");
-			args["StartOnCall"] = new Variant("Foo");
-			args["NoCpuKill"] = new Variant("true");
+			var args = new Dictionary<string, string>();
+			args["Executable"] = "CrashableServer";
+			args["Arguments"] = "127.0.0.1 0 5";
+			args["StartOnCall"] = "Foo";
+			args["NoCpuKill"] = "true";
 
-			var m = new LinuxDebugger(null, null, args);
+			var m = new LinuxDebugger(null);
+			m.StartMonitor(args);
 			m.SessionStarting();
-			m.IterationStarting(1, false);
+			m.IterationStarting(null);
 
-			m.Message("Action.Call", new Variant("Foo"));
+			m.Message("Foo");
 			Thread.Sleep(1000);
 
 			var sw = new System.Diagnostics.Stopwatch();
@@ -159,18 +165,19 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		[Test]
 		public void TestNoCpuKillWaitFail()
 		{
-			var args = new Dictionary<string, Variant>();
-			args["Executable"] = new Variant("CrashableServer");
-			args["Arguments"] = new Variant("127.0.0.1 0 5");
-			args["StartOnCall"] = new Variant("Foo");
-			args["NoCpuKill"] = new Variant("true");
-			args["WaitForExitTimeout"] = new Variant("1000");
+			var args = new Dictionary<string, string>();
+			args["Executable"] = "CrashableServer";
+			args["Arguments"] = "127.0.0.1 0 5";
+			args["StartOnCall"] = "Foo";
+			args["NoCpuKill"] = "true";
+			args["WaitForExitTimeout"] = "1000";
 
-			var m = new LinuxDebugger(null, null, args);
+			var m = new LinuxDebugger(null);
+			m.StartMonitor(args);
 			m.SessionStarting();
-			m.IterationStarting(1, false);
+			m.IterationStarting(null);
 
-			m.Message("Action.Call", new Variant("Foo"));
+			m.Message("Foo");
 			Thread.Sleep(1000);
 
 			var sw = new System.Diagnostics.Stopwatch();

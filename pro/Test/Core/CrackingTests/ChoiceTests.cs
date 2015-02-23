@@ -61,7 +61,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			cracker.CrackData(dom.dataModels[0], data);
 
 			Assert.IsTrue(dom.dataModels[0][0] is Choice);
-			Assert.AreEqual("Blob5", ((Choice)dom.dataModels[0][0])[0].name);
+			Assert.AreEqual("Blob5", ((Choice)dom.dataModels[0][0])[0].Name);
 			Assert.AreEqual(new byte[] { 1, 2, 3, 4, 5 }, ((DataElementContainer)dom.dataModels[0][0])[0].DefaultValue.BitsToArray());
 		}
 
@@ -268,6 +268,62 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			Assert.AreEqual(3, dom.dataModels[0][1].Value.Length);
 			Assert.AreEqual(0, dom.dataModels[0][2].Value.Length);
 
+		}
+
+		[Test]
+		public void ChoiceFieldSelection()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='Template'>
+		<Choice name='c'>
+			<Blob name='empty' />
+			<Blob name='blob' value='blob' />
+			<String name='str' value='string' />
+			<Number name='num' value='48' size='8' />
+			<Block name='block'>
+				<String name='str' value='block' />
+			</Block>
+		</Choice>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel name='DM'>
+					<Block name='b1' ref='Template' />
+					<Block name='b2' ref='Template' />
+					<Block name='b3' ref='Template' />
+					<Block name='b4' ref='Template' />
+					<Block name='b5' ref='Template' />
+				</DataModel>
+				<Data>
+					<Field name='b1.c.empty' value='' />
+					<Field name='b2.c.blob' value='' />
+					<Field name='b3.c.str' value='' />
+					<Field name='b4.c.num' value='' />
+					<Field name='b5.c.block' value='' />
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM' />
+		<Publisher class='Null'/>
+	</Test>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var cfg = new RunConfiguration { singleIteration = true };
+			var e = new Engine(null);
+
+			e.startFuzzing(dom, cfg);
+
+			var final = dom.tests[0].stateModel.states[0].actions[0].dataModel.Value.ToArray();
+			var asStr = Encoding.ASCII.GetString(final);
+
+			Assert.AreEqual("blobstring0block", asStr);
 		}
 
 		[Test]
@@ -577,7 +633,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 
 			Peach.Core.Dom.Choice c = (Peach.Core.Dom.Choice)dom.dataModels[0][0];
 			var selected = c.SelectedElement as Peach.Core.Dom.Block;
-			Assert.AreEqual("C2", selected.name);
+			Assert.AreEqual("C2", selected.Name);
 			Assert.AreEqual(1, selected[0].DefaultValue.BitsToArray().Length);
 			Assert.AreEqual(4, selected[1].DefaultValue.BitsToArray().Length);
 		}
@@ -617,7 +673,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			Assert.NotNull(c);
 			var selected = c.SelectedElement as Peach.Core.Dom.Block;
 			Assert.NotNull(selected);
-			Assert.AreEqual("C1", selected.name);
+			Assert.AreEqual("C1", selected.Name);
 			Assert.AreEqual(2, selected.Count);
 			var array = selected[1] as Peach.Core.Dom.Array;
 			Assert.NotNull(array);

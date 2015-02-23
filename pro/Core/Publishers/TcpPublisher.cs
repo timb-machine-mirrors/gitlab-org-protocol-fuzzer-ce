@@ -30,7 +30,7 @@ using Peach.Core;
 
 namespace Peach.Pro.Core.Publishers
 {
-	public abstract class TcpPublisher : BufferedStreamPublisher
+	public abstract class TcpPublisher : Peach.Core.Publishers.BufferedStreamPublisher
 	{
 		// Leave the setter public, it's used by pits.
 		public ushort Port { get; set; }

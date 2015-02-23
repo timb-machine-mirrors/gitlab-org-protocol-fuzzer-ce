@@ -162,7 +162,7 @@ namespace Peach.Core.Dom
 				return base.GetChild(name);
 
 			// If we haven't expanded, just check our original element
-			if (OriginalElement.name == name)
+			if (OriginalElement.Name == name)
 				return OriginalElement;
 
 			return null;
@@ -333,7 +333,7 @@ namespace Peach.Core.Dom
 		{
 			var clone = OriginalElement;
 
-			clone = clone.Clone("{0}_{1}".Fmt(clone.name, index));
+			clone = clone.Clone("{0}_{1}".Fmt(clone.Name, index));
 
 			return clone;
 		}
