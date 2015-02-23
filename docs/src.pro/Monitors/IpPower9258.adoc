@@ -21,10 +21,35 @@ Port:: Port to reset (1..4)
 
 _Optional:_
 
-ResetEveryIteration:: Reset power on every iteration, default false
 PowerOnOffPause:: Pause in milliseconds between power off/power on, default is 500
+ResetEveryIteration:: Reset power on every iteration, default false
+
 
 === Examples
+ifdef::peachug[]
+
+.Catch crashes from Movie Player +
+====================
+
+This parameter example is from a setup that controls port 1 of a IP Power 9258 Network Power Controller. If the hardware needs to restart (due to a fault), the monitor sends a signal to toggle the power to port 1 off, then back on.
+
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter    |Value
+|Host                 |192.168.1.1:8080
+|User                 |peach
+|Password             |power
+|Port                 |1
+|ResetEveryIteration  |true
+|==========================================================
+
+
+====================
+
+endif::peachug[]
+
+
+ifndef::peachug[]
 
 .Reset power on port 1
 ========================
@@ -70,3 +95,5 @@ PowerOnOffPause:: Pause in milliseconds between power off/power on, default is 5
 </Peach>
 ----
 ========================
+
+endif::peachug[]

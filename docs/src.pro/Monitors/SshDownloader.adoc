@@ -17,17 +17,40 @@ Username:: Username for SSH
 
 _Optional:_
 
-Password:: Password for SSH account, defaults to ""
-KeyPath:: Path to SSH key, defaults to ""
-File:: File to download, defaults to ""
-Folder:: Folder to download, defaults to ""
-Remove:: Remove the remote file after download, defaults to true
+Password:: Password for SSH account, defaults to "".
+KeyPath:: Path to SSH key, defaults to "".
+File:: File to download, defaults to "".
+Folder:: Folder to download, defaults to "".
+Remove:: Remove the remote file after download, defaults to true.
 
 === Examples
 
+ifdef::peachug[]
+
+.Grab core file +
+====================
+
+This parameter example is from a setup that creates a connection using SSH with the Host machines and check for core files. If any core files exist, _SshDownloader_ throws a fault, downloads all core files, and records the actions in the fault record.
+
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Parameter  |Value
+|Host       |my.target.com
+|Username   |tester
+|Password   |Password!
+|File       |/var/cores/*.core"
+|Remove     |false
+|==========================================================
+====================
+
+endif::peachug[]
+
+
+ifndef::peachug[]
+
 .Grab core file
 ============
-This example creates a connection using SSH with the Host machine and check for core files. If any core files exist, _SshDownloader_ throws a fault, downloads all core files, and records the actions in the fault record.
+This example creates a connection using SSH with the Host machine and checks for core files. If any core files exist, _SshDownloader_ throws a fault, downloads all core files, and records the actions in the fault record.
 
 [source,xml]
 ----
@@ -118,3 +141,5 @@ To verify that Peach is checking for a file on the remote machine, create a file
 
 
 ============
+
+endif::peachug[]
