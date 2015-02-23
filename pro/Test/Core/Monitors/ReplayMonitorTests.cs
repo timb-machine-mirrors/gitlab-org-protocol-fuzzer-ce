@@ -90,7 +90,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			{
 				var ex = Assert.Throws<PeachException>(() => e.startFuzzing(dom, cfg));
 
-				Assert.AreEqual("Fault detected on control iteration.", ex.Message);
+				Assert.AreEqual("Fault detected on control record iteration.", ex.Message);
 
 				expectedFaults = 1;
 			}
