@@ -47,8 +47,8 @@ namespace Peach.Pro.Core.Mutators.Utility
 			var str = (string)obj.InternalValue;
 
 			signed = false;
-			min = 1;
 			max = Utility.SizedHelpers.MaxSize(obj);
+			min = Math.Min(max, 1);
 			value = Math.Min(str.Length, max);
 			value = Math.Max(min, value);
 		}
