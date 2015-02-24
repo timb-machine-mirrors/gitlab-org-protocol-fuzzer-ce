@@ -698,7 +698,7 @@ namespace Peach.Core.Xsd
 							if (!addedElems.ContainsKey(key))
 							{
 								elem.MinOccursString = null;
-								elem.MaxOccursString = null;
+								SetMaxOccurs(elem, null);
 								schemaParticle.Items.Add(elem);
 								addedElems.Add(key, elem);
 							}
@@ -733,7 +733,7 @@ namespace Peach.Core.Xsd
 			typeAttr.SchemaType = enumType;
 			typeAttr.Annotate("Specify the {0} of a Peach {1}.".Fmt(
 				pluginAttr.AttributeName,
-				pluginAttr.PluginType.Name.ToLower()
+				pluginAttr.PluginName.ToLower()
 				));
 
 			complexType.Attributes.Add(typeAttr);
@@ -748,7 +748,7 @@ namespace Peach.Core.Xsd
 			{
 				var nameAttr = new XmlSchemaAttribute();
 				nameAttr.Name = "name";
-				nameAttr.Annotate("{0} name.".Fmt(pluginAttr.PluginType.Name));
+				nameAttr.Annotate("{0} name.".Fmt(pluginAttr.PluginName));
 				nameAttr.Use = XmlSchemaUse.Optional;
 
 				complexType.Attributes.Add(nameAttr);
@@ -768,8 +768,8 @@ namespace Peach.Core.Xsd
 			typeAttr.Name = pluginAttr.AttributeName;
 			typeAttr.Use = XmlSchemaUse.Required;
 			typeAttr.Annotate("Specify the class name of a Peach {0}. You can implement your own {1}s as needed.".Fmt(
-				pluginAttr.PluginType.Name,
-				pluginAttr.PluginType.Name.ToLower()
+				pluginAttr.PluginName,
+				pluginAttr.PluginName.ToLower()
 				));
 
 			var restrictEnum = new XmlSchemaSimpleTypeRestriction();
@@ -974,7 +974,7 @@ namespace Peach.Core.Xsd
 				foreach (var item in items)
 				{
 					item.MinOccursString = null;
-					item.MaxOccursString = null;
+					SetMaxOccurs(item, null);
 					choiceParticle.Items.Add(item);
 				}
 
@@ -1406,7 +1406,7 @@ namespace Peach.Core.Xsd
 				foreach (var elem in elems)
 				{
 					elem.MinOccursString = null;
-					elem.MaxOccursString = null;
+					SetMaxOccurs(elem, null);
 					schemaParticle.Items.Add(elem);
 				}
 			}
@@ -1440,8 +1440,27 @@ namespace Peach.Core.Xsd
 			foreach (var elem in elems)
 			{
 				elem.MinOccursString = null;
-				elem.MaxOccursString = null;
+				SetMaxOccurs(elem, null);
 				schemaParticle.Items.Add(elem);
+			}
+		}
+
+		static void SetMaxOccurs(XmlSchemaParticle item, string value)
+		{
+			try
+			{
+				item.MaxOccursString = value;
+			}
+			catch (ArgumentNullException)
+			{
+				var fi = typeof(XmlSchemaParticle).GetField("maxstr", BindingFlags.NonPublic | BindingFlags.Instance);
+				if (fi == null)
+					throw;
+
+				// Mono is broken, and won't let us clear MaxOccursString
+				// So reinitialize it to 1 and use reflection to clear the string
+				item.MaxOccurs = decimal.One;
+				fi.SetValue(item, value);
 			}
 		}
 	}

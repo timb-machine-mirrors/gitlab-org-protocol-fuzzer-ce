@@ -12,6 +12,7 @@ using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Agent.Channels;
 using Logger = NLog.Logger;
+using HttpListenerRequest = SocketHttpListener.Net.HttpListenerRequest;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {

@@ -170,8 +170,8 @@ namespace Peach.Pro.Test.Core.Publishers
 		[Test]
 		public void TestUdp([ValueSource("ChannelNames")]string protocol)
 		{
-			if (Platform.GetOS() == Platform.OS.OSX && protocol == "tcp")
-				Assert.Ignore(".NET remoting doesn't work inside nunit on osx");
+			if (Platform.GetOS() != Platform.OS.Windows && protocol == "tcp")
+				Assert.Ignore(".NET remoting doesn't work inside nunit on mono");
 
 			var port = TestBase.MakePort(12000, 13000);
 			RunRemote(protocol, udp.Fmt(protocol, port));

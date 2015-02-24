@@ -116,6 +116,17 @@ namespace Peach.Core
 		public string AttributeName { get; private set; }
 		public Type PluginType { get; private set; }
 
+		public string PluginName
+		{
+			get
+			{
+				var name = PluginType.Name;
+				if (PluginType.IsInterface && name.StartsWith("I"))
+					return name.Substring(1);
+				return name;
+			}
+		}
+
 		public PluginElementAttribute(string elementName, string attributeName, Type pluginType)
 		{
 			ElementName = elementName;
@@ -125,9 +136,9 @@ namespace Peach.Core
 
 		public PluginElementAttribute(string attributeName, Type pluginType)
 		{
-			ElementName = pluginType.Name;
 			AttributeName = attributeName;
 			PluginType = pluginType;
+			ElementName = PluginName;
 		}
 	}
 
