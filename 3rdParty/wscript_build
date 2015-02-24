@@ -42,6 +42,7 @@ subdirs = [
 	'VMware-VIX-1.13.0-1295980',
 	'SuperSocket',
 	'SuperWebSocket',
+	'SocketHttpListener/SocketHttpListener',
 ]
 
 bld.recurse(subdirs)
