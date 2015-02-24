@@ -16,6 +16,7 @@ deps = [
 	'System.Configuration.dll',
 
 	'Portable.Licensing.dll',
+	'SocketHttpListener.dll',
 
 	'NLog.dll',
 	'SharpPcap.dll',
