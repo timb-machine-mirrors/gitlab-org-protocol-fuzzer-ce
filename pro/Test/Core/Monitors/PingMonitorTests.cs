@@ -88,7 +88,7 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			var faults = runner.Run();
 
-			Verify(faults, "Reply from 127.0.0.1: bytes=32 time=\\d+ms TTL=\\d+", true);
+			Verify(faults, "Reply from 127.0.0.1: bytes=\\d+ time=\\d+ms TTL=\\d+", true);
 		}
 
 		[Test]
@@ -110,7 +110,7 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			var faults = runner.Run();
 
-			Verify(faults, "Reply from 127.0.0.1: bytes=32 time=\\d+ms TTL=\\d+", false);
+			Verify(faults, "Reply from 127.0.0.1: bytes=\\d+ time=\\d+ms TTL=\\d+", false);
 		}
 
 		[Test]
