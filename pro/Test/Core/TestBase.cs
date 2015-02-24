@@ -47,7 +47,7 @@ namespace Peach.Pro.Test.Core
 				var config = new LoggingConfiguration();
 				config.AddTarget("console", consoleTarget);
 
-				var rule = new LoggingRule("*", LogLevel.Info, consoleTarget);
+				var rule = new LoggingRule("*", LogLevel.Debug, consoleTarget);
 				config.LoggingRules.Add(rule);
 
 				LogManager.Configuration = config;
