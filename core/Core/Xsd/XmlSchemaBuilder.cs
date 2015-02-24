@@ -698,7 +698,7 @@ namespace Peach.Core.Xsd
 							if (!addedElems.ContainsKey(key))
 							{
 								elem.MinOccursString = null;
-								elem.MaxOccursString = null;
+								SetMaxOccurs(elem, null);
 								schemaParticle.Items.Add(elem);
 								addedElems.Add(key, elem);
 							}
@@ -974,7 +974,7 @@ namespace Peach.Core.Xsd
 				foreach (var item in items)
 				{
 					item.MinOccursString = null;
-					item.MaxOccursString = null;
+					SetMaxOccurs(item, null);
 					choiceParticle.Items.Add(item);
 				}
 
@@ -1406,7 +1406,7 @@ namespace Peach.Core.Xsd
 				foreach (var elem in elems)
 				{
 					elem.MinOccursString = null;
-					elem.MaxOccursString = null;
+					SetMaxOccurs(elem, null);
 					schemaParticle.Items.Add(elem);
 				}
 			}
@@ -1440,8 +1440,27 @@ namespace Peach.Core.Xsd
 			foreach (var elem in elems)
 			{
 				elem.MinOccursString = null;
-				elem.MaxOccursString = null;
+				SetMaxOccurs(elem, null);
 				schemaParticle.Items.Add(elem);
+			}
+		}
+
+		static void SetMaxOccurs(XmlSchemaParticle item, string value)
+		{
+			try
+			{
+				item.MaxOccursString = value;
+			}
+			catch (ArgumentNullException)
+			{
+				var fi = typeof(XmlSchemaParticle).GetField("maxstr", BindingFlags.NonPublic | BindingFlags.Instance);
+				if (fi == null)
+					throw;
+
+				// Mono is broken, and won't let us clear MaxOccursString
+				// So reinitialize it to 1 and use reflection to clear the string
+				item.MaxOccurs = decimal.One;
+				fi.SetValue(item, value);
 			}
 		}
 	}
