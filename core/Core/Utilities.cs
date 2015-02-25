@@ -603,15 +603,24 @@ namespace Peach.Core
 			HexDump(inputFunc, outputFunc, bytesPerLine);
 		}
 
-		public static string HexDump(Stream input, int bytesPerLine = 16)
+		public static string HexDump(Stream input, int bytesPerLine = 16, int maxOutputSize = 1024*8)
 		{
 			var sb = new StringBuilder();
 			var pos = input.Position;
 
-			HexInputFunc inputFunc = (buf, max) => input.Read(buf, 0, max);
+			HexInputFunc inputFunc = (buf, max) =>
+			{
+				var len = input.Read(buf, 0, Math.Min(max, maxOutputSize));
+				maxOutputSize -= len;
+				return len;
+			};
+
 			HexOutputFunc outputFunc = line => sb.Append(line);
 
 			HexDump(inputFunc, outputFunc, bytesPerLine);
+
+			if (input.Position != input.Length)
+				sb.AppendFormat("---- TRUNCATED (Total Length: {0} bytes) ----", input.Length);
 
 			input.Seek(pos, SeekOrigin.Begin);
 
