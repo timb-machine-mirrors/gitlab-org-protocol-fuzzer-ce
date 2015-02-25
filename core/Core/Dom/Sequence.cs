@@ -49,11 +49,6 @@ namespace Peach.Core.Dom
 
 		public virtual int GetCountOverride()
 		{
-			// Called from CountRelation to get our size.
-			// Ensure we have expanded before checking this.Count
-			//if (!expanded)
-			//    ExpandTo(occurs);
-
 			return countOverride.GetValueOrDefault(Count);
 		}
 
