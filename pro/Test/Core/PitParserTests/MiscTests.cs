@@ -58,7 +58,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, the value of Blob 'DM.blob' contains invalid hex characters.")]
+		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, the value of Blob 'DM.blob' contains invalid hex characters: Helloworld")]
 		public void TestBadHex()
 		{
 			// Verify good error message when parsing bad hex value
