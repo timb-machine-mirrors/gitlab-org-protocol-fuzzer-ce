@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
+using Peach.Core.Test;
 using Peach.Pro.OS.Linux.Agent.Monitors;
 
 namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
@@ -193,6 +194,33 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 
 			Assert.GreaterOrEqual(span.TotalSeconds, 0.5);
 			Assert.LessOrEqual(span.TotalSeconds, 1.5);
+		}
+
+		[Test]
+		public void TestSessionRestart()
+		{
+			var starts = 0;
+
+			var runner = new MonitorRunner("LinuxDebugger", new Dictionary<string, string>
+			{
+				{ "Executable", "CrashableServer" },
+				{ "Arguments", "127.0.0.1 0 1" },
+			})
+			{
+				StartMonitor = (m, args) =>
+				{
+					m.InternalEvent += (s, e) => ++starts;
+					m.StartMonitor(args);
+				},
+				Message = m => Thread.Sleep(2000)
+			};
+
+			// Run for two iterations, expect no faults
+			// but the process should be started twice
+			var faults = runner.Run(2);
+
+			Assert.AreEqual(0, faults.Length);
+			Assert.AreEqual(2, starts);
 		}
 	}
 }
