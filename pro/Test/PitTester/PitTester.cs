@@ -60,7 +60,9 @@ namespace PitTester
 
 				test.agents.Clear();
 
-				var data = testData.Tests.Where(t => t.Name == test.name).First();
+				var data = testData.Tests.FirstOrDefault(t => t.Name == test.name);
+				if (data == null)
+					throw new PeachException("Error, no test definition found for pit test named '{0}'.".Fmt(test.name));
 
 				var logger = new TestLogger(data, testData.Ignores.Select(i => i.Xpath));
 
