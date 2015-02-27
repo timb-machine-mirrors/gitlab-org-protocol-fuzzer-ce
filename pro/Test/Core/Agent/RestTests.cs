@@ -697,5 +697,125 @@ namespace Peach.Pro.Test.Core.Agent
 
 			cli.AgentDisconnect();
 		}
+
+		[Test]
+		public void TestSessionFinished()
+		{
+			// Behaivor of peach 3.4 is depth first init and breadth first shutdown
+			// Ensure rest agent works this way
+
+			var agent2 = new RestTests();
+			var tmp = Path.GetTempFileName();
+
+			try
+			{
+				StartServer();
+				agent2.StartServer();
+
+				var mgr = new AgentManager(new RunContext());
+
+				mgr.Connect(new Peach.Core.Dom.Agent
+				{
+					Name = "agent1",
+					location = _server.Uri.ToString(),
+					monitors = new NamedCollection<Peach.Core.Dom.Monitor>
+					{
+						new Peach.Core.Dom.Monitor
+						{
+							Name = "a1mon1",
+							cls = "Null",
+							parameters = new Dictionary<string,Variant>
+							{
+								{ "LogFile", new Variant(tmp) },
+							}
+						},
+						new Peach.Core.Dom.Monitor
+						{
+							Name = "a1mon2",
+							cls = "Null",
+							parameters = new Dictionary<string,Variant>
+							{
+								{ "LogFile", new Variant(tmp) },
+							}
+						},
+					}
+				});
+
+				mgr.Connect(new Peach.Core.Dom.Agent
+				{
+					Name = "agent2",
+					location = agent2._server.Uri.ToString(),
+					monitors = new NamedCollection<Peach.Core.Dom.Monitor>
+					{
+						new Peach.Core.Dom.Monitor
+						{
+							Name = "a2mon1",
+							cls = "Null",
+							parameters = new Dictionary<string,Variant>
+							{
+								{ "LogFile", new Variant(tmp) },
+							}
+						},
+						new Peach.Core.Dom.Monitor
+						{
+							Name = "a2mon2",
+							cls = "Null",
+							parameters = new Dictionary<string,Variant>
+							{
+								{ "LogFile", new Variant(tmp) },
+							}
+						},
+					}
+				});
+
+				mgr.IterationStarting(false, false);
+
+				mgr.IterationFinished();
+
+				mgr.Dispose();
+
+				var actual = File.ReadAllLines(tmp);
+				var expected = new[]
+				{
+
+					"a1mon1.StartMonitor",
+					"a1mon2.StartMonitor",
+					"a1mon1.SessionStarting",
+					"a1mon2.SessionStarting",
+
+					"a2mon1.StartMonitor",
+					"a2mon2.StartMonitor",
+					"a2mon1.SessionStarting",
+					"a2mon2.SessionStarting",
+
+					"a1mon1.IterationStarting False False",
+					"a1mon2.IterationStarting False False",
+					"a2mon1.IterationStarting False False",
+					"a2mon2.IterationStarting False False",
+					"a2mon2.IterationFinished",
+					"a2mon1.IterationFinished",
+					"a1mon2.IterationFinished",
+					"a1mon1.IterationFinished",
+
+					"a2mon2.SessionFinished",
+					"a2mon1.SessionFinished",
+					"a1mon2.SessionFinished",
+					"a1mon1.SessionFinished",
+
+					"a2mon2.StopMonitor",
+					"a2mon1.StopMonitor",
+					"a1mon2.StopMonitor",
+					"a1mon1.StopMonitor"
+				};
+
+				Assert.That(expected, Is.EqualTo(actual));
+
+			}
+			finally
+			{
+				File.Delete(tmp);
+				agent2.TearDown();
+			}
+		}
 	}
 }

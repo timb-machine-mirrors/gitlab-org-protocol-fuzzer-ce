@@ -133,10 +133,7 @@ namespace Peach.Core.Agent
 				Logger.Trace("StopAllMonitors: {0}", agent.Name);
 				Context.OnStopAllMonitors(agent);
 				Guard(agent, "StopAllMonitors", a => a.StopAllMonitors());
-			}
 
-			foreach (var agent in _agents.Reverse())
-			{
 				Logger.Trace("AgentDisconnect: {0}", agent.Name);
 				Context.OnAgentDisconnect(agent);
 				Guard(agent, "Shutdown", a => a.AgentDisconnect());

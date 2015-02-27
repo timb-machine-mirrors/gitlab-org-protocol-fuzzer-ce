@@ -333,10 +333,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		public override void SessionFinished()
 		{
-			// AgentDisconnect calls DELETE which does SessionFinished
-
-			// Leave the publishers around a they will get cleaned up
-			// when stop() is called on the RemotePublisher
+			if (_connectResp.Messages.Contains("SessionFinished"))
+				Send("PUT", "/SessionFinished", null);
 		}
 
 		public override void StopAllMonitors()
