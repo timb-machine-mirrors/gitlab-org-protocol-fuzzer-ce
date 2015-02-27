@@ -253,7 +253,7 @@ namespace Peach.Core.Dom
 				}
 				else
 				{
-					if (!container.TryGetValue(name, out elem))
+					if (container == null || !container.TryGetValue(name, out elem))
 						throw new PeachException("Error, unable to resolve field \"" + field + "\" against \"" + model.fullName + "\".");
 
 					container = elem as DataElementContainer;

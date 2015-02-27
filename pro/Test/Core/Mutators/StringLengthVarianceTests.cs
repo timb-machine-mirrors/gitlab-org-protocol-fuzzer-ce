@@ -122,5 +122,46 @@ namespace Peach.Pro.Test.Core.Mutators
 			foreach (var m in mutatedDataModels)
 				Assert.LessOrEqual(m.Value.Length, 50);
 		}
+
+		[Test]
+		public void TestMaxOutputSizeOverflow()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str1' value='Hello!' />
+		<String name='str2' value='World!' />
+	</DataModel>
+
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action> 
+		</State>
+	</StateModel>
+
+	<Test name='Default' maxOutputSize='5'>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+		<Strategy class='Sequential'/>
+		<Mutators mode='include'>
+			<Mutator class='StringLengthVariance' />
+		</Mutators>
+	</Test>
+</Peach>
+";
+
+			RunEngine(xml);
+
+			// Max output size is less than the model size
+			// so the strings should shrink but not expand
+			Assert.AreEqual(12, mutatedDataModels.Count);
+
+			// Each string should be no larger than 6, for a total
+			// model size of 12
+			foreach (var m in mutatedDataModels)
+				Assert.LessOrEqual(m.Value.Length, 12);
+		}
 	}
 }
