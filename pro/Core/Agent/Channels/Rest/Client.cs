@@ -17,6 +17,7 @@ using Logger = NLog.Logger;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
+
 	[Agent("http")]
 	public class Client : AgentClient
 	{
@@ -361,8 +362,12 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		public override void IterationStarting(IterationStartingArgs args)
 		{
 			// If any previous call failed, we need to reconnect
+			var tried = false;
 			if (_offline)
+			{
 				ReconnectAgent(true);
+				tried = true;
+			}
 
 			if (!_connectResp.Messages.Contains("IterationStarting"))
 				return;
@@ -373,7 +378,18 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				LastWasFault = args.LastWasFault,
 			};
 
-			Send("PUT", "/IterationStarting", req);
+			try
+			{
+				Send("PUT", "/IterationStarting", req);
+			}
+			catch (Exception)
+			{
+				if (!_offline || tried)
+					throw;
+
+				ReconnectAgent(true);
+				Send("PUT", "/IterationStarting", req);
+			}
 		}
 
 		public override void IterationFinished()
