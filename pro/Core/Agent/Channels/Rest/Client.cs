@@ -359,7 +359,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		public override void IterationStarting(IterationStartingArgs args)
 		{
 			// If any previous call failed, we need to reconnect
-			if (_offline)
+			var offline = _offline;
+			if (offline)
 				ReconnectAgent(true);
 
 			if (!_connectResp.Messages.Contains("IterationStarting"))
@@ -371,7 +372,20 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				LastWasFault = args.LastWasFault,
 			};
 
-			Send("PUT", "/IterationStarting", req);
+			try
+			{
+				Send("PUT", "/IterationStarting", req);
+			}
+			catch (WebException)
+			{
+				// If we are not offline now or we were previously offline
+				// don't try and reconnect since we just did!
+				if (!_offline || offline)
+					throw;
+
+				ReconnectAgent(true);
+				Send("PUT", "/IterationStarting", req);
+			}
 		}
 
 		public override void IterationFinished()
@@ -416,8 +430,6 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		internal void SimulateDisconnect()
 		{
 			Send("DELETE", "", null);
-
-			_offline = true;
 		}
 
 		private MonitorData MakeFault(FaultResponse.Record f)

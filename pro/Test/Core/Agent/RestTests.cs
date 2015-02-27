@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
@@ -592,7 +593,6 @@ namespace Peach.Pro.Test.Core.Agent
 				cli.SessionStarting();
 
 				cli.IterationStarting(new IterationStartingArgs());
-				cli.IterationFinished();
 
 				var actual = File.ReadAllLines(tmp);
 				var expected = new List<string>
@@ -603,26 +603,28 @@ namespace Peach.Pro.Test.Core.Agent
 					"mon2.SessionStarting",
 					"mon1.IterationStarting False False",
 					"mon2.IterationStarting False False",
-					"mon2.IterationFinished",
-					"mon1.IterationFinished",
 				};
 
 				Assert.That(actual, Is.EqualTo(expected));
 
-				// Simulate disconnect will gracefully shut down the remote monitors
+				// Simulate disconnect that occurs when the target
+				// crashes during fuzzing.
+				// This will gracefully shut down the remote monitors
 				// But leave the client in a state that simulates a disconnect
+
 				cli.SimulateDisconnect();
 
 				actual = File.ReadAllLines(tmp);
 				expected.AddRange(new[]
 				{
-					"mon2.SessionFinished",
-					"mon1.SessionFinished",
 					"mon2.StopMonitor",
 					"mon1.StopMonitor"
 				});
 
 				Assert.That(actual, Is.EqualTo(expected));
+
+				var ex = Assert.Throws<WebException>(cli.IterationFinished);
+				StringAssert.Contains("(404) Not Found", ex.Message);
 
 				Assert.False(cli.DetectedFault(), "Should not detect a fault");
 				var data1 = cli.GetMonitorData();
@@ -632,16 +634,15 @@ namespace Peach.Pro.Test.Core.Agent
 				actual = File.ReadAllLines(tmp);
 				Assert.That(actual, Is.EqualTo(expected));
 
-				// The next call to iteration starting will trigger a reconnect
+				// The calls to IterationFinished/DetectedFault
+				// don't do antything, but the next call
+				// to iteration starting will trigger a reconnect
 
 				cli.IterationStarting(new IterationStartingArgs());
 				cli.IterationFinished();
 				Assert.False(cli.DetectedFault(), "Should not detect a fault");
 				var data2 = cli.GetMonitorData();
 				Assert.AreEqual(0, data2.Count(), "Should not have monitor data");
-				cli.SessionFinished();
-				cli.StopAllMonitors();
-				cli.AgentDisconnect();
 
 				actual = File.ReadAllLines(tmp);
 				expected.AddRange(new[]
@@ -659,6 +660,42 @@ namespace Peach.Pro.Test.Core.Agent
 					"mon2.DetectedFault",
 					"mon1.GetMonitorData",
 					"mon2.GetMonitorData",
+				});
+
+				Assert.That(actual, Is.EqualTo(expected));
+
+				// Simulate an agent disconnect that can occur if a fault
+				// is detected and a virtual machine target is restarted
+				// This presents itself as a 404 in IterationStarting
+
+				cli.SimulateDisconnect();
+
+				actual = File.ReadAllLines(tmp);
+				expected.AddRange(new[]
+				{
+					"mon2.StopMonitor",
+					"mon1.StopMonitor"
+				});
+
+				Assert.That(actual, Is.EqualTo(expected));
+
+				cli.IterationStarting(new IterationStartingArgs());
+				cli.IterationFinished();
+				cli.SessionFinished();
+				cli.StopAllMonitors();
+				cli.AgentDisconnect();
+
+				actual = File.ReadAllLines(tmp);
+				expected.AddRange(new[]
+				{
+					"mon1.StartMonitor",
+					"mon2.StartMonitor",
+					"mon1.SessionStarting",
+					"mon2.SessionStarting",
+					"mon1.IterationStarting False False",
+					"mon2.IterationStarting False False",
+					"mon2.IterationFinished",
+					"mon1.IterationFinished",
 					"mon2.SessionFinished",
 					"mon1.SessionFinished",
 					"mon2.StopMonitor",
