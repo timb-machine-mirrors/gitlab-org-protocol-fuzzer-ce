@@ -6,13 +6,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Agent.Channels;
 using Logger = NLog.Logger;
 using HttpListenerRequest = SocketHttpListener.Net.HttpListenerRequest;
+using SocketHttpListener.Net;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
