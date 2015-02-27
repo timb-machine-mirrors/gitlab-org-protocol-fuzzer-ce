@@ -485,6 +485,7 @@ namespace Peach.Core
 						}
 
 						logger.Debug("runTest: SoftException, skipping to next iteration");
+						logger.Trace(se);
 					}
 					catch (OutOfMemoryException ex)
 					{

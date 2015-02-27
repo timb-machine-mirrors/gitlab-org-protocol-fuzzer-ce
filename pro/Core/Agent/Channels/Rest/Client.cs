@@ -334,10 +334,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		public override void SessionFinished()
 		{
-			// AgentDisconnect calls DELETE which does SessionFinished
-
-			// Leave the publishers around a they will get cleaned up
-			// when stop() is called on the RemotePublisher
+			if (_connectResp.Messages.Contains("SessionFinished"))
+				Send("PUT", "/SessionFinished", null);
 		}
 
 		public override void StopAllMonitors()
@@ -362,12 +360,9 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		public override void IterationStarting(IterationStartingArgs args)
 		{
 			// If any previous call failed, we need to reconnect
-			var tried = false;
-			if (_offline)
-			{
+			var offline = _offline;
+			if (offline)
 				ReconnectAgent(true);
-				tried = true;
-			}
 
 			if (!_connectResp.Messages.Contains("IterationStarting"))
 				return;
@@ -382,9 +377,11 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			{
 				Send("PUT", "/IterationStarting", req);
 			}
-			catch (Exception)
+			catch (WebException)
 			{
-				if (!_offline || tried)
+				// If we are not offline now or we were previously offline
+				// don't try and reconnect since we just did!
+				if (!_offline || offline)
 					throw;
 
 				ReconnectAgent(true);
@@ -434,8 +431,6 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		internal void SimulateDisconnect()
 		{
 			Send("DELETE", "", null);
-
-			_offline = true;
 		}
 
 		private MonitorData MakeFault(FaultResponse.Record f)
