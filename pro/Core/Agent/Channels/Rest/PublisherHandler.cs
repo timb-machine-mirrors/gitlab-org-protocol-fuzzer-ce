@@ -5,11 +5,11 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Net;
 using Peach.Core;
 using Peach.Core.Agent.Channels;
 using Peach.Core.IO;
 using HttpListenerRequest = SocketHttpListener.Net.HttpListenerRequest;
+using SocketHttpListener.Net;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
