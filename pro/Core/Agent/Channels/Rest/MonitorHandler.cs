@@ -112,20 +112,6 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				{
 					try
 					{
-						mon.SessionFinished();
-					}
-					catch (Exception ex)
-					{
-						Logger.Debug("Ignoring session finished exception on {0} monitor '{1}'.",
-							mon.Class, mon.Name);
-						Logger.Debug(ex.Message);
-					}
-				}
-
-				foreach (var mon in _monitors.Reverse())
-				{
-					try
-					{
 						mon.StopMonitor();
 					}
 					catch (Exception ex)
@@ -159,6 +145,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					Messages.AddRange(new[]
 					{
 						"SessionStarting",
+						"SessionFinished",
 						"IterationStarting",
 						"IterationFinished",
 						"DetectedFault",
@@ -166,6 +153,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					});
 
 					_handler._routes.Add(Url + "/SessionStarting", "PUT", OnSessionStarting);
+					_handler._routes.Add(Url + "/SessionFinished", "PUT", OnSessionFinished);
 					_handler._routes.Add(Url + "/IterationStarting", "PUT", OnIterationStarting);
 					_handler._routes.Add(Url + "/IterationFinished", "PUT", OnIterationFinished);
 					_handler._routes.Add(Url + "/DetectedFault", "GET", DetectedFault);
@@ -190,6 +178,25 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				foreach (var mon in _monitors)
 				{
 					mon.SessionStarting();
+				}
+
+				return RouteResponse.Success();
+			}
+
+			private RouteResponse OnSessionFinished(HttpListenerRequest req)
+			{
+				foreach (var mon in _monitors.Reverse())
+				{
+					try
+					{
+						mon.SessionFinished();
+					}
+					catch (Exception ex)
+					{
+						Logger.Debug("Ignoring session finished exception on {0} monitor '{1}'.",
+							mon.Class, mon.Name);
+						Logger.Debug(ex.Message);
+					}
 				}
 
 				return RouteResponse.Success();
