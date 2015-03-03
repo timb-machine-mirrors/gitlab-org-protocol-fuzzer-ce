@@ -1,10 +1,13 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Threading;
 
 namespace Peach.Core
 {
 	public class Retry
 	{
+		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
+
 		public static readonly TimeSpan DefaultRetryDelay = TimeSpan.FromSeconds(0.5);
 		public const int DefaultRetryCount = 3;
 
@@ -26,8 +29,42 @@ namespace Peach.Core
 				catch (Exception ex)
 				{
 					if (count++ == retryCount)
-						throw ex;
+						throw;
+
+					Logger.Trace("Retrying in {0}ms after error: {1}", 
+						retryDelay.TotalMilliseconds, 
+						ex.Message);
+		
 					Thread.Sleep(retryDelay);
+				}
+			}
+		}
+
+		public static void Backoff(TimeSpan maxDelay, int retryCount, Action fn)
+		{
+			int count = 0;
+			var retryDelay = TimeSpan.FromMilliseconds(1);
+			while (true)
+			{
+				try
+				{
+					fn();
+					break;
+				}
+				catch (Exception ex)
+				{
+					if (count++ == retryCount)
+						throw;
+
+					Logger.Trace("Retrying in {0}ms after error: {1}", 
+						retryDelay.TotalMilliseconds,
+						ex.Message);
+
+					Thread.Sleep(retryDelay);
+		
+					retryDelay = retryDelay.Add(retryDelay);
+					if (retryDelay.CompareTo(maxDelay) >= 0)
+						retryDelay = maxDelay;
 				}
 			}
 		}
