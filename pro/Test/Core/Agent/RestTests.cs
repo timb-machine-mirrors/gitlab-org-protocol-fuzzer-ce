@@ -10,6 +10,9 @@ using Peach.Core.Agent;
 using Peach.Core.IO;
 using Peach.Core.Test;
 using Peach.Pro.Core.Agent.Channels.Rest;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
 
 namespace Peach.Pro.Test.Core.Agent
 {
@@ -554,7 +557,7 @@ namespace Peach.Pro.Test.Core.Agent
 					new BitStream(Encoding.ASCII.GetBytes("Hello"))
 				};
 
-				var ex = Assert.Throws<PeachException>(() =>pub.Call(method, args));
+				var ex = Assert.Throws<PeachException>(() => pub.Call(method, args));
 
 				Assert.AreEqual("The Rest publisher does not support call actions when run on remote agents.", ex.Message);
 			}
@@ -647,7 +650,6 @@ namespace Peach.Pro.Test.Core.Agent
 				actual = File.ReadAllLines(tmp);
 				expected.AddRange(new[]
 				{
-
 					"mon1.StartMonitor",
 					"mon2.StartMonitor",
 					"mon1.SessionStarting",
@@ -814,7 +816,6 @@ namespace Peach.Pro.Test.Core.Agent
 				var actual = File.ReadAllLines(tmp);
 				var expected = new[]
 				{
-
 					"a1mon1.StartMonitor",
 					"a1mon2.StartMonitor",
 					"a1mon1.SessionStarting",
@@ -845,13 +846,68 @@ namespace Peach.Pro.Test.Core.Agent
 					"a1mon1.StopMonitor"
 				};
 
-				Assert.That(expected, Is.EqualTo(actual));
+				Assert.That(actual, Is.EqualTo(expected));
 
 			}
 			finally
 			{
 				File.Delete(tmp);
 				agent2.TearDown();
+			}
+		}
+
+		[Test]
+		public void TestLogging()
+		{
+			var target = new TestLogTarget();
+			var config = LogManager.Configuration;
+			var rule = new LoggingRule("Agent.Agent1", LogLevel.Info, target);
+
+			config.AddTarget("TestLog", target);
+			config.LoggingRules.Add(rule);
+			LogManager.ReconfigExistingLoggers();
+
+			StartServer();
+
+			var cli = new Client("Agent1", _server.Uri.ToString(), null);
+			cli.AgentConnect();
+			cli.StartMonitor("mon1", "Null", new Dictionary<string, string>
+			{
+				{ "UseNLog", "true" },
+			});
+			cli.SessionStarting();
+			cli.IterationStarting(new IterationStartingArgs());
+			cli.IterationFinished();
+			cli.SessionFinished();
+			cli.StopAllMonitors();
+			cli.AgentDisconnect();
+
+			var expected = new[]
+			{
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StartMonitor",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionStarting",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationStarting False False",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationFinished",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionFinished",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StopMonitor",
+			};
+			Assert.That(target.Messages, Is.EqualTo(expected));
+		}
+
+		class TestLogTarget : TargetWithLayout
+		{
+			public List<string> Messages { get; private set; }
+
+			public TestLogTarget()
+			{
+				Messages = new List<string>();
+				Layout = "${level}|${logger}|${message}";
+			}
+
+			protected override void Write(LogEventInfo logEvent)
+			{
+				var message = Layout.Render(logEvent);
+				Messages.Add(message);
 			}
 		}
 	}

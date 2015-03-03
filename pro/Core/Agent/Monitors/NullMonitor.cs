@@ -4,15 +4,18 @@ using Peach.Core;
 using Peach.Core.Agent;
 using Monitor = Peach.Core.Agent.Monitor2;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
+using NLog;
 
 namespace Peach.Pro.Core.Agent.Monitors
 {
 	[Monitor("Null")]
 	[Description("A monitor that does reports no faults and optionally logs events to a file.")]
 	[Parameter("LogFile", typeof(string), "Log monitor events to the specified file.", "")]
+	[Parameter("UseNLog", typeof(bool), "Log monitor events to NLog.", "false")]
 	public class NullMonitor : Monitor
 	{
 		public string LogFile { get; set; }
+		public bool UseNLog { get; set; }
 
 		void Log(string msg, params object[] args)
 		{
@@ -23,6 +26,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 					writer.WriteLine(msg, args);
 				}
 			}
+
+			if (UseNLog)
+				LogManager.GetCurrentClassLogger().Info(msg.Fmt(args));
 		}
 
 		public NullMonitor(string name)
