@@ -277,6 +277,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		private ConnectResponse _connectResp;
 		private Uri _agentUri;
 		private bool _offline;
+		private LogSink _sink;
 
 		public Client(string name, string uri, string password)
 			: base(name, uri, password)
@@ -295,6 +296,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			_publishers = new List<PublisherProxy>();
 			_cookies = new CookieContainer();
+			_sink = new LogSink(name, _baseUrl);
 		}
 
 		public override void AgentConnect()
@@ -481,6 +483,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		private void ReconnectAgent(bool log)
 		{
+			_sink.Start();
+
 			if (log)
 				Logger.Debug("Restarting all monitors on remote agent {0}", _baseUrl);
 
