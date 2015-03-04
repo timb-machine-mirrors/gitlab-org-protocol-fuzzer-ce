@@ -127,8 +127,15 @@ namespace Peach.Pro.Core.WebServices
 
 		private byte[] LoadFavIcon()
 		{
-			var path = Path.Combine(Utilities.ExecutionDirectory, "public", "favicon.ico");
-			return File.ReadAllBytes(path);
+			const string name = "Peach.Pro.Core.Resources.favicon.ico";
+			using (var src = Assembly.GetExecutingAssembly().GetManifestResourceStream(name))
+			{
+				using (var tgt = new MemoryStream())
+				{
+					src.CopyTo(tgt);
+					return tgt.ToArray();
+				}
+			}
 		}
 
 		protected override void ConfigureApplicationContainer(TinyIoCContainer container)
