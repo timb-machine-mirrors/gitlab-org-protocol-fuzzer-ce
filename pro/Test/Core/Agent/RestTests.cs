@@ -55,7 +55,9 @@ namespace Peach.Pro.Test.Core.Agent
 			});
 
 			_thread.Start();
-			_event.WaitOne();
+			Assert.IsTrue(
+				_event.WaitOne(TimeSpan.FromSeconds(10)),
+				"Timeout waiting for server to start");
 
 			// Trigger faulire if we couldn't start
 			if (_error != null)
