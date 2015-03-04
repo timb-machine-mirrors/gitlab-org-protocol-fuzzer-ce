@@ -6,6 +6,7 @@ using SocketHttpListener;
 using SocketHttpListener.Net;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
@@ -13,36 +14,48 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 	{
 		private readonly List<LogResponse> _responses = new List<LogResponse>();
 		private readonly LogTarget _target;
-		private const string Name = "RestLogTarget";
+		private readonly LoggingRule _rule;
+		private readonly RouteHandler _routes;
 
 		public LogHandler(RouteHandler routes)
 		{
-			_target = new LogTarget();
+			_target = new LogTarget { Name = "RestLogTarget" };
+			_rule = new LoggingRule("*", LogLevel.Trace, _target);
+			_routes = routes;
 
 			var config = LogManager.Configuration;
-			var rule = new LoggingRule("*", LogLevel.Trace, _target);
+			config.AddTarget(_target.Name, _target);
+			config.LoggingRules.Add(_rule);
+			LogManager.Configuration = config;
 
-			config.AddTarget(Name, _target);
-			config.LoggingRules.Add(rule);
-			LogManager.ReconfigExistingLoggers();
-
-			routes.Add(Server.LogPath, "GET", OnSubscribe);
+			_routes.Add(Server.LogPath, "GET", OnSubscribe);
 		}
 
 		public void Dispose()
 		{
-			LogManager.Configuration.RemoveTarget(Name);
+			var config = LogManager.Configuration;
+			config.LoggingRules.Remove(_rule);
+			config.RemoveTarget(_target.Name);
+			LogManager.Configuration = config;
+
+			_target.Dispose();
 
 			foreach (var resp in _responses)
 			{
 				resp.Dispose();
 			}
-			_responses.Clear();
+
+			_routes.Remove(Server.LogPath);
 		}
 
 		private RouteResponse OnSubscribe(HttpListenerRequest req)
 		{
-			var response = new LogResponse(_target);
+			var levelName = req.QueryString.Get("level");
+			if (string.IsNullOrEmpty(levelName))
+				levelName = "Info";
+			var level = LogLevel.FromString(levelName);
+
+			var response = new LogResponse(_target, level);
 			_responses.Add(response);
 			return response;
 		}
@@ -52,55 +65,99 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 	{
 		private WebSocket _ws;
 		private readonly LogTarget _target;
+		private readonly LogLevel _level;
+		private int _counter = 0;
+		private volatile int _pending = 0;
+		private AutoResetEvent _evt;
 
-		public LogResponse(LogTarget target)
+		public LogResponse(LogTarget target, LogLevel level)
 		{
 			_target = target;
+			_level = level;
+
+			_evt = new AutoResetEvent(false);
 		}
 
 		public override void Complete(HttpListenerContext ctx)
 		{
 			_ws = ctx.AcceptWebSocket("log").WebSocket;
+			_ws.OnMessage += OnMessage;
+			_ws.OnClose += OnClose;
 			_ws.ConnectAsServer();
-			_ws.OnClose += (s, e) =>
-			{
-				_target.RemoveSocket(_ws);
-				_ws = null;
-			};
-			_target.AddSocket(_ws);
+			_target.Add(this);
+		}
 
-			LogManager.GetCurrentClassLogger().Trace("New WebSocket");
+		void OnMessage(object sender, MessageEventArgs e)
+		{
+			Flush();
+		}
+
+		private void OnClose(object sender, CloseEventArgs e)
+		{
+			_target.Remove(this);
+			_ws = null;
 		}
 
 		public void Dispose()
 		{
 			if (_ws != null)
 			{
-				_target.RemoveSocket(_ws);
+				_target.Remove(this);
 				_ws.Close();
 				_ws = null;
 			}
 		}
-	}
 
-	class LogTarget : Target
-	{
-		private readonly List<WebSocket> _sockets = new List<WebSocket>();
-
-		public void AddSocket(WebSocket ws)
+		private void Flush()
 		{
-			lock (this)
+			while (_pending > 0)
 			{
-				_sockets.Add(ws);
+				_evt.WaitOne(TimeSpan.FromSeconds(1));
 			}
 		}
 
-		public void RemoveSocket(WebSocket ws)
+		public void Log(LogEventInfo logEvent)
 		{
-			lock(this)
+			try
 			{
-				_sockets.Remove(ws);
+				if (logEvent.Level >= _level)
+				{
+					var id = _counter++;
+					logEvent.Properties["ID"] = id;
+					var json = JsonConvert.SerializeObject(logEvent);
+
+					_pending++;
+					_ws.SendAsync(json, (done) =>
+					{
+						_pending--;
+						_evt.Set();
+					});
+				}
 			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("LogReponse.Log> Exception: {0}", ex.Message);
+			}
+		}
+	}
+
+	class LogTarget : TargetWithLayout
+	{
+		private readonly List<LogResponse> _loggers = new List<LogResponse>();
+		private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+
+		public void Add(LogResponse logger)
+		{
+			_lock.EnterWriteLock();
+			try { _loggers.Add(logger); }
+			finally { _lock.ExitWriteLock(); }
+		}
+
+		public void Remove(LogResponse logger)
+		{
+			_lock.EnterWriteLock();
+			try { _loggers.Remove(logger); }
+			finally { _lock.ExitWriteLock(); }
 		}
 
 		protected override void Write(LogEventInfo logEvent)
@@ -109,21 +166,9 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			if (logEvent.Properties.ContainsKey("PreventLoop"))
 				return;
 
-			var data = JsonConvert.SerializeObject(logEvent);
-			lock (this)
-			{
-				_sockets.ForEach(ws =>
-				{
-					try
-					{
-						ws.SendAsync(data, null);
-					}
-					catch (Exception ex)
-					{
-						Console.WriteLine("LogTarget.Write Exception: {0}", ex.Message);
-					}
-				});
-			}
+			_lock.EnterReadLock();
+			try { _loggers.ForEach(log => log.Log(logEvent)); }
+			finally { _lock.ExitReadLock(); }
 		}
 	}
 }

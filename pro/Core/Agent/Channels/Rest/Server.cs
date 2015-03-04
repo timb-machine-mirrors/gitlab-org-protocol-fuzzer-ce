@@ -141,9 +141,6 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				}
 			}
 
-			if (Started != null)
-				Started(this, EventArgs.Empty);
-
 			try
 			{
 				using (new LogHandler(_listener.Routes))
@@ -152,6 +149,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					{
 						using (new PublisherHandler(_listener.Routes))
 						{
+							if (Started != null)
+								Started(this, EventArgs.Empty);
 							_listener.Start();
 						}
 					}

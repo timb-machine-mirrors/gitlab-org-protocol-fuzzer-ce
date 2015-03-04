@@ -352,6 +352,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				Send("DELETE", "", null);
 
 			_connectResp = null;
+			_sink.Stop();
 		}
 
 		public override IPublisher CreatePublisher(string pubName, string cls, Dictionary<string, string> args)
