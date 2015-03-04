@@ -16,6 +16,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		private readonly NLog.Logger _chain;
 		private AutoResetEvent _evtReady;
 		private AutoResetEvent _evtClosed;
+		private AutoResetEvent _evtFlushed;
 		private readonly Dictionary<long, LogEventInfo> _pending;
 		private int _expectId;
 		private WebSocket _ws;
@@ -65,10 +66,16 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			if (_ws != null)
 			{
-				using (var evtFlushed = new AutoResetEvent(false))
+				_evtFlushed = new AutoResetEvent(false);
+
+				try
 				{
-					_ws.Send("Flush", (done) => evtFlushed.Set());
-					evtFlushed.WaitOne();
+					_ws.Send("Flush", (done) => _evtFlushed.Set());
+				}
+				finally
+				{
+					_evtFlushed.Dispose();
+					_evtFlushed = null;
 				}
 
 				_ws.Close();
@@ -96,6 +103,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		{
 			_logger.Error("OnError> {0}", e.Message);
 			_evtReady.Set();
+			if (_evtFlushed != null)
+				_evtFlushed.Set();
 		}
 
 		void OnMessage(object sender, MessageEventArgs e)
