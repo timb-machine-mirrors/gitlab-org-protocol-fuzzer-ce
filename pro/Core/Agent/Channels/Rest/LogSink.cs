@@ -81,7 +81,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				}
 
 				_ws.Close();
-	
+
 				if (!_evtClosed.WaitOne(TimeSpan.FromSeconds(10)))
 					_logger.Warn("Timeout waiting for remote logging service to stop");
 
@@ -97,9 +97,9 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		void OnClose(object sender, CloseEventArgs e)
 		{
-			_logger.Trace("OnClose> WasClean: {0}, Code: {1}, Reason: {2}", 
-				e.WasClean, 
-				e.Code, 
+			_logger.Trace("OnClose> WasClean: {0}, Code: {1}, Reason: {2}",
+				e.WasClean,
+				e.Code,
 				e.Reason);
 			_evtClosed.Set();
 			if (_evtFlushed != null)
@@ -122,7 +122,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				var id = Convert.ToInt64(logEvent.Properties["ID"]);
 				if (id == -1)
 				{
-					foreach(var kv in _pending)
+					foreach (var kv in _pending)
 					{
 						ProcessEvent(kv.Value);
 						_expectId = kv.Key + 1;
@@ -171,13 +171,13 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				_ws.Dispose();
 				_ws = null;
 			}
-			
+
 			if (_evtReady != null)
 			{
 				_evtReady.Dispose();
 				_evtReady = null;
 			}
-	
+
 			if (_evtClosed != null)
 			{
 				_evtClosed.Dispose();
