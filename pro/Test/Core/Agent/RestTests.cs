@@ -25,6 +25,14 @@ namespace Peach.Pro.Test.Core.Agent
 		 *    This is needed to clean up /pa/file/{id} resources from GetMonitorData.
 		 */
 
+		private Exception _error;
+		private AutoResetEvent _event;
+		private Thread _thread;
+		private Server _server;
+		private Uri _uri;
+		private LogCollector _collector;
+		private LoggingRule _rule;
+
 		private void StartServer()
 		{
 			_event = new AutoResetEvent(false);
@@ -54,12 +62,24 @@ namespace Peach.Pro.Test.Core.Agent
 				TearDown();
 
 			Assert.NotNull(_server.Uri);
+
+			// use 127.0.0.1 as host to avoid DNS lookups
+			var ub = new UriBuilder(_server.Uri);
+			ub.Host = "127.0.0.1";
+			_uri = ub.Uri;
 		}
 
-		private Exception _error;
-		private AutoResetEvent _event;
-		private Thread _thread;
-		private Server _server;
+		[SetUp]
+		public void SetUp()
+		{
+			_collector = new LogCollector { Name = "Collector" };
+			_rule = new LoggingRule("Agent.*", LogLevel.Info, _collector);
+
+			var config = LogManager.Configuration;
+			config.AddTarget(_collector.Name, _collector);
+			config.LoggingRules.Add(_rule);
+			LogManager.Configuration = config;
+		}
 
 		[TearDown]
 		public void TearDown()
@@ -85,6 +105,17 @@ namespace Peach.Pro.Test.Core.Agent
 			var err = _error;
 			_error = null;
 
+			if (_collector != null)
+			{
+				var config = LogManager.Configuration;
+				config.LoggingRules.Remove(_rule);
+				config.RemoveTarget(_collector.Name);
+				LogManager.Configuration = config;
+
+				_collector.Dispose();
+				_collector = null;
+			}
+
 			if (err != null)
 				throw new PeachException(err.Message, err);
 		}
@@ -104,7 +135,7 @@ namespace Peach.Pro.Test.Core.Agent
 		{
 			StartServer();
 
-			var cli = new Client(null, _server.Uri.ToString(), null);
+			var cli = new Client(null, _uri.ToString(), null);
 
 			cli.AgentConnect();
 			cli.StartMonitor("mon", "TcpPort", new Dictionary<string, string>
@@ -134,7 +165,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 			try
 			{
-				var cli = new Client("cli", _server.Uri.ToString(), null);
+				var cli = new Client("cli", _uri.ToString(), null);
 
 				cli.AgentConnect();
 				cli.StartMonitor("mon", "SaveFile", new Dictionary<string, string>
@@ -249,7 +280,7 @@ namespace Peach.Pro.Test.Core.Agent
 		{
 			StartServer();
 
-			var cli = new Client(null, _server.Uri.ToString(), null);
+			var cli = new Client(null, _uri.ToString(), null);
 
 			cli.AgentConnect();
 
@@ -281,7 +312,7 @@ namespace Peach.Pro.Test.Core.Agent
 			{
 				File.WriteAllText(tmp, "Hello World");
 
-				var cli = new Client(null, _server.Uri.ToString(), null);
+				var cli = new Client(null, _uri.ToString(), null);
 
 				cli.AgentConnect();
 
@@ -368,7 +399,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 			try
 			{
-				var cli = new Client(null, _server.Uri.ToString(), null);
+				var cli = new Client(null, _uri.ToString(), null);
 
 				cli.AgentConnect();
 
@@ -412,7 +443,6 @@ namespace Peach.Pro.Test.Core.Agent
 			}
 		}
 
-
 		[Test]
 		public void Call()
 		{
@@ -428,7 +458,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 			try
 			{
-				var cli = new Client(null, _server.Uri.ToString(), null);
+				var cli = new Client(null, _uri.ToString(), null);
 
 				cli.AgentConnect();
 
@@ -482,7 +512,6 @@ namespace Peach.Pro.Test.Core.Agent
 				};
 
 				Assert.That(contents, Is.EqualTo(expected));
-
 			}
 			finally
 			{
@@ -502,7 +531,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 			try
 			{
-				var cli = new Client(null, _server.Uri.ToString(), null);
+				var cli = new Client(null, _uri.ToString(), null);
 
 				cli.AgentConnect();
 
@@ -541,7 +570,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 			StartServer();
 
-			var cli = new Client(null, _server.Uri.ToString(), null);
+			var cli = new Client(null, _uri.ToString(), null);
 
 			cli.AgentConnect();
 
@@ -578,138 +607,128 @@ namespace Peach.Pro.Test.Core.Agent
 
 			StartServer();
 
-			var tmp = Path.GetTempFileName();
+			var cli = new Client("Agent1", _uri.ToString(), null);
 
-			try
+			cli.AgentConnect();
+			cli.StartMonitor("mon1", "Null", new Dictionary<string, string>
 			{
-				var cli = new Client(null, _server.Uri.ToString(), null);
-
-				cli.AgentConnect();
-				cli.StartMonitor("mon1", "Null", new Dictionary<string, string>
-				{
-					{ "LogFile", tmp },
-				});
-				cli.StartMonitor("mon2", "Null", new Dictionary<string, string>
-				{
-					{ "LogFile", tmp },
-				});
-				cli.SessionStarting();
-
-				cli.IterationStarting(new IterationStartingArgs());
-
-				var actual = File.ReadAllLines(tmp);
-				var expected = new List<string>
-				{
-					"mon1.StartMonitor",
-					"mon2.StartMonitor",
-					"mon1.SessionStarting",
-					"mon2.SessionStarting",
-					"mon1.IterationStarting False False",
-					"mon2.IterationStarting False False",
-				};
-
-				Assert.That(actual, Is.EqualTo(expected));
-
-				// Simulate disconnect that occurs when the target
-				// crashes during fuzzing.
-				// This will gracefully shut down the remote monitors
-				// But leave the client in a state that simulates a disconnect
-
-				cli.SimulateDisconnect();
-
-				actual = File.ReadAllLines(tmp);
-				expected.AddRange(new[]
-				{
-					"mon2.StopMonitor",
-					"mon1.StopMonitor"
-				});
-
-				Assert.That(actual, Is.EqualTo(expected));
-
-				var ex = Assert.Throws<WebException>(cli.IterationFinished);
-				StringAssert.Contains("(404) Not Found", ex.Message);
-
-				Assert.False(cli.DetectedFault(), "Should not detect a fault");
-				var data1 = cli.GetMonitorData();
-				Assert.AreEqual(0, data1.Count(), "Should not have monitor data");
-
-				// DetectedFault and GetMonitorData will not get remoted
-				actual = File.ReadAllLines(tmp);
-				Assert.That(actual, Is.EqualTo(expected));
-
-				// The calls to IterationFinished/DetectedFault
-				// don't do antything, but the next call
-				// to iteration starting will trigger a reconnect
-
-				cli.IterationStarting(new IterationStartingArgs());
-				cli.IterationFinished();
-				Assert.False(cli.DetectedFault(), "Should not detect a fault");
-				var data2 = cli.GetMonitorData();
-				Assert.AreEqual(0, data2.Count(), "Should not have monitor data");
-
-				actual = File.ReadAllLines(tmp);
-				expected.AddRange(new[]
-				{
-					"mon1.StartMonitor",
-					"mon2.StartMonitor",
-					"mon1.SessionStarting",
-					"mon2.SessionStarting",
-					"mon1.IterationStarting False False",
-					"mon2.IterationStarting False False",
-					"mon2.IterationFinished",
-					"mon1.IterationFinished",
-					"mon1.DetectedFault",
-					"mon2.DetectedFault",
-					"mon1.GetMonitorData",
-					"mon2.GetMonitorData",
-				});
-
-				Assert.That(actual, Is.EqualTo(expected));
-
-				// Simulate an agent disconnect that can occur if a fault
-				// is detected and a virtual machine target is restarted
-				// This presents itself as a 404 in IterationStarting
-
-				cli.SimulateDisconnect();
-
-				actual = File.ReadAllLines(tmp);
-				expected.AddRange(new[]
-				{
-					"mon2.StopMonitor",
-					"mon1.StopMonitor"
-				});
-
-				Assert.That(actual, Is.EqualTo(expected));
-
-				cli.IterationStarting(new IterationStartingArgs());
-				cli.IterationFinished();
-				cli.SessionFinished();
-				cli.StopAllMonitors();
-				cli.AgentDisconnect();
-
-				actual = File.ReadAllLines(tmp);
-				expected.AddRange(new[]
-				{
-					"mon1.StartMonitor",
-					"mon2.StartMonitor",
-					"mon1.SessionStarting",
-					"mon2.SessionStarting",
-					"mon1.IterationStarting False False",
-					"mon2.IterationStarting False False",
-					"mon2.IterationFinished",
-					"mon1.IterationFinished",
-					"mon2.SessionFinished",
-					"mon1.SessionFinished",
-					"mon2.StopMonitor",
-					"mon1.StopMonitor"
-				});
-
-				Assert.That(actual, Is.EqualTo(expected));
-			}
-			finally
+				{ "UseNLog", "true" },
+			});
+			cli.StartMonitor("mon2", "Null", new Dictionary<string, string>
 			{
-				File.Delete(tmp);
-			}
+				{ "UseNLog", "true" },
+			});
+			cli.SessionStarting();
+
+			cli.IterationStarting(new IterationStartingArgs());
+
+			var expected = new List<string>
+			{
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StartMonitor",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StartMonitor",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionStarting",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.SessionStarting",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationStarting False False",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationStarting False False",
+			};
+
+			Thread.Sleep(500); // allow time for logs to collect
+			Assert.That(_collector.Messages, Is.EqualTo(expected));
+
+			// Simulate disconnect that occurs when the target
+			// crashes during fuzzing.
+			// This will gracefully shut down the remote monitors
+			// But leave the client in a state that simulates a disconnect
+
+			cli.SimulateDisconnect();
+
+			expected.AddRange(new[]
+			{
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StopMonitor",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StopMonitor"
+			});
+
+			Thread.Sleep(500); // allow time for logs to collect
+			Assert.That(_collector.Messages, Is.EqualTo(expected));
+
+			var ex = Assert.Throws<WebException>(cli.IterationFinished);
+			StringAssert.Contains("(404) Not Found", ex.Message);
+
+			Assert.False(cli.DetectedFault(), "Should not detect a fault");
+			var data1 = cli.GetMonitorData();
+			Assert.AreEqual(0, data1.Count(), "Should not have monitor data");
+
+			// DetectedFault and GetMonitorData will not get remoted
+			Assert.That(_collector.Messages, Is.EqualTo(expected));
+
+			// The calls to IterationFinished/DetectedFault
+			// don't do anything, but the next call
+			// to iteration starting will trigger a reconnect
+
+			cli.IterationStarting(new IterationStartingArgs());
+			cli.IterationFinished();
+			Assert.False(cli.DetectedFault(), "Should not detect a fault");
+			var data2 = cli.GetMonitorData();
+			Assert.AreEqual(0, data2.Count(), "Should not have monitor data");
+
+			expected.AddRange(new[]
+			{
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StartMonitor",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StartMonitor",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionStarting",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.SessionStarting",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationStarting False False",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationStarting False False",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationFinished",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationFinished",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.DetectedFault",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.DetectedFault",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.GetMonitorData",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.GetMonitorData",
+			});
+
+			Thread.Sleep(500); // allow time for logs to collect
+			Assert.That(_collector.Messages, Is.EqualTo(expected));
+
+			// Simulate an agent disconnect that can occur if a fault
+			// is detected and a virtual machine target is restarted
+			// This presents itself as a 404 in IterationStarting
+
+			cli.SimulateDisconnect();
+
+			expected.AddRange(new[]
+			{
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StopMonitor",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StopMonitor"
+			});
+
+			Thread.Sleep(500); // allow time for logs to collect
+			Assert.That(_collector.Messages, Is.EqualTo(expected));
+
+			cli.IterationStarting(new IterationStartingArgs());
+			cli.IterationFinished();
+			cli.SessionFinished();
+			cli.StopAllMonitors();
+			cli.AgentDisconnect();
+
+			expected.AddRange(new[]
+			{
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StartMonitor",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StartMonitor",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionStarting",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.SessionStarting",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationStarting False False",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationStarting False False",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationFinished",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationFinished",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.SessionFinished",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionFinished",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StopMonitor",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StopMonitor"
+			});
+
+			Thread.Sleep(500); // allow time for logs to collect
+			Assert.That(_collector.Messages, Is.EqualTo(expected));
 		}
 
 		[Test]
@@ -720,7 +739,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 			StartServer();
 
-			var cli = new Client(null, _server.Uri.ToString(), null);
+			var cli = new Client(null, _uri.ToString(), null);
 
 			cli.AgentConnect();
 
@@ -756,7 +775,7 @@ namespace Peach.Pro.Test.Core.Agent
 				mgr.Connect(new Peach.Core.Dom.Agent
 				{
 					Name = "agent1",
-					location = _server.Uri.ToString(),
+					location = _uri.ToString(),
 					monitors = new NamedCollection<Peach.Core.Dom.Monitor>
 					{
 						new Peach.Core.Dom.Monitor
@@ -783,7 +802,7 @@ namespace Peach.Pro.Test.Core.Agent
 				mgr.Connect(new Peach.Core.Dom.Agent
 				{
 					Name = "agent2",
-					location = agent2._server.Uri.ToString(),
+					location = agent2._uri.ToString(),
 					monitors = new NamedCollection<Peach.Core.Dom.Monitor>
 					{
 						new Peach.Core.Dom.Monitor
@@ -859,17 +878,9 @@ namespace Peach.Pro.Test.Core.Agent
 		[Test]
 		public void TestLogging()
 		{
-			var target = new TestLogTarget();
-			var config = LogManager.Configuration;
-			var rule = new LoggingRule("Agent.Agent1", LogLevel.Info, target);
-
-			config.AddTarget("TestLog", target);
-			config.LoggingRules.Add(rule);
-			LogManager.ReconfigExistingLoggers();
-
 			StartServer();
 
-			var cli = new Client("Agent1", _server.Uri.ToString(), null);
+			var cli = new Client("Agent1", _uri.ToString(), null);
 			cli.AgentConnect();
 			cli.StartMonitor("mon1", "Null", new Dictionary<string, string>
 			{
@@ -891,14 +902,14 @@ namespace Peach.Pro.Test.Core.Agent
 				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionFinished",
 				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StopMonitor",
 			};
-			Assert.That(target.Messages, Is.EqualTo(expected));
+			Assert.That(_collector.Messages, Is.EqualTo(expected));
 		}
 
-		class TestLogTarget : TargetWithLayout
+		class LogCollector : TargetWithLayout
 		{
 			public List<string> Messages { get; private set; }
 
-			public TestLogTarget()
+			public LogCollector()
 			{
 				Messages = new List<string>();
 				Layout = "${level}|${logger}|${message}";

@@ -261,6 +261,8 @@ namespace Peach.Core
 		private static readonly string PeachDirectory =
 			AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
 
+		public static LogLevel LogLevel { get; private set; }
+
 		/// <summary>
 		/// Configure NLog.
 		/// </summary>
@@ -273,6 +275,21 @@ namespace Peach.Core
 		/// <param name="level"></param>
 		public static void ConfigureLogging(int level)
 		{
+			switch (level)
+			{
+				case 0:
+					LogLevel = LogLevel.Info;
+					break;
+				case 1:
+					LogLevel = LogLevel.Debug;
+					break;
+				case 2:
+					LogLevel = LogLevel.Trace;
+					break;
+				default:
+					break;
+			}
+
 			if (level < 0)
 			{
 				// Need to reset configuration to null for NLog 2.0 on mono
