@@ -71,6 +71,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				try
 				{
 					_ws.Send("Flush", (done) => _evtFlushed.Set());
+					_evtFlushed.WaitOne();
 				}
 				finally
 				{
