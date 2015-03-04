@@ -17,8 +17,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		private AutoResetEvent _evtReady;
 		private AutoResetEvent _evtClosed;
 		private AutoResetEvent _evtFlushed;
-		private readonly Dictionary<long, LogEventInfo> _pending;
-		private int _expectId;
+		private readonly SortedDictionary<long, LogEventInfo> _pending;
+		private long _expectId;
 		private WebSocket _ws;
 
 		public LogSink(string name, Uri baseUri)
@@ -27,7 +27,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			_baseUri = baseUri;
 			_logger = LogManager.GetCurrentClassLogger();
 			_chain = LogManager.GetLogger("Agent." + name);
-			_pending = new Dictionary<long, LogEventInfo>();
+			_pending = new SortedDictionary<long, LogEventInfo>();
 		}
 
 		public void Start()
@@ -71,7 +71,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				try
 				{
 					_ws.Send("Flush");
-					_evtFlushed.WaitOne();
+					if (!_evtFlushed.WaitOne(TimeSpan.FromSeconds(10)))
+						_logger.Warn("Timeout waiting for remote logging service to flush");
 				}
 				finally
 				{
@@ -121,11 +122,12 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				var id = Convert.ToInt64(logEvent.Properties["ID"]);
 				if (id == -1)
 				{
-					while (_pending.Count > 0)
+					foreach(var kv in _pending)
 					{
-						ProcessPending();
-						_expectId++;
+						ProcessEvent(kv.Value);
+						_expectId = kv.Key + 1;
 					}
+					_pending.Clear();
 					if (_evtFlushed != null)
 						_evtFlushed.Set();
 				}
@@ -150,11 +152,16 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					break;
 
 				_pending.Remove(_expectId);
-				logEvent.LoggerName = "[{0}] {1}".Fmt(_name, logEvent.LoggerName);
-				logEvent.Properties.Add("PreventLoop", true);
-				_chain.Log(logEvent);
+				ProcessEvent(logEvent);
 				_expectId++;
 			}
+		}
+
+		void ProcessEvent(LogEventInfo logEvent)
+		{
+			logEvent.LoggerName = "[{0}] {1}".Fmt(_name, logEvent.LoggerName);
+			logEvent.Properties.Add("PreventLoop", true);
+			_chain.Log(logEvent);
 		}
 
 		public void Dispose()
