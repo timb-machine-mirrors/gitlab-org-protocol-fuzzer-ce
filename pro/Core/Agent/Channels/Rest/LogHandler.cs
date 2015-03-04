@@ -114,6 +114,12 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			{
 				_evt.WaitOne(TimeSpan.FromSeconds(1));
 			}
+
+			var logEvent = new LogEventInfo(LogLevel.Off, "$LogResponse", "Flushed");
+			logEvent.Properties["ID"] = -1;
+	
+			var json = JsonConvert.SerializeObject(logEvent);
+			_ws.SendAsync(json, null);
 		}
 
 		public void Log(LogEventInfo logEvent)

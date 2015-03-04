@@ -70,7 +70,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 				try
 				{
-					_ws.Send("Flush", (done) => _evtFlushed.Set());
+					_ws.Send("Flush");
 					_evtFlushed.WaitOne();
 				}
 				finally
@@ -96,13 +96,18 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		void OnClose(object sender, CloseEventArgs e)
 		{
-			_logger.Trace("OnClose> WasClean: {0}, Code: {1}", e.WasClean, e.Code);
+			_logger.Trace("OnClose> WasClean: {0}, Code: {1}, Reason: {2}", 
+				e.WasClean, 
+				e.Code, 
+				e.Reason);
 			_evtClosed.Set();
+			if (_evtFlushed != null)
+				_evtFlushed.Set();
 		}
 
 		void OnError(object sender, ErrorEventArgs e)
 		{
-			_logger.Error("OnError> {0}", e.Message);
+			_logger.Trace("OnError> {0}", e.Message);
 			_evtReady.Set();
 			if (_evtFlushed != null)
 				_evtFlushed.Set();
@@ -114,8 +119,21 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			{
 				var logEvent = JsonConvert.DeserializeObject<LogEventInfo>(e.Data);
 				var id = Convert.ToInt64(logEvent.Properties["ID"]);
-				_pending.Add(id, logEvent);
-				ProcessPending();
+				if (id == -1)
+				{
+					while (_pending.Count > 0)
+					{
+						ProcessPending();
+						_expectId++;
+					}
+					if (_evtFlushed != null)
+						_evtFlushed.Set();
+				}
+				else
+				{
+					_pending.Add(id, logEvent);
+					ProcessPending();
+				}
 			}
 			catch (Exception ex)
 			{
