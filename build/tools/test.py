@@ -113,11 +113,12 @@ class utest(Task.Task):
 		if Logs.verbose < 0:
 			stderr = stdout = Utils.subprocess.PIPE
 
-		# env = {
-		# 	'PATH': '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games',
-		# 	'MONO_LOG_LEVEL' : 'debug',
-		# }
-		proc = Utils.subprocess.Popen(self.ut_exec, cwd=cwd, stderr=stderr, stdout=stdout)#, env=env)
+		env = {
+			'PATH': '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games',
+			# 'MONO_LOG_LEVEL' : 'debug',
+			'MONO_ENABLE_SHM' : '1',
+		}
+		proc = Utils.subprocess.Popen(self.ut_exec, cwd=cwd, stderr=stderr, stdout=stdout, env=env)
 		(stdout, stderr) = proc.communicate()
 
 		tup = (self.inputs[0].name, proc.returncode)
