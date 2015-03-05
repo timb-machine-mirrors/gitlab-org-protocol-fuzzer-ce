@@ -25,7 +25,7 @@ namespace Peach.Pro.Test.Core.Agent
 		[SetUp]
 		public void SetUp()
 		{
-			_si = SingleInstance.CreateInstance("Peach.Core.Test.Agent.AgentTests");
+			_si = SingleInstance.CreateInstance(GetType().FullName);
 			_si.Lock();
 		}
 
