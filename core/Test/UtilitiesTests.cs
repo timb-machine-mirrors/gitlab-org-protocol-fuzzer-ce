@@ -175,12 +175,13 @@ namespace Peach.Core.Test
 			ms.Seek(0, SeekOrigin.Begin);
 
 			var str = Utilities.HexDump(ms, 16, 24);
-			const string expexted = 
-@"00000000   00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F   ................
-00000010   10 11 12 13 14 15 16 17                            ........        
----- TRUNCATED (Total Length: 32 bytes) ----";
+			var expected = string.Join(Environment.NewLine, new[] {
+				"00000000   00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F   ................",
+				"00000010   10 11 12 13 14 15 16 17                            ........        ",
+				"---- TRUNCATED (Total Length: 32 bytes) ----",
+			});
 
-			Assert.That(str, Is.EqualTo(expexted));
+			Assert.That(str, Is.EqualTo(expected));
 		}
 	}
 }
