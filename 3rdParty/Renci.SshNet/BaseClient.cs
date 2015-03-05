@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Net.Sockets;
 using System.Threading;
 using Renci.SshNet.Common;
+using Renci.SshNet.Messages.Transport;
 
 namespace Renci.SshNet
 {
@@ -9,20 +11,35 @@ namespace Renci.SshNet
     /// </summary>
     public abstract class BaseClient : IDisposable
     {
-        private static readonly TimeSpan Infinite = new TimeSpan(0, 0, 0, 0, -1);
-
         /// <summary>
         /// Holds value indicating whether the connection info is owned by this client.
         /// </summary>
         private readonly bool _ownsConnectionInfo;
+
+        private readonly IServiceFactory _serviceFactory;
+        private readonly object _keepAliveLock = new object();
         private TimeSpan _keepAliveInterval;
         private Timer _keepAliveTimer;
         private ConnectionInfo _connectionInfo;
 
         /// <summary>
-        /// Gets current session.
+        /// Gets the current session.
         /// </summary>
-        protected Session Session { get; private set; }
+        /// <value>
+        /// The current session.
+        /// </value>
+        internal ISession Session { get; private set; }
+
+        /// <summary>
+        /// Gets the factory for creating new services.
+        /// </summary>
+        /// <value>
+        /// The factory for creating new services.
+        /// </value>
+        internal IServiceFactory ServiceFactory
+        {
+            get { return _serviceFactory; }
+        }
 
         /// <summary>
         /// Gets the connection info.
@@ -56,7 +73,7 @@ namespace Renci.SshNet
             get
             {
                 CheckDisposed();
-                return this.Session != null && this.Session.IsConnected;
+                return Session != null && Session.IsConnected;
             }
         }
 
@@ -73,7 +90,7 @@ namespace Renci.SshNet
             get
             {
                 CheckDisposed();
-                return this._keepAliveInterval;
+                return _keepAliveInterval;
             }
             set
             {
@@ -82,7 +99,7 @@ namespace Renci.SshNet
                 if (value == _keepAliveInterval)
                     return;
 
-                if (value == Infinite)
+                if (value == SshNet.Session.InfiniteTimeSpan)
                 {
                     // stop the timer when the value is -1 milliseconds
                     StopKeepAliveTimer();
@@ -97,7 +114,7 @@ namespace Renci.SshNet
                     if (_keepAliveTimer != null)
                         _keepAliveTimer.Change(value, value);
                 }
-                this._keepAliveInterval = value;
+                _keepAliveInterval = value;
             }
         }
 
@@ -128,13 +145,33 @@ namespace Renci.SshNet
         /// connection info will be disposed when this instance is disposed.
         /// </remarks>
         protected BaseClient(ConnectionInfo connectionInfo, bool ownsConnectionInfo)
+            : this(connectionInfo, ownsConnectionInfo, new ServiceFactory())
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BaseClient"/> class.
+        /// </summary>
+        /// <param name="connectionInfo">The connection info.</param>
+        /// <param name="ownsConnectionInfo">Specified whether this instance owns the connection info.</param>
+        /// <param name="serviceFactory">The factory to use for creating new services.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="connectionInfo"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="serviceFactory"/> is null.</exception>
+        /// <remarks>
+        /// If <paramref name="ownsConnectionInfo"/> is <c>true</c>, then the
+        /// connection info will be disposed when this instance is disposed.
+        /// </remarks>
+        internal BaseClient(ConnectionInfo connectionInfo, bool ownsConnectionInfo, IServiceFactory serviceFactory)
         {
             if (connectionInfo == null)
                 throw new ArgumentNullException("connectionInfo");
+            if (serviceFactory == null)
+                throw new ArgumentNullException("serviceFactory");
 
             ConnectionInfo = connectionInfo;
             _ownsConnectionInfo = ownsConnectionInfo;
-            _keepAliveInterval = Infinite;
+            _serviceFactory = serviceFactory;
+            _keepAliveInterval = SshNet.Session.InfiniteTimeSpan;
         }
 
         /// <summary>
@@ -142,15 +179,35 @@ namespace Renci.SshNet
         /// </summary>
         /// <exception cref="InvalidOperationException">The client is already connected.</exception>
         /// <exception cref="ObjectDisposedException">The method was called after the client was disposed.</exception>
+        /// <exception cref="SocketException">Socket connection to the SSH server or proxy server could not be established, or an error occurred while resolving the hostname.</exception>
+        /// <exception cref="SshConnectionException">SSH session could not be established.</exception>
+        /// <exception cref="SshAuthenticationException">Authentication of SSH session failed.</exception>
+        /// <exception cref="ProxyException">Failed to establish proxy connection.</exception>
         public void Connect()
         {
             CheckDisposed();
 
+            // TODO (see issue #1758):
+            // we're not stopping the keep-alive timer and disposing the session here
+            // 
+            // we could do this but there would still be side effects as concrete
+            // implementations may still hang on to the original session
+            // 
+            // therefore it would be better to actually invoke the Disconnect method
+            // (and then the Dispose on the session) but even that would have side effects
+            // eg. it would remove all forwarded ports from SshClient
+            // 
+            // I think we should modify our concrete clients to better deal with a
+            // disconnect. In case of SshClient this would mean not removing the 
+            // forwarded ports on disconnect (but only on dispose ?) and link a
+            // forwarded port with a client instead of with a session
+            //
+            // To be discussed with Oleg (or whoever is interested)
             if (Session != null && Session.IsConnected)
                 throw new InvalidOperationException("The client is already connected.");
 
             OnConnecting();
-            Session = new Session(ConnectionInfo);
+            Session = _serviceFactory.CreateSession(ConnectionInfo);
             Session.HostKeyReceived += Session_HostKeyReceived;
             Session.ErrorOccured += Session_ErrorOccured;
             Session.Connect();
@@ -167,22 +224,40 @@ namespace Renci.SshNet
             CheckDisposed();
 
             OnDisconnecting();
+
+            // stop sending keep-alive messages before we close the
+            // session
             StopKeepAliveTimer();
+
+            // disconnect and dispose the SSH session
             if (Session != null)
+            {
+                // a new session is created in Connect(), so we should dispose and
+                // dereference the current session here
+                Session.ErrorOccured -= Session_ErrorOccured;
+                Session.HostKeyReceived -= Session_HostKeyReceived;
                 Session.Disconnect();
+                Session.Dispose();
+                Session = null;
+            }
+
             OnDisconnected();
         }
 
         /// <summary>
-        /// Sends keep-alive message to the server.
+        /// Sends a keep-alive message to the server.
         /// </summary>
+        /// <remarks>
+        /// Use <see cref="KeepAliveInterval"/> to configure the client to send a keep-alive at regular
+        /// intervals.
+        /// </remarks>
         /// <exception cref="ObjectDisposedException">The method was called after the client was disposed.</exception>
+        [Obsolete("Use KeepAliveInterval to send a keep-alive message at regular intervals.")]
         public void SendKeepAlive()
         {
             CheckDisposed();
 
-            if (Session != null && Session.IsConnected)
-                Session.SendKeepAlive();
+            SendKeepAliveMessage();
         }
 
         /// <summary>
@@ -217,7 +292,7 @@ namespace Renci.SshNet
 
         private void Session_ErrorOccured(object sender, ExceptionEventArgs e)
         {
-            var handler = this.ErrorOccurred;
+            var handler = ErrorOccurred;
             if (handler != null)
             {
                 handler(this, e);
@@ -226,7 +301,7 @@ namespace Renci.SshNet
 
         private void Session_HostKeyReceived(object sender, HostKeyEventArgs e)
         {
-            var handler = this.HostKeyReceived;
+            var handler = HostKeyReceived;
             if (handler != null)
             {
                 handler(this, e);
@@ -252,24 +327,11 @@ namespace Renci.SshNet
         /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged ResourceMessages.</param>
         protected virtual void Dispose(bool disposing)
         {
-            // Check to see if Dispose has already been called.
-            if (!this._isDisposed)
+            if (!_isDisposed)
             {
-                // If disposing equals true, dispose all managed
-                // and unmanaged ResourceMessages.
                 if (disposing)
                 {
-                    // stop sending keep-alive messages before we close the
-                    // session
-                    StopKeepAliveTimer();
-
-                    if (this.Session != null)
-                    {
-                        this.Session.ErrorOccured -= Session_ErrorOccured;
-                        this.Session.HostKeyReceived -= Session_HostKeyReceived;
-                        this.Session.Dispose();
-                        this.Session = null;
-                    }
+                    Disconnect();
 
                     if (_ownsConnectionInfo && _connectionInfo != null)
                     {
@@ -280,7 +342,6 @@ namespace Renci.SshNet
                     }
                 }
 
-                // Note disposing has been done.
                 _isDisposed = true;
             }
         }
@@ -325,6 +386,26 @@ namespace Renci.SshNet
             _keepAliveTimer = null;
         }
 
+        private void SendKeepAliveMessage()
+        {
+            // do nothing if we have disposed or disconnected
+            if (Session == null)
+                return;
+
+            // do not send multiple keep-alive messages concurrently
+            if (Monitor.TryEnter(_keepAliveLock))
+            {
+                try
+                {
+                    Session.TrySendMessage(new IgnoreMessage());
+                }
+                finally
+                {
+                    Monitor.Exit(_keepAliveLock);
+                }
+            }
+        }
+
         /// <summary>
         /// Starts the keep-alive timer.
         /// </summary>
@@ -334,11 +415,11 @@ namespace Renci.SshNet
         /// </remarks>
         private void StartKeepAliveTimer()
         {
-            if (_keepAliveInterval == Infinite)
+            if (_keepAliveInterval == SshNet.Session.InfiniteTimeSpan)
                 return;
 
             if (_keepAliveTimer == null)
-                _keepAliveTimer = new Timer(state => this.SendKeepAlive());
+                _keepAliveTimer = new Timer(state => SendKeepAliveMessage());
             _keepAliveTimer.Change(_keepAliveInterval, _keepAliveInterval);
         }
     }
