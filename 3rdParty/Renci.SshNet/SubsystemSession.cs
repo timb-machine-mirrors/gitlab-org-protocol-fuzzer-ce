@@ -5,24 +5,25 @@ using System.Threading;
 using Renci.SshNet.Channels;
 using Renci.SshNet.Common;
 
-namespace Renci.SshNet.Sftp
+namespace Renci.SshNet
 {
     /// <summary>
     /// Base class for SSH subsystem implementations
     /// </summary>
-    public abstract class SubsystemSession : IDisposable
+    internal abstract class SubsystemSession : ISubsystemSession
     {
-        private readonly Session _session;
+        private ISession _session;
         private readonly string _subsystemName;
-        private ChannelSession _channel;
+        private IChannelSession _channel;
         private Exception _exception;
         private EventWaitHandle _errorOccuredWaitHandle = new ManualResetEvent(false);
+        private EventWaitHandle _sessionDisconnectedWaitHandle = new ManualResetEvent(false);
         private EventWaitHandle _channelClosedWaitHandle = new ManualResetEvent(false);
 
         /// <summary>
         /// Specifies a timeout to wait for operation to complete
         /// </summary>
-        protected TimeSpan _operationTimeout;
+        protected TimeSpan OperationTimeout { get; private set; }
 
         /// <summary>
         /// Occurs when an error occurred.
@@ -30,7 +31,7 @@ namespace Renci.SshNet.Sftp
         public event EventHandler<ExceptionEventArgs> ErrorOccurred;
 
         /// <summary>
-        /// Occurs when session has been disconnected form the server.
+        /// Occurs when the server has disconnected from the session.
         /// </summary>
         public event EventHandler<EventArgs> Disconnected;
 
@@ -40,9 +41,25 @@ namespace Renci.SshNet.Sftp
         /// <value>
         /// The channel associated with this session.
         /// </value>
-        internal ChannelSession Channel
+        internal IChannelSession Channel
         {
-            get { return _channel; }
+            get
+            {
+                EnsureNotDisposed();
+
+                return _channel;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this session is open.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this session is open; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsOpen
+        {
+            get { return _channel != null && _channel.IsOpen; }
         }
 
         /// <summary>
@@ -58,7 +75,7 @@ namespace Renci.SshNet.Sftp
         /// <param name="operationTimeout">The operation timeout.</param>
         /// <param name="encoding">The character encoding to use.</param>
         /// <exception cref="ArgumentNullException"><paramref name="session" /> or <paramref name="subsystemName" /> or <paramref name="encoding"/>is null.</exception>
-        protected SubsystemSession(Session session, string subsystemName, TimeSpan operationTimeout, Encoding encoding)
+        protected SubsystemSession(ISession session, string subsystemName, TimeSpan operationTimeout, Encoding encoding)
         {
             if (session == null)
                 throw new ArgumentNullException("session");
@@ -67,35 +84,63 @@ namespace Renci.SshNet.Sftp
             if (encoding == null)
                 throw new ArgumentNullException("encoding");
 
-            this._session = session;
-            this._subsystemName = subsystemName;
-            this._operationTimeout = operationTimeout;
-            this.Encoding = encoding;
+            _session = session;
+            _subsystemName = subsystemName;
+            OperationTimeout = operationTimeout;
+            Encoding = encoding;
         }
 
         /// <summary>
-        /// Connects subsystem on SSH channel.
+        /// Connects the subsystem using a new SSH channel session.
         /// </summary>
+        /// <exception cref="InvalidOperationException">The session is already connected.</exception>
+        /// <exception cref="ObjectDisposedException">The method was called after the session was disposed.</exception>
         public void Connect()
         {
-            this._channel = this._session.CreateClientChannel<ChannelSession>();
+            EnsureNotDisposed();
 
-            this._session.ErrorOccured += Session_ErrorOccured;
-            this._session.Disconnected += Session_Disconnected;
-            this._channel.DataReceived += Channel_DataReceived;
-            this._channel.Closed += Channel_Closed;
-            this._channel.Open();
-            this._channel.SendSubsystemRequest(_subsystemName);
-            this.OnChannelOpen();
+            if (IsOpen)
+                throw new InvalidOperationException("The session is already connected.");
+
+            // reset waithandles in case we're reconnecting
+            _errorOccuredWaitHandle.Reset();
+            _sessionDisconnectedWaitHandle.Reset();
+            _sessionDisconnectedWaitHandle.Reset();
+            _channelClosedWaitHandle.Reset();
+
+            _session.ErrorOccured += Session_ErrorOccured;
+            _session.Disconnected += Session_Disconnected;
+
+            _channel = _session.CreateChannelSession();
+            _channel.DataReceived += Channel_DataReceived;
+            _channel.Exception += Channel_Exception;
+            _channel.Closed += Channel_Closed;
+            _channel.Open();
+            _channel.SendSubsystemRequest(_subsystemName);
+
+            OnChannelOpen();
         }
 
         /// <summary>
-        /// Disconnects subsystem channel.
+        /// Disconnects the subsystem channel.
         /// </summary>
         public void Disconnect()
         {
-            this._channel.SendEof();
-            this._channel.Close();
+            if (_session != null)
+            {
+                _session.ErrorOccured -= Session_ErrorOccured;
+                _session.Disconnected -= Session_Disconnected;
+            }
+
+            if (_channel != null)
+            {
+                _channel.DataReceived -= Channel_DataReceived;
+                _channel.Exception -= Channel_Exception;
+                _channel.Closed -= Channel_Closed;
+                _channel.Close();
+                _channel.Dispose();
+                _channel = null;
+            }
         }
 
         /// <summary>
@@ -104,7 +149,10 @@ namespace Renci.SshNet.Sftp
         /// <param name="data">The data to be sent.</param>
         public void SendData(byte[] data)
         {
-            this._channel.SendData(data);
+            EnsureNotDisposed();
+            EnsureSessionIsOpen();
+
+            _channel.SendData(data);
         }
 
         /// <summary>
@@ -125,17 +173,30 @@ namespace Renci.SshNet.Sftp
         /// <param name="error">The error.</param>
         protected void RaiseError(Exception error)
         {
-            this._exception = error;
+            _exception = error;
 
             var errorOccuredWaitHandle = _errorOccuredWaitHandle;
             if (errorOccuredWaitHandle != null)
                 errorOccuredWaitHandle.Set();
+
             SignalErrorOccurred(error);
         }
 
         private void Channel_DataReceived(object sender, ChannelDataEventArgs e)
         {
-            this.OnDataReceived(e.DataTypeCode, e.Data);
+            try
+            {
+                OnDataReceived(e.DataTypeCode, e.Data);
+            }
+            catch (Exception ex)
+            {
+                RaiseError(ex);
+            }
+        }
+
+        private void Channel_Exception(object sender, ExceptionEventArgs e)
+        {
+            RaiseError(e.Exception);
         }
 
         private void Channel_Closed(object sender, ChannelEventArgs e)
@@ -145,20 +206,31 @@ namespace Renci.SshNet.Sftp
                 channelClosedWaitHandle.Set();
         }
 
-        internal void WaitOnHandle(WaitHandle waitHandle, TimeSpan operationTimeout)
+        /// <summary>
+        /// Waits a specified time for a given <see cref="WaitHandle"/> to get signaled.
+        /// </summary>
+        /// <param name="waitHandle">The handle to wait for.</param>
+        /// <param name="operationTimeout">The time to wait for <paramref name="waitHandle"/> to get signaled.</param>
+        /// <exception cref="SshException">The connection was closed by the server.</exception>
+        /// <exception cref="SshException">The channel was closed.</exception>
+        /// <exception cref="SshOperationTimeoutException">The handle did not get signaled within the specified <paramref name="operationTimeout"/>.</exception>
+        public void WaitOnHandle(WaitHandle waitHandle, TimeSpan operationTimeout)
         {
             var waitHandles = new[]
                 {
-                    this._errorOccuredWaitHandle,
-                    this._channelClosedWaitHandle,
+                    _errorOccuredWaitHandle,
+                    _sessionDisconnectedWaitHandle,
+                    _channelClosedWaitHandle,
                     waitHandle
                 };
 
             switch (WaitHandle.WaitAny(waitHandles, operationTimeout))
             {
                 case 0:
-                    throw this._exception;
+                    throw _exception;
                 case 1:
+                    throw new SshException("Connection was closed by the server.");
+                case 2:
                     throw new SshException("Channel was closed.");
                 case WaitHandle.WaitTimeout:
                     throw new SshOperationTimeoutException(string.Format(CultureInfo.CurrentCulture, "Operation has timed out."));
@@ -167,13 +239,16 @@ namespace Renci.SshNet.Sftp
 
         private void Session_Disconnected(object sender, EventArgs e)
         {
+            var sessionDisconnectedWaitHandle = _sessionDisconnectedWaitHandle;
+            if (sessionDisconnectedWaitHandle != null)
+                sessionDisconnectedWaitHandle.Set();
+
             SignalDisconnected();
-            this.RaiseError(new SshException("Connection was lost"));
         }
 
         private void Session_ErrorOccured(object sender, ExceptionEventArgs e)
         {
-            this.RaiseError(e.Exception);
+            RaiseError(e.Exception);
         }
 
         private void SignalErrorOccurred(Exception error)
@@ -192,6 +267,12 @@ namespace Renci.SshNet.Sftp
             {
                 disconnected(this, new EventArgs());
             }
+        }
+
+        private void EnsureSessionIsOpen()
+        {
+            if (!IsOpen)
+                throw new InvalidOperationException("The session is not open.");
         }
 
         #region IDisposable Members
@@ -214,38 +295,33 @@ namespace Renci.SshNet.Sftp
         protected virtual void Dispose(bool disposing)
         {
             // Check to see if Dispose has already been called.
-            if (!this._isDisposed)
+            if (!_isDisposed)
             {
-                if (this._channel != null)
-                {
-                    this._channel.DataReceived -= Channel_DataReceived;
-                    this._channel.Closed -= Channel_Closed;
-                    this._channel.Dispose();
-                    this._channel = null;
-                }
-
-                this._session.ErrorOccured -= Session_ErrorOccured;
-                this._session.Disconnected -= Session_Disconnected;
-
-                // If disposing equals true, dispose all managed
-                // and unmanaged resources.
                 if (disposing)
                 {
-                    // Dispose managed resources.
-                    if (this._errorOccuredWaitHandle != null)
+                    Disconnect();
+
+                    _session = null;
+
+                    if (_errorOccuredWaitHandle != null)
                     {
-                        this._errorOccuredWaitHandle.Dispose();
-                        this._errorOccuredWaitHandle = null;
+                        _errorOccuredWaitHandle.Dispose();
+                        _errorOccuredWaitHandle = null;
                     }
 
-                    if (this._channelClosedWaitHandle != null)
+                    if (_sessionDisconnectedWaitHandle != null)
                     {
-                        this._channelClosedWaitHandle.Dispose();
-                        this._channelClosedWaitHandle = null;
+                        _sessionDisconnectedWaitHandle.Dispose();
+                        _sessionDisconnectedWaitHandle = null;
+                    }
+
+                    if (_channelClosedWaitHandle != null)
+                    {
+                        _channelClosedWaitHandle.Dispose();
+                        _channelClosedWaitHandle = null;
                     }
                 }
 
-                // Note disposing has been done.
                 _isDisposed = true;
             }
         }
@@ -259,6 +335,12 @@ namespace Renci.SshNet.Sftp
             // Calling Dispose(false) is optimal in terms of
             // readability and maintainability.
             Dispose(false);
+        }
+
+        private void EnsureNotDisposed()
+        {
+            if (_isDisposed)
+                throw new ObjectDisposedException(GetType().FullName);
         }
 
         #endregion

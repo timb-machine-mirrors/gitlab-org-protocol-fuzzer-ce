@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
-using Renci.SshNet.Channels;
+using Renci.SshNet.Common;
 
 namespace Renci.SshNet
 {
@@ -11,123 +12,172 @@ namespace Renci.SshNet
     /// </summary>
     public partial class ForwardedPortLocal
     {
-        private TcpListener _listener;
-        private readonly object _listenerLocker = new object();
+        private Socket _listener;
+        private int _pendingRequests;
+
+        partial void ExecuteThread(Action action);
 
         partial void InternalStart()
         {
-            //  If port already started don't start it again
-            if (this.IsStarted)
-                return;
+            var addr = BoundHost.GetIPAddress();
+            var ep = new IPEndPoint(addr, (int) BoundPort);
 
-            IPAddress addr = this.BoundHost.GetIPAddress();
-            var ep = new IPEndPoint(addr, (int)this.BoundPort);
+            _listener = new Socket(ep.AddressFamily, SocketType.Stream, ProtocolType.Tcp) {Blocking = true};
+            _listener.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoDelay, true);
+            _listener.Bind(ep);
+            _listener.Listen(1);
 
-            this._listener = new TcpListener(ep);
-            this._listener.Start();
-            //  Update bound port if original was passed as zero
-            this.BoundPort = (uint)((IPEndPoint)_listener.LocalEndpoint).Port;
+            // update bound port (in case original was passed as zero)
+            BoundPort = (uint)((IPEndPoint)_listener.LocalEndPoint).Port;
 
-            this.Session.ErrorOccured += Session_ErrorOccured;
-            this.Session.Disconnected += Session_Disconnected;
+            Session.ErrorOccured += Session_ErrorOccured;
+            Session.Disconnected += Session_Disconnected;
 
-            this._listenerTaskCompleted = new ManualResetEvent(false);
-            this.ExecuteThread(() =>
-            {
-                try
+            _listenerTaskCompleted = new ManualResetEvent(false);
+
+            ExecuteThread(() =>
                 {
-                    while (true)
+                    try
                     {
-                        lock (this._listenerLocker)
+                        while (true)
                         {
-                            if (this._listener == null)
-                                break;
+                            // accept new inbound connection
+                            var asyncResult = _listener.BeginAccept(AcceptCallback, _listener);
+                            // wait for the connection to be established
+                            asyncResult.AsyncWaitHandle.WaitOne();
                         }
-
-                        var socket = this._listener.AcceptSocket();
-
-                        this.ExecuteThread(() =>
-                        {
-                            try
-                            {
-                                IPEndPoint originatorEndPoint = socket.RemoteEndPoint as IPEndPoint;
-
-                                this.RaiseRequestReceived(originatorEndPoint.Address.ToString(), (uint)originatorEndPoint.Port);
-
-                                using (var channel = this.Session.CreateClientChannel<ChannelDirectTcpip>())
-                                {
-                                    channel.Open(this.Host, this.Port, socket);
-
-                                    channel.Bind();
-
-                                    channel.Close();
-                                }
-                            }
-                            catch (Exception exp)
-                            {
-                                this.RaiseExceptionEvent(exp);
-                            }
-                        });
                     }
-                }
-                catch (SocketException exp)
-                {
-                    if (!(exp.SocketErrorCode == SocketError.Interrupted))
+                    catch (ObjectDisposedException)
                     {
-                        this.RaiseExceptionEvent(exp);
+                        // BeginAccept will throw an ObjectDisposedException when the
+                        // socket is closed
                     }
-                }
-                catch (Exception exp)
-                {
-                    this.RaiseExceptionEvent(exp);
-                }
-                finally
-                {
-                    this._listenerTaskCompleted.Set();
-                }
-            });
-
-            this.IsStarted = true;
+                    catch (Exception ex)
+                    {
+                        RaiseExceptionEvent(ex);
+                    }
+                    finally
+                    {
+                        // mark listener stopped
+                        _listenerTaskCompleted.Set();
+                    }
+                });
         }
 
-        partial void InternalStop()
+        private void AcceptCallback(IAsyncResult ar)
         {
-            //  If port not started you cant stop it
-            if (!this.IsStarted)
-                return;
+            // Get the socket that handles the client request
+            var serverSocket = (Socket)ar.AsyncState;
 
-            this.Session.Disconnected -= Session_Disconnected;
-            this.Session.ErrorOccured -= Session_ErrorOccured;
+            Socket clientSocket;
 
-            this.StopListener();
-
-            this._listenerTaskCompleted.WaitOne(this.Session.ConnectionInfo.Timeout);
-            this._listenerTaskCompleted.Dispose();
-            this._listenerTaskCompleted = null;
-
-            this.IsStarted = false;
-        }
-
-        private void StopListener()
-        {
-            lock (this._listenerLocker)
+            try
             {
-                if (this._listener != null)
+                clientSocket = serverSocket.EndAccept(ar);
+            }
+            catch (ObjectDisposedException)
+            {
+                // when the socket is closed, an ObjectDisposedException is thrown
+                // by Socket.EndAccept(IAsyncResult)
+                return;
+            }
+
+            Interlocked.Increment(ref _pendingRequests);
+
+            try
+            {
+                clientSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
+                clientSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoDelay, true);
+
+                var originatorEndPoint = (IPEndPoint) clientSocket.RemoteEndPoint;
+
+                RaiseRequestReceived(originatorEndPoint.Address.ToString(),
+                    (uint)originatorEndPoint.Port);
+
+                using (var channel = Session.CreateChannelDirectTcpip())
                 {
-                    this._listener.Stop();
-                    this._listener = null;
+                    channel.Exception += Channel_Exception;
+                    channel.Open(Host, Port, this, clientSocket);
+                    channel.Bind();
+                    channel.Close();
                 }
+            }
+            catch (Exception exp)
+            {
+                RaiseExceptionEvent(exp);
+                CloseSocket(clientSocket);
+            }
+            finally
+            {
+                Interlocked.Decrement(ref _pendingRequests);
             }
         }
 
-        private void Session_ErrorOccured(object sender, Common.ExceptionEventArgs e)
+        private static void CloseSocket(Socket socket)
         {
-            this.StopListener();
+            if (socket.Connected)
+            {
+                socket.Shutdown(SocketShutdown.Both);
+                socket.Close();
+            }
+        }
+
+        partial void InternalStop(TimeSpan timeout)
+        {
+            if (timeout == TimeSpan.Zero)
+                return;
+
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+
+            while (true)
+            {
+                // break out of loop when all pending requests have been processed
+                if (Interlocked.CompareExchange(ref _pendingRequests, 0, 0) == 0)
+                    break;
+                // break out of loop when specified timeout has elapsed
+                if (stopWatch.Elapsed >= timeout && timeout != SshNet.Session.InfiniteTimeSpan)
+                    break;
+                // give channels time to process pending requests
+                Thread.Sleep(50);
+            }
+
+            stopWatch.Stop();
+        }
+
+        /// <summary>
+        /// Interrupts the listener, and waits for the listener loop to finish.
+        /// </summary>
+        /// <remarks>
+        /// When the forwarded port is stopped, then any further action is skipped.
+        /// </remarks>
+        partial void StopListener()
+        {
+            if (!IsStarted)
+                return;
+
+            Session.Disconnected -= Session_Disconnected;
+            Session.ErrorOccured -= Session_ErrorOccured;
+
+            // close listener socket
+            _listener.Close();
+            // wait for listener loop to finish
+            _listenerTaskCompleted.WaitOne();
+        }
+
+        private void Session_ErrorOccured(object sender, ExceptionEventArgs e)
+        {
+            StopListener();
         }
 
         private void Session_Disconnected(object sender, EventArgs e)
         {
-            this.StopListener();
+            StopListener();
+        }
+
+        private void Channel_Exception(object sender, ExceptionEventArgs e)
+        {
+            RaiseExceptionEvent(e.Exception);
         }
     }
 }
