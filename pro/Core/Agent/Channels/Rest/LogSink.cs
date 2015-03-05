@@ -58,8 +58,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			//_ws.Compression = CompressionMethod.DEFLATE;
 
-			var timeout = 1;
-			Retry.Execute(() =>
+			Retry.Backoff(TimeSpan.FromSeconds(1), 30, () =>
 			{
 				// This will prevent requiring users to add a TcpPortMonitor
 				// to wait for remote agents to become available.
@@ -71,13 +70,10 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					_baseUri.Port,
 					Server.LogPath);
 
-				_logger.Trace("Attempting to GET '{0}' with timeout = {1}ms", urlGet, timeout);
+				_logger.Trace("Attempting to GET '{0}'", urlGet);
 
 				var req = (HttpWebRequest)WebRequest.Create(urlGet);
-				req.Timeout = timeout;
-
-				timeout *= 2;
-				timeout = Math.Min(timeout, 1000);
+				req.Timeout = 1000;
 
 				using (var resp = (HttpWebResponse)req.GetResponse())
 				{
@@ -86,7 +82,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					if (resp.StatusCode != HttpStatusCode.OK)
 						throw new PeachException("Logging service not available");
 				}
-			}, TimeSpan.Zero, 30);
+			});
 
 			_ws.Connect();
 
