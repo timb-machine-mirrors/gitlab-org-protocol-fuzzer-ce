@@ -149,7 +149,7 @@ namespace Peach.Pro.Test.Core.Publishers
 </Peach>
 ";
 
-		public void HttpClient(bool sendRecv, string method, int delay = 0)
+		private void HttpClient(bool sendRecv, string method, int delay = 0)
 		{
 			var port = TestBase.MakePort(56000, 57000);
 			var url = "http://localhost:{0}/".Fmt(port);
