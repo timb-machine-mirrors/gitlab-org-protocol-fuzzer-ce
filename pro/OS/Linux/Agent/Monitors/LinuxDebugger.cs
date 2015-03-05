@@ -529,7 +529,7 @@ quit
 			_procHandler = new System.Diagnostics.Process();
 			_procHandler.StartInfo = si;
 
-			logger.Debug("_Start(): Starting gdb process");
+			logger.Debug("_Start(): Starting gdb process: '{0} {1}'", si.FileName, si.Arguments);
 
 			if (File.Exists(_gdbLog))
 				File.Delete(_gdbLog);
