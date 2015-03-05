@@ -50,6 +50,10 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		private RouteResponse OnSubscribe(HttpListenerRequest req)
 		{
+			// a normal HTTP GET will be used to probe that this service is available
+			if (!req.IsWebSocketRequest)
+				return RouteResponse.Success();
+
 			var levelName = req.QueryString.Get("level");
 			if (string.IsNullOrEmpty(levelName))
 				levelName = "Info";

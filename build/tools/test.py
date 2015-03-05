@@ -19,13 +19,15 @@ def prepare_nunit_test(self):
 	self.ut_exec.extend([
 		self.env.NUNIT,
 		'-nologo',
-		'-out=%s' % self.outputs[1].abspath(),
+		'-labels',
 		'-xml=%s' % self.outputs[0].abspath(),
 	])
 
 	opts = self.generator.bld.options
 	if opts.testcase:
-		self.ut_exec.extend(['-run=%s' % opts.testcase])
+		self.ut_exec.append('-run=%s' % opts.testcase)
+	if not opts.stdout:
+		self.ut_exec.append('-out=%s' % self.outputs[1].abspath())
 
 	self.ut_exec.extend([ x.abspath() for x in self.inputs ])
 
@@ -151,6 +153,7 @@ def configure(conf):
 
 def options(opt):
 	opt.add_option('--testcase', action='store', help='Name of test case/fixture to execute')
+	opt.add_option('--stdout', action='store_true', help='Send results to stdout')
 
 class TestContext(InstallContext):
 	'''runs the unit tests'''

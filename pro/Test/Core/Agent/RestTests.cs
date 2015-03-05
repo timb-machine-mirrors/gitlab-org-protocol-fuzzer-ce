@@ -39,7 +39,12 @@ namespace Peach.Pro.Test.Core.Agent
 
 			_server = new Server();
 
-			_server.Started += (s, e) => _event.Set();
+			_server.Started += (s, e) =>
+			{
+				_event.Set();
+				// raise the odds that the LogSink will have to retry
+				Thread.Sleep(50);
+			};
 
 			_thread = new Thread(() =>
 			{
@@ -55,11 +60,10 @@ namespace Peach.Pro.Test.Core.Agent
 			});
 
 			_thread.Start();
-			Assert.IsTrue(
-				_event.WaitOne(TimeSpan.FromSeconds(10)),
-				"Timeout waiting for server to start");
+			var didStart = _event.WaitOne(TimeSpan.FromSeconds(10));
+			Assert.IsTrue(didStart, "Timeout waiting for server to start");
 
-			// Trigger faulire if we couldn't start
+			// Trigger failure if we couldn't start
 			if (_error != null)
 				TearDown();
 
@@ -94,7 +98,8 @@ namespace Peach.Pro.Test.Core.Agent
 
 			if (_thread != null)
 			{
-				_thread.Join();
+				if (!_thread.Join(TimeSpan.FromSeconds(10)))
+					_thread.Abort();
 				_thread = null;
 			}
 

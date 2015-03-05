@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Peach.Core;
 using System.Threading;
 using System.Collections.Generic;
+using System.Net;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
@@ -20,6 +21,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		private readonly SortedDictionary<long, LogEventInfo> _pending;
 		private long _expectId;
 		private WebSocket _ws;
+		private bool _isClosed = false;
 
 		public LogSink(string name, Uri baseUri)
 		{
@@ -47,6 +49,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				Utilities.LogLevel);
 
 			_ws = new WebSocket(url, "log");
+			//_ws.Log.Level = WebSocketSharp.LogLevel.Debug;
 
 			_ws.OnOpen += OnOpen;
 			_ws.OnMessage += OnMessage;
@@ -54,6 +57,37 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			_ws.OnClose += OnClose;
 
 			//_ws.Compression = CompressionMethod.DEFLATE;
+
+			var timeout = 1;
+			Retry.Execute(() =>
+			{
+				// This will prevent requiring users to add a TcpPortMonitor
+				// to wait for remote agents to become available.
+				// It will also prevent the log websocket from hanging
+				// when it tries to connect too soon.
+
+				var urlGet = "http://{0}:{1}{2}".Fmt(
+					_baseUri.Host,
+					_baseUri.Port,
+					Server.LogPath);
+
+				_logger.Trace("Attempting to GET '{0}' with timeout = {1}ms", urlGet, timeout);
+
+				var req = (HttpWebRequest)WebRequest.Create(urlGet);
+				req.Timeout = timeout;
+
+				timeout *= 2;
+				timeout = Math.Min(timeout, 1000);
+
+				using (var resp = (HttpWebResponse)req.GetResponse())
+				{
+					resp.Close();
+
+					if (resp.StatusCode != HttpStatusCode.OK)
+						throw new PeachException("Logging service not available");
+				}
+			}, TimeSpan.Zero, 30);
+
 			_ws.Connect();
 
 			if (!_evtReady.WaitOne(TimeSpan.FromSeconds(10)))
@@ -80,10 +114,15 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					_evtFlushed = null;
 				}
 
-				_ws.Close();
+				if (!_isClosed)
+				{
+					_ws.Close();
 
-				if (!_evtClosed.WaitOne(TimeSpan.FromSeconds(10)))
-					_logger.Warn("Timeout waiting for remote logging service to stop");
+					if (!_evtClosed.WaitOne(TimeSpan.FromSeconds(10)))
+						_logger.Warn("Timeout waiting for remote logging service to stop");
+
+					_isClosed = true;
+				}
 
 				Dispose();
 			}
@@ -108,7 +147,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		void OnError(object sender, ErrorEventArgs e)
 		{
-			_logger.Trace("OnError> {0}", e.Message);
+			_logger.Debug("OnError> {0}", e.Message);
 			_evtReady.Set();
 			if (_evtFlushed != null)
 				_evtFlushed.Set();
@@ -116,30 +155,39 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		void OnMessage(object sender, MessageEventArgs e)
 		{
+			_logger.Trace("OnMessage>");
 			try
 			{
 				var logEvent = JsonConvert.DeserializeObject<LogEventInfo>(e.Data);
-				var id = Convert.ToInt64(logEvent.Properties["ID"]);
-				if (id == -1)
+				lock (this)
 				{
-					foreach (var kv in _pending)
-					{
-						ProcessEvent(kv.Value);
-						_expectId = kv.Key + 1;
-					}
-					_pending.Clear();
-					if (_evtFlushed != null)
-						_evtFlushed.Set();
-				}
-				else
-				{
-					_pending.Add(id, logEvent);
-					ProcessPending();
+					ProcessMessage(logEvent);
 				}
 			}
 			catch (Exception ex)
 			{
 				_logger.Error("OnMessage> Error: Could not deserialize logEvent: {0}", ex.Message);
+			}
+		}
+
+		void ProcessMessage(LogEventInfo logEvent)
+		{
+			var id = Convert.ToInt64(logEvent.Properties["ID"]);
+			if (id == -1)
+			{
+				foreach (var kv in _pending)
+				{
+					ProcessEvent(kv.Value);
+					_expectId = kv.Key + 1;
+				}
+				_pending.Clear();
+				if (_evtFlushed != null)
+					_evtFlushed.Set();
+			}
+			else
+			{
+				_pending.Add(id, logEvent);
+				ProcessPending();
 			}
 		}
 
@@ -168,7 +216,17 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		{
 			if (_ws != null)
 			{
-				_ws.Dispose();
+				if (!_isClosed)
+				{
+					_ws.Close();
+					_isClosed = true;
+				}
+	
+				_ws.OnOpen -= OnOpen;
+				_ws.OnMessage -= OnMessage;
+				_ws.OnError -= OnError;
+				_ws.OnClose -= OnClose;
+
 				_ws = null;
 			}
 
