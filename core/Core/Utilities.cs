@@ -678,4 +678,13 @@ namespace Peach.Core
 			return bytes + " Bytes";
 		}
 	}
+
+	public class ToggleEventArgs : EventArgs
+	{
+		public bool Toggle { get; set; }
+		public ToggleEventArgs(bool toggle)
+		{
+			Toggle = toggle;
+		}
+	}
 }
