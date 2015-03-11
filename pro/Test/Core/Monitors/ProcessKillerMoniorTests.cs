@@ -208,7 +208,7 @@ namespace Peach.Pro.Test.Core.Monitors
 
 		static bool ProcessExists(string name)
 		{
-			var procs = Process.GetProcessesByName(name);
+			var procs = ProcessInfo.Instance.GetProcessesByName(name);
 			procs.ForEach(p => p.Close());
 			return procs.Length > 0;
 		}
