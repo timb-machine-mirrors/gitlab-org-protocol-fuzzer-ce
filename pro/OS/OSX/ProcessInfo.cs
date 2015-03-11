@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Peach.Core;
 
@@ -189,6 +190,11 @@ namespace Peach.Pro.OS.OSX
 			pi.PeakWorkingSet64 = 0;
 
 			return pi;
+		}
+
+		public Process[] GetProcessesByName(string name)
+		{
+			return Process.GetProcessesByName(name);
 		}
 	}
 }
