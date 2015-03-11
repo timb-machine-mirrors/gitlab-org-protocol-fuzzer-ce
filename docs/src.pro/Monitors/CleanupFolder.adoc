@@ -2,15 +2,15 @@
 [[Monitors_CleanupFolder]]
 == CleanupFolder Monitor
 
-The _CleanupFolder_ monitor removes from a specified directory the content created by a target during runtime. Cleanup occurs at the start of a fuzzing session and before every iteration.
+The _CleanupFolder_ monitor removes from a specified directory the files created on a target during a fuzzing session. Cleanup occurs before every test iteration.
 
-When beginning a fuzzing run, Peach creates a list of contents in the specified directory and removes any new files and new subdirectories created.  As part of the setup before each iteration, _CleanupFolder_ cleans so that the hard drives are not cluttered with temporary, recovery, and scratch files.
+When beginning a fuzzing run, Peach creates a list of the contents of a specified directory. The list identifies the items that are exempt from the cleanup activity. Before each iteration, _CleanupFolder_ cleans so that the hard drives are not cluttered with temporary, recovery, or scratch files.
 
 === Parameters
 
 _Required:_
 
-Folder:: Folder to clean
+Folder:: Folder to clean.
 
 _Optional:_
 

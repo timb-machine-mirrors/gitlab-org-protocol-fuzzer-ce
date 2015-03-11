@@ -6,15 +6,15 @@
 The _CrashReporter_ monitor collects information from crashes detected by the OS X System Crash Reporter.
 
 [IMPORTANT]
-====
+======
 Before fuzzing, make sure to disable the Apple crash report dialog window, and when the fuzzing session ends, make sure to enable the crash report dialog window. Commands to disable and enable the crash report dialog window follow:
 
 * Disable the crash report dialog: +
 defaults write com.apple.CrashReporter DialogType none+. 
 
-* Dnable the crash report dialog after fuzzing: +
+* Enable the crash report dialog after fuzzing: +
 defaults write com.apple.CrashReporter DialogType crashreport.
-====
+======
 
 
 === Parameters

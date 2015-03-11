@@ -2,17 +2,30 @@
 [[Monitors_MemoryMonitor]]
 == Memory Monitor
 
-The _Memory_ monitor checks the process memory usage and initiates a fault when the memory usage exceeds a specified limit.  This monitor can detect non-crashing extraneous memory usage.
+The _Memory_ monitor checks the process memory usage and initiates a fault when the memory 
+usage exceeds a specified limit.  This monitor can detect non-crashing extraneous memory 
+usage and whether a process exits early.
+
+The reported metrics for this monitor occur at the end of test iterations and include the following items:
+
+* *Private memory size* - Number of bytes allocated for the process. An approximate number of 
+bytes a process is using. 
+* *Working set memory* - Total physical memory used by the process, consisting of in-memory private 
+bytes plus memory-mapped files, such as dlls.
+* *Peak working set* - Largest working set used by the process.
+* *Virtual memory size* - Total address space occupied by the entire process, including the working 
+set plus paged private bytes and the standby list.
+
+NOTE: This monitor requires that you set a memory limit and identify a process to monitor, 
+specifying the process by name or by process id.
 
 === Parameters
 
 _Required:_
 
-Must use _MemoryLimit_, and either _Pid_ or _ProcessName_.
-
-MemoryLimit:: Fault when memory usage surpasses limit
-Pid:: Process ID to monitor
-ProcessName:: Name of the process to monitor
+MemoryLimit:: Fault when memory usage surpasses limit expressed in bytes, defaults to 0 bytes.
+Pid:: Process ID to monitor.
+ProcessName:: Name of the process to monitor.
 
 
 _Optional:_
@@ -26,7 +39,8 @@ ifdef::peachug[]
 .Monitor memory usage of Notepad
 ====================
 
-This parameter example is from a setup that monitors memory usage of Notepad.
+This parameter example is from a setup that monitors memory usage of Notepad. It generates a 
+fault on the test iteration.
 
 [cols="2,4" options="header",halign="center"] 
 |==========================================================

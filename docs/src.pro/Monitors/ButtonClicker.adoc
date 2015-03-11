@@ -2,20 +2,29 @@
 [[Monitors_ButtonClicker]]
 == ButtonClicker Monitor
 
-The _ButtonClicker_ monitor provides mouse click events for popup windows during fuzzing. _ButtonClicker_ identifies whether a window receives button clicks by trying to match a specified string to the message body in the window. The intent of this monitor is to keep a fuzzing session active, regardless of whether popup windows display during fuzzing. 
+The _ButtonClicker_ monitor provides mouse clicks for popup windows during fuzzing. This monitor runs in the Windows environment. _ButtonClicker_ watches for popup windows, and supplies a BM_CLICK message to any popup window that contains a specified string in the window message body. 
 
-This monitor runs in the Windows environment. 
+The intent of this monitor is to keep a fuzzing session active, regardless of whether popup windows display during fuzzing. _Buttonclicker_ runs from the beginning of a fuzzing session to the end of the session.
 
 For example, if an application crashes and needs to restart or has troublle starting, it might display a popup window asking to start with a specific set of featues that could aid in troubleshooting the cause of failure. A sample popup window consistent with this situation follows:
 
 .{nbsp}
 image::{images}/PopupWindowExample.png[]
 
-Here, the _ButtonClicker_ monitor provides a mouse click event in response to the popup window. The response allows fuzzing to continue instead of waiting for a user to respond to the question raised by the popup window.
+Here, the _ButtonClicker_ monitor provides a mouse click message in response to the popup 
+window. The response allows fuzzing to continue instead of waiting for a user to respond to the 
+question raised by the popup window.
 
-NOTE: This monitor is especially useful for applications that re-use a pop-up window for many purposes. The window has one 
-title, but the main area of the window can display several different messages depending on the context in the application. 
-Another monitor to consider for watching popup windows is xref:Monitors_PopupWatcher[PopupWatcher], that monitors popup windows based on the window title rather than matching a string in the message body.
+_ButtonClicker_ can generate faults in two cases:
+
+* A popup event fires, but, the popup window is not available
+* An exception occurs while clicking the button
+
+NOTE: This monitor is especially useful for applications that re-use a pop-up window for many 
+purposes. The window has one title, but the main area of the window can display several different
+messages depending on the context in the application. Another monitor to consider for watching 
+popup windows is xref:Monitors_PopupWatcher[PopupWatcher], that monitors popup windows based on 
+the window title rather than matching a string in the message body.
 
 === Parameters
 

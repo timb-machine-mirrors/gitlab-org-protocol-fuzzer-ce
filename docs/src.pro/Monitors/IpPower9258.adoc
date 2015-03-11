@@ -2,13 +2,29 @@
 [[Monitors_IpPower9258]]
 == IpPower9258 Monitor
 
-The _IpPower9258_ monitor controls an IP Power 9258 Network Power Controller (or Switch). This allows devices plugged into the IP Power 9258 switch to be powered on/off during fuzzing. 
+The _IpPower9258_ monitor controls an IP Power 9258 Network Power Controller (IP9258). The IP9258 consists of four three-prong outlets that support electrical loads of 6 amps at 110 or 240 VAC. Communications between Peach and the IP9258 uses EtherNet cabling. This monitor allows devices plugged into the IP Power 9258 switch to be powered on/off during fuzzing.
 
-Each _IpPower9258_ monitor switches an individual port. To control multiple ports, use multiple _IpPower9258_ monitors. 
+Each _IpPower9258_ monitor switches an individual outlet. Use one monitor per outlet to control multiple outlets concurrently. Times that the monitor can switch the power of an outlet include the following:
 
-TIP: You can purchase "IP Power 9258" Remote Network (or Network AC) Power Controllers (or switches) from a variety of online retailers. 
+* At the start of a fuzzing run
+* At the start of each test iteration
+* At the start of an iteration that immediately follows a fault 
 
-NOTE: IP Power 9258 is the only networked power switch that Peach supports. If you wish to fuzz another networked power controller or switch, you will need to write your own monitor.
+image::{images}/IP9258Mtr.PNG["Fuzzing Configuration Using an IP 9258 Network Power Controller", scalewidth="75%"]
+
+// image::../images/IP9258Mtr.PNG["Fuzzing Configuration Using an IP 9258 Network Power Controller", scalewidth="75%"]
+
+
+[NOTE]
+===============================
+
+IP Power 9258 is the only networked power switch that Peach supports. If you wish to fuzz another networked power controller or switch, you will need to write your own monitor.
+
+You can purchase "IP Power 9258" Remote Network (or Network AC) Power Controllers from a variety of online retailers. 
+
+===============================
+
+TIP: For controlling power to a device by wiring throuh a relay, Peach provides a monitor for the xref:Monitors_CanaKitRelay[Cana Kit 4-Port USB Relay Controller].
 
 === Parameters
 
@@ -17,7 +33,7 @@ _Required:_
 Host:: Host or IP address (can include HTTP interface port e.g. :8080)
 User:: Username
 Password:: Password
-Port:: Port to reset (1..4)
+Port:: Port/Outlet to reset (1, 2, 3, 4)
 
 _Optional:_
 

@@ -2,15 +2,26 @@
 [[Monitors_Process]]
 == Process Monitor
 
-The _Process_ monitor controls a process during a fuzzing run. It has a number of features:
+The _Process_ monitor controls a process during a fuzzing run. This monitor provides automation 
+by controlling when the process starts, restarts and ends, and whether the process should be 
+killed. This monitor also provides fault detection for early exit and failure to exit. Finally, 
+the _Process_ monitor provides data collection by copying messages from standard out and standard error.
 
- * Restarts a process when it dies
- * Logs a fault if a process exits early
- * Restarts a process on every iteration
- * Terminates a process if the CPU usage is low
- * Interacts with the state model to allow waiting for process exit
- * Interacts with the state model to allow for delayed starting of a process
+The _Process_ monitor provides the following functionality:
 
+ * Starts a monitor at the session start or at other designated times.
+ * Start or restart a process on every iteration.
+ * Start a process in response to a call from the state model (control when the process starts).
+ * Restart a process when it dies.
+ * Exit the process in response to a call from the state model (control when the process ends).
+ * Terminates a process if the CPU usage is low.
+ * Logs a fault if a process exits early.
+ * Logs a fault if a process fails to exit.
+ 
+ 
+The _Process_ monitor detects faults for a process that exits prematurely or fails to 
+exit. These faults generate bucket information with values for major hash set to "FailedToExit" and "ExitedEarly". Neither the minor hash nor the risk level is used for these faults.
+  
 === Parameters
 
 _Required:_
@@ -20,12 +31,16 @@ Executable:: Executable to launch
 _Optional:_
 
 Arguments:: Command line arguments
-FaultOnEarlyExit:: Trigger fault if process exits, defaults to false
-NoCpuKill:: Disable process killing when the CPU usage nears zero, defaults to false
-RestartOnEachTest:: Restart process on each iteration, defaults to false
-StartOnCall:: Start process on a call action from the state model (this value and the method value must match)
-WaitForExitOnCall:: Wait for process to exit on a call from the state model (this value and the method value must match)
-WaitForExitTimeout:: Wait timeout value.  Triggers fault when timeout hit. Defaults to 10000. Use -1 for infinite, no timeout
+FaultOnEarlyExit:: Trigger fault if process exits, defaults to false.
+NoCpuKill:: Disable process killing when the CPU usage nears zero, defaults to false. +
+hjfjhgf
+RestartOnEachTest:: Restart process on each iteration, defaults to false.
+StartOnCall:: Start process on a call action from the state model (this value and the 
+method value must match.)
+WaitForExitOnCall:: Wait for process to exit on a call from the state model (this value 
+and the method value must match.)
+WaitForExitTimeout:: Wait timeout value, expressed in milliseconds.  Triggers a fault 
+when the timeout period expires. Defaults to 10000 ms. Use -1 for infinite, no timeout.
 
 === Examples
 
