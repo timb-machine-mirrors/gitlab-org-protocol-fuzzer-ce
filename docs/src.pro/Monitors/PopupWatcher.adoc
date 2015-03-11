@@ -2,16 +2,18 @@
 [[Monitors_PopupWatcher]]
 == PopupWatcher Monitor (Windows)
 
-The _PopupWatcher_ monitor closes pop-up windows based on title. 
+The _PopupWatcher_ monitor closes pop-up windows based on title. _PopupWatcher_ monitors 
+the test target for a list of windows. When a window opens whose name is in the list, 
+_PopupWatcher_ closes the pop-up window, and, if specified in the configuration, can 
+issue a fault.
 
-_PopupWatcher_ monitors the test target for a list of windows. When _PopupWatcher_ detects a 
-window whose name matches an entry specified by +WindowNames+, this monitor triggers a fault and closes 
-the pop-up window.
+This monitor starts at the beginning of the session and runs to the session end. 
 
-NOTE: Some applications re-use a pop-up window for many purposes. The window has one title, but the 
-main area of the window can display several different messages depending on the context in the application. 
-If you're interested in monitoring a pop-up window based on content rather than the window title, consider 
-using the xref:Monitors_ButtonClicker[ButtonClicker] monitor. 
+NOTE: Some applications re-use a pop-up window for many purposes. The window has one title, 
+but the main area of the window can display several different messages depending on the 
+context in the application. If you're interested in monitoring a pop-up window based on 
+content rather than the window title, consider using the 
+xref:Monitors_ButtonClicker[ButtonClicker] monitor. 
 
 === Parameters
 

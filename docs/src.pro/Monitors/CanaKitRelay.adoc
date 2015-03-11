@@ -2,24 +2,41 @@
 [[Monitors_CanaKitRelay]]
 == CanaKitRelay Monitor
 
-The _CanaKitRelay_ monitor controls a set of relays capable of turning AC and DC lines on and off.  
+The _CanaKitRelay_ monitor controls a set of relays capable of turning AC and DC lines on and off. Uses of the kit include controlling power to devices and pushing buttons by acting as a switch in a circuit. The kit consists of 4 relays; each relay is capable of controlling a 5-amp, 110V AC or a 24V DC circuit. The kit uses serial communication over a USB line.
 
-_CanaKitRelay_ can be used to toggle power states or reset a device during a fuzzing run. Any device with an AC or DC power line can be controlled by wiring it through a relay. For more information on the relay, see the
+The CanaKitRelay Monitor controls one relay in a kit. Use one monitor per relay to control multiple relays concurrently. Times that the monitor can trigger the relay include the following:
+
+* At the start of a fuzzing run
+* At the start of each test iteration
+* At the start of an iteration that immediately follows a fault 
+
+_CanaKitRelay_ can toggle power states, reset a device, or push a button on a device during a fuzzing run. Any device with an AC or DC power line can be controlled by wiring it through a relay. A sample configuration follows that controls power through Relay 1. 
+
+image::{images}/CanaKitMtr.PNG["Fuzzing Configuration Using a CanaKit Relay", scalewidth="75%"]
+
+// image::../images/CanaKitMtr.PNG["Fuzzing Configuration Using a CanaKit Relay", scalewidth="75%"]
+
+For more information on the relay, including configuratinos, installation, and its command set, see the 
 http://www.canakit.com/catalog/product/view/id/627/s/4-port-usb-relay-controller[Cana Kit 4-Port USB Relay Controller].
+
+TIP: The CanaKit Relay requires a driver that is available at the supplier's website. At the time of this writing, the driver 
+is unsigned, which forces you to turn off Driver Signing Enforcement when installing the driver in 64-bit Windows 8.
+
+NOTE: For controlling power to devices using 3-prong outlets, Peach provides a monitor for the xref:Monitors_IpPower9258[IpPower9258 Network AC Power Controller Network AC Power].
 
 === Parameters
 
 _Required:_
 
-SerialPort:: Serial port for the board (e.g. COM2)
-RelayNumber:: Relay to trigger (1..4)
+SerialPort:: Serial port for the board (such as COM2)
+RelayNumber:: Relay to trigger (1, 2, 3, or 4)
 
 _Optional:_
 
 ResetEveryIteration:: Reset power on every iteration, defaults to false.
-OnOffPause:: Pause in milliseconds between off/on, defaults to 1/2 second.
+OnOffPause:: Pause in milliseconds between off/on, defaults to 500 ms--1/2 second.
 ResetOnStart:: Reset device on start, defaults to false.
-ReverseSwitch:: Switches the order of the on off commands for when the NC port is used for power, defaults to false.
+ReverseSwitch:: Switches the order of the on/off commands for when the NC port is used for power, defaults to false.
 
 === Examples
 
