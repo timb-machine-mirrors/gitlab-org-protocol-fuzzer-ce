@@ -27,7 +27,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		}
 
 		[Test]
-		public void TestSingleProcss()
+		public void TestSingleProcess()
 		{
 			const string args = "127.0.0.1 0";
 			var exe = GetTempExeName();
@@ -79,7 +79,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		}
 
 		[Test]
-		public void TestMultiProcss()
+		public void TestMultiProcess()
 		{
 			const string args = "127.0.0.1 0";
 			var exe1 = GetTempExeName();
