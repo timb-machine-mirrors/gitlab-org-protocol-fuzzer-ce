@@ -12,6 +12,7 @@ subdirs = [
 	'OS/Windows',
 	'Peach',
 	'SampleNinja',
+	'Service',
 	'SDK',
 	'Test/Apps/ComTest',
 	'Test/Apps/CrashableServer',
