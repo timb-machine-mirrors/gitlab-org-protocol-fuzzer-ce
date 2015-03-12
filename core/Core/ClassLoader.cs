@@ -112,6 +112,7 @@ namespace Peach.Core
 			"Telerik.Reporting.dll", 
 			"Telerik.Web.UI.dll", 
 			"VixAllProducts.dll", 
+			"vixAllProducts.dll", 
 			"CrashableServer.exe", 
 			"CrashingFileConsumer.exe", 
 			"CrashingProgram.exe", 

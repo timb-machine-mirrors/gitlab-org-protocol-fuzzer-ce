@@ -246,7 +246,7 @@ namespace Peach.Pro.Core.Runtime
 
 				var p = new OptionSet()
 				{
-					// Gobal option
+					// Global option
 					{ "h|?|help", v => Syntax() },
 
 					// Run analyzer and exit
