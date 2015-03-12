@@ -4,9 +4,7 @@ using Peach.Core.Test;
 using Peach.Pro.OS.Windows.Agent.Monitors;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 
 namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 {
@@ -37,6 +35,14 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			}
 
 			return false;
+		}
+
+		[SetUp]
+		public void SetUp()
+		{
+			if (Platform.GetOS() == Platform.OS.Windows &&
+				Platform.GetArch() == Platform.Architecture.x86)
+				Assert.Ignore("Test is not supported on this platform (yet)");
 		}
 
 		[Test]
