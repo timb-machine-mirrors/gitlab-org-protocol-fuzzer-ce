@@ -32,23 +32,20 @@ namespace Peach.Pro.Core.WebServices
 
 		Node MakeNode()
 		{
-			lock (Mutex)
+			var job = JobRunner.GetDefault();
+			var jobUrl = job != null ? JobService.Prefix + "/" + job.Guid : null;
+			return new Node
 			{
-				var node = new Node()
-				{
-					NodeUrl = Prefix + "/" + NodeGuid,
-					Name = Environment.MachineName,
-					Mac = "00:00:00:00:00:00",
-					Ip = "0.0.0.0",
-					Tags = new List<Tag>(),
-					Status = NodeStatus.Alive,
-					Version = Assembly.GetExecutingAssembly().GetName().Version.ToString(),
-					Timestamp = DateTime.UtcNow,
-					JobUrl = Runner != null ? JobService.Prefix + "/" + Runner.Guid : null,
-				};
-
-				return node;
-			}
+				NodeUrl = Prefix + "/" + NodeGuid,
+				Name = Environment.MachineName,
+				Mac = "00:00:00:00:00:00",
+				Ip = "0.0.0.0",
+				Tags = new List<Tag>(),
+				Status = NodeStatus.Alive,
+				Version = Assembly.GetExecutingAssembly().GetName().Version.ToString(),
+				Timestamp = DateTime.UtcNow,
+				JobUrl = jobUrl,
+			};
 		}
 	}
 }
