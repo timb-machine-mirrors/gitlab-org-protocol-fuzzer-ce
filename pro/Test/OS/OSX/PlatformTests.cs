@@ -1,30 +1,18 @@
 using System;
 using System.Diagnostics;
-using System.IO;
-using NLog;
 using NUnit.Framework;
 using Peach.Core;
 
 namespace Peach.Pro.Test.OS.OSX
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Category("Peach")]
 	public class PlatformTests
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
-
-		[Test]
-		public void Test1()
-		{
-			logger.Debug("Hello World");
-			logger.Debug(new FileNotFoundException().Message);
-			bool value = true;
-			Assert.IsTrue(value);
-		}
-
 		[Test]
 		public void TestCpuUsage()
 		{
-			using (Process p = Process.GetProcessById(1))
+			using (var p = Process.GetProcessById(1))
 			{
 				var pi = ProcessInfo.Instance.Snapshot(p);
 				Assert.NotNull(pi);
@@ -34,19 +22,17 @@ namespace Peach.Pro.Test.OS.OSX
 				Assert.Greater(pi.UserProcessorTicks, 0);
 			}
 
-			using (Process p = new Process())
+			using (var p = new Process())
 			{
-				var si = new ProcessStartInfo();
-				si.FileName = "/bin/ls";
+				var si = new ProcessStartInfo { FileName = "/bin/ls" };
 				p.StartInfo = si;
 				p.Start();
 				p.WaitForExit();
 				Assert.True(p.HasExited);
 				p.Close();
 
-				Assert.Throws<ArgumentException>(delegate() { ProcessInfo.Instance.Snapshot(p); });
+				Assert.Throws<ArgumentException>(() => ProcessInfo.Instance.Snapshot(p));
 			}
 		}
-
 	}
 }
