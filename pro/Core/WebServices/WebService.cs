@@ -5,84 +5,75 @@ namespace Peach.Pro.Core.WebServices
 {
 	public abstract class WebService : NancyModule
 	{
-		private WebContext context;
+		private readonly WebContext _context;
 
-		public WebService(WebContext context)
+		protected WebService(WebContext context)
 			: this(context, String.Empty)
 		{
 		}
 
-		public WebService(WebContext context, string modulePath)
+		protected WebService(WebContext context, string modulePath)
 			: base(modulePath)
 		{
-			this.context = context;
+			_context = context;
 		}
 
 		protected string NodeGuid
 		{
-			get
-			{
-				return context.NodeGuid;
-			}
+			get { return _context.NodeGuid; }
 		}
 
-		protected object Mutex
+		protected string PitLibraryPath
 		{
-			get
-			{
-				return context.Mutex;
-			}
+			get { return _context.PitLibraryPath; }
 		}
 
-		protected WebLogger Logger
-		{
-			get
-			{
-				return context.Logger;
-			}
-		}
+		//protected object Mutex
+		//{
+		//	get
+		//	{
+		//		return _context.Mutex;
+		//	}
+		//}
 
-		protected JobRunner Runner
-		{
-			get
-			{
-				return context.Runner;
-			}
-		}
+		//protected WebLogger Logger
+		//{
+		//	get
+		//	{
+		//		return context.Logger;
+		//	}
+		//}
 
-		protected PitTester Tester
-		{
-			get
-			{
-				return context.Tester;
-			}
-		}
+		//protected JobRunner Runner
+		//{
+		//	get
+		//	{
+		//		return _context.Runner;
+		//	}
+		//}
+
+		//protected PitTester Tester
+		//{
+		//	get { return _context.Tester; }
+		//}
 
 		protected PitDatabase PitDatabase
 		{
-			get
-			{
-				return new PitDatabase(context.PitLibraryPath);
-			}
+			get { return new PitDatabase(_context.PitLibraryPath); }
 		}
 
-		protected bool IsEngineRunning
-		{
-			get
-			{
-				return (Runner != null && Runner.Status != Models.JobStatus.Stopped) 
-					|| (Tester != null && Tester.Status == Models.TestStatus.Active);
-			}
-		}
+		//protected bool IsEngineRunning
+		//{
+		//	get
+		//	{
+		//		return (Runner != null && Runner.Status != Models.JobStatus.Stopped) 
+		//			|| (Tester != null && Tester.Status == Models.TestStatus.Active);
+		//	}
+		//}
 
-		protected void StartTest(Models.Pit pit)
-		{
-			context.StartTest(pit.Versions[0].Files[0].Name);
-		}
-
-		protected void StartJob(Models.Pit pit, uint? seed, uint rangeStart, uint rangeStop)
-		{
-			context.StartJob(pit.Versions[0].Files[0].Name, pit.PitUrl, seed, rangeStart, rangeStop);
-		}
+		//protected void StartTest(Models.Pit pit)
+		//{
+		//	_context.StartTest(pit.Versions[0].Files[0].Name);
+		//}
 	}
 }

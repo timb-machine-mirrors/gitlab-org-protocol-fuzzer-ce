@@ -119,7 +119,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			using (var svc = new WebServer(""))
 			{
 				// Tell the web service the job is running off the command line
-				svc.Context.AttachJob(dom, config);
+				JobRunner.Attach(dom, config);
 
 				svc.Start();
 
@@ -129,8 +129,8 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 				Console.WriteLine("Web site running at: {0}", svc.Uri);
 
 				// Add the web logger as the 1st logger to each test
-				foreach (var test in dom.tests)
-					test.loggers.Insert(0, svc.Context.Logger);
+				//foreach (var test in dom.tests)
+				//	test.loggers.Insert(0, svc.Context.Logger);
 
 				base.RunEngine();
 			}

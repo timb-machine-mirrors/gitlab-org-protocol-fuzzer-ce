@@ -1,5 +1,4 @@
 using System;
-using Peach.Core;
 
 namespace Peach.Pro.Core.WebServices
 {
@@ -16,50 +15,12 @@ namespace Peach.Pro.Core.WebServices
 
 		public WebContext(string pitLibraryPath)
 		{
-			Mutex = new object();
 			PitLibraryPath = pitLibraryPath;
-			NodeGuid = System.Guid.NewGuid().ToString().ToLower();
-			Logger = new WebLogger(NodeGuid);
+			NodeGuid = Guid.NewGuid().ToString().ToLower();
 		}
-
-		public object Mutex { get; private set; }
 
 		public string PitLibraryPath { get; private set; }
 
 		public string NodeGuid { get; private set; }
-
-		public WebLogger Logger { get; private set; }
-
-		public JobRunner Runner { get; private set; }
-
-		public PitTester Tester { get; private set; }
-
-		public void StartTest(string pitFile)
-		{
-			Tester = new PitTester(PitLibraryPath, pitFile);
-		}
-
-		public void StartJob(
-			string pitFile,
-			string pitUrl,
-			uint? seed,
-			uint rangeStart,
-			uint rangeStop)
-		{
-			Runner = JobRunner.Run(
-				Logger,
-				PitLibraryPath,
-				pitFile,
-				pitUrl,
-				seed,
-				rangeStart,
-				rangeStop
-			);
-		}
-
-		public void AttachJob(Peach.Core.Dom.Dom dom, RunConfiguration config)
-		{
-			Runner = JobRunner.Attach(dom, config);
-		}
 	}
 }
