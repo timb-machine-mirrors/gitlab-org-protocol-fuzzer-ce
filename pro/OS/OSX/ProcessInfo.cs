@@ -215,37 +215,34 @@ namespace Peach.Pro.OS.OSX
 			}
 		}
 
+		private static void RaiseError(Process p)
+		{
+			bool hasExited;
+
+			try
+			{
+				hasExited = p.HasExited;
+			}
+			catch (Exception ex)
+			{
+				throw new ArgumentException("Failed to check running status of pid '{0}'.".Fmt(p.Id), ex);
+			}
+
+			if (hasExited)
+				throw new ArgumentException("Can't query info for pid '{0}', it has already exited.".Fmt(p.Id));
+
+			throw new UnauthorizedAccessException("Can't query info for pid '{0}', ensure user has appropriate permissions".Fmt(p.Id));
+		}
+
 		public ProcessInfo Snapshot(Process p)
 		{
 			var kp = GetKernProc(p.Id);
 			if (!kp.HasValue)
-			{
-				try
-				{
-					if (p.HasExited)
-						throw new ArgumentException();
-					throw new UnauthorizedAccessException();
-				}
-				catch
-				{
-					throw new ArgumentException();
-				}
-			}
+				RaiseError(p);
 
 			var ti = GetTaskInfo(p.Id);
 			if (!ti.HasValue)
-			{
-				try
-				{
-					if (p.HasExited)
-						throw new ArgumentException();
-					throw new UnauthorizedAccessException();
-				}
-				catch
-				{
-					throw new ArgumentException();
-				}
-			}
+				RaiseError(p);
 
 			var pi = new ProcessInfo
 			{
