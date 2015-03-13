@@ -34,5 +34,18 @@ namespace Peach.Pro.Test.OS.OSX
 				Assert.Throws<ArgumentException>(() => ProcessInfo.Instance.Snapshot(p));
 			}
 		}
+
+		[Test]
+		public void GetProcByName()
+		{
+			var p = ProcessInfo.Instance.GetProcessesByName("sshd");
+
+			Assert.NotNull(p);
+
+			foreach (var i in p)
+				i.Dispose();
+
+			Assert.AreEqual(1, p.Length);
+		}
 	}
 }
