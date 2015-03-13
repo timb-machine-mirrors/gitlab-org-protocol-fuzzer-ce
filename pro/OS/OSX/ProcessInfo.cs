@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Peach.Core;
@@ -267,7 +268,17 @@ namespace Peach.Pro.OS.OSX
 
 		public Process[] GetProcessesByName(string name)
 		{
-			return Process.GetProcesses().Where(p => GetName(p) == name).ToArray();
+			var ret = new List<Process>();
+
+			foreach (var p in Process.GetProcesses())
+			{
+				if (GetName(p) == name)
+					ret.Add(p);
+				else
+					p.Dispose();
+			}
+
+			return ret.ToArray();
 		}
 	}
 }
