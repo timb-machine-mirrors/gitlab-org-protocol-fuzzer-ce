@@ -247,7 +247,7 @@ namespace Peach.Pro.OS.OSX
 			var pi = new ProcessInfo
 			{
 				Id = p.Id,
-				ProcessName = p.ProcessName,
+				ProcessName = GetName(p),
 				Responding = kp.Value.p_stat != (byte)p_stat.SZOMB,
 				UserProcessorTicks = ti.Value.pti_total_user,
 				PrivilegedProcessorTicks = ti.Value.pti_total_system,
