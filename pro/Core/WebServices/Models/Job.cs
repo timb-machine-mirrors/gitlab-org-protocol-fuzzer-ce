@@ -253,5 +253,8 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// Indicates if metrics are being collected for the job
 		/// </summary>
 		public bool HasMetrics { get; set; }
+
+		public uint StartIteration { get; set; }
+		public uint CurrentIteration { get; set; }
 	}
 }

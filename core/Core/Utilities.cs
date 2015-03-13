@@ -28,6 +28,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Net.NetworkInformation;
@@ -62,7 +63,7 @@ namespace Peach.Core
 
 		protected virtual void OnAssert(string message)
 		{
-			Console.WriteLine(message);
+			Console.Error.WriteLine(message);
 		}
 
 		public override void Fail(string message)
@@ -261,7 +262,14 @@ namespace Peach.Core
 		private static readonly string PeachDirectory =
 			AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
 
-		public static LogLevel LogLevel { get; private set; }
+		public static LogLevel LogLevel
+		{
+			get
+			{
+				// TODO: compute max log level
+				return LogLevel.Info;
+			}
+		}
 
 		/// <summary>
 		/// Configure NLog.
@@ -275,21 +283,6 @@ namespace Peach.Core
 		/// <param name="level"></param>
 		public static void ConfigureLogging(int level)
 		{
-			switch (level)
-			{
-				case 0:
-					LogLevel = LogLevel.Info;
-					break;
-				case 1:
-					LogLevel = LogLevel.Debug;
-					break;
-				case 2:
-					LogLevel = LogLevel.Trace;
-					break;
-				default:
-					break;
-			}
-
 			if (level < 0)
 			{
 				// Need to reset configuration to null for NLog 2.0 on mono
@@ -304,19 +297,34 @@ namespace Peach.Core
 
 			if (LogManager.Configuration != null && LogManager.Configuration.LoggingRules.Count > 0)
 			{
-				Console.WriteLine("Logging was configured by a .config file, not changing the configuration.");
+				Console.Error.WriteLine("Logging was configured by a .config file, not changing the configuration.");
 				return;
 			}
 
+			var consoleTarget = new ConsoleTarget
+			{
+				Layout = "${logger} ${message}", 
+				Error = true,
+			};
+			var rule = new LoggingRule("*", LogLevel, consoleTarget);
+
 			var nconfig = new LoggingConfiguration();
-			var consoleTarget = new ConsoleTarget();
 			nconfig.AddTarget("console", consoleTarget);
-			consoleTarget.Layout = "${logger} ${message}";
-
-			var rule = new LoggingRule("*", level == 1 ? LogLevel.Debug : LogLevel.Trace, consoleTarget);
 			nconfig.LoggingRules.Add(rule);
-
 			LogManager.Configuration = nconfig;
+		}
+
+		public static Configuration GetUserConfig()
+		{
+			var appConfig = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+			var userFile = new ExeConfigurationFileMap
+			{
+				ExeConfigFilename = Path.Combine(
+					Path.GetDirectoryName(appConfig.FilePath),
+					Path.GetFileNameWithoutExtension(appConfig.FilePath)
+				) + ".user.config"
+			};
+			return ConfigurationManager.OpenMappedExeConfiguration(userFile, ConfigurationUserLevel.None);
 		}
 
 		public static string FindProgram(string path, string program, string parameter)

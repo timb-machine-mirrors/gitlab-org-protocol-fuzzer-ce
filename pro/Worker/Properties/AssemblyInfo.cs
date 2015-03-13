@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PeachService")]
-[assembly: AssemblyDescription("Peach Fuzzing Service")]
+[assembly: AssemblyTitle("PeachWorker")]
+[assembly: AssemblyDescription("Peach Fuzzing Worker")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Deja vu Security")]
 [assembly: AssemblyProduct("Peach")]

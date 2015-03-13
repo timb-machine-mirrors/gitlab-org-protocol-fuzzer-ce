@@ -86,13 +86,13 @@ namespace Peach.Pro.Core.Loggers
 			{
 				case Category.Faults:
 					log.WriteLine("! Reproduced fault at iteration {0} : {1}",
-						fault.iteration, DateTime.Now.ToString());
+						fault.iteration, DateTime.Now);
 					break;
 				case Category.NonReproducable:
-					log.WriteLine("! Non-reproducable fault detected at iteration {0} : {1}", fault.iteration, DateTime.Now.ToString());
+					log.WriteLine("! Non-reproducable fault detected at iteration {0} : {1}", fault.iteration, DateTime.Now);
 					break;
 				case Category.Reproducing:
-					log.WriteLine("! Fault detected at iteration {0}, trying to reprduce : {1}", fault.iteration, DateTime.Now.ToString());
+					log.WriteLine("! Fault detected at iteration {0}, trying to reprduce : {1}", fault.iteration, DateTime.Now);
 					break;
 			}
 
@@ -115,7 +115,7 @@ namespace Peach.Pro.Core.Loggers
 		{
 			System.Diagnostics.Debug.Assert(reproFault == null);
 
-			reproFault = combineFaults(context, currentIteration, stateModel, faults);
+			reproFault = CombineFaults(context, currentIteration, stateModel, faults);
 			SaveFault(Category.Reproducing, reproFault);
 		}
 
@@ -133,7 +133,7 @@ namespace Peach.Pro.Core.Loggers
 
 		protected override void Engine_Fault(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faults)
 		{
-			var fault = combineFaults(context, currentIteration, stateModel, faults);
+			var fault = CombineFaults(context, currentIteration, stateModel, faults);
 
 			if (reproFault != null)
 			{
@@ -150,45 +150,7 @@ namespace Peach.Pro.Core.Loggers
 			SaveFault(Category.Faults, fault);
 		}
 
-		// TODO: Figure out how to not do this!
-		private static byte[] ToByteArray(BitwiseStream data)
-		{
-			var length = (data.LengthBits + 7) / 8;
-			var buffer = new byte[length];
-			var offset = 0;
-			var count = buffer.Length;
-
-			data.Seek(0, System.IO.SeekOrigin.Begin);
-
-			int nread;
-			while ((nread = data.Read(buffer, offset, count)) != 0)
-			{
-				offset += nread;
-				count -= nread;
-			}
-
-			if (count != 0)
-			{
-				System.Diagnostics.Debug.Assert(count == 1);
-
-				ulong bits;
-				nread = data.ReadBits(out bits, 64);
-
-				System.Diagnostics.Debug.Assert(nread > 0);
-				System.Diagnostics.Debug.Assert(nread < 8);
-
-				buffer[offset] = (byte)(bits << (8 - nread));
-			}
-
-			return buffer;
-		}
-
-		private static IEnumerable<T> SafeEnum<T>(IEnumerable<T> obj)
-		{
-			return obj == null ?  new T[0] : obj;
-		}
-
-		private Fault combineFaults(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faults)
+		private Fault CombineFaults(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faults)
 		{
 			// The combined fault will use toSave and not collectedData
 			Fault ret = new Fault() { collectedData = null };
@@ -277,12 +239,12 @@ namespace Peach.Pro.Core.Loggers
 
 			if (totalIterations.HasValue && totalIterations.Value < uint.MaxValue)
 			{
-				log.WriteLine(". Iteration {0} of {1} : {2}", currentIteration, (uint)totalIterations, DateTime.Now.ToString());
+				log.WriteLine(". Iteration {0} of {1} : {2}", currentIteration, (uint)totalIterations, DateTime.Now);
 				log.Flush();
 			}
 			else
 			{
-				log.WriteLine(". Iteration {0} : {1}", currentIteration, DateTime.Now.ToString());
+				log.WriteLine(". Iteration {0} : {1}", currentIteration, DateTime.Now);
 				log.Flush();
 			}
 		}
@@ -390,7 +352,7 @@ namespace Peach.Pro.Core.Loggers
 			log.WriteLine("Peach Fuzzing Run");
 			log.WriteLine("=================");
 			log.WriteLine("");
-			log.WriteLine("Date of run: " + context.config.runDateTime.ToString());
+			log.WriteLine("Date of run: " + context.config.runDateTime);
 			log.WriteLine("Peach Version: " + context.config.version);
 
 			log.WriteLine("Seed: " + context.config.randomSeed);

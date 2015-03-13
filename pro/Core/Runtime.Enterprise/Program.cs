@@ -160,7 +160,7 @@ Syntax:
   -t,--test xml_file         Validate a Peach XML file
   -p,--parallel M,N          Parallel fuzzing.  Total of M machines, this
                              is machine N.
-  --debug                    Enable debug messages. Usefull when debugging
+  --debug                    Enable debug messages. Useful when debugging
                              your Peach XML file.  Warning: Messages are very
                              cryptic sometimes.
   --trace                    Enable even more verbose debug messages.
