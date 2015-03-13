@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using NUnit.Framework;
 using Peach.Core;
+using System.Linq;
 
 namespace Peach.Pro.Test.OS.OSX
 {
@@ -38,14 +39,32 @@ namespace Peach.Pro.Test.OS.OSX
 		[Test]
 		public void GetProcByName()
 		{
-			var p = ProcessInfo.Instance.GetProcessesByName("sshd");
+			string procName;
+			int procId;
 
-			Assert.NotNull(p);
+			using (var self = Process.GetCurrentProcess())
+			{
+				// Use process snapshot so we are sure to get the correct name on osx
+				procName = ProcessInfo.Instance.Snapshot(self).ProcessName;
+				procId = self.Id;
+			}
 
-			foreach (var i in p)
-				i.Dispose();
+			var p = ProcessInfo.Instance.GetProcessesByName(procName);
 
-			Assert.AreEqual(1, p.Length);
+			try
+			{
+				Assert.NotNull(p);
+				Assert.Greater(p.Length, 0);
+
+				var match = p.Where(i => i.Id == procId);
+
+				Assert.AreEqual(1, match.Count());
+			}
+			finally
+			{
+				foreach (var i in p)
+					i.Dispose();
+			}
 		}
 	}
 }
