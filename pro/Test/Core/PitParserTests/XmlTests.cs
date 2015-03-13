@@ -274,7 +274,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			Assert.True(ret1);
 			
 			// The result should be a DataElement
-			DataElement valueElement = ((PeachXPathNavigator)it.Current).currentNode as DataElement;
+			DataElement valueElement = ((PeachXPathNavigator)it.Current).CurrentNode as DataElement;
 			Assert.NotNull(valueElement);
 			
 			// There sould on;ly be one result

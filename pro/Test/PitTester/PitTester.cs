@@ -100,7 +100,7 @@ namespace PitTester
 
 					do
 					{
-						var setElement = ((PeachXPathNavigator)iter.Current).currentNode as DataElement;
+						var setElement = ((PeachXPathNavigator)iter.Current).CurrentNode as DataElement;
 						if (setElement == null)
 							throw new PeachException("Error, slurp setXpath did not return a Data Element. [" + slurp.SetXpath + "]");
 
