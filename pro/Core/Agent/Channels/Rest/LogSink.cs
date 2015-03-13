@@ -21,7 +21,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		private readonly SortedDictionary<long, LogEventInfo> _pending;
 		private long _expectId;
 		private WebSocket _ws;
-		private bool _isClosed = false;
+		private bool _isClosed;
 
 		public LogSink(string name, Uri baseUri)
 		{

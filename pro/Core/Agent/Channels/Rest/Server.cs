@@ -144,16 +144,12 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			try
 			{
 				using (new LogHandler(_listener.Routes))
+				using (new MonitorHandler(_listener.Routes))
+				using (new PublisherHandler(_listener.Routes))
 				{
-					using (new MonitorHandler(_listener.Routes))
-					{
-						using (new PublisherHandler(_listener.Routes))
-						{
-							if (Started != null)
-								Started(this, EventArgs.Empty);
-							_listener.Start();
-						}
-					}
+					if (Started != null)
+						Started(this, EventArgs.Empty);
+					_listener.Start();
 				}
 			}
 			finally

@@ -28,6 +28,7 @@ subdirs = [
 	'Validator',
 	'Web',
 	'WindowsDebugInstance',
+	'Worker',
 	'XmlGenerator',
 ]
 

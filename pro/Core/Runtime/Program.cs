@@ -29,6 +29,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Peach.Core;
@@ -471,13 +472,9 @@ namespace Peach.Pro.Core.Runtime
 		/// <returns></returns>
 		protected virtual List<KeyValuePair<string, string>> ParseDefines()
 		{
-			var items = new List<List<KeyValuePair<string, string>>>();
+			var items = configFiles.Select(PitParser.parseDefines).ToList();
 
 			// Add .config files in order
-			foreach (var file in configFiles)
-			{
-				items.Add(PitParser.parseDefines(file));
-			}
 
 			// Add -D command line options last
 			items.Add(definedValues);

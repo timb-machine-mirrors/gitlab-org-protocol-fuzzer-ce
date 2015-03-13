@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using Peach.Core;
 using Peach.Pro.Core.Loggers;
 using Peach.Pro.Core.WebServices.Models;
@@ -15,25 +13,21 @@ namespace Peach.Pro.Core.WebServices
 		static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
 		Stopwatch stopwatch;
-		ManualResetEvent pauseEvent;
+		//ManualResetEvent pauseEvent;
 		//Thread thread;
 
-		private JobRunner()
-		{
-		}
-
-		public string PitUrl { get; private set; }
-		public string Guid { get; private set; }
-		public string Name { get; private set; }
-		public uint Seed { get; private set; }
-		public DateTime StartDate { get; private set; }
-		public DateTime StopDate { get; private set; }
-		public JobStatus Status { get; private set; }
-		public bool Range { get; private set; }
-		public uint RangeStart { get; private set; }
-		public uint RangeStop { get; private set; }
-		public bool HasMetrics { get; private set; }
-		public string Result { get; private set; }
+		public string PitUrl { get; set; }
+		public string Guid { get; set; }
+		public string Name { get; set; }
+		public uint Seed { get; set; }
+		public DateTime StartDate { get; set; }
+		public DateTime StopDate { get; set; }
+		public JobStatus Status { get; set; }
+		public bool Range { get; set; }
+		public uint RangeStart { get; set; }
+		public uint RangeStop { get; set; }
+		public bool HasMetrics { get; set; }
+		public string Result { get; set; }
 
 		public TimeSpan Runtime
 		{
@@ -161,7 +155,7 @@ namespace Peach.Pro.Core.WebServices
 				RangeStop = config.rangeStop,
 				HasMetrics = true,
 				stopwatch = new Stopwatch(),
-				pauseEvent = new ManualResetEvent(true)
+				//pauseEvent = new ManualResetEvent(true)
 			};
 
 			//ret.thread = new Thread(() => ret.ThreadProc(webLogger, pitLibraryPath, config));
@@ -202,42 +196,42 @@ namespace Peach.Pro.Core.WebServices
 			return ret;
 		}
 
-		bool shouldStop()
-		{
-			// Called once per iteration.
-			if (Status != JobStatus.Running)
-			{
-				try
-				{
-					stopwatch.Stop();
+		//bool shouldStop()
+		//{
+		//	// Called once per iteration.
+		//	if (Status != JobStatus.Running)
+		//	{
+		//		try
+		//		{
+		//			stopwatch.Stop();
 
-					lock (this)
-					{
-						if (Status == JobStatus.StopPending)
-							return true;
+		//			lock (this)
+		//			{
+		//				if (Status == JobStatus.StopPending)
+		//					return true;
 
-						Status = JobStatus.Paused;
-					}
+		//				Status = JobStatus.Paused;
+		//			}
 
-					// Will block the engine until the event is set by ResumeJob()
-					pauseEvent.WaitOne();
+		//			// Will block the engine until the event is set by ResumeJob()
+		//			pauseEvent.WaitOne();
 
-					lock (this)
-					{
-						if (Status == JobStatus.StopPending)
-							return true;
+		//			lock (this)
+		//			{
+		//				if (Status == JobStatus.StopPending)
+		//					return true;
 
-						Status = JobStatus.Running;
-					}
-				}
-				finally
-				{
-					stopwatch.Start();
-				}
-			}
+		//				Status = JobStatus.Running;
+		//			}
+		//		}
+		//		finally
+		//		{
+		//			stopwatch.Start();
+		//		}
+		//	}
 
-			return false;
-		}
+		//	return false;
+		//}
 
 		//void ThreadProc(WebLogger webLogger, string pitLibraryPath, RunConfiguration config)
 		//{
