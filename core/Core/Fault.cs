@@ -190,6 +190,6 @@ namespace Peach.Core
 		/// <summary>
 		/// List of all states run when fault was detected.
 		/// </summary>
-		public List<State> states = new List<State>();
+		public ICollection<State> states = new List<State>();
 	}
 }

@@ -8,90 +8,167 @@ using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Pro.Core.WebServices.Models;
 using File = System.IO.File;
+using Encoding = System.Text.Encoding;
+using Fault = Peach.Core.Fault;
+using Peach.Pro.Core.Storage;
+using Peach.Core.IO;
+using System.Data.Entity;
 
 namespace Peach.Pro.Core.Runtime.Enterprise
 {
+	public enum Category
+	{
+		Faults,
+		Reproducing,
+		NonReproducable,
+	}
+
 	class JobWatcher : Watcher
 	{
 		readonly string _logPath;
+		readonly List<Fault.State> _states = new List<Fault.State>();
+		readonly List<Sample> _samples = new List<Sample>();
+		Sample _sample = new Sample();
 		Fault _reproFault;
-		List<Fault.State> _states;
+		Guid _guid;
+		string _dbPath;
+		Job _job;
+		bool _isReproducing;
 
-		public JobWatcher(string id)
+		class MetricEntity<T> where T : class, IMetric, new()
 		{
+			readonly Dictionary<string, T> _map = new Dictionary<string, T>();
+
+			public void Load(DbSet<T> dbSet)
+			{
+				dbSet.ForEach(item => _map.Add(item.Name, item));
+			}
+
+			public T Add(JobContext db, DbSet<T> dbSet, string name)
+			{
+				T entity;
+				if (!_map.TryGetValue(name, out entity))
+				{
+					entity = dbSet.Add(new T { Name = name });
+					_map.Add(name, entity);
+				}
+				else
+				{
+					dbSet.Attach(entity);
+				}
+				return entity;
+			}
+		}
+
+		readonly MetricEntity<Storage.State> _stateMetrics = new MetricEntity<Storage.State>();
+		readonly MetricEntity<Storage.Action> _actionMetrics = new MetricEntity<Storage.Action>();
+		readonly MetricEntity<Storage.Parameter> _parameterMetrics = new MetricEntity<Storage.Parameter>();
+		readonly MetricEntity<Storage.Element> _elementMetrics = new MetricEntity<Storage.Element>();
+		readonly MetricEntity<Storage.Mutator> _mutatorMetrics = new MetricEntity<Storage.Mutator>();
+		readonly MetricEntity<Storage.Dataset> _datasetMetrics = new MetricEntity<Storage.Dataset>();
+		readonly Dictionary<string, Storage.Bucket> _bucketsMap = new Dictionary<string, Storage.Bucket>();
+
+		public JobWatcher(Guid guid)
+		{
+			_guid = guid;
+
 			var config = Utilities.GetUserConfig();
 			var logRoot = config.AppSettings.Settings.Get("LogPath");
 			if (string.IsNullOrEmpty(logRoot))
 				logRoot = Utilities.GetAppResourcePath("db");
 
-			_logPath = Path.Combine(logRoot, id);
+			_logPath = Path.Combine(logRoot, _guid.ToString());
 			Directory.CreateDirectory(_logPath);
+
+			_dbPath = Path.Combine(_logPath, "peach.db");
+
+			using (var db = new JobContext(_dbPath))
+			{
+				db.Database.Initialize(true);
+
+				_stateMetrics.Load(db.States);
+				_actionMetrics.Load(db.Actions);
+				_parameterMetrics.Load(db.Parameters);
+				_elementMetrics.Load(db.Elements);
+				_mutatorMetrics.Load(db.Mutators);
+				_datasetMetrics.Load(db.Datasets);
+			}
 		}
 
 		protected override void Engine_TestStarting(RunContext context)
 		{
-			Job job;
-
-			try
+			using (var db = new JobContext(_dbPath))
 			{
-				job = ReadJob();
-			}
-			catch (Exception)
-			{
-				Console.WriteLine("No job");
-				job = new Job
+				_job = db.Jobs.Find(_guid);
+				if (_job == null)
 				{
-					Name = Path.GetFileNameWithoutExtension(context.config.pitFile),
-					RangeStart = context.config.rangeStart,
-					RangeStop = context.config.rangeStart,
-					IterationCount = 0,
-					Seed = context.config.randomSeed,
-					StartDate = DateTime.UtcNow,
-					HasMetrics = true,
-				};
+					_job = db.Jobs.Add(new Job
+					{
+						Id = _guid,
+						Name = Path.GetFileNameWithoutExtension(context.config.pitFile),
+						RangeStart = context.config.rangeStart,
+						RangeStop = context.config.rangeStart,
+						IterationCount = 0,
+						Seed = context.config.randomSeed,
+						StartDate = DateTime.UtcNow,
+						HasMetrics = true,
+					});
+				}
+
+				_job.StartIteration = context.currentIteration;
+				_job.Mode = JobMode.Fuzzing;
+				_job.Status = JobStatus.Running;
+
+				db.SaveChanges();
 			}
-
-			job.StartIteration = context.currentIteration;
-			job.Mode = JobMode.Fuzzing;
-			job.Status = JobStatus.Running;
-
-			WriteJob(job);
 		}
 
 		protected override void Engine_TestFinished(RunContext context)
 		{
-			var job = ReadJob();
-			job.Mode = JobMode.Fuzzing;
-			job.StopDate = DateTime.UtcNow;
-			job.Status = JobStatus.Stopped;
-			WriteJob(job);
+			using (var db = new JobContext(_dbPath))
+			{
+				db.Jobs.Attach(_job);
+
+				_job.Mode = JobMode.Fuzzing;
+				_job.StopDate = DateTime.UtcNow;
+				_job.Status = JobStatus.Stopped;
+
+				db.SaveChanges();
+			}
 		}
 
 		protected override void Engine_IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
 		{
-			_states = new List<Fault.State>();
+			_states.Clear();
+			_samples.Clear();
+			_isReproducing = context.reproducingFault;
 
 			// TODO: rate throttle
-			var job = ReadJob();
-			if (context.reproducingFault)
+			using (var db = new JobContext(_dbPath))
 			{
-				if (context.reproducingIterationJumpCount == 0)
+				db.Jobs.Attach(_job);
+
+				if (context.reproducingFault)
 				{
-					Debug.Assert(context.reproducingInitialIteration == currentIteration);
-					job.Mode = JobMode.Reproducing;
+					if (context.reproducingIterationJumpCount == 0)
+					{
+						Debug.Assert(context.reproducingInitialIteration == currentIteration);
+						_job.Mode = JobMode.Reproducing;
+					}
+					else
+					{
+						_job.Mode = JobMode.Searching;
+					}
+					_job.CurrentIteration = context.reproducingInitialIteration;
 				}
 				else
 				{
-					job.Mode = JobMode.Searching;
+					_job.Mode = JobMode.Fuzzing;
+					_job.CurrentIteration = currentIteration;
 				}
-				job.CurrentIteration = context.reproducingInitialIteration;
+
+				db.SaveChanges();
 			}
-			else
-			{
-				job.Mode = JobMode.Fuzzing;
-				job.CurrentIteration = currentIteration;
-			}
-			WriteJob(job);
 		}
 
 		protected override void Engine_IterationFinished(RunContext context, uint currentIteration)
@@ -114,7 +191,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 				_reproFault = null;
 			}
 
-			SaveFault(fault);
+			SaveFault(context, Category.Faults, fault);
 		}
 
 		protected override void Engine_ReproFault(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faults)
@@ -122,7 +199,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			Debug.Assert(_reproFault == null);
 
 			_reproFault = CombineFaults(context, currentIteration, stateModel, faults);
-			SaveFault(_reproFault);
+			SaveFault(context, Category.Reproducing, _reproFault);
 		}
 
 		protected override void Engine_ReproFailed(RunContext context, uint currentIteration)
@@ -133,21 +210,41 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			_reproFault.iterationStart = context.reproducingInitialIteration - context.reproducingIterationJumpCount;
 			_reproFault.iterationStop = _reproFault.iteration;
 
-			SaveFault(_reproFault);
+			SaveFault(context, Category.NonReproducable, _reproFault);
 			_reproFault = null;
 		}
 
-		protected override void StateStarting(RunContext context, State state)
+		protected override void StateStarting(RunContext context, Peach.Core.Dom.State state)
 		{
 			_states.Add(new Fault.State
 			{
 				name = state.Name,
 				actions = new List<Fault.Action>()
 			});
+
+			var dom = state.parent.parent;
+
+			if (!_isReproducing && 
+				!dom.context.controlIteration && 
+				!dom.context.controlRecordingIteration)
+			{
+				using (var db = new JobContext(_dbPath))
+				{
+					_sample.State = _stateMetrics.Add(db, db.States, state.Name);
+					db.StateInstances.Add(new StateInstance { State = _sample.State });
+					db.SaveChanges();
+				}
+			}
 		}
 
 		protected override void ActionStarting(RunContext context, Peach.Core.Dom.Action action)
 		{
+			using (var db = new JobContext(_dbPath))
+			{
+				_sample.Action = _actionMetrics.Add(db, db.Actions, action.Name);
+				db.SaveChanges();
+			}
+
 			var rec = new Fault.Action
 			{
 				name = action.Name,
@@ -185,17 +282,57 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			}
 		}
 
-		protected override void DataMutating(RunContext context, ActionData data, DataElement element, Mutator mutator)
+		protected override void DataMutating(
+			RunContext context,
+			ActionData data,
+			DataElement element,
+			Peach.Core.Mutator mutator)
 		{
 			var rec = _states.Last().actions.Last();
 
 			var tgtName = data.dataModel.Name;
 			var tgtParam = data.Name ?? "";
 			var tgtDataSet = data.selectedData != null ? data.selectedData.Name : "";
-			var model = rec.models.FirstOrDefault(m => m.name == tgtName && m.parameter == tgtParam && m.dataSet == tgtDataSet);
+			var model = rec.models.FirstOrDefault(m =>
+				m.name == tgtName &&
+				m.parameter == tgtParam &&
+				m.dataSet == tgtDataSet);
 			Debug.Assert(model != null);
 
-			model.mutations.Add(new Fault.Mutation() { element = element.fullName, mutator = mutator.Name });
+			model.mutations.Add(new Fault.Mutation()
+			{
+				element = element.fullName,
+				mutator = mutator.Name
+			});
+
+			using (var db = new JobContext(_dbPath))
+			{
+				db.States.Attach(_sample.State);
+				db.Actions.Attach(_sample.Action);
+
+				_sample.Parameter = _parameterMetrics.Add(db, db.Parameters, data.Name ?? "");
+				_sample.Element = _elementMetrics.Add(db, db.Elements, element.fullName);
+				_sample.Mutator = _mutatorMetrics.Add(db, db.Mutators, mutator.Name);
+				_sample.Dataset = _datasetMetrics.Add(db, db.Datasets,
+					data.selectedData != null ? data.selectedData.Name : "");
+
+				_samples.Add(_sample);
+
+				if (!_isReproducing)
+					db.Samples.Add(_sample);
+
+				_sample = new Sample
+				{
+					State = _sample.State,
+					Action = _sample.Action,
+					Parameter = _sample.Parameter,
+					Element = _sample.Element,
+					Mutator = _sample.Mutator,
+					Dataset = _sample.Dataset,
+				};
+
+				db.SaveChanges();
+			}
 		}
 
 		private Fault CombineFaults(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faults)
@@ -296,96 +433,159 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			return ret;
 		}
 
-		protected void SaveFault(Fault fault)
+		void SaveFault(RunContext context, Category category, Fault fault)
 		{
 			//switch (category)
 			//{
 			//	case Category.Faults:
 			//		log.WriteLine("! Reproduced fault at iteration {0} : {1}",
-			//			fault.iteration, DateTime.Now);
+			//			fault.iteration, 
+			//			DateTime.Now);
 			//		break;
 			//	case Category.NonReproducable:
-			//		log.WriteLine("! Non-reproducable fault detected at iteration {0} : {1}", fault.iteration, DateTime.Now);
+			//		log.WriteLine("! Non-reproducable fault detected at iteration {0} : {1}", 
+			//			fault.iteration, 
+			//			DateTime.Now);
 			//		break;
 			//	case Category.Reproducing:
-			//		log.WriteLine("! Fault detected at iteration {0}, trying to reprduce : {1}", fault.iteration, DateTime.Now);
+			//		log.WriteLine("! Fault detected at iteration {0}, trying to reprduce : {1}", 
+			//			fault.iteration, 
+			//			DateTime.Now);
 			//		break;
 			//}
-
-			// root/category/bucket/iteration
-			//var subDir = Path.Combine(
-			//	RootDir, 
-			//	category.ToString(), 
-			//	fault.folderName, 
-			//	fault.iteration.ToString());
-
-			//foreach (var kv in fault.toSave)
-			//{
-			//	var fileName = Path.Combine(subDir, kv.Key);
-
-			//	SaveFile(category, fileName, kv.Value);
-			//}
-
-			//OnFaultSaved(category, fault, subDir);
-
-			//log.Flush();
-		}
-
-		private Job ReadJob()
-		{
-			return ReadObject<Job>("job.json");
-		}
-
-		private void WriteJob(Job job)
-		{
-			WriteObject(job, "job.json");
-		}
-
-		private T ReadObject<T>(string name)
-		{
-			var source = Path.Combine(_logPath, name);
-			using (var stream = File.OpenRead(source))
+			using (var db = new JobContext(_dbPath))
 			{
-				return ReadObject<T>(stream);
+				var now = DateTime.UtcNow;
+
+				var bucket = string.Join("_", new[] { 
+					fault.majorHash, 
+					fault.minorHash, 
+					fault.exploitability 
+				}.Where(s => !string.IsNullOrEmpty(s)));
+				if (fault.folderName != null)
+					bucket = fault.folderName;
+				else if (string.IsNullOrEmpty(bucket))
+					bucket = "Unknown";
+
+				var entity = new FaultDetail
+				{
+					Files = new List<FaultFile>(),
+					Iteration = fault.iteration,
+					TimeStamp = now,
+					BucketName = bucket,
+					Source = fault.detectionSource,
+					Exploitability = fault.exploitability,
+					MajorHash = fault.majorHash,
+					MinorHash = fault.minorHash,
+
+					Title = fault.title,
+					Description = fault.description,
+					Seed = context.config.randomSeed,
+					IterationStart = fault.iterationStart,
+					IterationStop = fault.iterationStop,
+				};
+
+				// root/category/bucket/iteration
+				var subDir = Path.Combine(
+					category.ToString(),
+					fault.folderName,
+					fault.iteration.ToString());
+
+				foreach (var item in fault.toSave)
+				{
+					var fullName = Path.Combine(subDir, item.Key);
+					var path = Path.Combine(_logPath, fullName);
+					var size = SaveFile(category, path, item.Value);
+
+					entity.Files.Add(new FaultFile
+					{
+						Name = Path.GetFileName(fullName),
+						FullName = fullName,
+						Size = size,
+					});
+				}
+
+				if (category == Category.Reproducing)
+					return;
+
+				// Ensure any past saving of this fault as Reproducing has been cleaned up
+				string reproDir = Path.Combine(
+					_logPath,
+					Category.Reproducing.ToString());
+
+				if (Directory.Exists(reproDir))
+				{
+					try { Directory.Delete(reproDir, true); }
+					// Can happen if a process has a file/subdirectory open...
+					catch (IOException) { }
+				}
+
+				db.Faults.Add(entity);
+
+				SaveFaultMetrics(db, fault, now);
+
+				db.SaveChanges();
 			}
 		}
 
-		private T ReadObject<T>(Stream stream)
+		private void SaveFaultMetrics(JobContext db, Fault fault, DateTime now)
 		{
-			var serializer = JsonSerializer.CreateDefault();
-			using (var reader = new StreamReader(stream))
+			var majorHash = fault.majorHash ?? "UNKNOWN";
+			var minorHash = fault.minorHash ?? "UNKONWN";
+			var name = majorHash;
+			if (fault.minorHash != null)
+				name = "{0}_{1}".Fmt(majorHash, minorHash);
+
+			var bucket = db.Buckets.Add(new Bucket
 			{
-				return (T)serializer.Deserialize(reader, typeof(T));
-			}
+				Name = name,
+				MajorHash = majorHash,
+				MinorHash = minorHash,
+			});
+
+			var metric = db.FaultMetrics.Add(new FaultMetric
+			{
+				Iteration = fault.iteration,
+				Bucket = bucket,
+				Timestamp = now,
+				Hour = now.Hour,
+				Samples = new List<FaultMetricSample>(),
+			});
+
+			_samples.ForEach(x =>
+			{
+				db.States.Attach(x.State);
+				db.Actions.Attach(x.Action);
+				db.Parameters.Attach(x.Parameter);
+				db.Elements.Attach(x.Element);
+				db.Mutators.Attach(x.Mutator);
+				db.Datasets.Attach(x.Dataset);
+
+				if (_sample.Id != 0)
+					db.Samples.Attach(x);
+
+				metric.Samples.Add(new FaultMetricSample { Sample = x });
+			});
 		}
 
-		private void WriteObject(object obj, string name)
+		long SaveFile(Category category, string fullPath, Stream contents)
 		{
-			var target = Path.Combine(_logPath, name);
-			var tmp = target + ".tmp";
-
-			using (var stream = new FileStream(tmp, FileMode.Create))
+			try
 			{
-				WriteObject(obj, stream);
+				string dir = Path.GetDirectoryName(fullPath);
+				Directory.CreateDirectory(dir);
+
+				contents.Seek(0, SeekOrigin.Begin);
+
+				using (var fs = new FileStream(fullPath, FileMode.CreateNew))
+				{
+					contents.CopyTo(fs, BitStream.BlockCopySize);
+					return fs.Position;
+				}
 			}
-
-			// save state to allow for resume
-			if (File.Exists(target))
-				File.Replace(tmp, target, null);
-			else
-				File.Move(tmp, target);
-		}
-
-		private void WriteObject(object obj, Stream stream)
-		{
-			var settings = new JsonSerializerSettings
+			catch (Exception e)
 			{
-				Formatting = Formatting.Indented
-			};
-			var serializer = JsonSerializer.CreateDefault(settings);
-			using (var writer = new StreamWriter(stream))
-			{
-				serializer.Serialize(writer, obj);
+				throw new PeachException(e.Message, e);
 			}
 		}
 	}
