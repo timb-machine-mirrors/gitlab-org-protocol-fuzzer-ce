@@ -57,6 +57,11 @@ deps = [
 	'LibUsbDotNet.dll',
 
 	'websocket-sharp.dll',
+
+	'EntityFramework.dll',
+	'System.Data.SQLite.EF6.dll',
+	'System.Data.SQLite.Linq.dll',
+	'System.ComponentModel.DataAnnotations.dll',
 ]
 
 if bld.env.TARGET == 'win':

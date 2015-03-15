@@ -41,9 +41,9 @@ namespace Peach.Pro.Core.WebServices
 				PitLibraryPath,
 				pit.Versions[0].Files[0].Name,
 				pit.PitUrl,
-				job.Seed,
-				job.RangeStart,
-				job.RangeStop
+				(uint?)job.Seed,
+				(uint)job.RangeStart,
+				(uint)job.RangeStop
 			);
 
 			return MakeJob(runner);
@@ -123,11 +123,11 @@ namespace Peach.Pro.Core.WebServices
 		{
 			var elapsed = runner.Runtime;
 
-			var group = new Group
-			{
-				Access = GroupAccess.Read | GroupAccess.Write,
-				GroupUrl = "",
-			};
+			//var group = new Group
+			//{
+			//	Access = GroupAccess.Read | GroupAccess.Write,
+			//	GroupUrl = "",
+			//};
 
 			// TODO: read current job status from datastore
 
@@ -174,8 +174,8 @@ namespace Peach.Pro.Core.WebServices
 				Runtime = (uint)elapsed.TotalSeconds,
 				//Speed = (uint)((Logger.CurrentIteration - Logger.StartIteration) / elapsed.TotalHours),
 				//FaultCount = Logger.FaultCount,
-				Tags = new List<Tag>(),
-				Groups = new List<Group>(new[] { group }),
+				//Tags = new List<Tag>(),
+				//Groups = new List<Group>(new[] { group }),
 				HasMetrics = runner.HasMetrics,
 			};
 

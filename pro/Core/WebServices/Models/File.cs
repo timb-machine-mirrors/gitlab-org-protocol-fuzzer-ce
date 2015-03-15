@@ -1,12 +1,26 @@
+using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations.Schema;
 namespace Peach.Pro.Core.WebServices.Models
 {
-	public class File
+	public class FaultFile
 	{
+		/// <summary>
+		/// Unique ID of the file.
+		/// </summary>
+		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+		public long Id { get; set; }
+
+		/// <summary>
+		/// Foreign key to FaultDetail table
+		/// </summary>
+		[JsonIgnore]
+		public long FaultDetailId { get; set; }
+
 		/// <summary>
 		///  The name of the file.
 		/// </summary>
 		/// <example>
-		/// "Faults/PROBABLY_EXPLOITABLE_0x63103514_0x32621b6f/13/WinAgent.Monitor.WindowsDebugEngine.description.txt"
+		/// "WinAgent.Monitor.WindowsDebugEngine.description.txt"
 		/// </example>
 		public string Name { get; set; }
 
@@ -24,8 +38,8 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <example>
 		/// "/p/files/{guid}"
 		/// </example>
+		[NotMapped]
 		public string FileUrl { get; set; }
-
 
 		/// <summary>
 		/// The size of the contents of the file.

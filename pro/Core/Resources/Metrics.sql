@@ -73,6 +73,7 @@ CREATE TABLE metrics_faults (
 	FOREIGN KEY(bucket)    REFERENCES buckets(id)
 );
 
+-- FaultTimeline
 CREATE TABLE metrics_faultsbyhour (
 	id INTEGER PRIMARY KEY,
 	date DATE,
@@ -131,6 +132,7 @@ CREATE UNIQUE INDEX faultsbyhour_index ON metrics_faultsbyhour (
 	hour
 );
 
+-- States
 CREATE VIEW view_metrics_states AS 
 SELECT
 	s.name AS state,
@@ -138,6 +140,7 @@ SELECT
 FROM metrics_states AS mi
 JOIN states AS s ON s.id = mi.state;
 
+-- Iterations
 CREATE VIEW view_metrics_iterations AS 
 SELECT
 	s.name AS state,
@@ -155,40 +158,41 @@ JOIN elements   AS e ON e.id = mi.element
 JOIN mutators   AS m ON m.id = mi.mutator
 JOIN datasets   AS d ON d.id = mi.dataset;
 
-CREATE VIEW view_metrics_faults AS
-SELECT
-	s.name AS state,
-	a.name AS action,
-	p.name AS parameter,
-	e.name AS element,
-	m.name AS mutator,
-	d.name AS dataset,
-	b.name AS bucket,
-	count(distinct mf.faultnumber) AS faultcount
-FROM metrics_faults AS mf
-JOIN states     AS s ON s.id = mf.state
-JOIN actions    AS a ON a.id = mf.action
-JOIN parameters AS p ON p.id = mf.state
-JOIN elements   AS e ON e.id = mf.element
-JOIN mutators   AS m ON m.id = mf.mutator
-JOIN datasets   AS d ON d.id = mf.dataset
-JOIN buckets    AS b ON b.id = mf.bucket
-GROUP BY
-	mf.state,
-	mf.action,
-	mf.parameter,
-	mf.element,
-	mf.mutator,
-	mf.bucket
-ORDER BY
-	mf.state,
-	mf.action,
-	mf.parameter,
-	mf.element,
-	mf.mutator,
-	mf.bucket
-;
+--CREATE VIEW view_metrics_faults AS
+--SELECT
+--	s.name AS state,
+--	a.name AS action,
+--	p.name AS parameter,
+--	e.name AS element,
+--	m.name AS mutator,
+--	d.name AS dataset,
+--	b.name AS bucket,
+--	count(distinct mf.faultnumber) AS faultcount
+--FROM metrics_faults AS mf
+--JOIN states     AS s ON s.id = mf.state
+--JOIN actions    AS a ON a.id = mf.action
+--JOIN parameters AS p ON p.id = mf.state
+--JOIN elements   AS e ON e.id = mf.element
+--JOIN mutators   AS m ON m.id = mf.mutator
+--JOIN datasets   AS d ON d.id = mf.dataset
+--JOIN buckets    AS b ON b.id = mf.bucket
+--GROUP BY
+--	mf.state,
+--	mf.action,
+--	mf.parameter,
+--	mf.element,
+--	mf.mutator,
+--	mf.bucket
+--ORDER BY
+--	mf.state,
+--	mf.action,
+--	mf.parameter,
+--	mf.element,
+--	mf.mutator,
+--	mf.bucket
+--;
 
+-- Buckets
 CREATE VIEW view_buckets AS
 SELECT
 	b.id,
@@ -225,6 +229,7 @@ GROUP BY
 	mf.dataset
 ORDER BY count(distinct(mf.faultnumber)) DESC;
 
+-- BucketTimeline
 CREATE VIEW view_buckettimeline AS
 SELECT
 	b.id,
@@ -254,15 +259,15 @@ SELECT
 FROM view_distincts
 GROUP BY mutator;
 
-CREATE VIEW view_buckets_major AS
-SELECT id
-FROM buckets
-WHERE type = 'majorHash';
+--CREATE VIEW view_buckets_major AS
+--SELECT id
+--FROM buckets
+--WHERE type = 'majorHash';
 
-CREATE VIEW view_buckets_minor AS
-SELECT id
-FROM buckets
-WHERE type = 'minorHash';
+--CREATE VIEW view_buckets_minor AS
+--SELECT id
+--FROM buckets
+--WHERE type = 'minorHash';
 
 CREATE VIEW view_mutators_faults AS
 SELECT 
@@ -270,7 +275,11 @@ SELECT
 	count(distinct mf.bucket) AS bucketcount, 
 	count(distinct mf.faultnumber) AS faultcount
 FROM metrics_faults AS mf
-WHERE mf.bucket IN (SELECT id FROM view_buckets_major)
+WHERE mf.bucket IN (
+	SELECT id 
+	FROM buckets
+	WHERE type = 'majorHash'
+)
 GROUP BY mf.mutator;
 
 CREATE VIEW view_mutators_iterations AS
@@ -282,6 +291,7 @@ FROM view_mutator_elementcount AS ec
 JOIN metrics_iterations AS mi ON ec.mutator = mi.mutator
 GROUP BY mi.mutator;
 
+-- Mutators
 CREATE VIEW view_mutators AS
 SELECT
 	m.name AS mutator,
@@ -320,7 +330,11 @@ SELECT
 	count(distinct(bucket)) as bucketcount,
 	count(distinct(faultnumber)) as faultcount
 FROM metrics_faults
-WHERE bucket IN (SELECT id FROM view_buckets_major)
+WHERE bucket IN (
+	SELECT id 
+	FROM buckets
+	WHERE type = 'majorHash'
+)
 GROUP BY 
 	state,
 	action,
@@ -329,6 +343,7 @@ GROUP BY
 	element
 ;
 
+-- Elements
 CREATE VIEW view_elements AS
 SELECT 
 	s.name as state,
@@ -366,9 +381,14 @@ SELECT
 	count(distinct(bucket)) as bucketcount,
 	count(distinct(faultnumber)) as faultcount
 FROM metrics_faults
-WHERE bucket IN (SELECT id FROM view_buckets_major)
+WHERE bucket IN (
+	SELECT id 
+	FROM buckets
+	WHERE type = 'majorHash'
+)
 GROUP BY dataset;
 
+-- Datasets
 CREATE VIEW view_datasets AS
 SELECT
 	d.name as dataset,

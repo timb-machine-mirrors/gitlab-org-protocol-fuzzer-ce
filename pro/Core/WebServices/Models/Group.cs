@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 
 namespace Peach.Pro.Core.WebServices.Models
@@ -13,6 +14,7 @@ namespace Peach.Pro.Core.WebServices.Models
 
 	public class Group
 	{
+		[Key]
 		public string GroupUrl { get; set; }
 
 		[JsonConverter(typeof(CamelCaseStringEnumConverter))]

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using System.Data.Entity;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
@@ -71,18 +73,22 @@ namespace Peach.Pro.Core.WebServices.Models
 
 	public class Job
 	{
+		public Guid Id { get; set; }
+
 		/// <summary>
 		/// The URL of this job
 		/// </summary>
 		/// <example>
 		/// "/p/jobs/{id}"
 		/// </example>
+		[NotMapped]
 		public string JobUrl { get; set; }
 
 		/// <summary>
 		/// URLs used to control a running job.
 		/// </summary>
-		public JobCommands Commands;
+		[NotMapped]
+		public JobCommands Commands { get; set; }
 
 		/// <summary>
 		/// The URL of faults from job
@@ -90,6 +96,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <example>
 		/// "/p/jobs/{id}/faults"
 		/// </example>
+		[NotMapped]
 		public string FaultsUrl { get; set; }
 
 		/// <summary>
@@ -98,6 +105,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <example>
 		/// "/p/targets/{id}"
 		/// </example>
+		[NotMapped]
 		public string TargetUrl { get; set; }
 
 		/// <summary>
@@ -106,6 +114,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <example>
 		/// "/p/targets/{target_id}/config/{config_id}"
 		/// </example>
+		[NotMapped]
 		public string TargetConfigUrl { get; set; }
 
 		/// <summary>
@@ -114,6 +123,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <example>
 		/// "/p/jobs/{id}/nodes"
 		/// </example>
+		[NotMapped]
 		public string NodesUrl { get; set; }
 
 		/// <summary>
@@ -123,6 +133,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <example>
 		/// "/p/pits/{id}"
 		/// </example>
+		[NotMapped]
 		public string PitUrl { get; set; }
 
 		/// <summary>
@@ -132,6 +143,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <example>
 		/// "/p/peaches/{id}"
 		/// </example>
+		[NotMapped]
 		public string PeachUrl { get; set; }
 
 		/// <summary>
@@ -140,6 +152,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <example>
 		/// "/p/files/{id}"
 		/// </example>
+		[NotMapped]
 		public string ReportUrl { get; set; }
 
 		/// <summary>
@@ -148,11 +161,13 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <example>
 		/// "/p/files/{id}"
 		/// </example>
+		[NotMapped]
 		public string PackageFileUrl { get; set; }
 
 		/// <summary>
 		/// URLs to associated metrics
 		/// </summary>
+		[NotMapped]
 		public JobMetrics Metrics { get; set; }
 
 		/// <summary>
@@ -197,12 +212,12 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// The random seed being used by the fuzzing job
 		/// </summary>
-		public uint? Seed { get; set; }
+		public long? Seed { get; set; }
 
 		/// <summary>
 		/// How many iterations of fuzzing have been completed
 		/// </summary>
-		public uint IterationCount { get; set; }
+		public long IterationCount { get; set; }
 
 		/// <summary>
 		/// The date the job was started
@@ -217,44 +232,44 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// The number of seconds the job has been running for
 		/// </summary>
-		public uint Runtime { get; set; }
+		public long Runtime { get; set; }
 
 		/// <summary>
 		/// The average speed of the job in iterations per hour
 		/// </summary>
-		public uint Speed { get; set; }
+		public long Speed { get; set; }
 
 		/// <summary>
 		/// How many faults have been detected
 		/// </summary>
-		public uint FaultCount { get; set; }
+		public long FaultCount { get; set; }
 
-		/// <summary>
-		/// List of tags associated with this job
-		/// </summary>
-		public List<Tag> Tags { get; set; }
+		///// <summary>
+		///// List of tags associated with this job
+		///// </summary>
+		//public virtual ICollection<Tag> Tags { get; set; }
 
-		/// <summary>
-		/// ACL for this job
-		/// </summary>
-		public List<Group> Groups { get; set; }
+		///// <summary>
+		///// ACL for this job
+		///// </summary>
+		//public virtual ICollection<Group> Groups { get; set; }
 
 		/// <summary>
 		/// Optional starting iteration number
 		/// </summary>
-		public uint RangeStart { get; set; }
+		public long RangeStart { get; set; }
 
 		/// <summary>
 		/// Optional ending iteration number
 		/// </summary>
-		public uint RangeStop { get; set; }
+		public long RangeStop { get; set; }
 
 		/// <summary>
 		/// Indicates if metrics are being collected for the job
 		/// </summary>
 		public bool HasMetrics { get; set; }
 
-		public uint StartIteration { get; set; }
-		public uint CurrentIteration { get; set; }
+		public long StartIteration { get; set; }
+		public long CurrentIteration { get; set; }
 	}
 }

@@ -17,7 +17,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 	{
 		OptionSet _options;
 		string _pitLibraryPath;
-		string _id;
+		Guid? _guid;
 		bool _shouldStop;
 		Exception _caught;
 		readonly RunConfiguration _config = new RunConfiguration();
@@ -115,7 +115,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 				{ 
 					"guid=", 
 					"The guid that identifies a job",
-					v => _id = v
+					(Guid v) => _guid = v
 				},
 				{ 
 					"seed=", 
@@ -160,8 +160,8 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			if (!start.HasValue)
 				throw new SyntaxException("The '--start' argument is required.");
 
-			if (string.IsNullOrEmpty(_id))
-				_id = Guid.NewGuid().ToString();
+			if (!_guid.HasValue)
+				_guid = Guid.NewGuid();
 
 			if (stop.HasValue)
 			{
@@ -223,7 +223,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			var parser = new Godel.Core.GodelPitParser();
 			var dom = parser.asParser(args, _config.pitFile);
 
-			var engine = new Engine(new JobWatcher(_id));
+			var engine = new Engine(new JobWatcher(_guid.Value));
 			var engineTask = Task.Factory.StartNew(() =>
 			{
 				try
