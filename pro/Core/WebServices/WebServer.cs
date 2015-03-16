@@ -21,6 +21,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Threading;
 using HttpStatusCode = Nancy.HttpStatusCode;
+using System.IO;
 
 namespace Peach.Pro.Core.WebServices
 {
@@ -47,7 +48,10 @@ namespace Peach.Pro.Core.WebServices
 		{
 			var enumerable = context.Request.Headers.Accept;
 
-			var ranges = enumerable.OrderByDescending(o => o.Item2).Select(o => new MediaRange(o.Item1)).ToList();
+			var ranges = enumerable
+				.OrderByDescending(o => o.Item2)
+				.Select(o => new MediaRange(o.Item1))
+				.ToList();
 			foreach (var item in ranges)
 			{
 				if (item.Matches("application/json"))
@@ -100,17 +104,38 @@ namespace Peach.Pro.Core.WebServices
 	internal class Bootstrapper : DefaultNancyBootstrapper
 	{
 		WebContext context;
+		byte[] _favicon;
 
 		static Bootstrapper()
 		{
 			// Do this here since RootNamespaces is static, and
 			// ConfigureApplicationContainer can be called more than once.
-			ResourceViewLocationProvider.RootNamespaces.Add(Assembly.GetExecutingAssembly(), "Peach.Pro.Core.WebServices.Views");
+			ResourceViewLocationProvider.RootNamespaces.Add(
+				Assembly.GetExecutingAssembly(),
+				"Peach.Pro.Core.WebServices.Views");
 		}
 
 		public Bootstrapper(WebContext context)
 		{
 			this.context = context;
+		}
+
+		protected override byte[] FavIcon
+		{
+			get { return _favicon ?? (_favicon = LoadFavIcon()); }
+		}
+
+		private byte[] LoadFavIcon()
+		{
+			const string name = "Peach.Pro.Core.Resources.favicon.ico";
+			using (var src = Assembly.GetExecutingAssembly().GetManifestResourceStream(name))
+			{
+				using (var tgt = new MemoryStream())
+				{
+					src.CopyTo(tgt);
+					return tgt.ToArray();
+				}
+			}
 		}
 
 		protected override void ConfigureApplicationContainer(TinyIoCContainer container)
@@ -142,7 +167,10 @@ namespace Peach.Pro.Core.WebServices
 			);
 		}
 
-		protected override void RequestStartup(TinyIoCContainer container, IPipelines pipelines, NancyContext context)
+		protected override void RequestStartup(
+			TinyIoCContainer container,
+			IPipelines pipelines,
+			NancyContext context)
 		{
 			// NOTE: The pipelies do not get called when serving static content.
 			// Need to investigate disabling this if we want the back end to do

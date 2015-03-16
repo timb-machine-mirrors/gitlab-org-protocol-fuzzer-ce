@@ -529,7 +529,7 @@ quit
 			_procHandler = new System.Diagnostics.Process();
 			_procHandler.StartInfo = si;
 
-			logger.Debug("_Start(): Starting gdb process");
+			logger.Debug("_Start(): Starting gdb process: '{0} {1}'", si.FileName, si.Arguments);
 
 			if (File.Exists(_gdbLog))
 				File.Delete(_gdbLog);
@@ -579,6 +579,9 @@ quit
 				// Program ran to completion
 				_procCommand = null;
 			}
+
+			// Notify event handler the process started
+			OnInternalEvent(EventArgs.Empty);
 		}
 
 		void _Stop()
@@ -746,7 +749,7 @@ quit
 			_messageExit = false;
 			_secondStart = true;
 
-			if (RestartOnEachTest)
+			if (RestartOnEachTest || !_IsRunning())
 				_Stop();
 			else if (firstStart)
 				return;

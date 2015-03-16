@@ -286,7 +286,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			var si = new ProcessStartInfo
 			{
 				FileName = ExecHandler,
-				Arguments = "\"" + Executable + "\"" + (Arguments.Length == 0 ? "" : " ") + Arguments,
+				Arguments = "\"" + Executable + "\"" + (string.IsNullOrEmpty(Arguments) ? "" : " ") + Arguments,
 				UseShellExecute = false
 			};
 

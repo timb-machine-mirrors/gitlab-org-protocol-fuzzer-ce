@@ -55,6 +55,8 @@ deps = [
 	'BouncyCastle.Crypto.dll',
 	'aardvark_net.dll',
 	'LibUsbDotNet.dll',
+
+	'websocket-sharp.dll',
 ]
 
 if bld.env.TARGET == 'win':

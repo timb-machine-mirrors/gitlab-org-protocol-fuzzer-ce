@@ -5,6 +5,7 @@ using NLog.Targets;
 using NLog.Config;
 
 using NUnit.Framework;
+using System;
 
 namespace Godel
 {
@@ -42,7 +43,12 @@ namespace Godel
 			var config = new LoggingConfiguration();
 			config.AddTarget("console", consoleTarget);
 
-			var rule = new LoggingRule("*", LogLevel.Info, consoleTarget);
+			var logLevel = LogLevel.Info;
+			var peachTrace = Environment.GetEnvironmentVariable("PEACH_TRACE");
+			if (peachTrace == "1")
+				logLevel = LogLevel.Trace;
+
+			var rule = new LoggingRule("*", logLevel, consoleTarget);
 			config.LoggingRules.Add(rule);
 
 			LogManager.Configuration = config;

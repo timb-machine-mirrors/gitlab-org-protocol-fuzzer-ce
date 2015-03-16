@@ -33,9 +33,9 @@ using System.Net;
 using System.Text;
 using NLog;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.IO;
 using Encoding = Peach.Core.Encoding;
+using Logger = NLog.Logger;
 
 namespace Peach.Pro.Core.Publishers
 {
@@ -52,8 +52,8 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("IgnoreCertErrors", typeof(bool), "Allow https regardless of cert status (defaults to false)", "false")]
 	public class HttpPublisher : Peach.Core.Publishers.BufferedStreamPublisher
 	{
-		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
-		protected override NLog.Logger Logger { get { return logger; } }
+		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+		protected override Logger Logger { get { return logger; } }
 
 		public string Url { get; protected set; }
 		public string Method { get; protected set; }
@@ -69,32 +69,33 @@ namespace Peach.Pro.Core.Publishers
 		protected HttpWebResponse Response { get; set; }
 		protected string Query { get; set; }
 		protected Dictionary<string, string> Headers = new Dictionary<string, string>();
-		protected CredentialCache credentials = null;
+		protected CredentialCache Credentials = null;
 
 		public HttpPublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
 			if (!string.IsNullOrWhiteSpace(Username) && !string.IsNullOrWhiteSpace(Password))
 			{
-				Uri baseUrl = new Uri(Url);
+				var baseUrl = new Uri(Url);
 
 				if (!string.IsNullOrWhiteSpace(BaseUrl))
 					baseUrl = new Uri(BaseUrl);
 
-				credentials = new CredentialCache();
-				credentials.Add(baseUrl, "Basic", new NetworkCredential(Username, Password));
+				Credentials = new CredentialCache
+				{
+					{baseUrl, "Basic", new NetworkCredential(Username, Password)}
+				};
 
 				if (!string.IsNullOrWhiteSpace(Domain))
 				{
-					credentials.Add(baseUrl, "NTLM", new NetworkCredential(Username, Password, Domain));
-					credentials.Add(baseUrl, "Digest", new NetworkCredential(Username, Password, Domain));
+					Credentials.Add(baseUrl, "NTLM", new NetworkCredential(Username, Password, Domain));
+					Credentials.Add(baseUrl, "Digest", new NetworkCredential(Username, Password, Domain));
 				}
 			}
 			if (IgnoreCertErrors)
 			{
 				logger.Info("Ignoring Certificate Validation Check Errors");
-				ServicePointManager.ServerCertificateValidationCallback =
-					new System.Net.Security.RemoteCertificateValidationCallback(delegate { return true; });
+				ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
 			}
 		}
 
@@ -124,7 +125,7 @@ namespace Peach.Pro.Core.Publishers
 					break;
 				case "Header":
 					var key = CleanHeaderValue(ReadString(args[0]));
-					var value =  CleanHeaderValue(ReadString(args[1]));
+					var value = CleanHeaderValue(ReadString(args[1]));
 					Headers[key] = value;
 					break;
 			}
@@ -132,9 +133,11 @@ namespace Peach.Pro.Core.Publishers
 			return null;
 		}
 
-		char [] InvalidParamChars = new char[] { 
-        '(', ')', '<', '>', '@', ',', ';', ':', '\\', '"', '\'', '/', '[', ']', '?', '=', 
-        '{', '}', ' ', '\t', '\r', '\n'
+		static readonly char[] InvalidParamChars =
+		{ 
+			'(', ')', '<', '>', '@', ',', ';', ':', 
+			'\\', '"', '\'', '/', '[', ']', '?', '=', 
+			'{', '}', ' ', '\t', '\r', '\n'
 		};
 
 
@@ -147,13 +150,12 @@ namespace Peach.Pro.Core.Publishers
 		{
 			var sb = new StringBuilder(str.Length);
 
-			for(int i = 0; i<str.Length;i++)
+			foreach (var c in str)
 			{
-				//char c = (char)('\x00ff' & str[i]);
-				char c = (char)str[i];
-				if (System.Array.IndexOf(InvalidParamChars, str[i]) == -1 && !((c == '\x007f') || ((c < ' ') && (c != '\t'))))
+				if (Array.IndexOf(InvalidParamChars, c) == -1 &&
+					!((c == '\x007f') || ((c < ' ') && (c != '\t'))))
 				{
-					sb.Append(str[i]);
+					sb.Append(c);
 				}
 			}
 
@@ -192,7 +194,7 @@ namespace Peach.Pro.Core.Publishers
 			}
 
 			// Send request with data as body.
-			Uri url = null;
+			Uri url;
 
 			try
 			{
@@ -200,20 +202,42 @@ namespace Peach.Pro.Core.Publishers
 				if (!string.IsNullOrWhiteSpace(Query))
 					url = new Uri(Url + "?" + Query);
 			}
-			catch (System.UriFormatException ex)
+			catch (UriFormatException ex)
 			{
 				throw new SoftException(ex);
 			}
 
-			var request = (HttpWebRequest)HttpWebRequest.Create(url);
+			Exception caught = null;
+			Retry.Backoff(TimeSpan.FromSeconds(1), 30, () =>
+			{
+				try
+				{
+					_client = TryCreateClient(url, data);
+				}
+				catch(SoftException softEx)
+				{
+					caught = softEx;
+				}
+			});
+
+			if (caught != null)
+				throw caught;
+
+			_clientName = url.ToString();
+
+			StartClient();
+		}
+
+		private Stream TryCreateClient(Uri url, BitwiseStream data)
+		{
+			var request = (HttpWebRequest)WebRequest.Create(url);
 			request.Method = Method;
 
 			if (Cookies)
 				request.CookieContainer = CookieJar;
 
-			if (credentials != null)
-				request.Credentials = credentials;
-
+			if (Credentials != null)
+				request.Credentials = Credentials;
 
 			foreach (var kv in Headers)
 			{
@@ -254,10 +278,7 @@ namespace Peach.Pro.Core.Publishers
 				throw new SoftException(ex);
 			}
 
-			_client = Response.GetResponseStream();
-			_clientName = url.ToString();
-
-			StartClient();
+			return Response.GetResponseStream();
 		}
 
 		protected override void OnClose()
@@ -279,5 +300,3 @@ namespace Peach.Pro.Core.Publishers
 
 	}
 }
-
-// END

@@ -60,7 +60,9 @@ namespace PitTester
 
 				test.agents.Clear();
 
-				var data = testData.Tests.Where(t => t.Name == test.Name).First();
+				var data = testData.Tests.FirstOrDefault(t => t.Name == test.Name);
+				if (data == null)
+					throw new PeachException("Error, no test definition found for pit test named '{0}'.".Fmt(test.Name));
 
 				var logger = new TestLogger(data, testData.Ignores.Select(i => i.Xpath));
 
@@ -98,7 +100,7 @@ namespace PitTester
 
 					do
 					{
-						var setElement = ((PeachXPathNavigator)iter.Current).currentNode as DataElement;
+						var setElement = ((PeachXPathNavigator)iter.Current).CurrentNode as DataElement;
 						if (setElement == null)
 							throw new PeachException("Error, slurp setXpath did not return a Data Element. [" + slurp.SetXpath + "]");
 

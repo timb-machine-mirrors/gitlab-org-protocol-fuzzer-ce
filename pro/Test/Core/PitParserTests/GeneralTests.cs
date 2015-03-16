@@ -674,7 +674,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, the hex value of Blob 'DM.blob' must contain an even number of characters.")]
+		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, the hex value of Blob 'DM.blob' must contain an even number of characters: 00a")]
 		public void TestBadHexValueType1()
 		{
 			string xml = @"
@@ -689,7 +689,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, the value of Blob 'DM.blob' contains invalid hex characters.")]
+		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, the value of Blob 'DM.blob' contains invalid hex characters: 00aq")]
 		public void TestBadHexValueType2()
 		{
 			string xml = @"

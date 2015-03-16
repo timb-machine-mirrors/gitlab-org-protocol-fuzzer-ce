@@ -315,7 +315,7 @@ namespace Peach.Pro.Test.Core
 			if (!iter.MoveNext())
 				Assert.Fail();
 
-			DataElement valueElement = ((PeachXPathNavigator)iter.Current).currentNode as DataElement;
+			DataElement valueElement = ((PeachXPathNavigator)iter.Current).CurrentNode as DataElement;
 			if (valueElement == null)
 				Assert.Fail();
 
@@ -330,7 +330,7 @@ namespace Peach.Pro.Test.Core
 			int count = 0;
 			do
 			{
-				var setElement = ((PeachXPathNavigator)iter.Current).currentNode as DataElement;
+				var setElement = ((PeachXPathNavigator)iter.Current).CurrentNode as DataElement;
 				if (setElement == null)
 					Assert.Fail();
 

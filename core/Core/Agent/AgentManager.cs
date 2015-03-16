@@ -133,10 +133,13 @@ namespace Peach.Core.Agent
 				Logger.Trace("StopAllMonitors: {0}", agent.Name);
 				Context.OnStopAllMonitors(agent);
 				Guard(agent, "StopAllMonitors", a => a.StopAllMonitors());
-			}
 
-			foreach (var agent in _agents.Reverse())
-			{
+				// Perform AgentDisconnect here instead of another loop around agents
+				// after all monitors have been stopped.
+				// Consider the case where a LocalAgent starts a VM and a RemoteAgent
+				// is started inside the newly created VM.
+				// When stopping, we need to ensure that the RemoteAgent is
+				// disconnected *before* the VM monitor is stopped.
 				Logger.Trace("AgentDisconnect: {0}", agent.Name);
 				Context.OnAgentDisconnect(agent);
 				Guard(agent, "Shutdown", a => a.AgentDisconnect());
