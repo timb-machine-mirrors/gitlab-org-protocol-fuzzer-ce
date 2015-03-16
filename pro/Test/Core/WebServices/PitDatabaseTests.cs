@@ -191,7 +191,13 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var cfg2 = db.GetConfigByUrl(imgCopy.PitUrl);
 			Assert.NotNull(cfg2);
-			Assert.AreEqual(0, cfg2.Count);
+			Assert.AreEqual(3, cfg2.Count);
+
+			// Should include system defines
+
+			Assert.AreEqual("Peach.Pwd", cfg2[0].Key);
+			Assert.AreEqual("Peach.Cwd", cfg2[1].Key);
+			Assert.AreEqual("PitLibraryPath", cfg2[2].Key);
 		}
 
 		[Test]
