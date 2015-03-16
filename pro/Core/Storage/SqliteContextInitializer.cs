@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
 using System.Linq;
-using Peach.Core;
 using System.Reflection;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
@@ -19,7 +18,6 @@ namespace Peach.Pro.Core.Storage
 		where T : DbContext
 	{
 		bool _dbExists;
-		HashSet<Type> _visited = new HashSet<Type>();
 		DbModelBuilder _modelBuilder;
 
 		public SqliteContextInitializer(string dbPath, DbModelBuilder modelBuilder)
@@ -108,14 +106,14 @@ namespace Peach.Pro.Core.Storage
 						}
 					}
 
-					defs.Add(columnTmpl.Fmt(p.Name, p.TypeName, string.Join(" ", decls)));
+					defs.Add(string.Format(columnTmpl, p.Name, p.TypeName, string.Join(" ", decls)));
 				}
 
 				// primary keys
 				if (type.KeyProperties.Any())
 				{
 					var keys = type.KeyProperties.Select(x => x.Name);
-					defs.Add(primaryKeyTmpl.Fmt(string.Join(", ", keys)));
+					defs.Add(string.Format(primaryKeyTmpl, string.Join(", ", keys)));
 				}
 
 				// foreign keys
@@ -125,7 +123,7 @@ namespace Peach.Pro.Core.Storage
 					{
 						var thisKeys = assoc.Constraint.ToProperties.Select(x => x.Name);
 						var thatKeys = assoc.Constraint.FromProperties.Select(x => x.Name);
-						defs.Add(foreignKeyTmpl.Fmt(
+						defs.Add(string.Format(foreignKeyTmpl,
 							string.Join(", ", thisKeys),
 							assoc.Constraint.FromRole.Name,
 							string.Join(", ", thatKeys)));
@@ -133,7 +131,7 @@ namespace Peach.Pro.Core.Storage
 				}
 
 				// create table
-				var sql = tableTmpl.Fmt(type.Name, string.Join(",\n", defs));
+				var sql = string.Format(tableTmpl, type.Name, string.Join(",\n", defs));
 				db.ExecuteSqlCommand(sql);
 			}
 
@@ -141,7 +139,7 @@ namespace Peach.Pro.Core.Storage
 			foreach (var index in indicies.Values)
 			{
 				var columns = string.Join(", ", index.Columns);
-				var sql = indexTmpl.Fmt(index.Name, index.Table, columns);
+				var sql = string.Format(indexTmpl, index.Name, index.Table, columns);
 				db.ExecuteSqlCommand(sql);
 			}
 		}
