@@ -17,6 +17,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		internal const string PublisherPath = "/pa/publisher";
 		internal const string MonitorPath = "/pa/agent";
 		internal const string FilePath = "/pa/file";
+		internal const string LogPath = "/pa/log";
 
 		public const ushort DefaultPort = 9001;
 
@@ -140,16 +141,18 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				}
 			}
 
-			if (Started != null)
-				Started(this, EventArgs.Empty);
-
 			try
 			{
-				using (new MonitorHandler(_listener.Routes))
+				using (new LogHandler(_listener.Routes))
 				{
-					using (new PublisherHandler(_listener.Routes))
+					using (new MonitorHandler(_listener.Routes))
 					{
-						_listener.Start();
+						using (new PublisherHandler(_listener.Routes))
+						{
+							if (Started != null)
+								Started(this, EventArgs.Empty);
+							_listener.Start();
+						}
 					}
 				}
 			}

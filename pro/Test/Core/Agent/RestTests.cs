@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
@@ -9,6 +10,9 @@ using Peach.Core.Agent;
 using Peach.Core.IO;
 using Peach.Core.Test;
 using Peach.Pro.Core.Agent.Channels.Rest;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
 
 namespace Peach.Pro.Test.Core.Agent
 {
@@ -21,13 +25,26 @@ namespace Peach.Pro.Test.Core.Agent
 		 *    This is needed to clean up /pa/file/{id} resources from GetMonitorData.
 		 */
 
+		private Exception _error;
+		private AutoResetEvent _event;
+		private Thread _thread;
+		private Server _server;
+		private Uri _uri;
+		private LogCollector _collector;
+		private LoggingRule _rule;
+
 		private void StartServer()
 		{
 			_event = new AutoResetEvent(false);
 
 			_server = new Server();
 
-			_server.Started += (s, e) => _event.Set();
+			_server.Started += (s, e) =>
+			{
+				_event.Set();
+				// raise the odds that the LogSink will have to retry
+				Thread.Sleep(50);
+			};
 
 			_thread = new Thread(() =>
 			{
@@ -43,19 +60,32 @@ namespace Peach.Pro.Test.Core.Agent
 			});
 
 			_thread.Start();
-			_event.WaitOne();
+			var didStart = _event.WaitOne(TimeSpan.FromSeconds(10));
+			Assert.IsTrue(didStart, "Timeout waiting for server to start");
 
-			// Trigger faulire if we couldn't start
+			// Trigger failure if we couldn't start
 			if (_error != null)
 				TearDown();
 
 			Assert.NotNull(_server.Uri);
+
+			// use 127.0.0.1 as host to avoid DNS lookups
+			var ub = new UriBuilder(_server.Uri);
+			ub.Host = "127.0.0.1";
+			_uri = ub.Uri;
 		}
 
-		private Exception _error;
-		private AutoResetEvent _event;
-		private Thread _thread;
-		private Server _server;
+		[SetUp]
+		public void SetUp()
+		{
+			_collector = new LogCollector { Name = "Collector" };
+			_rule = new LoggingRule("Agent.*", LogLevel.Info, _collector);
+
+			var config = LogManager.Configuration;
+			config.AddTarget(_collector.Name, _collector);
+			config.LoggingRules.Add(_rule);
+			LogManager.Configuration = config;
+		}
 
 		[TearDown]
 		public void TearDown()
@@ -68,7 +98,8 @@ namespace Peach.Pro.Test.Core.Agent
 
 			if (_thread != null)
 			{
-				_thread.Join();
+				if (!_thread.Join(TimeSpan.FromSeconds(10)))
+					_thread.Abort();
 				_thread = null;
 			}
 
@@ -80,6 +111,17 @@ namespace Peach.Pro.Test.Core.Agent
 
 			var err = _error;
 			_error = null;
+
+			if (_collector != null)
+			{
+				var config = LogManager.Configuration;
+				config.LoggingRules.Remove(_rule);
+				config.RemoveTarget(_collector.Name);
+				LogManager.Configuration = config;
+
+				_collector.Dispose();
+				_collector = null;
+			}
 
 			if (err != null)
 				throw new PeachException(err.Message, err);
@@ -100,7 +142,7 @@ namespace Peach.Pro.Test.Core.Agent
 		{
 			StartServer();
 
-			var cli = new Client(null, _server.Uri.ToString(), null);
+			var cli = new Client(null, _uri.ToString(), null);
 
 			cli.AgentConnect();
 			cli.StartMonitor("mon", "TcpPort", new Dictionary<string, string>
@@ -130,7 +172,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 			try
 			{
-				var cli = new Client("cli", _server.Uri.ToString(), null);
+				var cli = new Client("cli", _uri.ToString(), null);
 
 				cli.AgentConnect();
 				cli.StartMonitor("mon", "SaveFile", new Dictionary<string, string>
@@ -245,7 +287,7 @@ namespace Peach.Pro.Test.Core.Agent
 		{
 			StartServer();
 
-			var cli = new Client(null, _server.Uri.ToString(), null);
+			var cli = new Client(null, _uri.ToString(), null);
 
 			cli.AgentConnect();
 
@@ -277,7 +319,7 @@ namespace Peach.Pro.Test.Core.Agent
 			{
 				File.WriteAllText(tmp, "Hello World");
 
-				var cli = new Client(null, _server.Uri.ToString(), null);
+				var cli = new Client(null, _uri.ToString(), null);
 
 				cli.AgentConnect();
 
@@ -364,7 +406,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 			try
 			{
-				var cli = new Client(null, _server.Uri.ToString(), null);
+				var cli = new Client(null, _uri.ToString(), null);
 
 				cli.AgentConnect();
 
@@ -408,7 +450,6 @@ namespace Peach.Pro.Test.Core.Agent
 			}
 		}
 
-
 		[Test]
 		public void Call()
 		{
@@ -424,7 +465,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 			try
 			{
-				var cli = new Client(null, _server.Uri.ToString(), null);
+				var cli = new Client(null, _uri.ToString(), null);
 
 				cli.AgentConnect();
 
@@ -478,7 +519,6 @@ namespace Peach.Pro.Test.Core.Agent
 				};
 
 				Assert.That(contents, Is.EqualTo(expected));
-
 			}
 			finally
 			{
@@ -498,7 +538,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 			try
 			{
-				var cli = new Client(null, _server.Uri.ToString(), null);
+				var cli = new Client(null, _uri.ToString(), null);
 
 				cli.AgentConnect();
 
@@ -537,7 +577,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 			StartServer();
 
-			var cli = new Client(null, _server.Uri.ToString(), null);
+			var cli = new Client(null, _uri.ToString(), null);
 
 			cli.AgentConnect();
 
@@ -553,7 +593,7 @@ namespace Peach.Pro.Test.Core.Agent
 					new BitStream(Encoding.ASCII.GetBytes("Hello"))
 				};
 
-				var ex = Assert.Throws<PeachException>(() =>pub.Call(method, args));
+				var ex = Assert.Throws<PeachException>(() => pub.Call(method, args));
 
 				Assert.AreEqual("The Rest publisher does not support call actions when run on remote agents.", ex.Message);
 			}
@@ -574,103 +614,128 @@ namespace Peach.Pro.Test.Core.Agent
 
 			StartServer();
 
-			var tmp = Path.GetTempFileName();
+			var cli = new Client("Agent1", _uri.ToString(), null);
 
-			try
+			cli.AgentConnect();
+			cli.StartMonitor("mon1", "Null", new Dictionary<string, string>
 			{
-				var cli = new Client(null, _server.Uri.ToString(), null);
-
-				cli.AgentConnect();
-				cli.StartMonitor("mon1", "Null", new Dictionary<string, string>
-				{
-					{ "LogFile", tmp },
-				});
-				cli.StartMonitor("mon2", "Null", new Dictionary<string, string>
-				{
-					{ "LogFile", tmp },
-				});
-				cli.SessionStarting();
-
-				cli.IterationStarting(new IterationStartingArgs());
-				cli.IterationFinished();
-
-				var actual = File.ReadAllLines(tmp);
-				var expected = new List<string>
-				{
-					"mon1.StartMonitor",
-					"mon2.StartMonitor",
-					"mon1.SessionStarting",
-					"mon2.SessionStarting",
-					"mon1.IterationStarting False False",
-					"mon2.IterationStarting False False",
-					"mon2.IterationFinished",
-					"mon1.IterationFinished",
-				};
-
-				Assert.That(actual, Is.EqualTo(expected));
-
-				// Simulate disconnect will gracefully shut down the remote monitors
-				// But leave the client in a state that simulates a disconnect
-				cli.SimulateDisconnect();
-
-				actual = File.ReadAllLines(tmp);
-				expected.AddRange(new[]
-				{
-					"mon2.SessionFinished",
-					"mon1.SessionFinished",
-					"mon2.StopMonitor",
-					"mon1.StopMonitor"
-				});
-
-				Assert.That(actual, Is.EqualTo(expected));
-
-				Assert.False(cli.DetectedFault(), "Should not detect a fault");
-				var data1 = cli.GetMonitorData();
-				Assert.AreEqual(0, data1.Count(), "Should not have monitor data");
-
-				// DetectedFault and GetMonitorData will not get remoted
-				actual = File.ReadAllLines(tmp);
-				Assert.That(actual, Is.EqualTo(expected));
-
-				// The next call to iteration starting will trigger a reconnect
-
-				cli.IterationStarting(new IterationStartingArgs());
-				cli.IterationFinished();
-				Assert.False(cli.DetectedFault(), "Should not detect a fault");
-				var data2 = cli.GetMonitorData();
-				Assert.AreEqual(0, data2.Count(), "Should not have monitor data");
-				cli.SessionFinished();
-				cli.StopAllMonitors();
-				cli.AgentDisconnect();
-
-				actual = File.ReadAllLines(tmp);
-				expected.AddRange(new[]
-				{
-
-					"mon1.StartMonitor",
-					"mon2.StartMonitor",
-					"mon1.SessionStarting",
-					"mon2.SessionStarting",
-					"mon1.IterationStarting False False",
-					"mon2.IterationStarting False False",
-					"mon2.IterationFinished",
-					"mon1.IterationFinished",
-					"mon1.DetectedFault",
-					"mon2.DetectedFault",
-					"mon1.GetMonitorData",
-					"mon2.GetMonitorData",
-					"mon2.SessionFinished",
-					"mon1.SessionFinished",
-					"mon2.StopMonitor",
-					"mon1.StopMonitor"
-				});
-
-				Assert.That(actual, Is.EqualTo(expected));
-			}
-			finally
+				{ "UseNLog", "true" },
+			});
+			cli.StartMonitor("mon2", "Null", new Dictionary<string, string>
 			{
-				File.Delete(tmp);
-			}
+				{ "UseNLog", "true" },
+			});
+			cli.SessionStarting();
+
+			cli.IterationStarting(new IterationStartingArgs());
+
+			var expected = new List<string>
+			{
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StartMonitor",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StartMonitor",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionStarting",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.SessionStarting",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationStarting False False",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationStarting False False",
+			};
+
+			Thread.Sleep(500); // allow time for logs to collect
+			Assert.That(_collector.Messages, Is.EqualTo(expected));
+
+			// Simulate disconnect that occurs when the target
+			// crashes during fuzzing.
+			// This will gracefully shut down the remote monitors
+			// But leave the client in a state that simulates a disconnect
+
+			cli.SimulateDisconnect();
+
+			expected.AddRange(new[]
+			{
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StopMonitor",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StopMonitor"
+			});
+
+			Thread.Sleep(500); // allow time for logs to collect
+			Assert.That(_collector.Messages, Is.EqualTo(expected));
+
+			var ex = Assert.Throws<WebException>(cli.IterationFinished);
+			StringAssert.Contains("(404) Not Found", ex.Message);
+
+			Assert.False(cli.DetectedFault(), "Should not detect a fault");
+			var data1 = cli.GetMonitorData();
+			Assert.AreEqual(0, data1.Count(), "Should not have monitor data");
+
+			// DetectedFault and GetMonitorData will not get remoted
+			Assert.That(_collector.Messages, Is.EqualTo(expected));
+
+			// The calls to IterationFinished/DetectedFault
+			// don't do anything, but the next call
+			// to iteration starting will trigger a reconnect
+
+			cli.IterationStarting(new IterationStartingArgs());
+			cli.IterationFinished();
+			Assert.False(cli.DetectedFault(), "Should not detect a fault");
+			var data2 = cli.GetMonitorData();
+			Assert.AreEqual(0, data2.Count(), "Should not have monitor data");
+
+			expected.AddRange(new[]
+			{
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StartMonitor",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StartMonitor",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionStarting",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.SessionStarting",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationStarting False False",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationStarting False False",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationFinished",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationFinished",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.DetectedFault",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.DetectedFault",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.GetMonitorData",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.GetMonitorData",
+			});
+
+			Thread.Sleep(500); // allow time for logs to collect
+			Assert.That(_collector.Messages, Is.EqualTo(expected));
+
+			// Simulate an agent disconnect that can occur if a fault
+			// is detected and a virtual machine target is restarted
+			// This presents itself as a 404 in IterationStarting
+
+			cli.SimulateDisconnect();
+
+			expected.AddRange(new[]
+			{
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StopMonitor",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StopMonitor"
+			});
+
+			Thread.Sleep(500); // allow time for logs to collect
+			Assert.That(_collector.Messages, Is.EqualTo(expected));
+
+			cli.IterationStarting(new IterationStartingArgs());
+			cli.IterationFinished();
+			cli.SessionFinished();
+			cli.StopAllMonitors();
+			cli.AgentDisconnect();
+
+			expected.AddRange(new[]
+			{
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StartMonitor",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StartMonitor",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionStarting",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.SessionStarting",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationStarting False False",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationStarting False False",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationFinished",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationFinished",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.SessionFinished",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionFinished",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StopMonitor",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StopMonitor"
+			});
+
+			Thread.Sleep(500); // allow time for logs to collect
+			Assert.That(_collector.Messages, Is.EqualTo(expected));
 		}
 
 		[Test]
@@ -681,7 +746,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 			StartServer();
 
-			var cli = new Client(null, _server.Uri.ToString(), null);
+			var cli = new Client(null, _uri.ToString(), null);
 
 			cli.AgentConnect();
 
@@ -696,6 +761,172 @@ namespace Peach.Pro.Test.Core.Agent
 			StringAssert.IsMatch("Publisher 'Tcp' could not set parameter 'Port'.", ex.Message);
 
 			cli.AgentDisconnect();
+		}
+
+		[Test]
+		public void TestSessionFinished()
+		{
+			// Behaivor of peach 3.4 is depth first init and breadth first shutdown
+			// Ensure rest agent works this way
+
+			var agent2 = new RestTests();
+			var tmp = Path.GetTempFileName();
+
+			try
+			{
+				StartServer();
+				agent2.StartServer();
+
+				var mgr = new AgentManager(new RunContext());
+
+				mgr.Connect(new Peach.Core.Dom.Agent
+				{
+					Name = "agent1",
+					location = _uri.ToString(),
+					monitors = new NamedCollection<Peach.Core.Dom.Monitor>
+					{
+						new Peach.Core.Dom.Monitor
+						{
+							Name = "a1mon1",
+							cls = "Null",
+							parameters = new Dictionary<string,Variant>
+							{
+								{ "LogFile", new Variant(tmp) },
+							}
+						},
+						new Peach.Core.Dom.Monitor
+						{
+							Name = "a1mon2",
+							cls = "Null",
+							parameters = new Dictionary<string,Variant>
+							{
+								{ "LogFile", new Variant(tmp) },
+							}
+						},
+					}
+				});
+
+				mgr.Connect(new Peach.Core.Dom.Agent
+				{
+					Name = "agent2",
+					location = agent2._uri.ToString(),
+					monitors = new NamedCollection<Peach.Core.Dom.Monitor>
+					{
+						new Peach.Core.Dom.Monitor
+						{
+							Name = "a2mon1",
+							cls = "Null",
+							parameters = new Dictionary<string,Variant>
+							{
+								{ "LogFile", new Variant(tmp) },
+							}
+						},
+						new Peach.Core.Dom.Monitor
+						{
+							Name = "a2mon2",
+							cls = "Null",
+							parameters = new Dictionary<string,Variant>
+							{
+								{ "LogFile", new Variant(tmp) },
+							}
+						},
+					}
+				});
+
+				mgr.IterationStarting(false, false);
+
+				mgr.IterationFinished();
+
+				mgr.Dispose();
+
+				var actual = File.ReadAllLines(tmp);
+				var expected = new[]
+				{
+					"a1mon1.StartMonitor",
+					"a1mon2.StartMonitor",
+					"a1mon1.SessionStarting",
+					"a1mon2.SessionStarting",
+
+					"a2mon1.StartMonitor",
+					"a2mon2.StartMonitor",
+					"a2mon1.SessionStarting",
+					"a2mon2.SessionStarting",
+
+					"a1mon1.IterationStarting False False",
+					"a1mon2.IterationStarting False False",
+					"a2mon1.IterationStarting False False",
+					"a2mon2.IterationStarting False False",
+					"a2mon2.IterationFinished",
+					"a2mon1.IterationFinished",
+					"a1mon2.IterationFinished",
+					"a1mon1.IterationFinished",
+
+					"a2mon2.SessionFinished",
+					"a2mon1.SessionFinished",
+					"a1mon2.SessionFinished",
+					"a1mon1.SessionFinished",
+
+					"a2mon2.StopMonitor",
+					"a2mon1.StopMonitor",
+					"a1mon2.StopMonitor",
+					"a1mon1.StopMonitor"
+				};
+
+				Assert.That(actual, Is.EqualTo(expected));
+
+			}
+			finally
+			{
+				File.Delete(tmp);
+				agent2.TearDown();
+			}
+		}
+
+		[Test]
+		public void TestLogging()
+		{
+			StartServer();
+
+			var cli = new Client("Agent1", _uri.ToString(), null);
+			cli.AgentConnect();
+			cli.StartMonitor("mon1", "Null", new Dictionary<string, string>
+			{
+				{ "UseNLog", "true" },
+			});
+			cli.SessionStarting();
+			cli.IterationStarting(new IterationStartingArgs());
+			cli.IterationFinished();
+			cli.SessionFinished();
+			cli.StopAllMonitors();
+			cli.AgentDisconnect();
+
+			var expected = new[]
+			{
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StartMonitor",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionStarting",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationStarting False False",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationFinished",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionFinished",
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StopMonitor",
+			};
+			Assert.That(_collector.Messages, Is.EqualTo(expected));
+		}
+
+		class LogCollector : TargetWithLayout
+		{
+			public List<string> Messages { get; private set; }
+
+			public LogCollector()
+			{
+				Messages = new List<string>();
+				Layout = "${level}|${logger}|${message}";
+			}
+
+			protected override void Write(LogEventInfo logEvent)
+			{
+				var message = Layout.Render(logEvent);
+				Messages.Add(message);
+			}
 		}
 	}
 }

@@ -19,13 +19,16 @@ def prepare_nunit_test(self):
 	self.ut_exec.extend([
 		self.env.NUNIT,
 		'-nologo',
-		'-out=%s' % self.outputs[1].abspath(),
 		'-xml=%s' % self.outputs[0].abspath(),
 	])
 
 	opts = self.generator.bld.options
 	if opts.testcase:
-		self.ut_exec.extend(['-run=%s' % opts.testcase])
+		self.ut_exec.append('-run=%s' % opts.testcase)
+	if not opts.stdout:
+		self.ut_exec.append('-out=%s' % self.outputs[1].abspath())
+	else:
+		self.ut_exec.append('-labels')
 
 	self.ut_exec.extend([ x.abspath() for x in self.inputs ])
 
@@ -113,11 +116,16 @@ class utest(Task.Task):
 		if Logs.verbose < 0:
 			stderr = stdout = Utils.subprocess.PIPE
 
-		# env = {
-		# 	'PATH': '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games',
-		# 	'MONO_LOG_LEVEL' : 'debug',
-		# }
-		proc = Utils.subprocess.Popen(self.ut_exec, cwd=cwd, stderr=stderr, stdout=stdout)#, env=env)
+		opts = self.generator.bld.options
+
+		env = {}
+		env.update(os.environ)
+		if opts.mono_debug:
+			env.update({ 'MONO_LOG_LEVEL' : 'debug' })
+		if opts.trace:
+			env.update({ 'PEACH_TRACE' : '1' })
+
+		proc = Utils.subprocess.Popen(self.ut_exec, cwd=cwd, stderr=stderr, stdout=stdout, env=env)
 		(stdout, stderr) = proc.communicate()
 
 		tup = (self.inputs[0].name, proc.returncode)
@@ -150,6 +158,9 @@ def configure(conf):
 
 def options(opt):
 	opt.add_option('--testcase', action='store', help='Name of test case/fixture to execute')
+	opt.add_option('--stdout', action='store_true', help='Send results to stdout')
+	opt.add_option('--trace', action='store_true', help='Enable trace log level')
+	opt.add_option('--mono_debug', action='store_true', help='Enable mono debug logging')
 
 class TestContext(InstallContext):
 	'''runs the unit tests'''

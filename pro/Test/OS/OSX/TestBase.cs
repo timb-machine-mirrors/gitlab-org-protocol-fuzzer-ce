@@ -3,6 +3,7 @@ using NLog.Config;
 using NLog.Targets;
 using NUnit.Framework;
 using Peach.Core;
+using System;
 
 namespace Peach.Pro.Test.OS.OSX
 {
@@ -26,7 +27,12 @@ namespace Peach.Pro.Test.OS.OSX
 			var config = new LoggingConfiguration();
 			config.AddTarget("console", consoleTarget);
 
-			var rule = new LoggingRule("*", LogLevel.Debug, consoleTarget);
+			var logLevel = LogLevel.Debug;
+			var peachTrace = Environment.GetEnvironmentVariable("PEACH_TRACE");
+			if (peachTrace == "1")
+				logLevel = LogLevel.Trace;
+
+			var rule = new LoggingRule("*", logLevel, consoleTarget);
 			config.LoggingRules.Add(rule);
 
 			LogManager.Configuration = config;

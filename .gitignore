@@ -63,3 +63,19 @@ _Resharper*
 # and rsync the folders when doing a remote build
 /docs/publishing/asciidoctor-fopub/.gradle/
 /docs/publishing/asciidoctor-fopub/build/
+
+# ignore these are root level since remote builds
+# make use of this .gitignore
+/pro/Web/[Bb]in/
+/pro/Web/[Oo]bj/
+/pro/Web/public/js/app/
+/pro/Web/public/js/test/
+/pro/Web/public/tests.html
+/pro/Web/bower_components
+/pro/Web/node_modules
+/pro/Web/.tscache
+/pro/Web/.grunt
+/pro/Web/.e2e
+/pro/Web.baseDir.ts
+/pro/Web/Gruntfile.js*
+/pro/Web/Gruntfile.min*

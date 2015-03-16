@@ -17,6 +17,7 @@ using Logger = NLog.Logger;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
+
 	[Agent("http")]
 	public class Client : AgentClient
 	{
@@ -276,6 +277,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		private ConnectResponse _connectResp;
 		private Uri _agentUri;
 		private bool _offline;
+		private LogSink _sink;
 
 		public Client(string name, string uri, string password)
 			: base(name, uri, password)
@@ -294,6 +296,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			_publishers = new List<PublisherProxy>();
 			_cookies = new CookieContainer();
+			_sink = new LogSink(name, _baseUrl);
 		}
 
 		public override void AgentConnect()
@@ -333,10 +336,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		public override void SessionFinished()
 		{
-			// AgentDisconnect calls DELETE which does SessionFinished
-
-			// Leave the publishers around a they will get cleaned up
-			// when stop() is called on the RemotePublisher
+			if (_connectResp.Messages.Contains("SessionFinished"))
+				Send("PUT", "/SessionFinished", null);
 		}
 
 		public override void StopAllMonitors()
@@ -351,6 +352,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				Send("DELETE", "", null);
 
 			_connectResp = null;
+			_sink.Stop();
 		}
 
 		public override IPublisher CreatePublisher(string pubName, string cls, Dictionary<string, string> args)
@@ -361,7 +363,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		public override void IterationStarting(IterationStartingArgs args)
 		{
 			// If any previous call failed, we need to reconnect
-			if (_offline)
+			var offline = _offline;
+			if (offline)
 				ReconnectAgent(true);
 
 			if (!_connectResp.Messages.Contains("IterationStarting"))
@@ -373,7 +376,20 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				LastWasFault = args.LastWasFault,
 			};
 
-			Send("PUT", "/IterationStarting", req);
+			try
+			{
+				Send("PUT", "/IterationStarting", req);
+			}
+			catch (WebException)
+			{
+				// If we are not offline now or we were previously offline
+				// don't try and reconnect since we just did!
+				if (!_offline || offline)
+					throw;
+
+				ReconnectAgent(true);
+				Send("PUT", "/IterationStarting", req);
+			}
 		}
 
 		public override void IterationFinished()
@@ -418,8 +434,6 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		internal void SimulateDisconnect()
 		{
 			Send("DELETE", "", null);
-
-			_offline = true;
 		}
 
 		private MonitorData MakeFault(FaultResponse.Record f)
@@ -470,6 +484,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		private void ReconnectAgent(bool log)
 		{
+			_sink.Start();
+
 			if (log)
 				Logger.Debug("Restarting all monitors on remote agent {0}", _baseUrl);
 

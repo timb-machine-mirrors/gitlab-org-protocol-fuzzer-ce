@@ -84,6 +84,12 @@ namespace Peach.Pro.OS.Linux
 
 			return pi;
 		}
+
+
+		public Process[] GetProcessesByName(string name)
+		{
+			return Process.GetProcessesByName(name);
+		}
 	}
 
 }

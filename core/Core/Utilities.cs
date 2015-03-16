@@ -261,6 +261,8 @@ namespace Peach.Core
 		private static readonly string PeachDirectory =
 			AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
 
+		public static LogLevel LogLevel { get; private set; }
+
 		/// <summary>
 		/// Configure NLog.
 		/// </summary>
@@ -273,6 +275,21 @@ namespace Peach.Core
 		/// <param name="level"></param>
 		public static void ConfigureLogging(int level)
 		{
+			switch (level)
+			{
+				case 0:
+					LogLevel = LogLevel.Info;
+					break;
+				case 1:
+					LogLevel = LogLevel.Debug;
+					break;
+				case 2:
+					LogLevel = LogLevel.Trace;
+					break;
+				default:
+					break;
+			}
+
 			if (level < 0)
 			{
 				// Need to reset configuration to null for NLog 2.0 on mono
@@ -603,15 +620,24 @@ namespace Peach.Core
 			HexDump(inputFunc, outputFunc, bytesPerLine);
 		}
 
-		public static string HexDump(Stream input, int bytesPerLine = 16)
+		public static string HexDump(Stream input, int bytesPerLine = 16, int maxOutputSize = 1024*8)
 		{
 			var sb = new StringBuilder();
 			var pos = input.Position;
 
-			HexInputFunc inputFunc = (buf, max) => input.Read(buf, 0, max);
+			HexInputFunc inputFunc = (buf, max) =>
+			{
+				var len = input.Read(buf, 0, Math.Min(max, maxOutputSize));
+				maxOutputSize -= len;
+				return len;
+			};
+
 			HexOutputFunc outputFunc = line => sb.Append(line);
 
 			HexDump(inputFunc, outputFunc, bytesPerLine);
+
+			if (input.Position != input.Length)
+				sb.AppendFormat("---- TRUNCATED (Total Length: {0} bytes) ----", input.Length);
 
 			input.Seek(pos, SeekOrigin.Begin);
 
@@ -650,6 +676,15 @@ namespace Peach.Core
 			if (bytes > 1024)
 				return (bytes / 1024.0).ToString("0.###") + " Kbytes";
 			return bytes + " Bytes";
+		}
+	}
+
+	public class ToggleEventArgs : EventArgs
+	{
+		public bool Toggle { get; set; }
+		public ToggleEventArgs(bool toggle)
+		{
+			Toggle = toggle;
 		}
 	}
 }

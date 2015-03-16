@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Renci.SshNet.Security;
@@ -20,9 +19,9 @@ namespace Renci.SshNet
     /// This class is NOT thread-safe. Do not use the same <see cref="ConnectionInfo"/> with multiple
     /// client instances.
     /// </remarks>
-    public class ConnectionInfo : IConnectionInfo
+    public class ConnectionInfo : IConnectionInfoInternal
     {
-        internal static int DEFAULT_PORT = 22;
+        internal static int DefaultPort = 22;
 
         /// <summary>
         /// Gets supported key exchange algorithms for this connection.
@@ -55,8 +54,11 @@ namespace Renci.SshNet
         public IDictionary<string, Type> CompressionAlgorithms { get; private set; }
 
         /// <summary>
-        /// Gets supported channel requests for this connection.
+        /// Gets the supported channel requests for this connection.
         /// </summary>
+        /// <value>
+        /// The supported channel requests for this connection.
+        /// </value>
         public IDictionary<string, RequestInfo> ChannelRequests { get; private set; }
 
         /// <summary>
@@ -214,8 +216,13 @@ namespace Renci.SshNet
         /// <param name="host">The host.</param>
         /// <param name="username">The username.</param>
         /// <param name="authenticationMethods">The authentication methods.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="host"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="host"/> is a zero-length string.</exception>
+        /// <exception cref="ArgumentException"><paramref name="username" /> is null, a zero-length string or contains only whitespace characters.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="authenticationMethods"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentException">No <paramref name="authenticationMethods"/> specified.</exception>
         public ConnectionInfo(string host, string username, params AuthenticationMethod[] authenticationMethods)
-            : this(host, DEFAULT_PORT, username, ProxyTypes.None, null, 0, null, null, authenticationMethods)
+            : this(host, DefaultPort, username, ProxyTypes.None, null, 0, null, null, authenticationMethods)
         {
         }
 
@@ -226,6 +233,11 @@ namespace Renci.SshNet
         /// <param name="port">The port.</param>
         /// <param name="username">The username.</param>
         /// <param name="authenticationMethods">The authentication methods.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="host"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="username" /> is null, a zero-length string or contains only whitespace characters.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="port" /> is not within <see cref="F:System.Net.IPEndPoint.MinPort" /> and <see cref="F:System.Net.IPEndPoint.MaxPort" />.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="authenticationMethods"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentException">No <paramref name="authenticationMethods"/> specified.</exception>
         public ConnectionInfo(string host, int port, string username, params AuthenticationMethod[] authenticationMethods)
             : this(host, port, username, ProxyTypes.None, null, 0, null, null, authenticationMethods)
         {
@@ -245,41 +257,43 @@ namespace Renci.SshNet
         /// <param name="proxyUsername">The proxy username.</param>
         /// <param name="proxyPassword">The proxy password.</param>
         /// <param name="authenticationMethods">The authentication methods.</param>
-        /// <exception cref="System.ArgumentException">host</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">proxyPort</exception>
-        /// <exception cref="ArgumentException"><paramref name="host" /> is invalid, or <paramref name="username" /> is null or contains whitespace characters.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="host"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="username" /> is null, a zero-length string or contains only whitespace characters.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="port" /> is not within <see cref="F:System.Net.IPEndPoint.MinPort" /> and <see cref="F:System.Net.IPEndPoint.MaxPort" />.</exception>
-        /// <exception cref="ArgumentException"><paramref name="host" /> is invalid, or <paramref name="username" /> is null or contains whitespace characters.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="proxyType"/> is not <see cref="ProxyTypes.None"/> and <paramref name="proxyHost" /> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="proxyType"/> is not <see cref="ProxyTypes.None"/> and <paramref name="proxyPort" /> is not within <see cref="F:System.Net.IPEndPoint.MinPort" /> and <see cref="F:System.Net.IPEndPoint.MaxPort" />.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="authenticationMethods"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentException">No <paramref name="authenticationMethods"/> specified.</exception>
         public ConnectionInfo(string host, int port, string username, ProxyTypes proxyType, string proxyHost, int proxyPort, string proxyUsername, string proxyPassword, params AuthenticationMethod[] authenticationMethods)
         {
-            if (!host.IsValidHost())
-                throw new ArgumentException("host");
+            if (host == null)
+                throw new ArgumentNullException("host");
+            port.ValidatePort("port");
+
+            if (username == null)
+                throw new ArgumentNullException("username");
+            if (username.All(char.IsWhiteSpace))
+                throw new ArgumentException("Cannot be empty or contain only whitespace.", "username");
 
             if (proxyType != ProxyTypes.None)
             {
-                if (string.IsNullOrEmpty(proxyHost) && !proxyHost.IsValidHost())
-                    throw new ArgumentException("proxyHost");
-
-                if (!proxyPort.IsValidPort())
-                    throw new ArgumentOutOfRangeException("proxyPort");
+                if (proxyHost == null)
+                    throw new ArgumentNullException("proxyHost");
+                proxyPort.ValidatePort("proxyPort");
             }
 
-            if (!port.IsValidPort())
-                throw new ArgumentOutOfRangeException("port");
-
-            if (username.IsNullOrWhiteSpace())
-                throw new ArgumentException("username");
-
-            if (authenticationMethods == null || authenticationMethods.Length < 1)
-                throw new ArgumentException("authenticationMethods");
+            if (authenticationMethods == null)
+                throw new ArgumentNullException("authenticationMethods");
+            if (!authenticationMethods.Any())
+                throw new ArgumentException("At least one authentication method should be specified.", "authenticationMethods");
 
             //  Set default connection values
-            this.Timeout = TimeSpan.FromSeconds(30);
-            this.RetryAttempts = 10;
-            this.MaxSessions = 10;
-            this.Encoding = Encoding.UTF8;
+            Timeout = TimeSpan.FromSeconds(30);
+            RetryAttempts = 10;
+            MaxSessions = 10;
+            Encoding = Encoding.UTF8;
 
-            this.KeyExchangeAlgorithms = new Dictionary<string, Type>
+            KeyExchangeAlgorithms = new Dictionary<string, Type>
                 {
                     {"diffie-hellman-group-exchange-sha256", typeof (KeyExchangeDiffieHellmanGroupExchangeSha256)},
                     {"diffie-hellman-group-exchange-sha1", typeof (KeyExchangeDiffieHellmanGroupExchangeSha1)},
@@ -293,7 +307,7 @@ namespace Renci.SshNet
                     //"gss-gex-sha1-toWM5Slw5Ew8Mqkay+al2g==" - WinSSHD
                 };
 
-            this.Encryptions = new Dictionary<string, CipherInfo>
+            Encryptions = new Dictionary<string, CipherInfo>
                 {
                     {"aes256-ctr", new CipherInfo(256, (key, iv) => new AesCipher(key, new CtrCipherMode(iv), null))},
                     {"3des-cbc", new CipherInfo(192, (key, iv) => new TripleDesCipher(key, new CbcCipherMode(iv), null))},
@@ -318,7 +332,7 @@ namespace Renci.SshNet
                     {"aes192-ctr", new CipherInfo(192, (key, iv) => new AesCipher(key, new CtrCipherMode(iv), null))},
                 };
 
-            this.HmacAlgorithms = new Dictionary<string, HashInfo>
+            HmacAlgorithms = new Dictionary<string, HashInfo>
                 {
                     {"hmac-md5", new HashInfo(16*8, key => new HMac<MD5Hash>(key))},
                     {"hmac-sha1", new HashInfo(20*8, key => new HMac<SHA1Hash>(key))},
@@ -334,7 +348,7 @@ namespace Renci.SshNet
                     //{"none", typeof(...)},
                 };
 
-            this.HostKeyAlgorithms = new Dictionary<string, Func<byte[], KeyHostAlgorithm>>
+            HostKeyAlgorithms = new Dictionary<string, Func<byte[], KeyHostAlgorithm>>
                 {
                     {"ssh-rsa", data => new KeyHostAlgorithm("ssh-rsa", new RsaKey(), data)},
                     {"ssh-dss", data => new KeyHostAlgorithm("ssh-dss", new DsaKey(), data)},
@@ -347,14 +361,14 @@ namespace Renci.SshNet
                     //{"pgp-sign-dss", () => { ... },
                 };
 
-            this.CompressionAlgorithms = new Dictionary<string, Type>
+            CompressionAlgorithms = new Dictionary<string, Type>
                 {
                     //{"zlib@openssh.com", typeof(ZlibOpenSsh)}, 
                     //{"zlib", typeof(Zlib)}, 
                     {"none", null},
                 };
 
-            this.ChannelRequests = new Dictionary<string, RequestInfo>
+            ChannelRequests = new Dictionary<string, RequestInfo>
                 {
                     {EnvironmentVariableRequestInfo.NAME, new EnvironmentVariableRequestInfo()},
                     {ExecRequestInfo.NAME, new ExecRequestInfo()},
@@ -371,17 +385,17 @@ namespace Renci.SshNet
                     {KeepAliveRequestInfo.NAME, new KeepAliveRequestInfo()},
                 };
 
-            this.Host = host;
-            this.Port = port;
-            this.Username = username;
+            Host = host;
+            Port = port;
+            Username = username;
 
-            this.ProxyType = proxyType;
-            this.ProxyHost = proxyHost;
-            this.ProxyPort = proxyPort;
-            this.ProxyUsername = proxyUsername;
-            this.ProxyPassword = proxyPassword;
+            ProxyType = proxyType;
+            ProxyHost = proxyHost;
+            ProxyPort = proxyPort;
+            ProxyUsername = proxyUsername;
+            ProxyPassword = proxyPassword;
 
-            this.AuthenticationMethods = authenticationMethods;
+            AuthenticationMethods = authenticationMethods;
         }
 
         /// <summary>
@@ -390,13 +404,20 @@ namespace Renci.SshNet
         /// <param name="session">The session to be authenticated.</param>
         /// <exception cref="ArgumentNullException"><paramref name="session"/> is null.</exception>
         /// <exception cref="SshAuthenticationException">No suitable authentication method found to complete authentication, or permission denied.</exception>
-        public void Authenticate(Session session)
+        internal void Authenticate(ISession session)
         {
+            IsAuthenticated = false;
             var clientAuthentication = new ClientAuthentication();
             clientAuthentication.Authenticate(this, session);
+            IsAuthenticated = true;
         }
 
-        void IConnectionInfo.UserAuthenticationBannerReceived(object sender, MessageEventArgs<BannerMessage> e)
+        /// <summary>
+        /// Signals that an authentication banner message was received from the server.
+        /// </summary>
+        /// <param name="sender">The session in which the banner message was received.</param>
+        /// <param name="e">The banner message.{</param>
+        void IConnectionInfoInternal.UserAuthenticationBannerReceived(object sender, MessageEventArgs<BannerMessage> e)
         {
             var authenticationBanner = AuthenticationBanner;
             if (authenticationBanner != null)
@@ -406,12 +427,12 @@ namespace Renci.SshNet
             }
         }
 
-        IAuthenticationMethod IConnectionInfo.CreateNoneAuthenticationMethod()
+        IAuthenticationMethod IConnectionInfoInternal.CreateNoneAuthenticationMethod()
         {
             return new NoneAuthenticationMethod(Username);
         }
 
-        IEnumerable<IAuthenticationMethod> IConnectionInfo.AuthenticationMethods
+        IEnumerable<IAuthenticationMethod> IConnectionInfoInternal.AuthenticationMethods
         {
             get { return AuthenticationMethods.Cast<IAuthenticationMethod>(); }
         }

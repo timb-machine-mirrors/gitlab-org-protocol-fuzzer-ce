@@ -63,6 +63,10 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 		public LinuxCrashMonitor(string name)
 			: base(name)
 		{
+			// TODO
+			// 1) Remove dependency on PeachLinuxCrashHandler.exe
+			// 2) Use embedded resource PeachCrashHandler.sh
+			// 3) Maybe move the install/uninstall logic into the script
 		}
 
 		public override void  StopMonitor()

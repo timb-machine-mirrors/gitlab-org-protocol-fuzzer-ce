@@ -1,10 +1,786 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Xml.XPath;
 
 namespace Peach.Core.Dom.XPath
 {
+	public class PeachXPathNavigator : XPathNavigator
+	{
+		#region Base Node Entry
+
+		abstract class Entry : IEquatable<Entry>
+		{
+			public abstract INamed Node { get; }
+
+			protected int Index { get; set; }
+
+			public virtual XPathNodeType NodeType
+			{
+				get { return XPathNodeType.Element; }
+			}
+
+			public virtual string Name
+			{
+				get { return Node.Name; }
+			}
+
+			public virtual string NamespaceUri
+			{
+				get
+				{
+					var idx = Node.Name.IndexOf(':');
+					return idx < 0 ? string.Empty : Node.Name.Substring(0, idx);
+				}
+			}
+
+			public virtual string LocalName
+			{
+				get
+				{
+					try
+					{
+						var idx = Node.Name.LastIndexOf(':');
+						return idx < 0 ? Node.Name : Node.Name.Substring(idx + 1);
+					}
+					catch (ArgumentOutOfRangeException)
+					{
+						return "WTF";
+					}
+				}
+			}
+
+			public virtual string Value
+			{
+				get { return string.Empty; }
+			}
+
+			public virtual Entry GetFirstChild()
+			{
+				return null;
+			}
+
+			public virtual Entry GetNext()
+			{
+				return null;
+			}
+
+			public virtual Entry GetPrev()
+			{
+				return null;
+			}
+
+			public virtual Entry GetFirstAttr()
+			{
+				return new NamedAttrEntry { Parent = Node };
+			}
+
+			public virtual Entry GetNextAttr()
+			{
+				return null;
+			}
+
+			public bool Equals(Entry rhs)
+			{
+				if (rhs == null)
+					return false;
+
+				return Node == rhs.Node && Index == rhs.Index && NodeType == rhs.NodeType;
+			}
+		}
+
+		#endregion
+
+		#region Name Attribute Entry
+
+		class NamedAttrEntry : Entry
+		{
+			public INamed Parent { private get; set; }
+
+			public override INamed Node
+			{
+				get { return Parent; }
+			}
+
+			public override XPathNodeType NodeType
+			{
+				get { return XPathNodeType.Attribute; }
+			}
+
+			public override string Name
+			{
+				get { return "name"; }
+			}
+
+			public override string NamespaceUri
+			{
+				get { return string.Empty; }
+			}
+
+			public override string LocalName
+			{
+				get { return Name; }
+			}
+
+			public override string Value
+			{
+				get { return Parent.Name; }
+			}
+		}
+
+		#endregion
+
+		#region Dom Entry
+
+		class RootEntry : Entry
+		{
+			public Dom Dom { private get; set; }
+
+			public override INamed Node
+			{
+				get { return Dom; }
+			}
+
+			public override XPathNodeType NodeType
+			{
+				get { return XPathNodeType.Root; }
+			}
+
+			public override Entry GetFirstChild()
+			{
+				if (Dom.tests.Count == 0)
+					return null;
+
+				return new TestEntry { Test = Dom.tests[0] };
+			}
+
+			public override Entry GetFirstAttr()
+			{
+				return null;
+			}
+		}
+
+		#endregion
+
+		#region Test Entry
+
+		class TestEntry : Entry
+		{
+			public Test Test { private get; set; }
+
+			public override INamed Node { get { return Test; } }
+
+			public override Entry GetFirstChild()
+			{
+				if (Test.stateModel == null)
+					return null;
+
+				return new StateModelEntry { StateModel = Test.stateModel };
+			}
+
+			public override Entry GetNext()
+			{
+				var tests = Test.parent.tests;
+				var next = Index + 1;
+
+				if (next == tests.Count)
+					return null;
+
+				return new TestEntry { Test = tests[next], Index = next };
+			}
+
+			public override Entry GetPrev()
+			{
+				var tests = Test.parent.tests;
+				var next = Index - 1;
+
+				if (next < 0)
+					return null;
+
+				return new TestEntry { Test = tests[next], Index = next };
+			}
+		}
+
+		#endregion
+
+		#region State Model Entry
+
+		class StateModelEntry : Entry
+		{
+			public StateModel StateModel { private get; set; }
+
+			public override INamed Node { get { return StateModel; } }
+
+			public override Entry GetFirstChild()
+			{
+				if (StateModel.states.Count == 0)
+					return null;
+
+				return new StateEntry { State = StateModel.states[0] };
+			}
+
+			public override Entry GetNext()
+			{
+				return null;
+			}
+
+			public override Entry GetPrev()
+			{
+				return null;
+			}
+		}
+
+		#endregion
+
+		#region State Entry
+
+		class StateEntry : Entry
+		{
+			public State State { private get; set; }
+
+			public override INamed Node { get { return State; } }
+
+			public override Entry GetFirstChild()
+			{
+				if (State.actions.Count == 0)
+					return null;
+
+				return new ActionEntry { Action = State.actions[0] };
+			}
+
+			public override Entry GetNext()
+			{
+				var states = State.parent.states;
+				var next = Index + 1;
+
+				if (next == states.Count)
+					return null;
+
+				return new StateEntry { State = states[next], Index = next };
+			}
+
+			public override Entry GetPrev()
+			{
+				var states = State.parent.states;
+				var next = Index - 1;
+
+				if (next < 0)
+					return null;
+
+				return new StateEntry { State = states[next], Index = next };
+			}
+		}
+
+		#endregion
+
+		#region Action Entry
+
+		class ActionEntry : Entry
+		{
+			public Action Action { private get; set; }
+
+			public override INamed Node { get { return Action; } }
+
+			public override Entry GetFirstChild()
+			{
+				var actionData = Action.allData.FirstOrDefault();
+				if (actionData == null)
+					return null;
+
+				return new ModelEntry { ActionData = actionData };
+			}
+
+			public override Entry GetNext()
+			{
+				var actions = Action.parent.actions;
+				var next = Index + 1;
+
+				if (next == actions.Count)
+					return null;
+
+				return new ActionEntry { Action = actions[next], Index = next };
+			}
+
+			public override Entry GetPrev()
+			{
+				var actions = Action.parent.actions;
+				var next = Index - 1;
+
+				if (next < 0)
+					return null;
+
+				return new ActionEntry { Action = actions[next], Index = next };
+			}
+
+			public override Entry GetFirstAttr()
+			{
+				return new ActionAttrEntry { Parent = Action };
+			}
+		}
+
+		#endregion
+
+		#region Action Attributes
+
+		class ActionAttrEntry : Entry
+		{
+			public Action Parent { private get; set; }
+
+			static readonly List<Tuple<string, Func<Action, string>>> Attrs = new List<Tuple<string, Func<Action, string>>>
+			(
+				new[]
+				{
+					new Tuple<string, Func<Action, string>>("name", a => a.Name),
+					new Tuple<string, Func<Action, string>>("type", a => a.type),
+					new Tuple<string, Func<Action, string>>("method", GetMethod),
+					new Tuple<string, Func<Action, string>>("property", GetProperty)
+				}
+			);
+
+			private static string GetMethod(Action a)
+			{
+				var asCall = a as Actions.Call;
+				return asCall == null ? string.Empty : asCall.method;
+			}
+
+			private static string GetProperty(Action a)
+			{
+				var asSet = a as Actions.SetProperty;
+				if (asSet != null)
+					return asSet.property;
+
+				var asGet = a as Actions.GetProperty;
+				return asGet == null ? string.Empty : asGet.property;
+			}
+
+			public override INamed Node
+			{
+				get { return Parent; }
+			}
+
+			public override XPathNodeType NodeType
+			{
+				get { return XPathNodeType.Attribute; }
+			}
+
+			public override string Name
+			{
+				get { return Attrs[Index].Item1; }
+			}
+
+			public override string NamespaceUri
+			{
+				get { return string.Empty; }
+			}
+
+			public override string LocalName
+			{
+				get { return Name; }
+			}
+
+			public override string Value
+			{
+				get { return Attrs[Index].Item2(Parent); }
+			}
+
+			public override Entry GetNextAttr()
+			{
+				var next = Index + 1;
+				if (next == Attrs.Count)
+					return null;
+
+				return new ActionAttrEntry { Parent = Parent, Index = next };
+			}
+		}
+
+		#endregion
+
+		#region Data Model Entry
+
+		class ModelEntry : Entry
+		{
+			public ActionData ActionData { private get; set; }
+
+			public override INamed Node { get { return ActionData.dataModel; } }
+
+			public override Entry GetFirstChild()
+			{
+				if (ActionData.dataModel.Count == 0)
+					return null;
+
+				return ElementEntry.Make(ActionData.dataModel);
+			}
+
+			public override Entry GetNext()
+			{
+				var idx = Index + 1;
+				var next = ActionData.action.allData.ElementAtOrDefault(idx);
+
+				if (next == null)
+					return null;
+
+				return new ModelEntry { ActionData = next, Index = idx };
+			}
+
+			public override Entry GetPrev()
+			{
+				if (Index == 0)
+					return null;
+
+				var idx = Index - 1;
+				var next = ActionData.action.allData.ElementAtOrDefault(idx);
+
+				if (next == null)
+					return null;
+
+				return new ModelEntry { ActionData = next, Index = idx };
+			}
+
+			public override Entry GetFirstAttr()
+			{
+				return new ElementAttrEntry { Parent = ActionData.dataModel };
+			}
+		}
+
+		#endregion
+
+		#region Data Element Entry
+
+		class ElementEntry : Entry
+		{
+			static ElementEntry Make(Array elem)
+			{
+				return new ElementEntry { Peers = new[] { elem.OriginalElement }.Concat(elem).ToList() };
+			}
+
+			static ElementEntry Make(Choice elem)
+			{
+				if (elem.choiceElements.Count == 0)
+					return null;
+
+				return new ElementEntry { Peers = elem.choiceElements.Values.ToList() };
+			}
+
+			public static ElementEntry Make(DataElementContainer elem)
+			{
+				if (elem.Count == 0)
+					return null;
+
+				return new ElementEntry { Peers = elem };
+			}
+
+			static ElementEntry Make(DataElement elem)
+			{
+				var asArray = elem as Array;
+				if (asArray != null)
+					return Make(asArray);
+
+				var asChoice = elem as Choice;
+				if (asChoice != null)
+					return Make(asChoice);
+
+				var asCont = elem as DataElementContainer;
+				if (asCont != null)
+					return Make(asCont);
+
+				return null;
+			}
+
+			private IList<DataElement> Peers { get; set; }
+
+			public override INamed Node
+			{
+				get { return Peers[Index]; }
+			}
+
+			public override Entry GetFirstChild()
+			{
+				return Make(Peers[Index]);
+			}
+
+			public override Entry GetNext()
+			{
+				var next = Index + 1;
+
+				if (next == Peers.Count)
+					return null;
+
+				return new ElementEntry { Peers = Peers, Index = next };
+			}
+
+			public override Entry GetPrev()
+			{
+				var next = Index - 1;
+
+				if (next < 0)
+					return null;
+
+				return new ElementEntry { Peers = Peers, Index = next };
+			}
+
+			public override Entry GetFirstAttr()
+			{
+				return new ElementAttrEntry { Parent = Peers[Index] };
+			}
+		}
+
+		#endregion
+
+		#region Data Element Attributes
+
+		class ElementAttrEntry : Entry
+		{
+			public DataElement Parent { private get; set; }
+
+			static readonly List<Tuple<string, Func<DataElement, string>>> Attrs = new List<Tuple<string, Func<DataElement, string>>>
+			(
+				new[]
+				{
+					new Tuple<string, Func<DataElement, string>>("name", e => e.Name),
+					new Tuple<string, Func<DataElement, string>>("isMutable", e => e.isMutable.ToString()),
+					new Tuple<string, Func<DataElement, string>>("isToken", e => e.isToken.ToString())
+				}
+			);
+
+			public override INamed Node
+			{
+				get { return Parent; }
+			}
+
+			public override XPathNodeType NodeType
+			{
+				get
+				{
+					return XPathNodeType.Attribute;
+				}
+			}
+
+			public override string Name
+			{
+				get { return Attrs[Index].Item1; }
+			}
+
+			public override string NamespaceUri
+			{
+				get { return string.Empty; }
+			}
+
+			public override string LocalName
+			{
+				get { return Name; }
+			}
+
+			public override string Value
+			{
+				get { return Attrs[Index].Item2(Parent); }
+			}
+
+			public override Entry GetNextAttr()
+			{
+				var next = Index + 1;
+				if (next == Attrs.Count)
+					return null;
+
+				return new ElementAttrEntry { Parent = Parent, Index = next };
+			}
+		}
+
+		#endregion
+
+		private LinkedList<Entry> _position;
+
+		// ReSharper disable once InconsistentNaming
+		[Obsolete("This property is obsolete. Use the 'CurrentNode' property instead.")]
+		public object currentNode
+		{
+			get { return CurrentNode; }
+		}
+
+		public object CurrentNode
+		{
+			get { return _position.First.Value.Node; }
+		}
+
+		public PeachXPathNavigator(Dom dom)
+			: this(new[] { new RootEntry { Dom = dom } })
+		{
+		}
+
+		private PeachXPathNavigator(IEnumerable<Entry> position)
+		{
+			_position = new LinkedList<Entry>(position);
+		}
+
+		public override string BaseURI
+		{
+			get { return string.Empty; }
+		}
+
+		public override XPathNavigator Clone()
+		{
+			return new PeachXPathNavigator(_position);
+		}
+
+		public override bool IsEmptyElement
+		{
+			get { return false; }
+		}
+
+		public override bool IsSamePosition(XPathNavigator other)
+		{
+			var asPeach = other as PeachXPathNavigator;
+			if (asPeach == null)
+				return false;
+
+			var lhs = _position.GetEnumerator();
+			var rhs = asPeach._position.GetEnumerator();
+
+			while (true)
+			{
+				var hasLhs = lhs.MoveNext();
+				var hasRhs = rhs.MoveNext();
+
+				if (hasLhs != hasRhs)
+					return false;
+
+				if (!hasLhs)
+					return true;
+
+				Debug.Assert(lhs.Current != null);
+
+				if (!lhs.Current.Equals(rhs.Current))
+					return false;
+			}
+		}
+
+		public override string LocalName
+		{
+			get { return _position.First.Value.LocalName; }
+		}
+
+		public override bool MoveTo(XPathNavigator other)
+		{
+			var asPeach = other as PeachXPathNavigator;
+			if (asPeach == null)
+				return false;
+
+			_position = new LinkedList<Entry>(asPeach._position);
+			return true;
+		}
+
+		public override bool MoveToFirstAttribute()
+		{
+			var attr = _position.First.Value.GetFirstAttr();
+			if (attr == null)
+				return false;
+
+			_position.AddFirst(attr);
+			return true;
+		}
+
+		public override bool MoveToFirstChild()
+		{
+			var child = _position.First.Value.GetFirstChild();
+			if (child == null)
+				return false;
+
+			_position.AddFirst(child);
+			return true;
+		}
+
+		public override bool MoveToFirstNamespace(XPathNamespaceScope namespaceScope)
+		{
+			return false;
+		}
+
+		public override bool MoveToId(string id)
+		{
+			return false;
+		}
+
+		public override bool MoveToNext()
+		{
+			var next = _position.First.Value.GetNext();
+			if (next == null)
+				return false;
+
+			_position.RemoveFirst();
+			_position.AddFirst(next);
+			return true;
+		}
+
+		public override bool MoveToNextAttribute()
+		{
+			var next = _position.First.Value.GetNextAttr();
+			if (next == null)
+				return false;
+
+			_position.RemoveFirst();
+			_position.AddFirst(next);
+			return true;
+		}
+
+		public override bool MoveToNextNamespace(XPathNamespaceScope namespaceScope)
+		{
+			return false;
+		}
+
+		public override bool MoveToParent()
+		{
+			if (_position.Count == 1)
+				return false;
+
+			_position.RemoveFirst();
+
+			return true;
+		}
+
+		public override bool MoveToPrevious()
+		{
+			var next = _position.First.Value.GetPrev();
+			if (next == null)
+				return false;
+
+			_position.RemoveFirst();
+			_position.AddFirst(next);
+			return true;
+		}
+
+		public override string Name
+		{
+			get { return _position.First.Value.Name; }
+		}
+
+		public override System.Xml.XmlNameTable NameTable
+		{
+			get { throw new NotImplementedException(); }
+		}
+
+		public override string NamespaceURI
+		{
+			get { return _position.First.Value.NamespaceUri; }
+		}
+
+		public override XPathNodeType NodeType
+		{
+			get { return _position.First.Value.NodeType; }
+		}
+
+		public override string Prefix
+		{
+			get { return string.Empty; }
+		}
+
+		public override string Value
+		{
+			get { return _position.First.Value.Value; }
+		}
+	}
+}
+
+#if DISABLED
+
 	/// <summary>
 	/// Create an XPath Navigator for Peach DOM objects.
 	/// </summary>
@@ -61,6 +837,11 @@ namespace Peach.Core.Dom.XPath
 		/// Are we iterating attributes?
 		/// </summary>
 		protected bool iteratingAttributes = false;
+
+		public object CurrentNode
+		{
+			get { return currentNode; }
+		}
 
 		static PeachXPathNavigator()
 		{
@@ -668,3 +1449,4 @@ namespace Peach.Core.Dom.XPath
 		#endregion
 	}
 }
+#endif
