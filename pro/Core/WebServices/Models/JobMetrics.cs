@@ -31,6 +31,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		public string State { get; set; }
 		public string Action { get; set; }
 		public string Parameter { get; set; }
+		public string Dataset { get; set; }
 		public string Element { get; set; }
 		public long IterationCount { get; set; }
 		public long BucketCount { get; set; }

@@ -1,5 +1,7 @@
 using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Peach.Pro.Core.WebServices.Models
 {
 	public class FaultFile
@@ -7,6 +9,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// Unique ID of the file.
 		/// </summary>
+		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public long Id { get; set; }
 

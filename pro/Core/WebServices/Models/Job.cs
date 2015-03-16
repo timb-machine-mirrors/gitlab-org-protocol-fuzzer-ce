@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.Data.Entity;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Peach.Pro.Core.WebServices.Models
@@ -73,6 +74,7 @@ namespace Peach.Pro.Core.WebServices.Models
 
 	public class Job
 	{
+		[Key]
 		public Guid Id { get; set; }
 
 		/// <summary>

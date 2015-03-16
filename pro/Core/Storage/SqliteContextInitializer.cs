@@ -9,6 +9,9 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.IO;
 using System.Collections;
+using System.Data.Entity.Core.Metadata.Edm;
+using System.Data.Entity.Infrastructure;
+using System.Data.Entity.Infrastructure.Annotations;
 
 namespace Peach.Pro.Core.Storage
 {
@@ -17,10 +20,12 @@ namespace Peach.Pro.Core.Storage
 	{
 		bool _dbExists;
 		HashSet<Type> _visited = new HashSet<Type>();
+		DbModelBuilder _modelBuilder;
 
-		public SqliteContextInitializer(string dbPath)
+		public SqliteContextInitializer(string dbPath, DbModelBuilder modelBuilder)
 		{
 			_dbExists = File.Exists(dbPath);
+			_modelBuilder = modelBuilder;
 		}
 
 		public void InitializeDatabase(T context)
@@ -28,152 +33,117 @@ namespace Peach.Pro.Core.Storage
 			if (_dbExists)
 				return;
 
+			var model = _modelBuilder.Build(context.Database.Connection);
+
 			using (var xact = context.Database.BeginTransaction())
 			{
-				typeof(T).GetProperties().ForEach(p =>
+				try
 				{
-					var type = p.PropertyType;
-					if (type.IsGenericType && 
-						type.GetGenericTypeDefinition() == typeof(DbSet<>))
-					{
-						ProcessType(context, type.GetGenericArguments().First());
-					}
-				});
-				xact.Commit();
+					CreateDatabase(context.Database, model);
+					xact.Commit();
+				}
+				catch (Exception)
+				{
+					xact.Rollback();
+					throw;
+				}
 			}
 		}
 
-		private void ProcessType(T context, Type type)
+		class Index
 		{
-			if (_visited.Contains(type))
-				return;
-			_visited.Add(type);
-			CreateTable(context, type).ForEach(t => ProcessType(context, t));
+			public string Name { get; set; }
+			public string Table { get; set; }
+			public List<string> Columns { get; set; }
 		}
 
-		private ICollection<Type> CreateTable(T context, Type type)
+		private void CreateDatabase(Database db, DbModel model)
 		{
-			var subTypes = new List<Type>();
+			const string tableTmpl = "CREATE TABLE [{0}] (\n{1}\n);";
+			const string columnTmpl = "    [{0}] {1} {2}"; // name, type, decl
+			const string primaryKeyTmpl = "    PRIMARY KEY ({0})";
+			const string foreignKeyTmpl = "    FOREIGN KEY ({0}) REFERENCES {1} ({2})";
+			const string indexTmpl = "CREATE INDEX {0} ON {1} ({2});";
 
-			var columnTmpl = "    [{0}] {1} {2}"; // name, type, decl
-			var tableTmpl = "CREATE TABLE [{0}] (\n{1}\n);";
+			var indicies = new Dictionary<string, Index>();
 
-			var columns = new List<string>();
-			type.GetProperties().ForEach(p =>
+			foreach (var type in model.StoreModel.EntityTypes)
 			{
-				if (HasAttribute<NotMappedAttribute>(p))
-					return;
+				var defs = new List<string>();
 
-				if (IsCollection(p))
+				// columns
+				foreach (var p in type.Properties)
 				{
-					subTypes.Add(p.PropertyType.GetGenericArguments().First());
-					return;
+					var decls = new HashSet<string>();
+
+					if (!p.Nullable)
+						decls.Add("NOT NULL");
+
+					var annotations = p.MetadataProperties
+						.Select(x => x.Value)
+						.OfType<IndexAnnotation>();
+
+					foreach (var annotation in annotations)
+					{
+						foreach (var attr in annotation.Indexes)
+						{
+							if (attr.IsUnique)
+								decls.Add("UNIQUE");
+
+							if (string.IsNullOrEmpty(attr.Name))
+								continue;
+
+							Index index;
+							if (!indicies.TryGetValue(attr.Name, out index))
+							{
+								index = new Index
+								{
+									Name = attr.Name,
+									Table = type.Name,
+									Columns = new List<string>(),
+								};
+								indicies.Add(index.Name, index);
+							}
+							index.Columns.Add(p.Name);
+						}
+					}
+
+					defs.Add(columnTmpl.Fmt(p.Name, p.TypeName, string.Join(" ", decls)));
 				}
 
-				// check for this attribute after checking for IsCollection
-				// since it's ok for [ForeignKey] to be used on a navigation property.
-				if (HasAttribute<ForeignKeyAttribute>(p))
-					return;
+				// primary keys
+				if (type.KeyProperties.Any())
+				{
+					var keys = type.KeyProperties.Select(x => x.Name);
+					defs.Add(primaryKeyTmpl.Fmt(string.Join(", ", keys)));
+				}
 
-				var columnType = Nullable.GetUnderlyingType(p.PropertyType) ?? p.PropertyType;
-				var sqlType = GetSqlType(p, columnType);
+				// foreign keys
+				foreach (var assoc in model.StoreModel.AssociationTypes)
+				{
+					if (assoc.Constraint.ToRole.Name == type.Name)
+					{
+						var thisKeys = assoc.Constraint.ToProperties.Select(x => x.Name);
+						var thatKeys = assoc.Constraint.FromProperties.Select(x => x.Name);
+						defs.Add(foreignKeyTmpl.Fmt(
+							string.Join(", ", thisKeys),
+							assoc.Constraint.FromRole.Name,
+							string.Join(", ", thatKeys)));
+					}
+				}
 
-				var sqlDecls = new List<string>();
-				if (IsPK(p))
-					sqlDecls.Add("PRIMARY KEY");
-				if (IsAutoIncrement(p, columnType))
-					sqlDecls.Add("AUTOINCREMENT");
-				if (!IsNullable(p))
-					sqlDecls.Add("NOT NULL");
+				// create table
+				var sql = tableTmpl.Fmt(type.Name, string.Join(",\n", defs));
+				db.ExecuteSqlCommand(sql);
+			}
 
-				columns.Add(columnTmpl.Fmt(p.Name, sqlType, string.Join(" ", sqlDecls)));
-			});
-
-			var sql = tableTmpl.Fmt(type.Name, string.Join(",\n", columns));
-			context.Database.ExecuteSqlCommand(sql);
-
-			return subTypes;
-		}
-
-		const string SqlInt = "INTEGER";
-		const string SqlReal = "REAL";
-		const string SqlText = "TEXT";
-		const string SqlBlob = "BLOB";
-
-		static Dictionary<Type, string> SqlTypeMap = new Dictionary<Type, string>
-		{
-			{ typeof(Boolean), SqlInt },
-			{ typeof(Byte), SqlInt },
-			{ typeof(SByte), SqlInt },
-			{ typeof(Int16), SqlInt },
-			{ typeof(Int32), SqlInt },
-			{ typeof(Int64), SqlInt },
-			{ typeof(UInt16), SqlInt },
-			{ typeof(UInt32), SqlInt },
-			{ typeof(UInt64), SqlInt },
-			{ typeof(TimeSpan), SqlInt },
-			{ typeof(DateTimeOffset), SqlInt },
-
-			{ typeof(Single), SqlReal },
-			{ typeof(Double), SqlReal },
-			{ typeof(Decimal), SqlReal },
-
-			{ typeof(string), SqlText },
-			{ typeof(Guid), SqlText },
-			{ typeof(DateTime), SqlText },
-			
-			{ typeof(byte[]), SqlBlob },
-		};
-
-		private bool IsPK(PropertyInfo pi)
-		{
-			return pi.Name.ToLower() == "id" || HasAttribute<KeyAttribute>(pi);
-		}
-
-		private bool IsAutoIncrement(PropertyInfo pi, Type columnType)
-		{
-			var attrs = pi.GetCustomAttributes(typeof(DatabaseGeneratedAttribute), true);
-			var attr = attrs.FirstOrDefault() as DatabaseGeneratedAttribute;
-			var identity = attr != null ? attr.DatabaseGeneratedOption == DatabaseGeneratedOption.Identity : false;
-			return IsPK(pi) && SqlTypeMap[columnType] == SqlInt && identity;
-		}
-
-		private bool IsNullable(PropertyInfo pi)
-		{
-			if (IsPK(pi))
-				return false;
-			var type = pi.PropertyType;
-			if (type == typeof(string))
-				return true;
-			return type.IsGenericType &&
-				type.GetGenericTypeDefinition() == typeof(Nullable<>);
-		}
-
-		private bool HasAttribute<TAttr>(PropertyInfo pi)
-		{
-			return pi.GetCustomAttributes(typeof(TAttr), true).Any();
-		}
-
-		private string GetSqlType(PropertyInfo pi, Type columnType)
-		{
-			if (columnType.IsEnum)
-				return SqlInt;
-			string sqlType;
-			if (!SqlTypeMap.TryGetValue(columnType, out sqlType))
-				Debug.Assert(false, "Missing column type map",
-					"Missing column type map for property {0} with type {1}",
-					pi.Name,
-					columnType.Name);
-			return sqlType;
-		}
-
-		private bool IsCollection(PropertyInfo pi)
-		{
-			var type = pi.PropertyType;
-			return
-				type.IsInstanceOfType(typeof(ICollection)) ||
-				(type.IsGenericType() &&
-					type.GetGenericTypeDefinition().IsAssignableFrom(typeof(ICollection<>)));
+			// create index
+			foreach (var index in indicies.Values)
+			{
+				var columns = string.Join(", ", index.Columns);
+				var sql = indexTmpl.Fmt(index.Name, index.Table, columns);
+				db.ExecuteSqlCommand(sql);
+			}
 		}
 	}
 }
