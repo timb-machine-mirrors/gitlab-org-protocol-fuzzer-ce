@@ -10,6 +10,8 @@ using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Runtime;
 using Peach.Pro.Core.WebServices;
+using System.IO;
+using Peach.Pro.Core.Storage;
 
 namespace Peach.Pro.Core.Runtime.Enterprise
 {
@@ -17,6 +19,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 	{
 		OptionSet _options;
 		string _pitLibraryPath;
+		string _query;
 		Guid? _guid;
 		bool _shouldStop;
 		Exception _caught;
@@ -48,7 +51,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 				if (GetLogLevel() == LogLevel.Trace)
 					Console.Error.WriteLine(ex.InnerException ?? ex);
 				else
-					Console.Error.WriteLine(ex.InnerException != null ? 
+					Console.Error.WriteLine(ex.InnerException != null ?
 						ex.InnerException.Message : ex.Message);
 				return 1;
 			}
@@ -132,6 +135,10 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 					"The iteration to stop fuzzing",
 					(uint v) => stop = v
 				},
+				{
+					"query=",
+					v => _query = v
+				},
 			};
 
 			var extra = _options.Parse(args);
@@ -174,7 +181,14 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 				_config.skipToIteration = start.Value;
 			}
 
-			RunJob(extra);
+			if (!string.IsNullOrEmpty(_query))
+			{
+				RunQuery();
+			}
+			else
+			{
+				RunJob(extra);
+			}
 		}
 
 		private void ShowUsage()
@@ -287,6 +301,41 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			Console.WriteLine("    stop");
 			Console.WriteLine("    pause");
 			Console.WriteLine("    continue");
+		}
+
+		private void RunQuery()
+		{
+			var logRoot = Utilities.GetAppResourcePath("db");
+			var logPath = Path.Combine(logRoot, _guid.ToString());
+			var dbPath = Path.Combine(logPath, "peach.db");
+
+			using (var db = new JobContext(dbPath))
+			{
+				switch (_query.ToLower())
+				{
+					case "states":
+						db.QueryStates();
+						break;
+					case "iterations":
+						db.QueryIterations();
+						break;
+					case "buckets":
+						db.QueryBuckets();
+						break;
+					case "buckettimeline":
+						db.QueryBucketTimeline();
+						break;
+					case "mutators":
+						db.QueryMutators();
+						break;
+					case "elements":
+						db.QueryElements();
+						break;
+					case "datasets":
+						db.QueryDatasets();
+						break;
+				}
+			}
 		}
 	}
 }

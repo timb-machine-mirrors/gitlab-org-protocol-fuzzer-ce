@@ -13,6 +13,7 @@ using Fault = Peach.Core.Fault;
 using Peach.Pro.Core.Storage;
 using Peach.Core.IO;
 using System.Data.Entity;
+using System.Data.Entity.Validation;
 
 namespace Peach.Pro.Core.Runtime.Enterprise
 {
@@ -23,50 +24,49 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 		NonReproducable,
 	}
 
+	class MetricEntity<T> where T : class, IMetric, new()
+	{
+		readonly Dictionary<string, T> _map = new Dictionary<string, T>();
+
+		public MetricEntity(DbSet<T> dbSet)
+		{
+			_map = dbSet.ToDictionary(x => x.Name);
+		}
+
+		public T Add(JobContext db, DbSet<T> dbSet, string name)
+		{
+			T entity;
+			if (!_map.TryGetValue(name, out entity))
+			{
+				entity = dbSet.Add(new T { Name = name });
+				_map.Add(name, entity);
+			}
+			else
+			{
+				dbSet.Attach(entity);
+			}
+			return entity;
+		}
+	}
+
 	class JobWatcher : Watcher
 	{
 		readonly string _logPath;
 		readonly List<Fault.State> _states = new List<Fault.State>();
-		readonly List<Sample> _samples = new List<Sample>();
-		Sample _sample = new Sample();
+		readonly List<Mutation> _mutations = new List<Mutation>();
+		Mutation _mutation = new Mutation();
 		Fault _reproFault;
 		Guid _guid;
 		string _dbPath;
 		Job _job;
 		bool _isReproducing;
 
-		class MetricEntity<T> where T : class, IMetric, new()
-		{
-			readonly Dictionary<string, T> _map = new Dictionary<string, T>();
-
-			public void Load(DbSet<T> dbSet)
-			{
-				dbSet.ForEach(item => _map.Add(item.Name, item));
-			}
-
-			public T Add(JobContext db, DbSet<T> dbSet, string name)
-			{
-				T entity;
-				if (!_map.TryGetValue(name, out entity))
-				{
-					entity = dbSet.Add(new T { Name = name });
-					_map.Add(name, entity);
-				}
-				else
-				{
-					dbSet.Attach(entity);
-				}
-				return entity;
-			}
-		}
-
-		readonly MetricEntity<Storage.State> _stateMetrics = new MetricEntity<Storage.State>();
-		readonly MetricEntity<Storage.Action> _actionMetrics = new MetricEntity<Storage.Action>();
-		readonly MetricEntity<Storage.Parameter> _parameterMetrics = new MetricEntity<Storage.Parameter>();
-		readonly MetricEntity<Storage.Element> _elementMetrics = new MetricEntity<Storage.Element>();
-		readonly MetricEntity<Storage.Mutator> _mutatorMetrics = new MetricEntity<Storage.Mutator>();
-		readonly MetricEntity<Storage.Dataset> _datasetMetrics = new MetricEntity<Storage.Dataset>();
-		readonly Dictionary<string, Storage.Bucket> _bucketsMap = new Dictionary<string, Storage.Bucket>();
+		readonly MetricEntity<Storage.State> _stateMetrics;
+		readonly MetricEntity<Storage.Action> _actionMetrics;
+		readonly MetricEntity<Storage.Parameter> _parameterMetrics;
+		readonly MetricEntity<Storage.Element> _elementMetrics;
+		readonly MetricEntity<Storage.Mutator> _mutatorMetrics;
+		readonly MetricEntity<Storage.Dataset> _datasetMetrics;
 
 		public JobWatcher(Guid guid)
 		{
@@ -86,12 +86,12 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			{
 				db.Database.Initialize(true);
 
-				_stateMetrics.Load(db.States);
-				_actionMetrics.Load(db.Actions);
-				_parameterMetrics.Load(db.Parameters);
-				_elementMetrics.Load(db.Elements);
-				_mutatorMetrics.Load(db.Mutators);
-				_datasetMetrics.Load(db.Datasets);
+				_stateMetrics = new MetricEntity<Storage.State>(db.States);
+				_actionMetrics = new MetricEntity<Storage.Action>(db.Actions);
+				_parameterMetrics = new MetricEntity<Storage.Parameter>(db.Parameters);
+				_elementMetrics = new MetricEntity<Storage.Element>(db.Elements);
+				_mutatorMetrics = new MetricEntity<Storage.Mutator>(db.Mutators);
+				_datasetMetrics = new MetricEntity<Storage.Dataset>(db.Datasets);
 			}
 		}
 
@@ -140,7 +140,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 		protected override void Engine_IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
 		{
 			_states.Clear();
-			_samples.Clear();
+			_mutations.Clear();
 			_isReproducing = context.reproducingFault;
 
 			// TODO: rate throttle
@@ -230,8 +230,8 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			{
 				using (var db = new JobContext(_dbPath))
 				{
-					_sample.State = _stateMetrics.Add(db, db.States, state.Name);
-					db.StateInstances.Add(new StateInstance { State = _sample.State });
+					_mutation.State = _stateMetrics.Add(db, db.States, state.Name);
+					db.StateInstances.Add(new StateInstance { State = _mutation.State });
 					db.SaveChanges();
 				}
 			}
@@ -241,7 +241,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 		{
 			using (var db = new JobContext(_dbPath))
 			{
-				_sample.Action = _actionMetrics.Add(db, db.Actions, action.Name);
+				_mutation.Action = _actionMetrics.Add(db, db.Actions, action.Name);
 				db.SaveChanges();
 			}
 
@@ -307,28 +307,30 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 
 			using (var db = new JobContext(_dbPath))
 			{
-				db.States.Attach(_sample.State);
-				db.Actions.Attach(_sample.Action);
+				db.States.Attach(_mutation.State);
+				db.Actions.Attach(_mutation.Action);
 
-				_sample.Parameter = _parameterMetrics.Add(db, db.Parameters, data.Name ?? "");
-				_sample.Element = _elementMetrics.Add(db, db.Elements, element.fullName);
-				_sample.Mutator = _mutatorMetrics.Add(db, db.Mutators, mutator.Name);
-				_sample.Dataset = _datasetMetrics.Add(db, db.Datasets,
+				_mutation.Iteration = context.currentIteration;
+				_mutation.Parameter = _parameterMetrics.Add(db, db.Parameters, data.Name ?? "");
+				_mutation.Element = _elementMetrics.Add(db, db.Elements, element.fullName);
+				_mutation.Mutator = _mutatorMetrics.Add(db, db.Mutators, mutator.Name);
+				_mutation.Dataset = _datasetMetrics.Add(db, db.Datasets,
 					data.selectedData != null ? data.selectedData.Name : "");
 
-				_samples.Add(_sample);
+				_mutations.Add(_mutation);
 
 				if (!_isReproducing)
-					db.Samples.Add(_sample);
+					db.Mutations.Add(_mutation);
 
-				_sample = new Sample
+				_mutation = new Mutation
 				{
-					State = _sample.State,
-					Action = _sample.Action,
-					Parameter = _sample.Parameter,
-					Element = _sample.Element,
-					Mutator = _sample.Mutator,
-					Dataset = _sample.Dataset,
+					Iteration = _mutation.Iteration,
+					State = _mutation.State,
+					Action = _mutation.Action,
+					Parameter = _mutation.Parameter,
+					Element = _mutation.Element,
+					Mutator = _mutation.Mutator,
+					Dataset = _mutation.Dataset,
 				};
 
 				db.SaveChanges();
@@ -530,29 +532,17 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 
 		private void SaveFaultMetrics(JobContext db, Fault fault, DateTime now)
 		{
-			var majorHash = fault.majorHash ?? "UNKNOWN";
-			var minorHash = fault.minorHash ?? "UNKONWN";
-			var name = majorHash;
-			if (fault.minorHash != null)
-				name = "{0}_{1}".Fmt(majorHash, minorHash);
-
-			var bucket = db.Buckets.Add(new Bucket
-			{
-				Name = name,
-				MajorHash = majorHash,
-				MinorHash = minorHash,
-			});
-
 			var metric = db.FaultMetrics.Add(new FaultMetric
 			{
 				Iteration = fault.iteration,
-				Bucket = bucket,
+				MajorHash = fault.majorHash ?? "UNKNOWN",
+				MinorHash = fault.minorHash ?? "UNKONWN",
 				Timestamp = now,
 				Hour = now.Hour,
-				Samples = new List<FaultMetricSample>(),
+				Mutations = _mutations,
 			});
 
-			_samples.ForEach(x =>
+			_mutations.ForEach(x =>
 			{
 				db.States.Attach(x.State);
 				db.Actions.Attach(x.Action);
@@ -561,10 +551,8 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 				db.Mutators.Attach(x.Mutator);
 				db.Datasets.Attach(x.Dataset);
 
-				if (_sample.Id != 0)
-					db.Samples.Attach(x);
-
-				metric.Samples.Add(new FaultMetricSample { Sample = x });
+				if (_mutation.Id != 0)
+					db.Mutations.Attach(x);
 			});
 		}
 

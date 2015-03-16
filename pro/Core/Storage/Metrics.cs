@@ -1,111 +1,136 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Peach.Pro.Core.Storage
 {
 	public interface IMetric
 	{
-		int Id { get; set; }
+		long Id { get; set; }
 		string Name { get; set; }
 	}
 
-	[Serializable]
 	public class State : IMetric
 	{
+		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public int Id { get; set; }
+		public long Id { get; set; }
+	
 		[Index(IsUnique = true)]
+		[Required]
 		public string Name { get; set; }
 	}
 
-	[Serializable]
 	public class Action : IMetric
 	{
+		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public int Id { get; set; }
+		public long Id { get; set; }
+
 		[Index(IsUnique = true)]
+		[Required]
 		public string Name { get; set; }
 	}
 
-	[Serializable]
 	public class Parameter : IMetric
 	{
+		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public int Id { get; set; }
+		public long Id { get; set; }
+
 		[Index(IsUnique = true)]
 		public string Name { get; set; }
 	}
 
-	[Serializable]
 	public class Element : IMetric
 	{
+		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public int Id { get; set; }
+		public long Id { get; set; }
+
 		[Index(IsUnique = true)]
+		[Required]
 		public string Name { get; set; }
 	}
 
-	[Serializable]
 	public class Mutator : IMetric
 	{
+		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public int Id { get; set; }
+		public long Id { get; set; }
+
 		[Index(IsUnique = true)]
+		[Required]
 		public string Name { get; set; }
 	}
 
-	[Serializable]
 	public class Dataset : IMetric
 	{
+		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public int Id { get; set; }
+		public long Id { get; set; }
+
 		[Index(IsUnique = true)]
 		public string Name { get; set; }
 	}
 
-	[Serializable]
-	public class Bucket
-	{
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public int Id { get; set; }
-
-		public string Name { get; set; }
-		public string MajorHash { get; set; }
-		public string MinorHash { get; set; }
-	}
-
-	/// <summary>
-	/// One row per bucket instance.
-	/// </summary>
 	/// <summary>
 	/// One row per state instance.
 	/// </summary>
 	public class StateInstance
 	{
+		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public long Id { get; set; }
 
-		public int StateId { get; set; }
+		public long StateId { get; set; }
 		[ForeignKey("StateId")]
 		public virtual State State { get; set; }
 	}
 
 	/// <summary>
-	/// One row per sample (data mutation).
+	/// One row per data mutation.
 	/// </summary>
-	[Serializable]
-	public class Sample
+	public class Mutation
 	{
+		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public long Id { get; set; }
 
-		public int StateId { get; set; }
-		public int ActionId { get; set; }
-		public int ParameterId { get; set; }
-		public int ElementId { get; set; }
-		public int MutatorId { get; set; }
-		public int DatasetId { get; set; }
+		[Index("IX_Mutation_Iteration")]
+		[Index("IX_Mutation_Iteration_Alone")]
+		public long Iteration { get; set; }
+
+		[Index("IX_Mutation")]
+		[Index("IX_Mutation_Iteration")]
+		[Index("IX_Mutation_State")]
+		public long StateId { get; set; }
+		
+		[Index("IX_Mutation")]
+		[Index("IX_Mutation_Iteration")]
+		[Index("IX_Mutation_Action")]
+		public long ActionId { get; set; }
+		
+		[Index("IX_Mutation")]
+		[Index("IX_Mutation_Iteration")]
+		[Index("IX_Mutation_Parameter")]
+		public long ParameterId { get; set; }
+		
+		[Index("IX_Mutation")]
+		[Index("IX_Mutation_Iteration")]
+		[Index("IX_Mutation_Element")]
+		public long ElementId { get; set; }
+
+		[Index("IX_Mutation")]
+		[Index("IX_Mutation_Iteration")]
+		[Index("IX_Mutation_Mutator")]
+
+		public long MutatorId { get; set; }
+		[Index("IX_Mutation")]
+		[Index("IX_Mutation_Iteration")]
+		[Index("IX_Mutation_Dataset")]
+		public long DatasetId { get; set; }
 
 		[ForeignKey("StateId")]
 		public virtual State State { get; set; }
@@ -119,23 +144,8 @@ namespace Peach.Pro.Core.Storage
 		public virtual Mutator Mutator { get; set; }
 		[ForeignKey("DatasetId")]
 		public virtual Dataset Dataset { get; set; }
-	}
 
-	/// <summary>
-	/// One row per sample per fault.
-	/// </summary>
-	public class FaultMetricSample
-	{
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public long Id { get; set; }
-
-		public long FaultMetricId { get; set; }
-		[ForeignKey("FaultMetricId")]
-		public virtual FaultMetric Fault { get; set; }
-
-		public long SampleId { get; set; }
-		[ForeignKey("SampleId")]
-		public virtual Sample Sample { get; set; }
+		public virtual ICollection<FaultMetric> Faults { get; set; }
 	}
 
 	/// <summary>
@@ -143,18 +153,22 @@ namespace Peach.Pro.Core.Storage
 	/// </summary>
 	public class FaultMetric
 	{
+		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public long Id { get; set; }
 
+		[Index("IX_FaultMetric_Iteration")]
 		public long Iteration { get; set; }
 
-		public int BucketId { get; set; }
-		[ForeignKey("BucketId")]
-		public virtual Bucket Bucket { get; set; }
+		[Required]
+		[Index("IX_FaultMetric_MajorHash")]
+		public string MajorHash { get; set; }
+		[Required]
+		public string MinorHash { get; set; }
 
 		public DateTime Timestamp { get; set; }
 		public int Hour { get; set; }
 
-		public virtual ICollection<FaultMetricSample> Samples { get; set; }
+		public virtual ICollection<Mutation> Mutations { get; set; }
 	}
 }
