@@ -1,3 +1,4 @@
+:images: ../images
 <<<
 [[Monitors_SshCommand]]
 == SshCommand Monitor
@@ -75,10 +76,6 @@ Period when the command should be run. Defaults to +OnCall+
 
 .When Choices for Running a Command
 image::{images}/Timings_SSH.PNG["When Run Command Choices", scalewidth="75%"]
-
-// .When Choices for Running a Command
-// image::../images/Timings_SSH.PNG["When Run Command Choices", scalewidth="75%"]
-
 
 === Examples
 

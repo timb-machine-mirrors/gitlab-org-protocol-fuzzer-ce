@@ -1,3 +1,4 @@
+:images: ../images
 <<<
 [[Monitors_Serial]]
 == Serial Port Monitor
@@ -53,19 +54,7 @@ XOnXOff;;
 FaultRegex:: Fault when regular expression matches.
 WaitRegex:: Wait until regex matches received data.
 WaitOnCall:: Wait for message, WaitWhen must be set to OnCall.
-WaitWhen:: 
-+
-When to wait. Defaults to OnStart.
-+
-// [horizontal]
-// OnCall;; When triggered by a message from state machine.
-// OnStart;; Once at the start of the fuzzing session.
-// OnEnd;; Once at the end of the fuzzing session.
-// OnIterationStart;; At the start of each iteration.
-// OnIterationEnd;; At the end of each iteration.
-// OnFault;; When a fault occurs.
-// OnIterationStartAfterFault;; When a fault occurs, wait until the start of the next iteration.
-
+WaitWhen:: When to wait. Defaults to OnStart.
 
 [cols="1,2" options="header",halign="center"] 
 |==========================================================
@@ -79,16 +68,8 @@ When to wait. Defaults to OnStart.
 |OnCall                      |Waits upon receipt of a call from the state model.
 |==========================================================
 
-
-
-
-
-
-
-// image::{images}/Timings_All.PNG["When Timing Choices", scalewidth="75%"]
-
 .WaitWhen Choices
-image::../images/Timings_All.PNG["When Timing Choices", scalewidth="75%"]
+image::{images}/Timings_All.PNG["When Timing Choices", scalewidth="75%"]
 
 === Examples
 
