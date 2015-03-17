@@ -2,23 +2,43 @@
 [[Monitors_Vmware]]
 == Vmware Monitor
 
-The _Vmware_ monitor can control a VMware virtual machine (VM).  
+The _Vmware_ monitor can control a VMware virtual machine (VM). This monitor works with a 
+snapshot of the VM that provides a consistent VM environment throughout a fuzzing session. 
+_Vmware_ can start a VM snapshot and, optionally, reset the VM to a snapshot configuration 
+each iteration. 
 
-_Vmware_ can start a VM and, optionally, reset the VM to a snapshot configuration each iteration.  When a fault occurs, _Vmware_ resets the VM to the specified snapshot.
+The _Vmware_ monitor is primarily an automation monitor that manages the VM environment; 
+yet, the monitor includes in its log, the non-OK result codes and exceptions reported from 
+the VM environment.
+
+When a fault occurs, _Vmware_ resets the VM to the specified snapshot.  Fault detection is 
+not bucketed for this monitor.
+
+In the VMWare product, you can create, review, and manage the VM snapshots using the VM menu. 
+The following illustration shows the VMWare Snapshot Manager that shows the snapshots 
+created for a specific VM.
+
+image::../images/VMWare_Snapshot_Manager.PNG["VMWare Snapshot Manager", scalewidth="75%"]
+
+// image::{images}/VMWare_Snapshot_Manager.PNG["VMWare Snapshot Manager", scalewidth="75%"]
+
 
 TIP: When using with vSphere/ESXi, prefix the VM image name with the storage location in brackets.  For example, "[ha-datacenter/datastore1] guest/guest.vmx"
+
 
 === Parameters
 
 _Required:_
 
+The Vmx paramter and either the SnapshotIndex or the SnapshotName parameter are required.
+
 Vmx:: Path to the virtual machine
+SnapshotIndex:: VM snapshot index. Index values are zero-based.
+SnapshotName:: VM Snapshot name.
 
 _Optional:_
 
-Host:: Name of the host machine
-Login:: Username for authentication on the remote machine
-Password:: Password for authentication on the remote machine
+Host:: Name of the host machine.
 HostType:: Type of remote host, defaults to _Default_  +
 	*VIServer* - vCenter Server, ESX/ESXi hosts, VMWare Server 2.0  +
 	*Workstation* - VMWare Workstation  +
@@ -27,11 +47,10 @@ HostType:: Type of remote host, defaults to _Default_  +
 	*Server* - VMWare Server 1.0.x  +
     *Default* - Default
 
-HostPort::
-	TCP/IP port on the remote host
 
-SnapshotIndex:: VM snapshot index
-SnapshotName:: VM Snapshot name
+Login:: Username for authentication on the remote machine.
+Password:: Password for authentication on the remote machine.
+HostPort:: TCP/IP port on the remote host.
 ResetEveryIteration:: Reset VM to snapshot on every iteration. Defaults to false.
 ResetOnFaultBeforeCollection:: Reset VM after we detect a Fault during data collection. Defaults to false.
 WaitForToolsInGuest:: Wait for tools to start in guest. Defaults to true.
@@ -44,7 +63,11 @@ ifdef::peachug[]
 .Start Virtual Machine  +
 ====================
 
-This parameter example is from a setup that programmatically starts a VM.
+This parameter example is from a setup that programmatically starts a VM. 
+
+* The monitor requires both the physical filename with path of the VM and either the +SnapshotName+ or +SnapShotIndex+ of the VM. 
+* The +HostType+ identifies the VMWare product that is hosting the VM. 
+* The +Headless+ parameter provides visual feedback while configuring the test setup. 
 
 [cols="2,4" options="header",halign="center"] 
 |==========================================================
@@ -52,7 +75,9 @@ This parameter example is from a setup that programmatically starts a VM.
 |Vmx           |D:\VirtualMachines\OfficeWebTest\OfficeWebTest.vmx
 |HostType      |Workstation
 |SnapshotName  |Fuzzing
+|Headless      |false
 |==========================================================
+
 ====================
 
 

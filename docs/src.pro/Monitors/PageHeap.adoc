@@ -18,7 +18,7 @@ WinDbgPath:: Path to windbg install. If not provided, Peach attempts to locate t
 
 === Examples
 
-// ifdef::peachug[]
+ifdef::peachug[]
 
 .Enable for Notepad +
 ====================

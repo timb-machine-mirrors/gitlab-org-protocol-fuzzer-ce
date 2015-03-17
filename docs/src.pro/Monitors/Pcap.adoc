@@ -4,15 +4,42 @@
 
 The _Pcap_ monitor performs network captures during the fuzzing iteration. When a packet 
 arrives, this monitor writes the content into a file, increments the received packet count, 
-and then waits for the next packet to arrive. If a filter is used, the captured packets 
-and associated packet count are for packets that pass the filtering criteria.  
+and waits for the next packet to arrive. If a filter is used, the captured packets 
+and associated packet count are for packets that pass the filtering criteria.
 
 The captured data begins afresh for each iteration. If a fault occurs, the captured data is 
-logged as a pcap file and returned with the fault data. 
+logged as a pcap file and returned with the fault data. The pcap file is compatible with 
+Wireshark and tcpdump.
 
-NOTE: The pcap file contains captured data that is compatible with Wireshark and tcpdump.
+Peach supports supports multiple _Pcap_ monitors in the same pit, as well as simple and 
+compound packet filters in a single monitor. A compound packet filter consists of more than 
+one packet filter joined by AND or OR. 
 
-NOTE: On Windows platforms, the +ipconfig+ utility lists the network devices by name and IP address..
+[NOTE]
+==================================
+
+A packet filter is a boolean value applied to a packet. If the result of the operation is 
+true, the packet is accepted. If the result is false, the packet is ignored. 
+
+The main benefit of using filters is performance. Applying a filter to a packet is much 
+more time efficient than processing the packet information. The more restrictive filter 
+produces a smaller dataset. The result is faster processing for each iteration.  
+
+Two strategies for developing effective filters: 
+
+. Develop a filter that pinpoints the packets to process.
+. Develop a filter that prunes unwanted packets using negative logic.
+
+Generally, using one monitor with a complex filter is better than using two monitors with 
+simpler filters. Using one monitor places all the packets in a single file with 
+an order of arrival. Using multiple monitors makes correlating arrival more difficult 
+because each monitor has its own file to keep the processed packets.
+
+For information on filter strings, see the following: +
+http://www.infosecwriters.com/text_resources/pdf/JStebelton_BPF.pdf[Berkely Packet Filters - The Basics] +
+http://www.tcpdump.org:[tcpdump website] - Look for the “Main pcap man page.”
+
+==================================
 
 === Parameters
 
@@ -22,8 +49,10 @@ Device:: Device name or port where the packet capture takes place.
 
 _Optional:_
 
-Filter:: PCAP style filter string. If present, the filter restricts capture to packets that match 
-the filter string. For information on filter strings, see www.tcpdump.org, maintained by the TCPDUMP developers, and look for the “Main pcap man page”.
+Filter:: PCAP style filter string. If present, the filter restricts capture to packets that match the filter string.
+
+NOTE: On Windows platforms, the +ipconfig+ utility lists the network devices by name and IP address..
+
 
 === Examples
 
@@ -32,7 +61,7 @@ ifdef::peachug[]
 .Show the network devices from ipconfig
 ====================
 
-This example uses ipconfig from the command line to list the available network devices on the 
+This example uses ipconfig from the Windows command line to list the available network devices on the 
 system. The device names follow:
 
 * Local Area Connection* 2

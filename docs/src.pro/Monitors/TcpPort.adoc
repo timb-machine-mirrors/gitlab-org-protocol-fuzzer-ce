@@ -10,6 +10,8 @@ The _TcpPort_ monitor detects state changes on TCP ports. A state change is a tr
 
 The monitor includes an event trigger (the _When_ parameter) that you can use to control when automation occurs.
 
+Fault detection for this monitor uses bucketing. The major hash (bucket category) is the port number. The minor hash is the monitor state (open or closed). Risk evaluation is not used. 
+
 === Parameters
 
 _Required:_
@@ -19,36 +21,40 @@ Port:: Port number to monitor
 
 _Optional:_
 
-Action::  +
-Action to take (Automation, Data, Fault). Defaults to _Automation_.
-+
+Action::  Action to take (Automation, Data, Fault). Defaults to _Automation_.
+
 [horizontal]
 Automation;; Wait for the port to reach a specified state. The _When_ parameter determines when the monitor waits. The maximum waiting time can be configured by setting the _Timeout_ parameter.
 Data;; On a fault, report the state of fault at end of the current iteration.
-Fault;; At end of the current iteration, generate a fault if the port is in a specified state.
+Fault;; At end of the current iteration, generate a fault if the port is in a 
+specified state.
 
-When::  +
-Event that specifies when to perform monitoring. The default setting is _OnCall_. The following settings are defined:
-+
-[horizontal]
-OnCall;; Monitoring begins upon receipt of a message from the state machine.
-OnStart;; Monitoring occurs once at the start of the fuzzing session.
-OnEnd;; Monitoring occurs once at the end of the fuzzing session.
-OnIterationStart;; Monitoring occurs at the start of each iteration.
-OnIterationEnd;; Monitoring occurs at the end of each iteration.
-OnFault;; Monitoring occurs immediately following a fault.
-OnIterationStartAfterFault;; Monitoring occurs following a fault. Note that after the fault occurs, the current iteration completes. Then, at the start of the next iteration, monitoring begins.
+[vertical]
+When:: Event that specifies when to perform monitoring. The default setting is _OnCall_. The following settings are defined:
+
+[cols="1,2" options="header",halign="center"] 
+|==========================================================
+|"When" Setting              |Description
+|OnStart                     |Monitoring occurs once at the start of the fuzzing session.
+|OnEnd                       |Monitoring occurs once at the end of the fuzzing session.
+|OnIterationStart            |Monitoring occurs at the start of each iteration.
+|OnIterationEnd              |Monitoring occurs at the end of each iteration.
+|OnFault                     |Monitoring occurs immediately following a fault.
+|OnIterationStartAfterFault  |Monitoring occurs after a fault occurs and the current iteration completes. Then, at the start of the next iteration, monitoring begins.
+|OnCall                      |Monitoring begins upon receipt of a message from the state machine.
+|==========================================================
+
 
 WaitOnCall:: Call message to start monitoring. This parameter only applies to the _OnCall_ setting.
 
-State::  +
+State:: 
 Port state to monitor. The default value is _Open_.
 +
 [horizontal]
 Open;; The port is available for use.
 Closed;; The port is not available.
 
-Timeout:: Length of time to wait for an incoming connection to be established. Specify values in milliseconds, or specify -1 to not use a timeout interval. 
+Timeout:: Length of time to wait for an incoming connection to be established. Specify values in milliseconds, or specify -1 to indicate a timeout interval is not used. 
 
 === Examples
 
