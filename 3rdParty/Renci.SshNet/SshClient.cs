@@ -17,6 +17,14 @@ namespace Renci.SshNet
         /// </summary>
         private readonly List<ForwardedPort> _forwardedPorts;
 
+        /// <summary>
+        /// Holds a value indicating whether the current instance is disposed.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if the current instance is disposed; otherwise, <c>false</c>.
+        /// </value>
+        private bool _isDisposed;
+
         private Stream _inputStream;
 
         /// <summary>
@@ -26,7 +34,7 @@ namespace Renci.SshNet
         {
             get
             {
-                return this._forwardedPorts.AsReadOnly();
+                return _forwardedPorts.AsReadOnly();
             }
         }
 
@@ -76,7 +84,7 @@ namespace Renci.SshNet
         /// <exception cref="ArgumentNullException"><paramref name="password"/> is null.</exception>
         /// <exception cref="ArgumentException"><paramref name="host"/> is invalid, or <paramref name="username"/> is null or contains whitespace characters.</exception>
         public SshClient(string host, string username, string password)
-            : this(host, ConnectionInfo.DEFAULT_PORT, username, password)
+            : this(host, ConnectionInfo.DefaultPort, username, password)
         {
         }
 
@@ -113,7 +121,7 @@ namespace Renci.SshNet
         /// <exception cref="ArgumentNullException"><paramref name="keyFiles"/> is null.</exception>
         /// <exception cref="ArgumentException"><paramref name="host"/> is invalid, -or- <paramref name="username"/> is null or contains whitespace characters.</exception>
         public SshClient(string host, string username, params PrivateKeyFile[] keyFiles)
-            : this(host, ConnectionInfo.DEFAULT_PORT, username, keyFiles)
+            : this(host, ConnectionInfo.DefaultPort, username, keyFiles)
         {
         }
 
@@ -128,7 +136,24 @@ namespace Renci.SshNet
         /// connection info will be disposed when this instance is disposed.
         /// </remarks>
         private SshClient(ConnectionInfo connectionInfo, bool ownsConnectionInfo)
-            : base(connectionInfo, ownsConnectionInfo)
+            : this(connectionInfo, ownsConnectionInfo, new ServiceFactory())
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SshClient"/> class.
+        /// </summary>
+        /// <param name="connectionInfo">The connection info.</param>
+        /// <param name="ownsConnectionInfo">Specified whether this instance owns the connection info.</param>
+        /// <param name="serviceFactory">The factory to use for creating new services.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="connectionInfo"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="serviceFactory"/> is null.</exception>
+        /// <remarks>
+        /// If <paramref name="ownsConnectionInfo"/> is <c>true</c>, then the
+        /// connection info will be disposed when this instance is disposed.
+        /// </remarks>
+        internal SshClient(ConnectionInfo connectionInfo, bool ownsConnectionInfo, IServiceFactory serviceFactory)
+            : base(connectionInfo, ownsConnectionInfo, serviceFactory)
         {
             _forwardedPorts = new List<ForwardedPort>();
         }
@@ -142,7 +167,7 @@ namespace Renci.SshNet
         {
             base.OnDisconnecting();
 
-            foreach (var port in this._forwardedPorts)
+            foreach (var port in _forwardedPorts)
             {
                 port.Stop();
             }
@@ -163,13 +188,10 @@ namespace Renci.SshNet
         {
             if (port == null)
                 throw new ArgumentNullException("port");
+            EnsureSessionIsOpen();
 
-            if (port.Session != null && port.Session != this.Session)
-                throw new InvalidOperationException("Forwarded port is already added to a different client.");
-
-            port.Session = this.Session;
-
-            this._forwardedPorts.Add(port);
+            AttachForwardedPort(port);
+            _forwardedPorts.Add(port);
         }
 
         /// <summary>
@@ -185,9 +207,21 @@ namespace Renci.SshNet
             //  Stop port forwarding before removing it
             port.Stop();
 
-            port.Session = null;
+            DetachForwardedPort(port);
+            _forwardedPorts.Remove(port);
+        }
 
-            this._forwardedPorts.Remove(port);
+        private void AttachForwardedPort(ForwardedPort port)
+        {
+            if (port.Session != null && port.Session != Session)
+                throw new InvalidOperationException("Forwarded port is already added to a different client.");
+
+            port.Session = Session;
+        }
+
+        private static void DetachForwardedPort(ForwardedPort port)
+        {
+            port.Session = null;
         }
 
         /// <summary>
@@ -198,7 +232,7 @@ namespace Renci.SshNet
         /// <exception cref="SshConnectionException">Client is not connected.</exception>
         public SshCommand CreateCommand(string commandText)
         {
-            return this.CreateCommand(commandText, this.ConnectionInfo.Encoding);
+            return CreateCommand(commandText, ConnectionInfo.Encoding);
         }
 
         /// <summary>
@@ -212,8 +246,10 @@ namespace Renci.SshNet
         /// <exception cref="ArgumentNullException"><paramref name="commandText"/> or <paramref name="encoding"/> is null.</exception>
         public SshCommand CreateCommand(string commandText, Encoding encoding)
         {
-            this.ConnectionInfo.Encoding = encoding;
-            return new SshCommand(this.Session, commandText);
+            EnsureSessionIsOpen();
+
+            ConnectionInfo.Encoding = encoding;
+            return new SshCommand(Session, commandText, encoding);
         }
 
         /// <summary>
@@ -233,7 +269,7 @@ namespace Renci.SshNet
         /// <exception cref="ArgumentNullException"><paramref name="commandText"/> is null.</exception>
         public SshCommand RunCommand(string commandText)
         {
-            var cmd = this.CreateCommand(commandText);
+            var cmd = CreateCommand(commandText);
             cmd.Execute();
             return cmd;
         }
@@ -254,9 +290,12 @@ namespace Renci.SshNet
         /// <returns>
         /// Returns a representation of a <see cref="Shell" /> object.
         /// </returns>
+        /// <exception cref="SshConnectionException">Client is not connected.</exception>
         public Shell CreateShell(Stream input, Stream output, Stream extendedOutput, string terminalName, uint columns, uint rows, uint width, uint height, IDictionary<TerminalModes, uint> terminalModes, int bufferSize)
         {
-            return new Shell(this.Session, input, output, extendedOutput, terminalName, columns, rows, width, height, terminalModes, bufferSize);
+            EnsureSessionIsOpen();
+
+            return new Shell(Session, input, output, extendedOutput, terminalName, columns, rows, width, height, terminalModes, bufferSize);
         }
 
         /// <summary>
@@ -274,9 +313,10 @@ namespace Renci.SshNet
         /// <returns>
         /// Returns a representation of a <see cref="Shell" /> object.
         /// </returns>
+        /// <exception cref="SshConnectionException">Client is not connected.</exception>
         public Shell CreateShell(Stream input, Stream output, Stream extendedOutput, string terminalName, uint columns, uint rows, uint width, uint height, IDictionary<TerminalModes, uint> terminalModes)
         {
-            return this.CreateShell(input, output, extendedOutput, terminalName, columns, rows, width, height, terminalModes, 1024);
+            return CreateShell(input, output, extendedOutput, terminalName, columns, rows, width, height, terminalModes, 1024);
         }
 
         /// <summary>
@@ -288,9 +328,10 @@ namespace Renci.SshNet
         /// <returns>
         /// Returns a representation of a <see cref="Shell" /> object.
         /// </returns>
+        /// <exception cref="SshConnectionException">Client is not connected.</exception>
         public Shell CreateShell(Stream input, Stream output, Stream extendedOutput)
         {
-            return this.CreateShell(input, output, extendedOutput, string.Empty, 0, 0, 0, 0, null, 1024);
+            return CreateShell(input, output, extendedOutput, string.Empty, 0, 0, 0, 0, null, 1024);
         }
 
         /// <summary>
@@ -310,15 +351,18 @@ namespace Renci.SshNet
         /// <returns>
         /// Returns a representation of a <see cref="Shell" /> object.
         /// </returns>
+        /// <exception cref="SshConnectionException">Client is not connected.</exception>
         public Shell CreateShell(Encoding encoding, string input, Stream output, Stream extendedOutput, string terminalName, uint columns, uint rows, uint width, uint height, IDictionary<TerminalModes, uint> terminalModes, int bufferSize)
         {
-            this._inputStream = new MemoryStream();
-            var writer = new StreamWriter(this._inputStream, encoding);
+            // TODO let shell dispose of input stream when we own the stream!
+
+            _inputStream = new MemoryStream();
+            var writer = new StreamWriter(_inputStream, encoding);
             writer.Write(input);
             writer.Flush();
-            this._inputStream.Seek(0, SeekOrigin.Begin);
+            _inputStream.Seek(0, SeekOrigin.Begin);
 
-            return this.CreateShell(this._inputStream, output, extendedOutput, terminalName, columns, rows, width, height, terminalModes, bufferSize);
+            return CreateShell(_inputStream, output, extendedOutput, terminalName, columns, rows, width, height, terminalModes, bufferSize);
         }
 
         /// <summary>
@@ -337,9 +381,10 @@ namespace Renci.SshNet
         /// <returns>
         /// Returns a representation of a <see cref="Shell" /> object.
         /// </returns>
+        /// <exception cref="SshConnectionException">Client is not connected.</exception>
         public Shell CreateShell(Encoding encoding, string input, Stream output, Stream extendedOutput, string terminalName, uint columns, uint rows, uint width, uint height, IDictionary<TerminalModes, uint> terminalModes)
         {
-            return this.CreateShell(encoding, input, output, extendedOutput, terminalName, columns, rows, width, height, terminalModes, 1024);
+            return CreateShell(encoding, input, output, extendedOutput, terminalName, columns, rows, width, height, terminalModes, 1024);
         }
 
         /// <summary>
@@ -352,9 +397,10 @@ namespace Renci.SshNet
         /// <returns>
         /// Returns a representation of a <see cref="Shell" /> object.
         /// </returns>
+        /// <exception cref="SshConnectionException">Client is not connected.</exception>
         public Shell CreateShell(Encoding encoding, string input, Stream output, Stream extendedOutput)
         {
-            return this.CreateShell(encoding, input, output, extendedOutput, string.Empty, 0, 0, 0, 0, null, 1024);
+            return CreateShell(encoding, input, output, extendedOutput, string.Empty, 0, 0, 0, 0, null, 1024);
         }
 
         /// <summary>
@@ -369,9 +415,10 @@ namespace Renci.SshNet
         /// <returns>
         /// Reference to Created ShellStream object.
         /// </returns>
+        /// <exception cref="SshConnectionException">Client is not connected.</exception>
         public ShellStream CreateShellStream(string terminalName, uint columns, uint rows, uint width, uint height, int bufferSize)
         {
-            return this.CreateShellStream(terminalName, columns, rows, width, height, bufferSize, null);
+            return CreateShellStream(terminalName, columns, rows, width, height, bufferSize, null);
         }
 
         /// <summary>
@@ -387,9 +434,12 @@ namespace Renci.SshNet
         /// <returns>
         /// Reference to Created ShellStream object.
         /// </returns>
+        /// <exception cref="SshConnectionException">Client is not connected.</exception>
         public ShellStream CreateShellStream(string terminalName, uint columns, uint rows, uint width, uint height, int bufferSize, IDictionary<TerminalModes, uint> terminalModeValues)
         {
-            return new ShellStream(this.Session, terminalName, columns, rows, width, height, bufferSize, terminalModeValues);
+            EnsureSessionIsOpen();
+
+            return new ShellStream(Session, terminalName, columns, rows, width, height, bufferSize, terminalModeValues);
         }
 
         /// <summary>
@@ -399,11 +449,12 @@ namespace Renci.SshNet
         {
             base.OnDisconnected();
 
-            foreach (var forwardedPort in this._forwardedPorts.ToArray())
+            for (var i = _forwardedPorts.Count - 1; i >= 0; i--)
             {
-                this.RemoveForwardedPort(forwardedPort);
+                var port = _forwardedPorts[i];
+                DetachForwardedPort(port);
+                _forwardedPorts.RemoveAt(i);
             }
-
         }
 
         /// <summary>
@@ -414,11 +465,25 @@ namespace Renci.SshNet
         {
             base.Dispose(disposing);
 
-            if (this._inputStream != null)
+            if (!_isDisposed)
             {
-                this._inputStream.Dispose();
-                this._inputStream = null;
+                if (disposing)
+                {
+                    if (_inputStream != null)
+                    {
+                        _inputStream.Dispose();
+                        _inputStream = null;
+                    }
+                }
             }
+
+            _isDisposed = true;
+        }
+
+        private void EnsureSessionIsOpen()
+        {
+            if (Session == null)
+                throw new SshConnectionException("Client not connected.");
         }
     }
 }

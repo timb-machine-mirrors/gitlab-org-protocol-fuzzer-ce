@@ -325,7 +325,7 @@ namespace Peach.Core.Dom
 
 				while (nodeIter.MoveNext())
 				{
-					var dataElement = ((XPath.PeachXPathNavigator)nodeIter.Current).currentNode as DataElement;
+					var dataElement = ((XPath.PeachXPathNavigator)nodeIter.Current).CurrentNode as DataElement;
 
 					if (dataElement != null)
 					{

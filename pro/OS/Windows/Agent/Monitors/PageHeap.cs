@@ -66,53 +66,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				throw new PeachException("Error, unable to locate WinDbg, please specify using 'WinDbgPath' parameter.");
 		}
 
-		protected void Enable()
-		{
-			try
-			{
-				using (var p = new Process())
-				{
-					p.StartInfo = new ProcessStartInfo
-					{
-						FileName = Path.Combine(WinDbgPath, Gflags),
-						Arguments = string.Format(GflagsArgsEnable, Executable),
-						CreateNoWindow = true,
-						UseShellExecute = false
-					};
-					p.Start();
-					p.WaitForExit();
-				}
-			}
-			catch (Exception exception)
-			{
-				throw new PeachException("Error, Enable PageHeap: " + exception.Message, exception);
-			}
-		}
-
-		protected void Disable()
-		{
-			try
-			{
-				using (var p = new Process())
-				{
-					p.StartInfo = new ProcessStartInfo
-					{
-						FileName = Path.Combine(WinDbgPath, Gflags),
-						Arguments = string.Format(GflagsArgsDisable, Executable),
-						CreateNoWindow = true,
-						UseShellExecute = false
-					};
-
-					p.Start();
-					p.WaitForExit();
-				}
-			}
-			catch (Exception exception)
-			{
-				throw new PeachException("Error, Disable PageHeap: " + exception.Message, exception);
-			}
-		}
-
 		public override void SessionStarting()
 		{
 			Enable();
@@ -121,6 +74,46 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		public override void SessionFinished()
 		{
 			Disable();
+		}
+
+		protected void Enable()
+		{
+			try
+			{
+				Run(string.Format(GflagsArgsEnable, Executable));
+			}
+			catch (Exception ex)
+			{
+				throw new PeachException("Error, Enable PageHeap: " + ex.Message, ex);
+			}
+		}
+
+		protected void Disable()
+		{
+			try
+			{
+				Run(string.Format(GflagsArgsDisable, Executable));
+			}
+			catch (Exception ex)
+			{
+				throw new PeachException("Error, Disable PageHeap: " + ex.Message, ex);
+			}
+		}
+
+		private void Run(string args)
+		{
+			using (var p = new Process())
+			{
+				p.StartInfo = new ProcessStartInfo
+				{
+					FileName = Path.Combine(WinDbgPath, Gflags),
+					Arguments = args,
+					CreateNoWindow = true,
+					UseShellExecute = false
+				};
+				p.Start();
+				p.WaitForExit();
+			}
 		}
 	}
 }

@@ -23,6 +23,11 @@ DIR=""
 PID=""
 LOG="/var/peachcrashes"
 
+# TODO
+# Register $LOG with the kernel core_pattern so that
+# it can be controlled by the monitor and not hard
+# coded in this script.
+
 while :
 do
 	case $1 in

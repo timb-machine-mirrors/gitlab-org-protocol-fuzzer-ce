@@ -3,9 +3,12 @@ using System.Threading;
 
 namespace Renci.SshNet
 {
-    public partial class PasswordAuthenticationMethod : AuthenticationMethod
+    public partial class PasswordAuthenticationMethod
     {
-        /// <exception cref="ArgumentNullException"><paramref name="action"/> is null.</exception>
+        /// <summary>
+        /// Executes the specified action in a separate thread.
+        /// </summary>
+        /// <param name="action">The action to execute.</param>
         partial void ExecuteThread(Action action)
         {
             ThreadPool.QueueUserWorkItem(o => action());

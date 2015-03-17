@@ -25,7 +25,7 @@ namespace Peach.Pro.Test.Core.Agent
 		[SetUp]
 		public void SetUp()
 		{
-			_si = SingleInstance.CreateInstance("Peach.Core.Test.Agent.AgentTests");
+			_si = SingleInstance.CreateInstance(GetType().FullName);
 			_si.Lock();
 		}
 
@@ -118,6 +118,9 @@ namespace Peach.Pro.Test.Core.Agent
 		[Test]
 		public void TestReconnect([ValueSource("ChannelNames")]string protocol)
 		{
+			if (Platform.GetOS() != Platform.OS.Windows && protocol == "tcp")
+				Assert.Ignore(".NET remoting doesn't work inside nunit on mono");
+
 			var port = TestBase.MakePort(20000, 21000);
 			var tmp = Path.GetTempFileName();
 
@@ -224,6 +227,9 @@ namespace Peach.Pro.Test.Core.Agent
 		[Test]
 		public void TestSoftException([ValueSource("ChannelNames")]string protocol)
 		{
+			if (Platform.GetOS() != Platform.OS.Windows && protocol == "tcp")
+				Assert.Ignore(".NET remoting doesn't work inside nunit on mono");
+
 			var port = TestBase.MakePort(20000, 21000);
 
 			var xml = @"
@@ -290,6 +296,9 @@ namespace Peach.Pro.Test.Core.Agent
 		[Test]
 		public void TestBadProcess([ValueSource("ChannelNames")]string protocol)
 		{
+			if (Platform.GetOS() != Platform.OS.Windows && protocol == "tcp")
+				Assert.Ignore(".NET remoting doesn't work inside nunit on mono");
+
 			var xml = @"
 <Peach>
 	<DataModel name='TheDataModel'>
@@ -342,6 +351,9 @@ namespace Peach.Pro.Test.Core.Agent
 		[Test]
 		public void TestDefaultPort([ValueSource("ChannelNames")]string protocol)
 		{
+			if (Platform.GetOS() != Platform.OS.Windows && protocol == "tcp")
+				Assert.Ignore(".NET remoting doesn't work inside nunit on mono");
+
 			var xml = @"
 <Peach>
 	<DataModel name='TheDataModel'>
@@ -731,6 +743,9 @@ namespace Peach.Pro.Test.Core.Agent
 		[Test]
 		public void TestRemotePublisher([ValueSource("ChannelNames")]string protocol)
 		{
+			if (Platform.GetOS() != Platform.OS.Windows && protocol == "tcp")
+				Assert.Ignore(".NET remoting doesn't work inside nunit on mono");
+
 			var tmp = Path.GetTempFileName();
 
 			var pub = @"
@@ -766,6 +781,9 @@ namespace Peach.Pro.Test.Core.Agent
 		[Test]
 		public void TestNewRemotePublisher([ValueSource("ChannelNames")]string protocol)
 		{
+			if (Platform.GetOS() != Platform.OS.Windows && protocol == "tcp")
+				Assert.Ignore(".NET remoting doesn't work inside nunit on mono");
+
 			var tmp = Path.GetTempFileName();
 
 			var pub = @"

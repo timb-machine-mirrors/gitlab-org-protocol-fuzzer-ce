@@ -5,12 +5,13 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using System.Security.Principal;
 using System.Threading;
 using NLog;
 using Peach.Core;
 using Logger = NLog.Logger;
+using HttpListener = SocketHttpListener.Net.HttpListener;
+using HttpListenerContext = SocketHttpListener.Net.HttpListenerContext;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
@@ -49,18 +50,24 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		public void Start()
 		{
-			while (true)
-			{
-				var ar = _listener.BeginGetContext(null, null);
-				var idx = WaitHandle.WaitAny(new[] { _event, ar.AsyncWaitHandle });
+			_listener.OnContext = ProcessContext;
 
-				if (idx == 0)
-					break;
+			_listener.Start();
 
-				var ctx = _listener.EndGetContext(ar);
+			_event.WaitOne();
 
-				ProcessContext(ctx);
-			}
+			//while (true)
+			//{
+			//	var ar = _listener.BeginGetContext(null, null);
+			//	var idx = WaitHandle.WaitAny(new[] { _event, ar.AsyncWaitHandle });
+
+			//	if (idx == 0)
+			//		break;
+
+			//	var ctx = _listener.EndGetContext(ar);
+
+			//	ProcessContext(ctx);
+			//}
 		}
 
 		public void Stop()
@@ -83,29 +90,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			var response = Routes.Dispatch(ctx.Request);
 
-			ctx.Response.StatusCode = (int)response.StatusCode;
-
-			// On mono, reset the connection reuse counter
-			ctx.ResetReuses();
-
-			if (response.Content == null)
-			{
-				ctx.Response.ContentLength64 = 0;
-				ctx.Response.OutputStream.Close();
-			}
-			else
-			{
-				// Leave the stream at the position it was given to us at
-				// so we can return data starting at an offset.
-
-				ctx.Response.ContentType = response.ContentType;
-				ctx.Response.ContentLength64 = response.Content.Length - response.Content.Position;
-
-				using (var stream = ctx.Response.OutputStream)
-				{
-					response.Content.CopyTo(stream);
-				}
-			}
+			response.Complete(ctx);
 
 			Logger.Trace("<<< {0} {1}", (int)response.StatusCode, response.StatusCode);
 		}
@@ -133,7 +118,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			{
 				// If the listener fails to start it is disposed so we
 				// need to make a new one each time.
-				var ret = new HttpListener();
+				var ret = new HttpListener(new LogHook(), "");
 				ret.Prefixes.Add(prefix);
 
 				try
@@ -142,7 +127,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 					return ret;
 				}
-				catch (HttpListenerException ex)
+				catch (System.Net.HttpListenerException ex)
 				{
 					if (reserved || ex.ErrorCode != AccessDenied)
 						throw new PeachException("An error occurred starting the HTTP listener.", ex);
@@ -169,6 +154,71 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 					if (p.ExitCode != 0)
 						throw new PeachException("An error occurred reserving the prefix '{0}'.".Fmt(prefix));
+				}
+			}
+		}
+
+		private class LogHook : Patterns.Logging.ILogger
+		{
+			public void Info(string message, params object[] paramList)
+			{
+				Logger.Info(message, paramList);
+			}
+
+			public void Error(string message, params object[] paramList)
+			{
+				Logger.Error(message, paramList);
+			}
+
+			public void Warn(string message, params object[] paramList)
+			{
+				Logger.Warn(message, paramList);
+			}
+
+			public void Debug(string message, params object[] paramList)
+			{
+				Logger.Debug(message, paramList);
+			}
+
+			public void Fatal(string message, params object[] paramList)
+			{
+				Logger.Fatal(message, paramList);
+			}
+
+			public void FatalException(string message, Exception exception, params object[] paramList)
+			{
+				Logger.FatalException(message.Fmt(paramList), exception);
+			}
+
+			public void ErrorException(string message, Exception exception, params object[] paramList)
+			{
+				Logger.ErrorException(message.Fmt(paramList), exception);
+			}
+
+			public void LogMultiline(string message, Patterns.Logging.LogSeverity severity, System.Text.StringBuilder additionalContent)
+			{
+				Log(severity, message, new object[0]);
+			}
+
+			public void Log(Patterns.Logging.LogSeverity severity, string message, params object[] paramList)
+			{
+				switch (severity)
+				{
+					case Patterns.Logging.LogSeverity.Debug:
+						Debug(message, paramList);
+						break;
+					case Patterns.Logging.LogSeverity.Error:
+						Error(message, paramList);
+						break;
+					case Patterns.Logging.LogSeverity.Fatal:
+						Fatal(message, paramList);
+						break;
+					case Patterns.Logging.LogSeverity.Info:
+						Info(message, paramList);
+						break;
+					case Patterns.Logging.LogSeverity.Warn:
+						Warn(message, paramList);
+						break;
 				}
 			}
 		}

@@ -1014,11 +1014,19 @@ namespace Peach.Core.Analyzers
 					value = value.Replace("\\x", "");
 
 					if (value.Length % 2 != 0)
-						throw new PeachException("Error, the hex value of " + element.debugName + " must contain an even number of characters.");
+						throw new PeachException(
+							"Error, the hex value of {0} must contain an even number of characters: {1}".Fmt(
+								element.debugName,
+								value)
+							);
 
 					var array = HexString.ToArray(value);
 					if (array == null)
-						throw new PeachException("Error, the value of " + element.debugName + " contains invalid hex characters.");
+						throw new PeachException(
+							"Error, the value of {0} contains invalid hex characters: {1}".Fmt(
+								element.debugName,
+								value
+							));
 
 					element.DefaultValue = new Variant(new BitStream(array));
 					break;
@@ -1630,10 +1638,10 @@ namespace Peach.Core.Analyzers
 
 						DataElement tmp;
 
-						if (child.getAttr("valueType", "").ToLower() == "hex")
-							tmp = new Blob();
-						else
+						if (child.getAttr("valueType", "string").ToLower() == "string")
 							tmp = new Dom.String { stringType = StringType.utf8 };
+						else
+							tmp = new Blob();
 
 						// Hack to call common value parsing code.
 						handleCommonDataElementValue(child, tmp);

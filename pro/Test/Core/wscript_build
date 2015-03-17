@@ -20,6 +20,7 @@ deps = [
 	'BouncyCastle.Crypto.dll',
 	'Ionic.Zip.dll',
 	'Newtonsoft.Json.dll',
+	'SocketHttpListener.dll',
 ]
 
 bld(

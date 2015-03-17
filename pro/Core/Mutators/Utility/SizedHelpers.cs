@@ -77,40 +77,21 @@ namespace Peach.Pro.Core.Mutators.Utility
 			if (root.actionData == null)
 				return maxExpansion;
 
-			var max = root.actionData.MaxOutputSize;
+			var max = (long)root.actionData.MaxOutputSize * 8;
 			if (max == 0)
 				return maxExpansion;
 
-			var used = (ulong)root.Value.LengthBits;
-			var size = (ulong)obj.Value.LengthBits;
-			var limit = ((8 * max) - used + size + 7) / 8;
+			// When maxOutputSize hint is greater than the size of an individual
+			// element, artificially increase the maxOutputSize to be the size of
+			// the element
 
-			return (long)Math.Min(maxExpansion, limit);
-		}
+			var used = root.Value.LengthBits;
+			var size = obj.Value.LengthBits;
+			var limit = Math.Max(max - used + size, size);
 
-		/// <summary>
-		/// Returns the maximum number of bytes the element can be expanded
-		/// by and still be under the limit of the MaxOutputSize attribute.
-		/// </summary>
-		/// <param name="obj"></param>
-		/// <returns></returns>
-		public static long MaxExpansion(DataElement obj)
-		{
-			// For testing.  Figure out a way to not have this check in here
-			var root = obj.root as DataModel;
-			if (root == null)
-				return maxExpansion;
-			if (root.actionData == null)
-				return maxExpansion;
+			limit = (limit + 7) / 8;
 
-			var max = root.actionData.MaxOutputSize;
-			if (max == 0)
-				return maxExpansion;
-
-			var used = (ulong)root.Value.LengthBits;
-			var limit = ((8 * max) - used + 7) / 8;
-
-			return (long)Math.Min(maxExpansion, limit);
+			return Math.Min(maxExpansion, limit);
 		}
 
 		/// <summary>
@@ -128,20 +109,21 @@ namespace Peach.Pro.Core.Mutators.Utility
 			if (root.actionData == null)
 				return maxExpansion;
 
-			var max = root.actionData.MaxOutputSize;
+			var max = (long)root.actionData.MaxOutputSize * 8;
 			if (max == 0)
 				return maxExpansion;
 
-			var used = (ulong)root.Value.LengthBits;
-			var size = (ulong)obj.Value.LengthBits;
-
+			var size = obj.Value.LengthBits;
 			if (size == 0)
-				return maxExpansion;
+				return 0;
 
-			var avail = (8 * max) - used;
-			var ret = avail / size;
+			var used = root.Value.LengthBits;
+			if (max < used)
+				return 0;
 
-			return (long)Math.Min(maxExpansion, ret);
+			var avail = (max - used) / size;
+
+			return Math.Min(maxExpansion, avail);
 		}
 
 		public static void ExpandStringTo(DataElement obj, long value)

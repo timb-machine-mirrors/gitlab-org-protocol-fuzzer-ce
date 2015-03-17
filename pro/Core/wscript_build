@@ -16,6 +16,7 @@ deps = [
 	'System.Configuration.dll',
 
 	'Portable.Licensing.dll',
+	'SocketHttpListener.dll',
 
 	'NLog.dll',
 	'SharpPcap.dll',
@@ -54,6 +55,8 @@ deps = [
 	'BouncyCastle.Crypto.dll',
 	'aardvark_net.dll',
 	'LibUsbDotNet.dll',
+
+	'websocket-sharp.dll',
 ]
 
 if bld.env.TARGET == 'win':

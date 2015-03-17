@@ -56,7 +56,7 @@ namespace Peach.Pro.OS.Linux
 				if (locked)
 					return true;
 
-				if (flock(fd, LOCK_EX) == -1)
+				if (flock(fd, LOCK_EX | LOCK_NB) == -1)
 				{
 					int err = Marshal.GetLastWin32Error();
 					if (err != EWOULDBLOCK)

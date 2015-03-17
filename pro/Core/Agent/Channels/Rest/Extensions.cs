@@ -12,6 +12,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 using Peach.Core;
 using Peach.Core.IO;
+using HttpListenerRequest = SocketHttpListener.Net.HttpListenerRequest;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
