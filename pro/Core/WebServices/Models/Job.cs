@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using System.Data.Entity;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Peach.Pro.Core.Storage;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
@@ -72,10 +70,11 @@ namespace Peach.Pro.Core.WebServices.Models
 		public string Iterations { get; set; }
 	}
 
+	[Table]
 	public class Job
 	{
 		[Key]
-		public Guid Id { get; set; }
+		public string Id { get; set; }
 
 		/// <summary>
 		/// The URL of this job
@@ -249,12 +248,12 @@ namespace Peach.Pro.Core.WebServices.Models
 		///// <summary>
 		///// List of tags associated with this job
 		///// </summary>
-		//public virtual ICollection<Tag> Tags { get; set; }
+		//public ICollection<Tag> Tags { get; set; }
 
 		///// <summary>
 		///// ACL for this job
 		///// </summary>
-		//public virtual ICollection<Group> Groups { get; set; }
+		//public ICollection<Group> Groups { get; set; }
 
 		/// <summary>
 		/// Optional starting iteration number

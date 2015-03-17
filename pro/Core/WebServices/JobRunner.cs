@@ -10,7 +10,7 @@ namespace Peach.Pro.Core.WebServices
 {
 	public class JobRunner
 	{
-		static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+		//static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
 		Stopwatch stopwatch;
 		//ManualResetEvent pauseEvent;

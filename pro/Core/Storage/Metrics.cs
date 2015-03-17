@@ -1,79 +1,58 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Peach.Pro.Core.Storage
 {
-	public interface IMetric
-	{
-		long Id { get; set; }
-		string Name { get; set; }
-	}
+	[AttributeUsage(AttributeTargets.Property)]
+	class NotMappedAttribute : Attribute { }
 
-	public class State : IMetric
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
+	class Table : Attribute { }
+
+	[AttributeUsage(AttributeTargets.Property)]
+	class KeyAttribute : Attribute { }
+
+	[AttributeUsage(AttributeTargets.Property)]
+	class RequiredAttribute : Attribute { }
+
+	[AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
+	class IndexAttribute : Attribute
 	{
-		[Key]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public long Id { get; set; }
-	
-		[Index(IsUnique = true)]
-		[Required]
 		public string Name { get; set; }
+		public bool IsUnique { get; set; }
+
+		public IndexAttribute() { }
+		public IndexAttribute(string name) { Name = name; }
 	}
 
-	public class Action : IMetric
+	[AttributeUsage(AttributeTargets.Property)]
+	class ForeignKeyAttribute : Attribute
 	{
-		[Key]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public long Id { get; set; }
+		public Type TargetEntity { get; set; }
+		public string TargetProperty { get; set; }
 
-		[Index(IsUnique = true)]
-		[Required]
-		public string Name { get; set; }
+		public ForeignKeyAttribute(Type targetEntity)
+		{
+			TargetEntity = targetEntity;
+			TargetProperty = "Id";
+		}
 	}
 
-	public class Parameter : IMetric
+	public class Metric
 	{
 		[Key]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public long Id { get; set; }
-
-		[Index(IsUnique = true)]
-		public string Name { get; set; }
-	}
-
-	public class Element : IMetric
-	{
-		[Key]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public long Id { get; set; }
-
-		[Index(IsUnique = true)]
-		[Required]
-		public string Name { get; set; }
-	}
-
-	public class Mutator : IMetric
-	{
-		[Key]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public long Id { get; set; }
-
-		[Index(IsUnique = true)]
-		[Required]
-		public string Name { get; set; }
-	}
-
-	public class Dataset : IMetric
-	{
-		[Key]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public long Id { get; set; }
 
 		[Index(IsUnique = true)]
 		public string Name { get; set; }
 	}
+
+	public class State : Metric { }
+	public class Action : Metric { }
+	public class Parameter : Metric { }
+	public class Element : Metric { }
+	public class Mutator : Metric { }
+	public class Dataset : Metric { }
 
 	/// <summary>
 	/// One row per state instance.
@@ -81,12 +60,10 @@ namespace Peach.Pro.Core.Storage
 	public class StateInstance
 	{
 		[Key]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public long Id { get; set; }
 
+		[ForeignKey(typeof(State))]
 		public long StateId { get; set; }
-		[ForeignKey("StateId")]
-		public virtual State State { get; set; }
 	}
 
 	/// <summary>
@@ -95,7 +72,6 @@ namespace Peach.Pro.Core.Storage
 	public class Mutation
 	{
 		[Key]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public long Id { get; set; }
 
 		[Index("IX_Mutation_Iteration")]
@@ -105,47 +81,38 @@ namespace Peach.Pro.Core.Storage
 		[Index("IX_Mutation")]
 		[Index("IX_Mutation_Iteration")]
 		[Index("IX_Mutation_State")]
+		[ForeignKey(typeof(State))]
 		public long StateId { get; set; }
-		
+
 		[Index("IX_Mutation")]
 		[Index("IX_Mutation_Iteration")]
 		[Index("IX_Mutation_Action")]
+		[ForeignKey(typeof(Action))]
 		public long ActionId { get; set; }
-		
+
 		[Index("IX_Mutation")]
 		[Index("IX_Mutation_Iteration")]
 		[Index("IX_Mutation_Parameter")]
+		[ForeignKey(typeof(Parameter))]
 		public long ParameterId { get; set; }
-		
+
 		[Index("IX_Mutation")]
 		[Index("IX_Mutation_Iteration")]
 		[Index("IX_Mutation_Element")]
+		[ForeignKey(typeof(Element))]
 		public long ElementId { get; set; }
 
 		[Index("IX_Mutation")]
 		[Index("IX_Mutation_Iteration")]
 		[Index("IX_Mutation_Mutator")]
-
+		[ForeignKey(typeof(Mutator))]
 		public long MutatorId { get; set; }
+
 		[Index("IX_Mutation")]
 		[Index("IX_Mutation_Iteration")]
 		[Index("IX_Mutation_Dataset")]
+		[ForeignKey(typeof(Dataset))]
 		public long DatasetId { get; set; }
-
-		[ForeignKey("StateId")]
-		public virtual State State { get; set; }
-		[ForeignKey("ActionId")]
-		public virtual Action Action { get; set; }
-		[ForeignKey("ParameterId")]
-		public virtual Parameter Parameter { get; set; }
-		[ForeignKey("ElementId")]
-		public virtual Element Element { get; set; }
-		[ForeignKey("MutatorId")]
-		public virtual Mutator Mutator { get; set; }
-		[ForeignKey("DatasetId")]
-		public virtual Dataset Dataset { get; set; }
-
-		public virtual ICollection<FaultMetric> Faults { get; set; }
 	}
 
 	/// <summary>
@@ -154,7 +121,6 @@ namespace Peach.Pro.Core.Storage
 	public class FaultMetric
 	{
 		[Key]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public long Id { get; set; }
 
 		[Index("IX_FaultMetric_Iteration")]
@@ -168,7 +134,21 @@ namespace Peach.Pro.Core.Storage
 
 		public DateTime Timestamp { get; set; }
 		public int Hour { get; set; }
+	}
 
-		public virtual ICollection<Mutation> Mutations { get; set; }
+	/// <summary>
+	/// Many-to-many association
+	/// </summary>
+	public class FaultMetricMutation
+	{
+		[Key]
+		[ForeignKey(typeof(FaultMetric))]
+		[Index("IX_FaultMetricMutation_FaultMetric")]
+		public long FaultMetricId { get; set; }
+
+		[Key]
+		[ForeignKey(typeof(Mutation))]
+		[Index("IX_FaultMetricMutation_Mutation")]
+		public long MutationId { get; set; }
 	}
 }
