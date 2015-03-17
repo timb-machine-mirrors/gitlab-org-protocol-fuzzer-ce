@@ -503,7 +503,8 @@ namespace Peach.Core.Cracker
 			logger.Debug("Running constraint [{0}]", element.constraint);
 
 			Dictionary<string, object> scope = new Dictionary<string, object>();
-			scope["element"] = element;
+            scope["element"] = element;
+            scope["self"] = element;
 
 			// Use DefaultValue for constraint, it is the actual cracked value.
 			// InternalValue will have relations/fixups applied

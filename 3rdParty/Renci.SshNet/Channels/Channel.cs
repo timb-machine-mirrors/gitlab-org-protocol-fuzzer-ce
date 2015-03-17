@@ -1,4 +1,5 @@
-﻿ using System;
+﻿using System;
+using System.Net.Sockets;
 using System.Threading;
 using Renci.SshNet.Common;
 using Renci.SshNet.Messages;
@@ -10,19 +11,92 @@ namespace Renci.SshNet.Channels
     /// <summary>
     /// Represents base class for SSH channel implementations.
     /// </summary>
-    internal abstract class Channel : IDisposable
+    internal abstract class Channel : IChannel
     {
+        private const int Initial = 0;
+        private const int Considered = 1;
+        private const int Sent = 2;
+
         private EventWaitHandle _channelClosedWaitHandle = new ManualResetEvent(false);
         private EventWaitHandle _channelServerWindowAdjustWaitHandle = new ManualResetEvent(false);
         private EventWaitHandle _errorOccuredWaitHandle = new ManualResetEvent(false);
-        private EventWaitHandle _disconnectedWaitHandle = new ManualResetEvent(false);
         private readonly object _serverWindowSizeLock = new object();
-        private bool _closeMessageSent;
-        private uint _initialWindowSize;
+        private readonly uint _initialWindowSize;
         private uint? _remoteWindowSize;
         private uint? _remoteChannelNumber;
         private uint? _remotePacketSize;
-        private Session _session;
+        private ISession _session;
+
+        /// <summary>
+        /// Holds a value indicating whether the SSH_MSG_CHANNEL_CLOSE has been sent to the remote party.
+        /// </summary>
+        /// <value>
+        /// <c>0</c> when the SSH_MSG_CHANNEL_CLOSE message has not been sent or considered
+        /// <c>1</c> when sending a SSH_MSG_CHANNEL_CLOSE message to the remote party is under consideration
+        /// <c>2</c> when this message has been sent to the remote party
+        /// </value>
+        private int _closeMessageSent;
+
+        /// <summary>
+        /// Holds a value indicating whether a SSH_MSG_CHANNEL_CLOSE has been received from the other
+        /// party.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> when a SSH_MSG_CHANNEL_CLOSE message has been received from the other party;
+        /// otherwise, <c>false</c>.
+        /// </value>
+        private bool _closeMessageReceived;
+
+        /// <summary>
+        /// Holds a value indicating whether the SSH_MSG_CHANNEL_EOF has been received from the other party.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> when a SSH_MSG_CHANNEL_EOF message has been received from the other party;
+        /// otherwise, <c>false</c>.
+        /// </value>
+        private bool _eofMessageReceived;
+
+        /// <summary>
+        /// Holds a value indicating whether the SSH_MSG_CHANNEL_EOF has been sent to the remote party.
+        /// </summary>
+        /// <value>
+        /// <c>0</c> when the SSH_MSG_CHANNEL_EOF message has not been sent or considered
+        /// <c>1</c> when sending a SSH_MSG_CHANNEL_EOF message to the remote party is under consideration
+        /// <c>2</c> when this message has been sent to the remote party
+        /// </value>
+        private int _eofMessageSent;
+
+        /// <summary>
+        /// Occurs when an exception is thrown when processing channel messages.
+        /// </summary>
+        public event EventHandler<ExceptionEventArgs> Exception;
+
+        /// <summary>
+        /// Initializes a new <see cref="Channel"/> instance.
+        /// </summary>
+        /// <param name="session">The session.</param>
+        /// <param name="localChannelNumber">The local channel number.</param>
+        /// <param name="localWindowSize">Size of the window.</param>
+        /// <param name="localPacketSize">Size of the packet.</param>
+        protected Channel(ISession session, uint localChannelNumber, uint localWindowSize, uint localPacketSize)
+        {
+            _session = session;
+            _initialWindowSize = localWindowSize;
+            LocalChannelNumber = localChannelNumber;
+            LocalPacketSize = localPacketSize;
+            LocalWindowSize = localWindowSize;
+
+            _session.ChannelWindowAdjustReceived += OnChannelWindowAdjust;
+            _session.ChannelDataReceived += OnChannelData;
+            _session.ChannelExtendedDataReceived += OnChannelExtendedData;
+            _session.ChannelEofReceived += OnChannelEof;
+            _session.ChannelCloseReceived += OnChannelClose;
+            _session.ChannelRequestReceived += OnChannelRequest;
+            _session.ChannelSuccessReceived += OnChannelSuccess;
+            _session.ChannelFailureReceived += OnChannelFailure;
+            _session.ErrorOccured += Session_ErrorOccured;
+            _session.Disconnected += Session_Disconnected;
+        }
 
         /// <summary>
         /// Gets the session.
@@ -30,7 +104,7 @@ namespace Renci.SshNet.Channels
         /// <value>
         ///  Thhe session.
         /// </value>
-        protected Session Session
+        protected ISession Session
         {
             get { return _session; }
         }
@@ -46,6 +120,9 @@ namespace Renci.SshNet.Channels
         /// <summary>
         /// Gets the local channel number.
         /// </summary>
+        /// <value>
+        /// The local channel number.
+        /// </value>
         public uint LocalChannelNumber { get; private set; }
 
         /// <summary>
@@ -164,7 +241,7 @@ namespace Renci.SshNet.Channels
         /// <summary>
         /// Occurs when <see cref="ChannelSuccessMessage"/> message received
         /// </summary>
-        public event EventHandler<ChannelEventArgs> RequestSuccessed;
+        public event EventHandler<ChannelEventArgs> RequestSucceeded;
 
         /// <summary>
         /// Occurs when <see cref="ChannelFailureMessage"/> message received
@@ -181,16 +258,16 @@ namespace Renci.SshNet.Channels
         /// </value>
         protected bool IsConnected
         {
-            get { return this._session.IsConnected; }
+            get { return _session.IsConnected; }
         }
 
         /// <summary>
         /// Gets the connection info.
         /// </summary>
         /// <value>The connection info.</value>
-        protected ConnectionInfo ConnectionInfo
+        protected IConnectionInfo ConnectionInfo
         {
-            get { return this._session.ConnectionInfo; }
+            get { return _session.ConnectionInfo; }
         }
 
         /// <summary>
@@ -199,33 +276,7 @@ namespace Renci.SshNet.Channels
         /// <value>The session semaphore.</value>
         protected SemaphoreLight SessionSemaphore
         {
-            get { return this._session.SessionSemaphore; }
-        }
-
-        /// <summary>
-        /// Initializes the channel.
-        /// </summary>
-        /// <param name="session">The session.</param>
-        /// <param name="localWindowSize">Size of the window.</param>
-        /// <param name="localPacketSize">Size of the packet.</param>
-        internal virtual void Initialize(Session session, uint localWindowSize, uint localPacketSize)
-        {
-            _session = session;
-            _initialWindowSize = localWindowSize;
-            LocalPacketSize = localPacketSize;
-            LocalWindowSize = localWindowSize;  // Initial window size
-            LocalChannelNumber = session.NextChannelNumber;
-
-            _session.ChannelWindowAdjustReceived += OnChannelWindowAdjust;
-            _session.ChannelDataReceived += OnChannelData;
-            _session.ChannelExtendedDataReceived += OnChannelExtendedData;
-            _session.ChannelEofReceived += OnChannelEof;
-            _session.ChannelCloseReceived += OnChannelClose;
-            _session.ChannelRequestReceived += OnChannelRequest;
-            _session.ChannelSuccessReceived += OnChannelSuccess;
-            _session.ChannelFailureReceived += OnChannelFailure;
-            _session.ErrorOccured += Session_ErrorOccured;
-            _session.Disconnected += Session_Disconnected;
+            get { return _session.SessionSemaphore; }
         }
 
         protected void InitializeRemoteInfo(uint remoteChannelNumber, uint remoteWindowSize, uint remotePacketSize)
@@ -236,25 +287,20 @@ namespace Renci.SshNet.Channels
         }
 
         /// <summary>
-        /// Sends the SSH_MSG_CHANNEL_EOF message.
+        /// Sends a SSH_MSG_CHANNEL_DATA message with the specified payload.
         /// </summary>
-        internal void SendEof()
+        /// <param name="data">The payload to send.</param>
+        public void SendData(byte[] data)
         {
-            //  Send EOF message first when channel need to be closed
-            this.SendMessage(new ChannelEofMessage(this.RemoteChannelNumber));
-        }
-
-        internal void SendData(byte[] buffer)
-        {
-            this.SendMessage(new ChannelDataMessage(this.RemoteChannelNumber, buffer));
+            SendMessage(new ChannelDataMessage(RemoteChannelNumber, data));
         }
 
         /// <summary>
         /// Closes the channel.
         /// </summary>
-        public virtual void Close()
+        public void Close()
         {
-            this.Close(true);
+            Close(true);
         }
 
         #region Channel virtual methods
@@ -265,11 +311,11 @@ namespace Renci.SshNet.Channels
         /// <param name="bytesToAdd">The bytes to add.</param>
         protected virtual void OnWindowAdjust(uint bytesToAdd)
         {
-            lock (this._serverWindowSizeLock)
+            lock (_serverWindowSizeLock)
             {
-                this.RemoteWindowSize += bytesToAdd;
+                RemoteWindowSize += bytesToAdd;
             }
-            this._channelServerWindowAdjustWaitHandle.Set();
+            _channelServerWindowAdjustWaitHandle.Set();
         }
 
         /// <summary>
@@ -278,7 +324,7 @@ namespace Renci.SshNet.Channels
         /// <param name="data">The data.</param>
         protected virtual void OnData(byte[] data)
         {
-            this.AdjustDataWindow(data);
+            AdjustDataWindow(data);
 
             var dataReceived = DataReceived;
             if (dataReceived != null)
@@ -292,7 +338,7 @@ namespace Renci.SshNet.Channels
         /// <param name="dataTypeCode">The data type code.</param>
         protected virtual void OnExtendedData(byte[] data, uint dataTypeCode)
         {
-            this.AdjustDataWindow(data);
+            AdjustDataWindow(data);
 
             var extendedDataReceived = ExtendedDataReceived;
             if (extendedDataReceived != null)
@@ -304,6 +350,8 @@ namespace Renci.SshNet.Channels
         /// </summary>
         protected virtual void OnEof()
         {
+            _eofMessageReceived = true;
+
             var endOfData = EndOfData;
             if (endOfData != null)
                 endOfData(this, new ChannelEventArgs(LocalChannelNumber));
@@ -314,7 +362,10 @@ namespace Renci.SshNet.Channels
         /// </summary>
         protected virtual void OnClose()
         {
-            this.Close(false);
+            _closeMessageReceived = true;
+
+            // close the channel
+            Close(false);
 
             var closed = Closed;
             if (closed != null)
@@ -337,7 +388,7 @@ namespace Renci.SshNet.Channels
         /// </summary>
         protected virtual void OnSuccess()
         {
-            var requestSuccessed = RequestSuccessed;
+            var requestSuccessed = RequestSucceeded;
             if (requestSuccessed != null)
                 requestSuccessed(this, new ChannelEventArgs(LocalChannelNumber));
         }
@@ -355,32 +406,46 @@ namespace Renci.SshNet.Channels
         #endregion
 
         /// <summary>
+        /// Raises <see cref="Channel.Exception"/> event.
+        /// </summary>
+        /// <param name="exception">The exception.</param>
+        protected void RaiseExceptionEvent(Exception exception)
+        {
+            var handlers = Exception;
+            if (handlers != null)
+            {
+                handlers(this, new ExceptionEventArgs(exception));
+            }
+        }
+
+        /// <summary>
+        /// Sends a message to the server.
+        /// </summary>
+        /// <param name="message">The message to send.</param>
+        /// <returns>
+        /// <c>true</c> if the message was sent to the server; otherwise, <c>false</c>.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">The size of the packet exceeds the maximum size defined by the protocol.</exception>
+        /// <remarks>
+        /// This methods returns <c>false</c> when the attempt to send the message results in a
+        /// <see cref="SocketException"/> or a <see cref="SshException"/>.
+        /// </remarks>
+        private bool TrySendMessage(Message message)
+        {
+            return _session.TrySendMessage(message);
+        }
+
+        /// <summary>
         /// Sends SSH message to the server.
         /// </summary>
         /// <param name="message">The message.</param>
         protected void SendMessage(Message message)
         {
             // send channel messages only while channel is open
-            if (!this.IsOpen)
+            if (!IsOpen)
                 return;
 
-            this._session.SendMessage(message);
-        }
-
-        /// <summary>
-        /// Sends close channel message to the server, and marks the channel closed.
-        /// </summary>
-        /// <param name="message">The message to send.</param>
-        private void SendMessage(ChannelCloseMessage message)
-        {
-            // send channel messages only while channel is open
-            if (!this.IsOpen)
-                return;
-
-            this._session.SendMessage(message);
-
-            // when channel close message is sent channel considered to be closed
-            this.IsOpen = false;
+            _session.SendMessage(message);
         }
 
         /// <summary>
@@ -403,7 +468,7 @@ namespace Renci.SshNet.Channels
         protected void SendMessage(ChannelDataMessage message)
         {
             // send channel messages only while channel is open
-            if (!this.IsOpen)
+            if (!IsOpen)
                 return;
 
             var totalDataLength = message.Data.Length;
@@ -416,18 +481,31 @@ namespace Renci.SshNet.Channels
                 if (dataThatCanBeSentInMessage == totalDataLength)
                 {
                     // we can send the message in one chunk
-                    this._session.SendMessage(message);
+                    _session.SendMessage(message);
                 }
                 else
                 {
                     // we need to send the message in multiple chunks
                     var dataToSend = new byte[dataThatCanBeSentInMessage];
                     Array.Copy(message.Data, totalDataSent, dataToSend, 0, dataThatCanBeSentInMessage);
-                    this._session.SendMessage(new ChannelDataMessage(message.LocalChannelNumber, dataToSend));
+                    _session.SendMessage(new ChannelDataMessage(message.LocalChannelNumber, dataToSend));
                 }
                 totalDataSent += dataThatCanBeSentInMessage;
                 totalBytesToSend -= dataThatCanBeSentInMessage;
             }
+        }
+
+        /// <summary>
+        /// Sends a SSH_MSG_CHANNEL_EOF message to the remote server.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The channel is closed.</exception>
+        internal void SendEof()
+        {
+            if (!IsOpen)
+                throw CreateChannelClosedException();
+
+            _session.SendMessage(new ChannelEofMessage(RemoteChannelNumber));
+            _eofMessageSent = Sent;
         }
 
         /// <summary>
@@ -449,8 +527,8 @@ namespace Renci.SshNet.Channels
         /// </remarks>
         protected void SendMessage(ChannelExtendedDataMessage message)
         {
-            // end channel messages only while channel is open
-            if (!this.IsOpen)
+            // send channel messages only while channel is open
+            if (!IsOpen)
                 return;
 
             var totalDataLength = message.Data.Length;
@@ -463,14 +541,14 @@ namespace Renci.SshNet.Channels
                 if (dataThatCanBeSentInMessage == totalDataLength)
                 {
                     // we can send the message in one chunk
-                    this._session.SendMessage(message);
+                    _session.SendMessage(message);
                 }
                 else
                 {
                     // we need to send the message in multiple chunks
                     var dataToSend = new byte[dataThatCanBeSentInMessage];
                     Array.Copy(message.Data, totalDataSent, dataToSend, 0, dataThatCanBeSentInMessage);
-                    this._session.SendMessage(new ChannelExtendedDataMessage(message.LocalChannelNumber,
+                    _session.SendMessage(new ChannelExtendedDataMessage(message.LocalChannelNumber,
                         message.DataTypeCode, dataToSend));
                 }
                 totalDataSent += dataThatCanBeSentInMessage;
@@ -484,35 +562,63 @@ namespace Renci.SshNet.Channels
         /// <param name="waitHandle">The wait handle.</param>
         protected void WaitOnHandle(WaitHandle waitHandle)
         {
-            this._session.WaitOnHandle(waitHandle);
+            _session.WaitOnHandle(waitHandle);
         }
 
+        /// <summary>
+        /// Closes the channel, optionally waiting for the SSH_MSG_CHANNEL_CLOSE message to
+        /// be received from the server.
+        /// </summary>
+        /// <param name="wait"><c>true</c> to wait for the SSH_MSG_CHANNEL_CLOSE message to be received from the server; otherwise, <c>false</c>.</param>
         protected virtual void Close(bool wait)
         {
-            // send message to close the channel on the server
-            // ignore sending close message when client not connected
-            if (!_closeMessageSent && this.IsConnected)
+            // send EOF message first when channel need to be closed, and the remote party has not already sent
+            // a SSH_MSG_CHANNEL_EOF or SSH_MSG_CHANNEL_CLOSE message
+            //
+            // note that we might have had a race condition here when the remote party sends a SSH_MSG_CHANNEL_CLOSE
+            // immediately after it has sent a SSH_MSG_CHANNEL_EOF message
+            //
+            // in that case, we would risk sending a SSH_MSG_CHANNEL_EOF message after the remote party has
+            // closed its end of the channel
+            //
+            // as a solution for this issue we only send a SSH_MSG_CHANNEL_EOF message if we haven't received a
+            // SSH_MSG_CHANNEL_EOF or SSH_MSG_CHANNEL_CLOSE message from the remote party
+            if (Interlocked.CompareExchange(ref _eofMessageSent, Considered, Initial) == Initial)
             {
-                lock (this)
+                if (!_closeMessageReceived && !_eofMessageReceived && IsOpen && IsConnected)
                 {
-                    if (!_closeMessageSent)
-                    {
-                        this.SendMessage(new ChannelCloseMessage(this.RemoteChannelNumber));
-                        this._closeMessageSent = true;
-                    }
+                    if (TrySendMessage(new ChannelEofMessage(RemoteChannelNumber)))
+                        _eofMessageSent = Sent;
                 }
             }
-            else
+
+            // send message to close the channel on the server
+            if (Interlocked.CompareExchange(ref _closeMessageSent, Considered, Initial) == Initial)
             {
-                // also mark the channel closed if the session is no longer connected
-                IsOpen = false;
+                // ignore sending close message when client is not connected or the channel is closed
+                if (IsOpen && IsConnected)
+                {
+                    if (TrySendMessage(new ChannelCloseMessage(RemoteChannelNumber)))
+                        _closeMessageSent = Sent;
+                }
             }
 
-            // wait for channel to be closed
-            if (wait)
+            // mark the channel closed
+            IsOpen = false;
+
+            // wait for channel to be closed if we actually sent a close message (either to initiate closing
+            // the channel, or as response to a SSH_MSG_CHANNEL_CLOSE message sent by the server
+            if (wait && _closeMessageSent == Sent)
             {
-                WaitOnHandle(this._channelClosedWaitHandle);
+                WaitOnHandle(_channelClosedWaitHandle);
             }
+
+            // reset indicators in case we want to reopen the channel; these are safe to reset
+            // since the channel is marked closed by now
+            _eofMessageSent = Initial;
+            _eofMessageReceived = false;
+            _closeMessageReceived = false;
+            _closeMessageSent = Initial;
         }
 
         protected virtual void OnDisconnected()
@@ -525,69 +631,122 @@ namespace Renci.SshNet.Channels
 
         private void Session_Disconnected(object sender, EventArgs e)
         {
-            this.OnDisconnected();
+            IsOpen = false;
 
-            //  If object is disposed or being disposed don't handle this event
-            if (this._isDisposed)
-                return;
+            try
+            {
+                OnDisconnected();
+            }
+            catch (Exception ex)
+            {
+                OnChannelException(ex);
+            }
+        }
 
-            var disconnectedWaitHandle = this._disconnectedWaitHandle;
-            if (disconnectedWaitHandle != null)
-                disconnectedWaitHandle.Set();
+        /// <summary>
+        /// Called when an <see cref="Exception"/> occurs while processing a channel message.
+        /// </summary>
+        /// <param name="ex">The <see cref="Exception"/>.</param>
+        /// <remarks>
+        /// This method will in turn invoke <see cref="OnErrorOccured(System.Exception)"/>, and
+        /// raise the <see cref="Exception"/> event.
+        /// </remarks>
+        protected void OnChannelException(Exception ex)
+        {
+            OnErrorOccured(ex);
+            RaiseExceptionEvent(ex);
         }
 
         private void Session_ErrorOccured(object sender, ExceptionEventArgs e)
         {
-            this.OnErrorOccured(e.Exception);
+            try
+            {
+                OnErrorOccured(e.Exception);
 
-            //  If object is disposed or being disposed don't handle this event
-            if (this._isDisposed)
-                return;
-
-            var errorOccuredWaitHandle = this._errorOccuredWaitHandle;
-            if (errorOccuredWaitHandle != null)
-                errorOccuredWaitHandle.Set();
+                var errorOccuredWaitHandle = _errorOccuredWaitHandle;
+                if (errorOccuredWaitHandle != null)
+                    errorOccuredWaitHandle.Set();
+            }
+            catch (Exception ex)
+            {
+                RaiseExceptionEvent(ex);
+            }
         }
 
         #region Channel message event handlers
 
         private void OnChannelWindowAdjust(object sender, MessageEventArgs<ChannelWindowAdjustMessage> e)
         {
-            if (e.Message.LocalChannelNumber == this.LocalChannelNumber)
+            if (e.Message.LocalChannelNumber == LocalChannelNumber)
             {
-                this.OnWindowAdjust(e.Message.BytesToAdd);
+                try
+                {
+                    OnWindowAdjust(e.Message.BytesToAdd);
+                }
+                catch (Exception ex)
+                {
+                    OnChannelException(ex);
+                }
             }
         }
 
         private void OnChannelData(object sender, MessageEventArgs<ChannelDataMessage> e)
         {
-            if (e.Message.LocalChannelNumber == this.LocalChannelNumber)
+            if (e.Message.LocalChannelNumber == LocalChannelNumber)
             {
-                this.OnData(e.Message.Data);
+                try
+                {
+                    OnData(e.Message.Data);
+                }
+                catch (Exception ex)
+                {
+                    OnChannelException(ex);
+                }
             }
         }
 
         private void OnChannelExtendedData(object sender, MessageEventArgs<ChannelExtendedDataMessage> e)
         {
-            if (e.Message.LocalChannelNumber == this.LocalChannelNumber)
+            if (e.Message.LocalChannelNumber == LocalChannelNumber)
             {
-                this.OnExtendedData(e.Message.Data, e.Message.DataTypeCode);
+                try
+                {
+                    OnExtendedData(e.Message.Data, e.Message.DataTypeCode);
+                }
+                catch (Exception ex)
+                {
+                    OnChannelException(ex);
+                }
             }
         }
 
         private void OnChannelEof(object sender, MessageEventArgs<ChannelEofMessage> e)
         {
-            if (e.Message.LocalChannelNumber == this.LocalChannelNumber)
+            if (e.Message.LocalChannelNumber == LocalChannelNumber)
             {
-                this.OnEof();
+                try
+                {
+                    OnEof();
+                }
+                catch (Exception ex)
+                {
+                    OnChannelException(ex);
+                }
             }
         }
 
         private void OnChannelClose(object sender, MessageEventArgs<ChannelCloseMessage> e)
         {
-            if (e.Message.LocalChannelNumber == this.LocalChannelNumber)
+            if (e.Message.LocalChannelNumber == LocalChannelNumber)
             {
-                this.OnClose();
+                try
+                {
+                    OnClose();
+                }
+                catch (Exception ex)
+                {
+                    OnChannelException(ex);
+                }
 
                 var channelClosedWaitHandle = _channelClosedWaitHandle;
                 if (channelClosedWaitHandle != null)
@@ -597,39 +756,61 @@ namespace Renci.SshNet.Channels
 
         private void OnChannelRequest(object sender, MessageEventArgs<ChannelRequestMessage> e)
         {
-            if (e.Message.LocalChannelNumber == this.LocalChannelNumber)
+            if (e.Message.LocalChannelNumber == LocalChannelNumber)
             {
-                if (this._session.ConnectionInfo.ChannelRequests.ContainsKey(e.Message.RequestName))
+                try
                 {
-                    //  Get request specific class
-                    var requestInfo = this._session.ConnectionInfo.ChannelRequests[e.Message.RequestName];
+                    if (_session.ConnectionInfo.ChannelRequests.ContainsKey(e.Message.RequestName))
+                    {
+                        //  Get request specific class
+                        var requestInfo = _session.ConnectionInfo.ChannelRequests[e.Message.RequestName];
 
-                    //  Load request specific data
-                    requestInfo.Load(e.Message.RequestData);
+                        //  Load request specific data
+                        requestInfo.Load(e.Message.RequestData);
 
-                    //  Raise request specific event
-                    this.OnRequest(requestInfo);
+                        //  Raise request specific event
+                        OnRequest(requestInfo);
+                    }
+                    else
+                    {
+                        // TODO: we should also send a SSH_MSG_CHANNEL_FAILURE message
+                        throw new NotSupportedException(string.Format(CultureInfo.CurrentCulture, "Request '{0}' is not supported.", e.Message.RequestName));
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    throw new NotSupportedException(string.Format(CultureInfo.CurrentCulture, "Request '{0}' is not supported.", e.Message.RequestName));
+                    OnChannelException(ex);
                 }
             }
         }
 
         private void OnChannelSuccess(object sender, MessageEventArgs<ChannelSuccessMessage> e)
         {
-            if (e.Message.LocalChannelNumber == this.LocalChannelNumber)
+            if (e.Message.LocalChannelNumber == LocalChannelNumber)
             {
-                this.OnSuccess();
+                try
+                {
+                    OnSuccess();
+                }
+                catch (Exception ex)
+                {
+                    OnChannelException(ex);
+                }
             }
         }
 
         private void OnChannelFailure(object sender, MessageEventArgs<ChannelFailureMessage> e)
         {
-            if (e.Message.LocalChannelNumber == this.LocalChannelNumber)
+            if (e.Message.LocalChannelNumber == LocalChannelNumber)
             {
-                this.OnFailure();
+                try
+                {
+                    OnFailure();
+                }
+                catch (Exception ex)
+                {
+                    OnChannelException(ex);
+                }
             }
         }
 
@@ -637,13 +818,13 @@ namespace Renci.SshNet.Channels
 
         private void AdjustDataWindow(byte[] messageData)
         {
-            this.LocalWindowSize -= (uint)messageData.Length;
+            LocalWindowSize -= (uint)messageData.Length;
 
             //  Adjust window if window size is too low
-            if (this.LocalWindowSize < this.LocalPacketSize)
+            if (LocalWindowSize < LocalPacketSize)
             {
-                this.SendMessage(new ChannelWindowAdjustMessage(this.RemoteChannelNumber, this._initialWindowSize - this.LocalWindowSize));
-                this.LocalWindowSize = this._initialWindowSize;
+                SendMessage(new ChannelWindowAdjustMessage(RemoteChannelNumber, _initialWindowSize - LocalWindowSize));
+                LocalWindowSize = _initialWindowSize;
             }
         }
 
@@ -658,30 +839,35 @@ namespace Renci.SshNet.Channels
         {
             do
             {
-                lock (this._serverWindowSizeLock)
+                lock (_serverWindowSizeLock)
                 {
                     var serverWindowSize = RemoteWindowSize;
                     if (serverWindowSize == 0)
                     {
                         // allow us to be signal when remote window size is adjusted
-                        this._channelServerWindowAdjustWaitHandle.Reset();
+                        _channelServerWindowAdjustWaitHandle.Reset();
                     }
                     else
                     {
                         var bytesThatCanBeSent = Math.Min(Math.Min(RemotePacketSize, (uint) messageLength),
                             serverWindowSize);
-                        this.RemoteWindowSize -= bytesThatCanBeSent;
+                        RemoteWindowSize -= bytesThatCanBeSent;
                         return (int) bytesThatCanBeSent;
                     }
                 }
                 // wait for remote window size to change
-                this.WaitOnHandle(this._channelServerWindowAdjustWaitHandle);
+                WaitOnHandle(_channelServerWindowAdjustWaitHandle);
             } while (true);
         }
 
         private InvalidOperationException CreateRemoteChannelInfoNotAvailableException()
         {
             throw new InvalidOperationException("The channel has not been opened, or the open has not yet been confirmed.");
+        }
+
+        private InvalidOperationException CreateChannelClosedException()
+        {
+            throw new InvalidOperationException("The channel is closed.");
         }
 
         #region IDisposable Members
@@ -693,7 +879,7 @@ namespace Renci.SshNet.Channels
         /// </summary>
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -703,52 +889,45 @@ namespace Renci.SshNet.Channels
         /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
-            // Check to see if Dispose has already been called.
-            if (!this._isDisposed)
+            if (!_isDisposed)
             {
-                // If disposing equals true, dispose all managed
-                // and unmanaged resources.
                 if (disposing)
                 {
-                    this.Close(false);
+                    Close(false);
 
-                    //  Ensure that all events are detached from current instance
-                    this._session.ChannelWindowAdjustReceived -= OnChannelWindowAdjust;
-                    this._session.ChannelDataReceived -= OnChannelData;
-                    this._session.ChannelExtendedDataReceived -= OnChannelExtendedData;
-                    this._session.ChannelEofReceived -= OnChannelEof;
-                    this._session.ChannelCloseReceived -= OnChannelClose;
-                    this._session.ChannelRequestReceived -= OnChannelRequest;
-                    this._session.ChannelSuccessReceived -= OnChannelSuccess;
-                    this._session.ChannelFailureReceived -= OnChannelFailure;
-                    this._session.ErrorOccured -= Session_ErrorOccured;
-                    this._session.Disconnected -= Session_Disconnected;
+                    if (_session != null)
+                    {
+                        _session.ChannelWindowAdjustReceived -= OnChannelWindowAdjust;
+                        _session.ChannelDataReceived -= OnChannelData;
+                        _session.ChannelExtendedDataReceived -= OnChannelExtendedData;
+                        _session.ChannelEofReceived -= OnChannelEof;
+                        _session.ChannelCloseReceived -= OnChannelClose;
+                        _session.ChannelRequestReceived -= OnChannelRequest;
+                        _session.ChannelSuccessReceived -= OnChannelSuccess;
+                        _session.ChannelFailureReceived -= OnChannelFailure;
+                        _session.ErrorOccured -= Session_ErrorOccured;
+                        _session.Disconnected -= Session_Disconnected;
+                        _session = null;
+                    }
 
-                    // Dispose managed resources.
-                    if (this._channelClosedWaitHandle != null)
+                    if (_channelClosedWaitHandle != null)
                     {
-                        this._channelClosedWaitHandle.Dispose();
-                        this._channelClosedWaitHandle = null;
+                        _channelClosedWaitHandle.Dispose();
+                        _channelClosedWaitHandle = null;
                     }
-                    if (this._channelServerWindowAdjustWaitHandle != null)
+                    if (_channelServerWindowAdjustWaitHandle != null)
                     {
-                        this._channelServerWindowAdjustWaitHandle.Dispose();
-                        this._channelServerWindowAdjustWaitHandle = null;
+                        _channelServerWindowAdjustWaitHandle.Dispose();
+                        _channelServerWindowAdjustWaitHandle = null;
                     }
-                    if (this._errorOccuredWaitHandle != null)
+                    if (_errorOccuredWaitHandle != null)
                     {
-                        this._errorOccuredWaitHandle.Dispose();
-                        this._errorOccuredWaitHandle = null;
-                    }
-                    if (this._disconnectedWaitHandle != null)
-                    {
-                        this._disconnectedWaitHandle.Dispose();
-                        this._disconnectedWaitHandle = null;
+                        _errorOccuredWaitHandle.Dispose();
+                        _errorOccuredWaitHandle = null;
                     }
                 }
 
-                // Note disposing has been done.
-                this._isDisposed = true;
+                _isDisposed = true;
             }
         }
 
@@ -761,7 +940,7 @@ namespace Renci.SshNet.Channels
             // Do not re-create Dispose clean-up code here.
             // Calling Dispose(false) is optimal in terms of
             // readability and maintainability.
-            this.Dispose(false);
+            Dispose(false);
         }
 
         #endregion

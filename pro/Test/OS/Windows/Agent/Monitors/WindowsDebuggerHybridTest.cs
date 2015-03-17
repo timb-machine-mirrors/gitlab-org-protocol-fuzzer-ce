@@ -182,7 +182,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			}
 			catch (PeachException ex)
 			{
-				Assert.AreEqual("Fault detected on control iteration.", ex.Message);
+				Assert.AreEqual("Fault detected on control record iteration.", ex.Message);
 			}
 
 			Assert.NotNull(this.faults);

@@ -14,9 +14,10 @@ namespace Peach.Pro.Test.Core.StateModel
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
 
-		public ParamPublisher(Dictionary<string, Variant> args)
-			: base(args)
+		public ParamPublisher()
+			: base(new Dictionary<string, Variant>())
 		{
+			Name = "Pub";
 		}
 
 		public override Variant call(string method, List<ActionParameter> args)
@@ -494,7 +495,7 @@ namespace Peach.Pro.Test.Core.StateModel
 
 			PitParser parser = new PitParser();
 			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
-			dom.tests[0].publishers[0] = new ParamPublisher(new Dictionary<string, Variant>());
+			dom.tests[0].publishers[0] = new ParamPublisher();
 
 			RunConfiguration config = new RunConfiguration();
 			config.singleIteration = true;

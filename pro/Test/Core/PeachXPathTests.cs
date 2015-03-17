@@ -26,13 +26,16 @@
 
 // $Id$
 
+using System;
 using System.IO;
+using System.Xml;
 using System.Xml.XPath;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
 using Peach.Core.Dom.XPath;
+using String = Peach.Core.Dom.String;
 
 namespace Peach.Pro.Test.Core
 {
@@ -68,8 +71,8 @@ namespace Peach.Pro.Test.Core
 			XPathNodeIterator iter = navi.Select("//TheNumber");
 
 			Assert.IsTrue(iter.MoveNext());
-			Assert.AreEqual(dom.tests["Default"].stateModel.states["State1"].actions[0].dataModel["TheNumber"], 
-				((PeachXPathNavigator)iter.Current).currentNode);
+			Assert.AreEqual(dom.tests["Default"].stateModel.states["State1"].actions[0].dataModel["TheNumber"],
+				((PeachXPathNavigator)iter.Current).CurrentNode);
 			Assert.IsFalse(iter.MoveNext());
 		}
 
@@ -115,9 +118,9 @@ namespace Peach.Pro.Test.Core
 			XPathNodeIterator iter = navi.Select("//FindMe");
 
 			Assert.IsTrue(iter.MoveNext());
-			Assert.AreEqual(findMe1, ((PeachXPathNavigator)iter.Current).currentNode);
+			Assert.AreEqual(findMe1, ((PeachXPathNavigator)iter.Current).CurrentNode);
 			Assert.IsTrue(iter.MoveNext());
-			Assert.AreEqual(findMe2, ((PeachXPathNavigator)iter.Current).currentNode);
+			Assert.AreEqual(findMe2, ((PeachXPathNavigator)iter.Current).CurrentNode);
 			Assert.IsFalse(iter.MoveNext());
 		}
 
@@ -162,7 +165,7 @@ namespace Peach.Pro.Test.Core
 			XPathNodeIterator iter = navi.Select("//Block1//FindMe");
 
 			Assert.IsTrue(iter.MoveNext());
-			Assert.AreEqual(findMe, ((PeachXPathNavigator)iter.Current).currentNode);
+			Assert.AreEqual(findMe, ((PeachXPathNavigator)iter.Current).CurrentNode);
 			Assert.IsFalse(iter.MoveNext());
 		}
 
@@ -207,7 +210,7 @@ namespace Peach.Pro.Test.Core
 			XPathNodeIterator iter = navi.Select("//TheDataModel/Block1/Block1_1/FindMe");
 
 			Assert.IsTrue(iter.MoveNext());
-			Assert.AreEqual(findMe, ((PeachXPathNavigator)iter.Current).currentNode);
+			Assert.AreEqual(findMe, ((PeachXPathNavigator)iter.Current).CurrentNode);
 			Assert.IsFalse(iter.MoveNext());
 		}
 
@@ -252,7 +255,7 @@ namespace Peach.Pro.Test.Core
 			XPathNodeIterator iter = navi.Select("//FindMe[@isToken='True']");
 
 			Assert.IsTrue(iter.MoveNext());
-			Assert.AreEqual(findMe, ((PeachXPathNavigator)iter.Current).currentNode);
+			Assert.AreEqual(findMe, ((PeachXPathNavigator)iter.Current).CurrentNode);
 			Assert.IsFalse(iter.MoveNext());
 		}
 
@@ -298,9 +301,9 @@ namespace Peach.Pro.Test.Core
 			XPathNodeIterator iter = navi.Select("//FindMe");
 
 			Assert.IsTrue(iter.MoveNext());
-			Assert.AreEqual(findMe1, ((PeachXPathNavigator)iter.Current).currentNode);
+			Assert.AreEqual(findMe1, ((PeachXPathNavigator)iter.Current).CurrentNode);
 			Assert.IsTrue(iter.MoveNext());
-			Assert.AreEqual(findMe2, ((PeachXPathNavigator)iter.Current).currentNode);
+			Assert.AreEqual(findMe2, ((PeachXPathNavigator)iter.Current).CurrentNode);
 			Assert.IsFalse(iter.MoveNext());
 		}
 
@@ -339,10 +342,11 @@ namespace Peach.Pro.Test.Core
 			PeachXPathNavigator navi = new PeachXPathNavigator(dom);
 			XPathNodeIterator iter = navi.Select("//FindMe");
 
+			
 			Assert.IsTrue(iter.MoveNext());
-			Assert.AreEqual(findMe1, ((PeachXPathNavigator)iter.Current).currentNode);
+			Assert.AreEqual(findMe1, ((PeachXPathNavigator)iter.Current).CurrentNode);
 			Assert.IsTrue(iter.MoveNext());
-			Assert.AreEqual(findMe2, ((PeachXPathNavigator)iter.Current).currentNode);
+			Assert.AreEqual(findMe2, ((PeachXPathNavigator)iter.Current).CurrentNode);
 			Assert.IsFalse(iter.MoveNext());
 		}
 
@@ -378,7 +382,7 @@ namespace Peach.Pro.Test.Core
 			XPathNodeIterator iter = navi.Select("//FindMe");
 
 			Assert.IsTrue(iter.MoveNext());
-			Assert.AreEqual(findMe1, ((PeachXPathNavigator)iter.Current).currentNode);
+			Assert.AreEqual(findMe1, ((PeachXPathNavigator)iter.Current).CurrentNode);
 			Assert.IsFalse(iter.MoveNext());
 		}
 
@@ -421,22 +425,94 @@ namespace Peach.Pro.Test.Core
 			DataElement findMe = action.parameters[0].dataModel[0];
 
 			Assert.IsTrue(iter.MoveNext());
-			Assert.AreEqual(findMe, ((PeachXPathNavigator)iter.Current).currentNode);
+			Assert.AreEqual(findMe, ((PeachXPathNavigator)iter.Current).CurrentNode);
 			Assert.IsFalse(iter.MoveNext());
 
 			iter = navi.Select("//DM_Param2//FindMe");
 			findMe = action.parameters[1].dataModel[0];
 
 			Assert.IsTrue(iter.MoveNext());
-			Assert.AreEqual(findMe, ((PeachXPathNavigator)iter.Current).currentNode);
+			Assert.AreEqual(findMe, ((PeachXPathNavigator)iter.Current).CurrentNode);
 			Assert.IsFalse(iter.MoveNext());
 
 			iter = navi.Select("//DM_Result//FindMe");
 			findMe = action.result.dataModel[0];
 
 			Assert.IsTrue(iter.MoveNext());
-			Assert.AreEqual(findMe, ((PeachXPathNavigator)iter.Current).currentNode);
+			Assert.AreEqual(findMe, ((PeachXPathNavigator)iter.Current).CurrentNode);
 			Assert.IsFalse(iter.MoveNext());
+		}
+
+		static void Dump(PeachXPathNavigator nav, int indent)
+		{
+			if (nav.Prefix == string.Empty)
+				Console.Write("{0}<{1}", new string(' ', indent), nav.LocalName);
+			else
+				Console.Write("{0}<{1}:{2}", new string(' ', indent), nav.Prefix, nav.LocalName);
+
+			if (nav.NodeType != XPathNodeType.Attribute && nav.MoveToFirstAttribute())
+			{
+				do
+				{
+					Console.Write(" {0}='{1}'", nav.Name, nav.Value);
+				}
+				while (nav.MoveToNextAttribute());
+
+				nav.MoveToParent();
+			}
+
+			Console.WriteLine(">");
+
+			if (nav.MoveToFirstChild())
+			{
+				do
+				{
+					Dump(nav, indent + 2);
+				} while (nav.MoveToNext());
+
+				nav.MoveToParent();
+			}
+
+			Console.WriteLine("{0}</{1}>", new string(' ', indent), nav.Name);
+		}
+
+		[Test]
+		public void NewNav()
+		{
+			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
+				"	<DataModel name=\"TheDataModel\">" +
+				"		<Number name=\"FindMe\" size=\"8\"/>" +
+				"		<Block name=\"Empty\"/>" +
+				"	</DataModel>" +
+				"	<StateModel name=\"TheState\" initialState=\"State1\">" +
+				"		<State name=\"State1\">" +
+				"			<Action name='call' type=\"call\" method=\"foo\">" +
+				"				<Param>" +
+				"					<DataModel name=\"DM_Param1\" ref=\"TheDataModel\" />" +
+				"				</Param>" +
+				"				<Param>" +
+				"					<DataModel name=\"DM_Param2\" ref=\"TheDataModel\" />" +
+				"				</Param>" +
+				"				<Result>" +
+				"					<DataModel name=\"DM_Result\" ref=\"TheDataModel\" />" +
+				"				</Result>" +
+				"			</Action>" +
+				"		</State>" +
+				"	</StateModel>" +
+				"	<Test name=\"Default\">" +
+				"		<StateModel ref=\"TheState\"/>" +
+				"		<Publisher class=\"Console\" />" +
+				"	</Test>" +
+				"</Peach>";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			dom.Name = "Peach";
+
+			var nav = new PeachXPathNavigator(dom);
+
+			Dump(nav, 0);
 		}
 	}
 }

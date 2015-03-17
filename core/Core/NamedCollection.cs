@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace Peach.Core
@@ -34,6 +35,17 @@ namespace Peach.Core
 		}
 
 		/// <summary>
+		/// Uses typeof(T).Name as the base name when generating unique names.
+		/// </summary>
+		public NamedCollection(IEnumerable<T> items)
+		{
+			_baseName = typeof(T).Name;
+
+			foreach (var i in items)
+				Add(i);
+		}
+
+		/// <summary>
 		/// Specifies the base name to use when generating unique names.
 		/// </summary>
 		/// <param name="baseName"></param>
@@ -44,6 +56,9 @@ namespace Peach.Core
 
 		protected override string GetKeyForItem(T item)
 		{
+			if (item.Name == null)
+				throw new ArgumentNullException();
+
 			return item.Name;
 		}
 

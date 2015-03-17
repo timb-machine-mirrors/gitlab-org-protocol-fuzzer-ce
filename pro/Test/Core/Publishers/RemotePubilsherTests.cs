@@ -10,6 +10,22 @@ namespace Peach.Pro.Test.Core.Publishers
 	[Category("Peach")]
 	class RemotePublisherTests
 	{
+		SingleInstance _si;
+
+		[SetUp]
+		public void SetUp()
+		{
+			_si = SingleInstance.CreateInstance(GetType().FullName);
+			_si.Lock();
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			_si.Dispose();
+			_si = null;
+		}
+
 		private const string template = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Peach>
 	<DataModel name=""TheDataModel"">
@@ -170,6 +186,9 @@ namespace Peach.Pro.Test.Core.Publishers
 		[Test]
 		public void TestUdp([ValueSource("ChannelNames")]string protocol)
 		{
+			if (Platform.GetOS() != Platform.OS.Windows && protocol == "tcp")
+				Assert.Ignore(".NET remoting doesn't work inside nunit on mono");
+
 			var port = TestBase.MakePort(12000, 13000);
 			RunRemote(protocol, udp.Fmt(protocol, port));
 		}

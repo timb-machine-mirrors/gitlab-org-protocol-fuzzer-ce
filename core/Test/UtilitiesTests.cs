@@ -164,5 +164,24 @@ namespace Peach.Core.Test
 			Assert.True(System.Net.IPAddress.Parse("224.0.0.1").IsMulticast());
 			Assert.True(System.Net.IPAddress.Parse("239.255.255.255").IsMulticast());
 		}
+
+		[Test]
+		public void TestHexDumpTruncate()
+		{
+			var ms = new MemoryStream();
+			for (var i = 0; i < 32; ++i)
+				ms.WriteByte((byte)i);
+
+			ms.Seek(0, SeekOrigin.Begin);
+
+			var str = Utilities.HexDump(ms, 16, 24);
+			var expected = string.Join(Environment.NewLine, new[] {
+				"00000000   00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F   ................",
+				"00000010   10 11 12 13 14 15 16 17                            ........        ",
+				"---- TRUNCATED (Total Length: 32 bytes) ----",
+			});
+
+			Assert.That(str, Is.EqualTo(expected));
+		}
 	}
 }
