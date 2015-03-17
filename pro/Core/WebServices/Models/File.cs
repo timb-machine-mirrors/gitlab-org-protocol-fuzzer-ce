@@ -1,6 +1,5 @@
 using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Peach.Pro.Core.Storage;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
@@ -10,7 +9,6 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// Unique ID of the file.
 		/// </summary>
 		[Key]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public long Id { get; set; }
 
 		/// <summary>

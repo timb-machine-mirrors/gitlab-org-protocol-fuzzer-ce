@@ -1,43 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Data.Entity;
-using System.Linq;
-using System.Reflection;
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.IO;
-using System.Collections;
-using System.Data.Entity.Core.Metadata.Edm;
-using System.Data.Entity.Infrastructure;
-using System.Data.Entity.Infrastructure.Annotations;
+using System.Reflection;
+using System.Linq;
+using Peach.Core;
+using Dapper;
+
+#if MONO
+using Mono.Data.Sqlite;
+using SQLiteConnection = Mono.Data.Sqlite.SqliteConnection;
+#else
+using System.Data.SQLite;
+#endif
 
 namespace Peach.Pro.Core.Storage
 {
-	class SqliteContextInitializer<T> : IDatabaseInitializer<T>
-		where T : DbContext
+	class SqliteContextInitializer
 	{
-		bool _dbExists;
-		DbModelBuilder _modelBuilder;
-
-		public SqliteContextInitializer(string dbPath, DbModelBuilder modelBuilder)
+		static SqliteContextInitializer()
 		{
-			_dbExists = File.Exists(dbPath);
-			_modelBuilder = modelBuilder;
+			//SQLiteLog.Enabled = true;
+			//SQLiteLog.Log += (s, e) => Console.WriteLine("SQLiteLog: {0}", e.Message);
 		}
 
-		public void InitializeDatabase(T context)
+		readonly bool _dbExists;
+
+		public SqliteContextInitializer(string dbPath)
+		{
+			_dbExists = File.Exists(dbPath);
+		}
+
+		public void InitializeDatabase(
+			SQLiteConnection cnn,
+			IEnumerable<Type> types)
 		{
 			if (_dbExists)
 				return;
 
-			var model = _modelBuilder.Build(context.Database.Connection);
-
-			using (var xact = context.Database.BeginTransaction())
+			using (var xact = cnn.BeginTransaction())
 			{
 				try
 				{
-					CreateDatabase(context.Database, model);
+					CreateDatabase(cnn, types);
 					xact.Commit();
 				}
 				catch (Exception)
@@ -55,93 +60,171 @@ namespace Peach.Pro.Core.Storage
 			public List<string> Columns { get; set; }
 		}
 
-		private void CreateDatabase(Database db, DbModel model)
+		const string TableTmpl = "CREATE TABLE [{0}] (\n{1}\n);";
+		const string ColumnTmpl = "    [{0}] {1} {2}"; // name, type, decl
+		const string PrimaryKeyTmpl = "    PRIMARY KEY ({0})";
+		//const string foreignKeyTmpl = "    FOREIGN KEY ({0}) REFERENCES {1} ({2})";
+		const string IndexTmpl = "CREATE INDEX {0} ON {1} ({2});";
+
+		void CreateDatabase(SQLiteConnection cnn, IEnumerable<Type> types)
 		{
-			const string tableTmpl = "CREATE TABLE [{0}] (\n{1}\n);";
-			const string columnTmpl = "    [{0}] {1} {2}"; // name, type, decl
-			const string primaryKeyTmpl = "    PRIMARY KEY ({0})";
-			const string foreignKeyTmpl = "    FOREIGN KEY ({0}) REFERENCES {1} ({2})";
-			const string indexTmpl = "CREATE INDEX {0} ON {1} ({2});";
+			Console.WriteLine("CreateDatabase");
 
 			var indicies = new Dictionary<string, Index>();
+			//var foreignKeys = new Dictionary<string, string>();
 
-			foreach (var type in model.StoreModel.EntityTypes)
+			foreach (var type in types)
 			{
 				var defs = new List<string>();
+				var keys = new HashSet<string>();
 
-				// columns
-				foreach (var p in type.Properties)
+				foreach (var pi in type.GetProperties())
 				{
+					if (pi.HasAttribute<NotMappedAttribute>())
+						continue;
+
 					var decls = new HashSet<string>();
 
-					if (!p.Nullable)
+					if (!pi.IsNullable())
 						decls.Add("NOT NULL");
 
-					var annotations = p.MetadataProperties
-						.Select(x => x.Value)
-						.OfType<IndexAnnotation>();
-
-					foreach (var annotation in annotations)
+					foreach (var attr in pi.AttributesOfType<IndexAttribute>())
 					{
-						foreach (var attr in annotation.Indexes)
+						if (attr.IsUnique)
+							decls.Add("UNIQUE");
+
+						if (string.IsNullOrEmpty(attr.Name))
+							continue;
+
+						Index index;
+						if (!indicies.TryGetValue(attr.Name, out index))
 						{
-							if (attr.IsUnique)
-								decls.Add("UNIQUE");
-
-							if (string.IsNullOrEmpty(attr.Name))
-								continue;
-
-							Index index;
-							if (!indicies.TryGetValue(attr.Name, out index))
+							index = new Index
 							{
-								index = new Index
-								{
-									Name = attr.Name,
-									Table = type.Name,
-									Columns = new List<string>(),
-								};
-								indicies.Add(index.Name, index);
-							}
-							index.Columns.Add(p.Name);
+								Name = attr.Name,
+								Table = type.Name,
+								Columns = new List<string>(),
+							};
+							indicies.Add(index.Name, index);
 						}
+						index.Columns.Add(pi.Name);
 					}
 
-					defs.Add(string.Format(columnTmpl, p.Name, p.TypeName, string.Join(" ", decls)));
+					defs.Add(ColumnTmpl.Fmt(
+						pi.Name,
+						pi.GetSqlType(cnn),
+						string.Join(" ", decls)));
+
+					if (pi.IsPrimaryKey())
+						keys.Add(pi.Name);
+
+					//foreach (var attr in pi.AttributesOfType<ForeignKeyAttribute>())
+					//{
+					//	foreignKeys.Add(attr.TargetEntity.Name, attr.TargetProperty);
+					//}
 				}
 
-				// primary keys
-				if (type.KeyProperties.Any())
-				{
-					var keys = type.KeyProperties.Select(x => x.Name);
-					defs.Add(string.Format(primaryKeyTmpl, string.Join(", ", keys)));
-				}
+				if (keys.Any())
+					defs.Add(string.Format(PrimaryKeyTmpl, string.Join(", ", keys)));
 
-				// foreign keys
-				foreach (var assoc in model.StoreModel.AssociationTypes)
-				{
-					if (assoc.Constraint.ToRole.Name == type.Name)
-					{
-						var thisKeys = assoc.Constraint.ToProperties.Select(x => x.Name);
-						var thatKeys = assoc.Constraint.FromProperties.Select(x => x.Name);
-						defs.Add(string.Format(foreignKeyTmpl,
-							string.Join(", ", thisKeys),
-							assoc.Constraint.FromRole.Name,
-							string.Join(", ", thatKeys)));
-					}
-				}
+				var sql = TableTmpl.Fmt(type.Name, string.Join(",\n", defs));
+				cnn.Execute(sql);
 
-				// create table
-				var sql = string.Format(tableTmpl, type.Name, string.Join(",\n", defs));
-				db.ExecuteSqlCommand(sql);
+				//foreach (var item in foreignKeys)
+				//{
+				//	defs.Add(foreignKeyTmpl.Fmt(
+				//		string.Join(", ", thisKeys),
+				//		assoc.Constraint.FromRole.Name,
+				//		string.Join(", ", thatKeys)));
+				//}
 			}
 
-			// create index
 			foreach (var index in indicies.Values)
 			{
 				var columns = string.Join(", ", index.Columns);
-				var sql = string.Format(indexTmpl, index.Name, index.Table, columns);
-				db.ExecuteSqlCommand(sql);
+				var sql = IndexTmpl.Fmt(index.Name, index.Table, columns);
+				cnn.Execute(sql);
 			}
+		}
+	}
+
+	static class Extensions
+	{
+		const string SqlInt = "INTEGER";
+		const string SqlReal = "REAL";
+		const string SqlText = "TEXT";
+		const string SqlBlob = "BLOG";
+
+		static readonly Dictionary<Type, string> SqlTypeMap = new Dictionary<Type, string>
+		{
+			{ typeof(Boolean), SqlInt },
+
+			{ typeof(Byte), SqlInt },
+			{ typeof(SByte), SqlInt },
+			{ typeof(Int16), SqlInt },
+			{ typeof(Int32), SqlInt },
+			{ typeof(Int64), SqlInt },
+			{ typeof(UInt16), SqlInt },
+			{ typeof(UInt32), SqlInt },
+			{ typeof(UInt64), SqlInt },
+			{ typeof(TimeSpan), SqlInt },
+			{ typeof(DateTimeOffset), SqlInt },
+
+			{ typeof(Single), SqlReal },
+			{ typeof(Double), SqlReal },
+			{ typeof(Decimal), SqlReal },
+
+			{ typeof(string), SqlText },
+			{ typeof(DateTime), SqlText },
+			
+			{ typeof(byte[]), SqlBlob },		
+			{ typeof(Guid), SqlBlob },
+		};
+
+		public static bool HasAttribute<TAttr>(this PropertyInfo pi)
+		{
+			return pi.GetCustomAttributes(typeof(TAttr), true).Any();
+		}
+
+		public static IEnumerable<TAttr> AttributesOfType<TAttr>(this PropertyInfo pi)
+		{
+			return pi.GetCustomAttributes(true).OfType<TAttr>();
+		}
+
+		public static bool IsPrimaryKey(this PropertyInfo pi)
+		{
+			return pi.HasAttribute<KeyAttribute>();
+		}
+
+		public static bool IsNullable(this PropertyInfo pi)
+		{
+			if (IsPrimaryKey(pi))
+				return false;
+			var type = pi.PropertyType;
+			if (type == typeof(string))
+				return true;
+			return type.IsGenericType &&
+				type.GetGenericTypeDefinition() == typeof(Nullable<>);
+		}
+
+		public static string GetSqlType(this PropertyInfo pi, SQLiteConnection cnn)
+		{
+			var type = pi.PropertyType;
+
+			if (type.IsEnum)
+				return SqlInt;
+
+			if (type.IsGenericType &&
+				type.GetGenericTypeDefinition() == typeof(Nullable<>))
+				type = type.GetGenericArguments().First();
+
+			string sqlType;
+			if (!SqlTypeMap.TryGetValue(type, out sqlType))
+				Debug.Assert(false, "Missing column type map",
+					"Missing column type map for property {0} with type {1}",
+					pi.Name,
+					type.Name);
+			return sqlType;
 		}
 	}
 }
