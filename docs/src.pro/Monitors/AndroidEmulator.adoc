@@ -1,3 +1,4 @@
+:images: ../images
 <<<
 [[Monitors_AndroidEmulator]]
 == AndroidEmulator Monitor
@@ -27,8 +28,6 @@ This monitor requires the following items to run:
 The fuzzing configuration for a virtual or emulated device follows. For a configuration using a phsycial device, see the xref:Monitors_Android[Android Monitor].
 
 image::{images}/AndroidEmMtr.PNG["Fuzzing Configuration for Emulated Andtroid Device", scalewidth="75%"]
-
-// image::../images/AndroidEmMtr.PNG["Fuzzing Configuration for Emulated Andtroid Device", scalewidth="75%"]
 
 === Parameters
 

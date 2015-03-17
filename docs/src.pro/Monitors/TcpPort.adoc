@@ -1,3 +1,4 @@
+:images: ../images
 <<<
 [[Monitors_TcpPort]]
 == TcpPort Monitor
@@ -44,6 +45,8 @@ When:: Event that specifies when to perform monitoring. The default setting is _
 |OnCall                      |Monitoring begins upon receipt of a message from the state machine.
 |==========================================================
 
+.WaitWhen Choices
+image::{images}/Timings_All.PNG["When Timing Choices", scalewidth="75%"]
 
 WaitOnCall:: Call message to start monitoring. This parameter only applies to the _OnCall_ setting.
 

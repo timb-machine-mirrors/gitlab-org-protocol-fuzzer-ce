@@ -1,3 +1,4 @@
+:images: ../images
 <<<
 [[Monitors_CanaKitRelay]]
 == CanaKitRelay Monitor
@@ -13,8 +14,6 @@ The CanaKitRelay Monitor controls one relay in a kit. Use one monitor per relay 
 _CanaKitRelay_ can toggle power states, reset a device, or push a button on a device during a fuzzing run. Any device with an AC or DC power line can be controlled by wiring it through a relay. A sample configuration follows that controls power through Relay 1. 
 
 image::{images}/CanaKitMtr.PNG["Fuzzing Configuration Using a CanaKit Relay", scalewidth="75%"]
-
-// image::../images/CanaKitMtr.PNG["Fuzzing Configuration Using a CanaKit Relay", scalewidth="75%"]
 
 For more information on the relay, including configuratinos, installation, and its command set, see the 
 http://www.canakit.com/catalog/product/view/id/627/s/4-port-usb-relay-controller[Cana Kit 4-Port USB Relay Controller].

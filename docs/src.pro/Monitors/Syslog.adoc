@@ -1,3 +1,4 @@
+:images: ../images
 <<<
 [[Monitors_Syslog]]
 == Syslog Monitor
@@ -55,9 +56,6 @@ Parameter that specifies when to start monitoring. Choose from the following set
 
 .When Choices for Running a Command
 image::{images}/Timings_All.PNG["When Run Command Choices", scalewidth="75%"]
-
-// .When Choices for Running a Command
-// image::../images/Timings_All.PNG["When Run Command Choices", scalewidth="75%"]
 
 === Examples
 

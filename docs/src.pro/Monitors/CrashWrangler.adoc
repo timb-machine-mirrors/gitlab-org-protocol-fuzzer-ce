@@ -1,3 +1,4 @@
+:images: ../images
 <<<
 [[Monitors_CrashWrangler]]
 == CrashWrangler Monitor (OS X)

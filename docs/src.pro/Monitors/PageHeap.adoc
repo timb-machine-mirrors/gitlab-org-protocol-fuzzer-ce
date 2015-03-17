@@ -1,3 +1,4 @@
+:images: ../images
 <<<
 [[Monitors_PageHeap]]
 == PageHeap Monitor (Windows)
