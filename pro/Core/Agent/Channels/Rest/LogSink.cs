@@ -6,6 +6,7 @@ using Peach.Core;
 using System.Threading;
 using System.Collections.Generic;
 using System.Net;
+using System.Linq;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
@@ -42,11 +43,16 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			_evtReady = new AutoResetEvent(false);
 			_evtClosed = new AutoResetEvent(false);
 
+			var minLevel = LogManager.Configuration.LoggingRules
+				.Where(r => r.Targets.Count > 0)
+				.SelectMany(r => r.Levels)
+				.Min();
+
 			var url = "ws://{0}:{1}{2}?level={3}".Fmt(
 				_baseUri.Host,
 				_baseUri.Port,
 				Server.LogPath,
-				Utilities.LogLevel);
+				minLevel);
 
 			_ws = new WebSocket(url, "log");
 			//_ws.Log.Level = WebSocketSharp.LogLevel.Debug;
