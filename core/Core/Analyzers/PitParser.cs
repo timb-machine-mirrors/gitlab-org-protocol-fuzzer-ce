@@ -1540,17 +1540,14 @@ namespace Peach.Core.Analyzers
 
 			if (node.hasAttr("fileName"))
 			{
-				if (node.ChildNodes.AsEnumerable().Where(n => n.Name == "Field").Any())
-					throw new PeachException("Can't specify fields and file names.");
-
 				dataSet.Clear();
 
-				string dataFileName = node.getAttrString("fileName");
+				var dataFileName = node.getAttrString("fileName");
 
 				if (dataFileName.Contains('*'))
 				{
-					string pattern = Path.GetFileName(dataFileName);
-					string dir = dataFileName.Substring(0, dataFileName.Length - pattern.Length);
+					var pattern = Path.GetFileName(dataFileName);
+					var dir = dataFileName.Substring(0, dataFileName.Length - pattern.Length);
 
 					if (dir == "")
 						dir = ".";
@@ -1558,7 +1555,7 @@ namespace Peach.Core.Analyzers
 					try
 					{
 						dir = Path.GetFullPath(dir);
-						string[] files = Directory.GetFiles(dir, pattern, SearchOption.TopDirectoryOnly);
+						var files = Directory.GetFiles(dir, pattern, SearchOption.TopDirectoryOnly);
 						foreach (var item in files)
 							dataSet.Add(new DataFile(dataSet, item));
 					}
@@ -1575,7 +1572,7 @@ namespace Peach.Core.Analyzers
 				{
 					try
 					{
-						string normalized = Path.GetFullPath(dataFileName);
+						var normalized = Path.GetFullPath(dataFileName);
 
 						if (Directory.Exists(normalized))
 						{
@@ -1600,11 +1597,13 @@ namespace Peach.Core.Analyzers
 					}
 				}
 			}
-			else if (node.ChildNodes.AsEnumerable().Where(n => n.Name == "Field").Any())
+
+			if (node.ChildNodes.AsEnumerable().Where(n => n.Name == "Field").Any())
 			{
-				// Ensure <Field> and fileName="" aren't used together
-				if (node.hasAttr("fileName"))
-					throw new PeachException("Can't specify fields and file names.");
+				// Ensure <Field> isn't used with another data set method if more than one
+                // data set exists.
+				if (dataSet.Count > 1)
+					throw new PeachException("Can't specify fields and multiple files.");
 
 				// If this ref'd an existing Data element, clear all non FieldData children
 				if (dataSet.Where(o => !(o is DataField)).Any())
