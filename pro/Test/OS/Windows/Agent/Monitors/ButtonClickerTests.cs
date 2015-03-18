@@ -21,7 +21,8 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			var runner = new MonitorRunner(Monitor, new Dictionary<string, string>());
 			var ex = Assert.Catch(() => runner.Run());
 			Assert.That(ex, Is.InstanceOf<PeachException>());
-			var msg = "Could not start monitor \"ButtonClicker\".  Monitor 'ButtonClicker' is missing required parameter 'ButtonName'.";
+			// Note, param order is not guranteed so can't assert on parameter name
+			var msg = "Could not start monitor \"ButtonClicker\".  Monitor 'ButtonClicker' is missing required parameter";
 			StringAssert.StartsWith(msg, ex.Message);
 		}
 
