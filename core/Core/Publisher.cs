@@ -31,6 +31,7 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using Peach.Core.Dom;
+using Peach.Core.Dom.Actions;
 using Peach.Core.IO;
 
 namespace Peach.Core
@@ -193,16 +194,17 @@ namespace Peach.Core
 			throw new PeachException("Error, action 'call' not supported by publisher");
 		}
 
-		/// <summary>
-		/// Set a property on the Publishers resource.
-		/// </summary>
-		/// <remarks>
-		/// This method can be overriden by custom Publishers.
-		/// </remarks>
-		/// <seealso cref="GetProperty"/>
-		/// <param name="property">Name of property to set</param>
-		/// <param name="value">Value to set on property</param>
-		protected virtual void OnSetProperty(string property, Variant value)
+	    /// <summary>
+	    /// Set a property on the Publishers resource.
+	    /// </summary>
+	    /// <remarks>
+	    /// This method can be overriden by custom Publishers.
+	    /// </remarks>
+        /// <seealso>setProperty</seealso>
+        /// <seealso>OnGetProperty</seealso>
+        /// <param name="property">Name of property to set</param>
+	    /// <param name="value">Value to set on property</param>
+	    protected virtual void OnSetProperty(string property, Variant value)
 		{
 			throw new PeachException("Error, action 'setProperty' not supported by publisher");
 		}
@@ -469,7 +471,7 @@ namespace Peach.Core
 		/// occur when this method is called.
 		/// </remarks>
 		/// <seealso cref="OnInput"/>
-		/// <seealso cref="output"/>
+        /// <seealso cref="output(Peach.Core.IO.BitwiseStream)"/>
 		public void input()
 		{
 			Logger.Debug("input()");
