@@ -544,6 +544,44 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			var b2_array = b2[1] as Peach.Core.Dom.Array;
 			Assert.AreEqual(1, b2_array.Count);
 		}
+
+		[Test]
+		public void InvalidFieldTest()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Block name='Root'>
+			<Blob name='data'/>
+		</Block>
+		<Blob/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM' />
+				<Data>
+					<Field name='Root.data.str2' value='foo' />
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM' />
+		<Publisher class='Null'/>
+	</Test>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var config = new RunConfiguration { singleIteration = true };
+			var e = new Engine(null);
+
+			var ex = Assert.Throws<PeachException>(() => e.startFuzzing(dom, config));
+
+			Assert.AreEqual("Error, unable to resolve field \"Root.data.str2\" against \"DM\".", ex.Message);
+		}
 	}
 }
 

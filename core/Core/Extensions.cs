@@ -1,11 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Net;
 using System.Net.Sockets;
 using System.Xml;
+using System.Linq;
 
 namespace Peach.Core
 {
+
+	public static class NameValueCollectionExtensions
+	{
+		public static string PrettyPrint(this NameValueCollection collection, string separator = ",")
+		{
+			var items = collection.AllKeys.Select(x => "{0}={1}".Fmt(x, collection[x]));
+			return string.Join(separator, items);
+		}
+	}
+
 	public static class SocketExtensions
 	{
 		public static void SendTo(this Socket socket, string msg, IPEndPoint remote)

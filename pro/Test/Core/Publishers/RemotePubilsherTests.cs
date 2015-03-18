@@ -10,6 +10,22 @@ namespace Peach.Pro.Test.Core.Publishers
 	[Category("Peach")]
 	class RemotePublisherTests
 	{
+		SingleInstance _si;
+
+		[SetUp]
+		public void SetUp()
+		{
+			_si = SingleInstance.CreateInstance(GetType().FullName);
+			_si.Lock();
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			_si.Dispose();
+			_si = null;
+		}
+
 		private const string template = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Peach>
 	<DataModel name=""TheDataModel"">

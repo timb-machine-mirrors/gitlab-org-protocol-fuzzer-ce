@@ -67,10 +67,10 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 							Log("{0} <<< OnReadComplete (Stopped)", _parent._name);
 						}
 					}
-					catch (ObjectDisposedException)
+					catch (Exception ex)
 					{
 						// Stream was closed...
-						Log("{0} <<< OnReadComplete (Closed)", _parent._name);
+						Log("{0} <<< OnReadComplete ({1})", _parent._name, ex.GetType().Name);
 					}
 				}
 
@@ -96,9 +96,9 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 						{
 							_parent._stream.BeginRead(_buffer, 0, _buffer.Length, OnReadComplete, null);
 						}
-						catch (NotSupportedException)
+						catch (Exception ex)
 						{
-							Log("{0} Read (NotSupportedException)", _parent._name);
+							Log("{0} Read ({1})", _parent._name, ex.GetType().Name);
 
 							_length = 0;
 							_position = 0;
@@ -291,10 +291,10 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 							Log("{0} <<< OnReadComplete (Stopped)", _name);
 						}
 					}
-					catch (ObjectDisposedException)
+					catch (Exception ex)
 					{
 						// Stream was closed...
-						Log("{0} <<< OnReadComplete (Closed)", _name);
+						Log("{0} <<< OnReadComplete ({1})", _name, ex.GetType().Name);
 					}
 				};
 
@@ -306,9 +306,9 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 					{
 						_stream.BeginRead(buf, 0, buf.Length, cb, null);
 					}
-					catch (NotSupportedException)
+					catch (Exception ex)
 					{
-						Log("{0} Read (NotSupportedException)", _name);
+						Log("{0} Read ({1})", _name, ex.GetType().Name);
 						break;
 					}
 
@@ -529,7 +529,7 @@ quit
 			_procHandler = new System.Diagnostics.Process();
 			_procHandler.StartInfo = si;
 
-			logger.Debug("_Start(): Starting gdb process");
+			logger.Debug("_Start(): Starting gdb process: '{0} {1}'", si.FileName, si.Arguments);
 
 			if (File.Exists(_gdbLog))
 				File.Delete(_gdbLog);
@@ -579,6 +579,9 @@ quit
 				// Program ran to completion
 				_procCommand = null;
 			}
+
+			// Notify event handler the process started
+			OnInternalEvent(EventArgs.Empty);
 		}
 
 		void _Stop()
@@ -746,7 +749,7 @@ quit
 			_messageExit = false;
 			_secondStart = true;
 
-			if (RestartOnEachTest)
+			if (RestartOnEachTest || !_IsRunning())
 				_Stop();
 			else if (firstStart)
 				return;

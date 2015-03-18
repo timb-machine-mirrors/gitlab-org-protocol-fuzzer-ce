@@ -7,7 +7,8 @@ using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Monitors
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Category("Peach")]
 	class ProcessKillerMonitorTests
 	{
 		[Test]
@@ -26,7 +27,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		}
 
 		[Test]
-		public void TestSingleProcss()
+		public void TestSingleProcess()
 		{
 			const string args = "127.0.0.1 0";
 			var exe = GetTempExeName();
@@ -78,7 +79,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		}
 
 		[Test]
-		public void TestMultiProcss()
+		public void TestMultiProcess()
 		{
 			const string args = "127.0.0.1 0";
 			var exe1 = GetTempExeName();
@@ -208,7 +209,7 @@ namespace Peach.Pro.Test.Core.Monitors
 
 		static bool ProcessExists(string name)
 		{
-			var procs = Process.GetProcessesByName(name);
+			var procs = ProcessInfo.Instance.GetProcessesByName(name);
 			procs.ForEach(p => p.Close());
 			return procs.Length > 0;
 		}

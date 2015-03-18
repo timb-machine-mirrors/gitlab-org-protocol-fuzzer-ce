@@ -317,7 +317,7 @@ namespace Peach.Core
 				// This finally clause needs to be here so that agent shutdown
 				// happens when the engine is stopped...
 
-				logger.Debug("EndTest: Stoping all agents and monitors");
+				logger.Debug("EndTest: Stopping all agents and monitors");
 
 				_context.agentManager.Dispose();
 				_context.agentManager = null;
@@ -485,6 +485,7 @@ namespace Peach.Core
 						}
 
 						logger.Debug("runTest: SoftException, skipping to next iteration");
+						logger.Trace(se);
 					}
 					catch (OutOfMemoryException ex)
 					{

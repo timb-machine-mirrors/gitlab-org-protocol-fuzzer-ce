@@ -89,7 +89,7 @@ namespace PitTester
 
 				do
 				{
-					var valueElement = ((PeachXPathNavigator)iter.Current).currentNode as DataElement;
+					var valueElement = ((PeachXPathNavigator)iter.Current).CurrentNode as DataElement;
 					if (valueElement == null)
 						throw new PeachException("Error, ignore xpath did not return a Data Element. [" + item + "]");
 

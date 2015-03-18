@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace Peach.Core
@@ -31,6 +32,17 @@ namespace Peach.Core
 		public NamedCollection()
 		{
 			_baseName = typeof(T).Name;
+		}
+
+		/// <summary>
+		/// Uses typeof(T).Name as the base name when generating unique names.
+		/// </summary>
+		public NamedCollection(IEnumerable<T> items)
+		{
+			_baseName = typeof(T).Name;
+
+			foreach (var i in items)
+				Add(i);
 		}
 
 		/// <summary>

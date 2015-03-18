@@ -5,7 +5,6 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using System.Security.Principal;
 using System.Threading;
 using NLog;
@@ -91,29 +90,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			var response = Routes.Dispatch(ctx.Request);
 
-			ctx.Response.StatusCode = (int)response.StatusCode;
-
-			// On mono, reset the connection reuse counter
-			//ctx.ResetReuses();
-
-			if (response.Content == null)
-			{
-				ctx.Response.ContentLength64 = 0;
-				ctx.Response.OutputStream.Close();
-			}
-			else
-			{
-				// Leave the stream at the position it was given to us at
-				// so we can return data starting at an offset.
-
-				ctx.Response.ContentType = response.ContentType;
-				ctx.Response.ContentLength64 = response.Content.Length - response.Content.Position;
-
-				using (var stream = ctx.Response.OutputStream)
-				{
-					response.Content.CopyTo(stream);
-				}
-			}
+			response.Complete(ctx);
 
 			Logger.Trace("<<< {0} {1}", (int)response.StatusCode, response.StatusCode);
 		}
@@ -150,7 +127,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 					return ret;
 				}
-				catch (HttpListenerException ex)
+				catch (System.Net.HttpListenerException ex)
 				{
 					if (reserved || ex.ErrorCode != AccessDenied)
 						throw new PeachException("An error occurred starting the HTTP listener.", ex);

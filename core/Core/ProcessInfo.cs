@@ -16,6 +16,16 @@ namespace Peach.Core
 		/// <param name="p">Process to obtain info about.</param>
 		/// <returns>Information about the process.</returns>
 		ProcessInfo Snapshot(Process p);
+
+		/// <summary>
+		/// Returns a list of Processes that match the current name.
+		/// </summary>
+		/// <remarks>
+		/// this works around mono compatibility issues on linux/osx.
+		/// </remarks>
+		/// <param name="name">Name of process.</param>
+		/// <returns>List of processes.</returns>
+		Process[] GetProcessesByName(string name);
 	}
 
 	public class ProcessInfo : StaticPlatformFactory<IProcessInfo>

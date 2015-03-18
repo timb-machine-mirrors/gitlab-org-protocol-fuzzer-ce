@@ -41,7 +41,7 @@ namespace Peach.Core.Dom.Actions
 
 			while (iter.MoveNext())
 			{
-				var valueElement = ((PeachXPathNavigator)iter.Current).currentNode as DataElement;
+				var valueElement = ((PeachXPathNavigator)iter.Current).CurrentNode as DataElement;
 				if (valueElement == null)
 					throw new SoftException("Error, slurp valueXpath did not return a Data Element. [" + valueXpath + "]");
 
@@ -62,7 +62,7 @@ namespace Peach.Core.Dom.Actions
 
 			do
 			{
-				var setElement = ((PeachXPathNavigator)iter.Current).currentNode as DataElement;
+				var setElement = ((PeachXPathNavigator)iter.Current).CurrentNode as DataElement;
 				if (setElement == null)
 					throw new PeachException("Error, slurp setXpath did not return a Data Element. [" + valueXpath + "]");
 
