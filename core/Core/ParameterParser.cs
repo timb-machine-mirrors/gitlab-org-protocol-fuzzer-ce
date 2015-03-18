@@ -187,13 +187,8 @@ namespace Peach.Core
 
 		private static object ChangeType(Type ownerType, string value, Type destType)
 		{
-			try
-			{
+			if (Type.GetTypeCode(destType) != TypeCode.Object)
 				return Convert.ChangeType(value, destType);
-			}
-			catch (InvalidCastException)
-			{
-			}
 
 			// Look for a static Parse(string) on destType
 			var method = destType.GetMethod(
