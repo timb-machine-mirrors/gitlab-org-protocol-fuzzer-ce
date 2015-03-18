@@ -57,22 +57,15 @@ namespace Peach.Core.Dom
 	/// Data that comes from a file
 	/// </summary>
 	[Serializable]
-	public class DataFile : Data
+    public class DataFile : DataField
 	{
-		#region Obsolete Functions
-
-		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
-		public string name { get { return Name; } }
-
-		#endregion
-
-		public DataFile(DataSet dataSet, string fileName)
+		public DataFile(DataSet dataSet, string fileName) : base(dataSet)
 		{
 			Name = "{0}/{1}".Fmt(dataSet.Name, Path.GetFileName(fileName));
 			FileName = fileName;
 		}
 
-		public void Apply(DataModel model)
+		public override void Apply(DataModel model)
 		{
 			try
 			{
@@ -91,33 +84,24 @@ namespace Peach.Core.Dom
 						strm = ms;
 					}
 
-					DataCracker cracker = new DataCracker();
+					var cracker = new DataCracker();
 					cracker.CrackData(model, new BitStream(strm));
-				}
+
+                    // Apply field values
+                    base.Apply(model);
+                }
 			}
-			catch (Cracker.CrackingFailure ex)
+			catch (CrackingFailure ex)
 			{
 				throw new PeachException("Error, failed to crack \"" + FileName +
 					"\" into \"" + model.fullName + "\": " + ex.Message, ex);
 			}
 		}
 
-		public string Name
-		{
-			get;
-			private set;
-		}
-
 		public string FileName
 		{
 			get;
 			private set;
-		}
-
-		public bool Ignore
-		{
-			get;
-			set;
 		}
 	}
 
@@ -159,13 +143,13 @@ namespace Peach.Core.Dom
 		public string Name
 		{
 			get;
-			private set;
+			protected set;
 		}
 
 		public FieldCollection Fields
 		{
 			get;
-			private set;
+			protected set;
 		}
 
 		public bool Ignore
@@ -174,7 +158,7 @@ namespace Peach.Core.Dom
 			set;
 		}
 
-		public void Apply(DataModel model)
+		public virtual void Apply(DataModel model)
 		{
 			// Examples of valid field names:
 			//
@@ -191,7 +175,7 @@ namespace Peach.Core.Dom
 			model.evaulateAnalyzers();
 		}
 
-		static void ApplyField(DataElementContainer model, string field, Variant value)
+		static protected void ApplyField(DataElementContainer model, string field, Variant value)
 		{
 			DataElement elem = model;
 			DataElementContainer container = model;
