@@ -959,13 +959,11 @@ namespace Peach.Pro.Core.WebServices
 
 			var fileName = pit.Versions[0].Files[0].Name + ".config";
 
-			// ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
-			if (!File.Exists(fileName))
-			{
-				return new List<Parameter>();
-			}
+			var defs = File.Exists(fileName)
+				? PitDefines.Parse(fileName)
+				: new List<PitDefines.Define>();
 
-			return MakeConfig(PitDefines.Parse(fileName));
+			return MakeConfig(defs);
 		}
 
 		public List<Parameter> MakeConfig(List<PitDefines.Define> defines)

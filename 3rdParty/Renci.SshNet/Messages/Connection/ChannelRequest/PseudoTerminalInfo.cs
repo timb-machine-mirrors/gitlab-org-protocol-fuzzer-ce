@@ -25,7 +25,7 @@ namespace Renci.SshNet.Messages.Connection
         }
 
         /// <summary>
-        /// Gets or sets the environment variable.
+        /// Gets or sets the environment variable (e.g., vt100).
         /// </summary>
         /// <value>
         /// The environment variable.
@@ -33,34 +33,34 @@ namespace Renci.SshNet.Messages.Connection
         public string EnvironmentVariable { get; set; }
 
         /// <summary>
-        /// Gets or sets the columns.
+        /// Gets or sets the terminal width in columns (e.g., 80).
         /// </summary>
         /// <value>
-        /// The columns.
+        /// The terminal width in columns.
         /// </value>
         public uint Columns { get; set; }
 
         /// <summary>
-        /// Gets or sets the rows.
+        /// Gets or sets the terminal width in rows (e.g., 24).
         /// </summary>
         /// <value>
-        /// The rows.
+        /// The terminal width in rows.
         /// </value>
         public uint Rows { get; set; }
 
         /// <summary>
-        /// Gets or sets the width of the pixel.
+        /// Gets or sets the terminal width in pixels (e.g., 640).
         /// </summary>
         /// <value>
-        /// The width of the pixel.
+        /// The terminal width in pixels.
         /// </value>
         public uint PixelWidth { get; set; }
 
         /// <summary>
-        /// Gets or sets the height of the pixel.
+        /// Gets or sets the terminal height in pixels (e.g., 480).
         /// </summary>
         /// <value>
-        /// The height of the pixel.
+        /// The terminal height in pixels.
         /// </value>
         public uint PixelHeight { get; set; }
 
@@ -77,7 +77,7 @@ namespace Renci.SshNet.Messages.Connection
         /// </summary>
         public PseudoTerminalRequestInfo()
         {
-            this.WantReply = true;
+            WantReply = true;
         }
 
         /// <summary>
@@ -92,12 +92,12 @@ namespace Renci.SshNet.Messages.Connection
         public PseudoTerminalRequestInfo(string environmentVariable, uint columns, uint rows, uint width, uint height, IDictionary<TerminalModes, uint> terminalModeValues)
             : this()
         {
-            this.EnvironmentVariable = environmentVariable;
-            this.Columns = columns;
-            this.Rows = rows;
-            this.PixelWidth = width;
-            this.PixelHeight = height;
-            this.TerminalModeValues = terminalModeValues;
+            EnvironmentVariable = environmentVariable;
+            Columns = columns;
+            Rows = rows;
+            PixelWidth = width;
+            PixelHeight = height;
+            TerminalModeValues = terminalModeValues;
         }
 
         /// <summary>
@@ -107,26 +107,26 @@ namespace Renci.SshNet.Messages.Connection
         {
             base.SaveData();
 
-            this.Write(this.EnvironmentVariable);
-            this.Write(this.Columns);
-            this.Write(this.Rows);
-            this.Write(this.Rows);
-            this.Write(this.PixelHeight);
+            Write(EnvironmentVariable);
+            Write(Columns);
+            Write(Rows);
+            Write(Rows);
+            Write(PixelHeight);
 
-            if (this.TerminalModeValues != null)
+            if (TerminalModeValues != null)
             {
-                this.Write((uint)this.TerminalModeValues.Count * (1 + 4) + 1);
+                Write((uint)TerminalModeValues.Count * (1 + 4) + 1);
 
-                foreach (var item in this.TerminalModeValues)
+                foreach (var item in TerminalModeValues)
                 {
-                    this.Write((byte)item.Key);
-                    this.Write(item.Value);
+                    Write((byte)item.Key);
+                    Write(item.Value);
                 }
-                this.Write((byte)0);
+                Write((byte)0);
             }
             else
             {
-                this.Write((uint)0);
+                Write((uint)0);
             }
         }
     }

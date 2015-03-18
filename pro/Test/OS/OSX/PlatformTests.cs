@@ -1,30 +1,19 @@
 using System;
 using System.Diagnostics;
-using System.IO;
-using NLog;
 using NUnit.Framework;
 using Peach.Core;
+using System.Linq;
 
 namespace Peach.Pro.Test.OS.OSX
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Category("Peach")]
 	public class PlatformTests
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
-
-		[Test]
-		public void Test1()
-		{
-			logger.Debug("Hello World");
-			logger.Debug(new FileNotFoundException().Message);
-			bool value = true;
-			Assert.IsTrue(value);
-		}
-
 		[Test]
 		public void TestCpuUsage()
 		{
-			using (Process p = Process.GetProcessById(1))
+			using (var p = Process.GetProcessById(1))
 			{
 				var pi = ProcessInfo.Instance.Snapshot(p);
 				Assert.NotNull(pi);
@@ -34,19 +23,48 @@ namespace Peach.Pro.Test.OS.OSX
 				Assert.Greater(pi.UserProcessorTicks, 0);
 			}
 
-			using (Process p = new Process())
+			using (var p = new Process())
 			{
-				var si = new ProcessStartInfo();
-				si.FileName = "/bin/ls";
+				var si = new ProcessStartInfo { FileName = "/bin/ls" };
 				p.StartInfo = si;
 				p.Start();
 				p.WaitForExit();
 				Assert.True(p.HasExited);
 				p.Close();
 
-				Assert.Throws<ArgumentException>(delegate() { ProcessInfo.Instance.Snapshot(p); });
+				Assert.Throws<ArgumentException>(() => ProcessInfo.Instance.Snapshot(p));
 			}
 		}
 
+		[Test]
+		public void GetProcByName()
+		{
+			string procName;
+			int procId;
+
+			using (var self = Process.GetCurrentProcess())
+			{
+				// Use process snapshot so we are sure to get the correct name on osx
+				procName = ProcessInfo.Instance.Snapshot(self).ProcessName;
+				procId = self.Id;
+			}
+
+			var p = ProcessInfo.Instance.GetProcessesByName(procName);
+
+			try
+			{
+				Assert.NotNull(p);
+				Assert.Greater(p.Length, 0);
+
+				var match = p.Where(i => i.Id == procId);
+
+				Assert.AreEqual(1, match.Count());
+			}
+			finally
+			{
+				foreach (var i in p)
+					i.Dispose();
+			}
+		}
 	}
 }

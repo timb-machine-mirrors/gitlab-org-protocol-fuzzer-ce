@@ -12,6 +12,7 @@ namespace Peach.Pro.Test.Core.Monitors
 	class MemoryMonitorTests
 	{
 		string _thisPid;
+		string _thisProcessName;
 
 		[SetUp]
 		public void SetUp()
@@ -19,6 +20,8 @@ namespace Peach.Pro.Test.Core.Monitors
 			using (var p = Process.GetCurrentProcess())
 			{
 				_thisPid = p.Id.ToString(CultureInfo.InvariantCulture);
+				// Use process snapshot so we are sure to get the correct name on osx
+				_thisProcessName = ProcessInfo.Instance.Snapshot(p).ProcessName;
 			}
 		}
 
@@ -144,11 +147,9 @@ namespace Peach.Pro.Test.Core.Monitors
 		{
 			// Verify can generate faults using process name
 
-			var proc = Platform.GetOS() == Platform.OS.Windows ? "explorer" : "sshd";
-
 			var runner = new MonitorRunner("Memory", new Dictionary<string, string>
 			{
-				{ "ProcessName", proc },
+				{ "ProcessName", _thisProcessName },
 				{ "MemoryLimit", "1" },
 			});
 

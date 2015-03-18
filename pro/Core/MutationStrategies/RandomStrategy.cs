@@ -600,7 +600,8 @@ namespace Peach.Pro.Core.MutationStrategies
 
 					rec.Mutators.AddRange(dataMutators
 						.Where(m => SupportedDataElement(m, elem))
-						.Select(m => GetMutatorInstance(m, elem)));
+						.Select(m => GetMutatorInstance(m, elem))
+						.Where(m => m.SelectionWeight > 0));
 
 					if (rec.Mutators.Count > 0)
 					{

@@ -15,7 +15,7 @@ namespace Renci.SshNet
     /// </summary>
     public partial class ScpClient : BaseClient
     {
-        private static readonly Regex _fileInfoRe = new Regex(@"C(?<mode>\d{4}) (?<length>\d+) (?<filename>.+)");
+        private static readonly Regex FileInfoRe = new Regex(@"C(?<mode>\d{4}) (?<length>\d+) (?<filename>.+)");
         private static char[] _byteToChar;
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace Renci.SshNet
         /// <exception cref="ArgumentNullException"><paramref name="password"/> is null.</exception>
         /// <exception cref="ArgumentException"><paramref name="host"/> is invalid, or <paramref name="username"/> is null or contains whitespace characters.</exception>
         public ScpClient(string host, string username, string password)
-            : this(host, ConnectionInfo.DEFAULT_PORT, username, password)
+            : this(host, ConnectionInfo.DefaultPort, username, password)
         {
         }
 
@@ -111,7 +111,7 @@ namespace Renci.SshNet
         /// <exception cref="ArgumentNullException"><paramref name="keyFiles"/> is null.</exception>
         /// <exception cref="ArgumentException"><paramref name="host"/> is invalid, -or- <paramref name="username"/> is null or contains whitespace characters.</exception>
         public ScpClient(string host, string username, params PrivateKeyFile[] keyFiles)
-            : this(host, ConnectionInfo.DEFAULT_PORT, username, keyFiles)
+            : this(host, ConnectionInfo.DefaultPort, username, keyFiles)
         {
         }
 
@@ -126,16 +126,33 @@ namespace Renci.SshNet
         /// connection info will be disposed when this instance is disposed.
         /// </remarks>
         private ScpClient(ConnectionInfo connectionInfo, bool ownsConnectionInfo)
-            : base(connectionInfo, ownsConnectionInfo)
+            : this(connectionInfo, ownsConnectionInfo, new ServiceFactory())
         {
-            this.OperationTimeout = new TimeSpan(0, 0, 0, 0, -1);
-            this.BufferSize = 1024 * 16;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ScpClient"/> class.
+        /// </summary>
+        /// <param name="connectionInfo">The connection info.</param>
+        /// <param name="ownsConnectionInfo">Specified whether this instance owns the connection info.</param>
+        /// <param name="serviceFactory">The factory to use for creating new services.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="connectionInfo"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="serviceFactory"/> is null.</exception>
+        /// <remarks>
+        /// If <paramref name="ownsConnectionInfo"/> is <c>true</c>, then the
+        /// connection info will be disposed when this instance is disposed.
+        /// </remarks>
+        internal ScpClient(ConnectionInfo connectionInfo, bool ownsConnectionInfo, IServiceFactory serviceFactory)
+            : base(connectionInfo, ownsConnectionInfo, serviceFactory)
+        {
+            OperationTimeout = new TimeSpan(0, 0, 0, 0, -1);
+            BufferSize = 1024 * 16;
 
             if (_byteToChar == null)
             {
                 _byteToChar = new char[128];
                 var ch = '\0';
-                for (int i = 0; i < 128; i++)
+                for (var i = 0; i < 128; i++)
                 {
                     _byteToChar[i] = ch++;
                 }
@@ -151,8 +168,8 @@ namespace Renci.SshNet
         /// <param name="path">Remote host file name.</param>
         public void Upload(Stream source, string path)
         {
-            using (var input = new PipeStream())
-            using (var channel = this.Session.CreateClientChannel<ChannelSession>())
+            using (var input = ServiceFactory.CreatePipeStream())
+            using (var channel = Session.CreateChannelSession())
             {
                 channel.DataReceived += delegate(object sender, ChannelDataEventArgs e)
                 {
@@ -162,20 +179,20 @@ namespace Renci.SshNet
 
                 channel.Open();
 
-                int pathEnd = path.LastIndexOfAny(new[] { '\\', '/' });
+                var pathEnd = path.LastIndexOfAny(new[] { '\\', '/' });
                 if (pathEnd != -1)
                 {
                     // split the path from the file
-                    string pathOnly = path.Substring(0, pathEnd);
-                    string fileOnly = path.Substring(pathEnd + 1);
+                    var pathOnly = path.Substring(0, pathEnd);
+                    var fileOnly = path.Substring(pathEnd + 1);
                     //  Send channel command request
                     channel.SendExecRequest(string.Format("scp -t \"{0}\"", pathOnly));
-                    this.CheckReturnCode(input);
+                    CheckReturnCode(input);
 
                     path = fileOnly;
                 }
 
-                this.InternalUpload(channel, input, source, path);
+                InternalUpload(channel, input, source, path);
 
                 channel.Close();
             }
@@ -198,7 +215,7 @@ namespace Renci.SshNet
                 throw new ArgumentNullException("destination");
 
             using (var input = new PipeStream())
-            using (var channel = this.Session.CreateClientChannel<ChannelSession>())
+            using (var channel = Session.CreateChannelSession())
             {
                 channel.DataReceived += delegate(object sender, ChannelDataEventArgs e)
                 {
@@ -210,47 +227,48 @@ namespace Renci.SshNet
 
                 //  Send channel command request
                 channel.SendExecRequest(string.Format("scp -f \"{0}\"", filename));
-                this.SendConfirmation(channel); //  Send reply
+                SendConfirmation(channel); //  Send reply
 
                 var message = ReadString(input);
-                var match = _fileInfoRe.Match(message);
+                var match = FileInfoRe.Match(message);
 
                 if (match.Success)
                 {
                     //  Read file
-                    this.SendConfirmation(channel); //  Send reply
+                    SendConfirmation(channel); //  Send reply
 
                     var mode = match.Result("${mode}");
                     var length = long.Parse(match.Result("${length}"));
                     var fileName = match.Result("${filename}");
 
-                    this.InternalDownload(channel, input, destination, fileName, length);
+                    InternalDownload(channel, input, destination, fileName, length);
                 }
                 else
                 {
-                    this.SendConfirmation(channel, 1, string.Format("\"{0}\" is not valid protocol message.", message));
+                    SendConfirmation(channel, 1, string.Format("\"{0}\" is not valid protocol message.", message));
                 }
 
                 channel.Close();
             }
         }
 
-        private void InternalSetTimestamp(ChannelSession channel, Stream input, DateTime lastWriteTime, DateTime lastAccessime)
+        private void InternalSetTimestamp(IChannelSession channel, Stream input, DateTime lastWriteTime, DateTime lastAccessime)
         {
             var zeroTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             var modificationSeconds = (long)(lastWriteTime - zeroTime).TotalSeconds;
             var accessSeconds = (long)(lastAccessime - zeroTime).TotalSeconds;
-            this.SendData(channel, string.Format("T{0} 0 {1} 0\n", modificationSeconds, accessSeconds));
-            this.CheckReturnCode(input);
+            SendData(channel, string.Format("T{0} 0 {1} 0\n", modificationSeconds, accessSeconds));
+            CheckReturnCode(input);
         }
 
-        private void InternalUpload(ChannelSession channel, Stream input, Stream source, string filename)
+        private void InternalUpload(IChannelSession channel, Stream input, Stream source, string filename)
         {
             var length = source.Length;
 
-            this.SendData(channel, string.Format("C0644 {0} {1}\n", length, Path.GetFileName(filename)));
+            SendData(channel, string.Format("C0644 {0} {1}\n", length, Path.GetFileName(filename)));
+            CheckReturnCode(input);
 
-            var buffer = new byte[this.BufferSize];
+            var buffer = new byte[BufferSize];
 
             var read = source.Read(buffer, 0, buffer.Length);
 
@@ -258,31 +276,31 @@ namespace Renci.SshNet
 
             while (read > 0)
             {
-                this.SendData(channel, buffer, read);
+                SendData(channel, buffer, read);
 
                 totalRead += read;
 
-                this.RaiseUploadingEvent(filename, length, totalRead);
+                RaiseUploadingEvent(filename, length, totalRead);
 
                 read = source.Read(buffer, 0, buffer.Length);
             }
 
-            this.SendConfirmation(channel);
-            this.CheckReturnCode(input);
+            SendConfirmation(channel);
+            CheckReturnCode(input);
         }
 
-        private void InternalDownload(ChannelSession channel, Stream input, Stream output, string filename, long length)
+        private void InternalDownload(IChannelSession channel, Stream input, Stream output, string filename, long length)
         {
-            var buffer = new byte[Math.Min(length, this.BufferSize)];
+            var buffer = new byte[Math.Min(length, BufferSize)];
             var needToRead = length;
 
             do
             {
-                var read = input.Read(buffer, 0, (int)Math.Min(needToRead, this.BufferSize));
+                var read = input.Read(buffer, 0, (int)Math.Min(needToRead, BufferSize));
 
                 output.Write(buffer, 0, read);
 
-                this.RaiseDownloadingEvent(filename, length, length - needToRead);
+                RaiseDownloadingEvent(filename, length, length - needToRead);
 
                 needToRead -= read;
             }
@@ -291,39 +309,39 @@ namespace Renci.SshNet
             output.Flush();
 
             //  Raise one more time when file downloaded
-            this.RaiseDownloadingEvent(filename, length, length - needToRead);
+            RaiseDownloadingEvent(filename, length, length - needToRead);
 
             //  Send confirmation byte after last data byte was read
-            this.SendConfirmation(channel);
+            SendConfirmation(channel);
 
-            this.CheckReturnCode(input);
+            CheckReturnCode(input);
         }
 
         private void RaiseDownloadingEvent(string filename, long size, long downloaded)
         {
-            if (this.Downloading != null)
+            if (Downloading != null)
             {
-                this.Downloading(this, new ScpDownloadEventArgs(filename, size, downloaded));
+                Downloading(this, new ScpDownloadEventArgs(filename, size, downloaded));
             }
         }
 
         private void RaiseUploadingEvent(string filename, long size, long uploaded)
         {
-            if (this.Uploading != null)
+            if (Uploading != null)
             {
-                this.Uploading(this, new ScpUploadEventArgs(filename, size, uploaded));
+                Uploading(this, new ScpUploadEventArgs(filename, size, uploaded));
             }
         }
 
-        private void SendConfirmation(ChannelSession channel)
+        private void SendConfirmation(IChannelSession channel)
         {
-            this.SendData(channel, new byte[] { 0 });
+            SendData(channel, new byte[] { 0 });
         }
 
-        private void SendConfirmation(ChannelSession channel, byte errorCode, string message)
+        private void SendConfirmation(IChannelSession channel, byte errorCode, string message)
         {
-            this.SendData(channel, new[] { errorCode });
-            this.SendData(channel, string.Format("{0}\n", message));
+            SendData(channel, new[] { errorCode });
+            SendData(channel, string.Format("{0}\n", message));
         }
 
         /// <summary>
@@ -342,9 +360,9 @@ namespace Renci.SshNet
             }
         }
 
-        partial void SendData(ChannelSession channel, string command);
+        partial void SendData(IChannelSession channel, string command);
 
-        private void SendData(ChannelSession channel, byte[] buffer, int length)
+        private void SendData(IChannelSession channel, byte[] buffer, int length)
         {
             if (length == buffer.Length)
             {
@@ -356,7 +374,7 @@ namespace Renci.SshNet
             }
         }
 
-        private void SendData(ChannelSession channel, byte[] buffer)
+        private void SendData(IChannelSession channel, byte[] buffer)
         {
             channel.SendData(buffer);
         }

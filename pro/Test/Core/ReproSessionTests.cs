@@ -395,7 +395,7 @@ namespace Peach.Pro.Test.Core
 			foreach (var ts in _waitTimes)
 			{
 				Assert.GreaterOrEqual(ts, TimeSpan.FromMilliseconds(80));
-				Assert.LessOrEqual(ts, TimeSpan.FromMilliseconds(150));
+				Assert.LessOrEqual(ts, TimeSpan.FromMilliseconds(180));
 			}
 		}
 

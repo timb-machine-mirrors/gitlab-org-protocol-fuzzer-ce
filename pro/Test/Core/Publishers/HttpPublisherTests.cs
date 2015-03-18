@@ -9,64 +9,54 @@ using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Publishers
 {
-
 	class SimpleHttpListener
 	{
-		bool _stop;
+		volatile bool _stop;
+		readonly HttpListener _listener = new HttpListener();
+		readonly Thread _thread;
+		int _delay;
 
-		public SimpleHttpListener()
+		public SimpleHttpListener(params string[] prefixes)
 		{
 			Assert.True(HttpListener.IsSupported);
-		}
-
-		HttpListener _listener;
-
-		public void Stop()
-		{
-			_stop = true;
-
-			try
-			{
-				_listener.Stop();
-			}
-			catch
-			{
-			}
-		}
-
-		// This example requires the System and System.Net namespaces. 
-		public void Listen(string[] prefixes)
-		{
-			// URI prefixes are required, 
-			// for example "http://localhost:8080/index/".
-			if (prefixes == null || prefixes.Length == 0)
-				throw new ArgumentException("prefixes");
-
-			// Create a listener.
-			_listener = new HttpListener();
-			// Add the prefixes. 
 			foreach (var s in prefixes)
 			{
 				_listener.Prefixes.Add(s);
 			}
-			_listener.Start();
 
-			IAsyncResult ar = null;
+			_thread = new Thread(OnThread);
+		}
+
+		public void Start(int delay)
+		{
+			_delay = delay;
+			_thread.Start();
+		}
+
+		public void Stop()
+		{
+			_stop = true;
+			_listener.Stop();
+			_thread.Join();
+		}
+
+		private void OnThread()
+		{
+			Console.WriteLine("Delaying for {0}ms", _delay);
+			Thread.Sleep(_delay);
+
+			Console.WriteLine("Starting listener");
+			_listener.Start();
 
 			while (!_stop)
 			{
 				try
 				{
-					if (ar == null)
-						ar = _listener.BeginGetContext(null, null);
+					Console.WriteLine("Waiting for context");
+					var context = _listener.GetContext();
+					Console.WriteLine("Get context");
 
-					if (!ar.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(1)))
-						continue;
-
-					// Note: The GetContext method blocks while waiting for a request. 
-					var context = _listener.EndGetContext(ar);
 					var request = context.Request;
-					// Obtain a response object.
 
 					if (request.ContentLength64 > 0)
 					{
@@ -86,14 +76,12 @@ namespace Peach.Pro.Test.Core.Publishers
 					// You must close the output stream.
 					output.Close();
 					response.Close();
-
-					ar = null;
 				}
-				catch
+				catch (Exception ex)
 				{
+					Console.WriteLine("Exception in listener loop: {0}", ex.Message);
 					return;
 				}
-
 			}
 		}
 	}
@@ -161,45 +149,28 @@ namespace Peach.Pro.Test.Core.Publishers
 </Peach>
 ";
 
-		public void HttpClient(bool sendRecv, string method)
-		{
-			HttpClient(sendRecv, method, false);
-		}
-
-		public void HttpClient(bool sendRecv, string method, bool isHttps)
+		private void HttpClient(bool sendRecv, string method, int delay = 0)
 		{
 			var port = TestBase.MakePort(56000, 57000);
-			string url;
-			SimpleHttpListener listener = null;
-			Thread lThread = null;
-			if (isHttps)
-			{
-				url = "https://changethisurltotest.peach";
-			}
-			else
-			{
-				url = "http://localhost:" + port + "/";
+			var url = "http://localhost:{0}/".Fmt(port);
+			var listener = new SimpleHttpListener(url);
 
-				listener = new SimpleHttpListener();
-				var prefixes = new string[1] { url };
-				lThread = new Thread(() => listener.Listen(prefixes));
-
-				lThread.Start();
-			}
+			listener.Start(delay);
 
 			try
 			{
 				var xml = string.Format(sendRecv ? SendRecvTemplate : RecvTemplate, method, url);
 
 				var parser = new PitParser();
-				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+				var input = new MemoryStream(Encoding.ASCII.GetBytes(xml));
+				var dom = parser.asParser(null, input);
 
 				var config = new RunConfiguration {singleIteration = true};
 
 				var e = new Engine(this);
 				e.startFuzzing(dom, config);
 
-				if (sendRecv && !isHttps)
+				if (sendRecv)
 				{
 					Assert.AreEqual(2, actions.Count);
 
@@ -214,7 +185,7 @@ namespace Peach.Pro.Test.Core.Publishers
 					Assert.AreEqual("Hello World", send);
 					Assert.AreEqual(method + " Hello World Too = 11", recv);
 				}
-				else if (!isHttps)
+				else
 				{
 					Assert.AreEqual(1, actions.Count);
 					var de1 = actions[0].dataModel.find("TheDataModel.str");
@@ -227,11 +198,7 @@ namespace Peach.Pro.Test.Core.Publishers
 			}
 			finally
 			{
-				if (!isHttps)
-				{
-					listener.Stop();
-					lThread.Join();
-				}
+				listener.Stop();
 			}
 		}
 
@@ -265,8 +232,14 @@ namespace Peach.Pro.Test.Core.Publishers
 		public void AreCertErrorsIgnored()
 		{
 			// need to set url above to something that has a self signed cert for https
-			HttpClient(false, "GET", true);
-			HttpClient(false, "POST", true);
+			HttpClient(false, "GET");
+			HttpClient(false, "POST");
+		}
+
+		[Test]
+		public void TestReconnect()
+		{
+			HttpClient(true, "POST", 10000);
 		}
 	}
 }

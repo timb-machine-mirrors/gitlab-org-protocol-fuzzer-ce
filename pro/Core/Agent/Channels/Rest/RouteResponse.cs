@@ -4,9 +4,9 @@
 
 using System;
 using System.IO;
-using System.Net;
 using Newtonsoft.Json;
 using Peach.Core;
+using SocketHttpListener.Net;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
@@ -25,6 +25,35 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		public Stream Content { get; set; }
 
 		public HttpStatusCode StatusCode { get; set; }
+
+		public virtual void Complete(HttpListenerContext ctx)
+		{
+			var resp = ctx.Response;
+
+			resp.StatusCode = (int)StatusCode;
+
+			// On mono, reset the connection reuse counter
+			//ctx.ResetReuses();
+
+			if (Content == null)
+			{
+				resp.ContentLength64 = 0;
+				resp.OutputStream.Close();
+			}
+			else
+			{
+				// Leave the stream at the position it was given to us at
+				// so we can return data starting at an offset.
+
+				resp.ContentType = ContentType;
+				resp.ContentLength64 = Content.Length - Content.Position;
+
+				using (var stream = resp.OutputStream)
+				{
+					Content.CopyTo(stream);
+				}
+			}
+		}
 
 		/// <summary>
 		/// The generic success response.
