@@ -79,7 +79,7 @@ namespace Peach.Pro.Test.Core.Agent
 		public void SetUp()
 		{
 			_collector = new LogCollector { Name = "Collector" };
-			_rule = new LoggingRule("Agent.*", LogLevel.Info, _collector);
+			_rule = new LoggingRule("Agent.*", LogLevel.Debug, _collector);
 
 			var config = LogManager.Configuration;
 			config.AddTarget(_collector.Name, _collector);
@@ -625,9 +625,14 @@ namespace Peach.Pro.Test.Core.Agent
 			{
 				{ "UseNLog", "true" },
 			});
+
 			cli.SessionStarting();
 
 			cli.IterationStarting(new IterationStartingArgs());
+
+			var pub = cli.CreatePublisher("pub", "Null", new Dictionary<string, string>());
+
+			Assert.NotNull(pub, "Publisher should not be null");
 
 			var expected = new List<string>
 			{
@@ -637,6 +642,7 @@ namespace Peach.Pro.Test.Core.Agent
 				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.SessionStarting",
 				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationStarting False False",
 				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationStarting False False",
+				"Debug|[Agent1] Peach.Pro.Core.Publishers.NullPublisher|start()",
 			};
 
 			Thread.Sleep(500); // allow time for logs to collect
@@ -652,7 +658,8 @@ namespace Peach.Pro.Test.Core.Agent
 			expected.AddRange(new[]
 			{
 				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StopMonitor",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StopMonitor"
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StopMonitor",
+				"Debug|[Agent1] Peach.Pro.Core.Publishers.NullPublisher|stop()"
 			});
 
 			Thread.Sleep(500); // allow time for logs to collect
@@ -686,6 +693,7 @@ namespace Peach.Pro.Test.Core.Agent
 				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.SessionStarting",
 				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationStarting False False",
 				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationStarting False False",
+				"Debug|[Agent1] Peach.Pro.Core.Publishers.NullPublisher|start()",
 				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationFinished",
 				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationFinished",
 				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.DetectedFault",
@@ -706,7 +714,8 @@ namespace Peach.Pro.Test.Core.Agent
 			expected.AddRange(new[]
 			{
 				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StopMonitor",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StopMonitor"
+				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StopMonitor",
+				"Debug|[Agent1] Peach.Pro.Core.Publishers.NullPublisher|stop()"
 			});
 
 			Thread.Sleep(500); // allow time for logs to collect
@@ -714,6 +723,9 @@ namespace Peach.Pro.Test.Core.Agent
 
 			cli.IterationStarting(new IterationStartingArgs());
 			cli.IterationFinished();
+
+			pub.Dispose();
+
 			cli.SessionFinished();
 			cli.StopAllMonitors();
 			cli.AgentDisconnect();
@@ -726,8 +738,10 @@ namespace Peach.Pro.Test.Core.Agent
 				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.SessionStarting",
 				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationStarting False False",
 				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationStarting False False",
+				"Debug|[Agent1] Peach.Pro.Core.Publishers.NullPublisher|start()",
 				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationFinished",
 				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationFinished",
+				"Debug|[Agent1] Peach.Pro.Core.Publishers.NullPublisher|stop()",
 				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.SessionFinished",
 				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionFinished",
 				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StopMonitor",
@@ -924,6 +938,11 @@ namespace Peach.Pro.Test.Core.Agent
 
 			protected override void Write(LogEventInfo logEvent)
 			{
+				// Ignore mogs from the channel for the test, we only are interested
+				// in monitor and publisher log messages.
+				if (logEvent.LoggerName.Contains("Peach.Pro.Core.Agent.Channels.Rest"))
+					return;
+
 				var message = Layout.Render(logEvent);
 				Messages.Add(message);
 			}
