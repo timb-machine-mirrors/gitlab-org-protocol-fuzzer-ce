@@ -21,14 +21,15 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 		NonReproducable,
 	}
 
-	class MetricCache<T> where T : Metric, new()
+	internal interface IMetricCache
+	{
+		long Add(JobContext db, string name);
+	}
+
+	internal class MetricCache<T> : IMetricCache
+		where T : Metric, new()
 	{
 		readonly Dictionary<string, T> _map = new Dictionary<string, T>();
-
-		private string Table
-		{
-			get { return typeof(T).Name; }
-		}
 
 		public MetricCache(JobContext db)
 		{
@@ -48,24 +49,42 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 		}
 	}
 
+	internal class MetricsCache
+	{
+		readonly Dictionary<string, IMetricCache> _metrics;
+
+		public MetricsCache(JobContext db)
+		{
+			_metrics = new Dictionary<string, IMetricCache>
+			{
+				{ typeof(Storage.State).Name, new MetricCache<Storage.State>(db) },
+				{ typeof(Storage.Action).Name, new MetricCache<Storage.Action>(db) },
+				{ typeof(Storage.Parameter).Name, new MetricCache<Storage.Parameter>(db) },
+				{ typeof(Storage.Element).Name, new MetricCache<Storage.Element>(db) },
+				{ typeof(Storage.Mutator).Name, new MetricCache<Storage.Mutator>(db) },
+				{ typeof(Storage.Dataset).Name, new MetricCache<Storage.Dataset>(db) },
+			};
+		}
+
+		public long Add<T>(JobContext db, string name)
+		{
+			return _metrics[typeof(T).Name].Add(db, name);
+		}
+	}
+
 	class JobWatcher : Watcher
 	{
 		readonly Guid _guid;
 		readonly string _dbPath;
 		readonly string _logPath;
 		readonly List<Fault.State> _states = new List<Fault.State>();
-		readonly List<Storage.Mutation> _mutations = new List<Storage.Mutation>();
+		readonly List<Mutation> _mutations = new List<Mutation>();
 		Mutation _mutation = new Mutation();
 		Fault _reproFault;
 		Job _job;
 		bool _isReproducing;
 
-		readonly MetricCache<Storage.State> _stateMetrics;
-		readonly MetricCache<Storage.Action> _actionMetrics;
-		readonly MetricCache<Storage.Parameter> _parameterMetrics;
-		readonly MetricCache<Storage.Element> _elementMetrics;
-		readonly MetricCache<Storage.Mutator> _mutatorMetrics;
-		readonly MetricCache<Storage.Dataset> _datasetMetrics;
+		readonly MetricsCache _cache;
 
 		public JobWatcher(Guid guid)
 		{
@@ -83,12 +102,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 
 			using (var db = new JobContext(_dbPath))
 			{
-				_stateMetrics = new MetricCache<Storage.State>(db);
-				_actionMetrics = new MetricCache<Storage.Action>(db);
-				_parameterMetrics = new MetricCache<Storage.Parameter>(db);
-				_elementMetrics = new MetricCache<Storage.Element>(db);
-				_mutatorMetrics = new MetricCache<Storage.Mutator>(db);
-				_datasetMetrics = new MetricCache<Storage.Dataset>(db);
+				_cache = new MetricsCache(db);
 			}
 		}
 
@@ -169,7 +183,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 
 		protected override void Engine_Fault(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faults)
 		{
-			var fault = CombineFaults(context, currentIteration, stateModel, faults);
+			var fault = CombineFaults(currentIteration, stateModel, faults);
 
 			if (_reproFault != null)
 			{
@@ -190,7 +204,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 		{
 			Debug.Assert(_reproFault == null);
 
-			_reproFault = CombineFaults(context, currentIteration, stateModel, faults);
+			_reproFault = CombineFaults(currentIteration, stateModel, faults);
 			SaveFault(context, Category.Reproducing, _reproFault);
 		}
 
@@ -222,7 +236,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			{
 				using (var db = new JobContext(_dbPath))
 				{
-					_mutation.StateId = _stateMetrics.Add(db, state.Name);
+					_mutation.StateId = _cache.Add<Storage.State>(db, state.Name);
 					db.InsertStateInstance(new StateInstance { StateId = _mutation.StateId });
 				}
 			}
@@ -232,7 +246,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 		{
 			using (var db = new JobContext(_dbPath))
 			{
-				_mutation.ActionId = _actionMetrics.Add(db, action.Name);
+				_mutation.ActionId = _cache.Add<Storage.Action>(db, action.Name);
 			}
 
 			var rec = new Fault.Action
@@ -298,10 +312,10 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			using (var db = new JobContext(_dbPath))
 			{
 				_mutation.Iteration = context.currentIteration;
-				_mutation.ParameterId = _parameterMetrics.Add(db, data.Name ?? "");
-				_mutation.ElementId = _elementMetrics.Add(db, element.fullName);
-				_mutation.MutatorId = _mutatorMetrics.Add(db, mutator.Name);
-				_mutation.DatasetId = _datasetMetrics.Add(db, 
+				_mutation.ParameterId = _cache.Add<Storage.Parameter>(db, data.Name ?? "");
+				_mutation.ElementId = _cache.Add<Storage.Element>(db, element.fullName);
+				_mutation.MutatorId = _cache.Add<Storage.Mutator>(db, mutator.Name);
+				_mutation.DatasetId = _cache.Add<Storage.Dataset>(db,
 					data.selectedData != null ? data.selectedData.Name : "");
 
 				_mutations.Add(_mutation);
@@ -323,7 +337,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			}
 		}
 
-		private Fault CombineFaults(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faults)
+		private Fault CombineFaults(uint currentIteration, StateModel stateModel, Fault[] faults)
 		{
 			// The combined fault will use toSave and not collectedData
 			var ret = new Fault() { collectedData = null };
@@ -423,93 +437,74 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 
 		void SaveFault(RunContext context, Category category, Fault fault)
 		{
-			//switch (category)
-			//{
-			//	case Category.Faults:
-			//		log.WriteLine("! Reproduced fault at iteration {0} : {1}",
-			//			fault.iteration, 
-			//			DateTime.Now);
-			//		break;
-			//	case Category.NonReproducable:
-			//		log.WriteLine("! Non-reproducable fault detected at iteration {0} : {1}", 
-			//			fault.iteration, 
-			//			DateTime.Now);
-			//		break;
-			//	case Category.Reproducing:
-			//		log.WriteLine("! Fault detected at iteration {0}, trying to reprduce : {1}", 
-			//			fault.iteration, 
-			//			DateTime.Now);
-			//		break;
-			//}
-			using (var db = new JobContext(_dbPath))
-			{
-				var now = DateTime.UtcNow;
+			var now = DateTime.UtcNow;
 
-				var bucket = string.Join("_", new[] { 
+			var bucket = string.Join("_", new[] { 
 					fault.majorHash, 
 					fault.minorHash, 
 					fault.exploitability 
 				}.Where(s => !string.IsNullOrEmpty(s)));
-				if (fault.folderName != null)
-					bucket = fault.folderName;
-				else if (string.IsNullOrEmpty(bucket))
-					bucket = "Unknown";
+			if (fault.folderName != null)
+				bucket = fault.folderName;
+			else if (string.IsNullOrEmpty(bucket))
+				bucket = "Unknown";
 
-				var entity = new FaultDetail
+			var entity = new FaultDetail
+			{
+				Files = new List<FaultFile>(),
+				Iteration = fault.iteration,
+				TimeStamp = now,
+				BucketName = bucket,
+				Source = fault.detectionSource,
+				Exploitability = fault.exploitability,
+				MajorHash = fault.majorHash,
+				MinorHash = fault.minorHash,
+
+				Title = fault.title,
+				Description = fault.description,
+				Seed = context.config.randomSeed,
+				IterationStart = fault.iterationStart,
+				IterationStop = fault.iterationStop,
+			};
+
+			// root/category/bucket/iteration
+			var subDir = Path.Combine(
+				category.ToString(),
+				fault.folderName,
+				fault.iteration.ToString());
+
+			foreach (var item in fault.toSave)
+			{
+				var fullName = Path.Combine(subDir, item.Key);
+				var path = Path.Combine(_logPath, fullName);
+				var size = SaveFile(path, item.Value);
+
+				entity.Files.Add(new FaultFile
 				{
-					Files = new List<FaultFile>(),
-					Iteration = fault.iteration,
-					TimeStamp = now,
-					BucketName = bucket,
-					Source = fault.detectionSource,
-					Exploitability = fault.exploitability,
-					MajorHash = fault.majorHash,
-					MinorHash = fault.minorHash,
+					Name = Path.GetFileName(fullName),
+					FullName = fullName,
+					Size = size,
+				});
+			}
 
-					Title = fault.title,
-					Description = fault.description,
-					Seed = context.config.randomSeed,
-					IterationStart = fault.iterationStart,
-					IterationStop = fault.iterationStop,
-				};
+			if (category == Category.Reproducing)
+				return;
 
-				// root/category/bucket/iteration
-				var subDir = Path.Combine(
-					category.ToString(),
-					fault.folderName,
-					fault.iteration.ToString());
+			// Ensure any past saving of this fault as Reproducing has been cleaned up
+			var reproDir = Path.Combine(
+				_logPath,
+				Category.Reproducing.ToString());
 
-				foreach (var item in fault.toSave)
-				{
-					var fullName = Path.Combine(subDir, item.Key);
-					var path = Path.Combine(_logPath, fullName);
-					var size = SaveFile(category, path, item.Value);
+			if (Directory.Exists(reproDir))
+			{
+				try { Directory.Delete(reproDir, true); }
+				// Can happen if a process has a file/subdirectory open...
+				catch (IOException) { }
+			}
 
-					entity.Files.Add(new FaultFile
-					{
-						Name = Path.GetFileName(fullName),
-						FullName = fullName,
-						Size = size,
-					});
-				}
-
-				if (category == Category.Reproducing)
-					return;
-
-				// Ensure any past saving of this fault as Reproducing has been cleaned up
-				string reproDir = Path.Combine(
-					_logPath,
-					Category.Reproducing.ToString());
-
-				if (Directory.Exists(reproDir))
-				{
-					try { Directory.Delete(reproDir, true); }
-					// Can happen if a process has a file/subdirectory open...
-					catch (IOException) { }
-				}
-
+			using (var db = new JobContext(_dbPath))
+			{
 				db.InsertFault(entity);
-
 				SaveFaultMetrics(db, fault, now);
 			}
 		}
@@ -526,7 +521,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			}, _mutations);
 		}
 
-		long SaveFile(Category category, string fullPath, Stream contents)
+		long SaveFile(string fullPath, Stream contents)
 		{
 			try
 			{
