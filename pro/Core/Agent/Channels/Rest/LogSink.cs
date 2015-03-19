@@ -7,6 +7,7 @@ using System.Threading;
 using System.Collections.Generic;
 using System.Net;
 using System.Linq;
+using LogLevel = NLog.LogLevel;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
@@ -22,7 +23,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		private readonly SortedDictionary<long, LogEventInfo> _pending;
 		private long _expectId;
 		private WebSocket _ws;
-		private bool _isClosed = false;
+		private bool _isClosed;
 
 		public LogSink(string name, Uri baseUri)
 		{
@@ -54,7 +55,10 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				Server.LogPath,
 				minLevel);
 
-			_ws = new WebSocket(url, "log");
+			_ws = new WebSocket(url, "log")
+			{
+				Log = { Output = OnWebSocketLog }
+			};
 			//_ws.Log.Level = WebSocketSharp.LogLevel.Debug;
 
 			_ws.OnOpen += OnOpen;
@@ -94,6 +98,29 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			if (!_evtReady.WaitOne(TimeSpan.FromSeconds(10)))
 				throw new SoftException("Timeout waiting for remote logging service to start");
+		}
+
+		private void OnWebSocketLog(LogData logData, string msg)
+		{
+			var level = LogLevel.Info;
+			switch (logData.Level)
+			{
+				case WebSocketSharp.LogLevel.Debug:
+				case WebSocketSharp.LogLevel.Fatal:
+				case WebSocketSharp.LogLevel.Error:
+					level = LogLevel.Debug;
+					break;
+				case WebSocketSharp.LogLevel.Info:
+					level = LogLevel.Info;
+					break;
+				case WebSocketSharp.LogLevel.Trace:
+					level = LogLevel.Trace;
+					break;
+				case WebSocketSharp.LogLevel.Warn:
+					level = LogLevel.Warn;
+					break;
+			}
+			_logger.Log(level, msg);
 		}
 
 		public void Stop()
@@ -188,7 +215,9 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			}
 			else
 			{
-				_pending.Add(id, logEvent);
+				if (!_pending.ContainsKey(id))
+					_pending.Add(id, logEvent);
+
 				ProcessPending();
 			}
 		}
@@ -223,7 +252,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					_ws.Close();
 					_isClosed = true;
 				}
-	
+
 				_ws.OnOpen -= OnOpen;
 				_ws.OnMessage -= OnMessage;
 				_ws.OnError -= OnError;
