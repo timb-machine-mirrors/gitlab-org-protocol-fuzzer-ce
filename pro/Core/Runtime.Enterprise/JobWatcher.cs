@@ -515,7 +515,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			{
 				Iteration = fault.iteration,
 				MajorHash = fault.majorHash ?? "UNKNOWN",
-				MinorHash = fault.minorHash ?? "UNKONWN",
+				MinorHash = fault.minorHash ?? "UNKNOWN",
 				Timestamp = now,
 				Hour = now.Hour,
 			}, _mutations);
