@@ -26,18 +26,31 @@ Command:: The command or application to launch.
 _Optional:_
 
 Arguments:: Optional command line arguments
-When::
-+
-Details on when to launch the command. Specify one of the following launch triggers: 
-+
+When:: Details on when to launch the command. Specify one of the following launch triggers: 
+
 // [horizontal]  Yanked. Labels are too long for spacing.
-OnCall::: Specifies that the command launches from the state model when the monitor receives the _StartOnCall_ message. This is the default setting.
-OnStart::: Launch the command when the fuzzing session starts. The command launches once per session.
-OnEnd::: Launch the command when the fuzzing session stops. The command launches once per session.
-OnIterationStart::: Launch the command at start of each iteration.
-OnIterationEnd::: Launch the command at end of each iteration.
-OnFault::: Launch the command when a fault occurs.
-OnIterationStartAfterFault::: Monitoring occurs following a fault. Note that after the fault occurs, the current iteration completes. Then, at the start of the next iteration, the command launches.
+// OnCall::: Specifies that the command launches from the state model when the monitor receives the _StartOnCall_ message. This is the default setting.
+// OnStart::: Launch the command when the fuzzing session starts. The command launches once per session.
+// OnEnd::: Launch the command when the fuzzing session stops. The command launches once per session.
+// OnIterationStart::: Launch the command at start of each iteration.
+// OnIterationEnd::: Launch the command at end of each iteration.
+// OnFault::: Launch the command when a fault occurs.
+// OnIterationStartAfterFault::: Monitoring occurs following a fault. Note that after the fault occurs, the current iteration completes. Then, at the start of the next iteration, the command launches.
+
+[cols="1,2" options="header",halign="center"] 
+|==========================================================
+|"When" Setting              |Description
+|OnStart                     |Waits at the start of the fuzzing session, default value.
+|OnEnd                       |Waits at the end of the fuzzing session.
+|OnIterationStart            |Waits at the start of each iteration.
+|OnIterationEnd              |Waits at the end of each iteration.
+|OnFault                     |Waits when Peach detects a fault.
+|OnIterationStartAfterFault  |Waits at the start of the iteration that immediately follows a fault.
+|OnCall                      |Waits upon receipt of a call from the state model.
+|==========================================================
+
+.WaitWhen Choices
+image::{images}/Timings_All.PNG["When Timing Choices", scalewidth="75%"]
 
 FaultExitCode:: Exit code value of interest. If the specified exit code occurs, the monitor generates a fault. The default exit code value is 1.
 FaultOnExitCode:: Generate a fault when the FaultExitCode matches the exit code of the launched command. The default value is false.

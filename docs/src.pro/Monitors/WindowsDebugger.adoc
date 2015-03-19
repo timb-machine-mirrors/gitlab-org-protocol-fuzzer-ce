@@ -8,7 +8,7 @@ The _WindowsDebugger_ monitor controls a windows debugger instance.
 This monitor launches an executable file, a process, a service, or a kernel driver with 
 the debugger attached; or, this monitor can attach the debugger to a running executable, 
 process, or service. This monitor can also attach the debugger to kernel-mode drivers, 
-although that outside the scope of this documentation.
+although that lies outside the scope of this documentation.
 
 The _WindowsDebugger_ performs automation, fault detection, and data collection. 
 
