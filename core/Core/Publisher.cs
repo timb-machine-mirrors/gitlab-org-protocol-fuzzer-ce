@@ -471,7 +471,7 @@ namespace Peach.Core
 		/// occur when this method is called.
 		/// </remarks>
 		/// <seealso cref="OnInput"/>
-		/// <seealso cref="output(Peach.Core.IO.BitwiseStream)"/>
+		/// <seealso cref="!:Peach.Core.Publisher.output(Peach.Core.IO.BitwiseStream)"/>
 		public void input()
 		{
 			Logger.Debug("input()");
