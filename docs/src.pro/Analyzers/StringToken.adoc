@@ -1,3 +1,4 @@
+:images: ../images
 [[Analyzers_StringToken]]
 == String Token Analyzer
 
