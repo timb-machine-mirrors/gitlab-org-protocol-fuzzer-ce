@@ -1,404 +1,257 @@
-﻿PRAGMA automatic_index = false;
-
-CREATE TABLE states (
-	id INTEGER PRIMARY KEY,
-	name TEXT NOT NULL
-);
-
-CREATE TABLE actions (
-	id INTEGER PRIMARY KEY,
-	name TEXT NOT NULL
-);
-
-CREATE TABLE parameters (
-	id INTEGER PRIMARY KEY,
-	name TEXT NOT NULL
-);
-
-CREATE TABLE elements (
-	id INTEGER PRIMARY KEY,
-	name TEXT NOT NULL
-);
-
-CREATE TABLE mutators (
-	id INTEGER PRIMARY KEY,
-	name TEXT NOT NULL
-);
-
-CREATE TABLE datasets (
-	id INTEGER PRIMARY KEY,
-	name TEXT NOT NULL
-);
-
-CREATE TABLE metrics_states (
-	id INTEGER PRIMARY KEY,
-	state INTEGER,
-	count INTEGER,
-	FOREIGN KEY(state) REFERENCES states(id)
-);
-
-CREATE TABLE metrics_iterations (
-	id INTEGER PRIMARY KEY,
-	state INTEGER,
-	action INTEGER,
-	parameter INTEGER,
-	element INTEGER,
-	mutator INTEGER,
-	dataset INTEGER,
-	count INTEGER,
-	FOREIGN KEY(state)     REFERENCES states(id),
-	FOREIGN KEY(action)    REFERENCES actions(id),
-	FOREIGN KEY(parameter) REFERENCES parameters(id),
-	FOREIGN KEY(element)   REFERENCES elements(id),
-	FOREIGN KEY(mutator)   REFERENCES mutators(id),
-	FOREIGN KEY(dataset)   REFERENCES datasets(id)
-);
-
-CREATE TABLE metrics_faults (
-	id INTEGER PRIMARY KEY,
-	state INTEGER,
-	action INTEGER,
-	parameter INTEGER,
-	element INTEGER,
-	mutator INTEGER,
-	dataset INTEGER,
-	bucket INTEGER,
-	faultnumber INTEGER,
-	FOREIGN KEY(state)     REFERENCES states(id),
-	FOREIGN KEY(action)    REFERENCES actions(id),
-	FOREIGN KEY(parameter) REFERENCES parameters(id),
-	FOREIGN KEY(element)   REFERENCES elements(id),
-	FOREIGN KEY(mutator)   REFERENCES mutators(id),
-	FOREIGN KEY(dataset)   REFERENCES datasets(id),
-	FOREIGN KEY(bucket)    REFERENCES buckets(id)
-);
-
--- FaultTimeline
-CREATE TABLE metrics_faultsbyhour (
-	id INTEGER PRIMARY KEY,
-	date DATE,
-	hour INTEGER,
-	faultcount INTEGER
-);
-
-CREATE TABLE buckets (
-	id INTEGER PRIMARY KEY,
-	type TEXT,
-	majorhash TEXT,
-	minorhash TEXT,
-	name TEXT NOT NULL,
-	timestamp DATE,
-	firstiteration INTEGER,
-	faultcount INTEGER
-);
-
-CREATE UNIQUE INDEX states_index ON states (name);
-CREATE UNIQUE INDEX actions_index ON actions (name);
-CREATE UNIQUE INDEX parameters_index ON parameters (name);
-CREATE UNIQUE INDEX elements_index ON elements (name);
-CREATE UNIQUE INDEX mutators_index ON mutators (name);
-CREATE UNIQUE INDEX datasets_index ON datasets (name);
-CREATE UNIQUE INDEX buckets_index ON buckets (name);
-CREATE UNIQUE INDEX metrics_index ON metrics_iterations (
-	state,
-	action,
-	parameter,
-	element,
-	mutator,
-	dataset
-);
-
-CREATE INDEX metrics_mutator_index ON metrics_iterations (mutator);
-CREATE INDEX metrics_element_index ON metrics_iterations (element);
-CREATE INDEX metrics_dataset_index ON metrics_iterations (dataset);
-
-CREATE UNIQUE INDEX faults_index ON metrics_faults(
-	state,
-	action,
-	parameter,
-	element,
-	mutator,
-	dataset,
-	bucket,
-	faultnumber
-);
-
-CREATE INDEX faults_mutator_index ON metrics_faults (mutator);
-CREATE INDEX faults_element_index ON metrics_faults (element);
-CREATE INDEX faults_dataset_index on metrics_faults (dataset);
-
-CREATE UNIQUE INDEX faultsbyhour_index ON metrics_faultsbyhour (
-	date,
-	hour
-);
-
--- States
-CREATE VIEW view_metrics_states AS 
+﻿-- States >>>
+CREATE VIEW ViewStates AS 
 SELECT
-	s.name AS state,
-	mi.count AS iterationcount
-FROM metrics_states AS mi
-JOIN states AS s ON s.id = mi.state;
+	s.Name AS [State],
+	COUNT(*) AS [ExecutionCount]
+FROM [StateInstance] AS si
+JOIN [State] AS s ON s.Id = si.StateId
+GROUP BY si.StateId;
+-- States <<<
 
--- Iterations
-CREATE VIEW view_metrics_iterations AS 
+-- Iterations >>>
+CREATE VIEW ViewIterations AS 
 SELECT
-	s.name AS state,
-	a.name AS action,
-	p.name AS parameter,
-	e.name AS element,
-	m.name AS mutator,
-	d.name AS dataset,
-	mi.count AS iterationcount
-FROM metrics_iterations AS mi
-JOIN states     AS s ON s.id = mi.state
-JOIN actions    AS a ON a.id = mi.action
-JOIN parameters AS p ON p.id = mi.state
-JOIN elements   AS e ON e.id = mi.element
-JOIN mutators   AS m ON m.id = mi.mutator
-JOIN datasets   AS d ON d.id = mi.dataset;
+	s.Name AS [State],
+	a.Name AS [Action],
+	p.Name AS Parameter,
+	e.Name AS Element,
+	m.Name AS Mutator,
+	d.Name AS Dataset,
+	COUNT(DISTINCT(x.Iteration)) AS IterationCount
+FROM Mutation  AS x
+JOIN [State]   AS s ON s.Id = x.StateId
+JOIN [Action]  AS a ON a.Id = x.ActionId
+JOIN Parameter AS p ON p.Id = x.ParameterId
+JOIN Element   AS e ON e.Id = x.ElementId
+JOIN Mutator   AS m ON m.Id = x.MutatorId
+JOIN Dataset   AS d ON d.Id = x.DatasetId
+GROUP BY
+	x.StateId,
+	x.Actionid,
+	x.ParameterId,
+	x.ElementId,
+	x.MutatorId,
+	x.DatasetId
+;
+-- Iterations <<<
 
---CREATE VIEW view_metrics_faults AS
---SELECT
---	s.name AS state,
---	a.name AS action,
---	p.name AS parameter,
---	e.name AS element,
---	m.name AS mutator,
---	d.name AS dataset,
---	b.name AS bucket,
---	count(distinct mf.faultnumber) AS faultcount
---FROM metrics_faults AS mf
---JOIN states     AS s ON s.id = mf.state
---JOIN actions    AS a ON a.id = mf.action
---JOIN parameters AS p ON p.id = mf.state
---JOIN elements   AS e ON e.id = mf.element
---JOIN mutators   AS m ON m.id = mf.mutator
---JOIN datasets   AS d ON d.id = mf.dataset
---JOIN buckets    AS b ON b.id = mf.bucket
---GROUP BY
---	mf.state,
---	mf.action,
---	mf.parameter,
---	mf.element,
---	mf.mutator,
---	mf.bucket
---ORDER BY
---	mf.state,
---	mf.action,
---	mf.parameter,
---	mf.element,
---	mf.mutator,
---	mf.bucket
---;
-
--- Buckets
-CREATE VIEW view_buckets AS
+-- Buckets >>>
+CREATE VIEW ViewMutationsByIteration AS
 SELECT
-	b.id,
-	b.name AS bucket,
-	m.name AS mutator,
-	CASE WHEN length(p.name) > 0 THEN
-		s.name || '.' || a.name || '.' || p.name || '.' || e.name
+	COUNT(DISTINCT(m.Iteration)) AS IterationCount,
+	m.StateId,
+	m.ActionId,
+	m.ParameterId,
+	m.ElementId,
+	m.MutatorId,
+	m.DatasetId
+FROM Mutation AS m
+GROUP BY
+	m.StateId,
+	m.ActionId,
+	m.ParameterId,
+	m.ElementId,
+	m.MutatorId,
+	m.DatasetId
+;
+
+CREATE VIEW ViewMutationsByFault AS
+SELECT
+	COUNT(*) AS FaultCount,
+	z.StateId,
+	z.ActionId,
+	z.ParameterId,
+	z.ElementId,
+	z.MutatorId,
+	z.DatasetId
+FROM FaultMetric AS x
+JOIN FaultMetricMutation AS y ON y.FaultMetricId = x.Id
+JOIN Mutation AS z ON y.MutationId = z.Id
+GROUP BY
+	z.StateId,
+	z.ActionId,
+	z.ParameterId,
+	z.ElementId,
+	z.MutatorId,
+	z.DatasetId
+;
+
+CREATE VIEW ViewBuckets AS
+SELECT
+	printf('%s_%s', x.MajorHash, x.MinorHash) AS Bucket,
+	m.Name AS Mutator,
+	CASE WHEN length(p.Name) > 0 THEN
+		printf('%s.%s.%s.%s', s.Name, a.Name, p.Name, e.Name)
 	ELSE
-		s.name || '.' || a.name || '.' || e.name
-	END AS element,
-	sum(mi.count) AS iterationcount,
-	count(distinct(mf.faultnumber)) AS faultcount
-FROM metrics_faults AS mf
-JOIN metrics_iterations AS mi ON 
-	mi.state = mf.state AND
-	mi.action = mf.action AND
-	mi.parameter = mf.parameter AND
-	mi.element = mf.element AND
-	mi.mutator = mf.mutator AND
-	mi.dataset = mf.dataset
-JOIN buckets    AS b ON b.id = mf.bucket
-JOIN states     AS s ON s.id = mf.state
-JOIN actions    AS a ON a.id = mf.action
-JOIN parameters AS p ON p.id = mf.parameter
-JOIN elements   AS e ON e.id = mf.element
-JOIN mutators   AS m ON m.id = mf.mutator
+		printf('%s.%s.%s', s.Name, a.Name, e.Name)
+	END AS Element,
+	vmi.IterationCount AS IterationCount,
+	vmf.FaultCount AS FaultCount
+FROM FaultMetric AS x
+JOIN FaultMetricMutation AS y ON y.FaultMetricId = x.Id
+JOIN Mutation AS z ON y.MutationId = z.Id
+JOIN ViewMutationsByIteration AS vmi ON
+	z.StateId     = vmi.StateId AND
+	z.ActionId    = vmi.ActionId AND
+	z.ParameterId = vmi.ParameterId AND
+	z.ElementId   = vmi.ElementId AND
+	z.MutatorId   = vmi.MutatorId AND
+	z.DatasetId   = vmi.DatasetId
+JOIN ViewMutationsByFault AS vmf ON
+	z.StateId     = vmf.StateId AND
+	z.ActionId    = vmf.ActionId AND
+	z.ParameterId = vmf.ParameterId AND
+	z.ElementId   = vmf.ElementId AND
+	z.MutatorId   = vmf.MutatorId AND
+	z.DatasetId   = vmf.DatasetId
+JOIN [State]     AS s ON s.Id = z.[StateId]
+JOIN [Action]    AS a ON a.Id = z.[ActionId]
+JOIN [Parameter] AS p ON p.Id = z.[ParameterId]
+JOIN [Element]   AS e ON e.Id = z.[ElementId]
+JOIN [Mutator]   AS m ON m.Id = z.[MutatorId]
+JOIN [Dataset]   AS d ON d.Id = z.[MutatorId]
 GROUP BY 
-	mf.bucket, 
-	mf.mutator, 
-	mf.state, 
-	mf.action, 
-	mf.parameter, 
-	mf.element,
-	mf.dataset
-ORDER BY count(distinct(mf.faultnumber)) DESC;
-
--- BucketTimeline
-CREATE VIEW view_buckettimeline AS
+	Bucket,
+	Mutator,
+	Element
+;
+-- Buckets <<<
+	
+-- BucketTimeline >>>
+CREATE VIEW ViewBucketTimeline AS
 SELECT
-	b.id,
-	b.name AS bucket,
-	b.timestamp,
-	b.type,
-	b.majorhash,
-	b.minorhash,
-	b.firstiteration,
-	b.faultcount 
-FROM buckets AS b
-WHERE b.type = 'minorHash';
+	printf('%s_%s', x.MajorHash, x.MinorHash) AS Label,
+	MIN(x.[Iteration]) AS [Iteration],
+	MIN(x.[Timestamp]) AS [Time],
+	COUNT(DISTINCT(x.MinorHash)) AS FaultCount
+FROM FaultMetric AS x
+GROUP BY
+	x.MajorHash,
+	x.MinorHash
+;
+-- BucketTimeline <<<
 
-CREATE VIEW view_distincts AS
-SELECT DISTINCT
-	mutator,
-	state,
-	action,
-	parameter,
-	element
-FROM metrics_iterations;
-
-CREATE VIEW view_mutator_elementcount AS
+-- Mutators >>>
+CREATE VIEW ViewMutatorsByIteration AS
 SELECT 
-	mutator,
-	count(*) AS count
-FROM view_distincts
-GROUP BY mutator;
+	x.MutatorId,
+	COUNT(DISTINCT(x.MutatorId)) AS ElementCount,
+	COUNT(DISTINCT(x.Iteration)) AS IterationCount
+FROM Mutation AS x
+GROUP BY x.MutatorId;
 
---CREATE VIEW view_buckets_major AS
---SELECT id
---FROM buckets
---WHERE type = 'majorHash';
-
---CREATE VIEW view_buckets_minor AS
---SELECT id
---FROM buckets
---WHERE type = 'minorHash';
-
-CREATE VIEW view_mutators_faults AS
+CREATE VIEW ViewMutatorsByFault AS
 SELECT 
-	mf.mutator, 
-	count(distinct mf.bucket) AS bucketcount, 
-	count(distinct mf.faultnumber) AS faultcount
-FROM metrics_faults AS mf
-WHERE mf.bucket IN (
-	SELECT id 
-	FROM buckets
-	WHERE type = 'majorHash'
-)
-GROUP BY mf.mutator;
-
-CREATE VIEW view_mutators_iterations AS
-SELECT 
-    mi.mutator, 
-	ec.count AS elementcount,
-	sum(mi.count) AS iterationcount
-FROM view_mutator_elementcount AS ec
-JOIN metrics_iterations AS mi ON ec.mutator = mi.mutator
-GROUP BY mi.mutator;
-
--- Mutators
-CREATE VIEW view_mutators AS
+	z.MutatorId,
+	COUNT(DISTINCT(x.MajorHash)) AS BucketCount,
+	COUNT(DISTINCT(x.Iteration)) AS FaultCount
+FROM FaultMetric AS x
+JOIN FaultMetricMutation AS y ON y.FaultMetricId = x.Id
+JOIN Mutation AS z ON y.MutationId = z.Id
+GROUP BY z.MutatorId;
+	
+CREATE VIEW ViewMutators AS
 SELECT
-	m.name AS mutator,
-	mi.elementcount,
-	mi.iterationcount,
-	mf.bucketcount,
-	mf.faultcount
-FROM view_mutators_iterations AS mi
-LEFT JOIN view_mutators_faults AS mf ON mf.mutator = mi.mutator
-JOIN mutators AS m ON m.id = mi.mutator;
+	m.Name AS Mutator,
+	vmi.ElementCount,
+	vmi.IterationCount,
+	vmf.BucketCount,
+	vmf.FaultCount
+FROM ViewMutatorsByIteration AS vmi
+LEFT JOIN ViewMutatorsByFault AS vmf ON vmi.MutatorId = vmf.MutatorId
+JOIN Mutator AS m ON vmi.MutatorId = m.Id;
+-- Mutators <<<
 
-CREATE VIEW view_elements_iterations AS
+-- Elements >>>
+CREATE VIEW ViewElementsByIteration AS
 SELECT
-	state,
-	action,
-	parameter,
-	dataset,
-	element,
-	sum(count) AS iterationcount
-FROM metrics_iterations
+	x.StateId,
+	x.Actionid,
+	x.ParameterId,
+	x.DatasetId,
+	x.ElementId,
+	COUNT(DISTINCT(x.Iteration)) AS IterationCount
+FROM Mutation AS x
 GROUP BY 
-	state,
-	action,
-	parameter,
-	dataset,
-	element
+	x.StateId,
+	x.ActionId,
+	x.ParameterId,
+	x.DatasetId,
+	x.ElementId
 ;
 
-CREATE VIEW view_elements_faults AS
+CREATE VIEW ViewElementsByFault AS
 SELECT
-	state,
-	action,
-	parameter,
-	dataset,
-	element,
-	count(distinct(bucket)) as bucketcount,
-	count(distinct(faultnumber)) as faultcount
-FROM metrics_faults
-WHERE bucket IN (
-	SELECT id 
-	FROM buckets
-	WHERE type = 'majorHash'
-)
-GROUP BY 
-	state,
-	action,
-	parameter,
-	dataset,
-	element
+	z.StateId,
+	z.ActionId,
+	z.ParameterId,
+	z.DatasetId,
+	z.ElementId,
+	COUNT(DISTINCT(x.Iteration)) AS FaultCount,
+	COUNT(DISTINCT(x.MajorHash)) AS BucketCount
+FROM FaultMetric AS x
+JOIN FaultMetricMutation AS y ON y.FaultMetricId = x.Id
+JOIN Mutation AS z ON y.MutationId = z.Id
+GROUP BY
+	z.StateId,
+	z.ActionId,
+	z.ParameterId,
+	z.DatasetId,
+	z.ElementId
 ;
 
--- Elements
-CREATE VIEW view_elements AS
+CREATE VIEW ViewElements AS
 SELECT 
-	s.name as state,
-	a.name as action,
-	p.name as parameter,
-	d.name as dataset,
-	e.name as element,
-	ei.iterationcount,
-	ef.bucketcount,
-	ef.faultcount
-FROM view_elements_iterations AS ei
-LEFT JOIN view_elements_faults AS ef ON
-	ef.element = ei.element AND 
-	ef.state = ei.state AND 
-	ef.action = ei.action AND 
-	ef.parameter = ei.parameter AND 
-	ef.dataset = ei.dataset
-JOIN elements   AS e ON e.id = ei.element
-JOIN states     AS s ON s.id = ei.state
-JOIN actions    AS a ON a.id = ei.action
-JOIN parameters AS p ON p.id = ei.parameter
-JOIN datasets   AS d ON d.id = ei.dataset
-ORDER BY ef.faultcount DESC;
+	s.Name as [State],
+	a.Name as [Action],
+	p.Name as [Parameter],
+	d.Name as [Dataset],
+	e.Name as [Element],
+	vei.IterationCount,
+	vef.BucketCount,
+	vef.FaultCount
+FROM ViewElementsByIteration AS vei
+LEFT JOIN ViewElementsByFault AS vef ON
+	vei.ElementId   = vef.ElementId AND 
+	vei.StateId     = vef.StateId AND 
+	vei.ActionId    = vef.ActionId AND 
+	vei.ParameterId = vef.ParameterId AND 
+	vei.DatasetId   = vef.DatasetId
+JOIN [Element]   AS e ON e.Id = vei.ElementId
+JOIN [State]     AS s ON s.Id = vei.StateId
+JOIN [Action]    AS a ON a.Id = vei.ActionId
+JOIN [Parameter] AS p ON p.Id = vei.ParameterId
+JOIN [Dataset]   AS d ON d.Id = vei.DatasetId;
+-- Elements <<<
 
-CREATE VIEW view_datasets_iterations AS
+-- Datasets >>>
+CREATE VIEW ViewDatasetsByIteration AS
 SELECT
-	dataset,
-	sum(count) AS iterationcount
-FROM metrics_iterations
-GROUP BY dataset;
+	x.DatasetId,
+	COUNT(DISTINCT(x.Iteration)) AS IterationCount
+FROM Mutation AS x
+GROUP BY x.DatasetId;
 
-CREATE VIEW view_datasets_faults AS
+CREATE VIEW ViewDatasetsByFault AS
 SELECT
-	dataset,
-	count(distinct(bucket)) as bucketcount,
-	count(distinct(faultnumber)) as faultcount
-FROM metrics_faults
-WHERE bucket IN (
-	SELECT id 
-	FROM buckets
-	WHERE type = 'majorHash'
-)
-GROUP BY dataset;
+	z.DatasetId,
+	COUNT(DISTINCT(x.MajorHash)) as BucketCount,
+	COUNT(DISTINCT(x.Iteration)) as FaultCount
+FROM FaultMetric AS x
+JOIN FaultMetricMutation AS y ON y.FaultMetricId = x.Id
+JOIN Mutation AS z ON y.MutationId = z.Id
+GROUP BY z.DatasetId;
 
--- Datasets
-CREATE VIEW view_datasets AS
+CREATE VIEW ViewDatasets AS
 SELECT
-	d.name as dataset,
-	di.iterationcount,
-	df.bucketcount,
-	df.faultcount
-FROM view_datasets_iterations AS di
-LEFT JOIN view_datasets_faults as df ON 
-	df.dataset = di.dataset
-JOIN datasets AS d ON 
-	d.id = di.dataset
-ORDER BY df.bucketcount DESC
-LIMIT 20;
+	d.Name as Dataset,
+	vdi.IterationCount,
+	vdf.BucketCount,
+	vdf.FaultCount
+FROM ViewDatasetsByIteration AS vdi
+LEFT JOIN ViewDatasetsByFault as vdf ON 
+	vdi.DatasetId = vdf.DatasetId
+JOIN Dataset AS d ON 
+	vdi.DatasetId = d.Id
+;
+-- Datasets <<<

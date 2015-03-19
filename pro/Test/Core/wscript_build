@@ -21,6 +21,7 @@ deps = [
 	'Ionic.Zip.dll',
 	'Newtonsoft.Json.dll',
 	'SocketHttpListener.dll',
+	'Dapper.dll',
 ]
 
 bld(

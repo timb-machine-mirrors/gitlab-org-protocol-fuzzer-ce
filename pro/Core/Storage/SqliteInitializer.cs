@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using System.Linq;
 using Peach.Core;
 using Dapper;
-
+using FileInfo = System.IO.FileInfo;
 #if MONO
 using Mono.Data.Sqlite;
 using SQLiteConnection = Mono.Data.Sqlite.SqliteConnection;
@@ -16,9 +15,9 @@ using System.Data.SQLite;
 
 namespace Peach.Pro.Core.Storage
 {
-	class SqliteContextInitializer
+	class SqliteInitializer
 	{
-		static SqliteContextInitializer()
+		static SqliteInitializer()
 		{
 			//SQLiteLog.Enabled = true;
 			//SQLiteLog.Log += (s, e) => Console.WriteLine("SQLiteLog: {0}", e.Message);
@@ -26,14 +25,16 @@ namespace Peach.Pro.Core.Storage
 
 		readonly bool _dbExists;
 
-		public SqliteContextInitializer(string dbPath)
+		public SqliteInitializer(string dbPath)
 		{
-			_dbExists = File.Exists(dbPath);
+			var fi = new FileInfo(dbPath);
+			_dbExists = fi.Exists && fi.Length > 0;
 		}
 
 		public void InitializeDatabase(
 			SQLiteConnection cnn,
-			IEnumerable<Type> types)
+			IEnumerable<Type> types,
+			IEnumerable<string> scripts)
 		{
 			if (_dbExists)
 				return;
@@ -43,6 +44,9 @@ namespace Peach.Pro.Core.Storage
 				try
 				{
 					CreateDatabase(cnn, types);
+
+					scripts.ForEach(x => cnn.Execute(x));
+
 					xact.Commit();
 				}
 				catch (Exception)
@@ -60,16 +64,14 @@ namespace Peach.Pro.Core.Storage
 			public List<string> Columns { get; set; }
 		}
 
-		const string TableTmpl = "CREATE TABLE [{0}] (\n{1}\n);";
-		const string ColumnTmpl = "    [{0}] {1} {2}"; // name, type, decl
+		const string TableTmpl = "CREATE TABLE {0} (\n{1}\n);";
+		const string ColumnTmpl = "    {0} {1} {2}"; // name, type, decl
 		const string PrimaryKeyTmpl = "    PRIMARY KEY ({0})";
 		//const string foreignKeyTmpl = "    FOREIGN KEY ({0}) REFERENCES {1} ({2})";
 		const string IndexTmpl = "CREATE INDEX {0} ON {1} ({2});";
 
 		void CreateDatabase(SQLiteConnection cnn, IEnumerable<Type> types)
 		{
-			Console.WriteLine("CreateDatabase");
-
 			var indicies = new Dictionary<string, Index>();
 			//var foreignKeys = new Dictionary<string, string>();
 
@@ -154,6 +156,7 @@ namespace Peach.Pro.Core.Storage
 		const string SqlReal = "REAL";
 		const string SqlText = "TEXT";
 		const string SqlBlob = "BLOG";
+		const string SqlDateTime = "DATETIME";
 
 		static readonly Dictionary<Type, string> SqlTypeMap = new Dictionary<Type, string>
 		{
@@ -175,7 +178,7 @@ namespace Peach.Pro.Core.Storage
 			{ typeof(Decimal), SqlReal },
 
 			{ typeof(string), SqlText },
-			{ typeof(DateTime), SqlText },
+			{ typeof(DateTime), SqlDateTime },
 			
 			{ typeof(byte[]), SqlBlob },		
 			{ typeof(Guid), SqlBlob },

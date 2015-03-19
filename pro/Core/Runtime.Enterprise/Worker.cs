@@ -237,6 +237,11 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			var parser = new Godel.Core.GodelPitParser();
 			var dom = parser.asParser(args, _config.pitFile);
 
+			foreach (var test in dom.tests)
+			{
+				test.loggers.Clear();
+			}
+
 			var engine = new Engine(new JobWatcher(_guid.Value));
 			var engineTask = Task.Factory.StartNew(() =>
 			{
@@ -305,37 +310,37 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 
 		private void RunQuery()
 		{
-			//var logRoot = Utilities.GetAppResourcePath("db");
-			//var logPath = Path.Combine(logRoot, _guid.ToString());
-			//var dbPath = Path.Combine(logPath, "peach.db");
+			var logRoot = Utilities.GetAppResourcePath("db");
+			var logPath = Path.Combine(logRoot, _guid.ToString());
+			var dbPath = Path.Combine(logPath, "peach.db");
 
-			//using (var db = new JobContext(dbPath))
-			//{
-			//	switch (_query.ToLower())
-			//	{
-			//		case "states":
-			//			db.QueryStates();
-			//			break;
-			//		case "iterations":
-			//			db.QueryIterations();
-			//			break;
-			//		case "buckets":
-			//			db.QueryBuckets();
-			//			break;
-			//		case "buckettimeline":
-			//			db.QueryBucketTimeline();
-			//			break;
-			//		case "mutators":
-			//			db.QueryMutators();
-			//			break;
-			//		case "elements":
-			//			db.QueryElements();
-			//			break;
-			//		case "datasets":
-			//			db.QueryDatasets();
-			//			break;
-			//	}
-			//}
+			using (var db = new JobContext(dbPath))
+			{
+				switch (_query.ToLower())
+				{
+					case "states":
+						db.QueryStates();
+						break;
+					case "iterations":
+						db.QueryIterations();
+						break;
+					case "buckets":
+						db.QueryBuckets();
+						break;
+					case "buckettimeline":
+						db.QueryBucketTimeline();
+						break;
+					case "mutators":
+						db.QueryMutators();
+						break;
+					case "elements":
+						db.QueryElements();
+						break;
+					case "datasets":
+						db.QueryDatasets();
+						break;
+				}
+			}
 		}
 	}
 }
