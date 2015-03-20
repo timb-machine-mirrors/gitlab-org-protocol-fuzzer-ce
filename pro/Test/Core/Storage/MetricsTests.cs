@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Peach.Core;
-using Peach.Pro.Core.Runtime.Enterprise;
 using Peach.Pro.Core.Storage;
 using System.Linq;
 using Peach.Pro.Core.WebServices.Models;
@@ -34,9 +33,9 @@ namespace Peach.Pro.Test.Core.Storage
 		{
 			using (var db = new JobContext(_tmp.Path))
 			{
-				var cache = new MetricCache<State>(db);
-				var s1 = cache.Add(db, "S1");
-				var s2 = cache.Add(db, "S2");
+				var cache = new MetricsCache(db);
+				var s1 = cache.Add<State>(db, "S1");
+				var s2 = cache.Add<State>(db, "S2");
 
 				for (var i = 0; i < 10; i++)
 					db.InsertStateInstance(new StateInstance { StateId = s1 });
@@ -101,10 +100,12 @@ namespace Peach.Pro.Test.Core.Storage
 			{
 				AssertResult(db.QueryBuckets(), new[]
 				{
-					new BucketMetric("AAA_BBB", "M0", "S0.A0.P0.E0", 5, 3),
 					new BucketMetric("AAA_BBB", "M1", "S1.A1.P1.E1", 5, 3),
-					new BucketMetric("XXX_YYY", "M0", "S0.A0.P0.E0", 5, 3),
+					new BucketMetric("AAA_BBB", "M2", "S2.A2.P2.E2", 5, 3),
+					new BucketMetric("AAA_BBB", "M3", "S3.A3.P3.E3", 5, 3),
 					new BucketMetric("XXX_YYY", "M1", "S1.A1.P1.E1", 5, 3),
+					new BucketMetric("XXX_YYY", "M2", "S2.A2.P2.E2", 5, 3),
+					new BucketMetric("XXX_YYY", "M3", "S3.A3.P3.E3", 5, 3),
 				});
 			}
 		}
@@ -146,8 +147,9 @@ namespace Peach.Pro.Test.Core.Storage
 				var data = db.QueryMutators();
 				AssertResult(data, new[]
 				{
-					new MutatorMetric("M0", 1, 5, 2, 3),
 					new MutatorMetric("M1", 1, 5, 2, 3),
+					new MutatorMetric("M2", 1, 5, 2, 3),
+					new MutatorMetric("M3", 1, 5, 2, 3),
 				});
 			}
 		}
@@ -165,8 +167,9 @@ namespace Peach.Pro.Test.Core.Storage
 			{
 				AssertResult(db.QueryElements(), new[]
 				{
-					new ElementMetric("S0", "A0", "P0", "D0", "E0", 5, 2, 3),
 					new ElementMetric("S1", "A1", "P1", "D1", "E1", 5, 2, 3),
+					new ElementMetric("S2", "A2", "P2", "D2", "E2", 5, 2, 3),
+					new ElementMetric("S3", "A3", "P3", "D3", "E3", 5, 2, 3),
 				});
 			}
 		}
@@ -184,8 +187,9 @@ namespace Peach.Pro.Test.Core.Storage
 			{
 				AssertResult(db.QueryDatasets(), new[]
 				{
-					new DatasetMetric("D0", 5, 2, 3),
 					new DatasetMetric("D1", 5, 2, 3),
+					new DatasetMetric("D2", 5, 2, 3),
+					new DatasetMetric("D3", 5, 2, 3),
 				});
 			}
 		}
@@ -278,33 +282,33 @@ namespace Peach.Pro.Test.Core.Storage
 			{
 				AddMutations(1, new List<long[]>
 				{
-					new long[] {0, 0, 0, 0, 0, 0},
 					new long[] {1, 1, 1, 1, 1, 1},
 					new long[] {2, 2, 2, 2, 2, 2},
+					new long[] {3, 3, 3, 3, 3, 3},
 				});
 				AddMutations(2, new List<long[]>
 				{
-					new long[] {0, 0, 0, 0, 0, 0},
 					new long[] {1, 1, 1, 1, 1, 1},
 					new long[] {2, 2, 2, 2, 2, 2},
+					new long[] {3, 3, 3, 3, 3, 3},
 				});
 				AddFault(3, "AAA", "BBB", start, new List<long[]>
 				{
-					new long[] {0, 0, 0, 0, 0, 0},
 					new long[] {1, 1, 1, 1, 1, 1},
 					new long[] {2, 2, 2, 2, 2, 2},
+					new long[] {3, 3, 3, 3, 3, 3},
 				});
 				AddFault(4, "AAA", "BBB", start + TimeSpan.FromHours(1), new List<long[]>
 				{
-					new long[] {0, 0, 0, 0, 0, 0},
 					new long[] {1, 1, 1, 1, 1, 1},
 					new long[] {2, 2, 2, 2, 2, 2},
+					new long[] {3, 3, 3, 3, 3, 3},
 				});
 				AddFault(5, "XXX", "YYY", start + TimeSpan.FromHours(2), new List<long[]>
 				{
-					new long[] {0, 0, 0, 0, 0, 0},
 					new long[] {1, 1, 1, 1, 1, 1},
 					new long[] {2, 2, 2, 2, 2, 2},
+					new long[] {3, 3, 3, 3, 3, 3},
 				});
 			}
 		}

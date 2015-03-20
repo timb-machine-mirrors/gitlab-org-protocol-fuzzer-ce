@@ -59,26 +59,34 @@ namespace Peach.Pro.Core.Storage
 
 		class Index
 		{
+			public bool IsUnique { get; set; }
 			public string Name { get; set; }
 			public string Table { get; set; }
 			public List<string> Columns { get; set; }
 		}
 
+		class ForeignKey
+		{
+			public string TargetTable { get; set; }
+			public HashSet<string> SourceColumns { get; set; }
+			public HashSet<string> TargetColumns { get; set; }
+		}
+
 		const string TableTmpl = "CREATE TABLE {0} (\n{1}\n);";
 		const string ColumnTmpl = "    {0} {1} {2}"; // name, type, decl
 		const string PrimaryKeyTmpl = "    PRIMARY KEY ({0})";
-		//const string foreignKeyTmpl = "    FOREIGN KEY ({0}) REFERENCES {1} ({2})";
-		const string IndexTmpl = "CREATE INDEX {0} ON {1} ({2});";
+		const string ForeignKeyTmpl = "    FOREIGN KEY ({0}) REFERENCES {1} ({2})";
+		const string IndexTmpl = "CREATE{0}INDEX {1} ON {2} ({3});";
 
 		void CreateDatabase(SQLiteConnection cnn, IEnumerable<Type> types)
 		{
 			var indicies = new Dictionary<string, Index>();
-			//var foreignKeys = new Dictionary<string, string>();
 
 			foreach (var type in types)
 			{
 				var defs = new List<string>();
 				var keys = new HashSet<string>();
+				var foreignKeys = new Dictionary<string, ForeignKey>();
 
 				foreach (var pi in type.GetProperties())
 				{
@@ -89,28 +97,8 @@ namespace Peach.Pro.Core.Storage
 
 					if (!pi.IsNullable())
 						decls.Add("NOT NULL");
-
-					foreach (var attr in pi.AttributesOfType<IndexAttribute>())
-					{
-						if (attr.IsUnique)
-							decls.Add("UNIQUE");
-
-						if (string.IsNullOrEmpty(attr.Name))
-							continue;
-
-						Index index;
-						if (!indicies.TryGetValue(attr.Name, out index))
-						{
-							index = new Index
-							{
-								Name = attr.Name,
-								Table = type.Name,
-								Columns = new List<string>(),
-							};
-							indicies.Add(index.Name, index);
-						}
-						index.Columns.Add(pi.Name);
-					}
+					if (pi.HasAttribute<UniqueAttribute>())
+						decls.Add("UNIQUE");
 
 					defs.Add(ColumnTmpl.Fmt(
 						pi.Name,
@@ -120,31 +108,65 @@ namespace Peach.Pro.Core.Storage
 					if (pi.IsPrimaryKey())
 						keys.Add(pi.Name);
 
-					//foreach (var attr in pi.AttributesOfType<ForeignKeyAttribute>())
-					//{
-					//	foreignKeys.Add(attr.TargetEntity.Name, attr.TargetProperty);
-					//}
+					foreach (var attr in pi.AttributesOfType<IndexAttribute>())
+					{
+						Index index;
+						if (!indicies.TryGetValue(attr.Name, out index))
+						{
+							index = new Index
+							{
+								IsUnique = attr.IsUnique,
+								Name = attr.Name,
+								Table = type.Name,
+								Columns = new List<string>(),
+							};
+							indicies.Add(index.Name, index);
+						}
+						index.Columns.Add(pi.Name);
+					}
+
+					foreach (var attr in pi.AttributesOfType<ForeignKeyAttribute>())
+					{
+						var targetTable = attr.TargetEntity.Name;
+						var targetColumn = attr.TargetProperty;
+
+						ForeignKey foreignKey;
+						if (!foreignKeys.TryGetValue(targetTable, out foreignKey))
+						{
+							foreignKey = new ForeignKey
+							{
+								TargetTable = targetTable,
+								SourceColumns = new HashSet<string>(),
+								TargetColumns = new HashSet<string>(),
+							};
+							foreignKeys.Add(targetTable, foreignKey);
+						}
+		
+						foreignKey.SourceColumns.Add(pi.Name);
+						foreignKey.TargetColumns.Add(targetColumn);
+					}
 				}
 
 				if (keys.Any())
 					defs.Add(string.Format(PrimaryKeyTmpl, string.Join(", ", keys)));
 
+				foreach (var item in foreignKeys.Values)
+				{
+					defs.Add(ForeignKeyTmpl.Fmt(
+						string.Join(", ", item.SourceColumns),
+						item.TargetTable,
+						string.Join(", ", item.TargetColumns)));
+				}
+
 				var sql = TableTmpl.Fmt(type.Name, string.Join(",\n", defs));
 				cnn.Execute(sql);
-
-				//foreach (var item in foreignKeys)
-				//{
-				//	defs.Add(foreignKeyTmpl.Fmt(
-				//		string.Join(", ", thisKeys),
-				//		assoc.Constraint.FromRole.Name,
-				//		string.Join(", ", thatKeys)));
-				//}
 			}
 
 			foreach (var index in indicies.Values)
 			{
 				var columns = string.Join(", ", index.Columns);
-				var sql = IndexTmpl.Fmt(index.Name, index.Table, columns);
+				var isUnique = index.IsUnique ? " UNIQUE " : " ";
+				var sql = IndexTmpl.Fmt(isUnique, index.Name, index.Table, columns);
 				cnn.Execute(sql);
 			}
 		}
