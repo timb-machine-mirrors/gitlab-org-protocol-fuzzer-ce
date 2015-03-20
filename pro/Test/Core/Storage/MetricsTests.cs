@@ -38,9 +38,9 @@ namespace Peach.Pro.Test.Core.Storage
 				var s2 = cache.Add<State>(db, "S2");
 
 				for (var i = 0; i < 10; i++)
-					db.InsertStateInstance(new StateInstance { StateId = s1 });
+					db.IncrementStateCount(s1);
 				for (var i = 0; i < 20; i++)
-					db.InsertStateInstance(new StateInstance { StateId = s2 });
+					db.IncrementStateCount(s2);
 			}
 
 			using (var db = new JobContext(_tmp.Path))

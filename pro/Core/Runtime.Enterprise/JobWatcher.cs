@@ -186,7 +186,8 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 				using (var db = new JobContext(_dbPath))
 				{
 					_mutation.StateId = _cache.Add<Storage.State>(db, state.Name);
-					db.InsertStateInstance(new StateInstance { StateId = _mutation.StateId });
+					_mutation.StateRunId = state.runCount;
+					db.IncrementStateCount(_mutation.StateId);
 				}
 			}
 		}

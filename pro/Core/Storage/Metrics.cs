@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace Peach.Pro.Core.Storage
 {
@@ -48,24 +49,17 @@ namespace Peach.Pro.Core.Storage
 		public string Name { get; set; }
 	}
 
-	public class State : Metric { }
+	public class State : Metric
+	{
+		[DefaultValue(0)]
+		public long Count { get; set; }
+	}
+
 	public class Action : Metric { }
 	public class Parameter : Metric { }
 	public class Element : Metric { }
 	public class Mutator : Metric { }
 	public class Dataset : Metric { }
-
-	/// <summary>
-	/// One row per state instance.
-	/// </summary>
-	public class StateInstance
-	{
-		[Key]
-		public long Id { get; set; }
-
-		[ForeignKey(typeof(State))]
-		public long StateId { get; set; }
-	}
 
 	/// <summary>
 	/// One row per data mutation.
@@ -84,6 +78,10 @@ namespace Peach.Pro.Core.Storage
 		[Index("IX_Mutation_State")]
 		[ForeignKey(typeof(State))]
 		public long StateId { get; set; }
+
+		[Index("IX_Mutation")]
+		[Index("IX_Mutation_Iteration", IsUnique = true)]
+		public long StateRunId { get; set; }
 
 		[Index("IX_Mutation")]
 		[Index("IX_Mutation_Iteration", IsUnique = true)]

@@ -1,11 +1,9 @@
 ﻿-- States >>>
 CREATE VIEW ViewStates AS 
 SELECT
-	s.Name AS [State],
-	COUNT(*) AS [ExecutionCount]
-FROM [StateInstance] AS si
-JOIN [State] AS s ON s.Id = si.StateId
-GROUP BY si.StateId;
+	s.[Name] AS [State],
+	s.[Count] AS [ExecutionCount]
+FROM [State] AS s;
 -- States <<<
 
 -- Iterations >>>

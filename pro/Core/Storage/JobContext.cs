@@ -94,6 +94,7 @@ WHERE
 INSERT INTO Mutation (
 	Iteration,
 	StateId,
+	StateRunId,
 	ActionId,
 	ParameterId,
 	ElementId,
@@ -102,6 +103,7 @@ INSERT INTO Mutation (
 ) VALUES (
 	@Iteration,
 	@StateId,
+	@StateRunId,
 	@ActionId,
 	@ParameterId,
 	@ElementId,
@@ -197,7 +199,6 @@ SELECT last_insert_rowid();";
 			typeof(Element),
 			typeof(Mutator),
 			typeof(Dataset),
-			typeof(StateInstance),
 			typeof(Mutation),
 			typeof(FaultMetric),
 			typeof(FaultMetricMutation),
@@ -251,16 +252,16 @@ SELECT last_insert_rowid();";
 
 		public void InsertMetric(Metric metric)
 		{
-			var sql = "INSERT INTO {0} (Name) VALUES (@Name); ".Fmt(metric.GetType().Name) +
-					  "SELECT last_insert_rowid();";
+			var typeName = metric.GetType().Name;
+			var sql = "INSERT INTO {0} (Name) VALUES (@Name); ".Fmt(typeName) +
+				"SELECT last_insert_rowid();";
 			metric.Id = Connection.ExecuteScalar<long>(sql, metric);
 		}
 
-		public void InsertStateInstance(StateInstance si)
+		public void IncrementStateCount(long stateId)
 		{
-			const string sql = "INSERT INTO StateInstance (StateId) VALUES (@StateId); " +
-							   "SELECT last_insert_rowid();";
-			si.Id = Connection.ExecuteScalar<long>(sql, si);
+			const string sql = "UPDATE State SET Count = Count + 1 WHERE Id = @Id";
+			Connection.Execute(sql, new { Id = stateId });
 		}
 
 		public void InsertMutation(Mutation entity)
