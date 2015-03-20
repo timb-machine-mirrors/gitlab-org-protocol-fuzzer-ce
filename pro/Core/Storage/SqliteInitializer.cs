@@ -11,6 +11,7 @@ using Mono.Data.Sqlite;
 using SQLiteConnection = Mono.Data.Sqlite.SqliteConnection;
 #else
 using System.Data.SQLite;
+using System.ComponentModel;
 #endif
 
 namespace Peach.Pro.Core.Storage
@@ -74,6 +75,7 @@ namespace Peach.Pro.Core.Storage
 
 		const string TableTmpl = "CREATE TABLE {0} (\n{1}\n);";
 		const string ColumnTmpl = "    {0} {1} {2}"; // name, type, decl
+		const string DefaultTmpl = " DEFAULT ({0})";
 		const string PrimaryKeyTmpl = "    PRIMARY KEY ({0})";
 		const string ForeignKeyTmpl = "    FOREIGN KEY ({0}) REFERENCES {1} ({2})";
 		const string IndexTmpl = "CREATE{0}INDEX {1} ON {2} ({3});";
@@ -99,6 +101,9 @@ namespace Peach.Pro.Core.Storage
 						decls.Add("NOT NULL");
 					if (pi.HasAttribute<UniqueAttribute>())
 						decls.Add("UNIQUE");
+					var defaultValue = pi.GetDefaultValue();
+					if (defaultValue != null)
+						decls.Add(DefaultTmpl.Fmt(defaultValue));
 
 					defs.Add(ColumnTmpl.Fmt(
 						pi.Name,
@@ -250,6 +255,18 @@ namespace Peach.Pro.Core.Storage
 					pi.Name,
 					type.Name);
 			return sqlType;
+		}
+
+		public static string GetDefaultValue(this PropertyInfo pi)
+		{
+			var attr = pi.GetCustomAttributes(true)
+				.OfType<DefaultValueAttribute>()
+				.SingleOrDefault();
+			if (attr == null)
+				return null;
+			if (attr.Value is string)
+				return "\"{0}\"".Fmt(attr.Value);
+			return attr.Value.ToString();
 		}
 	}
 }
