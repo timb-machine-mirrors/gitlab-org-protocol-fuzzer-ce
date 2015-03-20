@@ -14,13 +14,15 @@ namespace Peach.Pro.Core.Storage
 	[AttributeUsage(AttributeTargets.Property)]
 	class RequiredAttribute : Attribute { }
 
+	[AttributeUsage(AttributeTargets.Property)]
+	class UniqueAttribute : Attribute { }
+
 	[AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
 	class IndexAttribute : Attribute
 	{
 		public string Name { get; set; }
 		public bool IsUnique { get; set; }
 
-		public IndexAttribute() { }
 		public IndexAttribute(string name) { Name = name; }
 	}
 
@@ -42,7 +44,7 @@ namespace Peach.Pro.Core.Storage
 		[Key]
 		public long Id { get; set; }
 
-		[Index(IsUnique = true)]
+		[Unique]
 		public string Name { get; set; }
 	}
 
@@ -73,42 +75,42 @@ namespace Peach.Pro.Core.Storage
 		[Key]
 		public long Id { get; set; }
 
-		[Index("IX_Mutation_Iteration")]
+		[Index("IX_Mutation_Iteration", IsUnique = true)]
 		[Index("IX_Mutation_Iteration_Alone")]
 		public long Iteration { get; set; }
 
 		[Index("IX_Mutation")]
-		[Index("IX_Mutation_Iteration")]
+		[Index("IX_Mutation_Iteration", IsUnique = true)]
 		[Index("IX_Mutation_State")]
 		[ForeignKey(typeof(State))]
 		public long StateId { get; set; }
 
 		[Index("IX_Mutation")]
-		[Index("IX_Mutation_Iteration")]
+		[Index("IX_Mutation_Iteration", IsUnique = true)]
 		[Index("IX_Mutation_Action")]
 		[ForeignKey(typeof(Action))]
 		public long ActionId { get; set; }
 
 		[Index("IX_Mutation")]
-		[Index("IX_Mutation_Iteration")]
+		[Index("IX_Mutation_Iteration", IsUnique = true)]
 		[Index("IX_Mutation_Parameter")]
 		[ForeignKey(typeof(Parameter))]
 		public long ParameterId { get; set; }
 
 		[Index("IX_Mutation")]
-		[Index("IX_Mutation_Iteration")]
+		[Index("IX_Mutation_Iteration", IsUnique = true)]
 		[Index("IX_Mutation_Element")]
 		[ForeignKey(typeof(Element))]
 		public long ElementId { get; set; }
 
 		[Index("IX_Mutation")]
-		[Index("IX_Mutation_Iteration")]
+		[Index("IX_Mutation_Iteration", IsUnique = true)]
 		[Index("IX_Mutation_Mutator")]
 		[ForeignKey(typeof(Mutator))]
 		public long MutatorId { get; set; }
 
 		[Index("IX_Mutation")]
-		[Index("IX_Mutation_Iteration")]
+		[Index("IX_Mutation_Iteration", IsUnique = true)]
 		[Index("IX_Mutation_Dataset")]
 		[ForeignKey(typeof(Dataset))]
 		public long DatasetId { get; set; }

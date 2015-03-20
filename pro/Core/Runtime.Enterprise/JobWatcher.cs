@@ -21,57 +21,6 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 		NonReproducable,
 	}
 
-	internal interface IMetricCache
-	{
-		long Add(JobContext db, string name);
-	}
-
-	internal class MetricCache<T> : IMetricCache
-		where T : Metric, new()
-	{
-		readonly Dictionary<string, T> _map = new Dictionary<string, T>();
-
-		public MetricCache(JobContext db)
-		{
-			_map = db.LoadTable<T>().ToDictionary(x => x.Name);
-		}
-
-		public long Add(JobContext db, string name)
-		{
-			T entity;
-			if (!_map.TryGetValue(name, out entity))
-			{
-				entity = new T { Name = name };
-				db.InsertMetric(entity);
-				_map.Add(name, entity);
-			}
-			return entity.Id;
-		}
-	}
-
-	internal class MetricsCache
-	{
-		readonly Dictionary<string, IMetricCache> _metrics;
-
-		public MetricsCache(JobContext db)
-		{
-			_metrics = new Dictionary<string, IMetricCache>
-			{
-				{ typeof(Storage.State).Name, new MetricCache<Storage.State>(db) },
-				{ typeof(Storage.Action).Name, new MetricCache<Storage.Action>(db) },
-				{ typeof(Storage.Parameter).Name, new MetricCache<Storage.Parameter>(db) },
-				{ typeof(Storage.Element).Name, new MetricCache<Storage.Element>(db) },
-				{ typeof(Storage.Mutator).Name, new MetricCache<Storage.Mutator>(db) },
-				{ typeof(Storage.Dataset).Name, new MetricCache<Storage.Dataset>(db) },
-			};
-		}
-
-		public long Add<T>(JobContext db, string name)
-		{
-			return _metrics[typeof(T).Name].Add(db, name);
-		}
-	}
-
 	class JobWatcher : Watcher
 	{
 		readonly Guid _guid;

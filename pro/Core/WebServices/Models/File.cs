@@ -15,6 +15,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// Foreign key to FaultDetail table
 		/// </summary>
 		[JsonIgnore]
+		[ForeignKey(typeof(FaultDetail))]
 		public long FaultDetailId { get; set; }
 
 		/// <summary>
