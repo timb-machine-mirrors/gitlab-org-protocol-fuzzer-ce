@@ -1,56 +1,175 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Peach.Pro.Core.Storage
 {
 	internal class MetricsCache
 	{
-		interface IMetricCache
+		class NameCache
 		{
-			long Add(JobContext db, string name);
-		}
+			long _lastId;
+			readonly Dictionary<string, NamedItem> _map = new Dictionary<string, NamedItem>();
+			List<NamedItem> _pending = new List<NamedItem>();
 
-		class MetricCache<T> : IMetricCache
-			where T : Metric, new()
-		{
-			readonly Dictionary<string, T> _map = new Dictionary<string, T>();
-
-			public MetricCache(JobContext db)
+			public NameCache(JobContext db)
 			{
-				_map = db.LoadTable<T>().ToDictionary(x => x.Name);
+				_map = db.LoadTable<NamedItem>().ToDictionary(x => x.Name);
+				_lastId = _map.Count + 1;
 			}
 
-			public long Add(JobContext db, string name)
+			public long Add(string name)
 			{
-				T entity;
-				if (!_map.TryGetValue(name, out entity))
+				NamedItem item;
+				if (!_map.TryGetValue(name, out item))
 				{
-					entity = new T { Name = name };
-					db.InsertMetric(entity);
-					_map.Add(name, entity);
+					item = new NamedItem { Id = _lastId++, Name = name };
+					_pending.Add(item);
+					_map.Add(name, item);
 				}
-				return entity.Id;
+				return item.Id;
+			}
+
+			public IEnumerable<NamedItem> Flush()
+			{
+				var ret = _pending;
+				_pending = new List<NamedItem>();
+				return ret;
 			}
 		}
 
-		readonly Dictionary<string, IMetricCache> _metrics;
+		readonly NameCache _nameCache;
+		readonly string _dbPath;
+		readonly Dictionary<Tuple<long, long>, State> _stateCache;
+		readonly Dictionary<Tuple<long, long>, State> _pendingStates;
+		readonly List<Mutation> _mutations = new List<Mutation>();
+		Mutation _mutation;
 
-		public MetricsCache(JobContext db)
+		public MetricsCache(string dbPath, JobContext db)
 		{
-			_metrics = new Dictionary<string, IMetricCache>
+			_dbPath = dbPath;
+			_nameCache = new NameCache(db);
+			_stateCache = db.LoadTable<State>().ToDictionary(x =>
+				new Tuple<long, long>(x.NameId, x.RunCount));
+			_pendingStates = new Dictionary<Tuple<long, long>, State>();
+		}
+
+		public void IterationStarting(uint iteration)
+		{
+			//Console.WriteLine("cache.IterationStarting({0});", iteration);
+
+			_mutations.Clear();
+			_mutation = new Mutation();
+		}
+
+		public void StateStarting(string name, uint runCount)
+		{
+			//Console.WriteLine("cache.StateStarting(\"{0}\", {1});", name, runCount);
+
+			var nameId = _nameCache.Add(name);
+			var key = new Tuple<long, long>(nameId, runCount);
+			State state;
+			if (_pendingStates.TryGetValue(key, out state))
 			{
-				{ typeof(State).Name, new MetricCache<State>(db) },
-				{ typeof(Action).Name, new MetricCache<Action>(db) },
-				{ typeof(Parameter).Name, new MetricCache<Parameter>(db) },
-				{ typeof(Element).Name, new MetricCache<Element>(db) },
-				{ typeof(Mutator).Name, new MetricCache<Mutator>(db) },
-				{ typeof(Dataset).Name, new MetricCache<Dataset>(db) },
+				// Special case:
+				// We've visited this state multiple times but we
+				// haven't reached IterationFinished yet.
+				state.Count++;
+			}
+			else if (_stateCache.TryGetValue(key, out state))
+			{
+				state.Count++;
+				_pendingStates.Add(key, state);
+			}
+			else
+			{
+				state = new State
+				{
+					Id = _stateCache.Count + 1,
+					NameId = nameId,
+					RunCount = runCount,
+					Count = 1,
+				};
+				_pendingStates.Add(key, state);
+				_stateCache.Add(key, state);
+			}
+			_mutation.StateId = state.Id;
+		}
+
+		public void ActionStarting(string name)
+		{
+			//Console.WriteLine("cache.ActionStarting(\"{0}\");", name);
+
+			_mutation.ActionId = _nameCache.Add(name);
+		}
+
+		public void DataMutating(
+			string parameter,
+			string element,
+			string mutator,
+			string dataset)
+		{
+			//Console.WriteLine("cache.DataMutating(\"{0}\", \"{1}\", \"{2}\", \"{3}\");", 
+			//	parameter, element, mutator, dataset);
+
+			_mutation.ParameterId = _nameCache.Add(parameter);
+			_mutation.ElementId = _nameCache.Add(element);
+			_mutation.MutatorId = _nameCache.Add(mutator);
+			_mutation.DatasetId = _nameCache.Add(dataset);
+
+			_mutations.Add(_mutation);
+
+			_mutation = new Mutation
+			{
+				StateId = _mutation.StateId,
+				ActionId = _mutation.ActionId,
 			};
 		}
 
-		public long Add<T>(JobContext db, string name)
+		public void IterationFinished()
 		{
-			return _metrics[typeof(T).Name].Add(db, name);
+			//Console.WriteLine("cache.IterationFinished();");
+
+			using (var db = new JobContext(_dbPath))
+			{
+				db.InsertNames(_nameCache.Flush());
+				db.UpsertStates(_pendingStates.Values);
+				db.UpsertMutations(_mutations);
+			}
+
+			_pendingStates.Clear();
+		}
+
+		public void OnFault(FaultMetric fault)
+		{
+			//Console.WriteLine("cache.OnFault({0}, \"{1}\", \"{2}\", \"{3}\");", 
+			//	fault.Iteration, 
+			//	fault.MajorHash,
+			//	fault.MinorHash,
+			//	fault.Timestamp);
+
+			using (var db = new JobContext(_dbPath))
+			{
+				db.InsertNames(_nameCache.Flush());
+				db.UpsertStates(_pendingStates.Values);
+				var faults = _mutations.Select(x => new FaultMetric
+				{
+					Iteration = fault.Iteration,
+					MajorHash = fault.MajorHash,
+					MinorHash = fault.MinorHash,
+					Timestamp = fault.Timestamp,
+					Hour = fault.Hour,
+					StateId = x.StateId,
+					ActionId = x.ActionId,
+					ParameterId = x.ParameterId,
+					ElementId = x.ElementId,
+					MutatorId = x.MutatorId,
+					DatasetId = x.DatasetId,
+				});
+				db.InsertFaultMetrics(faults);
+			}
+
+			_pendingStates.Clear();
 		}
 	}
 }

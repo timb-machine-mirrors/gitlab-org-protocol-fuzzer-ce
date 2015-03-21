@@ -1,5 +1,5 @@
 ﻿using System;
-using System.ComponentModel;
+using Peach.Pro.Core.WebServices.Models;
 
 namespace Peach.Pro.Core.Storage
 {
@@ -30,6 +30,7 @@ namespace Peach.Pro.Core.Storage
 	[AttributeUsage(AttributeTargets.Property)]
 	class ForeignKeyAttribute : Attribute
 	{
+		public string Name { get; set; }
 		public Type TargetEntity { get; set; }
 		public string TargetProperty { get; set; }
 
@@ -40,7 +41,7 @@ namespace Peach.Pro.Core.Storage
 		}
 	}
 
-	public class Metric
+	public class NamedItem
 	{
 		[Key]
 		public long Id { get; set; }
@@ -49,17 +50,20 @@ namespace Peach.Pro.Core.Storage
 		public string Name { get; set; }
 	}
 
-	public class State : Metric
+	public class State
 	{
-		[DefaultValue(0)]
+		[Key]
+		public long Id { get; set; }
+
+		[Index("UX_StateCount", IsUnique = true)]
+		[ForeignKey(typeof(NamedItem))]
+		public long NameId { get; set; }
+
+		[Index("UX_StateCount", IsUnique = true)]
+		public long RunCount { get; set; }
+
 		public long Count { get; set; }
 	}
-
-	public class Action : Metric { }
-	public class Parameter : Metric { }
-	public class Element : Metric { }
-	public class Mutator : Metric { }
-	public class Dataset : Metric { }
 
 	/// <summary>
 	/// One row per data mutation.
@@ -69,48 +73,42 @@ namespace Peach.Pro.Core.Storage
 		[Key]
 		public long Id { get; set; }
 
-		[Index("IX_Mutation_Iteration", IsUnique = true)]
-		[Index("IX_Mutation_Iteration_Alone")]
-		public long Iteration { get; set; }
+		public long IterationCount { get; set; }
 
 		[Index("IX_Mutation")]
-		[Index("IX_Mutation_Iteration", IsUnique = true)]
+		[Index("UX_Mutation", IsUnique = true)]
 		[Index("IX_Mutation_State")]
 		[ForeignKey(typeof(State))]
 		public long StateId { get; set; }
 
 		[Index("IX_Mutation")]
-		[Index("IX_Mutation_Iteration", IsUnique = true)]
-		public long StateRunId { get; set; }
-
-		[Index("IX_Mutation")]
-		[Index("IX_Mutation_Iteration", IsUnique = true)]
+		[Index("UX_Mutation", IsUnique = true)]
 		[Index("IX_Mutation_Action")]
-		[ForeignKey(typeof(Action))]
+		[ForeignKey(typeof(NamedItem), Name = "FK_Mutation_Action")]
 		public long ActionId { get; set; }
 
 		[Index("IX_Mutation")]
-		[Index("IX_Mutation_Iteration", IsUnique = true)]
+		[Index("UX_Mutation", IsUnique = true)]
 		[Index("IX_Mutation_Parameter")]
-		[ForeignKey(typeof(Parameter))]
+		[ForeignKey(typeof(NamedItem), Name = "FK_Mutation_Parameter")]
 		public long ParameterId { get; set; }
 
 		[Index("IX_Mutation")]
-		[Index("IX_Mutation_Iteration", IsUnique = true)]
+		[Index("UX_Mutation", IsUnique = true)]
 		[Index("IX_Mutation_Element")]
-		[ForeignKey(typeof(Element))]
+		[ForeignKey(typeof(NamedItem), Name = "FK_Mutation_Element")]
 		public long ElementId { get; set; }
 
 		[Index("IX_Mutation")]
-		[Index("IX_Mutation_Iteration", IsUnique = true)]
+		[Index("UX_Mutation", IsUnique = true)]
 		[Index("IX_Mutation_Mutator")]
-		[ForeignKey(typeof(Mutator))]
+		[ForeignKey(typeof(NamedItem), Name = "FK_Mutation_Mutator")]
 		public long MutatorId { get; set; }
 
 		[Index("IX_Mutation")]
-		[Index("IX_Mutation_Iteration", IsUnique = true)]
+		[Index("UX_Mutation", IsUnique = true)]
 		[Index("IX_Mutation_Dataset")]
-		[ForeignKey(typeof(Dataset))]
+		[ForeignKey(typeof(NamedItem), Name = "FK_Mutation_Dataset")]
 		public long DatasetId { get; set; }
 	}
 
@@ -128,26 +126,35 @@ namespace Peach.Pro.Core.Storage
 		[Required]
 		[Index("IX_FaultMetric_MajorHash")]
 		public string MajorHash { get; set; }
+
 		[Required]
 		public string MinorHash { get; set; }
 
-		public DateTime Timestamp { get; set; }
+		private DateTime _timestamp;
+		public DateTime Timestamp
+		{
+			get { return _timestamp; }
+			set { _timestamp = value.MakeUtc(); }
+		}
+
 		public int Hour { get; set; }
-	}
 
-	/// <summary>
-	/// Many-to-many association
-	/// </summary>
-	public class FaultMetricMutation
-	{
-		[Key]
-		[ForeignKey(typeof(FaultMetric))]
-		[Index("IX_FaultMetricMutation_FaultMetric")]
-		public long FaultMetricId { get; set; }
+		[ForeignKey(typeof(State))]
+		public long StateId { get; set; }
 
-		[Key]
-		[ForeignKey(typeof(Mutation))]
-		[Index("IX_FaultMetricMutation_Mutation")]
-		public long MutationId { get; set; }
+		[ForeignKey(typeof(NamedItem), Name = "FK_FaultMetric_Action")]
+		public long ActionId { get; set; }
+
+		[ForeignKey(typeof(NamedItem), Name = "FK_FaultMetric_Parameter")]
+		public long ParameterId { get; set; }
+
+		[ForeignKey(typeof(NamedItem), Name = "FK_FaultMetric_Element")]
+		public long ElementId { get; set; }
+
+		[ForeignKey(typeof(NamedItem), Name = "FK_FaultMetric_Mutator")]
+		public long MutatorId { get; set; }
+
+		[ForeignKey(typeof(NamedItem), Name = "FK_FaultMetric_Dataset")]
+		public long DatasetId { get; set; }
 	}
 }

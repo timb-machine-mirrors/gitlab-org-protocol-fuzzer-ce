@@ -223,12 +223,28 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// The date the job was started
 		/// </summary>
-		public DateTime StartDate { get; set; }
+		public DateTime StartDate
+		{
+			get { return _startDate; }
+			set { _startDate = value.MakeUtc(); }
+		}
+		private DateTime _startDate;
 
 		/// <summary>
 		/// The date the job ended
 		/// </summary>
-		public DateTime? StopDate { get; set; }
+		public DateTime? StopDate
+		{
+			get { return _stopDate; }
+			set
+			{
+				if (value.HasValue)
+					_stopDate = value.Value.MakeUtc();
+				else
+					_stopDate = null;
+			}
+		}
+		private DateTime? _stopDate;
 
 		/// <summary>
 		/// The number of seconds the job has been running for

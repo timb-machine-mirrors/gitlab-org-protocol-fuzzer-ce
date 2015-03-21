@@ -2,9 +2,31 @@
 
 namespace Peach.Pro.Core.WebServices.Models
 {
+	public static class DateTimeExtensions
+	{
+		// This hack is due to Dapper not being savvy about DateTime kinds:
+		// http://stackoverflow.com/questions/12510299/get-datetime-as-utc-with-dapper
+		public static DateTime MakeUtc(this DateTime value)
+		{
+			switch (value.Kind)
+			{
+				case DateTimeKind.Unspecified:
+				case DateTimeKind.Local:
+					return TimeZoneInfo.ConvertTimeToUtc(value);
+			}
+			return value;
+		}
+	}
+
 	public class FaultTimelineMetric
 	{
-		public DateTime Date { get; set; }
+		private DateTime _date;
+		public DateTime Date
+		{
+			get { return _date; }
+			set { _date = value.MakeUtc(); }
+		}
+
 		public long FaultCount { get; set; }
 
 		public FaultTimelineMetric() { }
@@ -12,7 +34,7 @@ namespace Peach.Pro.Core.WebServices.Models
 			DateTime date,
 			long faultCount)
 		{
-			Date = date;
+			_date = date;
 			FaultCount = faultCount;
 		}
 	}
@@ -21,7 +43,14 @@ namespace Peach.Pro.Core.WebServices.Models
 	{
 		public string Label { get; set; }
 		public long Iteration { get; set; }
-		public DateTime Time { get; set; }
+
+		private DateTime _time;
+		public DateTime Time
+		{
+			get { return _time; }
+			set { _time = value.MakeUtc(); }
+		}
+
 		public long FaultCount { get; set; }
 
 		public BucketTimelineMetric() { }
@@ -33,7 +62,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		{
 			Label = label;
 			Iteration = iteration;
-			Time = time;
+			_time = time;
 			FaultCount = faultCount;
 		}
 	}
