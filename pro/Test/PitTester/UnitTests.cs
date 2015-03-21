@@ -141,6 +141,74 @@ namespace PitTester
 		}
 
 		[Test]
+		public void TestIgnoreArrayField()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String value='pre ' />
+		<Block name='item' minOccurs='0'>
+			<String name='value'/>
+		</Block>
+		<String value=' post' />
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+				<Data>
+					<Field name='item[0].value' value='aaa' />
+					<Field name='item[1].value' value='bbb' />
+					<Field name='item[2].value' value='aaa' />
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='TheState'/>
+		<Publisher name='Pub' class='Null'/>
+	</Test>
+</Peach>
+";
+
+			const string test = @"
+<TestData>
+	<Ignore xpath='//value' />
+
+	<Test name='Default'>
+		<Open   action='TheState.Initial.Action' publisher='Pub'/>
+		<Output action='TheState.Initial.Action' publisher='Pub'>
+<![CDATA[
+0000000: 7072 6520 6161 6161 6161 6161 6120 706f  pre aaaaaaaaa po
+0000010: 7374                                     st
+]]>
+		</Output>
+		<Close  action='TheState.Initial.Action' publisher='Pub'/>
+	</Test>
+</TestData>
+";
+
+			// Ensure we can run when there is an ignore that matches a de-selected choice
+			var pitFile = Path.GetTempFileName();
+			var pitTest = pitFile + ".test";
+
+			File.WriteAllText(pitFile, xml);
+			File.WriteAllText(pitTest, test);
+
+			try
+			{
+				PitTester.TestPit("", pitFile, true, null);
+			}
+			finally
+			{
+				File.Delete(pitFile);
+				File.Delete(pitTest);
+			}
+		}
+
+		[Test]
 		public void TestIgnoreChoice()
 		{
 			const string xml = @"
