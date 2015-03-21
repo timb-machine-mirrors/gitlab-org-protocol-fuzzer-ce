@@ -68,6 +68,7 @@ namespace Peach.Pro.Core.Storage
 
 		class ForeignKey
 		{
+			public string Name { get; set; }
 			public string TargetTable { get; set; }
 			public HashSet<string> SourceColumns { get; set; }
 			public HashSet<string> TargetColumns { get; set; }
@@ -75,9 +76,9 @@ namespace Peach.Pro.Core.Storage
 
 		const string TableTmpl = "CREATE TABLE {0} (\n{1}\n);";
 		const string ColumnTmpl = "    {0} {1} {2}"; // name, type, decl
-		const string DefaultTmpl = " DEFAULT ({0})";
+		const string DefaultTmpl = "DEFAULT ({0})";
 		const string PrimaryKeyTmpl = "    PRIMARY KEY ({0})";
-		const string ForeignKeyTmpl = "    FOREIGN KEY ({0}) REFERENCES {1} ({2})";
+		const string ForeignKeyTmpl = "    CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})";
 		const string IndexTmpl = "CREATE{0}INDEX {1} ON {2} ({3});";
 
 		void CreateDatabase(SQLiteConnection cnn, IEnumerable<Type> types)
@@ -132,19 +133,24 @@ namespace Peach.Pro.Core.Storage
 
 					foreach (var attr in pi.AttributesOfType<ForeignKeyAttribute>())
 					{
+						var name = attr.Name;
 						var targetTable = attr.TargetEntity.Name;
 						var targetColumn = attr.TargetProperty;
 
+						if (string.IsNullOrEmpty(name))
+							name = "FK_{0}_{1}".Fmt(type.Name, targetTable);
+
 						ForeignKey foreignKey;
-						if (!foreignKeys.TryGetValue(targetTable, out foreignKey))
+						if (!foreignKeys.TryGetValue(name, out foreignKey))
 						{
 							foreignKey = new ForeignKey
 							{
+								Name = name,
 								TargetTable = targetTable,
 								SourceColumns = new HashSet<string>(),
 								TargetColumns = new HashSet<string>(),
 							};
-							foreignKeys.Add(targetTable, foreignKey);
+							foreignKeys.Add(name, foreignKey);
 						}
 		
 						foreignKey.SourceColumns.Add(pi.Name);
@@ -158,6 +164,7 @@ namespace Peach.Pro.Core.Storage
 				foreach (var item in foreignKeys.Values)
 				{
 					defs.Add(ForeignKeyTmpl.Fmt(
+						item.Name,
 						string.Join(", ", item.SourceColumns),
 						item.TargetTable,
 						string.Join(", ", item.TargetColumns)));

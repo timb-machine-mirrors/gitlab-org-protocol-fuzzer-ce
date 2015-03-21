@@ -18,8 +18,11 @@ namespace Peach.Pro.Core.Storage
 	class JobContext : IDisposable
 	{
 		#region SQL
+		const string SqlGetLastRowId = "SELECT last_insert_rowid();";
 		const string SqlSelectJob = @"
-SELECT * FROM [Job] WHERE Id = @Id
+SELECT * 
+FROM [Job] 
+WHERE Id = @Id;
 ";
 
 		const string SqlInsertJob = @"
@@ -63,7 +66,7 @@ INSERT INTO [Job] (
 	@HasMetrics,
 	@StartIteration,
 	@CurrentIteration
-)";
+);";
 
 		const string SqlUpdateJob = @"
 UPDATE [Job]
@@ -88,29 +91,49 @@ SET
 	CurrentIteration = @CurrentIteration
 WHERE
 	Id = @Id
-";
+;";
 
-		const string SqlInsertMutation = @"
-INSERT INTO Mutation (
-	Iteration,
+		const string SqlUpsertMutation = @"
+INSERT OR REPLACE INTO Mutation (
 	StateId,
-	StateRunId,
 	ActionId,
 	ParameterId,
 	ElementId,
 	MutatorId,
-	DatasetId
+	DatasetId,
+	IterationCount
 ) VALUES (
-	@Iteration,
 	@StateId,
-	@StateRunId,
 	@ActionId,
 	@ParameterId,
 	@ElementId,
 	@MutatorId,
-	@DatasetId
-);
-SELECT last_insert_rowid();";
+	@DatasetId,
+	COALESCE((
+		SELECT IterationCount + 1
+		FROM Mutation
+		WHERE
+			StateId = @StateId AND
+			ActionId = @ActionId AND
+			ParameterId = @ParameterId AND
+			ElementId = @ElementId AND
+			MutatorId = @MutatorId AND
+			DatasetId = @DatasetId
+	), 1)
+);";
+
+		const string SqlUpsertState = @"
+INSERT OR REPLACE INTO [State] (
+	Id, 
+	NameId, 
+	RunCount,
+	Count
+) VALUES (
+	@Id, 
+	@NameId, 
+	@RunCount,
+	@Count
+);";
 
 		const string SqlInsertFaultMetric = @"
 INSERT INTO FaultMetric (
@@ -118,24 +141,26 @@ INSERT INTO FaultMetric (
 	MajorHash,
 	MinorHash,
 	Timestamp,
-	Hour
+	Hour,
+	StateId,
+	ActionId,
+	ParameterId,
+	ElementId,
+	MutatorId,
+	DatasetId
 ) VALUES (
 	@Iteration,
 	@MajorHash,
 	@MinorHash,
 	@Timestamp,
-	@Hour
-);
-SELECT last_insert_rowid();";
-
-		const string SqlInsertFaultMetricMutation = @"
-INSERT INTO FaultMetricMutation (
-	FaultMetricId,
-	MutationId
-) VALUES (
-	@FaultMetricId,
-	@MutationId
-)";
+	@Hour,
+	@StateId,
+	@ActionId,
+	@ParameterId,
+	@ElementId,
+	@MutatorId,
+	@DatasetId
+);";
 
 		const string SqlInsertFaultDetail = @"
 INSERT INTO FaultDetail (
@@ -166,8 +191,7 @@ INSERT INTO FaultDetail (
 	@Seed,
 	@IterationStart,
 	@IterationStop
-);
-SELECT last_insert_rowid();";
+);" + SqlGetLastRowId;
 
 		const string SqlInsertFaultFile = @"
 INSERT INTO FaultFile (
@@ -180,8 +204,8 @@ INSERT INTO FaultFile (
 	@Name,
 	@FullName,
 	@Size
-);
-SELECT last_insert_rowid();";
+);" + SqlGetLastRowId;
+
 
 		#endregion
 
@@ -189,19 +213,16 @@ SELECT last_insert_rowid();";
 
 		static readonly IEnumerable<Type> EntityTypes = new[]
 		{
+			// job status
 			typeof(Job),
 			typeof(FaultDetail),
 			typeof(FaultFile),
 
+			// metrics
+			typeof(NamedItem),
 			typeof(State),
-			typeof(Action),
-			typeof(Parameter),
-			typeof(Element),
-			typeof(Mutator),
-			typeof(Dataset),
 			typeof(Mutation),
 			typeof(FaultMetric),
-			typeof(FaultMetricMutation),
 		};
 
 		static readonly string[] Scripts =
@@ -250,40 +271,31 @@ SELECT last_insert_rowid();";
 			return Connection.Query<T>(sql);
 		}
 
-		public void InsertMetric(Metric metric)
+		public void InsertNames(IEnumerable<NamedItem> items)
 		{
-			var typeName = metric.GetType().Name;
-			var sql = "INSERT INTO {0} (Name) VALUES (@Name); ".Fmt(typeName) +
-				"SELECT last_insert_rowid();";
-			metric.Id = Connection.ExecuteScalar<long>(sql, metric);
+			const string sql = "INSERT INTO NamedItem (Id, Name) VALUES (@Id, @Name)";
+			Connection.Execute(sql, items);
 		}
 
-		public void IncrementStateCount(long stateId)
+		public void UpdateStates(IEnumerable<State> states)
 		{
-			const string sql = "UPDATE State SET Count = Count + 1 WHERE Id = @Id";
-			Connection.Execute(sql, new { Id = stateId });
+			const string sql = "UPDATE State SET Count = @Count WHERE Id = @Id";
+			Connection.Execute(sql, states);
 		}
 
-		public void InsertMutation(Mutation entity)
+		public void UpsertStates(IEnumerable<State> states)
 		{
-			entity.Id = Connection.ExecuteScalar<long>(SqlInsertMutation, entity);
+			Connection.Execute(SqlUpsertState, states);
 		}
 
-		public void InsertFaultMetric(FaultMetric fault, List<Mutation> mutations)
+		public void UpsertMutations(IEnumerable<Mutation> mutations)
 		{
-			fault.Id = Connection.ExecuteScalar<long>(SqlInsertFaultMetric, fault);
+			Connection.Execute(SqlUpsertMutation, mutations);
+		}
 
-			foreach (var mutation in mutations.Where(mutation => mutation.Id == 0))
-			{
-				mutation.Id = Connection.ExecuteScalar<long>(SqlInsertMutation, mutation);
-			}
-
-			var linking = mutations.Select(x => new
-			{
-				FaultMetricId = fault.Id,
-				MutationId = x.Id,
-			});
-			Connection.Execute(SqlInsertFaultMetricMutation, linking);
+		public void InsertFaultMetrics(IEnumerable<FaultMetric> faults)
+		{
+			Connection.Execute(SqlInsertFaultMetric, faults);
 		}
 
 		public void InsertFault(FaultDetail fault)
@@ -330,6 +342,55 @@ SELECT last_insert_rowid();";
 		public IEnumerable<DatasetMetric> QueryDatasets()
 		{
 			return Connection.Query<DatasetMetric>("SELECT * FROM ViewDatasets");
+		}
+
+		public IEnumerable<FaultTimelineMetric> QueryFaultTimeline()
+		{
+			return Connection.Query<FaultTimelineMetric>("SELECT * FROM ViewFaultTimeline");
+		}
+
+		public static void Dump<T>(IEnumerable<T> data)
+		{
+			var type = typeof(T);
+
+			var columns = type.GetProperties()
+				.Where(pi => !pi.HasAttribute<NotMappedAttribute>())
+				.ToList();
+
+			var maxWidth = new int[columns.Count];
+			var header = new string[columns.Count];
+			var rows = new List<string[]> { header };
+
+			for (var i = 0; i < columns.Count; i++)
+			{
+				var pi = columns[i];
+				header[i] = pi.Name;
+				maxWidth[i] = pi.Name.Length;
+			}
+
+			foreach (var item in data)
+			{
+				var row = new string[columns.Count];
+				var values = columns.Select(pi => pi.GetValue(item, null).ToString())
+					.ToArray();
+				for (var i = 0; i < values.Length; i++)
+				{
+					var value = values[i];
+					row[i] = value;
+					maxWidth[i] = Math.Max(maxWidth[i], value.Length);
+				}
+				rows.Add(row);
+			}
+
+			var fmts = maxWidth
+				.Select((t, i) => "{0},{1}".Fmt(i, t))
+				.Select(fmt => "{" + fmt + "}")
+				.ToList();
+			var finalFmt = string.Join("|", fmts);
+			foreach (object[] row in rows)
+			{
+				Console.WriteLine(finalFmt, row);
+			}
 		}
 	}
 }
