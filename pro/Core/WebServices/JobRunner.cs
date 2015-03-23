@@ -5,196 +5,184 @@ using System.Linq;
 using Peach.Core;
 using Peach.Pro.Core.Loggers;
 using Peach.Pro.Core.WebServices.Models;
+using Peach.Pro.Core.Storage;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace Peach.Pro.Core.WebServices
 {
 	public class JobRunner
 	{
+		public Job Job { get; private set; }
+
+		enum Command
+		{
+			Stop,
+			Pause,
+			Continue,
+			Kill,
+		}
+
+		static object _mutex = new object();
+		static Dictionary<Guid, JobRunner> _jobs = new Dictionary<Guid, JobRunner>();
+
 		//static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
-		Stopwatch stopwatch;
-		//ManualResetEvent pauseEvent;
-		//Thread thread;
+		Stopwatch _stopwatch = new Stopwatch();
+		Process _process;
+		Task _stderr;
+		string _pitFile;
+		string _pitLibraryPath;
+		BlockingCollection<Command> _requestQueue = new BlockingCollection<Command>();
 
-		public string PitUrl { get; set; }
-		public string Guid { get; set; }
-		public string Name { get; set; }
-		public uint Seed { get; set; }
-		public DateTime StartDate { get; set; }
-		public DateTime StopDate { get; set; }
-		public JobStatus Status { get; set; }
-		public bool Range { get; set; }
-		public uint RangeStart { get; set; }
-		public uint RangeStop { get; set; }
-		public bool HasMetrics { get; set; }
-		public string Result { get; set; }
-
-		public TimeSpan Runtime
+		public JobRunner(Job job, string pitFile, string pitLibraryPath)
 		{
-			get
-			{
-				if (stopwatch != null)
-					return stopwatch.Elapsed;
-
-				return DateTime.UtcNow - StartDate;
-			}
+			Job = job;
+			_pitFile = pitFile;
+			_pitLibraryPath = pitLibraryPath;
 		}
 
-		public bool Pause()
+		public void Pause()
 		{
-			// TODO: send 'pause' command to child worker
-			return false;
-
-			//lock (this)
-			//{
-			//	if (thread != null && Status == JobStatus.Running)
-			//	{
-			//		Status = JobStatus.PausePending;
-			//		pauseEvent.Reset();
-			//		return true;
-			//	}
-
-			//	return false;
-			//}
+			_requestQueue.Add(Command.Pause);
 		}
 
-		public bool Continue()
+		public void Continue()
 		{
-			// TODO: send 'continue' command to child worker
-			return false;
-
-			//lock (this)
-			//{
-			//	if (thread != null && Status == JobStatus.Paused)
-			//	{
-			//		Status = JobStatus.ContinuePending;
-			//		pauseEvent.Set();
-			//		return true;
-			//	}
-
-			//	return false;
-			//}
+			_requestQueue.Add(Command.Continue);
 		}
 
-		public bool Stop()
+		public void Stop()
 		{
-			// TODO: send 'stop' command to child worker
-			return false;
-
-			//lock (this)
-			//{
-			//	if (thread != null && Status != JobStatus.StopPending && Status != JobStatus.Stopped)
-			//	{
-			//		Status = JobStatus.StopPending;
-			//		pauseEvent.Set();
-			//		return true;
-			//	}
-
-			//	return false;
-			//}
+			_requestQueue.Add(Command.Stop);
 		}
 
-		public bool Kill()
+		public void Kill()
 		{
-			// TODO: kill child process, wait for exit
-			return false;
-
-			//Thread th;
-
-			//lock (this)
-			//{
-			//	if (thread == null)
-			//		return false;
-
-			//	th = thread;
-			//	th.Abort();
-			//}
-
-			//th.Join();
-
-			//return true;
+			_requestQueue.Add(Command.Kill);
 		}
 
 		public static JobRunner Run(
-			string pitLibraryPath,
-			string pitFile,
-			string pitUrl,
-			uint? seed,
-			uint rangeStart,
-			uint rangeStop)
+			string prefix, 
+			string pitLibraryPath, 
+			Pit pit, 
+			Job jobRequest)
 		{
-			var config = new RunConfiguration()
-			{
-				pitFile = pitFile,
-			};
+			var pitFile = pit.Versions[0].Files[0].Name;
 
-			if (seed.HasValue)
-				config.randomSeed = seed.Value;
-
-			if (rangeStop > 0)
+			var job = new Job
 			{
-				config.range = true;
-				config.rangeStart = rangeStart;
-				config.rangeStop = rangeStop;
-			}
-			else if (rangeStart > 0)
-			{
-				config.skipToIteration = rangeStart;
-			}
-
-			var ret = new JobRunner
-			{
-				Guid = System.Guid.NewGuid().ToString().ToLower(),
+				Id = Guid.NewGuid(),
 				Name = Path.GetFileNameWithoutExtension(pitFile),
-				Seed = config.randomSeed,
-				StartDate = config.runDateTime.ToUniversalTime(),
 				Status = JobStatus.StartPending,
-				PitUrl = pitUrl,
-				Range = config.range,
-				RangeStart = config.rangeStart,
-				RangeStop = config.rangeStop,
-				HasMetrics = true,
-				stopwatch = new Stopwatch(),
-				//pauseEvent = new ManualResetEvent(true)
+				StartDate = DateTime.UtcNow,
+				Mode = JobMode.Fuzzing,
+
+				// select only params that we need to start a job
+				Seed = jobRequest.Seed,
+				RangeStart = jobRequest.RangeStart,
+				RangeStop = jobRequest.RangeStop,
 			};
 
-			//ret.thread = new Thread(() => ret.ThreadProc(webLogger, pitLibraryPath, config));
-
-			ret.stopwatch.Start();
-			//ret.thread.Start();
-
-			return ret;
+			var runner = new JobRunner(job, pitFile, pitLibraryPath);
+			runner.Start();
+			return runner;
 		}
 
-		public static JobRunner GetDefault()
+		public void Start()
 		{
-			// TODO: read latest JobRunner state from datastore 
-			return null;
-		}
-
-		public static JobRunner Get(string id)
-		{
-			// TODO: read JobRunner state from datastore based on id
-			return null;
-		}
-
-		public static JobRunner Attach(Peach.Core.Dom.Dom dom, RunConfiguration config)
-		{
-			var ret = new JobRunner()
+			using (var db = new NodeDatabase())
 			{
-				Guid = System.Guid.NewGuid().ToString().ToLower(),
-				Name = Path.GetFileNameWithoutExtension(config.pitFile),
-				Seed = config.randomSeed,
-				StartDate = config.runDateTime.ToUniversalTime(),
-				Status = JobStatus.Running,
-				PitUrl = string.Empty,
-				HasMetrics = dom.tests
-					.Where(t => t.Name == config.runName)
-					.SelectMany(t => t.loggers).Any(l => l is MetricsLogger),
+				db.InsertJob(Job);
+			}
+
+			lock (_mutex)
+			{
+				_jobs.Add(Job.Id, this);
+			}
+		}
+
+		void StartProcess()
+		{
+			var fileName = Utilities.GetAppResourcePath("PeachWorker.exe");
+
+			var args = new[]
+			{
+				"--pits", _pitLibraryPath,
+				"--guid", Job.Id.ToString(),
+				_pitFile,
 			};
 
-			return ret;
+			_process = new Process();
+			_process.StartInfo = new ProcessStartInfo
+			{
+				FileName = fileName,
+				Arguments = string.Join(" ", args),
+				CreateNoWindow = true,
+				UseShellExecute = false,
+				RedirectStandardError = true,
+				RedirectStandardInput = true,
+				RedirectStandardOutput = true,
+				WorkingDirectory = Utilities.ExecutionDirectory,
+			};
+			_process.Start();
+
+			_stderr = new Task(ProcessStdErr);
+			_stderr.Start();
+
+			// wait for prompt
+			_process.StandardOutput.ReadLine();
+
+			_stopwatch.Start();
 		}
+
+		void ProcessStdIn()
+		{
+			_process.StandardInput.WriteLine();
+		}
+
+		void ProcessStdOut()
+		{
+			var prompt = _process.StandardOutput.ReadLine();
+		}
+
+		void ProcessStdErr()
+		{
+			while (!_process.HasExited)
+			{
+				var line = _process.StandardError.ReadLine();
+				Console.WriteLine(line);
+			}
+		}
+
+		public static JobRunner Get(Guid id)
+		{
+			lock (_mutex)
+			{
+				JobRunner ret;
+				_jobs.TryGetValue(id, out ret);
+				return ret;
+			}
+		}
+
+		//public static JobRunner Attach(Peach.Core.Dom.Dom dom, RunConfiguration config)
+		//{
+		//	var ret = new JobRunner()
+		//	{
+		//		Guid = System.Guid.NewGuid().ToString().ToLower(),
+		//		Name = Path.GetFileNameWithoutExtension(config.pitFile),
+		//		Seed = config.randomSeed,
+		//		StartDate = config.runDateTime.ToUniversalTime(),
+		//		Status = JobStatus.Running,
+		//		PitUrl = string.Empty,
+		//		HasMetrics = dom.tests
+		//			.Where(t => t.Name == config.runName)
+		//			.SelectMany(t => t.loggers).Any(l => l is MetricsLogger),
+		//	};
+
+		//	return ret;
+		//}
 
 		//bool shouldStop()
 		//{
@@ -203,7 +191,7 @@ namespace Peach.Pro.Core.WebServices
 		//	{
 		//		try
 		//		{
-		//			stopwatch.Stop();
+		//			_stopwatch.Stop();
 
 		//			lock (this)
 		//			{
@@ -226,7 +214,7 @@ namespace Peach.Pro.Core.WebServices
 		//		}
 		//		finally
 		//		{
-		//			stopwatch.Start();
+		//			_stopwatch.Start();
 		//		}
 		//	}
 
@@ -294,7 +282,7 @@ namespace Peach.Pro.Core.WebServices
 		//	{
 		//		lock (this)
 		//		{
-		//			stopwatch.Stop();
+		//			_stopwatch.Stop();
 
 		//			pauseEvent.Dispose();
 		//			pauseEvent = null;

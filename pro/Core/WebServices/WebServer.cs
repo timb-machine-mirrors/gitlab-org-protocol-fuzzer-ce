@@ -341,7 +341,9 @@ namespace Peach.Pro.Core.WebServices
 					// Windows gives ERROR_SHARING_VIOLATION when port in use
 					// Windows gives ERROR_ALREADY_EXISTS when two http instances are running
 					// Mono raises "Prefix already in use" message
-					if (ex.ErrorCode != ERROR_SHARING_VIOLATION && ex.ErrorCode != ERROR_ALREADY_EXISTS && ex.Message != "Prefix already in use.")
+					if (ex.ErrorCode != ERROR_SHARING_VIOLATION && 
+						ex.ErrorCode != ERROR_ALREADY_EXISTS && 
+						ex.Message != "Prefix already in use.")
 						throw;
 				}
 				catch (SocketException ex)

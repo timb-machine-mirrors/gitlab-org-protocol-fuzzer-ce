@@ -74,7 +74,7 @@ namespace Peach.Pro.Core.WebServices.Models
 	public class Job
 	{
 		[Key]
-		public string Id { get; set; }
+		public Guid Id { get; set; }
 
 		/// <summary>
 		/// The URL of this job
@@ -279,14 +279,11 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// Optional ending iteration number
 		/// </summary>
-		public long RangeStop { get; set; }
+		public long? RangeStop { get; set; }
 
 		/// <summary>
 		/// Indicates if metrics are being collected for the job
 		/// </summary>
 		public bool HasMetrics { get; set; }
-
-		public long StartIteration { get; set; }
-		public long CurrentIteration { get; set; }
 	}
 }

@@ -11,87 +11,15 @@ using Mono.Data.Sqlite;
 using SQLiteConnection = Mono.Data.Sqlite.SqliteConnection;
 #else
 using System.Data.SQLite;
+using System.IO;
 #endif
 
 namespace Peach.Pro.Core.Storage
 {
-	class JobContext : IDisposable
+	internal class JobDatabase : Database
 	{
 		#region SQL
 		const string SqlGetLastRowId = "SELECT last_insert_rowid();";
-		const string SqlSelectJob = @"
-SELECT * 
-FROM [Job] 
-WHERE Id = @Id;
-";
-
-		const string SqlInsertJob = @"
-INSERT INTO [Job] (
-	Id,
-	Status,
-	Mode,
-	Name,
-	Result,
-	Notes,
-	User,
-	Seed,
-	IterationCount,
-	StartDate,
-	StopDate,
-	Runtime,
-	Speed,
-	FaultCount,
-	RangeStart,
-	RangeStop,
-	HasMetrics,
-	StartIteration,
-	CurrentIteration
-) VALUES (
-	@Id,
-	@Status,
-	@Mode,
-	@Name,
-	@Result,
-	@Notes,
-	@User,
-	@Seed,
-	@IterationCount,
-	@StartDate,
-	@StopDate,
-	@Runtime,
-	@Speed,
-	@FaultCount,
-	@RangeStart,
-	@RangeStop,
-	@HasMetrics,
-	@StartIteration,
-	@CurrentIteration
-);";
-
-		const string SqlUpdateJob = @"
-UPDATE [Job]
-SET 
-	Status = @Status,
-	Mode = @Mode,
-	Name = @Name,
-	Result = @Result,
-	Notes = @Notes,
-	User = @User,
-	Seed = @Seed,
-	IterationCount = @IterationCount,
-	StartDate = @StartDate,
-	StopDate = @StopDate,
-	Runtime = @Runtime,
-	Speed = @Speed,
-	FaultCount = @FaultCount,
-	RangeStart = @RangeStart,
-	RangeStop = @RangeStop,
-	HasMetrics = @HasMetrics,
-	StartIteration = @StartIteration,
-	CurrentIteration = @CurrentIteration
-WHERE
-	Id = @Id
-;";
 
 		const string SqlUpsertMutation = @"
 INSERT OR REPLACE INTO Mutation (
@@ -209,12 +137,14 @@ INSERT INTO FaultFile (
 
 		#endregion
 
-		public SQLiteConnection Connection { get; private set; }
-
-		static readonly IEnumerable<Type> EntityTypes = new[]
+		protected override IEnumerable<Type> Schema
 		{
-			// job status
-			typeof(Job),
+			get { return _schema; }
+		}
+
+		static readonly IEnumerable<Type> _schema = new[]
+		{
+			// fault data
 			typeof(FaultDetail),
 			typeof(FaultFile),
 
@@ -225,7 +155,12 @@ INSERT INTO FaultFile (
 			typeof(FaultMetric),
 		};
 
-		static readonly string[] Scripts =
+		protected override IEnumerable<string> Scripts
+		{
+			get { return _scripts; }
+		}
+
+		static readonly string[] _scripts =
 		{
 			Utilities.LoadStringResource(
 				Assembly.GetExecutingAssembly(), 
@@ -233,42 +168,34 @@ INSERT INTO FaultFile (
 			)
 		};
 
-		public JobContext(string dbPath)
+		public JobDatabase(Guid guid)
+			: base(GetDatabasePath(guid))
 		{
-			var init = new SqliteInitializer(dbPath);
-
-			var cnn = "Data Source=\"{0}\";Foreign Keys=True".Fmt(dbPath);
-			Connection = new SQLiteConnection(cnn);
-			Connection.Open();
-
-			init.InitializeDatabase(Connection, EntityTypes, Scripts);
 		}
 
-		public void Dispose()
+		// used by unit tests
+		internal JobDatabase(string path)
+			: base(path)
 		{
-			Connection.Dispose();
 		}
 
-		public Job GetJob(string id)
+		public static string GetStorageDirectory(Guid guid)
 		{
-			return Connection.Query<Job>(SqlSelectJob, new { Id = id })
-				.SingleOrDefault();
+			var config = Utilities.GetUserConfig();
+			var logRoot = config.AppSettings.Settings.Get("LogPath");
+			if (string.IsNullOrEmpty(logRoot))
+				logRoot = Utilities.GetAppResourcePath("db");
+
+			var logPath = System.IO.Path.Combine(logRoot, guid.ToString());
+			if (!Directory.Exists(logPath))
+				Directory.CreateDirectory(logPath);
+
+			return logPath;
 		}
 
-		public void UpsertJob(Job job, bool isNew)
+		static string GetDatabasePath(Guid guid)
 		{
-			Connection.Execute(isNew ? SqlInsertJob : SqlUpdateJob, job);
-		}
-
-		public void UpdateJob(Job job)
-		{
-			Connection.Execute(SqlUpdateJob, job);
-		}
-
-		public IEnumerable<T> LoadTable<T>()
-		{
-			var sql = "SELECT * FROM {0}".Fmt(typeof(T).Name);
-			return Connection.Query<T>(sql);
+			return System.IO.Path.Combine(GetStorageDirectory(guid), "job.db");
 		}
 
 		public void InsertNames(IEnumerable<NamedItem> items)
@@ -347,50 +274,6 @@ INSERT INTO FaultFile (
 		public IEnumerable<FaultTimelineMetric> QueryFaultTimeline()
 		{
 			return Connection.Query<FaultTimelineMetric>("SELECT * FROM ViewFaultTimeline");
-		}
-
-		public static void Dump<T>(IEnumerable<T> data)
-		{
-			var type = typeof(T);
-
-			var columns = type.GetProperties()
-				.Where(pi => !pi.HasAttribute<NotMappedAttribute>())
-				.ToList();
-
-			var maxWidth = new int[columns.Count];
-			var header = new string[columns.Count];
-			var rows = new List<string[]> { header };
-
-			for (var i = 0; i < columns.Count; i++)
-			{
-				var pi = columns[i];
-				header[i] = pi.Name;
-				maxWidth[i] = pi.Name.Length;
-			}
-
-			foreach (var item in data)
-			{
-				var row = new string[columns.Count];
-				var values = columns.Select(pi => pi.GetValue(item, null).ToString())
-					.ToArray();
-				for (var i = 0; i < values.Length; i++)
-				{
-					var value = values[i];
-					row[i] = value;
-					maxWidth[i] = Math.Max(maxWidth[i], value.Length);
-				}
-				rows.Add(row);
-			}
-
-			var fmts = maxWidth
-				.Select((t, i) => "{0},{1}".Fmt(i, t))
-				.Select(fmt => "{" + fmt + "}")
-				.ToList();
-			var finalFmt = string.Join("|", fmts);
-			foreach (object[] row in rows)
-			{
-				Console.WriteLine(finalFmt, row);
-			}
 		}
 	}
 }
