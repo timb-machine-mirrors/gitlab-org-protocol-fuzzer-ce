@@ -20,6 +20,8 @@ app = bld(
 	install_644 = 'peach.xsd',
 )
 
+# samples folder is installed to output dir by ../SDK/wscript_build
+
 if bld.env.MCS and bld.env.DEST_OS != 'win32':
 	app.install_755 = 'peach'
 
