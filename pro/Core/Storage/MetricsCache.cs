@@ -12,7 +12,7 @@ namespace Peach.Pro.Core.Storage
 			readonly Dictionary<string, NamedItem> _map = new Dictionary<string, NamedItem>();
 			List<NamedItem> _pending = new List<NamedItem>();
 
-			public NameCache(JobContext db)
+			public NameCache(JobDatabase db)
 			{
 				_map = db.LoadTable<NamedItem>().ToDictionary(x => x.Name);
 				_lastId = _map.Count + 1;
@@ -38,20 +38,26 @@ namespace Peach.Pro.Core.Storage
 			}
 		}
 
+		readonly JobDatabaseFactory _factory;
 		readonly NameCache _nameCache;
-		readonly string _dbPath;
 		readonly Dictionary<Tuple<long, long>, State> _stateCache;
 		readonly Dictionary<Tuple<long, long>, State> _pendingStates;
 		readonly List<Mutation> _mutations = new List<Mutation>();
 		Mutation _mutation;
 
-		public MetricsCache(string dbPath, JobContext db)
+		public delegate JobDatabase JobDatabaseFactory();
+
+		public MetricsCache(JobDatabaseFactory factory)
 		{
-			_dbPath = dbPath;
-			_nameCache = new NameCache(db);
-			_stateCache = db.LoadTable<State>().ToDictionary(x =>
-				new Tuple<long, long>(x.NameId, x.RunCount));
+			_factory = factory;
 			_pendingStates = new Dictionary<Tuple<long, long>, State>();
+
+			using (var db = _factory())
+			{
+				_nameCache = new NameCache(db);
+				_stateCache = db.LoadTable<State>().ToDictionary(x =>
+					new Tuple<long, long>(x.NameId, x.RunCount));
+			}
 		}
 
 		public void IterationStarting(uint iteration)
@@ -130,11 +136,23 @@ namespace Peach.Pro.Core.Storage
 		{
 			//Console.WriteLine("cache.IterationFinished();");
 
-			using (var db = new JobContext(_dbPath))
+			using (var db = _factory())
 			{
-				db.InsertNames(_nameCache.Flush());
-				db.UpsertStates(_pendingStates.Values);
-				db.UpsertMutations(_mutations);
+				using (var xact = db.Connection.BeginTransaction())
+				{
+					try
+					{
+						db.InsertNames(_nameCache.Flush());
+						db.UpsertStates(_pendingStates.Values);
+						db.UpsertMutations(_mutations);
+						xact.Commit();
+					}
+					catch (Exception)
+					{
+						xact.Rollback();
+						throw;
+					}
+				}
 			}
 
 			_pendingStates.Clear();
@@ -148,25 +166,37 @@ namespace Peach.Pro.Core.Storage
 			//	fault.MinorHash,
 			//	fault.Timestamp);
 
-			using (var db = new JobContext(_dbPath))
+			using (var db = _factory())
 			{
-				db.InsertNames(_nameCache.Flush());
-				db.UpsertStates(_pendingStates.Values);
-				var faults = _mutations.Select(x => new FaultMetric
+				using (var xact = db.Connection.BeginTransaction())
 				{
-					Iteration = fault.Iteration,
-					MajorHash = fault.MajorHash,
-					MinorHash = fault.MinorHash,
-					Timestamp = fault.Timestamp,
-					Hour = fault.Hour,
-					StateId = x.StateId,
-					ActionId = x.ActionId,
-					ParameterId = x.ParameterId,
-					ElementId = x.ElementId,
-					MutatorId = x.MutatorId,
-					DatasetId = x.DatasetId,
-				});
-				db.InsertFaultMetrics(faults);
+					try
+					{
+						db.InsertNames(_nameCache.Flush());
+						db.UpsertStates(_pendingStates.Values);
+						var faults = _mutations.Select(x => new FaultMetric
+						{
+							Iteration = fault.Iteration,
+							MajorHash = fault.MajorHash,
+							MinorHash = fault.MinorHash,
+							Timestamp = fault.Timestamp,
+							Hour = fault.Hour,
+							StateId = x.StateId,
+							ActionId = x.ActionId,
+							ParameterId = x.ParameterId,
+							ElementId = x.ElementId,
+							MutatorId = x.MutatorId,
+							DatasetId = x.DatasetId,
+						});
+						db.InsertFaultMetrics(faults);
+						xact.Commit();
+					}
+					catch (Exception)
+					{
+						xact.Rollback();
+						throw;
+					}
+				}
 			}
 
 			_pendingStates.Clear();

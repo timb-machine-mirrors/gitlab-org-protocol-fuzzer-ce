@@ -18,35 +18,20 @@ namespace Peach.Pro.Core.Storage
 {
 	class SqliteInitializer
 	{
-		static SqliteInitializer()
-		{
-			//SQLiteLog.Enabled = true;
-			//SQLiteLog.Log += (s, e) => Console.WriteLine("SQLiteLog: {0}", e.Message);
-		}
-
-		readonly bool _dbExists;
-
-		public SqliteInitializer(string dbPath)
-		{
-			var fi = new FileInfo(dbPath);
-			_dbExists = fi.Exists && fi.Length > 0;
-		}
-
-		public void InitializeDatabase(
+		public static void InitializeDatabase(
 			SQLiteConnection cnn,
 			IEnumerable<Type> types,
 			IEnumerable<string> scripts)
 		{
-			if (_dbExists)
-				return;
-
 			using (var xact = cnn.BeginTransaction())
 			{
 				try
 				{
-					CreateDatabase(cnn, types);
+					if (types != null)
+						CreateDatabase(cnn, types);
 
-					scripts.ForEach(x => cnn.Execute(x));
+					if (scripts != null)
+						scripts.ForEach(x => cnn.Execute(x));
 
 					xact.Commit();
 				}
@@ -81,7 +66,7 @@ namespace Peach.Pro.Core.Storage
 		const string ForeignKeyTmpl = "    CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})";
 		const string IndexTmpl = "CREATE{0}INDEX {1} ON {2} ({3});";
 
-		void CreateDatabase(SQLiteConnection cnn, IEnumerable<Type> types)
+		static void CreateDatabase(SQLiteConnection cnn, IEnumerable<Type> types)
 		{
 			var indicies = new Dictionary<string, Index>();
 

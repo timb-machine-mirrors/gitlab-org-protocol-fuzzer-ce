@@ -17,23 +17,21 @@ namespace Peach.Pro.Core.WebServices
 			Get["/{id}"] = _ => GetNode(_.id);
 		}
 
-		object GetNodes()
+		Response GetNodes()
 		{
-			return new[] { MakeNode() };
+			return Response.AsJson(new[] { MakeNode() });
 		}
 
-		object GetNode(string id)
+		Response GetNode(string id)
 		{
 			if (id != NodeGuid)
 				return HttpStatusCode.NotFound;
 
-			return MakeNode();
+			return Response.AsJson(MakeNode());
 		}
 
 		Node MakeNode()
 		{
-			var job = JobRunner.GetDefault();
-			var jobUrl = job != null ? JobService.Prefix + "/" + job.Guid : null;
 			return new Node
 			{
 				NodeUrl = Prefix + "/" + NodeGuid,
@@ -44,7 +42,7 @@ namespace Peach.Pro.Core.WebServices
 				Status = NodeStatus.Alive,
 				Version = Assembly.GetExecutingAssembly().GetName().Version.ToString(),
 				Timestamp = DateTime.UtcNow,
-				JobUrl = jobUrl,
+				JobUrl = JobService.Prefix,
 			};
 		}
 	}

@@ -34,12 +34,12 @@ namespace Peach.Pro.Core.WebServices
 			Get["/{id}/calls"] = _ => GetPitCalls(_.id);
 		}
 
-		object GetPits()
+		Response GetPits()
 		{
-			return PitDatabase.Entries.ToArray();
+			return Response.AsJson(PitDatabase.Entries.ToArray());
 		}
 
-		object GetPit(string id)
+		Response GetPit(string id)
 		{
 			var pit = PitDatabase.GetPitById(id);
 			if (pit == null)
@@ -54,11 +54,11 @@ namespace Peach.Pro.Core.WebServices
 					Peach.Core.Platform.GetOS().ToString().ToLower()
 				)
 			};
-			return pit;
+			return Response.AsJson(pit);
 		}
 
 		// Deprecated
-		object GetPitConfig(string id)
+		Response GetPitConfig(string id)
 		{
 			var ret = new PitConfig
 			{
@@ -67,11 +67,11 @@ namespace Peach.Pro.Core.WebServices
 			};
 			if (ret.Config == null)
 				return HttpStatusCode.NotFound;
-			return ret;
+			return Response.AsJson(ret);
 		}
 
 		// Deprecated
-		object GetPitAgents(string id)
+		Response GetPitAgents(string id)
 		{
 			var ret = new PitAgents
 			{
@@ -80,19 +80,19 @@ namespace Peach.Pro.Core.WebServices
 			};
 			if (ret.Agents == null)
 				return HttpStatusCode.NotFound;
-			return ret;
+			return Response.AsJson(ret);
 		}
 
 		// Deprecated
-		object GetPitCalls(string id)
+		Response GetPitCalls(string id)
 		{
 			var calls = PitDatabase.GetCallsById(id);
 			if (calls == null)
 				return HttpStatusCode.NotFound;
-			return calls;
+			return Response.AsJson(calls);
 		}
 
-		object CopyPit()
+		Response CopyPit()
 		{
 			var data = this.Bind<PitCopy>();
 			var newUrl = "";
@@ -123,11 +123,11 @@ namespace Peach.Pro.Core.WebServices
 			pit.Config = PitDatabase.GetConfigByUrl(newUrl);
 			pit.Agents = PitDatabase.GetAgentsByUrl(newUrl);
 			pit.Calls = PitDatabase.GetCallsByUrl(newUrl);
-			return pit;
+			return Response.AsJson(pit);
 		}
 
 		// Deprecated
-		object PostPitConfig(string id)
+		Response PostPitConfig(string id)
 		{
 			var pit = PitDatabase.GetPitById(id);
 			if (pit == null)
@@ -140,11 +140,11 @@ namespace Peach.Pro.Core.WebServices
 
 			var data = this.Bind<PitConfig>();
 			PitDatabase.SaveConfig(pit, data.Config);
-			return data;
+			return Response.AsJson(data);
 		}
 
 		// Deprecated
-		object PostPitAgents(string id)
+		Response PostPitAgents(string id)
 		{
 			var pit = PitDatabase.GetPitById(id);
 			if (pit == null)
@@ -157,10 +157,10 @@ namespace Peach.Pro.Core.WebServices
 
 			var data = this.Bind<PitAgents>();
 			PitDatabase.SaveAgents(pit, data.Agents);
-			return data;
+			return Response.AsJson(data);
 		}
 
-		object PostPit(string id)
+		Response PostPit(string id)
 		{
 			var pit = PitDatabase.GetPitById(id);
 			if (pit == null)

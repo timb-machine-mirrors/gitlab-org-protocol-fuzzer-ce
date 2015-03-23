@@ -28,30 +28,6 @@ namespace Peach.Pro.Core.WebServices
 			get { return _context.PitLibraryPath; }
 		}
 
-		//protected object Mutex
-		//{
-		//	get
-		//	{
-		//		return _context.Mutex;
-		//	}
-		//}
-
-		//protected WebLogger Logger
-		//{
-		//	get
-		//	{
-		//		return context.Logger;
-		//	}
-		//}
-
-		//protected JobRunner Runner
-		//{
-		//	get
-		//	{
-		//		return _context.Runner;
-		//	}
-		//}
-
 		//protected PitTester Tester
 		//{
 		//	get { return _context.Tester; }

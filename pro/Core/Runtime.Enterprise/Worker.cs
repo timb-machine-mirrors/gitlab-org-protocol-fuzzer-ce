@@ -12,204 +12,173 @@ using Peach.Core.Runtime;
 using Peach.Pro.Core.WebServices;
 using System.IO;
 using Peach.Pro.Core.Storage;
+using Peach.Pro.Core.WebServices.Models;
 
 namespace Peach.Pro.Core.Runtime.Enterprise
 {
-	public class Worker
+	public class Worker : Program
 	{
-		OptionSet _options;
 		string _pitLibraryPath;
 		string _query;
 		Guid? _guid;
 		bool _shouldStop;
-		Exception _caught;
 		readonly RunConfiguration _config = new RunConfiguration();
 		readonly ManualResetEvent _pausedEvt = new ManualResetEvent(true);
+		uint? _start = null;
+		uint? _stop = null;
+		uint? _seed = null;
 
 		public Worker()
 		{
 			_config.shouldStop = ShouldStop;
 		}
 
-		public int Run(string[] args)
+		protected override void AddCustomOptions(OptionSet options)
 		{
-			try
-			{
-				_Run(args);
-				return 0;
-			}
-			catch (OptionException ex)
-			{
-				return ReportError(true, ex);
-			}
-			catch (SyntaxException ex)
-			{
-				return ReportError(ex.ShowUsage, ex);
-			}
-			catch (Exception ex)
-			{
-				if (GetLogLevel() == LogLevel.Trace)
-					Console.Error.WriteLine(ex.InnerException ?? ex);
-				else
-					Console.Error.WriteLine(ex.InnerException != null ?
-						ex.InnerException.Message : ex.Message);
-				return 1;
-			}
+			options.Add(
+				"pits=",
+				"The path to the pit library",
+				v => _pitLibraryPath = v
+			);
+			options.Add(
+				"guid=",
+				"The guid that identifies a job",
+				(Guid v) => _guid = v
+			);
+			options.Add(
+				"seed=",
+				"The seed used by the random number generator",
+				(uint v) => _seed = v
+			);
+			options.Add(
+				"start=",
+				"The iteration to start fuzzing",
+				(uint v) => _start = v
+			);
+			options.Add(
+				"stop=",
+				"The iteration to stop fuzzing",
+				(uint v) => _stop = v
+			);
+			options.Add(
+				"query=",
+				v => _query = v
+			);
 		}
 
-		private int ReportError(bool showUsage, Exception ex)
+		protected override void ConfigureLogging()
 		{
-			if (!string.IsNullOrEmpty(ex.Message))
-			{
-				Console.Error.WriteLine(ex.Message);
-				Console.Error.WriteLine();
-			}
-			if (showUsage)
-				ShowUsage();
-			return string.IsNullOrEmpty(ex.Message) ? 0 : 2;
-		}
-
-		private LogLevel GetLogLevel()
-		{
-			switch (_config.debug)
-			{
-				case 0:
-					return LogLevel.Info;
-				case 1:
-					return LogLevel.Debug;
-				default:
-					return LogLevel.Trace;
-			}
-		}
-
-		private void _Run(IEnumerable<string> args)
-		{
-			AssertWriter.Register();
-
-			if (!Runtime.Program.VerifyCompatibility())
-				throw new PeachException("");
-
-			uint? start = null;
-			uint? stop = null;
-			uint? seed = null;
-
-			_options = new OptionSet
-			{
-				{
-					"h|help", 
-					"Display this help and exit",
-					v => { throw new SyntaxException(true); }
-				},
-				{
-					"V|version", 
-					"Display version information and exit",
-					v => ShowVersion()
-				},
-				{
-					"v|verbose", 
-					"Increase verbosity, can use multiple times",
-					v => _config.debug++
-				},
-				{ 
-					"pits=", 
-					"The path to the pit library",
-					v => _pitLibraryPath = v
-				},
-				{ 
-					"guid=", 
-					"The guid that identifies a job",
-					(Guid v) => _guid = v
-				},
-				{ 
-					"seed=", 
-					"The seed used by the random number generator",
-					(uint v) => seed = v
-				},
-				{ 
-					"start=", 
-					"The iteration to start fuzzing",
-					(uint v) => start = v
-				},
-				{ 
-					"stop=", 
-					"The iteration to stop fuzzing",
-					(uint v) => stop = v
-				},
-				{
-					"query=",
-					v => _query = v
-				},
-			};
-
-			var extra = _options.Parse(args);
-
 			// Override logging so that we force messages to stderr instead of stdout
 			var consoleTarget = new ConsoleTarget
 			{
 				Layout = "${logger} ${message}",
 				Error = true,
 			};
-			var rule = new LoggingRule("*", GetLogLevel(), consoleTarget);
+			var rule = new LoggingRule("*", LogLevel, consoleTarget);
 
 			var nconfig = new LoggingConfiguration();
 			nconfig.RemoveTarget("console");
 			nconfig.AddTarget("console", consoleTarget);
 			nconfig.LoggingRules.Add(rule);
 			LogManager.Configuration = nconfig;
+		}
 
-			// Load the platform assembly
-			Runtime.Program.LoadPlatformAssembly();
-
-			if (string.IsNullOrEmpty(_pitLibraryPath))
-				throw new SyntaxException("The '--pits' argument is required.");
-			if (!seed.HasValue)
-				throw new SyntaxException("The '--seed' argument is required.");
-			if (!start.HasValue)
-				throw new SyntaxException("The '--start' argument is required.");
-
+		protected override void OnRun(List<string> args)
+		{
 			if (!_guid.HasValue)
-				_guid = Guid.NewGuid();
-
-			if (stop.HasValue)
-			{
-				_config.range = true;
-				_config.rangeStart = start.Value;
-				_config.rangeStop = stop.Value;
-			}
-			else
-			{
-				_config.skipToIteration = start.Value;
-			}
+				throw new SyntaxException("The '--guid' argument is required.");
 
 			if (!string.IsNullOrEmpty(_query))
 			{
 				RunQuery();
+				return;
+			}
+
+			if (string.IsNullOrEmpty(_pitLibraryPath))
+				throw new SyntaxException("The '--pits' argument is required.");
+
+			if (args.Count == 0)
+				throw new SyntaxException("Missing <pit> argument.");
+
+			_config.pitFile = args.First();
+
+			Job job;
+
+			if (_start.HasValue)
+				job = CreateJobFromArgs();
+			else
+				job = ResumeJob();
+
+			RunJob(job);
+		}
+
+		Job CreateJobFromArgs()
+		{
+			if (_seed.HasValue)
+				_config.randomSeed = _seed.Value;
+
+			if (_stop.HasValue)
+			{
+				_config.range = true;
+				_config.rangeStart = _start.Value;
+				_config.rangeStop = _stop.Value;
 			}
 			else
 			{
-				RunJob(extra);
+				_config.skipToIteration = _start.Value;
+			}
+
+			var job = new Job
+			{
+				Id = _guid.Value,
+				Name = Path.GetFileNameWithoutExtension(_config.pitFile),
+				RangeStart = _config.rangeStart,
+				RangeStop = _config.rangeStop,
+				IterationCount = 0,
+				Seed = _config.randomSeed,
+				StartDate = DateTime.UtcNow,
+				HasMetrics = true,
+			};
+
+			using (var db = new NodeDatabase())
+			{
+				db.InsertJob(job);
+			}
+
+			return job;
+		}
+
+		Job ResumeJob()
+		{
+			using (var db = new NodeDatabase())
+			{
+				var job = db.GetJob(_guid.Value);
+
+				if (job.Seed.HasValue)
+					_config.randomSeed = (uint)job.Seed.Value;
+
+				if (job.RangeStop.HasValue)
+				{
+					_config.range = true;
+					_config.rangeStart = (uint)job.RangeStart + (uint)job.IterationCount;
+					_config.rangeStop = (uint)job.RangeStop.Value;
+				}
+				else
+				{
+					_config.skipToIteration = (uint)job.RangeStart + (uint)job.IterationCount;
+				}
+
+				return job;
 			}
 		}
 
-		private void ShowUsage()
+		protected override string UsageLine
 		{
-			var name = Assembly.GetEntryAssembly().GetName();
-
-			var usage = new[]
+			get
 			{
-				"ShowUsage: {0} [OPTION]... <pit> [<name>]".Fmt(name.Name),
-				"Valid options:",
-			};
-
-			Console.WriteLine(string.Join(Environment.NewLine, usage));
-			_options.WriteOptionDescriptions(Console.Out);
-		}
-
-		private void ShowVersion()
-		{
-			var name = Assembly.GetEntryAssembly().GetName();
-			Console.WriteLine("{0}: ShowVersion {1}".Fmt(name.Name, name.Version));
-			throw new SyntaxException();
+				var name = Assembly.GetEntryAssembly().GetName();
+				return "Usage: {0} [OPTION]... <pit> [<name>]".Fmt(name.Name);
+			}
 		}
 
 		private bool ShouldStop()
@@ -218,17 +187,8 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			return _shouldStop;
 		}
 
-		public void RunJob(IList<string> extra)
+		public void RunJob(Job job)
 		{
-			if (extra.Count == 0)
-				throw new SyntaxException("Missing <pit> argument.");
-
-			if (extra.Count > 0)
-				_config.pitFile = extra[0];
-
-			if (extra.Count > 1)
-				_config.runName = extra[1];
-
 			var pitConfig = _config.pitFile + ".config";
 			var defs = PitDatabase.ParseConfig(_pitLibraryPath, pitConfig);
 			var args = new Dictionary<string, object>();
@@ -237,28 +197,19 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			var parser = new Godel.Core.GodelPitParser();
 			var dom = parser.asParser(args, _config.pitFile);
 
+			// REVIEW: is this required?
 			foreach (var test in dom.tests)
 			{
 				test.loggers.Clear();
 			}
 
-			var engine = new Engine(new JobWatcher(_guid.Value));
+			var engine = new Engine(new JobWatcher(job));
 			var engineTask = Task.Factory.StartNew(() =>
 			{
-				try
-				{
-					engine.startFuzzing(dom, _config);
-				}
-				catch (Exception ex)
-				{
-					_caught = ex;
-				}
+				engine.startFuzzing(dom, _config);
 			});
 
 			Loop(engineTask);
-
-			if (_caught != null)
-				throw new Exception("Engine exception", _caught);
 
 			Console.WriteLine("Done");
 		}
@@ -271,7 +222,11 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 				var readerTask = Task.Factory.StartNew<string>(Console.ReadLine);
 				var index = Task.WaitAny(engineTask, readerTask);
 				if (index == 0)
+				{
+					// this causes any unhandled exceptions to be thrown
+					engineTask.Wait();
 					return;
+				}
 
 				switch (readerTask.Result)
 				{
@@ -310,34 +265,30 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 
 		private void RunQuery()
 		{
-			var logRoot = Utilities.GetAppResourcePath("db");
-			var logPath = Path.Combine(logRoot, _guid.ToString());
-			var dbPath = Path.Combine(logPath, "peach.db");
-
-			using (var db = new JobContext(dbPath))
+			using (var db = new JobDatabase(_guid.Value))
 			{
 				switch (_query.ToLower())
 				{
 					case "states":
-						db.QueryStates();
+						Database.Dump(db.QueryStates());
 						break;
 					case "iterations":
-						db.QueryIterations();
+						Database.Dump(db.QueryIterations());
 						break;
 					case "buckets":
-						db.QueryBuckets();
+						Database.Dump(db.QueryBuckets());
 						break;
 					case "buckettimeline":
-						db.QueryBucketTimeline();
+						Database.Dump(db.QueryBucketTimeline());
 						break;
 					case "mutators":
-						db.QueryMutators();
+						Database.Dump(db.QueryMutators());
 						break;
 					case "elements":
-						db.QueryElements();
+						Database.Dump(db.QueryElements());
 						break;
 					case "datasets":
-						db.QueryDatasets();
+						Database.Dump(db.QueryDatasets());
 						break;
 				}
 			}

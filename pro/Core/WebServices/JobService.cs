@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using Nancy;
 using Nancy.ModelBinding;
 using Peach.Pro.Core.WebServices.Models;
+using Peach.Core;
+using Peach.Pro.Core.Storage;
+using System.Linq;
 
 namespace Peach.Pro.Core.WebServices
 {
@@ -15,8 +18,10 @@ namespace Peach.Pro.Core.WebServices
 		{
 			Get[""] = _ => GetJobs();
 			Get["/{id}"] = _ => GetJob(_.id);
+			Delete["/{id}"] = _ => DeleteJob(_.id);
 			Get["/{id}/nodes"] = _ => GetNodes(_.id);
 			Get["/{id}/faults"] = _ => GetFaults(_.id);
+			// deprecated
 			Get["/{id}/visualizer"] = _ => GetVisualizer(_.id);
 
 			Post[""] = _ => CreateJob();
@@ -27,7 +32,7 @@ namespace Peach.Pro.Core.WebServices
 			Get["/{id}/kill"] = _ => KillJob(_.id);
 		}
 
-		object CreateJob()
+		Response CreateJob()
 		{
 			var job = this.Bind<Job>();
 			if (string.IsNullOrEmpty(job.PitUrl))
@@ -37,77 +42,96 @@ namespace Peach.Pro.Core.WebServices
 			if (pit == null)
 				return HttpStatusCode.NotFound;
 
-			var runner = JobRunner.Run(
-				PitLibraryPath,
-				pit.Versions[0].Files[0].Name,
-				pit.PitUrl,
-				(uint?)job.Seed,
-				(uint)job.RangeStart,
-				(uint)job.RangeStop
-			);
-
-			return MakeJob(runner);
+			var runner = JobRunner.Run(Prefix, PitLibraryPath, pit, job);
+			return Response.AsJson(runner.Job);
 		}
 
-		object PauseJob(string id)
+		Response DeleteJob(Guid id)
 		{
-			return QueryJob(id, r => r.Pause() ? HttpStatusCode.OK : HttpStatusCode.Forbidden);
+			var runner = JobRunner.Get(id);
+			if (runner != null)
+				return HttpStatusCode.Forbidden;
+
+			using (var db = new NodeDatabase())
+			{
+				var job = db.GetJob(id);
+				if (job == null)
+					return HttpStatusCode.NotFound;
+
+				db.DeleteJob(id);
+				return HttpStatusCode.OK;
+			}
 		}
 
-		object ContinueJob(string id)
+		Response PauseJob(Guid id)
 		{
-			return QueryJob(id, r => r.Continue() ? HttpStatusCode.OK : HttpStatusCode.Forbidden);
+			return QueryJob(id, r => { r.Pause(); return HttpStatusCode.OK; });
 		}
 
-		object StopJob(string id)
+		Response ContinueJob(Guid id)
 		{
-			return QueryJob(id, r => r.Stop() ? HttpStatusCode.OK : HttpStatusCode.Forbidden);
+			return QueryJob(id, r => { r.Continue(); return HttpStatusCode.OK; });
 		}
 
-		object KillJob(string id)
+		Response StopJob(Guid id)
 		{
-			return QueryJob(id, r => r.Kill() ? HttpStatusCode.OK : HttpStatusCode.Forbidden);
+			return QueryJob(id, r => { r.Stop(); return HttpStatusCode.OK; });
 		}
 
-		object GetJobs()
+		Response KillJob(Guid id)
 		{
-			// TODO: return list of jobs from datastore
-			return null;
-
-			//lock (Mutex)
-			//{
-			//	if (Runner == null)
-			//		return new Job[0];
-
-			//	return new[] { MakeJob() };
-			//}
+			return QueryJob(id, r => { r.Kill(); return HttpStatusCode.OK; });
 		}
 
-		object GetJob(string id)
+		Response GetNodes(Guid id)
 		{
-			return QueryJob(id, MakeJob);
+			return QueryJob(id, x => Response.AsJson(new[] { NodeService.Prefix + "/" + NodeGuid }));
 		}
 
-		object GetNodes(string id)
+		Response GetJobs()
 		{
-			return QueryJob(id, x => new[] { NodeService.Prefix + "/" + NodeGuid });
+			using (var db = new NodeDatabase())
+			{
+				var jobs = db.LoadTable<Job>();
+				return Response.AsJson(jobs.Select(x => LoadJob(x)));
+			}
 		}
 
-		object GetFaults(string id)
+		Response GetJob(Guid id)
 		{
-			// TODO: read faults from datastore
-			return null;
-			//return QueryJob(id, () => Logger.Faults);
+			using (var db = new NodeDatabase())
+			{
+				var job = db.GetJob(id);
+				if (job == null)
+					return HttpStatusCode.NotFound;
+				return Response.AsJson(LoadJob(job));
+			}
 		}
 
-		object GetVisualizer(string id)
+		Response GetFaults(Guid id)
 		{
-			// TODO: read visulizer from datastore
-			return null;
-			//return QueryJob(id, () => Logger.Visualizer);
+			using (var db = new NodeDatabase())
+			{
+				var job = db.GetJob(id);
+				if (job == null)
+					return HttpStatusCode.NotFound;
+			}
+
+			using (var db = new JobDatabase(id))
+			{
+				var faults = db.LoadTable<FaultDetail>()
+					.OfType<FaultSummary>();
+				return Response.AsJson(faults);
+			}
 		}
 
-		object QueryJob(string id, Func<JobRunner, object> query)
+		[Obsolete]
+		Response GetVisualizer(Guid id)
+		{
+			return HttpStatusCode.NotImplemented;
+		}
+
+		Response QueryJob(Guid id, Func<JobRunner, Response> query)
 		{
 			var runner = JobRunner.Get(id);
 			if (runner == null)
@@ -115,77 +139,118 @@ namespace Peach.Pro.Core.WebServices
 			return query(runner);
 		}
 
-		/// <summary>
-		/// Make a job record.
-		/// </summary>
-		/// <returns>The resultant job record.</returns>
-		Job MakeJob(JobRunner runner)
+		Job LoadJob(Job job)
 		{
-			var elapsed = runner.Runtime;
+			var id = job.Id.ToString();
 
-			//var group = new Group
-			//{
-			//	Access = GroupAccess.Read | GroupAccess.Write,
-			//	GroupUrl = "",
-			//};
+			job.JobUrl = MakeUrl(id);
+			job.FaultsUrl = MakeUrl(id, "faults");
+			job.TargetUrl = "";
+			job.TargetConfigUrl = "";
+			job.NodesUrl = MakeUrl(id, "nodes");
+			job.PeachUrl = "";
+			job.ReportUrl = "";
+			job.PackageFileUrl = "";
 
-			// TODO: read current job status from datastore
-
-			var job = new Job
+			job.Commands = new JobCommands
 			{
-				JobUrl = Prefix + "/" + runner.Guid,
-				FaultsUrl = Prefix + "/" + runner.Guid + "/faults",
-				TargetUrl = "",
-				TargetConfigUrl = "",
-				NodesUrl = Prefix + "/" + runner.Guid + "/nodes",
-				PitUrl = runner.PitUrl,
-				PeachUrl = "",
-				ReportUrl = "",
-				PackageFileUrl = "",
-
-				Commands = new JobCommands
-				{
-					StopUrl = Prefix + "/" + runner.Guid + "/stop",
-					ContinueUrl = Prefix + "/" + runner.Guid + "/continue",
-					PauseUrl = Prefix + "/" + runner.Guid + "/pause",
-					KillUrl = Prefix + "/" + runner.Guid + "/kill",
-				},
-
-				Metrics = new JobMetrics
-				{
-					BucketTimeline = Prefix + "/" + runner.Guid + "/metrics/bucketTimeline",
-					FaultTimeline = Prefix + "/" + runner.Guid + "/metrics/faultTimeline",
-					Mutators = Prefix + "/" + runner.Guid + "/metrics/mutators",
-					Elements = Prefix + "/" + runner.Guid + "/metrics/elements",
-					States = Prefix + "/" + runner.Guid + "/metrics/states",
-					Dataset = Prefix + "/" + runner.Guid + "/metrics/dataset",
-					Buckets = Prefix + "/" + runner.Guid + "/metrics/buckets",
-					Iterations = Prefix + "/" + runner.Guid + "/metrics/iterations",
-				},
-
-				Status = runner.Status,
-				//Mode = Logger.Mode,
-				Name = runner.Name,
-				Notes = "",
-				User = Environment.UserName,
-				Seed = runner.Seed,
-				//IterationCount = Logger.CurrentIteration,
-				StartDate = runner.StartDate,
-				Runtime = (uint)elapsed.TotalSeconds,
-				//Speed = (uint)((Logger.CurrentIteration - Logger.StartIteration) / elapsed.TotalHours),
-				//FaultCount = Logger.FaultCount,
-				//Tags = new List<Tag>(),
-				//Groups = new List<Group>(new[] { group }),
-				HasMetrics = runner.HasMetrics,
+				StopUrl = MakeUrl(id, "stop"),
+				ContinueUrl = MakeUrl(id, "continue"),
+				PauseUrl = MakeUrl(id, "pause"),
+				KillUrl = MakeUrl(id, "kill"),
 			};
 
-			if (runner.Status == JobStatus.Stopped)
+			job.Metrics = new JobMetrics
 			{
-				job.StopDate = runner.StopDate;
-				job.Result = runner.Result;
-			}
+				BucketTimeline = MakeUrl(id, "metrics", "bucketTimeline"),
+				FaultTimeline = MakeUrl(id, "metrics", "faultTimeline"),
+				Mutators = MakeUrl(id, "metrics", "mutators"),
+				Elements = MakeUrl(id, "metrics", "elements"),
+				States = MakeUrl(id, "metrics", "states"),
+				Dataset = MakeUrl(id, "metrics", "dataset"),
+				Buckets = MakeUrl(id, "metrics", "buckets"),
+				Iterations = MakeUrl(id, "metrics", "iterations"),
+			};
 
 			return job;
 		}
+
+		static string MakeUrl(params string[] args)
+		{
+			return string.Join("/", Prefix, string.Join("/", args));
+		}
+
+		///// <summary>
+		///// Make a job record.
+		///// </summary>
+		///// <returns>The resultant job record.</returns>
+		//Job LoadJob(JobRunner runner)
+		//{
+		//var elapsed = runner.Runtime;
+
+		//var group = new Group
+		//{
+		//	Access = GroupAccess.Read | GroupAccess.Write,
+		//	GroupUrl = "",
+		//};
+
+		// TODO: read current job status from datastore
+
+		//var job = new Job
+		//{
+		//	JobUrl = Prefix + "/" + runner.Guid,
+		//	FaultsUrl = Prefix + "/" + runner.Guid + "/faults",
+		//	TargetUrl = "",
+		//	TargetConfigUrl = "",
+		//	NodesUrl = Prefix + "/" + runner.Guid + "/nodes",
+		//	PitUrl = runner.PitUrl,
+		//	PeachUrl = "",
+		//	ReportUrl = "",
+		//	PackageFileUrl = "",
+
+		//	Commands = new JobCommands
+		//	{
+		//		StopUrl = Prefix + "/" + runner.Guid + "/stop",
+		//		ContinueUrl = Prefix + "/" + runner.Guid + "/continue",
+		//		PauseUrl = Prefix + "/" + runner.Guid + "/pause",
+		//		KillUrl = Prefix + "/" + runner.Guid + "/kill",
+		//	},
+
+		//	Metrics = new JobMetrics
+		//	{
+		//		BucketTimeline = Prefix + "/" + runner.Guid + "/metrics/bucketTimeline",
+		//		FaultTimeline = Prefix + "/" + runner.Guid + "/metrics/faultTimeline",
+		//		Mutators = Prefix + "/" + runner.Guid + "/metrics/mutators",
+		//		Elements = Prefix + "/" + runner.Guid + "/metrics/elements",
+		//		States = Prefix + "/" + runner.Guid + "/metrics/states",
+		//		Dataset = Prefix + "/" + runner.Guid + "/metrics/dataset",
+		//		Buckets = Prefix + "/" + runner.Guid + "/metrics/buckets",
+		//		Iterations = Prefix + "/" + runner.Guid + "/metrics/iterations",
+		//	},
+
+		//	//Status = runner.Status,
+		//	//Mode = Logger.Mode,
+		//	//Name = runner.Name,
+		//	Notes = "",
+		//	User = Environment.UserName,
+		//	//Seed = runner.Seed,
+		//	//IterationCount = Logger.CurrentIteration,
+		//	StartDate = runner.StartDate,
+		//	Runtime = (uint)elapsed.TotalSeconds,
+		//	//Speed = (uint)((Logger.CurrentIteration - Logger.StartIteration) / elapsed.TotalHours),
+		//	//FaultCount = Logger.FaultCount,
+		//	//Tags = new List<Tag>(),
+		//	//Groups = new List<Group>(new[] { group }),
+		//	//HasMetrics = runner.HasMetrics,
+		//};
+
+		//if (runner.Status == JobStatus.Stopped)
+		//{
+		//	job.StopDate = runner.StopDate;
+		//	job.Result = runner.Result;
+		//}
+
+		//return job;
+		//}
 	}
 }

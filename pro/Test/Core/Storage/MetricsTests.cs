@@ -20,146 +20,143 @@ namespace Peach.Pro.Test.Core.Storage
 			_tmp = new TempFile();
 			_now = DateTime.UtcNow;
 
-			using (var db = new JobContext(_tmp.Path))
+			var cache = new MetricsCache(() => new JobDatabase(_tmp.Path));
+
+			cache.IterationStarting(1);
+			cache.StateStarting("S1", 1);
+			cache.StateStarting("S2", 1);
+			cache.ActionStarting("A1");
+			cache.ActionStarting("A2");
+			cache.DataMutating("P1", "E1", "M1", "D1");
+			cache.ActionStarting("A3");
+			cache.StateStarting("S3", 1);
+			cache.ActionStarting("A3");
+			cache.DataMutating("P1", "E1", "M1", "D1");
+			cache.DataMutating("P2", "E2", "M2", "D2");
+			cache.IterationFinished();
+
+			cache.IterationStarting(2);
+			cache.StateStarting("S1", 1);
+			cache.StateStarting("S2", 1);
+			cache.ActionStarting("A1");
+			cache.ActionStarting("A2");
+			cache.DataMutating("P1", "E1", "M3", "D1");
+			cache.IterationFinished();
+
+			// simulate a reproducing iteration
+			cache.IterationStarting(2);
+			cache.StateStarting("S1", 1);
+			cache.StateStarting("S2", 1);
+			cache.ActionStarting("A1");
+			cache.ActionStarting("A2");
+			cache.DataMutating("P1", "E1", "M3", "D1");
+			// no iteration because we're reproducing
+
+			// reproduce on iteration 1
+			cache.IterationStarting(1);
+			cache.StateStarting("S1", 1);
+			cache.StateStarting("S2", 1);
+			cache.ActionStarting("A1");
+			cache.ActionStarting("A2");
+			cache.DataMutating("P1", "E1", "M1", "D1");
+			cache.ActionStarting("A3");
+			cache.StateStarting("S3", 1);
+			cache.ActionStarting("A3");
+			cache.OnFault(new FaultMetric
 			{
-				var cache = new MetricsCache(_tmp.Path, db);
+				Iteration = 1,
+				MajorHash = "AAA",
+				MinorHash = "BBB",
+				Timestamp = _now,
+				Hour = _now.Hour,
+			});
 
-				cache.IterationStarting(1);
-				cache.StateStarting("S1", 1);
-				cache.StateStarting("S2", 1);
-				cache.ActionStarting("A1");
-				cache.ActionStarting("A2");
-				cache.DataMutating("P1", "E1", "M1", "D1");
-				cache.ActionStarting("A3");
-				cache.StateStarting("S3", 1);
-				cache.ActionStarting("A3");
-				cache.DataMutating("P1", "E1", "M1", "D1");
-				cache.DataMutating("P2", "E2", "M2", "D2");
-				cache.IterationFinished();
+			cache.IterationStarting(3);
+			cache.StateStarting("S3", 1);
+			cache.ActionStarting("A3");
+			cache.DataMutating("P3", "E3", "M3", "D3");
+			cache.IterationFinished();
+			cache.OnFault(new FaultMetric
+			{
+				Iteration = 3,
+				MajorHash = "AAA",
+				MinorHash = "BBB",
+				Timestamp = _now,
+				Hour = _now.Hour,
+			});
 
-				cache.IterationStarting(2);
-				cache.StateStarting("S1", 1);
-				cache.StateStarting("S2", 1);
-				cache.ActionStarting("A1");
-				cache.ActionStarting("A2");
-				cache.DataMutating("P1", "E1", "M3", "D1");
-				cache.IterationFinished();
+			cache.IterationStarting(4);
+			cache.StateStarting("S4", 1);
+			cache.ActionStarting("A4");
+			cache.DataMutating("P4", "E4", "M4", "D4");
+			cache.IterationFinished();
 
-				// simulate a reproducing iteration
-				cache.IterationStarting(2);
-				cache.StateStarting("S1", 1);
-				cache.StateStarting("S2", 1);
-				cache.ActionStarting("A1");
-				cache.ActionStarting("A2");
-				cache.DataMutating("P1", "E1", "M3", "D1");
-				// no iteration because we're reproducing
+			// repro iteration 4
+			cache.IterationStarting(4);
+			cache.StateStarting("S4", 1);
+			cache.ActionStarting("A4");
+			cache.DataMutating("P4", "E4", "M4", "D4");
+			cache.ActionStarting("A5");
+			cache.DataMutating("P4", "E5", "M4", "D4");
+			cache.OnFault(new FaultMetric
+			{
+				Iteration = 4,
+				MajorHash = "XXX",
+				MinorHash = "YYY",
+				Timestamp = _now + TimeSpan.FromHours(1),
+				Hour = _now.Hour + 1,
+			});
 
-				// reproduce on iteration 1
-				cache.IterationStarting(1);
-				cache.StateStarting("S1", 1);
-				cache.StateStarting("S2", 1);
-				cache.ActionStarting("A1");
-				cache.ActionStarting("A2");
-				cache.DataMutating("P1", "E1", "M1", "D1");
-				cache.ActionStarting("A3");
-				cache.StateStarting("S3", 1);
-				cache.ActionStarting("A3");
-				cache.OnFault(new FaultMetric
-				{
-					Iteration = 1,
-					MajorHash = "AAA",
-					MinorHash = "BBB",
-					Timestamp = _now,
-					Hour = _now.Hour,
-				});
+			cache.IterationStarting(5);
+			cache.StateStarting("S5", 1);
+			cache.ActionStarting("A5");
+			cache.DataMutating("P5", "E5", "M5", "D5");
+			cache.StateStarting("S5", 2);
+			cache.ActionStarting("A5");
+			cache.DataMutating("P5", "E5", "M5", "D5");
+			cache.IterationFinished();
+			cache.OnFault(new FaultMetric
+			{
+				Iteration = 5,
+				MajorHash = "AAA",
+				MinorHash = "YYY",
+				Timestamp = _now + TimeSpan.FromHours(2),
+				Hour = _now.Hour + 2,
+			});
 
-				cache.IterationStarting(3);
-				cache.StateStarting("S3", 1);
-				cache.ActionStarting("A3");
-				cache.DataMutating("P3", "E3", "M3", "D3");
-				cache.IterationFinished();
-				cache.OnFault(new FaultMetric
-				{
-					Iteration = 3,
-					MajorHash = "AAA",
-					MinorHash = "BBB",
-					Timestamp = _now,
-					Hour = _now.Hour,
-				});
+			cache.IterationStarting(6);
+			cache.StateStarting("S3", 1);
+			cache.ActionStarting("A3");
+			cache.DataMutating("P3", "E3", "M3", "D3");
+			cache.IterationFinished();
+			cache.OnFault(new FaultMetric
+			{
+				Iteration = 6,
+				MajorHash = "AAA",
+				MinorHash = "BBB",
+				Timestamp = _now + TimeSpan.FromHours(3),
+				Hour = _now.Hour + 3,
+			});
 
-				cache.IterationStarting(4);
-				cache.StateStarting("S4", 1);
-				cache.ActionStarting("A4");
-				cache.DataMutating("P4", "E4", "M4", "D4");
-				cache.IterationFinished();
+			cache.IterationStarting(7);
+			cache.StateStarting("S3", 1);
+			cache.ActionStarting("A3");
+			cache.DataMutating("P3", "E3", "M3", "D3");
+			cache.IterationFinished();
 
-				// repro iteration 4
-				cache.IterationStarting(4);
-				cache.StateStarting("S4", 1);
-				cache.ActionStarting("A4");
-				cache.DataMutating("P4", "E4", "M4", "D4");
-				cache.ActionStarting("A5");
-				cache.DataMutating("P4", "E5", "M4", "D4");
-				cache.OnFault(new FaultMetric
-				{
-					Iteration = 4,
-					MajorHash = "XXX",
-					MinorHash = "YYY",
-					Timestamp = _now + TimeSpan.FromHours(1),
-					Hour = _now.Hour + 1,
-				});
-
-				cache.IterationStarting(5);
-				cache.StateStarting("S5", 1);
-				cache.ActionStarting("A5");
-				cache.DataMutating("P5", "E5", "M5", "D5");
-				cache.StateStarting("S5", 2);
-				cache.ActionStarting("A5");
-				cache.DataMutating("P5", "E5", "M5", "D5");
-				cache.IterationFinished();
-				cache.OnFault(new FaultMetric
-				{
-					Iteration = 5,
-					MajorHash = "AAA",
-					MinorHash = "YYY",
-					Timestamp = _now + TimeSpan.FromHours(2),
-					Hour = _now.Hour + 2,
-				});
-
-				cache.IterationStarting(6);
-				cache.StateStarting("S3", 1);
-				cache.ActionStarting("A3");
-				cache.DataMutating("P3", "E3", "M3", "D3");
-				cache.IterationFinished();
-				cache.OnFault(new FaultMetric
-				{
-					Iteration = 6,
-					MajorHash = "AAA",
-					MinorHash = "BBB",
-					Timestamp = _now + TimeSpan.FromHours(3),
-					Hour = _now.Hour + 3,
-				});
-
-				cache.IterationStarting(7);
-				cache.StateStarting("S3", 1);
-				cache.ActionStarting("A3");
-				cache.DataMutating("P3", "E3", "M3", "D3");
-				cache.IterationFinished();
-
-				cache.IterationStarting(8);
-				cache.StateStarting("S3", 1);
-				cache.ActionStarting("A3");
-				cache.DataMutating("P3", "E3", "M3", "D3");
-				cache.IterationFinished();
-				cache.OnFault(new FaultMetric
-				{
-					Iteration = 8,
-					MajorHash = "XXX",
-					MinorHash = "YYY",
-					Timestamp = _now + TimeSpan.FromHours(4),
-					Hour = _now.Hour + 4,
-				});
-			}
+			cache.IterationStarting(8);
+			cache.StateStarting("S3", 1);
+			cache.ActionStarting("A3");
+			cache.DataMutating("P3", "E3", "M3", "D3");
+			cache.IterationFinished();
+			cache.OnFault(new FaultMetric
+			{
+				Iteration = 8,
+				MajorHash = "XXX",
+				MinorHash = "YYY",
+				Timestamp = _now + TimeSpan.FromHours(4),
+				Hour = _now.Hour + 4,
+			});
 		}
 
 		[TearDown]
@@ -171,7 +168,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryStates()
 		{
-			using (var db = new JobContext(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path))
 			{
 				AssertResult(db.QueryStates(), new[]
 				{
@@ -188,7 +185,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryIterations()
 		{
-			using (var db = new JobContext(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path))
 			{
 				AssertResult(db.QueryIterations(), new[]
 				{
@@ -207,7 +204,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryBuckets()
 		{
-			using (var db = new JobContext(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path))
 			{
 				AssertResult(db.QueryBuckets(), new[]
 				{
@@ -224,7 +221,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryBucketTimeline()
 		{
-			using (var db = new JobContext(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path))
 			{
 				var data = db.QueryBucketTimeline();
 				AssertResult(data, new[]
@@ -239,7 +236,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryMutator()
 		{
-			using (var db = new JobContext(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path))
 			{
 				var data = db.QueryMutators();
 				AssertResult(data, new[]
@@ -256,7 +253,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryElement()
 		{
-			using (var db = new JobContext(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path))
 			{
 				AssertResult(db.QueryElements(), new[]
 				{
@@ -275,7 +272,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryDataset()
 		{
-			using (var db = new JobContext(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path))
 			{
 				AssertResult(db.QueryDatasets(), new[]
 				{
@@ -291,7 +288,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryFaultTimeline()
 		{
-			using (var db = new JobContext(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path))
 			{
 				AssertResult(db.QueryFaultTimeline(), new[]
 				{
@@ -309,7 +306,7 @@ namespace Peach.Pro.Test.Core.Storage
 			var actualList = actual.ToList();
 			var expectedList = expected.ToList();
 
-			JobContext.Dump(actualList);
+			Database.Dump(actualList);
 
 			Assert.AreEqual(expectedList.Count, actualList.Count, "Rows mismatch");
 

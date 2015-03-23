@@ -23,69 +23,34 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 
 	class JobWatcher : Watcher
 	{
-		readonly Guid _guid;
-		readonly string _dbPath;
+		readonly Job _job;
 		readonly string _logPath;
+		readonly MetricsCache _cache;
 		readonly List<Fault.State> _states = new List<Fault.State>();
 		Fault _reproFault;
-		Job _job;
 
-		readonly MetricsCache _cache;
-
-		public JobWatcher(Guid guid)
+		public JobWatcher(Job job)
 		{
-			_guid = guid;
-
-			var config = Utilities.GetUserConfig();
-			var logRoot = config.AppSettings.Settings.Get("LogPath");
-			if (string.IsNullOrEmpty(logRoot))
-				logRoot = Utilities.GetAppResourcePath("db");
-
-			_logPath = Path.Combine(logRoot, _guid.ToString());
-			Directory.CreateDirectory(_logPath);
-
-			_dbPath = Path.Combine(_logPath, "peach.db");
-
-			using (var db = new JobContext(_dbPath))
-			{
-				_cache = new MetricsCache(_dbPath, db);
-			}
+			_job = job;
+			_logPath = JobDatabase.GetStorageDirectory(_job.Id);
+			_cache = new MetricsCache(() => new JobDatabase(_job.Id));
 		}
 
 		protected override void Engine_TestStarting(RunContext context)
 		{
-			using (var db = new JobContext(_dbPath))
+			using (var db = new NodeDatabase())
 			{
-				bool isNew = false;
-
-				_job = db.GetJob(_guid.ToString());
-				if (_job == null)
-				{
-					isNew = true;
-					_job = new Job
-					{
-						Id = _guid.ToString(),
-						Name = Path.GetFileNameWithoutExtension(context.config.pitFile),
-						RangeStart = context.config.rangeStart,
-						RangeStop = context.config.rangeStart,
-						IterationCount = 0,
-						Seed = context.config.randomSeed,
-						StartDate = DateTime.UtcNow,
-						HasMetrics = true,
-					};
-				}
-
-				_job.StartIteration = context.currentIteration;
 				_job.Mode = JobMode.Fuzzing;
 				_job.Status = JobStatus.Running;
+				_job.Seed = context.config.randomSeed;
 
-				db.UpsertJob(_job, isNew);
+				db.UpdateJob(_job);
 			}
 		}
 
 		protected override void Engine_TestFinished(RunContext context)
 		{
-			using (var db = new JobContext(_dbPath))
+			using (var db = new NodeDatabase())
 			{
 				_job.Mode = JobMode.Fuzzing;
 				_job.StopDate = DateTime.UtcNow;
@@ -101,7 +66,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			_cache.IterationStarting(context.currentIteration);
 
 			// TODO: rate throttle
-			using (var db = new JobContext(_dbPath))
+			using (var db = new NodeDatabase())
 			{
 				if (context.reproducingFault)
 				{
@@ -114,12 +79,10 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 					{
 						_job.Mode = JobMode.Searching;
 					}
-					_job.CurrentIteration = context.reproducingInitialIteration;
 				}
 				else
 				{
 					_job.Mode = JobMode.Fuzzing;
-					_job.CurrentIteration = currentIteration;
 				}
 
 				db.UpdateJob(_job);
@@ -131,7 +94,15 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			if (!context.reproducingFault &&
 				!context.controlIteration &&
 				!context.controlRecordingIteration)
+			{
 				_cache.IterationFinished();
+
+				using (var db = new NodeDatabase())
+				{
+					_job.IterationCount++;
+					db.UpdateJob(_job);
+				}
+			}
 		}
 
 		protected override void Engine_Fault(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faults)
@@ -420,7 +391,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 				catch (IOException) { }
 			}
 
-			using (var db = new JobContext(_dbPath))
+			using (var db = new JobDatabase(_job.Id))
 			{
 				db.InsertFault(entity);
 				_cache.OnFault(new FaultMetric
