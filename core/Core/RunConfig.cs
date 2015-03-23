@@ -69,7 +69,8 @@ namespace Peach.Core
 		/// <summary>
 		/// Enable or disable debugging output
 		/// </summary>
-		public int debug = 0;
+		[Obsolete]
+		public int debug { get; set; }
 
 		/// <summary>
 		/// Name of run to perform

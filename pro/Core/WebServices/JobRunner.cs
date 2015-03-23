@@ -6,7 +6,6 @@ using Peach.Core;
 using Peach.Pro.Core.Loggers;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.Core.Storage;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 
@@ -25,16 +24,15 @@ namespace Peach.Pro.Core.WebServices
 		}
 
 		static object _mutex = new object();
-		static Dictionary<Guid, JobRunner> _jobs = new Dictionary<Guid, JobRunner>();
+		static JobRunner _instance;
 
 		//static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
-		Stopwatch _stopwatch = new Stopwatch();
 		Process _process;
 		Task _stderr;
-		string _pitFile;
-		string _pitLibraryPath;
-		BlockingCollection<Command> _requestQueue = new BlockingCollection<Command>();
+		readonly string _pitFile;
+		readonly string _pitLibraryPath;
+		readonly BlockingCollection<Command> _requestQueue = new BlockingCollection<Command>();
 
 		public JobRunner(Job job, string pitFile, string pitLibraryPath)
 		{
@@ -99,7 +97,7 @@ namespace Peach.Pro.Core.WebServices
 
 			lock (_mutex)
 			{
-				_jobs.Add(Job.Id, this);
+				_instance = this;
 			}
 		}
 
@@ -114,17 +112,19 @@ namespace Peach.Pro.Core.WebServices
 				_pitFile,
 			};
 
-			_process = new Process();
-			_process.StartInfo = new ProcessStartInfo
+			_process = new Process
 			{
-				FileName = fileName,
-				Arguments = string.Join(" ", args),
-				CreateNoWindow = true,
-				UseShellExecute = false,
-				RedirectStandardError = true,
-				RedirectStandardInput = true,
-				RedirectStandardOutput = true,
-				WorkingDirectory = Utilities.ExecutionDirectory,
+				StartInfo = new ProcessStartInfo
+				{
+					FileName = fileName,
+					Arguments = string.Join(" ", args),
+					CreateNoWindow = true,
+					UseShellExecute = false,
+					RedirectStandardError = true,
+					RedirectStandardInput = true,
+					RedirectStandardOutput = true,
+					WorkingDirectory = Utilities.ExecutionDirectory,
+				}
 			};
 			_process.Start();
 
@@ -133,8 +133,6 @@ namespace Peach.Pro.Core.WebServices
 
 			// wait for prompt
 			_process.StandardOutput.ReadLine();
-
-			_stopwatch.Start();
 		}
 
 		void ProcessStdIn()
@@ -160,9 +158,10 @@ namespace Peach.Pro.Core.WebServices
 		{
 			lock (_mutex)
 			{
-				JobRunner ret;
-				_jobs.TryGetValue(id, out ret);
-				return ret;
+				//JobRunner ret;
+				//_jobs.TryGetValue(id, out ret);
+				//return ret;
+				return null;
 			}
 		}
 
