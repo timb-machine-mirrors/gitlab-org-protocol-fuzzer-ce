@@ -6,13 +6,12 @@ using System.Linq;
 using Newtonsoft.Json;
 using Peach.Core;
 using Peach.Core.Dom;
+using Peach.Core.IO;
+using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices.Models;
 using Encoding = System.Text.Encoding;
-using Fault = Peach.Core.Fault;
-using Peach.Pro.Core.Storage;
-using Peach.Core.IO;
 
-namespace Peach.Pro.Core.Runtime.Enterprise
+namespace Peach.Pro.Core.Runtime
 {
 	public enum Category
 	{

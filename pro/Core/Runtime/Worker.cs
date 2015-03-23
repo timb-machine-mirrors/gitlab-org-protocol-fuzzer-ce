@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,12 +10,11 @@ using NLog.Targets;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Runtime;
-using Peach.Pro.Core.WebServices;
-using System.IO;
 using Peach.Pro.Core.Storage;
+using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 
-namespace Peach.Pro.Core.Runtime.Enterprise
+namespace Peach.Pro.Core.Runtime
 {
 	public class Worker : Program
 	{
@@ -24,9 +24,9 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 		bool _shouldStop;
 		readonly RunConfiguration _config = new RunConfiguration();
 		readonly ManualResetEvent _pausedEvt = new ManualResetEvent(true);
-		uint? _start = null;
-		uint? _stop = null;
-		uint? _seed = null;
+		uint? _start;
+		uint? _stop;
+		uint? _seed;
 
 		public Worker()
 		{
@@ -204,10 +204,7 @@ namespace Peach.Pro.Core.Runtime.Enterprise
 			}
 
 			var engine = new Engine(new JobWatcher(job));
-			var engineTask = Task.Factory.StartNew(() =>
-			{
-				engine.startFuzzing(dom, _config);
-			});
+			var engineTask = Task.Factory.StartNew(() => engine.startFuzzing(dom, _config));
 
 			Loop(engineTask);
 

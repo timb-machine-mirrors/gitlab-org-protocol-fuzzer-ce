@@ -1,11 +1,10 @@
-﻿using NLog;
+﻿using System.IO;
+using NLog;
 using Peach.Core;
 using Peach.Core.Runtime;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace Peach.Pro.Core.Runtime
 {
@@ -123,6 +122,8 @@ namespace Peach.Pro.Core.Runtime
 
 				var extra = _options.Parse(args);
 
+				ConfigureLogging();
+
 				LoadPlatformAssembly();
 
 				OnRun(extra);
@@ -139,11 +140,7 @@ namespace Peach.Pro.Core.Runtime
 			}
 			catch (Exception ex)
 			{
-				if (LogLevel == LogLevel.Trace)
-					Console.Error.WriteLine(ex.InnerException ?? ex);
-				else
-					Console.Error.WriteLine(ex.InnerException != null ?
-						ex.InnerException.Message : ex.Message);
+				ReportError(false, ex);
 				return 1;
 			}
 		}
@@ -152,6 +149,8 @@ namespace Peach.Pro.Core.Runtime
 
 		protected virtual void ConfigureLogging()
 		{
+			// Enable debugging if asked for
+			// If configuration was already done by a .config file, nothing will be changed
 			Utilities.ConfigureLogging(_verbosity);
 		}
 
@@ -198,13 +197,19 @@ namespace Peach.Pro.Core.Runtime
 
 		protected virtual int ReportError(bool showUsage, Exception ex)
 		{
-			if (!string.IsNullOrEmpty(ex.Message))
-			{
+			if (ex.InnerException != null)
+				ex = ex.InnerException;
+
+			if (_verbosity > 0)
+				Console.Error.WriteLine(ex);
+			else if (!string.IsNullOrEmpty(ex.Message))
 				Console.Error.WriteLine(ex.Message);
-				Console.Error.WriteLine();
-			}
+	
+			Console.Error.WriteLine();
+
 			if (showUsage)
 				ShowUsage();
+	
 			return string.IsNullOrEmpty(ex.Message) ? 0 : 2;
 		}
 
@@ -240,6 +245,27 @@ namespace Peach.Pro.Core.Runtime
 			var name = Assembly.GetEntryAssembly().GetName();
 			Console.WriteLine("{0}: Version {1}".Fmt(name.Name, name.Version));
 			throw new SyntaxException();
+		}
+
+		protected string FindPitLibrary(string pitLibraryPath)
+		{
+			if (pitLibraryPath == null)
+			{
+				var lib = Utilities.GetAppResourcePath("pits");
+				if (!Directory.Exists(lib))
+					throw new PeachException(
+						"Could not locate the Peach Pit Library.\r\n" +
+						"Ensure there is a 'pits' folder in your Peach installation directory or\r\n" +
+						"specify the location of the Peach Pit Library using the '--pits' " +
+						"command line option.");
+				return lib;
+			}
+
+			if (!Directory.Exists(pitLibraryPath))
+				throw new PeachException(
+					"The specified Peach Pit Library location '{0}' does not exist.".Fmt(
+						pitLibraryPath));
+			return pitLibraryPath;
 		}
 	}
 }

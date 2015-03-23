@@ -32,12 +32,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using Godel.Core;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Analyzers;
 using Peach.Core.Runtime;
+using Peach.Pro.Core.WebServices;
 using SharpPcap;
-using Version = System.Version;
 
 namespace Peach.Pro.Core.Runtime
 {
@@ -77,9 +78,13 @@ namespace Peach.Pro.Core.Runtime
 		/// </summary>
 		public int ExitCode = 1;
 
-		private string _analyzer = null;
-		private string _agent = null;
-		private bool _test = false;
+		private string _analyzer;
+		private string _agent;
+		private bool _test;
+		private Uri _webUri;
+		private string _pitLibraryPath;
+		private bool _noweb;
+		private bool _nobrowser;
 
 		#region Public Properties
 
@@ -88,7 +93,7 @@ namespace Peach.Pro.Core.Runtime
 		/// </summary>
 		public virtual string Copyright
 		{
-			get { return "Copyright (c) Michael Eddington"; }
+			get { return "Copyright (c) Deja vu Security"; }
 		}
 
 		/// <summary>
@@ -96,7 +101,7 @@ namespace Peach.Pro.Core.Runtime
 		/// </summary>
 		public virtual string ProductName
 		{
-			get { return "Peach v" + Assembly.GetExecutingAssembly().GetName().Version; }
+			get { return "Peach Pro v" + Assembly.GetExecutingAssembly().GetName().Version; }
 		}
 
 		#endregion
@@ -133,12 +138,12 @@ namespace Peach.Pro.Core.Runtime
 				"Enable debug messages. " + 
 				"Useful when debugging your Peach Pit file. " +
 				"Warning: Messages are very cryptic sometimes.",
-				v => _config.debug = 1
+				v => _verbosity = 1
 			);
 			options.Add(
 				"trace",
  				"Enable even more verbose debug messages.",
-				v => _config.debug = 2
+				v => _verbosity = 2
 			);
 			options.Add(
 				"range=", 
@@ -171,7 +176,7 @@ namespace Peach.Pro.Core.Runtime
 				"D|define=",
 				"Define a substitution value. " +
 				"In your PIT you can specify ##KEY## and it will be replaced with VALUE.",
-				v => AddNewDefine(v)
+				AddNewDefine
 			);
 			options.Add(
 				"definedvalues=", 
@@ -204,6 +209,23 @@ namespace Peach.Pro.Core.Runtime
 				"makexsd", 
 				"Generate peach.xsd",
 				var => MakeSchema()
+			);
+
+			// web ui
+			options.Add(
+				"pits=",
+				"The path to the pit library.",
+				v => _pitLibraryPath = v
+			);
+			options.Add(
+				"noweb",
+				"Disable the Peach web interface.",
+				v => _noweb = true
+			);
+			options.Add(
+				"nobrowser",
+				"Disable launching browser on start.",
+				v => _nobrowser = true
 			);
 		}
 
@@ -252,13 +274,6 @@ namespace Peach.Pro.Core.Runtime
 				Console.ForegroundColor = DefaultForground;
 				Console.WriteLine();
 
-				// Enable debugging if asked for
-				// If configuration was already done by a .config file, nothing will be changed
-				Utilities.ConfigureLogging(_config.debug);
-
-				// Load the platform assembly
-				LoadPlatformAssembly();
-
 				if (_agent != null)
 				{
 					OnRunAgent(_agent, args);
@@ -271,34 +286,9 @@ namespace Peach.Pro.Core.Runtime
 				{
 					OnRunJob(_test, args);
 				}
-
-				ExitCode = 0;
-			}
-			catch (ArgumentException ae)
-			{
-				Console.WriteLine(ae.Message + " " + ae.ParamName + "\n");
-				Console.WriteLine("Use -h for help");
-			}
-			catch (SyntaxException)
-			{
-				// Ignore, thrown by syntax()
-			}
-			catch (OptionException oe)
-			{
-				Console.WriteLine(oe.Message + "\n");
-			}
-			catch (PeachException ee)
-			{
-				if (_config.debug > 0)
-					Console.WriteLine(ee);
-				else
-					Console.WriteLine(ee.Message + "\n");
 			}
 			finally
 			{
-				// HACK - Required on Mono with NLog 2.0
-				Utilities.ConfigureLogging(-1);
-
 				// Reset console colors
 				Console.ForegroundColor = DefaultForground;
 			}
@@ -311,11 +301,29 @@ namespace Peach.Pro.Core.Runtime
 
 		protected virtual Watcher GetUIWatcher()
 		{
-			return new ConsoleWatcher();
+			try
+			{
+				if (_verbosity > 0)
+					return new ConsoleWatcher();
+
+				// Ensure console is interactive
+				Console.Clear();
+
+				var title = _webUri == null ? "" : " ({0})".Fmt(_webUri);
+
+				return new ConsoleWatcher(title);
+
+			}
+			catch (IOException)
+			{
+				return new ConsoleWatcher();
+			}
 		}
 
 		protected virtual Analyzer GetParser()
 		{
+			var parser = new GodelPitParser();
+			Analyzer.defaultParser = parser;
 			return Analyzer.defaultParser;
 		}
 
@@ -324,9 +332,35 @@ namespace Peach.Pro.Core.Runtime
 		/// </summary>
 		protected virtual void RunEngine(Peach.Core.Dom.Dom dom)
 		{
-			var e = new Engine(GetUIWatcher());
+			if (_noweb)
+			{
+				var e = new Engine(GetUIWatcher());
+				e.startFuzzing(dom, _config);
+				return;
+			}
 
-			e.startFuzzing(dom, _config);
+			// Pass an empty pit library path if we are running a job off of
+			// the command line.
+
+			using (var svc = new WebServer(""))
+			{
+				// Tell the web service the job is running off the command line
+				//JobRunner.Attach(dom, _config);
+
+				svc.Start();
+
+				_webUri = svc.Uri;
+
+				Runtime.ConsoleWatcher.WriteInfoMark();
+				Console.WriteLine("Web site running at: {0}", svc.Uri);
+
+				// Add the web logger as the 1st logger to each test
+				//foreach (var test in dom.tests)
+				//	test.loggers.Insert(0, svc.Context.Logger);
+
+				var e = new Engine(GetUIWatcher());
+				e.startFuzzing(dom, _config);
+			}
 		}
 
 		/// <summary>
@@ -386,48 +420,63 @@ namespace Peach.Pro.Core.Runtime
 		/// <param name="extra">Extra command line options</param>
 		protected virtual void OnRunJob(bool test, List<string> extra)
 		{
-			Console.CancelKeyPress += Console_CancelKeyPress;
-
-			if (extra.Count == 0)
-				Syntax();
-
 			if (extra.Count > 0)
-				_config.pitFile = extra[0];
-
-			if (extra.Count > 1)
-				_config.runName = extra[1];
-
-			AddNewDefine("Peach.Cwd=" + Environment.CurrentDirectory);
-			AddNewDefine("Peach.Pwd=" + Utilities.ExecutionDirectory);
-
-			// Do we have pit.xml.config file?
-			// If so load it as the first defines file.
-			if (extra.Count > 0 && File.Exists(extra[0]) &&
-				extra[0].ToLower().EndsWith(".xml") &&
-				File.Exists(extra[0] + ".config"))
 			{
-				_configFiles.Insert(0, extra[0] + ".config");
+				// Pit was specified on the command line, do normal behavior
+				// Ensure the EULA has been accepted before running a job
+				// on the command line.  The WebUI will present a EULA
+				// in the later case.
+
+				if (!License.EulaAccepted)
+					ShowEula();
+
+				Console.CancelKeyPress += Console_CancelKeyPress;
+
+				if (extra.Count > 0)
+					_config.pitFile = extra[0];
+
+				if (extra.Count > 1)
+					_config.runName = extra[1];
+
+				AddNewDefine("Peach.Cwd=" + Environment.CurrentDirectory);
+				AddNewDefine("Peach.Pwd=" + Utilities.ExecutionDirectory);
+
+				// Do we have pit.xml.config file?
+				// If so load it as the first defines file.
+				if (extra.Count > 0 && File.Exists(extra[0]) &&
+					extra[0].ToLower().EndsWith(".xml") &&
+					File.Exists(extra[0] + ".config"))
+				{
+					_configFiles.Insert(0, extra[0] + ".config");
+				}
+
+				var defs = ParseDefines();
+
+				var parserArgs = new Dictionary<string, object>();
+				parserArgs[PitParser.DEFINED_VALUES] = defs;
+
+				var parser = GetParser();
+
+				if (test)
+				{
+					ConsoleWatcher.WriteInfoMark();
+					Console.Write("Validating file [" + _config.pitFile + "]... ");
+					parser.asParserValidation(parserArgs, _config.pitFile);
+					Console.WriteLine("No Errors Found.");
+				}
+				else
+				{
+					var dom = parser.asParser(parserArgs, _config.pitFile);
+
+					RunEngine(dom);
+				}
 			}
-
-			var defs = ParseDefines();
-
-			var parserArgs = new Dictionary<string, object>();
-			parserArgs[PitParser.DEFINED_VALUES] = defs;
-
-			var parser = GetParser();
-
-			if (test)
+			else if (!_noweb)
 			{
-				ConsoleWatcher.WriteInfoMark();
-				Console.Write("Validating file [" + _config.pitFile + "]... ");
-				parser.asParserValidation(parserArgs, _config.pitFile);
-				Console.WriteLine("No Errors Found.");
-			}
-			else
-			{
-				var dom = parser.asParser(parserArgs, _config.pitFile);
+				// Ensure pit library exists
+				var pits = FindPitLibrary(_pitLibraryPath);
 
-				RunEngine(dom);
+				WebServer.Run(pits, !_nobrowser);
 			}
 		}
 
@@ -457,7 +506,7 @@ namespace Peach.Pro.Core.Runtime
 				}
 			}
 
-			return ret;
+			return PitDefines.Evaluate(ret);
 		}
 
 		/// <summary>
@@ -467,20 +516,20 @@ namespace Peach.Pro.Core.Runtime
 		{
 			const string syntax1 =
 @"This is the Peach Runtime.  The Peach Runtime is one of the many ways
-to use Peach Pit files.  Currently this runtime is still in development
+to use Peach XML files.  Currently this runtime is still in development
 but already exposes several abilities to the end-user such as performing
-simple fuzzer runs and performing parsing tests of Peach Pit files.
+simple fuzzer runs and performing parsing tests of Peach XML files.
 
 Please submit any bugs to https://forums.peachfuzzer.com.
 
 Syntax:
 
-  peach -a CHANNEL
-  peach -c PIT [TEST]
-  peach [--skipto #] PIT [TEST]
-  peach -p 10,2 [--skipto #] PIT [TEST]
-  peach --range 100,200 PIT [TEST]
-  peach -t PIT
+  peach -a channel
+  peach -c peach_xml_file [test_name]
+  peach [--skipto #] peach_xml_flie [test_name]
+  peach -p 10,2 [--skipto #] peach_xml_file [test_name]
+  peach --range 100,200 peach_xml_file [test_name]
+  peach -t peach_xml_file
 ";
 			const string syntax2 = @"
 Peach Web Interface
@@ -492,30 +541,30 @@ Peach Web Interface
 
 Peach Agent
 
-  Syntax: peach -a CHANNEL
+  Syntax: peach -a channel
   
-  Starts up a Peach Agent instance on the current machine.  User must provide
+  Starts up a Peach Agent instance on this current machine.  User must provide
   a channel/protocol name (e.g. tcp).
 
-  Note: Local agents are implicitly started.
+  Note: Local agents are started automatically.
 
 Performing Fuzzing Run
 
-  Syntax: peach PIT [TEST]
-  Syntax: peach --skipto 1234 PIT [TEST]
-  Syntax: peach --range 100,200 PIT [TEST]
+  Syntax: peach peach_xml_flie [test_name]
+  Syntax: peach --skipto 1234 peach_xml_flie [test_name]
+  Syntax: peach --range 100,200 peach_xml_flie [test_name]
   
-  To start a fuzzing run, specify the Peach Pit file and optionally, the
+  A fuzzing run is started by by specifying the Peach XML file and the
   name of a test to perform.
   
-  The --skipto parameter is useful for resuming a run in case it was interrupted
-  for any reason.  This parameter accepts the test # to resume.
+  If a run is interupted for some reason it can be restarted using the
+  --skipto parameter and providing the test # to start at.
   
   Additionally a range of test cases can be specified using --range.
 
 Performing A Parellel Fuzzing Run
 
-  Syntax: peach -p 10,2 PIT [TEST]
+  Syntax: peach -p 10,2 peach_xml_flie [test_name]
 
   A parallel fuzzing run uses multiple machines to perform the same fuzzing
   which shortens the time required.  To run in parallel mode we will need
@@ -523,25 +572,57 @@ Performing A Parellel Fuzzing Run
   information is fed into Peach via the " + "\"-p\"" + @" command line argument in the
   format " + "\"total_machines,our_machine\"." + @"
 
-Validate Peach Pit File
+Validate Peach XML File
 
-  Syntax: peach -t PIT
+  Syntax: peach -t peach_xml_file
   
-  This will perform a parsing pass of the Peach Pit file and display any
+  This will perform a parsing pass of the Peach XML file and display any
   errors that are found.
 
-Debug Peach Pit File
+Debug Peach XML File
 
-  Syntax: peach -1 --debug PIT
+  Syntax: peach -1 --debug peach_xml_file
   
   This will perform a single iteration (-1) of your pit file while displaying
   alot of debugging information (--debug).  The debugging information was
   origionally intended just for the developers, but can be usefull in pit
   debugging as well.
 ";
+
 			Console.WriteLine(syntax1);
 			_options.WriteOptionDescriptions(Console.Out);
 			Console.WriteLine(syntax2);
+		}
+
+		private void ShowEula()
+		{
+			Console.WriteLine(License.EulaText());
+
+			Console.WriteLine(@"
+BY TYPING ""YES"" YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTAND, AND
+AGREE TO BE BOUND BY THE TERMS ABOVE.
+");
+
+			while (true)
+			{
+				Console.WriteLine("Do you accept the end user license agreement?");
+
+				Console.Write("(yes/no) ");
+				var answer = Console.ReadLine();
+				Console.WriteLine();
+
+				if (answer == "no")
+					Environment.Exit(-1);
+
+				if (answer == "yes")
+				{
+					License.EulaAccepted = true;
+					return;
+				}
+
+				Console.WriteLine("The answer \"{0}\" is invalid. It must be one of \"yes\" or \"no\".", answer);
+				Console.WriteLine();
+			}
 		}
 
 		#region Command line option parsing helpers
@@ -659,7 +740,7 @@ Debug Peach Pit File
 
 		static void ShowEnvironment()
 		{
-			Peach.Core.Usage.Print();
+			Usage.Print();
 			throw new SyntaxException();
 		}
 
@@ -702,25 +783,9 @@ Debug Peach Pit File
 			// Need to call Environment.Exit from outside this event handler
 			// to ensure the finalizers get called...
 			// http://www.codeproject.com/Articles/16164/Managed-Application-Shutdown
-			new Thread(delegate()
-			{
-				Environment.Exit(0);
-			}).Start();
+			new Thread(() => Environment.Exit(0)).Start();
 
 			System.Diagnostics.Debug.Assert(th != null);
-
-			// TODO: Eventually move to use Thread.Abort() since it will properly cleanup!
-
-			// Don't use a lambda here because we don't want it to get jitted
-			// in the ctrl-c handler
-			// new Thread(StopperThread).Start(th);
-		}
-
-		private static void StopperThread(object param)
-		{
-			((Thread)param).Abort();
 		}
 	}
 }
-
-// end
