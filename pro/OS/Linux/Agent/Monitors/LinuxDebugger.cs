@@ -23,6 +23,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
 	[Parameter("GdbPath", typeof(string), "Path to gdb", "/usr/bin/gdb")]
 	[Parameter("RestartOnEachTest", typeof(bool), "Restart process for each interation", "false")]
+	[Parameter("RestartAfterFault", typeof(bool), "Restart process after any fault occurs", "false")]
 	[Parameter("FaultOnEarlyExit", typeof(bool), "Trigger fault if process exists", "false")]
 	[Parameter("NoCpuKill", typeof(bool), "Disable process killing when CPU usage nears zero", "false")]
 	[Parameter("StartOnCall", typeof(string), "Start command on state model call", "")]
@@ -475,6 +476,7 @@ quit
 		public string Executable { get; private set; }
 		public string Arguments { get; private set; }
 		public bool RestartOnEachTest { get; private set; }
+		public bool RestartAfterFault { get; set; }
 		public bool FaultOnEarlyExit { get; private set; }
 		public bool NoCpuKill { get; private set; }
 		public string StartOnCall { get; private set; }
@@ -749,7 +751,7 @@ quit
 			_messageExit = false;
 			_secondStart = true;
 
-			if (RestartOnEachTest || !_IsRunning())
+			if ((RestartAfterFault && args.LastWasFault) || RestartOnEachTest || !_IsRunning())
 				_Stop();
 			else if (firstStart)
 				return;
