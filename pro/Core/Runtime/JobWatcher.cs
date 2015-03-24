@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Newtonsoft.Json;
 using Peach.Core;
 using Peach.Core.Dom;
@@ -26,22 +27,62 @@ namespace Peach.Pro.Core.Runtime
 		readonly string _logPath;
 		readonly MetricsCache _cache;
 		readonly List<Fault.State> _states = new List<Fault.State>();
+		readonly ManualResetEvent _pausedEvt = new ManualResetEvent(true);
 		Fault _reproFault;
+		bool _shouldStop;
 
-		public JobWatcher(Job job)
+		public JobWatcher(Job job, RunConfiguration config)
 		{
 			_job = job;
-			_logPath = JobDatabase.GetStorageDirectory(_job.Id);
-			_cache = new MetricsCache(() => new JobDatabase(_job.Id));
+			_logPath = JobDatabase.GetStorageDirectory(_job.Guid);
+			_cache = new MetricsCache(() => new JobDatabase(_job.Guid));
+			config.shouldStop = ShouldStop;
 		}
 
+		private bool ShouldStop()
+		{
+			if (!_pausedEvt.WaitOne(0))
+			{
+				using (var db = new JobDatabase(_job.Guid))
+				{
+					_job.Status = JobStatus.Paused;
+					db.UpdateJob(_job);
+				}
+	
+				_pausedEvt.WaitOne();
+
+				using (var db = new JobDatabase(_job.Guid))
+				{
+					_job.Status = JobStatus.Running;
+					db.UpdateJob(_job);
+				}
+			}
+			return _shouldStop;
+		}
+
+		public void Pause()
+		{
+			_pausedEvt.Reset();
+		}
+
+		public void Continue()
+		{
+			_pausedEvt.Set();
+		}
+
+		public void Stop()
+		{
+			_shouldStop = true;
+			_pausedEvt.Set();
+		}
+		
 		protected override void Engine_TestStarting(RunContext context)
 		{
-			using (var db = new NodeDatabase())
+			using (var db = new JobDatabase(_job.Guid))
 			{
+				_job.Seed = context.config.randomSeed;
 				_job.Mode = JobMode.Fuzzing;
 				_job.Status = JobStatus.Running;
-				_job.Seed = context.config.randomSeed;
 
 				db.UpdateJob(_job);
 			}
@@ -49,10 +90,10 @@ namespace Peach.Pro.Core.Runtime
 
 		protected override void Engine_TestFinished(RunContext context)
 		{
-			using (var db = new NodeDatabase())
+			using (var db = new JobDatabase(_job.Guid))
 			{
-				_job.Mode = JobMode.Fuzzing;
 				_job.StopDate = DateTime.UtcNow;
+				_job.Mode = JobMode.Fuzzing;
 				_job.Status = JobStatus.Stopped;
 
 				db.UpdateJob(_job);
@@ -65,7 +106,7 @@ namespace Peach.Pro.Core.Runtime
 			_cache.IterationStarting(context.currentIteration);
 
 			// TODO: rate throttle
-			using (var db = new NodeDatabase())
+			using (var db = new JobDatabase(_job.Guid))
 			{
 				if (context.reproducingFault)
 				{
@@ -94,13 +135,13 @@ namespace Peach.Pro.Core.Runtime
 				!context.controlIteration &&
 				!context.controlRecordingIteration)
 			{
-				_cache.IterationFinished();
-
-				using (var db = new NodeDatabase())
+				using (var db = new JobDatabase(_job.Guid))
 				{
 					_job.IterationCount++;
 					db.UpdateJob(_job);
 				}
+
+				_cache.IterationFinished();
 			}
 		}
 
@@ -390,7 +431,7 @@ namespace Peach.Pro.Core.Runtime
 				catch (IOException) { }
 			}
 
-			using (var db = new JobDatabase(_job.Id))
+			using (var db = new JobDatabase(_job.Guid))
 			{
 				db.InsertFault(entity);
 				_cache.OnFault(new FaultMetric

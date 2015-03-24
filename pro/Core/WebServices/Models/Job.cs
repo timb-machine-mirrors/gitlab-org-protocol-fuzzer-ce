@@ -18,6 +18,8 @@ namespace Peach.Pro.Core.WebServices.Models
 
 	public enum JobMode
 	{
+		Starting,
+		Recording,
 		Fuzzing,
 		Searching,
 		Reproducing,
@@ -74,7 +76,15 @@ namespace Peach.Pro.Core.WebServices.Models
 	public class Job
 	{
 		[Key]
-		public Guid Id { get; set; }
+		public string Id { get; set; }
+
+		[NotMapped]
+		[JsonIgnore]
+		public Guid Guid
+		{
+			get { return new Guid(Id); }
+			set { Id = value.ToString(); }
+		}
 
 		/// <summary>
 		/// The URL of this job
@@ -261,15 +271,17 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// </summary>
 		public long FaultCount { get; set; }
 
-		///// <summary>
-		///// List of tags associated with this job
-		///// </summary>
-		//public ICollection<Tag> Tags { get; set; }
+		/// <summary>
+		/// List of tags associated with this job
+		/// </summary>
+		[NotMapped]
+		public ICollection<Tag> Tags { get; set; }
 
-		///// <summary>
-		///// ACL for this job
-		///// </summary>
-		//public ICollection<Group> Groups { get; set; }
+		/// <summary>
+		/// ACL for this job
+		/// </summary>
+		[NotMapped]
+		public ICollection<Group> Groups { get; set; }
 
 		/// <summary>
 		/// Optional starting iteration number

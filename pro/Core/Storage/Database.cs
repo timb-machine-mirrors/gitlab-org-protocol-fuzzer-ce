@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+#if MONO
+using Mono.Data.Sqlite;
+using SQLiteConnection = Mono.Data.Sqlite.SqliteConnection;
+#else
 using System.Data.SQLite;
+#endif
 using System.Linq;
-using System.Text;
 using Peach.Core;
-using System.IO;
 using Dapper;
 
 namespace Peach.Pro.Core.Storage
@@ -17,7 +20,7 @@ namespace Peach.Pro.Core.Storage
 		protected abstract IEnumerable<Type> Schema { get; }
 		protected abstract IEnumerable<string> Scripts { get; }
 
-		public Database(string path)
+		protected Database(string path)
 		{
 			Path = path;
 
@@ -27,8 +30,9 @@ namespace Peach.Pro.Core.Storage
 				"Foreign Keys=True",
 				"PRAGMA journal_mode=WAL",
 			};
-	
-			Connection = new SQLiteConnection(string.Join(";", parts));
+
+			var cnnString = string.Join(";", parts);
+			Connection = new SQLiteConnection(cnnString);
 			Connection.Open();
 
 			if (!IsInitialized)
@@ -83,8 +87,11 @@ namespace Peach.Pro.Core.Storage
 			foreach (var item in data)
 			{
 				var row = new string[columns.Count];
-				var values = columns.Select(pi => pi.GetValue(item, null).ToString())
-					.ToArray();
+				var values = columns.Select(pi =>
+				{
+					var value = pi.GetValue(item, null);
+					return value == null ? "<NULL>" : value.ToString();
+				}).ToArray();
 				for (var i = 0; i < values.Length; i++)
 				{
 					var value = values[i];
@@ -101,7 +108,7 @@ namespace Peach.Pro.Core.Storage
 			var finalFmt = string.Join("|", fmts);
 			foreach (object[] row in rows)
 			{
-				Console.WriteLine(finalFmt, row);
+				Console.Error.WriteLine(finalFmt, row);
 			}
 		}
 	}

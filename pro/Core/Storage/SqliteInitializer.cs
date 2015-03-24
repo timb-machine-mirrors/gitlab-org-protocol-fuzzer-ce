@@ -5,13 +5,12 @@ using System.Reflection;
 using System.Linq;
 using Peach.Core;
 using Dapper;
-using FileInfo = System.IO.FileInfo;
+using System.ComponentModel;
 #if MONO
 using Mono.Data.Sqlite;
 using SQLiteConnection = Mono.Data.Sqlite.SqliteConnection;
 #else
 using System.Data.SQLite;
-using System.ComponentModel;
 #endif
 
 namespace Peach.Pro.Core.Storage
@@ -137,7 +136,7 @@ namespace Peach.Pro.Core.Storage
 							};
 							foreignKeys.Add(name, foreignKey);
 						}
-		
+
 						foreignKey.SourceColumns.Add(pi.Name);
 						foreignKey.TargetColumns.Add(targetColumn);
 					}
@@ -197,10 +196,11 @@ namespace Peach.Pro.Core.Storage
 			{ typeof(Decimal), SqlReal },
 
 			{ typeof(string), SqlText },
+			{ typeof(Guid), SqlText },
+
 			{ typeof(DateTime), SqlDateTime },
 			
 			{ typeof(byte[]), SqlBlob },		
-			{ typeof(Guid), SqlBlob },
 		};
 
 		public static bool HasAttribute<TAttr>(this PropertyInfo pi)

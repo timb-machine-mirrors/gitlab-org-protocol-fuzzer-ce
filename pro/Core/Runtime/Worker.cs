@@ -21,17 +21,12 @@ namespace Peach.Pro.Core.Runtime
 		string _pitLibraryPath;
 		string _query;
 		Guid? _guid;
-		bool _shouldStop;
 		readonly RunConfiguration _config = new RunConfiguration();
-		readonly ManualResetEvent _pausedEvt = new ManualResetEvent(true);
 		uint? _start;
 		uint? _stop;
 		uint? _seed;
-
-		public Worker()
-		{
-			_config.shouldStop = ShouldStop;
-		}
+		bool _init;
+		JobWatcher _watcher;
 
 		protected override void AddCustomOptions(OptionSet options)
 		{
@@ -61,6 +56,11 @@ namespace Peach.Pro.Core.Runtime
 				(uint v) => _stop = v
 			);
 			options.Add(
+				"init",
+				"Initialize a new job",
+				v => _init = true
+			);
+			options.Add(
 				"query=",
 				v => _query = v
 			);
@@ -85,110 +85,77 @@ namespace Peach.Pro.Core.Runtime
 
 		protected override void OnRun(List<string> args)
 		{
-			if (!_guid.HasValue)
-				throw new SyntaxException("The '--guid' argument is required.");
-
 			if (!string.IsNullOrEmpty(_query))
 			{
 				RunQuery();
 				return;
 			}
 
-			if (string.IsNullOrEmpty(_pitLibraryPath))
-				throw new SyntaxException("The '--pits' argument is required.");
-
 			if (args.Count == 0)
 				throw new SyntaxException("Missing <pit> argument.");
 
-			_config.pitFile = args.First();
-
-			Job job;
-
-			if (_start.HasValue)
-				job = CreateJobFromArgs();
+			if (_init)
+				InitJob(args.First());
 			else
-				job = ResumeJob();
-
-			RunJob(job);
+				RunJob(args.First());
 		}
 
-		Job CreateJobFromArgs()
+		Job InitJob(string pitFile)
 		{
-			if (_seed.HasValue)
-				_config.randomSeed = _seed.Value;
+			if (!_guid.HasValue)
+				_guid = Guid.NewGuid();
 
-			if (_stop.HasValue)
-			{
-				_config.range = true;
-				_config.rangeStart = _start.Value;
-				_config.rangeStop = _stop.Value;
-			}
-			else
-			{
-				_config.skipToIteration = _start.Value;
-			}
-
-			var job = new Job
-			{
-				Id = _guid.Value,
-				Name = Path.GetFileNameWithoutExtension(_config.pitFile),
-				RangeStart = _config.rangeStart,
-				RangeStop = _config.rangeStop,
-				IterationCount = 0,
-				Seed = _config.randomSeed,
-				StartDate = DateTime.UtcNow,
-				HasMetrics = true,
-			};
-
-			using (var db = new NodeDatabase())
-			{
-				db.InsertJob(job);
-			}
-
-			return job;
-		}
-
-		Job ResumeJob()
-		{
-			using (var db = new NodeDatabase())
+			using (var db = new JobDatabase(_guid.Value))
 			{
 				var job = db.GetJob(_guid.Value);
+				if (job != null)
+					throw new Exception("Job has already been initialized.");
 
-				if (job.Seed.HasValue)
-					_config.randomSeed = (uint)job.Seed.Value;
-
-				if (job.RangeStop.HasValue)
+				// this code should be identical to JobRunner.Start()
+				job = new Job
 				{
-					_config.range = true;
-					_config.rangeStart = (uint)job.RangeStart + (uint)job.IterationCount;
-					_config.rangeStop = (uint)job.RangeStop.Value;
-				}
-				else
-				{
-					_config.skipToIteration = (uint)job.RangeStart + (uint)job.IterationCount;
-				}
+					Guid = _guid.Value,
+					Name = Path.GetFileNameWithoutExtension(pitFile),
+					StartDate = DateTime.UtcNow,
+					Status = JobStatus.StartPending,
+					Mode = JobMode.Starting,
 
+					RangeStart = _start.HasValue ? _start.Value : 0,
+					RangeStop = _stop,
+					Seed = _seed,
+				};
+				db.InsertJob(job);
 				return job;
 			}
 		}
 
-		protected override string UsageLine
+		void RunJob(string pitFile)
 		{
-			get
+			if (!_guid.HasValue)
+				throw new SyntaxException("The '--guid' argument is required.");
+
+			Job job;
+			using (var db = new JobDatabase(_guid.Value))
 			{
-				var name = Assembly.GetEntryAssembly().GetName();
-				return "Usage: {0} [OPTION]... <pit> [<name>]".Fmt(name.Name);
+				job = db.GetJob(_guid.Value) ?? InitJob(pitFile);
 			}
-		}
 
-		private bool ShouldStop()
-		{
-			_pausedEvt.WaitOne();
-			return _shouldStop;
-		}
+			_config.pitFile = pitFile;
 
-		public void RunJob(Job job)
-		{
+			if (job.Seed.HasValue)
+				_config.randomSeed = (uint)job.Seed.Value;
+
+			if (job.RangeStop.HasValue)
+			{
+				_config.range = true;
+				_config.rangeStart = (uint)job.RangeStart + (uint)job.IterationCount;
+				_config.rangeStop = (uint)job.RangeStop.Value;
+			}
+			else
+			{
+				_config.skipToIteration = (uint)job.RangeStart + (uint)job.IterationCount;
+			}
+
 			var pitConfig = _config.pitFile + ".config";
 			var defs = PitDatabase.ParseConfig(_pitLibraryPath, pitConfig);
 			var args = new Dictionary<string, object>();
@@ -203,16 +170,26 @@ namespace Peach.Pro.Core.Runtime
 				test.loggers.Clear();
 			}
 
-			var engine = new Engine(new JobWatcher(job));
+			_watcher = new JobWatcher(job, _config);
+			var engine = new Engine(_watcher);
 			var engineTask = Task.Factory.StartNew(() => engine.startFuzzing(dom, _config));
 
 			Loop(engineTask);
+		}
 
-			Console.WriteLine("Done");
+		protected override string UsageLine
+		{
+			get
+			{
+				var name = Assembly.GetEntryAssembly().GetName();
+				return "Usage: {0} [OPTION]... <pit> [<name>]".Fmt(name.Name);
+			}
 		}
 
 		private void Loop(Task engineTask)
 		{
+			Console.WriteLine("OK");
+
 			while (true)
 			{
 				Console.Write("> ");
@@ -232,17 +209,16 @@ namespace Peach.Pro.Core.Runtime
 						break;
 					case "stop":
 						Console.WriteLine("OK");
-						_shouldStop = true;
-						_pausedEvt.Set();
+						_watcher.Stop();
 						engineTask.Wait();
 						return;
 					case "pause":
 						Console.WriteLine("OK");
-						_pausedEvt.Reset();
+						_watcher.Pause();
 						break;
 					case "continue":
 						Console.WriteLine("OK");
-						_pausedEvt.Set();
+						_watcher.Continue();
 						break;
 					default:
 						Console.WriteLine("Invalid command");
@@ -262,6 +238,9 @@ namespace Peach.Pro.Core.Runtime
 
 		private void RunQuery()
 		{
+			if (!_guid.HasValue)
+				throw new SyntaxException("The '--guid' argument is required.");
+
 			using (var db = new JobDatabase(_guid.Value))
 			{
 				switch (_query.ToLower())
