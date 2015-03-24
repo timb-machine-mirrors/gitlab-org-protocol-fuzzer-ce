@@ -25,8 +25,6 @@
 
 // $Id$
 
-#if DISABLED
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -622,7 +620,7 @@ namespace Peach.Pro.Core.Agent.Channels
 				DetectionSource = f.detectionSource,
 				MonitorName = f.monitorName,
 				Title = f.title,
-				Data = f.collectedData.ToDictionary(i => i.Key, i => i.Value),
+				Data = f.collectedData.ToDictionary(i => i.Key, i => (Stream)new MemoryStream(i.Value)),
 			};
 
 			if (f.type == FaultType.Fault)
@@ -720,5 +718,3 @@ namespace Peach.Pro.Core.Agent.Channels
 		#endregion
 	}
 }
-// end
-#endif
