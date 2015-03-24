@@ -307,6 +307,49 @@ namespace Peach.Pro.Test.Core.Fixups
 		}
 
 		[Test]
+		public void NumericStringDefault()
+		{
+			// Test string parent
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str'>
+			<Fixup class='SequenceRandomFixup'/>
+		</String>
+		<String/>
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='TheState'/>
+		<Publisher class='Null'/>
+		<Strategy class='RandomDeterministic'/>
+	</Test>
+</Peach>
+";
+
+			var dom = ParsePit(xml);
+			var config = new RunConfiguration { singleIteration = true };
+			var e = new Engine(this);
+
+			e.startFuzzing(dom, config);
+
+			var elem = dom.tests[0].stateModel.states[0].actions[0].dataModel[0];
+
+
+			Assert.NotNull(elem);
+			Assert.AreNotEqual(0, (int)elem.InternalValue);
+			Assert.True(elem.Hints.ContainsKey("NumericalString"), "Should have NumericalString hint");
+		}
+
+		[Test]
 		public void BadStringParent()
 		{
 			// Test non-numeric string
