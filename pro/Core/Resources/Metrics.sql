@@ -1,7 +1,7 @@
 ﻿-- States >>>
 CREATE VIEW ViewStates AS 
 SELECT
-	printf('%s_%d', n.Name, s.RunCount) AS [State],
+	n.Name || '_' || s.RunCount AS [State],
 	s.[Count] AS [ExecutionCount]
 FROM [State] AS s
 JOIN NamedItem n ON s.NameId = n.Id;
@@ -10,7 +10,7 @@ JOIN NamedItem n ON s.NameId = n.Id;
 -- Iterations >>>
 CREATE VIEW ViewIterations AS 
 SELECT
-	printf('%s_%d', sn.Name, s.RunCount) AS [State],
+	sn.Name || '_' || s.RunCount AS [State],
 	a.Name AS [Action],
 	p.Name AS Parameter,
 	e.Name AS Element,
@@ -30,12 +30,17 @@ JOIN NamedItem AS d  ON d.Id  = x.DatasetId;
 -- Buckets >>>
 CREATE VIEW ViewBuckets AS
 SELECT
-	printf('%s_%s', x.MajorHash, x.MinorHash) AS Bucket,
+	x.MajorHash || '_' || x.MinorHash AS Bucket,
 	m.Name AS Mutator,
 	CASE WHEN LENGTH(p.Name) > 0 THEN
-		printf('%s_%d.%s.%s.%s', sn.Name, s.RunCount, a.Name, p.Name, e.Name)
+		sn.Name || '_' || s.RunCount || '.' || 
+		a.Name || '.' || 
+		p.Name || '.' || 
+		e.Name
 	ELSE
-		printf('%s_%d.%s.%s', sn.Name, s.RunCount, a.Name, e.Name)
+		sn.Name || '_' || s.RunCount || '.' || 
+		a.Name || '.' || 
+		e.Name
 	END AS Element,
 	y.IterationCount,
 	COUNT(DISTINCT(x.Iteration)) AS FaultCount
@@ -69,7 +74,7 @@ GROUP BY
 -- BucketTimeline >>>
 CREATE VIEW ViewBucketTimeline AS
 SELECT
-	printf('%s_%s', x.MajorHash, x.MinorHash) AS Label,
+	x.MajorHash || '_' || x.MinorHash AS Label,
 	MIN(x.[Iteration]) AS [Iteration],
 	MIN(x.[Timestamp]) AS [Time],
 	COUNT(DISTINCT(x.MinorHash)) AS FaultCount
@@ -173,7 +178,7 @@ GROUP BY
 
 CREATE VIEW ViewElements AS
 SELECT 
-	printf('%s_%d', sn.Name, s.RunCount) AS [State],
+	sn.Name || '_' || s.RunCount AS [State],
 	a.Name as [Action],
 	p.Name as [Parameter],
 	d.Name as [Dataset],
