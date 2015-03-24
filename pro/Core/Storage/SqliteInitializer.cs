@@ -1,24 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Reflection;
 using System.Linq;
 using Peach.Core;
 using Dapper;
 using System.ComponentModel;
-#if MONO
-using Mono.Data.Sqlite;
-using SQLiteConnection = Mono.Data.Sqlite.SqliteConnection;
-#else
-using System.Data.SQLite;
-#endif
 
 namespace Peach.Pro.Core.Storage
 {
 	class SqliteInitializer
 	{
 		public static void InitializeDatabase(
-			SQLiteConnection cnn,
+			IDbConnection cnn,
 			IEnumerable<Type> types,
 			IEnumerable<string> scripts)
 		{
@@ -65,7 +60,7 @@ namespace Peach.Pro.Core.Storage
 		const string ForeignKeyTmpl = "    CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})";
 		const string IndexTmpl = "CREATE{0}INDEX {1} ON {2} ({3});";
 
-		static void CreateDatabase(SQLiteConnection cnn, IEnumerable<Type> types)
+		static void CreateDatabase(IDbConnection cnn, IEnumerable<Type> types)
 		{
 			var indicies = new Dictionary<string, Index>();
 
@@ -92,7 +87,7 @@ namespace Peach.Pro.Core.Storage
 
 					defs.Add(ColumnTmpl.Fmt(
 						pi.Name,
-						pi.GetSqlType(cnn),
+						pi.GetSqlType(),
 						string.Join(" ", decls)));
 
 					if (pi.IsPrimaryKey())
@@ -229,7 +224,7 @@ namespace Peach.Pro.Core.Storage
 				type.GetGenericTypeDefinition() == typeof(Nullable<>);
 		}
 
-		public static string GetSqlType(this PropertyInfo pi, SQLiteConnection cnn)
+		public static string GetSqlType(this PropertyInfo pi)
 		{
 			var type = pi.PropertyType;
 
