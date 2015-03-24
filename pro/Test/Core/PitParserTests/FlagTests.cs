@@ -335,5 +335,40 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			var expected = new byte[] { 0xdc, 0xed, 0xfe, 0xf0 };
 			Assert.AreEqual(bytes, expected);
 		}
+
+
+		[Test]
+		public void TestEndianDefaults()
+		{
+			const string xml = @"
+<Peach>
+	<Defaults>
+		<Flags endian=""{0}"" />
+	</Defaults>
+
+	<DataModel name=""DM"">
+		<Flags size=""8"">
+			<Flag position=""0"" size=""1""/>
+			<Flag position=""1"" size=""1""/>
+			<Flag position=""2"" size=""1""/>
+			<Flag position=""3"" size=""1""/>
+			<Flag position=""4"" size=""1""/>
+			<Flag position=""5"" size=""1""/>
+			<Flag position=""6"" size=""1""/>
+			<Flag position=""7"" size=""1""/>
+		</Flags>
+	</DataModel>
+</Peach>";
+
+			var dom1 = DataModelCollector.ParsePit(xml.Fmt("little"));
+			var flags1 = (Flags)dom1.dataModels[0][0];
+			Assert.True(flags1.LittleEndian, "Should be little endian");
+
+			var dom2 = DataModelCollector.ParsePit(xml.Fmt("big"));
+			var flags2 = (Flags)dom2.dataModels[0][0];
+			Assert.False(flags2.LittleEndian, "Should be big endian");
+
+		}
+
 	}
 }
