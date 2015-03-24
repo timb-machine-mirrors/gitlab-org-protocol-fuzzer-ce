@@ -3,20 +3,12 @@ using System.Collections.Generic;
 using System.Reflection;
 using Peach.Pro.Core.WebServices.Models;
 using Dapper;
-using System.Linq;
 using Peach.Core;
-
-#if MONO
-using Mono.Data.Sqlite;
-using SQLiteConnection = Mono.Data.Sqlite.SqliteConnection;
-#else
-using System.Data.SQLite;
 using System.IO;
-#endif
 
 namespace Peach.Pro.Core.Storage
 {
-	internal class JobDatabase : Database
+	internal class JobDatabase : NodeDatabase
 	{
 		#region SQL
 		const string SqlGetLastRowId = "SELECT last_insert_rowid();";
@@ -139,11 +131,14 @@ INSERT INTO FaultFile (
 
 		protected override IEnumerable<Type> Schema
 		{
-			get { return _schema; }
+			get { return StaticSchema; }
 		}
 
-		static readonly IEnumerable<Type> _schema = new[]
+		static readonly IEnumerable<Type> StaticSchema = new[]
 		{
+			// live job status
+			typeof(Job),
+
 			// fault data
 			typeof(FaultDetail),
 			typeof(FaultFile),
@@ -157,10 +152,10 @@ INSERT INTO FaultFile (
 
 		protected override IEnumerable<string> Scripts
 		{
-			get { return _scripts; }
+			get { return StaticScripts; }
 		}
 
-		static readonly string[] _scripts =
+		static readonly string[] StaticScripts =
 		{
 			Utilities.LoadStringResource(
 				Assembly.GetExecutingAssembly(), 

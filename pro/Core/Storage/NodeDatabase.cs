@@ -85,7 +85,7 @@ WHERE Id = @Id;
 ";
 		#endregion
 
-		static readonly IEnumerable<Type> _schema = new[]
+		static readonly IEnumerable<Type> StaticSchema = new[]
 		{
 			// job status
 			typeof(Job),
@@ -93,7 +93,7 @@ WHERE Id = @Id;
 
 		protected override IEnumerable<Type> Schema
 		{
-			get { return _schema; }
+			get { return StaticSchema; }
 		}
 
 		protected override IEnumerable<string> Scripts
@@ -127,7 +127,7 @@ WHERE Id = @Id;
 
 		public Job GetJob(Guid id)
 		{
-			return Connection.Query<Job>(SqlSelectJob, new { Id = id })
+			return Connection.Query<Job>(SqlSelectJob, new { Id = id.ToString() })
 				.SingleOrDefault();
 		}
 
@@ -143,7 +143,7 @@ WHERE Id = @Id;
 
 		public void DeleteJob(Guid id)
 		{
-			Connection.Execute(SqlDeleteJob, new { Id = id });
+			Connection.Execute(SqlDeleteJob, new { Id = id.ToString() });
 		}
 	}
 }

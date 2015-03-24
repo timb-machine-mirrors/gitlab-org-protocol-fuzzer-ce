@@ -1,115 +1,154 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using Peach.Core;
-using Peach.Pro.Core.Loggers;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.Core.Storage;
 using System.Threading.Tasks;
-using System.Collections.Concurrent;
+using System.Threading;
 
 namespace Peach.Pro.Core.WebServices
 {
-	public class JobRunner
+	public class JobRunner : IDisposable
 	{
-		public Job Job { get; private set; }
+		public Job Job
+		{
+			get
+			{
+				lock (this)
+				{
+					if (_job != null)
+					{
+						// refresh job status from JobDatabase
+						// but only if we're currently running a job
+						using (var db = new JobDatabase(_job.Guid))
+						{
+							_job = db.GetJob(_job.Guid);
+						}
+					}
+					return _job;
+				}
+			}
+		}
+
+		Job _job;
+		Process _process;
+		Task _taskMonitor;
+		Task _taskStderr;
+		string _pitFile;
+		string _pitLibraryPath;
+		volatile bool _pendingKill;
+
+		static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+		public readonly static JobRunner Instance = new JobRunner();
+
+		internal JobRunner()
+		{
+		}
 
 		enum Command
 		{
 			Stop,
 			Pause,
 			Continue,
-			Kill,
 		}
 
-		static object _mutex = new object();
-		static JobRunner _instance;
-
-		//static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
-
-		Process _process;
-		Task _stderr;
-		readonly string _pitFile;
-		readonly string _pitLibraryPath;
-		readonly BlockingCollection<Command> _requestQueue = new BlockingCollection<Command>();
-
-		public JobRunner(Job job, string pitFile, string pitLibraryPath)
+		public bool Pause()
 		{
-			Job = job;
-			_pitFile = pitFile;
-			_pitLibraryPath = pitLibraryPath;
+			return SendCommand(Command.Pause);
 		}
 
-		public void Pause()
+		public bool Continue()
 		{
-			_requestQueue.Add(Command.Pause);
+			return SendCommand(Command.Continue);
 		}
 
-		public void Continue()
+		public bool Stop()
 		{
-			_requestQueue.Add(Command.Continue);
+			return SendCommand(Command.Stop);
 		}
 
-		public void Stop()
+		public bool Kill()
 		{
-			_requestQueue.Add(Command.Stop);
+			Logger.Trace("Kill");
+
+			lock (this)
+			{
+				if (_job == null)
+					return false;
+
+				try
+				{
+					_pendingKill = true;
+					_process.Kill();
+					return true;
+				}
+				catch (Exception ex)
+				{
+					Logger.Debug(ex);
+					return false;
+				}
+			}
 		}
 
-		public void Kill()
+		// used by unit tests
+		// kill the worker without setting _pendingKill
+		// this should test Restarts
+		internal void Terminate()
 		{
-			_requestQueue.Add(Command.Kill);
+			_process.Kill();
 		}
 
-		public static JobRunner Run(
-			string prefix, 
-			string pitLibraryPath, 
-			Pit pit, 
+		public bool Start(
+			string pitLibraryPath,
+			string pitFile,
 			Job jobRequest)
 		{
-			var pitFile = pit.Versions[0].Files[0].Name;
-
-			var job = new Job
+			lock (this)
 			{
-				Id = Guid.NewGuid(),
-				Name = Path.GetFileNameWithoutExtension(pitFile),
-				Status = JobStatus.StartPending,
-				StartDate = DateTime.UtcNow,
-				Mode = JobMode.Fuzzing,
+				if (_job != null)
+					return false;
 
-				// select only params that we need to start a job
-				Seed = jobRequest.Seed,
-				RangeStart = jobRequest.RangeStart,
-				RangeStop = jobRequest.RangeStop,
-			};
+				_pitFile = pitFile;
+				_pitLibraryPath = pitLibraryPath;
 
-			var runner = new JobRunner(job, pitFile, pitLibraryPath);
-			runner.Start();
-			return runner;
-		}
+				_job = new Job
+				{
+					Guid = Guid.NewGuid(),
+					Name = Path.GetFileNameWithoutExtension(_pitFile),
+					StartDate = DateTime.UtcNow,
+					Status = JobStatus.StartPending,
+					Mode = JobMode.Starting,
 
-		public void Start()
-		{
-			using (var db = new NodeDatabase())
-			{
-				db.InsertJob(Job);
-			}
+					// select only params that we need to start a job
+					Seed = jobRequest.Seed,
+					RangeStart = jobRequest.RangeStart,
+					RangeStop = jobRequest.RangeStop,
+				};
 
-			lock (_mutex)
-			{
-				_instance = this;
+				using (var db = new JobDatabase(_job.Guid))
+				{
+					db.InsertJob(_job);
+				}
+
+				StartProcess();
+
+				return true;
 			}
 		}
 
 		void StartProcess()
 		{
+			Logger.Trace("StartProcess");
+
 			var fileName = Utilities.GetAppResourcePath("PeachWorker.exe");
 
 			var args = new[]
 			{
 				"--pits", _pitLibraryPath,
-				"--guid", Job.Id.ToString(),
+				"--guid", _job.Id,
 				_pitFile,
+				//"-vv",
 			};
 
 			_process = new Process
@@ -128,169 +167,120 @@ namespace Peach.Pro.Core.WebServices
 			};
 			_process.Start();
 
-			_stderr = new Task(ProcessStdErr);
-			_stderr.Start();
+			_taskStderr = new Task(LoggingTask, _process.StandardError);
+			_taskStderr.Start();
+
+			_taskMonitor = new Task(MonitorTask);
+			_taskMonitor.Start();
 
 			// wait for prompt
 			_process.StandardOutput.ReadLine();
 		}
 
-		void ProcessStdIn()
+		bool SendCommand(Command cmd)
 		{
-			_process.StandardInput.WriteLine();
-		}
+			Logger.Trace("SendCommand: {0}", cmd);
 
-		void ProcessStdOut()
-		{
-			var prompt = _process.StandardOutput.ReadLine();
-		}
-
-		void ProcessStdErr()
-		{
-			while (!_process.HasExited)
+			lock (this)
 			{
-				var line = _process.StandardError.ReadLine();
-				Console.WriteLine(line);
+				if (_job == null)
+					return false;
+
+				try
+				{
+					_process.StandardInput.WriteLine(cmd.ToString().ToLower());
+					_process.StandardOutput.ReadLine();
+					return true;
+				}
+				catch (Exception ex)
+				{
+					Logger.Debug(ex);
+					return false;
+				}
 			}
 		}
 
-		public static JobRunner Get(Guid id)
+		void LoggingTask(object obj)
 		{
-			lock (_mutex)
+			var stream = (StreamReader)obj;
+			try
 			{
-				//JobRunner ret;
-				//_jobs.TryGetValue(id, out ret);
-				//return ret;
-				return null;
+				while (!_process.HasExited)
+				{
+					var line = stream.ReadLine();
+					if (line == null)
+						return;
+
+					// TODO: do something better with this
+					Console.WriteLine(line);
+				}
+			}
+			catch (Exception ex)
+			{
+				Logger.Debug(ex);
 			}
 		}
 
-		//public static JobRunner Attach(Peach.Core.Dom.Dom dom, RunConfiguration config)
-		//{
-		//	var ret = new JobRunner()
-		//	{
-		//		Guid = System.Guid.NewGuid().ToString().ToLower(),
-		//		Name = Path.GetFileNameWithoutExtension(config.pitFile),
-		//		Seed = config.randomSeed,
-		//		StartDate = config.runDateTime.ToUniversalTime(),
-		//		Status = JobStatus.Running,
-		//		PitUrl = string.Empty,
-		//		HasMetrics = dom.tests
-		//			.Where(t => t.Name == config.runName)
-		//			.SelectMany(t => t.loggers).Any(l => l is MetricsLogger),
-		//	};
+		void MonitorTask()
+		{
+			Logger.Trace("WaitForExit");
 
-		//	return ret;
-		//}
+			_process.WaitForExit();
+			var exitCode = _process.ExitCode;
 
-		//bool shouldStop()
-		//{
-		//	// Called once per iteration.
-		//	if (Status != JobStatus.Running)
-		//	{
-		//		try
-		//		{
-		//			_stopwatch.Stop();
+			Logger.Trace("WaitForExit: {0}", exitCode);
 
-		//			lock (this)
-		//			{
-		//				if (Status == JobStatus.StopPending)
-		//					return true;
+			// this shouldn't throw, LoggingTask should catch it
+			_taskStderr.Wait();
 
-		//				Status = JobStatus.Paused;
-		//			}
+			Logger.Trace("LoggingTask done");
 
-		//			// Will block the engine until the event is set by ResumeJob()
-		//			pauseEvent.WaitOne();
+			_process.Dispose();
+			_process = null;
 
-		//			lock (this)
-		//			{
-		//				if (Status == JobStatus.StopPending)
-		//					return true;
+			if (exitCode == 0 || _pendingKill)
+			{
+				FinishJob();
+			}
+			else
+			{
+				Thread.Sleep(TimeSpan.FromSeconds(1));
 
-		//				Status = JobStatus.Running;
-		//			}
-		//		}
-		//		finally
-		//		{
-		//			_stopwatch.Start();
-		//		}
-		//	}
+				StartProcess();
+			}
+		}
 
-		//	return false;
-		//}
+		void FinishJob()
+		{
+			lock (this)
+			{
+				// copy job from JobDatabase into NodeDatabase
+				using (var db = new JobDatabase(_job.Guid))
+				{
+					_job = db.GetJob(_job.Guid);
+				}
 
-		//void ThreadProc(WebLogger webLogger, string pitLibraryPath, RunConfiguration config)
-		//{
-		//	try
-		//	{
-		//		var pitConfig = config.pitFile + ".config";
-		//		var defs = PitDatabase.ParseConfig(pitLibraryPath, pitConfig);
-		//		var args = new Dictionary<string, object>();
+				using (var db = new NodeDatabase())
+				{
+					db.InsertJob(_job);
+				}
 
-		//		args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
+				_job = null;
+				_taskStderr = null;
+				_pitFile = null;
+				_pitLibraryPath = null;
+				_pendingKill = false;
+			}
+		}
 
-		//		var parser = new Godel.Core.GodelPitParser();
-		//		var dom = parser.asParser(args, config.pitFile);
-
-		//		foreach (var test in dom.tests)
-		//		{
-		//			// If test has metrics logger, do nothing
-		//			var metricsLogger = test.loggers.OfType<MetricsLogger>().FirstOrDefault();
-		//			if (metricsLogger != null)
-		//				continue;
-
-		//			// If test does not have a file logger, do nothing
-		//			var fileLogger = test.loggers.OfType<FileLogger>().FirstOrDefault();
-		//			if (fileLogger == null)
-		//				continue;
-
-		//			// Add metrics logger with same path as file logger
-		//			metricsLogger = new MetricsLogger(new Dictionary<string, Variant>
-		//			{
-		//				{ "Path", new Variant(fileLogger.Path) }
-		//			});
-
-		//			test.loggers.Add(metricsLogger);
-		//		}
-
-		//		var engine = new Engine(webLogger);
-
-
-		//		// hook up the stop event
-		//		config.shouldStop = shouldStop;
-
-		//		lock (this)
-		//		{
-		//			// If we are still start pending, then go to running
-		//			// We could be in StopPending, in which case we should just exit
-		//			if (Status == JobStatus.StopPending)
-		//				return;
-
-		//			Status = JobStatus.Running;
-		//		}
-
-		//		engine.startFuzzing(dom, config);
-		//	}
-		//	catch (Exception ex)
-		//	{
-		//		logger.Debug("Unhandled exception when running job:\n{0}", ex);
-		//		Result = ex.Message;
-		//	}
-		//	finally
-		//	{
-		//		lock (this)
-		//		{
-		//			_stopwatch.Stop();
-
-		//			pauseEvent.Dispose();
-		//			pauseEvent = null;
-		//			thread = null;
-
-		//			Status = JobStatus.Stopped;
-		//			StopDate = DateTime.UtcNow;
-		//		}
-		//	}
-		//}
+		// used by unit tests
+		public void Dispose()
+		{
+			if (Kill())
+			{
+				Logger.Trace("Waiting for process to die");
+				_taskMonitor.Wait(TimeSpan.FromSeconds(5));
+			}
+		}
 	}
 }
