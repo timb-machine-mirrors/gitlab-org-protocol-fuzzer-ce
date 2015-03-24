@@ -289,7 +289,14 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 			var dir = GetLogPath(context, Path);
 			System.IO.Directory.CreateDirectory(dir);
 			var path = System.IO.Path.Combine(dir, fileName);
-			var connectionString = "Data Source=\"{0}\";Foreign Keys=True".Fmt(path);
+
+			var parts = new[] 
+			{
+				"Data Source=\"{0}\"".Fmt(path),
+				"Foreign Keys=True",
+				"PRAGMA journal_mode=WAL",
+			};
+			var connectionString = string.Join(";", parts);
 
 			db = new SQLiteConnection(connectionString);
 			db.Open();
