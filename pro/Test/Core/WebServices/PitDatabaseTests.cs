@@ -460,17 +460,16 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void TestAllMonitors()
 		{
+			var errors = new List<string>();
+
 			// remove test SetUp handler for this test
 			db.ValidationEventHandler -= OnValidationEvent;
 
-			var error = false;
-			db.ValidationEventHandler += (s, e) =>
-			{
-				error = true;
-			};
+			db.ValidationEventHandler += (s, e) => errors.Add(e.Exception.Message);
 
 			db.GetAllMonitors();
-			Assert.IsFalse(error);
+
+			CollectionAssert.IsEmpty(errors);
 		}
 
 		[Test]
