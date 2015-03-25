@@ -74,8 +74,12 @@ namespace PitTester
 			}
 		}
 
-		protected override void Engine_TestStarting(RunContext context)
+		protected override void StateModelStarting(RunContext context, StateModel model)
 		{
+			// Re-evaluate ignores every only on control record iterations
+			if (!context.controlRecordingIteration)
+				return;
+
 			ignores = new List<Tuple<Action, DataElement>>();
 
 			var resolver = new PeachXmlNamespaceResolver();

@@ -71,6 +71,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 			// use 127.0.0.1 as host to avoid DNS lookups
 			var ub = new UriBuilder(_server.Uri);
+			ub.Scheme = "tcp";
 			ub.Host = "127.0.0.1";
 			_uri = ub.Uri;
 		}

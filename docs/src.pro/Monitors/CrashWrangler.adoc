@@ -1,10 +1,20 @@
+:images: ../images
 <<<
 [[Monitors_CrashWrangler]]
 == CrashWrangler Monitor (OS X)
 
-The _CrashWrangler_ monitor launches a process attached to the CrashWrangler debugger and monitors the process for crashes. 
+The _CrashWrangler_ monitor launches a process attached to the CrashWrangler debugger and 
+monitors the process for crashes and other faults. This monitor provides the preferred method 
+of catching faults on OS X.
 
-This is the preferred method of catching faults on OS X.
+The _CrashWrangler_ monitor detects crashes, exceptions, access violations, and faults. 
+The monitor can generate faults for an application that exits early or that fails to exit. 
+
+After detecting a fault, this monitor collects a stack trace, data from the device log files, 
+and crash dumps. Additionally, the monitor logs exceptions, and updates fault bucket 
+information. For bucketing, Peach uses the text from the fault to determine the major bucket 
+level. The minor bucket level is not used. The risk evaluation provides the following 
+levels: exploitable, not exmploitable, or unknown.  
 
 NOTE: This monitor uses Apple's Crash Wrangler tool that can be downloaded from the developer website. Crash Wrangler must be compiled on each machine it is used. 
 

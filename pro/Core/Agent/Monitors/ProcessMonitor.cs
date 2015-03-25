@@ -49,6 +49,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Parameter("Executable", typeof(string), "Executable to launch")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
 	[Parameter("RestartOnEachTest", typeof(bool), "Restart process for each interation", "false")]
+	[Parameter("RestartAfterFault", typeof(bool), "Restart process after any fault occurs", "false")]
 	[Parameter("FaultOnEarlyExit", typeof(bool), "Trigger fault if process exits", "false")]
 	[Parameter("NoCpuKill", typeof(bool), "Disable process killing when CPU usage nears zero", "false")]
 	[Parameter("StartOnCall", typeof(string), "Start command on state model call", "")]
@@ -65,6 +66,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 		public string Executable { get; set; }
 		public string Arguments { get; set; }
 		public bool RestartOnEachTest { get; set; }
+		public bool RestartAfterFault { get; set; }
 		public bool FaultOnEarlyExit { get; set; }
 		public bool NoCpuKill { get; set; }
 		public string StartOnCall { get; set; }
@@ -133,6 +135,8 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 					_LogOutput(prefix, () => _process.StandardError);
 					_LogOutput(prefix, () => _process.StandardOutput);
+
+					OnInternalEvent(EventArgs.Empty);
 				}
 				catch (Exception ex)
 				{
@@ -262,7 +266,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			_data = null;
 			_messageExit = false;
 
-			if (RestartOnEachTest)
+			if ((RestartAfterFault && args.LastWasFault) || RestartOnEachTest)
 				_Stop();
 
 			if (StartOnCall == null)
