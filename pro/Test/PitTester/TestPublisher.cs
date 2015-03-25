@@ -115,6 +115,10 @@ namespace PitTester
 				// payload into this.stream and use 'WantBytes' to
 				// deliver more bytes
 			}
+
+			if (Logger.IsDebugEnabled)
+				Logger.Debug("\n\n" + Utilities.HexDump(data.Payload, 0, data.Payload.Length));
+
 		}
 
 		public override void output(DataModel dataModel)
