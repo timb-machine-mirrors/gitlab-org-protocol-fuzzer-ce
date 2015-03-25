@@ -158,9 +158,12 @@ namespace Peach.Pro.Core.WebServices
 		{
 			base.ConfigureConventions(nancyConventions);
 
+			var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+			var versionRoot = "/" + version;
+
 			// Need to go before the default '/Content' handler in nancy
 			nancyConventions.StaticContentsConventions.Insert(0,
-				StaticContentConventionBuilder.AddDirectory("/", @"public")
+				StaticContentConventionBuilder.AddDirectory(versionRoot, @"public")
 			);
 			nancyConventions.StaticContentsConventions.Insert(0,
 				StaticContentConventionBuilder.AddDirectory("/docs", @"docs/webhelp")
