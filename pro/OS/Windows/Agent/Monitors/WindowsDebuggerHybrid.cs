@@ -64,6 +64,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 	[Parameter("WaitForExitOnCall", typeof(string), "Wait for process to exit on state model call and fault if timeout is reached", "")]
 	[Parameter("WaitForExitTimeout", typeof(int), "Wait for exit timeout value in milliseconds (-1 is infinite)", "10000")]
 	[Parameter("RestartOnEachTest", typeof(bool), "Restart process for each interation", "false")]
+	[Parameter("RestartAfterFault", typeof(bool), "Restart process after any fault occurs", "false")]
 	public class WindowsDebuggerHybrid : Monitor
 	{
 		protected static NLog.Logger logger = LogManager.GetCurrentClassLogger();
@@ -86,6 +87,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		bool _noCpuKill = false;
 		bool _faultOnEarlyExit = false;
 		bool _restartOnEachTest = false;
+		bool _restartAfterFault = false;
 
 		bool _waitForExitFailed = false;
 		bool _earlyExitFault = false;
@@ -182,6 +184,8 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 					throw new PeachException("Error, unable to locate WinDbg, please specify using 'WinDbgPath' parameter.");
 			}
 
+			if (args.ContainsKey("RestartAfterFault") && ((string)args["RestartAfterFault"]).ToLower() == "true")
+				_restartAfterFault = true;
 			if (args.ContainsKey("RestartOnEachTest") && ((string)args["RestartOnEachTest"]).ToLower() == "true")
 				_restartOnEachTest = true;
 			if (args.ContainsKey("IgnoreFirstChanceGuardPage") && ((string)args["IgnoreFirstChanceGuardPage"]).ToLower() == "true")
@@ -333,6 +337,9 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			_waitForExitFailed = false;
 			_earlyExitFault = false;
 			_stopMessage = false;
+
+			if (_restartAfterFault && args.LastWasFault)
+				_FinishDebugger();
 
 			if (!_IsDebuggerRunning() && _startOnCall == null)
 				_StartDebugger();
@@ -545,6 +552,8 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 				_systemDebugger.StopDebugger();
 				_systemDebugger.StartDebugger();
+
+				OnInternalEvent(EventArgs.Empty);
 			}
 		}
 
@@ -741,6 +750,8 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			}
 
 			_debugger.StartDebugger();
+
+			OnInternalEvent(EventArgs.Empty);
 		}
 
 		void _debuggerProcess_ErrorDataReceived(object sender, DataReceivedEventArgs e)

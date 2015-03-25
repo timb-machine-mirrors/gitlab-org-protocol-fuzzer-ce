@@ -25,8 +25,6 @@
 
 // $Id$
 
-#if DISABLED
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -41,20 +39,35 @@ using Peach.Core.IO;
 
 namespace Peach.Pro.Core.Agent.Channels
 {
-	#region RestProxyPublisher
-
-	internal class RestProxyPublisher : Publisher
+	[Agent("http")]
+	public class AgentClientRest : AgentClient
 	{
-		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
-		protected override NLog.Logger Logger { get { return logger; } }
-
-		public string Url = null;
-		public string Agent { get; set; }
-		public string Class { get; set; }
-		public Dictionary<string, string> Args { get; set; }
+		#region Models
 
 		[Serializable]
-		public class CreatePublisherRequest
+		class JsonResponse
+		{
+			public string Status { get; set; }
+			public string Data { get; set; }
+			public Dictionary<string, object> Results { get; set; }
+		}
+
+		[Serializable]
+		class JsonFaultResponse
+		{
+			public string Status { get; set; }
+			public string Data { get; set; }
+			public Fault[] Results { get; set; }
+		}
+
+		[Serializable]
+		class JsonArgsRequest
+		{
+			public Dictionary<string, string> args { get; set; }
+		}
+
+		[Serializable]
+		class CreatePublisherRequest
 		{
 			public uint iteration { get; set; }
 			public bool isControlIteration { get; set; }
@@ -63,160 +76,26 @@ namespace Peach.Pro.Core.Agent.Channels
 		}
 
 		[Serializable]
-		public class RestProxyPublisherResponse
+		class RestProxyPublisherResponse
 		{
 			public bool error { get; set; }
 			public string errorString { get; set; }
 		}
 
-		public RestProxyPublisher(Dictionary<string, string> args)
-			: base(new Dictionary<string, Variant>())
-		{
-			Args = args;
-		}
-
-		public string Send(string query)
-		{
-			return Send(query, "");
-		}
-
-		public string Send(string query, Dictionary<string, Variant> args)
-		{
-			var newArg = new Dictionary<string, string>();
-
-			foreach (var kv in args)
-			{
-				// NOTE: cast to string, rather than .ToString() since
-				// .ToString() can include debugging information.
-				newArg.Add(kv.Key, (string)kv.Value);
-			}
-
-			JsonArgsRequest request = new JsonArgsRequest();
-			request.args = newArg;
-
-			return Send(query, JsonConvert.SerializeObject(request));
-		}
-
-		public string Send(string query, string json, bool restart = true)
-		{
-			try
-			{
-				var httpWebRequest = (HttpWebRequest)WebRequest.Create(Url + "/Publisher/" + query);
-				httpWebRequest.ContentType = "text/json";
-
-				if (string.IsNullOrEmpty(json))
-				{
-					httpWebRequest.Method = "GET";
-				}
-				else
-				{
-					httpWebRequest.Method = "POST";
-					using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
-					{
-						streamWriter.Write(json);
-					}
-				}
-
-				var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-
-				if (httpResponse.GetResponseStream() != null)
-				{
-					using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
-					{
-						var jsonResponse = streamReader.ReadToEnd();
-						var response = JsonConvert.DeserializeObject<RestProxyPublisherResponse>(jsonResponse);
-
-						if (response.error)
-						{
-							logger.Warn("Query \"" + query + "\" error: " + response.errorString);
-							RestartRemotePublisher();
-
-							jsonResponse = Send(query, json, false);
-							response = JsonConvert.DeserializeObject<RestProxyPublisherResponse>(jsonResponse);
-
-							if (response.error)
-							{
-								logger.Warn("Unable to restart connection");
-								throw new SoftException("Query \"" + query + "\" error: " + response.errorString);
-							}
-						}
-
-						return jsonResponse;
-					}
-				}
-				else
-				{
-					return "";
-				}
-			}
-			catch (SoftException)
-			{
-				throw;
-			}
-			catch (Exception e)
-			{
-				throw new SoftException("Failure communicating with REST Agent", e);
-			}
-		}
-
-		protected void RestartRemotePublisher()
-		{
-			logger.Debug("Restarting remote publisher");
-
-			CreatePublisherRequest request = new CreatePublisherRequest();
-			request.iteration = Iteration;
-			request.isControlIteration = IsControlIteration;
-			request.Cls = Class;
-			request.args = Args;
-
-			Send("CreatePublisher", JsonConvert.SerializeObject(request));
-		}
-
 		[Serializable]
-		public class IterationRequest
+		class IterationRequest
 		{
 			public uint iteration { get; set; }
 		}
 
 		[Serializable]
-		public class IsControlIterationRequest
+		class IsControlIterationRequest
 		{
 			public bool isControlIteration { get; set; }
 		}
 
-		protected override void OnStart()
-		{
-			Send("start");
-		}
-
-		protected override void OnStop()
-		{
-			Send("stop");
-		}
-
-		protected override void OnOpen()
-		{
-			var req1 = new IterationRequest { iteration = Iteration };
-			Send("Set_Iteration", JsonConvert.SerializeObject(req1));
-
-			var req2 = new IsControlIterationRequest { isControlIteration = IsControlIteration };
-			Send("Set_IsControlIteration", JsonConvert.SerializeObject(req2));
-
-			Send("open");
-		}
-
-		protected override void OnClose()
-		{
-			Send("close");
-		}
-
-		protected override void OnAccept()
-		{
-			Send("accept");
-		}
-
 		[Serializable]
-		public class OnCallArgument
+		class OnCallArgument
 		{
 			public string name { get; set; }
 			public byte[] data { get; set; }
@@ -224,211 +103,78 @@ namespace Peach.Pro.Core.Agent.Channels
 		}
 
 		[Serializable]
-		public class OnCallRequest
+		class OnCallRequest
 		{
 			public string method { get; set; }
 			public OnCallArgument[] args { get; set; }
 		}
 
 		[Serializable]
-		public class OnCallResponse : RestProxyPublisherResponse
+		class OnCallResponse : RestProxyPublisherResponse
 		{
 			public byte[] value { get; set; }
 		}
 
-		protected override Variant OnCall(string method, List<BitwiseStream> args)
-		{
-			var request = new OnCallRequest();
-
-			request.method = method;
-			request.args = new OnCallArgument[args.Count];
-
-			for (int cnt = 0; cnt < args.Count; cnt++)
-			{
-				request.args[cnt] = new OnCallArgument();
-				request.args[cnt].name = args[cnt].Name;
-				request.args[cnt].data = new byte[args[cnt].Length];
-				args[cnt].Read(request.args[cnt].data, 0, (int)args[cnt].Length);
-			}
-
-			var json = Send("call", JsonConvert.SerializeObject(request));
-			var response = JsonConvert.DeserializeObject<OnCallResponse>(json);
-
-			return new Variant(response.value);
-		}
-
 		[Serializable]
-		public class OnSetPropertyRequest
+		class OnSetPropertyRequest
 		{
 			public string property { get; set; }
 			public byte[] data { get; set; }
 		}
 
-		protected override void OnSetProperty(string property, Variant value)
-		{
-			// The Engine always gives us a BitStream but we can't remote that
-
-			var request = new OnSetPropertyRequest();
-
-			request.property = property;
-			request.data = (byte[])value;
-
-			Send("setProperty", JsonConvert.SerializeObject(request));
-		}
-
 		[Serializable]
-		public class OnGetPropertyResponse : RestProxyPublisherResponse
+		class OnGetPropertyResponse : RestProxyPublisherResponse
 		{
 			public byte[] value { get; set; }
 		}
 
-		protected override Variant OnGetProperty(string property)
-		{
-			var json = Send("getProperty",
-				JsonConvert.SerializeObject(property));
-			var response = JsonConvert.DeserializeObject<OnGetPropertyResponse>(json);
-			return new Variant(response.value);
-		}
-
 		[Serializable]
-		public class OnOutputRequest
+		class OnOutputRequest
 		{
 			public byte[] data { get; set; }
 		}
 
-		protected override void OnOutput(BitwiseStream data)
-		{
-			var request = new OnOutputRequest();
-			request.data = new byte[data.Length];
-			data.Read(request.data, 0, (int)data.Length);
-
-			data.Position = 0;
-
-			Send("output", JsonConvert.SerializeObject(request));
-		}
-
-		protected override void OnInput()
-		{
-			Send("input");
-			ReadAllBytes();
-		}
-
 		[Serializable]
-		public class WantBytesRequest
+		class WantBytesRequest
 		{
 			public long count { get; set; }
 		}
 
-		public override void WantBytes(long count)
-		{
-			var request = new WantBytesRequest();
-			request.count = count;
-
-			Send("WantBytes", JsonConvert.SerializeObject(request));
-			ReadAllBytes();
-		}
-
 		[Serializable]
-		public class ReadBytesRequest
+		class ReadBytesRequest
 		{
 			public int count { get; set; }
 		}
 
 		[Serializable]
-		public class ReadBytesResponse : RestProxyPublisherResponse
+		class ReadBytesResponse : RestProxyPublisherResponse
 		{
 			public byte[] data { get; set; }
 		}
 
-		public byte[] ReadBytes(int count)
-		{
-			var request = new ReadBytesRequest();
-			request.count = count;
-
-			var json = Send("ReadBytes", JsonConvert.SerializeObject(request));
-			var response = JsonConvert.DeserializeObject<ReadBytesResponse>(json);
-
-			return response.data;
-		}
-
 		[Serializable]
-		public class ReadRequest
+		class ReadRequest
 		{
 			public int offset { get; set; }
 			public int count { get; set; }
 		}
 		[Serializable]
-		public class ReadResponse : RestProxyPublisherResponse
+		class ReadResponse : RestProxyPublisherResponse
 		{
 			public int count { get; set; }
 			public byte[] data { get; set; }
 		}
 
-		public override int Read(byte[] buffer, int offset, int count)
-		{
-			var request = new ReadRequest();
-			request.offset = offset;
-			request.count = count;
-
-			var json = Send("Read", JsonConvert.SerializeObject(request));
-			var response = JsonConvert.DeserializeObject<ReadResponse>(json);
-
-			System.Array.Copy(response.data, buffer, response.count);
-
-			return response.count;
-		}
-
 		[Serializable]
-		public class ReadByteResponse : RestProxyPublisherResponse
+		class ReadByteResponse : RestProxyPublisherResponse
 		{
 			public int data { get; set; }
 		}
 
-		public override int ReadByte()
-		{
-			var json = Send("ReadByte");
-			var response = JsonConvert.DeserializeObject<ReadByteResponse>(json);
 
-			return response.data;
-		}
+		#endregion
 
-		public byte[] ReadAllBytes()
-		{
-			var json = Send("ReadAllBytes");
-			var response = JsonConvert.DeserializeObject<ReadBytesResponse>(json);
-
-			return response.data;
-		}
-	}
-
-	#endregion
-
-	[Serializable]
-	public class JsonResponse
-	{
-		public string Status { get; set; }
-		public string Data { get; set; }
-		public Dictionary<string, object> Results { get; set; }
-	}
-
-	[Serializable]
-	public class JsonFaultResponse
-	{
-		public string Status { get; set; }
-		public string Data { get; set; }
-		public Fault[] Results { get; set; }
-	}
-
-	[Serializable]
-	public class JsonArgsRequest
-	{
-		public Dictionary<string, string> args { get; set; }
-	}
-
-	[Agent("http")]
-	public class AgentClientRest : AgentClient
-	{
-		#region Publisher Proxy
+		#region IPublisher
 
 		class PublisherProxy : IPublisher
 		{
@@ -509,6 +255,263 @@ namespace Peach.Pro.Core.Agent.Channels
 			}
 
 			#endregion
+		}
+
+		#endregion
+
+		#region Publisher Proxy
+
+		class RestProxyPublisher : Publisher
+		{
+			private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+			protected override NLog.Logger Logger { get { return logger; } }
+
+			public string Url = null;
+			public string Agent { get; set; }
+			public string Class { get; set; }
+			public Dictionary<string, string> Args { get; set; }
+
+			public RestProxyPublisher(Dictionary<string, string> args)
+				: base(new Dictionary<string, Variant>())
+			{
+				Args = args;
+			}
+
+			public string Send(string query)
+			{
+				return Send(query, "");
+			}
+
+			public string Send(string query, Dictionary<string, Variant> args)
+			{
+				var newArg = new Dictionary<string, string>();
+
+				foreach (var kv in args)
+				{
+					// NOTE: cast to string, rather than .ToString() since
+					// .ToString() can include debugging information.
+					newArg.Add(kv.Key, (string)kv.Value);
+				}
+
+				JsonArgsRequest request = new JsonArgsRequest();
+				request.args = newArg;
+
+				return Send(query, JsonConvert.SerializeObject(request));
+			}
+
+			public string Send(string query, string json, bool restart = true)
+			{
+				try
+				{
+					var httpWebRequest = (HttpWebRequest)WebRequest.Create(Url + "/Publisher/" + query);
+					httpWebRequest.ContentType = "text/json";
+
+					if (string.IsNullOrEmpty(json))
+					{
+						httpWebRequest.Method = "GET";
+					}
+					else
+					{
+						httpWebRequest.Method = "POST";
+						using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+						{
+							streamWriter.Write(json);
+						}
+					}
+
+					var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+
+					if (httpResponse.GetResponseStream() != null)
+					{
+						using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+						{
+							var jsonResponse = streamReader.ReadToEnd();
+							var response = JsonConvert.DeserializeObject<RestProxyPublisherResponse>(jsonResponse);
+
+							if (response.error)
+							{
+								logger.Warn("Query \"" + query + "\" error: " + response.errorString);
+								RestartRemotePublisher();
+
+								jsonResponse = Send(query, json, false);
+								response = JsonConvert.DeserializeObject<RestProxyPublisherResponse>(jsonResponse);
+
+								if (response.error)
+								{
+									logger.Warn("Unable to restart connection");
+									throw new SoftException("Query \"" + query + "\" error: " + response.errorString);
+								}
+							}
+
+							return jsonResponse;
+						}
+					}
+					else
+					{
+						return "";
+					}
+				}
+				catch (SoftException)
+				{
+					throw;
+				}
+				catch (Exception e)
+				{
+					throw new SoftException("Failure communicating with REST Agent", e);
+				}
+			}
+
+			protected void RestartRemotePublisher()
+			{
+				logger.Debug("Restarting remote publisher");
+
+				CreatePublisherRequest request = new CreatePublisherRequest();
+				request.iteration = Iteration;
+				request.isControlIteration = IsControlIteration;
+				request.Cls = Class;
+				request.args = Args;
+
+				Send("CreatePublisher", JsonConvert.SerializeObject(request));
+			}
+
+			protected override void OnStart()
+			{
+				Send("start");
+			}
+
+			protected override void OnStop()
+			{
+				Send("stop");
+			}
+
+			protected override void OnOpen()
+			{
+				var req1 = new IterationRequest { iteration = Iteration };
+				Send("Set_Iteration", JsonConvert.SerializeObject(req1));
+
+				var req2 = new IsControlIterationRequest { isControlIteration = IsControlIteration };
+				Send("Set_IsControlIteration", JsonConvert.SerializeObject(req2));
+
+				Send("open");
+			}
+
+			protected override void OnClose()
+			{
+				Send("close");
+			}
+
+			protected override void OnAccept()
+			{
+				Send("accept");
+			}
+
+			protected override Variant OnCall(string method, List<BitwiseStream> args)
+			{
+				var request = new OnCallRequest();
+
+				request.method = method;
+				request.args = new OnCallArgument[args.Count];
+
+				for (int cnt = 0; cnt < args.Count; cnt++)
+				{
+					request.args[cnt] = new OnCallArgument();
+					request.args[cnt].name = args[cnt].Name;
+					request.args[cnt].data = new byte[args[cnt].Length];
+					args[cnt].Read(request.args[cnt].data, 0, (int)args[cnt].Length);
+				}
+
+				var json = Send("call", JsonConvert.SerializeObject(request));
+				var response = JsonConvert.DeserializeObject<OnCallResponse>(json);
+
+				return new Variant(response.value);
+			}
+
+			protected override void OnSetProperty(string property, Variant value)
+			{
+				// The Engine always gives us a BitStream but we can't remote that
+
+				var request = new OnSetPropertyRequest();
+
+				request.property = property;
+				request.data = (byte[])value;
+
+				Send("setProperty", JsonConvert.SerializeObject(request));
+			}
+
+			protected override Variant OnGetProperty(string property)
+			{
+				var json = Send("getProperty",
+					JsonConvert.SerializeObject(property));
+				var response = JsonConvert.DeserializeObject<OnGetPropertyResponse>(json);
+				return new Variant(response.value);
+			}
+
+			protected override void OnOutput(BitwiseStream data)
+			{
+				var request = new OnOutputRequest();
+				request.data = new byte[data.Length];
+				data.Read(request.data, 0, (int)data.Length);
+
+				data.Position = 0;
+
+				Send("output", JsonConvert.SerializeObject(request));
+			}
+
+			protected override void OnInput()
+			{
+				Send("input");
+				ReadAllBytes();
+			}
+
+			public override void WantBytes(long count)
+			{
+				var request = new WantBytesRequest();
+				request.count = count;
+
+				Send("WantBytes", JsonConvert.SerializeObject(request));
+				ReadAllBytes();
+			}
+
+			public byte[] ReadBytes(int count)
+			{
+				var request = new ReadBytesRequest();
+				request.count = count;
+
+				var json = Send("ReadBytes", JsonConvert.SerializeObject(request));
+				var response = JsonConvert.DeserializeObject<ReadBytesResponse>(json);
+
+				return response.data;
+			}
+
+			public override int Read(byte[] buffer, int offset, int count)
+			{
+				var request = new ReadRequest();
+				request.offset = offset;
+				request.count = count;
+
+				var json = Send("Read", JsonConvert.SerializeObject(request));
+				var response = JsonConvert.DeserializeObject<ReadResponse>(json);
+
+				System.Array.Copy(response.data, buffer, response.count);
+
+				return response.count;
+			}
+
+			public override int ReadByte()
+			{
+				var json = Send("ReadByte");
+				var response = JsonConvert.DeserializeObject<ReadByteResponse>(json);
+
+				return response.data;
+			}
+
+			public byte[] ReadAllBytes()
+			{
+				var json = Send("ReadAllBytes");
+				var response = JsonConvert.DeserializeObject<ReadBytesResponse>(json);
+
+				return response.data;
+			}
 		}
 
 		#endregion
@@ -622,7 +625,7 @@ namespace Peach.Pro.Core.Agent.Channels
 				DetectionSource = f.detectionSource,
 				MonitorName = f.monitorName,
 				Title = f.title,
-				Data = f.collectedData.ToDictionary(i => i.Key, i => i.Value),
+				Data = f.collectedData.ToDictionary(i => i.Key, i => (Stream)new MemoryStream(i.Value)),
 			};
 
 			if (f.type == FaultType.Fault)
@@ -720,5 +723,3 @@ namespace Peach.Pro.Core.Agent.Channels
 		#endregion
 	}
 }
-// end
-#endif

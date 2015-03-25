@@ -355,30 +355,55 @@ ORDER BY ef.faultcount DESC;
 
 CREATE VIEW view_datasets_iterations AS
 SELECT
+	[state],
+	[action],
+	parameter,
 	dataset,
 	sum(count) AS iterationcount
 FROM metrics_iterations
-GROUP BY dataset;
+GROUP BY 
+	[state],
+	[action],
+	parameter,
+	dataset
+;
 
 CREATE VIEW view_datasets_faults AS
 SELECT
+	[state],
+	[action],
+	parameter,
 	dataset,
 	count(distinct(bucket)) as bucketcount,
 	count(distinct(faultnumber)) as faultcount
 FROM metrics_faults
 WHERE bucket IN (SELECT id FROM view_buckets_major)
-GROUP BY dataset;
+GROUP BY 
+	[state],
+	[action],
+	parameter,
+	dataset
+;
 
 CREATE VIEW view_datasets AS
 SELECT
-	d.name as dataset,
+	CASE WHEN length(p.name) > 0 THEN
+		s.name || '.' || a.name || '.' || p.name || '/' || d.name
+	ELSE
+		s.name || '.' || a.name || '/' || d.name
+	END AS dataset,
 	di.iterationcount,
 	df.bucketcount,
 	df.faultcount
 FROM view_datasets_iterations AS di
 LEFT JOIN view_datasets_faults as df ON 
+	df.[state] = di.[state] AND
+	df.[action] = di.[action] AND
+	df.parameter = di.parameter AND
 	df.dataset = di.dataset
-JOIN datasets AS d ON 
-	d.id = di.dataset
+JOIN states     AS s ON s.id = di.[state]
+JOIN actions    AS a ON a.id = di.[action]
+JOIN parameters AS p ON p.id = di.parameter
+JOIN datasets   AS d ON d.id = di.dataset
 ORDER BY df.bucketcount DESC
 LIMIT 20;

@@ -11,6 +11,7 @@ namespace Peach.Core
 		public string description { get; private set; }
 		public bool required { get; private set; }
 		public string defaultValue { get; private set; }
+		public string ListDelimiter { get; set; }
 
 		/// <summary>
 		/// Constructs a REQUIRED parameter.
@@ -25,6 +26,7 @@ namespace Peach.Core
 			this.description = description;
 			this.required = true;
 			this.defaultValue = null;
+			this.ListDelimiter = ",";
 		}
 
 		/// <summary>
@@ -44,6 +46,7 @@ namespace Peach.Core
 			this.description = description;
 			this.required = false;
 			this.defaultValue = defaultValue;
+			this.ListDelimiter = ",";
 		}
 	}
 

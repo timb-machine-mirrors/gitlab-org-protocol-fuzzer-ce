@@ -248,8 +248,10 @@ namespace Peach.Core.Dom
 			context.handleCommonDataElementChildren(node, str);
 			context.handleCommonDataElementValue(node, str);
 
+			// Run sanatize() once attributes have been parsed
+
 			if (!node.hasAttr("value"))
-				str.DefaultValue = new Variant("");
+				str.DefaultValue = str._defaultValue;
 
 			return str;
 		}
@@ -291,7 +293,7 @@ namespace Peach.Core.Dom
 
 		private string Sanitize(Variant value)
 		{
-			string final = null;
+			string final;
 
 			if (value.GetVariantType() == Variant.VariantType.ByteString)
 			{
@@ -304,7 +306,7 @@ namespace Peach.Core.Dom
 					throw new PeachException("Error, " + debugName + " value contains invalid " + stringType + " bytes.", ex);
 				}
 			}
-			if (value.GetVariantType() == Variant.VariantType.BitStream)
+			else if (value.GetVariantType() == Variant.VariantType.BitStream)
 			{
 				try
 				{
