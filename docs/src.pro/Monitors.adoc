@@ -1,40 +1,48 @@
+<<<
 [[Monitors]]
 == Monitors
 
 xref:Agent[Agents] are special Peach processes that can be run locally or remote. These processes host one or more Monitors that can perform such actions as attaching debuggers, watching memory consumption, and detecting faults.
  
-.Monitors and Operating Systems 
-[options="header",halign="center"] 
-|==========================================================
-|Monitor    |Linux|OSX|Windows
-|xref:Monitors_Android[Android Monitor]|X|X|X
-|xref:Monitors_AndroidEmulator[Android Emulator Monitor]|X|X|X
-|xref:Monitors_ButtonClicker[Windows ButtonClicker Monitor]|||X
-|xref:Monitors_CanaKitRelay[CanaKit Relay Monitor]|X|X|X
-|xref:Monitors_CleanupFolder[Cleanup Folder Monitor]|X|X|X
-|xref:Monitors_CleanupRegistry[Cleanup Registry Monitor]|||X
-|xref:Monitors_CrashReporter[OS X Crash Reporter Monitor]||X|
-|xref:Monitors_CrashWrangler[OS X Crash Wrangler Monitor]||X|
-|xref:Monitors_IpPower9258[IpPower9258 Monitor]|X|X|X
-|xref:Monitors_LinuxCrash[Linux Crash Monitor]|X||
-|xref:Monitors_LinuxDebugger[Linux Debugger Monitor]|X||
-|xref:Monitors_MemoryMonitor[Memory Monitor]|X|X|X
-|xref:Monitors_PageHeap[Page Heap Monitor]|||X
-|xref:Monitors_Pcap[Pcap Network Monitor]|X|X|X
-|xref:Monitors_Ping[Ping Monitor]|X|X|X
-|xref:Monitors_PopupWatcher[Popup Watcher Monitor]|||X
-|xref:Monitors_Process[Process Launcher Monitor]|X|X|X
-|xref:Monitors_ProcessKiller[Process Killer Monitor]|X|X|X
-|xref:Monitors_RunCommand[Run Command Monitor]|X|X|X
-|xref:Monitors_SaveFile[Save File Monitor]|X|X|X
-|xref:Monitors_Serial[Serial Port Monitor]|X|X|X
-|xref:Monitors_Socket[Socket Listener Monitor]|X|X|X
-|xref:Monitors_SshCommand[SSH Command Monitor]|X|X|X
-|xref:Monitors_SshDownloader[SSH Downloader Monitor]|X|X|X
-|xref:Monitors_Syslog[Syslog Monitor]|X|X|X
-|xref:Monitors_TcpPort[TcpPort Monitor]|X|X|X
-|xref:Monitors_Vmware[Vmware Control Monitor]|X|X|X
-|xref:Monitors_WindowsDebugger[Windows Debugger Monitor]|||X
-|xref:Monitors_WindowsService[Windows Service Monitor]|||X
-|==========================================================
+The following table lists each monitor by name, function type (Fault detection, Data collection, Automation), and by the operating systems that support the monitor. If the operating systems column is blank for an entry, that monitor is available in all supported operating systems.
 
+// Table categories:
+//    * Monitor Name
+//    * Monitor functions (Fault detection, Data collection, Automation)
+//    * Operating systems (Linux, OS X, Windows)
+
+.Monitors
+
+[cols="3,1,1,1,1,3" options="header",halign="center"] 
+|==========================================================
+|Monitor    |Detect Fault  |Collect Data  |Automate  |  |Operating Systems footnote:[When an operating system is listed, the monitor is available only for the listed operating system. A blank entry indicates the monitor is available for Windows, Linux, and OS X operating systems.]
+|xref:Monitors_Android[Android]                  |X   |    |X   |  |
+|xref:Monitors_AndroidEmulator[Android Emulator] |X   |    |X   |  |
+|xref:Monitors_ButtonClicker[ButtonClicker]      |    |    |X   |  |Windows
+|xref:Monitors_CanaKitRelay[CanaKit Relay]       |    |    |X   |  |
+|xref:Monitors_CleanupFolder[Cleanup Folder]     |    |    |X   |  |
+|xref:Monitors_CleanupRegistry[Cleanup Registry] |    |    |X   |  |Windows
+|xref:Monitors_CrashReporter[Crash Reporter]     |X   |X   |    |  |OS X
+|xref:Monitors_CrashWrangler[Crash Wrangler]     |X   |    |X   |  |OS X
+|xref:Monitors_IpPower9258[IpPower9258]          |    |    |X   |  |
+|xref:Monitors_LinuxCrash[Crash]                 |X   |X   |    |  |Linux
+|xref:Monitors_LinuxDebugger[Linux Debugger]     |X   |X   |X   |  |Linux
+|xref:Monitors_MemoryMonitor[Memory]             |X   |    |    |  |
+|xref:Monitors_PageHeap[Page Heap]               |X   |    |    |  |Windows
+|xref:Monitors_Pcap[Pcap Network]                |X   |X   |    |  |
+|xref:Monitors_Ping[Ping]                        |X   |    |    |  |
+|xref:Monitors_PopupWatcher[Popup Watcher]       |X   |    |    |  |Windows
+|xref:Monitors_Process[Process Launcher]         |X   |    |X   |  |
+|xref:Monitors_ProcessKiller[Process Killer]     |    |    |X   |  |
+|xref:Monitors_RunCommand[Run Command]           |X   |X   |X   |  |
+|xref:Monitors_SaveFile[Save File]               |    |X   |X   |  |
+|xref:Monitors_Serial[Serial Port]               |X   |X   |X   |  |
+|xref:Monitors_Socket[Socket Listener]           |X   |    |    |  |
+|xref:Monitors_SshCommand[SSH Command]           |X   |X   |X   |  |
+|xref:Monitors_SshDownloader[SSH Downloader]     |    |X   |X   |  |
+|xref:Monitors_Syslog[Syslog]                    |X   |X   |    |  |
+|xref:Monitors_TcpPort[TcpPort]                  |X   |X   |X   |  |
+|xref:Monitors_Vmware[Vmware Control]            |X   |    |X   |  |
+|xref:Monitors_WindowsDebugger[Windows Debugger] |X   |X   |X   |  |Windows
+|xref:Monitors_WindowsService[Windows Service]   |X   |    |X   |  |Windows
+|==========================================================

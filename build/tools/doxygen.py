@@ -224,7 +224,8 @@ def process_doxy(self):
 	# the task instance
 	dsk = self.create_task('doxygen', node)
 
-	inst = self.bld.install_files('${BINDIR}', [], cwd = node.parent, relative_trick = True, chmod = Utils.O644)
+	inst_to = getattr(self, 'install_path', '${BINDIR}')
+	inst = self.bld.install_files(inst_to, [], cwd = node.parent, relative_trick = True, chmod = Utils.O644)
 
 	if inst:
 		inst.doxy_tsk = dsk

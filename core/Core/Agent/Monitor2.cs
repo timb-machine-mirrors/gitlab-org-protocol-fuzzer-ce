@@ -52,16 +52,17 @@ namespace Peach.Core.Agent
 			Class = GetType().GetAttributes<MonitorAttribute>().First().Name;
 		}
 
+		[Flags]
 		public enum MonitorWhen
 		{
-			DetectFault,
-			OnCall,
-			OnStart,
-			OnEnd,
-			OnIterationStart,
-			OnIterationEnd,
-			OnFault,
-			OnIterationStartAfterFault
+			DetectFault = 0x01,
+			OnCall = 0x02,
+			OnStart = 0x04,
+			OnEnd = 0x08,
+			OnIterationStart = 0x10,
+			OnIterationEnd = 0x20,
+			OnFault = 0x40,
+			OnIterationStartAfterFault = 0x80
 		};
 
 		/// <summary>

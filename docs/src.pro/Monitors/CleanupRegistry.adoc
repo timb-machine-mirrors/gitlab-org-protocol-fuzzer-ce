@@ -1,9 +1,10 @@
+:images: ../images
 <<<
 [[Monitors_CleanupRegistry]]
 == CleanupRegistry Monitor (Windows)
 
 The _CleanupRegistry_ monitor removes a specified registry key, or removes the child keys of a specified 
-registry key. Cleanup occurs at the start of a fuzzing session and before every iteration.
+registry key. This monitor runs in the Windows operating system. Cleanup occurs at the start of a fuzzing session and before every iteration.
 
 === Parameters
 

@@ -308,7 +308,8 @@ namespace Peach.Core.Xsd
 		/// Specifies the length in bits of the flag set.
 		/// </summary>
 		[XmlAttribute]
-		public uint size { get; set; }
+		[DefaultValue(null)]
+		public uint? size { get; set; }
 	}
 
 	/// <summary>
