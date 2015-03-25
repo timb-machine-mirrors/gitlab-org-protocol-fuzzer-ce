@@ -1,8 +1,13 @@
+:images: ../images
 <<<
 [[Monitors_Socket]]
 == Socket Monitor
 
-The _Socket_ monitor waits for an incoming TCP or UDP connection. If a connection is accepted, _Socket_ raises a fault.
+The _Socket_ monitor waits for an incoming TCP or UDP connection. This monitor accepts 
+a point-to-point connection to a single host or a multicast connection where the host broadcasts to 
+one or more clients. Multicast connections are not supported when using the TCP protocol.
+
+If a connection is accepted, _Socket_ raises a fault if the +FaultOnSuccess+ parameter is specified.
 
 === Parameters
 

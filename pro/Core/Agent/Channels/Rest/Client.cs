@@ -18,7 +18,7 @@ using Logger = NLog.Logger;
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
 
-	[Agent("http")]
+	[Agent("tcp")]
 	public class Client : AgentClient
 	{
 		#region Publisher Proxy
@@ -277,12 +277,12 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		private readonly Uri _baseUrl;
 		private readonly List<PublisherProxy> _publishers;
 		private readonly CookieContainer _cookies;
+		private readonly LogSink _sink;
 
 		private ConnectRequest _connectReq;
 		private ConnectResponse _connectResp;
 		private Uri _agentUri;
 		private bool _offline;
-		private LogSink _sink;
 
 		public Client(string name, string uri, string password)
 			: base(name, uri, password)

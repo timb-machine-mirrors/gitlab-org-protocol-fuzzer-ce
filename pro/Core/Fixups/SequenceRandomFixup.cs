@@ -46,6 +46,8 @@ namespace Peach.Pro.Core.Fixups
 		public SequenceRandomFixup(DataElement parent, Dictionary<string, Variant> args)
 			: base(parent, args)
 		{
+			if (parent is Peach.Core.Dom.String)
+				parent.DefaultValue = new Variant(0);
 		}
 
 		protected override Variant OnActionRun(RunContext ctx)

@@ -278,5 +278,38 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			Assert.AreEqual(0, faults.Length);
 		}
+
+		[Test]
+		public void TestRestartAfterFault()
+		{
+			var startCount = 0;
+			var iteration = 0;
+
+			var runner = new MonitorRunner("Process", new Dictionary<string, string>
+			{
+				{ "Executable", "CrashableServer" },
+				{ "Arguments", "127.0.0.1 0" },
+				{ "RestartAfterFault", "true" },
+			})
+			{
+				StartMonitor = (m, args) =>
+				{
+					m.InternalEvent += (s, e) => ++startCount;
+					m.StartMonitor(args);
+				},
+				DetectedFault = m =>
+				{
+					Assert.False(m.DetectedFault(), "Should not have detected a fault");
+
+					return ++iteration == 2;
+				}
+			}
+			;
+
+			var faults = runner.Run(5);
+
+			Assert.AreEqual(0, faults.Length);
+			Assert.AreEqual(2, startCount);
+		}
 	}
 }
