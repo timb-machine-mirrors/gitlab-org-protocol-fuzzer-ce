@@ -244,7 +244,12 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.Greater(job.IterationCount, count);
 		}
 
-		// TODO: PitTester
+		[Test]
+		public void TestPitTester()
+		{
+
+		}
+
 		// TODO: Fatal error reporting (ensure no restarts):
 		//       Pit parser failure
 		//       Control iteration failure

@@ -5,6 +5,7 @@ using Peach.Pro.Core.WebServices.Models;
 using Dapper;
 using Peach.Core;
 using System.IO;
+using System.Linq;
 
 namespace Peach.Pro.Core.Storage
 {
@@ -126,6 +127,11 @@ INSERT INTO FaultFile (
 	@Size
 );" + SqlGetLastRowId;
 
+		const string SqlSelectFaultById = @"
+SELECT * FROM FaultDetail WHERE Id = @Id;
+SELECT * FROM FaultFile WHERE FaultDetailId = @Id;
+";
+
 
 		#endregion
 
@@ -229,6 +235,23 @@ INSERT INTO FaultFile (
 				file.FaultDetailId = fault.Id;
 			}
 			Connection.Execute(SqlInsertFaultFile, fault.Files);
+		}
+
+		public FaultDetail GetFaultById(long id)
+		{
+			using (var multi = Connection.QueryMultiple(SqlSelectFaultById, new { Id = id }))
+			{
+				var fault = multi.Read<FaultDetail>().SingleOrDefault();
+				fault.Files = multi.Read<FaultFile>().ToList();
+				return fault;
+			}
+		}
+
+		public FaultFile GetFaultFileById(long id)
+		{
+			const string sql = "SELECT * FROM FaultFile WHERE Id = @Id";
+			return Connection.Query<FaultFile>(sql, new { Id = id })
+				.SingleOrDefault();
 		}
 
 		public IEnumerable<StateMetric> QueryStates()

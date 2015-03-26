@@ -4,6 +4,8 @@ using Nancy.ModelBinding;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.Core.Storage;
 using System.Linq;
+using System.IO;
+using Peach.Pro.Core.WebServices.Utility;
 
 namespace Peach.Pro.Core.WebServices
 {
@@ -14,15 +16,22 @@ namespace Peach.Pro.Core.WebServices
 		public JobService(WebContext context)
 			: base(context, Prefix)
 		{
+			Post[""] = _ => CreateJob();
 			Get[""] = _ => GetJobs();
+
 			Get["/{id}"] = _ => GetJob(_.id);
 			Delete["/{id}"] = _ => DeleteJob(_.id);
+
 			Get["/{id}/nodes"] = _ => GetNodes(_.id);
+
 			Get["/{id}/faults"] = _ => GetFaults(_.id);
+			Get["/{id}/faults/{fid}"] = _ => GetFault(_.id, _.fid);
+			Get["/{id}/faults/{fid}/data/{did}"] = _ => GetFaultData(_.id, _.fid, _.did);
+			Get["/{id}/faults/{fid}/archive"] = _ => GetFaultArchive(_.id, _.fid);
+
 			// deprecated
 			Get["/{id}/visualizer"] = _ => GetVisualizer(_.id);
 
-			Post[""] = _ => CreateJob();
 
 			Get["/{id}/continue"] = _ => ContinueJob(_.id);
 			Get["/{id}/pause"] = _ => PauseJob(_.id);
@@ -99,7 +108,7 @@ namespace Peach.Pro.Core.WebServices
 				var liveJob = JobRunner.Instance.Job;
 				if (liveJob != null)
 					jobs.Insert(0, liveJob);
-				
+
 				return Response.AsJson(jobs.Select(LoadJob));
 			}
 		}
@@ -110,7 +119,7 @@ namespace Peach.Pro.Core.WebServices
 			var liveJob = JobRunner.Instance.Job;
 			if (liveJob != null && liveJob.Guid == id)
 				return Response.AsJson(LoadJob(liveJob));
-				
+
 			// otherwise grab historical data
 			using (var db = new NodeDatabase())
 			{
@@ -139,8 +148,40 @@ namespace Peach.Pro.Core.WebServices
 				// ReSharper disable once RedundantEnumerableCastCall
 				var faults = db.LoadTable<FaultDetail>()
 					.OfType<FaultSummary>();
-				return Response.AsJson(faults);
+				return Response.AsJson(faults.Select(LoadFaultSummary));
 			}
+		}
+
+		Response GetFault(Guid id, long faultId)
+		{
+			using (var db = new JobDatabase(id))
+			{
+				var fault = db.GetFaultById(faultId);
+				if (fault == null)
+					return HttpStatusCode.NotFound;
+				return Response.AsJson(LoadFault(fault));
+			}
+		}
+
+		Response GetFaultData(Guid id, long faultId, long fileId)
+		{
+			FaultFile file;
+			using (var db = new JobDatabase(id))
+			{
+				file = db.GetFaultFileById(fileId);
+				if (file == null)
+					return HttpStatusCode.NotFound;
+			}
+
+			var dir = JobDatabase.GetStorageDirectory(id);
+			var path = Path.Combine(dir, file.FullName);
+			var fs = File.OpenRead(path);
+			return Response.AsStream(() => fs, "application/octet-stream");
+		}
+
+		Response GetFaultArchive(Guid id, long faultId)
+		{
+			return null;
 		}
 
 		[Obsolete]
@@ -191,6 +232,33 @@ namespace Peach.Pro.Core.WebServices
 			};
 
 			return job;
+		}
+
+		FaultSummary LoadFaultSummary(FaultSummary fault)
+		{
+			fault.FaultUrl = "";
+			return fault;
+		}
+
+		FaultDetail LoadFault(FaultDetail fault)
+		{
+			LoadFaultSummary(fault);
+			fault.NodeUrl = "";
+			fault.PeachUrl = "";
+			fault.PitUrl = "";
+			fault.TargetConfigUrl = "";
+			fault.TargetUrl = "";
+			foreach (var file in fault.Files)
+			{
+				LoadFile(file);
+			}
+			return fault;
+		}
+
+		FaultFile LoadFile(FaultFile file)
+		{
+			file.FileUrl = "";
+			return file;
 		}
 
 		static string MakeUrl(params string[] args)

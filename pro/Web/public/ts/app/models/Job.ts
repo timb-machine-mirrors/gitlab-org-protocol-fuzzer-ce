@@ -94,8 +94,6 @@ module Peach {
 		rangeStart?: number;
 		rangeStop?: number;
 
-		hasMetrics?: boolean;
-
 		result?: string;
 	}
 
