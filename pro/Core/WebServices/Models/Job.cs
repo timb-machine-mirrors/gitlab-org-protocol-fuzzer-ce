@@ -296,6 +296,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// Indicates if metrics are being collected for the job
 		/// </summary>
+		[Obsolete]
 		public bool HasMetrics { get; set; }
 	}
 }

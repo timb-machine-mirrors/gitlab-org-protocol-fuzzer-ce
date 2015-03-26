@@ -72,7 +72,8 @@ namespace Peach.Pro.Core.Storage
 
 				foreach (var pi in type.GetProperties())
 				{
-					if (pi.HasAttribute<NotMappedAttribute>())
+					if (pi.HasAttribute<NotMappedAttribute>() ||
+						pi.HasAttribute<ObsoleteAttribute>())
 						continue;
 
 					var decls = new HashSet<string>();

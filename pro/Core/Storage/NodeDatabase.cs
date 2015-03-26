@@ -34,8 +34,7 @@ INSERT INTO [Job] (
 	Speed,
 	FaultCount,
 	RangeStart,
-	RangeStop,
-	HasMetrics
+	RangeStop
 ) VALUES (
 	@Id,
 	@Status,
@@ -52,8 +51,7 @@ INSERT INTO [Job] (
 	@Speed,
 	@FaultCount,
 	@RangeStart,
-	@RangeStop,
-	@HasMetrics
+	@RangeStop
 );";
 
 		const string SqlUpdateJob = @"
@@ -73,8 +71,7 @@ SET
 	Speed = @Speed,
 	FaultCount = @FaultCount,
 	RangeStart = @RangeStart,
-	RangeStop = @RangeStop,
-	HasMetrics = @HasMetrics
+	RangeStop = @RangeStop
 WHERE
 	Id = @Id
 ;";
