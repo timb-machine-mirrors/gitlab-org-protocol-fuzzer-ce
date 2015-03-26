@@ -23,6 +23,8 @@ namespace Peach.Pro.Core.Runtime
 
 	class JobWatcher : Watcher
 	{
+		static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
 		readonly Job _job;
 		readonly string _logPath;
 		readonly MetricsCache _cache;
@@ -105,26 +107,26 @@ namespace Peach.Pro.Core.Runtime
 			_states.Clear();
 			_cache.IterationStarting(context.currentIteration);
 
-			// TODO: rate throttle
-			using (var db = new JobDatabase(_job.Guid))
+			if (context.reproducingFault)
 			{
-				if (context.reproducingFault)
+				if (context.reproducingIterationJumpCount == 0)
 				{
-					if (context.reproducingIterationJumpCount == 0)
-					{
-						Debug.Assert(context.reproducingInitialIteration == currentIteration);
-						_job.Mode = JobMode.Reproducing;
-					}
-					else
-					{
-						_job.Mode = JobMode.Searching;
-					}
+					Debug.Assert(context.reproducingInitialIteration == currentIteration);
+					_job.Mode = JobMode.Reproducing;
 				}
 				else
 				{
-					_job.Mode = JobMode.Fuzzing;
+					_job.Mode = JobMode.Searching;
 				}
+			}
+			else
+			{
+				_job.Mode = JobMode.Fuzzing;
+			}
 
+			// TODO: rate throttle
+			using (var db = new JobDatabase(_job.Guid))
+			{
 				db.UpdateJob(_job);
 			}
 		}
@@ -143,45 +145,6 @@ namespace Peach.Pro.Core.Runtime
 
 				_cache.IterationFinished();
 			}
-		}
-
-		protected override void Engine_Fault(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faults)
-		{
-			var fault = CombineFaults(currentIteration, stateModel, faults);
-
-			if (_reproFault != null)
-			{
-				// Save reproFault toSave in fault
-				foreach (var kv in _reproFault.toSave)
-				{
-					var key = Path.Combine("Initial", _reproFault.iteration.ToString(), kv.Key);
-					fault.toSave.Add(key, kv.Value);
-				}
-
-				_reproFault = null;
-			}
-
-			SaveFault(context, Category.Faults, fault);
-		}
-
-		protected override void Engine_ReproFault(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faults)
-		{
-			Debug.Assert(_reproFault == null);
-
-			_reproFault = CombineFaults(currentIteration, stateModel, faults);
-			SaveFault(context, Category.Reproducing, _reproFault);
-		}
-
-		protected override void Engine_ReproFailed(RunContext context, uint currentIteration)
-		{
-			Debug.Assert(_reproFault != null);
-
-			// Update the searching ranges for the fault
-			_reproFault.iterationStart = context.reproducingInitialIteration - context.reproducingIterationJumpCount;
-			_reproFault.iterationStop = _reproFault.iteration;
-
-			SaveFault(context, Category.NonReproducable, _reproFault);
-			_reproFault = null;
 		}
 
 		protected override void StateStarting(RunContext context, Peach.Core.Dom.State state)
@@ -266,10 +229,55 @@ namespace Peach.Pro.Core.Runtime
 				data.selectedData != null ? data.selectedData.Name : "");
 		}
 
+		protected override void Engine_ReproFault(
+			RunContext context, 
+			uint currentIteration, 
+			StateModel stateModel, 
+			Fault[] faults)
+		{
+			Debug.Assert(_reproFault == null);
+			_reproFault = CombineFaults(currentIteration, stateModel, faults);
+		}
+
+		protected override void Engine_Fault(
+			RunContext context, 
+			uint currentIteration, 
+			StateModel stateModel, 
+			Fault[] faults)
+		{
+			var fault = CombineFaults(currentIteration, stateModel, faults);
+
+			if (_reproFault != null)
+			{
+				// Save reproFault toSave in fault
+				foreach (var kv in _reproFault.toSave)
+				{
+					var key = Path.Combine("Initial", kv.Key);
+					fault.toSave.Add(key, kv.Value);
+				}
+
+				_reproFault = null;
+			}
+
+			SaveFault(context, fault);
+		}
+
+		protected override void Engine_ReproFailed(RunContext context, uint currentIteration)
+		{
+			Debug.Assert(_reproFault != null);
+
+			// Update the searching ranges for the fault
+			_reproFault.iterationStart = context.reproducingInitialIteration - context.reproducingIterationJumpCount;
+			_reproFault.iterationStop = _reproFault.iteration;
+
+			SaveFault(context, _reproFault);
+			_reproFault = null;
+		}
+
 		private Fault CombineFaults(uint currentIteration, StateModel stateModel, Fault[] faults)
 		{
 			// The combined fault will use toSave and not collectedData
-			var ret = new Fault() { collectedData = null };
+			var ret = new Fault { collectedData = null };
 
 			Fault coreFault = null;
 			var dataFaults = new List<Fault>();
@@ -278,10 +286,7 @@ namespace Peach.Pro.Core.Runtime
 			foreach (var fault in faults)
 			{
 				if (fault.type == FaultType.Fault)
-				{
 					coreFault = fault;
-					//logger.Debug("Found core fault [" + coreFault.title + "]");
-				}
 				else
 					dataFaults.Add(fault);
 			}
@@ -292,15 +297,12 @@ namespace Peach.Pro.Core.Runtime
 			// Gather up data from the state model
 			foreach (var item in stateModel.dataActions)
 			{
-				//logger.Debug("Saving action: " + item.Key);
 				ret.toSave.Add(item.Key, item.Value);
 			}
 
 			// Write out all collected data information
 			foreach (var fault in faults)
 			{
-				//logger.Debug("Saving fault: " + fault.title);
-
 				foreach (var kv in fault.collectedData)
 				{
 					var fileName = string.Join(".", new[]
@@ -329,10 +331,15 @@ namespace Peach.Pro.Core.Runtime
 			// Copy over information from the core fault
 			if (coreFault.folderName != null)
 				ret.folderName = coreFault.folderName;
-			else if (coreFault.majorHash == null && coreFault.minorHash == null && coreFault.exploitability == null)
+			else if (coreFault.majorHash == null && 
+				coreFault.minorHash == null && 
+				coreFault.exploitability == null)
 				ret.folderName = "Unknown";
 			else
-				ret.folderName = string.Format("{0}_{1}_{2}", coreFault.exploitability, coreFault.majorHash, coreFault.minorHash);
+				ret.folderName = "{0}_{1}_{2}".Fmt(
+					coreFault.exploitability, 
+					coreFault.majorHash, 
+					coreFault.minorHash);
 
 			// Save all states, actions, data sets, mutations
 			var settings = new JsonSerializerSettings()
@@ -364,7 +371,7 @@ namespace Peach.Pro.Core.Runtime
 			return ret;
 		}
 
-		void SaveFault(RunContext context, Category category, Fault fault)
+		void SaveFault(RunContext context, Fault fault)
 		{
 			var now = DateTime.UtcNow;
 
@@ -373,12 +380,13 @@ namespace Peach.Pro.Core.Runtime
 					fault.minorHash, 
 					fault.exploitability 
 				}.Where(s => !string.IsNullOrEmpty(s)));
+
 			if (fault.folderName != null)
 				bucket = fault.folderName;
 			else if (string.IsNullOrEmpty(bucket))
 				bucket = "Unknown";
 
-			var entity = new FaultDetail
+			var faultDetail = new FaultDetail
 			{
 				Files = new List<FaultFile>(),
 				Iteration = fault.iteration,
@@ -396,19 +404,15 @@ namespace Peach.Pro.Core.Runtime
 				IterationStop = fault.iterationStop,
 			};
 
-			// root/category/bucket/iteration
-			var subDir = Path.Combine(
-				category.ToString(),
-				fault.folderName,
-				fault.iteration.ToString());
+			var dir = fault.iteration.ToString("X8");
 
 			foreach (var item in fault.toSave)
 			{
-				var fullName = Path.Combine(subDir, item.Key);
+				var fullName = Path.Combine(dir, item.Key);
 				var path = Path.Combine(_logPath, fullName);
 				var size = SaveFile(path, item.Value);
 
-				entity.Files.Add(new FaultFile
+				faultDetail.Files.Add(new FaultFile
 				{
 					Name = Path.GetFileName(fullName),
 					FullName = fullName,
@@ -416,24 +420,9 @@ namespace Peach.Pro.Core.Runtime
 				});
 			}
 
-			if (category == Category.Reproducing)
-				return;
-
-			// Ensure any past saving of this fault as Reproducing has been cleaned up
-			var reproDir = Path.Combine(
-				_logPath,
-				Category.Reproducing.ToString());
-
-			if (Directory.Exists(reproDir))
-			{
-				try { Directory.Delete(reproDir, true); }
-				// Can happen if a process has a file/subdirectory open...
-				catch (IOException) { }
-			}
-
 			using (var db = new JobDatabase(_job.Guid))
 			{
-				db.InsertFault(entity);
+				db.InsertFault(faultDetail);
 				_cache.OnFault(new FaultMetric
 				{
 					Iteration = fault.iteration,

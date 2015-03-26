@@ -1,6 +1,8 @@
 using System;
+using Ionic.Zip;
 using Nancy;
 using Nancy.ModelBinding;
+using Peach.Core;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.Core.Storage;
 using System.Linq;
@@ -26,7 +28,7 @@ namespace Peach.Pro.Core.WebServices
 
 			Get["/{id}/faults"] = _ => GetFaults(_.id);
 			Get["/{id}/faults/{fid}"] = _ => GetFault(_.id, _.fid);
-			Get["/{id}/faults/{fid}/data/{did}"] = _ => GetFaultData(_.id, _.fid, _.did);
+			Get["/{id}/faults/{fid}/data/{did}"] = _ => GetFaultData(_.id, _.did);
 			Get["/{id}/faults/{fid}/archive"] = _ => GetFaultArchive(_.id, _.fid);
 
 			// deprecated
@@ -163,7 +165,7 @@ namespace Peach.Pro.Core.WebServices
 			}
 		}
 
-		Response GetFaultData(Guid id, long faultId, long fileId)
+		Response GetFaultData(Guid id, long fileId)
 		{
 			FaultFile file;
 			using (var db = new JobDatabase(id))
@@ -175,13 +177,27 @@ namespace Peach.Pro.Core.WebServices
 
 			var dir = JobDatabase.GetStorageDirectory(id);
 			var path = Path.Combine(dir, file.FullName);
-			var fs = File.OpenRead(path);
-			return Response.AsStream(() => fs, "application/octet-stream");
+			return Response.AsStream(() => File.OpenRead(path), "application/octet-stream");
 		}
 
 		Response GetFaultArchive(Guid id, long faultId)
 		{
-			return null;
+			FaultDetail fault;
+			using (var db = new JobDatabase(id))
+			{
+				fault = db.GetFaultById(faultId, false);
+			}
+	
+			var dir = fault.Iteration.ToString("X8");
+			var dirInArchive = "Fault-{0}".Fmt(fault.Iteration);
+			var filename = "{0}.zip".Fmt(dirInArchive);
+
+			return Response.AsZip(filename, () =>
+			{
+				var zip = new ZipFile();
+				zip.AddDirectory(dir, dirInArchive);
+				return zip;
+			});
 		}
 
 		[Obsolete]

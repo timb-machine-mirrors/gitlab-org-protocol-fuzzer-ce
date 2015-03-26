@@ -127,8 +127,11 @@ INSERT INTO FaultFile (
 	@Size
 );" + SqlGetLastRowId;
 
-		const string SqlSelectFaultById = @"
+		const string SqlSelectFaultDetailById = @"
 SELECT * FROM FaultDetail WHERE Id = @Id;
+";
+
+		const string SqlSelectFaultFilesById = @"
 SELECT * FROM FaultFile WHERE FaultDetailId = @Id;
 ";
 
@@ -237,14 +240,22 @@ SELECT * FROM FaultFile WHERE FaultDetailId = @Id;
 			Connection.Execute(SqlInsertFaultFile, fault.Files);
 		}
 
-		public FaultDetail GetFaultById(long id)
+		public FaultDetail GetFaultById(long id, bool loadFiles = true)
 		{
-			using (var multi = Connection.QueryMultiple(SqlSelectFaultById, new { Id = id }))
+			if (loadFiles)
 			{
-				var fault = multi.Read<FaultDetail>().SingleOrDefault();
-				fault.Files = multi.Read<FaultFile>().ToList();
-				return fault;
+				const string sql = SqlSelectFaultDetailById + SqlSelectFaultFilesById;
+				using (var multi = Connection.QueryMultiple(sql, new { Id = id }))
+				{
+					var fault = multi.Read<FaultDetail>().SingleOrDefault();
+					if (fault == null)
+						return null;
+					fault.Files = multi.Read<FaultFile>().ToList();
+					return fault;
+				}
 			}
+			return Connection.Query<FaultDetail>(SqlSelectFaultDetailById, new { Id = id })
+				.SingleOrDefault();
 		}
 
 		public FaultFile GetFaultFileById(long id)

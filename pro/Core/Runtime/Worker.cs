@@ -132,7 +132,7 @@ namespace Peach.Pro.Core.Runtime
 		void RunJob(string pitFile)
 		{
 			if (!_guid.HasValue)
-				throw new SyntaxException("The '--guid' argument is required.");
+				_guid = Guid.NewGuid();
 
 			Job job;
 			using (var db = new JobDatabase(_guid.Value))
