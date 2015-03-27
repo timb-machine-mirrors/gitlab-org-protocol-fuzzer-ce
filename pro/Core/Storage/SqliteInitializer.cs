@@ -169,7 +169,7 @@ namespace Peach.Pro.Core.Storage
 		const string SqlInt = "INTEGER";
 		const string SqlReal = "REAL";
 		const string SqlText = "TEXT";
-		const string SqlBlob = "BLOG";
+		const string SqlBlob = "BLOB";
 		const string SqlDateTime = "DATETIME";
 
 		static readonly Dictionary<Type, string> SqlTypeMap = new Dictionary<Type, string>
