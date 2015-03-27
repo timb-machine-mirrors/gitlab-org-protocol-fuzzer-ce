@@ -17,8 +17,15 @@ namespace Peach.Pro.Core.WebServices
 			Get[""] = _ => GetPits();
 			Post[""] = _ => CopyPit();
 
+			Get["/monitors"] = _ => GetMonitors();
+
 			Get["/{id}"] = _ => GetPit(_.id);
 			Post["/{id}"] = _ => PostPit(_.id);
+		}
+
+		Response GetMonitors()
+		{
+			return Response.AsJson(PitDatabase.GetAllMonitors());
 		}
 
 		Response GetPits()

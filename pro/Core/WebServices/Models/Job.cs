@@ -81,7 +81,6 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <example>
 		/// "/p/pits/{id}"
 		/// </example>
-		[NotMapped]
 		public string PitUrl { get; set; }
 
 		/// <summary>

@@ -18,7 +18,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		TempDirectory _tmpDir;
 		TempFile _tmp1;
 		TempFile _tmp2;
-		JobRunner _runner;
+		JobMonitor _runner;
 
 		const string PitXml =
 @"<?xml version='1.0' encoding='utf-8'?>
@@ -60,7 +60,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			_tmpDir = new TempDirectory();
 			Configuration.LogRoot = _tmpDir.Path;
 
-			_runner = new JobRunner();
+			_runner = new JobMonitor();
 	
 			_tmp1 = new TempFile();
 			_tmp2 = new TempFile();

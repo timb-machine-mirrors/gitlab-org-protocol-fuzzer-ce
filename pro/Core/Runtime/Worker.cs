@@ -26,7 +26,7 @@ namespace Peach.Pro.Core.Runtime
 		uint? _seed;
 		bool _init;
 		bool? _test;
-		JobWatcher _watcher;
+		JobRunner _watcher;
 
 		protected override void AddCustomOptions(OptionSet options)
 		{
@@ -175,7 +175,7 @@ namespace Peach.Pro.Core.Runtime
 				config.skipToIteration = (uint)job.RangeStart + (uint)job.IterationCount;
 			}
 
-			_watcher = new JobWatcher(job, config, _pitLibraryPath);
+			_watcher = new JobRunner(job, config, _pitLibraryPath);
 			_watcher.Run();
 		}
 

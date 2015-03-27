@@ -17,6 +17,11 @@ namespace Peach.Pro.Core.WebServices
 			Get["/{id}"] = _ => GetNode(_.id);
 		}
 
+		public static string MakeUrl(string id)
+		{
+			return string.Join("/", Prefix, id);
+		}
+
 		Response GetNodes()
 		{
 			return Response.AsJson(new[] { MakeNode() });
