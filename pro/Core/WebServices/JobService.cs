@@ -38,6 +38,8 @@ namespace Peach.Pro.Core.WebServices
 			Get["/{id}/pause"] = _ => PauseJob(_.id);
 			Get["/{id}/stop"] = _ => StopJob(_.id);
 			Get["/{id}/kill"] = _ => KillJob(_.id);
+
+			Get["/{id}/result"] = _ => GetTestResult(_.id);
 		}
 
 		Response CreateJob()
@@ -52,16 +54,16 @@ namespace Peach.Pro.Core.WebServices
 
 			var pitFile = pit.Versions[0].Files[0].Name;
 
-			var job = JobRunner.Instance.Start(PitLibraryPath, pitFile, jobRequest);
+			var job = JobMonitor.Instance.Start(PitLibraryPath, pitFile, jobRequest);
 			if (job == null)
 				return HttpStatusCode.Forbidden;
 
-			return Response.AsJson(LoadJob(JobRunner.Instance.Job));
+			return Response.AsJson(LoadJob(JobMonitor.Instance.Job));
 		}
 
 		Response DeleteJob(Guid id)
 		{
-			var liveJob = JobRunner.Instance.Job;
+			var liveJob = JobMonitor.Instance.Job;
 			if (liveJob != null && liveJob.Guid == id)
 				return HttpStatusCode.Forbidden;
 
@@ -78,27 +80,27 @@ namespace Peach.Pro.Core.WebServices
 
 		Response PauseJob(Guid id)
 		{
-			return QueryJob(id, r => r.Pause() ? HttpStatusCode.OK : HttpStatusCode.Forbidden);
+			return WithJobMonitor(id, r => r.Pause() ? HttpStatusCode.OK : HttpStatusCode.Forbidden);
 		}
 
 		Response ContinueJob(Guid id)
 		{
-			return QueryJob(id, r => r.Continue() ? HttpStatusCode.OK : HttpStatusCode.Forbidden);
+			return WithJobMonitor(id, r => r.Continue() ? HttpStatusCode.OK : HttpStatusCode.Forbidden);
 		}
 
 		Response StopJob(Guid id)
 		{
-			return QueryJob(id, r => r.Stop() ? HttpStatusCode.OK : HttpStatusCode.Forbidden);
+			return WithJobMonitor(id, r => r.Stop() ? HttpStatusCode.OK : HttpStatusCode.Forbidden);
 		}
 
 		Response KillJob(Guid id)
 		{
-			return QueryJob(id, r => r.Kill() ? HttpStatusCode.OK : HttpStatusCode.Forbidden);
+			return WithJobMonitor(id, r => r.Kill() ? HttpStatusCode.OK : HttpStatusCode.Forbidden);
 		}
 
 		Response GetNodes(Guid id)
 		{
-			return QueryJob(id, x => Response.AsJson(new[] { NodeService.Prefix + "/" + NodeGuid }));
+			return WithJobMonitor(id, x => Response.AsJson(new[] { NodeService.Prefix + "/" + NodeGuid }));
 		}
 
 		Response GetJobs()
@@ -107,7 +109,7 @@ namespace Peach.Pro.Core.WebServices
 			{
 				var jobs = db.LoadTable<Job>().ToList();
 
-				var liveJob = JobRunner.Instance.Job;
+				var liveJob = JobMonitor.Instance.Job;
 				if (liveJob != null)
 					jobs.Insert(0, liveJob);
 
@@ -118,7 +120,7 @@ namespace Peach.Pro.Core.WebServices
 		Response GetJob(Guid id)
 		{
 			// is it currently live?
-			var liveJob = JobRunner.Instance.Job;
+			var liveJob = JobMonitor.Instance.Job;
 			if (liveJob != null && liveJob.Guid == id)
 				return Response.AsJson(LoadJob(liveJob));
 
@@ -132,9 +134,34 @@ namespace Peach.Pro.Core.WebServices
 			}
 		}
 
+		Response GetTestResult(Guid id)
+		{
+			var logPath = JobDatabase.GetStorageDirectory(id);
+			var debugLog = Path.Combine(logPath, "debug.log");
+
+			using (var db = new JobDatabase(id))
+			{
+				var events = db.LoadTable<TestEvent>();
+				var isActive = events.Any(x => x.Status == TestStatus.Active);
+				var isFail = events.Any(x => x.Status == TestStatus.Fail);
+
+				var result = new TestResult
+				{
+					Status = isActive ? TestStatus.Active : 
+						isFail ? TestStatus.Fail : TestStatus.Pass,
+					Events = events,
+				};
+
+				if (File.Exists(debugLog))
+					result.Log = File.ReadAllText(debugLog);
+
+				return Response.AsJson(result);
+			}
+		}
+
 		Response GetFaults(Guid id)
 		{
-			var job = JobRunner.Instance.Job;
+			var job = JobMonitor.Instance.Job;
 			if (job == null || job.Guid != id)
 			{
 				using (var db = new NodeDatabase())
@@ -150,7 +177,7 @@ namespace Peach.Pro.Core.WebServices
 				// ReSharper disable once RedundantEnumerableCastCall
 				var faults = db.LoadTable<FaultDetail>()
 					.OfType<FaultSummary>();
-				return Response.AsJson(faults.Select(LoadFaultSummary));
+				return Response.AsJson(faults.Select(x => LoadFaultSummary(job, x)));
 			}
 		}
 
@@ -158,10 +185,15 @@ namespace Peach.Pro.Core.WebServices
 		{
 			using (var db = new JobDatabase(id))
 			{
+				var job = db.GetJob(id);
+				if (job == null)
+					return HttpStatusCode.NotFound;
+
 				var fault = db.GetFaultById(faultId);
 				if (fault == null)
 					return HttpStatusCode.NotFound;
-				return Response.AsJson(LoadFault(fault));
+
+				return Response.AsJson(LoadFault(job, fault));
 			}
 		}
 
@@ -187,7 +219,7 @@ namespace Peach.Pro.Core.WebServices
 			{
 				fault = db.GetFaultById(faultId, false);
 			}
-	
+
 			var dir = fault.Iteration.ToString("X8");
 			var dirInArchive = "Fault-{0}".Fmt(fault.Iteration);
 			var filename = "{0}.zip".Fmt(dirInArchive);
@@ -206,12 +238,12 @@ namespace Peach.Pro.Core.WebServices
 			return HttpStatusCode.NotImplemented;
 		}
 
-		Response QueryJob(Guid id, Func<JobRunner, Response> query)
+		Response WithJobMonitor(Guid id, Func<JobMonitor, Response> fn)
 		{
-			var job = JobRunner.Instance.Job;
+			var job = JobMonitor.Instance.Job;
 			if (job == null || job.Guid != id)
 				return HttpStatusCode.NotFound;
-			return query(JobRunner.Instance);
+			return fn(JobMonitor.Instance);
 		}
 
 		Job LoadJob(Job job)
@@ -220,9 +252,9 @@ namespace Peach.Pro.Core.WebServices
 
 			job.JobUrl = MakeUrl(id);
 			job.FaultsUrl = MakeUrl(id, "faults");
+			job.NodesUrl = MakeUrl(id, "nodes");
 			job.TargetUrl = "";
 			job.TargetConfigUrl = "";
-			job.NodesUrl = MakeUrl(id, "nodes");
 			job.PeachUrl = "";
 			job.ReportUrl = "";
 			job.PackageFileUrl = "";
@@ -250,30 +282,37 @@ namespace Peach.Pro.Core.WebServices
 			return job;
 		}
 
-		FaultSummary LoadFaultSummary(FaultSummary fault)
+		FaultSummary LoadFaultSummary(Job job, FaultSummary fault)
 		{
-			fault.FaultUrl = "";
+			fault.FaultUrl = MakeUrl(
+				job.Guid.ToString(), "faults", fault.Id.ToString());
 			return fault;
 		}
 
-		FaultDetail LoadFault(FaultDetail fault)
+		FaultDetail LoadFault(Job job, FaultDetail fault)
 		{
-			LoadFaultSummary(fault);
-			fault.NodeUrl = "";
+			LoadFaultSummary(job, fault);
+			fault.PitUrl = job.PitUrl;
+			fault.NodeUrl = NodeService.MakeUrl(NodeGuid);
 			fault.PeachUrl = "";
-			fault.PitUrl = "";
 			fault.TargetConfigUrl = "";
 			fault.TargetUrl = "";
 			foreach (var file in fault.Files)
 			{
-				LoadFile(file);
+				LoadFile(job, file);
 			}
 			return fault;
 		}
 
-		FaultFile LoadFile(FaultFile file)
+		FaultFile LoadFile(Job job, FaultFile file)
 		{
-			file.FileUrl = "";
+			file.FileUrl = MakeUrl(
+				job.Guid.ToString(), 
+				"faults", 
+				file.FaultDetailId.ToString(),
+				"data",
+				file.Id.ToString()
+			);
 			return file;
 		}
 

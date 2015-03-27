@@ -35,7 +35,8 @@ INSERT INTO [Job] (
 	FaultCount,
 	RangeStart,
 	RangeStop,
-	IsTest
+	IsTest,
+	PitUrl
 ) VALUES (
 	@Id,
 	@Status,
@@ -53,7 +54,8 @@ INSERT INTO [Job] (
 	@FaultCount,
 	@RangeStart,
 	@RangeStop,
-	@IsTest
+	@IsTest,
+	@PitUrl
 );";
 
 		const string SqlUpdateJob = @"

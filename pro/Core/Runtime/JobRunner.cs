@@ -22,7 +22,7 @@ using NLog.Targets.Wrappers;
 
 namespace Peach.Pro.Core.Runtime
 {
-	class JobWatcher : Watcher
+	class JobRunner : Watcher
 	{
 		static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -40,7 +40,7 @@ namespace Peach.Pro.Core.Runtime
 
 		static string DEFINED_VALUES = "DefinedValues";
 
-		public JobWatcher(Job job, RunConfiguration config, string pitLibraryPath)
+		public JobRunner(Job job, RunConfiguration config, string pitLibraryPath)
 		{
 			_job = job;
 			_logPath = JobDatabase.GetStorageDirectory(_job.Guid);
@@ -568,7 +568,7 @@ namespace Peach.Pro.Core.Runtime
 				_reproFault = null;
 			}
 
-			SaveFault(context, fault);
+			SaveFault(context, fault, true);
 		}
 
 		protected override void Engine_ReproFailed(RunContext context, uint currentIteration)
@@ -579,7 +579,7 @@ namespace Peach.Pro.Core.Runtime
 			_reproFault.iterationStart = context.reproducingInitialIteration - context.reproducingIterationJumpCount;
 			_reproFault.iterationStop = _reproFault.iteration;
 
-			SaveFault(context, _reproFault);
+			SaveFault(context, _reproFault, false);
 			_reproFault = null;
 		}
 
@@ -683,7 +683,7 @@ namespace Peach.Pro.Core.Runtime
 			return ret;
 		}
 
-		void SaveFault(RunContext context, Fault fault)
+		void SaveFault(RunContext context, Fault fault, bool isRepro)
 		{
 			var now = DateTime.UtcNow;
 
@@ -701,6 +701,7 @@ namespace Peach.Pro.Core.Runtime
 			var faultDetail = new FaultDetail
 			{
 				Files = new List<FaultFile>(),
+				Reproducable = isRepro,
 				Iteration = fault.iteration,
 				TimeStamp = now,
 				BucketName = bucket,
@@ -743,6 +744,9 @@ namespace Peach.Pro.Core.Runtime
 					Timestamp = now,
 					Hour = now.Hour,
 				});
+
+				_job.FaultCount++;
+				db.UpdateJob(_job);
 			}
 		}
 

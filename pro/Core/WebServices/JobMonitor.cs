@@ -10,7 +10,7 @@ using System.Collections.Generic;
 
 namespace Peach.Pro.Core.WebServices
 {
-	public class JobRunner : IDisposable
+	public class JobMonitor : IDisposable
 	{
 		public Job Job
 		{
@@ -41,9 +41,9 @@ namespace Peach.Pro.Core.WebServices
 		volatile bool _pendingKill;
 
 		static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-		public readonly static JobRunner Instance = new JobRunner();
+		public readonly static JobMonitor Instance = new JobMonitor();
 
-		internal JobRunner()
+		internal JobMonitor()
 		{
 		}
 
@@ -123,6 +123,7 @@ namespace Peach.Pro.Core.WebServices
 					Mode = JobMode.Starting,
 
 					// select only params that we need to start a job
+					PitUrl = jobRequest.PitUrl,
 					IsTest = jobRequest.IsTest,
 					Seed = jobRequest.Seed,
 					RangeStart = jobRequest.RangeStart,
