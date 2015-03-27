@@ -32,10 +32,40 @@ RelayNumber:: Relay to trigger (1, 2, 3, or 4)
 
 _Optional:_
 
+Action:: Perform an action on the specified relay, defaults to ToggleOff. Valid actions include the following:
+
+[cols="2,4" options="header",halign="center"] 
+|==========================================================
+|Action     |Description
+|ToggleOff  |Sets the relay to the OFF position, then sets the relay to the ON position.
+|ToggleOn   |Sets the relay to the ON position, then sets the relay to the OFF position.
+|SetOn      |Sets the relay to the ON position.
+|SetOff     |Sets the realy to the OFF position.
+|==========================================================
+
 ResetEveryIteration:: Reset power on every iteration, defaults to false.
-OnOffPause:: Pause in milliseconds between off/on, defaults to 500 ms--1/2 second.
+ToggleDelay:: Pause in milliseconds between off/on, defaults to 500 ms--1/2 second. +
+Formerly named OnOffPause.
 ResetOnStart:: Reset device on start, defaults to false.
-ReverseSwitch:: Switches the order of the on/off commands for when the NC port is used for power, defaults to false.
+ReverseSwitch:: Obsolete. Instead, use the ToggleOn Action. 
+When:: Details on when to perform a specfied action. Specify one of the following values: 
+
+[cols="1,2" options="header",halign="center"] 
+|==========================================================
+|"When" Setting              |Description
+|DetectFault                 |Perform the action when checking for the faulting condition. Requires a regex expression in the +CheckValue+ parameter. Default mode of operation.
+|OnStart                     |Run the command when fuzzing session starts. Command runs once per session.
+|OnEnd                       |Run the command when fuzzing session stops. Command runs run once per session.
+|OnIterationStart            |Run the command at start of each iteration.
+|OnIterationEnd              |Run the command at end of each iteration.
+|OnFault                     |Run the command when Peach detects a fault.
+|OnIterationStartAfterFault  |Run the command at start of an iteration that immediately follows a fault detection.
+|OnCall                      |Trigger the command to run from the state model. The command runs when the _StartOnCall_ message is received.
+|==========================================================
+
+.When Choices for Performing an Action
+image::{images}/Timings_SSH.PNG["When Run Command Choices", scalewidth="75%"]
+
 
 === Examples
 
