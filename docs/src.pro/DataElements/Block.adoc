@@ -64,6 +64,7 @@ xref:Number[Number]:: Defines a binary number of arbitrary bit size.
 xref:Padding[Padding]:: Pads variably sized blocks or data models provide size uniformity or consistency.
 xref:Placement[Placement]:: Relocates an element after it has been cracked.
 xref:Stream[Stream]::  Groups one or more data elements in a logical structure.
+xref:String[String]:: Character sequence consisting of ASCII or Unicode characters.
 xref:Transformer[Transformer]:: Performs static transformations such as compression or encoding.
 xref:XmlElement[XmlElement]:: Defines an XML element, the basic building block of XML documents.
 
