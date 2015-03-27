@@ -25,6 +25,7 @@ namespace Peach.Pro.Core.Runtime
 		uint? _stop;
 		uint? _seed;
 		bool _init;
+		bool? _test;
 		JobWatcher _watcher;
 
 		protected override void AddCustomOptions(OptionSet options)
@@ -66,7 +67,13 @@ namespace Peach.Pro.Core.Runtime
 			options.Add(
 				"logRoot=",
 				"The root directory for output files",
-				v => Configuration.LogRoot = v);
+				v => Configuration.LogRoot = v
+			);
+			options.Add(
+				"test",
+				"Run a single dry iteration to test a pit",
+				v => _test = true
+			);
 		}
 
 		protected override void ConfigureLogging()
@@ -126,6 +133,7 @@ namespace Peach.Pro.Core.Runtime
 					RangeStart = _start.HasValue ? _start.Value : 0,
 					RangeStop = _stop,
 					Seed = _seed,
+					IsTest = _test.HasValue ? _test.Value : false,
 				};
 				db.InsertJob(job);
 				return job;
@@ -141,6 +149,7 @@ namespace Peach.Pro.Core.Runtime
 			using (var db = new JobDatabase(_guid.Value))
 			{
 				job = db.GetJob(_guid.Value) ?? InitJob(pitFile);
+				job.IsTest = _test.HasValue ? _test.Value : job.IsTest;
 			}
 
 			RunConfiguration config = new RunConfiguration

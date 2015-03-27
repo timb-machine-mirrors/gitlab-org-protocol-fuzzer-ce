@@ -101,26 +101,19 @@ namespace Peach.Pro.Core.Runtime
 
 				Loop(engineTask);
 
-				using (var db = new JobDatabase(_job.Guid))
+				if (_job.IsTest)
 				{
-					EventSuccess(db);
+					using (var db = new JobDatabase(_job.Guid))
+					{
+						EventSuccess(db);
+					}
 				}
 			}
 			catch (Exception ex)
 			{
-				foreach (var testEvent in _events)
-				{
-					if (testEvent.Status == TestStatus.Active)
-					{
-						testEvent.Status = TestStatus.Fail;
-						testEvent.Resolve = ex.Message;
-					}
-				}
-
-				using (var db = new JobDatabase(_job.Guid))
-				{
-					db.UpdateTestEvents(_events);
-				}
+				JobFail(ex);
+				Logger.ErrorException("Error", ex);
+				throw;
 			}
 			finally
 			{
@@ -217,6 +210,8 @@ namespace Peach.Pro.Core.Runtime
 
 		void AddEvent(JobDatabase db, string name, string description)
 		{
+			Debug.Assert(_job.IsTest);
+
 			var testEvent = new TestEvent
 			{
 				Status = TestStatus.Active,
@@ -229,6 +224,8 @@ namespace Peach.Pro.Core.Runtime
 
 		void EventSuccess(JobDatabase db)
 		{
+			Debug.Assert(_job.IsTest);
+
 			var last = _events.Last();
 			last.Status = TestStatus.Pass;
 			db.UpdateTestEvents(new[] { last });
@@ -236,10 +233,32 @@ namespace Peach.Pro.Core.Runtime
 
 		void EventFail(JobDatabase db, string resolve)
 		{
+			Debug.Assert(_job.IsTest);
+
 			var last = _events.Last();
 			last.Status = TestStatus.Fail;
 			last.Resolve = resolve;
 			db.UpdateTestEvents(new[] { last });
+		}
+
+		void JobFail(Exception ex)
+		{
+			if (_job.IsTest)
+			{
+				foreach (var testEvent in _events)
+				{
+					if (testEvent.Status == TestStatus.Active)
+					{
+						testEvent.Status = TestStatus.Fail;
+						testEvent.Resolve = ex.Message;
+					}
+				}
+
+				using (var db = new JobDatabase(_job.Guid))
+				{
+					db.UpdateTestEvents(_events);
+				}
+			}
 		}
 
 		Dictionary<string, object> ParseConfig()
@@ -248,7 +267,7 @@ namespace Peach.Pro.Core.Runtime
 			var pitConfig = _config.pitFile + ".config";
 
 			// It is ok if a .config doesn't exist
-			if (File.Exists(pitConfig))
+			if (_job.IsTest && File.Exists(pitConfig))
 			{
 				using (var db = new JobDatabase(_job.Guid))
 				{
@@ -283,22 +302,27 @@ namespace Peach.Pro.Core.Runtime
 			var args = ParseConfig();
 			var parser = new GodelPitParser();
 
-			using (var db = new JobDatabase(_job.Guid))
+			if (_job.IsTest)
 			{
-				AddEvent(db, "Loading pit file", "Loading pit file '{0}'".Fmt(_config.pitFile));
+				using (var db = new JobDatabase(_job.Guid))
+				{
+					AddEvent(db, "Loading pit file", "Loading pit file '{0}'".Fmt(_config.pitFile));
 
-				try
-				{
-					var dom = parser.asParser(args, _config.pitFile);
-					EventSuccess(db);
-					return dom;
-				}
-				catch (Exception ex)
-				{
-					EventFail(db, ex.Message);
-					throw;
+					try
+					{
+						var dom = parser.asParser(args, _config.pitFile);
+						EventSuccess(db);
+						return dom;
+					}
+					catch (Exception ex)
+					{
+						EventFail(db, ex.Message);
+						throw;
+					}
 				}
 			}
+
+			return parser.asParser(args, _config.pitFile);
 		}
 
 		protected override void Engine_TestStarting(RunContext context)
@@ -335,32 +359,41 @@ namespace Peach.Pro.Core.Runtime
 
 		protected override void Agent_AgentConnect(RunContext context, AgentClient agent)
 		{
-			using (var db = new JobDatabase(_job.Guid))
+			if (_job.IsTest)
 			{
-				if (_agentConnect++ > 0)
-					EventSuccess(db);
+				using (var db = new JobDatabase(_job.Guid))
+				{
+					if (_agentConnect++ > 0)
+						EventSuccess(db);
 
-				AddEvent(db, "Connecting to agent", "Connecting to agent '{0}'".Fmt(agent.Url));
+					AddEvent(db, "Connecting to agent", "Connecting to agent '{0}'".Fmt(agent.Url));
+				}
 			}
 		}
 
 		protected override void Agent_StartMonitor(RunContext context, AgentClient agent, string name, string cls)
 		{
-			using (var db = new JobDatabase(_job.Guid))
+			if (_job.IsTest)
 			{
-				EventSuccess(db);
-				AddEvent(db, "Starting monitor", "Starting monitor '{0}'".Fmt(cls));
+				using (var db = new JobDatabase(_job.Guid))
+				{
+					EventSuccess(db);
+					AddEvent(db, "Starting monitor", "Starting monitor '{0}'".Fmt(cls));
+				}
 			}
 		}
 
 		protected override void Agent_SessionStarting(RunContext context, AgentClient agent)
 		{
-			using (var db = new JobDatabase(_job.Guid))
+			if (_job.IsTest)
 			{
-				EventSuccess(db);
-				AddEvent(db,
-					"Starting fuzzing session",
-					"Notifying agent '{0}' that the fuzzing session is starting".Fmt(agent.Url));
+				using (var db = new JobDatabase(_job.Guid))
+				{
+					EventSuccess(db);
+					AddEvent(db,
+						"Starting fuzzing session",
+						"Notifying agent '{0}' that the fuzzing session is starting".Fmt(agent.Url));
+				}
 			}
 		}
 
@@ -396,14 +429,14 @@ namespace Peach.Pro.Core.Runtime
 					foreach (var testEvent in _events)
 						testEvent.Status = TestStatus.Pass;
 					db.UpdateTestEvents(_events);
+
+					var desc = context.reproducingFault
+						? "Reproducing fault found on the initial control record iteration"
+						: "Running the initial control record iteration";
+
+					// Add event for the iteration running
+					AddEvent(db, "Running iteration", desc);
 				}
-
-				var desc = context.reproducingFault
-					? "Reproducing fault found on the initial control record iteration"
-					: "Running the initial control record iteration";
-
-				// Add event for the iteration running
-				AddEvent(db, "Running iteration", desc);
 			}
 		}
 
