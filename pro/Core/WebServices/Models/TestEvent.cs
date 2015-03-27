@@ -1,4 +1,6 @@
 using Newtonsoft.Json;
+using Peach.Pro.Core.Storage;
+using System;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
@@ -14,7 +16,8 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// Identifier of event
 		/// </summary>
-		public uint Id { get; set; }
+		[Key]
+		public long Id { get; set; }
 
 		/// <summary>
 		/// Status of event

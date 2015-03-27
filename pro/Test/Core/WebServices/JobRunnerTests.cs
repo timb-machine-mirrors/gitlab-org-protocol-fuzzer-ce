@@ -6,12 +6,16 @@ using Peach.Core;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
+using Peach.Pro.Core;
+using System.Linq;
+using TestStatus = Peach.Pro.Core.WebServices.Models.TestStatus;
 
 namespace Peach.Pro.Test.Core.WebServices
 {
 	[TestFixture]
 	class JobRunnerTests
 	{
+		TempDirectory _tmpDir;
 		TempFile _tmp1;
 		TempFile _tmp2;
 		JobRunner _runner;
@@ -53,7 +57,11 @@ namespace Peach.Pro.Test.Core.WebServices
 		[SetUp]
 		public void SetUp()
 		{
+			_tmpDir = new TempDirectory();
+			Configuration.LogRoot = _tmpDir.Path;
+
 			_runner = new JobRunner();
+	
 			_tmp1 = new TempFile();
 			_tmp2 = new TempFile();
 			File.WriteAllText(_tmp1.Path, PitXml.Fmt(""));
@@ -64,9 +72,10 @@ namespace Peach.Pro.Test.Core.WebServices
 		[TearDown]
 		public void TearDown()
 		{
-			_tmp1.Dispose();
 			_tmp2.Dispose();
+			_tmp1.Dispose();
 			_runner.Dispose();
+			_tmpDir.Dispose();
 		}
 
 		bool WaitUntil(JobStatus status)
@@ -101,16 +110,16 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void TestBasic()
 		{
-			var jobRequest = new Job
+			var jobRequest = new JobRequest
 			{
 				RangeStop = 1,
 			};
 
-			var ret = _runner.Start(_tmp1.Path, _tmp1.Path, jobRequest);
-			Assert.IsTrue(ret);
+			var job = _runner.Start(_tmp1.Path, _tmp1.Path, jobRequest);
+			Assert.IsNotNull(job);
 			Assert.IsTrue(WaitUntil(JobStatus.Running));
 
-			var job = _runner.Job;
+			job = _runner.Job;
 			Assert.IsNotNull(job);
 
 			using (var db = new NodeDatabase())
@@ -122,13 +131,13 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void TestStop()
 		{
-			var jobRequest = new Job();
+			var jobRequest = new JobRequest();
 
-			var ret = _runner.Start(_tmp1.Path, _tmp1.Path, jobRequest);
-			Assert.IsTrue(ret);
+			var job = _runner.Start(_tmp1.Path, _tmp1.Path, jobRequest);
+			Assert.IsNotNull(job);
 			Assert.IsTrue(WaitUntil(JobStatus.Running));
 
-			var job = _runner.Job;
+			job = _runner.Job;
 			Assert.IsNotNull(job);
 
 			Assert.IsTrue(_runner.Stop());
@@ -143,13 +152,13 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void TestPauseContinue()
 		{
-			var jobRequest = new Job();
+			var jobRequest = new JobRequest();
 
-			var ret = _runner.Start(_tmp1.Path, _tmp1.Path, jobRequest);
-			Assert.IsTrue(ret);
+			var job = _runner.Start(_tmp1.Path, _tmp1.Path, jobRequest);
+			Assert.IsNotNull(job);
 			Assert.IsTrue(WaitUntil(JobStatus.Running));
 
-			var job = _runner.Job;
+			job = _runner.Job;
 			Assert.IsNotNull(job);
 
 			Assert.IsTrue(_runner.Pause());
@@ -171,13 +180,13 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void TestKill()
 		{
-			var jobRequest = new Job();
+			var jobRequest = new JobRequest();
 
-			var ret = _runner.Start(_tmp1.Path, _tmp1.Path, jobRequest);
-			Assert.IsTrue(ret);
+			var job = _runner.Start(_tmp1.Path, _tmp1.Path, jobRequest);
+			Assert.IsNotNull(job);
 			Assert.IsTrue(WaitUntil(JobStatus.Running));
 
-			var job = _runner.Job;
+			job = _runner.Job;
 			Assert.IsNotNull(job);
 
 			Assert.IsTrue(_runner.Kill());
@@ -192,13 +201,13 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void TestRestart()
 		{
-			var jobRequest = new Job();
+			var jobRequest = new JobRequest();
 
-			var ret = _runner.Start(_tmp1.Path, _tmp1.Path, jobRequest);
-			Assert.IsTrue(ret);
+			var job = _runner.Start(_tmp1.Path, _tmp1.Path, jobRequest);
+			Assert.IsNotNull(job);
 			Assert.IsTrue(WaitUntil(JobStatus.Running));
 
-			var job = _runner.Job;
+			job = _runner.Job;
 			Assert.IsNotNull(job);
 			var count = job.IterationCount;
 
@@ -222,13 +231,13 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void TestCrash()
 		{
-			var jobRequest = new Job();
+			var jobRequest = new JobRequest();
 
-			var ret = _runner.Start(_tmp2.Path, _tmp2.Path, jobRequest);
-			Assert.IsTrue(ret);
+			var job = _runner.Start(_tmp2.Path, _tmp2.Path, jobRequest);
+			Assert.IsNotNull(job);
 			Assert.IsTrue(WaitUntil(JobStatus.Running));
 
-			var job = _runner.Job;
+			job = _runner.Job;
 			Assert.IsNotNull(job);
 
 			var count = job.IterationCount;
@@ -242,12 +251,44 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.AreEqual(JobStatus.Running, job.Status);
 
 			Assert.Greater(job.IterationCount, count);
+
+			Assert.IsTrue(_runner.Kill());
+			Assert.IsTrue(WaitUntilStopped());
+
+			var logPath = Path.Combine(_tmpDir.Path, job.Guid.ToString(), "error.log");
+			Assert.IsTrue(File.Exists(logPath));
+			var log = File.ReadAllText(logPath);
+			Console.Write(log);
 		}
 
 		[Test]
 		public void TestPitTester()
 		{
+			var jobRequest = new JobRequest
+			{
+				IsTest = true,
+			};
 
+			var job = _runner.Start(_tmp1.Path, _tmp1.Path, jobRequest);
+			Assert.IsNotNull(job);
+			Assert.IsTrue(WaitUntilStopped());
+
+			using (var db = new NodeDatabase())
+			{
+				Assert.IsNotNull(db.GetJob(job.Guid));
+			}
+
+			using (var db = new JobDatabase(job.Guid))
+			{
+				Assert.IsNotNull(db.GetJob(job.Guid));
+				var events = db.LoadTable<TestEvent>();
+				Database.Dump(events);
+				Assert.IsTrue(events.All(x => x.Status == TestStatus.Pass));
+				var logPath = Path.Combine(_tmpDir.Path, job.Guid.ToString(), "debug.log");
+				Assert.IsTrue(File.Exists(logPath));
+				var log = File.ReadAllText(logPath);
+				Console.Write(log);
+			}
 		}
 
 		// TODO: Fatal error reporting (ensure no restarts):

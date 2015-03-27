@@ -6,6 +6,7 @@ using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.Core.Storage;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace Peach.Pro.Core.WebServices
 {
@@ -74,7 +75,8 @@ namespace Peach.Pro.Core.WebServices
 
 			lock (this)
 			{
-				if (_job == null)
+				if (_job == null ||
+					_process == null)
 					return false;
 
 				try
@@ -99,15 +101,15 @@ namespace Peach.Pro.Core.WebServices
 			_process.Kill();
 		}
 
-		public bool Start(
+		public Job Start(
 			string pitLibraryPath,
 			string pitFile,
-			Job jobRequest)
+			JobRequest jobRequest)
 		{
 			lock (this)
 			{
 				if (_job != null)
-					return false;
+					return null;
 
 				_pitFile = pitFile;
 				_pitLibraryPath = pitLibraryPath;
@@ -121,6 +123,7 @@ namespace Peach.Pro.Core.WebServices
 					Mode = JobMode.Starting,
 
 					// select only params that we need to start a job
+					IsTest = jobRequest.IsTest,
 					Seed = jobRequest.Seed,
 					RangeStart = jobRequest.RangeStart,
 					RangeStop = jobRequest.RangeStop,
@@ -133,7 +136,7 @@ namespace Peach.Pro.Core.WebServices
 
 				StartProcess();
 
-				return true;
+				return _job;
 			}
 		}
 
@@ -143,13 +146,19 @@ namespace Peach.Pro.Core.WebServices
 
 			var fileName = Utilities.GetAppResourcePath("PeachWorker.exe");
 
-			var args = new[]
+			var args = new List<string>
 			{
 				"--pits", _pitLibraryPath,
 				"--guid", _job.Id,
 				_pitFile,
 				//"-vv",
 			};
+
+			if (!string.IsNullOrEmpty(Configuration.LogRoot))
+			{
+				args.Add("--logRoot");
+				args.Add(Configuration.LogRoot);
+			}
 
 			_process = new Process
 			{
@@ -167,7 +176,12 @@ namespace Peach.Pro.Core.WebServices
 			};
 			_process.Start();
 
-			_taskStderr = new Task(LoggingTask, _process.StandardError);
+			var path = Path.Combine(Configuration.LogRoot, _job.Guid.ToString(), "error.log");
+			_taskStderr = new Task(LoggingTask, new LoggingTaskArgs
+			{
+				source = _process.StandardError,
+				sink = new StreamWriter(path),
+			});
 			_taskStderr.Start();
 
 			_taskMonitor = new Task(MonitorTask);
@@ -200,19 +214,29 @@ namespace Peach.Pro.Core.WebServices
 			}
 		}
 
+		struct LoggingTaskArgs
+		{
+			public StreamReader source;
+			public StreamWriter sink;
+		}
+
 		void LoggingTask(object obj)
 		{
-			var stream = (StreamReader)obj;
+			var args = (LoggingTaskArgs)obj;
 			try
 			{
-				while (!_process.HasExited)
+				using (args.source)
+				using (args.sink)
 				{
-					var line = stream.ReadLine();
-					if (line == null)
-						return;
+					while (!_process.HasExited)
+					{
+						var line = args.source.ReadLine();
+						if (line == null)
+							return;
 
-					// TODO: do something better with this
-					Console.WriteLine(line);
+						args.sink.WriteLine(line);
+						args.sink.Flush();
+					}
 				}
 			}
 			catch (Exception ex)

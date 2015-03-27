@@ -34,7 +34,8 @@ INSERT INTO [Job] (
 	Speed,
 	FaultCount,
 	RangeStart,
-	RangeStop
+	RangeStop,
+	IsTest
 ) VALUES (
 	@Id,
 	@Status,
@@ -51,7 +52,8 @@ INSERT INTO [Job] (
 	@Speed,
 	@FaultCount,
 	@RangeStart,
-	@RangeStop
+	@RangeStop,
+	@IsTest
 );";
 
 		const string SqlUpdateJob = @"
@@ -111,11 +113,8 @@ WHERE Id = @Id;
 
 		static string GetDatabasePath()
 		{
-			var config = Utilities.GetUserConfig();
-			var logRoot = config.AppSettings.Settings.Get("LogPath");
-			if (string.IsNullOrEmpty(logRoot))
-				logRoot = Utilities.GetAppResourcePath("db");
-	
+			var logRoot = Configuration.LogRoot;
+
 			if (!Directory.Exists(logRoot))
 				Directory.CreateDirectory(logRoot);
 
