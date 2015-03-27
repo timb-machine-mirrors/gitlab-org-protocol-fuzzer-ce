@@ -24,7 +24,15 @@ namespace Peach.Core
 		public static string Get(this KeyValueConfigurationCollection settings, string key)
 		{
 			var item = settings[key];
-			return item != null ? item.Value : string.Empty;
+			return item != null ? item.Value : null;
+		}
+
+		public static void Set(this KeyValueConfigurationCollection settings, string key, string value)
+		{
+			if (settings.Get(key) == null)
+				settings.Add(key, value);
+			else
+				settings[key].Value = value;
 		}
 	}
 

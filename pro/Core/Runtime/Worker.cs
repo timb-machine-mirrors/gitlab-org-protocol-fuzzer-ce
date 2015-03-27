@@ -21,7 +21,6 @@ namespace Peach.Pro.Core.Runtime
 		string _pitLibraryPath;
 		string _query;
 		Guid? _guid;
-		readonly RunConfiguration _config = new RunConfiguration();
 		uint? _start;
 		uint? _stop;
 		uint? _seed;
@@ -64,6 +63,10 @@ namespace Peach.Pro.Core.Runtime
 				"query=",
 				v => _query = v
 			);
+			options.Add(
+				"logRoot=",
+				"The root directory for output files",
+				v => Configuration.LogRoot = v);
 		}
 
 		protected override void ConfigureLogging()
@@ -140,41 +143,31 @@ namespace Peach.Pro.Core.Runtime
 				job = db.GetJob(_guid.Value) ?? InitJob(pitFile);
 			}
 
-			_config.pitFile = pitFile;
+			RunConfiguration config = new RunConfiguration
+			{
+				pitFile = pitFile
+			};
 
 			if (job.Seed.HasValue)
-				_config.randomSeed = (uint)job.Seed.Value;
+				config.randomSeed = (uint)job.Seed.Value;
 
-			if (job.RangeStop.HasValue)
+			if (job.IsTest)
 			{
-				_config.range = true;
-				_config.rangeStart = (uint)job.RangeStart + (uint)job.IterationCount;
-				_config.rangeStop = (uint)job.RangeStop.Value;
+				config.singleIteration = true;
+			}
+			else if (job.RangeStop.HasValue)
+			{
+				config.range = true;
+				config.rangeStart = (uint)job.RangeStart + (uint)job.IterationCount;
+				config.rangeStop = (uint)job.RangeStop.Value;
 			}
 			else
 			{
-				_config.skipToIteration = (uint)job.RangeStart + (uint)job.IterationCount;
+				config.skipToIteration = (uint)job.RangeStart + (uint)job.IterationCount;
 			}
 
-			var pitConfig = _config.pitFile + ".config";
-			var defs = PitDatabase.ParseConfig(_pitLibraryPath, pitConfig);
-			var args = new Dictionary<string, object>();
-			args[PitParser.DEFINED_VALUES] = defs;
-
-			var parser = new Godel.Core.GodelPitParser();
-			var dom = parser.asParser(args, _config.pitFile);
-
-			// REVIEW: is this required?
-			foreach (var test in dom.tests)
-			{
-				test.loggers.Clear();
-			}
-
-			_watcher = new JobWatcher(job, _config);
-			var engine = new Engine(_watcher);
-			var engineTask = Task.Factory.StartNew(() => engine.startFuzzing(dom, _config));
-
-			Loop(engineTask);
+			_watcher = new JobWatcher(job, config, _pitLibraryPath);
+			_watcher.Run();
 		}
 
 		protected override string UsageLine
@@ -184,56 +177,6 @@ namespace Peach.Pro.Core.Runtime
 				var name = Assembly.GetEntryAssembly().GetName();
 				return "Usage: {0} [OPTION]... <pit> [<name>]".Fmt(name.Name);
 			}
-		}
-
-		private void Loop(Task engineTask)
-		{
-			Console.WriteLine("OK");
-
-			while (true)
-			{
-				Console.Write("> ");
-				var readerTask = Task.Factory.StartNew<string>(Console.ReadLine);
-				var index = Task.WaitAny(engineTask, readerTask);
-				if (index == 0)
-				{
-					// this causes any unhandled exceptions to be thrown
-					engineTask.Wait();
-					return;
-				}
-
-				switch (readerTask.Result)
-				{
-					case "help":
-						ShowShellHelp();
-						break;
-					case "stop":
-						Console.WriteLine("OK");
-						_watcher.Stop();
-						engineTask.Wait();
-						return;
-					case "pause":
-						Console.WriteLine("OK");
-						_watcher.Pause();
-						break;
-					case "continue":
-						Console.WriteLine("OK");
-						_watcher.Continue();
-						break;
-					default:
-						Console.WriteLine("Invalid command");
-						break;
-				}
-			}
-		}
-
-		private void ShowShellHelp()
-		{
-			Console.WriteLine("Available commands:");
-			Console.WriteLine("    help");
-			Console.WriteLine("    stop");
-			Console.WriteLine("    pause");
-			Console.WriteLine("    continue");
 		}
 
 		private void RunQuery()

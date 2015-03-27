@@ -18,4 +18,22 @@ namespace Peach.Core
 			catch { }
 		}
 	}
+
+	public class TempDirectory : IDisposable
+	{
+		public string Path { get; private set; }
+
+		public TempDirectory()
+		{
+			Path = System.IO.Path.GetTempFileName();
+			File.Delete(Path);
+			Directory.CreateDirectory(Path);
+		}
+
+		public void Dispose()
+		{
+			try { Directory.Delete(Path, true); }
+			catch { }
+		}
+	}
 }

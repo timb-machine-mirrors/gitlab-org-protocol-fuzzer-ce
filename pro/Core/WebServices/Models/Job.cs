@@ -72,8 +72,41 @@ namespace Peach.Pro.Core.WebServices.Models
 		public string Iterations { get; set; }
 	}
 
+	public class JobRequest
+	{
+		/// <summary>
+		/// The URL of the specific version of the pit for this job
+		/// TODO: Include version in the URL
+		/// </summary>
+		/// <example>
+		/// "/p/pits/{id}"
+		/// </example>
+		[NotMapped]
+		public string PitUrl { get; set; }
+
+		/// <summary>
+		/// The random seed being used by the fuzzing job
+		/// </summary>
+		public long? Seed { get; set; }
+
+		/// <summary>
+		/// Optional starting iteration number
+		/// </summary>
+		public long RangeStart { get; set; }
+
+		/// <summary>
+		/// Optional ending iteration number
+		/// </summary>
+		public long? RangeStop { get; set; }
+
+		/// <summary>
+		/// Determines whether the job is a test run or an actual fuzzing session.
+		/// </summary>
+		public bool IsTest { get; set; }
+	}
+
 	[Table]
-	public class Job
+	public class Job : JobRequest
 	{
 		[Key]
 		public string Id { get; set; }
@@ -136,16 +169,6 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// </example>
 		[NotMapped]
 		public string NodesUrl { get; set; }
-
-		/// <summary>
-		/// The URL of the specific version of the pit for this job
-		/// TODO: Include version in the URL
-		/// </summary>
-		/// <example>
-		/// "/p/pits/{id}"
-		/// </example>
-		[NotMapped]
-		public string PitUrl { get; set; }
 
 		/// <summary>
 		/// The URL of the specific version of peach for this job
@@ -221,11 +244,6 @@ namespace Peach.Pro.Core.WebServices.Models
 		public string User { get; set; }
 
 		/// <summary>
-		/// The random seed being used by the fuzzing job
-		/// </summary>
-		public long? Seed { get; set; }
-
-		/// <summary>
 		/// How many iterations of fuzzing have been completed
 		/// </summary>
 		public long IterationCount { get; set; }
@@ -282,16 +300,6 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// </summary>
 		[NotMapped]
 		public ICollection<Group> Groups { get; set; }
-
-		/// <summary>
-		/// Optional starting iteration number
-		/// </summary>
-		public long RangeStart { get; set; }
-
-		/// <summary>
-		/// Optional ending iteration number
-		/// </summary>
-		public long? RangeStop { get; set; }
 
 		/// <summary>
 		/// Indicates if metrics are being collected for the job

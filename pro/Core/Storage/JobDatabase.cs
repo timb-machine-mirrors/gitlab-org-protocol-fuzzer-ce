@@ -14,6 +14,30 @@ namespace Peach.Pro.Core.Storage
 		#region SQL
 		const string SqlGetLastRowId = "SELECT last_insert_rowid();";
 
+		const string SqlInsertTestEvent = @"
+INSERT INTO TestEvent (
+	Status, 
+	Short, 
+	Description,
+	Resolve
+) VALUES (
+	@Status, 
+	@Short, 
+	@Description,
+	@Resolve
+);" + SqlGetLastRowId;
+
+		const string SqlUpdateTestEvent = @"
+UPDATE TestEvent
+SET
+	Status = @Status,
+	Short = @Short,
+	Description = @Description,
+	Resolve = @Resolve
+WHERE
+	Id = @Id
+;";
+
 		const string SqlUpsertMutation = @"
 INSERT OR REPLACE INTO Mutation (
 	StateId,
@@ -148,6 +172,9 @@ SELECT * FROM FaultFile WHERE FaultDetailId = @Id;
 			// live job status
 			typeof(Job),
 
+			// pit tester
+			typeof(TestEvent),
+
 			// fault data
 			typeof(FaultDetail),
 			typeof(FaultFile),
@@ -185,12 +212,7 @@ SELECT * FROM FaultFile WHERE FaultDetailId = @Id;
 
 		public static string GetStorageDirectory(Guid guid)
 		{
-			var config = Utilities.GetUserConfig();
-			var logRoot = config.AppSettings.Settings.Get("LogPath");
-			if (string.IsNullOrEmpty(logRoot))
-				logRoot = Utilities.GetAppResourcePath("db");
-
-			var logPath = System.IO.Path.Combine(logRoot, guid.ToString());
+			var logPath = System.IO.Path.Combine(Configuration.LogRoot, guid.ToString());
 			if (!Directory.Exists(logPath))
 				Directory.CreateDirectory(logPath);
 
@@ -200,6 +222,16 @@ SELECT * FROM FaultFile WHERE FaultDetailId = @Id;
 		static string GetDatabasePath(Guid guid)
 		{
 			return System.IO.Path.Combine(GetStorageDirectory(guid), "job.db");
+		}
+
+		public void InsertTestEvent(TestEvent testEvent)
+		{
+			testEvent.Id = Connection.ExecuteScalar<long>(SqlInsertTestEvent, testEvent);
+		}
+
+		public void UpdateTestEvents(IEnumerable<TestEvent> testEvent)
+		{
+			Connection.Execute(SqlUpdateTestEvent, testEvent);
 		}
 
 		public void InsertNames(IEnumerable<NamedItem> items)

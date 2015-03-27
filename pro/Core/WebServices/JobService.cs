@@ -34,7 +34,6 @@ namespace Peach.Pro.Core.WebServices
 			// deprecated
 			Get["/{id}/visualizer"] = _ => GetVisualizer(_.id);
 
-
 			Get["/{id}/continue"] = _ => ContinueJob(_.id);
 			Get["/{id}/pause"] = _ => PauseJob(_.id);
 			Get["/{id}/stop"] = _ => StopJob(_.id);
@@ -43,20 +42,21 @@ namespace Peach.Pro.Core.WebServices
 
 		Response CreateJob()
 		{
-			var job = this.Bind<Job>();
-			if (string.IsNullOrEmpty(job.PitUrl))
+			var jobRequest = this.Bind<JobRequest>();
+			if (string.IsNullOrEmpty(jobRequest.PitUrl))
 				return HttpStatusCode.BadRequest;
 
-			var pit = PitDatabase.GetPitByUrl(job.PitUrl);
+			var pit = PitDatabase.GetPitByUrl(jobRequest.PitUrl);
 			if (pit == null)
 				return HttpStatusCode.NotFound;
 
 			var pitFile = pit.Versions[0].Files[0].Name;
 
-			if (!JobRunner.Instance.Start(PitLibraryPath, pitFile, job))
+			var job = JobRunner.Instance.Start(PitLibraryPath, pitFile, jobRequest);
+			if (job == null)
 				return HttpStatusCode.Forbidden;
 
-			return Response.AsJson(JobRunner.Instance.Job);
+			return Response.AsJson(LoadJob(JobRunner.Instance.Job));
 		}
 
 		Response DeleteJob(Guid id)
@@ -177,7 +177,7 @@ namespace Peach.Pro.Core.WebServices
 
 			var dir = JobDatabase.GetStorageDirectory(id);
 			var path = Path.Combine(dir, file.FullName);
-			return Response.AsStream(() => File.OpenRead(path), "application/octet-stream");
+			return Response.AsFile(new System.IO.FileInfo(path));
 		}
 
 		Response GetFaultArchive(Guid id, long faultId)

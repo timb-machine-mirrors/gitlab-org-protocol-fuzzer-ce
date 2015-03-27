@@ -7,12 +7,11 @@ namespace Peach.Pro.Core.WebServices.Utility
 {
 	public static class FormatterExtensions
 	{
-		public static Response AsStream(
+		public static Response AsFile(
 			this IResponseFormatter formatter, 
-			Func<System.IO.Stream> fn, 
-			string contentType)
+			System.IO.FileInfo fi)
 		{
-			return new StreamResponse(fn, contentType);
+			return new FileResponse(fi);
 		}
 
 		public static Response AsZip(
@@ -24,18 +23,20 @@ namespace Peach.Pro.Core.WebServices.Utility
 		}
 	}
 
-	public class StreamResponse : Response
+	public class FileResponse : Response
 	{
-		public StreamResponse(Func<System.IO.Stream> fn, string contentType)
+		public FileResponse(System.IO.FileInfo fi)
 		{
 			Contents = stream =>
 			{
-				using (var read = fn())
+				using (var fs = fi.OpenRead())
 				{
-					read.CopyTo(stream);
+					fs.CopyTo(stream);
 				}
 			};
-			ContentType = contentType;
+			Headers.Add("Content-Length", fi.Length.ToString());
+			Headers.Add("Content-Disposition", "attachment; filename=\"{0}\"".Fmt(fi.Name));
+			ContentType = "application/octet-stream";
 			StatusCode = HttpStatusCode.OK;
 		}
 	}

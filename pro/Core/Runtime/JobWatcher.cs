@@ -11,16 +11,17 @@ using Peach.Core.IO;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices.Models;
 using Encoding = System.Text.Encoding;
+using Peach.Core.Agent;
+using Godel.Core;
+using Peach.Pro.Core.WebServices;
+using System.Threading.Tasks;
+using NLog.Config;
+using NLog.Targets;
+using NLog;
+using NLog.Targets.Wrappers;
 
 namespace Peach.Pro.Core.Runtime
 {
-	public enum Category
-	{
-		Faults,
-		Reproducing,
-		NonReproducable,
-	}
-
 	class JobWatcher : Watcher
 	{
 		static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
@@ -28,17 +29,153 @@ namespace Peach.Pro.Core.Runtime
 		readonly Job _job;
 		readonly string _logPath;
 		readonly MetricsCache _cache;
+		readonly List<TestEvent> _events = new List<TestEvent>();
 		readonly List<Fault.State> _states = new List<Fault.State>();
 		readonly ManualResetEvent _pausedEvt = new ManualResetEvent(true);
+		readonly RunConfiguration _config;
+		readonly string _pitLibraryPath;
 		Fault _reproFault;
 		bool _shouldStop;
+		int _agentConnect;
 
-		public JobWatcher(Job job, RunConfiguration config)
+		static string DEFINED_VALUES = "DefinedValues";
+
+		public JobWatcher(Job job, RunConfiguration config, string pitLibraryPath)
 		{
 			_job = job;
 			_logPath = JobDatabase.GetStorageDirectory(_job.Guid);
 			_cache = new MetricsCache(() => new JobDatabase(_job.Guid));
-			config.shouldStop = ShouldStop;
+			_config = config;
+			_config.shouldStop = ShouldStop;
+			_pitLibraryPath = pitLibraryPath;
+		}
+
+		// Filter these loggers to the info level since they are spammy at debug
+		private static string[] FilteredLoggers =
+		{
+			"Peach.Core.Dom.Array",
+			"Peach.Core.Dom.Choice",
+			"Peach.Core.Dom.DataElement",
+			"Peach.Core.Cracker.DataCracker",
+		};
+
+		public void Run()
+		{
+			try
+			{
+				var target = new AsyncTargetWrapper(new FileTarget
+				{
+					Layout = "${logger} ${message}",
+					FileName = Path.Combine(_logPath, "debug.log"),
+					KeepFileOpen = true,
+				});
+
+				var nconfig = new LoggingConfiguration();
+				nconfig.AddTarget("FileTarget", target);
+
+				if (_job.IsTest)
+				{
+					foreach (var logger in FilteredLoggers)
+					{
+						var rule = new LoggingRule(logger, LogLevel.Info, target) { Final = true };
+						nconfig.LoggingRules.Add(rule);
+					}
+				}
+
+				var defaultRule = new LoggingRule("*", LogLevel.Debug, target);
+				nconfig.LoggingRules.Add(defaultRule);
+
+				LogManager.Configuration = nconfig;
+
+				var dom = ParsePit();
+
+				// the JobWatcher integrates all the previous loggers into one:
+				// File, Metrics, Web
+				foreach (var test in dom.tests)
+				{
+					test.loggers.Clear();
+				}
+
+				var engine = new Engine(this);
+				var engineTask = Task.Factory.StartNew(() => engine.startFuzzing(dom, _config));
+
+				Loop(engineTask);
+
+				using (var db = new JobDatabase(_job.Guid))
+				{
+					EventSuccess(db);
+				}
+			}
+			catch (Exception ex)
+			{
+				foreach (var testEvent in _events)
+				{
+					if (testEvent.Status == TestStatus.Active)
+					{
+						testEvent.Status = TestStatus.Fail;
+						testEvent.Resolve = ex.Message;
+					}
+				}
+
+				using (var db = new JobDatabase(_job.Guid))
+				{
+					db.UpdateTestEvents(_events);
+				}
+			}
+			finally
+			{
+				NLog.LogManager.Flush();
+			}
+		}
+
+		private void Loop(Task engineTask)
+		{
+			Console.WriteLine("OK");
+
+			while (true)
+			{
+				Console.Write("> ");
+				var readerTask = Task.Factory.StartNew<string>(Console.ReadLine);
+				var index = Task.WaitAny(engineTask, readerTask);
+				if (index == 0)
+				{
+					// this causes any unhandled exceptions to be thrown
+					engineTask.Wait();
+					return;
+				}
+
+				switch (readerTask.Result)
+				{
+					case "help":
+						ShowHelp();
+						break;
+					case "stop":
+						Console.WriteLine("OK");
+						Stop();
+						engineTask.Wait();
+						return;
+					case "pause":
+						Console.WriteLine("OK");
+						Pause();
+						break;
+					case "continue":
+						Console.WriteLine("OK");
+						Continue();
+						break;
+					default:
+						Console.WriteLine("Invalid command");
+						break;
+				}
+			}
+		}
+
+		private void ShowHelp()
+		{
+			Console.WriteLine("Available commands:");
+			Console.WriteLine("    help");
+			Console.WriteLine("    stop");
+			Console.WriteLine("    pause");
+			Console.WriteLine("    continue");
 		}
 
 		private bool ShouldStop()
@@ -50,7 +187,7 @@ namespace Peach.Pro.Core.Runtime
 					_job.Status = JobStatus.Paused;
 					db.UpdateJob(_job);
 				}
-	
+
 				_pausedEvt.WaitOne();
 
 				using (var db = new JobDatabase(_job.Guid))
@@ -77,7 +214,93 @@ namespace Peach.Pro.Core.Runtime
 			_shouldStop = true;
 			_pausedEvt.Set();
 		}
-		
+
+		void AddEvent(JobDatabase db, string name, string description)
+		{
+			var testEvent = new TestEvent
+			{
+				Status = TestStatus.Active,
+				Short = name,
+				Description = description,
+			};
+			db.InsertTestEvent(testEvent);
+			_events.Add(testEvent);
+		}
+
+		void EventSuccess(JobDatabase db)
+		{
+			var last = _events.Last();
+			last.Status = TestStatus.Pass;
+			db.UpdateTestEvents(new[] { last });
+		}
+
+		void EventFail(JobDatabase db, string resolve)
+		{
+			var last = _events.Last();
+			last.Status = TestStatus.Fail;
+			last.Resolve = resolve;
+			db.UpdateTestEvents(new[] { last });
+		}
+
+		Dictionary<string, object> ParseConfig()
+		{
+			var args = new Dictionary<string, object>();
+			var pitConfig = _config.pitFile + ".config";
+
+			// It is ok if a .config doesn't exist
+			if (File.Exists(pitConfig))
+			{
+				using (var db = new JobDatabase(_job.Guid))
+				{
+					try
+					{
+						AddEvent(db, "Loading pit config", "Loading configuration file '{0}'".Fmt(pitConfig));
+
+						var defs = PitDatabase.ParseConfig(_pitLibraryPath, pitConfig);
+						args[DEFINED_VALUES] = defs;
+
+						EventSuccess(db);
+					}
+					catch (Exception ex)
+					{
+						EventFail(db, ex.Message);
+						throw;
+					}
+				}
+			}
+			else
+			{
+				// ParseConfig allows non-existant config files
+				var defs = PitDatabase.ParseConfig(_pitLibraryPath, pitConfig);
+				args[DEFINED_VALUES] = defs;
+			}
+
+			return args;
+		}
+
+		public Peach.Core.Dom.Dom ParsePit()
+		{
+			var args = ParseConfig();
+			var parser = new GodelPitParser();
+
+			using (var db = new JobDatabase(_job.Guid))
+			{
+				AddEvent(db, "Loading pit file", "Loading pit file '{0}'".Fmt(_config.pitFile));
+
+				try
+				{
+					var dom = parser.asParser(args, _config.pitFile);
+					EventSuccess(db);
+					return dom;
+				}
+				catch (Exception ex)
+				{
+					EventFail(db, ex.Message);
+					throw;
+				}
+			}
+		}
+
 		protected override void Engine_TestStarting(RunContext context)
 		{
 			using (var db = new JobDatabase(_job.Guid))
@@ -87,6 +310,14 @@ namespace Peach.Pro.Core.Runtime
 				_job.Status = JobStatus.Running;
 
 				db.UpdateJob(_job);
+
+				if (_job.IsTest)
+				{
+					AddEvent(db, "Starting fuzzing engine", "Starting fuzzing engine");
+
+					// Before we get iteration start, we will get AgentConnect & SessionStart
+					_agentConnect = 0;
+				}
 			}
 		}
 
@@ -99,6 +330,37 @@ namespace Peach.Pro.Core.Runtime
 				_job.Status = JobStatus.Stopped;
 
 				db.UpdateJob(_job);
+			}
+		}
+
+		protected override void Agent_AgentConnect(RunContext context, AgentClient agent)
+		{
+			using (var db = new JobDatabase(_job.Guid))
+			{
+				if (_agentConnect++ > 0)
+					EventSuccess(db);
+
+				AddEvent(db, "Connecting to agent", "Connecting to agent '{0}'".Fmt(agent.Url));
+			}
+		}
+
+		protected override void Agent_StartMonitor(RunContext context, AgentClient agent, string name, string cls)
+		{
+			using (var db = new JobDatabase(_job.Guid))
+			{
+				EventSuccess(db);
+				AddEvent(db, "Starting monitor", "Starting monitor '{0}'".Fmt(cls));
+			}
+		}
+
+		protected override void Agent_SessionStarting(RunContext context, AgentClient agent)
+		{
+			using (var db = new JobDatabase(_job.Guid))
+			{
+				EventSuccess(db);
+				AddEvent(db,
+					"Starting fuzzing session",
+					"Notifying agent '{0}' that the fuzzing session is starting".Fmt(agent.Url));
 			}
 		}
 
@@ -128,6 +390,20 @@ namespace Peach.Pro.Core.Runtime
 			using (var db = new JobDatabase(_job.Guid))
 			{
 				db.UpdateJob(_job);
+
+				if (_job.IsTest)
+				{
+					foreach (var testEvent in _events)
+						testEvent.Status = TestStatus.Pass;
+					db.UpdateTestEvents(_events);
+				}
+
+				var desc = context.reproducingFault
+					? "Reproducing fault found on the initial control record iteration"
+					: "Running the initial control record iteration";
+
+				// Add event for the iteration running
+				AddEvent(db, "Running iteration", desc);
 			}
 		}
 
@@ -230,9 +506,9 @@ namespace Peach.Pro.Core.Runtime
 		}
 
 		protected override void Engine_ReproFault(
-			RunContext context, 
-			uint currentIteration, 
-			StateModel stateModel, 
+			RunContext context,
+			uint currentIteration,
+			Peach.Core.Dom.StateModel stateModel,
 			Fault[] faults)
 		{
 			Debug.Assert(_reproFault == null);
@@ -240,9 +516,9 @@ namespace Peach.Pro.Core.Runtime
 		}
 
 		protected override void Engine_Fault(
-			RunContext context, 
-			uint currentIteration, 
-			StateModel stateModel, 
+			RunContext context,
+			uint currentIteration,
+			Peach.Core.Dom.StateModel stateModel,
 			Fault[] faults)
 		{
 			var fault = CombineFaults(currentIteration, stateModel, faults);
@@ -274,7 +550,10 @@ namespace Peach.Pro.Core.Runtime
 			_reproFault = null;
 		}
 
-		private Fault CombineFaults(uint currentIteration, StateModel stateModel, Fault[] faults)
+		private Fault CombineFaults(
+			uint currentIteration,
+			Peach.Core.Dom.StateModel stateModel,
+			Fault[] faults)
 		{
 			// The combined fault will use toSave and not collectedData
 			var ret = new Fault { collectedData = null };
@@ -331,14 +610,14 @@ namespace Peach.Pro.Core.Runtime
 			// Copy over information from the core fault
 			if (coreFault.folderName != null)
 				ret.folderName = coreFault.folderName;
-			else if (coreFault.majorHash == null && 
-				coreFault.minorHash == null && 
+			else if (coreFault.majorHash == null &&
+				coreFault.minorHash == null &&
 				coreFault.exploitability == null)
 				ret.folderName = "Unknown";
 			else
 				ret.folderName = "{0}_{1}_{2}".Fmt(
-					coreFault.exploitability, 
-					coreFault.majorHash, 
+					coreFault.exploitability,
+					coreFault.majorHash,
 					coreFault.minorHash);
 
 			// Save all states, actions, data sets, mutations

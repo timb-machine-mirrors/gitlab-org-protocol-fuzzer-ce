@@ -42,7 +42,7 @@ namespace Peach.Core
 					if (!eulaAccepted.HasValue)
 					{
 						var config = Utilities.GetUserConfig();
-						var str = config.AppSettings.Settings.Get(EulaConfig);
+						var str = config.AppSettings.Settings.Get(EulaConfig) ?? string.Empty;
 						bool val;
 
 						eulaAccepted = bool.TryParse(str, out val);
