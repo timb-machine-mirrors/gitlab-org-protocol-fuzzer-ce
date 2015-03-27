@@ -22,12 +22,16 @@ The following monitors/processes require these heightened privileges: PageHeap, 
 Local::
 	The agent is hosted in the current Peach process. This is the default channel.
 
-TCP Remoting::
+Legacy (formerly TCP Remoting)::
 	The Peach agent communicates using .NET TCP Remoting protocol. The agent must be written using the Microsoft.NET framework. Peach can run as a TCP remoting agent using the +-a tcp+ argument.
 
 REST JSON::
 	Agent protocol using REST style calls over HTTP. This channel is best suited for custom Peach agents. Example agents in C, C++, and Python are included in the Peach SDK.
- 
+
+TCP:: 
+	The Peach agent communicates using REST api calls over TCP. Peach can run as a TCP remoting agent using the +-a tcp+ argument.
+
+
 ==== Local Agent
 
 The peach runtime supports a local agent that runs in process.  LocalAgent is the default agent unless another agent type is specified.
@@ -40,7 +44,7 @@ The peach runtime supports a local agent that runs in process.  LocalAgent is th
 </Agent>
 ----
 
-==== TCP Remoting Agent
+==== Legacy (formerly TCP Remoting Agent)
 
 This agent lives in a separate process that can be located on remote machines.  Communication is performed over TCP Remoting, a form of RPC supported natively by the runtime.
 
