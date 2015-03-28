@@ -302,7 +302,7 @@ In this example, if a fault is triggered by another monitor, the TcpPort monitor
 
   <Agent name="Local">
     <!-- Fault detection -->
-    <Monitor class="LinuxDebugger">
+    <Monitor class="Gdb">
       <Param name="Executable" value="/usr/bin/curl"/>
       <Param name="Arguments" value="http://localhost"/>
       <Param name="StartOnCall" value="ScoobySnacks"/>

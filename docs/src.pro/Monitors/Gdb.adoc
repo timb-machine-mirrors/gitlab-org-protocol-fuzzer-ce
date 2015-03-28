@@ -1,17 +1,17 @@
 :images: ../images
 <<<
-[[Monitors_LinuxDebugger]]
-== LinuxDebugger Monitor (Linux)
+[[Monitors__Gdb]]
+== Gdb Monitor (Linux)
 
-The _LinuxDebugger_ monitor uses GDB to launch an executable and monitors the executing process for exceptions. 
+The _Gdb_ monitor uses GDB to launch an executable and monitors the executing process for exceptions. 
 
-When a fault or exception occurs, _LinuxDebugger_ collects and logs the appropriate information, including messages from stdout and stderr, stack traces, and the gdb log. Fault detection includes the conditions of 1) the early exit of a process, as well as 2) a process that does not exit. 
+When a fault or exception occurs, _Gdb_ collects and logs the appropriate information, including messages from stdout and stderr, stack traces, and the gdb log. Fault detection includes the conditions of 1) the early exit of a process, as well as 2) a process that does not exit. 
 
-_LinuxDebugger_ supports bucketing of crashes, and basic risk ranking that is based on 
+_Gdb_ supports bucketing of crashes, and basic risk ranking that is based on 
 exploitability of the fault. Bucketing uses categories for major and minor issuess. 
 Exploitability evaluation is similar to the !exploitable debugging extension for .NET.
 
-NOTE: The _LinuxDebugger_ monitor requires a recent version of GDB.
+NOTE: The _Gdb_ monitor requires a recent version of GDB.
 
 === Parameters
 
@@ -83,7 +83,7 @@ ifndef::peachug[]
   </StateModel>
 
   <Agent name="Local">
-    <Monitor class="LinuxDebugger">
+    <Monitor class="Gdb">
       <Param name="Executable" value="/usr/bin/curl"/>
       <Param name="Arguments" value="http://localhost"/>
       <Param name="StartOnCall" value="ScoobySnacks"/>
