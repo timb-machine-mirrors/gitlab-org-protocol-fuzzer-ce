@@ -8,7 +8,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 {
 	[TestFixture]
 	[Category("Peach")]
-	class LinuxCrashMonitorTests
+	class LinuxCoreFileTests
 	{
 		[Test]
 		public void TestTODO()
