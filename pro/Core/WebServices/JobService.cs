@@ -260,6 +260,17 @@ namespace Peach.Pro.Core.WebServices
 		{
 			var id = job.Id.ToString();
 
+			TimeSpan elapsed;
+			if (job.StopDate.HasValue)
+				elapsed = job.StopDate.Value - job.StartDate;
+			else
+				elapsed = DateTime.UtcNow - job.StartDate;
+			job.Runtime = (long)elapsed.TotalSeconds;
+
+			job.Speed = (long)(
+				(double)job.IterationCount / elapsed.TotalSeconds * 3600.0
+			);
+
 			job.Links = new JobLinks
 			{
 				JobUrl = MakeUrl(id),

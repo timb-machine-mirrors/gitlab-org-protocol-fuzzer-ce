@@ -65,21 +65,23 @@ namespace Peach.Pro.Core.Runtime
 			{
 				var target = new AsyncTargetWrapper(new FileTarget
 				{
-					Layout = "${logger} ${message}",
+					Layout = _job.IsTest ? 
+						"${logger} ${message}" :
+						"${longdate} ${logger} ${message}",
 					FileName = Path.Combine(_logPath, "debug.log"),
-					KeepFileOpen = true,
+					ConcurrentWrites = false,
+					KeepFileOpen = !_job.IsTest,
+					ArchiveAboveSize = 10 * 1024 * 1024,
+					ArchiveNumbering = ArchiveNumberingMode.Sequence,
 				});
 
 				var nconfig = new LoggingConfiguration();
 				nconfig.AddTarget("FileTarget", target);
 
-				if (_job.IsTest)
+				foreach (var logger in FilteredLoggers)
 				{
-					foreach (var logger in FilteredLoggers)
-					{
-						var rule = new LoggingRule(logger, LogLevel.Info, target) { Final = true };
-						nconfig.LoggingRules.Add(rule);
-					}
+					var rule = new LoggingRule(logger, LogLevel.Info, target) { Final = true };
+					nconfig.LoggingRules.Add(rule);
 				}
 
 				var defaultRule = new LoggingRule("*", LogLevel.Debug, target);
@@ -340,6 +342,7 @@ namespace Peach.Pro.Core.Runtime
 				_job.Seed = context.config.randomSeed;
 				_job.Mode = JobMode.Fuzzing;
 				_job.Status = JobStatus.Running;
+				_job.StartDate = DateTime.UtcNow;
 
 				db.UpdateJob(_job);
 

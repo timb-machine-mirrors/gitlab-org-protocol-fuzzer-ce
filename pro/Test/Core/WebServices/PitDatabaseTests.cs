@@ -333,27 +333,6 @@ namespace Peach.Pro.Test.Core.WebServices
 		}
 
 		[Test]
-		public void TestPitTester()
-		{
-			var pit = db.Entries.First();
-			var pitFile = pit.Versions[0].Files[0].Name;
-
-			var res = new PitTester(root, pitFile);
-
-			Assert.NotNull(res);
-
-			while (res.Status == TestStatus.Active)
-				Thread.Sleep(1000);
-
-			Assert.AreEqual(TestStatus.Pass, res.Status);
-
-			foreach (var ev in res.Result.Events.ToList())
-			{
-				Assert.AreEqual(TestStatus.Pass, ev.Status);
-			}
-		}
-
-		[Test]
 		public void TestGetPitConfig()
 		{
 			var pit = db.Entries.First();

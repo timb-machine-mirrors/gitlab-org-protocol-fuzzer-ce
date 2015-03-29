@@ -91,11 +91,10 @@ module Peach {
 		}
 
 		public GetJobs(): ng.IPromise<void> {
-			// TODO: ignore test jobs
-
 			var deferred = this.$q.defer<void>();
 			var promise = this.$http.get(C.Api.Jobs);
 			promise.success((jobs: IJob[]) => {
+				// ignore test jobs for now
 				jobs = _.where(jobs, { isTest: false });
 
 				var hasPit = false;
