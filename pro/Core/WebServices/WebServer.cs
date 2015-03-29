@@ -147,7 +147,6 @@ namespace Peach.Pro.Core.WebServices
 			container.Register<LibraryService>();
 			container.Register<NodeService>();
 			container.Register<JobService>();
-			container.Register<FaultService>();
 			container.Register<IndexService>();
 			container.Register<ErrorStatusCodeHandler>();
 			container.Register<ResourceViewLocationProvider>();
