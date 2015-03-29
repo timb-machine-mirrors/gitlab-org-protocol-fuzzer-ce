@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -204,7 +205,7 @@ namespace Peach.Pro.Test.Core.Publishers
 			}
 		}
 
-		private static IPAddress GetLinkLocalIPv6()
+		private static IEnumerable<Tuple<string, IPAddress>> GetAllLinkLocalIPv6()
 		{
 			// ReSharper disable once LoopCanBeConvertedToQuery
 			foreach (var adapter in NetworkInterface.GetAllNetworkInterfaces())
@@ -223,11 +224,14 @@ namespace Peach.Pro.Test.Core.Publishers
 					if (!ip.Address.IsIPv6LinkLocal)
 						continue;
 
-					return ip.Address;
+					yield return new Tuple<string, IPAddress>(adapter.Name, ip.Address);
 				}
 			}
+		}
 
-			return null;
+		private static IPAddress GetLinkLocalIPv6()
+		{
+			return GetAllLinkLocalIPv6().Select(i => i.Item2).FirstOrDefault();
 		}
 
 		private void StartEcho(IPAddress localIp)
@@ -448,7 +452,6 @@ namespace Peach.Pro.Test.Core.Publishers
 			RunEngine("Udp", new Dictionary<string, string>
 			{
 				{ "Host", "fe80::" },
-				 {"Interface", "fe80::" },
 			});
 		}
 
@@ -767,6 +770,110 @@ namespace Peach.Pro.Test.Core.Publishers
 			{
 				pub.close();
 				pub.stop();
+			}
+		}
+
+		[Test]
+		public void TestLinkLocalTwoIface()
+		{
+			// Ensure we can send to a link local address
+			// on two different interfaces at the same time
+
+			var linkLocal = GetAllLinkLocalIPv6().ToList();
+
+			if (linkLocal.Count < 2)
+				Assert.Ignore("Test requires two interfaces with link-local ipv6 addresses");
+
+			const string template = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='Value'/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output' publisher='if0'>
+				<DataModel ref='DM'/>
+				<Data>
+					<Field name='Value' value='Hello' />
+				</Data>
+			</Action>
+			<Action type='output' publisher='if1'>
+				<DataModel ref='DM'/>
+				<Data>
+					<Field name='Value' value='World' />
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+		<Publisher name='if0' class='Udp'>
+			<Param name='Interface' value='{0}'/>
+			<Param name='Host' value='{0}'/>
+			<Param name='Port' value='{1}'/>
+		</Publisher>
+		<Publisher name='if1' class='Udp'>
+			<Param name='Interface' value='{2}'/>
+			<Param name='Host' value='{2}'/>
+			<Param name='Port' value='{3}'/>
+		</Publisher>
+	</Test>
+</Peach>
+";
+
+			using (var s1 = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp))
+			{
+				s1.Bind(new IPEndPoint(linkLocal[0].Item2, 0));
+
+				using (var s2 = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp))
+				{
+					s2.Bind(new IPEndPoint(linkLocal[1].Item2, 0));
+
+					var ep1 = (IPEndPoint)s1.LocalEndPoint;
+					var ep2 = (IPEndPoint)s2.LocalEndPoint;
+
+					// Don't include scope id's when generating pit parameters
+					var src1 = new IPAddress(ep1.Address.GetAddressBytes());
+					var src2 = new IPAddress(ep2.Address.GetAddressBytes());
+
+					var xml = template.Fmt(
+							src1,
+							ep1.Port,
+							src2,
+							ep2.Port
+						);
+
+					var dom = DataModelCollector.ParsePit(xml);
+					var cfg = new RunConfiguration { singleIteration = true };
+					var e = new Engine(null);
+
+					e.startFuzzing(dom, cfg);
+
+					EndPoint ep = new IPEndPoint(IPAddress.IPv6Any, 0);
+					var buf = new byte[1024];
+
+					var ar = s1.BeginReceiveFrom(buf, 0, buf.Length, SocketFlags.None, ref ep, null, null);
+
+					if (!ar.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(1)))
+						Assert.Fail("Should have received message on first socket");
+
+					var len = s1.EndReceiveFrom(ar, ref ep);
+					var str = Encoding.ASCII.GetString(buf, 0, len);
+
+					Assert.AreEqual("Hello", str);
+
+					ar = s2.BeginReceiveFrom(buf, 0, buf.Length, SocketFlags.None, ref ep, null, null);
+
+					if (!ar.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(1)))
+						Assert.Fail("Should have received message on second socket");
+
+					len = s2.EndReceiveFrom(ar, ref ep);
+					str = Encoding.ASCII.GetString(buf, 0, len);
+
+					Assert.AreEqual("World", str);
+				}
 			}
 		}
 

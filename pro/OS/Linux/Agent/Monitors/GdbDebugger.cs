@@ -17,18 +17,20 @@ using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.OS.Linux.Agent.Monitors
 {
-	[Monitor("LinuxDebugger")]
+	[Monitor("Gdb")]
+	[Alias("LinuxDebugger")]
 	[Description("Uses GDB to launch an executable, monitoring it for exceptions")]
 	[Parameter("Executable", typeof(string), "Executable to launch")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
 	[Parameter("GdbPath", typeof(string), "Path to gdb", "/usr/bin/gdb")]
 	[Parameter("RestartOnEachTest", typeof(bool), "Restart process for each interation", "false")]
+	[Parameter("RestartAfterFault", typeof(bool), "Restart process after any fault occurs", "false")]
 	[Parameter("FaultOnEarlyExit", typeof(bool), "Trigger fault if process exists", "false")]
 	[Parameter("NoCpuKill", typeof(bool), "Disable process killing when CPU usage nears zero", "false")]
 	[Parameter("StartOnCall", typeof(string), "Start command on state model call", "")]
 	[Parameter("WaitForExitOnCall", typeof(string), "Wait for process to exit on state model call and fault if timeout is reached", "")]
 	[Parameter("WaitForExitTimeout", typeof(int), "Wait for exit timeout value in milliseconds (-1 is infinite)", "10000")]
-	public class LinuxDebugger : Monitor
+	public class GdbDebugger : Monitor
 	{
 		private class CaptureStream : IDisposable
 		{
@@ -67,10 +69,10 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 							Log("{0} <<< OnReadComplete (Stopped)", _parent._name);
 						}
 					}
-					catch (ObjectDisposedException)
+					catch (Exception ex)
 					{
 						// Stream was closed...
-						Log("{0} <<< OnReadComplete (Closed)", _parent._name);
+						Log("{0} <<< OnReadComplete ({1})", _parent._name, ex.GetType().Name);
 					}
 				}
 
@@ -96,9 +98,9 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 						{
 							_parent._stream.BeginRead(_buffer, 0, _buffer.Length, OnReadComplete, null);
 						}
-						catch (NotSupportedException)
+						catch (Exception ex)
 						{
-							Log("{0} Read (NotSupportedException)", _parent._name);
+							Log("{0} Read ({1})", _parent._name, ex.GetType().Name);
 
 							_length = 0;
 							_position = 0;
@@ -200,7 +202,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 			private readonly AutoResetEvent _stopEvent;
 			private bool _disposed;
 
-			public CaptureStream(LinuxDebugger owner, string fileName, Func<Process, StreamReader> strm)
+			public CaptureStream(GdbDebugger owner, string fileName, Func<Process, StreamReader> strm)
 			{
 				var fullPath = Path.Combine(owner._tmpPath, fileName);
 
@@ -291,10 +293,10 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 							Log("{0} <<< OnReadComplete (Stopped)", _name);
 						}
 					}
-					catch (ObjectDisposedException)
+					catch (Exception ex)
 					{
 						// Stream was closed...
-						Log("{0} <<< OnReadComplete (Closed)", _name);
+						Log("{0} <<< OnReadComplete ({1})", _name, ex.GetType().Name);
 					}
 				};
 
@@ -306,9 +308,9 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 					{
 						_stream.BeginRead(buf, 0, buf.Length, cb, null);
 					}
-					catch (NotSupportedException)
+					catch (Exception ex)
 					{
-						Log("{0} Read (NotSupportedException)", _name);
+						Log("{0} Read ({1})", _name, ex.GetType().Name);
 						break;
 					}
 
@@ -475,13 +477,14 @@ quit
 		public string Executable { get; private set; }
 		public string Arguments { get; private set; }
 		public bool RestartOnEachTest { get; private set; }
+		public bool RestartAfterFault { get; set; }
 		public bool FaultOnEarlyExit { get; private set; }
 		public bool NoCpuKill { get; private set; }
 		public string StartOnCall { get; private set; }
 		public string WaitForExitOnCall { get; private set; }
 		public int WaitForExitTimeout { get; private set; }
 
-		public LinuxDebugger(string name)
+		public GdbDebugger(string name)
 			: base(name)
 		{
 		}
@@ -513,7 +516,7 @@ quit
 					return full;
 			};
 
-			throw new PeachException("Error, LinuxDebugger could not find '" + target + "' in search path.");
+			throw new PeachException("Error, Gdb could not find '" + target + "' in search path.");
 		}
 
 		void _Start()
@@ -749,7 +752,7 @@ quit
 			_messageExit = false;
 			_secondStart = true;
 
-			if (RestartOnEachTest || !_IsRunning())
+			if ((RestartAfterFault && args.LastWasFault) || RestartOnEachTest || !_IsRunning())
 				_Stop();
 			else if (firstStart)
 				return;

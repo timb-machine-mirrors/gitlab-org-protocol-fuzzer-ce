@@ -171,7 +171,7 @@ namespace Peach.Pro.Test.Core.Publishers
 
 		public static string[] ChannelNames
 		{
-			get { return new[] { "tcp", "http" }; }
+			get { return new[] { "legacy", "tcp" }; }
 		}
 
 		[Test]
@@ -186,7 +186,7 @@ namespace Peach.Pro.Test.Core.Publishers
 		[Test]
 		public void TestUdp([ValueSource("ChannelNames")]string protocol)
 		{
-			if (Platform.GetOS() != Platform.OS.Windows && protocol == "tcp")
+			if (Platform.GetOS() != Platform.OS.Windows && protocol == "legacy")
 				Assert.Ignore(".NET remoting doesn't work inside nunit on mono");
 
 			var port = TestBase.MakePort(12000, 13000);

@@ -17,8 +17,10 @@ app = bld(
 	source = bld.path.ant_glob('**/*.cs'),
 	name = 'Peach.exe',
 	ver_product = 'Peach Fuzzing Platfom',
-	install_644 = bld.path.ant_glob('peach.xsd template.xml samples/*')
+	install_644 = 'peach.xsd',
 )
+
+# samples folder is installed to output dir by ../SDK/wscript_build
 
 if bld.env.MCS and bld.env.DEST_OS != 'win32':
 	app.install_755 = 'peach'

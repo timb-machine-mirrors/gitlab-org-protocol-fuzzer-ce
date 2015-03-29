@@ -31,6 +31,7 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using Peach.Core.Dom;
+using Peach.Core.Dom.Actions;
 using Peach.Core.IO;
 
 namespace Peach.Core
@@ -49,6 +50,11 @@ namespace Peach.Core
 	/// Multiple publishers can be used in a single state model to allow
 	/// for more complex operations such as writing to the registry and
 	/// then calling an RPC method.
+	/// 
+	/// Custom publishers should implement the methods prefixed with "On"
+	/// such as OnStart, OnOpen and OnInput. Additionally they should
+	/// the Stream interface as needed if they will support the
+	/// input action.
 	/// </remarks>
 	public abstract class Publisher : Stream, INamed
 	{
@@ -105,6 +111,14 @@ namespace Peach.Core
 		/// Called when the publisher is started.  This method will be called
 		/// once per fuzzing "Session", not on every iteration.
 		/// </summary>
+		/// <remarks>
+		/// This method can be overriden by custom Publishers.
+		/// 
+		/// For Publishers that will listen for incoming connections, this is a good
+		/// place to bind to a port, then perform the blocking accept in the OnAccept
+		/// method.
+		/// </remarks>
+		/// <seealso cref="OnStop"/>
 		protected virtual void OnStart()
 		{
 		}
@@ -113,6 +127,10 @@ namespace Peach.Core
 		/// Called when the publisher is stopped.  This method will be called
 		/// once per fuzzing "Session", not on every iteration.
 		/// </summary>
+		/// <remarks>
+		/// This method can be overriden by custom Publishers.
+		/// </remarks>
+		/// <seealso cref="OnStart"/>
 		protected virtual void OnStop()
 		{
 		}
@@ -122,6 +140,8 @@ namespace Peach.Core
 		/// automatically if not called specifically.
 		/// </summary>
 		/// <remarks>
+		/// This method can be overriden by custom Publishers.
+		/// 
 		/// OnOpen will automatically get called if an input or output action
 		/// is performed from the state model. In the case where only a call
 		/// action is performed, there is no automatic open or close.
@@ -137,6 +157,8 @@ namespace Peach.Core
 		/// needed.
 		/// </summary>
 		/// <remarks>
+		/// This method can be overriden by custom Publishers.
+		/// 
 		/// This method will not be called unless OnOpen has also been called.
 		/// OnOpen will automatically get called if an input or output action
 		/// is performed from the state model. In the case where only a call
@@ -150,6 +172,9 @@ namespace Peach.Core
 		/// <summary>
 		/// Accept an incoming connection.
 		/// </summary>
+		/// <remarks>
+		/// This method can be overriden by custom Publishers.
+		/// </remarks>
 		protected virtual void OnAccept()
 		{
 			throw new PeachException("Error, action 'accept' not supported by publisher");
@@ -158,6 +183,9 @@ namespace Peach.Core
 		/// <summary>
 		/// Call a method on the Publishers resource
 		/// </summary>
+		/// <remak>
+		/// This method can be overriden by custom Publishers.
+		/// </remak>
 		/// <param name="method">Name of method to call</param>
 		/// <param name="args">Arguments to pass</param>
 		/// <returns>Returns resulting data</returns>
@@ -169,6 +197,11 @@ namespace Peach.Core
 		/// <summary>
 		/// Set a property on the Publishers resource.
 		/// </summary>
+		/// <remarks>
+		/// This method can be overriden by custom Publishers.
+		/// </remarks>
+		/// <seealso>setProperty</seealso>
+		/// <seealso>OnGetProperty</seealso>
 		/// <param name="property">Name of property to set</param>
 		/// <param name="value">Value to set on property</param>
 		protected virtual void OnSetProperty(string property, Variant value)
@@ -179,6 +212,9 @@ namespace Peach.Core
 		/// <summary>
 		/// Get value of a property exposed by Publishers resource
 		/// </summary>
+		/// <remarks>
+		/// This method can be overriden by custom Publishers.
+		/// </remarks>
 		/// <param name="property">Name of property</param>
 		/// <returns>Returns value of property</returns>
 		protected virtual Variant OnGetProperty(string property)
@@ -189,6 +225,10 @@ namespace Peach.Core
 		/// <summary>
 		/// Send data
 		/// </summary>
+		/// <remarks>
+		/// This method can be overriden by custom Publishers.
+		/// </remarks>
+		/// <seealso cref="OnInput"/>
 		/// <param name="data">Data to send/write</param>
 		protected virtual void OnOutput(BitwiseStream data)
 		{
@@ -198,6 +238,32 @@ namespace Peach.Core
 		/// <summary>
 		/// Read data
 		/// </summary>
+		/// <remarks>
+		/// This method can be overriden by custom Publishers.
+		/// 
+		/// The following chain of method calls will occour when an input action is performed:
+		/// 
+		/// <list type="number">
+		///		<item>
+		///			OnInput() is called when an input action occurs. For publishers that can read a complete
+		///			peice of data with out any indication of how much data must be read can do so at this time.
+		///			An example of this is UDP based protocols in which an entire packet can be read. Typically
+		///			stream based publishers cannot read data at this time and should instead implement
+		///			WantBytes.
+		///		</item>
+		///		<item>
+		///			Cracking of input data model will commence resulting in the following method calls:
+		///			
+		///			<list type="number">
+		///				<item>WantBytes(count) is called when the cracker needs additional data. Custom publishers should perform blocking reads here.</item>
+		///				<item>read() is called on the stream interface as needed to read from buffered data.</item>
+		///				<item>These steps repeat until cracking has completed or no more data can be read.</item>
+		///			</list>
+		///		</item>
+		///		<item>Input action has completed.</item>
+		/// </list>
+		/// </remarks>
+		/// <seealso cref="OnOutput"/>
 		protected virtual void OnInput()
 		{
 			throw new PeachException("Error, action 'input' not supported by publisher");
@@ -217,10 +283,18 @@ namespace Peach.Core
 		#region Public Methods
 
 		/// <summary>
-		/// Called to Start publisher.  This action is always performed
+		/// Called to Start publisher. To implement override the OnStart method.
+		/// </summary>
+		/// <remarks>
+		/// This action is always performed
 		/// even if not specifically called.  This method will be called
 		/// once per fuzzing "Session", not on every iteration.
-		/// </summary>
+		/// 
+		/// This method is part of the base class. When implenting a custom Publisher 
+		/// the OnStart method can be overriden to implement functionality that should
+		/// occur when this method is called.
+		/// </remarks>
+		/// <seealso cref="OnStart"/>
 		public void start()
 		{
 			if (_hasStarted)
@@ -237,6 +311,12 @@ namespace Peach.Core
 		/// even if not specifically called.  This method will be called
 		/// once per fuzzing "Session", not on every iteration.
 		/// </summary>
+		/// <remarks>
+		/// This method is part of the base class. When implenting a custom Publisher 
+		/// the OnStop method can be overriden to implement functionality that should
+		/// occur when this method is called.
+		/// </remarks>
+		/// <seealso cref="OnStop"/>
 		public void stop()
 		{
 			if (!_hasStarted)
@@ -251,6 +331,12 @@ namespace Peach.Core
 		/// <summary>
 		/// Accept an incoming connection.
 		/// </summary>
+		/// <remarks>
+		/// This method is part of the base class. When implenting a custom Publisher 
+		/// the OnAccept method can be overriden to implement functionality that should
+		/// occur when this method is called.
+		/// </remarks>
+		/// <seealso cref="OnAccept"/>
 		public void accept()
 		{
 			Logger.Debug("accept()");
@@ -261,6 +347,13 @@ namespace Peach.Core
 		/// Open or connect to a resource.  Will be called
 		/// automatically if not called specifically.
 		/// </summary>
+		/// <remarks>
+		/// This method is part of the base class. When implenting a custom Publisher 
+		/// the OnOpen method can be overriden to implement functionality that should
+		/// occur when this method is called.
+		/// </remarks>
+		/// <seealso cref="OnOpen"/>
+		/// <seealso cref="close"/>
 		public void open()
 		{
 			if (_isOpen)
@@ -277,6 +370,13 @@ namespace Peach.Core
 		/// state model exists.  Can also be called explicitly when
 		/// needed.
 		/// </summary>
+		/// <remarks>
+		/// This method is part of the base class. When implenting a custom Publisher 
+		/// the OnClose method can be overriden to implement functionality that should
+		/// occur when this method is called.
+		/// </remarks>
+		/// <seealso cref="OnClose"/>
+		/// <seealso cref="open"/>
 		public void close()
 		{
 			if (!_isOpen)
@@ -291,6 +391,12 @@ namespace Peach.Core
 		/// <summary>
 		/// Call a method on the Publishers resource
 		/// </summary>
+		/// <remarks>
+		/// This method is part of the base class. When implenting a custom Publisher 
+		/// the OnCall method can be overriden to implement functionality that should
+		/// occur when this method is called.
+		/// </remarks>
+		/// <seealso cref="OnCall"/>
 		/// <param name="method">Name of method to call</param>
 		/// <param name="args">Arguments to pass</param>
 		/// <returns>Returns resulting data</returns>
@@ -303,6 +409,13 @@ namespace Peach.Core
 		/// <summary>
 		/// Set a property on the Publishers resource.
 		/// </summary>
+		/// <remarks>
+		/// This method is part of the base class. When implenting a custom Publisher 
+		/// the OnSetProperty method can be overriden to implement functionality that should
+		/// occur when this method is called.
+		/// </remarks>
+		/// <seealso cref="OnSetProperty"/>
+		/// <seealso cref="getProperty"/>
 		/// <param name="property">Name of property to set</param>
 		/// <param name="value">Value to set on property</param>
 		public void setProperty(string property, Variant value)
@@ -314,6 +427,13 @@ namespace Peach.Core
 		/// <summary>
 		/// Get value of a property exposed by Publishers resource
 		/// </summary>
+		/// <remarks>
+		/// This method is part of the base class. When implenting a custom Publisher 
+		/// the OnGetProperty method can be overriden to implement functionality that should
+		/// occur when this method is called.
+		/// </remarks>
+		/// <seealso cref="OnGetProperty"/>
+		/// <seealso cref="setProperty"/>
 		/// <param name="property">Name of property</param>
 		/// <returns>Returns value of property</returns>
 		public Variant getProperty(string property)
@@ -325,6 +445,13 @@ namespace Peach.Core
 		/// <summary>
 		/// Send data
 		/// </summary>
+		/// <remarks>
+		/// This method is part of the base class. When implenting a custom Publisher 
+		/// the OnOutput method can be overriden to implement functionality that should
+		/// occur when this method is called.
+		/// </remarks>
+		/// <seealso cref="OnOutput"/>
+		/// <seealso cref="input"/>
 		/// <param name="data">Data to send/write</param>
 		public void output(BitwiseStream data)
 		{
@@ -338,6 +465,13 @@ namespace Peach.Core
 		/// <summary>
 		/// Read data
 		/// </summary>
+		/// <remarks>
+		/// This method is part of the base class. When implenting a custom Publisher 
+		/// the OnInput method can be overriden to implement functionality that should
+		/// occur when this method is called.
+		/// </remarks>
+		/// <seealso cref="OnInput"/>
+		/// <seealso cref="!:Peach.Core.Publisher.output(Peach.Core.IO.BitwiseStream)"/>
 		public void input()
 		{
 			Logger.Debug("input()");
@@ -348,6 +482,31 @@ namespace Peach.Core
 		/// Blocking stream based publishers override this to wait
 		/// for a certian amount of bytes to be available for reading.
 		/// </summary>
+		/// <remarks>
+		/// This method can be overriden by custom Publishers.
+		/// 
+		/// The following chain of method calls will occour when an input action is performed:
+		/// 
+		/// <list type="number">
+		///		<item>
+		///			OnInput() is called when an input action occurs. For publishers that can read a complete
+		///			peice of data with out any indication of how much data must be read can do so at this time.
+		///			An example of this is UDP based protocols in which an entire packet can be read. Typically
+		///			stream based publishers cannot read data at this time and should instead implement
+		///			WantBytes.
+		///		</item>
+		///		<item>
+		///			Cracking of input data model will commence resulting in the following method calls:
+		///			
+		///			<list type="number">
+		///				<item>WantBytes(count) is called when the cracker needs additional data. Custom publishers should perform blocking reads here.</item>
+		///				<item>read() is called on the stream interface as needed to read from buffered data.</item>
+		///				<item>These steps repeat until cracking has completed or no more data can be read.</item>
+		///			</list>
+		///		</item>
+		///		<item>Input action has completed.</item>
+		/// </list>
+		/// </remarks>
 		/// <param name="count">The requested byte count</param>
 		public virtual void WantBytes(long count)
 		{
@@ -356,6 +515,12 @@ namespace Peach.Core
 		/// <summary>
 		/// Send data model
 		/// </summary>
+		/// <remarks>
+		/// This method is part of the base class. When implenting a custom Publisher 
+		/// the OnOutput method can be overriden to implement functionality that should
+		/// occur when this method is called.
+		/// </remarks>
+		/// <seealso cref="OnOutput"/>
 		/// <param name="dataModel">DataModel to send/write</param>
 		public virtual void output(DataModel dataModel)
 		{
@@ -365,6 +530,12 @@ namespace Peach.Core
 		/// <summary>
 		/// Call a method on the Publishers resource
 		/// </summary>
+		/// <remarks>
+		/// This method is part of the base class. When implenting a custom Publisher 
+		/// the OnCall method can be overriden to implement functionality that should
+		/// occur when this method is called.
+		/// </remarks>
+		/// <seealso cref="OnCall"/>
 		/// <param name="method">Name of method to call</param>
 		/// <param name="args">Arguments to pass</param>
 		/// <returns>Returns resulting data</returns>
@@ -377,52 +548,212 @@ namespace Peach.Core
 
 		#region Stream
 
+		/// <summary>
+		/// Can stream be read from.
+		/// </summary>
+		/// <remarks>
+		/// This method is part of the Stream interface that is implemented as part of the Publisher interface.
+		/// Custom publishers should implement this property.
+		/// 
+		/// Typically this property is implemented by exposing the internal buffer's own stream operations.
+		/// 
+		/// <code>
+		/// private MemoryStream _buffer;
+		/// 
+		/// public override bool CanRead { get { lock(_buffer) { return _buffer.CanRead; } } }
+		/// </code>
+		/// </remarks>
 		public override bool CanRead
 		{
 			get { return false; }
 		}
 
+		/// <summary>
+		/// Can seek in buffer.
+		/// </summary>
+		/// <remarks>
+		/// This method is part of the Stream interface that is implemented as part of the Publisher interface.
+		/// Custom publishers should implement this property.
+		/// 
+		/// Typically this property is implemented by exposing the internal buffer's own stream operations.
+		/// 
+		/// <code>
+		/// private MemoryStream _buffer;
+		/// 
+		/// public override bool CanSeek { get { lock(_buffer) { return _buffer.CanSeek; } } }
+		/// </code>
+		/// </remarks>
 		public override bool CanSeek
 		{
 			get { return false; }
 		}
 
+		/// <summary>
+		/// Can stream be written to.
+		/// </summary>
+		/// <remarks>
+		/// This method is part of the Stream interface that is implemented as part of the Publisher interface.
+		/// Custom publishers should implement this property.
+		/// 
+		/// Typically this property is implemented by exposing the internal buffer's own stream operations.
+		/// 
+		/// <code>
+		/// private MemoryStream _buffer;
+		/// 
+		/// public override bool CanWrite { get { lock(_buffer) { return _buffer.CanWrite; } } }
+		/// </code>
+		/// </remarks>
 		public override bool CanWrite
 		{
 			get { return false; }
 		}
 
+		/// <summary>
+		/// Flush stream
+		/// </summary>
+		/// <remarks>
+		/// This method is part of the Stream interface that is implemented as part of the Publisher interface.
+		/// Custom publishers should implement this method.
+		/// 
+		/// Typically this property is implemented by exposing the internal buffer's own stream operations.
+		/// 
+		/// <code>
+		/// private MemoryStream _buffer;
+		/// 
+		/// public override void Flush { lock(_buffer) { _buffer.Flush(); } }
+		/// </code>
+		/// </remarks>
 		public override void Flush()
 		{
 			throw new NotSupportedException();
 		}
 
+		/// <summary>
+		/// Length of stream in bytes.
+		/// </summary>
+		/// <remarks>
+		/// This method is part of the Stream interface that is implemented as part of the Publisher interface.
+		/// Custom publishers should implement this property.
+		/// 
+		/// Typically this property is implemented by exposing the internal buffer's own stream operations.
+		/// 
+		/// <code>
+		/// private MemoryStream _buffer;
+		/// 
+		/// public override long Length { get { lock(_buffer) { return _buffer.Length; } } }
+		/// </code>
+		/// </remarks>
 		public override long Length
 		{
 			get { throw new NotSupportedException(); }
 		}
 
+		/// <summary>
+		/// Current position in stream
+		/// </summary>
+		/// <remarks>
+		/// This method is part of the Stream interface that is implemented as part of the Publisher interface.
+		/// Custom publishers should implement this property.
+		/// 
+		/// Typically this property is implemented by exposing the internal buffer's own stream operations.
+		/// 
+		/// <code>
+		/// private MemoryStream _buffer;
+		/// 
+		/// public override long Position { get { lock(_buffer) { return _buffer.Position; } } }
+		/// </code>
+		/// </remarks>
 		public override long Position
 		{
 			get { throw new NotSupportedException(); }
 			set { throw new NotSupportedException(); }
 		}
 
+		/// <summary>
+		/// Read data from stream.
+		/// </summary>
+		/// <remarks>
+		/// This method is part of the Stream interface that is implemented as part of the Publisher interface.
+		/// Custom publishers must implement this method.
+		/// 
+		/// Typically this property is implemented by exposing the internal buffer's own stream operations.
+		/// 
+		/// <code>
+		/// private MemoryStream _buffer;
+		/// 
+		/// public override int Read(byte[] buffer, int offset, int count)
+		/// {
+		///		lock(_buffer)
+		///		{
+		///			return _buffer.Read(buffer, offset, count);
+		///		}
+		///	}
+		/// </code>
+		/// </remarks>
 		public override int Read(byte[] buffer, int offset, int count)
 		{
 			throw new NotSupportedException();
 		}
 
+		/// <summary>
+		/// Seek to position in stream.
+		/// </summary>
+		/// <remarks>
+		/// This method is part of the Stream interface that is implemented as part of the Publisher interface.
+		/// Custom publishers must implement this method.
+		/// 
+		/// Typically this property is implemented by exposing the internal buffer's own stream operations.
+		/// 
+		/// <code>
+		/// private MemoryStream _buffer;
+		/// 
+		/// public override long Seek(long offset, SeekOrigin origin)
+		/// {
+		///		lock(_buffer)
+		///		{
+		///			return _buffer.Seek(offset, origin);
+		///		}
+		///	}
+		/// </code>
+		/// </remarks>
 		public override long Seek(long offset, SeekOrigin origin)
 		{
 			throw new NotSupportedException();
 		}
 
+		/// <summary>
+		/// Set length of stream.
+		/// </summary>
+		/// <remarks>
+		/// This method is part of the Stream interface that is implemented as part of the Publisher interface.
+		/// Custom publishers can implement this method.
+		/// 
+		/// Typically this property is implemented by exposing the internal buffer's own stream operations.
+		/// 
+		/// <code>
+		/// private MemoryStream _buffer;
+		/// 
+		/// public override int SetLength(long value)
+		/// {
+		///		lock(_buffer)
+		///		{
+		///			return _buffer.SetLength(value);
+		///		}
+		///	}
+		/// </code>
+		/// </remarks>
 		public override void SetLength(long value)
 		{
 			throw new NotSupportedException();
 		}
 
+		/// <summary>
+		/// This method is not currently used.
+		/// </summary>
+		/// <remarks>
+		/// This method is part of the Stream interface that is implemented as part of the Publisher interface.
+		/// Custom publishers should not implement this method.
+		/// </remarks>
 		public override void Write(byte[] buffer, int offset, int count)
 		{
 			throw new NotSupportedException();

@@ -191,7 +191,13 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var cfg2 = db.GetConfigByUrl(imgCopy.PitUrl);
 			Assert.NotNull(cfg2);
-			Assert.AreEqual(0, cfg2.Count);
+			Assert.AreEqual(3, cfg2.Count);
+
+			// Should include system defines
+
+			Assert.AreEqual("Peach.Pwd", cfg2[0].Key);
+			Assert.AreEqual("Peach.Cwd", cfg2[1].Key);
+			Assert.AreEqual("PitLibraryPath", cfg2[2].Key);
 		}
 
 		[Test]
@@ -433,17 +439,16 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void TestAllMonitors()
 		{
+			var errors = new List<string>();
+
 			// remove test SetUp handler for this test
 			db.ValidationEventHandler -= OnValidationEvent;
 
-			var error = false;
-			db.ValidationEventHandler += (s, e) =>
-			{
-				error = true;
-			};
+			db.ValidationEventHandler += (s, e) => errors.Add(e.Exception.Message);
 
 			db.GetAllMonitors();
-			Assert.IsFalse(error);
+
+			CollectionAssert.IsEmpty(errors);
 		}
 
 		[Test]
@@ -734,6 +739,50 @@ namespace Peach.Pro.Test.Core.WebServices
 			var file = db.Entries.FirstOrDefault(e => e.Name == "My");
 			Assert.NotNull(file);
 			Assert.AreEqual(2, file.Versions[0].Files.Count);
+		}
+
+		[Test]
+		public void GetConfigNoConfig()
+		{
+			string pit =
+@"<?xml version='1.0' encoding='utf-8'?>
+<Peach>
+	<DataModel name='DM'>
+		<String/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel name='DM:DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<Strategy class='##Strategy##'/>
+		<StateModel ref='SM' />
+		<Publisher class='Null'/>
+	</Test>
+</Peach>
+";
+			File.WriteAllText(Path.Combine(root, "Image", "My.xml"), pit);
+
+			db = new PitDatabase(root);
+			Assert.NotNull(db);
+			Assert.AreEqual(2, db.Entries.Count());
+
+			var file = db.Entries.FirstOrDefault(e => e.Name == "My");
+			Assert.NotNull(file);
+
+			var cfg = db.GetConfigByUrl(file.PitUrl);
+			Assert.NotNull(cfg);
+
+			Assert.AreEqual(3, cfg.Count);
+
+			Assert.AreEqual("Peach.Pwd", cfg[0].Key);
+			Assert.AreEqual("Peach.Cwd", cfg[1].Key);
+			Assert.AreEqual("PitLibraryPath", cfg[2].Key);
 		}
 	}
 }

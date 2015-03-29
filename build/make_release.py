@@ -11,8 +11,7 @@ pitfile  = 'peach-pits-%(buildtag)s.zip'
 pittrial = 'peach-pits-%(buildtag)s-trial.zip'
 
 peach_docs = {
-	'docs/' : [ 'Peach_Professional.pdf', 'webhelp/*' ],
-	'sdk/'  : [ 'apidocs/*' ],
+	''      : [ 'sdk/*', 'docs/*' ],
 }
 pit_docs   = {
 	''      : [ 'Pit_Library.pdf' ],

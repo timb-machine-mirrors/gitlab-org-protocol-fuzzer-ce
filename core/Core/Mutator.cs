@@ -117,6 +117,9 @@ namespace Peach.Core
 		/// <summary>
 		/// The name of the mutator
 		/// </summary>
+		/// <remarks>
+		/// The default implementation of this method returns the class name.
+		/// </remarks>
 		public virtual string Name
 		{
 			get
@@ -126,9 +129,12 @@ namespace Peach.Core
 		}
 
 		/// <summary>
-		/// Check to see if DataElement is supported by this 
-		/// mutator.
+		/// Check to see if DataElement is supported by this mutator.
 		/// </summary>
+		/// <remarks>
+		/// Custom mutators that mutate data models must implement this method. The mutator
+		/// will only be used to mutate a specific element when it returns true.
+		/// </remarks>
 		/// <param name="obj">DataElement to check</param>
 		/// <returns>True if object is supported, else False</returns>
 		public static bool supportedDataElement(DataElement obj)
@@ -137,10 +143,11 @@ namespace Peach.Core
 		}
 
 		/// <summary>
-		/// Returns the total number of mutations this
-		/// mutator is able to perform.
+		/// Returns the total number of mutations this mutator is able to perform.
 		/// </summary>
-		/// <returns>Returns number of mutations mutator can generate.</returns>
+		/// <returns>
+		/// Returns number of mutations mutator can generate.
+		/// </returns>
 		public abstract int count
 		{
 			get;
@@ -151,6 +158,9 @@ namespace Peach.Core
 		/// The selection weight will also take into account if the element
 		/// being mutated has a fixup or relation on it.
 		/// </summary>
+		/// <remarks>
+		/// It is recommended that the base class implementation of this property be used.
+		/// </remarks>
 		public virtual int weight
 		{
 			get { return count; }

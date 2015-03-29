@@ -1,4 +1,5 @@
-
+:images: ../images
+<<<
 [[Intro_to_FuzzingBrand_new_items]]
 == Introduction to Fuzzing
 

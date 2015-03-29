@@ -40,9 +40,14 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 		[SetUp]
 		public void SetUp()
 		{
-			if (Platform.GetOS() == Platform.OS.Windows &&
-				Platform.GetArch() == Platform.Architecture.x86)
-				Assert.Ignore("Test is not supported on this platform (yet)");
+			if (Platform.GetOS() == Platform.OS.Windows)
+			{
+				if (!Environment.Is64BitProcess && Environment.Is64BitOperatingSystem)
+					Assert.Ignore("32bit builds are not aupported on 64bit operating systems");
+
+				if (Environment.Is64BitProcess && !Environment.Is64BitOperatingSystem)
+					Assert.Ignore("64bit builds are not aupported on 32bit operating systems");
+			}
 		}
 
 		[Test]

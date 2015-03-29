@@ -19,7 +19,6 @@ def prepare_nunit_test(self):
 	self.ut_exec.extend([
 		self.env.NUNIT,
 		'-nologo',
-		'-labels',
 		'-xml=%s' % self.outputs[0].abspath(),
 	])
 
@@ -28,6 +27,8 @@ def prepare_nunit_test(self):
 		self.ut_exec.append('-run=%s' % opts.testcase)
 	if not opts.stdout:
 		self.ut_exec.append('-out=%s' % self.outputs[1].abspath())
+	else:
+		self.ut_exec.append('-labels')
 
 	self.ut_exec.extend([ x.abspath() for x in self.inputs ])
 

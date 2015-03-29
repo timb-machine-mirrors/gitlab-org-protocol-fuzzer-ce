@@ -138,7 +138,8 @@ def apply_asciidoc(self):
 			pdf = merge.outputs[0]
 
 		# Install pdf to bin directory
-		inst = self.install_as('${BINDIR}/%s' % self.name, pdf, chmod=Utils.O644)
+		inst_to = getattr(self, 'install_path', '${BINDIR}')
+		inst = self.install_as('%s/%s' % (inst_to, self.name), pdf, chmod=Utils.O644)
 
 		# Store inst task in install_extras for packaging
 		try:
@@ -160,6 +161,8 @@ def apply_asciidoc(self):
 @feature('webhelp')
 @after_method('process_source')
 def apply_webhelp(self):
+	inst_to = getattr(self, 'install_path', '${BINDIR}/%s' % self.name)
+
 	for adoc in getattr(self, 'compiled_tasks', []):
 		xml = adoc.outputs[0]
 
@@ -175,7 +178,7 @@ def apply_webhelp(self):
 		# so include this in our cwd so it is stripped in the BINDIR
 		cwd = self.output_dir.find_or_declare('docs/file').parent
 
-		inst = self.bld.install_files('${BINDIR}/%s' % self.name, [], cwd = cwd, relative_trick = True, chmod = Utils.O644)
+		inst = self.bld.install_files(inst_to, [], cwd = cwd, relative_trick = True, chmod = Utils.O644)
 
 		if inst:
 			inst.set_run_after(idx)
@@ -199,7 +202,7 @@ def apply_webhelp(self):
 		adoc.env.append_value('ASCIIDOCTOR_OPTS', [ '-a', 'images=images' ])
 
 		# Install images to bin directory
-		inst = self.bld.install_files('${BINDIR}/%s/images' % self.name, img.ant_glob('**/*'), cwd = img, relative_trick = True, chmod = Utils.O644)
+		inst = self.bld.install_files('%s/images' % inst_to, img.ant_glob('**/*'), cwd = img, relative_trick = True, chmod = Utils.O644)
 		if inst:
 			self.install_extras.append(inst)
 
@@ -207,7 +210,7 @@ def apply_webhelp(self):
 
 	# Install template files to BINDIR
 	template = root.find_dir(os.path.join(self.env.WEBHELP_DIR, 'template'))
-	inst = self.bld.install_files('${BINDIR}/%s' % self.name, template.ant_glob('**/*', excl='favicon.ico'), cwd = template, relative_trick = True, chmod = Utils.O644)
+	inst = self.bld.install_files(inst_to, template.ant_glob('**/*', excl='favicon.ico'), cwd = template, relative_trick = True, chmod = Utils.O644)
 	if inst:
 		self.install_extras.append(inst)
 

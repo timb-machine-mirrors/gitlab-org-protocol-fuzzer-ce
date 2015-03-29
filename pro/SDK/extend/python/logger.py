@@ -5,12 +5,12 @@ import System
 from System.Reflection import BindingFlags
 
 clr.AddReference("Peach.Core")
-clr.AddReference("Peach.Enterprise")
+clr.AddReference("Peach.Pro")
 
 import Peach.Core
 from Peach.Core import Variant, Logger, RunContext
 from Peach.Core.Dom import Block, String, DataElement
-from Peach.Enterprise.Loggers import BasePythonLogger
+from Peach.Pro.Loggers import BasePythonLogger
 
 # Add the special assembly that our Python extensions will 
 # appear in. This is the list of assemblies that Peach checks

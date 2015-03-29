@@ -2,7 +2,7 @@
 
 'use strict';
 
-var RandofaulterPath = ['Peach Pro Library 2014 Q4', 'Test', 'randofaulter'];
+var RandofaulterPath = ['Peach Pro Library 2015 Q1', 'Test', 'randofaulter'];
 
 describe('Dashboard |', () => {
 	var page = new Dashboard();

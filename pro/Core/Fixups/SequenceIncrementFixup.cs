@@ -55,10 +55,14 @@ namespace Peach.Pro.Core.Fixups
 			: base(parent, args)
 		{
 			ParameterParser.Parse(this, args);
+
 			if(string.IsNullOrEmpty(Group))
 				_stateKey = "Peach.SequenceIncrementFixup." + parent.fullName;
 			else
 				_stateKey = "Peach.SequenceIncrementFixup.Group." + Group;
+
+			if (parent is Peach.Core.Dom.String)
+				parent.DefaultValue = new Variant(0);
 		}
 
 		protected override Variant OnActionRun(RunContext ctx)

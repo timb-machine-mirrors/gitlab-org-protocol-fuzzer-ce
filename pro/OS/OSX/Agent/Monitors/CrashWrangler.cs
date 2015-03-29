@@ -67,6 +67,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 	[Parameter("WaitForExitOnCall", typeof(string), "Wait for process to exit on state model call and fault if timeout is reached", "")]
 	[Parameter("WaitForExitTimeout", typeof(int), "Wait for exit timeout value in milliseconds (-1 is infinite)", "10000")]
 	[Parameter("RestartOnEachTest", typeof(bool), "Restart process for each interation", "false")]
+	[Parameter("RestartAfterFault", typeof(bool), "Restart process after any fault occurs", "false")]
 	public class CrashWrangler : Monitor
 	{
 		static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
@@ -85,6 +86,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 		public string WaitForExitOnCall { get; set; }
 		public int WaitForExitTimeout { get; set; }
 		public bool RestartOnEachTest { get; set; }
+		public bool RestartAfterFault { get; set; }
 
 		private Process _procHandler; // Handle to exec_handler process
 		private Process _procCommand; // Handle to inferrior process
@@ -117,6 +119,9 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			_faultExitFail = false;
 			_faultExitEarly = false;
 			_messageExit = false;
+
+			if (RestartAfterFault && args.LastWasFault)
+				_StopProcess();
 
 			if (!_IsProcessRunning() && StartOnCall == null)
 				_StartProcess();
@@ -286,7 +291,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			var si = new ProcessStartInfo
 			{
 				FileName = ExecHandler,
-				Arguments = "\"" + Executable + "\"" + (Arguments.Length == 0 ? "" : " ") + Arguments,
+				Arguments = "\"" + Executable + "\"" + (string.IsNullOrEmpty(Arguments) ? "" : " ") + Arguments,
 				UseShellExecute = false
 			};
 
@@ -348,6 +353,8 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 					_procCommand = null;
 				}
 			}
+
+			OnInternalEvent(EventArgs.Empty);
 		}
 
 		private void _StopProcess()
