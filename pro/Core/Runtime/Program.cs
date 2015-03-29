@@ -152,6 +152,7 @@ namespace Peach.Pro.Core.Runtime
 			// Enable debugging if asked for
 			// If configuration was already done by a .config file, nothing will be changed
 			Utilities.ConfigureLogging(_verbosity);
+			Configuration.LogLevel = LogLevel;
 		}
 
 		/// <summary>
@@ -265,7 +266,7 @@ namespace Peach.Pro.Core.Runtime
 				throw new PeachException(
 					"The specified Peach Pit Library location '{0}' does not exist.".Fmt(
 						pitLibraryPath));
-			return pitLibraryPath;
+			return Path.GetFullPath(pitLibraryPath);
 		}
 	}
 }

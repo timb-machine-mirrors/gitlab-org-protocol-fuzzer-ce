@@ -109,10 +109,17 @@ namespace Peach.Pro.Core.Runtime
 					}
 				}
 			}
-			catch (Exception ex)
+			catch (ApplicationException ex)
 			{
 				JobFail(ex);
-				Logger.ErrorException("Error", ex);
+				if (Configuration.LogLevel == LogLevel.Trace)
+					Logger.Error("Exception: {0}", ex);
+				else
+					Logger.Error("Exception: {0}", ex.Message);
+			}
+			catch (Exception ex)
+			{
+				Logger.Error("Unhandled Exception: {0}", ex);
 				throw;
 			}
 			finally
@@ -133,7 +140,8 @@ namespace Peach.Pro.Core.Runtime
 				if (index == 0)
 				{
 					// this causes any unhandled exceptions to be thrown
-					engineTask.Wait();
+					try { engineTask.Wait(); }
+					catch (AggregateException ex) { throw ex.InnerException; }
 					return;
 				}
 

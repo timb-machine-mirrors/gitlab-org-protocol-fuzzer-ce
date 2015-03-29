@@ -46,7 +46,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				_baseUri.Host,
 				_baseUri.Port,
 				Server.LogPath,
-				Utilities.LogLevel);
+				Configuration.LogLevel);
 
 			_ws = new WebSocket(url, "log");
 			//_ws.Log.Level = WebSocketSharp.LogLevel.Debug;
