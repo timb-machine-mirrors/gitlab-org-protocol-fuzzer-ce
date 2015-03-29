@@ -245,31 +245,22 @@ namespace Peach.Pro.Core.WebServices
 
 		public string ErrorMessage
 		{
-			get
-			{
-				return error.ErrorMessage;
-			}
+			get { return error.ErrorMessage; }
 		}
 
 		public string FullException
 		{
-			get
-			{
-				return error.FullException;
-			}
+			get { return error.FullException; }
 		}
 
 		public bool HasDetails
 		{
-			get
-			{
-				return !string.IsNullOrEmpty(FullException);
-			}
+			get { return !string.IsNullOrEmpty(FullException); }
 		}
 
 		public static ErrorResponse FromMessage(string message)
 		{
-			return new ErrorResponse(new Error()
+			return new ErrorResponse(new Error
 			{
 				ErrorMessage = message,
 			});
@@ -277,7 +268,7 @@ namespace Peach.Pro.Core.WebServices
 
 		public static ErrorResponse FromException(Exception ex)
 		{
-			return new ErrorResponse(new Error()
+			return new ErrorResponse(new Error
 			{
 				ErrorMessage = ex.GetBaseException().Message,
 				FullException = ex.ToString(),
@@ -340,8 +331,8 @@ namespace Peach.Pro.Core.WebServices
 					// Windows gives ERROR_SHARING_VIOLATION when port in use
 					// Windows gives ERROR_ALREADY_EXISTS when two http instances are running
 					// Mono raises "Prefix already in use" message
-					if (ex.ErrorCode != ERROR_SHARING_VIOLATION && 
-						ex.ErrorCode != ERROR_ALREADY_EXISTS && 
+					if (ex.ErrorCode != ERROR_SHARING_VIOLATION &&
+						ex.ErrorCode != ERROR_ALREADY_EXISTS &&
 						ex.Message != "Prefix already in use.")
 						throw;
 				}

@@ -262,15 +262,6 @@ namespace Peach.Core
 		private static readonly string PeachDirectory =
 			AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
 
-		public static LogLevel LogLevel
-		{
-			get
-			{
-				// TODO: compute max log level
-				return LogLevel.Info;
-			}
-		}
-
 		/// <summary>
 		/// Configure NLog.
 		/// </summary>
@@ -301,12 +292,26 @@ namespace Peach.Core
 				return;
 			}
 
+			LogLevel logLevel;
+			switch (level)
+			{
+				case 0:
+					logLevel = LogLevel.Info;
+					break;
+				case 1:
+					logLevel = LogLevel.Debug;
+					break;
+				default:
+					logLevel = LogLevel.Trace;
+					break;
+			}
+
 			var consoleTarget = new ConsoleTarget
 			{
 				Layout = "${logger} ${message}", 
 				Error = true,
 			};
-			var rule = new LoggingRule("*", LogLevel, consoleTarget);
+			var rule = new LoggingRule("*", logLevel, consoleTarget);
 
 			var nconfig = new LoggingConfiguration();
 			nconfig.AddTarget("console", consoleTarget);

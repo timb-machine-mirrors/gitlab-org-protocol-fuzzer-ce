@@ -153,7 +153,19 @@ namespace Peach.Pro.Core.WebServices
 				};
 
 				if (File.Exists(debugLog))
-					result.Log = File.ReadAllText(debugLog);
+				{
+					using (var file = new FileStream(
+						debugLog, 
+						FileMode.Open, 
+						FileAccess.Read, 
+						FileShare.ReadWrite, 
+						64 * 1024,
+						FileOptions.SequentialScan))
+					using (var reader = new StreamReader(file))
+					{
+						result.Log = reader.ReadToEnd();
+					}
+				}
 
 				return Response.AsJson(result);
 			}
@@ -220,16 +232,14 @@ namespace Peach.Pro.Core.WebServices
 				fault = db.GetFaultById(faultId, false);
 			}
 
-			var dir = fault.Iteration.ToString("X8");
-			var dirInArchive = "Fault-{0}".Fmt(fault.Iteration);
-			var filename = "{0}.zip".Fmt(dirInArchive);
+			var filename = "Fault-{0}.zip".Fmt(fault.Iteration);
 
-			return Response.AsZip(filename, () =>
-			{
-				var zip = new ZipFile();
-				zip.AddDirectory(dir, dirInArchive);
-				return zip;
-			});
+			var dir = new DirectoryInfo(Path.Combine(
+				JobDatabase.GetStorageDirectory(id),
+				fault.Iteration.ToString("X8")
+			));
+
+			return Response.AsZip(filename, dir);
 		}
 
 		[Obsolete]
@@ -250,34 +260,38 @@ namespace Peach.Pro.Core.WebServices
 		{
 			var id = job.Id.ToString();
 
-			job.JobUrl = MakeUrl(id);
-			job.FaultsUrl = MakeUrl(id, "faults");
-			job.NodesUrl = MakeUrl(id, "nodes");
-			job.TargetUrl = "";
-			job.TargetConfigUrl = "";
-			job.PeachUrl = "";
-			job.ReportUrl = "";
-			job.PackageFileUrl = "";
-
-			job.Commands = new JobCommands
+			job.Links = new JobLinks
 			{
-				StopUrl = MakeUrl(id, "stop"),
-				ContinueUrl = MakeUrl(id, "continue"),
-				PauseUrl = MakeUrl(id, "pause"),
-				KillUrl = MakeUrl(id, "kill"),
+				JobUrl = MakeUrl(id),
+				FaultsUrl = MakeUrl(id, "faults"),
+				NodesUrl = MakeUrl(id, "nodes"),
+				//TargetUrl = "",
+				//TargetConfigUrl = "",
+				//PeachUrl = "",
+				//ReportUrl = "",
+				//PackageFileUrl = "",
+				Commands = new JobCommands
+				{
+					StopUrl = MakeUrl(id, "stop"),
+					ContinueUrl = MakeUrl(id, "continue"),
+					PauseUrl = MakeUrl(id, "pause"),
+					KillUrl = MakeUrl(id, "kill"),
+				},
+				Metrics = new JobMetrics
+				{
+					BucketTimeline = MakeUrl(id, "metrics", "bucketTimeline"),
+					FaultTimeline = MakeUrl(id, "metrics", "faultTimeline"),
+					Mutators = MakeUrl(id, "metrics", "mutators"),
+					Elements = MakeUrl(id, "metrics", "elements"),
+					States = MakeUrl(id, "metrics", "states"),
+					Dataset = MakeUrl(id, "metrics", "dataset"),
+					Buckets = MakeUrl(id, "metrics", "buckets"),
+					Iterations = MakeUrl(id, "metrics", "iterations"),
+				},
 			};
 
-			job.Metrics = new JobMetrics
-			{
-				BucketTimeline = MakeUrl(id, "metrics", "bucketTimeline"),
-				FaultTimeline = MakeUrl(id, "metrics", "faultTimeline"),
-				Mutators = MakeUrl(id, "metrics", "mutators"),
-				Elements = MakeUrl(id, "metrics", "elements"),
-				States = MakeUrl(id, "metrics", "states"),
-				Dataset = MakeUrl(id, "metrics", "dataset"),
-				Buckets = MakeUrl(id, "metrics", "buckets"),
-				Iterations = MakeUrl(id, "metrics", "iterations"),
-			};
+			if (job.IsTest)
+				job.Links.TestUrl = MakeUrl(id, "result");
 
 			return job;
 		}
@@ -292,11 +306,15 @@ namespace Peach.Pro.Core.WebServices
 		FaultDetail LoadFault(Job job, FaultDetail fault)
 		{
 			LoadFaultSummary(job, fault);
-			fault.PitUrl = job.PitUrl;
-			fault.NodeUrl = NodeService.MakeUrl(NodeGuid);
-			fault.PeachUrl = "";
-			fault.TargetConfigUrl = "";
-			fault.TargetUrl = "";
+			fault.Links = new FaultLinks
+			{
+				PitUrl = job.PitUrl,
+				NodeUrl = NodeService.MakeUrl(NodeGuid),
+				ArchiveUrl = MakeUrl(job.Id, "faults", fault.Id.ToString(), "archive"),
+				//PeachUrl = "",
+				//TargetConfigUrl = "",
+				//TargetUrl = "",
+			};
 			foreach (var file in fault.Files)
 			{
 				LoadFile(job, file);

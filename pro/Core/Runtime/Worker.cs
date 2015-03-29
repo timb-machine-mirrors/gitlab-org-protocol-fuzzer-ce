@@ -26,7 +26,6 @@ namespace Peach.Pro.Core.Runtime
 		uint? _seed;
 		bool _init;
 		bool? _test;
-		JobRunner _watcher;
 
 		protected override void AddCustomOptions(OptionSet options)
 		{
@@ -91,6 +90,8 @@ namespace Peach.Pro.Core.Runtime
 			nconfig.AddTarget("console", consoleTarget);
 			nconfig.LoggingRules.Add(rule);
 			LogManager.Configuration = nconfig;
+
+			Configuration.LogLevel = LogLevel;
 		}
 
 		protected override void OnRun(List<string> args)
@@ -175,8 +176,8 @@ namespace Peach.Pro.Core.Runtime
 				config.skipToIteration = (uint)job.RangeStart + (uint)job.IterationCount;
 			}
 
-			_watcher = new JobRunner(job, config, _pitLibraryPath);
-			_watcher.Run();
+			var runner = new JobRunner(job, config, _pitLibraryPath);
+			runner.Run();
 		}
 
 		protected override string UsageLine

@@ -2,6 +2,7 @@ using System;
 using Ionic.Zip;
 using Nancy;
 using Peach.Core;
+using System.IO;
 
 namespace Peach.Pro.Core.WebServices.Utility
 {
@@ -17,9 +18,9 @@ namespace Peach.Pro.Core.WebServices.Utility
 		public static Response AsZip(
 			this IResponseFormatter formatter,
 			string filename,
-			Func<ZipFile> fn)
+			DirectoryInfo di)
 		{
-			return new ZipResponse(filename, fn);
+			return new ZipResponse(filename, di);
 		}
 	}
 
@@ -34,26 +35,30 @@ namespace Peach.Pro.Core.WebServices.Utility
 					fs.CopyTo(stream);
 				}
 			};
-			Headers.Add("Content-Length", fi.Length.ToString());
-			Headers.Add("Content-Disposition", "attachment; filename=\"{0}\"".Fmt(fi.Name));
-			ContentType = "application/octet-stream";
+
+			Headers["Last-Modified"] = fi.LastWriteTimeUtc.ToString("R");
+			Headers["Content-Length"] = fi.Length.ToString();
+			Headers["Content-Disposition"] = "attachment; filename=\"{0}\"".Fmt(fi.Name);
+			ContentType = MimeTypes.GetMimeType(fi.FullName); ;
 			StatusCode = HttpStatusCode.OK;
 		}
 	}
 
 	public class ZipResponse : Response
 	{
-		public ZipResponse(string filename, Func<ZipFile> fn)
+		public ZipResponse(string filename, DirectoryInfo di)
 		{
 			Contents = stream =>
 			{
-				using (var zip = fn())
+				using (var zip = new ZipFile())
 				{
+					zip.CompressionLevel = Ionic.Zlib.CompressionLevel.BestSpeed;
+					zip.AddDirectory(di.FullName);
 					zip.Save(stream);
 				}
 			};
-			Headers.Add("Content-Disposition", "attachment; filename=\"{0}\"".Fmt(filename));
-			ContentType = "application/octet-stream";
+			Headers["Content-Disposition"] = "attachment; filename=\"{0}\"".Fmt(filename);
+			ContentType = MimeTypes.GetMimeType(filename);
 			StatusCode = HttpStatusCode.OK;
 		}
 	}

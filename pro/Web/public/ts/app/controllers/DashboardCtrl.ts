@@ -85,7 +85,7 @@ module Peach {
 			this.$modal.open({
 				templateUrl: C.Templates.Modal.StartJob,
 				controller: StartJobController
-			}).result.then((job: IJob) => {
+			}).result.then((job: IJobRequest) => {
 				this.jobService.StartJob(job);
 			});
 		}

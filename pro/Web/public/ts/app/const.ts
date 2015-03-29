@@ -47,8 +47,7 @@ module Peach.C {
 		export var Libraries = '/p/libraries';
 		export var Pits = '/p/pits';
 		export var Jobs = '/p/jobs';
-		export var PeachMonitors = '/p/conf/wizard/monitors';
-		export var TestStart = '/p/conf/wizard/test/start';
+		export var PeachMonitors = '/p/pits/monitors';
 	}
 
 	export module Tracks {

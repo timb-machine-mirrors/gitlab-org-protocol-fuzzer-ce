@@ -111,7 +111,7 @@ namespace Peach.Pro.Core.WebServices
 				if (_job != null)
 					return null;
 
-				_pitFile = pitFile;
+				_pitFile = Path.GetFullPath(pitFile);
 				_pitLibraryPath = pitLibraryPath;
 
 				_job = new Job
@@ -152,7 +152,6 @@ namespace Peach.Pro.Core.WebServices
 				"--pits", _pitLibraryPath,
 				"--guid", _job.Id,
 				_pitFile,
-				//"-vv",
 			};
 
 			if (!string.IsNullOrEmpty(Configuration.LogRoot))
@@ -248,22 +247,19 @@ namespace Peach.Pro.Core.WebServices
 
 		void MonitorTask()
 		{
-			Logger.Trace("WaitForExit");
+			Logger.Trace("WaitForExit> pid: {0}", _process.Id);
 
 			_process.WaitForExit();
 			var exitCode = _process.ExitCode;
 
-			Logger.Trace("WaitForExit: {0}", exitCode);
+			Logger.Trace("WaitForExit> ExitCode: {0}", exitCode);
 
 			// this shouldn't throw, LoggingTask should catch it
 			_taskStderr.Wait();
 
 			Logger.Trace("LoggingTask done");
 
-			_process.Dispose();
-			_process = null;
-
-			if (exitCode == 0 || _pendingKill)
+			if (exitCode == 0 || exitCode == 2 || _pendingKill)
 			{
 				FinishJob();
 			}
@@ -271,7 +267,13 @@ namespace Peach.Pro.Core.WebServices
 			{
 				Thread.Sleep(TimeSpan.FromSeconds(1));
 
-				StartProcess();
+				lock (this)
+				{
+					_process.Dispose();
+					_process = null;
+
+					StartProcess();
+				}
 			}
 		}
 
@@ -290,6 +292,8 @@ namespace Peach.Pro.Core.WebServices
 					db.InsertJob(_job);
 				}
 
+				_process.Dispose();
+				_process = null;
 				_job = null;
 				_taskStderr = null;
 				_pitFile = null;
