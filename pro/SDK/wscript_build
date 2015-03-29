@@ -1,8 +1,13 @@
 #!/usr/bin/env python
 
+peach = bld.path.find_node('../Peach')
+
 bld(
 	name='peach-sdk',
 	features = 'peach',
 	install_path = '${BINDIR}/sdk',
-	install_644 = bld.path.ant_glob('**/*', excl='wscript_build')
+	install_644 = {
+		bld.path : bld.path.ant_glob('**/*', excl='wscript_build'),
+		peach    : peach.ant_glob('samples/*'),
+	}
 )

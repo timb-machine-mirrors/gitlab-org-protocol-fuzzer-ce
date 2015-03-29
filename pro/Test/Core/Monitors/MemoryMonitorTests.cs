@@ -20,7 +20,8 @@ namespace Peach.Pro.Test.Core.Monitors
 			using (var p = Process.GetCurrentProcess())
 			{
 				_thisPid = p.Id.ToString(CultureInfo.InvariantCulture);
-				_thisProcessName = p.ProcessName;
+				// Use process snapshot so we are sure to get the correct name on osx
+				_thisProcessName = ProcessInfo.Instance.Snapshot(p).ProcessName;
 			}
 		}
 

@@ -74,8 +74,12 @@ namespace PitTester
 			}
 		}
 
-		protected override void Engine_TestStarting(RunContext context)
+		protected override void StateModelStarting(RunContext context, StateModel model)
 		{
+			// Re-evaluate ignores every only on control record iterations
+			if (!context.controlRecordingIteration)
+				return;
+
 			ignores = new List<Tuple<Action, DataElement>>();
 
 			var resolver = new PeachXmlNamespaceResolver();
@@ -89,7 +93,7 @@ namespace PitTester
 
 				do
 				{
-					var valueElement = ((PeachXPathNavigator)iter.Current).currentNode as DataElement;
+					var valueElement = ((PeachXPathNavigator)iter.Current).CurrentNode as DataElement;
 					if (valueElement == null)
 						throw new PeachException("Error, ignore xpath did not return a Data Element. [" + item + "]");
 

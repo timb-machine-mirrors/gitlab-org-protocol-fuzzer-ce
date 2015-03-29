@@ -11,7 +11,7 @@ using Peach.Pro.Core.Runtime;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
-	[AgentServer("http")]
+	[AgentServer("tcp")]
 	public class Server : IAgentServer
 	{
 		internal const string PublisherPath = "/pa/publisher";

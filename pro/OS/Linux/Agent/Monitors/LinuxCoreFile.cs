@@ -40,12 +40,13 @@ using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.OS.Linux.Agent.Monitors
 {
-	[Monitor("LinuxCrashMonitor")]
+	[Monitor("LinuxCoreFile")]
+	[Alias("LinuxCrashMonitor")]
 	[Description("Detect when a process crashes and collect there resulting core file")]
 	[Parameter("Executable", typeof(string), "Target executable used to filter crashes.", "")]
 	[Parameter("LogFolder", typeof(string), "Folder with log files. Defaults to /var/peachcrash", "/var/peachcrash")]
 	[Parameter("Mono", typeof(string), "Full path and executable for mono runtime. Defaults to /usr/bin/mono.", "/usr/bin/mono")]
-	public class LinuxCrashMonitor : Monitor
+	public class LinuxCoreFile : Monitor
 	{
 		protected string corePattern = "|{0} {1} -p=%p -u=%u -g=%g -s=%s -t=%t -h=%h -e=%e";
 		protected string monoExecutable = "/usr/bin/mono";
@@ -60,7 +61,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 		public string LogFolder { get; private set; }
 		public string Executable { get; private set; }
 
-		public LinuxCrashMonitor(string name)
+		public LinuxCoreFile(string name)
 			: base(name)
 		{
 			// TODO
@@ -80,7 +81,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 			// Ensure the crash handler has been installed at the right place
 			string handler = Path.DirectorySeparatorChar + linuxCrashHandlerExe;
 			if (!File.Exists(handler))
-				throw new PeachException("Error, LinuxCrashMonitor did not find crash handler located at '" + handler + "'.");
+				throw new PeachException("Error, LinuxCoreFile did not find crash handler located at '" + handler + "'.");
 
             try
             {
@@ -110,7 +111,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 
 				var checkWrite = File.ReadAllText("/proc/sys/kernel/core_pattern", System.Text.Encoding.ASCII);
 				if (checkWrite.IndexOf(linuxCrashHandlerExe) == -1)
-					throw new PeachException("Error, LinuxCrashMonitor was unable to update /proc/sys/kernel/core_pattern.");
+					throw new PeachException("Error, LinuxCoreFile was unable to update /proc/sys/kernel/core_pattern.");
 			}
 			else
 				origionalCorePattern = null;
@@ -126,7 +127,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 
 				var checkWrite = File.ReadAllText("/proc/sys/fs/suid_dumpable", System.Text.Encoding.ASCII);
 				if (!checkWrite.StartsWith("1"))
-					throw new PeachException("Error, LinuxCrashMonitor was unable to update /proc/sys/fs/suid_dumpable.");
+					throw new PeachException("Error, LinuxCoreFile was unable to update /proc/sys/fs/suid_dumpable.");
 			}
 			else
 				origionalSuidDumpable = null;
@@ -140,7 +141,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 			}
 			catch (Exception ex)
 			{
-				throw new PeachException("Error, LinuxCrashMonitor was unable to create the log directory.  " + ex.Message, ex);
+				throw new PeachException("Error, LinuxCoreFile was unable to create the log directory.  " + ex.Message, ex);
 			}
 
 			logFolderCreated = true;
@@ -178,7 +179,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 			}
 			catch (Exception ex)
 			{
-				throw new PeachException("Error, LinuxCrashMonitor was unable to clear the log directory.  " + ex.Message, ex);
+				throw new PeachException("Error, LinuxCoreFile was unable to clear the log directory.  " + ex.Message, ex);
 			}
 		}
 
@@ -248,7 +249,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 				}
 				catch (UnauthorizedAccessException ex)
 				{
-					throw new PeachException("Error, LinuxCrashMonitor was unable to read the crash log.  " + ex.Message, ex);
+					throw new PeachException("Error, LinuxCoreFile was unable to read the crash log.  " + ex.Message, ex);
 				}
 			}
 

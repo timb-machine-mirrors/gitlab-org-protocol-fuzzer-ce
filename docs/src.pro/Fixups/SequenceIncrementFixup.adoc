@@ -24,11 +24,13 @@
 // - 02/18/2014: Mick
 // Added full examples
 
-_SequenceIncrement_ increments each iteration starting at 1.
-This fixup is useful when a field must be a unique value, or a sequenced value every iteration.
+_SequenceIncrement_ supplies a value that increments with each iteration in a fuzzing session. 
+The value supplied for the first iteration starts with 1. This fixup is useful when a field 
+must be a unique value, or a sequenced value every iteration.
 
-This checksum can be used when fuzzing protocols that contain an increasing numerical sequence.
-The Fixup produces valid numbers for the data element it modifies and is constrained to the size of the data element.
+This checksum is useful for fuzzing a protocol that contains an increasing numerical sequence. 
+The Fixup produces valid numbers for the data element it modifies. The maximum value supplied 
+by _SequenceIncrement_ is constrained to the size of the data element.
 
 === Parent Elements
 
@@ -193,6 +195,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 ----
 ==================================
 
+
 .Non Default Once
 ==================================
 Three outputs with Once set to true. Each action outputs the same incremented number.
@@ -274,6 +277,7 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 ----
 ==================================
+
 
 .Group
 ==================================

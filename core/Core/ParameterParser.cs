@@ -47,7 +47,7 @@ namespace Peach.Core
 		/// <typeparam name="T">Class type</typeparam>
 		/// <param name="obj">Instance of class T</param>
 		/// <param name="args">Dictionary of arguments</param>
-		public static void Parse<T>(T obj, Dictionary<string, Variant> args) where T: class
+		public static void Parse<T>(T obj, Dictionary<string, Variant> args) where T : class
 		{
 			foreach (var item in GetProperties(obj))
 			{
@@ -81,7 +81,7 @@ namespace Peach.Core
 		/// <returns></returns>
 		public static object FromString(Type type, ParameterAttribute attr, string value)
 		{
-			return FromString(type, attr.type, attr.name, value);
+			return FromString(attr, type, attr.type, attr.name, value);
 		}
 
 		public static IEnumerable<KeyValuePair<string, string>> Get<T>(T obj) where T : class
@@ -99,7 +99,8 @@ namespace Peach.Core
 			}
 		}
 
-		private static IEnumerable<KeyValuePair<ParameterAttribute, PropertyInfo>> GetProperties<T>(T obj) where T : class
+		private static IEnumerable<KeyValuePair<ParameterAttribute, PropertyInfo>> GetProperties<T>(T obj)
+			where T : class
 		{
 			var type = obj.GetType();
 
@@ -120,7 +121,12 @@ namespace Peach.Core
 
 		}
 
-		private static object FromString(Type pluginType, Type destType, string name, string value)
+		private static object FromString(
+			ParameterAttribute attr,
+			Type pluginType,
+			Type destType,
+			string name,
+			string value)
 		{
 			object val = null;
 
@@ -129,13 +135,14 @@ namespace Peach.Core
 				if (destType.GetArrayRank() != 1)
 					throw new NotSupportedException();
 
-				var parts = value.Split(new[]{','}, StringSplitOptions.RemoveEmptyEntries);
+				var delim = attr.ListDelimiter;
+				var parts = value.Split(new[] { delim }, StringSplitOptions.RemoveEmptyEntries);
 				var array = (IList)Activator.CreateInstance(destType, new object[] { parts.Length });
 				var elemType = destType.GetElementType();
 
 				for (var i = 0; i < parts.Length; ++i)
 				{
-					array[i] = FromString(pluginType, elemType, name, parts[i]);
+					array[i] = FromString(attr, pluginType, elemType, name, parts[i]);
 				}
 
 				return array;
@@ -176,7 +183,8 @@ namespace Peach.Core
 			return val;
 		}
 
-		private static void ApplyProperty<T>(T obj, PropertyInfo prop, ParameterAttribute attr, string value) where T : class
+		private static void ApplyProperty<T>(T obj, PropertyInfo prop, ParameterAttribute attr, string value)
+			where T : class
 		{
 			var type = obj.GetType();
 
@@ -187,13 +195,8 @@ namespace Peach.Core
 
 		private static object ChangeType(Type ownerType, string value, Type destType)
 		{
-			try
-			{
+			if (Type.GetTypeCode(destType) != TypeCode.Object)
 				return Convert.ChangeType(value, destType);
-			}
-			catch (InvalidCastException)
-			{
-			}
 
 			// Look for a static Parse(string) on destType
 			var method = destType.GetMethod(
@@ -234,7 +237,7 @@ namespace Peach.Core
 			try
 			{
 				if (method.ReturnType != typeof(void))
-					return method.Invoke(null, new object[] {value});
+					return method.Invoke(null, new object[] { value });
 
 				var parameters = new object[] { value, null };
 				method.Invoke(null, parameters);

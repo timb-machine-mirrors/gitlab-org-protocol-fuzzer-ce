@@ -204,26 +204,48 @@ JOIN NamedItem AS d  ON d.Id  = vei.DatasetId;
 -- Datasets >>>
 CREATE VIEW ViewDatasetsByIteration AS
 SELECT
+	x.StateId,
+	x.ActionId,
+	x.ParameterId,
 	x.DatasetId,
 	SUM(x.IterationCount) AS IterationCount
 FROM Mutation AS x
-GROUP BY x.DatasetId;
+GROUP BY 
+	x.StateId,
+	x.ActionId,
+	x.ParameterId,
+	x.DatasetId
+;
 
 CREATE VIEW ViewDatasetsByFault AS
 SELECT
+	x.StateId,
+	x.ActionId,
+	x.ParameterId,
 	x.DatasetId,
 	COUNT(DISTINCT(x.MajorHash)) as BucketCount,
 	COUNT(DISTINCT(x.Iteration)) as FaultCount
 FROM FaultMetric AS x
-GROUP BY x.DatasetId;
+GROUP BY 
+	x.StateId,
+	x.ActionId,
+	x.ParameterId,
+	x.DatasetId
+;
 
 CREATE VIEW ViewDatasets AS
 SELECT
-	n.Name as Dataset,
+	CASE WHEN length(p.name) > 0 THEN
+		s.name || '.' || a.name || '.' || p.name || '/' || d.name
+	ELSE
+		s.name || '.' || a.name || '/' || d.name
+	END AS Dataset,
 	vdi.IterationCount,
 	vdf.BucketCount,
 	vdf.FaultCount
 FROM ViewDatasetsByIteration AS vdi
 LEFT JOIN ViewDatasetsByFault as vdf ON vdi.DatasetId = vdf.DatasetId
-JOIN NamedItem AS n ON vdi.DatasetId = n.Id;
--- Datasets <<<
+JOIN NamedItem AS s ON vdi.StateId = s.Id
+JOIN NamedItem AS a ON vdi.ActionId = a.Id
+JOIN NamedItem AS p ON vdi.ParameterId = p.Id
+JOIN NamedItem AS d ON vdi.DatasetId = d.Id;

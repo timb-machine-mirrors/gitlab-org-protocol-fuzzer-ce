@@ -1,14 +1,15 @@
+:images: ../images
 <<<
 [[Monitors_Serial]]
 == Serial Port Monitor
 
-The serial port monitor can be used to perform data collection, fault detection, and automation tasks based on the received input. 
+The _serial port_ monitor can be used to perform data collection, fault detection, and automation tasks based on the received input. 
 
-* The default usage of serial port monitor is data collection. The data received via the serial port is logged when a fault occurs. 
-* To perform fault detection, a regular expression can be provided through the FaultRegex parameter. When the regex matches, a fault is thrown. 
+* The default usage of  _serial port_ monitor is data collection. The data received via the serial port is logged when a fault occurs. 
+* To perform fault detection, a regular expression can be provided through the FaultRegex parameter. When the regex matches, Peach detects a fault. 
 * For automation tasks, the WaitForRegex and WaitWhen parameters can be used. The automation parameters cause Peach to wait for matching input before continuing.
 
-Additionally, the serial port monitor supports multiple instances that utilize the same port. This allows for more complex automation configurations.
+Additionally, Peach supports multiple _serial port_ monitors in a pit, monitoring a single port and/or multiple ports. This flexibility allows more complex automation configurations.
 
 === Parameters
 
@@ -53,18 +54,22 @@ XOnXOff;;
 FaultRegex:: Fault when regular expression matches.
 WaitRegex:: Wait until regex matches received data.
 WaitOnCall:: Wait for message, WaitWhen must be set to OnCall.
-WaitWhen:: 
-+
-When to wait. Defaults to OnStart.
-+
-[horizontal]
-OnCall;; When triggered by a message from state machine.
-OnStart;; Once at the start of the fuzzing session.
-OnEnd;; Once at the end of the fuzzing session.
-OnIterationStart;; At the start of each iteration.
-OnIterationEnd;; At the end of each iteration.
-OnFault;; When a fault occurs.
-OnIterationStartAfterFault;; When a fault occurs, wait until the start of the next iteration.
+WaitWhen:: When to wait. Defaults to OnStart.
+
+[cols="1,2" options="header",halign="center"] 
+|==========================================================
+|"When" Setting              |Description
+|OnStart                     |Waits at the start of the fuzzing session, default value.
+|OnEnd                       |Waits at the end of the fuzzing session.
+|OnIterationStart            |Waits at the start of each iteration.
+|OnIterationEnd              |Waits at the end of each iteration.
+|OnFault                     |Waits when Peach detects a fault.
+|OnIterationStartAfterFault  |Waits at the start of the iteration that immediately follows a fault.
+|OnCall                      |Waits upon receipt of a call from the state model.
+|==========================================================
+
+.WaitWhen Choices
+image::{images}/Timings_All.PNG["When Timing Choices", scalewidth="75%"]
 
 === Examples
 
