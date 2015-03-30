@@ -1,6 +1,6 @@
 :images: ../images
 <<<
-[[Monitors__Gdb]]
+[[Monitors_Gdb]]
 == Gdb Monitor (Linux)
 
 The _Gdb_ monitor uses GDB to launch an executable and monitors the executing process for exceptions. 
