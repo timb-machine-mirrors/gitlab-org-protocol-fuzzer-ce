@@ -2,16 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
 using Peach.Core;
-using Peach.Core.Analyzers;
 using Peach.Core.Runtime;
 using Peach.Pro.Core.Storage;
-using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 
 namespace Peach.Pro.Core.Runtime
@@ -134,7 +130,7 @@ namespace Peach.Pro.Core.Runtime
 					RangeStart = _start.HasValue ? _start.Value : 0,
 					RangeStop = _stop,
 					Seed = _seed,
-					IsTest = _test.HasValue ? _test.Value : false,
+					IsTest = _test.HasValue && _test.Value,
 				};
 				db.InsertJob(job);
 				return job;
@@ -153,7 +149,7 @@ namespace Peach.Pro.Core.Runtime
 				job.IsTest = _test.HasValue ? _test.Value : job.IsTest;
 			}
 
-			RunConfiguration config = new RunConfiguration
+			var config = new RunConfiguration
 			{
 				pitFile = pitFile
 			};
