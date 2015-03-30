@@ -24,9 +24,9 @@ The following table lists each monitor by name, function type (Fault detection, 
 |xref:Monitors_CleanupRegistry[Cleanup Registry] |    |    |X   |  |Windows
 |xref:Monitors_CrashReporter[Crash Reporter]     |X   |X   |    |  |OS X
 |xref:Monitors_CrashWrangler[Crash Wrangler]     |X   |    |X   |  |OS X
+|xref:Monitors_Gdb[Gdb]                          |X   |X   |X   |  |Linux
 |xref:Monitors_IpPower9258[IpPower9258]          |    |    |X   |  |
-|xref:Monitors_LinuxCrash[Crash]                 |X   |X   |    |  |Linux
-|xref:Monitors_LinuxDebugger[Linux Debugger]     |X   |X   |X   |  |Linux
+|xref:Monitors_LinuxCoreFile[LinuxCoreFile]      |X   |X   |    |  |Linux
 |xref:Monitors_MemoryMonitor[Memory]             |X   |    |    |  |
 |xref:Monitors_PageHeap[Page Heap]               |X   |    |    |  |Windows
 |xref:Monitors_Pcap[Pcap Network]                |X   |X   |    |  |
