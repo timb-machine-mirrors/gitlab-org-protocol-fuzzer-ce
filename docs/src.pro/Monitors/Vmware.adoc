@@ -46,14 +46,33 @@ HostType:: Type of remote host, defaults to _Default_  +
 	*Server* - VMWare Server 1.0.x  +
     *Default* - Default
 
-
 Login:: Username for authentication on the remote machine.
 Password:: Password for authentication on the remote machine.
 HostPort:: TCP/IP port on the remote host.
-ResetEveryIteration:: Reset VM to snapshot on every iteration. Defaults to false.
 ResetOnFaultBeforeCollection:: Reset VM after we detect a Fault during data collection. Defaults to false.
+RestartAfterFault:: If "true", restarts the target when any monitor detects a fault. 
+If "false", restarts the target if the process exits or crashes. +
+This argument defaults to false.
+
 WaitForToolsInGuest:: Wait for tools to start in guest. Defaults to true.
 WaitTimeout:: How many seconds to wait for guest tools. Defaults to 600.
+When:: Details on when to perform a specfied action. Specify one of the following values: 
+
+[cols="1,2" options="header",halign="center"] 
+|==========================================================
+|"When" Setting              |Description
+|DetectFault                 |Perform the action when checking for the faulting condition. Requires a regex expression in the +CheckValue+ parameter. Default mode of operation.
+|OnStart                     |Run the command when fuzzing session starts. Command runs once per session.
+|OnEnd                       |Run the command when fuzzing session stops. Command runs run once per session.
+|OnIterationStart            |Run the command at start of each iteration.
+|OnIterationEnd              |Run the command at end of each iteration.
+|OnFault                     |Run the command when Peach detects a fault.
+|OnIterationStartAfterFault  |Run the command at start of an iteration that immediately follows a fault detection.
+|OnCall                      |Trigger the command to run from the state model. The command runs when the _StartOnCall_ message is received.
+|==========================================================
+
+.When Choices for Performing an Action
+image::{images}/Timings_SSH.PNG["When Run Command Choices", scalewidth="75%"]
 
 === Examples
 
