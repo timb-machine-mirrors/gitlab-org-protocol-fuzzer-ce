@@ -189,11 +189,12 @@ namespace Peach.Pro.Test.Core.Storage
 			{
 				AssertResult(db.QueryIterations(), new[]
 				{
-					new IterationMetric("S2_1", "A2", "P1", "E1", "M1", "D1", 1),
 					new IterationMetric("S3_1", "A3", "P1", "E1", "M1", "D1", 1),
 					new IterationMetric("S3_1", "A3", "P2", "E2", "M2", "D2", 1),
 					new IterationMetric("S2_1", "A2", "P1", "E1", "M3", "D1", 1),
-					new IterationMetric("S4_1", "A4", "P4", "E4", "M4", "D4", 1),
+					new IterationMetric("S2_1", "A2", "P1", "E1", "M1", "D1", 2),
+					new IterationMetric("S4_1", "A4", "P4", "E4", "M4", "D4", 2),
+					new IterationMetric("S4_1", "A5", "P4", "E5", "M4", "D4", 1),
 					new IterationMetric("S5_1", "A5", "P5", "E5", "M5", "D5", 1),
 					new IterationMetric("S5_2", "A5", "P5", "E5", "M5", "D5", 1),
 					new IterationMetric("S3_1", "A3", "P3", "E3", "M3", "D3", 4),
@@ -208,12 +209,13 @@ namespace Peach.Pro.Test.Core.Storage
 			{
 				AssertResult(db.QueryBuckets(), new[]
 				{
-					new BucketMetric("AAA_BBB", "M1", "S2_1.A2.P1.E1", 1, 1),
+					new BucketMetric("AAA_BBB", "M1", "S2_1.A2.P1.E1", 2, 1),
 					new BucketMetric("AAA_BBB", "M3", "S3_1.A3.P3.E3", 4, 2),
 					new BucketMetric("AAA_YYY", "M5", "S5_1.A5.P5.E5", 1, 1),
 					new BucketMetric("AAA_YYY", "M5", "S5_2.A5.P5.E5", 1, 1),
 					new BucketMetric("XXX_YYY", "M3", "S3_1.A3.P3.E3", 4, 1),
-					new BucketMetric("XXX_YYY", "M4", "S4_1.A4.P4.E4", 1, 1),
+					new BucketMetric("XXX_YYY", "M4", "S4_1.A4.P4.E4", 2, 1),
+					new BucketMetric("XXX_YYY", "M4", "S4_1.A5.P4.E5", 1, 1),
 				});
 			}
 		}
@@ -241,10 +243,10 @@ namespace Peach.Pro.Test.Core.Storage
 				var data = db.QueryMutators();
 				AssertResult(data, new[]
 				{
-					new MutatorMetric("M1", 2, 2, 1, 1),
+					new MutatorMetric("M1", 2, 3, 1, 1),
 					new MutatorMetric("M2", 1, 1, 0, 0),
 					new MutatorMetric("M3", 2, 5, 2, 3),
-					new MutatorMetric("M4", 1, 1, 1, 1),
+					new MutatorMetric("M4", 2, 3, 1, 1),
 					new MutatorMetric("M5", 2, 2, 1, 1),
 				});
 			}
@@ -257,11 +259,11 @@ namespace Peach.Pro.Test.Core.Storage
 			{
 				AssertResult(db.QueryElements(), new[]
 				{
-					new ElementMetric("S2_1", "A2", "P1", "D1", "E1", 2, 1, 1),
+					new ElementMetric("S2_1", "A2", "P1", "D1", "E1", 3, 1, 1),
 					new ElementMetric("S3_1", "A3", "P1", "D1", "E1", 1, 0, 0),
 					new ElementMetric("S3_1", "A3", "P2", "D2", "E2", 1, 0, 0),
 					new ElementMetric("S3_1", "A3", "P3", "D3", "E3", 4, 2, 3),
-					new ElementMetric("S4_1", "A4", "P4", "D4", "E4", 1, 1, 1),
+					new ElementMetric("S4_1", "A4", "P4", "D4", "E4", 2, 1, 1),
 					new ElementMetric("S4_1", "A5", "P4", "D4", "E5", 1, 1, 1),
 					new ElementMetric("S5_1", "A5", "P5", "D5", "E5", 1, 1, 1),
 					new ElementMetric("S5_2", "A5", "P5", "D5", "E5", 1, 1, 1),
@@ -276,11 +278,14 @@ namespace Peach.Pro.Test.Core.Storage
 			{
 				AssertResult(db.QueryDatasets(), new[]
 				{
-					new DatasetMetric("D1", 3, 1, 1),
-					new DatasetMetric("D2", 1, 0, 0),
-					new DatasetMetric("D3", 4, 2, 3),
-					new DatasetMetric("D4", 1, 1, 1),
-					new DatasetMetric("D5", 2, 1, 1),
+					new DatasetMetric("S2.A2.P1/D1", 3, 1, 1),
+					new DatasetMetric("S3.A3.P1/D1", 1, 0, 0),
+					new DatasetMetric("S3.A3.P2/D2", 1, 0, 0),
+					new DatasetMetric("S3.A3.P3/D3", 4, 2, 3),
+					new DatasetMetric("S4.A4.P4/D4", 2, 1, 1),
+					new DatasetMetric("S4.A5.P4/D4", 1, 1, 1),
+					new DatasetMetric("S5.A5.P5/D5", 1, 1, 1),
+					new DatasetMetric("S5.A5.P5/D5", 1, 1, 1),
 				});
 			}
 		}

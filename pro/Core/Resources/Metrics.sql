@@ -236,16 +236,21 @@ GROUP BY
 CREATE VIEW ViewDatasets AS
 SELECT
 	CASE WHEN length(p.name) > 0 THEN
-		s.name || '.' || a.name || '.' || p.name || '/' || d.name
+		sn.name || '.' || a.name || '.' || p.name || '/' || d.name
 	ELSE
-		s.name || '.' || a.name || '/' || d.name
+		sn.name || '.' || a.name || '/' || d.name
 	END AS Dataset,
 	vdi.IterationCount,
 	vdf.BucketCount,
 	vdf.FaultCount
 FROM ViewDatasetsByIteration AS vdi
-LEFT JOIN ViewDatasetsByFault as vdf ON vdi.DatasetId = vdf.DatasetId
-JOIN NamedItem AS s ON vdi.StateId = s.Id
+LEFT JOIN ViewDatasetsByFault as vdf ON 
+	vdi.StateId = vdf.StateId AND
+	vdi.ActionId = vdf.ActionId AND
+	vdi.ParameterId = vdf.ParameterId AND
+	vdi.DatasetId = vdf.DatasetId
+JOIN [State] AS s ON vdi.StateId = s.Id
+JOIN NamedItem AS sn ON s.NameId = sn.Id
 JOIN NamedItem AS a ON vdi.ActionId = a.Id
 JOIN NamedItem AS p ON vdi.ParameterId = p.Id
 JOIN NamedItem AS d ON vdi.DatasetId = d.Id;
