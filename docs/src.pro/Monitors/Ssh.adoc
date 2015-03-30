@@ -27,7 +27,13 @@ when a fault is detected.
 
 *Automation*
 
-This monitor can run commands on remote machines to perform automation tasks. The monitor supports several points in the fuzzing session to run commands.
+This monitor can run commands on remote machines to perform automation tasks. Interesting points to wait during a fuzzing session include the following: 
+
+* At the start or end of a fuzzing run
+* At the start or end of each test iteration
+* After detecting a fault
+* At the start of an iteration that immediately follows a fault 
+* When called from the StateModel
 
 === Parameters
 

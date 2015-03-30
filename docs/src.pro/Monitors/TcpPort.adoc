@@ -9,7 +9,14 @@ The _TcpPort_ monitor detects state changes on TCP ports. A state change is a tr
 * fault detection (fault on a specific state)
 * data collection (report the current state) 
 
-The monitor includes an event trigger (the _When_ parameter) that you can use to control when automation occurs.
+The monitor includes an event trigger (the _When_ parameter) that you can use to control when automation occurs. Interesting points to start monitoring include the following: 
+
+* At the start or end of a fuzzing run
+* At the start or end of each test iteration
+* After detecting a fault
+* At the start of an iteration that immediately follows a fault 
+* When called from the StateModel
+
 
 Fault detection for this monitor uses bucketing. The major hash (bucket category) is the port number. The minor hash is the monitor state (open or closed). Risk evaluation is not used. 
 

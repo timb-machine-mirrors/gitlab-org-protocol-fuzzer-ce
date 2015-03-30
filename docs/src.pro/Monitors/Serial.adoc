@@ -3,11 +3,24 @@
 [[Monitors_Serial]]
 == Serial Port Monitor
 
-The _serial port_ monitor can be used to perform data collection, fault detection, and automation tasks based on the received input. 
+The _Serial Port_ monitor can be used to perform data collection, fault detection, 
+and automation tasks based on the received input. 
 
-* The default usage of  _serial port_ monitor is data collection. The data received via the serial port is logged when a fault occurs. 
-* To perform fault detection, a regular expression can be provided through the FaultRegex parameter. When the regex matches, Peach detects a fault. 
-* For automation tasks, the WaitForRegex and WaitWhen parameters can be used. The automation parameters cause Peach to wait for matching input before continuing.
+The default usage of  _serial port_ monitor is data collection. The data received 
+via the serial port typically is logged when a fault occurs.
+
+To perform fault detection, specify a regular expression using the +FaultRegex+ 
+parameter. When the regex matches, Peach detects a fault. 
+
+For automation tasks, the +WaitForRegex+ and +WaitWhen+ parameters can be used. 
+The automation parameters cause Peach to wait for matching input before continuing. 
+Interesting points to wait during a fuzzing session include the following: 
+
+* At the start or end of a fuzzing run
+* At the start or end of each test iteration
+* After detecting a fault
+* At the start of an iteration that immediately follows a fault 
+* When called from the StateModel
 
 Additionally, Peach supports multiple _serial port_ monitors in a pit, monitoring a single port and/or multiple ports. This flexibility allows more complex automation configurations.
 
