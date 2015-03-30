@@ -62,6 +62,12 @@ The default value is 200 ms.
 
 FaultOnEarlyExit:: Triggers a fault if the target exits prematurely, defaults to false.
 
+RestartAfterFault:: If "true", restarts the target when any monitor detects a fault. 
+If "false", restarts the target if the process exits or crashes. +
+This argument defaults to false.
+
+RestartOnEachTest:: Restarts the process for each iteration, defaults to false.
+
 WaitForExitOnCall:: Exits the target upon receiving a call from the state model. If the 
 call fails to occur within an acceptable  waiting period, issue a fault and then exit. The 
 WaitForExitTimeout parameter specifies the waiting period.
@@ -69,7 +75,6 @@ WaitForExitTimeout parameter specifies the waiting period.
 WaitForExitTimeout:: Specifies the WaitForExitOnCall timeout value, expressed in milliseconds, 
 defaults to 10000 ms (10 sec). The value -1 specifies an infiniate waiting period.
 
-RestartOnEachTest:: Restarts the process for each iteration, defaults to false.
 
 === Examples
 

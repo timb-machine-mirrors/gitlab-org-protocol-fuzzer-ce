@@ -76,6 +76,9 @@ ReadyTimeout:: Sets the maximum number of seconds to wait for the device to reac
 RebootEveryN:: Specifies the number of iterations between successive device reboots, defaults to 0.
 RebootOnFault:: Reboots the device when a fault occurs, defaults to false.
 RestartEveryIteration:: Restarts the application every iteration, defaults to false.
+RestartAfterFault:: If "true", restarts the target when any monitor detects a fault. 
+If "false", restarts the target if the process exits or crashes. +
+This argument defaults to false.
 StartOnCall:: Starts the application when notified by the state machine. The string value used here must match the Call Action statement of the state model. The default string is "".
 WaitForReadyOnCall:: Waits for the device to be ready when notified by the state machine. The string used here must match the corresponding Call Action statement of the state model. the default string is "".
 

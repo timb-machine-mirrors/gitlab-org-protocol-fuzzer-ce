@@ -43,10 +43,13 @@ Action:: Perform an action on the specified relay, defaults to ToggleOff. Valid 
 |SetOff     |Sets the realy to the OFF position.
 |==========================================================
 
-ResetEveryIteration:: Reset power on every iteration, defaults to false.
 ToggleDelay:: Pause in milliseconds between off/on, defaults to 500 ms--1/2 second. +
 Formerly named OnOffPause.
 ResetOnStart:: Reset device on start, defaults to false.
+RestartAfterFault:: If "true", restarts the target when any monitor detects a fault. 
+If "false", restarts the target if the process exits or crashes. +
+This argument defaults to false.
+
 ReverseSwitch:: Obsolete. Instead, use the ToggleOn Action. 
 When:: Details on when to perform a specfied action. Specify one of the following values: 
 
