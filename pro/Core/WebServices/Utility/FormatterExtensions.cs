@@ -1,4 +1,3 @@
-using System;
 using Ionic.Zip;
 using Nancy;
 using Peach.Core;

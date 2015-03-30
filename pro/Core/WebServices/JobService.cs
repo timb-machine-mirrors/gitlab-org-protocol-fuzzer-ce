@@ -1,5 +1,4 @@
 using System;
-using Ionic.Zip;
 using Nancy;
 using Nancy.ModelBinding;
 using Peach.Core;
@@ -141,7 +140,7 @@ namespace Peach.Pro.Core.WebServices
 
 			using (var db = new JobDatabase(id))
 			{
-				var events = db.LoadTable<TestEvent>();
+				var events = db.LoadTable<TestEvent>().ToList();
 				var isActive = events.Any(x => x.Status == TestStatus.Active);
 				var isFail = events.Any(x => x.Status == TestStatus.Fail);
 
@@ -258,7 +257,7 @@ namespace Peach.Pro.Core.WebServices
 
 		Job LoadJob(Job job)
 		{
-			var id = job.Id.ToString();
+			var id = job.Id;
 
 			TimeSpan elapsed;
 			if (job.StopDate.HasValue)
@@ -268,7 +267,7 @@ namespace Peach.Pro.Core.WebServices
 			job.Runtime = (long)elapsed.TotalSeconds;
 
 			job.Speed = (long)(
-				(double)job.IterationCount / elapsed.TotalSeconds * 3600.0
+				job.IterationCount / elapsed.TotalSeconds * 3600.0
 			);
 
 			job.Links = new JobLinks
@@ -333,7 +332,7 @@ namespace Peach.Pro.Core.WebServices
 			return fault;
 		}
 
-		FaultFile LoadFile(Job job, FaultFile file)
+		void LoadFile(Job job, FaultFile file)
 		{
 			file.FileUrl = MakeUrl(
 				job.Guid.ToString(), 
@@ -342,7 +341,6 @@ namespace Peach.Pro.Core.WebServices
 				"data",
 				file.Id.ToString()
 			);
-			return file;
 		}
 
 		static string MakeUrl(params string[] args)
