@@ -7,8 +7,9 @@ The _IpPower9258_ monitor controls an IP Power 9258 Network Power Controller (IP
 
 Each _IpPower9258_ monitor switches an individual outlet. Use one monitor per outlet to control multiple outlets concurrently. Times that the monitor can switch the power of an outlet include the following:
 
-* At the start of a fuzzing run
-* At the start of each test iteration
+* At the start or end of a fuzzing run
+* At the start or end of each test iteration
+* After detecting a fault
 * At the start of an iteration that immediately follows a fault 
 
 image::{images}/IP9258Mtr.PNG["Fuzzing Configuration Using an IP 9258 Network Power Controller", scalewidth="75%"] 

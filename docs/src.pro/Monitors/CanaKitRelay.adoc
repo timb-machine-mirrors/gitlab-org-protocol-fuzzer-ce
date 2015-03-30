@@ -7,8 +7,9 @@ The _CanaKitRelay_ monitor controls a set of relays capable of turning AC and DC
 
 The CanaKitRelay Monitor controls one relay in a kit. Use one monitor per relay to control multiple relays concurrently. Times that the monitor can trigger the relay include the following:
 
-* At the start of a fuzzing run
-* At the start of each test iteration
+* At the start or end of a fuzzing run
+* At the start or end of each test iteration
+* After detecting a fault
 * At the start of an iteration that immediately follows a fault 
 
 _CanaKitRelay_ can toggle power states, reset a device, or push a button on a device during a fuzzing run. Any device with an AC or DC power line can be controlled by wiring it through a relay. A sample configuration follows that controls power through Relay 1. 

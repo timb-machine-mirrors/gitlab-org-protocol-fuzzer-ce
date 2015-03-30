@@ -12,7 +12,13 @@ matches an incoming syslog message, a fault is generated. Faults are bucketed at
 major level with the value="SYSLOG". Other bucketing components--minor hash and risk 
 evaluation--are not used. 
 
-Several options exist to specify when to start the _syslog_ monior. See the parameters for details.
+Several options exist to specify when to start the _syslog_ monior. Interesting points to start this monitor include the following: 
+
+* At the start or end of a fuzzing run
+* At the start or end of each test iteration
+* After detecting a fault
+* At the start of an iteration that immediately follows a fault 
+* When called from the StateModel
 
 === Parameters
 
