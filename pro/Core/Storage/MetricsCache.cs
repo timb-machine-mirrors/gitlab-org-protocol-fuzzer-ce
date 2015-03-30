@@ -155,6 +155,10 @@ namespace Peach.Pro.Core.Storage
 				}
 			}
 
+			foreach (var mutation in _mutations)
+			{
+				mutation.IsSaved = true;
+			}
 			_pendingStates.Clear();
 		}
 
@@ -174,6 +178,8 @@ namespace Peach.Pro.Core.Storage
 					{
 						db.InsertNames(_nameCache.Flush());
 						db.UpsertStates(_pendingStates.Values);
+						db.UpsertMutations(_mutations.Where(x => !x.IsSaved));
+
 						var faults = _mutations.Select(x => new FaultMetric
 						{
 							Iteration = fault.Iteration,

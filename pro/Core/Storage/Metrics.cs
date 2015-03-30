@@ -72,6 +72,9 @@ namespace Peach.Pro.Core.Storage
 		[Index("IX_Mutation_Dataset")]
 		[ForeignKey(typeof(NamedItem), Name = "FK_Mutation_Dataset")]
 		public long DatasetId { get; set; }
+
+		[NotMapped]
+		public bool IsSaved { get; set; }
 	}
 
 	/// <summary>
