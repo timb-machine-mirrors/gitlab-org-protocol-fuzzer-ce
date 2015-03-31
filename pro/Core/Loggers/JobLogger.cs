@@ -57,21 +57,21 @@ namespace Peach.Pro.Core.Loggers
 		TextWriter _log;
 		List<Fault.State> _states;
 
-		public JobLogger(Dictionary<string, Variant> args)
-		{
-			Path = (string)args["Path"];
-		}
-
 		/// <summary>
 		/// The user configured base path for all the logs
 		/// </summary>
-		public string Path { get; private set; }
+		public string BasePath { get; private set; }
 
 		/// <summary>
 		/// The specific path used to log faults for a given test.
 		/// </summary>
 		protected string RootDir { get; private set; }
 
+		public JobLogger(Dictionary<string, Variant> args)
+		{
+			BasePath = (string)args["Path"];
+		}
+		
 		public enum Category { Faults, Reproducing, NonReproducable }
 
 		protected void SaveFault(Category category, Fault fault)
@@ -93,7 +93,7 @@ namespace Peach.Pro.Core.Loggers
 			}
 
 			// root/category/bucket/iteration
-			var subDir = System.IO.Path.Combine(
+			var subDir = Path.Combine(
 				RootDir, 
 				category.ToString(), 
 				fault.folderName, 
@@ -101,7 +101,7 @@ namespace Peach.Pro.Core.Loggers
 
 			foreach (var kv in fault.toSave)
 			{
-				var fileName = System.IO.Path.Combine(subDir, kv.Key);
+				var fileName = Path.Combine(subDir, kv.Key);
 
 				SaveFile(category, fileName, kv.Value);
 			}
@@ -148,7 +148,7 @@ namespace Peach.Pro.Core.Loggers
 				// Save reproFault toSave in fault
 				foreach (var kv in _reproFault.toSave)
 				{
-					var key = System.IO.Path.Combine("Initial", _reproFault.iteration.ToString(), kv.Key);
+					var key = Path.Combine("Initial", _reproFault.iteration.ToString(), kv.Key);
 					fault.toSave.Add(key, kv.Value);
 				}
 
@@ -387,15 +387,9 @@ namespace Peach.Pro.Core.Loggers
 
 		protected override void Engine_TestStarting(RunContext context)
 		{
-			if (_log != null)
-			{
-				_log.Flush();
-				_log.Close();
-				_log.Dispose();
-				_log = null;
-			}
+			Debug.Assert(_log == null);
 
-			RootDir = GetBasePath(context);
+			RootDir = GetLogPath(context, BasePath);
 
 			_log = OpenStatusLog();
 
@@ -415,7 +409,7 @@ namespace Peach.Pro.Core.Loggers
 			_log.Flush();
 		}
 
-		protected virtual TextWriter OpenStatusLog()
+		TextWriter OpenStatusLog()
 		{
 			try
 			{
@@ -426,12 +420,7 @@ namespace Peach.Pro.Core.Loggers
 				throw new PeachException(e.Message, e);
 			}
 
-			return File.CreateText(System.IO.Path.Combine(RootDir, "status.txt"));
-		}
-
-		protected virtual string GetBasePath(RunContext context)
-		{
-			return GetLogPath(context, Path);
+			return File.CreateText(Path.Combine(RootDir, "status.txt"));
 		}
 
 		/// <summary>
@@ -443,12 +432,12 @@ namespace Peach.Pro.Core.Loggers
 		public delegate void FaultSavedEvent(Category category, Fault fault, string rootPath);
 		public event FaultSavedEvent FaultSaved;
 
-		protected virtual void OnFaultSaved(Category category, Fault fault, string rootPath)
+		void OnFaultSaved(Category category, Fault fault, string rootPath)
 		{
 			if (category != Category.Reproducing)
 			{
 				// Ensure any past saving of this fault as Reproducing has been cleaned up
-				var reproDir = System.IO.Path.Combine(RootDir, Category.Reproducing.ToString());
+				var reproDir = Path.Combine(RootDir, Category.Reproducing.ToString());
 
 				if (Directory.Exists(reproDir))
 				{
@@ -467,11 +456,11 @@ namespace Peach.Pro.Core.Loggers
 				FaultSaved(category, fault, rootPath);
 		}
 
-		protected virtual void SaveFile(Category category, string fullPath, Stream contents)
+		void SaveFile(Category category, string fullPath, Stream contents)
 		{
 			try
 			{
-				var dir = System.IO.Path.GetDirectoryName(fullPath);
+				var dir = Path.GetDirectoryName(fullPath);
 				Directory.CreateDirectory(dir);
 
 				contents.Seek(0, SeekOrigin.Begin);
