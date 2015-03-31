@@ -370,7 +370,7 @@ namespace Peach.Pro.Core.Runtime
 
 		protected override void Agent_AgentConnect(RunContext context, AgentClient agent)
 		{
-			if (_job.IsTest)
+			if (context.controlRecordingIteration)
 			{
 				using (var db = new JobDatabase(_job.Guid))
 				{
@@ -384,7 +384,7 @@ namespace Peach.Pro.Core.Runtime
 
 		protected override void Agent_StartMonitor(RunContext context, AgentClient agent, string name, string cls)
 		{
-			if (_job.IsTest)
+			if (context.controlRecordingIteration)
 			{
 				using (var db = new JobDatabase(_job.Guid))
 				{
@@ -396,7 +396,7 @@ namespace Peach.Pro.Core.Runtime
 
 		protected override void Agent_SessionStarting(RunContext context, AgentClient agent)
 		{
-			if (_job.IsTest)
+			if (context.controlRecordingIteration)
 			{
 				using (var db = new JobDatabase(_job.Guid))
 				{
@@ -543,10 +543,10 @@ namespace Peach.Pro.Core.Runtime
 			});
 
 			_cache.DataMutating(
-				data.Name ?? "",
+				tgtParam,
 				element.fullName,
 				mutator.Name,
-				data.selectedData != null ? data.selectedData.Name : "");
+				tgtDataSet);
 		}
 
 		protected override void Engine_ReproFault(

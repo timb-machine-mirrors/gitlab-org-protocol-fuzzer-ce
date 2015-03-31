@@ -14,7 +14,7 @@ namespace Peach.Pro.Core
 			var config = Utilities.GetUserConfig();
 			LogRoot = config.AppSettings.Settings.Get("LogRoot");
 			if (LogRoot == null)
-				LogRoot = Utilities.GetAppResourcePath("db");
+				LogRoot = Utilities.GetAppResourcePath("Logs");
 		}
 	}
 }
