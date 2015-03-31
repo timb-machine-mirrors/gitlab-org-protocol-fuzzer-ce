@@ -15,6 +15,17 @@ using Peach.Core;
 
 namespace Peach.Pro.Core.Loggers
 {
+
+	[Logger("Metrics", true)]
+	[Parameter("Path", typeof(string), "Log folder")]
+	public class ObsoleteMetricsLogger : Logger
+	{
+		public ObsoleteMetricsLogger(Dictionary<string, Variant> args)
+		{
+			NLog.LogManager.GetCurrentClassLogger().Warn("The Metrics logger is obsolete.");
+		}
+	}
+
 	/// <summary>
 	/// Logs fuzzing metrics to a SQLite database.
 	/// </summary>
@@ -386,7 +397,7 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 			CleanupCommand(update_iteration_cmd);
 			CleanupCommand(insert_iteration_cmd);
 			CleanupCommand(select_iteration_cmd);
-	
+
 			CleanupCommand(update_state_cmd);
 			CleanupCommand(insert_state_cmd);
 			CleanupCommand(select_state_cmd);
