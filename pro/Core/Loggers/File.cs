@@ -41,19 +41,19 @@ using Logger = Peach.Core.Logger;
 namespace Peach.Pro.Core.Loggers
 {
 	/// <summary>
-	/// Standard file system logger.
+	/// Standard file system Logger.
 	/// </summary>
 	[Logger("File")]
 	[Logger("Filesystem", true)]
-	[Logger("logger.Filesystem")]
+	[Logger("Logger.Filesystem")]
 	[Parameter("Path", typeof(string), "Log folder")]
 	public class FileLogger : Logger
 	{
-		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		Fault reproFault = null;
-		TextWriter log = null;
-		List<Fault.State> states = null;
+		Fault _reproFault;
+		TextWriter _log;
+		List<Fault.State> _states;
 
 		public FileLogger(Dictionary<string, Variant> args)
 		{
@@ -63,20 +63,12 @@ namespace Peach.Pro.Core.Loggers
 		/// <summary>
 		/// The user configured base path for all the logs
 		/// </summary>
-		public string Path
-		{
-			get;
-			private set;
-		}
+		public string Path { get; private set; }
 
 		/// <summary>
 		/// The specific path used to log faults for a given test.
 		/// </summary>
-		protected string RootDir
-		{
-			get;
-			private set;
-		}
+		protected string RootDir { get; private set; }
 
 		public enum Category { Faults, Reproducing, NonReproducable }
 
@@ -85,14 +77,14 @@ namespace Peach.Pro.Core.Loggers
 			switch (category)
 			{
 				case Category.Faults:
-					log.WriteLine("! Reproduced fault at iteration {0} : {1}",
+					_log.WriteLine("! Reproduced fault at iteration {0} : {1}",
 						fault.iteration, DateTime.Now);
 					break;
 				case Category.NonReproducable:
-					log.WriteLine("! Non-reproducable fault detected at iteration {0} : {1}", fault.iteration, DateTime.Now);
+					_log.WriteLine("! Non-reproducable fault detected at iteration {0} : {1}", fault.iteration, DateTime.Now);
 					break;
 				case Category.Reproducing:
-					log.WriteLine("! Fault detected at iteration {0}, trying to reprduce : {1}", fault.iteration, DateTime.Now);
+					_log.WriteLine("! Fault detected at iteration {0}, trying to reprduce : {1}", fault.iteration, DateTime.Now);
 					break;
 			}
 
@@ -108,43 +100,43 @@ namespace Peach.Pro.Core.Loggers
 
 			OnFaultSaved(category, fault, subDir);
 
-			log.Flush();
+			_log.Flush();
 		}
 
 		protected override void Engine_ReproFault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faults)
 		{
-			System.Diagnostics.Debug.Assert(reproFault == null);
+			System.Diagnostics.Debug.Assert(_reproFault == null);
 
-			reproFault = CombineFaults(context, currentIteration, stateModel, faults);
-			SaveFault(Category.Reproducing, reproFault);
+			_reproFault = CombineFaults(context, currentIteration, stateModel, faults);
+			SaveFault(Category.Reproducing, _reproFault);
 		}
 
 		protected override void Engine_ReproFailed(RunContext context, uint currentIteration)
 		{
-			System.Diagnostics.Debug.Assert(reproFault != null);
+			System.Diagnostics.Debug.Assert(_reproFault != null);
 
 			// Update the searching ranges for the fault
-			reproFault.iterationStart = context.reproducingInitialIteration - context.reproducingIterationJumpCount;
-			reproFault.iterationStop = reproFault.iteration;
+			_reproFault.iterationStart = context.reproducingInitialIteration - context.reproducingIterationJumpCount;
+			_reproFault.iterationStop = _reproFault.iteration;
 
-			SaveFault(Category.NonReproducable, reproFault);
-			reproFault = null;
+			SaveFault(Category.NonReproducable, _reproFault);
+			_reproFault = null;
 		}
 
 		protected override void Engine_Fault(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faults)
 		{
 			var fault = CombineFaults(context, currentIteration, stateModel, faults);
 
-			if (reproFault != null)
+			if (_reproFault != null)
 			{
 				// Save reproFault toSave in fault
-				foreach (var kv in reproFault.toSave)
+				foreach (var kv in _reproFault.toSave)
 				{
-					var key = System.IO.Path.Combine("Initial", reproFault.iteration.ToString(), kv.Key);
+					var key = System.IO.Path.Combine("Initial", _reproFault.iteration.ToString(), kv.Key);
 					fault.toSave.Add(key, kv.Value);
 				}
 
-				reproFault = null;
+				_reproFault = null;
 			}
 
 			SaveFault(Category.Faults, fault);
@@ -153,18 +145,18 @@ namespace Peach.Pro.Core.Loggers
 		private Fault CombineFaults(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faults)
 		{
 			// The combined fault will use toSave and not collectedData
-			Fault ret = new Fault() { collectedData = null };
+			var ret = new Fault() { collectedData = null };
 
 			Fault coreFault = null;
-			List<Fault> dataFaults = new List<Fault>();
+			var dataFaults = new List<Fault>();
 
 			// First find the core fault.
-			foreach (Fault fault in faults)
+			foreach (var fault in faults)
 			{
 				if (fault.type == FaultType.Fault)
 				{
 					coreFault = fault;
-					logger.Debug("Found core fault [" + coreFault.title + "]");
+					Logger.Debug("Found core fault [" + coreFault.title + "]");
 				}
 				else
 					dataFaults.Add(fault);
@@ -176,24 +168,24 @@ namespace Peach.Pro.Core.Loggers
 			// Gather up data from the state model
 			foreach (var item in stateModel.dataActions)
 			{
-				logger.Debug("Saving action: " + item.Key);
+				Logger.Debug("Saving action: " + item.Key);
 				ret.toSave.Add(item.Key, item.Value);
 			}
 
 			// Write out all collected data information
-			foreach (Fault fault in faults)
+			foreach (var fault in faults)
 			{
-				logger.Debug("Saving fault: " + fault.title);
+				Logger.Debug("Saving fault: " + fault.title);
 
 				foreach (var kv in fault.collectedData)
 				{
-					string fileName = string.Join(".", new[] { fault.agentName, fault.monitorName, fault.detectionSource, kv.Key }.Where(a => !string.IsNullOrEmpty(a)));
+					var fileName = string.Join(".", new[] { fault.agentName, fault.monitorName, fault.detectionSource, kv.Key }.Where(a => !string.IsNullOrEmpty(a)));
 					ret.toSave.Add(fileName, new MemoryStream(kv.Value));
 				}
 
 				if (!string.IsNullOrEmpty(fault.description))
 				{
-					string fileName = string.Join(".", new[] { fault.agentName, fault.monitorName, fault.detectionSource, "description.txt" }.Where(a => !string.IsNullOrEmpty(a)));
+					var fileName = string.Join(".", new[] { fault.agentName, fault.monitorName, fault.detectionSource, "description.txt" }.Where(a => !string.IsNullOrEmpty(a)));
 					ret.toSave.Add(fileName, new MemoryStream(Encoding.UTF8.GetBytes(fault.description)));
 				}
 			}
@@ -208,7 +200,7 @@ namespace Peach.Pro.Core.Loggers
 
 			// Save all states, actions, data sets, mutations
 			var settings = new JsonSerializerSettings() { DefaultValueHandling = DefaultValueHandling.Ignore };
-			var json = JsonConvert.SerializeObject(new { States = states }, Formatting.Indented, settings);
+			var json = JsonConvert.SerializeObject(new { States = _states }, Formatting.Indented, settings);
 			ret.toSave.Add("fault.json", new MemoryStream(Encoding.UTF8.GetBytes(json)));
 
 			ret.controlIteration = coreFault.controlIteration;
@@ -225,33 +217,33 @@ namespace Peach.Pro.Core.Loggers
 			ret.minorHash = coreFault.minorHash;
 			ret.title = coreFault.title;
 			ret.type = coreFault.type;
-			ret.states = states;
+			ret.states = _states;
 
 			return ret;
 		}
 
 		protected override void Engine_IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
 		{
-			states = new List<Fault.State>();
+			_states = new List<Fault.State>();
 
 			if (currentIteration != 1 && currentIteration % 100 != 0)
 				return;
 
 			if (totalIterations.HasValue && totalIterations.Value < uint.MaxValue)
 			{
-				log.WriteLine(". Iteration {0} of {1} : {2}", currentIteration, (uint)totalIterations, DateTime.Now);
-				log.Flush();
+				_log.WriteLine(". Iteration {0} of {1} : {2}", currentIteration, (uint)totalIterations, DateTime.Now);
+				_log.Flush();
 			}
 			else
 			{
-				log.WriteLine(". Iteration {0} : {1}", currentIteration, DateTime.Now);
-				log.Flush();
+				_log.WriteLine(". Iteration {0} : {1}", currentIteration, DateTime.Now);
+				_log.Flush();
 			}
 		}
 
 		protected override void StateStarting(RunContext context, State state)
 		{
-			states.Add(
+			_states.Add(
 				new Fault.State()
 				{
 					name = state.Name,
@@ -282,12 +274,12 @@ namespace Peach.Pro.Core.Loggers
 			if (rec.models.Count == 0)
 				rec.models = null;
 
-			states.Last().actions.Add(rec);
+			_states.Last().actions.Add(rec);
 		}
 
 		protected override void ActionFinished(RunContext context, Peach.Core.Dom.Action action)
 		{
-			var rec = states.Last().actions.Last();
+			var rec = _states.Last().actions.Last();
 			if (rec.models == null)
 				return;
 
@@ -300,12 +292,15 @@ namespace Peach.Pro.Core.Loggers
 
 		protected override void DataMutating(RunContext context, ActionData data, DataElement element, Mutator mutator)
 		{
-			var rec = states.Last().actions.Last();
+			var rec = _states.Last().actions.Last();
 
 			var tgtName = data.dataModel.Name;
 			var tgtParam = data.Name ?? "";
 			var tgtDataSet = data.selectedData != null ? data.selectedData.Name : "";
-			var model = rec.models.Where(m => m.name == tgtName && m.parameter == tgtParam && m.dataSet == tgtDataSet).FirstOrDefault();
+			var model = rec.models.FirstOrDefault(m => 
+				m.name == tgtName && 
+				m.parameter == tgtParam && 
+				m.dataSet == tgtDataSet);
 			System.Diagnostics.Debug.Assert(model != null);
 
 			model.mutations.Add(new Fault.Mutation() { element = element.fullName, mutator = mutator.Name });
@@ -315,54 +310,54 @@ namespace Peach.Pro.Core.Loggers
 		{
 			// Happens if we can't open the log during TestStarting()
 			// because of permission issues
-			if (log != null)
+			if (_log != null)
 			{
-				log.WriteLine("! Test error:");
-				log.WriteLine(e);
-				log.Flush();
+				_log.WriteLine("! Test error:");
+				_log.WriteLine(e);
+				_log.Flush();
 			}
 		}
 
 		protected override void Engine_TestFinished(RunContext context)
 		{
-			if (log != null)
+			if (_log != null)
 			{
-				log.WriteLine(". Test finished: " + context.test.Name);
-				log.Flush();
-				log.Close();
-				log.Dispose();
-				log = null;
+				_log.WriteLine(". Test finished: " + context.test.Name);
+				_log.Flush();
+				_log.Close();
+				_log.Dispose();
+				_log = null;
 			}
 		}
 
 		protected override void Engine_TestStarting(RunContext context)
 		{
-			if (log != null)
+			if (_log != null)
 			{
-				log.Flush();
-				log.Close();
-				log.Dispose();
-				log = null;
+				_log.Flush();
+				_log.Close();
+				_log.Dispose();
+				_log = null;
 			}
 
 			RootDir = GetBasePath(context);
 
-			log = OpenStatusLog();
+			_log = OpenStatusLog();
 
-			log.WriteLine("Peach Fuzzing Run");
-			log.WriteLine("=================");
-			log.WriteLine("");
-			log.WriteLine("Date of run: " + context.config.runDateTime);
-			log.WriteLine("Peach Version: " + context.config.version);
+			_log.WriteLine("Peach Fuzzing Run");
+			_log.WriteLine("=================");
+			_log.WriteLine("");
+			_log.WriteLine("Date of run: " + context.config.runDateTime);
+			_log.WriteLine("Peach Version: " + context.config.version);
 
-			log.WriteLine("Seed: " + context.config.randomSeed);
+			_log.WriteLine("Seed: " + context.config.randomSeed);
 
-			log.WriteLine("Command line: " + string.Join(" ", context.config.commandLine));
-			log.WriteLine("Pit File: " + context.config.pitFile);
-			log.WriteLine(". Test starting: " + context.test.Name);
-			log.WriteLine("");
+			_log.WriteLine("Command line: " + string.Join(" ", context.config.commandLine));
+			_log.WriteLine("Pit File: " + context.config.pitFile);
+			_log.WriteLine(". Test starting: " + context.test.Name);
+			_log.WriteLine("");
 
-			log.Flush();
+			_log.Flush();
 		}
 
 		protected virtual TextWriter OpenStatusLog()
@@ -398,7 +393,7 @@ namespace Peach.Pro.Core.Loggers
 			if (category != Category.Reproducing)
 			{
 				// Ensure any past saving of this fault as Reproducing has been cleaned up
-				string reproDir = System.IO.Path.Combine(RootDir, Category.Reproducing.ToString());
+				var reproDir = System.IO.Path.Combine(RootDir, Category.Reproducing.ToString());
 
 				if (Directory.Exists(reproDir))
 				{
@@ -421,7 +416,7 @@ namespace Peach.Pro.Core.Loggers
 		{
 			try
 			{
-				string dir = System.IO.Path.GetDirectoryName(fullPath);
+				var dir = System.IO.Path.GetDirectoryName(fullPath);
 				Directory.CreateDirectory(dir);
 
 				contents.Seek(0, SeekOrigin.Begin);
@@ -438,6 +433,3 @@ namespace Peach.Pro.Core.Loggers
 		}
 	}
 }
-
-// end
-

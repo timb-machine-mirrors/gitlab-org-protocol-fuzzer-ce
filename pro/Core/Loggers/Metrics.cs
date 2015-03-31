@@ -18,9 +18,7 @@ namespace Peach.Pro.Core.Loggers
 	/// <summary>
 	/// Logs fuzzing metrics to a SQLite database.
 	/// </summary>
-	[Logger("Metrics", true)]
-	[Parameter("Path", typeof(string), "Log folder")]
-	public class MetricsLogger : Logger
+	public class LegacyMetricsLogger : Logger
 	{
 		private static string fileName = "metrics.sqlite";
 		private List<Sample> samples = new List<Sample>();
@@ -269,7 +267,7 @@ UPDATE metrics_states SET count = count + 1 WHERE id = :id;";
 
 		public event ConnectionOpenedEvent ConnectionOpened;
 
-		public MetricsLogger(Dictionary<string, Variant> args)
+		public LegacyMetricsLogger(Dictionary<string, Variant> args)
 		{
 			ParameterParser.Parse(this, args);
 		}
