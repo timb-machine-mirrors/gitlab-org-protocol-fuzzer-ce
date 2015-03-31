@@ -4,8 +4,6 @@ module Peach {
 	"use strict";
 
 	export class ConfigureMonitorsController {
-		public Agents: Agent[];
-
 		static $inject = [
 			C.Angular.$scope,
 			C.Services.Pit
@@ -18,10 +16,18 @@ module Peach {
 			var promise = pitService.ReloadPit();
 			promise.then((pit: IPit) => {
 				this.Agents = pit.agents;
+				this.hasLoaded = true;
 			});
 		}
 
+		private hasLoaded: boolean = false;
 		private isSaved: boolean = false;
+
+		public Agents: Agent[];
+
+		public get ShowLoading(): boolean {
+			return !this.hasLoaded;
+		}
 
 		public get ShowSaved(): boolean {
 			return !this.$scope.form.$dirty && this.isSaved;
@@ -32,7 +38,7 @@ module Peach {
 		}
 
 		public get ShowMissingAgents(): boolean {
-			return this.numAgents === 0;
+			return this.hasLoaded && this.numAgents === 0;
 		}
 
 		public get CanSave(): boolean {

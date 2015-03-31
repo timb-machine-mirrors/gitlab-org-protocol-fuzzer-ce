@@ -17,7 +17,8 @@ using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.OS.Linux.Agent.Monitors
 {
-	[Monitor("LinuxDebugger")]
+	[Monitor("Gdb")]
+	[Alias("LinuxDebugger")]
 	[Description("Uses GDB to launch an executable, monitoring it for exceptions")]
 	[Parameter("Executable", typeof(string), "Executable to launch")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
@@ -29,7 +30,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 	[Parameter("StartOnCall", typeof(string), "Start command on state model call", "")]
 	[Parameter("WaitForExitOnCall", typeof(string), "Wait for process to exit on state model call and fault if timeout is reached", "")]
 	[Parameter("WaitForExitTimeout", typeof(int), "Wait for exit timeout value in milliseconds (-1 is infinite)", "10000")]
-	public class LinuxDebugger : Monitor
+	public class GdbDebugger : Monitor
 	{
 		private class CaptureStream : IDisposable
 		{
@@ -201,7 +202,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 			private readonly AutoResetEvent _stopEvent;
 			private bool _disposed;
 
-			public CaptureStream(LinuxDebugger owner, string fileName, Func<Process, StreamReader> strm)
+			public CaptureStream(GdbDebugger owner, string fileName, Func<Process, StreamReader> strm)
 			{
 				var fullPath = Path.Combine(owner._tmpPath, fileName);
 
@@ -483,7 +484,7 @@ quit
 		public string WaitForExitOnCall { get; private set; }
 		public int WaitForExitTimeout { get; private set; }
 
-		public LinuxDebugger(string name)
+		public GdbDebugger(string name)
 			: base(name)
 		{
 		}
@@ -515,7 +516,7 @@ quit
 					return full;
 			};
 
-			throw new PeachException("Error, LinuxDebugger could not find '" + target + "' in search path.");
+			throw new PeachException("Error, Gdb could not find '" + target + "' in search path.");
 		}
 
 		void _Start()

@@ -4,7 +4,6 @@ module Peach {
 	"use strict";
 
 	export class ConfigureVariablesController {
-
 		static $inject = [
 			C.Angular.$scope,
 			C.Angular.$modal,
@@ -19,12 +18,18 @@ module Peach {
 			var promise = pitService.ReloadPit();
 			promise.then((pit: IPit) => {
 				this.Config = pit.config;
+				this.hasLoaded = true;
 			});
 		}
 
+		private hasLoaded: boolean = false;
 		private isSaved: boolean = false;
 
 		public Config: IParameter[];
+
+		public get ShowLoading(): boolean {
+			return !this.hasLoaded;
+		}
 
 		public get ShowSaved() {
 			return !this.$scope.form.$dirty && this.isSaved;

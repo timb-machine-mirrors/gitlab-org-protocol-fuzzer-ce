@@ -9,8 +9,9 @@ using System.IO;
 
 namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 {
-	[TestFixture] [Category("Peach")]
-	public class LinuxDebuggerTests
+	[TestFixture] 
+	[Category("Peach")]
+	public class GdbTests
 	{
 		[Test]
 		public void TestFault()
@@ -22,7 +23,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			args["Arguments"] = self;
 			args["RestartOnEachTest"] = "true";
 
-			var m = new LinuxDebugger(null);
+			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
 			m.SessionStarting();
 			m.IterationStarting(null);
@@ -48,7 +49,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			var args = new Dictionary<string, string>();
 			args["Executable"] = "CrashingFileConsumer";
 
-			var m = new LinuxDebugger(null);
+			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
 			m.SessionStarting();
 			m.IterationStarting(null);
@@ -65,7 +66,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			var args = new Dictionary<string, string>();
 			args["Executable"] = "MissingProgram";
 
-			var m = new LinuxDebugger(null);
+			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
 			try
 			{
@@ -85,7 +86,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			args["Executable"] = "MissingProgram";
 			args["GdbPath"] = "MissingGdb";
 
-			var m = new LinuxDebugger(null);
+			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
 
 			try
@@ -109,7 +110,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			args["Arguments"] = "127.0.0.1 12346";
 			args["StartOnCall"] = "Foo";
 
-			var m = new LinuxDebugger(null);
+			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
 			m.SessionStarting();
 			m.IterationStarting(null);
@@ -141,7 +142,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			args["StartOnCall"] = "Foo";
 			args["NoCpuKill"] = "true";
 
-			var m = new LinuxDebugger(null);
+			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
 			m.SessionStarting();
 			m.IterationStarting(null);
@@ -174,7 +175,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			args["NoCpuKill"] = "true";
 			args["WaitForExitTimeout"] = "1000";
 
-			var m = new LinuxDebugger(null);
+			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
 			m.SessionStarting();
 			m.IterationStarting(null);
@@ -202,7 +203,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		{
 			var starts = 0;
 
-			var runner = new MonitorRunner("LinuxDebugger", new Dictionary<string, string>
+			var runner = new MonitorRunner("Gdb", new Dictionary<string, string>
 			{
 				{ "Executable", "CrashableServer" },
 				{ "Arguments", "127.0.0.1 0 1" },
@@ -230,7 +231,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			var startCount = 0;
 			var iteration = 0;
 
-			var runner = new MonitorRunner("LinuxDebugger", new Dictionary<string, string>
+			var runner = new MonitorRunner("Gdb", new Dictionary<string, string>
 			{
 				{ "Executable", "CrashableServer" },
 				{ "Arguments", "127.0.0.1 0" },

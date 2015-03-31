@@ -1,9 +1,7 @@
 ﻿using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -11,6 +9,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 {
 	[TestFixture]
 	[Category("Peach")]
+	[Ignore("This requires an interactive windows session")]
 	class ButtonClickerTests
 	{
 		const string Monitor = "ButtonClicker";
