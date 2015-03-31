@@ -4,6 +4,14 @@
 			Metrics &raquo; Bucket Timeline
 		</h1>
 	</div>
+	<p>
+		This metric display shows a timeline with new fault buckets listed, 
+		and total number of times the bucket was found during the fuzzing session.
+	</p>
+	<p>
+		Drag the timeline left or right to move through time.
+		Zoom in and out with the mouse wheel.
+	</p>
 	<vis ng-transclude>
 		<time-line data="vm.BucketTimelineData"
 							 options="vm.BucketTimelineOptions">

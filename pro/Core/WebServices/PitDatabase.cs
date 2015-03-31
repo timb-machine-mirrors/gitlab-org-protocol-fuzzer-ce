@@ -1074,6 +1074,7 @@ namespace Peach.Pro.Core.WebServices
 			{
 				case "String":
 				case "String[]":
+				case "Int32[]":
 					p.Type = ParameterType.String;
 					break;
 				case "UInt16":

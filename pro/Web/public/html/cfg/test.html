@@ -3,17 +3,6 @@
 		<h1>Configuration &raquo; Test</h1>
 	</div>
 
-	<div class="alert alert-warning alert-dismissable"
-			 ng-show="vm.ShowNotConfigured">
-		<button type="button"
-						class="close"
-						data-dismiss="alert">
-			<i class="icon-remove"></i>
-		</button>
-		<strong>Warning!</strong>
-		The current Pit is not fully configured.
-	</div>
-
 	<p>
 		This section validates the configuration by executing one test iteration,
 		and exposes issues that would hinder a fuzzing session. The output will
@@ -24,6 +13,17 @@
 	<p>
 		Click the Begin Test button to validate the configuration.
 	</p>
+
+	<div class="alert alert-warning alert-dismissable"
+			 ng-show="vm.ShowNotConfigured">
+		<button type="button"
+						class="close"
+						data-dismiss="alert">
+			<i class="icon-remove"></i>
+		</button>
+		<strong>Warning!</strong>
+		The current Pit is not fully configured.
+	</div>
 
 	<div class="wizard-actions">
 		<button class="btn btn-success btn-sm"
