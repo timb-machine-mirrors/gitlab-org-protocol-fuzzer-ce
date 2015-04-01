@@ -25,7 +25,7 @@ We are going to uncomment this section and remove the "location" attribute.
 When no "location" attribute is present, Peach automatically starts a local Peach Agent.
 We will configure three agents, one for Windows, one for Linux and one for OSX.
 The Windows agent will be comprised of two monitors: WindowsDebugger and PageHeap.
-The Linux agent will also be comprised of one monitor: LinuxDebugger.
+The Linux agent will also be comprised of one monitor: Gdb.
 The OSX agent will only be comprised of a single monitor: CrashWrangler.
 
 [source,xml]
@@ -60,7 +60,7 @@ The OSX agent will only be comprised of a single monitor: CrashWrangler.
 
 <Agent name="LinAgent">
     <!-- Register for core file notifications. -->
-    <Monitor class="LinuxDebugger"/>
+    <Monitor class="Gdb"/>
 
         <!-- This is the program we're going to run inside of the debugger -->
         <Param name="Executable" value="feh"/>

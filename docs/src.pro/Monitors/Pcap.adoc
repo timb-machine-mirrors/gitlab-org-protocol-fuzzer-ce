@@ -54,7 +54,11 @@ _Optional:_
 
 Filter:: PCAP style filter string. If present, the filter restricts capture to packets that match the filter string.
 
-NOTE: On Windows platforms, the +ipconfig+ utility lists the network devices by name and IP address..
+NOTE: On Windows platforms, the +ipconfig+ utility lists the network devices by name and IP address. + 
+On Linux platforms, the 'ifconfig' utility lists the network devices. +
+On OS X platforms, the 'ifconfig' utility lists the network devices.
+
+
 
 
 === Examples
