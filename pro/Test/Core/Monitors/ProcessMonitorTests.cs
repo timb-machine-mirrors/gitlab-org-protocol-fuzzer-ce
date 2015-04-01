@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
+using Peach.Core.Agent;
 using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Monitors
@@ -137,7 +138,8 @@ namespace Peach.Pro.Test.Core.Monitors
 			Assert.AreEqual(1, faults.Length);
 			Assert.AreEqual("Process 'CrashableServer' did not exit in 2000ms.", faults[0].Title);
 			Assert.NotNull(faults[0].Fault);
-			Assert.AreEqual("FailedToExit", faults[0].Fault.MajorHash);
+			Assert.AreEqual(Monitor2.Hash("ProcessCrashableServer"), faults[0].Fault.MajorHash);
+			Assert.AreEqual(Monitor2.Hash("FailedToExit"), faults[0].Fault.MinorHash);
 		}
 
 		[Test]
@@ -184,7 +186,8 @@ namespace Peach.Pro.Test.Core.Monitors
 			Assert.AreEqual(1, faults.Length);
 			Assert.AreEqual("Process 'CrashingFileConsumer' exited early.", faults[0].Title);
 			Assert.NotNull(faults[0].Fault);
-			Assert.AreEqual("ExitedEarly", faults[0].Fault.MajorHash);
+			Assert.AreEqual(Monitor2.Hash("ProcessCrashingFileConsumer"), faults[0].Fault.MajorHash);
+			Assert.AreEqual(Monitor2.Hash("ExitedEarly"), faults[0].Fault.MinorHash);
 		}
 
 		[Test]
@@ -237,7 +240,8 @@ namespace Peach.Pro.Test.Core.Monitors
 			Assert.AreEqual(1, faults.Length);
 			Assert.AreEqual("Process 'CrashingFileConsumer' exited early.", faults[0].Title);
 			Assert.NotNull(faults[0].Fault);
-			Assert.AreEqual("ExitedEarly", faults[0].Fault.MajorHash);
+			Assert.AreEqual(Monitor2.Hash("ProcessCrashingFileConsumer"), faults[0].Fault.MajorHash);
+			Assert.AreEqual(Monitor2.Hash("ExitedEarly"), faults[0].Fault.MinorHash);
 		}
 
 		[Test]

@@ -111,7 +111,13 @@ namespace Peach.Pro.Core.Agent.Monitors
 						Timeout);
 
 					if (reply.Status != IPStatus.Success ^ FaultOnSuccess)
-						_data.Fault = new MonitorData.Info();
+					{
+						_data.Fault = new MonitorData.Info
+						{
+							MajorHash = Hash(Host),
+							MinorHash = Hash(reply.Status.ToString()),
+						};
+					}
 
 					_data.Title = MakeDescription(reply);
 				}
@@ -133,7 +139,13 @@ namespace Peach.Pro.Core.Agent.Monitors
 				_data.Title = ex.Message;
 
 				if (!FaultOnSuccess)
-					_data.Fault = new MonitorData.Info();
+				{
+					_data.Fault = new MonitorData.Info
+					{
+						MajorHash = Hash(Host),
+						MinorHash = Hash(ex.Message),
+					};
+				}
 			}
 
 			return _data.Fault != null;
