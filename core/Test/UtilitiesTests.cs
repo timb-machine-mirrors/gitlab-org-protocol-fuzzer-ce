@@ -188,9 +188,9 @@ namespace Peach.Core.Test
 		[Test]
 		public void TestHash()
 		{
-			Assert.AreEqual("D41D8CD9", MonitorData.Hash(""));
-			Assert.AreEqual("ACBD18DB", MonitorData.Hash("foo"));
-			Assert.AreEqual("6DF23DC0", MonitorData.Hash("foobarbaz"));
+			Assert.AreEqual("D41D8CD9", Monitor2.Hash(""));
+			Assert.AreEqual("ACBD18DB", Monitor2.Hash("foo"));
+			Assert.AreEqual("6DF23DC0", Monitor2.Hash("foobarbaz"));
 		}
 	}
 }

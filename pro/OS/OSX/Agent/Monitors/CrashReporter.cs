@@ -31,6 +31,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -52,6 +53,8 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 	public class CrashReporter : Monitor
 	{
 		private static readonly Regex CrashRegex = new Regex("Saved crash report for (.*)\\[\\d+\\] version .*? to (.*)");
+		private static readonly Regex ProcessRegex = new Regex("^Process:\\s+(.*)\\s+\\[\\d+\\]", RegexOptions.Multiline);
+		private static readonly Regex ExceptionRegex = new Regex("^Exception Type:\\s+(.*)$", RegexOptions.Multiline);
 
 		private string _lastTime;
 		private IntPtr _asl;
@@ -157,10 +160,20 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 				? "Crash report."
 				: "{0} crash report.".Fmt(ProcessName);
 
+			var log = File.ReadAllText(_crashLogs.First());
+
+			var reMajor = ProcessRegex.Match(log);
+			var reMinor = ExceptionRegex.Match(log);
+
 			var ret = new MonitorData
 			{
 				Title = title,
-				Fault = new MonitorData.Info(),
+				Fault = new MonitorData.Info
+				{
+					Description = log,
+					MajorHash = Hash(reMajor.Success ? reMajor.Groups[1].Value : title),
+					MinorHash = Hash(reMinor.Success ? reMinor.Groups[1].Value : "UNKNOWN"),
+				},
 				Data = new Dictionary<string, Stream>()
 			};
 

@@ -186,8 +186,8 @@ namespace Peach.Pro.Test.Core.Monitors
 				StringAssert.IsMatch("\\w+ \\(pid: \\d+\\) exceeded memory limit", faults[0].Title);
 				Assert.NotNull(faults[0].Data);
 				Assert.AreEqual(0, faults[0].Data.Count);
-				Assert.Null(faults[0].Fault.MajorHash);
-				Assert.Null(faults[0].Fault.MinorHash);
+				Assert.AreNotEqual(string.Empty, faults[0].Fault.MajorHash);
+				Assert.AreNotEqual(string.Empty, faults[0].Fault.MinorHash);
 				Assert.Null(faults[0].Fault.Risk);
 
 				var usage = faults[0].Fault.Description;

@@ -26,8 +26,8 @@ namespace Peach.Pro.Test.Core.Monitors
 			else
 			{
 				Assert.NotNull(faults[0].Fault);
-				Assert.AreEqual(null, faults[0].Fault.MajorHash);
-				Assert.AreEqual(null, faults[0].Fault.MinorHash);
+				Assert.AreNotEqual("", faults[0].Fault.MajorHash);
+				Assert.AreNotEqual("", faults[0].Fault.MinorHash);
 				Assert.AreEqual(null, faults[0].Fault.Risk);
 				Assert.NotNull(faults[0].Data);
 				Assert.AreEqual(0, faults[0].Data.Count);

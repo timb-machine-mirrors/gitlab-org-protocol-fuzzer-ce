@@ -215,8 +215,8 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 				Data = new Dictionary<string, Stream>(),
 				Fault = new MonitorData.Info
 				{
-					MajorHash = "CORE",
-					MinorHash = Executable
+					MajorHash = Hash(Class + Executable),
+					MinorHash = Hash("CORE"),
 				}
 			};
 
