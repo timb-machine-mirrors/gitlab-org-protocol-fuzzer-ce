@@ -7,8 +7,9 @@ The _IpPower9258_ monitor controls an IP Power 9258 Network Power Controller (IP
 
 Each _IpPower9258_ monitor switches an individual outlet. Use one monitor per outlet to control multiple outlets concurrently. Times that the monitor can switch the power of an outlet include the following:
 
-* At the start of a fuzzing run
-* At the start of each test iteration
+* At the start or end of a fuzzing run
+* At the start or end of each test iteration
+* After detecting a fault
 * At the start of an iteration that immediately follows a fault 
 
 image::{images}/IP9258Mtr.PNG["Fuzzing Configuration Using an IP 9258 Network Power Controller", scalewidth="75%"] 
@@ -37,7 +38,31 @@ Port:: Port/Outlet to reset (1, 2, 3, 4)
 _Optional:_
 
 PowerOnOffPause:: Pause in milliseconds between power off/power on, default is 500
-ResetEveryIteration:: Reset power on every iteration, default false
+// Following is obsolete. 3/30/2014. Bug 230.
+// ResetEveryIteration:: Reset power on every iteration, default false
+
+RestartAfterFault:: If "true", restarts the target when any monitor detects a fault. 
+If "false", restarts the target if the process exits or crashes. +
+This argument defaults to false.
+
+When:: Details on when to perform a specfied action. Specify one of the following values: 
+
+[cols="1,2" options="header",halign="center"] 
+|==========================================================
+|"When" Setting              |Description
+|DetectFault                 |Perform the action when checking for the faulting condition. Requires a regex expression in the +CheckValue+ parameter. Default mode of operation.
+|OnStart                     |Run the command when fuzzing session starts. Command runs once per session.
+|OnEnd                       |Run the command when fuzzing session stops. Command runs run once per session.
+|OnIterationStart            |Run the command at start of each iteration.
+|OnIterationEnd              |Run the command at end of each iteration.
+|OnFault                     |Run the command when Peach detects a fault.
+|OnIterationStartAfterFault  |Run the command at start of an iteration that immediately follows a fault detection.
+|OnCall                      |Trigger the command to run from the state model. The command runs when the _StartOnCall_ message is received.
+|==========================================================
+
+.When Choices for Performing an Action
+image::{images}/Timings_SSH.PNG["When Run Command Choices", scalewidth="75%"]
+
 
 
 === Examples
