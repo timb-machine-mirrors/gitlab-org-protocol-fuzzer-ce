@@ -19,7 +19,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		protected TempFile _tmp2;
 		protected IJobMonitor _monitor;
 
-		const string PitXml =
+		protected const string PitXml =
 @"<?xml version='1.0' encoding='utf-8'?>
 <Peach xmlns='http://peachfuzzer.com/2012/Peach'
        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
@@ -215,12 +215,18 @@ namespace Peach.Pro.Test.Core.WebServices
 
 				DatabaseTests.AssertResult(db.GetTestEventsByJob(job.Guid), new[]
 				{
-					 new TestEvent(1, job.Guid, TestStatus.Pass, "Loading pit file", "Loading pit file '{0}'".Fmt(_tmp1.Path), null),
-					 new TestEvent(2, job.Guid, TestStatus.Pass, "Starting fuzzing engine", "Starting fuzzing engine", null),
-					 new TestEvent(3, job.Guid, TestStatus.Pass, "Connecting to agent", "Connecting to agent 'local://'", null),
-					 new TestEvent(4, job.Guid, TestStatus.Pass, "Starting monitor", "Starting monitor 'RandoFaulter'", null),
-					 new TestEvent(5, job.Guid, TestStatus.Pass, "Starting fuzzing session", "Notifying agent 'local://' that the fuzzing session is starting", null),
-					 new TestEvent(6, job.Guid, TestStatus.Pass, "Running iteration", "Running the initial control record iteration", null),
+					 new TestEvent(1, job.Guid, TestStatus.Pass, "Loading pit file", 
+						 "Loading pit file '{0}'".Fmt(_tmp1.Path), null),
+					 new TestEvent(2, job.Guid, TestStatus.Pass, "Starting fuzzing engine", 
+						 "Starting fuzzing engine", null),
+					 new TestEvent(3, job.Guid, TestStatus.Pass, "Connecting to agent", 
+						 "Connecting to agent 'local://'", null),
+					 new TestEvent(4, job.Guid, TestStatus.Pass, "Starting monitor", 
+						 "Starting monitor 'RandoFaulter'", null),
+					 new TestEvent(5, job.Guid, TestStatus.Pass, "Starting fuzzing session", 
+						 "Notifying agent 'local://' that the fuzzing session is starting", null),
+					 new TestEvent(6, job.Guid, TestStatus.Pass, "Running iteration", 
+						 "Running the initial control record iteration", null),
 				});
 			}
 
@@ -233,9 +239,89 @@ namespace Peach.Pro.Test.Core.WebServices
 			Console.Write(File.ReadAllText(job.DebugLogPath));
 		}
 
-		// TODO: Fatal error reporting (ensure no restarts):
-		//       Pit parser failure
-		//       Control iteration failure
+		[Test]
+		public void TestPitParseFailureDuringTest()
+		{
+			using (var xmlFile = new TempFile())
+			{
+				File.WriteAllText(xmlFile.Path, PitXml.Fmt("xxx"));
+
+				var jobRequest = new JobRequest
+				{
+					IsTest = true,
+				};
+
+				var job = _monitor.Start(xmlFile.Path, xmlFile.Path, jobRequest);
+				Assert.IsNotNull(job);
+				Assert.IsTrue(WaitUntil(JobStatus.Stopped));
+
+				using (var db = new NodeDatabase())
+				{
+					DatabaseTests.AssertResult(db.GetTestEventsByJob(job.Guid), new[]
+					{
+						 new TestEvent(
+							 1, 
+							 job.Guid, 
+							 TestStatus.Fail, 
+							 "Loading pit file", 
+							 "Loading pit file '{0}'".Fmt(xmlFile.Path), 
+							 "Error, Pit file \"{0}\" failed to validate: ".Fmt(xmlFile.Path) +
+							 Environment.NewLine +
+							 "Line: 21, Position: 33 - The element 'Monitor' in namespace 'http://peachfuzzer.com/2012/Peach' cannot contain text. " +
+							 "List of possible elements expected: 'Param' in namespace 'http://peachfuzzer.com/2012/Peach'." +
+							 Environment.NewLine),
+					});
+
+					job = db.GetJob(job.Guid);
+					Assert.IsNotNull(job);
+				}
+
+				Assert.IsFalse(File.Exists(job.DatabasePath));
+				Assert.IsFalse(File.Exists(job.DebugLogPath));
+				Assert.IsTrue(File.Exists(job.AltDebugLogPath));
+				Console.Write(File.ReadAllText(job.AltDebugLogPath));
+			}
+		}
+
+		[Test]
+		public void TestPitParseFailureDuringRun()
+		{
+			using (var xmlFile = new TempFile())
+			{
+				File.WriteAllText(xmlFile.Path, PitXml.Fmt("xxx"));
+
+				var jobRequest = new JobRequest();
+				var job = _monitor.Start(xmlFile.Path, xmlFile.Path, jobRequest);
+				Assert.IsNotNull(job);
+				Assert.IsTrue(WaitUntil(JobStatus.Stopped));
+
+				using (var db = new NodeDatabase())
+				{
+					DatabaseTests.AssertResult(db.GetTestEventsByJob(job.Guid), new[]
+					{
+						 new TestEvent(
+							 1, 
+							 job.Guid, 
+							 TestStatus.Fail, 
+							 "Loading pit file", 
+							 "Loading pit file '{0}'".Fmt(xmlFile.Path), 
+							 "Error, Pit file \"{0}\" failed to validate: ".Fmt(xmlFile.Path) +
+							 Environment.NewLine +
+							 "Line: 21, Position: 33 - The element 'Monitor' in namespace 'http://peachfuzzer.com/2012/Peach' cannot contain text. " +
+							 "List of possible elements expected: 'Param' in namespace 'http://peachfuzzer.com/2012/Peach'." +
+							 Environment.NewLine),
+					});
+
+					job = db.GetJob(job.Guid);
+					Assert.IsNotNull(job);
+				}
+
+				Assert.IsFalse(File.Exists(job.DatabasePath));
+				Assert.IsFalse(File.Exists(job.DebugLogPath));
+				Assert.IsTrue(File.Exists(job.AltDebugLogPath));
+				Console.Write(File.ReadAllText(job.AltDebugLogPath));
+			}
+		}
 	}
 
 	[TestFixture]

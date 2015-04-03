@@ -116,7 +116,7 @@ namespace Peach.Pro.Core.Loggers
 						fault.iteration, DateTime.Now);
 					break;
 				case Category.Reproducing:
-					_log.WriteLine("! Fault detected at iteration {0}, trying to reprduce : {1}",
+					_log.WriteLine("! Fault detected at iteration {0}, trying to reproduce : {1}",
 						fault.iteration, DateTime.Now);
 					break;
 			}
@@ -520,6 +520,8 @@ namespace Peach.Pro.Core.Loggers
 
 		protected override void Engine_TestError(RunContext context, Exception ex)
 		{
+			Logger.Trace("Engine_TestError");
+
 			_caught = ex;
 
 			// Happens if we can't open the log during TestStarting()
@@ -534,6 +536,8 @@ namespace Peach.Pro.Core.Loggers
 
 		protected override void Engine_TestFinished(RunContext context)
 		{
+			Logger.Trace("Engine_TestFinished");
+
 			using (var db = new JobDatabase(_job.DatabasePath))
 			{
 				_job.StopDate = DateTime.UtcNow;
@@ -807,7 +811,7 @@ namespace Peach.Pro.Core.Loggers
 
 		void ConfigureLogging(string oldName, string name, Target target)
 		{
-			var nconfig = new LoggingConfiguration();
+			var nconfig = LogManager.Configuration;
 			if (oldName != null)
 				nconfig.RemoveTarget(oldName);
 			nconfig.AddTarget(name, target);

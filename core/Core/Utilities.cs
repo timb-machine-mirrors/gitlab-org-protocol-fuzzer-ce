@@ -39,6 +39,7 @@ using NLog;
 using NLog.Targets;
 using NLog.Config;
 using System.Threading;
+using NLog.Targets.Wrappers;
 
 namespace Peach.Core
 {
@@ -306,11 +307,11 @@ namespace Peach.Core
 					break;
 			}
 
-			var consoleTarget = new ConsoleTarget
+			var consoleTarget = new AsyncTargetWrapper(new ConsoleTarget
 			{
 				Layout = "${logger} ${message}", 
 				Error = true,
-			};
+			});
 			var rule = new LoggingRule("*", logLevel, consoleTarget);
 
 			var nconfig = new LoggingConfiguration();
