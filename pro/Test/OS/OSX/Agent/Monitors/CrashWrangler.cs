@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
+using Peach.Core.Agent;
 using Peach.Core.Test;
 using Peach.Pro.OS.OSX.Agent.Monitors;
 
@@ -195,7 +196,8 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			var f = w.GetMonitorData();
 			Assert.NotNull(f);
 			Assert.NotNull(f.Fault);
-			Assert.AreEqual("FailedToExit", f.Fault.MajorHash);
+			Assert.AreEqual(Monitor2.Hash("CrashWranglernc"), f.Fault.MajorHash);
+			Assert.AreEqual(Monitor2.Hash("FailedToExit"), f.Fault.MinorHash);
 
 			w.SessionFinished();
 			w.StopMonitor();
@@ -253,7 +255,8 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			var f = w.GetMonitorData();
 			Assert.NotNull(f);
 			Assert.NotNull(f.Fault);
-			Assert.AreEqual("ExitedEarly", f.Fault.MajorHash);
+			Assert.AreEqual(Monitor2.Hash("CrashWranglerecho"), f.Fault.MajorHash);
+			Assert.AreEqual(Monitor2.Hash("ExitedEarly"), f.Fault.MinorHash);
 
 			w.SessionFinished();
 			w.StopMonitor();
@@ -317,8 +320,8 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			var f = w.GetMonitorData();
 			Assert.NotNull(f);
 			Assert.NotNull(f.Fault);
-			Assert.AreEqual("ExitedEarly", f.Fault.MajorHash);
-
+			Assert.AreEqual(Monitor2.Hash("CrashWranglerecho"), f.Fault.MajorHash);
+			Assert.AreEqual(Monitor2.Hash("ExitedEarly"), f.Fault.MinorHash);
 
 			w.SessionFinished();
 			w.StopMonitor();
