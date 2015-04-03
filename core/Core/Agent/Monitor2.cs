@@ -29,6 +29,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Peach.Core.Agent
 {
@@ -166,6 +168,28 @@ namespace Peach.Core.Agent
 		{
 			if (InternalEvent != null)
 				InternalEvent(this, args);
+		}
+
+		/// <summary>
+		/// Compute the hash of a value for use as either
+		/// the MajorHash or MinorHash of a MonitorData.Info object.
+		/// </summary>
+		/// <param name="value">String value to hash</param>
+		/// <returns>The first 4 bytes of the md5 has as a hex string</returns>
+		public static string Hash(string value)
+		{
+			using (var md5 = MD5.Create())
+			{
+				const int hashLen = 4;
+
+				var data = md5.ComputeHash(Encoding.UTF8.GetBytes(value));
+				var sb = new StringBuilder(hashLen * 2);
+
+				for (var i = 0; i < hashLen; i++)
+					sb.Append(data[i].ToString("X2"));
+
+				return sb.ToString();
+			}
 		}
 	}
 }
