@@ -13,36 +13,36 @@ The following table lists each monitor by name, function type (Fault detection, 
 
 .Monitors
 
-[cols="3,1,1,1,1,3" options="header",halign="center"] 
+[cols="3,1,1,2,3" options="header",halign="center"] 
 |==========================================================
-|Monitor    |Detect Fault  |Collect Data  |Automate  |  |Operating Systems footnote:[When an operating system is listed, the monitor is available only for the listed operating system. A blank entry indicates the monitor is available for Windows, Linux, and OS X operating systems.]
-|xref:Monitors_Android[Android]                  |X   |    |X   |  |
-|xref:Monitors_AndroidEmulator[Android Emulator] |X   |    |X   |  |
-|xref:Monitors_ButtonClicker[ButtonClicker]      |    |    |X   |  |Windows
-|xref:Monitors_CanaKitRelay[CanaKit Relay]       |    |    |X   |  |
-|xref:Monitors_CleanupFolder[Cleanup Folder]     |    |    |X   |  |
-|xref:Monitors_CleanupRegistry[Cleanup Registry] |    |    |X   |  |Windows
-|xref:Monitors_CrashReporter[Crash Reporter]     |X   |X   |    |  |OS X
-|xref:Monitors_CrashWrangler[Crash Wrangler]     |X   |    |X   |  |OS X
-|xref:Monitors_Gdb[Gdb]                          |X   |X   |X   |  |Linux
-|xref:Monitors_IpPower9258[IpPower9258]          |    |    |X   |  |
-|xref:Monitors_LinuxCoreFile[LinuxCoreFile]      |X   |X   |    |  |Linux
-|xref:Monitors_MemoryMonitor[Memory]             |X   |    |    |  |
-|xref:Monitors_PageHeap[Page Heap]               |X   |    |    |  |Windows
-|xref:Monitors_Pcap[Pcap Network]                |X   |X   |    |  |
-|xref:Monitors_Ping[Ping]                        |X   |    |    |  |
-|xref:Monitors_PopupWatcher[Popup Watcher]       |X   |    |    |  |Windows
-|xref:Monitors_Process[Process Launcher]         |X   |    |X   |  |
-|xref:Monitors_ProcessKiller[Process Killer]     |    |    |X   |  |
-|xref:Monitors_RunCommand[Run Command]           |X   |X   |X   |  |
-|xref:Monitors_SaveFile[Save File]               |    |X   |X   |  |
-|xref:Monitors_Serial[Serial Port]               |X   |X   |X   |  |
-|xref:Monitors_Socket[Socket Listener]           |X   |    |    |  |
-|xref:Monitors_SshCommand[SSH Command]           |X   |X   |X   |  |
-|xref:Monitors_SshDownloader[SSH Downloader]     |    |X   |X   |  |
-|xref:Monitors_Syslog[Syslog]                    |X   |X   |    |  |
-|xref:Monitors_TcpPort[TcpPort]                  |X   |X   |X   |  |
-|xref:Monitors_Vmware[Vmware Control]            |X   |    |X   |  |
-|xref:Monitors_WindowsDebugger[Windows Debugger] |X   |X   |X   |  |Windows
-|xref:Monitors_WindowsService[Windows Service]   |X   |    |X   |  |Windows
+|Monitor    |Detect Fault  |Collect Data  |Automate  |Operating Systems footnote:[When an operating system is listed, the monitor is available only for the listed operating system. A blank entry indicates the monitor is available for Windows, Linux, and OS X operating systems.]
+|xref:Monitors_Android[Android]                  |X   |    |X   |
+|xref:Monitors_AndroidEmulator[Android Emulator] |X   |    |X   |
+|xref:Monitors_ButtonClicker[ButtonClicker]      |    |    |X   |Windows
+|xref:Monitors_CanaKitRelay[CanaKit Relay]       |    |    |X   |
+|xref:Monitors_CleanupFolder[Cleanup Folder]     |    |    |X   |
+|xref:Monitors_CleanupRegistry[Cleanup Registry] |    |    |X   |Windows
+|xref:Monitors_CrashReporter[Crash Reporter]     |X   |X   |    |OS X
+|xref:Monitors_CrashWrangler[Crash Wrangler]     |X   |    |X   |OS X
+|xref:Monitors_Gdb[Gdb]                          |X   |X   |X   |Linux
+|xref:Monitors_IpPower9258[IpPower9258]          |    |    |X   |
+|xref:Monitors_LinuxCoreFile[LinuxCoreFile]      |X   |X   |    |Linux
+|xref:Monitors_MemoryMonitor[Memory]             |X   |    |    |
+|xref:Monitors_PageHeap[Page Heap]               |X   |    |    |Windows
+|xref:Monitors_Pcap[Pcap Network]                |X   |X   |    |
+|xref:Monitors_Ping[Ping]                        |X   |    |    |
+|xref:Monitors_PopupWatcher[Popup Watcher]       |X   |    |    |Windows
+|xref:Monitors_Process[Process Launcher]         |X   |    |X   |
+|xref:Monitors_ProcessKiller[Process Killer]     |    |    |X   |
+|xref:Monitors_RunCommand[Run Command]           |X   |X   |X   |
+|xref:Monitors_SaveFile[Save File]               |    |X   |X   |
+|xref:Monitors_Serial[Serial Port]               |X   |X   |X   |
+|xref:Monitors_Socket[Socket Listener]           |X   |    |    |
+|xref:Monitors_SshCommand[SSH Command]           |X   |X   |X   |
+|xref:Monitors_SshDownloader[SSH Downloader]     |    |X   |X   |
+|xref:Monitors_Syslog[Syslog]                    |X   |X   |    |
+|xref:Monitors_TcpPort[TcpPort]                  |X   |X   |X   |
+|xref:Monitors_Vmware[Vmware Control]            |X   |    |X   |
+|xref:Monitors_WindowsDebugger[Windows Debugger] |X   |X   |X   |Windows
+|xref:Monitors_WindowsService[Windows Service]   |X   |    |X   |Windows
 |==========================================================
