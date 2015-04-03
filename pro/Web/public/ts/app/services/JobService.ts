@@ -137,7 +137,7 @@ module Peach {
 				promise.error(reason => this.onError(reason));
 			} else if (this.CanContinue) {
 				this.job.status = JobStatus.ContinuePending;
-				this.$http.get(this.job.links.commands.continueUrl)
+				this.$http.get(this.job.commands.continueUrl)
 					.success(() => this.startJobPoller())
 					.error(reason => this.onError(reason));
 			}
@@ -146,7 +146,7 @@ module Peach {
 		public PauseJob() {
 			if (this.CanPause) {
 				this.job.status = JobStatus.PausePending;
-				this.$http.get(this.job.links.commands.pauseUrl)
+				this.$http.get(this.job.commands.pauseUrl)
 					.success(() => this.startJobPoller())
 					.error(reason => this.onError(reason));
 			}
@@ -155,7 +155,7 @@ module Peach {
 		public StopJob() {
 			if (this.CanStop) {
 				this.job.status = JobStatus.StopPending;
-				this.$http.get(this.job.links.commands.stopUrl)
+				this.$http.get(this.job.commands.stopUrl)
 					.success(() => this.startJobPoller())
 					.error(reason => this.onError(reason));
 			}
@@ -183,7 +183,7 @@ module Peach {
 			}
 
 			this.poller = this.$interval(() => {
-				var promise = this.$http.get(this.job.links.jobUrl);
+				var promise = this.$http.get(this.job.jobUrl);
 				promise.success((job: IJob) => {
 					this.job = job;
 					if (job.status === JobStatus.Stopped ||
@@ -200,7 +200,7 @@ module Peach {
 		}
 
 		private reloadFaults() {
-			var promise = this.$http.get(this.job.links.faultsUrl);
+			var promise = this.$http.get(this.job.faultsUrl);
 			promise.success((faults: IFaultSummary[]) => {
 				this.faults = faults;
 			});

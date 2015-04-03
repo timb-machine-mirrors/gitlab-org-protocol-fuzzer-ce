@@ -202,7 +202,7 @@ module Peach {
 		}
 
 		private getData<T>(): ng.IHttpPromise<T> {
-			return this.$http.get(this.jobService.Job.links.metrics[this.metric]);
+			return this.$http.get(this.jobService.Job.metrics[this.metric]);
 		}
 	}
 }

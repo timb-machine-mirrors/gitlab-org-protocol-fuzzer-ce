@@ -9,7 +9,9 @@ namespace Peach.Core
 
 		public TempFile()
 		{
-			Path = System.IO.Path.GetTempFileName();
+			Path = System.IO.Path.Combine(
+				System.IO.Path.GetTempPath(),
+				"Peach-{0}".Fmt(Guid.NewGuid()));
 		}
 
 		public void Dispose()
@@ -25,8 +27,9 @@ namespace Peach.Core
 
 		public TempDirectory()
 		{
-			Path = System.IO.Path.GetTempFileName();
-			File.Delete(Path);
+			Path = System.IO.Path.Combine(
+				System.IO.Path.GetTempPath(),
+				"Peach-{0}".Fmt(Guid.NewGuid()));
 			Directory.CreateDirectory(Path);
 		}
 

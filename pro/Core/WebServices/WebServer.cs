@@ -291,9 +291,9 @@ namespace Peach.Pro.Core.WebServices
 		public Uri Uri { get; private set; }
 		public WebContext Context { get; private set; }
 
-		public WebServer(string pitLibraryPath)
+		public WebServer(string pitLibraryPath, IJobMonitor jobMonitor)
 		{
-			Context = new WebContext(pitLibraryPath);
+			Context = new WebContext(pitLibraryPath, jobMonitor);
 		}
 
 		public void Start()
@@ -365,13 +365,17 @@ namespace Peach.Pro.Core.WebServices
 			Context = null;
 		}
 
-		public static int Run(string pitLibraryPath, bool shouldStartBrowser)
+		public static int Run(string pitLibraryPath, bool shouldStartBrowser, IJobMonitor jobMonitor)
 		{
 			using (var evt = new AutoResetEvent(false))
 			{
-				ConsoleCancelEventHandler handler = (s, e) => { evt.Set(); e.Cancel = true; };
+				ConsoleCancelEventHandler handler = (s, e) =>
+				{
+					evt.Set(); 
+					e.Cancel = true;
+				};
 
-				using (var svc = new WebServer(pitLibraryPath))
+				using (var svc = new WebServer(pitLibraryPath, jobMonitor))
 				{
 					svc.Start();
 

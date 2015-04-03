@@ -36,8 +36,12 @@ using Godel.Core;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Analyzers;
+using Peach.Core.Dom;
 using Peach.Core.Runtime;
+using Peach.Pro.Core.Loggers;
+using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices;
+using Peach.Pro.Core.WebServices.Models;
 using SharpPcap;
 
 namespace Peach.Pro.Core.Runtime
@@ -53,8 +57,6 @@ namespace Peach.Pro.Core.Runtime
 		////{
 		////    return new ConsoleProgram(args).ExitCode;
 		////}
-
-		public static Thread CurrentThread = Thread.CurrentThread;
 
 		public static ConsoleColor DefaultForground = Console.ForegroundColor;
 
@@ -85,6 +87,7 @@ namespace Peach.Pro.Core.Runtime
 		private string _pitLibraryPath;
 		private bool _noweb;
 		private bool _nobrowser;
+		private static volatile bool _shouldStop;
 
 		#region Public Properties
 
@@ -116,14 +119,14 @@ namespace Peach.Pro.Core.Runtime
 		{
 			// Run analyzer and exit
 			options.Add(
-				"analyzer=", 
+				"analyzer=",
 				"Launch Peach Analyzer",
 				v => _analyzer = v
 			);
 
 			// Run agent and wait for ctrl-c
 			options.Add(
-				"a|agent=", 
+				"a|agent=",
 				"Launch Peach Agent",
 				v => _agent = v
 			);
@@ -135,23 +138,23 @@ namespace Peach.Pro.Core.Runtime
 			);
 			options.Add(
 				"debug",
-				"Enable debug messages. " + 
+				"Enable debug messages. " +
 				"Useful when debugging your Peach Pit file. " +
 				"Warning: Messages are very cryptic sometimes.",
 				v => _verbosity = 1
 			);
 			options.Add(
 				"trace",
- 				"Enable even more verbose debug messages.",
+				"Enable even more verbose debug messages.",
 				v => _verbosity = 2
 			);
 			options.Add(
-				"range=", 
+				"range=",
 				"Provide a range of test #'s to be run.",
 				v => ParseRange("range", v)
 			);
 			options.Add(
-				"c|count", 
+				"c|count",
 				"Count test cases",
 				v => _config.countOnly = true
 			);
@@ -161,12 +164,12 @@ namespace Peach.Pro.Core.Runtime
 				(uint v) => _config.skipToIteration = v
 			);
 			options.Add(
-				"seed=", 
+				"seed=",
 				"Sets the seed used by the random number generator.",
 				(uint v) => _config.randomSeed = v
 			);
 			options.Add(
-				"p|parallel=", 
+				"p|parallel=",
 				"Parallel fuzzing. Total of M machines, this is machine N.",
 				v => ParseParallel("parallel", v)
 			);
@@ -179,16 +182,16 @@ namespace Peach.Pro.Core.Runtime
 				AddNewDefine
 			);
 			options.Add(
-				"definedvalues=", 
+				"definedvalues=",
 				v => _configFiles.Add(v)
 			);
 			options.Add(
-				"config=", 
+				"config=",
 				"XML file containing defined values",
 				v => _configFiles.Add(v)
 			);
 			options.Add(
-				"t|test", 
+				"t|test",
 				"Validate a Peach Pit file",
 				v => _test = true
 			);
@@ -206,7 +209,7 @@ namespace Peach.Pro.Core.Runtime
 				var => ShowEnvironment()
 			);
 			options.Add(
-				"makexsd", 
+				"makexsd",
 				"Generate peach.xsd",
 				var => MakeSchema()
 			);
@@ -332,6 +335,25 @@ namespace Peach.Pro.Core.Runtime
 		/// </summary>
 		protected virtual void RunEngine(Peach.Core.Dom.Dom dom)
 		{
+			// Add the JobLogger as necessary
+			Test test;
+
+			if (!dom.tests.TryGetValue(_config.runName, out test))
+				throw new PeachException("Unable to locate test named '{0}'.".Fmt(_config.runName));
+
+			Job job = null;
+			var userLogger = test.loggers.OfType<JobLogger>().FirstOrDefault();
+			if (userLogger != null || !_noweb)
+			{
+				var jobRequest = new JobRequest
+				{
+					Seed = _config.randomSeed,
+					RangeStart = _config.rangeStart,
+					RangeStop = _config.rangeStop == 0 ? null : (long?)_config.rangeStop,
+				};
+				job = JobRunner.CreateJob(_config.pitFile, jobRequest, _config.id);
+			}
+
 			if (_noweb)
 			{
 				var e = new Engine(GetUIWatcher());
@@ -341,22 +363,18 @@ namespace Peach.Pro.Core.Runtime
 
 			// Pass an empty pit library path if we are running a job off of
 			// the command line.
-
-			using (var svc = new WebServer(""))
+			using (var svc = new WebServer("", new ConsoleJobMonitor(job)))
 			{
-				// Tell the web service the job is running off the command line
-				//JobRunner.Attach(dom, _config);
-
 				svc.Start();
 
 				_webUri = svc.Uri;
 
-				Runtime.ConsoleWatcher.WriteInfoMark();
+				ConsoleWatcher.WriteInfoMark();
 				Console.WriteLine("Web site running at: {0}", svc.Uri);
 
-				// Add the web logger as the 1st logger to each test
-				//foreach (var test in dom.tests)
-				//	test.loggers.Insert(0, svc.Context.Logger);
+				// Add the JobLogger as necessary
+				if (userLogger == null)
+					test.loggers.Insert(0, new JobLogger());
 
 				var e = new Engine(GetUIWatcher());
 				e.startFuzzing(dom, _config);
@@ -430,6 +448,7 @@ namespace Peach.Pro.Core.Runtime
 				if (!License.EulaAccepted)
 					ShowEula();
 
+				_config.shouldStop = () => _shouldStop;
 				Console.CancelKeyPress += Console_CancelKeyPress;
 
 				if (extra.Count > 0)
@@ -476,7 +495,7 @@ namespace Peach.Pro.Core.Runtime
 				// Ensure pit library exists
 				var pits = FindPitLibrary(_pitLibraryPath);
 
-				WebServer.Run(pits, !_nobrowser);
+				WebServer.Run(pits, !_nobrowser, new InternalJobMonitor());
 			}
 		}
 
@@ -771,21 +790,86 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 		{
 			e.Cancel = true;
 
-			if (CurrentThread == null)
-				return;
-
+			Console.WriteLine();
 			Console.WriteLine();
 			Console.WriteLine(" --- Ctrl+C Detected --- ");
 
-			var th = CurrentThread;
-			CurrentThread = null;
+			if (!_shouldStop)
+			{
+				Console.WriteLine(" --- Waiting for last iteration to complete --- ");
+				_shouldStop = true;
+			}
+			else
+			{
+				Console.WriteLine(" --- Aborting --- ");
 
-			// Need to call Environment.Exit from outside this event handler
-			// to ensure the finalizers get called...
-			// http://www.codeproject.com/Articles/16164/Managed-Application-Shutdown
-			new Thread(() => Environment.Exit(0)).Start();
-
-			System.Diagnostics.Debug.Assert(th != null);
+				// Need to call Environment.Exit from outside this event handler
+				// to ensure the finalizers get called...
+				// http://www.codeproject.com/Articles/16164/Managed-Application-Shutdown
+				new Thread(() => Environment.Exit(0)).Start();
+			}
 		}
+	}
+
+	class ConsoleJobMonitor : IJobMonitor
+	{
+		readonly Guid _guid;
+
+		public ConsoleJobMonitor(Job job)
+		{
+			_guid = job.Guid;
+		}
+
+		public void Dispose()
+		{
+		}
+
+		public Job GetJob()
+		{
+			Job job;
+			using (var db = new NodeDatabase())
+			{
+				job = db.GetJob(_guid);
+				if (job == null)
+					return null;
+
+				if (job.DatabasePath == null)
+					return job;
+			}
+
+			using (var db = new JobDatabase(job.DatabasePath))
+			{
+				job = db.GetJob(_guid);
+			}
+
+			return job;
+		}
+
+		#region Not Implemented
+		public Job Start(string pitLibraryPath, string pitFile, JobRequest jobRequest)
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool Pause()
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool Continue()
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool Stop()
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool Kill()
+		{
+			throw new NotImplementedException();
+		}
+		#endregion
 	}
 }

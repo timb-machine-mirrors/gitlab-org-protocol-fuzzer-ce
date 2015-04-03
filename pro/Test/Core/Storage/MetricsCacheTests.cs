@@ -24,7 +24,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestFKConstraint1()
 		{
-			var cache = new MetricsCache(() => new JobDatabase(_tmp.Path));
+			var cache = new MetricsCache(_tmp.Path);
 			cache.IterationStarting(1);
 			cache.StateStarting("S1", 1);
 			cache.ActionStarting("Action");

@@ -3,17 +3,9 @@
 module Peach {
 	"use strict";
 
-	export interface IFaultLinks {
-		nodeUrl: string;
-		targetUrl: string;
-		targetConfigUrl: string;
-		pitUrl: string;
-		peachUrl: string;
-		archiveUrl: string;
-	}
-
 	export interface IFaultSummary {
 		faultUrl: string;
+		archiveUrl: string;
 		reproducable: boolean;
 		iteration: number;
 		timeStamp: string;
@@ -25,7 +17,11 @@ module Peach {
 	}
 
 	export interface IFaultDetail extends IFaultSummary {
-		links: IFaultLinks;
+		nodeUrl: string;
+		targetUrl: string;
+		targetConfigUrl: string;
+		pitUrl: string;
+		peachUrl: string;
 
 		title: string;
 		description: string;

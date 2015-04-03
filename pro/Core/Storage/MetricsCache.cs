@@ -38,21 +38,19 @@ namespace Peach.Pro.Core.Storage
 			}
 		}
 
-		readonly JobDatabaseFactory _factory;
+		readonly string _dbPath;
 		readonly NameCache _nameCache;
 		readonly Dictionary<Tuple<long, long>, State> _stateCache;
 		readonly Dictionary<Tuple<long, long>, State> _pendingStates;
 		readonly List<Mutation> _mutations = new List<Mutation>();
 		Mutation _mutation;
 
-		public delegate JobDatabase JobDatabaseFactory();
-
-		public MetricsCache(JobDatabaseFactory factory)
+		public MetricsCache(string dbPath)
 		{
-			_factory = factory;
+			_dbPath = dbPath;
 			_pendingStates = new Dictionary<Tuple<long, long>, State>();
 
-			using (var db = _factory())
+			using (var db = new JobDatabase(_dbPath))
 			{
 				_nameCache = new NameCache(db);
 				_stateCache = db.LoadTable<State>().ToDictionary(x =>
@@ -136,7 +134,7 @@ namespace Peach.Pro.Core.Storage
 		{
 			//Console.WriteLine("cache.IterationFinished();");
 
-			using (var db = _factory())
+			using (var db = new JobDatabase(_dbPath))
 			{
 				using (var xact = db.Connection.BeginTransaction())
 				{
@@ -170,7 +168,7 @@ namespace Peach.Pro.Core.Storage
 			//	fault.MinorHash,
 			//	fault.Timestamp);
 
-			using (var db = _factory())
+			using (var db = new JobDatabase(_dbPath))
 			{
 				using (var xact = db.Connection.BeginTransaction())
 				{

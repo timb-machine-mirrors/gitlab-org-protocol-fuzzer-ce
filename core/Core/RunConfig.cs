@@ -38,6 +38,20 @@ namespace Peach.Core
 	public class RunConfiguration
 	{
 		/// <summary>
+		/// A unique identifier for this run
+		/// </summary>
+		public Guid id
+		{
+			get
+			{
+				if (!_id.HasValue)
+					_id = Guid.NewGuid();
+				return _id.Value;
+			}
+			set { _id = value; }
+		}
+
+		/// <summary>
 		/// Just get the count of mutations
 		/// </summary>
 		public bool countOnly = false;
@@ -143,6 +157,7 @@ namespace Peach.Core
 		public StopHandler shouldStop = null;
 
 		private uint _randomSeed = (uint)DateTime.Now.Ticks & 0x0000FFFF;
+		private Guid? _id;
 	}
 }
 

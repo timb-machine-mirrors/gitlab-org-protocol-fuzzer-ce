@@ -1,4 +1,5 @@
 ﻿using System;
+using Peach.Pro.Core.Storage;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
@@ -18,6 +19,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		}
 	}
 
+	[Table("ViewFaultTimeline")]
 	public class FaultTimelineMetric
 	{
 		private DateTime _date;
@@ -39,6 +41,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		}
 	}
 
+	[Table("ViewBucketTimeline")]
 	public class BucketTimelineMetric
 	{
 		public string Label { get; set; }
@@ -67,6 +70,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		}
 	}
 
+	[Table("ViewMutators")]
 	public class MutatorMetric
 	{
 		public string Mutator { get; set; }
@@ -91,6 +95,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		}
 	}
 
+	[Table("ViewElements")]
 	public class ElementMetric
 	{
 		public string State { get; set; }
@@ -124,6 +129,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		}
 	}
 
+	[Table("ViewStates")]
 	public class StateMetric
 	{
 		public string State { get; set; }
@@ -139,6 +145,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		}
 	}
 
+	[Table("ViewDatasets")]
 	public class DatasetMetric
 	{
 		public string Dataset { get; set; }
@@ -160,6 +167,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		}
 	}
 
+	[Table("ViewBuckets")]
 	public class BucketMetric
 	{
 		public string Bucket { get; set; }
@@ -184,6 +192,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		}
 	}
 
+	[Table("ViewIterations")]
 	public class IterationMetric
 	{
 		public string State { get; set; }

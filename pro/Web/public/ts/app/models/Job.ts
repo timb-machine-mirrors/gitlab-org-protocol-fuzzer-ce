@@ -3,7 +3,32 @@
 module Peach {
 	"use strict";
 
-	export interface IJobLinks {
+	export interface IJobCommands {
+		stopUrl: string;
+		continueUrl: string;
+		pauseUrl: string;
+		killUrl: string;
+	}
+
+	export interface IJobMetrics {
+		[name: string]: string;
+	}
+
+	export interface IJobRequest {
+		// URL to configured pit
+		// /p/pits/ID
+		pitUrl: string;
+
+		seed?: number;
+		rangeStart?: number;
+		rangeStop?: number;
+
+		isTest?: boolean;
+	}
+
+	export interface IJob extends IJobRequest {
+		id: string;
+
 		jobUrl?: string;
 
 		// The URL for getting test results
@@ -38,35 +63,6 @@ module Peach {
 
 		// URLs used to control a running job.
 		commands?: IJobCommands;
-	}
-
-	export interface IJobCommands {
-		stopUrl: string;
-		continueUrl: string;
-		pauseUrl: string;
-		killUrl: string;
-	}
-
-	export interface IJobMetrics {
-		[name: string]: string;
-	}
-
-	export interface IJobRequest {
-		// URL to configured pit
-		// /p/pits/ID
-		pitUrl: string;
-
-		seed?: number;
-		rangeStart?: number;
-		rangeStop?: number;
-
-		isTest?: boolean;
-	}
-
-	export interface IJob extends IJobRequest {
-		id: string;
-
-		links?: IJobLinks;
 
 		status?: string;
 		mode?: string;

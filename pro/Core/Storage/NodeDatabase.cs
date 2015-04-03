@@ -7,88 +7,15 @@ using Dapper;
 
 namespace Peach.Pro.Core.Storage
 {
-	class NodeDatabase : Database
+	public class NodeDatabase : Database
 	{
-		#region SQL
-		const string SqlSelectJob = @"
-SELECT * 
-FROM [Job] 
-WHERE Id = @Id;
-";
-
-		const string SqlInsertJob = @"
-INSERT INTO [Job] (
-	Id,
-	Status,
-	Mode,
-	Name,
-	Result,
-	Notes,
-	User,
-	Seed,
-	IterationCount,
-	StartDate,
-	StopDate,
-	Runtime,
-	Speed,
-	FaultCount,
-	RangeStart,
-	RangeStop,
-	IsTest,
-	PitUrl
-) VALUES (
-	@Id,
-	@Status,
-	@Mode,
-	@Name,
-	@Result,
-	@Notes,
-	@User,
-	@Seed,
-	@IterationCount,
-	@StartDate,
-	@StopDate,
-	@Runtime,
-	@Speed,
-	@FaultCount,
-	@RangeStart,
-	@RangeStop,
-	@IsTest,
-	@PitUrl
-);";
-
-		const string SqlUpdateJob = @"
-UPDATE [Job]
-SET 
-	Status = @Status,
-	Mode = @Mode,
-	Name = @Name,
-	Result = @Result,
-	Notes = @Notes,
-	User = @User,
-	Seed = @Seed,
-	IterationCount = @IterationCount,
-	StartDate = @StartDate,
-	StopDate = @StopDate,
-	Runtime = @Runtime,
-	Speed = @Speed,
-	FaultCount = @FaultCount,
-	RangeStart = @RangeStart,
-	RangeStop = @RangeStop
-WHERE
-	Id = @Id
-;";
-
-		const string SqlDeleteJob = @"
-DELETE FROM [Job]
-WHERE Id = @Id;
-";
-		#endregion
-
 		static readonly IEnumerable<Type> StaticSchema = new[]
 		{
 			// job status
 			typeof(Job),
+
+			// pit tester
+			typeof(TestEvent),
 		};
 
 		protected override IEnumerable<Type> Schema
@@ -102,17 +29,12 @@ WHERE Id = @Id;
 		}
 
 		public NodeDatabase()
-			: base(GetDatabasePath())
+			: base(GetDatabasePath(), false)
 		{
 		}
 
 		// used by unit tests
-		internal NodeDatabase(string path)
-			: base(path)
-		{
-		}
-
-		static string GetDatabasePath()
+		internal static string GetDatabasePath()
 		{
 			var logRoot = Configuration.LogRoot;
 
@@ -124,23 +46,50 @@ WHERE Id = @Id;
 
 		public Job GetJob(Guid id)
 		{
-			return Connection.Query<Job>(SqlSelectJob, new { Id = id.ToString() })
+			return Connection.Query<Job>(Sql.SelectJob, new { Id = id.ToString() })
 				.SingleOrDefault();
 		}
 
 		public void InsertJob(Job job)
 		{
-			Connection.Execute(SqlInsertJob, job);
+			Connection.Execute(Sql.InsertJob, job);
 		}
 
 		public void UpdateJob(Job job)
 		{
-			Connection.Execute(SqlUpdateJob, job);
+			Connection.Execute(Sql.UpdateJob, job);
 		}
 
 		public void DeleteJob(Guid id)
 		{
-			Connection.Execute(SqlDeleteJob, new { Id = id.ToString() });
+			Connection.Execute(Sql.DeleteJob, new { Id = id.ToString() });
+		}
+
+		public void UpdateJobs(IEnumerable<Job> job)
+		{
+			Connection.Execute(Sql.UpdateJob, job);
+		}
+
+		public void DeleteJobs(IEnumerable<Job> jobs)
+		{
+			var ids = jobs.Select(x => new { Id = x.Id });
+			Connection.Execute(Sql.DeleteJob, ids);
+		}
+
+		public void InsertTestEvent(TestEvent testEvent)
+		{
+			testEvent.Id = Connection.ExecuteScalar<long>(Sql.InsertTestEvent, testEvent);
+		}
+
+		public void UpdateTestEvents(IEnumerable<TestEvent> testEvent)
+		{
+			Connection.Execute(Sql.UpdateTestEvent, testEvent);
+		}
+
+		public IEnumerable<TestEvent> GetTestEventsByJob(Guid jobId)
+		{
+			const string sql = "SELECT * FROM [TestEvent] WHERE JobId = @JobId;";
+			return Connection.Query<TestEvent>(sql, new { JobId = jobId.ToString() });
 		}
 	}
 }

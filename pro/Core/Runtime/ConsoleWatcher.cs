@@ -8,25 +8,24 @@ namespace Peach.Pro.Core.Runtime
 {
 	public class ConsoleWatcher : Watcher
 	{
-		string _title = "Peach Pro v";
-		string _copyright = "Copyright (c) Deja vu Security";
+		readonly string _title = "Peach Pro v";
+		private const string _copyright = "Copyright (c) Deja vu Security";
 
-		Stopwatch timer = new Stopwatch();
-		uint startIteration = 0;
-		bool reproducing = false;
+		readonly Stopwatch timer = new Stopwatch();
+		uint startIteration;
+		bool reproducing;
 
-		RunContext _context = null;
-		uint _currentIteration = 0;
-		uint _totalIterations = 0;
-		List<Fault> _faults = new List<Fault>();
-		Dictionary<string, int> _majorFaultCount = new Dictionary<string, int>();
+		RunContext _context;
+		uint _currentIteration;
+		uint _totalIterations;
+		readonly List<Fault> _faults = new List<Fault>();
+		readonly Dictionary<string, int> _majorFaultCount = new Dictionary<string, int>();
 		DateTime _started = DateTime.Now;
 		string _status = "";
 		string _eta = "";
 		DateTime _lastScreenUpdate = DateTime.Now;
 
 		public ConsoleWatcher(string titleSuffix = "")
-			: base()
 		{
 			_title += Assembly.GetExecutingAssembly().GetName().Version;
 			_title += titleSuffix;
@@ -96,8 +95,6 @@ namespace Peach.Pro.Core.Runtime
 			if (totalIterations != null)
 				_totalIterations = totalIterations.Value;
 
-			string strEta = "-";
-
 			if (!timer.IsRunning)
 			{
 				timer.Start();
@@ -120,8 +117,7 @@ namespace Peach.Pro.Core.Runtime
 					remain = TimeSpan.FromMilliseconds((total * elapsed / done) - elapsed);
 				}
 
-				strEta = remain.ToString("g");
-				_eta = strEta;
+				_eta = remain.ToString("g");
 			}
 
 
@@ -148,6 +144,8 @@ namespace Peach.Pro.Core.Runtime
 		{
 			_status = "Test '" + context.test.Name + "' finished.";
 			RefreshScreen();
+			Console.WriteLine();
+			Console.WriteLine();
 		}
 
 		protected override void Engine_TestStarting(RunContext context)
@@ -163,11 +161,6 @@ namespace Peach.Pro.Core.Runtime
 		void DisplayStaticText(string text)
 		{
 			DisplayText(text, ConsoleColor.DarkCyan);
-		}
-
-		void DisplayStatusText(string text)
-		{
-			Console.Write(text);
 		}
 
 		void DisplayText(string text, ConsoleColor color)

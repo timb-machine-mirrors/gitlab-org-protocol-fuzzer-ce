@@ -33,6 +33,8 @@ using System.Linq;
 using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
+using Action = Peach.Core.Dom.Action;
+using Logger = NLog.Logger;
 using Random = Peach.Core.Random;
 
 /*
@@ -136,7 +138,7 @@ namespace Peach.Pro.Core.MutationStrategies
 			{
 				this.ModelName = ModelName;
 				this.Options = Options;
-				this.Iteration = 1;
+				Iteration = 1;
 			}
 
 			public string Name { get { return ModelName; } }
@@ -145,7 +147,7 @@ namespace Peach.Pro.Core.MutationStrategies
 			public uint Iteration { get; set; }
 		}
 
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		static Logger logger = LogManager.GetCurrentClassLogger();
 
 		/// <summary>
 		/// Collection of all dataSets across all fully qualified model names.
@@ -218,12 +220,12 @@ namespace Peach.Pro.Core.MutationStrategies
 		/// <summary>
 		/// The most recent state that has started.
 		/// </summary>
-		Peach.Core.Dom.State currentState;
+		State currentState;
 
 		/// <summary>
 		/// The most recent action that was started.
 		/// </summary>
-		Peach.Core.Dom.Action currentAction;
+		Action currentAction;
 
 		/// <summary>
 		/// Current fuzzing iteration number
@@ -387,9 +389,9 @@ namespace Peach.Pro.Core.MutationStrategies
 				if (mutableItems.Count == 1)
 				{
 					// No states should have contributed to mutableItems
-					System.Diagnostics.Debug.Assert(mutationScopeState.Where(m => m.Count > 0 && m.ChildScopes > 1).Count() == 0);
+					Debug.Assert(!mutationScopeState.Any(m => m.Count > 0 && m.ChildScopes > 1));
 					// The sum of mutations should be the same
-					System.Diagnostics.Debug.Assert(mutableItems.Select(m => m.Count).Sum() == mutationScopeGlobal.Count);
+					Debug.Assert(mutableItems.Select(m => m.Count).Sum() == mutationScopeGlobal.Count);
 					// Clear mutable items since global is the same as the single action
 					mutableItems.Clear();
 				}
@@ -420,18 +422,17 @@ namespace Peach.Pro.Core.MutationStrategies
 				// All state mutations are in the same scope.
 				// When state model mutation is selected, there should only
 				// be a single picked mutation.
-				var m = mutations.Where(i => i.InstanceName == stateModel.Name).FirstOrDefault();
-
+				var m = mutations.FirstOrDefault(i => i.InstanceName == stateModel.Name);
 				if (m != null)
 				{
-					System.Diagnostics.Debug.Assert(mutations.Length == 1);
+					Debug.Assert(mutations.Length == 1);
 					stateModelMutation = Random.WeightedChoice(m.Mutators);
 					stateModelMutation.randomMutation(stateModel);
 				}
 			}
 		}
 
-		void ActionStarting(RunContext context, Peach.Core.Dom.Action action)
+		void ActionStarting(RunContext context, Action action)
 		{
 			currentAction = action;
 
@@ -487,7 +488,7 @@ namespace Peach.Pro.Core.MutationStrategies
 
 			if (randomDataSet == null)
 			{
-				randomDataSet = new Random(this.Seed + switchIteration);
+				randomDataSet = new Random(Seed + switchIteration);
 
 				Context.controlIteration = true;
 				Context.controlRecordingIteration = true;
@@ -508,14 +509,14 @@ namespace Peach.Pro.Core.MutationStrategies
 
 				// Don't use the instance name here, we only pick the data set
 				// once per state, not each time the state is re-entered.
-				System.Diagnostics.Debug.Assert(!dataSets.Contains(item.modelName));
+				Debug.Assert(!dataSets.Contains(item.modelName));
 				dataSets.Add(new DataSetTracker(item.modelName, options));
 			}
 		}
 
 		private void SyncDataSets()
 		{
-			System.Diagnostics.Debug.Assert(Iteration != 0);
+			Debug.Assert(Iteration != 0);
 
 			// Compute the iteration we need to switch on
 			var switchIteration = GetSwitchIteration();
@@ -582,7 +583,7 @@ namespace Peach.Pro.Core.MutationStrategies
 
 		#endregion
 
-		private void RecordDataModel(Peach.Core.Dom.Action action)
+		private void RecordDataModel(Action action)
 		{
 			var scopeState = mutationScopeState.Last();
 
@@ -646,10 +647,10 @@ namespace Peach.Pro.Core.MutationStrategies
 			}
 		}
 
-		private void MutateDataModel(Peach.Core.Dom.Action action)
+		private void MutateDataModel(Action action)
 		{
 			// MutateDataModel should only be called after ParseDataModel
-			System.Diagnostics.Debug.Assert(Iteration > 0);
+			Debug.Assert(Iteration > 0);
 
 			foreach (var item in action.outputData)
 			{
@@ -661,7 +662,7 @@ namespace Peach.Pro.Core.MutationStrategies
 		{
 			if (stateModelMutation != null)
 			{
-				System.Diagnostics.Debug.Assert(!Context.controlIteration);
+				Debug.Assert(!Context.controlIteration);
 
 				Context.OnStateMutating(nextState, stateModelMutation);
 
@@ -674,11 +675,11 @@ namespace Peach.Pro.Core.MutationStrategies
 			return nextState;
 		}
 
-		public override Peach.Core.Dom.Action NextAction(State state, Peach.Core.Dom.Action lastAction, Peach.Core.Dom.Action nextAction)
+		public override Action NextAction(State state, Action lastAction, Action nextAction)
 		{
 			if (stateModelMutation != null)
 			{
-				System.Diagnostics.Debug.Assert(!Context.controlIteration);
+				Debug.Assert(!Context.controlIteration);
 				return stateModelMutation.nextAction(state, lastAction, nextAction);
 			}
 
