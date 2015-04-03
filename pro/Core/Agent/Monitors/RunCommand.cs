@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using NLog;
@@ -83,29 +84,58 @@ namespace Peach.Pro.Core.Agent.Monitors
 				if (p.Timeout)
 				{
 					_data.Title = "Process failed to exit in allotted time.";
-					_data.Fault = new MonitorData.Info();
+					_data.Fault = new MonitorData.Info
+					{
+						MajorHash = Hash(Class + Command),
+						MinorHash = Hash("FailedToExit")
+					};
 				}
 				else if (FaultOnExitCode && p.ExitCode == FaultExitCode)
 				{
 					_data.Title = "Process exited with code {0}.".Fmt(p.ExitCode);
-					_data.Fault = new MonitorData.Info();
+					_data.Fault = new MonitorData.Info
+					{
+						MajorHash = Hash(Class + Command),
+						MinorHash = Hash(p.ExitCode.ToString(CultureInfo.InvariantCulture))
+					};
 				}
 				else if (FaultOnNonZeroExit && p.ExitCode != 0)
 				{
 					_data.Title = "Process exited with code {0}.".Fmt(p.ExitCode);
-					_data.Fault = new MonitorData.Info();
+					_data.Fault = new MonitorData.Info
+					{
+						MajorHash = Hash(Class + Command),
+						MinorHash = Hash(p.ExitCode.ToString(CultureInfo.InvariantCulture))
+					};
 				}
 				else if (_faulOnRegex != null)
 				{
-					if (_faulOnRegex.Match(stdout).Success)
+					var m = _faulOnRegex.Match(stdout);
+
+					if (m.Success)
 					{
 						_data.Title = "Process stdout matched FaulOnRegex \"{0}\".".Fmt(FaultOnRegex);
-						_data.Fault = new MonitorData.Info();
+						_data.Fault = new MonitorData.Info
+						{
+							Description = stdout,
+							MajorHash = Hash(Class + Command),
+							MinorHash = Hash(m.Value)
+						};
 					}
-					else if (_faulOnRegex.Match(stderr).Success)
+					else
 					{
-						_data.Title = "Process stderr matched FaulOnRegex \"{0}\".".Fmt(FaultOnRegex);
-						_data.Fault = new MonitorData.Info();
+						m = _faulOnRegex.Match(stderr);
+
+						if (m.Success)
+						{
+							_data.Title = "Process stderr matched FaulOnRegex \"{0}\".".Fmt(FaultOnRegex);
+							_data.Fault = new MonitorData.Info
+							{
+								Description = stderr,
+								MajorHash = Hash(Class + Command),
+								MinorHash = Hash(m.Value)
+							};
+						}
 					}
 				}
 				else if (AddressSanitizer && AsanMatch.IsMatch(stderr))

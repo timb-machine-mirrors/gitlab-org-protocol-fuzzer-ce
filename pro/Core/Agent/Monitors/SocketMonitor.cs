@@ -78,7 +78,13 @@ namespace Peach.Pro.Core.Agent.Monitors
 				_data.Data.Add("Response.bin", new MemoryStream(data.Item2));
 
 				if (!FaultOnSuccess)
-					_data.Fault = new MonitorData.Info();
+				{
+					_data.Fault = new MonitorData.Info
+					{
+						MajorHash = Hash("{0}{1}{2}{3}".Fmt(Host, Interface, Protocol, Port)),
+						MinorHash = Hash(data.Item1.ToString()),
+					};
+				}
 			}
 			else
 			{
@@ -86,7 +92,13 @@ namespace Peach.Pro.Core.Agent.Monitors
 				_data.Title = "Monitoring {0}, no connections recorded.".Fmt(ep);
 
 				if (FaultOnSuccess)
-					_data.Fault = new MonitorData.Info();
+				{
+					_data.Fault = new MonitorData.Info
+					{
+						MajorHash = Hash("{0}{1}{2}{3}".Fmt(Host, Interface, Protocol, Port)),
+						MinorHash = Hash("NoConnection"),
+					};
+				}
 			}
 		}
 
