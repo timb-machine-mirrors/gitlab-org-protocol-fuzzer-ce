@@ -223,7 +223,7 @@ namespace Peach.Pro.Core.Runtime
 				job = db.GetJob(_guid.Value);
 			}
 
-			if (job == null || job.DatabasePath == null)
+			if (job == null || !File.Exists(job.DatabasePath))
 				throw new Exception("Job not found");
 
 			using (var db = new JobDatabase(job.DatabasePath))

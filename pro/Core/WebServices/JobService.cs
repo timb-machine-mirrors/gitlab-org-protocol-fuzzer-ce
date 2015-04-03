@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Nancy;
 using Nancy.ModelBinding;
 using Peach.Core;
@@ -182,7 +181,7 @@ namespace Peach.Pro.Core.WebServices
 					db.UpdateJob(job);
 			}
 
-			if (job != null && job.DatabasePath != null)
+			if (job != null && File.Exists(job.DatabasePath))
 			{
 				using (var db = new JobDatabase(job.DatabasePath))
 				{
@@ -210,15 +209,13 @@ namespace Peach.Pro.Core.WebServices
 				var isActive = events.Any(x => x.Status == TestStatus.Active);
 				var isFail = events.Any(x => x.Status == TestStatus.Fail);
 
-				var preParsePath = Path.Combine(Configuration.LogRoot, job.Id, "debug.log");
-
 				var result = new TestResult
 				{
 					Status = isActive
 						? TestStatus.Active
 						: isFail ? TestStatus.Fail : TestStatus.Pass,
 					Events = events,
-					Log = TryReadLog(preParsePath) ?? TryReadLog(job.DebugLogPath),
+					Log = TryReadLog(job.AltDebugLogPath) ?? TryReadLog(job.DebugLogPath),
 				};
 
 				return Response.AsJson(result);
@@ -307,7 +304,7 @@ namespace Peach.Pro.Core.WebServices
 				job = db.GetJob(id);
 			}
 
-			if (job == null || job.DatabasePath == null)
+			if (job == null || !File.Exists(job.DatabasePath))
 				return HttpStatusCode.NotFound;
 
 			using (var db = new JobDatabase(job.DatabasePath))
