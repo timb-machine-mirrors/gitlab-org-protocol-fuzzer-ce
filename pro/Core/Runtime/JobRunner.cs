@@ -128,11 +128,8 @@ namespace Peach.Pro.Core.Runtime
 			finally
 			{
 				LogManager.Flush();
-				var path = Path.Combine(
-					Configuration.LogRoot, 
-					_config.id.ToString(), 
-					"debug.log");
-				_jobLogger.FlushDebugLog(path);
+				var job = new Job { Guid = _config.id };
+				_jobLogger.FlushDebugLog(job.AltDebugLogPath);
 			}
 		}
 

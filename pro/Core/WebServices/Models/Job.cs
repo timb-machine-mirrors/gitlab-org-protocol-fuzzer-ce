@@ -145,6 +145,13 @@ namespace Peach.Pro.Core.WebServices.Models
 			}
 		}
 
+		[NotMapped]
+		[JsonIgnore]
+		public string AltDebugLogPath
+		{
+			get { return Path.Combine(Configuration.LogRoot, Id, "debug.log"); }
+		}
+
 		/// <summary>
 		/// The URL of this job
 		/// </summary>

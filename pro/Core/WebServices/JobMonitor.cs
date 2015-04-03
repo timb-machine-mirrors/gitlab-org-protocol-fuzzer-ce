@@ -126,7 +126,7 @@ namespace Peach.Pro.Core.WebServices
 				db.UpdateJob(job);
 			}
 
-			if (job.DatabasePath != null)
+			if (File.Exists(job.DatabasePath))
 			{
 				using (var db = new JobDatabase(job.DatabasePath))
 				{

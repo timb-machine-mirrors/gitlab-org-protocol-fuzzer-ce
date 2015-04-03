@@ -90,7 +90,7 @@ namespace Peach.Pro.Test.Core.Runtime
 				Assert.IsNotNull(job);
 			}
 
-			if (job.DatabasePath == null)
+			if (!File.Exists(job.DatabasePath))
 				return job;
 
 			using (var db = new JobDatabase(job.DatabasePath))
@@ -250,9 +250,8 @@ namespace Peach.Pro.Test.Core.Runtime
 				job = GetJob(id);
 				Assert.IsFalse(File.Exists(job.DebugLogPath));
 
-				var debugLogPath = Path.Combine(Configuration.LogRoot, job.Id, "debug.log");
-				Assert.IsTrue(File.Exists(debugLogPath));
-				Console.Write(File.ReadAllText(debugLogPath));
+				Assert.IsTrue(File.Exists(job.AltDebugLogPath));
+				Console.Write(File.ReadAllText(job.AltDebugLogPath));
 			}
 		}
 	}

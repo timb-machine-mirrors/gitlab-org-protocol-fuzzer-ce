@@ -833,7 +833,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 				if (job == null)
 					return null;
 
-				if (job.DatabasePath == null)
+				if (!File.Exists(job.DatabasePath))
 					return job;
 			}
 
