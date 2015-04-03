@@ -300,6 +300,11 @@ namespace Peach.Pro.Core.WebServices
 				args.Add(Configuration.LogRoot);
 			}
 
+			//if (Configuration.LogLevel == NLog.LogLevel.Debug)
+			//	args.Add("-v");
+			//if (Configuration.LogLevel == NLog.LogLevel.Trace)
+			//	args.Add("-vv");
+
 			_process = new Process
 			{
 				StartInfo = new ProcessStartInfo
@@ -373,6 +378,7 @@ namespace Peach.Pro.Core.WebServices
 						if (line == null)
 							return;
 
+						Logger.Error(line);
 						args.Sink.WriteLine(line);
 						args.Sink.Flush();
 					}

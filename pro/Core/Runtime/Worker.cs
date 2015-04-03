@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
+using NLog.Targets.Wrappers;
 using Peach.Core;
 using Peach.Core.Runtime;
 using Peach.Pro.Core.Storage;
@@ -75,15 +76,14 @@ namespace Peach.Pro.Core.Runtime
 		protected override void ConfigureLogging()
 		{
 			// Override logging so that we force messages to stderr instead of stdout
-			var consoleTarget = new ConsoleTarget
+			var consoleTarget = new AsyncTargetWrapper(new ConsoleTarget
 			{
-				Layout = "${logger} ${message}",
+				Layout = "${longdate} ${logger} ${message}",
 				Error = true,
-			};
+			});
 			var rule = new LoggingRule("*", LogLevel, consoleTarget);
 
 			var nconfig = new LoggingConfiguration();
-			nconfig.RemoveTarget("console");
 			nconfig.AddTarget("console", consoleTarget);
 			nconfig.LoggingRules.Add(rule);
 			LogManager.Configuration = nconfig;
@@ -166,7 +166,8 @@ namespace Peach.Pro.Core.Runtime
 				if (index == 0)
 				{
 					// this causes any unhandled exceptions to be thrown
-					engineTask.Wait();
+					engineTask.Wait(TimeSpan.FromSeconds(10));
+					return;
 				}
 
 				switch (readerTask.Result)
@@ -177,7 +178,7 @@ namespace Peach.Pro.Core.Runtime
 					case "stop":
 						Console.WriteLine("OK");
 						runner.Stop();
-						engineTask.Wait();
+						engineTask.Wait(TimeSpan.FromSeconds(10));
 						return;
 					case "pause":
 						Console.WriteLine("OK");

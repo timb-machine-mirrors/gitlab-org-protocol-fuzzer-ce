@@ -10,10 +10,7 @@ using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices.Models;
 using Godel.Core;
 using Peach.Pro.Core.WebServices;
-using NLog.Config;
-using NLog.Targets;
 using NLog;
-using NLog.Targets.Wrappers;
 
 namespace Peach.Pro.Core.Runtime
 {
@@ -22,7 +19,6 @@ namespace Peach.Pro.Core.Runtime
 		static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
 		readonly JobLogger _jobLogger = new JobLogger();
-		//readonly string _logPath;
 		readonly ManualResetEvent _pausedEvt = new ManualResetEvent(true);
 		readonly RunConfiguration _config;
 		readonly string _pitLibraryPath;
@@ -32,10 +28,7 @@ namespace Peach.Pro.Core.Runtime
 
 		public JobRunner(Job job, string pitLibraryPath, string pitFile)
 		{
-			//_logPath = Path.Combine(Configuration.LogRoot, job.Id);
 			_pitLibraryPath = pitLibraryPath;
-
-			//Directory.CreateDirectory(_logPath);
 
 			_config = new RunConfiguration
 			{
