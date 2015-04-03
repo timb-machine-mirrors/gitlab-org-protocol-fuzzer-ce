@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using System.IO;
+using NLog;
 using Peach.Core;
 
 namespace Peach.Pro.Core
@@ -12,9 +13,10 @@ namespace Peach.Pro.Core
 		static Configuration()
 		{
 			var config = Utilities.GetUserConfig();
-			LogRoot = config.AppSettings.Settings.Get("LogRoot");
-			if (LogRoot == null)
-				LogRoot = Utilities.GetAppResourcePath("Logs");
+			var path = 
+				config.AppSettings.Settings.Get("LogRoot") ?? 
+				Utilities.GetAppResourcePath("Logs");
+			LogRoot = Path.GetFullPath(path);
 		}
 	}
 }

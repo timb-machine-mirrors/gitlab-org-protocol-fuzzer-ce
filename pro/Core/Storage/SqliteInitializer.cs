@@ -78,7 +78,7 @@ namespace Peach.Pro.Core.Storage
 
 					var decls = new HashSet<string>();
 
-					if (!pi.IsNullable())
+					if (!pi.IsNullable() || pi.HasAttribute<RequiredAttribute>())
 						decls.Add("NOT NULL");
 					if (pi.HasAttribute<UniqueAttribute>())
 						decls.Add("UNIQUE");

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
@@ -112,7 +113,7 @@ namespace Peach.Pro.Core.Runtime
 			if (!_guid.HasValue)
 				_guid = Guid.NewGuid();
 
-			using (var db = new JobDatabase(_guid.Value))
+			using (var db = new NodeDatabase())
 			{
 				var job = db.GetJob(_guid.Value);
 				if (job != null)
@@ -143,37 +144,63 @@ namespace Peach.Pro.Core.Runtime
 				_guid = Guid.NewGuid();
 
 			Job job;
-			using (var db = new JobDatabase(_guid.Value))
+			using (var db = new NodeDatabase())
 			{
 				job = db.GetJob(_guid.Value) ?? InitJob(pitFile);
-				job.IsTest = _test.HasValue ? _test.Value : job.IsTest;
 			}
 
-			var config = new RunConfiguration
-			{
-				pitFile = pitFile
-			};
+			var runner = new JobRunner(job, _pitLibraryPath, pitFile);
+			var engineTask = Task.Factory.StartNew(runner.Run);
+			Loop(runner, engineTask);
+		}
 
-			if (job.Seed.HasValue)
-				config.randomSeed = (uint)job.Seed.Value;
+		private void Loop(JobRunner runner, Task engineTask)
+		{
+			Console.WriteLine("OK");
 
-			if (job.IsTest)
+			while (true)
 			{
-				config.singleIteration = true;
-			}
-			else if (job.RangeStop.HasValue)
-			{
-				config.range = true;
-				config.rangeStart = (uint)job.RangeStart + (uint)job.IterationCount;
-				config.rangeStop = (uint)job.RangeStop.Value;
-			}
-			else
-			{
-				config.skipToIteration = (uint)job.RangeStart + (uint)job.IterationCount;
-			}
+				Console.Write("> ");
+				var readerTask = Task.Factory.StartNew<string>(Console.ReadLine);
+				var index = Task.WaitAny(engineTask, readerTask);
+				if (index == 0)
+				{
+					// this causes any unhandled exceptions to be thrown
+					engineTask.Wait();
+				}
 
-			var runner = new JobRunner(job, config, _pitLibraryPath);
-			runner.Run();
+				switch (readerTask.Result)
+				{
+					case "help":
+						ShowHelp();
+						break;
+					case "stop":
+						Console.WriteLine("OK");
+						runner.Stop();
+						engineTask.Wait();
+						return;
+					case "pause":
+						Console.WriteLine("OK");
+						runner.Pause();
+						break;
+					case "continue":
+						Console.WriteLine("OK");
+						runner.Continue();
+						break;
+					default:
+						Console.WriteLine("Invalid command");
+						break;
+				}
+			}
+		}
+
+		private void ShowHelp()
+		{
+			Console.WriteLine("Available commands:");
+			Console.WriteLine("    help");
+			Console.WriteLine("    stop");
+			Console.WriteLine("    pause");
+			Console.WriteLine("    continue");
 		}
 
 		protected override string UsageLine
@@ -190,30 +217,39 @@ namespace Peach.Pro.Core.Runtime
 			if (!_guid.HasValue)
 				throw new SyntaxException("The '--guid' argument is required.");
 
-			using (var db = new JobDatabase(_guid.Value))
+			Job job;
+			using (var db = new NodeDatabase())
+			{
+				job = db.GetJob(_guid.Value);
+			}
+
+			if (job == null || job.DatabasePath == null)
+				throw new Exception("Job not found");
+
+			using (var db = new JobDatabase(job.DatabasePath))
 			{
 				switch (_query.ToLower())
 				{
 					case "states":
-						Database.Dump(db.QueryStates());
+						Database.Dump(db.LoadTable<StateMetric>());
 						break;
 					case "iterations":
-						Database.Dump(db.QueryIterations());
+						Database.Dump(db.LoadTable<IterationMetric>());
 						break;
 					case "buckets":
-						Database.Dump(db.QueryBuckets());
+						Database.Dump(db.LoadTable<BucketMetric>());
 						break;
 					case "buckettimeline":
-						Database.Dump(db.QueryBucketTimeline());
+						Database.Dump(db.LoadTable<BucketTimelineMetric>());
 						break;
 					case "mutators":
-						Database.Dump(db.QueryMutators());
+						Database.Dump(db.LoadTable<MutatorMetric>());
 						break;
 					case "elements":
-						Database.Dump(db.QueryElements());
+						Database.Dump(db.LoadTable<ElementMetric>());
 						break;
 					case "datasets":
-						Database.Dump(db.QueryDatasets());
+						Database.Dump(db.LoadTable<DatasetMetric>());
 						break;
 				}
 			}

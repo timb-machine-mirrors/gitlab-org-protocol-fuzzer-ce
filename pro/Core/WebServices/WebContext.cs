@@ -8,19 +8,17 @@ namespace Peach.Pro.Core.WebServices
 	/// </summary>
 	public class WebContext
 	{
-		public WebContext()
-			: this(String.Empty)
-		{
-		}
-
-		public WebContext(string pitLibraryPath)
+		public WebContext(string pitLibraryPath, IJobMonitor jobMonitor)
 		{
 			PitLibraryPath = pitLibraryPath;
 			NodeGuid = Guid.NewGuid().ToString().ToLower();
+			JobMonitor = jobMonitor;
 		}
 
 		public string PitLibraryPath { get; private set; }
 
 		public string NodeGuid { get; private set; }
+
+		public IJobMonitor JobMonitor { get; private set; }
 	}
 }

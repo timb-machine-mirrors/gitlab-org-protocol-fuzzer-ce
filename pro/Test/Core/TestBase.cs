@@ -7,6 +7,7 @@ using NLog.Config;
 using NLog.Targets;
 using NUnit.Framework;
 using Peach.Core;
+using Peach.Pro.Core;
 using Peach.Pro.Core.Runtime;
 
 // ReSharper disable once CheckNamespace (required for NUnit SetupFixture)
@@ -23,6 +24,8 @@ namespace Peach.Pro.Test.Core
 	[SetUpFixture]
 	class TestBase
 	{
+		TempDirectory _tmpDir;
+
 		public static ushort MakePort(ushort min, ushort max)
 		{
 			var pid = Process.GetCurrentProcess().Id;
@@ -59,6 +62,15 @@ namespace Peach.Pro.Test.Core
 			}
 
 			Program.LoadPlatformAssembly();
+
+			_tmpDir = new TempDirectory();
+			Configuration.LogRoot = _tmpDir.Path;
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			_tmpDir.Dispose();
 		}
 	
 		public static MemoryStream LoadResource(string name)
@@ -73,8 +85,7 @@ namespace Peach.Pro.Test.Core
 			}
 		}
 	}
-
-
+	
 	[TestFixture]
 	[Category("Peach")]
 	class AssertTest

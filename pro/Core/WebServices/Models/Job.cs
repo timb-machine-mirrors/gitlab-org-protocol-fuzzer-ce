@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Peach.Pro.Core.Storage;
+using System.IO;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
@@ -23,89 +24,6 @@ namespace Peach.Pro.Core.WebServices.Models
 		Fuzzing,
 		Searching,
 		Reproducing,
-	}
-
-	public class JobLinks
-	{
-		/// <summary>
-		/// The URL of this job
-		/// </summary>
-		/// <example>
-		/// "/p/jobs/{id}"
-		/// </example>
-		public string JobUrl { get; set; }
-
-		/// <summary>
-		/// URLs used to control a running job.
-		/// </summary>
-		public JobCommands Commands { get; set; }
-
-		/// <summary>
-		/// URLs to associated metrics
-		/// </summary>
-		public JobMetrics Metrics { get; set; }
-
-		/// <summary>
-		/// The URL for getting test results
-		/// </summary>
-		public string TestUrl { get; set; }
-
-		/// <summary>
-		/// The URL of faults from job
-		/// </summary>
-		/// <example>
-		/// "/p/jobs/{id}/faults"
-		/// </example>
-		public string FaultsUrl { get; set; }
-
-		/// <summary>
-		/// The URL of the target this job is fuzzing
-		/// </summary>
-		/// <example>
-		/// "/p/targets/{id}"
-		/// </example>
-		public string TargetUrl { get; set; }
-
-		/// <summary>
-		/// The URL of the target configuration for this job
-		/// </summary>
-		/// <example>
-		/// "/p/targets/{target_id}/config/{config_id}"
-		/// </example>
-		public string TargetConfigUrl { get; set; }
-
-		/// <summary>
-		/// The URL that returns a list of nodes used by this job
-		/// </summary>
-		/// <example>
-		/// "/p/jobs/{id}/nodes"
-		/// </example>
-		public string NodesUrl { get; set; }
-
-		/// <summary>
-		/// The URL of the specific version of peach for this job
-		/// TODO: Include version in the URL
-		/// </summary>
-		/// <example>
-		/// "/p/peaches/{id}"
-		/// </example>
-		public string PeachUrl { get; set; }
-
-		/// <summary>
-		/// The URL of the version of final report for this job
-		/// </summary>
-		/// <example>
-		/// "/p/files/{id}"
-		/// </example>
-		public string ReportUrl { get; set; }
-
-		/// <summary>
-		/// The URL of the version of the package containing all job inputs
-		/// </summary>
-		/// <example>
-		/// "/p/files/{id}"
-		/// </example>
-		public string PackageFileUrl { get; set; }
 	}
 
 	public class JobCommands
@@ -187,7 +105,6 @@ namespace Peach.Pro.Core.WebServices.Models
 		public bool IsTest { get; set; }
 	}
 
-	[Table]
 	public class Job : JobRequest
 	{
 		[Key]
@@ -201,8 +118,123 @@ namespace Peach.Pro.Core.WebServices.Models
 			set { Id = value.ToString(); }
 		}
 
+		[JsonIgnore]
+		public string LogPath { get; set; }
+
 		[NotMapped]
-		public JobLinks Links { get; set; }
+		[JsonIgnore]
+		public string DatabasePath
+		{
+			get
+			{
+				if (LogPath == null)
+					return null;
+				return Path.Combine(LogPath, "job.db");
+			}
+		}
+
+		[NotMapped]
+		[JsonIgnore]
+		public string DebugLogPath
+		{
+			get
+			{
+				if (LogPath == null)
+					return null;
+				return Path.Combine(LogPath, "debug.log");
+			}
+		}
+
+		/// <summary>
+		/// The URL of this job
+		/// </summary>
+		/// <example>
+		/// "/p/jobs/{id}"
+		/// </example>
+		[NotMapped]
+		public string JobUrl { get; set; }
+
+		/// <summary>
+		/// URLs used to control a running job.
+		/// </summary>
+		[NotMapped]
+		public JobCommands Commands { get; set; }
+
+		/// <summary>
+		/// URLs to associated metrics
+		/// </summary>
+		[NotMapped]
+		public JobMetrics Metrics { get; set; }
+
+		/// <summary>
+		/// The URL for getting test results
+		/// </summary>
+		[NotMapped]
+		public string TestUrl { get; set; }
+
+		/// <summary>
+		/// The URL of faults from job
+		/// </summary>
+		/// <example>
+		/// "/p/jobs/{id}/faults"
+		/// </example>
+		[NotMapped]
+		public string FaultsUrl { get; set; }
+
+		/// <summary>
+		/// The URL of the target this job is fuzzing
+		/// </summary>
+		/// <example>
+		/// "/p/targets/{id}"
+		/// </example>
+		[NotMapped]
+		public string TargetUrl { get; set; }
+
+		/// <summary>
+		/// The URL of the target configuration for this job
+		/// </summary>
+		/// <example>
+		/// "/p/targets/{target_id}/config/{config_id}"
+		/// </example>
+		[NotMapped]
+		public string TargetConfigUrl { get; set; }
+
+		/// <summary>
+		/// The URL that returns a list of nodes used by this job
+		/// </summary>
+		/// <example>
+		/// "/p/jobs/{id}/nodes"
+		/// </example>
+		[NotMapped]
+		public string NodesUrl { get; set; }
+
+		/// <summary>
+		/// The URL of the specific version of peach for this job
+		/// TODO: Include version in the URL
+		/// </summary>
+		/// <example>
+		/// "/p/peaches/{id}"
+		/// </example>
+		[NotMapped]
+		public string PeachUrl { get; set; }
+
+		/// <summary>
+		/// The URL of the version of final report for this job
+		/// </summary>
+		/// <example>
+		/// "/p/files/{id}"
+		/// </example>
+		[NotMapped]
+		public string ReportUrl { get; set; }
+
+		/// <summary>
+		/// The URL of the version of the package containing all job inputs
+		/// </summary>
+		/// <example>
+		/// "/p/files/{id}"
+		/// </example>
+		[NotMapped]
+		public string PackageFileUrl { get; set; }
 
 		/// <summary>
 		/// The status of this job record
@@ -213,7 +245,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// The mode that this job is operating under
 		/// </summary>
-		[JsonConverter(typeof (CamelCaseStringEnumConverter))]
+		[JsonConverter(typeof(CamelCaseStringEnumConverter))]
 		public JobMode Mode { get; set; }
 
 		/// <summary>

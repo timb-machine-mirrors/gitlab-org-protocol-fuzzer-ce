@@ -20,16 +20,17 @@ namespace Peach.Pro.Core.Storage
 		protected abstract IEnumerable<Type> Schema { get; }
 		protected abstract IEnumerable<string> Scripts { get; }
 
-		protected Database(string path)
+		protected Database(string path, bool useWal)
 		{
 			Path = path;
 
-			var parts = new[]
+			var parts = new List<string>
 			{
 				"Data Source=\"{0}\"".Fmt(Path),
 				"Foreign Keys=True",
-				"PRAGMA journal_mode=WAL",
 			};
+			if (useWal)
+				parts.Add("PRAGMA journal_mode=WAL");
 
 			var cnnString = string.Join(";", parts);
 			Connection = new SQLiteConnection(cnnString);
@@ -61,7 +62,14 @@ namespace Peach.Pro.Core.Storage
 
 		public IEnumerable<T> LoadTable<T>()
 		{
-			var sql = "SELECT * FROM {0}".Fmt(typeof(T).Name);
+			var type = typeof(T);
+
+			var attr = type.GetCustomAttributes(typeof(TableAttribute), true)
+				.OfType<TableAttribute>()
+				.FirstOrDefault();
+	
+			var table = (attr != null) ? attr.Name : type.Name;
+			var sql = "SELECT * FROM {0}".Fmt(table);
 			return Connection.Query<T>(sql);
 		}
 

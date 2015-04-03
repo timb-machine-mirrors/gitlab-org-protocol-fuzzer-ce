@@ -1,5 +1,7 @@
 using System;
 using Nancy;
+using Peach.Pro.Core.Storage;
+using Peach.Pro.Core.WebServices.Models;
 
 namespace Peach.Pro.Core.WebServices
 {
@@ -31,6 +33,11 @@ namespace Peach.Pro.Core.WebServices
 		protected PitDatabase PitDatabase
 		{
 			get { return new PitDatabase(_context.PitLibraryPath); }
+		}
+
+		protected IJobMonitor JobMonitor
+		{
+			get { return _context.JobMonitor; }
 		}
 	}
 }

@@ -4,164 +4,12 @@ using System.Reflection;
 using Peach.Pro.Core.WebServices.Models;
 using Dapper;
 using Peach.Core;
-using System.IO;
 using System.Linq;
 
 namespace Peach.Pro.Core.Storage
 {
-	internal class JobDatabase : NodeDatabase
+	internal class JobDatabase : Database
 	{
-		#region SQL
-		const string SqlGetLastRowId = "SELECT last_insert_rowid();";
-
-		const string SqlInsertTestEvent = @"
-INSERT INTO TestEvent (
-	Status, 
-	Short, 
-	Description,
-	Resolve
-) VALUES (
-	@Status, 
-	@Short, 
-	@Description,
-	@Resolve
-);" + SqlGetLastRowId;
-
-		const string SqlUpdateTestEvent = @"
-UPDATE TestEvent
-SET
-	Status = @Status,
-	Short = @Short,
-	Description = @Description,
-	Resolve = @Resolve
-WHERE
-	Id = @Id
-;";
-
-		const string SqlUpsertMutation = @"
-INSERT OR REPLACE INTO Mutation (
-	StateId,
-	ActionId,
-	ParameterId,
-	ElementId,
-	MutatorId,
-	DatasetId,
-	IterationCount
-) VALUES (
-	@StateId,
-	@ActionId,
-	@ParameterId,
-	@ElementId,
-	@MutatorId,
-	@DatasetId,
-	COALESCE((
-		SELECT IterationCount + 1
-		FROM Mutation
-		WHERE
-			StateId = @StateId AND
-			ActionId = @ActionId AND
-			ParameterId = @ParameterId AND
-			ElementId = @ElementId AND
-			MutatorId = @MutatorId AND
-			DatasetId = @DatasetId
-	), 1)
-);";
-
-		const string SqlUpsertState = @"
-INSERT OR REPLACE INTO [State] (
-	Id, 
-	NameId, 
-	RunCount,
-	Count
-) VALUES (
-	@Id, 
-	@NameId, 
-	@RunCount,
-	@Count
-);";
-
-		const string SqlInsertFaultMetric = @"
-INSERT INTO FaultMetric (
-	Iteration,
-	MajorHash,
-	MinorHash,
-	Timestamp,
-	Hour,
-	StateId,
-	ActionId,
-	ParameterId,
-	ElementId,
-	MutatorId,
-	DatasetId
-) VALUES (
-	@Iteration,
-	@MajorHash,
-	@MinorHash,
-	@Timestamp,
-	@Hour,
-	@StateId,
-	@ActionId,
-	@ParameterId,
-	@ElementId,
-	@MutatorId,
-	@DatasetId
-);";
-
-		const string SqlInsertFaultDetail = @"
-INSERT INTO FaultDetail (
-	Reproducable,
-	Iteration,
-	TimeStamp,
-	BucketName,
-	Source,
-	Exploitability,
-	MajorHash,
-	MinorHash,
-	Title,
-	Description,
-	Seed,
-	IterationStart,
-	IterationStop
-) VALUES (
-	@Reproducable,
-	@Iteration,
-	@TimeStamp,
-	@BucketName,
-	@Source,
-	@Exploitability,
-	@MajorHash,
-	@MinorHash,
-	@Title,
-	@Description,
-	@Seed,
-	@IterationStart,
-	@IterationStop
-);" + SqlGetLastRowId;
-
-		const string SqlInsertFaultFile = @"
-INSERT INTO FaultFile (
-	FaultDetailId,
-	Name,
-	FullName,
-	Size
-) VALUES (
-	@FaultDetailId,
-	@Name,
-	@FullName,
-	@Size
-);" + SqlGetLastRowId;
-
-		const string SqlSelectFaultDetailById = @"
-SELECT * FROM FaultDetail WHERE Id = @Id;
-";
-
-		const string SqlSelectFaultFilesById = @"
-SELECT * FROM FaultFile WHERE FaultDetailId = @Id;
-";
-
-
-		#endregion
-
 		protected override IEnumerable<Type> Schema
 		{
 			get { return StaticSchema; }
@@ -171,9 +19,6 @@ SELECT * FROM FaultFile WHERE FaultDetailId = @Id;
 		{
 			// live job status
 			typeof(Job),
-
-			// pit tester
-			typeof(TestEvent),
 
 			// fault data
 			typeof(FaultDetail),
@@ -199,39 +44,9 @@ SELECT * FROM FaultFile WHERE FaultDetailId = @Id;
 			)
 		};
 
-		public JobDatabase(Guid guid)
-			: base(GetDatabasePath(guid))
+		public JobDatabase(string path)
+			: base(path, true)
 		{
-		}
-
-		// used by unit tests
-		internal JobDatabase(string path)
-			: base(path)
-		{
-		}
-
-		public static string GetStorageDirectory(Guid guid)
-		{
-			var logPath = System.IO.Path.Combine(Configuration.LogRoot, guid.ToString());
-			if (!Directory.Exists(logPath))
-				Directory.CreateDirectory(logPath);
-
-			return logPath;
-		}
-
-		static string GetDatabasePath(Guid guid)
-		{
-			return System.IO.Path.Combine(GetStorageDirectory(guid), "job.db");
-		}
-
-		public void InsertTestEvent(TestEvent testEvent)
-		{
-			testEvent.Id = Connection.ExecuteScalar<long>(SqlInsertTestEvent, testEvent);
-		}
-
-		public void UpdateTestEvents(IEnumerable<TestEvent> testEvent)
-		{
-			Connection.Execute(SqlUpdateTestEvent, testEvent);
 		}
 
 		public void InsertNames(IEnumerable<NamedItem> items)
@@ -248,35 +63,35 @@ SELECT * FROM FaultFile WHERE FaultDetailId = @Id;
 
 		public void UpsertStates(IEnumerable<State> states)
 		{
-			Connection.Execute(SqlUpsertState, states);
+			Connection.Execute(Sql.UpsertState, states);
 		}
 
 		public void UpsertMutations(IEnumerable<Mutation> mutations)
 		{
-			Connection.Execute(SqlUpsertMutation, mutations);
+			Connection.Execute(Sql.UpsertMutation, mutations);
 		}
 
 		public void InsertFaultMetrics(IEnumerable<FaultMetric> faults)
 		{
-			Connection.Execute(SqlInsertFaultMetric, faults);
+			Connection.Execute(Sql.InsertFaultMetric, faults);
 		}
 
 		public void InsertFault(FaultDetail fault)
 		{
-			fault.Id = Connection.ExecuteScalar<long>(SqlInsertFaultDetail, fault);
+			fault.Id = Connection.ExecuteScalar<long>(Sql.InsertFaultDetail, fault);
 
 			foreach (var file in fault.Files)
 			{
 				file.FaultDetailId = fault.Id;
 			}
-			Connection.Execute(SqlInsertFaultFile, fault.Files);
+			Connection.Execute(Sql.InsertFaultFile, fault.Files);
 		}
 
 		public FaultDetail GetFaultById(long id, bool loadFiles = true)
 		{
 			if (loadFiles)
 			{
-				const string sql = SqlSelectFaultDetailById + SqlSelectFaultFilesById;
+				const string sql = Sql.SelectFaultDetailById + Sql.SelectFaultFilesById;
 				using (var multi = Connection.QueryMultiple(sql, new { Id = id }))
 				{
 					var fault = multi.Read<FaultDetail>().SingleOrDefault();
@@ -286,7 +101,7 @@ SELECT * FROM FaultFile WHERE FaultDetailId = @Id;
 					return fault;
 				}
 			}
-			return Connection.Query<FaultDetail>(SqlSelectFaultDetailById, new { Id = id })
+			return Connection.Query<FaultDetail>(Sql.SelectFaultDetailById, new { Id = id })
 				.SingleOrDefault();
 		}
 
@@ -297,44 +112,20 @@ SELECT * FROM FaultFile WHERE FaultDetailId = @Id;
 				.SingleOrDefault();
 		}
 
-		public IEnumerable<StateMetric> QueryStates()
+		public Job GetJob(Guid id)
 		{
-			return Connection.Query<StateMetric>("SELECT * FROM ViewStates");
+			return Connection.Query<Job>(Sql.SelectJob, new { Id = id.ToString() })
+				.SingleOrDefault();
+		}
+	
+		public void InsertJob(Job job)
+		{
+			Connection.Execute(Sql.InsertJob, job);
 		}
 
-		public IEnumerable<IterationMetric> QueryIterations()
+		public void UpdateJob(Job job)
 		{
-			return Connection.Query<IterationMetric>("SELECT * FROM ViewIterations");
-		}
-
-		public IEnumerable<BucketMetric> QueryBuckets()
-		{
-			return Connection.Query<BucketMetric>("SELECT * FROM ViewBuckets");
-		}
-
-		public IEnumerable<BucketTimelineMetric> QueryBucketTimeline()
-		{
-			return Connection.Query<BucketTimelineMetric>("SELECT * FROM ViewBucketTimeline");
-		}
-
-		public IEnumerable<MutatorMetric> QueryMutators()
-		{
-			return Connection.Query<MutatorMetric>("SELECT * FROM ViewMutators");
-		}
-
-		public IEnumerable<ElementMetric> QueryElements()
-		{
-			return Connection.Query<ElementMetric>("SELECT * FROM ViewElements");
-		}
-
-		public IEnumerable<DatasetMetric> QueryDatasets()
-		{
-			return Connection.Query<DatasetMetric>("SELECT * FROM ViewDatasets");
-		}
-
-		public IEnumerable<FaultTimelineMetric> QueryFaultTimeline()
-		{
-			return Connection.Query<FaultTimelineMetric>("SELECT * FROM ViewFaultTimeline");
+			Connection.Execute(Sql.UpdateJob, job);
 		}
 	}
 }

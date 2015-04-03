@@ -6,7 +6,11 @@ namespace Peach.Pro.Core.Storage
 	class NotMappedAttribute : Attribute { }
 
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
-	class Table : Attribute { }
+	class TableAttribute : Attribute
+	{
+		public string Name { get; set; }
+		public TableAttribute(string name) { Name = name; }
+	}
 
 	[AttributeUsage(AttributeTargets.Property)]
 	class KeyAttribute : Attribute { }

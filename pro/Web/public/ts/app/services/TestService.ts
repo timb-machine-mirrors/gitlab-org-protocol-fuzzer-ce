@@ -63,7 +63,7 @@ module Peach {
 			};
 			var promise = this.$http.post(C.Api.Jobs, request);
 			promise.success((job: IJob) => {
-				this.startTestPoller(job.links.testUrl);
+				this.startTestPoller(job.testUrl);
 			});
 			promise.catch(reason => {
 				this.setFailure(reason);
