@@ -25,7 +25,7 @@ The Android monitor watches the message logs and the device, and can generate fa
 
 After detecting a fault, this monitor collects data from the device log files and crash dumps.
 
-Additionally, the monistor logs exceptions, and updates fault bucket information. For bucketing, 
+Additionally, the monitor logs exceptions, and updates fault bucket information. For bucketing, 
 Peach uses the text from the fault to determine the major bucket level. The minor bucket level 
 is not used. The risk evaluation looks for error, fatal error, or unknown.  
 
