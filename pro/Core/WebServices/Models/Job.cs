@@ -102,7 +102,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// Determines whether the job is a test run or an actual fuzzing session.
 		/// </summary>
-		public bool IsTest { get; set; }
+		public bool IsControlIteration { get; set; }
 	}
 
 	public class Job : JobRequest
@@ -177,7 +177,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// The URL for getting test results
 		/// </summary>
 		[NotMapped]
-		public string TestUrl { get; set; }
+		public string FirstNodeUrl { get; set; }
 
 		/// <summary>
 		/// The URL of faults from job

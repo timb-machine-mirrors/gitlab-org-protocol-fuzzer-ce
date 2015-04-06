@@ -95,7 +95,7 @@ module Peach {
 			var promise = this.$http.get(C.Api.Jobs);
 			promise.success((jobs: IJob[]) => {
 				// ignore test jobs for now
-				jobs = _.where(jobs, { isTest: false });
+				jobs = _.where(jobs, { isControlIteration: false });
 
 				var hasPit = false;
 				if (jobs.length > 0) {

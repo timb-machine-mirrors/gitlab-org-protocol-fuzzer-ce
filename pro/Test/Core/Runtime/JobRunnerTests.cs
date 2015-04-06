@@ -186,7 +186,7 @@ namespace Peach.Pro.Test.Core.Runtime
 		{
 			var jobRequest = new JobRequest
 			{
-				IsTest = true,
+				IsControlIteration = true,
 			};
 
 			var tuple = StartJob(jobRequest);
@@ -223,7 +223,7 @@ namespace Peach.Pro.Test.Core.Runtime
 
 				var jobRequest = new JobRequest
 				{
-					IsTest = true,
+					IsControlIteration = true,
 				};
 
 				var id = Guid.NewGuid();

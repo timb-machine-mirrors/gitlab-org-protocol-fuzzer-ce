@@ -28,7 +28,7 @@ INSERT INTO [Job] (
 	FaultCount,
 	RangeStart,
 	RangeStop,
-	IsTest,
+	IsControlIteration,
 	PitUrl,
 	LogPath
 ) VALUES (
@@ -48,7 +48,7 @@ INSERT INTO [Job] (
 	@FaultCount,
 	@RangeStart,
 	@RangeStop,
-	@IsTest,
+	@IsControlIteration,
 	@PitUrl,
 	@LogPath
 );";
