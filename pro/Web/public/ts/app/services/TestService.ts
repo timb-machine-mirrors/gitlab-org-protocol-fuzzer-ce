@@ -59,11 +59,11 @@ module Peach {
 
 			var request: IJobRequest = {
 				pitUrl: this.pitService.Pit.pitUrl,
-				isTest: true
+				isControlIteration: true
 			};
 			var promise = this.$http.post(C.Api.Jobs, request);
 			promise.success((job: IJob) => {
-				this.startTestPoller(job.testUrl);
+				this.startTestPoller(job.firstNodeUrl);
 			});
 			promise.catch(reason => {
 				this.setFailure(reason);

@@ -131,7 +131,7 @@ namespace Peach.Pro.Core.Runtime
 					RangeStart = _start.HasValue ? _start.Value : 0,
 					RangeStop = _stop,
 					Seed = _seed,
-					IsTest = _test.HasValue && _test.Value,
+					IsControlIteration = _test.HasValue && _test.Value,
 				};
 				db.InsertJob(job);
 				return job;

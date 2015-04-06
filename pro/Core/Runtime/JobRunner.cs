@@ -40,7 +40,7 @@ namespace Peach.Pro.Core.Runtime
 			if (job.Seed.HasValue)
 				_config.randomSeed = (uint)job.Seed.Value;
 
-			if (job.IsTest)
+			if (job.IsControlIteration)
 			{
 				_config.singleIteration = true;
 			}
@@ -68,7 +68,7 @@ namespace Peach.Pro.Core.Runtime
 
 				// select only params that we need to start a job
 				PitUrl = jobRequest.PitUrl,
-				IsTest = jobRequest.IsTest,
+				IsControlIteration = jobRequest.IsControlIteration,
 				Seed = jobRequest.Seed,
 				RangeStart = jobRequest.RangeStart,
 				RangeStop = jobRequest.RangeStop,

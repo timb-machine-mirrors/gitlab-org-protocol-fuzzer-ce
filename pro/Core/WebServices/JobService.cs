@@ -24,6 +24,7 @@ namespace Peach.Pro.Core.WebServices
 			Delete["/{id}"] = _ => DeleteJob(_.id);
 
 			Get["/{id}/nodes"] = _ => GetNodes(_.id);
+			Get["/{id}/nodes/first"] = _ => GetFirstNode(_.id);
 
 			Get["/{id}/faults"] = _ => GetFaults(_.id);
 			Get["/{id}/faults/{fid}"] = _ => GetFault(_.id, _.fid);
@@ -37,8 +38,6 @@ namespace Peach.Pro.Core.WebServices
 			Get["/{id}/pause"] = _ => PauseJob(_.id);
 			Get["/{id}/stop"] = _ => StopJob(_.id);
 			Get["/{id}/kill"] = _ => KillJob(_.id);
-
-			Get["/{id}/result"] = _ => GetTestResult(_.id);
 
 			// metrics
 			Get["/{id}/metrics/faultTimeline"] = _ => Query<FaultTimelineMetric>(_.id);
@@ -137,6 +136,31 @@ namespace Peach.Pro.Core.WebServices
 			}));
 		}
 
+		Response GetFirstNode(Guid id)
+		{
+			using (var db = new NodeDatabase())
+			{
+				var job = db.GetJob(id);
+				if (job == null)
+					return HttpStatusCode.NotFound;
+
+				var events = db.GetTestEventsByJob(id).ToList();
+				var isActive = events.Any(x => x.Status == TestStatus.Active);
+				var isFail = events.Any(x => x.Status == TestStatus.Fail);
+
+				var result = new TestResult
+				{
+					Status = isActive
+						? TestStatus.Active
+						: isFail ? TestStatus.Fail : TestStatus.Pass,
+					Events = events,
+					Log = TryReadLog(job.AltDebugLogPath) ?? TryReadLog(job.DebugLogPath),
+				};
+
+				return Response.AsJson(result);
+			}
+		}
+
 		Response GetJobs()
 		{
 			using (var db = new NodeDatabase())
@@ -195,31 +219,6 @@ namespace Peach.Pro.Core.WebServices
 				return HttpStatusCode.NotFound;
 
 			return Response.AsJson(LoadJob(job));
-		}
-
-		Response GetTestResult(Guid id)
-		{
-			using (var db = new NodeDatabase())
-			{
-				var job = db.GetJob(id);
-				if (job == null)
-					return HttpStatusCode.NotFound;
-
-				var events = db.GetTestEventsByJob(id).ToList();
-				var isActive = events.Any(x => x.Status == TestStatus.Active);
-				var isFail = events.Any(x => x.Status == TestStatus.Fail);
-
-				var result = new TestResult
-				{
-					Status = isActive
-						? TestStatus.Active
-						: isFail ? TestStatus.Fail : TestStatus.Pass,
-					Events = events,
-					Log = TryReadLog(job.AltDebugLogPath) ?? TryReadLog(job.DebugLogPath),
-				};
-
-				return Response.AsJson(result);
-			}
 		}
 
 		Response GetFaults(Guid id)
@@ -339,11 +338,14 @@ namespace Peach.Pro.Core.WebServices
 			job.JobUrl = MakeUrl(id);
 			job.FaultsUrl = MakeUrl(id, "faults");
 			job.NodesUrl = MakeUrl(id, "nodes");
+			job.FirstNodeUrl = MakeUrl(id, "nodes", "first");
+
 			//TargetUrl = "",
 			//TargetConfigUrl = "",
 			//PeachUrl = "",
 			//ReportUrl = "",
 			//PackageFileUrl = "",
+
 			job.Commands = new JobCommands
 			{
 				StopUrl = MakeUrl(id, "stop"),
@@ -351,6 +353,7 @@ namespace Peach.Pro.Core.WebServices
 				PauseUrl = MakeUrl(id, "pause"),
 				KillUrl = MakeUrl(id, "kill"),
 			};
+
 			job.Metrics = new JobMetrics
 			{
 				BucketTimeline = MakeUrl(id, "metrics", "bucketTimeline"),
@@ -362,9 +365,6 @@ namespace Peach.Pro.Core.WebServices
 				Buckets = MakeUrl(id, "metrics", "buckets"),
 				Iterations = MakeUrl(id, "metrics", "iterations"),
 			};
-
-			if (job.IsTest)
-				job.TestUrl = MakeUrl(id, "result");
 
 			return job;
 		}
