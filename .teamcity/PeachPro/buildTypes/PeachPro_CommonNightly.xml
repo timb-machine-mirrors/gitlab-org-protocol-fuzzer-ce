@@ -7,7 +7,9 @@
     </options>
     <parameters />
     <build-runners />
-    <vcs-settings />
+    <vcs-settings>
+      <vcs-entry-ref root-id="PeachPro_Dejavu" />
+    </vcs-settings>
     <requirements />
     <build-triggers />
     <cleanup />
