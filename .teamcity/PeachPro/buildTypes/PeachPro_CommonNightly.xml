@@ -4,6 +4,7 @@
   <settings>
     <options>
       <option name="buildNumberPattern" value="%build.vcs.number%" />
+      <option name="checkoutMode" value="ON_AGENT" />
     </options>
     <parameters />
     <build-runners />
