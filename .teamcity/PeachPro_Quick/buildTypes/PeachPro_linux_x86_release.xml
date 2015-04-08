@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<build-type xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" uuid="0b19e32a-7c02-4472-88c4-6c49c89e41dd" xsi:noNamespaceSchemaLocation="http://www.jetbrains.com/teamcity/schemas/9.0/project-config.xsd">
+  <name>linux_x86_release</name>
+  <description />
+  <settings ref="PeachPro_Common">
+    <parameters>
+      <param name="PlatformTest" value="Peach.Pro.Test.OS.Linux.dll" />
+      <param name="waf.ext" value="" />
+      <param name="waf.variant" value="linux_x86_release" />
+    </parameters>
+    <build-runners order="RUNNER_4, RUNNER_5, RUNNER_6, RUNNER_3" />
+    <vcs-settings />
+    <requirements>
+      <contains name="teamcity.agent.jvm.os.name" value="Linux" />
+      <equals name="teamcity.agent.jvm.os.arch" value="i386" />
+    </requirements>
+    <build-triggers />
+    <cleanup />
+  </settings>
+</build-type>
+
