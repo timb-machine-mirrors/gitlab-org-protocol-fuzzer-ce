@@ -11,7 +11,7 @@
       <runner id="RUNNER_1" name="configure" type="simpleRunner">
         <parameters>
           <param name="command.executable" value="waf%waf.ext%" />
-          <param name="command.parameters" value="configure --strict" />
+          <param name="command.parameters" value="configure --strict --verbose" />
           <param name="teamcity.step.mode" value="default" />
         </parameters>
       </runner>
