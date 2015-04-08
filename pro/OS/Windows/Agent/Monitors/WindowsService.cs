@@ -126,7 +126,11 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 							? "The windows service '{0}' stopped early.".Fmt(Service)
 							: "The windows service '{0}' on machine '{1}' stopped early.".Fmt(Service, MachineName),
 						Data = new Dictionary<string, Stream>(),
-						Fault = new MonitorData.Info()
+						Fault = new MonitorData.Info
+						{
+							MajorHash = Hash(_sc.MachineName + "\\\\" + _sc.ServiceName),
+							MinorHash = Hash("ExitedEarly")
+						}
 					};
 				}
 			}

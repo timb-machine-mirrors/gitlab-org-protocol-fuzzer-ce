@@ -106,7 +106,7 @@ namespace Peach.Core.Test
 				process.Start();
 				process.BeginOutputReadLine();
 
-				if (!startEvent.WaitOne(5000))
+				if (!startEvent.WaitOne(TimeSpan.FromSeconds(10)))
 				{
 					Assert.Fail(string.Join("\n", output.ToArray()));
 				}

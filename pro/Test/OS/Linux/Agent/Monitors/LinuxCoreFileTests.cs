@@ -13,7 +13,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		[Test]
 		public void TestTODO()
 		{
-			Assert.Fail();
+			Assert.Ignore("Needs to be implemented");
 		}
 	}
 }

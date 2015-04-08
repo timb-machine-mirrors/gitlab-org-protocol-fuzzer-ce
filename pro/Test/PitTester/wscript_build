@@ -14,7 +14,7 @@ deps = [
 ]
 
 bld(
-	features = 'cs',
+	features = 'cs test',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
 	name = 'PitTester.exe',
