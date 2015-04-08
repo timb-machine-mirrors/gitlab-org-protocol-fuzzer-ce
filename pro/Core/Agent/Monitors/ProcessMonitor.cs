@@ -246,7 +246,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			return _process != null && !_process.HasExited;
 		}
 
-		MonitorData MakeFault(string majorHash, string title)
+		MonitorData MakeFault(string reason, string title)
 		{
 			return new MonitorData
 			{
@@ -254,9 +254,8 @@ namespace Peach.Pro.Core.Agent.Monitors
 				Data = new Dictionary<string, Stream>(),
 				Fault = new MonitorData.Info
 				{
-					MajorHash = majorHash,
-					MinorHash = null,
-					Risk = null,
+					MajorHash = Hash(Class + Executable),
+					MinorHash = Hash(reason),
 				}
 			};
 		}

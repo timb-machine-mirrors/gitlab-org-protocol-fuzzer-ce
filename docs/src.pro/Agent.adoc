@@ -19,34 +19,40 @@ The following monitors/processes require these heightened privileges: PageHeap, 
 
 === Agent Channels
 
-Local::
+LocalAgent (local)::
 	The agent is hosted in the current Peach process. This is the default channel.
 
-TCP Remoting::
-	The Peach agent communicates using .NET TCP Remoting protocol. The agent must be written using the Microsoft.NET framework. Peach can run as a TCP remoting agent using the +-a tcp+ argument.
+TCP REMOTING (tcp):: 
+	The external Peach agent communicates using REST api calls over TCP. Peach can run as a TCP remoting agent using the +-a tcp+ argument.
 
-REST JSON::
-	Agent protocol using REST style calls over HTTP. This channel is best suited for custom Peach agents. Example agents in C, C++, and Python are included in the Peach SDK.
- 
+REST JSON (http)::
+	The agent protocol uses REST style calls over HTTP. This channel is best suited for custom Peach agents. For more information, see the _Peach Professional Developer Guide_.
+
+
 ==== Local Agent
 
-The peach runtime supports a local agent that runs in process.  LocalAgent is the default agent unless another agent type is specified.
+The peach runtime supports a local agent that runs in process. LocalAgent is the default agent unless another agent type is specified.
+
+ifndef::peachug[]
 
 .Configuring a local agent
 [source,xml]
 ----
-<Agent name="LocalAgent">
+<Agent name="local">
    <!-- Monitors -->
 </Agent>
 ----
+endif::peachug[]
 
-==== TCP Remoting Agent
+==== Legacy (formerly TCP Remoting Agent)
 
 This agent lives in a separate process that can be located on remote machines.  Communication is performed over TCP Remoting, a form of RPC supported natively by the runtime.
 
 To use a remote agent, the agent process must be running before launching Peach.
 
 TIP: The default port for remote agents is 9001.
+
+ifndef::peachug[]
 
 .Configuring a remote agent
 [source,xml]
@@ -66,33 +72,6 @@ c:\peach3> peach.exe -a tcp
 [*] Starting agent server
  -- Press ENTER to quit agent --
 
-----
-
-===== Multiple Interfaces on Agent Machine
-
-There is a bug in the Microsoft.NET remoting framework that causes the default IP address of the network adapter to be used, even when communication occurs over a secondary interface.
-
-When running a Peach Agent on a machine that has multiple network interfaces, the interface can be explicitly bound to the appropriate network adapter IP address using a configuration setting. This configuration setting is only required for the Peach Agent process.
-
-The following XML can be added to the +Peach.exe.config+ file inside of the _configuration_ element:
-
-[source,xml]
-----
-<appSettings>
-    <add key="AgentBindIp" value="INTERFACE_IP"/>
-</appSettings>
-----
-
-.Peach.exe.config Example
-[source,xml]
-----
-<?xml version="1.0" encoding="utf-8"?>
-<configuration>
-  <appSettings>
-    <!-- Force agent to use correct interface address -->
-    <add key="AgentBindIp" value="192.168.64.135"/>
-  </appSettings>
-</configuration>
 ----
 
 ==== REST JSON Agent
@@ -385,3 +364,4 @@ GET /Agent/AgentDisconnect
 << { "Status":"true" }
 
 ----
+endif::peachug[]

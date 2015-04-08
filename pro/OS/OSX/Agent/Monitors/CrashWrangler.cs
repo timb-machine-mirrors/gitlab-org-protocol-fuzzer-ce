@@ -173,13 +173,15 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			{
 				fault.Title = "Process exited early.";
 				fault.Fault.Description = "{0} {1} {2}".Fmt(fault.Title, Executable, Arguments);
-				fault.Fault.MajorHash = "ExitedEarly";
+				fault.Fault.MajorHash = Hash(Class + Executable);
+				fault.Fault.MinorHash = Hash("ExitedEarly");
 			}
 			else
 			{
 				fault.Title = "Process did not exit in " + WaitForExitTimeout + "ms.";
 				fault.Fault.Description = "{0} {1} {2}".Fmt(fault.Title, Executable, Arguments);
-				fault.Fault.MajorHash = "FailedToExit";
+				fault.Fault.MajorHash = Hash(Class + Executable);
+				fault.Fault.MinorHash = Hash("FailedToExit");
 			}
 			return fault;
 		}

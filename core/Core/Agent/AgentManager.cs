@@ -225,7 +225,7 @@ namespace Peach.Core.Agent
 			if (data.Fault != null)
 			{
 				ret.type = FaultType.Fault;
-				ret.description = data.Fault.Description;
+				ret.description = data.Fault.Description ?? data.Title;
 				ret.majorHash = data.Fault.MajorHash;
 				ret.minorHash = data.Fault.MinorHash;
 				ret.exploitability = data.Fault.Risk;

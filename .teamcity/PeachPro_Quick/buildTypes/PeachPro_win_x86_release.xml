@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<build-type xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" uuid="586caa23-f532-40c9-92a7-fd8aeb3791ce" xsi:noNamespaceSchemaLocation="http://www.jetbrains.com/teamcity/schemas/9.0/project-config.xsd">
+  <name>win_x86_release</name>
+  <description />
+  <settings ref="PeachPro_Common">
+    <disabled-settings>
+      <setting-ref ref="JetBrains.AssemblyInfo" />
+    </disabled-settings>
+    <parameters>
+      <param name="PlatformTest" value="Peach.Pro.Test.OS.Windows.dll" />
+      <param name="waf.ext" value=".bat" />
+      <param name="waf.variant" value="win_x86_release" />
+    </parameters>
+    <build-runners order="RUNNER_4, RUNNER_5, RUNNER_6, RUNNER_3, RUNNER_7" />
+    <vcs-settings />
+    <requirements>
+      <contains name="teamcity.agent.jvm.os.name" value="Windows" />
+      <not-exists name="DotNetFramework4.0_x64" />
+    </requirements>
+    <build-triggers />
+    <cleanup />
+  </settings>
+</build-type>
+

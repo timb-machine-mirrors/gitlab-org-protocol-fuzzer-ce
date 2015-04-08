@@ -2,7 +2,11 @@
 [[Defaults]]
 == Defaults
 
-The _Defaults_ element is used to change data element attribute defaults. 
+The _Defaults_ element is used to change data element attribute default values. Items specified 
+in the _Defaults_ section must be optional element attributes. 
+
+NOTE: Required attributes do not belong in the _Defaults_ section. Instead, place required 
+attribute values in the definition of each element. 
 
 // TODO List all the attributes we can change
 
