@@ -724,7 +724,8 @@ quit
 				Fault = new MonitorData.Info
 				{
 					Description = "{0} {1} {2}".Fmt(reason, Executable, Arguments),
-					MajorHash = type,
+					MajorHash = Hash(Class + Executable),
+					MinorHash = Hash(type),
 				}
 			};
 

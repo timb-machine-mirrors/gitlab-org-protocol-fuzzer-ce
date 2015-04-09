@@ -8,4 +8,15 @@ case "$*" in
     ;;
 esac
 
-mono --gc=sgen ${DEBUG} ${DIRNAME}/Peach.exe $@
+MONO="$(which mono)"
+
+if [ -z $MONO ];
+then
+	echo "Error: mono could not be found."
+	echo ""
+	echo "Ensure mono is properly installed and try again."
+	echo ""
+	exit 1
+fi
+
+${MONO} --gc=sgen ${DEBUG} ${DIRNAME}/Peach.exe $@
