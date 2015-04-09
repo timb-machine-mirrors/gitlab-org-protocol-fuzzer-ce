@@ -61,7 +61,7 @@ output/%waf.variant%/bin/Godel.Tests.dll]]></param>
           <param name="teamcity.step.mode" value="default" />
         </parameters>
       </runner>
-      <runner id="RUNNER_17" name="" type="simpleRunner">
+      <runner id="RUNNER_17" name="pkg" type="simpleRunner">
         <parameters>
           <param name="command.executable" value="waf%waf.ext%" />
           <param name="command.parameters" value="pkg --variant=%waf.variant%" />
