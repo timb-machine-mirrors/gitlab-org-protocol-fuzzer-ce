@@ -3,7 +3,7 @@
   <name>common</name>
   <settings>
     <options>
-      <option name="buildNumberPattern" value="%MajorVersion%.%MinorVersion%.%dep.PeachPro_Quick_Root.system.build.number%" />
+      <option name="buildNumberPattern" value="%MajorVersion%.%MinorVersion%.%dep.PeachPro_Root.system.build.number%" />
       <option name="checkoutMode" value="ON_AGENT" />
     </options>
     <parameters>
@@ -81,7 +81,7 @@ output/%waf.variant%/bin/Godel.Tests.dll]]></param>
       </build-trigger>
     </build-triggers>
     <dependencies>
-      <depend-on sourceBuildTypeId="PeachPro_Quick_Root">
+      <depend-on sourceBuildTypeId="PeachPro_Root">
         <options>
           <option name="run-build-if-dependency-failed" value="RUN_ADD_PROBLEM" />
           <option name="take-started-build-with-same-revisions" value="true" />
