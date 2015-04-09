@@ -3,6 +3,9 @@
   <name>Integration</name>
   <description />
   <settings>
+    <options>
+      <option name="buildNumberPattern" value="%PatchVersion%" />
+    </options>
     <parameters />
     <build-runners />
     <vcs-settings />
