@@ -7,7 +7,6 @@
       <option name="checkoutMode" value="ON_AGENT" />
     </options>
     <parameters>
-      <param name="MajorVersion" value="3" />
       <param name="MinorVersion" value="4" />
       <param name="PatchVersion" value="0" />
     </parameters>
