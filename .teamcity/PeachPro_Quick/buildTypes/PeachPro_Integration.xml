@@ -20,6 +20,7 @@
     <dependencies>
       <depend-on sourceBuildTypeId="PeachPro_Doc">
         <options>
+          <option name="run-build-if-dependency-failed" value="RUN_ADD_PROBLEM" />
           <option name="take-started-build-with-same-revisions" value="true" />
           <option name="take-successful-builds-only" value="true" />
         </options>
@@ -48,36 +49,50 @@
       <depend-on sourceBuildTypeId="PeachPro_linux_x86_release">
         <options>
           <option name="run-build-if-dependency-failed" value="RUN_ADD_PROBLEM" />
+          <option name="take-started-build-with-same-revisions" value="true" />
+          <option name="take-successful-builds-only" value="true" />
         </options>
       </depend-on>
       <depend-on sourceBuildTypeId="PeachPro_osx_debug">
         <options>
           <option name="run-build-if-dependency-failed" value="RUN_ADD_PROBLEM" />
+          <option name="take-started-build-with-same-revisions" value="true" />
+          <option name="take-successful-builds-only" value="true" />
         </options>
       </depend-on>
       <depend-on sourceBuildTypeId="PeachPro_osx_release">
         <options>
           <option name="run-build-if-dependency-failed" value="RUN_ADD_PROBLEM" />
+          <option name="take-started-build-with-same-revisions" value="true" />
+          <option name="take-successful-builds-only" value="true" />
         </options>
       </depend-on>
       <depend-on sourceBuildTypeId="PeachPro_win_x64_debug">
         <options>
           <option name="run-build-if-dependency-failed" value="RUN_ADD_PROBLEM" />
+          <option name="take-started-build-with-same-revisions" value="true" />
+          <option name="take-successful-builds-only" value="true" />
         </options>
       </depend-on>
       <depend-on sourceBuildTypeId="PeachPro_win_x64_release">
         <options>
           <option name="run-build-if-dependency-failed" value="RUN_ADD_PROBLEM" />
+          <option name="take-started-build-with-same-revisions" value="true" />
+          <option name="take-successful-builds-only" value="true" />
         </options>
       </depend-on>
       <depend-on sourceBuildTypeId="PeachPro_win_x86_debug">
         <options>
           <option name="run-build-if-dependency-failed" value="RUN_ADD_PROBLEM" />
+          <option name="take-started-build-with-same-revisions" value="true" />
+          <option name="take-successful-builds-only" value="true" />
         </options>
       </depend-on>
       <depend-on sourceBuildTypeId="PeachPro_win_x86_release">
         <options>
           <option name="run-build-if-dependency-failed" value="RUN_ADD_PROBLEM" />
+          <option name="take-started-build-with-same-revisions" value="true" />
+          <option name="take-successful-builds-only" value="true" />
         </options>
       </depend-on>
     </dependencies>
