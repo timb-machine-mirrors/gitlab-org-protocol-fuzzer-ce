@@ -11,7 +11,7 @@
       <param name="waf.ext" value="" />
       <param name="waf.variant" value="doc" />
     </parameters>
-    <build-runners order="RUNNER_4, RUNNER_5, RUNNER_6, RUNNER_3" />
+    <build-runners order="RUNNER_4, RUNNER_5, RUNNER_6, RUNNER_3, RUNNER_17" />
     <vcs-settings />
     <requirements>
       <contains name="teamcity.agent.jvm.os.name" value="Linux" />
