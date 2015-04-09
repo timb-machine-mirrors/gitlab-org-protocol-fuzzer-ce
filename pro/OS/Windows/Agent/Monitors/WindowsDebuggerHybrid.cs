@@ -466,16 +466,18 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 		protected MonitorData GetGeneralFault(string type, string reason)
 		{
-			var desc = reason + ": ";
+			var name = string.Empty;
 
 			if (_processName != null)
-				desc += _processName;
+				name = _processName;
 			else if (_commandLine != null)
-				desc += _commandLine;
+				name = _commandLine;
 			else if (_kernelConnectionString != null)
-				desc += _kernelConnectionString;
+				name = _kernelConnectionString;
 			else if (_service != null)
-				desc += _service;
+				name = _service;
+
+			var desc = reason + ": " + name;
 
 			var fault = new MonitorData
 			{
@@ -485,7 +487,8 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				Fault = new MonitorData.Info
 				{
 					Description = desc,
-					MajorHash = type,
+					MajorHash = Hash(Class + name),
+					MinorHash = Hash(type),
 				}
 			};
 

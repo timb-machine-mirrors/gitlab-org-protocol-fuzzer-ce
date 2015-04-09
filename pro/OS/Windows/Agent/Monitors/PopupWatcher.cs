@@ -202,9 +202,16 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 					var eol = Environment.NewLine;
 					var desc = "Window Titles:{0}{1}".Fmt(eol, string.Join(eol, _closedWindows));
+					var first = _closedWindows.First();
+					var match = WindowNames.First(n => first.IndexOf(n, StringComparison.Ordinal) > -1);
 
 					if (Fault)
-						_data.Fault = new MonitorData.Info { Description = desc };
+						_data.Fault = new MonitorData.Info
+						{
+							Description = desc,
+							MajorHash = Hash(Class + match),
+							MinorHash = Hash(first),
+						};
 					else
 						_data.Data.Add("ClosedWindows.txt", new MemoryStream(Encoding.UTF8.GetBytes(desc)));
 

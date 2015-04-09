@@ -2,6 +2,7 @@ using System;
 using System.IO;
 
 using NUnit.Framework;
+using Peach.Core.Agent;
 
 namespace Peach.Core.Test
 {
@@ -182,6 +183,14 @@ namespace Peach.Core.Test
 			});
 
 			Assert.That(str, Is.EqualTo(expected));
+		}
+
+		[Test]
+		public void TestHash()
+		{
+			Assert.AreEqual("D41D8CD9", Monitor2.Hash(""));
+			Assert.AreEqual("ACBD18DB", Monitor2.Hash("foo"));
+			Assert.AreEqual("6DF23DC0", Monitor2.Hash("foobarbaz"));
 		}
 	}
 }
