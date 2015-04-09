@@ -26,13 +26,18 @@
 
 // $Id$
 
+using System;
+using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
 using Peach.Core.Dom;
+using Peach.Core.IO;
+using Peach.Core.Publishers;
 using Peach.Core.Test;
+using Logger = NLog.Logger;
 
 namespace Peach.Pro.Test.Core.CrackingTests
 {
@@ -582,6 +587,106 @@ namespace Peach.Pro.Test.Core.CrackingTests
 
 			Assert.AreEqual("Error, unable to resolve field \"Root.data.str2\" against \"DM\".", ex.Message);
 		}
+
+		class DeferredPublisher : StreamPublisher
+		{
+			static readonly Logger ClassLogger = NLog.LogManager.GetCurrentClassLogger();
+
+			public DeferredPublisher(string payload)
+				: base(new Dictionary<string, Variant>())
+			{
+				var bytes = Encoding.ASCII.GetBytes(payload);
+
+				stream = new MemoryStream();
+				stream.Write(bytes, 0, bytes.Length);
+				stream.Position = 0;
+			}
+
+			protected override Logger Logger
+			{
+				get { return ClassLogger; }
+			}
+
+			public override void WantBytes(long count)
+			{
+				var len = stream.Length;
+				var pos = stream.Position;
+
+				var need = count - len + pos;
+
+				if (need <= 0)
+					return;
+
+				var num = Math.Max(need, 2);
+
+				stream.Seek(0, SeekOrigin.End);
+
+				for (var i = 0; i < num; ++i)
+				{
+					if (i % 2 == 0)
+						stream.WriteByte(0);
+					else
+						stream.WriteByte(255);
+				}
+
+				stream.Position = pos;
+
+				if (stream.Length > 1000)
+					Assert.Fail("Reading is going on forever!");
+			}
+		}
+
+		[Test]
+		public void TokenAfterArrayMoreData()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Block name='blk' minOccurs='0'>
+			<Choice name='c'>
+				<Block name='b'>
+					<String name='key' />
+					<String name='delim' value=': '  token='true' />
+					<String name='value' />
+					<String name='eol' value='\r\n' token='true' />
+				</Block>
+			</Choice>
+		</Block>
+		<String name='end' value='\r\n' token='true' />
+		<String name='body' />
+	</DataModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var pub = new DeferredPublisher("Foo: Bar\r\nBaz: Qux\r\n\r\n");
+			var cracker = new DataCracker();
+
+			cracker.CrackData(dom.dataModels[0], new BitStream(pub));
+		}
+
+		[Test]
+		public void TokenAfterArrayWithTokenMoreData()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String />
+		<Block minOccurs='0'>
+			<String value=','  token='true' />
+			<String />
+		</Block>
+		<String value='\n' token='true' />
+		<String />
+	</DataModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var pub = new DeferredPublisher("a,b,c\ndone");
+			var cracker = new DataCracker();
+
+			cracker.CrackData(dom.dataModels[0], new BitStream(pub));
+		}
+
 	}
 }
 
