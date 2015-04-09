@@ -12,7 +12,7 @@
       <extension id="BUILD_EXT_1" type="VcsLabeling">
         <parameters>
           <param name="branchFilter" value="+:&lt;default&gt;" />
-          <param name="labelingPattern" value="tc-%BuildTag%" />
+          <param name="labelingPattern" value="tc-%build.number%" />
           <param name="vcsRootId" value="__ALL__" />
         </parameters>
       </extension>
