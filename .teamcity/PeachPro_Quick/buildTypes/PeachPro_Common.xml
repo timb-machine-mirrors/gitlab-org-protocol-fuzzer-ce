@@ -10,7 +10,6 @@
       <param name="MajorVersion" value="3" />
       <param name="MinorVersion" value="4" />
       <param name="PatchVersion" value="0" />
-      <param name="BuildFormatSpecification" value="%MajorVersion%.%MinorVersion%.%PatchVersion%" />
     </parameters>
     <build-runners>
       <runner id="RUNNER_4" name="configure" type="simpleRunner">
