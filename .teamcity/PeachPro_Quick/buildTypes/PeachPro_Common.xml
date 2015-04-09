@@ -68,6 +68,13 @@ output/%waf.variant%/bin/Godel.Tests.dll]]></param>
           <param name="teamcity.step.mode" value="default" />
         </parameters>
       </runner>
+      <runner id="RUNNER_18" name="zip" type="simpleRunner">
+        <parameters>
+          <param name="command.executable" value="waf%waf.ext%" />
+          <param name="command.parameters" value="zip --variant=%waf.variant%" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
     </build-runners>
     <vcs-settings>
       <vcs-entry-ref root-id="PeachPro_Dejavu" />
