@@ -31,6 +31,20 @@
           <param name="teamcity.step.mode" value="default" />
         </parameters>
       </runner>
+      <runner id="RUNNER_17" name="pkg" type="simpleRunner">
+        <parameters>
+          <param name="command.executable" value="waf%waf.ext%" />
+          <param name="command.parameters" value="pkg --variant=%waf.variant%" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+      <runner id="RUNNER_18" name="zip" type="simpleRunner">
+        <parameters>
+          <param name="command.executable" value="waf%waf.ext%" />
+          <param name="command.parameters" value="zip --variant=%waf.variant%" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
       <runner id="RUNNER_3" name="unittest" type="NUnit">
         <parameters>
           <param name="dotNetCoverage.NCover.HTMLReport.File.Sort" value="0" />
@@ -58,20 +72,6 @@ output/%waf.variant%/bin/Godel.Tests.dll]]></param>
           <param name="nunit_platform" value="MSIL" />
           <param name="nunit_process_per_process" value="true" />
           <param name="nunit_version" value="NUnit-2.6.3" />
-          <param name="teamcity.step.mode" value="default" />
-        </parameters>
-      </runner>
-      <runner id="RUNNER_17" name="pkg" type="simpleRunner">
-        <parameters>
-          <param name="command.executable" value="waf%waf.ext%" />
-          <param name="command.parameters" value="pkg --variant=%waf.variant%" />
-          <param name="teamcity.step.mode" value="default" />
-        </parameters>
-      </runner>
-      <runner id="RUNNER_18" name="zip" type="simpleRunner">
-        <parameters>
-          <param name="command.executable" value="waf%waf.ext%" />
-          <param name="command.parameters" value="zip --variant=%waf.variant%" />
           <param name="teamcity.step.mode" value="default" />
         </parameters>
       </runner>
