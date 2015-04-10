@@ -7,6 +7,9 @@
       <option name="buildNumberPattern" value="%MajorVersion%.%MinorVersion%.%dep.PeachPro_Root.system.build.number%" />
       <option name="checkoutMode" value="ON_AGENT" />
     </options>
+    <disabled-settings>
+      <setting-ref ref="RUNNER_3" />
+    </disabled-settings>
     <parameters>
       <param name="PatchVersion" value="0" />
     </parameters>
