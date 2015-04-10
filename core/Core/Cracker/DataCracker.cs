@@ -706,7 +706,8 @@ namespace Peach.Core.Cracker
 
 			for (int i = tokenCount; i < tokens.Count; ++i)
 			{
-				tokens[i].Optional = array.Count >= array.minOccurs;
+				if (array.Count >= array.minOccurs)
+					tokens[i].Priority = 2;
 				tokens[i].Position += pos;
 			}
 
@@ -778,7 +779,7 @@ namespace Peach.Core.Cracker
 		{
 			public DataElement Element { get; set; }
 			public long Position { get; set; }
-			public bool Optional { get; set; }
+			public int Priority { get; set; }
 		}
 
 		enum Until { FirstSized, FirstUnsized };
@@ -804,7 +805,7 @@ namespace Peach.Core.Cracker
 		{
 			if (elem.isToken)
 			{
-				tokens.Add(new Mark() { Element = elem, Position = pos, Optional = false });
+				tokens.Add(new Mark() { Element = elem, Position = pos, Priority = 0 });
 				logger.Debug("scan: {0} -> Pos: {1}, Saving Token", elem.debugName, pos);
 			}
 
@@ -959,8 +960,8 @@ namespace Peach.Core.Cracker
 
 			foreach (var token in tokens)
 			{
-				long? where = findToken(data, token.Element.Value, token.Position, token.Optional);
-				if (!where.HasValue && !token.Optional)
+				long? where = findToken(data, token.Element.Value, token.Position, token.Priority != 0);
+				if (!where.HasValue && token.Priority == 0)
 				{
 					logger.Debug("getSize: <----- Missing Required Token: ???");
 					return where;
@@ -975,7 +976,7 @@ namespace Peach.Core.Cracker
 					winner = token;
 				}
 
-				if (!token.Optional)
+				if (token.Priority <= 1)
 					break;
 			}
 
@@ -983,7 +984,7 @@ namespace Peach.Core.Cracker
 			{
 				closest -= winner.Position;
 				logger.Debug("getSize: <----- {0} Token: {1}",
-					winner.Optional ? "Optional" : "Required",
+					winner.Priority == 0 ? "Optional" : "Required",
 					closest.ToString());
 				return closest;
 			}
@@ -1092,7 +1093,13 @@ namespace Peach.Core.Cracker
 						if (array.maxOccurs == -1 || array.Count < array.maxOccurs)
 						{
 							if (elem.isChildOf(array))
-								tokens.ForEach(t => t.Optional = true);
+							{
+								// Since we are crossing an array boundary
+								// reset our token position offset back to zero
+								// in case we encounter any new tokens
+								tokens.ForEach(t => t.Priority = 1);
+								pos = 0;
+							}
 
 							long arrayPos = pos;
 							var ret = scanArray(array, ref arrayPos, tokens, Until.FirstUnsized);
@@ -1102,11 +1109,6 @@ namespace Peach.Core.Cracker
 							if ((!ret.HasValue || ret.Value == false) && array.Count < array.minOccurs)
 									return ret;
 						}
-
-						// Since we are crossing an array boundary
-						// reset our token position offset back to zero
-						// in case we encounter any new tokens
-						pos = 0;
 					}
 
 					// no more siblings, ascend
