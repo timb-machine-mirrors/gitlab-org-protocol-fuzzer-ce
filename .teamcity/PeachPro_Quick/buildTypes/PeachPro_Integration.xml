@@ -8,6 +8,7 @@
     <vcs-settings />
     <requirements>
       <equals name="teamcity.agent.jvm.os.arch" value="amd64" />
+      <contains name="teamcity.agent.jvm.os.name" value="Linux" />
     </requirements>
     <build-triggers />
     <build-extensions>
