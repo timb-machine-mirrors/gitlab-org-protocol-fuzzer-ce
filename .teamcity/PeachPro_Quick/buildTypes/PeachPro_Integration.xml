@@ -4,6 +4,7 @@
   <description />
   <settings>
     <options>
+      <option name="artifactRules" value="output =&gt; output" />
       <option name="buildNumberPattern" value="%dep.PeachPro_Doc.build.number%" />
       <option name="showDependenciesChanges" value="true" />
     </options>
