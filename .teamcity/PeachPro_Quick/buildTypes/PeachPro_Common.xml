@@ -84,14 +84,7 @@ output/%waf.variant%/bin/Godel.Tests.dll]]></param>
       <vcs-entry-ref root-id="PeachPro_Dejavu" />
     </vcs-settings>
     <requirements />
-    <build-triggers>
-      <build-trigger id="remoteRunOnBranch" type="remoteRunOnBranch">
-        <parameters>
-          <param name="branchy:jetbrains.git" value="pattern:jetbrains.git" />
-          <param name="pattern:jetbrains.git" value="refs/heads/personal/*" />
-        </parameters>
-      </build-trigger>
-    </build-triggers>
+    <build-triggers />
     <dependencies>
       <depend-on sourceBuildTypeId="PeachPro_Root">
         <options>
