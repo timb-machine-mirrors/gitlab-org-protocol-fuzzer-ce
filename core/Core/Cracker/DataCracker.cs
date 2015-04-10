@@ -661,8 +661,9 @@ namespace Peach.Core.Cracker
 		/// <param name="data">BitStream to search in.</param>
 		/// <param name="token">BitStream to search for.</param>
 		/// <param name="offset">How many bits after the current position of data to start searching.</param>
+		/// <param name="optional">Is the token optional.</param>
 		/// <returns>The location of the token in data from the current position or null.</returns>
-		long? findToken(BitStream data, BitwiseStream token, long offset)
+		long? findToken(BitStream data, BitwiseStream token, long offset, bool optional)
 		{
 			while (true)
 			{
@@ -677,6 +678,8 @@ namespace Peach.Core.Cracker
 						return end - pos;
 				}
 
+				if (optional)
+					return null;
 
 				// The minimum to ask for is offset + tokenLength;
 				// Ask for 1 more than actually needed
@@ -956,7 +959,7 @@ namespace Peach.Core.Cracker
 
 			foreach (var token in tokens)
 			{
-				long? where = findToken(data, token.Element.Value, token.Position);
+				long? where = findToken(data, token.Element.Value, token.Position, token.Optional);
 				if (!where.HasValue && !token.Optional)
 				{
 					logger.Debug("getSize: <----- Missing Required Token: ???");
@@ -1057,7 +1060,15 @@ namespace Peach.Core.Cracker
 				if (curr != null)
 				{
 					var ret = scan(curr, ref pos, tokens, end, Until.FirstUnsized);
-					if (!ret.HasValue || ret.Value == false)
+					if (!ret.HasValue)
+					{
+						if (tokens.Count == 0)
+							return ret;
+
+						final = ret;
+						curr = prev.parent;
+					}
+					else if (ret.Value == false)
 						return ret;
 
 					if (end.Element != null)
@@ -1080,6 +1091,9 @@ namespace Peach.Core.Cracker
 						var array = (Dom.Array)prev.parent;
 						if (array.maxOccurs == -1 || array.Count < array.maxOccurs)
 						{
+							if (elem.isChildOf(array))
+								tokens.ForEach(t => t.Optional = true);
+
 							long arrayPos = pos;
 							var ret = scanArray(array, ref arrayPos, tokens, Until.FirstUnsized);
 
@@ -1088,6 +1102,11 @@ namespace Peach.Core.Cracker
 							if ((!ret.HasValue || ret.Value == false) && array.Count < array.minOccurs)
 									return ret;
 						}
+
+						// Since we are crossing an array boundary
+						// reset our token position offset back to zero
+						// in case we encounter any new tokens
+						pos = 0;
 					}
 
 					// no more siblings, ascend
