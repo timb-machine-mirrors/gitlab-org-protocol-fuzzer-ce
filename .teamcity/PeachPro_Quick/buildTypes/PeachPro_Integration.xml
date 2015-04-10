@@ -3,6 +3,9 @@
   <name>Integration</name>
   <description />
   <settings>
+    <options>
+      <option name="buildNumberPattern" value="%dep.PeachPro_Doc.build.number%" />
+    </options>
     <parameters />
     <build-runners />
     <vcs-settings />
