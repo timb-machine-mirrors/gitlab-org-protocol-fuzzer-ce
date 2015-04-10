@@ -186,9 +186,19 @@ namespace Peach.Core.Analyzers
 			return ret.ToList();
 		}
 
+		public Dom.Dom asParser(Dictionary<string, object> args, TextReader data)
+		{
+			return asParser(args,data, string.Empty, true);
+		}
+
 		public override Dom.Dom asParser(Dictionary<string, object> args, Stream data)
 		{
-			return asParser(args, data, true);
+			return asParser(args, new StreamReader(data), getName(data), true);
+		}
+
+		public override void asParserValidation(Dictionary<string, object> args, Stream data)
+		{
+			asParser(args, new StreamReader(data), getName(data), false);
 		}
 
 		class Resetter : DataElement
@@ -214,18 +224,18 @@ namespace Peach.Core.Analyzers
 			return new Dom.StateModel();
 		}
 
-		public virtual Dom.Dom asParser(Dictionary<string, object> args, Stream data, bool doValidatePit)
+		protected virtual Dom.Dom asParser(Dictionary<string, object> args, TextReader data, string dataName, bool parse)
 		{
 			// Reset the data element auto-name suffix back to zero
 			Resetter.Reset();
 
-			string xml = readWithDefines(args, data);
+			var xml = readWithDefines(args, data);
+			var xmldoc = validatePit(xml, dataName);
 
-			if (doValidatePit)
-				validatePit(xml, getName(data));
-
-			XmlDocument xmldoc = new XmlDocument();
 			xmldoc.LoadXml(xml);
+
+			if (!parse)
+				return null;
 
 			var dom = CreateDom();
 
@@ -243,10 +253,9 @@ namespace Peach.Core.Analyzers
 			return dom;
 		}
 
-		private static string readWithDefines(Dictionary<string, object> args, Stream data)
+		private static string readWithDefines(Dictionary<string, object> args, TextReader data)
 		{
-			data.Position = 0;
-			string xml = new StreamReader(data).ReadToEnd();
+			var xml = data.ReadToEnd();
 
 			object obj;
 			if (args != null && args.TryGetValue(DEFINED_VALUES, out obj))
@@ -263,12 +272,6 @@ namespace Peach.Core.Analyzers
 			}
 
 			return xml;
-		}
-
-		public override void asParserValidation(Dictionary<string, object> args, Stream data)
-		{
-			string xml = readWithDefines(args, data);
-			validatePit(xml, getName(data));
 		}
 
 		static protected void populatePitParsable()
@@ -293,7 +296,7 @@ namespace Peach.Core.Analyzers
 		/// </summary>
 		/// <param name="xmlData">Pit file to validate</param>
 		/// <param name="sourceName">Name of pit file</param>
-		private void validatePit(string xmlData, string sourceName)
+		private XmlDocument validatePit(string xmlData, string sourceName)
 		{
 			// Collect the errors
 			var errors = new StringBuilder();
@@ -324,12 +327,13 @@ namespace Peach.Core.Analyzers
 			nsMgr.AddNamespace("", PEACH_NAMESPACE_URI);
 
 			var parserCtx = new XmlParserContext(settings.NameTable, nsMgr, null, XmlSpace.Default);
+			var ret = new XmlDocument();
 
 			using (var rdr = XmlReader.Create(new StringReader(xmlData), settings, parserCtx))
 			{
 				try
 				{
-					new XmlDocument().Load(rdr);
+					ret.Load(rdr);
 				}
 				catch (XmlException ex)
 				{
@@ -344,6 +348,8 @@ namespace Peach.Core.Analyzers
 				else
 					throw new PeachException("Error, Pit file failed to validate: \r\n{0}".Fmt(errors));
 			}
+
+			return ret;
 		}
 
 		public static void displayDataModel(DataElement elem, int indent = 0)
