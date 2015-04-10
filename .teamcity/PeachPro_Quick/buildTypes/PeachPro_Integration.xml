@@ -5,6 +5,7 @@
   <settings>
     <options>
       <option name="buildNumberPattern" value="%dep.PeachPro_Doc.build.number%" />
+      <option name="showDependenciesChanges" value="true" />
     </options>
     <parameters />
     <build-runners />
