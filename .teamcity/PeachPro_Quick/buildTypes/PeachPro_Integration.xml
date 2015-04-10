@@ -18,6 +18,13 @@
           <param name="teamcity.step.mode" value="default" />
         </parameters>
       </runner>
+      <runner id="RUNNER_26" name="rsync to nas" type="simpleRunner">
+        <parameters>
+          <param name="command.executable" value="rsync" />
+          <param name="command.parameters" value="-av output/ /mnt/builds/tc/%build.number%" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
     </build-runners>
     <vcs-settings>
       <vcs-entry-ref root-id="PeachPro_Dejavu" />
