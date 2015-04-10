@@ -40,12 +40,6 @@
           <param name="quietPeriodMode" value="USE_DEFAULT" />
         </parameters>
       </build-trigger>
-      <build-trigger id="remoteRunOnBranch" type="remoteRunOnBranch">
-        <parameters>
-          <param name="branchy:jetbrains.git" value="pattern:jetbrains.git" />
-          <param name="pattern:jetbrains.git" value="refs/heads/personal/*" />
-        </parameters>
-      </build-trigger>
     </build-triggers>
     <build-extensions>
       <extension id="BUILD_EXT_1" type="VcsLabeling">
