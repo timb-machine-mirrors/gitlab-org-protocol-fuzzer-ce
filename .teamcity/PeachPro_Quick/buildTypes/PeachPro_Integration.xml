@@ -9,7 +9,15 @@
       <option name="showDependenciesChanges" value="true" />
     </options>
     <parameters />
-    <build-runners />
+    <build-runners>
+      <runner id="RUNNER_25" name="make release" type="simpleRunner">
+        <parameters>
+          <param name="command.executable" value="build/make_release.py" />
+          <param name="command.parameters" value="--buildtag %build.number% --nightly False" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+    </build-runners>
     <vcs-settings>
       <vcs-entry-ref root-id="PeachPro_Dejavu" />
     </vcs-settings>
