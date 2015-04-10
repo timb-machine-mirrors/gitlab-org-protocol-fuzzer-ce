@@ -32,6 +32,10 @@
         <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
         <artifact sourcePath="archive.zip* =&gt; doc&#xD;&#xA;" />
       </dependency>
+      <dependency sourceBuildTypeId="PeachPro_linux_x86_64_debug" cleanDestination="false">
+        <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
+        <artifact sourcePath="archive.zip* =&gt; linux_x86_64_debug" />
+      </dependency>
     </artifact-dependencies>
     <dependencies>
       <depend-on sourceBuildTypeId="PeachPro_Doc">
