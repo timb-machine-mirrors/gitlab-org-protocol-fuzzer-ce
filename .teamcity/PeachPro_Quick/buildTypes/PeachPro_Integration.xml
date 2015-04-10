@@ -36,47 +36,47 @@
     <artifact-dependencies>
       <dependency sourceBuildTypeId="PeachPro_Doc" cleanDestination="false">
         <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
-        <artifact sourcePath="archive.zip* =&gt; tmp/doc" />
+        <artifact sourcePath="archive.zip* =&gt; output/doc" />
       </dependency>
       <dependency sourceBuildTypeId="PeachPro_linux_x86_64_debug" cleanDestination="false">
         <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
-        <artifact sourcePath="archive.zip* =&gt; tmp/linux_x86_64_debug" />
+        <artifact sourcePath="archive.zip* =&gt; output/linux_x86_64_debug" />
       </dependency>
       <dependency sourceBuildTypeId="PeachPro_linux_x86_64_release" cleanDestination="false">
         <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
-        <artifact sourcePath="archive.zip* =&gt; tmp/linux_x86_64_release" />
+        <artifact sourcePath="archive.zip* =&gt; output/linux_x86_64_release" />
       </dependency>
       <dependency sourceBuildTypeId="PeachPro_linux_x86_debug" cleanDestination="false">
         <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
-        <artifact sourcePath="archive.zip* =&gt; tmp/linux_x86_debug" />
+        <artifact sourcePath="archive.zip* =&gt; output/linux_x86_debug" />
       </dependency>
       <dependency sourceBuildTypeId="PeachPro_linux_x86_release" cleanDestination="false">
         <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
-        <artifact sourcePath="archive.zip* =&gt; tmp/linux_x86_release" />
+        <artifact sourcePath="archive.zip* =&gt; output/linux_x86_release" />
       </dependency>
       <dependency sourceBuildTypeId="PeachPro_osx_debug" cleanDestination="false">
         <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
-        <artifact sourcePath="archive.zip* =&gt; tmp/osx_debug" />
+        <artifact sourcePath="archive.zip* =&gt; output/osx_debug" />
       </dependency>
       <dependency sourceBuildTypeId="PeachPro_osx_release" cleanDestination="false">
         <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
-        <artifact sourcePath="archive.zip* =&gt; tmp/osx_release" />
+        <artifact sourcePath="archive.zip* =&gt; output/osx_release" />
       </dependency>
       <dependency sourceBuildTypeId="PeachPro_win_x86_debug" cleanDestination="false">
         <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
-        <artifact sourcePath="archive.zip* =&gt; tmp/win_x86_debug" />
+        <artifact sourcePath="archive.zip* =&gt; output/win_x86_debug" />
       </dependency>
       <dependency sourceBuildTypeId="PeachPro_win_x86_release" cleanDestination="false">
         <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
-        <artifact sourcePath="archive.zip* =&gt; tmp/win_x86_release" />
+        <artifact sourcePath="archive.zip* =&gt; output/win_x86_release" />
       </dependency>
       <dependency sourceBuildTypeId="PeachPro_win_x64_debug" cleanDestination="false">
         <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
-        <artifact sourcePath="archive.zip* =&gt; tmp/win_x64_debug" />
+        <artifact sourcePath="archive.zip* =&gt; output/win_x64_debug" />
       </dependency>
       <dependency sourceBuildTypeId="PeachPro_win_x64_release" cleanDestination="false">
         <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
-        <artifact sourcePath="archive.zip* =&gt; tmp/win_x64_release" />
+        <artifact sourcePath="archive.zip* =&gt; output/win_x64_release" />
       </dependency>
     </artifact-dependencies>
     <dependencies>
