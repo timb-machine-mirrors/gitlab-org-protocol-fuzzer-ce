@@ -609,30 +609,8 @@ namespace Peach.Pro.Test.Core.CrackingTests
 
 			public override void WantBytes(long count)
 			{
-				var len = stream.Length;
-				var pos = stream.Position;
-
-				var need = count - len + pos;
-
-				if (need <= 0)
-					return;
-
-				var num = Math.Max(need, 2);
-
-				stream.Seek(0, SeekOrigin.End);
-
-				for (var i = 0; i < num; ++i)
-				{
-					if (i % 2 == 0)
-						stream.WriteByte(0);
-					else
-						stream.WriteByte(255);
-				}
-
-				stream.Position = pos;
-
-				if (stream.Length > 1000)
-					Assert.Fail("Reading is going on forever!");
+				if (stream.Position + count > stream.Length)
+					Assert.Fail("Publisher shouldn't be asking for more bytes!");
 			}
 		}
 
@@ -652,7 +630,9 @@ namespace Peach.Pro.Test.Core.CrackingTests
 				</Block>
 			</Choice>
 		</Block>
-		<String name='end' value='\r\n' token='true' />
+		<Block>
+			<String name='end' value='\r\n' token='true' />
+		</Block>
 		<String name='body' />
 	</DataModel>
 </Peach>";
@@ -662,7 +642,43 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			var cracker = new DataCracker();
 
 			cracker.CrackData(dom.dataModels[0], new BitStream(pub));
+
+			Assert.AreEqual("", (string)dom.dataModels[0][2].InternalValue);
 		}
+
+		[Test]
+		public void TokenAfterArrayMoreData2()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Block name='blk' minOccurs='0'>
+			<Choice name='c'>
+				<Block name='b'>
+					<String name='key' />
+					<String name='delim' value=': '  token='true' />
+					<String name='value' />
+					<String name='eol' value='\r\n' token='true' />
+				</Block>
+			</Choice>
+		</Block>
+		<Block>
+			<String />
+			<String name='end' value='\r\n' token='true' />
+		</Block>
+		<String name='body' />
+	</DataModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var pub = new DeferredPublisher("Foo: Bar\r\nBaz: Qux\r\n\r\n");
+			var cracker = new DataCracker();
+
+			cracker.CrackData(dom.dataModels[0], new BitStream(pub));
+
+			Assert.AreEqual("", (string)dom.dataModels[0][2].InternalValue);
+		}
+
 
 		[Test]
 		public void TokenAfterArrayWithTokenMoreData()
@@ -685,6 +701,8 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			var cracker = new DataCracker();
 
 			cracker.CrackData(dom.dataModels[0], new BitStream(pub));
+
+			Assert.AreEqual("done", (string)dom.dataModels[0][3].InternalValue);
 		}
 
 	}
