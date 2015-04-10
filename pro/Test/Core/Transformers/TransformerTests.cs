@@ -45,7 +45,7 @@ namespace Peach.Pro.Test.Core.Transformers
 
 			PitParser parser = new PitParser();
 
-			parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)), false);
+			parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 		}
 
