@@ -216,7 +216,9 @@ namespace Peach.Core
 				final = Expression.Convert(final, typeof(object));
 
 			// Compile the final expression
-			result = Expression.Lambda<CloneFunc>(final, tbl, obj, ctx).Compile();
+			var lamba = Expression.Lambda<CloneFunc>(final, tbl, obj, ctx);
+
+			result = lamba.Compile();
 		}
 
 		#endregion

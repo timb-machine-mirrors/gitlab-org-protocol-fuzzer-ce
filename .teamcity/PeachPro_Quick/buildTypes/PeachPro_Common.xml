@@ -3,9 +3,13 @@
   <name>common</name>
   <settings>
     <options>
+      <option name="artifactRules" value="output/%waf.variant%/archive.zip&#xA;output/%waf.variant%/archive.zip.sha1" />
       <option name="buildNumberPattern" value="%MajorVersion%.%MinorVersion%.%dep.PeachPro_Root.system.build.number%" />
       <option name="checkoutMode" value="ON_AGENT" />
     </options>
+    <disabled-settings>
+      <setting-ref ref="RUNNER_3" />
+    </disabled-settings>
     <parameters>
       <param name="PatchVersion" value="0" />
     </parameters>
@@ -13,7 +17,7 @@
       <runner id="RUNNER_4" name="configure" type="simpleRunner">
         <parameters>
           <param name="command.executable" value="waf%waf.ext%" />
-          <param name="command.parameters" value="configure --strict --verbose --buildtag %BuildTag%" />
+          <param name="command.parameters" value="configure --strict --verbose --buildtag %build.number%" />
           <param name="teamcity.step.mode" value="default" />
         </parameters>
       </runner>
@@ -28,6 +32,20 @@
         <parameters>
           <param name="command.executable" value="waf%waf.ext%" />
           <param name="command.parameters" value="install --strict --variant=%waf.variant%" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+      <runner id="RUNNER_17" name="pkg" type="simpleRunner">
+        <parameters>
+          <param name="command.executable" value="waf%waf.ext%" />
+          <param name="command.parameters" value="pkg --variant=%waf.variant%" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+      <runner id="RUNNER_18" name="zip" type="simpleRunner">
+        <parameters>
+          <param name="command.executable" value="waf%waf.ext%" />
+          <param name="command.parameters" value="zip --variant=%waf.variant%" />
           <param name="teamcity.step.mode" value="default" />
         </parameters>
       </runner>
@@ -66,20 +84,7 @@ output/%waf.variant%/bin/Godel.Tests.dll]]></param>
       <vcs-entry-ref root-id="PeachPro_Dejavu" />
     </vcs-settings>
     <requirements />
-    <build-triggers>
-      <build-trigger id="remoteRunOnBranch" type="remoteRunOnBranch">
-        <parameters>
-          <param name="branchy:jetbrains.git" value="pattern:jetbrains.git" />
-          <param name="pattern:jetbrains.git" value="refs/heads/personal/*" />
-        </parameters>
-      </build-trigger>
-      <build-trigger id="vcsTrigger" type="vcsTrigger">
-        <parameters>
-          <param name="branchFilter" value="+:master" />
-          <param name="quietPeriodMode" value="USE_DEFAULT" />
-        </parameters>
-      </build-trigger>
-    </build-triggers>
+    <build-triggers />
     <dependencies>
       <depend-on sourceBuildTypeId="PeachPro_Root">
         <options>
