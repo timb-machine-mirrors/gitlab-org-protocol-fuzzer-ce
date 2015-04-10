@@ -6,7 +6,9 @@
     <parameters />
     <build-runners />
     <vcs-settings />
-    <requirements />
+    <requirements>
+      <equals name="teamcity.agent.jvm.os.arch" value="amd64" />
+    </requirements>
     <build-triggers />
     <build-extensions>
       <extension id="BUILD_EXT_1" type="VcsLabeling">
