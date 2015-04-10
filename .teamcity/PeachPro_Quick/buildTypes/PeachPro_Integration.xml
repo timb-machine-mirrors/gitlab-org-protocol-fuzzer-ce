@@ -10,7 +10,7 @@
     </options>
     <parameters />
     <build-runners>
-      <runner id="RUNNER_25" name="make_release" type="simpleRunner">
+      <runner id="RUNNER_25" name="make release" type="simpleRunner">
         <parameters>
           <param name="command.executable" value="build/make_release.py" />
           <param name="command.parameters" value="--buildtag %build.number% --nightly False" />
