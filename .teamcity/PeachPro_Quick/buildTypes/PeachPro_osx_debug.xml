@@ -9,7 +9,7 @@
       <param name="waf.ext" value="" />
       <param name="waf.variant" value="osx_debug" />
     </parameters>
-    <build-runners order="RUNNER_4, RUNNER_5, RUNNER_6, RUNNER_3" />
+    <build-runners order="RUNNER_4, RUNNER_5, RUNNER_6, RUNNER_17, RUNNER_18, RUNNER_3" />
     <vcs-settings />
     <requirements>
       <contains name="teamcity.agent.jvm.os.name" value="Mac OS X" />

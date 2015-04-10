@@ -3,20 +3,21 @@
   <name>common</name>
   <settings>
     <options>
-      <option name="buildNumberPattern" value="%build.vcs.number%" />
+      <option name="artifactRules" value="output/%waf.variant%/archive.zip&#xA;output/%waf.variant%/archive.zip.sha1" />
+      <option name="buildNumberPattern" value="%MajorVersion%.%MinorVersion%.%dep.PeachPro_Root.system.build.number%" />
       <option name="checkoutMode" value="ON_AGENT" />
     </options>
+    <disabled-settings>
+      <setting-ref ref="RUNNER_3" />
+    </disabled-settings>
     <parameters>
-      <param name="MajorVersion" value="3" />
-      <param name="MinorVersion" value="4" />
       <param name="PatchVersion" value="0" />
-      <param name="BuildFormatSpecification" value="%MajorVersion%.%MinorVersion%.%PatchVersion%" />
     </parameters>
     <build-runners>
       <runner id="RUNNER_4" name="configure" type="simpleRunner">
         <parameters>
           <param name="command.executable" value="waf%waf.ext%" />
-          <param name="command.parameters" value="configure --strict --verbose" />
+          <param name="command.parameters" value="configure --strict --verbose --buildtag %build.number%" />
           <param name="teamcity.step.mode" value="default" />
         </parameters>
       </runner>
@@ -31,6 +32,20 @@
         <parameters>
           <param name="command.executable" value="waf%waf.ext%" />
           <param name="command.parameters" value="install --strict --variant=%waf.variant%" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+      <runner id="RUNNER_17" name="pkg" type="simpleRunner">
+        <parameters>
+          <param name="command.executable" value="waf%waf.ext%" />
+          <param name="command.parameters" value="pkg --variant=%waf.variant%" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+      <runner id="RUNNER_18" name="zip" type="simpleRunner">
+        <parameters>
+          <param name="command.executable" value="waf%waf.ext%" />
+          <param name="command.parameters" value="zip --variant=%waf.variant%" />
           <param name="teamcity.step.mode" value="default" />
         </parameters>
       </runner>
@@ -51,6 +66,7 @@
           <param name="dotNetCoverage.PartCover.platformBitness" value="x86" />
           <param name="dotNetCoverage.PartCover.platformVersion" value="v2.0" />
           <param name="dotNetTestRunner.Type" value="NUnit" />
+          <param name="nunit_categery_exclude" value="Unreliable" />
           <param name="nunit_enabled" value="checked" />
           <param name="nunit_environment" value="v4.0" />
           <param name="nunit_include"><![CDATA[output/%waf.variant%/bin/Peach.Core.Test.dll
@@ -75,13 +91,16 @@ output/%waf.variant%/bin/Godel.Tests.dll]]></param>
           <param name="pattern:jetbrains.git" value="refs/heads/personal/*" />
         </parameters>
       </build-trigger>
-      <build-trigger id="vcsTrigger" type="vcsTrigger">
-        <parameters>
-          <param name="branchFilter" value="+:master" />
-          <param name="quietPeriodMode" value="USE_DEFAULT" />
-        </parameters>
-      </build-trigger>
     </build-triggers>
+    <dependencies>
+      <depend-on sourceBuildTypeId="PeachPro_Root">
+        <options>
+          <option name="run-build-if-dependency-failed" value="RUN_ADD_PROBLEM" />
+          <option name="take-started-build-with-same-revisions" value="true" />
+          <option name="take-successful-builds-only" value="true" />
+        </options>
+      </depend-on>
+    </dependencies>
     <cleanup />
   </settings>
 </template>
