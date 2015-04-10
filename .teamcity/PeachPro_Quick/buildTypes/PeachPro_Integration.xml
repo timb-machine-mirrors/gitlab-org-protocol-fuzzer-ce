@@ -8,7 +8,9 @@
     </options>
     <parameters />
     <build-runners />
-    <vcs-settings />
+    <vcs-settings>
+      <vcs-entry-ref root-id="PeachPro_Dejavu" />
+    </vcs-settings>
     <requirements>
       <equals name="teamcity.agent.jvm.os.arch" value="amd64" />
       <contains name="teamcity.agent.jvm.os.name" value="Linux" />
