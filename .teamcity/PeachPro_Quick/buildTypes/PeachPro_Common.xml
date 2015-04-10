@@ -91,12 +91,6 @@ output/%waf.variant%/bin/Godel.Tests.dll]]></param>
           <param name="pattern:jetbrains.git" value="refs/heads/personal/*" />
         </parameters>
       </build-trigger>
-      <build-trigger id="vcsTrigger" type="vcsTrigger">
-        <parameters>
-          <param name="branchFilter" value="+:master" />
-          <param name="quietPeriodMode" value="USE_DEFAULT" />
-        </parameters>
-      </build-trigger>
     </build-triggers>
     <dependencies>
       <depend-on sourceBuildTypeId="PeachPro_Root">
