@@ -4,10 +4,13 @@ using System.IO;
 using NLog;
 using NUnit.Framework;
 using Peach.Core;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.OS.Linux
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	public class PlatformTests
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();

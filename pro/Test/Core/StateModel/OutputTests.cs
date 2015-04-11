@@ -22,7 +22,9 @@ namespace Peach.Pro.Test.Core.StateModel
 		}
 	}
 
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class OutputTests : DataModelCollector
 	{
 		[Test]

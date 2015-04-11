@@ -8,6 +8,7 @@ using NLog.Targets;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Pro.Core.Runtime;
+using Peach.Core.Test;
 
 // ReSharper disable once CheckNamespace (required for NUnit SetupFixture)
 namespace Peach.Pro.Test.Core
@@ -76,7 +77,8 @@ namespace Peach.Pro.Test.Core
 
 
 	[TestFixture]
-	[Category("Peach")]
+	[Quick]
+	[Peach]
 	class AssertTest
 	{
 		[Test]

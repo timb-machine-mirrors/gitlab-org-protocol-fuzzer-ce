@@ -42,7 +42,8 @@ using SharpPcap.LibPcap;
 namespace Peach.Pro.Test.Core.Monitors
 {
 	[TestFixture]
-	[Category("Peach")]
+	[Quick]
+	[Peach]
 	class PcapMonitorTests
 	{
 		private AutoResetEvent _evt;

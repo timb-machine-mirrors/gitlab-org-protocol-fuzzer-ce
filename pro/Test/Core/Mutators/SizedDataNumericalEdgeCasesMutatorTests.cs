@@ -12,7 +12,9 @@ using Peach.Core.IO;
 #if DISABLED
 namespace Peach.Core.Test.Mutators
 {
-    [TestFixture] [Category("Peach")]
+    [TestFixture] 
+	[Quick]
+	[Peach]
     class SizedDataNumericalEdgeCasesMutatorTests : DataModelCollector
     {
         [Test]

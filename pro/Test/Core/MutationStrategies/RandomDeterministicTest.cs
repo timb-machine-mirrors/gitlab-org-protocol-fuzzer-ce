@@ -3,7 +3,9 @@ using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.MutationStrategies
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class RandomDeterministicTest : DataModelCollector
 	{
 		[Test]

@@ -1,10 +1,13 @@
 using System;
 using NUnit.Framework;
 using Peach.Core;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core
 {
 	[TestFixture]
+	[Quick]
+	[Peach]
 	class EulaTests
 	{
 		[Datapoints]

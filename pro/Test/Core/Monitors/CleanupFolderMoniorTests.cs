@@ -6,7 +6,9 @@ using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Monitors
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class CleanupFolderMonitorTests
 	{
 		string _tmp;

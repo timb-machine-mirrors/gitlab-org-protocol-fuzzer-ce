@@ -10,7 +10,9 @@ using Peach.Pro.OS.Windows.Agent.Monitors;
 
 namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	public class WindowsDebuggerHybridTest
 	{
 		Fault[] faults = null;
