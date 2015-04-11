@@ -538,20 +538,26 @@ namespace Peach.Pro.Core.Loggers
 		{
 			Logger.Trace("Engine_TestFinished");
 
-			using (var db = new JobDatabase(_job.DatabasePath))
+			if (_job != null)
 			{
-				_job.StopDate = DateTime.UtcNow;
-				_job.Mode = JobMode.Fuzzing;
-				_job.Status = JobStatus.Stopped;
+				if (_job.DatabasePath != null)
+				{
+					using (var db = new JobDatabase(_job.DatabasePath))
+					{
+						_job.StopDate = DateTime.UtcNow;
+						_job.Mode = JobMode.Fuzzing;
+						_job.Status = JobStatus.Stopped;
 
-				db.UpdateJob(_job);
-			}
+						db.UpdateJob(_job);
+					}
+				}
 
-			using (var db = new NodeDatabase())
-			{
-				if (_caught == null)
-					EventSuccess(db);
-				db.UpdateJob(_job);
+				using (var db = new NodeDatabase())
+				{
+					if (_caught == null)
+						EventSuccess(db);
+					db.UpdateJob(_job);
+				}
 			}
 
 			// it's possible we reach here before Engine_TestStarting has had a chance to finish
