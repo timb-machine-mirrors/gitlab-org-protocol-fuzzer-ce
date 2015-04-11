@@ -6,6 +6,8 @@ using Peach.Core.Test;
 namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
+	[Quick]
+	[Peach]
 	class NumberEdgeCaseTests
 	{
 		// TODO: Numerical string test

@@ -5,10 +5,13 @@ using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
 using Peach.Core.IO;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Analyzers
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class ZipAnalyzerTests
 	{
 		[Test]

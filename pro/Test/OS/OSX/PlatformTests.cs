@@ -3,11 +3,13 @@ using System.Diagnostics;
 using NUnit.Framework;
 using Peach.Core;
 using System.Linq;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.OS.OSX
 {
 	[TestFixture]
-	[Category("Peach")]
+	[Quick]
+	[Peach]
 	public class PlatformTests
 	{
 		[Test]

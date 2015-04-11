@@ -6,7 +6,9 @@ using Peach.Core.Agent;
 
 namespace Peach.Core.Test
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Peach]
+	[Quick]
 	class UtilitiesTests
 	{
 		[Test]

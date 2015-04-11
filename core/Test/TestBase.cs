@@ -8,6 +8,10 @@ using System;
 
 namespace Peach.Core.Test
 {
+	public class PeachAttribute : CategoryAttribute { }
+	public class QuickAttribute : CategoryAttribute { }
+	public class SlowAttribute : CategoryAttribute { }
+
 	class AssertTestFail : TraceListener
 	{
 		public override void Write(string message)
@@ -62,7 +66,9 @@ namespace Peach.Core.Test
 	}
 
 
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Peach]
+	[Quick]
 	class AssertTest
 	{
 		[Test]

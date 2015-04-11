@@ -9,6 +9,8 @@ using Peach.Core.Test;
 namespace Peach.Pro.Test.Core.Loggers
 {
 	[TestFixture]
+	[Quick]
+	[Peach]
 	class ControlIterationFaultTests
 	{
 		class ExceptionalPublisher : Publisher

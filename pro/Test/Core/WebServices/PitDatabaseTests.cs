@@ -14,11 +14,13 @@ using Peach.Pro.Core.WebServices.Models;
 using File = System.IO.File;
 using Monitor = Peach.Pro.Core.WebServices.Models.Monitor;
 using TestStatus = Peach.Pro.Core.WebServices.Models.TestStatus;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.WebServices
 {
 	[TestFixture]
-	[Category("Peach")]
+	[Quick]
+	[Peach]
 	public class PitDatabaseTests
 	{
 		string root;

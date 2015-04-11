@@ -9,6 +9,8 @@ using Peach.Core.Test;
 namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
+	[Quick]
+	[Peach]
 	class StringCaseRandomTests
 	{
 		[Test]

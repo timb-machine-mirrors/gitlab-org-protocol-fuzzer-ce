@@ -6,10 +6,13 @@ using System.Text.RegularExpressions;
 using NLog;
 using NUnit.Framework;
 using Peach.Core;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Publishers
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class ParameterTests
 	{
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();

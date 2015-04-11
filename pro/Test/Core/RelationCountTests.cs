@@ -35,7 +35,9 @@ using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class RelationCountTests
 	{
 		[Test]
