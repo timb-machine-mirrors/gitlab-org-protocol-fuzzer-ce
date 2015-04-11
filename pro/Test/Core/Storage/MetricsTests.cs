@@ -5,10 +5,13 @@ using Peach.Core;
 using Peach.Pro.Core.Storage;
 using System.Linq;
 using Peach.Pro.Core.WebServices.Models;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Storage
 {
 	[TestFixture]
+	[Peach]
+	[Quick]
 	class MetricsTests
 	{
 		TempFile _tmp;

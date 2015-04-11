@@ -10,6 +10,7 @@ using Peach.Pro.Core;
 using System.Linq;
 using Peach.Pro.Test.Core.Storage;
 using TestStatus = Peach.Pro.Core.WebServices.Models.TestStatus;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.WebServices
 {
@@ -107,6 +108,8 @@ namespace Peach.Pro.Test.Core.WebServices
 
 	[TestFixture(typeof(InternalJobMonitor))]
 	[TestFixture(typeof(ExternalJobMonitor))]
+	[Peach]
+	[Quick]
 	class JobMonitorTests<T> : BaseJobMonitorTests<T>
 		where T : IJobMonitor, new()
 	{
@@ -325,6 +328,8 @@ namespace Peach.Pro.Test.Core.WebServices
 	}
 
 	[TestFixture]
+	[Peach]
+	[Quick]
 	class ExternalJobMonitorTests : BaseJobMonitorTests<ExternalJobMonitor>
 	{
 		[Test]
