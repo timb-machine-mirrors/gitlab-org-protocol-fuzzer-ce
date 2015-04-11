@@ -74,7 +74,8 @@
           <param name="nunit_include"><![CDATA[output/%waf.variant%/bin/Peach.Core.Test.dll
 output/%waf.variant%/bin/Peach.Pro.Test.dll
 output/%waf.variant%/bin/%PlatformTest%
-output/%waf.variant%/bin/Godel.Tests.dll]]></param>
+output/%waf.variant%/bin/Godel.Tests.dll
+output/%waf.variant%/bin/PitTester.exe]]></param>
           <param name="nunit_platform" value="MSIL" />
           <param name="nunit_process_per_process" value="true" />
           <param name="nunit_version" value="NUnit-2.6.4" />
