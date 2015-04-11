@@ -67,7 +67,7 @@
           <param name="dotNetCoverage.PartCover.platformVersion" value="v2.0" />
           <param name="dotNetTestRunner.Type" value="NUnit" />
           <param name="nunit_categery_include"><![CDATA[%QuickTests%
-%LongTests%
+%SlowTests%
 %UnreliableTests%]]></param>
           <param name="nunit_enabled" value="checked" />
           <param name="nunit_environment" value="v4.0" />
