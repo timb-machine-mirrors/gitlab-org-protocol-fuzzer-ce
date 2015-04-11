@@ -9,8 +9,9 @@ using System.IO;
 
 namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 {
-	[TestFixture] 
-	[Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	public class GdbTests
 	{
 		[Test]

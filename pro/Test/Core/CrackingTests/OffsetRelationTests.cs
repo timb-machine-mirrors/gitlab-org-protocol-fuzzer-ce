@@ -35,7 +35,9 @@ using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.CrackingTests
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	public class OffsetRelationTests
 	{
 		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "String 'TheDataModel.Data' has offset of 160 bits but buffer only has 96 bits.")]

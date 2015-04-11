@@ -9,7 +9,8 @@ using System.Linq;
 namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 {
 	[TestFixture]
-	[Category("Peach")]
+	[Quick]
+	[Peach]
 	class CleanupRegistryTests
 	{
 		const string Monitor = "CleanupRegistry";

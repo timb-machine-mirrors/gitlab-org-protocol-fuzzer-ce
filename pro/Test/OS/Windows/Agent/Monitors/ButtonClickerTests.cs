@@ -8,7 +8,8 @@ using System.Windows.Forms;
 namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 {
 	[TestFixture]
-	[Category("Peach")]
+	[Quick]
+	[Peach]
 	[Ignore("This requires an interactive windows session")]
 	class ButtonClickerTests
 	{

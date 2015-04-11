@@ -6,7 +6,9 @@ using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Transformers.Crypto
 {
-    [TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
     class UnixMd5CryptTests : DataModelCollector
     {
         [Test]

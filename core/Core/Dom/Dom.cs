@@ -59,8 +59,19 @@ namespace Peach.Core.Dom
 		public NamedCollection<Agent> agents { get; private set; }
 		public NamedCollection<DataSet> datas { get; private set; }
 
-		public Scripting Python { get; private set; }
-		public Scripting Ruby { get; private set; }
+		Scripting _python;
+
+		public Scripting Python
+		{
+			get { return _python ?? (_python = new PythonScripting()); }
+		}
+
+		Scripting _ruby;
+
+		public Scripting Ruby
+		{
+			get { return _ruby ?? (_ruby = new RubyScripting()); }
+		}
 
 		public Dom()
 		{
@@ -76,9 +87,6 @@ namespace Peach.Core.Dom
 			ns = new NamedCollection<Dom>();
 			agents = new NamedCollection<Agent>();
 			datas = new NamedCollection<DataSet>();
-
-			Python = new PythonScripting();
-			Ruby = new RubyScripting();
 		}
 
 		/// <summary>

@@ -11,7 +11,9 @@ using Peach.Pro.Core.Publishers;
 
 namespace Peach.Pro.Test.Core
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class RunTests
 	{
 		[Test, ExpectedException(typeof(PeachException), ExpectedMessage="Error, DataModel could not resolve ref 'foo'. XML:\n<DataModel ref=\"foo\" />")]

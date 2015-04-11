@@ -7,7 +7,8 @@ using Peach.Core.Test;
 namespace Peach.Pro.Test.Core.Monitors
 {
 	[TestFixture]
-	[Category("Peach")]
+	[Quick]
+	[Peach]
 	internal class ReplayMonitorTests
 	{
 		private readonly List<Fault> _nonRerpoFaults = new List<Fault>();

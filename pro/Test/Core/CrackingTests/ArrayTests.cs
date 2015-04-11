@@ -26,17 +26,24 @@
 
 // $Id$
 
+using System;
+using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
 using Peach.Core.Dom;
+using Peach.Core.IO;
+using Peach.Core.Publishers;
 using Peach.Core.Test;
+using Logger = NLog.Logger;
 
 namespace Peach.Pro.Test.Core.CrackingTests
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	public class ArrayTests
 	{
 
@@ -582,6 +589,124 @@ namespace Peach.Pro.Test.Core.CrackingTests
 
 			Assert.AreEqual("Error, unable to resolve field \"Root.data.str2\" against \"DM\".", ex.Message);
 		}
+
+		class DeferredPublisher : StreamPublisher
+		{
+			static readonly Logger ClassLogger = NLog.LogManager.GetCurrentClassLogger();
+
+			public DeferredPublisher(string payload)
+				: base(new Dictionary<string, Variant>())
+			{
+				var bytes = Encoding.ASCII.GetBytes(payload);
+
+				stream = new MemoryStream();
+				stream.Write(bytes, 0, bytes.Length);
+				stream.Position = 0;
+			}
+
+			protected override Logger Logger
+			{
+				get { return ClassLogger; }
+			}
+
+			public override void WantBytes(long count)
+			{
+				if (stream.Position + count > stream.Length)
+					Assert.Fail("Publisher shouldn't be asking for more bytes!");
+			}
+		}
+
+		[Test]
+		public void TokenAfterArrayMoreData()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Block name='blk' minOccurs='0'>
+			<Choice name='c'>
+				<Block name='b'>
+					<String name='key' />
+					<String name='delim' value=': '  token='true' />
+					<String name='value' />
+					<String name='eol' value='\r\n' token='true' />
+				</Block>
+			</Choice>
+		</Block>
+		<Block>
+			<String name='end' value='\r\n' token='true' />
+		</Block>
+		<String name='body' />
+	</DataModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var pub = new DeferredPublisher("Foo: Bar\r\nBaz: Qux\r\n\r\n");
+			var cracker = new DataCracker();
+
+			cracker.CrackData(dom.dataModels[0], new BitStream(pub));
+
+			Assert.AreEqual("", (string)dom.dataModels[0][2].InternalValue);
+		}
+
+		[Test]
+		public void TokenAfterArrayMoreData2()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Block name='blk' minOccurs='0'>
+			<Choice name='c'>
+				<Block name='b'>
+					<String name='key' />
+					<String name='delim' value=': '  token='true' />
+					<String name='value' />
+					<String name='eol' value='\r\n' token='true' />
+				</Block>
+			</Choice>
+		</Block>
+		<Block>
+			<String />
+			<String name='end' value='\r\n' token='true' />
+		</Block>
+		<String name='body' />
+	</DataModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var pub = new DeferredPublisher("Foo: Bar\r\nBaz: Qux\r\n\r\n");
+			var cracker = new DataCracker();
+
+			cracker.CrackData(dom.dataModels[0], new BitStream(pub));
+
+			Assert.AreEqual("", (string)dom.dataModels[0][2].InternalValue);
+		}
+
+
+		[Test]
+		public void TokenAfterArrayWithTokenMoreData()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String />
+		<Block minOccurs='0'>
+			<String value=','  token='true' />
+			<String />
+		</Block>
+		<String value='\n' token='true' />
+		<String />
+	</DataModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var pub = new DeferredPublisher("a,b,c\ndone");
+			var cracker = new DataCracker();
+
+			cracker.CrackData(dom.dataModels[0], new BitStream(pub));
+
+			Assert.AreEqual("done", (string)dom.dataModels[0][3].InternalValue);
+		}
+
 	}
 }
 

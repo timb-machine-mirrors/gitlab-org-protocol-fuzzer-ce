@@ -34,7 +34,9 @@ using System.IO;
 
 namespace Peach.Core.Test
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture] 
+	[Peach]
+	[Quick]
 	public class BitStreamTest
 	{
 		[Test]

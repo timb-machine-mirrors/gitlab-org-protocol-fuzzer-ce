@@ -3,10 +3,13 @@ using System.IO;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.PitParserTests
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class DefaultValuesTests
 	{
 		public void TestEncoding(Encoding enc, bool defaultArgs)
