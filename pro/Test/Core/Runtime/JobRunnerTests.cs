@@ -148,7 +148,7 @@ namespace Peach.Pro.Test.Core.Runtime
 
 			WaitUntil(tuple.Job.Guid, JobStatus.Running, JobStatus.Stopped);
 
-			task.Wait();
+			Assert.IsTrue(task.Wait(TimeSpan.FromSeconds(10)));
 
 			VerifyDatabase(tuple.Job);
 		}
@@ -162,7 +162,7 @@ namespace Peach.Pro.Test.Core.Runtime
 			WaitUntil(tuple.Job.Guid, JobStatus.Running);
 			tuple.JobRunner.Stop();
 			WaitUntil(tuple.Job.Guid, JobStatus.Stopped);
-			task.Wait();
+			Assert.IsTrue(task.Wait(TimeSpan.FromSeconds(10)));
 			VerifyDatabase(tuple.Job);
 		}
 
@@ -179,7 +179,7 @@ namespace Peach.Pro.Test.Core.Runtime
 			WaitUntil(tuple.Job.Guid, JobStatus.Running);
 			tuple.JobRunner.Stop();
 			WaitUntil(tuple.Job.Guid, JobStatus.Stopped);
-			task.Wait();
+			Assert.IsTrue(task.Wait(TimeSpan.FromSeconds(10)));
 			VerifyDatabase(tuple.Job);
 		}
 
@@ -195,7 +195,7 @@ namespace Peach.Pro.Test.Core.Runtime
 			var tuple = StartJob(jobRequest);
 			var task = Task.Factory.StartNew(tuple.JobRunner.Run);
 			WaitUntil(tuple.Job.Guid, JobStatus.Stopped);
-			task.Wait();
+			Assert.IsTrue(task.Wait(TimeSpan.FromSeconds(10)));
 
 			var id = tuple.Job.Guid;
 
@@ -234,7 +234,7 @@ namespace Peach.Pro.Test.Core.Runtime
 				var runner = new JobRunner(job, "", xmlFile.Path);
 				var task = Task.Factory.StartNew(runner.Run);
 				WaitUntil(job.Guid, JobStatus.Stopped);
-				task.Wait();
+				Assert.IsTrue(task.Wait(TimeSpan.FromSeconds(10)));
 
 				using (var db = new NodeDatabase())
 				{
