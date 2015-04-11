@@ -6,6 +6,7 @@ using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.StateModel
 {
@@ -42,7 +43,9 @@ namespace Peach.Pro.Test.Core.StateModel
 		}
 	}
 
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class ActionTests
 	{
 		bool started;

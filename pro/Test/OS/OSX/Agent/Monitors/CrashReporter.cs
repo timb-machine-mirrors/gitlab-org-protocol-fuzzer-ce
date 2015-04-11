@@ -4,10 +4,13 @@ using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Pro.OS.OSX.Agent.Monitors;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	public class CrashReporterTest
 	{
 		static string CrashingProcess

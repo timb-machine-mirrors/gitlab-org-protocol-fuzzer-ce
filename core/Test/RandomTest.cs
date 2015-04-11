@@ -5,7 +5,9 @@ using NUnit.Framework;
 
 namespace Peach.Core.Test
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Peach]
+	[Quick]
 	class RandomTest
 	{
 		// Precomputed values for a seed of 0

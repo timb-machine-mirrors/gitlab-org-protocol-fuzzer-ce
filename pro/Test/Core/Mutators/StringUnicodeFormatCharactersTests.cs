@@ -1,10 +1,13 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Peach.Core.Dom;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
+	[Quick]
+	[Peach]
 	class StringUnicodeFormatCharactersTests : StringMutatorTester
 	{
 		public StringUnicodeFormatCharactersTests()

@@ -7,7 +7,8 @@ using Peach.Core.Test;
 namespace Peach.Pro.Test.Core.Monitors
 {
 	[TestFixture]
-	[Category("Peach")]
+	[Quick]
+	[Peach]
 	class SaveFileMonitorTests
 	{
 		private string _file;

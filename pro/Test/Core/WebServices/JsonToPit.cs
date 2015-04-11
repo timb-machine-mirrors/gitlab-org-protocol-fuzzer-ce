@@ -7,10 +7,13 @@ using System.Xml;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using Peach.Pro.Core.WebServices;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.WebServices
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	public class JsonToPit
 	{
 		[Test]

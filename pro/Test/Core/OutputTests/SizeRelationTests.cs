@@ -35,7 +35,9 @@ using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.OutputTests
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class SizeRelationTests
 	{
 		[Test]

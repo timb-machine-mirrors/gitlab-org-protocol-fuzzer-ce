@@ -6,7 +6,9 @@ using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Publishers
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class TcpListenerPublisherTests : DataModelCollector
 	{
 		[Test]

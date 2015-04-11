@@ -18,6 +18,8 @@ using Peach.Pro.Core;
 namespace Peach.Pro.Test.Core.Agent
 {
 	[TestFixture]
+	[Quick]
+	[Peach]
 	class RestTests
 	{
 		/*
