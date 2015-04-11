@@ -66,7 +66,9 @@
           <param name="dotNetCoverage.PartCover.platformBitness" value="x86" />
           <param name="dotNetCoverage.PartCover.platformVersion" value="v2.0" />
           <param name="dotNetTestRunner.Type" value="NUnit" />
-          <param name="nunit_categery_exclude" value="Unreliable" />
+          <param name="nunit_categery_include"><![CDATA[%QuickTests%
+%LongTests%
+%UnreliableTests%]]></param>
           <param name="nunit_enabled" value="checked" />
           <param name="nunit_environment" value="v4.0" />
           <param name="nunit_include"><![CDATA[output/%waf.variant%/bin/Peach.Core.Test.dll
@@ -75,7 +77,7 @@ output/%waf.variant%/bin/%PlatformTest%
 output/%waf.variant%/bin/Godel.Tests.dll]]></param>
           <param name="nunit_platform" value="MSIL" />
           <param name="nunit_process_per_process" value="true" />
-          <param name="nunit_version" value="NUnit-2.6.3" />
+          <param name="nunit_version" value="NUnit-2.6.4" />
           <param name="teamcity.step.mode" value="default" />
         </parameters>
       </runner>
