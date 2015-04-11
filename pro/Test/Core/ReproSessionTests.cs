@@ -10,7 +10,9 @@ using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core
 {
-	[TestFixture, Category("Peach")]
+	[TestFixture]
+	[Peach]
+	[Quick]
 	class ReproSessionTests
 	{
 		class Args

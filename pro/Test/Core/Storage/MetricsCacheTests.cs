@@ -1,10 +1,13 @@
 ﻿using NUnit.Framework;
 using Peach.Core;
 using Peach.Pro.Core.Storage;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Storage
 {
 	[TestFixture]
+	[Peach]
+	[Quick]
 	class MetricsCacheTests
 	{
 		TempFile _tmp;

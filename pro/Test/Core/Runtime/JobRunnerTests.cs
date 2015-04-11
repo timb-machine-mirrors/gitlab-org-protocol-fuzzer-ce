@@ -11,10 +11,13 @@ using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.Test.Core.Storage;
 using TestStatus = Peach.Pro.Core.WebServices.Models.TestStatus;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Runtime
 {
 	[TestFixture]
+	[Peach]
+	[Quick]
 	class JobRunnerTests
 	{
 		TempFile _tmp;

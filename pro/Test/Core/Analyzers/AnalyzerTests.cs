@@ -10,7 +10,8 @@ namespace Peach.Pro.Test.Core.Analyzers
 	public class AnalyzerTests : DataModelCollector
 	{
 		[Test]
-		[Category("Peach")]
+		[Peach]
+		[Quick]
 		public void TestFieldData()
 		{
 			string xml = @"
