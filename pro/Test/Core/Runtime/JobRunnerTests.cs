@@ -69,7 +69,7 @@ namespace Peach.Pro.Test.Core.Runtime
 			Job _job;
 			public JobRunner JobRunner { get; private set; }
 			Thread _thread;
-			Exception _caught;
+			Exception _caught = null;
 
 			public SafeRunner(string xmlFile, JobRequest jobRequest)
 			{
@@ -109,6 +109,8 @@ namespace Peach.Pro.Test.Core.Runtime
 			public void Join()
 			{
 				Assert.IsTrue(_thread.Join(TimeSpan.FromSeconds(10)));
+				if (_caught != null)
+					throw new AggregateException(_caught);
 			}
 
 			public Job GetJob()
