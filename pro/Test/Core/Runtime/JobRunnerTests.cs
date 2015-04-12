@@ -2,7 +2,6 @@
 using System.Linq;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Pro.Core;
@@ -42,83 +41,12 @@ namespace Peach.Pro.Test.Core.Runtime
 		</State>
 	</StateModel>
 
-	<Agent name='LocalAgent'>
-		<Monitor class='RandoFaulter'>
-		</Monitor>
-	</Agent>
-
 	<Test name='Default'>
 		<StateModel ref='SM' />
 		<Publisher class='Null'/>
-		<Agent ref='LocalAgent' />
 	</Test>
 </Peach>
 ";
-		class JobTuple
-		{
-			public Job Job { get; set; }
-			public JobRunner JobRunner { get; set; }
-		}
-
-		JobTuple StartJob(JobRequest jobRequest)
-		{
-			var job = JobRunner.CreateJob(_tmp.Path, jobRequest, Guid.NewGuid());
-			return new JobTuple
-			{
-				Job = job,
-				JobRunner = new JobRunner(job, "", _tmp.Path),
-			};
-		}
-
-		void VerifyDatabase(Job job)
-		{
-			using (var db = new NodeDatabase())
-			{
-				job = db.GetJob(job.Guid);
-				Assert.IsNotNull(job);
-			}
-
-			using (var db = new JobDatabase(job.DatabasePath))
-			{
-				Assert.IsNotNull(db.GetJob(job.Guid));
-			}
-		}
-
-		Job GetJob(Guid guid)
-		{
-			Job job;
-			using (var db = new NodeDatabase())
-			{
-				job = db.GetJob(guid);
-				Assert.IsNotNull(job);
-			}
-
-			if (!File.Exists(job.DatabasePath))
-				return job;
-
-			using (var db = new JobDatabase(job.DatabasePath))
-			{
-				job = db.GetJob(job.Guid);
-				Assert.IsNotNull(job);
-			}
-
-			return job;
-		}
-
-		void WaitUntil(Guid guid, params JobStatus[] status)
-		{
-			// waits up to 10 seconds
-			for (var i = 0; i < 100; i++)
-			{
-				var job = GetJob(guid);
-				Assert.IsNotNull(job);
-				if (status.Contains(job.Status))
-					return;
-
-				Thread.Sleep(100);
-			}
-			Assert.Fail("Timeout");
-		}
 
 		[SetUp]
 		public void SetUp()
@@ -136,6 +64,95 @@ namespace Peach.Pro.Test.Core.Runtime
 			_tmp.Dispose();
 		}
 
+		class SafeRunner : IDisposable
+		{
+			Job _job;
+			public JobRunner JobRunner { get; private set; }
+			Thread _thread;
+			Exception _caught;
+
+			public SafeRunner(string xmlFile, JobRequest jobRequest)
+			{
+				_job = JobRunner.CreateJob(xmlFile, jobRequest, Guid.NewGuid());
+				JobRunner = new JobRunner(_job, "", xmlFile);
+				_thread = new Thread(() =>
+				{
+					try
+					{
+						JobRunner.Run();
+					}
+					catch (Exception ex)
+					{
+						_caught = ex;
+					}
+				});
+				_thread.Start();
+			}
+
+			public Guid Id { get { return _job.Guid; } }
+
+			public void WaitUntil(params JobStatus[] status)
+			{
+				// waits up to 20 seconds
+				for (var i = 0; i < 40; i++)
+				{
+					var job = GetJob();
+					Assert.IsNotNull(job);
+					if (status.Contains(job.Status))
+						return;
+
+					Thread.Sleep(500);
+				}
+				Assert.Fail("Timeout");
+			}
+
+			public void Join()
+			{
+				Assert.IsTrue(_thread.Join(TimeSpan.FromSeconds(10)));
+			}
+
+			public Job GetJob()
+			{
+				Job job;
+				using (var db = new NodeDatabase())
+				{
+					job = db.GetJob(Id);
+					Assert.IsNotNull(job);
+				}
+
+				if (!File.Exists(job.DatabasePath))
+					return job;
+
+				using (var db = new JobDatabase(job.DatabasePath))
+				{
+					job = db.GetJob(Id);
+					Assert.IsNotNull(job);
+				}
+
+				return job;
+			}
+
+			public void VerifyDatabase()
+			{
+				Job job;
+				using (var db = new NodeDatabase())
+				{
+					job = db.GetJob(Id);
+					Assert.IsNotNull(job);
+				}
+
+				using (var db = new JobDatabase(job.DatabasePath))
+				{
+					Assert.IsNotNull(db.GetJob(Id));
+				}
+			}
+
+			public void Dispose()
+			{
+				_thread.Abort();
+			}
+		}
+
 		[Test]
 		public void TestBasic()
 		{
@@ -143,44 +160,44 @@ namespace Peach.Pro.Test.Core.Runtime
 			{
 				RangeStop = 1,
 			};
-			var tuple = StartJob(jobRequest);
-			var task = Task.Factory.StartNew(tuple.JobRunner.Run);
-
-			WaitUntil(tuple.Job.Guid, JobStatus.Running, JobStatus.Stopped);
-
-			Assert.IsTrue(task.Wait(TimeSpan.FromSeconds(10)));
-
-			VerifyDatabase(tuple.Job);
+			using (var runner = new SafeRunner(_tmp.Path, jobRequest))
+			{
+				runner.WaitUntil(JobStatus.Stopped);
+				runner.Join();
+				runner.VerifyDatabase();
+			}
 		}
 
 		[Test]
 		public void TestStop()
 		{
 			var jobRequest = new JobRequest();
-			var tuple = StartJob(jobRequest);
-			var task = Task.Factory.StartNew(tuple.JobRunner.Run);
-			WaitUntil(tuple.Job.Guid, JobStatus.Running);
-			tuple.JobRunner.Stop();
-			WaitUntil(tuple.Job.Guid, JobStatus.Stopped);
-			Assert.IsTrue(task.Wait(TimeSpan.FromSeconds(10)));
-			VerifyDatabase(tuple.Job);
+			using (var runner = new SafeRunner(_tmp.Path, jobRequest))
+			{
+				runner.WaitUntil(JobStatus.Running);
+				runner.JobRunner.Stop();
+				runner.WaitUntil(JobStatus.Stopped);
+				runner.Join();
+				runner.VerifyDatabase();
+			}
 		}
 
 		[Test]
 		public void TestPauseContinue()
 		{
 			var jobRequest = new JobRequest();
-			var tuple = StartJob(jobRequest);
-			var task = Task.Factory.StartNew(tuple.JobRunner.Run);
-			WaitUntil(tuple.Job.Guid, JobStatus.Running);
-			tuple.JobRunner.Pause();
-			WaitUntil(tuple.Job.Guid, JobStatus.Paused);
-			tuple.JobRunner.Continue();
-			WaitUntil(tuple.Job.Guid, JobStatus.Running);
-			tuple.JobRunner.Stop();
-			WaitUntil(tuple.Job.Guid, JobStatus.Stopped);
-			Assert.IsTrue(task.Wait(TimeSpan.FromSeconds(10)));
-			VerifyDatabase(tuple.Job);
+			using (var runner = new SafeRunner(_tmp.Path, jobRequest))
+			{
+				runner.WaitUntil(JobStatus.Running);
+				runner.JobRunner.Pause();
+				runner.WaitUntil(JobStatus.Paused);
+				runner.JobRunner.Continue();
+				runner.WaitUntil(JobStatus.Running);
+				runner.JobRunner.Stop();
+				runner.WaitUntil(JobStatus.Stopped);
+				runner.Join();
+				runner.VerifyDatabase();
+			}
 		}
 
 		[Test]
@@ -191,30 +208,28 @@ namespace Peach.Pro.Test.Core.Runtime
 			{
 				IsControlIteration = true,
 			};
-
-			var tuple = StartJob(jobRequest);
-			var task = Task.Factory.StartNew(tuple.JobRunner.Run);
-			WaitUntil(tuple.Job.Guid, JobStatus.Stopped);
-			Assert.IsTrue(task.Wait(TimeSpan.FromSeconds(10)));
-
-			var id = tuple.Job.Guid;
-
-			using (var db = new NodeDatabase())
+			using (var runner = new SafeRunner(_tmp.Path, jobRequest))
 			{
-				DatabaseTests.AssertResult(db.GetTestEventsByJob(id), new[]
-				{
-					 new TestEvent(1, id, TestStatus.Pass, "Loading pit file", "Loading pit file '{0}'".Fmt(_tmp.Path), null),
-					 new TestEvent(2, id, TestStatus.Pass, "Starting fuzzing engine", "Starting fuzzing engine", null),
-					 new TestEvent(3, id, TestStatus.Pass, "Connecting to agent", "Connecting to agent 'local://'", null),
-					 new TestEvent(4, id, TestStatus.Pass, "Starting monitor", "Starting monitor 'RandoFaulter'", null),
-					 new TestEvent(5, id, TestStatus.Pass, "Starting fuzzing session", "Notifying agent 'local://' that the fuzzing session is starting", null),
-					 new TestEvent(6, id, TestStatus.Pass, "Running iteration", "Running the initial control record iteration", null),
-				});
-			}
+				runner.WaitUntil(JobStatus.Stopped);
+				runner.Join();
 
-			var job = GetJob(tuple.Job.Guid);
-			Assert.IsTrue(File.Exists(job.DebugLogPath));
-			Console.Write(File.ReadAllText(job.DebugLogPath));
+				using (var db = new NodeDatabase())
+				{
+					DatabaseTests.AssertResult(db.GetTestEventsByJob(runner.Id), new[]
+					{
+						 new TestEvent(1, runner.Id, TestStatus.Pass, 
+							 "Loading pit file", "Loading pit file '{0}'".Fmt(_tmp.Path), null),
+						 new TestEvent(2, runner.Id, TestStatus.Pass, 
+							 "Starting fuzzing engine", "Starting fuzzing engine", null),
+						 new TestEvent(3, runner.Id, TestStatus.Pass, 
+							 "Running iteration", "Running the initial control record iteration", null),
+					});
+				}
+
+				var job = runner.GetJob();
+				Assert.IsTrue(File.Exists(job.DebugLogPath));
+				Console.Write(File.ReadAllText(job.DebugLogPath));
+			}
 		}
 
 		[Test]
@@ -228,33 +243,31 @@ namespace Peach.Pro.Test.Core.Runtime
 				{
 					IsControlIteration = true,
 				};
-
-				var id = Guid.NewGuid();
-				var job = JobRunner.CreateJob(xmlFile.Path, jobRequest, id);
-				var runner = new JobRunner(job, "", xmlFile.Path);
-				var task = Task.Factory.StartNew(runner.Run);
-				WaitUntil(job.Guid, JobStatus.Stopped);
-				Assert.IsTrue(task.Wait(TimeSpan.FromSeconds(10)));
-
-				using (var db = new NodeDatabase())
+				using (var runner = new SafeRunner(xmlFile.Path, jobRequest))
 				{
-					DatabaseTests.AssertResult(db.GetTestEventsByJob(id), new[]
+					runner.WaitUntil(JobStatus.Stopped);
+					runner.Join();
+
+					using (var db = new NodeDatabase())
+					{
+						DatabaseTests.AssertResult(db.GetTestEventsByJob(runner.Id), new[]
 					{
 						 new TestEvent(
 							 1, 
-							 id, 
+							 runner.Id, 
 							 TestStatus.Fail, 
 							 "Loading pit file", 
 							 "Loading pit file '{0}'".Fmt(xmlFile.Path), 
-							 "Error: XML Failed to load: Data at the root level is invalid. Line 31, position 1."),
+							 "Error: XML Failed to load: Data at the root level is invalid. Line 25, position 1."),
 					});
+					}
+
+					var job = runner.GetJob();
+					Assert.IsFalse(File.Exists(job.DebugLogPath));
+
+					Assert.IsTrue(File.Exists(job.AltDebugLogPath));
+					Console.Write(File.ReadAllText(job.AltDebugLogPath));
 				}
-
-				job = GetJob(id);
-				Assert.IsFalse(File.Exists(job.DebugLogPath));
-
-				Assert.IsTrue(File.Exists(job.AltDebugLogPath));
-				Console.Write(File.ReadAllText(job.AltDebugLogPath));
 			}
 		}
 	}

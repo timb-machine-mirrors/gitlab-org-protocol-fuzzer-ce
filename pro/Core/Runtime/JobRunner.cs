@@ -106,16 +106,16 @@ namespace Peach.Pro.Core.Runtime
 			}
 			catch (ApplicationException ex) // PeachException or SoftException
 			{
-				_jobLogger.JobFail(_config.id, ex);
 				if (Configuration.LogLevel == LogLevel.Trace)
 					Logger.Error("Exception: {0}", ex);
 				else
 					Logger.Error("Exception: {0}", ex.Message);
+				_jobLogger.JobFail(_config.id, ex);
 			}
 			catch (Exception ex)
 			{
-				_jobLogger.JobFail(_config.id, ex);
 				Logger.Error("Unhandled Exception: {0}", ex);
+				_jobLogger.JobFail(_config.id, ex);
 				throw;
 			}
 			finally
