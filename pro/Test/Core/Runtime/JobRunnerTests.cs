@@ -11,6 +11,8 @@ using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.Test.Core.Storage;
 using TestStatus = Peach.Pro.Core.WebServices.Models.TestStatus;
 using Peach.Core.Test;
+using NLog.Config;
+using NLog;
 
 namespace Peach.Pro.Test.Core.Runtime
 {
@@ -19,7 +21,9 @@ namespace Peach.Pro.Test.Core.Runtime
 	[Quick]
 	class JobRunnerTests
 	{
+		TempDirectory _tmpDir;
 		TempFile _tmp;
+		LoggingConfiguration _loggingConfig;
 
 		const string PitXml =
 @"<?xml version='1.0' encoding='utf-8'?>
@@ -54,14 +58,19 @@ namespace Peach.Pro.Test.Core.Runtime
 			_tmp = new TempFile();
 			File.WriteAllText(_tmp.Path, PitXml);
 
-			if (File.Exists(NodeDatabase.GetDatabasePath()))
-				File.Delete(NodeDatabase.GetDatabasePath());
+			_tmpDir = new TempDirectory();
+			Configuration.LogRoot = _tmpDir.Path;
+
+			_loggingConfig = LogManager.Configuration;
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
+			_tmpDir.Dispose();
 			_tmp.Dispose();
+
+			LogManager.Configuration = _loggingConfig;
 		}
 
 		class SafeRunner : IDisposable

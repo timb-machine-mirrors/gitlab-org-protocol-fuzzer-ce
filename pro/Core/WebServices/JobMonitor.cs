@@ -106,6 +106,8 @@ namespace Peach.Pro.Core.WebServices
 		protected void JobFail(Exception ex)
 		{
 			var job = GetJob();
+			if (job == null)
+				return;
 
 			job.Status = JobStatus.Stopped;
 			job.Result = ex.Message;
