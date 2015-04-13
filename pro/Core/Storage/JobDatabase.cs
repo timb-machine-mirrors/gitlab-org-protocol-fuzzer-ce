@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Peach.Pro.Core.Storage
 {
-	internal class JobDatabase : Database
+	public class JobDatabase : Database
 	{
 		protected override IEnumerable<Type> Schema
 		{
