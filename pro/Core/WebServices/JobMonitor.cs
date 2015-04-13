@@ -85,6 +85,9 @@ namespace Peach.Pro.Core.WebServices
 			// copy job from JobDatabase into NodeDatabase
 			// this is needed to update the LogPath
 			var job = GetJob();
+			if (job == null)
+				return;
+
 			job.Status = JobStatus.Stopped;
 
 			if (File.Exists(job.DatabasePath))

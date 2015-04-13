@@ -363,6 +363,8 @@ namespace Peach.Pro.Test.Core.WebServices
 		[SetUp]
 		public void SetUp()
 		{
+			_monitor = new ExternalJobMonitor();
+
 			_tmp1 = new TempFile();
 			_tmp2 = new TempFile();
 			File.WriteAllText(_tmp1.Path, PitXml);
