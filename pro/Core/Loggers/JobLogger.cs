@@ -82,6 +82,8 @@ namespace Peach.Pro.Core.Loggers
 		MemoryTarget _tempTarget;
 		LoggingConfiguration _loggingConfig;
 
+		enum Category { Faults, Reproducing, NonReproducable }
+
 		/// <summary>
 		/// The user configured base path for all the logs
 		/// </summary>
@@ -102,264 +104,175 @@ namespace Peach.Pro.Core.Loggers
 			ConfigureTemporaryLogging();
 		}
 
-		public enum Category { Faults, Reproducing, NonReproducable }
-
-		protected void SaveFault(RunContext context, Category category, Fault fault)
+		protected override void Agent_AgentConnect(RunContext context, AgentClient agent)
 		{
-			switch (category)
+			if (context.controlRecordingIteration)
 			{
-				case Category.Faults:
-					_log.WriteLine("! Reproduced fault at iteration {0} : {1}",
-						fault.iteration, DateTime.Now);
-					break;
-				case Category.NonReproducable:
-					_log.WriteLine("! Non-reproducable fault detected at iteration {0} : {1}",
-						fault.iteration, DateTime.Now);
-					break;
-				case Category.Reproducing:
-					_log.WriteLine("! Fault detected at iteration {0}, trying to reproduce : {1}",
-						fault.iteration, DateTime.Now);
-					break;
-			}
-
-			var now = DateTime.UtcNow;
-
-			var bucket = string.Join("_", new[] { 
-				fault.majorHash, 
-				fault.minorHash, 
-				fault.exploitability 
-			}.Where(s => !string.IsNullOrEmpty(s)));
-
-			if (fault.folderName != null)
-				bucket = fault.folderName;
-			else if (string.IsNullOrEmpty(bucket))
-				bucket = "Unknown";
-
-			// root/category/bucket/iteration
-			var subDir = Path.Combine(
-				_job.LogPath,
-				category.ToString(),
-				fault.folderName,
-				fault.iteration.ToString());
-
-			var faultDetail = new FaultDetail
-			{
-				Files = new List<FaultFile>(),
-				Reproducable = category == Category.Reproducing,
-				Iteration = fault.iteration,
-				TimeStamp = now,
-				BucketName = bucket,
-				Source = fault.detectionSource,
-				Exploitability = fault.exploitability,
-				MajorHash = fault.majorHash,
-				MinorHash = fault.minorHash,
-
-				Title = fault.title,
-				Description = fault.description,
-				Seed = context.config.randomSeed,
-				IterationStart = fault.iterationStart,
-				IterationStop = fault.iterationStop,
-
-				FaultPath = subDir,
-			};
-
-			foreach (var kv in fault.toSave)
-			{
-				var fileName = Path.Combine(subDir, kv.Key);
-				var size = SaveFile(fileName, kv.Value);
-				faultDetail.Files.Add(new FaultFile
+				using (var db = new NodeDatabase())
 				{
-					Name = Path.GetFileName(fileName),
-					FullName = kv.Key,
-					Size = size,
-				});
-			}
+					if (_agentConnect++ > 0)
+						EventSuccess(db);
 
-			if (category != Category.Reproducing)
-			{
-				// Ensure any past saving of this fault as Reproducing has been cleaned up
-				var reproDir = Path.Combine(_job.LogPath, Category.Reproducing.ToString());
-
-				if (Directory.Exists(reproDir))
-				{
-					try
-					{
-						Directory.Delete(reproDir, true);
-					}
-					catch (IOException)
-					{
-						// Can happen if a process has a file/subdirectory open...
-					}
-				}
-
-				using (var db = new JobDatabase(_job.DatabasePath))
-				{
-					db.InsertFault(faultDetail);
-					_cache.OnFault(new FaultMetric
-					{
-						Iteration = fault.iteration,
-						MajorHash = fault.majorHash ?? "UNKNOWN",
-						MinorHash = fault.minorHash ?? "UNKNOWN",
-						Timestamp = now,
-						Hour = now.Hour,
-					});
-
-					_job.FaultCount++;
-					db.UpdateJob(_job);
+					AddEvent(db,
+						context.config.id,
+						"Connecting to agent",
+						"Connecting to agent '{0}'".Fmt(agent.Url));
 				}
 			}
+		}
+
+		protected override void Agent_StartMonitor(RunContext context, AgentClient agent, string name, string cls)
+		{
+			if (context.controlRecordingIteration)
+			{
+				using (var db = new NodeDatabase())
+				{
+					EventSuccess(db);
+					AddEvent(db,
+						context.config.id,
+						"Starting monitor",
+						"Starting monitor '{0}'".Fmt(cls));
+				}
+			}
+		}
+
+		protected override void Agent_SessionStarting(RunContext context, AgentClient agent)
+		{
+			if (context.controlRecordingIteration)
+			{
+				using (var db = new NodeDatabase())
+				{
+					EventSuccess(db);
+					AddEvent(db,
+						context.config.id,
+						"Starting fuzzing session",
+						"Notifying agent '{0}' that the fuzzing session is starting".Fmt(agent.Url));
+				}
+			}
+		}
+
+		protected override void Engine_TestStarting(RunContext context)
+		{
+			Debug.Assert(_log == null);
+
+			using (var db = new NodeDatabase())
+			{
+				_job = db.GetJob(context.config.id);
+				if (_job == null)
+					throw new PeachException("Missing job");
+			}
+
+			if (_job.DatabasePath == null)
+			{
+				_job.LogPath = GetLogPath(context, BasePath);
+				if (!Directory.Exists(_job.LogPath))
+					Directory.CreateDirectory(_job.LogPath);
+			}
+
+			SwitchDebugLog(context.config);
+
+			using (var db = new JobDatabase(_job.DatabasePath))
+			{
+				var job = db.GetJob(_job.Guid);
+				if (job == null)
+				{
+					_job.Seed = context.config.randomSeed;
+					_job.Mode = JobMode.Fuzzing;
+					_job.Status = JobStatus.Running;
+					_job.StartDate = DateTime.UtcNow;
+
+					db.InsertJob(_job);
+				}
+				else
+				{
+					_job = job;
+				}
+			}
+
+			_cache = new MetricsCache(_job.DatabasePath);
+
+			using (var db = new NodeDatabase())
+			{
+				AddEvent(db,
+					context.config.id,
+					"Starting fuzzing engine",
+					"Starting fuzzing engine");
+
+				// Before we get iteration start, we will get AgentConnect & SessionStart
+				_agentConnect = 0;
+
+				db.UpdateJob(_job);
+			}
+
+			_log = File.CreateText(Path.Combine(_job.LogPath, "status.txt"));
+
+			_log.WriteLine("Peach Fuzzing Run");
+			_log.WriteLine("=================");
+			_log.WriteLine("");
+			_log.WriteLine("Date of run: " + context.config.runDateTime);
+			_log.WriteLine("Peach Version: " + context.config.version);
+
+			_log.WriteLine("Seed: " + context.config.randomSeed);
+
+			_log.WriteLine("Command line: " + string.Join(" ", context.config.commandLine));
+			_log.WriteLine("Pit File: " + context.config.pitFile);
+			_log.WriteLine(". Test starting: " + context.test.Name);
+			_log.WriteLine("");
 
 			_log.Flush();
 		}
 
-		protected override void Engine_ReproFault(
-			RunContext context,
-			uint currentIteration,
-			StateModel stateModel,
-			Fault[] faults)
+		protected override void Engine_TestError(RunContext context, Exception ex)
 		{
-			Debug.Assert(_reproFault == null);
+			Logger.Trace("Engine_TestError");
 
-			_reproFault = CombineFaults(currentIteration, stateModel, faults);
-			SaveFault(context, Category.Reproducing, _reproFault);
+			_caught = ex;
+
+			// Happens if we can't open the log during TestStarting()
+			// because of permission issues
+			if (_log != null)
+			{
+				_log.WriteLine("! Test error:");
+				_log.WriteLine(ex);
+				_log.Flush();
+			}
 		}
 
-		protected override void Engine_ReproFailed(RunContext context, uint currentIteration)
+		protected override void Engine_TestFinished(RunContext context)
 		{
-			Debug.Assert(_reproFault != null);
+			Logger.Trace("Engine_TestFinished");
 
-			// Update the searching ranges for the fault
-			_reproFault.iterationStart = context.reproducingInitialIteration - context.reproducingIterationJumpCount;
-			_reproFault.iterationStop = _reproFault.iteration;
-
-			SaveFault(context, Category.NonReproducable, _reproFault);
-			_reproFault = null;
-		}
-
-		protected override void Engine_Fault(
-			RunContext context,
-			uint currentIteration,
-			StateModel stateModel,
-			Fault[] faults)
-		{
-			var fault = CombineFaults(currentIteration, stateModel, faults);
-
-			if (_reproFault != null)
+			if (_job != null)
 			{
-				// Save reproFault toSave in fault
-				foreach (var kv in _reproFault.toSave)
+				Debug.Assert(_job.DatabasePath != null);
+				using (var db = new JobDatabase(_job.DatabasePath))
 				{
-					var key = Path.Combine("Initial", _reproFault.iteration.ToString(), kv.Key);
-					fault.toSave.Add(key, kv.Value);
+					_job.StopDate = DateTime.UtcNow;
+					_job.Mode = JobMode.Fuzzing;
+					_job.Status = JobStatus.Stopped;
+
+					db.UpdateJob(_job);
 				}
 
-				_reproFault = null;
-			}
-
-			SaveFault(context, Category.Faults, fault);
-		}
-
-		private Fault CombineFaults(uint currentIteration, StateModel stateModel, Fault[] faults)
-		{
-			// The combined fault will use toSave and not collectedData
-			var ret = new Fault { collectedData = null };
-
-			Fault coreFault = null;
-			var dataFaults = new List<Fault>();
-
-			// First find the core fault.
-			foreach (var fault in faults)
-			{
-				if (fault.type == FaultType.Fault)
+				using (var db = new NodeDatabase())
 				{
-					coreFault = fault;
-					Logger.Debug("Found core fault [" + coreFault.title + "]");
-				}
-				else
-					dataFaults.Add(fault);
-			}
-
-			if (coreFault == null)
-				throw new PeachException("Error, we should always have a fault with type = Fault!");
-
-			// Gather up data from the state model
-			foreach (var item in stateModel.dataActions)
-			{
-				Logger.Debug("Saving action: " + item.Key);
-				ret.toSave.Add(item.Key, item.Value);
-			}
-
-			// Write out all collected data information
-			foreach (var fault in faults)
-			{
-				Logger.Debug("Saving fault: " + fault.title);
-
-				foreach (var kv in fault.collectedData)
-				{
-					var fileName = string.Join(".", new[]
-					{
-						fault.agentName, 
-						fault.monitorName, 
-						fault.detectionSource, 
-						kv.Key
-					}.Where(a => !string.IsNullOrEmpty(a)));
-					ret.toSave.Add(fileName, new MemoryStream(kv.Value));
-				}
-
-				if (!string.IsNullOrEmpty(fault.description))
-				{
-					var fileName = string.Join(".", new[]
-					{
-						fault.agentName, 
-						fault.monitorName, 
-						fault.detectionSource, 
-						"description.txt"
-					}.Where(a => !string.IsNullOrEmpty(a)));
-					ret.toSave.Add(fileName, new MemoryStream(Encoding.UTF8.GetBytes(fault.description)));
+					if (_caught == null)
+						EventSuccess(db);
+					db.UpdateJob(_job);
 				}
 			}
 
-			// Copy over information from the core fault
-			if (coreFault.folderName != null)
-				ret.folderName = coreFault.folderName;
-			else if (coreFault.majorHash == null &&
-				coreFault.minorHash == null &&
-				coreFault.exploitability == null)
-				ret.folderName = "Unknown";
-			else
-				ret.folderName = string.Format("{0}_{1}_{2}",
-					coreFault.exploitability,
-					coreFault.majorHash,
-					coreFault.minorHash);
-
-			// Save all states, actions, data sets, mutations
-			var settings = new JsonSerializerSettings()
+			// it's possible we reach here before Engine_TestStarting has had a chance to finish
+			if (_log != null)
 			{
-				DefaultValueHandling = DefaultValueHandling.Ignore
-			};
-			var json = JsonConvert.SerializeObject(
-				new { States = _states },
-				Formatting.Indented,
-				settings);
-			ret.toSave.Add("fault.json", new MemoryStream(Encoding.UTF8.GetBytes(json)));
+				_log.WriteLine(". Test finished: " + context.test.Name);
+				_log.Flush();
+				_log.Close();
+				_log.Dispose();
+				_log = null;
+			}
 
-			ret.controlIteration = coreFault.controlIteration;
-			ret.controlRecordingIteration = coreFault.controlRecordingIteration;
-			ret.description = coreFault.description;
-			ret.detectionSource = coreFault.detectionSource;
-			ret.monitorName = coreFault.monitorName;
-			ret.agentName = coreFault.agentName;
-			ret.exploitability = coreFault.exploitability;
-			ret.iteration = currentIteration;
-			ret.iterationStart = coreFault.iterationStart;
-			ret.iterationStop = coreFault.iterationStop;
-			ret.majorHash = coreFault.majorHash;
-			ret.minorHash = coreFault.minorHash;
-			ret.title = coreFault.title;
-			ret.type = coreFault.type;
-			ret.states = _states;
-
-			return ret;
+			RestoreLogging();
 		}
 
 		protected override void Engine_IterationStarting(
@@ -519,130 +432,51 @@ namespace Peach.Pro.Core.Loggers
 			_cache.DataMutating(tgtParam, element.fullName, mutator.Name, tgtDataSet);
 		}
 
-		protected override void Engine_TestError(RunContext context, Exception ex)
+		protected override void Engine_ReproFault(
+			RunContext context,
+			uint currentIteration,
+			StateModel stateModel,
+			Fault[] faults)
 		{
-			Logger.Trace("Engine_TestError");
+			Debug.Assert(_reproFault == null);
 
-			_caught = ex;
-
-			// Happens if we can't open the log during TestStarting()
-			// because of permission issues
-			if (_log != null)
-			{
-				_log.WriteLine("! Test error:");
-				_log.WriteLine(ex);
-				_log.Flush();
-			}
+			_reproFault = CombineFaults(currentIteration, stateModel, faults);
+			SaveFault(context, Category.Reproducing, _reproFault);
 		}
 
-		protected override void Engine_TestFinished(RunContext context)
+		protected override void Engine_ReproFailed(RunContext context, uint currentIteration)
 		{
-			Logger.Trace("Engine_TestFinished");
+			Debug.Assert(_reproFault != null);
 
-			if (_job != null)
-			{
-				if (_job.DatabasePath != null)
-				{
-					using (var db = new JobDatabase(_job.DatabasePath))
-					{
-						_job.StopDate = DateTime.UtcNow;
-						_job.Mode = JobMode.Fuzzing;
-						_job.Status = JobStatus.Stopped;
+			// Update the searching ranges for the fault
+			_reproFault.iterationStart = context.reproducingInitialIteration - context.reproducingIterationJumpCount;
+			_reproFault.iterationStop = _reproFault.iteration;
 
-						db.UpdateJob(_job);
-					}
-				}
-
-				using (var db = new NodeDatabase())
-				{
-					if (_caught == null)
-						EventSuccess(db);
-					db.UpdateJob(_job);
-				}
-			}
-
-			// it's possible we reach here before Engine_TestStarting has had a chance to finish
-			if (_log != null)
-			{
-				_log.WriteLine(". Test finished: " + context.test.Name);
-				_log.Flush();
-				_log.Close();
-				_log.Dispose();
-				_log = null;
-			}
-
-			RestoreLogging();
+			SaveFault(context, Category.NonReproducable, _reproFault);
+			_reproFault = null;
 		}
 
-		protected override void Engine_TestStarting(RunContext context)
+		protected override void Engine_Fault(
+			RunContext context,
+			uint currentIteration,
+			StateModel stateModel,
+			Fault[] faults)
 		{
-			Debug.Assert(_log == null);
+			var fault = CombineFaults(currentIteration, stateModel, faults);
 
-			using (var db = new NodeDatabase())
+			if (_reproFault != null)
 			{
-				_job = db.GetJob(context.config.id);
-				if (_job == null)
-					throw new PeachException("Missing job");
-			}
-
-			if (_job.DatabasePath == null)
-			{
-				_job.LogPath = GetLogPath(context, BasePath);
-				if (!Directory.Exists(_job.LogPath))
-					Directory.CreateDirectory(_job.LogPath);
-			}
-
-			SwitchDebugLog(context.config);
-
-			using (var db = new JobDatabase(_job.DatabasePath))
-			{
-				var job = db.GetJob(_job.Guid);
-				if (job == null)
+				// Save reproFault toSave in fault
+				foreach (var kv in _reproFault.toSave)
 				{
-					_job.Seed = context.config.randomSeed;
-					_job.Mode = JobMode.Fuzzing;
-					_job.Status = JobStatus.Running;
-					_job.StartDate = DateTime.UtcNow;
+					var key = Path.Combine("Initial", _reproFault.iteration.ToString(), kv.Key);
+					fault.toSave.Add(key, kv.Value);
+				}
 
-					db.InsertJob(_job);
-				}
-				else
-				{
-					_job = job;
-				}
+				_reproFault = null;
 			}
 
-			_cache = new MetricsCache(_job.DatabasePath);
-
-			using (var db = new NodeDatabase())
-			{
-				AddEvent(db,
-					context.config.id,
-					"Starting fuzzing engine",
-					"Starting fuzzing engine");
-
-				// Before we get iteration start, we will get AgentConnect & SessionStart
-				_agentConnect = 0;
-
-				db.UpdateJob(_job);
-			}
-
-			_log = File.CreateText(Path.Combine(_job.LogPath, "status.txt"));
-
-			_log.WriteLine("Peach Fuzzing Run");
-			_log.WriteLine("=================");
-			_log.WriteLine("");
-			_log.WriteLine("Date of run: " + context.config.runDateTime);
-			_log.WriteLine("Peach Version: " + context.config.version);
-
-			_log.WriteLine("Seed: " + context.config.randomSeed);
-
-			_log.WriteLine("Command line: " + string.Join(" ", context.config.commandLine));
-			_log.WriteLine("Pit File: " + context.config.pitFile);
-			_log.WriteLine(". Test starting: " + context.test.Name);
-			_log.WriteLine("");
-
-			_log.Flush();
+			SaveFault(context, Category.Faults, fault);
 		}
 
 		long SaveFile(string fullPath, Stream contents)
@@ -667,51 +501,215 @@ namespace Peach.Pro.Core.Loggers
 			}
 		}
 
-		protected override void Agent_AgentConnect(RunContext context, AgentClient agent)
+		private Fault CombineFaults(uint currentIteration, StateModel stateModel, Fault[] faults)
 		{
-			if (context.controlRecordingIteration)
-			{
-				using (var db = new NodeDatabase())
-				{
-					if (_agentConnect++ > 0)
-						EventSuccess(db);
+			// The combined fault will use toSave and not collectedData
+			var ret = new Fault { collectedData = null };
 
-					AddEvent(db,
-						context.config.id,
-						"Connecting to agent",
-						"Connecting to agent '{0}'".Fmt(agent.Url));
+			Fault coreFault = null;
+			var dataFaults = new List<Fault>();
+
+			// First find the core fault.
+			foreach (var fault in faults)
+			{
+				if (fault.type == FaultType.Fault)
+				{
+					coreFault = fault;
+					Logger.Debug("Found core fault [" + coreFault.title + "]");
+				}
+				else
+					dataFaults.Add(fault);
+			}
+
+			if (coreFault == null)
+				throw new PeachException("Error, we should always have a fault with type = Fault!");
+
+			// Gather up data from the state model
+			foreach (var item in stateModel.dataActions)
+			{
+				Logger.Debug("Saving action: " + item.Key);
+				ret.toSave.Add(item.Key, item.Value);
+			}
+
+			// Write out all collected data information
+			foreach (var fault in faults)
+			{
+				Logger.Debug("Saving fault: " + fault.title);
+
+				foreach (var kv in fault.collectedData)
+				{
+					var fileName = string.Join(".", new[]
+					{
+						fault.agentName, 
+						fault.monitorName, 
+						fault.detectionSource, 
+						kv.Key
+					}.Where(a => !string.IsNullOrEmpty(a)));
+					ret.toSave.Add(fileName, new MemoryStream(kv.Value));
+				}
+
+				if (!string.IsNullOrEmpty(fault.description))
+				{
+					var fileName = string.Join(".", new[]
+					{
+						fault.agentName, 
+						fault.monitorName, 
+						fault.detectionSource, 
+						"description.txt"
+					}.Where(a => !string.IsNullOrEmpty(a)));
+					ret.toSave.Add(fileName, new MemoryStream(Encoding.UTF8.GetBytes(fault.description)));
 				}
 			}
+
+			// Copy over information from the core fault
+			if (coreFault.folderName != null)
+				ret.folderName = coreFault.folderName;
+			else if (coreFault.majorHash == null &&
+				coreFault.minorHash == null &&
+				coreFault.exploitability == null)
+				ret.folderName = "Unknown";
+			else
+				ret.folderName = string.Format("{0}_{1}_{2}",
+					coreFault.exploitability,
+					coreFault.majorHash,
+					coreFault.minorHash);
+
+			// Save all states, actions, data sets, mutations
+			var settings = new JsonSerializerSettings()
+			{
+				DefaultValueHandling = DefaultValueHandling.Ignore
+			};
+			var json = JsonConvert.SerializeObject(
+				new { States = _states },
+				Formatting.Indented,
+				settings);
+			ret.toSave.Add("fault.json", new MemoryStream(Encoding.UTF8.GetBytes(json)));
+
+			ret.controlIteration = coreFault.controlIteration;
+			ret.controlRecordingIteration = coreFault.controlRecordingIteration;
+			ret.description = coreFault.description;
+			ret.detectionSource = coreFault.detectionSource;
+			ret.monitorName = coreFault.monitorName;
+			ret.agentName = coreFault.agentName;
+			ret.exploitability = coreFault.exploitability;
+			ret.iteration = currentIteration;
+			ret.iterationStart = coreFault.iterationStart;
+			ret.iterationStop = coreFault.iterationStop;
+			ret.majorHash = coreFault.majorHash;
+			ret.minorHash = coreFault.minorHash;
+			ret.title = coreFault.title;
+			ret.type = coreFault.type;
+			ret.states = _states;
+
+			return ret;
 		}
 
-		protected override void Agent_StartMonitor(RunContext context, AgentClient agent, string name, string cls)
+		void SaveFault(RunContext context, Category category, Fault fault)
 		{
-			if (context.controlRecordingIteration)
+			switch (category)
 			{
-				using (var db = new NodeDatabase())
-				{
-					EventSuccess(db);
-					AddEvent(db,
-						context.config.id,
-						"Starting monitor",
-						"Starting monitor '{0}'".Fmt(cls));
-				}
+				case Category.Faults:
+					_log.WriteLine("! Reproduced fault at iteration {0} : {1}",
+						fault.iteration, DateTime.Now);
+					break;
+				case Category.NonReproducable:
+					_log.WriteLine("! Non-reproducable fault detected at iteration {0} : {1}",
+						fault.iteration, DateTime.Now);
+					break;
+				case Category.Reproducing:
+					_log.WriteLine("! Fault detected at iteration {0}, trying to reproduce : {1}",
+						fault.iteration, DateTime.Now);
+					break;
 			}
-		}
 
-		protected override void Agent_SessionStarting(RunContext context, AgentClient agent)
-		{
-			if (context.controlRecordingIteration)
+			var now = DateTime.UtcNow;
+
+			var bucket = string.Join("_", new[] { 
+				fault.majorHash, 
+				fault.minorHash, 
+				fault.exploitability 
+			}.Where(s => !string.IsNullOrEmpty(s)));
+
+			if (fault.folderName != null)
+				bucket = fault.folderName;
+			else if (string.IsNullOrEmpty(bucket))
+				bucket = "Unknown";
+
+			// root/category/bucket/iteration
+			var subDir = Path.Combine(
+				_job.LogPath,
+				category.ToString(),
+				fault.folderName,
+				fault.iteration.ToString());
+
+			var faultDetail = new FaultDetail
 			{
-				using (var db = new NodeDatabase())
+				Files = new List<FaultFile>(),
+				Reproducable = category == Category.Reproducing,
+				Iteration = fault.iteration,
+				TimeStamp = now,
+				BucketName = bucket,
+				Source = fault.detectionSource,
+				Exploitability = fault.exploitability,
+				MajorHash = fault.majorHash,
+				MinorHash = fault.minorHash,
+
+				Title = fault.title,
+				Description = fault.description,
+				Seed = context.config.randomSeed,
+				IterationStart = fault.iterationStart,
+				IterationStop = fault.iterationStop,
+
+				FaultPath = subDir,
+			};
+
+			foreach (var kv in fault.toSave)
+			{
+				var fileName = Path.Combine(subDir, kv.Key);
+				var size = SaveFile(fileName, kv.Value);
+				faultDetail.Files.Add(new FaultFile
 				{
-					EventSuccess(db);
-					AddEvent(db,
-						context.config.id,
-						"Starting fuzzing session",
-						"Notifying agent '{0}' that the fuzzing session is starting".Fmt(agent.Url));
+					Name = Path.GetFileName(fileName),
+					FullName = kv.Key,
+					Size = size,
+				});
+			}
+
+			if (category != Category.Reproducing)
+			{
+				// Ensure any past saving of this fault as Reproducing has been cleaned up
+				var reproDir = Path.Combine(_job.LogPath, Category.Reproducing.ToString());
+
+				if (Directory.Exists(reproDir))
+				{
+					try
+					{
+						Directory.Delete(reproDir, true);
+					}
+					catch (IOException)
+					{
+						// Can happen if a process has a file/subdirectory open...
+					}
+				}
+
+				using (var db = new JobDatabase(_job.DatabasePath))
+				{
+					db.InsertFault(faultDetail);
+					_cache.OnFault(new FaultMetric
+					{
+						Iteration = fault.iteration,
+						MajorHash = fault.majorHash ?? "UNKNOWN",
+						MinorHash = fault.minorHash ?? "UNKNOWN",
+						Timestamp = now,
+						Hour = now.Hour,
+					});
+
+					_job.FaultCount++;
+					db.UpdateJob(_job);
 				}
 			}
+
+			_log.Flush();
 		}
 
 		public void AddEvent(NodeDatabase db, Guid jobId, string name, string description)
@@ -756,6 +754,8 @@ namespace Peach.Pro.Core.Loggers
 			using (var db = new NodeDatabase())
 			{
 				var job = db.GetJob(id);
+				Debug.Assert(job != null);
+
 				job.StopDate = DateTime.UtcNow;
 				job.Mode = JobMode.Fuzzing;
 				job.Status = JobStatus.Stopped;

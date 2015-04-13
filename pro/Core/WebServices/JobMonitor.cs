@@ -46,8 +46,14 @@ namespace Peach.Pro.Core.WebServices
 				if (job == null)
 					return null;
 
-				if (!File.Exists(job.DatabasePath))
+				if (job.DatabasePath == null)
 					return job;
+
+				if (!File.Exists(job.DatabasePath))
+				{
+					db.DeleteJob(_guid.Value);
+					return null;
+				}
 			}
 
 			using (var db = new JobDatabase(job.DatabasePath))
