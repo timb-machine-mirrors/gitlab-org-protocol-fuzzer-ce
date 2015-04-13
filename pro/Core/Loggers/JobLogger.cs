@@ -80,6 +80,7 @@ namespace Peach.Pro.Core.Loggers
 		int _agentConnect;
 		Exception _caught;
 		MemoryTarget _tempTarget;
+		LoggingConfiguration _loggingConfig;
 
 		/// <summary>
 		/// The user configured base path for all the logs
@@ -569,6 +570,8 @@ namespace Peach.Pro.Core.Loggers
 				_log.Dispose();
 				_log = null;
 			}
+
+			RestoreLogging();
 		}
 
 		protected override void Engine_TestStarting(RunContext context)
@@ -777,8 +780,16 @@ namespace Peach.Pro.Core.Loggers
 
 		void ConfigureTemporaryLogging()
 		{
+			_loggingConfig = LogManager.Configuration;
 			_tempTarget = new MemoryTarget { Layout = DebugLogLayout };
 			ConfigureLogging(null, "MemoryTarget", _tempTarget);
+		}
+
+		void RestoreLogging()
+		{
+			Debug.Assert(_loggingConfig != null);
+
+			LogManager.Configuration = _loggingConfig;
 		}
 
 		public void FlushDebugLog(string tempLogPath)
