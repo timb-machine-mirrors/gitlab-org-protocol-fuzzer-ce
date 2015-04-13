@@ -1,9 +1,16 @@
 #!/usr/bin/env python
 
-import os
+import re
+import subprocess
 
-if __name__ == "__main__":
-	for key in os.environ.keys():
-		print('%s: %s' % (key, os.environ[key]))
+buildtag = '0.0.0'
+branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip()
+desc = subprocess.check_output(['git', 'describe']).strip()
 
-	print("##teamcity[buildNumber '0.0.0']")
+if branch == 'master' or branch.startswith('prod-'):
+	match = re.match(r'v(\d+\.\d+\.\d+).*', desc)
+	if match:
+		buildtag = match.group(1)
+
+print("##teamcity[setParameter name='BuildTag' value='%s']" % buildtag)
+print("##teamcity[buildNumber '%s']" % desc)
