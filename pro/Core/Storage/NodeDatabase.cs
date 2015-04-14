@@ -7,12 +7,53 @@ using Dapper;
 
 namespace Peach.Pro.Core.Storage
 {
+	public class JobResolver
+	{
+		/// <summary>
+		/// refresh job status from NodeDatabase or JobDatabase
+		/// 1. Use NodeDatabase if LogPath is not set
+		/// 2. Use JobDatabase if LogPath is set
+		/// 3. Return null if job does not exist in NodeDatabase or LogPath is invalid
+		/// </summary>
+		/// <param name="id">Job ID</param>
+		/// <returns>Job if job can be found, otherwise null</returns>
+		public static Job GetJob(Guid id)
+		{
+			Job job;
+			using (var db = new NodeDatabase())
+			{
+				job = db.GetJob(id);
+				if (job == null)
+					return null;
+
+				if (job.DatabasePath == null)
+					return job;
+
+				if (!File.Exists(job.DatabasePath))
+				{
+					db.DeleteJob(id);
+					return null;
+				}
+			}
+
+			using (var db = new JobDatabase(job.DatabasePath))
+			{
+				job = db.GetJob(id);
+				if (job == null)
+					return null;
+			}
+
+			return job;
+		}
+	}
+
 	public class NodeDatabase : Database
 	{
 		static readonly IEnumerable<Type> StaticSchema = new[]
 		{
 			// job status
 			typeof(Job),
+			typeof(JobLog),
 
 			// pit tester
 			typeof(TestEvent),
@@ -42,6 +83,16 @@ namespace Peach.Pro.Core.Storage
 				Directory.CreateDirectory(logRoot);
 
 			return System.IO.Path.Combine(logRoot, "node.db");
+		}
+
+		public IEnumerable<JobLog> GetJobLogs(Guid id)
+		{
+			return Connection.Query<JobLog>(Sql.SelectJobLogs, new { Id = id.ToString() });
+		}
+
+		public void InsertJobLog(JobLog log)
+		{
+			Connection.Execute(Sql.InsertJobLog, log);
 		}
 
 		public Job GetJob(Guid id)

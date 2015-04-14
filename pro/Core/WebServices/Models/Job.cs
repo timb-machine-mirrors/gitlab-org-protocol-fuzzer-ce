@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Peach.Pro.Core.Storage;
 using System.IO;
+using Peach.Core;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
@@ -105,8 +106,77 @@ namespace Peach.Pro.Core.WebServices.Models
 		public bool IsControlIteration { get; set; }
 	}
 
+	public class JobLog
+	{
+		[Key]
+		public long Id { get; set; }
+
+		[Required]
+		[ForeignKey(typeof(Job))]
+		public string JobId { get; set; }
+
+		public string Logger { get; set; }
+		public string Message { get; set; }
+
+		public DateTime TimeStamp
+		{
+			get { return _timeStamp; }
+			set { _timeStamp = value.MakeUtc(); }
+		}
+		private DateTime _timeStamp;
+	}
+
 	public class Job : JobRequest
 	{
+		public Job()
+		{
+		}
+
+		public Job(JobRequest request, string pitFile)
+		{
+			Guid = Guid.NewGuid();
+			Name = Path.GetFileNameWithoutExtension(pitFile);
+			StartDate = DateTime.UtcNow;
+			Status = JobStatus.StartPending;
+			Mode = JobMode.Starting;
+
+			Seed = request.Seed;
+			RangeStart = request.RangeStart;
+			RangeStop = request.RangeStop;
+			IsControlIteration = request.IsControlIteration;
+
+			using (var db = new NodeDatabase())
+			{
+				db.InsertJob(this);
+			}
+		}
+
+		public Job(RunConfiguration config)
+		{
+			Guid = config.id;
+			Name = Path.GetFileNameWithoutExtension(config.pitFile);
+			StartDate = DateTime.UtcNow;
+			Status = JobStatus.StartPending;
+			Mode = JobMode.Starting;
+
+			IsControlIteration = config.singleIteration;
+			Seed = config.randomSeed;
+			if (config.range)
+			{
+				RangeStart = config.rangeStart;
+				RangeStop = config.rangeStop;
+			}
+			else
+			{
+				RangeStart = config.skipToIteration;
+			}
+
+			using (var db = new NodeDatabase())
+			{
+				db.InsertJob(this);
+			}
+		}
+
 		[Key]
 		public string Id { get; set; }
 
@@ -143,13 +213,6 @@ namespace Peach.Pro.Core.WebServices.Models
 					return null;
 				return Path.Combine(LogPath, "debug.log");
 			}
-		}
-
-		[NotMapped]
-		[JsonIgnore]
-		public string AltDebugLogPath
-		{
-			get { return Path.Combine(Configuration.LogRoot, Id, "debug.log"); }
 		}
 
 		/// <summary>

@@ -46,6 +46,7 @@ using Logger = Peach.Core.Logger;
 using System.Diagnostics;
 using Action = Peach.Core.Dom.Action;
 using State = Peach.Core.Dom.State;
+using Peach.Pro.Core.Runtime;
 
 namespace Peach.Pro.Core.Loggers
 {
@@ -73,14 +74,14 @@ namespace Peach.Pro.Core.Loggers
 
 		readonly List<Fault.State> _states = new List<Fault.State>();
 		readonly List<TestEvent> _events = new List<TestEvent>();
+		readonly LoggingConfiguration _loggingConfig = LogManager.Configuration;
 		Fault _reproFault;
 		TextWriter _log;
 		MetricsCache _cache;
 		Job _job;
 		int _agentConnect;
 		Exception _caught;
-		MemoryTarget _tempTarget;
-		LoggingConfiguration _loggingConfig;
+		DatabaseTarget _tempTarget;
 
 		enum Category { Faults, Reproducing, NonReproducable }
 
@@ -92,7 +93,6 @@ namespace Peach.Pro.Core.Loggers
 		public JobLogger()
 		{
 			BasePath = Configuration.LogRoot;
-			ConfigureTemporaryLogging();
 		}
 
 		public JobLogger(Dictionary<string, Variant> args)
@@ -101,7 +101,12 @@ namespace Peach.Pro.Core.Loggers
 			if (!args.TryGetValue("Path", out path))
 				path = new Variant(Configuration.LogRoot);
 			BasePath = Path.GetFullPath((string)path);
-			ConfigureTemporaryLogging();
+		}
+
+		public void Initialize(RunConfiguration config)
+		{
+			_tempTarget = new DatabaseTarget(config.id);
+			ConfigureLogging(null, _tempTarget.Name, _tempTarget);
 		}
 
 		protected override void Agent_AgentConnect(RunContext context, AgentClient agent)
@@ -159,7 +164,7 @@ namespace Peach.Pro.Core.Loggers
 			{
 				_job = db.GetJob(context.config.id);
 				if (_job == null)
-					throw new PeachException("Missing job");
+					_job = new Job(context.config);
 			}
 
 			if (_job.DatabasePath == null)
@@ -169,14 +174,13 @@ namespace Peach.Pro.Core.Loggers
 					Directory.CreateDirectory(_job.LogPath);
 			}
 
-			SwitchDebugLog(context.config);
+			ConfigureDebugLogging(context.config);
 
 			using (var db = new JobDatabase(_job.DatabasePath))
 			{
 				var job = db.GetJob(_job.Guid);
 				if (job == null)
 				{
-					_job.Seed = context.config.randomSeed;
 					_job.Mode = JobMode.Fuzzing;
 					_job.Status = JobStatus.Running;
 					_job.StartDate = DateTime.UtcNow;
@@ -778,13 +782,6 @@ namespace Peach.Pro.Core.Loggers
 			}
 		}
 
-		void ConfigureTemporaryLogging()
-		{
-			_loggingConfig = LogManager.Configuration;
-			_tempTarget = new MemoryTarget { Layout = DebugLogLayout };
-			ConfigureLogging(null, "MemoryTarget", _tempTarget);
-		}
-
 		void RestoreLogging()
 		{
 			Debug.Assert(_loggingConfig != null);
@@ -792,36 +789,25 @@ namespace Peach.Pro.Core.Loggers
 			LogManager.Configuration = _loggingConfig;
 		}
 
-		public void FlushDebugLog(string tempLogPath)
+		void ConfigureDebugLogging(RunConfiguration config)
 		{
-			// allow this method to be called multiple times
-			if (_tempTarget == null)
-				return;
-
-			var dir = Path.GetDirectoryName(tempLogPath);
-			Directory.CreateDirectory(dir);
-			File.WriteAllLines(tempLogPath, _tempTarget.Logs);
-
-			_tempTarget = null;
-		}
-
-		void SwitchDebugLog(RunConfiguration config)
-		{
-			Debug.Assert(_tempTarget != null);
-
-			File.WriteAllLines(_job.DebugLogPath, _tempTarget.Logs);
-
-			var target = new AsyncTargetWrapper(new FileTarget
+			var target = new FileTarget
 			{
+				Name = "FileTarget",
 				Layout = DebugLogLayout,
 				FileName = _job.DebugLogPath,
 				ConcurrentWrites = false,
 				KeepFileOpen = !config.singleIteration,
 				ArchiveAboveSize = 10 * 1024 * 1024,
 				ArchiveNumbering = ArchiveNumberingMode.Sequence,
-			});
+			};
 
-			ConfigureLogging("MemoryTarget", "FileTarget", target);
+			var wrapper = new AsyncTargetWrapper(target);
+
+			string oldName = null;
+			if (_tempTarget != null)
+				oldName = _tempTarget.Name;
+			ConfigureLogging(oldName, target.Name, wrapper);
 
 			_tempTarget = null;
 		}
@@ -843,6 +829,42 @@ namespace Peach.Pro.Core.Loggers
 			nconfig.LoggingRules.Add(defaultRule);
 
 			LogManager.Configuration = nconfig;
+		}
+	}
+
+	class DatabaseTarget : Target
+	{
+		NodeDatabase _db = new NodeDatabase();
+		readonly string _jobId;
+
+		public DatabaseTarget(Guid jobId)
+		{
+			Name = "DatabaseTarget";
+			_jobId = jobId.ToString();
+		}
+
+		protected override void Write(LogEventInfo logEvent)
+		{
+			_db.InsertJobLog(new JobLog
+			{
+				JobId = _jobId,
+				Logger = logEvent.LoggerName,
+				Message = logEvent.Message.Fmt(logEvent.Parameters),
+				TimeStamp = logEvent.TimeStamp,
+			});
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			Console.WriteLine("DatabaseTarget.Dispose>");
+
+			base.Dispose(disposing);
+
+			if (disposing && _db != null)
+			{
+				_db.Dispose();
+				_db = null;
+			}
 		}
 	}
 }

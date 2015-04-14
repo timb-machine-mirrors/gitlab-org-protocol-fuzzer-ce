@@ -13,12 +13,15 @@ using TestStatus = Peach.Pro.Core.WebServices.Models.TestStatus;
 using Peach.Core.Test;
 using NLog.Config;
 using NLog;
+using NLog.Targets;
+using NLog.Targets.Wrappers;
 
 namespace Peach.Pro.Test.Core.WebServices
 {
 	class BaseJobMonitorTests<T> where T : IJobMonitor, new()
 	{
 		protected IJobMonitor _monitor;
+		protected ManualResetEvent _doneEvt;
 
 		protected const string PitXml =
 @"<?xml version='1.0' encoding='utf-8'?>
@@ -62,6 +65,12 @@ namespace Peach.Pro.Test.Core.WebServices
 			return false;
 		}
 
+		protected void WaitForFinish()
+		{
+			Console.WriteLine("Waiting for finish");
+			Assert.IsTrue(_doneEvt.WaitOne(TimeSpan.FromSeconds(20)), "Timeout waiting for job to finish");
+		}
+
 		protected void VerifyDatabase(Job job)
 		{
 			using (var db = new NodeDatabase())
@@ -83,6 +92,7 @@ namespace Peach.Pro.Test.Core.WebServices
 	class JobMonitorTests<T> : BaseJobMonitorTests<T>
 		where T : IJobMonitor, new()
 	{
+		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 		protected TempFile _tmp;
 		protected TempDirectory _tmpDir;
 		LoggingConfiguration _loggingConfig;
@@ -90,7 +100,27 @@ namespace Peach.Pro.Test.Core.WebServices
 		[SetUp]
 		public void SetUp()
 		{
+			Logger.Trace(">>> Setup");
+
+			var target = new AsyncTargetWrapper(new ConsoleTarget
+			{
+				Layout = "${time} ${logger} ${message}"
+			});
+
+			var config = new LoggingConfiguration();
+			var rule = new LoggingRule("*", LogLevel.Trace, target);
+			config.AddTarget("console", target);
+			config.LoggingRules.Add(rule);
+			LogManager.Configuration = config;
+
+			_doneEvt = new ManualResetEvent(false);
+
 			_monitor = new T();
+			_monitor.InternalEvent = (s, a) =>
+			{
+				Logger.Trace("InternalEvent");
+				_doneEvt.Set();
+			};
 
 			_tmp = new TempFile();
 			File.WriteAllText(_tmp.Path, PitXml);
@@ -99,24 +129,28 @@ namespace Peach.Pro.Test.Core.WebServices
 			Configuration.LogRoot = _tmpDir.Path;
 
 			_loggingConfig = LogManager.Configuration;
+
+			Logger.Trace("<<< Setup");
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
-			_tmpDir.Dispose();
-			_tmp.Dispose();
+			Logger.Trace(">>> TearDown");
+
 			_monitor.Dispose();
+			_tmp.Dispose();
+			_tmpDir.Dispose();
 
 			LogManager.Configuration = _loggingConfig;
+
+			Logger.Trace("<<< TearDown");
 		}
 
 		[Test]
 		[Repeat(10)]
 		public void TestBasic()
 		{
-			LogManager.Configuration = new LoggingConfiguration();
-
 			var jobRequest = new JobRequest
 			{
 				RangeStop = 1,
@@ -124,11 +158,12 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var job = _monitor.Start(_tmp.Path, _tmp.Path, jobRequest);
 			Assert.IsNotNull(job);
-			Assert.IsTrue(WaitUntil(JobStatus.Stopped), "Timeout waiting for Stopped");
+			WaitForFinish();
 
 			job = _monitor.GetJob();
 			Assert.IsNotNull(job);
 			Assert.IsNotNull(job.DatabasePath);
+			Assert.AreEqual(JobStatus.Stopped, job.Status);
 
 			VerifyDatabase(job);
 		}
@@ -146,7 +181,10 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.IsNotNull(job);
 
 			Assert.IsTrue(_monitor.Stop());
-			Assert.IsTrue(WaitUntil(JobStatus.Stopped), "Timeout waiting for Stopped");
+			WaitForFinish();
+
+			job = _monitor.GetJob();
+			Assert.AreEqual(JobStatus.Stopped, job.Status);
 
 			VerifyDatabase(job);
 		}
@@ -174,7 +212,10 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.IsTrue(WaitUntil(JobStatus.Running), "Timeout waiting for Running");
 
 			Assert.IsTrue(_monitor.Stop());
-			Assert.IsTrue(WaitUntil(JobStatus.Stopped), "Timeout waiting for Stopped");
+			WaitForFinish();
+
+			job = _monitor.GetJob();
+			Assert.AreEqual(JobStatus.Stopped, job.Status);
 
 			job = _monitor.GetJob();
 			Assert.IsNotNull(job);
@@ -196,7 +237,10 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.IsNotNull(job);
 
 			Assert.IsTrue(_monitor.Kill());
-			Assert.IsTrue(WaitUntil(JobStatus.Stopped), "Timeout waiting for Stopped");
+			WaitForFinish();
+
+			job = _monitor.GetJob();
+			Assert.AreEqual(JobStatus.Stopped, job.Status);
 
 			VerifyDatabase(job);
 		}
@@ -212,7 +256,10 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var job = _monitor.Start(_tmp.Path, _tmp.Path, jobRequest);
 			Assert.IsNotNull(job);
-			Assert.IsTrue(WaitUntil(JobStatus.Stopped), "Timeout waiting for Stopped");
+			WaitForFinish();
+
+			job = _monitor.GetJob();
+			Assert.AreEqual(JobStatus.Stopped, job.Status);
 
 			using (var db = new NodeDatabase())
 			{
@@ -253,7 +300,10 @@ namespace Peach.Pro.Test.Core.WebServices
 
 				var job = _monitor.Start(xmlFile.Path, xmlFile.Path, jobRequest);
 				Assert.IsNotNull(job);
-				Assert.IsTrue(WaitUntil(JobStatus.Stopped), "Timeout waiting for Stopped");
+				WaitForFinish();
+
+				job = _monitor.GetJob();
+				Assert.AreEqual(JobStatus.Stopped, job.Status);
 
 				using (var db = new NodeDatabase())
 				{
@@ -265,17 +315,26 @@ namespace Peach.Pro.Test.Core.WebServices
 							 TestStatus.Fail, 
 							 "Loading pit file", 
 							 "Loading pit file '{0}'".Fmt(xmlFile.Path), 
-							 "Error: XML Failed to load: Data at the root level is invalid. Line 25, position 1."),					
+#if MONO
+							 "Error: XML Failed to load: Text node cannot appear in this state.  Line 25, position 1."),
+#else
+							 "Error: XML Failed to load: Data at the root level is invalid. Line 25, position 1."),
+#endif
 					});
 
 					job = db.GetJob(job.Guid);
 					Assert.IsNotNull(job);
+
+					var logs = db.GetJobLogs(job.Guid).ToList();
+					Assert.IsTrue(logs.Count > 0, "Missing JobLogs");
+					foreach (var log in logs)
+					{
+						Console.WriteLine("{0} {1} {2}", log.TimeStamp, log.Logger, log.Message);
+					}
 				}
 
 				Assert.IsFalse(File.Exists(job.DatabasePath), "job.DatabasePath should not exist");
 				Assert.IsFalse(File.Exists(job.DebugLogPath), "job.DebugLogPath should not exist");
-				Assert.IsTrue(File.Exists(job.AltDebugLogPath), "job.AltDebugLogPath should exist");
-				Console.Write(File.ReadAllText(job.AltDebugLogPath));
 			}
 		}
 
@@ -289,7 +348,10 @@ namespace Peach.Pro.Test.Core.WebServices
 				var jobRequest = new JobRequest();
 				var job = _monitor.Start(xmlFile.Path, xmlFile.Path, jobRequest);
 				Assert.IsNotNull(job);
-				Assert.IsTrue(WaitUntil(JobStatus.Stopped), "Timeout waiting for Stopped");
+				WaitForFinish();
+
+				job = _monitor.GetJob();
+				Assert.AreEqual(JobStatus.Stopped, job.Status);
 
 				using (var db = new NodeDatabase())
 				{
@@ -300,18 +362,27 @@ namespace Peach.Pro.Test.Core.WebServices
 							 job.Guid, 
 							 TestStatus.Fail, 
 							 "Loading pit file", 
-							 "Loading pit file '{0}'".Fmt(xmlFile.Path), 
+							 "Loading pit file '{0}'".Fmt(xmlFile.Path),
+#if MONO
+							 "Error: XML Failed to load: Text node cannot appear in this state.  Line 25, position 1."),
+#else
 							 "Error: XML Failed to load: Data at the root level is invalid. Line 25, position 1."),
+#endif
 					});
 
 					job = db.GetJob(job.Guid);
 					Assert.IsNotNull(job);
+
+					var logs = db.GetJobLogs(job.Guid).ToList();
+					Assert.IsTrue(logs.Count > 0, "Missing JobLogs");
+					foreach (var log in logs)
+					{
+						Console.WriteLine("{0} {1} {2}", log.TimeStamp, log.Logger, log.Message);
+					}
 				}
 
 				Assert.IsFalse(File.Exists(job.DatabasePath), "job.DatabasePath should not exist");
 				Assert.IsFalse(File.Exists(job.DebugLogPath), "job.DebugLogPath should not exist");
-				Assert.IsTrue(File.Exists(job.AltDebugLogPath), "job.AltDebugLogPath should exist");
-				Console.Write(File.ReadAllText(job.AltDebugLogPath));
 			}
 		}
 	}
@@ -321,6 +392,7 @@ namespace Peach.Pro.Test.Core.WebServices
 	[Quick]
 	class ExternalJobMonitorTests : BaseJobMonitorTests<ExternalJobMonitor>
 	{
+		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 		protected TempDirectory _tmpDir;
 		protected TempFile _tmp1;
 		protected TempFile _tmp2;
@@ -363,7 +435,15 @@ namespace Peach.Pro.Test.Core.WebServices
 		[SetUp]
 		public void SetUp()
 		{
+			Logger.Trace(">>> Setup");
+
+			_doneEvt = new ManualResetEvent(false);
 			_monitor = new ExternalJobMonitor();
+			_monitor.InternalEvent = (s, a) =>
+			{
+				Logger.Trace("InternalEvent");
+				_doneEvt.Set();
+			};
 
 			_tmp1 = new TempFile();
 			_tmp2 = new TempFile();
@@ -374,17 +454,34 @@ namespace Peach.Pro.Test.Core.WebServices
 			Configuration.LogRoot = _tmpDir.Path;
 
 			_loggingConfig = LogManager.Configuration;
+
+			var target = new AsyncTargetWrapper(new ConsoleTarget
+			{
+				Layout = "${time} ${logger} ${message}"
+			});
+
+			var config = new LoggingConfiguration();
+			var rule = new LoggingRule("*", LogLevel.Trace, target);
+			config.AddTarget("console", target);
+			config.LoggingRules.Add(rule);
+			LogManager.Configuration = config;
+
+			Logger.Trace("<<< Setup");
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
-			_tmpDir.Dispose();
+			Logger.Trace(">>> TearDown");
+
+			_monitor.Dispose();
 			_tmp1.Dispose();
 			_tmp2.Dispose();
-			_monitor.Dispose();
+			_tmpDir.Dispose();
 
 			LogManager.Configuration = _loggingConfig;
+
+			Logger.Trace("<<< TearDown");
 		}
 
 		[Test]
@@ -409,6 +506,10 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.IsNotNull(job);
 			Assert.AreEqual(JobStatus.Running, job.Status);
 
+			Assert.IsTrue(_monitor.Stop());
+			WaitForFinish();
+
+			job = _monitor.GetJob();
 			Assert.Greater(job.IterationCount, count);
 
 			VerifyDatabase(job);
@@ -438,8 +539,11 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			Assert.Greater(job.IterationCount, count);
 
-			Assert.IsTrue(_monitor.Kill());
-			Assert.IsTrue(WaitUntil(JobStatus.Stopped), "Timeout waiting for Stopped");
+			Assert.IsTrue(_monitor.Kill(), "Kill failed");
+			WaitForFinish();
+
+			job = _monitor.GetJob();
+			Assert.AreEqual(JobStatus.Stopped, job.Status);
 
 			var logPath = Path.Combine(Configuration.LogRoot, job.Id, "error.log");
 			Assert.IsTrue(File.Exists(logPath));

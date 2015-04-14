@@ -4,6 +4,25 @@
 	{
 		public const string GetLastRowId = "SELECT last_insert_rowid();";
 
+		public const string InsertJobLog = @"
+INSERT INTO [JobLog] (
+	JobId,
+	Logger,
+	Message,
+	Timestamp
+) VALUES (
+	@JobId,
+	@Logger,
+	@Message,
+	@Timestamp
+);";
+
+		public const string SelectJobLogs = @"
+SELECT * 
+FROM [JobLog] 
+WHERE JobId = @Id;
+";
+
 		public const string SelectJob = @"
 SELECT * 
 FROM [Job] 

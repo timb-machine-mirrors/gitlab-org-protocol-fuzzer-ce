@@ -344,15 +344,7 @@ namespace Peach.Pro.Core.Runtime
 			Job job = null;
 			var userLogger = test.loggers.OfType<JobLogger>().FirstOrDefault();
 			if (userLogger != null || !_noweb)
-			{
-				var jobRequest = new JobRequest
-				{
-					Seed = _config.randomSeed,
-					RangeStart = _config.rangeStart,
-					RangeStop = _config.rangeStop == 0 ? null : (long?)_config.rangeStop,
-				};
-				job = JobRunner.CreateJob(_config.pitFile, jobRequest, _config.id);
-			}
+				job = new Job(_config);
 
 			if (_noweb)
 			{
@@ -869,6 +861,11 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 		public bool Kill()
 		{
 			throw new NotImplementedException();
+		}
+
+		public EventHandler InternalEvent
+		{
+			set { throw new NotImplementedException(); }
 		}
 		#endregion
 	}
