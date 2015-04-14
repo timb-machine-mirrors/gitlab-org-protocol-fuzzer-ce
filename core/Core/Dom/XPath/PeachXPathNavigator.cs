@@ -12,21 +12,24 @@ namespace Peach.Core.Dom.XPath
 
 		abstract class Entry : IEquatable<Entry>
 		{
-			// Keep local references to Node, Index and Name
-			// to keep up performance when running the navigator
-
 			protected Entry(INamed node, int index)
 			{
 				Index = index;
 				Node = node;
 				Name = node.Name;
+				NamespaceUri = string.Empty;
+				LocalName = Name;
+				NodeType = XPathNodeType.Element;
 			}
 
-			protected Entry(INamed node, int index, string name)
+			protected Entry(INamed node, int index, string name, XPathNodeType nodeType)
 			{
 				Index = index;
 				Node = node;
 				Name = name;
+				NamespaceUri = string.Empty;
+				LocalName = Name;
+				NodeType = nodeType;
 			}
 
 			public INamed Node { get; private set;}
@@ -35,20 +38,11 @@ namespace Peach.Core.Dom.XPath
 
 			protected int Index { get; private set; }
 
-			public virtual XPathNodeType NodeType
-			{
-				get { return XPathNodeType.Element; }
-			}
+			public XPathNodeType NodeType { get; private set; }
 
-			public virtual string NamespaceUri
-			{
-				get { return string.Empty; }
-			}
+			public string NamespaceUri { get; protected set; }
 
-			public virtual string LocalName
-			{
-				get { return Name; }
-			}
+			public string LocalName { get; protected set; }
 
 			public virtual string Value
 			{
@@ -96,13 +90,8 @@ namespace Peach.Core.Dom.XPath
 		class NamedAttrEntry : Entry
 		{
 			public NamedAttrEntry(INamed node)
-				: base(node, 0, "name")
+				: base(node, 0, "name", XPathNodeType.Attribute)
 			{
-			}
-
-			public override XPathNodeType NodeType
-			{
-				get { return XPathNodeType.Attribute; }
 			}
 
 			public override string Value
@@ -120,14 +109,9 @@ namespace Peach.Core.Dom.XPath
 			private readonly Dom _dom;
 
 			public RootEntry(Dom dom)
-				: base(dom, 0)
+				: base(dom, 0, dom.Name, XPathNodeType.Root)
 			{
 				_dom = dom;
-			}
-
-			public override XPathNodeType NodeType
-			{
-				get { return XPathNodeType.Root; }
 			}
 
 			public override Entry GetFirstChild()
@@ -196,8 +180,6 @@ namespace Peach.Core.Dom.XPath
 		class StateModelEntry : Entry
 		{
 			private readonly StateModel _stateModel;
-			private readonly string _namespaceUri;
-			private readonly string _localName;
 
 			public StateModelEntry(StateModel stateModel)
 				: base(stateModel, 0)
@@ -205,26 +187,11 @@ namespace Peach.Core.Dom.XPath
 				_stateModel = stateModel;
 
 				var idx = Name.LastIndexOf(':');
-				if (idx < 0)
+				if (idx > 0)
 				{
-					_namespaceUri = string.Empty;
-					_localName = Name;
+					NamespaceUri = Name.Substring(0, idx);
+					LocalName = Name.Substring(idx + 1);
 				}
-				else
-				{
-					_namespaceUri = Name.Substring(0, idx);
-					_localName = Name.Substring(idx + 1);
-				}
-			}
-
-			public override string NamespaceUri
-			{
-				get { return _namespaceUri; }
-			}
-
-			public override string LocalName
-			{
-				get { return _localName; }
 			}
 
 			public override Entry GetFirstChild()
@@ -351,7 +318,7 @@ namespace Peach.Core.Dom.XPath
 			private readonly Action _action;
 
 			public ActionAttrEntry(Action action, int index)
-				: base(action, index, Attrs[index].Item1)
+				: base(action, index, Attrs[index].Item1, XPathNodeType.Attribute)
 			{
 				_action = action;
 			}
@@ -383,11 +350,6 @@ namespace Peach.Core.Dom.XPath
 				return asGet == null ? string.Empty : asGet.property;
 			}
 
-			public override XPathNodeType NodeType
-			{
-				get { return XPathNodeType.Attribute; }
-			}
-
 			public override string Value
 			{
 				get { return Attrs[Index].Item2(_action); }
@@ -410,8 +372,6 @@ namespace Peach.Core.Dom.XPath
 		class ModelEntry : Entry
 		{
 			private readonly ActionData _actionData;
-			private readonly string _namespaceUri;
-			private readonly string _localName;
 
 			public ModelEntry(ActionData actionData, int index)
 				: base(actionData.dataModel, index)
@@ -419,26 +379,11 @@ namespace Peach.Core.Dom.XPath
 				_actionData = actionData;
 
 				var idx = Name.LastIndexOf(':');
-				if (idx < 0)
+				if (idx > 0)
 				{
-					_namespaceUri = string.Empty;
-					_localName = Name;
+					NamespaceUri = Name.Substring(0, idx);
+					LocalName = Name.Substring(idx + 1);
 				}
-				else
-				{
-					_namespaceUri = Name.Substring(0, idx);
-					_localName = Name.Substring(idx + 1);
-				}
-			}
-
-			public override string NamespaceUri
-			{
-				get { return _namespaceUri; }
-			}
-
-			public override string LocalName
-			{
-				get { return _localName; }
 			}
 
 			public override Entry GetFirstChild()
@@ -572,7 +517,7 @@ namespace Peach.Core.Dom.XPath
 			private readonly DataElement _element;
 
 			public ElementAttrEntry(DataElement element, int index)
-				: base(element, index, Attrs[index].Item1)
+				: base(element, index, Attrs[index].Item1, XPathNodeType.Attribute)
 			{
 				_element = element;
 			}
@@ -586,11 +531,6 @@ namespace Peach.Core.Dom.XPath
 					new Tuple<string, Func<DataElement, string>>("isToken", e => e.isToken.ToString())
 				}
 			);
-
-			public override XPathNodeType NodeType
-			{
-				get { return XPathNodeType.Attribute; }
-			}
 
 			public override string Value
 			{
