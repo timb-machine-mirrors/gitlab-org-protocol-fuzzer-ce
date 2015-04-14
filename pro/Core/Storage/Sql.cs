@@ -7,14 +7,10 @@
 		public const string InsertJobLog = @"
 INSERT INTO [JobLog] (
 	JobId,
-	Logger,
-	Message,
-	Timestamp
+	Message
 ) VALUES (
 	@JobId,
-	@Logger,
-	@Message,
-	@Timestamp
+	@Message
 );";
 
 		public const string SelectJobLogs = @"
@@ -97,6 +93,9 @@ WHERE
 
 		public const string DeleteJob = @"
 DELETE FROM [TestEvent]
+WHERE JobId = @Id;
+
+DELETE FROM [JobLog]
 WHERE JobId = @Id;
 
 DELETE FROM [Job]

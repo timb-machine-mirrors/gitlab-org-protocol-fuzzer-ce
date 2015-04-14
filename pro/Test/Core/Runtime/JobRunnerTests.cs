@@ -158,13 +158,16 @@ namespace Peach.Pro.Test.Core.Runtime
 				return job;
 			}
 
-			public void VerifyDatabase()
+			public void VerifyDatabase(int expectedLogs)
 			{
 				Job job;
 				using (var db = new NodeDatabase())
 				{
 					job = db.GetJob(Id);
 					Assert.IsNotNull(job);
+
+					var logs = db.GetJobLogs(job.Guid).ToList();
+					Assert.AreEqual(expectedLogs, logs.Count, "JobLog mismatch");
 				}
 
 				using (var db = new JobDatabase(job.DatabasePath))
@@ -189,7 +192,7 @@ namespace Peach.Pro.Test.Core.Runtime
 			using (var runner = new SafeRunner(_tmp.Path, jobRequest))
 			{
 				runner.WaitForFinish();
-				runner.VerifyDatabase();
+				runner.VerifyDatabase(1);
 			}
 		}
 
@@ -202,7 +205,7 @@ namespace Peach.Pro.Test.Core.Runtime
 				runner.WaitUntil(JobStatus.Running);
 				runner.JobRunner.Stop();
 				runner.WaitForFinish();
-				runner.VerifyDatabase();
+				runner.VerifyDatabase(0);
 			}
 		}
 
@@ -219,7 +222,7 @@ namespace Peach.Pro.Test.Core.Runtime
 				runner.WaitUntil(JobStatus.Running);
 				runner.JobRunner.Stop();
 				runner.WaitForFinish();
-				runner.VerifyDatabase();
+				runner.VerifyDatabase(0);
 			}
 		}
 
@@ -287,11 +290,9 @@ namespace Peach.Pro.Test.Core.Runtime
 						});
 
 						var logs = db.GetJobLogs(runner.Id).ToList();
-						Assert.IsTrue(logs.Count > 0, "Missing JobLogs");
+						Assert.AreEqual(1, logs.Count, "Missing JobLogs");
 						foreach (var log in logs)
-						{
-							Console.WriteLine("{0} {1} {2}", log.TimeStamp, log.Logger, log.Message);
-						}
+							Console.WriteLine(log.Message);
 					}
 
 					var job = runner.GetJob();
