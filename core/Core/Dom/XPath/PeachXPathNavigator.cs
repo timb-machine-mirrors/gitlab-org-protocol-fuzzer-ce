@@ -611,6 +611,9 @@ namespace Peach.Core.Dom.XPath
 
 		private LinkedList<Entry> _position;
 
+		private string _localName;  // Cache so we don't have to call _position.First.Value.LocalName
+		private Entry _currentNode; // Cache so we don't have to call _position.First.Value
+
 		// ReSharper disable once InconsistentNaming
 		[Obsolete("This property is obsolete. Use the 'CurrentNode' property instead.")]
 		public object currentNode
@@ -620,17 +623,19 @@ namespace Peach.Core.Dom.XPath
 
 		public object CurrentNode
 		{
-			get { return _position.First.Value.Node; }
+			get { return _currentNode.Node; }
 		}
 
 		public PeachXPathNavigator(Dom dom)
-			: this(new[] { new RootEntry { Dom = dom } })
+			: this(new[] { new RootEntry(dom) })
 		{
 		}
 
 		private PeachXPathNavigator(IEnumerable<Entry> position)
 		{
 			_position = new LinkedList<Entry>(position);
+			_currentNode = _position.First.Value;
+			_localName = _currentNode.LocalName;
 		}
 
 		public override string BaseURI
@@ -677,7 +682,7 @@ namespace Peach.Core.Dom.XPath
 
 		public override string LocalName
 		{
-			get { return _position.First.Value.LocalName; }
+			get { return _localName; }
 		}
 
 		public override bool MoveTo(XPathNavigator other)
@@ -687,26 +692,35 @@ namespace Peach.Core.Dom.XPath
 				return false;
 
 			_position = new LinkedList<Entry>(asPeach._position);
+			_localName = asPeach._localName;
+			_currentNode = asPeach._currentNode;
+
 			return true;
 		}
 
 		public override bool MoveToFirstAttribute()
 		{
-			var attr = _position.First.Value.GetFirstAttr();
+			var attr = _currentNode.GetFirstAttr();
 			if (attr == null)
 				return false;
 
 			_position.AddFirst(attr);
+			_currentNode = attr;
+			_localName = _currentNode.LocalName;
+
 			return true;
 		}
 
 		public override bool MoveToFirstChild()
 		{
-			var child = _position.First.Value.GetFirstChild();
+			var child = _currentNode.GetFirstChild();
 			if (child == null)
 				return false;
 
 			_position.AddFirst(child);
+			_currentNode = child;
+			_localName = _currentNode.LocalName;
+
 			return true;
 		}
 
@@ -722,23 +736,29 @@ namespace Peach.Core.Dom.XPath
 
 		public override bool MoveToNext()
 		{
-			var next = _position.First.Value.GetNext();
+			var next = _currentNode.GetNext();
 			if (next == null)
 				return false;
 
 			_position.RemoveFirst();
 			_position.AddFirst(next);
+			_currentNode = next;
+			_localName = _currentNode.LocalName;
+
 			return true;
 		}
 
 		public override bool MoveToNextAttribute()
 		{
-			var next = _position.First.Value.GetNextAttr();
+			var next = _currentNode.GetNextAttr();
 			if (next == null)
 				return false;
 
 			_position.RemoveFirst();
 			_position.AddFirst(next);
+			_currentNode = next;
+			_localName = _currentNode.LocalName;
+
 			return true;
 		}
 
@@ -753,24 +773,29 @@ namespace Peach.Core.Dom.XPath
 				return false;
 
 			_position.RemoveFirst();
+			_currentNode = _position.First.Value;
+			_localName = _currentNode.LocalName;
 
 			return true;
 		}
 
 		public override bool MoveToPrevious()
 		{
-			var next = _position.First.Value.GetPrev();
+			var next = _currentNode.GetPrev();
 			if (next == null)
 				return false;
 
 			_position.RemoveFirst();
 			_position.AddFirst(next);
+			_currentNode = next;
+			_localName = _currentNode.LocalName;
+
 			return true;
 		}
 
 		public override string Name
 		{
-			get { return _position.First.Value.Name; }
+			get { return _currentNode.Name; }
 		}
 
 		public override System.Xml.XmlNameTable NameTable
@@ -780,12 +805,12 @@ namespace Peach.Core.Dom.XPath
 
 		public override string NamespaceURI
 		{
-			get { return _position.First.Value.NamespaceUri; }
+			get { return _currentNode.NamespaceUri; }
 		}
 
 		public override XPathNodeType NodeType
 		{
-			get { return _position.First.Value.NodeType; }
+			get { return _currentNode.NodeType; }
 		}
 
 		public override string Prefix
@@ -795,7 +820,7 @@ namespace Peach.Core.Dom.XPath
 
 		public override string Value
 		{
-			get { return _position.First.Value.Value; }
+			get { return _currentNode.Value; }
 		}
 	}
 }
