@@ -7,6 +7,8 @@ using Peach.Pro.Core.Storage;
 using System.Linq;
 using System.IO;
 using Peach.Pro.Core.WebServices.Utility;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Peach.Pro.Core.WebServices
 {
@@ -94,10 +96,6 @@ namespace Peach.Pro.Core.WebServices
 				if (Directory.Exists(job.LogPath))
 					Directory.Delete(job.LogPath, true);
 
-				var altPath = Path.Combine(Configuration.LogRoot, job.Id);
-				if (Directory.Exists(altPath))
-					Directory.Delete(altPath, true);
-
 				db.DeleteJob(id);
 
 				return HttpStatusCode.OK;
@@ -148,7 +146,15 @@ namespace Peach.Pro.Core.WebServices
 				var isActive = events.Any(x => x.Status == TestStatus.Active);
 				var isFail = events.Any(x => x.Status == TestStatus.Fail);
 
-				//var logs = db.GetJobLogs(id);
+				var sb = new StringBuilder();
+
+				var logs = db.GetJobLogs(id);
+				foreach (var log in logs)
+					sb.AppendLine(log.Message);
+
+				var debugLog = TryReadLog(job.DebugLogPath);
+				if (debugLog != null)
+					sb.Append(debugLog);
 
 				var result = new TestResult
 				{
@@ -156,7 +162,7 @@ namespace Peach.Pro.Core.WebServices
 						? TestStatus.Active
 						: isFail ? TestStatus.Fail : TestStatus.Pass,
 					Events = events,
-					Log = TryReadLog(job.DebugLogPath),
+					Log = sb.ToString(),
 				};
 
 				return Response.AsJson(result);
@@ -198,27 +204,25 @@ namespace Peach.Pro.Core.WebServices
 		{
 			var liveJob = JobMonitor.GetJob();
 
-			Job job;
-
-			using (var db = new NodeDatabase())
-			{
-				job = db.GetJob(id);
-				if (FixStaleJob(liveJob, job))
-					db.UpdateJob(job);
-			}
-
-			if (job != null && File.Exists(job.DatabasePath))
-			{
-				using (var db = new JobDatabase(job.DatabasePath))
-				{
-					job = db.GetJob(id);
-					if (FixStaleJob(liveJob, job))
-						db.UpdateJob(job);
-				}
-			}
-
+			var job = JobResolver.GetJob(id);
 			if (job == null)
 				return HttpStatusCode.NotFound;
+
+			if (FixStaleJob(liveJob, job))
+			{
+				using (var db = new NodeDatabase())
+				{
+					db.UpdateJob(job);
+				}
+
+				if (File.Exists(job.DatabasePath))
+				{
+					using (var db = new JobDatabase(job.DatabasePath))
+					{
+						db.UpdateJob(job);
+					}
+				}
+			}
 
 			return Response.AsJson(LoadJob(job));
 		}
@@ -447,6 +451,82 @@ namespace Peach.Pro.Core.WebServices
 			{
 				return null;
 			}
+		}
+	}
+
+	class ConcatenatedStream : Stream
+	{
+		Queue<Stream> _streams;
+
+		public ConcatenatedStream(IEnumerable<Stream> streams)
+		{
+			_streams = new Queue<Stream>(streams);
+		}
+
+		public override int Read(byte[] buffer, int offset, int count)
+		{
+			if (_streams.Count == 0)
+				return 0;
+
+			int bytesRead = _streams.Peek().Read(buffer, offset, count);
+			if (bytesRead == 0)
+			{
+				_streams.Dequeue().Dispose();
+				bytesRead += Read(buffer, offset + bytesRead, count - bytesRead);
+			}
+			return bytesRead;
+		}
+
+		public override bool CanRead
+		{
+			get { return true; }
+		}
+
+		public override bool CanSeek
+		{
+			get { throw new NotImplementedException(); }
+		}
+
+		public override bool CanWrite
+		{
+			get { throw new NotImplementedException(); }
+		}
+
+		public override void Flush()
+		{
+			throw new NotImplementedException();
+		}
+
+		public override long Length
+		{
+			get { throw new NotImplementedException(); }
+		}
+
+		public override long Position
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+			set
+			{
+				throw new NotImplementedException();
+			}
+		}
+
+		public override long Seek(long offset, SeekOrigin origin)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override void SetLength(long value)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override void Write(byte[] buffer, int offset, int count)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

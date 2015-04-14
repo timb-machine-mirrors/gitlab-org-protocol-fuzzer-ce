@@ -115,15 +115,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		[ForeignKey(typeof(Job))]
 		public string JobId { get; set; }
 
-		public string Logger { get; set; }
 		public string Message { get; set; }
-
-		public DateTime TimeStamp
-		{
-			get { return _timeStamp; }
-			set { _timeStamp = value.MakeUtc(); }
-		}
-		private DateTime _timeStamp;
 	}
 
 	public class Job : JobRequest
@@ -140,6 +132,7 @@ namespace Peach.Pro.Core.WebServices.Models
 			Status = JobStatus.StartPending;
 			Mode = JobMode.Starting;
 
+			PitUrl = request.PitUrl;
 			Seed = request.Seed;
 			RangeStart = request.RangeStart;
 			RangeStop = request.RangeStop;

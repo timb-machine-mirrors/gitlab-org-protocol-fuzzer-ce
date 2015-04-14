@@ -74,6 +74,7 @@ namespace Peach.Pro.Core.Loggers
 
 		readonly List<Fault.State> _states = new List<Fault.State>();
 		readonly List<TestEvent> _events = new List<TestEvent>();
+		readonly List<LoggingRule> _tempRules = new List<LoggingRule>();
 		readonly LoggingConfiguration _loggingConfig = LogManager.Configuration;
 		Fault _reproFault;
 		TextWriter _log;
@@ -105,8 +106,8 @@ namespace Peach.Pro.Core.Loggers
 
 		public void Initialize(RunConfiguration config)
 		{
-			_tempTarget = new DatabaseTarget(config.id);
-			ConfigureLogging(null, _tempTarget.Name, _tempTarget);
+			_tempTarget = new DatabaseTarget(config.id) { Layout = DebugLogLayout };
+			ConfigureLogging(null, _tempTarget);
 		}
 
 		protected override void Agent_AgentConnect(RunContext context, AgentClient agent)
@@ -181,6 +182,7 @@ namespace Peach.Pro.Core.Loggers
 				var job = db.GetJob(_job.Guid);
 				if (job == null)
 				{
+					_job.Seed = context.config.randomSeed;
 					_job.Mode = JobMode.Fuzzing;
 					_job.Status = JobStatus.Running;
 					_job.StartDate = DateTime.UtcNow;
@@ -803,36 +805,40 @@ namespace Peach.Pro.Core.Loggers
 			};
 
 			var wrapper = new AsyncTargetWrapper(target);
+			wrapper.Name = target.Name;
 
-			string oldName = null;
-			if (_tempTarget != null)
-				oldName = _tempTarget.Name;
-			ConfigureLogging(oldName, target.Name, wrapper);
+			ConfigureLogging(_tempTarget, wrapper);
 
 			_tempTarget = null;
 		}
 
-		void ConfigureLogging(string oldName, string name, Target target)
+		void ConfigureLogging(Target oldTarget, Target newTarget)
 		{
 			var nconfig = LogManager.Configuration;
-			if (oldName != null)
-				nconfig.RemoveTarget(oldName);
-			nconfig.AddTarget(name, target);
+			if (oldTarget != null)
+			{
+				nconfig.RemoveTarget(oldTarget.Name);
+				foreach (var rule in _tempRules)
+					nconfig.LoggingRules.Remove(rule);
+			}
+			nconfig.AddTarget(newTarget.Name, newTarget);
 
 			foreach (var logger in FilteredLoggers)
 			{
-				var rule = new LoggingRule(logger, LogLevel.Info, target) { Final = true };
+				var rule = new LoggingRule(logger, LogLevel.Info, newTarget) { Final = true };
+				_tempRules.Add(rule);
 				nconfig.LoggingRules.Add(rule);
 			}
 
-			var defaultRule = new LoggingRule("*", LogLevel.Debug, target);
+			var defaultRule = new LoggingRule("*", LogLevel.Debug, newTarget);
+			_tempRules.Add(defaultRule);
 			nconfig.LoggingRules.Add(defaultRule);
 
 			LogManager.Configuration = nconfig;
 		}
 	}
 
-	class DatabaseTarget : Target
+	class DatabaseTarget : TargetWithLayout
 	{
 		NodeDatabase _db = new NodeDatabase();
 		readonly string _jobId;
@@ -848,9 +854,7 @@ namespace Peach.Pro.Core.Loggers
 			_db.InsertJobLog(new JobLog
 			{
 				JobId = _jobId,
-				Logger = logEvent.LoggerName,
-				Message = logEvent.Message.Fmt(logEvent.Parameters),
-				TimeStamp = logEvent.TimeStamp,
+				Message = Layout.Render(logEvent),
 			});
 		}
 
