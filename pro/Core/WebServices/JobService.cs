@@ -148,13 +148,15 @@ namespace Peach.Pro.Core.WebServices
 				var isActive = events.Any(x => x.Status == TestStatus.Active);
 				var isFail = events.Any(x => x.Status == TestStatus.Fail);
 
+				//var logs = db.GetJobLogs(id);
+
 				var result = new TestResult
 				{
 					Status = isActive
 						? TestStatus.Active
 						: isFail ? TestStatus.Fail : TestStatus.Pass,
 					Events = events,
-					Log = TryReadLog(job.AltDebugLogPath) ?? TryReadLog(job.DebugLogPath),
+					Log = TryReadLog(job.DebugLogPath),
 				};
 
 				return Response.AsJson(result);

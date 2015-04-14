@@ -56,36 +56,12 @@ namespace Peach.Pro.Core.Runtime
 			}
 		}
 
-		public static Job CreateJob(string pitFile, JobRequest jobRequest, Guid id)
-		{
-			var job = new Job
-			{
-				Guid = id,
-				Name = Path.GetFileNameWithoutExtension(pitFile),
-				StartDate = DateTime.UtcNow,
-				Status = JobStatus.StartPending,
-				Mode = JobMode.Starting,
-
-				// select only params that we need to start a job
-				PitUrl = jobRequest.PitUrl,
-				IsControlIteration = jobRequest.IsControlIteration,
-				Seed = jobRequest.Seed,
-				RangeStart = jobRequest.RangeStart,
-				RangeStop = jobRequest.RangeStop,
-			};
-
-			using (var db = new NodeDatabase())
-			{
-				db.InsertJob(job);
-			}
-
-			return job;
-		}
-
 		public void Run()
 		{
 			try
 			{
+				_jobLogger.Initialize(_config);
+
 				var dom = ParsePit();
 
 				Test test;
@@ -121,8 +97,6 @@ namespace Peach.Pro.Core.Runtime
 			finally
 			{
 				LogManager.Flush();
-				var job = new Job { Guid = _config.id };
-				_jobLogger.FlushDebugLog(job.AltDebugLogPath);
 			}
 		}
 

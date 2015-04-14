@@ -22,13 +22,18 @@ namespace Peach.Pro.Core.WebServices
 		bool Continue();
 		bool Stop();
 		bool Kill();
+
+		EventHandler InternalEvent { set; }
 	}
 
 	public abstract class BaseJobMonitor
 	{
+		static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 		protected Guid? _guid;
 		protected string _pitFile;
 		protected string _pitLibraryPath;
+
+		public EventHandler InternalEvent { get; set; }
 
 		public Job GetJob()
 		{
@@ -38,32 +43,7 @@ namespace Peach.Pro.Core.WebServices
 					return null;
 			}
 
-			// refresh job status from NodeDatabase or JobDatabase
-			Job job;
-			using (var db = new NodeDatabase())
-			{
-				job = db.GetJob(_guid.Value);
-				if (job == null)
-					return null;
-
-				if (job.DatabasePath == null)
-					return job;
-
-				if (!File.Exists(job.DatabasePath))
-				{
-					db.DeleteJob(_guid.Value);
-					return null;
-				}
-			}
-
-			using (var db = new JobDatabase(job.DatabasePath))
-			{
-				job = db.GetJob(_guid.Value);
-				if (job == null)
-					return null;
-			}
-
-			return job;
+			return JobResolver.GetJob(_guid.Value);
 		}
 
 		public Job Start(string pitLibraryPath, string pitFile, JobRequest jobRequest)
@@ -75,10 +55,12 @@ namespace Peach.Pro.Core.WebServices
 
 				_pitFile = Path.GetFullPath(pitFile);
 				_pitLibraryPath = pitLibraryPath;
-				_guid = Guid.NewGuid();
 
-				var job = JobRunner.CreateJob(_pitFile, jobRequest, _guid.Value);
+				var job = new Job(jobRequest, _pitFile);
+				_guid = job.Guid;
+
 				OnStart(job);
+
 				return job;
 			}
 		}
@@ -86,37 +68,16 @@ namespace Peach.Pro.Core.WebServices
 		protected abstract void OnStart(Job job);
 		protected abstract bool IsRunning { get; }
 
-		protected void JobDone()
-		{
-			// copy job from JobDatabase into NodeDatabase
-			// this is needed to update the LogPath
-			var job = GetJob();
-			if (job == null)
-				return;
-
-			job.Status = JobStatus.Stopped;
-
-			if (File.Exists(job.DatabasePath))
-			{
-				using (var db = new JobDatabase(job.DatabasePath))
-				{
-					job = db.GetJob(job.Guid);
-					job.Status = JobStatus.Stopped;
-					db.UpdateJob(job);
-				}
-			}
-
-			using (var db = new NodeDatabase())
-			{
-				db.UpdateJob(job);
-			}
-		}
-
 		protected void JobFail(Exception ex)
 		{
+			Logger.Trace(">>> JobFail");
+
 			var job = GetJob();
 			if (job == null)
+			{
+				Logger.Trace("<<< JobFail (job == null)");
 				return;
+			}
 
 			job.Status = JobStatus.Stopped;
 			job.Result = ex.Message;
@@ -144,12 +105,15 @@ namespace Peach.Pro.Core.WebServices
 					db.UpdateJob(job);
 				}
 			}
+
+			Logger.Trace("<<< JobFail");
 		}
 	}
 
 	public class InternalJobMonitor : BaseJobMonitor, IJobMonitor
 	{
-		JobRunner _runner;
+		static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+		volatile JobRunner _runner;
 		Thread _thread;
 
 		protected override bool IsRunning { get { return _runner != null; } }
@@ -189,19 +153,35 @@ namespace Peach.Pro.Core.WebServices
 
 		public bool Kill()
 		{
+			Logger.Trace(">>> Kill");
+
 			lock (this)
 			{
 				if (!IsRunning)
+				{
+					Logger.Trace("<<< Kill (!IsRunning)");
 					return false;
+				}
+
+				Logger.Trace("Abort");
 				_thread.Abort();
+
+				Logger.Trace("<<< Kill");
 				return true;
 			}
 		}
 
 		public void Dispose()
 		{
+			Logger.Trace(">>> Dispose");
+
 			if (Kill())
+			{
+				Logger.Trace("Join");
 				_thread.Join(TimeSpan.FromSeconds(5));
+			}
+
+			Logger.Trace("<<< Dispose");
 		}
 
 		protected override void OnStart(Job job)
@@ -212,16 +192,20 @@ namespace Peach.Pro.Core.WebServices
 				try
 				{
 					_runner.Run();
-					JobDone();
 				}
 				catch (Exception ex)
 				{
 					JobFail(ex);
 				}
-
-				lock (this)
+				finally
 				{
-					_runner = null;
+					lock (this)
+					{
+						_runner = null;
+					}
+
+					if (InternalEvent != null)
+						InternalEvent(this, EventArgs.Empty);
 				}
 			});
 			_thread.Start();
@@ -268,12 +252,17 @@ namespace Peach.Pro.Core.WebServices
 			lock (this)
 			{
 				if (!IsRunning)
-					return false;
+					return true;
 
 				try
 				{
 					_pendingKill = true;
 					_process.Kill();
+					return true;
+				}
+				catch (InvalidOperationException)
+				{
+					// The process has already been killed
 					return true;
 				}
 				catch (Exception ex)
@@ -419,6 +408,8 @@ namespace Peach.Pro.Core.WebServices
 
 			if (exitCode == 0 || exitCode == 2 || _pendingKill)
 			{
+				if (exitCode != 0 && _pendingKill)
+					JobFail(new Exception("Job has been aborted."));
 				FinishJob();
 			}
 			else
@@ -437,28 +428,42 @@ namespace Peach.Pro.Core.WebServices
 
 		void FinishJob()
 		{
-			Logger.Trace("FinishJob");
-
-			JobDone();
+			Logger.Trace(">>> FinishJob");
 
 			lock (this)
 			{
-				try { _process.Dispose(); }
-				catch { }
+				try 
+				{ 
+					_process.Dispose(); 
+				}
+				catch(Exception ex) 
+				{
+ 					Logger.Trace("Exception during _process.Dispose: {0}", ex.Message);
+				}
+
 				_process = null;
 				_taskStderr = null;
 				_pendingKill = false;
 			}
+
+			if (InternalEvent != null)
+				InternalEvent(this, EventArgs.Empty);
+
+			Logger.Trace("<<< FinishJob");
 		}
 
 		// used by unit tests
 		public void Dispose()
 		{
+			Logger.Trace(">>> Dispose");
+
 			if (Kill())
 			{
 				Logger.Trace("Waiting for process to die");
 				_taskMonitor.Wait(TimeSpan.FromSeconds(5));
 			}
+
+			Logger.Trace("<<< Dispose");
 		}
 	}
 }

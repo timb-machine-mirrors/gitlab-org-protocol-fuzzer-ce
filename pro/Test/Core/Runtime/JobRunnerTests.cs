@@ -13,6 +13,8 @@ using TestStatus = Peach.Pro.Core.WebServices.Models.TestStatus;
 using Peach.Core.Test;
 using NLog.Config;
 using NLog;
+using NLog.Targets.Wrappers;
+using NLog.Targets;
 
 namespace Peach.Pro.Test.Core.Runtime
 {
@@ -62,6 +64,17 @@ namespace Peach.Pro.Test.Core.Runtime
 			Configuration.LogRoot = _tmpDir.Path;
 
 			_loggingConfig = LogManager.Configuration;
+
+			var target = new AsyncTargetWrapper(new ConsoleTarget
+			{
+				Layout = "${time} ${logger} ${message}"
+			});
+
+			var config = new LoggingConfiguration();
+			var rule = new LoggingRule("*", LogLevel.Trace, target);
+			config.AddTarget("console", target);
+			config.LoggingRules.Add(rule);
+			LogManager.Configuration = config;
 		}
 
 		[TearDown]
@@ -82,7 +95,7 @@ namespace Peach.Pro.Test.Core.Runtime
 
 			public SafeRunner(string xmlFile, JobRequest jobRequest)
 			{
-				_job = JobRunner.CreateJob(xmlFile, jobRequest, Guid.NewGuid());
+				_job = new Job(jobRequest, xmlFile);
 				JobRunner = new JobRunner(_job, "", xmlFile);
 				_thread = new Thread(() =>
 				{
@@ -115,9 +128,11 @@ namespace Peach.Pro.Test.Core.Runtime
 				Assert.Fail("Timeout");
 			}
 
-			public void Join()
+			public void WaitForFinish()
 			{
-				Assert.IsTrue(_thread.Join(TimeSpan.FromSeconds(10)));
+				Console.WriteLine("Waiting for finish");
+				Assert.IsTrue(_thread.Join(TimeSpan.FromSeconds(20)), "Timeout waiting for job to finish");
+				Assert.AreEqual(JobStatus.Stopped, GetJob().Status);
 				if (_caught != null)
 					throw new AggregateException(_caught);
 			}
@@ -173,8 +188,7 @@ namespace Peach.Pro.Test.Core.Runtime
 			};
 			using (var runner = new SafeRunner(_tmp.Path, jobRequest))
 			{
-				runner.WaitUntil(JobStatus.Stopped);
-				runner.Join();
+				runner.WaitForFinish();
 				runner.VerifyDatabase();
 			}
 		}
@@ -187,8 +201,7 @@ namespace Peach.Pro.Test.Core.Runtime
 			{
 				runner.WaitUntil(JobStatus.Running);
 				runner.JobRunner.Stop();
-				runner.WaitUntil(JobStatus.Stopped);
-				runner.Join();
+				runner.WaitForFinish();
 				runner.VerifyDatabase();
 			}
 		}
@@ -205,8 +218,7 @@ namespace Peach.Pro.Test.Core.Runtime
 				runner.JobRunner.Continue();
 				runner.WaitUntil(JobStatus.Running);
 				runner.JobRunner.Stop();
-				runner.WaitUntil(JobStatus.Stopped);
-				runner.Join();
+				runner.WaitForFinish();
 				runner.VerifyDatabase();
 			}
 		}
@@ -221,8 +233,7 @@ namespace Peach.Pro.Test.Core.Runtime
 			};
 			using (var runner = new SafeRunner(_tmp.Path, jobRequest))
 			{
-				runner.WaitUntil(JobStatus.Stopped);
-				runner.Join();
+				runner.WaitForFinish();
 
 				using (var db = new NodeDatabase())
 				{
@@ -256,28 +267,35 @@ namespace Peach.Pro.Test.Core.Runtime
 				};
 				using (var runner = new SafeRunner(xmlFile.Path, jobRequest))
 				{
-					runner.WaitUntil(JobStatus.Stopped);
-					runner.Join();
+					runner.WaitForFinish();
 
 					using (var db = new NodeDatabase())
 					{
 						DatabaseTests.AssertResult(db.GetTestEventsByJob(runner.Id), new[]
-					{
-						 new TestEvent(
-							 1, 
-							 runner.Id, 
-							 TestStatus.Fail, 
-							 "Loading pit file", 
-							 "Loading pit file '{0}'".Fmt(xmlFile.Path), 
-							 "Error: XML Failed to load: Data at the root level is invalid. Line 25, position 1."),
-					});
+						{
+							 new TestEvent(
+								 1, 
+								 runner.Id, 
+								 TestStatus.Fail, 
+								 "Loading pit file", 
+								 "Loading pit file '{0}'".Fmt(xmlFile.Path), 
+#if MONO
+								 "Error: XML Failed to load: Text node cannot appear in this state.  Line 25, position 1."),
+#else
+								 "Error: XML Failed to load: Data at the root level is invalid. Line 25, position 1."),
+#endif
+						});
+
+						var logs = db.GetJobLogs(runner.Id).ToList();
+						Assert.IsTrue(logs.Count > 0, "Missing JobLogs");
+						foreach (var log in logs)
+						{
+							Console.WriteLine("{0} {1} {2}", log.TimeStamp, log.Logger, log.Message);
+						}
 					}
 
 					var job = runner.GetJob();
 					Assert.IsFalse(File.Exists(job.DebugLogPath));
-
-					Assert.IsTrue(File.Exists(job.AltDebugLogPath));
-					Console.Write(File.ReadAllText(job.AltDebugLogPath));
 				}
 			}
 		}

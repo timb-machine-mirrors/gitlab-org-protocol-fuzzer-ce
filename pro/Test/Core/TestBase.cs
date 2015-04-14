@@ -10,6 +10,7 @@ using Peach.Core;
 using Peach.Pro.Core;
 using Peach.Pro.Core.Runtime;
 using Peach.Core.Test;
+using NLog.Targets.Wrappers;
 
 // ReSharper disable once CheckNamespace (required for NUnit SetupFixture)
 namespace Peach.Pro.Test.Core
@@ -43,15 +44,15 @@ namespace Peach.Pro.Test.Core
 
 			if (!(LogManager.Configuration != null && LogManager.Configuration.LoggingRules.Count > 0))
 			{
-				var consoleTarget = new ConsoleTarget
+				var consoleTarget = new AsyncTargetWrapper(new ConsoleTarget
 				{
-					Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}"
-				};
+					Layout = "${time} ${logger} ${message}"
+				});
 
 				var config = new LoggingConfiguration();
 				config.AddTarget("console", consoleTarget);
 
-				var logLevel = LogLevel.Debug;
+				var logLevel = LogLevel.Info;
 				var peachTrace = Environment.GetEnvironmentVariable("PEACH_TRACE");
 				if (peachTrace == "1")
 					logLevel = LogLevel.Trace;
