@@ -27,6 +27,7 @@ namespace Peach.Pro.Core.WebServices
 
 			Get["/{id}/nodes"] = _ => GetNodes(_.id);
 			Get["/{id}/nodes/first"] = _ => GetFirstNode(_.id);
+			Get["/{id}/nodes/{nid}/log"] = _ => GetLog(_.id, _.nid);
 
 			Get["/{id}/faults"] = _ => GetFaults(_.id);
 			Get["/{id}/faults/{fid}"] = _ => GetFault(_.id, _.fid);
@@ -163,10 +164,46 @@ namespace Peach.Pro.Core.WebServices
 						: isFail ? TestStatus.Fail : TestStatus.Pass,
 					Events = events,
 					Log = sb.ToString(),
+					LogUrl = MakeUrl(id.ToString(), "nodes", NodeGuid, "log"),
 				};
 
 				return Response.AsJson(result);
 			}
+		}
+
+		Response GetLog(Guid jobId, Guid nodeId)
+		{
+			var streams = new List<Stream>();
+
+			using (var db = new NodeDatabase())
+			{
+				var job = db.GetJob(jobId);
+				if (job == null)
+					return HttpStatusCode.NotFound;
+
+				var logs = db.GetJobLogs(jobId).ToList();
+				if (logs.Count > 0)
+				{
+					var ms = new MemoryStream();
+					var writer = new StreamWriter(ms);
+					foreach (var log in logs)
+						writer.WriteLine(log.Message);
+					streams.Add(ms);
+				}
+
+				if (File.Exists(job.DebugLogPath))
+				{
+					streams.Add(new FileStream(
+						job.DebugLogPath,
+						FileMode.Open,
+						FileAccess.Read,
+						FileShare.ReadWrite,
+						64 * 1024,
+						FileOptions.SequentialScan));
+				}
+			}
+
+			return Response.FromStream(new ConcatenatedStream(streams), "text/plain");
 		}
 
 		Response GetJobs()
@@ -457,6 +494,7 @@ namespace Peach.Pro.Core.WebServices
 	class ConcatenatedStream : Stream
 	{
 		Queue<Stream> _streams;
+		long _position;
 
 		public ConcatenatedStream(IEnumerable<Stream> streams)
 		{
@@ -465,16 +503,21 @@ namespace Peach.Pro.Core.WebServices
 
 		public override int Read(byte[] buffer, int offset, int count)
 		{
-			if (_streams.Count == 0)
-				return 0;
+			var result = 0;
 
-			int bytesRead = _streams.Peek().Read(buffer, offset, count);
-			if (bytesRead == 0)
+			while (count > 0 && _streams.Count > 0)
 			{
-				_streams.Dequeue().Dispose();
-				bytesRead += Read(buffer, offset + bytesRead, count - bytesRead);
+				int bytesRead = _streams.Peek().Read(buffer, offset, count);
+				result += bytesRead;
+				offset += bytesRead;
+				count -= bytesRead;
+				_position += bytesRead;
+
+				if (count > 0)
+					_streams.Dequeue();
 			}
-			return bytesRead;
+
+			return result;
 		}
 
 		public override bool CanRead
@@ -484,34 +527,35 @@ namespace Peach.Pro.Core.WebServices
 
 		public override bool CanSeek
 		{
-			get { throw new NotImplementedException(); }
+			get { return false; }
 		}
 
 		public override bool CanWrite
 		{
-			get { throw new NotImplementedException(); }
+			get { return false; }
 		}
 
 		public override void Flush()
 		{
-			throw new NotImplementedException();
+			foreach (var stream in _streams)
+				stream.Flush();
 		}
 
 		public override long Length
 		{
-			get { throw new NotImplementedException(); }
+			get
+			{
+				var result = 0L;
+				foreach (var stream in _streams)
+					result += stream.Length;
+				return result;
+			}
 		}
 
 		public override long Position
 		{
-			get
-			{
-				throw new NotImplementedException();
-			}
-			set
-			{
-				throw new NotImplementedException();
-			}
+			get { return _position; }
+			set { throw new NotImplementedException(); }
 		}
 
 		public override long Seek(long offset, SeekOrigin origin)
