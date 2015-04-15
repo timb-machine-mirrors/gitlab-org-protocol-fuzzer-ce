@@ -549,10 +549,13 @@ namespace Peach.Core.Dom.XPath
 
 		#endregion
 
+		// Stack of previous nodes so MoveToParent is quick
+		// Use a LinkedList so Clone() doesn't reverse our history!
 		private LinkedList<Entry> _position;
 
-		private string _localName;  // Cache so we don't have to call _position.First.Value.LocalName
-		private Entry _currentNode; // Cache so we don't have to call _position.First.Value
+		// Current node is not contained in the position list
+		// so that MoveNext/MovePrev doesn't have to do a Pop()/Push()
+		private Entry _currentNode;
 
 		// ReSharper disable once InconsistentNaming
 		[Obsolete("This property is obsolete. Use the 'CurrentNode' property instead.")]
@@ -567,15 +570,15 @@ namespace Peach.Core.Dom.XPath
 		}
 
 		public PeachXPathNavigator(Dom dom)
-			: this(new[] { new RootEntry(dom) })
 		{
+			_position = new LinkedList<Entry>();
+			_currentNode = new RootEntry(dom);
 		}
 
-		private PeachXPathNavigator(IEnumerable<Entry> position)
+		private PeachXPathNavigator(PeachXPathNavigator other)
 		{
-			_position = new LinkedList<Entry>(position);
-			_currentNode = _position.First.Value;
-			_localName = _currentNode.LocalName;
+			_position = new LinkedList<Entry>(other._position);
+			_currentNode = other._currentNode;
 		}
 
 		public override string BaseURI
@@ -585,7 +588,7 @@ namespace Peach.Core.Dom.XPath
 
 		public override XPathNavigator Clone()
 		{
-			return new PeachXPathNavigator(_position);
+			return new PeachXPathNavigator(this);
 		}
 
 		public override bool IsEmptyElement
@@ -597,6 +600,9 @@ namespace Peach.Core.Dom.XPath
 		{
 			var asPeach = other as PeachXPathNavigator;
 			if (asPeach == null)
+				return false;
+
+			if (!_currentNode.Equals(asPeach._currentNode))
 				return false;
 
 			var lhs = _position.GetEnumerator();
@@ -622,7 +628,7 @@ namespace Peach.Core.Dom.XPath
 
 		public override string LocalName
 		{
-			get { return _localName; }
+			get { return _currentNode.LocalName; }
 		}
 
 		public override bool MoveTo(XPathNavigator other)
@@ -632,7 +638,6 @@ namespace Peach.Core.Dom.XPath
 				return false;
 
 			_position = new LinkedList<Entry>(asPeach._position);
-			_localName = asPeach._localName;
 			_currentNode = asPeach._currentNode;
 
 			return true;
@@ -644,9 +649,8 @@ namespace Peach.Core.Dom.XPath
 			if (attr == null)
 				return false;
 
-			_position.AddFirst(attr);
+			_position.AddFirst(_currentNode);
 			_currentNode = attr;
-			_localName = _currentNode.LocalName;
 
 			return true;
 		}
@@ -657,9 +661,8 @@ namespace Peach.Core.Dom.XPath
 			if (child == null)
 				return false;
 
-			_position.AddFirst(child);
+			_position.AddFirst(_currentNode);
 			_currentNode = child;
-			_localName = _currentNode.LocalName;
 
 			return true;
 		}
@@ -680,10 +683,7 @@ namespace Peach.Core.Dom.XPath
 			if (next == null)
 				return false;
 
-			_position.RemoveFirst();
-			_position.AddFirst(next);
 			_currentNode = next;
-			_localName = _currentNode.LocalName;
 
 			return true;
 		}
@@ -694,10 +694,7 @@ namespace Peach.Core.Dom.XPath
 			if (next == null)
 				return false;
 
-			_position.RemoveFirst();
-			_position.AddFirst(next);
 			_currentNode = next;
-			_localName = _currentNode.LocalName;
 
 			return true;
 		}
@@ -709,26 +706,22 @@ namespace Peach.Core.Dom.XPath
 
 		public override bool MoveToParent()
 		{
-			if (_position.Count == 1)
+			if (_position.Count == 0)
 				return false;
 
-			_position.RemoveFirst();
 			_currentNode = _position.First.Value;
-			_localName = _currentNode.LocalName;
+			_position.RemoveFirst();
 
 			return true;
 		}
 
 		public override bool MoveToPrevious()
 		{
-			var next = _currentNode.GetPrev();
-			if (next == null)
+			var prev = _currentNode.GetPrev();
+			if (prev == null)
 				return false;
 
-			_position.RemoveFirst();
-			_position.AddFirst(next);
-			_currentNode = next;
-			_localName = _currentNode.LocalName;
+			_currentNode = prev;
 
 			return true;
 		}
