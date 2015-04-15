@@ -320,12 +320,17 @@ namespace Peach.Pro.Core.WebServices
 
 				try
 				{
-					var tmpUri = new Uri(string.Format("http://{0}:{1}", hostname, port++));
+					// On windows, localhost gets turned into "+" by NancyHost so the
+					// HttpListener can receive requests on any prefix.
+					// On mono, the HttpListener tries to resolve "+" which makes
+					// startup/shutdown extremly slow.
+					var tmpHostname = Platform.IsRunningOnMono() && hostname == "localhost" ? hostname : "0.0.0.0";
+					var tmpUri = new Uri(string.Format("http://{0}:{1}", tmpHostname, port++));
 					var tmpHost = new NancyHost(bootstrapper, config, tmpUri);
 
 					tmpHost.Start();
 
-					Uri = tmpUri;
+					Uri = new Uri(string.Format("http://{0}:{1}", hostname, tmpUri.Port));
 					host = tmpHost;
 				}
 				catch (HttpListenerException ex)
