@@ -17,5 +17,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		public IEnumerable<TestEvent> Events { get; set; }
 
 		public string Log { get; set; }
+
+		public string LogUrl { get; set; }
 	}
 }
