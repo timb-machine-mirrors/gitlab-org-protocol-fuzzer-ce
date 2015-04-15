@@ -5,8 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Threading;
 
 namespace Peach.Pro.Test.Core
 {
@@ -26,8 +24,10 @@ namespace Peach.Pro.Test.Core
 				path = "mono";
 			}
 			var args = string.Join(" ", argsList);
-			var proc = new Process();
-			proc.StartInfo = new ProcessStartInfo(path, args);
+			var proc = new Process
+			{
+				StartInfo = new ProcessStartInfo(path, args)
+			};
 
 			using (var mutex = SingleInstance.CreateInstance("CrashTestDummy"))
 			{

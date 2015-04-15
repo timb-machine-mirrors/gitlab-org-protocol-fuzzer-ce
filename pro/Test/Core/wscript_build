@@ -5,6 +5,7 @@ deps = [
 	'nunit.framework.dll',
 	'System.dll',
 	'System.Core.dll',
+	'System.Configuration.dll',
 	'System.Runtime.Remoting.dll',
 	'System.Xml.dll',
 	'Peach.Core.dll',
@@ -21,6 +22,7 @@ deps = [
 	'Ionic.Zip.dll',
 	'Newtonsoft.Json.dll',
 	'SocketHttpListener.dll',
+	'Dapper.dll',
 ]
 
 bld(

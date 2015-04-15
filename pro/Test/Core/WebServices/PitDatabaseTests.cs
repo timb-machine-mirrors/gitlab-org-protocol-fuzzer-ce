@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using Peach.Core;
@@ -13,7 +12,6 @@ using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using File = System.IO.File;
 using Monitor = Peach.Pro.Core.WebServices.Models.Monitor;
-using TestStatus = Peach.Pro.Core.WebServices.Models.TestStatus;
 using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.WebServices
@@ -338,27 +336,6 @@ namespace Peach.Pro.Test.Core.WebServices
 			var newCfg = File.ReadAllText(expName + ".config");
 
 			Assert.AreEqual(srcCfg, newCfg);
-		}
-
-		[Test]
-		public void TestPitTester()
-		{
-			var pit = db.Entries.First();
-			var pitFile = pit.Versions[0].Files[0].Name;
-
-			var res = new PitTester(root, pitFile);
-
-			Assert.NotNull(res);
-
-			while (res.Status == TestStatus.Active)
-				Thread.Sleep(1000);
-
-			Assert.AreEqual(TestStatus.Pass, res.Status);
-
-			foreach (var ev in res.Result.Events.ToList())
-			{
-				Assert.AreEqual(TestStatus.Pass, ev.Status);
-			}
 		}
 
 		[Test]

@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Peach.Pro.Core.Storage;
+using System.IO;
+using Peach.Core;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
@@ -17,6 +20,8 @@ namespace Peach.Pro.Core.WebServices.Models
 
 	public enum JobMode
 	{
+		Starting,
+		Recording,
 		Fuzzing,
 		Searching,
 		Reproducing,
@@ -69,53 +74,8 @@ namespace Peach.Pro.Core.WebServices.Models
 		public string Iterations { get; set; }
 	}
 
-	public class Job
+	public class JobRequest
 	{
-		/// <summary>
-		/// The URL of this job
-		/// </summary>
-		/// <example>
-		/// "/p/jobs/{id}"
-		/// </example>
-		public string JobUrl { get; set; }
-
-		/// <summary>
-		/// URLs used to control a running job.
-		/// </summary>
-		public JobCommands Commands;
-
-		/// <summary>
-		/// The URL of faults from job
-		/// </summary>
-		/// <example>
-		/// "/p/jobs/{id}/faults"
-		/// </example>
-		public string FaultsUrl { get; set; }
-
-		/// <summary>
-		/// The URL of the target this job is fuzzing
-		/// </summary>
-		/// <example>
-		/// "/p/targets/{id}"
-		/// </example>
-		public string TargetUrl { get; set; }
-
-		/// <summary>
-		/// The URL of the target configuration for this job
-		/// </summary>
-		/// <example>
-		/// "/p/targets/{target_id}/config/{config_id}"
-		/// </example>
-		public string TargetConfigUrl { get; set; }
-
-		/// <summary>
-		/// The URL that returns a list of nodes used by this job
-		/// </summary>
-		/// <example>
-		/// "/p/jobs/{id}/nodes"
-		/// </example>
-		public string NodesUrl { get; set; }
-
 		/// <summary>
 		/// The URL of the specific version of the pit for this job
 		/// TODO: Include version in the URL
@@ -126,12 +86,199 @@ namespace Peach.Pro.Core.WebServices.Models
 		public string PitUrl { get; set; }
 
 		/// <summary>
+		/// The random seed being used by the fuzzing job
+		/// </summary>
+		public long? Seed { get; set; }
+
+		/// <summary>
+		/// Optional starting iteration number
+		/// </summary>
+		public long RangeStart { get; set; }
+
+		/// <summary>
+		/// Optional ending iteration number
+		/// </summary>
+		public long? RangeStop { get; set; }
+
+		/// <summary>
+		/// Determines whether the job is a test run or an actual fuzzing session.
+		/// </summary>
+		public bool IsControlIteration { get; set; }
+	}
+
+	public class JobLog
+	{
+		[Key]
+		public long Id { get; set; }
+
+		[Required]
+		[ForeignKey(typeof(Job))]
+		public string JobId { get; set; }
+
+		public string Message { get; set; }
+	}
+
+	public class Job : JobRequest
+	{
+		public Job()
+		{
+		}
+
+		public Job(JobRequest request, string pitFile)
+		{
+			Guid = Guid.NewGuid();
+			Name = Path.GetFileNameWithoutExtension(pitFile);
+			StartDate = DateTime.UtcNow;
+			Status = JobStatus.StartPending;
+			Mode = JobMode.Starting;
+
+			PitUrl = request.PitUrl;
+			Seed = request.Seed;
+			RangeStart = request.RangeStart;
+			RangeStop = request.RangeStop;
+			IsControlIteration = request.IsControlIteration;
+
+			using (var db = new NodeDatabase())
+			{
+				db.InsertJob(this);
+			}
+		}
+
+		public Job(RunConfiguration config)
+		{
+			Guid = config.id;
+			Name = Path.GetFileNameWithoutExtension(config.pitFile);
+			StartDate = DateTime.UtcNow;
+			Status = JobStatus.StartPending;
+			Mode = JobMode.Starting;
+
+			IsControlIteration = config.singleIteration;
+			Seed = config.randomSeed;
+			if (config.range)
+			{
+				RangeStart = config.rangeStart;
+				RangeStop = config.rangeStop;
+			}
+			else
+			{
+				RangeStart = config.skipToIteration;
+			}
+
+			using (var db = new NodeDatabase())
+			{
+				db.InsertJob(this);
+			}
+		}
+
+		[Key]
+		public string Id { get; set; }
+
+		[NotMapped]
+		[JsonIgnore]
+		public Guid Guid
+		{
+			get { return new Guid(Id); }
+			set { Id = value.ToString(); }
+		}
+
+		[JsonIgnore]
+		public string LogPath { get; set; }
+
+		[NotMapped]
+		[JsonIgnore]
+		public string DatabasePath
+		{
+			get
+			{
+				if (LogPath == null)
+					return null;
+				return Path.Combine(LogPath, "job.db");
+			}
+		}
+
+		[NotMapped]
+		[JsonIgnore]
+		public string DebugLogPath
+		{
+			get
+			{
+				if (LogPath == null)
+					return null;
+				return Path.Combine(LogPath, "debug.log");
+			}
+		}
+
+		/// <summary>
+		/// The URL of this job
+		/// </summary>
+		/// <example>
+		/// "/p/jobs/{id}"
+		/// </example>
+		[NotMapped]
+		public string JobUrl { get; set; }
+
+		/// <summary>
+		/// URLs used to control a running job.
+		/// </summary>
+		[NotMapped]
+		public JobCommands Commands { get; set; }
+
+		/// <summary>
+		/// URLs to associated metrics
+		/// </summary>
+		[NotMapped]
+		public JobMetrics Metrics { get; set; }
+
+		/// <summary>
+		/// The URL for getting test results
+		/// </summary>
+		[NotMapped]
+		public string FirstNodeUrl { get; set; }
+
+		/// <summary>
+		/// The URL of faults from job
+		/// </summary>
+		/// <example>
+		/// "/p/jobs/{id}/faults"
+		/// </example>
+		[NotMapped]
+		public string FaultsUrl { get; set; }
+
+		/// <summary>
+		/// The URL of the target this job is fuzzing
+		/// </summary>
+		/// <example>
+		/// "/p/targets/{id}"
+		/// </example>
+		[NotMapped]
+		public string TargetUrl { get; set; }
+
+		/// <summary>
+		/// The URL of the target configuration for this job
+		/// </summary>
+		/// <example>
+		/// "/p/targets/{target_id}/config/{config_id}"
+		/// </example>
+		[NotMapped]
+		public string TargetConfigUrl { get; set; }
+
+		/// <summary>
+		/// The URL that returns a list of nodes used by this job
+		/// </summary>
+		/// <example>
+		/// "/p/jobs/{id}/nodes"
+		/// </example>
+		[NotMapped]
+		public string NodesUrl { get; set; }
+
+		/// <summary>
 		/// The URL of the specific version of peach for this job
 		/// TODO: Include version in the URL
 		/// </summary>
 		/// <example>
 		/// "/p/peaches/{id}"
 		/// </example>
+		[NotMapped]
 		public string PeachUrl { get; set; }
 
 		/// <summary>
@@ -140,6 +287,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <example>
 		/// "/p/files/{id}"
 		/// </example>
+		[NotMapped]
 		public string ReportUrl { get; set; }
 
 		/// <summary>
@@ -148,12 +296,8 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <example>
 		/// "/p/files/{id}"
 		/// </example>
+		[NotMapped]
 		public string PackageFileUrl { get; set; }
-
-		/// <summary>
-		/// URLs to associated metrics
-		/// </summary>
-		public JobMetrics Metrics { get; set; }
 
 		/// <summary>
 		/// The status of this job record
@@ -164,7 +308,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// The mode that this job is operating under
 		/// </summary>
-		[JsonConverter(typeof (CamelCaseStringEnumConverter))]
+		[JsonConverter(typeof(CamelCaseStringEnumConverter))]
 		public JobMode Mode { get; set; }
 
 		/// <summary>
@@ -195,63 +339,67 @@ namespace Peach.Pro.Core.WebServices.Models
 		public string User { get; set; }
 
 		/// <summary>
-		/// The random seed being used by the fuzzing job
-		/// </summary>
-		public uint? Seed { get; set; }
-
-		/// <summary>
 		/// How many iterations of fuzzing have been completed
 		/// </summary>
-		public uint IterationCount { get; set; }
+		public long IterationCount { get; set; }
 
 		/// <summary>
 		/// The date the job was started
 		/// </summary>
-		public DateTime StartDate { get; set; }
+		public DateTime StartDate
+		{
+			get { return _startDate; }
+			set { _startDate = value.MakeUtc(); }
+		}
+		private DateTime _startDate;
 
 		/// <summary>
 		/// The date the job ended
 		/// </summary>
-		public DateTime? StopDate { get; set; }
+		public DateTime? StopDate
+		{
+			get { return _stopDate; }
+			set
+			{
+				if (value.HasValue)
+					_stopDate = value.Value.MakeUtc();
+				else
+					_stopDate = null;
+			}
+		}
+		private DateTime? _stopDate;
 
 		/// <summary>
 		/// The number of seconds the job has been running for
 		/// </summary>
-		public uint Runtime { get; set; }
+		public long Runtime { get; set; }
 
 		/// <summary>
 		/// The average speed of the job in iterations per hour
 		/// </summary>
-		public uint Speed { get; set; }
+		public long Speed { get; set; }
 
 		/// <summary>
 		/// How many faults have been detected
 		/// </summary>
-		public uint FaultCount { get; set; }
+		public long FaultCount { get; set; }
 
 		/// <summary>
 		/// List of tags associated with this job
 		/// </summary>
-		public List<Tag> Tags { get; set; }
+		[NotMapped]
+		public ICollection<Tag> Tags { get; set; }
 
 		/// <summary>
 		/// ACL for this job
 		/// </summary>
-		public List<Group> Groups { get; set; }
-
-		/// <summary>
-		/// Optional starting iteration number
-		/// </summary>
-		public uint RangeStart { get; set; }
-
-		/// <summary>
-		/// Optional ending iteration number
-		/// </summary>
-		public uint RangeStop { get; set; }
+		[NotMapped]
+		public ICollection<Group> Groups { get; set; }
 
 		/// <summary>
 		/// Indicates if metrics are being collected for the job
 		/// </summary>
+		[Obsolete]
 		public bool HasMetrics { get; set; }
 	}
 }

@@ -79,3 +79,9 @@ _Resharper*
 /pro/Web.baseDir.ts
 /pro/Web/Gruntfile.js*
 /pro/Web/Gruntfile.min*
+
+# NUnit files
+TestResult.xml
+*.VisualState.xml
+
+

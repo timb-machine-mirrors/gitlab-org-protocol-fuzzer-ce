@@ -7,8 +7,10 @@ using NLog.Config;
 using NLog.Targets;
 using NUnit.Framework;
 using Peach.Core;
+using Peach.Pro.Core;
 using Peach.Pro.Core.Runtime;
 using Peach.Core.Test;
+using NLog.Targets.Wrappers;
 
 // ReSharper disable once CheckNamespace (required for NUnit SetupFixture)
 namespace Peach.Pro.Test.Core
@@ -24,6 +26,8 @@ namespace Peach.Pro.Test.Core
 	[SetUpFixture]
 	class TestBase
 	{
+		TempDirectory _tmpDir;
+
 		public static ushort MakePort(ushort min, ushort max)
 		{
 			var pid = Process.GetCurrentProcess().Id;
@@ -40,15 +44,15 @@ namespace Peach.Pro.Test.Core
 
 			if (!(LogManager.Configuration != null && LogManager.Configuration.LoggingRules.Count > 0))
 			{
-				var consoleTarget = new ConsoleTarget
+				var consoleTarget = new AsyncTargetWrapper(new ConsoleTarget
 				{
-					Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}"
-				};
+					Layout = "${time} ${logger} ${message}"
+				});
 
 				var config = new LoggingConfiguration();
 				config.AddTarget("console", consoleTarget);
 
-				var logLevel = LogLevel.Debug;
+				var logLevel = LogLevel.Info;
 				var peachTrace = Environment.GetEnvironmentVariable("PEACH_TRACE");
 				if (peachTrace == "1")
 					logLevel = LogLevel.Trace;
@@ -60,6 +64,15 @@ namespace Peach.Pro.Test.Core
 			}
 
 			Program.LoadPlatformAssembly();
+
+			_tmpDir = new TempDirectory();
+			Configuration.LogRoot = _tmpDir.Path;
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			_tmpDir.Dispose();
 		}
 	
 		public static MemoryStream LoadResource(string name)
@@ -74,8 +87,7 @@ namespace Peach.Pro.Test.Core
 			}
 		}
 	}
-
-
+	
 	[TestFixture]
 	[Quick]
 	[Peach]

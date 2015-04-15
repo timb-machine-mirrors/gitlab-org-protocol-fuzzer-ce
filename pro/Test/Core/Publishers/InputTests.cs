@@ -44,7 +44,8 @@ namespace Peach.Pro.Test.Core.Publishers
 	class InputTests : DataModelCollector
 	{
 		[Test]
-		[Category("Peach")]
+		[Peach]
+		[Quick]
 		public void TestWantBytes()
 		{
 			// Ensure we successfully read "Hello World" from a publisher that
