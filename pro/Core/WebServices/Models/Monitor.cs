@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Peach.Core;
 
 namespace Peach.Pro.Core.WebServices.Models
 {

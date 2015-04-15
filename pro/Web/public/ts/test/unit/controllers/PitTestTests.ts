@@ -59,13 +59,18 @@ describe("Peach", () => {
 
 		it("can begin a test", () => {
 			var testUrl = '/p/my/test/url';
-			var req: Peach.ITestRequest = {
-				pitUrl: pitUrl
+			var req: Peach.IJobRequest = {
+				pitUrl: pitUrl,
+				isTest: true
 			};
-			var ref: Peach.ITestRef = {
-				testUrl: testUrl
+			var job: Peach.IJob = {
+				id: 'JOB_ID',
+				pitUrl: pitUrl,
+				links: {
+					testUrl: testUrl
+				}
 			};
-			$httpBackend.expectPOST(Peach.C.Api.TestStart, req).respond(ref);
+			$httpBackend.expectPOST(Peach.C.Api.Jobs, req).respond(job);
 			ctrl.OnBeginTest();
 			$httpBackend.flush();
 

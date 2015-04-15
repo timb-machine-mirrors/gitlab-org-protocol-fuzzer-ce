@@ -8,7 +8,9 @@ using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core
 {
-	[TestFixture, Category("Peach")]
+	[TestFixture]
+	[Peach]
+	[Quick]
 	class ReproIterationTests
 	{
 		readonly List<uint> _iterationHistory = new List<uint>();

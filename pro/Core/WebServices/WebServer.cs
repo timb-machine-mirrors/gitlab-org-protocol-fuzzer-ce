@@ -147,8 +147,6 @@ namespace Peach.Pro.Core.WebServices
 			container.Register<LibraryService>();
 			container.Register<NodeService>();
 			container.Register<JobService>();
-			container.Register<FaultService>();
-			container.Register<WizardService>();
 			container.Register<IndexService>();
 			container.Register<ErrorStatusCodeHandler>();
 			container.Register<ResourceViewLocationProvider>();
@@ -249,31 +247,22 @@ namespace Peach.Pro.Core.WebServices
 
 		public string ErrorMessage
 		{
-			get
-			{
-				return error.ErrorMessage;
-			}
+			get { return error.ErrorMessage; }
 		}
 
 		public string FullException
 		{
-			get
-			{
-				return error.FullException;
-			}
+			get { return error.FullException; }
 		}
 
 		public bool HasDetails
 		{
-			get
-			{
-				return !string.IsNullOrEmpty(FullException);
-			}
+			get { return !string.IsNullOrEmpty(FullException); }
 		}
 
 		public static ErrorResponse FromMessage(string message)
 		{
-			return new ErrorResponse(new Error()
+			return new ErrorResponse(new Error
 			{
 				ErrorMessage = message,
 			});
@@ -281,7 +270,7 @@ namespace Peach.Pro.Core.WebServices
 
 		public static ErrorResponse FromException(Exception ex)
 		{
-			return new ErrorResponse(new Error()
+			return new ErrorResponse(new Error
 			{
 				ErrorMessage = ex.GetBaseException().Message,
 				FullException = ex.ToString(),
@@ -302,9 +291,9 @@ namespace Peach.Pro.Core.WebServices
 		public Uri Uri { get; private set; }
 		public WebContext Context { get; private set; }
 
-		public WebServer(string pitLibraryPath)
+		public WebServer(string pitLibraryPath, IJobMonitor jobMonitor)
 		{
-			Context = new WebContext(pitLibraryPath);
+			Context = new WebContext(pitLibraryPath, jobMonitor);
 		}
 
 		public void Start()
@@ -349,7 +338,9 @@ namespace Peach.Pro.Core.WebServices
 					// Windows gives ERROR_SHARING_VIOLATION when port in use
 					// Windows gives ERROR_ALREADY_EXISTS when two http instances are running
 					// Mono raises "Prefix already in use" message
-					if (ex.ErrorCode != ERROR_SHARING_VIOLATION && ex.ErrorCode != ERROR_ALREADY_EXISTS && ex.Message != "Prefix already in use.")
+					if (ex.ErrorCode != ERROR_SHARING_VIOLATION &&
+						ex.ErrorCode != ERROR_ALREADY_EXISTS &&
+						ex.Message != "Prefix already in use.")
 						throw;
 				}
 				catch (SocketException ex)
@@ -379,13 +370,17 @@ namespace Peach.Pro.Core.WebServices
 			Context = null;
 		}
 
-		public static int Run(string pitLibraryPath, bool shouldStartBrowser)
+		public static int Run(string pitLibraryPath, bool shouldStartBrowser, IJobMonitor jobMonitor)
 		{
 			using (var evt = new AutoResetEvent(false))
 			{
-				ConsoleCancelEventHandler handler = (s, e) => { evt.Set(); e.Cancel = true; };
+				ConsoleCancelEventHandler handler = (s, e) =>
+				{
+					evt.Set(); 
+					e.Cancel = true;
+				};
 
-				using (var svc = new WebServer(pitLibraryPath))
+				using (var svc = new WebServer(pitLibraryPath, jobMonitor))
 				{
 					svc.Start();
 

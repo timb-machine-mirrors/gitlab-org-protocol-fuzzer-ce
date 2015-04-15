@@ -1,7 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using Peach.Core;
 using Peach.Core.Agent;
 using Monitor = Peach.Core.Agent.Monitor2;
@@ -17,20 +21,30 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Parameter("Boolean", typeof(bool), "A boolean parameter", "true")]
 	[Parameter("String", typeof(string), "A string parameter", "some string")]
 	[Parameter("When", typeof(MonitorWhen), "An enum parameter", "OnCall")]
+	[Parameter("CrashAfter", typeof(int), "Cause native process to crash after specified seconds", "-1")]
 	public class RandoFaulter : Monitor
 	{
+		static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
 		readonly System.Random _rnd = new System.Random();
 
 		public int Fault { get; set; }
 		public int NewMajor { get; set; }
 		public int NewMinor { get; set; }
+		public int CrashAfter { get; set; }
 		public bool Boolean { get; set; }
 		public string String { get; set; }
 		public MonitorWhen When { get; set; }
 
 		private const string Fmt = "X8";
 		private static readonly MemoryStream Snmpv2CPacket = LoadResource("snmpv2c.pcap");
-		private static readonly string[] Severity = { "EXPLOITABLE", "PROBABLY EXPLOITABLE", "PROBABLY NOT EXPLOITABLE", "UNKNOWN" };
+		private static readonly string[] Severity =
+		{
+			"EXPLOITABLE", 
+			"PROBABLY EXPLOITABLE", 
+			"PROBABLY NOT EXPLOITABLE", 
+			"UNKNOWN",
+		};
 
 		uint _startCount;
 		bool _isControl;
@@ -40,6 +54,27 @@ namespace Peach.Pro.Core.Agent.Monitors
 		public RandoFaulter(string name)
 			: base(name)
 		{
+		}
+
+		public override void StartMonitor(Dictionary<string, string> args)
+		{
+			base.StartMonitor(args);
+
+			if (CrashAfter > 0)
+			{
+				Task.Factory.StartNew(() =>
+				{
+					Logger.Info("Crashing after {0}ms", CrashAfter);
+					Thread.Sleep(CrashAfter);
+
+					Logger.Info("Crash!!!");
+					var ptr = Marshal.AllocHGlobal(10);
+					for (var i = 0; i < 100000; i++)
+					{
+						Marshal.WriteInt64(ptr, i, -1);
+					}
+				});
+			}
 		}
 
 		public override void IterationStarting(IterationStartingArgs args)

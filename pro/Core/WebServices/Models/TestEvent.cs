@@ -1,4 +1,6 @@
+using System;
 using Newtonsoft.Json;
+using Peach.Pro.Core.Storage;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
@@ -11,10 +13,33 @@ namespace Peach.Pro.Core.WebServices.Models
 
 	public class TestEvent
 	{
+		public TestEvent() { }
+
+		public TestEvent(
+			long id, 
+			Guid jobId,
+			TestStatus status, 
+			string short_, 
+			string description, 
+			string resolve)
+		{
+			Id = id;
+			JobId = jobId.ToString();
+			Status = status;
+			Short = short_;
+			Description = description;
+			Resolve = resolve;
+		}
+
 		/// <summary>
 		/// Identifier of event
 		/// </summary>
-		public uint Id { get; set; }
+		[Key]
+		public long Id { get; set; }
+
+		[Required]
+		[ForeignKey(typeof(Job))]
+		public string JobId { get; set; }
 
 		/// <summary>
 		/// Status of event

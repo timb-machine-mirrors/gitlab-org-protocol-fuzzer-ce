@@ -7,7 +7,9 @@ using Peach.Pro.Core.MutationStrategies;
 
 namespace Peach.Pro.Test.Core.MutationStrategies
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture] 
+	[Peach]
+	[Quick]
 	class SequentialTest : DataModelCollector
 	{
 		static readonly string xml = @"

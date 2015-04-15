@@ -105,7 +105,7 @@ namespace PeachMinset
 			arguments = string.Join(" ", extra.Skip(1));
 
 			if (args.Length == 0)
-				throw new SyntaxException();
+				throw new SyntaxException("Error, missing arguments.");
 
 			if (samples == null)
 				throw new SyntaxException("Error, 'samples' argument is required.");
@@ -137,9 +137,9 @@ namespace PeachMinset
 
 			if (verbose == 0)
 			{
-				ms.TraceCompleted += new TraceEventHandler(ms_TraceCompleted);
-				ms.TraceStarting += new TraceEventHandler(ms_TraceStarting);
-				ms.TraceFailed += new TraceEventHandler(ms_TraceFailed);
+				ms.TraceCompleted += ms_TraceCompleted;
+				ms.TraceStarting += ms_TraceStarting;
+				ms.TraceFailed += ms_TraceFailed;
 			}
 
 			if (minset != null && executable != null)
