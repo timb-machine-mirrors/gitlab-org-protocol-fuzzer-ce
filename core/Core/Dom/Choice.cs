@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 
 using Peach.Core.Analyzers;
@@ -363,6 +364,16 @@ namespace Peach.Core.Dom
 				return base.Children();
 			else
 				return choiceElements.Values;
+		}
+
+		/// <summary>
+		/// Returns a list of children for use in XPath navigation.
+		/// Should not be called directly.
+		/// </summary>
+		/// <returns></returns>
+		public override IList<DataElement> XPathChildren()
+		{
+			return choiceElements.Select(kv => kv.Value).ToList();
 		}
 
 		protected override DataElement GetChild(string name)
