@@ -193,6 +193,11 @@ namespace Peach.Pro.Core.WebServices
 				{
 					_runner.Run();
 				}
+				catch (ThreadAbortException ex)
+				{
+					Thread.ResetAbort();
+					JobFail(ex);
+				}
 				catch (Exception ex)
 				{
 					JobFail(ex);
