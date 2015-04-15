@@ -155,6 +155,16 @@ namespace Peach.Core.Dom
 			return new DataElement[0];
 		}
 
+		/// <summary>
+		/// Returns a list of children for use in XPath navigation.
+		/// Should not be called directly.
+		/// </summary>
+		/// <returns></returns>
+		public override IList<DataElement> XPathChildren()
+		{
+			return new[] { OriginalElement }.Concat(this).ToList();
+		}
+
 		protected override DataElement GetChild(string name)
 		{
 			// If we already expanded, just search our children

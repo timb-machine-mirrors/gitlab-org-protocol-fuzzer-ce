@@ -431,42 +431,13 @@ namespace Peach.Core.Dom.XPath
 
 		class ElementEntry : Entry
 		{
-			static ElementEntry Make(Array elem)
+			public static ElementEntry Make(DataElement parent)
 			{
-				return new ElementEntry(new[] { elem.OriginalElement }.Concat(elem).ToList(), 0);
-			}
-
-			static ElementEntry Make(Choice elem)
-			{
-				if (elem.choiceElements.Count == 0)
+				var peers = parent.XPathChildren();
+				if (peers.Count == 0)
 					return null;
 
-				return new ElementEntry(elem.choiceElements.Values.ToList(), 0);
-			}
-
-			public static ElementEntry Make(DataElementContainer elem)
-			{
-				if (elem.Count == 0)
-					return null;
-
-				return new ElementEntry(elem, 0);
-			}
-
-			static ElementEntry Make(DataElement elem)
-			{
-				var asArray = elem as Array;
-				if (asArray != null)
-					return Make(asArray);
-
-				var asChoice = elem as Choice;
-				if (asChoice != null)
-					return Make(asChoice);
-
-				var asCont = elem as DataElementContainer;
-				if (asCont != null)
-					return Make(asCont);
-
-				return null;
+				return new ElementEntry(peers, 0);
 			}
 
 			private readonly IList<DataElement> _peers;
