@@ -38,7 +38,9 @@ using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.CrackingTests
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	public class BlockTests
 	{
 		[Test]

@@ -57,12 +57,13 @@ module Peach {
 
 			this.testTime = moment().format("h:mm a");
 
-			var request: ITestRequest = {
-				pitUrl: this.pitService.Pit.pitUrl
+			var request: IJobRequest = {
+				pitUrl: this.pitService.Pit.pitUrl,
+				isControlIteration: true
 			};
-			var promise = this.$http.post(C.Api.TestStart, request);
-			promise.success((data: ITestRef) => {
-				this.startTestPoller(data.testUrl);
+			var promise = this.$http.post(C.Api.Jobs, request);
+			promise.success((job: IJob) => {
+				this.startTestPoller(job.firstNodeUrl);
 			});
 			promise.catch(reason => {
 				this.setFailure(reason);

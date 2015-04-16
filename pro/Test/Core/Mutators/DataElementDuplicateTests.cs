@@ -9,6 +9,8 @@ using Peach.Pro.Core.Mutators.Utility;
 namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
+	[Quick]
+	[Peach]
 	class DataElementDuplicateTests : DataModelCollector
 	{
 		[Test]

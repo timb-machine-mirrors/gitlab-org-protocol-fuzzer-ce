@@ -94,6 +94,9 @@ module Peach {
 			var deferred = this.$q.defer<void>();
 			var promise = this.$http.get(C.Api.Jobs);
 			promise.success((jobs: IJob[]) => {
+				// ignore test jobs for now
+				jobs = _.where(jobs, { isControlIteration: false });
+
 				var hasPit = false;
 				if (jobs.length > 0) {
 					this.job = _.first(jobs);
@@ -118,7 +121,7 @@ module Peach {
 			return deferred.promise;
 		}
 
-		public StartJob(job?: IJob) {
+		public StartJob(job?: IJobRequest) {
 			if (job === undefined) {
 				job = { pitUrl: this.pitService.Pit.pitUrl };
 			} else {
@@ -133,7 +136,7 @@ module Peach {
 				});
 				promise.error(reason => this.onError(reason));
 			} else if (this.CanContinue) {
-				this.job.status = JobStatus.ActionPending;
+				this.job.status = JobStatus.ContinuePending;
 				this.$http.get(this.job.commands.continueUrl)
 					.success(() => this.startJobPoller())
 					.error(reason => this.onError(reason));
@@ -142,7 +145,7 @@ module Peach {
 
 		public PauseJob() {
 			if (this.CanPause) {
-				this.job.status = JobStatus.ActionPending;
+				this.job.status = JobStatus.PausePending;
 				this.$http.get(this.job.commands.pauseUrl)
 					.success(() => this.startJobPoller())
 					.error(reason => this.onError(reason));
@@ -151,7 +154,7 @@ module Peach {
 
 		public StopJob() {
 			if (this.CanStop) {
-				this.job.status = JobStatus.ActionPending;
+				this.job.status = JobStatus.StopPending;
 				this.$http.get(this.job.commands.stopUrl)
 					.success(() => this.startJobPoller())
 					.error(reason => this.onError(reason));

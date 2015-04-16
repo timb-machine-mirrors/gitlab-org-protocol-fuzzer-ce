@@ -56,7 +56,7 @@
 							<tbody>
 								<tr>
 									<td>
-										<a href="{{vm.Fault.faultUrl}}/archive/fault.zip">
+										<a href="{{vm.Fault.archiveUrl}}">
 											Full Archive
 										</a>
 									</td>
@@ -64,7 +64,7 @@
 								</tr>
 								<tr ng-repeat="file in vm.Fault.files">
 									<td>
-										<a href="{{file.fileUrl}}/{{file.name}}">
+										<a href="{{file.fileUrl}}">
 											{{file.fullName}}
 										</a>
 									</td>

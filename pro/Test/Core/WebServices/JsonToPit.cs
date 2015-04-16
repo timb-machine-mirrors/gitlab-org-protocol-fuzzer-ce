@@ -7,10 +7,13 @@ using System.Xml;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using Peach.Pro.Core.WebServices;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.WebServices
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	public class JsonToPit
 	{
 		[Test]
@@ -308,14 +311,14 @@ namespace Peach.Pro.Test.Core.WebServices
 				var port = ((IPEndPoint)listener.LocalEndpoint).Port;
 				Assert.AreNotEqual(0, port);
 
-				using (var web = new WebServer(""))
+				using (var web = new WebServer("", new InternalJobMonitor()))
 				{
 					web.Start("localhost", port);
 
 					var actualPort = web.Uri.Port;
 					Assert.Greater(actualPort, port);
 
-					using (var web2 = new WebServer(""))
+					using (var web2 = new WebServer("", new InternalJobMonitor()))
 					{
 						web2.Start("localhost", actualPort);
 						Assert.Greater(web2.Uri.Port, actualPort);

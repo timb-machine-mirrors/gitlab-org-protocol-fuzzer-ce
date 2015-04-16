@@ -13,10 +13,13 @@ using Peach.Pro.Core.Agent.Channels.Rest;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
+using Peach.Pro.Core;
 
 namespace Peach.Pro.Test.Core.Agent
 {
 	[TestFixture]
+	[Quick]
+	[Peach]
 	class RestTests
 	{
 		/*
@@ -612,6 +615,8 @@ namespace Peach.Pro.Test.Core.Agent
 			// If an error happens during fuzzing and the agent server goes away.
 			// The agent client should automatically reconnect on the
 			// next IterationStarting()
+
+			Configuration.LogLevel = LogLevel.Debug;
 
 			StartServer();
 

@@ -3,7 +3,9 @@ using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Mutators
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class NoutatorTests : DataModelCollector
 	{
 		[Test]

@@ -1,0 +1,872 @@
+﻿
+//
+// Copyright (c) Michael Eddington
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy 
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights 
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
+// copies of the Software, and to permit persons to whom the Software is 
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in	
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+
+// Authors:
+//   Michael Eddington (mike@dejavusecurity.com)
+
+// $Id$
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
+using Godel.Core;
+using Peach.Core;
+using Peach.Core.Agent;
+using Peach.Core.Analyzers;
+using Peach.Core.Dom;
+using Peach.Core.Runtime;
+using Peach.Pro.Core.Loggers;
+using Peach.Pro.Core.Storage;
+using Peach.Pro.Core.WebServices;
+using Peach.Pro.Core.WebServices.Models;
+using SharpPcap;
+
+namespace Peach.Pro.Core.Runtime
+{
+	/// <summary>
+	/// Command line interface for Peach 3.  Mostly backwards compatable with
+	/// Peach 2.3.
+	/// </summary>
+	public class ConsoleProgram : Program
+	{
+		// PUT THIS INTO YOUR PROGRAM
+		////public static int Run(string[] args)
+		////{
+		////    return new ConsoleProgram(args).ExitCode;
+		////}
+
+		public static ConsoleColor DefaultForground = Console.ForegroundColor;
+
+		/// <summary>
+		/// The list of .config files to be parsed for defines
+		/// </summary>
+		protected List<string> _configFiles = new List<string>();
+
+		/// <summary>
+		/// List of key,value pairs of extra defines to use
+		/// </summary>
+		protected List<KeyValuePair<string, string>> _definedValues = new List<KeyValuePair<string, string>>();
+
+		/// <summary>
+		/// Configuration options for the engine
+		/// </summary>
+		protected RunConfiguration _config = new RunConfiguration();
+
+		/// <summary>
+		/// The exit code of the process
+		/// </summary>
+		public int ExitCode = 1;
+
+		private string _analyzer;
+		private string _agent;
+		private bool _test;
+		private Uri _webUri;
+		private string _pitLibraryPath;
+		private bool _noweb;
+		private bool _nobrowser;
+		private static volatile bool _shouldStop;
+
+		#region Public Properties
+
+		/// <summary>
+		/// Copyright message
+		/// </summary>
+		public virtual string Copyright
+		{
+			get { return "Copyright (c) Deja vu Security"; }
+		}
+
+		/// <summary>
+		/// Product name
+		/// </summary>
+		public virtual string ProductName
+		{
+			get { return "Peach Pro v" + Assembly.GetExecutingAssembly().GetName().Version; }
+		}
+
+		#endregion
+
+		public ConsoleProgram(string[] args)
+		{
+			_config.commandLine = args;
+			ExitCode = Run(args);
+		}
+
+		protected override void AddCustomOptions(OptionSet options)
+		{
+			// Run analyzer and exit
+			options.Add(
+				"analyzer=",
+				"Launch Peach Analyzer",
+				v => _analyzer = v
+			);
+
+			// Run agent and wait for ctrl-c
+			options.Add(
+				"a|agent=",
+				"Launch Peach Agent",
+				v => _agent = v
+			);
+
+			options.Add(
+				"1",
+				"Perform a single iteration",
+				v => _config.singleIteration = true
+			);
+			options.Add(
+				"debug",
+				"Enable debug messages. " +
+				"Useful when debugging your Peach Pit file. " +
+				"Warning: Messages are very cryptic sometimes.",
+				v => _verbosity = 1
+			);
+			options.Add(
+				"trace",
+				"Enable even more verbose debug messages.",
+				v => _verbosity = 2
+			);
+			options.Add(
+				"range=",
+				"Provide a range of test #'s to be run.",
+				v => ParseRange("range", v)
+			);
+			options.Add(
+				"c|count",
+				"Count test cases",
+				v => _config.countOnly = true
+			);
+			options.Add(
+				"skipto=",
+				"Skip to a specific test #. This replaced -r for restarting a Peach run.",
+				(uint v) => _config.skipToIteration = v
+			);
+			options.Add(
+				"seed=",
+				"Sets the seed used by the random number generator.",
+				(uint v) => _config.randomSeed = v
+			);
+			options.Add(
+				"p|parallel=",
+				"Parallel fuzzing. Total of M machines, this is machine N.",
+				v => ParseParallel("parallel", v)
+			);
+
+			// Defined values & .config files
+			options.Add(
+				"D|define=",
+				"Define a substitution value. " +
+				"In your PIT you can specify ##KEY## and it will be replaced with VALUE.",
+				AddNewDefine
+			);
+			options.Add(
+				"definedvalues=",
+				v => _configFiles.Add(v)
+			);
+			options.Add(
+				"config=",
+				"XML file containing defined values",
+				v => _configFiles.Add(v)
+			);
+			options.Add(
+				"t|test",
+				"Validate a Peach Pit file",
+				v => _test = true
+			);
+
+			// Global actions, get run and immediately exit
+			options.Add(
+				"showdevices",
+				"Display the list of PCAP devices",
+				var => ShowDevices()
+			);
+			options.Add(
+				"showenv",
+				"Print a list of all DataElements, Fixups, Agents, " +
+				"Publishers and their associated parameters.",
+				var => ShowEnvironment()
+			);
+			options.Add(
+				"makexsd",
+				"Generate peach.xsd",
+				var => MakeSchema()
+			);
+
+			// web ui
+			options.Add(
+				"pits=",
+				"The path to the pit library.",
+				v => _pitLibraryPath = v
+			);
+			options.Add(
+				"noweb",
+				"Disable the Peach web interface.",
+				v => _noweb = true
+			);
+			options.Add(
+				"nobrowser",
+				"Disable launching browser on start.",
+				v => _nobrowser = true
+			);
+		}
+
+		protected override bool VerifyCompatibility()
+		{
+			var type = Type.GetType("Mono.Runtime");
+
+			// If we are not on mono, no checks need to be performed.
+			if (type == null)
+				return true;
+
+			try
+			{
+				Console.ForegroundColor = DefaultForground;
+				Console.ResetColor();
+			}
+			catch
+			{
+				var term = Environment.GetEnvironmentVariable("TERM");
+
+				if (term == null)
+					Console.WriteLine("An incompatible terminal type was detected.");
+				else
+					Console.WriteLine("An incompatible terminal type '{0}' was detected.", term);
+
+				Console.WriteLine("Change your terminal type to 'linux', 'xterm' or 'rxvt' and try again.");
+				return false;
+			}
+
+			return base.VerifyCompatibility();
+		}
+
+		protected override void OnRun(List<string> args)
+		{
+			try
+			{
+				Console.Write("\n");
+				Console.ForegroundColor = ConsoleColor.DarkRed;
+				Console.Write("[[ ");
+				Console.ForegroundColor = ConsoleColor.DarkCyan;
+				Console.WriteLine(ProductName);
+				Console.ForegroundColor = ConsoleColor.DarkRed;
+				Console.Write("[[ ");
+				Console.ForegroundColor = ConsoleColor.DarkCyan;
+				Console.WriteLine(Copyright);
+				Console.ForegroundColor = DefaultForground;
+				Console.WriteLine();
+
+				if (_agent != null)
+				{
+					OnRunAgent(_agent, args);
+				}
+				else if (_analyzer != null)
+				{
+					OnRunAnalyzer(_analyzer, args);
+				}
+				else
+				{
+					OnRunJob(_test, args);
+				}
+			}
+			finally
+			{
+				// Reset console colors
+				Console.ForegroundColor = DefaultForground;
+			}
+		}
+
+		protected override void ShowUsage()
+		{
+			Syntax();
+		}
+
+		protected virtual Watcher GetUIWatcher()
+		{
+			try
+			{
+				if (_verbosity > 0)
+					return new ConsoleWatcher();
+
+				// Ensure console is interactive
+				Console.Clear();
+
+				var title = _webUri == null ? "" : " ({0})".Fmt(_webUri);
+
+				return new ConsoleWatcher(title);
+
+			}
+			catch (IOException)
+			{
+				return new ConsoleWatcher();
+			}
+		}
+
+		protected virtual Analyzer GetParser()
+		{
+			var parser = new GodelPitParser();
+			Analyzer.defaultParser = parser;
+			return Analyzer.defaultParser;
+		}
+
+		/// <summary>
+		/// Create an engine and run the fuzzing job
+		/// </summary>
+		protected virtual void RunEngine(Peach.Core.Dom.Dom dom)
+		{
+			// Add the JobLogger as necessary
+			Test test;
+
+			if (!dom.tests.TryGetValue(_config.runName, out test))
+				throw new PeachException("Unable to locate test named '{0}'.".Fmt(_config.runName));
+
+			Job job = null;
+			var userLogger = test.loggers.OfType<JobLogger>().FirstOrDefault();
+			if (userLogger != null || !_noweb)
+				job = new Job(_config);
+
+			if (_noweb)
+			{
+				var e = new Engine(GetUIWatcher());
+				e.startFuzzing(dom, _config);
+				return;
+			}
+
+			// Pass an empty pit library path if we are running a job off of
+			// the command line.
+			using (var svc = new WebServer("", new ConsoleJobMonitor(job)))
+			{
+				svc.Start();
+
+				_webUri = svc.Uri;
+
+				ConsoleWatcher.WriteInfoMark();
+				Console.WriteLine("Web site running at: {0}", svc.Uri);
+
+				// Add the JobLogger as necessary
+				if (userLogger == null)
+					test.loggers.Insert(0, new JobLogger());
+
+				var e = new Engine(GetUIWatcher());
+				e.startFuzzing(dom, _config);
+			}
+		}
+
+		/// <summary>
+		/// Run a command line analyzer of the specified name
+		/// </summary>
+		/// <param name="analyzer"></param>
+		/// <param name="extra"></param>
+		protected virtual void OnRunAnalyzer(string analyzer, List<string> extra)
+		{
+			var analyzerType = ClassLoader.FindPluginByName<AnalyzerAttribute>(analyzer);
+			if (analyzerType == null)
+				throw new PeachException("Error, unable to locate analyzer called '" + analyzer + "'.\n");
+
+			var field = analyzerType.GetField("supportCommandLine", BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy);
+			if ((bool)field.GetValue(null) == false)
+				throw new PeachException("Error, analyzer not configured to run from command line.");
+
+			var analyzerInstance = (Analyzer)Activator.CreateInstance(analyzerType);
+
+			ConsoleWatcher.WriteInfoMark();
+			Console.WriteLine("Starting Analyzer");
+
+			var args = new Dictionary<string, string>();
+			for (int i = 0; i < extra.Count; i++)
+				args[i.ToString()] = extra[i];
+
+			analyzerInstance.asCommandLine(args);
+		}
+
+		/// <summary>
+		/// Run a peach agent of the specified protocol
+		/// </summary>
+		/// <param name="agent"></param>
+		/// <param name="extra"></param>
+		protected virtual void OnRunAgent(string agent, List<string> extra)
+		{
+			var agentType = ClassLoader.FindPluginByName<AgentServerAttribute>(agent);
+			if (agentType == null)
+				throw new PeachException("Error, unable to locate agent server for protocol '" + agent + "'.\n");
+
+			var agentServer = (IAgentServer)Activator.CreateInstance(agentType);
+
+			ConsoleWatcher.WriteInfoMark();
+			Console.WriteLine("Starting agent server");
+
+			var args = new Dictionary<string, string>();
+			for (int i = 0; i < extra.Count; i++)
+				args[i.ToString()] = extra[i];
+
+			agentServer.Run(args);
+		}
+
+		/// <summary>
+		/// Run a fuzzing job
+		/// </summary>
+		/// <param name="test">Test only. Parses the pit and exits.</param>
+		/// <param name="extra">Extra command line options</param>
+		protected virtual void OnRunJob(bool test, List<string> extra)
+		{
+			if (extra.Count > 0)
+			{
+				// Pit was specified on the command line, do normal behavior
+				// Ensure the EULA has been accepted before running a job
+				// on the command line.  The WebUI will present a EULA
+				// in the later case.
+
+				if (!License.EulaAccepted)
+					ShowEula();
+
+				_config.shouldStop = () => _shouldStop;
+				Console.CancelKeyPress += Console_CancelKeyPress;
+
+				if (extra.Count > 0)
+					_config.pitFile = extra[0];
+
+				if (extra.Count > 1)
+					_config.runName = extra[1];
+
+				AddNewDefine("Peach.Cwd=" + Environment.CurrentDirectory);
+				AddNewDefine("Peach.Pwd=" + Utilities.ExecutionDirectory);
+
+				// Do we have pit.xml.config file?
+				// If so load it as the first defines file.
+				if (extra.Count > 0 && File.Exists(extra[0]) &&
+					extra[0].ToLower().EndsWith(".xml") &&
+					File.Exists(extra[0] + ".config"))
+				{
+					_configFiles.Insert(0, extra[0] + ".config");
+				}
+
+				var defs = ParseDefines();
+
+				var parserArgs = new Dictionary<string, object>();
+				parserArgs[PitParser.DEFINED_VALUES] = defs;
+
+				var parser = GetParser();
+
+				if (test)
+				{
+					ConsoleWatcher.WriteInfoMark();
+					Console.Write("Validating file [" + _config.pitFile + "]... ");
+					parser.asParserValidation(parserArgs, _config.pitFile);
+					Console.WriteLine("No Errors Found.");
+				}
+				else
+				{
+					var dom = parser.asParser(parserArgs, _config.pitFile);
+
+					RunEngine(dom);
+				}
+			}
+			else if (!_noweb)
+			{
+				// Ensure pit library exists
+				var pits = FindPitLibrary(_pitLibraryPath);
+
+				WebServer.Run(pits, !_nobrowser, new InternalJobMonitor());
+			}
+		}
+
+		/// <summary>
+		/// Combines define files and define arguments into a single list
+		/// Command line arguments override any .config file's defines
+		/// </summary>
+		/// <returns></returns>
+		protected virtual List<KeyValuePair<string, string>> ParseDefines()
+		{
+			var items = _configFiles.Select(PitParser.parseDefines).ToList();
+
+			// Add .config files in order
+
+			// Add -D command line options last
+			items.Add(_definedValues);
+
+			var ret = new List<KeyValuePair<string, string>>();
+
+			// Foreach #define, save it, overwriting and previous value
+			foreach (var defs in items)
+			{
+				foreach (var kv in defs)
+				{
+					ret.RemoveAll(i => i.Key == kv.Key);
+					ret.Add(new KeyValuePair<string, string>(kv.Key, kv.Value));
+				}
+			}
+
+			return PitDefines.Evaluate(ret);
+		}
+
+		/// <summary>
+		/// Override to change syntax message.
+		/// </summary>
+		protected virtual void Syntax()
+		{
+			const string syntax1 =
+@"This is the Peach Runtime.  The Peach Runtime is one of the many ways
+to use Peach XML files.  Currently this runtime is still in development
+but already exposes several abilities to the end-user such as performing
+simple fuzzer runs and performing parsing tests of Peach XML files.
+
+Please submit any bugs to https://forums.peachfuzzer.com.
+
+Syntax:
+
+  peach -a channel
+  peach -c peach_xml_file [test_name]
+  peach [--skipto #] peach_xml_flie [test_name]
+  peach -p 10,2 [--skipto #] peach_xml_file [test_name]
+  peach --range 100,200 peach_xml_file [test_name]
+  peach -t peach_xml_file
+";
+			const string syntax2 = @"
+Peach Web Interface
+
+  Syntax: peach
+
+  Starts up peach and provides a web site for configuring and starting
+  a fuzzing job from the Peach Pit Library.
+
+Peach Agent
+
+  Syntax: peach -a channel
+  
+  Starts up a Peach Agent instance on this current machine.  User must provide
+  a channel/protocol name (e.g. tcp).
+
+  Note: Local agents are started automatically.
+
+Performing Fuzzing Run
+
+  Syntax: peach peach_xml_flie [test_name]
+  Syntax: peach --skipto 1234 peach_xml_flie [test_name]
+  Syntax: peach --range 100,200 peach_xml_flie [test_name]
+  
+  A fuzzing run is started by by specifying the Peach XML file and the
+  name of a test to perform.
+  
+  If a run is interupted for some reason it can be restarted using the
+  --skipto parameter and providing the test # to start at.
+  
+  Additionally a range of test cases can be specified using --range.
+
+Performing A Parellel Fuzzing Run
+
+  Syntax: peach -p 10,2 peach_xml_flie [test_name]
+
+  A parallel fuzzing run uses multiple machines to perform the same fuzzing
+  which shortens the time required.  To run in parallel mode we will need
+  to know the total number of machines and which machine we are.  This
+  information is fed into Peach via the " + "\"-p\"" + @" command line argument in the
+  format " + "\"total_machines,our_machine\"." + @"
+
+Validate Peach XML File
+
+  Syntax: peach -t peach_xml_file
+  
+  This will perform a parsing pass of the Peach XML file and display any
+  errors that are found.
+
+Debug Peach XML File
+
+  Syntax: peach -1 --debug peach_xml_file
+  
+  This will perform a single iteration (-1) of your pit file while displaying
+  alot of debugging information (--debug).  The debugging information was
+  origionally intended just for the developers, but can be usefull in pit
+  debugging as well.
+";
+
+			Console.WriteLine(syntax1);
+			_options.WriteOptionDescriptions(Console.Out);
+			Console.WriteLine(syntax2);
+		}
+
+		private void ShowEula()
+		{
+			Console.WriteLine(License.EulaText());
+
+			Console.WriteLine(@"
+BY TYPING ""YES"" YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTAND, AND
+AGREE TO BE BOUND BY THE TERMS ABOVE.
+");
+
+			while (true)
+			{
+				Console.WriteLine("Do you accept the end user license agreement?");
+
+				Console.Write("(yes/no) ");
+				var answer = Console.ReadLine();
+				Console.WriteLine();
+
+				if (answer == "no")
+					Environment.Exit(-1);
+
+				if (answer == "yes")
+				{
+					License.EulaAccepted = true;
+					return;
+				}
+
+				Console.WriteLine("The answer \"{0}\" is invalid. It must be one of \"yes\" or \"no\".", answer);
+				Console.WriteLine();
+			}
+		}
+
+		#region Command line option parsing helpers
+
+		protected void ParseRange(string arg, string v)
+		{
+			string[] parts = v.Split(',');
+			if (parts.Length != 2)
+				throw new PeachException("Invalid range: " + v);
+
+			try
+			{
+				_config.rangeStart = Convert.ToUInt32(parts[0]);
+			}
+			catch (Exception ex)
+			{
+				throw new PeachException("Invalid range start iteration: " + parts[0], ex);
+			}
+
+			try
+			{
+				_config.rangeStop = Convert.ToUInt32(parts[1]);
+			}
+			catch (Exception ex)
+			{
+				throw new PeachException("Invalid range stop iteration: " + parts[1], ex);
+			}
+
+			if (_config.parallel)
+				throw new PeachException("--range is not supported when --parallel is specified");
+
+			_config.range = true;
+		}
+
+		protected void ParseParallel(string arg, string v)
+		{
+			string[] parts = v.Split(',');
+			if (parts.Length != 2)
+				throw new PeachException("Invalid parallel value: " + v);
+
+			try
+			{
+				_config.parallelTotal = Convert.ToUInt32(parts[0]);
+
+				if (_config.parallelTotal == 0)
+					throw new ArgumentOutOfRangeException();
+			}
+			catch (Exception ex)
+			{
+				throw new PeachException("Invalid parallel machine total: " + parts[0], ex);
+			}
+
+			try
+			{
+				_config.parallelNum = Convert.ToUInt32(parts[1]);
+				if (_config.parallelNum == 0 || _config.parallelNum > _config.parallelTotal)
+					throw new ArgumentOutOfRangeException();
+			}
+			catch (Exception ex)
+			{
+				throw new PeachException("Invalid parallel machine number: " + parts[1], ex);
+			}
+
+			if (_config.range)
+				throw new PeachException("--parallel is not supported when --range is specified");
+
+			_config.parallel = true;
+		}
+
+		protected void AddNewDefine(string arg)
+		{
+			var idx = arg.IndexOf("=");
+			if (idx < 0)
+				throw new PeachException("Error, defined values supplied via -D/--define must have an equals sign providing a key-pair set.");
+
+			var key = arg.Substring(0, idx);
+			var value = arg.Substring(idx + 1);
+
+			// Allow command line options to override others
+			_definedValues.RemoveAll(i => i.Key == key);
+			_definedValues.Add(new KeyValuePair<string, string>(key, value));
+		}
+
+		#endregion
+
+		#region Global Actions
+
+		static void ShowDevices()
+		{
+			var devices = CaptureDeviceList.Instance;
+
+			if (devices.Count == 0)
+			{
+				Console.WriteLine();
+				Console.WriteLine("No capture devices were found.  Ensure you have the proper");
+				Console.WriteLine("permissions for performing PCAP captures and try again.");
+				Console.WriteLine();
+			}
+			else
+			{
+				Console.WriteLine();
+				Console.WriteLine("The following devices are available on this machine:");
+				Console.WriteLine("----------------------------------------------------");
+				Console.WriteLine();
+
+				// Print out all available devices
+				foreach (var dev in devices)
+				{
+					Console.WriteLine("Name: {0}\nDescription: {1}\n\n", dev.Name, dev.Description);
+				}
+			}
+
+			throw new SyntaxException();
+		}
+
+		static void ShowEnvironment()
+		{
+			Usage.Print();
+			throw new SyntaxException();
+		}
+
+		static void MakeSchema()
+		{
+			try
+			{
+				Console.WriteLine();
+
+				using (var stream = new FileStream("peach.xsd", FileMode.Create, FileAccess.Write))
+				{
+					Peach.Core.Xsd.SchemaBuilder.Generate(typeof(Peach.Core.Xsd.Dom), stream);
+
+					Console.WriteLine("Successfully generated {0}", stream.Name);
+				}
+
+				throw new SyntaxException();
+			}
+			catch (UnauthorizedAccessException ex)
+			{
+				throw new PeachException("Error creating schema. {0}".Fmt(ex.Message), ex);
+			}
+		}
+
+		#endregion
+
+		protected static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
+		{
+			e.Cancel = true;
+
+			Console.WriteLine();
+			Console.WriteLine();
+			Console.WriteLine(" --- Ctrl+C Detected --- ");
+
+			if (!_shouldStop)
+			{
+				Console.WriteLine(" --- Waiting for last iteration to complete --- ");
+				_shouldStop = true;
+			}
+			else
+			{
+				Console.WriteLine(" --- Aborting --- ");
+
+				// Need to call Environment.Exit from outside this event handler
+				// to ensure the finalizers get called...
+				// http://www.codeproject.com/Articles/16164/Managed-Application-Shutdown
+				new Thread(() => Environment.Exit(0)).Start();
+			}
+		}
+	}
+
+	class ConsoleJobMonitor : IJobMonitor
+	{
+		readonly Guid _guid;
+
+		public ConsoleJobMonitor(Job job)
+		{
+			_guid = job.Guid;
+		}
+
+		public void Dispose()
+		{
+		}
+
+		public Job GetJob()
+		{
+			Job job;
+			using (var db = new NodeDatabase())
+			{
+				job = db.GetJob(_guid);
+				if (job == null)
+					return null;
+
+				if (!File.Exists(job.DatabasePath))
+					return job;
+			}
+
+			using (var db = new JobDatabase(job.DatabasePath))
+			{
+				job = db.GetJob(_guid);
+			}
+
+			return job;
+		}
+
+		#region Not Implemented
+		public Job Start(string pitLibraryPath, string pitFile, JobRequest jobRequest)
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool Pause()
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool Continue()
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool Stop()
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool Kill()
+		{
+			throw new NotImplementedException();
+		}
+
+		public EventHandler InternalEvent
+		{
+			set { throw new NotImplementedException(); }
+		}
+		#endregion
+	}
+}

@@ -1,5 +1,6 @@
 using System;
 using Newtonsoft.Json;
+using Peach.Pro.Core.Storage;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
@@ -13,6 +14,7 @@ namespace Peach.Pro.Core.WebServices.Models
 
 	public class Group
 	{
+		[Key]
 		public string GroupUrl { get; set; }
 
 		[JsonConverter(typeof(CamelCaseStringEnumConverter))]

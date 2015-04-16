@@ -14,18 +14,18 @@ namespace Peach.Pro.Core.WebServices
 			Get["/{id}"] = _ => GetLibrary(_.id);
 		}
 
-		object GetLibraries()
+		Response GetLibraries()
 		{
-			return PitDatabase.Libraries.ToArray();
+			return Response.AsJson(PitDatabase.Libraries.ToArray());
 		}
 
-		object GetLibrary(string id)
+		Response GetLibrary(string id)
 		{
 			var lib = PitDatabase.GetLibraryById(id);
 			if (lib == null)
 				return HttpStatusCode.NotFound;
 
-			return lib;
+			return Response.AsJson(lib);
 		}
 	}
 }

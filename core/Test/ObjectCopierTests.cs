@@ -11,7 +11,9 @@ using System.Diagnostics;
 
 namespace Peach.Core.Test
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Peach]
+	[Quick]
 	class ObjectCopierTests
 	{
 		[Test]

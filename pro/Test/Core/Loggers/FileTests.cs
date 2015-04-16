@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Core.IO;
 using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Loggers
 {
 	[TestFixture]
+	[Quick]
+	[Peach]
 	class ControlIterationFaultTests
 	{
 		class ExceptionalPublisher : Publisher

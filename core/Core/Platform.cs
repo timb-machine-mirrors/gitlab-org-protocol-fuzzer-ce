@@ -141,5 +141,10 @@ namespace Peach.Core
 			}
 			return false;
 		}
+
+		public static bool IsRunningOnMono()
+		{
+			return Type.GetType("Mono.Runtime") != null;
+		}
 	}
 }

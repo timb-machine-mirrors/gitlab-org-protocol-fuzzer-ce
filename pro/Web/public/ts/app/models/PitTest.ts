@@ -3,18 +3,10 @@
 module Peach {
 	"use strict";
 
-	export interface ITestRequest {
-		pitUrl: string;
-	}
-
-	export interface ITestRef {
-		testUrl: string;
-	}
-
 	export interface ITestResult {
 		status: string;
-		log: string;
 		events: ITestEvent[];
+		log: string;
 	}
 
 	export interface ITestEvent {

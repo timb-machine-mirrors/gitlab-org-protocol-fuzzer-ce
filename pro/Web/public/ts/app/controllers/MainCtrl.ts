@@ -144,9 +144,6 @@ module Peach {
 			if (_.isUndefined(this.job)) {
 				return "No Job available";
 			}
-			if (this.jobService.IsRunning && !this.job.hasMetrics) {
-				return "Metrics unavailable for this Job.";
-			}
 			return "";
 		}
 
@@ -172,7 +169,7 @@ module Peach {
 		}
 
 		public get CanViewMetrics(): boolean {
-			return !_.isUndefined(this.job) && this.job.hasMetrics;
+			return !_.isUndefined(this.job);
 		}
 
 		public OnSelectPit() {

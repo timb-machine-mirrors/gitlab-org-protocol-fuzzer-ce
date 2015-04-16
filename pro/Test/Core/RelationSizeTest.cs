@@ -42,7 +42,9 @@ using Encoding = Peach.Core.Encoding;
 
 namespace Peach.Pro.Test.Core
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class RelationSizeTest : DataModelCollector
 	{
 		[Test]

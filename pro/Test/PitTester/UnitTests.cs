@@ -8,10 +8,12 @@ using Peach.Core;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using File = System.IO.File;
+using Peach.Core.Test;
 
 namespace PitTester
 {
 	[TestFixture]
+	[Slow]
 	class UnitTests
 	{
 		public class TestCase

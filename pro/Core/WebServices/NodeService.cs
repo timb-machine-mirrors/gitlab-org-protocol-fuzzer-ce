@@ -17,38 +17,38 @@ namespace Peach.Pro.Core.WebServices
 			Get["/{id}"] = _ => GetNode(_.id);
 		}
 
-		object GetNodes()
+		public static string MakeUrl(string id)
 		{
-			return new[] { MakeNode() };
+			return string.Join("/", Prefix, id);
 		}
 
-		object GetNode(string id)
+		Response GetNodes()
+		{
+			return Response.AsJson(new[] { MakeNode() });
+		}
+
+		Response GetNode(string id)
 		{
 			if (id != NodeGuid)
 				return HttpStatusCode.NotFound;
 
-			return MakeNode();
+			return Response.AsJson(MakeNode());
 		}
 
 		Node MakeNode()
 		{
-			lock (Mutex)
+			return new Node
 			{
-				var node = new Node()
-				{
-					NodeUrl = Prefix + "/" + NodeGuid,
-					Name = Environment.MachineName,
-					Mac = "00:00:00:00:00:00",
-					Ip = "0.0.0.0",
-					Tags = new List<Tag>(),
-					Status = NodeStatus.Alive,
-					Version = Assembly.GetExecutingAssembly().GetName().Version.ToString(),
-					Timestamp = DateTime.UtcNow,
-					JobUrl = Runner != null ? JobService.Prefix + "/" + Runner.Guid : null,
-				};
-
-				return node;
-			}
+				NodeUrl = Prefix + "/" + NodeGuid,
+				Name = Environment.MachineName,
+				Mac = "00:00:00:00:00:00",
+				Ip = "0.0.0.0",
+				Tags = new List<Tag>(),
+				Status = NodeStatus.Alive,
+				Version = Assembly.GetExecutingAssembly().GetName().Version.ToString(),
+				Timestamp = DateTime.UtcNow,
+				JobUrl = JobService.Prefix,
+			};
 		}
 	}
 }

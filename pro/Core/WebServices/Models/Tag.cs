@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Peach.Pro.Core.Storage;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
@@ -13,6 +14,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <example>
 		/// "Category.Network"
 		/// </example>
+		[Key]
 		public string Name { get; set; }
 
 		/// <summary>

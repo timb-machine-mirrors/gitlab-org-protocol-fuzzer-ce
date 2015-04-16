@@ -36,10 +36,13 @@ using Peach.Core.Analyzers;
 using Peach.Core.Dom;
 using Peach.Core.Dom.XPath;
 using String = Peach.Core.Dom.String;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class PeachXPathTests
 	{
 		[Test]
