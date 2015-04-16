@@ -246,7 +246,7 @@ namespace Peach.Pro.Core.Loggers
 
 		protected override void Engine_TestFinished(RunContext context)
 		{
-			Logger.Trace("Engine_TestFinished");
+			Logger.Trace(">>> Engine_TestFinished");
 
 			if (_job != null)
 			{
@@ -279,6 +279,8 @@ namespace Peach.Pro.Core.Loggers
 			}
 
 			RestoreLogging();
+
+			Logger.Trace("<<< Engine_TestFinished");
 		}
 
 		protected override void Engine_IterationStarting(

@@ -375,7 +375,7 @@ namespace Peach.Core.Test
 			sw.Stop();
 			Assert.NotNull(copy);
 			Assert.AreEqual(copy.Count, list.Count);
-			Assert.LessOrEqual(sw.ElapsedMilliseconds, TimeSpan.FromSeconds(5).TotalMilliseconds);
+			Assert.LessOrEqual(sw.ElapsedMilliseconds, 5500);
 		}
 
 		bool VerifyField(FieldInfo field, Type type)
