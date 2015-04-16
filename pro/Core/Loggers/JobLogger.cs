@@ -75,14 +75,13 @@ namespace Peach.Pro.Core.Loggers
 		readonly List<Fault.State> _states = new List<Fault.State>();
 		readonly List<TestEvent> _events = new List<TestEvent>();
 		readonly List<LoggingRule> _tempRules = new List<LoggingRule>();
-		readonly LoggingConfiguration _loggingConfig = LogManager.Configuration;
 		Fault _reproFault;
 		TextWriter _log;
 		MetricsCache _cache;
 		Job _job;
 		int _agentConnect;
 		Exception _caught;
-		DatabaseTarget _tempTarget;
+		Target _tempTarget;
 
 		enum Category { Faults, Reproducing, NonReproducable }
 
@@ -282,7 +281,8 @@ namespace Peach.Pro.Core.Loggers
 			}
 
 			Logger.Trace("Engine_TestFinished> RestoreLogging");
-			RestoreLogging();
+			ConfigureLogging(_tempTarget, null);
+			_tempTarget = null;
 
 			Logger.Trace("<<< Engine_TestFinished");
 		}
@@ -790,13 +790,6 @@ namespace Peach.Pro.Core.Loggers
 			}
 		}
 
-		void RestoreLogging()
-		{
-			Debug.Assert(_loggingConfig != null);
-
-			LogManager.Configuration = _loggingConfig;
-		}
-
 		void ConfigureDebugLogging(RunConfiguration config)
 		{
 			var target = new FileTarget
@@ -810,35 +803,40 @@ namespace Peach.Pro.Core.Loggers
 				ArchiveNumbering = ArchiveNumberingMode.Sequence,
 			};
 
-			var wrapper = new AsyncTargetWrapper(target);
-			wrapper.Name = target.Name;
+			var oldTarget = _tempTarget;
+			_tempTarget = new AsyncTargetWrapper(target);
+			_tempTarget.Name = target.Name;
 
-			ConfigureLogging(_tempTarget, wrapper);
-
-			_tempTarget = null;
+			ConfigureLogging(oldTarget, _tempTarget);
 		}
 
 		void ConfigureLogging(Target oldTarget, Target newTarget)
 		{
 			var nconfig = LogManager.Configuration;
+
 			if (oldTarget != null)
 			{
 				nconfig.RemoveTarget(oldTarget.Name);
 				foreach (var rule in _tempRules)
 					nconfig.LoggingRules.Remove(rule);
+				_tempRules.Clear();
 			}
-			nconfig.AddTarget(newTarget.Name, newTarget);
 
-			foreach (var logger in FilteredLoggers)
+			if (newTarget != null)
 			{
-				var rule = new LoggingRule(logger, LogLevel.Info, newTarget) { Final = true };
-				_tempRules.Add(rule);
-				nconfig.LoggingRules.Add(rule);
-			}
+				nconfig.AddTarget(newTarget.Name, newTarget);
 
-			var defaultRule = new LoggingRule("*", LogLevel.Debug, newTarget);
-			_tempRules.Add(defaultRule);
-			nconfig.LoggingRules.Add(defaultRule);
+				foreach (var logger in FilteredLoggers)
+				{
+					var rule = new LoggingRule(logger, LogLevel.Info, newTarget) { Final = true };
+					_tempRules.Add(rule);
+					nconfig.LoggingRules.Add(rule);
+				}
+
+				var defaultRule = new LoggingRule("*", LogLevel.Debug, newTarget);
+				_tempRules.Add(defaultRule);
+				nconfig.LoggingRules.Add(defaultRule);
+			}
 
 			LogManager.Configuration = nconfig;
 		}
