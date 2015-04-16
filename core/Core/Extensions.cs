@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Configuration;
 using System.Net;
 using System.Net.Sockets;
 using System.Xml;
@@ -15,6 +16,23 @@ namespace Peach.Core
 		{
 			var items = collection.AllKeys.Select(x => "{0}={1}".Fmt(x, collection[x]));
 			return string.Join(separator, items);
+		}
+	}
+
+	public static class KeyValueConfigurationCollectionExtensions
+	{
+		public static string Get(this KeyValueConfigurationCollection settings, string key)
+		{
+			var item = settings[key];
+			return item != null ? item.Value : null;
+		}
+
+		public static void Set(this KeyValueConfigurationCollection settings, string key, string value)
+		{
+			if (settings.Get(key) == null)
+				settings.Add(key, value);
+			else
+				settings[key].Value = value;
 		}
 	}
 

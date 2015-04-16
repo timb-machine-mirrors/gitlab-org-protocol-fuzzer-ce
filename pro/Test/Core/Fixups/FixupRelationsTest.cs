@@ -9,7 +9,9 @@ using Peach.Pro.Core.Fixups.Libraries;
 
 namespace Peach.Pro.Test.Core.Fixups
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class FixupRelationsTest : DataModelCollector
 	{
 		[Test]

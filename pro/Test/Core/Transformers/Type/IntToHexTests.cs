@@ -8,7 +8,9 @@ using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Transformers.Type
 {
-    [TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
     class IntToHexTests : DataModelCollector
     {
         [Test]

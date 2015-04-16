@@ -1,15 +1,16 @@
 ﻿using NUnit.Framework;
 using Peach.Core;
+using Peach.Core.Test;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Threading;
 
 namespace Peach.Pro.Test.Core
 {
 	[TestFixture]
+	[Quick]
+	[Peach]
 	class SingleInstanceTests
 	{
 		[Test]
@@ -23,8 +24,10 @@ namespace Peach.Pro.Test.Core
 				path = "mono";
 			}
 			var args = string.Join(" ", argsList);
-			var proc = new Process();
-			proc.StartInfo = new ProcessStartInfo(path, args);
+			var proc = new Process
+			{
+				StartInfo = new ProcessStartInfo(path, args)
+			};
 
 			using (var mutex = SingleInstance.CreateInstance("CrashTestDummy"))
 			{

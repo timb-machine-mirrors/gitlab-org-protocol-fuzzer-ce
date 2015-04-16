@@ -5,6 +5,7 @@ module Peach {
 
 	export interface IFaultSummary {
 		faultUrl: string;
+		archiveUrl: string;
 		reproducable: boolean;
 		iteration: number;
 		timeStamp: string;
@@ -21,6 +22,7 @@ module Peach {
 		targetConfigUrl: string;
 		pitUrl: string;
 		peachUrl: string;
+
 		title: string;
 		description: string;
 		seed: number;

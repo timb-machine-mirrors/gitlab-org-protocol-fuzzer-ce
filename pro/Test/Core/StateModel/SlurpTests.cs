@@ -8,7 +8,9 @@ using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.StateModel
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class SlurpTests
 	{
 		[Test]

@@ -1,20 +1,14 @@
 ﻿using System.IO;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-
 using NUnit.Framework;
-//using NUnit.Framework.Constraints;
-
 using Peach.Core;
 using System.Collections.Generic;
-//using Peach.Core.Dom;
-//using Peach.Core.Analyzers;
-//using Peach.Core.IO;
+using Peach.Core.Test;
 
 namespace Godel.Tests
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class BasicTests
 	{
 		[Test]

@@ -7,7 +7,9 @@ using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Fixups
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class IcmpV6ChecksumFixupTests : DataModelCollector
 	{
 		[Test]

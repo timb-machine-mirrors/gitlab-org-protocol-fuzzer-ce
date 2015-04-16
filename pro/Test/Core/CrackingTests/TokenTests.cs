@@ -40,7 +40,9 @@ using Logger = NLog.Logger;
 
 namespace Peach.Pro.Test.Core.CrackingTests
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	public class TokenTests
 	{
 

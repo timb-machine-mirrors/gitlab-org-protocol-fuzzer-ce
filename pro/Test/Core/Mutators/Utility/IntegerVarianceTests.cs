@@ -5,10 +5,13 @@ using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Pro.Core.Mutators.Utility;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Mutators.Utility
 {
 	[TestFixture]
+	[Quick]
+	[Peach]
 	class IntegerVarianceTests
 	{
 		class Tester : IntegerVariance

@@ -7,10 +7,13 @@ using Peach.Core;
 using Peach.Pro.Core;
 using Peach.Pro.Core.WebServices.Models;
 using File = System.IO.File;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	public class PitDefinesTests
 	{
 		[Test]

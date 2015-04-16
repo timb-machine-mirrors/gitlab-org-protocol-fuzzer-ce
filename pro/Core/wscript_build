@@ -57,6 +57,7 @@ deps = [
 	'LibUsbDotNet.dll',
 
 	'websocket-sharp.dll',
+	'Dapper.dll',
 ]
 
 if bld.env.TARGET == 'win':

@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using Peach.Core.Test;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,8 @@ using System.Text;
 namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 {
 	[TestFixture]
-	[Category("Peach")]
+	[Quick]
+	[Peach]
 	class LinuxCoreFileTests
 	{
 		[Test]

@@ -28,6 +28,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Net.NetworkInformation;
@@ -38,6 +39,7 @@ using NLog;
 using NLog.Targets;
 using NLog.Config;
 using System.Threading;
+using NLog.Targets.Wrappers;
 
 namespace Peach.Core
 {
@@ -62,7 +64,7 @@ namespace Peach.Core
 
 		protected virtual void OnAssert(string message)
 		{
-			Console.WriteLine(message);
+			Console.Error.WriteLine(message);
 		}
 
 		public override void Fail(string message)
@@ -287,19 +289,48 @@ namespace Peach.Core
 
 			if (LogManager.Configuration != null && LogManager.Configuration.LoggingRules.Count > 0)
 			{
-				Console.WriteLine("Logging was configured by a .config file, not changing the configuration.");
+				Console.Error.WriteLine("Logging was configured by a .config file, not changing the configuration.");
 				return;
 			}
 
+			LogLevel logLevel;
+			switch (level)
+			{
+				case 0:
+					logLevel = LogLevel.Info;
+					break;
+				case 1:
+					logLevel = LogLevel.Debug;
+					break;
+				default:
+					logLevel = LogLevel.Trace;
+					break;
+			}
+
+			var consoleTarget = new AsyncTargetWrapper(new ConsoleTarget
+			{
+				Layout = "${logger} ${message}", 
+				Error = true,
+			});
+			var rule = new LoggingRule("*", logLevel, consoleTarget);
+
 			var nconfig = new LoggingConfiguration();
-			var consoleTarget = new ConsoleTarget();
 			nconfig.AddTarget("console", consoleTarget);
-			consoleTarget.Layout = "${logger} ${message}";
-
-			var rule = new LoggingRule("*", level == 1 ? LogLevel.Debug : LogLevel.Trace, consoleTarget);
 			nconfig.LoggingRules.Add(rule);
-
 			LogManager.Configuration = nconfig;
+		}
+
+		public static Configuration GetUserConfig()
+		{
+			var appConfig = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+			var userFile = new ExeConfigurationFileMap
+			{
+				ExeConfigFilename = Path.Combine(
+					Path.GetDirectoryName(appConfig.FilePath),
+					Path.GetFileNameWithoutExtension(appConfig.FilePath)
+				) + ".user.config"
+			};
+			return ConfigurationManager.OpenMappedExeConfiguration(userFile, ConfigurationUserLevel.None);
 		}
 
 		public static string FindProgram(string path, string program, string parameter)

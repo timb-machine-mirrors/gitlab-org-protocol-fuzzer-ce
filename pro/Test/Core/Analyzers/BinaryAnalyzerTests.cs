@@ -37,7 +37,9 @@ using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Analyzers
 {
-    [TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
     class BinaryAnalyzerTests
     {
         [Test]

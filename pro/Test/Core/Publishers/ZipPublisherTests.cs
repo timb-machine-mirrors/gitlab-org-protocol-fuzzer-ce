@@ -4,10 +4,13 @@ using Ionic.Zip;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Publishers
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class ZipPublisherTests
 	{
 		[Test]
