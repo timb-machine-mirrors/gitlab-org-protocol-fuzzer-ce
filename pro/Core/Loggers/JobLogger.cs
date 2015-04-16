@@ -251,6 +251,7 @@ namespace Peach.Pro.Core.Loggers
 			if (_job != null)
 			{
 				Debug.Assert(_job.DatabasePath != null);
+				Logger.Trace("Engine_TestFinished> Update JobDatabase");
 				using (var db = new JobDatabase(_job.DatabasePath))
 				{
 					_job.StopDate = DateTime.UtcNow;
@@ -260,6 +261,7 @@ namespace Peach.Pro.Core.Loggers
 					db.UpdateJob(_job);
 				}
 
+				Logger.Trace("Engine_TestFinished> Update NodeDatabase");
 				using (var db = new NodeDatabase())
 				{
 					if (_caught == null)
@@ -271,6 +273,7 @@ namespace Peach.Pro.Core.Loggers
 			// it's possible we reach here before Engine_TestStarting has had a chance to finish
 			if (_log != null)
 			{
+				Logger.Trace("Engine_TestFinished> Close status.txt");
 				_log.WriteLine(". Test finished: " + context.test.Name);
 				_log.Flush();
 				_log.Close();
@@ -278,6 +281,7 @@ namespace Peach.Pro.Core.Loggers
 				_log = null;
 			}
 
+			Logger.Trace("Engine_TestFinished> RestoreLogging");
 			RestoreLogging();
 
 			Logger.Trace("<<< Engine_TestFinished");
