@@ -7,7 +7,9 @@ using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Transformers.Encode
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class HexTests : DataModelCollector
 	{
 		byte[] precalcResult = new byte[] { 0x34, 0x38, 0x36, 0x35, 0x36, 0x63, 0x36, 0x63, 0x36, 0x66 };

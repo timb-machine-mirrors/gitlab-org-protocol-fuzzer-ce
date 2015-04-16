@@ -47,7 +47,12 @@ namespace Peach.Core.IO
 
 		public void CopyTo(BitwiseStream destination)
 		{
-			CopyTo(destination, BlockCopySize);
+			// Copying a BitwiseStream of 7 bits means
+			// length will be 0 so always add one to our minimum size.
+			// Also, on mono objects larger than 8k are considered large
+			// objets so keep our temp buffer as small as possible so it
+			// stays in the nursery
+			CopyTo(destination, (int)Math.Min(Length + 1,BlockCopySize));
 		}
 
 		public void CopyTo(BitwiseStream destination, int bufferSize)

@@ -87,7 +87,8 @@ namespace Peach.Pro.Test.Core.Publishers
 	}
 
 	[TestFixture]
-	[Category("Peach")]
+	[Quick]
+	[Peach]
 	public class HttpPublisherTests : DataModelCollector
 	{
 		private const string SendRecvTemplate = @"

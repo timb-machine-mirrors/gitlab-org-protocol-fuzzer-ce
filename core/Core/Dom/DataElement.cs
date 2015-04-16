@@ -425,6 +425,16 @@ namespace Peach.Core.Dom
 		}
 
 		/// <summary>
+		/// Returns a list of children for use in XPath navigation.
+		/// Should not be called directly.
+		/// </summary>
+		/// <returns></returns>
+		public virtual IList<DataElement> XPathChildren()
+		{
+			return new DataElement[0];
+		}
+
+		/// <summary>
 		/// Is this element in scope in the data model.
 		/// </summary>
 		/// <returns></returns>

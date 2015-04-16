@@ -20,7 +20,8 @@ using Encoding = Peach.Core.Encoding;
 namespace Peach.Pro.Test.Core.Publishers
 {
 	[TestFixture]
-	[Category("Peach")]
+	[Quick]
+	[Peach]
 	class SocketPublisherTests
 	{
 		#region OSX Multicast IPV6 Declarations

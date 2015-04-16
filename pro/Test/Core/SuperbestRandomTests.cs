@@ -2,10 +2,13 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Pro.Core;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core
 {
 	[TestFixture]
+	[Quick]
+	[Peach]
 	class SuperbestRandomTests
 	{
 		[Test]

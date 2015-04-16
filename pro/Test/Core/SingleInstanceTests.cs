@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using Peach.Core;
+using Peach.Core.Test;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,6 +11,8 @@ using System.Threading;
 namespace Peach.Pro.Test.Core
 {
 	[TestFixture]
+	[Quick]
+	[Peach]
 	class SingleInstanceTests
 	{
 		[Test]

@@ -16,7 +16,8 @@ using Logger = NLog.Logger;
 namespace Peach.Pro.Test.Core.Agent
 {
 	[TestFixture]
-	[Category("Peach")]
+	[Quick]
+	[Peach]
 	public class AgentTests
 	{
 		SingleInstance _si;

@@ -9,7 +9,9 @@ using Peach.Pro.OS.OSX.Agent.Monitors;
 
 namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	public class CrashWranglerTest
 	{
 		[Test]

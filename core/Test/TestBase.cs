@@ -8,6 +8,10 @@ using System;
 
 namespace Peach.Core.Test
 {
+	public class PeachAttribute : CategoryAttribute { }
+	public class QuickAttribute : CategoryAttribute { }
+	public class SlowAttribute : CategoryAttribute { }
+
 	class AssertTestFail : TraceListener
 	{
 		public override void Write(string message)
@@ -42,10 +46,10 @@ namespace Peach.Core.Test
 			var config = new LoggingConfiguration();
 			config.AddTarget("console", consoleTarget);
 
-			var logLevel = LogLevel.Debug;
+			var logLevel = LogLevel.Info;
 			var peachTrace = Environment.GetEnvironmentVariable("PEACH_TRACE");
 			if (peachTrace == "1")
-				logLevel = LogLevel.Info;
+				logLevel = LogLevel.Trace;
 
 			var rule = new LoggingRule("*", logLevel, consoleTarget);
 			config.LoggingRules.Add(rule);
@@ -62,7 +66,9 @@ namespace Peach.Core.Test
 	}
 
 
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Peach]
+	[Quick]
 	class AssertTest
 	{
 		[Test]

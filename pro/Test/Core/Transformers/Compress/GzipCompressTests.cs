@@ -7,7 +7,9 @@ using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Transformers.Compress
 {
-    [TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
     class GzipCompressTests : DataModelCollector
     {
         [Test]

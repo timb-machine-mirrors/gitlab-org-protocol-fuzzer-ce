@@ -8,7 +8,8 @@ using Peach.Core.Test;
 namespace Peach.Pro.Test.Core.Monitors
 {
 	[TestFixture]
-	[Category("Peach")]
+	[Quick]
+	[Peach]
 	class PingMonitorTests
 	{
 		private static void Verify(MonitorData[] faults, string title, bool isFault)
