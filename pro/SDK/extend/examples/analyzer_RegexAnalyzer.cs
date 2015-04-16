@@ -1,13 +1,12 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
+using System.IO;
 using System.Text.RegularExpressions;
-using NLog;
-
+using System.Xml;
 using Peach.Core;
 using Peach.Core.Dom;
+using Peach.Core.IO;
 
 namespace Peach.Pro.Analyzers
 {
@@ -17,6 +16,11 @@ namespace Peach.Pro.Analyzers
     [Serializable]
     public class RegexAnalyzer : Analyzer
     {
+		public new static readonly bool supportParser = false;
+		public new static readonly bool supportDataElement = true;
+		public new static readonly bool supportCommandLine = true;
+		public new static readonly bool supportTopLevel = false;
+
         public string Regex { get; set; }
 
         public RegexAnalyzer()
@@ -27,6 +31,46 @@ namespace Peach.Pro.Analyzers
         {
             ParameterParser.Parse(this, args);
         }
+		
+		public override void asCommandLine(Dictionary<string, string> args)
+		{
+			var extra = new List<string>();
+			for (int i = 0; i < args.Count; i++)
+				extra.Add(args[i.ToString()]);
+
+			if (extra.Count < 3)
+			{
+				Console.WriteLine("Syntax: <regex> <infile> <outfile>");
+				return;
+			}
+
+			Regex = extra[0];
+			var inFile = extra[1];
+			var outFile = extra[2];
+			var data = new BitStream(File.ReadAllBytes(inFile));
+			var model = new DataModel(Path.GetFileName(inFile).Replace(".", "_"));
+
+			model.Add(new Peach.Core.Dom.String());
+			model[0].DefaultValue = new Variant(data);
+
+			asDataElement(model[0], null);
+
+			var settings = new XmlWriterSettings();
+			settings.Encoding = System.Text.UTF8Encoding.UTF8;
+			settings.Indent = true;
+
+			using (var sout = new FileStream(outFile, FileMode.Create))
+			using (var xml = XmlWriter.Create(sout, settings))
+			{
+				xml.WriteStartDocument();
+				xml.WriteStartElement("Peach");
+
+				model.WritePit(xml);
+
+				xml.WriteEndElement();
+				xml.WriteEndDocument();
+			}
+		}
 
         public override void asDataElement(Peach.Core.Dom.DataElement parent, Dictionary<Peach.Core.Dom.DataElement, Peach.Core.Cracker.Position> positions)
         {

@@ -4,6 +4,8 @@ using Peach.Core.Test;
 namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
+	[Quick]
+	[Peach]
 	class ArrayVarianceTests : DataModelCollector
 	{
 		// TODO: Test we hit +/- N around default value

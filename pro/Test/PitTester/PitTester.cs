@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml;
 using System.Xml.XPath;
@@ -195,6 +196,95 @@ namespace PitTester
 					config.randomSeed,
 					ex.Message);
 				throw new PeachException(msg, ex);
+			}
+		}
+
+		public static void VerifyDataSets(string pitLibraryPath, string fileName, bool verifyBytes = true)
+		{
+			var defs = Peach.Core.Analyzers.PitParser.parseDefines(fileName + ".config");
+			defs.Remove(defs.First(k => k.Key == "PitLibraryPath"));
+			defs.Add(new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
+
+			var args = new Dictionary<string, object>();
+			args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
+
+			var parser = new Peach.Core.Analyzers.PitParser();
+
+			var dom = parser.asParser(args, fileName);
+
+			dom.context = new RunContext();
+
+			foreach (var test in dom.tests)
+			{
+				dom.context.test = test;
+
+				foreach (var state in test.stateModel.states)
+				{
+					foreach (var action in state.actions)
+					{
+						foreach (var actionData in action.allData)
+						{
+							foreach (var data in actionData.allData)
+							{
+								if (data is DataFile)
+								{
+									// Verify file cracks correctly
+									try
+									{
+										actionData.Apply(data);
+									}
+									catch (Exception ex)
+									{
+										throw new PeachException(string.Format("Error cracking data file '{0}' to '{1}.{2}.{3}.{4}'.",
+											((DataFile)data).FileName, test.Name, state.Name, action.Name, actionData.dataModel.Name), ex);
+									}
+
+									// SHould we skip verifying bytes?
+									if (!verifyBytes)
+										continue;
+
+									var value = actionData.dataModel.Value;
+									var dataFileBytes = File.ReadAllBytes(((DataFile) data).FileName);
+
+									// Verify all bytes match
+									for (var i = 0; i < dataFileBytes.Length && i < value.Length; i++)
+									{
+										var b = value.ReadByte();
+										if (dataFileBytes[i] != b)
+										{
+											throw new PeachException(
+												string.Format(
+													"Error: Data did not match at {0}.  Got {1:x2} expected {2:x2}. Data file '{3}' to '{4}.{5}.{6}.{7}'.",
+													i, b, dataFileBytes[i], ((DataFile) data).FileName, test.Name, state.Name, action.Name,
+													actionData.dataModel.Name));
+										}
+									}
+
+									// Verify length matches
+									if (dataFileBytes.Length != value.Length)
+										throw new PeachException(
+											string.Format(
+												"Error: Data size mismatch. Got {0} bytes, expected {1}. Data file '{2}' to '{3}.{4}.{5}.{6}'.",
+												value.Length, dataFileBytes.Length, ((DataFile) data).FileName, test.Name, state.Name, action.Name,
+												actionData.dataModel.Name));
+								}
+								else if(data is DataField)
+								{
+									// Verify fields apply correctly
+									try
+									{
+										actionData.Apply(data);
+									}
+									catch (Exception ex)
+									{
+										throw new PeachException(string.Format("Error applying data fields '{0}' to '{1}.{2}.{3}.{4}'.",
+											data.Name, test.Name, state.Name, action.Name, actionData.dataModel.Name), ex);
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 

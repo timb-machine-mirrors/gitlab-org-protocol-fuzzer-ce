@@ -11,7 +11,9 @@ using Peach.Pro.Test.Core.Publishers;
 
 namespace Peach.Pro.Test.Core.CrackingTests
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class FlagsTests
 	{
 		[Test]

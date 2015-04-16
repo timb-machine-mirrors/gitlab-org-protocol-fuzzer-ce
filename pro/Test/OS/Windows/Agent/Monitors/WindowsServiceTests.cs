@@ -9,7 +9,8 @@ using System.ServiceProcess;
 namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 {
 	[TestFixture]
-	[Category("Peach")]
+	[Quick]
+	[Peach]
 	class WindowsServiceTests
 	{
 		const string Monitor = "WindowsService";

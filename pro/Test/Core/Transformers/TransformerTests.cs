@@ -7,7 +7,9 @@ using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Transformers
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class TransformerTests
 	{
 		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, multiple transformers are defined on element 'str'.")]
@@ -45,7 +47,7 @@ namespace Peach.Pro.Test.Core.Transformers
 
 			PitParser parser = new PitParser();
 
-			parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)), false);
+			parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
 		}
 

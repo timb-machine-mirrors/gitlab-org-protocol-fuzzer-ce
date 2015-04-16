@@ -8,10 +8,12 @@ using Peach.Core;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using File = System.IO.File;
+using Peach.Core.Test;
 
 namespace PitTester
 {
 	[TestFixture]
+	[Slow]
 	class UnitTests
 	{
 		public class TestCase
@@ -119,6 +121,25 @@ namespace PitTester
 
 			if (errors.Length > 0)
 				Assert.Fail(errors.ToString());
+		}
+
+		[Test]
+		public void VerifyDataSetsCrack([ValueSource("AllPits")]TestCase test)
+		{
+			var fileName = test.Pit.Versions[0].Files[0].Name;
+
+			try
+			{
+				PitTester.VerifyDataSets(LibraryPath, fileName, !fileName.Contains("PPTX"));
+			}
+			catch (FileNotFoundException)
+			{
+				Assert.Ignore("No test definition found.");
+			}
+			catch (Exception ex)
+			{
+				Assert.Fail(ex.Message);
+			}
 		}
 
 		[Test]

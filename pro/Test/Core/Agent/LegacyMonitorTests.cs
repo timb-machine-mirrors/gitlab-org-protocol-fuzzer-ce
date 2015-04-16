@@ -15,7 +15,8 @@ using Peach.Core.Test;
 namespace Peach.Pro.Test.Core.Agent
 {
 	[TestFixture]
-	[Category("Peach")]
+	[Quick]
+	[Peach]
 	class LegacyMonitorTests
 	{
 		static readonly string Target = Platform.GetOS() == Platform.OS.Windows ? "ipconfig" : "ifconfig";

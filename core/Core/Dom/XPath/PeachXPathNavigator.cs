@@ -12,44 +12,37 @@ namespace Peach.Core.Dom.XPath
 
 		abstract class Entry : IEquatable<Entry>
 		{
-			public abstract INamed Node { get; }
-
-			protected int Index { get; set; }
-
-			public virtual XPathNodeType NodeType
+			protected Entry(INamed node, int index)
 			{
-				get { return XPathNodeType.Element; }
+				Index = index;
+				Node = node;
+				Name = node.Name;
+				NamespaceUri = string.Empty;
+				LocalName = Name;
+				NodeType = XPathNodeType.Element;
 			}
 
-			public virtual string Name
+			protected Entry(INamed node, int index, string name, XPathNodeType nodeType)
 			{
-				get { return Node.Name; }
+				Index = index;
+				Node = node;
+				Name = name;
+				NamespaceUri = string.Empty;
+				LocalName = Name;
+				NodeType = nodeType;
 			}
 
-			public virtual string NamespaceUri
-			{
-				get
-				{
-					var idx = Node.Name.IndexOf(':');
-					return idx < 0 ? string.Empty : Node.Name.Substring(0, idx);
-				}
-			}
+			public INamed Node { get; private set;}
 
-			public virtual string LocalName
-			{
-				get
-				{
-					try
-					{
-						var idx = Node.Name.LastIndexOf(':');
-						return idx < 0 ? Node.Name : Node.Name.Substring(idx + 1);
-					}
-					catch (ArgumentOutOfRangeException)
-					{
-						return "WTF";
-					}
-				}
-			}
+			public string Name { get; private set; }
+
+			protected int Index { get; private set; }
+
+			public XPathNodeType NodeType { get; private set; }
+
+			public string NamespaceUri { get; protected set; }
+
+			public string LocalName { get; protected set; }
 
 			public virtual string Value
 			{
@@ -73,7 +66,7 @@ namespace Peach.Core.Dom.XPath
 
 			public virtual Entry GetFirstAttr()
 			{
-				return new NamedAttrEntry { Parent = Node };
+				return new NamedAttrEntry(Node);
 			}
 
 			public virtual Entry GetNextAttr()
@@ -96,36 +89,14 @@ namespace Peach.Core.Dom.XPath
 
 		class NamedAttrEntry : Entry
 		{
-			public INamed Parent { private get; set; }
-
-			public override INamed Node
+			public NamedAttrEntry(INamed node)
+				: base(node, 0, "name", XPathNodeType.Attribute)
 			{
-				get { return Parent; }
-			}
-
-			public override XPathNodeType NodeType
-			{
-				get { return XPathNodeType.Attribute; }
-			}
-
-			public override string Name
-			{
-				get { return "name"; }
-			}
-
-			public override string NamespaceUri
-			{
-				get { return string.Empty; }
-			}
-
-			public override string LocalName
-			{
-				get { return Name; }
 			}
 
 			public override string Value
 			{
-				get { return Parent.Name; }
+				get { return Node.Name; }
 			}
 		}
 
@@ -135,24 +106,20 @@ namespace Peach.Core.Dom.XPath
 
 		class RootEntry : Entry
 		{
-			public Dom Dom { private get; set; }
+			private readonly Dom _dom;
 
-			public override INamed Node
+			public RootEntry(Dom dom)
+				: base(dom, 0, dom.Name, XPathNodeType.Root)
 			{
-				get { return Dom; }
-			}
-
-			public override XPathNodeType NodeType
-			{
-				get { return XPathNodeType.Root; }
+				_dom = dom;
 			}
 
 			public override Entry GetFirstChild()
 			{
-				if (Dom.tests.Count == 0)
+				if (_dom.tests.Count == 0)
 					return null;
 
-				return new TestEntry { Test = Dom.tests[0] };
+				return new TestEntry(_dom.tests[0], 0);
 			}
 
 			public override Entry GetFirstAttr()
@@ -167,38 +134,42 @@ namespace Peach.Core.Dom.XPath
 
 		class TestEntry : Entry
 		{
-			public Test Test { private get; set; }
+			private readonly Test _test;
 
-			public override INamed Node { get { return Test; } }
+			public TestEntry(Test test, int index)
+				: base(test, index)
+			{
+				_test = test;
+			}
 
 			public override Entry GetFirstChild()
 			{
-				if (Test.stateModel == null)
+				if (_test.stateModel == null)
 					return null;
 
-				return new StateModelEntry { StateModel = Test.stateModel };
+				return new StateModelEntry(_test.stateModel);
 			}
 
 			public override Entry GetNext()
 			{
-				var tests = Test.parent.tests;
+				var tests = _test.parent.tests;
 				var next = Index + 1;
 
 				if (next == tests.Count)
 					return null;
 
-				return new TestEntry { Test = tests[next], Index = next };
+				return new TestEntry(tests[next], next);
 			}
 
 			public override Entry GetPrev()
 			{
-				var tests = Test.parent.tests;
+				var tests = _test.parent.tests;
 				var next = Index - 1;
 
 				if (next < 0)
 					return null;
 
-				return new TestEntry { Test = tests[next], Index = next };
+				return new TestEntry(tests[next], next);
 			}
 		}
 
@@ -208,16 +179,27 @@ namespace Peach.Core.Dom.XPath
 
 		class StateModelEntry : Entry
 		{
-			public StateModel StateModel { private get; set; }
+			private readonly StateModel _stateModel;
 
-			public override INamed Node { get { return StateModel; } }
+			public StateModelEntry(StateModel stateModel)
+				: base(stateModel, 0)
+			{
+				_stateModel = stateModel;
+
+				var idx = Name.LastIndexOf(':');
+				if (idx > 0)
+				{
+					NamespaceUri = Name.Substring(0, idx);
+					LocalName = Name.Substring(idx + 1);
+				}
+			}
 
 			public override Entry GetFirstChild()
 			{
-				if (StateModel.states.Count == 0)
+				if (_stateModel.states.Count == 0)
 					return null;
 
-				return new StateEntry { State = StateModel.states[0] };
+				return new StateEntry(_stateModel.states[0], 0);
 			}
 
 			public override Entry GetNext()
@@ -237,38 +219,42 @@ namespace Peach.Core.Dom.XPath
 
 		class StateEntry : Entry
 		{
-			public State State { private get; set; }
+			private readonly State _state;
 
-			public override INamed Node { get { return State; } }
+			public StateEntry(State state, int index)
+				: base(state, index)
+			{
+				_state = state;
+			}
 
 			public override Entry GetFirstChild()
 			{
-				if (State.actions.Count == 0)
+				if (_state.actions.Count == 0)
 					return null;
 
-				return new ActionEntry { Action = State.actions[0] };
+				return new ActionEntry(_state.actions[0], 0);
 			}
 
 			public override Entry GetNext()
 			{
-				var states = State.parent.states;
+				var states = _state.parent.states;
 				var next = Index + 1;
 
 				if (next == states.Count)
 					return null;
 
-				return new StateEntry { State = states[next], Index = next };
+				return new StateEntry(states[next], next);
 			}
 
 			public override Entry GetPrev()
 			{
-				var states = State.parent.states;
+				var states = _state.parent.states;
 				var next = Index - 1;
 
 				if (next < 0)
 					return null;
 
-				return new StateEntry { State = states[next], Index = next };
+				return new StateEntry(states[next], next);
 			}
 		}
 
@@ -278,44 +264,48 @@ namespace Peach.Core.Dom.XPath
 
 		class ActionEntry : Entry
 		{
-			public Action Action { private get; set; }
+			private readonly Action _action;
 
-			public override INamed Node { get { return Action; } }
+			public ActionEntry(Action action, int index)
+				: base(action, index)
+			{
+				_action = action;
+			}
 
 			public override Entry GetFirstChild()
 			{
-				var actionData = Action.allData.FirstOrDefault();
+				var actionData = _action.allData.FirstOrDefault();
 				if (actionData == null)
 					return null;
 
-				return new ModelEntry { ActionData = actionData };
+				return new ModelEntry(actionData, 0);
 			}
 
 			public override Entry GetNext()
 			{
-				var actions = Action.parent.actions;
+				var actions = _action.parent.actions;
 				var next = Index + 1;
 
 				if (next == actions.Count)
 					return null;
 
-				return new ActionEntry { Action = actions[next], Index = next };
+				return new ActionEntry(actions[next], next);
 			}
 
 			public override Entry GetPrev()
 			{
-				var actions = Action.parent.actions;
+				var actions = _action.parent.actions;
 				var next = Index - 1;
 
 				if (next < 0)
 					return null;
 
-				return new ActionEntry { Action = actions[next], Index = next };
+				return new ActionEntry(actions[next], next);
 			}
 
 			public override Entry GetFirstAttr()
 			{
-				return new ActionAttrEntry { Parent = Action };
+				return new ActionAttrEntry(_action, 0);
 			}
 		}
 
@@ -325,7 +315,13 @@ namespace Peach.Core.Dom.XPath
 
 		class ActionAttrEntry : Entry
 		{
-			public Action Parent { private get; set; }
+			private readonly Action _action;
+
+			public ActionAttrEntry(Action action, int index)
+				: base(action, index, Attrs[index].Item1, XPathNodeType.Attribute)
+			{
+				_action = action;
+			}
 
 			static readonly List<Tuple<string, Func<Action, string>>> Attrs = new List<Tuple<string, Func<Action, string>>>
 			(
@@ -354,34 +350,9 @@ namespace Peach.Core.Dom.XPath
 				return asGet == null ? string.Empty : asGet.property;
 			}
 
-			public override INamed Node
-			{
-				get { return Parent; }
-			}
-
-			public override XPathNodeType NodeType
-			{
-				get { return XPathNodeType.Attribute; }
-			}
-
-			public override string Name
-			{
-				get { return Attrs[Index].Item1; }
-			}
-
-			public override string NamespaceUri
-			{
-				get { return string.Empty; }
-			}
-
-			public override string LocalName
-			{
-				get { return Name; }
-			}
-
 			public override string Value
 			{
-				get { return Attrs[Index].Item2(Parent); }
+				get { return Attrs[Index].Item2(_action); }
 			}
 
 			public override Entry GetNextAttr()
@@ -390,7 +361,7 @@ namespace Peach.Core.Dom.XPath
 				if (next == Attrs.Count)
 					return null;
 
-				return new ActionAttrEntry { Parent = Parent, Index = next };
+				return new ActionAttrEntry(_action, next);
 			}
 		}
 
@@ -400,27 +371,38 @@ namespace Peach.Core.Dom.XPath
 
 		class ModelEntry : Entry
 		{
-			public ActionData ActionData { private get; set; }
+			private readonly ActionData _actionData;
 
-			public override INamed Node { get { return ActionData.dataModel; } }
+			public ModelEntry(ActionData actionData, int index)
+				: base(actionData.dataModel, index)
+			{
+				_actionData = actionData;
+
+				var idx = Name.LastIndexOf(':');
+				if (idx > 0)
+				{
+					NamespaceUri = Name.Substring(0, idx);
+					LocalName = Name.Substring(idx + 1);
+				}
+			}
 
 			public override Entry GetFirstChild()
 			{
-				if (ActionData.dataModel.Count == 0)
+				if (_actionData.dataModel.Count == 0)
 					return null;
 
-				return ElementEntry.Make(ActionData.dataModel);
+				return ElementEntry.Make(_actionData.dataModel);
 			}
 
 			public override Entry GetNext()
 			{
 				var idx = Index + 1;
-				var next = ActionData.action.allData.ElementAtOrDefault(idx);
+				var next = _actionData.action.allData.ElementAtOrDefault(idx);
 
 				if (next == null)
 					return null;
 
-				return new ModelEntry { ActionData = next, Index = idx };
+				return new ModelEntry(next, idx);
 			}
 
 			public override Entry GetPrev()
@@ -429,17 +411,17 @@ namespace Peach.Core.Dom.XPath
 					return null;
 
 				var idx = Index - 1;
-				var next = ActionData.action.allData.ElementAtOrDefault(idx);
+				var next = _actionData.action.allData.ElementAtOrDefault(idx);
 
 				if (next == null)
 					return null;
 
-				return new ModelEntry { ActionData = next, Index = idx };
+				return new ModelEntry(next, idx);
 			}
 
 			public override Entry GetFirstAttr()
 			{
-				return new ElementAttrEntry { Parent = ActionData.dataModel };
+				return new ElementAttrEntry(_actionData.dataModel, 0);
 			}
 		}
 
@@ -449,64 +431,36 @@ namespace Peach.Core.Dom.XPath
 
 		class ElementEntry : Entry
 		{
-			static ElementEntry Make(Array elem)
+			public static ElementEntry Make(DataElement parent)
 			{
-				return new ElementEntry { Peers = new[] { elem.OriginalElement }.Concat(elem).ToList() };
-			}
-
-			static ElementEntry Make(Choice elem)
-			{
-				if (elem.choiceElements.Count == 0)
+				var peers = parent.XPathChildren();
+				if (peers.Count == 0)
 					return null;
 
-				return new ElementEntry { Peers = elem.choiceElements.Values.ToList() };
+				return new ElementEntry(peers, 0);
 			}
 
-			public static ElementEntry Make(DataElementContainer elem)
+			private readonly IList<DataElement> _peers;
+
+			private ElementEntry(IList<DataElement> peers, int index)
+				: base(peers[index], index)
 			{
-				if (elem.Count == 0)
-					return null;
-
-				return new ElementEntry { Peers = elem };
-			}
-
-			static ElementEntry Make(DataElement elem)
-			{
-				var asArray = elem as Array;
-				if (asArray != null)
-					return Make(asArray);
-
-				var asChoice = elem as Choice;
-				if (asChoice != null)
-					return Make(asChoice);
-
-				var asCont = elem as DataElementContainer;
-				if (asCont != null)
-					return Make(asCont);
-
-				return null;
-			}
-
-			private IList<DataElement> Peers { get; set; }
-
-			public override INamed Node
-			{
-				get { return Peers[Index]; }
+				_peers = peers;
 			}
 
 			public override Entry GetFirstChild()
 			{
-				return Make(Peers[Index]);
+				return Make(_peers[Index]);
 			}
 
 			public override Entry GetNext()
 			{
 				var next = Index + 1;
 
-				if (next == Peers.Count)
+				if (next == _peers.Count)
 					return null;
 
-				return new ElementEntry { Peers = Peers, Index = next };
+				return new ElementEntry(_peers, next);
 			}
 
 			public override Entry GetPrev()
@@ -516,12 +470,12 @@ namespace Peach.Core.Dom.XPath
 				if (next < 0)
 					return null;
 
-				return new ElementEntry { Peers = Peers, Index = next };
+				return new ElementEntry(_peers, next);
 			}
 
 			public override Entry GetFirstAttr()
 			{
-				return new ElementAttrEntry { Parent = Peers[Index] };
+				return new ElementAttrEntry(_peers[Index], 0);
 			}
 		}
 
@@ -531,7 +485,13 @@ namespace Peach.Core.Dom.XPath
 
 		class ElementAttrEntry : Entry
 		{
-			public DataElement Parent { private get; set; }
+			private readonly DataElement _element;
+
+			public ElementAttrEntry(DataElement element, int index)
+				: base(element, index, Attrs[index].Item1, XPathNodeType.Attribute)
+			{
+				_element = element;
+			}
 
 			static readonly List<Tuple<string, Func<DataElement, string>>> Attrs = new List<Tuple<string, Func<DataElement, string>>>
 			(
@@ -543,37 +503,9 @@ namespace Peach.Core.Dom.XPath
 				}
 			);
 
-			public override INamed Node
-			{
-				get { return Parent; }
-			}
-
-			public override XPathNodeType NodeType
-			{
-				get
-				{
-					return XPathNodeType.Attribute;
-				}
-			}
-
-			public override string Name
-			{
-				get { return Attrs[Index].Item1; }
-			}
-
-			public override string NamespaceUri
-			{
-				get { return string.Empty; }
-			}
-
-			public override string LocalName
-			{
-				get { return Name; }
-			}
-
 			public override string Value
 			{
-				get { return Attrs[Index].Item2(Parent); }
+				get { return Attrs[Index].Item2(_element); }
 			}
 
 			public override Entry GetNextAttr()
@@ -582,13 +514,19 @@ namespace Peach.Core.Dom.XPath
 				if (next == Attrs.Count)
 					return null;
 
-				return new ElementAttrEntry { Parent = Parent, Index = next };
+				return new ElementAttrEntry(_element, next);
 			}
 		}
 
 		#endregion
 
+		// Stack of previous nodes so MoveToParent is quick
+		// Use a LinkedList so Clone() doesn't reverse our history!
 		private LinkedList<Entry> _position;
+
+		// Current node is not contained in the position list
+		// so that MoveNext/MovePrev doesn't have to do a Pop()/Push()
+		private Entry _currentNode;
 
 		// ReSharper disable once InconsistentNaming
 		[Obsolete("This property is obsolete. Use the 'CurrentNode' property instead.")]
@@ -599,17 +537,19 @@ namespace Peach.Core.Dom.XPath
 
 		public object CurrentNode
 		{
-			get { return _position.First.Value.Node; }
+			get { return _currentNode.Node; }
 		}
 
 		public PeachXPathNavigator(Dom dom)
-			: this(new[] { new RootEntry { Dom = dom } })
 		{
+			_position = new LinkedList<Entry>();
+			_currentNode = new RootEntry(dom);
 		}
 
-		private PeachXPathNavigator(IEnumerable<Entry> position)
+		private PeachXPathNavigator(PeachXPathNavigator other)
 		{
-			_position = new LinkedList<Entry>(position);
+			_position = new LinkedList<Entry>(other._position);
+			_currentNode = other._currentNode;
 		}
 
 		public override string BaseURI
@@ -619,7 +559,7 @@ namespace Peach.Core.Dom.XPath
 
 		public override XPathNavigator Clone()
 		{
-			return new PeachXPathNavigator(_position);
+			return new PeachXPathNavigator(this);
 		}
 
 		public override bool IsEmptyElement
@@ -631,6 +571,9 @@ namespace Peach.Core.Dom.XPath
 		{
 			var asPeach = other as PeachXPathNavigator;
 			if (asPeach == null)
+				return false;
+
+			if (!_currentNode.Equals(asPeach._currentNode))
 				return false;
 
 			var lhs = _position.GetEnumerator();
@@ -656,7 +599,7 @@ namespace Peach.Core.Dom.XPath
 
 		public override string LocalName
 		{
-			get { return _position.First.Value.LocalName; }
+			get { return _currentNode.LocalName; }
 		}
 
 		public override bool MoveTo(XPathNavigator other)
@@ -666,26 +609,32 @@ namespace Peach.Core.Dom.XPath
 				return false;
 
 			_position = new LinkedList<Entry>(asPeach._position);
+			_currentNode = asPeach._currentNode;
+
 			return true;
 		}
 
 		public override bool MoveToFirstAttribute()
 		{
-			var attr = _position.First.Value.GetFirstAttr();
+			var attr = _currentNode.GetFirstAttr();
 			if (attr == null)
 				return false;
 
-			_position.AddFirst(attr);
+			_position.AddFirst(_currentNode);
+			_currentNode = attr;
+
 			return true;
 		}
 
 		public override bool MoveToFirstChild()
 		{
-			var child = _position.First.Value.GetFirstChild();
+			var child = _currentNode.GetFirstChild();
 			if (child == null)
 				return false;
 
-			_position.AddFirst(child);
+			_position.AddFirst(_currentNode);
+			_currentNode = child;
+
 			return true;
 		}
 
@@ -701,23 +650,23 @@ namespace Peach.Core.Dom.XPath
 
 		public override bool MoveToNext()
 		{
-			var next = _position.First.Value.GetNext();
+			var next = _currentNode.GetNext();
 			if (next == null)
 				return false;
 
-			_position.RemoveFirst();
-			_position.AddFirst(next);
+			_currentNode = next;
+
 			return true;
 		}
 
 		public override bool MoveToNextAttribute()
 		{
-			var next = _position.First.Value.GetNextAttr();
+			var next = _currentNode.GetNextAttr();
 			if (next == null)
 				return false;
 
-			_position.RemoveFirst();
-			_position.AddFirst(next);
+			_currentNode = next;
+
 			return true;
 		}
 
@@ -728,9 +677,10 @@ namespace Peach.Core.Dom.XPath
 
 		public override bool MoveToParent()
 		{
-			if (_position.Count == 1)
+			if (_position.Count == 0)
 				return false;
 
+			_currentNode = _position.First.Value;
 			_position.RemoveFirst();
 
 			return true;
@@ -738,18 +688,18 @@ namespace Peach.Core.Dom.XPath
 
 		public override bool MoveToPrevious()
 		{
-			var next = _position.First.Value.GetPrev();
-			if (next == null)
+			var prev = _currentNode.GetPrev();
+			if (prev == null)
 				return false;
 
-			_position.RemoveFirst();
-			_position.AddFirst(next);
+			_currentNode = prev;
+
 			return true;
 		}
 
 		public override string Name
 		{
-			get { return _position.First.Value.Name; }
+			get { return _currentNode.Name; }
 		}
 
 		public override System.Xml.XmlNameTable NameTable
@@ -759,12 +709,12 @@ namespace Peach.Core.Dom.XPath
 
 		public override string NamespaceURI
 		{
-			get { return _position.First.Value.NamespaceUri; }
+			get { return _currentNode.NamespaceUri; }
 		}
 
 		public override XPathNodeType NodeType
 		{
-			get { return _position.First.Value.NodeType; }
+			get { return _currentNode.NodeType; }
 		}
 
 		public override string Prefix
@@ -774,7 +724,7 @@ namespace Peach.Core.Dom.XPath
 
 		public override string Value
 		{
-			get { return _position.First.Value.Value; }
+			get { return _currentNode.Value; }
 		}
 	}
 }

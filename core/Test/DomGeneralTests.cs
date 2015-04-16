@@ -9,7 +9,9 @@ using Peach.Core.Analyzers;
 
 namespace Peach.Core.Test
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Peach]
+	[Quick]
 	class DomGeneralTests
 	{
 		[Test]

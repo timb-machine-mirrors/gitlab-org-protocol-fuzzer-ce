@@ -7,10 +7,13 @@ using NUnit.Framework;
 using Peach.Core;
 using Peach.Pro.Core;
 using Random = Peach.Core.Random;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core
 {
 	[TestFixture]
+	[Quick]
+	[Peach]
 	class EdgeCaseGeneratorTests
 	{
 		class Sample

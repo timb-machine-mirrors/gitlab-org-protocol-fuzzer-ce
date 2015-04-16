@@ -35,10 +35,13 @@ using Peach.Core;
 using Peach.Pro.OS.Windows;
 using Peach.Pro.OS.Windows.Agent.Monitors.WindowsDebug;
 using Peach.Pro.OS.Windows.Debuggers.WindowsSystem;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.OS.Windows.Debuggers
 {
-	[TestFixture] [Category("Peach")]
+	[TestFixture]
+	[Quick]
+	[Peach]
 	class WinSystemTests
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
