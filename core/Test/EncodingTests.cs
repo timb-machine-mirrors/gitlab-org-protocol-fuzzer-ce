@@ -55,7 +55,9 @@ namespace Peach.Core.Test
 				// mono 3.12 has 4 bytes
 				Assert.GreaterOrEqual(4, Enc.BigEndianUnicode.GetMaxByteCount(1), "BigEndianUnicode");
 
-				Assert.AreEqual(2, Enc.Unicode.GetMaxByteCount(1), "Unicode");
+				Assert.LessOrEqual(2, Enc.Unicode.GetMaxByteCount(1), "Unicode");
+				// mono 3.12 has 4 bytes
+				Assert.GreaterOrEqual(4, Enc.Unicode.GetMaxByteCount(1), "Unicode");
 				Assert.AreEqual(5, Enc.UTF7.GetMaxByteCount(1), "UTF7");
 
 				// mono 2.10 is 4 bytes per utf8, mono 3.x is 6 bytes per utf8
