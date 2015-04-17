@@ -183,9 +183,9 @@ namespace Peach.Core
 		/// <summary>
 		/// Call a method on the Publishers resource
 		/// </summary>
-		/// <remak>
+		/// <remarks>
 		/// This method can be overriden by custom Publishers.
-		/// </remak>
+		/// </remarks>
 		/// <param name="method">Name of method to call</param>
 		/// <param name="args">Arguments to pass</param>
 		/// <returns>Returns resulting data</returns>
@@ -200,8 +200,8 @@ namespace Peach.Core
 		/// <remarks>
 		/// This method can be overriden by custom Publishers.
 		/// </remarks>
-		/// <seealso>setProperty</seealso>
-		/// <seealso>OnGetProperty</seealso>
+		/// <seealso cref="setProperty" />
+		/// <seealso cref="OnGetProperty" />
 		/// <param name="property">Name of property to set</param>
 		/// <param name="value">Value to set on property</param>
 		protected virtual void OnSetProperty(string property, Variant value)
@@ -215,6 +215,8 @@ namespace Peach.Core
 		/// <remarks>
 		/// This method can be overriden by custom Publishers.
 		/// </remarks>
+		/// <seealso cref="getProperty" />
+		/// <seealso cref="OnSetProperty" />
 		/// <param name="property">Name of property</param>
 		/// <returns>Returns value of property</returns>
 		protected virtual Variant OnGetProperty(string property)

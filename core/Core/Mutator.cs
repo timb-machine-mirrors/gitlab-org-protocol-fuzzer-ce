@@ -39,35 +39,43 @@ namespace Peach.Core
 	/// will affect the flow of the state model and actions in the state model. Data model mutators will
 	/// affect the data produced during the current test case.</para>
 	/// 
-	/// <para>The operation of the mutator is as follows:</para>
+	/// <para>Your static constructor will correct set the <see cref="affectStateModel"/>
+	/// and <see cref="affectDataModel"/> variables.
+	/// These static variables determine in which modes your mutator will operate.</para>
+	/// 
+	/// <para>The operation of <see cref="affectDataModel"/> is as follows:</para>
 	/// 
 	/// <list type="number">
 	/// <item>
-	/// Your static constructor will correct set the "affectStateModel" and "affectDataModel"
-	/// variables. These static variables determine in which modes your mutator will operate.
-	/// </item>
-	/// <item>
-	/// <para>affectDataModel: During record iterations your supportedDataElement static method
+	/// During record iterations your supportedDataElement static method
 	/// will be called to check if your mutator supports a specific data element. If true 
 	/// an instance of your mutator will be created with the original instance of the data element
 	/// passed in. For every data element in the model you will be queried and asked and an
-	/// instance created for that specific element.</para>
-	/// 
-	/// <para>affectStateModel: A single instance of your mutator will be created and passed a 
-	/// the original state model instance.</para>
+	/// instance created for that specific element.
 	/// </item>
 	/// <item>
-	/// <para>affectDataModel: During mutation your sequentialMutation or randomMutation methods
+	/// During mutation your sequentialMutation or randomMutation methods
 	/// will get called with a cloned instance of the original data element. Each call to these
 	/// methods will be passed a new cloned instance that can be modified in any way. In face the
-	/// entire model could be modified in any way desired.</para>
+	/// entire model could be modified in any way desired.
+	/// </item>
+	/// </list>
 	/// 
-	/// <para>affectStateModel: During mutation your sequentialMutation or randomMutation methods
+	/// <para>The operation of <see cref="affectStateModel"/> is as follows:</para>
+	/// 
+	/// <list type="number">
+	/// <item>
+	/// A single instance of your mutator will be created and passed a 
+	/// the original state model instance.
+	/// </item>
+	/// <item>
+	/// During mutation your sequentialMutation or randomMutation methods
 	/// will get called with a cloned instance of the original state model. Each call to these
-	/// methods will be passed a new cloned instance that can be modified in any way.</para>
-	/// 
-	/// <para>affectStateModel: When a changeState action occurs the changeState method is called
-	/// to provide an opportunity to modify the state that will be switched to.</para>
+	/// methods will be passed a new cloned instance that can be modified in any way.
+	/// </item>
+	/// <item>
+	/// When a changeState action occurs the changeState method is called
+	/// to provide an opportunity to modify the state that will be switched to.
 	/// </item>
 	/// </list>
 	/// </remarks>
