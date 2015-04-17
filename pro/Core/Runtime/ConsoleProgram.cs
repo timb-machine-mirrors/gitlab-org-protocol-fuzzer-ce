@@ -314,8 +314,7 @@ namespace Peach.Pro.Core.Runtime
 
 				var title = _webUri == null ? "" : " ({0})".Fmt(_webUri);
 
-				return new ConsoleWatcher(title);
-
+				return new InteractiveConsoleWatcher(title);
 			}
 			catch (IOException)
 			{
@@ -361,7 +360,7 @@ namespace Peach.Pro.Core.Runtime
 
 				_webUri = svc.Uri;
 
-				ConsoleWatcher.WriteInfoMark();
+				InteractiveConsoleWatcher.WriteInfoMark();
 				Console.WriteLine("Web site running at: {0}", svc.Uri);
 
 				// Add the JobLogger as necessary
@@ -390,7 +389,7 @@ namespace Peach.Pro.Core.Runtime
 
 			var analyzerInstance = (Analyzer)Activator.CreateInstance(analyzerType);
 
-			ConsoleWatcher.WriteInfoMark();
+			InteractiveConsoleWatcher.WriteInfoMark();
 			Console.WriteLine("Starting Analyzer");
 
 			var args = new Dictionary<string, string>();
@@ -413,7 +412,7 @@ namespace Peach.Pro.Core.Runtime
 
 			var agentServer = (IAgentServer)Activator.CreateInstance(agentType);
 
-			ConsoleWatcher.WriteInfoMark();
+			InteractiveConsoleWatcher.WriteInfoMark();
 			Console.WriteLine("Starting agent server");
 
 			var args = new Dictionary<string, string>();
@@ -470,7 +469,7 @@ namespace Peach.Pro.Core.Runtime
 
 				if (test)
 				{
-					ConsoleWatcher.WriteInfoMark();
+					InteractiveConsoleWatcher.WriteInfoMark();
 					Console.Write("Validating file [" + _config.pitFile + "]... ");
 					parser.asParserValidation(parserArgs, _config.pitFile);
 					Console.WriteLine("No Errors Found.");
