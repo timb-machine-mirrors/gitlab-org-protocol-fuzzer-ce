@@ -271,7 +271,7 @@ namespace Peach.Core.Xsd
 		/// Specify the character to bad the string with if it's length if less then
 		/// specified in the length attribute. Only valid when the length attribute is also
 		/// specified.  This field will accept python escape sequences
-		/// such as \xNN, \r, \n, etc.
+		/// such as \\xNN, \\r, \\n, etc.
 		/// </summary>
 		[XmlAttribute]
 		[DefaultValue("\\x00")]

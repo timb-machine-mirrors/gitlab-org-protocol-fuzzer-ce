@@ -116,7 +116,7 @@ namespace Peach.Core.IO
 		/// <returns>
 		/// The zero-based index position of value if that BitStream is found, or -1 if it is not.
 		/// </returns>
-		/// <exception cref="ArgumentNullException"><paramref name="value"/> is <null/>.</exception>
+		/// <exception cref="ArgumentNullException"><paramref name="value"/> is null.</exception>
 		/// <exception cref="ArgumentOutOfRangeException"><paramref name="offsetBits"/> specifies a position not within this instance.</exception>
 		public long IndexOf(BitwiseStream value, long offsetBits)
 		{

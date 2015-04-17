@@ -46,7 +46,7 @@ namespace Peach.Core.Dom
 		/// </summary>
 		/// <param name="index">The zero-based index at which the element should be inserted.</param>
 		/// <param name="key">The key of the entry to add.</param>
-		/// <param name="value">The value of the entry to add. The value can be <null/> if the type of the values in the dictionary is a reference type.</param>
+		/// <param name="value">The value of the entry to add. The value can be null if the type of the values in the dictionary is a reference type.</param>
 		/// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is less than 0.<br/>
 		/// -or-<br/>
 		/// <paramref name="index"/> is greater than <see cref="System.Collections.ICollection.Count"/>.</exception>

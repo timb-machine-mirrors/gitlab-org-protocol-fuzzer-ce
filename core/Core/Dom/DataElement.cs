@@ -77,7 +77,7 @@ namespace Peach.Core.Dom
 	public enum ValueType
 	{
 		/// <summary>
-		/// Regular string. C style &quot;\&quot; escaping can be used such as: \r, \n, \t, and \\.
+		/// Regular string. C style "\" escaping can be used such as: \\r, \\n, \\t, and \\\\\.
 		/// </summary>
 		[XmlEnum("string")]
 		String,
