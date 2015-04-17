@@ -7,7 +7,7 @@ The _ButtonClicker_ monitor provides mouse clicks for popup windows during fuzzi
 
 The intent of this monitor is to keep a fuzzing session active, regardless of whether popup windows display during fuzzing. _Buttonclicker_ runs from the beginning of a fuzzing session to the end of the session.
 
-For example, if an application crashes and needs to restart or has troublle starting, it might display a popup window asking to start with a specific set of featues that could aid in troubleshooting the cause of failure. A sample popup window consistent with this situation follows:
+For example, if an application crashes and needs to restart or has trouble starting, it might display a popup window asking to start with a specific set of features that could aid in troubleshooting the cause of failure. A sample popup window consistent with this situation follows:
 
 .{nbsp}
 image::{images}/PopupWindowExample.png[]
