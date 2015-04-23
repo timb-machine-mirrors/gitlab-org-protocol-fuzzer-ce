@@ -324,7 +324,7 @@ namespace Peach.Pro.Core.WebServices
 					// HttpListener can receive requests on any prefix.
 					// On mono, the HttpListener tries to resolve "+" which makes
 					// startup/shutdown extremly slow.
-					var tmpHostname = Platform.IsRunningOnMono() && hostname == "localhost" ? hostname : "0.0.0.0";
+					var tmpHostname = Platform.IsRunningOnMono() && hostname == "localhost" ? "0.0.0.0" : hostname;
 					var tmpUri = new Uri(string.Format("http://{0}:{1}", tmpHostname, port++));
 					var tmpHost = new NancyHost(bootstrapper, config, tmpUri);
 

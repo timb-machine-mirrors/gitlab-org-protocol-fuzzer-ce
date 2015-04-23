@@ -61,14 +61,12 @@ describe("Peach", () => {
 			var testUrl = '/p/my/test/url';
 			var req: Peach.IJobRequest = {
 				pitUrl: pitUrl,
-				isTest: true
+				isControlIteration: true
 			};
 			var job: Peach.IJob = {
 				id: 'JOB_ID',
 				pitUrl: pitUrl,
-				links: {
-					testUrl: testUrl
-				}
+				firstNodeUrl: testUrl
 			};
 			$httpBackend.expectPOST(Peach.C.Api.Jobs, req).respond(job);
 			ctrl.OnBeginTest();

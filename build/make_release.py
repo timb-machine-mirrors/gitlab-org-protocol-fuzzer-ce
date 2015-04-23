@@ -31,7 +31,7 @@ pits = [
 pits_trial = [
 	{
 		'root' : 'pits/pro',
-		'incl' : 'Net/SNMP* Image/PNG* _Common/Samples/Image/*.png _Common/Models/Image/PNG* _Common/Models/Net/SNMP* ',
+		'incl' : 'Net/SNMP* Image/PNG* _Common/Samples/Image/*.PNG _Common/Models/Image/PNG* _Common/Models/Net/SNMP* ',
 		'excl' : 'Test/* _Common/Specs/* _Testing/* */.gitignore *.TODO *.adoc *.test *.pdf'
 	},
 ]
