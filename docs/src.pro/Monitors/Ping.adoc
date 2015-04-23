@@ -17,13 +17,13 @@ In the first scenario (left), Ping successfully interacts with the test target.
 within the time period, and gives the "OK" response. The Ping Monitor resets for the 
 sequence to repeat at the end of the next iteration.
 
-In the second scenario (right), the test target target is nonresponsive. 
+In the second scenario (right), the test target is nonresponsive. 
 
 . At the end of the iteration, the Ping monitor sends a message to the test target.
 . (2B) In this case, the target is nonresponsive or no longer exists. No response is sent.
 . (3B) The monitor waits a specified time period for a response. In this case, a timeout 
 occurs. The Ping monitor issues a fault and collects data around the fault. Ping resets 
-for the next itereation. 
+for the next iteration. 
 
 _Ping_ can validate that a target is still up or is waiting to restart. This is useful when fuzzing 
 embedded devices that crash surreptitiously.

@@ -14,7 +14,7 @@ Wireshark and tcpdump. A sample capture follows:
 
 image::{images}/PacketCapture.PNG["Sample Network Traffic with Packet Captures", scalewidth="75%"]
 
-Peach supports supports multiple _Pcap_ monitors in the same pit, as well as simple and 
+Peach supports multiple _Pcap_ monitors in the same pit, as well as simple and 
 compound packet filters in a single monitor. A compound packet filter consists of more than 
 one packet filter joined by AND or OR. 
 
