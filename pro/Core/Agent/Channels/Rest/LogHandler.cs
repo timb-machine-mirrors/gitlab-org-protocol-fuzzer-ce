@@ -122,7 +122,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			var logEvent = new LogEventInfo(LogLevel.Off, "$LogResponse", "Flushed");
 			logEvent.Properties["ID"] = -1;
 	
-			var json = JsonConvert.SerializeObject(logEvent);
+			var json = JsonConvert.SerializeObject(logEvent, NLogLevelConverter.Instance);
 			_ws.SendAsync(json, null);
 		}
 
@@ -134,7 +134,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				{
 					var id = _counter++;
 					logEvent.Properties["ID"] = id;
-					var json = JsonConvert.SerializeObject(logEvent);
+					var json = JsonConvert.SerializeObject(logEvent, NLogLevelConverter.Instance);
 
 					_pending++;
 					_ws.SendAsync(json, (done) =>
