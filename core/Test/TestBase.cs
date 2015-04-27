@@ -1,4 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 using NLog;
 using NLog.Config;
@@ -80,6 +83,36 @@ namespace Peach.Core.Test
 			Debug.Assert(false);
 #endif
 
+		}
+	}
+
+	[TestFixture]
+	[Quick]
+	class CategoryTest
+	{
+		[Test]
+		public void NoneMissing()
+		{
+			var missing = new List<string>();
+
+			foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
+			{
+				if (!type.GetAttributes<TestFixtureAttribute>().Any())
+					continue;
+
+				foreach (var attr in type.GetCustomAttributes(true))
+				{
+					if (attr is QuickAttribute || attr is SlowAttribute)
+						goto Found;
+				}
+
+				missing.Add(type.FullName);
+
+			Found:
+				{ }
+			}
+
+			Assert.That(missing, Is.Empty);
 		}
 	}
 }
