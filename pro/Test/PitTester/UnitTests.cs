@@ -1,71 +1,24 @@
+using System.Collections.Generic;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using Peach.Core;
-using Peach.Pro.Core.WebServices;
-using Peach.Pro.Core.WebServices.Models;
 using File = System.IO.File;
 using Peach.Core.Test;
 
 namespace PitTester
 {
 	[TestFixture]
-	[Slow]
-	class UnitTests
+	[Quick]
+	class UnitTests : TestBase
 	{
-		public class TestCase
-		{
-			public Pit Pit
-			{
-				get;
-				set;
-			}
-
-			public override string ToString()
-			{
-				return Pit.Name;
-			}
-		}
-
-		static UnitTests()
-		{
-			LibraryPath = "../../../pits/pro".Replace('/', Path.DirectorySeparatorChar);
-
-			var lib = new PitDatabase(LibraryPath);
-			var errors = new StringBuilder();
-
-			lib.ValidationEventHandler += delegate(object sender, ValidationEventArgs e)
-			{
-				errors.AppendLine(e.FileName);
-				errors.AppendLine(e.Exception.Message);
-				errors.AppendLine();
-			};
-
-			// Ignore user pits & category "Test"
-			AllPits = lib.Entries.Where(e => e.Locked && e.Tags.All(t => t.Name != "Category.Test")).Select(p => new TestCase() { Pit = p }).ToList();
-
-			LoadErrors = errors.ToString();
-		}
-
-		public static string LibraryPath
-		{
-			get;
-			private set;
-		}
-
+		// ValueSource attribute doesn't resolve properties
+		// on the base class so expose the pit list here.
 		public static IEnumerable<TestCase> AllPits
 		{
-			get;
-			private set;
-		}
-
-		public static string LoadErrors
-		{
-			get;
-			private set;
+			get { return ThePits; }
 		}
 
 		[Test]
@@ -121,44 +74,6 @@ namespace PitTester
 
 			if (errors.Length > 0)
 				Assert.Fail(errors.ToString());
-		}
-
-		[Test]
-		public void VerifyDataSetsCrack([ValueSource("AllPits")]TestCase test)
-		{
-			var fileName = test.Pit.Versions[0].Files[0].Name;
-
-			try
-			{
-				PitTester.VerifyDataSets(LibraryPath, fileName, !fileName.Contains("PPTX"));
-			}
-			catch (FileNotFoundException)
-			{
-				Assert.Ignore("No test definition found.");
-			}
-			catch (Exception ex)
-			{
-				Assert.Fail(ex.Message);
-			}
-		}
-
-		[Test]
-		public void Run([ValueSource("AllPits")]TestCase test)
-		{
-			var fileName = test.Pit.Versions[0].Files[0].Name;
-
-			try
-			{
-				PitTester.TestPit(LibraryPath, fileName, false, null);
-			}
-			catch (FileNotFoundException)
-			{
-				Assert.Ignore("No test definition found.");
-			}
-			catch (Exception ex)
-			{
-				Assert.Fail(ex.Message);
-			}
 		}
 
 		[Test]
