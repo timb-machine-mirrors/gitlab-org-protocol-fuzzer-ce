@@ -11,6 +11,45 @@ using LogLevel = NLog.LogLevel;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
+	class NLogLevelConverter : JsonConverter
+	{
+		static NLogLevelConverter()
+		{
+			Instance = new NLogLevelConverter();
+		}
+
+		public static NLogLevelConverter Instance { get; private set; }
+
+		private NLogLevelConverter()
+		{
+		}
+
+		public override bool CanConvert(Type objectType)
+		{
+			return objectType == typeof(LogLevel);
+		}
+
+		public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+		{
+			if (reader.TokenType == JsonToken.None)
+				return null;
+
+			var name = (string)serializer.Deserialize(reader, typeof(string));
+
+			return LogLevel.FromString(name);
+		}
+
+		public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+		{
+			if (value == null)
+				return;
+
+			var level = (LogLevel)value;
+
+			serializer.Serialize(writer, level.Name);
+		}
+	}
+
 	class LogSink : IDisposable
 	{
 		private readonly string _name;
@@ -182,7 +221,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			_logger.Trace("OnMessage>");
 			try
 			{
-				var logEvent = JsonConvert.DeserializeObject<LogEventInfo>(e.Data);
+				var logEvent = JsonConvert.DeserializeObject<LogEventInfo>(e.Data, NLogLevelConverter.Instance);
 				lock (this)
 				{
 					ProcessMessage(logEvent);
