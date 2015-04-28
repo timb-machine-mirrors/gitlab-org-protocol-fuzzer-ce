@@ -51,6 +51,12 @@ namespace Peach.Pro.Core.Agent.Monitors
 		readonly List<string> _majors = new List<string>();
 		readonly Dictionary<string, List<string>> _minors = new Dictionary<string, List<string>>();
 
+		[DllImport("kernel32")]
+		private static extern uint SetErrorMode(uint mode);
+
+		private const uint SEM_FAILCRITICALERRORS = 0x1;
+		private const uint SEM_NOGPFAULTERRORBOX = 0x2;
+
 		public RandoFaulter(string name)
 			: base(name)
 		{
@@ -62,6 +68,10 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 			if (CrashAfter > 0)
 			{
+				// Prevent Windows Error Reporting from getting in the way
+				if (Platform.GetOS() == Platform.OS.Windows)
+					SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
+
 				Task.Factory.StartNew(() =>
 				{
 					Logger.Info("Crashing after {0}ms", CrashAfter);
