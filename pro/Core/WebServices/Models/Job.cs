@@ -302,13 +302,11 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// The status of this job record
 		/// </summary>
-		[JsonConverter(typeof(CamelCaseStringEnumConverter))]
 		public JobStatus Status { get; set; }
 
 		/// <summary>
 		/// The mode that this job is operating under
 		/// </summary>
-		[JsonConverter(typeof(CamelCaseStringEnumConverter))]
 		public JobMode Mode { get; set; }
 
 		/// <summary>

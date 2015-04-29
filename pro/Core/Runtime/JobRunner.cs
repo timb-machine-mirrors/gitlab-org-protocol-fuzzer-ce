@@ -83,7 +83,7 @@ namespace Peach.Pro.Core.Runtime
 			catch (ApplicationException ex) // PeachException or SoftException
 			{
 				if (Configuration.LogLevel == LogLevel.Trace)
-					Logger.Error("Exception: {0}", ex);
+					Logger.ErrorException("Exception: {0}", ex);
 				else
 					Logger.Error("Exception: {0}", ex.Message);
 				_jobLogger.JobFail(_config.id, ex);
