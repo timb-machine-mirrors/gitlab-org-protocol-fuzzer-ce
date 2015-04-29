@@ -27,6 +27,7 @@ subdirs = [
 	'Test/PitTester',
 	'Validator',
 	'Web',
+	'WebApi',
 	'WindowsDebugInstance',
 	'Worker',
 	'XmlGenerator',

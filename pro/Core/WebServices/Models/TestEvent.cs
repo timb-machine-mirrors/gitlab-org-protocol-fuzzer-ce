@@ -44,7 +44,6 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// Status of event
 		/// </summary>
-		[JsonConverter(typeof(CamelCaseStringEnumConverter))]
 		public TestStatus Status { get; set; }
 
 		/// <summary>

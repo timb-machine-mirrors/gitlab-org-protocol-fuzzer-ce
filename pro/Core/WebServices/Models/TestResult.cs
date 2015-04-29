@@ -8,7 +8,6 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// The overall status of the test result
 		/// </summary>
-		[JsonConverter(typeof(CamelCaseStringEnumConverter))]
 		public TestStatus Status { get; set; }
 
 		/// <summary>

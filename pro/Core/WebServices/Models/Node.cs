@@ -29,7 +29,6 @@ namespace Peach.Pro.Core.WebServices.Models
 
 		public List<Tag> Tags { get; set; }
 
-		[JsonConverter(typeof(CamelCaseStringEnumConverter))]
 		public NodeStatus Status { get; set; }
 
 		public string Version { get; set; }

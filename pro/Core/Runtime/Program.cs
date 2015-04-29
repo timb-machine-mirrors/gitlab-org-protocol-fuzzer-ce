@@ -5,11 +5,21 @@ using Peach.Core.Runtime;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Peach.Pro.Core.WebServices;
 
 namespace Peach.Pro.Core.Runtime
 {
+	public interface IWebStatus : IDisposable
+	{
+		void Start();
+		Uri Uri { get; }
+	}
+
 	public abstract class Program
 	{
+		public Func<string, bool, IJobMonitor, int> RunWeb { get; set; }
+		public Func<IJobMonitor, IWebStatus> AttachWeb { get; set; }
+
 		protected OptionSet _options;
 		protected int _verbosity;
 
