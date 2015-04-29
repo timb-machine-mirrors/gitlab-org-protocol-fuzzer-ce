@@ -289,6 +289,30 @@ namespace Peach.Pro.Core.WebServices
 		}
 	}
 
+	class RewriteUri : Uri
+	{
+		// On windows, localhost gets turned into "+" by NancyHost so the
+		// HttpListener can receive requests on any prefix.
+		// On mono, the HttpListener tries to resolve "+" which makes
+		// startup/shutdown extremly slow.
+
+		// Mono tries to resolve any string that is not a parsable IP or '*'.
+		// In order to receive requests on all interfaces with mono the
+		// prefix needs to be rewritten to '*'.
+
+		static readonly string AnyHost = Platform.IsRunningOnMono() ? "*" : "+";
+
+		public RewriteUri(string hostname, int port)
+			: base("http://{0}:{1}".Fmt(hostname, port))
+		{
+		}
+
+		public override string ToString()
+		{
+			return base.ToString().Replace("localhost", AnyHost);
+		}
+	}
+
 	public class WebServer : IDisposable
 	{
 		// http://msdn.microsoft.com/en-us/library/windows/desktop/ms681382.aspx
@@ -323,20 +347,19 @@ namespace Peach.Pro.Core.WebServices
 				bootstrapper = new Bootstrapper(Context);
 				config = new HostConfiguration()
 				{
+					// Register prefixes with netsh on windows
 					UrlReservations = new UrlReservations()
 					{
 						CreateAutomatically = true,
 					},
+
+					// The RewriteUri class does the rewriting for us
+					RewriteLocalhost = false,
 				};
 
 				try
 				{
-					// On windows, localhost gets turned into "+" by NancyHost so the
-					// HttpListener can receive requests on any prefix.
-					// On mono, the HttpListener tries to resolve "+" which makes
-					// startup/shutdown extremly slow.
-					var tmpHostname = Platform.IsRunningOnMono() && hostname == "localhost" ? "0.0.0.0" : hostname;
-					var tmpUri = new Uri(string.Format("http://{0}:{1}", tmpHostname, port++));
+					var tmpUri = new RewriteUri(hostname, port++);
 					var tmpHost = new NancyHost(bootstrapper, config, tmpUri);
 
 					tmpHost.Start();
