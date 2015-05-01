@@ -155,8 +155,13 @@ namespace Peach.Pro.Test.Core.Agent
 				{"Port", "1" },
 				{"WaitOnCall", "MyWaitMessage" },
 				{"When", "OnCall" },
+				{"State", "Closed" },
+				{"Timeout", "1" },
 			});
 			cli.SessionStarting();
+			cli.IterationStarting(new IterationStartingArgs());
+			cli.Message("MyWaitMessage");
+			cli.IterationFinished();
 			cli.SessionFinished();
 			cli.StopAllMonitors();
 			cli.AgentDisconnect();

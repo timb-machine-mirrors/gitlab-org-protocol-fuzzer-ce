@@ -137,6 +137,8 @@ namespace Peach.Pro.Test.Core.Agent
 				<DataModel ref='TheDataModel'/>
 			</Action>
 
+			<Action type='call' method='ScoobySnacks' publisher='Peach.Agent'/>
+
 			<Action type='open' publisher='Killer'/>
 		</State>
 	</StateModel>
@@ -150,6 +152,7 @@ namespace Peach.Pro.Test.Core.Agent
 		</Monitor>
 		<Monitor name='M' class='Null'>
 			<Param name='LogFile' value='{4}'/>
+			<Param name='OnCall' value='ScoobySnacks'/>
 		</Monitor>
 	</Agent>
 
@@ -193,17 +196,17 @@ namespace Peach.Pro.Test.Core.Agent
 				var contents = File.ReadAllLines(tmp);
 				var expected = new[] {
 // Iteration 83 (Control & Record)
-"M.StartMonitor", "M.SessionStarting", "M.IterationStarting False False", "M.IterationFinished", "M.DetectedFault", 
+"M.StartMonitor", "M.SessionStarting", "M.IterationStarting False False", "M.Message ScoobySnacks", "M.IterationFinished", "M.DetectedFault", 
 // Iteration 83 - Agent is killed (IterationFinished is a hack to kill CrashableServer)
-"M.IterationStarting False False", "M.IterationFinished", 
+"M.IterationStarting False False", "M.Message ScoobySnacks", "M.IterationFinished", 
 // Agent is restarted & fault is not detected
-"M.StartMonitor", "M.SessionStarting", "M.IterationStarting False False", "M.IterationFinished", "M.DetectedFault",
+"M.StartMonitor", "M.SessionStarting", "M.IterationStarting False False", "M.Message ScoobySnacks", "M.IterationFinished", "M.DetectedFault",
 // Agent is killed
-"M.IterationStarting False False", "M.IterationFinished", 
+"M.IterationStarting False False", "M.Message ScoobySnacks", "M.IterationFinished", 
 // Agent is restarted & fault is detected
-"M.StartMonitor", "M.SessionStarting", "M.IterationStarting False False", "M.IterationFinished", "M.DetectedFault", "M.GetMonitorData",
+"M.StartMonitor", "M.SessionStarting", "M.IterationStarting False False", "M.Message ScoobySnacks", "M.IterationFinished", "M.DetectedFault", "M.GetMonitorData",
 // Reproduction occurs & fault is detected
-"M.IterationStarting True True", "M.IterationFinished", "M.DetectedFault", "M.GetMonitorData",
+"M.IterationStarting True True", "M.Message ScoobySnacks", "M.IterationFinished", "M.DetectedFault", "M.GetMonitorData",
 // Fussing stops
 "M.SessionFinished", "M.StopMonitor"
 				};
