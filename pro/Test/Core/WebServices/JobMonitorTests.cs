@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using NUnit.Framework;
@@ -380,6 +381,41 @@ namespace Peach.Pro.Test.Core.WebServices
 				Assert.IsFalse(File.Exists(job.DatabasePath), "job.DatabasePath should not exist");
 				Assert.IsFalse(File.Exists(job.DebugLogPath), "job.DebugLogPath should not exist");
 			}
+		}
+
+		[Test]
+		public void TestPid()
+		{
+			// The pid should always be set to the pid of the process that controls
+			// the engine.  For the InternalJobMonitor it will be the same process
+			// as the engine, but for the ExternalJobMonitor it will be the process
+			// that manages the worker process.
+
+			int pid;
+			using (var p = Process.GetCurrentProcess())
+				pid = p.Id;
+
+			var jobRequest = new JobRequest();
+
+			var job = _monitor.Start(_tmp.Path, _tmp.Path, jobRequest);
+			Assert.IsNotNull(job);
+			Assert.IsTrue(WaitUntil(JobStatus.Running), "Timeout waiting for Running");
+
+			job = _monitor.GetJob();
+			Assert.IsNotNull(job);
+
+			Assert.AreEqual(pid, job.Pid);
+			Assert.GreaterOrEqual(job.HeartBeat, job.StartDate);
+
+			Assert.IsTrue(_monitor.Stop());
+			WaitForFinish();
+
+			job = _monitor.GetJob();
+			Assert.AreEqual(JobStatus.Stopped, job.Status);
+
+			job = _monitor.GetJob();
+			Assert.IsNotNull(job);
+			VerifyDatabase(job);
 		}
 	}
 
