@@ -167,7 +167,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					break;
 				case Variant.VariantType.ByteString:
 					ret.Type = VariantMessage.ValueType.Bytes;
-					ret.Value = v.ToString();
+					ret.Value = Convert.ToBase64String((byte[])v);
 					break;
 				case Variant.VariantType.Double:
 					ret.Type = VariantMessage.ValueType.Double;
@@ -183,7 +183,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					break;
 				case Variant.VariantType.String:
 					ret.Type = VariantMessage.ValueType.String;
-					ret.Value = v.ToString();
+					ret.Value = (string)v; // Must cast, .ToString() truncates!
 					break;
 				case Variant.VariantType.ULong:
 					ret.Type = VariantMessage.ValueType.Integer;
@@ -206,7 +206,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				//case VariantMessage.ValueType.Bool:
 				//	return new Variant(Convert.ToBoolean(msg.Value));
 				case VariantMessage.ValueType.Bytes:
-					return new Variant(Convert.FromBase64String((string)msg.Value));
+					return new Variant(Convert.FromBase64String(msg.Value));
 				case VariantMessage.ValueType.Double:
 					return new Variant(Convert.ToDouble(msg.Value));
 				case VariantMessage.ValueType.String:

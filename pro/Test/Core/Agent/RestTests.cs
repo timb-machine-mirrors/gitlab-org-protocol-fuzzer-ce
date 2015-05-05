@@ -291,6 +291,33 @@ namespace Peach.Pro.Test.Core.Agent
 
 			v = FromJsonString("");
 			Assert.Null(v);
+
+			// Verify long strings & byte arrays work
+			var longString = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+			longString += longString;
+			longString += longString;
+			longString += longString;
+
+			s = ToJsonString(new Variant(longString));
+			Assert.AreEqual("{{\"type\":\"string\",\"value\":\"{0}\"}}".Fmt(longString), s);
+			v = FromJsonString(s);
+			Assert.AreEqual(Variant.VariantType.String, v.GetVariantType());
+			Assert.AreEqual(longString, (string)v);
+
+			var longBuf = Encoding.ASCII.GetBytes(longString);
+			var base64 = Convert.ToBase64String(longBuf);
+
+			s = ToJsonString(new Variant(longBuf));
+			Assert.AreEqual("{{\"type\":\"bytes\",\"value\":\"{0}\"}}".Fmt(base64), s);
+			v = FromJsonString(s);
+			Assert.AreEqual(Variant.VariantType.BitStream, v.GetVariantType());
+			Assert.AreEqual(longBuf, ((BitwiseStream)v).ToArray());
+
+			s = ToJsonString(new Variant(new BitStream(longBuf)));
+			Assert.AreEqual("{{\"type\":\"bytes\",\"value\":\"{0}\"}}".Fmt(base64), s);
+			v = FromJsonString(s);
+			Assert.AreEqual(Variant.VariantType.BitStream, v.GetVariantType());
+			Assert.AreEqual(longBuf, ((BitwiseStream)v).ToArray());
 		}
 
 		[Test]
