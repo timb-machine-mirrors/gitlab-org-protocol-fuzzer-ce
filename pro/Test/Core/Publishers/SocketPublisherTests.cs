@@ -499,6 +499,50 @@ namespace Peach.Pro.Test.Core.Publishers
 		}
 
 		[Test]
+		[TestCase("RawV4")]
+		[TestCase("RawIPv4")]
+		public void RawTcp(string pub)
+		{
+			var xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='Data' value='Hello World' />
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM' />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM' />
+		<Publisher class='{0}'>
+			<Param name='Host' value='127.0.0.1' />
+			<Param name='Protocol' value='6' />
+		</Publisher>
+	</Test>
+</Peach>".Fmt(pub);
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var cfg = new RunConfiguration { singleIteration = true };
+			var e = new Engine(null);
+
+			if (Platform.GetOS() == Platform.OS.Windows)
+			{
+				var ex = Assert.Throws<PeachException>(() => e.startFuzzing(dom, cfg));
+				var msg = "The {0} publisher does not support the TCP protocol on windows.".Fmt(pub);
+				Assert.AreEqual(msg, ex.Message);
+			}
+			else
+			{
+				e.startFuzzing(dom, cfg);
+			}
+		}
+
+		[Test]
 		public void UdpNoPortRecv()
 		{
 			// If no 'Port' parameter is specified, the publisher should
