@@ -73,9 +73,11 @@ namespace Peach.Pro.Test.Core.Agent
 			Assert.NotNull(_server.Uri);
 
 			// use 127.0.0.1 as host to avoid DNS lookups
-			var ub = new UriBuilder(_server.Uri);
-			ub.Scheme = "tcp";
-			ub.Host = "127.0.0.1";
+			var ub = new UriBuilder(_server.Uri)
+			{
+				Scheme = "tcp", 
+				Host = "127.0.0.1"
+			};
 			_uri = ub.Uri;
 		}
 
@@ -235,31 +237,31 @@ namespace Peach.Pro.Test.Core.Agent
 		public void TestVariants()
 		{
 			var s = ToJsonString(new Variant(100));
-			Assert.AreEqual("{\"type\":\"integer\",\"value\":100}", s);
+			Assert.AreEqual("{\"type\":\"integer\",\"value\":\"100\"}", s);
 			var v = FromJsonString(s);
 			Assert.AreEqual(Variant.VariantType.Int, v.GetVariantType());
 			Assert.AreEqual(100, (int)v);
 
 			s = ToJsonString(new Variant(long.MinValue));
-			Assert.AreEqual("{\"type\":\"integer\",\"value\":-9223372036854775808}", s);
+			Assert.AreEqual("{\"type\":\"integer\",\"value\":\"-9223372036854775808\"}", s);
 			v = FromJsonString(s);
 			Assert.AreEqual(Variant.VariantType.Long, v.GetVariantType());
 			Assert.AreEqual(long.MinValue, (long)v);
 
 			s = ToJsonString(new Variant(long.MaxValue));
-			Assert.AreEqual("{\"type\":\"integer\",\"value\":9223372036854775807}", s);
+			Assert.AreEqual("{\"type\":\"integer\",\"value\":\"9223372036854775807\"}", s);
 			v = FromJsonString(s);
 			Assert.AreEqual(Variant.VariantType.Long, v.GetVariantType());
 			Assert.AreEqual(long.MaxValue, (long)v);
 
 			s = ToJsonString(new Variant(ulong.MaxValue));
-			Assert.AreEqual("{\"type\":\"integer\",\"value\":18446744073709551615}", s);
+			Assert.AreEqual("{\"type\":\"integer\",\"value\":\"18446744073709551615\"}", s);
 			v = FromJsonString(s);
 			Assert.AreEqual(Variant.VariantType.ULong, v.GetVariantType());
 			Assert.AreEqual(ulong.MaxValue, (ulong)v);
 
 			s = ToJsonString(new Variant(1.1));
-			Assert.AreEqual("{\"type\":\"double\",\"value\":1.1}", s);
+			Assert.AreEqual("{\"type\":\"double\",\"value\":\"1.1\"}", s);
 			v = FromJsonString(s);
 			Assert.AreEqual(Variant.VariantType.Double, v.GetVariantType());
 			Assert.AreEqual(1.1, (double)v);

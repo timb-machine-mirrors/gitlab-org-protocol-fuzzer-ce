@@ -162,7 +162,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		public ValueType Type { get; set; }
 
 		[JsonProperty("value")]
-		public object Value { get; set; }
+		public string Value { get; set; }
 	}
 
 	internal class SetPropertyRequest : VariantMessage
