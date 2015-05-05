@@ -186,7 +186,7 @@ namespace Peach.Pro.Core.Loggers
 					_job.Status = JobStatus.Running;
 
 					// Start date is set when job record initially constructed
-					Debug.Assert(_job.StartDate != null);
+					Debug.Assert(_job.StartDate != DateTime.MinValue);
 
 					db.InsertJob(_job);
 				}
