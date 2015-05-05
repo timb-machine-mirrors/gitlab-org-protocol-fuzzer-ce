@@ -11,11 +11,13 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Monitor("Null")]
 	[Description("A monitor that does reports no faults and optionally logs events to a file.")]
 	[Parameter("LogFile", typeof(string), "Log monitor events to the specified file.", "")]
+	[Parameter("OnCall", typeof(string), "Send message to monitor.", "")]
 	[Parameter("UseNLog", typeof(bool), "Log monitor events to NLog.", "false")]
 	public class NullMonitor : Monitor
 	{
 		public string LogFile { get; set; }
 		public bool UseNLog { get; set; }
+		public string OnCall { get; set; }
 
 		void Log(string msg, params object[] args)
 		{
