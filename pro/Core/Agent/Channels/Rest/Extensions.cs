@@ -159,35 +159,35 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 					bs.SeekBits(pos, SeekOrigin.Begin);
 
 					ret.Type = VariantMessage.ValueType.Bytes;
-					ret.Value = buf;
+					ret.Value = Convert.ToBase64String(buf);
 					break;
 				case Variant.VariantType.Boolean:
 					ret.Type = VariantMessage.ValueType.Bool;
-					ret.Value = (bool)v;
+					ret.Value = v.ToString();
 					break;
 				case Variant.VariantType.ByteString:
 					ret.Type = VariantMessage.ValueType.Bytes;
-					ret.Value = (byte[])v;
+					ret.Value = v.ToString();
 					break;
 				case Variant.VariantType.Double:
 					ret.Type = VariantMessage.ValueType.Double;
-					ret.Value = (double)v;
+					ret.Value = v.ToString();
 					break;
 				case Variant.VariantType.Int:
 					ret.Type = VariantMessage.ValueType.Integer;
-					ret.Value = (int)v;
+					ret.Value = v.ToString();
 					break;
 				case Variant.VariantType.Long:
 					ret.Type = VariantMessage.ValueType.Integer;
-					ret.Value = (long)v;
+					ret.Value = v.ToString();
 					break;
 				case Variant.VariantType.String:
 					ret.Type = VariantMessage.ValueType.String;
-					ret.Value = (string)v;
+					ret.Value = v.ToString();
 					break;
 				case Variant.VariantType.ULong:
 					ret.Type = VariantMessage.ValueType.Integer;
-					ret.Value = (ulong)v;
+					ret.Value = v.ToString();
 					break;
 				default:
 					throw new NotSupportedException("Unable to convert variant type '{0}' to JSON.".Fmt(type));
@@ -212,22 +212,16 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				case VariantMessage.ValueType.String:
 					return new Variant(Convert.ToString(msg.Value));
 				case VariantMessage.ValueType.Integer:
-					if (msg.Value is BigInteger)
-					{
-						var bi = (BigInteger)msg.Value;
-						if (bi < long.MinValue)
-							throw new NotSupportedException("Unable to convert JSON integer value to a variant, the value is less than the minimum value of a long.");
-						if (bi > ulong.MaxValue)
-							throw new NotSupportedException("Unable to convert JSON integer value to a variant, the value is greater than the maximum value of an unsigned long.");
+					var bi = BigInteger.Parse(msg.Value);
+					if (bi < long.MinValue)
+						throw new NotSupportedException("Unable to convert JSON integer value to a variant, the value is less than the minimum value of a long.");
+					if (bi > ulong.MaxValue)
+						throw new NotSupportedException("Unable to convert JSON integer value to a variant, the value is greater than the maximum value of an unsigned long.");
+					if (bi > long.MaxValue)
 						return new Variant((ulong)bi);
-					}
-
-					var asLong = (long)msg.Value;
-
-					if (asLong < int.MinValue || asLong > int.MaxValue)
-						return new Variant(asLong);
-
-					return new Variant((int)asLong);
+					if (bi < int.MinValue || bi > int.MaxValue)
+						return new Variant((long)bi);
+					return new Variant((int)bi);
 				default:
 					throw new NotSupportedException("Unable to convert JSON value type '{0}' to a variant.".Fmt(msg.Type));
 			}
