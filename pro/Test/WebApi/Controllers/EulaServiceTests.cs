@@ -1,11 +1,13 @@
 using Nancy;
 using Nancy.Testing;
 using NUnit.Framework;
+using Peach.Core.Test;
 using Peach.Pro.WebApi;
 
 namespace Peach.Pro.Test.WebApi.Controllers
 {
 	[TestFixture]
+	[Quick]
 	class EulaServiceTests
 	{
 		[Test]
