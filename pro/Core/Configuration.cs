@@ -12,9 +12,14 @@ namespace Peach.Pro.Core
 
 		static Configuration()
 		{
+			//var logRoot = UserConfig.Get<string>(UserConfig.LogRoot, Utilities.GetAppResourcePath("Logs"));
+
+			//UserConfig.Set<bool>("EulaAccepted");
+
+
 			var config = Utilities.GetUserConfig();
-			var path = 
-				config.AppSettings.Settings.Get("LogRoot") ?? 
+			var path =
+				config.AppSettings.Settings.Get("LogRoot") ??
 				Utilities.GetAppResourcePath("Logs");
 			LogRoot = Path.GetFullPath(path);
 		}

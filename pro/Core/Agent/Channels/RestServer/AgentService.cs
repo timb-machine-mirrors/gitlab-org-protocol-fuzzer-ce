@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if DISABLED
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Nancy;
@@ -8,7 +9,6 @@ using Peach.Core.Agent;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
-#if DISABLED
 
 namespace Peach.Pro.Core.Agent.Channels.RestServer
 {
@@ -271,7 +271,7 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 			return HttpStatusCode.OK;
 		}
 
-		#region Publisher
+#region Publisher
 
 		string StreamToString(Stream stream)
 		{
@@ -392,7 +392,7 @@ namespace Peach.Pro.Core.Agent.Channels.RestServer
 			return HttpStatusCode.OK;
 		}
 
-		#region Stream
+#region Stream
 
 		object PublisherRead()
 		{

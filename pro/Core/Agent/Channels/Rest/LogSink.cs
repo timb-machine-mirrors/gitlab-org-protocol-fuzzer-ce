@@ -33,7 +33,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		{
 			if (reader.TokenType == JsonToken.None)
 				return null;
-
+			// { "foo":12345 }
 			var name = (string)serializer.Deserialize(reader, typeof(string));
 
 			return LogLevel.FromString(name);

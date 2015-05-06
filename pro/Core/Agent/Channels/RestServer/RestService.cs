@@ -1,7 +1,7 @@
-﻿using System;
+﻿#if DISABLED
+using System;
 using Nancy;
 
-#if DISABLED
 
 namespace Peach.Pro.Core.Agent.Channels.RestServer
 {

@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
+//using System.Diagnostics;
+//using System.IO;
 using System.Linq;
 using System.Reflection;
 using NLog;
@@ -9,12 +9,12 @@ using NLog.Config;
 using NLog.Targets;
 using NUnit.Framework;
 using Peach.Core;
-using Peach.Pro.Core;
-using Peach.Pro.Core.Runtime;
+//using Peach.Pro.Core;
+//using Peach.Pro.Core.Runtime;
 using Peach.Core.Test;
 using NLog.Targets.Wrappers;
 
-namespace Peach.Pro.Test.Core
+namespace Peach.Pro.Test.WebApi
 {
 	class AssertTestFail : AssertWriter
 	{
@@ -27,16 +27,7 @@ namespace Peach.Pro.Test.Core
 	[SetUpFixture]
 	class TestBase
 	{
-		TempDirectory _tmpDir;
-
-		public static ushort MakePort(ushort min, ushort max)
-		{
-			var pid = Process.GetCurrentProcess().Id;
-			var seed = Environment.TickCount * pid;
-			var rng = new Peach.Core.Random((uint)seed);
-			var ret = (ushort)rng.Next(min, max);
-			return ret;
-		}
+		//TempDirectory _tmpDir;
 
 		[SetUp]
 		public void Initialize()
@@ -64,44 +55,16 @@ namespace Peach.Pro.Test.Core
 				LogManager.Configuration = config;
 			}
 
-			Program.LoadPlatformAssembly();
+			//Program.LoadPlatformAssembly();
 
-			_tmpDir = new TempDirectory();
-			Configuration.LogRoot = _tmpDir.Path;
+			//_tmpDir = new TempDirectory();
+			//Configuration.LogRoot = _tmpDir.Path;
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
-			_tmpDir.Dispose();
-		}
-	
-		public static MemoryStream LoadResource(string name)
-		{
-			var asm = Assembly.GetExecutingAssembly();
-			var fullName = "Peach.Pro.Test.Core.Resources." + name;
-			using (var stream = asm.GetManifestResourceStream(fullName))
-			{
-				var ms = new MemoryStream();
-				stream.CopyTo(ms);
-				return ms;
-			}
-		}
-	}
-	
-	[TestFixture]
-	[Quick]
-	[Peach]
-	class AssertTest
-	{
-		[Test]
-		public void TestAssert()
-		{
-#if DEBUG
-			Assert.Throws<AssertionException>(() => Debug.Assert(false));
-#else
-			Debug.Assert(false);
-#endif
+			//_tmpDir.Dispose();
 		}
 	}
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if DISABLED
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -20,7 +21,6 @@ using Newtonsoft.Json.Serialization;
 using Peach.Core.Agent;
 using Peach.Pro.Core.Runtime;
 
-#if DISABLED
 
 namespace Peach.Pro.Core.Agent.Channels.RestServer
 {
