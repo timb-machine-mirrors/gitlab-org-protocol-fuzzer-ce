@@ -14,7 +14,7 @@ namespace Peach.Pro.Test.Core.WebServices
 	[TestFixture]
 	[Quick]
 	[Peach]
-	public class JsonToPit
+	class JsonToPit
 	{
 		[Test]
 		public void Test()
@@ -265,70 +265,18 @@ namespace Peach.Pro.Test.Core.WebServices
 
 		public class IntMember
 		{
-			public string Value { get; set; }
-		}
-
-		class MyJsonReader : JsonTextReader
-		{
-			public MyJsonReader(TextReader rdr)
-				: base(rdr)
-			{
-			}
-
-			public override string ReadAsString()
-			{
-				return base.ReadAsString();
-			}
-
-			public override int? ReadAsInt32()
-			{
-				return base.ReadAsInt32();
-			}
+			public int Value { get; set; }
 		}
 
 		[Test]
 		public void JsonInt()
 		{
-			var json = " { \"Value\":500 }";
-			//var obj = JsonConvert.DeserializeObject<IntMember>(json);
+			const string json = " { \"Value\":500 }";
 
-			var s = new JsonSerializer();
-			var rdr = new MyJsonReader(new StringReader(json));
-			var obj = s.Deserialize(rdr, typeof(IntMember)) as IntMember;
+			var obj = JsonConvert.DeserializeObject<IntMember>(json);
 
 			Assert.NotNull(obj);
 			Assert.AreEqual("500", obj.Value);
-		}
-
-		[Test]
-		public void MultipleServers()
-		{
-			var listener = new TcpListener(IPAddress.Any, 0);
-
-			try
-			{
-				listener.Start();
-				var port = ((IPEndPoint)listener.LocalEndpoint).Port;
-				Assert.AreNotEqual(0, port);
-
-				//using (var web = new WebServer("", new InternalJobMonitor()))
-				//{
-				//	web.Start("localhost", port);
-
-				//	var actualPort = web.Uri.Port;
-				//	Assert.Greater(actualPort, port);
-
-				//	using (var web2 = new WebServer("", new InternalJobMonitor()))
-				//	{
-				//		web2.Start("localhost", actualPort);
-				//		Assert.Greater(web2.Uri.Port, actualPort);
-				//	}
-				//}
-			}
-			finally
-			{
-				listener.Stop();
-			}
 		}
 	}
 }
