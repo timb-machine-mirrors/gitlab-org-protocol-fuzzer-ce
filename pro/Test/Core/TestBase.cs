@@ -14,7 +14,6 @@ using Peach.Pro.Core.Runtime;
 using Peach.Core.Test;
 using NLog.Targets.Wrappers;
 
-// ReSharper disable once CheckNamespace (required for NUnit SetupFixture)
 namespace Peach.Pro.Test.Core
 {
 	class AssertTestFail : AssertWriter

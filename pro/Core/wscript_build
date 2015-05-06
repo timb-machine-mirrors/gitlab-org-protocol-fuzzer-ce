@@ -43,14 +43,6 @@ deps = [
 	'Peach.Core.dll',
 	'Godel.Core.dll',
 
-	'Nancy.dll',
-	'Nancy.Metadata.Modules.dll',
-	'Nancy.Hosting.Self.dll',
-	'Nancy.Serialization.JsonNet.dll',
-#	'Nancy.Swagger.Annotations.dll',
-#	'Nancy.Swagger.dll',
-#	'Swagger.ObjectModel.dll',
-
 	'Managed.Adb.dll',
 	'BouncyCastle.Crypto.dll',
 	'aardvark_net.dll',
