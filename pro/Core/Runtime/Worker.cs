@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using NLog;
 using NLog.Config;
@@ -150,7 +151,10 @@ namespace Peach.Pro.Core.Runtime
 			}
 
 			var runner = new JobRunner(job, _pitLibraryPath, pitFile);
-			var engineTask = Task.Factory.StartNew(runner.Run);
+			var evtReady = new AutoResetEvent(false);
+			var engineTask = Task.Factory.StartNew(() => runner.Run(evtReady));
+			if (!evtReady.WaitOne(1000))
+				throw new PeachException("Timeout waiting for job to start");
 			Loop(runner, engineTask);
 		}
 

@@ -7,8 +7,10 @@ using Dapper;
 
 namespace Peach.Pro.Core.Storage
 {
-	public class JobResolver
+	public class JobHelper
 	{
+		static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
 		/// <summary>
 		/// refresh job status from NodeDatabase or JobDatabase
 		/// 1. Use NodeDatabase if LogPath is not set
@@ -24,13 +26,17 @@ namespace Peach.Pro.Core.Storage
 			{
 				job = db.GetJob(id);
 				if (job == null)
+				{
+					Logger.Trace("Job does not exist in NodeDatabase");
 					return null;
+				}
 
 				if (job.DatabasePath == null)
 					return job;
 
 				if (!File.Exists(job.DatabasePath))
 				{
+					Logger.Trace("DatabasePath is invalid, deleting job");
 					db.DeleteJob(id);
 					return null;
 				}
@@ -40,10 +46,52 @@ namespace Peach.Pro.Core.Storage
 			{
 				job = db.GetJob(id);
 				if (job == null)
+				{
+					Logger.Trace("Job does not exist in JobDatabase");
 					return null;
+				}
 			}
 
 			return job;
+		}
+
+		public static void Fail(
+			Guid id,
+			Func<NodeDatabase, IEnumerable<TestEvent>> getEvents,
+			string message)
+		{
+			var job = GetJob(id);
+			if (job == null)
+				return;
+
+			using (var db = new NodeDatabase())
+			{
+				var events = getEvents(db).ToList();
+				foreach (var testEvent in events)
+				{
+					if (testEvent.Status == TestStatus.Active)
+					{
+						testEvent.Status = TestStatus.Fail;
+						testEvent.Resolve = message;
+					}
+				}
+
+				job.StopDate = DateTime.UtcNow;
+				job.Mode = JobMode.Fuzzing;
+				job.Status = JobStatus.Stopped;
+				job.Result = message;
+
+				db.UpdateJob(job);
+				db.UpdateTestEvents(events);
+			}
+
+			if (File.Exists(job.DatabasePath))
+			{
+				using (var db = new JobDatabase(job.DatabasePath))
+				{
+					db.UpdateJob(job);
+				}
+			}
 		}
 	}
 

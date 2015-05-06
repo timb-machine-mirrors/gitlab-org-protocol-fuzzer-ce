@@ -241,7 +241,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 			var liveJob = JobMonitor.GetJob();
 
-			var job = JobResolver.GetJob(id);
+			var job = JobHelper.GetJob(id);
 			if (job == null)
 				return HttpStatusCode.NotFound;
 

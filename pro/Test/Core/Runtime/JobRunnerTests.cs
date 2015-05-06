@@ -90,18 +90,19 @@ namespace Peach.Pro.Test.Core.Runtime
 		{
 			Job _job;
 			public JobRunner JobRunner { get; private set; }
-			Thread _thread;
-			Exception _caught = null;
+			readonly Thread _thread;
+			Exception _caught;
 
 			public SafeRunner(string xmlFile, JobRequest jobRequest)
 			{
+				var evtReady = new AutoResetEvent(false);
 				_job = new Job(jobRequest, xmlFile);
 				JobRunner = new JobRunner(_job, "", xmlFile);
 				_thread = new Thread(() =>
 				{
 					try
 					{
-						JobRunner.Run();
+						JobRunner.Run(evtReady);
 					}
 					catch (ThreadAbortException ex)
 					{
@@ -114,6 +115,8 @@ namespace Peach.Pro.Test.Core.Runtime
 					}
 				});
 				_thread.Start();
+				if (!evtReady.WaitOne(1000))
+					throw new PeachException("Timeout waiting for job to start");
 			}
 
 			public Guid Id { get { return _job.Guid; } }

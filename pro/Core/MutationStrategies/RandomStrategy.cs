@@ -248,6 +248,10 @@ namespace Peach.Pro.Core.MutationStrategies
 				maxFieldsToMutate = int.Parse((string)args["MaxFieldsToMutate"]);
 			if (args.ContainsKey("StateMutation"))
 				stateMutations = bool.Parse((string)args["StateMutation"]);
+
+			mutationScopeGlobal = new MutationScope("All");
+			mutationScopeState = new List<MutationScope>();
+			mutationScopeAction = new List<MutationScope>();
 		}
 
 		#region Mutation Strategy Overrides
