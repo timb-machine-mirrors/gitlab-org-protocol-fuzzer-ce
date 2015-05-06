@@ -25,6 +25,7 @@ subdirs = [
 	'Test/OS/OSX',
 	'Test/OS/Windows',
 	'Test/PitTester',
+	'Test/WebApi',
 	'Validator',
 	'Web',
 	'WebApi',
