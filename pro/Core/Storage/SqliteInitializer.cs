@@ -19,21 +19,13 @@ namespace Peach.Pro.Core.Storage
 		{
 			using (var xact = cnn.BeginTransaction())
 			{
-				try
-				{
-					if (types != null)
-						CreateDatabase(cnn, types);
+				if (types != null)
+					CreateDatabase(cnn, types);
 
-					if (scripts != null)
-						scripts.ForEach(x => cnn.Execute(x));
+				if (scripts != null)
+					scripts.ForEach(x => cnn.Execute(x));
 
-					xact.Commit();
-				}
-				catch (Exception)
-				{
-					xact.Rollback();
-					throw;
-				}
+				xact.Commit();
 			}
 		}
 

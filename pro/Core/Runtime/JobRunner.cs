@@ -11,6 +11,7 @@ using Peach.Pro.Core.WebServices.Models;
 using Godel.Core;
 using Peach.Pro.Core.WebServices;
 using NLog;
+using Action = System.Action;
 
 namespace Peach.Pro.Core.Runtime
 {
@@ -23,6 +24,8 @@ namespace Peach.Pro.Core.Runtime
 		readonly RunConfiguration _config;
 		readonly string _pitLibraryPath;
 		bool _shouldStop;
+		Engine _engine;
+		Thread _currentThread;
 
 		const string DefinedValues = "DefinedValues";
 
@@ -56,11 +59,15 @@ namespace Peach.Pro.Core.Runtime
 			}
 		}
 
-		public void Run()
+		public void Run(EventWaitHandle evtReady)
 		{
 			try
 			{
+				_currentThread = Thread.CurrentThread;
+
 				_jobLogger.Initialize(_config);
+
+				evtReady.Set();
 
 				var dom = ParsePit();
 
@@ -76,26 +83,32 @@ namespace Peach.Pro.Core.Runtime
 					test.loggers.Remove(userLogger);
 				}
 
-				var engine = new Engine(_jobLogger);
-
-				engine.startFuzzing(dom, _config);
+				_engine = new Engine(_jobLogger);
+				_engine.startFuzzing(dom, _config);
+			}
+			catch (ThreadAbortException)
+			{
+				Thread.ResetAbort();
+				Logger.Trace("Thread aborted");
+				_jobLogger.JobFail(_config.id, "Job killed.");
 			}
 			catch (ApplicationException ex) // PeachException or SoftException
 			{
 				if (Configuration.LogLevel == LogLevel.Trace)
-					Logger.Error("Exception: {0}", ex);
+					Logger.Error("Exception: {0}".Fmt(ex));
 				else
 					Logger.Error("Exception: {0}", ex.Message);
-				_jobLogger.JobFail(_config.id, ex);
+				_jobLogger.JobFail(_config.id, ex.Message);
 			}
 			catch (Exception ex)
 			{
-				Logger.Error("Unhandled Exception: {0}", ex);
-				_jobLogger.JobFail(_config.id, ex);
+				Logger.Error("Unhandled Exception: {0}".Fmt(ex));
+				_jobLogger.JobFail(_config.id, ex.Message);
 				throw;
 			}
 			finally
 			{
+				Logger.Trace("Flush Logs");
 				LogManager.Flush();
 			}
 		}
@@ -129,6 +142,22 @@ namespace Peach.Pro.Core.Runtime
 			_pausedEvt.Set();
 		}
 
+		public void Abort()
+		{
+			Logger.Trace(">>> Abort");
+			if (_engine != null)
+			{
+				_engine.Abort();
+			}
+			else
+			{
+				// this happens if pit parsing hangs...
+				_currentThread.Abort();
+				_currentThread.Join();
+			}
+			Logger.Trace("<<< Abort");
+		}
+
 		Dictionary<string, object> ParseConfig()
 		{
 			var args = new Dictionary<string, object>();
@@ -141,7 +170,7 @@ namespace Peach.Pro.Core.Runtime
 				{
 					try
 					{
-						_jobLogger.AddEvent(db, 
+						_jobLogger.AddEvent(db,
 							_config.id,
 							"Loading pit config", "Loading configuration file '{0}'".Fmt(pitConfig));
 
@@ -174,7 +203,7 @@ namespace Peach.Pro.Core.Runtime
 
 			using (var db = new NodeDatabase())
 			{
-				_jobLogger.AddEvent(db, 
+				_jobLogger.AddEvent(db,
 					_config.id,
 					"Loading pit file", "Loading pit file '{0}'".Fmt(_config.pitFile));
 

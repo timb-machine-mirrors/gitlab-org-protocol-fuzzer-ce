@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using Peach.Core;
 using Peach.Pro.Core.Runtime;
 using Peach.Pro.Core.WebServices.Models;
@@ -40,10 +39,13 @@ namespace Peach.Pro.Core.WebServices
 			lock (this)
 			{
 				if (!_guid.HasValue)
+				{
+					Logger.Trace("Job not started yet");
 					return null;
+				}
 			}
 
-			return JobResolver.GetJob(_guid.Value);
+			return JobHelper.GetJob(_guid.Value);
 		}
 
 		public Job Start(string pitLibraryPath, string pitFile, JobRequest jobRequest)
@@ -67,47 +69,6 @@ namespace Peach.Pro.Core.WebServices
 
 		protected abstract void OnStart(Job job);
 		protected abstract bool IsRunning { get; }
-
-		protected void JobFail(Exception ex)
-		{
-			Logger.Trace(">>> JobFail");
-
-			var job = GetJob();
-			if (job == null)
-			{
-				Logger.Trace("<<< JobFail (job == null)");
-				return;
-			}
-
-			job.Status = JobStatus.Stopped;
-			job.Result = ex.Message;
-
-			using (var db = new NodeDatabase())
-			{
-				var events = db.GetTestEventsByJob(job.Guid).ToList();
-				foreach (var testEvent in events)
-				{
-					if (testEvent.Status == TestStatus.Active)
-					{
-						testEvent.Status = TestStatus.Fail;
-						testEvent.Resolve = ex.Message;
-					}
-				}
-
-				db.UpdateTestEvents(events);
-				db.UpdateJob(job);
-			}
-
-			if (File.Exists(job.DatabasePath))
-			{
-				using (var db = new JobDatabase(job.DatabasePath))
-				{
-					db.UpdateJob(job);
-				}
-			}
-
-			Logger.Trace("<<< JobFail");
-		}
 	}
 
 	public class InternalJobMonitor : BaseJobMonitor, IJobMonitor
@@ -164,7 +125,7 @@ namespace Peach.Pro.Core.WebServices
 				}
 
 				Logger.Trace("Abort");
-				_thread.Abort();
+				_runner.Abort();
 
 				Logger.Trace("<<< Kill");
 				return true;
@@ -186,34 +147,21 @@ namespace Peach.Pro.Core.WebServices
 
 		protected override void OnStart(Job job)
 		{
+			var evtReady = new AutoResetEvent(false);
 			_runner = new JobRunner(job, _pitLibraryPath, _pitFile);
 			_thread = new Thread(() =>
 			{
-				try
-				{
-					_runner.Run();
-				}
-				catch (ThreadAbortException ex)
-				{
-					Thread.ResetAbort();
-					JobFail(ex);
-				}
-				catch (Exception ex)
-				{
-					JobFail(ex);
-				}
-				finally
-				{
-					lock (this)
-					{
-						_runner = null;
-					}
+				_runner.Run(evtReady);
 
-					if (InternalEvent != null)
-						InternalEvent(this, EventArgs.Empty);
-				}
+				Logger.Trace("runner.Run() done");
+				_runner = null;
+
+				if (InternalEvent != null)
+					InternalEvent(this, EventArgs.Empty);
 			});
 			_thread.Start();
+			if (!evtReady.WaitOne(1000))
+				throw new PeachException("Timeout waiting for job to start");
 		}
 	}
 
@@ -429,6 +377,17 @@ namespace Peach.Pro.Core.WebServices
 					OnStart(job);
 				}
 			}
+		}
+		
+		void JobFail(Exception ex)
+		{
+			lock (this)
+			{
+				if (!_guid.HasValue)
+					return;
+			}
+
+			JobHelper.Fail(_guid.Value, db => db.GetTestEventsByJob(_guid.Value), ex.Message);
 		}
 
 		void FinishJob()

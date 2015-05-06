@@ -3,22 +3,6 @@ using Peach.Pro.Core.Storage;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
-	public static class DateTimeExtensions
-	{
-		// This hack is due to Dapper not being savvy about DateTime kinds:
-		// http://stackoverflow.com/questions/12510299/get-datetime-as-utc-with-dapper
-		public static DateTime MakeUtc(this DateTime value)
-		{
-			switch (value.Kind)
-			{
-				case DateTimeKind.Unspecified:
-				case DateTimeKind.Local:
-					return TimeZoneInfo.ConvertTimeToUtc(value);
-			}
-			return value;
-		}
-	}
-
 	[Table("ViewFaultTimeline")]
 	public class FaultTimelineMetric
 	{

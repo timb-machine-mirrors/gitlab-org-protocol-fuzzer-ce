@@ -35,6 +35,7 @@ using Peach.Core.Agent;
 using Peach.Core.Dom;
 
 using NLog;
+using Monitor = System.Threading.Monitor;
 
 namespace Peach.Core
 {
@@ -54,6 +55,7 @@ namespace Peach.Core
 
 		private readonly Watcher _watcher;
 		private readonly RunContext _context;
+		private readonly Thread _currentThread;
 
 		//public Dom.Dom dom { get { return runContext.dom; } }
 		//public Test test  { get { return runContext.test; } }
@@ -204,6 +206,7 @@ namespace Peach.Core
 
 		public Engine(Watcher watcher)
 		{
+			_currentThread = Thread.CurrentThread;
 			_watcher = watcher;
 			_context = new RunContext
 			{
@@ -256,12 +259,23 @@ namespace Peach.Core
 
 				try
 				{
-					StartTest();
+					try
+					{
+						StartTest();
 
-					RunTest();
+						RunTest();
+					}
+					finally
+					{
+						logger.Trace("finally Enter");
+						Monitor.Enter(this);
+						logger.Trace("finally Lock Acquired");
+					}
 				}
 				catch (ThreadAbortException)
 				{
+					logger.Trace("ResetAbort()");
+					Thread.ResetAbort();
 				}
 				catch (Exception ex)
 				{
@@ -275,9 +289,11 @@ namespace Peach.Core
 			}
 			finally
 			{
+				logger.Trace("Finalize loggers");
 				foreach (var item in test.loggers)
 					item.Finalize(this, _context);
 
+				logger.Trace("Finalize watcher");
 				if (_watcher != null)
 					_watcher.Finalize(this, _context);
 
@@ -286,6 +302,25 @@ namespace Peach.Core
 				_context.test = null;
 				_context.config = null;
 			}
+		}
+
+		public void Abort()
+		{
+			logger.Trace(">>> Abort");
+			
+			if (Monitor.TryEnter(this))
+			{
+				logger.Trace("Abort> Acquired Lock");
+				_currentThread.Abort();
+
+				logger.Trace("Abort> Release Lock");
+				Monitor.Exit(this);
+			}
+
+			logger.Trace("Join");
+			_currentThread.Join();
+
+			logger.Trace("<<< Abort");
 		}
 
 		protected void StartTest()
@@ -500,7 +535,6 @@ namespace Peach.Core
 						context.agentManager.IterationFinished();
 
 						OnIterationFinished(iterationCount);
-
 					}
 
 					CollectControlFaults();

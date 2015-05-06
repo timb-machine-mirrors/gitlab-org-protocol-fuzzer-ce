@@ -16,6 +16,7 @@ using NLog.Config;
 using NLog;
 using NLog.Targets;
 using NLog.Targets.Wrappers;
+using Random = System.Random;
 
 namespace Peach.Pro.Test.Core.WebServices
 {
@@ -72,16 +73,24 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.IsTrue(_doneEvt.WaitOne(TimeSpan.FromSeconds(20)), "Timeout waiting for job to finish");
 		}
 
-		protected void VerifyDatabase(Job job)
+		protected void VerifyDatabase(Job job, bool required = true)
 		{
 			using (var db = new NodeDatabase())
 			{
 				Assert.IsNotNull(db.GetJob(job.Guid));
 			}
 
-			using (var db = new JobDatabase(job.DatabasePath))
+			if (required)
 			{
-				Assert.IsNotNull(db.GetJob(job.Guid));
+				Assert.IsTrue(File.Exists(job.DatabasePath));
+			}
+
+			if (File.Exists(job.DatabasePath))
+			{
+				using (var db = new JobDatabase(job.DatabasePath))
+				{
+					Assert.IsNotNull(db.GetJob(job.Guid));
+				}
 			}
 		}
 	}
@@ -116,11 +125,13 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			_doneEvt = new ManualResetEvent(false);
 
-			_monitor = new T();
-			_monitor.InternalEvent = (s, a) =>
+			_monitor = new T
 			{
-				Logger.Trace("InternalEvent");
-				_doneEvt.Set();
+				InternalEvent = (s, a) =>
+				{
+					Logger.Trace("InternalEvent");
+					_doneEvt.Set();
+				}
 			};
 
 			_tmp = new TempFile();
@@ -170,24 +181,29 @@ namespace Peach.Pro.Test.Core.WebServices
 		}
 
 		[Test]
+		[Repeat(10)]
 		public void TestStop()
 		{
 			var jobRequest = new JobRequest();
 
 			var job = _monitor.Start(_tmp.Path, _tmp.Path, jobRequest);
 			Assert.IsNotNull(job);
-			Assert.IsTrue(WaitUntil(JobStatus.Running), "Timeout waiting for Running");
 
 			job = _monitor.GetJob();
 			Assert.IsNotNull(job);
 
-			Assert.IsTrue(_monitor.Stop());
+			var duration = new Random().Next(1000);
+			Logger.Trace("Sleep: {0}ms", duration);
+			Thread.Sleep(duration);
+
+			_monitor.Stop();
+
 			WaitForFinish();
 
 			job = _monitor.GetJob();
 			Assert.AreEqual(JobStatus.Stopped, job.Status);
 
-			VerifyDatabase(job);
+			VerifyDatabase(job, false);
 		}
 
 		[Test]
@@ -224,26 +240,32 @@ namespace Peach.Pro.Test.Core.WebServices
 		}
 
 		[Test]
+		[Repeat(30)]
 		public void TestKill()
 		{
-			Configuration.LogLevel = NLog.LogLevel.Trace;
+			Configuration.LogLevel = LogLevel.Trace;
+			Logger.Trace("TestKill");
 
 			var jobRequest = new JobRequest();
 
 			var job = _monitor.Start(_tmp.Path, _tmp.Path, jobRequest);
 			Assert.IsNotNull(job);
-			Assert.IsTrue(WaitUntil(JobStatus.Running), "Timeout waiting for Running");
 
 			job = _monitor.GetJob();
 			Assert.IsNotNull(job);
+
+			var duration = new Random().Next(1000);
+			Logger.Trace("Sleep: {0}ms", duration);
+			Thread.Sleep(duration);
 
 			Assert.IsTrue(_monitor.Kill());
 			WaitForFinish();
 
 			job = _monitor.GetJob();
+			Assert.IsNotNull(job);
 			Assert.AreEqual(JobStatus.Stopped, job.Status);
 
-			VerifyDatabase(job);
+			VerifyDatabase(job, false);
 		}
 
 		[Test]

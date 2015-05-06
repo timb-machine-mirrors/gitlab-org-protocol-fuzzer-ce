@@ -30,6 +30,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Newtonsoft.Json;
 using NLog;
 using NLog.Config;
@@ -158,57 +159,26 @@ namespace Peach.Pro.Core.Loggers
 
 		protected override void Engine_TestStarting(RunContext context)
 		{
+			Logger.Trace(">>> Engine_TestStarting");
+
 			Debug.Assert(_log == null);
 
 			using (var db = new NodeDatabase())
 			{
-				_job = db.GetJob(context.config.id);
-				if (_job == null)
-					_job = new Job(context.config);
+				_job = db.GetJob(context.config.id) ?? new Job(context.config);
 			}
 
-			if (_job.DatabasePath == null)
+
+			// we need to ensure that the JobDatabase gets fully initialized
+			// so that by the time we get to Engine_TestFinished,
+			// we aren't in any half-initialized states.
+			try
 			{
-				_job.LogPath = GetLogPath(context, BasePath);
-				if (!Directory.Exists(_job.LogPath))
-					Directory.CreateDirectory(_job.LogPath);
+				InitializeJobDatabase(context, true);
 			}
-
-			ConfigureDebugLogging(context.config);
-
-			using (var db = new JobDatabase(_job.DatabasePath))
+			catch (ThreadAbortException)
 			{
-				var job = db.GetJob(_job.Guid);
-				if (job == null)
-				{
-					_job.Seed = context.config.randomSeed;
-					_job.Mode = JobMode.Fuzzing;
-					_job.Status = JobStatus.Running;
-
-					// Start date is set when job record initially constructed
-					Debug.Assert(_job.StartDate != DateTime.MinValue);
-
-					db.InsertJob(_job);
-				}
-				else
-				{
-					_job = job;
-				}
-			}
-
-			_cache = new MetricsCache(_job.DatabasePath);
-
-			using (var db = new NodeDatabase())
-			{
-				AddEvent(db,
-					context.config.id,
-					"Starting fuzzing engine",
-					"Starting fuzzing engine");
-
-				// Before we get iteration start, we will get AgentConnect & SessionStart
-				_agentConnect = 0;
-
-				db.UpdateJob(_job);
+				InitializeJobDatabase(context, false);
 			}
 
 			_log = File.CreateText(Path.Combine(_job.LogPath, "status.txt"));
@@ -227,6 +197,64 @@ namespace Peach.Pro.Core.Loggers
 			_log.WriteLine("");
 
 			_log.Flush();
+
+			Logger.Trace("<<< Engine_TestStarting");
+		}
+
+		private void InitializeJobDatabase(RunContext context, bool first)
+		{
+			if (_job.DatabasePath == null)
+				_job.LogPath = GetLogPath(context, BasePath);
+
+			if (!Directory.Exists(_job.LogPath))
+				Directory.CreateDirectory(_job.LogPath);
+
+			ConfigureDebugLogging(context.config);
+
+			using (var db = new JobDatabase(_job.DatabasePath))
+			{
+				var job = db.GetJob(_job.Guid);
+				if (job == null)
+				{
+					_job.Seed = context.config.randomSeed;
+					_job.Mode = JobMode.Fuzzing;
+					_job.Status = JobStatus.Running;
+
+					// Start date is set when job record initially constructed
+					Debug.Assert(_job.StartDate != DateTime.MinValue);
+
+					try
+					{
+						db.InsertJob(_job);
+					}
+					catch (Exception)
+					{
+						if (first)
+							throw;
+					}
+				}
+				else
+				{
+					// this happens if we are recovering from a crash and we want to resume
+					_job = job;
+				}
+			}
+
+			_cache = new MetricsCache(_job.DatabasePath);
+
+			using (var db = new NodeDatabase())
+			{
+				if (first)
+					AddEvent(db,
+						context.config.id,
+						"Starting fuzzing engine",
+						"Starting fuzzing engine");
+
+				// Before we get iteration start, we will get AgentConnect & SessionStart
+				_agentConnect = 0;
+
+				db.UpdateJob(_job);
+			}
 		}
 
 		protected override void Engine_TestError(RunContext context, Exception ex)
@@ -754,30 +782,9 @@ namespace Peach.Pro.Core.Loggers
 			db.UpdateTestEvents(new[] { last });
 		}
 
-		public void JobFail(Guid id, Exception ex)
+		public void JobFail(Guid id, string message)
 		{
-			foreach (var testEvent in _events)
-			{
-				if (testEvent.Status == TestStatus.Active)
-				{
-					testEvent.Status = TestStatus.Fail;
-					testEvent.Resolve = ex.Message;
-				}
-			}
-
-			using (var db = new NodeDatabase())
-			{
-				var job = db.GetJob(id);
-				Debug.Assert(job != null);
-
-				job.StopDate = DateTime.UtcNow;
-				job.Mode = JobMode.Fuzzing;
-				job.Status = JobStatus.Stopped;
-				job.Result = ex.Message;
-				db.UpdateJob(job);
-
-				db.UpdateTestEvents(_events);
-			}
+			JobHelper.Fail(id, _ => _events, message);
 		}
 
 		public void UpdateStatus(JobStatus status)
@@ -806,8 +813,7 @@ namespace Peach.Pro.Core.Loggers
 			};
 
 			var oldTarget = _tempTarget;
-			_tempTarget = new AsyncTargetWrapper(target);
-			_tempTarget.Name = target.Name;
+			_tempTarget = new AsyncTargetWrapper(target) { Name = target.Name };
 
 			ConfigureLogging(oldTarget, _tempTarget);
 		}
