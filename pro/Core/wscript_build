@@ -44,7 +44,7 @@ deps = [
 	'Godel.Core.dll',
 
 	'Nancy.dll',
-	'Nancy.Metadata.Module.dll',
+	'Nancy.Metadata.Modules.dll',
 	'Nancy.Hosting.Self.dll',
 	'Nancy.Serialization.JsonNet.dll',
 #	'Nancy.Swagger.Annotations.dll',
