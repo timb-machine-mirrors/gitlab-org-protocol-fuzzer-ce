@@ -73,9 +73,11 @@ namespace Peach.Pro.Test.Core.Agent
 			Assert.NotNull(_server.Uri);
 
 			// use 127.0.0.1 as host to avoid DNS lookups
-			var ub = new UriBuilder(_server.Uri);
-			ub.Scheme = "tcp";
-			ub.Host = "127.0.0.1";
+			var ub = new UriBuilder(_server.Uri)
+			{
+				Scheme = "tcp", 
+				Host = "127.0.0.1"
+			};
 			_uri = ub.Uri;
 		}
 
@@ -155,8 +157,13 @@ namespace Peach.Pro.Test.Core.Agent
 				{"Port", "1" },
 				{"WaitOnCall", "MyWaitMessage" },
 				{"When", "OnCall" },
+				{"State", "Closed" },
+				{"Timeout", "1" },
 			});
 			cli.SessionStarting();
+			cli.IterationStarting(new IterationStartingArgs());
+			cli.Message("MyWaitMessage");
+			cli.IterationFinished();
 			cli.SessionFinished();
 			cli.StopAllMonitors();
 			cli.AgentDisconnect();
@@ -230,31 +237,31 @@ namespace Peach.Pro.Test.Core.Agent
 		public void TestVariants()
 		{
 			var s = ToJsonString(new Variant(100));
-			Assert.AreEqual("{\"type\":\"integer\",\"value\":100}", s);
+			Assert.AreEqual("{\"type\":\"integer\",\"value\":\"100\"}", s);
 			var v = FromJsonString(s);
 			Assert.AreEqual(Variant.VariantType.Int, v.GetVariantType());
 			Assert.AreEqual(100, (int)v);
 
 			s = ToJsonString(new Variant(long.MinValue));
-			Assert.AreEqual("{\"type\":\"integer\",\"value\":-9223372036854775808}", s);
+			Assert.AreEqual("{\"type\":\"integer\",\"value\":\"-9223372036854775808\"}", s);
 			v = FromJsonString(s);
 			Assert.AreEqual(Variant.VariantType.Long, v.GetVariantType());
 			Assert.AreEqual(long.MinValue, (long)v);
 
 			s = ToJsonString(new Variant(long.MaxValue));
-			Assert.AreEqual("{\"type\":\"integer\",\"value\":9223372036854775807}", s);
+			Assert.AreEqual("{\"type\":\"integer\",\"value\":\"9223372036854775807\"}", s);
 			v = FromJsonString(s);
 			Assert.AreEqual(Variant.VariantType.Long, v.GetVariantType());
 			Assert.AreEqual(long.MaxValue, (long)v);
 
 			s = ToJsonString(new Variant(ulong.MaxValue));
-			Assert.AreEqual("{\"type\":\"integer\",\"value\":18446744073709551615}", s);
+			Assert.AreEqual("{\"type\":\"integer\",\"value\":\"18446744073709551615\"}", s);
 			v = FromJsonString(s);
 			Assert.AreEqual(Variant.VariantType.ULong, v.GetVariantType());
 			Assert.AreEqual(ulong.MaxValue, (ulong)v);
 
 			s = ToJsonString(new Variant(1.1));
-			Assert.AreEqual("{\"type\":\"double\",\"value\":1.1}", s);
+			Assert.AreEqual("{\"type\":\"double\",\"value\":\"1.1\"}", s);
 			v = FromJsonString(s);
 			Assert.AreEqual(Variant.VariantType.Double, v.GetVariantType());
 			Assert.AreEqual(1.1, (double)v);
@@ -284,6 +291,33 @@ namespace Peach.Pro.Test.Core.Agent
 
 			v = FromJsonString("");
 			Assert.Null(v);
+
+			// Verify long strings & byte arrays work
+			var longString = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+			longString += longString;
+			longString += longString;
+			longString += longString;
+
+			s = ToJsonString(new Variant(longString));
+			Assert.AreEqual("{{\"type\":\"string\",\"value\":\"{0}\"}}".Fmt(longString), s);
+			v = FromJsonString(s);
+			Assert.AreEqual(Variant.VariantType.String, v.GetVariantType());
+			Assert.AreEqual(longString, (string)v);
+
+			var longBuf = Encoding.ASCII.GetBytes(longString);
+			var base64 = Convert.ToBase64String(longBuf);
+
+			s = ToJsonString(new Variant(longBuf));
+			Assert.AreEqual("{{\"type\":\"bytes\",\"value\":\"{0}\"}}".Fmt(base64), s);
+			v = FromJsonString(s);
+			Assert.AreEqual(Variant.VariantType.BitStream, v.GetVariantType());
+			Assert.AreEqual(longBuf, ((BitwiseStream)v).ToArray());
+
+			s = ToJsonString(new Variant(new BitStream(longBuf)));
+			Assert.AreEqual("{{\"type\":\"bytes\",\"value\":\"{0}\"}}".Fmt(base64), s);
+			v = FromJsonString(s);
+			Assert.AreEqual(Variant.VariantType.BitStream, v.GetVariantType());
+			Assert.AreEqual(longBuf, ((BitwiseStream)v).ToArray());
 		}
 
 		[Test]

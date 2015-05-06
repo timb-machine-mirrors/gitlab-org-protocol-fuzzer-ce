@@ -184,7 +184,9 @@ namespace Peach.Pro.Core.Loggers
 					_job.Seed = context.config.randomSeed;
 					_job.Mode = JobMode.Fuzzing;
 					_job.Status = JobStatus.Running;
-					_job.StartDate = DateTime.UtcNow;
+
+					// Start date is set when job record initially constructed
+					Debug.Assert(_job.StartDate != DateTime.MinValue);
 
 					db.InsertJob(_job);
 				}
