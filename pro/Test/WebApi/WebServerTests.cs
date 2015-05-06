@@ -1,12 +1,14 @@
 using System.Net;
 using System.Net.Sockets;
 using NUnit.Framework;
+using Peach.Core.Test;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.WebApi;
 
 namespace Peach.Pro.Test.WebApi
 {
 	[TestFixture]
+	[Quick]
 	class WebServerTetsts
 	{
 		[Test]
