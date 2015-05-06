@@ -17,6 +17,7 @@ namespace Peach.Pro.Core.Runtime
 
 	public abstract class Program
 	{
+		// PitLibraryPath, StrtBrowser, IJobMonitor
 		public Func<string, bool, IJobMonitor, int> RunWeb { get; set; }
 		public Func<IJobMonitor, IWebStatus> AttachWeb { get; set; }
 
