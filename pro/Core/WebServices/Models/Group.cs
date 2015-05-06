@@ -17,7 +17,6 @@ namespace Peach.Pro.Core.WebServices.Models
 		[Key]
 		public string GroupUrl { get; set; }
 
-		[JsonConverter(typeof(CamelCaseStringEnumConverter))]
 		public GroupAccess Access { get; set; }
 	}
 }

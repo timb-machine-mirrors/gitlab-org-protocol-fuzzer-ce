@@ -209,6 +209,9 @@ namespace Peach.Pro.Core.WebServices
 
 	public class PitDatabase
 	{
+		public static readonly string PitServicePrefix = "/p/pits";
+		public static readonly string LibraryServicePrefix = "/p/libraries";
+
 		private static PeachElement Parse(string fileName)
 		{
 			var settingsRdr = new XmlReaderSettings
@@ -330,7 +333,7 @@ namespace Peach.Pro.Core.WebServices
 		/// <returns>List of calls</returns>
 		public List<string> GetCallsById(string guid)
 		{
-			return GetCallsByUrl(PitService.Prefix + "/" + guid);
+			return GetCallsByUrl(PitServicePrefix + "/" + guid);
 		}
 
 		public List<string> GetCallsByUrl(string url)
@@ -581,7 +584,7 @@ namespace Peach.Pro.Core.WebServices
 
 		public List<Models.Agent> GetAgentsById(string guid)
 		{
-			return GetAgentsByUrl(PitService.Prefix + "/" + guid);
+			return GetAgentsByUrl(PitServicePrefix + "/" + guid);
 		}
 
 		public List<Models.Agent> GetAgentsByUrl(string url)
@@ -828,7 +831,7 @@ namespace Peach.Pro.Core.WebServices
 
 			var lib = new Library
 			{
-				LibraryUrl = LibraryService.Prefix + "/" + guid,
+				LibraryUrl = LibraryServicePrefix + "/" + guid,
 				Name = name,
 				Description = name,
 				Locked = locked,
@@ -936,7 +939,7 @@ namespace Peach.Pro.Core.WebServices
 
 		public Library GetLibraryById(string guid)
 		{
-			return GetLibraryByUrl(LibraryService.Prefix + "/" + guid);
+			return GetLibraryByUrl(LibraryServicePrefix + "/" + guid);
 		}
 
 		public Library GetLibraryByUrl(string url)
@@ -948,7 +951,7 @@ namespace Peach.Pro.Core.WebServices
 
 		public List<Parameter> GetConfigById(string guid)
 		{
-			return GetConfigByUrl(PitService.Prefix + "/" + guid);
+			return GetConfigByUrl(PitServicePrefix + "/" + guid);
 		}
 
 		public List<Parameter> GetConfigByUrl(string url)
@@ -1122,7 +1125,7 @@ namespace Peach.Pro.Core.WebServices
 
 		private PitDetail GetPitDetailById(string guid)
 		{
-			return GetPitDetailByUrl(PitService.Prefix + "/" + guid);	
+			return GetPitDetailByUrl(PitServicePrefix + "/" + guid);	
 		}
 
 		private PitDetail GetPitDetailByUrl(string url)
@@ -1149,7 +1152,7 @@ namespace Peach.Pro.Core.WebServices
 			var guid = MakeGuid(fileName);
 			var value = new Pit
 			{
-				PitUrl = PitService.Prefix + "/" + guid,
+				PitUrl = PitServicePrefix + "/" + guid,
 				Name = Path.GetFileNameWithoutExtension(fileName),
 				Description = contents.Description,
 				Locked = lib.Locked,

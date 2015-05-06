@@ -109,9 +109,12 @@ namespace Peach.Pro.Core.Runtime
 
 		#endregion
 
+		public ConsoleProgram()
+		{
+		}
+
 		public ConsoleProgram(string[] args)
 		{
-			_config.commandLine = args;
 			ExitCode = Run(args);
 		}
 
@@ -263,6 +266,8 @@ namespace Peach.Pro.Core.Runtime
 
 		protected override void OnRun(List<string> args)
 		{
+			_config.commandLine = args.ToArray();
+
 			try
 			{
 				Console.Write("\n");
@@ -345,16 +350,14 @@ namespace Peach.Pro.Core.Runtime
 			if (userLogger != null || !_noweb)
 				job = new Job(_config);
 
-			if (_noweb)
+			if (_noweb || AttachWeb == null)
 			{
 				var e = new Engine(GetUIWatcher());
 				e.startFuzzing(dom, _config);
 				return;
 			}
 
-			// Pass an empty pit library path if we are running a job off of
-			// the command line.
-			using (var svc = new WebServer("", new ConsoleJobMonitor(job)))
+			using (var svc = AttachWeb(new ConsoleJobMonitor(job)))
 			{
 				svc.Start();
 
@@ -481,12 +484,12 @@ namespace Peach.Pro.Core.Runtime
 					RunEngine(dom);
 				}
 			}
-			else if (!_noweb)
+			else if (!_noweb && RunWeb != null)
 			{
 				// Ensure pit library exists
 				var pits = FindPitLibrary(_pitLibraryPath);
 
-				WebServer.Run(pits, !_nobrowser, new InternalJobMonitor());
+				RunWeb(pits, !_nobrowser, new InternalJobMonitor());
 			}
 		}
 

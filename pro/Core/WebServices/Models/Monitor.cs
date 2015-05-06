@@ -54,7 +54,6 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <example>
 		/// "string"
 		/// </example>
-		[JsonConverter(typeof(CamelCaseStringEnumConverter))]
 		public ParameterType Type { get; set; }
 
 		/// <summary>
