@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Newtonsoft.Json;
 using Peach.Pro.Core.Storage;
 using System.IO;
@@ -129,6 +130,7 @@ namespace Peach.Pro.Core.WebServices.Models
 			Guid = Guid.NewGuid();
 			Name = Path.GetFileNameWithoutExtension(pitFile);
 			StartDate = DateTime.UtcNow;
+			HeartBeat = StartDate;
 			Status = JobStatus.StartPending;
 			Mode = JobMode.Starting;
 
@@ -137,6 +139,9 @@ namespace Peach.Pro.Core.WebServices.Models
 			RangeStart = request.RangeStart;
 			RangeStop = request.RangeStop;
 			IsControlIteration = request.IsControlIteration;
+
+			using (var p = Process.GetCurrentProcess())
+				Pid = p.Id;
 
 			using (var db = new NodeDatabase())
 			{
@@ -149,6 +154,7 @@ namespace Peach.Pro.Core.WebServices.Models
 			Guid = config.id;
 			Name = Path.GetFileNameWithoutExtension(config.pitFile);
 			StartDate = DateTime.UtcNow;
+			HeartBeat = StartDate;
 			Status = JobStatus.StartPending;
 			Mode = JobMode.Starting;
 
@@ -163,6 +169,9 @@ namespace Peach.Pro.Core.WebServices.Models
 			{
 				RangeStart = config.skipToIteration;
 			}
+
+			using (var p = Process.GetCurrentProcess())
+				Pid = p.Id;
 
 			using (var db = new NodeDatabase())
 			{
@@ -381,6 +390,21 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// How many faults have been detected
 		/// </summary>
 		public long FaultCount { get; set; }
+
+		public long Pid { get; set; }
+
+		public DateTime? HeartBeat
+		{
+			get { return _heartBeat; }
+			set
+			{
+				if (value.HasValue)
+					_heartBeat = value.Value.MakeUtc();
+				else
+					_heartBeat = null;
+			}
+		}
+		private DateTime? _heartBeat;
 
 		/// <summary>
 		/// List of tags associated with this job

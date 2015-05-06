@@ -72,6 +72,11 @@ namespace Peach.Core
 		{
 		}
 
+		public Variant(bool v)
+		{
+			SetValue(v);
+		}
+
 		public Variant(int v)
 		{
 			SetValue(v);

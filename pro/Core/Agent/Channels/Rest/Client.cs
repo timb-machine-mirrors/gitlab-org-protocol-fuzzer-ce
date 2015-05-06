@@ -438,7 +438,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			var path = "Message/{0}".Fmt(msg);
 
 			if (_connectResp.Messages.Contains(path))
-				Send("PUT", path, null);
+				Send("PUT", "/" + path, null);
 		}
 
 		internal void SimulateDisconnect()
