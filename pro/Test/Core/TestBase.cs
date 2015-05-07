@@ -16,16 +16,8 @@ using NLog.Targets.Wrappers;
 
 namespace Peach.Pro.Test.Core
 {
-	class AssertTestFail : AssertWriter
-	{
-		protected override void OnAssert(string message)
-		{
-			Assert.Fail(message);
-		}
-	}
-
 	[SetUpFixture]
-	class TestBase
+	class TestBase : SetUpFixture
 	{
 		TempDirectory _tmpDir;
 
@@ -38,100 +30,23 @@ namespace Peach.Pro.Test.Core
 			return ret;
 		}
 
-		[SetUp]
-		public void Initialize()
+		protected override void OnSetUp()
 		{
-			AssertWriter.Register<AssertTestFail>();
-
-			if (!(LogManager.Configuration != null && LogManager.Configuration.LoggingRules.Count > 0))
-			{
-				var consoleTarget = new AsyncTargetWrapper(new ConsoleTarget
-				{
-					Layout = "${time} ${logger} ${message}"
-				});
-
-				var config = new LoggingConfiguration();
-				config.AddTarget("console", consoleTarget);
-
-				var logLevel = LogLevel.Info;
-				var peachTrace = Environment.GetEnvironmentVariable("PEACH_TRACE");
-				if (peachTrace == "1")
-					logLevel = LogLevel.Trace;
-
-				var rule = new LoggingRule("*", logLevel, consoleTarget);
-				config.LoggingRules.Add(rule);
-
-				LogManager.Configuration = config;
-			}
-
 			Program.LoadPlatformAssembly();
 
 			_tmpDir = new TempDirectory();
 			Configuration.LogRoot = _tmpDir.Path;
 		}
 
-		[TearDown]
-		public void TearDown()
+		protected override void OnTearDown()
 		{
 			_tmpDir.Dispose();
 		}
-	
-		public static MemoryStream LoadResource(string name)
-		{
-			var asm = Assembly.GetExecutingAssembly();
-			var fullName = "Peach.Pro.Test.Core.Resources." + name;
-			using (var stream = asm.GetManifestResourceStream(fullName))
-			{
-				var ms = new MemoryStream();
-				stream.CopyTo(ms);
-				return ms;
-			}
-		}
-	}
-	
-	[TestFixture]
-	[Quick]
-	[Peach]
-	class AssertTest
-	{
-		[Test]
-		public void TestAssert()
-		{
-#if DEBUG
-			Assert.Throws<AssertionException>(() => Debug.Assert(false));
-#else
-			Debug.Assert(false);
-#endif
-		}
 	}
 
 	[TestFixture]
 	[Quick]
-	class CategoryTest
+	class CommonTests : TestFixture
 	{
-		[Test]
-		public void NoneMissing()
-		{
-			var missing = new List<string>();
-
-			foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
-			{
-				if (!type.GetAttributes<TestFixtureAttribute>().Any())
-					continue;
-
-				foreach (var attr in type.GetCustomAttributes(true))
-				{
-					if (attr is QuickAttribute || attr is SlowAttribute)
-						goto Found;
-				}
-
-				missing.Add(type.FullName);
-
-			Found:
-				{ }
-			}
-
-			Assert.That(missing, Is.Empty);
-		}
 	}
 }

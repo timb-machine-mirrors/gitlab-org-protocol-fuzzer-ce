@@ -387,6 +387,17 @@ namespace Peach.Core
 			}
 		}
 
+		public static MemoryStream LoadBinaryResource(Assembly asm, string name)
+		{
+			using (var stream = asm.GetManifestResourceStream(name))
+			{
+				var ms = new MemoryStream();
+				stream.CopyTo(ms);
+				ms.Seek(0, SeekOrigin.Begin);
+				return ms;
+			}
+		}
+
 		public static void ExtractEmbeddedResource(Assembly asm, string name, string target)
 		{
 			var path = Path.Combine(ExecutionDirectory, target);
