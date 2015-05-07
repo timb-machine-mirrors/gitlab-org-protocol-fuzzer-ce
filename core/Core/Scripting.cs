@@ -253,9 +253,11 @@ namespace Peach.Core
 
 				var obj = compiled.Execute(scope);
 
-				if (obj != null && obj.GetType() == typeof (BigInteger))
+				// changing this to be sane (using as instead of is) causes weird compiler issues!
+				// you've been warned.
+				if (obj is BigInteger)
 				{
-					BigInteger bint = (BigInteger) obj;
+					var bint = (BigInteger) obj;
 
 					int i32;
 					uint ui32;
@@ -277,18 +279,11 @@ namespace Peach.Core
 
 				return obj;
 			}
-			catch (ThreadAbortException)
-			{
-				throw;
-			}
 			catch (Exception ex)
 			{
-				throw new PeachException("Error executing expression [" + code + "]: " + ex.ToString(), ex);
-			}
-			finally
-			{
-				// Make this happen once per-iteration at the end.
-				//CleanupScope(scope, localScope);
+				if (ex.GetBaseException() is ThreadAbortException)
+					throw;
+				throw new PeachException("Error executing expression [" + code + "]: " + ex, ex);
 			}
 		}
 

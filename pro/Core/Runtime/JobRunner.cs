@@ -86,12 +86,6 @@ namespace Peach.Pro.Core.Runtime
 				_engine = new Engine(_jobLogger);
 				_engine.startFuzzing(dom, _config);
 			}
-			catch (ThreadAbortException)
-			{
-				Thread.ResetAbort();
-				Logger.Trace("Thread aborted");
-				_jobLogger.JobFail(_config.id, "Job killed.");
-			}
 			catch (ApplicationException ex) // PeachException or SoftException
 			{
 				if (Configuration.LogLevel == LogLevel.Trace)
@@ -102,9 +96,18 @@ namespace Peach.Pro.Core.Runtime
 			}
 			catch (Exception ex)
 			{
-				Logger.Error("Unhandled Exception: {0}".Fmt(ex));
-				_jobLogger.JobFail(_config.id, ex.Message);
-				throw;
+				if (ex.GetBaseException() is ThreadAbortException)
+				{
+					Thread.ResetAbort();
+					Logger.Trace("Thread aborted");
+					_jobLogger.JobFail(_config.id, "Job killed.");
+				}
+				else
+				{
+					Logger.Error("Unhandled Exception: {0}".Fmt(ex));
+					_jobLogger.JobFail(_config.id, ex.Message);
+					throw;
+				}
 			}
 			finally
 			{
