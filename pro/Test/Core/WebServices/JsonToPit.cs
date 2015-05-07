@@ -271,12 +271,27 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void JsonInt()
 		{
-			const string json = " { \"Value\":500 }";
+			const string json = " { \"Value\" : 500 }";
 
 			var obj = JsonConvert.DeserializeObject<IntMember>(json);
 
 			Assert.NotNull(obj);
-			Assert.AreEqual("500", obj.Value);
+			Assert.AreEqual(500, obj.Value);
+		}
+
+		class Model
+		{
+			public ulong Id { get; set; }
+		}
+
+		[Test]
+		public void LongTest()
+		{
+			var m1 = new Model { Id = long.MaxValue };
+			var asJson = JsonConvert.SerializeObject(m1);
+			Assert.AreEqual("{\"Id\":9223372036854775807}", asJson);
+			var m2 = JsonConvert.DeserializeObject<Model>(asJson);
+			Assert.AreEqual(m1.Id, m2.Id);
 		}
 	}
 }
