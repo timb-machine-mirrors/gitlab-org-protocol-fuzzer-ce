@@ -230,6 +230,8 @@ namespace Peach.Pro.Core.Publishers
 
 		private Stream TryCreateClient(Uri url, BitwiseStream data)
 		{
+			Logger.Debug("TryCreateClient> {0} {1}", Method, url);
+
 			var request = (HttpWebRequest)WebRequest.Create(url);
 			request.Method = Method;
 

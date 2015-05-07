@@ -506,7 +506,7 @@ namespace Peach.Pro.Test.Core.Publishers
 			var xml = @"
 <Peach>
 	<DataModel name='DM'>
-		<String name='Data' value='Hello World' />
+		<String name='Data' value='Hello World Hello World Hello World' />
 	</DataModel>
 
 	<StateModel name='SM' initialState='Initial'>
