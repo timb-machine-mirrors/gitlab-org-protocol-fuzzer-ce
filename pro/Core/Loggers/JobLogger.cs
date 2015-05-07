@@ -168,17 +168,16 @@ namespace Peach.Pro.Core.Loggers
 				_job = db.GetJob(context.config.id) ?? new Job(context.config);
 			}
 
-
 			// we need to ensure that the JobDatabase gets fully initialized
 			// so that by the time we get to Engine_TestFinished,
 			// we aren't in any half-initialized states.
 			try
 			{
-				InitializeJobDatabase(context, true);
+				InitializeJobDatabase(context, true, true);
 			}
 			catch (ThreadAbortException)
 			{
-				InitializeJobDatabase(context, false);
+				InitializeJobDatabase(context, false, true);
 			}
 
 			_log = File.CreateText(Path.Combine(_job.LogPath, "status.txt"));
@@ -201,7 +200,7 @@ namespace Peach.Pro.Core.Loggers
 			Logger.Trace("<<< Engine_TestStarting");
 		}
 
-		private void InitializeJobDatabase(RunContext context, bool first)
+		private void InitializeJobDatabase(RunContext context, bool first, bool configureLogging)
 		{
 			if (_job.DatabasePath == null)
 				_job.LogPath = GetLogPath(context, BasePath);
@@ -209,7 +208,8 @@ namespace Peach.Pro.Core.Loggers
 			if (!Directory.Exists(_job.LogPath))
 				Directory.CreateDirectory(_job.LogPath);
 
-			ConfigureDebugLogging(context.config);
+			if (configureLogging)
+				ConfigureDebugLogging(context.config);
 
 			using (var db = new JobDatabase(_job.DatabasePath))
 			{
@@ -277,26 +277,32 @@ namespace Peach.Pro.Core.Loggers
 		{
 			Logger.Trace(">>> Engine_TestFinished");
 
-			if (_job != null)
+			if (_job == null)
 			{
-				Debug.Assert(_job.DatabasePath != null);
-				Logger.Trace("Engine_TestFinished> Update JobDatabase");
-				using (var db = new JobDatabase(_job.DatabasePath))
-				{
-					_job.StopDate = DateTime.UtcNow;
-					_job.Mode = JobMode.Fuzzing;
-					_job.Status = JobStatus.Stopped;
-
-					db.UpdateJob(_job);
-				}
-
-				Logger.Trace("Engine_TestFinished> Update NodeDatabase");
 				using (var db = new NodeDatabase())
 				{
-					if (_caught == null)
-						EventSuccess(db);
-					db.UpdateJob(_job);
+					_job = db.GetJob(context.config.id) ?? new Job(context.config);
 				}
+
+				InitializeJobDatabase(context, false, false);
+			}
+
+			Logger.Trace("Engine_TestFinished> Update JobDatabase");
+			using (var db = new JobDatabase(_job.DatabasePath))
+			{
+				_job.StopDate = DateTime.UtcNow;
+				_job.Mode = JobMode.Fuzzing;
+				_job.Status = JobStatus.Stopped;
+
+				db.UpdateJob(_job);
+			}
+
+			Logger.Trace("Engine_TestFinished> Update NodeDatabase");
+			using (var db = new NodeDatabase())
+			{
+				if (_caught == null)
+					EventSuccess(db);
+				db.UpdateJob(_job);
 			}
 
 			// it's possible we reach here before Engine_TestStarting has had a chance to finish
