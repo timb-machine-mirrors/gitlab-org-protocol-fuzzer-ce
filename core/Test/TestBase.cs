@@ -15,83 +15,87 @@ namespace Peach.Core.Test
 	public class QuickAttribute : CategoryAttribute { }
 	public class SlowAttribute : CategoryAttribute { }
 
-	class AssertTestFail : TraceListener
+	public class SetUpFixture
 	{
-		public override void Write(string message)
+		class AssertTestFail : TraceListener
 		{
-			Assert.Fail(message);
+			public override void Write(string message)
+			{
+				Assert.Fail(message);
+			}
+
+			public override void WriteLine(string message)
+			{
+				var sb = new StringBuilder();
+
+				sb.AppendLine("Assertion " + message);
+				sb.AppendLine(new StackTrace(2, true).ToString());
+
+				Assert.Fail(sb.ToString());
+			}
 		}
 
-		public override void WriteLine(string message)
-		{
-			var sb = new StringBuilder();
-
-			sb.AppendLine("Assertion " + message);
-			sb.AppendLine(new StackTrace(2, true).ToString());
-
-			Assert.Fail(sb.ToString());
-		}
-	}
-
-	[SetUpFixture]
-	class TestBase
-	{
 		[SetUp]
-		public void Initialize()
+		public void SetUp()
 		{
 			Debug.Listeners.Insert(0, new AssertTestFail());
 
-			var consoleTarget = new ConsoleTarget
+			if (!(LogManager.Configuration != null && LogManager.Configuration.LoggingRules.Count > 0))
 			{
-				Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}"
-			};
+				var consoleTarget = new ConsoleTarget
+				{
+					Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}"
+				};
 
-			var config = new LoggingConfiguration();
-			config.AddTarget("console", consoleTarget);
+				var config = new LoggingConfiguration();
+				config.AddTarget("console", consoleTarget);
 
-			var logLevel = LogLevel.Info;
-			var peachTrace = Environment.GetEnvironmentVariable("PEACH_TRACE");
-			if (peachTrace == "1")
-				logLevel = LogLevel.Trace;
+				var logLevel = LogLevel.Info;
+				var peachTrace = Environment.GetEnvironmentVariable("PEACH_TRACE");
+				if (peachTrace == "1")
+					logLevel = LogLevel.Trace;
 
-			var rule = new LoggingRule("*", logLevel, consoleTarget);
-			config.LoggingRules.Add(rule);
+				var rule = new LoggingRule("*", logLevel, consoleTarget);
+				config.LoggingRules.Add(rule);
 
-			LogManager.Configuration = config;
+				LogManager.Configuration = config;
+			}
+
+			OnSetUp();
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
+			OnTearDown();
+
 			LogManager.Flush();
 			LogManager.Configuration = null;
 		}
+
+		protected virtual void OnSetUp()
+		{
+		}
+
+		protected virtual void OnTearDown()
+		{
+		}
 	}
 
-
-	[TestFixture]
-	[Peach]
-	[Quick]
-	class AssertTest
+	public class TestFixture
 	{
 		[Test]
-		public void TestAssert()
+		public void AssertWorks()
 		{
 #if DEBUG
 			Assert.Throws<AssertionException>(() => Debug.Assert(false));
 #else
 			Debug.Assert(false);
 #endif
-
 		}
-	}
 
-	[TestFixture]
-	[Quick]
-	class CategoryTest
-	{
 		[Test]
-		public void NoneMissing()
+		public void NoMissingAttributes()
 		{
 			var missing = new List<string>();
 
@@ -114,5 +118,16 @@ namespace Peach.Core.Test
 
 			Assert.That(missing, Is.Empty);
 		}
+	}
+
+	[SetUpFixture]
+	class TestBase : SetUpFixture
+	{
+	}
+
+	[TestFixture]
+	[Quick]
+	class CommonTests : TestFixture
+	{
 	}
 }
