@@ -30,6 +30,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using Newtonsoft.Json;
 using NLog;
@@ -168,16 +169,48 @@ namespace Peach.Pro.Core.Loggers
 				_job = db.GetJob(context.config.id) ?? new Job(context.config);
 			}
 
-			// we need to ensure that the JobDatabase gets fully initialized
-			// so that by the time we get to Engine_TestFinished,
-			// we aren't in any half-initialized states.
-			try
+			if (_job.DatabasePath == null)
+				_job.LogPath = GetLogPath(context, BasePath);
+
+			if (!Directory.Exists(_job.LogPath))
+				Directory.CreateDirectory(_job.LogPath);
+
+			ConfigureDebugLogging(context.config);
+
+			using (var db = new JobDatabase(_job.DatabasePath))
 			{
-				InitializeJobDatabase(context, true, true);
+				var job = db.GetJob(_job.Guid);
+				if (job == null)
+				{
+					_job.Seed = context.config.randomSeed;
+					_job.Mode = JobMode.Fuzzing;
+					_job.Status = JobStatus.Running;
+
+					// Start date is set when job record initially constructed
+					Debug.Assert(_job.StartDate != DateTime.MinValue);
+
+					db.InsertJob(_job);
+				}
+				else
+				{
+					// this happens if we are recovering from a crash and we want to resume
+					_job = job;
+				}
 			}
-			catch (ThreadAbortException)
+
+			_cache = new MetricsCache(_job.DatabasePath);
+
+			using (var db = new NodeDatabase())
 			{
-				InitializeJobDatabase(context, false, true);
+				AddEvent(db,
+					context.config.id,
+					"Starting fuzzing engine",
+					"Starting fuzzing engine");
+
+				// Before we get iteration start, we will get AgentConnect & SessionStart
+				_agentConnect = 0;
+
+				db.UpdateJob(_job);
 			}
 
 			_log = File.CreateText(Path.Combine(_job.LogPath, "status.txt"));
@@ -200,63 +233,6 @@ namespace Peach.Pro.Core.Loggers
 			Logger.Trace("<<< Engine_TestStarting");
 		}
 
-		private void InitializeJobDatabase(RunContext context, bool first, bool configureLogging)
-		{
-			if (_job.DatabasePath == null)
-				_job.LogPath = GetLogPath(context, BasePath);
-
-			if (!Directory.Exists(_job.LogPath))
-				Directory.CreateDirectory(_job.LogPath);
-
-			if (configureLogging)
-				ConfigureDebugLogging(context.config);
-
-			using (var db = new JobDatabase(_job.DatabasePath))
-			{
-				var job = db.GetJob(_job.Guid);
-				if (job == null)
-				{
-					_job.Seed = context.config.randomSeed;
-					_job.Mode = JobMode.Fuzzing;
-					_job.Status = JobStatus.Running;
-
-					// Start date is set when job record initially constructed
-					Debug.Assert(_job.StartDate != DateTime.MinValue);
-
-					try
-					{
-						db.InsertJob(_job);
-					}
-					catch (Exception)
-					{
-						if (first)
-							throw;
-					}
-				}
-				else
-				{
-					// this happens if we are recovering from a crash and we want to resume
-					_job = job;
-				}
-			}
-
-			_cache = new MetricsCache(_job.DatabasePath);
-
-			using (var db = new NodeDatabase())
-			{
-				if (first)
-					AddEvent(db,
-						context.config.id,
-						"Starting fuzzing engine",
-						"Starting fuzzing engine");
-
-				// Before we get iteration start, we will get AgentConnect & SessionStart
-				_agentConnect = 0;
-
-				db.UpdateJob(_job);
-			}
-		}
-
 		protected override void Engine_TestError(RunContext context, Exception ex)
 		{
 			Logger.Trace("Engine_TestError");
@@ -277,32 +253,25 @@ namespace Peach.Pro.Core.Loggers
 		{
 			Logger.Trace(">>> Engine_TestFinished");
 
-			if (_job == null)
+			if (_job != null)
 			{
-				using (var db = new NodeDatabase())
+				Logger.Trace("Engine_TestFinished> Update JobDatabase");
+				using (var db = new JobDatabase(_job.DatabasePath))
 				{
-					_job = db.GetJob(context.config.id) ?? new Job(context.config);
+					_job.StopDate = DateTime.UtcNow;
+					_job.Mode = JobMode.Fuzzing;
+					_job.Status = JobStatus.Stopped;
+
+					db.UpdateJob(_job);
 				}
 
-				InitializeJobDatabase(context, false, false);
-			}
-
-			Logger.Trace("Engine_TestFinished> Update JobDatabase");
-			using (var db = new JobDatabase(_job.DatabasePath))
-			{
-				_job.StopDate = DateTime.UtcNow;
-				_job.Mode = JobMode.Fuzzing;
-				_job.Status = JobStatus.Stopped;
-
-				db.UpdateJob(_job);
-			}
-
-			Logger.Trace("Engine_TestFinished> Update NodeDatabase");
-			using (var db = new NodeDatabase())
-			{
-				if (_caught == null)
-					EventSuccess(db);
-				db.UpdateJob(_job);
+				Logger.Trace("Engine_TestFinished> Update NodeDatabase");
+				using (var db = new NodeDatabase())
+				{
+					if (_caught == null)
+						EventSuccess(db);
+					db.UpdateJob(_job);
+				}
 			}
 
 			// it's possible we reach here before Engine_TestStarting has had a chance to finish
