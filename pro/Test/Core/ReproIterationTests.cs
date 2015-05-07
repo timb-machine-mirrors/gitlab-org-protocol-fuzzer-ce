@@ -17,7 +17,6 @@ namespace Peach.Pro.Test.Core
 		readonly List<string> _faultHistory = new List<string>();
 		readonly List<TimeSpan> _waitTimes = new List<TimeSpan>();
 
-
 		/// <summary>
 		/// Fuzz from iteration 1 to 10
 		/// Fault on 'faultIter'
@@ -261,8 +260,8 @@ namespace Peach.Pro.Test.Core
 
 			for (var i = 0; i < expected.Length; ++i)
 			{
-				Assert.Greater(actual[i].TotalSeconds, expected[i] - 0.05);
-				Assert.Less(actual[i].TotalSeconds, expected[i] + 0.05);
+				Assert.Greater(actual[i].TotalSeconds, expected[i] - 0.10);
+				Assert.Less(actual[i].TotalSeconds, expected[i] + 0.10);
 			}
 		}
 
@@ -290,8 +289,8 @@ namespace Peach.Pro.Test.Core
 
 			for (var i = 0; i < expected.Length; ++i)
 			{
-				Assert.Greater(actual[i].TotalSeconds, expected[i] - 0.05);
-				Assert.Less(actual[i].TotalSeconds, expected[i] + 0.05);
+				Assert.Greater(actual[i].TotalSeconds, expected[i] - 0.10);
+				Assert.Less(actual[i].TotalSeconds, expected[i] + 0.10);
 			}
 		}
 	}
