@@ -57,6 +57,9 @@ namespace Peach.Core
 		private readonly RunContext _context;
 		private readonly Thread _currentThread;
 
+		private object _canAbortSync = new object();
+		private object _hasAbortedSync = new object();
+
 		//public Dom.Dom dom { get { return runContext.dom; } }
 		//public Test test  { get { return runContext.test; } }
 
@@ -268,19 +271,22 @@ namespace Peach.Core
 					finally
 					{
 						logger.Trace("finally Enter");
-						Monitor.Enter(this);
+						Monitor.Enter(_hasAbortedSync);
 						logger.Trace("finally Lock Acquired");
 					}
 				}
-				catch (ThreadAbortException)
-				{
-					logger.Trace("ResetAbort()");
-					Thread.ResetAbort();
-				}
 				catch (Exception ex)
 				{
-					OnTestError(ex);
-					throw;
+					if (ex.GetBaseException() is ThreadAbortException)
+					{
+						logger.Trace("ResetAbort()");
+						Thread.ResetAbort();
+					}
+					else
+					{
+						OnTestError(ex);
+						throw;
+					}
 				}
 				finally
 				{
@@ -307,18 +313,21 @@ namespace Peach.Core
 		public void Abort()
 		{
 			logger.Trace(">>> Abort");
-			
-			if (Monitor.TryEnter(this))
+
+			lock (_canAbortSync)
 			{
-				logger.Trace("Abort> Acquired Lock");
-				_currentThread.Abort();
+				if (Monitor.TryEnter(_hasAbortedSync))
+				{
+					logger.Trace("Abort> Acquired Lock");
+					_currentThread.Abort();
 
-				logger.Trace("Abort> Release Lock");
-				Monitor.Exit(this);
+					logger.Trace("Abort> Release Lock");
+					Monitor.Exit(_hasAbortedSync);
+				}
+
+				logger.Trace("Join");
+				_currentThread.Join();
 			}
-
-			logger.Trace("Join");
-			_currentThread.Join();
 
 			logger.Trace("<<< Abort");
 		}
@@ -413,7 +422,7 @@ namespace Peach.Core
 			}
 			else if (context.config.skipToIteration > 1)
 			{
-				logger.Debug("runTest: context.config.skipToIteration == ",
+				logger.Debug("runTest: context.config.skipToIteration == {0}",
 					context.config.skipToIteration);
 
 				iterationStart = context.config.skipToIteration;
@@ -435,7 +444,10 @@ namespace Peach.Core
 
 			test.markMutableElements();
 
-			OnTestStarting();
+			lock (_canAbortSync)
+			{
+				OnTestStarting();
+			}
 
 			StartAgents();
 
@@ -831,16 +843,15 @@ namespace Peach.Core
 					{
 						throw;
 					}
-					catch (ThreadAbortException)
-					{
-						throw;
-					}
 					catch (AgentException ae)
 					{
 						throw new PeachException("Agent Failure: " + ae.Message, ae);
 					}
 					catch (Exception ex)
 					{
+						if (ex.GetBaseException() is ThreadAbortException)
+							throw;
+
 						throw new PeachException("General Agent Failure: " + ex.Message, ex);
 					}
 				}

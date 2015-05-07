@@ -104,13 +104,10 @@ namespace Peach.Pro.Test.Core.Runtime
 					{
 						JobRunner.Run(evtReady);
 					}
-					catch (ThreadAbortException ex)
-					{
-						Thread.ResetAbort();
-						_caught = ex;
-					}
 					catch (Exception ex)
 					{
+						if (ex.GetBaseException() is ThreadAbortException)
+							Thread.ResetAbort();
 						_caught = ex;
 					}
 				});
