@@ -17,13 +17,13 @@ describe("Peach", () => {
 		var pitUrl = '/p/pits/PIT_GUID';
 
 		beforeEach(inject(($injector: ng.auto.IInjectorService) => {
-			$modal = $injector.get('$modal');
-			$rootScope = <ng.IRootScopeService> $injector.get('$rootScope');
-			$controller = <ng.IControllerService> $injector.get('$controller');
+			$modal = $injector.get(Peach.C.Angular.$modal);
+			$rootScope = <ng.IRootScopeService> $injector.get(Peach.C.Angular.$rootScope);
+			$controller = <ng.IControllerService> $injector.get(Peach.C.Angular.$controller);
 			$scope = $rootScope.$new();
 
-			$httpBackend = $injector.get('$httpBackend');
-			service = $injector.get('PitService');
+			$httpBackend = $injector.get(Peach.C.Angular.$httpBackend);
+			service = $injector.get(Peach.C.Services.Pit);
 		}));
 
 		afterEach(() => {
