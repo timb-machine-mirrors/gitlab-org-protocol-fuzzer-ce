@@ -122,7 +122,8 @@ module Peach {
 		}
 
 		private refreshFaults() {
-			this.Faults = _.last(this.jobService.Faults, 10).reverse();
+			if (this.jobService.Faults.length > 0)
+				this.Faults = _.last(this.jobService.Faults, 10).reverse();
 		}
 	}
 }

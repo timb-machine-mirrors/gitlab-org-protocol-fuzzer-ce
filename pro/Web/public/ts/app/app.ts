@@ -53,7 +53,7 @@ module Peach {
 	p.config([
 		C.Angular.$stateProvider,
 		C.Angular.$urlRouterProvider, (
-			$stateProvider: ng.ui.IStateProvider,
+			$stateProvider: angular.ui.IStateProvider,
 			$urlRouterProvider: ng.ui.IUrlRouterProvider
 		) => {
 			$urlRouterProvider.otherwise('/');
@@ -100,7 +100,7 @@ module Peach {
 						}
 						return C.Templates.Wizard.Track;
 					},
-					controllerProvider: ($stateParams): any => {
+					controllerProvider: ($stateParams: any): any => {
 						switch ($stateParams.track) {
 							case C.Tracks.Test:
 								return PitTestController;
