@@ -191,7 +191,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 				e.startFuzzing(dom, config);
 
-				Assert.Greater(_faults.Count, 0);
+				Assert.Greater(_faults.Count, 0, "Test should have found faults");
 
 				var contents = File.ReadAllLines(tmp);
 				var expected = new[] {
