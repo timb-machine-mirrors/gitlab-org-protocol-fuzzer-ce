@@ -709,7 +709,7 @@ namespace Peach.Core.Dom
 
 				stream.Seek(0, SeekOrigin.Begin);
 
-				for (int i = 0; i < stream.Length; i++)
+				for (var i = 0; i < stream.Length; i++)
 					sb.Append(stream.ReadByte().ToString("x2"));
 
 				stream.Position = pos;
@@ -779,10 +779,9 @@ namespace Peach.Core.Dom
 				pit.WriteAttributeString("length", lengthType == LengthType.Bits ? lengthAsBits.ToString() : length.ToString());
 			}
 
-			if (parent != null && parent is Peach.Core.Dom.Array)
+			var array = parent as Array;
+			if (array != null)
 			{
-				var array = parent as Peach.Core.Dom.Array;
-
 				if (array.occurs != 1)
 					pit.WriteAttributeString("occurs", array.occurs.ToString());
 				else
@@ -797,7 +796,8 @@ namespace Peach.Core.Dom
 
 		protected void OnInvalidated(EventArgs e)
 		{
-			logger.Trace("OnInvalidated: {0}", Name);
+			// This spews a lot, only turn it on when needed
+			//logger.Trace("OnInvalidated: {0}", Name);
 
 			// Prevent infinite loops
 			if (_invalidated)
