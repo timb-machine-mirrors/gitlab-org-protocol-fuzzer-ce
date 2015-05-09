@@ -76,7 +76,7 @@ module Peach {
 					views: {
 						'@': {
 							templateUrl: C.Templates.Library,
-							controller: HomeController,
+							controller: LibraryController,
 							controllerAs: 'vm'
 						}
 					}
@@ -86,7 +86,7 @@ module Peach {
 					views: {
 						'@': {
 							templateUrl: C.Templates.Templates,
-							controller: HomeController,
+							controller: TemplatesController,
 							controllerAs: 'vm'
 						}
 					}
