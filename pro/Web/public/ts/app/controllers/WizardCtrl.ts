@@ -54,7 +54,7 @@ module Peach {
 			// since the all the params might be the same,
 			// we need to force the controller to reinitialize with reload: true.
 			this.$state.go(
-				C.States.WizardIntro,
+				C.States.PitWizardIntro,
 				{ track: this.trackId, id: 0 },
 				{ reload: true }
 			);
@@ -64,10 +64,10 @@ module Peach {
 			this.resetPrompts();
 
 			if (id === 0) {
-				if (this.$state.is(C.States.WizardIntro)) {
+				if (this.$state.is(C.States.PitWizardIntro)) {
 					this.initIntro();
 				}
-				else if (this.$state.is(C.States.WizardReview)) {
+				else if (this.$state.is(C.States.PitWizardReview)) {
 					this.initReview();
 				}
 			} else {
@@ -155,12 +155,12 @@ module Peach {
 			if (_.isUndefined(nextId)) {
 				// no more questions, this track is complete
 				this.$state.go(
-					C.States.WizardReview,
+					C.States.PitWizardReview,
 					{ track: this.trackId, id: 0 }
 				);
 			} else {
 				this.$state.go(
-					C.States.WizardQuestion,
+					C.States.PitWizardQuestion,
 					{ track: this.trackId, id: nextId }
 				);
 			}
@@ -181,7 +181,7 @@ module Peach {
 				this.gotoIntro();
 			} else {
 				this.$state.go(
-					C.States.WizardQuestion,
+					C.States.PitWizardQuestion,
 					{ track: this.trackId, id: previousId }
 				);
 			}
@@ -295,7 +295,7 @@ module Peach {
 
 		public get IsSetVars(): boolean {
 			return this.$state.includes(
-				C.States.Wizard,
+				C.States.PitWizard,
 				{ track: C.Tracks.Vars }
 			);
 		}

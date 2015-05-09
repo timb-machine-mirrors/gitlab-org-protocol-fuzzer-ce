@@ -118,7 +118,7 @@ module Peach {
 				bucket: 'all',
 				id: fault.iteration
 			};
-			this.$state.go(C.States.FaultsDetail, params);
+			this.$state.go(C.States.JobFaultsDetail, params);
 		}
 
 		private refreshFaults() {

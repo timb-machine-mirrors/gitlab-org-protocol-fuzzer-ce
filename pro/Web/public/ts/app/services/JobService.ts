@@ -31,6 +31,11 @@ module Peach {
 
 		private isLoading: boolean;
 
+		private jobs: IJob[];
+		public get Jobs(): IJob[] {
+			return this.jobs;
+		}
+
 		private job: IJob;
 		public get Job(): IJob {
 			return this.job;
@@ -95,11 +100,11 @@ module Peach {
 			var promise = this.$http.get(C.Api.Jobs);
 			promise.success((jobs: IJob[]) => {
 				// ignore test jobs for now
-				jobs = _.where(jobs, { isControlIteration: false });
+				this.jobs = _.where(jobs, { isControlIteration: false });
 
 				var hasPit = false;
-				if (jobs.length > 0) {
-					this.job = _.first(jobs);
+				if (this.jobs.length > 0) {
+					this.job = _.first(this.jobs);
 					hasPit = !_.isEmpty(this.job.pitUrl);
 					if (hasPit) {
 						this.isLoading = true;

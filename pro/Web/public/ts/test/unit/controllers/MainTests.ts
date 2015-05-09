@@ -39,7 +39,8 @@ describe("Peach", () => {
 				}
 			});
 
-			$templateCache.put(C.Templates.Dashboard, '');
+			$templateCache.put(C.Templates.Home, '');
+			$templateCache.put(C.Templates.Job, '');
 			$templateCache.put(C.Templates.Wizard.Intro, '');
 
 			$httpBackend.expectGET(C.Api.Jobs).respond([]);
@@ -57,7 +58,7 @@ describe("Peach", () => {
 		describe('when a Pit is not selected', () => {
 			it("new", () => {
 				expect(_.isObject(ctrl)).toBe(true);
-				expect($state.is(C.States.Home)).toBe(true);
+				expect($state.is(C.States.MainHome)).toBe(true);
 			});
 
 			it("SelectPitPrompt is 'Select a Pit'", () => {
@@ -65,7 +66,7 @@ describe("Peach", () => {
 			});
 
 			it("should not start the wizard", () => {
-				expect($state.is(C.States.Wizard, { step: C.Tracks.Intro })).toBe(false);
+				expect($state.is(C.States.PitWizard, { step: C.Tracks.Intro })).toBe(false);
 			});
 		});
 
@@ -101,7 +102,7 @@ describe("Peach", () => {
 			});
 
 			it("should start the wizard", () => {
-				expect($state.is(C.States.Wizard, { track: C.Tracks.Intro })).toBe(true);
+				expect($state.is(C.States.PitWizard, { track: C.Tracks.Intro })).toBe(true);
 			});
 		});
 
@@ -135,7 +136,7 @@ describe("Peach", () => {
 			});
 
 			it("should not start the wizard", () => {
-				expect($state.is(C.States.Wizard, { step: C.Tracks.Intro })).toBe(false);
+				expect($state.is(C.States.PitWizard, { step: C.Tracks.Intro })).toBe(false);
 			});
 		});
 	});

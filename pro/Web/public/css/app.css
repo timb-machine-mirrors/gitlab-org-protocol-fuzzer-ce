@@ -1,9 +1,15 @@
 ﻿@font-face {
-	font-family: 'FontAwesome';
-	src: url('../lib/ace-bootstrap/fontawesome-webfont.eot?v=3.2.1');
-	src: url('../lib/ace-bootstrap/fontawesome-webfont.eot?#iefix&v=3.2.1') format('embedded-opentype'), url('../lib/ace-bootstrap/fontawesome-webfont.woff?v=3.2.1') format('woff'), url('../lib/ace-bootstrap/fontawesome-webfont.ttf?v=3.2.1') format('truetype'), url('../lib/ace-bootstrap/fontawesome-webfont.svg#fontawesomeregular?v=3.2.1') format('svg');
-	font-weight: normal;
+	font-family: 'Open Sans';
 	font-style: normal;
+	font-weight: 300;
+	src: local('Open Sans Light'), local('OpenSans-Light'), url('../fonts/font1.woff') format('woff');
+}
+
+@font-face {
+	font-family: 'Open Sans';
+	font-style: normal;
+	font-weight: 400;
+	src: local('Open Sans'), local('OpenSans'), url('../fonts/font2.woff') format('woff');
 }
 
 .skin-1 .nav-list > li.disabled > a > .menu-text,
@@ -17,10 +23,6 @@
 	height: 50px;
 }
 
-.nav-list > li .submenu {
-	display: block;
-}
-
 a.disabled {
 	cursor: not-allowed;
 }
@@ -32,15 +34,6 @@ a.disabled {
 pre {
 	word-wrap: normal;
 	overflow: auto;
-}
-
-.peach-field-info:before {
-	content: "\f059";
-}
-
-.peach-field-info {
-	font-family: FontAwesome2;
-	cursor: pointer;
 }
 
 .pointer {
@@ -97,7 +90,7 @@ pre.peach-test-log {
 	content: "\f0dc";
 	display: inline-block;
 	color: #555;
-	font-family: FontAwesome2;
+	font-family: FontAwesome;
 	font-size: 13px;
 	font-weight: normal;
 	float: right;
@@ -138,20 +131,6 @@ pre.peach-test-log {
 	overflow: auto;
 }
 
-/* 
-	fix for ace.css
-	default seems to be relative
-	this can cause main-content form-groups to flow below the bottom of the sidebar
-*/
-.sidebar {
-	position: absolute;
-}
-
-/* fix for backdrop, for some reason this is missing */
-.modal-backdrop {
-	bottom: 0;
-}
-
 /* turn off animation, this can screw with autofocus */
 .modal.fade .modal-dialog,
 .modal.in .modal-dialog {
@@ -159,7 +138,6 @@ pre.peach-test-log {
 	-ms-transform: translate(0, 0);
 	transform: translate(0, 0);
 }
-
 
 .peach-add-monitor {
 	width: 400px;
@@ -174,7 +152,7 @@ pre.peach-test-log {
 }
 
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
-display: none !important;
+	display: none !important;
 }
 
 noscript {

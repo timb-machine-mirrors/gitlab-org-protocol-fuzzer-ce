@@ -130,7 +130,7 @@ module Peach {
 			case C.Metrics.BucketTimeline:
 				promise.success((data: IBucketTimelineMetric[]) => {
 					var items = data.map((item: IBucketTimelineMetric) => {
-						item.href = this.$state.href(C.States.Faults, { bucket: item.label });
+						item.href = this.$state.href(C.States.JobFaults, { bucket: item.label });
 						return <ITimelineItem> {
 							id: item.iteration,
 							content: undefined,
