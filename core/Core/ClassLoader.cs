@@ -132,7 +132,8 @@ namespace Peach.Core
 			"pf_admin.exe", 
 			"pf_controller.exe", 
 			"pf_node.exe", 
-			"PitTester.exe" 
+			"PitTester.exe",
+			"Nancy.Testing.dll",
 		};
 
 		#endregion
@@ -360,9 +361,6 @@ namespace Peach.Core
 		{
 			foreach (var asm in AssemblyCache.Values)
 			{
-				//if (asm.IsDynamic)
-				//	continue;
-
 				foreach (var type in asm.GetTypes())
 				{
 					if (!type.IsClass || (!type.IsPublic && !type.IsNestedPublic))
