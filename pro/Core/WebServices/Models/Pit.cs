@@ -5,6 +5,8 @@ namespace Peach.Pro.Core.WebServices.Models
 {
 	public class Pit : LibraryPit
 	{
+		public string Id { get; set; }
+		
 		public bool Locked { get; set; }
 
 		public List<PitVersion> Versions { get; set; }
