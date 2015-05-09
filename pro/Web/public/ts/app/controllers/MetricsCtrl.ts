@@ -119,7 +119,7 @@ module Peach {
 				if (item.content) {
 					return item.content;
 				}
-				var html = this.$templateCache.get(C.Templates.BucketTimelineItem);
+				var html = this.$templateCache.get(C.Templates.Job.BucketTimelineItem);
 				return this.$interpolate(html)({ item: item });
 			}
 		}

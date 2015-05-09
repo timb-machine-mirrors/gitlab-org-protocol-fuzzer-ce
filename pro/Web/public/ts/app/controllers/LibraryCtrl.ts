@@ -11,7 +11,7 @@ module Peach {
 		public Categories: PitCategory[] = [];
 	}
 	
-	class PitCategory {		
+	class PitCategory {
 		constructor(
 			public Name: string
 		) {}
@@ -29,7 +29,7 @@ module Peach {
 			$scope: IViewModelScope,
 			private pitService: PitService
 		) {
-			$scope.vm = this;			
+			$scope.vm = this;
 			this.init();
 		}
 
