@@ -79,6 +79,7 @@ namespace Peach.Core
 			"Nancy.Hosting.Self.dll", 
 			"Nancy.Metadata.Module.dll",
 			"Nancy.Serialization.JsonNet.dll", 
+			"Nancy.Testing.dll",
 			"Newtonsoft.Json.dll", 
 			"NLog.dll", 
 			"nunit.core.dll", 
@@ -132,7 +133,7 @@ namespace Peach.Core
 			"pf_admin.exe", 
 			"pf_controller.exe", 
 			"pf_node.exe", 
-			"PitTester.exe" 
+			"PitTester.exe",
 		};
 
 		#endregion
