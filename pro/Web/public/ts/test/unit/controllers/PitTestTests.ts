@@ -37,7 +37,7 @@ describe("Peach", () => {
 			$templateCache = $injector.get(C.Angular.$templateCache);
 			pitService = $injector.get(C.Services.Pit);
 
-			$templateCache.put(C.Templates.Dashboard, '');
+			$templateCache.put(C.Templates.Home, '');
 
 			$httpBackend.expectGET(pitUrl).respond(pit);
 			pitService.SelectPit(pitUrl);

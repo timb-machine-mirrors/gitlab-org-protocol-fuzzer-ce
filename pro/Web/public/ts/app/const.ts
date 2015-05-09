@@ -71,7 +71,11 @@ module Peach.C {
 	}
 
 	export module Templates {
-		export var Dashboard = 'html/dashboard.html';
+		export var Home = 'html/home.html';
+		export var Jobs = 'html/jobs.html';
+		export var Library = 'html/library.html';
+		export var Templates = 'html/templates.html';
+		export var Job = 'html/dashboard.html';
 		export var Faults = 'html/faults/summary.html';
 		export var FaultsDetail = 'html/faults/detail.html';
 		export var MetricPage = 'html/metrics/:metric.html';
@@ -109,19 +113,26 @@ module Peach.C {
 	}
 
 	export module States {
-		export var Home = 'home';
-		export var Faults = 'faults';
-		export var FaultsDetail = 'faults.detail';
-		export var Metrics = 'metrics';
+		export var Main = 'main';
+		export var MainHome = 'main.home';
+		export var MainJobs = 'main.jobs';
+		export var MainLibrary = 'main.library';
+		export var MainTemplates = 'main.templates';
 
-		export var Wizard = 'wizard';
-		export var WizardIntro = 'wizard.intro';
-		export var WizardQuestion = 'wizard.question';
-		export var WizardReview = 'wizard.review';
+		export var Job = 'job';
+		export var JobDashboard = 'job.dashboard';
+		export var JobFaults = 'job.faults';
+		export var JobFaultsDetail = 'job.faults.detail';
+		export var JobMetrics = 'job.metrics';
 
-		export var Config = 'config';
-		export var ConfigVariables = 'config.variables';
-		export var ConfigMonitoring = 'config.monitoring';
-		export var ConfigTest = 'config.test';
+		export var Pit = 'pit';
+		export var PitWizard = 'pit.wizard';
+		export var PitWizardIntro = 'pit.wizard.intro';
+		export var PitWizardQuestion = 'pit.wizard.question';
+		export var PitWizardReview = 'pit.wizard.review';
+		export var PitConfig = 'pit.config';
+		export var PitConfigVariables = 'pit.config.variables';
+		export var PitConfigMonitoring = 'pit.config.monitoring';
+		export var PitConfigTest = 'pit.config.test';
 	}
 }

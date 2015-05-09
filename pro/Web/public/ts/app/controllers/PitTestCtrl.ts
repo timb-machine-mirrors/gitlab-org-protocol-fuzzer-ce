@@ -62,7 +62,7 @@ module Peach {
 		public Title = 'Test';
 
 		private get isWizard(): boolean {
-			return this.$state.is(C.States.Wizard, { track: C.Tracks.Test });
+			return this.$state.is(C.States.PitWizard, { track: C.Tracks.Test });
 		}
 
 		public get ShowNotConfigured(): boolean {
@@ -126,7 +126,7 @@ module Peach {
 		}
 
 		public OnNextTrack() {
-			this.$state.go(C.States.Home);
+			this.$state.go(C.States.MainHome);
 		}
 	}
 }

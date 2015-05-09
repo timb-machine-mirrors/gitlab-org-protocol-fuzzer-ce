@@ -54,6 +54,14 @@ module Peach {
 			return this.jobService.Job;
 		}
 
+		public get JobId(): number {
+			return 1;
+		}
+
+		public get PitId(): number {
+			return 1;
+		}
+
 		public Metrics = [
 			{ id: C.Metrics.BucketTimeline, name: 'Bucket Timeline' },
 			{ id: C.Metrics.FaultTimeline, name: 'Faults Over Time' },
@@ -66,18 +74,18 @@ module Peach {
 
 		// TODO: use WizardService definition of tracks
 		public WizardTracks = [
-			{ id: C.Tracks.Intro, name: 'Introduction', state: C.States.Wizard },
-			{ id: C.Tracks.Vars, name: 'Set Variables', state: C.States.WizardIntro },
-			{ id: C.Tracks.Fault, name: 'Fault Detection', state: C.States.WizardIntro },
-			{ id: C.Tracks.Data, name: 'Data Collection', state: C.States.WizardIntro },
-			{ id: C.Tracks.Auto, name: 'Automation', state: C.States.WizardIntro },
-			{ id: C.Tracks.Test, name: 'Test', state: C.States.Wizard }
+			{ id: C.Tracks.Intro, name: 'Introduction', state: C.States.PitWizard },
+			{ id: C.Tracks.Vars, name: 'Set Variables', state: C.States.PitWizardIntro },
+			{ id: C.Tracks.Fault, name: 'Fault Detection', state: C.States.PitWizardIntro },
+			{ id: C.Tracks.Data, name: 'Data Collection', state: C.States.PitWizardIntro },
+			{ id: C.Tracks.Auto, name: 'Automation', state: C.States.PitWizardIntro },
+			{ id: C.Tracks.Test, name: 'Test', state: C.States.PitWizard }
 		];
 
 		public ConfigSteps = [
-			{ id: C.States.ConfigVariables, name: 'Variables' },
-			{ id: C.States.ConfigMonitoring, name: 'Monitoring' },
-			{ id: C.States.ConfigTest, name: 'Test' }
+			{ id: C.States.PitConfigVariables, name: 'Variables' },
+			{ id: C.States.PitConfigMonitoring, name: 'Monitoring' },
+			{ id: C.States.PitConfigTest, name: 'Test' }
 		];
 
 		public OnItemClick(event: ng.IAngularEvent, enabled) {
@@ -88,9 +96,9 @@ module Peach {
 		}
 
 		private subMenus = [
-			{ state: C.States.Metrics, collapsed: true },
-			{ state: C.States.Wizard, collapsed: true },
-			{ state: C.States.Config, collapsed: true }
+			{ state: C.States.JobMetrics, collapsed: true },
+			{ state: C.States.PitWizard, collapsed: true },
+			{ state: C.States.PitConfig, collapsed: true }
 		];
 
 		private getSubMenu(state) {
@@ -102,6 +110,7 @@ module Peach {
 		}
 
 		public OnSubClick(event: ng.IAngularEvent, state, enabled) {
+			console.log('OnSubClick', state, enabled);
 			event.preventDefault();
 			if (enabled) {
 				this.subMenus.forEach(item => {
@@ -179,9 +188,9 @@ module Peach {
 			});
 			modal.result.then(() => {
 				if (!this.pitService.IsConfigured) {
-					this.$state.go(C.States.Wizard, { track: C.Tracks.Intro });
+					this.$state.go(C.States.PitWizard, { track: C.Tracks.Intro });
 				} else {
-					this.$state.go(C.States.Home);
+					this.$state.go(C.States.MainHome);
 				}
 			});
 		}
@@ -195,11 +204,6 @@ module Peach {
 
 		public OnToggleSidebar() {
 			this.isMenuMin = !this.isMenuMin;
-		}
-
-		public get SidebarCollapseClass() {
-			return this.IsMenuMinimized ?
-				'icon-double-angle-right' : 'icon-double-angle-left';
 		}
 
 		public get SidebarClass() {
@@ -217,6 +221,10 @@ module Peach {
 
 		public OnMenuToggle() {
 			this.showSidebar = !this.showSidebar;
+		}
+
+		public ShowMenu(name: string) {
+			return this.$state.includes(name);
 		}
 	}
 }

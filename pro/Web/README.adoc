@@ -12,8 +12,7 @@ Then run the following commands from this directory:
 
 ```
 mkdir %HOME%\AppData\Roaming\npm
-npm install -g grunt-cli
-npm install -g bower
+npm install -g grunt-cli bower
 npm install
 bower install
 ```
@@ -23,7 +22,7 @@ I usually have two terminals open at all times running these commands:
 This one is for unit test.
 
 ```
-grunt test
+grunt unit
 ```
 
 This one generates the app code and hosts a proxy server. 
@@ -40,6 +39,8 @@ Example for looking for package updates:
 ```
 bower ls
 ```
+
+### Maintenance
 
 To add a new package (in this case `angular`):
 

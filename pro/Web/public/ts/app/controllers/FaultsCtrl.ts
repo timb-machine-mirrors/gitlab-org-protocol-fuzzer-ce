@@ -37,7 +37,7 @@ module Peach {
 			promise.then((detail: IFaultDetail) => {
 				this.Fault = detail;
 			}, () => {
-				$state.go(C.States.Home);
+				$state.go(C.States.MainHome);
 			});
 		}
 
@@ -91,7 +91,7 @@ module Peach {
 				bucket: this.bucket,
 				id: fault.iteration
 			};
-			this.$state.go(C.States.FaultsDetail, params);
+			this.$state.go(C.States.JobFaultsDetail, params);
 		}
 
 		private refreshBucketFaults() {
