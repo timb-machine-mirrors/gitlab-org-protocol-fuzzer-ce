@@ -40,8 +40,7 @@ describe("Peach", () => {
 			});
 
 			$templateCache.put(C.Templates.Home, '');
-			$templateCache.put(C.Templates.Job, '');
-			$templateCache.put(C.Templates.Wizard.Intro, '');
+			$templateCache.put(C.Templates.Pit.Wizard.Intro, '');
 
 			$httpBackend.expectGET(C.Api.Jobs).respond([]);
 			ctrl = $controller('MainController', {

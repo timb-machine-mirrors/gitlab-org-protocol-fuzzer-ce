@@ -89,66 +89,58 @@ module Peach {
 				// ----- Job -----
 				.state(C.States.Job, {
 					url: '/job/:job',
-					abstract: true
+					abstract: true,
+					template: '<div ui-view></div>'
 				})
 				.state(C.States.JobDashboard, {
 					url: '/',
-					views: {
-						'@': {
-							templateUrl: C.Templates.Job,
-							controller: DashboardController,
-							controllerAs: 'vm'
-						}
-					}
+					templateUrl: C.Templates.Job,
+					controller: DashboardController,
+					controllerAs: 'vm'
 				})
 				.state(C.States.JobFaults, {
 					url: '/faults/:bucket',
 					params: { bucket: 'all' },
-					views: {
-						'@': {
-							templateUrl: C.Templates.Faults,
-							controller: FaultsController,
-							controllerAs: 'vm'
-						}
-					}
+					templateUrl: C.Templates.Job.Faults.Summary,
+					controller: FaultsController,
+					controllerAs: 'vm'
 				})
 				.state(C.States.JobFaultsDetail, {
 					url: '/{id:int}',
-					views: {
-						'@': {
-							templateUrl: C.Templates.FaultsDetail,
-							controller: FaultsDetailController,
-							controllerAs: 'vm'
-						}
-					}
+					templateUrl: C.Templates.Job.Faults.Detail,
+					controller: FaultsDetailController,
+					controllerAs: 'vm'
 				})
 				.state(C.States.JobMetrics, {
 					url: '/metrics/:metric',
-					views: {
-						'@': {
-							templateUrl: params =>
-								C.Templates.MetricPage.replace(':metric', params.metric),
-							controller: MetricsController,
-							controllerAs: 'vm'
-						}
-					}
+					templateUrl: params =>
+						C.Templates.Job.MetricPage.replace(':metric', params.metric),
+					controller: MetricsController,
+					controllerAs: 'vm'
 				})
 
 				// ----- Configure -----
 				.state(C.States.Pit, {
 					url: '/pit/:pit',
-					abstract: true
+					abstract: true,
+					template: '<div ui-view></div>'
+				})
+				.state(C.States.PitConfigure, {
+					url: '/configure',
+					templateUrl: C.Templates.Pit.Configure,
+					controller: HomeController,
+					controllerAs: 'vm'
 				})
 				.state(C.States.PitWizard, {
 					url: '/quickstart/:track/{id:int}',
 					templateUrl: params => {
 						switch (params.track) {
 							case C.Tracks.Intro:
-								return C.Templates.Wizard.Intro;
+								return C.Templates.Pit.Wizard.Intro;
 							case C.Tracks.Test:
-								return C.Templates.Wizard.Test;
+								return C.Templates.Pit.Wizard.Test;
 						}
-						return C.Templates.Wizard.Track;
+						return C.Templates.Pit.Wizard.Track;
 					},
 					controllerProvider: ($stateParams: any): any => {
 						switch ($stateParams.track) {
@@ -165,38 +157,38 @@ module Peach {
 				.state(C.States.PitWizardIntro, {
 					url: '/intro',
 					templateUrl: params =>
-						C.Templates.Wizard.TrackIntro.replace(':track', params.track)
+						C.Templates.Pit.Wizard.TrackIntro.replace(':track', params.track)
 				})
 				.state(C.States.PitWizardQuestion, {
-					templateUrl: C.Templates.Wizard.Question,
+					templateUrl: C.Templates.Pit.Wizard.Question,
 					controller: WizardQuestionController,
 					controllerAs: 'vm'
 				})
 				.state(C.States.PitWizardReview, {
 					url: '/review',
 					templateUrl: params =>
-						C.Templates.Wizard.TrackDone.replace(':track', params.track)
+						C.Templates.Pit.Wizard.TrackDone.replace(':track', params.track)
 				})
-				.state(C.States.PitConfig, {
+				.state(C.States.PitAdvanced, {
 					abstract: true,
-					url: '/config',
+					url: '/advanced',
 					template: '<div ui-view></div>'
 				})
-				.state(C.States.PitConfigVariables, {
+				.state(C.States.PitAdvancedVariables, {
 					url: '/variables',
-					templateUrl: C.Templates.Config.Variables,
+					templateUrl: C.Templates.Pit.Advanced.Variables,
 					controller: ConfigureVariablesController,
 					controllerAs: 'vm'
 				})
-				.state(C.States.PitConfigMonitoring, {
+				.state(C.States.PitAdvancedMonitoring, {
 					url: '/monitoring',
-					templateUrl: C.Templates.Config.Monitoring,
+					templateUrl: C.Templates.Pit.Advanced.Monitoring,
 					controller: ConfigureMonitorsController,
 					controllerAs: 'vm'
 				})
-				.state(C.States.PitConfigTest, {
+				.state(C.States.PitAdvancedTest, {
 					url: '/test',
-					templateUrl: C.Templates.Config.Test,
+					templateUrl: C.Templates.Pit.Advanced.Test,
 					controller: PitTestController,
 					controllerAs: 'vm'
 				})
