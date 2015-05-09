@@ -290,7 +290,7 @@ module Peach {
 			if (template === 'user') {
 				template = 'string';
 			}
-			return C.Templates.Wizard.QuestionType.replace(':type', template);
+			return C.Templates.Pit.Wizard.QuestionType.replace(':type', template);
 		}
 
 		public get IsSetVars(): boolean {

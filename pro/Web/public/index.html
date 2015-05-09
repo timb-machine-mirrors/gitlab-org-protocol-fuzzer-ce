@@ -221,7 +221,7 @@
 							tooltip="{{vm.JobRunningTooltip}}"
 							tooltip-placement="right">
 						<a href="#"
-							 ng-click="vm.OnSubClick($event, 'pit.config', vm.CanConfigurePit)">
+							 ng-click="vm.OnSubClick($event, 'pit.advanced', vm.CanConfigurePit)">
 							<i class="fa fa-wrench"></i>
 							<span class="menu-text">
 								Advanced
@@ -230,7 +230,7 @@
 						</a>
 
 						<ul class="submenu"
-								collapse="vm.IsCollapsed('pit.config')">
+								collapse="vm.IsCollapsed('pit.advanced')">
 							<li ui-sref-active="active"
 									ng-repeat="item in vm.ConfigSteps">
 								<a ui-sref="{{item.id}}({pit: vm.PitId})">
