@@ -75,31 +75,38 @@ module Peach.C {
 		export var Jobs = 'html/jobs.html';
 		export var Library = 'html/library.html';
 		export var Templates = 'html/templates.html';
-		export var Job = 'html/dashboard.html';
-		export var Faults = 'html/faults/summary.html';
-		export var FaultsDetail = 'html/faults/detail.html';
-		export var MetricPage = 'html/metrics/:metric.html';
-		export var BucketTimelineItem = 'bucketTimelineItem.html';
+		export module Job {
+			export var Dashboard = 'html/job/dashboard.html';
+			export module Faults {
+				export var Summary = 'html/job/faults/summary.html';
+				export var Detail = 'html/job/faults/detail.html';
+			}
+			export var MetricPage = 'html/job/metrics/:metric.html';
+			export var BucketTimelineItem = 'bucketTimelineItem.html';
+		}
+		export module Pit {
+			export var Configure = 'html/pit/configure.html';
+			export module Wizard {
+				export var Intro = 'html/pit/wizard/intro.html';
+				export var Track = 'html/pit/wizard/track.html';
+				export var TrackIntro = 'html/pit/wizard/:track/intro.html';
+				export var Question = 'html/pit/wizard/question.html';
+				export var TrackDone = 'html/pit/wizard/:track/done.html';
+				export var Test = 'html/pit/wizard/test.html';
+				export var QuestionType = 'html/pit/q/:type.html';
+			}
+			export module Advanced {
+				export var Variables = 'html/pit/advanced/variables.html';
+				export var Monitoring = 'html/pit/advanced/monitoring.html';
+				export var Test = 'html/pit/advanced/test.html';
+			}
+		}
 		export module Modal {
 			export var CopyPit = 'html/modal/CopyPit.html';
 			export var PitLibrary = 'html/modal/PitLibrary.html';
 			export var StartJob = 'html/modal/StartJob.html';
 			export var NewVar = 'html/modal/NewVar.html';
 			export var Unsaved = 'html/modal/Unsaved.html';
-		}
-		export module Wizard {
-			export var Intro = 'html/wizard/intro.html';
-			export var Track = 'html/wizard/track.html';
-			export var TrackIntro = 'html/wizard/:track/intro.html';
-			export var Question = 'html/wizard/question.html';
-			export var TrackDone = 'html/wizard/:track/done.html';
-			export var Test = 'html/wizard/test.html';
-			export var QuestionType = 'html/q/:type.html';
-		}
-		export module Config {
-			export var Variables = 'html/cfg/variables.html';
-			export var Monitoring = 'html/cfg/monitoring.html';
-			export var Test = 'html/cfg/test.html';
 		}
 		export module Directives {
 			export var Agent = 'html/directives/agent.html';
@@ -126,13 +133,14 @@ module Peach.C {
 		export var JobMetrics = 'job.metrics';
 
 		export var Pit = 'pit';
+		export var PitConfigure = 'pit.configure';
 		export var PitWizard = 'pit.wizard';
 		export var PitWizardIntro = 'pit.wizard.intro';
 		export var PitWizardQuestion = 'pit.wizard.question';
 		export var PitWizardReview = 'pit.wizard.review';
-		export var PitConfig = 'pit.config';
-		export var PitConfigVariables = 'pit.config.variables';
-		export var PitConfigMonitoring = 'pit.config.monitoring';
-		export var PitConfigTest = 'pit.config.test';
+		export var PitAdvanced = 'pit.advanced';
+		export var PitAdvancedVariables = 'pit.advanced.variables';
+		export var PitAdvancedMonitoring = 'pit.advanced.monitoring';
+		export var PitAdvancedTest = 'pit.advanced.test';
 	}
 }

@@ -1181,6 +1181,7 @@ namespace Peach.Pro.Core.WebServices
 
 			lib.Pits.Add(new LibraryPit
 			{
+				Id = detail.Pit.Id,
 				PitUrl = url,
 				Name = detail.Pit.Name,
 				Description = detail.Pit.Description,

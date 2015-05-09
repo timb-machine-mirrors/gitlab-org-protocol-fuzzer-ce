@@ -39,8 +39,8 @@ describe("Peach", () => {
 			wizardService = $injector.get(C.Services.Wizard);
 
 			$templateCache.put(C.Templates.Home, '');
-			$templateCache.put(C.Templates.Wizard.Track, '');
-			$templateCache.put(C.Templates.Wizard.Question, '');
+			$templateCache.put(C.Templates.Pit.Wizard.Track, '');
+			$templateCache.put(C.Templates.Pit.Wizard.Question, '');
 
 			var tracks = [
 				C.Tracks.Vars,
@@ -49,10 +49,10 @@ describe("Peach", () => {
 			];
 			tracks.forEach(track => {
 				$templateCache.put(
-					C.Templates.Wizard.TrackIntro.replace(':track', track), ''
+					C.Templates.Pit.Wizard.TrackIntro.replace(':track', track), ''
 				);
 				$templateCache.put(
-					C.Templates.Wizard.TrackDone.replace(':track', track), ''
+					C.Templates.Pit.Wizard.TrackDone.replace(':track', track), ''
 				);
 			});
 

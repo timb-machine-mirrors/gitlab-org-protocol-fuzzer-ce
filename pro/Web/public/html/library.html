@@ -12,7 +12,7 @@
 					heading="{{cat.Name}}">
 				<ul class="list-inline">
 					<li ng-repeat="pit in cat.Pits">
-						<a href="#">{{pit.name}}</a>
+						<a ui-sref="pit.configure({pit: pit.id})">{{pit.name}}</a>
 					</li>
 				</ul>
 			</accordion-group>

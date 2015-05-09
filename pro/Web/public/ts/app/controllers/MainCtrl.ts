@@ -83,9 +83,9 @@ module Peach {
 		];
 
 		public ConfigSteps = [
-			{ id: C.States.PitConfigVariables, name: 'Variables' },
-			{ id: C.States.PitConfigMonitoring, name: 'Monitoring' },
-			{ id: C.States.PitConfigTest, name: 'Test' }
+			{ id: C.States.PitAdvancedVariables, name: 'Variables' },
+			{ id: C.States.PitAdvancedMonitoring, name: 'Monitoring' },
+			{ id: C.States.PitAdvancedTest, name: 'Test' }
 		];
 
 		public OnItemClick(event: ng.IAngularEvent, enabled) {
@@ -98,7 +98,7 @@ module Peach {
 		private subMenus = [
 			{ state: C.States.JobMetrics, collapsed: true },
 			{ state: C.States.PitWizard, collapsed: true },
-			{ state: C.States.PitConfig, collapsed: true }
+			{ state: C.States.PitAdvanced, collapsed: true }
 		];
 
 		private getSubMenu(state) {
@@ -110,7 +110,6 @@ module Peach {
 		}
 
 		public OnSubClick(event: ng.IAngularEvent, state, enabled) {
-			console.log('OnSubClick', state, enabled);
 			event.preventDefault();
 			if (enabled) {
 				this.subMenus.forEach(item => {

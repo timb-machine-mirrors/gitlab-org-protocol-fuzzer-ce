@@ -4,6 +4,7 @@ module Peach {
 	"use strict";
 
 	export interface IPit {
+		id: string;
 		pitUrl: string;
 		name: string;
 		description: string;
