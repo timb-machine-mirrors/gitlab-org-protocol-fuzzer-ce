@@ -12,17 +12,14 @@ module Peach {
 		_.forOwn(ns, (component, key: string) => {
 			var name = getComponentName(key, component);
 			if (key.endsWith('Controller')) {
-				//console.log('Registering controller', name, key);
 				app.controller(name, component);
 			}
 			if (key.endsWith('Directive')) {
-				//console.log('Registering directive', name, key);
 				app.directive(name, () => {
 					return component;
 				});
 			}
 			if (key.endsWith('Service')) {
-				//console.log('Registering service', name, key);
 				app.service(name, component);
 			}
 		});
@@ -60,46 +57,33 @@ module Peach {
 
 			$stateProvider
 				// ----- Main -----
-				.state(C.States.Main, { abstract: true })
+				.state(C.States.Main, { 
+					abstract: true,
+					template: '<div ui-view></div>'
+				})
 				.state(C.States.MainHome, {
 					url: '/',
-					views: {
-						'@': {
-							templateUrl: C.Templates.Home,
-							controller: HomeController,
-							controllerAs: 'vm'
-						}
-					}
+					templateUrl: C.Templates.Home,
+					controller: HomeController,
+					controllerAs: 'vm'
 				})
 				.state(C.States.MainLibrary, {
 					url: '/library',
-					views: {
-						'@': {
-							templateUrl: C.Templates.Library,
-							controller: LibraryController,
-							controllerAs: 'vm'
-						}
-					}
+					templateUrl: C.Templates.Library,
+					controller: LibraryController,
+					controllerAs: 'vm'
 				})
 				.state(C.States.MainTemplates, {
 					url: '/templates',
-					views: {
-						'@': {
-							templateUrl: C.Templates.Templates,
-							controller: TemplatesController,
-							controllerAs: 'vm'
-						}
-					}
+					templateUrl: C.Templates.Templates,
+					controller: TemplatesController,
+					controllerAs: 'vm'
 				})
 				.state(C.States.MainJobs, {
 					url: '/jobs',
-					views: {
-						'@': {
-							templateUrl: C.Templates.Jobs,
-							controller: JobsController,
-							controllerAs: 'vm'
-						}
-					}
+					templateUrl: C.Templates.Jobs,
+					controller: JobsController,
+					controllerAs: 'vm'
 				})
 
 				// ----- Job -----
