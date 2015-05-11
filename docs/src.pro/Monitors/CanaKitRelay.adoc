@@ -33,8 +33,10 @@ RelayNumber:: Relay to trigger (1, 2, 3, or 4)
 
 _Optional:_
 
-Action:: Perform an action on the specified relay, defaults to ToggleOff. Valid actions include the following:
-
+Action:: 
++
+Perform an action on the specified relay, defaults to ToggleOff. Valid actions include the following:
++
 [cols="2,4" options="header",halign="center"] 
 |==========================================================
 |Action     |Description
@@ -52,8 +54,10 @@ If "false", restarts the target if the process exits or crashes. +
 This argument defaults to false.
 
 ReverseSwitch:: Obsolete. Instead, use the ToggleOn Action. 
-When:: Details on when to perform a specfied action. Specify one of the following values: 
-
+When:: 
++
+Details on when to perform a specfied action. Specify one of the following values: 
++
 [cols="1,2" options="header",halign="center"] 
 |==========================================================
 |"When" Setting              |Description
@@ -66,7 +70,7 @@ When:: Details on when to perform a specfied action. Specify one of the followin
 |OnIterationStartAfterFault  |Run the command at start of an iteration that immediately follows a fault detection.
 |OnCall                      |Trigger the command to run from the state model. The command runs when the _StartOnCall_ message is received.
 |==========================================================
-
++
 .When Choices for Performing an Action
 image::{images}/Timings_SSH.PNG["When Run Command Choices", scalewidth="75%"]
 
