@@ -17,13 +17,9 @@ namespace Peach.Pro.Test.Core.Storage
 		TempFile _tmp;
 		DateTime _now;
 
-		[SetUp]
-		public void SetUp()
+		public static void MakeSampleCache(DateTime now, string dbPath)
 		{
-			_tmp = new TempFile();
-			_now = DateTime.UtcNow;
-
-			var cache = new MetricsCache(_tmp.Path);
+			var cache = new MetricsCache(dbPath);
 
 			cache.IterationStarting(1);
 			cache.StateStarting("S1", 1);
@@ -70,8 +66,8 @@ namespace Peach.Pro.Test.Core.Storage
 				Iteration = 1,
 				MajorHash = "AAA",
 				MinorHash = "BBB",
-				Timestamp = _now,
-				Hour = _now.Hour,
+				Timestamp = now,
+				Hour = now.Hour,
 			});
 
 			cache.IterationStarting(3);
@@ -84,8 +80,8 @@ namespace Peach.Pro.Test.Core.Storage
 				Iteration = 3,
 				MajorHash = "AAA",
 				MinorHash = "BBB",
-				Timestamp = _now,
-				Hour = _now.Hour,
+				Timestamp = now,
+				Hour = now.Hour,
 			});
 
 			cache.IterationStarting(4);
@@ -106,8 +102,8 @@ namespace Peach.Pro.Test.Core.Storage
 				Iteration = 4,
 				MajorHash = "XXX",
 				MinorHash = "YYY",
-				Timestamp = _now + TimeSpan.FromHours(1),
-				Hour = _now.Hour + 1,
+				Timestamp = now + TimeSpan.FromHours(1),
+				Hour = now.Hour + 1,
 			});
 
 			cache.IterationStarting(5);
@@ -123,8 +119,8 @@ namespace Peach.Pro.Test.Core.Storage
 				Iteration = 5,
 				MajorHash = "AAA",
 				MinorHash = "YYY",
-				Timestamp = _now + TimeSpan.FromHours(2),
-				Hour = _now.Hour + 2,
+				Timestamp = now + TimeSpan.FromHours(2),
+				Hour = now.Hour + 2,
 			});
 
 			cache.IterationStarting(6);
@@ -137,8 +133,8 @@ namespace Peach.Pro.Test.Core.Storage
 				Iteration = 6,
 				MajorHash = "AAA",
 				MinorHash = "BBB",
-				Timestamp = _now + TimeSpan.FromHours(3),
-				Hour = _now.Hour + 3,
+				Timestamp = now + TimeSpan.FromHours(3),
+				Hour = now.Hour + 3,
 			});
 
 			cache.IterationStarting(7);
@@ -157,9 +153,18 @@ namespace Peach.Pro.Test.Core.Storage
 				Iteration = 8,
 				MajorHash = "XXX",
 				MinorHash = "YYY",
-				Timestamp = _now + TimeSpan.FromHours(4),
-				Hour = _now.Hour + 4,
+				Timestamp = now + TimeSpan.FromHours(4),
+				Hour = now.Hour + 4,
 			});
+		}
+
+		[SetUp]
+		public void SetUp()
+		{
+			_tmp = new TempFile();
+			_now = DateTime.UtcNow;
+
+			MakeSampleCache(_now, _tmp.Path);
 		}
 
 		[TearDown]
