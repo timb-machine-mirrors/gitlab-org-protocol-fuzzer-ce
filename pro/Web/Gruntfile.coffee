@@ -102,8 +102,8 @@ module.exports = (grunt) ->
 					'public/js/test/unit.js'
 				]
 				options:
-					outfile: 'public/tests.html'
-					keepRunner: true
+					display: 'short'
+					summary: true
 					vendor: [
 						# ordered libraries
 						'public/lib/jquery/jquery.js'
