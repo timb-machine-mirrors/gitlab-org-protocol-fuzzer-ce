@@ -67,8 +67,10 @@ XOnXOff;;
 FaultRegex:: Fault when regular expression matches.
 WaitRegex:: Wait until regex matches received data.
 WaitOnCall:: Wait for message, WaitWhen must be set to OnCall.
-WaitWhen:: When to wait. Defaults to OnStart.
-
+WaitWhen:: 
++
+When to wait. Defaults to OnStart.
++
 [cols="1,2" options="header",halign="center"] 
 |==========================================================
 |"When" Setting              |Description
@@ -80,7 +82,7 @@ WaitWhen:: When to wait. Defaults to OnStart.
 |OnIterationStartAfterFault  |Waits at the start of the iteration that immediately follows a fault.
 |OnCall                      |Waits upon receipt of a call from the state model.
 |==========================================================
-
++
 .WaitWhen Choices
 image::{images}/Timings_All.PNG["When Timing Choices", scalewidth="75%"]
 
