@@ -127,5 +127,23 @@ namespace Peach.Pro.Core.Storage
 		{
 			Connection.Execute(Sql.UpdateJob, job);
 		}
+
+		public Report GetReport(Guid id)
+		{
+			var job = GetJob(id);
+			if (job == null)
+				return null;
+
+			return new Report
+			{
+				Job = job,
+				BucketDetails = LoadTable<BucketDetail>().ToList(),
+				MutatorMetrics = LoadTable<MutatorMetric>().ToList(),
+				ElementMetrics = LoadTable<ElementMetric>().ToList(),
+				StateMetrics = LoadTable<StateMetric>().ToList(),
+				DatasetMetrics = LoadTable<DatasetMetric>().ToList(),
+				BucketMetrics = LoadTable<BucketMetric>().ToList(),
+			};
+		}
 	}
 }
