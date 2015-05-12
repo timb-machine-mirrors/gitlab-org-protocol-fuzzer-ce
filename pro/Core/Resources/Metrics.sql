@@ -70,7 +70,17 @@ GROUP BY
 	x.DatasetId
 ;
 -- Buckets <<<
-	
+
+-- Bucket Details >>>
+CREATE VIEW ViewBucketDetails AS
+SELECT
+	COUNT(*) as FaultCount,
+	*
+FROM FaultDetail
+GROUP BY
+	MajorHash,MinorHash;
+-- Bucket Details <<<
+
 -- BucketTimeline >>>
 CREATE VIEW ViewBucketTimeline AS
 SELECT
