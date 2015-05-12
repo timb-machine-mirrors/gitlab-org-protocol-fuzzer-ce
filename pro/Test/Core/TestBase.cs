@@ -48,5 +48,6 @@ namespace Peach.Pro.Test.Core
 	[Quick]
 	class CommonTests : TestFixture
 	{
+		public CommonTests() : base(Assembly.GetExecutingAssembly()) { }
 	}
 }
