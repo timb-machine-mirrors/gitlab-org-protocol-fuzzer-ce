@@ -206,4 +206,10 @@ namespace Peach.Pro.Core.WebServices.Models
 			IterationCount = iterationCount;
 		}
 	}
+
+	[Table("ViewBucketDetails")]
+	public class BucketDetail : FaultDetail
+	{
+		public long FaultCount { get; set; }
+	}
 }
