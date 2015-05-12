@@ -30,7 +30,7 @@ INSERT INTO [Job] (
 	Id,
 	Status,
 	Mode,
-	Name,
+	PitFile,
 	Result,
 	Notes,
 	User,
@@ -47,12 +47,13 @@ INSERT INTO [Job] (
 	RangeStop,
 	IsControlIteration,
 	PitUrl,
-	LogPath
+	LogPath,
+	PeachVersion
 ) VALUES (
 	@Id,
 	@Status,
 	@Mode,
-	@Name,
+	@PitFile,
 	@Result,
 	@Notes,
 	@User,
@@ -69,7 +70,8 @@ INSERT INTO [Job] (
 	@RangeStop,
 	@IsControlIteration,
 	@PitUrl,
-	@LogPath
+	@LogPath,
+	@PeachVersion
 );";
 
 		public const string UpdateJob = @"
@@ -77,7 +79,7 @@ UPDATE [Job]
 SET 
 	Status = @Status,
 	Mode = @Mode,
-	Name = @Name,
+	PitFile = @PitFile,
 	Result = @Result,
 	Notes = @Notes,
 	User = @User,
@@ -92,7 +94,8 @@ SET
 	FaultCount = @FaultCount,
 	RangeStart = @RangeStart,
 	RangeStop = @RangeStop,
-	LogPath = @LogPath
+	LogPath = @LogPath,
+	PeachVersion = @PeachVersion
 WHERE
 	Id = @Id
 ;";

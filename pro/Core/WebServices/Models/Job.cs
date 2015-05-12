@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using Newtonsoft.Json;
 using Peach.Pro.Core.Storage;
 using System.IO;
@@ -128,11 +129,12 @@ namespace Peach.Pro.Core.WebServices.Models
 		public Job(JobRequest request, string pitFile)
 		{
 			Guid = Guid.NewGuid();
-			Name = Path.GetFileNameWithoutExtension(pitFile);
+			PitFile = Path.GetFileName(pitFile);
 			StartDate = DateTime.UtcNow;
 			HeartBeat = StartDate;
 			Status = JobStatus.StartPending;
 			Mode = JobMode.Starting;
+			PeachVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
 			PitUrl = request.PitUrl;
 			Seed = request.Seed;
@@ -152,11 +154,12 @@ namespace Peach.Pro.Core.WebServices.Models
 		public Job(RunConfiguration config)
 		{
 			Guid = config.id;
-			Name = Path.GetFileNameWithoutExtension(config.pitFile);
+			PitFile = Path.GetFileName(config.pitFile);
 			StartDate = DateTime.UtcNow;
 			HeartBeat = StartDate;
 			Status = JobStatus.StartPending;
 			Mode = JobMode.Starting;
+			PeachVersion = config.version;
 
 			IsControlIteration = config.singleIteration;
 			Seed = config.randomSeed;
@@ -214,6 +217,21 @@ namespace Peach.Pro.Core.WebServices.Models
 				if (LogPath == null)
 					return null;
 				return Path.Combine(LogPath, "debug.log");
+			}
+		}
+
+		/// <summary>
+		/// The human readable name for the job
+		/// </summary>
+		/// <example>
+		/// "DHCP Server"
+		/// </example>
+		[NotMapped]
+		public string Name
+		{
+			get
+			{
+				return (Path.GetFileNameWithoutExtension(PitFile) ?? string.Empty).Replace("_", " ");
 			}
 		}
 
@@ -319,9 +337,12 @@ namespace Peach.Pro.Core.WebServices.Models
 		public JobMode Mode { get; set; }
 
 		/// <summary>
-		/// Display name for the job
+		/// Pit file for the job
 		/// </summary>
-		public string Name { get; set; }
+		/// <example>
+		/// "DHCP_Server.xml"
+		/// </example>
+		public string PitFile { get; set; }
 
 		/// <summary>
 		/// The result of the job.
@@ -405,6 +426,14 @@ namespace Peach.Pro.Core.WebServices.Models
 			}
 		}
 		private DateTime? _heartBeat;
+
+		/// <summary>
+		/// The version of peach that ran the job.
+		/// </summary>
+		/// <example>
+		/// 3.6.20.0
+		/// </example>
+		public string PeachVersion { get; set; }
 
 		/// <summary>
 		/// List of tags associated with this job
