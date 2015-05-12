@@ -235,9 +235,9 @@ namespace Peach.Pro.Test.Core.Storage
 			{
 				DatabaseTests.AssertResult(db.LoadTable<BucketTimelineMetric>(), new[]
 				{
-					new BucketTimelineMetric("AAA_BBB", 1, _now, 1),
+					new BucketTimelineMetric("AAA_BBB", 1, _now, 3),
 					new BucketTimelineMetric("AAA_YYY", 5, _now + TimeSpan.FromHours(2), 1),
-					new BucketTimelineMetric("XXX_YYY", 4, _now + TimeSpan.FromHours(1), 1),
+					new BucketTimelineMetric("XXX_YYY", 4, _now + TimeSpan.FromHours(1), 2),
 				});
 			}
 		}

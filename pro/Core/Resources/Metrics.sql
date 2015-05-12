@@ -77,7 +77,7 @@ SELECT
 	x.MajorHash || '_' || x.MinorHash AS Label,
 	MIN(x.[Iteration]) AS [Iteration],
 	MIN(x.[Timestamp]) AS [Time],
-	COUNT(DISTINCT(x.MinorHash)) AS FaultCount
+	COUNT(DISTINCT(x.Iteration)) AS FaultCount
 FROM FaultMetric AS x
 GROUP BY
 	x.MajorHash,
