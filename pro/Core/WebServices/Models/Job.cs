@@ -220,6 +220,16 @@ namespace Peach.Pro.Core.WebServices.Models
 			}
 		}
 
+		[NotMapped]
+		[JsonIgnore]
+		public TimeSpan RunTimeSpan
+		{
+			get
+			{
+				return TimeSpan.FromSeconds(Runtime);
+			}
+		}
+
 		/// <summary>
 		/// The human readable name for the job
 		/// </summary>
