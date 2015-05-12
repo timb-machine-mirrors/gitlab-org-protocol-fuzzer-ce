@@ -198,6 +198,18 @@ namespace Peach.Pro.Core.WebServices.Models
 
 		[NotMapped]
 		[JsonIgnore]
+		public string ReportPath
+		{
+			get
+			{
+				if (LogPath == null)
+					return null;
+				return Path.Combine(LogPath, "report.pdf");
+			}
+		}
+
+		[NotMapped]
+		[JsonIgnore]
 		public string DatabasePath
 		{
 			get
