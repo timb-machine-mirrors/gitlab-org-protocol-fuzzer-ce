@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Pro.Core.Storage;
@@ -162,7 +163,9 @@ namespace Peach.Pro.Test.Core.Storage
 		public void SetUp()
 		{
 			_tmp = new TempFile();
-			_now = DateTime.UtcNow;
+
+			// The database doesn't store milliseconds/microseconds, so don't include them in the test
+			_now = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal);
 
 			MakeSampleCache(_now, _tmp.Path);
 		}
