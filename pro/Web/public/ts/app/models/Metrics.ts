@@ -28,7 +28,6 @@ module Peach {
 	export interface IElementMetric {
 		state: string;
 		action: string;
-		parameter: string;
 		element: string;
 		iterationCount: number;
 		mutationCount: number;

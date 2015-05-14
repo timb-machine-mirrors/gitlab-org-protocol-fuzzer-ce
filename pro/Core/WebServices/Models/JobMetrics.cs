@@ -71,7 +71,6 @@ namespace Peach.Pro.Core.WebServices.Models
 	{
 		public string State { get; set; }
 		public string Action { get; set; }
-		public string Parameter { get; set; }
 		public string Dataset { get; set; }
 		public string Element { get; set; }
 		public long IterationCount { get; set; }
@@ -82,7 +81,6 @@ namespace Peach.Pro.Core.WebServices.Models
 		public ElementMetric(
 			string state,
 			string action,
-			string parameter,
 			string dataset,
 			string element,
 			long iterationCount,
@@ -91,7 +89,6 @@ namespace Peach.Pro.Core.WebServices.Models
 		{
 			State = state;
 			Action = action;
-			Parameter = parameter;
 			Dataset = dataset;
 			Element = element;
 			IterationCount = iterationCount;

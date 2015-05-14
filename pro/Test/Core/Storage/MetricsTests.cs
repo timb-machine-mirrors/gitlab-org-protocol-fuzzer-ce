@@ -268,14 +268,14 @@ namespace Peach.Pro.Test.Core.Storage
 			{
 				DatabaseTests.AssertResult(db.LoadTable<ElementMetric>(), new[]
 				{
-					new ElementMetric("S2_1", "A2", "P1", "D1", "E1", 3, 1, 1),
-					new ElementMetric("S3_1", "A3", "P1", "D1", "E1", 1, 0, 0),
-					new ElementMetric("S3_1", "A3", "P2", "D2", "E2", 1, 0, 0),
-					new ElementMetric("S3_1", "A3", "P3", "D3", "E3", 4, 2, 3),
-					new ElementMetric("S4_1", "A4", "P4", "D4", "E4", 2, 1, 1),
-					new ElementMetric("S4_1", "A5", "P4", "D4", "E5", 1, 1, 1),
-					new ElementMetric("S5_1", "A5", "P5", "D5", "E5", 1, 1, 1),
-					new ElementMetric("S5_2", "A5", "P5", "D5", "E5", 1, 1, 1),
+					new ElementMetric("S2_1", "A2", "D1", "P1.E1", 3, 1, 1),
+					new ElementMetric("S3_1", "A3", "D1", "P1.E1", 1, 0, 0),
+					new ElementMetric("S3_1", "A3", "D2", "P2.E2", 1, 0, 0),
+					new ElementMetric("S3_1", "A3", "D3", "P3.E3", 4, 2, 3),
+					new ElementMetric("S4_1", "A4", "D4", "P4.E4", 2, 1, 1),
+					new ElementMetric("S4_1", "A5", "D4", "P4.E5", 1, 1, 1),
+					new ElementMetric("S5_1", "A5", "D5", "P5.E5", 1, 1, 1),
+					new ElementMetric("S5_2", "A5", "D5", "P5.E5", 1, 1, 1),
 				});
 			}
 		}
