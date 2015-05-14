@@ -190,9 +190,13 @@ CREATE VIEW ViewElements AS
 SELECT 
 	sn.Name || '_' || s.RunCount AS [State],
 	a.Name as [Action],
-	p.Name as [Parameter],
 	d.Name as [Dataset],
-	e.Name as [Element],
+	CASE WHEN LENGTH(p.Name) > 0 THEN
+		p.Name || '.' || 
+		e.Name
+	ELSE
+		e.Name
+	END AS [Element],
 	vei.IterationCount,
 	vef.BucketCount,
 	vef.FaultCount
