@@ -3,24 +3,62 @@
 [[Monitors_CanaKitRelay]]
 == CanaKitRelay Monitor
 
-The _CanaKitRelay_ monitor controls a set of relays capable of turning AC and DC lines on and off. Uses of the kit include controlling power to devices and pushing buttons by acting as a switch in a circuit. The kit consists of 4 relays; each relay is capable of controlling a 5-amp, 110V AC or a 24V DC circuit. The kit uses serial communication over a USB line.
+*Monitor category*: *Automation*
 
-The CanaKitRelay Monitor controls one relay in a kit. Use one monitor per relay to control multiple relays concurrently. Times that the monitor can trigger the relay include the following:
+The _CanaKitRelay_ monitor provides automation to a number of test configurations:
+
+* Control power to an external device that is the fuzzing target. You can turn it on at
+the start of the test, then toggle power after a fault occurs to return the device to a 
+known, stable state. 
+* Control a supporting device in a fuzzing test configuration. Supporting devices can 
+include recording devices, lighting, heating devices, sound or motion generators, even 
+turning on an espresso machine after every 10,000th test iteration.
+* Emulate a button push by inserting the device into a circuit containing the button. 
+The idea is to automate the press of a button, such as `NumLock`, or the play button on 
+a surveillance device.
+* For simulating the attachment or removal of a cable, such as USB, by routing the power 
+line (VCC) through the relay.
+
+The Cana Kit is an external product that you can add as part of your test configuration. 
+The kit consists of 4 relays. A relay is an electrically operated switch that uses an 
+electromagnet to operate a switching mechanism. Each relay in the kit is capable of 
+controlling a 5-amp, 110V AC or a 24V DC circuit. Communication with the kit occurs 
+over USB. 
+
+For more information on the kit, including configurations, installation, and the relay 
+command set, see http://www.canakit.com/catalog/product/view/id/627/s/4-port-usb-relay-controller[Cana Kit 4-Port USB Relay Controller]. 
+
+You can purchase the Cana Kit from the manufacturer at previous web site or from 
+Amazon.com. In each case, the kit price is about $60.00 U.S. plus shipping costs. 
+
+The _CanaKitRelay_ monitor controls one relay in a kit. Use one monitor per relay to 
+control multiple relays concurrently. Within a fuzzing session, the monitor can trigger 
+the relay at the following times:
 
 * At the start or end of a fuzzing run
 * At the start or end of each test iteration
 * After detecting a fault
 * At the start of an iteration that immediately follows a fault 
 
-_CanaKitRelay_ can toggle power states, reset a device, or push a button on a device during a fuzzing run. Any device with an AC or DC power line can be controlled by wiring it through a relay. A sample configuration follows that controls power through Relay 1. 
+
+The following diagram shows a sample configuration that controls power through Relay 1. 
 
 image::{images}/CanaKitMtr.PNG["Fuzzing Configuration Using a CanaKit Relay", scalewidth="75%"]
 
-For more information on the relay, including configuratinos, installation, and its command set, see the 
-http://www.canakit.com/catalog/product/view/id/627/s/4-port-usb-relay-controller[Cana Kit 4-Port USB Relay Controller].
+Each relay supplies three terminals: Normally Open (NO), Common (COM), and Normally Closed (NC). Basic configurations will connect the hot wire to Common and the other wire to either NO or NC. For DC connections, attach the anode (+) to the Common terminal. 
 
-TIP: The CanaKit Relay requires a driver that is available at the supplier's website. At the time of this writing, the driver 
-is unsigned, which forces you to turn off Driver Signing Enforcement when installing the driver in 64-bit Windows 8.
+NO provides an open circuit when the relay is off. NC provides a closed circuit when the relay is off, giving opposite on/off states from NO. The following diagram shows the terminal layout and imagines that Relay 1 is On.
+
+image::{images}/CanaRelayTerminals.PNG["CanaKit Relay Terminal Layout", scalewidth="75%"]
+
+TIP: The CanaKit Relay requires a driver that is available at the supplier's website. 
+At the time of this writing, the driver is unsigned, which forces you to turn off Driver
+Signing Enforcement when installing the driver in 64-bit Windows 8. For instructions on how to install unsigned drivers in this environment, see http://www.howtogeek.com/167723/how-to-disable-driver-signature-verification-on-64-bit-windows-8.1-so-that-you-can-install-unsigned-drivers/[How to Disable Driver Signature Verification on 64-Bit Windows 8.1]. 
+
+After installing the Cana Kit device driver, connect the unit to your PC. Windows 
+dynamically assigns a serial port to the USB channel for the connection. You can see the 
+port assignment by looking at the `Ports(COM and LPT)` entry in the Device Manager. 
+The Device Manager is available from the System applet in the Control Panel.
 
 NOTE: For controlling power to devices using 3-prong outlets, Peach provides a monitor for the xref:Monitors_IpPower9258[IpPower9258 Network AC Power Controller Network AC Power].
 
@@ -28,8 +66,9 @@ NOTE: For controlling power to devices using 3-prong outlets, Peach provides a m
 
 _Required:_
 
-SerialPort:: Serial port for the board (such as COM2)
-RelayNumber:: Relay to trigger (1, 2, 3, or 4)
+SerialPort:: Serial port for the board (such as COM2).
+
+RelayNumber:: Relay to trigger (1, 2, 3, or 4). Each relay number corresponds to a single relay in the kit, as shown in the first diagram. 
 
 _Optional:_
 
@@ -48,12 +87,13 @@ Perform an action on the specified relay, defaults to ToggleOff. Valid actions i
 
 ToggleDelay:: Pause in milliseconds between off/on, defaults to 500 ms--1/2 second. +
 Formerly named OnOffPause.
-ResetOnStart:: Reset device on start, defaults to false.
-RestartAfterFault:: If "true", restarts the target when any monitor detects a fault. 
-If "false", restarts the target if the process exits or crashes. +
-This argument defaults to false.
+// ResetOnStart:: Reset device on start, defaults to false.
+// RestartAfterFault:: If "true", restarts the target when any monitor detects a fault. 
+// If "false", restarts the target if the process exits or crashes. +
+// This argument defaults to false.
 
-ReverseSwitch:: Obsolete. Instead, use the ToggleOn Action. 
+//ReverseSwitch:: Obsolete. Instead, use the ToggleOn Action. 
+
 When:: 
 +
 Details on when to perform a specfied action. Specify one of the following values: 
