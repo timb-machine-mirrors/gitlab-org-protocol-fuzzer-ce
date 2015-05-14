@@ -258,7 +258,7 @@ namespace Peach.Pro.Core.Loggers
 				Logger.Trace("Engine_TestFinished> Update JobDatabase");
 				using (var db = new JobDatabase(_job.DatabasePath))
 				{
-					_job.StopDate = DateTime.UtcNow;
+					_job.StopDate = DateTime.Now;
 					_job.Mode = JobMode.Fuzzing;
 					_job.Status = JobStatus.Stopped;
 
@@ -623,23 +623,23 @@ namespace Peach.Pro.Core.Loggers
 
 		void SaveFault(RunContext context, Category category, Fault fault)
 		{
+			var now = DateTime.Now;
+
 			switch (category)
 			{
 				case Category.Faults:
 					_log.WriteLine("! Reproduced fault at iteration {0} : {1}",
-						fault.iteration, DateTime.Now);
+						fault.iteration, now);
 					break;
 				case Category.NonReproducable:
 					_log.WriteLine("! Non-reproducable fault detected at iteration {0} : {1}",
-						fault.iteration, DateTime.Now);
+						fault.iteration, now);
 					break;
 				case Category.Reproducing:
 					_log.WriteLine("! Fault detected at iteration {0}, trying to reproduce : {1}",
-						fault.iteration, DateTime.Now);
+						fault.iteration, now);
 					break;
 			}
-
-			var now = DateTime.UtcNow;
 
 			var bucket = string.Join("_", new[] { 
 				fault.majorHash, 

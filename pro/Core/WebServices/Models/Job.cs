@@ -130,7 +130,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		{
 			Guid = Guid.NewGuid();
 			PitFile = Path.GetFileName(pitFile);
-			StartDate = DateTime.UtcNow;
+			StartDate = DateTime.Now;
 			HeartBeat = StartDate;
 			Status = JobStatus.StartPending;
 			Mode = JobMode.Starting;
@@ -155,7 +155,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		{
 			Guid = config.id;
 			PitFile = Path.GetFileName(config.pitFile);
-			StartDate = DateTime.UtcNow;
+			StartDate = DateTime.Now;
 			HeartBeat = StartDate;
 			Status = JobStatus.StartPending;
 			Mode = JobMode.Starting;
