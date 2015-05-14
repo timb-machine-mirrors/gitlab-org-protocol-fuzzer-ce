@@ -125,7 +125,7 @@ namespace Peach.Pro.Core.Runtime
 				{
 					Guid = _guid.Value,
 					PitFile = Path.GetFileName(pitFile),
-					StartDate = DateTime.UtcNow,
+					StartDate = DateTime.Now,
 					Status = JobStatus.StartPending,
 					Mode = JobMode.Starting,
 					PeachVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString(),
