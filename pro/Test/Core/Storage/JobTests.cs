@@ -99,5 +99,36 @@ namespace Peach.Pro.Test.Core.Storage
 				Assert.AreEqual(j.StartDate.ToUniversalTime().ToString("o"), asUtc.ToString("o"));
 			}
 		}
+
+		[Test]
+		public void TestRunTime()
+		{
+			// Ensure runtime round trips from the job database
+			Console.WriteLine(_tmp.Path);
+
+			var j = new Job
+			{
+				Guid = Guid.Empty,
+				Runtime = TimeSpan.FromMilliseconds(36111),
+			};
+
+			using (var db = new JobDatabase(_tmp.Path))
+				db.InsertJob(j);
+
+			using (var db = new JobDatabase(_tmp.Path))
+				j = db.GetJob(j.Guid);
+
+			Assert.AreEqual(TimeSpan.FromSeconds(36), j.Runtime);
+
+			// Ensure TimeSpan is stored as total seconds
+
+			using (var db = new JobDatabase(_tmp.Path))
+			{
+				var val = db.SelectLong("SELECT Runtime from Job where Id=\"" + Guid.Empty + "\"");
+
+				Assert.That(val, Is.TypeOf<long>());
+				Assert.AreEqual(36, val);
+			}
+		}
 	}
 }
