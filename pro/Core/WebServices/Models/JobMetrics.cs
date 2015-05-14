@@ -6,13 +6,7 @@ namespace Peach.Pro.Core.WebServices.Models
 	[Table("ViewFaultTimeline")]
 	public class FaultTimelineMetric
 	{
-		private DateTime _date;
-		public DateTime Date
-		{
-			get { return _date; }
-			set { _date = value.MakeUtc(); }
-		}
-
+		public DateTime Date { get; set; }
 		public long FaultCount { get; set; }
 
 		public FaultTimelineMetric() { }
@@ -20,7 +14,7 @@ namespace Peach.Pro.Core.WebServices.Models
 			DateTime date,
 			long faultCount)
 		{
-			_date = date;
+			Date = date;
 			FaultCount = faultCount;
 		}
 	}
@@ -30,14 +24,7 @@ namespace Peach.Pro.Core.WebServices.Models
 	{
 		public string Label { get; set; }
 		public long Iteration { get; set; }
-
-		private DateTime _time;
-		public DateTime Time
-		{
-			get { return _time; }
-			set { _time = value.MakeUtc(); }
-		}
-
+		public DateTime Time { get; set; }
 		public long FaultCount { get; set; }
 
 		public BucketTimelineMetric() { }
@@ -49,7 +36,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		{
 			Label = label;
 			Iteration = iteration;
-			_time = time;
+			Time = time;
 			FaultCount = faultCount;
 		}
 	}
