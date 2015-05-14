@@ -396,28 +396,12 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// The date the job was started
 		/// </summary>
-		public DateTime StartDate
-		{
-			get { return _startDate; }
-			set { _startDate = value.MakeUtc(); }
-		}
-		private DateTime _startDate;
+		public DateTime StartDate { get; set; }
 
 		/// <summary>
 		/// The date the job ended
 		/// </summary>
-		public DateTime? StopDate
-		{
-			get { return _stopDate; }
-			set
-			{
-				if (value.HasValue)
-					_stopDate = value.Value.MakeUtc();
-				else
-					_stopDate = null;
-			}
-		}
-		private DateTime? _stopDate;
+		public DateTime? StopDate { get; set; }
 
 		/// <summary>
 		/// The number of seconds the job has been running for
@@ -436,18 +420,7 @@ namespace Peach.Pro.Core.WebServices.Models
 
 		public long Pid { get; set; }
 
-		public DateTime? HeartBeat
-		{
-			get { return _heartBeat; }
-			set
-			{
-				if (value.HasValue)
-					_heartBeat = value.Value.MakeUtc();
-				else
-					_heartBeat = null;
-			}
-		}
-		private DateTime? _heartBeat;
+		public DateTime? HeartBeat { get; set; }
 
 		/// <summary>
 		/// The version of peach that ran the job.

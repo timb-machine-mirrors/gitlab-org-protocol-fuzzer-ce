@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Reflection;
 #if MONO
 using Mono.Data.Sqlite;
 using SQLiteConnection = Mono.Data.Sqlite.SqliteConnection;
+using SQLiteCommand = Mono.Data.Sqlite.SqliteCommand;
 #else
 using System.Data.SQLite;
 #endif
@@ -14,6 +17,63 @@ namespace Peach.Pro.Core.Storage
 {
 	public abstract class Database : IDisposable
 	{
+		class DateTimeHandler : SqlMapper.TypeHandler<DateTime>
+		{
+			public override DateTime Parse(object value)
+			{
+				// Both Mono.Data.Sqlite and System.Data.SQLite ADO.NET implementations
+				// return DateTimes with DateTimeKind.Unspecified.  However, if a timezone
+				// is specified in the database, System.Data.SQLite will convert it
+				// to local time (but leave the type as Unspecified) and Mono.Data.Sqlite
+				// will fail to parse and throw an exception.
+
+				// To work around this we are intentionally saving DateTimes w/o any time zone
+				// indication, meaning on both ADO.NET providers they are going to come
+				// in as DateTimeKind.Unspecified and actually be in UTC.
+				// Explicitly mark them as UTC and then return them as Local.
+
+				var dt = Convert.ToDateTime(value);
+
+				System.Diagnostics.Debug.Assert(dt.Kind == DateTimeKind.Unspecified);
+
+				return DateTime.SpecifyKind(dt, DateTimeKind.Utc).ToLocalTime();
+			}
+
+			public override void SetValue(IDbDataParameter parameter, DateTime value)
+			{
+				// Mono.Data.Sqlite does not support time zones in its ISO8601
+				// DateTime parsing code.  This means that Mono.Data.Sqlite does not
+				// include the UTC timezone identifier in the database when saving, whereas
+				// System.Data.SQLite does.  In order to make sure our database can be read
+				// by both Mono.Data.Sqlite and System.Data.SQLite we need to manually convert
+				// times to a compatible ISO8601 UTC time w/o a time zone marker and
+				// insert as a string.
+
+				parameter.DbType = DbType.String;
+				parameter.Value = value.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss");
+			}
+		}
+
+		static Database()
+		{
+			// Use custom type handler for storing DateTime objects in sqlite.
+			SqlMapper.AddTypeHandler(new DateTimeHandler());
+
+			// Work around an issue with Dapper where custom type handlers
+			// don't get called when sending values into sqlite (SetValue codepath).
+			// https://github.com/StackExchange/dapper-dot-net/issues/206
+			// https://github.com/StackExchange/dapper-dot-net/pull/177
+
+			var fi = typeof(SqlMapper).GetField("typeMap", BindingFlags.Static | BindingFlags.NonPublic);
+			if (fi == null)
+				throw new InvalidOperationException("SqlMapper is missing typeMap member.");
+
+			var typeMap = (Dictionary<Type, DbType>)fi.GetValue(null);
+
+			typeMap.Remove(typeof(DateTime));
+			typeMap.Remove(typeof(DateTime?));
+		}
+
 		public string Path { get; private set; }
 		public SQLiteConnection Connection { get; private set; }
 
@@ -117,6 +177,14 @@ namespace Peach.Pro.Core.Storage
 			foreach (object[] row in rows)
 			{
 				Console.Error.WriteLine(finalFmt, row);
+			}
+		}
+
+		internal DateTime SelectDateTime(string commandText)
+		{
+			using (var cmd = new SQLiteCommand(commandText, Connection))
+			{
+				return Convert.ToDateTime(cmd.ExecuteScalar());
 			}
 		}
 	}
