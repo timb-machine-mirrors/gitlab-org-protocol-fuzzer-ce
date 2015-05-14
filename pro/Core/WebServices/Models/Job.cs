@@ -256,8 +256,8 @@ namespace Peach.Pro.Core.WebServices.Models
 			get
 			{
 				// Use ticks to avoid floating point math
-				return (IterationCount * 3600) / (Runtime.Ticks / TimeSpan.TicksPerSecond);
-			
+				var sec = Runtime.Ticks / TimeSpan.TicksPerSecond;
+				return sec == 0 ? 0 : (IterationCount * 3600) / sec;
 			}
 		}
 
