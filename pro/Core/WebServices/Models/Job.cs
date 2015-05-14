@@ -232,16 +232,6 @@ namespace Peach.Pro.Core.WebServices.Models
 			}
 		}
 
-		[NotMapped]
-		[JsonIgnore]
-		public TimeSpan RunTimeSpan
-		{
-			get
-			{
-				return TimeSpan.FromSeconds(Runtime);
-			}
-		}
-
 		/// <summary>
 		/// The human readable name for the job
 		/// </summary>
@@ -254,6 +244,20 @@ namespace Peach.Pro.Core.WebServices.Models
 			get
 			{
 				return (Path.GetFileNameWithoutExtension(PitFile) ?? string.Empty).Replace("_", " ");
+			}
+		}
+
+		/// <summary>
+		/// The average speed of the job in iterations per hour
+		/// </summary>
+		[NotMapped]
+		public long Speed
+		{
+			get
+			{
+				// Use ticks to avoid floating point math
+				return (IterationCount * 3600) / (Runtime.Ticks / TimeSpan.TicksPerSecond);
+			
 			}
 		}
 
@@ -406,12 +410,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// The number of seconds the job has been running for
 		/// </summary>
-		public long Runtime { get; set; }
-
-		/// <summary>
-		/// The average speed of the job in iterations per hour
-		/// </summary>
-		public long Speed { get; set; }
+		public TimeSpan Runtime { get; set; }
 
 		/// <summary>
 		/// How many faults have been detected

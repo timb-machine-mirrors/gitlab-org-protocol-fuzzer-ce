@@ -17,6 +17,22 @@ namespace Peach.Pro.Core.Storage
 {
 	public abstract class Database : IDisposable
 	{
+		class TimeSpanHandler : SqlMapper.TypeHandler<TimeSpan>
+		{
+			public override TimeSpan Parse(object value)
+			{
+				// Use ticks to avoid floating point computation
+				return TimeSpan.FromTicks(Convert.ToInt64(value) * TimeSpan.TicksPerSecond);
+			}
+
+			public override void SetValue(IDbDataParameter parameter, TimeSpan value)
+			{
+				// Use ticks to avoid floating point computation
+				parameter.DbType = DbType.Int64;
+				parameter.Value = value.Ticks / TimeSpan.TicksPerSecond;
+			}
+		}
+
 		class DateTimeHandler : SqlMapper.TypeHandler<DateTime>
 		{
 			public override DateTime Parse(object value)
@@ -56,6 +72,9 @@ namespace Peach.Pro.Core.Storage
 
 		static Database()
 		{
+			// Store TimeSpan objects as number of elapsed seconds
+			SqlMapper.AddTypeHandler(new TimeSpanHandler());
+
 			// Use custom type handler for storing DateTime objects in sqlite.
 			SqlMapper.AddTypeHandler(new DateTimeHandler());
 
@@ -72,6 +91,8 @@ namespace Peach.Pro.Core.Storage
 
 			typeMap.Remove(typeof(DateTime));
 			typeMap.Remove(typeof(DateTime?));
+			typeMap.Remove(typeof(TimeSpan));
+			typeMap.Remove(typeof(TimeSpan?));
 		}
 
 		public string Path { get; private set; }
@@ -180,12 +201,35 @@ namespace Peach.Pro.Core.Storage
 			}
 		}
 
+		#region Unit Test Helpers
+
 		internal DateTime SelectDateTime(string commandText)
 		{
 			using (var cmd = new SQLiteCommand(commandText, Connection))
 			{
-				return Convert.ToDateTime(cmd.ExecuteScalar());
+				var obj = cmd.ExecuteScalar();
+				return Convert.ToDateTime(obj);
 			}
 		}
+
+		internal long SelectLong(string commandText)
+		{
+			using (var cmd = new SQLiteCommand(commandText, Connection))
+			{
+				var obj = cmd.ExecuteScalar();
+				return Convert.ToInt64(obj);
+			}
+		}
+
+		internal string SelectString(string commandText)
+		{
+			using (var cmd = new SQLiteCommand(commandText, Connection))
+			{
+				var obj = cmd.ExecuteScalar();
+				return Convert.ToString(obj);
+			}
+		}
+
+		#endregion
 	}
 }
