@@ -134,6 +134,11 @@ namespace Peach.Pro.Core.Storage
 			if (job == null)
 				return null;
 
+			return GetReport(job);
+		}
+
+		public Report GetReport(Job job)
+		{
 			return new Report
 			{
 				Job = job,
