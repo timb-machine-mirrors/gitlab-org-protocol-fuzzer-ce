@@ -3,42 +3,68 @@
 [[Monitors_ButtonClicker]]
 == ButtonClicker Monitor
 
-The _ButtonClicker_ monitor provides mouse clicks for popup windows during fuzzing. This monitor runs in the Windows environment. _ButtonClicker_ watches for popup windows, and supplies a BM_CLICK message to any popup window that contains a specified string in the window message body. 
+The _ButtonClicker_ monitor provides automation functionality by clicking buttons 
+in the Windows GUI. This monitor runs in the Windows environment. _ButtonClicker_
+watches and clicks the appropriate button within the specified window. For example, 
+you can specify that _ButtonClicker_ click an "OK" button to perform an action or 
+to close a window.
 
-The intent of this monitor is to keep a fuzzing session active, regardless of whether popup windows display during fuzzing. _Buttonclicker_ runs from the beginning of a fuzzing session to the end of the session.
+The intent of this monitor is to activate an action, or to close a window keep a 
+fuzzing session active. _Buttonclicker_ runs from the beginning of a fuzzing session 
+to the end of the session.
+
+For example,
 
 For example, if an application crashes and needs to restart or has trouble starting, it might display a popup window asking to start with a specific set of features that could aid in troubleshooting the cause of failure. A sample popup window consistent with this situation follows:
 
 .{nbsp}
-image::{images}/PopupWindowExample.png[]
+image::{images}/ButtonClickerExample.png[]
 
-Here, the _ButtonClicker_ monitor provides a mouse click message in response to the popup 
-window. The response allows fuzzing to continue instead of waiting for a user to respond to the 
-question raised by the popup window.
+Here, the _ButtonClicker_ monitor provides a mouse click to close the popup window 
+and to restart Windows in normal mode. The response allows fuzzing to continue instead 
+of waiting for a user to respond to the question raised by the window.
 
-_ButtonClicker_ can generate faults in two cases:
-
-* A popup event fires, but, the popup window is not available
-* An exception occurs while clicking the button
-
-NOTE: This monitor is especially useful for applications that re-use a pop-up window for many 
-purposes. The window has one title, but the main area of the window can display several different
-messages depending on the context in the application. Another monitor to consider for watching 
-popup windows is xref:Monitors_PopupWatcher[PopupWatcher], that monitors popup windows based on 
-the window title rather than matching a string in the message body.
+NOTE: This monitor is especially useful for applications that re-use a pop-up window 
+for many purposes. The window has one title, but the main area of the window can 
+display several different messages depending on the context in the application. Another 
+monitor to consider for watching popup windows is xref:Monitors_PopupWatcher[PopupWatcher], that monitors popup windows based on the window title rather than matching a string 
+in the message body.
 
 === Parameters
 
 _Required:_
 
-WindowText:: Text to find in the popup window. Peach performs a string search to determine whether matching text occurs in the popup window.
-ButtonName:: Label displayed to the user that is on or near the button that will receive the click.
+WindowText:: Name of the window or dialog box. Peach performs a string search to 
+determine whether matching text occurs in the popup window.
+ButtonName:: Text label of the button to click. The label is displayed to the user, 
+and is on or around the button that will receive the click.
 
 _Optional:_
 
-RestartAfterFault:: If "true", restarts the target when any monitor detects a fault. 
-If "false", restarts the target if the process exits or crashes. +
-This argument defaults to false.
+None.
+
+[TIP]
+====
+If Peach has trouble clicking a button, the button might have a link to a shortcut key. Windows does this by inserting an ampersand "&" immediately before the shortcut key within the button label. Further, not all underlining shows in the initial display of the window.
+
+In an application, you can manually force underlining to display in window buttons by 
+pressing the <CTRL> or <ALT> key. Once you find the underlining in the application, 
+you can adjust the value of the +ButtonName+ parameter for _ButtonClick_ by inserting 
+an ampersand (&) immediately before any underlined character. Then, Peach will find the 
+button to click.
+
+In Microsoft Word, the Browsing dialog box used to open a document does not immediately 
+display underlining in its command buttons. You can see this by following the sequence 
+that opens a file:
+
+. Click *File* on the ribbon.
+. Click *Open* on the vertical menu.
+. Click *Computer* in the Open column.
+. Click the *Browse* button. +
+The dialog opens and the "Open" button in the lower right corner is not underlined. Press the <ALT> or <CTRL> key to see the underlining as in the following illustration.  
++
+image::{images}/UnderliningExample.png[]
+====
 
 === Examples
 

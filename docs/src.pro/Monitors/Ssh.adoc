@@ -65,8 +65,7 @@ Period when the command should be run. Defaults to +OnCall+
 // OnIterationEnd::: Run command at end of each iteration.
 // OnFault::: Run command when a fault occurs.
 // OnIterationStartAfterFault::: Run command at start of the iteration that follows a fault detection.
-
-
++
 [cols="1,2" options="header",halign="center"] 
 |==========================================================
 |"When" Setting              |Description
@@ -79,7 +78,7 @@ Period when the command should be run. Defaults to +OnCall+
 |OnIterationStartAfterFault  |Run the command at start of an iteration that immediately follows a fault detection.
 |OnCall                      |Trigger the command to run from the state model. The command runs when the _StartOnCall_ message is received.
 |==========================================================
-
++
 .When Choices for Running a Command
 image::{images}/Timings_SSH.PNG["When Run Command Choices", scalewidth="75%"]
 

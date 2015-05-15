@@ -406,8 +406,22 @@ namespace Peach.Pro.Core.WebServices
 			libraries = new Dictionary<string, Library>();
 			interfaces = null;
 
+			HashSet<string> old;
+			lock (_cache)
+			{
+				old = new HashSet<string>(_cache.Keys);
+			}
+
 			AddLibrary(path, "", "Peach Pro Library 2015 Q1", true);
 			AddLibrary(path, "User", "User Library", false);
+
+			lock (_cache)
+			{
+				foreach (var key in old.Except(entries.Keys))
+				{
+					_cache.Remove(key);
+				}
+			}
 		}
 
 		/// <summary>
@@ -1148,10 +1162,47 @@ namespace Peach.Pro.Core.WebServices
 
 		private Pit AddEntry(LibraryVersion lib, string pitLibraryPath, string fileName)
 		{
-			var contents = Parse(fileName);
 			var guid = MakeGuid(fileName);
+			var url = PitServicePrefix + "/" + guid;
+			var lastModified = File.GetLastWriteTime(fileName);
+
+			PitDetail detail;
+			lock (_cache)
+			{
+				if (!_cache.TryGetValue(url, out detail) ||
+					detail.Pit.Timestamp < lastModified)
+				{
+					detail = MakePitDetail(lib, pitLibraryPath, fileName, guid, url, lastModified);
+					_cache.Add(url, detail);
+				}
+			}
+
+			entries.Add(url, detail);
+
+			lib.Pits.Add(new LibraryPit
+			{
+				PitUrl = url,
+				Name = detail.Pit.Name,
+				Description = detail.Pit.Description,
+				Tags = detail.Pit.Tags,
+			});
+
+			return detail.Pit;
+		}
+
+		private PitDetail MakePitDetail(
+			LibraryVersion lib, 
+			string pitLibraryPath, 
+			string fileName,
+			string guid,
+			string url,
+			DateTime lastModified)
+		{
+			var contents = Parse(fileName);
+
 			var value = new Pit
 			{
+				Id = guid,
 				PitUrl = PitServicePrefix + "/" + guid,
 				Name = Path.GetFileNameWithoutExtension(fileName),
 				Description = contents.Description,
@@ -1160,7 +1211,7 @@ namespace Peach.Pro.Core.WebServices
 				Versions = new List<PitVersion>(),
 				Peaches = new List<PeachVersion>(),
 				User = contents.Author,
-				Timestamp = File.GetLastWriteTime(fileName),
+				Timestamp = lastModified,
 			};
 
 			var ver = new PitVersion
@@ -1199,17 +1250,7 @@ namespace Peach.Pro.Core.WebServices
 			value.Tags.Add(tag);
 			value.Peaches.Add(Version);
 
-			entries.Add(value.PitUrl, detail);
-
-			lib.Pits.Add(new LibraryPit
-			{
-				PitUrl = value.PitUrl,
-				Name = value.Name,
-				Description = value.Description,
-				Tags = value.Tags,
-			});
-
-			return value;
+			return detail;
 		}
 
 		private static void AddAllFiles(PitDetail pit, ICollection<PitFile> list, string pitLibraryPath, string fileName, PeachElement contents, string ns)
@@ -1270,5 +1311,6 @@ namespace Peach.Pro.Core.WebServices
 		private Dictionary<string, PitDetail> entries;
 		private Dictionary<string, Library> libraries;
 		private List<NetworkInterface> interfaces;
+		private static Dictionary<string, PitDetail> _cache = new Dictionary<string, PitDetail>();
 	}
 }
