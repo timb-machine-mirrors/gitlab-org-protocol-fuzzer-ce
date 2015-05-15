@@ -45,7 +45,7 @@ None.
 
 [TIP]
 ====
-If Peach has trouble clicking a button, the button might have a link to a shortcut key. Windows does this by inserting an ampersand "&" immediately before the shortcut key within the button label. Further, not all underlining shows in the initial display of the window.
+If Peach has trouble clicking a button, the button might have a link to a shortcut key, and is displayed with an underlined character. Windows does this by inserting an ampersand "&" immediately before the shortcut key within the button label. Further, not all underlining shows in the initial display of the window.
 
 In an application, you can manually force underlining to display in window buttons by 
 pressing the <CTRL> or <ALT> key. Once you find the underlining in the application, 
