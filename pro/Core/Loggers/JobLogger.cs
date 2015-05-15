@@ -273,6 +273,29 @@ namespace Peach.Pro.Core.Loggers
 					_job.Mode = JobMode.Fuzzing;
 					_job.Status = JobStatus.Stopped;
 
+					if (!_job.IsControlIteration)
+					{
+						var report = db.GetReport(_job);
+
+						try
+						{
+							Reporting.SaveReportPdf(report);
+						}
+						catch (Exception ex)
+						{
+							Logger.Debug("An unexpected error occured saving the job report.", ex);
+
+							try
+							{
+								if (File.Exists(_job.ReportPath))
+									File.Delete(_job.ReportPath);
+							}
+							catch
+							{
+							}
+						}
+					}
+
 					db.UpdateJob(_job);
 				}
 
