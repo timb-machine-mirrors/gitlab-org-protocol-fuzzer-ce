@@ -142,12 +142,48 @@ namespace Peach.Pro.Core.Storage
 			return new Report
 			{
 				Job = job,
-				BucketDetails = LoadTable<BucketDetail>().ToList(),
-				MutatorMetrics = LoadTable<MutatorMetric>().ToList(),
-				ElementMetrics = LoadTable<ElementMetric>().ToList(),
-				StateMetrics = LoadTable<StateMetric>().ToList(),
-				DatasetMetrics = LoadTable<DatasetMetric>().ToList(),
-				BucketMetrics = LoadTable<BucketMetric>().ToList(),
+
+				BucketDetails = LoadTable<BucketDetail>()
+					.OrderByDescending(m => m.FaultCount)
+					.ThenBy(m => m.BucketName)
+					.ToList(),
+
+				MutatorMetrics = LoadTable<MutatorMetric>()
+					.OrderByDescending(m => m.BucketCount)
+					.ThenByDescending(m => m.FaultCount)
+					.ThenByDescending(m => m.IterationCount)
+					.ThenByDescending(m => m.ElementCount)
+					.ThenBy(m => m.Mutator)
+					.ToList(),
+
+				ElementMetrics = LoadTable<ElementMetric>()
+					.OrderByDescending(m => m.BucketCount)
+					.ThenByDescending(m => m.FaultCount)
+					.ThenByDescending(m => m.IterationCount)
+					.ThenBy(m => m.State)
+					.ThenBy(m => m.Action)
+					.ThenBy(m => m.Element)
+					.ToList(),
+
+				StateMetrics = LoadTable<StateMetric>()
+					.OrderByDescending(m => m.ExecutionCount)
+					.ThenBy(m => m.State)
+					.ToList(),
+
+				DatasetMetrics = LoadTable<DatasetMetric>()
+					.OrderByDescending(m => m.BucketCount)
+					.ThenByDescending(m => m.FaultCount)
+					.ThenByDescending(m => m.IterationCount)
+					.ThenBy(m => m.Dataset)
+					.ToList(),
+
+				BucketMetrics = LoadTable<BucketMetric>()
+					.OrderByDescending(m => m.FaultCount)
+					.ThenByDescending(m => m.IterationCount)
+					.ThenBy(m => m.Mutator)
+					.ThenBy(m => m.Bucket)
+					.ThenBy(m => m.Element)
+					.ToList(),
 			};
 		}
 	}
