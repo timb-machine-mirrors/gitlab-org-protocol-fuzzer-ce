@@ -15,61 +15,67 @@ using Dapper;
 
 namespace Peach.Pro.Core.Storage
 {
+	// This can not be an inner class of Database otherwise
+	// assemblies that try to use the JobDatabase will fail
+	// to compile on mono 2.10
+	class TimeSpanHandler : SqlMapper.TypeHandler<TimeSpan>
+	{
+		public override TimeSpan Parse(object value)
+		{
+			// Use ticks to avoid floating point computation
+			return TimeSpan.FromTicks(Convert.ToInt64(value) * TimeSpan.TicksPerSecond);
+		}
+
+		public override void SetValue(IDbDataParameter parameter, TimeSpan value)
+		{
+			// Use ticks to avoid floating point computation
+			parameter.DbType = DbType.Int64;
+			parameter.Value = value.Ticks / TimeSpan.TicksPerSecond;
+		}
+	}
+
+	// This can not be an inner class of Database otherwise
+	// assemblies that try to use the JobDatabase will fail
+	// to compile on mono 2.10
+	class DateTimeHandler : SqlMapper.TypeHandler<DateTime>
+	{
+		public override DateTime Parse(object value)
+		{
+			// Both Mono.Data.Sqlite and System.Data.SQLite ADO.NET implementations
+			// return DateTimes with DateTimeKind.Unspecified.  However, if a timezone
+			// is specified in the database, System.Data.SQLite will convert it
+			// to local time (but leave the type as Unspecified) and Mono.Data.Sqlite
+			// will fail to parse and throw an exception.
+
+			// To work around this we are intentionally saving DateTimes w/o any time zone
+			// indication, meaning on both ADO.NET providers they are going to come
+			// in as DateTimeKind.Unspecified and actually be in UTC.
+			// Explicitly mark them as UTC and then return them as Local.
+
+			var dt = Convert.ToDateTime(value);
+
+			System.Diagnostics.Debug.Assert(dt.Kind == DateTimeKind.Unspecified);
+
+			return DateTime.SpecifyKind(dt, DateTimeKind.Utc).ToLocalTime();
+		}
+
+		public override void SetValue(IDbDataParameter parameter, DateTime value)
+		{
+			// Mono.Data.Sqlite does not support time zones in its ISO8601
+			// DateTime parsing code.  This means that Mono.Data.Sqlite does not
+			// include the UTC timezone identifier in the database when saving, whereas
+			// System.Data.SQLite does.  In order to make sure our database can be read
+			// by both Mono.Data.Sqlite and System.Data.SQLite we need to manually convert
+			// times to a compatible ISO8601 UTC time w/o a time zone marker and
+			// insert as a string.
+
+			parameter.DbType = DbType.String;
+			parameter.Value = value.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss");
+		}
+	}
+
 	public abstract class Database : IDisposable
 	{
-		class TimeSpanHandler : SqlMapper.TypeHandler<TimeSpan>
-		{
-			public override TimeSpan Parse(object value)
-			{
-				// Use ticks to avoid floating point computation
-				return TimeSpan.FromTicks(Convert.ToInt64(value) * TimeSpan.TicksPerSecond);
-			}
-
-			public override void SetValue(IDbDataParameter parameter, TimeSpan value)
-			{
-				// Use ticks to avoid floating point computation
-				parameter.DbType = DbType.Int64;
-				parameter.Value = value.Ticks / TimeSpan.TicksPerSecond;
-			}
-		}
-
-		class DateTimeHandler : SqlMapper.TypeHandler<DateTime>
-		{
-			public override DateTime Parse(object value)
-			{
-				// Both Mono.Data.Sqlite and System.Data.SQLite ADO.NET implementations
-				// return DateTimes with DateTimeKind.Unspecified.  However, if a timezone
-				// is specified in the database, System.Data.SQLite will convert it
-				// to local time (but leave the type as Unspecified) and Mono.Data.Sqlite
-				// will fail to parse and throw an exception.
-
-				// To work around this we are intentionally saving DateTimes w/o any time zone
-				// indication, meaning on both ADO.NET providers they are going to come
-				// in as DateTimeKind.Unspecified and actually be in UTC.
-				// Explicitly mark them as UTC and then return them as Local.
-
-				var dt = Convert.ToDateTime(value);
-
-				System.Diagnostics.Debug.Assert(dt.Kind == DateTimeKind.Unspecified);
-
-				return DateTime.SpecifyKind(dt, DateTimeKind.Utc).ToLocalTime();
-			}
-
-			public override void SetValue(IDbDataParameter parameter, DateTime value)
-			{
-				// Mono.Data.Sqlite does not support time zones in its ISO8601
-				// DateTime parsing code.  This means that Mono.Data.Sqlite does not
-				// include the UTC timezone identifier in the database when saving, whereas
-				// System.Data.SQLite does.  In order to make sure our database can be read
-				// by both Mono.Data.Sqlite and System.Data.SQLite we need to manually convert
-				// times to a compatible ISO8601 UTC time w/o a time zone marker and
-				// insert as a string.
-
-				parameter.DbType = DbType.String;
-				parameter.Value = value.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss");
-			}
-		}
-
 		static Database()
 		{
 			// Store TimeSpan objects as number of elapsed seconds
