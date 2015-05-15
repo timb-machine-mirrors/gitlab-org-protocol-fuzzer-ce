@@ -3,9 +3,29 @@
 [[Monitors_CleanupFolder]]
 == CleanupFolder Monitor
 
-The _CleanupFolder_ monitor removes from a specified directory the files created on a target during a fuzzing session. Cleanup occurs before every test iteration.
+*Monitor Category*: *Automation*
 
-When beginning a fuzzing run, Peach creates a list of the contents of a specified directory. The list identifies the items that are exempt from the cleanup activity. Before each iteration, _CleanupFolder_ cleans so that the hard drives are not cluttered with temporary, recovery, or scratch files.
+The _CleanupFolder_ monitor provides automated cleanup of files created during a 
+fuzzing session. This monitor purges files produced during an iteration before 
+the start of the following iteration. CleanupFolder acts upon a specified directory, 
+and does not affect any files or directories that predate the fuzzing session.
+
+. The directory, clean2, initially contains a single file. 
++
+image::{images}/Monitor_CleanFolder_PreFuzz.png[,75%]
+. Before each iteration, the CleanupFolder monitor deletes from the specified folder 
+all files that were generated in the previous fuzzing iteration. 
+. During each iteration, the File publisher creates a fuzzed file.
+
+. The following image shows the output from a file fuzzing session that uses _CleanupFolder_ on the clean2 directory. The session duration is 5 iterations.
++
+image::{images}/Monitor_CleanFolder_Cleaned.png[,75%]
+
+. The following image shows the clean2 directory with output from a file fuzzing session that does _not_ use _CleanupFolder_, but is otherwise identical to the pit used for the previous diagram. Files generated in the fuzzing session are highlighted.
++
+image::{images}/Monitor_CleanFolder_NotCleaned.png[,75%]
+
+NOTE: The FilePerIteration publisher, that generates a new filename for each fuzzed file, produced the fuzzed output files for both of the previous images.
 
 === Parameters
 
@@ -24,27 +44,14 @@ ifdef::peachug[]
 .Remove contents of a folder +
 
 ==============================
-This parameter example is from a setup that uses the CleanupFolder monitor to remove a fuzzed file created by the File publisher. The directory, clean2, is empty at the start of each fuzzing run. Before each iteration, the CleanupFolder monitor deletes all files from the specified folder. During each iteration, the File publisher creates a fuzzed file.
+This parameter example is from a setup that uses the CleanupFolder monitor to remove a fuzzed file created by the File publisher. 
 
 [cols="2,4" options="header",halign="center"] 
 |==========================================================
 |Parameter    |Value
-|Folder   |C:\\cleanme
+|Folder   |C:\\clean2
 |==========================================================
 
-The following image shows the output from a file fuzzing session that uses _CleanupFolder_. The session duration is 3 iterations.
-
-.{nbsp}
-image::{images}/Monitor_CleanupFolder2.png[]
-
-
-The following image shows the output from a file fuzzing session that does _not_ use _CleanupFolder_, but is otherwise identical to the previous setup.
-
-.{nbsp}
-image::{images}/Monitor_CleanupFolder3.png[]
-
-
-NOTE: The FilePerIteration publisher, that generates a new filename for each fuzzed file, produced the fuzzed output files for both of the previous images.
 ==============================
 
 endif::peachug[]
