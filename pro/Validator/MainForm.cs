@@ -80,10 +80,6 @@ namespace PeachValidator
 			SampleFileName = ofd.FileName;
 			setTitle();
 
-			DynamicFileByteProvider dynamicFileByteProvider;
-			dynamicFileByteProvider = new DynamicFileByteProvider(new FileStream(SampleFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-			hexBox1.ByteProvider = dynamicFileByteProvider;
-
 			toolStripButtonRefreshSample_Click(null, null);
 		}
 
@@ -94,78 +90,83 @@ namespace PeachValidator
             var holder = (DataModelHolder)toolStripComboBoxDataModel.SelectedItem;
 			try
 			{
-                textBoxLogs.Clear();
+				// Clear the cracking debug logs
+				textBoxLogs.Text = "";
+				logTarget.Logs.Clear();
 
 				if (holder == null || string.IsNullOrEmpty(SampleFileName) || string.IsNullOrEmpty(PitFileName))
 					return;
 
-				byte[] buff;
+				// Refresh the hex display in case the file has changed.
+				DynamicFileByteProvider dynamicFileByteProvider;
+				dynamicFileByteProvider = new DynamicFileByteProvider(new FileStream(SampleFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+				hexBox1.ByteProvider = dynamicFileByteProvider;
+
 				using (Stream sin = new FileStream(SampleFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 				{
-					buff = new byte[sin.Length];
-					sin.Read(buff, 0, buff.Length);
-				}
-				
-				treeViewAdv1.BeginUpdate();
-				treeViewAdv1.Model = null;
+					treeViewAdv1.BeginUpdate();
+					treeViewAdv1.Model = null;
 
-                try
-				{
-					BitStream data = new BitStream(buff);
-					DataCracker cracker = new DataCracker();
-					cracker.EnterHandleNodeEvent += new EnterHandleNodeEventHandler(cracker_EnterHandleNodeEvent);
-					cracker.ExitHandleNodeEvent += new ExitHandleNodeEventHandler(cracker_ExitHandleNodeEvent);
-					cracker.AnalyzerEvent += new AnalyzerEventHandler(cracker_AnalyzerEvent);
-					cracker.ExceptionHandleNodeEvent += new ExceptionHandleNodeEventHandler(cracker_ExceptionHandleNodeEvent);
-					//cracker.CrackData(dom.dataModels[dataModel], data);
 					try
 					{
-						cracker.CrackData(holder.MakeCrackModel(), data);
-					}
-					catch (CrackingFailure ex)
-					{
-						throw new PeachException("Error cracking \"" + ex.element.fullName + "\".\n" + ex.Message);
-					}
-				}
-				catch (Exception ex)
-				{
-					MessageBox.Show(ex.Message, "Error Cracking");
+						BitStream data = new BitStream(sin);
+						DataCracker cracker = new DataCracker();
+						cracker.EnterHandleNodeEvent += new EnterHandleNodeEventHandler(cracker_EnterHandleNodeEvent);
+						cracker.ExitHandleNodeEvent += new ExitHandleNodeEventHandler(cracker_ExitHandleNodeEvent);
+						cracker.AnalyzerEvent += new AnalyzerEventHandler(cracker_AnalyzerEvent);
+						cracker.ExceptionHandleNodeEvent += new ExceptionHandleNodeEventHandler(cracker_ExceptionHandleNodeEvent);
+						//cracker.CrackData(dom.dataModels[dataModel], data);
 
-					long endPos = -1;
-					foreach (var element in exceptions)
-					{
-						CrackNode currentModel;
-						if (_crackMap.TryGetValue(element, out currentModel))
+						try
 						{
-							currentModel.Error = true;
-
-							if (endPos == -1)
-								endPos = currentModel.StartBits;
-
-							currentModel.StopBits = endPos;
-
-							if (element.parent != null && _crackMap.ContainsKey(element.parent))
-								_crackMap[element.parent].Children.Add(currentModel);
+							cracker.CrackData(holder.MakeCrackModel(), data);
+						}
+						catch (CrackingFailure ex)
+						{
+							throw new PeachException("Error cracking \"" + ex.element.fullName + "\".\n" + ex.Message);
 						}
 					}
+					catch (Exception ex)
+					{
+						MessageBox.Show(ex.Message, "Error Cracking");
+
+						long endPos = -1;
+						foreach (var element in exceptions)
+						{
+							CrackNode currentModel;
+							if (_crackMap.TryGetValue(element, out currentModel))
+							{
+								currentModel.Error = true;
+
+								if (endPos == -1)
+									endPos = currentModel.StartBits;
+
+								currentModel.StopBits = endPos;
+
+								if (element.parent != null && _crackMap.ContainsKey(element.parent))
+									_crackMap[element.parent].Children.Add(currentModel);
+							}
+						}
+					}
+
+					foreach (var node in _crackMap.Values)
+					{
+						if (node.DataElement.parent != null)
+							node.Parent = _crackMap[node.DataElement.parent];
+					}
+
+					crackModel.Root = _crackMap.Values.First().Root;
+					treeViewAdv1.Model = crackModel;
+					treeViewAdv1.EndUpdate();
+					treeViewAdv1.Root.Children[0].Expand();
+
+					// No longer needed
+					_crackMap.Clear();
+
+					// Display debug logs
+					textBoxLogs.Text = string.Join("\r\n", logTarget.Logs);
+					logTarget.Logs.Clear();
 				}
-
-				foreach (var node in _crackMap.Values)
-				{
-					if (node.DataElement.parent != null)
-						node.Parent = _crackMap[node.DataElement.parent];
-				}
-
-				crackModel.Root = _crackMap.Values.First().Root;
-				treeViewAdv1.Model = crackModel;
-				treeViewAdv1.EndUpdate();
-				treeViewAdv1.Root.Children[0].Expand();
-
-				// No longer needed
-				_crackMap.Clear();
-
-                // Display debug logs
-                textBoxLogs.AppendText(string.Join("\r\n", logTarget.Logs)); 
 			}
 			catch (Exception ex)
 			{
@@ -253,35 +254,38 @@ namespace PeachValidator
 			PitFileName = fileName;
 			setTitle();
 
+			// Switch out working folder to pit location
+			// this should allow us to resolve local data files
+			var pitPath = Path.GetDirectoryName(fileName);
+			if(Directory.Exists(pitPath))
+				Directory.SetCurrentDirectory(pitPath);
+
 			Regex re = new Regex("##\\w+##");
-			if (File.Exists(PitFileName) && re.IsMatch(File.ReadAllText(PitFileName)))
+            List<KeyValuePair<string, string>> defs;
+            if (File.Exists(PitFileName + ".config"))
+            {
+                defs = PitParser.parseDefines(PitFileName + ".config");
+            }
+			else if (getDefs && File.Exists(PitFileName) && re.IsMatch(File.ReadAllText(PitFileName)))
+            {
+	            var ofd = new OpenFileDialog();
+	            ofd.Title = "Select PIT defines file";
+
+	            if (ofd.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+		            return;
+
+	            defs = PitParser.parseDefines(ofd.FileName);
+            }
+            else
+            {
+                defs = new List<KeyValuePair<string, string>>();
+            }
+
+			foreach (var kv in defs)
 			{
-                List<KeyValuePair<string, string>> defs;
-                if (File.Exists(PitFileName + ".config"))
-                {
-                    defs = PitParser.parseDefines(PitFileName + ".config");
-                }
-                else if (getDefs)
-                {
-	                var ofd = new OpenFileDialog();
-	                ofd.Title = "Select PIT defines file";
-
-	                if (ofd.ShowDialog() != System.Windows.Forms.DialogResult.OK)
-		                return;
-
-	                defs = PitParser.parseDefines(ofd.FileName);
-                }
-                else
-                {
-                    defs = new List<KeyValuePair<string, string>>();
-                }
-
-				foreach (var kv in defs)
-				{
-					// Allow command line to override values in XML file.
-					if (!DefinedValues.ContainsKey(kv.Key))
-						DefinedValues.Add(kv.Key, kv.Value);
-				}
+				// Allow command line to override values in XML file.
+				if (!DefinedValues.ContainsKey(kv.Key))
+					DefinedValues.Add(kv.Key, kv.Value);
 			}
 
 			_parserArgs[PitParser.DEFINED_VALUES] = DefinedValues;
