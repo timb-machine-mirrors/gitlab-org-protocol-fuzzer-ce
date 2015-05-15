@@ -104,7 +104,6 @@ namespace Peach.Pro.Test.Core.Storage
 		public void TestRunTime()
 		{
 			// Ensure runtime round trips from the job database
-			Console.WriteLine(_tmp.Path);
 
 			var j = new Job
 			{
