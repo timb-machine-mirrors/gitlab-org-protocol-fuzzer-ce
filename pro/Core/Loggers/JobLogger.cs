@@ -84,6 +84,9 @@ namespace Peach.Pro.Core.Loggers
 		int _agentConnect;
 		Exception _caught;
 		Target _tempTarget;
+		TimeSpan _runtime;
+
+		readonly Stopwatch _stopwatch = new Stopwatch();
 
 		enum Category { Faults, Reproducing, NonReproducable }
 
@@ -200,6 +203,11 @@ namespace Peach.Pro.Core.Loggers
 
 			_cache = new MetricsCache(_job.DatabasePath);
 
+			// Remember previous runtime so it properly accumulates on restarted jobs
+			_runtime = _job.Runtime;
+
+			_stopwatch.Restart();
+
 			using (var db = new NodeDatabase())
 			{
 				AddEvent(db,
@@ -253,11 +261,14 @@ namespace Peach.Pro.Core.Loggers
 		{
 			Logger.Trace(">>> Engine_TestFinished");
 
+			_stopwatch.Stop();
+
 			if (_job != null)
 			{
 				Logger.Trace("Engine_TestFinished> Update JobDatabase");
 				using (var db = new JobDatabase(_job.DatabasePath))
 				{
+					_job.Runtime = _runtime + _stopwatch.Elapsed;
 					_job.StopDate = DateTime.Now;
 					_job.Mode = JobMode.Fuzzing;
 					_job.Status = JobStatus.Stopped;
@@ -299,6 +310,8 @@ namespace Peach.Pro.Core.Loggers
 		{
 			_states.Clear();
 			_cache.IterationStarting(context.currentIteration);
+
+			_job.Runtime = _runtime + _stopwatch.Elapsed;
 
 			if (context.reproducingFault)
 			{
@@ -364,6 +377,7 @@ namespace Peach.Pro.Core.Loggers
 				using (var db = new JobDatabase(_job.DatabasePath))
 				{
 					_job.IterationCount++;
+					_job.Runtime = _runtime + _stopwatch.Elapsed;
 					db.UpdateJob(_job);
 				}
 
@@ -722,6 +736,7 @@ namespace Peach.Pro.Core.Loggers
 					});
 
 					_job.FaultCount++;
+					_job.Runtime = _runtime + _stopwatch.Elapsed;
 					db.UpdateJob(_job);
 				}
 			}
@@ -766,7 +781,13 @@ namespace Peach.Pro.Core.Loggers
 		{
 			Debug.Assert(_job.DatabasePath != null);
 
+			_job.Runtime = _runtime + _stopwatch.Elapsed;
 			_job.Status = status;
+
+			if (status == JobStatus.Paused)
+				_stopwatch.Stop();
+			else if (status == JobStatus.Running)
+				_stopwatch.Start();
 
 			using (var db = new JobDatabase(_job.DatabasePath))
 			{
