@@ -298,14 +298,25 @@ namespace Peach.Pro.Core.Loggers
 
 					db.UpdateJob(_job);
 				}
-
-				Logger.Trace("Engine_TestFinished> Update NodeDatabase");
+			}
+			else
+			{
+				// Job was killed before TestStarting got called
 				using (var db = new NodeDatabase())
 				{
-					if (_caught == null)
-						EventSuccess(db);
-					db.UpdateJob(_job);
+					_job = db.GetJob(context.config.id) ?? new Job(context.config);
+					_job.StopDate = DateTime.Now;
+					_job.Mode = JobMode.Fuzzing;
+					_job.Status = JobStatus.Stopped;
 				}
+			}
+
+			Logger.Trace("Engine_TestFinished> Update NodeDatabase");
+			using (var db = new NodeDatabase())
+			{
+				if (_caught == null)
+					EventSuccess(db);
+				db.UpdateJob(_job);
 			}
 
 			// it's possible we reach here before Engine_TestStarting has had a chance to finish
