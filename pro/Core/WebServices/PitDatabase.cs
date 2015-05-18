@@ -1160,20 +1160,35 @@ namespace Peach.Pro.Core.WebServices
 			return elem.Children.OfType<PeachElement.TestElement>().Any(e => e.AgentRefs.Any());
 		}
 
+		private bool AnyFilesStale(PitDetail detail)
+		{
+			foreach (var version in detail.Pit.Versions)
+			{
+				foreach (var file in version.Files)
+				{
+					var fi = new System.IO.FileInfo(file.Name);
+					if (!fi.Exists || file.Timestamp < fi.LastWriteTimeUtc)
+						return true;
+				}
+			}
+			return false;
+		}
+
 		private Pit AddEntry(LibraryVersion lib, string pitLibraryPath, string fileName)
 		{
 			var guid = MakeGuid(fileName);
 			var url = PitServicePrefix + "/" + guid;
-			var lastModified = File.GetLastWriteTime(fileName);
+			var lastModified = File.GetLastWriteTimeUtc(fileName);
 
 			PitDetail detail;
 			lock (_cache)
 			{
 				if (!_cache.TryGetValue(url, out detail) ||
-					detail.Pit.Timestamp < lastModified)
+					detail.Pit.Timestamp < lastModified ||
+					AnyFilesStale(detail))
 				{
 					detail = MakePitDetail(lib, pitLibraryPath, fileName, guid, url, lastModified);
-					_cache.Add(url, detail);
+					_cache[url] = detail;
 				}
 			}
 
@@ -1222,7 +1237,7 @@ namespace Peach.Pro.Core.WebServices
 				Locked = value.Locked,
 				Files = new List<PitFile>(),
 				User = Environment.UserName,
-				Timestamp = value.Timestamp
+				Timestamp = lastModified
 			};
 
 			var detail = new PitDetail
@@ -1254,12 +1269,19 @@ namespace Peach.Pro.Core.WebServices
 			return detail;
 		}
 
-		private static void AddAllFiles(PitDetail pit, ICollection<PitFile> list, string pitLibraryPath, string fileName, PeachElement contents, string ns)
+		private static void AddAllFiles(
+			PitDetail pit, 
+			ICollection<PitFile> list, 
+			string pitLibraryPath, 
+			string fileName, 
+			PeachElement contents, 
+			string ns)
 		{
 			list.Add(new PitFile
 			{
 				Name = fileName,
 				FileUrl = "",
+				Timestamp = File.GetLastWriteTimeUtc(fileName),
 			});
 
 			foreach (var sm in contents.Children.OfType<PeachElement.StateModelElement>())
