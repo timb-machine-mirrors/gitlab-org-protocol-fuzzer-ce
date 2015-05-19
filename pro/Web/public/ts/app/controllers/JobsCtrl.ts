@@ -15,8 +15,6 @@ module Peach {
 			private $state: ng.ui.IStateService,
 			private jobService: JobService
 		) {
-			$scope.vm = this;
-
 			this.jobService.GetJobs();
 		}
 
@@ -25,10 +23,7 @@ module Peach {
 		}
 
 		public OnJobSelected(job: IJob) {
-			var params = {
-				job: 1
-			};
-			this.$state.go(C.States.JobDashboard, params);
+			this.$state.go(C.States.JobDashboard, { job: job.id });
 		}
 	}
 }

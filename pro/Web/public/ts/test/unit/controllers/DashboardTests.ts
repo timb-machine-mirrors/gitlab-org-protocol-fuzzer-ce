@@ -29,7 +29,6 @@ describe("Peach", () => {
 
 		it("new", () => {
 			expect(_.isObject(ctrl)).toBe(true);
-			expect(ctrl.ShowNotConfigured).toBe(true);
 		});
 	});
 });

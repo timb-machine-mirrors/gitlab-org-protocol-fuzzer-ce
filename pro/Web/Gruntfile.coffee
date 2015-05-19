@@ -40,6 +40,7 @@ module.exports = (grunt) ->
 				options:
 					destPrefix: 'public/lib'
 				files:
+					'angular-chart'               : 'angular-chart.js/dist/angular-chart.css.map'
 					'angular-tree-control/css'    : 'angular-tree-control/css/*'
 					'angular-tree-control/images' : 'angular-tree-control/images/*'
 					'angular-tree-control/js'     : 'angular-tree-control/angular-tree-control.js'
@@ -102,8 +103,8 @@ module.exports = (grunt) ->
 					'public/js/test/unit.js'
 				]
 				options:
-					display: 'short'
-					summary: true
+#					display: 'short'
+#					summary: true
 					vendor: [
 						# ordered libraries
 						'public/lib/jquery/jquery.js'
@@ -113,7 +114,6 @@ module.exports = (grunt) ->
 						'public/lib/**/*.js'
 						# extra stuff
 						'public/js/angular-vis.js'
-						'node_modules/jasmine-custom-message/jasmine-custom-message.js'
 					]
 
 		protractor:
@@ -257,6 +257,7 @@ module.exports = (grunt) ->
 	]
 
 	grunt.registerTask 'test', [
+		'ts:unit'
 		'jasmine:test'
 	]
 

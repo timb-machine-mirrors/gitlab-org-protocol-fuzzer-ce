@@ -170,7 +170,7 @@ namespace Peach.Pro.Core.Loggers
 			}
 
 			if (_job.DatabasePath == null)
-				_job.LogPath = GetLogPath(context, BasePath);
+				_job.LogPath = GetLogPath(context, Path.GetFullPath(BasePath));
 
 			if (!Directory.Exists(_job.LogPath))
 				Directory.CreateDirectory(_job.LogPath);

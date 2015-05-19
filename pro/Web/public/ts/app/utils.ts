@@ -23,19 +23,19 @@ module Peach {
 	export interface IDirective extends ng.IDirective, IComponent {
 	}
 
-	export interface ITab {
-		title: string;
-		content: string;
-		active: boolean;
-		disabled: boolean;
-	}
-
 	export interface IViewModelScope extends ng.IScope {
 		vm: any;
 	}
 
 	export interface IFormScope extends IViewModelScope {
 		form: ng.IFormController;
+	}
+	
+	export function onlyWith<T, R>(obj: T, fn: (T) => R): R {
+		if (!_.isUndefined(obj)) {
+			return fn(obj);
+		}
+		return undefined;
 	}
 
 	export function onlyIf<T>(preds: any, fn: () => T): T {

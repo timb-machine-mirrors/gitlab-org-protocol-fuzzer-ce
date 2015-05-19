@@ -20,23 +20,21 @@ module Peach {
 			private $interval: ng.IIntervalService,
 			private pitService: PitService
 		) {
-			this.reset();
-			pitService.OnPitChanged(() => this.reset());
 		}
 
 		private pendingResult: ng.IDeferred<any>;
 		private isPending: boolean = false;
+		private testResult: ITestResult;
+		private testTime: string;
 
 		public get IsPending(): boolean {
 			return this.isPending;
 		}
 
-		private testResult: ITestResult;
 		public get TestResult(): ITestResult {
 			return this.testResult;
 		}
 
-		private testTime: string;
 		public get TestTime(): string {
 			return this.testTime;
 		}
@@ -50,7 +48,7 @@ module Peach {
 		}
 
 		public BeginTest(): ng.IPromise<any> {
-			this.reset();
+			this.Reset();
 
 			this.pendingResult = this.$q.defer<any>();
 			this.isPending = true;
@@ -63,17 +61,17 @@ module Peach {
 			};
 			var promise = this.$http.post(C.Api.Jobs, request);
 			promise.success((job: IJob) => {
-				this.startTestPoller(job.firstNodeUrl);
+				this.StartTestPoller(job.firstNodeUrl);
 			});
 			promise.catch(reason => {
-				this.setFailure(reason);
+				this.SetFailure(reason);
 				this.pendingResult.reject();
 			});
 
 			return this.pendingResult.promise;
 		}
 
-		private reset() {
+		private Reset() {
 			this.testTime = "";
 			this.testResult = {
 				status: "",
@@ -82,13 +80,13 @@ module Peach {
 			};
 		}
 
-		private startTestPoller(testUrl: string) {
+		private StartTestPoller(testUrl: string) {
 			var interval = this.$interval(() => {
 				var promise = this.$http.get(testUrl);
 				promise.success((data: ITestResult) => {
 					this.testResult = data;
 					if (data.status !== TestStatus.Active) {
-						this.stopTestPoller(interval);
+						this.StopTestPoller(interval);
 						var pass = (data.status === TestStatus.Pass);
 						if (pass) {
 							this.pendingResult.resolve();
@@ -98,19 +96,19 @@ module Peach {
 					}
 				});
 				promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
-					this.stopTestPoller(interval);
-					this.setFailure(reason.data.errorMessage);
+					this.StopTestPoller(interval);
+					this.SetFailure(reason.data.errorMessage);
 					this.pendingResult.reject();
 				});
 			}, TEST_INTERVAL);
 		}
 
-		private stopTestPoller(interval: any) {
+		private StopTestPoller(interval: any) {
 			this.isPending = false;
 			this.$interval.cancel(interval);
 		}
 
-		private setFailure(reason) {
+		private SetFailure(reason) {
 			this.testResult.status = TestStatus.Fail;
 
 			var event: ITestEvent = {

@@ -17,8 +17,10 @@ describe("Peach", () => {
 		var wizardService: Peach.WizardService;
 
 		var WizardController = 'WizardController';
-		var pitUrl = '/p/pits/PIT_GUID';
+		var pitId = 'PIT_GUID';
+		var pitUrl = C.Api.PitUrl.replace(':id', pitId);
 		var pit = {
+			id: pitId,
 			name: 'My Pit',
 			pitUrl: pitUrl,
 			peachConfig: [{ key: "LocalOS", value: "windows" }],
@@ -39,6 +41,7 @@ describe("Peach", () => {
 			wizardService = $injector.get(C.Services.Wizard);
 
 			$templateCache.put(C.Templates.Home, '');
+			$templateCache.put(C.Templates.Pit.Configure, '');
 			$templateCache.put(C.Templates.Pit.Wizard.Track, '');
 			$templateCache.put(C.Templates.Pit.Wizard.Question, '');
 
@@ -55,9 +58,12 @@ describe("Peach", () => {
 					C.Templates.Pit.Wizard.TrackDone.replace(':track', track), ''
 				);
 			});
+			
+			$state.go(C.States.PitConfigure, { pit: pitId });
+			$rootScope.$digest();
 
-			$httpBackend.expectGET(pitUrl).respond(pit);
-			pitService.SelectPit(pitUrl);
+			$httpBackend.whenGET(pitUrl).respond(pit);
+			pitService.LoadPit();
 			$httpBackend.flush();
 		}));
 
@@ -88,7 +94,7 @@ describe("Peach", () => {
 		}
 
 		function expectState(state, track, id?) {
-			var actual = $state.is(state, { track: track, id: id });
+			var actual = $state.is(state, { pit: pitId, track: track, id: id });
 			expect(actual).toBe(true);
 			if (!actual) {
 				console.error('expectState', state, track, id);
@@ -98,7 +104,7 @@ describe("Peach", () => {
 
 		describe("'vars' track", () => {
 			beforeEach(() => {
-				$state.go(C.States.PitWizardIntro, { track: C.Tracks.Vars });
+				$state.go(C.States.PitWizardIntro, { pit: pitId, track: C.Tracks.Vars });
 				$rootScope.$digest();
 			});
 
@@ -132,9 +138,13 @@ describe("Peach", () => {
 			});
 
 			describe("with variables to configure", () => {
+				var key = "Key";
+				var name = "Name";
+				var value = "Value";
+
 				beforeEach(() => {
 					pit.config = [
-						{ key: "Key", name: "Name", type: Peach.QuestionTypes.String }
+						{ key: key, name: name, type: Peach.QuestionTypes.String }
 					];
 
 					$httpBackend.expectGET(pitUrl).respond(pit);
@@ -154,12 +164,14 @@ describe("Peach", () => {
 					Next();
 					expectState(C.States.PitWizardQuestion, C.Tracks.Vars, 1);
 
-					scope.Question.value = "Value";
+					scope.Question.value = value;
+					expect(scope.Question.shortName).toBe(name);
+					expect(scope.Question.key).toBe(key);
 					expect(scope.Question.type).toBe(Peach.QuestionTypes.String);
 
 					var post = angular.copy(pit);
 					post.config = [
-						{ key: "Key", name: "Name", value: "Value", type: "string" }
+						{ key: key, name: name, value: value, type: Peach.QuestionTypes.String }
 					];
 					$httpBackend.expectPOST(pitUrl, post).respond(post);
 					Next();

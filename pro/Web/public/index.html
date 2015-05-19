@@ -43,30 +43,12 @@
 			ng-controller="MainController">
 
 	<div class="navbar navbar-default">
-
 		<div class="navbar-container"
 				 id="navbar-container">
 			<div class="navbar-header">
 				<a ui-sref="main.home">
 					<img src="img/peachlogo.png" />
 				</a>
-			</div>
-
-			<div class="navbar-header pull-right">
-				<ul class="nav">
-					<li class="tooltip-warning"
-							tooltip="{{vm.JobRunningTooltip}}"
-							tooltip-placement="left"
-							ng-cloak>
-						<button type="button"
-										class="btn btn-primary"
-										ng-class="{disabled: !vm.CanSelectPit}"
-										ng-click="vm.OnSelectPit()">
-							{{vm.SelectPitPrompt}}
-						</button>
-					</li>
-				</ul>
-
 			</div>
 		</div>
 	</div>
@@ -136,12 +118,8 @@
 					</li>
 
 					<li ui-sref-active="active"
-							ng-show="vm.ShowMenu('job')"
-							ng-class="{disabled: !vm.CanViewFaults}"
-							tooltip="{{vm.FaultsUnavailableTooltip}}"
-							tooltip-placement="right">
-						<a ui-sref="job.faults({job: vm.JobId, bucket: 'all'})"
-							 ng-click="vm.OnItemClick($event, vm.CanViewFaults)">
+							ng-show="vm.ShowMenu('job')">
+						<a ui-sref="job.faults({job: vm.JobId, bucket: 'all'})">
 							<i class="fa fa-flag"></i>
 							<span class="menu-text">
 								Faults
@@ -151,17 +129,14 @@
 					</li>
 
 					<li ui-sref-active="active"
-							ng-show="vm.ShowMenu('job')"
-							ng-class="{disabled: !vm.CanViewMetrics}"
-							tooltip="{{vm.MetricsUnavailableTooltip}}"
-							tooltip-placement="right">
+							ng-show="vm.ShowMenu('job')">
 						<a href="#"
-							 ng-click="vm.OnSubClick($event, 'job.metrics', vm.CanViewMetrics)">
+							 ng-click="vm.OnSubClick($event, 'job.metrics')">
 							<i class="fa fa-bar-chart"></i>
 							<span class="menu-text">
 								Metrics
 							</span>
-							<b class="arrow icon-angle-down"></b>
+							<b class="arrow fa fa-angle-down"></b>
 						</a>
 
 						<ul class="submenu"
@@ -188,26 +163,23 @@
 					</li>
 
 					<li ui-sref-active="active"
-							ng-show="vm.ShowMenu('pit')"
-							ng-class="{disabled: !vm.CanConfigurePit}"
-							tooltip="{{vm.JobRunningTooltip}}"
-							tooltip-placement="right">
+							ng-show="vm.ShowMenu('pit')">
 						<a href="#"
-							 ng-click="vm.OnSubClick($event, 'pit.wizard', vm.CanConfigurePit)">
+							 ng-click="vm.OnSubClick($event, 'pit.wizard')">
 							<i class="fa fa-rocket"></i>
 							<span class="menu-text">
 								Quick Start
 							</span>
-							<b class="arrow icon-angle-down"></b>
+							<b class="arrow fa fa-angle-down"></b>
 						</a>
 
 						<ul class="submenu"
 								collapse="vm.IsCollapsed('pit.wizard')">
 							<li ui-sref-active="active"
 									ng-repeat="item in vm.WizardTracks">
-								<a ui-sref="{{item.state}}({pit: vm.PitId, track: item.id, id: 0})">
+								<a ui-sref="{{item.start}}({pit: vm.PitId, track: item.id, id: 0})">
 									<span class="menu-text">
-										<i ng-class="{'icon-ok-sign green': vm.IsComplete(item.id)}"></i>
+										<i ng-class="{'fa fa-ok-sign green': vm.IsComplete(item.id)}"></i>
 										{{item.name}}
 									</span>
 								</a>
@@ -216,12 +188,9 @@
 					</li>
 
 					<li ui-sref-active="active"
-							ng-show="vm.ShowMenu('pit')"
-							ng-class="{disabled: !vm.CanConfigurePit}"
-							tooltip="{{vm.JobRunningTooltip}}"
-							tooltip-placement="right">
+							ng-show="vm.ShowMenu('pit')">
 						<a href="#"
-							 ng-click="vm.OnSubClick($event, 'pit.advanced', vm.CanConfigurePit)">
+							 ng-click="vm.OnSubClick($event, 'pit.advanced')">
 							<i class="fa fa-wrench"></i>
 							<span class="menu-text">
 								Advanced

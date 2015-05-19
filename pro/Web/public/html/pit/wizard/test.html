@@ -1,5 +1,5 @@
 <div class="page-content">
-	<div ng-include="'html/wizard/header.html'">
+	<div ng-include="'html/pit/wizard/header.html'">
 	</div>
 	<p>
 		When all of the sections of the configuration are complete,
@@ -15,13 +15,13 @@
 
 	<dl class="dl-horizontal">
 		<dt ng-repeat-start="item in vm.Tracks">
-			{{item.title}}
+			{{item.name}}
 		</dt>
 		<dd ng-repeat-end>
 			<span class="label arrowed"
 						ng-class="vm.TrackStatus(item)">
 				{{vm.TrackMessage(item)}}
-				<a ui-sref="wizard.intro({track: item.track})"
+				<a ui-sref="{{item.start}}({track: item.id})"
 					 ng-show="vm.TrackLink(item)"
 					 style="color: white">
 					<b>

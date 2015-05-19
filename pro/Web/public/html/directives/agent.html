@@ -1,9 +1,9 @@
 ﻿<ng-form name="form">
-	<accordion-group is-open="isOpen">
+	<accordion-group is-open="vm.IsOpen">
 		<accordion-heading>
 			<span style="line-height: 22px">
 				<i class="glyphicon"
-					 ng-class="{'glyphicon-chevron-down': isOpen, 'glyphicon-chevron-right': !isOpen}">
+					 ng-class="{'glyphicon-chevron-down': vm.IsOpen, 'glyphicon-chevron-right': !vm.IsOpen}">
 				</i>
 				&nbsp;
 				{{vm.Header}}

@@ -33,7 +33,7 @@ module Peach {
 		) {
 			this.trackId = this.$state.params['track'];
 			this.track = wizardService.GetTrack(this.trackId);
-			this.Title = this.track.title;
+			this.Title = this.track.name;
 
 			if (this.trackId !== C.Tracks.Intro) {
 				var id = this.$state.params['id'];
