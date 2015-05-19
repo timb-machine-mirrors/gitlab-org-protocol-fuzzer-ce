@@ -4,11 +4,19 @@ module Peach {
 	"use strict";
 
 	export var JOB_INTERVAL = 1000;
-
+	
+	interface IJobEntry {
+		id: string;
+		job: IJob;
+		poller: ng.IPromise<any>;
+		error: any;
+	}
+	
 	export class JobService {
 		static $inject = [
 			C.Angular.$q,
 			C.Angular.$http,
+			C.Angular.$state,
 			C.Angular.$interval,
 			C.Services.Pit
 		];
@@ -16,34 +24,95 @@ module Peach {
 		constructor(
 			private $q: ng.IQService,
 			private $http: ng.IHttpService,
-			private $interval: ng.IIntervalService,
-			public pitService: PitService
+			private $state: ng.ui.IStateService,
+			private $interval: ng.IIntervalService
 		) {
-			pitService.OnPitChanged(() => {
-				if (!this.isLoading) {
-					this.job = undefined;
-					this.faults = [];
-				}
+		}
+
+		private jobs: IJobEntry[] = [];
+		private faults: IFaultSummary[] = [];
+		
+		public OnEnter(id) {
+			this.GetJobs().then(() => {
+				var entry = this.GetJobEntry(id);
+				console.log('OnEnter.then', id, this.jobs, entry);
+				this.ReloadFaults(entry.job);
 			});
 		}
+		
+		public OnExit() {
+			console.log('OnExit');
+			this.faults = [];
+		}
+		
+		public get CurrentJobId(): string {
+			return this.$state.params['job'];
+		}
 
-		private poller: ng.IPromise<any>;
+		private GetJobEntry(id): IJobEntry {
+			return _.find(this.jobs, { id: id });
+		}
+		
+		public GetJob(id): IJob {
+			var entry = this.GetJobEntry(id);
+			return entry ? entry.job : undefined;
+		}
 
-		private isLoading: boolean;
-
-		private jobs: IJob[];
 		public get Jobs(): IJob[] {
-			return this.jobs;
+			return _.pluck(this.jobs, 'job');
+		}
+		
+		public get JobEntry(): IJobEntry {
+			return this.GetJobEntry(this.CurrentJobId);
 		}
 
-		private job: IJob;
 		public get Job(): IJob {
-			return this.job;
+			return this.GetJob(this.CurrentJobId);
 		}
 
-		private faults: IFaultSummary[] = [];
 		public get Faults(): IFaultSummary[] {
 			return this.faults;
+		}
+
+		public get IsRunning(): boolean {
+			return this.Job && this.Job.status === JobStatus.Running;
+		}
+
+		public get IsPaused(): boolean {
+			return this.Job && this.Job.status === JobStatus.Paused;
+		}
+
+		public get CanStart(): boolean {
+			return _.isUndefined(this.Job) || this.Job.status === JobStatus.Stopped;
+		}
+
+		public get CanContinue(): boolean {
+			return this.CheckStatus([JobStatus.Paused]);
+		}
+
+		public get CanPause(): boolean {
+			return this.CheckStatus([JobStatus.Running]);
+		}
+
+		public get CanStop(): boolean {
+			return this.CheckStatus([
+				JobStatus.Running,
+				JobStatus.Paused,
+				JobStatus.StartPending,
+				JobStatus.PausePending,
+				JobStatus.ContinuePending
+			]);
+		}
+
+		private CheckStatus(good: string[]): boolean {
+			return this.Job && _.contains(good, this.Job.status);
+		}
+
+		public get RunningTime(): string {
+			if (_.isUndefined(this.Job)) {
+				return undefined;
+			}
+			return moment(new Date(0, 0, 0, 0, 0, this.Job.runtime)).format("H:mm:ss");
 		}
 
 		public LoadFaultDetail(id: string): ng.IPromise<IFaultDetail> {
@@ -56,160 +125,115 @@ module Peach {
 			return StripHttpPromise(this.$q, this.$http.get(fault.faultUrl));
 		}
 
-		public get IsRunning(): boolean {
-			return onlyIf(this.job, () => this.job.status === JobStatus.Running);
-		}
-
-		public get IsPaused(): boolean {
-			return onlyIf(this.job, () => this.job.status === JobStatus.Paused);
-		}
-
-		public get CanStart(): boolean {
-			return onlyIf(this.pitService.IsSelected, () => 
-				_.isUndefined(this.job) || this.job.status === JobStatus.Stopped
-			);
-		}
-
-		public get CanContinue(): boolean {
-			return this.checkStatus([JobStatus.Paused]);
-		}
-
-		public get CanPause(): boolean {
-			return this.checkStatus([JobStatus.Running]);
-		}
-
-		public get CanStop(): boolean {
-			return this.checkStatus([
-				JobStatus.Running,
-				JobStatus.Paused,
-				JobStatus.StartPending,
-				JobStatus.PausePending,
-				JobStatus.ContinuePending
-			]);
-		}
-
-		public get RunningTime(): string {
-			if (this.job === undefined) {
-				return undefined;
-			}
-			return moment(new Date(0, 0, 0, 0, 0, this.job.runtime)).format("H:mm:ss");
-		}
-
-		public GetJobs(): ng.IPromise<void> {
-			var deferred = this.$q.defer<void>();
+		public GetJobs(): ng.IPromise<IJob[]> {
 			var promise = this.$http.get(C.Api.Jobs);
 			promise.success((jobs: IJob[]) => {
 				// ignore test jobs for now
-				this.jobs = _.where(jobs, { isControlIteration: false });
-
-				var hasPit = false;
-				if (this.jobs.length > 0) {
-					this.job = _.first(this.jobs);
-					hasPit = !_.isEmpty(this.job.pitUrl);
-					if (hasPit) {
-						this.isLoading = true;
-						var promise2 = this.pitService.SelectPit(this.job.pitUrl);
-						promise2.then(() => {
-							deferred.resolve();
-						});
-						promise2.finally(() => {
-							this.isLoading = false;
-						});
-					}
-					this.startJobPoller();
-				}
-				if (!hasPit) {
-					deferred.resolve();
-				}
+				this.jobs = _(jobs)
+					.filter({ isControlIteration: false })
+					.map(job => {
+						var entry = this.GetJobEntry(job.id);
+						console.log('GetJobs.success, entry:', entry);
+						var result = <IJobEntry> {
+							id: job.id,
+							job: job,
+							poller: entry ? entry.poller : undefined
+						};
+						if (job.status !== JobStatus.Stopped) {
+							this.StartJobPoller(result);
+						}
+						return result;
+					})
+					.value();
 			});
-			promise.error(reason => this.onError(reason));
-			return deferred.promise;
+			return StripHttpPromise(this.$q, promise);
 		}
 
-		public StartJob(job?: IJobRequest) {
-			if (job === undefined) {
-				job = { pitUrl: this.pitService.Pit.pitUrl };
-			} else {
-				job.pitUrl = this.pitService.Pit.pitUrl;
-			}
-
+		public Start(job: IJobRequest): ng.IPromise<IJob> {
 			if (this.CanStart) {
 				var promise = this.$http.post(C.Api.Jobs, job);
-				promise.success((newJob: IJob) => {
-					this.job = newJob;
-					this.startJobPoller();
+				promise.success((job: IJob) => {
+					console.log('Start:', job.id);
+					var entry = <IJobEntry> {
+						id: job.id,
+						job: job
+					};
+					this.jobs.push(entry);
+					this.StartJobPoller(entry);
 				});
-				promise.error(reason => this.onError(reason));
-			} else if (this.CanContinue) {
-				this.job.status = JobStatus.ContinuePending;
-				this.$http.get(this.job.commands.continueUrl)
-					.success(() => this.startJobPoller())
-					.error(reason => this.onError(reason));
+				promise.error(reason => {
+					console.log('JobService.StartJob().error>', reason);
+				});
+				return StripHttpPromise(this.$q, promise);
+			}
+		}
+		
+		public Continue() {
+			if (this.CanContinue) {
+				this.Job.status = JobStatus.ContinuePending;
+				this.$http.get(this.Job.commands.continueUrl)
+					.success(() => this.StartJobPoller(this.JobEntry))
+					.error(reason => this.OnError(this.JobEntry, reason));
 			}
 		}
 
-		public PauseJob() {
+		public Pause() {
 			if (this.CanPause) {
-				this.job.status = JobStatus.PausePending;
-				this.$http.get(this.job.commands.pauseUrl)
-					.success(() => this.startJobPoller())
-					.error(reason => this.onError(reason));
+				this.Job.status = JobStatus.PausePending;
+				this.$http.get(this.Job.commands.pauseUrl)
+					.success(() => this.StartJobPoller(this.JobEntry))
+					.error(reason => this.OnError(this.JobEntry, reason));
 			}
 		}
 
-		public StopJob() {
+		public Stop() {
 			if (this.CanStop) {
-				this.job.status = JobStatus.StopPending;
-				this.$http.get(this.job.commands.stopUrl)
-					.success(() => this.startJobPoller())
-					.error(reason => this.onError(reason));
+				this.Job.status = JobStatus.StopPending;
+				this.$http.get(this.Job.commands.stopUrl)
+					.success(() => this.StartJobPoller(this.JobEntry))
+					.error(reason => this.OnError(this.JobEntry, reason));
 			}
 		}
 
-		private checkStatus(good: string[]): boolean {
-			return (
-				this.job &&
-				_.contains(good, this.job.status) &&
-				this.pitService.IsSelected
-			);
+		private OnError(entry: IJobEntry, error: any) {
+			console.log('onError', error);
+			this.StopJobPoller(entry);
 		}
 
-		private onError(response) {
-			//alert("Peach is busy with another task.\n" +
-			//	"Confirm that there aren't multiple browsers accessing the same instance of Peach.");
-			console.log('onError', response);
-			this.job = undefined;
-			this.$interval.cancel(this.poller);
-		}
-
-		private startJobPoller() {
-			if (!_.isUndefined(this.poller)) {
+		private StartJobPoller(entry: IJobEntry) {
+			if (!_.isUndefined(entry.poller)) {
 				return;
 			}
+			
+			console.log('StartJobPoller:', entry.id);
 
-			this.poller = this.$interval(() => {
-				var promise = this.$http.get(this.job.jobUrl);
+			entry.poller = this.$interval(() => {
+				var promise = this.$http.get(entry.job.jobUrl);
 				promise.success((job: IJob) => {
-					this.job = job;
+					entry.job = job;
 					if (job.status === JobStatus.Stopped ||
 						job.status === JobStatus.Paused) {
-						this.$interval.cancel(this.poller);
-						this.poller = undefined;
+						this.StopJobPoller(entry);
 					}
 					if (this.faults.length !== job.faultCount) {
-						this.reloadFaults();
+						this.ReloadFaults(job);
 					}
 				});
-				promise.error(reason => this.onError(reason));
+				promise.error(reason => this.OnError(entry, reason));
 			}, JOB_INTERVAL);
 		}
+		
+		private StopJobPoller(entry: IJobEntry) {
+			this.$interval.cancel(entry.poller);
+			entry.poller = undefined;
+		}
 
-		private reloadFaults() {
-			var promise = this.$http.get(this.job.faultsUrl);
+		private ReloadFaults(job: IJob) {
+			var promise = this.$http.get(job.faultsUrl);
 			promise.success((faults: IFaultSummary[]) => {
 				this.faults = faults;
 			});
-			promise.error(reason => this.onError(reason));
+//			promise.error(reason => this.OnError(reason));
 		}
 	}
 }

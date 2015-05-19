@@ -10,6 +10,7 @@
 //grunt-start
 /// <reference path="controllers/ConfigMonitorsCtrl.ts" />
 /// <reference path="controllers/ConfigVarsCtrl.ts" />
+/// <reference path="controllers/ConfigureCtrl.ts" />
 /// <reference path="controllers/CopyPitCtrl.ts" />
 /// <reference path="controllers/DashboardCtrl.ts" />
 /// <reference path="controllers/FaultsCtrl.ts" />
@@ -18,7 +19,7 @@
 /// <reference path="controllers/LibraryCtrl.ts" />
 /// <reference path="controllers/MainCtrl.ts" />
 /// <reference path="controllers/MetricsCtrl.ts" />
-/// <reference path="controllers/PitLibraryCtrl.ts" />
+/// <reference path="controllers/NewVarCtrl.ts" />
 /// <reference path="controllers/PitTestCtrl.ts" />
 /// <reference path="controllers/StartJobCtrl.ts" />
 /// <reference path="controllers/TemplatesCtrl.ts" />

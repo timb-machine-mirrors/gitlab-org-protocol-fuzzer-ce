@@ -45,7 +45,9 @@ namespace Peach.Core
 		/// <param name="path"></param>
 		/// <returns></returns>
 		protected static string GetLogPath(RunContext context, string path)
-		{
+		{	
+			Console.WriteLine("GetLogPath: {0}", path);
+			
 			var sb = new StringBuilder();
 
 			sb.Append(Path.Combine(path, Path.GetFileName(context.config.pitFile)));

@@ -46,7 +46,7 @@ module Peach {
 
 	export interface ITrack {
 		// readonly
-		title: string;
+		name: string;
 		next?: ITrackNext;
 		nextPrompt?: string;
 		backPrompt?: string;

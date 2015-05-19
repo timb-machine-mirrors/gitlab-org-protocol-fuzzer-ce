@@ -8,7 +8,6 @@ module Peach {
 		static $inject = [
 			C.Angular.$scope,
 			C.Angular.$state,
-			C.Angular.$modal,
 			C.Services.Pit,
 			C.Services.Job
 		];
@@ -16,34 +15,19 @@ module Peach {
 		constructor(
 			$scope: IViewModelScope,
 			private $state: ng.ui.IStateService,
-			private $modal: ng.ui.bootstrap.IModalService,
 			private pitService: PitService,
 			private jobService: JobService
 		) {
 			$scope.$watch(() => jobService.Faults.length, (newVal, oldVal) => {
 				if (newVal !== oldVal) {
-					this.refreshFaults();
+					this.RefreshFaults();
 				}
 			});
 
-			this.refreshFaults();
+			this.RefreshFaults();
 		}
 
 		public Faults: IFaultSummary[] = [];
-
-		public get ShowSelectPit(): boolean {
-			return !this.Job && !this.pitService.Pit;
-		}
-
-		public get ShowReady(): boolean {
-			return onlyIf([this.pitService.Pit, !this.jobService.Job], () =>
-				this.pitService.IsConfigured && this.CanStart
-			);
-		}
-
-		public get ShowNotConfigured(): boolean {
-			return onlyIf(this.pitService.Pit, () => !this.pitService.IsConfigured);
-		}
 
 		public get ShowLimited(): boolean {
 			return onlyIf(this.Job, () => _.isEmpty(this.Job.pitUrl));
@@ -69,37 +53,28 @@ module Peach {
 			return this.jobService.RunningTime;
 		}
 
-		public get CanStart() {
-			return this.jobService.CanStart || this.jobService.CanContinue;
-		}
-
-		public get CanPause() {
+		public get CanPause(): boolean {
 			return this.jobService.CanPause;
 		}
 
-		public get CanStop() {
+		public get CanContinue(): boolean {
+			return this.jobService.CanContinue;
+		}
+
+		public get CanStop(): boolean {
 			return this.jobService.CanStop;
 		}
 
-		public StartWithOptions() {
-			this.$modal.open({
-				templateUrl: C.Templates.Modal.StartJob,
-				controller: StartJobController
-			}).result.then((job: IJobRequest) => {
-				this.jobService.StartJob(job);
-			});
-		}
-
-		public Start() {
-			this.jobService.StartJob();
-		}
-
 		public Pause() {
-			this.jobService.PauseJob();
+			this.jobService.Pause();
 		}
 
 		public Stop() {
-			this.jobService.StopJob();
+			this.jobService.Stop();
+		}
+		
+		public Continue() {
+			this.jobService.Continue();
 		}
 
 		public get StatusClass(): any {
@@ -121,7 +96,7 @@ module Peach {
 			this.$state.go(C.States.JobFaultsDetail, params);
 		}
 
-		private refreshFaults() {
+		private RefreshFaults() {
 			if (this.jobService.Faults.length > 0)
 				this.Faults = _.last(this.jobService.Faults, 10).reverse();
 		}

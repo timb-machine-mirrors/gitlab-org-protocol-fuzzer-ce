@@ -29,7 +29,6 @@ module Peach {
 			$scope: IViewModelScope,
 			private pitService: PitService
 		) {
-			$scope.vm = this;
 			this.init();
 		}
 

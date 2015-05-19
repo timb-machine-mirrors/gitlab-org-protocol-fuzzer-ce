@@ -2,6 +2,8 @@
 
 module Peach.C {
 	"use strict";
+	
+	export var ViewModel = 'vm';
 
 	export module Vendor {
 		export var VisDataSet = 'visDataSet';
@@ -46,12 +48,13 @@ module Peach.C {
 	export module Api {
 		export var Libraries = '/p/libraries';
 		export var Pits = '/p/pits';
+		export var PitUrl = '/p/pits/:id';
 		export var Jobs = '/p/jobs';
+		export var JobUrl = '/p/jobs/:id';
 		export var PeachMonitors = '/p/pits/monitors';
 	}
 
 	export module Tracks {
-		export var Default = 'default';
 		export var Intro = 'intro';
 		export var Vars = 'vars';
 		export var Fault = 'fault';
@@ -71,6 +74,7 @@ module Peach.C {
 	}
 
 	export module Templates {
+		export var UiView = '<div ui-view></div>';
 		export var Home = 'html/home.html';
 		export var Jobs = 'html/jobs.html';
 		export var Library = 'html/library.html';

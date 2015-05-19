@@ -6,28 +6,11 @@
 	</div>
 
 	<div class="alert alert-warning"
-			 ng-show="vm.ShowSelectPit">
-		<strong>Warning!</strong>
-		Select a Pit before continuing.
-	</div>
-	<div class="alert alert-warning"
-			 ng-show="vm.ShowNotConfigured">
-		<strong>Warning!</strong>
-		The currently selected Pit should be configured for the environment.
-		<a ui-sref="wizard({track: 'intro', id: 0})">Go to Pit Configuration now.</a>
-	</div>
-	<div class="alert alert-warning"
 			 ng-show="vm.ShowLimited">
 		<strong>Note:</strong>
 		The current Pit was specified from the command line,
 		which limits activities to viewing faults that occur.
 		You can stop the current job by stopping the Peach process responsible for this job.
-	</div>
-
-	<div class="alert alert-success"
-			 ng-show="vm.ShowReady">
-		The Pit is configured and ready for use.
-		Click the START button below to begin fuzzing.
 	</div>
 
 	<div class="alert alert-info"
