@@ -48,7 +48,7 @@ module Peach {
 		}
 
 		public BeginTest(): ng.IPromise<any> {
-			this.Reset();
+			this.reset();
 
 			this.pendingResult = this.$q.defer<any>();
 			this.isPending = true;
@@ -61,17 +61,17 @@ module Peach {
 			};
 			var promise = this.$http.post(C.Api.Jobs, request);
 			promise.success((job: IJob) => {
-				this.StartTestPoller(job.firstNodeUrl);
+				this.startTestPoller(job.firstNodeUrl);
 			});
 			promise.catch(reason => {
-				this.SetFailure(reason);
+				this.setFailure(reason);
 				this.pendingResult.reject();
 			});
 
 			return this.pendingResult.promise;
 		}
 
-		private Reset() {
+		private reset() {
 			this.testTime = "";
 			this.testResult = {
 				status: "",
@@ -80,13 +80,13 @@ module Peach {
 			};
 		}
 
-		private StartTestPoller(testUrl: string) {
+		private startTestPoller(testUrl: string) {
 			var interval = this.$interval(() => {
 				var promise = this.$http.get(testUrl);
 				promise.success((data: ITestResult) => {
 					this.testResult = data;
 					if (data.status !== TestStatus.Active) {
-						this.StopTestPoller(interval);
+						this.stopTestPoller(interval);
 						var pass = (data.status === TestStatus.Pass);
 						if (pass) {
 							this.pendingResult.resolve();
@@ -96,19 +96,19 @@ module Peach {
 					}
 				});
 				promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
-					this.StopTestPoller(interval);
-					this.SetFailure(reason.data.errorMessage);
+					this.stopTestPoller(interval);
+					this.setFailure(reason.data.errorMessage);
 					this.pendingResult.reject();
 				});
 			}, TEST_INTERVAL);
 		}
 
-		private StopTestPoller(interval: any) {
+		private stopTestPoller(interval: any) {
 			this.isPending = false;
 			this.$interval.cancel(interval);
 		}
 
-		private SetFailure(reason) {
+		private setFailure(reason) {
 			this.testResult.status = TestStatus.Fail;
 
 			var event: ITestEvent = {

@@ -28,7 +28,7 @@ module Peach {
 		public Tracks: ITrackStatic[] = _.filter(WizardTracks, 'incompleteMsg');
 		public Title = 'Test';
 
-		private get IsWizard(): boolean {
+		private get isWizard(): boolean {
 			return this.$state.is(C.States.PitWizard, { track: C.Tracks.Test });
 		}
 
@@ -69,7 +69,7 @@ module Peach {
 		}
 
 		public OnBeginTest() {
-			if (this.IsWizard) {
+			if (this.isWizard) {
 				this.track.isComplete = false;
 				var agents = [
 					this.wizardService.GetTrack(C.Tracks.Fault).agents,
@@ -78,17 +78,17 @@ module Peach {
 				];
 				var promise = this.pitService.SaveAgents(_.flatten<Agent>(agents));
 				promise.then(() => {
-					this.StartTest();
+					this.startTest();
 				});
 			} else {
-				this.StartTest();
+				this.startTest();
 			}
 		}
 
-		private StartTest() {
+		private startTest() {
 			var promise = this.testService.BeginTest();
 			promise.then(() => {
-				if (this.IsWizard) {
+				if (this.isWizard) {
 					this.track.isComplete = true;
 				}
 			});
