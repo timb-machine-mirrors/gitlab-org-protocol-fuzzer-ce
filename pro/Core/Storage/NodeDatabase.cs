@@ -76,7 +76,8 @@ namespace Peach.Pro.Core.Storage
 					}
 				}
 
-				job.StopDate = DateTime.UtcNow;
+				job.StopDate = DateTime.Now;
+				job.HeartBeat = job.StopDate;
 				job.Mode = JobMode.Fuzzing;
 				job.Status = JobStatus.Stopped;
 				job.Result = message;
