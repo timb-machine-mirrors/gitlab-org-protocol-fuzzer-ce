@@ -139,45 +139,22 @@
 	<div class="space-6"></div>
 
 	<div class="row text-center">
-		<div class="btn-group">
-			<button type="button"
-							class="btn btn-lg btn-primary"
-							ng-click="vm.Start()"
-							ng-class="{disabled: !vm.CanStart}">
-				START
-			</button>
-			<button type="button"
-							class="btn btn-lg btn-primary dropdown-toggle"
-							data-toggle="dropdown"
-							ng-class="{disabled: !vm.CanStart}">
-				<i class="fa fa-caret-down"></i>
-			</button>
-			<ul class="dropdown-menu">
-				<li>
-					<a class="pointer"
-						 ng-click="vm.Start()">
-						Start Now
-					</a>
-				</li>
-				<li>
-					<a class="pointer"
-						 ng-click="vm.StartWithOptions()">
-						Start with options
-					</a>
-				</li>
-			</ul>
-		</div>
+		<button class="btn btn-lg btn-success"
+						ng-click="vm.Continue()"
+						ng-class="{disabled: !vm.CanContinue}">
+			<i class="fa fa-play"></i>
+		</button>
 
 		<button class="btn btn-lg btn-danger"
 						ng-click="vm.Stop()"
 						ng-class="{disabled: !vm.CanStop}">
-			STOP
+			<i class="fa fa-stop"></i>
 		</button>
 
 		<button class="btn btn-lg btn-default"
 						ng-click="vm.Pause()"
 						ng-class="{disabled: !vm.CanPause}">
-			PAUSE
+			<i class="fa fa-pause"></i>
 		</button>
 	</div>
 
