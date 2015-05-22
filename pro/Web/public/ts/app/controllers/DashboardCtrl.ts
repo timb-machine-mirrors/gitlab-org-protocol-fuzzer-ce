@@ -8,14 +8,12 @@ module Peach {
 		static $inject = [
 			C.Angular.$scope,
 			C.Angular.$state,
-			C.Services.Pit,
 			C.Services.Job
 		];
 
 		constructor(
 			$scope: IViewModelScope,
 			private $state: ng.ui.IStateService,
-			private pitService: PitService,
 			private jobService: JobService
 		) {
 			$scope.$watch(() => jobService.Faults.length, (newVal, oldVal) => {
