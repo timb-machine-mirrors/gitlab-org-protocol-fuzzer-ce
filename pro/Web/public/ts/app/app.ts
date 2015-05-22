@@ -32,7 +32,6 @@ module Peach {
 		"ngSanitize",
 		"ngVis",
 		"smart-table",
-		"treeControl",
 		"ui.bootstrap",
 		"ui.select",
 		"ui.router"
