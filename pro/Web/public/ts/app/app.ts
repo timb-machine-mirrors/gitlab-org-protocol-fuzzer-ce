@@ -28,6 +28,7 @@ module Peach {
 	var p = angular.module("Peach", [
 		"angular-loading-bar",
 		"chart.js",
+		"ncy-angular-breadcrumb",
 		"ngMessages",
 		"ngSanitize",
 		"ngVis",
@@ -64,13 +65,19 @@ module Peach {
 					url: '/',
 					templateUrl: C.Templates.Home,
 					controller: HomeController,
-					controllerAs: C.ViewModel
+					controllerAs: C.ViewModel,
+					ncyBreadcrumb: {
+						label: 'Home'
+					}
 				})
 				.state(C.States.MainLibrary, {
 					url: '/library',
 					templateUrl: C.Templates.Library,
 					controller: LibraryController,
-					controllerAs: C.ViewModel
+					controllerAs: C.ViewModel,
+					ncyBreadcrumb: {
+						label: 'Library'
+					}
 				})
 				.state(C.States.MainTemplates, {
 					url: '/templates',
@@ -82,7 +89,10 @@ module Peach {
 					url: '/jobs',
 					templateUrl: C.Templates.Jobs,
 					controller: JobsController,
-					controllerAs: C.ViewModel
+					controllerAs: C.ViewModel,
+					ncyBreadcrumb: {
+						label: 'Jobs'
+					}
 				})
 
 				// ----- Job -----
@@ -90,6 +100,9 @@ module Peach {
 					url: '/job/:job',
 					abstract: true,
 					template: C.Templates.UiView,
+					ncyBreadcrumb: {
+						label: 'Job'
+					},
 					onEnter: [
 						C.Services.Job, 
 						C.Angular.$stateParams, 
@@ -107,14 +120,21 @@ module Peach {
 					url: '/dashboard',
 					templateUrl: C.Templates.Job.Dashboard,
 					controller: DashboardController,
-					controllerAs: C.ViewModel
+					controllerAs: C.ViewModel,
+					ncyBreadcrumb: {
+						label: 'Dashboard',
+						parent: C.States.Job
+					}
 				})
 				.state(C.States.JobFaults, {
 					url: '/faults/:bucket',
 					params: { bucket: 'all' },
 					templateUrl: C.Templates.Job.Faults.Summary,
 					controller: FaultsController,
-					controllerAs: C.ViewModel
+					controllerAs: C.ViewModel,
+					ncyBreadcrumb: {
+						label: 'Faults'
+					}
 				})
 				.state(C.States.JobFaultsDetail, {
 					url: '/{id:int}',
@@ -124,6 +144,9 @@ module Peach {
 							controller: FaultsDetailController,
 							controllerAs: C.ViewModel
 						}
+					},
+					ncyBreadcrumb: {
+						label: 'Fault'
 					}
 				})
 				.state(C.States.JobMetrics, {

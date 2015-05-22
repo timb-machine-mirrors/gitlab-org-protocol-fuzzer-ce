@@ -23,6 +23,7 @@ module.exports = (grunt) ->
 				files:
 					'public/lib/angular'             : 'angular:main'
 					'public/lib/angular-bootstrap'   : 'angular-bootstrap:main'
+					'public/lib/angular-breadcrumb'  : 'angular-breadcrumb:main'
 					'public/lib/angular-chart'       : 'angular-chart.js:main'
 					'public/lib/angular-loading-bar' : 'angular-loading-bar:main'
 					'public/lib/angular-mocks'       : 'angular-mocks:main'
