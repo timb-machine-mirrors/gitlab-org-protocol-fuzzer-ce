@@ -5,13 +5,6 @@ module Peach {
 
 	export var JOB_INTERVAL = 1000;
 	
-	interface IJobEntry {
-		id: string;
-		job: IJob;
-		poller: ng.IPromise<any>;
-		error: any;
-	}
-	
 	export class JobService {
 		static $inject = [
 			C.Angular.$q,
@@ -29,45 +22,30 @@ module Peach {
 		) {
 		}
 
-		private jobs: IJobEntry[] = [];
+		private jobs: IJob[] = [];
+
+		private poller: ng.IPromise<any>;
+		private job: IJob;
 		private faults: IFaultSummary[] = [];
 		
 		public OnEnter(id) {
-			this.GetJobs().then(() => {
-				var entry = this.GetJobEntry(id);
-				console.log('OnEnter.then', id, this.jobs, entry);
-				this.ReloadFaults(entry.job);
-			});
+			this.$http.get(C.Api.JobUrl.replace(':id', id))
+				.success((job: IJob) => {
+					this.job = job;
+				});
 		}
 		
 		public OnExit() {
-			console.log('OnExit');
+			this.job = undefined;
 			this.faults = [];
 		}
 		
-		public get CurrentJobId(): string {
-			return this.$state.params['job'];
-		}
-
-		private GetJobEntry(id): IJobEntry {
-			return _.find(this.jobs, { id: id });
+		public get Jobs(): IJob[]{
+			return this.jobs;
 		}
 		
-		public GetJob(id): IJob {
-			var entry = this.GetJobEntry(id);
-			return entry ? entry.job : undefined;
-		}
-
-		public get Jobs(): IJob[] {
-			return _.pluck(this.jobs, 'job');
-		}
-		
-		public get JobEntry(): IJobEntry {
-			return this.GetJobEntry(this.CurrentJobId);
-		}
-
 		public get Job(): IJob {
-			return this.GetJob(this.CurrentJobId);
+			return this.job;
 		}
 
 		public get Faults(): IFaultSummary[] {
@@ -126,26 +104,8 @@ module Peach {
 		}
 
 		public GetJobs(): ng.IPromise<IJob[]> {
-			var promise = this.$http.get(C.Api.Jobs);
-			promise.success((jobs: IJob[]) => {
-				// ignore test jobs for now
-				this.jobs = _(jobs)
-					.filter({ isControlIteration: false })
-					.map(job => {
-						var entry = this.GetJobEntry(job.id);
-						console.log('GetJobs.success, entry:', entry);
-						var result = <IJobEntry> {
-							id: job.id,
-							job: job,
-							poller: entry ? entry.poller : undefined
-						};
-						if (job.status !== JobStatus.Stopped) {
-							this.StartJobPoller(result);
-						}
-						return result;
-					})
-					.value();
-			});
+			var params = { filter: 'dryRun' };
+			var promise = this.$http.get(C.Api.Jobs, { params: params });
 			return StripHttpPromise(this.$q, promise);
 		}
 
@@ -153,13 +113,7 @@ module Peach {
 			if (this.CanStart) {
 				var promise = this.$http.post(C.Api.Jobs, job);
 				promise.success((job: IJob) => {
-					console.log('Start:', job.id);
-					var entry = <IJobEntry> {
-						id: job.id,
-						job: job
-					};
-					this.jobs.push(entry);
-					this.StartJobPoller(entry);
+					this.StartJobPoller(job);
 				});
 				promise.error(reason => {
 					console.log('JobService.StartJob().error>', reason);
@@ -195,13 +149,13 @@ module Peach {
 			}
 		}
 
-		private OnError(entry: IJobEntry, error: any) {
+		private OnError(entry: IJob, error: any) {
 			console.log('onError', error);
-			this.StopJobPoller(entry);
+			this.StopJobPoller(job);
 		}
 
-		private StartJobPoller(entry: IJobEntry) {
-			if (!_.isUndefined(entry.poller)) {
+		private StartJobPoller(job: IJob) {
+			if (!_.isUndefined(this.poller)) {
 				return;
 			}
 			
@@ -210,6 +164,7 @@ module Peach {
 			entry.poller = this.$interval(() => {
 				var promise = this.$http.get(entry.job.jobUrl);
 				promise.success((job: IJob) => {
+					console.log("job:", job);
 					entry.job = job;
 					if (job.status === JobStatus.Stopped ||
 						job.status === JobStatus.Paused) {
@@ -223,12 +178,15 @@ module Peach {
 			}, JOB_INTERVAL);
 		}
 		
-		private StopJobPoller(entry: IJobEntry) {
-			this.$interval.cancel(entry.poller);
-			entry.poller = undefined;
+		private StopJobPoller() {
+			console.log("StopJobPoller:");
+
+			this.$interval.cancel(this.poller);
+			this.poller = undefined;
 		}
 
 		private ReloadFaults(job: IJob) {
+			console.log("ReloadFaults:", job);
 			var promise = this.$http.get(job.faultsUrl);
 			promise.success((faults: IFaultSummary[]) => {
 				this.faults = faults;
