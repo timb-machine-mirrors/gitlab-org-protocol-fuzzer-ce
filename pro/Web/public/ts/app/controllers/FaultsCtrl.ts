@@ -22,18 +22,16 @@ module Peach {
 		static $inject = [
 			C.Angular.$scope,
 			C.Angular.$state,
-			C.Angular.$stateParams,
 			C.Services.Job
 		];
 
 		constructor(
 			$scope: IViewModelScope,
 			$state: ng.ui.IStateService,
-			$stateParams,
 			jobService: JobService
 		) {
-			this.Title = FaultsTitleParts($stateParams);
-			var promise = jobService.LoadFaultDetail($stateParams.id);
+			this.Title = FaultsTitleParts($state.params);
+			var promise = jobService.LoadFaultDetail($state.params['id']);
 			promise.then((detail: IFaultDetail) => {
 				this.Fault = detail;
 			}, () => {
@@ -49,18 +47,16 @@ module Peach {
 		static $inject = [
 			C.Angular.$scope,
 			C.Angular.$state,
-			C.Angular.$stateParams,
 			C.Services.Job
 		];
 
 		constructor(
 			$scope: IViewModelScope,
 			private $state: ng.ui.IStateService,
-			$stateParams,
 			private jobService: JobService
 		) {
-			this.bucket = $stateParams.bucket;
-			this.Title = FaultsTitleParts($stateParams)[0];
+			this.bucket = $state.params['bucket'];
+			this.Title = FaultsTitleParts($state.params)[0];
 			if (this.bucket !== "all") {
 				this.refreshBucketFaults();
 				$scope.$watch(() => jobService.Faults.length, (newVal, oldVal) => {

@@ -23,7 +23,6 @@ module Peach {
 		}
 
 		private jobs: IJob[] = [];
-
 		private poller: ng.IPromise<any>;
 		private job: IJob;
 		private faults: IFaultSummary[] = [];
@@ -32,10 +31,17 @@ module Peach {
 			this.$http.get(C.Api.JobUrl.replace(':id', id))
 				.success((job: IJob) => {
 					this.job = job;
+					if (this.job.faultCount > 0) {
+						this.ReloadFaults();
+					}
+					if (this.job.status !== JobStatus.Stopped) {
+						this.StartJobPoller();
+					}
 				});
 		}
 		
 		public OnExit() {
+			this.StopJobPoller();
 			this.job = undefined;
 			this.faults = [];
 		}
@@ -105,16 +111,14 @@ module Peach {
 
 		public GetJobs(): ng.IPromise<IJob[]> {
 			var params = { filter: 'dryRun' };
-			var promise = this.$http.get(C.Api.Jobs, { params: params });
+			var promise = this.$http.get(C.Api.Jobs, { params: params })
+				.success((jobs: IJob[]) => this.jobs = jobs);
 			return StripHttpPromise(this.$q, promise);
 		}
 
 		public Start(job: IJobRequest): ng.IPromise<IJob> {
 			if (this.CanStart) {
 				var promise = this.$http.post(C.Api.Jobs, job);
-				promise.success((job: IJob) => {
-					this.StartJobPoller(job);
-				});
 				promise.error(reason => {
 					console.log('JobService.StartJob().error>', reason);
 				});
@@ -123,75 +127,72 @@ module Peach {
 		}
 		
 		public Continue() {
-			if (this.CanContinue) {
-				this.Job.status = JobStatus.ContinuePending;
-				this.$http.get(this.Job.commands.continueUrl)
-					.success(() => this.StartJobPoller(this.JobEntry))
-					.error(reason => this.OnError(this.JobEntry, reason));
-			}
+			this.SendCommand(
+				this.CanContinue, 
+				JobStatus.ContinuePending, 
+				this.job.commands.continueUrl);
 		}
 
 		public Pause() {
-			if (this.CanPause) {
-				this.Job.status = JobStatus.PausePending;
-				this.$http.get(this.Job.commands.pauseUrl)
-					.success(() => this.StartJobPoller(this.JobEntry))
-					.error(reason => this.OnError(this.JobEntry, reason));
-			}
+			this.SendCommand(
+				this.CanPause, 
+				JobStatus.PausePending, 
+				this.job.commands.pauseUrl);
 		}
 
 		public Stop() {
-			if (this.CanStop) {
-				this.Job.status = JobStatus.StopPending;
-				this.$http.get(this.Job.commands.stopUrl)
-					.success(() => this.StartJobPoller(this.JobEntry))
-					.error(reason => this.OnError(this.JobEntry, reason));
+			this.SendCommand(
+				this.CanStop, 
+				JobStatus.StopPending, 
+				this.job.commands.stopUrl);
+		}
+		
+		private SendCommand(check: boolean, status: string, url: string) {
+			if (check) {
+				this.job.status = status;
+				this.$http.get(url)
+					.success(() => this.StartJobPoller())
+					.error(reason => this.OnError(reason));
 			}
 		}
 
-		private OnError(entry: IJob, error: any) {
+		private OnError(error: any) {
 			console.log('onError', error);
-			this.StopJobPoller(job);
+			this.StopJobPoller();
 		}
 
-		private StartJobPoller(job: IJob) {
+		private StartJobPoller() {
 			if (!_.isUndefined(this.poller)) {
 				return;
 			}
 			
-			console.log('StartJobPoller:', entry.id);
-
-			entry.poller = this.$interval(() => {
-				var promise = this.$http.get(entry.job.jobUrl);
+			this.poller = this.$interval(() => {
+				var promise = this.$http.get(this.job.jobUrl);
 				promise.success((job: IJob) => {
-					console.log("job:", job);
-					entry.job = job;
+					this.job = job;
 					if (job.status === JobStatus.Stopped ||
 						job.status === JobStatus.Paused) {
-						this.StopJobPoller(entry);
+						this.StopJobPoller();
 					}
 					if (this.faults.length !== job.faultCount) {
-						this.ReloadFaults(job);
+						this.ReloadFaults();
 					}
 				});
-				promise.error(reason => this.OnError(entry, reason));
+				promise.error(reason => this.OnError(reason));
 			}, JOB_INTERVAL);
 		}
 		
 		private StopJobPoller() {
-			console.log("StopJobPoller:");
-
 			this.$interval.cancel(this.poller);
 			this.poller = undefined;
 		}
 
-		private ReloadFaults(job: IJob) {
-			console.log("ReloadFaults:", job);
-			var promise = this.$http.get(job.faultsUrl);
-			promise.success((faults: IFaultSummary[]) => {
-				this.faults = faults;
-			});
-//			promise.error(reason => this.OnError(reason));
+		private ReloadFaults() {
+			this.$http.get(this.job.faultsUrl)
+				.success((faults: IFaultSummary[]) => {
+					this.faults = faults;
+				})
+				.error(reason => this.OnError(reason));
 		}
 	}
 }
