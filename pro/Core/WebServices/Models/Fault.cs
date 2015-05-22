@@ -41,12 +41,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// The time this fault was recorded at.
 		/// </summary>
-		public DateTime TimeStamp
-		{
-			get { return _timestamp; }
-			set { _timestamp = value.MakeUtc(); }
-		}
-		private DateTime _timestamp;
+		public DateTime TimeStamp { get; set; }
 
 		/// <summary>
 		/// The fault bucket used to group similar faults.

@@ -6,13 +6,7 @@ namespace Peach.Pro.Core.WebServices.Models
 	[Table("ViewFaultTimeline")]
 	public class FaultTimelineMetric
 	{
-		private DateTime _date;
-		public DateTime Date
-		{
-			get { return _date; }
-			set { _date = value.MakeUtc(); }
-		}
-
+		public DateTime Date { get; set; }
 		public long FaultCount { get; set; }
 
 		public FaultTimelineMetric() { }
@@ -20,7 +14,7 @@ namespace Peach.Pro.Core.WebServices.Models
 			DateTime date,
 			long faultCount)
 		{
-			_date = date;
+			Date = date;
 			FaultCount = faultCount;
 		}
 	}
@@ -30,14 +24,7 @@ namespace Peach.Pro.Core.WebServices.Models
 	{
 		public string Label { get; set; }
 		public long Iteration { get; set; }
-
-		private DateTime _time;
-		public DateTime Time
-		{
-			get { return _time; }
-			set { _time = value.MakeUtc(); }
-		}
-
+		public DateTime Time { get; set; }
 		public long FaultCount { get; set; }
 
 		public BucketTimelineMetric() { }
@@ -49,7 +36,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		{
 			Label = label;
 			Iteration = iteration;
-			_time = time;
+			Time = time;
 			FaultCount = faultCount;
 		}
 	}
@@ -84,7 +71,6 @@ namespace Peach.Pro.Core.WebServices.Models
 	{
 		public string State { get; set; }
 		public string Action { get; set; }
-		public string Parameter { get; set; }
 		public string Dataset { get; set; }
 		public string Element { get; set; }
 		public long IterationCount { get; set; }
@@ -95,7 +81,6 @@ namespace Peach.Pro.Core.WebServices.Models
 		public ElementMetric(
 			string state,
 			string action,
-			string parameter,
 			string dataset,
 			string element,
 			long iterationCount,
@@ -104,7 +89,6 @@ namespace Peach.Pro.Core.WebServices.Models
 		{
 			State = state;
 			Action = action;
-			Parameter = parameter;
 			Dataset = dataset;
 			Element = element;
 			IterationCount = iterationCount;
@@ -205,5 +189,11 @@ namespace Peach.Pro.Core.WebServices.Models
 			Dataset = dataset;
 			IterationCount = iterationCount;
 		}
+	}
+
+	[Table("ViewBucketDetails")]
+	public class BucketDetail : FaultDetail
+	{
+		public long FaultCount { get; set; }
 	}
 }

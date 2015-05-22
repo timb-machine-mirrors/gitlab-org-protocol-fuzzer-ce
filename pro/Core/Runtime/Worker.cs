@@ -124,10 +124,11 @@ namespace Peach.Pro.Core.Runtime
 				job = new Job
 				{
 					Guid = _guid.Value,
-					Name = Path.GetFileNameWithoutExtension(pitFile),
-					StartDate = DateTime.UtcNow,
+					PitFile = Path.GetFileName(pitFile),
+					StartDate = DateTime.Now,
 					Status = JobStatus.StartPending,
 					Mode = JobMode.Starting,
+					PeachVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString(),
 
 					RangeStart = _start.HasValue ? _start.Value : 0,
 					RangeStop = _stop,

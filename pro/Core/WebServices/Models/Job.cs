@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using Newtonsoft.Json;
 using Peach.Pro.Core.Storage;
 using System.IO;
@@ -128,11 +129,12 @@ namespace Peach.Pro.Core.WebServices.Models
 		public Job(JobRequest request, string pitFile)
 		{
 			Guid = Guid.NewGuid();
-			Name = Path.GetFileNameWithoutExtension(pitFile);
-			StartDate = DateTime.UtcNow;
+			PitFile = Path.GetFileName(pitFile);
+			StartDate = DateTime.Now;
 			HeartBeat = StartDate;
 			Status = JobStatus.StartPending;
 			Mode = JobMode.Starting;
+			PeachVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
 			PitUrl = request.PitUrl;
 			Seed = request.Seed;
@@ -152,11 +154,12 @@ namespace Peach.Pro.Core.WebServices.Models
 		public Job(RunConfiguration config)
 		{
 			Guid = config.id;
-			Name = Path.GetFileNameWithoutExtension(config.pitFile);
-			StartDate = DateTime.UtcNow;
+			PitFile = Path.GetFileName(config.pitFile);
+			StartDate = DateTime.Now;
 			HeartBeat = StartDate;
 			Status = JobStatus.StartPending;
 			Mode = JobMode.Starting;
+			PeachVersion = config.version;
 
 			IsControlIteration = config.singleIteration;
 			Seed = config.randomSeed;
@@ -195,6 +198,18 @@ namespace Peach.Pro.Core.WebServices.Models
 
 		[NotMapped]
 		[JsonIgnore]
+		public string ReportPath
+		{
+			get
+			{
+				if (LogPath == null)
+					return null;
+				return Path.Combine(LogPath, "report.pdf");
+			}
+		}
+
+		[NotMapped]
+		[JsonIgnore]
 		public string DatabasePath
 		{
 			get
@@ -218,6 +233,35 @@ namespace Peach.Pro.Core.WebServices.Models
 		}
 
 		/// <summary>
+		/// The human readable name for the job
+		/// </summary>
+		/// <example>
+		/// "DHCP Server"
+		/// </example>
+		[NotMapped]
+		public string Name
+		{
+			get
+			{
+				return (Path.GetFileNameWithoutExtension(PitFile) ?? string.Empty).Replace("_", " ");
+			}
+		}
+
+		/// <summary>
+		/// The average speed of the job in iterations per hour
+		/// </summary>
+		[NotMapped]
+		public long Speed
+		{
+			get
+			{
+				// Use ticks to avoid floating point math
+				var sec = Runtime.Ticks / TimeSpan.TicksPerSecond;
+				return sec == 0 ? 0 : (IterationCount * 3600) / sec;
+			}
+		}
+
+		/// <summary>
 		/// The URL of this job
 		/// </summary>
 		/// <example>
@@ -229,6 +273,10 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// URLs used to control a running job.
 		/// </summary>
+		/// <remarks>
+		/// If this property is null than the job can
+		/// not be controlled by the web api.
+		/// </remarks>
 		[NotMapped]
 		public JobCommands Commands { get; set; }
 
@@ -319,9 +367,17 @@ namespace Peach.Pro.Core.WebServices.Models
 		public JobMode Mode { get; set; }
 
 		/// <summary>
-		/// Display name for the job
+		/// Pit file for the job
 		/// </summary>
-		public string Name { get; set; }
+		/// <remarks>
+		/// This is used by reporting.  The web api
+		/// should be using PitUrl.
+		/// </remarks>
+		/// <example>
+		/// "DHCP_Server.xml"
+		/// </example>
+		[JsonIgnore]
+		public string PitFile { get; set; }
 
 		/// <summary>
 		/// The result of the job.
@@ -353,58 +409,42 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// The date the job was started
 		/// </summary>
-		public DateTime StartDate
-		{
-			get { return _startDate; }
-			set { _startDate = value.MakeUtc(); }
-		}
-		private DateTime _startDate;
+		public DateTime StartDate { get; set; }
 
 		/// <summary>
 		/// The date the job ended
 		/// </summary>
-		public DateTime? StopDate
-		{
-			get { return _stopDate; }
-			set
-			{
-				if (value.HasValue)
-					_stopDate = value.Value.MakeUtc();
-				else
-					_stopDate = null;
-			}
-		}
-		private DateTime? _stopDate;
+		public DateTime? StopDate { get; set; }
 
 		/// <summary>
 		/// The number of seconds the job has been running for
 		/// </summary>
-		public long Runtime { get; set; }
-
-		/// <summary>
-		/// The average speed of the job in iterations per hour
-		/// </summary>
-		public long Speed { get; set; }
+		public TimeSpan Runtime { get; set; }
 
 		/// <summary>
 		/// How many faults have been detected
 		/// </summary>
 		public long FaultCount { get; set; }
 
+		/// <summary>
+		/// The pid of peach that owns the job
+		/// </summary>
+		[JsonIgnore]
 		public long Pid { get; set; }
 
-		public DateTime? HeartBeat
-		{
-			get { return _heartBeat; }
-			set
-			{
-				if (value.HasValue)
-					_heartBeat = value.Value.MakeUtc();
-				else
-					_heartBeat = null;
-			}
-		}
-		private DateTime? _heartBeat;
+		/// <summary>
+		/// The time when the job was last updated
+		/// </summary>
+		[JsonIgnore]
+		public DateTime? HeartBeat { get; set; }
+
+		/// <summary>
+		/// The version of peach that ran the job.
+		/// </summary>
+		/// <example>
+		/// 3.6.20.0
+		/// </example>
+		public string PeachVersion { get; set; }
 
 		/// <summary>
 		/// List of tags associated with this job

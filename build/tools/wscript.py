@@ -182,6 +182,21 @@ def configure(ctx):
 	if not base_env.variants and Logs.verbose == 0:
 		Logs.warn('No available variants detected. Re-run configure with the \'-v\' option for more info.')
 
+def verify_external(bld):
+	if bld.env.MCS:
+		externals = []
+		for g in bld.groups:
+			for tg in g:
+				tsk = getattr(tg, 'link_task', None)
+				if tsk and tsk.__class__.__name__ == 'fake_csshlib':
+					externals.extend(tsk.outputs)
+		for g in bld.groups:
+			for tg in g:
+				tsk = getattr(tg, 'cs_task', None)
+				if tsk:
+					externals = [ x for x in externals if x not in tsk.dep_nodes ]
+		for e in externals:
+			Logs.warn('Unreferenced Assembly: %s' % e)
 
 def build(bld):
 	subdirs = getattr(bld, 'subdirs', None)
@@ -218,6 +233,7 @@ def build(bld):
 			ctx.subdirs = subdirs
 			ctx.options = Options.options
 			ctx.variant = variant
+			ctx.add_post_fun(verify_external)
 			ctx.execute()
 			success = True
 

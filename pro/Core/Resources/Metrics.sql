@@ -70,14 +70,24 @@ GROUP BY
 	x.DatasetId
 ;
 -- Buckets <<<
-	
+
+-- Bucket Details >>>
+CREATE VIEW ViewBucketDetails AS
+SELECT
+	COUNT(*) as FaultCount,
+	*
+FROM FaultDetail
+GROUP BY
+	MajorHash,MinorHash;
+-- Bucket Details <<<
+
 -- BucketTimeline >>>
 CREATE VIEW ViewBucketTimeline AS
 SELECT
 	x.MajorHash || '_' || x.MinorHash AS Label,
 	MIN(x.[Iteration]) AS [Iteration],
 	MIN(x.[Timestamp]) AS [Time],
-	COUNT(DISTINCT(x.MinorHash)) AS FaultCount
+	COUNT(DISTINCT(x.Iteration)) AS FaultCount
 FROM FaultMetric AS x
 GROUP BY
 	x.MajorHash,
@@ -180,9 +190,13 @@ CREATE VIEW ViewElements AS
 SELECT 
 	sn.Name || '_' || s.RunCount AS [State],
 	a.Name as [Action],
-	p.Name as [Parameter],
 	d.Name as [Dataset],
-	e.Name as [Element],
+	CASE WHEN LENGTH(p.Name) > 0 THEN
+		p.Name || '.' || 
+		e.Name
+	ELSE
+		e.Name
+	END AS [Element],
 	vei.IterationCount,
 	vef.BucketCount,
 	vef.FaultCount
