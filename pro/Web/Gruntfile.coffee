@@ -41,9 +41,6 @@ module.exports = (grunt) ->
 					destPrefix: 'public/lib'
 				files:
 					'angular-chart'               : 'angular-chart.js/dist/angular-chart.css.map'
-					'angular-tree-control/css'    : 'angular-tree-control/css/*'
-					'angular-tree-control/images' : 'angular-tree-control/images/*'
-					'angular-tree-control/js'     : 'angular-tree-control/angular-tree-control.js'
 					'bootstrap/css'               : 'bootstrap/dist/css/bootstrap.css*'
 					'bootstrap/fonts'             : 'bootstrap/dist/fonts/*'
 					'bootstrap/js'                : 'bootstrap/dist/js/bootstrap.js'
