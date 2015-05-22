@@ -17,6 +17,7 @@ app = bld(
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
 	name = 'Peach.exe',
+#	mkbundle = True,
 	ver_product = 'Peach Fuzzing Platfom',
 	install_644 = 'peach.xsd',
 )

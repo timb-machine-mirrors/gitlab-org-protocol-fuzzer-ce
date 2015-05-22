@@ -20,6 +20,7 @@ tools = [
 	'tools.mdoc',
 	'tools.zip',
 	'tools.tsc',
+	'tools.mkbundle',
 ]
 
 def prepare(conf):
