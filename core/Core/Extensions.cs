@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Xml;
 using System.Linq;
 
@@ -92,6 +94,21 @@ namespace Peach.Core
 				return (buf[0] & 0xf0) == 0xe0;
 			else
 				return (buf[0] == 0xff);
+		}
+	}
+
+	public static class AssemblyExtensions
+	{
+		public static string LoadStringResource(this Assembly asm, string name)
+		{
+			var fullName = asm.GetName().Name + ".Resources." + name;
+			return Utilities.LoadStringResource(asm, fullName);
+		}
+
+		public static MemoryStream LoadBinaryResource(this Assembly asm, string name)
+		{
+			var fullName = asm.GetName().Name + ".Resources." + name;
+			return Utilities.LoadBinaryResource(asm, fullName);
 		}
 	}
 

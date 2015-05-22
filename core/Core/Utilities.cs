@@ -376,9 +376,9 @@ namespace Peach.Core
 			return Path.Combine(ExecutionDirectory, resource);
 		}
 
-		public static string LoadStringResource(Assembly asm, string name)
+		public static string LoadStringResource(Assembly asm, string fullName)
 		{
-			using (var stream = asm.GetManifestResourceStream(name))
+			using (var stream = asm.GetManifestResourceStream(fullName))
 			{
 				using (var reader = new StreamReader(stream, System.Text.Encoding.UTF8))
 				{
@@ -387,9 +387,9 @@ namespace Peach.Core
 			}
 		}
 
-		public static MemoryStream LoadBinaryResource(Assembly asm, string name)
+		public static MemoryStream LoadBinaryResource(Assembly asm, string fullName)
 		{
-			using (var stream = asm.GetManifestResourceStream(name))
+			using (var stream = asm.GetManifestResourceStream(fullName))
 			{
 				var ms = new MemoryStream();
 				stream.CopyTo(ms);
@@ -398,12 +398,12 @@ namespace Peach.Core
 			}
 		}
 
-		public static void ExtractEmbeddedResource(Assembly asm, string name, string target)
+		public static void ExtractEmbeddedResource(Assembly asm, string fullName, string targetFile)
 		{
-			var path = Path.Combine(ExecutionDirectory, target);
+			var path = Path.Combine(ExecutionDirectory, targetFile);
 			using (var sout = new FileStream(path, FileMode.Create))
 			{
-				using (var sin = asm.GetManifestResourceStream(name))
+				using (var sin = asm.GetManifestResourceStream(fullName))
 				{
 					sin.CopyTo(sout);
 				}

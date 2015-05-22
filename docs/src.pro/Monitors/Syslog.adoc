@@ -46,8 +46,7 @@ Parameter that specifies when to start monitoring. Choose from the following set
 // OnIterationEnd::: Monitoring occurs at the end of every iteration.
 // OnFault::: Monitoring occurs immediately following a fault.
 // OnIterationStartAfterFault::: Monitoring occurs following a fault. Note that after the fault occurs, the current iteration completes. Then, at the start of the next iteration, monitoring begins.
-
-
++
 [cols="1,2" options="header",halign="center"] 
 |==========================================================
 |"When" Setting              |Description
@@ -59,7 +58,7 @@ Parameter that specifies when to start monitoring. Choose from the following set
 |OnIterationStartAfterFault  |After the fault occurs, the current iteration completes. Then, at the start of the next iteration, monitoring begins.
 |OnCall                      |Monitoring begins upon receipt of a message from the state machine.
 |==========================================================
-
++
 .When Choices for Running a Command
 image::{images}/Timings_All.PNG["When Run Command Choices", scalewidth="75%"]
 
