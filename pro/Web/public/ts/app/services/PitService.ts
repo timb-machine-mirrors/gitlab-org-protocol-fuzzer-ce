@@ -67,16 +67,16 @@ module Peach {
 			return this.SavePit();
 		}
 
-		public SaveTemplate(): ng.IPromise<IPit> {
+		public SaveTemplate(pit: IPit): ng.IHttpPromise<IPit> {
 			var request: IPitCopy = {
 				libraryUrl: this.userPitLibrary,
-				pitUrl: this.pit.pitUrl,
-				name: this.pit.name,
-				description: this.pit.description
+				pitUrl: pit.pitUrl,
+				name: pit.name,
+				description: pit.description
 			}
 			var promise = this.$http.post(C.Api.Pits, request);
 			promise.success((pit: IPit) => this.OnSuccess(pit));
-			return StripHttpPromise(this.$q, promise);
+			return promise;
 		}
 
 		public get IsConfigured(): boolean {

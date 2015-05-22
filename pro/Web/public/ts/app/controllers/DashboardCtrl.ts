@@ -84,7 +84,7 @@ module Peach {
 			return 'alert-info';
 		}
 
-		public ValueAlt(value, alt) {
+		public ValueOr(value, alt) {
 			return _.isUndefined(value) ? alt : value;
 		}
 

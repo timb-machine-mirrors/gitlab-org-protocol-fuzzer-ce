@@ -78,7 +78,7 @@
 			<div class="infobox infobox-blue">
 				<div class="infobox-data">
 					<span class="infobox-data-number">
-						{{vm.ValueAlt(vm.RunningTime, '---')}}
+						{{vm.ValueOr(vm.RunningTime, '---')}}
 					</span>
 					<div class="infobox-content">
 						Running Time
@@ -90,7 +90,7 @@
 			<div class="infobox infobox-blue">
 				<div class="infobox-data">
 					<span class="infobox-data-number">
-						{{vm.ValueAlt(vm.Job.speed, '---')}}
+						{{vm.ValueOr(vm.Job.speed, '---')}}
 					</span>
 					<div class="infobox-content">
 						Iterations/Hour
@@ -101,7 +101,7 @@
 			<div class="infobox infobox-blue">
 				<div class="infobox-data">
 					<span class="infobox-data-number">
-						{{vm.ValueAlt(vm.Job.seed, '---')}}
+						{{vm.ValueOr(vm.Job.seed, '---')}}
 					</span>
 					<div class="infobox-content">
 						Seed
@@ -112,7 +112,7 @@
 			<div class="infobox infobox-blue">
 				<div class="infobox-data">
 					<span class="infobox-data-number">
-						{{vm.ValueAlt(vm.Job.iterationCount, '---')}}
+						{{vm.ValueOr(vm.Job.iterationCount, '---')}}
 					</span>
 					<div class="infobox-content">
 						Current Iteration
@@ -123,7 +123,7 @@
 			<div class="infobox infobox-red">
 				<div class="infobox-data">
 					<span class="infobox-data-number">
-						{{vm.ValueAlt(vm.Job.faultCount, '---')}}
+						{{vm.ValueOr(vm.Job.faultCount, '---')}}
 					</span>
 					<div class="infobox-content">
 						Total Faults

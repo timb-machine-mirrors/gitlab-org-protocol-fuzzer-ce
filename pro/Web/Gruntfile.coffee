@@ -81,7 +81,7 @@ module.exports = (grunt) ->
 			options:
 				module: 'commonjs'
 				sourceMap: true
-				sourceRoot: '/ts'
+				sourceRoot: '/ts/app'
 				removeComments: false
 			app:
 				src: ['public/ts/app/**/*.ts']

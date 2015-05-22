@@ -16,17 +16,28 @@ module Peach {
 			public Name: string
 		) {}
 		
-		public Pits: IPit[] = [];
+		public Pits: PitEntry[] = [];
+	}
+
+	class PitEntry {
+		constructor(
+			public Library: ILibrary,
+			public Pit: IPit
+		) {}
 	}
 	
 	export class LibraryController {
 		static $inject = [
 			C.Angular.$scope,
+			C.Angular.$state,
+			C.Angular.$modal,
 			C.Services.Pit
 		];
 
 		constructor(
 			$scope: IViewModelScope,
+			private $state: ng.ui.IStateService,
+			private $modal: ng.ui.bootstrap.IModalService,
 			private pitService: PitService
 		) {
 			this.init();
@@ -53,11 +64,29 @@ module Peach {
 								pitLib.Categories.push(pitCategory);
 							}
 							
-							pitCategory.Pits.push(pit);
+							pitCategory.Pits.push(new PitEntry(lib, pit));
 						});
 					});
 				});
 			});
+		}
+
+		public OnSelectPit(entry: PitEntry) {
+			if (entry.Library.locked) {
+				this.$modal.open({
+					templateUrl: C.Templates.Modal.CopyPit,
+					controller: CopyPitController,
+					resolve: { Pit: () => entry.Pit }
+				}).result.then((copied: IPit) => {
+					this.GoToPit(copied);
+				});
+			} else {
+				this.GoToPit(entry.Pit);
+			}
+		}
+
+		private GoToPit(pit: IPit) {
+			this.$state.go(C.States.PitConfigure, { pit: pit.id });
 		}
 	}
 }
