@@ -33,13 +33,15 @@ Action::  Action to take (Automation, Data, Fault). Defaults to _Automation_.
 
 [horizontal]
 Automation;; Wait for the port to reach a specified state. The _When_ parameter determines when the monitor waits. The maximum waiting time can be configured by setting the _Timeout_ parameter.
-Data;; On a fault, report the state of fault at end of the current iteration.
+Data;; On a fault, report the state of the port at end of the current iteration.
 Fault;; At end of the current iteration, generate a fault if the port is in a 
 specified state.
 
 [vertical]
-When:: Event that specifies when to perform monitoring. The default setting is _OnCall_. The following settings are defined:
-
+When:: 
++
+Event that specifies when to perform monitoring. The default setting is _OnCall_. The following settings are defined:
++
 [cols="1,2" options="header",halign="center"] 
 |==========================================================
 |"When" Setting              |Description
@@ -51,7 +53,7 @@ When:: Event that specifies when to perform monitoring. The default setting is _
 |OnIterationStartAfterFault  |Monitoring occurs after a fault occurs and the current iteration completes. Then, at the start of the next iteration, monitoring begins.
 |OnCall                      |Monitoring begins upon receipt of a message from the state machine.
 |==========================================================
-
++
 .WaitWhen Choices
 image::{images}/Timings_All.PNG["When Timing Choices", scalewidth="75%"]
 
@@ -123,7 +125,9 @@ at the end of an iteration, Peach generates a fault.
 .Report the Port State on Fault  +
 ====================
 
-This parameter example is from a setup that uses the TcpPort monitor for data collection. If another monitor detects or generates a // fault during fuzzing, the TcpPort monitor reports the state of the port when the fault occurs.
+This parameter example is from a setup that uses the TcpPort monitor for data collection. If
+another monitor detects or generates a fault during fuzzing, the TcpPort monitor reports the 
+state of the port when the fault occurs.
 
 [cols="2,4" options="header",halign="center"] 
 |==========================================================

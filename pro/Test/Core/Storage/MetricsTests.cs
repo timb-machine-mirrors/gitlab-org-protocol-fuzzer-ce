@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Pro.Core.Storage;
@@ -17,13 +18,9 @@ namespace Peach.Pro.Test.Core.Storage
 		TempFile _tmp;
 		DateTime _now;
 
-		[SetUp]
-		public void SetUp()
+		public static void MakeSampleCache(DateTime now, string dbPath)
 		{
-			_tmp = new TempFile();
-			_now = DateTime.UtcNow;
-
-			var cache = new MetricsCache(_tmp.Path);
+			var cache = new MetricsCache(dbPath);
 
 			cache.IterationStarting(1);
 			cache.StateStarting("S1", 1);
@@ -70,8 +67,8 @@ namespace Peach.Pro.Test.Core.Storage
 				Iteration = 1,
 				MajorHash = "AAA",
 				MinorHash = "BBB",
-				Timestamp = _now,
-				Hour = _now.Hour,
+				Timestamp = now,
+				Hour = now.Hour,
 			});
 
 			cache.IterationStarting(3);
@@ -84,8 +81,8 @@ namespace Peach.Pro.Test.Core.Storage
 				Iteration = 3,
 				MajorHash = "AAA",
 				MinorHash = "BBB",
-				Timestamp = _now,
-				Hour = _now.Hour,
+				Timestamp = now,
+				Hour = now.Hour,
 			});
 
 			cache.IterationStarting(4);
@@ -106,8 +103,8 @@ namespace Peach.Pro.Test.Core.Storage
 				Iteration = 4,
 				MajorHash = "XXX",
 				MinorHash = "YYY",
-				Timestamp = _now + TimeSpan.FromHours(1),
-				Hour = _now.Hour + 1,
+				Timestamp = now + TimeSpan.FromHours(1),
+				Hour = now.Hour + 1,
 			});
 
 			cache.IterationStarting(5);
@@ -123,8 +120,8 @@ namespace Peach.Pro.Test.Core.Storage
 				Iteration = 5,
 				MajorHash = "AAA",
 				MinorHash = "YYY",
-				Timestamp = _now + TimeSpan.FromHours(2),
-				Hour = _now.Hour + 2,
+				Timestamp = now + TimeSpan.FromHours(2),
+				Hour = now.Hour + 2,
 			});
 
 			cache.IterationStarting(6);
@@ -137,8 +134,8 @@ namespace Peach.Pro.Test.Core.Storage
 				Iteration = 6,
 				MajorHash = "AAA",
 				MinorHash = "BBB",
-				Timestamp = _now + TimeSpan.FromHours(3),
-				Hour = _now.Hour + 3,
+				Timestamp = now + TimeSpan.FromHours(3),
+				Hour = now.Hour + 3,
 			});
 
 			cache.IterationStarting(7);
@@ -157,9 +154,20 @@ namespace Peach.Pro.Test.Core.Storage
 				Iteration = 8,
 				MajorHash = "XXX",
 				MinorHash = "YYY",
-				Timestamp = _now + TimeSpan.FromHours(4),
-				Hour = _now.Hour + 4,
+				Timestamp = now + TimeSpan.FromHours(4),
+				Hour = now.Hour + 4,
 			});
+		}
+
+		[SetUp]
+		public void SetUp()
+		{
+			_tmp = new TempFile();
+
+			// The database doesn't store milliseconds/microseconds, so don't include them in the test
+			_now = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal);
+
+			MakeSampleCache(_now, _tmp.Path);
 		}
 
 		[TearDown]
@@ -230,9 +238,9 @@ namespace Peach.Pro.Test.Core.Storage
 			{
 				DatabaseTests.AssertResult(db.LoadTable<BucketTimelineMetric>(), new[]
 				{
-					new BucketTimelineMetric("AAA_BBB", 1, _now, 1),
+					new BucketTimelineMetric("AAA_BBB", 1, _now, 3),
 					new BucketTimelineMetric("AAA_YYY", 5, _now + TimeSpan.FromHours(2), 1),
-					new BucketTimelineMetric("XXX_YYY", 4, _now + TimeSpan.FromHours(1), 1),
+					new BucketTimelineMetric("XXX_YYY", 4, _now + TimeSpan.FromHours(1), 2),
 				});
 			}
 		}
@@ -260,14 +268,14 @@ namespace Peach.Pro.Test.Core.Storage
 			{
 				DatabaseTests.AssertResult(db.LoadTable<ElementMetric>(), new[]
 				{
-					new ElementMetric("S2_1", "A2", "P1", "D1", "E1", 3, 1, 1),
-					new ElementMetric("S3_1", "A3", "P1", "D1", "E1", 1, 0, 0),
-					new ElementMetric("S3_1", "A3", "P2", "D2", "E2", 1, 0, 0),
-					new ElementMetric("S3_1", "A3", "P3", "D3", "E3", 4, 2, 3),
-					new ElementMetric("S4_1", "A4", "P4", "D4", "E4", 2, 1, 1),
-					new ElementMetric("S4_1", "A5", "P4", "D4", "E5", 1, 1, 1),
-					new ElementMetric("S5_1", "A5", "P5", "D5", "E5", 1, 1, 1),
-					new ElementMetric("S5_2", "A5", "P5", "D5", "E5", 1, 1, 1),
+					new ElementMetric("S2_1", "A2", "D1", "P1.E1", 3, 1, 1),
+					new ElementMetric("S3_1", "A3", "D1", "P1.E1", 1, 0, 0),
+					new ElementMetric("S3_1", "A3", "D2", "P2.E2", 1, 0, 0),
+					new ElementMetric("S3_1", "A3", "D3", "P3.E3", 4, 2, 3),
+					new ElementMetric("S4_1", "A4", "D4", "P4.E4", 2, 1, 1),
+					new ElementMetric("S4_1", "A5", "D4", "P4.E5", 1, 1, 1),
+					new ElementMetric("S5_1", "A5", "D5", "P5.E5", 1, 1, 1),
+					new ElementMetric("S5_2", "A5", "D5", "P5.E5", 1, 1, 1),
 				});
 			}
 		}

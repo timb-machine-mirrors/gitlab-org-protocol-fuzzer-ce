@@ -84,6 +84,10 @@ namespace Peach.Core.Test
 
 	public class TestFixture
 	{
+		readonly Assembly _asm;
+
+		public TestFixture(Assembly asm) { _asm = asm; }
+
 		[Test]
 		public void AssertWorks()
 		{
@@ -99,7 +103,7 @@ namespace Peach.Core.Test
 		{
 			var missing = new List<string>();
 
-			foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
+			foreach (var type in _asm.GetTypes())
 			{
 				if (!type.GetAttributes<TestFixtureAttribute>().Any())
 					continue;
@@ -129,5 +133,6 @@ namespace Peach.Core.Test
 	[Quick]
 	class CommonTests : TestFixture
 	{
+		public CommonTests() : base(Assembly.GetExecutingAssembly()) { }
 	}
 }

@@ -1,3 +1,4 @@
+using System.Reflection;
 using NUnit.Framework;
 using Peach.Core.Test;
 
@@ -12,5 +13,6 @@ namespace Peach.Pro.Test.WebApi
 	[Quick]
 	class CommonTests : TestFixture
 	{
+		public CommonTests() : base(Assembly.GetExecutingAssembly()) { }
 	}
 }
