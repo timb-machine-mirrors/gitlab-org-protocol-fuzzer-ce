@@ -12,7 +12,6 @@
 	<link rel="stylesheet" href="css/ace-skins.css" />
 	<link rel="stylesheet" href="lib/angular-chart/angular-chart.css" />
 	<link rel="stylesheet" href="lib/angular-loading-bar/loading-bar.css" />
-	<link rel="stylesheet" href="lib/angular-tree-control/css/tree-control-attribute.css" />
 	<link rel="stylesheet" href="lib/angular-ui-select/select.css" />
 	<link rel="stylesheet" href="lib/vis/vis.css" />
 	<link rel="stylesheet" href="css/app.css" />
@@ -27,12 +26,12 @@
 	<script src="lib/bootstrap/js/bootstrap.js"></script>
 	<script src="lib/angular/angular.js"></script>
 	<script src="lib/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+	<script src="lib/angular-breadcrumb/angular-breadcrumb.js"></script>
 	<script src="lib/angular-chart/angular-chart.js"></script>
 	<script src="lib/angular-loading-bar/loading-bar.js"></script>
 	<script src="lib/angular-messages/angular-messages.js"></script>
 	<script src="lib/angular-sanitize/angular-sanitize.js"></script>
 	<script src="lib/angular-smart-table/smart-table.js"></script>
-	<script src="lib/angular-tree-control/js/angular-tree-control.js"></script>
 	<script src="lib/angular-ui-router/angular-ui-router.js"></script>
 	<script src="lib/angular-ui-select/select.js"></script>
 	<script src="js/angular-vis.js"></script>
@@ -43,8 +42,7 @@
 			ng-controller="MainController">
 
 	<div class="navbar navbar-default">
-		<div class="navbar-container"
-				 id="navbar-container">
+		<div class="navbar-container">
 			<div class="navbar-header">
 				<a ui-sref="main.home">
 					<img src="img/peachlogo.png" />
@@ -246,10 +244,17 @@
 				</div>
 			</div>
 
-			<div class="main-content"
-					 ui-view>
-
+			<div class="main-content">
 				<noscript>JavaScript is required.</noscript>
+				
+				<div class="page-content">
+					<div class="well well-sm" ncy-breadcrumb>
+					</div>
+				
+					<div ui-view>
+					</div>
+				</div>
+
 			</div>
 		</div>
 	</div>

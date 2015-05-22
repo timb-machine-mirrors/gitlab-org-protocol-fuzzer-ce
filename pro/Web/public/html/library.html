@@ -1,23 +1,21 @@
-﻿<div class="page-content">
-	<div class="page-header">
-		<h1>
-			Library
-		</h1>
-	</div>
-
-	<div ng-repeat="lib in vm.Libraries">
-		<h3>{{lib.Name}}</h3>
-		<accordion>
-			<accordion-group ng-repeat="cat in lib.Categories" 
-					heading="{{cat.Name}}">
-				<ul class="list-inline">
-					<li ng-repeat="entry in cat.Pits">
-						<a href=""
-							 ng-click="vm.OnSelectPit(entry)">{{entry.Pit.name}}</a>
-					</li>
-				</ul>
-			</accordion-group>
-		</accordion>
-	</div>
-
+﻿<div class="page-header">
+	<h1>
+		Library
+	</h1>
 </div>
+
+<div ng-repeat="lib in vm.Libraries">
+	<h3>{{lib.Name}}</h3>
+	<accordion>
+		<accordion-group ng-repeat="cat in lib.Categories" 
+				heading="{{cat.Name}}">
+			<ul class="list-inline">
+				<li ng-repeat="entry in cat.Pits">
+					<a href=""
+						 ng-click="vm.OnSelectPit(entry)">{{entry.Pit.name}}</a>
+				</li>
+			</ul>
+		</accordion-group>
+	</accordion>
+</div>
+
