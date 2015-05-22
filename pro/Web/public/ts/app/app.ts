@@ -119,9 +119,13 @@ module Peach {
 				})
 				.state(C.States.JobFaultsDetail, {
 					url: '/{id:int}',
-					templateUrl: C.Templates.Job.Faults.Detail,
-					controller: FaultsDetailController,
-					controllerAs: C.ViewModel
+					views: {
+						'@': {
+							templateUrl: C.Templates.Job.Faults.Detail,
+							controller: FaultsDetailController,
+							controllerAs: C.ViewModel
+						}
+					}
 				})
 				.state(C.States.JobMetrics, {
 					url: '/metrics/:metric',

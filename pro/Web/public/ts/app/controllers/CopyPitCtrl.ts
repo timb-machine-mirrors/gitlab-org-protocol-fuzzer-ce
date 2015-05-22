@@ -30,7 +30,6 @@ module Peach {
 					this.$modalInstance.close(response.data);
 				},
 				(response: ng.IHttpPromiseCallbackArg<any>) => {
-					console.log("Error:", response);
 					switch (response.status) {
 						case 400:
 							this.Error = this.Pit.name + " already exists, please choose a new name.";
