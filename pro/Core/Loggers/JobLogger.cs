@@ -620,7 +620,7 @@ namespace Peach.Pro.Core.Loggers
 			// Gather up data from the state model
 			foreach (var item in stateModel.dataActions)
 			{
-				Logger.Debug("Saving action: " + item.Key);
+				Logger.Debug("Saving data from action: " + item.Key);
 				ret.toSave.Add(item.Key, item.Value);
 			}
 
@@ -701,19 +701,24 @@ namespace Peach.Pro.Core.Loggers
 		{
 			var now = DateTime.Now;
 
+			var desc = "at {0}{1}iteration {2}".Fmt(
+				fault.controlIteration ? "control " : "",
+				fault.controlRecordingIteration ? "record " : "",
+				fault.iteration);
+
 			switch (category)
 			{
 				case Category.Faults:
-					_log.WriteLine("! Reproduced fault at iteration {0} : {1}",
-						fault.iteration, now);
+					_log.WriteLine("! Reproduced fault {0} : {1}",
+						desc, now);
 					break;
 				case Category.NonReproducable:
-					_log.WriteLine("! Non-reproducable fault detected at iteration {0} : {1}",
-						fault.iteration, now);
+					_log.WriteLine("! Non-reproducable fault detected {0} : {1}",
+						desc, now);
 					break;
 				case Category.Reproducing:
-					_log.WriteLine("! Fault detected at iteration {0}, trying to reproduce : {1}",
-						fault.iteration, now);
+					_log.WriteLine("! Fault detected {0}, trying to reproduce : {1}",
+						desc, now);
 					break;
 			}
 
