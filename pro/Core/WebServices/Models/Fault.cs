@@ -44,11 +44,6 @@ namespace Peach.Pro.Core.WebServices.Models
 		public DateTime TimeStamp { get; set; }
 
 		/// <summary>
-		/// The fault bucket used to group similar faults.
-		/// </summary>
-		public string BucketName { get; set; }
-
-		/// <summary>
 		/// The monitor that generated this fault.
 		/// </summary>
 		public string Source { get; set; }
