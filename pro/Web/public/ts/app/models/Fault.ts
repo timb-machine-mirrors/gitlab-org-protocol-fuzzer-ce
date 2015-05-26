@@ -9,7 +9,6 @@ module Peach {
 		reproducable: boolean;
 		iteration: number;
 		timeStamp: string;
-		bucketName: string;
 		source: string;
 		exploitability: string;
 		majorHash: string;

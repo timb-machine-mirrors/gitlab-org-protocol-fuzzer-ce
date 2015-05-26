@@ -741,7 +741,6 @@ namespace Peach.Pro.Core.Loggers
 				Reproducable = category == Category.Reproducing,
 				Iteration = fault.iteration,
 				TimeStamp = now,
-				BucketName = bucket,
 				Source = fault.detectionSource,
 				Exploitability = fault.exploitability,
 				MajorHash = fault.majorHash,

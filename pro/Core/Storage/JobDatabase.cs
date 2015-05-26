@@ -145,7 +145,9 @@ namespace Peach.Pro.Core.Storage
 
 				BucketDetails = LoadTable<BucketDetail>()
 					.OrderByDescending(m => m.FaultCount)
-					.ThenBy(m => m.BucketName)
+					.ThenBy(m => m.MajorHash)
+					.ThenBy(m => m.MinorHash)
+					.ThenBy(m => m.Exploitability)
 					.ToList(),
 
 				MutatorMetrics = LoadTable<MutatorMetric>()
