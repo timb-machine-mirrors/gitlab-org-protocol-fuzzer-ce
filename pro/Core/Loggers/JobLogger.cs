@@ -28,9 +28,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using Newtonsoft.Json;
 using NLog;
@@ -48,7 +48,6 @@ using Logger = Peach.Core.Logger;
 using System.Diagnostics;
 using Action = Peach.Core.Dom.Action;
 using State = Peach.Core.Dom.State;
-using Peach.Pro.Core.Runtime;
 
 namespace Peach.Pro.Core.Loggers
 {
@@ -71,7 +70,7 @@ namespace Peach.Pro.Core.Loggers
 			"Peach.Core.Dom.Array",
 			"Peach.Core.Dom.Choice",
 			"Peach.Core.Dom.DataElement",
-			"Peach.Core.Cracker.DataCracker",
+			"Peach.Core.Cracker.DataCracker"
 		};
 
 		readonly List<Fault.State> _states = new List<Fault.State>();
@@ -305,6 +304,7 @@ namespace Peach.Pro.Core.Loggers
 								if (File.Exists(_job.ReportPath))
 									File.Delete(_job.ReportPath);
 							}
+							// ReSharper disable once EmptyGeneralCatchClause
 							catch
 							{
 							}
@@ -465,7 +465,7 @@ namespace Peach.Pro.Core.Loggers
 
 			foreach (var data in action.allData)
 			{
-				rec.models.Add(new Fault.Model()
+				rec.models.Add(new Fault.Model
 				{
 					name = data.dataModel.Name,
 					parameter = data.Name ?? "",
@@ -488,6 +488,8 @@ namespace Peach.Pro.Core.Loggers
 
 			foreach (var model in rec.models)
 			{
+				Debug.Assert(model.mutations != null);
+
 				if (model.mutations.Count == 0)
 					model.mutations = null;
 			}
@@ -556,7 +558,10 @@ namespace Peach.Pro.Core.Loggers
 				// Save reproFault toSave in fault
 				foreach (var kv in _reproFault.toSave)
 				{
-					var key = Path.Combine("Initial", _reproFault.iteration.ToString(), kv.Key);
+					var key = Path.Combine("Initial",
+						_reproFault.iteration.ToString(CultureInfo.InvariantCulture),
+						kv.Key);
+
 					fault.toSave.Add(key, kv.Value);
 				}
 
@@ -571,7 +576,8 @@ namespace Peach.Pro.Core.Loggers
 			try
 			{
 				var dir = Path.GetDirectoryName(fullPath);
-				if (!Directory.Exists(dir))
+
+				if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
 					Directory.CreateDirectory(dir);
 
 				contents.Seek(0, SeekOrigin.Begin);
@@ -727,7 +733,7 @@ namespace Peach.Pro.Core.Loggers
 				_job.LogPath,
 				category.ToString(),
 				fault.folderName,
-				fault.iteration.ToString());
+				fault.iteration.ToString(CultureInfo.InvariantCulture));
 
 			var faultDetail = new FaultDetail
 			{
