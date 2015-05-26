@@ -654,45 +654,64 @@ namespace Peach.Pro.Core.Loggers
 				}
 			}
 
-			// Copy over information from the core fault
-			if (coreFault.folderName != null)
-				ret.folderName = coreFault.folderName;
-			else if (coreFault.majorHash == null &&
-				coreFault.minorHash == null &&
-				coreFault.exploitability == null)
-				ret.folderName = "Unknown";
-			else
-				ret.folderName = string.Format("{0}_{1}_{2}",
-					coreFault.exploitability,
-					coreFault.majorHash,
-					coreFault.minorHash);
-
 			// Save all states, actions, data sets, mutations
-			var settings = new JsonSerializerSettings()
-			{
-				DefaultValueHandling = DefaultValueHandling.Ignore
-			};
 			var json = JsonConvert.SerializeObject(
 				new { States = _states },
 				Formatting.Indented,
-				settings);
+				new JsonSerializerSettings
+				{
+					DefaultValueHandling = DefaultValueHandling.Ignore
+				}
+			);
+
 			ret.toSave.Add("fault.json", new MemoryStream(Encoding.UTF8.GetBytes(json)));
 
+			// Copy over information from the core fault
+			ret.folderName = coreFault.folderName;
 			ret.controlIteration = coreFault.controlIteration;
 			ret.controlRecordingIteration = coreFault.controlRecordingIteration;
 			ret.description = coreFault.description;
 			ret.detectionSource = coreFault.detectionSource;
 			ret.monitorName = coreFault.monitorName;
 			ret.agentName = coreFault.agentName;
-			ret.exploitability = coreFault.exploitability;
 			ret.iteration = currentIteration;
 			ret.iterationStart = coreFault.iterationStart;
 			ret.iterationStop = coreFault.iterationStop;
+			ret.exploitability = coreFault.exploitability;
 			ret.majorHash = coreFault.majorHash;
 			ret.minorHash = coreFault.minorHash;
 			ret.title = coreFault.title;
 			ret.type = coreFault.type;
 			ret.states = _states;
+
+			// If a folder name was not specified, try using hashes for bucketing
+			if (string.IsNullOrEmpty(ret.folderName))
+				ret.folderName = string.Join("_", new[]
+				{
+					ret.exploitability,
+					ret.majorHash,
+					ret.minorHash
+				}.Where(s => !string.IsNullOrEmpty(s)));
+
+			// If no hashes were specified, use sensible default
+			if (string.IsNullOrEmpty(ret.folderName))
+				ret.folderName = "UNKNOWN";
+
+			// DetectionSource needs to be set
+			if (string.IsNullOrEmpty(ret.detectionSource))
+				ret.detectionSource = "Unknown";
+
+			// Default the major hash to be the hash of the detection source
+			if (string.IsNullOrEmpty(ret.majorHash))
+				ret.majorHash = Monitor2.Hash(ret.detectionSource);
+
+			// Default the minor hash to be the major hash
+			if (string.IsNullOrEmpty(ret.minorHash))
+				ret.minorHash = ret.majorHash;
+
+			// Default the risk to "UNKNOWN"
+			if (string.IsNullOrEmpty(ret.exploitability))
+				ret.exploitability = "UNKNOWN";
 
 			return ret;
 		}
@@ -722,16 +741,11 @@ namespace Peach.Pro.Core.Loggers
 					break;
 			}
 
-			var bucket = string.Join("_", new[] { 
-				fault.majorHash, 
-				fault.minorHash, 
-				fault.exploitability 
-			}.Where(s => !string.IsNullOrEmpty(s)));
-
-			if (fault.folderName != null)
-				bucket = fault.folderName;
-			else if (string.IsNullOrEmpty(bucket))
-				bucket = "Unknown";
+			// Fault should have already been sanitized by CombineFaults
+			Debug.Assert(!string.IsNullOrEmpty(fault.folderName));
+			Debug.Assert(!string.IsNullOrEmpty(fault.majorHash));
+			Debug.Assert(!string.IsNullOrEmpty(fault.minorHash));
+			Debug.Assert(!string.IsNullOrEmpty(fault.exploitability));
 
 			// root/category/bucket/iteration
 			var subDir = Path.Combine(
@@ -795,8 +809,8 @@ namespace Peach.Pro.Core.Loggers
 					_cache.OnFault(new FaultMetric
 					{
 						Iteration = fault.iteration,
-						MajorHash = fault.majorHash ?? "UNKNOWN",
-						MinorHash = fault.minorHash ?? "UNKNOWN",
+						MajorHash = fault.majorHash,
+						MinorHash = fault.minorHash,
 						Timestamp = now,
 						Hour = now.Hour,
 					});
