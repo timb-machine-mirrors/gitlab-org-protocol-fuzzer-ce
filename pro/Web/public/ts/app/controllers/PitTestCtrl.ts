@@ -3,6 +3,10 @@
 module Peach {
 	"use strict";
 
+	export interface IPitTestScope extends IViewModelScope {
+		Title: string;
+	}
+
 	export class PitTestController {
 
 		static $inject = [
@@ -14,12 +18,13 @@ module Peach {
 		];
 
 		constructor(
-			$scope: IViewModelScope,
+			$scope: IPitTestScope,
 			private $state: ng.ui.IStateService,
 			private pitService: PitService,
 			private testService: TestService,
 			private wizardService: WizardService
 		) {
+			$scope.Title = "Test";
 			this.track = this.wizardService.GetTrack(C.Tracks.Test);
 			this.pitService.LoadPit();
 		}

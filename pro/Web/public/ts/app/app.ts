@@ -48,6 +48,16 @@ module Peach {
 	]);
 
 	p.config([
+		C.Angular.$breadcrumbProvider,
+		($breadcrumbProvider) => {
+			$breadcrumbProvider.setOptions({
+				prefixStateName: C.States.MainHome,
+				includeAbstract: true
+			});
+		}
+	]);
+
+	p.config([
 		C.Angular.$stateProvider,
 		C.Angular.$urlRouterProvider, (
 			$stateProvider: angular.ui.IStateProvider,
@@ -59,7 +69,10 @@ module Peach {
 				// ----- Main -----
 				.state(C.States.Main, { 
 					abstract: true,
-					template: C.Templates.UiView
+					template: C.Templates.UiView,
+					ncyBreadcrumb: {
+						skip: true
+					}
 				})
 				.state(C.States.MainHome, {
 					url: '/',
@@ -101,7 +114,7 @@ module Peach {
 					abstract: true,
 					template: C.Templates.UiView,
 					ncyBreadcrumb: {
-						label: 'Job'
+						label: 'Job: {{job.name}}'
 					},
 					onEnter: [
 						C.Services.Job, 
@@ -122,8 +135,7 @@ module Peach {
 					controller: DashboardController,
 					controllerAs: C.ViewModel,
 					ncyBreadcrumb: {
-						label: 'Dashboard',
-						parent: C.States.Job
+						label: 'Dashboard'
 					}
 				})
 				.state(C.States.JobFaults, {
@@ -133,7 +145,7 @@ module Peach {
 					controller: FaultsController,
 					controllerAs: C.ViewModel,
 					ncyBreadcrumb: {
-						label: 'Faults'
+						label: '{{FaultSummaryTitle}}'
 					}
 				})
 				.state(C.States.JobFaultsDetail, {
@@ -146,91 +158,158 @@ module Peach {
 						}
 					},
 					ncyBreadcrumb: {
-						label: 'Fault'
+						label: '{{FaultDetailTitle}}'
 					}
 				})
 				.state(C.States.JobMetrics, {
-					url: '/metrics/:metric',
-					templateUrl: params =>
-						C.Templates.Job.MetricPage.replace(':metric', params.metric),
-					controller: MetricsController,
-					controllerAs: C.ViewModel
+					url: '/metrics',
+					abstract: true,
+					template: C.Templates.UiView,
+					ncyBreadcrumb: {
+						label: 'Metrics'
+					}
 				})
 
 				// ----- Pit -----
 				.state(C.States.Pit, {
 					url: '/pit/:pit',
 					abstract: true,
-					template: C.Templates.UiView
+					template: C.Templates.UiView,
+					ncyBreadcrumb: {
+						label: 'Pit: {{pit.name}}'
+					}
 				})
 				.state(C.States.PitConfigure, {
 					url: '/configure',
 					templateUrl: C.Templates.Pit.Configure,
 					controller: ConfigureController,
-					controllerAs: C.ViewModel
-				})
-				.state(C.States.PitWizard, {
-					url: '/quickstart/:track/{id:int}',
-					templateUrl: params => {
-						switch (params.track) {
-							case C.Tracks.Intro:
-								return C.Templates.Pit.Wizard.Intro;
-							case C.Tracks.Test:
-								return C.Templates.Pit.Wizard.Test;
-						}
-						return C.Templates.Pit.Wizard.Track;
-					},
-					controllerProvider: ($stateParams: any): any => {
-						switch ($stateParams.track) {
-							case C.Tracks.Test:
-								return PitTestController;
-						}
-						return WizardController;
-					},
 					controllerAs: C.ViewModel,
-					params: {
-						id: { value: 0, squash: true }
+					ncyBreadcrumb: {
+						label: 'Configure'
 					}
 				})
-				.state(C.States.PitWizardIntro, {
-					url: '/intro',
-					templateUrl: params =>
-						C.Templates.Pit.Wizard.TrackIntro.replace(':track', params.track)
+				.state(C.States.PitWizard, {
+					url: '/quickstart',
+					templateUrl: C.Templates.Pit.Wizard.Intro,
+					ncyBreadcrumb: {
+						label: 'Quick Start'
+					}
 				})
-				.state(C.States.PitWizardQuestion, {
-					templateUrl: C.Templates.Pit.Wizard.Question,
-					controller: WizardQuestionController,
-					controllerAs: C.ViewModel
-				})
-				.state(C.States.PitWizardReview, {
-					url: '/review',
-					templateUrl: params =>
-						C.Templates.Pit.Wizard.TrackDone.replace(':track', params.track)
+				.state(C.States.PitWizardTest, {
+					url: '/test',
+					views: {
+						'@': {
+							templateUrl: C.Templates.Pit.Wizard.Test,
+							controller: PitTestController,
+							controllerAs: C.ViewModel
+						}
+					},
+					ncyBreadcrumb: {
+						label: 'Test'
+					}
 				})
 				.state(C.States.PitAdvanced, {
 					abstract: true,
 					url: '/advanced',
-					template: C.Templates.UiView
+					template: C.Templates.UiView,
+					ncyBreadcrumb: {
+						label: 'Advanced'
+					}
 				})
 				.state(C.States.PitAdvancedVariables, {
 					url: '/variables',
 					templateUrl: C.Templates.Pit.Advanced.Variables,
 					controller: ConfigureVariablesController,
-					controllerAs: C.ViewModel
+					controllerAs: C.ViewModel,
+					ncyBreadcrumb: {
+						label: 'Variables'
+					}
 				})
 				.state(C.States.PitAdvancedMonitoring, {
 					url: '/monitoring',
 					templateUrl: C.Templates.Pit.Advanced.Monitoring,
 					controller: ConfigureMonitorsController,
-					controllerAs: C.ViewModel
+					controllerAs: C.ViewModel,
+					ncyBreadcrumb: {
+						label: 'Monitoring'
+					}
 				})
 				.state(C.States.PitAdvancedTest, {
 					url: '/test',
 					templateUrl: C.Templates.Pit.Advanced.Test,
 					controller: PitTestController,
-					controllerAs: C.ViewModel
+					controllerAs: C.ViewModel,
+					ncyBreadcrumb: {
+						label: 'Test'
+					}
 				})
 			;
+
+			_.forEach(C.MetricsList,(metric: C.IMetric) => {
+				var state = C.States.JobMetrics + '.' + metric.id;
+				$stateProvider.state(state, {
+					url: '/' + metric.id,
+					templateUrl: C.Templates.Job.MetricPage.replace(':metric', metric.id),
+					controller: MetricsController,
+					controllerAs: C.ViewModel,
+					params: {
+						metric: metric.id
+					},
+					ncyBreadcrumb: {
+						label: metric.name
+					}
+				});
+			});
+
+			_.forEach(WizardTracks, (track: ITrackStatic) => {
+				if (track.skip)
+					return;
+
+				var views = {
+					'@': {
+						templateUrl: C.Templates.Pit.Wizard.Track,
+						controller: WizardController,
+						controllerAs: C.ViewModel
+					}
+				};
+
+				views['@pit.wizard.' + track.id] = {
+					templateUrl: C.Templates.Pit.Wizard.TrackIntro.replace(':track', track.id)
+				};
+
+				$stateProvider
+					.state(C.States.PitWizard + '.' + track.id, {
+						url: '/' + track.id,
+						views: views,
+						params: {
+							track: track.id,
+							id: 0
+						},
+						ncyBreadcrumb: {
+							label: track.name
+						}
+					})
+					.state(C.States.PitWizard + '.' + track.id + '.review', {
+						url: '/review',
+						templateUrl: C.Templates.Pit.Wizard.TrackDone.replace(':track', track.id),
+						params: {
+							id: 0
+						},
+						ncyBreadcrumb: {
+							label: 'Review'
+						}
+					})
+					.state(C.States.PitWizard + '.' + track.id + '.steps', {
+						url: '/{id:int}',
+						templateUrl: C.Templates.Pit.Wizard.Question,
+						controller: WizardQuestionController,
+						controllerAs: C.ViewModel,
+						ncyBreadcrumb: {
+							label: 'Questions & Answers'
+						}
+					})
+				;
+			});
 		}
 	]);
 

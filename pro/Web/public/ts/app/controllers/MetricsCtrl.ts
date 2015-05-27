@@ -53,11 +53,14 @@ module Peach {
 		zoomMin?: number;
 	}
 
+	export interface IMetricsScope extends IViewModelScope {
+		metric: string;
+	}
+
 	export class MetricsController {
 		static $inject = [
 			C.Angular.$scope,
 			C.Angular.$state,
-			C.Angular.$stateParams,
 			C.Angular.$http,
 			C.Angular.$interpolate,
 			C.Angular.$templateCache,
@@ -67,9 +70,8 @@ module Peach {
 		];
 
 		constructor(
-			private $scope: IViewModelScope,
+			private $scope: IMetricsScope,
 			private $state: ng.ui.IStateService,
-			$stateParams: ng.ui.IStateParamsService,
 			private $http: ng.IHttpService,
 			private $interpolate: ng.IInterpolateService,
 			private $templateCache: ng.ITemplateCacheService,
@@ -77,11 +79,9 @@ module Peach {
 			private visDataSet,
 			private jobService: JobService
 		) {
-			this.metric = $stateParams['metric'];
+			this.$scope.metric = $state.params['metric'];
 			this.initializeData();
 		}
-
-		private metric: string;
 
 		public MutatorData: IMutatorMetric[] = [];
 		public AllMutatorData: IMutatorMetric[] = [];
@@ -126,8 +126,8 @@ module Peach {
 
 		private initializeData(): void {
 			var promise = this.getData();
-			switch (this.metric) {
-			case C.Metrics.BucketTimeline:
+			switch (this.$scope.metric) {
+			case C.Metrics.BucketTimeline.id:
 				promise.success((data: IBucketTimelineMetric[]) => {
 					var items = data.map((item: IBucketTimelineMetric) => {
 						item.href = this.$state.href(C.States.JobFaults, { bucket: item.label });
@@ -157,7 +157,7 @@ module Peach {
 					}, 100);
 				});
 				break;
-			case C.Metrics.FaultTimeline:
+			case C.Metrics.FaultTimeline.id:
 				promise.success((data: IFaultTimelineMetric[]) => {
 					if (data.length === 0) {
 						this.FaultsOverTimeLabels = [moment(Date.now()).format("M/D h a")];
@@ -168,31 +168,31 @@ module Peach {
 					}
 				});
 				break;
-			case C.Metrics.Mutators:
+			case C.Metrics.Mutators.id:
 				this.MutatorData = _.clone(this.AllMutatorData);
 				promise.success((data: IMutatorMetric[]) => {
 					this.AllMutatorData = data;
 				});
 				break;
-			case C.Metrics.Elements:
+			case C.Metrics.Elements.id:
 				this.ElementData = _.clone(this.AllElementData);
 				promise.success((data: IElementMetric[]) => {
 					this.AllElementData = data;
 				});
 				break;
-			case C.Metrics.Dataset:
+			case C.Metrics.Dataset.id:
 				this.DatasetData = _.clone(this.AllDatasetData);
 				promise.success((data: IDatasetMetric[]) => {
 					this.AllDatasetData = data;
 				});
 				break;
-			case C.Metrics.States:
+			case C.Metrics.States.id:
 				this.StateData = _.clone(this.AllStateData);
 				promise.success((data: IStateMetric[]) => {
 					this.AllStateData = data;
 				});
 				break;
-			case C.Metrics.Buckets:
+			case C.Metrics.Buckets.id:
 				this.BucketData = _.clone(this.AllBucketData);
 				promise.success((data: IBucketMetric[]) => {
 					this.AllBucketData = data;
@@ -202,7 +202,7 @@ module Peach {
 		}
 
 		private getData<T>(): ng.IHttpPromise<T> {
-			return this.$http.get(this.jobService.Job.metrics[this.metric]);
+			return this.$http.get(this.jobService.Job.metrics[this.$scope.metric]);
 		}
 	}
 }

@@ -3,19 +3,8 @@
 module Peach {
 	"use strict";
 
-	function FaultsTitleParts($stateParams) {
-		var parts = [];
-		var bucket = $stateParams.bucket;
-		if (bucket === "all") {
-			parts.push('All');
-		} else {
-			parts.push('Bucket: ' + bucket);
-		}
-
-		if ($stateParams.id) {
-			parts.push('Iteration: ' + $stateParams.id);
-		}
-		return parts;
+	export interface IFaultDetailScope extends IFaultSummaryScope {
+		FaultDetailTitle: string;
 	}
 
 	export class FaultsDetailController {
@@ -26,12 +15,20 @@ module Peach {
 		];
 
 		constructor(
-			$scope: IViewModelScope,
+			$scope: IFaultDetailScope,
 			$state: ng.ui.IStateService,
 			jobService: JobService
 		) {
-			this.Title = FaultsTitleParts($state.params);
-			var promise = jobService.LoadFaultDetail($state.params['id']);
+			var bucket = $state.params['bucket'];
+			if (bucket === "all") {
+				$scope.FaultSummaryTitle = 'Faults';
+			} else {
+				$scope.FaultSummaryTitle = 'Faults by Bucket: ' + bucket;
+			}
+
+			var id = $state.params['id'];
+			$scope.FaultDetailTitle = 'Iteration: ' + id;
+			var promise = jobService.LoadFaultDetail(id);
 			promise.then((detail: IFaultDetail) => {
 				this.Fault = detail;
 			}, () => {
@@ -39,8 +36,11 @@ module Peach {
 			});
 		}
 
-		public Title: string[];
 		public Fault: IFaultDetail;
+	}
+
+	export interface IFaultSummaryScope extends IViewModelScope {
+		FaultSummaryTitle: string;
 	}
 
 	export class FaultsController {
@@ -51,13 +51,15 @@ module Peach {
 		];
 
 		constructor(
-			$scope: IViewModelScope,
+			$scope: IFaultSummaryScope,
 			private $state: ng.ui.IStateService,
 			private jobService: JobService
 		) {
 			this.bucket = $state.params['bucket'];
-			this.Title = FaultsTitleParts($state.params)[0];
-			if (this.bucket !== "all") {
+			if (this.bucket === "all") {
+				$scope.FaultSummaryTitle = 'Faults';
+			} else {
+				$scope.FaultSummaryTitle = 'Faults by Bucket: ' + this.bucket;
 				this.refreshBucketFaults();
 				$scope.$watch(() => jobService.Faults.length, (newVal, oldVal) => {
 					if (newVal !== oldVal) {
@@ -73,7 +75,6 @@ module Peach {
 		private bucketFaults: IFaultSummary[];
 
 		public Faults: IFaultSummary[];
-		public Title: string;
 
 		public get AllFaults(): IFaultSummary[] {
 			if (this.bucket === "all") {

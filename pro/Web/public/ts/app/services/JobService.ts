@@ -7,6 +7,7 @@ module Peach {
 	
 	export class JobService {
 		static $inject = [
+			C.Angular.$rootScope,
 			C.Angular.$q,
 			C.Angular.$http,
 			C.Angular.$state,
@@ -15,6 +16,7 @@ module Peach {
 		];
 
 		constructor(
+			private $rootScope: ng.IRootScopeService,
 			private $q: ng.IQService,
 			private $http: ng.IHttpService,
 			private $state: ng.ui.IStateService,
@@ -31,6 +33,7 @@ module Peach {
 			this.$http.get(C.Api.JobUrl.replace(':id', id))
 				.success((job: IJob) => {
 					this.job = job;
+					this.$rootScope['job'] = job;
 					if (this.job.faultCount > 0) {
 						this.ReloadFaults();
 					}
@@ -43,6 +46,7 @@ module Peach {
 		public OnExit() {
 			this.StopJobPoller();
 			this.job = undefined;
+			this.$rootScope['job'] = undefined;
 			this.faults = [];
 		}
 		
@@ -170,6 +174,7 @@ module Peach {
 				var promise = this.$http.get(this.job.jobUrl);
 				promise.success((job: IJob) => {
 					this.job = job;
+					this.$rootScope['job'] = job;
 					if (job.status === JobStatus.Stopped ||
 						job.status === JobStatus.Paused) {
 						this.StopJobPoller();
