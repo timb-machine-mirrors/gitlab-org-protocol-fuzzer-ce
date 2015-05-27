@@ -278,7 +278,7 @@ module Peach {
 				};
 
 				$stateProvider
-					.state(C.States.PitWizard + '.' + track.id, {
+					.state([C.States.PitWizard, track.id].join('.'), {
 						url: '/' + track.id,
 						views: views,
 						params: {
@@ -289,7 +289,7 @@ module Peach {
 							label: track.name
 						}
 					})
-					.state(C.States.PitWizard + '.' + track.id + '.review', {
+					.state([C.States.PitWizard, track.id, 'review'].join('.'), {
 						url: '/review',
 						templateUrl: C.Templates.Pit.Wizard.TrackDone.replace(':track', track.id),
 						params: {
@@ -299,7 +299,7 @@ module Peach {
 							label: 'Review'
 						}
 					})
-					.state(C.States.PitWizard + '.' + track.id + '.steps', {
+					.state([C.States.PitWizard, track.id, 'steps'].join('.'), {
 						url: '/{id:int}',
 						templateUrl: C.Templates.Pit.Wizard.Question,
 						controller: WizardQuestionController,
