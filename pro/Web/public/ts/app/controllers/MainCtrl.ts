@@ -49,15 +49,7 @@ module Peach {
 			return this.$state.params['pit'];
 		}
 
-		public Metrics = [
-			{ id: C.Metrics.BucketTimeline, name: 'Bucket Timeline' },
-			{ id: C.Metrics.FaultTimeline, name: 'Faults Over Time' },
-			{ id: C.Metrics.Mutators, name: 'Mutators' },
-			{ id: C.Metrics.Elements, name: 'Elements' },
-			{ id: C.Metrics.States, name: 'States' },
-			{ id: C.Metrics.Dataset, name: 'Datasets' },
-			{ id: C.Metrics.Buckets, name: 'Buckets' }
-		];
+		public Metrics = C.MetricsList;
 
 		public WizardTracks = Peach.WizardTracks;
 
@@ -104,7 +96,7 @@ module Peach {
 			return count || '';
 		}
 
-		public IsComplete(step: string) {
+		public IsComplete(step: string): boolean {
 			return this.wizardService.GetTrack(step).isComplete;
 		}
 
@@ -133,8 +125,14 @@ module Peach {
 			this.showSidebar = !this.showSidebar;
 		}
 
-		public ShowMenu(name: string) {
+		public ShowMenu(name: string): boolean {
 			return this.$state.includes(name);
+		}
+
+		public MetricUrl(metric: C.IMetric): string {
+			var state = C.States.JobMetrics + '.' + metric.id;
+			var params = { job: this.JobId };
+			return this.$state.href(state, params);
 		}
 	}
 }

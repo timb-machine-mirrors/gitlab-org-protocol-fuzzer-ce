@@ -6,12 +6,14 @@ module Peach {
 	export class PitService {
 
 		static $inject = [
+			C.Angular.$rootScope,
 			C.Angular.$q,
 			C.Angular.$http,
 			C.Angular.$state
 		];
 
 		constructor(
+			private $rootScope: ng.IRootScopeService,
 			private $q: ng.IQService,
 			private $http: ng.IHttpService,
 			private $state: ng.ui.IStateService
@@ -85,6 +87,7 @@ module Peach {
 		
 		private OnSuccess(pit: IPit) {
 			this.pit = pit;
+			this.$rootScope['pit'] = pit;
 		}
 	}
 }

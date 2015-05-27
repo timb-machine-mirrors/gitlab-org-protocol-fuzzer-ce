@@ -4,6 +4,7 @@ module Peach {
 	"use strict";
 
 	export interface IWizardScope extends IFormScope {
+		Title: string;
 		Question: IQuestion;
 		Step: number;
 		NextPrompt: string;
@@ -33,7 +34,7 @@ module Peach {
 		) {
 			this.trackId = this.$state.params['track'];
 			this.track = wizardService.GetTrack(this.trackId);
-			this.Title = this.track.name;
+			this.$scope.Title = this.track.name;
 
 			if (this.trackId !== C.Tracks.Intro) {
 				var id = this.$state.params['id'];
@@ -43,7 +44,6 @@ module Peach {
 
 		private trackId: string;
 		private track: ITrack;
-		public Title: string;
 
 		public OnNextTrack() {
 			var next = this.track.next;
@@ -51,23 +51,19 @@ module Peach {
 		}
 
 		private gotoIntro() {
-			// since the all the params might be the same,
+			// since all the params might be the same,
 			// we need to force the controller to reinitialize with reload: true.
-			this.$state.go(
-				C.States.PitWizardIntro,
-				{ track: this.trackId, id: 0 },
-				{ reload: true }
-			);
+			this.$state.go(this.track.start, { id: 0 }, { reload: true });
 		}
 
 		private init(id: number) {
 			this.resetPrompts();
 
 			if (id === 0) {
-				if (this.$state.is(C.States.PitWizardIntro)) {
+				if (this.$state.is(this.track.start)) {
 					this.initIntro();
 				}
-				else if (this.$state.is(C.States.PitWizardReview)) {
+				else if (this.$state.is(this.track.finish)) {
 					this.initReview();
 				}
 			} else {
@@ -154,15 +150,9 @@ module Peach {
 
 			if (_.isUndefined(nextId)) {
 				// no more questions, this track is complete
-				this.$state.go(
-					C.States.PitWizardReview,
-					{ track: this.trackId, id: 0 }
-				);
+				this.$state.go(this.track.finish, {id: 0 });
 			} else {
-				this.$state.go(
-					C.States.PitWizardQuestion,
-					{ track: this.trackId, id: nextId }
-				);
+				this.$state.go(this.track.steps, { id: nextId });
 			}
 		}
 
@@ -180,10 +170,7 @@ module Peach {
 			if (previousId === 0) {
 				this.gotoIntro();
 			} else {
-				this.$state.go(
-					C.States.PitWizardQuestion,
-					{ track: this.trackId, id: previousId }
-				);
+				this.$state.go(this.track.steps, { id: previousId });
 			}
 		}
 
@@ -294,10 +281,7 @@ module Peach {
 		}
 
 		public get IsSetVars(): boolean {
-			return this.$state.includes(
-				C.States.PitWizard,
-				{ track: C.Tracks.Vars }
-			);
+			return this.$state.includes(C.States.PitWizardVars);
 		}
 
 		public OnInsertDefine(def: IParameter) {

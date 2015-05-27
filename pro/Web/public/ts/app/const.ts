@@ -2,7 +2,7 @@
 
 module Peach.C {
 	"use strict";
-	
+
 	export var ViewModel = 'vm';
 
 	export module Vendor {
@@ -63,15 +63,44 @@ module Peach.C {
 		export var Test = 'test';
 	}
 
-	export module Metrics {
-		export var BucketTimeline = 'bucketTimeline';
-		export var FaultTimeline = 'faultTimeline';
-		export var Mutators = 'mutators';
-		export var Elements = 'elements';
-		export var Dataset = 'dataset';
-		export var States = 'states';
-		export var Buckets = 'buckets';
+	export interface IMetric {
+		id: string;
+		name: string;
 	}
+
+	export module Metrics {
+		export var BucketTimeline: IMetric = {
+			id: 'bucketTimeline', name: 'Bucket Timeline'
+		};
+		export var FaultTimeline: IMetric = {
+			id: 'faultTimeline', name: 'Faults Over Time'
+		};
+		export var Mutators: IMetric = {
+			id: 'mutators', name: 'Mutators'
+		};
+		export var Elements: IMetric = {
+			id: 'elements', name: 'Elements'
+		};
+		export var States: IMetric = {
+			id: 'states', name: 'States'
+		};
+		export var Dataset: IMetric = {
+			id: 'dataset', name: 'Datasets'
+		};
+		export var Buckets: IMetric = {
+			id: 'buckets', name: 'Buckets'
+		};
+	}
+
+	export var MetricsList: IMetric[] = [
+		Metrics.BucketTimeline,
+		Metrics.FaultTimeline,
+		Metrics.Mutators,
+		Metrics.Elements,
+		Metrics.States,
+		Metrics.Dataset,
+		Metrics.Buckets
+	];
 
 	export module Templates {
 		export var UiView = '<div ui-view></div>';
@@ -138,10 +167,14 @@ module Peach.C {
 
 		export var Pit = 'pit';
 		export var PitConfigure = 'pit.configure';
+
 		export var PitWizard = 'pit.wizard';
-		export var PitWizardIntro = 'pit.wizard.intro';
-		export var PitWizardQuestion = 'pit.wizard.question';
-		export var PitWizardReview = 'pit.wizard.review';
+		export var PitWizardVars = 'pit.wizard.vars';
+		export var PitWizardFault = 'pit.wizard.fault';
+		export var PitWizardData = 'pit.wizard.data';
+		export var PitWizardAuto = 'pit.wizard.auto';
+		export var PitWizardTest = 'pit.wizard.test';
+
 		export var PitAdvanced = 'pit.advanced';
 		export var PitAdvancedVariables = 'pit.advanced.variables';
 		export var PitAdvancedMonitoring = 'pit.advanced.monitoring';

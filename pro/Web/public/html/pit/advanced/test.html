@@ -1,43 +1,37 @@
-﻿<div class="page-content">
-	<div class="page-header">
-		<h1>Configuration &raquo; Test</h1>
-	</div>
+﻿<p>
+	This section validates the configuration by executing one test iteration,
+	and exposes issues that would hinder a fuzzing session. The output will
+	display any warnings and errors that surface in the control iteration.
+	Detailed log messages are provided to help diagnose issues with the
+	configuration.
+</p>
+<p>
+	Click the Begin Test button to validate the configuration.
+</p>
 
-	<p>
-		This section validates the configuration by executing one test iteration,
-		and exposes issues that would hinder a fuzzing session. The output will
-		display any warnings and errors that surface in the control iteration.
-		Detailed log messages are provided to help diagnose issues with the
-		configuration.
-	</p>
-	<p>
-		Click the Begin Test button to validate the configuration.
-	</p>
-
-	<div class="alert alert-warning alert-dismissable"
-			 ng-show="vm.ShowNotConfigured">
-		<button type="button"
-						class="close"
-						data-dismiss="alert">
-			<i class="fa fa-remove"></i>
-		</button>
-		<strong>Warning!</strong>
-		The current Pit is not fully configured.
-	</div>
-
-	<div class="wizard-actions">
-		<button class="btn btn-success btn-sm"
-						ng-click="vm.OnNextTrack()"
-						ng-class="{disabled: !vm.CanContinue}">
-			Continue &nbsp;
-			<i class="glyphicon glyphicon-arrow-right"></i>
-		</button>
-		<button class="btn btn-warning btn-sm"
-						ng-click="vm.OnBeginTest()"
-						ng-class="{disabled: !vm.CanBeginTest}">
-			Begin Test
-		</button>
-	</div>
-	<peach:test>
-	</peach:test>
+<div class="alert alert-warning alert-dismissable"
+		 ng-show="vm.ShowNotConfigured">
+	<button type="button"
+					class="close"
+					data-dismiss="alert">
+		<i class="fa fa-remove"></i>
+	</button>
+	<strong>Warning!</strong>
+	The current Pit is not fully configured.
 </div>
+
+<div class="wizard-actions">
+	<button class="btn btn-success btn-sm"
+					ng-click="vm.OnNextTrack()"
+					ng-class="{disabled: !vm.CanContinue}">
+		Continue &nbsp;
+		<i class="glyphicon glyphicon-arrow-right"></i>
+	</button>
+	<button class="btn btn-warning btn-sm"
+					ng-click="vm.OnBeginTest()"
+					ng-class="{disabled: !vm.CanBeginTest}">
+		Begin Test
+	</button>
+</div>
+<peach:test>
+</peach:test>
