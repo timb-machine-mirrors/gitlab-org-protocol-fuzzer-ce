@@ -76,7 +76,7 @@ module Peach {
 			private $interpolate: ng.IInterpolateService,
 			private $templateCache: ng.ITemplateCacheService,
 			private $timeout: ng.ITimeoutService,
-			private visDataSet,
+			private VisDataSet,
 			private jobService: JobService
 		) {
 			this.$scope.metric = $state.params['metric'];
@@ -106,10 +106,8 @@ module Peach {
 			[0]
 		];
 
-		public BucketTimelineData = {
-			single: true,
-			load: []
-		};
+		public BucketTimelineData = {};
+		public BucketTimelineLoaded: boolean = false;
 
 		public BucketTimelineOptions: ITimelineOptions = {
 			showCurrentTime: true,
@@ -128,33 +126,41 @@ module Peach {
 			var promise = this.getData();
 			switch (this.$scope.metric) {
 			case C.Metrics.BucketTimeline.id:
+				var items = new this.VisDataSet();
+				this.BucketTimelineData = {
+					items: items
+				};
+				
 				promise.success((data: IBucketTimelineMetric[]) => {
-					var items = data.map((item: IBucketTimelineMetric) => {
+					data.forEach((item: IBucketTimelineMetric) => {
 						item.href = this.$state.href(C.States.JobFaults, { bucket: item.label });
-						return <ITimelineItem> {
+						items.add({
 							id: item.iteration,
 							content: undefined,
 							start: item.time,
 							data: item
-						};
+						});
 					});
-					items.unshift({
+					items.add({
 						id: 0,
 						style: "color: green",
 						content: "Job Start",
 						start: this.jobService.Job.startDate
 					});
 					if (this.jobService.Job.stopDate) {
-						items.push({
+						items.add({
 							id: -1,
 							style: "color: red",
 							content: "Job End",
 							start: this.jobService.Job.stopDate
 						});
 					}
-					this.$timeout(() => {
-						this.BucketTimelineData = this.visDataSet(items);
-					}, 100);
+					
+					this.BucketTimelineData = {
+						items: items
+					};
+					
+					this.BucketTimelineLoaded = true;
 				});
 				break;
 			case C.Metrics.FaultTimeline.id:

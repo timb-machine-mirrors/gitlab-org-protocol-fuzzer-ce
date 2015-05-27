@@ -34,6 +34,7 @@
     "vis": "~3.12.0",
     "angular-ui-router": "~0.2.13",
     "fontawesome": "~4.3.0",
-    "angular-breadcrumb": "~0.4.0"
+    "angular-breadcrumb": "~0.4.0",
+    "angular-visjs": "~0.0.7"
   }
 }

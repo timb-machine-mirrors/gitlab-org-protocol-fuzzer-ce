@@ -6,7 +6,7 @@ module Peach.C {
 	export var ViewModel = 'vm';
 
 	export module Vendor {
-		export var VisDataSet = 'visDataSet';
+		export var VisDataSet = 'VisDataSet';
 	}
 
 	export module Directives {
