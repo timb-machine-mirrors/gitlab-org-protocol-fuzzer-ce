@@ -42,6 +42,7 @@ describe("Peach", () => {
 
 			$templateCache.put(C.Templates.Home, '');
 			$templateCache.put(C.Templates.Pit.Configure, '');
+			$templateCache.put(C.Templates.Pit.Wizard.Intro, '');
 			$templateCache.put(C.Templates.Pit.Wizard.Track, '');
 			$templateCache.put(C.Templates.Pit.Wizard.Question, '');
 
@@ -93,18 +94,18 @@ describe("Peach", () => {
 			NewCtrl();
 		}
 
-		function expectState(state, track, id?) {
-			var actual = $state.is(state, { pit: pitId, track: track, id: id });
+		function expectState(state, id?) {
+			var actual = $state.is(state, { pit: pitId, id: id });
 			expect(actual).toBe(true);
 			if (!actual) {
-				console.error('expectState', state, track, id);
+				console.error('expectState', state, id);
 				console.error('state is', $state.current.name, JSON.stringify($state.params));
 			}
 		}
 
 		describe("'vars' track", () => {
 			beforeEach(() => {
-				$state.go(C.States.PitWizardIntro, { pit: pitId, track: C.Tracks.Vars });
+				$state.go(C.States.PitWizardVars, { pit: pitId });
 				$rootScope.$digest();
 			});
 
@@ -119,21 +120,21 @@ describe("Peach", () => {
 					expect(_.isObject(ctrl)).toBe(true);
 					expect(scope.Question.id).toBe(0);
 					expect(scope.Question.type).toBe(Peach.QuestionTypes.Intro);
-					expectState(C.States.PitWizardIntro, C.Tracks.Vars);
+					expectState(C.States.PitWizardVars);
 				});
 
 				it("Next() will move to review", () => {
 					$httpBackend.expectPOST(pitUrl, pit).respond(pit);
 					Next();
 					$httpBackend.flush();
-					expectState(C.States.PitWizardReview, C.Tracks.Vars);
+					expectState([C.States.PitWizardVars, 'review'].join('.'));
 				});
 
 				it("OnNextTrack() moves to the next track", () => {
 					$httpBackend.expectGET(pitUrl).respond(pit);
 					NextTrack();
 					$httpBackend.flush();
-					expectState(C.States.PitWizardIntro, C.Tracks.Fault);
+					expectState(C.States.PitWizardFault);
 				});
 			});
 
@@ -156,13 +157,13 @@ describe("Peach", () => {
 					expect(_.isObject(ctrl)).toBe(true);
 					expect(scope.Question.id).toBe(0);
 					expect(scope.Question.type).toBe(Peach.QuestionTypes.Intro);
-					expectState(C.States.PitWizardIntro, C.Tracks.Vars);
+					expectState(C.States.PitWizardVars);
 				});
 
 				it("should walk thru wizard", () => {
-					expectState(C.States.PitWizardIntro, C.Tracks.Vars);
+					expectState(C.States.PitWizardVars);
 					Next();
-					expectState(C.States.PitWizardQuestion, C.Tracks.Vars, 1);
+					expectState([C.States.PitWizardVars, 'steps'].join('.'), 1);
 
 					scope.Question.value = value;
 					expect(scope.Question.shortName).toBe(name);
@@ -178,14 +179,14 @@ describe("Peach", () => {
 					$httpBackend.flush();
 
 					expect(scope.Question.type).toBe(Peach.QuestionTypes.Done);
-					expectState(C.States.PitWizardReview, C.Tracks.Vars);
+					expectState([C.States.PitWizardVars, 'review'].join('.'));
 				});
 			});
 		});
 
 		describe("'fault' track", () => {
 			beforeEach(() => {
-				$state.go(C.States.PitWizardIntro, { track: C.Tracks.Fault });
+				$state.go(C.States.PitWizardFault);
 				$rootScope.$digest();
 
 				$httpBackend.expectGET(pitUrl).respond(pit);
@@ -197,14 +198,14 @@ describe("Peach", () => {
 				expect(_.isObject(ctrl)).toBe(true);
 				expect(scope.Question.id).toBe(0);
 				expect(scope.Question.type).toBe(Peach.QuestionTypes.Intro);
-				expectState(C.States.PitWizardIntro, C.Tracks.Fault);
+				expectState(C.States.PitWizardFault);
 			});
 
 			it("should walk thru wizard", () => {
-				expectState(C.States.PitWizardIntro, C.Tracks.Fault);
+				expectState(C.States.PitWizardFault);
 				Next();
 
-				expectState(C.States.PitWizardQuestion, C.Tracks.Fault, 1);
+				expectState([C.States.PitWizardFault, 'steps'].join('.'), 1);
 				expect(scope.Question.key).toBe("AgentScheme");
 				expect(scope.Question.id).toBe(1);
 				scope.Question.value = "local";
@@ -213,42 +214,42 @@ describe("Peach", () => {
 				// Jump occurred
 				NewCtrl();
 
-				expectState(C.States.PitWizardQuestion, C.Tracks.Fault, 100);
+				expectState([C.States.PitWizardFault, 'steps'].join('.'), 100);
 				expect(scope.Question.id).toBe(100);
 				scope.Question.value = 0;
 				Next();
 
-				expectState(C.States.PitWizardQuestion, C.Tracks.Fault, 1100);
+				expectState([C.States.PitWizardFault, 'steps'].join('.'), 1100);
 				expect(scope.Question.id).toBe(1100);
 				scope.Question.value = 0;
 				Next();
 
-				expectState(C.States.PitWizardQuestion, C.Tracks.Fault, 1110);
+				expectState([C.States.PitWizardFault, 'steps'].join('.'), 1110);
 				expect(scope.Question.id).toBe(1110);
 				scope.Question.value = "C:\\some\\program.exe";
 				Next();
 
-				expectState(C.States.PitWizardQuestion, C.Tracks.Fault, 1111);
+				expectState([C.States.PitWizardFault, 'steps'].join('.'), 1111);
 				expect(scope.Question.id).toBe(1111);
 				scope.Question.value = "/args";
 				Next();
 
-				expectState(C.States.PitWizardQuestion, C.Tracks.Fault, 1140);
+				expectState([C.States.PitWizardFault, 'steps'].join('.'), 1140);
 				expect(scope.Question.id).toBe(1140);
 				scope.Question.value = "StartOnEachIteration";
 				Next();
 
-				expectState(C.States.PitWizardQuestion, C.Tracks.Fault, 1141);
+				expectState([C.States.PitWizardFault, 'steps'].join('.'), 1141);
 				expect(scope.Question.id).toBe(1141);
 				scope.Question.value = "";
 				Next();
 
-				expectState(C.States.PitWizardQuestion, C.Tracks.Fault, 1142);
+				expectState([C.States.PitWizardFault, 'steps'].join('.'), 1142);
 				expect(scope.Question.id).toBe(1142);
 				scope.Question.value = true;
 				Next();
 
-				expectState(C.States.PitWizardQuestion, C.Tracks.Fault, 1143);
+				expectState([C.States.PitWizardFault, 'steps'].join('.'), 1143);
 				expect(scope.Question.id).toBe(1143);
 				scope.Question.value = true;
 				Next();
@@ -357,7 +358,7 @@ describe("Peach", () => {
 			beforeEach(() => {
 				wizardService.SetTrackTemplate(C.Tracks.Data, mockTemplate);
 
-				$state.go(C.States.PitWizardIntro, { track: C.Tracks.Data });
+				$state.go(C.States.PitWizardData);
 				$rootScope.$digest();
 
 				$httpBackend.expectGET(pitUrl).respond(pit);
@@ -374,30 +375,30 @@ describe("Peach", () => {
 				expect(_.isObject(ctrl)).toBe(true);
 				expect(scope.Question.id).toBe(0);
 				expect(scope.Question.type).toBe(Peach.QuestionTypes.Intro);
-				expectState(C.States.PitWizardIntro, C.Tracks.Data);
+				expectState(C.States.PitWizardData);
 			});
 
 			it("should walk thru wizard", () => {
-				expectState(C.States.PitWizardIntro, C.Tracks.Data);
+				expectState(C.States.PitWizardData);
 				expect(scope.Question.type).toBe(Peach.QuestionTypes.Intro);
 				Next();
 
-				expectState(C.States.PitWizardQuestion, C.Tracks.Data, 1);
+				expectState([C.States.PitWizardData, 'steps'].join('.'), 1);
 				expect(scope.Question.id).toBe(1);
 				scope.Question.value = "local";
 				Next();
 
-				expectState(C.States.PitWizardQuestion, C.Tracks.Data, 3);
+				expectState([C.States.PitWizardData, 'steps'].join('.'), 3);
 				expect(scope.Question.id).toBe(3);
 				scope.Question.value = 0;
 				Next();
 
-				expectState(C.States.PitWizardQuestion, C.Tracks.Data, 1000);
+				expectState([C.States.PitWizardData, 'steps'].join('.'), 1000);
 				expect(scope.Question.id).toBe(1000);
 				scope.Question.value = "FooValue";
 				Next();
 
-				expectState(C.States.PitWizardReview, C.Tracks.Data);
+				expectState([C.States.PitWizardData, 'review'].join('.'));
 				expect(scope.Question.type).toBe(Peach.QuestionTypes.Done);
 
 				var expected: Peach.Agent[] = [
@@ -422,26 +423,26 @@ describe("Peach", () => {
 			});
 
 			it("should allow adding multiple agents", () => {
-				expectState(C.States.PitWizardIntro, C.Tracks.Data);
+				expectState(C.States.PitWizardData);
 				expect(scope.Question.type).toBe(Peach.QuestionTypes.Intro);
 				Next();
 
-				expectState(C.States.PitWizardQuestion, C.Tracks.Data, 1);
+				expectState([C.States.PitWizardData, 'steps'].join('.'), 1);
 				expect(scope.Question.id).toBe(1);
 				scope.Question.value = "local";
 				Next();
 
-				expectState(C.States.PitWizardQuestion, C.Tracks.Data, 3);
+				expectState([C.States.PitWizardData, 'steps'].join('.'), 3);
 				expect(scope.Question.id).toBe(3);
 				scope.Question.value = 0;
 				Next();
 
-				expectState(C.States.PitWizardQuestion, C.Tracks.Data, 1000);
+				expectState([C.States.PitWizardData, 'steps'].join('.'), 1000);
 				expect(scope.Question.id).toBe(1000);
 				scope.Question.value = "FooValue";
 				Next();
 
-				expectState(C.States.PitWizardReview, C.Tracks.Data);
+				expectState([C.States.PitWizardData, 'review'].join('.'));
 				expect(scope.Question.type).toBe(Peach.QuestionTypes.Done);
 
 				var expected1: Peach.Agent[] = [
@@ -471,31 +472,31 @@ describe("Peach", () => {
 				NewCtrl();
 				$httpBackend.flush();
 
-				expectState(C.States.PitWizardIntro, C.Tracks.Data);
+				expectState(C.States.PitWizardData);
 				expect(scope.Question.type).toBe(Peach.QuestionTypes.Intro);
 				Next();
 
-				expectState(C.States.PitWizardQuestion, C.Tracks.Data, 1);
+				expectState([C.States.PitWizardData, 'steps'].join('.'), 1);
 				expect(scope.Question.id).toBe(1);
 				scope.Question.value = "tcp";
 				Next();
 
-				expectState(C.States.PitWizardQuestion, C.Tracks.Data, 2);
+				expectState([C.States.PitWizardData, 'steps'].join('.'), 2);
 				expect(scope.Question.id).toBe(2);
 				scope.Question.value = "host";
 				Next();
 
-				expectState(C.States.PitWizardQuestion, C.Tracks.Data, 3);
+				expectState([C.States.PitWizardData, 'steps'].join('.'), 3);
 				expect(scope.Question.id).toBe(3);
 				scope.Question.value = 1;
 				Next();
 
-				expectState(C.States.PitWizardQuestion, C.Tracks.Data, 2000);
+				expectState([C.States.PitWizardData, 'steps'].join('.'), 2000);
 				expect(scope.Question.id).toBe(2000);
 				scope.Question.value = "BarValue";
 				Next();
 
-				expectState(C.States.PitWizardReview, C.Tracks.Data);
+				expectState([C.States.PitWizardData, 'review'].join('.'));
 				expect(scope.Question.type).toBe(Peach.QuestionTypes.Done);
 
 				var expected2: Peach.Agent[] = [
