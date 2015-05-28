@@ -9,17 +9,13 @@ module Peach {
 			C.Angular.$scope,
 			C.Angular.$state,
 			C.Angular.$modal,
-			C.Services.Pit,
-			C.Services.Test,
 			C.Services.Wizard
 		];
 
 		constructor(
-			$scope: IViewModelScope,
+			private $scope: IViewModelScope,
 			private $state: ng.ui.IStateService,
 			private $modal: ng.ui.bootstrap.IModalService,
-			private jobService: JobService,
-			private testService: TestService,
 			private wizardService: WizardService
 		) {
 			$scope.vm = this;
@@ -38,10 +34,6 @@ module Peach {
 		private isMenuMin: boolean = false;
 		public Metrics = C.MetricsList;
 		public WizardTracks = Peach.WizardTracks;
-
-		private get job(): IJob {
-			return this.jobService.Job;
-		}
 
 		public get JobId(): number {
 			return this.$state.params['job'];
@@ -88,8 +80,8 @@ module Peach {
 
 		public get FaultCount(): any {
 			var count = 0;
-			if (this.job) {
-				count = this.job.faultCount;
+			if (this.$scope.job) {
+				count = this.$scope.job.faultCount;
 			}
 			return count || '';
 		}

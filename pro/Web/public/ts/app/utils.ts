@@ -22,8 +22,13 @@ module Peach {
 
 	export interface IDirective extends ng.IDirective, IComponent {
 	}
+	
+	export interface IRootScope extends ng.IScope {
+		job: IJob;
+		pit: IPit;
+	}
 
-	export interface IViewModelScope extends ng.IScope {
+	export interface IViewModelScope extends IRootScope {
 		vm: any;
 	}
 

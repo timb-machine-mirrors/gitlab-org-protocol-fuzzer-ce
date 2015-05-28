@@ -177,7 +177,7 @@
 									ng-repeat="item in vm.WizardTracks">
 								<a ui-sref="{{item.start}}({pit: vm.PitId, track: item.id, id: 0})">
 									<span class="menu-text">
-										<i ng-class="{'fa fa-ok-sign green': vm.IsComplete(item.id)}"></i>
+										<i ng-class="{'fa fa-check green': vm.IsComplete(item.id)}"></i>
 										{{item.name}}
 									</span>
 								</a>
