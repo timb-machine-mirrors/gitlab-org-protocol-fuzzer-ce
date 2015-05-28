@@ -21,7 +21,6 @@
 /// <reference path="controllers/MetricsCtrl.ts" />
 /// <reference path="controllers/NewVarCtrl.ts" />
 /// <reference path="controllers/PitTestCtrl.ts" />
-/// <reference path="controllers/StartJobCtrl.ts" />
 /// <reference path="controllers/TemplatesCtrl.ts" />
 /// <reference path="controllers/WizardCtrl.ts" />
 /// <reference path="def/angular-ui-bootstrap/angular-ui-bootstrap.d.ts" />
