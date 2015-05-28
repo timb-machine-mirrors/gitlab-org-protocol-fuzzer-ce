@@ -119,7 +119,7 @@ namespace Peach.Pro.Test.Core.Loggers
 			Assert.AreEqual(3, faults[0].iteration);
 
 			Assert.AreEqual("Peach Control Iteration Failed", faults[0].title);
-			Assert.AreEqual("PeachControlIteration", faults[0].detectionSource);
+			Assert.AreEqual("ControlIteration", faults[0].detectionSource);
 			Assert.AreEqual("ControlIteration", faults[0].folderName);
 
 			var asStr = faults[0].description;
@@ -216,7 +216,7 @@ namespace Peach.Pro.Test.Core.Loggers
 			Assert.AreEqual(3, faults[0].iteration);
 
 			Assert.AreEqual("Peach Control Iteration Failed", faults[0].title);
-			Assert.AreEqual("PeachControlIteration", faults[0].detectionSource);
+			Assert.AreEqual("ControlIteration", faults[0].detectionSource);
 			Assert.AreEqual("ControlIteration", faults[0].folderName);
 
 			var asStr = faults[0].description;
@@ -325,7 +325,7 @@ namespace Peach.Pro.Test.Core.Loggers
 			Assert.AreEqual(3, faults[0].iteration);
 
 			Assert.AreEqual("Peach Control Iteration Failed", faults[0].title);
-			Assert.AreEqual("PeachControlIteration", faults[0].detectionSource);
+			Assert.AreEqual("ControlIteration", faults[0].detectionSource);
 			Assert.AreEqual("ControlIteration", faults[0].folderName);
 
 			var asStr = faults[0].description;
