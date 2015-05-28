@@ -105,7 +105,10 @@ module Peach {
 					url: '/job/:job',
 					abstract: true,
 					template: C.Templates.UiView,
-					ncyBreadcrumb: { label: 'Job: {{job.name}}' },
+					ncyBreadcrumb: { 
+						label: 'Job: {{job.name}}',
+						parent: C.States.MainJobs
+					},
 					onEnter: [
 						C.Services.Job, 
 						C.Angular.$stateParams, 
@@ -157,7 +160,10 @@ module Peach {
 					url: '/pit/:pit',
 					abstract: true,
 					template: C.Templates.UiView,
-					ncyBreadcrumb: { label: 'Pit: {{pit.name}}' }
+					ncyBreadcrumb: { 
+						label: 'Pit: {{pit.name}}',
+						parent: C.States.MainLibrary
+					}
 				})
 				.state(C.States.PitConfigure, {
 					url: '/configure',
