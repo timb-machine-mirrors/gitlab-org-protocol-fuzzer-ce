@@ -128,8 +128,7 @@
 						</a>
 					</li>
 
-					<li ui-sref-active="active"
-							ng-show="vm.ShowMenu('job')">
+					<li ng-show="vm.ShowMenu('job')">
 						<a href="#"
 							 ng-click="vm.OnSubClick($event, 'job.metrics')">
 							<i class="fa fa-bar-chart"></i>
@@ -141,7 +140,7 @@
 
 						<ul class="submenu"
 								collapse="vm.IsCollapsed('job.metrics')">
-							<li ui-sref-active="active"
+							<li ng-class="vm.MetricActive(item)"
 									ng-repeat="item in vm.Metrics">
 								<a href="{{vm.MetricUrl(item)}}">
 									<span class="menu-text">
@@ -162,8 +161,7 @@
 						</a>
 					</li>
 
-					<li ui-sref-active="active"
-							ng-show="vm.ShowMenu('pit')">
+					<li ng-show="vm.ShowMenu('pit')">
 						<a href="#"
 							 ng-click="vm.OnSubClick($event, 'pit.wizard')">
 							<i class="fa fa-rocket"></i>
@@ -175,7 +173,7 @@
 
 						<ul class="submenu"
 								collapse="vm.IsCollapsed('pit.wizard')">
-							<li ui-sref-active="active"
+							<li ng-class="vm.WizardActive(item)"
 									ng-repeat="item in vm.WizardTracks">
 								<a ui-sref="{{item.start}}({pit: vm.PitId, track: item.id, id: 0})">
 									<span class="menu-text">
@@ -187,8 +185,7 @@
 						</ul>
 					</li>
 
-					<li ui-sref-active="active"
-							ng-show="vm.ShowMenu('pit')">
+					<li ng-show="vm.ShowMenu('pit')">
 						<a href="#"
 							 ng-click="vm.OnSubClick($event, 'pit.advanced')">
 							<i class="fa fa-wrench"></i>

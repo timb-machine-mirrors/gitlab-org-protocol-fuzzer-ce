@@ -70,27 +70,21 @@ module Peach {
 				.state(C.States.Main, { 
 					abstract: true,
 					template: C.Templates.UiView,
-					ncyBreadcrumb: {
-						skip: true
-					}
+					ncyBreadcrumb: { skip: true }
 				})
 				.state(C.States.MainHome, {
 					url: '/',
 					templateUrl: C.Templates.Home,
 					controller: HomeController,
 					controllerAs: C.ViewModel,
-					ncyBreadcrumb: {
-						label: 'Home'
-					}
+					ncyBreadcrumb: { label: 'Home' }
 				})
 				.state(C.States.MainLibrary, {
 					url: '/library',
 					templateUrl: C.Templates.Library,
 					controller: LibraryController,
 					controllerAs: C.ViewModel,
-					ncyBreadcrumb: {
-						label: 'Library'
-					}
+					ncyBreadcrumb: { label: 'Library' }
 				})
 				.state(C.States.MainTemplates, {
 					url: '/templates',
@@ -103,9 +97,7 @@ module Peach {
 					templateUrl: C.Templates.Jobs,
 					controller: JobsController,
 					controllerAs: C.ViewModel,
-					ncyBreadcrumb: {
-						label: 'Jobs'
-					}
+					ncyBreadcrumb: { label: 'Jobs' }
 				})
 
 				// ----- Job -----
@@ -113,9 +105,7 @@ module Peach {
 					url: '/job/:job',
 					abstract: true,
 					template: C.Templates.UiView,
-					ncyBreadcrumb: {
-						label: 'Job: {{job.name}}'
-					},
+					ncyBreadcrumb: { label: 'Job: {{job.name}}' },
 					onEnter: [
 						C.Services.Job, 
 						C.Angular.$stateParams, 
@@ -134,9 +124,7 @@ module Peach {
 					templateUrl: C.Templates.Job.Dashboard,
 					controller: DashboardController,
 					controllerAs: C.ViewModel,
-					ncyBreadcrumb: {
-						label: 'Dashboard'
-					}
+					ncyBreadcrumb: { label: 'Dashboard' }
 				})
 				.state(C.States.JobFaults, {
 					url: '/faults/:bucket',
@@ -144,9 +132,7 @@ module Peach {
 					templateUrl: C.Templates.Job.Faults.Summary,
 					controller: FaultsController,
 					controllerAs: C.ViewModel,
-					ncyBreadcrumb: {
-						label: '{{FaultSummaryTitle}}'
-					}
+					ncyBreadcrumb: { label: '{{FaultSummaryTitle}}' }
 				})
 				.state(C.States.JobFaultsDetail, {
 					url: '/{id:int}',
@@ -157,17 +143,13 @@ module Peach {
 							controllerAs: C.ViewModel
 						}
 					},
-					ncyBreadcrumb: {
-						label: '{{FaultDetailTitle}}'
-					}
+					ncyBreadcrumb: { label: '{{FaultDetailTitle}}' }
 				})
 				.state(C.States.JobMetrics, {
 					url: '/metrics',
 					abstract: true,
 					template: C.Templates.UiView,
-					ncyBreadcrumb: {
-						label: 'Metrics'
-					}
+					ncyBreadcrumb: { label: 'Metrics' }
 				})
 
 				// ----- Pit -----
@@ -175,25 +157,22 @@ module Peach {
 					url: '/pit/:pit',
 					abstract: true,
 					template: C.Templates.UiView,
-					ncyBreadcrumb: {
-						label: 'Pit: {{pit.name}}'
-					}
+					ncyBreadcrumb: { label: 'Pit: {{pit.name}}' }
 				})
 				.state(C.States.PitConfigure, {
 					url: '/configure',
 					templateUrl: C.Templates.Pit.Configure,
 					controller: ConfigureController,
 					controllerAs: C.ViewModel,
-					ncyBreadcrumb: {
-						label: 'Configure'
-					}
+					ncyBreadcrumb: { label: 'Configure' }
 				})
 				.state(C.States.PitWizard, {
 					url: '/quickstart',
 					templateUrl: C.Templates.Pit.Wizard.Intro,
-					ncyBreadcrumb: {
-						label: 'Quick Start'
-					}
+					controller: WizardController,
+					controllerAs: C.ViewModel,
+					data: { track: C.Tracks.Intro },
+					ncyBreadcrumb: { label: 'Quick Start' }
 				})
 				.state(C.States.PitWizardTest, {
 					url: '/test',
@@ -204,60 +183,46 @@ module Peach {
 							controllerAs: C.ViewModel
 						}
 					},
-					ncyBreadcrumb: {
-						label: 'Test'
-					}
+					ncyBreadcrumb: { label: 'Test' }
 				})
 				.state(C.States.PitAdvanced, {
 					abstract: true,
 					url: '/advanced',
 					template: C.Templates.UiView,
-					ncyBreadcrumb: {
-						label: 'Advanced'
-					}
+					ncyBreadcrumb: { label: 'Advanced' }
 				})
 				.state(C.States.PitAdvancedVariables, {
 					url: '/variables',
 					templateUrl: C.Templates.Pit.Advanced.Variables,
 					controller: ConfigureVariablesController,
 					controllerAs: C.ViewModel,
-					ncyBreadcrumb: {
-						label: 'Variables'
-					}
+					ncyBreadcrumb: { label: 'Variables' }
 				})
 				.state(C.States.PitAdvancedMonitoring, {
 					url: '/monitoring',
 					templateUrl: C.Templates.Pit.Advanced.Monitoring,
 					controller: ConfigureMonitorsController,
 					controllerAs: C.ViewModel,
-					ncyBreadcrumb: {
-						label: 'Monitoring'
-					}
+					ncyBreadcrumb: { label: 'Monitoring' }
 				})
 				.state(C.States.PitAdvancedTest, {
 					url: '/test',
 					templateUrl: C.Templates.Pit.Advanced.Test,
 					controller: PitTestController,
 					controllerAs: C.ViewModel,
-					ncyBreadcrumb: {
-						label: 'Test'
-					}
+					ncyBreadcrumb: { label: 'Test' }
 				})
 			;
 
 			_.forEach(C.MetricsList,(metric: C.IMetric) => {
-				var state = C.States.JobMetrics + '.' + metric.id;
+				var state = [C.States.JobMetrics, metric.id].join('.');
 				$stateProvider.state(state, {
 					url: '/' + metric.id,
 					templateUrl: C.Templates.Job.MetricPage.replace(':metric', metric.id),
 					controller: MetricsController,
 					controllerAs: C.ViewModel,
-					params: {
-						metric: metric.id
-					},
-					ncyBreadcrumb: {
-						label: metric.name
-					}
+					params: { metric: metric.id },
+					ncyBreadcrumb: { label: metric.name }
 				});
 			});
 
@@ -281,32 +246,20 @@ module Peach {
 					.state([C.States.PitWizard, track.id].join('.'), {
 						url: '/' + track.id,
 						views: views,
-						params: {
-							track: track.id,
-							id: 0
-						},
-						ncyBreadcrumb: {
-							label: track.name
-						}
+						data: { track: track.id },
+						ncyBreadcrumb: { label: track.name }
 					})
 					.state([C.States.PitWizard, track.id, 'review'].join('.'), {
 						url: '/review',
 						templateUrl: C.Templates.Pit.Wizard.TrackDone.replace(':track', track.id),
-						params: {
-							id: 0
-						},
-						ncyBreadcrumb: {
-							label: 'Review'
-						}
+						ncyBreadcrumb: { label: 'Review' }
 					})
 					.state([C.States.PitWizard, track.id, 'steps'].join('.'), {
 						url: '/{id:int}',
 						templateUrl: C.Templates.Pit.Wizard.Question,
 						controller: WizardQuestionController,
 						controllerAs: C.ViewModel,
-						ncyBreadcrumb: {
-							label: 'Questions & Answers'
-						}
+						ncyBreadcrumb: { label: 'Questions & Answers' }
 					})
 				;
 			});

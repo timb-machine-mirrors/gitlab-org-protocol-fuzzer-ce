@@ -36,6 +36,8 @@ module Peach {
 
 		private showSidebar: boolean = false;
 		private isMenuMin: boolean = false;
+		public Metrics = C.MetricsList;
+		public WizardTracks = Peach.WizardTracks;
 
 		private get job(): IJob {
 			return this.jobService.Job;
@@ -48,10 +50,6 @@ module Peach {
 		public get PitId(): number {
 			return this.$state.params['pit'];
 		}
-
-		public Metrics = C.MetricsList;
-
-		public WizardTracks = Peach.WizardTracks;
 
 		public ConfigSteps = [
 			{ id: C.States.PitAdvancedVariables, name: 'Variables' },
@@ -130,9 +128,29 @@ module Peach {
 		}
 
 		public MetricUrl(metric: C.IMetric): string {
-			var state = C.States.JobMetrics + '.' + metric.id;
+			var state = [C.States.JobMetrics, metric.id].join('.');
 			var params = { job: this.JobId };
 			return this.$state.href(state, params);
+		}
+		
+		public MetricActive(metric: C.IMetric) {
+			var state = [C.States.JobMetrics, metric.id].join('.');
+			var params = { job: this.JobId };
+			if (this.$state.is(state, params)) {
+				return 'active';
+			}
+			return undefined;
+		}
+		
+		public WizardActive(track: ITrackStatic) {
+			if (track.id == C.Tracks.Intro) {
+				if (this.$state.is(track.start)) {
+					return 'active';
+				}
+			} else if (this.$state.includes(track.start)) {
+				return 'active';
+			}
+			return undefined;
 		}
 	}
 }

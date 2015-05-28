@@ -32,41 +32,40 @@ module Peach {
 			private pitService: PitService,
 			private wizardService: WizardService
 		) {
-			this.trackId = this.$state.params['track'];
-			this.track = wizardService.GetTrack(this.trackId);
+			var trackId = this.$state.current.data.track;
+			this.track = wizardService.GetTrack(trackId);
 			this.$scope.Title = this.track.name;
 
-			if (this.trackId !== C.Tracks.Intro) {
-				var id = this.$state.params['id'];
-				this.init(id);
+			if (trackId !== C.Tracks.Intro) {
+				this.unregister = this.$scope.$on(C.Angular.$stateChangeSuccess, () => {
+					this.onStateChange();
+				});
 			}
 		}
 
-		private trackId: string;
+		private unregister;
 		private track: ITrack;
 
 		public OnNextTrack() {
+			// this is needed to make unit tests happy
+			if (this.unregister) { 
+				this.unregister();
+			}
+
 			var next = this.track.next;
 			this.$state.go(next.state, next.params);
 		}
 
-		private gotoIntro() {
-			// since all the params might be the same,
-			// we need to force the controller to reinitialize with reload: true.
-			this.$state.go(this.track.start, { id: 0 }, { reload: true });
-		}
-
-		private init(id: number) {
+		private onStateChange() {
 			this.resetPrompts();
 
-			if (id === 0) {
-				if (this.$state.is(this.track.start)) {
-					this.initIntro();
-				}
-				else if (this.$state.is(this.track.finish)) {
-					this.initReview();
-				}
+			if (this.$state.is(this.track.start)) {
+				this.initIntro();
+			}
+			else if (this.$state.is(this.track.finish)) {
+				this.initReview();
 			} else {
+				var id = this.$state.params['id'];
 				this.$scope.Step = WizardStep.QA;
 				this.loadQuestion(id);
 			}
@@ -84,7 +83,7 @@ module Peach {
 
 		private initReview() {
 			if (!this.track.IsValid()) {
-				this.gotoIntro();
+				this.$state.go(this.track.start);
 				return;
 			}
 			this.$scope.Step = WizardStep.Review;
@@ -104,7 +103,7 @@ module Peach {
 			if (this.$scope.Question) {
 				this.prepareQuestion();
 			} else {
-				this.gotoIntro();
+				this.$state.go(this.track.start);
 			}
 		}
 
@@ -150,7 +149,7 @@ module Peach {
 
 			if (_.isUndefined(nextId)) {
 				// no more questions, this track is complete
-				this.$state.go(this.track.finish, {id: 0 });
+				this.$state.go(this.track.finish);
 			} else {
 				this.$state.go(this.track.steps, { id: nextId });
 			}
@@ -168,7 +167,7 @@ module Peach {
 			}
 
 			if (previousId === 0) {
-				this.gotoIntro();
+				this.$state.go(this.track.start);
 			} else {
 				this.$state.go(this.track.steps, { id: previousId });
 			}
@@ -176,7 +175,7 @@ module Peach {
 
 		public OnRestart() {
 			this.track.Restart();
-			this.gotoIntro();
+			this.$state.go(this.track.start);
 		}
 
 		public OnRemoveAgent(index: number) {
