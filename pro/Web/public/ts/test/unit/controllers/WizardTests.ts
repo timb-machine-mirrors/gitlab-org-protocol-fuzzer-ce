@@ -73,11 +73,11 @@ describe("Peach", () => {
 			$httpBackend.verifyNoOutstandingRequest();
 		});
 
-		function NewCtrl() {
+		function NewCtrl(track) {
+			$state.current.data = { track: track };
 			scope = <Peach.IWizardScope> $rootScope.$new();
 			ctrl = $controller(WizardController, {
-				$scope: scope,
-				WizardService: wizardService
+				$scope: scope
 			});
 			$rootScope.$digest();
 		}
@@ -85,13 +85,11 @@ describe("Peach", () => {
 		function Next() {
 			ctrl.Next();
 			$rootScope.$digest();
-			NewCtrl();
 		}
 
-		function NextTrack() {
+		function NextTrack(track) {
 			ctrl.OnNextTrack();
-			$rootScope.$digest();
-			NewCtrl();
+			NewCtrl(track);
 		}
 
 		function expectState(state, id?) {
@@ -106,13 +104,12 @@ describe("Peach", () => {
 		describe("'vars' track", () => {
 			beforeEach(() => {
 				$state.go(C.States.PitWizardVars, { pit: pitId });
-				$rootScope.$digest();
 			});
 
 			describe("without variables to configure", () => {
 				beforeEach(() => {
 					$httpBackend.expectGET(pitUrl).respond(pit);
-					NewCtrl();
+					NewCtrl(C.Tracks.Vars);
 					$httpBackend.flush();
 				});
 
@@ -132,7 +129,7 @@ describe("Peach", () => {
 
 				it("OnNextTrack() moves to the next track", () => {
 					$httpBackend.expectGET(pitUrl).respond(pit);
-					NextTrack();
+					NextTrack(C.Tracks.Fault);
 					$httpBackend.flush();
 					expectState(C.States.PitWizardFault);
 				});
@@ -149,7 +146,7 @@ describe("Peach", () => {
 					];
 
 					$httpBackend.expectGET(pitUrl).respond(pit);
-					NewCtrl();
+					NewCtrl(C.Tracks.Vars);
 					$httpBackend.flush();
 				});
 
@@ -187,10 +184,9 @@ describe("Peach", () => {
 		describe("'fault' track", () => {
 			beforeEach(() => {
 				$state.go(C.States.PitWizardFault);
-				$rootScope.$digest();
 
 				$httpBackend.expectGET(pitUrl).respond(pit);
-				NewCtrl();
+				NewCtrl(C.Tracks.Fault);
 				$httpBackend.flush();
 			});
 
@@ -210,9 +206,6 @@ describe("Peach", () => {
 				expect(scope.Question.id).toBe(1);
 				scope.Question.value = "local";
 				Next();
-
-				// Jump occurred
-				NewCtrl();
 
 				expectState([C.States.PitWizardFault, 'steps'].join('.'), 100);
 				expect(scope.Question.id).toBe(100);
@@ -254,7 +247,6 @@ describe("Peach", () => {
 				scope.Question.value = true;
 				Next();
 
-				//expectState(C.States.WizardReview, C.Tracks.Fault);
 				expect(scope.Question.type).toBe(Peach.QuestionTypes.Done);
 
 				var expected: Peach.Agent[] = [
@@ -359,10 +351,9 @@ describe("Peach", () => {
 				wizardService.SetTrackTemplate(C.Tracks.Data, mockTemplate);
 
 				$state.go(C.States.PitWizardData);
-				$rootScope.$digest();
 
 				$httpBackend.expectGET(pitUrl).respond(pit);
-				NewCtrl();
+				NewCtrl(C.Tracks.Data);
 				$httpBackend.flush();
 			});
 
@@ -465,11 +456,9 @@ describe("Peach", () => {
 				var actual = wizardService.GetTrack(C.Tracks.Data).agents;
 				expect(JSON.stringify(actual)).toEqual(JSON.stringify(expected1));
 
+				$httpBackend.expectGET(pitUrl).respond(pit);
 				ctrl.OnRestart();
 				$rootScope.$digest();
-
-				$httpBackend.expectGET(pitUrl).respond(pit);
-				NewCtrl();
 				$httpBackend.flush();
 
 				expectState(C.States.PitWizardData);

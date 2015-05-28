@@ -80,7 +80,16 @@ module Peach {
 			private jobService: JobService
 		) {
 			this.$scope.metric = $state.params['metric'];
-			this.initializeData();
+
+			$scope.$watch(() => jobService.Job, (newVal, oldVal) => {
+				if (newVal !== oldVal) {
+					this.update(false);
+				}
+			});
+			
+			if (this.jobService.Job) {
+				this.update(true);
+			}
 		}
 
 		public MutatorData: IMutatorMetric[] = [];
@@ -106,7 +115,7 @@ module Peach {
 			[0]
 		];
 
-		public BucketTimelineData = {};
+		public BucketTimelineData = undefined;
 		public BucketTimelineLoaded: boolean = false;
 
 		public BucketTimelineOptions: ITimelineOptions = {
@@ -122,14 +131,17 @@ module Peach {
 			}
 		}
 
-		private initializeData(): void {
+		private update(isNew: boolean): void {
 			var promise = this.getData();
 			switch (this.$scope.metric) {
 			case C.Metrics.BucketTimeline.id:
 				var items = new this.VisDataSet();
-				this.BucketTimelineData = {
-					items: items
-				};
+
+				if (_.isUndefined(this.BucketTimelineData)) {
+					this.BucketTimelineData = {
+						items: items
+					};
+				}
 				
 				promise.success((data: IBucketTimelineMetric[]) => {
 					data.forEach((item: IBucketTimelineMetric) => {
@@ -141,12 +153,14 @@ module Peach {
 							data: item
 						});
 					});
+
 					items.add({
 						id: 0,
 						style: "color: green",
 						content: "Job Start",
 						start: this.jobService.Job.startDate
 					});
+
 					if (this.jobService.Job.stopDate) {
 						items.add({
 							id: -1,
@@ -175,31 +189,26 @@ module Peach {
 				});
 				break;
 			case C.Metrics.Mutators.id:
-				this.MutatorData = _.clone(this.AllMutatorData);
 				promise.success((data: IMutatorMetric[]) => {
 					this.AllMutatorData = data;
 				});
 				break;
 			case C.Metrics.Elements.id:
-				this.ElementData = _.clone(this.AllElementData);
 				promise.success((data: IElementMetric[]) => {
 					this.AllElementData = data;
 				});
 				break;
 			case C.Metrics.Dataset.id:
-				this.DatasetData = _.clone(this.AllDatasetData);
 				promise.success((data: IDatasetMetric[]) => {
 					this.AllDatasetData = data;
 				});
 				break;
 			case C.Metrics.States.id:
-				this.StateData = _.clone(this.AllStateData);
 				promise.success((data: IStateMetric[]) => {
 					this.AllStateData = data;
 				});
 				break;
 			case C.Metrics.Buckets.id:
-				this.BucketData = _.clone(this.AllBucketData);
 				promise.success((data: IBucketMetric[]) => {
 					this.AllBucketData = data;
 				});
