@@ -33,6 +33,7 @@ pre {
 .accordion-toggle:focus {
 	outline: none;
 	cursor: pointer;
+	text-decoration: none;
 }
 
 .btn-cell {

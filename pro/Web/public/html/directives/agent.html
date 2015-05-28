@@ -1,9 +1,9 @@
 ﻿<ng-form name="form">
-	<accordion-group is-open="vm.IsOpen">
+	<accordion-group is-open="isOpen">
 		<accordion-heading>
 			<span style="line-height: 22px">
 				<i class="glyphicon"
-					 ng-class="{'glyphicon-chevron-down': vm.IsOpen, 'glyphicon-chevron-right': !vm.IsOpen}">
+					 ng-class="{'glyphicon-chevron-down': isOpen, 'glyphicon-chevron-right': !isOpen}">
 				</i>
 				&nbsp;
 				{{vm.Header}}
@@ -46,7 +46,7 @@
 				<div class="input-group">
 					<span class="input-group-addon"
 					      tooltip="Friendly name for your agent"
-					      tooltip-placement="right"
+					      tooltip-placement="above"
 					      tooltip-append-to-body="true">
 						<i class="fa fa-question-circle"></i>
 					</span>
@@ -72,7 +72,7 @@
 				<div class="input-group">
 					<span class="input-group-addon"
 					      tooltip="URL for the agent. Leave blank for a local agent."
-					      tooltip-placement="right"
+					      tooltip-placement="above"
 					      tooltip-append-to-body="true">
 						<i class="fa fa-question-circle"></i>
 					</span>
