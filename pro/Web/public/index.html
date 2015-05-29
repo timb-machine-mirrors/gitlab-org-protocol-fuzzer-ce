@@ -107,9 +107,9 @@
 						</a>
 					</li>
 					
-					<li ui-sref-active="active"
+					<li ui-sref-active-eq="active"
 							ng-show="vm.ShowMenu('job')">
-						<a ui-sref="job.dashboard({job: vm.JobId})">
+						<a ui-sref="job({job: vm.JobId})">
 							<i class="fa fa-dashboard"></i>
 							<span class="menu-text">
 								Dashboard
@@ -151,9 +151,9 @@
 						</ul>
 					</li>
 
-					<li ui-sref-active="active"
+					<li ui-sref-active-eq="active"
 							ng-show="vm.ShowMenu('pit')">
-						<a ui-sref="pit.configure({pit: vm.PitId})">
+						<a ui-sref="pit({pit: vm.PitId})">
 							<i class="fa fa-sliders"></i>
 							<span class="menu-text">
 								Configure

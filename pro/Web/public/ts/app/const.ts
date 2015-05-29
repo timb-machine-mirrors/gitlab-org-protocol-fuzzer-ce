@@ -160,13 +160,11 @@ module Peach.C {
 		export var MainTemplates = 'main.templates';
 
 		export var Job = 'job';
-		export var JobDashboard = 'job.dashboard';
 		export var JobFaults = 'job.faults';
 		export var JobFaultsDetail = 'job.faults.detail';
 		export var JobMetrics = 'job.metrics';
 
 		export var Pit = 'pit';
-		export var PitConfigure = 'pit.configure';
 
 		export var PitWizard = 'pit.wizard';
 		export var PitWizardVars = 'pit.wizard.vars';

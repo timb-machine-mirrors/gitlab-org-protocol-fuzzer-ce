@@ -86,7 +86,7 @@ module Peach {
 		}
 
 		private GoToPit(pit: IPit) {
-			this.$state.go(C.States.PitConfigure, { pit: pit.id });
+			this.$state.go(C.States.Pit, { pit: pit.id });
 		}
 	}
 }

@@ -54,7 +54,7 @@ describe("Peach", () => {
 			};
 			
 			beforeEach(() => {
-				$state.go(C.States.PitConfigure, { pit: pitId });
+				$state.go(C.States.Pit, { pit: pitId });
 				$rootScope.$digest();
 				
 				$httpBackend.whenGET(pitUrl).respond(pit);

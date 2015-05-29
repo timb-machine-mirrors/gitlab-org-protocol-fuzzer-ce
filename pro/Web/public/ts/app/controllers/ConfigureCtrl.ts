@@ -43,7 +43,7 @@ module Peach {
 		public Start() {
 			this.jobService.Start(this.Job)
 				.then((job: IJob) => {
-					this.$state.go(C.States.JobDashboard, { job: job.id });
+					this.$state.go(C.States.Job, { job: job.id });
 				});
 		}
 	}

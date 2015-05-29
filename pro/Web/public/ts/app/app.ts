@@ -103,8 +103,9 @@ module Peach {
 				// ----- Job -----
 				.state(C.States.Job, {
 					url: '/job/:job',
-					abstract: true,
-					template: C.Templates.UiView,
+					templateUrl: C.Templates.Job.Dashboard,
+					controller: DashboardController,
+					controllerAs: C.ViewModel,
 					ncyBreadcrumb: { 
 						label: '{{job.name}}',
 						parent: C.States.MainJobs
@@ -122,19 +123,16 @@ module Peach {
 						jobService.OnExit();
 					}]
 				})
-				.state(C.States.JobDashboard, {
-					url: '/dashboard',
-					templateUrl: C.Templates.Job.Dashboard,
-					controller: DashboardController,
-					controllerAs: C.ViewModel,
-					ncyBreadcrumb: { label: 'Dashboard' }
-				})
 				.state(C.States.JobFaults, {
 					url: '/faults/:bucket',
 					params: { bucket: 'all' },
-					templateUrl: C.Templates.Job.Faults.Summary,
-					controller: FaultsController,
-					controllerAs: C.ViewModel,
+					views: {
+						'@': {
+							templateUrl: C.Templates.Job.Faults.Summary,
+							controller: FaultsController,
+							controllerAs: C.ViewModel
+						}
+					},
 					ncyBreadcrumb: { label: '{{FaultSummaryTitle}}' }
 				})
 				.state(C.States.JobFaultsDetail, {
@@ -151,32 +149,29 @@ module Peach {
 				.state(C.States.JobMetrics, {
 					url: '/metrics',
 					abstract: true,
-					template: C.Templates.UiView,
 					ncyBreadcrumb: { label: 'Metrics' }
 				})
 
 				// ----- Pit -----
 				.state(C.States.Pit, {
 					url: '/pit/:pit',
-					abstract: true,
-					template: C.Templates.UiView,
+					templateUrl: C.Templates.Pit.Configure,
+					controller: ConfigureController,
+					controllerAs: C.ViewModel,
 					ncyBreadcrumb: { 
 						label: '{{pit.name}}',
 						parent: C.States.MainLibrary
 					}
 				})
-				.state(C.States.PitConfigure, {
-					url: '/configure',
-					templateUrl: C.Templates.Pit.Configure,
-					controller: ConfigureController,
-					controllerAs: C.ViewModel,
-					ncyBreadcrumb: { label: 'Configure' }
-				})
 				.state(C.States.PitWizard, {
 					url: '/quickstart',
-					templateUrl: C.Templates.Pit.Wizard.Intro,
-					controller: WizardController,
-					controllerAs: C.ViewModel,
+					views: {
+						'@': {
+							templateUrl: C.Templates.Pit.Wizard.Intro,
+							controller: WizardController,
+							controllerAs: C.ViewModel
+						}
+					},
 					data: { track: C.Tracks.Intro },
 					ncyBreadcrumb: { label: 'Quick Start' }
 				})
@@ -194,28 +189,39 @@ module Peach {
 				.state(C.States.PitAdvanced, {
 					abstract: true,
 					url: '/advanced',
-					template: C.Templates.UiView,
 					ncyBreadcrumb: { label: 'Advanced' }
 				})
 				.state(C.States.PitAdvancedVariables, {
 					url: '/variables',
-					templateUrl: C.Templates.Pit.Advanced.Variables,
-					controller: ConfigureVariablesController,
-					controllerAs: C.ViewModel,
+					views: {
+						'@': {
+							templateUrl: C.Templates.Pit.Advanced.Variables,
+							controller: ConfigureVariablesController,
+							controllerAs: C.ViewModel
+						}
+					},
 					ncyBreadcrumb: { label: 'Variables' }
 				})
 				.state(C.States.PitAdvancedMonitoring, {
 					url: '/monitoring',
-					templateUrl: C.Templates.Pit.Advanced.Monitoring,
-					controller: ConfigureMonitorsController,
-					controllerAs: C.ViewModel,
+					views: {
+						'@': {
+							templateUrl: C.Templates.Pit.Advanced.Monitoring,
+							controller: ConfigureMonitorsController,
+							controllerAs: C.ViewModel
+						}
+					},
 					ncyBreadcrumb: { label: 'Monitoring' }
 				})
 				.state(C.States.PitAdvancedTest, {
 					url: '/test',
-					templateUrl: C.Templates.Pit.Advanced.Test,
-					controller: PitTestController,
-					controllerAs: C.ViewModel,
+					views: {
+						'@': {
+							templateUrl: C.Templates.Pit.Advanced.Test,
+							controller: PitTestController,
+							controllerAs: C.ViewModel
+						}
+					},
 					ncyBreadcrumb: { label: 'Test' }
 				})
 			;
@@ -224,9 +230,13 @@ module Peach {
 				var state = [C.States.JobMetrics, metric.id].join('.');
 				$stateProvider.state(state, {
 					url: '/' + metric.id,
-					templateUrl: C.Templates.Job.MetricPage.replace(':metric', metric.id),
-					controller: MetricsController,
-					controllerAs: C.ViewModel,
+					views: {
+						'@': {
+							templateUrl: C.Templates.Job.MetricPage.replace(':metric', metric.id),
+							controller: MetricsController,
+							controllerAs: C.ViewModel
+						}
+					},
 					params: { metric: metric.id },
 					ncyBreadcrumb: { label: metric.name }
 				});
