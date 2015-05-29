@@ -106,7 +106,7 @@ module Peach {
 					abstract: true,
 					template: C.Templates.UiView,
 					ncyBreadcrumb: { 
-						label: 'Job: {{job.name}}',
+						label: '{{job.name}}',
 						parent: C.States.MainJobs
 					},
 					onEnter: [
@@ -161,7 +161,7 @@ module Peach {
 					abstract: true,
 					template: C.Templates.UiView,
 					ncyBreadcrumb: { 
-						label: 'Pit: {{pit.name}}',
+						label: '{{pit.name}}',
 						parent: C.States.MainLibrary
 					}
 				})

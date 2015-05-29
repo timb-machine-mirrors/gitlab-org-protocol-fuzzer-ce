@@ -118,6 +118,11 @@ pre.peach-test-log {
 	overflow: auto;
 }
 
+.peach-fault-files {
+	height: 24em;
+	overflow-y: scroll;
+}
+
 /* turn off animation, this can screw with autofocus */
 .modal.fade .modal-dialog,
 .modal.in .modal-dialog {
@@ -147,4 +152,9 @@ noscript {
 	padding: 30px;
 	display: block;
 	font-size: large;
+}
+
+ul.library li a {
+	/*background-color: #dddddd;*/
+	padding: 1px 3px;
 }

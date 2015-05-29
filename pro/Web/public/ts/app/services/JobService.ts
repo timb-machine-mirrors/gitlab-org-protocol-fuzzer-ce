@@ -129,6 +129,14 @@ module Peach {
 				return StripHttpPromise(this.$q, promise);
 			}
 		}
+
+		public Delete(job: IJob): ng.IPromise<any> {
+			var promise = this.$http.delete(job.jobUrl);
+			promise.success(() => {
+				return this.GetJobs();
+			});
+			return StripHttpPromise(this.$q, promise);
+		}
 		
 		public Continue() {
 			this.SendCommand(

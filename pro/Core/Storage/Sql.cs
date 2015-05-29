@@ -205,7 +205,7 @@ INSERT INTO FaultMetric (
 
 		public const string InsertFaultDetail = @"
 INSERT INTO FaultDetail (
-	Reproducable,
+	Reproducible,
 	Iteration,
 	TimeStamp,
 	Source,
@@ -219,7 +219,7 @@ INSERT INTO FaultDetail (
 	IterationStop,
 	FaultPath
 ) VALUES (
-	@Reproducable,
+	@Reproducible,
 	@Iteration,
 	@TimeStamp,
 	@Source,

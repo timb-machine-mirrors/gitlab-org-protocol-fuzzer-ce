@@ -44,7 +44,9 @@
 			{{vm.Job.result}}
 		</span>
 		<span ng-if="!vm.Job.result">
-			Peach is currently stopped.
+			This job has completed.
+			<a ng-if="vm.Job.reportUrl"
+				 href="{{vm.Job.reportUrl}}">Click here to view the final report</a>
 		</span>
 	</span>
 	<span ng-switch-when="actionPending">
