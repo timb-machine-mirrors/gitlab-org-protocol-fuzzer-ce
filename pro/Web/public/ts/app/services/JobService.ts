@@ -28,19 +28,29 @@ module Peach {
 		private poller: ng.IPromise<any>;
 		private job: IJob;
 		private faults: IFaultSummary[] = [];
+		private pending: ng.IPromise<IJob>;
 		
-		public OnEnter(id) {
-			this.$http.get(C.Api.JobUrl.replace(':id', id))
-				.success((job: IJob) => {
-					this.job = job;
-					this.$rootScope['job'] = job;
-					if (this.job.faultCount > 0) {
-						this.ReloadFaults();
-					}
+		public OnEnter(id: string) {
+			var url = C.Api.JobUrl.replace(':id', id);
+			this.pending = this.$http.get(url)
+				.then((response: ng.IHttpPromiseCallbackArg<IJob>) => {
+					this.job = response.data;
+					this.$rootScope['job'] = this.job;
 					if (this.job.status !== JobStatus.Stopped) {
 						this.StartJobPoller();
 					}
-				});
+					if (this.job.faultCount > 0) {
+						var deferred = this.$q.defer<IJob>();
+						this.ReloadFaults()
+							.success(() => { deferred.resolve(this.job); })
+							.error(reason => { deferred.reject(reason); })
+							.finally(() => { this.pending = undefined; })
+						;
+						return deferred.promise;
+					}
+					return undefined;
+				})
+			;
 		}
 		
 		public OnExit() {
@@ -103,14 +113,26 @@ module Peach {
 			return moment(new Date(0, 0, 0, 0, 0, this.Job.runtime)).format("H:mm:ss");
 		}
 
-		public LoadFaultDetail(id: string): ng.IPromise<IFaultDetail> {
+		private doLoadFaultDetail(defer: ng.IDeferred<IFaultDetail>, id: string) {
 			var fault = _.find(this.faults, { iteration: id });
 			if (_.isUndefined(fault)) {
-				var defer = this.$q.defer<IFaultDetail>();
 				defer.reject();
-				return defer.promise;
+			} else {
+				this.$http.get(fault.faultUrl)
+					.success((data: IFaultDetail) => { defer.resolve(data); })
+					.error(reason => { defer.reject(reason); })
+				;
 			}
-			return StripHttpPromise(this.$q, this.$http.get(fault.faultUrl));
+		}
+
+		public LoadFaultDetail(id: string): ng.IPromise<IFaultDetail> {
+			var defer = this.$q.defer<IFaultDetail>();
+			if (this.pending) {
+				this.pending.finally(() => { this.doLoadFaultDetail(defer, id); });
+			} else {
+				this.doLoadFaultDetail(defer, id);
+			}
+			return defer.promise;
 		}
 
 		public GetJobs(): ng.IPromise<IJob[]> {
@@ -200,8 +222,8 @@ module Peach {
 			this.poller = undefined;
 		}
 
-		private ReloadFaults() {
-			this.$http.get(this.job.faultsUrl)
+		private ReloadFaults(): ng.IHttpPromise<IFaultSummary[]> {
+			return this.$http.get(this.job.faultsUrl)
 				.success((faults: IFaultSummary[]) => {
 					this.faults = faults;
 				})

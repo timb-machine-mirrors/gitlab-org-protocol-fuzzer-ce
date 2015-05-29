@@ -7,6 +7,10 @@ module Peach {
 		FaultDetailTitle: string;
 	}
 
+	function FaultsTitle(bucket: string) {
+		return (bucket === "all") ? 'Faults' : 'Bucket: ' + bucket;
+	}
+
 	export class FaultsDetailController {
 		static $inject = [
 			C.Angular.$scope,
@@ -19,12 +23,7 @@ module Peach {
 			$state: ng.ui.IStateService,
 			jobService: JobService
 		) {
-			var bucket = $state.params['bucket'];
-			if (bucket === "all") {
-				$scope.FaultSummaryTitle = 'Faults';
-			} else {
-				$scope.FaultSummaryTitle = 'Faults by Bucket: ' + bucket;
-			}
+			$scope.FaultSummaryTitle = FaultsTitle($state.params['bucket']);
 
 			var id = $state.params['id'];
 			$scope.FaultDetailTitle = 'Iteration: ' + id;
@@ -56,10 +55,8 @@ module Peach {
 			private jobService: JobService
 		) {
 			this.bucket = $state.params['bucket'];
-			if (this.bucket === "all") {
-				$scope.FaultSummaryTitle = 'Faults';
-			} else {
-				$scope.FaultSummaryTitle = 'Faults by Bucket: ' + this.bucket;
+			$scope.FaultSummaryTitle = FaultsTitle(this.bucket);
+			if (this.bucket !== "all") {
 				this.refreshBucketFaults();
 				$scope.$watch(() => jobService.Faults.length, (newVal, oldVal) => {
 					if (newVal !== oldVal) {

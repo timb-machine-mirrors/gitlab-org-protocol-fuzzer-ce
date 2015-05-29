@@ -1,4 +1,4 @@
-﻿<div class="header blue"
+﻿<div class="blue"
 		 ng-show="vm.IsSetVars">
 	{{Question.shortName || Question.key}}
 </div>
@@ -6,7 +6,9 @@
 <div class="row">
 	<div class="col-sm-6">
 		<select class="form-control"
-						ng-model="Question.value"
-						ng-options="default for default in Question.defaults"></select>
+		        ng-model="Question.value"
+		        ng-options="default for default in Question.defaults"
+		        peach:auto-focus>
+		</select>
 	</div>
 </div>

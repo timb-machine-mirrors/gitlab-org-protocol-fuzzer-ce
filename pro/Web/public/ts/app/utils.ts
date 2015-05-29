@@ -71,8 +71,8 @@ module Peach {
 		return array;
 	}
 
-	export function StripHttpPromise<T>(q$: ng.IQService, promise: ng.IHttpPromise<T>): ng.IPromise<T> {
-		var deferred = q$.defer<T>();
+	export function StripHttpPromise<T>($q: ng.IQService, promise: ng.IHttpPromise<T>): ng.IPromise<T> {
+		var deferred = $q.defer<T>();
 		promise.success((data: T) => {
 			deferred.resolve(data);
 		});
