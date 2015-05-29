@@ -90,7 +90,7 @@ namespace Peach.Pro.Core.Loggers
 
 		readonly Stopwatch _stopwatch = new Stopwatch();
 
-		enum Category { Faults, Reproducing, NonReproducable }
+		enum Category { Faults, Reproducing, NonReproducible }
 
 		/// <summary>
 		/// The user configured base path for all the logs
@@ -541,7 +541,7 @@ namespace Peach.Pro.Core.Loggers
 			_reproFault.iterationStart = context.reproducingInitialIteration - context.reproducingIterationJumpCount;
 			_reproFault.iterationStop = _reproFault.iteration;
 
-			SaveFault(context, Category.NonReproducable, _reproFault);
+			SaveFault(context, Category.NonReproducible, _reproFault);
 			_reproFault = null;
 		}
 
@@ -731,8 +731,8 @@ namespace Peach.Pro.Core.Loggers
 					_log.WriteLine("! Reproduced fault {0} : {1}",
 						desc, now);
 					break;
-				case Category.NonReproducable:
-					_log.WriteLine("! Non-reproducable fault detected {0} : {1}",
+				case Category.NonReproducible:
+					_log.WriteLine("! Non-reproducible fault detected {0} : {1}",
 						desc, now);
 					break;
 				case Category.Reproducing:
@@ -757,7 +757,7 @@ namespace Peach.Pro.Core.Loggers
 			var faultDetail = new FaultDetail
 			{
 				Files = new List<FaultFile>(),
-				Reproducable = category == Category.Reproducing,
+				Reproducible = category == Category.Reproducing,
 				Iteration = fault.iteration,
 				TimeStamp = now,
 				Source = fault.detectionSource,
