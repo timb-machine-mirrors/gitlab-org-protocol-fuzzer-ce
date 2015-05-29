@@ -26,7 +26,7 @@ module Peach {
 		}
 
 		public OnJobSelected(job: IJob) {
-			this.$state.go(C.States.JobDashboard, { job: job.id });
+			this.$state.go(C.States.Job, { job: job.id });
 		}
 
 		public IsReportDisabled(job: IJob): boolean {

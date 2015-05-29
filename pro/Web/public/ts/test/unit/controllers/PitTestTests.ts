@@ -38,7 +38,7 @@ describe("Peach", () => {
 			$templateCache.put(C.Templates.Home, '');
 			$templateCache.put(C.Templates.Pit.Configure, '');
 
-			$state.go(C.States.PitConfigure, { pit: pitId });
+			$state.go(C.States.Pit, { pit: pitId });
 			$rootScope.$digest();
 
 			$httpBackend.whenGET(pitUrl).respond(pit);
