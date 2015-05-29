@@ -9,6 +9,7 @@
 
 .combobox input {
 	margin: 0;
+	padding: 0 10px;
 	width: 100%;
 }
 
@@ -19,7 +20,7 @@
 	top: 0;
 	right: 0;
 	text-align: center;
-	padding: 6px 6px;
+	padding: 6px 10px;
 	font-size: 0;
 }
 
