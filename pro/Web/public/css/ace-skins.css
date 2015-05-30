@@ -7,7 +7,8 @@
 	background: #2C6AA0;
 }
 
-.skin-1 .sidebar, .skin-1 .sidebar:before {
+.skin-1 .sidebar, 
+.skin-1 .sidebar:before {
 	background-color: #222A2D;
 	border-right: none;
 }
@@ -17,7 +18,8 @@
 	border-top-width: 0;
 }
 
-.skin-1 .nav-list > li > a, .skin-1 .menu-min .nav-list > li.open > a {
+.skin-1 .nav-list > li > a, 
+.skin-1 .menu-min .nav-list > li.open > a {
 	background-color: #222A2D;
 	color: #B1BAC1;
 }
@@ -66,13 +68,16 @@
 	border-right-color: #242A2B;
 }
 
-.skin-1 .nav-list > li.open > a, .skin-1 .nav-list > li.open > a:hover {
+.skin-1 .nav-list > li.open > a, 
+.skin-1 .nav-list > li.open > a:hover {
 	color: #85C0EC;
 	background-color: #222A2D;
 }
 
-.skin-1 .nav-list > li.active > a, .skin-1 .nav-list > li.active > a:hover,
-.skin-1 .menu-min .nav-list > li.active > a, .skin-1 .menu-min .nav-list > li.active > a:hover {
+.skin-1 .nav-list > li.active > a, 
+.skin-1 .nav-list > li.active > a:hover,
+.skin-1 .menu-min .nav-list > li.active > a, 
+.skin-1 .menu-min .nav-list > li.active > a:hover {
 	background-color: #141A1B;
 	color: #55A0DC;
 }
@@ -138,11 +143,13 @@
 	border-left-color: #242A2B;
 }
 
-.skin-1 .nav-list > li > .submenu > li:before, .skin-1 .nav-list > li > .submenu:before {
+.skin-1 .nav-list > li > .submenu > li:before, 
+.skin-1 .nav-list > li > .submenu:before {
 	border-color: #929BA3;
 }
 
-.skin-1 .nav-list > li.active > .submenu > li:before, .skin-1 .nav-list > li.active > .submenu:before {
+.skin-1 .nav-list > li.active > .submenu > li:before, 
+.skin-1 .nav-list > li.active > .submenu:before {
 	border-color: #3F4E54;
 }
 
@@ -164,7 +171,8 @@
 	background-color: #222A2D;
 }
 
-.skin-1 .sidebar-shortcuts, .skin-1 .sidebar-shortcuts-mini {
+.skin-1 .sidebar-shortcuts, 
+.skin-1 .sidebar-shortcuts-mini {
 	background-color: #141A1B;
 	border-color: #3F4E54;
 }
@@ -184,25 +192,6 @@
 .skin-1 .breadcrumbs {
 	border: none;
 	background-color: #F0F0F0;
-}
-
-@media only screen and (max-width: 991px) {
-	.skin-1 .sidebar {
-		border: none;
-		box-shadow: none;
-	}
-
-	.skin-1 .nav-list li.active > a:after {
-		display: none;
-	}
-
-	.skin-1 .menu-min .nav-list > li.active.open > a:after {
-		display: none;
-	}
-
-	.skin-1 .menu-min .nav-list > li.active:hover > a:after {
-		display: block;
-	}
 }
 
 /* 3rd & 4th level menu */

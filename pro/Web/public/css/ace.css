@@ -17,13 +17,6 @@
 		z-index: -2;
 	}
 
-@media (min-width: 768px) {
-	.container.main-container:after {
-		-webkit-box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
-		box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
-	}
-}
-
 .main-container > .main-container-inner {
 	position: relative;
 }
@@ -1085,19 +1078,6 @@ blockquote.pull-right {
 		padding-right: 0;
 	}
 
-/* move the icons to the line below */
-@media only screen and (max-width: 460px) {
-	.navbar .navbar-header.pull-left {
-		display: block;
-		float: none !important;
-	}
-
-	.navbar .navbar-header.pull-right {
-		display: block;
-		float: none !important;
-	}
-}
-
 .sidebar {
 	width: 190px;
 	float: left;
@@ -1556,13 +1536,6 @@ li .fa,
 		filter: alpha(opacity=85);
 	}
 
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-	::safari-only,
-	.sidebar-shortcuts-mini > .btn {
-		margin: 0;
-	}
-}
-
 .nav-list > li > .submenu li > .submenu {
 	border-top: none;
 	background-color: transparent;
@@ -1898,183 +1871,6 @@ li .fa,
 .menu-toggler {
 	display: none;
 }
-/* responsive sidebar */
-@media only screen and (max-width: 991px) {
-	.sidebar:before {
-		display: none;
-	}
-
-	.sidebar {
-		display: none;
-		float: none;
-		position: absolute;
-		z-index: 999;
-		left: 0;
-		bottom: auto;
-		top: auto !important;
-		/*so that it's applied even if it's .sidebar-fixed */
-		margin-top: 40px;
-		border: 1px solid #CCC;
-		border-left-width: 0;
-		box-shadow: 2px 1px 2px 0 rgba(0, 0, 0, 0.2);
-	}
-
-		.sidebar.display {
-			display: block;
-		}
-
-	.menu-toggler {
-		display: inline-block;
-		position: absolute;
-		left: 0;
-		z-index: 998;
-		width: 52px;
-		height: 32px;
-		margin-right: 2px;
-		line-height: normal;
-		padding-left: 33px;
-		padding-top: 7px;
-		padding-bottom: 1px;
-		font-size: 13px;
-		font-weight: bold;
-		text-transform: uppercase;
-		background-color: #444;
-		color: #F3F3F3;
-		-webkit-box-sizing: content-box;
-		-moz-box-sizing: content-box;
-		box-sizing: content-box;
-	}
-
-		.menu-toggler:hover {
-			text-decoration: none;
-		}
-
-		.menu-toggler:before {
-			border-top: 1px solid #87B87F;
-			border-bottom: 1px solid #6FB3E0;
-			height: 2px;
-			width: 24px;
-			content: "";
-			position: absolute;
-			z-index: 11;
-			top: 13px;
-			left: 4px;
-			-webkit-transition: all 0.1s ease;
-			transition: all 0.1s ease;
-			-o-transition: none;
-			-webkit-box-sizing: content-box;
-			-moz-box-sizing: content-box;
-			box-sizing: content-box;
-		}
-
-		.menu-toggler:after {
-			border-top: 1px solid #FFA24D;
-			border-bottom: 1px solid #D15B47;
-			content: "";
-			height: 2px;
-			width: 24px;
-			position: absolute;
-			top: 19px;
-			left: 4px;
-			-webkit-transition: all 0.1s ease;
-			transition: all 0.1s ease;
-			-o-transition: none;
-			-webkit-box-sizing: content-box;
-			-moz-box-sizing: content-box;
-			box-sizing: content-box;
-		}
-
-		.menu-toggler.display:before {
-			height: 4px;
-			top: 8px;
-			border-width: 2px;
-		}
-
-		.menu-toggler.display:after {
-			height: 4px;
-			top: 20px;
-			border-width: 2px;
-		}
-
-		.menu-toggler > .menu-text {
-			display: block;
-			position: absolute;
-			bottom: -18px;
-			left: 0;
-			border: 1px solid transparent;
-			border-width: 9px 42px;
-			border-top-color: #444;
-		}
-
-			.menu-toggler > .menu-text:after {
-				display: block;
-				color: #FFF;
-				content: "MENU";
-				position: absolute;
-				left: -8px;
-				top: -41px;
-			}
-
-	.nav-list > li.active:after {
-		display: none;
-	}
-
-	.nav-list li.active > a:after {
-		display: none;
-	}
-
-	.nav-list li.active.open > .submenu > li.active > a:after {
-		display: none;
-	}
-
-	.menu-min .nav-list > li.active:after {
-		display: block;
-	}
-
-	.menu-min .nav-list > li.active > a:after {
-		display: block;
-	}
-}
-
-@media only screen and (max-width: 320px) {
-	.menu-toggler {
-		width: 0;
-	}
-
-		.menu-toggler > .menu-text {
-			border-width: 7px 16px;
-			bottom: -14px;
-		}
-
-			.menu-toggler > .menu-text:after {
-				font-size: 9px;
-				font-weight: normal;
-				color: #FFF;
-				position: absolute;
-				left: -13px;
-				top: -42px;
-			}
-
-		.menu-toggler:before,
-		.menu-toggler:after {
-			margin-top: 8px;
-		}
-
-		.menu-toggler.display:before,
-		.menu-toggler.display:after {
-			height: 2px;
-			border-width: 1px;
-		}
-
-		.menu-toggler.display:before {
-			top: 13px;
-		}
-
-		.menu-toggler.display:after {
-			top: 19px;
-		}
-}
-
 
 /* tables */ th,
 td,
@@ -2433,51 +2229,6 @@ td .lbl {
 		height: 16px;
 		padding: 0 1px;
 	}
-
-.infobox-small {
-	width: 135px;
-	height: 52px;
-	text-align: left;
-	padding-bottom: 5px;
-}
-
-	.infobox-small > .infobox-icon,
-	.infobox-small > .infobox-chart,
-	.infobox-small > .infobox-progress {
-		display: inline-block;
-		width: 40px;
-		max-width: 40px;
-		height: 42px;
-		line-height: 38px;
-		vertical-align: middle;
-	}
-
-	.infobox-small > .infobox-data {
-		display: inline-block;
-		text-align: left;
-		vertical-align: middle;
-		max-width: 72px;
-		min-width: 0;
-	}
-
-	.infobox-small > .infobox-chart > .sparkline {
-		font-size: 14px;
-		margin-left: 2px;
-	}
-
-.percentage {
-	font-size: 14px;
-	font-weight: bold;
-	display: inline-block;
-	vertical-align: top;
-}
-
-.infobox-small .percentage {
-	font-size: 13px;
-	font-weight: normal;
-	margin-top: 2px;
-	margin-left: 2px;
-}
 
 /* wizard */
 .wizard-steps {
