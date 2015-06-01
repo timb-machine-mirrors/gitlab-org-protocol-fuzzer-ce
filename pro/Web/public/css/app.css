@@ -1,12 +1,4 @@
-﻿@font-face {
-	font-family: 'FontAwesome';
-	src: url('../lib/ace-bootstrap/fontawesome-webfont.eot?v=3.2.1');
-	src: url('../lib/ace-bootstrap/fontawesome-webfont.eot?#iefix&v=3.2.1') format('embedded-opentype'), url('../lib/ace-bootstrap/fontawesome-webfont.woff?v=3.2.1') format('woff'), url('../lib/ace-bootstrap/fontawesome-webfont.ttf?v=3.2.1') format('truetype'), url('../lib/ace-bootstrap/fontawesome-webfont.svg#fontawesomeregular?v=3.2.1') format('svg');
-	font-weight: normal;
-	font-style: normal;
-}
-
-.skin-1 .nav-list > li.disabled > a > .menu-text,
+﻿.skin-1 .nav-list > li.disabled > a > .menu-text,
 .skin-1 .nav-list > li.disabled > a > i,
 .skin-1 .nav-list > li.disabled > a > .arrow {
 	color: #595D60;
@@ -15,10 +7,6 @@
 
 .skin-1 .navbar-header img {
 	height: 50px;
-}
-
-.nav-list > li .submenu {
-	display: block;
 }
 
 a.disabled {
@@ -34,15 +22,6 @@ pre {
 	overflow: auto;
 }
 
-.peach-field-info:before {
-	content: "\f059";
-}
-
-.peach-field-info {
-	font-family: FontAwesome2;
-	cursor: pointer;
-}
-
 .pointer {
 	cursor: pointer;
 }
@@ -54,6 +33,7 @@ pre {
 .accordion-toggle:focus {
 	outline: none;
 	cursor: pointer;
+	text-decoration: none;
 }
 
 .btn-cell {
@@ -97,7 +77,7 @@ pre.peach-test-log {
 	content: "\f0dc";
 	display: inline-block;
 	color: #555;
-	font-family: FontAwesome2;
+	font-family: FontAwesome;
 	font-size: 13px;
 	font-weight: normal;
 	float: right;
@@ -138,18 +118,9 @@ pre.peach-test-log {
 	overflow: auto;
 }
 
-/* 
-	fix for ace.css
-	default seems to be relative
-	this can cause main-content form-groups to flow below the bottom of the sidebar
-*/
-.sidebar {
-	position: absolute;
-}
-
-/* fix for backdrop, for some reason this is missing */
-.modal-backdrop {
-	bottom: 0;
+.peach-fault-files {
+	height: 24em;
+	overflow-y: scroll;
 }
 
 /* turn off animation, this can screw with autofocus */
@@ -159,7 +130,6 @@ pre.peach-test-log {
 	-ms-transform: translate(0, 0);
 	transform: translate(0, 0);
 }
-
 
 .peach-add-monitor {
 	width: 400px;
@@ -174,7 +144,7 @@ pre.peach-test-log {
 }
 
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
-display: none !important;
+	display: none !important;
 }
 
 noscript {
@@ -182,4 +152,9 @@ noscript {
 	padding: 30px;
 	display: block;
 	font-size: large;
+}
+
+ul.library li a {
+	/*background-color: #dddddd;*/
+	padding: 1px 3px;
 }

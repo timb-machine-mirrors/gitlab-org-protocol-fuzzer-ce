@@ -3,27 +3,47 @@
 'use strict';
 
 describe("Peach", () => {
+	var C = Peach.C;
 	beforeEach(module('Peach'));
 
 	describe('ConfigureVariablesController', () => {
 		var $httpBackend: ng.IHttpBackendService;
-		var $modal: ng.ui.bootstrap.IModalService;
 		var $controller: ng.IControllerService;
-		var $rootScope: ng.IRootScopeService;
 		var $scope;
 
 		var service: Peach.PitService;
 		var ctrl: Peach.ConfigureVariablesController;
-		var pitUrl = '/p/pits/PIT_GUID';
+
+		var pitId = 'PIT_GUID';
+		var pitUrl = C.Api.PitUrl.replace(':id', pitId);
+		var pit = {
+			id: pitId,
+			name: 'My Pit',
+			pitUrl: pitUrl,
+			config: [
+				{ key: 'Key', name: 'Name', value: 'Value' }
+			]
+		};
 
 		beforeEach(inject(($injector: ng.auto.IInjectorService) => {
-			$modal = $injector.get('$modal');
-			$rootScope = <ng.IRootScopeService> $injector.get('$rootScope');
-			$controller = <ng.IControllerService> $injector.get('$controller');
+			var $rootScope = <ng.IRootScopeService> $injector.get(C.Angular.$rootScope);
+			$controller = <ng.IControllerService> $injector.get(C.Angular.$controller);
 			$scope = $rootScope.$new();
+			var $templateCache = $injector.get(C.Angular.$templateCache);
+			var $state = <ng.ui.IStateService> $injector.get(C.Angular.$state);
+			$httpBackend = $injector.get(C.Angular.$httpBackend);
+			service = $injector.get(C.Services.Pit);
 
-			$httpBackend = $injector.get('$httpBackend');
-			service = $injector.get('PitService');
+			$templateCache.put(C.Templates.Home, '');
+
+			$state.params['pit'] = pitId;
+
+			$httpBackend.whenGET(pitUrl).respond(pit);
+			ctrl = $controller('ConfigureVariablesController', {
+				$scope: $scope,
+				PitService: service
+			});
+			$httpBackend.flush();
 		}));
 
 		afterEach(() => {
@@ -31,69 +51,26 @@ describe("Peach", () => {
 			$httpBackend.verifyNoOutstandingRequest();
 		});
 
-		describe("when a Pit is not selected", () => {
-			beforeEach(() => {
-				ctrl = $controller('ConfigureVariablesController', {
-					$scope: $scope,
-					$modal: $modal,
-					PitService: service
-				});
-			});
-
-			it("new", () => {
-				expect(_.isObject(ctrl)).toBe(true);
-			});
-
-			it("PitConfig is undefined", () => {
-				expect(ctrl.Config).toBeUndefined();
-			});
+		it("new", () => {
+			expect(_.isObject(ctrl)).toBe(true);
 		});
 
-		describe("when a Pit is selected", () => {
-			var pit;
-			beforeEach(() => {
-				pit = {
-					name: 'My Pit',
-					pitUrl: pitUrl,
-					config: [
-						{ key: 'Key', name: 'Name', value: 'Value' }
-					]
-				};
+		it("PitConfig is valid", () => {
+			expect(_.isObject(ctrl.Config)).toBe(true);
+		});
 
-				$httpBackend.expectGET(pitUrl).respond(pit);
-				var promise = service.SelectPit(pitUrl);
-				promise.then(() => {
-					$httpBackend.expectGET(pitUrl).respond(pit);
-					ctrl = $controller('ConfigureVariablesController', {
-						$scope: $scope,
-						$modal: $modal,
-						PitService: service
-					});
-				});
-				$httpBackend.flush();
-			});
+		it("PitConfig can be saved", () => {
+			var dirty = true;
+			$scope['form'] = {
+				$setPristine: () => {
+					dirty = false;
+				}
+			};
 
-			it("new", () => {
-				expect(_.isObject(ctrl)).toBe(true);
-			});
-
-			it("PitConfig is valid", () => {
-				expect(_.isObject(ctrl.Config)).toBe(true);
-			});
-
-			it("PitConfig can be saved", () => {
-				var dirty = true;
-				$scope['form'] = {
-					$setPristine: () => {
-						dirty = false;
-					}
-				};
-
-				$httpBackend.expectPOST(pitUrl).respond(pit);
-				ctrl.OnSave();
-				$httpBackend.flush();
-				expect(dirty).toBe(false);
-			});
+			$httpBackend.expectPOST(pitUrl).respond(pit);
+			ctrl.OnSave();
+			$httpBackend.flush();
+			expect(dirty).toBe(false);
 		});
 	});
 });

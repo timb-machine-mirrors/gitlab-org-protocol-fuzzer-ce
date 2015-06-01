@@ -22,20 +22,25 @@ module Peach {
 
 	export interface IDirective extends ng.IDirective, IComponent {
 	}
-
-	export interface ITab {
-		title: string;
-		content: string;
-		active: boolean;
-		disabled: boolean;
+	
+	export interface IRootScope extends ng.IScope {
+		job: IJob;
+		pit: IPit;
 	}
 
-	export interface IViewModelScope extends ng.IScope {
+	export interface IViewModelScope extends IRootScope {
 		vm: any;
 	}
 
 	export interface IFormScope extends IViewModelScope {
 		form: ng.IFormController;
+	}
+	
+	export function onlyWith<T, R>(obj: T, fn: (T) => R): R {
+		if (!_.isUndefined(obj)) {
+			return fn(obj);
+		}
+		return undefined;
 	}
 
 	export function onlyIf<T>(preds: any, fn: () => T): T {
@@ -66,8 +71,8 @@ module Peach {
 		return array;
 	}
 
-	export function StripHttpPromise<T>(q$: ng.IQService, promise: ng.IHttpPromise<T>): ng.IPromise<T> {
-		var deferred = q$.defer<T>();
+	export function StripHttpPromise<T>($q: ng.IQService, promise: ng.IHttpPromise<T>): ng.IPromise<T> {
+		var deferred = $q.defer<T>();
 		promise.success((data: T) => {
 			deferred.resolve(data);
 		});

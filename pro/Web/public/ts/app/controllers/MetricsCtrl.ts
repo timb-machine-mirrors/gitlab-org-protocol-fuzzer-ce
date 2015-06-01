@@ -53,11 +53,14 @@ module Peach {
 		zoomMin?: number;
 	}
 
+	export interface IMetricsScope extends IViewModelScope {
+		metric: string;
+	}
+
 	export class MetricsController {
 		static $inject = [
 			C.Angular.$scope,
 			C.Angular.$state,
-			C.Angular.$stateParams,
 			C.Angular.$http,
 			C.Angular.$interpolate,
 			C.Angular.$templateCache,
@@ -67,21 +70,27 @@ module Peach {
 		];
 
 		constructor(
-			private $scope: IViewModelScope,
+			private $scope: IMetricsScope,
 			private $state: ng.ui.IStateService,
-			$stateParams: ng.ui.IStateParamsService,
 			private $http: ng.IHttpService,
 			private $interpolate: ng.IInterpolateService,
 			private $templateCache: ng.ITemplateCacheService,
 			private $timeout: ng.ITimeoutService,
-			private visDataSet,
+			private VisDataSet,
 			private jobService: JobService
 		) {
-			this.metric = $stateParams['metric'];
-			this.initializeData();
-		}
+			this.$scope.metric = $state.params['metric'];
 
-		private metric: string;
+			$scope.$watch(() => jobService.Job, (newVal, oldVal) => {
+				if (newVal !== oldVal) {
+					this.update(false);
+				}
+			});
+			
+			if (this.jobService.Job) {
+				this.update(true);
+			}
+		}
 
 		public MutatorData: IMutatorMetric[] = [];
 		public AllMutatorData: IMutatorMetric[] = [];
@@ -106,10 +115,8 @@ module Peach {
 			[0]
 		];
 
-		public BucketTimelineData = {
-			single: true,
-			load: []
-		};
+		public BucketTimelineData = undefined;
+		public BucketTimelineLoaded: boolean = false;
 
 		public BucketTimelineOptions: ITimelineOptions = {
 			showCurrentTime: true,
@@ -119,45 +126,58 @@ module Peach {
 				if (item.content) {
 					return item.content;
 				}
-				var html = this.$templateCache.get(C.Templates.BucketTimelineItem);
+				var html = this.$templateCache.get(C.Templates.Job.BucketTimelineItem);
 				return this.$interpolate(html)({ item: item });
 			}
 		}
 
-		private initializeData(): void {
+		private update(isNew: boolean): void {
 			var promise = this.getData();
-			switch (this.metric) {
-			case C.Metrics.BucketTimeline:
+			switch (this.$scope.metric) {
+			case C.Metrics.BucketTimeline.id:
+				var items = new this.VisDataSet();
+
+				if (_.isUndefined(this.BucketTimelineData)) {
+					this.BucketTimelineData = {
+						items: items
+					};
+				}
+				
 				promise.success((data: IBucketTimelineMetric[]) => {
-					var items = data.map((item: IBucketTimelineMetric) => {
-						item.href = this.$state.href(C.States.Faults, { bucket: item.label });
-						return <ITimelineItem> {
+					data.forEach((item: IBucketTimelineMetric) => {
+						item.href = this.$state.href(C.States.JobFaults, { bucket: item.label });
+						items.add({
 							id: item.iteration,
 							content: undefined,
 							start: item.time,
 							data: item
-						};
+						});
 					});
-					items.unshift({
+
+					items.add({
 						id: 0,
 						style: "color: green",
 						content: "Job Start",
 						start: this.jobService.Job.startDate
 					});
+
 					if (this.jobService.Job.stopDate) {
-						items.push({
+						items.add({
 							id: -1,
 							style: "color: red",
 							content: "Job End",
 							start: this.jobService.Job.stopDate
 						});
 					}
-					this.$timeout(() => {
-						this.BucketTimelineData = this.visDataSet(items);
-					}, 100);
+					
+					this.BucketTimelineData = {
+						items: items
+					};
+					
+					this.BucketTimelineLoaded = true;
 				});
 				break;
-			case C.Metrics.FaultTimeline:
+			case C.Metrics.FaultTimeline.id:
 				promise.success((data: IFaultTimelineMetric[]) => {
 					if (data.length === 0) {
 						this.FaultsOverTimeLabels = [moment(Date.now()).format("M/D h a")];
@@ -168,32 +188,27 @@ module Peach {
 					}
 				});
 				break;
-			case C.Metrics.Mutators:
-				this.MutatorData = _.clone(this.AllMutatorData);
+			case C.Metrics.Mutators.id:
 				promise.success((data: IMutatorMetric[]) => {
 					this.AllMutatorData = data;
 				});
 				break;
-			case C.Metrics.Elements:
-				this.ElementData = _.clone(this.AllElementData);
+			case C.Metrics.Elements.id:
 				promise.success((data: IElementMetric[]) => {
 					this.AllElementData = data;
 				});
 				break;
-			case C.Metrics.Dataset:
-				this.DatasetData = _.clone(this.AllDatasetData);
+			case C.Metrics.Dataset.id:
 				promise.success((data: IDatasetMetric[]) => {
 					this.AllDatasetData = data;
 				});
 				break;
-			case C.Metrics.States:
-				this.StateData = _.clone(this.AllStateData);
+			case C.Metrics.States.id:
 				promise.success((data: IStateMetric[]) => {
 					this.AllStateData = data;
 				});
 				break;
-			case C.Metrics.Buckets:
-				this.BucketData = _.clone(this.AllBucketData);
+			case C.Metrics.Buckets.id:
 				promise.success((data: IBucketMetric[]) => {
 					this.AllBucketData = data;
 				});
@@ -202,7 +217,7 @@ module Peach {
 		}
 
 		private getData<T>(): ng.IHttpPromise<T> {
-			return this.$http.get(this.jobService.Job.metrics[this.metric]);
+			return this.$http.get(this.jobService.Job.metrics[this.$scope.metric]);
 		}
 	}
 }

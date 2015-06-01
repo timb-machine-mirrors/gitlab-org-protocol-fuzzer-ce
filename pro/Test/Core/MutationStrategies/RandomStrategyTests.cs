@@ -381,7 +381,7 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 		[Test]
 		public void Test7()
 		{
-			// Test that the random strategy is reproducable when starting at an
+			// Test that the random strategy is reproducible when starting at an
 			// arbitrary iteration when configured to cycles through data models
 			// with multiple actions
 			string temp1 = Path.GetTempFileName();

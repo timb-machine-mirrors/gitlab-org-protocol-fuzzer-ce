@@ -205,10 +205,9 @@ INSERT INTO FaultMetric (
 
 		public const string InsertFaultDetail = @"
 INSERT INTO FaultDetail (
-	Reproducable,
+	Reproducible,
 	Iteration,
 	TimeStamp,
-	BucketName,
 	Source,
 	Exploitability,
 	MajorHash,
@@ -220,10 +219,9 @@ INSERT INTO FaultDetail (
 	IterationStop,
 	FaultPath
 ) VALUES (
-	@Reproducable,
+	@Reproducible,
 	@Iteration,
 	@TimeStamp,
-	@BucketName,
 	@Source,
 	@Exploitability,
 	@MajorHash,

@@ -1,0 +1,17 @@
+﻿<div ng-repeat="lib in vm.Libraries">
+	<h3>{{lib.Name}}</h3>
+	<accordion close-others="false">
+		<accordion-group ng-repeat="cat in lib.Categories" 
+				heading="{{cat.Name}}"
+				is-open="true">
+			<ul class="list-inline library">
+				<li ng-repeat="entry in cat.Pits">
+					<a href=""
+						 tooltip="{{entry.Pit.description}}"
+						 ng-click="vm.OnSelectPit(entry)">{{entry.Pit.name}}</a>
+				</li>
+			</ul>
+		</accordion-group>
+	</accordion>
+</div>
+

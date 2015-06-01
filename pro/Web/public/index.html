@@ -6,13 +6,12 @@
 	<title>Peach Fuzzer</title>
 
 	<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.css" />
+	<link rel="stylesheet" href="lib/fontawesome/css/font-awesome.css" />
 	<link rel="stylesheet" href="lib/select2/select2.css" />
-	<link rel="stylesheet" href="lib/ace-bootstrap/ace-fonts.css" />
-	<link rel="stylesheet" href="lib/ace-bootstrap/ace.css" />
-	<link rel="stylesheet" href="lib/ace-bootstrap/ace-skins.css" />
+	<link rel="stylesheet" href="css/ace.css" />
+	<link rel="stylesheet" href="css/ace-skins.css" />
 	<link rel="stylesheet" href="lib/angular-chart/angular-chart.css" />
 	<link rel="stylesheet" href="lib/angular-loading-bar/loading-bar.css" />
-	<link rel="stylesheet" href="lib/angular-tree-control/css/tree-control-attribute.css" />
 	<link rel="stylesheet" href="lib/angular-ui-select/select.css" />
 	<link rel="stylesheet" href="lib/vis/vis.css" />
 	<link rel="stylesheet" href="css/app.css" />
@@ -27,46 +26,27 @@
 	<script src="lib/bootstrap/js/bootstrap.js"></script>
 	<script src="lib/angular/angular.js"></script>
 	<script src="lib/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+	<script src="lib/angular-breadcrumb/angular-breadcrumb.js"></script>
 	<script src="lib/angular-chart/angular-chart.js"></script>
 	<script src="lib/angular-loading-bar/loading-bar.js"></script>
 	<script src="lib/angular-messages/angular-messages.js"></script>
 	<script src="lib/angular-sanitize/angular-sanitize.js"></script>
 	<script src="lib/angular-smart-table/smart-table.js"></script>
-	<script src="lib/angular-tree-control/js/angular-tree-control.js"></script>
 	<script src="lib/angular-ui-router/angular-ui-router.js"></script>
 	<script src="lib/angular-ui-select/select.js"></script>
-	<script src="js/angular-vis.js"></script>
+	<script src="lib/angular-visjs/angular-vis.js"></script>
 
 	<script src="js/app/app.js"></script>
 </head>
 <body class="skin-1"
 			ng-controller="MainController">
 
-	<div class="navbar navbar-default">
-
-		<div class="navbar-container"
-				 id="navbar-container">
+	<div class="navbar">
+		<div class="navbar-container">
 			<div class="navbar-header">
-				<a ui-sref="home">
+				<a ui-sref="main.home">
 					<img src="img/peachlogo.png" />
 				</a>
-			</div>
-
-			<div class="navbar-header pull-right">
-				<ul class="nav">
-					<li class="tooltip-warning"
-							tooltip="{{vm.JobRunningTooltip}}"
-							tooltip-placement="left"
-							ng-cloak>
-						<button type="button"
-										class="btn btn-primary"
-										ng-class="{disabled: !vm.CanSelectPit}"
-										ng-click="vm.OnSelectPit()">
-							{{vm.SelectPitPrompt}}
-						</button>
-					</li>
-				</ul>
-
 			</div>
 		</div>
 	</div>
@@ -85,10 +65,52 @@
 					 ng-class="vm.SidebarClass">
 				<ul class="nav nav-list"
 						ng-cloak>
-
+					
 					<li ui-sref-active="active">
-						<a ui-sref="home">
-							<i class="icon-dashboard"></i>
+						<a ui-sref="main.home">
+							<i class="fa fa-home"></i>
+							<span class="menu-text">
+								Home
+							</span>
+						</a>
+					</li>
+
+					<li ui-sref-active="active"
+							ng-show="vm.ShowMenu('main')">
+						<a ui-sref="main.library">
+							<i class="fa fa-book"></i>
+							<span class="menu-text">
+								Library
+							</span>
+						</a>
+					</li>
+
+					<!--
+						<li ui-sref-active="active"
+						    ng-show="vm.ShowMenu('main')">
+							<a ui-sref="main.templates">
+								<i class="fa fa-file-powerpoint-o"></i>
+								<span class="menu-text">
+									Templates
+								</span>
+							</a>
+						</li>
+						-->
+
+					<li ui-sref-active="active"
+							ng-show="vm.ShowMenu('main')">
+						<a ui-sref="main.jobs">
+							<i class="fa fa-history"></i>
+							<span class="menu-text">
+								Jobs
+							</span>
+						</a>
+					</li>
+					
+					<li ui-sref-active-eq="active"
+							ng-show="vm.ShowMenu('job')">
+						<a ui-sref="job({job: vm.JobId})">
+							<i class="fa fa-dashboard"></i>
 							<span class="menu-text">
 								Dashboard
 							</span>
@@ -96,38 +118,31 @@
 					</li>
 
 					<li ui-sref-active="active"
-							ng-class="{disabled: !vm.CanViewFaults}"
-							tooltip="{{vm.FaultsUnavailableTooltip}}"
-							tooltip-placement="right">
-						<a ui-sref="faults({bucket: 'all'})"
-							 ng-click="vm.OnItemClick($event, vm.CanViewFaults)">
-							<i class="icon-fire"></i>
+							ng-show="vm.ShowMenu('job')">
+						<a ui-sref="job.faults({job: vm.JobId, bucket: 'all'})">
+							<i class="fa fa-flag"></i>
 							<span class="menu-text">
 								Faults
-								<span ng-cloak class="badge badge-primary">{{vm.FaultCount}}</span>
+								<span ng-cloak class="badge">{{vm.FaultCount}}</span>
 							</span>
 						</a>
 					</li>
 
-					<li ui-sref-active="active"
-							ng-class="{disabled: !vm.CanViewMetrics}"
-							tooltip="{{vm.MetricsUnavailableTooltip}}"
-							tooltip-placement="right">
+					<li ng-show="vm.ShowMenu('job')">
 						<a href="#"
-							 ng-click="vm.OnSubClick($event, 'metrics', vm.CanViewMetrics)">
-							<i class="icon-signal"></i>
+							 ng-click="vm.OnSubClick($event, 'job.metrics')">
+							<i class="fa fa-bar-chart"></i>
 							<span class="menu-text">
 								Metrics
 							</span>
-							<b class="arrow icon-angle-down"></b>
+							<b class="arrow fa fa-angle-down"></b>
 						</a>
 
 						<ul class="submenu"
-								collapse="vm.IsCollapsed('metrics')">
-							<li ui-sref-active="active"
+								collapse="vm.IsCollapsed('job.metrics')">
+							<li ng-class="vm.MetricActive(item)"
 									ng-repeat="item in vm.Metrics">
-								<a ui-sref="metrics({metric: item.id})">
-									<i class="icon-double-angle-right"></i>
+								<a href="{{vm.MetricUrl(item)}}">
 									<span class="menu-text">
 										{{item.name}}
 									</span>
@@ -136,27 +151,33 @@
 						</ul>
 					</li>
 
-					<li ui-sref-active="active"
-							ng-class="{disabled: !vm.CanConfigurePit}"
-							tooltip="{{vm.JobRunningTooltip}}"
-							tooltip-placement="right">
+					<li ui-sref-active-eq="active"
+							ng-show="vm.ShowMenu('pit')">
+						<a ui-sref="pit({pit: vm.PitId})">
+							<i class="fa fa-sliders"></i>
+							<span class="menu-text">
+								Configure
+							</span>
+						</a>
+					</li>
+
+					<li ng-show="vm.ShowMenu('pit')">
 						<a href="#"
-							 ng-click="vm.OnSubClick($event, 'wizard', vm.CanConfigurePit)">
-							<i class="icon-desktop"></i>
+							 ng-click="vm.OnSubClick($event, 'pit.wizard')">
+							<i class="fa fa-rocket"></i>
 							<span class="menu-text">
 								Quick Start
 							</span>
-							<b class="arrow icon-angle-down"></b>
+							<b class="arrow fa fa-angle-down"></b>
 						</a>
 
 						<ul class="submenu"
-								collapse="vm.IsCollapsed('wizard')">
-							<li ui-sref-active="active"
+								collapse="vm.IsCollapsed('pit.wizard')">
+							<li ng-class="vm.WizardActive(item)"
 									ng-repeat="item in vm.WizardTracks">
-								<a ui-sref="{{item.state}}({track: item.id, id: 0})">
-									<i class="icon-double-angle-right"></i>
+								<a ui-sref="{{item.start}}({pit: vm.PitId, track: item.id, id: 0})">
 									<span class="menu-text">
-										<i ng-class="{'icon-ok-sign green': vm.IsComplete(item.id)}"></i>
+										<i ng-class="{'fa fa-check green': vm.IsComplete(item.id)}"></i>
 										{{item.name}}
 									</span>
 								</a>
@@ -164,25 +185,21 @@
 						</ul>
 					</li>
 
-					<li ui-sref-active="active"
-							ng-class="{disabled: !vm.CanConfigurePit}"
-							tooltip="{{vm.JobRunningTooltip}}"
-							tooltip-placement="right">
+					<li ng-show="vm.ShowMenu('pit')">
 						<a href="#"
-							 ng-click="vm.OnSubClick($event, 'config', vm.CanConfigurePit)">
-							<i class="icon-desktop"></i>
+							 ng-click="vm.OnSubClick($event, 'pit.advanced')">
+							<i class="fa fa-wrench"></i>
 							<span class="menu-text">
-								Configuration
+								Advanced
 							</span>
-							<b class="arrow icon-angle-down"></b>
+							<b class="arrow fa fa-angle-down"></b>
 						</a>
 
 						<ul class="submenu"
-								collapse="vm.IsCollapsed('config')">
+								collapse="vm.IsCollapsed('pit.advanced')">
 							<li ui-sref-active="active"
 									ng-repeat="item in vm.ConfigSteps">
-								<a ui-sref="{{item.id}}">
-									<i class="icon-double-angle-right"></i>
+								<a ui-sref="{{item.id}}({pit: vm.PitId})">
 									<span class="menu-text">
 										{{item.name}}
 									</span>
@@ -194,9 +211,9 @@
 					<li>
 						<a href="/docs"
 							 target="_blank">
-							<i class="icon-book"></i>
+							<i class="fa fa-question"></i>
 							<span class="menu-text">
-								Documentation
+								Help
 							</span>
 						</a>
 					</li>
@@ -204,7 +221,7 @@
 					<li>
 						<a href="https://forums.peachfuzzer.com"
 							 target="_blank">
-							<i class="icon-bookmark"></i>
+							<i class="fa fa-comment"></i>
 							<span class="menu-text">
 								Forums
 							</span>
@@ -214,16 +231,33 @@
 				</ul>
 
 				<div class="sidebar-collapse"
-						 ng-click="vm.OnToggleSidebar()">
-					<i ng-class="vm.SidebarCollapseClass">
+				     ng-click="vm.OnToggleSidebar()">
+					<i ng-if="vm.IsMenuMinimized"
+						  class="fa fa-angle-double-right">
+					</i>
+					<i ng-if="!vm.IsMenuMinimized"
+						 class="fa fa-angle-double-left">
 					</i>
 				</div>
 			</div>
 
-			<div class="main-content"
-					 ui-view>
-
+			<div class="main-content">
 				<noscript>JavaScript is required.</noscript>
+				
+				<div class="page-content">
+					<div class="well well-sm" ncy-breadcrumb>
+					</div>
+
+					<div class="page-header">
+						<h1>
+							<span ncy-breadcrumb-last></span>
+						</h1>
+					</div>
+				
+					<div ui-view>
+					</div>
+				</div>
+
 			</div>
 		</div>
 	</div>

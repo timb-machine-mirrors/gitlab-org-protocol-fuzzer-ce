@@ -1,0 +1,102 @@
+<div class="alert alert-warning"
+			ng-show="vm.ShowNotConfigured">
+	<strong>Warning!</strong>
+	The currently selected Pit should be configured for the environment.
+	<a ui-sref="wizard({track: 'intro', id: 0})">Pit Configuration Quick Start</a>
+</div>
+
+<div class="alert alert-success"
+			ng-show="vm.ShowReady">
+	The Pit is configured and ready for use.
+	Click the START button below to begin fuzzing.
+</div>
+
+<accordion>
+	<accordion-group is-open="true">
+		<accordion-heading>
+			Start Options
+		</accordion-heading>
+		<form name="form"
+				class="form-horizontal"
+				novalidate>
+			<div class="form-group"
+						ng-class="{'has-error': form.seed.$invalid && form.seed.$dirty}">
+				<label class="col-sm-4 control-label">
+					Seed
+				</label>
+				<div class="col-sm-6">
+					<input name="seed"
+									ng-model="vm.Job.seed"
+									type="number"
+									step="1"
+									class="form-control"
+									placeholder="Random Seed"
+									tabindex="1"
+									peach:range
+									peach:range-min="0"
+									peach:range-max="4294967295"
+									peach:auto-focus />
+					<span class="help-block"
+								ng-messages="form.seed.$error"
+								ng-messages-include="html/messages.html">
+					</span>
+				</div>
+			</div>
+		
+			<div class="form-group"
+						ng-class="{'has-error': form.start.$invalid && form.start.$dirty}">
+				<label class="col-sm-4 control-label">
+					Start Iteration
+				</label>
+				<div class="col-sm-6">
+					<input name="start"
+									ng-model="vm.Job.rangeStart"
+									type="number"
+									step="1"
+									class="form-control"
+									placeholder="1"
+									tabindex="2"
+									peach:range
+									peach:range-min="1"
+									peach:range-max="4294967295" />
+					<span class="help-block"
+								ng-messages="form.start.$error"
+								ng-messages-include="html/messages.html">
+					</span>
+				</div>
+			</div>
+		
+			<div class="form-group"
+						ng-class="{'has-error': form.stop.$invalid && form.stop.$dirty}">
+				<label class="col-sm-4 control-label">
+					Stop Iteration
+				</label>
+				<div class="col-sm-6">
+					<input name="stop"
+									ng-model="vm.Job.rangeStop"
+									type="number"
+									step="1"
+									class="form-control"
+									placeholder="Default"
+									tabindex="3"
+									peach:range
+									peach:range-min="1"
+									peach:range-max="4294967295" />
+					<span class="help-block"
+								ng-messages="form.stop.$error"
+								ng-messages-include="html/messages.html">
+					</span>
+				</div>
+			</div>
+		</form>
+	</accordion-group>
+</accordion>
+
+<div class="row text-center">
+	<button type="button"
+					class="btn btn-lg btn-primary"
+					ng-click="vm.Start()"
+					ng-class="{disabled: !vm.CanStart}">
+		START
+	</button>
+</div>

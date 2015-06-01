@@ -4,7 +4,9 @@
 					 ng-model="selected"
 					 ng-keydown="vm.OnKeyDown($event)"
 					 ng-keyup="vm.OnKeyUp($event)"
-					 placeholder="{{placeholder}}" />
+					 placeholder="{{placeholder}}"
+					 class="form-control"
+					 peach:auto-focus />
 		<span class="open"
 					ng-click="vm.ToggleOptions()"
 					ng-class="{disabled: !data.length}">
