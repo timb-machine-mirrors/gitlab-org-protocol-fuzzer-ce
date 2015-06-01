@@ -44,7 +44,6 @@ selected key are listed in the right side of the window.
 
 image::{images}/WindowsRegKey_n_Values.png["Registry Key with Named Values", scalewidth="75%"]
 
-
 Each hive has one root key that is the entry point to the hive. These root keys 
 are the prefixes described for the _CleanupRegistry_ `Key` parameter. The hives 
 used most often are `HKCU` and `HKLM`, but keys from other hives are accessible as well. 
@@ -57,10 +56,6 @@ A root key, such as `HKCU,` has child keys; that is, the keys that it contains.
 A non-root key, such as `HKCU\Software`, has a parent key (`HKCU`) and, optionally, 
 child keys. Note that `HKCU` is the parent key of `Software`. The key 
 `HKCU\Software\Mozilla\FireFox` also has two child keys or children (`Crash Reporter` and `TaskBarIDs`).
-
-Additional values that are associated with a registry key can be attached to the 
-key as unnamed or named values. An additional value has a data type and a value. 
-If no value is specified, a default value is supplied--based on the type.
 
 For more information, see 
 http://en.wikipedia.org/wiki/Windows_Registry[Windows Registry]. Note the rich 
@@ -93,8 +88,9 @@ Key::
 
 _Optional:_
 
-ChildrenOnly:: Omits the parent key from the purge if set to true, thereby 
-deleting all descendents (subkeys) of the specified key. Defaults to false.
+ChildrenOnly:: If true, omits the parent key from the purge, thereby deleting 
+all descendents (subkeys) of the specified key. +
+If false, the parent key and all descendents are deleted. Defaults to false.
 
 === Examples
 
