@@ -12,6 +12,7 @@ module Peach.C {
 	export module Directives {
 		export var Agent = 'peachAgent';
 		export var AutoFocus = 'peachAutoFocus';
+		export var Jobs = 'peachJobs';
 		export var Combobox = 'peachCombobox';
 		export var Monitor = 'peachMonitor';
 		export var Parameter = 'peachParameter';
@@ -26,14 +27,14 @@ module Peach.C {
 	}
 
 	export module Controllers {
-		export var Combobox = 'ComboboxController';
-		export var UniqueChannel = 'UniqueChannelController';
-		export var Unsaved = 'UnsavedController';
 		export var Agent = 'AgentController';
+		export var Combobox = 'ComboboxController';
+		export var Jobs = 'JobsDirectiveController';
 		export var Monitor = 'MonitorController';
 		export var Parameter = 'ParameterController';
 		export var Test = 'TestController';
-		export var Combobox = 'ComboboxController';
+		export var UniqueChannel = 'UniqueChannelController';
+		export var Unsaved = 'UnsavedController';
 	}
 
 	export module Services {
@@ -143,6 +144,7 @@ module Peach.C {
 		}
 		export module Directives {
 			export var Agent = 'html/directives/agent.html';
+			export var Jobs = 'html/directives/jobs.html';
 			export var Monitor = 'html/directives/monitor.html';
 			export var Parameter = 'html/directives/parameter.html';
 			export var ParameterInput = 'html/directives/parameter-input.html';
