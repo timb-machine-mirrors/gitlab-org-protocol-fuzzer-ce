@@ -22,26 +22,36 @@ module Peach {
 			$scope.vm = this;
 		}
 
+		private pending: boolean = false;
+
 		public Submit() {
 			this.Error = "";
 
-			var promise = this.pitService.CopyPit(this.Pit);
-			promise.then((response: ng.IHttpPromiseCallbackArg<IPit>) => {
-				this.$modalInstance.close(response.data);
-			}, (response: ng.IHttpPromiseCallbackArg<IPit>) => {
-				switch (response.status) {
-				case 400:
-					this.Error = this.Pit.name + " already exists, please choose a new name.";
-					break;
-				default:
-					this.Error = "Error: " + response.statusText;
-					break;
-				}
-			});
+			this.pending = true;
+			this.pitService.SaveTemplate(this.Pit)
+				.then((response: ng.IHttpPromiseCallbackArg<IPit>) => {
+					this.pending = false;
+					this.$modalInstance.close(response.data);
+				},
+				(response: ng.IHttpPromiseCallbackArg<any>) => {
+					this.pending = false;
+					switch (response.status) {
+						case 400:
+							this.Error = this.Pit.name + " already exists, please choose a new name.";
+							break;
+						default:
+							this.Error = "Error: " + response.statusText;
+							break;
+					}
+				});
 		}
 
 		public Cancel() {
 			this.$modalInstance.dismiss();
+		}
+
+		public get IsSubmitDisabled(): boolean {
+			return this.pending;
 		}
 	}
 }

@@ -29,9 +29,9 @@ namespace Peach.Pro.Core.WebServices.Models
 		public string ArchiveUrl { get; set; }
 
 		/// <summary>
-		/// Was this fault reproducable.
+		/// Was this fault reproducible.
 		/// </summary>
-		public bool Reproducable { get; set; }
+		public bool Reproducible { get; set; }
 
 		/// <summary>
 		/// The iteration this fault was detected on.
@@ -42,11 +42,6 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// The time this fault was recorded at.
 		/// </summary>
 		public DateTime TimeStamp { get; set; }
-
-		/// <summary>
-		/// The fault bucket used to group similar faults.
-		/// </summary>
-		public string BucketName { get; set; }
 
 		/// <summary>
 		/// The monitor that generated this fault.

@@ -28,9 +28,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using Newtonsoft.Json;
 using NLog;
@@ -48,7 +48,6 @@ using Logger = Peach.Core.Logger;
 using System.Diagnostics;
 using Action = Peach.Core.Dom.Action;
 using State = Peach.Core.Dom.State;
-using Peach.Pro.Core.Runtime;
 
 namespace Peach.Pro.Core.Loggers
 {
@@ -71,7 +70,7 @@ namespace Peach.Pro.Core.Loggers
 			"Peach.Core.Dom.Array",
 			"Peach.Core.Dom.Choice",
 			"Peach.Core.Dom.DataElement",
-			"Peach.Core.Cracker.DataCracker",
+			"Peach.Core.Cracker.DataCracker"
 		};
 
 		readonly List<Fault.State> _states = new List<Fault.State>();
@@ -85,10 +84,13 @@ namespace Peach.Pro.Core.Loggers
 		Exception _caught;
 		Target _tempTarget;
 		TimeSpan _runtime;
+		Timer _timer;
+
+		const int HeartBeatInterval = 1000;
 
 		readonly Stopwatch _stopwatch = new Stopwatch();
 
-		enum Category { Faults, Reproducing, NonReproducable }
+		enum Category { Faults, Reproducing, NonReproducible }
 
 		/// <summary>
 		/// The user configured base path for all the logs
@@ -173,7 +175,7 @@ namespace Peach.Pro.Core.Loggers
 			}
 
 			if (_job.DatabasePath == null)
-				_job.LogPath = GetLogPath(context, BasePath);
+				_job.LogPath = GetLogPath(context, Path.GetFullPath(BasePath));
 
 			if (!Directory.Exists(_job.LogPath))
 				Directory.CreateDirectory(_job.LogPath);
@@ -185,6 +187,7 @@ namespace Peach.Pro.Core.Loggers
 				var job = db.GetJob(_job.Guid);
 				if (job == null)
 				{
+					_job.HeartBeat = DateTime.Now;
 					_job.Seed = context.config.randomSeed;
 					_job.Mode = JobMode.Fuzzing;
 					_job.Status = JobStatus.Running;
@@ -203,11 +206,6 @@ namespace Peach.Pro.Core.Loggers
 
 			_cache = new MetricsCache(_job.DatabasePath);
 
-			// Remember previous runtime so it properly accumulates on restarted jobs
-			_runtime = _job.Runtime;
-
-			_stopwatch.Restart();
-
 			using (var db = new NodeDatabase())
 			{
 				AddEvent(db,
@@ -220,6 +218,14 @@ namespace Peach.Pro.Core.Loggers
 
 				db.UpdateJob(_job);
 			}
+
+			// Remember previous runtime so it properly accumulates on restarted jobs
+			_runtime = _job.Runtime;
+
+			// Schedule heartbeat timer to keep job db up to date after the initial insert
+			// and after the stopwatch is started so we don't have to worry about locking
+			_stopwatch.Restart();
+			_timer = new Timer(OnHeartBeat, null, HeartBeatInterval, HeartBeatInterval);
 
 			_log = File.CreateText(Path.Combine(_job.LogPath, "status.txt"));
 
@@ -265,11 +271,19 @@ namespace Peach.Pro.Core.Loggers
 
 			if (_job != null)
 			{
+				Logger.Trace("Engine_TestFinished> Stopping heartbeat timer");
+				using (var evt = new AutoResetEvent(false))
+				{
+					if (_timer.Dispose(evt))
+						evt.WaitOne();
+				}
+
 				Logger.Trace("Engine_TestFinished> Update JobDatabase");
 				using (var db = new JobDatabase(_job.DatabasePath))
 				{
 					_job.Runtime = _runtime + _stopwatch.Elapsed;
 					_job.StopDate = DateTime.Now;
+					_job.HeartBeat = _job.StopDate;
 					_job.Mode = JobMode.Fuzzing;
 					_job.Status = JobStatus.Stopped;
 
@@ -290,6 +304,7 @@ namespace Peach.Pro.Core.Loggers
 								if (File.Exists(_job.ReportPath))
 									File.Delete(_job.ReportPath);
 							}
+							// ReSharper disable once EmptyGeneralCatchClause
 							catch
 							{
 							}
@@ -298,14 +313,28 @@ namespace Peach.Pro.Core.Loggers
 
 					db.UpdateJob(_job);
 				}
+			}
+			else
+			{
+				Debug.Assert(_timer == null);
 
-				Logger.Trace("Engine_TestFinished> Update NodeDatabase");
+				// Job was killed before TestStarting got called
 				using (var db = new NodeDatabase())
 				{
-					if (_caught == null)
-						EventSuccess(db);
-					db.UpdateJob(_job);
+					_job = db.GetJob(context.config.id) ?? new Job(context.config);
+					_job.StopDate = DateTime.Now;
+					_job.HeartBeat = _job.StopDate;
+					_job.Mode = JobMode.Fuzzing;
+					_job.Status = JobStatus.Stopped;
 				}
+			}
+
+			Logger.Trace("Engine_TestFinished> Update NodeDatabase");
+			using (var db = new NodeDatabase())
+			{
+				if (_caught == null)
+					EventSuccess(db);
+				db.UpdateJob(_job);
 			}
 
 			// it's possible we reach here before Engine_TestStarting has had a chance to finish
@@ -334,28 +363,29 @@ namespace Peach.Pro.Core.Loggers
 			_states.Clear();
 			_cache.IterationStarting(context.currentIteration);
 
-			_job.Runtime = _runtime + _stopwatch.Elapsed;
+			var mode = JobMode.Fuzzing;
 
 			if (context.reproducingFault)
 			{
 				if (context.reproducingIterationJumpCount == 0)
 				{
 					Debug.Assert(context.reproducingInitialIteration == currentIteration);
-					_job.Mode = JobMode.Reproducing;
+					mode = JobMode.Reproducing;
 				}
 				else
 				{
-					_job.Mode = JobMode.Searching;
+					mode = JobMode.Searching;
 				}
-			}
-			else
-			{
-				_job.Mode = JobMode.Fuzzing;
 			}
 
 			using (var db = new JobDatabase(_job.DatabasePath))
 			{
-				db.UpdateJob(_job);
+				lock (_timer)
+				{
+					_job.Mode = mode;
+
+					UpdateRunningJob(db);
+				}
 			}
 
 			if (context.controlRecordingIteration)
@@ -399,9 +429,12 @@ namespace Peach.Pro.Core.Loggers
 			{
 				using (var db = new JobDatabase(_job.DatabasePath))
 				{
-					_job.IterationCount++;
-					_job.Runtime = _runtime + _stopwatch.Elapsed;
-					db.UpdateJob(_job);
+					lock (_timer)
+					{
+						_job.IterationCount++;
+
+						UpdateRunningJob(db);
+					}
 				}
 
 				_cache.IterationFinished();
@@ -432,7 +465,7 @@ namespace Peach.Pro.Core.Loggers
 
 			foreach (var data in action.allData)
 			{
-				rec.models.Add(new Fault.Model()
+				rec.models.Add(new Fault.Model
 				{
 					name = data.dataModel.Name,
 					parameter = data.Name ?? "",
@@ -455,6 +488,8 @@ namespace Peach.Pro.Core.Loggers
 
 			foreach (var model in rec.models)
 			{
+				Debug.Assert(model.mutations != null);
+
 				if (model.mutations.Count == 0)
 					model.mutations = null;
 			}
@@ -506,7 +541,7 @@ namespace Peach.Pro.Core.Loggers
 			_reproFault.iterationStart = context.reproducingInitialIteration - context.reproducingIterationJumpCount;
 			_reproFault.iterationStop = _reproFault.iteration;
 
-			SaveFault(context, Category.NonReproducable, _reproFault);
+			SaveFault(context, Category.NonReproducible, _reproFault);
 			_reproFault = null;
 		}
 
@@ -523,7 +558,10 @@ namespace Peach.Pro.Core.Loggers
 				// Save reproFault toSave in fault
 				foreach (var kv in _reproFault.toSave)
 				{
-					var key = Path.Combine("Initial", _reproFault.iteration.ToString(), kv.Key);
+					var key = Path.Combine("Initial",
+						_reproFault.iteration.ToString(CultureInfo.InvariantCulture),
+						kv.Key);
+
 					fault.toSave.Add(key, kv.Value);
 				}
 
@@ -538,7 +576,8 @@ namespace Peach.Pro.Core.Loggers
 			try
 			{
 				var dir = Path.GetDirectoryName(fullPath);
-				if (!Directory.Exists(dir))
+
+				if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
 					Directory.CreateDirectory(dir);
 
 				contents.Seek(0, SeekOrigin.Begin);
@@ -581,7 +620,7 @@ namespace Peach.Pro.Core.Loggers
 			// Gather up data from the state model
 			foreach (var item in stateModel.dataActions)
 			{
-				Logger.Debug("Saving action: " + item.Key);
+				Logger.Debug("Saving data from action: " + item.Key);
 				ret.toSave.Add(item.Key, item.Value);
 			}
 
@@ -615,45 +654,64 @@ namespace Peach.Pro.Core.Loggers
 				}
 			}
 
-			// Copy over information from the core fault
-			if (coreFault.folderName != null)
-				ret.folderName = coreFault.folderName;
-			else if (coreFault.majorHash == null &&
-				coreFault.minorHash == null &&
-				coreFault.exploitability == null)
-				ret.folderName = "Unknown";
-			else
-				ret.folderName = string.Format("{0}_{1}_{2}",
-					coreFault.exploitability,
-					coreFault.majorHash,
-					coreFault.minorHash);
-
 			// Save all states, actions, data sets, mutations
-			var settings = new JsonSerializerSettings()
-			{
-				DefaultValueHandling = DefaultValueHandling.Ignore
-			};
 			var json = JsonConvert.SerializeObject(
 				new { States = _states },
 				Formatting.Indented,
-				settings);
+				new JsonSerializerSettings
+				{
+					DefaultValueHandling = DefaultValueHandling.Ignore
+				}
+			);
+
 			ret.toSave.Add("fault.json", new MemoryStream(Encoding.UTF8.GetBytes(json)));
 
+			// Copy over information from the core fault
+			ret.folderName = coreFault.folderName;
 			ret.controlIteration = coreFault.controlIteration;
 			ret.controlRecordingIteration = coreFault.controlRecordingIteration;
 			ret.description = coreFault.description;
 			ret.detectionSource = coreFault.detectionSource;
 			ret.monitorName = coreFault.monitorName;
 			ret.agentName = coreFault.agentName;
-			ret.exploitability = coreFault.exploitability;
 			ret.iteration = currentIteration;
 			ret.iterationStart = coreFault.iterationStart;
 			ret.iterationStop = coreFault.iterationStop;
+			ret.exploitability = coreFault.exploitability;
 			ret.majorHash = coreFault.majorHash;
 			ret.minorHash = coreFault.minorHash;
 			ret.title = coreFault.title;
 			ret.type = coreFault.type;
 			ret.states = _states;
+
+			// If a folder name was not specified, try using hashes for bucketing
+			if (string.IsNullOrEmpty(ret.folderName))
+				ret.folderName = string.Join("_", new[]
+				{
+					ret.exploitability,
+					ret.majorHash,
+					ret.minorHash
+				}.Where(s => !string.IsNullOrEmpty(s)));
+
+			// If no hashes were specified, use sensible default
+			if (string.IsNullOrEmpty(ret.folderName))
+				ret.folderName = "UNKNOWN";
+
+			// DetectionSource needs to be set
+			if (string.IsNullOrEmpty(ret.detectionSource))
+				ret.detectionSource = "Unknown";
+
+			// Default the major hash to be the hash of the detection source
+			if (string.IsNullOrEmpty(ret.majorHash))
+				ret.majorHash = Monitor2.Hash(ret.detectionSource);
+
+			// Default the minor hash to be the major hash
+			if (string.IsNullOrEmpty(ret.minorHash))
+				ret.minorHash = ret.majorHash;
+
+			// Default the risk to "UNKNOWN"
+			if (string.IsNullOrEmpty(ret.exploitability))
+				ret.exploitability = "UNKNOWN";
 
 			return ret;
 		}
@@ -662,47 +720,46 @@ namespace Peach.Pro.Core.Loggers
 		{
 			var now = DateTime.Now;
 
+			var desc = "at {0}{1}iteration {2}".Fmt(
+				fault.controlIteration ? "control " : "",
+				fault.controlRecordingIteration ? "record " : "",
+				fault.iteration);
+
 			switch (category)
 			{
 				case Category.Faults:
-					_log.WriteLine("! Reproduced fault at iteration {0} : {1}",
-						fault.iteration, now);
+					_log.WriteLine("! Reproduced fault {0} : {1}",
+						desc, now);
 					break;
-				case Category.NonReproducable:
-					_log.WriteLine("! Non-reproducable fault detected at iteration {0} : {1}",
-						fault.iteration, now);
+				case Category.NonReproducible:
+					_log.WriteLine("! Non-reproducible fault detected {0} : {1}",
+						desc, now);
 					break;
 				case Category.Reproducing:
-					_log.WriteLine("! Fault detected at iteration {0}, trying to reproduce : {1}",
-						fault.iteration, now);
+					_log.WriteLine("! Fault detected {0}, trying to reproduce : {1}",
+						desc, now);
 					break;
 			}
 
-			var bucket = string.Join("_", new[] { 
-				fault.majorHash, 
-				fault.minorHash, 
-				fault.exploitability 
-			}.Where(s => !string.IsNullOrEmpty(s)));
-
-			if (fault.folderName != null)
-				bucket = fault.folderName;
-			else if (string.IsNullOrEmpty(bucket))
-				bucket = "Unknown";
+			// Fault should have already been sanitized by CombineFaults
+			Debug.Assert(!string.IsNullOrEmpty(fault.folderName));
+			Debug.Assert(!string.IsNullOrEmpty(fault.majorHash));
+			Debug.Assert(!string.IsNullOrEmpty(fault.minorHash));
+			Debug.Assert(!string.IsNullOrEmpty(fault.exploitability));
 
 			// root/category/bucket/iteration
 			var subDir = Path.Combine(
 				_job.LogPath,
 				category.ToString(),
 				fault.folderName,
-				fault.iteration.ToString());
+				fault.iteration.ToString(CultureInfo.InvariantCulture));
 
 			var faultDetail = new FaultDetail
 			{
 				Files = new List<FaultFile>(),
-				Reproducable = category == Category.Reproducing,
+				Reproducible = category == Category.Reproducing,
 				Iteration = fault.iteration,
 				TimeStamp = now,
-				BucketName = bucket,
 				Source = fault.detectionSource,
 				Exploitability = fault.exploitability,
 				MajorHash = fault.majorHash,
@@ -752,15 +809,18 @@ namespace Peach.Pro.Core.Loggers
 					_cache.OnFault(new FaultMetric
 					{
 						Iteration = fault.iteration,
-						MajorHash = fault.majorHash ?? "UNKNOWN",
-						MinorHash = fault.minorHash ?? "UNKNOWN",
+						MajorHash = fault.majorHash,
+						MinorHash = fault.minorHash,
 						Timestamp = now,
 						Hour = now.Hour,
 					});
 
-					_job.FaultCount++;
-					_job.Runtime = _runtime + _stopwatch.Elapsed;
-					db.UpdateJob(_job);
+					lock (_timer)
+					{
+						_job.FaultCount++;
+
+						UpdateRunningJob(db);
+					}
 				}
 			}
 
@@ -804,17 +864,19 @@ namespace Peach.Pro.Core.Loggers
 		{
 			Debug.Assert(_job.DatabasePath != null);
 
-			_job.Runtime = _runtime + _stopwatch.Elapsed;
-			_job.Status = status;
-
-			if (status == JobStatus.Paused)
-				_stopwatch.Stop();
-			else if (status == JobStatus.Running)
-				_stopwatch.Start();
-
 			using (var db = new JobDatabase(_job.DatabasePath))
 			{
-				db.UpdateJob(_job);
+				lock (_timer)
+				{
+					if (status == JobStatus.Paused)
+						_stopwatch.Stop();
+					else if (status == JobStatus.Running)
+						_stopwatch.Start();
+
+					_job.Status = status;
+
+					UpdateRunningJob(db);
+				}
 			}
 		}
 
@@ -866,6 +928,36 @@ namespace Peach.Pro.Core.Loggers
 			}
 
 			LogManager.Configuration = nconfig;
+		}
+
+
+		void OnHeartBeat(object state)
+		{
+			using (var db = new JobDatabase(_job.DatabasePath))
+			{
+				lock (_timer)
+				{
+					// Don't reschedule if called from the Timer's callback
+					// to prevent deadlocks when using Dispose(WaitHandle)
+
+					_job.HeartBeat = DateTime.Now;
+					_job.Runtime = _runtime + _stopwatch.Elapsed;
+
+					db.UpdateJob(_job);
+				}
+			}
+		}
+
+		void UpdateRunningJob(JobDatabase db)
+		{
+			// NOTE: The lock MUST to be held prior to calling this function
+			// Defer the heart beat timer since the database is about to be changed
+			_timer.Change(HeartBeatInterval, HeartBeatInterval);
+
+			_job.HeartBeat = DateTime.Now;
+			_job.Runtime = _runtime + _stopwatch.Elapsed;
+
+			db.UpdateJob(_job);
 		}
 	}
 

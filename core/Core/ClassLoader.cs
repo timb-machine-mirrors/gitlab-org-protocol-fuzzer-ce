@@ -361,9 +361,6 @@ namespace Peach.Core
 		{
 			foreach (var asm in AssemblyCache.Values)
 			{
-				//if (asm.IsDynamic)
-				//	continue;
-
 				foreach (var type in asm.GetTypes())
 				{
 					if (!type.IsClass || (!type.IsPublic && !type.IsNestedPublic))

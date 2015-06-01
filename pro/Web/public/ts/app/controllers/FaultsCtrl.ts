@@ -3,64 +3,59 @@
 module Peach {
 	"use strict";
 
-	function FaultsTitleParts($stateParams) {
-		var parts = [];
-		var bucket = $stateParams.bucket;
-		if (bucket === "all") {
-			parts.push('All');
-		} else {
-			parts.push('Bucket: ' + bucket);
-		}
+	export interface IFaultDetailScope extends IFaultSummaryScope {
+		FaultDetailTitle: string;
+	}
 
-		if ($stateParams.id) {
-			parts.push('Iteration: ' + $stateParams.id);
-		}
-		return parts;
+	function FaultsTitle(bucket: string) {
+		return (bucket === "all") ? 'Faults' : 'Bucket: ' + bucket;
 	}
 
 	export class FaultsDetailController {
 		static $inject = [
 			C.Angular.$scope,
 			C.Angular.$state,
-			C.Angular.$stateParams,
 			C.Services.Job
 		];
 
 		constructor(
-			$scope: IViewModelScope,
+			$scope: IFaultDetailScope,
 			$state: ng.ui.IStateService,
-			$stateParams,
 			jobService: JobService
 		) {
-			this.Title = FaultsTitleParts($stateParams);
-			var promise = jobService.LoadFaultDetail($stateParams.id);
+			$scope.FaultSummaryTitle = FaultsTitle($state.params['bucket']);
+
+			var id = $state.params['id'];
+			$scope.FaultDetailTitle = 'Iteration: ' + id;
+			var promise = jobService.LoadFaultDetail(id);
 			promise.then((detail: IFaultDetail) => {
 				this.Fault = detail;
 			}, () => {
-				$state.go(C.States.Home);
+				$state.go(C.States.MainHome);
 			});
 		}
 
-		public Title: string[];
 		public Fault: IFaultDetail;
+	}
+
+	export interface IFaultSummaryScope extends IViewModelScope {
+		FaultSummaryTitle: string;
 	}
 
 	export class FaultsController {
 		static $inject = [
 			C.Angular.$scope,
 			C.Angular.$state,
-			C.Angular.$stateParams,
 			C.Services.Job
 		];
 
 		constructor(
-			$scope: IViewModelScope,
+			$scope: IFaultSummaryScope,
 			private $state: ng.ui.IStateService,
-			$stateParams,
 			private jobService: JobService
 		) {
-			this.bucket = $stateParams.bucket;
-			this.Title = FaultsTitleParts($stateParams)[0];
+			this.bucket = $state.params['bucket'];
+			$scope.FaultSummaryTitle = FaultsTitle(this.bucket);
 			if (this.bucket !== "all") {
 				this.refreshBucketFaults();
 				$scope.$watch(() => jobService.Faults.length, (newVal, oldVal) => {
@@ -77,7 +72,6 @@ module Peach {
 		private bucketFaults: IFaultSummary[];
 
 		public Faults: IFaultSummary[];
-		public Title: string;
 
 		public get AllFaults(): IFaultSummary[] {
 			if (this.bucket === "all") {
@@ -91,7 +85,7 @@ module Peach {
 				bucket: this.bucket,
 				id: fault.iteration
 			};
-			this.$state.go(C.States.FaultsDetail, params);
+			this.$state.go(C.States.JobFaultsDetail, params);
 		}
 
 		private refreshBucketFaults() {

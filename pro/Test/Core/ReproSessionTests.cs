@@ -771,7 +771,7 @@ namespace Peach.Pro.Test.Core
 		[Test]
 		public void TestNoSearchPastNonRepro()
 		{
-			// If a non-reproducable fault is detected, future backlog searches
+			// If a non-reproducible fault is detected, future backlog searches
 			// should not go prior to that iteration
 
 			// Fuzz 1 to 10
@@ -791,7 +791,7 @@ namespace Peach.Pro.Test.Core
 		[Test]
 		public void TestNoSearchPastInitialRepro()
 		{
-			// If a reproducable fault is detected, future backlog searches
+			// If a reproducible fault is detected, future backlog searches
 			// should not go prior to the initial iteration that caused the fault
 
 			// Fuzz 1 to 10

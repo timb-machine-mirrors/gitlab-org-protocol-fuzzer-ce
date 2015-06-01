@@ -31,4 +31,7 @@ module Peach.C.Angular {
 	export var $stateParams = '$stateParams';
 	export var $stateProvider = '$stateProvider';
 	export var $urlRouterProvider = '$urlRouterProvider';
+
+	// angular-breadcrumb
+	export var $breadcrumbProvider = '$breadcrumbProvider';
 }

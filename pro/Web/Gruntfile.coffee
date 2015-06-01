@@ -3,6 +3,7 @@
 module.exports = (grunt) ->
 	path = require('path')
 	proxy = require('grunt-connect-proxy/lib/utils').proxyRequest
+	require('load-grunt-tasks')(grunt);
 
 	variant = grunt.option('variant') || 'win_debug_x64'
 	repo = '../..'
@@ -20,39 +21,34 @@ module.exports = (grunt) ->
 		bowercopy:
 			libs:
 				files:
-					'public/lib/angular'           : 'angular:main'
-					'public/lib/angular-bootstrap' : 'angular-bootstrap:main'
+					'public/lib/angular'             : 'angular:main'
+					'public/lib/angular-bootstrap'   : 'angular-bootstrap:main'
+					'public/lib/angular-breadcrumb'  : 'angular-breadcrumb:main'
+					'public/lib/angular-chart'       : 'angular-chart.js:main'
 					'public/lib/angular-loading-bar' : 'angular-loading-bar:main'
-					'public/lib/angular-mocks'     : 'angular-mocks:main'
-					'public/lib/angular-messages'  : 'angular-messages:main'
-					'public/lib/angular-sanitize'  : 'angular-sanitize:main'
-					'public/lib/angular-ui-router' : 'angular-ui-router:main'
-					'public/lib/angular-ui-select' : 'angular-ui-select:main'
-					'public/lib/jquery'            : 'jquery:main'
-					'public/lib/lodash'            : 'lodash:main'
-					'public/lib/moment'            : 'moment:main'
-					'public/lib/select2'           : 'select2:main'
+					'public/lib/angular-mocks'       : 'angular-mocks:main'
+					'public/lib/angular-messages'    : 'angular-messages:main'
+					'public/lib/angular-sanitize'    : 'angular-sanitize:main'
+					'public/lib/angular-smart-table' : 'angular-smart-table:main'
+					'public/lib/angular-ui-router'   : 'angular-ui-router:main'
+					'public/lib/angular-ui-select'   : 'angular-ui-select:main'
+					'public/lib/angular-visjs'       : 'angular-visjs:main'
+					'public/lib/jquery'              : 'jquery:main'
+					'public/lib/lodash'              : 'lodash:main'
+					'public/lib/moment'              : 'moment:main'
+					'public/lib/select2'             : 'select2:main'
 
 			mainless:
 				options:
 					destPrefix: 'public/lib'
 				files:
-					'ace-bootstrap'               : [
-						'ace-bootstrap/css/*'
-						'ace-bootstrap/fonts/*'
-					]
-					'angular-chart'               : [
-						'angular-chart.js/dist/angular-chart.css*'
-						'angular-chart.js/angular-chart.js'
-					]
-					'angular-smart-table/smart-table.js' : 'angular-smart-table/dist/smart-table.debug.js'
-					'angular-tree-control/css'    : 'angular-tree-control/css/*'
-					'angular-tree-control/images' : 'angular-tree-control/images/*'
-					'angular-tree-control/js'     : 'angular-tree-control/angular-tree-control.js'
+					'angular-chart'               : 'angular-chart.js/dist/angular-chart.css.map'
 					'bootstrap/css'               : 'bootstrap/dist/css/bootstrap.css*'
 					'bootstrap/fonts'             : 'bootstrap/dist/fonts/*'
 					'bootstrap/js'                : 'bootstrap/dist/js/bootstrap.js'
 					'chartjs'                     : 'Chart.js/Chart.js'
+					'fontawesome/css'             : 'fontawesome/css/font-awesome.css'
+					'fontawesome/fonts'           : 'fontawesome/fonts/*'
 					'pithy'                       : 'pithy/lib/pithy.js'
 					'vis/img'                     : 'vis/dist/img/*'
 					'vis/vis.css'                 : 'vis/dist/vis.css'
@@ -84,7 +80,7 @@ module.exports = (grunt) ->
 			options:
 				module: 'commonjs'
 				sourceMap: true
-				sourceRoot: '/ts'
+				sourceRoot: '/ts/app'
 				removeComments: false
 			app:
 				src: ['public/ts/app/**/*.ts']
@@ -106,8 +102,8 @@ module.exports = (grunt) ->
 					'public/js/test/unit.js'
 				]
 				options:
-					outfile: 'public/tests.html'
-					keepRunner: true
+#					display: 'short'
+#					summary: true
 					vendor: [
 						# ordered libraries
 						'public/lib/jquery/jquery.js'
@@ -117,7 +113,6 @@ module.exports = (grunt) ->
 						'public/lib/**/*.js'
 						# extra stuff
 						'public/js/angular-vis.js'
-						'node_modules/jasmine-custom-message/jasmine-custom-message.js'
 					]
 
 		protractor:
@@ -233,22 +228,6 @@ module.exports = (grunt) ->
 				options:
 					cwd: vs_bindir
 
-	grunt.loadNpmTasks 'grunt-bowercopy'
-	grunt.loadNpmTasks 'grunt-contrib-clean'
-	grunt.loadNpmTasks 'grunt-contrib-connect'
-	grunt.loadNpmTasks 'grunt-contrib-copy'
-	grunt.loadNpmTasks 'grunt-contrib-jasmine'
-	grunt.loadNpmTasks 'grunt-connect-proxy'
-	grunt.loadNpmTasks 'grunt-contrib-uglify'
-	grunt.loadNpmTasks 'grunt-contrib-watch'
-	grunt.loadNpmTasks 'grunt-focus'
-	grunt.loadNpmTasks 'grunt-http'
-	grunt.loadNpmTasks 'grunt-open'
-	grunt.loadNpmTasks 'grunt-protractor-runner'
-	grunt.loadNpmTasks 'grunt-run'
-	grunt.loadNpmTasks 'grunt-ts'
-	grunt.loadNpmTasks 'grunt-tsd'
-
 	grunt.registerTask 'default', ['work']
 
 	grunt.registerTask 'init', [
@@ -277,6 +256,7 @@ module.exports = (grunt) ->
 	]
 
 	grunt.registerTask 'test', [
+		'ts:unit'
 		'jasmine:test'
 	]
 

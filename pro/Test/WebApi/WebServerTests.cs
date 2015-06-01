@@ -15,7 +15,7 @@ namespace Peach.Pro.Test.WebApi
 {
 	[TestFixture]
 	[Quick]
-	class WebServerTetsts
+	class WebServerTests
 	{
 		[Test]
 		public void MultipleServers()

@@ -20,23 +20,21 @@ module Peach {
 			private $interval: ng.IIntervalService,
 			private pitService: PitService
 		) {
-			this.reset();
-			pitService.OnPitChanged(() => this.reset());
 		}
 
 		private pendingResult: ng.IDeferred<any>;
 		private isPending: boolean = false;
+		private testResult: ITestResult;
+		private testTime: string;
 
 		public get IsPending(): boolean {
 			return this.isPending;
 		}
 
-		private testResult: ITestResult;
 		public get TestResult(): ITestResult {
 			return this.testResult;
 		}
 
-		private testTime: string;
 		public get TestTime(): string {
 			return this.testTime;
 		}

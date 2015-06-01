@@ -273,6 +273,10 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// URLs used to control a running job.
 		/// </summary>
+		/// <remarks>
+		/// If this property is null than the job can
+		/// not be controlled by the web api.
+		/// </remarks>
 		[NotMapped]
 		public JobCommands Commands { get; set; }
 
@@ -365,9 +369,14 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// Pit file for the job
 		/// </summary>
+		/// <remarks>
+		/// This is used by reporting.  The web api
+		/// should be using PitUrl.
+		/// </remarks>
 		/// <example>
 		/// "DHCP_Server.xml"
 		/// </example>
+		[JsonIgnore]
 		public string PitFile { get; set; }
 
 		/// <summary>
@@ -417,8 +426,16 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// </summary>
 		public long FaultCount { get; set; }
 
+		/// <summary>
+		/// The pid of peach that owns the job
+		/// </summary>
+		[JsonIgnore]
 		public long Pid { get; set; }
 
+		/// <summary>
+		/// The time when the job was last updated
+		/// </summary>
+		[JsonIgnore]
 		public DateTime? HeartBeat { get; set; }
 
 		/// <summary>

@@ -1,14 +1,3 @@
-/** Library references (unordered) */
-/// <reference path="def/angular-ui-bootstrap/angular-ui-bootstrap.d.ts" />
-/// <reference path="def/angular-ui/angular-ui-router.d.ts" />
-/// <reference path="def/angularjs/angular-mocks.d.ts" />
-/// <reference path="def/angularjs/angular.d.ts" />
-/// <reference path="def/chartjs/chart.d.ts" />
-/// <reference path="def/jquery/jquery.d.ts" />
-/// <reference path="def/lodash/lodash.d.ts" />
-/// <reference path="def/moment/moment.d.ts" />
-/// <reference path="def/pithy/pithy.d.ts" />
-
 /** Manual references (ordered) */
 /// <reference path="utils.ts" />
 /// <reference path="ng.ts" />
@@ -21,15 +10,28 @@
 //grunt-start
 /// <reference path="controllers/ConfigMonitorsCtrl.ts" />
 /// <reference path="controllers/ConfigVarsCtrl.ts" />
+/// <reference path="controllers/ConfigureCtrl.ts" />
 /// <reference path="controllers/CopyPitCtrl.ts" />
 /// <reference path="controllers/DashboardCtrl.ts" />
 /// <reference path="controllers/FaultsCtrl.ts" />
+/// <reference path="controllers/HomeCtrl.ts" />
+/// <reference path="controllers/JobsCtrl.ts" />
+/// <reference path="controllers/LibraryCtrl.ts" />
 /// <reference path="controllers/MainCtrl.ts" />
 /// <reference path="controllers/MetricsCtrl.ts" />
-/// <reference path="controllers/PitLibraryCtrl.ts" />
+/// <reference path="controllers/NewVarCtrl.ts" />
 /// <reference path="controllers/PitTestCtrl.ts" />
-/// <reference path="controllers/StartJobCtrl.ts" />
+/// <reference path="controllers/TemplatesCtrl.ts" />
 /// <reference path="controllers/WizardCtrl.ts" />
+/// <reference path="def/angular-ui-bootstrap/angular-ui-bootstrap.d.ts" />
+/// <reference path="def/angular-ui-router/angular-ui-router.d.ts" />
+/// <reference path="def/angularjs/angular-mocks.d.ts" />
+/// <reference path="def/angularjs/angular.d.ts" />
+/// <reference path="def/chartjs/chart.d.ts" />
+/// <reference path="def/jquery/jquery.d.ts" />
+/// <reference path="def/lodash/lodash.d.ts" />
+/// <reference path="def/moment/moment.d.ts" />
+/// <reference path="def/pithy/pithy.d.ts" />
 /// <reference path="def/reference.ts" />
 /// <reference path="directives/AgentDirective.ts" />
 /// <reference path="directives/AutoFocusDirective.ts" />

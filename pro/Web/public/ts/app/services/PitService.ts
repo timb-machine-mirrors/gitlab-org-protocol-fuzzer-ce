@@ -6,39 +6,29 @@ module Peach {
 	export class PitService {
 
 		static $inject = [
+			C.Angular.$rootScope,
 			C.Angular.$q,
-			C.Angular.$window,
-			C.Angular.$modal,
-			C.Angular.$http
+			C.Angular.$http,
+			C.Angular.$state
 		];
 
 		constructor(
+			private $rootScope: ng.IRootScopeService,
 			private $q: ng.IQService,
-			private $window: ng.IWindowService,
-			private $modal: ng.ui.bootstrap.IModalService,
-			private $http: ng.IHttpService
+			private $http: ng.IHttpService,
+			private $state: ng.ui.IStateService
 		) {
 		}
 
-		private pendingPit: ng.IDeferred<IPit>;
-
-		private userPitLibrary: string;
-		public get UserPitLibrary(): string {
-			return this.userPitLibrary;
-		}
-
 		private pit: IPit;
-		public get Pit(): IPit {
-			return this.pit;
-		}
+		private userPitLibrary: string;
 
-		private changeHandlers: Function[] = [];
-		public OnPitChanged(callback: Function) {
-			this.changeHandlers.push(callback);
+		public get CurrentPitId() {
+			return this.$state.params['pit'];
 		}
-
-		private notifyOnPitChanged() {
-			this.changeHandlers.forEach(fn => fn());
+		
+		public get Pit(): IPit { 
+			return this.pit; 
 		}
 
 		public LoadLibrary(): ng.IPromise<ILibrary[]> {
@@ -53,117 +43,51 @@ module Peach {
 		}
 
 		public LoadPeachMonitors(): ng.IPromise<IMonitor[]> {
-			var promise = this.$http.get(C.Api.PeachMonitors);
-			return StripHttpPromise(this.$q, promise);
+			return StripHttpPromise(this.$q, this.$http.get(C.Api.PeachMonitors));
 		}
 
-		// MainController 
-		// -> PitLibraryController (modal)
-		//    -> SelectPit 
-		//       -> CopyPitController (modal)
-		//          -> CopyPit
-		public SelectPit(url: string): ng.IPromise<IPit> {
-			this.pendingPit = this.$q.defer<IPit>();
+		public LoadPit(): ng.IPromise<IPit> {
+			var url = C.Api.PitUrl.replace(':id', this.CurrentPitId);
 			var promise = this.$http.get(url);
-			promise.success((pit: IPit) => {
-				if (pit.locked) {
-					var modal = this.$modal.open({
-						templateUrl: C.Templates.Modal.CopyPit,
-						controller: CopyPitController,
-						resolve: { Pit: () => pit }
-					});
-					modal.result.then((copied: IPit) => {
-						// only update the current Pit if successful
-						// a failed copy leaves the current Pit untouched
-						this.changePit(copied);
-						this.pendingPit.resolve(this.pit);
-					});
-					modal.result.catch((reason) => {
-						this.pendingPit.reject(reason);
-					});
-				} else {
-					this.changePit(pit);
-					this.pendingPit.resolve(this.pit);
-				}
-			});
-			promise.error(reason => {
-				this.pendingPit.reject(reason);
-			});
-			return this.pendingPit.promise;
-		}
-
-		private changePit(pit: IPit) {
-			this.pit = pit;
-			this.$window.sessionStorage.setItem('pitUrl', pit.pitUrl);
-			this.notifyOnPitChanged();
-		}
-
-		public RestorePit(): boolean {
-			var pitUrl = this.$window.sessionStorage.getItem('pitUrl');
-			if (_.isString(pitUrl)) {
-				this.SelectPit(pitUrl);
-				return true;
-			}
-			return false;
-		}
-
-		public ReloadPit(): ng.IPromise<IPit> {
-			if (_.isUndefined(this.pit)) {
-				if (this.pendingPit) {
-					return this.pendingPit.promise;
-				}
-				return this.$q.reject('no pit selected');
-			}
-
-			var promise = this.$http.get(this.pit.pitUrl);
-			promise.success((pit: IPit) => {
-				this.pit = pit;
-			});
+			promise.success((pit: IPit) => this.OnSuccess(pit));
 			return StripHttpPromise(this.$q, promise);
 		}
 
 		public SavePit(): ng.IPromise<IPit> {
-			if (_.isUndefined(this.pit)) {
-				return this.$q.reject('no pit selected');
-			}
-
 			var promise = this.$http.post(this.pit.pitUrl, this.pit);
-			promise.success((pit: IPit) => {
-				this.pit = pit;
-			});
+			promise.success((pit: IPit) => this.OnSuccess(pit));
 			return StripHttpPromise(this.$q, promise);
 		}
-
-		public CopyPit(pit: IPit): ng.IHttpPromise<IPit> {
-			var request: IPitCopy = {
-				libraryUrl: this.UserPitLibrary,
-				pitUrl: pit.pitUrl,
-				name: pit.name,
-				description: pit.description
-			}
-			return this.$http.post(C.Api.Pits, request);
-		}
-
+		
 		public SaveConfig(config: IParameter[]): ng.IPromise<IPit> {
 			this.pit.config = config;
 			return this.SavePit();
 		}
-
+		
 		public SaveAgents(agents: Agent[]): ng.IPromise<IPit> {
 			this.pit.agents = agents;
 			return this.SavePit();
 		}
 
+		public SaveTemplate(pit: IPit): ng.IHttpPromise<IPit> {
+			var request: IPitCopy = {
+				libraryUrl: this.userPitLibrary,
+				pitUrl: pit.pitUrl,
+				name: pit.name,
+				description: pit.description
+			}
+			var promise = this.$http.post(C.Api.Pits, request);
+			promise.success((pit: IPit) => this.OnSuccess(pit));
+			return promise;
+		}
+
 		public get IsConfigured(): boolean {
-			return onlyIf(this.pit, () => this.latestVersion.configured) || false;
+			return onlyIf(this.pit, () => _.last(this.pit.versions).configured) || false;
 		}
-
-		public get IsSelected(): boolean {
-			return !_.isUndefined(this.pit);
-		}
-
-		private get latestVersion(): IPitVersion {
-			return _.last(this.pit.versions);
+		
+		private OnSuccess(pit: IPit) {
+			this.pit = pit;
+			this.$rootScope['pit'] = pit;
 		}
 	}
 }
