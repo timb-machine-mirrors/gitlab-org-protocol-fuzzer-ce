@@ -353,6 +353,12 @@ namespace Peach.Core
 				program, path != null ? " in specified" : ", please specify using", parameter));
 		}
 
+		public static int GetCurrentProcessId()
+		{
+			using (var p = Process.GetCurrentProcess())
+				return p.Id;
+		}
+
 		/// <summary>
 		/// The location on disk where peach is executing from.
 		/// Does not include the trailing slash in the directory name.
