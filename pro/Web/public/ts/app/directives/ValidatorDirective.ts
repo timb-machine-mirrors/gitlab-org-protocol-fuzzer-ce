@@ -43,12 +43,12 @@ module Peach {
 			attrs: ng.IAttributes,
 			ctrl: ng.INgModelController
 		) => {
-			predicateValidation('rangeMin', ctrl, (value: string) => {
+			predicateValidation(C.Validation.RangeMin, ctrl, (value: string) => {
 				var int = parseInt(value);
 				var min = scope.min();
 				return _.isUndefined(min) || (!_.isNaN(int) && int >= min);
 			});
-			predicateValidation('rangeMax', ctrl, (value: string) => {
+			predicateValidation(C.Validation.RangeMax, ctrl, (value: string) => {
 				var int = parseInt(value);
 				var max = scope.max();
 				return _.isUndefined(max) || (!_.isNaN(int) && int <= max);
@@ -67,7 +67,7 @@ module Peach {
 			ctrl: ng.INgModelController
 		) => {
 			var pattern = /^(\-|\+)?\d+$/;
-			predicateValidation(C.Directives.Integer, ctrl,
+			predicateValidation(C.Validation.Integer, ctrl,
 				(value: string) => pattern.test(value)
 			);
 		}
@@ -84,7 +84,7 @@ module Peach {
 			ctrl: ng.INgModelController
 		) => {
 			var pattern = /^[0-9A-Fa-f]+$/;
-			predicateValidation(C.Directives.HexString, ctrl,
+			predicateValidation(C.Validation.HexString, ctrl,
 				(value: string) => pattern.test(value)
 			);
 		}
