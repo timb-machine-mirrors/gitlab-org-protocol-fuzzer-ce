@@ -34,7 +34,7 @@ module Peach {
 		public Title = 'Test';
 
 		private get isWizard(): boolean {
-			return this.$state.is(C.States.PitWizard, { track: C.Tracks.Test });
+			return this.$state.is(C.States.PitWizardTest);
 		}
 
 		public get ShowNotConfigured(): boolean {
