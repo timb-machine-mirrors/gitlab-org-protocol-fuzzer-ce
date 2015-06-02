@@ -12,8 +12,9 @@ module Peach.C {
 	export module Directives {
 		export var Agent = 'peachAgent';
 		export var AutoFocus = 'peachAutoFocus';
-		export var Jobs = 'peachJobs';
 		export var Combobox = 'peachCombobox';
+		export var Faults = 'peachFaults';
+		export var Jobs = 'peachJobs';
 		export var Monitor = 'peachMonitor';
 		export var Parameter = 'peachParameter';
 		export var ParameterInput = 'peachParameterInput';
@@ -22,13 +23,21 @@ module Peach.C {
 		export var UniqueChannel = 'peachUniqueChannel';
 		export var Unsaved = 'peachUnsaved';
 		export var Range = 'peachRange';
-		export var Integer = 'integer';
+		export var Integer = 'peachInteger';
+		export var HexString = 'peachHexstring';
+	}
+
+	export module Validation {
 		export var HexString = 'hexstring';
+		export var Integer = 'integer';
+		export var RangeMax = 'rangeMax';
+		export var RangeMin = 'rangeMin';
 	}
 
 	export module Controllers {
 		export var Agent = 'AgentController';
 		export var Combobox = 'ComboboxController';
+		export var Faults = 'FaultsDirectiveController';
 		export var Jobs = 'JobsDirectiveController';
 		export var Monitor = 'MonitorController';
 		export var Parameter = 'ParameterController';
@@ -144,12 +153,13 @@ module Peach.C {
 		}
 		export module Directives {
 			export var Agent = 'html/directives/agent.html';
+			export var Combobox = 'html/directives/combobox.html';
+			export var Faults = 'html/directives/faults.html';
 			export var Jobs = 'html/directives/jobs.html';
 			export var Monitor = 'html/directives/monitor.html';
 			export var Parameter = 'html/directives/parameter.html';
 			export var ParameterInput = 'html/directives/parameter-input.html';
 			export var Question = 'html/directives/question.html';
-			export var Combobox = 'html/directives/combobox.html';
 			export var Test = 'html/directives/test.html';
 		}
 	}

@@ -7,25 +7,14 @@ module Peach {
 
 		static $inject = [
 			C.Angular.$scope,
-			C.Angular.$state,
 			C.Services.Job
 		];
 
 		constructor(
 			$scope: IViewModelScope,
-			private $state: ng.ui.IStateService,
 			private jobService: JobService
 		) {
-			$scope.$watch(() => jobService.Faults.length, (newVal, oldVal) => {
-				if (newVal !== oldVal) {
-					this.RefreshFaults();
-				}
-			});
-
-			this.RefreshFaults();
 		}
-
-		public Faults: IFaultSummary[] = [];
 
 		public get ShowLimited(): boolean {
 			return onlyIf(this.Job, () => _.isEmpty(this.Job.pitUrl));
@@ -84,19 +73,6 @@ module Peach {
 
 		public ValueOr(value, alt) {
 			return _.isUndefined(value) ? alt : value;
-		}
-
-		public OnFaultSelected(fault: IFaultSummary) {
-			var params = {
-				bucket: 'all',
-				id: fault.iteration
-			};
-			this.$state.go(C.States.JobFaultsDetail, params);
-		}
-
-		private RefreshFaults() {
-			if (this.jobService.Faults.length > 0)
-				this.Faults = _.last(this.jobService.Faults, 10).reverse();
 		}
 	}
 }

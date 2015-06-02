@@ -36,6 +36,7 @@
 /// <reference path="directives/AgentDirective.ts" />
 /// <reference path="directives/AutoFocusDirective.ts" />
 /// <reference path="directives/ComboboxDirective.ts" />
+/// <reference path="directives/FaultsDirective.ts" />
 /// <reference path="directives/JobsDirective.ts" />
 /// <reference path="directives/MonitorDirective.ts" />
 /// <reference path="directives/ParameterDirective.ts" />
