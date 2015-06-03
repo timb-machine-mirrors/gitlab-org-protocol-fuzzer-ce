@@ -24,6 +24,10 @@ module Peach {
 			return !_.isUndefined(this.Job);
 		}
 
+		public get ShowCommands(): boolean {
+			return this.JobStatus !== JobStatus.Stopped;
+		}
+
 		public get JobStatus(): string {
 			return onlyIf(this.Job, () => this.Job.status);
 		}
