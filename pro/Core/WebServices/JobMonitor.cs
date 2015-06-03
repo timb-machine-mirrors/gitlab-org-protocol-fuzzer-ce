@@ -13,6 +13,9 @@ namespace Peach.Pro.Core.WebServices
 {
 	public interface IJobMonitor : IDisposable
 	{
+		int Pid { get; }
+		bool IsTracking(Job job);
+
 		Job GetJob();
 
 		Job Start(string pitLibraryPath, string pitFile, JobRequest jobRequest);
@@ -28,11 +31,24 @@ namespace Peach.Pro.Core.WebServices
 	public abstract class BaseJobMonitor
 	{
 		static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
+		readonly int _pid = Utilities.GetCurrentProcessId();
+
 		protected Guid? _guid;
 		protected string _pitFile;
 		protected string _pitLibraryPath;
 
 		public EventHandler InternalEvent { get; set; }
+
+		public int Pid { get { return _pid; } }
+
+		public bool IsTracking(Job job)
+		{
+			lock (this)
+			{
+				return _guid.HasValue && _guid.Value == job.Guid;
+			}
+		}
 
 		public Job GetJob()
 		{
