@@ -133,24 +133,26 @@
 
 <div class="space-6"></div>
 
-<div class="row text-center">
+<div class="row text-center"
+		 ng-show="vm.ShowCommands">
 	<button class="btn btn-lg btn-success"
 					ng-click="vm.Continue()"
 					ng-class="{disabled: !vm.CanContinue}">
-		<i class="fa fa-play"></i>
-	</button>
-
-	<button class="btn btn-lg btn-danger"
-					ng-click="vm.Stop()"
-					ng-class="{disabled: !vm.CanStop}">
-		<i class="fa fa-stop"></i>
+		START
 	</button>
 
 	<button class="btn btn-lg btn-default"
 					ng-click="vm.Pause()"
 					ng-class="{disabled: !vm.CanPause}">
-		<i class="fa fa-pause"></i>
+		PAUSE
 	</button>
+
+	<button class="btn btn-lg btn-danger"
+					ng-click="vm.Stop()"
+					ng-class="{disabled: !vm.CanStop}">
+		STOP
+	</button>
+
 </div>
 
 <hr />
