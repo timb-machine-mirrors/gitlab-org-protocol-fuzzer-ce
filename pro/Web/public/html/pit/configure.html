@@ -73,15 +73,15 @@
 				</label>
 				<div class="col-sm-6">
 					<input name="stop"
-									ng-model="vm.Job.rangeStop"
-									type="number"
-									step="1"
-									class="form-control"
-									placeholder="Default"
-									tabindex="3"
-									peach:range
-									peach:range-min="1"
-									peach:range-max="4294967295" />
+								 ng-model="vm.Job.rangeStop"
+								 type="number"
+								 step="1"
+								 class="form-control"
+								 placeholder="4294967295"
+								 tabindex="3"
+								 peach:range
+								 peach:range-min="1"
+								 peach:range-max="4294967295" />
 					<span class="help-block"
 								ng-messages="form.stop.$error"
 								ng-messages-include="html/messages.html">
