@@ -21,6 +21,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 		class TestJobMonitor : IJobMonitor
 		{
 			readonly JobServiceTests _owner;
+			readonly int _pid = Utilities.GetCurrentProcessId();
 
 			public TestJobMonitor(JobServiceTests owner)
 			{
@@ -29,6 +30,16 @@ namespace Peach.Pro.Test.WebApi.Controllers
 
 			public void Dispose()
 			{
+			}
+
+			public int Pid { get { return _pid; } }
+
+			public bool IsTracking(Job job)
+			{
+				lock (this)
+				{
+					return _owner._runningJob != null && _owner._runningJob.Guid == job.Guid;
+				}
 			}
 
 			public Job GetJob()
@@ -62,7 +73,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			}
 
 			public EventHandler InternalEvent { set { } }
-		}
+			}
 
 		class TestBootstrapper : Bootstrapper
 		{
@@ -75,6 +86,21 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			{
 				get { return true; }
 			}
+		}
+
+		static int GetRunningPid()
+		{
+			int pid = -1;
+
+			foreach (var proc in Process.GetProcesses())
+			{
+				if (pid == -1)
+					pid = proc.Id;
+
+				proc.Dispose();
+			}
+
+			return pid;
 		}
 
 		Job _runningJob;
@@ -159,7 +185,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			Directory.CreateDirectory(dir1);
 			j1.LogPath = dir1;
 			j1.Status = JobStatus.Running;
-			j1.Pid +=1 ;
+			j1.Pid = GetRunningPid();
 
 			_runningJob = new Job(new JobRequest(), "pit2.xml");
 
@@ -217,17 +243,20 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			// ours and also in start pending.
 
 			var j1 = new Job(new JobRequest(), "pit1.xml");
-
-			j1.Pid += 1; // Make the pid not be us
-
-			using (var db = new NodeDatabase())
-			{
-				db.UpdateJob(j1);
-			}
+			j1.Pid = GetRunningPid(); // Make the pid not be us
 
 			Assert.AreEqual(j1.Status, JobStatus.StartPending);
 
 			_runningJob = new Job(new JobRequest(), "pit2.xml");
+
+			var j2 = new Job(new JobRequest(), "pit2.xml");
+			j2.Pid = -1; // Make it be an invalid pid
+
+			using (var db = new NodeDatabase())
+			{
+				db.UpdateJob(j1);
+				db.UpdateJob(j2);
+			}
 
 			var result = _browser.Get("/p/jobs", with => with.HttpRequest());
 
@@ -236,11 +265,13 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			var jobs = result.DeserializeJson<Job[]>();
 
 			Assert.NotNull(jobs);
-			Assert.AreEqual(2, jobs.Length);
+			Assert.AreEqual(3, jobs.Length);
 			Assert.AreEqual(j1.Id, jobs[0].Id);
 			Assert.AreEqual(JobStatus.StartPending, jobs[0].Status);
 			Assert.AreEqual(_runningJob.Id, jobs[1].Id);
 			Assert.AreEqual(JobStatus.StartPending, jobs[1].Status);
+			Assert.AreEqual(j2.Id, jobs[2].Id);
+			Assert.AreEqual(JobStatus.Stopped, jobs[2].Status);
 		}
 
 		[Test]
@@ -360,20 +391,27 @@ namespace Peach.Pro.Test.WebApi.Controllers
 				Status = JobStatus.Running
 			};
 
-			using (var db = new NodeDatabase())
+			var jobs = new[] { j1, j2, j3, j4, _runningJob };
+
+			foreach (var j in jobs)
 			{
-				db.UpdateJob(j1);
-				db.UpdateJob(j2);
-				db.UpdateJob(j3);
-				db.UpdateJob(j4);
-				db.UpdateJob(_runningJob);
+				j.LogPath = Path.Combine(Configuration.LogRoot, j.PitFile);
+				Directory.CreateDirectory(j.LogPath);
+
+				using (var db = new JobDatabase(j.DatabasePath))
+				{
+					db.InsertJob(j);
+				}
 			}
+
+			using (var db = new NodeDatabase())
+				db.UpdateJobs(jobs);
 
 			var result = _browser.Get("/p/jobs", with => with.HttpRequest());
 
 			Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
 
-			var jobs = result.DeserializeJson<Job[]>();
+			jobs = result.DeserializeJson<Job[]>();
 
 			Assert.NotNull(jobs);
 			Assert.AreEqual(5, jobs.Length);
@@ -385,13 +423,13 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			Assert.AreEqual(JobStatus.Running, jobs[1].Status);
 
 			Assert.AreEqual(j3.Id, jobs[2].Id);
-			Assert.AreEqual(JobStatus.Stopped, jobs[2].Status);
+			Assert.AreEqual(JobStatus.Running, jobs[2].Status);
 
 			Assert.AreEqual(j4.Id, jobs[3].Id);
 			Assert.AreEqual(JobStatus.Stopped, jobs[3].Status);
 
 			Assert.AreEqual(_runningJob.Id, jobs[4].Id);
-			Assert.AreEqual(JobStatus.Stopped, jobs[4].Status);
+			Assert.AreEqual(JobStatus.Running, jobs[4].Status);
 		}
 	}
 }
