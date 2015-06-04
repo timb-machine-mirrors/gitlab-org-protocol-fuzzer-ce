@@ -9,6 +9,7 @@ module Peach {
 			C.Angular.$scope,
 			C.Angular.$state,
 			C.Angular.$modal,
+			C.Angular.$window,
 			C.Services.Wizard
 		];
 
@@ -16,6 +17,7 @@ module Peach {
 			private $scope: IViewModelScope,
 			private $state: ng.ui.IStateService,
 			private $modal: ng.ui.bootstrap.IModalService,
+			private $window: ng.IWindowService,
 			private wizardService: WizardService
 		) {
 			$scope.vm = this;
@@ -143,6 +145,17 @@ module Peach {
 				return 'active';
 			}
 			return undefined;
+		}
+
+		public ShortcutClass(section: string) {
+			//if (this.$state.includes(section)) {
+			//	return 'active-shortcut';
+			//}
+			return '';
+		}
+
+		public OnHelp() {
+			this.$window.open('/docs', '_blank');
 		}
 	}
 }

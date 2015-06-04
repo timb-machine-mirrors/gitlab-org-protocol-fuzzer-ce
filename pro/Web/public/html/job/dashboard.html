@@ -1,3 +1,4 @@
+
 <div class="alert alert-warning"
 		 ng-show="vm.ShowLimited">
 	<strong>Note:</strong>
@@ -135,24 +136,46 @@
 
 <div class="row text-center"
 		 ng-show="vm.ShowCommands">
-	<button class="btn btn-lg btn-success"
-					ng-click="vm.Continue()"
-					ng-class="{disabled: !vm.CanContinue}">
-		START
-	</button>
+	<div>
+		<button class="btn btn-success"
+						ng-click="vm.Continue()"
+						ng-class="{disabled: !vm.CanContinue}">
+			<i class="fa fa-play"></i>
+			Start
+		</button>
 
-	<button class="btn btn-lg btn-default"
-					ng-click="vm.Pause()"
-					ng-class="{disabled: !vm.CanPause}">
-		PAUSE
-	</button>
+		<button class="btn btn-primary"
+						ng-click="vm.Pause()"
+						ng-class="{disabled: !vm.CanPause}">
+			<i class="fa fa-pause"></i>
+			Pause
+		</button>
 
-	<button class="btn btn-lg btn-danger"
-					ng-click="vm.Stop()"
-					ng-class="{disabled: !vm.CanStop}">
-		STOP
-	</button>
+		<button class="btn btn-danger"
+						ng-click="vm.Stop()"
+						ng-class="{disabled: !vm.CanStop}">
+			<i class="fa fa-stop"></i>
+			Stop
+		</button>
+	</div>
+</div>
 
+<div class="row text-center"
+		 ng-show="!vm.ShowCommands">
+	<div>
+		<button class="btn btn-primary"
+						ng-disabled="vm.IsEditDisabled"
+						ng-click="vm.OnEdit()">
+			<i class="fa fa-edit"></i>
+			Edit Configuration
+		</button>
+		<button class="btn btn-primary"
+						ng-disabled="vm.IsReplayDisabled"
+						ng-click="vm.OnReplay()">
+			<i class="fa fa-reply"></i>
+			Replay Job
+		</button>
+	</div>
 </div>
 
 <hr />

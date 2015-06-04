@@ -412,8 +412,8 @@ namespace Peach.Pro.Core.WebServices
 				old = new HashSet<string>(_cache.Keys);
 			}
 
-			AddLibrary(path, "", "Peach Pro Library 2015 Q1", true);
-			AddLibrary(path, "User", "User Library", false);
+			AddLibrary(path, "", "Pits", true);
+			AddLibrary(path, "User", "Configurations", false);
 
 			lock (_cache)
 			{

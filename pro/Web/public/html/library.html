@@ -1,9 +1,11 @@
 ﻿<div ng-repeat="lib in vm.Libraries">
-	<h3>{{lib.Name}}</h3>
+	<div ng-show="$index" class="page-header">
+		<h1>{{lib.Name}}</h1>
+	</div>
 	<accordion close-others="false">
-		<accordion-group ng-repeat="cat in lib.Categories" 
-				heading="{{cat.Name}}"
-				is-open="true">
+		<accordion-group ng-repeat="cat in lib.Categories"
+										 heading="{{cat.Name}}"
+										 is-open="true">
 			<ul class="list-inline library">
 				<li ng-repeat="entry in cat.Pits">
 					<a href=""
