@@ -431,5 +431,81 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			Assert.AreEqual(_runningJob.Id, jobs[4].Id);
 			Assert.AreEqual(JobStatus.Running, jobs[4].Status);
 		}
+
+		[Test]
+		[TestCase("true")]
+		[TestCase("false")]
+		public void GetRunning(string query)
+		{
+			var j1 = new Job(new JobRequest(), "pit1.xml");
+			Assert.AreEqual(j1.Status, JobStatus.StartPending);
+			j1.IterationCount = 100;
+			j1.Status = JobStatus.Stopped;
+
+			_runningJob = new Job(new JobRequest(), "pit2.xml");
+
+			var dir2 = Path.Combine(Configuration.LogRoot, "pit2");
+			Directory.CreateDirectory(dir2);
+			_runningJob.LogPath = dir2;
+			_runningJob.Status = JobStatus.Running;
+
+			using (var db = new NodeDatabase())
+			{
+				db.UpdateJob(j1);
+				db.UpdateJob(_runningJob);
+			}
+
+			using (var db = new JobDatabase(_runningJob.DatabasePath))
+				db.InsertJob(_runningJob);
+
+			var result = _browser.Get("/p/jobs", with =>
+			{
+				with.Query("running", query);
+				with.HttpRequest();
+			});
+
+			Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+
+			var jobs = result.DeserializeJson<Job[]>();
+			Assert.NotNull(jobs);
+
+			Assert.AreEqual(1, jobs.Length);
+		}
+
+		[Test]
+		[TestCase("true")]
+		[TestCase("false")]
+		public void GetDryRun(string query)
+		{
+			var j1 = new Job(new JobRequest { IsControlIteration = true }, "pit1.xml")
+			{
+				Status = JobStatus.Stopped
+			};
+
+			var j2 = new Job(new JobRequest(), "pit1.xml")
+			{
+				IterationCount = 100,
+				Status = JobStatus.Stopped
+			};
+
+			using (var db = new NodeDatabase())
+			{
+				db.UpdateJob(j1);
+				db.UpdateJob(j2);
+			}
+
+			var result = _browser.Get("/p/jobs", with =>
+			{
+				with.Query("dryrun", query);
+				with.HttpRequest();
+			});
+
+			Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+
+			var jobs = result.DeserializeJson<Job[]>();
+			Assert.NotNull(jobs);
+
+			Assert.AreEqual(1, jobs.Length);
+		}
 	}
 }
