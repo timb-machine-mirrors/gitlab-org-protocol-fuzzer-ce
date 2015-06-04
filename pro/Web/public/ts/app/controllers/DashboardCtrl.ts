@@ -7,11 +7,13 @@ module Peach {
 
 		static $inject = [
 			C.Angular.$scope,
+			C.Angular.$state,
 			C.Services.Job
 		];
 
 		constructor(
 			$scope: IViewModelScope,
+			private $state: ng.ui.IStateService,
 			private jobService: JobService
 		) {
 		}
@@ -77,6 +79,29 @@ module Peach {
 
 		public ValueOr(value, alt) {
 			return _.isUndefined(value) ? alt : value;
+		}
+
+		public get IsEditDisabled(): boolean {
+			return this.ShowLimited;
+		}
+
+		public get IsReplayDisabled(): boolean {
+			return this.ShowLimited;
+		}
+
+		public OnEdit() {
+			var pitId = _.last(this.Job.pitUrl.split('/'));
+			this.$state.go(C.States.Pit, { pit: pitId });
+		}
+
+		public OnReplay() {
+			var pitId = _.last(this.Job.pitUrl.split('/'));
+			this.$state.go(C.States.Pit, {
+				pit: pitId,
+				seed: this.Job.seed,
+				rangeStart: this.Job.rangeStart,
+				rangeStop: this.Job.rangeStop
+			});
 		}
 	}
 }

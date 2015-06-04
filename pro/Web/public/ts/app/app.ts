@@ -158,6 +158,11 @@ module Peach {
 					templateUrl: C.Templates.Pit.Configure,
 					controller: ConfigureController,
 					controllerAs: C.ViewModel,
+					params: {
+						seed: undefined,
+						rangeStart: undefined,
+						rangeStop: undefined
+					},
 					ncyBreadcrumb: { 
 						label: '{{pit.name}}',
 						parent: C.States.MainLibrary

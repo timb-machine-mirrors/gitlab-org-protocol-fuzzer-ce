@@ -19,9 +19,12 @@ module Peach {
 		) {
 			this.pitService.LoadPit().then((pit: IPit) => {
 				this.Job = {
-					pitUrl: pit.pitUrl
+					pitUrl: pit.pitUrl,
+					seed: $state.params['seed'],
+					rangeStart: $state.params['rangeStart'] || undefined,
+					rangeStop: $state.params['rangeStop']
 				};
-			})
+			});
 		}
 
 		public IsOpen: boolean = false;
