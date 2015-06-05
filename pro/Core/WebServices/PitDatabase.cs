@@ -451,7 +451,7 @@ namespace Peach.Pro.Core.WebServices
 				throw new UnauthorizedAccessException("The destination pit library is locked.");
 
 			// Only support a single user library for now
-			Debug.Assert(dstLib.Name == "User Library");
+			Debug.Assert(dstLib.Name == "Configurations");
 
 			var srcPit = GetPitByUrl(pitUrl);
 			if (srcPit == null)
