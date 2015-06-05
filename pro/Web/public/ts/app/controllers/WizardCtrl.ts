@@ -3,19 +3,19 @@
 module Peach {
 	"use strict";
 
+	enum WizardStep {
+		Intro = 1,
+		QandA,
+		Review
+	}
+
 	export interface IWizardScope extends IFormScope {
 		Title: string;
 		Question: IQuestion;
-		Step: number;
+		Step: WizardStep;
 		NextPrompt: string;
 		BackPrompt: string;
 		Defines: IParameter[];
-	}
-
-	enum WizardStep {
-		Intro = 1,
-		QA,
-		Review
 	}
 
 	export class WizardController {
@@ -46,7 +46,7 @@ module Peach {
 		private unregister;
 		private track: ITrack;
 
-		public OnNextTrack() {
+		public OnNextTrack(): void {
 			// this is needed to make unit tests happy
 			if (this.unregister) { 
 				this.unregister();
@@ -56,32 +56,29 @@ module Peach {
 			this.$state.go(next.state, next.params);
 		}
 
-		private onStateChange() {
+		private onStateChange(): void {
 			this.resetPrompts();
 
 			if (this.$state.is(this.track.start)) {
 				this.initIntro();
-			}
-			else if (this.$state.is(this.track.finish)) {
+			} else if (this.$state.is(this.track.finish)) {
 				this.initReview();
 			} else {
 				var id = this.$state.params['id'];
-				this.$scope.Step = WizardStep.QA;
+				this.$scope.Step = WizardStep.QandA;
 				this.loadQuestion(id);
 			}
 		}
 
-		private initIntro() {
+		private initIntro(): void {
 			this.$scope.Step = WizardStep.Intro;
-			var promise = this.track.Begin();
-			if (promise) {
-				promise.then(() => {
-					this.loadQuestion(0);
-				});
-			}
+			this.$scope.Question = {
+				id: 0,
+				type: QuestionTypes.Intro
+			};
 		}
 
-		private initReview() {
+		private initReview(): void {
 			if (!this.track.IsValid()) {
 				this.$state.go(this.track.start);
 				return;
@@ -98,7 +95,7 @@ module Peach {
 			this.$scope.BackPrompt = this.track.backPrompt;
 		}
 
-		private loadQuestion(id: number) {
+		private loadQuestion(id: number): void {
 			this.$scope.Question = this.track.GetQuestionById(id);
 			if (this.$scope.Question) {
 				this.prepareQuestion();
@@ -135,9 +132,24 @@ module Peach {
 			return this.track.history.length > 0;
 		}
 
-		public Next() {
+		public Next(): void {
 			if (this.$scope.Question.type === QuestionTypes.Done) {
 				this.OnNextTrack();
+				return;
+			}
+
+			if (this.$scope.Question.type === QuestionTypes.Intro) {
+				var promise = this.track.Begin();
+				if (promise) {
+					promise.then(() => {
+						var first = this.track.GetQuestionById(1);
+						if (_.isUndefined(first)) {
+							this.$state.go(this.track.finish);
+						} else {
+							this.$state.go(this.track.steps, { id: 1 });
+						}
+					});
+				}
 				return;
 			}
 
@@ -155,7 +167,7 @@ module Peach {
 			}
 		}
 
-		public Back() {
+		public Back(): void {
 			if (this.$scope.Question.type === QuestionTypes.Done) {
 				this.OnRestart();
 				return;
@@ -173,12 +185,12 @@ module Peach {
 			}
 		}
 
-		public OnRestart() {
-			this.track.Restart();
+		public OnRestart(): void {
+			this.track.history = [];
 			this.$state.go(this.track.start);
 		}
 
-		public OnRemoveAgent(index: number) {
+		public OnRemoveAgent(index: number): void {
 			this.track.agents.splice(index, 1);
 		}
 
@@ -209,7 +221,7 @@ module Peach {
 			return q.next;
 		}
 
-		private prepareQuestion() {
+		private prepareQuestion(): void {
 			this.$scope.Defines = this.pitService.Pit.config;
 
 			// special stuff to do based on the next question
@@ -241,7 +253,7 @@ module Peach {
 			}
 		}
 
-		private resetPrompts() {
+		private resetPrompts(): void {
 			this.$scope.NextPrompt = "Next";
 			this.$scope.BackPrompt = "Back";
 		}
@@ -280,7 +292,7 @@ module Peach {
 		}
 
 		public get IsSetVars(): boolean {
-			return this.$state.includes(C.States.PitWizardVars);
+			return this.$state.includes(WizardTrackIntro(C.Tracks.Vars));
 		}
 
 		public OnInsertDefine(def: IParameter) {

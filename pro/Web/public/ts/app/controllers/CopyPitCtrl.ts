@@ -28,7 +28,7 @@ module Peach {
 			this.Error = "";
 
 			this.pending = true;
-			this.pitService.SaveTemplate(this.Pit)
+			this.pitService.SaveConfig(this.Pit)
 				.then((response: ng.IHttpPromiseCallbackArg<IPit>) => {
 					this.pending = false;
 					this.$modalInstance.close(response.data);

@@ -49,6 +49,8 @@ module Peach {
 						return deferred.promise;
 					}
 					return undefined;
+				}, (response: ng.IHttpPromiseCallbackArg<IError>) => {
+					this.$state.go(C.States.MainError, { message: response.data.errorMessage });
 				})
 			;
 		}
@@ -144,19 +146,19 @@ module Peach {
 
 		public Start(job: IJobRequest): ng.IPromise<IJob> {
 			if (this.CanStart) {
-				var promise = this.$http.post(C.Api.Jobs, job);
-				promise.error(reason => {
-					console.log('JobService.StartJob().error>', reason);
-				});
+				var promise = this.$http.post(C.Api.Jobs, job)
+					.error(reason => {
+						console.log('JobService.StartJob().error>', reason);
+					})
+				;
 				return StripHttpPromise(this.$q, promise);
 			}
 		}
 
 		public Delete(job: IJob): ng.IPromise<any> {
-			var promise = this.$http.delete(job.jobUrl);
-			promise.success(() => {
-				return this.GetJobs();
-			});
+			var promise = this.$http.delete(job.jobUrl)
+				.success(() => { return this.GetJobs(); })
+			;
 			return StripHttpPromise(this.$q, promise);
 		}
 		
@@ -201,19 +203,19 @@ module Peach {
 			}
 			
 			this.poller = this.$interval(() => {
-				var promise = this.$http.get(this.job.jobUrl);
-				promise.success((job: IJob) => {
-					this.job = job;
-					this.$rootScope['job'] = job;
-					if (job.status === JobStatus.Stopped ||
-						job.status === JobStatus.Paused) {
-						this.StopJobPoller();
-					}
-					if (this.faults.length !== job.faultCount) {
-						this.ReloadFaults();
-					}
-				});
-				promise.error(reason => this.OnError(reason));
+				this.$http.get(this.job.jobUrl)
+					.success((job: IJob) => {
+						this.job = job;
+						this.$rootScope['job'] = job;
+						if (job.status === JobStatus.Stopped ||
+							job.status === JobStatus.Paused) {
+							this.StopJobPoller();
+						}
+						if (this.faults.length !== job.faultCount) {
+							this.ReloadFaults();
+						}
+					})
+					.error(reason => this.OnError(reason));
 			}, JOB_INTERVAL);
 		}
 		
@@ -228,6 +230,10 @@ module Peach {
 					this.faults = faults;
 				})
 				.error(reason => this.OnError(reason));
+		}
+
+		public LoadMetric<T>(metric: string): ng.IHttpPromise<T> {
+			return this.$http.get(this.Job.metrics[metric]);
 		}
 	}
 }

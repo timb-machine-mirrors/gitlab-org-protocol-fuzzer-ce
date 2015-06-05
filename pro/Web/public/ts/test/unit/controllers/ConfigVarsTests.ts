@@ -35,6 +35,7 @@ describe("Peach", () => {
 			service = $injector.get(C.Services.Pit);
 
 			$templateCache.put(C.Templates.Home, '');
+			$templateCache.put(C.Templates.Error, '');
 
 			$state.params['pit'] = pitId;
 

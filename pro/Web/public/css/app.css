@@ -162,3 +162,15 @@ ul.library li a {
 .breadcrumb {
 	background-color: transparent;
 }
+
+.badge-transparent {
+	background-color: transparent;
+}
+
+.submenu .badge {
+	padding: 1px 7px;
+}
+
+.peach-error {
+	width: 500px;
+}

@@ -49,17 +49,20 @@ module Peach {
 		public LoadPit(): ng.IPromise<IPit> {
 			var url = C.Api.PitUrl.replace(':id', this.CurrentPitId);
 			var promise = this.$http.get(url);
-			promise.success((pit: IPit) => this.OnSuccess(pit));
+			promise.success((pit: IPit) => this.OnSuccess(pit, false));
+			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
+				this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
+			});
 			return StripHttpPromise(this.$q, promise);
 		}
 
 		public SavePit(): ng.IPromise<IPit> {
 			var promise = this.$http.post(this.pit.pitUrl, this.pit);
-			promise.success((pit: IPit) => this.OnSuccess(pit));
+			promise.success((pit: IPit) => this.OnSuccess(pit, true));
 			return StripHttpPromise(this.$q, promise);
 		}
 		
-		public SaveConfig(config: IParameter[]): ng.IPromise<IPit> {
+		public SaveVars(config: IParameter[]): ng.IPromise<IPit> {
 			this.pit.config = config;
 			return this.SavePit();
 		}
@@ -69,7 +72,7 @@ module Peach {
 			return this.SavePit();
 		}
 
-		public SaveTemplate(pit: IPit): ng.IHttpPromise<IPit> {
+		public SaveConfig(pit: IPit): ng.IHttpPromise<IPit> {
 			var request: IPitCopy = {
 				libraryUrl: this.userPitLibrary,
 				pitUrl: pit.pitUrl,
@@ -77,7 +80,7 @@ module Peach {
 				description: pit.description
 			}
 			var promise = this.$http.post(C.Api.Pits, request);
-			promise.success((pit: IPit) => this.OnSuccess(pit));
+			promise.success((pit: IPit) => this.OnSuccess(pit, true));
 			return promise;
 		}
 
@@ -85,9 +88,12 @@ module Peach {
 			return onlyIf(this.pit, () => _.last(this.pit.versions).configured) || false;
 		}
 		
-		private OnSuccess(pit: IPit) {
+		private OnSuccess(pit: IPit, saved: boolean) {
 			this.pit = pit;
 			this.$rootScope['pit'] = pit;
+			if (saved) {
+				this.$rootScope.$emit(C.Events.PitChanged, pit);
+			}
 		}
 	}
 }
