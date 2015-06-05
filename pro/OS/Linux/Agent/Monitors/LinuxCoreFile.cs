@@ -49,7 +49,6 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 	public class LinuxCoreFile : Monitor
 	{
 		protected string corePattern = "|{0} {1} -p=%p -u=%u -g=%g -s=%s -t=%t -h=%h -e=%e";
-		protected string monoExecutable = "/usr/bin/mono";
 		protected string origionalCorePattern = null;
 		protected string origionalSuidDumpable = null;
 		protected string linuxCrashHandlerExe = "PeachLinuxCrashHandler.exe";
@@ -60,6 +59,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 
 		public string LogFolder { get; private set; }
 		public string Executable { get; private set; }
+		public string Mono { get; private set; }
 
 		public LinuxCoreFile(string name)
 			: base(name)
@@ -101,7 +101,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 				// Register our crash handler via proc file system
 
 				var corePat = string.Format(corePattern,
-					monoExecutable,
+					Mono,
 					linuxCrashHandlerExe);
 
 				File.WriteAllText(
