@@ -138,7 +138,7 @@ module Peach {
 		}
 
 		public GetJobs(): ng.IPromise<IJob[]> {
-			var params = { filter: 'dryRun' };
+			var params = { dryrun: false };
 			var promise = this.$http.get(C.Api.Jobs, { params: params })
 				.success((jobs: IJob[]) => this.jobs = jobs);
 			return StripHttpPromise(this.$q, promise);
