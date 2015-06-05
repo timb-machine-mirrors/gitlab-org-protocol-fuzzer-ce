@@ -88,24 +88,19 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			}
 		}
 
-		static int GetRunningPid()
-		{
-			int pid = -1;
-
-			foreach (var proc in Process.GetProcesses())
-			{
-				if (pid == -1)
-					pid = proc.Id;
-
-				proc.Dispose();
-			}
-
-			return pid;
-		}
-
 		Job _runningJob;
 		Browser _browser;
 		TempDirectory _tmpDir;
+		Process _process;
+
+		static string CrashableServer
+		{
+			get
+			{
+				var ext = Platform.GetOS() == Platform.OS.Windows ? ".exe" : "";
+				return Utilities.GetAppResourcePath("CrashableServer") + ext;
+			}
+		}
 
 		[SetUp]
 		public void SetUp()
@@ -115,12 +110,31 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			_browser = new Browser(new TestBootstrapper(new TestJobMonitor(this)));
 
 			Configuration.LogRoot = _tmpDir.Path;
+
+			_process = new Process()
+			{
+				StartInfo = new ProcessStartInfo
+				{
+					FileName = CrashableServer,
+					Arguments = "127.0.0.1 0",
+					UseShellExecute = false,
+					RedirectStandardError = true,
+					RedirectStandardInput = true,
+					RedirectStandardOutput = true,
+				}
+			};
+
+			_process.Start();
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
 			_tmpDir.Dispose();
+
+			_process.Kill();
+			_process.WaitForExit();
+			_process.Dispose();
 		}
 
 		[Test]
@@ -185,7 +199,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			Directory.CreateDirectory(dir1);
 			j1.LogPath = dir1;
 			j1.Status = JobStatus.Running;
-			j1.Pid = GetRunningPid();
+			j1.Pid = _process.Id;
 
 			_runningJob = new Job(new JobRequest(), "pit2.xml");
 
@@ -243,7 +257,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			// ours and also in start pending.
 
 			var j1 = new Job(new JobRequest(), "pit1.xml");
-			j1.Pid = GetRunningPid(); // Make the pid not be us
+			j1.Pid = _process.Id; // Make the pid not be us
 
 			Assert.AreEqual(j1.Status, JobStatus.StartPending);
 
@@ -338,16 +352,6 @@ namespace Peach.Pro.Test.WebApi.Controllers
 
 			var now = DateTime.Now;
 
-			int pid = -1;
-
-			foreach (var proc in Process.GetProcesses())
-			{
-				if (pid == -1)
-					pid = proc.Id;
-
-				proc.Dispose();
-			}
-
 			// Our pid and not being monitored and recent herarbeat
 			var j1 = new Job(new JobRequest(), "pit1.xml")
 			{
@@ -361,7 +365,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			{
 				StartDate = now - TimeSpan.FromHours(1),
 				HeartBeat = now - TimeSpan.FromSeconds(30),
-				Pid = pid,
+				Pid = _process.Id,
 				Status = JobStatus.Running
 			};
 
@@ -370,7 +374,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			{
 				StartDate = now - TimeSpan.FromHours(1),
 				HeartBeat = now - TimeSpan.FromSeconds(60),
-				Pid = pid,
+				Pid = _process.Id,
 				Status = JobStatus.Running
 			};
 
@@ -430,6 +434,82 @@ namespace Peach.Pro.Test.WebApi.Controllers
 
 			Assert.AreEqual(_runningJob.Id, jobs[4].Id);
 			Assert.AreEqual(JobStatus.Running, jobs[4].Status);
+		}
+
+		[Test]
+		[TestCase("true")]
+		[TestCase("false")]
+		public void GetRunning(string query)
+		{
+			var j1 = new Job(new JobRequest(), "pit1.xml");
+			Assert.AreEqual(j1.Status, JobStatus.StartPending);
+			j1.IterationCount = 100;
+			j1.Status = JobStatus.Stopped;
+
+			_runningJob = new Job(new JobRequest(), "pit2.xml");
+
+			var dir2 = Path.Combine(Configuration.LogRoot, "pit2");
+			Directory.CreateDirectory(dir2);
+			_runningJob.LogPath = dir2;
+			_runningJob.Status = JobStatus.Running;
+
+			using (var db = new NodeDatabase())
+			{
+				db.UpdateJob(j1);
+				db.UpdateJob(_runningJob);
+			}
+
+			using (var db = new JobDatabase(_runningJob.DatabasePath))
+				db.InsertJob(_runningJob);
+
+			var result = _browser.Get("/p/jobs", with =>
+			{
+				with.Query("running", query);
+				with.HttpRequest();
+			});
+
+			Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+
+			var jobs = result.DeserializeJson<Job[]>();
+			Assert.NotNull(jobs);
+
+			Assert.AreEqual(1, jobs.Length);
+		}
+
+		[Test]
+		[TestCase("true")]
+		[TestCase("false")]
+		public void GetDryRun(string query)
+		{
+			var j1 = new Job(new JobRequest { IsControlIteration = true }, "pit1.xml")
+			{
+				Status = JobStatus.Stopped
+			};
+
+			var j2 = new Job(new JobRequest(), "pit1.xml")
+			{
+				IterationCount = 100,
+				Status = JobStatus.Stopped
+			};
+
+			using (var db = new NodeDatabase())
+			{
+				db.UpdateJob(j1);
+				db.UpdateJob(j2);
+			}
+
+			var result = _browser.Get("/p/jobs", with =>
+			{
+				with.Query("dryrun", query);
+				with.HttpRequest();
+			});
+
+			Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+
+			var jobs = result.DeserializeJson<Job[]>();
+			Assert.NotNull(jobs);
+
+			Assert.AreEqual(1, jobs.Length);
 		}
 	}
 }
