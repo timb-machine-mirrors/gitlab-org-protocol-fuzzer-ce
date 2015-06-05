@@ -61,8 +61,7 @@ module Peach {
 		history: number[];
 
 		Begin(): ng.IPromise<any>;
-		Finish();
-		Restart();
+		Finish(): void;
 
 		GetQuestionById(id: number): IQuestion;
 		GetQuestionByKey(key: string): IQuestion;

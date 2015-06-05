@@ -186,7 +186,7 @@
 						<a ui-sref="pit({pit: vm.PitId})">
 							<i class="fa fa-sliders"></i>
 							<span class="menu-text">
-								Configure
+								Pit
 							</span>
 						</a>
 					</li>
@@ -207,8 +207,12 @@
 							    ng-repeat="item in vm.WizardTracks">
 								<a ui-sref="{{item.start}}({pit: vm.PitId, track: item.id, id: 0})">
 									<span class="menu-text">
-										<i ng-class="{'fa fa-check green': vm.IsComplete(item.id)}"></i>
 										{{item.name}}
+										<span ng-cloak
+													ng-show="vm.IsComplete(item.id)"
+													class="badge badge-transparent">
+											<i ng-class="{'fa fa-check-circle fa-lg green': vm.IsComplete(item.id)}"></i>
+										</span>
 									</span>
 								</a>
 							</li>
@@ -220,7 +224,7 @@
 						   ng-click="vm.OnSubClick($event, 'pit.advanced')">
 							<i class="fa fa-wrench"></i>
 							<span class="menu-text">
-								Advanced
+								Configure
 							</span>
 							<b class="arrow fa fa-angle-down"></b>
 						</a>

@@ -47,7 +47,7 @@ module Peach {
 		}
 
 		public OnSave(): void {
-			var promise = this.pitService.SaveConfig(this.Config);
+			var promise = this.pitService.SaveVars(this.Config);
 			promise.then(() => {
 				this.isSaved = true;
 				this.$scope.form.$setPristine();

@@ -96,12 +96,16 @@ module Peach {
 
 		public OnReplay() {
 			var pitId = _.last(this.Job.pitUrl.split('/'));
-			this.$state.go(C.States.Pit, {
-				pit: pitId,
-				seed: this.Job.seed,
-				rangeStart: this.Job.rangeStart,
-				rangeStop: this.Job.rangeStop
-			});
+			this.$state
+				.go(C.States.Pit, {
+					pit: pitId,
+					seed: this.Job.seed,
+					rangeStart: this.Job.rangeStart,
+					rangeStop: this.Job.rangeStop
+				})
+				.catch(reason => {
+					console.log('failed to go', reason);
+				});
 		}
 	}
 }

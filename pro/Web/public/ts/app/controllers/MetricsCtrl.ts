@@ -61,7 +61,6 @@ module Peach {
 		static $inject = [
 			C.Angular.$scope,
 			C.Angular.$state,
-			C.Angular.$http,
 			C.Angular.$interpolate,
 			C.Angular.$templateCache,
 			C.Angular.$timeout,
@@ -72,7 +71,6 @@ module Peach {
 		constructor(
 			private $scope: IMetricsScope,
 			private $state: ng.ui.IStateService,
-			private $http: ng.IHttpService,
 			private $interpolate: ng.IInterpolateService,
 			private $templateCache: ng.ITemplateCacheService,
 			private $timeout: ng.ITimeoutService,
@@ -132,7 +130,7 @@ module Peach {
 		}
 
 		private update(isNew: boolean): void {
-			var promise = this.getData();
+			var promise = this.jobService.LoadMetric(this.$scope.metric);
 			switch (this.$scope.metric) {
 			case C.Metrics.BucketTimeline.id:
 				var items = new this.VisDataSet();
@@ -214,10 +212,6 @@ module Peach {
 				});
 				break;
 			}
-		}
-
-		private getData<T>(): ng.IHttpPromise<T> {
-			return this.$http.get(this.jobService.Job.metrics[this.$scope.metric]);
 		}
 	}
 }

@@ -26,7 +26,6 @@ module Peach {
 		) {
 			$scope.Title = "Test";
 			this.track = this.wizardService.GetTrack(C.Tracks.Test);
-			this.pitService.LoadPit();
 		}
 
 		private track: ITrack;
@@ -51,7 +50,8 @@ module Peach {
 
 		public get CanContinue(): boolean {
 			return onlyIf(this.testService.TestResult, () => { 
-				return this.testService.TestResult.status === TestStatus.Pass;
+				return this.testService.CanBeginTest &&
+					this.testService.TestResult.status === TestStatus.Pass;
 			}) || false;
 		}
 

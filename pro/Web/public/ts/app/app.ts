@@ -26,10 +26,10 @@ module Peach {
 	}
 
 	var p = angular.module("Peach", [
+		"ngMessages",
 		"angular-loading-bar",
 		"chart.js",
 		"ncy-angular-breadcrumb",
-		"ngMessages",
 		"ngSanitize",
 		"ngVis",
 		"smart-table",
@@ -39,13 +39,6 @@ module Peach {
 	]);
 
 	registerModule(Peach, p);
-
-	p.config([
-		C.Angular.$httpProvider,
-		($httpProvider: ng.IHttpProvider) => {
-			$httpProvider.interceptors.push(C.Services.HttpError);
-		}
-	]);
 
 	p.config([
 		C.Angular.$breadcrumbProvider,
@@ -63,7 +56,7 @@ module Peach {
 			$stateProvider: angular.ui.IStateProvider,
 			$urlRouterProvider: ng.ui.IUrlRouterProvider
 		) => {
-			$urlRouterProvider.otherwise('/');
+			$urlRouterProvider.otherwise('/error');
 
 			$stateProvider
 				// ----- Main -----
@@ -86,18 +79,20 @@ module Peach {
 					controllerAs: C.ViewModel,
 					ncyBreadcrumb: { label: 'Library' }
 				})
-				.state(C.States.MainTemplates, {
-					url: '/templates',
-					templateUrl: C.Templates.Templates,
-					controller: TemplatesController,
-					controllerAs: C.ViewModel
-				})
 				.state(C.States.MainJobs, {
 					url: '/jobs',
 					templateUrl: C.Templates.Jobs,
 					controller: JobsController,
 					controllerAs: C.ViewModel,
 					ncyBreadcrumb: { label: 'Jobs' }
+				})
+				.state(C.States.MainError, {
+					url: '/error',
+					templateUrl: C.Templates.Error,
+					controller: ErrorController,
+					controllerAs: C.ViewModel,
+					params: { message: undefined },
+					ncyBreadcrumb: { label: 'Oops!' }
 				})
 
 				// ----- Job -----
@@ -194,7 +189,7 @@ module Peach {
 				.state(C.States.PitAdvanced, {
 					abstract: true,
 					url: '/advanced',
-					ncyBreadcrumb: { label: 'Advanced' }
+					ncyBreadcrumb: { label: 'Configure' }
 				})
 				.state(C.States.PitAdvancedVariables, {
 					url: '/variables',

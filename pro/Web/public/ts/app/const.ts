@@ -9,6 +9,10 @@ module Peach.C {
 		export var VisDataSet = 'VisDataSet';
 	}
 
+	export module Events {
+		export var PitChanged = 'PitChanged';
+	}
+
 	export module Directives {
 		export var Agent = 'peachAgent';
 		export var AutoFocus = 'peachAutoFocus';
@@ -117,7 +121,7 @@ module Peach.C {
 		export var Home = 'html/home.html';
 		export var Jobs = 'html/jobs.html';
 		export var Library = 'html/library.html';
-		export var Templates = 'html/templates.html';
+		export var Error = 'html/error.html';
 		export module Job {
 			export var Dashboard = 'html/job/dashboard.html';
 			export module Faults {
@@ -169,7 +173,7 @@ module Peach.C {
 		export var MainHome = 'main.home';
 		export var MainJobs = 'main.jobs';
 		export var MainLibrary = 'main.library';
-		export var MainTemplates = 'main.templates';
+		export var MainError = 'main.error';
 
 		export var Job = 'job';
 		export var JobFaults = 'job.faults';
@@ -179,10 +183,6 @@ module Peach.C {
 		export var Pit = 'pit';
 
 		export var PitWizard = 'pit.wizard';
-		export var PitWizardVars = 'pit.wizard.vars';
-		export var PitWizardFault = 'pit.wizard.fault';
-		export var PitWizardData = 'pit.wizard.data';
-		export var PitWizardAuto = 'pit.wizard.auto';
 		export var PitWizardTest = 'pit.wizard.test';
 
 		export var PitAdvanced = 'pit.advanced';
