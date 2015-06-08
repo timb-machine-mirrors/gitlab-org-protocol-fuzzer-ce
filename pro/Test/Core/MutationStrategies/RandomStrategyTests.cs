@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
-using Peach.Core.Dom;
 using Peach.Core.Test;
+using Peach.Pro.Core;
+using Action = Peach.Core.Dom.Action;
+using Random = Peach.Core.Random;
 
 namespace Peach.Pro.Test.Core.MutationStrategies
 {
@@ -151,10 +154,10 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 
 			// verify values
 			// 1000 mutations, control on iteration 1, 201, 401, 601, 801 = 1005 actions
-			// Random number between 1 and 5 is on average 3, for 1000 iterations is 3000 mutations
+			// Random gaussian number between 1 and 5 is on average 1.8, for 1000 iterations is 1800 mutations
 			Assert.AreEqual(1005, actions.Count);
-			Assert.Greater(allStrategies.Count, 2500);
-			Assert.Less(allStrategies.Count, 3100);
+			Assert.Greater(allStrategies.Count, 1800);
+			Assert.Less(allStrategies.Count, 2000);
 		}
 
 		[Test]
@@ -773,8 +776,8 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 					++total;
 			}
 
-			Assert.Greater(total, 1);
-			Assert.Less(total, 10);
+			Assert.GreaterOrEqual(total, 1);
+			Assert.LessOrEqual(total, 10);
 		}
 
 		[Test]
@@ -1013,7 +1016,7 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 
 			// Normally there are 40 fuzzed outputs.
 			// With state/action mutations there should be more.
-			Assert.AreEqual(58, dataModels.Count);
+			Assert.Greater(dataModels.Count, 40);
 		}
 
 		[Test]
@@ -1067,8 +1070,8 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 
 			var pct = (1.0 * numUpper) / (numUpper + numLower);
 
-			Assert.Greater(pct, 0.47);
-			Assert.Less(pct, 0.53);
+			Assert.Greater(pct, 0.46);
+			Assert.Less(pct, 0.54);
 		}
 
 		[Test]
@@ -1101,10 +1104,10 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 	</Test>
 </Peach>";
 
-			RunSwitchTest(xml, 1, 2000);
+			RunSwitchTest(xml, 1, 4000);
 
-			// 1 control, 2000 mutations
-			Assert.AreEqual(2001, iterStrategies.Count);
+			// 1 control, 4000 mutations
+			Assert.AreEqual(4001, iterStrategies.Count);
 
 			int numStatic = 0;
 			int numLower = 0;
@@ -1123,10 +1126,10 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 			Assert.AreEqual(1, numOther); // control iteration
 
 			// StringStatic has 1659, StringCaseLower has 1
-			// In 2000 iterations, it should only once
+			// In 4000 iterations, it should only run a few times
 
-			Assert.AreEqual(1, numLower);
-			Assert.AreEqual(2000 - numLower, numStatic);
+			Assert.LessOrEqual(numLower, 5);
+			Assert.AreEqual(4000 - numLower, numStatic);
 		}
 
 		[Test]
