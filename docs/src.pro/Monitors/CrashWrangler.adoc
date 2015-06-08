@@ -3,22 +3,31 @@
 [[Monitors_CrashWrangler]]
 == CrashWrangler Monitor (OS X)
 
-The _CrashWrangler_ monitor launches a process attached to the CrashWrangler debugger and 
-monitors the process for crashes and other faults. This monitor provides the preferred method 
-of catching faults on OS X.
+*Monitor Categores*: *Automation*, *Data collection*, *Fault detection*
 
-The _CrashWrangler_ monitor detects crashes, exceptions, access violations, and faults. 
-The monitor can generate faults for an application that exits early or that fails to exit. 
+IMPORTANT: The gdb debugger and xref:Monitors_Gdb[gdb] monitor are the preferred tools to detect crashes and to collect core files on OS X.
 
-After detecting a fault, this monitor collects a stack trace, data from the device log files, 
-and crash dumps. Additionally, the monitor logs exceptions, and updates fault bucket 
-information. For bucketing, Peach uses the text from the fault to determine the major bucket 
-level. The minor bucket level is not used. The risk evaluation provides the following 
-levels: exploitable, not exmploitable, or unknown.  
+The _CrashWrangler_ monitor launches a process attached to the CrashWrangler debugger 
+and monitors the process for crashes and other faults. This monitor runs only on OS X 
+systems. Use this monitor when gdb is not an option, such as when anti-debugging 
+mechanisms are used on the test target.
 
-NOTE: This monitor uses Apple's Crash Wrangler tool that can be downloaded from the developer website. Crash Wrangler must be compiled on each machine it is used. 
+_CrashWrangler_ monitor detects crashes, exceptions, access violations, and faults. 
+This monitor can generate faults for an application that exits early or that fails to exit. 
 
-IMPORTANT: When using more than one instance of CrashWrangler in the same fuzzing session, assign unique names for the CwLockFile, CwLogFile, and CwPidFile files used with each instance of CrashWrangler. This practice will avoid contention issues involving these files.
+After detecting a fault, _CrashWrangler_ monitor collects a stack trace, data from 
+the device log files, and crash dumps. Additionally, the monitor logs exceptions, and 
+updates fault bucket information. For bucketing, Peach uses the text from the fault to 
+determine the major bucket level. The minor bucket level is not used. The risk 
+evaluation provides the following levels: exploitable, not exmploitable, or unknown.  
+
+[TIP]
+====
+This monitor uses Apple's Crash Wrangler tool that can be downloaded from the 
+developer website. Crash Wrangler must be compiled on each machine it is used. 
+
+When using more than one instance of CrashWrangler in the same fuzzing session, assign unique names for the CwLockFile, CwLogFile, and CwPidFile files used with each instance of CrashWrangler. This practice will avoid contention issues involving these files.
+====
 
 === Parameters
 

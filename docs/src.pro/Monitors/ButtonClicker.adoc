@@ -9,11 +9,11 @@ watches and clicks the appropriate button within the specified window. For examp
 you can specify that _ButtonClicker_ click an "OK" button to perform an action or 
 to close a window.
 
-The intent of this monitor is to activate an action, or to close a window keep a 
+The intent of this monitor is to activate an action, or to close a window to keep a 
 fuzzing session active. _Buttonclicker_ runs from the beginning of a fuzzing session 
 to the end of the session.
 
-For example,
+
 
 For example, if an application crashes and needs to restart or has trouble starting, it might display a popup window asking to start with a specific set of features that could aid in troubleshooting the cause of failure. A sample popup window consistent with this situation follows:
 
@@ -34,10 +34,10 @@ in the message body.
 
 _Required:_
 
-WindowText:: Name of the window or dialog box. Peach performs a string search to 
-determine whether matching text occurs in the popup window.
+WindowText:: Text used to identify the  window that contains the button to click. 
+Peach performs a string search to determine whether matching text occurs in the popup window. The _WindowText_ is not the title of the window.
 ButtonName:: Text label of the button to click. The label is displayed to the user, 
-and is on or around the button that will receive the click.
+and is on or near the button that will receive the click.
 
 _Optional:_
 
@@ -45,7 +45,11 @@ None.
 
 [TIP]
 ====
-If Peach has trouble clicking a button, the button might have a link to a shortcut key, and is displayed with an underlined character. Windows does this by inserting an ampersand "&" immediately before the shortcut key within the button label. Further, not all underlining shows in the initial display of the window.
+If Peach has trouble clicking a button, the button might have a link to a shortcut key.
+
+The shortcut key is displayed in the label using an underlined character. Windows does 
+this by inserting an ampersand "&" immediately before the shortcut key within the button 
+label. Further, not all underlining shows in the initial display of the window.
 
 In an application, you can manually force underlining to display in window buttons by 
 pressing the <CTRL> or <ALT> key. Once you find the underlining in the application, 
@@ -53,9 +57,9 @@ you can adjust the value of the +ButtonName+ parameter for _ButtonClick_ by inse
 an ampersand (&) immediately before any underlined character. Then, Peach will find the 
 button to click.
 
-In Microsoft Word, the Browsing dialog box used to open a document does not immediately 
-display underlining in its command buttons. You can see this by following the sequence 
-that opens a file:
+For example, in Microsoft Word, the Browsing dialog box used to open a document does 
+not immediately display underlining in its command buttons. You can see this by following 
+the sequence that opens a file:
 
 . Click *File* on the ribbon.
 . Click *Open* on the vertical menu.
@@ -72,7 +76,7 @@ ifdef::peachug[]
 
 .Basic Usage Example +
 
-This parameter example is from a setup that uses the ButtonClicker monitor. The monitor will respond to the pop-up window that displays when restarting the application after a crash.
+This parameter example is from a setup that uses the _ButtonClicker_ monitor. The monitor will respond to the pop-up window that displays when restarting the application after a crash.
 
 The ButtonClicker monitor uses the following parameter settings to click the "No" button in the pop-up window :
 
