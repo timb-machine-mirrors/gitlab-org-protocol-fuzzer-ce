@@ -760,7 +760,7 @@ namespace Peach.Core.Analyzers
 
 		#region Value Attribute Escaping
 
-		static Regex reHexWhiteSpace = new Regex(@"[h{},\s\r\n:]+", RegexOptions.Singleline);
+		static Regex reHexWhiteSpace = new Regex(@"[h{},\s\r\n:-]+", RegexOptions.Singleline);
 		static Regex reEscapeSlash = new Regex(@"\\\\|\\n|\\r|\\t");
 
 		static string ReplaceSlash(Match m)
