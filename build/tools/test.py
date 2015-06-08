@@ -65,8 +65,10 @@ def make_test(self):
 		test = getattr(self.bld, 'nunit_task', None)
 		if not test:
 			xml = get_inst_node(self, '${PREFIX}/utest', 'nunit.xml')
-			log = get_inst_node(self, '${PREFIX}/utest', 'nunit.log')
-			outputs = [ xml, log ]
+			outputs = [ xml ]
+			if not self.bld.options.stdout:
+				log = get_inst_node(self, '${PREFIX}/utest', 'nunit.log')
+				outputs.append(log)
 			tg = self.bld(name = '')
 			test = tg.create_task('utest', inputs, outputs)
 			run_after_last_test(self, test)
