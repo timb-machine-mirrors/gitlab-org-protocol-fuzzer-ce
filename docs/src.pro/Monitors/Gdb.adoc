@@ -18,10 +18,10 @@ NOTE: The _Gdb_ monitor requires a recent version of GDB.
 _Required:_
 
 Executable:: Executable to launch
-Arguments:: Optional command line arguments for the executable.
 
 _Optional:_
 
+Arguments:: Command line arguments for the executable.
 FaultOnEarlyExit:: Trigger a fault if the process exits prematurely, defaults to false.
 GdbPath:: Path to gdb, defaults to +/usr/bin/gdb+.
 NoCpuKill:: Disable process killing when the CPU usage nears zero, default false.
@@ -32,6 +32,70 @@ RestartOnEachTest:: Restarts the process for each iteration, defaults to false.
 StartOnCall:: Start the executable on a state model call.
 WaitForExitOnCall:: Wait for the process to exit on a state model call and fault if a timeout is reached.
 WaitForExitTimeout:: WaitForExitOnCall timeout value, expressed in milliseconds. -1 is infinite, defaults to 10000.
+
+=== Gdb Installation
+
+This section describes where to find gdb sources and a base set of instructions to install 
+the debugger. A reference appears at the end of these instructions for more advanced
+installations. 
+
+==== Most Linux Versions 
+This set of installation instructions is valid for most versions of Linux, including Ubuntu/Demian Linux and SUSE Enterprise Linux. The gdb project files are located at http://ftp.gnu.org/gnu/gdb[Project GNU FTP server] 
+and ftp://sourceware.org/pub/gdb/releases/[Red Hat source files]. 
+
+Choose and download a recent version of gdb. At the time of this writing, the current gdb version is gdb-7.9.xz.
+
+==== CentOS and RedHat Enterprise Linux Versions 
+This set of installation instructions is valid for CentOS and RHEL version. The gdb package 
+is located at http://pkgs.org/download/gdb[pkgs.org]; also, gdb is part of the developer 
+tools package and available on the OS distribution. This installation differs from the 
+prior instruction set in download location and the name of the tar file.
+
+Choose and download a recent version of gdb. At the time of this writing, the latest package 
+is `gdb-7.6.1-64.el7.x86_64.rpm`
+
+==== Procecure to Install gdb
+
+This set of installation instructions is valid as is for most versions of Linux, 
+including Ubuntu/Demian Linux and SUSE Enterprise Linux. For CentOS and RHEL, substitute 
+the name of the unpacked gdb directory for `gdb-7.9`.
+
+Once downloaded, install gdb using the following steps:
+
+1. Unpack gdb. +
++
+Unpacking the gdb-VERSION.tar.gz archive results in a new directory called `gdb-VERSION` that holds the unpacked files and libraries. For example, unpacking the gdb tar archive ball file `gdb-7.9.tar.gz` creates the `gdb-7.9` directory.
+
+2. Make a build directory in an appropriate place, then configure and make the executable. The following command sequence includes starting the Bourne shell because the configure script is written for it. +
++
+=======================
+   cd gdb-7.9
+   mkdir ../build
+   cd ../build    
+   /bin/sh
+   ../gdb-7.9/configure
+   make
+=======================
++    
+If `configure` can't determine your system type, specify a system type as an argument, 
+such as +
+`../gdb-7.9/configure sun4` or `../gdb-7.9/configure decstation`.
++    
+The system type reported by configure is a triplet that indicates processor-vendor-OS. 
+The string `x86_64-unknown-linux-gnu` is a valid system type and indicates a 64-bit 
+Intel processor, an unknown vendor, and a GNU linux operating system. 
+    
+3. Put the executable in an appropriate directory, such as the following: +
+    `cp gdb/gdb /usr/local/bin/gdb`
+
+For more information about installing gdb on Ubuntu/Demian Linux and 
+SUSE Enterprise Linux, see the second README file in the packed gdb tar archive. 
+This README is located in the gdb directory and is specific to installing gdb 
+with sections on customizing inatllation, generating documentation, creating multiple 
+instances of gdb for remote debugging, and resolving installation issues.
+
+For more information on installing gdb on CentOS and RedHat Enterprise Linux, see  http://www.linuxtopia.org/online_books/redhat_linux_debugging_with_gdb/installing-gdb.html[Appendix B. Installing gdb].
+
 
 === Examples
 
@@ -53,9 +117,7 @@ This parameter example is from a typical setup where a state model call triggers
 
 endif::peachug[]
 
-
 ifndef::peachug[]
-
 
 .Basic Usage Example
 ======================
