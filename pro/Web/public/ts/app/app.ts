@@ -56,6 +56,7 @@ module Peach {
 			$stateProvider: angular.ui.IStateProvider,
 			$urlRouterProvider: ng.ui.IUrlRouterProvider
 		) => {
+			$urlRouterProvider.when('', '/');
 			$urlRouterProvider.otherwise('/error');
 
 			$stateProvider
