@@ -3,7 +3,7 @@
 [[Monitors_CrashWrangler]]
 == CrashWrangler Monitor (OS X)
 
-*Monitor Categores*: *Automation*, *Data collection*, *Fault detection*
+*Monitor Categories*: *Automation*, *Data collection*, *Fault detection*
 
 IMPORTANT: The gdb debugger and xref:Monitors_Gdb[gdb] monitor are the preferred tools to detect crashes and to collect core files on OS X.
 
