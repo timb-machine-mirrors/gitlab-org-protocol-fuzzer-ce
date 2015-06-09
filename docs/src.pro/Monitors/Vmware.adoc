@@ -3,6 +3,8 @@
 [[Monitors_Vmware]]
 == Vmware Monitor
 
+*Monitor Categories*: *Automation*, *Fault detection*
+
 The _Vmware_ monitor can control a VMware virtual machine (VM). This monitor works with a 
 snapshot of the VM that provides a consistent VM environment throughout a fuzzing session. 
 _Vmware_ can start a VM snapshot and, optionally, reset the VM to a snapshot configuration 

@@ -3,6 +3,8 @@
 [[Monitors_SshCommand]]
 == SshCommand Monitor
 
+*Monitor Categories*: *Automation*, *Data collection*, *Fault detection*
+
 The _SshCommand_ monitor connects to a remote host over SSH (Secure Shell), runs a command, 
 and waits for the command to complete. The output from the process is logged when a fault 
 is detected. This monitor can operate as a fault detector, data collector, and automation 
