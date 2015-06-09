@@ -183,7 +183,7 @@ def configure(ctx):
 		Logs.warn('No available variants detected. Re-run configure with the \'-v\' option for more info.')
 
 def verify_external(bld):
-	if bld.env.MCS:
+	if bld.env.MCS and Logs.verbose > 0:
 		externals = []
 		for g in bld.groups:
 			for tg in g:

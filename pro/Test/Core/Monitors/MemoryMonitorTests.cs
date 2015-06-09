@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Agent;
@@ -13,18 +15,60 @@ namespace Peach.Pro.Test.Core.Monitors
 	[Peach]
 	class MemoryMonitorTests
 	{
+		string _file;
+		Process _proc;
 		string _thisPid;
 		string _thisProcessName;
 
 		[SetUp]
 		public void SetUp()
 		{
-			using (var p = Process.GetCurrentProcess())
+			// Copy CrashableServer to tmp and give it a long name
+			var exe = Platform.GetOS() == Platform.OS.Windows ? "CrashableServer.exe" : "CrashableServer";
+			var tmp = Path.GetTempFileName();
+			var dir = Path.GetDirectoryName(tmp);
+
+			if (string.IsNullOrEmpty(dir))
+				Assert.Fail("Temp directory should not be null or empty");
+
+			_file= Path.Combine(dir, exe + "-" + Guid.NewGuid() + "-" + Guid.NewGuid());
+
+			File.Delete(tmp);
+			File.Copy(Utilities.GetAppResourcePath(exe), _file);
+
+			_thisProcessName = Path.GetFileNameWithoutExtension(_file);
+
+			_proc = new Process
 			{
-				_thisPid = p.Id.ToString(CultureInfo.InvariantCulture);
-				// Use process snapshot so we are sure to get the correct name on osx
-				_thisProcessName = ProcessInfo.Instance.Snapshot(p).ProcessName;
+				StartInfo = new ProcessStartInfo
+				{
+					FileName = exe,
+					Arguments = "127.0.0.1 0",
+					UseShellExecute = false,
+					RedirectStandardError = true,
+					RedirectStandardInput = true,
+					RedirectStandardOutput = true,
+					CreateNoWindow = true
+				}
+			};
+
+			_proc.Start();
+
+			_thisPid = _proc.Id.ToString(CultureInfo.InvariantCulture);
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			if (!_proc.HasExited)
+			{
+				_proc.Kill();
+				_proc.WaitForExit();
 			}
+
+			_proc.Dispose();
+
+			File.Delete(_file);
 		}
 
 		[Test]

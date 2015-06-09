@@ -506,7 +506,7 @@ namespace Peach.Pro.Test.Core.Publishers
 			var xml = @"
 <Peach>
 	<DataModel name='DM'>
-		<String name='Data' value='Hello World Hello World Hello World' />
+		<Blob name='Data' valueType='hex' value='4500 003c 7f5c 4000 4006 bd5d 7f00 0001 7f00 0001 afb2 0050 00ea a292 0000 0000 a002 8018 fe30 0000 0204 400c 0402 080a 2f77 ddce 0000 0000 0103 0307' />
 	</DataModel>
 
 	<StateModel name='SM' initialState='Initial'>

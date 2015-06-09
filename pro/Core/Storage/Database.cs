@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
+using System.Threading;
+
+
 #if MONO
 using Mono.Data.Sqlite;
 using SQLiteConnection = Mono.Data.Sqlite.SqliteConnection;
@@ -74,6 +77,29 @@ namespace Peach.Pro.Core.Storage
 		}
 	}
 
+	public class SqliteConnectionBuilder
+	{
+		public string DataSource { get; set; }
+		public bool ForeignKeys { get; set; }
+		public bool UseWAL { get; set; }
+
+		public SQLiteConnection Create()
+		{
+			var parts = new List<string>
+			{
+				"Data Source=\"{0}\"".Fmt(DataSource),
+				"Foreign Keys={0}".Fmt(ForeignKeys),
+			};
+			if (UseWAL)
+				parts.Add("PRAGMA journal_mode=WAL");
+
+			var cnnString = string.Join(";", parts);
+			return new SQLiteConnection(cnnString);
+		}
+	}
+
+	public delegate void MigrationHandler();
+
 	public abstract class Database : IDisposable
 	{
 		static Database()
@@ -107,24 +133,30 @@ namespace Peach.Pro.Core.Storage
 		protected abstract IEnumerable<Type> Schema { get; }
 		protected abstract IEnumerable<string> Scripts { get; }
 
-		protected Database(string path, bool useWal)
+		protected virtual int RequiredVersion { get { return Migrations.Count; } }
+		protected virtual IList<MigrationHandler> Migrations
+		{ 
+			get { return new List<MigrationHandler>(); } 
+		}
+
+		protected Database(string path, bool useWal, bool doMigration)
 		{
 			Path = path;
 
-			var parts = new List<string>
+			var builder = new SqliteConnectionBuilder 
 			{
-				"Data Source=\"{0}\"".Fmt(Path),
-				"Foreign Keys=True",
+				DataSource = Path,
+				ForeignKeys = true,
+				UseWAL = useWal,
 			};
-			if (useWal)
-				parts.Add("PRAGMA journal_mode=WAL");
 
-			var cnnString = string.Join(";", parts);
-			Connection = new SQLiteConnection(cnnString);
+			Connection = builder.Create();
 			Connection.Open();
 
 			if (!IsInitialized)
 				Initialize();
+			else if (doMigration)
+				Migrate();
 		}
 
 		public void Dispose()
@@ -133,17 +165,63 @@ namespace Peach.Pro.Core.Storage
 				Connection.Dispose();
 		}
 
-		public void Initialize()
-		{
-			SqliteInitializer.InitializeDatabase(Connection, Schema, Scripts);
-		}
-
 		public bool IsInitialized
 		{
 			get
 			{
 				var fi = new System.IO.FileInfo(Path);
 				return fi.Exists && fi.Length > 0;
+			}
+		}
+
+		public int CurrentVersion
+		{
+			get
+			{
+				return Convert.ToInt32(Connection.ExecuteScalar("PRAGMA user_version;"));
+			}
+			private set
+			{
+				Connection.Execute("PRAGMA user_version = {0};".Fmt(value));
+			}
+		}
+
+		public void Initialize()
+		{
+			SqliteInitializer.InitializeDatabase(Connection, Schema, Scripts);
+			CurrentVersion = RequiredVersion;
+		}
+
+		public void Migrate()
+		{
+			using (var mutex = new Mutex(false, Path))
+			{
+				mutex.WaitOne();
+
+				try
+				{
+					if (CurrentVersion < RequiredVersion)
+					{
+						for (var i = CurrentVersion; i < RequiredVersion; i++)
+						{
+							Migrations[i]();
+							CurrentVersion = i + 1;
+						}
+					}
+
+					if (CurrentVersion != RequiredVersion)
+					{
+						throw new PeachException("Invalid {0} version {1}, expected version {2}".Fmt(
+							GetType().Name,
+							CurrentVersion,
+							RequiredVersion
+						));
+					}
+				}
+				finally 
+				{
+					mutex.ReleaseMutex();
+				}
 			}
 		}
 
