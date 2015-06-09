@@ -23,7 +23,7 @@ The following table lists each monitor by name, function type (Fault detection, 
 |xref:Monitors_CleanupFolder[Cleanup Folder]     |    |    |X   |
 |xref:Monitors_CleanupRegistry[Cleanup Registry] |    |    |X   |Windows
 |xref:Monitors_CrashReporter[Crash Reporter]     |X   |X   |    |OS X
-|xref:Monitors_CrashWrangler[Crash Wrangler]     |X   |    |X   |OS X
+|xref:Monitors_CrashWrangler[Crash Wrangler]     |X   |X   |X   |OS X
 |xref:Monitors_Gdb[Gdb]                          |X   |X   |X   |Linux, OS X
 |xref:Monitors_IpPower9258[IpPower9258]          |    |    |X   |
 |xref:Monitors_LinuxCoreFile[LinuxCoreFile]      |X   |X   |    |Linux
