@@ -1,9 +1,11 @@
 :images: ../images
 <<<
 [[Monitors_Gdb]]
-== Gdb Monitor (Linux)
+== Gdb Monitor (Linux, OS X)
 
-The _Gdb_ monitor uses GDB to launch an executable and monitors the executing process for exceptions. 
+*Monitor Categories*: *Automation*, *Data collection*, *Fault detection*
+
+The _Gdb_ monitor uses GDB to launch an executable and monitors the executing process for exceptions. _Gdb_ is the main debugger for Linux and OS X operating systems.
 
 When a fault or exception occurs, _Gdb_ collects and logs the appropriate information, including messages from stdout and stderr, stack traces, and the gdb log. Fault detection includes the conditions of 1) the early exit of a process, as well as 2) a process that does not exit. 
 
@@ -35,67 +37,21 @@ WaitForExitTimeout:: WaitForExitOnCall timeout value, expressed in milliseconds.
 
 === Gdb Installation
 
-This section describes where to find gdb sources and a base set of instructions to install 
-the debugger. A reference appears at the end of these instructions for more advanced
-installations. 
+Installing gdb on Linux consists of using the package manager to download and install the gdb degugger and the needed support files and libraries. 
 
-==== Most Linux Versions 
-This set of installation instructions is valid for most versions of Linux, including Ubuntu/Demian Linux and SUSE Enterprise Linux. The gdb project files are located at http://ftp.gnu.org/gnu/gdb[Project GNU FTP server] 
-and ftp://sourceware.org/pub/gdb/releases/[Red Hat source files]. 
+* For Ubuntu systems, run the following command install gdb:
 
-Choose and download a recent version of gdb. At the time of this writing, the current gdb version is gdb-7.9.xz.
+    `sudo apt-get install gdb`
 
-==== CentOS and RedHat Enterprise Linux Versions 
-This set of installation instructions is valid for CentOS and RHEL version. The gdb package 
-is located at http://pkgs.org/download/gdb[pkgs.org]; also, gdb is part of the developer 
-tools package and available on the OS distribution. This installation differs from the 
-prior instruction set in download location and the name of the tar file.
+* For CentOS and RedHat Enterprise Linux installations, run the following command to install gdb:
 
-Choose and download a recent version of gdb. At the time of this writing, the latest package 
-is `gdb-7.6.1-64.el7.x86_64.rpm`
+    `sudo yum install gdb`
 
-==== Procecure to Install gdb
+* For SUSE Enterprise Linux installations, run the following command to install gdb:
 
-This set of installation instructions is valid as is for most versions of Linux, 
-including Ubuntu/Demian Linux and SUSE Enterprise Linux. For CentOS and RHEL, substitute 
-the name of the unpacked gdb directory for `gdb-7.9`.
+    `sudo zypper install gdb`
 
-Once downloaded, install gdb using the following steps:
-
-1. Unpack gdb. +
-+
-Unpacking the gdb-VERSION.tar.gz archive results in a new directory called `gdb-VERSION` that holds the unpacked files and libraries. For example, unpacking the gdb tar archive ball file `gdb-7.9.tar.gz` creates the `gdb-7.9` directory.
-
-2. Make a build directory in an appropriate place, then configure and make the executable. The following command sequence includes starting the Bourne shell because the configure script is written for it. +
-+
-=======================
-   cd gdb-7.9
-   mkdir ../build
-   cd ../build    
-   /bin/sh
-   ../gdb-7.9/configure
-   make
-=======================
-+    
-If `configure` can't determine your system type, specify a system type as an argument, 
-such as +
-`../gdb-7.9/configure sun4` or `../gdb-7.9/configure decstation`.
-+    
-The system type reported by configure is a triplet that indicates processor-vendor-OS. 
-The string `x86_64-unknown-linux-gnu` is a valid system type and indicates a 64-bit 
-Intel processor, an unknown vendor, and a GNU linux operating system. 
-    
-3. Put the executable in an appropriate directory, such as the following: +
-    `cp gdb/gdb /usr/local/bin/gdb`
-
-For more information about installing gdb on Ubuntu/Demian Linux and 
-SUSE Enterprise Linux, see the second README file in the packed gdb tar archive. 
-This README is located in the gdb directory and is specific to installing gdb 
-with sections on customizing inatllation, generating documentation, creating multiple 
-instances of gdb for remote debugging, and resolving installation issues.
-
-For more information on installing gdb on CentOS and RedHat Enterprise Linux, see  http://www.linuxtopia.org/online_books/redhat_linux_debugging_with_gdb/installing-gdb.html[Appendix B. Installing gdb].
-
+You can also install gdb on OS X using a package manager. See the http://ntraft.com/installing-gdb-on-os-x-mavericks/[Installing GDB on OS X Mavericks] article for more information.
 
 === Examples
 
