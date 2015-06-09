@@ -6,6 +6,7 @@ deps = [
 	'System.dll',
 	'System.Core.dll',
 	'System.Configuration.dll',
+	'System.Data.dll',
 	'System.Runtime.Remoting.dll',
 	'System.Xml.dll',
 	'Peach.Core.dll',
@@ -23,7 +24,17 @@ deps = [
 	'Newtonsoft.Json.dll',
 	'SocketHttpListener.dll',
 	'Dapper.dll',
+	'Aspose.Words.dll',
 ]
+
+if bld.env.TARGET == 'win':
+	deps.extend([
+		'System.Data.SQLite.dll',
+	])
+else:
+	deps.extend([
+		'Mono.Data.Sqlite.dll',
+	])
 
 bld(
 	features = 'cs test',

@@ -95,12 +95,7 @@ namespace Peach.Pro.Core.Storage
 		[Required]
 		public string MinorHash { get; set; }
 
-		private DateTime _timestamp;
-		public DateTime Timestamp
-		{
-			get { return _timestamp; }
-			set { _timestamp = value.MakeUtc(); }
-		}
+		public DateTime Timestamp { get; set; }
 
 		public int Hour { get; set; }
 

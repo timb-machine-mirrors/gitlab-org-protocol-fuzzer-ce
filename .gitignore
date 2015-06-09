@@ -1,6 +1,9 @@
 # Files created by windows
 Thumbs.db
 
+# Files created by OSX
+.DS_Store
+
 # Visual C++ cache files
 *.aps
 *.ncb

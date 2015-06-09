@@ -8,6 +8,7 @@ module Peach {
 	export class TestService {
 
 		static $inject = [
+			C.Angular.$rootScope,
 			C.Angular.$q,
 			C.Angular.$http,
 			C.Angular.$interval,
@@ -15,28 +16,30 @@ module Peach {
 		];
 
 		constructor(
+			private $rootScope: ng.IRootScopeService,
 			private $q: ng.IQService,
 			private $http: ng.IHttpService,
 			private $interval: ng.IIntervalService,
 			private pitService: PitService
 		) {
-			this.reset();
-			pitService.OnPitChanged(() => this.reset());
+			$rootScope.$on(C.Events.PitChanged,() => {
+				this.reset();
+			});
 		}
 
 		private pendingResult: ng.IDeferred<any>;
 		private isPending: boolean = false;
+		private testResult: ITestResult;
+		private testTime: string;
 
 		public get IsPending(): boolean {
 			return this.isPending;
 		}
 
-		private testResult: ITestResult;
 		public get TestResult(): ITestResult {
 			return this.testResult;
 		}
 
-		private testTime: string;
 		public get TestTime(): string {
 			return this.testTime;
 		}
@@ -61,14 +64,16 @@ module Peach {
 				pitUrl: this.pitService.Pit.pitUrl,
 				isControlIteration: true
 			};
-			var promise = this.$http.post(C.Api.Jobs, request);
-			promise.success((job: IJob) => {
-				this.startTestPoller(job.firstNodeUrl);
-			});
-			promise.catch(reason => {
-				this.setFailure(reason);
-				this.pendingResult.reject();
-			});
+
+			this.$http.post(C.Api.Jobs, request)
+				.success((job: IJob) => {
+					this.startTestPoller(job.firstNodeUrl);
+				})
+				.catch(reason => {
+					this.setFailure(reason);
+					this.pendingResult.reject();
+				})
+			;
 
 			return this.pendingResult.promise;
 		}
@@ -84,24 +89,25 @@ module Peach {
 
 		private startTestPoller(testUrl: string) {
 			var interval = this.$interval(() => {
-				var promise = this.$http.get(testUrl);
-				promise.success((data: ITestResult) => {
-					this.testResult = data;
-					if (data.status !== TestStatus.Active) {
-						this.stopTestPoller(interval);
-						var pass = (data.status === TestStatus.Pass);
-						if (pass) {
-							this.pendingResult.resolve();
-						} else {
-							this.pendingResult.reject();
+				this.$http.get(testUrl)
+					.success((data: ITestResult) => {
+						this.testResult = data;
+						if (data.status !== TestStatus.Active) {
+							this.stopTestPoller(interval);
+							var pass = (data.status === TestStatus.Pass);
+							if (pass) {
+								this.pendingResult.resolve();
+							} else {
+								this.pendingResult.reject();
+							}
 						}
-					}
-				});
-				promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
-					this.stopTestPoller(interval);
-					this.setFailure(reason.data.errorMessage);
-					this.pendingResult.reject();
-				});
+					})
+					.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
+						this.stopTestPoller(interval);
+						this.setFailure(reason.data.errorMessage);
+						this.pendingResult.reject();
+					})
+				;
 			}, TEST_INTERVAL);
 		}
 

@@ -1,0 +1,79 @@
+﻿<form name="form"
+			peach:unsaved>
+	<p>
+		This page lists the information needed by the selected pit.
+		Some of the information applies to the Peach environment;
+		two examples are the Peach Installation Directory and the Pit Library Path.
+		Other information is pit specific,
+		such as port addresses for a network protocol or source files for a file format.
+	</p>
+	<div class="row"
+			 style="margin-bottom: 10px">
+		<div class="col-xs-6">
+			<span ng-show="vm.ShowSaved"
+						class="green">
+				Saved successfully.
+			</span>
+			<span ng-show="vm.ShowValidation"
+						class="red">
+				You have some validation issues to correct.
+			</span>
+		</div>
+		<div class="col-xs-6 text-right">
+			<button class="btn btn-xs btn-danger"
+							ng-class="{disabled: !vm.CanSave}"
+							ng-click="vm.OnSave()">
+				Save
+			</button>
+			<button class="btn btn-xs btn-info"
+							ng-click="vm.OnAdd()">
+				Add Variable &nbsp;
+				<i class="glyphicon glyphicon-plus">
+				</i>
+			</button>
+		</div>
+	</div>
+	<div class="alert alert-info"
+			 ng-show="vm.ShowLoading">
+		Loading configuration...
+	</div>
+	<div class="row"
+			 ng-hide="vm.ShowLoading">
+		<div class="col-xs-12">
+			<table class="table table-striped table-hover table-bordered">
+				<thead>
+					<tr>
+						<th class="nowrap">Name</th>
+						<th class="nowrap">Key</th>
+						<th class="width-100">Value</th>
+						<th class="center nowrap">Remove</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="param in vm.Config"
+							ng-form="form">
+						<td class="nowrap align-middle">
+							{{param.name}}
+						</td>
+						<td class="nowrap align-middle">
+							{{param.key}}
+						</td>
+						<td class="width-100"
+								ng-class="{'has-error': form.param.$invalid && form.param.$dirty}">
+							<peach:parameter-input param="param"
+																		 form="form">
+							</peach:parameter-input>
+						</td>
+						<td class="center nowrap align-middle">
+							<button class="btn btn-xs btn-cell"
+											ng-show="vm.CanRemove(param)"
+											ng-click="vm.OnRemove($index)">
+								<i class="glyphicon glyphicon-remove"></i>
+							</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</form>

@@ -12,30 +12,27 @@ module Peach {
 		_.forOwn(ns, (component, key: string) => {
 			var name = getComponentName(key, component);
 			if (key.endsWith('Controller')) {
-				//console.log('Registering controller', name, key);
 				app.controller(name, component);
 			}
 			if (key.endsWith('Directive')) {
-				//console.log('Registering directive', name, key);
 				app.directive(name, () => {
 					return component;
 				});
 			}
 			if (key.endsWith('Service')) {
-				//console.log('Registering service', name, key);
 				app.service(name, component);
 			}
 		});
 	}
 
 	var p = angular.module("Peach", [
+		"ngMessages",
 		"angular-loading-bar",
 		"chart.js",
-		"ngMessages",
+		"ncy-angular-breadcrumb",
 		"ngSanitize",
 		"ngVis",
 		"smart-table",
-		"treeControl",
 		"ui.bootstrap",
 		"ui.select",
 		"ui.router"
@@ -44,113 +41,245 @@ module Peach {
 	registerModule(Peach, p);
 
 	p.config([
-		C.Angular.$httpProvider,
-		($httpProvider: ng.IHttpProvider) => {
-			$httpProvider.interceptors.push(C.Services.HttpError);
+		C.Angular.$breadcrumbProvider,
+		($breadcrumbProvider) => {
+			$breadcrumbProvider.setOptions({
+				prefixStateName: C.States.MainHome,
+				includeAbstract: true
+			});
 		}
 	]);
 
 	p.config([
 		C.Angular.$stateProvider,
 		C.Angular.$urlRouterProvider, (
-			$stateProvider: ng.ui.IStateProvider,
+			$stateProvider: angular.ui.IStateProvider,
 			$urlRouterProvider: ng.ui.IUrlRouterProvider
 		) => {
-			$urlRouterProvider.otherwise('/');
+			$urlRouterProvider.when('', '/');
+			$urlRouterProvider.otherwise('/error');
 
 			$stateProvider
-				.state(C.States.Home, {
+				// ----- Main -----
+				.state(C.States.Main, { 
+					abstract: true,
+					template: C.Templates.UiView,
+					ncyBreadcrumb: { skip: true }
+				})
+				.state(C.States.MainHome, {
 					url: '/',
-					templateUrl: C.Templates.Dashboard,
+					templateUrl: C.Templates.Home,
+					controller: HomeController,
+					controllerAs: C.ViewModel,
+					ncyBreadcrumb: { label: 'Home' }
+				})
+				.state(C.States.MainLibrary, {
+					url: '/library',
+					templateUrl: C.Templates.Library,
+					controller: LibraryController,
+					controllerAs: C.ViewModel,
+					ncyBreadcrumb: { label: 'Library' }
+				})
+				.state(C.States.MainJobs, {
+					url: '/jobs',
+					templateUrl: C.Templates.Jobs,
+					controller: JobsController,
+					controllerAs: C.ViewModel,
+					ncyBreadcrumb: { label: 'Jobs' }
+				})
+				.state(C.States.MainError, {
+					url: '/error',
+					templateUrl: C.Templates.Error,
+					controller: ErrorController,
+					controllerAs: C.ViewModel,
+					params: { message: undefined },
+					ncyBreadcrumb: { label: 'Oops!' }
+				})
+
+				// ----- Job -----
+				.state(C.States.Job, {
+					url: '/job/:job',
+					templateUrl: C.Templates.Job.Dashboard,
 					controller: DashboardController,
-					controllerAs: 'vm'
+					controllerAs: C.ViewModel,
+					ncyBreadcrumb: { 
+						label: '{{job.name}}',
+						parent: C.States.MainJobs
+					},
+					onEnter: [
+						C.Services.Job, 
+						C.Angular.$stateParams, 
+					(
+						jobService: JobService,
+						$stateParams: any
+					) => {
+						jobService.OnEnter($stateParams.job);
+					}],
+					onExit: [C.Services.Job, (jobService: JobService) => {
+						jobService.OnExit();
+					}]
 				})
-				.state(C.States.Faults, {
+				.state(C.States.JobFaults, {
 					url: '/faults/:bucket',
-					templateUrl: C.Templates.Faults,
-					controller: FaultsController,
-					controllerAs: 'vm',
-					params: { bucket: 'all' }
+					params: { bucket: 'all' },
+					views: {
+						'@': {
+							templateUrl: C.Templates.Job.Faults.Summary,
+							controller: FaultsController,
+							controllerAs: C.ViewModel
+						}
+					},
+					ncyBreadcrumb: { label: '{{FaultSummaryTitle}}' }
 				})
-				.state(C.States.FaultsDetail, {
+				.state(C.States.JobFaultsDetail, {
 					url: '/{id:int}',
 					views: {
 						'@': {
-							templateUrl: C.Templates.FaultsDetail,
+							templateUrl: C.Templates.Job.Faults.Detail,
 							controller: FaultsDetailController,
-							controllerAs: 'vm'
+							controllerAs: C.ViewModel
 						}
-					}
-				})
-				.state(C.States.Metrics, {
-					url: '/metrics/:metric',
-					templateUrl: params =>
-						C.Templates.MetricPage.replace(':metric', params.metric),
-					controller: MetricsController,
-					controllerAs: 'vm'
-				})
-				.state(C.States.Wizard, {
-					url: '/quickstart/:track/{id:int}',
-					templateUrl: params => {
-						switch (params.track) {
-							case C.Tracks.Intro:
-								return C.Templates.Wizard.Intro;
-							case C.Tracks.Test:
-								return C.Templates.Wizard.Test;
-						}
-						return C.Templates.Wizard.Track;
 					},
-					controllerProvider: ($stateParams): any => {
-						switch ($stateParams.track) {
-							case C.Tracks.Test:
-								return PitTestController;
-						}
-						return WizardController;
-					},
-					controllerAs: 'vm',
-					params: {
-						id: { value: 0, squash: true }
-					}
+					ncyBreadcrumb: { label: '{{FaultDetailTitle}}' }
 				})
-				.state(C.States.WizardIntro, {
-					url: '/intro',
-					templateUrl: params =>
-						C.Templates.Wizard.TrackIntro.replace(':track', params.track)
-				})
-				.state(C.States.WizardQuestion, {
-					templateUrl: C.Templates.Wizard.Question,
-					controller: WizardQuestionController,
-					controllerAs: 'vm'
-				})
-				.state(C.States.WizardReview, {
-					url: '/review',
-					templateUrl: params =>
-						C.Templates.Wizard.TrackDone.replace(':track', params.track)
-				})
-				.state(C.States.Config, {
+				.state(C.States.JobMetrics, {
+					url: '/metrics',
 					abstract: true,
-					url: '/config',
-					template: '<div ui-view></div>'
+					ncyBreadcrumb: { label: 'Metrics' }
 				})
-				.state(C.States.ConfigVariables, {
-					url: '/variables',
-					templateUrl: C.Templates.Config.Variables,
-					controller: ConfigureVariablesController,
-					controllerAs: 'vm'
+
+				// ----- Pit -----
+				.state(C.States.Pit, {
+					url: '/pit/:pit',
+					templateUrl: C.Templates.Pit.Configure,
+					controller: ConfigureController,
+					controllerAs: C.ViewModel,
+					params: {
+						seed: undefined,
+						rangeStart: undefined,
+						rangeStop: undefined
+					},
+					ncyBreadcrumb: { 
+						label: '{{pit.name}}',
+						parent: C.States.MainLibrary
+					}
 				})
-				.state(C.States.ConfigMonitoring, {
-					url: '/monitoring',
-					templateUrl: C.Templates.Config.Monitoring,
-					controller: ConfigureMonitorsController,
-					controllerAs: 'vm'
+				.state(C.States.PitWizard, {
+					url: '/quickstart',
+					views: {
+						'@': {
+							templateUrl: C.Templates.Pit.Wizard.Intro,
+							controller: WizardController,
+							controllerAs: C.ViewModel
+						}
+					},
+					data: { track: C.Tracks.Intro },
+					ncyBreadcrumb: { label: 'Quick Start' }
 				})
-				.state(C.States.ConfigTest, {
+				.state(C.States.PitWizardTest, {
 					url: '/test',
-					templateUrl: C.Templates.Config.Test,
-					controller: PitTestController,
-					controllerAs: 'vm'
+					views: {
+						'@': {
+							templateUrl: C.Templates.Pit.Wizard.Test,
+							controller: PitTestController,
+							controllerAs: C.ViewModel
+						}
+					},
+					ncyBreadcrumb: { label: 'Test' }
+				})
+				.state(C.States.PitAdvanced, {
+					abstract: true,
+					url: '/advanced',
+					ncyBreadcrumb: { label: 'Configure' }
+				})
+				.state(C.States.PitAdvancedVariables, {
+					url: '/variables',
+					views: {
+						'@': {
+							templateUrl: C.Templates.Pit.Advanced.Variables,
+							controller: ConfigureVariablesController,
+							controllerAs: C.ViewModel
+						}
+					},
+					ncyBreadcrumb: { label: 'Variables' }
+				})
+				.state(C.States.PitAdvancedMonitoring, {
+					url: '/monitoring',
+					views: {
+						'@': {
+							templateUrl: C.Templates.Pit.Advanced.Monitoring,
+							controller: ConfigureMonitorsController,
+							controllerAs: C.ViewModel
+						}
+					},
+					ncyBreadcrumb: { label: 'Monitoring' }
+				})
+				.state(C.States.PitAdvancedTest, {
+					url: '/test',
+					views: {
+						'@': {
+							templateUrl: C.Templates.Pit.Advanced.Test,
+							controller: PitTestController,
+							controllerAs: C.ViewModel
+						}
+					},
+					ncyBreadcrumb: { label: 'Test' }
 				})
 			;
+
+			_.forEach(C.MetricsList,(metric: C.IMetric) => {
+				var state = [C.States.JobMetrics, metric.id].join('.');
+				$stateProvider.state(state, {
+					url: '/' + metric.id,
+					views: {
+						'@': {
+							templateUrl: C.Templates.Job.MetricPage.replace(':metric', metric.id),
+							controller: MetricsController,
+							controllerAs: C.ViewModel
+						}
+					},
+					params: { metric: metric.id },
+					ncyBreadcrumb: { label: metric.name }
+				});
+			});
+
+			_.forEach(WizardTracks, (track: ITrackStatic) => {
+				if (track.skip)
+					return;
+
+				var views = {
+					'@': {
+						templateUrl: C.Templates.Pit.Wizard.Track,
+						controller: WizardController,
+						controllerAs: C.ViewModel
+					}
+				};
+
+				views['@pit.wizard.' + track.id] = {
+					templateUrl: C.Templates.Pit.Wizard.TrackIntro.replace(':track', track.id)
+				};
+
+				$stateProvider
+					.state([C.States.PitWizard, track.id].join('.'), {
+						url: '/' + track.id,
+						views: views,
+						data: { track: track.id },
+						ncyBreadcrumb: { label: track.name }
+					})
+					.state([C.States.PitWizard, track.id, 'review'].join('.'), {
+						url: '/review',
+						templateUrl: C.Templates.Pit.Wizard.TrackDone.replace(':track', track.id),
+						ncyBreadcrumb: { label: 'Review' }
+					})
+					.state([C.States.PitWizard, track.id, 'steps'].join('.'), {
+						url: '/{id:int}',
+						templateUrl: C.Templates.Pit.Wizard.Question,
+						controller: WizardQuestionController,
+						controllerAs: C.ViewModel,
+						ncyBreadcrumb: { label: 'Questions & Answers' }
+					})
+				;
+			});
 		}
 	]);
 

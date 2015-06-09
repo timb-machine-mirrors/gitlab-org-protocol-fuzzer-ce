@@ -65,8 +65,10 @@ def make_test(self):
 		test = getattr(self.bld, 'nunit_task', None)
 		if not test:
 			xml = get_inst_node(self, '${PREFIX}/utest', 'nunit.xml')
-			log = get_inst_node(self, '${PREFIX}/utest', 'nunit.log')
-			outputs = [ xml, log ]
+			outputs = [ xml ]
+			if not self.bld.options.stdout:
+				log = get_inst_node(self, '${PREFIX}/utest', 'nunit.log')
+				outputs.append(log)
 			tg = self.bld(name = '')
 			test = tg.create_task('utest', inputs, outputs)
 			run_after_last_test(self, test)
@@ -146,7 +148,7 @@ def configure(conf):
 	j = os.path.join
 
 	try:
-		conf.env['NUNIT_VER'] = 'NUnit.Runners.2.6.3'
+		conf.env['NUNIT_VER'] = 'NUnit.Runners.2.6.4'
 		nunit_path = j(conf.get_peach_dir(), '3rdParty', conf.env['NUNIT_VER'], 'tools')
 		nunit_name = '64' in conf.env.SUBARCH and 'nunit-console' or 'nunit-console-x86'
 		conf.find_program([nunit_name], var='NUNIT', exts='.exe', path_list=[nunit_path])

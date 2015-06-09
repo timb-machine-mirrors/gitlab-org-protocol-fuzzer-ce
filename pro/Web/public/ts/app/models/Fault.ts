@@ -6,10 +6,9 @@ module Peach {
 	export interface IFaultSummary {
 		faultUrl: string;
 		archiveUrl: string;
-		reproducable: boolean;
+		reproducible: boolean;
 		iteration: number;
 		timeStamp: string;
-		bucketName: string;
 		source: string;
 		exploitability: string;
 		majorHash: string;

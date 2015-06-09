@@ -14,7 +14,10 @@ deps = [
 	'Peach.Pro.WebApi.dll',
 
 	'Nancy.dll',
+	'Nancy.Serialization.JsonNet.dll',
 	'Nancy.Testing.dll',
+
+	'Newtonsoft.Json.dll',
 ]
 
 bld(

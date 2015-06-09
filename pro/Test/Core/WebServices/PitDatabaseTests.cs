@@ -784,5 +784,57 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.AreEqual("Peach.Cwd", cfg[1].Key);
 			Assert.AreEqual("PitLibraryPath", cfg[2].Key);
 		}
+
+		[Test]
+		public void AddRemovePit()
+		{
+			Assert.AreEqual(1, db.Entries.Count());
+			Assert.AreEqual(2, db.Libraries.Count());
+
+			const string pit = 
+@"<?xml version='1.0' encoding='utf-8'?>
+<Peach>
+	<DataModel name='DM'>
+		<String/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel name='DM:DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<Strategy class='##Strategy##'/>
+		<StateModel ref='SM' />
+		<Publisher class='Null'/>
+	</Test>
+</Peach>
+";
+			var path = Path.Combine(root, "Image", "My.xml");
+			File.WriteAllText(path, pit);
+
+			db = new PitDatabase(root);
+			Assert.NotNull(db);
+			Assert.AreEqual(2, db.Entries.Count());
+
+			var file = db.Entries.FirstOrDefault(e => e.Name == "My");
+			Assert.NotNull(file);
+
+			var cfg = db.GetConfigByUrl(file.PitUrl);
+			Assert.NotNull(cfg);
+
+			Assert.AreEqual(3, cfg.Count);
+
+			File.Delete(path);
+
+			db = new PitDatabase(root);
+			Assert.NotNull(db);
+			Assert.AreEqual(1, db.Entries.Count());
+
+			Assert.Null(db.Entries.FirstOrDefault(e => e.Name == "My"));
+		}
 	}
 }

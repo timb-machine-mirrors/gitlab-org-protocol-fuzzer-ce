@@ -808,6 +808,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 	class ConsoleJobMonitor : IJobMonitor
 	{
 		readonly Guid _guid;
+		readonly int _pid = Utilities.GetCurrentProcessId();
 
 		public ConsoleJobMonitor(Job job)
 		{
@@ -816,6 +817,16 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 
 		public void Dispose()
 		{
+		}
+
+		public int Pid { get { return _pid; } }
+
+		public bool IsTracking(Job job)
+		{
+			lock (this)
+			{
+				return _guid == job.Guid;
+			}
 		}
 
 		public Job GetJob()

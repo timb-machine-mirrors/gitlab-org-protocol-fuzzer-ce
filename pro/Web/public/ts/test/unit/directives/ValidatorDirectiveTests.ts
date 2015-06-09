@@ -7,7 +7,8 @@ interface ITestValidatorsScope extends ng.IScope {
 	model: any;
 }
 
-describe("Peach", () => {
+describe("Peach",() => {
+	var C = Peach.C;
 	beforeEach(module('Peach'));
 
 	describe('RangeDirective', () => {
@@ -42,40 +43,40 @@ describe("Peach", () => {
 				modelCtrl.$setViewValue('');
 				scope.$digest();
 				expect(scope.form.$valid).toBe(true);
-				expect(_.has(modelCtrl.$error, 'rangeMin')).toBe(false);
-				expect(_.has(modelCtrl.$error, 'rangeMax')).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMin)).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMax)).toBe(false);
 			});
 
 			it("ok: 1", () => {
 				modelCtrl.$setViewValue('1');
 				scope.$digest();
 				expect(scope.form.$valid).toBe(true);
-				expect(_.has(modelCtrl.$error, 'rangeMin')).toBe(false);
-				expect(_.has(modelCtrl.$error, 'rangeMax')).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMin)).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMax)).toBe(false);
 			});
 
 			it("min: 0", () => {
 				modelCtrl.$setViewValue('0');
 				scope.$digest();
 				expect(scope.form.$valid).toBe(false);
-				expect(_.has(modelCtrl.$error, 'rangeMin')).toBe(true);
-				expect(_.has(modelCtrl.$error, 'rangeMax')).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMin)).toBe(true);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMax)).toBe(false);
 			});
 
 			it("min: -1", () => {
 				modelCtrl.$setViewValue('-1');
 				scope.$digest();
 				expect(scope.form.$valid).toBe(false);
-				expect(_.has(modelCtrl.$error, 'rangeMin')).toBe(true);
-				expect(_.has(modelCtrl.$error, 'rangeMax')).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMin)).toBe(true);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMax)).toBe(false);
 			});
 
 			it("min: x", () => {
 				modelCtrl.$setViewValue('x');
 				scope.$digest();
 				expect(scope.form.$valid).toBe(false);
-				expect(_.has(modelCtrl.$error, 'rangeMin')).toBe(true);
-				expect(_.has(modelCtrl.$error, 'rangeMax')).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMin)).toBe(true);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMax)).toBe(false);
 			});
 		});
 
@@ -99,40 +100,40 @@ describe("Peach", () => {
 				modelCtrl.$setViewValue('');
 				scope.$digest();
 				expect(scope.form.$valid).toBe(true);
-				expect(_.has(modelCtrl.$error, 'rangeMin')).toBe(false);
-				expect(_.has(modelCtrl.$error, 'rangeMax')).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMin)).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMax)).toBe(false);
 			});
 
 			it("ok: 10", () => {
 				modelCtrl.$setViewValue('10');
 				scope.$digest();
 				expect(scope.form.$valid).toBe(true);
-				expect(_.has(modelCtrl.$error, 'rangeMin')).toBe(false);
-				expect(_.has(modelCtrl.$error, 'rangeMax')).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMin)).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMax)).toBe(false);
 			});
 
 			it("max: 11", () => {
 				modelCtrl.$setViewValue('11');
 				scope.$digest();
 				expect(scope.form.$valid).toBe(false);
-				expect(_.has(modelCtrl.$error, 'rangeMin')).toBe(false);
-				expect(_.has(modelCtrl.$error, 'rangeMax')).toBe(true);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMin)).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMax)).toBe(true);
 			});
 
 			it("ok: -1", () => {
 				modelCtrl.$setViewValue('-1');
 				scope.$digest();
 				expect(scope.form.$valid).toBe(true);
-				expect(_.has(modelCtrl.$error, 'rangeMin')).toBe(false);
-				expect(_.has(modelCtrl.$error, 'rangeMax')).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMin)).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMax)).toBe(false);
 			});
 
 			it("max: x", () => {
 				modelCtrl.$setViewValue('x');
 				scope.$digest();
 				expect(scope.form.$valid).toBe(false);
-				expect(_.has(modelCtrl.$error, 'rangeMin')).toBe(false);
-				expect(_.has(modelCtrl.$error, 'rangeMax')).toBe(true);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMin)).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMax)).toBe(true);
 			});
 		});
 
@@ -157,48 +158,48 @@ describe("Peach", () => {
 				modelCtrl.$setViewValue('');
 				scope.$digest();
 				expect(scope.form.$valid).toBe(true);
-				expect(_.has(modelCtrl.$error, 'rangeMin')).toBe(false);
-				expect(_.has(modelCtrl.$error, 'rangeMax')).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMin)).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMax)).toBe(false);
 			});
 
 			it("ok: 1", () => {
 				modelCtrl.$setViewValue('1');
 				scope.$digest();
 				expect(scope.form.$valid).toBe(true);
-				expect(_.has(modelCtrl.$error, 'rangeMin')).toBe(false);
-				expect(_.has(modelCtrl.$error, 'rangeMax')).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMin)).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMax)).toBe(false);
 			});
 
 			it("ok: 10", () => {
 				modelCtrl.$setViewValue('1');
 				scope.$digest();
 				expect(scope.form.$valid).toBe(true);
-				expect(_.has(modelCtrl.$error, 'rangeMin')).toBe(false);
-				expect(_.has(modelCtrl.$error, 'rangeMax')).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMin)).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMax)).toBe(false);
 			});
 
 			it("min: 0", () => {
 				modelCtrl.$setViewValue('0');
 				scope.$digest();
 				expect(scope.form.$valid).toBe(false);
-				expect(_.has(modelCtrl.$error, 'rangeMin')).toBe(true);
-				expect(_.has(modelCtrl.$error, 'rangeMax')).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMin)).toBe(true);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMax)).toBe(false);
 			});
 
 			it("max: 11", () => {
 				modelCtrl.$setViewValue('11');
 				scope.$digest();
 				expect(scope.form.$valid).toBe(false);
-				expect(_.has(modelCtrl.$error, 'rangeMin')).toBe(false);
-				expect(_.has(modelCtrl.$error, 'rangeMax')).toBe(true);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMin)).toBe(false);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMax)).toBe(true);
 			});
 
 			it("min, max: x", () => {
 				modelCtrl.$setViewValue('x');
 				scope.$digest();
 				expect(scope.form.$valid).toBe(false);
-				expect(_.has(modelCtrl.$error, 'rangeMin')).toBe(true);
-				expect(_.has(modelCtrl.$error, 'rangeMax')).toBe(true);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMin)).toBe(true);
+				expect(_.has(modelCtrl.$error, C.Validation.RangeMax)).toBe(true);
 			});
 		});
 	});
@@ -219,7 +220,7 @@ describe("Peach", () => {
 					type: 'text',
 					name: 'input',
 					'ng-model': 'model',
-					'integer': 'true'
+					'peach-integer': 'true'
 				})
 			]).toString();
 
@@ -231,49 +232,49 @@ describe("Peach", () => {
 			modelCtrl.$setViewValue('');
 			scope.$digest();
 			expect(scope.form.$valid).toBe(true);
-			expect(_.has(modelCtrl.$error, 'integer')).toBe(false);
+			expect(_.has(modelCtrl.$error, C.Validation.Integer)).toBe(false);
 		});
 
 		it("ok: 1", () => {
 			modelCtrl.$setViewValue('1');
 			scope.$digest();
 			expect(scope.form.$valid).toBe(true);
-			expect(_.has(modelCtrl.$error, 'integer')).toBe(false);
+			expect(_.has(modelCtrl.$error, C.Validation.Integer)).toBe(false);
 		});
 
 		it("ok: +1", () => {
 			modelCtrl.$setViewValue('+1');
 			scope.$digest();
 			expect(scope.form.$valid).toBe(true);
-			expect(_.has(modelCtrl.$error, 'integer')).toBe(false);
+			expect(_.has(modelCtrl.$error, C.Validation.Integer)).toBe(false);
 		});
 
 		it("ok: -1", () => {
 			modelCtrl.$setViewValue('-1');
 			scope.$digest();
 			expect(scope.form.$valid).toBe(true);
-			expect(_.has(modelCtrl.$error, 'integer')).toBe(false);
+			expect(_.has(modelCtrl.$error, C.Validation.Integer)).toBe(false);
 		});
 
 		it("bad: 0x01", () => {
 			modelCtrl.$setViewValue('0x01');
 			scope.$digest();
 			expect(scope.form.$valid).toBe(false);
-			expect(_.has(modelCtrl.$error, 'integer')).toBe(true);
+			expect(_.has(modelCtrl.$error, C.Validation.Integer)).toBe(true);
 		});
 
 		it("bad: 0.0", () => {
 			modelCtrl.$setViewValue('0.0');
 			scope.$digest();
 			expect(scope.form.$valid).toBe(false);
-			expect(_.has(modelCtrl.$error, 'integer')).toBe(true);
+			expect(_.has(modelCtrl.$error, C.Validation.Integer)).toBe(true);
 		});
 
 		it("bad: x", () => {
 			modelCtrl.$setViewValue('x');
 			scope.$digest();
 			expect(scope.form.$valid).toBe(false);
-			expect(_.has(modelCtrl.$error, 'integer')).toBe(true);
+			expect(_.has(modelCtrl.$error, C.Validation.Integer)).toBe(true);
 		});
 	});
 
@@ -293,7 +294,7 @@ describe("Peach", () => {
 					type: 'text',
 					name: 'input',
 					'ng-model': 'model',
-					'hexstring': 'true'
+					'peach-hexstring': 'true'
 				})
 			]).toString();
 
@@ -305,63 +306,63 @@ describe("Peach", () => {
 			modelCtrl.$setViewValue('');
 			scope.$digest();
 			expect(scope.form.$valid).toBe(true);
-			expect(_.has(modelCtrl.$error, 'hexstring')).toBe(false);
+			expect(_.has(modelCtrl.$error, C.Validation.HexString)).toBe(false);
 		});
 
 		it("ok: 1", () => {
 			modelCtrl.$setViewValue('1');
 			scope.$digest();
 			expect(scope.form.$valid).toBe(true);
-			expect(_.has(modelCtrl.$error, 'hexstring')).toBe(false);
+			expect(_.has(modelCtrl.$error, C.Validation.HexString)).toBe(false);
 		});
 
 		it("ok: A", () => {
 			modelCtrl.$setViewValue('A');
 			scope.$digest();
 			expect(scope.form.$valid).toBe(true);
-			expect(_.has(modelCtrl.$error, 'hexstring')).toBe(false);
+			expect(_.has(modelCtrl.$error, C.Validation.HexString)).toBe(false);
 		});
 
 		it("ok: FFFFFFFF", () => {
 			modelCtrl.$setViewValue('FFFFFFFF');
 			scope.$digest();
 			expect(scope.form.$valid).toBe(true);
-			expect(_.has(modelCtrl.$error, 'hexstring')).toBe(false);
+			expect(_.has(modelCtrl.$error, C.Validation.HexString)).toBe(false);
 		});
 
 		it("bad: x", () => {
 			modelCtrl.$setViewValue('x');
 			scope.$digest();
 			expect(scope.form.$valid).toBe(false);
-			expect(_.has(modelCtrl.$error, 'hexstring')).toBe(true);
+			expect(_.has(modelCtrl.$error, C.Validation.HexString)).toBe(true);
 		});
 
 		it("bad: +1", () => {
 			modelCtrl.$setViewValue('+1');
 			scope.$digest();
 			expect(scope.form.$valid).toBe(false);
-			expect(_.has(modelCtrl.$error, 'hexstring')).toBe(true);
+			expect(_.has(modelCtrl.$error, C.Validation.HexString)).toBe(true);
 		});
 
 		it("bad: -1", () => {
 			modelCtrl.$setViewValue('-1');
 			scope.$digest();
 			expect(scope.form.$valid).toBe(false);
-			expect(_.has(modelCtrl.$error, 'hexstring')).toBe(true);
+			expect(_.has(modelCtrl.$error, C.Validation.HexString)).toBe(true);
 		});
 
 		it("bad: 0x01", () => {
 			modelCtrl.$setViewValue('0x01');
 			scope.$digest();
 			expect(scope.form.$valid).toBe(false);
-			expect(_.has(modelCtrl.$error, 'hexstring')).toBe(true);
+			expect(_.has(modelCtrl.$error, C.Validation.HexString)).toBe(true);
 		});
 
 		it("bad: 0.0", () => {
 			modelCtrl.$setViewValue('0.0');
 			scope.$digest();
 			expect(scope.form.$valid).toBe(false);
-			expect(_.has(modelCtrl.$error, 'hexstring')).toBe(true);
+			expect(_.has(modelCtrl.$error, C.Validation.HexString)).toBe(true);
 		});
 	});
 });

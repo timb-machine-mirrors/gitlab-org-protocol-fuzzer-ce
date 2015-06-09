@@ -3,39 +3,9 @@
 module Peach {
 	"use strict";
 
-	export interface ITrackTestItem {
-		track: string;
-		title: string;
-		message: string;
-		link?: string;
-		fail?: boolean;
+	export interface IPitTestScope extends IViewModelScope {
+		Title: string;
 	}
-
-
-	var TestTracks: ITrackTestItem[] = [
-		{
-			track: C.Tracks.Vars,
-			title: 'Set Variables',
-			message: 'Not completed, default values will be used.'
-		},
-		{
-			track: C.Tracks.Fault,
-			title: 'Fault Detection',
-			message: 'Fault Detection requires completion.',
-			link: 'Go to Fault Detection',
-			fail: true
-		},
-		{
-			track: C.Tracks.Data,
-			title: 'Data Collection',
-			message: 'No Data Collection will be performed.'
-		},
-		{
-			track: C.Tracks.Auto,
-			title: 'Automation',
-			message: 'No Automation will be performed.'
-		}
-	];
 
 	export class PitTestController {
 
@@ -48,21 +18,22 @@ module Peach {
 		];
 
 		constructor(
-			$scope: IViewModelScope,
+			$scope: IPitTestScope,
 			private $state: ng.ui.IStateService,
 			private pitService: PitService,
 			private testService: TestService,
 			private wizardService: WizardService
 		) {
+			$scope.Title = "Test";
 			this.track = this.wizardService.GetTrack(C.Tracks.Test);
 		}
 
 		private track: ITrack;
-		public Tracks: ITrackTestItem[] = TestTracks;
+		public Tracks: ITrackStatic[] = _.filter(WizardTracks, 'incompleteMsg');
 		public Title = 'Test';
 
 		private get isWizard(): boolean {
-			return this.$state.is(C.States.Wizard, { track: C.Tracks.Test });
+			return this.$state.is(C.States.PitWizardTest);
 		}
 
 		public get ShowNotConfigured(): boolean {
@@ -77,26 +48,29 @@ module Peach {
 			return this.testService.CanBeginTest;
 		}
 
-		public get CanContinue() {
-			return this.testService.TestResult.status === TestStatus.Pass;
+		public get CanContinue(): boolean {
+			return onlyIf(this.testService.TestResult, () => { 
+				return this.testService.CanBeginTest &&
+					this.testService.TestResult.status === TestStatus.Pass;
+			}) || false;
 		}
 
 		public IsComplete(track: string): boolean {
 			return this.wizardService.GetTrack(track).isComplete;
 		}
 
-		public TrackStatus(item: ITrackTestItem) {
-			return this.IsComplete(item.track) ?
+		public TrackStatus(item: ITrackStatic) {
+			return this.IsComplete(item.id) ?
 				'label-success' : item.fail ?
 					'label-danger' : 'label-warning';
 		}
 
-		public TrackMessage(item: ITrackTestItem) {
-			return this.IsComplete(item.track) ? 'Complete' : item.message;
+		public TrackMessage(item: ITrackStatic) {
+			return this.IsComplete(item.id) ? 'Complete' : item.incompleteMsg;
 		}
 
-		public TrackLink(item: ITrackTestItem) {
-			return this.IsComplete(item.track) ? false : _.isString(item.link);
+		public TrackLink(item: ITrackStatic) {
+			return this.IsComplete(item.id) ? false : _.isString(item.link);
 		}
 
 		public OnBeginTest() {
@@ -126,7 +100,7 @@ module Peach {
 		}
 
 		public OnNextTrack() {
-			this.$state.go(C.States.Home);
+			this.$state.go(this.track.next.state);
 		}
 	}
 }

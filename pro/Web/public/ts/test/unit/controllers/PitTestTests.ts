@@ -10,10 +10,11 @@ describe("Peach", () => {
 		var $httpBackend: ng.IHttpBackendService;
 		var $interval: ng.IIntervalService;
 		var ctrl: Peach.PitTestController;
-		var pitService: Peach.PitService;
 
-		var pitUrl = '/p/pits/PIT_GUID';
+		var pitId = 'PIT_GUID';
+		var pitUrl = C.Api.PitUrl.replace(':id', pitId);
 		var pit = <Peach.IPit> {
+			id: pitId,
 			pitUrl: pitUrl,
 			name: 'My Pit',
 			versions: [
@@ -26,21 +27,23 @@ describe("Peach", () => {
 		};
 
 		beforeEach(inject(($injector: ng.auto.IInjectorService) => {
-			var $controller: ng.IControllerService;
-			var $rootScope: ng.IRootScopeService;
-			var $templateCache: ng.ITemplateCacheService;
+			var $state = <ng.ui.IStateService> $injector.get(C.Angular.$state);
+			var $rootScope = <ng.IRootScopeService> $injector.get(C.Angular.$rootScope);
+			var $controller = <ng.IControllerService> $injector.get(C.Angular.$controller);
+			var $templateCache = <ng.ITemplateCacheService> $injector.get(C.Angular.$templateCache);
+			var pitService = <Peach.PitService> $injector.get(C.Services.Pit);
 
 			$httpBackend = $injector.get(C.Angular.$httpBackend);
-			$rootScope = $injector.get(C.Angular.$rootScope);
-			$controller = $injector.get(C.Angular.$controller);
 			$interval = $injector.get(C.Angular.$interval);
-			$templateCache = $injector.get(C.Angular.$templateCache);
-			pitService = $injector.get(C.Services.Pit);
 
-			$templateCache.put(C.Templates.Dashboard, '');
+			$templateCache.put(C.Templates.Home, '');
+			$templateCache.put(C.Templates.Pit.Configure, '');
 
-			$httpBackend.expectGET(pitUrl).respond(pit);
-			pitService.SelectPit(pitUrl);
+			$state.go(C.States.Pit, { pit: pitId });
+			$rootScope.$digest();
+
+			$httpBackend.whenGET(pitUrl).respond(pit);
+			pitService.LoadPit();
 			$httpBackend.flush();
 
 			ctrl = $controller('PitTestController', {
