@@ -3,6 +3,8 @@
 [[Monitors_WindowsService]]
 == WindowsService Monitor (Windows)
 
+*Monitor Categories*: *Automation*, *Fault detection*
+
 The _WindowsService_ monitor controls a windows service. When the monitor runs, it checks 
 the state of the service. If the service exits prematurely, _WindowsService_ generates a fault. 
 If a fault is detected by from _windowsService_ or from another monitor, the monitor collects status of 

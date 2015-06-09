@@ -3,7 +3,7 @@
 [[Monitors_LinuxCoreFile]]
 == LinuxCoreFile Monitor (Linux)
 
-*Monitor Categores*: *Data collection*, *Fault detection*
+*Monitor Categories*: *Data collection*, *Fault detection*
 
 [IMPORTANT]
 ====

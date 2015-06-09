@@ -3,6 +3,8 @@
 [[Monitors_Android]]
 == Android Monitor
 
+*Monitor Categories*: *Automation*, *Fault detection*
+
 The _Android_ monitor examines both targeted Android applications and the state of the 
 Android OS. Two expected use cases are:
 
