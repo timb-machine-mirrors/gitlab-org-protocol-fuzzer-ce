@@ -439,6 +439,55 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.IsNotNull(job);
 			VerifyDatabase(job);
 		}
+
+		[Test]
+		public void TestHeartBeat()
+		{
+			var jobRequest = new JobRequest();
+
+			var job = _monitor.Start(_tmp.Path, _tmp.Path, jobRequest);
+			Assert.IsNotNull(job);
+			Assert.IsTrue(WaitUntil(JobStatus.Running), "Timeout waiting for Running");
+
+			job = _monitor.GetJob();
+			Assert.IsNotNull(job);
+
+			Assert.GreaterOrEqual(job.HeartBeat, job.StartDate);
+
+			Assert.IsTrue(_monitor.Pause());
+			Assert.IsTrue(WaitUntil(JobStatus.Paused), "Timeout waiting for Paused");
+
+			job = _monitor.GetJob();
+			Assert.IsNotNull(job);
+			Assert.AreEqual(JobStatus.Paused, job.Status);
+
+			var time = job.HeartBeat;
+
+			Thread.Sleep(2000);
+
+			job = _monitor.GetJob();
+			Assert.IsNotNull(job);
+			Assert.AreEqual(JobStatus.Paused, job.Status);
+
+			// Heartbeat should go up when we are paused
+			Assert.Greater(job.HeartBeat, time);
+
+			time = job.HeartBeat;
+
+			Thread.Sleep(1000);
+
+			Assert.IsTrue(_monitor.Stop());
+			WaitForFinish();
+
+			job = _monitor.GetJob();
+			Assert.AreEqual(JobStatus.Stopped, job.Status);
+
+			// Heartberat should advance when job stops
+			Assert.Greater(job.HeartBeat, time);
+			Assert.AreEqual(job.HeartBeat, job.StopDate);
+
+			VerifyDatabase(job);
+		}
 	}
 
 	[TestFixture]

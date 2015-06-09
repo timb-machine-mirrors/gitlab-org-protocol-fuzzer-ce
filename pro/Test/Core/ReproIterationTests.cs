@@ -112,7 +112,7 @@ namespace Peach.Pro.Test.Core
 		[Test]
 		public void TestIterationNoRepro()
 		{
-			// Target lifetime is per iteration and non-reproducable fault
+			// Target lifetime is per iteration and non-reproducible fault
 			// found on a fuzzing iteration.
 			// expect it to only replay the same interation
 
@@ -142,7 +142,7 @@ namespace Peach.Pro.Test.Core
 		[Test]
 		public void TestIterationRepro()
 		{
-			// Target lifetime is per iteration and reproducable fault
+			// Target lifetime is per iteration and reproducible fault
 			// found on a fuzzing iteration.
 			// expect it to only replay the same interation
 
@@ -171,7 +171,7 @@ namespace Peach.Pro.Test.Core
 		[Test]
 		public void TestIterationNoReproControl()
 		{
-			// Target lifetime is per iteration and non-reproducable fault
+			// Target lifetime is per iteration and non-reproducible fault
 			// found on a control iteration.
 			// expect it to only replay the same interation
 
@@ -206,7 +206,7 @@ namespace Peach.Pro.Test.Core
 		[Test]
 		public void TestIterationReproControl()
 		{
-			// Target lifetime is per iteration and reproducable fault
+			// Target lifetime is per iteration and reproducible fault
 			// found on a control iteration.
 			// expect it to only replay the same interation and
 			// stop fuzzing.

@@ -967,7 +967,7 @@ namespace Peach.Core
 
 			var fault = new Fault
 			{
-				detectionSource = "PeachControlIteration",
+				detectionSource = "ControlIteration",
 				iteration = _context.currentIteration,
 				controlIteration = _context.controlIteration,
 				controlRecordingIteration = _context.controlRecordingIteration,

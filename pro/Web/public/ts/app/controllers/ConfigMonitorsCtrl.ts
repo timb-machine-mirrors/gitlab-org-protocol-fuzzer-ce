@@ -13,7 +13,7 @@ module Peach {
 			private $scope: IFormScope,
 			private pitService: PitService
 		) {
-			var promise = pitService.ReloadPit();
+			var promise = pitService.LoadPit();
 			promise.then((pit: IPit) => {
 				this.Agents = pit.agents;
 				this.hasLoaded = true;

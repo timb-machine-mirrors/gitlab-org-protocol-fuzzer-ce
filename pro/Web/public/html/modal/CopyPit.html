@@ -60,7 +60,7 @@
 						class="btn btn-primary"
 						ng-click="vm.Submit()"
 						ng-class="{disabled: form.$invalid}"
-						ng-disabled="form.$invalid"
+						ng-disabled="form.$invalid || vm.IsSubmitDisabled"
 						tabindex="3">
 			Submit
 		</button>

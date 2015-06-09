@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 deps = [
-	'System.dll',
-	'System.Web.dll',
 ]
 
 content = [
@@ -29,7 +27,6 @@ bld(
 	source = 'public/ts/app/app.ts',
 	install_path = '${BINDIR}',
 	install_644 = public,
-	ide_source = 'ReverseProxy.cs',
 	ide_content = content,
 	ide_aspnet = True,
 	use = deps,

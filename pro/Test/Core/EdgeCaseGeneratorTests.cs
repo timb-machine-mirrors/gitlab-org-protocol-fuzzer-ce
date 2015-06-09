@@ -120,8 +120,6 @@ namespace Peach.Pro.Test.Core
 		[Test]
 		public void TestRanges()
 		{
-			Console.WriteLine("TestRanges");
-
 			var e1 = new EdgeCaseGenerator(short.MinValue, (ulong)short.MaxValue);
 
 			// 6 edges
@@ -202,8 +200,6 @@ namespace Peach.Pro.Test.Core
 		[Test]
 		public void HitsEdges()
 		{
-			Console.WriteLine("HitsEdges");
-
 			HitsEdges(short.MinValue, (ulong)short.MaxValue);
 			HitsEdges(int.MinValue, (ulong)int.MaxValue);
 			//HitsEdges(long.MinValue, (ulong)long.MaxValue);
@@ -271,12 +267,8 @@ namespace Peach.Pro.Test.Core
 		[Test]
 		public void IntRandom()
 		{
-			Console.WriteLine("IntRandom");
-
 			var rng = new Random(0);
 			var e = new EdgeCaseGenerator(int.MinValue, (ulong)int.MaxValue);
-
-			Console.WriteLine("TestRanges> after new EdgeCaseGenerator: {0} cases", e.Edges.Count);
 
 			var hits = new bool[e.Edges.Count];
 

@@ -45,7 +45,7 @@ namespace Peach.Pro.Core.Storage
 		};
 
 		public JobDatabase(string path)
-			: base(path, true)
+			: base(path, true, true)
 		{
 		}
 
@@ -126,6 +126,67 @@ namespace Peach.Pro.Core.Storage
 		public void UpdateJob(Job job)
 		{
 			Connection.Execute(Sql.UpdateJob, job);
+		}
+
+		public Report GetReport(Guid id)
+		{
+			var job = GetJob(id);
+			if (job == null)
+				return null;
+
+			return GetReport(job);
+		}
+
+		public Report GetReport(Job job)
+		{
+			return new Report
+			{
+				Job = job,
+
+				BucketDetails = LoadTable<BucketDetail>()
+					.OrderByDescending(m => m.FaultCount)
+					.ThenBy(m => m.MajorHash)
+					.ThenBy(m => m.MinorHash)
+					.ThenBy(m => m.Exploitability)
+					.ToList(),
+
+				MutatorMetrics = LoadTable<MutatorMetric>()
+					.OrderByDescending(m => m.BucketCount)
+					.ThenByDescending(m => m.FaultCount)
+					.ThenByDescending(m => m.IterationCount)
+					.ThenByDescending(m => m.ElementCount)
+					.ThenBy(m => m.Mutator)
+					.ToList(),
+
+				ElementMetrics = LoadTable<ElementMetric>()
+					.OrderByDescending(m => m.BucketCount)
+					.ThenByDescending(m => m.FaultCount)
+					.ThenByDescending(m => m.IterationCount)
+					.ThenBy(m => m.State)
+					.ThenBy(m => m.Action)
+					.ThenBy(m => m.Element)
+					.ToList(),
+
+				StateMetrics = LoadTable<StateMetric>()
+					.OrderByDescending(m => m.ExecutionCount)
+					.ThenBy(m => m.State)
+					.ToList(),
+
+				DatasetMetrics = LoadTable<DatasetMetric>()
+					.OrderByDescending(m => m.BucketCount)
+					.ThenByDescending(m => m.FaultCount)
+					.ThenByDescending(m => m.IterationCount)
+					.ThenBy(m => m.Dataset)
+					.ToList(),
+
+				BucketMetrics = LoadTable<BucketMetric>()
+					.OrderByDescending(m => m.FaultCount)
+					.ThenByDescending(m => m.IterationCount)
+					.ThenBy(m => m.Mutator)
+					.ThenBy(m => m.Bucket)
+					.ThenBy(m => m.Element)
+					.ToList(),
+			};
 		}
 	}
 }

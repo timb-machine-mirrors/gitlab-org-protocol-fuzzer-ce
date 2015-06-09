@@ -1,4 +1,5 @@
-﻿using Peach.Pro.Core.WebServices.Models;
+﻿using System.Diagnostics;
+using Peach.Pro.Core.WebServices.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -31,20 +32,25 @@ namespace Peach.Pro.Core.Storage
 					return null;
 				}
 
-				if (job.DatabasePath == null)
-					return job;
+				return EnsureUpToDate(db, job);
+			}
+		}
 
-				if (!File.Exists(job.DatabasePath))
-				{
-					Logger.Trace("DatabasePath is invalid, deleting job");
-					db.DeleteJob(id);
-					return null;
-				}
+		public static Job EnsureUpToDate(NodeDatabase db, Job job)
+		{
+			if (job.DatabasePath == null)
+				return job;
+
+			if (!File.Exists(job.DatabasePath))
+			{
+				Logger.Trace("DatabasePath is invalid, deleting job");
+				db.DeleteJob(job.Guid);
+				return null;
 			}
 
-			using (var db = new JobDatabase(job.DatabasePath))
+			using (var jobDb = new JobDatabase(job.DatabasePath))
 			{
-				job = db.GetJob(id);
+				job = jobDb.GetJob(job.Guid);
 				if (job == null)
 				{
 					Logger.Trace("Job does not exist in JobDatabase");
@@ -76,7 +82,8 @@ namespace Peach.Pro.Core.Storage
 					}
 				}
 
-				job.StopDate = DateTime.UtcNow;
+				job.StopDate = DateTime.Now;
+				job.HeartBeat = job.StopDate;
 				job.Mode = JobMode.Fuzzing;
 				job.Status = JobStatus.Stopped;
 				job.Result = message;
@@ -118,7 +125,7 @@ namespace Peach.Pro.Core.Storage
 		}
 
 		public NodeDatabase()
-			: base(GetDatabasePath(), false)
+			: base(GetDatabasePath(), false, true)
 		{
 		}
 

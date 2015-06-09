@@ -30,7 +30,7 @@ INSERT INTO [Job] (
 	Id,
 	Status,
 	Mode,
-	Name,
+	PitFile,
 	Result,
 	Notes,
 	User,
@@ -41,18 +41,18 @@ INSERT INTO [Job] (
 	HeartBeat,
 	Pid,
 	Runtime,
-	Speed,
 	FaultCount,
 	RangeStart,
 	RangeStop,
 	IsControlIteration,
 	PitUrl,
-	LogPath
+	LogPath,
+	PeachVersion
 ) VALUES (
 	@Id,
 	@Status,
 	@Mode,
-	@Name,
+	@PitFile,
 	@Result,
 	@Notes,
 	@User,
@@ -63,13 +63,13 @@ INSERT INTO [Job] (
 	@HeartBeat,
 	@Pid,
 	@Runtime,
-	@Speed,
 	@FaultCount,
 	@RangeStart,
 	@RangeStop,
 	@IsControlIteration,
 	@PitUrl,
-	@LogPath
+	@LogPath,
+	@PeachVersion
 );";
 
 		public const string UpdateJob = @"
@@ -77,7 +77,7 @@ UPDATE [Job]
 SET 
 	Status = @Status,
 	Mode = @Mode,
-	Name = @Name,
+	PitFile = @PitFile,
 	Result = @Result,
 	Notes = @Notes,
 	User = @User,
@@ -88,11 +88,11 @@ SET
 	HeartBeat = @HeartBeat,
 	Pid = @Pid,
 	Runtime = @Runtime,
-	Speed = @Speed,
 	FaultCount = @FaultCount,
 	RangeStart = @RangeStart,
 	RangeStop = @RangeStop,
-	LogPath = @LogPath
+	LogPath = @LogPath,
+	PeachVersion = @PeachVersion
 WHERE
 	Id = @Id
 ;";
@@ -205,10 +205,9 @@ INSERT INTO FaultMetric (
 
 		public const string InsertFaultDetail = @"
 INSERT INTO FaultDetail (
-	Reproducable,
+	Reproducible,
 	Iteration,
 	TimeStamp,
-	BucketName,
 	Source,
 	Exploitability,
 	MajorHash,
@@ -220,10 +219,9 @@ INSERT INTO FaultDetail (
 	IterationStop,
 	FaultPath
 ) VALUES (
-	@Reproducable,
+	@Reproducible,
 	@Iteration,
 	@TimeStamp,
-	@BucketName,
 	@Source,
 	@Exploitability,
 	@MajorHash,

@@ -3,18 +3,19 @@
 module Peach {
 	"use strict";
 
+	enum WizardStep {
+		Intro = 1,
+		QandA,
+		Review
+	}
+
 	export interface IWizardScope extends IFormScope {
+		Title: string;
 		Question: IQuestion;
-		Step: number;
+		Step: WizardStep;
 		NextPrompt: string;
 		BackPrompt: string;
 		Defines: IParameter[];
-	}
-
-	enum WizardStep {
-		Intro = 1,
-		QA,
-		Review
 	}
 
 	export class WizardController {
@@ -31,64 +32,55 @@ module Peach {
 			private pitService: PitService,
 			private wizardService: WizardService
 		) {
-			this.trackId = this.$state.params['track'];
-			this.track = wizardService.GetTrack(this.trackId);
-			this.Title = this.track.title;
+			var trackId = this.$state.current.data.track;
+			this.track = wizardService.GetTrack(trackId);
+			this.$scope.Title = this.track.name;
 
-			if (this.trackId !== C.Tracks.Intro) {
-				var id = this.$state.params['id'];
-				this.init(id);
-			}
-		}
-
-		private trackId: string;
-		private track: ITrack;
-		public Title: string;
-
-		public OnNextTrack() {
-			var next = this.track.next;
-			this.$state.go(next.state, next.params);
-		}
-
-		private gotoIntro() {
-			// since the all the params might be the same,
-			// we need to force the controller to reinitialize with reload: true.
-			this.$state.go(
-				C.States.WizardIntro,
-				{ track: this.trackId, id: 0 },
-				{ reload: true }
-			);
-		}
-
-		private init(id: number) {
-			this.resetPrompts();
-
-			if (id === 0) {
-				if (this.$state.is(C.States.WizardIntro)) {
-					this.initIntro();
-				}
-				else if (this.$state.is(C.States.WizardReview)) {
-					this.initReview();
-				}
-			} else {
-				this.$scope.Step = WizardStep.QA;
-				this.loadQuestion(id);
-			}
-		}
-
-		private initIntro() {
-			this.$scope.Step = WizardStep.Intro;
-			var promise = this.track.Begin();
-			if (promise) {
-				promise.then(() => {
-					this.loadQuestion(0);
+			if (trackId !== C.Tracks.Intro) {
+				this.unregister = this.$scope.$on(C.Angular.$stateChangeSuccess, () => {
+					this.onStateChange();
 				});
 			}
 		}
 
-		private initReview() {
+		private unregister;
+		private track: ITrack;
+
+		public OnNextTrack(): void {
+			// this is needed to make unit tests happy
+			if (this.unregister) { 
+				this.unregister();
+			}
+
+			var next = this.track.next;
+			this.$state.go(next.state, next.params);
+		}
+
+		private onStateChange(): void {
+			this.resetPrompts();
+
+			if (this.$state.is(this.track.start)) {
+				this.initIntro();
+			} else if (this.$state.is(this.track.finish)) {
+				this.initReview();
+			} else {
+				var id = this.$state.params['id'];
+				this.$scope.Step = WizardStep.QandA;
+				this.loadQuestion(id);
+			}
+		}
+
+		private initIntro(): void {
+			this.$scope.Step = WizardStep.Intro;
+			this.$scope.Question = {
+				id: 0,
+				type: QuestionTypes.Intro
+			};
+		}
+
+		private initReview(): void {
 			if (!this.track.IsValid()) {
-				this.gotoIntro();
+				this.$state.go(this.track.start);
 				return;
 			}
 			this.$scope.Step = WizardStep.Review;
@@ -103,12 +95,12 @@ module Peach {
 			this.$scope.BackPrompt = this.track.backPrompt;
 		}
 
-		private loadQuestion(id: number) {
+		private loadQuestion(id: number): void {
 			this.$scope.Question = this.track.GetQuestionById(id);
 			if (this.$scope.Question) {
 				this.prepareQuestion();
 			} else {
-				this.gotoIntro();
+				this.$state.go(this.track.start);
 			}
 		}
 
@@ -140,9 +132,24 @@ module Peach {
 			return this.track.history.length > 0;
 		}
 
-		public Next() {
+		public Next(): void {
 			if (this.$scope.Question.type === QuestionTypes.Done) {
 				this.OnNextTrack();
+				return;
+			}
+
+			if (this.$scope.Question.type === QuestionTypes.Intro) {
+				var promise = this.track.Begin();
+				if (promise) {
+					promise.then(() => {
+						var first = this.track.GetQuestionById(1);
+						if (_.isUndefined(first)) {
+							this.$state.go(this.track.finish);
+						} else {
+							this.$state.go(this.track.steps, { id: 1 });
+						}
+					});
+				}
 				return;
 			}
 
@@ -154,19 +161,13 @@ module Peach {
 
 			if (_.isUndefined(nextId)) {
 				// no more questions, this track is complete
-				this.$state.go(
-					C.States.WizardReview,
-					{ track: this.trackId, id: 0 }
-				);
+				this.$state.go(this.track.finish);
 			} else {
-				this.$state.go(
-					C.States.WizardQuestion,
-					{ track: this.trackId, id: nextId }
-				);
+				this.$state.go(this.track.steps, { id: nextId });
 			}
 		}
 
-		public Back() {
+		public Back(): void {
 			if (this.$scope.Question.type === QuestionTypes.Done) {
 				this.OnRestart();
 				return;
@@ -178,21 +179,18 @@ module Peach {
 			}
 
 			if (previousId === 0) {
-				this.gotoIntro();
+				this.$state.go(this.track.start);
 			} else {
-				this.$state.go(
-					C.States.WizardQuestion,
-					{ track: this.trackId, id: previousId }
-				);
+				this.$state.go(this.track.steps, { id: previousId });
 			}
 		}
 
-		public OnRestart() {
-			this.track.Restart();
-			this.gotoIntro();
+		public OnRestart(): void {
+			this.track.history = [];
+			this.$state.go(this.track.start);
 		}
 
-		public OnRemoveAgent(index: number) {
+		public OnRemoveAgent(index: number): void {
 			this.track.agents.splice(index, 1);
 		}
 
@@ -223,7 +221,7 @@ module Peach {
 			return q.next;
 		}
 
-		private prepareQuestion() {
+		private prepareQuestion(): void {
 			this.$scope.Defines = this.pitService.Pit.config;
 
 			// special stuff to do based on the next question
@@ -255,7 +253,7 @@ module Peach {
 			}
 		}
 
-		private resetPrompts() {
+		private resetPrompts(): void {
 			this.$scope.NextPrompt = "Next";
 			this.$scope.BackPrompt = "Back";
 		}
@@ -290,14 +288,11 @@ module Peach {
 			if (template === 'user') {
 				template = 'string';
 			}
-			return C.Templates.Wizard.QuestionType.replace(':type', template);
+			return C.Templates.Pit.Wizard.QuestionType.replace(':type', template);
 		}
 
 		public get IsSetVars(): boolean {
-			return this.$state.includes(
-				C.States.Wizard,
-				{ track: C.Tracks.Vars }
-			);
+			return this.$state.includes(WizardTrackIntro(C.Tracks.Vars));
 		}
 
 		public OnInsertDefine(def: IParameter) {
