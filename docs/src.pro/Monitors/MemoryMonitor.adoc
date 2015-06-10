@@ -3,6 +3,8 @@
 [[Monitors_MemoryMonitor]]
 == Memory Monitor
 
+*Monitor Category*: *Fault detection*
+
 The _Memory_ monitor checks the process memory usage and initiates a fault when the memory 
 usage exceeds a specified limit.  This monitor can detect non-crashing extraneous memory 
 usage and whether a process exits early.

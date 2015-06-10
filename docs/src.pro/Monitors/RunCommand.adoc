@@ -3,6 +3,8 @@
 [[Monitors_RunCommand]]
 == Run Command
 
+*Monitor Categories*: *Automation*, *Data collection*, *Fault detection*
+
 The _RunCommand_ monitor launches a specified command to perform a utility function. The user, through the parameters, can control when the command runs: at the start or end of the fuzzing session, at the start or end of an iteration, in the middle of an iteration, after detecting a fault, and at the start of an iteration immediately following a fault. 
 
 The utility command can send an email message reporting a count, set an environment variable, start a timer, append an external log file, and more.

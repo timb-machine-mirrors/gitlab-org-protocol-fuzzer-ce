@@ -3,6 +3,8 @@
 [[Monitors_Serial]]
 == Serial Port Monitor
 
+*Monitor Categories*: *Automation*, *Data collection*, *Fault detection*
+
 The _Serial Port_ monitor can be used to perform data collection, fault detection, 
 and automation tasks based on the received input. 
 
