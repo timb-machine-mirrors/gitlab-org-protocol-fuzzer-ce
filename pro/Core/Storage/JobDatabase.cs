@@ -45,7 +45,7 @@ namespace Peach.Pro.Core.Storage
 		};
 
 		public JobDatabase(string path)
-			: base(path, true)
+			: base(path, true, true)
 		{
 		}
 

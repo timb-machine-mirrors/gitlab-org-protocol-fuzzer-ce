@@ -3,6 +3,8 @@
 [[Monitors_WindowsDebugger]]
 == WindowsDebugger Monitor (Windows)
 
+*Monitor Categories*: *Automation*, *Data collection*, *Fault detection*
+
 The _WindowsDebugger_ monitor controls a windows debugger instance.  
 
 This monitor launches an executable file, a process, a service, or a kernel driver with 

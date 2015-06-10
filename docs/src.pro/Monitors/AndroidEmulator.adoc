@@ -3,6 +3,8 @@
 [[Monitors_AndroidEmulator]]
 == AndroidEmulator Monitor
 
+*Monitor Categories*: *Automation*, *Fault detection*
+
 The _AndroidEmulator_ monitor handles setup and tear-down for Android Virtual Devices (AVDs) 
 running within the Android Emulator. This monitor detects faults related to the emulator 
 operation, not fuzzing results. 

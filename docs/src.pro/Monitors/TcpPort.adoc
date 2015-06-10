@@ -3,6 +3,8 @@
 [[Monitors_TcpPort]]
 == TcpPort Monitor
 
+*Monitor Categories*: *Automation*, *Data collection*, *Fault detection*
+
 The _TcpPort_ monitor detects state changes on TCP ports. A state change is a transition in port status from Open to Closed or from Closed to Open. The _TcpPort_ monitor can be configured in the following ways:
 
 * as an automation task (wait until a specified state occurs)
