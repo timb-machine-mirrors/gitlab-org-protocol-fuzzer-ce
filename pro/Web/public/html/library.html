@@ -1,22 +1,66 @@
-﻿<div ng-repeat="lib in vm.Libraries">
-	<div ng-show="$index" class="page-header">
-		<h1>{{lib.Name}}</h1>
-	</div>
-	<p>
-		<!--Some junk here.-->
-	</p>
-	<accordion close-others="false">
-		<accordion-group ng-repeat="cat in lib.Categories"
-										 heading="{{cat.Name}}"
-										 is-open="true">
-			<ul class="list-inline library">
-				<li ng-repeat="entry in cat.Pits">
-					<a href=""
-						 tooltip="{{entry.Pit.description}}"
-						 ng-click="vm.OnSelectPit(entry)">{{entry.Pit.name}}</a>
-				</li>
-			</ul>
-		</accordion-group>
-	</accordion>
-</div>
+﻿<p>
+	Welcome to the Peach Pit library. This page consists of two main parts:
+</p>
 
+<dl class="dl-horizontal">
+	<dt>
+		Pits
+	</dt>
+	<dd>
+		Peach Pit definitions
+	</dd>
+
+	<dt>
+		Configurations
+	</dt>
+	<dd>
+		Peach Pit definitions with configuration settings
+	</dd>
+</dl>
+
+<div class="page-header">
+	<h3>Pits</h3>
+</div>
+<p>
+	The "Pits" section identifies Peach pits or Pit Packs that are present on your system. 
+	The pits listed here are fully developed and tested in house. 
+	What they lack is information specific to your test bench, the configuration information. 
+	The entries mirror the contents of the subfolders of the specified <code>--pits</code> directory.
+</p>
+<accordion close-others="false">
+	<accordion-group ng-repeat="cat in vm.Pits.Categories"
+									 heading="{{cat.Name}}"
+									 is-open="true">
+		<ul class="list-inline library">
+			<li ng-repeat="entry in cat.Pits">
+				<a href=""
+					tooltip="{{entry.Pit.description}}"
+					ng-click="vm.OnSelectPit(entry)">{{entry.Pit.name}}</a>
+			</li>
+		</ul>
+	</accordion-group>
+</accordion>
+
+<div class="page-header">
+	<h3>Configurations</h3>
+</div>
+<p>
+	The "Configurations" section identifies Peach pits configured for your system. 
+	These pits are ready to use. 
+	Rather than use the Pit name, each entry contains name given when the configuration data was supplied. 
+	The entries in this section mirror the contents of the 
+	<code>User</code> subfolder of the specified <code>--pits</code> directory.
+</p>
+<accordion close-others="false">
+	<accordion-group ng-repeat="cat in vm.User.Categories"
+									 heading="{{cat.Name}}"
+									 is-open="true">
+		<ul class="list-inline library">
+			<li ng-repeat="entry in cat.Pits">
+				<a href=""
+					tooltip="{{entry.Pit.description}}"
+					ng-click="vm.OnSelectPit(entry)">{{entry.Pit.name}}</a>
+			</li>
+		</ul>
+	</accordion-group>
+</accordion>
