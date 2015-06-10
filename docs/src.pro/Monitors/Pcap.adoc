@@ -3,6 +3,8 @@
 [[Monitors_Pcap]]
 == Pcap Monitor
 
+*Monitor Categories*: *Data collection*, *Fault detection*
+
 The _Pcap_ monitor performs network captures during the fuzzing iteration. When a packet 
 arrives, this monitor writes the content into a file, increments the received packet count, 
 and waits for the next packet to arrive. If a filter is used, the captured packets 

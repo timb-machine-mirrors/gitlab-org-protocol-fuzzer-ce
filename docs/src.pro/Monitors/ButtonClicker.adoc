@@ -3,6 +3,8 @@
 [[Monitors_ButtonClicker]]
 == ButtonClicker Monitor
 
+*Monitor Category*: *Automation*
+
 The _ButtonClicker_ monitor provides automation functionality by clicking buttons 
 in the Windows GUI. This monitor runs in the Windows environment. _ButtonClicker_
 watches and clicks the appropriate button within the specified window. You can use 
@@ -66,7 +68,7 @@ image::{images}/UnderliningExample.png[]
 
 === Examples
 
-// ifdef::peachug[]
+ifdef::peachug[]
 
 .Basic Usage Example +
 

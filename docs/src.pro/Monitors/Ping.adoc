@@ -3,6 +3,8 @@
 [[Monitors_Ping]]
 == Ping Monitor
 
+*Monitor Category*: *Fault detection*
+
 The _Ping_ monitor verifies whether a device is functioning by sending a packet to a target location, 
 and waiting for a response from the device. _Ping_ continues to monitor until either a _Timeout_ occurs 
 or a response from the target device reaches the _Ping_ monitor. Ping runs at the end of each iteration. 
