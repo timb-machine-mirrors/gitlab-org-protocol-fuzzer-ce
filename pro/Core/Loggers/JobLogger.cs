@@ -378,13 +378,16 @@ namespace Peach.Pro.Core.Loggers
 				}
 			}
 
-			using (var db = new JobDatabase(_job.DatabasePath))
+			if (mode != _job.Mode)
 			{
-				lock (_timer)
+				using (var db = new JobDatabase(_job.DatabasePath))
 				{
-					_job.Mode = mode;
+					lock (_timer)
+					{
+						_job.Mode = mode;
 
-					UpdateRunningJob(db);
+						UpdateRunningJob(db);
+					}
 				}
 			}
 
