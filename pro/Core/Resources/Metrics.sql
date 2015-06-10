@@ -27,6 +27,30 @@ JOIN NamedItem AS m  ON m.Id  = x.MutatorId
 JOIN NamedItem AS d  ON d.Id  = x.DatasetId;
 -- Iterations <<<
 
+-- Faults >>>
+CREATE VIEW ViewFaults AS 
+SELECT
+	sn.Name || '_' || s.RunCount AS [State],
+	a.Name AS [Action],
+	CASE WHEN LENGTH(p.Name) > 0 THEN
+		p.Name || '.' || 
+		e.Name
+	ELSE
+		e.Name
+	END AS [Element],
+	m.Name AS Mutator,
+	d.Name AS Dataset,
+	x.Iteration
+FROM FaultMetric  AS x
+JOIN [State]   AS s  ON s.Id  = x.StateId
+JOIN NamedItem AS sn ON sn.Id = s.NameId
+JOIN NamedItem AS a  ON a.Id  = x.ActionId
+JOIN NamedItem AS p  ON p.Id  = x.ParameterId
+JOIN NamedItem AS e  ON e.Id  = x.ElementId
+JOIN NamedItem AS m  ON m.Id  = x.MutatorId
+JOIN NamedItem AS d  ON d.Id  = x.DatasetId;
+-- Faults <<<
+
 -- Buckets >>>
 CREATE VIEW ViewBuckets AS
 SELECT
