@@ -40,7 +40,8 @@ namespace Peach.Pro.OS.OSX
 		{
 			obj = new object();
 			locked = false;
-			lockfile = Path.Combine(Path.GetTempPath(), name);
+			var safeName = name.Replace("\\", "_").Replace("/", "_");
+			lockfile = Path.Combine(Path.GetTempPath(), safeName);
 			fd = open(lockfile, O_RDWR | O_CREAT, Convert.ToInt32("600", 8));
 			if (fd == -1)
 				RaiseError("Opening");
