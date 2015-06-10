@@ -109,10 +109,13 @@ GROUP BY
 CREATE VIEW ViewBucketDetails AS
 SELECT
 	COUNT(*) as FaultCount,
+	MIN(Iteration) as Iteration,
 	*
 FROM FaultDetail
 GROUP BY
-	MajorHash,MinorHash;
+	MajorHash,
+	MinorHash
+;
 -- Bucket Details <<<
 
 -- BucketTimeline >>>
