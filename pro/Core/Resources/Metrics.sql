@@ -66,7 +66,18 @@ SELECT
 		a.Name || '.' || 
 		e.Name
 	END AS Element,
-	y.IterationCount,
+	(
+		SELECT 
+			SUM(m.IterationCount)
+		FROM 
+			Mutation AS m 
+		WHERE 
+			m.StateId     = y.StateId AND
+			m.ActionId    = y.ActionId AND
+			m.ParameterId = y.ParameterId AND
+			m.ElementId   = y.ElementId AND
+			m.MutatorId   = y.MutatorId
+	) as IterationCount,
 	COUNT(DISTINCT(x.Iteration)) AS FaultCount
 FROM FaultMetric AS x
 JOIN Mutation AS y ON 
@@ -82,7 +93,7 @@ JOIN NamedItem AS a  ON a.Id  = x.ActionId
 JOIN NamedItem AS p  ON p.Id  = x.ParameterId
 JOIN NamedItem AS e  ON e.Id  = x.ElementId
 JOIN NamedItem AS m  ON m.Id  = x.MutatorId
-JOIN NamedItem AS d  ON d.Id  = x.MutatorId
+JOIN NamedItem AS d  ON d.Id  = x.DatasetId
 GROUP BY 
 	x.MajorHash,
 	x.MinorHash,
@@ -90,8 +101,7 @@ GROUP BY
 	x.StateId,
 	x.ActionId,
 	x.ParameterId,
-	x.ElementId,
-	x.DatasetId
+	x.ElementId
 ;
 -- Buckets <<<
 
@@ -180,7 +190,6 @@ SELECT
 	x.StateId,
 	x.Actionid,
 	x.ParameterId,
-	x.DatasetId,
 	x.ElementId,
 	SUM(x.IterationCount) AS IterationCount
 FROM Mutation AS x
@@ -188,7 +197,6 @@ GROUP BY
 	x.StateId,
 	x.ActionId,
 	x.ParameterId,
-	x.DatasetId,
 	x.ElementId
 ;
 
@@ -197,7 +205,6 @@ SELECT
 	x.StateId,
 	x.ActionId,
 	x.ParameterId,
-	x.DatasetId,
 	x.ElementId,
 	COUNT(DISTINCT(x.Iteration)) AS FaultCount,
 	COUNT(DISTINCT(x.MajorHash)) AS BucketCount
@@ -206,7 +213,6 @@ GROUP BY
 	x.StateId,
 	x.ActionId,
 	x.ParameterId,
-	x.DatasetId,
 	x.ElementId
 ;
 
@@ -214,7 +220,6 @@ CREATE VIEW ViewElements AS
 SELECT 
 	sn.Name || '_' || s.RunCount AS [State],
 	a.Name as [Action],
-	d.Name as [Dataset],
 	CASE WHEN LENGTH(p.Name) > 0 THEN
 		p.Name || '.' || 
 		e.Name
@@ -229,14 +234,12 @@ LEFT JOIN ViewElementsByFault AS vef ON
 	vei.ElementId   = vef.ElementId AND 
 	vei.StateId     = vef.StateId AND 
 	vei.ActionId    = vef.ActionId AND 
-	vei.ParameterId = vef.ParameterId AND 
-	vei.DatasetId   = vef.DatasetId
+	vei.ParameterId = vef.ParameterId
 JOIN [State]   AS s  ON s.Id  = vei.StateId
 JOIN NamedItem AS sn ON sn.Id = s.NameId
 JOIN NamedItem AS e  ON e.Id  = vei.ElementId
 JOIN NamedItem AS a  ON a.Id  = vei.ActionId
-JOIN NamedItem AS p  ON p.Id  = vei.ParameterId
-JOIN NamedItem AS d  ON d.Id  = vei.DatasetId;
+JOIN NamedItem AS p  ON p.Id  = vei.ParameterId;
 -- Elements <<<
 
 -- Datasets >>>
@@ -278,9 +281,9 @@ SELECT
 	ELSE
 		sn.name || '.' || a.name || '/' || d.name
 	END AS Dataset,
-	vdi.IterationCount,
-	vdf.BucketCount,
-	vdf.FaultCount
+	SUM(vdi.IterationCount) as IterationCount,
+	SUM(vdf.BucketCount) as BucketCount,
+	SUM(vdf.FaultCount) as FaultCount
 FROM ViewDatasetsByIteration AS vdi
 LEFT JOIN ViewDatasetsByFault as vdf ON 
 	vdi.StateId = vdf.StateId AND
@@ -291,4 +294,12 @@ JOIN [State] AS s ON vdi.StateId = s.Id
 JOIN NamedItem AS sn ON s.NameId = sn.Id
 JOIN NamedItem AS a ON vdi.ActionId = a.Id
 JOIN NamedItem AS p ON vdi.ParameterId = p.Id
-JOIN NamedItem AS d ON vdi.DatasetId = d.Id;
+JOIN NamedItem AS d ON vdi.DatasetId = d.Id
+WHERE
+	length(d.name) > 0
+GROUP BY
+	s.NameId,
+	vdi.ActionId,
+	vdi.ParameterId,
+	vdi.DatasetId
+;
