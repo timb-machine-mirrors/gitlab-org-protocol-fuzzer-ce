@@ -194,33 +194,26 @@ namespace Peach.Pro.Core.Storage
 
 		public void Migrate()
 		{
-			using (var mutex = new Mutex(false, Path))
+			using (var si = SingleInstance.CreateInstance(Path))
 			{
-				mutex.WaitOne();
+				si.Lock();
 
-				try
+				if (CurrentVersion < RequiredVersion)
 				{
-					if (CurrentVersion < RequiredVersion)
+					for (var i = CurrentVersion; i < RequiredVersion; i++)
 					{
-						for (var i = CurrentVersion; i < RequiredVersion; i++)
-						{
-							Migrations[i]();
-							CurrentVersion = i + 1;
-						}
-					}
-
-					if (CurrentVersion != RequiredVersion)
-					{
-						throw new PeachException("Invalid {0} version {1}, expected version {2}".Fmt(
-							GetType().Name,
-							CurrentVersion,
-							RequiredVersion
-						));
+						Migrations[i]();
+						CurrentVersion = i + 1;
 					}
 				}
-				finally 
+
+				if (CurrentVersion != RequiredVersion)
 				{
-					mutex.ReleaseMutex();
+					throw new PeachException("Invalid {0} version {1}, expected version {2}".Fmt(
+						GetType().Name,
+						CurrentVersion,
+						RequiredVersion
+					));
 				}
 			}
 		}

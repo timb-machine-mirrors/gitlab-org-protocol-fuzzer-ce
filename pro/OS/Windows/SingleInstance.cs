@@ -13,9 +13,10 @@ namespace Peach.Pro.OS.Windows
 
 		public SingleInstanceImpl(string name)
 		{
-			this.locked = false;
-			this.obj = new object();
-			this.mutex = new Mutex(false, "Global\\" + name);
+			locked = false;
+			obj = new object();
+			var safeName = name.Replace("\\", "_").Replace("/", "_");
+			mutex = new Mutex(false, "Global\\" + safeName);
 		}
 
 		public override void Dispose()

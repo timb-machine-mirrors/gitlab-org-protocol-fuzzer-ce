@@ -3,6 +3,8 @@
 [[Monitors_Syslog]]
 == Syslog Monitor
 
+*Monitor Categories*: *Data collection*, *Fault detection*
+
 The _Syslog_ monitor listens on a specified port for incoming syslog messages. This monitor 
 is capable of performing data collection and fault detection. The default operation is 
 data collection. 
