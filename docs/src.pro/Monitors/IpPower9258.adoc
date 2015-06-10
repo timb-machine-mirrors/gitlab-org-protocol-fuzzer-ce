@@ -3,7 +3,9 @@
 [[Monitors_IpPower9258]]
 == IpPower9258 Monitor
 
-The _IpPower9258_ monitor controls an IP Power 9258 Network Power Controller (IP9258). The IP9258 consists of four three-prong outlets that support electrical loads of 6 amps at 110 or 240 VAC. Communications between Peach and the IP9258 uses EtherNet cabling. This monitor allows devices plugged into the IP Power 9258 switch to be powered on/off during fuzzing.
+*Monitor Category*: *Automation*
+
+The _IpPower9258_ monitor controls an IP Power 9258 Network Power Controller (IP9258). The IP9258 consists of four three-prong outlets that support electrical loads of 6 amps at 110 or 240 VAC. Communications between Peach and the IP9258 uses Ethernet cabling. This monitor allows devices plugged into the IP Power 9258 switch to be powered on/off during fuzzing.
 
 Each _IpPower9258_ monitor switches an individual outlet. Use one monitor per outlet to control multiple outlets concurrently. Times that the monitor can switch the power of an outlet include the following:
 

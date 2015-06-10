@@ -3,6 +3,8 @@
 [[Monitors_SshDownloader]]
 == SshDownloader Monitor
 
+*Monitor Categories*: *Automation*, *Data collection*
+
 The _SshDownloader_ monitor downloads a file or folder from a remote host over SSH SFTP ((Secure Shell File Transfer Protocol) during data collection. 
 
 _SshDownloader_ supports password, keyboard, and private key authentication methods.

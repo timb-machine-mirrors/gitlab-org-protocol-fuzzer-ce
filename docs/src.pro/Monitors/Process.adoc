@@ -3,6 +3,8 @@
 [[Monitors_Process]]
 == Process Monitor
 
+*Monitor Categories*: *Automation*, *Fault detection*
+
 The _Process_ monitor controls a process during a fuzzing run. This monitor provides automation 
 by controlling when the process starts, restarts and ends, and whether the process should be 
 killed. This monitor also provides fault detection for early exit and failure to exit. Finally, 

@@ -3,6 +3,8 @@
 [[Monitors_ProcessKiller]]
 == ProcessKiller Monitor
 
+*Monitor Category*: *Automation*
+
 The _ProcessKiller_ monitor kills (terminates) specified processes after each iteration.
 
 === Parameters

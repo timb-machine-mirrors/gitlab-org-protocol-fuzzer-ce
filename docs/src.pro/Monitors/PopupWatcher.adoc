@@ -3,6 +3,8 @@
 [[Monitors_PopupWatcher]]
 == PopupWatcher Monitor (Windows)
 
+*Monitor Categories*: *Automation*, *Fault detection*
+
 The _PopupWatcher_ monitor closes pop-up windows based on title. _PopupWatcher_ monitors 
 the test target for a list of windows. When a window opens whose name is in the list, 
 _PopupWatcher_ closes the pop-up window, and, if specified in the configuration, can 
