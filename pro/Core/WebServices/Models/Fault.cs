@@ -146,6 +146,9 @@ namespace Peach.Pro.Core.WebServices.Models
 
 		[JsonIgnore]
 		public string FaultPath { get; set; }
+
+		[NotMapped]
+		public ICollection<FaultMutation> Mutations { get; set; }
 	}
 
 	public class FaultFile
@@ -195,5 +198,33 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// 1024
 		/// </example>
 		public long Size { get; set; }
+	}
+
+	[Table("ViewFaults")]
+	public class FaultMutation
+	{
+		public long Iteration { get; set; }
+		public string State { get; set; }
+		public string Action { get; set; }
+		public string Element { get; set; }
+		public string Mutator { get; set; }
+		public string Dataset { get; set; }
+
+		public FaultMutation() { }
+		public FaultMutation(
+			long iteration,
+			string state,
+			string action,
+			string element,
+			string mutator,
+			string dataset)
+		{
+			Iteration = iteration;
+			State = state;
+			Action = action;
+			Element = element;
+			Mutator = mutator;
+			Dataset = dataset;
+		}
 	}
 }
