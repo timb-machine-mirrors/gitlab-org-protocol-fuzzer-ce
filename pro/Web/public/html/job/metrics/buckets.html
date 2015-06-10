@@ -1,9 +1,10 @@
 ﻿<p>
 	This metric display shows the buckets encountered during the fuzzing job.
 </p>
-<table st-table="vm.BucketData"
-				st-safe-src="vm.AllBucketData"
-				class="table table-striped table-bordered table-hover peach-table">
+<table
+	st-table="vm.BucketData"
+	st-safe-src="vm.AllBucketData"
+	class="table table-striped table-bordered table-hover peach-table">
 	<thead>
 		<tr>
 			<th st-sort="bucket">
@@ -16,11 +17,11 @@
 				Element
 			</th>
 			<th st-sort="iterationCount">
-				Iteration Count
+				Iterations
 			</th>
 			<th st-sort="faultCount"
-					st-sort-default="reverse">
-				Fault Count
+				st-sort-default="reverse">
+				Faults
 			</th>
 		</tr>
 	</thead>
@@ -33,11 +34,21 @@
 			</td>
 		</tr>
 		<tr ng-repeat="row in vm.BucketData">
-			<td>{{row.bucket}}</td>
-			<td>{{row.mutator}}</td>
-			<td>{{row.element}}</td>
-			<td>{{row.iterationCount}}</td>
-			<td>{{row.faultCount}}</td>
+			<td>
+				{{row.bucket}}
+			</td>
+			<td>
+				{{row.mutator}}
+			</td>
+			<td class="max-width-500 width-100 break-word">
+				{{row.element}}
+			</td>
+			<td>
+				{{row.iterationCount}}
+			</td>
+			<td>
+				{{row.faultCount}}
+			</td>
 		</tr>
 	</tbody>
 	<tfoot>

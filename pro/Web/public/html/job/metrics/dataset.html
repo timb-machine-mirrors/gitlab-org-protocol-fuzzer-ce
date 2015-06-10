@@ -5,9 +5,10 @@
 	of the data sources used in mutating.
 </p>
 
-<table st-table="vm.DatasetData"
-				st-safe-src="vm.AllDatasetData"
-				class="table table-striped table-bordered table-hover peach-table">
+<table
+	st-table="vm.DatasetData"
+	st-safe-src="vm.AllDatasetData"
+	class="table table-striped table-bordered table-hover peach-table">
 	<thead>
 		<tr>
 			<th st-sort="dataset">
@@ -20,7 +21,7 @@
 				Buckets
 			</th>
 			<th st-sort="faultCount"
-					st-sort-default="reverse">
+				st-sort-default="reverse">
 				Faults
 			</th>
 		</tr>
@@ -34,10 +35,18 @@
 			</td>
 		</tr>
 		<tr ng-repeat="row in vm.DatasetData">
-			<td>{{row.dataset}}</td>
-			<td>{{row.iterationCount}}</td>
-			<td>{{row.bucketCount}}</td>
-			<td>{{row.faultCount}}</td>
+			<td class="max-width-500 width-100 break-word">
+				{{row.dataset}}
+			</td>
+			<td>
+				{{row.iterationCount}}
+			</td>
+			<td>
+				{{row.bucketCount}}
+			</td>
+			<td>
+				{{row.faultCount}}
+			</td>
 		</tr>
 	</tbody>
 	<tfoot>

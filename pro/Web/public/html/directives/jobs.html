@@ -1,7 +1,9 @@
 ﻿
-<table st-table="vm.Jobs"
-			 st-safe-src="vm.AllJobs"
-			 class="table table-striped table-bordered table-hover peach-table">
+<table
+	id="jobs"
+	st-table="vm.Jobs"
+	st-safe-src="vm.AllJobs"
+	class="table table-striped table-bordered table-hover peach-table">
 	<thead>
 		<tr>
 			<th st-sort="name">
@@ -11,7 +13,7 @@
 				Status
 			</th>
 			<th st-sort="startDate"
-					st-sort-default="reverse">
+				st-sort-default="reverse">
 				Start Time
 			</th>
 			<th st-sort="stopDate">
@@ -39,13 +41,25 @@
 		<tr ng-repeat="row in vm.Jobs"
 				ng-click="vm.OnJobSelected(row)"
 				class="pointer">
-			<td>{{row.name}}</td>
-			<td>{{row.status}}</td>
-			<td>{{row.startDate | date:'M/d/yy h:mm a'}}</td>
-			<td>{{row.stopDate | date:'M/d/yy h:mm a'}}</td>
-			<td>{{row.iterationCount}}</td>
-			<td>{{row.faultCount}}</td>
+			<td class="width-100">
+				{{row.name}}
+			</td>
 			<td>
+				{{row.status}}
+			</td>
+			<td class="nowrap">
+				{{row.startDate | date:'M/d/yy h:mm a'}}
+			</td>
+			<td class="nowrap">
+				{{row.stopDate | date:'M/d/yy h:mm a'}}
+			</td>
+			<td>
+				{{row.iterationCount}}
+			</td>
+			<td>
+				{{row.faultCount}}
+			</td>
+			<td class="nowrap">
 				<button class="btn btn-xs btn-default"
 								ng-disabled="vm.IsReportDisabled(row)"
 								ng-click="vm.OnViewReport($event, row)"

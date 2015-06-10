@@ -26,29 +26,26 @@
 			<!--Some junk goes here.-->
 		</p>
 		<div class="center">
-			<button type="button"
-							class="btn btn-primary"
-							ng-click="vm.Start()"
-							ng-class="{disabled: !vm.CanStart}">
+			<a role="button"
+				class="btn btn-primary"
+				ui-sref="pit.wizard">
 				<i class="fa fa-rocket"></i>
 				Quick Start Wizard
-			</button>
+			</a>
 
-			<button type="button"
-							class="btn btn-primary"
-							ng-click="vm.Start()"
-							ng-class="{disabled: !vm.CanStart}">
+			<a role="button"
+				class="btn btn-primary"
+				ui-sref="pit.advanced.variables">
 				<i class="fa fa-wrench"></i>
 				Configure Variables
-			</button>
+			</a>
 
-			<button type="button"
-							class="btn btn-primary"
-							ng-click="vm.Start()"
-							ng-class="{disabled: !vm.CanStart}">
+			<a role="button"
+				class="btn btn-primary"
+				ui-sref="pit.advanced.monitoring">
 				<i class="fa fa-wrench"></i>
 				Configure Monitoring
-			</button>
+			</a>
 		</div>
 	</div>
 </div>

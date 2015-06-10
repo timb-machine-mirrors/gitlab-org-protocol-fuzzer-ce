@@ -71,30 +71,33 @@ pre.peach-test-log {
 
 .peach-table th[st-sort] {
 	cursor: pointer;
+	white-space: nowrap;
 }
 
-.peach-table th[st-sort]::after {
+.peach-table th[st-sort]::before {
 	content: "\f0dc";
 	display: inline-block;
 	color: #555;
 	font-family: FontAwesome;
 	font-size: 13px;
 	font-weight: normal;
-	float: right;
-	margin-right: 4px;
-	position: relative;
+	margin-right: 2px;
 }
 
-.peach-table th.st-sort-descent::after {
+.peach-table th.st-sort-descent::before {
 	content: "\f0dd";
 }
 
-.peach-table th.st-sort-ascent::after {
+.peach-table th.st-sort-ascent::before {
 	content: "\f0de";
 }
 
 .nowrap {
 	white-space: nowrap;
+}
+
+.break-word {
+	word-wrap: break-word;
 }
 
 .peach-fault-detail {
@@ -173,4 +176,24 @@ ul.library li a {
 
 .peach-error {
 	width: 500px;
+}
+
+.max-width-200 {
+	max-width: 200px;
+}
+
+.max-width-500 {
+	max-width: 500px;
+}
+
+@media only screen and (max-width: 1260px) {
+	.max-width-500 {
+		max-width: 400px;
+	}
+}
+
+@media only screen and (max-width: 1199px) {
+	.max-width-500 {
+		max-width: 300px;
+	}
 }
