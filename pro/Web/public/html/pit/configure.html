@@ -12,7 +12,7 @@
 </div>
 
 <p>
-	<!--Some junk here.-->
+	This configuration uses the <code>{{vm.Pit.name}}</code> pit and includes configuration data for your test setup.
 </p>
 
 <div class="panel panel-default">
@@ -22,8 +22,28 @@
 		</h3>
 	</div>
 	<div class="panel-body">
-		<p class="center">
-			<!--Some junk goes here.-->
+		<p>
+			Set or change the test configuration using the following buttons:
+			<dl class="dl-horizontal">
+				<dt>
+					Quick Start Wizard
+				</dt>
+				<dd>
+					Leads a structured question &amp; answer session that covers typical test setup.
+				</dd>
+				<dt>
+					Configure Variables
+				</dt>
+				<dd>
+					Lists environment and pit-specific information needed by the selected pit.
+				</dd>
+				<dt>
+					Configure Monitoring
+				</dt>
+				<dd>
+					Defines one or more agents and one or more monitors for the pit.
+				</dd>
+			</dl>
 		</p>
 		<div class="center">
 			<a role="button"
@@ -60,9 +80,15 @@
 		<form name="form"
 					class="form-horizontal"
 					novalidate>
-			<p class="center">
-				<!--Some junk here.-->
+			<p>
+				The following items help in reproducing issues. 
+				By using the same seed value, and starting and stopping test cases, 
+				Peach runs through the same tests and uses exactly the same values as in the original session.
 			</p>
+			<p>
+				Keep the current values or edit them, whichever is appropriate.
+			</p>
+			<br/>
 			<div class="form-group"
 					 ng-class="{'has-error': form.seed.$invalid && form.seed.$dirty}">
 				<label class="col-sm-4 control-label">
@@ -145,4 +171,3 @@
 		</form>
 	</div>
 </div>
-
