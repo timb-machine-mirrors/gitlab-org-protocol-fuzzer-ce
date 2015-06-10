@@ -227,5 +227,22 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			DoHexPad(false, 4, "01 02 03", true);
 			DoHexPad(false, 4, "", true);
 		}
+
+		[Test]
+		public void ValueTypeHex()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Blob value='00-11-22-33-44-55' valueType='hex' />
+	</DataModel>
+</Peach>";
+			var dom = DataModelCollector.ParsePit(xml);
+
+			var val = dom.dataModels[0].Value.ToArray();
+			var exp = new byte[] { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55 };
+			Assert.AreEqual(exp, val);
+		}
+
 	}
 }

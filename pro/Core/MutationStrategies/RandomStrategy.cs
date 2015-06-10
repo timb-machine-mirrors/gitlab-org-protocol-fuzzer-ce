@@ -329,6 +329,27 @@ namespace Peach.Pro.Core.MutationStrategies
 
 		#endregion
 
+		int GetMutationCount()
+		{
+			while (true)
+			{
+				// For half bell curves, sigma should be 1/3 of our range
+				var sigma = maxFieldsToMutate / 3.0;
+
+				var num = Random.NextGaussian(0, sigma);
+
+				// Only want half a bell curve
+				num = Math.Abs(num);
+
+				var asInt = (int)Math.Floor(num) + 1;
+
+				if (asInt > maxFieldsToMutate)
+					continue;
+
+				return asInt;
+			}
+		}
+
 		void IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
 		{
 			// Reset per-iteration state
@@ -350,7 +371,7 @@ namespace Peach.Pro.Core.MutationStrategies
 			else
 			{
 				// Random.Next() Doesn't include max and we want it to
-				var fieldsToMutate = Random.Next(1, maxFieldsToMutate + 1);
+				var fieldsToMutate = GetMutationCount();
 
 				if (mutableItems.Count == 0)
 				{
