@@ -29,7 +29,7 @@ namespace Peach.Pro.Test.Core.WebServices
 <Peach xmlns='http://peachfuzzer.com/2012/Peach'
        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
        xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
-       author='Deja Vu Security, LLC'
+       author='Pit Author Name'
        description='IMG PIT'
        version='0.0.1'>
 
@@ -50,7 +50,7 @@ namespace Peach.Pro.Test.Core.WebServices
 <Peach xmlns='http://peachfuzzer.com/2012/Peach'
        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
        xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
-       author='Deja Vu Security, LLC'
+       author='Pit Author Name'
        description='IMG PIT'
        version='0.0.1'>
 
@@ -65,7 +65,7 @@ namespace Peach.Pro.Test.Core.WebServices
 <Peach xmlns='http://peachfuzzer.com/2012/Peach'
        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
        xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
-       author='Deja Vu Security, LLC'
+       author='Pit Author Name'
        version='0.0.1'>
 
 	<Agent name='TheAgent'>
@@ -423,7 +423,7 @@ namespace Peach.Pro.Test.Core.WebServices
 <Peach xmlns='http://peachfuzzer.com/2012/Peach'
        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
        xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
-       author='Deja Vu Security, LLC'
+       author='Pit Author Name'
        description='File'
        version='0.0.1'>
 
