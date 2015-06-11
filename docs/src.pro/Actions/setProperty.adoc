@@ -30,7 +30,7 @@ _setProperty_ provides one half of a property metaphor in Peach state models. _s
 Properties that are modified receive fuzzing in the same way an output action would be. 
 For example, a test target, such as a COM object, can have a property set and mutated by Peach, as in the following example. 
 
-The second use, setting and mutating a property in a publisher, is fuzzing the MTU attribute of the RawEther Publisher. Some Publishers support the use of properties.
+The second use, setting and mutating a property in a publisher, is fuzzing the MTU attribute of the xref:Publishers_RawEther[RawEther] Publisher. Some Publishers support the use of properties.
 
 NOTE: If you do not want to fuzz a property that is set using _setProperty_, set the mutable attribute of the data item to false. The item declaration is located in the DataModel.
 

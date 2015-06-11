@@ -16,7 +16,7 @@ Remote channels are used for both remote agents and remote publishers. Remote ch
 * Install Peach on the remote device. Remote agents and remote publishers can run and exchange data with the controlling Peach process.
 * Install a small remote agent on the target machine that Peach can communicate with. This implementation is necessary when it isn't possible for Peach to run on the target machine. The remote agent implementation allows Peach to detect crashes more intelligently which increases fuzzing's usefulness.
 
-Remote publishers run publishers on a remote machine. This is useful when running OS specific publishers (such as xref:Publishers_RawEther[RawEther] which only runs on Linux). 
+Remote publishers run publishers on a remote machine. This is useful when running OS specific publishers (such as xref:Publishers_Com[Com] which only runs on Windows). 
 
 One reason to remote publish is when Peach runs on a local machine that is much faster than the remote target; by using remote publishers, all fuzzing can be done on the local machine and the results sent to the target to be output. Another reason to remote publish is if you fuzz a system that expects to communicate with two different machines.
 By having one publisher speaking from the main machine and another from the remote machine you can trick the target application into thinking it was talking to two different systems

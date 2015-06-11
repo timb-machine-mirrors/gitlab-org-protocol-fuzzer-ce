@@ -30,6 +30,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Peach.Core;
 using Peach.Core.Agent;
 using SharpPcap;
@@ -47,6 +48,8 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Parameter("Filter", typeof(string), "PCAP Style filter", "")]
 	public class PcapMonitor : Monitor
 	{
+		const int ReadTimeout = 1000;
+
 		private readonly string _tempFileName = Path.GetTempFileName();
 		private readonly object _lock = new object();
 		private int _numPackets;
@@ -144,7 +147,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			}
 
 			_device.OnPacketArrival += _OnPacketArrival;
-			_device.Open(DeviceMode.Normal);
+			_device.Open(DeviceMode.Normal, ReadTimeout);
 
 			try
 			{
@@ -191,6 +194,10 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		public override MonitorData GetMonitorData()
 		{
+			// Need to ensure the read timeout has elapsed before closing the writer
+			// so that all packets will be delivered to the monitor
+			Thread.Sleep(ReadTimeout);
+
 			_CloseWriter();
 
 			var ret = new MonitorData

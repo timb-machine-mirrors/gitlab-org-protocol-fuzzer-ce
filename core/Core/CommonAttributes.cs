@@ -4,6 +4,19 @@ using System.Collections.Generic;
 namespace Peach.Core
 {
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
+	public class ObsoleteParameterAttribute : Attribute
+	{
+		public string Name { get; private set; }
+		public string Message { get; private set; }
+
+		public ObsoleteParameterAttribute(string name, string message)
+		{
+			Name = name;
+			Message = message;
+		}
+	}
+
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
 	public class ParameterAttribute : Attribute
 	{
 		public string name { get; private set; }

@@ -115,18 +115,6 @@
 						</a>
 					</li>
 
-					<!--
-						<li ui-sref-active="active"
-						    ng-show="vm.ShowMenu('main')">
-							<a ui-sref="main.templates">
-								<i class="fa fa-file-powerpoint-o"></i>
-								<span class="menu-text">
-									Templates
-								</span>
-							</a>
-						</li>
-						-->
-
 					<li ui-sref-active="active"
 					    ng-show="vm.ShowMenu('main')">
 						<a ui-sref="main.jobs">
@@ -205,7 +193,7 @@
 						    collapse="vm.IsCollapsed('pit.wizard')">
 							<li ng-class="vm.WizardActive(item)"
 							    ng-repeat="item in vm.WizardTracks">
-								<a ui-sref="{{item.start}}({pit: vm.PitId, track: item.id, id: 0})">
+								<a ui-sref="{{item.start}}({pit: vm.PitId})">
 									<span class="menu-text">
 										{{item.name}}
 										<span ng-cloak

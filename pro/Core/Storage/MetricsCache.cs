@@ -43,6 +43,7 @@ namespace Peach.Pro.Core.Storage
 		readonly Dictionary<Tuple<long, long>, State> _stateCache;
 		readonly Dictionary<Tuple<long, long>, State> _pendingStates;
 		readonly List<Mutation> _mutations = new List<Mutation>();
+		long _nextStateId;
 		Mutation _mutation;
 
 		public MetricsCache(string dbPath)
@@ -64,6 +65,9 @@ namespace Peach.Pro.Core.Storage
 
 			_mutations.Clear();
 			_mutation = new Mutation();
+
+			_pendingStates.Clear();
+			_nextStateId = _stateCache.Count + 1;
 		}
 
 		public void StateStarting(string name, uint runCount)
@@ -82,21 +86,27 @@ namespace Peach.Pro.Core.Storage
 			}
 			else if (_stateCache.TryGetValue(key, out state))
 			{
-				state.Count++;
+				state = new State
+				{
+					Id = state.Id,
+					NameId = state.NameId,
+					RunCount = state.RunCount,
+					Count = state.Count + 1,
+				};
 				_pendingStates.Add(key, state);
 			}
 			else
 			{
 				state = new State
 				{
-					Id = _stateCache.Count + 1,
+					Id = _nextStateId++,
 					NameId = nameId,
 					RunCount = runCount,
 					Count = 1,
 				};
 				_pendingStates.Add(key, state);
-				_stateCache.Add(key, state);
 			}
+
 			_mutation.StateId = state.Id;
 		}
 
@@ -138,26 +148,15 @@ namespace Peach.Pro.Core.Storage
 			{
 				using (var xact = db.Connection.BeginTransaction())
 				{
-					try
-					{
-						db.InsertNames(_nameCache.Flush());
-						db.UpsertStates(_pendingStates.Values);
-						db.UpsertMutations(_mutations);
-						xact.Commit();
-					}
-					catch (Exception)
-					{
-						xact.Rollback();
-						throw;
-					}
+					db.InsertNames(_nameCache.Flush());
+					db.UpsertStates(_pendingStates.Values);
+					db.UpsertMutations(_mutations);
+					xact.Commit();
 				}
 			}
 
-			foreach (var mutation in _mutations)
-			{
-				mutation.IsSaved = true;
-			}
-			_pendingStates.Clear();
+			foreach (var kv in _pendingStates)
+				_stateCache[kv.Key] = kv.Value;
 		}
 
 		public void OnFault(FaultMetric fault)
@@ -172,38 +171,27 @@ namespace Peach.Pro.Core.Storage
 			{
 				using (var xact = db.Connection.BeginTransaction())
 				{
-					try
-					{
-						db.InsertNames(_nameCache.Flush());
-						db.UpsertStates(_pendingStates.Values);
-						db.UpsertMutations(_mutations.Where(x => !x.IsSaved));
+					db.InsertNames(_nameCache.Flush());
 
-						var faults = _mutations.Select(x => new FaultMetric
-						{
-							Iteration = fault.Iteration,
-							MajorHash = fault.MajorHash,
-							MinorHash = fault.MinorHash,
-							Timestamp = fault.Timestamp,
-							Hour = fault.Hour,
-							StateId = x.StateId,
-							ActionId = x.ActionId,
-							ParameterId = x.ParameterId,
-							ElementId = x.ElementId,
-							MutatorId = x.MutatorId,
-							DatasetId = x.DatasetId,
-						});
-						db.InsertFaultMetrics(faults);
-						xact.Commit();
-					}
-					catch (Exception)
+					var faults = _mutations.Select(x => new FaultMetric
 					{
-						xact.Rollback();
-						throw;
-					}
+						Iteration = fault.Iteration,
+						MajorHash = fault.MajorHash,
+						MinorHash = fault.MinorHash,
+						Timestamp = fault.Timestamp,
+						Hour = fault.Hour,
+						StateId = x.StateId,
+						ActionId = x.ActionId,
+						ParameterId = x.ParameterId,
+						ElementId = x.ElementId,
+						MutatorId = x.MutatorId,
+						DatasetId = x.DatasetId,
+					});
+
+					db.InsertFaultMetrics(faults);
+					xact.Commit();
 				}
 			}
-
-			_pendingStates.Clear();
 		}
 	}
 }
