@@ -23,8 +23,7 @@ _Remote_ resides on a separate (virtual or actual) machine from the remote xref:
 	<Param name="Class" value="RawEther"/>
 
 	<!-- Parameters for RawEther -->
-	<Param name="Interface" value="lo" />
-	<Param name="Protocol" value="ETH_P_ALL" />
+	<Param name="Interface" value="eth0" />
 </Publisher>
 ----
 
@@ -91,8 +90,7 @@ Any actions supported by remoted publisher.
     <Param name="Class" value="RawEther"/>
 
     <!-- Parameters for RawEther -->
-    <Param name="Interface" value="lo" />
-    <Param name="Protocol" value="ETH_P_ALL" />
+    <Param name="Interface" value="eth0" />
   </Publisher>
   </Test>
 </Peach>
