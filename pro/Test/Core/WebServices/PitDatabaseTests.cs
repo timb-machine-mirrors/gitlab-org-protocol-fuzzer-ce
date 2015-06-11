@@ -198,6 +198,18 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.AreEqual("Peach.Pwd", cfg2[0].Key);
 			Assert.AreEqual("Peach.Cwd", cfg2[1].Key);
 			Assert.AreEqual("PitLibraryPath", cfg2[2].Key);
+
+			// Saving should create the file
+			var cfg = imgCopy.Versions[0].Files[0].Name + ".config";
+			Assert.False(File.Exists(cfg), ".config file should not exist");
+
+			PitDatabase.SaveConfig(imgCopy, cfg2);
+
+			// System defines should not be in the file
+			Assert.True(File.Exists(cfg), ".config file should exist");
+
+			var defs = PitDefines.Parse(cfg);
+			Assert.AreEqual(0, defs.Count);
 		}
 
 		[Test]
