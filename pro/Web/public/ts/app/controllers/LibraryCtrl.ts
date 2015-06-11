@@ -79,8 +79,8 @@ module Peach {
 		public OnSelectPit(entry: PitEntry) {
 			if (entry.Library.locked) {
 				this.$modal.open({
-					templateUrl: C.Templates.Modal.CopyPit,
-					controller: CopyPitController,
+					templateUrl: C.Templates.Modal.NewConfig,
+					controller: NewConfigController,
 					resolve: { Pit: () => entry.Pit }
 				}).result.then((copied: IPit) => {
 					this.GoToPit(copied);

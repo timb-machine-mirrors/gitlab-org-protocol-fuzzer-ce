@@ -3,14 +3,13 @@
 			novalidate>
 	<div class="modal-header">
 		<h3 class="modal-title">
-			Copy Pit
+			New Pit Configuration
 		</h3>
 	</div>
 	<div class="modal-body">
 		<p>
-			The Pit you chose is locked. 
-			A working copy of the Pit will be placed in the User Library. 
-			Please supply the following details to name and describe this new copy of the Pit.
+			This will create a new configuration for the <code>{{vm.Pit.name}}</code> pit.
+			You will then be able to edit the configuration and start a new fuzzing job.
 		</p>
 		<div class="form-group"
 				 ng-class="{'has-error': form.name.$invalid && form.name.$dirty}">
