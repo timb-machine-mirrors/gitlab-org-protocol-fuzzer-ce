@@ -110,6 +110,14 @@ namespace Peach.Core
 			var fullName = asm.GetName().Name + ".Resources." + name;
 			return Utilities.LoadBinaryResource(asm, fullName);
 		}
+
+		public static string GetCopyright(this Assembly asm)
+		{
+			return asm.GetCustomAttributes(false)
+				.OfType<AssemblyCopyrightAttribute>()
+				.Select(a => a.Copyright)
+				.FirstOrDefault();
+		}
 	}
 
 	public static class ByteArrayExtensions
