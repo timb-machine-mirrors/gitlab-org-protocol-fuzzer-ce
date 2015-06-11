@@ -156,10 +156,9 @@ module Peach {
 		}
 
 		public Delete(job: IJob): ng.IPromise<any> {
-			var promise = this.$http.delete(job.jobUrl)
-				.success(() => { return this.GetJobs(); })
+			return this.$http.delete(job.jobUrl)
+				.then(() => { return this.GetJobs(); })
 			;
-			return StripHttpPromise(this.$q, promise);
 		}
 		
 		public Continue() {
