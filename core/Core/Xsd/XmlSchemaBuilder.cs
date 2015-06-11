@@ -612,7 +612,7 @@ namespace Peach.Core.Xsd
 			var writer = XmlWriter.Create(stream, settings);
 			var compiled = new SchemaBuilder(type).Compile();
 
-			writer.WriteComment("{0}{0}Copyright (c) Deja vu Security{0}{0}".Fmt(Environment.NewLine));
+			writer.WriteComment("{0}{0}{1}{0}{0}".Fmt(Environment.NewLine, type.Assembly.GetCopyright()));
 
 			compiled.Write(writer);
 		}

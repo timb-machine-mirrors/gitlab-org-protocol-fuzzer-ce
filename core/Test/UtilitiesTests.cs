@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-
+using System.Reflection;
 using NUnit.Framework;
 using Peach.Core.Agent;
 
@@ -193,6 +193,13 @@ namespace Peach.Core.Test
 			Assert.AreEqual("D41D8CD9", Monitor2.Hash(""));
 			Assert.AreEqual("ACBD18DB", Monitor2.Hash("foo"));
 			Assert.AreEqual("6DF23DC0", Monitor2.Hash("foobarbaz"));
+		}
+
+		[Test]
+		public void TestCopyright()
+		{
+			var str = Assembly.GetExecutingAssembly().GetCopyright();
+			Assert.AreEqual("Copyright (c) Peach Fuzzer, LLC", str);
 		}
 	}
 }
