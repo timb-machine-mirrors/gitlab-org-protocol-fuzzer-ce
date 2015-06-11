@@ -23,13 +23,13 @@
 			<button class="btn btn-xs btn-danger"
 							ng-class="{disabled: !vm.CanSave}"
 							ng-click="vm.OnSave()">
+				<i class="fa fa-save"></i>
 				Save
 			</button>
 			<button class="btn btn-xs btn-info"
 							ng-click="vm.OnAdd()">
+				<i class="fa fa-plus"></i>
 				Add Variable &nbsp;
-				<i class="glyphicon glyphicon-plus">
-				</i>
 			</button>
 		</div>
 	</div>
@@ -65,10 +65,10 @@
 							</peach:parameter-input>
 						</td>
 						<td class="center nowrap align-middle">
-							<button class="btn btn-xs btn-cell"
+							<button class="btn btn-xs btn-danger"
 											ng-show="vm.CanRemove(param)"
 											ng-click="vm.OnRemove($index)">
-								<i class="glyphicon glyphicon-remove"></i>
+								<i class="fa fa-remove"></i>
 							</button>
 						</td>
 					</tr>

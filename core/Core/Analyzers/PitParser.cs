@@ -760,7 +760,7 @@ namespace Peach.Core.Analyzers
 
 		#region Value Attribute Escaping
 
-		static Regex reHexWhiteSpace = new Regex(@"[h{},\s\r\n:]+", RegexOptions.Singleline);
+		static Regex reHexWhiteSpace = new Regex(@"[h{},\s\r\n:-]+", RegexOptions.Singleline);
 		static Regex reEscapeSlash = new Regex(@"\\\\|\\n|\\r|\\t");
 
 		static string ReplaceSlash(Match m)
@@ -1973,12 +1973,20 @@ namespace Peach.Core.Analyzers
 						pluginType, name, missing, formatParameterAttributes(objParams)));
 			}
 
-			var extra = xmlParameters.Select(kv => kv.Key).Where(k => null == objParams.FirstOrDefault(a => a.name == k)).FirstOrDefault();
-			if (extra != null)
+			var extraParams = xmlParameters.Select(kv => kv.Key).Where(k => null == objParams.FirstOrDefault(a => a.name == k)).ToList();
+
+			foreach (var extra in extraParams)
 			{
-				throw new PeachException(
-					string.Format("Error, {0} '{1}' has unknown parameter '{2}'.\n{3}",
-						pluginType, name, extra, formatParameterAttributes(objParams)));
+				var obsolete = type.GetAttributes<ObsoleteParameterAttribute>().FirstOrDefault(a => a.Name == extra);
+				if (obsolete == null)
+				{
+					throw new PeachException(
+						string.Format("Error, {0} '{1}' has unknown parameter '{2}'.\n{3}",
+							pluginType, name, extra, formatParameterAttributes(objParams)));
+				}
+
+				logger.Info(obsolete.Message);
+				xmlParameters.Remove(obsolete.Name);
 			}
 		}
 

@@ -18,6 +18,7 @@ module Peach {
 			private jobService: JobService
 		) {
 			this.pitService.LoadPit().then((pit: IPit) => {
+				this.Pit = pit;
 				this.Job = {
 					pitUrl: pit.pitUrl,
 					seed: $state.params['seed'],
@@ -29,6 +30,7 @@ module Peach {
 
 		public IsOpen: boolean = false;
 		public Job: IJobRequest;
+		public Pit: IPit;
 
 		public get ShowReady(): boolean {
 			return onlyIf(this.pitService.Pit, () => 

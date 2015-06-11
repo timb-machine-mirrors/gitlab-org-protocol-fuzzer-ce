@@ -29,6 +29,7 @@ module Peach.C {
 		export var Range = 'peachRange';
 		export var Integer = 'peachInteger';
 		export var HexString = 'peachHexstring';
+		export var Ratio = 'stRatio';
 	}
 
 	export module Validation {

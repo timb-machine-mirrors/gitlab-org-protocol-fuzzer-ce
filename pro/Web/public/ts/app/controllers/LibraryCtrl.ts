@@ -43,14 +43,19 @@ module Peach {
 			this.init();
 		}
 
-		public Libraries: PitLibrary[] = [];
+		public Pits: PitLibrary;
+		public User: PitLibrary;
 		
 		private init() {
 			var promise = this.pitService.LoadLibrary();
 			promise.then((data: ILibrary[]) => {
 				data.forEach((lib: ILibrary) => {
 					var pitLib = new PitLibrary(lib.name);
-					this.Libraries.push(pitLib);
+					if (lib.locked) {
+						this.Pits = pitLib;
+					} else {
+						this.User = pitLib;
+					}
 					
 					lib.versions.forEach((version: ILibraryVersion) => {
 						version.pits.forEach((pit: IPit) => {

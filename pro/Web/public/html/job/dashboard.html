@@ -48,7 +48,10 @@
 			This job has completed.
 		</span>
 		<a ng-if="vm.Job.reportUrl"
-			 href="{{vm.Job.reportUrl}}">Click here to view the final report</a>
+			href="{{vm.Job.reportUrl}}">
+			<i class="fa fa-lg fa-file-pdf-o"></i>
+			Click here to view the final report.
+		</a>
 	</span>
 	<span ng-switch-when="actionPending">
 		Peach is waiting for an action to complete...
@@ -111,7 +114,7 @@
 					{{vm.ValueOr(vm.Job.iterationCount, '---')}}
 				</span>
 				<div class="infobox-content">
-					Current Iteration
+					Current Test Case
 				</div>
 			</div>
 		</div>
