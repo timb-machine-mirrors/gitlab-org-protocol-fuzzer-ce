@@ -9,7 +9,6 @@
 /** Managed references (unordered) */
 //grunt-start
 /// <reference path="controllers/ConfirmCtrl.ts" />
-/// <reference path="controllers/CopyPitCtrl.ts" />
 /// <reference path="controllers/ErrorCtrl.ts" />
 /// <reference path="controllers/HomeCtrl.ts" />
 /// <reference path="controllers/JobDashboardCtrl.ts" />
@@ -18,6 +17,7 @@
 /// <reference path="controllers/JobsCtrl.ts" />
 /// <reference path="controllers/LibraryCtrl.ts" />
 /// <reference path="controllers/MainCtrl.ts" />
+/// <reference path="controllers/NewConfigCtrl.ts" />
 /// <reference path="controllers/NewVarCtrl.ts" />
 /// <reference path="controllers/PitConfigMonitorsCtrl.ts" />
 /// <reference path="controllers/PitConfigVarsCtrl.ts" />

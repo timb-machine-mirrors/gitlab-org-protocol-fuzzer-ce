@@ -151,7 +151,7 @@ module Peach.C {
 		}
 		export module Modal {
 			export var Confirm = 'html/modal/Confirm.html';
-			export var CopyPit = 'html/modal/CopyPit.html';
+			export var NewConfig = 'html/modal/NewConfig.html';
 			export var NewVar = 'html/modal/NewVar.html';
 			export var PitLibrary = 'html/modal/PitLibrary.html';
 			export var StartJob = 'html/modal/StartJob.html';
