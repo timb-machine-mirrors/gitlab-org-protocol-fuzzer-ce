@@ -67,7 +67,7 @@ module Peach {
 
 			this.$http.post(C.Api.Jobs, request)
 				.success((job: IJob) => {
-					this.startTestPoller(job.firstNodeUrl);
+					this.startTestPoller(job);
 				})
 				.catch(reason => {
 					this.setFailure(reason);
@@ -87,15 +87,14 @@ module Peach {
 			};
 		}
 
-		private startTestPoller(testUrl: string) {
+		private startTestPoller(job: IJob) {
 			var interval = this.$interval(() => {
-				this.$http.get(testUrl)
+				this.$http.get(job.firstNodeUrl)
 					.success((data: ITestResult) => {
 						this.testResult = data;
 						if (data.status !== TestStatus.Active) {
-							this.stopTestPoller(interval);
-							var pass = (data.status === TestStatus.Pass);
-							if (pass) {
+							this.stopTestPoller(job, interval);
+							if (data.status === TestStatus.Pass) {
 								this.pendingResult.resolve();
 							} else {
 								this.pendingResult.reject();
@@ -103,7 +102,7 @@ module Peach {
 						}
 					})
 					.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
-						this.stopTestPoller(interval);
+						this.stopTestPoller(job, interval);
 						this.setFailure(reason.data.errorMessage);
 						this.pendingResult.reject();
 					})
@@ -111,9 +110,10 @@ module Peach {
 			}, TEST_INTERVAL);
 		}
 
-		private stopTestPoller(interval: any) {
+		private stopTestPoller(job: IJob, interval: any) {
 			this.isPending = false;
 			this.$interval.cancel(interval);
+			this.$http.delete(job.jobUrl);
 		}
 
 		private setFailure(reason) {
