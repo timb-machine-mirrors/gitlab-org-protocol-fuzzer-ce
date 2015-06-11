@@ -58,15 +58,19 @@ module Peach {
 			return this.jobService.CanStop;
 		}
 
-		public Pause() {
+		public Pause(): void {
 			this.jobService.Pause();
 		}
 
-		public Stop() {
-			this.jobService.Stop();
+		public Stop(): void {
+			if (this.Job.status === JobStatus.StopPending) {
+				this.jobService.Kill();
+			} else {
+				this.jobService.Stop();
+			}
 		}
 		
-		public Continue() {
+		public Continue(): void {
 			this.jobService.Continue();
 		}
 
@@ -77,7 +81,7 @@ module Peach {
 			return 'alert-info';
 		}
 
-		public ValueOr(value, alt) {
+		public ValueOr(value, alt): any {
 			return _.isUndefined(value) ? alt : value;
 		}
 
@@ -89,12 +93,12 @@ module Peach {
 			return this.ShowLimited;
 		}
 
-		public OnEdit() {
+		public OnEdit(): void {
 			var pitId = _.last(this.Job.pitUrl.split('/'));
 			this.$state.go(C.States.Pit, { pit: pitId });
 		}
 
-		public OnReplay() {
+		public OnReplay(): void {
 			var pitId = _.last(this.Job.pitUrl.split('/'));
 			this.$state
 				.go(C.States.Pit, {
@@ -106,6 +110,18 @@ module Peach {
 				.catch(reason => {
 					console.log('failed to go', reason);
 				});
+		}
+
+		public get StopPrompt(): string {
+			return (this.Job && this.Job.status === JobStatus.StopPending) ?
+				"Abort" :
+				"Stop";
+		}
+
+		public get StopIcon(): string {
+			return (this.Job && this.Job.status === JobStatus.StopPending) ?
+				"fa-power-off" :
+				"fa-stop";
 		}
 	}
 }
