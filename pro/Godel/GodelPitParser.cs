@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Peach.Core;
 using Peach.Core.Analyzers;
-using Peach.Core.Dom;
 using System.Xml;
-using System.Xml.Schema;
 using NLog;
-using Godel.Core.OCL;
 
 namespace Godel.Core
 {

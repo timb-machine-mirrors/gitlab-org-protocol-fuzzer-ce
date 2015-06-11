@@ -78,8 +78,8 @@ namespace PeachMinset
 		public Program(string[] args)
 		{
 			Console.WriteLine();
-			Console.WriteLine("] Peach 3 -- Minset");
-			Console.WriteLine("] Copyright (c) Deja vu Security\n");
+			Console.WriteLine("] Peach Minset v" + Assembly.GetExecutingAssembly().GetName().Version);
+			Console.WriteLine("] {0}\n", Assembly.GetExecutingAssembly().GetCopyright());
 
 			int verbose = 0;
 			string samples = null;

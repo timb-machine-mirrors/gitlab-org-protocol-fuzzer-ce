@@ -96,7 +96,7 @@ namespace Peach.Pro.Core.Runtime
 		/// </summary>
 		public virtual string Copyright
 		{
-			get { return "Copyright (c) Deja vu Security"; }
+			get { return Assembly.GetExecutingAssembly().GetCopyright(); }
 		}
 
 		/// <summary>

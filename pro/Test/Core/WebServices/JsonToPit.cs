@@ -108,7 +108,7 @@ namespace Peach.Pro.Test.Core.WebServices
 <Peach xmlns='http://peachfuzzer.com/2012/Peach'
        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
        xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
-       author='Deja Vu Security, LLC'
+       author='Pit Author Name'
        description='IMG PIT'
        version='0.0.1'>
 	<Test name='Default' />
@@ -151,7 +151,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			string xml =
 @"<?xml version=""1.0"" encoding=""utf-8""?>
-<Peach xmlns=""http://peachfuzzer.com/2012/Peach"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xsi:schemaLocation=""http://peachfuzzer.com/2012/Peach peach.xsd"" author=""Deja Vu Security, LLC"">
+<Peach xmlns=""http://peachfuzzer.com/2012/Peach"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xsi:schemaLocation=""http://peachfuzzer.com/2012/Peach peach.xsd"" author=""Pit Author Name"">
   <Test name=""Default"" />
 </Peach>";
 
@@ -198,13 +198,13 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			string xml =
 @"<?xml version=""1.0"" encoding=""utf-8""?>
-<Peach xmlns=""http://peachfuzzer.com/2012/Peach"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xsi:schemaLocation=""http://peachfuzzer.com/2012/Peach peach.xsd"" author=""Deja Vu Security, LLC"">
+<Peach xmlns=""http://peachfuzzer.com/2012/Peach"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xsi:schemaLocation=""http://peachfuzzer.com/2012/Peach peach.xsd"" author=""Pit Author Name"">
   <Test name=""Default"" />
 </Peach>";
 
 			string expected =
 @"<?xml version=""1.0"" encoding=""utf-8""?>
-<Peach xmlns=""http://peachfuzzer.com/2012/Peach"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xsi:schemaLocation=""http://peachfuzzer.com/2012/Peach peach.xsd"" author=""Deja Vu Security, LLC"">
+<Peach xmlns=""http://peachfuzzer.com/2012/Peach"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xsi:schemaLocation=""http://peachfuzzer.com/2012/Peach peach.xsd"" author=""Pit Author Name"">
   <Agent name=""TheAgent"" />
   <Test name=""Default"" />
 </Peach>";
