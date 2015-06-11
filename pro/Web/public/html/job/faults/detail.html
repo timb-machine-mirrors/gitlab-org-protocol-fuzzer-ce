@@ -49,8 +49,13 @@
 					<table class="table table-hover table-bordered">
 						<thead>
 							<tr>
-								<th>Name</th>
-								<th>Size</th>
+								<th st-ratio="85">
+									Name
+								</th>
+								<th st-ratio="15"
+									class="align-right">
+									Size
+								</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -68,7 +73,7 @@
 										{{file.fullName}}
 									</a>
 								</td>
-								<td>
+								<td class="align-right">
 									{{file.size | filesize:2}}
 								</td>
 							</tr>
