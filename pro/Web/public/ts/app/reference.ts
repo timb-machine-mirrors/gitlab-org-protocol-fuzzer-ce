@@ -8,19 +8,20 @@
 
 /** Managed references (unordered) */
 //grunt-start
-/// <reference path="controllers/ConfigMonitorsCtrl.ts" />
-/// <reference path="controllers/ConfigVarsCtrl.ts" />
-/// <reference path="controllers/ConfigureCtrl.ts" />
+/// <reference path="controllers/ConfirmCtrl.ts" />
 /// <reference path="controllers/CopyPitCtrl.ts" />
-/// <reference path="controllers/DashboardCtrl.ts" />
 /// <reference path="controllers/ErrorCtrl.ts" />
-/// <reference path="controllers/FaultsCtrl.ts" />
 /// <reference path="controllers/HomeCtrl.ts" />
+/// <reference path="controllers/JobDashboardCtrl.ts" />
+/// <reference path="controllers/JobFaultsCtrl.ts" />
+/// <reference path="controllers/JobMetricsCtrl.ts" />
 /// <reference path="controllers/JobsCtrl.ts" />
 /// <reference path="controllers/LibraryCtrl.ts" />
 /// <reference path="controllers/MainCtrl.ts" />
-/// <reference path="controllers/MetricsCtrl.ts" />
 /// <reference path="controllers/NewVarCtrl.ts" />
+/// <reference path="controllers/PitConfigMonitorsCtrl.ts" />
+/// <reference path="controllers/PitConfigVarsCtrl.ts" />
+/// <reference path="controllers/PitCtrl.ts" />
 /// <reference path="controllers/PitTestCtrl.ts" />
 /// <reference path="controllers/WizardCtrl.ts" />
 /// <reference path="def/angular-ui-bootstrap/angular-ui-bootstrap.d.ts" />

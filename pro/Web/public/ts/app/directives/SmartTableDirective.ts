@@ -9,6 +9,7 @@ module Peach {
 
 	export var SmartTableRatioDirective: IDirective = {
 		ComponentID: C.Directives.Ratio,
+		restrict: 'A',
 		scope: {
 			stRatio: '='
 		},

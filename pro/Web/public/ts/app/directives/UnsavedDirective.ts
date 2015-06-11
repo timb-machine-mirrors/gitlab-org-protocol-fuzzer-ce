@@ -52,41 +52,22 @@ module Peach {
 				}
 
 				event.preventDefault();
+				
+				var options: IConfirmOptions = {
+					Title: 'Unsaved Changes',
+					Body: 'You have unsaved changes. Do you want to leave the page?',
+					SubmitPrompt: 'Ignore Changes'
+				};
 
-				var modal = this.$modal.open({
-					templateUrl: C.Templates.Modal.Unsaved,
-					controller: UnsavedModalController
-				});
-				modal.result.then((result) => {
-					if (result === 'ok') {
-						onRouteChangeOff();
-						this.$state.transitionTo(toState.name, toParams);
-					}
-				});
+				Confirm(this.$modal, options).result
+					.then(result => {
+						if (result === 'ok') {
+							onRouteChangeOff();
+							this.$state.transitionTo(toState.name, toParams);
+						}
+					})
+				;
 			});
-		}
-	}
-
-	class UnsavedModalController {
-
-		static $inject = [
-			C.Angular.$scope,
-			C.Angular.$modalInstance
-		];
-
-		constructor(
-			private $scope: IFormScope,
-			private $modalInstance: ng.ui.bootstrap.IModalServiceInstance
-		) {
-			$scope.vm = this;
-		}
-
-		public OnCancel() {
-			this.$modalInstance.dismiss();
-		}
-
-		public OnSubmit() {
-			this.$modalInstance.close('ok');
 		}
 	}
 }
