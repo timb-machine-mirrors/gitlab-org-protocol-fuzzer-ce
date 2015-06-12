@@ -53,7 +53,7 @@ namespace Peach.Core.Dom
 	[Serializable]
 	[DataElement("Array")]
 	[DataElementParentSupported(null)]
-	public class Array : Block
+	public class Array : Sequence
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -70,31 +70,29 @@ namespace Peach.Core.Dom
 		/// </summary>
 		public int occurs = 1;
 
-		private bool expanded;
+		//private BitwiseStream expandedValue;
+		//private int? countOverride;
 
-		private BitwiseStream expandedValue;
-		private int? countOverride;
+        public override int? CountOverride
+        {
+            set
+            {
+                countOverride = value;
 
-		public int? CountOverride
-		{
-			set
-			{
-				countOverride = value;
+                if (Count == 0)
+                    ExpandedValue = OriginalElement.Value;
+                else
+                    ExpandedValue = this[Count - 1].Value;
 
-				if (Count == 0)
-					expandedValue = OriginalElement.Value;
-				else
-					expandedValue = this[Count - 1].Value;
+                Invalidate();
+            }
+        }
 
-				Invalidate();
-			}
-		}
-
-		public int GetCountOverride()
+		public override int GetCountOverride()
 		{
 			// Called from CountRelation to get our size.
 			// Ensure we have expanded before checking this.Count
-			if (!expanded)
+			if (!Expanded)
 				ExpandTo(occurs);
 
 			return countOverride.GetValueOrDefault(Count);
@@ -106,21 +104,21 @@ namespace Peach.Core.Dom
 		/// The original elements that was marked with the occurs, minOccurs, or maxOccurs
 		/// attributes.
 		/// </summary>
-		public DataElement OriginalElement
-		{
-			get
-			{
-				return originalElement;
-			}
-			set
-			{
-				if (value == null)
-					throw new ArgumentNullException("value");
+        public DataElement OriginalElement
+        {
+            get
+            {
+                return originalElement;
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("value");
 
-				originalElement = value;
-				originalElement.parent = this;
-			}
-		}
+                originalElement = value;
+                originalElement.parent = this;
+            }
+        }
 
 		public Array()
 		{
@@ -144,7 +142,7 @@ namespace Peach.Core.Dom
 		protected override IEnumerable<DataElement> Children()
 		{
 			// If we have entries, just return them
-			if (expanded)
+			if (Expanded)
 				return this;
 
 			// If we don't have entries, just return our original element
@@ -168,7 +166,7 @@ namespace Peach.Core.Dom
 		protected override DataElement GetChild(string name)
 		{
 			// If we already expanded, just search our children
-			if (expanded)
+			if (Expanded)
 				return base.GetChild(name);
 
 			// If we haven't expanded, just check our original element
@@ -197,7 +195,7 @@ namespace Peach.Core.Dom
 			EndUpdate();
 
 			// Mark that we have expanded since cracking will create our children
-			expanded = true;
+			Expanded = true;
 
 			long min = minOccurs;
 			long max = maxOccurs;
@@ -267,7 +265,7 @@ namespace Peach.Core.Dom
 
 		protected override Variant GenerateDefaultValue()
 		{
-			if (!expanded)
+			if (!Expanded)
 				ExpandTo(occurs);
 
 			int remain = countOverride.GetValueOrDefault(Count);
@@ -282,7 +280,7 @@ namespace Peach.Core.Dom
 
 			// If we are here, it is because of CountOverride being set!
 			System.Diagnostics.Debug.Assert(countOverride.HasValue);
-			System.Diagnostics.Debug.Assert(expandedValue != null);
+			System.Diagnostics.Debug.Assert(ExpandedValue != null);
 
 			var halves = new Stack<Tuple<long, bool>>();
 			halves.Push(null);
@@ -294,7 +292,7 @@ namespace Peach.Core.Dom
 				halves.Push(new Tuple<long, bool>(remain, carry));
 			}
 
-			var value = expandedValue;
+			var value = ExpandedValue;
 			var toAdd = value;
 
 			var item = halves.Pop();
@@ -375,7 +373,7 @@ namespace Peach.Core.Dom
 			System.Diagnostics.Debug.Assert(OriginalElement != null);
 
 			// Once this has been called mark the array as having been expanded
-			expanded = true;
+			Expanded = true;
 
 			BeginUpdate();
 
