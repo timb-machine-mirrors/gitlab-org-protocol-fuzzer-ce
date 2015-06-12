@@ -12,6 +12,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 {
 	[TestFixture]
 	[Category("Peach")]
+	[Quick]
 	class SequenceTests
 	{
 	[Test]

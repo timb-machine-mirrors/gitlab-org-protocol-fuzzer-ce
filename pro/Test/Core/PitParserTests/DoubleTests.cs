@@ -10,6 +10,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 {
 	[TestFixture]
 	[Category("Peach")]
+	[Quick]
 	class DoubleTests
 	{
 		[Test]
