@@ -335,9 +335,9 @@ namespace Peach.Pro.Test.Core.WebServices
 							 "Loading pit file", 
 							 "Loading pit file '{0}'".Fmt(xmlFile.Path), 
 #if MONO
-							 "Error: XML Failed to load: Text node cannot appear in this state.  Line 25, position 1."),
+							 "Error: XML Failed to load: Text node cannot appear in this state.  Line 21, position 1."),
 #else
-							 "Error: XML Failed to load: Data at the root level is invalid. Line 25, position 1."),
+							 "Error: XML Failed to load: Data at the root level is invalid. Line 21, position 1."),
 #endif
 					});
 
@@ -381,9 +381,9 @@ namespace Peach.Pro.Test.Core.WebServices
 							 "Loading pit file", 
 							 "Loading pit file '{0}'".Fmt(xmlFile.Path),
 #if MONO
-							 "Error: XML Failed to load: Text node cannot appear in this state.  Line 25, position 1."),
+							 "Error: XML Failed to load: Text node cannot appear in this state.  Line 21, position 1."),
 #else
-							 "Error: XML Failed to load: Data at the root level is invalid. Line 25, position 1."),
+							 "Error: XML Failed to load: Data at the root level is invalid. Line 21, position 1."),
 #endif
 					});
 
