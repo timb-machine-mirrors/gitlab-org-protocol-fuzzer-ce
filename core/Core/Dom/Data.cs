@@ -194,9 +194,8 @@ namespace Peach.Core.Dom
 					if (!container.TryGetValue(name, out elem))
 						throw new PeachException("Error, unable to resolve field \"" + field + "\" against \"" + model.fullName + "\".");
 
-					
-					//if (array == null)
-					if (!(elem is Sequence))
+					var seq = elem as Sequence;
+					if (seq == null)
 						throw new PeachException("Error, cannot use array index syntax on field name unless target element is an array. Field: " + field);
 					
 					var array = elem as Array;
@@ -224,21 +223,17 @@ namespace Peach.Core.Dom
 
 						// Add elements up to our index
 						array.ExpandTo(index + 1);
-
-						elem = array[index];
-						container = elem as DataElementContainer;
 					}
 					else
 					{
-						var seq = elem as Sequence;
-
 						if (index < 0)
 							throw new PeachException("Error, index must be equal to or greater than 0");
 						if (index > seq.Count - 1)
 							throw new PeachException("Error, array index greater than the number of elements in sequence");
-
-						seq[index].DefaultValue = value;
 					}
+
+					elem = seq[index];
+					container = elem as DataElementContainer;
 				}
 				else if (container is Choice)
 				{
