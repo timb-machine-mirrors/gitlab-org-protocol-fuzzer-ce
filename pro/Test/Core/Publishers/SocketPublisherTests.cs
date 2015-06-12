@@ -362,7 +362,7 @@ namespace Peach.Pro.Test.Core.Publishers
 			s.BeginReceiveFrom(_buffer, 0, _buffer.Length, SocketFlags.None, ref _remoteEp, OnReadComplete, s);
 		}
 
-		private Dom RunEngine(string publisher, Dictionary<string, string> parameters)
+		private Peach.Core.Dom.Dom RunEngine(string publisher, Dictionary<string, string> parameters)
 		{
 			var sb = new StringBuilder();
 			foreach (var kv in parameters)
