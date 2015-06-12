@@ -172,9 +172,16 @@ namespace Peach.Pro.Core.Publishers
 				Logger.Debug("\n\n" + Utilities.HexDump(data));
 
 			var len = (int)Math.Min(data.Length, MaxMTU);
-			var buf = new byte[len];
 
-			len = data.Read(buf, 0, buf.Length);
+			var bufLen = len;
+			// We get BSOD if we don't pad to at least 15 bytes on Windows
+			// possibly only needed for VMWare network adapters
+			// https://www.winpcap.org/pipermail/winpcap-users/2012-November/004672.html
+			if (Platform.GetOS() == Platform.OS.Windows)
+				bufLen = Math.Max(15, len);
+
+			var buf = new byte[bufLen];
+			var readLen = data.Read(buf, 0, len);
 
 			try
 			{
@@ -185,7 +192,7 @@ namespace Peach.Pro.Core.Publishers
 				throw new SoftException(ex.Message, ex);
 			}
 
-			if (len < data.Length)
+			if (readLen < data.Length)
 				throw new SoftException("Only sent {0} of {1} byte packet.".Fmt(buf, data.Length));
 		}
 	}
