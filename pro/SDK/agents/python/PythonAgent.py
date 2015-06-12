@@ -1,6 +1,6 @@
 
 #
-# Copyright (c) Deja vu Security
+# Copyright (c) Peach Fuzzer, LLC
 #
 #
 # Example Python Agent. Implement stubs as needed.

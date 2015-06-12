@@ -2,8 +2,8 @@
 	<accordion-group is-open="isOpen">
 		<accordion-heading>
 			<span style="line-height: 22px">
-				<i class="glyphicon"
-					 ng-class="{'glyphicon-chevron-down': isOpen, 'glyphicon-chevron-right': !isOpen}">
+				<i class="fa"
+					 ng-class="{'fa-chevron-down': isOpen, 'fa-chevron-right': !isOpen}">
 				</i>
 				&nbsp;
 				{{vm.Header}}
@@ -14,7 +14,7 @@
 									ng-class="{disabled: !vm.CanMoveUp}"
 									tooltip="Move Agent Up"
 									tooltip-append-to-body="true">
-						<i class="glyphicon glyphicon-chevron-up">
+						<i class="fa fa-chevron-up">
 						</i>
 					</button>
 					<button type="button"
@@ -23,7 +23,7 @@
 									ng-class="{disabled: !vm.CanMoveDown}"
 									tooltip="Move Agent Down"
 									tooltip-append-to-body="true">
-						<i class="glyphicon glyphicon-chevron-down">
+						<i class="fa fa-chevron-down">
 						</i>
 					</button>
 					<button type="button"
@@ -31,7 +31,7 @@
 									ng-click="vm.OnRemove($event)"
 									tooltip="Remove Agent"
 									tooltip-append-to-body="true">
-						<i class="glyphicon glyphicon-remove">
+						<i class="fa fa-remove">
 						</i>
 					</button>
 				</span>

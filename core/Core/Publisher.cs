@@ -206,7 +206,7 @@ namespace Peach.Core
 		/// <param name="value">Value to set on property</param>
 		protected virtual void OnSetProperty(string property, Variant value)
 		{
-			throw new PeachException("Error, action 'setProperty' not supported by publisher");
+			throw new PeachException("Error, action setProperty='{0}' not supported by publisher".Fmt(property));
 		}
 
 		/// <summary>
@@ -221,7 +221,7 @@ namespace Peach.Core
 		/// <returns>Returns value of property</returns>
 		protected virtual Variant OnGetProperty(string property)
 		{
-			throw new PeachException("Error, action 'getProperty' not supported by publisher");
+			throw new PeachException("Error, action getProperty='{0}' not supported by publisher".Fmt(property));
 		}
 
 		/// <summary>

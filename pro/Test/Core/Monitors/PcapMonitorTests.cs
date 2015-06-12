@@ -143,32 +143,17 @@ namespace Peach.Pro.Test.Core.Monitors
 		public void DataCollection()
 		{
 			const int max = 10;
-			var num = 0;
 
 			var runner = new MonitorRunner("NetworkCapture", new Dictionary<string, string>
 			{
 				{ "Device", _iface },
 			})
 			{
-				SessionStarting = m =>
-				{
-					m.InternalEvent += (o, e) =>
-					{
-						if (++num == max)
-							_evt.Set();
-					};
-
-					m.SessionStarting();
-				},
 				IterationFinished = m =>
 				{
 					// Capture starts in IterationStarting, and stops in IterationFinished
 					for (var i = 0; i < max; ++i)
 						_socket.SendTo("Hello World", _remoteEp);
-
-					// Ensure packets are captured
-					if (!_evt.WaitOne(5000))
-						Assert.Fail("Didn't receive packets within 5 second.");
 
 					m.IterationFinished();
 				},

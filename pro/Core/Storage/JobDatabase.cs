@@ -112,6 +112,12 @@ namespace Peach.Pro.Core.Storage
 				.SingleOrDefault();
 		}
 
+		public IEnumerable<FaultMutation> GetFaultMutations(long iteration)
+		{
+			const string sql = "SELECT * FROM ViewFaults WHERE Iteration = @Iteration";
+			return Connection.Query<FaultMutation>(sql, new { Iteration = iteration });
+		}
+
 		public Job GetJob(Guid id)
 		{
 			return Connection.Query<Job>(Sql.SelectJob, new { Id = id.ToString() })
@@ -139,7 +145,7 @@ namespace Peach.Pro.Core.Storage
 
 		public Report GetReport(Job job)
 		{
-			return new Report
+			var report = new Report
 			{
 				Job = job,
 
@@ -187,6 +193,11 @@ namespace Peach.Pro.Core.Storage
 					.ThenBy(m => m.Element)
 					.ToList(),
 			};
+
+			foreach (var b in report.BucketDetails)
+				b.Mutations = GetFaultMutations(b.Iteration).ToList();
+
+			return report;
 		}
 	}
 }

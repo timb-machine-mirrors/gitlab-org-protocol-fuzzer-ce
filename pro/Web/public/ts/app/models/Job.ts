@@ -114,6 +114,7 @@ module Peach {
 		public static ContinuePending: string = "continuePending";
 		public static StopPending: string = "stopPending";
 		public static Stopped: string = "stopped";
+		public static KillPending: string = "killPending";
 	}
 
 	export class JobMode {

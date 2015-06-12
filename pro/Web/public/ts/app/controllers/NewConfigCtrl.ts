@@ -3,7 +3,7 @@
 module Peach {
 	"use strict";
 
-	export class CopyPitController {
+	export class NewConfigController {
 		public Error: string = "";
 
 		static $inject = [

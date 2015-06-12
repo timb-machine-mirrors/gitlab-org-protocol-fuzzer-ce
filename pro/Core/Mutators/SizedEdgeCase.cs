@@ -1,5 +1,5 @@
 //
-// Copyright (c) Deja vu Security
+// Copyright (c) Peach Fuzzer, LLC
 //
 
 using NLog;

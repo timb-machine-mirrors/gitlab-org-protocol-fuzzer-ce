@@ -34,9 +34,10 @@ namespace Peach.Pro.Core.WebServices
 
 		readonly int _pid = Utilities.GetCurrentProcessId();
 
-		protected Guid? _guid;
-		protected string _pitFile;
-		protected string _pitLibraryPath;
+		private Guid _guid = Guid.Empty;
+
+		protected string PitFile { get; private set; }
+		protected string PitLibraryPath { get; private set; }
 
 		public EventHandler InternalEvent { get; set; }
 
@@ -46,7 +47,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 			lock (this)
 			{
-				return _guid.HasValue && _guid.Value == job.Guid;
+				return _guid == job.Guid;
 			}
 		}
 
@@ -54,14 +55,14 @@ namespace Peach.Pro.Core.WebServices
 		{
 			lock (this)
 			{
-				if (!_guid.HasValue)
+				if (_guid == Guid.Empty)
 				{
 					Logger.Trace("Job not started yet");
 					return null;
 				}
 			}
 
-			return JobHelper.GetJob(_guid.Value);
+			return JobHelper.GetJob(_guid);
 		}
 
 		public Job Start(string pitLibraryPath, string pitFile, JobRequest jobRequest)
@@ -71,10 +72,10 @@ namespace Peach.Pro.Core.WebServices
 				if (IsRunning)
 					return null;
 
-				_pitFile = Path.GetFullPath(pitFile);
-				_pitLibraryPath = pitLibraryPath;
+				PitFile = Path.GetFullPath(pitFile);
+				PitLibraryPath = pitLibraryPath;
 
-				var job = new Job(jobRequest, _pitFile);
+				var job = new Job(jobRequest, PitFile);
 				_guid = job.Guid;
 
 				OnStart(job);
@@ -121,9 +122,8 @@ namespace Peach.Pro.Core.WebServices
 		{
 			lock (this)
 			{
-				if (!IsRunning)
-					return false;
-				_runner.Stop();
+				if (IsRunning)
+					_runner.Stop();
 				return true;
 			}
 		}
@@ -137,7 +137,7 @@ namespace Peach.Pro.Core.WebServices
 				if (!IsRunning)
 				{
 					Logger.Trace("<<< Kill (!IsRunning)");
-					return false;
+					return true;
 				}
 
 				Logger.Trace("Abort");
@@ -164,7 +164,7 @@ namespace Peach.Pro.Core.WebServices
 		protected override void OnStart(Job job)
 		{
 			var evtReady = new AutoResetEvent(false);
-			_runner = new JobRunner(job, _pitLibraryPath, _pitFile);
+			_runner = new JobRunner(job, PitLibraryPath, PitFile);
 			_thread = new Thread(() =>
 			{
 				_runner.Run(evtReady);
@@ -258,9 +258,9 @@ namespace Peach.Pro.Core.WebServices
 
 			var args = new List<string>
 			{
-				"--pits", _pitLibraryPath,
+				"--pits", PitLibraryPath,
 				"--guid", job.Id,
-				_pitFile,
+				PitFile,
 			};
 
 			if (!string.IsNullOrEmpty(Configuration.LogRoot))
@@ -290,12 +290,13 @@ namespace Peach.Pro.Core.WebServices
 			};
 			_process.Start();
 
-			var path = Path.Combine(Configuration.LogRoot, job.Id, "error.log");
-			Directory.CreateDirectory(Path.GetDirectoryName(path));
+			var root = Path.Combine(Configuration.LogRoot, job.Id);
+			Directory.CreateDirectory(root);
+			var logFile = Path.Combine(root, "error.log");
 			_taskStderr = Task.Factory.StartNew(LoggingTask, new LoggingTaskArgs
 			{
 				Source = _process.StandardError,
-				Sink = new StreamWriter(path),
+				Sink = new StreamWriter(logFile),
 			});
 
 			_taskMonitor = Task.Factory.StartNew(MonitorTask, job);
@@ -378,7 +379,7 @@ namespace Peach.Pro.Core.WebServices
 			if (exitCode == 0 || exitCode == 2 || _pendingKill)
 			{
 				if (exitCode != 0 && _pendingKill)
-					JobFail(new Exception("Job has been aborted."));
+					JobHelper.Fail(job.Guid, db => db.GetTestEventsByJob(job.Guid), "Job has been aborted.");
 				FinishJob();
 			}
 			else
@@ -395,17 +396,6 @@ namespace Peach.Pro.Core.WebServices
 			}
 		}
 		
-		void JobFail(Exception ex)
-		{
-			lock (this)
-			{
-				if (!_guid.HasValue)
-					return;
-			}
-
-			JobHelper.Fail(_guid.Value, db => db.GetTestEventsByJob(_guid.Value), ex.Message);
-		}
-
 		void FinishJob()
 		{
 			Logger.Trace(">>> FinishJob");

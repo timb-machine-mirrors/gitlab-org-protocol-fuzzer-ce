@@ -40,6 +40,9 @@
 	<span ng-switch-when="stopPending">
 		Peach is stopping...
 	</span>
+	<span ng-switch-when="killPending">
+		Peach is aborting...
+	</span>
 	<span ng-switch-when="stopped">
 		<span ng-if="vm.Job.result">
 			{{vm.Job.result}}
@@ -48,7 +51,10 @@
 			This job has completed.
 		</span>
 		<a ng-if="vm.Job.reportUrl"
-			 href="{{vm.Job.reportUrl}}">Click here to view the final report</a>
+			href="{{vm.Job.reportUrl}}">
+			<i class="fa fa-lg fa-file-pdf-o"></i>
+			Click here to view the final report.
+		</a>
 	</span>
 	<span ng-switch-when="actionPending">
 		Peach is waiting for an action to complete...
@@ -89,7 +95,7 @@
 					{{vm.ValueOr(vm.Job.speed, '---')}}
 				</span>
 				<div class="infobox-content">
-					Iterations/Hour
+					Test Cases/Hour
 				</div>
 			</div>
 		</div>
@@ -111,7 +117,7 @@
 					{{vm.ValueOr(vm.Job.iterationCount, '---')}}
 				</span>
 				<div class="infobox-content">
-					Current Iteration
+					Test Cases Executed
 				</div>
 			</div>
 		</div>
@@ -154,8 +160,9 @@
 		<button class="btn btn-danger"
 						ng-click="vm.Stop()"
 						ng-class="{disabled: !vm.CanStop}">
-			<i class="fa fa-stop"></i>
-			Stop
+			<i class="fa"
+				 ng-class="vm.StopIcon"></i>
+			{{vm.StopPrompt}}
 		</button>
 	</div>
 </div>

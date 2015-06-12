@@ -7,9 +7,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("PeachWorker")]
 [assembly: AssemblyDescription("Peach Fuzzing Worker")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Deja vu Security")]
+[assembly: AssemblyCompany("Peach Fuzzer, LLC")]
 [assembly: AssemblyProduct("Peach")]
-[assembly: AssemblyCopyright("Copyright © Deja vu Security")]
+[assembly: AssemblyCopyright("Copyright (c) Peach Fuzzer, LLC")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

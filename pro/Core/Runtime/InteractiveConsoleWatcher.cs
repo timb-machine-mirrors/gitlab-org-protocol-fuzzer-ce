@@ -9,7 +9,7 @@ namespace Peach.Pro.Core.Runtime
 	public class InteractiveConsoleWatcher : Watcher
 	{
 		readonly string _title = "Peach Pro v";
-		private const string _copyright = "Copyright (c) Deja vu Security";
+		readonly string _copyright = Assembly.GetExecutingAssembly().GetCopyright();
 
 		readonly Stopwatch timer = new Stopwatch();
 		uint startIteration;

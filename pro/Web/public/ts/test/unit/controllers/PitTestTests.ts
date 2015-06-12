@@ -69,6 +69,7 @@ describe("Peach", () => {
 			var job: Peach.IJob = {
 				id: 'JOB_ID',
 				pitUrl: pitUrl,
+				jobUrl: '/p/jobs/JOB_ID',
 				firstNodeUrl: testUrl
 			};
 			$httpBackend.expectPOST(Peach.C.Api.Jobs, req).respond(job);
@@ -96,6 +97,7 @@ describe("Peach", () => {
 			pit.versions[0].configured = true;
 
 			$httpBackend.expectGET(testUrl).respond(result2);
+			$httpBackend.expectDELETE(job.jobUrl).respond({});
 			$interval.flush(Peach.TEST_INTERVAL);
 			$httpBackend.flush();
 

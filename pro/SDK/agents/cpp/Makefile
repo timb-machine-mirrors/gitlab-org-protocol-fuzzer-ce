@@ -1,5 +1,5 @@
 
-# Copyright (c) Deja vu Security
+# Copyright (c) Peach Fuzzer, LLC
 
 # Native agent make file. Assumes Poco has already been build in sub folder poco.
 

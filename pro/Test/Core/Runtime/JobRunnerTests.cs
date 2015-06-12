@@ -29,11 +29,7 @@ namespace Peach.Pro.Test.Core.Runtime
 
 		const string PitXml =
 @"<?xml version='1.0' encoding='utf-8'?>
-<Peach xmlns='http://peachfuzzer.com/2012/Peach'
-       xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
-       xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
-       author='Deja Vu Security, LLC'
-       version='0.0.1'>
+<Peach>
 
 	<DataModel name='DM'>
 		<String value='Hello World' />
