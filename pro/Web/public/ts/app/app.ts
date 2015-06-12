@@ -39,6 +39,16 @@ module Peach {
 	]);
 
 	registerModule(Peach, p);
+	
+	// Fix for #355
+	// https://stackoverflow.com/questions/22290570/angular-ui-router-scroll-to-top-not-to-ui-view
+	p.config(($provide: ng.auto.IProvideService) => {
+		$provide.decorator('$uiViewScroll', () => {
+			return () => {
+				window.scrollTo(0, 0);
+			};
+		})
+	});
 
 	p.config([
 		C.Angular.$breadcrumbProvider,

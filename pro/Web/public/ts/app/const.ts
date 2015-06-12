@@ -29,6 +29,7 @@ module Peach.C {
 		export var Range = 'peachRange';
 		export var Integer = 'peachInteger';
 		export var HexString = 'peachHexstring';
+		export var Ratio = 'stRatio';
 	}
 
 	export module Validation {
@@ -149,11 +150,11 @@ module Peach.C {
 			}
 		}
 		export module Modal {
-			export var CopyPit = 'html/modal/CopyPit.html';
+			export var Confirm = 'html/modal/Confirm.html';
+			export var NewConfig = 'html/modal/NewConfig.html';
+			export var NewVar = 'html/modal/NewVar.html';
 			export var PitLibrary = 'html/modal/PitLibrary.html';
 			export var StartJob = 'html/modal/StartJob.html';
-			export var NewVar = 'html/modal/NewVar.html';
-			export var Unsaved = 'html/modal/Unsaved.html';
 		}
 		export module Directives {
 			export var Agent = 'html/directives/agent.html';

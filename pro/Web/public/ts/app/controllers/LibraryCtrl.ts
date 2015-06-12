@@ -43,14 +43,19 @@ module Peach {
 			this.init();
 		}
 
-		public Libraries: PitLibrary[] = [];
+		public Pits: PitLibrary;
+		public User: PitLibrary;
 		
 		private init() {
 			var promise = this.pitService.LoadLibrary();
 			promise.then((data: ILibrary[]) => {
 				data.forEach((lib: ILibrary) => {
 					var pitLib = new PitLibrary(lib.name);
-					this.Libraries.push(pitLib);
+					if (lib.locked) {
+						this.Pits = pitLib;
+					} else {
+						this.User = pitLib;
+					}
 					
 					lib.versions.forEach((version: ILibraryVersion) => {
 						version.pits.forEach((pit: IPit) => {
@@ -74,8 +79,8 @@ module Peach {
 		public OnSelectPit(entry: PitEntry) {
 			if (entry.Library.locked) {
 				this.$modal.open({
-					templateUrl: C.Templates.Modal.CopyPit,
-					controller: CopyPitController,
+					templateUrl: C.Templates.Modal.NewConfig,
+					controller: NewConfigController,
 					resolve: { Pit: () => entry.Pit }
 				}).result.then((copied: IPit) => {
 					this.GoToPit(copied);

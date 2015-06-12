@@ -239,6 +239,7 @@ namespace Peach.Pro.Core.Loggers
 
 			_log.WriteLine("Command line: " + string.Join(" ", context.config.commandLine));
 			_log.WriteLine("Pit File: " + context.config.pitFile);
+			_log.WriteLine("Strategy: " + context.test.strategy.GetType().GetPluginName());
 			_log.WriteLine(". Test starting: " + context.test.Name);
 			_log.WriteLine("");
 
@@ -378,13 +379,16 @@ namespace Peach.Pro.Core.Loggers
 				}
 			}
 
-			using (var db = new JobDatabase(_job.DatabasePath))
+			if (mode != _job.Mode)
 			{
-				lock (_timer)
+				using (var db = new JobDatabase(_job.DatabasePath))
 				{
-					_job.Mode = mode;
+					lock (_timer)
+					{
+						_job.Mode = mode;
 
-					UpdateRunningJob(db);
+						UpdateRunningJob(db);
+					}
 				}
 			}
 

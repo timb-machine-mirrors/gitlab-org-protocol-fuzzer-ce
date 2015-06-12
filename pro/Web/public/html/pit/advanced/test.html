@@ -24,12 +24,13 @@
 	<button class="btn btn-success btn-sm"
 					ng-click="vm.OnNextTrack()"
 					ng-class="{disabled: !vm.CanContinue}">
+		<i class="fa fa-arrow-right"></i>
 		Continue &nbsp;
-		<i class="glyphicon glyphicon-arrow-right"></i>
 	</button>
 	<button class="btn btn-warning btn-sm"
 					ng-click="vm.OnBeginTest()"
 					ng-class="{disabled: !vm.CanBeginTest}">
+		<i class="fa fa-bolt"></i>
 		Begin Test
 	</button>
 </div>

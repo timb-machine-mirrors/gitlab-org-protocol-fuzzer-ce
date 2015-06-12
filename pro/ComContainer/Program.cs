@@ -29,6 +29,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Collections;
 using System.Runtime.Remoting;
@@ -51,7 +52,7 @@ namespace Peach.Core.ComContainer
 			if (args.Length == 1 && args[0] == "-h")
 			{
 				Console.WriteLine("> Peach.Pro.ComContainer");
-				Console.WriteLine("> Copyright (c) Deja vu Security\n");
+				Console.WriteLine("> {0}\n", Assembly.GetExecutingAssembly().GetCopyright());
 
 				Console.WriteLine("Syntax:");
 				Console.WriteLine(" Peach.Pro.ComContainer.exe IPC_CHANNEL_NAME\n\n");

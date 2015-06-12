@@ -89,9 +89,10 @@ module Peach {
 		}
 		
 		private OnSuccess(pit: IPit, saved: boolean) {
+			var oldPit = this.pit;
 			this.pit = pit;
 			this.$rootScope['pit'] = pit;
-			if (saved) {
+			if (saved || (oldPit && oldPit.id !== pit.id)) {
 				this.$rootScope.$emit(C.Events.PitChanged, pit);
 			}
 		}

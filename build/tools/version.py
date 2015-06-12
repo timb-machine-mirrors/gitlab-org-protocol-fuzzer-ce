@@ -75,7 +75,7 @@ END
 def configure(conf):
 	env = conf.env
 
-	env.VER_COMPANY = 'Deja vu Security'
+	env.VER_COMPANY = 'Peach Fuzzer, LLC'
 
 	env.VER_TEMPLATE = {
 		'.c'      : template_c,

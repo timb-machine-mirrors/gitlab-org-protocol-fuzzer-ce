@@ -12,6 +12,7 @@ module Peach.C.Angular {
 	export var $interpolate = '$interpolate';
 	export var $interval = '$interval';
 	export var $location = '$location';
+	export var $provide = '$provide';
 	export var $q = '$q';
 	export var $rootScope = '$rootScope';
 	export var $scope = '$scope';

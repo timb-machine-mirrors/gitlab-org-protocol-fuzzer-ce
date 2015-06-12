@@ -29,7 +29,7 @@ namespace Peach.Pro.Test.Core.WebServices
 <Peach xmlns='http://peachfuzzer.com/2012/Peach'
        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
        xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
-       author='Deja Vu Security, LLC'
+       author='Pit Author Name'
        description='IMG PIT'
        version='0.0.1'>
 
@@ -50,7 +50,7 @@ namespace Peach.Pro.Test.Core.WebServices
 <Peach xmlns='http://peachfuzzer.com/2012/Peach'
        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
        xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
-       author='Deja Vu Security, LLC'
+       author='Pit Author Name'
        description='IMG PIT'
        version='0.0.1'>
 
@@ -65,7 +65,7 @@ namespace Peach.Pro.Test.Core.WebServices
 <Peach xmlns='http://peachfuzzer.com/2012/Peach'
        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
        xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
-       author='Deja Vu Security, LLC'
+       author='Pit Author Name'
        version='0.0.1'>
 
 	<Agent name='TheAgent'>
@@ -198,6 +198,18 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.AreEqual("Peach.Pwd", cfg2[0].Key);
 			Assert.AreEqual("Peach.Cwd", cfg2[1].Key);
 			Assert.AreEqual("PitLibraryPath", cfg2[2].Key);
+
+			// Saving should create the file
+			var cfg = imgCopy.Versions[0].Files[0].Name + ".config";
+			Assert.False(File.Exists(cfg), ".config file should not exist");
+
+			PitDatabase.SaveConfig(imgCopy, cfg2);
+
+			// System defines should not be in the file
+			Assert.True(File.Exists(cfg), ".config file should exist");
+
+			var defs = PitDefines.Parse(cfg);
+			Assert.AreEqual(0, defs.Count);
 		}
 
 		[Test]
@@ -411,7 +423,7 @@ namespace Peach.Pro.Test.Core.WebServices
 <Peach xmlns='http://peachfuzzer.com/2012/Peach'
        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
        xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
-       author='Deja Vu Security, LLC'
+       author='Pit Author Name'
        description='File'
        version='0.0.1'>
 

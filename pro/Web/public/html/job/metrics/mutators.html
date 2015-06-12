@@ -1,13 +1,14 @@
 ﻿<p>
 	This metric display shows statistics for each mutator.
 </p>
-<table st-table="vm.MutatorData"
-				st-safe-src="vm.AllMutatorData"
-				class="table table-striped table-bordered table-hover peach-table">
+<table
+	st-table="vm.MutatorData"
+	st-safe-src="vm.AllMutatorData"
+	class="table table-striped table-bordered table-hover peach-table">
 	<thead>
 		<tr>
 			<th st-sort="mutator"
-					st-sort-default>
+				class="width-100">
 				Mutator
 			</th>
 			<th st-sort="elementCount">
@@ -19,7 +20,8 @@
 			<th st-sort="bucketCount">
 				Bucket Count
 			</th>
-			<th st-sort="faultCount">
+			<th st-sort="faultCount"
+				st-sort-default="reverse">
 				Fault Count
 			</th>
 		</tr>
@@ -33,11 +35,21 @@
 			</td>
 		</tr>
 		<tr ng-repeat="row in vm.MutatorData">
-			<td>{{row.mutator}}</td>
-			<td>{{row.elementCount}}</td>
-			<td>{{row.iterationCount}}</td>
-			<td>{{row.bucketCount}}</td>
-			<td>{{row.faultCount}}</td>
+			<td class="width-100">
+				{{row.mutator}}
+			</td>
+			<td>
+				{{row.elementCount}}
+			</td>
+			<td>
+				{{row.iterationCount}}
+			</td>
+			<td>
+				{{row.bucketCount}}
+			</td>
+			<td>
+				{{row.faultCount}}
+			</td>
 		</tr>
 	</tbody>
 	<tfoot>

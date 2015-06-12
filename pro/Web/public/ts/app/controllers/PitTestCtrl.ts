@@ -25,6 +25,7 @@ module Peach {
 			private wizardService: WizardService
 		) {
 			$scope.Title = "Test";
+			this.pitService.LoadPit();
 			this.track = this.wizardService.GetTrack(C.Tracks.Test);
 		}
 

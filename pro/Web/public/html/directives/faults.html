@@ -4,7 +4,7 @@
 	<thead>
 		<tr>
 			<th st-sort="iteration"
-					st-sort-default="{{vm.DefaultSort}}">
+				st-sort-default="{{vm.DefaultSort}}">
 				#
 			</th>
 			<th st-sort="timeStamp">
@@ -22,7 +22,9 @@
 			<th st-sort="minorHash">
 				Minor Hash
 			</th>
-			<th>Download</th>
+			<th>
+				Download
+			</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -36,12 +38,24 @@
 		<tr ng-repeat="row in vm.Faults"
 				ng-click="vm.OnFaultSelected(row)"
 				class="pointer">
-			<td>{{row.iteration}}</td>
-			<td>{{row.timeStamp | date:'M/d/yy h:mm a'}}</td>
-			<td>{{row.source}}</td>
-			<td>{{row.exploitability}}</td>
-			<td>{{row.majorHash}}</td>
-			<td>{{row.minorHash}}</td>
+			<td>
+				{{row.iteration}}
+			</td>
+			<td class="nowrap">
+				{{row.timeStamp | date:'M/d/yy h:mm a'}}
+			</td>
+			<td>
+				{{row.source}}
+			</td>
+			<td class="nowrap">
+				{{row.exploitability}}
+			</td>
+			<td>
+				{{row.majorHash}}
+			</td>
+			<td>
+				{{row.minorHash}}
+			</td>
 			<td>
 				<a ng-click='$event.stopPropagation()'
 					 href='{{row.archiveUrl}}'>
