@@ -58,7 +58,7 @@ Produces the following output:
 [source,xml]
 ----
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 54950.
 

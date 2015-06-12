@@ -132,7 +132,7 @@ Output showing the default behavior of the sample pit where the _start_ action i
 > peach --range 1,3 --seed 51405 example.xml
 
 [[ Peach Professional v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 Peach.Core.Engine runTest: context.config.range == true, start: 1, stop: 3
 
 [*] Test 'Default' starting with random seed 51405.
@@ -318,7 +318,7 @@ In the following output, the _start_ action executes at the beginning of every i
 > peach --range 1,3 --seed 51405 example.xml
 
 [[ Peach Professional v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 Peach.Core.Engine runTest: context.config.range == true, start: 1, stop: 3
 
 [*] Test 'Default' starting with random seed 51405.
