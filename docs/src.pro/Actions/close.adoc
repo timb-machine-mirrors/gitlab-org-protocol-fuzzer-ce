@@ -135,7 +135,7 @@ When run the following output is generated.
 > peach -1 --debug C:\temp\example.xml
 
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 18872.
 
@@ -223,7 +223,7 @@ When run the following output is generated.
 > peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 14756.
 Peach.Core.Agent.Agent StartMonitor: Monitor WindowsDebugger

@@ -79,7 +79,7 @@ Output of this example.
 >peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 24885.
 

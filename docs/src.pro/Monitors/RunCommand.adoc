@@ -199,7 +199,7 @@ The preceding XML source produces the following output:
 > peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 48150.
 Peach.Core.Agent.Agent StartMonitor: Monitor RunCommand
@@ -275,7 +275,7 @@ The preceding XML source produces the following output:
 > peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 Peach.Core.Engine runTest: context.config.range == true, start: 1, stop: 1
 
 [*] Test 'Default' starting with random seed 46690.
@@ -359,7 +359,7 @@ The preceding XML produces the following output:
 > peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 Peach.Core.Engine runTest: context.config.range == true, start: 1, stop: 1
 
 [*] Test 'Default' starting with random seed 16446.
@@ -442,7 +442,7 @@ The preceding XML produces the following output:
 > peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 Peach.Core.Engine runTest: context.config.range == true, start: 1, stop: 1
 
 [*] Test 'Default' starting with random seed 11594.
@@ -528,7 +528,7 @@ The preceding XML source produces the following output:
 > peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 Peach.Core.Engine runTest: context.config.range == true, start: 1, stop: 1
 
 [*] Test 'Default' starting with random seed 18641.

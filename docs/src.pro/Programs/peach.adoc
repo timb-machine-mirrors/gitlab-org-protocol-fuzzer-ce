@@ -55,7 +55,7 @@ The following command line launches Peach and fuzzes using +pit.xml+ (and if it 
 > peach -1 --debug samples\DebuggerWindows.xml
 
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 27886.
 Peach.Core.Agent.Agent StartMonitor: Monitor WindowsDebugger
@@ -166,7 +166,7 @@ The following command line starts a Peach agent using the _tcp_ channel protocol
 > peach -a tcp
 
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 [*] Starting agent server
  -- Press ENTER to quit agent --
 ----

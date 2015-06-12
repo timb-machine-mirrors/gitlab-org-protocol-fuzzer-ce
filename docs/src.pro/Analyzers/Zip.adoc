@@ -87,7 +87,7 @@ Output from the example that decomposes a .docx file into its underlying streams
 >peach -1 --debug example.xml 
 
 [[ Peach Pro v3.1.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 22910.
 
@@ -368,7 +368,7 @@ Output from the example that decomposes a .docx file into its underlying streams
 ----
 
 [[ Peach Pro v3.1.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 6071.
 

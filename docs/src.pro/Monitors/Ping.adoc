@@ -60,12 +60,12 @@ ifdef::peachug[]
 .Ping Host
 ====================
 
-This parameter example is from a setup that pings the Deja vu Security website.
+This parameter example is from a setup that pings the Peach Fuzzer, LLC, website.
 
 [cols="1,2" options="header",halign="center"] 
 |==========================================================
 |Parameter    |Value
-|Host         |www.dejavusecurity.com
+|Host         |www.peachfuzzer.com
 |Timeout      |10000
 |==========================================================
 ====================
@@ -97,7 +97,7 @@ ifndef::peachug[]
 
   <Agent name="Local">
     <Monitor class="Ping">
-      <Param name="Host" value="www.dejavusecurity.com" />
+      <Param name="Host" value="www.peachfuzzer.com" />
       <Param name="Timeout" value="10000"/>
     </Monitor>
   </Agent>
@@ -108,7 +108,7 @@ ifndef::peachug[]
     <Agent ref="Local" />
 
     <Publisher class="TcpClient">
-      <Param name="Host" value="www.dejavusecurity.com"/>
+      <Param name="Host" value="www.peachfuzzer.com"/>
       <Param name="Port" value="80"/>
     </Publisher>
 
@@ -125,7 +125,7 @@ Output from this example.
 >peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 26777.
 Peach.Core.Agent.Agent StartMonitor: Monitor Ping
@@ -146,7 +146,7 @@ Peach.Core.Publishers.TcpClientPublisher close()
 Peach.Core.Publishers.TcpClientPublisher Shutting down connection to 198.185.159.135:80
 Peach.Core.Publishers.TcpClientPublisher Read 0 bytes from 198.185.159.135:80, closing client connection.
 Peach.Core.Publishers.TcpClientPublisher Closing connection to 198.185.159.135:80
-Peach.Core.Agent.Monitors.PingMonitor DetectedFault(): www.dejavusecurity.com replied after 10000ms
+Peach.Core.Agent.Monitors.PingMonitor DetectedFault(): www.peachfuzzer.com replied after 10000ms
 Peach.Core.Engine runTest: context.config.singleIteration == true
 Peach.Core.Publishers.TcpClientPublisher stop()
 Peach.Core.Agent.Agent SessionFinished: Monitor
