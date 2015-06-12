@@ -114,7 +114,7 @@ This example prints a message when the _onStart_ expression is run.
 > peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 27537.
 
@@ -190,7 +190,7 @@ This example use the iteration state bag to simulate a for loop.
 > peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 28742.
 

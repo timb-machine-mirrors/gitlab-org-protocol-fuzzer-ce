@@ -153,7 +153,7 @@ You might use multiple publishers to communicate with a network service that lis
 $ peach -1 --debug TwoPublisher.xml
 
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 9324.
 Peach.Core.MutationStrategies.RandomStrategy Iteration: Switch iteration, setting controlIteration and controlRecordingIteration.
