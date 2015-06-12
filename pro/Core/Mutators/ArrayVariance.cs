@@ -35,13 +35,13 @@ namespace Peach.Pro.Core.Mutators
 
 			signed = false;
 			min = 0;
-            max = Utility.SizedHelpers.MaxDuplication(TargetElement(asSeq));
+			max = Utility.SizedHelpers.MaxDuplication(TargetElement(asSeq));
 			value = Math.Min(asSeq.Count, max);
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-            if (obj is Peach.Core.Dom.Sequence && obj.isMutable && TargetElement(obj as Peach.Core.Dom.Sequence) != null)
+			if (obj is Peach.Core.Dom.Sequence && obj.isMutable && TargetElement(obj as Peach.Core.Dom.Sequence) != null)
 				return true;
 
 			return false;
@@ -60,7 +60,7 @@ namespace Peach.Pro.Core.Mutators
 
 			if (num > 0)
 			{
-                var limit = Utility.SizedHelpers.MaxDuplication(targetElem);
+				var limit = Utility.SizedHelpers.MaxDuplication(targetElem);
 
 				if (num > limit)
 				{
@@ -105,6 +105,6 @@ namespace Peach.Pro.Core.Mutators
 				return ((Peach.Core.Dom.Array)asSeq).OriginalElement;
 
 			return null;
-}
+		}
 	}
 }
