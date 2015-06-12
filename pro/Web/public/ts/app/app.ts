@@ -31,6 +31,7 @@ module Peach {
 		"chart.js",
 		"ncy-angular-breadcrumb",
 		"ngSanitize",
+		"ngStorage",
 		"ngVis",
 		"smart-table",
 		"ui.bootstrap",
