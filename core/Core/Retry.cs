@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using System.Diagnostics;
+using NLog;
 using System;
 using System.Threading;
 
@@ -65,6 +66,36 @@ namespace Peach.Core
 					retryDelay = retryDelay.Add(retryDelay);
 					if (retryDelay.CompareTo(maxDelay) >= 0)
 						retryDelay = maxDelay;
+				}
+			}
+		}
+
+		public static void TimedBackoff(TimeSpan maxRetryDelay, TimeSpan maxTotalDelay, Action fn)
+		{
+			var retryDelay = TimeSpan.FromMilliseconds(1);
+			var sw = Stopwatch.StartNew();
+
+			while (true)
+			{
+				try
+				{
+					fn();
+					break;
+				}
+				catch (Exception ex)
+				{
+					if (sw.Elapsed >= maxTotalDelay)
+						throw;
+
+					Logger.Trace("Retrying in {0}ms after error: {1}",
+						retryDelay.TotalMilliseconds,
+						ex.Message);
+
+					Thread.Sleep(retryDelay);
+
+					retryDelay = retryDelay.Add(retryDelay);
+					if (retryDelay.CompareTo(maxTotalDelay) >= 0)
+						retryDelay = maxTotalDelay;
 				}
 			}
 		}
