@@ -70,7 +70,7 @@ Output of the example using an inline value.
 >peach -1 --debug example.xml 
 
 [[ Peach Pro v0.0.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 22910.
 
@@ -136,7 +136,7 @@ Output from the example using an inline value with encoded Xml characters.
 >peach -1 --debug example.xml 
 
 [[ Peach Pro v3.0.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 44192.
 
@@ -204,7 +204,7 @@ Output from the example that uses the Xml analyzer on itself.
 >peach -1 --debug example.xml 
 
 [[ Peach Pro v3.0.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 10150.
 
