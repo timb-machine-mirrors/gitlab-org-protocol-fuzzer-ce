@@ -152,7 +152,9 @@ namespace Peach.Pro.Core.WebServices
 		{
 			Logger.Trace(">>> Dispose");
 
-			if (Kill())
+			Kill();
+
+			if (_thread != null)
 			{
 				Logger.Trace("Join");
 				_thread.Join(TimeSpan.FromSeconds(5));
