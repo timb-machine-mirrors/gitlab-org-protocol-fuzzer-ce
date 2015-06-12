@@ -1,6 +1,8 @@
 'use strict'
 
 module.exports = (grunt) ->
+	grunt.util.linefeed = '\r\n'
+	
 	path = require('path')
 	proxy = require('grunt-connect-proxy/lib/utils').proxyRequest
 	require('load-grunt-tasks')(grunt);
