@@ -123,12 +123,9 @@ The following example shows file fragments of a pit and definition files that co
     <!--  Peach v3.x Pit file   -->
     <Peach xmlns=http://peachfuzzer.com/2012/Peach
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation=http://peachfuzzer.com/2012/Peach peach.xsd
-        author="Deja Vu Security, LLC"
-        description="Fuzz an FTP server in active mode"
-        version="0.0.2">
+        xsi:schemaLocation=http://peachfuzzer.com/2012/Peach peach.xsd>
 
-        <!--  Pull the StateModel into the pit.  -->   
+        <!--  Pull the StateModel into the pit.  -->
         <Include ns="FTP" 
             src="file:##PitLibraryPath##/_Common/Models/Net/ftp_State.xml"/>
 
@@ -138,11 +135,9 @@ The following example shows file fragments of a pit and definition files that co
     <!--  Peach v3.x StateModel definitions (ftp_State.xml)  -->
     <Peach xmlns="http://peachfuzzer.com/2012/Peach"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd"
-           author="Deja Vu Security, LLC"
-     description="File Transfer Protocol PIT StateModels" version="0.0.2">
+           xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
-        <!--  Pull the DataModel into the StateModel.  -->   
+        <!--  Pull the DataModel into the StateModel.  -->
         <Include ns="FTP" 
             src="file:##PitLibraryPath##/_Common/Models/Net/ftp_Data.xml"/>
         <Import import="ftp" />

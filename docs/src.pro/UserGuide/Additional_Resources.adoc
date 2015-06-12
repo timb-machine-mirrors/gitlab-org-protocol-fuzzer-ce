@@ -23,7 +23,7 @@ To access the {product} forums, follow these steps:
 . Send an email to peach@dejavusecurity.com with your license email and forum username.
 . Your account will be granted access to the commercial forums within 24 business hours.
 
-Forums are monitored by the Deja vu Security team, but there is no guarantee of response time.
+Forums are monitored by the team at Peach Fuzzer, LLC; however, there is no guarantee of response time.
 
 ==== Support Tickets
 

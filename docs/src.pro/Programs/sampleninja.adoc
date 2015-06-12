@@ -42,7 +42,7 @@ with the correct values.
 > PeachSampleNinja.exe pits\_Common\Models\Image\PNG_Data.xml File samples_png
 
 >> Peach Pro Sample Ninja -- Sample Scanner
->> Copyright (c) Deja vu Security
+>> Copyright (c) Peach Fuzzer LLC
 
 Creating new sample database.
 Processing: samples_png\ajou_logo.png
@@ -81,7 +81,7 @@ This command generates +png.xml.ninja+.
 > PeachSampleNinja.exe pits\_Common\Models\Image\PNG_Data.xml File samples_png
 
 >> Peach Pro Sample Ninja -- Sample Scanner
->> Copyright (c) Deja vu Security
+>> Copyright (c) Peach Fuzzer LLC
 
 Creating new sample database.
 Processing: samples_png\ajou_logo.png
