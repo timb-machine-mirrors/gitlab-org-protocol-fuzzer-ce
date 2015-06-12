@@ -199,7 +199,7 @@ namespace Peach.Core.Test
 		public void TestCopyright()
 		{
 			var str = Assembly.GetExecutingAssembly().GetCopyright();
-			Assert.AreEqual("Copyright (c) Peach Fuzzer, LLC", str);
+			StringAssert.IsMatch("Copyright \\(c\\) (\\d+ )?Peach Fuzzer, LLC", str);
 		}
 	}
 }
