@@ -1,6 +1,8 @@
 'use strict'
 
 module.exports = (grunt) ->
+	grunt.util.linefeed = '\r\n'
+	
 	path = require('path')
 	proxy = require('grunt-connect-proxy/lib/utils').proxyRequest
 	require('load-grunt-tasks')(grunt);
@@ -36,6 +38,7 @@ module.exports = (grunt) ->
 					'public/lib/jquery'              : 'jquery:main'
 					'public/lib/lodash'              : 'lodash:main'
 					'public/lib/moment'              : 'moment:main'
+					'public/lib/ngstorage'           : 'ngstorage:main'
 					'public/lib/select2'             : 'select2:main'
 
 			mainless:

@@ -17,34 +17,52 @@
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h3 class="panel-title">
+		<span class="panel-title">
 			Configuration Options
-		</h3>
+		</span>
+			<span class="pull-right">
+				<button type="button"
+								class="btn btn-xs btn-default"
+								ng-class="vm.CfgHelpClass"
+								ng-click="vm.OnCfgHelp()">
+					<i class="fa fa-question-circle"></i>
+					{{vm.CfgHelpPrompt}}
+				</button>
+			</span>
 	</div>
 	<div class="panel-body">
-		<p>
-			Set or change the test configuration using the following buttons:
-			<dl class="dl-horizontal">
-				<dt>
-					Quick Start Wizard
-				</dt>
-				<dd>
-					Leads a structured question &amp; answer session that covers typical test setup.
-				</dd>
-				<dt>
-					Configure Variables
-				</dt>
-				<dd>
-					Lists environment and pit-specific information needed by the selected pit.
-				</dd>
-				<dt>
-					Configure Monitoring
-				</dt>
-				<dd>
-					Defines one or more agents and one or more monitors for the pit.
-				</dd>
-			</dl>
-		</p>
+		<div ng-show="vm.storage.showCfgHelp">
+			<p>
+				Set or change the test configuration using the following buttons:
+				<dl class="dl-horizontal">
+					<dt>
+						Quick Start Wizard
+					</dt>
+					<dd>
+						Leads a structured question &amp; answer session that covers typical configurations.
+						<br/>
+						This choice is recommended for novice users and for simple configurations.
+					</dd>
+					<dt>
+						Configure Variables
+					</dt>
+					<dd>
+						A list of items needed by the configuration, 
+						including environment variables and pit-specific information, such as target IP addresses.
+					</dd>
+					<dt>
+						Configure Monitoring
+					</dt>
+					<dd>
+						A list of the agents and monitors defined for the test configuration. 
+						Click this button to select and update the agents, 
+						monitors and associated monitor settings for the test configuration. 
+						<br/>
+						This choice provides the most flexibility in implementing fault detection, data collection, and automation.
+					</dd>
+				</dl>
+			</p>
+		</div>
 		<div class="center">
 			<a role="button"
 				class="btn btn-primary"
@@ -72,23 +90,66 @@
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h3 class="panel-title">
-			Start Options
-		</h3>
+		<span>
+			<span class="panel-title">
+				Start Options
+			</span>
+			<span class="pull-right">
+				<button type="button"
+								class="btn btn-xs btn-default"
+								ng-class="vm.StartHelpClass"
+								ng-click="vm.OnStartHelp()">
+					<i class="fa fa-question-circle"></i>
+					{{vm.StartHelpPrompt}}
+				</button>
+			</span>
+		</span>
 	</div>
 	<div class="panel-body">
 		<form name="form"
 					class="form-horizontal"
 					novalidate>
-			<p>
-				The following items help in reproducing issues. 
-				By using the same seed value, and starting and stopping test cases, 
-				Peach runs through the same tests and uses exactly the same values as in the original session.
-			</p>
-			<p>
-				Keep the current values or edit them, whichever is appropriate.
-			</p>
-			<br/>
+			<div ng-show="vm.storage.showStartHelp">
+				<p>
+					The Start Options specify the test cases that start and end a fuzzing job, 
+					and identify a seed for generating mutating data. 
+					For a new fuzzing job, the default values are usually appropriate to use, 
+					although you can select other values to use.
+				</p>
+	
+				<p>
+					If you want to replay a fuzzing run, you need to use the same Start Options
+					as in the original fuzzing job. 
+					You can obtain these values by 
+					1) selecting the fuzzing run you want to replay, 
+					and 2) click the Replay button on that job page.
+				</p>
+	
+				<p>
+					For replay, changing the Start Options has the following effects:
+					<ul>
+						<li>
+							Change the Seed. 
+							This changes the mutated data values used in all test cases. 
+							The result is definitely a new job.
+						</li>
+						<li>
+							Change the Start or Stop Test Case. 
+							This changes the first (or last) test case to execute in the job, 
+							thereby lengthening or shortening the total number of test cases executed in the job.
+							Note that changing the start or stop test case for the job can help validate an issue
+							or the fix for an issue. 
+							However, the result might not produce the intended results.
+						</li>
+					</ul>
+				</p>
+				
+				<p>
+					Click "Start” to begin the fuzzing job.
+				</p>
+	
+				<br/>
+			</div>
 			<div class="form-group"
 					 ng-class="{'has-error': form.seed.$invalid && form.seed.$dirty}">
 				<label class="col-sm-4 control-label">
@@ -116,7 +177,7 @@
 			<div class="form-group"
 					 ng-class="{'has-error': form.start.$invalid && form.start.$dirty}">
 				<label class="col-sm-4 control-label">
-					Start Iteration
+					Start Test Case
 				</label>
 				<div class="col-sm-6">
 					<input name="start"
@@ -139,7 +200,7 @@
 			<div class="form-group"
 					 ng-class="{'has-error': form.stop.$invalid && form.stop.$dirty}">
 				<label class="col-sm-4 control-label">
-					Stop Iteration
+					Stop Test Case
 				</label>
 				<div class="col-sm-6">
 					<input name="stop"

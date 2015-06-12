@@ -26,6 +26,10 @@ pre {
 	cursor: pointer;
 }
 
+.accordion-toggle span {
+	line-height: 22px;
+}
+
 .accordion-toggle:hover {
 	text-decoration: none;
 }
