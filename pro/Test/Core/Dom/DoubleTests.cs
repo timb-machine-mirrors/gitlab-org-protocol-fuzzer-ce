@@ -4,6 +4,7 @@ using Peach.Core.Test;
 namespace Peach.Pro.Test.Core.Dom
 {
 	[TestFixture]
+	[Quick]
 	class DoubleTests : DataModelCollector
 	{
 		[Test]

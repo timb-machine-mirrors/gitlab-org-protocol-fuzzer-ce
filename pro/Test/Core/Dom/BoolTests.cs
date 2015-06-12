@@ -6,6 +6,7 @@ using Peach.Pro.Core.Dom;
 namespace Peach.Pro.Test.Core.Dom
 {
 	[TestFixture]
+	[Quick]
 	class BoolTests : DataModelCollector
 	{
 		[Test]
