@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using NLog;
 using NUnit.Framework;
@@ -349,6 +351,78 @@ namespace Peach.Pro.Test.Core.Agent
 			finally
 			{
 				StopAgent();
+			}
+		}
+
+		[Test]
+		public void TestSessionStarting([ValueSource("ChannelNames")]string protocol)
+		{
+			// If session starting throws a SoftException, it should come out of
+			// the engine as a PeachException
+
+			if (Platform.GetOS() != Platform.OS.Windows && protocol == "legacy")
+				Assert.Ignore(".NET remoting doesn't work inside nunit on mono");
+
+			var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+			socket.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+
+			var port = ((IPEndPoint)socket.LocalEndPoint).Port;
+
+			var xml = @"
+<Peach>
+	<DataModel name='TheDataModel'>
+		<String value='Hello'/>
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='TheDataModel'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Agent name='RemoteAgent' location='{0}://127.0.0.1:9001'>
+		<Monitor class='TcpPort'>
+			<Param name='Host' value='127.0.0.1'/>
+			<Param name='Port' value='{1}'/>
+			<Param name='Action' value='Automation'/>
+			<Param name='When' value='OnStart'/>
+			<Param name='Timeout' value='1'/>
+			<Param name='State' value='Open'/>
+		</Monitor>
+	</Agent>
+
+	<Test name='Default'>
+		<Agent ref='RemoteAgent'/>
+		<StateModel ref='TheState'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>".Fmt(protocol, port);
+
+			try
+			{
+				StartAgent(protocol);
+
+				var dom = DataModelCollector.ParsePit(xml);
+				var cfg = new RunConfiguration { singleIteration = true };
+				var e = new Engine(null);
+
+				var ex = Assert.Throws<PeachException>(() => e.startFuzzing(dom, cfg));
+
+				var msg = "TcpPort monitor timeout reached checking 127.0.0.1:{0} for state of Open.".Fmt(port);
+
+				Assert.AreEqual(msg, ex.Message);
+
+				Assert.NotNull(ex.InnerException, "InnerException should be non-null");
+				Assert.True(ex.InnerException is SoftException, "InnerException should be a SoftException");
+			}
+			finally
+			{
+				StopAgent();
+
+				socket.Dispose();
 			}
 		}
 
