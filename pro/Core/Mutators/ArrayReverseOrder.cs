@@ -51,7 +51,7 @@ namespace Peach.Pro.Core.Mutators
 			performMutation((Peach.Core.Dom.Sequence)obj);
 		}
 
-        void performMutation(Peach.Core.Dom.Sequence obj)
+		void performMutation(Peach.Core.Dom.Sequence obj)
 		{
 			obj.mutationFlags = MutateOverride.Default;
 

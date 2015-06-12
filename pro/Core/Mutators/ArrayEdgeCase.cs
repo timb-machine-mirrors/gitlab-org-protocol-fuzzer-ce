@@ -33,12 +33,12 @@ namespace Peach.Pro.Core.Mutators
 		{
 			var asSeq = (Peach.Core.Dom.Sequence)obj;
 			min = ushort.MinValue;
-            max = (ulong)Utility.SizedHelpers.MaxDuplication(TargetElement(asSeq));
+			max = (ulong)Utility.SizedHelpers.MaxDuplication(TargetElement(asSeq));
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-            if (obj is Peach.Core.Dom.Sequence && obj.isMutable && TargetElement(obj as Peach.Core.Dom.Sequence) != null)
+			if (obj is Peach.Core.Dom.Sequence && obj.isMutable && TargetElement(obj as Peach.Core.Dom.Sequence) != null)
 				return true;
 
 			return false;
@@ -57,7 +57,7 @@ namespace Peach.Pro.Core.Mutators
 
 			if (num > 0)
 			{
-                var limit = Utility.SizedHelpers.MaxDuplication(targetElem);
+				var limit = Utility.SizedHelpers.MaxDuplication(targetElem);
 
 				if (num > limit)
 				{
