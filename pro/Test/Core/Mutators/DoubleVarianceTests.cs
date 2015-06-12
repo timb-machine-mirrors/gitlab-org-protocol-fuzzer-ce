@@ -54,5 +54,29 @@ namespace Peach.Pro.Test.Core.Mutators
 
 			Assert.AreEqual(500, m.Count());
 		}
+
+		[Test]
+		public void Positive()
+		{
+			var runner = new MutatorRunner("DoubleVariance");
+
+			var dble = new Double("Double") { DefaultValue = new Variant(10.0) };
+
+			var m = runner.Random(500, dble);
+
+			Assert.AreEqual(500, m.Count());
+		}
+
+		[Test]
+		public void Negative()
+		{
+			var runner = new MutatorRunner("DoubleVariance");
+
+			var dble = new Double("Double") { DefaultValue = new Variant(-10.0) };
+
+			var m = runner.Random(500, dble);
+
+			Assert.AreEqual(500, m.Count());
+		}
 	}
 }

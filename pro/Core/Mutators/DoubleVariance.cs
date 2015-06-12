@@ -20,31 +20,29 @@ namespace Peach.Pro.Core.Mutators
 		public DoubleVariance(DataElement obj)
 			: base(obj)
 		{
+			var val = (double)obj.InternalValue;
+			var abs = Math.Abs(val);
 
-			var max = Math.Min((double)obj.InternalValue + 10, double.MaxValue);
-			var min = Math.Max(-(double)obj.InternalValue - 10, double.MinValue);
-			var maxRange = Math.Min(Math.Abs((double)obj.InternalValue) + 100, double.MaxValue / 3);
+			double max;
+			double min;
+			double maxRange;
 
 			var asDouble = obj as Double;
 
 			if (asDouble != null && obj.lengthAsBits == 32)
 			{
-				max = Math.Min((double)obj.InternalValue + 10, float.MaxValue);
-				min = Math.Max(-(double)obj.InternalValue - 10, float.MinValue);
-				maxRange = Math.Min(Math.Abs((double)obj.InternalValue) + 100, float.MaxValue / 3);
-
-				if (maxRange > float.MaxValue)
-					maxRange = float.MaxValue / 3;
+				max = Math.Min(abs + 10, float.MaxValue);
+				min = Math.Max(-abs - 10, float.MinValue);
+				maxRange = Math.Min(abs + 100, float.MaxValue / 3);
 			}
-
-			if (max < min)
+			else
 			{
-				var tmp = max;
-				max = min;
-				min = tmp;
+				max = Math.Min(abs + 10, double.MaxValue);
+				min = Math.Max(-abs - 10, double.MinValue);
+				maxRange = Math.Min(abs + 100, double.MaxValue / 3);
 			}
 
-			_gen = new DoubleVarianceGenerator((double)obj.InternalValue, min, max, maxRange);
+			_gen = new DoubleVarianceGenerator(val, min, max, maxRange);
 		}
 
 		// ReSharper disable once InconsistentNaming
