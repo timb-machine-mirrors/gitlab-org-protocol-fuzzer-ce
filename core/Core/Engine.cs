@@ -835,9 +835,9 @@ namespace Peach.Core
 						// 3) Call SessionStarting on each monitor
 						ctx.agentManager.Connect(agent);
 					}
-					catch (SoftException)
+					catch (SoftException se)
 					{
-						throw;
+						throw new PeachException(se.Message, se);
 					}
 					catch (PeachException)
 					{
