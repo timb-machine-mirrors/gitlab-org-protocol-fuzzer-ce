@@ -239,6 +239,7 @@ namespace Peach.Pro.Core.Loggers
 
 			_log.WriteLine("Command line: " + string.Join(" ", context.config.commandLine));
 			_log.WriteLine("Pit File: " + context.config.pitFile);
+			_log.WriteLine("Strategy: " + context.test.strategy.GetType().GetPluginName());
 			_log.WriteLine(". Test starting: " + context.test.Name);
 			_log.WriteLine("");
 

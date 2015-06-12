@@ -81,6 +81,15 @@ namespace Peach.Core
 		}
 	}
 
+	public static class TypeExtensions
+	{
+		public static string GetPluginName(this Type type)
+		{
+			return type.GetAttributes<PluginAttribute>()
+				.Select(a => a.Name).FirstOrDefault() ?? type.Name;
+		}
+	}
+
 	public static class IpAddressExtensions
 	{
 		public static bool IsMulticast(this System.Net.IPAddress ip)
