@@ -122,9 +122,8 @@ namespace Peach.Pro.Core.WebServices
 		{
 			lock (this)
 			{
-				if (!IsRunning)
-					return false;
-				_runner.Stop();
+				if (IsRunning)
+					_runner.Stop();
 				return true;
 			}
 		}
@@ -138,7 +137,7 @@ namespace Peach.Pro.Core.WebServices
 				if (!IsRunning)
 				{
 					Logger.Trace("<<< Kill (!IsRunning)");
-					return false;
+					return true;
 				}
 
 				Logger.Trace("Abort");
