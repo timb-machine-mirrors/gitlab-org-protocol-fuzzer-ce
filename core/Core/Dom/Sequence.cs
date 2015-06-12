@@ -111,7 +111,7 @@ namespace Peach.Core.Dom
 		{
 			var remain = countOverride.GetValueOrDefault(Count);
 
-			var stream = new BitStreamList() { Name = fullName };
+			var stream = new BitStreamList { Name = fullName };
 
 			for (var i = 0; remain > 0 && i < Count; ++i, --remain)
 				stream.Add(this[i].Value);

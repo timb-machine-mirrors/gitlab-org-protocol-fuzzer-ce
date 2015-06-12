@@ -5,7 +5,6 @@ using System.Xml;
 using Peach.Core.Analyzers;
 using Peach.Core.IO;
 // ReSharper disable DoNotCallOverridableMethodsInConstructor
-// ReSharper disable CompareOfFloatsByEqualityOperator
 
 namespace Peach.Core.Dom
 {
@@ -100,7 +99,7 @@ namespace Peach.Core.Dom
 
 			pit.WriteAttributeString("name", Name);
 
-			pit.WriteAttributeString("size", lengthAsBits.ToString());
+			pit.WriteAttributeString("size", lengthAsBits.ToString(CultureInfo.InvariantCulture));
 
 			if (!LittleEndian)
 				pit.WriteAttributeString("endian", "big");
@@ -228,9 +227,9 @@ namespace Peach.Core.Dom
 		{
 			var value = GetNumber(variant);
 
-			if (value < MinValue && value != double.NegativeInfinity)
+			if (value < MinValue && !double.IsNegativeInfinity(value))
 				throw new PeachException(string.Format("Error, {0} value '{1}' is less than the minimum {2}-bit double.", debugName, value, lengthAsBits));
-			if (value > MaxValue && value != double.PositiveInfinity)
+			if (value > MaxValue && !double.IsPositiveInfinity(value))
 				throw new PeachException(string.Format("Error, {0} value '{1}' is greater than the maximum {2}-bit double.", debugName, value, lengthAsBits));
 
 			return new Variant(value);
@@ -298,14 +297,14 @@ namespace Peach.Core.Dom
 		{
 			var value = GetNumber(InternalValue);
 
-			if (value > 0 && value > MaxValue && value != double.PositiveInfinity)
+			if (value > 0 && value > MaxValue && !double.IsPositiveInfinity(value))
 			{
 				var msg = string.Format("Error, {0} value '{1}' is greater than the maximum {2}-bit number.", debugName, value, lengthAsBits);
 				var inner = new OverflowException(msg);
 				throw new SoftException(inner);
 			}
 
-			if (value < 0 && value < MinValue && value != double.NegativeInfinity)
+			if (value < 0 && value < MinValue && !double.IsNegativeInfinity(value))
 			{
 				var msg = string.Format("Error, {0} value '{1}' is less than the minimum {2}-bit number.", debugName, value, lengthAsBits);
 				var inner = new OverflowException(msg);
