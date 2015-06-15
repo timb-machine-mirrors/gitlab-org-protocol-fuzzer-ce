@@ -363,7 +363,7 @@ namespace PitTester
 						else if (string.IsNullOrEmpty(rdr.Value))
 							errors.AppendLine("Pit description is empty.");
 
-						var author = "Deja Vu Security, LLC";
+						const string author = "Peach Fuzzer, LLC";
 
 						if (!rdr.MoveToAttribute("author"))
 							errors.AppendLine("Pit is missing author attribute.");
