@@ -20,14 +20,14 @@ There are two sets of forums for Peach, the community forums and the professiona
 To access the {product} forums, follow these steps:
 
 . Register an account on the forums site.
-. Send an email to peach@dejavusecurity.com with your license email and forum username.
+. Send an email to support@peachfuzzer.com with your license email and forum username.
 . Your account will be granted access to the commercial forums within 24 business hours.
 
 Forums are monitored by the team at Peach Fuzzer, LLC; however, there is no guarantee of response time.
 
 ==== Support Tickets
 
-You can open a support ticket by sending an email to _support@dejavusecurity.com_. You will receive an initial response within 24 business hours of opening the ticket. Peach support is available Monday through Friday. Peach support is not currently available on weekends or holidays.
+You can open a support ticket by sending an email to _support@peachfuzzer.com_. You will receive an initial response within 24 business hours of opening the ticket. Peach support is available Monday through Friday. Peach support is not currently available on weekends or holidays.
 
 When opening a ticket, please provide the following information in your email:
 
