@@ -31,17 +31,17 @@ namespace Peach.Pro.Core.Mutators
 
 		protected override void GetLimits(DataElement obj, out bool signed, out long value, out long min, out long max)
 		{
-			var asArray = (Peach.Core.Dom.Array)obj;
+			var asSeq = (Peach.Core.Dom.Sequence)obj;
 
 			signed = false;
 			min = 0;
-			max = Utility.SizedHelpers.MaxDuplication(LastElement(asArray));
-			value = Math.Min(asArray.Count, max);
+			max = Utility.SizedHelpers.MaxDuplication(TargetElement(asSeq));
+			value = Math.Min(asSeq.Count, max);
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			if (obj is Peach.Core.Dom.Array && obj.isMutable)
+			if (obj is Peach.Core.Dom.Sequence && obj.isMutable && TargetElement(obj as Peach.Core.Dom.Sequence) != null)
 				return true;
 
 			return false;
@@ -49,11 +49,18 @@ namespace Peach.Pro.Core.Mutators
 
 		protected override void performMutation(DataElement obj, long num)
 		{
-			var objAsArray = (Peach.Core.Dom.Array)obj;
+			var objAsSeq = (Peach.Core.Dom.Sequence)obj;
+
+			var targetElem = TargetElement(objAsSeq);
+			if (targetElem == null)
+			{
+				logger.Trace("Skipping mutation, the sequence currently has no elements.");
+				return;
+			}
 
 			if (num > 0)
 			{
-				var limit = Utility.SizedHelpers.MaxDuplication(LastElement(objAsArray));
+				var limit = Utility.SizedHelpers.MaxDuplication(targetElem);
 
 				if (num > limit)
 				{
@@ -62,22 +69,22 @@ namespace Peach.Pro.Core.Mutators
 				}
 			}
 
-			if (num < objAsArray.Count)
+			if (num < objAsSeq.Count)
 			{
 				// remove some items
-				for (int i = objAsArray.Count - 1; i >= num; --i)
+				for (int i = objAsSeq.Count - 1; i >= num; --i)
 				{
-					if (objAsArray[i] == null)
+					if (objAsSeq[i] == null)
 						break;
 
-					objAsArray.RemoveAt(i);
+					objAsSeq.RemoveAt(i);
 				}
 			}
-			else if (num > objAsArray.Count)
+			else if (num > objAsSeq.Count)
 			{
 				// add some items, but do it by replicating
 				// the last item over and over to save memory
-				objAsArray.CountOverride = (int)num;
+				objAsSeq.CountOverride = (int)num;
 			}
 		}
 
@@ -87,12 +94,17 @@ namespace Peach.Pro.Core.Mutators
 			throw new NotImplementedException();
 		}
 
-		static DataElement LastElement(Peach.Core.Dom.Array asArray)
-		{
-			if (asArray.Count == 0)
-				return asArray.OriginalElement;
 
-			return asArray[asArray.Count - 1];
+		static DataElement TargetElement(Peach.Core.Dom.Sequence asSeq)
+		{
+			if (asSeq.Count > 0)
+				return asSeq[asSeq.Count - 1];
+
+			var asArray = asSeq as Peach.Core.Dom.Array;
+			if (asArray != null)
+				return ((Peach.Core.Dom.Array)asSeq).OriginalElement;
+
+			return null;
 		}
 	}
 }

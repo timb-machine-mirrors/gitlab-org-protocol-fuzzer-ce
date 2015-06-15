@@ -95,7 +95,29 @@ namespace Peach.Pro.Test.Core.Fixups
 			byte[] expected = new byte[] { 0x05, 0x11, 0x56, 0x1e, 0xc6, 0x48 };
 			Assert.AreEqual(expected, actual);
 		}
-    }
+
+		[Test]
+		public void TestRoundTrip()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Block name='Header'>
+			<Number size='32' signed='false' endian='big'>
+				<Fixup class='Crc32DualFixup'>
+					<Param name='ref1' value='Header' />
+					<Param name='ref2' value='Payload' />
+				</Fixup>
+			</Number>
+		</Block>
+		<Blob name='Payload' value='Hello' />
+	</DataModel>
+</Peach>
+";
+
+			VerifyRoundTrip(xml);
+		}
+	}
 }
 
 // end

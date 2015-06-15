@@ -31,7 +31,6 @@ describe("Peach", () => {
 			var $rootScope = <ng.IRootScopeService> $injector.get(C.Angular.$rootScope);
 			var $controller = <ng.IControllerService> $injector.get(C.Angular.$controller);
 			var $templateCache = <ng.ITemplateCacheService> $injector.get(C.Angular.$templateCache);
-			var pitService = <Peach.PitService> $injector.get(C.Services.Pit);
 
 			$httpBackend = $injector.get(C.Angular.$httpBackend);
 			$interval = $injector.get(C.Angular.$interval);
@@ -43,12 +42,10 @@ describe("Peach", () => {
 			$rootScope.$digest();
 
 			$httpBackend.whenGET(pitUrl).respond(pit);
-			pitService.LoadPit();
-			$httpBackend.flush();
-
 			ctrl = $controller('PitTestController', {
 				$scope: $rootScope.$new()
 			});
+			$httpBackend.flush();
 		}));
 
 		afterEach(() => {

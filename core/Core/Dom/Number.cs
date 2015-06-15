@@ -137,6 +137,8 @@ namespace Peach.Core.Dom
 		{
 			pit.WriteStartElement("Number");
 
+			pit.WriteAttributeString("name", Name);
+
 			pit.WriteAttributeString("size", lengthAsBits.ToString());
 			pit.WriteAttributeString("signed", Signed.ToString().ToLower());
 

@@ -72,6 +72,11 @@ namespace Peach.Pro.Core.Fixups
 
 			return new Variant(new BitStream(new byte[] { lrc }));
 		}
+
+		protected override Variant GetDefaultValue(DataElement obj)
+		{
+			return new Variant(0);
+		}
 	}
 }
 
