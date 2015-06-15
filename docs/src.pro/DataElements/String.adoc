@@ -212,7 +212,7 @@ Produces the following output:
 > peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 25723.
 
@@ -273,7 +273,7 @@ Produces the following output:
 > peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 57920.
 
@@ -335,7 +335,7 @@ Produces the following output:
 > peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 53517.
 
@@ -396,7 +396,7 @@ Produces the following output:
 > peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 43832.
 
@@ -458,7 +458,7 @@ Produces the following output:
 > peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 62597.
 
@@ -520,7 +520,7 @@ Produces the following output:
 > peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 29966.
 
@@ -591,7 +591,7 @@ Produces the following output:
 > peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 2887.
 
@@ -667,7 +667,7 @@ Produces the following output:
 > peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 18622.
 

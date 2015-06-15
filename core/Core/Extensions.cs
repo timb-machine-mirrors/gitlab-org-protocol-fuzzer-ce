@@ -81,6 +81,15 @@ namespace Peach.Core
 		}
 	}
 
+	public static class TypeExtensions
+	{
+		public static string GetPluginName(this Type type)
+		{
+			return type.GetAttributes<PluginAttribute>()
+				.Select(a => a.Name).FirstOrDefault() ?? type.Name;
+		}
+	}
+
 	public static class IpAddressExtensions
 	{
 		public static bool IsMulticast(this System.Net.IPAddress ip)
@@ -109,6 +118,14 @@ namespace Peach.Core
 		{
 			var fullName = asm.GetName().Name + ".Resources." + name;
 			return Utilities.LoadBinaryResource(asm, fullName);
+		}
+
+		public static string GetCopyright(this Assembly asm)
+		{
+			return asm.GetCustomAttributes(false)
+				.OfType<AssemblyCopyrightAttribute>()
+				.Select(a => a.Copyright)
+				.FirstOrDefault();
 		}
 	}
 

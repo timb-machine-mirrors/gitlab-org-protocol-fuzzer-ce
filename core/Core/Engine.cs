@@ -27,6 +27,7 @@
 // $Id$
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Linq;
@@ -835,9 +836,9 @@ namespace Peach.Core
 						// 3) Call SessionStarting on each monitor
 						ctx.agentManager.Connect(agent);
 					}
-					catch (SoftException)
+					catch (SoftException se)
 					{
-						throw;
+						throw new PeachException(se.Message, se);
 					}
 					catch (PeachException)
 					{
@@ -882,84 +883,85 @@ namespace Peach.Core
 			if (ctx.faults.Count > 0)
 				return;
 
-			if (ctx.controlRecordingActionsExecuted.Count != ctx.controlActionsExecuted.Count)
-			{
-				var desc = string.Format(@"The Peach control iteration performed failed to execute same as initial control.  Number of actions is different. {0} != {1}",
-					ctx.controlRecordingActionsExecuted.Count,
-					ctx.controlActionsExecuted.Count);
+			var expected = ctx.controlRecordingActionsExecuted;
+			var actual = ctx.controlActionsExecuted;
 
-				logger.Debug(desc);
-				OnControlFault(desc);
-				return;
+			int i;
+
+			for (i = 0; i < expected.Count && i < actual.Count; ++i)
+			{
+				if (expected[i] != actual[i])
+					break;
 			}
 
-			if (ctx.controlRecordingStatesExecuted.Count != ctx.controlStatesExecuted.Count)
+			string diff;
+			string major;
+			string minor;
+
+			if (i < expected.Count)
 			{
-				var desc = string.Format(@"The Peach control iteration performed failed to execute same as initial control.  Number of states is different. {0} != {1}",
-					ctx.controlRecordingStatesExecuted.Count,
-					ctx.controlStatesExecuted.Count);
-
-				logger.Debug(desc);
-				OnControlFault(desc);
-				return;
-			}
-
-			// Check states first, since actions will always be different if states are not executed
-			var missedStates = ctx.controlRecordingStatesExecuted
-				.Where(s => !ctx.controlStatesExecuted.Contains(s))
-				.ToList();
-
-			if (missedStates.Count > 0)
-			{
-				var sb = new StringBuilder();
-				sb.Append("The Peach control iteration performed failed to execute same as initial control. ");
-
-				if (missedStates.Count == 1)
+				if (i < actual.Count)
 				{
-					sb.AppendFormat("State '{0}' was not performed.", missedStates[0].Name);
+					diff = "The {0}{1} executed action is different from what was expexted."
+						.Fmt(i + 1, i == 0 ? "st" : (i == 1 ? "nd" : (i == 2 ? "rd" : "th")));
+
+					major = expected[i].parent.Name + ":" + actual[i].parent.Name;
+					minor = expected[i].Name + ":" + actual[i].Name;
 				}
 				else
 				{
-					sb.AppendLine("The following states were not performed:");
-					foreach (var s in missedStates)
-						sb.AppendLine("\t'{0}'".Fmt(s.Name));
+					diff = "The state model should have executed action '{0}.{1}' but finished instead."
+						.Fmt(expected[i].parent.Name, expected[i].Name);
+
+					major = expected[i].parent.Name + ":";
+					minor = expected[i].Name + ":";
 				}
+			}
+			else if (i < actual.Count)
+			{
+				diff = "The state model should have finished but executed action '{0}.{1}' instead."
+					.Fmt(actual[i].parent.Name, actual[i].Name);
 
-				var desc = sb.ToString();
-
-				logger.Debug(desc);
-				OnControlFault(desc);
+				major = ":" + actual[i].parent.Name;
+				minor = ":" + actual[i].Name;
+			}
+			else
+			{
 				return;
 			}
 
-			var missedActions = ctx.controlRecordingActionsExecuted
-				.Where(a => !ctx.controlActionsExecuted.Contains(a))
-				.ToList();
+			var sb = new StringBuilder();
+			sb.AppendLine("The Peach control iteration performed failed to execute same as initial control.");
+			sb.AppendLine();
+			sb.AppendLine(diff);
 
-			if (missedActions.Count > 0)
+			FormatActions(sb, "Expected", ctx.controlRecordingActionsExecuted);
+			FormatActions(sb, "Actual", ctx.controlActionsExecuted);
+
+			minor = Monitor2.Hash(major + "," + minor);
+			major = Monitor2.Hash(major);
+
+			var desc = sb.ToString();
+
+			logger.Debug(desc);
+			OnControlFault(desc, major, minor);
+		}
+
+		private static void FormatActions(StringBuilder sb, string heading, IEnumerable<Dom.Action> actions)
+		{
+			sb.AppendLine();
+			sb.AppendLine(heading);
+			sb.AppendLine("----------------------------------------");
+
+			// 'ChangeState' is longest action name at 11 characters
+			foreach (var action in actions)
 			{
-				var sb = new StringBuilder();
-				sb.Append("The Peach control iteration performed failed to execute same as initial control. ");
-
-				if (missedActions.Count == 1)
-				{
-					sb.AppendFormat("Action '{0}.{1}' was not performed.", missedActions[0].parent.Name, missedActions[0].Name);
-				}
-				else
-				{
-					sb.AppendLine("The following actions were not performed:");
-					foreach (var a in missedActions)
-						sb.AppendLine("\t'{0}.{1}'".Fmt(a.parent.Name, a.Name));
-				}
-
-				var desc = sb.ToString();
-
-				logger.Debug(desc);
-				OnControlFault(desc);
+				sb.AppendFormat("{0,-11} | {1}.{2}", action.type, action.parent.Name, action.Name);
+				sb.AppendLine();
 			}
 		}
 
-		private void OnControlFault(string description)
+		private void OnControlFault(string description, string majorHash = null, string minorHash = null)
 		{
 			// Don't tell the engine to stop, let the replay logic determine what to do
 			// If a fault is detected or reproduced on a control iteration the engine
@@ -974,6 +976,8 @@ namespace Peach.Core
 				title = "Peach Control Iteration Failed",
 				description = description,
 				folderName = "ControlIteration",
+				majorHash = majorHash,
+				minorHash = minorHash,
 				type = FaultType.Fault
 			};
 

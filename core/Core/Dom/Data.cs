@@ -194,34 +194,45 @@ namespace Peach.Core.Dom
 					if (!container.TryGetValue(name, out elem))
 						throw new PeachException("Error, unable to resolve field \"" + field + "\" against \"" + model.fullName + "\".");
 
-					var array = elem as Array;
-					if (array == null)
+					var seq = elem as Sequence;
+					if (seq == null)
 						throw new PeachException("Error, cannot use array index syntax on field name unless target element is an array. Field: " + field);
-
-					// Are we disabling this array?
-					if (index == -1)
+					
+					var array = elem as Array;
+					if (array != null)
 					{
-						if (array.minOccurs > 0)
-							throw new PeachException("Error, cannot set array to zero elements when minOccurs > 0. Field: " + field + " Element: " + array.fullName);
+						// Are we disabling this array?
+						if (index == -1)
+						{
+							if (array.minOccurs > 0)
+								throw new PeachException("Error, cannot set array to zero elements when minOccurs > 0. Field: " + field + " Element: " + array.fullName);
 
-						// Mark array as expanded
-						array.ExpandTo(0);
+							// Mark array as expanded
+							array.ExpandTo(0);
 
-						// The field should be applied to a template data model so
-						// the array should have never had any elements in it.
-						// Only the original element should be set.
-						System.Diagnostics.Debug.Assert(array.Count == 0);
+							// The field should be applied to a template data model so
+							// the array should have never had any elements in it.
+							// Only the original element should be set.
+							System.Diagnostics.Debug.Assert(array.Count == 0);
 
-						return;
+							return;
+						}
+
+						if (array.maxOccurs != -1 && index > array.maxOccurs)
+							throw new PeachException("Error, index larger that maxOccurs.  Field: " + field + " Element: " + array.fullName);
+
+						// Add elements up to our index
+						array.ExpandTo(index + 1);
+					}
+					else
+					{
+						if (index < 0)
+							throw new PeachException("Error, index must be equal to or greater than 0");
+						if (index > seq.Count - 1)
+							throw new PeachException("Error, array index greater than the number of elements in sequence");
 					}
 
-					if (array.maxOccurs != -1 && index > array.maxOccurs)
-						throw new PeachException("Error, index larger that maxOccurs.  Field: " + field + " Element: " + array.fullName);
-
-					// Add elements up to our index
-					array.ExpandTo(index + 1);
-
-					elem = array[index];
+					elem = seq[index];
 					container = elem as DataElementContainer;
 				}
 				else if (container is Choice)

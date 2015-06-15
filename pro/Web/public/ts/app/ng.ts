@@ -35,4 +35,8 @@ module Peach.C.Angular {
 
 	// angular-breadcrumb
 	export var $breadcrumbProvider = '$breadcrumbProvider';
+	
+	// ngStorage
+	export var $localStorage = '$localStorage';
+	export var $sessionStorage = '$sessionStorage';
 }

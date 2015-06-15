@@ -71,7 +71,7 @@ final compute minimum set cannot be distributed.
 > peachminset -s pinsamples -m minset -t traces bin\pngcheck.exe %%s
 
 ] Peach 3 -- Minset
-] Copyright (c) Deja vu Security
+] Copyright (c) Peach Fuzzer LLC
 
 [*] Running both trace and coverage analysis
 [*] Running trace analysis on 15 samples...

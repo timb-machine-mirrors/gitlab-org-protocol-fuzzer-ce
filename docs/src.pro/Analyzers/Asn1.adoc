@@ -88,7 +88,7 @@ Output from inline Blob data example.
 > peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 62676.
 
@@ -208,7 +208,7 @@ Output from the Blob data file example.
 > peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 18200.
 

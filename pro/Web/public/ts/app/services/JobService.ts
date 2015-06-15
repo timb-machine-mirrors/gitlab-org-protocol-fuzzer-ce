@@ -37,11 +37,11 @@ module Peach {
 					this.job = response.data;
 					this.$rootScope['job'] = this.job;
 					if (this.job.status !== JobStatus.Stopped) {
-						this.StartJobPoller();
+						this.startJobPoller();
 					}
 					if (this.job.faultCount > 0) {
 						var deferred = this.$q.defer<IJob>();
-						this.ReloadFaults()
+						this.reloadFaults()
 							.success(() => { deferred.resolve(this.job); })
 							.error(reason => { deferred.reject(reason); })
 							.finally(() => { this.pending = undefined; })
@@ -56,7 +56,7 @@ module Peach {
 		}
 		
 		public OnExit() {
-			this.StopJobPoller();
+			this.stopJobPoller();
 			this.job = undefined;
 			this.$rootScope['job'] = undefined;
 			this.faults = [];
@@ -87,25 +87,15 @@ module Peach {
 		}
 
 		public get CanContinue(): boolean {
-			return this.CheckStatus([JobStatus.Paused]);
+			return this.Job && this.Job.status === JobStatus.Paused;
 		}
 
 		public get CanPause(): boolean {
-			return this.CheckStatus([JobStatus.Running]);
+			return this.Job && this.Job.status === JobStatus.Running;
 		}
 
 		public get CanStop(): boolean {
-			return this.CheckStatus([
-				JobStatus.Running,
-				JobStatus.Paused,
-				JobStatus.StartPending,
-				JobStatus.PausePending,
-				JobStatus.ContinuePending
-			]);
-		}
-
-		private CheckStatus(good: string[]): boolean {
-			return this.Job && _.contains(good, this.Job.status);
+			return this.Job && this.Job.status !== JobStatus.Stopped;
 		}
 
 		public get RunningTime(): string {
@@ -162,41 +152,48 @@ module Peach {
 		}
 		
 		public Continue() {
-			this.SendCommand(
+			this.sendCommand(
 				this.CanContinue, 
 				JobStatus.ContinuePending, 
 				this.job.commands.continueUrl);
 		}
 
 		public Pause() {
-			this.SendCommand(
+			this.sendCommand(
 				this.CanPause, 
 				JobStatus.PausePending, 
 				this.job.commands.pauseUrl);
 		}
 
 		public Stop() {
-			this.SendCommand(
+			this.sendCommand(
 				this.CanStop, 
 				JobStatus.StopPending, 
 				this.job.commands.stopUrl);
 		}
 		
-		private SendCommand(check: boolean, status: string, url: string) {
+		public Kill() {
+			this.sendCommand(
+				this.CanStop,
+				JobStatus.KillPending,
+				this.job.commands.killUrl);
+		}
+
+		private sendCommand(check: boolean, status: string, url: string) {
 			if (check) {
 				this.job.status = status;
 				this.$http.get(url)
-					.success(() => this.StartJobPoller())
-					.error(reason => this.OnError(reason));
+					.success(() => this.startJobPoller())
+					.error(reason => this.onError(reason));
 			}
 		}
 
-		private OnError(error: any) {
+		private onError(error: any) {
 			console.log('onError', error);
-			this.StopJobPoller();
+			this.stopJobPoller();
 		}
 
-		private StartJobPoller() {
+		private startJobPoller() {
 			if (!_.isUndefined(this.poller)) {
 				return;
 			}
@@ -204,31 +201,45 @@ module Peach {
 			this.poller = this.$interval(() => {
 				this.$http.get(this.job.jobUrl)
 					.success((job: IJob) => {
+						var stopPending = (this.job.status === JobStatus.StopPending);
+						var killPending = (this.job.status === JobStatus.KillPending);
+
 						this.job = job;
-						this.$rootScope['job'] = job;
+
+						if (this.job.status !== JobStatus.Stopped) {
+							if (stopPending) {
+								this.job.status = JobStatus.StopPending;
+							} else if (killPending) {
+								this.job.status = JobStatus.KillPending;
+							}
+						}
+
+						this.$rootScope['job'] = this.job;
+
 						if (job.status === JobStatus.Stopped ||
 							job.status === JobStatus.Paused) {
-							this.StopJobPoller();
+							this.stopJobPoller();
 						}
+
 						if (this.faults.length !== job.faultCount) {
-							this.ReloadFaults();
+							this.reloadFaults();
 						}
 					})
-					.error(reason => this.OnError(reason));
+					.error(reason => this.onError(reason));
 			}, JOB_INTERVAL);
 		}
 		
-		private StopJobPoller() {
+		private stopJobPoller() {
 			this.$interval.cancel(this.poller);
 			this.poller = undefined;
 		}
 
-		private ReloadFaults(): ng.IHttpPromise<IFaultSummary[]> {
+		private reloadFaults(): ng.IHttpPromise<IFaultSummary[]> {
 			return this.$http.get(this.job.faultsUrl)
 				.success((faults: IFaultSummary[]) => {
 					this.faults = faults;
 				})
-				.error(reason => this.OnError(reason));
+				.error(reason => this.onError(reason));
 		}
 
 		public LoadMetric<T>(metric: string): ng.IHttpPromise<T> {

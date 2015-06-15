@@ -70,10 +70,25 @@ namespace Peach.Pro.Test.Core.Storage
 			public List<MigrationHandler> TestMigrations = new List<MigrationHandler>();
 		}
 
+		TempDirectory _tmp;
+
+		[SetUp]
+		public void SetUp()
+		{
+			_tmp = new TempDirectory();
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			_tmp.Dispose();
+		}
+
+
 		[Test]
 		public void Migration()
 		{
-			var path = Path.Combine(Configuration.LogRoot, "test.db");
+			var path = Path.Combine(_tmp.Path, "test.db");
 			var builder = new SqliteConnectionBuilder 
 			{
 				DataSource = path,
