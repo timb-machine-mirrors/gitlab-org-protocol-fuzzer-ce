@@ -207,21 +207,37 @@ namespace Peach.Pro.Core.Publishers
 				throw new SoftException(ex);
 			}
 
-			Exception caught = null;
-			Retry.Backoff(TimeSpan.FromSeconds(1), 30, () =>
+			SoftException caught = null;
+
+			try
 			{
-				try
+				Retry.TimedBackoff(TimeSpan.FromSeconds(1), TimeSpan.FromMilliseconds(Timeout), () =>
 				{
-					_client = TryCreateClient(url, data);
-				}
-				catch(SoftException softEx)
-				{
-					caught = softEx;
-				}
-			});
+					try
+					{
+						_client = TryCreateClient(url, data);
+					}
+					catch (ProtocolViolationException ex)
+					{
+						// Happens if we try to write data and the method doesn't support it
+						caught = new SoftException(ex);
+					}
+					catch (WebException ex)
+					{
+						if (ex.Status == WebExceptionStatus.Timeout || ex.Status == WebExceptionStatus.ConnectFailure)
+							throw new TimeoutException(ex.Message, ex);
+
+						caught = new SoftException(ex);
+					}
+				});
+			}
+			catch (TimeoutException ex)
+			{
+				caught = new SoftException("Timed out connecting to {0}".Fmt(url), ex);
+			}
 
 			if (caught != null)
-				throw caught;
+				throw new SoftException(caught);
 
 			_clientName = url.ToString();
 
@@ -234,6 +250,7 @@ namespace Peach.Pro.Core.Publishers
 
 			var request = (HttpWebRequest)WebRequest.Create(url);
 			request.Method = Method;
+			request.Timeout = Timeout;
 
 			if (Cookies)
 				request.CookieContainer = CookieJar;
@@ -254,16 +271,9 @@ namespace Peach.Pro.Core.Publishers
 				if (Logger.IsDebugEnabled)
 					Logger.Debug("\n\n" + Utilities.HexDump(data));
 
-				try
+				using (var sout = request.GetRequestStream())
 				{
-					using (var sout = request.GetRequestStream())
-					{
-						data.CopyTo(sout);
-					}
-				}
-				catch (ProtocolViolationException ex)
-				{
-					throw new SoftException(ex);
+					data.CopyTo(sout);
 				}
 			}
 			else
@@ -271,14 +281,7 @@ namespace Peach.Pro.Core.Publishers
 				request.ContentLength = 0;
 			}
 
-			try
-			{
-				Response = (HttpWebResponse)request.GetResponse();
-			}
-			catch (WebException ex)
-			{
-				throw new SoftException(ex);
-			}
+			Response = (HttpWebResponse)request.GetResponse();
 
 			return Response.GetResponseStream();
 		}

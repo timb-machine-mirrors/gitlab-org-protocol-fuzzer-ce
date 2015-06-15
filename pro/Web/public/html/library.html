@@ -7,14 +7,14 @@
 		Pits
 	</dt>
 	<dd>
-		Peach Pit definitions
+		All Peach Pits (test modules) that are present on your system
 	</dd>
 
 	<dt>
 		Configurations
 	</dt>
 	<dd>
-		Peach Pit definitions with configuration settings
+		Saved pit configurations
 	</dd>
 </dl>
 
@@ -22,10 +22,7 @@
 	<h3>Pits</h3>
 </div>
 <p>
-	The "Pits" section identifies Peach pits or Pit Packs that are present on your system. 
-	The pits listed here are fully developed and tested in house. 
-	What they lack is information specific to your test bench, the configuration information. 
-	The entries mirror the contents of the subfolders of the specified <code>--pits</code> directory.
+	Peach Pits allow testing of a data format or a network protocol against a variety of targets.
 </p>
 <accordion close-others="false">
 	<accordion-group ng-repeat="cat in vm.Pits.Categories"
@@ -45,11 +42,8 @@
 	<h3>Configurations</h3>
 </div>
 <p>
-	The "Configurations" section identifies Peach pits configured for your system. 
-	These pits are ready to use. 
-	Rather than use the Pit name, each entry contains name given when the configuration data was supplied. 
-	The entries in this section mirror the contents of the 
-	<code>User</code> subfolder of the specified <code>--pits</code> directory.
+	The Configurations section contains existing Peach Pit (test module) configurations. 
+	Selecting an existing configuration allows editing the configuration and starting a new fuzzing job.
 </p>
 <accordion close-others="false">
 	<accordion-group ng-repeat="cat in vm.User.Categories"

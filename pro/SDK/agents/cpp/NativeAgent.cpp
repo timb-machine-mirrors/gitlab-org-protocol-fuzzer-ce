@@ -1,5 +1,5 @@
 
-/* Copyright (c) Deja vu Security LLC
+/* Copyright (c) Peach Fuzzer, LLC
  *
  * Example of a native Peach Agent using the Poco opensource C++ library.
  *
@@ -657,7 +657,7 @@ int main(int argc, char** argv)
 {
 	cout << "\n";
 	cout << ">> Peach Native Agent Sample\n";
-	cout << ">> Copyright (c) Deja vu Security\n";
+	cout << ">> Copyright (c) Peach Fuzzer, LLC\n";
 	cout << "\n";
 
     HTTPPeachServer app;

@@ -21,10 +21,6 @@
 int peach_major =   PEACH_MAJOR;
 int peach_devs =    PEACH_DEVS;
 
-//module_param(peach_major, int, 0);
-//MODULE_AUTHOR("Deja vu Security, LLC");
-//MODULE_LICENSE("Copyright (c) Deja vu Security, LLC");
-
 struct peach_dev *peach_device;
 
 /* Set by START/STOP IOCTLs */

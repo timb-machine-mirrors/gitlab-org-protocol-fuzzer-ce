@@ -752,7 +752,9 @@ namespace Managed.Adb {
 
 					byte[] buffer = new byte[buflen];
 					socket.ReceiveBufferSize = buffer.Length;
-					count = socket.Receive ( buffer, buflen, SocketFlags.None );
+					var ar = socket.BeginReceive(buffer, 0, buflen, SocketFlags.None, null, null);
+					ar.AsyncWaitHandle.WaitOne();
+					count = socket.EndReceive(ar);
 					if ( count < 0 ) {
 						throw new IOException ( "EOF" );
 					} else if ( count == 0 ) {

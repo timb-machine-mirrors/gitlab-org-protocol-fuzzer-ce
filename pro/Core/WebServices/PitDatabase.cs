@@ -553,19 +553,22 @@ namespace Peach.Pro.Core.WebServices
 			var fileName = pit.Versions[0].Files[0].Name + ".config";
 
 			var defines = new List<PitDefines.Define>();
-
 			var reserved = new HashSet<string>();
-			foreach (var def in PitDefines.Parse(fileName))
+
+			if (File.Exists(fileName))
 			{
-				if (def.ConfigType != ParameterType.User)
+				foreach (var def in PitDefines.Parse(fileName))
 				{
-					var param = config.SingleOrDefault(x => x.Key == def.Key && x.Type != ParameterType.System);
-					if (param != null)
+					if (def.ConfigType != ParameterType.User)
 					{
-						def.Value = param.Value;
+						var param = config.SingleOrDefault(x => x.Key == def.Key && x.Type != ParameterType.System);
+						if (param != null)
+						{
+							def.Value = param.Value;
+						}
+						defines.Add(def);
+						reserved.Add(def.Key);
 					}
-					defines.Add(def);
-					reserved.Add(def.Key);
 				}
 			}
 

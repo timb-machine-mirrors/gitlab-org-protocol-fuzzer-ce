@@ -69,8 +69,8 @@ module Peach {
 				.success((job: IJob) => {
 					this.startTestPoller(job);
 				})
-				.catch(reason => {
-					this.setFailure(reason);
+				.catch((response: ng.IHttpPromiseCallbackArg<IError>) => {
+					this.setFailure(response.data.errorMessage);
 					this.pendingResult.reject();
 				})
 			;
@@ -101,9 +101,9 @@ module Peach {
 							}
 						}
 					})
-					.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
+					.catch((response: ng.IHttpPromiseCallbackArg<IError>) => {
 						this.stopTestPoller(job, interval);
-						this.setFailure(reason.data.errorMessage);
+						this.setFailure(response.data.errorMessage);
 						this.pendingResult.reject();
 					})
 				;

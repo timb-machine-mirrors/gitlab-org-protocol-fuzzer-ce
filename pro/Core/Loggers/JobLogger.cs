@@ -239,6 +239,7 @@ namespace Peach.Pro.Core.Loggers
 
 			_log.WriteLine("Command line: " + string.Join(" ", context.config.commandLine));
 			_log.WriteLine("Pit File: " + context.config.pitFile);
+			_log.WriteLine("Strategy: " + context.test.strategy.GetType().GetPluginName());
 			_log.WriteLine(". Test starting: " + context.test.Name);
 			_log.WriteLine("");
 
@@ -406,19 +407,24 @@ namespace Peach.Pro.Core.Loggers
 					// Add event for the iteration running
 					AddEvent(db, context.config.id, "Running iteration", desc);
 				}
-			}
 
-			if (currentIteration == 1 || currentIteration % 100 == 0)
+				_log.WriteLine(". Record Iteration {0}", currentIteration);
+				_log.Flush();
+			}
+			else if (!context.reproducingFault && (currentIteration == 1 || currentIteration % 100 == 0))
 			{
 				if (totalIterations.HasValue && totalIterations.Value < uint.MaxValue)
 				{
-					_log.WriteLine(". Iteration {0} of {1} : {2}",
+					_log.WriteLine(". {0}Iteration {1} of {2} : {3}",
+						context.controlIteration ? "Control " : "",
 						currentIteration, (uint)totalIterations, DateTime.Now);
 					_log.Flush();
 				}
 				else
 				{
-					_log.WriteLine(". Iteration {0} : {1}", currentIteration, DateTime.Now);
+					_log.WriteLine(". {0} Iteration {1} : {2}",
+						context.controlIteration ? "Control " : "",
+						currentIteration, DateTime.Now);
 					_log.Flush();
 				}
 			}
