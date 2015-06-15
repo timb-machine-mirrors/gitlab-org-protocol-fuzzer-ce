@@ -105,6 +105,27 @@ namespace Peach.Pro.Test.Core.Fixups
 			var val = csum.InternalValue;
 			Assert.AreEqual(0x68bd, (int)val);
 		}
+
+		[Test]
+		public void TestRoundTrip()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Number size='16' signed='false' endian='big'>
+			<Fixup class='IcmpV6ChecksumFixup'>
+				<Param name='ref' value='DM' />
+				<Param name='src' value='::1' />
+				<Param name='dst' value='::1' />
+			</Fixup>
+		</Number>
+		<Blob value='Hello' />
+	</DataModel>
+</Peach>
+";
+
+			VerifyRoundTrip(xml);
+		}
 	}
 }
 

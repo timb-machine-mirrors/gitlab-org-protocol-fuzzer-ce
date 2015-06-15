@@ -69,6 +69,11 @@ namespace Peach.Pro.Core.Fixups
 
 			return new Variant((uint)crcTool.crctablefast(data));
 		}
+
+		protected override Variant GetDefaultValue(DataElement obj)
+		{
+			return new Variant(0);
+		}
 	}
 }
 
