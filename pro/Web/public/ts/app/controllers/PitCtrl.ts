@@ -2,11 +2,17 @@
 
 module Peach {
 	"use strict";
+	
+	interface IConfigureStorage {
+		showCfgHelp: boolean;
+		showStartHelp: boolean;
+	}
 
 	export class ConfigureController {
 		static $inject = [
 			C.Angular.$scope,
 			C.Angular.$state,
+			C.Angular.$localStorage,
 			C.Services.Pit,
 			C.Services.Job
 		];
@@ -14,9 +20,15 @@ module Peach {
 		constructor(
 			$scope: IViewModelScope,
 			private $state: ng.ui.IStateService,
+			$localStorage,
 			private pitService: PitService,
 			private jobService: JobService
 		) {
+			this.storage = $localStorage['$default']({
+				showCfgHelp: true,
+				showStartHelp: true
+			});
+			
 			this.pitService.LoadPit().then((pit: IPit) => {
 				this.Pit = pit;
 				this.Job = {
@@ -28,9 +40,9 @@ module Peach {
 			});
 		}
 
-		public IsOpen: boolean = false;
 		public Job: IJobRequest;
 		public Pit: IPit;
+		private storage: IConfigureStorage;
 
 		public get ShowReady(): boolean {
 			return onlyIf(this.pitService.Pit, () => 
@@ -45,11 +57,36 @@ module Peach {
 			return this.jobService.CanStart;
 		}
 
-		public Start() {
+		public Start(): void {
 			this.jobService.Start(this.Job)
 				.then((job: IJob) => {
 					this.$state.go(C.States.Job, { job: job.id });
-				});
+				})
+			;
+		}
+
+		public OnCfgHelp(): void {
+			this.storage.showCfgHelp = !this.storage.showCfgHelp;
+		}
+
+		public OnStartHelp(): void {
+			this.storage.showStartHelp = !this.storage.showStartHelp;
+		}
+		
+		public get StartHelpClass() {
+			return { active: this.storage.showStartHelp };
+		}
+
+		public get CfgHelpClass() {
+			return { active: this.storage.showCfgHelp };
+		}
+		
+		public get StartHelpPrompt(): string {
+			return this.storage.showStartHelp ? 'Hide' : 'Help';
+		}
+
+		public get CfgHelpPrompt(): string {
+			return this.storage.showCfgHelp ? 'Hide' : 'Help';
 		}
 	}
 }

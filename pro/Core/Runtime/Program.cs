@@ -212,7 +212,7 @@ namespace Peach.Pro.Core.Runtime
 			if (ex.InnerException != null)
 				ex = ex.InnerException;
 
-			if (_verbosity > 0)
+			if (_verbosity > 1)
 				Console.Error.WriteLine(ex);
 			else if (!string.IsNullOrEmpty(ex.Message))
 				Console.Error.WriteLine(ex.Message);

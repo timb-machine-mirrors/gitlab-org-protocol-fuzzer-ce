@@ -2,6 +2,8 @@
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
+using Peach.Core.Cracker;
+using Peach.Core.IO;
 using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Fixups
@@ -148,6 +150,25 @@ namespace Peach.Pro.Test.Core.Fixups
 			byte[] precalcChecksum = new byte[] { 0xe2, 0xba };
 			Assert.AreEqual(1, values.Count);
 			Assert.AreEqual(precalcChecksum, values[0].ToArray());
+		}
+
+		[Test]
+		public void TestRoundTrip()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Number size='16' signed='false' endian='big'>
+			<Fixup class='CiscoFixup'>
+				<Param name='ref' value='DM' />
+			</Fixup>
+		</Number>
+		<Blob value='Hello' />
+	</DataModel>
+</Peach>
+";
+
+			VerifyRoundTrip(xml);
 		}
 	}
 }

@@ -118,6 +118,7 @@ namespace Peach.Pro.Test.Core.Publishers
 			<Param name=""Method"" value=""{0}""/>
 			<Param name=""Url"" value=""{1}""/>
 			<Param name=""IgnoreCertErrors"" value=""true""/>
+			{2}
 		</Publisher>
 	</Test>
 
@@ -144,13 +145,14 @@ namespace Peach.Pro.Test.Core.Publishers
 			<Param name=""Method"" value=""{0}""/>
 			<Param name=""Url"" value=""{1}""/>
 			<Param name=""IgnoreCertErrors"" value=""true""/>
+			{2}
 		</Publisher>
 	</Test>
 
 </Peach>
 ";
 
-		private void HttpClient(bool sendRecv, string method, int delay = 0)
+		private void HttpClient(bool sendRecv, string method, int delay = 0, string extra = "")
 		{
 			var port = TestBase.MakePort(56000, 57000);
 			var url = "http://localhost:{0}/".Fmt(port);
@@ -160,7 +162,7 @@ namespace Peach.Pro.Test.Core.Publishers
 
 			try
 			{
-				var xml = string.Format(sendRecv ? SendRecvTemplate : RecvTemplate, method, url);
+				var xml = string.Format(sendRecv ? SendRecvTemplate : RecvTemplate, method, url, extra);
 
 				var parser = new PitParser();
 				var input = new MemoryStream(Encoding.ASCII.GetBytes(xml));
@@ -238,9 +240,18 @@ namespace Peach.Pro.Test.Core.Publishers
 		}
 
 		[Test]
-		public void TestReconnect()
+		public void TestReconnectFail()
 		{
-			HttpClient(true, "POST", 10000);
+			var ex = Assert.Throws<PeachException>(() =>
+				HttpClient(true, "POST", 1000, "<Param name='Timeout' value='10'/>"));
+
+			StringAssert.StartsWith("Timed out connecting to http://", ex.Message);
+		}
+
+		[Test]
+		public void TestReconnectSuccess()
+		{
+			HttpClient(true, "POST", 10000, "<Param name='Timeout' value='15000'/>");
 		}
 	}
 }

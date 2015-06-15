@@ -108,6 +108,24 @@ namespace Peach.Pro.Test.Core.Fixups
 			Assert.AreEqual(expected, actual);
 		}
 
+		[Test]
+		public void TestRoundTrip()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Number size='16' signed='false' endian='big'>
+			<Fixup class='LRCFixup'>
+				<Param name='ref' value='DM' />
+			</Fixup>
+		</Number>
+		<Blob value='Hello' />
+	</DataModel>
+</Peach>
+";
+
+			VerifyRoundTrip(xml);
+		}
     }
 }
 
