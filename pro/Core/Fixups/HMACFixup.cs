@@ -45,9 +45,11 @@ namespace Peach.Pro.Core.Fixups
     [Parameter("Key", typeof(HexString), "Key used in the hash algorithm")]
     [Parameter("Hash", typeof(Algorithms), "Hash algorithm to use", "HMACSHA1")]
     [Parameter("Length", typeof(int), "Length in bytes to return (Value of 0 means don't truncate)", "0")]
+    [Parameter("DefaultValue", typeof(HexString), "Default value to use when recursing (default is parent's DefaultValue)", "")]
     [Serializable]
     public class HMACFixup : Fixup
     {
+        public HexString DefaultValue { get; protected set; }
         public HexString Key { get; protected set; }
         public Algorithms Hash { get; protected set; }
         public int Length { get; protected set; }
@@ -82,6 +84,11 @@ namespace Peach.Pro.Core.Fixups
 				bs.Write(hash, 0, Length);
 
 			return new Variant(bs);
+		}
+
+		protected override Variant GetDefaultValue(DataElement obj)
+		{
+			return DefaultValue != null ? new Variant(DefaultValue.Value) : base.GetDefaultValue(obj);
 		}
     }
 }
