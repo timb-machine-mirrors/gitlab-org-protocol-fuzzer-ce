@@ -82,10 +82,8 @@ Output from inline example.
 ----
 > peach -1 --debug example.xml
 
-[[ Peach Pro v0.0.0.0
-[[ Copyright (c) Deja vu Security
-
-[*] Web site running at: http://localhost:8888/
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 56481.
 
@@ -146,10 +144,8 @@ Output from JSON data file example.
 ----
 > peach -1 --debug example.xml
 
-[[ Peach Pro v0.0.0.0
-[[ Copyright (c) Deja vu Security
-
-[*] Web site running at: http://localhost:8888/
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 33175.
 
