@@ -42,6 +42,7 @@ namespace Peach.Pro.Core.Fixups
 	[Fixup("MD5Fixup")]
 	[Fixup("checksums.MD5Fixup")]
 	[Parameter("ref", typeof(DataElement), "Reference to data element")]
+	[Parameter("DefaultValue", typeof(HexString), "Default value to use when recursing (default is parent's DefaultValue)", "")]
 	[Serializable]
 	public class MD5Fixup : HashFixup<MD5CryptoServiceProvider>
 	{
