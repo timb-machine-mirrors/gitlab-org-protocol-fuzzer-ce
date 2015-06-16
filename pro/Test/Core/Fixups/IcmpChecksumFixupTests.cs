@@ -105,6 +105,24 @@ namespace Peach.Pro.Test.Core.Fixups
             Assert.AreEqual(precalcChecksum, values[0].ToArray());
         }
 
+		[Test]
+		public void TestRoundTrip()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Number size='16' signed='false' endian='big'>
+			<Fixup class='IcmpChecksumFixup'>
+				<Param name='ref' value='DM' />
+			</Fixup>
+		</Number>
+		<Blob value='Hello' />
+	</DataModel>
+</Peach>
+";
+
+			VerifyRoundTrip(xml);
+		}
     }
 }
 

@@ -57,6 +57,26 @@ namespace Peach.Pro.Test.Core.Fixups
             Assert.AreEqual(1, values.Count);
             Assert.AreEqual(precalcChecksum, values[0].ToArray());
         }
+
+		[Test]
+		public void TestRoundTrip()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Blob length='20'>
+			<Fixup class='Sha1'>
+				<Param name='ref' value='DM' />
+				<Param name='DefaultValue' value='0000000000000000000000000000000000000000' />
+			</Fixup>
+		</Blob>
+		<Blob value='Hello' />
+	</DataModel>
+</Peach>
+";
+
+			VerifyRoundTrip(xml);
+		}
     }
 }
 

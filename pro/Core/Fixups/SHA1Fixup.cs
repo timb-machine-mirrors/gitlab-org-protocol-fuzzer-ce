@@ -42,6 +42,7 @@ namespace Peach.Pro.Core.Fixups
 	[Fixup("SHA1Fixup")]
 	[Fixup("checksums.SHA1Fixup")]
 	[Parameter("ref", typeof(DataElement), "Reference to data element")]
+	[Parameter("DefaultValue", typeof(HexString), "Default value to use when recursing (default is parent's DefaultValue)", "")]
 	[Serializable]
 	public class SHA1Fixup : HashFixup<SHA1CryptoServiceProvider>
 	{

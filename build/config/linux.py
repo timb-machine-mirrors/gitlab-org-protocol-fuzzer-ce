@@ -21,6 +21,7 @@ tools = [
 	'tools.zip',
 	'tools.tsc',
 	'tools.mkbundle',
+	'tools.asan',
 ]
 
 def prepare(conf):
@@ -73,6 +74,9 @@ def prepare(conf):
 
 	env['TARGET_FRAMEWORK'] = 'v4.0'
 	env['TARGET_FRAMEWORK_NAME'] = '.NET Framework 4'
+
+	env['ASAN_CC'] = 'clang'
+	env['ASAN_CXX'] = 'clang++'
 
 	env.append_value('supported_features', [
 		'peach',

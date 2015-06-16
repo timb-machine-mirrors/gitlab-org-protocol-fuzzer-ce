@@ -191,6 +191,28 @@ namespace Peach.Pro.Test.Core.Fixups
             Engine e = new Engine(this);
             e.startFuzzing(dom, config);
         }
+
+		[Test]
+		public void TestRoundTrip()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Blob length='20'>
+			<Fixup class='Hmac'>
+				<Param name='ref' value='DM' />
+				<Param name='Key' value='4141414141414141414141414141414141414141' />
+				<Param name='Hash' value='HMACSHA1' />
+				<Param name='DefaultValue' value='0000000000000000000000000000000000000000' />
+			</Fixup>
+		</Blob>
+		<Blob value='Hello' />
+	</DataModel>
+</Peach>
+";
+
+			VerifyRoundTrip(xml);
+		}
     }
 }
 
