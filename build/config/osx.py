@@ -19,6 +19,7 @@ tools = [
 	'tools.mdoc',
 	'tools.zip',
 	'tools.tsc',
+	'tools.asan',
 ]
 
 def find_directory(dirs, paths):
@@ -108,6 +109,9 @@ def prepare(conf):
 
 	env['TARGET_FRAMEWORK'] = 'v4.0'
 	env['TARGET_FRAMEWORK_NAME'] = '.NET Framework 4'
+
+	env['ASAN_CC'] = 'clang-3.6'
+	env['ASAN_CXX'] = 'clang++-3.6'
 
 def configure(conf):
 	env = conf.env

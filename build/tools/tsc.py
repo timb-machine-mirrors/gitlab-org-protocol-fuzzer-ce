@@ -43,8 +43,6 @@ def process_tsc(self):
 			self.tsc_out = tsc_out
 
 def parse_tsc(self):
-	env = self.env
-
 	outputs = []
 	lst_src = []
 	missing = []
