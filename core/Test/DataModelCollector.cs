@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using Peach.Core.Cracker;
 using Peach.Core.IO;
 using Peach.Core.Dom;
 using Peach.Core.Analyzers;
@@ -13,6 +14,30 @@ namespace Peach.Core.Test
 		public static Dom.Dom ParsePit(string xml)
 		{
 			return new PitParser().asParser(null, new MemoryStream(Encoding.UTF8.GetBytes(xml)));
+		}
+
+		public static void VerifyRoundTrip(string xml)
+		{
+			// Given a data model snippet, we should be able to
+			// 1) Parse it
+			// 2) Get its default value
+			// 3) Crack the default value
+			// 4) Get its new default value
+			// 5) Expect values to be identical
+
+			var dom = ParsePit(xml);
+
+			Assert.AreEqual(1, dom.dataModels.Count);
+
+			var expected = dom.dataModels[0].Value.ToArray();
+			var bs = new BitStream(expected);
+			var cracker = new DataCracker();
+
+			cracker.CrackData(dom.dataModels[0], bs);
+
+			var actual = dom.dataModels[0].Value.ToArray();
+
+			Assert.AreEqual(expected, actual);
 		}
 
 		protected void RunEngine(string xml)

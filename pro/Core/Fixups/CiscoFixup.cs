@@ -62,5 +62,9 @@ namespace Peach.Pro.Core.Fixups
 			return new Variant(sum.Final());
 		}
 
+		protected override Variant GetDefaultValue(DataElement obj)
+		{
+			return new Variant(0);
+		}
 	}
 }

@@ -112,7 +112,7 @@ Output from this example.
 >peach -1 --debug NullExample1.xml
 
 [[ Peach Pro v3.0.0
-[[ Copyright (c) Deja vu Security
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Web site running at: http://localhost:8888/
 
@@ -133,3 +133,4 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 [*] Test 'Default' finished.
 ----
+==========================

@@ -132,8 +132,8 @@ Output from this example.
 ----
 >peach -1 --debug example.xml
 
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Deja vu Security
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 37920.
 
@@ -197,8 +197,8 @@ Output from this example.
 ----
 >peach -1 --debug example.xml
 
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Deja vu Security
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 30169.
 
@@ -267,10 +267,8 @@ Output from this example.
 ----
 >peach -1 --debug example.xml
 
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Deja vu Security
-
-[*] Test 'Default' starting with random seed 30169.
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 37527.
 

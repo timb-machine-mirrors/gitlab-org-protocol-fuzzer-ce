@@ -148,7 +148,7 @@ namespace Peach.Core
 		public Variant fixup(DataElement obj)
 		{
 			if (isRecursing)
-				return obj.DefaultValue;
+				return GetDefaultValue(obj);
 
 			try
 			{
@@ -159,6 +159,18 @@ namespace Peach.Core
 			{
 				isRecursing = false;
 			}
+		}
+
+		/// <summary>
+		/// This is the value to use for the data element if the
+		/// fixup has been recursivley called.  This can happen when
+		/// the fixup references a parent of the element being fixed up.
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		protected virtual Variant GetDefaultValue(DataElement obj)
+		{
+			return obj.DefaultValue;
 		}
 
 		private Variant doFixupImpl(DataElement obj)

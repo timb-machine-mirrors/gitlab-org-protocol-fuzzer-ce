@@ -109,6 +109,27 @@ namespace Peach.Pro.Test.Core.Fixups
 			Assert.AreEqual(1, values.Count);
 			Assert.AreEqual(precalcChecksum, values[0].ToArray());
 		}
+
+		[Test]
+		public void TestRoundTrip()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Number size='16' signed='false' endian='big'>
+			<Fixup class='TCPChecksumFixup'>
+				<Param name='ref' value='DM' />
+				<Param name='src' value='1.1.1.1' />
+				<Param name='dst' value='1.1.1.1' />
+			</Fixup>
+		</Number>
+		<Blob value='Hello' />
+	</DataModel>
+</Peach>
+";
+
+			VerifyRoundTrip(xml);
+		}
 	}
 }
 
