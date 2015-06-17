@@ -28,7 +28,7 @@ namespace Renci.SshNet
         /// <value>
         /// The current session.
         /// </value>
-        internal ISession Session { get; private set; }
+        public ISession Session { get; private set; }
 
         /// <summary>
         /// Gets the factory for creating new services.
