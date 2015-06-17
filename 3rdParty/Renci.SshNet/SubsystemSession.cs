@@ -10,7 +10,7 @@ namespace Renci.SshNet
     /// <summary>
     /// Base class for SSH subsystem implementations
     /// </summary>
-    internal abstract class SubsystemSession : ISubsystemSession
+    public abstract class SubsystemSession : ISubsystemSession
     {
         private ISession _session;
         private readonly string _subsystemName;
