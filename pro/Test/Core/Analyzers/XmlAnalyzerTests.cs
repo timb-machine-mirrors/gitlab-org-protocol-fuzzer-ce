@@ -236,6 +236,70 @@ namespace Peach.Pro.Test.Core.Analyzers
 		}
 
 		[Test]
+		public void MarkMutable()
+		{
+			var tmp = Path.GetTempFileName();
+
+			try
+			{
+				File.WriteAllText(tmp, @"<Root><Elem>1</Elem><Elem>2</Elem></Root>");
+
+				var xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='Root' type='utf8'>
+			<Analyzer class='Xml'/>
+		</String>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+				<Data fileName='{0}'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+
+		<Exclude />
+		<Include xpath='//Value'/>
+	</Test>
+</Peach>
+".Fmt(tmp);
+
+				var dom = ParsePit(xml);
+				var cfg = new RunConfiguration { singleIteration = true };
+				var e = new Engine(null);
+
+				e.startFuzzing(dom, cfg);
+
+				var dm = dom.tests[0].stateModel.states[0].actions[0].dataModel;
+
+				Assert.NotNull(dm);
+
+				foreach (var elem in dm.PreOrderTraverse())
+				{
+					if (elem.Name == "Value")
+					{
+						Assert.True(elem.isMutable, "{0} should be mutable".Fmt(elem.debugName));
+					}
+					else
+					{
+						Assert.False(elem.isMutable, "{0} should be non-mutable".Fmt(elem.debugName));
+					}
+				}
+			}
+			finally
+			{
+				File.Delete(tmp);
+			}
+		}
+
+		[Test]
 		public void Fuzz1()
 		{
 			// Trying to emit xmlns="" is invalid, have to remove xmlns attr

@@ -42,6 +42,6 @@ bld(
 	source = bld.path.ant_glob('**/*.cs **/*.resx'),
 	name = 'Peach.Pro.Test.dll',
 	resource = bld.path.ant_glob('Resources/**/*'),
-	ide_use = 'CrashingProgram CrashingFileConsumer CrashableServer',
+	ide_use = 'CrashingProgram CrashingFileConsumer CrashableServer CrashTest',
 	namespace = 'Peach.Pro.Test.Core',
 )

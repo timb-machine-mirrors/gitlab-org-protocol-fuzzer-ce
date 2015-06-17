@@ -148,6 +148,11 @@ namespace Peach.Core.Dom
 				foreach (State state in states)
 					state.UpdateToOriginalDataModel();
 
+				// If this is a record iteration, apply element mutability
+				// after datasets and analyzers have been applied
+				if (context.controlRecordingIteration)
+					context.test.markMutableElements();
+
 				State currentState = initialState;
 
 				context.OnStateModelStarting(this);
