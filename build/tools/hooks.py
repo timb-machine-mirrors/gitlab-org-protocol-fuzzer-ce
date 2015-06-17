@@ -1,8 +1,8 @@
 from waflib.Build import BuildContext, InstallContext
 from waflib.Configure import ConfigurationContext
 from waflib.Context import Context
-from waflib.Task import TaskBase
-from waflib import Build, Utils, Logs, Errors
+from waflib.Task import TaskBase, CRASHED, MISSING
+from waflib import Build, Utils, Logs, Errors, Task
 import os.path
 import sys
 
@@ -84,6 +84,27 @@ def colorize(value, color):
 	return color + Logs.colors.BOLD + value + Logs.colors.NORMAL
 
 # TaskBase
+def format_error(self):
+	if Logs.verbose > 0:
+		return self.base_format_error()
+
+	msg = getattr(self, 'last_cmd', '')
+	name = getattr(self.generator, 'name', '')
+	if getattr(self, "err_msg", None):
+		return self.err_msg
+	elif not self.hasrun:
+		return 'task in %r was not executed for some reason' % (name)
+	elif self.hasrun == CRASHED:
+		try:
+			return ' -> task in %r failed (exit status %r)' % (name, self.err_code)
+		except AttributeError:
+			return ' -> task in %r failed' % (name)
+	elif self.hasrun == MISSING:
+		return ' -> missing files in %r' % (name)
+	else:
+		return 'invalid status for task in %r: %r' % (name, desc.hasrun)
+
+# TaskBase
 def display(self):
 	sep = Logs.colors.NORMAL + ' | '
 	master = self.master
@@ -140,6 +161,9 @@ def do_install(self, src, tgt, chmod=Utils.O644):
 		colorize(target, Logs.colors.GREEN))
 
 	self.to_log(msg)
+
+TaskBase.base_format_error = TaskBase.format_error
+TaskBase.format_error = format_error
 
 TaskBase.base_display = TaskBase.display
 TaskBase.display = display
