@@ -38,7 +38,7 @@ namespace Renci.SshNet
     /// <summary>
     /// Represents remote connection information.
     /// </summary>
-    internal interface IConnectionInfo
+    public interface IConnectionInfo
     {
         /// <summary>
         /// Gets the supported channel requests for this connection.
