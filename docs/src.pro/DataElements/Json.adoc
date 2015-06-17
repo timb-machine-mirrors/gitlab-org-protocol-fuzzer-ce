@@ -2,16 +2,27 @@
 [[Json]]
 == Json
 
-Json elements are used to organize Peach elements that will be represented as JSON. The output of a Json element will always be valid JSON strings.
+The _Json_ element is a container for other data elements that will be represented 
+in JSON in attribute-value pairs. The output of a _Json_ element is a valid JSON string 
+enclosed with the `{` and `}` characters. 
 
-If a name attribute is included on an element it will always be used as the "name" portion of the JSON data. If no name is included the elements default name will be used. If the element is included inside of a Sequence element no name will be used as a Sequence represents an array in JSON.
+// Original. Keep until OK'ed.
+// Json elements are used to organize Peach elements that will be represented as JSON. 
+// The output of a Json element will always be valid JSON strings.
 
-A Json element will always print a "{" at the beginning of the data and a "}" at the end of the data. The following is a list of Peach elements that have different output behavior when placed inside a Json element.
+A name attribute, if specified for an element, always is used as the "name" portion of the JSON data. If no name is specified, the default name for the element is used. 
 
-xref:Block[Block]:: When a Block is included within a Json element it is used to represent a new object.
-xref:Bool[Bool]:: When a Bool is included within a Json element it is used to represent data that has the value of either 'true' or 'false'.
-xref:Null[Null]:: When a Null is included within a Json element it is used to represent data that has the value of 'null'. 
-xref:Sequence[Sequence]: When a Sequence is included within a Json element it is used to represent an array of values.
+If the element occurs within a _Sequence_ element, the name is not used because a _Sequence_ represents an array in JSON.
+
+The following Peach elements have different output behavior when used inside a Json element.
+
+xref:Block[Block]:: A Block within a Json element represents a new object.
+xref:Bool[Bool]:: A Bool within a Json element represents data that has the value `true` or `false`.
+xref:Null[Null]:: A Null within a Json element represents data that has the value `null`.
+xref:Sequence[Sequence]:: A Sequence within a Json element represents an array of values.
+
+NOTE: A _Json_ element without any child data elements does not have any size nor 
+contains other data.
 
 === Syntax
 

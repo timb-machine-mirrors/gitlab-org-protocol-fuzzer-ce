@@ -2,7 +2,13 @@
 [[Sequence]]
 == Sequence
 
-Sequence elements are used to construct an array with all its elements predefined. A Sequence is able to contain multiple data types at once. Unlike regular arrays in Peach, the size of the Sequence it determined by the number of elements within the sequence not the minOccurs attribute. Adding the minOccurs attribute to a Sequence will make an array of Sequences. 
+A _Sequence_ element is used to construct an array with all its elements predefined. 
+A _Sequence_ is able to contain multiple data types at once. Unlike regular arrays 
+in Peach, the size of the Sequence it determined by the number of elements within 
+the sequence.
+
+NOTE: A _Sequence_ element that uses the Occurs, minOccurs, or maxOccurs attribute 
+creates an array of _Sequences_.
 
 === Syntax
 
@@ -23,7 +29,7 @@ There are no required attributes.
 _Optional:_
 
 xref:name[name]:: Name of the sequence.
-xref:ref[ref]:: Reference to a [DataModel_DataModel]] to use as a template.
+xref:ref[ref]:: Reference to a xref:DataModel[DataModel] to use as a template.
 xref:length[length]:: Data element length.
 xref:lengthType[lengthType]:: The unit measure of length attribute. Default is bytes.
 xref:constraint[constraint]:: Scripting expression that evaluates to true or false. Default is null.
