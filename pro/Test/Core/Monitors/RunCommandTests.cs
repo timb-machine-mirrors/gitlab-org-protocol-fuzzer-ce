@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using NUnit.Framework;
 using Peach.Core;
+using Peach.Core.Agent;
 using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Monitors
@@ -14,38 +15,19 @@ namespace Peach.Pro.Test.Core.Monitors
 	[Peach]
 	class RunCommandTests
 	{
-		[DllImport("libc")]
-		private static extern int chmod(string path, int mode);
-
-		private string _scriptFile;
+		private readonly string _scriptFile = Utilities.GetAppResourcePath("CrashTest");
 		private string _outputFile;
 
 		[SetUp]
 		public void SetUp()
 		{
 			_outputFile = Path.GetTempFileName();
-			_scriptFile = _outputFile + ".cmd";
-
-			using (var f = new StreamWriter(_scriptFile))
-			{
-				if (Platform.GetOS() != Platform.OS.Windows)
-				{
-					chmod(_scriptFile, Convert.ToInt32("777", 8));
-					f.WriteLine("#!/usr/bin/env sh");
-					f.WriteLine("echo $* >> {0}", _outputFile);
-				}
-				else
-				{
-					f.WriteLine("echo %* >> {0}", _outputFile);
-				}
-			}
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
 			File.Delete(_outputFile);
-			File.Delete(_scriptFile);
 		}
 
 		private MonitorRunner MakeWhen(string when)
@@ -53,7 +35,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			return new MonitorRunner("RunCommand", new Dictionary<string, string>
 			{
 				{ "Command", _scriptFile },
-				{ "Arguments", when },
+				{ "Arguments", string.Join(" ", "when", _outputFile, when) },
 				{ "When", when },
 			});
 		}
@@ -199,7 +181,6 @@ namespace Peach.Pro.Test.Core.Monitors
 			Verify("OnIterationEnd");
 		}
 
-
 		[Test]
 		public void TestOnFault()
 		{
@@ -293,6 +274,323 @@ namespace Peach.Pro.Test.Core.Monitors
 
 				VerifyCall(idx);
 			};
+		}
+
+		[Test]
+		public void TestAddressSanitizer()
+		{
+			if (Platform.GetOS() == Platform.OS.Windows)
+				Assert.Ignore("ASAN is not supported on Windows");
+
+			MonitorData data = null;
+
+			var runner = new MonitorRunner("RunCommand", new Dictionary<string, string>
+			{
+				{ "Command", Utilities.GetAppResourcePath("UseAfterFree") },
+				{ "AddressSanitizer", "true" },
+				{ "When", "OnStart" },
+			})
+			{
+				DetectedFault = m =>
+				{
+					var ret = m.DetectedFault();
+					Assert.True(ret, "Monitor should have detected fault.");
+					return ret;
+				},
+				GetMonitorData = m =>
+				{
+					data = m.GetMonitorData();
+					return data;
+				},
+			};
+
+			runner.Run();
+
+			Assert.NotNull(data);
+
+			Assert.AreEqual("RunCommand", data.DetectionSource);
+			Assert.AreEqual("heap-use-after-free", data.Fault.Risk);
+			Assert.IsFalse(data.Fault.MustStop);
+			StringAssert.Contains("Shadow bytes", data.Fault.Description);
+
+			if (Platform.GetOS() == Platform.OS.OSX)
+			{
+				const string pattern = "heap-use-after-free on address 0x61400000fe44 at pc 0x000100001b8f";
+				StringAssert.StartsWith(pattern, data.Title);
+				StringAssert.Contains(pattern, data.Fault.Description);
+				Assert.AreEqual("02133A7E", data.Fault.MajorHash);
+				Assert.AreEqual("9DD19897", data.Fault.MinorHash);
+			}
+			else if (Platform.GetOS() == Platform.OS.Linux)
+			{
+				const string pattern = "heap-use-after-free on address 0x61400000fe44 at pc 0x47b8ac";
+				StringAssert.StartsWith(pattern, data.Title);
+				StringAssert.Contains(pattern, data.Fault.Description);
+				Assert.AreEqual("C755DA91", data.Fault.MajorHash);
+				Assert.AreEqual("9DD19897", data.Fault.MinorHash);
+			}
+		}
+
+		class Result
+		{
+			public bool DetectedFault { get; set; }
+			public MonitorData Data { get; set; }
+		}
+
+		Result DoExitTest(bool faultOnExitCode, bool faultOnNonZeroExit, int faultExitCode, int exitCode)
+		{
+			var result = new Result();
+
+			var runner = new MonitorRunner("RunCommand", new Dictionary<string, string>
+			{
+				{ "Command", _scriptFile },
+				{ "Arguments", string.Join(" ", "exit", exitCode.ToString()) },
+				{ "When", "OnStart" },
+				{ "FaultOnExitCode", faultOnExitCode.ToString() },
+				{ "FaultExitCode", faultExitCode.ToString() },
+				{ "FaultOnNonZeroExit", faultOnNonZeroExit.ToString() },
+			})
+			{
+				DetectedFault = m =>
+				{
+					result.DetectedFault = m.DetectedFault();
+					return result.DetectedFault;
+				},
+				GetMonitorData = m =>
+				{
+					result.Data = m.GetMonitorData();
+					return result.Data;
+				},
+			};
+
+			runner.Run();
+
+			return result;
+		}
+
+		void ExitShouldFault(bool faultOnExitCode, bool faultOnNonZeroExit, int faultExitCode, int exitCode)
+		{
+			var result = DoExitTest(faultOnExitCode, faultOnNonZeroExit, faultExitCode, exitCode);
+
+			Assert.IsTrue(result.DetectedFault);
+			Assert.IsNotNull(result.Data);
+
+			Console.WriteLine("Title: {0}", result.Data.Title);
+			Console.WriteLine("Fault.MajorHash: {0}", result.Data.Fault.MajorHash);
+			Console.WriteLine("Fault.MinorHash: {0}", result.Data.Fault.MinorHash);
+
+			var majorHash = Monitor2.Hash("RunCommand" + _scriptFile);
+			var minorHash = Monitor2.Hash(exitCode.ToString(CultureInfo.InvariantCulture));
+
+			Assert.AreEqual("Process exited with code {0}.".Fmt(exitCode), result.Data.Title);
+			Assert.AreEqual(majorHash, result.Data.Fault.MajorHash);
+			Assert.AreEqual(minorHash, result.Data.Fault.MinorHash);
+			Assert.IsFalse(result.Data.Fault.MustStop);
+			Assert.IsNull(result.Data.Fault.Description);
+		}
+
+		void ExitNoFault(bool faultOnExitCode, bool faultOnNonZeroExit, int faultExitCode, int exitCode)
+		{
+			var result = DoExitTest(faultOnExitCode, faultOnNonZeroExit, faultExitCode, exitCode);
+
+			Assert.IsFalse(result.DetectedFault);
+			Assert.IsNull(result.Data);
+		}
+
+		[Test]
+		public void TestFaultDefault()
+		{
+			ExitNoFault(false, false, 0, 0);
+			ExitNoFault(false, false, 0, 1);
+			ExitNoFault(false, false, 1, 0);
+			ExitNoFault(false, false, 1, 1);
+		}
+
+		[Test]
+		public void TestFaultOnExitCode()
+		{
+			ExitNoFault(true, false, 1, 0);
+			ExitNoFault(true, false, 0, 1);
+			ExitNoFault(true, false, 1, 2);
+			ExitShouldFault(true, false, 0, 0);
+			ExitShouldFault(true, false, 1, 1);
+			ExitShouldFault(true, false, 2, 2);
+		}
+
+		[Test]
+		public void TestFaultOnNonZeroExit()
+		{
+			ExitNoFault(false, true, 0, 0);
+			ExitShouldFault(false, true, 0, 1);
+			ExitShouldFault(false, true, 1, 1);
+		}
+
+		[Test]
+		public void TestFaultOnBoth()
+		{
+			ExitNoFault(true, true, 1, 0);
+			ExitShouldFault(true, true, 0, 0);
+			ExitShouldFault(true, true, 0, 1);
+			ExitShouldFault(true, true, 1, 1);
+			ExitShouldFault(true, true, 1, 2);
+		}
+
+		Result DoTimeoutTest(int timeout, int sleep)
+		{
+			var result = new Result();
+
+			var runner = new MonitorRunner("RunCommand", new Dictionary<string, string>
+			{
+				{ "Command", _scriptFile },
+				{ "Arguments", string.Join(" ", "timeout", sleep.ToString()) },
+				{ "When", "OnStart" },
+				{ "Timeout", timeout.ToString() },
+			})
+			{
+				DetectedFault = m =>
+				{
+					result.DetectedFault = m.DetectedFault();
+					return result.DetectedFault;
+				},
+				GetMonitorData = m =>
+				{
+					result.Data = m.GetMonitorData();
+					return result.Data;
+				},
+			};
+
+			runner.Run();
+
+			return result;
+		}
+
+		void TimeoutShouldFault(int timeout, int sleep)
+		{
+			var result = DoTimeoutTest(timeout, sleep);
+
+			Assert.IsTrue(result.DetectedFault);
+			Assert.IsNotNull(result.Data);
+
+			Console.WriteLine("Title: {0}", result.Data.Title);
+			Console.WriteLine("Fault.MajorHash: {0}", result.Data.Fault.MajorHash);
+			Console.WriteLine("Fault.MinorHash: {0}", result.Data.Fault.MinorHash);
+
+			var majorHash = Monitor2.Hash("RunCommand" + _scriptFile);
+			var minorHash = Monitor2.Hash("FailedToExit");
+
+			Assert.AreEqual("Process failed to exit in allotted time.", result.Data.Title);
+			Assert.AreEqual(majorHash, result.Data.Fault.MajorHash);
+			Assert.AreEqual(minorHash, result.Data.Fault.MinorHash);
+			Assert.IsFalse(result.Data.Fault.MustStop);
+			Assert.IsNull(result.Data.Fault.Description);
+		}
+
+		void TimeoutNoFault(int timeout, int sleep)
+		{
+			var result = DoTimeoutTest(timeout, sleep);
+
+			Assert.IsFalse(result.DetectedFault);
+			Assert.IsNull(result.Data);
+		}
+
+		[Test]
+		public void TestTimeoutNoFault()
+		{
+			TimeoutNoFault(-1, 0);
+			TimeoutNoFault(-1, 3);
+			TimeoutNoFault(10000, 0);
+		}
+
+		[Test]
+		public void TestTimeout()
+		{
+			TimeoutShouldFault(0, 10);
+			TimeoutShouldFault(1000, 10);
+		}
+
+		Result DoRegexTest(string regex, string stdout, string stderr)
+		{
+			var result = new Result();
+
+			var runner = new MonitorRunner("RunCommand", new Dictionary<string, string>
+			{
+				{ "Command", _scriptFile },
+				{ "Arguments", string.Join(" ", "regex", stdout, stderr) },
+				{ "When", "OnStart" },
+				{ "FaultOnRegex", regex },
+			})
+			{
+				DetectedFault = m =>
+				{
+					result.DetectedFault = m.DetectedFault();
+					return result.DetectedFault;
+				},
+				GetMonitorData = m =>
+				{
+					result.Data = m.GetMonitorData();
+					return result.Data;
+				},
+			};
+
+			runner.Run();
+
+			return result;
+		}
+
+		void RegexShouldFault(string regex, string stdout, string stderr)
+		{
+			var useStdout = regex == stdout;
+			var result = DoRegexTest(regex, stdout, stderr);
+
+			Assert.IsTrue(result.DetectedFault, "DetectedFault should be true");
+			Assert.IsNotNull(result.Data, "MonitorData should not be null");
+
+			Console.WriteLine("Title: {0}", result.Data.Title);
+			Console.WriteLine("Fault.MajorHash: {0}", result.Data.Fault.MajorHash);
+			Console.WriteLine("Fault.MinorHash: {0}", result.Data.Fault.MinorHash);
+
+			var majorHash = Monitor2.Hash("RunCommand" + _scriptFile);
+			var minorHash = Monitor2.Hash(regex);
+			var pipe = useStdout ? "stdout" : "stderr";
+
+			Assert.AreEqual("Process {0} matched FaultOnRegex \"{1}\".".Fmt(pipe, regex), result.Data.Title);
+			Assert.AreEqual(majorHash, result.Data.Fault.MajorHash);
+			Assert.AreEqual(minorHash, result.Data.Fault.MinorHash);
+			Assert.IsFalse(result.Data.Fault.MustStop, "MustStop should be false");
+			StringAssert.Contains(useStdout ? stdout : stderr, result.Data.Fault.Description);
+		}
+
+		void RegexNoFault(string regex, string stdout, string stderr)
+		{
+			var result = DoRegexTest(regex, stdout, stderr);
+
+			Assert.IsFalse(result.DetectedFault, "DetectedFault should be false");
+			Assert.IsNull(result.Data, "Should not have data");
+		}
+
+		[Test]
+		public void TestRegexNoFault()
+		{
+			RegexNoFault("", "foo", "foo");
+			RegexNoFault("foo", "bar", "bar");
+		}
+
+		[Test]
+		public void TestRegexStdout()
+		{
+			RegexShouldFault("foo", "foo", "bar");
+		}
+
+		[Test]
+		public void TestRegexStderr()
+		{
+			RegexShouldFault("foo", "bar", "foo");
+		}
+
+		[Test]
+		public void TestRegexBoth()
+		{
+			RegexShouldFault("foo", "foo", "foo");
 		}
 	}
 }
