@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using NLog;
 using Peach.Core;
@@ -9,11 +11,11 @@ namespace Peach.Pro.OS.Linux
 	[PlatformImpl(Platform.OS.Linux)]
 	public class ProcessInfoImpl : IProcessInfo
 	{
-		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		private static string StatPath = "/proc/{0}/stat";
+		private const string StatPath = "/proc/{0}/stat";
 
-		private enum Fields : int
+		private enum Fields
 		{
 			State = 0,
 			UserTime = 11,
@@ -21,9 +23,9 @@ namespace Peach.Pro.OS.Linux
 			Max = 13,
 		}
 
-		private static string[] ReadProc(int pid)
+		private static Tuple<string, string[]> ReadProc(int pid, bool stats)
 		{
-			string path = string.Format(StatPath, pid);
+			var path = string.Format(StatPath, pid);
 			string stat;
 
 			try
@@ -32,44 +34,59 @@ namespace Peach.Pro.OS.Linux
 			}
 			catch (Exception ex)
 			{
-				logger.Info("Failed to read \"{0}\".  {1}", path, ex.Message);
-				return null;
+				Logger.Info("Failed to read \"{0}\".  {1}", path, ex.Message);
+				return new Tuple<string,string[]>(null, null);
 			}
 
-			int start = stat.IndexOf('(');
-			int end = stat.LastIndexOf(')');
+			var start = stat.IndexOf('(');
+			var end = stat.LastIndexOf(')');
 
 			if (stat.Length < 2 || start < 0 || end < start)
-				return null;
+				return new Tuple<string, string[]>(null, null);
 
-			string before = stat.Substring(0, start);
-			string middle = stat.Substring(start + 1, end - start - 1);
-			string after = stat.Substring(end + 1);
+			var before = stat.Substring(0, start);
+			var middle = stat.Substring(start + 1, end - start - 1);
+			var after = stat.Substring(end + 1);
 
-			string[] strPid = before.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-			if (strPid.Length != 1 || strPid[0] != pid.ToString())
-				return null;
+			var strPid = before.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+			if (strPid.Length != 1 || strPid[0] != pid.ToString(CultureInfo.InvariantCulture))
+				return new Tuple<string, string[]>(null, null);
 
 			if (string.IsNullOrEmpty(middle))
-				return null;
+				return new Tuple<string, string[]>(null, null);
 
-			string[] parts = after.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+			if (!stats)
+				return new Tuple<string, string[]>(middle, null);
+
+			var parts = after.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 			if (parts.Length < (int)Fields.Max)
 				return null;
 
-			return parts;
+			return new Tuple<string, string[]>(middle, parts);
 		}
 
 		public ProcessInfo Snapshot(Process p)
 		{
-			var parts = ReadProc(p.Id);
-			if (parts == null)
+			var tuple = ReadProc(p.Id, true);
+			if (tuple.Item1 == null)
 				throw new ArgumentException();
 
-			ProcessInfo pi = new ProcessInfo();
+			var parts = tuple.Item2;
 
-			pi.Id = p.Id;
-			pi.ProcessName = p.ProcessName;
+			var pi = new ProcessInfo
+			{
+				Id = p.Id
+			};
+
+			try
+			{
+				pi.ProcessName = p.ProcessName;
+			}
+			catch (InvalidOperationException)
+			{
+				pi.ProcessName = tuple.Item1;
+			}
+
 			pi.Responding = parts[(int)Fields.State] != "Z";
 
 			pi.UserProcessorTicks = ulong.Parse(parts[(int)Fields.UserTime]);
@@ -85,10 +102,33 @@ namespace Peach.Pro.OS.Linux
 			return pi;
 		}
 
-
 		public Process[] GetProcessesByName(string name)
 		{
-			return Process.GetProcessesByName(name);
+			if (name == null)
+				throw new ArgumentNullException("name");
+
+			var ret = new List<Process>();
+
+			foreach (var p in Process.GetProcesses())
+			{
+				string procName;
+
+				try
+				{
+					procName = p.ProcessName;
+				}
+				catch (InvalidOperationException)
+				{
+					procName = ReadProc(p.Id, false).Item1;
+				}
+
+				if (name == procName)
+					ret.Add(p);
+				else
+					p.Dispose();
+			}
+
+			return ret.ToArray();
 		}
 	}
 

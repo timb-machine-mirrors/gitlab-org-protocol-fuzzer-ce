@@ -42,7 +42,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			{
 				StartInfo = new ProcessStartInfo
 				{
-					FileName = exe,
+					FileName = _file,
 					Arguments = "127.0.0.1 0",
 					UseShellExecute = false,
 					RedirectStandardError = true,
