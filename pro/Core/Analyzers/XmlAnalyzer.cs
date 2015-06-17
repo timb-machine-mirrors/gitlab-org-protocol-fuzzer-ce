@@ -175,7 +175,7 @@ namespace Peach.Pro.Core.Analyzers
 			{
 				if (child.Name == "#text")
 				{
-					var str = makeString(child.Name, child.Value, type);
+					var str = makeString("Value", child.Value, type);
 					elem.Add(str);
 				}
 				else if (!child.Name.StartsWith("#"))

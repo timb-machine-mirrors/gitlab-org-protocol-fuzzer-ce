@@ -1,18 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Reflection;
-using NLog;
-using NLog.Config;
-using NLog.Targets;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Pro.Core;
 using Peach.Pro.Core.Runtime;
 using Peach.Core.Test;
-using NLog.Targets.Wrappers;
 
 namespace Peach.Pro.Test.Core
 {

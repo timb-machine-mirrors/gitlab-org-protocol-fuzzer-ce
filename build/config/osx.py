@@ -180,6 +180,14 @@ def configure(conf):
 		'-O3',
 	]
 
+	asan = [
+		'-fsanitize=address'
+	]
+
+	env.append_value('CFLAGS_asan', asan)
+	env.append_value('CXXFLAGS_asan', asan)
+	env.append_value('LINKFLAGS_asan', asan)
+
 	env.append_value('CPPFLAGS', arch_flags + cppflags)
 	env.append_value('CPPFLAGS_debug', cppflags_debug)
 	env.append_value('CPPFLAGS_release', cppflags_release)

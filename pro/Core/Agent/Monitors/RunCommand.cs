@@ -22,7 +22,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Parameter("FaultOnNonZeroExit", typeof(bool), "Fault if exit code is non-zero", "false")]
 	[Parameter("FaultOnRegex", typeof(string), "Fault if regex matches", "")]
 	[Parameter("AddressSanitizer", typeof(bool), "Enable Google AddressSanitizer support", "false")]
-	[Parameter("Timeout", typeof(int), "Fault if process takes more than Timeout seconds where -1 is infinite timeout ", "-1")]
+	[Parameter("Timeout", typeof(int), "Fault if process takes more than 'Timeout' milliseconds to exit, where -1 means infinite timeout", "-1")]
 	public class RunCommand  : Monitor
 	{
 		static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
@@ -31,7 +31,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 		public string Arguments { get; set; }
 		public string StartOnCall { get; set; }
 		public MonitorWhen When { get; set; }
-		public string CheckValue { get; set; }
 		public int Timeout { get; set; }
 		public bool FaultOnNonZeroExit { get; set; }
 		public int FaultExitCode { get; set; }
@@ -41,10 +40,10 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		static readonly Regex AsanMatch = new Regex(@"==\d+==ERROR: AddressSanitizer:");
 		static readonly Regex AsanBucket = new Regex(@"==\d+==ERROR: AddressSanitizer: ([^\s]+) on address ([0-9a-z]+) at pc ([0-9a-z]+)");
-		static readonly Regex AsanMessage = new Regex(@"(==\d+==ERROR: AddressSanitizer:.*==\d+==ABORTING)");
+		static readonly Regex AsanMessage = new Regex(@"(==\d+==ERROR: AddressSanitizer:.*==\d+==ABORTING)", RegexOptions.Singleline);
 		static readonly Regex AsanTitle = new Regex(@"==\d+==ERROR: AddressSanitizer: ([^\r\n]+)");
 
-		private Regex _faulOnRegex;
+		private Regex _faultOnRegex;
 		private MonitorData _data;
 
 		public RunCommand(string name)
@@ -57,7 +56,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			base.StartMonitor(args);
 
 			if (!string.IsNullOrWhiteSpace(FaultOnRegex))
-				_faulOnRegex = new Regex(FaultOnRegex);
+				_faultOnRegex = new Regex(FaultOnRegex);
 		}
 
 		void _Start()
@@ -108,13 +107,13 @@ namespace Peach.Pro.Core.Agent.Monitors
 						MinorHash = Hash(p.ExitCode.ToString(CultureInfo.InvariantCulture))
 					};
 				}
-				else if (_faulOnRegex != null)
+				else if (_faultOnRegex != null)
 				{
-					var m = _faulOnRegex.Match(stdout);
+					var m = _faultOnRegex.Match(stdout);
 
 					if (m.Success)
 					{
-						_data.Title = "Process stdout matched FaulOnRegex \"{0}\".".Fmt(FaultOnRegex);
+						_data.Title = "Process stdout matched FaultOnRegex \"{0}\".".Fmt(FaultOnRegex);
 						_data.Fault = new MonitorData.Info
 						{
 							Description = stdout,
@@ -124,11 +123,11 @@ namespace Peach.Pro.Core.Agent.Monitors
 					}
 					else
 					{
-						m = _faulOnRegex.Match(stderr);
+						m = _faultOnRegex.Match(stderr);
 
 						if (m.Success)
 						{
-							_data.Title = "Process stderr matched FaulOnRegex \"{0}\".".Fmt(FaultOnRegex);
+							_data.Title = "Process stderr matched FaultOnRegex \"{0}\".".Fmt(FaultOnRegex);
 							_data.Fault = new MonitorData.Info
 							{
 								Description = stderr,
@@ -147,9 +146,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 					_data.Title = title.Groups[1].Value;
 					_data.Fault = new MonitorData.Info
 					{
-						Description = stderr.Substring(desc.Groups[1].Index, desc.Groups[1].Length),
-						MajorHash = bucket.Groups[3].Value,
-						MinorHash = bucket.Groups[2].Value,
+						Description = stderr.Substring(desc.Index, desc.Length),
+						MajorHash = Hash(bucket.Groups[3].Value),
+						MinorHash = Hash(bucket.Groups[2].Value),
 						Risk = bucket.Groups[1].Value,
 					};
 				}

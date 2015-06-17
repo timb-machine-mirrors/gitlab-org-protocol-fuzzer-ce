@@ -443,8 +443,6 @@ namespace Peach.Core
 			// Initialize the current iteration prior to the TestStarting event
 			context.currentIteration = iterationStart;
 
-			test.markMutableElements();
-
 			lock (_canAbortSync)
 			{
 				OnTestStarting();
