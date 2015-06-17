@@ -18,6 +18,3 @@ def process_asan(self):
 	self.env['CXX'] = self.env['ASAN_CXX']
 	self.env['LINK_CC'] = self.env['ASAN_CC']
 	self.env['LINK_CXX'] = self.env['ASAN_CXX']
-	self.env.append_value('CFLAGS', ['-fsanitize=address'])
-	self.env.append_value('CXXFLAGS', ['-fsanitize=address'])
-	self.env.append_value('LINKFLAGS', ['-fsanitize=address'])
