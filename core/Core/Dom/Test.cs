@@ -30,6 +30,7 @@ using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.ComponentModel;
+using Peach.Core.Dom.XPath;
 
 namespace Peach.Core.Dom
 {
@@ -317,7 +318,7 @@ namespace Peach.Core.Dom
 
 		public void markMutableElements()
 		{
-			var nav = new XPath.PeachXPathNavigator(parent);
+			var nav = new PeachXPathNavigator(parent);
 
 			foreach (var item in mutables)
 			{
@@ -325,14 +326,13 @@ namespace Peach.Core.Dom
 
 				while (nodeIter.MoveNext())
 				{
-					var dataElement = ((XPath.PeachXPathNavigator)nodeIter.Current).CurrentNode as DataElement;
+					var dataElement = ((PeachXPathNavigator)nodeIter.Current).CurrentNode as DataElement;
 
-					if (dataElement != null)
-					{
-						dataElement.isMutable = item.mutable;
-						foreach (var child in dataElement.EnumerateAllElements())
-							child.isMutable = item.mutable;
-					}
+					if (dataElement == null)
+						continue;
+
+					foreach (var elem in dataElement.PreOrderTraverse())
+						elem.isMutable = item.mutable;
 				}
 			}
 		}
