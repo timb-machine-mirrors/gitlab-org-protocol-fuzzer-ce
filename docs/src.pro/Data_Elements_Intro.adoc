@@ -19,6 +19,12 @@ The _Block_ element is a container for other data elements. By themselves, _Bloc
 For example, if two data elements are included in a checksum calculation, they can be placed in a  _Block_ element and then the fixup can perform its function by referencing the _Block_. Both items in the group will be included in the fixup operation.
 --
 
+xref:Bool[Bool]::
++
+--
+The Bool element defines a Boolean value (values 0 or 1) that represents either true or false. The intended use of _Bool_ is in JSON strings, where the values `true` and `false` are assigned to variables upon parsing with the JSON analzyer.
+--
+
 xref:Choice[Choice]::
 +
 --
@@ -31,6 +37,14 @@ xref:DataModel[DataModel]::
 The _DataModel_ element is a top-level element that defines a data model.
 Multiple _DataModels_ can be defined in a pit file.
 _DataModels_ by themselves have no size and should simply be considered containers for other data elements.
+--
+
+xref:Double[Double]::
++
+--
+_Double_ defines a floating-point number of 32 or 64 bits conforming to the IEEE 754 standard. Floating point values are packed into a byte representation with a byte order of little or big endian.
+
+_Doubles_ are always packed down to bit/byte representation with byte order (endian-ness). For ASCII strings, use the _String_ element instead of a _Number_.
 --
 
 xref:Flags[Flags]::
@@ -47,6 +61,21 @@ xref:Flag[Flag]::
 _Flag_ defines a specific _Flag_ in a flag set. _Flag_ elements have a bit position and bit length.
 --
 
+xref:Json[Json]::
++
+--
+The _Json_ element is a container for other data elements. By themselves, _Jsons_ do not 
+have any size or contain other data. They group other data elements that will be represented 
+in JSON in attribute-value pairs. The output of a _Json_ element is a valid JSON string 
+enclosed with the `{` and `}` characters. 
+--
+
+xref:Null[Null]::
++
+--
+The _Null_ element defines an element which has no value. This element is most useful when used as a child of a xref:Json[Json] element.
+--
+
 xref:Number[Number]::
 +
 --
@@ -57,6 +86,15 @@ xref:Padding[Padding]::
 +
 --
 _Padding_ defines padding of one or more characters for a _Block_ or a _DataModel_. The attributes of the _Padding_ element specify things such as a reference to start the alignment calculation, a size, and the _Padding_ element name. The most common use of _Padding_ is to ensure a consistent length of a _Block_ or _DataModel_ that contains variable length data elements, such as padding a _DataModel_ for a 64-byte packet.
+--
+
+xref:Sequence[Sequence]::
++
+--
+_Sequence_ elements are used to construct arrays with all of the array elements predefined. 
+A _Sequence_ is able to contain multiple data types at once. Unlike regular arrays 
+in Peach, the size of the Sequence it determined by the number of elements within 
+the sequence.
 --
 
 xref:Stream[Stream]::
