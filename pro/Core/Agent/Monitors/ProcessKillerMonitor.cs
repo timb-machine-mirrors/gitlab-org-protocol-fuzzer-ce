@@ -36,11 +36,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			{
 				try
 				{
-					if (!p.HasExited)
-					{
-						p.Kill();
-						p.WaitForExit();
-					}
+					ProcessInfo.Instance.Kill(p);
 				}
 				catch (Exception ex)
 				{
