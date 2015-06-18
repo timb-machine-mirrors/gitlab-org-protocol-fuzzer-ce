@@ -842,7 +842,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 					return job;
 			}
 
-			using (var db = new JobDatabase(job.DatabasePath))
+			using (var db = new JobDatabase(job.DatabasePath, true))
 			{
 				job = db.GetJob(_guid);
 			}

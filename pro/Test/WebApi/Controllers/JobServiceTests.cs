@@ -220,10 +220,10 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			_runningJob.IterationCount = 10;
 			_runningJob.FaultCount = 3;
 
-			using (var db = new JobDatabase(j1.DatabasePath))
+			using (var db = new JobDatabase(j1.DatabasePath, false))
 				db.InsertJob(j1);
 
-			using (var db = new JobDatabase(_runningJob.DatabasePath))
+			using (var db = new JobDatabase(_runningJob.DatabasePath, false))
 				db.InsertJob(_runningJob);
 
 			var result = _browser.Get("/p/jobs", with => with.HttpRequest());
@@ -317,7 +317,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 				Status = JobStatus.Stopped
 			};
 
-			using (var db = new JobDatabase(j1.DatabasePath))
+			using (var db = new JobDatabase(j1.DatabasePath, false))
 				db.InsertJob(j1);
 
 			using (var db = new NodeDatabase())
@@ -402,7 +402,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 				j.LogPath = Path.Combine(Configuration.LogRoot, j.PitFile);
 				Directory.CreateDirectory(j.LogPath);
 
-				using (var db = new JobDatabase(j.DatabasePath))
+				using (var db = new JobDatabase(j.DatabasePath, false))
 				{
 					db.InsertJob(j);
 				}
@@ -459,7 +459,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 				db.UpdateJob(_runningJob);
 			}
 
-			using (var db = new JobDatabase(_runningJob.DatabasePath))
+			using (var db = new JobDatabase(_runningJob.DatabasePath, false))
 				db.InsertJob(_runningJob);
 
 			var result = _browser.Get("/p/jobs", with =>

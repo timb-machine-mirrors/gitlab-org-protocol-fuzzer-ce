@@ -47,7 +47,7 @@ namespace Peach.Pro.Test.Core.Storage
 			Assert.AreEqual("5/2/2001 5:38:09 AM", j.StartDate.ToString(dateFmt));
 			Assert.False(j.StopDate.HasValue);
 
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path, false))
 				db.InsertJob(j);
 
 			Assert.AreEqual(DateTimeKind.Local, j.StartDate.Kind);
@@ -56,7 +56,7 @@ namespace Peach.Pro.Test.Core.Storage
 
 			// Issue update w/o a stop date
 
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path, false))
 				db.UpdateJob(j);
 
 			Assert.AreEqual(DateTimeKind.Local, j.StartDate.Kind);
@@ -70,7 +70,7 @@ namespace Peach.Pro.Test.Core.Storage
 			Assert.True(j.StopDate.HasValue, "StopDate should be set");
 			Assert.AreEqual("5/2/2001 5:38:09 AM", j.StopDate.Value.ToString(dateFmt));
 
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path, false))
 				db.UpdateJob(j);
 
 			Assert.AreEqual(DateTimeKind.Local, j.StartDate.Kind);
@@ -78,7 +78,7 @@ namespace Peach.Pro.Test.Core.Storage
 			Assert.True(j.StopDate.HasValue, "StopDate should be set");
 			Assert.AreEqual("5/2/2001 5:38:09 AM", j.StopDate.Value.ToString(dateFmt));
 
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path, false))
 				j = db.GetJob(j.Guid);
 
 			Assert.NotNull(j, "Job is null");
@@ -89,7 +89,7 @@ namespace Peach.Pro.Test.Core.Storage
 
 			// Ensure they are stored in the database as UTC
 
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path, false))
 			{
 				var dt = db.SelectDateTime("SELECT StartDate from Job where Id=\"" + Guid.Empty + "\"");
 
@@ -112,17 +112,17 @@ namespace Peach.Pro.Test.Core.Storage
 				Runtime = TimeSpan.FromMilliseconds(36111),
 			};
 
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path, false))
 				db.InsertJob(j);
 
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path, false))
 				j = db.GetJob(j.Guid);
 
 			Assert.AreEqual(TimeSpan.FromSeconds(36), j.Runtime);
 
 			// Ensure TimeSpan is stored as total seconds
 
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path, false))
 			{
 				var val = db.SelectLong("SELECT Runtime from Job where Id=\"" + Guid.Empty + "\"");
 
