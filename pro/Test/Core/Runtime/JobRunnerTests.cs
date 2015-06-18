@@ -150,7 +150,7 @@ namespace Peach.Pro.Test.Core.Runtime
 				if (!File.Exists(job.DatabasePath))
 					return job;
 
-				using (var db = new JobDatabase(job.DatabasePath))
+				using (var db = new JobDatabase(job.DatabasePath, true))
 				{
 					job = db.GetJob(Id);
 					Assert.IsNotNull(job);
@@ -171,7 +171,7 @@ namespace Peach.Pro.Test.Core.Runtime
 					Assert.AreEqual(expectedLogs, logs.Count, "JobLog mismatch");
 				}
 
-				using (var db = new JobDatabase(job.DatabasePath))
+				using (var db = new JobDatabase(job.DatabasePath, true))
 				{
 					Assert.IsNotNull(db.GetJob(Id));
 				}
