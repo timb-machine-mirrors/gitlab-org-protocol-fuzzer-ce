@@ -48,7 +48,7 @@ namespace Peach.Pro.Core.Storage
 				return null;
 			}
 
-			using (var jobDb = new JobDatabase(job.DatabasePath))
+			using (var jobDb = new JobDatabase(job.DatabasePath, true))
 			{
 				job = jobDb.GetJob(job.Guid);
 				if (job == null)
@@ -94,7 +94,7 @@ namespace Peach.Pro.Core.Storage
 
 			if (File.Exists(job.DatabasePath))
 			{
-				using (var db = new JobDatabase(job.DatabasePath))
+				using (var db = new JobDatabase(job.DatabasePath, false))
 				{
 					db.UpdateJob(job);
 				}

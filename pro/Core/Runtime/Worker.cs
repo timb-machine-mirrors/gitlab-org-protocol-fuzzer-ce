@@ -232,7 +232,7 @@ namespace Peach.Pro.Core.Runtime
 			if (job == null || !File.Exists(job.DatabasePath))
 				throw new Exception("Job not found");
 
-			using (var db = new JobDatabase(job.DatabasePath))
+			using (var db = new JobDatabase(job.DatabasePath, true))
 			{
 				switch (_query.ToLower())
 				{

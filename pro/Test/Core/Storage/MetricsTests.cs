@@ -211,7 +211,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryStates()
 		{
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path, false))
 			{
 				DatabaseTests.AssertResult(db.LoadTable<StateMetric>(), new[]
 				{
@@ -228,7 +228,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryIterations()
 		{
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path, false))
 			{
 				DatabaseTests.AssertResult(db.LoadTable<IterationMetric>(), new[]
 				{
@@ -248,7 +248,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryBuckets()
 		{
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path, false))
 			{
 				DatabaseTests.AssertResult(db.LoadTable<BucketMetric>(), new[]
 				{
@@ -265,7 +265,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryBucketTimeline()
 		{
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path, false))
 			{
 				DatabaseTests.AssertResult(db.LoadTable<BucketTimelineMetric>(), new[]
 				{
@@ -279,7 +279,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryMutator()
 		{
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path, false))
 			{
 				// Mutator,ElementCount,IterationCount,BucketCount,FaultCount
 				DatabaseTests.AssertResult(db.LoadTable<MutatorMetric>(), new[]
@@ -296,7 +296,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryElement()
 		{
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path, false))
 			{
 				DatabaseTests.AssertResult(db.LoadTable<ElementMetric>(), new[]
 				{
@@ -314,7 +314,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryDataset()
 		{
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path, false))
 			{
 				DatabaseTests.AssertResult(db.LoadTable<DatasetMetric>(), new[]
 				{
@@ -331,7 +331,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryFaultTimeline()
 		{
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path, false))
 			{
 				DatabaseTests.AssertResult(db.LoadTable<FaultTimelineMetric>(), new[]
 				{
@@ -347,7 +347,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryFaults()
 		{
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_tmp.Path, false))
 			{
 				DatabaseTests.AssertResult(db.LoadTable<FaultMutation>(), new[]
 				{
