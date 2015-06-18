@@ -51,7 +51,7 @@ namespace Peach.Pro.Core.Storage
 			_dbPath = dbPath;
 			_pendingStates = new Dictionary<Tuple<long, long>, State>();
 
-			using (var db = new JobDatabase(_dbPath))
+			using (var db = new JobDatabase(_dbPath, false))
 			{
 				_nameCache = new NameCache(db);
 				_stateCache = db.LoadTable<State>().ToDictionary(x =>
@@ -144,7 +144,7 @@ namespace Peach.Pro.Core.Storage
 		{
 			//Console.WriteLine("cache.IterationFinished();");
 
-			using (var db = new JobDatabase(_dbPath))
+			using (var db = new JobDatabase(_dbPath, false))
 			{
 				using (var xact = db.Connection.BeginTransaction())
 				{
@@ -167,7 +167,7 @@ namespace Peach.Pro.Core.Storage
 			//	fault.MinorHash,
 			//	fault.Timestamp);
 
-			using (var db = new JobDatabase(_dbPath))
+			using (var db = new JobDatabase(_dbPath, false))
 			{
 				using (var xact = db.Connection.BeginTransaction())
 				{

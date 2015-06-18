@@ -83,7 +83,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			if (File.Exists(job.DatabasePath))
 			{
-				using (var db = new JobDatabase(job.DatabasePath))
+				using (var db = new JobDatabase(job.DatabasePath, false))
 				{
 					Assert.IsNotNull(db.GetJob(job.Guid));
 				}
@@ -296,7 +296,7 @@ namespace Peach.Pro.Test.Core.WebServices
 				});
 			}
 
-			using (var db = new JobDatabase(job.DatabasePath))
+			using (var db = new JobDatabase(job.DatabasePath, false))
 			{
 				Assert.IsNotNull(db.GetJob(job.Guid));
 			}

@@ -44,8 +44,8 @@ namespace Peach.Pro.Core.Storage
 			)
 		};
 
-		public JobDatabase(string path)
-			: base(path, true, true)
+		public JobDatabase(string path, bool doMigration)
+			: base(path, true, doMigration)
 		{
 		}
 

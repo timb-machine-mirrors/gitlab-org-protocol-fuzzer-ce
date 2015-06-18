@@ -182,7 +182,7 @@ namespace Peach.Pro.Core.Loggers
 
 			ConfigureDebugLogging(context.config);
 
-			using (var db = new JobDatabase(_job.DatabasePath))
+			using (var db = new JobDatabase(_job.DatabasePath, true))
 			{
 				var job = db.GetJob(_job.Guid);
 				if (job == null)
@@ -280,7 +280,7 @@ namespace Peach.Pro.Core.Loggers
 				}
 
 				Logger.Trace("Engine_TestFinished> Update JobDatabase");
-				using (var db = new JobDatabase(_job.DatabasePath))
+				using (var db = new JobDatabase(_job.DatabasePath, false))
 				{
 					_job.Runtime = _runtime + _stopwatch.Elapsed;
 					_job.StopDate = DateTime.Now;
@@ -381,7 +381,7 @@ namespace Peach.Pro.Core.Loggers
 
 			if (mode != _job.Mode)
 			{
-				using (var db = new JobDatabase(_job.DatabasePath))
+				using (var db = new JobDatabase(_job.DatabasePath, false))
 				{
 					lock (_timer)
 					{
@@ -436,7 +436,7 @@ namespace Peach.Pro.Core.Loggers
 				!context.controlIteration &&
 				!context.controlRecordingIteration)
 			{
-				using (var db = new JobDatabase(_job.DatabasePath))
+				using (var db = new JobDatabase(_job.DatabasePath, false))
 				{
 					lock (_timer)
 					{
@@ -812,7 +812,7 @@ namespace Peach.Pro.Core.Loggers
 					}
 				}
 
-				using (var db = new JobDatabase(_job.DatabasePath))
+				using (var db = new JobDatabase(_job.DatabasePath, false))
 				{
 					db.InsertFault(faultDetail);
 					_cache.OnFault(new FaultMetric
@@ -873,7 +873,7 @@ namespace Peach.Pro.Core.Loggers
 		{
 			Debug.Assert(_job.DatabasePath != null);
 
-			using (var db = new JobDatabase(_job.DatabasePath))
+			using (var db = new JobDatabase(_job.DatabasePath, false))
 			{
 				lock (_timer)
 				{
@@ -942,7 +942,7 @@ namespace Peach.Pro.Core.Loggers
 
 		void OnHeartBeat(object state)
 		{
-			using (var db = new JobDatabase(_job.DatabasePath))
+			using (var db = new JobDatabase(_job.DatabasePath, false))
 			{
 				lock (_timer)
 				{
