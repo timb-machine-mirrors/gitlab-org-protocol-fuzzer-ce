@@ -2,7 +2,9 @@
 [[Bool]]
 == Bool
 
-The Bool element defines a boolean value (values 0 or 1) which represent either true or false.
+The _Bool_ element defines a Boolean value (values 0 or 1) that represents either true or false. The intended use of _Bool_ is in JSON strings, where the values `true` and `false` are assigned to variables upon parsing with the JSON analzyer. 
+
+When not used in JSON strings, _Bool_ is a one-bit number with a value of 0 or 1.
 
 The Bool element is a child element of xref:DataModel[DataModel], xref:Block[Block], xref:Sequence[Sequence], xref:Json[Json] or xref:Choice[Choice].
 
