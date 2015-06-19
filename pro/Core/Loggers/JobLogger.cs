@@ -57,7 +57,7 @@ namespace Peach.Pro.Core.Loggers
 	[Logger("File")]
 	[Logger("Filesystem", true)]
 	[Logger("Logger.Filesystem")]
-	[Parameter("Path", typeof(string), "Log folder")]
+	[Parameter("Path", typeof(string), "Log folder", "")]
 	public class JobLogger : Logger
 	{
 		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
