@@ -36,6 +36,20 @@ namespace Peach.Pro.Core.Storage
 			get { return StaticScripts; }
 		}
 
+		protected override IList<MigrationHandler> Migrations
+		{
+			get
+			{
+				return new[] { new MigrationHandler(MigrateV1) };
+			}
+		}
+
+		private void MigrateV1()
+		{
+			const string sql = "ALTER TABLE FaultDetail ADD COLUMN Flags INTEGER NOT NULL DEFAULT 0";
+			Connection.Execute(sql);
+		}
+
 		static readonly string[] StaticScripts =
 		{
 			Utilities.LoadStringResource(

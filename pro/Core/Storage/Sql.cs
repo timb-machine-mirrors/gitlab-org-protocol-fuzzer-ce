@@ -217,6 +217,7 @@ INSERT INTO FaultDetail (
 	Seed,
 	IterationStart,
 	IterationStop,
+	Flags,
 	FaultPath
 ) VALUES (
 	@Reproducible,
@@ -231,6 +232,7 @@ INSERT INTO FaultDetail (
 	@Seed,
 	@IterationStart,
 	@IterationStop,
+	@Flags,
 	@FaultPath
 );" + GetLastRowId;
 

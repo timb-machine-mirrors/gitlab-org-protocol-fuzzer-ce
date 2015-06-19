@@ -783,6 +783,12 @@ namespace Peach.Pro.Core.Loggers
 				FaultPath = subDir,
 			};
 
+			if (context.controlIteration)
+				faultDetail.Flags |= IterationFlags.Control;
+
+			if (context.controlRecordingIteration)
+				faultDetail.Flags |= IterationFlags.Record;
+
 			foreach (var kv in fault.toSave)
 			{
 				var fileName = Path.Combine(subDir, kv.Key);
