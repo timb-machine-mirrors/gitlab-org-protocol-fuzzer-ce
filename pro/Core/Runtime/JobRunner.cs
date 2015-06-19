@@ -120,11 +120,11 @@ namespace Peach.Pro.Core.Runtime
 		{
 			if (!_pausedEvt.WaitOne(0))
 			{
-				_jobLogger.UpdateStatus(JobStatus.Paused);
+				_jobLogger.Pause();
 
 				_pausedEvt.WaitOne();
 
-				_jobLogger.UpdateStatus(JobStatus.Running);
+				_jobLogger.Continue();
 			}
 			return _shouldStop;
 		}
