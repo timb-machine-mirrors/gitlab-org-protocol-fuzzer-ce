@@ -1,6 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Peach.Pro.Core.WebServices.Models;
+using Dapper;
+using Monitor = System.Threading.Monitor;
 
 namespace Peach.Pro.Core.Storage
 {
@@ -38,36 +44,99 @@ namespace Peach.Pro.Core.Storage
 			}
 		}
 
-		readonly string _dbPath;
 		readonly NameCache _nameCache;
 		readonly Dictionary<Tuple<long, long>, State> _stateCache;
-		readonly Dictionary<Tuple<long, long>, State> _pendingStates;
-		readonly List<Mutation> _mutations = new List<Mutation>();
+		Dictionary<Tuple<long, long>, State> _pendingStates;
+		List<Mutation> _mutations;
 		long _nextStateId;
 		Mutation _mutation;
+		readonly JobDatabase _db;
+		const int HeartBeatInterval = 1000;
+		readonly Stopwatch _stopwatch = Stopwatch.StartNew();
+		readonly TimeSpan _runtime;
+		private readonly Task _task;
+		private readonly Queue<Func<bool>> _queue = new Queue<Func<bool>>();
+		private readonly SemaphoreSlim _queueSemaphore = new SemaphoreSlim(100);
+		private int _maxQueueDepth;
 
-		public MetricsCache(string dbPath)
+		public MetricsCache(Job job)
 		{
-			_dbPath = dbPath;
-			_pendingStates = new Dictionary<Tuple<long, long>, State>();
+			_db = new JobDatabase(job.DatabasePath);
 
-			using (var db = new JobDatabase(_dbPath, false))
+			_nameCache = new NameCache(_db);
+			_stateCache = _db.LoadTable<State>().ToDictionary(x =>
+				new Tuple<long, long>(x.NameId, x.RunCount));
+
+			// Remember previous runtime so it properly accumulates on restarted jobs
+			_runtime = job.Runtime;
+
+			_task = Task.Factory.StartNew(Executor);
+		}
+
+		private void Executor()
+		{
+			var more = true;
+			while (more)
 			{
-				_nameCache = new NameCache(db);
-				_stateCache = db.LoadTable<State>().ToDictionary(x =>
-					new Tuple<long, long>(x.NameId, x.RunCount));
+				var func = GetNext();
+				if (func == null)
+					continue;
+
+				using (var xact = _db.Connection.BeginTransaction())
+				{
+					more = func();
+					xact.Commit();
+				}
 			}
 		}
 
-		public void IterationStarting(uint iteration)
+		private Func<bool> GetNext()
+		{
+			lock (_queue)
+			{
+				if (_queue.Count == 0 && !Monitor.Wait(_queue, HeartBeatInterval))
+				{
+					// inject heartbeat record
+					return null;
+				}
+
+				_queueSemaphore.Release();
+				return _queue.Dequeue();
+			}
+		}
+
+		private void Enqueue(Func<bool> func)
+		{
+			_queueSemaphore.Wait();
+
+			lock (_queue)
+			{
+				_queue.Enqueue(func);
+				_maxQueueDepth = Math.Max(_maxQueueDepth, _queue.Count);
+				Monitor.Pulse(_queue);
+			}
+		}
+
+		public void IterationStarting(JobMode newMode, Job job)
 		{
 			//Console.WriteLine("cache.IterationStarting({0});", iteration);
 
-			_mutations.Clear();
+			_pendingStates = new Dictionary<Tuple<long, long>, State>();
+			_mutations = new List<Mutation>();
 			_mutation = new Mutation();
 
-			_pendingStates.Clear();
 			_nextStateId = _stateCache.Count + 1;
+
+			if (newMode != job.Mode)
+			{
+				job.Mode = newMode;
+				var copy = CopyJob(job);
+				Enqueue(() =>
+				{
+					UpdateRunningJob(copy);
+					return true;
+				});
+			}
 		}
 
 		public void StateStarting(string name, uint runCount)
@@ -140,58 +209,131 @@ namespace Peach.Pro.Core.Storage
 			};
 		}
 
-		public void IterationFinished()
+		public void IterationFinished(Job job)
 		{
 			//Console.WriteLine("cache.IterationFinished();");
+			job.IterationCount++;
+			var copy = CopyJob(job);
 
-			using (var db = new JobDatabase(_dbPath, false))
-			{
-				using (var xact = db.Connection.BeginTransaction())
-				{
-					db.InsertNames(_nameCache.Flush());
-					db.UpsertStates(_pendingStates.Values);
-					db.UpsertMutations(_mutations);
-					xact.Commit();
-				}
-			}
+			var names = _nameCache.Flush();
+			var states = _pendingStates;
+			var mutations = _mutations;
 
 			foreach (var kv in _pendingStates)
 				_stateCache[kv.Key] = kv.Value;
+
+			Enqueue(() =>
+			{
+				UpdateRunningJob(copy);
+				_db.InsertNames(names);
+				_db.UpsertStates(states.Values);
+				_db.UpsertMutations(mutations);
+				return true;
+			});
 		}
 
-		public void OnFault(FaultMetric fault)
+		public void OnFault(Job job, FaultDetail detail)
 		{
+			job.FaultCount++;
+			var copy = CopyJob(job);
+
+			var fault = new FaultMetric
+			{
+				Iteration = detail.Iteration,
+				MajorHash = detail.MajorHash,
+				MinorHash = detail.MinorHash,
+				Timestamp = detail.TimeStamp,
+				Hour = detail.TimeStamp.Hour,
+			};
+
 			//Console.WriteLine("cache.OnFault({0}, \"{1}\", \"{2}\", \"{3}\");", 
 			//	fault.Iteration, 
 			//	fault.MajorHash,
 			//	fault.MinorHash,
 			//	fault.Timestamp);
+			var names = _nameCache.Flush();
 
-			using (var db = new JobDatabase(_dbPath, false))
+			var faults = _mutations.Select(x => new FaultMetric
 			{
-				using (var xact = db.Connection.BeginTransaction())
+				Iteration = fault.Iteration,
+				MajorHash = fault.MajorHash,
+				MinorHash = fault.MinorHash,
+				Timestamp = fault.Timestamp,
+				Hour = fault.Hour,
+				StateId = x.StateId,
+				ActionId = x.ActionId,
+				ParameterId = x.ParameterId,
+				ElementId = x.ElementId,
+				MutatorId = x.MutatorId,
+				DatasetId = x.DatasetId,
+			});
+
+			// This is to ensure that the queue is drained
+			lock (copy)
+			{
+				Enqueue(() =>
 				{
-					db.InsertNames(_nameCache.Flush());
+					UpdateRunningJob(copy);
+					_db.InsertNames(names);
+					_db.InsertFault(detail);
+					_db.InsertFaultMetrics(faults);
 
-					var faults = _mutations.Select(x => new FaultMetric
+					lock (copy)
 					{
-						Iteration = fault.Iteration,
-						MajorHash = fault.MajorHash,
-						MinorHash = fault.MinorHash,
-						Timestamp = fault.Timestamp,
-						Hour = fault.Hour,
-						StateId = x.StateId,
-						ActionId = x.ActionId,
-						ParameterId = x.ParameterId,
-						ElementId = x.ElementId,
-						MutatorId = x.MutatorId,
-						DatasetId = x.DatasetId,
-					});
+						Monitor.Pulse(copy);
+					}
+					return true;
+				});
 
-					db.InsertFaultMetrics(faults);
-					xact.Commit();
-				}
+				Monitor.Wait(copy);
 			}
+		}
+
+		public Report GetReport(Job job)
+		{
+			return _db.GetReport(job);
+		}
+
+		public void TestFinished(Job job)
+		{
+			job.Runtime = _runtime + _stopwatch.Elapsed;
+			job.StopDate = DateTime.Now;
+			job.HeartBeat = job.StopDate;
+			job.Mode = JobMode.Fuzzing;
+			// TODO: we should probably have a new state until report is done
+			job.Status = JobStatus.Stopped;
+
+			Enqueue(() => false);
+			_task.Wait();
+
+			_db.Connection.Execute(Sql.UpdateJob, job);
+		}
+
+		public void Pause()
+		{
+		}
+
+		public void Continue()
+		{
+		}
+
+		private Job CopyJob(Job job)
+		{
+			return new Job
+			{
+				Id = job.Id,
+				IterationCount = job.IterationCount,
+				FaultCount = job.FaultCount,
+				Status = job.Status,
+				Mode = job.Mode,
+				Runtime = job.Runtime,
+			};
+		}
+
+		private void UpdateRunningJob(Job job)
+		{
+			job.HeartBeat = DateTime.Now;
+			_db.Connection.Execute(Sql.UpdateRunningJob, job);
 		}
 	}
 }

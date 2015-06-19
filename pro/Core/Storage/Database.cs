@@ -128,8 +128,8 @@ namespace Peach.Pro.Core.Storage
 		}
 
 		public string Path { get; private set; }
-		public SQLiteConnection Connection { get; private set; }
-
+		public IDbConnection Connection { get; private set; }
+		
 		protected abstract IEnumerable<Type> Schema { get; }
 		protected abstract IEnumerable<string> Scripts { get; }
 
@@ -150,6 +150,7 @@ namespace Peach.Pro.Core.Storage
 				UseWAL = useWal,
 			};
 
+			var cnn = builder.Create();
 			Connection = builder.Create();
 			Connection.Open();
 
@@ -282,8 +283,9 @@ namespace Peach.Pro.Core.Storage
 
 		internal DateTime SelectDateTime(string commandText)
 		{
-			using (var cmd = new SQLiteCommand(commandText, Connection))
+			using (var cmd = Connection.CreateCommand())
 			{
+				cmd.CommandText = commandText;
 				var obj = cmd.ExecuteScalar();
 				return Convert.ToDateTime(obj);
 			}
@@ -291,8 +293,9 @@ namespace Peach.Pro.Core.Storage
 
 		internal long SelectLong(string commandText)
 		{
-			using (var cmd = new SQLiteCommand(commandText, Connection))
+			using (var cmd = Connection.CreateCommand())
 			{
+				cmd.CommandText = commandText;
 				var obj = cmd.ExecuteScalar();
 				return Convert.ToInt64(obj);
 			}
@@ -300,8 +303,9 @@ namespace Peach.Pro.Core.Storage
 
 		internal string SelectString(string commandText)
 		{
-			using (var cmd = new SQLiteCommand(commandText, Connection))
+			using (var cmd = Connection.CreateCommand())
 			{
+				cmd.CommandText = commandText;
 				var obj = cmd.ExecuteScalar();
 				return Convert.ToString(obj);
 			}

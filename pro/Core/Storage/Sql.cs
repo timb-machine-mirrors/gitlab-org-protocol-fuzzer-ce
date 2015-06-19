@@ -72,6 +72,19 @@ INSERT INTO [Job] (
 	@PeachVersion
 );";
 
+		public const string UpdateRunningJob = @"
+UPDATE [Job]
+SET 
+	IterationCount = @IterationCount,
+	FaultCount = @FaultCount,
+	Status = @Status,
+	Mode = @Mode,
+	Runtime = @Runtime,
+	HeartBeat = @HeartBeat
+WHERE
+	Id = @Id
+";
+
 		public const string UpdateJob = @"
 UPDATE [Job]
 SET 

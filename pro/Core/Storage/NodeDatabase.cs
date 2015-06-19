@@ -22,10 +22,9 @@ namespace Peach.Pro.Core.Storage
 		/// <returns>Job if job can be found, otherwise null</returns>
 		public static Job GetJob(Guid id)
 		{
-			Job job;
 			using (var db = new NodeDatabase())
 			{
-				job = db.GetJob(id);
+				var job = db.GetJob(id);
 				if (job == null)
 				{
 					Logger.Trace("Job does not exist in NodeDatabase");
@@ -94,7 +93,7 @@ namespace Peach.Pro.Core.Storage
 
 			if (File.Exists(job.DatabasePath))
 			{
-				using (var db = new JobDatabase(job.DatabasePath, false))
+				using (var db = new JobDatabase(job.DatabasePath))
 				{
 					db.UpdateJob(job);
 				}
