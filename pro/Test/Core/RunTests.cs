@@ -208,6 +208,67 @@ namespace Peach.Pro.Test.Core
 
 		}
 
+		[Test]
+		public void TestFieldAndFiles()
+		{
+			using (var dir = new TempDirectory())
+			{
+				var xml = @"
+<Peach>
+	<DataModel name='TheDataModel'>
+		<String name='key'/>
+		<String value=':' token='true'/>
+		<String name='value' />
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='TheDataModel'/>
+				<Data fileName='{0}'>
+					<Field name='key' value='key_override' />
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='TheState'/>
+		<Publisher class='Null'/>
+		<Strategy class='Random'>
+			<Param name='SwitchCount' value='2'/>
+		</Strategy>
+	</Test>
+</Peach>".Fmt(dir.Path);
+
+				File.WriteAllText(Path.Combine(dir.Path, "one.txt"), "aaa_key:aaa_value");
+				File.WriteAllText(Path.Combine(dir.Path, "two.txt"), "bbb_key:bbb_value");
+
+				var dom = DataModelCollector.ParsePit(xml);
+				var config = new RunConfiguration
+				{
+					range = true,
+					rangeStart = 1,
+					rangeStop = 10,
+					randomSeed = 1
+				};
+				var e = new Engine(null);
+
+				var selected = new List<string>();
+
+				e.IterationFinished += (ctx, it) =>
+				{
+					if (ctx.controlRecordingIteration)
+						selected.Add(ctx.test.stateModel.states[0].actions[0].dataModel.InternalValue.BitsToString());
+				};
+
+				e.startFuzzing(dom, config);
+
+				Assert.True(selected.Contains("key_override:aaa_value"), "Field aaa_key should be overridden");
+				Assert.True(selected.Contains("key_override:bbb_value"), "Field bb_key should be overridden");
+			}
+		}
+
 		internal class WantBytesPub : Peach.Core.Publishers.StreamPublisher
 		{
 			static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
