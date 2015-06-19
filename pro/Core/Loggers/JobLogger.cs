@@ -757,8 +757,7 @@ namespace Peach.Pro.Core.Loggers
 			Debug.Assert(!string.IsNullOrEmpty(fault.exploitability));
 
 			// root/category/bucket/iteration
-			var subDir = Path.Combine(
-				_job.LogPath,
+			var faultPath = Path.Combine(
 				category.ToString(),
 				fault.folderName,
 				fault.iteration.ToString(CultureInfo.InvariantCulture));
@@ -780,7 +779,7 @@ namespace Peach.Pro.Core.Loggers
 				IterationStart = fault.iterationStart,
 				IterationStop = fault.iterationStop,
 
-				FaultPath = subDir,
+				FaultPath = faultPath,
 			};
 
 			if (context.controlIteration)
@@ -788,6 +787,8 @@ namespace Peach.Pro.Core.Loggers
 
 			if (context.controlRecordingIteration)
 				faultDetail.Flags |= IterationFlags.Record;
+
+			var subDir = Path.Combine(_job.LogPath, faultPath);
 
 			foreach (var kv in fault.toSave)
 			{
