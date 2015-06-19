@@ -757,15 +757,25 @@ namespace Peach.Pro.Core.Loggers
 			Debug.Assert(!string.IsNullOrEmpty(fault.exploitability));
 
 			// root/category/bucket/iteration
-			var faultPath = Path.Combine(
+			var initialFaultPath = Path.Combine(
 				category.ToString(),
 				fault.folderName,
 				fault.iteration.ToString(CultureInfo.InvariantCulture));
 
+			if (context.controlRecordingIteration)
+				initialFaultPath += "R";
+			else if (context.controlIteration)
+				initialFaultPath += "C";
+
+			var faultPath = initialFaultPath;
+
+			for (var i = 1; Directory.Exists(Path.Combine(_job.LogPath, faultPath)); ++i)
+				faultPath = initialFaultPath + "_" + i;
+
 			var faultDetail = new FaultDetail
 			{
 				Files = new List<FaultFile>(),
-				Reproducible = category == Category.Reproducing,
+				Reproducible = category == Category.Faults,
 				Iteration = fault.iteration,
 				TimeStamp = now,
 				Source = fault.detectionSource,
