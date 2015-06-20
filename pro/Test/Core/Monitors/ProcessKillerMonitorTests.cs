@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -31,10 +32,10 @@ namespace Peach.Pro.Test.Core.Monitors
 		public void TestSingleProcess()
 		{
 			const string args = "127.0.0.1 0";
-			var exe = GetTempExeName();
 
-			// On windows, the process name does not include the extension!
-			var procName = Path.GetFileNameWithoutExtension(exe);
+			var temp1 = GetTempExeName();
+			var exe = temp1.Item1;
+			var procName = temp1.Item2;
 
 			Process p = null;
 
@@ -83,12 +84,14 @@ namespace Peach.Pro.Test.Core.Monitors
 		public void TestMultiProcess()
 		{
 			const string args = "127.0.0.1 0";
-			var exe1 = GetTempExeName();
-			var exe2 = GetTempExeName();
 
-			// On windows, the process name does not include the extension!
-			var procName1 = Path.GetFileNameWithoutExtension(exe1);
-			var procName2 = Path.GetFileNameWithoutExtension(exe2);
+			var temp1 = GetTempExeName();
+			var exe1 = temp1.Item1;
+			var procName1 = temp1.Item2;
+
+			var temp2 = GetTempExeName();
+			var exe2 = temp2.Item1;
+			var procName2 = temp2.Item2;
 
 			Process p1 = null;
 			Process p2 = null;
@@ -148,23 +151,60 @@ namespace Peach.Pro.Test.Core.Monitors
 			Assert.False(ProcessExists(procName2), "Process '{0}' should not exist after test".Fmt(procName2));
 		}
 
-		static string GetTempExeName()
+		[Test]
+		public void TestKillingProcess()
 		{
-			var exe = Platform.GetOS() == Platform.OS.Windows ? "CrashableServer.exe" : "CrashableServer";
+			var temp = GetTempExeName();
+			var exe = temp.Item1;
+			var procName = temp.Item2;
+
+			Process p = null;
+
+			try
+			{
+				p = RunProcess(exe, "127.0.0.1 0");
+
+				p.Kill();
+				p.WaitForExit();
+
+				Assert.True(p.HasExited, "Process should have exited");
+
+				// Killing a process that has exited should throw
+				// an InvalidOperationException
+				Assert.Throws<InvalidOperationException>(() => p.Kill());
+			}
+			finally
+			{
+				KillProcess(p);
+
+				try
+				{
+					File.Delete(exe);
+				}
+				// ReSharper disable once EmptyGeneralCatchClause
+				catch
+				{
+				}
+			}
+		}
+
+		static Tuple<string, string> GetTempExeName()
+		{
+			const string cs = "CrashableServer";
+			var suffix = Platform.GetOS() == Platform.OS.Windows ? ".exe" : "";
 			var tmp = Path.GetTempFileName();
 			var dir = Path.GetDirectoryName(tmp);
 
 			if (string.IsNullOrEmpty(dir))
 				Assert.Fail("Temp directory should not be null or empty");
 
-			var name = Path.GetFileNameWithoutExtension(tmp);
-
-			var tmpExe = Path.Combine(dir, name + "-" + exe);
+			var procName = cs + "-" + Guid.NewGuid();
+			var fileName = Path.Combine(dir, procName + suffix);
 
 			File.Delete(tmp);
-			File.Copy(Utilities.GetAppResourcePath(exe), tmpExe);
+			File.Copy(Utilities.GetAppResourcePath(cs + suffix), fileName);
 
-			return tmpExe;
+			return new Tuple<string, string>(fileName, procName);
 		}
 
 		static Process RunProcess(string exe, string args)
@@ -192,15 +232,19 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			try
 			{
-				if (!p.HasExited)
+				if (p.HasExited)
+					return;
+
+				try
 				{
 					p.Kill();
-					p.WaitForExit(10000);
 				}
-			}
-			// ReSharper disable once EmptyGeneralCatchClause
-			catch
-			{
+				catch (InvalidOperationException)
+				{
+				}
+
+				// Waiting is ok since we created the process
+				p.WaitForExit();
 			}
 			finally
 			{

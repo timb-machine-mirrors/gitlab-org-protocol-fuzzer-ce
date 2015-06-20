@@ -10,11 +10,6 @@ namespace Peach.Pro.Core.Storage
 {
 	public class JobDatabase : Database
 	{
-		protected override IEnumerable<Type> Schema
-		{
-			get { return StaticSchema; }
-		}
-
 		static readonly IEnumerable<Type> StaticSchema = new[]
 		{
 			// live job status
@@ -31,11 +26,6 @@ namespace Peach.Pro.Core.Storage
 			typeof(FaultMetric),
 		};
 
-		protected override IEnumerable<string> Scripts
-		{
-			get { return StaticScripts; }
-		}
-
 		static readonly string[] StaticScripts =
 		{
 			Utilities.LoadStringResource(
@@ -43,6 +33,30 @@ namespace Peach.Pro.Core.Storage
 				"Peach.Pro.Core.Resources.Metrics.sql"
 			)
 		};
+
+		protected override IEnumerable<Type> Schema
+		{
+			get { return StaticSchema; }
+		}
+
+		protected override IEnumerable<string> Scripts
+		{
+			get { return StaticScripts; }
+		}
+
+		protected override IList<MigrationHandler> Migrations
+		{
+			get
+			{
+				return new[] { new MigrationHandler(MigrateV1) };
+			}
+		}
+
+		private void MigrateV1()
+		{
+			const string sql = "ALTER TABLE FaultDetail ADD COLUMN Flags INTEGER NOT NULL DEFAULT 0";
+			Connection.Execute(sql);
+		}
 
 		public JobDatabase(string path, bool doMigration = false)
 			: base(path, false, doMigration)
