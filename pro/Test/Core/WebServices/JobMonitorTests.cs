@@ -80,14 +80,6 @@ namespace Peach.Pro.Test.Core.WebServices
 			{
 				Assert.IsTrue(File.Exists(job.DatabasePath));
 			}
-
-			if (File.Exists(job.DatabasePath))
-			{
-				using (var db = new JobDatabase(job.DatabasePath, false))
-				{
-					Assert.IsNotNull(db.GetJob(job.Guid));
-				}
-			}
 		}
 	}
 
@@ -294,11 +286,6 @@ namespace Peach.Pro.Test.Core.WebServices
 					 new TestEvent(3, job.Guid, TestStatus.Pass, "Running iteration", 
 						 "Running the initial control record iteration", null),
 				});
-			}
-
-			using (var db = new JobDatabase(job.DatabasePath, false))
-			{
-				Assert.IsNotNull(db.GetJob(job.Guid));
 			}
 
 			Assert.IsTrue(File.Exists(job.DebugLogPath));

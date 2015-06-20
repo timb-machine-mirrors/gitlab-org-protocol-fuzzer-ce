@@ -52,7 +52,7 @@ namespace Peach.Pro.Core.Storage
 		readonly Dictionary<Tuple<long, long>, State> _stateCache;
 		readonly TimeSpan _runtime;
 		readonly Task<Job> _task;
-		readonly LinkedList<Func<JobDatabase, Stopwatch, Job>> _queue = new LinkedList<Func<JobDatabase, Stopwatch, Job>>();
+		readonly LinkedList<Func<Stopwatch, Job>> _queue = new LinkedList<Func<Stopwatch, Job>>();
 		readonly SemaphoreSlim _queueSemaphore = new SemaphoreSlim(10);
 
 		Dictionary<Tuple<long, long>, State> _pendingStates;
@@ -89,38 +89,31 @@ namespace Peach.Pro.Core.Storage
 
 			while (true)
 			{
-				using (var db = new JobDatabase(job.DatabasePath))
+				var func = GetNext(sw, job);
+				if (func == null)
+					continue;
+
+				var ret = func(sw);
+				if (ret == null)
+					return job;
+
+				job = ret;
+
+				lock (job)
 				{
-					var func = GetNext(db, sw, job);
-					if (func == null)
-						continue;
-
-					using (var xact = db.Connection.BeginTransaction())
-					{
-						var ret = func(db, sw);
-						if (ret == null)
-							return job;
-						xact.Commit();
-
-						job = ret;
-					}
-
-					lock (job)
-					{
-						Monitor.Pulse(job);
-					}
+					Monitor.Pulse(job);
 				}
 			}
 		}
 
-		private Func<JobDatabase, Stopwatch, Job> GetNext(JobDatabase db, Stopwatch sw, Job job)
+		private Func<Stopwatch, Job> GetNext(Stopwatch sw, Job job)
 		{
 			lock (_queue)
 			{
 				if (_queue.Count == 0 && !Monitor.Wait(_queue, HeartBeatInterval))
 				{
 					// inject heartbeat record
-					DoUpdateRunningJob(db, sw, job);
+					DoUpdateRunningJob(sw, job);
 					return null;
 				}
 
@@ -131,7 +124,7 @@ namespace Peach.Pro.Core.Storage
 			}
 		}
 
-		private void EnqueueFront(Func<JobDatabase, Stopwatch, Job> func)
+		private void EnqueueFront(Func<Stopwatch, Job> func)
 		{
 			_queueSemaphore.Wait();
 			lock (_queue)
@@ -142,7 +135,7 @@ namespace Peach.Pro.Core.Storage
 			}
 		}
 
-		private void EnqueueBack(Func<JobDatabase, Stopwatch, Job> func)
+		private void EnqueueBack(Func<Stopwatch, Job> func)
 		{
 			_queueSemaphore.Wait();
 
@@ -168,9 +161,9 @@ namespace Peach.Pro.Core.Storage
 			{
 				Job.Mode = newMode;
 				var copy = CopyJob();
-				EnqueueBack((db, sw) =>
+				EnqueueBack(sw =>
 				{
-					DoUpdateRunningJob(db, sw, copy);
+					DoUpdateRunningJob(sw, copy);
 					return copy;
 				});
 			}
@@ -260,12 +253,18 @@ namespace Peach.Pro.Core.Storage
 			foreach (var kv in _pendingStates)
 				_stateCache[kv.Key] = kv.Value;
 
-			EnqueueBack((db, sw) =>
+			EnqueueBack(sw =>
 			{
-				DoUpdateRunningJob(db, sw, copy);
-				db.InsertNames(names);
-				db.UpsertStates(states.Values);
-				db.UpsertMutations(mutations);
+				using (var db = new JobDatabase(copy.DatabasePath))
+				{
+					db.Transaction(() =>
+					{
+						db.InsertNames(names);
+						db.UpsertStates(states.Values);
+						db.UpsertMutations(mutations);
+					});
+				}
+				DoUpdateRunningJob(sw, copy);
 				return copy;
 			});
 		}
@@ -310,12 +309,18 @@ namespace Peach.Pro.Core.Storage
 			// Ensure that the queue is drained before proceeding
 			lock (copy)
 			{
-				EnqueueBack((db, sw) =>
+				EnqueueBack(sw =>
 				{
-					DoUpdateRunningJob(db, sw, copy);
-					db.InsertNames(names);
-					db.InsertFault(detail);
-					db.InsertFaultMetrics(faults);
+					using (var db = new JobDatabase(copy.DatabasePath))
+					{
+						db.Transaction(() =>
+						{
+							db.InsertNames(names);
+							db.InsertFault(detail);
+							db.InsertFaultMetrics(faults);
+						});
+					}
+					DoUpdateRunningJob(sw, copy);
 					return copy;
 				});
 
@@ -330,11 +335,11 @@ namespace Peach.Pro.Core.Storage
 			var copy = CopyJob();
 			lock (copy)
 			{
-				EnqueueFront((db, sw) =>
+				EnqueueFront(sw =>
 				{
 					_status = JobStatus.StopPending;
 					sw.Stop();
-					DoUpdateRunningJob(db, sw, copy);
+					DoUpdateRunningJob(sw, copy);
 					return copy;
 				});
 				// Wait until StopPending is received
@@ -343,12 +348,12 @@ namespace Peach.Pro.Core.Storage
 
 			lock (copy)
 			{
-				EnqueueBack((db, sw) =>
+				EnqueueBack(sw =>
 				{
 					_status = JobStatus.Stopped;
 					copy.StopDate = now;
 					copy.Mode = !copy.IsControlIteration ? JobMode.Reporting : JobMode.Fuzzing;
-					DoUpdateRunningJob(db, sw, copy);
+					DoUpdateRunningJob(sw, copy);
 					return copy;
 				});
 				// Wait for queue to drain
@@ -382,14 +387,11 @@ namespace Peach.Pro.Core.Storage
 				}
 			}
 
-			EnqueueBack((db, sw) => null);
+			EnqueueBack(sw => null);
 			_task.Wait();
 
 			Job = _task.Result;
-			using (var db = new JobDatabase(Job.DatabasePath))
-			{
-				db.Connection.Execute(Sql.UpdateJob, Job);
-			}
+			Job.Mode = JobMode.Fuzzing;
 		}
 
 		public void Pause()
@@ -397,11 +399,11 @@ namespace Peach.Pro.Core.Storage
 			var copy = CopyJob();
 			lock (copy)
 			{
-				EnqueueFront((db, sw) =>
+				EnqueueFront(sw =>
 				{
 					_status = JobStatus.Paused;
 					sw.Stop();
-					DoUpdateRunningJob(db, sw, copy);
+					DoUpdateRunningJob(sw, copy);
 					return copy;
 				});
 				Monitor.Wait(copy);
@@ -413,11 +415,11 @@ namespace Peach.Pro.Core.Storage
 			var copy = CopyJob();
 			lock (copy)
 			{
-				EnqueueFront((db, sw) =>
+				EnqueueFront(sw =>
 				{
 					_status = JobStatus.Running;
 					sw.Start();
-					DoUpdateRunningJob(db, sw, copy);
+					DoUpdateRunningJob(sw, copy);
 					return copy;
 				});
 				Monitor.Wait(copy);
@@ -429,12 +431,15 @@ namespace Peach.Pro.Core.Storage
 			return ObjectCopier.Clone(Job);
 		}
 
-		private void DoUpdateRunningJob(JobDatabase db, Stopwatch sw, Job job)
+		private void DoUpdateRunningJob(Stopwatch sw, Job job)
 		{
-			job.HeartBeat = DateTime.Now;
-			job.Runtime = _runtime + sw.Elapsed;
-			job.Status = _status;
-			db.Connection.Execute(Sql.UpdateRunningJob, job);
+			using (var db = new NodeDatabase())
+			{
+				job.HeartBeat = DateTime.Now;
+				job.Runtime = _runtime + sw.Elapsed;
+				job.Status = _status;
+				db.UpdateRunningJob(job);
+			}
 		}
 	}
 }

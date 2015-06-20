@@ -165,6 +165,10 @@ namespace Peach.Pro.Core.Loggers
 			using (var db = new NodeDatabase())
 			{
 				job = db.GetJob(context.config.id) ?? new Job(context.config);
+				job.Mode = JobMode.Fuzzing;
+				job.Status = JobStatus.Running;
+				job.HeartBeat = DateTime.Now;
+				job.Seed = context.config.randomSeed;
 			}
 
 			if (job.DatabasePath == null)
@@ -174,28 +178,6 @@ namespace Peach.Pro.Core.Loggers
 				Directory.CreateDirectory(job.LogPath);
 
 			ConfigureDebugLogging(job.DebugLogPath, context.config);
-
-			using (var db = new JobDatabase(job.DatabasePath))
-			{
-				var resume = db.GetJob(job.Guid);
-				if (resume == null)
-				{
-					job.HeartBeat = DateTime.Now;
-					job.Seed = context.config.randomSeed;
-					job.Mode = JobMode.Fuzzing;
-					job.Status = JobStatus.Running;
-
-					// Start date is set when job record initially constructed
-					Debug.Assert(job.StartDate != DateTime.MinValue);
-
-					db.InsertJob(job);
-				}
-				else
-				{
-					// this happens if we are recovering from a crash and we want to resume
-					job = resume;
-				}
-			}
 
 			_cache = new AsyncDbCache(job);
 

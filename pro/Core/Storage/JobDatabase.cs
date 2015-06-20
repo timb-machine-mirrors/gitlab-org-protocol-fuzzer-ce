@@ -12,9 +12,6 @@ namespace Peach.Pro.Core.Storage
 	{
 		static readonly IEnumerable<Type> StaticSchema = new[]
 		{
-			// live job status
-			typeof(Job),
-
 			// fault data
 			typeof(FaultDetail),
 			typeof(FaultFile),
@@ -48,31 +45,37 @@ namespace Peach.Pro.Core.Storage
 		{
 			get
 			{
-				return new[] { new MigrationHandler(MigrateV1) };
+				return new MigrationHandler[]
+				{
+					MigrateV1,
+					MigrateV2,
+				};
 			}
 		}
 
 		private void MigrateV1()
 		{
-			const string sql = "ALTER TABLE FaultDetail ADD COLUMN Flags INTEGER NOT NULL DEFAULT 0";
-			Connection.Execute(sql);
+			Connection.Execute(Sql.JobMigrateV1);
+		}
+
+		private void MigrateV2()
+		{
+			Connection.Execute(Sql.JobMigrateV2);
 		}
 
 		public JobDatabase(string path, bool doMigration = false)
-			: base(path, false, doMigration)
+			: base(path, true, doMigration)
 		{
 		}
 
 		public void InsertNames(IEnumerable<NamedItem> items)
 		{
-			const string sql = "INSERT INTO NamedItem (Id, Name) VALUES (@Id, @Name)";
-			Connection.Execute(sql, items);
+			Connection.Execute(Sql.InsertNames, items);
 		}
 
 		public void UpdateStates(IEnumerable<State> states)
 		{
-			const string sql = "UPDATE State SET Count = @Count WHERE Id = @Id";
-			Connection.Execute(sql, states);
+			Connection.Execute(Sql.UpdateStates, states);
 		}
 
 		public void UpsertStates(IEnumerable<State> states)
@@ -105,7 +108,7 @@ namespace Peach.Pro.Core.Storage
 		{
 			if (loadFiles)
 			{
-				const string sql = Sql.SelectFaultDetailById + Sql.SelectFaultFilesById;
+				const string sql = Sql.SelectFaultDetailById + Sql.SelectFaultFilesByFaultId;
 				using (var multi = Connection.QueryMultiple(sql, new { Id = id }))
 				{
 					var fault = multi.Read<FaultDetail>().SingleOrDefault();
@@ -121,40 +124,16 @@ namespace Peach.Pro.Core.Storage
 
 		public FaultFile GetFaultFileById(long id)
 		{
-			const string sql = "SELECT * FROM FaultFile WHERE Id = @Id";
-			return Connection.Query<FaultFile>(sql, new { Id = id })
+			return Connection.Query<FaultFile>(Sql.SelectFaultFilesById, new { Id = id })
 				.SingleOrDefault();
 		}
 
 		public IEnumerable<FaultMutation> GetFaultMutations(long iteration)
 		{
-			const string sql = "SELECT * FROM ViewFaults WHERE Iteration = @Iteration";
-			return Connection.Query<FaultMutation>(sql, new { Iteration = iteration });
-		}
-
-		public Job GetJob(Guid id)
-		{
-			return Connection.Query<Job>(Sql.SelectJob, new { Id = id.ToString() })
-				.SingleOrDefault();
-		}
-	
-		public void InsertJob(Job job)
-		{
-			Connection.Execute(Sql.InsertJob, job);
-		}
-
-		public void UpdateJob(Job job)
-		{
-			Connection.Execute(Sql.UpdateJob, job);
-		}
-
-		public Report GetReport(Guid id)
-		{
-			var job = GetJob(id);
-			if (job == null)
-				return null;
-
-			return GetReport(job);
+			return Connection.Query<FaultMutation>(
+				Sql.SelectMutationByIteration, 
+				new { Iteration = iteration }
+			);
 		}
 
 		public Report GetReport(Job job)

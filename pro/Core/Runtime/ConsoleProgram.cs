@@ -831,23 +831,10 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 
 		public Job GetJob()
 		{
-			Job job;
 			using (var db = new NodeDatabase())
 			{
-				job = db.GetJob(_guid);
-				if (job == null)
-					return null;
-
-				if (!File.Exists(job.DatabasePath))
-					return job;
+				return db.GetJob(_guid);
 			}
-
-			using (var db = new JobDatabase(job.DatabasePath, true))
-			{
-				job = db.GetJob(_guid);
-			}
-
-			return job;
 		}
 
 		#region Not Implemented

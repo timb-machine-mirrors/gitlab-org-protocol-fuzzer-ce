@@ -62,7 +62,10 @@ namespace Peach.Pro.Core.WebServices
 				}
 			}
 
-			return JobHelper.GetJob(_guid);
+			using (var db = new NodeDatabase())
+			{
+				return db.GetJob(_guid);
+			}
 		}
 
 		public Job Start(string pitLibraryPath, string pitFile, JobRequest jobRequest)

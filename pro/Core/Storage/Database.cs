@@ -128,7 +128,7 @@ namespace Peach.Pro.Core.Storage
 		}
 
 		public string Path { get; private set; }
-		public IDbConnection Connection { get; private set; }
+		protected IDbConnection Connection { get; private set; }
 		
 		protected abstract IEnumerable<Type> Schema { get; }
 		protected abstract IEnumerable<string> Scripts { get; }
@@ -163,6 +163,15 @@ namespace Peach.Pro.Core.Storage
 		{
 			if (Connection != null)
 				Connection.Dispose();
+		}
+
+		public void Transaction(Action action)
+		{
+			using (var xact = Connection.BeginTransaction())
+			{
+				action();
+				xact.Commit();
+			}
 		}
 
 		public bool IsInitialized
