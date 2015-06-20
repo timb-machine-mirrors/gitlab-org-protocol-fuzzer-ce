@@ -480,7 +480,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			// Heartberat should advance when job stops
 			Assert.Greater(job.HeartBeat, time);
-			Assert.AreEqual(job.HeartBeat, job.StopDate);
+			Assert.GreaterOrEqual(job.HeartBeat, job.StopDate);
 
 			VerifyDatabase(job);
 		}

@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Peach.Core;
 using Peach.Pro.Core.WebServices.Models;
 using Dapper;
 using Monitor = System.Threading.Monitor;
 
 namespace Peach.Pro.Core.Storage
 {
-	internal class AsyncDbCache : IDisposable
+	internal class AsyncDbCache
 	{
 		class NameCache
 		{
@@ -48,26 +50,29 @@ namespace Peach.Pro.Core.Storage
 
 		readonly NameCache _nameCache;
 		readonly Dictionary<Tuple<long, long>, State> _stateCache;
-		readonly JobDatabase _db;
 		readonly TimeSpan _runtime;
 		readonly Task<Job> _task;
-		readonly Queue<Func<Stopwatch, Job>> _queue = new Queue<Func<Stopwatch, Job>>();
-		readonly SemaphoreSlim _queueSemaphore = new SemaphoreSlim(100);
+		readonly LinkedList<Func<JobDatabase, Stopwatch, Job>> _queue = new LinkedList<Func<JobDatabase, Stopwatch, Job>>();
+		readonly SemaphoreSlim _queueSemaphore = new SemaphoreSlim(10);
 
 		Dictionary<Tuple<long, long>, State> _pendingStates;
 		List<Mutation> _mutations;
 		long _nextStateId;
 		Mutation _mutation;
 		int _maxQueueDepth;
+		JobStatus _status;
 
 		public AsyncDbCache(Job job)
 		{
+			_status = job.Status;
 			Job = job;
-			_db = new JobDatabase(job.DatabasePath);
 
-			_nameCache = new NameCache(_db);
-			_stateCache = _db.LoadTable<State>().ToDictionary(x =>
-				new Tuple<long, long>(x.NameId, x.RunCount));
+			using (var db = new JobDatabase(job.DatabasePath))
+			{
+				_nameCache = new NameCache(db);
+				_stateCache = db.LoadTable<State>().ToDictionary(x =>
+					new Tuple<long, long>(x.NameId, x.RunCount));
+			}
 
 			// Remember previous runtime so it properly accumulates on restarted jobs
 			_runtime = job.Runtime;
@@ -79,48 +84,71 @@ namespace Peach.Pro.Core.Storage
 
 		private Job BackgroundTask(object obj)
 		{
-			var job = obj as Job;
+			var job = (Job)obj;
 			var sw = Stopwatch.StartNew();
 
 			while (true)
 			{
-				var func = GetNext(sw, job);
-				if (func == null)
-					continue;
-
-				using (var xact = _db.Connection.BeginTransaction())
+				using (var db = new JobDatabase(job.DatabasePath))
 				{
-					var ret = func(sw);
-					if (ret == null)
-						return job;
-					xact.Commit();
+					var func = GetNext(db, sw, job);
+					if (func == null)
+						continue;
+
+					using (var xact = db.Connection.BeginTransaction())
+					{
+						var ret = func(db, sw);
+						if (ret == null)
+							return job;
+						xact.Commit();
+
+						job = ret;
+					}
+
+					lock (job)
+					{
+						Monitor.Pulse(job);
+					}
 				}
 			}
 		}
 
-		private Func<Stopwatch, Job> GetNext(Stopwatch sw, Job job)
+		private Func<JobDatabase, Stopwatch, Job> GetNext(JobDatabase db, Stopwatch sw, Job job)
 		{
 			lock (_queue)
 			{
 				if (_queue.Count == 0 && !Monitor.Wait(_queue, HeartBeatInterval))
 				{
 					// inject heartbeat record
-					DoUpdateRunningJob(sw, job);
+					DoUpdateRunningJob(db, sw, job);
 					return null;
 				}
 
 				_queueSemaphore.Release();
-				return _queue.Dequeue();
+				var ret = _queue.First();
+				_queue.RemoveFirst();
+				return ret;
 			}
 		}
 
-		private void Enqueue(Func<Stopwatch, Job> func)
+		private void EnqueueFront(Func<JobDatabase, Stopwatch, Job> func)
+		{
+			_queueSemaphore.Wait();
+			lock (_queue)
+			{
+				_queue.AddFirst(func);
+				_maxQueueDepth = Math.Max(_maxQueueDepth, _queue.Count);
+				Monitor.Pulse(_queue);
+			}
+		}
+
+		private void EnqueueBack(Func<JobDatabase, Stopwatch, Job> func)
 		{
 			_queueSemaphore.Wait();
 
 			lock (_queue)
 			{
-				_queue.Enqueue(func);
+				_queue.AddLast(func);
 				_maxQueueDepth = Math.Max(_maxQueueDepth, _queue.Count);
 				Monitor.Pulse(_queue);
 			}
@@ -140,9 +168,9 @@ namespace Peach.Pro.Core.Storage
 			{
 				Job.Mode = newMode;
 				var copy = CopyJob();
-				Enqueue(sw =>
+				EnqueueBack((db, sw) =>
 				{
-					DoUpdateRunningJob(sw, copy);
+					DoUpdateRunningJob(db, sw, copy);
 					return copy;
 				});
 			}
@@ -232,12 +260,12 @@ namespace Peach.Pro.Core.Storage
 			foreach (var kv in _pendingStates)
 				_stateCache[kv.Key] = kv.Value;
 
-			Enqueue(sw =>
+			EnqueueBack((db, sw) =>
 			{
-				DoUpdateRunningJob(sw, copy);
-				_db.InsertNames(names);
-				_db.UpsertStates(states.Values);
-				_db.UpsertMutations(mutations);
+				DoUpdateRunningJob(db, sw, copy);
+				db.InsertNames(names);
+				db.UpsertStates(states.Values);
+				db.UpsertMutations(mutations);
 				return copy;
 			});
 		}
@@ -282,17 +310,12 @@ namespace Peach.Pro.Core.Storage
 			// Ensure that the queue is drained before proceeding
 			lock (copy)
 			{
-				Enqueue(sw =>
+				EnqueueBack((db, sw) =>
 				{
-					DoUpdateRunningJob(sw, copy);
-					_db.InsertNames(names);
-					_db.InsertFault(detail);
-					_db.InsertFaultMetrics(faults);
-
-					lock (copy)
-					{
-						Monitor.Pulse(copy);
-					}
+					DoUpdateRunningJob(db, sw, copy);
+					db.InsertNames(names);
+					db.InsertFault(detail);
+					db.InsertFaultMetrics(faults);
 					return copy;
 				});
 
@@ -300,73 +323,118 @@ namespace Peach.Pro.Core.Storage
 			}
 		}
 
-		public Report TestFinished()
+		public void TestFinished()
 		{
 			var now = DateTime.Now;
 
-			Enqueue(sw => null);
-			
+			var copy = CopyJob();
+			lock (copy)
+			{
+				EnqueueFront((db, sw) =>
+				{
+					_status = JobStatus.StopPending;
+					sw.Stop();
+					DoUpdateRunningJob(db, sw, copy);
+					return copy;
+				});
+				// Wait until StopPending is received
+				Monitor.Wait(copy);
+			}
+
+			lock (copy)
+			{
+				EnqueueBack((db, sw) =>
+				{
+					_status = JobStatus.Stopped;
+					copy.StopDate = now;
+					copy.Mode = !copy.IsControlIteration ? JobMode.Reporting : JobMode.Fuzzing;
+					DoUpdateRunningJob(db, sw, copy);
+					return copy;
+				});
+				// Wait for queue to drain
+				Monitor.Wait(copy);
+			}
+
+			if (!Job.IsControlIteration)
+			{
+				// use the `copy` here because it has been modified with the stopped status
+				try
+				{
+					using (var db = new JobDatabase(Job.DatabasePath))
+					{
+						var report = db.GetReport(copy);
+						Reporting.SaveReportPdf(report);
+					}
+				}
+				catch (Exception)
+				{
+					//Logger.Debug("An unexpected error occured saving the job report.", ex);
+
+					try
+					{
+						if (File.Exists(Job.ReportPath))
+							File.Delete(Job.ReportPath);
+					}
+					// ReSharper disable once EmptyGeneralCatchClause
+					catch
+					{
+					}
+				}
+			}
+
+			EnqueueBack((db, sw) => null);
 			_task.Wait();
 
 			Job = _task.Result;
-			Job.StopDate = now;
-			Job.HeartBeat = DateTime.Now;
-			Job.Mode = JobMode.Fuzzing;
-			// TODO: we should probably have a new state until report is done
-			Job.Status = JobStatus.Stopped;
-
-			_db.Connection.Execute(Sql.UpdateJob, Job);
-
-			return _db.GetReport(Job);
+			using (var db = new JobDatabase(Job.DatabasePath))
+			{
+				db.Connection.Execute(Sql.UpdateJob, Job);
+			}
 		}
 
 		public void Pause()
 		{
-			Job.Status = JobStatus.Paused;
 			var copy = CopyJob();
-			Enqueue(sw =>
+			lock (copy)
 			{
-				sw.Stop();
-				DoUpdateRunningJob(sw, copy);
-				return copy;
-			});
+				EnqueueFront((db, sw) =>
+				{
+					_status = JobStatus.Paused;
+					sw.Stop();
+					DoUpdateRunningJob(db, sw, copy);
+					return copy;
+				});
+				Monitor.Wait(copy);
+			}
 		}
 
 		public void Continue()
 		{
-			Job.Status = JobStatus.Running;
 			var copy = CopyJob();
-			Enqueue(sw =>
+			lock (copy)
 			{
-				sw.Start();
-				DoUpdateRunningJob(sw, copy);
-				return copy;
-			});
+				EnqueueFront((db, sw) =>
+				{
+					_status = JobStatus.Running;
+					sw.Start();
+					DoUpdateRunningJob(db, sw, copy);
+					return copy;
+				});
+				Monitor.Wait(copy);
+			}
 		}
 
 		private Job CopyJob()
 		{
-			return new Job
-			{
-				Id = Job.Id,
-				IterationCount = Job.IterationCount,
-				FaultCount = Job.FaultCount,
-				Status = Job.Status,
-				Mode = Job.Mode,
-				Runtime = Job.Runtime,
-			};
+			return ObjectCopier.Clone(Job);
 		}
 
-		private void DoUpdateRunningJob(Stopwatch sw, Job job)
+		private void DoUpdateRunningJob(JobDatabase db, Stopwatch sw, Job job)
 		{
 			job.HeartBeat = DateTime.Now;
 			job.Runtime = _runtime + sw.Elapsed;
-			_db.Connection.Execute(Sql.UpdateRunningJob, job);
-		}
-
-		public void Dispose()
-		{
-			_db.Dispose();
+			job.Status = _status;
+			db.Connection.Execute(Sql.UpdateRunningJob, job);
 		}
 	}
 }

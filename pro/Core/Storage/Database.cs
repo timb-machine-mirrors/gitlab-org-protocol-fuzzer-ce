@@ -150,7 +150,6 @@ namespace Peach.Pro.Core.Storage
 				UseWAL = useWal,
 			};
 
-			var cnn = builder.Create();
 			Connection = builder.Create();
 			Connection.Open();
 

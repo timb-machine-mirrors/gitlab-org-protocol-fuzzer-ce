@@ -56,7 +56,7 @@ namespace Peach.Pro.Core.Loggers
 	[Logger("File")]
 	[Logger("Filesystem", true)]
 	[Logger("Logger.Filesystem")]
-	[Parameter("Path", typeof(string), "Log folder")]
+	[Parameter("Path", typeof(string), "Log folder", "")]
 	public class JobLogger : Logger
 	{
 		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
@@ -195,9 +195,9 @@ namespace Peach.Pro.Core.Loggers
 					// this happens if we are recovering from a crash and we want to resume
 					job = resume;
 				}
-
-				_cache = new AsyncDbCache(job);
 			}
+
+			_cache = new AsyncDbCache(job);
 
 			using (var db = new NodeDatabase())
 			{
@@ -258,29 +258,8 @@ namespace Peach.Pro.Core.Loggers
 			{
 				Logger.Trace("Engine_TestFinished> Update JobDatabase");
 
-				var report = _cache.TestFinished();
+				_cache.TestFinished();
 
-				if (!_cache.Job.IsControlIteration)
-				{
-					try
-					{
-						Reporting.SaveReportPdf(report);
-					}
-					catch (Exception ex)
-					{
-						Logger.Debug("An unexpected error occured saving the job report.", ex);
-
-						try
-						{
-							if (File.Exists(_cache.Job.ReportPath))
-								File.Delete(_cache.Job.ReportPath);
-						}
-						// ReSharper disable once EmptyGeneralCatchClause
-						catch
-						{
-						}
-					}
-				}
 				job = _cache.Job;
 			}
 			else
@@ -701,16 +680,26 @@ namespace Peach.Pro.Core.Loggers
 			Debug.Assert(!string.IsNullOrEmpty(fault.exploitability));
 
 			// root/category/bucket/iteration
-			var subDir = Path.Combine(
-				_cache.Job.LogPath,
+			var initialFaultPath = Path.Combine(
 				category.ToString(),
 				fault.folderName,
-				fault.iteration.ToString(CultureInfo.InvariantCulture));
+				fault.iteration.ToString(CultureInfo.InvariantCulture)
+			);
+
+			if (context.controlRecordingIteration)
+				initialFaultPath += "R";
+			else if (context.controlIteration)
+				initialFaultPath += "C";
+
+			var faultPath = initialFaultPath;
+
+			for (var i = 1; Directory.Exists(Path.Combine(_cache.Job.LogPath, faultPath)); ++i)
+				faultPath = initialFaultPath + "_" + i;
 
 			var faultDetail = new FaultDetail
 			{
 				Files = new List<FaultFile>(),
-				Reproducible = category == Category.Reproducing,
+				Reproducible = category == Category.Faults,
 				Iteration = fault.iteration,
 				TimeStamp = now,
 				Source = fault.detectionSource,
@@ -724,8 +713,16 @@ namespace Peach.Pro.Core.Loggers
 				IterationStart = fault.iterationStart,
 				IterationStop = fault.iterationStop,
 
-				FaultPath = subDir,
+				FaultPath = faultPath,
 			};
+
+			if (context.controlIteration)
+				faultDetail.Flags |= IterationFlags.Control;
+
+			if (context.controlRecordingIteration)
+				faultDetail.Flags |= IterationFlags.Record;
+
+			var subDir = Path.Combine(_cache.Job.LogPath, faultPath);
 
 			foreach (var kv in fault.toSave)
 			{

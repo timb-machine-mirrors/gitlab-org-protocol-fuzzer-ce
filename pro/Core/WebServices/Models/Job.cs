@@ -27,6 +27,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		Fuzzing,
 		Searching,
 		Reproducing,
+		Reporting,
 	}
 
 	public class JobCommands
@@ -120,6 +121,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		public string Message { get; set; }
 	}
 
+	[Serializable]
 	public class Job : JobRequest
 	{
 		public Job()
