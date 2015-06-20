@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Peach.Pro.Core.WebServices.Models;
+﻿using Peach.Pro.Core.WebServices.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,67 +9,17 @@ namespace Peach.Pro.Core.Storage
 {
 	public class JobHelper
 	{
-		static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-
-		/// <summary>
-		/// refresh job status from NodeDatabase or JobDatabase
-		/// 1. Use NodeDatabase if LogPath is not set
-		/// 2. Use JobDatabase if LogPath is set
-		/// 3. Return null if job does not exist in NodeDatabase or LogPath is invalid
-		/// </summary>
-		/// <param name="id">Job ID</param>
-		/// <returns>Job if job can be found, otherwise null</returns>
-		public static Job GetJob(Guid id)
-		{
-			using (var db = new NodeDatabase())
-			{
-				var job = db.GetJob(id);
-				if (job == null)
-				{
-					Logger.Trace("Job does not exist in NodeDatabase");
-					return null;
-				}
-
-				return EnsureUpToDate(db, job);
-			}
-		}
-
-		public static Job EnsureUpToDate(NodeDatabase db, Job job)
-		{
-			if (job.DatabasePath == null)
-				return job;
-
-			if (!File.Exists(job.DatabasePath))
-			{
-				Logger.Trace("DatabasePath is invalid, deleting job");
-				db.DeleteJob(job.Guid);
-				return null;
-			}
-
-			using (var jobDb = new JobDatabase(job.DatabasePath, true))
-			{
-				job = jobDb.GetJob(job.Guid);
-				if (job == null)
-				{
-					Logger.Trace("Job does not exist in JobDatabase");
-					return null;
-				}
-			}
-
-			return job;
-		}
-
 		public static void Fail(
 			Guid id,
 			Func<NodeDatabase, IEnumerable<TestEvent>> getEvents,
 			string message)
 		{
-			var job = GetJob(id);
-			if (job == null)
-				return;
-
 			using (var db = new NodeDatabase())
 			{
+				var job = db.GetJob(id);
+				if (job == null)
+					return;
+
 				var events = getEvents(db).ToList();
 				foreach (var testEvent in events)
 				{
@@ -89,14 +38,6 @@ namespace Peach.Pro.Core.Storage
 
 				db.UpdateJob(job);
 				db.UpdateTestEvents(events);
-			}
-
-			if (File.Exists(job.DatabasePath))
-			{
-				using (var db = new JobDatabase(job.DatabasePath))
-				{
-					db.UpdateJob(job);
-				}
 			}
 		}
 	}
@@ -165,6 +106,11 @@ namespace Peach.Pro.Core.Storage
 			Connection.Execute(Sql.UpdateJob, job);
 		}
 
+		public void UpdateRunningJob(Job job)
+		{
+			Connection.Execute(Sql.UpdateRunningJob, job);
+		}
+
 		public void DeleteJob(Guid id)
 		{
 			Connection.Execute(Sql.DeleteJob, new { Id = id.ToString() });
@@ -177,7 +123,7 @@ namespace Peach.Pro.Core.Storage
 
 		public void DeleteJobs(IEnumerable<Job> jobs)
 		{
-			var ids = jobs.Select(x => new { Id = x.Id });
+			var ids = jobs.Select(x => new {x.Id });
 			Connection.Execute(Sql.DeleteJob, ids);
 		}
 
@@ -193,8 +139,10 @@ namespace Peach.Pro.Core.Storage
 
 		public IEnumerable<TestEvent> GetTestEventsByJob(Guid jobId)
 		{
-			const string sql = "SELECT * FROM [TestEvent] WHERE JobId = @JobId;";
-			return Connection.Query<TestEvent>(sql, new { JobId = jobId.ToString() });
+			return Connection.Query<TestEvent>(
+				Sql.SelectTestEvents, 
+				new { JobId = jobId.ToString() }
+			);
 		}
 	}
 }

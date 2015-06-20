@@ -145,40 +145,23 @@ namespace Peach.Pro.Test.Core.Runtime
 
 			public Job GetJob()
 			{
-				Job job;
 				using (var db = new NodeDatabase())
 				{
-					job = db.GetJob(Id);
+					var job = db.GetJob(Id);
 					Assert.IsNotNull(job);
-				}
-
-				if (!File.Exists(job.DatabasePath))
 					return job;
-
-				using (var db = new JobDatabase(job.DatabasePath, true))
-				{
-					job = db.GetJob(Id);
-					Assert.IsNotNull(job);
 				}
-
-				return job;
 			}
 
 			public void VerifyDatabase(int expectedLogs)
 			{
-				Job job;
 				using (var db = new NodeDatabase())
 				{
-					job = db.GetJob(Id);
+					var job = db.GetJob(Id);
 					Assert.IsNotNull(job);
 
 					var logs = db.GetJobLogs(job.Guid).ToList();
 					Assert.AreEqual(expectedLogs, logs.Count, "JobLog mismatch");
-				}
-
-				using (var db = new JobDatabase(job.DatabasePath))
-				{
-					Assert.IsNotNull(db.GetJob(Id));
 				}
 			}
 
