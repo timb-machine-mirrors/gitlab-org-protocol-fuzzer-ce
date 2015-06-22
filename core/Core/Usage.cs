@@ -83,12 +83,13 @@ namespace Peach.Core
 			var color = Console.ForegroundColor;
 
 			var domTypes = new SortedDictionary<string, Type>();
+			var dupes = new List<string>();
 
 			foreach (var type in ClassLoader.GetAllByAttribute<Peach.Core.Dom.DataElementAttribute>(null))
 			{
 				if (domTypes.ContainsKey(type.Key.elementName))
 				{
-					PrintDuplicate("Data element", type.Key.elementName, domTypes[type.Key.elementName], type.Value);
+					AddDuplicate(dupes, "Data element", type.Key.elementName, domTypes[type.Key.elementName], type.Value);
 					continue;
 				}
 
@@ -108,7 +109,7 @@ namespace Peach.Core
 				string fullName = type.Key.Type.Name + ": " + type.Key.Name;
 				if (pluginsByName.ContainsKey(fullName))
 				{
-					PrintDuplicate(type.Key.Type.Name, type.Key.Name, pluginsByName[fullName], type.Value);
+					AddDuplicate(dupes, type.Key.Type.Name, type.Key.Name, pluginsByName[fullName], type.Value);
 					continue;
 				}
 
@@ -168,28 +169,31 @@ namespace Peach.Core
 					PrintParams(plugin.Key);
 				}
 			}
+
+			foreach (var dupe in dupes)
+			{
+				Console.WriteLine();
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine(dupe);
+				Console.ForegroundColor = color;
+			}
 		}
 
-		private static void PrintDuplicate(string category, string name, Type type1, Type type2)
+		private static void AddDuplicate(List<string> dupes, string category, string name, Type type1, Type type2)
 		{
-			var color = Console.ForegroundColor;
-			Console.ForegroundColor = ConsoleColor.Red;
-
 			if (type1 == type2)
 			{
 				// duplicate name on same type
-				Console.WriteLine("{0} '{1}' declared more than once in assembly '{2}' class '{3}'.",
-					category, name, type1.Assembly.Location, type1.FullName);
+				dupes.Add("{0} '{1}' declared more than once in assembly '{2}' class '{3}'.".Fmt(
+					category, name, type1.Assembly.Location, type1.FullName));
 			}
 			else
 			{
 				// duplicate name on different types
-				Console.WriteLine("{0} '{1}' declared in assembly '{2}' class '{3}' and in assembly {4} and class '{5}'.",
-					category, name, type1.Assembly.Location, type1.FullName, type2.Assembly.Location, type2.FullName);
+				dupes.Add("{0} '{1}' declared in assembly '{2}' class '{3}' and in assembly {4} and class '{5}'.".Fmt(
+					category, name, type1.Assembly.Location, type1.FullName, type2.Assembly.Location, type2.FullName));
 			}
 
-			Console.ForegroundColor = color;
-			Console.WriteLine();
 		}
 
 		private static void PrintParams(Type elem)
