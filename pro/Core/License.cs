@@ -22,6 +22,7 @@ namespace Peach.Core
 			TrialAllPits,
 			Trial,
 			Acedemic,
+			TestSuites,
 			Unknown,
 		}
 
