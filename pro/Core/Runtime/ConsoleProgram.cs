@@ -611,8 +611,8 @@ Debug Peach XML File
 		{
 			Console.WriteLine(License.EulaText());
 
-			Console.WriteLine(@"
-BY TYPING ""YES"" YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTAND, AND
+			Console.WriteLine(
+@"BY TYPING ""YES"" YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTAND, AND
 AGREE TO BE BOUND BY THE TERMS ABOVE.
 ");
 
