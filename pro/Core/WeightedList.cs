@@ -147,6 +147,27 @@ namespace Peach.Pro.Core
 			}
 		}
 
+		/// <summary>
+		/// Recompute the weights of the items using a transform function.
+		/// </summary>
+		/// <param name="how">Given current item weight, compute a new weight</param>
+		/// <returns>The updated selection weight for the container.</returns>
+		public int TransformWeight(Func<int, int> how)
+		{
+			var weight = 0;
+			var newItems = new SortedList<long, T>();
+
+			foreach (var kv in items)
+			{
+				weight += kv.Value.TransformWeight(how);
+				newItems.Add(weight, kv.Value);
+			}
+
+			items = newItems;
+
+			return how(SelectionWeight);
+		}
+
 		#region ICollection<T>
 
 		public void Add(T item)
