@@ -191,7 +191,7 @@ namespace Peach.Core
 		/// <returns>Returns resulting data</returns>
 		protected virtual Variant OnCall(string method, List<ActionParameter> args)
 		{
-			return call(method, args.Select(i => i.dataModel.Value).ToList());
+			return call(method, args.Select(AsBitwiseStream).ToList());
 		}
 
 		/// <summary>
@@ -775,6 +775,13 @@ namespace Peach.Core
 		}
 
 		#endregion
+
+		private static BitwiseStream AsBitwiseStream(ActionParameter param)
+		{
+			// Turn into a BitwiseStream where the name corresponds
+			// to the name of the parameter.
+			return new BitStreamList(new[] { param.dataModel.Value }) { Name = param.Name };
+		}
 	}
 
 	/// <summary>
