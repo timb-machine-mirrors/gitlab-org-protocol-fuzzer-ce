@@ -181,7 +181,21 @@ namespace Peach.Core
 		}
 
 		/// <summary>
-		/// Call a method on the Publishers resource
+		/// Call a method on the Publishers resource using data models.
+		/// </summary>
+		/// <remak>
+		/// This method can be overriden by custom Publishers.
+		/// </remak>
+		/// <param name="method">Name of method to call</param>
+		/// <param name="args">Arguments to pass</param>
+		/// <returns>Returns resulting data</returns>
+		protected virtual Variant OnCall(string method, List<ActionParameter> args)
+		{
+			return call(method, args.Select(i => i.dataModel.Value).ToList());
+		}
+
+		/// <summary>
+		/// Call a method on the Publishers resource using data model values.
 		/// </summary>
 		/// <remak>
 		/// This method can be overriden by custom Publishers.
@@ -396,13 +410,13 @@ namespace Peach.Core
 		/// the OnCall method can be overriden to implement functionality that should
 		/// occur when this method is called.
 		/// </remarks>
-		/// <seealso cref="OnCall"/>
+		/// <seealso cref="!:Peach.Core.Publisher.OnCall(string, System.Collections.Generic.List`Peach.Core.IO.BitwiseStream)"/>
 		/// <param name="method">Name of method to call</param>
 		/// <param name="args">Arguments to pass</param>
 		/// <returns>Returns resulting data</returns>
 		public Variant call(string method, List<BitwiseStream> args)
 		{
-			Logger.Debug("call({0}, Arg Count: {1})", method, args.Count);
+			Logger.Debug("call({0}) BitwiseStream Count: {1}", method, args.Count);
 			return OnCall(method, args);
 		}
 
@@ -535,13 +549,14 @@ namespace Peach.Core
 		/// the OnCall method can be overriden to implement functionality that should
 		/// occur when this method is called.
 		/// </remarks>
-		/// <seealso cref="OnCall"/>
+		/// <seealso cref="!:Peach.Core.Publisher.OnCall(string, System.Collections.Generic.List`Peach.Core.Dom.ActionParameter)"/>
 		/// <param name="method">Name of method to call</param>
 		/// <param name="args">Arguments to pass</param>
 		/// <returns>Returns resulting data</returns>
-		public virtual Variant call(string method, List<ActionParameter> args)
+		public Variant call(string method, List<ActionParameter> args)
 		{
-			return call(method, args.Select(i => i.dataModel.Value).ToList());
+			Logger.Debug("call({0}) ActionParameter Count: {1}", method, args.Count);
+			return OnCall(method, args);
 		}
 
 		#endregion

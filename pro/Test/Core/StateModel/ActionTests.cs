@@ -21,7 +21,7 @@ namespace Peach.Pro.Test.Core.StateModel
 			Name = "Pub";
 		}
 
-		public override Variant call(string method, List<ActionParameter> args)
+		protected override Variant OnCall(string method, List<ActionParameter> args)
 		{
 			Assert.AreEqual(args[0].Name, "Named Param 1");
 			Assert.AreEqual(args[0].type, ActionParameter.Type.In);
