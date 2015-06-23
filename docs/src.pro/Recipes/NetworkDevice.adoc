@@ -1,0 +1,180 @@
+:images: ../images
+:peachweb: Peach Web Interface
+:peachcomd: Peach Command Line Interface
+:peachug: Peach User Guide
+
+[[Recipe_NetDevice]]
+
+=== Recipe: Monitoring a Network Device
+
+You have a new network device, such as a router, and need to perform security testing on it.  
+
+image::{images}/NetDevice_Router.png["Network Device to Fuzz", scalewidth="50%"]
+
+The network device connects to the computer running Peach, and communicates with 
+via the adapter.The adapter acts a conduit for the communications and conceptually 
+is a wire, even though other implementations exist.  A serial connection addresses 
+logging issues. 
+
+==== What is the fuzzing session workflow?
+
+The workflow that we want to follow in the test consists of the following steps:
+
+1.	Power on the device.
+2.	Wait for the bootstrapping process to complete.
+3.	Fuzz the device and look for faults.
+4.	When a fault occurs, do the following:
+a.	Reset the device by cycling the power off and then on.
+b.	Wait for the bootstrapping process to complete.
+5.	Loop to step 3 and continue fuzzing.
+
+Given this, here's a diagram of connections for the test configuration.
+
+image::{images}/Network_Device.png["Configuration diagram Fuzzing a Network Device", scalewidth="70%"]
+
+Peach handles communications with the device using a single agent that is local. In fact, 
+it's in process to Peach. Peach also is connected to a programmable power supply, the 
+IpPower 9258, that can-be powered down and up upon command. In step 4a of the workflow, 
+Peach sends the power cycling command to the IpPower 9258 to perform this task.
+
+Now for setting up the monitors, consisting of detecting faults, collecting data, and 
+automating the test environmennt.
+
+We need to detect faults. First, we want to ensure the device stays responsive to 
+communications from Peach, so we use the TcpPort monitor periodically to check 
+communications. The Ping monitor could be used here as an alternative. Second, we want 
+to watch the console for error messages. The Serial monitor with a regular expression 
+(Regex) specified, such as “Error”, can perform this task.
+
+When a fault occurs, we want to collect data relevant to the fault. The Pcap monitor 
+provides the mechanism to capture network packets around the time that the fault occurs. 
+The Serial monitor provides console logs with messages leading up to the fault.
+
+Finally, we want to reset the device after a fault occurs by cycling the power off, 
+then on again. The IpPower9258 monitor provides control over outlets. A second aspect 
+of automation is that the system must wait for the bootstrapping process to complete 
+before resuming fuzzing activiites. The Serial monitor performs this task by 
+watching logging messages that indicate the bootstrapping process completed.
+
+==== Setting up Monitors Using the Peach Web UI
+
+===== Starting Peach 
+
+1. Launch Peach from the command line (type `peach` and press the Return key) to start the UI.
+2. Select a pit (test definition) of a protocol supported by the network device, so that Peach can communicate with device protocol during fuzzing.
+* Give the pit a name and a description. Peach makes a configuration file of the selections you make, so that you can re-use the setup again.
+3. From the configuration menu along the left edge of the window, select Monitoring.
+4. Fill in a name for the agent. Since this agent resides within Peach, the default 
+location `local` is appropriate. Then, click the`Save` button.
+
+image::{images}/Local_Agent.png["Local agent for Network Device", scalewidth="60%"]
+
+===== Supplying Monitor Details
+
+Begin each monitor with a name or descriptive text. This helps identify one monitor from 
+another, and is especially evident with the two serial monitors.
+
+Next, fill in the critical parameters for each monitor. These parameters have callouts in 
+the settings diagram of each monitor. Details for these paramters are given in the text 
+that follows.
+
+NOTE: The order of the monitors listed in the agent is significant. Peach processes 
+the monitors in the order listed (from top to bottom). For example, if the IpPower 
+monitor were last on the list, a blocking situation might arise because one of the 
+Serial monitors would be waiting for the bootstrap process to finish before the power 
+is recycled to initiate the bootstrap.
+
+For this recipe, use the monitors in the order they are presented:
+
+* IpPower9258 (BootAndRebootDevice)
+* SerialPort (WaitforBootOnStartAndFault)
+* SerialPort (WaitForBootAfterFault)
+* TcpPort (VerifyDeviceAlive)
+* Pcap (NetworkCapture)
+
+===== IpPower9258 (BootAndRebootDevice)
+
+The xref:Monitors_IpPower9258[IpPower 9258 Monitor] sends commands to the IpPower 9258 device to recycle power, ensuring that the network device starts in a clean state following a fault.
+
+image::{images}/IpPower9258.png["IpPower 9258 Monitor", scalewidth="60%"]
+
+The *Port* parameter identifies the receptacle of the IpPower9258 device. Numbers range from 1 to 4. Receptacle 1 is the leftmost recepticle. 
+
+image::{images}/IpPower_RearPanel2.png["IpPower 9258 Recepticles", scalewidth="60%"]
+
+===== Serial Port (WaitforBootOnStartAndFault)
+
+The xref:Monitors_Serial[Serial Port Monitor] addresses the initial bootstrap operation at the start of the fuzzing session, and identifies faults from message content flowing through the serial port.
+
+image::{images}/Serial_WaitForBootOnStartAndFault2.png["Serial Monitor - Part I", scalewidth="60%"]
+
+The *Port* parameter identifies the serial port on the computer that receives monitoring.
+
+* In Windows, the port map is accessible from the Device Manager located in the 
+Control Panel\System applet. In the illustration, the value is `COM1`.
+* In Linux and OS X systems the port map is accessible with the following command:
+`dmesg | grep tty`. Specify the value of the appropriate port, such as `tty0`.
+
+The *Fault Regex* `(CRITICAL | ERROR | ASSERT | CRASH)` identifies words that indicate 
+a fault occurred. When the monitor encounters any word of a message that matches any word 
+in the Regex, Peach issues a fault.
+
+The *Wait When* and *Wait Regex* parameters are automation oriented. *Wait When* identifies 
+when peach should enter a waiting state. The value `OnStart` identifies that the waiting 
+period is when the test target goes through the bootstrap process at the beginning of 
+the fuzzing session. The *Wait Regex* identifies the message text that the monitor looks 
+to match. Here, the value is `Bootup Completed`. Peach waits until this message appears 
+to begin fuzzing the target. For more information, see <<Monitor Parameters When and Wait When>>.
+
+===== Serial Port Monitor (WaitForBootAfterFault)
+This second instance of the xref:Monitors_Serial[Serial Port Monitor] addresses resumption 
+of a fuzzing session after a fault. Specifically, the monitor causes Peach to resume the 
+current fuzzing session after the target finishes rebooting. 
+
+image::{images}/Serial_WaitForBootAfterFault2.png["Serial Monitor - Part II", scalewidth="60%"]
+
+The *Port* parameter identifies the serial port on the computer that receives monitoring. 
+Since only one serial port is in this fuzzing setup, the value should be identical with 
+the value for the WaitforBootOnStartAndFault monitor.
+
+The *Wait When* and *Wait Regex* parameters identify when Peach should enter a waiting 
+state. The *Wait When* value `OnIterationStartAfterFault` identifies that the waiting 
+period follows each fault occurrence. The *Wait Regex* identifies the message text that 
+the monitor looks to match. Here, the value is `Bootup Completed`. Peach waits until 
+this message appears to resume the fuzzing session in progress.
+
+===== TcpPort (VerifyDeviceAlive)
+The xref:Monitors_TcpPort[TcpPort Monitor] periodically checks the status of the TCP communication port with the target. The checks occur when the State Model issues a `Call` action during a test case. If the status of the port is `Closed`, Peach reports an error.
+
+image::{images}/TcpPort_VerifyDeviceAlive.png["TcpPort Verify the Device is Alive", scalewidth="60%"]
+
+The *Host* parameter specifies the hostname of the target or the IPv4 address of the 
+target. The `\\##TargetIPv4##` value is a configuration variable that you set to identify 
+the target. Its operation is similar to operating system environment variables. For more information, see <<Variables>>.
+
+The *Port* value for Tcp is 80. This is a standard value that is OS independent. However, 
+a Tcp port can exist at another address,.
+
+The *Action* parameter specifies the type of action the monitor performs. Here, the 
+reponse is `FAULT` for fault detection.
+
+The *State* parameter specifies the fault condition. The value `Closed` indicates a 
+fault occurs when the communication channel changes to `Closed`.
+
+===== Pcap (NetworkCapture)
+The xref:Monitors_Pcap[Pcap Monitor] captures network traffic (packets) sent and 
+received from the test target. 
+
+image::{images}/Pcap_NetworkCapture2.png["Capture Network Packs", scalewidth="60%"]
+
+The *Device* parameter specifies the hostname of the target or the IPv4 address of the 
+target. The value given is `eth0`. 
+
+The *Filter* parameter is a capture filter (Berkely Packet Syntax filter used by 
+Libpcap) that captures the packet from the wire as it arrives or leaves the test 
+target. Here, the the filter consists of the hostname of the test target combined 
+with `port 80`.
+
+TIP: WireShark refers to the Libpcap filters as capture filters. Use the capture filters. Wireshark also defines its own display filters that it uses to filter entries in its session files. The display filters are not compatible with Libpcap.
+
+

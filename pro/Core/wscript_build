@@ -69,6 +69,7 @@ else:
 
 bld(
 	features = 'cs',
+	unsafe = True,
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
 	resource = bld.path.ant_glob('Resources/**/* WebServices/Views/**/*'),
