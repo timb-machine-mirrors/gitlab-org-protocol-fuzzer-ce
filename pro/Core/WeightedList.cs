@@ -42,6 +42,16 @@ namespace Peach.Pro.Core
 		internal SortedList<long, T> items = new SortedList<long, T>();
 
 		/// <summary>
+		/// Represents a bounded item.
+		/// </summary>
+		public class BoundedItem
+		{
+			public long LowerBound { get; set; }
+			public long UpperBound { get; set; }
+			public T Item { get; set; }
+		}
+
+		/// <summary>
 		/// The sum of all weights of contained elements.
 		/// </summary>
 		public long Max
@@ -73,8 +83,8 @@ namespace Peach.Pro.Core
 		/// Returns the first element in the list with a key greater than value.
 		/// </summary>
 		/// <param name="value">A number greater than or equal to 0 and less than Max.</param>
-		/// <returns>A key value pair of the upper bound and the element.</returns>
-		public KeyValuePair<long, T> UpperBound(long value)
+		/// <returns>The lower bound and the upper bound and the element.</returns>
+		public BoundedItem UpperBound(long value)
 		{
 			if (value < 0 || value >= Max)
 				throw new ArgumentOutOfRangeException("value");
@@ -95,7 +105,12 @@ namespace Peach.Pro.Core
 			if (keys[low] <= value)
 				++low;
 
-			return new KeyValuePair<long,T>(items.Keys[low], items.Values[low]);
+			return new BoundedItem
+			{
+				LowerBound = low > 0 ? items.Keys[low - 1] : 0,
+				UpperBound = items.Keys[low],
+				Item = items.Values[low]
+			};
 		}
 
 		/// <summary>
