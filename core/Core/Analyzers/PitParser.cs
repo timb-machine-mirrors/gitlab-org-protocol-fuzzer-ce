@@ -1615,11 +1615,6 @@ namespace Peach.Core.Analyzers
 
 			if (node.ChildNodes.AsEnumerable().Where(n => n.Name == "Field").Any())
 			{
-				// Ensure <Field> isn't used with another data set method if more than one
-                // data set exists.
-				if (dataSet.Count > 1)
-					throw new PeachException("Can't specify fields and multiple files.");
-
 				// If this ref'd an existing Data element, clear all non FieldData children
 				if (dataSet.Where(o => !(o is DataField)).Any())
 					dataSet.Clear();
@@ -1627,8 +1622,6 @@ namespace Peach.Core.Analyzers
 				// Ensure there is a field data record we can populate
 				if (dataSet.Count == 0)
 					dataSet.Add(new DataField(dataSet));
-
-				var fieldData = (DataField)dataSet[0];
 
 				var dupes = new HashSet<string>();
 
@@ -1651,8 +1644,11 @@ namespace Peach.Core.Analyzers
 						// Hack to call common value parsing code.
 						handleCommonDataElementValue(child, tmp);
 
-						fieldData.Fields.Remove(name);
-						fieldData.Fields.Add(new DataField.Field() { Name = name, Value = tmp.DefaultValue });
+						foreach (var fieldData in dataSet.OfType<DataField>())
+						{
+							fieldData.Fields.Remove(name);
+							fieldData.Fields.Add(new DataField.Field() { Name = name, Value = tmp.DefaultValue });
+						}
 					}
 				}
 			}

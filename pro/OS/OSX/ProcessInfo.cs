@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Peach.Core;
 using System.Linq;
 using System.IO;
@@ -276,6 +277,58 @@ namespace Peach.Pro.OS.OSX
 			}
 
 			return ret.ToArray();
+		}
+
+		public void Kill(Process p)
+		{
+			if (p.HasExited)
+				return;
+
+			try
+			{
+				p.Kill();
+			}
+			catch (InvalidOperationException)
+			{
+			}
+
+			while (!p.HasExited)
+				Thread.Sleep(10);
+		}
+
+		public bool Kill(Process p, int milliseconds)
+		{
+			if (p.HasExited)
+				return true;
+
+			try
+			{
+				p.Kill();
+			}
+			catch (InvalidOperationException)
+			{
+			}
+
+			// Process.WaitForExit doesn't work on processes
+			// that were not started from within mono.
+			// waitpid returns ECHILD
+
+			var sw = Stopwatch.StartNew();
+
+			if (milliseconds <= 0)
+				return p.HasExited;
+
+			while (true)
+			{
+				if (p.HasExited)
+					return true;
+
+				var remain = milliseconds - sw.ElapsedMilliseconds;
+				if (remain <= 0)
+					return false;
+
+				Thread.Sleep(Math.Min((int)remain, 10));
+			}
 		}
 	}
 }

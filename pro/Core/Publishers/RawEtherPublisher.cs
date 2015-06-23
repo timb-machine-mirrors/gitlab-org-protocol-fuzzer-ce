@@ -18,13 +18,24 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("PcapTimeout", typeof(int), "Pcap internal read timeout (default 10)", "10")]
 	[Parameter("MinMTU", typeof(uint), "Minimum allowable MTU property value", DefaultMinMtu)]
 	[Parameter("MaxMTU", typeof(uint), "Maximum allowable MTU property value", DefaultMaxMtu)]
+	[Parameter("MinFrameSize", typeof(uint), "Short frames are padded to this minimum length", DefaultMinFrameSize)]
+	[Parameter("MaxFrameSize", typeof(uint), "Long frames are truncated to this maximum length", DefaultMaxFrameSize)]
 	[Parameter("Filter", typeof(string), "Input filter in libpcap format", "")]
 	[ObsoleteParameter("Protocol", "The RawEther publisher parameter 'Protocol' is no longer used.")]
 	public class RawEtherPublisher : EthernetPublisher
 	{
+		// We get BSOD if we don't pad to at least 15 bytes on Windows
+		// possibly only needed for VMWare network adapters
+		// https://www.winpcap.org/pipermail/winpcap-users/2012-November/004672.html
+		// Newer linux kernels (Ubuntu 15.04) will also error if sending packets less than 15 bytes
+		const string DefaultMinFrameSize = "15";
+		const string DefaultMaxFrameSize = DefaultMaxMtu;
+
 		public string Interface { get; set; }
 		public int PcapTimeout { get; set; }
 		public string Filter { get; set; }
+		public uint MinFrameSize { get; set; }
+		public uint MaxFrameSize { get; set; }
 
 		protected override string DeviceName
 		{
@@ -106,6 +117,8 @@ namespace Peach.Pro.Core.Publishers
 			_device.OnPacketArrival += OnPacketArrival;
 			_device.StartCapture();
 
+			Thread.Sleep(PcapTimeout);
+
 			_deviceName = _device.Interface.FriendlyName;
 
 			base.OnStart();
@@ -171,17 +184,9 @@ namespace Peach.Pro.Core.Publishers
 			if (Logger.IsDebugEnabled)
 				Logger.Debug("\n\n" + Utilities.HexDump(data));
 
-			var len = (int)Math.Min(data.Length, MaxMTU);
-
-			var bufLen = len;
-			// We get BSOD if we don't pad to at least 15 bytes on Windows
-			// possibly only needed for VMWare network adapters
-			// https://www.winpcap.org/pipermail/winpcap-users/2012-November/004672.html
-			if (Platform.GetOS() == Platform.OS.Windows)
-				bufLen = Math.Max(15, len);
-
-			var buf = new byte[bufLen];
-			var readLen = data.Read(buf, 0, len);
+			var len = (int)Math.Min(Math.Max(MinFrameSize, data.Length), MaxFrameSize);
+			var buf = new byte[len];
+			var bufLen = data.Read(buf, 0, len);
 
 			try
 			{
@@ -192,8 +197,8 @@ namespace Peach.Pro.Core.Publishers
 				throw new SoftException(ex.Message, ex);
 			}
 
-			if (readLen < data.Length)
-				throw new SoftException("Only sent {0} of {1} byte packet.".Fmt(buf, data.Length));
+			if (bufLen != data.Length)
+				Logger.Debug("Only sent {0} of {1} bytes to device.", bufLen, data.Length);
 		}
 	}
 }

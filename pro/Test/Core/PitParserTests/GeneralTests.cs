@@ -312,10 +312,18 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			Assert.False(dm.mutable("TheDataModel.ExcludeMe.block.num"));
 
 			var choice = dm["ExcludeMe"] as Peach.Core.Dom.Choice;
+			Assert.NotNull(choice);
+
+			// All in-scope children should be non-mutable
+			foreach (var elem in choice.PreOrderTraverse())
+				Assert.False(elem.isMutable, "{0} should not be mutable".Fmt(elem.debugName));
+
 			choice.SelectedElement = choice.choiceElements[1];
 
-			Assert.False(dm.mutable("TheDataModel.ExcludeMe.block2"));
-			Assert.False(dm.mutable("TheDataModel.ExcludeMe.block2.num"));
+			// Because block2 was not selected, its mutability should be not effected
+			Assert.True(dm.mutable("TheDataModel.ExcludeMe.block2"));
+			Assert.True(dm.mutable("TheDataModel.ExcludeMe.block2.num"));
+
 		}
 
 		[Test]

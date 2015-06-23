@@ -24,25 +24,26 @@ namespace Peach.Pro.Test.Core.Monitors
 		public void SetUp()
 		{
 			// Copy CrashableServer to tmp and give it a long name
-			var exe = Platform.GetOS() == Platform.OS.Windows ? "CrashableServer.exe" : "CrashableServer";
+			const string cs = "CrashableServer";
+
+			var suffix = Platform.GetOS() == Platform.OS.Windows ? ".exe" : "";
 			var tmp = Path.GetTempFileName();
 			var dir = Path.GetDirectoryName(tmp);
 
 			if (string.IsNullOrEmpty(dir))
 				Assert.Fail("Temp directory should not be null or empty");
 
-			_file= Path.Combine(dir, exe + "-" + Guid.NewGuid() + "-" + Guid.NewGuid());
+			_thisProcessName = cs + "-" + Guid.NewGuid() + "-" + Guid.NewGuid();
+			_file = Path.Combine(dir, _thisProcessName + suffix);
 
 			File.Delete(tmp);
-			File.Copy(Utilities.GetAppResourcePath(exe), _file);
-
-			_thisProcessName = Path.GetFileNameWithoutExtension(_file);
+			File.Copy(Utilities.GetAppResourcePath(cs + suffix), _file);
 
 			_proc = new Process
 			{
 				StartInfo = new ProcessStartInfo
 				{
-					FileName = exe,
+					FileName = _file,
 					Arguments = "127.0.0.1 0",
 					UseShellExecute = false,
 					RedirectStandardError = true,

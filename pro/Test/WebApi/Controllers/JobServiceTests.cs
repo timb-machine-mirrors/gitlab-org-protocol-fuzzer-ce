@@ -190,8 +190,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 		[Test]
 		public void TwoRunning()
 		{
-			// When jobs are running, their status should ne pulled from the job database
-			// since it will be more up to date than the node database
+			// All jobs now reside *only* in the NodeDatabase
 
 			var j1 = new Job(new JobRequest(), "pit1.xml");
 
@@ -200,6 +199,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			j1.LogPath = dir1;
 			j1.Status = JobStatus.Running;
 			j1.Pid = _process.Id;
+			File.Create(j1.DatabasePath);
 
 			_runningJob = new Job(new JobRequest(), "pit2.xml");
 
@@ -207,12 +207,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			Directory.CreateDirectory(dir2);
 			_runningJob.LogPath = dir2;
 			_runningJob.Status = JobStatus.Running;
-
-			using (var db = new NodeDatabase())
-			{
-				db.UpdateJob(j1);
-				db.UpdateJob(_runningJob);
-			}
+			File.Create(_runningJob.DatabasePath);
 
 			j1.IterationCount = 100;
 			j1.FaultCount = 5;
@@ -220,11 +215,11 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			_runningJob.IterationCount = 10;
 			_runningJob.FaultCount = 3;
 
-			using (var db = new JobDatabase(j1.DatabasePath))
-				db.InsertJob(j1);
-
-			using (var db = new JobDatabase(_runningJob.DatabasePath))
-				db.InsertJob(_runningJob);
+			using (var db = new NodeDatabase())
+			{
+				db.UpdateJob(j1);
+				db.UpdateJob(_runningJob);
+			}
 
 			var result = _browser.Get("/p/jobs", with => with.HttpRequest());
 
@@ -256,15 +251,13 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			// One job is ours and in start pending, the other job is not
 			// ours and also in start pending.
 
-			var j1 = new Job(new JobRequest(), "pit1.xml");
-			j1.Pid = _process.Id; // Make the pid not be us
+			var j1 = new Job(new JobRequest(), "pit1.xml") {Pid = _process.Id};
 
 			Assert.AreEqual(j1.Status, JobStatus.StartPending);
 
 			_runningJob = new Job(new JobRequest(), "pit2.xml");
 
-			var j2 = new Job(new JobRequest(), "pit2.xml");
-			j2.Pid = -1; // Make it be an invalid pid
+			var j2 = new Job(new JobRequest(), "pit2.xml") {Pid = -1};
 
 			using (var db = new NodeDatabase())
 			{
@@ -303,6 +296,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 				LogPath = dir1,
 				Status = JobStatus.Stopped
 			};
+			File.Create(j1.DatabasePath);
 
 			// Stopped job w/o database
 			var j2 = new Job(new JobRequest(), "pit2.xml")
@@ -316,9 +310,6 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			{
 				Status = JobStatus.Stopped
 			};
-
-			using (var db = new JobDatabase(j1.DatabasePath))
-				db.InsertJob(j1);
 
 			using (var db = new NodeDatabase())
 			{
@@ -401,11 +392,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			{
 				j.LogPath = Path.Combine(Configuration.LogRoot, j.PitFile);
 				Directory.CreateDirectory(j.LogPath);
-
-				using (var db = new JobDatabase(j.DatabasePath))
-				{
-					db.InsertJob(j);
-				}
+				File.Create(j.DatabasePath);
 			}
 
 			using (var db = new NodeDatabase())
@@ -452,15 +439,13 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			Directory.CreateDirectory(dir2);
 			_runningJob.LogPath = dir2;
 			_runningJob.Status = JobStatus.Running;
+			File.Create(_runningJob.DatabasePath);
 
 			using (var db = new NodeDatabase())
 			{
 				db.UpdateJob(j1);
 				db.UpdateJob(_runningJob);
 			}
-
-			using (var db = new JobDatabase(_runningJob.DatabasePath))
-				db.InsertJob(_runningJob);
 
 			var result = _browser.Get("/p/jobs", with =>
 			{
