@@ -4,12 +4,7 @@ using System.IO;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-
-#if MONO
-using Mono.Security.Protocol.Ntlm;
-#else
 using Peach.Pro.Core.Fixups.Ntlm;
-#endif
 
 namespace Peach.Pro.Core.Fixups
 {
