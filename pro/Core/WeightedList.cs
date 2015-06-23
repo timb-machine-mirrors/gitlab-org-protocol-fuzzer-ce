@@ -77,7 +77,7 @@ namespace Peach.Pro.Core
 		public KeyValuePair<long, T> UpperBound(long value)
 		{
 			if (value < 0 || value >= Max)
-				throw new ArgumentOutOfRangeException("bound");
+				throw new ArgumentOutOfRangeException("value");
 
 			var keys = items.Keys;
 			var low = 0;
