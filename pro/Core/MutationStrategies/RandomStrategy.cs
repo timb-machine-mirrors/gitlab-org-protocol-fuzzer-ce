@@ -78,6 +78,11 @@ namespace Peach.Pro.Core.MutationStrategies
 			public string ElementName { get; private set; }
 			public WeightedList<Mutator> Mutators { get; private set; }
 			public int SelectionWeight { get { return Mutators.SelectionWeight; } }
+
+			public int TransformWeight(Func<int, int> how)
+			{
+				return Mutators.TransformWeight(how);
+			}
 		}
 
 		[DebuggerDisplay("{Name} Count = {Count}")]
