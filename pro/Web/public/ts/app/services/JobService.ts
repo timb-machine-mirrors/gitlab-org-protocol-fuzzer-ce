@@ -3,7 +3,7 @@
 module Peach {
 	"use strict";
 
-	export var JOB_INTERVAL = 1000;
+	export var JOB_INTERVAL = 3000;
 	
 	export class JobService {
 		static $inject = [
@@ -29,12 +29,16 @@ module Peach {
 		private job: IJob;
 		private faults: IFaultSummary[] = [];
 		private pending: ng.IPromise<IJob>;
+		private isActive: boolean;
 		
 		public OnEnter(id: string): void {
+			this.isActive = true;
 			this.onPoll(C.Api.JobUrl.replace(':id', id));
 		}
 		
 		public OnExit(): void {
+			this.isActive = false;
+
 			if (this.poller) {
 				this.$timeout.cancel(this.poller);
 				this.poller = undefined;
@@ -191,6 +195,9 @@ module Peach {
 		private onPoll(url: string): void {
 			this.pending = this.$http.get(url)
 				.then((response: ng.IHttpPromiseCallbackArg<IJob>) => {
+					if (!this.isActive)
+						return undefined;
+
 					var stopPending = (this.job && this.job.status === JobStatus.StopPending);
 					var killPending = (this.job && this.job.status === JobStatus.KillPending);
 
@@ -224,6 +231,8 @@ module Peach {
 
 					return undefined;
 				},(response: ng.IHttpPromiseCallbackArg<IError>) => {
+					if (!this.isActive)
+						return undefined;
 					this.$state.go(C.States.MainError, { message: response.data.errorMessage });
 				})
 			;
