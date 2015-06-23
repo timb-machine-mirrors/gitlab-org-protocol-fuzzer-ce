@@ -1,5 +1,4 @@
 using System;
-using Newtonsoft.Json;
 using Peach.Pro.Core.Storage;
 
 namespace Peach.Pro.Core.WebServices.Models
@@ -60,5 +59,10 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// How to resolve the event if it is an issue
 		/// </summary>
 		public string Resolve { get; set; }
+
+		public override string ToString()
+		{
+			return string.Format("{0}: {1}", Status, Short);
+		}
 	}
 }
