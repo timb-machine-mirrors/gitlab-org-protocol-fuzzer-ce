@@ -233,12 +233,14 @@ namespace Peach.Pro.Test.Core.Runtime
 				{
 					DatabaseTests.AssertResult(db.GetTestEventsByJob(runner.Id), new[]
 					{
-						 new TestEvent(1, runner.Id, TestStatus.Pass, 
-							 "Loading pit file", "Loading pit file '{0}'".Fmt(_tmp.Path), null),
-						 new TestEvent(2, runner.Id, TestStatus.Pass, 
-							 "Starting fuzzing engine", "Starting fuzzing engine", null),
-						 new TestEvent(3, runner.Id, TestStatus.Pass, 
-							 "Running iteration", "Running the initial control record iteration", null),
+						new TestEvent(1, runner.Id, TestStatus.Pass, 
+							"Loading pit file", "Loading pit file '{0}'".Fmt(_tmp.Path), null),
+						new TestEvent(2, runner.Id, TestStatus.Pass, 
+							"Starting fuzzing engine", "Starting fuzzing engine", null),
+						new TestEvent(3, runner.Id, TestStatus.Pass, 
+							"Running iteration", "Running the initial control record iteration", null),
+						new TestEvent(4, runner.Id, TestStatus.Pass, 
+							"Flushing logs.", "Flushing logs.", null),
 					});
 				}
 
@@ -267,21 +269,28 @@ namespace Peach.Pro.Test.Core.Runtime
 					{
 						DatabaseTests.AssertResult(db.GetTestEventsByJob(runner.Id), new[]
 						{
-							 new TestEvent(
-								 1, 
-								 runner.Id, 
-								 TestStatus.Fail, 
-								 "Loading pit file", 
-								 "Loading pit file '{0}'".Fmt(xmlFile.Path), 
+							new TestEvent(
+								1, 
+								runner.Id, 
+								TestStatus.Fail, 
+								"Loading pit file", 
+								"Loading pit file '{0}'".Fmt(xmlFile.Path), 
 #if MONO
-								 "Error: XML Failed to load: Text node cannot appear in this state.  Line 21, position 1."),
+								"Error: XML Failed to load: Text node cannot appear in this state.  Line 21, position 1."),
 #else
-								 "Error: XML Failed to load: Data at the root level is invalid. Line 21, position 1."),
+								"Error: XML Failed to load: Data at the root level is invalid. Line 21, position 1."),
 #endif
+							new TestEvent(
+								2, 
+								runner.Id, 
+								TestStatus.Pass, 
+								"Flushing logs.", 
+								"Flushing logs.", 
+								null),
 						});
 
 						var logs = db.GetJobLogs(runner.Id).ToList();
-						Assert.AreEqual(1, logs.Count, "Missing JobLogs");
+						Assert.AreEqual(2, logs.Count, "Missing JobLogs");
 						foreach (var log in logs)
 							Console.WriteLine(log.Message);
 					}

@@ -350,6 +350,7 @@ namespace Peach.Pro.Core.Storage
 			{
 				EnqueueBack(sw =>
 				{
+					_status = JobStatus.Stopped; 
 					copy.StopDate = now;
 					copy.Mode = !copy.IsControlIteration ? JobMode.Reporting : JobMode.Fuzzing;
 					DoUpdateRunningJob(sw, copy);

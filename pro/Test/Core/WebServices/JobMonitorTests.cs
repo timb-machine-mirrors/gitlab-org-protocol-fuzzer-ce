@@ -279,12 +279,14 @@ namespace Peach.Pro.Test.Core.WebServices
 
 				DatabaseTests.AssertResult(db.GetTestEventsByJob(job.Guid), new[]
 				{
-					 new TestEvent(1, job.Guid, TestStatus.Pass, "Loading pit file", 
-						 "Loading pit file '{0}'".Fmt(_tmp.Path), null),
-					 new TestEvent(2, job.Guid, TestStatus.Pass, "Starting fuzzing engine", 
-						 "Starting fuzzing engine", null),
-					 new TestEvent(3, job.Guid, TestStatus.Pass, "Running iteration", 
-						 "Running the initial control record iteration", null),
+					new TestEvent(1, job.Guid, TestStatus.Pass, "Loading pit file", 
+						"Loading pit file '{0}'".Fmt(_tmp.Path), null),
+					new TestEvent(2, job.Guid, TestStatus.Pass, "Starting fuzzing engine", 
+						"Starting fuzzing engine", null),
+					new TestEvent(3, job.Guid, TestStatus.Pass, "Running iteration", 
+						"Running the initial control record iteration", null),
+					new TestEvent(4, job.Guid, TestStatus.Pass, 
+						"Flushing logs.", "Flushing logs.", null),
 				});
 			}
 
@@ -315,24 +317,31 @@ namespace Peach.Pro.Test.Core.WebServices
 				{
 					DatabaseTests.AssertResult(db.GetTestEventsByJob(job.Guid), new[]
 					{
-						 new TestEvent(
-							 1, 
-							 job.Guid, 
-							 TestStatus.Fail, 
-							 "Loading pit file", 
-							 "Loading pit file '{0}'".Fmt(xmlFile.Path), 
+						new TestEvent(
+							1, 
+							job.Guid, 
+							TestStatus.Fail, 
+							"Loading pit file", 
+							"Loading pit file '{0}'".Fmt(xmlFile.Path), 
 #if MONO
-							 "Error: XML Failed to load: Text node cannot appear in this state.  Line 21, position 1."),
+							"Error: XML Failed to load: Text node cannot appear in this state.  Line 21, position 1."),
 #else
-							 "Error: XML Failed to load: Data at the root level is invalid. Line 21, position 1."),
+							"Error: XML Failed to load: Data at the root level is invalid. Line 21, position 1."),
 #endif
+							new TestEvent(
+								2, 
+								job.Guid, 
+								TestStatus.Pass, 
+								"Flushing logs.", 
+								"Flushing logs.", 
+								null),
 					});
 
 					job = db.GetJob(job.Guid);
 					Assert.IsNotNull(job);
 
 					var logs = db.GetJobLogs(job.Guid).ToList();
-					Assert.AreEqual(1, logs.Count, "Missing JobLogs");
+					Assert.AreEqual(2, logs.Count, "Missing JobLogs");
 					foreach (var log in logs)
 						Console.WriteLine(log.Message);
 				}
@@ -362,23 +371,30 @@ namespace Peach.Pro.Test.Core.WebServices
 					DatabaseTests.AssertResult(db.GetTestEventsByJob(job.Guid), new[]
 					{
 						 new TestEvent(
-							 1, 
-							 job.Guid, 
-							 TestStatus.Fail, 
-							 "Loading pit file", 
-							 "Loading pit file '{0}'".Fmt(xmlFile.Path),
+							1, 
+							job.Guid, 
+							TestStatus.Fail, 
+							"Loading pit file", 
+							"Loading pit file '{0}'".Fmt(xmlFile.Path),
 #if MONO
-							 "Error: XML Failed to load: Text node cannot appear in this state.  Line 21, position 1."),
+							"Error: XML Failed to load: Text node cannot appear in this state.  Line 21, position 1."),
 #else
-							 "Error: XML Failed to load: Data at the root level is invalid. Line 21, position 1."),
+							"Error: XML Failed to load: Data at the root level is invalid. Line 21, position 1."),
 #endif
+							new TestEvent(
+								2, 
+								job.Guid, 
+								TestStatus.Pass, 
+								"Flushing logs.", 
+								"Flushing logs.", 
+								null),
 					});
 
 					job = db.GetJob(job.Guid);
 					Assert.IsNotNull(job);
 
 					var logs = db.GetJobLogs(job.Guid).ToList();
-					Assert.AreEqual(1, logs.Count, "Missing JobLogs");
+					Assert.AreEqual(2, logs.Count, "Missing JobLogs");
 					foreach (var log in logs)
 						Console.WriteLine(log.Message);
 				}

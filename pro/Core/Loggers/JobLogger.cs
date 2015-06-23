@@ -289,7 +289,7 @@ namespace Peach.Pro.Core.Loggers
 
 		public void RestoreLogging(Guid id)
 		{
-			Logger.Trace("RestoringLogging>");
+			Logger.Trace("RestoreLogging>");
 
 			ConfigureLogging(_tempTarget, null);
 			_tempTarget = null;
