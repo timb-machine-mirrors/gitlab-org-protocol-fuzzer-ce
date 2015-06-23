@@ -141,54 +141,19 @@ namespace Peach.Pro.Core.Storage
 			var report = new Report
 			{
 				Job = job,
-
+				BucketCount  = Connection.ExecuteScalar<int>(Sql.SelectBucketCount),
 				BucketDetails = LoadTable<BucketDetail>()
-					.OrderByDescending(m => m.FaultCount)
-					.ThenBy(m => m.MajorHash)
-					.ThenBy(m => m.MinorHash)
-					.ThenBy(m => m.Exploitability)
-					.ToList(),
-
-				MutatorMetrics = LoadTable<MutatorMetric>()
-					.OrderByDescending(m => m.BucketCount)
-					.ThenByDescending(m => m.FaultCount)
-					.ThenByDescending(m => m.IterationCount)
-					.ThenByDescending(m => m.ElementCount)
-					.ThenBy(m => m.Mutator)
-					.ToList(),
-
-				ElementMetrics = LoadTable<ElementMetric>()
-					.OrderByDescending(m => m.BucketCount)
-					.ThenByDescending(m => m.FaultCount)
-					.ThenByDescending(m => m.IterationCount)
-					.ThenBy(m => m.State)
-					.ThenBy(m => m.Action)
-					.ThenBy(m => m.Element)
-					.ToList(),
-
-				StateMetrics = LoadTable<StateMetric>()
-					.OrderByDescending(m => m.ExecutionCount)
-					.ThenBy(m => m.State)
-					.ToList(),
-
-				DatasetMetrics = LoadTable<DatasetMetric>()
-					.OrderByDescending(m => m.BucketCount)
-					.ThenByDescending(m => m.FaultCount)
-					.ThenByDescending(m => m.IterationCount)
-					.ThenBy(m => m.Dataset)
-					.ToList(),
-
-				BucketMetrics = LoadTable<BucketMetric>()
-					.OrderByDescending(m => m.FaultCount)
-					.ThenByDescending(m => m.IterationCount)
-					.ThenBy(m => m.Mutator)
-					.ThenBy(m => m.Bucket)
-					.ThenBy(m => m.Element)
-					.ToList(),
+					.Select(m =>
+					{
+						m.Mutations = GetFaultMutations(m.Iteration);
+						return m;
+					}),
+				MutatorMetrics = LoadTable<MutatorMetric>(),
+				ElementMetrics = LoadTable<ElementMetric>(),
+				StateMetrics = LoadTable<StateMetric>(),
+				DatasetMetrics = LoadTable<DatasetMetric>(),
+				BucketMetrics = LoadTable<BucketMetric>(),
 			};
-
-			foreach (var b in report.BucketDetails)
-				b.Mutations = GetFaultMutations(b.Iteration).ToList();
 
 			return report;
 		}
