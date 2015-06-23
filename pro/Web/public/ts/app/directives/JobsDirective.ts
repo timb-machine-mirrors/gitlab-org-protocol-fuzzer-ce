@@ -51,6 +51,10 @@ module Peach {
 			return !_.isUndefined(this.pendingDelete) || job.status !== JobStatus.Stopped;
 		}
 
+		public IsActive(job: IJob): boolean {
+			return job.status !== JobStatus.Stopped;
+		}
+
 		public OnRemove($event: ng.IAngularEvent, job: IJob): void {
 			$event.preventDefault();
 			$event.stopPropagation();
@@ -77,7 +81,7 @@ module Peach {
 		private refresh(promise: ng.IPromise<IJob[]>): void {
 			promise.then((jobs: IJob[]) => {
 				if (this.$scope.limit) {
-					this.AllJobs = _.last(jobs, this.$scope.limit);
+					this.AllJobs = _.takeRight(jobs, this.$scope.limit);
 				} else {
 					this.AllJobs = jobs;
 				}

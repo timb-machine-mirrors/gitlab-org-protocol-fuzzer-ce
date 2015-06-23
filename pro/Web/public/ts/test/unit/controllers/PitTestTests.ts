@@ -8,7 +8,7 @@ describe("Peach", () => {
 
 	describe('PitTestController', () => {
 		var $httpBackend: ng.IHttpBackendService;
-		var $interval: ng.IIntervalService;
+		var $timeout: ng.ITimeoutService;
 		var ctrl: Peach.PitTestController;
 
 		var pitId = 'PIT_GUID';
@@ -33,7 +33,7 @@ describe("Peach", () => {
 			var $templateCache = <ng.ITemplateCacheService> $injector.get(C.Angular.$templateCache);
 
 			$httpBackend = $injector.get(C.Angular.$httpBackend);
-			$interval = $injector.get(C.Angular.$interval);
+			$timeout = $injector.get(C.Angular.$timeout);
 
 			$templateCache.put(C.Templates.Home, '');
 			$templateCache.put(C.Templates.Pit.Configure, '');
@@ -69,20 +69,17 @@ describe("Peach", () => {
 				jobUrl: '/p/jobs/JOB_ID',
 				firstNodeUrl: testUrl
 			};
-			$httpBackend.expectPOST(Peach.C.Api.Jobs, req).respond(job);
-			ctrl.OnBeginTest();
-			$httpBackend.flush();
-
 			var result1: Peach.ITestResult = {
 				status: 'active',
 				log: '',
 				events: []
 			};
 
+			ctrl.OnBeginTest();
+			$httpBackend.expectPOST(Peach.C.Api.Jobs, req).respond(job);
 			$httpBackend.expectGET(testUrl).respond(result1);
-			$interval.flush(Peach.TEST_INTERVAL);
 			$httpBackend.flush();
-
+			
 			expect(ctrl.CanBeginTest).toBe(false);
 			expect(ctrl.CanContinue).toBe(false);
 
@@ -95,7 +92,7 @@ describe("Peach", () => {
 
 			$httpBackend.expectGET(testUrl).respond(result2);
 			$httpBackend.expectDELETE(job.jobUrl).respond({});
-			$interval.flush(Peach.TEST_INTERVAL);
+			$timeout.flush(Peach.TEST_INTERVAL);
 			$httpBackend.flush();
 
 			expect(ctrl.CanBeginTest).toBe(true);

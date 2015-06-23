@@ -9,7 +9,7 @@
 					 peach:auto-focus />
 		<span class="open"
 					ng-click="vm.ToggleOptions()"
-					ng-class="{disabled: !data.length}">
+					ng-disabled="!data.length">
 		</span>
 		<ul class="options"
 		    ng-if="showOptions && options.length">
