@@ -31,7 +31,6 @@
 		<ul class="list-inline library">
 			<li ng-repeat="entry in cat.Pits">
 				<a href=""
-					tooltip="{{entry.Pit.description}}"
 					ng-click="vm.OnSelectPit(entry)">{{entry.Pit.name}}</a>
 			</li>
 		</ul>
@@ -42,7 +41,7 @@
 	<h3>Configurations</h3>
 </div>
 <p>
-	The Configurations section contains existing Peach Pit (test module) configurations. 
+	The Configurations section contains existing Peach Pit configurations. 
 	Selecting an existing configuration allows editing the configuration and starting a new fuzzing job.
 </p>
 <accordion close-others="false">
@@ -52,7 +51,6 @@
 		<ul class="list-inline library">
 			<li ng-repeat="entry in cat.Pits">
 				<a href=""
-					tooltip="{{entry.Pit.description}}"
 					ng-click="vm.OnSelectPit(entry)">{{entry.Pit.name}}</a>
 			</li>
 		</ul>

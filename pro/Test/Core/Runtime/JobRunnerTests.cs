@@ -84,7 +84,7 @@ namespace Peach.Pro.Test.Core.Runtime
 
 		class SafeRunner : IDisposable
 		{
-			Job _job;
+			readonly Job _job;
 			public JobRunner JobRunner { get; private set; }
 			readonly Thread _thread;
 			Exception _caught;
@@ -116,6 +116,8 @@ namespace Peach.Pro.Test.Core.Runtime
 
 			public void WaitUntil(params JobStatus[] status)
 			{
+				Console.WriteLine("WaitUntil({0})", string.Join(",", status));
+
 				// waits up to 20 seconds
 				for (var i = 0; i < 40; i++)
 				{
@@ -126,13 +128,16 @@ namespace Peach.Pro.Test.Core.Runtime
 
 					Thread.Sleep(500);
 				}
+				Console.WriteLine("Timeout");
 				Assert.Fail("Timeout");
 			}
 
 			public void WaitForFinish()
 			{
 				Console.WriteLine("Waiting for finish");
-				Assert.IsTrue(_thread.Join(TimeSpan.FromSeconds(20)), "Timeout waiting for job to finish");
+				var ret = _thread.Join(TimeSpan.FromSeconds(20));
+				Console.WriteLine("Done");
+				Assert.IsTrue(ret, "Timeout waiting for job to finish");
 				Assert.AreEqual(JobStatus.Stopped, GetJob().Status);
 				if (_caught != null)
 					throw new AggregateException(_caught);
@@ -140,40 +145,23 @@ namespace Peach.Pro.Test.Core.Runtime
 
 			public Job GetJob()
 			{
-				Job job;
 				using (var db = new NodeDatabase())
 				{
-					job = db.GetJob(Id);
+					var job = db.GetJob(Id);
 					Assert.IsNotNull(job);
-				}
-
-				if (!File.Exists(job.DatabasePath))
 					return job;
-
-				using (var db = new JobDatabase(job.DatabasePath))
-				{
-					job = db.GetJob(Id);
-					Assert.IsNotNull(job);
 				}
-
-				return job;
 			}
 
 			public void VerifyDatabase(int expectedLogs)
 			{
-				Job job;
 				using (var db = new NodeDatabase())
 				{
-					job = db.GetJob(Id);
+					var job = db.GetJob(Id);
 					Assert.IsNotNull(job);
 
 					var logs = db.GetJobLogs(job.Guid).ToList();
 					Assert.AreEqual(expectedLogs, logs.Count, "JobLog mismatch");
-				}
-
-				using (var db = new JobDatabase(job.DatabasePath))
-				{
-					Assert.IsNotNull(db.GetJob(Id));
 				}
 			}
 
@@ -204,8 +192,10 @@ namespace Peach.Pro.Test.Core.Runtime
 			using (var runner = new SafeRunner(_tmp.Path, jobRequest))
 			{
 				runner.WaitUntil(JobStatus.Running);
+				Console.WriteLine("Stop");
 				runner.JobRunner.Stop();
 				runner.WaitForFinish();
+				Console.WriteLine("VerifyDatabase");
 				runner.VerifyDatabase(0);
 			}
 		}

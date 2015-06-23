@@ -13,6 +13,12 @@ INSERT INTO [JobLog] (
 	@Message
 );";
 
+		public const string SelectTestEvents = @"
+SELECT * 
+FROM [TestEvent] 
+WHERE JobId = @JobId;
+";
+
 		public const string SelectJobLogs = @"
 SELECT * 
 FROM [JobLog] 
@@ -71,6 +77,19 @@ INSERT INTO [Job] (
 	@LogPath,
 	@PeachVersion
 );";
+
+		public const string UpdateRunningJob = @"
+UPDATE [Job]
+SET 
+	IterationCount = @IterationCount,
+	FaultCount = @FaultCount,
+	Status = @Status,
+	Mode = @Mode,
+	Runtime = @Runtime,
+	HeartBeat = @HeartBeat
+WHERE
+	Id = @Id
+";
 
 		public const string UpdateJob = @"
 UPDATE [Job]
@@ -217,6 +236,7 @@ INSERT INTO FaultDetail (
 	Seed,
 	IterationStart,
 	IterationStop,
+	Flags,
 	FaultPath
 ) VALUES (
 	@Reproducible,
@@ -231,6 +251,7 @@ INSERT INTO FaultDetail (
 	@Seed,
 	@IterationStart,
 	@IterationStop,
+	@Flags,
 	@FaultPath
 );" + GetLastRowId;
 
@@ -248,11 +269,54 @@ INSERT INTO FaultFile (
 );" + GetLastRowId;
 
 		public const string SelectFaultDetailById = @"
-SELECT * FROM FaultDetail WHERE Id = @Id;
+SELECT * 
+FROM FaultDetail 
+WHERE Id = @Id;
+";
+
+		public const string SelectFaultFilesByFaultId = @"
+SELECT * 
+FROM FaultFile 
+WHERE FaultDetailId = @Id;
 ";
 
 		public const string SelectFaultFilesById = @"
-SELECT * FROM FaultFile WHERE FaultDetailId = @Id;
+SELECT * 
+FROM FaultFile 
+WHERE Id = @Id;
+";
+
+		public const string SelectMutationByIteration = @"
+SELECT * 
+FROM ViewFaults 
+WHERE Iteration = @Iteration;
+";
+
+		public const string InsertNames = @"
+INSERT INTO NamedItem (
+	Id, 
+	Name
+) VALUES (
+	@Id, 
+	@Name
+);
+";
+
+		public const string UpdateStates = @"
+UPDATE State 
+SET Count = @Count 
+WHERE Id = @Id;
+";
+
+		public const string JobMigrateV1 = @"
+ALTER TABLE FaultDetail 
+ADD COLUMN 
+	Flags INTEGER NOT NULL DEFAULT 0
+;
+";
+
+		public const string JobMigrateV2 = @"
+DROP TABLE Job;
 ";
 	}
 }

@@ -5,6 +5,14 @@ using Peach.Pro.Core.Storage;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
+	[Flags]
+	public enum IterationFlags
+	{
+		None = 0x0,
+		Control = 0x1,
+		Record = 0x2,
+	}
+
 	public class FaultSummary
 	{
 		/// <summary>
@@ -37,6 +45,11 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// The iteration this fault was detected on.
 		/// </summary>
 		public long Iteration { get; set; }
+
+		/// <summary>
+		/// The type of iteration this fault was detected on.
+		/// </summary>
+		public IterationFlags Flags { get; set; }
 
 		/// <summary>
 		/// The time this fault was recorded at.

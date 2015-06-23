@@ -1,4 +1,5 @@
 from waflib.TaskGen import feature, after_method
+from waflib import Logs
 
 def configure(conf):
 	v = conf.env

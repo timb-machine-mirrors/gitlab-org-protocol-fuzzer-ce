@@ -2,6 +2,7 @@
 using Peach.Core;
 using Peach.Pro.Core.Storage;
 using Peach.Core.Test;
+using Peach.Pro.Core.WebServices.Models;
 
 namespace Peach.Pro.Test.Core.Storage
 {
@@ -10,12 +11,12 @@ namespace Peach.Pro.Test.Core.Storage
 	[Quick]
 	class MetricsCacheTests
 	{
-		TempFile _tmp;
+		TempDirectory _tmp;
 
 		[SetUp]
 		public void SetUp()
 		{
-			_tmp = new TempFile();
+			_tmp = new TempDirectory();
 		}
 
 		[TearDown]
@@ -25,10 +26,11 @@ namespace Peach.Pro.Test.Core.Storage
 		}
 
 		[Test]
-		public void TestFKConstraint1()
+		public void TestFkConstraint1()
 		{
-			var cache = new MetricsCache(_tmp.Path);
-			cache.IterationStarting(1);
+			var job = new Job { LogPath = _tmp.Path };
+			var cache = new AsyncDbCache(job);
+			cache.IterationStarting(JobMode.Fuzzing);
 			cache.StateStarting("S1", 1);
 			cache.ActionStarting("Action");
 			cache.ActionStarting("A1");
@@ -57,7 +59,7 @@ namespace Peach.Pro.Test.Core.Storage
 			cache.ActionStarting("A3");
 			cache.ActionStarting("A4");
 			cache.ActionStarting("ACALL");
-			cache.IterationStarting(1);
+			cache.IterationStarting(JobMode.Fuzzing);
 			cache.StateStarting("S1", 1);
 			cache.ActionStarting("Action");
 			cache.ActionStarting("A1");
@@ -91,6 +93,7 @@ namespace Peach.Pro.Test.Core.Storage
 			cache.DataMutating("P2", "TheDataModel.Length", "NumberVariance", "Data");
 			cache.DataMutating("P3", "TheDataModel.Length", "SizedDataEdgeCase", "Data");
 			cache.IterationFinished();
+			cache.TestFinished();
 		}
 	}
 }

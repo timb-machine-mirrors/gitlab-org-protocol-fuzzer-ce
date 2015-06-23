@@ -4,7 +4,6 @@ using System.Globalization;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Pro.Core.Storage;
-using System.Linq;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Core.Test;
 
@@ -15,15 +14,16 @@ namespace Peach.Pro.Test.Core.Storage
 	[Quick]
 	class MetricsTests
 	{
-		TempFile _tmp;
+		Job _job;
+		TempDirectory _tmp;
 		DateTime _now;
 
-		public static void MakeSampleCache(DateTime now, string dbPath)
+		public static void MakeSampleCache(DateTime now, Job job)
 		{
-			var cache = new MetricsCache(dbPath);
-
+			var cache = new AsyncDbCache(job);
+			
 			// NORMAL
-			cache.IterationStarting(1);
+			cache.IterationStarting(JobMode.Fuzzing);
 			cache.StateStarting("S1", 1);
 			cache.StateStarting("S2", 1);
 			cache.ActionStarting("A1");
@@ -37,7 +37,7 @@ namespace Peach.Pro.Test.Core.Storage
 			cache.IterationFinished();
 
 			// NORMAL
-			cache.IterationStarting(2);
+			cache.IterationStarting(JobMode.Fuzzing);
 			cache.StateStarting("S1", 1);
 			cache.StateStarting("S2", 1);
 			cache.ActionStarting("A1");
@@ -46,7 +46,7 @@ namespace Peach.Pro.Test.Core.Storage
 			cache.IterationFinished();
 
 			// REPRO FAIL
-			cache.IterationStarting(2);
+			cache.IterationStarting(JobMode.Reproducing);
 			cache.StateStarting("S1", 1);
 			cache.StateStarting("S2", 1);
 			cache.ActionStarting("A1");
@@ -55,7 +55,7 @@ namespace Peach.Pro.Test.Core.Storage
 			// no iteration finished because we're reproducing
 
 			// REPRO SUCCESS
-			cache.IterationStarting(1);
+			cache.IterationStarting(JobMode.Searching);
 			cache.StateStarting("S1", 1);
 			cache.StateStarting("S2", 1);
 			cache.ActionStarting("A1");
@@ -63,61 +63,76 @@ namespace Peach.Pro.Test.Core.Storage
 			cache.DataMutating("P1", "E1", "M1", "");
 			cache.ActionStarting("A3");
 			// Simulate S2_A3 soft exception, so we don't run S3
-			cache.OnFault(new FaultMetric
+			cache.OnFault(new FaultDetail
 			{
 				Iteration = 1,
+				Title = "Fault Title Goes Here",
 				MajorHash = "AAA",
 				MinorHash = "BBB",
-				Timestamp = now,
-				Hour = now.Hour,
+				TimeStamp = now,
+				Files = new List<FaultFile>(),
+				Source = "WindowsDebugger",
+				Exploitability = "UNKNOWN",
+				Description = "Fault Description Goes Here",
+				Reproducible = false,
 			});
 
 			// NORMAL
-			cache.IterationStarting(3);
+			cache.IterationStarting(JobMode.Fuzzing);
 			cache.StateStarting("S3", 1);
 			cache.ActionStarting("A3");
 			cache.DataMutating("P3", "E3", "M3", "D3");
 			cache.IterationFinished();
 
 			// REPRO SUCCESS
-			cache.IterationStarting(3);
+			cache.IterationStarting(JobMode.Reproducing);
 			cache.StateStarting("S3", 1);
 			cache.ActionStarting("A3");
 			cache.DataMutating("P3", "E3", "M3", "D3");
-			cache.OnFault(new FaultMetric
+			cache.OnFault(new FaultDetail
 			{
 				Iteration = 3,
+				Title = "Fault Title Goes Here",
 				MajorHash = "AAA",
 				MinorHash = "BBB",
-				Timestamp = now,
-				Hour = now.Hour,
+				TimeStamp = now,
+				Files = new List<FaultFile>(),
+				Source = "WindowsDebugger",
+				Exploitability = "UNKNOWN",
+				Description = "Fault Description Goes Here",
+				Reproducible = false,
 			});
 
 			// NORMAL
-			cache.IterationStarting(4);
+			cache.IterationStarting(JobMode.Fuzzing);
 			cache.StateStarting("S4", 1);
 			cache.ActionStarting("A4");
 			cache.DataMutating("P4", "E4", "M4", "D4");
 			cache.IterationFinished();
 
 			// REPRO SUCCESS
-			cache.IterationStarting(4);
+			cache.IterationStarting(JobMode.Reproducing);
 			cache.StateStarting("S4", 1);
 			cache.ActionStarting("A4");
 			cache.DataMutating("P4", "E4", "M4", "D4");
 			cache.ActionStarting("A5");
 			cache.DataMutating("P4", "E5", "M9", "D9");
-			cache.OnFault(new FaultMetric
+			cache.OnFault(new FaultDetail
 			{
 				Iteration = 4,
+				Title = "Fault Title Goes Here",
 				MajorHash = "XXX",
 				MinorHash = "YYY",
-				Timestamp = now + TimeSpan.FromHours(1),
-				Hour = now.Hour + 1,
+				TimeStamp = now + TimeSpan.FromHours(1),
+				Files = new List<FaultFile>(),
+				Source = "WindowsDebugger",
+				Exploitability = "UNKNOWN",
+				Description = "Fault Description Goes Here",
+				Reproducible = true,
 			});
 
 			// NORMAL
-			cache.IterationStarting(5);
+			cache.IterationStarting(JobMode.Fuzzing);
 			cache.StateStarting("S5", 1);
 			cache.ActionStarting("A5");
 			cache.DataMutating("P5", "E5", "M5", "D5");
@@ -127,79 +142,102 @@ namespace Peach.Pro.Test.Core.Storage
 			cache.IterationFinished();
 
 			// REPRO SUCCESS
-			cache.IterationStarting(5);
+			cache.IterationStarting(JobMode.Reproducing);
 			cache.StateStarting("S5", 1);
 			cache.ActionStarting("A5");
 			cache.DataMutating("P5", "E5", "M5", "D5");
 			cache.StateStarting("S5", 2);
 			cache.ActionStarting("A5");
 			cache.DataMutating("P5", "E5", "M5", "D5");
-			cache.OnFault(new FaultMetric
+			cache.OnFault(new FaultDetail
 			{
 				Iteration = 5,
+				Title = "Fault Title Goes Here",
 				MajorHash = "AAA",
 				MinorHash = "YYY",
-				Timestamp = now + TimeSpan.FromHours(2),
-				Hour = now.Hour + 2,
+				TimeStamp = now + TimeSpan.FromHours(2),
+				Files = new List<FaultFile>(),
+				Source = "WindowsDebugger",
+				Exploitability = "UNKNOWN",
+				Description = "Fault Description Goes Here",
+				Reproducible = false,
 			});
 
 			// NORMAL
-			cache.IterationStarting(6);
+			cache.IterationStarting(JobMode.Fuzzing);
 			cache.StateStarting("S3", 1);
 			cache.ActionStarting("A3");
 			cache.DataMutating("P3", "E3", "M3", "D8");
 			cache.IterationFinished();
 
-			cache.IterationStarting(6);
+			cache.IterationStarting(JobMode.Reproducing);
 			cache.StateStarting("S3", 1);
 			cache.ActionStarting("A3");
 			cache.DataMutating("P3", "E3", "M3", "D8");
-			cache.OnFault(new FaultMetric
+			cache.OnFault(new FaultDetail
 			{
 				Iteration = 6,
+				Title = "Fault Title Goes Here",
 				MajorHash = "AAA",
 				MinorHash = "BBB",
-				Timestamp = now + TimeSpan.FromHours(3),
-				Hour = now.Hour + 3,
+				TimeStamp = now + TimeSpan.FromHours(3),
+				Files = new List<FaultFile>(),
+				Source = "WindowsDebugger",
+				Exploitability = "UNKNOWN",
+				Description = "Fault Description Goes Here",
+				Reproducible = true,
 			});
 
 			// NORMAL
-			cache.IterationStarting(7);
+			cache.IterationStarting(JobMode.Fuzzing);
 			cache.StateStarting("S3", 1);
 			cache.ActionStarting("A3");
 			cache.DataMutating("P3", "E3", "M3", "D3");
 			cache.IterationFinished();
 
 			// NORMAL
-			cache.IterationStarting(8);
+			cache.IterationStarting(JobMode.Fuzzing);
 			cache.StateStarting("S3", 1);
 			cache.ActionStarting("A3");
 			cache.DataMutating("P3", "E3", "M3", "D3");
 			cache.IterationFinished();
 
-			cache.IterationStarting(8);
+			cache.IterationStarting(JobMode.Reproducing);
 			cache.StateStarting("S3", 1);
 			cache.ActionStarting("A3");
 			cache.DataMutating("P3", "E3", "M3", "D3");
-			cache.OnFault(new FaultMetric
+			cache.OnFault(new FaultDetail
 			{
 				Iteration = 8,
+				Title = "Fault Title Goes Here",
 				MajorHash = "XXX",
 				MinorHash = "YYY",
-				Timestamp = now + TimeSpan.FromHours(4),
-				Hour = now.Hour + 4,
+				TimeStamp = now + TimeSpan.FromHours(4),
+				Files = new List<FaultFile>(),
+				Source = "WindowsDebugger",
+				Exploitability = "UNKNOWN",
+				Description = "Fault Description Goes Here",
+				Reproducible = true,
 			});
+
+			cache.TestFinished();
 		}
 
 		[SetUp]
 		public void SetUp()
 		{
-			_tmp = new TempFile();
+			_tmp = new TempDirectory();
 
 			// The database doesn't store milliseconds/microseconds, so don't include them in the test
-			_now = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal);
+			_now = DateTime.Parse(
+				"2015-06-18 00:00:00",
+				CultureInfo.InvariantCulture,
+				DateTimeStyles.AssumeLocal
+			);
 
-			MakeSampleCache(_now, _tmp.Path);
+			_job = new Job { LogPath = _tmp.Path };
+
+			MakeSampleCache(_now, _job);
 		}
 
 		[TearDown]
@@ -211,7 +249,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryStates()
 		{
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_job.DatabasePath))
 			{
 				DatabaseTests.AssertResult(db.LoadTable<StateMetric>(), new[]
 				{
@@ -228,7 +266,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryIterations()
 		{
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_job.DatabasePath))
 			{
 				DatabaseTests.AssertResult(db.LoadTable<IterationMetric>(), new[]
 				{
@@ -248,7 +286,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryBuckets()
 		{
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_job.DatabasePath))
 			{
 				DatabaseTests.AssertResult(db.LoadTable<BucketMetric>(), new[]
 				{
@@ -265,7 +303,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryBucketTimeline()
 		{
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_job.DatabasePath))
 			{
 				DatabaseTests.AssertResult(db.LoadTable<BucketTimelineMetric>(), new[]
 				{
@@ -279,7 +317,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryMutator()
 		{
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_job.DatabasePath))
 			{
 				// Mutator,ElementCount,IterationCount,BucketCount,FaultCount
 				DatabaseTests.AssertResult(db.LoadTable<MutatorMetric>(), new[]
@@ -296,7 +334,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryElement()
 		{
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_job.DatabasePath))
 			{
 				DatabaseTests.AssertResult(db.LoadTable<ElementMetric>(), new[]
 				{
@@ -314,7 +352,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryDataset()
 		{
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_job.DatabasePath))
 			{
 				DatabaseTests.AssertResult(db.LoadTable<DatasetMetric>(), new[]
 				{
@@ -331,7 +369,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryFaultTimeline()
 		{
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_job.DatabasePath))
 			{
 				DatabaseTests.AssertResult(db.LoadTable<FaultTimelineMetric>(), new[]
 				{
@@ -347,7 +385,7 @@ namespace Peach.Pro.Test.Core.Storage
 		[Test]
 		public void TestQueryFaults()
 		{
-			using (var db = new JobDatabase(_tmp.Path))
+			using (var db = new JobDatabase(_job.DatabasePath))
 			{
 				DatabaseTests.AssertResult(db.LoadTable<FaultMutation>(), new[]
 				{

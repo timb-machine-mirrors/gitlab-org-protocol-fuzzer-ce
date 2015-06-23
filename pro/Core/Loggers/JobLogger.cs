@@ -31,7 +31,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using Newtonsoft.Json;
 using NLog;
 using NLog.Config;
@@ -57,7 +56,7 @@ namespace Peach.Pro.Core.Loggers
 	[Logger("File")]
 	[Logger("Filesystem", true)]
 	[Logger("Logger.Filesystem")]
-	[Parameter("Path", typeof(string), "Log folder")]
+	[Parameter("Path", typeof(string), "Log folder", "")]
 	public class JobLogger : Logger
 	{
 		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
@@ -78,17 +77,10 @@ namespace Peach.Pro.Core.Loggers
 		readonly List<LoggingRule> _tempRules = new List<LoggingRule>();
 		Fault _reproFault;
 		TextWriter _log;
-		MetricsCache _cache;
-		Job _job;
+		AsyncDbCache _cache;
 		int _agentConnect;
 		Exception _caught;
 		Target _tempTarget;
-		TimeSpan _runtime;
-		Timer _timer;
-
-		const int HeartBeatInterval = 1000;
-
-		readonly Stopwatch _stopwatch = new Stopwatch();
 
 		enum Category { Faults, Reproducing, NonReproducible }
 
@@ -169,42 +161,25 @@ namespace Peach.Pro.Core.Loggers
 
 			Debug.Assert(_log == null);
 
+			Job job;
 			using (var db = new NodeDatabase())
 			{
-				_job = db.GetJob(context.config.id) ?? new Job(context.config);
+				job = db.GetJob(context.config.id) ?? new Job(context.config);
+				job.Mode = JobMode.Fuzzing;
+				job.Status = JobStatus.Running;
+				job.HeartBeat = DateTime.Now;
+				job.Seed = context.config.randomSeed;
 			}
 
-			if (_job.DatabasePath == null)
-				_job.LogPath = GetLogPath(context, Path.GetFullPath(BasePath));
+			if (job.DatabasePath == null)
+				job.LogPath = GetLogPath(context, Path.GetFullPath(BasePath));
 
-			if (!Directory.Exists(_job.LogPath))
-				Directory.CreateDirectory(_job.LogPath);
+			if (!Directory.Exists(job.LogPath))
+				Directory.CreateDirectory(job.LogPath);
 
-			ConfigureDebugLogging(context.config);
+			ConfigureDebugLogging(job.DebugLogPath, context.config);
 
-			using (var db = new JobDatabase(_job.DatabasePath))
-			{
-				var job = db.GetJob(_job.Guid);
-				if (job == null)
-				{
-					_job.HeartBeat = DateTime.Now;
-					_job.Seed = context.config.randomSeed;
-					_job.Mode = JobMode.Fuzzing;
-					_job.Status = JobStatus.Running;
-
-					// Start date is set when job record initially constructed
-					Debug.Assert(_job.StartDate != DateTime.MinValue);
-
-					db.InsertJob(_job);
-				}
-				else
-				{
-					// this happens if we are recovering from a crash and we want to resume
-					_job = job;
-				}
-			}
-
-			_cache = new MetricsCache(_job.DatabasePath);
+			_cache = new AsyncDbCache(job);
 
 			using (var db = new NodeDatabase())
 			{
@@ -216,18 +191,10 @@ namespace Peach.Pro.Core.Loggers
 				// Before we get iteration start, we will get AgentConnect & SessionStart
 				_agentConnect = 0;
 
-				db.UpdateJob(_job);
+				db.UpdateJob(_cache.Job);
 			}
 
-			// Remember previous runtime so it properly accumulates on restarted jobs
-			_runtime = _job.Runtime;
-
-			// Schedule heartbeat timer to keep job db up to date after the initial insert
-			// and after the stopwatch is started so we don't have to worry about locking
-			_stopwatch.Restart();
-			_timer = new Timer(OnHeartBeat, null, HeartBeatInterval, HeartBeatInterval);
-
-			_log = File.CreateText(Path.Combine(_job.LogPath, "status.txt"));
+			_log = File.CreateText(Path.Combine(_cache.Job.LogPath, "status.txt"));
 
 			_log.WriteLine("Peach Fuzzing Run");
 			_log.WriteLine("=================");
@@ -268,65 +235,25 @@ namespace Peach.Pro.Core.Loggers
 		{
 			Logger.Trace(">>> Engine_TestFinished");
 
-			_stopwatch.Stop();
-
-			if (_job != null)
+			Job job;
+			if (_cache != null)
 			{
-				Logger.Trace("Engine_TestFinished> Stopping heartbeat timer");
-				using (var evt = new AutoResetEvent(false))
-				{
-					if (_timer.Dispose(evt))
-						evt.WaitOne();
-				}
-
 				Logger.Trace("Engine_TestFinished> Update JobDatabase");
-				using (var db = new JobDatabase(_job.DatabasePath))
-				{
-					_job.Runtime = _runtime + _stopwatch.Elapsed;
-					_job.StopDate = DateTime.Now;
-					_job.HeartBeat = _job.StopDate;
-					_job.Mode = JobMode.Fuzzing;
-					_job.Status = JobStatus.Stopped;
 
-					if (!_job.IsControlIteration)
-					{
-						var report = db.GetReport(_job);
+				_cache.TestFinished();
 
-						try
-						{
-							Reporting.SaveReportPdf(report);
-						}
-						catch (Exception ex)
-						{
-							Logger.Debug("An unexpected error occured saving the job report.", ex);
-
-							try
-							{
-								if (File.Exists(_job.ReportPath))
-									File.Delete(_job.ReportPath);
-							}
-							// ReSharper disable once EmptyGeneralCatchClause
-							catch
-							{
-							}
-						}
-					}
-
-					db.UpdateJob(_job);
-				}
+				job = _cache.Job;
 			}
 			else
 			{
-				Debug.Assert(_timer == null);
-
 				// Job was killed before TestStarting got called
 				using (var db = new NodeDatabase())
 				{
-					_job = db.GetJob(context.config.id) ?? new Job(context.config);
-					_job.StopDate = DateTime.Now;
-					_job.HeartBeat = _job.StopDate;
-					_job.Mode = JobMode.Fuzzing;
-					_job.Status = JobStatus.Stopped;
+					job = db.GetJob(context.config.id) ?? new Job(context.config);
+					job.StopDate = DateTime.Now;
+					job.HeartBeat = job.StopDate;
+					job.Mode = JobMode.Fuzzing;
+					job.Status = JobStatus.Stopped;
 				}
 			}
 
@@ -335,7 +262,7 @@ namespace Peach.Pro.Core.Loggers
 			{
 				if (_caught == null)
 					EventSuccess(db);
-				db.UpdateJob(_job);
+				db.UpdateJob(job);
 			}
 
 			// it's possible we reach here before Engine_TestStarting has had a chance to finish
@@ -362,7 +289,6 @@ namespace Peach.Pro.Core.Loggers
 			uint? totalIterations)
 		{
 			_states.Clear();
-			_cache.IterationStarting(context.currentIteration);
 
 			var mode = JobMode.Fuzzing;
 
@@ -379,18 +305,7 @@ namespace Peach.Pro.Core.Loggers
 				}
 			}
 
-			if (mode != _job.Mode)
-			{
-				using (var db = new JobDatabase(_job.DatabasePath))
-				{
-					lock (_timer)
-					{
-						_job.Mode = mode;
-
-						UpdateRunningJob(db);
-					}
-				}
-			}
+			_cache.IterationStarting(mode);
 
 			if (context.controlRecordingIteration)
 			{
@@ -436,16 +351,6 @@ namespace Peach.Pro.Core.Loggers
 				!context.controlIteration &&
 				!context.controlRecordingIteration)
 			{
-				using (var db = new JobDatabase(_job.DatabasePath))
-				{
-					lock (_timer)
-					{
-						_job.IterationCount++;
-
-						UpdateRunningJob(db);
-					}
-				}
-
 				_cache.IterationFinished();
 			}
 		}
@@ -757,16 +662,26 @@ namespace Peach.Pro.Core.Loggers
 			Debug.Assert(!string.IsNullOrEmpty(fault.exploitability));
 
 			// root/category/bucket/iteration
-			var subDir = Path.Combine(
-				_job.LogPath,
+			var initialFaultPath = Path.Combine(
 				category.ToString(),
 				fault.folderName,
-				fault.iteration.ToString(CultureInfo.InvariantCulture));
+				fault.iteration.ToString(CultureInfo.InvariantCulture)
+			);
+
+			if (context.controlRecordingIteration)
+				initialFaultPath += "R";
+			else if (context.controlIteration)
+				initialFaultPath += "C";
+
+			var faultPath = initialFaultPath;
+
+			for (var i = 1; Directory.Exists(Path.Combine(_cache.Job.LogPath, faultPath)); ++i)
+				faultPath = initialFaultPath + "_" + i;
 
 			var faultDetail = new FaultDetail
 			{
 				Files = new List<FaultFile>(),
-				Reproducible = category == Category.Reproducing,
+				Reproducible = category == Category.Faults,
 				Iteration = fault.iteration,
 				TimeStamp = now,
 				Source = fault.detectionSource,
@@ -780,8 +695,16 @@ namespace Peach.Pro.Core.Loggers
 				IterationStart = fault.iterationStart,
 				IterationStop = fault.iterationStop,
 
-				FaultPath = subDir,
+				FaultPath = faultPath,
 			};
+
+			if (context.controlIteration)
+				faultDetail.Flags |= IterationFlags.Control;
+
+			if (context.controlRecordingIteration)
+				faultDetail.Flags |= IterationFlags.Record;
+
+			var subDir = Path.Combine(_cache.Job.LogPath, faultPath);
 
 			foreach (var kv in fault.toSave)
 			{
@@ -798,7 +721,7 @@ namespace Peach.Pro.Core.Loggers
 			if (category != Category.Reproducing)
 			{
 				// Ensure any past saving of this fault as Reproducing has been cleaned up
-				var reproDir = Path.Combine(_job.LogPath, Category.Reproducing.ToString());
+				var reproDir = Path.Combine(_cache.Job.LogPath, Category.Reproducing.ToString());
 
 				if (Directory.Exists(reproDir))
 				{
@@ -812,25 +735,7 @@ namespace Peach.Pro.Core.Loggers
 					}
 				}
 
-				using (var db = new JobDatabase(_job.DatabasePath))
-				{
-					db.InsertFault(faultDetail);
-					_cache.OnFault(new FaultMetric
-					{
-						Iteration = fault.iteration,
-						MajorHash = fault.majorHash,
-						MinorHash = fault.minorHash,
-						Timestamp = now,
-						Hour = now.Hour,
-					});
-
-					lock (_timer)
-					{
-						_job.FaultCount++;
-
-						UpdateRunningJob(db);
-					}
-				}
+				_cache.OnFault(faultDetail);
 			}
 
 			_log.Flush();
@@ -869,33 +774,23 @@ namespace Peach.Pro.Core.Loggers
 			JobHelper.Fail(id, _ => _events, message);
 		}
 
-		public void UpdateStatus(JobStatus status)
+		public void Pause()
 		{
-			Debug.Assert(_job.DatabasePath != null);
-
-			using (var db = new JobDatabase(_job.DatabasePath))
-			{
-				lock (_timer)
-				{
-					if (status == JobStatus.Paused)
-						_stopwatch.Stop();
-					else if (status == JobStatus.Running)
-						_stopwatch.Start();
-
-					_job.Status = status;
-
-					UpdateRunningJob(db);
-				}
-			}
+			_cache.Pause();
 		}
 
-		void ConfigureDebugLogging(RunConfiguration config)
+		public void Continue()
+		{
+			_cache.Continue();
+		}
+
+		void ConfigureDebugLogging(string logPath, RunConfiguration config)
 		{
 			var target = new FileTarget
 			{
 				Name = "FileTarget",
 				Layout = DebugLogLayout,
-				FileName = _job.DebugLogPath,
+				FileName = logPath,
 				ConcurrentWrites = false,
 				KeepFileOpen = !config.singleIteration,
 				ArchiveAboveSize = 10 * 1024 * 1024,
@@ -937,36 +832,6 @@ namespace Peach.Pro.Core.Loggers
 			}
 
 			LogManager.Configuration = nconfig;
-		}
-
-
-		void OnHeartBeat(object state)
-		{
-			using (var db = new JobDatabase(_job.DatabasePath))
-			{
-				lock (_timer)
-				{
-					// Don't reschedule if called from the Timer's callback
-					// to prevent deadlocks when using Dispose(WaitHandle)
-
-					_job.HeartBeat = DateTime.Now;
-					_job.Runtime = _runtime + _stopwatch.Elapsed;
-
-					db.UpdateJob(_job);
-				}
-			}
-		}
-
-		void UpdateRunningJob(JobDatabase db)
-		{
-			// NOTE: The lock MUST to be held prior to calling this function
-			// Defer the heart beat timer since the database is about to be changed
-			_timer.Change(HeartBeatInterval, HeartBeatInterval);
-
-			_job.HeartBeat = DateTime.Now;
-			_job.Runtime = _runtime + _stopwatch.Elapsed;
-
-			db.UpdateJob(_job);
 		}
 	}
 

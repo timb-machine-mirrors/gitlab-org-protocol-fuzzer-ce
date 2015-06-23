@@ -80,14 +80,6 @@ namespace Peach.Pro.Test.Core.WebServices
 			{
 				Assert.IsTrue(File.Exists(job.DatabasePath));
 			}
-
-			if (File.Exists(job.DatabasePath))
-			{
-				using (var db = new JobDatabase(job.DatabasePath))
-				{
-					Assert.IsNotNull(db.GetJob(job.Guid));
-				}
-			}
 		}
 	}
 
@@ -296,11 +288,6 @@ namespace Peach.Pro.Test.Core.WebServices
 				});
 			}
 
-			using (var db = new JobDatabase(job.DatabasePath))
-			{
-				Assert.IsNotNull(db.GetJob(job.Guid));
-			}
-
 			Assert.IsTrue(File.Exists(job.DebugLogPath));
 			Console.Write(File.ReadAllText(job.DebugLogPath));
 		}
@@ -480,7 +467,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			// Heartberat should advance when job stops
 			Assert.Greater(job.HeartBeat, time);
-			Assert.AreEqual(job.HeartBeat, job.StopDate);
+			Assert.GreaterOrEqual(job.HeartBeat, job.StopDate);
 
 			VerifyDatabase(job);
 		}

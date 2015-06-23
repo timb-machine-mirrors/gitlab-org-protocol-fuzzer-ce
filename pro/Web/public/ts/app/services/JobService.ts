@@ -102,7 +102,20 @@ module Peach {
 			if (_.isUndefined(this.Job)) {
 				return undefined;
 			}
-			return moment(new Date(0, 0, 0, 0, 0, this.Job.runtime)).format("H:mm:ss");
+			var duration = moment.duration(this.job.runtime, 'seconds');
+			if (duration.asDays() >= 1) {
+				return '{0}d {1}h {2}m'.format(
+					Math.floor(duration.asDays()),
+					duration.hours().toString().paddingLeft('00'),
+					duration.minutes().toString().paddingLeft('00')
+				);
+			} else {
+				return '{0}h {1}m {2}s'.format(
+					duration.hours().toString().paddingLeft('00'),
+					duration.minutes().toString().paddingLeft('00'),
+					duration.seconds().toString().paddingLeft('00')
+				);
+			}
 		}
 
 		private doLoadFaultDetail(defer: ng.IDeferred<IFaultDetail>, id: string) {
