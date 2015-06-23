@@ -5,7 +5,7 @@
 				<button type="button"
 								class="btn btn-sm btn-default"
 								ng-click="vm.Back()"
-								ng-class="{disabled: !vm.CanMoveBack}">
+								ng-disabled="!vm.CanMoveBack">
 					&larr; {{BackPrompt}}
 				</button>
 			</span>
@@ -13,7 +13,7 @@
 				<button type="submit"
 								class="btn btn-sm btn-success"
 								ng-click="vm.Next()"
-								ng-class="{disabled: !vm.CanMoveNext}">
+								ng-disabled="!vm.CanMoveNext">
 					{{NextPrompt}} &rarr;
 				</button>
 			</span>

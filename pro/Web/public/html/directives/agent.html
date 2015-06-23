@@ -11,7 +11,7 @@
 					<button type="button"
 									class="btn btn-xs btn-info"
 									ng-click="vm.OnMoveUp($event)"
-									ng-class="{disabled: !vm.CanMoveUp}"
+									ng-disabled="!vm.CanMoveUp"
 									tooltip="Move Agent Up"
 									tooltip-append-to-body="true">
 						<i class="fa fa-chevron-up">
@@ -20,7 +20,7 @@
 					<button type="button"
 									class="btn btn-xs btn-info"
 									ng-click="vm.OnMoveDown($event)"
-									ng-class="{disabled: !vm.CanMoveDown}"
+									ng-disabled="!vm.CanMoveDown"
 									tooltip="Move Agent Down"
 									tooltip-append-to-body="true">
 						<i class="fa fa-chevron-down">

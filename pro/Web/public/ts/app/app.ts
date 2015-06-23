@@ -335,6 +335,12 @@ module Peach {
 		};
 	});
 
+	p.filter('capitalize',() => {
+		return (value: string): string => {
+			return _.capitalize(value);
+		};
+	});
+
 	export function Startup() {
 		window.onerror = (message, url, lineNo) => {
 			console.log('Error: ' + message + '\n' + 'Line Number: ' + lineNo);

@@ -57,9 +57,16 @@ module Peach {
 		}
 
 		public StatusClass(row: ITestEvent): any {
+			return _.isNull(row)
+				? this.statusClassFor(this.TestStatus) 
+				: this.statusClassFor(row.status);
+		}
+
+		private statusClassFor(status: string): any {
 			return {
-				'glyphicon glyphicon-ok green': row.status === TestStatus.Pass,
-				'glyphicon glyphicon-remove red': row.status === TestStatus.Fail
+				'fa fa-spinner fa-pulse': _.isEmpty(status) || status === TestStatus.Active,
+				'fa fa-check green': status === TestStatus.Pass,
+				'fa fa-ban red': status === TestStatus.Fail
 			};
 		}
 	}
