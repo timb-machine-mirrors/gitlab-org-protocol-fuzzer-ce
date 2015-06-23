@@ -26,6 +26,8 @@
 
 // $Id$
 
+using System;
+
 namespace Peach.Core
 {
 	/// <summary>
@@ -37,6 +39,13 @@ namespace Peach.Core
 		/// Selection weight used for weighted selection.
 		/// </summary>
 		int SelectionWeight { get; }
+
+		/// <summary>
+		/// Return transformed weight based on function.
+		/// </summary>
+		/// <param name="how"></param>
+		/// <returns></returns>
+		int TransformWeight(Func<int, int> how);
 	}
 }
 
