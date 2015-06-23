@@ -119,7 +119,7 @@ namespace Peach.Pro.Core.Fixups.Ntlm
 				}
 
 				// create NT password
-				MD4 md4 = MD4.Create ();
+				MD4 md4 = new MD4();
 				byte[] data = ((value == null) ? (new byte [0]) : (Encoding.Unicode.GetBytes (value)));
 				byte[] hash = md4.ComputeHash (data);
 				Buffer.BlockCopy (hash, 0, _ntpwd, 0, 16);
