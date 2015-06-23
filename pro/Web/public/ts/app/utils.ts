@@ -5,6 +5,14 @@
 interface String {
 	startsWith(str: string): boolean;
 	endsWith(str: string): boolean;
+	format(...args: any[]): string;
+	paddingLeft(pattern: string): string;
+}
+
+declare module _ {
+	interface LoDashStatic {
+		takeRight<T>(array: List<T>, n: number): T[];
+	}
 }
 
 String.prototype.startsWith = function (prefix: string): boolean {
@@ -13,6 +21,16 @@ String.prototype.startsWith = function (prefix: string): boolean {
 
 String.prototype.endsWith = function (suffix: string): boolean {
 	return this.indexOf(suffix, this.length - suffix.length) !== -1;
+}
+
+String.prototype.format = function (...args: any[]): string {
+	return this.replace(/{(\d+)}/g,(match, i) => {
+		return !_.isUndefined(args[i]) ? args[i] : match;
+	});
+}
+
+String.prototype.paddingLeft = function (pattern: string): string {
+	return String(pattern + this).slice(-pattern.length);
 }
 
 module Peach {

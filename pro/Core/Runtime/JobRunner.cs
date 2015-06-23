@@ -1,23 +1,23 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
+using Godel.Core;
+using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Pro.Core.Loggers;
 using Peach.Pro.Core.Storage;
-using Peach.Pro.Core.WebServices.Models;
-using Godel.Core;
 using Peach.Pro.Core.WebServices;
-using NLog;
-using Action = System.Action;
+using Peach.Pro.Core.WebServices.Models;
+using Logger = NLog.Logger;
 
 namespace Peach.Pro.Core.Runtime
 {
 	class JobRunner : Watcher
 	{
-		static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
+		static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
 		readonly JobLogger _jobLogger = new JobLogger();
 		readonly ManualResetEvent _pausedEvt = new ManualResetEvent(true);
@@ -111,8 +111,9 @@ namespace Peach.Pro.Core.Runtime
 			}
 			finally
 			{
-				Logger.Trace("Flush Logs");
+				Logger.Debug("Flushing Logs");
 				LogManager.Flush();
+				_jobLogger.RestoreLogging(_config.id);
 			}
 		}
 
@@ -175,12 +176,11 @@ namespace Peach.Pro.Core.Runtime
 					{
 						_jobLogger.AddEvent(db,
 							_config.id,
-							"Loading pit config", "Loading configuration file '{0}'".Fmt(pitConfig));
+							"Loading pit config", "Loading configuration file '{0}'".Fmt(pitConfig),
+							CompleteTestEvents.Last);
 
 						var defs = PitDatabase.ParseConfig(_pitLibraryPath, pitConfig);
 						args[DefinedValues] = defs;
-
-						_jobLogger.EventSuccess(db);
 					}
 					catch (Exception ex)
 					{
@@ -208,13 +208,12 @@ namespace Peach.Pro.Core.Runtime
 			{
 				_jobLogger.AddEvent(db,
 					_config.id,
-					"Loading pit file", "Loading pit file '{0}'".Fmt(_config.pitFile));
+					"Loading pit file", "Loading pit file '{0}'".Fmt(_config.pitFile),
+					CompleteTestEvents.Last);
 
 				try
 				{
-					var dom = parser.asParser(args, _config.pitFile);
-					_jobLogger.EventSuccess(db);
-					return dom;
+					return parser.asParser(args, _config.pitFile);
 				}
 				catch (Exception ex)
 				{

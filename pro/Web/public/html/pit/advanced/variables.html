@@ -21,7 +21,7 @@
 		</div>
 		<div class="col-xs-6 text-right">
 			<button class="btn btn-xs btn-danger"
-							ng-class="{disabled: !vm.CanSave}"
+							ng-disabled="!vm.CanSave"
 							ng-click="vm.OnSave()">
 				<i class="fa fa-save"></i>
 				Save

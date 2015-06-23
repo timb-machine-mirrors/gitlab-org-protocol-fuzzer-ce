@@ -50,6 +50,13 @@ using State = Peach.Core.Dom.State;
 
 namespace Peach.Pro.Core.Loggers
 {
+	public enum CompleteTestEvents
+	{
+		None,
+		Last,
+		All
+	}
+
 	/// <summary>
 	/// Standard file system Logger.
 	/// </summary>
@@ -114,13 +121,11 @@ namespace Peach.Pro.Core.Loggers
 			{
 				using (var db = new NodeDatabase())
 				{
-					if (_agentConnect++ > 0)
-						EventSuccess(db);
-
 					AddEvent(db,
 						context.config.id,
 						"Connecting to agent",
-						"Connecting to agent '{0}'".Fmt(agent.Url));
+						"Connecting to agent '{0}'".Fmt(agent.Url),
+						_agentConnect++ > 0  ? CompleteTestEvents.Last : CompleteTestEvents.None);
 				}
 			}
 		}
@@ -131,11 +136,11 @@ namespace Peach.Pro.Core.Loggers
 			{
 				using (var db = new NodeDatabase())
 				{
-					EventSuccess(db);
 					AddEvent(db,
 						context.config.id,
 						"Starting monitor",
-						"Starting monitor '{0}'".Fmt(cls));
+						"Starting monitor '{0}'".Fmt(cls),
+						CompleteTestEvents.Last);
 				}
 			}
 		}
@@ -146,11 +151,11 @@ namespace Peach.Pro.Core.Loggers
 			{
 				using (var db = new NodeDatabase())
 				{
-					EventSuccess(db);
 					AddEvent(db,
 						context.config.id,
 						"Starting fuzzing session",
-						"Notifying agent '{0}' that the fuzzing session is starting".Fmt(agent.Url));
+						"Notifying agent '{0}' that the fuzzing session is starting".Fmt(agent.Url),
+						CompleteTestEvents.Last);
 				}
 			}
 		}
@@ -186,7 +191,8 @@ namespace Peach.Pro.Core.Loggers
 				AddEvent(db,
 					context.config.id,
 					"Starting fuzzing engine",
-					"Starting fuzzing engine");
+					"Starting fuzzing engine",
+					CompleteTestEvents.Last);
 
 				// Before we get iteration start, we will get AgentConnect & SessionStart
 				_agentConnect = 0;
@@ -253,7 +259,7 @@ namespace Peach.Pro.Core.Loggers
 					job.StopDate = DateTime.Now;
 					job.HeartBeat = job.StopDate;
 					job.Mode = JobMode.Fuzzing;
-					job.Status = JobStatus.Stopped;
+					job.Status = JobStatus.StopPending;
 				}
 			}
 
@@ -261,7 +267,9 @@ namespace Peach.Pro.Core.Loggers
 			using (var db = new NodeDatabase())
 			{
 				if (_caught == null)
-					EventSuccess(db);
+				{
+					AddEvent(db, job.Guid, "Flushing logs.", "Flushing logs.", CompleteTestEvents.All);
+				}
 				db.UpdateJob(job);
 			}
 
@@ -276,11 +284,20 @@ namespace Peach.Pro.Core.Loggers
 				_log = null;
 			}
 
-			Logger.Trace("Engine_TestFinished> RestoreLogging");
+			Logger.Trace("<<< Engine_TestFinished");
+		}
+
+		public void RestoreLogging(Guid id)
+		{
+			Logger.Trace("RestoringLogging>");
+
 			ConfigureLogging(_tempTarget, null);
 			_tempTarget = null;
 
-			Logger.Trace("<<< Engine_TestFinished");
+			using (var db = new NodeDatabase())
+			{
+				db.PassPendingTestEvents(id);
+			}
 		}
 
 		protected override void Engine_IterationStarting(
@@ -311,16 +328,12 @@ namespace Peach.Pro.Core.Loggers
 			{
 				using (var db = new NodeDatabase())
 				{
-					foreach (var testEvent in _events)
-						testEvent.Status = TestStatus.Pass;
-					db.UpdateTestEvents(_events);
-
 					var desc = context.reproducingFault
 						? "Reproducing fault found on the initial control record iteration"
 						: "Running the initial control record iteration";
 
 					// Add event for the iteration running
-					AddEvent(db, context.config.id, "Running iteration", desc);
+					AddEvent(db, context.config.id, "Running iteration", desc, CompleteTestEvents.All);
 				}
 
 				_log.WriteLine(". Record Iteration {0}", currentIteration);
@@ -741,32 +754,57 @@ namespace Peach.Pro.Core.Loggers
 			_log.Flush();
 		}
 
-		public void AddEvent(NodeDatabase db, Guid jobId, string name, string description)
+		public void AddEvent(
+			NodeDatabase db, 
+			Guid jobId, 
+			string name, 
+			string description,
+			CompleteTestEvents complete)
 		{
-			var testEvent = new TestEvent
+			IEnumerable<TestEvent> completed;
+			switch (complete)
 			{
-				JobId = jobId.ToString(),
-				Status = TestStatus.Active,
-				Short = name,
-				Description = description,
-			};
-			db.InsertTestEvent(testEvent);
-			_events.Add(testEvent);
-		}
+				case CompleteTestEvents.All:
+					completed = _events;
+					break;
+				case CompleteTestEvents.Last:
+					completed = _events.Count > 0 
+						? _events.LastEnumerable() 
+						: new TestEvent[0];
+					break;
+				default:
+					completed = new TestEvent[0];
+					break;
+			}
 
-		public void EventSuccess(NodeDatabase db)
-		{
-			var last = _events.Last();
-			last.Status = TestStatus.Pass;
-			db.UpdateTestEvents(new[] { last });
+			db.Transaction(() =>
+			{
+				db.UpdateTestEvents(completed.Select(x =>
+				{
+					x.Status = TestStatus.Pass;
+					return x;
+				}));
+
+				var testEvent = new TestEvent
+				{
+					JobId = jobId.ToString(),
+					Status = TestStatus.Active,
+					Short = name,
+					Description = description,
+				};
+				db.InsertTestEvent(testEvent);
+				_events.Add(testEvent);
+			});
 		}
 
 		public void EventFail(NodeDatabase db, string resolve)
 		{
-			var last = _events.Last();
-			last.Status = TestStatus.Fail;
-			last.Resolve = resolve;
-			db.UpdateTestEvents(new[] { last });
+			db.UpdateTestEvents(_events.LastEnumerable().Select(x =>
+			{
+				x.Status = TestStatus.Fail;
+				x.Resolve = resolve;
+				return x;
+			}));
 		}
 
 		public void JobFail(Guid id, string message)

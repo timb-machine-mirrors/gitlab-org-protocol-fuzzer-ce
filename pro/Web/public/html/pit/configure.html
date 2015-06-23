@@ -48,7 +48,7 @@
 					</dt>
 					<dd>
 						A list of items needed by the configuration, 
-						including environment variables and pit-specific information, such as target IP addresses.
+						including global pit variables and pit-specific information, such as target IP addresses.
 					</dd>
 					<dt>
 						Configure Monitoring
@@ -58,7 +58,8 @@
 						Click this button to select and update the agents, 
 						monitors and associated monitor settings for the test configuration. 
 						<br/>
-						This choice provides the most flexibility in implementing fault detection, data collection, and automation.
+						This choice provides the most flexibility in implementing 
+						fault detection, data collection, and automation.
 					</dd>
 				</dl>
 			</p>
@@ -112,7 +113,7 @@
 			<div ng-show="vm.storage.showStartHelp">
 				<p>
 					The Start Options specify the test cases that start and end a fuzzing job, 
-					and identify a seed for generating mutating data. 
+					and identify a seed for generating mutated data. 
 					For a new fuzzing job, the default values are usually appropriate to use, 
 					although you can select other values to use.
 				</p>
@@ -135,9 +136,9 @@
 						</li>
 						<li>
 							Change the Start or Stop Test Case. 
-							This changes the first (or last) test case to execute in the job, 
+							This changes the test cases (first and/or last) to execute in the job, 
 							thereby lengthening or shortening the total number of test cases executed in the job.
-							Note that changing the start or stop test case for the job can help validate an issue
+							Note that changing the test cases (first and last) for the job can help validate an issue
 							or the fix for an issue. 
 							However, the result might not produce the intended results.
 						</li>
@@ -224,7 +225,7 @@
 				<button type="button"
 								class="btn btn-primary"
 								ng-click="vm.Start()"
-								ng-class="{disabled: !vm.CanStart}">
+								ng-disabled="!vm.CanStart">
 					<i class="fa fa-play"></i>
 					Start
 				</button>
