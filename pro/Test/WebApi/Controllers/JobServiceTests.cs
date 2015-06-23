@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using Nancy;
 using Nancy.Testing;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
@@ -282,7 +283,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 		}
 
 		[Test]
-		public void PruneDeleted()
+		public void WarnDeleted()
 		{
 			// If the job db is deleted, the entry from the node db should also be deleted
 			// on the next get
@@ -322,12 +323,19 @@ namespace Peach.Pro.Test.WebApi.Controllers
 
 			Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
 
-			var jobs = result.DeserializeJson<Job[]>();
+			var jobs = result.DeserializeJson<JArray>();
 
 			Assert.NotNull(jobs);
-			Assert.AreEqual(2, jobs.Length);
-			Assert.AreEqual(j1.Id, jobs[0].Id);
-			Assert.AreEqual(j3.Id, jobs[1].Id);
+			Assert.AreEqual(3, jobs.Count);
+			
+			Assert.AreEqual(j1.Id, jobs[0].Value<string>("id"));
+			Assert.IsTrue(jobs[0].Value<bool>("hasMetrics"));
+
+			Assert.AreEqual(j2.Id, jobs[1].Value<string>("id"));
+			Assert.IsFalse(jobs[1].Value<bool>("hasMetrics"));
+
+			Assert.AreEqual(j3.Id, jobs[2].Value<string>("id"));
+			Assert.IsFalse(jobs[2].Value<bool>("hasMetrics"));
 		}
 
 		[Test]

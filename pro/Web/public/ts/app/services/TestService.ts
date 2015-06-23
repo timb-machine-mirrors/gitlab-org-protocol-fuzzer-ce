@@ -11,7 +11,7 @@ module Peach {
 			C.Angular.$rootScope,
 			C.Angular.$q,
 			C.Angular.$http,
-			C.Angular.$interval,
+			C.Angular.$timeout,
 			C.Services.Pit
 		];
 
@@ -19,7 +19,7 @@ module Peach {
 			private $rootScope: ng.IRootScopeService,
 			private $q: ng.IQService,
 			private $http: ng.IHttpService,
-			private $interval: ng.IIntervalService,
+			private $timeout: ng.ITimeoutService,
 			private pitService: PitService
 		) {
 			$rootScope.$on(C.Events.PitChanged,() => {
@@ -67,7 +67,7 @@ module Peach {
 
 			this.$http.post(C.Api.Jobs, request)
 				.success((job: IJob) => {
-					this.startTestPoller(job);
+					this.onPoll(job);
 				})
 				.catch((response: ng.IHttpPromiseCallbackArg<IError>) => {
 					this.setFailure(response.data.errorMessage);
@@ -78,7 +78,7 @@ module Peach {
 			return this.pendingResult.promise;
 		}
 
-		private reset() {
+		private reset(): void {
 			this.testTime = "";
 			this.testResult = {
 				status: "",
@@ -87,36 +87,30 @@ module Peach {
 			};
 		}
 
-		private startTestPoller(job: IJob) {
-			var interval = this.$interval(() => {
-				this.$http.get(job.firstNodeUrl)
-					.success((data: ITestResult) => {
-						this.testResult = data;
-						if (data.status !== TestStatus.Active) {
-							this.stopTestPoller(job, interval);
-							if (data.status === TestStatus.Pass) {
-								this.pendingResult.resolve();
-							} else {
-								this.pendingResult.reject();
-							}
+		private onPoll(job: IJob): void {
+			this.$http.get(job.firstNodeUrl)
+				.success((data: ITestResult) => {
+					this.testResult = data;
+					if (data.status === TestStatus.Active) {
+						this.$timeout(() => { this.onPoll(job); }, TEST_INTERVAL);
+					} else {
+						if (data.status === TestStatus.Pass) {
+							this.pendingResult.resolve();
+						} else {
+							this.pendingResult.reject();
 						}
-					})
-					.catch((response: ng.IHttpPromiseCallbackArg<IError>) => {
-						this.stopTestPoller(job, interval);
-						this.setFailure(response.data.errorMessage);
-						this.pendingResult.reject();
-					})
-				;
-			}, TEST_INTERVAL);
+						this.isPending = false;
+						this.$http.delete(job.jobUrl);
+					}
+				})
+				.catch((response: ng.IHttpPromiseCallbackArg<IError>) => {
+					this.setFailure(response.data.errorMessage);
+					this.pendingResult.reject();
+				})
+			;
 		}
 
-		private stopTestPoller(job: IJob, interval: any) {
-			this.isPending = false;
-			this.$interval.cancel(interval);
-			this.$http.delete(job.jobUrl);
-		}
-
-		private setFailure(reason) {
+		private setFailure(reason): void {
 			this.testResult.status = TestStatus.Fail;
 
 			var event: ITestEvent = {

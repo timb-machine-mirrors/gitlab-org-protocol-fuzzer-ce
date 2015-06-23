@@ -4,7 +4,11 @@ SELECT
 	n.Name || '_' || s.RunCount AS [State],
 	s.[Count] AS [ExecutionCount]
 FROM [State] AS s
-JOIN NamedItem n ON s.NameId = n.Id;
+JOIN NamedItem n ON s.NameId = n.Id
+ORDER BY
+	ExecutionCount DESC,
+	[State]
+;
 -- States <<<
 
 -- Iterations >>>
@@ -102,6 +106,12 @@ GROUP BY
 	x.ActionId,
 	x.ParameterId,
 	x.ElementId
+ORDER BY
+	FaultCount DESC,
+	IterationCount DESC,
+	Mutator,
+	Bucket,
+	Element
 ;
 -- Buckets <<<
 
@@ -115,6 +125,11 @@ FROM FaultDetail
 GROUP BY
 	MajorHash,
 	MinorHash
+ORDER BY 
+	FaultCount DESC,
+	MajorHash,
+	MinorHash,
+	Exploitability
 ;
 -- Bucket Details <<<
 
@@ -184,7 +199,14 @@ SELECT
 	vmf.FaultCount
 FROM ViewMutatorsByIteration AS vmi
 LEFT JOIN ViewMutatorsByFault AS vmf ON vmi.MutatorId = vmf.MutatorId
-JOIN NamedItem AS n ON vmi.MutatorId = n.Id;
+JOIN NamedItem AS n ON vmi.MutatorId = n.Id
+ORDER BY
+	BucketCount DESC,
+	FaultCount DESC,
+	IterationCount DESC,
+	ElementCount DESC,
+	Mutator
+;
 -- Mutators <<<
 
 -- Elements >>>
@@ -242,7 +264,15 @@ JOIN [State]   AS s  ON s.Id  = vei.StateId
 JOIN NamedItem AS sn ON sn.Id = s.NameId
 JOIN NamedItem AS e  ON e.Id  = vei.ElementId
 JOIN NamedItem AS a  ON a.Id  = vei.ActionId
-JOIN NamedItem AS p  ON p.Id  = vei.ParameterId;
+JOIN NamedItem AS p  ON p.Id  = vei.ParameterId
+ORDER BY
+	BucketCount DESC,
+	FaultCount DESC,
+	IterationCount DESC,
+	[State],
+	[Action],
+	[Element]
+;
 -- Elements <<<
 
 -- Datasets >>>
@@ -305,4 +335,9 @@ GROUP BY
 	vdi.ActionId,
 	vdi.ParameterId,
 	vdi.DatasetId
+ORDER BY
+	BucketCount DESC,
+	FaultCount DESC,
+	IterationCount DESC,
+	Dataset
 ;

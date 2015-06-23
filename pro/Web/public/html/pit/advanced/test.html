@@ -23,13 +23,13 @@
 <div class="wizard-actions">
 	<button class="btn btn-success btn-sm"
 					ng-click="vm.OnNextTrack()"
-					ng-class="{disabled: !vm.CanContinue}">
+					ng-disabled="!vm.CanContinue">
 		<i class="fa fa-arrow-right"></i>
 		Continue &nbsp;
 	</button>
 	<button class="btn btn-warning btn-sm"
 					ng-click="vm.OnBeginTest()"
-					ng-class="{disabled: !vm.CanBeginTest}">
+					ng-disabled="!vm.CanBeginTest">
 		<i class="fa fa-bolt"></i>
 		Begin Test
 	</button>

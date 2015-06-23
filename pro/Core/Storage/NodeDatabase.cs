@@ -36,8 +36,20 @@ namespace Peach.Pro.Core.Storage
 				job.Status = JobStatus.Stopped;
 				job.Result = message;
 
-				db.UpdateJob(job);
-				db.UpdateTestEvents(events);
+				db.Transaction(() =>
+				{
+					var testEvent = new TestEvent
+					{
+						JobId = id.ToString(),
+						Status = TestStatus.Active,
+						Short = "Flushing logs.",
+						Description = "Flushing logs.",
+					};
+
+					db.UpdateTestEvents(events);
+					db.InsertTestEvent(testEvent);
+					db.UpdateJob(job);
+				});
 			}
 		}
 	}
@@ -135,6 +147,11 @@ namespace Peach.Pro.Core.Storage
 		public void UpdateTestEvents(IEnumerable<TestEvent> testEvent)
 		{
 			Connection.Execute(Sql.UpdateTestEvent, testEvent);
+		}
+
+		public void PassPendingTestEvents(Guid id)
+		{
+			Connection.Execute(Sql.PassPendingTestEvents, new { JobId = id.ToString() });
 		}
 
 		public IEnumerable<TestEvent> GetTestEventsByJob(Guid jobId)
