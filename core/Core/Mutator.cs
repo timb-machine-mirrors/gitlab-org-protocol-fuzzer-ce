@@ -281,6 +281,11 @@ namespace Peach.Core
 			}
 		}
 
+		public int TransformWeight(Func<int, int> how)
+		{
+			return how(SelectionWeight);
+		}
+
 		#endregion
 
 		protected static string getHint(DataElement obj, string name)
