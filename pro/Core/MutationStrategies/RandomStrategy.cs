@@ -86,17 +86,17 @@ namespace Peach.Pro.Core.MutationStrategies
 		{
 			class DebugView
 			{
-				MutationScope obj;
+				readonly MutationScope _obj;
 
 				public DebugView(MutationScope obj)
 				{
-					this.obj = obj;
+					_obj = obj;
 				}
 
 				[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 				public MutableItem[] Items
 				{
-					get { return obj.ToArray(); }
+					get { return _obj.ToArray(); }
 				}
 			}
 
@@ -124,7 +124,7 @@ namespace Peach.Pro.Core.MutationStrategies
 			}
 		}
 
-		[DebuggerDisplay("{name} - {Opions.Count} Options")]
+		[DebuggerDisplay("{Name} - {Options.Count} Options")]
 		protected class DataSetTracker : INamed
 		{
 			#region Obsolete Functions
@@ -134,10 +134,10 @@ namespace Peach.Pro.Core.MutationStrategies
 
 			#endregion
 
-			public DataSetTracker(string ModelName, List<Data> Options)
+			public DataSetTracker(string modelName, List<Data> options)
 			{
-				this.ModelName = ModelName;
-				this.Options = Options;
+				ModelName = modelName;
+				Options = options;
 				Iteration = 1;
 			}
 
@@ -237,7 +237,7 @@ namespace Peach.Pro.Core.MutationStrategies
 		/// </summary>
 		int maxFieldsToMutate = 6;
 
-		bool stateMutations = false;
+		bool stateMutations;
 
 		public RandomStrategy(Dictionary<string, Variant> args)
 			: base(args)
@@ -623,10 +623,11 @@ namespace Peach.Pro.Core.MutationStrategies
 				foreach (var elem in allElements)
 				{
 					var rec = new MutableItem(item.instanceName, elem.fullName);
+					var e = elem;
 
 					rec.Mutators.AddRange(dataMutators
-						.Where(m => SupportedDataElement(m, elem))
-						.Select(m => GetMutatorInstance(m, elem))
+						.Where(m => SupportedDataElement(m, e))
+						.Select(m => GetMutatorInstance(m, e))
 						.Where(m => m.SelectionWeight > 0));
 
 					if (rec.Mutators.Count > 0)
