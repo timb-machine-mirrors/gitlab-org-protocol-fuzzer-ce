@@ -117,6 +117,7 @@ namespace Peach.Core
 			"CrashableServer.exe", 
 			"CrashingFileConsumer.exe", 
 			"CrashingProgram.exe", 
+			"CrashTest.exe",
 			"Peach.Core.ComContainer.exe", 
 			"Peach.Core.WindowsDebugInstance.exe", 
 			"Peach.exe", 
