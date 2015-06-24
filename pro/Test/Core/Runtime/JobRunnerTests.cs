@@ -1,20 +1,19 @@
 ﻿using System;
-using System.Linq;
 using System.IO;
+using System.Linq;
 using System.Threading;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
 using NUnit.Framework;
 using Peach.Core;
+using Peach.Core.Test;
 using Peach.Pro.Core;
 using Peach.Pro.Core.Runtime;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.Test.Core.Storage;
 using TestStatus = Peach.Pro.Core.WebServices.Models.TestStatus;
-using Peach.Core.Test;
-using NLog.Config;
-using NLog;
-using NLog.Targets.Wrappers;
-using NLog.Targets;
 
 namespace Peach.Pro.Test.Core.Runtime
 {
@@ -61,10 +60,10 @@ namespace Peach.Pro.Test.Core.Runtime
 
 			_loggingConfig = LogManager.Configuration;
 
-			var target = new AsyncTargetWrapper(new ConsoleTarget
+			var target = new ConsoleTarget
 			{
 				Layout = "${time} ${logger} ${message}"
-			});
+			};
 
 			var config = new LoggingConfiguration();
 			var rule = new LoggingRule("*", LogLevel.Trace, target);

@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Peach.Core;
 using Peach.Pro.Core.WebServices.Models;
-using Dapper;
 using Monitor = System.Threading.Monitor;
 
 namespace Peach.Pro.Core.Storage

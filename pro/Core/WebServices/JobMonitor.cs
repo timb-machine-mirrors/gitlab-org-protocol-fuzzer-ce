@@ -269,15 +269,16 @@ namespace Peach.Pro.Core.WebServices
 			};
 
 			if (!string.IsNullOrEmpty(Configuration.LogRoot))
-			{
-				args.Add("--logRoot");
-				args.Add(Configuration.LogRoot);
-			}
+				args.AddRange(new[] { "--logRoot", Configuration.LogRoot });
 
-			//if (Configuration.LogLevel == NLog.LogLevel.Debug)
-			//	args.Add("-v");
-			//if (Configuration.LogLevel == NLog.LogLevel.Trace)
-			//	args.Add("-vv");
+			if (!Configuration.UseAsyncLogging)
+				args.Add("--syncLogging");
+
+			if (Configuration.LogLevel == NLog.LogLevel.Debug)
+				args.Add("-v");
+
+			if (Configuration.LogLevel == NLog.LogLevel.Trace)
+				args.Add("-vv");
 
 			_process = new Process
 			{
