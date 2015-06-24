@@ -191,13 +191,14 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var cfg2 = db.GetConfigByUrl(imgCopy.PitUrl);
 			Assert.NotNull(cfg2);
-			Assert.AreEqual(3, cfg2.Count);
+			Assert.AreEqual(4, cfg2.Count);
 
 			// Should include system defines
 
 			Assert.AreEqual("Peach.Pwd", cfg2[0].Key);
 			Assert.AreEqual("Peach.Cwd", cfg2[1].Key);
-			Assert.AreEqual("PitLibraryPath", cfg2[2].Key);
+			Assert.AreEqual("Peach.LogRoot", cfg2[2].Key);
+			Assert.AreEqual("PitLibraryPath", cfg2[3].Key);
 
 			// Saving should create the file
 			var cfg = imgCopy.Versions[0].Files[0].Name + ".config";
@@ -358,25 +359,27 @@ namespace Peach.Pro.Test.Core.WebServices
 			var cfg = db.GetConfigByUrl(pit.PitUrl);
 
 			Assert.NotNull(cfg);
-			Assert.AreEqual(5, cfg.Count);
+			Assert.AreEqual(6, cfg.Count);
 
 			// Always are 3 system types at the beginning!
 			Assert.AreEqual("Peach.Pwd", cfg[0].Key);
 			Assert.AreEqual(ParameterType.System, cfg[0].Type);
 			Assert.AreEqual("Peach.Cwd", cfg[1].Key);
 			Assert.AreEqual(ParameterType.System, cfg[1].Type);
+			Assert.AreEqual("Peach.LogRoot", cfg[2].Key);
+			Assert.AreEqual(ParameterType.System, cfg[2].Type);
 
 			// PitLibraryPath is special, and gets turned into a System type
 			// regardless of what is in the pit .config
-			Assert.AreEqual("PitLibraryPath", cfg[2].Key);
-			Assert.AreNotEqual(".", cfg[2].Value);
-			Assert.AreEqual(ParameterType.System, cfg[2].Type);
+			Assert.AreEqual("PitLibraryPath", cfg[3].Key);
+			Assert.AreNotEqual(".", cfg[3].Value);
+			Assert.AreEqual(ParameterType.System, cfg[3].Type);
 
-			Assert.AreEqual("Strategy", cfg[3].Key);
-			Assert.AreEqual(ParameterType.Enum, cfg[3].Type);
+			Assert.AreEqual("Strategy", cfg[4].Key);
+			Assert.AreEqual(ParameterType.Enum, cfg[4].Type);
 
-			Assert.AreEqual("SomeMiscVariable", cfg[4].Key);
-			Assert.AreEqual(ParameterType.String, cfg[4].Type);
+			Assert.AreEqual("SomeMiscVariable", cfg[5].Key);
+			Assert.AreEqual(ParameterType.String, cfg[5].Type);
 		}
 
 		[Test]
@@ -388,11 +391,11 @@ namespace Peach.Pro.Test.Core.WebServices
 
 
 			Assert.NotNull(cfg);
-			Assert.AreEqual(5, cfg.Count);
-			Assert.AreEqual("SomeMiscVariable", cfg[4].Key);
-			Assert.AreEqual(ParameterType.String, cfg[4].Type);
-			Assert.AreNotEqual("Foo Bar Baz", cfg[4].Value);
-			cfg[4].Value = "Foo Bar Baz";
+			Assert.AreEqual(6, cfg.Count);
+			Assert.AreEqual("SomeMiscVariable", cfg[5].Key);
+			Assert.AreEqual(ParameterType.String, cfg[5].Type);
+			Assert.AreNotEqual("Foo Bar Baz", cfg[5].Value);
+			cfg[5].Value = "Foo Bar Baz";
 
 			PitDatabase.SaveConfig(pit, cfg);
 
@@ -790,11 +793,12 @@ namespace Peach.Pro.Test.Core.WebServices
 			var cfg = db.GetConfigByUrl(file.PitUrl);
 			Assert.NotNull(cfg);
 
-			Assert.AreEqual(3, cfg.Count);
+			Assert.AreEqual(4, cfg.Count);
 
 			Assert.AreEqual("Peach.Pwd", cfg[0].Key);
 			Assert.AreEqual("Peach.Cwd", cfg[1].Key);
-			Assert.AreEqual("PitLibraryPath", cfg[2].Key);
+			Assert.AreEqual("Peach.LogRoot", cfg[2].Key);
+			Assert.AreEqual("PitLibraryPath", cfg[3].Key);
 		}
 
 		[Test]
@@ -838,7 +842,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			var cfg = db.GetConfigByUrl(file.PitUrl);
 			Assert.NotNull(cfg);
 
-			Assert.AreEqual(3, cfg.Count);
+			Assert.AreEqual(4, cfg.Count);
 
 			File.Delete(path);
 

@@ -453,6 +453,7 @@ namespace Peach.Pro.Core.Runtime
 
 				AddNewDefine("Peach.Cwd=" + Environment.CurrentDirectory);
 				AddNewDefine("Peach.Pwd=" + Utilities.ExecutionDirectory);
+				AddNewDefine("Peach.LogRoot=" + Configuration.LogRoot);
 
 				// Do we have pit.xml.config file?
 				// If so load it as the first defines file.
