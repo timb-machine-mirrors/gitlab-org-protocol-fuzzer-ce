@@ -25,6 +25,10 @@ namespace Peach.Pro.Test.Core
 
 			public string Name { get; private set; }
 			public int SelectionWeight { get; private set; }
+			public int TransformWeight(Func<int, int> how)
+			{
+				return how(SelectionWeight);
+			}
 		}
 
 		[Test]

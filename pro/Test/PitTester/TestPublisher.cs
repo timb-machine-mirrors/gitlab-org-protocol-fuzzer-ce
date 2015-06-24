@@ -62,7 +62,7 @@ namespace PitTester
 			_logger.Verify<TestData.Accept>(Name);
 		}
 
-		public override Variant call(string method, List<ActionParameter> args)
+		protected override Variant OnCall(string method, List<ActionParameter> args)
 		{
 			throw new NotImplementedException();
 		}

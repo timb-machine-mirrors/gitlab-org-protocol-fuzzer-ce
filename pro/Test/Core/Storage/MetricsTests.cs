@@ -253,9 +253,9 @@ namespace Peach.Pro.Test.Core.Storage
 			{
 				DatabaseTests.AssertResult(db.LoadTable<StateMetric>(), new[]
 				{
+					new StateMetric("S3_1", 5),
 					new StateMetric("S1_1", 2),
 					new StateMetric("S2_1", 2),
-					new StateMetric("S3_1", 5),
 					new StateMetric("S4_1", 1),
 					new StateMetric("S5_1", 1),
 					new StateMetric("S5_2", 1),
@@ -290,12 +290,12 @@ namespace Peach.Pro.Test.Core.Storage
 			{
 				DatabaseTests.AssertResult(db.LoadTable<BucketMetric>(), new[]
 				{
-					new BucketMetric("AAA_BBB", "M1", "S2_1.A2.P1.E1", 1, 1),
 					new BucketMetric("AAA_BBB", "M3", "S3_1.A3.P3.E3", 4, 2),
+					new BucketMetric("XXX_YYY", "M3", "S3_1.A3.P3.E3", 4, 1),
+					new BucketMetric("AAA_BBB", "M1", "S2_1.A2.P1.E1", 1, 1),
+					new BucketMetric("XXX_YYY", "M4", "S4_1.A4.P4.E4", 1, 1),
 					new BucketMetric("AAA_YYY", "M5", "S5_1.A5.P5.E5", 1, 1),
 					new BucketMetric("AAA_YYY", "M5", "S5_2.A5.P5.E5", 1, 1),
-					new BucketMetric("XXX_YYY", "M3", "S3_1.A3.P3.E3", 4, 1),
-					new BucketMetric("XXX_YYY", "M4", "S4_1.A4.P4.E4", 1, 1),
 				});
 			}
 		}
@@ -322,11 +322,11 @@ namespace Peach.Pro.Test.Core.Storage
 				// Mutator,ElementCount,IterationCount,BucketCount,FaultCount
 				DatabaseTests.AssertResult(db.LoadTable<MutatorMetric>(), new[]
 				{
-					new MutatorMetric("M1", 2, 2, 1, 1),
-					new MutatorMetric("M2", 1, 1, 0, 0),
 					new MutatorMetric("M3", 2, 5, 2, 3),
-					new MutatorMetric("M4", 1, 1, 1, 1),
+					new MutatorMetric("M1", 2, 2, 1, 1),
 					new MutatorMetric("M5", 2, 2, 1, 1),
+					new MutatorMetric("M4", 1, 1, 1, 1),
+					new MutatorMetric("M2", 1, 1, 0, 0),
 				});
 			}
 		}
@@ -338,13 +338,13 @@ namespace Peach.Pro.Test.Core.Storage
 			{
 				DatabaseTests.AssertResult(db.LoadTable<ElementMetric>(), new[]
 				{
-					new ElementMetric("S2_1", "A2", "P1.E1", 2, 1, 1),
-					new ElementMetric("S3_1", "A3", "P1.E1", 1, 0, 0),
-					new ElementMetric("S3_1", "A3", "P2.E2", 1, 0, 0),
 					new ElementMetric("S3_1", "A3", "P3.E3", 4, 2, 3),
+					new ElementMetric("S2_1", "A2", "P1.E1", 2, 1, 1),
 					new ElementMetric("S4_1", "A4", "P4.E4", 1, 1, 1),
 					new ElementMetric("S5_1", "A5", "P5.E5", 1, 1, 1),
 					new ElementMetric("S5_2", "A5", "P5.E5", 1, 1, 1),
+					new ElementMetric("S3_1", "A3", "P1.E1", 1, 0, 0),
+					new ElementMetric("S3_1", "A3", "P2.E2", 1, 0, 0),
 				});
 			}
 		}
@@ -356,12 +356,12 @@ namespace Peach.Pro.Test.Core.Storage
 			{
 				DatabaseTests.AssertResult(db.LoadTable<DatasetMetric>(), new[]
 				{
-					new DatasetMetric("S2.A2.P1/D1", 1, 0, 0),
-					new DatasetMetric("S3.A3.P2/D2", 1, 0, 0),
 					new DatasetMetric("S3.A3.P3/D3", 3, 2, 2),
+					new DatasetMetric("S5.A5.P5/D5", 2, 2, 2),
 					new DatasetMetric("S3.A3.P3/D8", 1, 1, 1),
 					new DatasetMetric("S4.A4.P4/D4", 1, 1, 1),
-					new DatasetMetric("S5.A5.P5/D5", 2, 2, 2),
+					new DatasetMetric("S2.A2.P1/D1", 1, 0, 0),
+					new DatasetMetric("S3.A3.P2/D2", 1, 0, 0),
 				});
 			}
 		}

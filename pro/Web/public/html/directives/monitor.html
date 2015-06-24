@@ -9,16 +9,16 @@
 				{{vm.Header}}
 				<span class="btn-group btn-group-xs pull-right">
 					<button class="btn btn-xs btn-info"
-					        ng-click="vm.OnMoveUp($event)"
-					        ng-class="{disabled: !vm.CanMoveUp}"
-					        tooltip="Move Monitor Up"
-					        tooltip-append-to-body="true">
+									ng-click="vm.OnMoveUp($event)"
+									ng-disabled="!vm.CanMoveUp"
+									tooltip="Move Monitor Up"
+									tooltip-append-to-body="true">
 						<i class="fa fa-chevron-up">
 						</i>
 					</button>
 					<button class="btn btn-xs btn-info"
 									ng-click="vm.OnMoveDown($event)"
-									ng-class="{disabled: !vm.CanMoveDown}"
+									ng-disabled="!vm.CanMoveDown"
 									tooltip="Move Monitor Down"
 									tooltip-append-to-body="true">
 						<i class="fa fa-chevron-down">

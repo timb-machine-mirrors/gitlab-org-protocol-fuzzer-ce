@@ -9,6 +9,12 @@ interface String {
 	paddingLeft(pattern: string): string;
 }
 
+declare module _ {
+	interface LoDashStatic {
+		takeRight<T>(array: List<T>, n: number): T[];
+	}
+}
+
 String.prototype.startsWith = function (prefix: string): boolean {
 	return this.slice(0, prefix.length) === prefix;
 }

@@ -27,9 +27,9 @@
 // $Id$
 
 using System;
-using System.Collections.Generic;
-using Peach.Core.Dom;
 using Peach.Core.Agent;
+using Peach.Core.Dom;
+using Action = Peach.Core.Dom.Action;
 
 namespace Peach.Core
 {
@@ -164,11 +164,11 @@ namespace Peach.Core
 		{
 		}
 
-		protected virtual void ActionFinished(RunContext context, Dom.Action action)
+		protected virtual void ActionFinished(RunContext context, Action action)
 		{
 		}
 
-		protected virtual void ActionStarting(RunContext context, Dom.Action action)
+		protected virtual void ActionStarting(RunContext context, Action action)
 		{
 		}
 

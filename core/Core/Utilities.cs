@@ -27,18 +27,18 @@
 // $Id$
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.NetworkInformation;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using NLog;
-using NLog.Targets;
 using NLog.Config;
-using System.Threading;
+using NLog.Targets;
 using NLog.Targets.Wrappers;
 
 namespace Peach.Core
@@ -273,7 +273,8 @@ namespace Peach.Core
 		/// Leven &gt; 1 --&gt; Trace
 		/// </remarks>
 		/// <param name="level"></param>
-		public static void ConfigureLogging(int level)
+		/// <param name="sync"></param>
+		public static void ConfigureLogging(int level, bool sync = false)
 		{
 			if (level < 0)
 			{
@@ -307,15 +308,18 @@ namespace Peach.Core
 					break;
 			}
 
-			var consoleTarget = new AsyncTargetWrapper(new ConsoleTarget
+			Target target = new ConsoleTarget
 			{
-				Layout = "${logger} ${message}", 
+				Layout = "${logger} ${message}",
 				Error = true,
-			});
-			var rule = new LoggingRule("*", logLevel, consoleTarget);
+			};
 
+			if (!sync)
+				target = new AsyncTargetWrapper(target);
+
+			var rule = new LoggingRule("*", logLevel, target);
 			var nconfig = new LoggingConfiguration();
-			nconfig.AddTarget("console", consoleTarget);
+			nconfig.AddTarget("console", target);
 			nconfig.LoggingRules.Add(rule);
 			LogManager.Configuration = nconfig;
 		}
@@ -484,32 +488,14 @@ namespace Peach.Core
 
 		public static bool TcpPortAvailable(int port)
 		{
-			var isAvailable = true;
-
 			var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
-			var tcpConnInfoArray = ipGlobalProperties.GetActiveTcpConnections();
+	
+			var listeners = ipGlobalProperties.GetActiveTcpListeners();
+			if (listeners.Any(endp => endp.Port == port))
+				return false;
 
-			foreach (var tcpi in tcpConnInfoArray)
-			{
-				if (tcpi.LocalEndPoint.Port == port)
-				{
-					isAvailable = false;
-					break;
-				}
-			}
-
-			var objEndPoints = ipGlobalProperties.GetActiveTcpListeners();
-
-			foreach (var endp in objEndPoints)
-			{
-				if (endp.Port == port)
-				{
-					isAvailable = false;
-					break;
-				}
-			}
-
-			return isAvailable;
+			var connections = ipGlobalProperties.GetActiveTcpConnections();
+			return connections.All(tcpi => tcpi.LocalEndPoint.Port != port);
 		}
 
 		/// <summary>
