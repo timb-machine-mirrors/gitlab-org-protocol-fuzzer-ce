@@ -1,0 +1,84 @@
+<<<
+[[Fixups_SspiFixup]]
+== Sspi
+
+// Updated:
+// - 02/18/2014: Mick
+// Added full examples
+
+Performs Microsoft SSPI authentication and places the result in the parent 
+element. SSPI supports a number of challenge-response authentication protocols.  
+
+This fixup is useful for working with NTLM authentication, with Microsoft 
+protocols such as CIFS and SMB, and with authentication across secure boundaries (domains).
+
+=== Parent Elements
+
+xref:String[String]
+
+=== Parameters
+
+_Required:_
+
+User:: User name of the authorizing account.
+Password:: Password associated with the authorizing account.  
+
+_Optional:_
+
+Domain:: Domain in which the authorizing account resides. Default is `""`.
+ContinueNeeded:: Reference to key for connection-oriented use in NTLM. 
+The value is the name of the field in the state bag that indicates whether 
+authrentication continues (as in a connection).
+
+=== Examples
+
+//TBD
+
+.Basic Sspi Fixup Example
+=========================
+[source,xml]
+----
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+    
+	<DataModel name="Packet">
+        <String name="SspiResponse">
+			<Fixup class="SspiFixup">
+                <String name="User" value="PeachUser"/>
+                <String name="Password" value="Calhoun30701"/>
+                <String name="Domain" value="CAITLIN" />
+                <String name="SecurityContinues" value="" />
+		    </Fixup>
+        </String>
+
+        <BLob name="UserData" />
+    </DataModel>
+
+	<StateModel name="TheState" initialState="initial">
+		<State name="initial">
+			<Action type="output">
+				<DataModel ref="Packet" />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name="Default">
+		<StateModel ref="TheState"/>
+
+		<Publisher class="ConsoleHex" />
+
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
+	</Test>
+</Peach>
+----
+
+Output from this example.
+
+----
+//Output goes here.
+
+
+----
+=========================
