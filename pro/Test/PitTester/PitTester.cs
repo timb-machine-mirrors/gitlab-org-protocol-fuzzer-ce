@@ -304,10 +304,20 @@ namespace PitTester
 					throw new ApplicationException(string.Format("PitParser didn't properly parse defines file. Expected '{1}' defines, got '{2}' for value at index {0}.", i, defs[i].Value, old[i].Value));
 			}
 
+			var sb = new StringBuilder();
+			
+			var logger = defs.Where(d => d.Key == "LoggerPath").ToArray();
+			if (logger.Length == 0)
+				sb.AppendLine("Missing a define for key 'LoggerPath'.");
+			if (logger.Length > 1)
+				sb.AppendLine("There is more than one define for 'LoggerPath'.");
+			var expected = "##Peach.LogRoot##/" + Path.GetFileNameWithoutExtension(fileName);
+			if (logger[0].Value != expected)
+				sb.AppendLine("LoggerPath is set as '" + logger[0].Value + "' but it should be '" + expected + "'.");
+
 			var noName = string.Join(", ", defs.Where(d => string.IsNullOrEmpty(d.Name)).Select(d => d.Key));
 			var noDesc = string.Join(", ", defs.Where(d => string.IsNullOrEmpty(d.Description)).Select(d => d.Key));
 
-			var sb = new StringBuilder();
 
 			if (noName.Length > 0)
 				sb.AppendFormat("The following keys have an empty name: {0}", noName);
@@ -431,6 +441,35 @@ namespace PitTester
 					{
 						if (lifetime != "session")
 							errors.AppendLine("<Test> element has incorrect targetLifetime attribute. Expected 'session' but found '{0}'.".Fmt(lifetime));
+					}
+
+					var loggers = it.Current.Select("p:Logger", nsMgr);
+					if (loggers.Count != 1)
+						errors.AppendLine("Number of <Logger> elements is " + loggers.Count + " but should be 1.");
+
+					while (loggers.MoveNext())
+					{
+						var cls = loggers.Current.GetAttribute("class", string.Empty);
+						if (cls == "Metrics")
+							errors.AppendLine("Found obsolete <Logger> element for class '" + cls + "'.");
+						else if (cls != "File")
+							errors.AppendLine("<Logger> element has class '" + cls + "' but should be 'File'.");
+
+						var parameters = loggers.Current.Select("p:Param", nsMgr);
+
+						if (parameters.Count != 1)
+							errors.AppendLine("Nmber of logger <Param> elements is " + parameters.Count + "but should be 1.");
+
+						while (parameters.MoveNext())
+						{
+							var name = parameters.Current.GetAttribute("name", string.Empty);
+							if (name != "Path")
+								errors.AppendLine("<Logger> element has unexpected parameter named '" + name + "'.");
+
+							var path = parameters.Current.GetAttribute("value", string.Empty);
+							if (path != "##LoggerPath##")
+								errors.AppendLine("Path parameter on <Logger> element is '" + path + "' but should be '##LoggerPath##'.");
+						}
 					}
 				}
 
