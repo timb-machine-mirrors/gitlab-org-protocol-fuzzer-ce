@@ -64,10 +64,6 @@ The default value is 200 ms.
 
 FaultOnEarlyExit:: Triggers a fault if the target exits prematurely, defaults to false.
 
-RestartAfterFault:: If "true", restarts the target when any monitor detects a fault. 
-If "false", restarts the target if the process exits or crashes. +
-This argument defaults to false.
-
 RestartOnEachTest:: Restarts the process for each iteration, defaults to false.
 
 WaitForExitOnCall:: Exits the target upon receiving a call from the state model. If the 

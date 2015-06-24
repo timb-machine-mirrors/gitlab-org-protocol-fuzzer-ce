@@ -88,7 +88,6 @@ Perform an action on the specified relay, defaults to ToggleOff. Valid actions i
 ToggleDelay:: Pause in milliseconds between off/on, defaults to 500 ms--1/2 second. +
 Formerly named OnOffPause.
 // ResetOnStart:: Reset device on start, defaults to false.
-// RestartAfterFault:: If "true", restarts the target when any monitor detects a fault. 
 // If "false", restarts the target if the process exits or crashes. +
 // This argument defaults to false.
 
