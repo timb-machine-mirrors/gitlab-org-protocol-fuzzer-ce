@@ -94,6 +94,8 @@ namespace Peach.Pro.Core.Mutators
 				// Make sure we pick a unique name
 				var newName = "{0}_{1}".Fmt(baseName, i);
 
+				// TODO: Why not just use a blob here?
+
 				var newElem = (DataElement)Activator.CreateInstance(obj.GetType(), new object[] { newName });
 				newElem.MutatedValue = mutatedValue;
 				newElem.mutationFlags = MutateOverride.Default | MutateOverride.TypeTransform;

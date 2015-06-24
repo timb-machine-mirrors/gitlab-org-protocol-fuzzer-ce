@@ -13,6 +13,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		Record = 0x2,
 	}
 
+	[Table("FaultDetail")]
 	public class FaultSummary
 	{
 		/// <summary>
@@ -161,7 +162,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		public string FaultPath { get; set; }
 
 		[NotMapped]
-		public ICollection<FaultMutation> Mutations { get; set; }
+		public IEnumerable<FaultMutation> Mutations { get; set; }
 	}
 
 	public class FaultFile

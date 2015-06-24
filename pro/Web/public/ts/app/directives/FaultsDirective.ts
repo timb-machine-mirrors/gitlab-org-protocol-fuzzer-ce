@@ -69,7 +69,7 @@ module Peach {
 			}
 
 			if (this.$scope.limit) {
-				this.AllFaults = _.last(faults, this.$scope.limit);
+				this.AllFaults = _.takeRight(faults, this.$scope.limit);
 			} else {
 				this.AllFaults = faults;
 			}

@@ -58,6 +58,11 @@ namespace Peach.Core
 			foreach (var item in sequence)
 				action(item);
 		}
+
+		public static IEnumerable<T> LastEnumerable<T>(this IEnumerable<T> source)
+		{
+			return new[] { source.Last() };
+		}
 	}
 
 	public static class ListExtensions

@@ -142,6 +142,15 @@ INSERT INTO TestEvent (
 	@Resolve
 );" + GetLastRowId;
 
+		public const string PassPendingTestEvents = @"
+UPDATE TestEvent
+SET
+	Status = 1
+WHERE
+	Status = 0 AND
+	JobId = @JobId 
+;";
+
 		public const string	UpdateTestEvent = @"
 UPDATE TestEvent
 SET
@@ -306,6 +315,11 @@ INSERT INTO NamedItem (
 UPDATE State 
 SET Count = @Count 
 WHERE Id = @Id;
+";
+
+		public const string SelectBucketCount = @"
+SELECT COUNT(*)
+FROM ViewBucketDetails;
 ";
 
 		public const string JobMigrateV1 = @"

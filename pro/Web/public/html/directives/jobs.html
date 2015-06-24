@@ -42,10 +42,12 @@
 				ng-click="vm.OnJobSelected(row)"
 				class="pointer">
 			<td class="width-100">
+				<i class="fa fa-spinner fa-pulse"
+					 ng-show="vm.IsActive(row)"></i>
 				{{row.name}}
 			</td>
-			<td>
-				{{row.status}}
+			<td class="nowrap">
+				{{row.status | capitalize | peachParameterName}}
 			</td>
 			<td class="nowrap">
 				{{row.startDate | date:'M/d/yy h:mm a'}}

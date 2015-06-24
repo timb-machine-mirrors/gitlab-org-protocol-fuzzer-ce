@@ -81,9 +81,19 @@ namespace Peach.Pro.Core.WebServices
 				var job = new Job(jobRequest, PitFile);
 				_guid = job.Guid;
 
-				OnStart(job);
-
-				return job;
+				try
+				{
+					OnStart(job);
+					return job;
+				}
+				catch
+				{
+					using (var db = new NodeDatabase())
+					{
+						db.DeleteJob(_guid);
+					}
+					throw;
+				}
 			}
 		}
 
@@ -269,15 +279,16 @@ namespace Peach.Pro.Core.WebServices
 			};
 
 			if (!string.IsNullOrEmpty(Configuration.LogRoot))
-			{
-				args.Add("--logRoot");
-				args.Add(Configuration.LogRoot);
-			}
+				args.AddRange(new[] { "--logRoot", Configuration.LogRoot });
 
-			//if (Configuration.LogLevel == NLog.LogLevel.Debug)
-			//	args.Add("-v");
-			//if (Configuration.LogLevel == NLog.LogLevel.Trace)
-			//	args.Add("-vv");
+			if (!Configuration.UseAsyncLogging)
+				args.Add("--syncLogging");
+
+			if (Configuration.LogLevel == NLog.LogLevel.Debug)
+				args.Add("-v");
+
+			if (Configuration.LogLevel == NLog.LogLevel.Trace)
+				args.Add("-vv");
 
 			_process = new Process
 			{
@@ -400,20 +411,20 @@ namespace Peach.Pro.Core.WebServices
 				}
 			}
 		}
-		
+
 		void FinishJob()
 		{
 			Logger.Trace(">>> FinishJob");
 
 			lock (this)
 			{
-				try 
-				{ 
-					_process.Dispose(); 
-				}
-				catch(Exception ex) 
+				try
 				{
- 					Logger.Trace("Exception during _process.Dispose: {0}", ex.Message);
+					_process.Dispose();
+				}
+				catch (Exception ex)
+				{
+					Logger.Trace("Exception during _process.Dispose: {0}", ex.Message);
 				}
 
 				_process = null;

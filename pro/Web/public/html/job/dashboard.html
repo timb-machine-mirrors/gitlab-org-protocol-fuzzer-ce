@@ -145,21 +145,21 @@
 	<div>
 		<button class="btn btn-success"
 						ng-click="vm.Continue()"
-						ng-class="{disabled: !vm.CanContinue}">
+						ng-disabled="!vm.CanContinue">
 			<i class="fa fa-play"></i>
 			Start
 		</button>
 
 		<button class="btn btn-primary"
 						ng-click="vm.Pause()"
-						ng-class="{disabled: !vm.CanPause}">
+						ng-disabled="!vm.CanPause">
 			<i class="fa fa-pause"></i>
 			Pause
 		</button>
 
 		<button class="btn btn-danger"
 						ng-click="vm.Stop()"
-						ng-class="{disabled: !vm.CanStop}">
+						ng-disabled="!vm.CanStop">
 			<i class="fa"
 				 ng-class="vm.StopIcon"></i>
 			{{vm.StopPrompt}}

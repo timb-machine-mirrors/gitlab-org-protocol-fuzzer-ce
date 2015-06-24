@@ -28,11 +28,13 @@ namespace Peach.Pro.Core.WebServices.Models
 
 		public Job Job { get; set; }
 
-		public ICollection<BucketDetail> BucketDetails { get; set; }
-		public ICollection<MutatorMetric> MutatorMetrics { get; set; }
-		public ICollection<ElementMetric> ElementMetrics { get; set; }
-		public ICollection<StateMetric> StateMetrics { get; set; }
-		public ICollection<DatasetMetric> DatasetMetrics { get; set; }
-		public ICollection<BucketMetric> BucketMetrics { get; set; }
+		public int BucketCount { get; set; }
+
+		public IEnumerable<BucketDetail> BucketDetails { get; set; }
+		public IEnumerable<MutatorMetric> MutatorMetrics { get; set; }
+		public IEnumerable<ElementMetric> ElementMetrics { get; set; }
+		public IEnumerable<StateMetric> StateMetrics { get; set; }
+		public IEnumerable<DatasetMetric> DatasetMetrics { get; set; }
+		public IEnumerable<BucketMetric> BucketMetrics { get; set; }
 	}
 }

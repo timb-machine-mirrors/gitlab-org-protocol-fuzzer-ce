@@ -49,6 +49,7 @@ namespace Peach.Pro.Core.MutationStrategies
 	[Parameter("SwitchCount", typeof(int), "Number of iterations to perform per-mutator befor switching.", "200")]
 	[Parameter("MaxFieldsToMutate", typeof(int), "Maximum fields to mutate at once.", "6")]
 	[Parameter("StateMutation", typeof(bool), "Enable state mutations.", "false")]
+	[Parameter("Weighting", typeof(int), "Controls mutation weight evaulation.", "10")]
 	public class RandomStrategy : MutationStrategy
 	{
 		[DebuggerDisplay("{InstanceName} {ElementName} Mutators = {Mutators.Count}")]
@@ -78,6 +79,11 @@ namespace Peach.Pro.Core.MutationStrategies
 			public string ElementName { get; private set; }
 			public WeightedList<Mutator> Mutators { get; private set; }
 			public int SelectionWeight { get { return Mutators.SelectionWeight; } }
+
+			public int TransformWeight(Func<int, int> how)
+			{
+				return Mutators.TransformWeight(how);
+			}
 		}
 
 		[DebuggerDisplay("{Name} Count = {Count}")]
@@ -86,17 +92,17 @@ namespace Peach.Pro.Core.MutationStrategies
 		{
 			class DebugView
 			{
-				MutationScope obj;
+				readonly MutationScope _obj;
 
 				public DebugView(MutationScope obj)
 				{
-					this.obj = obj;
+					_obj = obj;
 				}
 
 				[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 				public MutableItem[] Items
 				{
-					get { return obj.ToArray(); }
+					get { return _obj.ToArray(); }
 				}
 			}
 
@@ -124,7 +130,7 @@ namespace Peach.Pro.Core.MutationStrategies
 			}
 		}
 
-		[DebuggerDisplay("{name} - {Opions.Count} Options")]
+		[DebuggerDisplay("{Name} - {Options.Count} Options")]
 		protected class DataSetTracker : INamed
 		{
 			#region Obsolete Functions
@@ -134,10 +140,10 @@ namespace Peach.Pro.Core.MutationStrategies
 
 			#endregion
 
-			public DataSetTracker(string ModelName, List<Data> Options)
+			public DataSetTracker(string modelName, List<Data> options)
 			{
-				this.ModelName = ModelName;
-				this.Options = Options;
+				ModelName = modelName;
+				Options = options;
 				Iteration = 1;
 			}
 
@@ -207,6 +213,11 @@ namespace Peach.Pro.Core.MutationStrategies
 		WeightedList<MutationScope> mutableItems = new WeightedList<MutationScope>();
 
 		/// <summary>
+		/// Controls how weights are applied to the weighted list.
+		/// </summary>
+		readonly Func<int, int> _tuneWeights;
+
+		/// <summary>
 		/// The selected mutations for a given fuzzing iteration
 		/// </summary>
 		MutableItem[] mutations;
@@ -237,7 +248,7 @@ namespace Peach.Pro.Core.MutationStrategies
 		/// </summary>
 		int maxFieldsToMutate = 6;
 
-		bool stateMutations = false;
+		bool stateMutations;
 
 		public RandomStrategy(Dictionary<string, Variant> args)
 			: base(args)
@@ -248,6 +259,17 @@ namespace Peach.Pro.Core.MutationStrategies
 				maxFieldsToMutate = int.Parse((string)args["MaxFieldsToMutate"]);
 			if (args.ContainsKey("StateMutation"))
 				stateMutations = bool.Parse((string)args["StateMutation"]);
+
+			var weighting = 10;
+			if (args.ContainsKey("Weighting"))
+				weighting = int.Parse((string)args["Weighting"]);
+
+			if (weighting < 1)        // If param<1, weight=1
+				_tuneWeights = x => 1;
+			else if (weighting == 1)  // If param=1, weight=SelectionWeight
+				_tuneWeights = x => x;
+			else                      // If param>1, weight=LOG(SelectionWeight,param)
+				_tuneWeights = x => (int)Math.Round(Math.Log(x, weighting)) + 1;
 
 			mutationScopeGlobal = new MutationScope("All");
 			mutationScopeState = new List<MutationScope>();
@@ -432,6 +454,8 @@ namespace Peach.Pro.Core.MutationStrategies
 				// Add global scope 1st
 				if (mutationScopeGlobal.Count > 0)
 					mutableItems.Add(mutationScopeGlobal);
+
+				mutableItems.TransformWeight(_tuneWeights);
 
 				// Cleanup containers used to collect the different scopes
 				mutationScopeGlobal = null;
@@ -623,10 +647,11 @@ namespace Peach.Pro.Core.MutationStrategies
 				foreach (var elem in allElements)
 				{
 					var rec = new MutableItem(item.instanceName, elem.fullName);
+					var e = elem;
 
 					rec.Mutators.AddRange(dataMutators
-						.Where(m => SupportedDataElement(m, elem))
-						.Select(m => GetMutatorInstance(m, elem))
+						.Where(m => SupportedDataElement(m, e))
+						.Select(m => GetMutatorInstance(m, e))
 						.Where(m => m.SelectionWeight > 0));
 
 					if (rec.Mutators.Count > 0)

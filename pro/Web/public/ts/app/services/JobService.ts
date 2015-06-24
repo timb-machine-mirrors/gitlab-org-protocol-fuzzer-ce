@@ -3,7 +3,7 @@
 module Peach {
 	"use strict";
 
-	export var JOB_INTERVAL = 1000;
+	export var JOB_INTERVAL = 3000;
 	
 	export class JobService {
 		static $inject = [
@@ -11,7 +11,7 @@ module Peach {
 			C.Angular.$q,
 			C.Angular.$http,
 			C.Angular.$state,
-			C.Angular.$interval,
+			C.Angular.$timeout,
 			C.Services.Pit
 		];
 
@@ -20,7 +20,7 @@ module Peach {
 			private $q: ng.IQService,
 			private $http: ng.IHttpService,
 			private $state: ng.ui.IStateService,
-			private $interval: ng.IIntervalService
+			private $timeout: ng.ITimeoutService
 		) {
 		}
 
@@ -29,34 +29,21 @@ module Peach {
 		private job: IJob;
 		private faults: IFaultSummary[] = [];
 		private pending: ng.IPromise<IJob>;
+		private isActive: boolean;
 		
-		public OnEnter(id: string) {
-			var url = C.Api.JobUrl.replace(':id', id);
-			this.pending = this.$http.get(url)
-				.then((response: ng.IHttpPromiseCallbackArg<IJob>) => {
-					this.job = response.data;
-					this.$rootScope['job'] = this.job;
-					if (this.job.status !== JobStatus.Stopped) {
-						this.startJobPoller();
-					}
-					if (this.job.faultCount > 0) {
-						var deferred = this.$q.defer<IJob>();
-						this.reloadFaults()
-							.success(() => { deferred.resolve(this.job); })
-							.error(reason => { deferred.reject(reason); })
-							.finally(() => { this.pending = undefined; })
-						;
-						return deferred.promise;
-					}
-					return undefined;
-				}, (response: ng.IHttpPromiseCallbackArg<IError>) => {
-					this.$state.go(C.States.MainError, { message: response.data.errorMessage });
-				})
-			;
+		public OnEnter(id: string): void {
+			this.isActive = true;
+			this.onPoll(C.Api.JobUrl.replace(':id', id));
 		}
 		
-		public OnExit() {
-			this.stopJobPoller();
+		public OnExit(): void {
+			this.isActive = false;
+
+			if (this.poller) {
+				this.$timeout.cancel(this.poller);
+				this.poller = undefined;
+			}
+
 			this.job = undefined;
 			this.$rootScope['job'] = undefined;
 			this.faults = [];
@@ -164,87 +151,91 @@ module Peach {
 			;
 		}
 		
-		public Continue() {
+		public Continue(): void {
 			this.sendCommand(
 				this.CanContinue, 
 				JobStatus.ContinuePending, 
 				this.job.commands.continueUrl);
 		}
 
-		public Pause() {
+		public Pause(): void {
 			this.sendCommand(
 				this.CanPause, 
 				JobStatus.PausePending, 
 				this.job.commands.pauseUrl);
 		}
 
-		public Stop() {
+		public Stop(): void {
 			this.sendCommand(
 				this.CanStop, 
 				JobStatus.StopPending, 
 				this.job.commands.stopUrl);
 		}
 		
-		public Kill() {
+		public Kill(): void {
 			this.sendCommand(
 				this.CanStop,
 				JobStatus.KillPending,
 				this.job.commands.killUrl);
 		}
 
-		private sendCommand(check: boolean, status: string, url: string) {
+		private sendCommand(check: boolean, status: string, url: string): void {
 			if (check) {
 				this.job.status = status;
 				this.$http.get(url)
-					.success(() => this.startJobPoller())
+					.success(() => this.onPoll(this.job.jobUrl))
 					.error(reason => this.onError(reason));
 			}
 		}
 
-		private onError(error: any) {
+		private onError(error: any): void {
 			console.log('onError', error);
-			this.stopJobPoller();
 		}
 
-		private startJobPoller() {
-			if (!_.isUndefined(this.poller)) {
-				return;
-			}
-			
-			this.poller = this.$interval(() => {
-				this.$http.get(this.job.jobUrl)
-					.success((job: IJob) => {
-						var stopPending = (this.job.status === JobStatus.StopPending);
-						var killPending = (this.job.status === JobStatus.KillPending);
+		private onPoll(url: string): void {
+			this.pending = this.$http.get(url)
+				.then((response: ng.IHttpPromiseCallbackArg<IJob>) => {
+					if (!this.isActive)
+						return undefined;
 
-						this.job = job;
+					var stopPending = (this.job && this.job.status === JobStatus.StopPending);
+					var killPending = (this.job && this.job.status === JobStatus.KillPending);
 
-						if (this.job.status !== JobStatus.Stopped) {
-							if (stopPending) {
-								this.job.status = JobStatus.StopPending;
-							} else if (killPending) {
-								this.job.status = JobStatus.KillPending;
-							}
+					var job = response.data;
+					this.job = job;
+
+					if (this.job.status !== JobStatus.Stopped) {
+						if (stopPending) {
+							this.job.status = JobStatus.StopPending;
+						} else if (killPending) {
+							this.job.status = JobStatus.KillPending;
 						}
+					}
 
-						this.$rootScope['job'] = this.job;
+					this.$rootScope['job'] = this.job;
 
-						if (job.status === JobStatus.Stopped ||
-							job.status === JobStatus.Paused) {
-							this.stopJobPoller();
-						}
+					if (job.status !== JobStatus.Stopped &&
+						job.status !== JobStatus.Paused) {
+						this.poller = this.$timeout(() => { this.onPoll(url); }, JOB_INTERVAL);
+					}
 
-						if (this.faults.length !== job.faultCount) {
-							this.reloadFaults();
-						}
-					})
-					.error(reason => this.onError(reason));
-			}, JOB_INTERVAL);
-		}
-		
-		private stopJobPoller() {
-			this.$interval.cancel(this.poller);
-			this.poller = undefined;
+					if (this.faults.length !== job.faultCount) {
+						var deferred = this.$q.defer<IJob>();
+						this.reloadFaults()
+							.success(() => { deferred.resolve(this.job); })
+							.error(reason => { deferred.reject(reason); })
+							.finally(() => { this.pending = undefined; })
+						;
+						return deferred.promise;
+					}
+
+					return undefined;
+				},(response: ng.IHttpPromiseCallbackArg<IError>) => {
+					if (!this.isActive)
+						return undefined;
+					this.$state.go(C.States.MainError, { message: response.data.errorMessage });
+				})
+			;
 		}
 
 		private reloadFaults(): ng.IHttpPromise<IFaultSummary[]> {

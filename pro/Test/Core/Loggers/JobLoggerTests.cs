@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
 using Peach.Pro.Core;
-using Peach.Pro.Core.Loggers;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices.Models;
-using Dapper;
 
 namespace Peach.Pro.Test.Core.Loggers
 {

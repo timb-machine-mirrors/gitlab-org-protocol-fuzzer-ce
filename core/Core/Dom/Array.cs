@@ -160,6 +160,9 @@ namespace Peach.Core.Dom
 		/// <returns></returns>
 		public override IList<DataElement> XPathChildren()
 		{
+			if (OriginalElement == null)
+				return this;
+
 			return new[] { OriginalElement }.Concat(this).ToList();
 		}
 
