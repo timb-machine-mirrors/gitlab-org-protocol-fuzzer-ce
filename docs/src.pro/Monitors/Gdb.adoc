@@ -27,9 +27,6 @@ Arguments:: Command line arguments for the executable.
 FaultOnEarlyExit:: Trigger a fault if the process exits prematurely, defaults to false.
 GdbPath:: Path to gdb, defaults to +/usr/bin/gdb+.
 NoCpuKill:: Disable process killing when the CPU usage nears zero, default false.
-RestartAfterFault:: If "true", restarts the target when any monitor detects a fault. 
-If "false", restarts the target if the process exits or crashes. +
-This argument defaults to false.
 RestartOnEachTest:: Restarts the process for each iteration, defaults to false.
 StartOnCall:: Start the executable on a state model call.
 WaitForExitOnCall:: Wait for the process to exit on a state model call and fault if a timeout is reached.
