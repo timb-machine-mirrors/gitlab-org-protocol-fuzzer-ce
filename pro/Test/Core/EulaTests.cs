@@ -1,4 +1,4 @@
-using System;
+Ôªøusing System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -23,7 +23,7 @@ namespace Peach.Pro.Test.Core
 		public void HaveEulaText(string version)
 		{
 			License.Feature ver;
- 			if (!Enum.TryParse<License.Feature>(version, out ver))
+ 			if (!Enum.TryParse(version, out ver))
 				Assert.Fail("Enumeration value '{0}' is not a valid License.Version".Fmt(version));
 
 			var txt = License.EulaText(ver);
@@ -32,6 +32,7 @@ namespace Peach.Pro.Test.Core
 			Assert.Greater(txt.Length, 0);
 		}
 
+		// This code is used for converting HTML EULAs into text.
 		static void FixEulaText(string[] args)
 		{
 			if (args.Length != 2)
@@ -46,7 +47,7 @@ namespace Peach.Pro.Test.Core
 			var whitespace = new Regex("\\s+");
 			var number = new Regex("^(\\d+\\.)\\s+(.*?)\\r?$");
 			var letter = new Regex("^(\\([a-z]\\))\\s+(.*?)\\r?$");
-			var special = new Regex("[ìîíôñ]");
+			var special = new Regex("[‚Äú‚Äù‚Äô‚Ñ¢‚Äì]");
 
 			var indent = "";
 
@@ -95,14 +96,14 @@ namespace Peach.Pro.Test.Core
 
 					switch (ret)
 					{
-						case "ì":
-						case "î":
+						case "‚Äú":
+						case "‚Äù":
 							return "\"";
-						case "í":
+						case "‚Äô":
 							return "'";
-						case "ô":
+						case "‚Ñ¢":
 							return "(TM)";
-						case "ñ":
+						case "‚Äì":
 							return "-";
 					}
 

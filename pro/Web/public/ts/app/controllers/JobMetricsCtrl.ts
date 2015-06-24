@@ -79,14 +79,15 @@ module Peach {
 		) {
 			this.$scope.metric = $state.params['metric'];
 
-			$scope.$watch(() => jobService.Job, (newVal, oldVal) => {
-				if (newVal !== oldVal) {
-					this.update(false);
-				}
-			});
-			
 			if (this.jobService.Job) {
-				this.update(true);
+				this.update();
+			} else {
+				var unwatch = $scope.$watch(() => jobService.Job,(newVal, oldVal) => {
+					if (newVal !== oldVal) {
+						this.update();
+						unwatch();
+					}
+				});
 			}
 		}
 
@@ -129,7 +130,7 @@ module Peach {
 			}
 		}
 
-		private update(isNew: boolean): void {
+		private update(): void {
 			var promise = this.jobService.LoadMetric(this.$scope.metric);
 			switch (this.$scope.metric) {
 			case C.Metrics.BucketTimeline.id:
