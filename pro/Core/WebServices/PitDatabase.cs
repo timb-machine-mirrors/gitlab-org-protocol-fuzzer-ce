@@ -298,6 +298,7 @@ namespace Peach.Pro.Core.WebServices
 
 			AddDefine(defs, "Peach.Cwd", Environment.CurrentDirectory);
 			AddDefine(defs, "Peach.Pwd", Utilities.ExecutionDirectory);
+			AddDefine(defs, "Peach.LogRoot", Configuration.LogRoot);
 			AddDefine(defs, "PitLibraryPath", pitLibraryPath);
 
 			var final = PitDefines.Evaluate(defs);
@@ -1005,6 +1006,14 @@ namespace Peach.Pro.Core.WebServices
 					Name = "Peach Working Directory",
 					Description = "Full path to the current working directory",
 					Value = Environment.CurrentDirectory,
+				},
+				new Parameter()
+				{
+					Type = ParameterType.System,
+					Key = "Peach.LogRoot",
+					Name = "Root Log Directory",
+					Description = "Full path to the root log directory",
+					Value = Configuration.LogRoot,
 				},
 				new Parameter()
 				{
