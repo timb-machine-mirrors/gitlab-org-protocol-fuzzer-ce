@@ -219,7 +219,7 @@ namespace Peach.Core
 			}
 			catch (Exception ex)
 			{
-				throw new PeachException("Error executing expression [" + code + "]: " + ex.ToString(), ex);
+				throw new SoftException("Error executing expression [" + code + "]: " + ex.Message, ex);
 			}
 			finally
 			{
@@ -283,7 +283,8 @@ namespace Peach.Core
 			{
 				if (ex.GetBaseException() is ThreadAbortException)
 					throw;
-				throw new PeachException("Error executing expression [" + code + "]: " + ex, ex);
+
+				throw new SoftException("Error evalating expression [" + code + "]: " + ex.Message, ex);
 			}
 		}
 
