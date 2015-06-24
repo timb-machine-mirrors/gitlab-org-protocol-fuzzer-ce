@@ -287,19 +287,6 @@ namespace Peach.Pro.Core.Loggers
 			Logger.Trace("<<< Engine_TestFinished");
 		}
 
-		public void RestoreLogging(Guid id)
-		{
-			Logger.Trace("RestoringLogging>");
-
-			ConfigureLogging(_tempTarget, null);
-			_tempTarget = null;
-
-			using (var db = new NodeDatabase())
-			{
-				db.PassPendingTestEvents(id);
-			}
-		}
-
 		protected override void Engine_IterationStarting(
 			RunContext context,
 			uint currentIteration,
@@ -822,6 +809,19 @@ namespace Peach.Pro.Core.Loggers
 			_cache.Continue();
 		}
 
+		public void RestoreLogging(Guid id)
+		{
+			Logger.Trace("RestoreLogging>");
+
+			ConfigureLogging(_tempTarget, null);
+			_tempTarget = null;
+
+			using (var db = new NodeDatabase())
+			{
+				db.PassPendingTestEvents(id);
+			}
+		}
+
 		void ConfigureDebugLogging(string logPath, RunConfiguration config)
 		{
 			var target = new FileTarget
@@ -851,6 +851,7 @@ namespace Peach.Pro.Core.Loggers
 				foreach (var rule in _tempRules)
 					nconfig.LoggingRules.Remove(rule);
 				_tempRules.Clear();
+				oldTarget.Dispose();
 			}
 
 			if (newTarget != null)

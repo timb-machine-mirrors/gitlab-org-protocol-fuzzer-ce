@@ -46,8 +46,8 @@
 					 ng-show="vm.IsActive(row)"></i>
 				{{row.name}}
 			</td>
-			<td>
-				{{row.status | capitalize}}
+			<td class="nowrap">
+				{{row.status | capitalize | peachParameterName}}
 			</td>
 			<td class="nowrap">
 				{{row.startDate | date:'M/d/yy h:mm a'}}

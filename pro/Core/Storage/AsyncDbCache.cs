@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Peach.Core;
 using Peach.Pro.Core.WebServices.Models;
-using Dapper;
 using Monitor = System.Threading.Monitor;
 
 namespace Peach.Pro.Core.Storage
@@ -350,6 +349,7 @@ namespace Peach.Pro.Core.Storage
 			{
 				EnqueueBack(sw =>
 				{
+					_status = JobStatus.Stopped; 
 					copy.StopDate = now;
 					copy.Mode = !copy.IsControlIteration ? JobMode.Reporting : JobMode.Fuzzing;
 					DoUpdateRunningJob(sw, copy);

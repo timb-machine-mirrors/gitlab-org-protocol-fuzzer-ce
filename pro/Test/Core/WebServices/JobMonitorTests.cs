@@ -1,22 +1,22 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
 using NUnit.Framework;
 using Peach.Core;
+using Peach.Core.Test;
+using Peach.Pro.Core;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
-using Peach.Pro.Core;
-using System.Linq;
 using Peach.Pro.Test.Core.Storage;
-using TestStatus = Peach.Pro.Core.WebServices.Models.TestStatus;
-using Peach.Core.Test;
-using NLog.Config;
-using NLog;
-using NLog.Targets;
-using NLog.Targets.Wrappers;
+using Logger = NLog.Logger;
 using Random = System.Random;
+using TestStatus = Peach.Pro.Core.WebServices.Models.TestStatus;
 
 namespace Peach.Pro.Test.Core.WebServices
 {
@@ -90,20 +90,26 @@ namespace Peach.Pro.Test.Core.WebServices
 	class JobMonitorTests<T> : BaseJobMonitorTests<T>
 		where T : IJobMonitor, new()
 	{
-		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 		protected TempFile _tmp;
 		protected TempDirectory _tmpDir;
-		LoggingConfiguration _loggingConfig;
+		private LoggingConfiguration _loggingConfig;
+		private LogLevel _oldLogLevel;
 
 		[SetUp]
 		public void SetUp()
 		{
 			Logger.Trace(">>> Setup");
 
-			var target = new AsyncTargetWrapper(new ConsoleTarget
+			_oldLogLevel = Configuration.LogLevel;
+			Configuration.LogLevel = LogLevel.Debug;
+
+			Configuration.UseAsyncLogging = false;
+
+			var target = new ConsoleTarget
 			{
 				Layout = "${time} ${logger} ${message}"
-			});
+			};
 
 			var config = new LoggingConfiguration();
 			var rule = new LoggingRule("*", LogLevel.Trace, target);
@@ -143,6 +149,8 @@ namespace Peach.Pro.Test.Core.WebServices
 			_tmpDir.Dispose();
 
 			LogManager.Configuration = _loggingConfig;
+			Configuration.UseAsyncLogging = true;
+			Configuration.LogLevel = _oldLogLevel;
 
 			Logger.Trace("<<< TearDown");
 		}
@@ -279,12 +287,14 @@ namespace Peach.Pro.Test.Core.WebServices
 
 				DatabaseTests.AssertResult(db.GetTestEventsByJob(job.Guid), new[]
 				{
-					 new TestEvent(1, job.Guid, TestStatus.Pass, "Loading pit file", 
-						 "Loading pit file '{0}'".Fmt(_tmp.Path), null),
-					 new TestEvent(2, job.Guid, TestStatus.Pass, "Starting fuzzing engine", 
-						 "Starting fuzzing engine", null),
-					 new TestEvent(3, job.Guid, TestStatus.Pass, "Running iteration", 
-						 "Running the initial control record iteration", null),
+					new TestEvent(1, job.Guid, TestStatus.Pass, "Loading pit file", 
+						"Loading pit file '{0}'".Fmt(_tmp.Path), null),
+					new TestEvent(2, job.Guid, TestStatus.Pass, "Starting fuzzing engine", 
+						"Starting fuzzing engine", null),
+					new TestEvent(3, job.Guid, TestStatus.Pass, "Running iteration", 
+						"Running the initial control record iteration", null),
+					new TestEvent(4, job.Guid, TestStatus.Pass, 
+						"Flushing logs.", "Flushing logs.", null),
 				});
 			}
 
@@ -315,24 +325,31 @@ namespace Peach.Pro.Test.Core.WebServices
 				{
 					DatabaseTests.AssertResult(db.GetTestEventsByJob(job.Guid), new[]
 					{
-						 new TestEvent(
-							 1, 
-							 job.Guid, 
-							 TestStatus.Fail, 
-							 "Loading pit file", 
-							 "Loading pit file '{0}'".Fmt(xmlFile.Path), 
+						new TestEvent(
+							1, 
+							job.Guid, 
+							TestStatus.Fail, 
+							"Loading pit file", 
+							"Loading pit file '{0}'".Fmt(xmlFile.Path), 
 #if MONO
-							 "Error: XML Failed to load: Text node cannot appear in this state.  Line 21, position 1."),
+							"Error: XML Failed to load: Text node cannot appear in this state.  Line 21, position 1."),
 #else
-							 "Error: XML Failed to load: Data at the root level is invalid. Line 21, position 1."),
+							"Error: XML Failed to load: Data at the root level is invalid. Line 21, position 1."),
 #endif
+							new TestEvent(
+								2, 
+								job.Guid, 
+								TestStatus.Pass, 
+								"Flushing logs.", 
+								"Flushing logs.", 
+								null),
 					});
 
 					job = db.GetJob(job.Guid);
 					Assert.IsNotNull(job);
 
 					var logs = db.GetJobLogs(job.Guid).ToList();
-					Assert.AreEqual(1, logs.Count, "Missing JobLogs");
+					Assert.AreEqual(2, logs.Count, "Missing JobLogs");
 					foreach (var log in logs)
 						Console.WriteLine(log.Message);
 				}
@@ -362,23 +379,30 @@ namespace Peach.Pro.Test.Core.WebServices
 					DatabaseTests.AssertResult(db.GetTestEventsByJob(job.Guid), new[]
 					{
 						 new TestEvent(
-							 1, 
-							 job.Guid, 
-							 TestStatus.Fail, 
-							 "Loading pit file", 
-							 "Loading pit file '{0}'".Fmt(xmlFile.Path),
+							1, 
+							job.Guid, 
+							TestStatus.Fail, 
+							"Loading pit file", 
+							"Loading pit file '{0}'".Fmt(xmlFile.Path),
 #if MONO
-							 "Error: XML Failed to load: Text node cannot appear in this state.  Line 21, position 1."),
+							"Error: XML Failed to load: Text node cannot appear in this state.  Line 21, position 1."),
 #else
-							 "Error: XML Failed to load: Data at the root level is invalid. Line 21, position 1."),
+							"Error: XML Failed to load: Data at the root level is invalid. Line 21, position 1."),
 #endif
+							new TestEvent(
+								2, 
+								job.Guid, 
+								TestStatus.Pass, 
+								"Flushing logs.", 
+								"Flushing logs.", 
+								null),
 					});
 
 					job = db.GetJob(job.Guid);
 					Assert.IsNotNull(job);
 
 					var logs = db.GetJobLogs(job.Guid).ToList();
-					Assert.AreEqual(1, logs.Count, "Missing JobLogs");
+					Assert.AreEqual(2, logs.Count, "Missing JobLogs");
 					foreach (var log in logs)
 						Console.WriteLine(log.Message);
 				}
@@ -465,7 +489,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			job = _monitor.GetJob();
 			Assert.AreEqual(JobStatus.Stopped, job.Status);
 
-			// Heartberat should advance when job stops
+			// Heartbeat should advance when job stops
 			Assert.Greater(job.HeartBeat, time);
 			Assert.GreaterOrEqual(job.HeartBeat, job.StopDate);
 
@@ -478,7 +502,7 @@ namespace Peach.Pro.Test.Core.WebServices
 	[Quick]
 	class ExternalJobMonitorTests : BaseJobMonitorTests<ExternalJobMonitor>
 	{
-		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 		protected TempDirectory _tmpDir;
 		protected TempFile _tmp1;
 		protected TempFile _tmp2;
@@ -519,12 +543,16 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			Logger.Trace(">>> Setup");
 
+			Configuration.UseAsyncLogging = false;
+
 			_doneEvt = new ManualResetEvent(false);
-			_monitor = new ExternalJobMonitor();
-			_monitor.InternalEvent = (s, a) =>
+			_monitor = new ExternalJobMonitor
 			{
-				Logger.Trace("InternalEvent");
-				_doneEvt.Set();
+				InternalEvent = (s, a) =>
+				{
+					Logger.Trace("InternalEvent");
+					_doneEvt.Set();
+				}
 			};
 
 			_tmp1 = new TempFile();
@@ -537,10 +565,10 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			_loggingConfig = LogManager.Configuration;
 
-			var target = new AsyncTargetWrapper(new ConsoleTarget
+			var target = new ConsoleTarget
 			{
 				Layout = "${time} ${logger} ${message}"
-			});
+			};
 
 			var config = new LoggingConfiguration();
 			var rule = new LoggingRule("*", LogLevel.Trace, target);
@@ -562,6 +590,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			_tmpDir.Dispose();
 
 			LogManager.Configuration = _loggingConfig;
+			Configuration.UseAsyncLogging = true;
 
 			Logger.Trace("<<< TearDown");
 		}

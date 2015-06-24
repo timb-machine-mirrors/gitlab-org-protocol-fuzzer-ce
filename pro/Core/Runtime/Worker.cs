@@ -25,6 +25,7 @@ namespace Peach.Pro.Core.Runtime
 		uint? _seed;
 		bool _init;
 		bool? _test;
+		bool syncLogging;
 
 		protected override void AddCustomOptions(OptionSet options)
 		{
@@ -72,20 +73,30 @@ namespace Peach.Pro.Core.Runtime
 				"Run a single dry iteration to test a pit",
 				v => _test = true
 			);
+			options.Add(
+				"syncLogging",
+				"Use synchronous logging, useful for testing",
+				v => syncLogging = true
+			);
 		}
 
 		protected override void ConfigureLogging()
 		{
 			// Override logging so that we force messages to stderr instead of stdout
-			var consoleTarget = new AsyncTargetWrapper(new ConsoleTarget
+
+			Target target = new ConsoleTarget
 			{
 				Layout = "${longdate} ${logger} ${message}",
 				Error = true,
-			});
-			var rule = new LoggingRule("*", LogLevel, consoleTarget);
+			};
+
+			if (!syncLogging)
+				target = new AsyncTargetWrapper(target);
+
+			var rule = new LoggingRule("*", LogLevel, target);
 
 			var nconfig = new LoggingConfiguration();
-			nconfig.AddTarget("console", consoleTarget);
+			nconfig.AddTarget("console", target);
 			nconfig.LoggingRules.Add(rule);
 			LogManager.Configuration = nconfig;
 
