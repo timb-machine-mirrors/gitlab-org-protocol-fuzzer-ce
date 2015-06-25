@@ -60,24 +60,16 @@ namespace Peach.Pro.Core.Publishers
 			stream = new MemoryStream();
 		}
 
-		static IEnumerable<LibPcapLiveDevice> Devices
+		public static ICollection<LibPcapLiveDevice> Devices()
 		{
-			get
+			try
 			{
-				try
-				{
-					// Must use New() so we can have multiple publishers using the same pcap device
-					var devs = CaptureDeviceList.New().OfType<LibPcapLiveDevice>().ToList();
-
-					if (devs.Count == 0)
-						throw new PeachException("No pcap devices found. Ensure appropriate permissions for using libpcap.");
-
-					return devs;
-				}
-				catch (DllNotFoundException ex)
-				{
-					throw new PeachException("An error occurred getting the pcap device list.  Ensure libpcap is installed and try again.", ex);
-				}
+				// Must use New() so we can have multiple publishers using the same pcap device
+				return CaptureDeviceList.New().OfType<LibPcapLiveDevice>().ToList();
+			}
+			catch (DllNotFoundException ex)
+			{
+				throw new PeachException("An error occurred getting the pcap device list.  Ensure libpcap is installed and try again.", ex);
 			}
 		}
 
@@ -103,11 +95,16 @@ namespace Peach.Pro.Core.Publishers
 
 		protected override void OnStart()
 		{
-			_device = Devices.FirstOrDefault(d => d.Interface.FriendlyName == Interface);
+			var devs = Devices();
+
+			if (devs.Count == 0)
+				throw new PeachException("No pcap devices found. Ensure appropriate permissions for using libpcap.");
+
+			_device = devs.FirstOrDefault(d => d.Interface.FriendlyName == Interface);
 
 			if (_device == null)
 			{
-				var avail = string.Join("', '", Devices.Select(d => d.Interface.FriendlyName));
+				var avail = string.Join("', '", devs.Select(d => d.Interface.FriendlyName));
 				throw new PeachException("Unable to locate pcap device named '{0}'. The following pcap devices were found: '{1}'.".Fmt(Interface, avail));
 			}
 
