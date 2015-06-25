@@ -308,12 +308,19 @@ namespace PitTester
 			
 			var logger = defs.Where(d => d.Key == "LoggerPath").ToArray();
 			if (logger.Length == 0)
+			{
 				sb.AppendLine("Missing a define for key 'LoggerPath'.");
-			if (logger.Length > 1)
-				sb.AppendLine("There is more than one define for 'LoggerPath'.");
-			var expected = "##Peach.LogRoot##/" + Path.GetFileNameWithoutExtension(fileName);
-			if (logger[0].Value != expected)
-				sb.AppendLine("LoggerPath is set as '" + logger[0].Value + "' but it should be '" + expected + "'.");
+			}
+			else
+			{
+				var expected = "##Peach.LogRoot##/" + Path.GetFileNameWithoutExtension(fileName);
+
+				if (logger.Length > 1)
+					sb.AppendLine("There is more than one define for 'LoggerPath'.");
+
+				if (logger[0].Value != expected)
+					sb.AppendLine("LoggerPath is set as '" + logger[0].Value + "' but it should be '" + expected + "'.");
+			}
 
 			var noName = string.Join(", ", defs.Where(d => string.IsNullOrEmpty(d.Name)).Select(d => d.Key));
 			var noDesc = string.Join(", ", defs.Where(d => string.IsNullOrEmpty(d.Description)).Select(d => d.Key));
@@ -491,7 +498,7 @@ namespace PitTester
 						else if (meth == "ExitIterationEvent")
 							gotEnd = true;
 						else if (!gotStart && !ShouldSkipStart(actions))
-							errors.AppendLine(string.Format("StateModel '{0}' has an unexpected call action.  Method is '{1}' and should be 'StartIterationEvent' or 'EndIterationEvent'.", smName, meth));
+							errors.AppendLine(string.Format("StateModel '{0}' has an unexpected call action.  Method is '{1}' and should be 'StartIterationEvent' or 'ExitIterationEvent'.", smName, meth));
 					}
 
 					if (!gotStart)
