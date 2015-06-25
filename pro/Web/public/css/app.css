@@ -146,6 +146,12 @@ pre.peach-test-log {
 	max-height: 600px;
 }
 
+@media only screen and (max-height: 1000px) {
+	.peach-add-monitor .select2-results {
+		max-height: 400px;
+	}
+}
+
 #loading-bar .bar {
 	background: orange;
 }
