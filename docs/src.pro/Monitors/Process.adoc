@@ -36,6 +36,9 @@ _Optional:_
 Arguments:: Command line arguments
 FaultOnEarlyExit:: Trigger fault if process exits, defaults to false.
 NoCpuKill:: Disable process killing when the CPU usage nears zero, defaults to false. 
+RestartAfterFault:: If "true", restarts the target when any monitor detects a fault. 
+If "false", restarts the target if the process exits or crashes. +
+This argument defaults to false.
 StartOnCall:: Start process on a call action from the state model (this value and the 
 method value must match.)
 WaitForExitOnCall:: Wait for process to exit on a call from the state model (this value 
