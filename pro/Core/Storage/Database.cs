@@ -139,7 +139,7 @@ namespace Peach.Pro.Core.Storage
 			get { return new List<MigrationHandler>(); } 
 		}
 
-		protected Database(string path, bool useWal, bool doMigration)
+		protected Database(string path, bool useWal)
 		{
 			Path = path;
 
@@ -155,8 +155,6 @@ namespace Peach.Pro.Core.Storage
 
 			if (!IsInitialized)
 				Initialize();
-			else if (doMigration)
-				Migrate();
 		}
 
 		public void Dispose()

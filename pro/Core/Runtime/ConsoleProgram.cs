@@ -52,12 +52,6 @@ namespace Peach.Pro.Core.Runtime
 	/// </summary>
 	public class ConsoleProgram : Program
 	{
-		// PUT THIS INTO YOUR PROGRAM
-		////public static int Run(string[] args)
-		////{
-		////    return new ConsoleProgram(args).ExitCode;
-		////}
-
 		public static ConsoleColor DefaultForground = Console.ForegroundColor;
 
 		/// <summary>
@@ -814,6 +808,11 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 		public ConsoleJobMonitor(Job job)
 		{
 			_guid = job.Guid;
+
+			using (var db = new NodeDatabase())
+			{
+				db.Migrate();
+			}
 		}
 
 		public void Dispose()

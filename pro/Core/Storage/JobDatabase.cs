@@ -63,8 +63,8 @@ namespace Peach.Pro.Core.Storage
 			Connection.Execute(Sql.JobMigrateV2);
 		}
 
-		public JobDatabase(string path, bool doMigration = false)
-			: base(path, true, doMigration)
+		public JobDatabase(string path)
+			: base(path, true)
 		{
 		}
 
