@@ -74,7 +74,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			}
 
 			public EventHandler InternalEvent { set { } }
-			}
+		}
 
 		class TestBootstrapper : Bootstrapper
 		{
@@ -252,13 +252,13 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			// One job is ours and in start pending, the other job is not
 			// ours and also in start pending.
 
-			var j1 = new Job(new JobRequest(), "pit1.xml") {Pid = _process.Id};
+			var j1 = new Job(new JobRequest(), "pit1.xml") { Pid = _process.Id };
 
 			Assert.AreEqual(j1.Status, JobStatus.StartPending);
 
 			_runningJob = new Job(new JobRequest(), "pit2.xml");
 
-			var j2 = new Job(new JobRequest(), "pit2.xml") {Pid = -1};
+			var j2 = new Job(new JobRequest(), "pit2.xml") { Pid = -1 };
 
 			using (var db = new NodeDatabase())
 			{
@@ -327,7 +327,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 
 			Assert.NotNull(jobs);
 			Assert.AreEqual(3, jobs.Count);
-			
+
 			Assert.AreEqual(j1.Id, jobs[0].Value<string>("id"));
 			Assert.IsTrue(jobs[0].Value<bool>("hasMetrics"));
 
