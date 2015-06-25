@@ -833,6 +833,7 @@ namespace Peach.Pro.Core.Loggers
 				KeepFileOpen = !config.singleIteration,
 				ArchiveAboveSize = 10 * 1024 * 1024,
 				ArchiveNumbering = ArchiveNumberingMode.Sequence,
+				Encoding = System.Text.Encoding.UTF8,
 			};
 
 			var oldTarget = _tempTarget;
