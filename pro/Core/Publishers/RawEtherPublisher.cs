@@ -106,7 +106,10 @@ namespace Peach.Pro.Core.Publishers
 			_device = Devices.FirstOrDefault(d => d.Interface.FriendlyName == Interface);
 
 			if (_device == null)
-				throw new PeachException("Unable to locate pcap device named '{0}'.".Fmt(Interface));
+			{
+				var avail = string.Join("', '", Devices.Select(d => d.Interface.FriendlyName));
+				throw new PeachException("Unable to locate pcap device named '{0}'. The following pcap devices were found: '{1}'.".Fmt(Interface, avail));
+			}
 
 			string error;
 			if (!PcapDevice.CheckFilter(Filter, out error))
