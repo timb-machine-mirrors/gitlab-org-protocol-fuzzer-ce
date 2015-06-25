@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using NLog;
 using Peach.Core;
 using Peach.Pro.Core.WebServices.Models;
 using Monitor = System.Threading.Monitor;
@@ -47,6 +48,7 @@ namespace Peach.Pro.Core.Storage
 
 		const int HeartBeatInterval = 1000;
 
+		static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 		readonly NameCache _nameCache;
 		readonly Dictionary<Tuple<long, long>, State> _stateCache;
 		readonly TimeSpan _runtime;
@@ -370,9 +372,9 @@ namespace Peach.Pro.Core.Storage
 						Reporting.SaveReportPdf(report);
 					}
 				}
-				catch (Exception)
+				catch (Exception ex)
 				{
-					//Logger.Debug("An unexpected error occured saving the job report.", ex);
+					Logger.Error("An unexpected error occured saving the job report.", ex);
 
 					try
 					{
