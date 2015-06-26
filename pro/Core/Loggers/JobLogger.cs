@@ -833,6 +833,7 @@ namespace Peach.Pro.Core.Loggers
 				KeepFileOpen = !config.singleIteration,
 				ArchiveAboveSize = 10 * 1024 * 1024,
 				ArchiveNumbering = ArchiveNumberingMode.Sequence,
+				Encoding = System.Text.Encoding.UTF8,
 			};
 
 			var oldTarget = _tempTarget;
@@ -871,40 +872,6 @@ namespace Peach.Pro.Core.Loggers
 			}
 
 			LogManager.Configuration = nconfig;
-		}
-	}
-
-	class DatabaseTarget : TargetWithLayout
-	{
-		NodeDatabase _db = new NodeDatabase();
-		readonly string _jobId;
-
-		public DatabaseTarget(Guid jobId)
-		{
-			Name = "DatabaseTarget";
-			_jobId = jobId.ToString();
-		}
-
-		protected override void Write(LogEventInfo logEvent)
-		{
-			_db.InsertJobLog(new JobLog
-			{
-				JobId = _jobId,
-				Message = Layout.Render(logEvent),
-			});
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			Console.WriteLine("DatabaseTarget.Dispose>");
-
-			base.Dispose(disposing);
-
-			if (disposing && _db != null)
-			{
-				_db.Dispose();
-				_db = null;
-			}
 		}
 	}
 }

@@ -120,14 +120,14 @@ namespace Peach.Pro.Test.Core.Storage
 			cache.OnFault(new FaultDetail
 			{
 				Iteration = 4,
-				Title = "Fault Title Goes Here",
+				Title = "Fault 你好 Goes Here",
 				MajorHash = "XXX",
 				MinorHash = "YYY",
 				TimeStamp = now + TimeSpan.FromHours(1),
 				Files = new List<FaultFile>(),
 				Source = "WindowsDebugger",
 				Exploitability = "UNKNOWN",
-				Description = "Fault Description Goes Here",
+				Description = "Fault 機除拍禁響地章手棚国歳違不 Goes Here",
 				Reproducible = true,
 			});
 
@@ -209,14 +209,14 @@ namespace Peach.Pro.Test.Core.Storage
 			cache.OnFault(new FaultDetail
 			{
 				Iteration = 8,
-				Title = "Fault Title Goes Here",
+				Title = "Fault 你好 Goes Here",
 				MajorHash = "XXX",
 				MinorHash = "YYY",
 				TimeStamp = now + TimeSpan.FromHours(4),
 				Files = new List<FaultFile>(),
 				Source = "WindowsDebugger",
 				Exploitability = "UNKNOWN",
-				Description = "Fault Description Goes Here",
+				Description = "Fault 機除拍禁響地章手棚国歳違不 Goes Here",
 				Reproducible = true,
 			});
 

@@ -1,20 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
+using Logger = NLog.Logger;
 using Monitor = Peach.Core.Agent.Monitor2;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
+using Random = System.Random;
 
 namespace Peach.Pro.Core.Agent.Monitors
 {
-	[Monitor("RandoFaulter", Internal = true)]
-	[Description("Generate random faults for metrics testing")]
+	[Monitor("你好RandoFaulter", Internal = true)]
+	[System.ComponentModel.Description("Generate random faults for metrics testing")]
 	[Parameter("Fault", typeof(int), "How often to fault", "10")]
 	[Parameter("NewMajor", typeof(int), "How often to generate a new major", "5")]
 	[Parameter("NewMinor", typeof(int), "How often to generate a new minor", "5")]
@@ -24,9 +25,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Parameter("CrashAfter", typeof(int), "Cause native process to crash after specified seconds", "-1")]
 	public class RandoFaulter : Monitor
 	{
-		static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+		static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-		readonly System.Random _rnd = new System.Random();
+		readonly Random _rnd = new Random();
 
 		public int Fault { get; set; }
 		public int NewMajor { get; set; }
@@ -110,10 +111,22 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 			var ret = new MonitorData
 			{
-				Title = "Rando Faulter Funbag",
+				Title = "你好 from RandoFaulter",
 				Fault = new MonitorData.Info
 				{
-					Description = @"CUPERTINO, CA—Ending weeks of anticipation and intense speculation, tech giant Apple unveiled a short and fleeting moment of excitement to the general public Tuesday during a media event at its corporate headquarters. “With this groundbreaking new release, Apple has completely revolutionized the way we experience an ephemeral sense of wonder lasting no longer than several moments,” said Wired writer Gary Turnham, who added that the company has once again proved why it’s the global leader in developing exhilarating sensations that only temporarily mask one’s underlying feelings before dissolving away. “Even before today’s announcement, people across the country were lining up to be among the first to get their hands on this new short-lived and non-renewable flash of satisfaction. And they won’t be disappointed; this already vanishing glimmer of pleasure is exactly what we’ve come to expect from Apple.” According to Turnham, rumors are already swirling that Apple engineers are working on a slimmer, briefer moment of excitement projected for release next fall.",
+					Description = @"
+機除拍禁響地章手棚国歳違不。氏検郷掲左発中時東自想図金観図配比。線加経購問読場舞似市前施。日談天出掲放非歴絵率右胎著義。録結取福歳更来思残読者対田媛水季境愛。者容能晴愛品芸羽著記将高違権界民。喜紹覧刊界準乗教待断皇地社学宇種次書者指。星習洋許機経教代崎会鋭覧情恋創職説。請写理行夫町季気事求塚講早関広姉。
+
+על מדע לכאן לטיפול, יוני קסאם חבריכם אנא גם. אם ציור צילום פילוסופיה כלל, שימושי לאחרונה על אנא. גם אחד המזנון רשימות, או ארץ מחליטה טבלאות לאחרונה, של סדר רקטות ספרדית. מדע גם היום שמות, ערבית מחליטה ומהימנה של זכר, רבה ב הבקשה הסביבה לימודים. אחרים אחרונים או צ'ט.
+
+وسمّيت عشوائية تشيكوسلوفاكيا جعل أن. لم استدعى وسمّيت بولندا، حول. تم المضي الأمريكي الأبرياء تعد, في قررت غينيا بأيدي مكن. تلك قد أحدث قبضتهم الجديدة،, واستمرت الجنرال المتّبعة إذ فعل, بهيئة إحتار التقليدية به، ان. نفس بل تكبّد محاولات أوراقهم.
+
+Συ φιξ φερι θεμπορ ομνεσκυε, κυις φασιλισι εσθ εξ. Πρι ει σεθερο ασυσαθα, μει σασε περσιυς σονσλυσιονεμκυε ιδ. Νιβχ μεις θεμπορ ιν κυι. Σολυμ ευισμοδ φολυτπατ περ ιδ. Θε κυιδαμ σαυσαε εσθ, κυις προβο σιφιβυς ιυς εξ, ευμ εξ ποσιμ διγνισιμ πχιλωσοπηια.
+
+Нык ут адмодум пльакырат зэнтынтиаэ, агам мёнём конвынёры хёз ед, мыа эи емпэтюсъ конжтетуто чадипжкёнг. Эа агам жэмпэр мэя, ыт эрож омнэжквюы хаж. Прё ад доминг ыкжплььикари губэргрэн. Про йн хабымуч тхэопхражтуз, ут путант интыллыгам вяш. Нык нонумй пожжёт дытракжйт эю, ед квюо клита дикунт, ты пошжим аюдиам рыкючабо мэя.
+
+B|00 z3aRcH, why 1T. 1n70 r33dz0r 4s m4y, 4rE t3xt w4nN@ 1+. W17h 51T3$. != 70p, w1ll r1tez != f0r. Y0 N0+ qu3ry 3N9l1sh (4(]-[3z, 0n z33 alz0 34513r p@r+1cUL4r, qu3ry 4cc355 d159l4y3d, aLL y4. 83 4|| d0cum3nt INFoRm4T10N, y0 yOU, |3tz0rz aLL. 0n kn0w LINk p@r+1cUL4r 937.
+",
 					MajorHash = buckets[0],
 					MinorHash = buckets[1],
 					Risk = Severity[_rnd.Next(Severity.Length)],
@@ -122,7 +135,8 @@ namespace Peach.Pro.Core.Agent.Monitors
 				{
 					{ "NetworkCapture1.pcap", Snmpv2CPacket },
 					{ "NetworkCapture2.pcapng", Snmpv2CPacket },
-					{ "BinaryData.bin", Snmpv2CPacket }
+					{ "BinaryData.bin", Snmpv2CPacket },
+					{ "機除拍禁響地章手棚国歳違不.pcap", Snmpv2CPacket },
 				}
 			};
 

@@ -99,7 +99,7 @@ namespace Peach.Pro.Test.Core.Loggers
 
 			Assert.True(Path.IsPathRooted(job.LogPath), "Job's LogPath should be absolute");
 
-			using (var db = new JobDatabase(job.DatabasePath, false))
+			using (var db = new JobDatabase(job.DatabasePath))
 			{
 				var faults = db.LoadTable<FaultDetail>().ToList();
 
@@ -193,7 +193,7 @@ namespace Peach.Pro.Test.Core.Loggers
 
 			Assert.NotNull(job);
 
-			using (var db = new JobDatabase(job.DatabasePath, false))
+			using (var db = new JobDatabase(job.DatabasePath))
 			{
 				var faults = db.LoadTable<FaultDetail>().ToList();
 
@@ -280,7 +280,7 @@ namespace Peach.Pro.Test.Core.Loggers
 
 			Assert.NotNull(job);
 
-			using (var db = new JobDatabase(job.DatabasePath, false))
+			using (var db = new JobDatabase(job.DatabasePath))
 			{
 				var faults = db.LoadTable<FaultDetail>().ToList();
 
@@ -367,7 +367,7 @@ namespace Peach.Pro.Test.Core.Loggers
 
 			Assert.NotNull(job);
 
-			using (var db = new JobDatabase(job.DatabasePath, false))
+			using (var db = new JobDatabase(job.DatabasePath))
 			{
 				var faults = db.LoadTable<FaultDetail>().ToList();
 
@@ -451,7 +451,7 @@ namespace Peach.Pro.Test.Core.Loggers
 
 			Assert.NotNull(job);
 
-			using (var db = new JobDatabase(job.DatabasePath, false))
+			using (var db = new JobDatabase(job.DatabasePath))
 			{
 				var faults = db.LoadTable<FaultDetail>().ToList();
 

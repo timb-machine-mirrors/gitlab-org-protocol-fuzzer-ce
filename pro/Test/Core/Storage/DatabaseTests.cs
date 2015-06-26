@@ -1,13 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using Peach.Core;
-using Peach.Pro.Core.Storage;
 using Peach.Core.Test;
-using Peach.Pro.Core;
-using System.IO;
-using System;
-using Dapper;
+using Peach.Pro.Core.Storage;
 
 namespace Peach.Pro.Test.Core.Storage
 {
@@ -51,7 +49,7 @@ namespace Peach.Pro.Test.Core.Storage
 		class TestDatabase : Database
 		{
 			public TestDatabase(string path)
-				: base(path, false, false)
+				: base(path, false)
 			{
 			}
 
