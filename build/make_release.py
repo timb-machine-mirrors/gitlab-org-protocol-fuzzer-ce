@@ -5,48 +5,19 @@ import os, sys, argparse, fnmatch, zipfile, shutil, json, datetime
 buildtag = None
 outdir   = 'output'
 reldir   = os.path.join(outdir, 'release')
-archive  = 'archive.zip'
-docfile  = os.path.join(outdir, 'doc', 'archive.zip')
-pitfile  = 'peach-pits-%(buildtag)s.zip'
-pittrial = 'peach-pits-%(buildtag)s-trial.zip'
+pitfile  = os.path.join(outdir, 'pits.zip')
+docfile  = os.path.join(outdir, 'doc.zip')
+tmpdir   = os.path.join(outdir, 'tmp')
 
 peach_docs = {
 	''      : [ 'sdk/*', 'docs/*' ],
 }
-pit_docs   = {
-	''      : [ 'Pit_Library.pdf' ],
-}
-trial_docs = {
-	''      : [ 'Pit_Library_Trial.pdf' ],
-}
-
-pits = [
-	{
-		'root' : 'pits/pro',
-		'incl' : '*',
-		'excl' : 'Test/* _Common/Specs/* _Testing/* */.gitignore *.TODO *.adoc *.test *.pdf'
-	},
-]
-
-pits_trial = [
-	{
-		'root' : 'pits/pro',
-		'incl' : 'Net/SNMP* Image/PNG* _Common/Samples/Image/*.PNG _Common/Models/Image/PNG* _Common/Models/Net/SNMP* ',
-		'excl' : 'Test/* _Common/Specs/* _Testing/* */.gitignore *.TODO *.adoc *.test *.pdf'
-	},
-]
 
 releases = [
 	{
-		'name'    : 'pro',
+		'dirname' : '%(buildtag)s',
 		'all'     : 'peach-pro-%(buildtag)s.zip',
-		'product' : 'Peach Professional',
-		'filter'  : lambda s: s.startswith('peach-pro'),
-	},
-	{
-		'name'    : 'ent',
-		'all'     : 'peach-pro-%(buildtag)s.zip',
-		'product' : 'Peach Enterprise',
+		'product' : 'Peach Studio',
 		'filter'  : lambda s: s.startswith('peach-pro'),
 	},
 ]
@@ -97,7 +68,7 @@ def sha1sum(filename):
 		f.write('SHA1(%s)= %s\n' % (os.path.basename(filename), digest))
 
 def extract_pkg():
-	# Lookfor output/XXX/archive.zip
+	# Lookfor output/*.zip
 	# Open up archive.zip and look for zip files in the pkg directory
 	# Extract said zips to the release folder
 
@@ -108,13 +79,15 @@ def extract_pkg():
 	pkgs = []
 
 	for (path, dirs, files) in os.walk(outdir):
-		for name in dirs:
-			f = os.path.join(path, name, archive)
-			if not os.path.isfile(f):
-				print 'IGNORING   %s' % os.path.dirname(f)
+		for name in files:
+			f = os.path.join(path, name)
+
+			if not f.endswith('release.zip'):
+				print 'IGNORING   %s' % f
 				continue
-			
+
 			print 'PROCESSING %s' % f
+
 			with zipfile.ZipFile(f, 'r') as z:
 				for i in z.infolist():
 					if not i.filename.startswith('pkg/'):
@@ -131,8 +104,8 @@ def extract_pkg():
 	return pkgs
 
 def extract_doc():
-	# Lookfor output/doc/archive.zip
-	# Extract to output/doc and make list of all files
+	# Lookfor output/doc.zip
+	# Extract to release/tmp/doc and make list of all files
 
 	print ''
 	print 'Extract documentation'
@@ -140,17 +113,51 @@ def extract_doc():
 
 	files = []
 
-	basedir = os.path.dirname(docfile)
+	docdir = os.path.join(tmpdir, 'doc')
 
 	print 'PROCESSING %s' % docfile
 
 	with zipfile.ZipFile(docfile, 'r') as z:
 		for i in z.infolist():
 			print ' - %s' % i.filename
-			z.extract(i, basedir)
+			z.extract(i, docdir)
 			files.append(os.path.join(i.filename))
 
 	return files
+
+def extract_pits():
+	# Lookfor output/pits.zip
+	# Extract to release/tmp/pits and make list of all files
+
+	print ''
+	print 'Extract pits'
+	print ''
+
+	files = []
+	packs = None
+	archives = None
+
+	pitdir = os.path.join(tmpdir, 'pits')
+
+	print 'PROCESSING %s' % pitfile
+
+	with zipfile.ZipFile(pitfile, 'r') as z:
+		for i in z.infolist():
+			if os.path.basename(i.filename) == 'shipping_packs.json':
+				packs = z.read(i)
+			if os.path.basename(i.filename) == 'shipping_pits.json':
+				archives = z.read(i)
+			if not i.filename.endswith('.zip'):
+				continue;
+
+			print ' - %s' % i.filename
+			z.extract(i, pitdir)
+			files.append(os.path.join(i.filename))
+
+	packs = json.loads(packs)
+	archives = json.loads(archives)
+
+	return (files, packs, archives)
 
 def update_pkg(pkg, docs):
 	# Add all files in docs to pkg zip
@@ -159,7 +166,7 @@ def update_pkg(pkg, docs):
 	print 'Adding docs to %s' % pkg
 	print ''
 
-	docdir = os.path.dirname(docfile)
+	docdir = os.path.join(tmpdir, 'doc')
 
 	with zipfile.ZipFile(pkg, 'a', compression=zipfile.ZIP_DEFLATED) as z:
 		for b,i in docs:
@@ -231,8 +238,6 @@ if __name__ == "__main__":
 
 	c = p.parse_args()
 	buildtag = c.buildtag
-	pitfile = pitfile % c.__dict__
-	pittrial = pittrial % c.__dict__
 
 	if os.path.isdir(reldir):
 		shutil.rmtree(reldir)
@@ -242,44 +247,41 @@ if __name__ == "__main__":
 
 	pkgs = extract_pkg()
 	docs = extract_doc()
+	(pit_files, packs, pit_archives) = extract_pits()
 
 	toAdd = filter_docs(docs, peach_docs)
 
 	for x in pkgs:
 		update_pkg(x, toAdd)
 
-	toAdd = filter_docs(docs, pit_docs)
-
-	make_pits(os.path.join(reldir, pitfile), pits, toAdd)
-
-	toAdd = filter_docs(docs, trial_docs)
-
-	make_pits(os.path.join(reldir, pittrial), pits_trial, toAdd)
-
 	d = datetime.datetime.now()
 
 	names = [ os.path.basename(x) for x in pkgs ]
 
 	for r in releases:
+		dirname = r['dirname'] % c.__dict__
+
 		print ''
-		print 'Generating release %s.%s' % (buildtag, r['name'])
+		print 'Generating release folder %s' % dirname
 		print ''
 
 		o = Object()
 		o.files = [ x for x in names if 'release' in x and r['filter'](x)]
-		o.pits = pitfile
-		o.trial = pittrial
 		o.product = r['product']
 		o.build = buildtag
 		o.nightly = c.nightly
+		o.version = 2
 		o.date = '%s/%s/%s' % (d.day, d.month, d.year)
+		o.pit_archives = pit_archives
+		o.packs = packs
 
 		if not o.files:
 			print 'No files found, skipping!'
 			continue
 
-		path = os.path.join(reldir, '%s.%s' % (buildtag, r['name']))
+		path = os.path.join(reldir, dirname)
 		os.mkdir(path)
+		os.mkdir(os.path.join(path, 'pits'))
 
 		rel = os.path.join(path, 'release.json')
 
@@ -289,11 +291,10 @@ if __name__ == "__main__":
 			shutil.copy(src, dst)
 			shutil.copy(src + '.sha1', dst + '.sha1')
 
-		for f in [ pitfile, pittrial ]:
-			src = os.path.join(reldir, f)
-			dst = os.path.join(path, f)
+		for f in pit_files:
+			src = os.path.join(tmpdir, 'pits', f)
+			dst = os.path.join(path, 'pits', f)
 			shutil.copy(src, dst)
-			shutil.copy(src + '.sha1', dst + '.sha1')
 
 		# Make all zip
 		dst = os.path.join(path, r['all'] % c.__dict__)
@@ -311,7 +312,10 @@ if __name__ == "__main__":
 			print j
 			f.write(j)
 
-	for x in pkgs + [ os.path.join(reldir, pitfile), os.path.join(reldir, pittrial) ]:
+	if os.path.isdir(tmpdir):
+		shutil.rmtree(tmpdir)
+
+	for x in pkgs:
 		try:
 			os.unlink(x)
 			os.unlink(x + '.sha1')
