@@ -17,6 +17,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Monitor("你好RandoFaulter", Internal = true)]
 	[System.ComponentModel.Description("Generate random faults for metrics testing")]
 	[Parameter("Fault", typeof(int), "How often to fault", "10")]
+	[Parameter("Exception", typeof(int), "How often to throw SoftException", "100")]
 	[Parameter("NewMajor", typeof(int), "How often to generate a new major", "5")]
 	[Parameter("NewMinor", typeof(int), "How often to generate a new minor", "5")]
 	[Parameter("Boolean", typeof(bool), "A boolean parameter", "true")]
@@ -30,6 +31,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 		readonly Random _rnd = new Random();
 
 		public int Fault { get; set; }
+		public int Exception { get; set; }
 		public int NewMajor { get; set; }
 		public int NewMinor { get; set; }
 		public int CrashAfter { get; set; }
@@ -91,6 +93,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 		public override void IterationStarting(IterationStartingArgs args)
 		{
 			++_startCount;
+
+			if (_rnd.Next() % Exception == 0)
+				throw new SoftException("你好 from RandoFaulter.");
 		}
 
 		public override bool DetectedFault()
