@@ -94,6 +94,13 @@ unlimited.
 When using Publishers that have a maximum output size, such as UDP, it's recommended this attribute
 be used to set maximum size to correspond with this limit.
 
+nonDeterministicActions::
++
+If true, checks actions in the state model flow for exceptions. +
+If false, checks actions in the state model flow for exceptions and fully analyzes 
+the state model for consistency. The value false specifies legacy behavior and is the 
+default. 
+
 === Child Elements
 
 _Required:_
