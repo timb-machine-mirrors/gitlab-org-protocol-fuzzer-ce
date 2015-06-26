@@ -5,7 +5,7 @@ import subprocess
 
 buildtag = '0.0.0'
 branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip()
-desc = subprocess.check_output(['git', 'describe']).strip()
+desc = subprocess.check_output(['git', 'describe', '--match v*']).strip()
 
 if branch == 'master' or branch.startswith('prod-'):
 	match = re.match(r'v(\d+)\.(\d+)\.(\d+).*', desc)
