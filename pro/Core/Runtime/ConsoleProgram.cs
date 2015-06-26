@@ -39,6 +39,7 @@ using Peach.Core.Analyzers;
 using Peach.Core.Dom;
 using Peach.Core.Runtime;
 using Peach.Pro.Core.Loggers;
+using Peach.Pro.Core.Publishers;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
@@ -720,7 +721,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 
 		static void ShowDevices()
 		{
-			var devices = CaptureDeviceList.Instance;
+			var devices = RawEtherPublisher.Devices();
 
 			if (devices.Count == 0)
 			{
@@ -739,7 +740,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 				// Print out all available devices
 				foreach (var dev in devices)
 				{
-					Console.WriteLine("Name: {0}\nDescription: {1}\n\n", dev.Name, dev.Description);
+					Console.WriteLine("Name: {0}\nDescription: {1}\n\n", dev.Interface.FriendlyName, dev.Description);
 				}
 			}
 
