@@ -273,8 +273,7 @@ namespace Peach.Core
 		/// Leven &gt; 1 --&gt; Trace
 		/// </remarks>
 		/// <param name="level"></param>
-		/// <param name="sync"></param>
-		public static void ConfigureLogging(int level, bool sync = false)
+		public static void ConfigureLogging(int level)
 		{
 			if (level < 0)
 			{
@@ -308,14 +307,11 @@ namespace Peach.Core
 					break;
 			}
 
-			Target target = new ConsoleTarget
+			var target = new ConsoleTarget
 			{
 				Layout = "${logger} ${message}",
 				Error = true,
 			};
-
-			if (!sync)
-				target = new AsyncTargetWrapper(target);
 
 			var rule = new LoggingRule("*", logLevel, target);
 			var nconfig = new LoggingConfiguration();
