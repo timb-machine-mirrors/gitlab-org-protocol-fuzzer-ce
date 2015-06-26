@@ -76,6 +76,7 @@ bld(
 	use = peach_pro,
 )
 
+'''
 farm = [
 	'pf_admin.exe',
 	'pf_controller.exe',
@@ -91,4 +92,5 @@ bld(
 	name = tgt,
 	use = peach_pro + farm,
 )
+'''
 
