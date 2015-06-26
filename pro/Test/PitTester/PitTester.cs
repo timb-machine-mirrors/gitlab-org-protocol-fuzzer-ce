@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.Dom.XPath;
@@ -217,6 +217,8 @@ namespace PitTester
 
 			dom.context = new RunContext();
 
+			var sb = new StringBuilder();
+
 			foreach (var test in dom.tests)
 			{
 				dom.context.test = test;
@@ -229,66 +231,76 @@ namespace PitTester
 						{
 							foreach (var data in actionData.allData)
 							{
-								if (data is DataFile)
+								try
 								{
-									// Verify file cracks correctly
-									try
+									if (data is DataFile)
 									{
-										actionData.Apply(data);
-									}
-									catch (Exception ex)
-									{
-										throw new PeachException(string.Format("Error cracking data file '{0}' to '{1}.{2}.{3}.{4}'.",
-											((DataFile)data).FileName, test.Name, state.Name, action.Name, actionData.dataModel.Name), ex);
-									}
-
-									// SHould we skip verifying bytes?
-									if (!verifyBytes)
-										continue;
-
-									var value = actionData.dataModel.Value;
-									var dataFileBytes = File.ReadAllBytes(((DataFile) data).FileName);
-
-									// Verify all bytes match
-									for (var i = 0; i < dataFileBytes.Length && i < value.Length; i++)
-									{
-										var b = value.ReadByte();
-										if (dataFileBytes[i] != b)
+										// Verify file cracks correctly
+										try
 										{
+											actionData.Apply(data);
+										}
+										catch (Exception ex)
+										{
+											throw new PeachException(string.Format("Error cracking data file '{0}' to '{1}.{2}.{3}.{4}'.",
+												((DataFile)data).FileName, test.Name, state.Name, action.Name, actionData.dataModel.Name), ex);
+										}
+
+										// SHould we skip verifying bytes?
+										if (!verifyBytes)
+											continue;
+
+										var value = actionData.dataModel.Value;
+										var dataFileBytes = File.ReadAllBytes(((DataFile)data).FileName);
+
+										// Verify all bytes match
+										for (var i = 0; i < dataFileBytes.Length && i < value.Length; i++)
+										{
+											var b = value.ReadByte();
+											if (dataFileBytes[i] != b)
+											{
+												throw new PeachException(
+													string.Format(
+														"Error: Data did not match at {0}.  Got {1:x2} expected {2:x2}. Data file '{3}' to '{4}.{5}.{6}.{7}'.",
+														i, b, dataFileBytes[i], ((DataFile)data).FileName, test.Name, state.Name, action.Name,
+														actionData.dataModel.Name));
+											}
+										}
+
+										// Verify length matches
+										if (dataFileBytes.Length != value.Length)
 											throw new PeachException(
 												string.Format(
-													"Error: Data did not match at {0}.  Got {1:x2} expected {2:x2}. Data file '{3}' to '{4}.{5}.{6}.{7}'.",
-													i, b, dataFileBytes[i], ((DataFile) data).FileName, test.Name, state.Name, action.Name,
+													"Error: Data size mismatch. Got {0} bytes, expected {1}. Data file '{2}' to '{3}.{4}.{5}.{6}'.",
+													value.Length, dataFileBytes.Length, ((DataFile)data).FileName, test.Name, state.Name, action.Name,
 													actionData.dataModel.Name));
+									}
+									else if (data is DataField)
+									{
+										// Verify fields apply correctly
+										try
+										{
+											actionData.Apply(data);
+										}
+										catch (Exception ex)
+										{
+											throw new PeachException(string.Format("Error applying data fields '{0}' to '{1}.{2}.{3}.{4}'.",
+												data.Name, test.Name, state.Name, action.Name, actionData.dataModel.Name), ex);
 										}
 									}
-
-									// Verify length matches
-									if (dataFileBytes.Length != value.Length)
-										throw new PeachException(
-											string.Format(
-												"Error: Data size mismatch. Got {0} bytes, expected {1}. Data file '{2}' to '{3}.{4}.{5}.{6}'.",
-												value.Length, dataFileBytes.Length, ((DataFile) data).FileName, test.Name, state.Name, action.Name,
-												actionData.dataModel.Name));
 								}
-								else if(data is DataField)
+								catch (Exception ಠ_ಠ)
 								{
-									// Verify fields apply correctly
-									try
-									{
-										actionData.Apply(data);
-									}
-									catch (Exception ex)
-									{
-										throw new PeachException(string.Format("Error applying data fields '{0}' to '{1}.{2}.{3}.{4}'.",
-											data.Name, test.Name, state.Name, action.Name, actionData.dataModel.Name), ex);
-									}
+									sb.AppendLine(ಠ_ಠ.Message);
 								}
 							}
 						}
 					}
 				}
 			}
+
+			if (sb.Length > 0)
+				throw new PeachException(sb.ToString());
 		}
 
 		public static void VerifyPitConfig(string fileName)
