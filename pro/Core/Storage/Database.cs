@@ -128,6 +128,8 @@ namespace Peach.Pro.Core.Storage
 			typeMap.Remove(typeof(DateTime?));
 			typeMap.Remove(typeof(TimeSpan));
 			typeMap.Remove(typeof(TimeSpan?));
+
+			SqliteTrace();
 		}
 
 		public string Path { get; private set; }
@@ -156,20 +158,18 @@ namespace Peach.Pro.Core.Storage
 			Connection = builder.Create();
 			Connection.Open();
 			
-#if SQLITE_TRACE
-			SQLiteLog.Log += SQLiteLog_Log;
-#endif
-
 			if (!IsInitialized)
 				Initialize();
 		}
 
-#if SQLITE_TRACE
-		void SQLiteLog_Log(object sender, LogEventArgs e)
+		[Conditional("SQLITE_TRACE")]
+		private static void SqliteTrace()
 		{
-			Logger.Trace("SQL> {0}", e.Message);
+			SQLiteLog.Log += (o, args) =>
+			{
+				Logger.Trace("SQL> {0}", args.Message);
+			};
 		}
-#endif
 
 		public void Dispose()
 		{
