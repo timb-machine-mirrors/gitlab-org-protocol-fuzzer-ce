@@ -62,7 +62,7 @@ module Peach {
 
 			var request: IJobRequest = {
 				pitUrl: this.pitService.Pit.pitUrl,
-				isControlIteration: true
+				dryRun: true
 			};
 
 			this.$http.post(C.Api.Jobs, request)

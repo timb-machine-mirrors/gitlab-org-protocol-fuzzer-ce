@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
-using System.Threading;
-
+using Dapper;
+using NLog;
+using Peach.Core;
+using FileInfo = System.IO.FileInfo;
 
 #if MONO
 using Mono.Data.Sqlite;
@@ -12,9 +16,6 @@ using SQLiteCommand = Mono.Data.Sqlite.SqliteCommand;
 #else
 using System.Data.SQLite;
 #endif
-using System.Linq;
-using Peach.Core;
-using Dapper;
 
 namespace Peach.Pro.Core.Storage
 {
@@ -57,7 +58,7 @@ namespace Peach.Pro.Core.Storage
 
 			var dt = Convert.ToDateTime(value);
 
-			System.Diagnostics.Debug.Assert(dt.Kind == DateTimeKind.Unspecified);
+			Debug.Assert(dt.Kind == DateTimeKind.Unspecified);
 
 			return DateTime.SpecifyKind(dt, DateTimeKind.Utc).ToLocalTime();
 		}
@@ -102,6 +103,8 @@ namespace Peach.Pro.Core.Storage
 
 	public abstract class Database : IDisposable
 	{
+		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
+
 		static Database()
 		{
 			// Store TimeSpan objects as number of elapsed seconds
@@ -152,10 +155,21 @@ namespace Peach.Pro.Core.Storage
 
 			Connection = builder.Create();
 			Connection.Open();
+			
+#if SQLITE_TRACE
+			SQLiteLog.Log += SQLiteLog_Log;
+#endif
 
 			if (!IsInitialized)
 				Initialize();
 		}
+
+#if SQLITE_TRACE
+		void SQLiteLog_Log(object sender, LogEventArgs e)
+		{
+			Logger.Trace("SQL> {0}", e.Message);
+		}
+#endif
 
 		public void Dispose()
 		{
@@ -176,7 +190,7 @@ namespace Peach.Pro.Core.Storage
 		{
 			get
 			{
-				var fi = new System.IO.FileInfo(Path);
+				var fi = new FileInfo(Path);
 				return fi.Exists && fi.Length > 0;
 			}
 		}

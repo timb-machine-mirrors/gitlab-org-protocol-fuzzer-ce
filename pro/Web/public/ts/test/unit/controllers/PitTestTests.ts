@@ -61,7 +61,7 @@ describe("Peach", () => {
 			var testUrl = '/p/my/test/url';
 			var req: Peach.IJobRequest = {
 				pitUrl: pitUrl,
-				isControlIteration: true
+				dryRun: true
 			};
 			var job: Peach.IJob = {
 				id: 'JOB_ID',

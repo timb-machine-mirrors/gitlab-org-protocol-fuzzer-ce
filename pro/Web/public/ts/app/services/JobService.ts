@@ -82,7 +82,15 @@ module Peach {
 		}
 
 		public get CanStop(): boolean {
-			return this.Job && this.Job.status !== JobStatus.Stopped;
+			return this.Job && (
+				this.Job.status === JobStatus.Starting ||
+				this.Job.status === JobStatus.Running ||
+				this.Job.status === JobStatus.Paused
+			);
+		}
+
+		public get CanKill(): boolean {
+			return this.Job && this.Job.status === JobStatus.Stopping;
 		}
 
 		public get RunningTime(): string {
@@ -205,7 +213,7 @@ module Peach {
 					this.job = job;
 
 					if (this.job.status !== JobStatus.Stopped) {
-						if (stopPending) {
+						if (stopPending && this.job.status !== JobStatus.Stopping) {
 							this.job.status = JobStatus.StopPending;
 						} else if (killPending) {
 							this.job.status = JobStatus.KillPending;

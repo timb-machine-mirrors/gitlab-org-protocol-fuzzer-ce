@@ -47,20 +47,10 @@ namespace Peach.Pro.Core.Storage
 			{
 				return new MigrationHandler[]
 				{
-					MigrateV1,
-					MigrateV2,
+					() => { Connection.Execute(Sql.JobMigrateV1); },
+					() => { Connection.Execute(Sql.JobMigrateV2); },
 				};
 			}
-		}
-
-		private void MigrateV1()
-		{
-			Connection.Execute(Sql.JobMigrateV1);
-		}
-
-		private void MigrateV2()
-		{
-			Connection.Execute(Sql.JobMigrateV2);
 		}
 
 		public JobDatabase(string path)
@@ -131,7 +121,7 @@ namespace Peach.Pro.Core.Storage
 		public IEnumerable<FaultMutation> GetFaultMutations(long iteration)
 		{
 			return Connection.Query<FaultMutation>(
-				Sql.SelectMutationByIteration, 
+				Sql.SelectMutationByIteration,
 				new { Iteration = iteration }
 			);
 		}
@@ -141,7 +131,7 @@ namespace Peach.Pro.Core.Storage
 			var report = new Report
 			{
 				Job = job,
-				BucketCount  = Connection.ExecuteScalar<int>(Sql.SelectBucketCount),
+				BucketCount = Connection.ExecuteScalar<int>(Sql.SelectBucketCount),
 				BucketDetails = LoadTable<BucketDetail>()
 					.Select(m =>
 					{
