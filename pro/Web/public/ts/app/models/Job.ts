@@ -23,7 +23,7 @@ module Peach {
 		rangeStart?: number;
 		rangeStop?: number;
 
-		isControlIteration?: boolean;
+		dryRun?: boolean;
 	}
 
 	export interface IJob extends IJobRequest {
@@ -107,19 +107,26 @@ module Peach {
 	}
 
 	export class JobStatus {
+		// client-side states
 		public static StartPending: string = "startPending";
-		public static Running: string = "running";
 		public static PausePending: string = "pausePending";
-		public static Paused: string = "paused";
 		public static ContinuePending: string = "continuePending";
 		public static StopPending: string = "stopPending";
-		public static Stopped: string = "stopped";
 		public static KillPending: string = "killPending";
+
+		// server-side states
+		public static Stopped: string = "stopped";
+		public static Starting: string = "starting";
+		public static Running: string = "running";
+		public static Paused: string = "paused";
+		public static Stopping: string = "stopping";
 	}
 
 	export class JobMode {
+		public static Preparing: string = "preparing";
 		public static Fuzzing: string = "fuzzing";
 		public static Searching: string = "searching";
 		public static Reproducing: string = "reproducing";
+		public static Reporting: string = "reporting";
 	}
 }

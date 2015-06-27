@@ -222,7 +222,7 @@ namespace Peach.Pro.Test.Core.Runtime
 		{
 			var jobRequest = new JobRequest
 			{
-				IsControlIteration = true,
+				DryRun = true,
 			};
 			using (var runner = new SafeRunner(_tmp.Path, jobRequest))
 			{
@@ -258,7 +258,7 @@ namespace Peach.Pro.Test.Core.Runtime
 
 				var jobRequest = new JobRequest
 				{
-					IsControlIteration = true,
+					DryRun = true,
 				};
 				using (var runner = new SafeRunner(xmlFile.Path, jobRequest))
 				{

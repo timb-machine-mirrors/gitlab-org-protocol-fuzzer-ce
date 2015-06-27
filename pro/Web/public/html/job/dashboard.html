@@ -14,6 +14,21 @@
 	<span ng-switch-when="startPending">
 		Peach is starting...
 	</span>
+	<span ng-switch-when="pausePending">
+		Peach is pausing...
+	</span>
+	<span ng-switch-when="continuePending">
+		Peach is continuing...
+	</span>
+	<span ng-switch-when="stopPending">
+		Peach is stopping...
+	</span>
+	<span ng-switch-when="killPending">
+		Peach is aborting...
+	</span>
+	<span ng-switch-when="starting">
+		Peach is starting...
+	</span>
 	<span ng-switch-when="running"
 				ng-switch="vm.JobMode">
 		<span ng-switch-when="fuzzing">
@@ -28,20 +43,17 @@
 			This action could take a while to complete.
 		</span>
 	</span>
-	<span ng-switch-when="pausePending">
-		Peach is pausing...
-	</span>
 	<span ng-switch-when="paused">
 		Peach is currently paused.
 	</span>
-	<span ng-switch-when="continuePending">
-		Peach is continuing...
-	</span>
-	<span ng-switch-when="stopPending">
-		Peach is stopping...
-	</span>
-	<span ng-switch-when="killPending">
-		Peach is aborting...
+	<span ng-switch-when="stopping"
+				ng-switch="vm.JobMode">
+		<span ng-switch-when="reporting">
+			Generating report...
+		</span>
+		<span ng-switch-default>
+			Peach is stopping...
+		</span>
 	</span>
 	<span ng-switch-when="stopped">
 		<span ng-if="vm.Job.result">
@@ -55,9 +67,6 @@
 			<i class="fa fa-lg fa-file-pdf-o"></i>
 			Click here to view the final report.
 		</a>
-	</span>
-	<span ng-switch-when="actionPending">
-		Peach is waiting for an action to complete...
 	</span>
 </div>
 

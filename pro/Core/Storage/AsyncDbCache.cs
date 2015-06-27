@@ -338,7 +338,7 @@ namespace Peach.Pro.Core.Storage
 			{
 				EnqueueFront(sw =>
 				{
-					_status = JobStatus.StopPending;
+					_status = JobStatus.Stopping;
 					sw.Stop();
 					DoUpdateRunningJob(sw, copy);
 					return copy;
@@ -351,9 +351,8 @@ namespace Peach.Pro.Core.Storage
 			{
 				EnqueueBack(sw =>
 				{
-					_status = JobStatus.Stopped; 
 					copy.StopDate = now;
-					copy.Mode = !copy.IsControlIteration ? JobMode.Reporting : JobMode.Fuzzing;
+					copy.Mode = !copy.DryRun ? JobMode.Reporting : JobMode.Fuzzing;
 					DoUpdateRunningJob(sw, copy);
 					return copy;
 				});
@@ -361,13 +360,15 @@ namespace Peach.Pro.Core.Storage
 				Monitor.Wait(copy);
 			}
 
-			if (!Job.IsControlIteration)
+			if (!Job.DryRun)
 			{
 				// use the `copy` here because it has been modified with the stopped status
 				try
 				{
 					using (var db = new JobDatabase(Job.DatabasePath))
 					{
+						copy.Status = JobStatus.Stopped;
+						copy.StopDate = DateTime.Now;
 						var report = db.GetReport(copy);
 						Reporting.SaveReportPdf(report);
 					}
