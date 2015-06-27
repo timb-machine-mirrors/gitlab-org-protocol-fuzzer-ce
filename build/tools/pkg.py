@@ -33,19 +33,17 @@ class ZipContext(PkgContext):
 		env = self.env
 
 		base_path = self.path.make_node(env.PREFIX)
-		base_name = 'archive.zip'
-		arch_name = os.path.join(env.PREFIX, base_name)
 
-		Logs.warn('Creating archive: %s' % arch_name)
+		arch = self.path.make_node(env.PREFIX + '.zip')
 
-		node = self.path.make_node(arch_name)
+		Logs.warn('Creating archive: %s' % arch)
 
 		try:
-			node.delete()
+			arch.delete()
 		except Exception:
 			pass
 
-		zip = zipfile.ZipFile(node.abspath(), 'w', compression=zipfile.ZIP_DEFLATED)
+		zip = zipfile.ZipFile(arch.abspath(), 'w', compression=zipfile.ZIP_DEFLATED)
 
 		for x in self.installed_files:
 			n = self.path.find_node(x)
@@ -72,15 +70,15 @@ class ZipContext(PkgContext):
 		except ImportError:
 			from sha import sha
 
-		digest = sha(node.read()).hexdigest()
-		dgst = 	self.path.make_node(arch_name + '.sha1')
+		digest = sha(arch.read()).hexdigest()
+		dgst = arch.change_ext('.zip.sha1')
 		try:
 			dgst.delete()
 		except Exception:
 			pass
-		dgst.write('SHA1(%s)= %s\n' % (base_name, digest))
+		dgst.write('SHA1(%s)= %s\n' % (arch, digest))
 
-		Logs.warn('New archive created: %s (sha1=%s)' % (arch_name, digest))
+		Logs.warn('New archive created: %s (sha1=%s)' % (arch, digest))
 
 class PkgTask(Task.Task):
 	def runnable_status(self):
