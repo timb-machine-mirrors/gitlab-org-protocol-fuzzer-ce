@@ -108,12 +108,10 @@ The xref:Monitors_Vmware[Vmware Monitor] automates the VMware virtual machine us
 this recipe. This monitor works with a snapshot of the virtual machine that provides a consistent 
 virtual machine environment throughout a fuzzing session. 
 
-/////////////// 
-6/26/2015 per mike
-The _Vmware_ monitor primarily manages the virtual machine environment; yet, the 
-monitor includes in its log the non-OK result codes and exceptions reported from 
-the virtual machine environment.
-///////////////
+
+The xref:Monitors_Vmware[Vmware Monitor] automates the VMware virtual machine used in 
+this recipe. This monitor works with a snapshot of the virtual machine that provides 
+a consistent environment for the network service throughout a fuzzing session. 
 
 image::{images}/Vmware_Monitor2.png["VMWare Monitor", scalewidth="70%"]
 
@@ -171,10 +169,10 @@ that follows.
 
 =====  Gdb (Debugger)
 
-The xref:Monitors_Gdb[Gdb Debugger Monitor] uses GDB to launch the network service executable 
-and monitors the for exceptions. When a fault or exception occurs, _Gdb_ collects and 
-logs the appropriate information, including messages from stdout and stderr, stack 
-traces, and the gdb log.
+The xref:Monitors_Gdb[Gdb Debugger Monitor] uses GDB to launch the network service 
+and monitors the service for exceptions. When a fault or exception occurs, _Gdb_ 
+collects and logs the appropriate information, including messages from stdout and stderr, 
+stack traces, and the gdb log.
 
 image::{images}/Gdb_Monitor_VM2.png["Gdb Monitor", scalewidth="70%"]
 
