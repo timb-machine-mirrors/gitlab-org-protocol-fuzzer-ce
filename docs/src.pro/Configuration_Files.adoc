@@ -30,7 +30,7 @@ Use of the defined key's is done by wrapping them in "##". So Interface becomes 
 
 [source,xml]
 ----
-<Monitor class="Pcap">
+<Monitor class="NetworkCapture">
   <Param name="Device" value="##Interface##"/>
 </Monitor>
 

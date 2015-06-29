@@ -36,7 +36,7 @@ starts to function. For example, if you are fuzzing a device that programmatical
 other computers on, you can use _Ping_ with *FaultOnSuccess=true* to determine whether the 
 computers are off (an uninteresting result) or on (an interesting result). 
 
-The Peach command line option +--showdevices+ causes Peach to generate a list of all available network interfaces. For a sample device listing, see the the xref:Monitors_Pcap[Pcap Network] monitor.
+The Peach command line option +--showdevices+ causes Peach to generate a list of all available network interfaces. For a sample device listing, see the the xref:Monitors_Pcap[NetworkCapture] monitor.
 
 NOTE: When running Mono (for Linux and OS X systems), Ping needs administrative or root privileges. In addition, the output string for Mono is limited to 100 bytes, including 28 bytes needed for the IP and ICMP.
 
