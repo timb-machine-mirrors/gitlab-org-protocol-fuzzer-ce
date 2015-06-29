@@ -103,7 +103,9 @@ namespace Peach.Pro.Core.Storage
 
 	public abstract class Database : IDisposable
 	{
+#if SQLITE_TRACE
 		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
+#endif
 
 		static Database()
 		{
@@ -165,10 +167,12 @@ namespace Peach.Pro.Core.Storage
 		[Conditional("SQLITE_TRACE")]
 		private static void SqliteTrace()
 		{
+#if SQLITE_TRACE
 			SQLiteLog.Log += (o, args) =>
 			{
 				Logger.Trace("SQL> {0}", args.Message);
 			};
+#endif
 		}
 
 		public void Dispose()
