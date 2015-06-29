@@ -259,7 +259,7 @@ namespace Peach.Pro.Core.Loggers
 					job.StopDate = DateTime.Now;
 					job.HeartBeat = job.StopDate;
 					job.Mode = JobMode.Fuzzing;
-					job.Status = JobStatus.StopPending;
+					job.Status = JobStatus.Stopping;
 				}
 			}
 
@@ -818,6 +818,10 @@ namespace Peach.Pro.Core.Loggers
 
 			using (var db = new NodeDatabase())
 			{
+				var job = db.GetJob(id);
+				job.StopDate = DateTime.Now;
+				job.Status = JobStatus.Stopped;
+				db.UpdateJob(job);
 				db.PassPendingTestEvents(id);
 			}
 		}

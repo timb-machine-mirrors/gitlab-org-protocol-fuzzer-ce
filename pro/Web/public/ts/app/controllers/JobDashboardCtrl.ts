@@ -55,7 +55,7 @@ module Peach {
 		}
 
 		public get CanStop(): boolean {
-			return this.jobService.CanStop;
+			return this.jobService.CanStop || this.jobService.CanKill;
 		}
 
 		public Pause(): void {
@@ -63,7 +63,7 @@ module Peach {
 		}
 
 		public Stop(): void {
-			if (this.Job.status === JobStatus.StopPending) {
+			if (this.Job.status === JobStatus.Stopping) {
 				this.jobService.Kill();
 			} else {
 				this.jobService.Stop();
@@ -113,13 +113,13 @@ module Peach {
 		}
 
 		public get StopPrompt(): string {
-			return (this.Job && this.Job.status === JobStatus.StopPending) ?
+			return (this.Job && this.Job.status === JobStatus.Stopping) ?
 				"Abort" :
 				"Stop";
 		}
 
 		public get StopIcon(): string {
-			return (this.Job && this.Job.status === JobStatus.StopPending) ?
+			return (this.Job && this.Job.status === JobStatus.Stopping) ?
 				"fa-power-off" :
 				"fa-stop";
 		}

@@ -270,7 +270,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			var jobRequest = new JobRequest
 			{
-				IsControlIteration = true,
+				DryRun = true,
 			};
 
 			var job = _monitor.Start(_tmp.Path, _tmp.Path, jobRequest);
@@ -289,8 +289,8 @@ namespace Peach.Pro.Test.Core.WebServices
 				{
 					new TestEvent(1, job.Guid, TestStatus.Pass, "Loading pit file", 
 						"Loading pit file '{0}'".Fmt(_tmp.Path), null),
-					new TestEvent(2, job.Guid, TestStatus.Pass, "Starting fuzzing engine", 
-						"Starting fuzzing engine", null),
+					new TestEvent(2, job.Guid, TestStatus.Pass, "Preparing fuzzing engine", 
+						"Preparing fuzzing engine", null),
 					new TestEvent(3, job.Guid, TestStatus.Pass, "Running iteration", 
 						"Running the initial control record iteration", null),
 					new TestEvent(4, job.Guid, TestStatus.Pass, 
@@ -311,7 +311,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 				var jobRequest = new JobRequest
 				{
-					IsControlIteration = true,
+					DryRun = true,
 				};
 
 				var job = _monitor.Start(xmlFile.Path, xmlFile.Path, jobRequest);
