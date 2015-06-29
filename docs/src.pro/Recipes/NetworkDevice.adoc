@@ -111,11 +111,13 @@ The xref:Monitors_IpPower9258[IpPower 9258 Monitor] controls the IpPower 9258 de
 
 image::{images}/IpPower9258_Boot.png["IpPower 9258 Monitor", scalewidth="60%"]
 
-The *Port* parameter identifies the receptacle of the IpPower9258 device. Numbers range from 1 to 4. Receptacle 1 is the leftmost recepticle. 
+The *Port* parameter identifies the receptacle of the IpPower9258 device. Numbers range 
+from 1 to 4. Receptacle 1 is the leftmost recepticle. 
 
 image::{images}/IpPower_RearPanel2.png["IpPower 9258 Recepticles", scalewidth="60%"]
 
-The *When* parameter "OnStart" identifies that the the power cycle occurs at the start of the fuzzing session. 
+The *When* parameter "OnStart" identifies that the power cycle occurs at the start of 
+the fuzzing session. 
 
 ===== IpPower9258 (RebootDevice)
 
