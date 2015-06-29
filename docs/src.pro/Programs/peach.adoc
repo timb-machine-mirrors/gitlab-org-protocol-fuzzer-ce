@@ -60,7 +60,7 @@ The following command line launches Peach and fuzzes using +pit.xml+ (and if it 
 [*] Test 'Default' starting with random seed 27886.
 Peach.Core.Agent.Agent StartMonitor: Monitor WindowsDebugger
 Peach.Core.Agent.Agent StartMonitor: Monitor_1 PageHeap
-Peach.Core.Agent.Agent StartMonitor: Monitor_2 Pcap
+Peach.Core.Agent.Agent StartMonitor: Monitor_2 NetworkCapture
 Peach.Core.Agent.Agent SessionStarting: Monitor
 Peach.Core.Agent.Monitors.WindowsDebuggerHybrid SessionStarting
 Peach.Core.Agent.Agent SessionStarting: Monitor_1

@@ -299,7 +299,7 @@ Each monitor must filter for their desired messages, ignoring all unexpected mes
 
 The DetectedFault and GetMonitorData functions are used to report faults back to Peach.
 At the end of each iteration, the Peach engine calls DetectedFault() on every monitor.
-If any Smonitor reports that a fault occurred, Peach calls GetMonitorData() on every monitor.
+If any monitor reports that a fault occurred, Peach calls GetMonitorData() on every monitor.
 The GetMonitorData function returns a Fault record, and the type of the record can be either Fault or Data.
 
 Fault Detection:
@@ -309,7 +309,8 @@ Fault Detection:
  * GetMonitorData() returns applicable data
  * Returned fault can be +fault+ or +data+
  ** Debugger stack trace is +fault+
- ** Pcap is +data+
+ ** Network packet capture is +data+
+ ** Log file is +data+
  * Faults can include a hash for bucketing information
 
 Monitor best practices:

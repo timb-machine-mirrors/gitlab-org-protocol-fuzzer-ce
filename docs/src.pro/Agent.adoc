@@ -15,7 +15,8 @@ can be used as an alternative to running the process from root. This command all
 
 * Windows systems sometimes require an Agent to run with administrative privileges. 
 
-The following monitors/processes require these heightened privileges: PageHeap, PCAP, 
+The following monitors/processes require these heightened privileges: 
+PageHeap and NetworkCapture. 
 
 === Agent Channels
 
