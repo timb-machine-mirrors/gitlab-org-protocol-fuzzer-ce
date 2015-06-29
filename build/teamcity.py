@@ -30,6 +30,6 @@ if __name__ == "__main__":
 	print("##teamcity[setParameter name='BuildTag' value='%s']" % buildtag)
 	print("##teamcity[buildNumber '%s']" % desc)
 
-	if p.promote and buildtag != '0.0.0':
+	if args.promote and buildtag != '0.0.0':
 		subprocess.check_call([ 'git', 'tag', '-a', '-m', 'Tagging build', 'v%s' % buildtag ])
 		subprocess.check_call([ 'git', 'push', '--tags' ])
