@@ -50,7 +50,7 @@ INSERT INTO [Job] (
 	FaultCount,
 	RangeStart,
 	RangeStop,
-	IsControlIteration,
+	DryRun,
 	PitUrl,
 	LogPath,
 	PeachVersion
@@ -72,7 +72,7 @@ INSERT INTO [Job] (
 	@FaultCount,
 	@RangeStart,
 	@RangeStop,
-	@IsControlIteration,
+	@DryRun,
 	@PitUrl,
 	@LogPath,
 	@PeachVersion
@@ -331,6 +331,95 @@ ADD COLUMN
 
 		public const string JobMigrateV2 = @"
 DROP TABLE Job;
+";
+
+		public const string NodeMigrateV1 = @"
+PRAGMA foreign_keys=OFF;
+
+BEGIN TRANSACTION;
+
+ALTER TABLE Job
+RENAME TO tmp_Job;
+
+CREATE TABLE Job (
+	Id TEXT NOT NULL,
+	LogPath TEXT,
+	Status INTEGER NOT NULL,
+	Mode INTEGER NOT NULL,
+	PitFile TEXT,
+	Result TEXT,
+	Notes TEXT,
+	User TEXT,
+	IterationCount INTEGER NOT NULL,
+	StartDate DATETIME NOT NULL,
+	StopDate DATETIME,
+	Runtime INTEGER NOT NULL,
+	FaultCount INTEGER NOT NULL,
+	Pid INTEGER NOT NULL,
+	HeartBeat DATETIME,
+	PeachVersion TEXT,
+	PitUrl TEXT,
+	Seed INTEGER,
+	RangeStart INTEGER NOT NULL,
+	RangeStop INTEGER,
+	DryRun INTEGER NOT NULL,
+	PRIMARY KEY (Id)
+);
+
+INSERT INTO Job (
+	Id,
+	Status,
+	Mode,
+	PitFile,
+	Result,
+	Notes,
+	User,
+	Seed,
+	IterationCount,
+	StartDate,
+	StopDate,
+	HeartBeat,
+	Pid,
+	Runtime,
+	FaultCount,
+	RangeStart,
+	RangeStop,
+	DryRun,
+	PitUrl,
+	LogPath,
+	PeachVersion
+)
+SELECT
+	Id,
+	Status,
+	Mode,
+	PitFile,
+	Result,
+	Notes,
+	User,
+	Seed,
+	IterationCount,
+	StartDate,
+	StopDate,
+	HeartBeat,
+	Pid,
+	Runtime,
+	FaultCount,
+	RangeStart,
+	RangeStop,
+	IsControlIteration,
+	PitUrl,
+	LogPath,
+	PeachVersion
+FROM tmp_Job;
+
+DROP TABLE tmp_Job;
+
+PRAGMA foreign_key_check;
+
+COMMIT;
+
+PRAGMA foreign_keys=ON;
 ";
 	}
 }

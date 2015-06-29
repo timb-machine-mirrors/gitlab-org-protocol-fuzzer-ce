@@ -9,20 +9,37 @@ using Peach.Core;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
+	/// <summary>
+	/// Server-side status
+	/// Client-side maintains a superset with *Pending states
+	/// </summary>
 	public enum JobStatus
 	{
-		Stopped,
-		StartPending,
-		StopPending,
+		/// <summary>
+		/// Client-side polling finishes once this state is entered
+		/// </summary>
+		/// <remarks>
+		/// To maintain backwards compatiblity, this value should always be 0.
+		/// </remarks>
+		Stopped = 0,
+		Starting,
 		Running,
-		ContinuePending,
-		PausePending,
 		Paused,
+		/// <summary>
+		/// Kill is only possible from this state
+		/// </summary>
+		Stopping,
 	}
 
+	// The following fields must be resolved by the time we enter the Stopped state:
+	// * StopDate
+	// * Result
+	// * ReportUrl
+	// * All associated TestEvents
+	
 	public enum JobMode
 	{
-		Starting,
+		Preparing,
 		Recording,
 		Fuzzing,
 		Searching,
@@ -106,7 +123,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// Determines whether the job is a test run or an actual fuzzing session.
 		/// </summary>
-		public bool IsControlIteration { get; set; }
+		public bool DryRun { get; set; }
 	}
 
 	public class JobLog
@@ -134,15 +151,15 @@ namespace Peach.Pro.Core.WebServices.Models
 			PitFile = Path.GetFileName(pitFile);
 			StartDate = DateTime.Now;
 			HeartBeat = StartDate;
-			Status = JobStatus.StartPending;
-			Mode = JobMode.Starting;
+			Status = JobStatus.Starting;
+			Mode = JobMode.Preparing;
 			PeachVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
 			PitUrl = request.PitUrl;
 			Seed = request.Seed;
 			RangeStart = request.RangeStart;
 			RangeStop = request.RangeStop;
-			IsControlIteration = request.IsControlIteration;
+			DryRun = request.DryRun;
 
 			using (var p = Process.GetCurrentProcess())
 				Pid = p.Id;
@@ -159,11 +176,11 @@ namespace Peach.Pro.Core.WebServices.Models
 			PitFile = Path.GetFileName(config.pitFile);
 			StartDate = DateTime.Now;
 			HeartBeat = StartDate;
-			Status = JobStatus.StartPending;
-			Mode = JobMode.Starting;
+			Status = JobStatus.Starting;
+			Mode = JobMode.Preparing;
 			PeachVersion = config.version;
 
-			IsControlIteration = config.singleIteration;
+			DryRun = config.singleIteration;
 			Seed = config.randomSeed;
 			if (config.range)
 			{
