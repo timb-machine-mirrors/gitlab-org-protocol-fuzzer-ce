@@ -296,17 +296,6 @@ if __name__ == "__main__":
 			dst = os.path.join(path, 'pits', f)
 			shutil.copy(src, dst)
 
-		# Make all zip
-		dst = os.path.join(path, r['all'] % c.__dict__)
-
-		with zipfile.ZipFile(dst, 'w', compression=zipfile.ZIP_STORED) as z:
-			for x in o.files:
-				src = os.path.join(path, x)
-				z.write(src, x)
-
-		sha1sum(dst)
-		o.files.append(os.path.basename(dst))
-
 		with open(rel, 'w') as f:
 			j = to_JSON(o)
 			print j
