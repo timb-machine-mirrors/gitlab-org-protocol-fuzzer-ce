@@ -23,10 +23,9 @@ if __name__ == "__main__":
 
 	if branch == 'master' or branch.startswith('prod-'):
 		match = re.match(r'v(\d+)\.(\d+)\.(\d+).*', desc)
-		if match:
+		if args.advance and match:
 			buildtag = '%s.%s.%d' % (match.group(1), match.group(2), int(match.group(3)) + args.advance)
-			if args.advance:
-				tag(args.root)
+			tag(args.root)
 
 	print("##teamcity[setParameter name='BuildTag' value='%s']" % buildtag)
 	print("##teamcity[buildNumber '%s']" % desc)
