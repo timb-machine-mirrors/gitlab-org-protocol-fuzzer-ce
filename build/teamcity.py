@@ -11,7 +11,8 @@ def tag(roots):
 
 if __name__ == "__main__":
 	p = argparse.ArgumentParser(description='teamcity init')
-	p.add_argument('--advance', action='count', default=0)
+	p.add_argument('--promote', action='store_true')
+	p.add_argument('--tag', action='store_true')
 	p.add_argument('--match', default="v*")
 	p.add_argument('--root', action='append')
 
@@ -23,9 +24,10 @@ if __name__ == "__main__":
 
 	if branch == 'master' or branch.startswith('prod-'):
 		match = re.match(r'v(\d+)\.(\d+)\.(\d+).*', desc)
-		if args.advance and match:
-			buildtag = '%s.%s.%d' % (match.group(1), match.group(2), int(match.group(3)) + args.advance)
-			tag(args.root)
+		if args.promote and match:
+			buildtag = '%s.%s.%d' % (match.group(1), match.group(2), int(match.group(3)) + 1)
+			if args.tag:
+				tag(args.root)
 
 	print("##teamcity[setParameter name='BuildTag' value='%s']" % buildtag)
 	print("##teamcity[buildNumber '%s']" % desc)
