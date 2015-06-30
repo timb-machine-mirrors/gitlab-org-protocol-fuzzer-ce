@@ -26,6 +26,7 @@
 
 // $Id$
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.XPath;
@@ -284,5 +285,55 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			Assert.False(ret2);
 		}
 		
+		[Test]
+		public void XmlInChoice()
+		{
+			const string xml = @"
+<Peach>
+ <DataModel name='example1'>
+    <Choice>
+      <Block>
+        <XmlElement elementName='methodCall'>
+         <XmlElement elementName='methodName'><String value='Get'/></XmlElement> 
+        </XmlElement>
+      </Block>
+      <Block>
+        <XmlElement elementName='methodCall'>
+         <XmlElement elementName='methodName2'><String value='Get2'/></XmlElement> 
+        </XmlElement>
+      </Block>
+    </Choice>
+  </DataModel>
+
+  <DataModel name='example2'>
+    <XmlElement elementName='methodCall'>
+      <Choice>
+         <XmlElement elementName='methodName'><String value='Get'/></XmlElement> 
+         <XmlElement elementName='methodName2'><String value='Get2'/></XmlElement> 
+      </Choice>
+    </XmlElement>
+  </DataModel>
+
+  <DataModel name='example3'>
+    <XmlElement elementName='methodCall'>
+      <Choice>
+         <Choice>
+            <XmlElement elementName='methodName'><String value='Get'/></XmlElement> 
+            <XmlElement elementName='methodName2'><String value='Get2'/></XmlElement> 
+         </Choice>
+      </Choice>
+    </XmlElement>
+  </DataModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+
+			var str1 = dom.dataModels[0].InternalValue.BitsToString();
+			var str2 = dom.dataModels[1].InternalValue.BitsToString();
+			var str3 = dom.dataModels[1].InternalValue.BitsToString();
+
+			Assert.AreEqual(str1, str2);
+			Assert.AreEqual(str1, str3);
+		}
 	}
 }
