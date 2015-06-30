@@ -156,13 +156,30 @@ namespace Peach.Core.Dom
 			return sb.ToString();
 		}
 
+		static DataElement ResolveChoices(DataElement elem)
+		{
+			while (true)
+			{
+				var asChoice = elem as Choice;
+				if (asChoice == null)
+					return elem;
+
+				if (asChoice.SelectedElement == null)
+					asChoice.SelectDefault();
+
+				elem = asChoice.SelectedElement;
+			}
+		}
+
 		protected void GenXmlNode(XmlDocument doc, XmlNode parent)
 		{
 			var node = doc.CreateElement(elementName, ns);
 			parent.AppendChild(node);
 
-			foreach (var child in this)
+			foreach (var childElem in this)
 			{
+				var child = ResolveChoices(childElem);
+
 				var asAttr = child as XmlAttribute;
 				if (asAttr != null && asAttr.attributeName != null)
 				{
