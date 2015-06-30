@@ -13,7 +13,7 @@ def promote(buildtag):
 
 if __name__ == "__main__":
 	p = argparse.ArgumentParser(description='teamcity init')
-	p.add_argument('--promote', default=False)
+	p.add_argument('--promote', action='store_true')
 	p.add_argument('--match', default="v*")
 
 	args = p.parse_args()
