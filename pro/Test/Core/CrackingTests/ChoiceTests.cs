@@ -824,10 +824,10 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			{
 				Assert.Fail("should not throw cracking failure");
 			}
-			catch (PeachException)
+			catch (SoftException)
 			{
 				// The bad scripting expression should propigate all the way up
-				// and not result in us matching on choice 'Bar'
+				// as a SoftException and not result in us matching on choice 'Bar'
 			}
 		}
 
