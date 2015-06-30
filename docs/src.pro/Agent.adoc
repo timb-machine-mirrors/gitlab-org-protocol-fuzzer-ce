@@ -44,7 +44,7 @@ ifndef::peachug[]
    <!-- Monitors -->
 </Agent>
 ----
-endif::peachug[]
+
 
 ==== REST JSON Agent
 
