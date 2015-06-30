@@ -31,9 +31,13 @@ the number of iterations needed to gain authentication. In this case, the sequen
 indefinite and control iteration sequence flow should not be compared to that of the 
 record iteration. 
 
-When the value of _nonDeterministicActions_ is `false', the default action occurs, in which Peach enforces a matching execution flow sequence between the record iteration and each control iteration. If the flows do not match, Peach issues a fault. 
+When the value of _nonDeterministicActions_ is `false', the default action occurs, in which 
+Peach enforces a matching execution flow sequence between the record iteration and each 
+control iteration. If the flows do not match, Peach issues a fault. 
 
-When the value of _nonDeterministicActions_ is `true`, the Peach skips the check of the execution flow sequence, and just checks for other faults that occur.
+When the value of _nonDeterministicActions_ is `true`, the Peach skips the check of 
+the execution flow sequence. If a control iteration state flow differs from record 
+iteration, Peach does not produce a fault.
 
 .Syntax example
 [source,xml]
