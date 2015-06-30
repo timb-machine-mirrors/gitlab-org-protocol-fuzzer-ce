@@ -22,4 +22,23 @@ Control iterations are configured on the xref:Test[_Test_ element] using the _co
 <Test name="TheTest" controlIterations="1"> .... </Test>
 ----
 
+A second attribute, _nonDeterministicActions_, allows Peach to continue fuzzing when 
+the execution flow of a control iteration might not match the execution flow of the 
+record iteration. 
+
+For example, some protocols that use a challenge-response authentication process negotiate 
+the number of iterations needed to gain authentication. In this case, the sequence flow is
+indefinite and control iteration sequence flow should not be compared to that of the 
+record iteration. 
+
+When the value of _nonDeterministicActions_ is `false', the default action occurs, in which Peach enforces a matching execution flow sequence between the record iteration and each control iteration. If the flows do not match, Peach issues a fault. 
+
+When the value of _nonDeterministicActions_ is `true`, the Peach skips the check of the execution flow sequence, and just checks for other faults that occur.
+
+.Syntax example
+[source,xml]
+----
+<Test name="TheTest" controlIterations="1" nonDeterministicActions="true"> .... </Test>
+----
+
 See also xref:Iteration_control[control iterations] and xref:Iteration_fuzzing[fuzzing iterations].
