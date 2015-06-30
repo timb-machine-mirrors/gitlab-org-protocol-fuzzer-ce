@@ -26,7 +26,7 @@ if __name__ == "__main__":
 		if match:
 			buildtag = '%s.%s.%d' % (match.group(1), match.group(2), int(match.group(3)) + args.advance)
 			if args.advance:
-				tag(arg.root)
+				tag(args.root)
 
 	print("##teamcity[setParameter name='BuildTag' value='%s']" % buildtag)
 	print("##teamcity[buildNumber '%s']" % desc)
