@@ -76,6 +76,17 @@ namespace Peach.Pro.Core.Storage
 			get { return null; }
 		}
 
+		protected override IList<MigrationHandler> Migrations
+		{
+			get
+			{
+				return new MigrationHandler[]
+				{
+					() => { Connection.Execute(Sql.NodeMigrateV1); },
+				};
+			}
+		}
+
 		public NodeDatabase()
 			: base(GetDatabasePath(), false)
 		{
@@ -135,7 +146,7 @@ namespace Peach.Pro.Core.Storage
 
 		public void DeleteJobs(IEnumerable<Job> jobs)
 		{
-			var ids = jobs.Select(x => new {x.Id });
+			var ids = jobs.Select(x => new { x.Id });
 			Connection.Execute(Sql.DeleteJob, ids);
 		}
 
@@ -157,7 +168,7 @@ namespace Peach.Pro.Core.Storage
 		public IEnumerable<TestEvent> GetTestEventsByJob(Guid jobId)
 		{
 			return Connection.Query<TestEvent>(
-				Sql.SelectTestEvents, 
+				Sql.SelectTestEvents,
 				new { JobId = jobId.ToString() }
 			);
 		}

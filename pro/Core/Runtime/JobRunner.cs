@@ -43,7 +43,7 @@ namespace Peach.Pro.Core.Runtime
 			if (job.Seed.HasValue)
 				_config.randomSeed = (uint)job.Seed.Value;
 
-			if (job.IsControlIteration)
+			if (job.DryRun)
 			{
 				_config.singleIteration = true;
 			}

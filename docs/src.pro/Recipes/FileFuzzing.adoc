@@ -7,11 +7,16 @@
 
 === Recipe: Monitoring a File Consumer (File Fuzzing)
 
+This recipe identifies the monitors and associated settings suitable for testing a 
+file consumer. When fuzzing a file consumer, Peach creates malformed data files, 
+and then has the file consumer open and access the data from the malformed files.
+
 image::{images}/Document.png["A File to Consume", scalewidth="50%"]
 
-Peach can fuzz file consumers as well as protocols, network servers, firmware, and entire systems. It doesn't matter whether the file consumer accesses multimedia files--sound, images, or video; documents--word processing, text, or presentation; or other files such as archive or compressed data files.  
-
-Peach fuzzes these consumers by creating malformed data files, and then has the consumer open and access the data from the malformed files.
+TIP: Using one common approach, Peach can fuzz file consumers of all types, whether 
+the file types are multimedia--sound, images, or video; documents--word processing, 
+text, or presentation; or other types of files, such as archive or compressed data 
+files.
 
 ==== What is the fuzzing session workflow?
 
@@ -22,15 +27,19 @@ a. Write a file to disk that contains fuzzed data.
 b. Run the target application.
 c. Wait for the target to consume the data file.
 d. Check for faults.
-e. If a fault occurs, 
-
-* Collect data.
-
+e. If a fault occurs, collect data.
 2.	Repeat step 1.
 
-The monitoring setup for this recipe is simple because the Windows Debugger provides most of the functionality needed, including: fault detection, data collection, and automation. A second monitor, PageHelp assists the Windows Debuger by setting some additional settings for the Windows debugger for handling the heap and other advanced data structures.
+The monitoring setup for this recipe is simple because a single monitor, the Windows 
+Debugger monitor, provides most of the functionality needed, including: fault detection, 
+data collection, and automation. 
 
-Given this, here's a diagram of connections for the test configuration.
+A second monitor, the PageHeap monitor, enables debug memory allocation settings for
+the target process. PageHeap can improve the likelihood that certain types of issues, 
+such as buffer overflow, will cause the the target to crash. Using the debug memory 
+allocation settings normally leads to finding more faults during testing.
+
+Here's a diagram of connections for the test configuration.
 
 image::{images}/FileFuzzing2.png["Configuration for File Fuzzing", scalewidth="70%"]
 
@@ -95,8 +104,7 @@ via the debugger. If the executable has command-line arguments, specify these us
 the "Arguments" paramter.
 
 The *StartOnCall* parameter defers launching the target until the state model issues a 
-call to the monitor to begin. Upon receiving the call, the debugger attaches to the 
-process, or starts the process or executable. 
+call to the monitor to begin. Upon receiving the call, the debugger starts the process. 
 
 ==== Summary
 
