@@ -23,6 +23,8 @@ namespace Peach.Core
 			Trial,
 			Acedemic,
 			TestSuites,
+			Studio,
+			Developer,
 			Unknown,
 		}
 
