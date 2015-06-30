@@ -11,7 +11,7 @@ def tag(roots):
 
 if __name__ == "__main__":
 	p = argparse.ArgumentParser(description='teamcity init')
-	p.add_argument('--advance', action='count')
+	p.add_argument('--advance', action='count', default=0)
 	p.add_argument('--match', default="v*")
 	p.add_argument('--root', action='append')
 
