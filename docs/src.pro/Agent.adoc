@@ -46,36 +46,6 @@ ifndef::peachug[]
 ----
 endif::peachug[]
 
-==== Legacy (formerly TCP Remoting Agent)
-
-This agent lives in a separate process that can be located on remote machines.  Communication is performed over TCP Remoting, a form of RPC supported natively by the runtime.
-
-To use a remote agent, the agent process must be running before launching Peach.
-
-TIP: The default port for remote agents is 9001.
-
-ifndef::peachug[]
-
-.Configuring a remote agent
-[source,xml]
-----
-<Agent name="RemoteAgent" location="tcp://192.168.1.1:9001">
-   <!-- Monitors -->
-</Agent>
-----
-
-.Running remote agent
-----
-c:\peach3> peach.exe -a tcp
-
-[[ Peach v3.0
-[[ Copyright (c) Michael Eddington
-
-[*] Starting agent server
- -- Press ENTER to quit agent --
-
-----
-
 ==== REST JSON Agent
 
 // TODO - Document each rest call
