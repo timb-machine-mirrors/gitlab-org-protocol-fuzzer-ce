@@ -29,7 +29,7 @@ namespace Peach.Pro.Core.Publishers
 		// https://www.winpcap.org/pipermail/winpcap-users/2012-November/004672.html
 		// Newer linux kernels (Ubuntu 15.04) will also error if sending packets less than 15 bytes
 		const string DefaultMinFrameSize = "15";
-		const string DefaultMaxFrameSize = DefaultMaxMtu;
+		const string DefaultMaxFrameSize = "65535"; // SharpPcap throws if > 65535
 
 		public string Interface { get; set; }
 		public int PcapTimeout { get; set; }
