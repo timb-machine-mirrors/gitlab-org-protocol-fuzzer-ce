@@ -18,6 +18,11 @@ if __name__ == "__main__":
 
 	args = p.parse_args()
 
+	if args.tag:
+		advance = 1
+	else:
+		advance = 0
+
 	buildtag = '0.0.0'
 	branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip()
 	desc = subprocess.check_output(['git', 'describe', '--match', args.match]).strip()
@@ -25,7 +30,7 @@ if __name__ == "__main__":
 	if branch == 'master' or branch.startswith('prod-'):
 		match = re.match(r'v(\d+)\.(\d+)\.(\d+).*', desc)
 		if args.promote and match:
-			buildtag = '%s.%s.%d' % (match.group(1), match.group(2), int(match.group(3)) + 1)
+			buildtag = '%s.%s.%d' % (match.group(1), match.group(2), int(match.group(3)) + advance)
 			if args.tag:
 				tag(args.root)
 
