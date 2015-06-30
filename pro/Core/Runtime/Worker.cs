@@ -137,14 +137,14 @@ namespace Peach.Pro.Core.Runtime
 					Guid = _guid.Value,
 					PitFile = Path.GetFileName(pitFile),
 					StartDate = DateTime.Now,
-					Status = JobStatus.StartPending,
-					Mode = JobMode.Starting,
+					Status = JobStatus.Starting,
+					Mode = JobMode.Preparing,
 					PeachVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString(),
 
 					RangeStart = _start.HasValue ? _start.Value : 0,
 					RangeStop = _stop,
 					Seed = _seed,
-					IsControlIteration = _test.HasValue && _test.Value,
+					DryRun = _test.HasValue && _test.Value,
 				};
 				db.InsertJob(job);
 				return job;

@@ -157,12 +157,12 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			// When jobs are running, their status should ne pulled from the job database
 
 			var j1 = new Job(new JobRequest(), "pit1.xml");
-			Assert.AreEqual(j1.Status, JobStatus.StartPending);
+			Assert.AreEqual(j1.Status, JobStatus.Starting);
 			j1.IterationCount = 100;
 			j1.Status = JobStatus.Stopped;
 
 			var j2 = new Job(new JobRequest(), "pit2.xml");
-			Assert.AreEqual(j2.Status, JobStatus.StartPending);
+			Assert.AreEqual(j2.Status, JobStatus.Starting);
 			j1.IterationCount = 100;
 			j2.Status = JobStatus.Stopped;
 
@@ -248,13 +248,13 @@ namespace Peach.Pro.Test.WebApi.Controllers
 		[Test]
 		public void StartPending()
 		{
-			// Ensure we can get /p/jobs when a job is in the StartPending state
+			// Ensure we can get /p/jobs when a job is in the Preparing state
 			// One job is ours and in start pending, the other job is not
 			// ours and also in start pending.
 
 			var j1 = new Job(new JobRequest(), "pit1.xml") { Pid = _process.Id };
 
-			Assert.AreEqual(j1.Status, JobStatus.StartPending);
+			Assert.AreEqual(j1.Status, JobStatus.Starting);
 
 			_runningJob = new Job(new JobRequest(), "pit2.xml");
 
@@ -275,9 +275,9 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			Assert.NotNull(jobs);
 			Assert.AreEqual(3, jobs.Length);
 			Assert.AreEqual(j1.Id, jobs[0].Id);
-			Assert.AreEqual(JobStatus.StartPending, jobs[0].Status);
+			Assert.AreEqual(JobStatus.Starting, jobs[0].Status);
 			Assert.AreEqual(_runningJob.Id, jobs[1].Id);
-			Assert.AreEqual(JobStatus.StartPending, jobs[1].Status);
+			Assert.AreEqual(JobStatus.Starting, jobs[1].Status);
 			Assert.AreEqual(j2.Id, jobs[2].Id);
 			Assert.AreEqual(JobStatus.Stopped, jobs[2].Status);
 		}
@@ -437,7 +437,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 		public void GetRunning(string query)
 		{
 			var j1 = new Job(new JobRequest(), "pit1.xml");
-			Assert.AreEqual(j1.Status, JobStatus.StartPending);
+			Assert.AreEqual(j1.Status, JobStatus.Starting);
 			j1.IterationCount = 100;
 			j1.Status = JobStatus.Stopped;
 
@@ -474,7 +474,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 		[TestCase("false")]
 		public void GetDryRun(string query)
 		{
-			var j1 = new Job(new JobRequest { IsControlIteration = true }, "pit1.xml")
+			var j1 = new Job(new JobRequest { DryRun = true }, "pit1.xml")
 			{
 				Status = JobStatus.Stopped
 			};

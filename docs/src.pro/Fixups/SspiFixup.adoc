@@ -12,6 +12,8 @@ element. SSPI supports a number of challenge-response authentication protocols.
 This fixup is useful for working with NTLM authentication, with Microsoft 
 protocols such as CIFS and SMB, and with authentication across secure boundaries (domains).
 
+[NOTE] The SSPI challenge-response authentication acts more like a CRC or checksum than a protocol. Typically, the SSPI data is within a packet of a protocol, such as CIFS. 
+
 === Parent Elements
 
 xref:String[String]
@@ -32,9 +34,39 @@ authrentication continues (as in a connection).
 
 === Examples
 
-//TBD
+.Sspi Fixup Example
 
-.Basic Sspi Fixup Example
+This example consists ot two code fragments: 
+
+* A few lines of Python code takes the received message from the server and places 
+it into the Peach state store. The fixup then processes the message text next time 
+the script runs:
+* A portion of the State model that performs the challenge response authentication. 
+
+[NOTE] The challenge-response authentication requires multiple exchanges between 
+the client and the server to complete the authentication process. The example 
+shows the portion of the state model that achieves the authentication.
+
+The following Python fragment sets up the storage for the challenge/response value 
+in the state bag:
+
+=========================
+    import clr
+    clr.AddReferenceByPartialName('Peach.Core')
+
+    import Peach.Core
+    import System
+
+    def ContinueUpdate(ctx, action):
+        securityBuffer = action.dataModel.find('SecurityBuffer')
+        if securityBuffer != None:
+            ctx.iterationStateStore['Peach.SspiSecurityBuffer'] = securityBuffer.Value
+            
+=========================
+
+
+The following pit fragment defines the action to achieve authentication in the state model.
+
 =========================
 [source,xml]
 ----
@@ -54,31 +86,37 @@ authrentication continues (as in a connection).
         <BLob name="UserData" />
     </DataModel>
 
-	<StateModel name="TheState" initialState="initial">
-		<State name="initial">
-			<Action type="output">
-				<DataModel ref="Packet" />
-			</Action>
-		</State>
-	</StateModel>
 
-	<Test name="Default">
-		<StateModel ref="TheState"/>
+    <StateModel>
+        <State name="Initial">
+            <!-- Fill in initial state details -->
+        </State>
 
-		<Publisher class="ConsoleHex" />
+        <!-- The next state will loop several times to perform
+             the challenge-response authentication -->
+        <State name="Authenticate">
+            <Action type="output" name="SessionSetupRequest">
+                <DataModel ref="CIFS:TcpRequest"/>
+            </Action>
+            
+            <Action type="input" name="SessionSetupResponse" 
+                onComplete="cifs.ContinueUpdate(Context, Action)">
+                
+                <DataModel ref="CIFS:TcpResponse"/>
+            </Action>
 
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
-	</Test>
+            <!-- Next action does the loop until authenticate is done -->
+            <Action type="changeState" ref="Authenticate"
+                when="Context.iterationStateStore['Peach.SspiContinueNeeded']" />
+
+            <!-- Authentication complete, goto next state -->
+            <Action type="changeState" ref="ConnectIpc" />
+        </State>
+    </StateModel>
+
+    <!-- Place the remaining pit details here. -->
+
 </Peach>
 ----
 
-Output from this example.
-
-----
-//Output goes here.
-
-
-----
 =========================

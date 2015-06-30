@@ -7,13 +7,19 @@
 
 === Recipe: Monitoring a Linux Network Service
 
+This recipe identifies the monitors and associated settings suitable for testing a 
+network service on Linux. When fuzzing a network server, Peach impersonates the 
+other endpoint of the network, the client.
+
+In this scenario, Peach runs on a host computer; the network server runs in a 
+Virtual Machine (VM) on the host. With Peach running on the host, it controls the 
+environment. If the netowrk server crashes, the worst thing that happens is that 
+the virtual machine has to restart. Peach should recover the data if the network 
+server crashes. 
+
 image::{images}/linux_tux.png["Linux Tux mascot", scalewidth="70%"]
 
-The network service in this recipe is an SNMP server. Peach acts as a network 
-client for fuzzing. Peach runs on a host computer; the SNMP server runs in a 
-Virtual Machine (VM) on the host. With Peach running on the host, it controls the 
-environment. If the SNMP server crashes, the worst thing that happens is that 
-the VM has to restart. Peach should recover the data if the SNMP server crashes.
+This recipe uses the Linux SNMP server to demonstrate the procedure.
 
 ==== What is the fuzzing session workflow?
 
@@ -21,7 +27,7 @@ The workflow that we want to follow in the test consists of the following steps:
 
 1. Power on the device
 2. Wait for the bootstrapping process to complete.
-3. Start the VM snapshot containing the test target.
+3. Start the virtual machine snapshot containing the test target.
 4. Fuzz the device and look for faults.
 5. When a fault occurs, do the following:
 a. Collect data.
@@ -30,45 +36,43 @@ b. Revert to a snapshot of the system.
 
 The host computer does the following:
 
-- Hosts a VM.
-- Provides a virtual network to communicate with the VM. 
+- Hosts a virtual machine.
+- Provides a virtual network to communicate with the virtual machine. 
 - Provides storage for logging.
 - Runs Peach. +
-Peach uses a local, in process agent to manage and communicate with the VM and system services. 
+Peach uses a local agent to manage and communicate with the virtual machine and system services. 
 
-- The host OS needs to run Peach, and support the VM.
+The virtual machine computer does the following:
 
-The VM computer does the following:
-
-- Runs the SNMP server.
-- Runs a remote Peach agent that interacts with applications and services within the VM, 
+- Runs the network server.
+- Runs a remote Peach agent that interacts with applications and services within the virtual machine, 
 and communicates with Peach.
-- The VM OS is Linux and needs to support the SNMP server. 
 
 ==== Setting up Monitors Using the Peach Web UI
 
-This setup uses 2 agents. Each agent manages 2 monitors. The basic layout showing the 
+This setup uses two agents. Each agent manages two monitors. The basic layout showing the 
 monitors follows:
 
 image::{images}/LinuxNetworkService.png["Configuration for Linux Service with VM", scalewidth="70%"]
 
 Monitors in the local agent include the following:
 
-- VMware montor to restart a clean environment after a fault.
-- Pcap (Libpcap) to handle virtual network connection, so data doesn’t go out on the net.
+- VMware montor restarts a clean environment after a fault.
+- NetworkCapture (InterestingPackets) captures the test network traffic, and logs 
+the appropriate packets when a fault occurs.
 
-Monitors in the remote agent (within the VM) include the following:. 
+Monitors in the remote agent (within the virtual machine) include the following:. 
 
-- Gdb (Linux debugger), for detecting faults, collecting data, and automating running of 
-the SNMP Server. 
-- SaveFile, for porting files to peach for logging.
+- Gdb (Linux debugger) detects faults, collects data, and automates running of 
+the network Service. On Windows environments, use the WindowsDebugger monitor instead.  
+- SaveFile saves log files in the event of a crash.
 
 ===== Starting Peach 
 
 1. Launch Peach from the command line (type `peach` and press the Return key) to start the UI.
 2. Select a pit (test definition) of a protocol supported by the network device, so 
 that Peach can communicate with device protocol during fuzzing.
-* Choose the SNMP Server.
+* Choose the network service.
 * Give the pit a name and a description. Peach makes a configuration file of the 
 selections you make, so that you can re-use the setup again.
 3. From the configuration menu along the left edge of the window, select Monitoring.
@@ -78,7 +82,7 @@ location `local` is appropriate. Then, click the`Save` button.
 image::{images}/Local_Agent.png["Local Agent for Network Device", scalewidth="60%"]
 
 NOTE: The order of the agents in the list is significant. In this case, the local 
-agent comes first because the VM automation occurs first from a workflow perspective. 
+agent comes first because the virtual machine automation occurs first from a workflow perspective. 
 
 ===== Populating the Local Agent with Monitor Details
 
@@ -95,34 +99,36 @@ the monitors in the order listed (from top to bottom).
 For this recipe, use the monitors in the order they are presented:
 
 * Local Agent
-** WMware (BootAndRebootDevice)
-** NetworkCapture (Pcap)
+** VMware (BootAndRebootDevice)
+** NetworkCapture (InterestingPackets)
 
-===== Vmware (Linux VM Automation)
+===== Vmware (Linux virtual machine Automation)
 
 The xref:Monitors_Vmware[Vmware Monitor] automates the VMware virtual machine used in 
-this recipe. This monitor works with a snapshot of the VM that provides a consistent 
-VM environment throughout a fuzzing session. The _Vmware_ monitor primarily manages 
-the VM environment; yet, the monitor includes in its log the non-OK result codes and 
-exceptions reported from the VM environment.
+this recipe. This monitor works with a snapshot of the virtual machine that provides a consistent 
+virtual machine environment throughout a fuzzing session. 
+
+
+The xref:Monitors_Vmware[Vmware Monitor] automates the VMware virtual machine used in 
+this recipe. This monitor works with a snapshot of the virtual machine that provides 
+a consistent environment for the network service throughout a fuzzing session. 
 
 image::{images}/Vmware_Monitor2.png["VMWare Monitor", scalewidth="70%"]
 
-The *Vmx* parameter identifies the virtual machine image that runs the SNMP server. 
-Provide the path on the host system that locates the VM image.
+The *Vmx* parameter identifies the Linux virtual machine image. 
+Provide the path on the host system that locates the virtual machine image.
 
-The *Host Type* identifies the VM hosting application. In this case, the VMWare Workstation 
-hosts the VM.
+The *Host Type* identifies the virtual machine hosting application. In this case, the VMWare Workstation 
+hosts the virtual machine.
 
-The *Snapshot Name* identifies a specific snapshot of the VM. VMware allows multiple 
-snapshots of a specific VM. 
+The *Snapshot Name* identifies a specific snapshot of the virtual machine. VMware allows multiple 
+snapshots of a specific virtual machine. 
 
 
-===== Network Capture (Pcap)
+===== Network Capture (InterestingPackets)
 
-The xref:Monitors_Pcap[Netowrk Capture Monitor (Pcap)] captures network packets sent 
-and received from the test target. Pcap is on the local agent, so the data doesn’t 
-go out over the network.
+The xref:Monitors_Pcap[Netowrk Capture Monitor (InterestingPackets)] captures network packets sent 
+and received from the test target.
 
 image::{images}/NetworkCapture_VMWare2.png["Network Capture VMWare", scalewidth="70%"]
 
@@ -145,7 +151,7 @@ the remaining monitors.
 
 1. If you haven't already done so, save the Monitor configuration defined so far.
 2. Add a new agent, and give the agent a name, such as `Remote`. 
-3. Since this agent will reside in the VM, the location providing the tcp port address 
+3. Since this agent will reside in the virtual machine, the location providing the tcp port address 
 is appropriate. Then, click the`Save` button.
 
 image::{images}/Remote_Agent_VMSetup.png["Remote Agent for Network Device", scalewidth="60%"]
@@ -163,10 +169,10 @@ that follows.
 
 =====  Gdb (Debugger)
 
-The xref:Monitors_Gdb[Gdb Debugger Monitor] uses GDB to launch the SNMP Server executable 
-and monitors the for exceptions. When a fault or exception occurs, _Gdb_ collects and 
-logs the appropriate information, including messages from stdout and stderr, stack 
-traces, and the gdb log.
+The xref:Monitors_Gdb[Gdb Debugger Monitor] uses GDB to launch the network service 
+and monitors the service for exceptions. When a fault or exception occurs, _Gdb_ 
+collects and logs the appropriate information, including messages from stdout and stderr, 
+stack traces, and the gdb log.
 
 image::{images}/Gdb_Monitor_VM2.png["Gdb Monitor", scalewidth="70%"]
 
@@ -174,7 +180,7 @@ The *Executable* parameter identifies the application to run, concatentated with
 path to the executable file, such as `usr/sbin/sndpd`.  
 
 The *Arguments* parameter identifies the rest of the command line used in launching 
-the application. In this case, nothing additional is needed.
+the application.
 
 ===== Savefile (CollectLogs) 
 
@@ -186,15 +192,15 @@ image::{images}/SaveFileMonitor2.png["SaveFile Monitor", scalewidth="70%"]
 The *Filename* parameter identifies file to save on fault. The value includes the 
 path information. 
 
-TIP: Since this monitor is running on the VM, the *Filename* lists the file name 
+TIP: Since this monitor is running on the virtual machine, the *Filename* lists the file name 
 on the test target, not the host.
 
 ===== Summary
 
-This test configuration provides a setup for testing a network server in a VM. 
-Peach needs 2 agents in this setup. A local agent runs in process in Peach and 
-communicates with the host system and the VM sysemt. The remote agent runs on linux 
-and uses Gdb as the main monitor for detecting faults, collecting data, and 
+This test configuration provides a setup for testing a network server in a virtual machine. 
+Peach needs two agents in this setup. A local agent runs in Peach and 
+communicates with the host system and the virtual machine system. The remote agent runs 
+on linux and uses Gdb as the main monitor for detecting faults, collecting data, and 
 automating the workflow. The remote agent uses a second monitor, SaveFile, to 
 retrieve files from Gdb and place them in the Peach logging directories. 
 

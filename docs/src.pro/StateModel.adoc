@@ -169,7 +169,7 @@ The sample executable _CrashableServer.exe_ is included with the Peach distribut
 			<Param name="Executable" value="CrashableServer.exe"/>
 			<!--<Param name="WinDbgPath" value="C:\Program Files (x86)\Debugging Tools for Windows (x86)" />-->
 		</Monitor>
-		<Monitor class="Pcap">
+		<Monitor class="NetworkCapture">
 			<Param name="Device" value="Local Area Connection"/>
 		</Monitor>
 	</Agent>

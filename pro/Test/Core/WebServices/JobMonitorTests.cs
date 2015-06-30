@@ -270,7 +270,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			var jobRequest = new JobRequest
 			{
-				IsControlIteration = true,
+				DryRun = true,
 			};
 
 			var job = _monitor.Start(_tmp.Path, _tmp.Path, jobRequest);
@@ -311,7 +311,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 				var jobRequest = new JobRequest
 				{
-					IsControlIteration = true,
+					DryRun = true,
 				};
 
 				var job = _monitor.Start(xmlFile.Path, xmlFile.Path, jobRequest);

@@ -1,11 +1,12 @@
 :images: ../images
 <<<
 [[Monitors_Pcap]]
-== Pcap Monitor
+//Name change: New name is NetworkCapture 6/26/2015
+== NetworkCapture Monitor
 
 *Monitor Categories*: *Data collection*, *Fault detection*
 
-The _Pcap_ monitor performs network captures during the fuzzing iteration. When a packet 
+The _NetworkCapture_ monitor performs network captures during the fuzzing iteration. When a packet 
 arrives, this monitor writes the content into a file, increments the received packet count, 
 and waits for the next packet to arrive. If a filter is used, the captured packets 
 and associated packet count are for packets that pass the filtering criteria.
@@ -16,7 +17,7 @@ Wireshark and tcpdump. A sample capture follows:
 
 image::{images}/PacketCapture.PNG["Sample Network Traffic with Packet Captures", scalewidth="75%"]
 
-Peach supports multiple _Pcap_ monitors in the same pit, as well as simple and 
+Peach supports multiple _NetworkCapture_ monitors in the same pit, as well as simple and 
 compound packet filters in a single monitor. A compound packet filter consists of more than 
 one packet filter joined by AND or OR. 
 
@@ -130,9 +131,12 @@ Ethernet adapter VMware Network Adapter VMnet8:
 .Capture output to CrashableServer on port 4244
 ====================
 
-This parameter example is from a setup that captures all network traffic using the pcap monitor when a fault occurs. When running the fuzzing definition for this example, a crash occurs after few iterations. When Peach logs the fault, a pcap file is created inside the fault record.
+This parameter example is from a setup that captures all network traffic using 
+the NetworkCapture monitor when a fault occurs. When running the fuzzing definition 
+for this example, a crash occurs after few iterations. When Peach logs the fault, 
+a pcap file is created inside the fault record.
 
-*Pcap monitor settings*
+*NetworkCapture monitor settings*
 [cols="2,4" options="header",halign="center"] 
 |==========================================================
 |Parameter    |Value
@@ -161,7 +165,8 @@ ifndef::peachug[]
 
 .Capture output to CrashableServer on port 4244
 ==================
-This example runs CrashableServer.exe and capture all network traffic using the pcap monitor when a fault occurs. 
+This example runs CrashableServer.exe and capture all network traffic using the 
+NetworkCapture monitor when a fault occurs. 
 
 To run this example, point to the CrashableServer location (normally the Peach directory).
 
@@ -184,7 +189,7 @@ To run this example, point to the CrashableServer location (normally the Peach d
   </StateModel>
 
   <Agent name="Local">
-    <Monitor class="Pcap">
+    <Monitor class="NetworkCapture">
       <Param name="Device" value="Local Area Connection" />
       <Param name="Filter" value="port 4244" />
     </Monitor>
@@ -221,7 +226,7 @@ Output from this example.
 [[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 10470.
-Peach.Core.Agent.Agent StartMonitor: Monitor Pcap
+Peach.Core.Agent.Agent StartMonitor: Monitor NetworkCapture
 Peach.Core.Agent.Agent StartMonitor: Monitor_1 WindowsDebugger
 Peach.Core.Agent.Agent SessionStarting: Monitor
 Peach.Core.Agent.Agent SessionStarting: Monitor_1
