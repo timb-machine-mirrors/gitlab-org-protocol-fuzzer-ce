@@ -34,18 +34,52 @@ namespace PitTester
 			if (!File.Exists(testFile))
 				throw new FileNotFoundException();
 
-			//var pitName = GetRelativePath(libraryPath, pitFile);
-
-			//var fileName = Path.Combine(pitLibrary, pitName);
-
-			//var defines = PitDefines.Parse(fileName + ".config");
 			var testData = TestData.Parse(testFile);
 
 			var defs = new List<KeyValuePair<string, string>>();
-			foreach (var item in testData.Defines)
-				if (item.Key != "PitLibraryPath")
+			var configFile = pitFile + ".config";
+			if (File.Exists(configFile))
+			{
+				var baseDefs = Peach.Core.Analyzers.PitParser.parseDefines(configFile);
+				baseDefs.Insert(0, new KeyValuePair<string, string>("PitLibraryPath", libraryPath));
+
+				var testDefs = testData.Defines.ToDictionary(x => x.Key, x => x.Value);
+
+				foreach (var item in baseDefs)
+				{
+					string value;
+					if (testDefs.TryGetValue(item.Key, out value))
+					{
+						if (value == item.Value)
+						{
+							Console.WriteLine("Warning, .test and .config value are identical for PitDefine named: \"{0}\"", 
+								item.Key
+							);
+						}
+						defs.Add(new KeyValuePair<string, string>(item.Key, value));
+						testDefs.Remove(item.Key);
+					}
+					else
+						defs.Add(item);
+				}
+
+				if (testDefs.Count > 0)
+				{
+					throw new PeachException("Error, PitDefine(s) in .test not found in .config: {0}".Fmt(
+						string.Join(", ", testDefs.Keys))
+					);
+				}
+			}
+			else
+			{
+				defs.Add(new KeyValuePair<string, string>("PitLibraryPath", libraryPath));
+				foreach (var item in testData.Defines)
+				{
 					defs.Add(new KeyValuePair<string, string>(item.Key, item.Value));
-			defs.Add(new KeyValuePair<string, string>("PitLibraryPath", libraryPath));
+				}
+			}
+
+			defs = PitDefines.Evaluate(defs);
 
 			var args = new Dictionary<string, object>();
 			args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
@@ -437,10 +471,10 @@ namespace PitTester
 
 				var it = nav.Select("/p:Peach/p:Test", nsMgr);
 
-				var expexted = isTest ? 1 : 0;
+				var expected = isTest ? 1 : 0;
 
-				if (it.Count != expexted)
-					errors.AppendLine("Number of <Test> elements is " + it.Count + " but should be " + expexted + ".");
+				if (it.Count != expected)
+					errors.AppendLine("Number of <Test> elements is " + it.Count + " but should be " + expected + ".");
 
 				while (it.MoveNext())
 				{
