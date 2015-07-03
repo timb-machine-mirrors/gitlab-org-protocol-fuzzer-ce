@@ -54,7 +54,7 @@ namespace PitTester
 		[Test]
 		public void Verify([ValueSource("AllPits")]TestCase test)
 		{
-			var errors = new StringBuilder();
+			var errors = new List<Exception>();
 
 			for (int i = 0; i < test.Pit.Versions[0].Files.Count; ++i)
 			{
@@ -66,14 +66,13 @@ namespace PitTester
 				}
 				catch (Exception ex)
 				{
-					errors.AppendFormat("{0}", fileName);
-					errors.AppendLine();
-					errors.AppendLine(ex.Message);
+					errors.Add(ex);
+					Console.WriteLine("{0}", fileName);
+					Console.WriteLine(ex.ToString());
 				}
 			}
 
-			if (errors.Length > 0)
-				Assert.Fail(errors.ToString());
+			CollectionAssert.IsEmpty(errors);
 		}
 
 		[Test]
