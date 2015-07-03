@@ -374,7 +374,6 @@ namespace PitTester
 			var noName = string.Join(", ", defs.Where(d => string.IsNullOrEmpty(d.Name)).Select(d => d.Key));
 			var noDesc = string.Join(", ", defs.Where(d => string.IsNullOrEmpty(d.Description)).Select(d => d.Key));
 
-
 			if (noName.Length > 0)
 				sb.AppendFormat("The following keys have an empty name: {0}", noName);
 			if (sb.Length > 0)
@@ -514,7 +513,7 @@ namespace PitTester
 						var parameters = loggers.Current.Select("p:Param", nsMgr);
 
 						if (parameters.Count != 1)
-							errors.AppendLine("Nmber of logger <Param> elements is " + parameters.Count + "but should be 1.");
+							errors.AppendLine("Number of logger <Param> elements is " + parameters.Count + "but should be 1.");
 
 						while (parameters.MoveNext())
 						{
@@ -525,6 +524,25 @@ namespace PitTester
 							var path = parameters.Current.GetAttribute("value", string.Empty);
 							if (path != "##LoggerPath##")
 								errors.AppendLine("Path parameter on <Logger> element is '" + path + "' but should be '##LoggerPath##'.");
+						}
+					}
+
+					var pubs = it.Current.Select("p:Publisher", nsMgr);
+					while (pubs.MoveNext())
+					{
+						var parameters = pubs.Current.Select("p:Param", nsMgr);
+						while (parameters.MoveNext())
+						{
+							var name = parameters.Current.GetAttribute("name", string.Empty);
+							var value = parameters.Current.GetAttribute("value", string.Empty);
+							if (!ShouldSkipRule(parameters, "Allow_HardCodedParamValue") && 
+								(!value.StartsWith("##") || !value.EndsWith("##")))
+							{
+								errors.AppendLine(
+									"<Publisher> parameter '{0}' is hard-coded, use a PitDefine ".Fmt(name) +
+									"(suppress with 'Allow_HardCodedParamValue')"
+								);
+							}
 						}
 					}
 				}
@@ -546,7 +564,7 @@ namespace PitTester
 							gotStart = true;
 						else if (meth == "ExitIterationEvent")
 							gotEnd = true;
-						else if (!gotStart && !ShouldSkipStart(actions))
+						else if (!gotStart && !ShouldSkipRule(actions, "Skip_StartIterationEvent"))
 							errors.AppendLine(string.Format("StateModel '{0}' has an unexpected call action.  Method is '{1}' and should be 'StartIterationEvent' or 'ExitIterationEvent'.", smName, meth));
 					}
 
@@ -567,7 +585,6 @@ namespace PitTester
 					defs.Insert(0, new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
 					defs = PitDefines.Evaluate(defs);
 					args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
-
 					new Godel.Core.GodelPitParser().asParser(args, fileName);
 				}
 			}
@@ -580,10 +597,10 @@ namespace PitTester
 				throw new ApplicationException(errors.ToString());
 		}
 
-		private static bool ShouldSkipStart(XPathNodeIterator actions)
+		private static bool ShouldSkipRule(XPathNodeIterator it, string rule)
 		{
-			var preceding = actions.Current.SelectSingleNode("preceding-sibling::comment()");
-			return (preceding != null && preceding.Value.Contains("PitTester: Skip_StartIterationEvent"));
+			var preceding = it.Current.SelectSingleNode("preceding-sibling::comment()");
+			return (preceding != null && preceding.Value.Contains("PitTester: {0}".Fmt(rule)));
 		}
 	}
 }
