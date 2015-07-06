@@ -535,6 +535,9 @@ namespace PitTester
 					var pubs = it.Current.Select("p:Publisher", nsMgr);
 					while (pubs.MoveNext())
 					{
+						var cls = pubs.Current.GetAttribute("class", string.Empty);
+						var parms = new List<string>();
+
 						var parameters = pubs.Current.Select("p:Param", nsMgr);
 						while (parameters.MoveNext())
 						{
@@ -547,6 +550,26 @@ namespace PitTester
 									"<Publisher> parameter '{0}' is hard-coded, use a PitDefine ".Fmt(name) +
 									"(suppress with 'Allow_HardCodedParamValue')"
 								);
+							}
+
+							parms.Add(name);
+						}
+
+						var pub = ClassLoader.FindPluginByName<PublisherAttribute>(cls);
+						if (pub == null)
+						{
+							errors.AppendLine("<Publisher> class '{0}' is not recognized.".Fmt(cls));
+						}
+						else
+						{
+							var pri = pub.GetAttributes<PublisherAttribute>().First();
+							if (pri.Name != cls)
+								errors.AppendLine("'{0}' <Publisher> is referenced with deprecated name '{1}'.".Fmt(pri.Name, cls));
+
+							foreach (var attr in pub.GetAttributes<ParameterAttribute>())
+							{
+								if (attr.name.Contains("Timeout") && !parms.Contains(attr.name))
+									errors.AppendLine("{0} publisher missing configuration for parameter '{1}'.".Fmt(pri.Name, attr.name));
 							}
 						}
 					}
