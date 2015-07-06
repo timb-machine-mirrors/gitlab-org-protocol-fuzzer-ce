@@ -21,7 +21,6 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("MinFrameSize", typeof(uint), "Short frames are padded to this minimum length", DefaultMinFrameSize)]
 	[Parameter("MaxFrameSize", typeof(uint), "Long frames are truncated to this maximum length", DefaultMaxFrameSize)]
 	[Parameter("Filter", typeof(string), "Input filter in libpcap format", "")]
-	[Parameter("RecvSentPackets", typeof(bool), "Should sent packets appear as incoming", "false")]
 	[ObsoleteParameter("Protocol", "The RawEther publisher parameter 'Protocol' is no longer used.")]
 	public class RawEtherPublisher : EthernetPublisher
 	{
@@ -37,7 +36,6 @@ namespace Peach.Pro.Core.Publishers
 		public string Filter { get; set; }
 		public uint MinFrameSize { get; set; }
 		public uint MaxFrameSize { get; set; }
-		public bool RecvSentPackets { get; set; }
 
 		protected override string DeviceName
 		{
@@ -53,7 +51,8 @@ namespace Peach.Pro.Core.Publishers
 
 		readonly Queue<byte[]> _queue = new Queue<byte[]>();
 
-		LibPcapLiveDevice _device;
+		LibPcapLiveDevice _deviceRx;
+		LibPcapLiveDevice _deviceTx;
 		string _deviceName;
 
 		public RawEtherPublisher(Dictionary<string, Variant> args)
@@ -108,9 +107,9 @@ namespace Peach.Pro.Core.Publishers
 			if (devs.Count == 0)
 				throw new PeachException("No pcap devices found. Ensure appropriate permissions for using libpcap.");
 
-			_device = devs.FirstOrDefault(d => d.Interface.FriendlyName == Interface);
+			_deviceRx = devs.FirstOrDefault(d => d.Interface.FriendlyName == Interface);
 
-			if (_device == null)
+			if (_deviceRx == null)
 			{
 				var avail = string.Join("', '", devs.Select(d => d.Interface.FriendlyName));
 				throw new PeachException("Unable to locate pcap device named '{0}'. The following pcap devices were found: '{1}'.".Fmt(Interface, avail));
@@ -120,15 +119,25 @@ namespace Peach.Pro.Core.Publishers
 			if (!PcapDevice.CheckFilter(Filter, out error))
 				throw new PeachException("The specified pcap filter string '{0}' is invalid.".Fmt(Filter));
 
-			_device.Open(DeviceMode.Promiscuous, PcapTimeout);
-			_device.Filter = Filter;
-			_device.OnPacketArrival += OnPacketArrival;
-			_deviceName = _device.Interface.FriendlyName;
+			_deviceRx.Open(DeviceMode.Promiscuous, PcapTimeout);
+			_deviceRx.Filter = Filter;
+			_deviceRx.OnPacketArrival += OnPacketArrival;
+			_deviceName = _deviceRx.Interface.FriendlyName;
+
+			// Open a 2nd pcap device to the same interface for transmitting
+			// so that we are guranteed to receive our own transmissions
+			// With winpcap, the sending device will receive, but with libpcap
+			// you need once device for sending and one for receiving
+			// The user should use a pcap filter to control what packets are received
+
+			_deviceTx = Devices().First(d => d.Interface.FriendlyName == Interface);
+			_deviceTx.Open();
 
 			Logger.Debug("Starting Capture on {0} (filter: {1}, timeout: {2}", _deviceName, Filter, PcapTimeout);
 
-			_device.StartCapture();
+			_deviceRx.StartCapture();
 
+			// Sleep to ensure the capture thread is started
 			Thread.Sleep(PcapTimeout);
 
 			base.OnStart();
@@ -138,10 +147,20 @@ namespace Peach.Pro.Core.Publishers
 		{
 			base.OnStop();
 
-			_device.StopCapture();
-			_device.OnPacketArrival -= OnPacketArrival;
-			_device.Close();
-			_device = null;
+			if (_deviceRx != null)
+			{
+				_deviceRx.StopCapture();
+				_deviceRx.OnPacketArrival -= OnPacketArrival;
+				_deviceRx.Close();
+				_deviceRx = null;
+			}
+
+			if (_deviceTx != null)
+			{
+				_deviceTx.Close();
+				_deviceTx = null;
+			}
+
 			_deviceName = null;
 		}
 
@@ -200,10 +219,7 @@ namespace Peach.Pro.Core.Publishers
 
 			try
 			{
-				_device.SendPacket(buf);
-
-				if (RecvSentPackets)
-					OnPacketArrival(buf);
+				_deviceTx.SendPacket(buf);
 			}
 			catch (Exception ex)
 			{
