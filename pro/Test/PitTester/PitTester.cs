@@ -284,7 +284,12 @@ namespace PitTester
 										if (!verifyBytes)
 											continue;
 
-										var value = actionData.dataModel.Value;
+										var bs = actionData.dataModel.Value;
+										var value = new MemoryStream();
+										bs.Seek(0, SeekOrigin.Begin);
+										bs.CopyTo(value);
+										value.Seek(0, SeekOrigin.Begin);
+
 										var dataFileBytes = File.ReadAllBytes(((DataFile)data).FileName);
 
 										// Verify all bytes match
