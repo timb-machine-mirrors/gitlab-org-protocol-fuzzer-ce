@@ -34,18 +34,52 @@ namespace PitTester
 			if (!File.Exists(testFile))
 				throw new FileNotFoundException();
 
-			//var pitName = GetRelativePath(libraryPath, pitFile);
-
-			//var fileName = Path.Combine(pitLibrary, pitName);
-
-			//var defines = PitDefines.Parse(fileName + ".config");
 			var testData = TestData.Parse(testFile);
 
 			var defs = new List<KeyValuePair<string, string>>();
-			foreach (var item in testData.Defines)
-				if (item.Key != "PitLibraryPath")
+			var configFile = pitFile + ".config";
+			if (File.Exists(configFile))
+			{
+				var baseDefs = Peach.Core.Analyzers.PitParser.parseDefines(configFile);
+				baseDefs.Insert(0, new KeyValuePair<string, string>("PitLibraryPath", libraryPath));
+
+				var testDefs = testData.Defines.ToDictionary(x => x.Key, x => x.Value);
+
+				foreach (var item in baseDefs)
+				{
+					string value;
+					if (testDefs.TryGetValue(item.Key, out value))
+					{
+						if (value == item.Value)
+						{
+							Console.WriteLine("Warning, .test and .config value are identical for PitDefine named: \"{0}\"", 
+								item.Key
+							);
+						}
+						defs.Add(new KeyValuePair<string, string>(item.Key, value));
+						testDefs.Remove(item.Key);
+					}
+					else
+						defs.Add(item);
+				}
+
+				if (testDefs.Count > 0)
+				{
+					throw new PeachException("Error, PitDefine(s) in .test not found in .config: {0}".Fmt(
+						string.Join(", ", testDefs.Keys))
+					);
+				}
+			}
+			else
+			{
+				defs.Add(new KeyValuePair<string, string>("PitLibraryPath", libraryPath));
+				foreach (var item in testData.Defines)
+				{
 					defs.Add(new KeyValuePair<string, string>(item.Key, item.Value));
-			defs.Add(new KeyValuePair<string, string>("PitLibraryPath", libraryPath));
+				}
+			}
+
+			defs = PitDefines.Evaluate(defs);
 
 			var args = new Dictionary<string, object>();
 			args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
@@ -345,7 +379,6 @@ namespace PitTester
 			var noName = string.Join(", ", defs.Where(d => string.IsNullOrEmpty(d.Name)).Select(d => d.Key));
 			var noDesc = string.Join(", ", defs.Where(d => string.IsNullOrEmpty(d.Description)).Select(d => d.Key));
 
-
 			if (noName.Length > 0)
 				sb.AppendFormat("The following keys have an empty name: {0}", noName);
 			if (sb.Length > 0)
@@ -442,10 +475,10 @@ namespace PitTester
 
 				var it = nav.Select("/p:Peach/p:Test", nsMgr);
 
-				var expexted = isTest ? 1 : 0;
+				var expected = isTest ? 1 : 0;
 
-				if (it.Count != expexted)
-					errors.AppendLine("Number of <Test> elements is " + it.Count + " but should be " + expexted + ".");
+				if (it.Count != expected)
+					errors.AppendLine("Number of <Test> elements is " + it.Count + " but should be " + expected + ".");
 
 				while (it.MoveNext())
 				{
@@ -485,7 +518,7 @@ namespace PitTester
 						var parameters = loggers.Current.Select("p:Param", nsMgr);
 
 						if (parameters.Count != 1)
-							errors.AppendLine("Nmber of logger <Param> elements is " + parameters.Count + "but should be 1.");
+							errors.AppendLine("Number of logger <Param> elements is " + parameters.Count + "but should be 1.");
 
 						while (parameters.MoveNext())
 						{
@@ -496,6 +529,25 @@ namespace PitTester
 							var path = parameters.Current.GetAttribute("value", string.Empty);
 							if (path != "##LoggerPath##")
 								errors.AppendLine("Path parameter on <Logger> element is '" + path + "' but should be '##LoggerPath##'.");
+						}
+					}
+
+					var pubs = it.Current.Select("p:Publisher", nsMgr);
+					while (pubs.MoveNext())
+					{
+						var parameters = pubs.Current.Select("p:Param", nsMgr);
+						while (parameters.MoveNext())
+						{
+							var name = parameters.Current.GetAttribute("name", string.Empty);
+							var value = parameters.Current.GetAttribute("value", string.Empty);
+							if (!ShouldSkipRule(parameters, "Allow_HardCodedParamValue") && 
+								(!value.StartsWith("##") || !value.EndsWith("##")))
+							{
+								errors.AppendLine(
+									"<Publisher> parameter '{0}' is hard-coded, use a PitDefine ".Fmt(name) +
+									"(suppress with 'Allow_HardCodedParamValue')"
+								);
+							}
 						}
 					}
 				}
@@ -517,7 +569,7 @@ namespace PitTester
 							gotStart = true;
 						else if (meth == "ExitIterationEvent")
 							gotEnd = true;
-						else if (!gotStart && !ShouldSkipStart(actions))
+						else if (!gotStart && !ShouldSkipRule(actions, "Skip_StartIterationEvent"))
 							errors.AppendLine(string.Format("StateModel '{0}' has an unexpected call action.  Method is '{1}' and should be 'StartIterationEvent' or 'ExitIterationEvent'.", smName, meth));
 					}
 
@@ -538,7 +590,6 @@ namespace PitTester
 					defs.Insert(0, new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
 					defs = PitDefines.Evaluate(defs);
 					args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
-
 					new Godel.Core.GodelPitParser().asParser(args, fileName);
 				}
 			}
@@ -551,10 +602,10 @@ namespace PitTester
 				throw new ApplicationException(errors.ToString());
 		}
 
-		private static bool ShouldSkipStart(XPathNodeIterator actions)
+		private static bool ShouldSkipRule(XPathNodeIterator it, string rule)
 		{
-			var preceding = actions.Current.SelectSingleNode("preceding-sibling::comment()");
-			return (preceding != null && preceding.Value.Contains("PitTester: Skip_StartIterationEvent"));
+			var preceding = it.Current.SelectSingleNode("preceding-sibling::comment()");
+			return (preceding != null && preceding.Value.Contains("PitTester: {0}".Fmt(rule)));
 		}
 	}
 }
