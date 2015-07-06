@@ -15,12 +15,13 @@ namespace Peach.Pro.Core.Publishers
 	[Alias("raw.RawEther")]
 	[Parameter("Interface", typeof(string), "Name of interface to bind to")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default 3000)", "3000")]
-	[Parameter("PcapTimeout", typeof(int), "Pcap internal read timeout (default 10)", "10")]
+	[Parameter("PcapTimeout", typeof(int), "Pcap internal read timeout (default 100)", "100")]
 	[Parameter("MinMTU", typeof(uint), "Minimum allowable MTU property value", DefaultMinMtu)]
 	[Parameter("MaxMTU", typeof(uint), "Maximum allowable MTU property value", DefaultMaxMtu)]
 	[Parameter("MinFrameSize", typeof(uint), "Short frames are padded to this minimum length", DefaultMinFrameSize)]
 	[Parameter("MaxFrameSize", typeof(uint), "Long frames are truncated to this maximum length", DefaultMaxFrameSize)]
 	[Parameter("Filter", typeof(string), "Input filter in libpcap format", "")]
+	[Parameter("RecvSentPackets", typeof(bool), "Should sent packets appear as incoming", "false")]
 	[ObsoleteParameter("Protocol", "The RawEther publisher parameter 'Protocol' is no longer used.")]
 	public class RawEtherPublisher : EthernetPublisher
 	{
@@ -28,7 +29,7 @@ namespace Peach.Pro.Core.Publishers
 		// possibly only needed for VMWare network adapters
 		// https://www.winpcap.org/pipermail/winpcap-users/2012-November/004672.html
 		// Newer linux kernels (Ubuntu 15.04) will also error if sending packets less than 15 bytes
-		const string DefaultMinFrameSize = "15";
+		const string DefaultMinFrameSize = "64"; // Raw sockets pad to 64 by default
 		const string DefaultMaxFrameSize = "65535"; // SharpPcap throws if > 65535
 
 		public string Interface { get; set; }
@@ -36,6 +37,7 @@ namespace Peach.Pro.Core.Publishers
 		public string Filter { get; set; }
 		public uint MinFrameSize { get; set; }
 		public uint MaxFrameSize { get; set; }
+		public bool RecvSentPackets { get; set; }
 
 		protected override string DeviceName
 		{
@@ -49,7 +51,7 @@ namespace Peach.Pro.Core.Publishers
 
 		protected override NLog.Logger Logger { get { return ClassLogger; } }
 
-		readonly Queue<RawCapture> _queue = new Queue<RawCapture>();
+		readonly Queue<byte[]> _queue = new Queue<byte[]>();
 
 		LibPcapLiveDevice _device;
 		string _deviceName;
@@ -75,9 +77,15 @@ namespace Peach.Pro.Core.Publishers
 
 		private void OnPacketArrival(object sender, CaptureEventArgs e)
 		{
+			OnPacketArrival(e.Packet.Data);
+		}
+
+		private void OnPacketArrival(byte[] buf)
+		{
 			lock (_queue)
 			{
-				_queue.Enqueue(e.Packet);
+				Logger.Debug("OnPacketArrival> {0}", _deviceName);
+				_queue.Enqueue(buf);
 				Monitor.Pulse(_queue);
 			}
 		}
@@ -89,7 +97,7 @@ namespace Peach.Pro.Core.Publishers
 				if (_queue.Count == 0 && !Monitor.Wait(_queue, Timeout))
 					return null;
 
-				return _queue.Dequeue().Data;
+				return _queue.Dequeue();
 			}
 		}
 
@@ -115,11 +123,13 @@ namespace Peach.Pro.Core.Publishers
 			_device.Open(DeviceMode.Promiscuous, PcapTimeout);
 			_device.Filter = Filter;
 			_device.OnPacketArrival += OnPacketArrival;
+			_deviceName = _device.Interface.FriendlyName;
+
+			Logger.Debug("Starting Capture on {0} (filter: {1}, timeout: {2}", _deviceName, Filter, PcapTimeout);
+
 			_device.StartCapture();
 
 			Thread.Sleep(PcapTimeout);
-
-			_deviceName = _device.Interface.FriendlyName;
 
 			base.OnStart();
 		}
@@ -191,6 +201,9 @@ namespace Peach.Pro.Core.Publishers
 			try
 			{
 				_device.SendPacket(buf);
+
+				if (RecvSentPackets)
+					OnPacketArrival(buf);
 			}
 			catch (Exception ex)
 			{
