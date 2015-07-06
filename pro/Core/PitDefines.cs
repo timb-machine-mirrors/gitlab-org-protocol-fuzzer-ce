@@ -346,6 +346,9 @@ namespace Peach.Pro.Core
 			for (var i = 0; i < ret.Count; )
 			{
 				var oldVal = ret[i].Value;
+				if (oldVal == null)
+					throw new PeachException("Undefined PitDefine: \"{0}\"".Fmt(ret[i].Key));
+				
 				var newVal = re.Replace(oldVal, evaluator);
 
 				if (oldVal != newVal)

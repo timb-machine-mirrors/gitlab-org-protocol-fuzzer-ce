@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 
+import os
 import re
 import subprocess
 import argparse
 
 def tag(roots):
 	for root in roots:
+		repo = os.path.basename(root)
+		remote = 'git@github_%s:dejavu/%s.git' % (repo, repo)
 		subprocess.check_call([ 'git', 'tag', '-a', '-m', 'Tagging build', 'v%s' % buildtag ], cwd=root)
-		subprocess.check_call([ 'git', 'push', '--tags' ], cwd=root)
+		subprocess.check_call([ 'git', 'push', '--tags', remote ], cwd=root)
 
 if __name__ == "__main__":
 	p = argparse.ArgumentParser(description='teamcity init')
