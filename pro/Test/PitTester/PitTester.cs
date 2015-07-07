@@ -640,7 +640,18 @@ namespace PitTester
 		private static bool ShouldSkipRule(XPathNodeIterator it, string rule)
 		{
 			var preceding = it.Current.SelectSingleNode("preceding-sibling::comment()");
-			return (preceding != null && preceding.Value.Contains("PitTester: {0}".Fmt(rule)));
+			if (preceding == null)
+				return false;
+
+			var skip = false;
+
+			do
+			{
+				skip |= preceding.Value.Contains("PitLint: {0}".Fmt(rule));
+			}
+			while (!skip && preceding.MoveToNext());
+
+			return skip;
 		}
 	}
 }
