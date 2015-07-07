@@ -20,6 +20,16 @@ namespace PitTester
 {
 	public class PitTester
 	{
+		static readonly Dictionary<string, string[]> OptionalParams = new Dictionary<string,string[]>
+		{
+			{ "RawEther", new[] { "MinMTU", "MaxMTU", "MinFrameSize", "MaxFrameSize", "PcapTimeout" }},
+			{ "RawV4", new[] { "MinMTU", "MaxMTU" }},
+			{ "RawV6", new[] { "MinMTU", "MaxMTU" }},
+			{ "Udp", new[] { "MinMTU", "MaxMTU" }},
+			{ "File", new[] { "Append", "Overwrite" }},
+			{ "ConsoleHex", new[] { "BytesPerLine" }}
+		};
+
 		public static event Peach.Core.Engine.IterationStartingEventHandler IterationStarting;
 
 		public static void OnIterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
@@ -578,9 +588,13 @@ namespace PitTester
 							if (pri.Name != cls)
 								errors.AppendLine("'{0}' <Publisher> is referenced with deprecated name '{1}'.".Fmt(pri.Name, cls));
 
+							string[] optionalParams;
+							if (!OptionalParams.TryGetValue(pri.Name, out optionalParams))
+								optionalParams = new string[0];
+
 							foreach (var attr in pub.GetAttributes<ParameterAttribute>())
 							{
-								if (attr.name.Contains("Timeout") && !parms.Contains(attr.name))
+								if (!optionalParams.Contains(attr.name) && !parms.Contains(attr.name))
 									errors.AppendLine("{0} publisher missing configuration for parameter '{1}'.".Fmt(pri.Name, attr.name));
 							}
 						}
