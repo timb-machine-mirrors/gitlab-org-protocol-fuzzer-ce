@@ -27,7 +27,8 @@ namespace PitTester
 			{ "RawV6", new[] { "MinMTU", "MaxMTU" }},
 			{ "Udp", new[] { "MinMTU", "MaxMTU" }},
 			{ "File", new[] { "Append", "Overwrite" }},
-			{ "ConsoleHex", new[] { "BytesPerLine" }}
+			{ "ConsoleHex", new[] { "BytesPerLine" }},
+			{ "Null", new[] { "MaxOutputSize" }}
 		};
 
 		public static event Peach.Core.Engine.IterationStartingEventHandler IterationStarting;
