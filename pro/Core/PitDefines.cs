@@ -133,6 +133,22 @@ namespace Peach.Pro.Core
 			}
 		}
 
+		public class BoolDefine : Define
+		{
+			public override ParameterType ConfigType
+			{
+				get { return ParameterType.Bool; }
+			}
+
+			public override string[] Defaults
+			{
+				get
+				{
+					return new[] { "true", "false" };
+				}
+			}
+		}
+
 		public class StrategyDefine : Define
 		{
 			public override ParameterType ConfigType
@@ -222,6 +238,7 @@ namespace Peach.Pro.Core
 			[XmlElement("Strategy", Type = typeof(StrategyDefine))]
 			[XmlElement("Enum", Type = typeof(EnumDefine))]
 			[XmlElement("Define", Type = typeof(UserDefine))]
+			[XmlElement("Bool", Type = typeof(BoolDefine))]
 			public List<Define> Defines { get; set; }
 		}
 
