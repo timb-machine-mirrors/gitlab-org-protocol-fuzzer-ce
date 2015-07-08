@@ -38,7 +38,7 @@ namespace PitTester
 
 			try
 			{
-				PitTester.VerifyPitConfig(fileName);
+				PitTester.VerifyPitConfig(test.Pit.Versions[0]);
 			}
 			catch (Exception ex)
 			{
