@@ -15,6 +15,7 @@ using Peach.Pro.Core;
 using Peach.Pro.Core.Fixups;
 using Peach.Pro.Core.MutationStrategies;
 using Peach.Pro.Core.WebServices;
+using Peach.Pro.Core.WebServices.Models;
 
 namespace PitTester
 {
@@ -353,8 +354,9 @@ namespace PitTester
 				throw new PeachException(sb.ToString());
 		}
 
-		public static void VerifyPitConfig(string fileName)
+		public static void VerifyPitConfig(PitVersion version)
 		{
+			var fileName = version.Files[0].Name;
 			var defs = PitDefines.Parse(fileName + ".config");
 			var old = Peach.Core.Analyzers.PitParser.parseDefines(fileName + ".config");
 
@@ -396,6 +398,26 @@ namespace PitTester
 				sb.AppendLine();
 			if (noDesc.Length > 0)
 				sb.AppendFormat("The following keys have an empty description: {0}", noDesc);
+
+			foreach (var pitFile in version.Files)
+			{
+				var contents = File.ReadAllText(pitFile.Name);
+
+				for (var i = defs.Count - 1; i >= 0; i--)
+				{
+					var key = "##{0}##".Fmt(defs[i].Key);
+					if (contents.Contains(key))
+						defs.RemoveAt(i);
+				}
+
+				if (defs.Count == 0)
+					break;
+			}
+
+			var extraDefs = string.Join(", ", defs.Select(d => d.Key));
+			if (extraDefs.Length > 0)
+				sb.AppendFormat("The following keys are not used by the pit: {0}", extraDefs);
+
 			if (sb.Length > 0)
 				throw new ApplicationException(sb.ToString());
 		}
