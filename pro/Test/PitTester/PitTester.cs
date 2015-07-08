@@ -1,18 +1,20 @@
-﻿using System.Globalization;
-using Peach.Core;
-using Peach.Core.Dom;
-using Peach.Core.Dom.XPath;
-using Peach.Core.IO;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml;
+using System.Xml.Schema;
 using System.Xml.XPath;
+using Godel.Core;
+using Peach.Core;
+using Peach.Core.Analyzers;
+using Peach.Core.Dom;
+using Peach.Core.Dom.XPath;
+using Peach.Core.Fixups;
+using Peach.Core.IO;
 using Peach.Pro.Core;
-using Peach.Pro.Core.Fixups;
 using Peach.Pro.Core.MutationStrategies;
 using Peach.Pro.Core.WebServices;
 
@@ -31,7 +33,7 @@ namespace PitTester
 			{ "Null", new[] { "MaxOutputSize" }}
 		};
 
-		public static event Peach.Core.Engine.IterationStartingEventHandler IterationStarting;
+		public static event Engine.IterationStartingEventHandler IterationStarting;
 
 		public static void OnIterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
 		{
@@ -51,7 +53,7 @@ namespace PitTester
 			var configFile = pitFile + ".config";
 			if (File.Exists(configFile))
 			{
-				var baseDefs = Peach.Core.Analyzers.PitParser.parseDefines(configFile);
+				var baseDefs = PitParser.parseDefines(configFile);
 				baseDefs.Insert(0, new KeyValuePair<string, string>("PitLibraryPath", libraryPath));
 
 				var testDefs = testData.Defines.ToDictionary(x => x.Key, x => x.Value);
@@ -93,9 +95,9 @@ namespace PitTester
 			defs = PitDefines.Evaluate(defs);
 
 			var args = new Dictionary<string, object>();
-			args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
+			args[PitParser.DEFINED_VALUES] = defs;
 
-			var parser = new Peach.Core.Analyzers.PitParser();
+			var parser = new PitParser();
 
 			var dom = parser.asParser(args, pitFile);
 
@@ -142,7 +144,7 @@ namespace PitTester
 					n.SetAttribute("value", slurp.Value);
 
 					var blob = new Blob();
-					new Peach.Core.Analyzers.PitParser().handleCommonDataElementValue(n, blob);
+					new PitParser().handleCommonDataElementValue(n, blob);
 
 					do
 					{
@@ -152,7 +154,7 @@ namespace PitTester
 
 						setElement.DefaultValue = blob.DefaultValue;
 
-						if (setElement.fixup is Peach.Core.Fixups.VolatileFixup)
+						if (setElement.fixup is VolatileFixup)
 						{
 							var dm = setElement.root as DataModel;
 							if (dm != null && dm.actionData != null)
@@ -246,7 +248,7 @@ namespace PitTester
 
 		public static void VerifyDataSets(string pitLibraryPath, string fileName, bool verifyBytes = true)
 		{
-			var defs = Peach.Core.Analyzers.PitParser.parseDefines(fileName + ".config");
+			var defs = PitParser.parseDefines(fileName + ".config");
 			if (defs.Any(k => k.Key == "PitLibraryPath"))
 			{
 				defs.Remove(defs.First(k => k.Key == "PitLibraryPath"));
@@ -254,9 +256,9 @@ namespace PitTester
 			}
 
 			var args = new Dictionary<string, object>();
-			args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
+			args[PitParser.DEFINED_VALUES] = defs;
 
-			var parser = new Peach.Core.Analyzers.PitParser();
+			var parser = new PitParser();
 
 			var dom = parser.asParser(args, fileName);
 
@@ -356,7 +358,7 @@ namespace PitTester
 		public static void VerifyPitConfig(string fileName)
 		{
 			var defs = PitDefines.Parse(fileName + ".config");
-			var old = Peach.Core.Analyzers.PitParser.parseDefines(fileName + ".config");
+			var old = PitParser.parseDefines(fileName + ".config");
 
 			if (defs.Count != old.Count)
 				throw new ApplicationException(string.Format("PitParser didn't properly parse defines file.  Expected '{0}' defines, got '{1}' defines.", defs.Count, old.Count));
@@ -460,7 +462,7 @@ namespace PitTester
 
 						var schema = PeachElement.SchemaLocation;
 
-						if (!rdr.MoveToAttribute("schemaLocation", System.Xml.Schema.XmlSchema.InstanceNamespace))
+						if (!rdr.MoveToAttribute("schemaLocation", XmlSchema.InstanceNamespace))
 							errors.AppendLine("Pit is missing xsi:schemaLocation attribute.");
 						else if (schema != rdr.Value)
 							errors.AppendLine("Pit xsi:schemaLocation is '" + rdr.Value + "' but should be '" + schema + "'.");
@@ -636,11 +638,11 @@ namespace PitTester
 				if (isTest)
 				{
 					var args = new Dictionary<string, object>();
-					var defs = Peach.Core.Analyzers.PitParser.parseDefines(fileName + ".config");
+					var defs = PitParser.parseDefines(fileName + ".config");
 					defs.Insert(0, new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
 					defs = PitDefines.Evaluate(defs);
-					args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
-					new Godel.Core.GodelPitParser().asParser(args, fileName);
+					args[PitParser.DEFINED_VALUES] = defs;
+					new GodelPitParser().asParser(args, fileName);
 				}
 			}
 			catch (Exception ex)

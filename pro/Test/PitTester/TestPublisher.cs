@@ -2,17 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
+using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using Peach.Pro.Core.Publishers;
+using Peach.Core.Publishers;
+using Logger = NLog.Logger;
 
 namespace PitTester
 {
-	public class TestPublisher : Peach.Core.Publishers.StreamPublisher
+	public class TestPublisher : StreamPublisher
 	{
-		static readonly NLog.Logger ClassLogger = NLog.LogManager.GetCurrentClassLogger();
+		static readonly Logger ClassLogger = LogManager.GetCurrentClassLogger();
 
 		bool _datagram;
 		readonly TestLogger _logger;
@@ -24,7 +25,7 @@ namespace PitTester
 			stream = new MemoryStream();
 		}
 
-		protected override NLog.Logger Logger
+		protected override Logger Logger
 		{
 			get { return ClassLogger; }
 		}
