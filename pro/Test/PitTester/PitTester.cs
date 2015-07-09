@@ -18,12 +18,14 @@ using Peach.Pro.Core;
 using Peach.Pro.Core.MutationStrategies;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
+using Action = Peach.Core.Dom.Action;
+using Dom = Peach.Core.Dom.Dom;
 
 namespace PitTester
 {
 	public class PitTester
 	{
-		static readonly Dictionary<string, string[]> OptionalParams = new Dictionary<string,string[]>
+		static readonly Dictionary<string, string[]> OptionalParams = new Dictionary<string, string[]>
 		{
 			{ "RawEther", new[] { "MinMTU", "MaxMTU", "MinFrameSize", "MaxFrameSize", "PcapTimeout" }},
 			{ "RawV4", new[] { "MinMTU", "MaxMTU" }},
@@ -66,7 +68,7 @@ namespace PitTester
 					{
 						if (value == item.Value)
 						{
-							Console.WriteLine("Warning, .test and .config value are identical for PitDefine named: \"{0}\"", 
+							Console.WriteLine("Warning, .test and .config value are identical for PitDefine named: \"{0}\"",
 								item.Key
 							);
 						}
@@ -87,10 +89,7 @@ namespace PitTester
 			else
 			{
 				defs.Add(new KeyValuePair<string, string>("PitLibraryPath", libraryPath));
-				foreach (var item in testData.Defines)
-				{
-					defs.Add(new KeyValuePair<string, string>(item.Key, item.Value));
-				}
+				defs.AddRange(testData.Defines.Select(item => new KeyValuePair<string, string>(item.Key, item.Value)));
 			}
 
 			defs = PitDefines.Evaluate(defs);
@@ -130,50 +129,7 @@ namespace PitTester
 
 			if (testData.Slurps.Count > 0)
 			{
-				var doc = new XmlDocument();
-				var resolver = new PeachXmlNamespaceResolver();
-				var navi = new PeachXPathNavigator(dom);
-
-				foreach (var slurp in testData.Slurps)
-				{
-					var iter = navi.Select(slurp.SetXpath, resolver);
-					if (!iter.MoveNext())
-						throw new SoftException("Error, slurp valueXpath returned no values. [" + slurp.SetXpath + "]");
-
-					var n = doc.CreateElement("Foo");
-					n.SetAttribute("valueType", slurp.ValueType);
-					n.SetAttribute("value", slurp.Value);
-
-					var blob = new Blob();
-					new PitParser().handleCommonDataElementValue(n, blob);
-
-					do
-					{
-						var setElement = ((PeachXPathNavigator)iter.Current).CurrentNode as DataElement;
-						if (setElement == null)
-							throw new PeachException("Error, slurp setXpath did not return a Data Element. [" + slurp.SetXpath + "]");
-
-						setElement.DefaultValue = blob.DefaultValue;
-
-						if (setElement.fixup is VolatileFixup)
-						{
-							var dm = setElement.root as DataModel;
-							if (dm != null && dm.actionData != null)
-							{
-								// If the element is under an action, and has a volatile fixup
-								// store off the value for overriding during TestStarting
-								var key = "Peach.VolatileOverride.{0}.{1}".Fmt(dm.actionData.outputName, setElement.fullName);
-								fixupOverrides[key] = blob.DefaultValue;
-							}
-						}
-
-						if (blob.DefaultValue.GetVariantType() == Variant.VariantType.BitStream)
-							((BitwiseStream)blob.DefaultValue).Position = 0;
-					}
-					while (iter.MoveNext());
-
-					//ApplySlurp(dom, slurp);
-				}
+				ApplySlurps(testData, dom, fixupOverrides);
 			}
 
 			// See #214
@@ -199,18 +155,20 @@ namespace PitTester
 				}
 			}
 
-			var config = new RunConfiguration();
-			config.range = true;
-			config.rangeStart = 0;
-			config.rangeStop = 500;
-			config.pitFile = Path.GetFileName(pitFile);
-			config.runName = "Default";
-			config.singleIteration = singleIteration;
+			var config = new RunConfiguration
+			{
+				range = true,
+				rangeStart = 0,
+				rangeStop = 500,
+				pitFile = Path.GetFileName(pitFile),
+				runName = "Default",
+				singleIteration = singleIteration
+			};
 
 			if (seed.HasValue)
 				config.randomSeed = seed.Value;
 
-			var q = testData.Tests.Where(i => i.Name == config.runName).First();
+			var q = testData.Tests.First(i => i.Name == config.runName);
 			if (!string.IsNullOrEmpty(q.Seed))
 			{
 				uint s;
@@ -229,6 +187,14 @@ namespace PitTester
 			{
 				foreach (var kv in fixupOverrides)
 					ctx.stateStore.Add(kv.Key, kv.Value);
+
+				if (testData.Slurps.Count > 0)
+				{
+					ctx.StateModelStarting += (context, model) =>
+					{
+						ApplySlurps(testData, context.dom, null);
+					};
+				}
 			};
 
 			e.IterationStarting += (ctx, it, tot) => num = it;
@@ -244,6 +210,51 @@ namespace PitTester
 					config.randomSeed,
 					ex.Message);
 				throw new PeachException(msg, ex);
+			}
+		}
+
+		private static void ApplySlurps(TestData testData, Dom dom, Dictionary<string, Variant> fixupOverrides)
+		{
+			var doc = new XmlDocument();
+			var resolver = new PeachXmlNamespaceResolver();
+			var navi = new PeachXPathNavigator(dom);
+
+			foreach (var slurp in testData.Slurps)
+			{
+				var iter = navi.Select(slurp.SetXpath, resolver);
+				if (!iter.MoveNext())
+					throw new SoftException("Error, slurp valueXpath returned no values. [" + slurp.SetXpath + "]");
+
+				var n = doc.CreateElement("Foo");
+				n.SetAttribute("valueType", slurp.ValueType);
+				n.SetAttribute("value", slurp.Value);
+
+				var blob = new Blob();
+				new PitParser().handleCommonDataElementValue(n, blob);
+
+				do
+				{
+					var setElement = ((PeachXPathNavigator)iter.Current).CurrentNode as DataElement;
+					if (setElement == null)
+						throw new PeachException("Error, slurp setXpath did not return a Data Element. [" + slurp.SetXpath + "]");
+
+					setElement.DefaultValue = blob.DefaultValue;
+
+					if (fixupOverrides != null && setElement.fixup is VolatileFixup)
+					{
+						var dm = setElement.root as DataModel;
+						if (dm != null && dm.actionData != null)
+						{
+							// If the element is under an action, and has a volatile fixup
+							// store off the value for overriding during TestStarting
+							var key = "Peach.VolatileOverride.{0}.{1}".Fmt(dm.actionData.outputName, setElement.fullName);
+							fixupOverrides[key] = blob.DefaultValue;
+						}
+					}
+
+					if (blob.DefaultValue.GetVariantType() == Variant.VariantType.BitStream)
+						((BitwiseStream)blob.DefaultValue).Position = 0;
+				} while (iter.MoveNext());
 			}
 		}
 
@@ -279,73 +290,7 @@ namespace PitTester
 						{
 							foreach (var data in actionData.allData)
 							{
-								try
-								{
-									if (data is DataFile)
-									{
-										// Verify file cracks correctly
-										try
-										{
-											actionData.Apply(data);
-										}
-										catch (Exception ex)
-										{
-											throw new PeachException(string.Format("Error cracking data file '{0}' to '{1}.{2}.{3}.{4}'.",
-												((DataFile)data).FileName, test.Name, state.Name, action.Name, actionData.dataModel.Name), ex);
-										}
-
-										// SHould we skip verifying bytes?
-										if (!verifyBytes)
-											continue;
-
-										var bs = actionData.dataModel.Value;
-										var value = new MemoryStream();
-										bs.Seek(0, SeekOrigin.Begin);
-										bs.CopyTo(value);
-										value.Seek(0, SeekOrigin.Begin);
-
-										var dataFileBytes = File.ReadAllBytes(((DataFile)data).FileName);
-
-										// Verify all bytes match
-										for (var i = 0; i < dataFileBytes.Length && i < value.Length; i++)
-										{
-											var b = value.ReadByte();
-											if (dataFileBytes[i] != b)
-											{
-												throw new PeachException(
-													string.Format(
-														"Error: Data did not match at {0}.  Got {1:x2} expected {2:x2}. Data file '{3}' to '{4}.{5}.{6}.{7}'.",
-														i, b, dataFileBytes[i], ((DataFile)data).FileName, test.Name, state.Name, action.Name,
-														actionData.dataModel.Name));
-											}
-										}
-
-										// Verify length matches
-										if (dataFileBytes.Length != value.Length)
-											throw new PeachException(
-												string.Format(
-													"Error: Data size mismatch. Got {0} bytes, expected {1}. Data file '{2}' to '{3}.{4}.{5}.{6}'.",
-													value.Length, dataFileBytes.Length, ((DataFile)data).FileName, test.Name, state.Name, action.Name,
-													actionData.dataModel.Name));
-									}
-									else if (data is DataField)
-									{
-										// Verify fields apply correctly
-										try
-										{
-											actionData.Apply(data);
-										}
-										catch (Exception ex)
-										{
-											throw new PeachException(string.Format("Error applying data fields '{0}' to '{1}.{2}.{3}.{4}'.",
-												data.Name, test.Name, state.Name, action.Name, actionData.dataModel.Name), ex);
-										}
-									}
-								}
-								catch (Exception ಠ_ಠ)
-								{
-									sb.AppendLine(ಠ_ಠ.Message);
-								}
+								VerifyDataSet(verifyBytes, data, actionData, test, state, action, sb);
 							}
 						}
 					}
@@ -354,6 +299,84 @@ namespace PitTester
 
 			if (sb.Length > 0)
 				throw new PeachException(sb.ToString());
+		}
+
+		private static void VerifyDataSet(
+			bool verifyBytes, 
+			Data data, 
+			ActionData actionData, 
+			Test test, 
+			State state,
+			Action action, 
+			StringBuilder sb)
+		{
+			try
+			{
+				if (data is DataFile)
+				{
+					// Verify file cracks correctly
+					try
+					{
+						actionData.Apply(data);
+					}
+					catch (Exception ex)
+					{
+						throw new PeachException(string.Format("Error cracking data file '{0}' to '{1}.{2}.{3}.{4}'.",
+							((DataFile) data).FileName, test.Name, state.Name, action.Name, actionData.dataModel.Name), ex);
+					}
+
+					// SHould we skip verifying bytes?
+					if (!verifyBytes)
+						return;
+
+					var bs = actionData.dataModel.Value;
+					var value = new MemoryStream();
+					bs.Seek(0, SeekOrigin.Begin);
+					bs.CopyTo(value);
+					value.Seek(0, SeekOrigin.Begin);
+
+					var dataFileBytes = File.ReadAllBytes(((DataFile) data).FileName);
+
+					// Verify all bytes match
+					for (var i = 0; i < dataFileBytes.Length && i < value.Length; i++)
+					{
+						var b = value.ReadByte();
+						if (dataFileBytes[i] != b)
+						{
+							throw new PeachException(
+								string.Format(
+									"Error: Data did not match at {0}.  Got {1:x2} expected {2:x2}. Data file '{3}' to '{4}.{5}.{6}.{7}'.",
+									i, b, dataFileBytes[i], ((DataFile) data).FileName, test.Name, state.Name, action.Name,
+									actionData.dataModel.Name));
+						}
+					}
+
+					// Verify length matches
+					if (dataFileBytes.Length != value.Length)
+						throw new PeachException(
+							string.Format(
+								"Error: Data size mismatch. Got {0} bytes, expected {1}. Data file '{2}' to '{3}.{4}.{5}.{6}'.",
+								value.Length, dataFileBytes.Length, ((DataFile) data).FileName, test.Name, state.Name, action.Name,
+								actionData.dataModel.Name));
+				}
+				else if (data is DataField)
+				{
+					// Verify fields apply correctly
+					try
+					{
+						actionData.Apply(data);
+					}
+					catch (Exception ex)
+					{
+						throw new PeachException(string.Format("Error applying data fields '{0}' to '{1}.{2}.{3}.{4}'.",
+							data.Name, test.Name, state.Name, action.Name, actionData.dataModel.Name), ex);
+					}
+				}
+			}
+			catch (Exception ಠ_ಠ)
+			{
+				sb.AppendLine(ಠ_ಠ.Message);
+			}
 		}
 
 		public static void VerifyPitConfig(PitVersion version)
@@ -374,7 +397,7 @@ namespace PitTester
 			}
 
 			var sb = new StringBuilder();
-			
+
 			var logger = defs.Where(d => d.Key == "LoggerPath").ToArray();
 			if (logger.Length == 0)
 			{
@@ -526,7 +549,7 @@ namespace PitTester
 						errors.AppendLine("<Test> element is missing targetLifetime attribute.");
 
 					var parts = fileName.Split(Path.DirectorySeparatorChar);
-					var fileFuzzing = new[] {"Image", "Video", "Application"};
+					var fileFuzzing = new[] { "Image", "Video", "Application" };
 					if (parts.Any(fileFuzzing.Contains) || parts.Last().Contains("Client"))
 					{
 						if (lifetime != "iteration")
@@ -578,7 +601,7 @@ namespace PitTester
 						{
 							var name = parameters.Current.GetAttribute("name", string.Empty);
 							var value = parameters.Current.GetAttribute("value", string.Empty);
-							if (!ShouldSkipRule(parameters, "Allow_HardCodedParamValue") && 
+							if (!ShouldSkipRule(parameters, "Allow_HardCodedParamValue") &&
 								(!value.StartsWith("##") || !value.EndsWith("##")))
 							{
 								errors.AppendLine(
