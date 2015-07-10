@@ -416,8 +416,10 @@ namespace PitTester
 
 		public static void VerifyPitConfig(PitVersion version)
 		{
+			var os = Platform.GetOS();
 			var fileName = version.Files[0].Name;
-			var defs = PitDefines.Parse(fileName + ".config");
+			var raw = XmlTools.Deserialize<PitDefines>(fileName + ".config");
+			var defs = raw.Platforms.Where(a => a.Platform.HasFlag(os)).SelectMany(a => a.Defines).ToList();
 			var old = PitParser.parseDefines(fileName + ".config");
 
 			if (defs.Count != old.Count)
@@ -477,6 +479,9 @@ namespace PitTester
 			var extraDefs = string.Join(", ", defs.Select(d => d.Key));
 			if (extraDefs.Length > 0)
 				sb.AppendFormat("The following keys are not used by the pit: {0}", extraDefs);
+
+			if (raw.Platforms.Count > 1 || raw.Platforms[0].Platform != Platform.OS.All)
+				sb.AppendFormat("Config file should only have a single <All> element.");
 
 			if (sb.Length > 0)
 				throw new ApplicationException(sb.ToString());
