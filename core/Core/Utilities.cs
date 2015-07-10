@@ -597,12 +597,12 @@ namespace Peach.Core
 		{
 			var pos = input.Position;
 
-			HexInputFunc inputFunc = delegate(byte[] buf, int max)
+			HexInputFunc inputFunc = (buf, max) =>
 			{
 				return input.Read(buf, 0, max);
 			};
 
-			HexOutputFunc outputFunc = delegate(char[] line)
+			HexOutputFunc outputFunc = line =>
 			{
 				var buf = System.Text.Encoding.ASCII.GetBytes(line);
 				output.Write(buf, 0, buf.Length);
@@ -615,7 +615,7 @@ namespace Peach.Core
 
 		public static void HexDump(byte[] buffer, int offset, int count, Stream output, int bytesPerLine = 16)
 		{
-			HexInputFunc inputFunc = delegate(byte[] buf, int max)
+			HexInputFunc inputFunc = (buf, max) =>
 			{
 				var len = Math.Min(count, max);
 				Buffer.BlockCopy(buffer, offset, buf, 0, len);
@@ -624,7 +624,7 @@ namespace Peach.Core
 				return len;
 			};
 
-			HexOutputFunc outputFunc = delegate(char[] line)
+			HexOutputFunc outputFunc = line =>
 			{
 				var buf = System.Text.Encoding.ASCII.GetBytes(line);
 				output.Write(buf, 0, buf.Length);
@@ -645,9 +645,7 @@ namespace Peach.Core
 				return len;
 			};
 
-			HexOutputFunc outputFunc = line => sb.Append(line);
-
-			HexDump(inputFunc, outputFunc, bytesPerLine);
+			HexDump(inputFunc, line => sb.Append(line), bytesPerLine);
 
 			if (input.Position != input.Length)
 				sb.AppendFormat("---- TRUNCATED (Total Length: {0} bytes) ----", input.Length);
@@ -661,7 +659,7 @@ namespace Peach.Core
 		{
 			var sb = new StringBuilder();
 
-			HexInputFunc inputFunc = delegate(byte[] buf, int max)
+			HexInputFunc inputFunc = (buf, max) =>
 			{
 				var len = Math.Min(count, max);
 				Buffer.BlockCopy(buffer, offset, buf, 0, len);
@@ -670,9 +668,7 @@ namespace Peach.Core
 				return len;
 			};
 
-			HexOutputFunc outputFunc = line => sb.Append(line);
-
-			HexDump(inputFunc, outputFunc, bytesPerLine);
+			HexDump(inputFunc, line => sb.Append(line), bytesPerLine);
 
 			return sb.ToString();
 		}

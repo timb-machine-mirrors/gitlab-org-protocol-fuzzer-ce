@@ -214,23 +214,32 @@ namespace Peach.Pro.Core.WebServices
 
 		private static PeachElement Parse(string fileName)
 		{
-			var settingsRdr = new XmlReaderSettings
+			try
 			{
-				ValidationType = ValidationType.Schema,
-				NameTable = new NameTable(),
-			};
+				var settingsRdr = new XmlReaderSettings
+				{
+					ValidationType = ValidationType.Schema,
+					NameTable = new NameTable(),
+				};
 
-			// Default the namespace to peach
-			var nsMgrRdr = new XmlNamespaceManager(settingsRdr.NameTable);
-			nsMgrRdr.AddNamespace("", PeachElement.Namespace);
+				// Default the namespace to peach
+				var nsMgrRdr = new XmlNamespaceManager(settingsRdr.NameTable);
+				nsMgrRdr.AddNamespace("", PeachElement.Namespace);
 
-			var parserCtx = new XmlParserContext(settingsRdr.NameTable, nsMgrRdr, null, XmlSpace.Default);
+				var parserCtx = new XmlParserContext(settingsRdr.NameTable, nsMgrRdr, null, XmlSpace.Default);
 
-			var s = new XmlSerializer(typeof(PeachElement));
-			using (var rdr = XmlReader.Create(fileName, settingsRdr, parserCtx))
+				var s = new XmlSerializer(typeof(PeachElement));
+				using (var rdr = XmlReader.Create(fileName, settingsRdr, parserCtx))
+				{
+					var elem = (PeachElement)s.Deserialize(rdr);
+					return elem;
+				}
+			}
+			catch (Exception ex)
 			{
-				var elem = (PeachElement)s.Deserialize(rdr);
-				return elem;
+				throw new PeachException(
+					"Dependency error: {0} -- {1}".Fmt(fileName, ex.Message), ex
+				);
 			}
 		}
 
@@ -1199,7 +1208,7 @@ namespace Peach.Pro.Core.WebServices
 					detail.Pit.Timestamp < lastModified ||
 					AnyFilesStale(detail))
 				{
-					detail = MakePitDetail(lib, pitLibraryPath, fileName, guid, url, lastModified);
+					detail = MakePitDetail(lib, pitLibraryPath, fileName, guid, lastModified);
 					_cache[url] = detail;
 				}
 			}
@@ -1223,7 +1232,6 @@ namespace Peach.Pro.Core.WebServices
 			string pitLibraryPath, 
 			string fileName,
 			string guid,
-			string url,
 			DateTime lastModified)
 		{
 			var contents = Parse(fileName);
