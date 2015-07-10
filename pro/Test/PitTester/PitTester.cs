@@ -20,6 +20,7 @@ using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using Action = Peach.Core.Dom.Action;
 using Dom = Peach.Core.Dom.Dom;
+using Ionic.Zip;
 
 namespace PitTester
 {
@@ -37,6 +38,40 @@ namespace PitTester
 		};
 
 		public static event Engine.IterationStartingEventHandler IterationStarting;
+
+		public static void ExtractPack(string pack, string dir, int logLevel)
+		{
+			using (var zip = new ZipFile(pack))
+			{
+				Console.WriteLine("Extracting {0} to {1}", pack, dir);
+		
+				zip.ExtractProgress += (sender, e) => 
+				{
+					if (e.EventType == ZipProgressEventType.Extracting_BeforeExtractEntry)
+					{
+						var fileName = e.CurrentEntry.FileName;
+
+						if (logLevel > 0)
+							Console.WriteLine(fileName);
+						
+						if (fileName.EndsWith(".xml.config"))
+						{
+							var testFile = Path.ChangeExtension(fileName, ".test");
+							var src = Path.Combine(Path.GetDirectoryName(pack), "Assets", testFile);
+							var tgt = Path.Combine(dir, testFile);
+							if (File.Exists(src))
+							{
+								Console.WriteLine(testFile);
+								File.Copy(src, tgt);
+							}
+						}
+					}
+				};
+
+				zip.ExtractAll(dir);
+				Console.WriteLine();
+			}
+		}
 
 		public static void OnIterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
 		{
