@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,6 +9,8 @@ using Peach.Core.Dom;
 using Peach.Core.IO;
 using Peach.Core.Publishers;
 using Logger = NLog.Logger;
+using System.Text;
+using String = System.String;
 
 namespace PitTester
 {
@@ -144,7 +147,7 @@ namespace PitTester
 			if (Logger.IsDebugEnabled)
 				Logger.Debug("\n\n" + Utilities.HexDump(actual, 0, actual.Length));
 
-		    var skipList = new List<Tuple<string, long, long>>();
+		    var skipList = new List<Tuple<long, long>>();
 
 			foreach (var ignore in _logger.Ignores)
 			{
@@ -169,75 +172,196 @@ namespace PitTester
 				if (!lst.TryGetPosition(elem.fullName, out pos))
 					throw new PeachException("Error, Couldn't locate position of {0} in model on action {1} for ignoring.".Fmt(elem, _logger.ActionName));
 
-				skipList.Add(new Tuple<string, long, long>(elem.fullName, pos / 8, (pos / 8) + (tgt.Value.LengthBits + 7) / 8));
+				var skip = new Tuple<long, long>(pos / 8, (pos / 8) + (tgt.Value.LengthBits + 7) / 8);
+				Logger.Debug("Ignoring {0} from index {1} to {2}", elem.fullName, skip.Item1, skip.Item2);
+				skipList.Add(skip);
 			}
 
-			foreach (var i in skipList)
-				Logger.Debug("Ignoring {0} from index {1} to {2}", i.Item1, i.Item2, i.Item3);
-
-		    var checkLength = actual.Length > expected.Length ? expected.Length : actual.Length;
-            for (var i = 0; i < checkLength; ++i)
-		    {
-		        var skip = skipList.Any(p => p.Item2 <= i && p.Item3 > i);
-		        if (skip || expected[i] == actual[i]) continue;
-
-		        if (Logger.IsDebugEnabled)
-		        {
-		            Logger.Debug("vv Dumping DataModel vvvvvvvvvvvvvvvvv");
-		            long pos = 0;
-
-		            foreach (var item in dataModel.Walk())
-		            {
-		                Logger.Debug("0x{1:x}-0x{2:X}: {0}: {3}", 
-		                    item.fullName, 
-		                    pos,
-		                    pos + item.Value.Length,
-		                    Utilities.HexDump(item.Value));
-
-		                if(!(item is DataElementContainer))
-		                    pos += item.Value.Length;
-		            }
-		            Logger.Debug("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-                }
-
-		        throw new PeachException(
-		            "\nTest failed on action: {0}\n\tValues differ at offset 0x{3:x8}\n\tExpected: 0x{1:x2}\n\tBut was: 0x{2:x2}\n"
-						.Fmt(_logger.ActionName, expected[i], actual[i], i));
-		    }
-
-            // Perform length check after byte comparison. More usefull this way.
-            if (expected.Length != actual.Length)
-            {
-                if (Logger.IsDebugEnabled)
-                {
-                    Logger.Debug("vv Dumping DataModel vvvvvvvvvvvvvvvvv");
-                    long pos = 0;
-
-                    foreach (var item in dataModel.Walk())
-                    {
-                        Logger.Debug("0x{1:x}-0x{2:X}: {0}: {3}",
-                            item.fullName,
-                            pos,
-                            pos + item.Value.Length,
-                            Utilities.HexDump(item.Value));
-
-                        if (!(item is DataElementContainer))
-                            pos += item.Value.Length;
-                    }
-                    Logger.Debug("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-                }
-
-                throw new PeachException(
-					"Length mismatch in action {0}. Expected {1} bytes but got {2} bytes.".Fmt(_logger.ActionName,
-                        expected.Length, actual.Length));
-            }
-
+			var cb = new ConsoleBuffer();
+			if (BinDiff(expected, actual, skipList, cb))
+			{
+				cb.Print();
+				throw new PeachException("Values differ on action: {0}".Fmt(_logger.ActionName));
+			}
         }
 
 		protected override void OnOutput(BitwiseStream data)
 		{
 			// Handled with the override for output()
 			throw new NotSupportedException();
+		}
+
+		bool BinDiff(byte[] expected, byte[] actual, List<Tuple<long,long>> skipList, ConsoleBuffer cb)
+		{
+			var ms1 = new MemoryStream(expected);
+			var ms2 = new MemoryStream(actual);
+			
+			const int bytesPerLine = 16;
+
+			var diff = false;
+			var bytes1 = new byte[bytesPerLine];
+			var bytes2 = new byte[bytesPerLine];
+
+			for (var i = 0;; i += bytesPerLine)
+			{
+				var readLen1 = ms1.Read(bytes1, 0, bytesPerLine);
+				var readLen2 = ms2.Read(bytes2, 0, bytesPerLine);
+				if (readLen1 == 0 && readLen2 == 0)
+					break;
+
+				var hex1 = new ConsoleBuffer();
+				var hex2 = new ConsoleBuffer();
+
+				var ascii1 = new ConsoleBuffer();
+				var ascii2 = new ConsoleBuffer();
+
+				var lineDiff = false;
+				for (var j = 0; j < bytesPerLine; j++)
+				{
+					ConsoleColor bg;
+					var offset = i + j;
+					var skip = skipList.Any(p => p.Item1 <= offset && p.Item2 > offset);
+					if (skip)
+					{
+						bg = ConsoleColor.Blue;
+					}
+					else
+					{
+						bg = ConsoleColor.Black;
+					}
+
+					if (j < readLen1 && j < readLen2)
+					{
+						if (bytes1[j] == bytes2[j])
+						{
+							hex1.Append(ConsoleColor.Gray, bg, "{0:X2}".Fmt(bytes1[j]));
+							hex1.Append(" ");
+							ascii1.Append(ConsoleColor.Gray, bg, "{0}".Fmt(ByteToAscii(bytes1[j])));
+
+							hex2.Append(ConsoleColor.Gray, bg, "{0:X2}".Fmt(bytes2[j]));
+							hex2.Append(" ");
+							ascii2.Append(ConsoleColor.Gray, bg, "{0}".Fmt(ByteToAscii(bytes2[j])));
+						}
+						else
+						{
+							if (!skip) lineDiff = true;
+
+							hex1.Append(ConsoleColor.Green, bg, "{0:X2}".Fmt(bytes1[j]));
+							hex1.Append(" ");
+							ascii1.Append(ConsoleColor.Green, bg, "{0}".Fmt(ByteToAscii(bytes1[j])));
+
+							hex2.Append(ConsoleColor.Red, bg, "{0:X2}".Fmt(bytes2[j]));
+							hex2.Append(" ");
+							ascii2.Append(ConsoleColor.Red, bg, "{0}".Fmt(ByteToAscii(bytes2[j])));
+						}
+					}
+					else if (j < readLen1)
+					{
+						if (!skip) lineDiff = true;
+
+						hex1.Append(ConsoleColor.Green, bg, "{0:X2}".Fmt(bytes1[j]));
+						hex1.Append(" ");
+						ascii1.Append(ConsoleColor.Green, bg, "{0}".Fmt(ByteToAscii(bytes1[j])));
+
+						hex2.Append("   ");
+						ascii2.Append(" ");
+					}
+					else if (j < readLen2)
+					{
+						if (!skip) lineDiff = true;
+
+						hex1.Append("   ");
+						ascii1.Append(" ");
+
+						hex2.Append(ConsoleColor.Red, bg, "{0:X2}".Fmt(bytes2[j]));
+						hex2.Append(" ");
+						ascii2.Append(ConsoleColor.Red, bg, "{0}".Fmt(ByteToAscii(bytes2[j])));
+					}
+					else
+					{
+						hex1.Append("   ");
+						ascii1.Append(" ");
+
+						hex2.Append("   ");
+						ascii2.Append(" ");
+					}
+				}
+
+				cb.Append("{0:X8}   ".Fmt(i));
+				cb.Append(hex1);
+				cb.Append("  ");
+				cb.Append(ascii1);
+				cb.Append(Environment.NewLine);
+
+				if (lineDiff)
+				{
+					diff = true;
+
+					cb.Append("           ");
+					cb.Append(hex2);
+					cb.Append("  ");
+					cb.Append(ascii2);
+					cb.Append(Environment.NewLine);
+				}
+			}
+
+			return diff;
+		}
+
+		char ByteToAscii(byte b)
+		{
+			return ((b < 32 || b > 126) ? '.' : (char)b);
+		}
+	}
+
+	class ConsoleRegion
+	{
+		public ConsoleColor ForegroundColor { get; set; }
+		public ConsoleColor BackgroundColor { get; set; }
+		public string String { get; set; }
+	}
+
+	class ConsoleBuffer
+	{
+		List<ConsoleRegion> _regions = new List<ConsoleRegion>();
+
+		public void Append(ConsoleColor fg, ConsoleColor bg, string str)
+		{
+			_regions.Add(new ConsoleRegion {
+				ForegroundColor = fg,
+				BackgroundColor = bg,
+				String = str,
+			});
+		}
+
+		public void Append(string str)
+		{
+			Append(ConsoleColor.Gray, ConsoleColor.Black, str);
+		}
+
+		public void Append(ConsoleBuffer cb)
+		{
+			_regions.AddRange(cb._regions);
+		}
+
+		public void Print()
+		{
+			var fg = Console.ForegroundColor;
+			var bg = Console.BackgroundColor;
+			try
+			{
+				foreach (var region in _regions)
+				{
+					Console.ForegroundColor = region.ForegroundColor;
+					Console.BackgroundColor = region.BackgroundColor;
+					Console.Write(region.String);
+				}
+			}
+			finally
+			{
+				Console.ForegroundColor = fg;
+				Console.BackgroundColor = bg;
+			}
 		}
 	}
 }
