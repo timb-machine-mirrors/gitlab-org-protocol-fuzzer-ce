@@ -16,9 +16,13 @@ namespace PitTester
 	{
 		// ValueSource attribute doesn't resolve properties
 		// on the base class so expose the pit list here.
-		public static IEnumerable<TestCase> AllPits
+		public static List<TestCase> AllPits
 		{
-			get { return ThePits; }
+			get 
+			{
+				CollectionAssert.IsNotEmpty(ThePits);
+				return ThePits;
+			}
 		}
 
 		[Test]
@@ -27,7 +31,7 @@ namespace PitTester
 			if (!string.IsNullOrEmpty(LoadErrors))
 				Assert.Fail(LoadErrors);
 
-			Assert.Greater(AllPits.Count(), 0);
+			CollectionAssert.IsNotEmpty(AllPits);
 		}
 
 		[Test]
@@ -62,7 +66,7 @@ namespace PitTester
 
 				try
 				{
-					PitTester.VerifyPit(LibraryPath, fileName, i == 0);
+					PitTester.VerifyPit(test.LibraryPath, fileName, i == 0);
 				}
 				catch (Exception ex)
 				{
