@@ -21,7 +21,7 @@ namespace Peach.Core
 			Professional,
 			TrialAllPits,
 			Trial,
-			Acedemic,
+			Academic,
 			TestSuites,
 			Studio,
 			Developer,
