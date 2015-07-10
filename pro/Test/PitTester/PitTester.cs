@@ -613,16 +613,19 @@ namespace PitTester
 							parms.Add(name);
 						}
 
-						var comments = parameters.Current.SelectSingleNode("following-sibling::comment()");
-						while (comments != null)
+						if (parameters.Current != null)
 						{
-							var value = comments.Value.Trim();
-							const string ignore = "PitLint: Allow_MissingParamValue=";
-							if (value.StartsWith(ignore))
-								parms.Add(value.Substring(ignore.Length));
+							var comments = parameters.Current.SelectSingleNode("following-sibling::comment()");
+							while (comments != null)
+							{
+								var value = comments.Value.Trim();
+								const string ignore = "PitLint: Allow_MissingParamValue=";
+								if (value.StartsWith(ignore))
+									parms.Add(value.Substring(ignore.Length));
 
-							if (!comments.MoveToNext())
-								comments = null;
+								if (!comments.MoveToNext())
+									comments = null;
+							}
 						}
 
 						var pub = ClassLoader.FindPluginByName<PublisherAttribute>(cls);
