@@ -1,26 +1,77 @@
-﻿using System.Globalization;
-using Peach.Core;
-using Peach.Core.Dom;
-using Peach.Core.Dom.XPath;
-using Peach.Core.IO;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml;
+using System.Xml.Schema;
 using System.Xml.XPath;
+using Godel.Core;
+using Peach.Core;
+using Peach.Core.Analyzers;
+using Peach.Core.Dom;
+using Peach.Core.Dom.XPath;
+using Peach.Core.Fixups;
+using Peach.Core.IO;
 using Peach.Pro.Core;
-using Peach.Pro.Core.Fixups;
 using Peach.Pro.Core.MutationStrategies;
 using Peach.Pro.Core.WebServices;
+using Peach.Pro.Core.WebServices.Models;
+using Action = Peach.Core.Dom.Action;
+using Dom = Peach.Core.Dom.Dom;
+using Ionic.Zip;
 
 namespace PitTester
 {
 	public class PitTester
 	{
-		public static event Peach.Core.Engine.IterationStartingEventHandler IterationStarting;
+		static readonly Dictionary<string, string[]> OptionalParams = new Dictionary<string, string[]>
+		{
+			{ "RawEther", new[] { "MinMTU", "MaxMTU", "MinFrameSize", "MaxFrameSize", "PcapTimeout" }},
+			{ "RawV4", new[] { "MinMTU", "MaxMTU" }},
+			{ "RawV6", new[] { "MinMTU", "MaxMTU" }},
+			{ "Udp", new[] { "MinMTU", "MaxMTU" }},
+			{ "File", new[] { "Append", "Overwrite" }},
+			{ "ConsoleHex", new[] { "BytesPerLine" }},
+			{ "Null", new[] { "MaxOutputSize" }}
+		};
+
+		public static event Engine.IterationStartingEventHandler IterationStarting;
+
+		public static void ExtractPack(string pack, string dir, int logLevel)
+		{
+			using (var zip = new ZipFile(pack))
+			{
+				Console.WriteLine("Extracting {0} to {1}", pack, dir);
+		
+				zip.ExtractProgress += (sender, e) => 
+				{
+					if (e.EventType == ZipProgressEventType.Extracting_BeforeExtractEntry)
+					{
+						var fileName = e.CurrentEntry.FileName;
+
+						if (logLevel > 0)
+							Console.WriteLine(fileName);
+						
+						if (fileName.EndsWith(".xml.config"))
+						{
+							var testFile = Path.ChangeExtension(fileName, ".test");
+							var src = Path.Combine(Path.GetDirectoryName(pack), "Assets", testFile);
+							var tgt = Path.Combine(dir, testFile);
+							if (File.Exists(src))
+							{
+								Console.WriteLine(testFile);
+								File.Copy(src, tgt);
+							}
+						}
+					}
+				};
+
+				zip.ExtractAll(dir);
+				Console.WriteLine();
+			}
+		}
 
 		public static void OnIterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
 		{
@@ -40,7 +91,7 @@ namespace PitTester
 			var configFile = pitFile + ".config";
 			if (File.Exists(configFile))
 			{
-				var baseDefs = Peach.Core.Analyzers.PitParser.parseDefines(configFile);
+				var baseDefs = PitParser.parseDefines(configFile);
 				baseDefs.Insert(0, new KeyValuePair<string, string>("PitLibraryPath", libraryPath));
 
 				var testDefs = testData.Defines.ToDictionary(x => x.Key, x => x.Value);
@@ -52,7 +103,7 @@ namespace PitTester
 					{
 						if (value == item.Value)
 						{
-							Console.WriteLine("Warning, .test and .config value are identical for PitDefine named: \"{0}\"", 
+							Console.WriteLine("Warning, .test and .config value are identical for PitDefine named: \"{0}\"",
 								item.Key
 							);
 						}
@@ -73,18 +124,15 @@ namespace PitTester
 			else
 			{
 				defs.Add(new KeyValuePair<string, string>("PitLibraryPath", libraryPath));
-				foreach (var item in testData.Defines)
-				{
-					defs.Add(new KeyValuePair<string, string>(item.Key, item.Value));
-				}
+				defs.AddRange(testData.Defines.Select(item => new KeyValuePair<string, string>(item.Key, item.Value)));
 			}
 
 			defs = PitDefines.Evaluate(defs);
 
 			var args = new Dictionary<string, object>();
-			args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
+			args[PitParser.DEFINED_VALUES] = defs;
 
-			var parser = new Peach.Core.Analyzers.PitParser();
+			var parser = new PitParser();
 
 			var dom = parser.asParser(args, pitFile);
 
@@ -116,50 +164,7 @@ namespace PitTester
 
 			if (testData.Slurps.Count > 0)
 			{
-				var doc = new XmlDocument();
-				var resolver = new PeachXmlNamespaceResolver();
-				var navi = new PeachXPathNavigator(dom);
-
-				foreach (var slurp in testData.Slurps)
-				{
-					var iter = navi.Select(slurp.SetXpath, resolver);
-					if (!iter.MoveNext())
-						throw new SoftException("Error, slurp valueXpath returned no values. [" + slurp.SetXpath + "]");
-
-					var n = doc.CreateElement("Foo");
-					n.SetAttribute("valueType", slurp.ValueType);
-					n.SetAttribute("value", slurp.Value);
-
-					var blob = new Blob();
-					new Peach.Core.Analyzers.PitParser().handleCommonDataElementValue(n, blob);
-
-					do
-					{
-						var setElement = ((PeachXPathNavigator)iter.Current).CurrentNode as DataElement;
-						if (setElement == null)
-							throw new PeachException("Error, slurp setXpath did not return a Data Element. [" + slurp.SetXpath + "]");
-
-						setElement.DefaultValue = blob.DefaultValue;
-
-						if (setElement.fixup is Peach.Core.Fixups.VolatileFixup)
-						{
-							var dm = setElement.root as DataModel;
-							if (dm != null && dm.actionData != null)
-							{
-								// If the element is under an action, and has a volatile fixup
-								// store off the value for overriding during TestStarting
-								var key = "Peach.VolatileOverride.{0}.{1}".Fmt(dm.actionData.outputName, setElement.fullName);
-								fixupOverrides[key] = blob.DefaultValue;
-							}
-						}
-
-						if (blob.DefaultValue.GetVariantType() == Variant.VariantType.BitStream)
-							((BitwiseStream)blob.DefaultValue).Position = 0;
-					}
-					while (iter.MoveNext());
-
-					//ApplySlurp(dom, slurp);
-				}
+				ApplySlurps(testData, dom, fixupOverrides);
 			}
 
 			// See #214
@@ -185,18 +190,20 @@ namespace PitTester
 				}
 			}
 
-			var config = new RunConfiguration();
-			config.range = true;
-			config.rangeStart = 0;
-			config.rangeStop = 500;
-			config.pitFile = Path.GetFileName(pitFile);
-			config.runName = "Default";
-			config.singleIteration = singleIteration;
+			var config = new RunConfiguration
+			{
+				range = true,
+				rangeStart = 0,
+				rangeStop = 500,
+				pitFile = Path.GetFileName(pitFile),
+				runName = "Default",
+				singleIteration = singleIteration
+			};
 
 			if (seed.HasValue)
 				config.randomSeed = seed.Value;
 
-			var q = testData.Tests.Where(i => i.Name == config.runName).First();
+			var q = testData.Tests.First(i => i.Name == config.runName);
 			if (!string.IsNullOrEmpty(q.Seed))
 			{
 				uint s;
@@ -215,6 +222,14 @@ namespace PitTester
 			{
 				foreach (var kv in fixupOverrides)
 					ctx.stateStore.Add(kv.Key, kv.Value);
+
+				if (testData.Slurps.Count > 0)
+				{
+					ctx.StateModelStarting += (context, model) =>
+					{
+						ApplySlurps(testData, context.dom, null);
+					};
+				}
 			};
 
 			e.IterationStarting += (ctx, it, tot) => num = it;
@@ -233,9 +248,54 @@ namespace PitTester
 			}
 		}
 
+		private static void ApplySlurps(TestData testData, Dom dom, Dictionary<string, Variant> fixupOverrides)
+		{
+			var doc = new XmlDocument();
+			var resolver = new PeachXmlNamespaceResolver();
+			var navi = new PeachXPathNavigator(dom);
+
+			foreach (var slurp in testData.Slurps)
+			{
+				var iter = navi.Select(slurp.SetXpath, resolver);
+				if (!iter.MoveNext())
+					throw new SoftException("Error, slurp valueXpath returned no values. [" + slurp.SetXpath + "]");
+
+				var n = doc.CreateElement("Foo");
+				n.SetAttribute("valueType", slurp.ValueType);
+				n.SetAttribute("value", slurp.Value);
+
+				var blob = new Blob();
+				new PitParser().handleCommonDataElementValue(n, blob);
+
+				do
+				{
+					var setElement = ((PeachXPathNavigator)iter.Current).CurrentNode as DataElement;
+					if (setElement == null)
+						throw new PeachException("Error, slurp setXpath did not return a Data Element. [" + slurp.SetXpath + "]");
+
+					setElement.DefaultValue = blob.DefaultValue;
+
+					if (fixupOverrides != null && setElement.fixup is VolatileFixup)
+					{
+						var dm = setElement.root as DataModel;
+						if (dm != null && dm.actionData != null)
+						{
+							// If the element is under an action, and has a volatile fixup
+							// store off the value for overriding during TestStarting
+							var key = "Peach.VolatileOverride.{0}.{1}".Fmt(dm.actionData.outputName, setElement.fullName);
+							fixupOverrides[key] = blob.DefaultValue;
+						}
+					}
+
+					if (blob.DefaultValue.GetVariantType() == Variant.VariantType.BitStream)
+						((BitwiseStream)blob.DefaultValue).Position = 0;
+				} while (iter.MoveNext());
+			}
+		}
+
 		public static void VerifyDataSets(string pitLibraryPath, string fileName, bool verifyBytes = true)
 		{
-			var defs = Peach.Core.Analyzers.PitParser.parseDefines(fileName + ".config");
+			var defs = PitParser.parseDefines(fileName + ".config");
 			if (defs.Any(k => k.Key == "PitLibraryPath"))
 			{
 				defs.Remove(defs.First(k => k.Key == "PitLibraryPath"));
@@ -243,9 +303,9 @@ namespace PitTester
 			}
 
 			var args = new Dictionary<string, object>();
-			args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
+			args[PitParser.DEFINED_VALUES] = defs;
 
-			var parser = new Peach.Core.Analyzers.PitParser();
+			var parser = new PitParser();
 
 			var dom = parser.asParser(args, fileName);
 
@@ -265,73 +325,7 @@ namespace PitTester
 						{
 							foreach (var data in actionData.allData)
 							{
-								try
-								{
-									if (data is DataFile)
-									{
-										// Verify file cracks correctly
-										try
-										{
-											actionData.Apply(data);
-										}
-										catch (Exception ex)
-										{
-											throw new PeachException(string.Format("Error cracking data file '{0}' to '{1}.{2}.{3}.{4}'.",
-												((DataFile)data).FileName, test.Name, state.Name, action.Name, actionData.dataModel.Name), ex);
-										}
-
-										// SHould we skip verifying bytes?
-										if (!verifyBytes)
-											continue;
-
-										var bs = actionData.dataModel.Value;
-										var value = new MemoryStream();
-										bs.Seek(0, SeekOrigin.Begin);
-										bs.CopyTo(value);
-										value.Seek(0, SeekOrigin.Begin);
-
-										var dataFileBytes = File.ReadAllBytes(((DataFile)data).FileName);
-
-										// Verify all bytes match
-										for (var i = 0; i < dataFileBytes.Length && i < value.Length; i++)
-										{
-											var b = value.ReadByte();
-											if (dataFileBytes[i] != b)
-											{
-												throw new PeachException(
-													string.Format(
-														"Error: Data did not match at {0}.  Got {1:x2} expected {2:x2}. Data file '{3}' to '{4}.{5}.{6}.{7}'.",
-														i, b, dataFileBytes[i], ((DataFile)data).FileName, test.Name, state.Name, action.Name,
-														actionData.dataModel.Name));
-											}
-										}
-
-										// Verify length matches
-										if (dataFileBytes.Length != value.Length)
-											throw new PeachException(
-												string.Format(
-													"Error: Data size mismatch. Got {0} bytes, expected {1}. Data file '{2}' to '{3}.{4}.{5}.{6}'.",
-													value.Length, dataFileBytes.Length, ((DataFile)data).FileName, test.Name, state.Name, action.Name,
-													actionData.dataModel.Name));
-									}
-									else if (data is DataField)
-									{
-										// Verify fields apply correctly
-										try
-										{
-											actionData.Apply(data);
-										}
-										catch (Exception ex)
-										{
-											throw new PeachException(string.Format("Error applying data fields '{0}' to '{1}.{2}.{3}.{4}'.",
-												data.Name, test.Name, state.Name, action.Name, actionData.dataModel.Name), ex);
-										}
-									}
-								}
-								catch (Exception ಠ_ಠ)
-								{
-									sb.AppendLine(ಠ_ಠ.Message);
-								}
+								VerifyDataSet(verifyBytes, data, actionData, test, state, action, sb);
 							}
 						}
 					}
@@ -342,10 +336,91 @@ namespace PitTester
 				throw new PeachException(sb.ToString());
 		}
 
-		public static void VerifyPitConfig(string fileName)
+		private static void VerifyDataSet(
+			bool verifyBytes, 
+			Data data, 
+			ActionData actionData, 
+			Test test, 
+			State state,
+			Action action, 
+			StringBuilder sb)
 		{
-			var defs = PitDefines.Parse(fileName + ".config");
-			var old = Peach.Core.Analyzers.PitParser.parseDefines(fileName + ".config");
+			try
+			{
+				if (data is DataFile)
+				{
+					// Verify file cracks correctly
+					try
+					{
+						actionData.Apply(data);
+					}
+					catch (Exception ex)
+					{
+						throw new PeachException(string.Format("Error cracking data file '{0}' to '{1}.{2}.{3}.{4}'.",
+							((DataFile) data).FileName, test.Name, state.Name, action.Name, actionData.dataModel.Name), ex);
+					}
+
+					// SHould we skip verifying bytes?
+					if (!verifyBytes)
+						return;
+
+					var bs = actionData.dataModel.Value;
+					var value = new MemoryStream();
+					bs.Seek(0, SeekOrigin.Begin);
+					bs.CopyTo(value);
+					value.Seek(0, SeekOrigin.Begin);
+
+					var dataFileBytes = File.ReadAllBytes(((DataFile) data).FileName);
+
+					// Verify all bytes match
+					for (var i = 0; i < dataFileBytes.Length && i < value.Length; i++)
+					{
+						var b = value.ReadByte();
+						if (dataFileBytes[i] != b)
+						{
+							throw new PeachException(
+								string.Format(
+									"Error: Data did not match at {0}.  Got {1:x2} expected {2:x2}. Data file '{3}' to '{4}.{5}.{6}.{7}'.",
+									i, b, dataFileBytes[i], ((DataFile) data).FileName, test.Name, state.Name, action.Name,
+									actionData.dataModel.Name));
+						}
+					}
+
+					// Verify length matches
+					if (dataFileBytes.Length != value.Length)
+						throw new PeachException(
+							string.Format(
+								"Error: Data size mismatch. Got {0} bytes, expected {1}. Data file '{2}' to '{3}.{4}.{5}.{6}'.",
+								value.Length, dataFileBytes.Length, ((DataFile) data).FileName, test.Name, state.Name, action.Name,
+								actionData.dataModel.Name));
+				}
+				else if (data is DataField)
+				{
+					// Verify fields apply correctly
+					try
+					{
+						actionData.Apply(data);
+					}
+					catch (Exception ex)
+					{
+						throw new PeachException(string.Format("Error applying data fields '{0}' to '{1}.{2}.{3}.{4}'.",
+							data.Name, test.Name, state.Name, action.Name, actionData.dataModel.Name), ex);
+					}
+				}
+			}
+			catch (Exception ಠ_ಠ)
+			{
+				sb.AppendLine(ಠ_ಠ.Message);
+			}
+		}
+
+		public static void VerifyPitConfig(PitVersion version)
+		{
+			var os = Platform.GetOS();
+			var fileName = version.Files[0].Name;
+			var raw = XmlTools.Deserialize<PitDefines>(fileName + ".config");
+			var defs = raw.Platforms.Where(a => a.Platform.HasFlag(os)).SelectMany(a => a.Defines).ToList();
+			var old = PitParser.parseDefines(fileName + ".config");
 
 			if (defs.Count != old.Count)
 				throw new ApplicationException(string.Format("PitParser didn't properly parse defines file.  Expected '{0}' defines, got '{1}' defines.", defs.Count, old.Count));
@@ -359,7 +434,7 @@ namespace PitTester
 			}
 
 			var sb = new StringBuilder();
-			
+
 			var logger = defs.Where(d => d.Key == "LoggerPath").ToArray();
 			if (logger.Length == 0)
 			{
@@ -385,6 +460,29 @@ namespace PitTester
 				sb.AppendLine();
 			if (noDesc.Length > 0)
 				sb.AppendFormat("The following keys have an empty description: {0}", noDesc);
+
+			foreach (var pitFile in version.Files)
+			{
+				var contents = File.ReadAllText(pitFile.Name);
+
+				for (var i = defs.Count - 1; i >= 0; i--)
+				{
+					var key = "##{0}##".Fmt(defs[i].Key);
+					if (contents.Contains(key))
+						defs.RemoveAt(i);
+				}
+
+				if (defs.Count == 0)
+					break;
+			}
+
+			var extraDefs = string.Join(", ", defs.Select(d => d.Key));
+			if (extraDefs.Length > 0)
+				sb.AppendFormat("The following keys are not used by the pit: {0}", extraDefs);
+
+			if (raw.Platforms.Count > 1 || raw.Platforms[0].Platform != Platform.OS.All)
+				sb.AppendFormat("Config file should only have a single <All> element.");
+
 			if (sb.Length > 0)
 				throw new ApplicationException(sb.ToString());
 		}
@@ -449,7 +547,7 @@ namespace PitTester
 
 						var schema = PeachElement.SchemaLocation;
 
-						if (!rdr.MoveToAttribute("schemaLocation", System.Xml.Schema.XmlSchema.InstanceNamespace))
+						if (!rdr.MoveToAttribute("schemaLocation", XmlSchema.InstanceNamespace))
 							errors.AppendLine("Pit is missing xsi:schemaLocation attribute.");
 						else if (schema != rdr.Value)
 							errors.AppendLine("Pit xsi:schemaLocation is '" + rdr.Value + "' but should be '" + schema + "'.");
@@ -491,7 +589,7 @@ namespace PitTester
 						errors.AppendLine("<Test> element is missing targetLifetime attribute.");
 
 					var parts = fileName.Split(Path.DirectorySeparatorChar);
-					var fileFuzzing = new[] {"Image", "Video", "Application"};
+					var fileFuzzing = new[] { "Image", "Video", "Application" };
 					if (parts.Any(fileFuzzing.Contains) || parts.Last().Contains("Client"))
 					{
 						if (lifetime != "iteration")
@@ -535,18 +633,60 @@ namespace PitTester
 					var pubs = it.Current.Select("p:Publisher", nsMgr);
 					while (pubs.MoveNext())
 					{
+						var cls = pubs.Current.GetAttribute("class", string.Empty);
+						var parms = new List<string>();
+
 						var parameters = pubs.Current.Select("p:Param", nsMgr);
 						while (parameters.MoveNext())
 						{
 							var name = parameters.Current.GetAttribute("name", string.Empty);
 							var value = parameters.Current.GetAttribute("value", string.Empty);
-							if (!ShouldSkipRule(parameters, "Allow_HardCodedParamValue") && 
+							if (!ShouldSkipRule(parameters, "Allow_HardCodedParamValue") &&
 								(!value.StartsWith("##") || !value.EndsWith("##")))
 							{
 								errors.AppendLine(
 									"<Publisher> parameter '{0}' is hard-coded, use a PitDefine ".Fmt(name) +
 									"(suppress with 'Allow_HardCodedParamValue')"
 								);
+							}
+
+							parms.Add(name);
+						}
+
+						if (parameters.Current != null)
+						{
+							var comments = parameters.Current.SelectSingleNode("following-sibling::comment()");
+							while (comments != null)
+							{
+								var value = comments.Value.Trim();
+								const string ignore = "PitLint: Allow_MissingParamValue=";
+								if (value.StartsWith(ignore))
+									parms.Add(value.Substring(ignore.Length));
+
+								if (!comments.MoveToNext())
+									comments = null;
+							}
+						}
+
+						var pub = ClassLoader.FindPluginByName<PublisherAttribute>(cls);
+						if (pub == null)
+						{
+							errors.AppendLine("<Publisher> class '{0}' is not recognized.".Fmt(cls));
+						}
+						else
+						{
+							var pri = pub.GetAttributes<PublisherAttribute>().First();
+							if (pri.Name != cls)
+								errors.AppendLine("'{0}' <Publisher> is referenced with deprecated name '{1}'.".Fmt(pri.Name, cls));
+
+							string[] optionalParams;
+							if (!OptionalParams.TryGetValue(pri.Name, out optionalParams))
+								optionalParams = new string[0];
+
+							foreach (var attr in pub.GetAttributes<ParameterAttribute>())
+							{
+								if (!optionalParams.Contains(attr.name) && !parms.Contains(attr.name))
+									errors.AppendLine("{0} publisher missing configuration for parameter '{1}'.".Fmt(pri.Name, attr.name));
 							}
 						}
 					}
@@ -586,11 +726,11 @@ namespace PitTester
 				if (isTest)
 				{
 					var args = new Dictionary<string, object>();
-					var defs = Peach.Core.Analyzers.PitParser.parseDefines(fileName + ".config");
+					var defs = PitParser.parseDefines(fileName + ".config");
 					defs.Insert(0, new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
 					defs = PitDefines.Evaluate(defs);
-					args[Peach.Core.Analyzers.PitParser.DEFINED_VALUES] = defs;
-					new Godel.Core.GodelPitParser().asParser(args, fileName);
+					args[PitParser.DEFINED_VALUES] = defs;
+					new GodelPitParser().asParser(args, fileName);
 				}
 			}
 			catch (Exception ex)
@@ -605,7 +745,18 @@ namespace PitTester
 		private static bool ShouldSkipRule(XPathNodeIterator it, string rule)
 		{
 			var preceding = it.Current.SelectSingleNode("preceding-sibling::comment()");
-			return (preceding != null && preceding.Value.Contains("PitTester: {0}".Fmt(rule)));
+			if (preceding == null)
+				return false;
+
+			var skip = false;
+
+			do
+			{
+				skip |= preceding.Value.Contains("PitLint: {0}".Fmt(rule));
+			}
+			while (!skip && preceding.MoveToNext());
+
+			return skip;
 		}
 	}
 }

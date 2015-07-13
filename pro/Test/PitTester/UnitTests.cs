@@ -16,9 +16,13 @@ namespace PitTester
 	{
 		// ValueSource attribute doesn't resolve properties
 		// on the base class so expose the pit list here.
-		public static IEnumerable<TestCase> AllPits
+		public static List<TestCase> AllPits
 		{
-			get { return ThePits; }
+			get 
+			{
+				CollectionAssert.IsNotEmpty(ThePits);
+				return ThePits;
+			}
 		}
 
 		[Test]
@@ -27,7 +31,7 @@ namespace PitTester
 			if (!string.IsNullOrEmpty(LoadErrors))
 				Assert.Fail(LoadErrors);
 
-			Assert.Greater(AllPits.Count(), 0);
+			CollectionAssert.IsNotEmpty(AllPits);
 		}
 
 		[Test]
@@ -38,7 +42,7 @@ namespace PitTester
 
 			try
 			{
-				PitTester.VerifyPitConfig(fileName);
+				PitTester.VerifyPitConfig(test.Pit.Versions[0]);
 			}
 			catch (Exception ex)
 			{
@@ -62,7 +66,7 @@ namespace PitTester
 
 				try
 				{
-					PitTester.VerifyPit(LibraryPath, fileName, i == 0);
+					PitTester.VerifyPit(test.LibraryPath, fileName, i == 0);
 				}
 				catch (Exception ex)
 				{
@@ -395,6 +399,66 @@ namespace PitTester
 		<Output action='TheState.Initial.Act2' publisher='Pub'>
 <![CDATA[
 0000000: 3331 3333 3700                           31337.
+]]>
+		</Output>
+	</Test>
+</TestData>
+";
+
+			// Ensure we can run when there is an ignore that matches a de-selected choice
+			var pitFile = Path.GetTempFileName();
+			var pitTest = pitFile + ".test";
+
+			File.WriteAllText(pitFile, xml);
+			File.WriteAllText(pitTest, test);
+
+			try
+			{
+				PitTester.TestPit("", pitFile, false, null);
+			}
+			finally
+			{
+				File.Delete(pitFile);
+				File.Delete(pitTest);
+			}
+		}
+
+		[Test]
+		public void SlurpOverField()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='str1' value='0' />
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action name='Act1' type='output'>
+				<DataModel ref='DM'/>
+				<Data>
+					<Field name='str1' value='Hello'/>
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default' maxOutputSize='65535'>
+		<StateModel ref='TheState'/>
+		<Publisher name='Pub' class='Null' />
+	</Test>
+</Peach>
+";
+
+			const string test = @"
+<TestData>
+	<Slurp setXpath='//Act1/DM/str1' value='1234567890'/>
+
+	<Test name='Default'>
+		<Open   action='TheState.Initial.Act1' publisher='Pub'/>
+		<Output action='TheState.Initial.Act1' publisher='Pub'>
+<![CDATA[
+0000000: 3132 3334 3536 3738 3930                 1234567890
 ]]>
 		</Output>
 	</Test>
