@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 
 namespace Peach.Core
 {
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
 	public class PlatformImplAttribute : Attribute
 	{
 		public Platform.OS OS { get; private set; }
@@ -84,7 +84,7 @@ namespace Peach.Core
 
 		public static Architecture GetArch()
 		{
-			return _arch;
+			return IntPtr.Size == 8 ? Architecture.x64 : Architecture.x86;
 		}
 
 		public static OS GetOS()
@@ -92,25 +92,15 @@ namespace Peach.Core
 			return _os;
 		}
 
-		static Architecture _arch = _GetArch();
-
-		static Architecture _GetArch()
-		{
-			if (IntPtr.Size == 64)
-				return Architecture.x64;
-
-			return Architecture.x86;
-		}
-
 		static OS _os = _GetOS();
 
 		static OS _GetOS()
 		{
 			if (System.IO.Path.DirectorySeparatorChar == '\\')
-				return Platform.OS.Windows;
+				return OS.Windows;
 			if (IsRunningOnMac())
 				return OS.OSX;
-			if (System.Environment.OSVersion.Platform == PlatformID.Unix)
+			if (Environment.OSVersion.Platform == PlatformID.Unix)
 				return OS.Linux;
 			return OS.None;
 		}
