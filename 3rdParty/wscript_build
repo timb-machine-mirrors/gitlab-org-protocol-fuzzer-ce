@@ -12,9 +12,6 @@ excludes = {
 
 bld.read_nuget('packages.config', excl=excludes, mapping=mapping)
 
-bld.read_all_csshlibs('Telerik Reporting Q3 2013/Bin')
-bld.read_all_csshlibs('Telerik ASP.NET AJAX/Bin40')
-
 # Be.HexBox is not nugetable yet
 bld.read_csshlib('Be.Windows.Forms.HexBox.dll', paths=['Be.HexEditor.150/bin'])
 

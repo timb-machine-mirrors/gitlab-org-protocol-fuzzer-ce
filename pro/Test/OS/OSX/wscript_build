@@ -9,8 +9,6 @@ deps = [
 	'Peach.Core.dll',
 	'Peach.Core.Test.dll',
 	'Peach.Pro.OS.OSX.dll',
-	'SharpPcap.dll',
-	'PacketDotNet.dll',	
 ]
 
 bld(
