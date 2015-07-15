@@ -1,12 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using NLog;
 using NUnit.Framework;
 using Peach.Core;
+using Peach.Core.Dom;
+using Peach.Core.IO;
+using Peach.Core.Publishers;
 using Peach.Core.Test;
 using Peach.Pro.Core;
+using Peach.Pro.Core.Loggers;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices.Models;
+using Logger = NLog.Logger;
 
 namespace Peach.Pro.Test.Core.Loggers
 {
@@ -461,6 +467,254 @@ namespace Peach.Pro.Test.Core.Loggers
 				Assert.AreEqual(false, f.Reproducible);
 				Assert.AreEqual(IterationFlags.Record | IterationFlags.Control, f.Flags);
 				Assert.AreEqual(Path.Combine("NonReproducible", "InjectedFault", "1R"), f.FaultPath);
+			}
+		}
+
+		[Test]
+		public void TestSaveActionData()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='CallModel'>
+		<String name='Value' value='Hello' mutable='false'/>
+	</DataModel>
+
+	<DataModel name='RequestModel'>
+		<Number name='Sequence' size='8'/>
+		<String name='Method' length='1'/>
+	</DataModel>
+
+	<DataModel name='XModel'>
+		<Number name='Sequence' size='8'/>
+		<String name='Response' value='X Response'/>
+	</DataModel>
+
+	<DataModel name='YModel'>
+		<Number name='Sequence' size='8'/>
+		<String name='Response' value='Y Response'/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='open'/>
+
+			<Action name='DoCall' type='call' method='foo'>
+				<Param>
+					<DataModel ref='CallModel'/>
+				</Param>
+				<Param name='MyParam2'>
+					<DataModel ref='CallModel'/>
+				</Param>
+				<Param name='MyParam3' type='inout'>
+					<DataModel ref='CallModel'/>
+					<Data>
+						<Field name='Value' value='inout'/>
+					</Data>
+				</Param>
+				<Param name='MyParam4' type='out'>
+					<DataModel ref='CallModel'/>
+				</Param>
+				<Result>
+					<DataModel ref='CallModel'/>
+				</Result>
+			</Action>
+
+			<Action type='changeState' ref='Request'/>
+		</State>
+
+		<State name='Request'>
+			<Action name='RecvReq' type='input'>
+				<DataModel ref='RequestModel'/>
+			</Action>
+
+			<Action type='changeState' 
+				ref='XResponse' 
+				when=""str(getattr(StateModel.states['Request'].actions[0].dataModel.find('Method'), 'DefaultValue', None)) == 'X'"" />
+
+			<Action type='changeState' 
+				ref='YResponse' 
+				when=""str(getattr(StateModel.states['Request'].actions[0].dataModel.find('Method'), 'DefaultValue', None)) == 'Y'"" />
+		</State>
+
+		<State name='XResponse'>
+			<Action type='slurp' 
+				valueXpath='//Request//RecvReq//RequestModel//Sequence' setXpath='//Sequence' />
+
+			<Action type='output' name='OutputX'>
+				<DataModel ref='XModel' />
+			</Action>
+
+			<Action type='changeState' ref='Request' />
+		</State>
+
+		<State name='YResponse'>
+			<Action type='slurp' 
+				valueXpath='//Request//RecvReq//RequestModel//Sequence' setXpath='//Sequence' />
+
+			<Action type='output' name='OutputY'>
+				<DataModel ref='YModel' />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default' faultWaitTime='0'>
+		<Publisher class='Null'/>
+		<StateModel ref='SM'/>
+		<Logger class='File'>
+			<Param name='Path' value='{0}'/>
+		</Logger>
+	</Test>
+</Peach>".Fmt(Configuration.LogRoot);
+
+			var dom = DataModelCollector.ParsePit(xml);
+			dom.tests[0].publishers[0] = new TestPub();
+
+			var config = new RunConfiguration
+			{
+				range = true,
+				rangeStart = 1,
+				rangeStop = 2,
+				pitFile = "LoggerTest"
+			};
+
+			var e = new Engine(null);
+
+			e.TestStarting += ctx =>
+			{
+				ctx.engine.Fault += e_Fault;
+				ctx.engine.ReproFault += e_ReproFault;
+			};
+
+			e.IterationStarting += (ctx, it, tot) =>
+			{
+				if (it == 2)
+					ctx.InjectFault();
+			};
+
+			e.startFuzzing(dom, config);
+		}
+
+		void e_ReproFault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faultData)
+		{
+			VerifyFaults("Reproducing", context, currentIteration);
+		}
+
+		void e_Fault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faultData)
+		{
+			VerifyFaults("Faults", context, currentIteration);
+		}
+
+		void VerifyFaults(string dir, RunContext context, uint currentIteration)
+		{
+			var pub = context.dom.tests[0].publishers[0] as TestPub;
+			Assert.NotNull(pub);
+			Assert.AreEqual(6, pub.outputs.Count);
+
+			var logger = context.dom.tests[0].loggers[0] as JobLogger;
+			Assert.NotNull(logger);
+
+			var subdir = Directory.EnumerateDirectories(logger.BasePath).FirstOrDefault();
+			Assert.NotNull(subdir);
+
+			var fullPath = Path.Combine(logger.BasePath, subdir, dir, "UnitTest", currentIteration.ToString());
+
+			var files = Directory.EnumerateFiles(fullPath, "*.bin").ToList();
+			Assert.AreEqual(12, files.Count);
+
+			var actual = File.ReadAllBytes(Path.Combine(fullPath, "1.Initial.DoCall.Param.In.bin"));
+			Assert.AreEqual(actual, pub.outputs[0]);
+
+			actual = File.ReadAllBytes(Path.Combine(fullPath, "2.Initial.DoCall.MyParam2.In.bin"));
+			Assert.AreEqual(actual, pub.outputs[1]);
+
+			// In half of param
+			actual = File.ReadAllBytes(Path.Combine(fullPath, "3.Initial.DoCall.MyParam3.In.bin"));
+			Assert.AreEqual(actual, Encoding.ASCII.GetBytes("inout"));
+			Assert.AreEqual(actual, pub.outputs[2]);
+
+			// Out half of param
+			actual = File.ReadAllBytes(Path.Combine(fullPath, "4.Initial.DoCall.MyParam3.Out.bin"));
+			Assert.AreEqual(actual, Encoding.ASCII.GetBytes("MyParam3"));
+
+			// Out param
+			actual = File.ReadAllBytes(Path.Combine(fullPath, "5.Initial.DoCall.MyParam4.Out.bin"));
+			Assert.AreEqual(actual, Encoding.ASCII.GetBytes("MyParam4"));
+
+			actual = File.ReadAllBytes(Path.Combine(fullPath, "6.Initial.DoCall.Result.bin"));
+			Assert.AreEqual(actual, Encoding.ASCII.GetBytes("Result!"));
+
+			actual = File.ReadAllBytes(Path.Combine(fullPath, "7.Request.RecvReq.bin"));
+			Assert.AreEqual(new byte[] { 1, (byte)'X' }, actual);
+
+			actual = File.ReadAllBytes(Path.Combine(fullPath, "8.XResponse.OutputX.bin"));
+			Assert.AreEqual(pub.outputs[3], actual);
+
+			actual = File.ReadAllBytes(Path.Combine(fullPath, "9.Request.RecvReq.bin"));
+			Assert.AreEqual(new byte[] { 2, (byte)'X' }, actual);
+
+			actual = File.ReadAllBytes(Path.Combine(fullPath, "10.XResponse.OutputX.bin"));
+			Assert.AreEqual(pub.outputs[4], actual);
+
+			actual = File.ReadAllBytes(Path.Combine(fullPath, "11.Request.RecvReq.bin"));
+			Assert.AreEqual(new byte[] { 3, (byte)'Y' }, actual);
+
+			actual = File.ReadAllBytes(Path.Combine(fullPath, "12.YResponse.OutputY.bin"));
+			Assert.AreEqual(pub.outputs[5], actual);
+		}
+
+		class TestPub : StreamPublisher
+		{
+			private static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
+
+			protected override Logger Logger { get { return logger; } }
+
+			private int cnt;
+
+			public readonly List<byte[]> outputs = new List<byte[]>();
+
+			public TestPub()
+				: base(new Dictionary<string, Variant>())
+			{
+				Name = "Pub";
+				stream = new MemoryStream();
+			}
+
+			protected override void OnOpen()
+			{
+				cnt = 0;
+				outputs.Clear();
+			}
+
+			protected override void OnInput()
+			{
+				++cnt;
+
+				stream.SetLength(0);
+				stream.WriteByte((byte)cnt);
+
+				if (cnt == 3)
+					stream.WriteByte((byte)'Y');
+				else
+					stream.WriteByte((byte)'X');
+
+				stream.Position = 0;
+			}
+
+			protected override void OnOutput(BitwiseStream data)
+			{
+				outputs.Add(data.ToArray());
+			}
+
+			protected override Variant OnCall(string method, List<ActionParameter> args)
+			{
+				foreach (var item in args)
+				{
+					if (item.type != ActionParameter.Type.Out)
+						outputs.Add(item.dataModel.Value.ToArray());
+					if (item.type != ActionParameter.Type.In)
+						item.Crack(new BitStream(Encoding.ASCII.GetBytes(item.Name)));
+				}
+				return new Variant(new BitStream(Encoding.ASCII.GetBytes("Result!")));
 			}
 		}
 	}
