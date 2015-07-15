@@ -820,6 +820,7 @@ namespace Peach.Pro.Core.Loggers
 			{
 				var job = db.GetJob(id);
 				job.StopDate = DateTime.Now;
+				job.HeartBeat = job.StopDate;
 				job.Status = JobStatus.Stopped;
 				db.UpdateJob(job);
 				db.PassPendingTestEvents(id);
