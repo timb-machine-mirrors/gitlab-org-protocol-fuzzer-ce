@@ -130,7 +130,7 @@ namespace PitTester
 			defs = PitDefines.Evaluate(defs);
 
 			var args = new Dictionary<string, object>();
-			args[PitParser.DEFINED_VALUES] = defs;
+			args[PitParser.DefinedValues] = defs;
 
 			var parser = new PitParser();
 
@@ -303,7 +303,7 @@ namespace PitTester
 			}
 
 			var args = new Dictionary<string, object>();
-			args[PitParser.DEFINED_VALUES] = defs;
+			args[PitParser.DefinedValues] = defs;
 
 			var parser = new PitParser();
 
@@ -723,7 +723,7 @@ namespace PitTester
 					var defs = PitParser.parseDefines(fileName + ".config");
 					defs.Insert(0, new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
 					defs = PitDefines.Evaluate(defs);
-					args[PitParser.DEFINED_VALUES] = defs;
+					args[PitParser.DefinedValues] = defs;
 					new GodelPitParser().asParser(args, fileName);
 				}
 			}

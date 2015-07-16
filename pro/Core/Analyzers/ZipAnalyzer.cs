@@ -22,10 +22,10 @@ namespace Peach.Pro.Core.Analyzers
 
 		protected Dictionary<string, string> mappings = new Dictionary<string, string>();
 
-		public new static readonly bool supportParser = false;
-		public new static readonly bool supportDataElement = true;
-		public new static readonly bool supportCommandLine = false;
-		public new static readonly bool supportTopLevel = false;
+		public new static readonly bool SupportParser = false;
+		public new static readonly bool SupportDataElement = true;
+		public new static readonly bool SupportCommandLine = false;
+		public new static readonly bool SupportTopLevel = false;
 
 		public ZipAnalyzer()
 		{

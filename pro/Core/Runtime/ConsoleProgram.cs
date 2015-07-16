@@ -325,8 +325,8 @@ namespace Peach.Pro.Core.Runtime
 		protected virtual Analyzer GetParser()
 		{
 			var parser = new GodelPitParser();
-			Analyzer.defaultParser = parser;
-			return Analyzer.defaultParser;
+			Analyzer.DefaultParser = parser;
+			return Analyzer.DefaultParser;
 		}
 
 		/// <summary>
@@ -462,7 +462,7 @@ namespace Peach.Pro.Core.Runtime
 				var defs = ParseDefines();
 
 				var parserArgs = new Dictionary<string, object>();
-				parserArgs[PitParser.DEFINED_VALUES] = defs;
+				parserArgs[PitParser.DefinedValues] = defs;
 
 				var parser = GetParser();
 
