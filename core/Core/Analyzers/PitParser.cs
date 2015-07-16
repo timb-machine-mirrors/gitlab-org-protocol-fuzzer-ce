@@ -27,21 +27,25 @@
 // $Id$
 
 using System;
-using System.Xml;
-using System.Xml.Schema;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.IO;
-using System.Reflection;
-using System.Linq;
-
+using System.Xml;
+using System.Xml.Schema;
 using NLog;
 using Peach.Core.Agent;
 using Peach.Core.Dom;
+using Peach.Core.Dom.Actions;
 using Peach.Core.IO;
-using System.Net;
+using Action = Peach.Core.Dom.Action;
+using Array = Peach.Core.Dom.Array;
 using Monitor = Peach.Core.Dom.Monitor;
+using String = Peach.Core.Dom.String;
+using XmlElement = System.Xml.XmlElement;
 
 namespace Peach.Core.Analyzers
 {
@@ -51,41 +55,37 @@ namespace Peach.Core.Analyzers
 	/// </summary>
 	public class PitParser : Analyzer
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		public new static readonly bool supportParser = true;
-		public new static readonly bool supportDataElement = false;
-		public new static readonly bool supportCommandLine = false;
-		public new static readonly bool supportTopLevel = false;
+		public new static readonly bool SupportParser = true;
+		public new static readonly bool SupportDataElement = false;
+		public new static readonly bool SupportCommandLine = false;
+		public new static readonly bool SupportTopLevel = false;
 
 		/// <summary>
 		/// args key for passing a dictionary of defined values to replace.
 		/// </summary>
-		public static string DEFINED_VALUES = "DefinedValues";
+		public static string DefinedValues = "DefinedValues";
 
-		static readonly string PEACH_NAMESPACE_URI = "http://peachfuzzer.com/2012/Peach";
+		static readonly string PeachNamespaceUri = "http://peachfuzzer.com/2012/Peach";
 
 		/// <summary>
 		/// Contains default attributes for DataElements
 		/// </summary>
-		Dictionary<Type, Dictionary<string, string>> dataElementDefaults = new Dictionary<Type, Dictionary<string, string>>();
+		readonly Dictionary<Type, Dictionary<string, string>> _dataElementDefaults = new Dictionary<Type, Dictionary<string, string>>();
 
 		/// <summary>
 		/// Mapping of XML ELement names to type as provided by PitParsableAttribute
 		/// </summary>
-		static Dictionary<string, Type> dataElementPitParsable = new Dictionary<string, Type>();
-		static Dictionary<string, Type> dataModelPitParsable = new Dictionary<string, Type>();
-		static readonly string[] dataElementCommon = { "Relation", "Fixup", "Transformer", "Hint", "Analyzer", "Placement" };
+		static readonly Dictionary<string, Type> DataElementPitParsable = new Dictionary<string, Type>();
+		static readonly Dictionary<string, Type> DataModelPitParsable = new Dictionary<string, Type>();
+		static readonly string[] DataElementCommon = { "Relation", "Fixup", "Transformer", "Hint", "Analyzer", "Placement" };
 
 		static PitParser()
 		{
 			populatePitParsable();
 
-			Analyzer.defaultParser = new PitParser();
-		}
-
-		public PitParser()
-		{
+			DefaultParser = new PitParser();
 		}
 
 		public static List<KeyValuePair<string, string>> parseDefines(string definedValuesFile)
@@ -93,12 +93,12 @@ namespace Peach.Core.Analyzers
 			var ret = new OrderedDictionary<string, string>();
 			var keys = new HashSet<string>();
 
-			string normalized = Path.GetFullPath(definedValuesFile);
+			var normalized = Path.GetFullPath(definedValuesFile);
 
 			if (!File.Exists(normalized))
 				throw new PeachException("Error, defined values file \"" + definedValuesFile + "\" does not exist.");
 
-			XmlDocument xmlDoc = new XmlDocument();
+			var xmlDoc = new XmlDocument();
 			xmlDoc.Load(normalized);
 
 			var root = xmlDoc.FirstChild;
@@ -157,7 +157,7 @@ namespace Peach.Core.Analyzers
 					}
 				}
 
-				string include = node.getAttr("include", null);
+				var include = node.getAttr("include", null);
 				if (include != null)
 				{
 					var other = parseDefines(include);
@@ -170,8 +170,8 @@ namespace Peach.Core.Analyzers
 					if (defNode is XmlComment)
 						continue;
 
-					string key = defNode.getAttr("key", null);
-					string value = defNode.getAttr("value", null);
+					var key = defNode.getAttr("key", null);
+					var value = defNode.getAttr("value", null);
 
 					if (key == null || value == null)
 						throw new PeachException("Error, Define elements in definition file must have both key and value attributes.");
@@ -205,7 +205,7 @@ namespace Peach.Core.Analyzers
 		{
 			public static void Reset()
 			{
-				DataElement._uniqueName = 0;
+				_uniqueName = 0;
 			}
 
 			public override void WritePit(XmlWriter pit)
@@ -219,9 +219,9 @@ namespace Peach.Core.Analyzers
 			return new Dom.Dom();
 		}
 
-		protected virtual Dom.StateModel CreateStateModel()
+		protected virtual StateModel CreateStateModel()
 		{
-			return new Dom.StateModel();
+			return new StateModel();
 		}
 
 		protected virtual Dom.Dom asParser(Dictionary<string, object> args, TextReader data, string dataName, bool parse)
@@ -258,7 +258,7 @@ namespace Peach.Core.Analyzers
 			var xml = data.ReadToEnd();
 
 			object obj;
-			if (args != null && args.TryGetValue(DEFINED_VALUES, out obj))
+			if (args != null && args.TryGetValue(DefinedValues, out obj))
 			{
 				var definedValues = (IEnumerable<KeyValuePair<string, string>>)obj;
 				var sb = new StringBuilder(xml);
@@ -279,9 +279,9 @@ namespace Peach.Core.Analyzers
 			foreach (var kv in ClassLoader.GetAllByAttribute<PitParsableAttribute>(null))
 			{
 				if (kv.Key.topLevel)
-					dataModelPitParsable[kv.Key.xmlElementName] = kv.Value;
+					DataModelPitParsable[kv.Key.xmlElementName] = kv.Value;
 				else
-					dataElementPitParsable[kv.Key.xmlElementName] = kv.Value;
+					DataElementPitParsable[kv.Key.xmlElementName] = kv.Value;
 			}
 		}
 
@@ -306,14 +306,16 @@ namespace Peach.Core.Analyzers
 			var xsd = Utilities.GetAppResourcePath("peach.xsd");
 			using (var tr = XmlReader.Create(xsd))
 			{
-				set.Add(PEACH_NAMESPACE_URI, tr);
+				set.Add(PeachNamespaceUri, tr);
 			}
 
-			var settings = new XmlReaderSettings();
-			settings.ValidationType = ValidationType.Schema;
-			settings.Schemas = set;
-			settings.NameTable = new NameTable();
-			settings.ValidationEventHandler += delegate(object sender, ValidationEventArgs e)
+			var settings = new XmlReaderSettings
+			{
+				ValidationType = ValidationType.Schema,
+				Schemas = set,
+				NameTable = new NameTable()
+			};
+			settings.ValidationEventHandler += (sender, e) =>
 			{
 				var ex = e.Exception;
 
@@ -324,7 +326,7 @@ namespace Peach.Core.Analyzers
 
 			// Default the namespace to peach
 			var nsMgr = new XmlNamespaceManager(settings.NameTable);
-			nsMgr.AddNamespace("", PEACH_NAMESPACE_URI);
+			nsMgr.AddNamespace("", PeachNamespaceUri);
 
 			var parserCtx = new XmlParserContext(settings.NameTable, nsMgr, null, XmlSpace.Default);
 			var ret = new XmlDocument();
@@ -354,8 +356,8 @@ namespace Peach.Core.Analyzers
 
 		public static void displayDataModel(DataElement elem, int indent = 0)
 		{
-			string sIndent = "";
-			for (int i = 0; i < indent; i++)
+			var sIndent = "";
+			for (var i = 0; i < indent; i++)
 				sIndent += "  ";
 
 			Console.WriteLine(sIndent + string.Format("{0}: {1}", elem.GetHashCode(), elem.Name));
@@ -396,14 +398,14 @@ namespace Peach.Core.Analyzers
 				switch (child.Name)
 				{
 					case "Include":
-						string ns = child.getAttrString("ns");
-						string fileName = child.getAttrString("src");
+						var ns = child.getAttrString("ns");
+						var fileName = child.getAttrString("src");
 						fileName = fileName.Replace("file:", "");
-						string normalized = Path.GetFullPath(fileName);
+						var normalized = Path.GetFullPath(fileName);
 
 						if (!File.Exists(normalized))
 						{
-							string newFileName = Utilities.GetAppResourcePath(fileName);
+							var newFileName = Utilities.GetAppResourcePath(fileName);
 							normalized = Path.GetFullPath(newFileName);
 							if (!File.Exists(normalized))
 								throw new PeachException("Error, Unable to locate Pit file [" + fileName + "].\n");
@@ -507,7 +509,7 @@ namespace Peach.Core.Analyzers
 					}
 					catch (ArgumentException)
 					{
-						var entry = dataModelPitParsable.Where(kv => kv.Value == dm.GetType()).Select(kv => kv.Key).FirstOrDefault();
+						var entry = DataModelPitParsable.Where(kv => kv.Value == dm.GetType()).Select(kv => kv.Key).FirstOrDefault();
 						var name = entry != null ? "<" + entry + ">" : "Data Model";
 						throw new PeachException("Error, a " + name + " element named '" + dm.Name + "' already exists.");
 					}
@@ -544,7 +546,7 @@ namespace Peach.Core.Analyzers
 			{
 				if (child.Name == "StateModel")
 				{
-					StateModel sm = handleStateModel(child, dom);
+					var sm = handleStateModel(child, dom);
 
 					try
 					{
@@ -558,7 +560,7 @@ namespace Peach.Core.Analyzers
 
 				if (child.Name == "Agent")
 				{
-					Dom.Agent agent = handleAgent(child);
+					var agent = handleAgent(child);
 
 					try
 					{
@@ -577,7 +579,7 @@ namespace Peach.Core.Analyzers
 			{
 				if (child.Name == "Test")
 				{
-					Test test = handleTest(child, dom);
+					var test = handleTest(child, dom);
 
 					try
 					{
@@ -599,7 +601,7 @@ namespace Peach.Core.Analyzers
 		{
 			foreach (XmlNode child in node.ChildNodes)
 			{
-				Dictionary<string, string> args = new Dictionary<string, string>();
+				var args = new Dictionary<string, string>();
 
 				switch (child.Name)
 				{
@@ -611,7 +613,7 @@ namespace Peach.Core.Analyzers
 						if (child.hasAttr("valueType"))
 							args["valueType"] = child.getAttrString("valueType");
 
-						dataElementDefaults[typeof(Number)] = args;
+						_dataElementDefaults[typeof(Number)] = args;
 						break;
 					case "String":
 						if (child.hasAttr("lengthType"))
@@ -625,7 +627,7 @@ namespace Peach.Core.Analyzers
 						if (child.hasAttr("valueType"))
 							args["valueType"] = child.getAttrString("valueType");
 
-						dataElementDefaults[typeof(Dom.String)] = args;
+						_dataElementDefaults[typeof(String)] = args;
 						break;
 					case "Flags":
 						if (child.hasAttr("endian"))
@@ -633,7 +635,7 @@ namespace Peach.Core.Analyzers
 						if (child.hasAttr("size"))
 							args["size"] = child.getAttrString("size");
 
-						dataElementDefaults[typeof(Flags)] = args;
+						_dataElementDefaults[typeof(Flags)] = args;
 						break;
 					case "Blob":
 						if (child.hasAttr("lengthType"))
@@ -641,7 +643,7 @@ namespace Peach.Core.Analyzers
 						if (child.hasAttr("valueType"))
 							args["valueType"] = child.getAttrString("valueType");
 
-						dataElementDefaults[typeof(Blob)] = args;
+						_dataElementDefaults[typeof(Blob)] = args;
 						break;
 					default:
 						throw new PeachException("Error, defaults not supported for '" + child.Name + "'.");
@@ -655,7 +657,7 @@ namespace Peach.Core.Analyzers
 
 		protected virtual Dom.Agent handleAgent(XmlNode node)
 		{
-			Dom.Agent agent = new Dom.Agent();
+			var agent = new Dom.Agent();
 
 			agent.Name = node.getAttrString("name");
 			agent.location = node.getAttr("location", null);
@@ -668,7 +670,7 @@ namespace Peach.Core.Analyzers
 			{
 				if (child.Name == "Monitor")
 				{
-					Dom.Monitor monitor = new Monitor();
+					var monitor = new Monitor();
 
 					monitor.cls = child.getAttrString("class");
 					monitor.Name = child.getAttr("name", agent.monitors.UniqueName());
@@ -700,7 +702,7 @@ namespace Peach.Core.Analyzers
 		public string getDefaultAttr(Type type, string key, string defaultValue)
 		{
 			Dictionary<string, string> defaults = null;
-			if (!dataElementDefaults.TryGetValue(type, out defaults))
+			if (!_dataElementDefaults.TryGetValue(type, out defaults))
 				return defaultValue;
 
 			string value = null;
@@ -712,7 +714,7 @@ namespace Peach.Core.Analyzers
 
 		public bool getDefaultAttr(Type type, string key, bool defaultValue)
 		{
-			string value = getDefaultAttr(type, key, null);
+			var value = getDefaultAttr(type, key, null);
 
 			switch (value)
 			{
@@ -731,7 +733,7 @@ namespace Peach.Core.Analyzers
 
 		public int getDefaultAttr(Type type, string key, int defaultValue)
 		{
-			string value = getDefaultAttr(type, key, null);
+			var value = getDefaultAttr(type, key, null);
 			if (value == null)
 				return defaultValue;
 
@@ -744,7 +746,7 @@ namespace Peach.Core.Analyzers
 
 		public char getDefaultAttr(Type type, string key, char defaultValue)
 		{
-			string value = getDefaultAttr(type, key, null);
+			var value = getDefaultAttr(type, key, null);
 			if (value == null)
 				return defaultValue;
 
@@ -765,7 +767,7 @@ namespace Peach.Core.Analyzers
 
 		static string ReplaceSlash(Match m)
 		{
-			string s = m.ToString();
+			var s = m.ToString();
 
 			switch (s)
 			{
@@ -835,7 +837,7 @@ namespace Peach.Core.Analyzers
 
 			if (node.hasAttr("length"))
 			{
-				int length = node.getAttrInt("length");
+				var length = node.getAttrInt("length");
 
 				try
 				{
@@ -903,19 +905,19 @@ namespace Peach.Core.Analyzers
 
 				Type dataElementType;
 
-				if (!dataElementPitParsable.TryGetValue(child.Name, out dataElementType))
+				if (!DataElementPitParsable.TryGetValue(child.Name, out dataElementType))
 				{
-					if (((IList<string>)dataElementCommon).Contains(child.Name))
+					if (((IList<string>)DataElementCommon).Contains(child.Name))
 						continue;
 					else
 						throw new PeachException("Error, found unknown data element in pit file: " + child.Name);
 				}
 
-				MethodInfo pitParsableMethod = dataElementType.GetMethod("PitParser");
+				var pitParsableMethod = dataElementType.GetMethod("PitParser");
 				if (pitParsableMethod == null)
 					throw new PeachException("Error, type with PitParsableAttribute is missing static PitParser(...) method: " + dataElementType.FullName);
 
-				PitParserDelegate delegateAction = Delegate.CreateDelegate(typeof(PitParserDelegate), pitParsableMethod) as PitParserDelegate;
+				var delegateAction = Delegate.CreateDelegate(typeof(PitParserDelegate), pitParsableMethod) as PitParserDelegate;
 
 				// Prevent dots from being in the name for element construction, they get resolved afterwards
 				string childName = null;
@@ -937,9 +939,9 @@ namespace Peach.Core.Analyzers
 				if (child.hasAttr("minOccurs") || child.hasAttr("maxOccurs") || child.hasAttr("occurs"))
 				{
 					// Ensure the array has the same name as the 1st element
-					((System.Xml.XmlElement)child).SetAttribute("name", elem.Name);
+					((XmlElement)child).SetAttribute("name", elem.Name);
 
-					var array = Dom.Array.PitParser(this, child, element) as Dom.Array;
+					var array = Array.PitParser(this, child, element) as Array;
 
 					// Set the original element
 					array.OriginalElement = elem;
@@ -993,7 +995,7 @@ namespace Peach.Core.Analyzers
 			if (!node.hasAttr("value"))
 				return;
 
-			string value = node.getAttrString("value");
+			var value = node.getAttrString("value");
 
 			value = reEscapeSlash.Replace(value, new MatchEvaluator(ReplaceSlash));
 
@@ -1056,13 +1058,13 @@ namespace Peach.Core.Analyzers
 					element.DefaultValue = new Variant(value);
 					break;
 				case "ipv4":
-					if (!IPAddress.TryParse(value, out asIp) || asIp.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
+					if (!IPAddress.TryParse(value, out asIp) || asIp.AddressFamily != AddressFamily.InterNetwork)
 						throw new PeachException("Error, the value '" + value + "' of " + element.debugName + " is not a valid IPv4 address.");
 
 					element.DefaultValue = new Variant(asIp.GetAddressBytes());
 					break;
 				case "ipv6":
-					if (!IPAddress.TryParse(value, out asIp) || asIp.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6)
+					if (!IPAddress.TryParse(value, out asIp) || asIp.AddressFamily != AddressFamily.InterNetworkV6)
 						throw new PeachException("Error, the value '" + value + "' of " + element.debugName + " is not a valid IPv6 address.");
 
 					element.DefaultValue = new Variant(asIp.GetAddressBytes());
@@ -1080,18 +1082,18 @@ namespace Peach.Core.Analyzers
 		protected DataModel handleDataModel(XmlNode node, Dom.Dom dom, DataModel old)
 		{
 			Type type;
-			if (!dataModelPitParsable.TryGetValue(node.Name, out type))
+			if (!DataModelPitParsable.TryGetValue(node.Name, out type))
 				return old;
 
 			if (old != null)
 				throw new PeachException("Error, more than one {0} not allowed. XML:\n{1}".Fmt(
-					string.Join(",", dataModelPitParsable.Keys), node.OuterXml));
+					string.Join(",", DataModelPitParsable.Keys), node.OuterXml));
 
-			MethodInfo pitParsableMethod = type.GetMethod("PitParser");
+			var pitParsableMethod = type.GetMethod("PitParser");
 			if (pitParsableMethod == null)
 				throw new PeachException("Error, type with PitParsableAttribute is missing static PitParser(...) method: " + type.FullName);
 
-			PitParserTopLevelDelegate delegateAction = Delegate.CreateDelegate(typeof(PitParserTopLevelDelegate), pitParsableMethod) as PitParserTopLevelDelegate;
+			var delegateAction = Delegate.CreateDelegate(typeof(PitParserTopLevelDelegate), pitParsableMethod) as PitParserTopLevelDelegate;
 
 			var dataModel = delegateAction(this, node, dom);
 			if (dataModel == null)
@@ -1146,12 +1148,12 @@ namespace Peach.Core.Analyzers
 		{
 			var hint = new Hint(node.getAttrString("name"), node.getAttrString("value"));
 			element.Hints.Add(hint.Name, hint);
-			logger.Trace("handleHint: " + hint.Name + ": " + hint.Value);
+			Logger.Trace("handleHint: " + hint.Name + ": " + hint.Value);
 		}
 
 		protected void handlePlacement(XmlNode node, DataElement element)
 		{
-			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
+			var args = new Dictionary<string, Variant>();
 
 			if (node.hasAttr("after"))
 				args["after"] = new Variant(node.getAttrString("after"));
@@ -1160,19 +1162,19 @@ namespace Peach.Core.Analyzers
 			else
 				throw new PeachException("Error, Placement on element \"" + element.Name + "\" is missing 'after' or 'before' attribute.");
 
-			Placement placement = new Placement(args);
+			var placement = new Placement(args);
 			element.placement = placement;
 		}
 
 		protected void handleRelation(XmlNode node, DataElement parent)
 		{
-			string value = node.getAttrString("type");
+			var value = node.getAttrString("type");
 			switch (value)
 			{
 				case "size":
 					if (node.hasAttr("of"))
 					{
-						SizeRelation rel = new SizeRelation(parent);
+						var rel = new SizeRelation(parent);
 						rel.OfName = node.getAttrString("of");
 
 						if (node.hasAttr("expressionGet"))
@@ -1194,7 +1196,7 @@ namespace Peach.Core.Analyzers
 				case "count":
 					if (node.hasAttr("of"))
 					{
-						CountRelation rel = new CountRelation(parent);
+						var rel = new CountRelation(parent);
 						rel.OfName = node.getAttrString("of");
 
 						if (node.hasAttr("expressionGet"))
@@ -1208,7 +1210,7 @@ namespace Peach.Core.Analyzers
 				case "offset":
 					if (node.hasAttr("of"))
 					{
-						OffsetRelation rel = new OffsetRelation(parent);
+						var rel = new OffsetRelation(parent);
 						rel.OfName = node.getAttrString("of");
 
 						if (node.hasAttr("expressionGet"))
@@ -1239,9 +1241,9 @@ namespace Peach.Core.Analyzers
 
 		protected virtual StateModel handleStateModel(XmlNode node, Dom.Dom parent)
 		{
-			string name = node.getAttrString("name");
-			string initialState = node.getAttrString("initialState");
-			StateModel stateModel = CreateStateModel();
+			var name = node.getAttrString("name");
+			var initialState = node.getAttrString("initialState");
+			var stateModel = CreateStateModel();
 			stateModel.Name = name;
 			stateModel.parent = parent;
 
@@ -1249,7 +1251,7 @@ namespace Peach.Core.Analyzers
 			{
 				if (child.Name == "State")
 				{
-					State state = handleState(child, stateModel);
+					var state = handleState(child, stateModel);
 
 					try
 					{
@@ -1277,7 +1279,7 @@ namespace Peach.Core.Analyzers
 
 		protected virtual State handleState(XmlNode node, StateModel parent)
 		{
-			State state = new State();
+			var state = new State();
 			state.parent = parent;
 			state.Name = node.getAttr("name", parent.states.UniqueName());
 			state.onStart = node.getAttr("onStart", null);
@@ -1287,7 +1289,7 @@ namespace Peach.Core.Analyzers
 			{
 				if (child.Name == "Action")
 				{
-					Core.Dom.Action action = handleAction(child, state);
+					var action = handleAction(child, state);
 
 					try
 					{
@@ -1307,7 +1309,7 @@ namespace Peach.Core.Analyzers
 
 		#region Action
 
-		protected virtual void handleActionAttr(XmlNode node, Dom.Action action, params string[] badAttrs)
+		protected virtual void handleActionAttr(XmlNode node, Action action, params string[] badAttrs)
 		{
 			foreach (var attr in badAttrs)
 				if (node.hasAttr(attr))
@@ -1318,9 +1320,9 @@ namespace Peach.Core.Analyzers
 						attr));
 		}
 
-		protected virtual void handleActionParameter(XmlNode node, Dom.Actions.Call action)
+		protected virtual void handleActionParameter(XmlNode node, Call action)
 		{
-			string strType = node.getAttr("type", "in");
+			var strType = node.getAttr("type", "in");
 			ActionParameter.Type type;
 			if (!Enum.TryParse(strType, true, out type))
 				throw new PeachException("Error, type attribute '{0}' on <Param> child of action '{1}.{2}.{3}' is invalid.".Fmt(
@@ -1353,7 +1355,7 @@ namespace Peach.Core.Analyzers
 			}
 		}
 
-		protected virtual void handleActionResult(XmlNode node, Dom.Actions.Call action)
+		protected virtual void handleActionResult(XmlNode node, Call action)
 		{
 			action.result = new ActionResult()
 			{
@@ -1363,7 +1365,7 @@ namespace Peach.Core.Analyzers
 			handleActionData(node, action.result, "<Result> child of ", false);
 		}
 
-		protected virtual void handleActionCall(XmlNode node, Dom.Actions.Call action)
+		protected virtual void handleActionCall(XmlNode node, Call action)
 		{
 			action.method = node.getAttrString("method");
 
@@ -1378,14 +1380,14 @@ namespace Peach.Core.Analyzers
 			handleActionAttr(node, action, "ref", "property", "setXpath", "valueXpath");
 		}
 
-		protected virtual void handleActionChangeState(XmlNode node, Dom.Actions.ChangeState action)
+		protected virtual void handleActionChangeState(XmlNode node, ChangeState action)
 		{
 			action.reference = node.getAttrString("ref");
 
 			handleActionAttr(node, action, "method", "property", "setXpath", "valueXpath");
 		}
 
-		protected virtual void handleActionSlurp(XmlNode node, Dom.Actions.Slurp action)
+		protected virtual void handleActionSlurp(XmlNode node, Slurp action)
 		{
 			action.setXpath = node.getAttrString("setXpath");
 			action.valueXpath = node.getAttrString("valueXpath");
@@ -1393,7 +1395,7 @@ namespace Peach.Core.Analyzers
 			handleActionAttr(node, action, "ref", "method", "property");
 		}
 
-		protected virtual void handleActionSetProperty(XmlNode node, Dom.Actions.SetProperty action)
+		protected virtual void handleActionSetProperty(XmlNode node, SetProperty action)
 		{
 			action.property = node.getAttrString("property");
 			action.data = new ActionData()
@@ -1406,7 +1408,7 @@ namespace Peach.Core.Analyzers
 			handleActionAttr(node, action, "ref", "method", "setXpath", "valueXpath");
 		}
 
-		protected virtual void handleActionGetProperty(XmlNode node, Dom.Actions.GetProperty action)
+		protected virtual void handleActionGetProperty(XmlNode node, GetProperty action)
 		{
 			action.property = node.getAttrString("property");
 			action.data = new ActionData()
@@ -1419,7 +1421,7 @@ namespace Peach.Core.Analyzers
 			handleActionAttr(node, action, "ref", "method", "setXpath", "valueXpath");
 		}
 
-		protected virtual void handleActionOutput(XmlNode node, Dom.Actions.Output action)
+		protected virtual void handleActionOutput(XmlNode node, Output action)
 		{
 			action.data = new ActionData()
 			{
@@ -1431,7 +1433,7 @@ namespace Peach.Core.Analyzers
 			handleActionAttr(node, action, "ref", "method", "property", "setXpath", "valueXpath");
 		}
 
-		protected virtual void handleActionInput(XmlNode node, Dom.Actions.Input action)
+		protected virtual void handleActionInput(XmlNode node, Input action)
 		{
 			action.data = new ActionData()
 			{
@@ -1492,7 +1494,7 @@ namespace Peach.Core.Analyzers
 					data.action.Name));
 		}
 
-		protected virtual Dom.Action handleAction(XmlNode node, State parent)
+		protected virtual Action handleAction(XmlNode node, State parent)
 		{
 			var strType = node.getAttrString("type");
 			var type = ClassLoader.FindTypeByAttribute<ActionAttribute>((t, a) => 0 == string.Compare(a.Name, strType, true));
@@ -1501,7 +1503,7 @@ namespace Peach.Core.Analyzers
 
 			var name = node.getAttr("name", parent.actions.UniqueName());
 
-			var action = (Dom.Action)Activator.CreateInstance(type);
+			var action = (Action)Activator.CreateInstance(type);
 
 			action.Name = name;
 			action.parent = parent;
@@ -1510,20 +1512,20 @@ namespace Peach.Core.Analyzers
 			action.onStart = node.getAttr("onStart", null);
 			action.onComplete = node.getAttr("onComplete", null);
 
-			if (action is Dom.Actions.Call)
-				handleActionCall(node, (Dom.Actions.Call)action);
-			else if (action is Dom.Actions.ChangeState)
-				handleActionChangeState(node, (Dom.Actions.ChangeState)action);
-			else if (action is Dom.Actions.Slurp)
-				handleActionSlurp(node, (Dom.Actions.Slurp)action);
-			else if (action is Dom.Actions.GetProperty)
-				handleActionGetProperty(node, (Dom.Actions.GetProperty)action);
-			else if (action is Dom.Actions.SetProperty)
-				handleActionSetProperty(node, (Dom.Actions.SetProperty)action);
-			else if (action is Dom.Actions.Input)
-				handleActionInput(node, (Dom.Actions.Input)action);
-			else if (action is Dom.Actions.Output)
-				handleActionOutput(node, (Dom.Actions.Output)action);
+			if (action is Call)
+				handleActionCall(node, (Call)action);
+			else if (action is ChangeState)
+				handleActionChangeState(node, (ChangeState)action);
+			else if (action is Slurp)
+				handleActionSlurp(node, (Slurp)action);
+			else if (action is GetProperty)
+				handleActionGetProperty(node, (GetProperty)action);
+			else if (action is SetProperty)
+				handleActionSetProperty(node, (SetProperty)action);
+			else if (action is Input)
+				handleActionInput(node, (Input)action);
+			else if (action is Output)
+				handleActionOutput(node, (Output)action);
 
 			return action;
 		}
@@ -1538,7 +1540,7 @@ namespace Peach.Core.Analyzers
 
 			if (node.hasAttr("ref"))
 			{
-				string refName = node.getAttrString("ref");
+				var refName = node.getAttrString("ref");
 
 				var other = dom.getRef<DataSet>(refName, a => a.datas);
 				if (other == null)
@@ -1591,7 +1593,7 @@ namespace Peach.Core.Analyzers
 
 						if (Directory.Exists(normalized))
 						{
-							foreach (string fileName in Directory.GetFiles(normalized))
+							foreach (var fileName in Directory.GetFiles(normalized))
 								dataSet.Add(new DataFile(dataSet, fileName));
 
 							if (dataSet.Count == 0)
@@ -1613,10 +1615,10 @@ namespace Peach.Core.Analyzers
 				}
 			}
 
-			if (node.ChildNodes.AsEnumerable().Where(n => n.Name == "Field").Any())
+			if (node.ChildNodes.AsEnumerable().Any(n => n.Name == "Field"))
 			{
 				// If this ref'd an existing Data element, clear all non FieldData children
-				if (dataSet.Where(o => !(o is DataField)).Any())
+				if (dataSet.Any(o => !(o is DataField)))
 					dataSet.Clear();
 
 				// Ensure there is a field data record we can populate
@@ -1629,7 +1631,7 @@ namespace Peach.Core.Analyzers
 				{
 					if (child.Name == "Field")
 					{
-						string name = child.getAttrString("name");
+						var name = child.getAttrString("name");
 
 						if (!dupes.Add(name))
 							throw new PeachException("Error, Data element has multiple entries for field '" + name + "'.");
@@ -1637,7 +1639,7 @@ namespace Peach.Core.Analyzers
 						DataElement tmp;
 
 						if (child.getAttr("valueType", "string").ToLower() == "string")
-							tmp = new Dom.String { stringType = StringType.utf8 };
+							tmp = new String { stringType = StringType.utf8 };
 						else
 							tmp = new Blob();
 
@@ -1671,7 +1673,7 @@ namespace Peach.Core.Analyzers
 			{
 				if (child.Name == "Mutator")
 				{
-					string name = child.getAttrString("class");
+					var name = child.getAttrString("class");
 					ret.Add(name);
 				}
 			}
@@ -1681,10 +1683,11 @@ namespace Peach.Core.Analyzers
 
 		protected virtual Test handleTest(XmlNode node, Dom.Dom parent)
 		{
-			Test test = new Test();
-			test.parent = parent;
-
-			test.Name = node.getAttrString("name");
+			var test = new Test
+			{
+				parent = parent,
+				Name = node.getAttrString("name")
+			};
 
 			if (node.hasAttr("waitTime"))
 				test.waitTime = double.Parse(node.getAttrString("waitTime"));
@@ -1812,9 +1815,9 @@ namespace Peach.Core.Analyzers
 				// StateModel
 				if (child.Name == "StateModel")
 				{
-					string strRef = child.getAttrString("ref");
+					var strRef = child.getAttrString("ref");
 
-					test.stateModel = parent.getRef<Dom.StateModel>(strRef, a => a.stateModels);
+					test.stateModel = parent.getRef<StateModel>(strRef, a => a.stateModels);
 					if (test.stateModel == null)
 						throw new PeachException("Error, could not locate StateModel named '" +
 							strRef + "' for Test '" + test.Name + "'.");
@@ -1878,7 +1881,7 @@ namespace Peach.Core.Analyzers
 				// Mutator
 				if (child.Name == "Mutators")
 				{
-					string mode = child.getAttrString("mode");
+					var mode = child.getAttrString("mode");
 
 					var list = handleMutators(child);
 
@@ -1981,7 +1984,7 @@ namespace Peach.Core.Analyzers
 							pluginType, name, extra, formatParameterAttributes(objParams)));
 				}
 
-				logger.Info(obsolete.Message);
+				Logger.Info(obsolete.Message);
 				xmlParameters.Remove(obsolete.Name);
 			}
 		}
@@ -1992,7 +1995,7 @@ namespace Peach.Core.Analyzers
 			var reversed = new List<ParameterAttribute>(publisherParameters);
 			reversed.Reverse();
 
-			string s = "\nSupported Parameters:\n\n";
+			var s = "\nSupported Parameters:\n\n";
 			foreach (var p in reversed)
 			{
 				if (p.required)
@@ -2007,14 +2010,14 @@ namespace Peach.Core.Analyzers
 
 		protected Dictionary<string, Variant> handleParams(XmlNode node)
 		{
-			Dictionary<string, Variant> ret = new Dictionary<string, Variant>();
+			var ret = new Dictionary<string, Variant>();
 			foreach (XmlNode child in node.ChildNodes)
 			{
 				if (child.Name != "Param")
 					continue;
 
-				string name = child.getAttrString("name");
-				string value = child.getAttrString("value");
+				var name = child.getAttrString("name");
+				var value = child.getAttrString("value");
 
 				if (child.hasAttr("valueType"))
 				{
