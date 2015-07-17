@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using Peach.Core;
@@ -21,7 +22,7 @@ namespace Peach.Pro.Test.Core.WebServices
 	[Peach]
 	public class PitDatabaseTests
 	{
-		string root;
+		TempDirectory root;
 		PitDatabase db;
 
 		static string remoteInclude =
@@ -107,18 +108,38 @@ namespace Peach.Pro.Test.Core.WebServices
 </PitDefines>
 ";
 
+		const string pitNoConfig =
+@"<?xml version='1.0' encoding='utf-8'?>
+<Peach>
+	<DataModel name='DM'>
+		<String/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel name='DM:DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<Strategy class='##Strategy##'/>
+		<StateModel ref='SM' />
+		<Publisher class='Null'/>
+	</Test>
+</Peach>
+";
+
 		[SetUp]
 		public void SetUp()
 		{
-			var tmp = Path.GetTempFileName();
-			File.Delete(tmp);
-			Directory.CreateDirectory(tmp);
-			root = tmp;
+			root = new TempDirectory();
 
-			var cat = Path.Combine(tmp, "Image");
+			var cat = Path.Combine(root.Path, "Image");
 			Directory.CreateDirectory(cat);
 
-			var mod = Path.Combine(tmp, "_Common", "Models", "Image");
+			var mod = Path.Combine(root.Path, "_Common", "Models", "Image");
 			Directory.CreateDirectory(mod);
 
 			File.WriteAllText(Path.Combine(mod, "IMG_Data.xml"), modelExample);
@@ -127,15 +148,13 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			db = new PitDatabase();
 			db.ValidationEventHandler += OnValidationEvent;
-			db.Load(root);
+			db.Load(root.Path);
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
-			if (root != null)
-				Directory.Delete(root, true);
-
+			root.Dispose();
 			root = null;
 			db = null;
 		}
@@ -175,9 +194,9 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void TestNoConfig()
 		{
-			File.WriteAllText(Path.Combine(root, "Image", "IMG Copy.xml"), pitExample);
+			File.WriteAllText(Path.Combine(root.Path, "Image", "IMG Copy.xml"), pitExample);
 
-			db.Load(root);
+			db.Load(root.Path);
 
 			var ent = db.Entries.ToList();
 			Assert.AreEqual(2, ent.Count);
@@ -240,7 +259,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.AreEqual(newDesc, newPit.Description);
 			Assert.AreEqual(Environment.UserName, newPit.User);
 
-			var expName = Path.Combine(root, "User", "Image", "IMG Copy.xml");
+			var expName = Path.Combine(root.Path, "User", "Image", "IMG Copy.xml");
 			Assert.AreEqual(2, newPit.Versions[0].Files.Count);
 			Assert.AreEqual(expName, newPit.Versions[0].Files[0].Name);
 
@@ -269,6 +288,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		}
 
 		[Test]
+		[ExpectedException]
 		public void TestCopyPathInFilename()
 		{
 			var pit = db.Entries.ElementAt(0);
@@ -277,14 +297,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			var newName = "../../../Foo";
 			var newDesc = "My copy of the img pit";
 
-			try
-			{
-				db.CopyPit(lib.LibraryUrl, pit.PitUrl, newName, newDesc);
-				Assert.Fail("Should throw");
-			}
-			catch (ArgumentException)
-			{
-			}
+			db.CopyPit(lib.LibraryUrl, pit.PitUrl, newName, newDesc);
 		}
 
 		[Test]
@@ -338,7 +351,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			var newXml = File.ReadAllText(newPit.Versions[0].Files[0].Name);
 			Assert.NotNull(newXml);
 
-			var expName = Path.Combine(root, "User", "Image", "IMG Copy 2.xml");
+			var expName = Path.Combine(root.Path, "User", "Image", "IMG Copy 2.xml");
 			Assert.AreEqual(2, newPit.Versions[0].Files.Count);
 			Assert.AreEqual(expName, newPit.Versions[0].Files[0].Name);
 
@@ -436,9 +449,9 @@ namespace Peach.Pro.Test.Core.WebServices
 </Peach>
 ";
 
-			File.WriteAllText(Path.Combine(root, "Image", "File.xml"), noAgents);
+			File.WriteAllText(Path.Combine(root.Path, "Image", "File.xml"), noAgents);
 
-			db = new PitDatabase(root);
+			db = new PitDatabase(root.Path);
 			Assert.NotNull(db);
 			Assert.AreEqual(2, db.Entries.Count());
 
@@ -580,7 +593,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var defs = new Dictionary<string, string>
 			{
-				{"PitLibraryPath", root}, 
+				{"PitLibraryPath", root.Path}, 
 				{"Strategy", "Random"}
 			};
 
@@ -632,32 +645,33 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			var pit = db.Entries.First();
 
-			var json = @"
+			const string json = @"
 [
-{
-	""agentUrl"":""local://"",
-	""monitors"": [
-		{
-			""monitorClass"":""WindowsDebugger"",
-			""map"": [
-				{ ""name"":""StartMode"", ""value"":""StartOnCall"" },
-			],
-		},
-		{
-			""monitorClass"":""WindowsDebugger"",
-			""map"": [
-				{ ""name"":""StartMode"", ""value"":""RestartOnEachTest"" },
-			],
-		},
-		{
-			""monitorClass"":""WindowsDebugger"",
-			""map"": [
-				{ ""name"":""StartMode"", ""value"":""StartOnEachIteration"" },
-			],
-		},
-	],
-},
+	{
+		""agentUrl"":""local://"",
+		""monitors"": [
+			{
+				""monitorClass"":""WindowsDebugger"",
+				""map"": [
+					{ ""name"":""StartMode"", ""value"":""StartOnCall"" },
+				],
+			},
+			{
+				""monitorClass"":""WindowsDebugger"",
+				""map"": [
+					{ ""name"":""StartMode"", ""value"":""RestartOnEachTest"" },
+				],
+			},
+			{
+				""monitorClass"":""WindowsDebugger"",
+				""map"": [
+					{ ""name"":""StartMode"", ""value"":""StartOnEachIteration"" },
+				],
+			}
+		]
+	}
 ]";
+
 			var agents = JsonConvert.DeserializeObject<List<Pro.Core.WebServices.Models.Agent>>(json);
 
 			PitDatabase.SaveAgents(pit, agents);
@@ -667,7 +681,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			var opts = new Dictionary<string, object>();
 			var defs = new Dictionary<string, string>
 			{
-				{"PitLibraryPath", root},
+				{"PitLibraryPath", root.Path},
 				{"Strategy", "Random"}
 			};
 			opts[PitParser.DefinedValues] = defs;
@@ -685,7 +699,6 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.True(param1.ContainsKey("StartOnCall"));
 			Assert.AreEqual("ExitIterationEvent", (string)param1["StartOnCall"]);
 
-
 			var param2 = dom.tests[0].agents[0].monitors[1].parameters;
 			Assert.AreEqual(2, param2.Count);
 			Assert.True(param2.ContainsKey("StartOnCall"));
@@ -702,9 +715,9 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void RemoteInclude()
 		{
-			File.WriteAllText(Path.Combine(root, "Image", "Remote.xml"), remoteInclude);
+			File.WriteAllText(Path.Combine(root.Path, "Image", "Remote.xml"), remoteInclude);
 
-			db = new PitDatabase(root);
+			db = new PitDatabase(root.Path);
 			Assert.NotNull(db);
 			Assert.AreEqual(2, db.Entries.Count());
 
@@ -744,10 +757,10 @@ namespace Peach.Pro.Test.Core.WebServices
 	</Test>
 </Peach>
 ";
-			File.WriteAllText(Path.Combine(root, "_Common", "Models", "Image", "My_Data.xml"), data);
-			File.WriteAllText(Path.Combine(root, "Image", "My.xml"), pit);
+			File.WriteAllText(Path.Combine(root.Path, "_Common", "Models", "Image", "My_Data.xml"), data);
+			File.WriteAllText(Path.Combine(root.Path, "Image", "My.xml"), pit);
 
-			db = new PitDatabase(root);
+			db = new PitDatabase(root.Path);
 			Assert.NotNull(db);
 			Assert.AreEqual(2, db.Entries.Count());
 
@@ -759,31 +772,9 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void GetConfigNoConfig()
 		{
-			string pit =
-@"<?xml version='1.0' encoding='utf-8'?>
-<Peach>
-	<DataModel name='DM'>
-		<String/>
-	</DataModel>
+			File.WriteAllText(Path.Combine(root.Path, "Image", "My.xml"), pitNoConfig);
 
-	<StateModel name='SM' initialState='Initial'>
-		<State name='Initial'>
-			<Action type='output'>
-				<DataModel name='DM:DM'/>
-			</Action>
-		</State>
-	</StateModel>
-
-	<Test name='Default'>
-		<Strategy class='##Strategy##'/>
-		<StateModel ref='SM' />
-		<Publisher class='Null'/>
-	</Test>
-</Peach>
-";
-			File.WriteAllText(Path.Combine(root, "Image", "My.xml"), pit);
-
-			db = new PitDatabase(root);
+			db = new PitDatabase(root.Path);
 			Assert.NotNull(db);
 			Assert.AreEqual(2, db.Entries.Count());
 
@@ -807,32 +798,10 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.AreEqual(1, db.Entries.Count());
 			Assert.AreEqual(2, db.Libraries.Count());
 
-			const string pit = 
-@"<?xml version='1.0' encoding='utf-8'?>
-<Peach>
-	<DataModel name='DM'>
-		<String/>
-	</DataModel>
+			var path = Path.Combine(root.Path, "Image", "My.xml");
+			File.WriteAllText(path, pitNoConfig);
 
-	<StateModel name='SM' initialState='Initial'>
-		<State name='Initial'>
-			<Action type='output'>
-				<DataModel name='DM:DM'/>
-			</Action>
-		</State>
-	</StateModel>
-
-	<Test name='Default'>
-		<Strategy class='##Strategy##'/>
-		<StateModel ref='SM' />
-		<Publisher class='Null'/>
-	</Test>
-</Peach>
-";
-			var path = Path.Combine(root, "Image", "My.xml");
-			File.WriteAllText(path, pit);
-
-			db = new PitDatabase(root);
+			db = new PitDatabase(root.Path);
 			Assert.NotNull(db);
 			Assert.AreEqual(2, db.Entries.Count());
 
@@ -846,11 +815,96 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			File.Delete(path);
 
-			db = new PitDatabase(root);
+			db = new PitDatabase(root.Path);
 			Assert.NotNull(db);
 			Assert.AreEqual(1, db.Entries.Count());
 
 			Assert.Null(db.Entries.FirstOrDefault(e => e.Name == "My"));
+		}
+
+		[Test]
+		public void TestConfigInjection()
+		{
+			var path = Path.Combine(root.Path, "Image", "inject.xml");
+			File.WriteAllText(path, pitNoConfig);
+
+			var asm = Assembly.GetExecutingAssembly();
+			var json = Utilities.LoadStringResource(asm, "Peach.Pro.Test.Core.Resources.pit.json");
+			var cfg = JsonConvert.DeserializeObject<PitConfig>(json);
+
+			var opts = new Dictionary<string, object>();
+			var defs = new Dictionary<string, string>
+			{
+				{"PitLibraryPath", root.Path},
+			};
+			foreach (var item in cfg.Config)
+			{
+				defs[item.Key] = item.Value;
+			}
+			opts[PitParser.DefinedValues] = defs;
+
+			var parser = new PitParser();
+			var dom = parser.asParser(opts, path);
+
+			var agents = new NamedCollection<Peach.Core.Dom.Agent>();
+			foreach (var agent in cfg.Agents)
+			{
+				agents.Add(new Peach.Core.Dom.Agent
+				{
+					Name = agent.Name ?? agents.UniqueName(),
+					location = agent.AgentUrl,
+					monitors = ConvertMonitors(agent),
+				});
+			}
+
+			foreach (var test in dom.tests)
+			{
+				test.agents = agents;
+			}
+		}
+
+		NamedCollection<Peach.Core.Dom.Monitor> ConvertMonitors(Pro.Core.WebServices.Models.Agent agent)
+		{
+			var monitors = new NamedCollection<Peach.Core.Dom.Monitor>();
+			foreach (var monitor in agent.Monitors)
+			{
+				monitors.Add(new Peach.Core.Dom.Monitor
+				{
+					cls = monitor.MonitorClass,
+					Name = monitor.Name ?? monitors.UniqueName(),
+					parameters = ConvertParameters(monitor),
+				});
+			}
+			return monitors;
+		}
+
+		private static Dictionary<string, Variant> ConvertParameters(Monitor monitor)
+		{
+			var ret = new Dictionary<string, Variant>();
+			foreach (var x in monitor.Map)
+			{
+				if (x.Name == "StartMode")
+				{
+					switch (x.Value)
+					{
+						case "StartOnCall":
+							ret.Add("StartOnCall", new Variant("ExitIterationEvent"));
+							break;
+						case "RestartOnEachTest":
+							ret.Add("StartOnCall", new Variant("StartIterationEvent"));
+							ret.Add("WaitForExitOnCall", new Variant("ExitIterationEvent"));
+							break;
+						default:
+							ret.Add("RestartOnEachTest", new Variant(false));
+							break;
+					}
+				}
+				else
+				{
+					ret.Add(x.Name, new Variant(x.Value));
+				}
+			}
+			return ret;
 		}
 	}
 }
