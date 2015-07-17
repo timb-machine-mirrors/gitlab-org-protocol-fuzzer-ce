@@ -391,7 +391,7 @@ namespace Peach.Pro.Core.Runtime
 			Console.WriteLine("Starting Analyzer");
 
 			var args = new Dictionary<string, string>();
-			for (int i = 0; i < extra.Count; i++)
+			for (var i = 0; i < extra.Count; i++)
 				args[i.ToString()] = extra[i];
 
 			analyzerInstance.asCommandLine(args);
@@ -414,7 +414,7 @@ namespace Peach.Pro.Core.Runtime
 			Console.WriteLine("Starting agent server");
 
 			var args = new Dictionary<string, string>();
-			for (int i = 0; i < extra.Count; i++)
+			for (var i = 0; i < extra.Count; i++)
 				args[i.ToString()] = extra[i];
 
 			agentServer.Run(args);
@@ -638,7 +638,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 
 		protected void ParseRange(string arg, string v)
 		{
-			string[] parts = v.Split(',');
+			var parts = v.Split(',');
 			if (parts.Length != 2)
 				throw new PeachException("Invalid range: " + v);
 
@@ -668,7 +668,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 
 		protected void ParseParallel(string arg, string v)
 		{
-			string[] parts = v.Split(',');
+			var parts = v.Split(',');
 			if (parts.Length != 2)
 				throw new PeachException("Invalid parallel value: " + v);
 
@@ -703,12 +703,12 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 
 		protected void AddNewDefine(string arg)
 		{
-			var idx = arg.IndexOf("=");
-			if (idx < 0)
+			var parts = arg.Split('=');
+			if (parts.Length != 2)
 				throw new PeachException("Error, defined values supplied via -D/--define must have an equals sign providing a key-pair set.");
 
-			var key = arg.Substring(0, idx);
-			var value = arg.Substring(idx + 1);
+			var key = parts[0];
+			var value = parts[1];
 
 			// Allow command line options to override others
 			_definedValues.RemoveAll(i => i.Key == key);

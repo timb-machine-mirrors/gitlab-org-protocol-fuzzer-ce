@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using System.Xml;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using Peach.Pro.Core.WebServices;
+using Peach.Core;
 using Peach.Core.Test;
+using Encoding = System.Text.Encoding;
 
 namespace Peach.Pro.Test.Core.WebServices
 {
@@ -19,7 +18,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void Test()
 		{
-			string json = @"
+			var json = @"
 [
     {
         ""monitors"": [
@@ -35,7 +34,7 @@ namespace Peach.Pro.Test.Core.WebServices
     }
 ]";
 
-			string pit = @"
+			var pit = @"
 <Peach>
 	<Include ns='foo' src='other'/>
 
@@ -84,7 +83,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			var final = sb.ToString();
 			Assert.NotNull(final);
 
-			string expected =
+			var expected =
 @"<Peach>
   <Include ns=""foo"" src=""other"" />
   <Test name=""Default"">
@@ -103,7 +102,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void NamespacedXml()
 		{
-			string xml =
+			var xml =
 @"<?xml version='1.0' encoding='utf-8'?>
 <Peach xmlns='http://peachfuzzer.com/2012/Peach'
        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
@@ -115,15 +114,13 @@ namespace Peach.Pro.Test.Core.WebServices
 </Peach>
 ";
 
-			string tmp = Path.GetTempFileName();
-
-			try
+			using (var tmp = new TempFile())
 			{
-				File.WriteAllText(tmp, xml);
+				File.WriteAllText(tmp.Path, xml);
 
 				var doc = new XmlDocument();
 
-				using (var rdr = XmlReader.Create(tmp))
+				using (var rdr = XmlReader.Create(tmp.Path))
 				{
 					doc.Load(rdr);
 				}
@@ -137,11 +134,6 @@ namespace Peach.Pro.Test.Core.WebServices
 
 				Assert.True(test.MoveNext());
 				Assert.AreEqual("Default", test.Current.GetAttribute("name", ""));
-
-			}
-			finally
-			{
-				File.Delete(tmp);
 			}
 		}
 
@@ -149,22 +141,20 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void WriteXmlWithAttrs()
 		{
-			string xml =
+			var xml =
 @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Peach xmlns=""http://peachfuzzer.com/2012/Peach"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xsi:schemaLocation=""http://peachfuzzer.com/2012/Peach peach.xsd"" author=""Pit Author Name"">
   <Test name=""Default"" />
 </Peach>";
 
-			string src = Path.GetTempFileName();
-			string dst = Path.GetTempFileName();
-
-			try
+			using (var src = new TempFile())
+			using (var dst = new TempFile())
 			{
-				File.WriteAllText(src, xml);
+				File.WriteAllText(src.Path, xml);
 
 				var doc = new XmlDocument();
 
-				using (var rdr = XmlReader.Create(src))
+				using (var rdr = XmlReader.Create(src.Path))
 				{
 					doc.Load(rdr);
 				}
@@ -172,53 +162,46 @@ namespace Peach.Pro.Test.Core.WebServices
 				var settings = new XmlWriterSettings()
 				{
 					Indent = true,
-					Encoding = System.Text.Encoding.UTF8,
+					Encoding = Encoding.UTF8,
 					IndentChars = "  ",
 				};
 
-				using (var writer = XmlWriter.Create(dst, settings))
+				using (var writer = XmlWriter.Create(dst.Path, settings))
 				{
 					doc.WriteTo(writer);
 				}
 
-				string srcStr = File.ReadAllText(src).Replace("\r\n", "\n");
-				string dstStr = File.ReadAllText(dst).Replace("\r\n", "\n");
+				var srcStr = File.ReadAllText(src.Path).Replace("\r\n", "\n");
+				var dstStr = File.ReadAllText(dst.Path).Replace("\r\n", "\n");
 
 				Assert.AreEqual(srcStr, dstStr);
-			}
-			finally
-			{
-				File.Delete(src);
-				File.Delete(dst);
 			}
 		}
 
 		[Test]
 		public void AddXmlElement()
 		{
-			string xml =
+			var xml =
 @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Peach xmlns=""http://peachfuzzer.com/2012/Peach"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xsi:schemaLocation=""http://peachfuzzer.com/2012/Peach peach.xsd"" author=""Pit Author Name"">
   <Test name=""Default"" />
 </Peach>";
 
-			string expected =
+			var expected =
 @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Peach xmlns=""http://peachfuzzer.com/2012/Peach"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xsi:schemaLocation=""http://peachfuzzer.com/2012/Peach peach.xsd"" author=""Pit Author Name"">
   <Agent name=""TheAgent"" />
   <Test name=""Default"" />
 </Peach>";
 
-			string src = Path.GetTempFileName();
-			string dst = Path.GetTempFileName();
-
-			try
+			using (var src = new TempFile())
+			using (var dst = new TempFile())
 			{
-				File.WriteAllText(src, xml);
+				File.WriteAllText(src.Path, xml);
 
 				var doc = new XmlDocument();
 
-				using (var rdr = XmlReader.Create(src))
+				using (var rdr = XmlReader.Create(src.Path))
 				{
 					doc.Load(rdr);
 				}
@@ -242,24 +225,19 @@ namespace Peach.Pro.Test.Core.WebServices
 				var settings = new XmlWriterSettings()
 				{
 					Indent = true,
-					Encoding = System.Text.Encoding.UTF8,
+					Encoding = Encoding.UTF8,
 					IndentChars = "  ",
 				};
 
-				using (var writer = XmlWriter.Create(dst, settings))
+				using (var writer = XmlWriter.Create(dst.Path, settings))
 				{
 					doc.WriteTo(writer);
 				}
 
-				string srcStr = expected.Replace("\r\n", "\n");
-				string dstStr = File.ReadAllText(dst).Replace("\r\n", "\n");
+				var srcStr = expected.Replace("\r\n", "\n");
+				var dstStr = File.ReadAllText(dst.Path).Replace("\r\n", "\n");
 
 				Assert.AreEqual(srcStr, dstStr);
-			}
-			finally
-			{
-				File.Delete(src);
-				File.Delete(dst);
 			}
 		}
 
@@ -271,7 +249,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void JsonInt()
 		{
-			const string json = " { \"Value\" : 500 }";
+			const string json = "{ \"Value\" : 500 }";
 
 			var obj = JsonConvert.DeserializeObject<IntMember>(json);
 
