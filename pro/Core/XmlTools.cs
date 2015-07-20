@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -34,12 +35,16 @@ namespace Peach.Pro.Core
 			var xmlTypeMapping = importer.ImportTypeMapping(type);
 			exporter.ExportTypeMapping(xmlTypeMapping);
 
+			PrintSchema(schema[0]);
+
 			foreach (XmlSchemaObject obj in schema[0].Items)
 			{
 				if (obj is XmlSchemaElement)
 					continue;
 
 				var asType = (XmlSchemaComplexType)obj;
+
+				FixupComplexType(asType);
 
 				FixupAttributes(asType.Attributes);
 
@@ -54,7 +59,7 @@ namespace Peach.Pro.Core
 						content.IsMixed = true;
 
 					FixupAttributes(ext.Attributes);
-				}	
+				}
 			}
 
 			var errors = new StringBuilder();
@@ -75,9 +80,20 @@ namespace Peach.Pro.Core
 
 			ret = schema[0];
 
+			PrintSchema(ret);
+
 			schemas.Add(type, ret);
 
 			return ret;
+		}
+
+		[Conditional("DISABLED")]
+		private static void PrintSchema(XmlSchema schema)
+		{
+			var sb = new StringBuilder();
+			var writer = XmlWriter.Create(sb, new XmlWriterSettings { Indent = true });
+			schema.Write(writer);
+			Console.WriteLine(sb);
 		}
 
 		private static Dictionary<string, XmlSchemaSimpleType> MakeSimpleTypes()
@@ -138,6 +154,64 @@ namespace Peach.Pro.Core
 					attr.SchemaTypeName = null;
 					attr.SchemaType = simpleType;
 				}
+			}
+		}
+
+		private static void MoveElement(XmlSchemaParticle elem, XmlSchemaGroupBase group)
+		{
+			var asGroup = elem as XmlSchemaGroupBase;
+			if (asGroup == null)
+			{
+				elem.MaxOccursString = "1";
+				group.Items.Add(elem);
+			}
+			else
+			{
+				foreach (var item in asGroup.Items)
+					group.Items.Add(item);
+			}
+		}
+
+		private static void FixupComplexType(XmlSchemaComplexType type)
+		{
+			var seq = type.Particle as XmlSchemaSequence;
+
+			if (seq == null)
+				return;
+
+			// If the complex type is a sequence, look at how many times each
+			// element can occur and modify for order independence.
+			// If all children occur 0/1 times, replace xs:sequence with xs:all
+			// Otherwise, replace xs:sequence with xs:choice
+
+			var all = new XmlSchemaAll();
+			var choice = new XmlSchemaChoice
+			{
+				MinOccursString = "0",
+				MaxOccursString = "unbounded"
+			};
+
+			foreach (var item in seq.Items.OfType<XmlSchemaParticle>())
+			{
+				if (item.MaxOccursString == "unbounded")
+					MoveElement(item, choice);
+				else
+					MoveElement(item, all);
+			}
+
+			if (choice.Items.Count > 0)
+			{
+				if (all.Items.Count > 0)
+				{
+					//throw new NotSupportedException("Complex type '{0}' uses mix of maxOccurs='unbounded' and maxOccurs='1'.".Fmt(type.Name));
+					MoveElement(all, choice);
+				}
+
+				type.Particle = choice;
+			}
+			else
+			{
+				type.Particle = all;
 			}
 		}
 
