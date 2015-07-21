@@ -41,3 +41,16 @@ if bld.env.BASENAME == 'osx':
 		install_path = '${BINDIR}',
 		install_644 = bld.path.ant_glob('CrashWrangler/**/*'),
 	)
+
+nunit = [
+	'NUnit.Runners.2.6.4/tools/nunit-agent.exe',
+	'NUnit.Runners.2.6.4/tools/nunit-agent.exe.config',
+	'NUnit.Runners.2.6.4/tools/nunit-console.exe',
+	'NUnit.Runners.2.6.4/tools/nunit-console.exe.config',
+	'NUnit.Runners.2.6.4/tools/lib/nunit-console-runner.dll',
+	'NUnit.Runners.2.6.4/tools/lib/nunit.util.dll',
+	'NUnit.Runners.2.6.4/tools/lib/nunit.core.dll',
+	'NUnit.Runners.2.6.4/tools/lib/nunit.core.interfaces.dll',
+]
+
+bld.install_files('${BINDIR}', nunit)
