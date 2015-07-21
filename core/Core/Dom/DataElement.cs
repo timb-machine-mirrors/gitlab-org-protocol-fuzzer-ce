@@ -675,6 +675,8 @@ namespace Peach.Core.Dom
 				throw new CrackingFailure(pe.Message, this, data);
 			}
 
+			context.Log("Value: {0}", DefaultValue);
+
 			logger.Debug("{0} value is: {1}", debugName, DefaultValue);
 
 			if (isToken && oldDefalut != DefaultValue)

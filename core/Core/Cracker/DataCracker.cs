@@ -29,7 +29,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Text;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
@@ -78,6 +78,8 @@ namespace Peach.Core.Cracker
 	{
 		#region Private Members
 
+		static readonly NLog.Logger Logger = LogManager.GetLogger("DataCracker");
+
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
 		#region Position Class
@@ -116,6 +118,11 @@ namespace Peach.Core.Cracker
 		/// Elements that have analyzers attached.  We run them all post-crack.
 		/// </summary>
 		List<DataElement> _elementsWithAnalyzer;
+
+		/// <summary>
+		/// The string to prefix log messages with.
+		/// </summary>
+		readonly StringBuilder _logPrefix = new StringBuilder();
 
 		#endregion
 
@@ -170,6 +177,11 @@ namespace Peach.Core.Cracker
 		/// <param name="data">Data stream to read data from</param>
 		public void CrackData(DataElement element, BitStream data)
 		{
+			if (element == null)
+				throw new ArgumentNullException("element");
+			if (data == null)
+				throw new ArgumentNullException("data");
+
 			try
 			{
 				_dataStack.Insert(0, data);
@@ -228,6 +240,17 @@ namespace Peach.Core.Cracker
 					// TODO - Fast CACHE IT!
 				}
 			}
+		}
+
+		/// <summary>
+		/// Elements can use this to log messages whe nthey are being cracked.
+		/// </summary>
+		/// <param name="msg"></param>
+		/// <param name="fmt"></param>
+		public void Log(string msg, params object[] fmt)
+		{
+			if (Logger.IsDebugEnabled)
+				Logger.Debug("{0} {1}", _logPrefix, string.Format(msg, fmt));
 		}
 
 		#endregion
@@ -321,13 +344,22 @@ namespace Peach.Core.Cracker
 		{
 			List<BitStream> oldStack = null;
 
+			if (Logger.IsDebugEnabled)
+			{
+				if (elem is DataElementContainer)
+				{
+					Logger.Debug("{0}-+ {1} '{2}'", _logPrefix, elem.elementType, elem.Name);
+					_logPrefix.Append(" |");
+				}
+				else
+				{
+					Logger.Debug("{0}-- {1} '{2}'", _logPrefix, elem.elementType, elem.Name);
+					_logPrefix.Append("  ");
+				}
+			}
+
 			try
 			{
-				if (elem == null)
-					throw new ArgumentNullException("elem");
-				if (data == null)
-					throw new ArgumentNullException("data");
-
 				logger.Debug("------------------------------------");
 				logger.Debug("{0} {1}", elem.debugName, data.Progress);
 
@@ -371,6 +403,14 @@ namespace Peach.Core.Cracker
 			}
 			finally
 			{
+				if (Logger.IsDebugEnabled)
+				{
+					_logPrefix.Remove(_logPrefix.Length - 2, 2);
+
+					if (elem is DataElementContainer)
+						Logger.Debug("{0} /", _logPrefix);
+				}
+
 				if (oldStack != null)
 					_dataStack = oldStack;
 			}
@@ -583,6 +623,9 @@ namespace Peach.Core.Cracker
 
 		void handleCrack(DataElement elem, BitStream data, long? size)
 		{
+			Log("Size: {0}, {1}",
+				size.HasValue ? size.ToString() : "???", data.Progress);
+
 			logger.Debug("Crack: {0} Size: {1}, {2}", elem.debugName,
 				size.HasValue ? size.ToString() : "<null>", data.Progress);
 
