@@ -8,7 +8,7 @@ refs = re.compile('<reference\s+path="(.*)"\s*/>', re.M)
 def configure(conf):
 	v = conf.env
 
-	v['TSC_FLAGS'] = [ '--target', 'ES5', '--module', 'amd', '--removeComments', '--sourcemap' ]
+	v['TSC_FLAGS'] = [ '--target', 'ES5', '--module', 'commonjs', '--sourcemap' ]
 
 	try:
 		conf.find_program('tsc')

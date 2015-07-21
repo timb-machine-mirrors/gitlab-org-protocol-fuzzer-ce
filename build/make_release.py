@@ -22,6 +22,24 @@ releases = [
 	},
 ]
 
+'''
+This script expects the following directory structure:
+output
+  doc/doc.zip
+  pits/${pit}.zip
+  ${platform}_release/pkg/peach-pro-${buildtag}-${platform}_release.zip
+
+The result should be:    <--- archive to smb://nas/builds/peach-pro
+output
+  release
+    ${buildtag}          <--- publish to ssh://dl.peachfuzzer.com
+      release.json
+      peach-pro-${buildtag}-${platform}_release.zip
+      peach-pro-${buildtag}-${platform}_release.zip.sha1
+      pits
+        ${pit}.zip
+'''
+
 def to_JSON(self):
 	return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
