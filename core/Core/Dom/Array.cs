@@ -217,6 +217,18 @@ namespace Peach.Core.Dom
 				throw new CrackingFailure("Count of {0} is less than the minimum of {1}."
 					.Fmt(min, minOccurs), this, data);
 
+			if (context.IsLogEnabled)
+			{
+				if (min == max)
+					context.Log("Occurs: {0}{1}", min, rel == null ? "" : " (Count Relation)");
+				else if (min == -1)
+					context.Log("Max: {0}", max);
+				else if (max == -1)
+					context.Log("Min: {0}", min);
+				else
+					context.Log("Min: {0}, Max: {1}", min, max);
+			}
+
 			for (int i = 0; max == -1 || i < max; ++i)
 			{
 				logger.Trace("Crack: ======================");
