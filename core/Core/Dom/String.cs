@@ -161,10 +161,10 @@ namespace Peach.Core.Dom
 
 				return sb.ToString();
 			}
-			catch (DecoderFallbackException)
+			catch (DecoderFallbackException ex)
 			{
 				throw new CrackingFailure("String contains invalid {0} bytes."
-					.Fmt(_type.ToString().ToUpper()), this, data);
+					.Fmt(_type.ToString().ToUpper()), this, data, ex);
 			}
 		}
 

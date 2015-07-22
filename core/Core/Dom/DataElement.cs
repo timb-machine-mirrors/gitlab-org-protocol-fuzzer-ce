@@ -672,7 +672,7 @@ namespace Peach.Core.Dom
 			}
 			catch (PeachException pe)
 			{
-				throw new CrackingFailure(pe.Message, this, data);
+				throw new CrackingFailure(pe.Message, this, data, pe);
 			}
 
 			context.Log("Value: {0}", DefaultValue);
