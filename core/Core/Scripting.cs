@@ -35,8 +35,6 @@ using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
 using Microsoft.Scripting.Math;
 using System.IO;
-using System.Text;
-using NLog;
 using Peach.Core.IO;
 
 namespace Peach.Core
@@ -145,25 +143,15 @@ namespace Peach.Core
 
 			public override void ErrorReported(ScriptSource source, string message, SourceSpan span, int errorCode, Severity severity)
 			{
-				var sb = new StringBuilder(message.Length);
-				sb.Append(char.ToUpperInvariant(message[0]));
-				sb.Append(message.Substring(1));
-
 				switch (severity)
 				{
 					case Severity.FatalError:
 					case Severity.Error:
-						Errors.Add("{0} lines {1}: {2}.".Fmt(
-							sb,
-							span.Start,
-							source.MapLine(span)));
+						Errors.Add("{0} at line {1}.".Fmt(message, source.MapLine(span)));
 						break;
 					case Severity.Warning:
 					case Severity.Ignore:
-						Warnings.Add("{0} lines {1}: {2}.".Fmt(
-							sb,
-							span.Start,
-							source.MapLine(span)));
+						Warnings.Add("{0} at line {1}.".Fmt(message, source.MapLine(span)));
 						break;
 				}
 			}
@@ -191,7 +179,7 @@ namespace Peach.Core
 					if (err == null)
 						throw new PeachException("Failed to comile expression [{0}].".Fmt(code));
 
-					throw new PeachException("Failed to comile expression [{0}]. {1}".Fmt(code, err));
+					throw new PeachException("Failed to comile expression [{0}], {1}".Fmt(code, err));
 				}
 
 				if (cache)
@@ -245,7 +233,7 @@ namespace Peach.Core
 				if (ex.GetBaseException() is ThreadAbortException)
 					throw;
 
-				throw new SoftException("Failed to execute expression [{0}]. {1}.".Fmt(code, ex.Message), ex);
+				throw new SoftException("Failed to execute expression [{0}], {1}.".Fmt(code, ex.Message), ex);
 			}
 			finally
 			{
@@ -300,7 +288,7 @@ namespace Peach.Core
 				if (ex.GetBaseException() is ThreadAbortException)
 					throw;
 
-				throw new SoftException("Failed to evalate expression [{0}]. {1}.".Fmt(code, ex.Message), ex);
+				throw new SoftException("Failed to evalate expression [{0}], {1}.".Fmt(code, ex.Message), ex);
 			}
 		}
 
