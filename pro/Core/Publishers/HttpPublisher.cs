@@ -262,6 +262,8 @@ namespace Peach.Pro.Core.Publishers
 			{
 				if (0 == string.Compare("Content-Type", kv.Key, StringComparison.OrdinalIgnoreCase))
 					request.ContentType = kv.Value;
+				else if (0 == string.Compare("Referer", kv.Key, StringComparison.OrdinalIgnoreCase))
+					request.Referer = kv.Value;
 				else if (!string.IsNullOrWhiteSpace(kv.Key))
 					request.Headers[kv.Key] = kv.Value;
 			}
