@@ -147,8 +147,7 @@ namespace PitTester
 			if (Logger.IsDebugEnabled)
 				Logger.Debug("\n\n" + Utilities.HexDump(actual, 0, actual.Length));
 
-		    var skipList = new List<Tuple<long, long>>();
-
+			var skipList = new List<Tuple<string, long, long>>();
 			foreach (var ignore in _logger.Ignores)
 			{
 				var act = ignore.Item1;
@@ -170,11 +169,85 @@ namespace PitTester
 				long pos;
 				var lst = (BitStreamList)dataModel.Value;
 				if (!lst.TryGetPosition(elem.fullName, out pos))
-					throw new PeachException("Error, Couldn't locate position of {0} in model on action {1} for ignoring.".Fmt(elem, _logger.ActionName));
+					throw new PeachException("Error, Couldn't locate position of {0} in model on action {1} for ignoring.".Fmt(elem,
+						_logger.ActionName));
 
-				var skip = new Tuple<long, long>(pos / 8, (pos / 8) + (tgt.Value.LengthBits + 7) / 8);
+				var skip = new Tuple<string, long, long>(elem.fullName, pos / 8, (pos / 8) + (tgt.Value.LengthBits + 7) / 8);
 				Logger.Debug("Ignoring {0} from index {1} to {2}", elem.fullName, skip.Item1, skip.Item2);
 				skipList.Add(skip);
+			}
+
+			foreach (var i in skipList)
+				Console.WriteLine("Ignoring {0} from index {1} to {2}", i.Item1, i.Item2, i.Item3);
+
+			var checkLength = actual.Length > expected.Length ? expected.Length : actual.Length;
+
+			var errorMax = 15;
+			var errorCount = 0;
+			long lastItemEndPos = 0;
+
+			for (var i = 0; i < checkLength; ++i)
+			{
+				var skip = skipList.Any(p => p.Item2 <= i && p.Item3 > i);
+				if (skip || expected[i] == actual[i]) continue;
+
+				// Don't show every byte for same element
+				if (i <= lastItemEndPos)
+					continue;
+
+				if (errorCount > errorMax)
+				{
+					Console.WriteLine("** Too many errors, skipping rest");
+					break;
+				}
+
+				errorCount++;
+
+				if (!Logger.IsDebugEnabled)
+					break;
+
+				var forColor = Console.ForegroundColor;
+
+				Console.ForegroundColor = ConsoleColor.Yellow;
+				Console.WriteLine("----------------------------------------------");
+				Console.ForegroundColor = forColor;
+				long posBits = 0;
+
+				foreach (var item in dataModel.Walk())
+				{
+					if (item is DataElementContainer)
+						continue;
+
+					var pos = posBits / 8;
+					var posLastBits = posBits + item.Value.LengthBits;
+					var posLast = posLastBits/8;
+
+					if (!(i >= pos && i <= posLast))
+					{
+						posBits = posLastBits;
+						continue;
+					}
+
+					Console.WriteLine("0x{1:X2}-0x{2:X2}: {0}\n\t{3}",
+						item.fullName,
+						pos,
+						posLast,
+						Utilities.HexDump(item.Value).Replace("\n", "\n\t"));
+
+					if (item is Peach.Core.Dom.String || item is Number)
+						Console.WriteLine("\tValue: " + item.InternalValue.ToString());
+
+					posBits = posLastBits;
+					lastItemEndPos = posLast;
+				}
+
+				Console.ForegroundColor = ConsoleColor.Red;
+
+				Console.WriteLine(
+					"\nTest failed on action: {0}\n\tValues differ at offset 0x{3:x8}\n\tExpected: 0x{1:x2}\n\tBut was.: 0x{2:x2}\n"
+					.Fmt(_logger.ActionName, expected[i], actual[i], i));
+
+				Console.ForegroundColor = forColor;
 			}
 
 			var cb = new ConsoleBuffer();
@@ -183,7 +256,7 @@ namespace PitTester
 				cb.Print();
 				throw new PeachException("Values differ on action: {0}".Fmt(_logger.ActionName));
 			}
-        }
+		}
 
 		protected override void OnOutput(BitwiseStream data)
 		{
@@ -191,7 +264,7 @@ namespace PitTester
 			throw new NotSupportedException();
 		}
 
-		bool BinDiff(byte[] expected, byte[] actual, List<Tuple<long,long>> skipList, ConsoleBuffer cb)
+		bool BinDiff(byte[] expected, byte[] actual, List<Tuple<string, long,long>> skipList, ConsoleBuffer cb)
 		{
 			var ms1 = new MemoryStream(expected);
 			var ms2 = new MemoryStream(actual);
@@ -220,7 +293,7 @@ namespace PitTester
 				{
 					ConsoleColor bg;
 					var offset = i + j;
-					var skip = skipList.Any(p => p.Item1 <= offset && p.Item2 > offset);
+					var skip = skipList.Any(p => p.Item2 <= offset && p.Item3 > offset);
 					if (skip)
 					{
 						bg = ConsoleColor.Blue;
