@@ -349,20 +349,20 @@ namespace Peach.Core.Cracker
 			{
 				if (elem is DataElementContainer)
 				{
-					Logger.Debug("{0}-+ {1} '{2}'", _logPrefix, elem.elementType, elem.Name);
+					Logger.Debug("{0}-+ {1} '{2}', {3}", _logPrefix, elem.elementType, elem.Name, data.Progress);
 					_logPrefix.Append(" |");
 				}
 				else
 				{
-					Logger.Debug("{0}-- {1} '{2}'", _logPrefix, elem.elementType, elem.Name);
+					Logger.Debug("{0}-- {1} '{2}', {3}", _logPrefix, elem.elementType, elem.Name, data.Progress);
 					_logPrefix.Append("  ");
 				}
 			}
 
 			try
 			{
-				logger.Debug("------------------------------------");
-				logger.Debug("{0} {1}", elem.debugName, data.Progress);
+				logger.Trace("------------------------------------");
+				logger.Trace("{0} {1}", elem.debugName, data.Progress);
 
 				var pos = handleNodeBegin(elem, data);
 
@@ -396,14 +396,7 @@ namespace Peach.Core.Cracker
 					_elementsWithAnalyzer.Add(elem);
 
 				handleNodeEnd(elem, data, pos);
-			}
-			catch (Exception e)
-			{
-				handleException(elem, data, e);
-				throw;
-			}
-			finally
-			{
+
 				if (Logger.IsDebugEnabled)
 				{
 					_logPrefix.Remove(_logPrefix.Length - 2, 2);
@@ -411,7 +404,33 @@ namespace Peach.Core.Cracker
 					if (elem is DataElementContainer)
 						Logger.Debug("{0} /", _logPrefix);
 				}
+			}
+			catch (Exception e)
+			{
+				var ex = e as CrackingFailure;
 
+				if (Logger.IsDebugEnabled)
+				{
+					_logPrefix.Remove(_logPrefix.Length - 2, 2);
+
+					if (elem is DataElementContainer)
+					{
+						if (ex != null && !ex.logged)
+							Logger.Debug("{0} X ({1})", _logPrefix, ex.ShortMessage);
+						else
+							Logger.Debug("{0} X", _logPrefix);
+					}
+					else if (ex != null && !ex.logged)
+					{
+						Logger.Debug("{0}   Failed: {1}", _logPrefix, ex.ShortMessage);
+					}
+				}
+
+				handleException(elem, data, e);
+				throw;
+			}
+			finally
+			{
 				if (oldStack != null)
 					_dataStack = oldStack;
 			}
@@ -484,7 +503,13 @@ namespace Peach.Core.Cracker
 			// Clear placement now that it has occured
 			newElem.placement = null;
 
-			logger.Debug("handlePlacement: {0} -> {1}", debugName, newElem.fullName);
+			logger.Trace("handlePlacement: {0} -> {1}", debugName, newElem.fullName);
+
+			if (Logger.IsDebugEnabled)
+			{
+				Logger.Debug("{0}-- {1} '{2}'", _logPrefix, element.elementType, element.Name);
+				Logger.Debug("{0}   Placed As: {1}", _logPrefix, newElem.fullName);
+			}
 
 			OnPlacementEvent(element, newElem, oldParent);
 		}
@@ -522,16 +547,18 @@ namespace Peach.Core.Cracker
 			_sizedElements.Remove(elem);
 
 			CrackingFailure ex = e as CrackingFailure;
+
 			if (ex != null)
 			{
-				logger.Debug("{0} failed to crack.", elem.debugName);
+				logger.Trace("{0} failed to crack.", elem.debugName);
 				if (!ex.logged)
-					logger.Debug(ex.Message);
+					logger.Trace(ex.Message);
 				ex.logged = true;
 			}
 			else
 			{
-				logger.Debug("Exception occured: {0}", e.ToString());
+
+				logger.Trace("Exception occured: {0}", e.ToString());
 			}
 
 			OnExceptionHandleNodeEvent(elem, data.PositionBits, data, e);
@@ -539,11 +566,11 @@ namespace Peach.Core.Cracker
 
 		void handleConstraint(DataElement element, BitStream data)
 		{
-			logger.Debug("Running constraint [{0}]", element.constraint);
+			logger.Trace("Running constraint [{0}]", element.constraint);
 
-			Dictionary<string, object> scope = new Dictionary<string, object>();
-            scope["element"] = element;
-            scope["self"] = element;
+			var scope = new Dictionary<string, object>();
+			scope["element"] = element;
+			scope["self"] = element;
 
 			// Use DefaultValue for constraint, it is the actual cracked value.
 			// InternalValue will have relations/fixups applied
@@ -552,17 +579,17 @@ namespace Peach.Core.Cracker
 			if (iv == null)
 			{
 				scope["value"] = null;
-				logger.Debug("Constraint, value=None.");
+				logger.Trace("Constraint, value=None.");
 			}
 			else if (iv.GetVariantType() == Variant.VariantType.ByteString || iv.GetVariantType() == Variant.VariantType.BitStream)
 			{
 				scope["value"] = (BitwiseStream)iv;
-				logger.Debug("Constraint, value=byte array.");
+				logger.Trace("Constraint, value=byte array.");
 			}
 			else
 			{
 				scope["value"] = (string)iv;
-				logger.Debug("Constraint, value=[{0}].", (string)iv);
+				logger.Trace("Constraint, value=[{0}].", (string)iv);
 			}
 
 			object oReturn = element.EvalExpression(element.constraint, scope);
@@ -604,10 +631,10 @@ namespace Peach.Core.Cracker
 					long size = rel.GetValue();
 
 					if (other.size.HasValue)
-						logger.Debug("Size relation of {0} cracked again. Updating size from: {1} to: {2}",
+						logger.Trace("Size relation of {0} cracked again. Updating size from: {1} to: {2}",
 							rel.Of.debugName, other.size, size);
 					else
-						logger.Debug("Size relation of {0} cracked. Updating size to: {1}",
+						logger.Trace("Size relation of {0} cracked. Updating size to: {1}",
 							rel.Of.debugName, size);
 
 					other.size = size;
@@ -622,10 +649,7 @@ namespace Peach.Core.Cracker
 
 		void handleCrack(DataElement elem, BitStream data, long? size)
 		{
-			Log("Size: {0}, {1}",
-				size.HasValue ? size.ToString() : "???", data.Progress);
-
-			logger.Debug("Crack: {0} Size: {1}, {2}", elem.debugName,
+			logger.Trace("Crack: {0} Size: {1}, {2}", elem.debugName,
 				size.HasValue ? size.ToString() : "<null>", data.Progress);
 
 			elem.Crack(this, data, size);
@@ -734,7 +758,7 @@ namespace Peach.Core.Cracker
 
 		bool? scanArray(Dom.Array array, ref long pos, List<Mark> tokens, Until until)
 		{
-			logger.Debug("scanArray: {0}", array.debugName);
+			logger.Trace("scanArray: {0}", array.debugName);
 
 			int tokenCount = tokens.Count;
 			long arrayPos = 0;
@@ -760,13 +784,13 @@ namespace Peach.Core.Cracker
 					{
 						arrayPos *= rel.GetValue();
 						pos += arrayPos;
-						logger.Debug("scanArray: {0} -> Count Relation: {1}, Size: {2}",
+						logger.Trace("scanArray: {0} -> Count Relation: {1}, Size: {2}",
 							array.debugName, rel.GetValue(), arrayPos);
 						return ret;
 					}
 					else
 					{
-						logger.Debug("scanArray: {0} -> Count Relation: ???", array.debugName);
+						logger.Trace("scanArray: {0} -> Count Relation: ???", array.debugName);
 						return null;
 					}
 				}
@@ -774,7 +798,7 @@ namespace Peach.Core.Cracker
 				{
 					arrayPos *= array.occurs;
 					pos += arrayPos;
-					logger.Debug("scanArray: {0} -> Occurs: {1}, Size: {2}",
+					logger.Trace("scanArray: {0} -> Occurs: {1}, Size: {2}",
 						array.debugName, array.occurs, arrayPos);
 					return ret;
 				}
@@ -786,7 +810,7 @@ namespace Peach.Core.Cracker
 					// If no tokens were found in the array, we are done
 					if (tokenCount == tokens.Count)
 					{
-						logger.Debug("scanArray: {0} -> Count Unknown", array.debugName);
+						logger.Trace("scanArray: {0} -> Count Unknown", array.debugName);
 						return ret;
 					}
 				}
@@ -795,19 +819,19 @@ namespace Peach.Core.Cracker
 			// If we are looking for the first sized element, try cracking our first element
 			if (until == Until.FirstSized)
 			{
-				logger.Debug("scanArray: {0} -> FirstSized", array.debugName);
+				logger.Trace("scanArray: {0} -> FirstSized", array.debugName);
 				return false;
 			}
 
 			if (tokenCount == tokens.Count)
 			{
-				logger.Debug("scanArray: {0} -> No Tokens", array.debugName);
+				logger.Trace("scanArray: {0} -> No Tokens", array.debugName);
 					//ret.HasValue ? "Deterministic" : "Unsized");
 				return false;
 			}
 
 			// If we have tokens, keep scanning thru the dom.
-			logger.Debug("scanArray: {0} -> Tokens", array.debugName);
+			logger.Trace("scanArray: {0} -> Tokens", array.debugName);
 			return true;
 		}
 
@@ -842,7 +866,7 @@ namespace Peach.Core.Cracker
 			if (elem.isToken)
 			{
 				tokens.Add(new Mark() { Element = elem, Position = pos, Priority = 0 });
-				logger.Debug("scan: {0} -> Pos: {1}, Saving Token", elem.debugName, pos);
+				logger.Trace("scan: {0} -> Pos: {1}, Saving Token", elem.debugName, pos);
 			}
 
 			if (end != null)
@@ -852,7 +876,7 @@ namespace Peach.Core.Cracker
 				{
 					end.Element = elem;
 					end.Position = offRel.Value;
-					logger.Debug("scan: {0} -> Pos: {1}, Offset relation: {2}", elem.debugName, pos, end.Position);
+					logger.Trace("scan: {0} -> Pos: {1}, Offset relation: {2}", elem.debugName, pos, end.Position);
 					return true;
 				}
 			}
@@ -866,13 +890,13 @@ namespace Peach.Core.Cracker
 				if (sizeRel != null)
 				{
 					pos += sizeRel.GetValue();
-					logger.Debug("scan: {0} -> Pos: {1}, Size relation: {2}", elem.debugName, pos, sizeRel.GetValue());
+					logger.Trace("scan: {0} -> Pos: {1}, Size relation: {2}", elem.debugName, pos, sizeRel.GetValue());
 					return true;
 				}
 				else
 				{
 					// If the size relation has not been resolved, keep cracking until it has
-					logger.Debug("scan: {0} -> Pos: {1}, Size relation: ???", elem.debugName, pos);
+					logger.Trace("scan: {0} -> Pos: {1}, Size relation: ???", elem.debugName, pos);
 					return false;
 				}
 			}
@@ -881,14 +905,14 @@ namespace Peach.Core.Cracker
 			if (elem.hasLength)
 			{
 				pos += elem.lengthAsBits;
-				logger.Debug("scan: {0} -> Pos: {1}, Length: {2}", elem.debugName, pos, elem.lengthAsBits);
+				logger.Trace("scan: {0} -> Pos: {1}, Length: {2}", elem.debugName, pos, elem.lengthAsBits);
 				return true;
 			}
 
 			// See if our length is determinstic, size is determined by cracking
 			if (elem.isDeterministic)
 			{
-				logger.Debug("scan: {0} -> Pos: {1}, Determinstic", elem.debugName, pos);
+				logger.Trace("scan: {0} -> Pos: {1}, Determinstic", elem.debugName, pos);
 				return false;
 			}
 
@@ -896,14 +920,14 @@ namespace Peach.Core.Cracker
 			var cont = elem as DataElementContainer;
 			if (cont == null)
 			{
-				logger.Debug("scan: {0} -> Offset: {1}, Unsized element", elem.debugName, pos);
+				logger.Trace("scan: {0} -> Offset: {1}, Unsized element", elem.debugName, pos);
 				return null;
 			}
 
 			// Elements with transformers require a size
 			if (cont.transformer != null)
 			{
-				logger.Debug("scan: {0} -> Offset: {1}, Unsized transformer", elem.debugName, pos);
+				logger.Trace("scan: {0} -> Offset: {1}, Unsized transformer", elem.debugName, pos);
 				return null;
 			}
 
@@ -914,7 +938,7 @@ namespace Peach.Core.Cracker
 				if (choice.choiceElements.Count == 1)
 					return scan(choice.choiceElements[0], ref pos, tokens, end, until);
 
-				logger.Debug("scan: {0} -> Offset: {1}, Unsized choice", elem.debugName, pos);
+				logger.Trace("scan: {0} -> Offset: {1}, Unsized choice", elem.debugName, pos);
 
 				if (until == Until.FirstSized)
 					return false;
@@ -927,7 +951,7 @@ namespace Peach.Core.Cracker
 				return scanArray((Dom.Array)cont, ref pos, tokens, until);
 			}
 
-			logger.Debug("scan: {0}", elem.debugName);
+			logger.Trace("scan: {0}", elem.debugName);
 
 			foreach (var child in cont)
 			{
@@ -959,7 +983,7 @@ namespace Peach.Core.Cracker
 		/// <returns>Null if size is unknown or the size in bits.</returns>
 		long? getSize(DataElement elem, BitStream data)
 		{
-			logger.Debug("getSize: -----> {0}", elem.debugName);
+			logger.Trace("getSize: -----> {0}", elem.debugName);
 
 			long pos = 0;
 
@@ -969,11 +993,13 @@ namespace Peach.Core.Cracker
 			{
 				if (ret.Value)
 				{
-					logger.Debug("getSize: <----- Size: {0}", pos);
+					logger.Trace("getSize: <----- Size: {0}", pos);
+					Log("Size: {0} (Sized)", pos);
 					return pos;
 				}
 
-				logger.Debug("getSize: <----- Deterministic: ???");
+				logger.Trace("getSize: <----- Deterministic: ???");
+				Log("Size: ??? (Deterministic)");
 				return null;
 			}
 
@@ -986,7 +1012,8 @@ namespace Peach.Core.Cracker
 			if (end.Element != null)
 			{
 				pos = end.Position - pos;
-				logger.Debug("getSize: <----- Placement: {0}", pos);
+				logger.Trace("getSize: <----- Placement: {0}", pos);
+				Log("Size: {0} (End Placement)", pos);
 				return pos;
 			}
 
@@ -999,7 +1026,8 @@ namespace Peach.Core.Cracker
 				long? where = findToken(data, token.Element.Value, token.Position, token.Priority != 0);
 				if (!where.HasValue && token.Priority == 0)
 				{
-					logger.Debug("getSize: <----- Missing Required Token: ???");
+					logger.Trace("getSize: <----- Missing Required Token: ???");
+					Log("Size: ??? (Missing Required Token '{0}')", token.Element.DefaultValue);
 					return where;
 				}
 
@@ -1019,16 +1047,19 @@ namespace Peach.Core.Cracker
 			if (closest.HasValue)
 			{
 				closest -= winner.Position;
-				logger.Debug("getSize: <----- {0} Token: {1}",
-					winner.Priority == 0 ? "Optional" : "Required",
+				logger.Trace("getSize: <----- {0} Token: {1}",
+					winner.Priority != 0 ? "Optional" : "Required",
 					closest.ToString());
+				Log("Size: {0} ({1}Token '{2}')", closest,
+					winner.Priority == 0 ? "" : "Optional ", winner.Element.DefaultValue);
 				return closest;
 			}
 
 			if (tokens.Count > 0 && ret.HasValue && ret.Value)
 			{
 				pos = data.LengthBits - (data.PositionBits + pos);
-				logger.Debug("getSize: <----- Missing Optional Token: {0}", pos);
+				logger.Trace("getSize: <----- Missing Optional Token: {0}", pos);
+				Log("Size: {0} (Missing Optional Token)", pos);
 				return pos;
 			}
 
@@ -1038,27 +1069,31 @@ namespace Peach.Core.Cracker
 				if (ret.Value && (pos != 0 || !(elem is DataElementContainer)))
 				{
 					pos = data.LengthBits - (data.PositionBits + pos);
-					logger.Debug("getSize: <----- Last Unsized: {0}", pos);
+					logger.Trace("getSize: <----- Last Unsized: {0}", pos);
+					Log("Size: {0} (Last Unsized)", pos);
 					return pos;
 				}
 
-				logger.Debug("getSize: <----- Last Unsized: ???");
+				logger.Trace("getSize: <----- Last Unsized: ???");
+				Log("Size: ??? (Last Unsized)");
 				return null;
 			}
 
+			Log("Size: ??? (Not Last Unsized)");
+
 			if (elem is Dom.Array)
 			{
-				logger.Debug("getSize: <----- Array Not Last Unsized: ???");
+				logger.Trace("getSize: <----- Array Not Last Unsized: ???");
 				return null;
 			}
 
 			if (elem is Dom.Choice)
 			{
-				logger.Debug("getSize: <----- Choice Not Last Unsized: ???");
+				logger.Trace("getSize: <----- Choice Not Last Unsized: ???");
 				return null;
 			}
 
-			logger.Debug("getSize: <----- Not Last Unsized: ???");
+			logger.Trace("getSize: <----- Not Last Unsized: ???");
 			return null;
 		}
 
@@ -1079,7 +1114,7 @@ namespace Peach.Core.Cracker
 		/// True if all elements are sized.</returns>
 		bool? lookahead(DataElement elem, ref long pos, List<Mark> tokens, Mark end)
 		{
-			logger.Debug("lookahead: {0}", elem.debugName);
+			logger.Trace("lookahead: {0}", elem.debugName);
 
 			// Ensure all elements are sized until we reach either
 			// 1) A token

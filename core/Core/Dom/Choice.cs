@@ -206,13 +206,13 @@ namespace Peach.Core.Dom
 
 					try
 					{
-						logger.Debug("handleChoice: Cache hit for child: {0}", child.debugName);
+						logger.Trace("handleChoice: Cache hit for child: {0}", child.debugName);
 
 						sizedData.SeekBits(startPosition, System.IO.SeekOrigin.Begin);
 						context.CrackData(child, sizedData);
 						SelectedElement = child;
 
-						logger.Debug("handleChoice: Keeping child: {0}", child.debugName);
+						logger.Trace("handleChoice: Keeping child: {0}", child.debugName);
 						return;
 					}
 					catch (CrackingFailure)
@@ -243,22 +243,22 @@ namespace Peach.Core.Dom
 
 				try
 				{
-					logger.Debug("handleChoice: Trying child: {0}", child.debugName);
+					logger.Trace("handleChoice: Trying child: {0}", child.debugName);
 
 					sizedData.SeekBits(startPosition, System.IO.SeekOrigin.Begin);
 					context.CrackData(child, sizedData);
 					SelectedElement = child;
 
-					logger.Debug("handleChoice: Keeping child: {0}", child.debugName);
+					logger.Trace("handleChoice: Keeping child: {0}", child.debugName);
 					return;
 				}
 				catch (CrackingFailure)
 				{
-					logger.Debug("handleChoice: Failed to crack child: {0}", child.debugName);
+					logger.Trace("handleChoice: Failed to crack child: {0}", child.debugName);
 				}
 				catch (Exception ex)
 				{
-					logger.Debug("handleChoice: Child threw exception: {0}: {1}", child.debugName, ex.Message);
+					logger.Trace("handleChoice: Child threw exception: {0}: {1}", child.debugName, ex.Message);
 					throw;
 				}
 			}

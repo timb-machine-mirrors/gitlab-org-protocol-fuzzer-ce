@@ -219,13 +219,13 @@ namespace Peach.Core.Dom
 
 			for (int i = 0; max == -1 || i < max; ++i)
 			{
-				logger.Debug("Crack: ======================");
-				logger.Debug("Crack: {0} Trying #{1}", OriginalElement.debugName, i + 1);
+				logger.Trace("Crack: ======================");
+				logger.Trace("Crack: {0} Trying #{1}", OriginalElement.debugName, i + 1);
 
 				long pos = sizedData.PositionBits;
 				if (pos == sizedData.LengthBits)
 				{
-					logger.Debug("Crack: Consumed all bytes. {0}", sizedData.Progress);
+					logger.Trace("Crack: Consumed all bytes. {0}", sizedData.Progress);
 					break;
 				}
 
@@ -245,7 +245,7 @@ namespace Peach.Core.Dom
 				}
 				catch (CrackingFailure ex)
 				{
-					logger.Debug("Crack: {0} Failed on #{1}", debugName, i+1);
+					logger.Trace("Crack: {0} Failed on #{1}", debugName, i+1);
 
 					// If we couldn't satisfy the minimum propigate failure
 					if (i < min)
