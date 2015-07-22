@@ -443,9 +443,25 @@ namespace Peach.Core.Cracker
 					{
 						Logger.Debug("{0}   Failed: {1}", _logPrefix, msg);
 					}
-
-					_lastError = e;
 				}
+
+				if (_lastError == e)
+				{
+					// Already logged the exception
+					logger.Trace("{0} failed to crack.", elem.debugName);
+				}
+				else if (e is CrackingFailure)
+				{
+					// Cracking failures include element name in message
+					logger.Trace(e.Message);
+				}
+				else
+				{
+					logger.Trace("{0} failed to crack.", elem.debugName);
+					logger.Trace("Exception occured: {0}", e.ToString());
+				}
+
+				_lastError = e;
 
 				handleException(elem, data, e);
 				throw;
@@ -524,13 +540,13 @@ namespace Peach.Core.Cracker
 			// Clear placement now that it has occured
 			newElem.placement = null;
 
-			logger.Trace("handlePlacement: {0} -> {1}", debugName, newElem.fullName);
-
 			if (Logger.IsDebugEnabled)
 			{
 				Logger.Debug("{0}-- {1} '{2}'", _logPrefix, element.elementType, element.Name);
 				Logger.Debug("{0}   Placed As: {1}", _logPrefix, newElem.fullName);
 			}
+
+			logger.Trace("handlePlacement: {0} -> {1}", debugName, newElem.fullName);
 
 			OnPlacementEvent(element, newElem, oldParent);
 		}
@@ -567,27 +583,11 @@ namespace Peach.Core.Cracker
 
 			_sizedElements.Remove(elem);
 
-			CrackingFailure ex = e as CrackingFailure;
-
-			if (ex != null)
-			{
-				logger.Trace("{0} failed to crack.", elem.debugName);
-				if (!ex.logged)
-					logger.Trace(ex.Message);
-				ex.logged = true;
-			}
-			else
-			{
-				logger.Trace("Exception occured: {0}", e.ToString());
-			}
-
 			OnExceptionHandleNodeEvent(elem, data.PositionBits, data, e);
 		}
 
 		void handleConstraint(DataElement element, BitStream data)
 		{
-			logger.Trace("Running constraint [{0}]", element.constraint);
-
 			var scope = new Dictionary<string, object>();
 			scope["element"] = element;
 			scope["self"] = element;
@@ -599,17 +599,17 @@ namespace Peach.Core.Cracker
 			if (iv == null)
 			{
 				scope["value"] = null;
-				logger.Trace("Constraint, value=None.");
+				logger.Trace("Running constraint [{0}], value=None.", element.constraint);
 			}
 			else if (iv.GetVariantType() == Variant.VariantType.ByteString || iv.GetVariantType() == Variant.VariantType.BitStream)
 			{
 				scope["value"] = (BitwiseStream)iv;
-				logger.Trace("Constraint, value=byte array.");
+				logger.Trace("Running constraint [{0}], value={1}.", element.constraint, iv);
 			}
 			else
 			{
 				scope["value"] = (string)iv;
-				logger.Trace("Constraint, value=[{0}].", (string)iv);
+				logger.Trace("Running constraint [{0}], value={1}.", element.constraint, (string)iv);
 			}
 
 			object oReturn = element.EvalExpression(element.constraint, scope);
