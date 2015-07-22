@@ -130,7 +130,7 @@ namespace PitTester
 			defs = PitDefines.Evaluate(defs);
 
 			var args = new Dictionary<string, object>();
-			args[PitParser.DEFINED_VALUES] = defs;
+			args[PitParser.DefinedValues] = defs;
 
 			var parser = new PitParser();
 
@@ -303,7 +303,7 @@ namespace PitTester
 			}
 
 			var args = new Dictionary<string, object>();
-			args[PitParser.DEFINED_VALUES] = defs;
+			args[PitParser.DefinedValues] = defs;
 
 			var parser = new PitParser();
 
@@ -653,19 +653,13 @@ namespace PitTester
 							parms.Add(name);
 						}
 
-						if (parameters.Current != null)
+						var comments = pubs.Current.SelectChildren(XPathNodeType.Comment);
+						while (comments.MoveNext())
 						{
-							var comments = parameters.Current.SelectSingleNode("following-sibling::comment()");
-							while (comments != null)
-							{
-								var value = comments.Value.Trim();
-								const string ignore = "PitLint: Allow_MissingParamValue=";
-								if (value.StartsWith(ignore))
-									parms.Add(value.Substring(ignore.Length));
-
-								if (!comments.MoveToNext())
-									comments = null;
-							}
+							var value = comments.Current.Value.Trim();
+							const string ignore = "PitLint: Allow_MissingParamValue=";
+							if (value.StartsWith(ignore))
+								parms.Add(value.Substring(ignore.Length));
 						}
 
 						var pub = ClassLoader.FindPluginByName<PublisherAttribute>(cls);
@@ -729,7 +723,7 @@ namespace PitTester
 					var defs = PitParser.parseDefines(fileName + ".config");
 					defs.Insert(0, new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
 					defs = PitDefines.Evaluate(defs);
-					args[PitParser.DEFINED_VALUES] = defs;
+					args[PitParser.DefinedValues] = defs;
 					new GodelPitParser().asParser(args, fileName);
 				}
 			}

@@ -360,15 +360,15 @@ namespace Peach.Pro.Core.Storage
 				Monitor.Wait(copy);
 			}
 
-			if (!Job.DryRun)
+			if (!Job.DryRun && Job.IterationCount > 0)
 			{
 				// use the `copy` here because it has been modified with the stopped status
 				try
 				{
 					using (var db = new JobDatabase(Job.DatabasePath))
 					{
+						Debug.Assert(copy.StopDate == now);
 						copy.Status = JobStatus.Stopped;
-						copy.StopDate = DateTime.Now;
 						var report = db.GetReport(copy);
 						Reporting.SaveReportPdf(report);
 					}
