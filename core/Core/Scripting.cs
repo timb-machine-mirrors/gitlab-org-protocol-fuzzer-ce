@@ -35,6 +35,7 @@ using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
 using Microsoft.Scripting.Math;
 using System.IO;
+using System.Text;
 using NLog;
 using Peach.Core.IO;
 
@@ -136,47 +137,68 @@ namespace Peach.Core
 		#endregion
 
 		#region Error Listener
+
 		class ScriptErrorListener : ErrorListener
 		{
-			static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+			public readonly List<string> Errors = new List<string>();
+			public readonly List<string> Warnings = new List<string>();
 
 			public override void ErrorReported(ScriptSource source, string message, SourceSpan span, int errorCode, Severity severity)
 			{
+				var sb = new StringBuilder(message.Length);
+				sb.Append(char.ToUpperInvariant(message[0]));
+				sb.Append(message.Substring(1));
+
 				switch (severity)
 				{
 					case Severity.FatalError:
 					case Severity.Error:
-						logger.Error("Error: {0} lines {1}: {2}",
-							message,
+						Errors.Add("{0} lines {1}: {2}.".Fmt(
+							sb,
 							span.Start,
-							source.MapLine(span));
+							source.MapLine(span)));
 						break;
 					case Severity.Warning:
 					case Severity.Ignore:
-						logger.Warn("Warning: {0} lines {1}: {2}",
-							message,
+						Warnings.Add("{0} lines {1}: {2}.".Fmt(
+							sb,
 							span.Start,
-							source.MapLine(span));
+							source.MapLine(span)));
 						break;
 				}
 			}
 		}
 
-		ScriptErrorListener _errorListener = new ScriptErrorListener();
 		#endregion
-
 
 		#region Compile
 
-		Dictionary<string, CompiledCode> _scriptCache = new Dictionary<string, CompiledCode>();
+		readonly Dictionary<string, CompiledCode> _scriptCache = new Dictionary<string, CompiledCode>();
 
-		public void Compile(string code, SourceCodeKind kind = SourceCodeKind.Expression)
+		private CompiledCode CompileCode(ScriptScope scope, string code, bool cache)
 		{
-			if (_scriptCache.ContainsKey(code))
-				return;
+			CompiledCode compiled;
 
-			var compiled = this.engine.CreateScriptSourceFromString(code, kind);
-			_scriptCache[code] = compiled.Compile();
+			if (!_scriptCache.TryGetValue(code, out compiled))
+			{
+				var errors = new ScriptErrorListener();
+				var source = scope.Engine.CreateScriptSourceFromString(code, SourceCodeKind.Expression);
+				compiled = source.Compile(errors);
+
+				if (compiled == null)
+				{
+					var err = errors.Errors.FirstOrDefault() ?? errors.Warnings.FirstOrDefault();
+					if (err == null)
+						throw new PeachException("Failed to comile expression [{0}].".Fmt(code));
+
+					throw new PeachException("Failed to comile expression [{0}]. {1}".Fmt(code, err));
+				}
+
+				if (cache)
+					_scriptCache[code] = compiled;
+			}
+
+			return compiled;
 		}
 
 		#endregion
@@ -212,14 +234,18 @@ namespace Peach.Core
 		public void Exec(string code, Dictionary<string, object> localScope)
 		{
 			var scope = CreateScope(localScope);
+			var compiled = CompileCode(scope, code, false);
 
 			try
 			{
-				scope.Engine.Execute(code, scope);
+				compiled.Execute(scope);
 			}
 			catch (Exception ex)
 			{
-				throw new SoftException("Error executing expression [" + code + "]: " + ex.Message, ex);
+				if (ex.GetBaseException() is ThreadAbortException)
+					throw;
+
+				throw new SoftException("Failed to execute expression [{0}]. {1}.".Fmt(code, ex.Message), ex);
 			}
 			finally
 			{
@@ -237,20 +263,10 @@ namespace Peach.Core
 		public object Eval(string code, Dictionary<string, object> localScope, bool cache = true)
 		{
 			var scope = CreateScope(localScope);
+			var compiled = CompileCode(scope, code, cache);
 
 			try
 			{
-				CompiledCode compiled;
-
-				if (!_scriptCache.TryGetValue(code, out compiled))
-				{
-					var source = scope.Engine.CreateScriptSourceFromString(code, SourceCodeKind.Expression);
-					compiled = source.Compile(_errorListener);
-
-					if (cache)
-						_scriptCache[code] = compiled;
-				}
-
 				var obj = compiled.Execute(scope);
 
 				// changing this to be sane (using as instead of is) causes weird compiler issues!
@@ -284,7 +300,7 @@ namespace Peach.Core
 				if (ex.GetBaseException() is ThreadAbortException)
 					throw;
 
-				throw new SoftException("Error evalating expression [" + code + "]: " + ex.Message, ex);
+				throw new SoftException("Failed to evalate expression [{0}]. {1}.".Fmt(code, ex.Message), ex);
 			}
 		}
 
