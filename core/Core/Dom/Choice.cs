@@ -263,7 +263,7 @@ namespace Peach.Core.Dom
 				}
 			}
 
-			throw new CrackingFailure(debugName + " has no valid children.", this, data);
+			throw new CrackingFailure("No valid children were found.", this, data);
 		}
 
 		public override void WritePit(XmlWriter pit)

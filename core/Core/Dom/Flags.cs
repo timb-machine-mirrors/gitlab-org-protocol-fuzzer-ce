@@ -87,7 +87,7 @@ namespace Peach.Core.Dom
 				var flag = child as Flag;
 
 				if (flag == null)
-					throw new CrackingFailure("Found non-Flag child.", this, data);
+					throw new CrackingFailure("Found non-Flag child '{0}'.".Fmt(flag.Name), this, data);
 
 				sizedData.SeekBits(flag.position + pos, SeekOrigin.Begin);
 				context.CrackData(child, sizedData);

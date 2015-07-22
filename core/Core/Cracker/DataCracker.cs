@@ -323,7 +323,8 @@ namespace Peach.Core.Cracker
 				}
 				catch (Exception ex)
 				{
-					throw new CrackingFailure("Exception in analyzer on '" + elem.fullName + "': " + ex.Message, elem, data, ex);
+					throw new CrackingFailure("The analyzer encountered an error. {0}".Fmt(ex.Message),
+						elem, data, ex);
 				}
 
 				var de = parent[elem.Name];
@@ -436,7 +437,8 @@ namespace Peach.Core.Cracker
 				{
 					var refElem = child.find(item.Item2);
 					if (refElem == null)
-						throw new CrackingFailure("Error, unable to resolve Fixup reference to match current element.", element, data);
+						throw new CrackingFailure("Failed to resolve Fixup ref '{0}' during placement."
+							.Fmt(item.Item2), element, data);
 
 					if (refElem == element)
 						fixups.Add(new Tuple<Fixup, string, string>(child.fixup, item.Item1, null));
@@ -459,16 +461,16 @@ namespace Peach.Core.Cracker
 			{
 				var after = element.find(element.placement.after);
 				if (after == null)
-					throw new CrackingFailure("Error, unable to resolve Placement on element '" + element.fullName +
-						"' with 'after' == '" + element.placement.after + "'.", element, data);
+					throw new CrackingFailure("Couldn't place element after '{0}', target could not be found."
+						.Fmt(element.placement.after), element, data);
 				newElem = element.MoveAfter(after);
 			}
 			else if (element.placement.before != null)
 			{
 				DataElement before = element.find(element.placement.before);
 				if (before == null)
-					throw new CrackingFailure("Error, unable to resolve Placement on element '" + element.fullName +
-						"' with 'before' == '" + element.placement.after + "'.", element, data);
+					throw new CrackingFailure("Couldn't place element before '{0}', target could not be found."
+						.Fmt(element.placement.before), element, data);
 				newElem = element.MoveBefore(before);
 			}
 
@@ -504,11 +506,8 @@ namespace Peach.Core.Cracker
 				data.WantBytes((offset.Value + 7 - data.LengthBits) / 8);
 
 			if (offset > data.LengthBits)
-			{
-				string msg = "{0} has offset of {1} bits but buffer only has {2} bits.".Fmt(
-					element.debugName, offset, data.LengthBits);
-				throw new CrackingFailure(msg, element, data);
-			}
+				throw new CrackingFailure("Offset is {0} bits but buffer only has {1} bits."
+					.Fmt(offset, data.LengthBits), element, data);
 
 			data.SeekBits(offset.Value, System.IO.SeekOrigin.Begin);
 		}
@@ -569,7 +568,7 @@ namespace Peach.Core.Cracker
 			object oReturn = element.EvalExpression(element.constraint, scope);
 
 			if (!((bool)oReturn))
-				throw new CrackingFailure("Constraint failed.", element, data);
+				throw new CrackingFailure("Constraint failed ({0}).".Fmt(element.constraint), element, data);
 		}
 
 		SizedPosition handleNodeBegin(DataElement elem, BitStream data)
@@ -660,8 +659,8 @@ namespace Peach.Core.Cracker
 					from = from.find(rel.relativeTo);
 
 				if (from == null)
-					throw new CrackingFailure("Unable to locate 'relativeTo' element in relation attached to " +
-						elem.debugName + "'.", elem, data);
+					throw new CrackingFailure("Unable to resolve offset relation relative to '{0}'."
+						.Fmt(rel.relativeTo), elem, data);
 
 				// Get the position we are related to
 				SizedPosition pos;
@@ -678,22 +677,16 @@ namespace Peach.Core.Cracker
 
 			// Ensure the offset is not before our current position
 			if (offset < data.PositionBits)
-			{
-				string msg = "{0} has offset of {1} bits but already read {2} bits.".Fmt(
-					elem.debugName, offset, data.PositionBits);
-				throw new CrackingFailure(msg, elem, data);
-			}
+				throw new CrackingFailure("Offset is {0} bits but already read {1} bits."
+					.Fmt(offset, data.PositionBits), elem, data);
 
 			// Make offset relative to current position
 			offset -= data.PositionBits;
 
 			// Ensure the offset satisfies the minimum
 			if (offset < minOffset)
-			{
-				string msg = "{0} has offset of {1} bits but must be at least {2} bits.".Fmt(
-					elem.debugName, offset, minOffset);
-				throw new CrackingFailure(msg, elem, data);
-			}
+				throw new CrackingFailure("Offset is {0} bits but must be at least {1} bits."
+					.Fmt(offset, minOffset), elem, data);
 
 			return offset;
 		}

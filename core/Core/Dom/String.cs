@@ -142,13 +142,12 @@ namespace Peach.Core.Dom
 
 					if (len == 0)
 					{
-						string msg = "";
 						if (!stopOnNull)
-							msg = "' of '" + maxCount;
+							throw new CrackingFailure("Only read {0} of {1} characters."
+								.Fmt(sb.Length, maxCount), this, data);
 
-						throw new CrackingFailure(debugName +
-								" could only crack '" + sb.Length + msg + "' characters " +
-								"before exhausting the input buffer.", this, data);
+						throw new CrackingFailure("Did not encouter a null terminator.",
+							this, data);
 					}
 
 					if (dec.GetChars(buf, 0, buf.Length, chars, 0) == 0)
@@ -164,7 +163,8 @@ namespace Peach.Core.Dom
 			}
 			catch (DecoderFallbackException)
 			{
-				throw new CrackingFailure(debugName + " contains invalid bytes.", this, data);
+				throw new CrackingFailure("String contains invalid {0} bytes."
+					.Fmt(_type.ToString().ToUpper()), this, data);
 			}
 		}
 
