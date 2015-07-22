@@ -1,11 +1,9 @@
-using System.Collections.Generic;
-using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
+using NUnit.Framework;
 using Peach.Core;
-using File = System.IO.File;
 using Peach.Core.Test;
 
 namespace PitTester
@@ -465,7 +463,6 @@ namespace PitTester
 </TestData>
 ";
 
-			// Ensure we can run when there is an ignore that matches a de-selected choice
 			var pitFile = Path.GetTempFileName();
 			var pitTest = pitFile + ".test";
 
@@ -480,6 +477,76 @@ namespace PitTester
 			{
 				File.Delete(pitFile);
 				File.Delete(pitTest);
+			}
+		}
+
+		[Test]
+		public void TestPitLintIgnore()
+		{
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+<!--
+PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
+-->
+<Peach 
+	xmlns='http://peachfuzzer.com/2012/Peach'
+	xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+	xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
+	author='Peach Fuzzer, LLC'
+	description='PIT'>
+
+	<DataModel name='DM'>
+		<String name='str1' value='0' />
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='call' method='StartIterationEvent' publisher='Peach.Agent' />
+			<Action name='Act1' type='output'>
+				<DataModel ref='DM'/>
+				<Data>
+					<Field name='str1' value='Hello'/>
+				</Data>
+			</Action>
+			<Action type='call' method='ExitIterationEvent' publisher='Peach.Agent' />
+		</State>
+	</StateModel>
+
+	<Test name='Default' maxOutputSize='65535' targetLifetime='session'>
+		<StateModel ref='TheState'/>
+		<Publisher class='RawEther' name='pub1'>
+			<Param name='Interface' value='##Interface##'/>
+			<!-- Pit is send only, don't need to expose timeouts or filter -->
+			<!-- PitLint: Allow_MissingParamValue=Timeout -->
+			<!-- PitLint: Allow_MissingParamValue=Filter -->
+		</Publisher>
+		<Publisher class='RawEther' name='pub2'>
+			<!-- Pit is send only, don't need to expose timeouts or filter -->
+			<!-- PitLint: Allow_MissingParamValue=Timeout -->
+			<!-- PitLint: Allow_MissingParamValue=Filter -->
+			<Param name='Interface' value='##Interface##'/>
+		</Publisher>
+		<Publisher class='Null' name='null'>
+			<!-- Comment -->
+			<!-- PitLint: Allow_MissingParamValue=MaxOutputSize -->
+		</Publisher>
+		<Logger class='File'>
+			<Param name='Path' value='##LoggerPath##'/>
+		</Logger>
+	</Test>
+</Peach>
+";
+
+			const string config = @"<?xml version='1.0' encoding='utf-8'?>
+<PitDefines>
+</PitDefines>
+";
+
+			using (var tmp = new TempDirectory())
+			{
+				var pitFile = Path.Combine(tmp.Path, "foo.xml");
+				File.WriteAllText(pitFile, xml);
+				File.WriteAllText(Path.Combine(tmp.Path, "foo.xml.config"), config);
+				PitTester.VerifyPit(tmp.Path, pitFile, true);
 			}
 		}
 	}

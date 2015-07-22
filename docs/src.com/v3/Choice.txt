@@ -50,7 +50,7 @@ If the first 8 bits are 1 then the remaining data is treated as a 32 bit number.
 If the first 8 bits are 2 then the remaining data is treated as a 255 bytes of binary data. 
 If the first 8 bits are 3 then the remaining data is treated as a 8 byte string. 
 
-When fuzzing Peach will chose one of the three types and fuzz it's output as an 8bit number followed by the corresponding type. Peach will attempt to full all three types.  
+When fuzzing Peach will chose one of the three types and fuzz it's output as an 8bit number followed by the corresponding type. Peach will attempt to fill all three types.  
 
 [source,xml]
 ----

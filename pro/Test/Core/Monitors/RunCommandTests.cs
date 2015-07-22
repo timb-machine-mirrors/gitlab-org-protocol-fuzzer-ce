@@ -277,6 +277,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		}
 
 		[Test]
+		[Repeat(30)]
 		public void TestAddressSanitizer()
 		{
 			if (Platform.GetOS() == Platform.OS.Windows)
@@ -337,7 +338,7 @@ namespace Peach.Pro.Test.Core.Monitors
 					StringAssert.StartsWith(pattern, data.Title);
 					StringAssert.Contains(pattern, data.Fault.Description);
 					Assert.AreEqual("DF8C57E3", data.Fault.MajorHash);
-					Assert.AreEqual("6B08385F", data.Fault.MinorHash);
+					CollectionAssert.Contains(new []{ "6B08385F", "552648B1" }, data.Fault.MinorHash);
 				}
 			}
 		}

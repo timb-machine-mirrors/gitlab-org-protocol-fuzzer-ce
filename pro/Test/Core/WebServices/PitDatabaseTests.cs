@@ -586,7 +586,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var opts = new Dictionary<string, object>
 			{
-				{PitParser.DEFINED_VALUES, defs}
+				{PitParser.DefinedValues, defs}
 			};
 
 			var dom = parser.asParser(opts, pit.Versions[0].Files[0].Name);
@@ -670,7 +670,7 @@ namespace Peach.Pro.Test.Core.WebServices
 				{"PitLibraryPath", root},
 				{"Strategy", "Random"}
 			};
-			opts[PitParser.DEFINED_VALUES] = defs;
+			opts[PitParser.DefinedValues] = defs;
 
 			var dom = parser.asParser(opts, pit.Versions[0].Files[0].Name);
 

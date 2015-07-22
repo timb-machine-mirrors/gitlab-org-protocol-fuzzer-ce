@@ -42,7 +42,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				defaultValues["VAR1"] = "TheDataModel";
 				defaultValues["VAR2"] = "SomeString";
 
-				parserArgs[PitParser.DEFINED_VALUES] = defaultValues;
+				parserArgs[PitParser.DefinedValues] = defaultValues;
 			}
 
 			string pitFile = Path.GetTempFileName();
@@ -55,7 +55,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				}
 			}
 
-			Peach.Core.Dom.Dom dom = Analyzer.defaultParser.asParser(parserArgs, pitFile);
+			Peach.Core.Dom.Dom dom = Analyzer.DefaultParser.asParser(parserArgs, pitFile);
 			dom.evaulateDataModelAnalyzers();
 
 			Assert.AreEqual(1, dom.dataModels.Count);
@@ -123,7 +123,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			defines["FILE"] = tempFile;
 
 			var args = new Dictionary<string, object>();
-			args[PitParser.DEFINED_VALUES] = defines;
+			args[PitParser.DefinedValues] = defines;
 
 			PitParser parser = new PitParser();
 			Peach.Core.Dom.Dom dom = parser.asParser(args, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
