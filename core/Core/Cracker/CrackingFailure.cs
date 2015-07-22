@@ -38,25 +38,20 @@ namespace Peach.Core.Cracker
 		public BitStream data;
 		public bool logged = false;
 
-		public CrackingFailure(DataElement element, BitStream data)
-			: base("Unknown error")
-		{
-			this.element = element;
-			this.data = data;
-		}
+		public string ShortMessage { get; private set; }
 
 		public CrackingFailure(string msg, DataElement element, BitStream data)
-			: base(msg)
+			: this(msg, element, data, null)
 		{
-			this.element = element;
-			this.data = data;
 		}
 
 		public CrackingFailure(string msg, DataElement element, BitStream data, Exception innerException)
-			: base(msg, innerException)
+			: base("{0} failed to crack. {1}".Fmt(element.debugName, msg), innerException)
 		{
 			this.element = element;
 			this.data = data;
+
+			ShortMessage = msg;
 		}
 	}
 }

@@ -574,7 +574,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			return dom;
 		}
 
-		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "String 'TheDataModel.str1' is unsized.")]
+		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "String 'TheDataModel.str1' failed to crack. Element is unsized.")]
 		public void CrackTokenArrayZero()
 		{
 			DoCrackTokenArray("HelloWorld");

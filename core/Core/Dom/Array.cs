@@ -185,7 +185,7 @@ namespace Peach.Core.Dom
 			BitStream sizedData = ReadSizedData(data, size);
 
 			if (OriginalElement == null)
-				throw new CrackingFailure("{0} has no original element.".Fmt(debugName), this, data);
+				throw new CrackingFailure("No original element was found.", this, data);
 
 			//Clear();
 
@@ -209,12 +209,13 @@ namespace Peach.Core.Dom
 			else if (minOccurs == 1 && maxOccurs == 1)
 				min = max = occurs;
 
-			if (((min > maxOccurs && maxOccurs != -1) || (min < minOccurs)) && min != occurs)
-			{
-				string msg = "{0} has invalid count of {1} (minOccurs={2}, maxOccurs={3}, occurs={4}).".Fmt(
-				    debugName, min, minOccurs, maxOccurs, occurs);
-				throw new CrackingFailure(msg, this, data);
-			}
+			if (min > maxOccurs && maxOccurs != -1 && min != occurs)
+				throw new CrackingFailure("Count of {0} is greater than the maximum of {1}."
+					.Fmt(min, maxOccurs), this, data);
+
+			if (min < minOccurs && min != occurs)
+				throw new CrackingFailure("Count of {0} is less than the minimum of {1}."
+					.Fmt(min, minOccurs), this, data);
 
 			for (int i = 0; max == -1 || i < max; ++i)
 			{
@@ -242,13 +243,14 @@ namespace Peach.Core.Dom
 						break;
 					}
 				}
-				catch (CrackingFailure)
+				catch (CrackingFailure ex)
 				{
 					logger.Debug("Crack: {0} Failed on #{1}", debugName, i+1);
 
 					// If we couldn't satisfy the minimum propigate failure
 					if (i < min)
-						throw;
+						throw new CrackingFailure("Only cracked {0} of {1} array entries."
+							.Fmt(i, min), this, data, ex);
 
 					RemoveAt(clone.parent.IndexOf(clone));
 					sizedData.SeekBits(pos, System.IO.SeekOrigin.Begin);
@@ -257,10 +259,8 @@ namespace Peach.Core.Dom
 			}
 
 			if (this.Count < min)
-			{
-				string msg = "{0} only cracked {1} of {2} elements.".Fmt(debugName, Count, min);
-				throw new CrackingFailure(msg, this, data);
-			}
+				throw new CrackingFailure("Only cracked {0} of {1} array entries."
+					.Fmt(Count, min), this, data);
 
 			if (size.HasValue && data != sizedData)
 				data.SeekBits(startPos + sizedData.PositionBits, System.IO.SeekOrigin.Begin);

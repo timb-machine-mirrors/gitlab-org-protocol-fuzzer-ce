@@ -337,7 +337,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			Assert.AreEqual(16, elem.Value.LengthBits);
 		}
 
-		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "Block 'TheDataModel.block' has length of 16 bits but already read 32 bits.")]
+		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "Block 'TheDataModel.block' failed to crack. Length is 16 bits but already read 32 bits.")]
 		public void CrackBadSizeParent()
 		{
 			string xml = @"<?xml version='1.0' encoding='utf-8'?>
@@ -360,7 +360,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			cracker.CrackData(dom.dataModels[0], data);
 		}
 
-		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "Block 'TheDataModel.block' has length of 16 bits but already read 32 bits.")]
+		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "Block 'TheDataModel.block' failed to crack. Length is 16 bits but already read 32 bits.")]
 		public void CrackBadSizeBlockParent()
 		{
 			string xml = @"<?xml version='1.0' encoding='utf-8'?>

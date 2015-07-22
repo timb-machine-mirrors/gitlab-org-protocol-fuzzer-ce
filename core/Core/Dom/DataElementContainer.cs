@@ -154,9 +154,8 @@ namespace Peach.Core.Dom
 
 			if (size.Value < read)
 			{
-				string msg = "{0} has length of {1} bits but already read {2} bits.".Fmt(
-					debugName, size.Value, read);
-				throw new CrackingFailure(msg, this, data);
+				throw new CrackingFailure("Length is {0} bits but already read {1} bits."
+					.Fmt(size.Value, read), this, data);
 			}
 
 			long needed = size.Value - read;
@@ -165,9 +164,12 @@ namespace Peach.Core.Dom
 
 			if (needed > remain)
 			{
-				string msg = "{0} has length of {1} bits{2}but buffer only has {3} bits left.".Fmt(
-					debugName, size.Value, read == 0 ? " " : ", already read " + read + " bits, ", remain);
-				throw new CrackingFailure(msg, this, data);
+				if (read == 0)
+					throw new CrackingFailure("Length is {0} bits but buffer only has {1} bits left."
+						.Fmt(size.Value, remain), this, data);
+
+				throw new CrackingFailure("Read {0} of {1} bits but buffer only has {2} bits left."
+					.Fmt(read, size.Value, remain), this, data);
 			}
 
 			// Always return a slice of data.  This way, if data

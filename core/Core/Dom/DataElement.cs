@@ -683,10 +683,9 @@ namespace Peach.Core.Dom
 			{
 				var newDefault = DefaultValue;
 				DefaultValue = oldDefalut;
-				var msg = "{0} marked as token, values did not match '{1}' vs. '{2}'.";
-				msg = msg.Fmt(debugName, newDefault, oldDefalut);
-				logger.Debug(msg);
-				throw new CrackingFailure(msg, this, data);
+
+				throw new CrackingFailure("Token did not match '{0}' vs. '{1}'."
+					.Fmt(newDefault, oldDefalut), this, data);
 			}
 		}
 
@@ -1548,14 +1547,11 @@ namespace Peach.Core.Dom
 		public virtual BitStream ReadSizedData(BitStream data, long? size, long read = 0)
 		{
 			if (!size.HasValue)
-				throw new CrackingFailure(debugName + " is unsized.", this, data);
+				throw new CrackingFailure("Element is unsized.", this, data);
 
 			if (size.Value < read)
-			{
-				string msg = "{0} has length of {1} bits but already read {2} bits.".Fmt(
-					debugName, size.Value, read);
-				throw new CrackingFailure(msg, this, data);
-			}
+				throw new CrackingFailure("Length is {0} bits but already read {1} bits."
+					.Fmt(size.Value, read), this, data);
 
 			long needed = size.Value - read;
 			data.WantBytes((needed + 7) / 8);
@@ -1563,9 +1559,12 @@ namespace Peach.Core.Dom
 
 			if (needed > remain)
 			{
-				string msg = "{0} has length of {1} bits{2}but buffer only has {3} bits left.".Fmt(
-					debugName, size.Value, read == 0 ? " " : ", already read " + read + " bits, ", remain);
-				throw new CrackingFailure(msg, this, data);
+				if (read == 0)
+					throw new CrackingFailure("Length is {0} bits but buffer only has {1} bits left."
+						.Fmt(size.Value, remain), this, data);
+
+				throw new CrackingFailure("Read {0} of {1} bits but buffer only has {2} bits left."
+					.Fmt(read, size.Value, remain), this, data);
 			}
 
 			var slice = data.SliceBits(needed);

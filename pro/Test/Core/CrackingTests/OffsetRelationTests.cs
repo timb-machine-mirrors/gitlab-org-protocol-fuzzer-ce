@@ -40,7 +40,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 	[Peach]
 	public class OffsetRelationTests
 	{
-		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "String 'TheDataModel.Data' has offset of 160 bits but buffer only has 96 bits.")]
+		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "String 'TheDataModel.Data' failed to crack. Offset is 160 bits but buffer only has 96 bits.")]
 		public void TooBigOffset()
 		{
 			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
@@ -61,7 +61,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			cracker.CrackData(dom.dataModels[0], data);
 		}
 
-		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "String 'TheDataModel.Data' has offset of 0 bits but already read 8 bits.")]
+		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "String 'TheDataModel.Data' failed to crack. Offset is 0 bits but already read 8 bits.")]
 		public void TooSmallOffset()
 		{
 			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
@@ -193,7 +193,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			Assert.AreEqual(target, (string)dom.dataModels[0][3].DefaultValue);
 		}
 
-		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "String 'TheDataModel.Data' has offset of 16 bits but must be at least 40 bits.")]
+		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "String 'TheDataModel.Data' failed to crack. Offset is 16 bits but must be at least 40 bits.")]
 		public void BadOffset()
 		{
 			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
@@ -255,7 +255,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			Assert.AreEqual("Hello World", (string)dom.dataModels[0].find("block.Data").DefaultValue);
 		}
 
-		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "String 'TheDataModel.block.Data' has offset of 224 bits but buffer only has 168 bits.")]
+		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "String 'TheDataModel.block.Data' failed to crack. Offset is 224 bits but buffer only has 168 bits.")]
 		public void BadOffsetInSizedBlock()
 		{
 			string xml = @"<?xml version='1.0' encoding='utf-8'?>
