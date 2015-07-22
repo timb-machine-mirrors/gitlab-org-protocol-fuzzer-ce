@@ -677,7 +677,7 @@ namespace Peach.Core.Dom
 
 			context.Log("Value: {0}", DefaultValue);
 
-			logger.Debug("{0} value is: {1}", debugName, DefaultValue);
+			logger.Trace("{0} value is: {1}", debugName, DefaultValue);
 
 			if (isToken && oldDefalut != DefaultValue)
 			{
