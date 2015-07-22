@@ -124,6 +124,11 @@ namespace Peach.Core.Cracker
 		/// </summary>
 		readonly StringBuilder _logPrefix = new StringBuilder();
 
+		/// <summary>
+		/// The last error we logged
+		/// </summary>
+		Exception _lastError;
+
 		#endregion
 
 		#region Events
@@ -407,23 +412,26 @@ namespace Peach.Core.Cracker
 			}
 			catch (Exception e)
 			{
-				var ex = e as CrackingFailure;
-
 				if (Logger.IsDebugEnabled)
 				{
 					_logPrefix.Remove(_logPrefix.Length - 2, 2);
 
+					var ex = e as CrackingFailure;
+					var msg = ex != null ? ex.ShortMessage : e.Message;
+
 					if (elem is DataElementContainer)
 					{
-						if (ex != null && !ex.logged)
-							Logger.Debug("{0} X ({1})", _logPrefix, ex.ShortMessage);
+						if (_lastError != e)
+							Logger.Debug("{0} X ({1})", _logPrefix, msg);
 						else
 							Logger.Debug("{0} X", _logPrefix);
 					}
-					else if (ex != null && !ex.logged)
+					else if (_lastError != e)
 					{
-						Logger.Debug("{0}   Failed: {1}", _logPrefix, ex.ShortMessage);
+						Logger.Debug("{0}   Failed: {1}", _logPrefix, msg);
 					}
+
+					_lastError = e;
 				}
 
 				handleException(elem, data, e);
@@ -557,7 +565,6 @@ namespace Peach.Core.Cracker
 			}
 			else
 			{
-
 				logger.Trace("Exception occured: {0}", e.ToString());
 			}
 
