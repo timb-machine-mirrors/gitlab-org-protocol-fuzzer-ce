@@ -602,7 +602,7 @@ namespace Peach.Core.Cracker
 			object oReturn = element.EvalExpression(element.constraint, scope);
 
 			if (!((bool)oReturn))
-				throw new CrackingFailure("Constraint failed ({0}).".Fmt(element.constraint), element, data);
+				throw new CrackingFailure("Constraint failed [{0}].".Fmt(element.constraint), element, data);
 		}
 
 		SizedPosition handleNodeBegin(DataElement elem, BitStream data)
