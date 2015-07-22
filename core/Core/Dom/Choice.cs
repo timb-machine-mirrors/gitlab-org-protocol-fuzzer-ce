@@ -207,6 +207,7 @@ namespace Peach.Core.Dom
 					try
 					{
 						logger.Trace("handleChoice: Cache hit for child: {0}", child.debugName);
+						context.Log("Cache hit: {0}", child.Name);
 
 						sizedData.SeekBits(startPosition, System.IO.SeekOrigin.Begin);
 						context.CrackData(child, sizedData);
@@ -219,14 +220,15 @@ namespace Peach.Core.Dom
 					{
 						// If we fail to crack the cached option, fall back to the slow method. It's possible
 						// there are two tokens in a row and the first one is not deterministic.
-						logger.Debug("handleChoice: Failed to crack child using cache. Retrying with slow method...: {0}", child.debugName);
+						logger.Trace("handleChoice: Failed to crack child using cache. Retrying with slow method...: {0}", child.debugName);
+						context.Log("Cache failed, falling back to slow method");
 						isTryAfterFailure = true;
 
 						break;
 					}
 					catch (Exception ex)
 					{
-						logger.Debug("handleChoice: Child threw exception: {0}: {1}", child.debugName, ex.Message);
+						logger.Trace("handleChoice: Child threw exception: {0}: {1}", child.debugName, ex.Message);
 						throw;
 					}
 				}
