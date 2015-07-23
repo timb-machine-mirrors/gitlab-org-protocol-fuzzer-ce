@@ -3,6 +3,7 @@ using System.IO;
 using System.Xml.Serialization;
 using NUnit.Framework;
 using Peach.Core;
+using Peach.Core.Test;
 using Peach.Pro.Core;
 
 namespace Peach.Pro.Test.Core
@@ -108,6 +109,7 @@ namespace Peach.Pro.Test.Core
 	#endregion
 
 	[TestFixture]
+	[Quick]
 	class XmlToolsTests
 	{
 		static T Deserialize<T>(string xml)
