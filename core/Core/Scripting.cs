@@ -163,14 +163,14 @@ namespace Peach.Core
 
 		readonly Dictionary<string, CompiledCode> _scriptCache = new Dictionary<string, CompiledCode>();
 
-		private CompiledCode CompileCode(ScriptScope scope, string code, bool cache)
+		private CompiledCode CompileCode(ScriptScope scope, string code, SourceCodeKind kind, bool cache)
 		{
 			CompiledCode compiled;
 
 			if (!_scriptCache.TryGetValue(code, out compiled))
 			{
 				var errors = new ScriptErrorListener();
-				var source = scope.Engine.CreateScriptSourceFromString(code, SourceCodeKind.Expression);
+				var source = scope.Engine.CreateScriptSourceFromString(code, kind);
 				compiled = source.Compile(errors);
 
 				if (compiled == null)
@@ -222,7 +222,7 @@ namespace Peach.Core
 		public void Exec(string code, Dictionary<string, object> localScope)
 		{
 			var scope = CreateScope(localScope);
-			var compiled = CompileCode(scope, code, false);
+			var compiled = CompileCode(scope, code, SourceCodeKind.Statements, false);
 
 			try
 			{
@@ -251,7 +251,7 @@ namespace Peach.Core
 		public object Eval(string code, Dictionary<string, object> localScope, bool cache = true)
 		{
 			var scope = CreateScope(localScope);
-			var compiled = CompileCode(scope, code, cache);
+			var compiled = CompileCode(scope, code, SourceCodeKind.Expression, cache);
 
 			try
 			{
