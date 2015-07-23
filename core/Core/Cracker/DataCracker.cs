@@ -363,20 +363,6 @@ namespace Peach.Core.Cracker
 		{
 			List<BitStream> oldStack = null;
 
-			if (Logger.IsDebugEnabled)
-			{
-				if (elem is DataElementContainer)
-				{
-					Logger.Debug("{0}-+ {1} '{2}', {3}", _logPrefix, elem.elementType, elem.Name, data.Progress);
-					_logPrefix.Append(" |");
-				}
-				else
-				{
-					Logger.Debug("{0}-- {1} '{2}', {3}", _logPrefix, elem.elementType, elem.Name, data.Progress);
-					_logPrefix.Append("  ");
-				}
-			}
-
 			try
 			{
 				logger.Trace("------------------------------------");
@@ -620,7 +606,32 @@ namespace Peach.Core.Cracker
 
 		SizedPosition handleNodeBegin(DataElement elem, BitStream data)
 		{
-			handleOffsetRelation(elem, data);
+			try
+			{
+				handleOffsetRelation(elem, data);
+			}
+			finally
+			{
+				// Wait to log start element until we have updated data.Progress
+				// to reflect any offset relations that might exist.
+				// We always want to log so that if an exception is thrown
+				// we will be at the right indentation level for logging
+				// in handleException()
+
+				if (Logger.IsDebugEnabled)
+				{
+					if (elem is DataElementContainer)
+					{
+						Logger.Debug("{0}-+ {1} '{2}', {3}", _logPrefix, elem.elementType, elem.Name, data.Progress);
+						_logPrefix.Append(" |");
+					}
+					else
+					{
+						Logger.Debug("{0}-- {1} '{2}', {3}", _logPrefix, elem.elementType, elem.Name, data.Progress);
+						_logPrefix.Append("  ");
+					}
+				}
+			}
 
 			System.Diagnostics.Debug.Assert(!_sizedElements.ContainsKey(elem));
 
