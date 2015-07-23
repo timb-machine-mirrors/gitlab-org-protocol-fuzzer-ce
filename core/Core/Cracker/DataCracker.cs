@@ -400,55 +400,9 @@ namespace Peach.Core.Cracker
 					_elementsWithAnalyzer.Add(elem);
 
 				handleNodeEnd(elem, data, pos);
-
-				if (Logger.IsDebugEnabled)
-				{
-					_logPrefix.Remove(_logPrefix.Length - 2, 2);
-
-					if (elem is DataElementContainer)
-						Logger.Debug("{0} /", _logPrefix);
-				}
 			}
 			catch (Exception e)
 			{
-				if (Logger.IsDebugEnabled)
-				{
-					_logPrefix.Remove(_logPrefix.Length - 2, 2);
-
-					var ex = e as CrackingFailure;
-					var msg = ex != null ? ex.ShortMessage : e.Message;
-
-					if (elem is DataElementContainer)
-					{
-						if (_lastError != e)
-							Logger.Debug("{0} X ({1})", _logPrefix, msg);
-						else
-							Logger.Debug("{0} X", _logPrefix);
-					}
-					else if (_lastError != e)
-					{
-						Logger.Debug("{0}   Failed: {1}", _logPrefix, msg);
-					}
-				}
-
-				if (_lastError == e)
-				{
-					// Already logged the exception
-					logger.Trace("{0} failed to crack.", elem.debugName);
-				}
-				else if (e is CrackingFailure)
-				{
-					// Cracking failures include element name in message
-					logger.Trace(e.Message);
-				}
-				else
-				{
-					logger.Trace("{0} failed to crack.", elem.debugName);
-					logger.Trace("Exception occured: {0}", e.ToString());
-				}
-
-				_lastError = e;
-
 				handleException(elem, data, e);
 				throw;
 			}
@@ -562,6 +516,44 @@ namespace Peach.Core.Cracker
 
 		void handleException(DataElement elem, BitStream data, Exception e)
 		{
+			if (Logger.IsDebugEnabled)
+			{
+				_logPrefix.Remove(_logPrefix.Length - 2, 2);
+
+				var ex = e as CrackingFailure;
+				var msg = ex != null ? ex.ShortMessage : e.Message;
+
+				if (elem is DataElementContainer)
+				{
+					if (_lastError != e)
+						Logger.Debug("{0} X ({1})", _logPrefix, msg);
+					else
+						Logger.Debug("{0} X", _logPrefix);
+				}
+				else if (_lastError != e)
+				{
+					Logger.Debug("{0}   Failed: {1}", _logPrefix, msg);
+				}
+			}
+
+			if (_lastError == e)
+			{
+				// Already logged the exception
+				logger.Trace("{0} failed to crack.", elem.debugName);
+			}
+			else if (e is CrackingFailure)
+			{
+				// Cracking failures include element name in message
+				logger.Trace(e.Message);
+			}
+			else
+			{
+				logger.Trace("{0} failed to crack.", elem.debugName);
+				logger.Trace("Exception occured: {0}", e.ToString());
+			}
+
+			_lastError = e;
+
 			var items = _sizedElements.Where(x => x.Key.isChildOf(elem)).ToList();
 
 			foreach (var item in items)
@@ -684,6 +676,14 @@ namespace Peach.Core.Cracker
 			pos.end = data.PositionBits + getDataOffset();
 
 			OnExitHandleNodeEvent(elem, pos.end, data);
+
+			if (Logger.IsDebugEnabled)
+			{
+				_logPrefix.Remove(_logPrefix.Length - 2, 2);
+
+				if (elem is DataElementContainer)
+					Logger.Debug("{0} /", _logPrefix);
+			}
 		}
 
 		void handleCrack(DataElement elem, BitStream data, long? size)
