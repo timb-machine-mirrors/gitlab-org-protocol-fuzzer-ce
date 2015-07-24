@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Xml;
 using Peach.Core;
 using Peach.Core.Analyzers;
@@ -23,13 +24,13 @@ namespace Peach.Pro.Core.Dom
 		public Frag()
 			: base()
 		{
-			Add(new Sequence("Rendering"));
+			Add(new FragSequence("Rendering"));
 		}
 
 		public Frag(string name)
 			: base(name)
 		{
-			Add(new Sequence("Rendering"));
+			Add(new FragSequence("Rendering"));
 		}
 
 		#region Parameter Properties
@@ -39,7 +40,25 @@ namespace Peach.Pro.Core.Dom
 
 		#endregion
 
+		/// <summary>
+		/// Set by Payload.Invalidated event handler
+		/// </summary>
+		private bool _payloadInvalidated = false;
+
+		/// <summary>
+		/// Set after we have generated fragements at least once
+		/// </summary>
+		private bool _generatedFragments = false;
+
+		/// <summary>
+		/// Instance of our fragement algorithm class. Can be null.
+		/// </summary>
 		public FragmentAlgorithm FragmentAlg { get; set; }
+
+		/// <summary>
+		/// Template to use for fragments
+		/// </summary>
+		public DataElement Template { get; set; }
 
 		public new static DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
 		{
@@ -85,8 +104,11 @@ namespace Peach.Pro.Core.Dom
 
 			if (block.Count != 3)
 				throw new PeachException(string.Format(
-					"Error: Frag '{0}' element has too many children. Expecting 2, found {1}.",
+					"Error: Frag '{0}' element has too many children. Expecting 3, found {1}.",
 					block.Name, block.Count - 1));
+
+			block.Template = block["Template"];
+			block.Remove(block.Template);
 
 			return block;
 		}
@@ -106,25 +128,51 @@ namespace Peach.Pro.Core.Dom
 			WritePitCommonAttributes(pit);
 			WritePitCommonChildren(pit);
 
-			this["Template"].WritePit(pit);
+			Template.WritePit(pit);
 			this["Payload"].WritePit(pit);
 
 			pit.WriteEndElement();
 		}
 
+		protected override IEnumerable<DataElement> Children()
+		{
+			// Make sure we re-generate if needed
+			GenerateDefaultValue();
+			return base.Children();
+		}
+
+		protected override DataElement GetChild(string name)
+		{
+			// Make sure we re-generate if needed
+			GenerateDefaultValue();
+			return base.GetChild(name);
+		}
+
 		protected override Variant GenerateDefaultValue()
 		{
-			if (!this._childrenDict.ContainsKey("Template") ||
-			    !this._childrenDict.ContainsKey("Payload") ||
+			if (!this._childrenDict.ContainsKey("Payload") ||
 			    !this._childrenDict.ContainsKey("Rendering"))
 			{
-				return new Variant(new byte[]{});
+				return new Variant(new byte[] {});
 			}
 
-			if (FragmentAlg != null)
-				FragmentAlg.Fragment(this["Template"], this["Payload"], this["Rendering"] as Sequence);
+			// Subscribe to this event once
+			if (!_generatedFragments)
+			{
+				this["Payload"].Invalidated += (sender, args) => { _payloadInvalidated = true; };
+			}
 
-			// TODO -- Handle script property
+			// Only perform regeneration if payload is invalidated
+			if (_payloadInvalidated || !_generatedFragments)
+			{
+				_generatedFragments = true;
+				_payloadInvalidated = false;
+
+				if (FragmentAlg != null)
+					FragmentAlg.Fragment(Template, this["Payload"], this["Rendering"] as Sequence);
+
+				// TODO -- Handle script property
+			}
 
 			return this["Rendering"].DefaultValue;
 		}
