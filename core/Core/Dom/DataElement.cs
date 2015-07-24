@@ -1709,22 +1709,20 @@ namespace Peach.Core.Dom
 
 		private DataElement MoveTo(DataElementContainer newParent, int index)
 		{
-			DataElement newElem;
-
 			var oldIndex = parent.IndexOf(this);
 
 			if (parent == newParent)
 			{
-				newElem = Clone();
-
 				if (oldIndex < index)
 					index--;
+
+				parent.MoveChild(oldIndex, index);
+
+				return this;
 			}
-			else
-			{
-				var newName = newParent.UniqueName(Name);
-				newElem = Clone(newName);
-			}
+
+			var newName = newParent.UniqueName(Name);
+			var newElem = Clone(newName);
 
 			parent.RemoveAt(oldIndex);
 			newParent.Insert(index, newElem);
