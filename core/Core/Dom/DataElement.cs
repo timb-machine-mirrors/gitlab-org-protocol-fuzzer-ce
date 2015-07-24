@@ -675,7 +675,17 @@ namespace Peach.Core.Dom
 				throw new CrackingFailure(pe.Message, this, data, pe);
 			}
 
-			context.Log("Value: {0}", DefaultValue);
+			if (context.IsLogEnabled)
+			{
+				var vt = DefaultValue.GetVariantType();
+
+				if (vt == Variant.VariantType.Int || vt == Variant.VariantType.Long)
+					context.Log("Value: {0} (0x{1:X})", DefaultValue, (long)DefaultValue);
+				else if (vt == Variant.VariantType.ULong)
+					context.Log("Value: {0} (0x{1:X})", DefaultValue, (ulong)DefaultValue);
+				else
+					context.Log("Value: {0}", DefaultValue);
+			}
 
 			logger.Trace("{0} value is: {1}", debugName, DefaultValue);
 
