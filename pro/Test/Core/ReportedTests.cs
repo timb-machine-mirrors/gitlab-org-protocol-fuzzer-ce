@@ -347,7 +347,8 @@ namespace Peach.Pro.Test.Core
 			Assert.AreEqual(2, count);
 			Assert.AreEqual(1, array.Count);
 
-			array.CountOverride = 50;
+			array.SetCountOverride(50, array[0].Value, 0);
+			//array.CountOverride = 50;
 			Assert.AreEqual(50, array.GetCountOverride());
 
 			var val = array.InternalValue.BitsToString();

@@ -692,7 +692,7 @@ namespace Peach.Pro.Core.MutationStrategies
 
 					// Trigger re-generation of data
 					// needed for Frag element.
-					var obj = data.dataModel.Value;
+					//var obj = data.dataModel.Value;
 				}
 				else
 				{
