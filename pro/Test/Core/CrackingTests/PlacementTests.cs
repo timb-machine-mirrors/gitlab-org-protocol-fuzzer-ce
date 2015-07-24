@@ -766,6 +766,149 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			Assert.NotNull(str);
 			Assert.AreEqual("BB", (string)str.DefaultValue);
 		}
+
+		[Test]
+		public void BacktrackPlacementBefore()
+		{
+			const string xml = @"
+<Peach>
+  <DataModel name='repro'>
+    <Number size='8' name='array_offset'>
+      <Relation type='offset' of='array' />
+    </Number>
+
+    <Number size='8' name='array_count'>
+      <Relation type='count' of='array' />
+    </Number>
+
+    <Block name='array' minOccurs='0'>
+      <Number name='len' size='8'>
+        <Relation type='size' of='value' />
+      </Number>
+      <String name='value'>
+        <Placement before='array' />
+      </String>
+    </Block>
+  </DataModel>
+</Peach>
+";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var data = Bits.Fmt("{0}{1}{2}", new byte[] {12, 4}, "ABBCCCDDDD", new byte[] {1, 2, 3, 4});
+			var cracker = new DataCracker();
+
+			cracker.CrackData(dom.dataModels[0], data);
+
+			Assert.AreEqual(2 + 4 + 1, dom.dataModels[0].Count);
+
+			Assert.AreEqual("A", (string)dom.dataModels[0][2].DefaultValue);
+			Assert.AreEqual("BB", (string)dom.dataModels[0][3].DefaultValue);
+			Assert.AreEqual("CCC", (string)dom.dataModels[0][4].DefaultValue);
+			Assert.AreEqual("DDDD", (string)dom.dataModels[0][5].DefaultValue);
+		}
+
+		[Test]
+		public void BacktrackPlacementAfter()
+		{
+			const string xml = @"
+<Peach>
+  <DataModel name='repro'>
+    <Number size='8' name='array_offset'>
+      <Relation type='offset' of='array' />
+    </Number>
+
+    <Number size='8' name='array_count'>
+      <Relation type='count' of='array' />
+    </Number>
+
+    <Block name='array' minOccurs='0'>
+      <Number name='len' size='8'>
+        <Relation type='size' of='value' />
+      </Number>
+      <String name='value'>
+        <Placement after='array_count' />
+      </String>
+    </Block>
+  </DataModel>
+</Peach>
+";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var data = Bits.Fmt("{0}{1}{2}", new byte[] { 12, 4 }, "DDDDCCCBBA", new byte[] { 1, 2, 3, 4 });
+			var cracker = new DataCracker();
+
+			cracker.CrackData(dom.dataModels[0], data);
+
+			Assert.AreEqual(2 + 4 + 1, dom.dataModels[0].Count);
+
+			Assert.AreEqual("DDDD", (string)dom.dataModels[0][2].DefaultValue);
+			Assert.AreEqual("CCC", (string)dom.dataModels[0][3].DefaultValue);
+			Assert.AreEqual("BB", (string)dom.dataModels[0][4].DefaultValue);
+			Assert.AreEqual("A", (string)dom.dataModels[0][5].DefaultValue);
+		}
+
+		[Test]
+		public void BacktrackPlacementSimpleNotLast()
+		{
+			const string xml = @"
+<Peach>
+  <DataModel name='repro'>
+    <Number size='8' name='block_offset'>
+      <Relation type='offset' of='block' />
+    </Number>
+
+    <Block name='block'>
+      <String name='dot' value='.' token='true' />
+      <String name='payload'>
+        <Placement before='dot' />
+      </String>
+      <String name='end' value='end' token='true' />
+    </Block>
+  </DataModel>
+</Peach>
+";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var data = Bits.Fmt("{0:b8}{1}", 8, "abcdefg.end");
+			var cracker = new DataCracker();
+
+			cracker.CrackData(dom.dataModels[0], data);
+
+			var payload = dom.dataModels[0].find("payload");
+			Assert.NotNull(payload);
+			Assert.AreEqual("abcdefg", (string)payload.DefaultValue);
+		}
+
+		[Test]
+		public void BacktrackPlacementSimpleLast()
+		{
+			const string xml = @"
+<Peach>
+  <DataModel name='repro'>
+    <Number size='8' name='block_offset'>
+      <Relation type='offset' of='block' />
+    </Number>
+
+    <Block name='block'>
+      <String name='end' value='.end' token='true' />
+      <String name='payload'>
+        <Placement before='end' />
+      </String>
+    </Block>
+  </DataModel>
+</Peach>
+";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var data = Bits.Fmt("{0:b8}{1}", 8, "abcdefg.end");
+			var cracker = new DataCracker();
+
+			cracker.CrackData(dom.dataModels[0], data);
+
+			var payload = dom.dataModels[0].find("payload");
+			Assert.NotNull(payload);
+			Assert.AreEqual("abcdefg", (string)payload.DefaultValue);
+		}
 	}
 }
 

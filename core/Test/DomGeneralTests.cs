@@ -6,6 +6,7 @@ using NUnit.Framework;
 using Peach.Core.Dom;
 using System.IO;
 using Peach.Core.Analyzers;
+using Peach.Core.Cracker;
 
 namespace Peach.Core.Test
 {
@@ -361,6 +362,38 @@ namespace Peach.Core.Test
 			const string rootEnum = "B,G,A,D,L,C,E,K,I,H,J,F";
 			Assert.AreEqual(rootEnum, string.Join(",", iter7));
 			Assert.AreEqual(rootEnum, string.Join(",", iter8));
+		}
+
+
+		[Test]
+		public void TestElementComparison()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String value='https://www.google.com/search?site=&amp;tbm=isch&amp;source=hp&amp;biw=1920&amp;bih=979&amp;q=peach&amp;oq=peach&amp;gs_l=img.3..0l10.1242.1667.0.1828.5.5.0.0.0.0.79.287.5.5.0....0...1ac.1.64.img..0.5.287.8H3bm7Z3gFw'>			<Analyzer class='StringToken' />
+		</String>
+	</DataModel>
+</Peach>
+";
+
+
+			var dom = DataModelCollector.ParsePit(xml);
+
+			var items = new List<DataElement>(dom.dataModels[0].Walk());
+
+			CollectionAssert.IsNotEmpty(items);
+
+			var rng = new Random(1);
+
+			for (var i = 0; i < 1000; ++i)
+			{
+				var copy = new List<DataElement>(rng.Shuffle(items.ToArray()));
+
+				copy.Sort(new DataCracker.ElementComparer());
+
+				CollectionAssert.AreEqual(items, copy);
+			}
 		}
 	}
 }
