@@ -2,6 +2,7 @@
 using System.Xml;
 using Peach.Core;
 using Peach.Core.Analyzers;
+using Peach.Core.Cracker;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 using Array = Peach.Core.Dom.Array;
@@ -10,13 +11,11 @@ using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 namespace Peach.Pro.Core.Dom
 {
 	[PitParsable("Frag")]
-	
 	[DataElement("Frag", DataElementTypes.All)]
 	[DescriptionAttribute("Fragmentation element")]
 	[Parameter("name", typeof(string), "Element name", "")]
 	[Parameter("class", typeof(string), "Frag extension class", "")]
 	[Parameter("script", typeof(string), "Frag script", "")]
-	[Parameter("mutable", typeof(bool), "Is element mutable", "true")]
 	[Parameter("constraint", typeof(string), "Scripting expression that evaluates to true or false", "")]
 	[Serializable]
 	public class Frag : Block
@@ -24,13 +23,13 @@ namespace Peach.Pro.Core.Dom
 		public Frag()
 			: base()
 		{
-			Add(new Sequence("Rendering"));// { maxOccurs = -1 });
+			Add(new Sequence("Rendering"));
 		}
 
 		public Frag(string name)
 			: base(name)
 		{
-			Add(new Sequence("Rendering"));// { maxOccurs = -1 });
+			Add(new Sequence("Rendering"));
 		}
 
 		#region Parameter Properties
@@ -47,7 +46,7 @@ namespace Peach.Pro.Core.Dom
 			if (node.Name != "Frag")
 				return null;
 
-			var block = DataElement.Generate<Frag>(node, parent);
+			var block = Generate<Frag>(node, parent);
 			block.parent = parent;
 
 			block.Class = node.getAttr("class", null);
@@ -57,8 +56,9 @@ namespace Peach.Pro.Core.Dom
 			if (!string.IsNullOrEmpty(block.Class))
 			{
 				var type = ClassLoader.FindTypeByAttribute<FragmentAlgorithmAttribute>((t, a) => 0 == string.Compare(a.Name, block.Class, true));
-				//if (type == null)
-				//	throw new PeachException("Error, state '" + parent.Name + "' has an invalid action type '" + strType + "'.");
+				if (type == null)
+					throw new PeachException(
+						"Error, state '" + parent.Name + "' has an invalid action type '" + block.Class + "'.");
 
 				block.FragmentAlg = (FragmentAlgorithm)Activator.CreateInstance(type);
 				block.FragmentAlg.Parent = block;
@@ -121,11 +121,12 @@ namespace Peach.Pro.Core.Dom
 				return new Variant(new byte[]{});
 			}
 
-			if(FragmentAlg != null)
+			if (FragmentAlg != null)
 				FragmentAlg.Fragment(this["Template"], this["Payload"], this["Rendering"] as Sequence);
+
+			// TODO -- Handle script property
 
 			return this["Rendering"].DefaultValue;
 		}
-
 	}
 }
