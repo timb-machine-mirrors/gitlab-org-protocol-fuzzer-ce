@@ -28,6 +28,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Peach.Core.Dom;
@@ -119,6 +121,11 @@ namespace Peach.Core.Cracker
 		/// Elements that have analyzers attached.  We run them all post-crack.
 		/// </summary>
 		List<DataElement> _elementsWithAnalyzer;
+
+		/// <summary>
+		/// Placements to run after current cracking phase cracking complete
+		/// </summary>
+		List<DataElement> _deferredPlacement;
 
 		/// <summary>
 		/// The string to prefix log messages with.
@@ -314,18 +321,115 @@ namespace Peach.Core.Cracker
 
 		#region Handlers
 
+		internal class ElementComparer : IComparer<DataElement>
+		{
+			public static DataElement FollowingElement(DataElement elem)
+			{
+				for (var curr = elem; curr != null; curr = curr.parent)
+				{
+					var next = curr.nextSibling();
+					if (next != null)
+						return next;
+				}
+
+				return null;
+			}
+
+			public static DataElement PreceedingElement(DataElement elem)
+			{
+				for (var curr = elem; curr != null; curr = curr.parent)
+				{
+					var prev = curr.previousSibling();
+					if (prev != null)
+						return prev;
+				}
+
+				return null;
+			}
+
+
+			public static int CompareTo(DataElement lhs, DataElement rhs)
+			{
+				if (lhs == rhs)
+					return 0;
+
+				var parents = new List<DataElement>();
+
+				for (var p = lhs; p != null; p = p.parent)
+					parents.Add(p);
+
+				// rhs is a parent of lhs
+				if (parents.Contains(rhs))
+					return 1;
+
+				for (var e = rhs; e != null; e = e.parent)
+				{
+					var idx = parents.IndexOf(e.parent);
+
+					// no common parent
+					if (idx == -1)
+						continue;
+
+					// lhs is a child of rhs
+					if (idx == 0)
+						return -1;
+
+					// Found common parent, so compare the siblings
+					var sibling = parents[idx - 1];
+
+					Debug.Assert(sibling.parent == e.parent);
+
+					if (e.parent.IndexOf(sibling) < e.parent.IndexOf(e))
+						return -1;
+
+					return 1;
+				}
+
+				throw new ArgumentException("No common parent could be found.");
+			}
+
+			public int Compare(DataElement lhs, DataElement rhs)
+			{
+				return CompareTo(lhs, rhs);
+			}
+		}
+
 		#region Top Level Handlers
 
 		void handleRoot(DataElement element, BitStream data)
 		{
 			_sizedElements = new Dictionary<DataElement, SizedPosition>();
 			_elementsWithAnalyzer = new List<DataElement>();
+			_deferredPlacement = new List<DataElement>();
 
 			// We want at least 1 byte before we begin
 			data.WantBytes(1);
 
 			// Crack the model
 			handleNode(element, data);
+
+			// Need to sort based on dom walking order
+			_deferredPlacement.Sort(new ElementComparer());
+
+			foreach (var elem in _deferredPlacement)
+			{
+				var prev = ElementComparer.PreceedingElement(elem);
+
+				if (prev == null)
+				{
+					data.Position = 0;
+				}
+				else
+				{
+					SizedPosition pos;
+					if (!_sizedElements.TryGetValue(prev, out pos))
+						Debug.Assert(false, "Preceeding element should have been cracked");
+					else
+						data.PositionBits = pos.end;
+				}
+
+				handleNode(elem, data);
+			}
 
 			// Handle any analyzers
 			foreach (DataElement elem in _elementsWithAnalyzer)
@@ -417,6 +521,7 @@ namespace Peach.Core.Cracker
 		{
 			var fixups = new List<Tuple<Fixup, string, string>>();
 			DataElementContainer oldParent = element.parent;
+			var next = element.nextSibling();
 
 			// Locate relevant fixups that reference this element about to me moved
 			// or any element that is a child of the element that is going to be moved
@@ -486,7 +591,35 @@ namespace Peach.Core.Cracker
 				Logger.Debug("{0}   Placed As: {1}", _logPrefix, newElem.fullName);
 			}
 
-			logger.Trace("handlePlacement: {0} -> {1}", debugName, newElem.fullName);
+			// We placed behind the current position if:
+			// 1) No next and newElem is a child of oldParent
+			// 2) No next element and newElem < oldParent
+			// 3) Next and newElem < next
+
+			if (next == null)
+			{
+				if (newElem.isChildOf(oldParent) || ElementComparer.CompareTo(newElem, oldParent) < 0)
+				{
+					_deferredPlacement.Add(newElem);
+					logger.Trace("handlePlacement: {0} -> {1} (Deferring cracking, no next)", debugName, newElem.fullName);
+				}
+				else
+				{
+					logger.Trace("handlePlacement: {0} -> {1} (Immediate cracking, no next)", debugName, newElem.fullName);
+				}
+			}
+			else
+			{
+				if (ElementComparer.CompareTo(newElem, next) < 0)
+				{
+					_deferredPlacement.Add(newElem);
+					logger.Trace("handlePlacement: {0} -> {1} (Deferring cracking, yes next)", debugName, newElem.fullName);
+				}
+				else
+				{
+					logger.Trace("handlePlacement: {0} -> {1} (Immediate cracking, yes next)", debugName, newElem.fullName);
+				}
+			}
 
 			OnPlacementEvent(element, newElem, oldParent);
 		}
