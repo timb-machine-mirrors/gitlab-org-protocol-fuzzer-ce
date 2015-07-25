@@ -4,8 +4,6 @@ tools = [
 	'nunit.py',
 ]
 
-bld.install_files('${BINDIR}', tools, chmod=Utils.O755)
-
 files = [
 	'nunit3-to-junit.xsl',
 ]
