@@ -15,8 +15,7 @@ namespace Peach.Pro.Core.Dom
 	[DataElement("Frag", DataElementTypes.All)]
 	[DescriptionAttribute("Fragmentation element")]
 	[Parameter("name", typeof(string), "Element name", "")]
-	[Parameter("class", typeof(string), "Frag extension class", "")]
-	[Parameter("script", typeof(string), "Frag script", "")]
+	[Parameter("class", typeof(string), "Frag extension class")]
 	[Parameter("constraint", typeof(string), "Scripting expression that evaluates to true or false", "")]
 	[Serializable]
 	public class Frag : Block
@@ -69,29 +68,20 @@ namespace Peach.Pro.Core.Dom
 			block.parent = parent;
 
 			block.Class = node.getAttr("class", null);
-			block.Script = node.getAttr("script", null);
 			block.isMutable = false;
 
-			if (!string.IsNullOrEmpty(block.Class))
-			{
-				var type = ClassLoader.FindTypeByAttribute<FragmentAlgorithmAttribute>((t, a) => 0 == string.Compare(a.Name, block.Class, true));
-				if (type == null)
-					throw new PeachException(
-						"Error, state '" + parent.Name + "' has an invalid action type '" + block.Class + "'.");
+			var type = ClassLoader.FindTypeByAttribute<FragmentAlgorithmAttribute>((t, a) => 0 == string.Compare(a.Name, block.Class, true));
+			if (type == null)
+				throw new PeachException(
+					"Error, state '" + parent.Name + "' has an invalid action type '" + block.Class + "'.");
 
-				block.FragmentAlg = (FragmentAlgorithm)Activator.CreateInstance(type);
-				block.FragmentAlg.Parent = block;
-			}
+			block.FragmentAlg = (FragmentAlgorithm)Activator.CreateInstance(type);
+			block.FragmentAlg.Parent = block;
 
 			context.handleCommonDataElementAttributes(node, block);
 			context.handleCommonDataElementChildren(node, block);
 			context.handleDataElementContainer(node, block);
 
-			if (string.IsNullOrEmpty(block.Class) && string.IsNullOrEmpty(block.Script))
-				throw new PeachException(string.Format(
-					"Error: Frag '{0}' missing both class and script attributes.",
-					block.Name));
-			
 			if (!block._childrenDict.ContainsKey("Template"))
 				throw new PeachException(string.Format(
 					"Error: Frag '{0}' missing child element named 'Template'.",

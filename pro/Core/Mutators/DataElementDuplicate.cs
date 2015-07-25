@@ -115,7 +115,6 @@ namespace Peach.Pro.Core.Mutators
 				newElem.MutatedValue = mutatedValue;
 				newElem.mutationFlags = MutateOverride.Default | MutateOverride.TypeTransform;
 
-				Console.Error.WriteLine(">>> "+newName+" : "+baseName);
 				obj.parent.Insert(idx + i, newElem);
 			}
 		}
