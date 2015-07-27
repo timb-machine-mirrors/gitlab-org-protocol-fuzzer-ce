@@ -303,7 +303,7 @@ namespace PitTester
 			}
 
 			var args = new Dictionary<string, object>();
-			args[PitParser.DefinedValues] = defs;
+			args[PitParser.DEFINED_VALUES] = defs;
 
 			var parser = new PitParser();
 
