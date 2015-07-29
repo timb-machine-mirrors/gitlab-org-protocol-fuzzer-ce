@@ -271,6 +271,11 @@ namespace Peach.Pro.Core.Agent.Channels
 			public string Class { get; set; }
 			public Dictionary<string, string> Args { get; set; }
 
+			/// <summary>
+			/// Has the create publisher rest call been made?
+			/// </summary>
+			protected bool isCreated = false;
+
 			public RestProxyPublisher(Dictionary<string, string> args)
 				: base(new Dictionary<string, Variant>())
 			{
@@ -363,19 +368,27 @@ namespace Peach.Pro.Core.Agent.Channels
 
 			protected void RestartRemotePublisher()
 			{
-				logger.Debug("Restarting remote publisher");
+				if (isCreated)
+					logger.Debug("Restarting remote publisher");
+				else
+					logger.Debug("Starting remote publisher");
 
-				CreatePublisherRequest request = new CreatePublisherRequest();
+				var request = new CreatePublisherRequest();
 				request.iteration = Iteration;
 				request.isControlIteration = IsControlIteration;
 				request.Cls = Class;
 				request.args = Args;
 
 				Send("CreatePublisher", JsonConvert.SerializeObject(request));
+
+				isCreated = true;
 			}
 
 			protected override void OnStart()
 			{
+				if(!isCreated)
+					RestartRemotePublisher();
+
 				Send("start");
 			}
 
