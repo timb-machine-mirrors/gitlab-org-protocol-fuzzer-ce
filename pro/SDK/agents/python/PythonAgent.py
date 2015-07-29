@@ -278,7 +278,10 @@ class Agent_Publisher_call:
 			# TODO - Do something with arguments!
 		
 		# TODO - Do something with method call
-		
+
+		# If method needs to return data, put 'data' member in returned object
+		# return json.dumps({ "data":"T3V0cHV0IGRhdGE=", "error":"false", "errorString":None })
+
 		return json.dumps({ "error":"false", "errorString":None })
 
 
