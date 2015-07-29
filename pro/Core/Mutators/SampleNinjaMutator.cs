@@ -86,7 +86,7 @@ select from count('x'), se.elementid
 			var pitFile = GetPitFile(obj);
 			if (pitFile == null)
 			{
-				logger.Debug("no pit file specified in run configuration, disabing mutator.");
+				logger.Trace("no pit file specified in run configuration, disabing mutator.");
 				return false;
 			}
 

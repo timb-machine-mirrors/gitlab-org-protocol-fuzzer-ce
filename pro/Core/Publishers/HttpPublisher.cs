@@ -244,6 +244,11 @@ namespace Peach.Pro.Core.Publishers
 			StartClient();
 		}
 
+		static bool HeaderCompare(string lhs, string rhs)
+		{
+			return 0 == string.Compare(lhs, rhs, StringComparison.OrdinalIgnoreCase);
+		}
+
 		private Stream TryCreateClient(Uri url, BitwiseStream data)
 		{
 			Logger.Debug("TryCreateClient> {0} {1}", Method, url);
@@ -260,10 +265,24 @@ namespace Peach.Pro.Core.Publishers
 
 			foreach (var kv in Headers)
 			{
-				if (0 == string.Compare("Content-Type", kv.Key, StringComparison.OrdinalIgnoreCase))
+				if (HeaderCompare(kv.Key, "Accept"))
+					request.Accept = kv.Value;
+				else if (HeaderCompare(kv.Key, "Connection"))
+					request.Connection = kv.Value;
+				else if (HeaderCompare(kv.Key, "Content-Type"))
 					request.ContentType = kv.Value;
-				else if (0 == string.Compare("Referer", kv.Key, StringComparison.OrdinalIgnoreCase))
+				else if (HeaderCompare(kv.Key, "Date"))
+					request.Date = DateTime.Parse(kv.Value);
+				else if (HeaderCompare(kv.Key, "Expect"))
+					request.Expect = kv.Value;
+				else if (HeaderCompare(kv.Key, "If-Modified-Since"))
+					request.IfModifiedSince = DateTime.Parse(kv.Value);
+				else if (HeaderCompare(kv.Key, "Referer"))
 					request.Referer = kv.Value;
+				else if (HeaderCompare(kv.Key, "Transfer-Encoding"))
+					request.TransferEncoding = kv.Value;
+				else if (HeaderCompare(kv.Key, "User-Agent"))
+					request.UserAgent = kv.Value;
 				else if (!string.IsNullOrWhiteSpace(kv.Key))
 					request.Headers[kv.Key] = kv.Value;
 			}

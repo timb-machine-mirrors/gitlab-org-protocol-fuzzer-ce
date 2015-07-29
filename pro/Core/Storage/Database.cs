@@ -299,7 +299,7 @@ namespace Peach.Pro.Core.Storage
 			var finalFmt = string.Join("|", fmts);
 			foreach (object[] row in rows)
 			{
-				Console.Error.WriteLine(finalFmt, row);
+				Console.WriteLine(finalFmt, row);
 			}
 		}
 

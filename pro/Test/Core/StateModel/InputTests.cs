@@ -103,7 +103,7 @@ namespace Peach.Pro.Test.Core.StateModel
 
 			var ex = Assert.Throws<PeachException>(() => e.startFuzzing(dom, cfg));
 
-			StringAssert.IsMatch("String 'DM.DataElement_1' marked as token, values did not match 'TWO' vs. 'two'.", ex.Message);
+			StringAssert.IsMatch("String 'DM.DataElement_1' failed to crack. Token did not match 'TWO' vs. 'two'.", ex.Message);
 
 			var data = dom.tests[0].stateModel.dataActions.ToList();
 

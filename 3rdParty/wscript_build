@@ -41,3 +41,15 @@ if bld.env.BASENAME == 'osx':
 		install_path = '${BINDIR}',
 		install_644 = bld.path.ant_glob('CrashWrangler/**/*'),
 	)
+
+
+nunit_tools = bld.path.find_node('NUnit.Console.3.0.0-beta-3/tools')
+
+bld(
+	name='nunit-console',
+	features = 'peach',
+	install_path = '${BINDIR}',
+	install_644 = {
+		nunit_tools : nunit_tools.ant_glob('**/*'),
+	}
+)

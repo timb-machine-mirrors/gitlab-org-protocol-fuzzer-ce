@@ -393,41 +393,43 @@ namespace Peach.Pro.Core.WebServices
 
 		public PitDatabase()
 		{
-			_entries = new Dictionary<string, PitDetail>();
-			_libraries = new Dictionary<string, Library>();
-			_interfaces = null;
+			entries = new Dictionary<string, PitDetail>();
+			libraries = new Dictionary<string, Library>();
+			interfaces = null;
 		}
 
 		public PitDatabase(string libraryPath)
 		{
 			Load(libraryPath);
 		}
-		
+
+		private string pitLibraryPath;
+
 		public event EventHandler<ValidationEventArgs> ValidationEventHandler;
 		public event EventHandler<LoadEventArgs> LoadEventHandler;
 
 		public void Load(string path)
 		{
-			_pitLibraryPath = path;
-			_roots = new Dictionary<string, LibraryRoot>();
-			_entries = new Dictionary<string, PitDetail>();
-			_libraries = new Dictionary<string, Library>();
-			_interfaces = null;
+			pitLibraryPath = path;
+			roots = new Dictionary<string, LibraryRoot>();
+			entries = new Dictionary<string, PitDetail>();
+			libraries = new Dictionary<string, Library>();
+			interfaces = null;
 
 			HashSet<string> old;
-			lock (Cache)
+			lock (_cache)
 			{
-				old = new HashSet<string>(Cache.Keys);
+				old = new HashSet<string>(_cache.Keys);
 			}
 
 			AddLibrary(path, "", "Pits", true);
 			AddLibrary(path, "User", "Configurations", false);
 
-			lock (Cache)
+			lock (_cache)
 			{
-				foreach (var key in old.Except(_entries.Keys))
+				foreach (var key in old.Except(entries.Keys))
 				{
-					Cache.Remove(key);
+					_cache.Remove(key);
 				}
 			}
 		}
@@ -465,7 +467,7 @@ namespace Peach.Pro.Core.WebServices
 			if (srcPit == null)
 				throw new KeyNotFoundException("The source pit could not be found.");
 
-			var dstRoot = _roots[dstLib.LibraryUrl];
+			var dstRoot = roots[dstLib.LibraryUrl];
 			var srcFile = srcPit.Versions[0].Files[0].Name;
 			var srcCat = srcPit.Tags[0].Values[1];
 
@@ -884,8 +886,8 @@ namespace Peach.Pro.Core.WebServices
 
 			lib.Versions.Add(ver);
 			lib.Groups.Add(group);
-			_libraries.Add(lib.LibraryUrl, lib);
-			_roots.Add(lib.LibraryUrl, new LibraryRoot { PitLibraryPath = root, SubDir = subdir });
+			libraries.Add(lib.LibraryUrl, lib);
+			roots.Add(lib.LibraryUrl, new LibraryRoot { PitLibraryPath = root, SubDir = subdir });
 
 			if (!Directory.Exists(path))
 				return;
@@ -917,7 +919,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 			get
 			{
-				return _entries.Select(kv => kv.Value.Pit);
+				return entries.Select(kv => kv.Value.Pit);
 			}
 		}
 
@@ -925,7 +927,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 			get
 			{
-				return _libraries.Values;
+				return libraries.Values;
 			}
 		}
 
@@ -934,15 +936,15 @@ namespace Peach.Pro.Core.WebServices
 			get
 			{
 				// ReSharper disable once ConvertIfStatementToNullCoalescingExpression
-				if (_interfaces == null)
-					_interfaces = NetworkInterface.GetAllNetworkInterfaces()
+				if (interfaces == null)
+					interfaces = NetworkInterface.GetAllNetworkInterfaces()
 						.Where(i => i.OperationalStatus == OperationalStatus.Up)
 						.Where(i => i.NetworkInterfaceType == NetworkInterfaceType.Ethernet
 							|| i.NetworkInterfaceType == NetworkInterfaceType.Wireless80211
 							|| i.NetworkInterfaceType == NetworkInterfaceType.Loopback)
 						.ToList();
 
-				return _interfaces;
+				return interfaces;
 			}
 		}
 
@@ -970,7 +972,7 @@ namespace Peach.Pro.Core.WebServices
 		public Library GetLibraryByUrl(string url)
 		{
 			Library library;
-			_libraries.TryGetValue(url, out library);
+			libraries.TryGetValue(url, out library);
 			return library;
 		}
 
@@ -1028,7 +1030,7 @@ namespace Peach.Pro.Core.WebServices
 					Key = "PitLibraryPath",
 					Name = "Pit Library Path",
 					Description = "Path to root of Pit Library",
-					Value = _pitLibraryPath,
+					Value = pitLibraryPath,
 				}
 			};
 
@@ -1164,7 +1166,7 @@ namespace Peach.Pro.Core.WebServices
 		private PitDetail GetPitDetailByUrl(string url)
 		{
 			PitDetail pit;
-			_entries.TryGetValue(url, out pit);
+			entries.TryGetValue(url, out pit);
 			return pit;
 		}
 
@@ -1200,18 +1202,18 @@ namespace Peach.Pro.Core.WebServices
 			var lastModified = File.GetLastWriteTimeUtc(fileName);
 
 			PitDetail detail;
-			lock (Cache)
+			lock (_cache)
 			{
-				if (!Cache.TryGetValue(url, out detail) ||
+				if (!_cache.TryGetValue(url, out detail) ||
 					detail.Pit.Timestamp < lastModified ||
 					AnyFilesStale(detail))
 				{
 					detail = MakePitDetail(lib, pitLibraryPath, fileName, guid, lastModified);
-					Cache[url] = detail;
+					_cache[url] = detail;
 				}
 			}
 
-			_entries.Add(url, detail);
+			entries.Add(url, detail);
 
 			lib.Pits.Add(new LibraryPit
 			{
@@ -1348,11 +1350,10 @@ namespace Peach.Pro.Core.WebServices
 			public List<PeachElement.AgentElement> Agents { get; set; }
 		}
 
-		private string _pitLibraryPath;
-		private Dictionary<string, LibraryRoot> _roots;
-		private Dictionary<string, PitDetail> _entries;
-		private Dictionary<string, Library> _libraries;
-		private List<NetworkInterface> _interfaces;
-		private static readonly Dictionary<string, PitDetail> Cache = new Dictionary<string, PitDetail>();
+		private Dictionary<string, LibraryRoot> roots;
+		private Dictionary<string, PitDetail> entries;
+		private Dictionary<string, Library> libraries;
+		private List<NetworkInterface> interfaces;
+		private static Dictionary<string, PitDetail> _cache = new Dictionary<string, PitDetail>();
 	}
 }

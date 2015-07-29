@@ -34,6 +34,7 @@ using Peach.Core.Dom;
 using Peach.Core.IO;
 
 using NLog;
+using Array = Peach.Core.Dom.Array;
 
 namespace Peach.Core.Cracker
 {
@@ -123,6 +124,11 @@ namespace Peach.Core.Cracker
 		/// The string to prefix log messages with.
 		/// </summary>
 		readonly StringBuilder _logPrefix = new StringBuilder();
+
+		/// <summary>
+		/// The last error we logged
+		/// </summary>
+		Exception _lastError;
 
 		#endregion
 
@@ -251,6 +257,18 @@ namespace Peach.Core.Cracker
 		{
 			if (Logger.IsDebugEnabled)
 				Logger.Debug("{0} {1}", _logPrefix, string.Format(msg, fmt));
+		}
+
+		/// <summary>
+		/// Returns true if the logger is enabled.
+		/// </summary>
+		/// <returns></returns>
+		public bool IsLogEnabled
+		{
+			get
+			{
+				return Logger.IsDebugEnabled;
+			}
 		}
 
 		#endregion
@@ -407,24 +425,43 @@ namespace Peach.Core.Cracker
 			}
 			catch (Exception e)
 			{
-				var ex = e as CrackingFailure;
-
 				if (Logger.IsDebugEnabled)
 				{
 					_logPrefix.Remove(_logPrefix.Length - 2, 2);
 
+					var ex = e as CrackingFailure;
+					var msg = ex != null ? ex.ShortMessage : e.Message;
+
 					if (elem is DataElementContainer)
 					{
-						if (ex != null && !ex.logged)
-							Logger.Debug("{0} X ({1})", _logPrefix, ex.ShortMessage);
+						if (_lastError != e)
+							Logger.Debug("{0} X ({1})", _logPrefix, msg);
 						else
 							Logger.Debug("{0} X", _logPrefix);
 					}
-					else if (ex != null && !ex.logged)
+					else if (_lastError != e)
 					{
-						Logger.Debug("{0}   Failed: {1}", _logPrefix, ex.ShortMessage);
+						Logger.Debug("{0}   Failed: {1}", _logPrefix, msg);
 					}
 				}
+
+				if (_lastError == e)
+				{
+					// Already logged the exception
+					logger.Trace("{0} failed to crack.", elem.debugName);
+				}
+				else if (e is CrackingFailure)
+				{
+					// Cracking failures include element name in message
+					logger.Trace(e.Message);
+				}
+				else
+				{
+					logger.Trace("{0} failed to crack.", elem.debugName);
+					logger.Trace("Exception occured: {0}", e.ToString());
+				}
+
+				_lastError = e;
 
 				handleException(elem, data, e);
 				throw;
@@ -503,13 +540,13 @@ namespace Peach.Core.Cracker
 			// Clear placement now that it has occured
 			newElem.placement = null;
 
-			logger.Trace("handlePlacement: {0} -> {1}", debugName, newElem.fullName);
-
 			if (Logger.IsDebugEnabled)
 			{
 				Logger.Debug("{0}-- {1} '{2}'", _logPrefix, element.elementType, element.Name);
 				Logger.Debug("{0}   Placed As: {1}", _logPrefix, newElem.fullName);
 			}
+
+			logger.Trace("handlePlacement: {0} -> {1}", debugName, newElem.fullName);
 
 			OnPlacementEvent(element, newElem, oldParent);
 		}
@@ -546,28 +583,11 @@ namespace Peach.Core.Cracker
 
 			_sizedElements.Remove(elem);
 
-			CrackingFailure ex = e as CrackingFailure;
-
-			if (ex != null)
-			{
-				logger.Trace("{0} failed to crack.", elem.debugName);
-				if (!ex.logged)
-					logger.Trace(ex.Message);
-				ex.logged = true;
-			}
-			else
-			{
-
-				logger.Trace("Exception occured: {0}", e.ToString());
-			}
-
 			OnExceptionHandleNodeEvent(elem, data.PositionBits, data, e);
 		}
 
 		void handleConstraint(DataElement element, BitStream data)
 		{
-			logger.Trace("Running constraint [{0}]", element.constraint);
-
 			var scope = new Dictionary<string, object>();
 			scope["element"] = element;
 			scope["self"] = element;
@@ -579,23 +599,23 @@ namespace Peach.Core.Cracker
 			if (iv == null)
 			{
 				scope["value"] = null;
-				logger.Trace("Constraint, value=None.");
+				logger.Trace("Running constraint [{0}], value=None.", element.constraint);
 			}
 			else if (iv.GetVariantType() == Variant.VariantType.ByteString || iv.GetVariantType() == Variant.VariantType.BitStream)
 			{
 				scope["value"] = (BitwiseStream)iv;
-				logger.Trace("Constraint, value=byte array.");
+				logger.Trace("Running constraint [{0}], value={1}.", element.constraint, iv);
 			}
 			else
 			{
 				scope["value"] = (string)iv;
-				logger.Trace("Constraint, value=[{0}].", (string)iv);
+				logger.Trace("Running constraint [{0}], value={1}.", element.constraint, (string)iv);
 			}
 
 			object oReturn = element.EvalExpression(element.constraint, scope);
 
 			if (!((bool)oReturn))
-				throw new CrackingFailure("Constraint failed ({0}).".Fmt(element.constraint), element, data);
+				throw new CrackingFailure("Constraint failed [{0}].".Fmt(element.constraint), element, data);
 		}
 
 		SizedPosition handleNodeBegin(DataElement elem, BitStream data)
@@ -604,11 +624,19 @@ namespace Peach.Core.Cracker
 
 			System.Diagnostics.Debug.Assert(!_sizedElements.ContainsKey(elem));
 
-			long? size = getSize(elem, data);
+			logger.Trace("getSize: -----> {0}", elem.debugName);
 
-			var pos = new SizedPosition();
-			pos.begin = data.PositionBits + getDataOffset();
-			pos.size = size;
+			var size = GetSize(elem, data);
+
+			logger.Trace("getSize: <----- {0} {1}", elem.debugName, size);
+
+			Log("{0}", size);
+
+			var pos = new SizedPosition
+			{
+				begin = data.PositionBits + getDataOffset(),
+				size = size.Unknown ? (long?)null : size.Size,
+			};
 
 			_sizedElements.Add(elem, pos);
 
@@ -976,15 +1004,48 @@ namespace Peach.Core.Cracker
 		}
 
 		/// <summary>
+		/// Helper class for representing the size of an element.
+		/// </summary>
+		class ElementSize
+		{
+			/// <summary>
+			/// Is the size unknown.
+			/// </summary>
+			public bool Unknown { get; set; }
+
+			/// <summary>
+			/// If the size is known, the size of the element in bits.
+			/// </summary>
+			public long Size { get; set; }
+
+			/// <summary>
+			/// Why the element was determined to be of this size.
+			/// Stored as a delegate so any styring formatting will
+			/// not happen unless logging is enabled.
+			/// </summary>
+			public Func<string> Reason { private get; set; }
+
+			/// <summary>
+			/// Format size for logging.
+			/// </summary>
+			/// <returns>String representation of size.</returns>
+			public override string ToString()
+			{
+				if (Unknown)
+					return "Size: ??? ({0})".Fmt(Reason());
+
+				return "Size: {0} bytes | {1} bits ({2})".Fmt(Size / 8, Size, Reason());
+			}
+		}
+
+		/// <summary>
 		/// Get the size of the data element.
 		/// </summary>
 		/// <param name="elem">Element to size</param>
 		/// <param name="data">Bits to crack</param>
 		/// <returns>Null if size is unknown or the size in bits.</returns>
-		long? getSize(DataElement elem, BitStream data)
+		ElementSize GetSize(DataElement elem, BitStream data)
 		{
-			logger.Trace("getSize: -----> {0}", elem.debugName);
-
 			long pos = 0;
 
 			var ret = scan(elem, ref pos, new List<Mark>(), null, Until.FirstSized);
@@ -993,14 +1054,18 @@ namespace Peach.Core.Cracker
 			{
 				if (ret.Value)
 				{
-					logger.Trace("getSize: <----- Size: {0}", pos);
-					Log("Size: {0} (Sized)", pos);
-					return pos;
+					return new ElementSize
+					{
+						Size = pos,
+						Reason = () => "Has Length"
+					};
 				}
 
-				logger.Trace("getSize: <----- Deterministic: ???");
-				Log("Size: ??? (Deterministic)");
-				return null;
+				return new ElementSize
+				{
+					Unknown = true,
+					Reason = () => "Deterministic"
+				};
 			}
 
 			var tokens = new List<Mark>();
@@ -1011,10 +1076,11 @@ namespace Peach.Core.Cracker
 			// 1st priority, end placement
 			if (end.Element != null)
 			{
-				pos = end.Position - pos;
-				logger.Trace("getSize: <----- Placement: {0}", pos);
-				Log("Size: {0} (End Placement)", pos);
-				return pos;
+				return new ElementSize
+				{
+					Size = end.Position - pos,
+					Reason = () => "End Placement"
+				};
 			}
 
 			// 2rd priority, token scan
@@ -1026,9 +1092,13 @@ namespace Peach.Core.Cracker
 				long? where = findToken(data, token.Element.Value, token.Position, token.Priority != 0);
 				if (!where.HasValue && token.Priority == 0)
 				{
-					logger.Trace("getSize: <----- Missing Required Token: ???");
-					Log("Size: ??? (Missing Required Token '{0}')", token.Element.DefaultValue);
-					return where;
+					var val = token.Element.DefaultValue;
+
+					return new ElementSize
+					{
+						Unknown = true,
+						Reason = () => "Missing Required Token '{0}'".Fmt(val)
+					};
 				}
 
 				if (!where.HasValue)
@@ -1046,21 +1116,24 @@ namespace Peach.Core.Cracker
 
 			if (closest.HasValue)
 			{
-				closest -= winner.Position;
-				logger.Trace("getSize: <----- {0} Token: {1}",
-					winner.Priority != 0 ? "Optional" : "Required",
-					closest.ToString());
-				Log("Size: {0} ({1}Token '{2}')", closest,
-					winner.Priority == 0 ? "" : "Optional ", winner.Element.DefaultValue);
-				return closest;
+				var pri = winner.Priority;
+				var val = winner.Element.DefaultValue;
+
+				return new ElementSize
+				{
+					Size = closest.Value - winner.Position,
+					Reason = () => "{0}Token '{1}'".Fmt(pri == 0 ? "" : "Optional ", val)
+				};
 			}
 
 			if (tokens.Count > 0 && ret.HasValue && ret.Value)
 			{
-				pos = data.LengthBits - (data.PositionBits + pos);
-				logger.Trace("getSize: <----- Missing Optional Token: {0}", pos);
-				Log("Size: {0} (Missing Optional Token)", pos);
-				return pos;
+				return new ElementSize
+				{
+					Size = data.LengthBits - (data.PositionBits + pos),
+					Reason = () => "Missing Optional Tokens '{0}'".Fmt(
+						string.Join("', '", tokens.Select(t => t.Element.DefaultValue)))
+				};
 			}
 
 			// 3nd priority, last unsized element
@@ -1068,33 +1141,43 @@ namespace Peach.Core.Cracker
 			{
 				if (ret.Value && (pos != 0 || !(elem is DataElementContainer)))
 				{
-					pos = data.LengthBits - (data.PositionBits + pos);
-					logger.Trace("getSize: <----- Last Unsized: {0}", pos);
-					Log("Size: {0} (Last Unsized)", pos);
-					return pos;
+					return new ElementSize
+					{
+						Size = data.LengthBits - (data.PositionBits + pos),
+						Reason = () => "Last Unsized"
+					};
 				}
 
-				logger.Trace("getSize: <----- Last Unsized: ???");
-				Log("Size: ??? (Last Unsized)");
-				return null;
+				return new ElementSize
+				{
+					Unknown = true,
+					Reason = () => "Last Unsized"
+				};
 			}
 
-			Log("Size: ??? (Not Last Unsized)");
-
-			if (elem is Dom.Array)
+			if (elem is Array)
 			{
-				logger.Trace("getSize: <----- Array Not Last Unsized: ???");
-				return null;
+				return new ElementSize
+				{
+					Unknown = true,
+					Reason = () => "Array Not Last Unsized"
+				};
 			}
 
-			if (elem is Dom.Choice)
+			if (elem is Choice)
 			{
-				logger.Trace("getSize: <----- Choice Not Last Unsized: ???");
-				return null;
+				return new ElementSize
+				{
+					Unknown = true,
+					Reason = () => "Choice Not Last Unsized"
+				};
 			}
 
-			logger.Trace("getSize: <----- Not Last Unsized: ???");
-			return null;
+			return new ElementSize
+			{
+				Unknown = true,
+				Reason = () => "Not Last Unsized"
+			};
 		}
 
 		/// <summary>

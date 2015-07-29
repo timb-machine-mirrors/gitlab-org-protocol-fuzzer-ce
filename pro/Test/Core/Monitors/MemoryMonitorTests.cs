@@ -69,7 +69,7 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			_proc.Dispose();
 
-			File.Delete(_file);
+			Retry.Backoff(TimeSpan.FromSeconds(1), 5, () => File.Delete(_file));
 		}
 
 		[Test]

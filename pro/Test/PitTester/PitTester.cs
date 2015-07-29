@@ -130,7 +130,7 @@ namespace PitTester
 			defs = PitDefines.Evaluate(defs);
 
 			var args = new Dictionary<string, object>();
-			args[PitParser.DefinedValues] = defs;
+			args[PitParser.DEFINED_VALUES] = defs;
 
 			var parser = new PitParser();
 
@@ -293,6 +293,53 @@ namespace PitTester
 			}
 		}
 
+		public static void ProfilePit(string pitLibraryPath, string fileName)
+		{
+			var defs = PitParser.parseDefines(fileName + ".config");
+			if (defs.Any(k => k.Key == "PitLibraryPath"))
+			{
+				defs.Remove(defs.First(k => k.Key == "PitLibraryPath"));
+				defs.Add(new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
+			}
+
+			var args = new Dictionary<string, object>();
+			args[PitParser.DEFINED_VALUES] = defs;
+
+			var parser = new PitParser();
+
+			var dom = parser.asParser(args, fileName);
+
+			dom.context = new RunContext();
+
+			foreach (var test in dom.tests)
+			{
+				dom.context.test = test;
+
+				foreach (var state in test.stateModel.states)
+				{
+					foreach (var action in state.actions)
+					{
+						foreach (var actionData in action.allData)
+						{
+							foreach (var data in actionData.allData.OfType<DataFile>())
+							{
+								var dm = actionData.dataModel;
+
+								for (var i = 0; i < 1000; ++i)
+								{
+									var clone = (DataModel)dm.Clone();
+									clone.actionData = actionData;
+									data.Apply(clone);
+								}
+
+								return;
+							}
+						}
+					}
+				}
+			}
+		}
+
 		public static void VerifyDataSets(string pitLibraryPath, string fileName, bool verifyBytes = true)
 		{
 			var defs = PitParser.parseDefines(fileName + ".config");
@@ -303,7 +350,7 @@ namespace PitTester
 			}
 
 			var args = new Dictionary<string, object>();
-			args[PitParser.DefinedValues] = defs;
+			args[PitParser.DEFINED_VALUES] = defs;
 
 			var parser = new PitParser();
 
@@ -723,7 +770,7 @@ namespace PitTester
 					var defs = PitParser.parseDefines(fileName + ".config");
 					defs.Insert(0, new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
 					defs = PitDefines.Evaluate(defs);
-					args[PitParser.DefinedValues] = defs;
+					args[PitParser.DEFINED_VALUES] = defs;
 					new GodelPitParser().asParser(args, fileName);
 				}
 			}
