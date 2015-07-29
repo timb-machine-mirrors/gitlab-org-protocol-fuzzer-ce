@@ -288,7 +288,7 @@ namespace PeachValidator
 					DefinedValues.Add(kv.Key, kv.Value);
 			}
 
-			_parserArgs[PitParser.DefinedValues] = DefinedValues;
+			_parserArgs[PitParser.DEFINED_VALUES] = DefinedValues;
 			toolStripButtonRefreshPit_Click(null, null);
 		}
 

@@ -16,10 +16,10 @@ namespace Peach.Pro.Core.Analyzers
     [Serializable]
     public class RegexAnalyzer : Analyzer
     {
-		public new static readonly bool SupportParser = false;
-		public new static readonly bool SupportDataElement = true;
-		public new static readonly bool SupportCommandLine = true;
-		public new static readonly bool SupportTopLevel = false;
+		public new static readonly bool supportParser = false;
+		public new static readonly bool supportDataElement = true;
+		public new static readonly bool supportCommandLine = true;
+		public new static readonly bool supportTopLevel = false;
 
         public string Regex { get; set; }
 

@@ -161,10 +161,10 @@ namespace Peach.Core.Dom
 
 				return sb.ToString();
 			}
-			catch (DecoderFallbackException)
+			catch (DecoderFallbackException ex)
 			{
 				throw new CrackingFailure("String contains invalid {0} bytes."
-					.Fmt(_type.ToString().ToUpper()), this, data);
+					.Fmt(_type.ToString().ToUpper()), this, data, ex);
 			}
 		}
 
@@ -207,6 +207,28 @@ namespace Peach.Core.Dom
 			}
 
 			return ret;
+		}
+
+		public override void Crack(DataCracker context, BitStream data, long? size)
+		{
+			try
+			{
+				base.Crack(context, data, size);
+			}
+			catch (Exception ex)
+			{
+				// Produce a nice error by wrapping the exception in a CrackingFailure
+				// so that --debug log output of the cracker looks nice.
+				// Otherwise the exception message looks like:
+				// Failed: Error, String 'TheDataModel.DataElement_0' value contains invalid ascii bytes.
+				if (ex.GetBaseException() is DecoderFallbackException)
+				{
+					throw new CrackingFailure("String contains invalid {0} bytes."
+						.Fmt(_type.ToString().ToUpper()), this, data, ex);
+				}
+
+				throw;
+			}
 		}
 
 		public static DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)

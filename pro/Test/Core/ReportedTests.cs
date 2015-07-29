@@ -83,7 +83,7 @@ namespace Peach.Pro.Test.Core
 		/// <summary>
 		/// Reported by Sirus
 		/// </summary>
-		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "Block 'GeneratedModel.0.2' has length of 5381942480 bits, already read 64 bits, but buffer only has 40 bits left.")]
+		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "Block 'GeneratedModel.0.2' failed to crack. Read 64 of 5381942480 bits but buffer only has 40 bits left.")]
 		public void CrackExplode()
 		{
 			string xml = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -175,7 +175,7 @@ namespace Peach.Pro.Test.Core
 		/// <summary>
 		/// Reported by Sirus
 		/// </summary>
-		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "Block 'GeneratedModel.0.1' has length of 8 bits but already read 64 bits.")]
+		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "Block 'GeneratedModel.0.1' failed to crack. Length is 8 bits but already read 64 bits.")]
 		public void CrackExplode2()
 		{
 			string xml = @"<?xml version=""1.0"" encoding=""utf-8""?>

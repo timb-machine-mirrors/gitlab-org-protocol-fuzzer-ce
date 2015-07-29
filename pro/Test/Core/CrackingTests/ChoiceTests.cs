@@ -790,7 +790,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 		}
 
 		[Test]
-		public void ChoiceThrows()
+		public void ScriptingThrowsPeach()
 		{
 			string xml = @"
 <Peach>
@@ -814,21 +814,39 @@ namespace Peach.Pro.Test.Core.CrackingTests
 
 			DataCracker cracker = new DataCracker();
 
-			try
-			{
-				cracker.CrackData(dom.dataModels[0], data);
+			// Invalid syntax in a scripting expression should propigate all the way up
+			// as a PeachException and not result in us matching on choice 'Bar'
+			Assert.Throws<PeachException>(() => cracker.CrackData(dom.dataModels[0], data));
+		}
 
-				Assert.Fail("should throw");
-			}
-			catch (CrackingFailure)
-			{
-				Assert.Fail("should not throw cracking failure");
-			}
-			catch (SoftException)
-			{
-				// The bad scripting expression should propigate all the way up
-				// as a SoftException and not result in us matching on choice 'Bar'
-			}
+		[Test]
+		public void ScriptingThrowsSoft()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name=""DM"">
+		<Choice name=""Choice"">
+			<Block>
+				<Number size=""16"" name=""Foo"">
+					<Relation type=""size"" of=""Value"" expressionGet=""int(value.foo)""/>
+				</Number>
+				<String name=""Value""/>
+			</Block>
+			<String name=""Bar"" value=""Bar""/>
+		</Choice>
+	</DataModel>
+</Peach>";
+
+			PitParser parser = new PitParser();
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			var data = Bits.Fmt("{0}", "Bar");
+
+			DataCracker cracker = new DataCracker();
+
+			// Runtime error in a scripting expression should propigate all the way up
+			// as a SoftException and not result in us matching on choice 'Bar'
+			Assert.Throws<SoftException>(() => cracker.CrackData(dom.dataModels[0], data));
 		}
 
 		[Test]
