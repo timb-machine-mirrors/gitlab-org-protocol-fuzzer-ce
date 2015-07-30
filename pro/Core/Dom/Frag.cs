@@ -15,7 +15,8 @@ namespace Peach.Pro.Core.Dom
 	[DataElement("Frag", DataElementTypes.All)]
 	[DescriptionAttribute("Fragmentation element")]
 	[Parameter("name", typeof(string), "Element name", "")]
-	[Parameter("class", typeof(string), "Frag extension class")]
+	[Parameter("fragLength", typeof(int), "Fragment size in bytes")]
+	[Parameter("class", typeof(string), "Fragment extension class", "ByLength")]
 	[Parameter("constraint", typeof(string), "Scripting expression that evaluates to true or false", "")]
 	[Serializable]
 	public class Frag : Block
@@ -35,7 +36,7 @@ namespace Peach.Pro.Core.Dom
 		#region Parameter Properties
 
 		public string Class { get; set; }
-		public string Script { get; set; }
+		public int FragLength { get; set; }
 
 		#endregion
 
@@ -67,13 +68,14 @@ namespace Peach.Pro.Core.Dom
 			var block = Generate<Frag>(node, parent);
 			block.parent = parent;
 
-			block.Class = node.getAttr("class", null);
+			block.Class = node.getAttr("class", "ByLength");
+			block.FragLength = node.getAttr("fragLength", 0);
 			block.isMutable = false;
 
 			var type = ClassLoader.FindTypeByAttribute<FragmentAlgorithmAttribute>((t, a) => 0 == string.Compare(a.Name, block.Class, true));
 			if (type == null)
 				throw new PeachException(
-					"Error, state '" + parent.Name + "' has an invalid action type '" + block.Class + "'.");
+					"Error, Frag element '" + parent.Name + "' has an invalid class attribute '" + block.Class + "'.");
 
 			block.FragmentAlg = (FragmentAlgorithm)Activator.CreateInstance(type);
 			block.FragmentAlg.Parent = block;
@@ -109,12 +111,9 @@ namespace Peach.Pro.Core.Dom
 
 			//pit.WriteAttributeString("name", Name);
 
-			if(!string.IsNullOrEmpty(Class))
-				pit.WriteAttributeString("class", Class.ToString());
+			pit.WriteAttributeString("class", Class);
+			pit.WriteAttributeString("fragLength", FragLength.ToString());
 			
-			if (!string.IsNullOrEmpty(Script))
-				pit.WriteAttributeString("script", Script.ToString());
-
 			WritePitCommonAttributes(pit);
 			WritePitCommonChildren(pit);
 
@@ -158,10 +157,7 @@ namespace Peach.Pro.Core.Dom
 				_generatedFragments = true;
 				_payloadInvalidated = false;
 
-				if (FragmentAlg != null)
-					FragmentAlg.Fragment(Template, this["Payload"], this["Rendering"] as Sequence);
-
-				// TODO -- Handle script property
+				FragmentAlg.Fragment(Template, this["Payload"], this["Rendering"] as Sequence);
 			}
 
 			return this["Rendering"].DefaultValue;
