@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+
+subdirs = [
+	'peach-pro',
+]
+
+bld.recurse(subdirs)

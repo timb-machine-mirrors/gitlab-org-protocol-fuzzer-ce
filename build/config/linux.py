@@ -22,6 +22,7 @@ tools = [
 	'tools.tsc',
 	'tools.mkbundle',
 	'tools.asan',
+	'tools.docker',
 ]
 
 def prepare(conf):

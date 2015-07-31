@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+
+bld(
+	features='docker',
+	install_path='${PREFIX}',
+	install_644='Dockerfile',
+)
