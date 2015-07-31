@@ -808,6 +808,46 @@ namespace Peach.Pro.Test.Core.CrackingTests
 		}
 
 		[Test]
+		public void BacktrackPlacementBeforeTwoPass()
+		{
+			const string xml = @"
+<Peach>
+  <DataModel name='repro'>
+    <Number size='8' name='offset1'>
+      <Relation type='offset' of='offset2' />
+    </Number>
+
+    <Number size='8' name='offset2'>
+      <Relation type='offset' of='block' />
+    </Number>
+
+    <Block name='block'>
+      <Block name='value'>
+        <Placement before='block' />
+          <String name='string1'>
+            <Placement before='offset2' />
+          </String>
+          <String name='string2'/>
+      </Block>
+      <String name='string3' />
+    </Block>
+  </DataModel>
+</Peach>
+";
+			var dom = DataModelCollector.ParsePit(xml);
+			var data = Bits.Fmt("{0}", "\x0004abc\x0008defghi");
+			var cracker = new DataCracker();
+
+			cracker.CrackData(dom.dataModels[0], data);
+
+			Assert.AreEqual(5, dom.dataModels[0].Count);
+
+			Assert.AreEqual("abc", (string)dom.dataModels[0][1].DefaultValue);
+			Assert.AreEqual("def", dom.dataModels[0][3].InternalValue.BitsToString());
+			Assert.AreEqual("ghi", dom.dataModels[0][4].InternalValue.BitsToString());
+		}
+
+		[Test]
 		public void BacktrackPlacementAfter()
 		{
 			const string xml = @"
@@ -908,6 +948,69 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			var payload = dom.dataModels[0].find("payload");
 			Assert.NotNull(payload);
 			Assert.AreEqual("abcdefg", (string)payload.DefaultValue);
+		}
+
+		[Test]
+		public void AbsolutePlacementNoOffset()
+		{
+			const string xml = @"
+<Peach>
+  <DataModel name='DM'>
+    <String name='value'>
+      <Placement />
+    </String>
+  </DataModel>
+</Peach>
+";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var data = Bits.Fmt("{0}", "abcdefg");
+			var cracker = new DataCracker();
+
+			var ex = Assert.Throws<CrackingFailure>(() => cracker.CrackData(dom.dataModels[0], data));
+
+			Assert.AreEqual("Placement requires before/after attribute or an offset relation.", ex.ShortMessage);
+		}
+
+		[Test]
+		public void AbsolutePlacement()
+		{
+			const string xml = @"
+<Peach>
+  <DataModel name='repro'>
+    <Number size='8' name='array_offset'>
+      <Relation type='offset' of='array' />
+    </Number>
+
+    <Number size='8' name='array_count'>
+      <Relation type='count' of='array' />
+    </Number>
+
+    <Block name='array' minOccurs='0'>
+      <Number name='offset' size='8'>
+        <Relation type='offset' of='value' />
+      </Number>
+      <Number name='length' size='8'>
+        <Relation type='size' of='value' />
+      </Number>
+      <String name='value'>
+        <Placement />
+      </String>
+    </Block>
+  </DataModel>
+</Peach>
+";
+			// 8 3 a bb ccc  5 3 2 1 3 2
+			var dom = DataModelCollector.ParsePit(xml);
+			var data = Bits.Fmt("{0}{1}{2}", "\x8\x3", "abbccc", "\x5\x3\x2\x1\x3\x2");
+			var cracker = new DataCracker();
+
+			cracker.CrackData(dom.dataModels[0], data);
+
+			Assert.AreEqual(6, dom.dataModels[0].Count);
+			Assert.AreEqual("a", (string)dom.dataModels[0][2].InternalValue);
+			Assert.AreEqual("bb", (string)dom.dataModels[0][3].InternalValue);
+			Assert.AreEqual("ccc", (string)dom.dataModels[0][4].InternalValue);
 		}
 	}
 }

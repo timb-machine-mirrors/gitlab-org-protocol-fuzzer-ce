@@ -128,6 +128,11 @@ namespace Peach.Core.Cracker
 		List<DataElement> _deferredPlacement;
 
 		/// <summary>
+		/// Absolute placements based on offset relations
+		/// </summary>
+		SortedDictionary<long, DataElement> _absolutePlacement;
+
+		/// <summary>
 		/// The string to prefix log messages with.
 		/// </summary>
 		readonly StringBuilder _logPrefix = new StringBuilder();
@@ -211,6 +216,13 @@ namespace Peach.Core.Cracker
 				_dataStack.RemoveAt(0);
 			}
 
+		}
+
+		public Position GetElementPos(DataElement elem)
+		{
+			SizedPosition ret;
+			_sizedElements.TryGetValue(elem, out ret);
+			return ret;
 		}
 
 		/// <summary>
@@ -401,6 +413,7 @@ namespace Peach.Core.Cracker
 			_sizedElements = new Dictionary<DataElement, SizedPosition>();
 			_elementsWithAnalyzer = new List<DataElement>();
 			_deferredPlacement = new List<DataElement>();
+			_absolutePlacement = new SortedDictionary<long, DataElement>();
 
 			// We want at least 1 byte before we begin
 			data.WantBytes(1);
@@ -408,27 +421,52 @@ namespace Peach.Core.Cracker
 			// Crack the model
 			handleNode(element, data);
 
-			// Need to sort based on dom walking order
-			_deferredPlacement.Sort(new ElementComparer());
-
-			foreach (var elem in _deferredPlacement)
+			while (_absolutePlacement.Count > 0 || _deferredPlacement.Count > 0)
 			{
-				var prev = ElementComparer.PreceedingElement(elem);
-
-				if (prev == null)
+				// Handle absolute placements first
+				while (_absolutePlacement.Count > 0)
 				{
+					var first = _absolutePlacement.First();
+					_absolutePlacement.Remove(first.Key);
+
+					var elem = element.Walk().SkipWhile(e =>
+					{
+						var p = _sizedElements[e];
+						return p.begin < first.Key;
+					}).First();
+
+					elem = placeElement(first.Value, data, elem, false, false);
+
 					data.Position = 0;
-				}
-				else
-				{
-					SizedPosition pos;
-					if (!_sizedElements.TryGetValue(prev, out pos))
-						Debug.Assert(false, "Preceeding element should have been cracked");
-					else
-						data.PositionBits = pos.end;
+					handleNode(elem, data);
 				}
 
-				handleNode(elem, data);
+				// Need to sort based on dom walking order
+				_deferredPlacement.Sort(new ElementComparer());
+
+				// Copy current list so it doesn't get modified when iterating
+				var copy = _deferredPlacement;
+				_deferredPlacement = new List<DataElement>();
+
+				foreach (var elem in copy)
+				{
+					var prev = ElementComparer.PreceedingElement(elem);
+
+					if (prev == null)
+					{
+						data.Position = 0;
+					}
+					else
+					{
+						SizedPosition pos;
+						if (!_sizedElements.TryGetValue(prev, out pos))
+							Debug.Assert(false, "Preceeding element should have been cracked");
+						else
+							data.PositionBits = pos.end;
+					}
+
+					handleNode(elem, data);
+				}
 			}
 
 			// Handle any analyzers
@@ -519,17 +557,54 @@ namespace Peach.Core.Cracker
 
 		void handlePlacelemt(DataElement element, BitStream data)
 		{
+			if (element.placement.after != null)
+			{
+				var target = element.find(element.placement.after);
+				if (target == null)
+					throw new CrackingFailure("Couldn't place element after '{0}', target could not be found."
+						.Fmt(element.placement.after), element, data);
+
+				placeElement(element, data, target, true, true);
+			}
+			else if (element.placement.before != null)
+			{
+				var target = element.find(element.placement.before);
+				if (target == null)
+					throw new CrackingFailure("Couldn't place element before '{0}', target could not be found."
+						.Fmt(element.placement.before), element, data);
+
+				placeElement(element, data, target, false, true);
+			}
+			else
+			{
+				var pos = GetAbsoluteOffset(element, data);
+				if (!pos.HasValue)
+					throw new CrackingFailure("Placement requires before/after attribute or an offset relation.", element, data);
+
+				// Element has an offset relation so use that when cracking
+
+				if (Logger.IsDebugEnabled)
+				{
+					Logger.Debug("{0}-- {1} '{2}'", _logPrefix, element.elementType, element.Name);
+					Logger.Debug("{0}   Placing At Offset: {1} bytes | {2} bits", _logPrefix, pos / 8, pos);
+				}
+
+				element.placement = null;
+
+				_absolutePlacement.Add(pos.Value, element);
+			}
+		}
+
+		DataElement placeElement(DataElement element, BitStream data, DataElement target, bool after, bool defer)
+		{
 			var fixups = new List<Tuple<Fixup, string, string>>();
-			DataElementContainer oldParent = element.parent;
-			var next = element.nextSibling();
 
 			// Locate relevant fixups that reference this element about to me moved
 			// or any element that is a child of the element that is going to be moved
 			// Store off fixup,ref,Full.Path.To.Element.We.Are.Placing
 			// So we can update it to New.Path.To.Placed.Element
 
-			DataElementContainer root = element.getRoot() as DataElementContainer;
-			foreach (DataElement child in root.EnumerateAllElements())
+			foreach (var child in element.getRoot().Walk())
 			{
 				if (child.fixup == null)
 					continue;
@@ -549,46 +624,38 @@ namespace Peach.Core.Cracker
 			}
 
 			// Update fixups
-			foreach (var fixup in fixups)
+			foreach (var fixup in fixups.Where(f => f.Item3 != null))
 			{
-				if (fixup.Item3 != null)
-					fixup.Item1.updateRef(fixup.Item2, fixup.Item3);
+				fixup.Item1.updateRef(fixup.Item2, fixup.Item3);
 			}
 
-			string debugName = element.debugName;
-			DataElement newElem = null;
+			var oldElem = element;
+			var oldParent = element.parent;
+			var next = element.nextSibling();
 
-			if (element.placement.after != null)
+
+			if (after)
 			{
-				var after = element.find(element.placement.after);
-				if (after == null)
-					throw new CrackingFailure("Couldn't place element after '{0}', target could not be found."
-						.Fmt(element.placement.after), element, data);
-				newElem = element.MoveAfter(after);
+				element = element.MoveAfter(target);
 			}
-			else if (element.placement.before != null)
+			else
 			{
-				DataElement before = element.find(element.placement.before);
-				if (before == null)
-					throw new CrackingFailure("Couldn't place element before '{0}', target could not be found."
-						.Fmt(element.placement.before), element, data);
-				newElem = element.MoveBefore(before);
+				element = element.MoveBefore(target);
 			}
 
 			// Update fixups
-			foreach (var fixup in fixups)
+			foreach (var fixup in fixups.Where(f => f.Item3 == null))
 			{
-				if (fixup.Item3 == null)
-					fixup.Item1.updateRef(fixup.Item2, newElem.fullName);
+				fixup.Item1.updateRef(fixup.Item2, element.fullName);
 			}
 
 			// Clear placement now that it has occured
-			newElem.placement = null;
+			element.placement = null;
 
 			if (Logger.IsDebugEnabled)
 			{
-				Logger.Debug("{0}-- {1} '{2}'", _logPrefix, element.elementType, element.Name);
-				Logger.Debug("{0}   Placed As: {1}", _logPrefix, newElem.fullName);
+				Logger.Debug("{0}-- {1} '{2}'", _logPrefix, oldElem.elementType, oldElem.Name);
+				Logger.Debug("{0}   Placed As: {1}", _logPrefix, element.fullName);
 			}
 
 			// We placed behind the current position if:
@@ -596,32 +663,38 @@ namespace Peach.Core.Cracker
 			// 2) No next element and newElem < oldParent
 			// 3) Next and newElem < next
 
-			if (next == null)
+			if (!defer)
 			{
-				if (newElem.isChildOf(oldParent) || ElementComparer.CompareTo(newElem, oldParent) < 0)
+				logger.Trace("handlePlacement: {0} -> {1}", oldElem.debugName, element.fullName);
+			}
+			else if (next == null)
+			{
+				if (element.isChildOf(oldParent) || ElementComparer.CompareTo(element, oldParent) < 0)
 				{
-					_deferredPlacement.Add(newElem);
-					logger.Trace("handlePlacement: {0} -> {1} (Deferring cracking, no next)", debugName, newElem.fullName);
+					_deferredPlacement.Add(element);
+					logger.Trace("handlePlacement: {0} -> {1} (Deferring cracking, no next)", oldElem.debugName, element.fullName);
 				}
 				else
 				{
-					logger.Trace("handlePlacement: {0} -> {1} (Immediate cracking, no next)", debugName, newElem.fullName);
+					logger.Trace("handlePlacement: {0} -> {1} (Immediate cracking, no next)", oldElem.debugName, element.fullName);
 				}
 			}
 			else
 			{
-				if (ElementComparer.CompareTo(newElem, next) < 0)
+				if (ElementComparer.CompareTo(element, next) < 0)
 				{
-					_deferredPlacement.Add(newElem);
-					logger.Trace("handlePlacement: {0} -> {1} (Deferring cracking, yes next)", debugName, newElem.fullName);
+					_deferredPlacement.Add(element);
+					logger.Trace("handlePlacement: {0} -> {1} (Deferring cracking, yes next)", oldElem.debugName, element.fullName);
 				}
 				else
 				{
-					logger.Trace("handlePlacement: {0} -> {1} (Immediate cracking, yes next)", debugName, newElem.fullName);
+					logger.Trace("handlePlacement: {0} -> {1} (Immediate cracking, yes next)", oldElem.debugName, element.fullName);
 				}
 			}
 
-			OnPlacementEvent(element, newElem, oldParent);
+			OnPlacementEvent(oldElem, element, oldParent);
+
+			return element;
 		}
 
 		#endregion
@@ -833,9 +906,9 @@ namespace Peach.Core.Cracker
 
 		#region Calculate Element Size
 
-		long? getRelativeOffset(DataElement elem, BitStream data, long minOffset = 0)
+		long? GetAbsoluteOffset(DataElement elem, BitStream data)
 		{
-			var relations = elem.relations.Of<OffsetRelation>();
+			var relations = elem.relations.Of<OffsetRelation>().ToList();
 			if (!relations.Any())
 				return null;
 
@@ -845,11 +918,11 @@ namespace Peach.Core.Cracker
 				return null;
 
 			// Offset is in bytes
-			long offset = (long)rel.GetValue() * 8;
+			var offset = rel.GetValue() * 8;
 
 			if (rel.isRelativeOffset)
 			{
-				DataElement from = rel.From;
+				var from = rel.From;
 
 				if (rel.relativeTo != null)
 					from = from.find(rel.relativeTo);
@@ -867,6 +940,15 @@ namespace Peach.Core.Cracker
 				// Otherwise, offset is after the From element
 				offset += rel.relativeTo != null ? pos.begin : pos.end;
 			}
+
+			return offset;
+		}
+
+		long? getRelativeOffset(DataElement elem, BitStream data, long minOffset = 0)
+		{
+			var offset = GetAbsoluteOffset(elem, data);
+			if (!offset.HasValue)
+				return null;
 
 			// Adjust offset to be relative to the current BitStream
 			offset -= getDataOffset();

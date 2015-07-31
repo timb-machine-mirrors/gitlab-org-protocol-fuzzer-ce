@@ -1159,8 +1159,6 @@ namespace Peach.Core.Analyzers
 				args["after"] = new Variant(node.getAttrString("after"));
 			else if (node.hasAttr("before"))
 				args["before"] = new Variant(node.getAttrString("before"));
-			else
-				throw new PeachException("Error, Placement on element \"" + element.Name + "\" is missing 'after' or 'before' attribute.");
 
 			var placement = new Placement(args);
 			element.placement = placement;
