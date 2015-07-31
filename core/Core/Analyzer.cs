@@ -38,18 +38,18 @@ using Peach.Core.Cracker;
 namespace Peach.Core
 {
 	[Serializable]
-	public abstract class Analyzer : IPitSerializable
+	public abstract class Analyzer: IPitSerializable
 	{
-		public static readonly bool SupportParser = false;
-		public static readonly bool SupportDataElement = false;
-		public static readonly bool SupportCommandLine = false;
-		public static readonly bool SupportTopLevel = false;
+		public static readonly bool supportParser = false;
+		public static readonly bool supportDataElement = false;
+		public static readonly bool supportCommandLine = false;
+		public static readonly bool supportTopLevel = false;
 
-		public static Analyzer DefaultParser = null;
+		public static Analyzer defaultParser = null;
 
 		static Analyzer()
 		{
-			foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
+			foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
 			{
 				if (!type.IsAbstract && type.IsClass &&
 					type.IsPublic && type.IsSubclassOf(typeof(Analyzer)))
@@ -70,9 +70,9 @@ namespace Peach.Core
 		{
 			try
 			{
-				using (var fin = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+				using(Stream fin = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 				{
-					var ret = asParser(args, fin);
+					Dom.Dom ret = asParser(args, fin);
 					ret.fileName = fileName;
 					return ret;
 				}
@@ -103,18 +103,18 @@ namespace Peach.Core
 		{
 			pit.WriteStartElement("Analyzer");
 
-			foreach (var attrib in GetType().GetAttributes<AnalyzerAttribute>(null))
+			foreach (var attrib in this.GetType().GetAttributes<AnalyzerAttribute>(null))
 			{
 				if (attrib.IsDefault)
 					pit.WriteAttributeString("class", attrib.Name);
 			}
 
-			foreach (var param in GetType().GetAttributes<ParameterAttribute>(null))
+			foreach (var param in this.GetType().GetAttributes<ParameterAttribute>(null))
 			{
 				pit.WriteStartElement("Param");
 				pit.WriteAttributeString("name", param.name);
 
-				var prop = GetType().GetProperty(param.name);
+				var prop = this.GetType().GetProperty(param.name);
 				var value = prop.GetValue(this, null).ToString();
 
 				pit.WriteAttributeString("value", value);
