@@ -589,6 +589,8 @@ namespace Peach.Core.Cracker
 					Logger.Debug("{0}   Placing At Offset: {1} bytes | {2} bits", _logPrefix, pos / 8, pos);
 				}
 
+				logger.Trace("handlePlacement: {0} -> Placing at offset {1} bits", element, pos);
+
 				element.placement = null;
 
 				_absolutePlacement.Add(pos.Value, element);

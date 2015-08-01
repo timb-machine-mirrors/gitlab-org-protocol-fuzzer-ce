@@ -21,8 +21,6 @@ namespace Peach.Pro.Test.Core.Agent.Http
 {
 	internal class HttpChannelHandler : IDisposable
 	{
-		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
 		private readonly RouteHandler _routes;
 		private readonly List<string> _restCalls; 
 

@@ -6,7 +6,6 @@ using Peach.Core.Test;
 using Peach.Pro.Test.Core.Agent.Http;
 using Peach.Pro.Test.Core.Publishers;
 using Encoding = Peach.Core.Encoding;
-using Logger = NLog.Logger;
 
 
 namespace Peach.Pro.Test.Core.Agent
