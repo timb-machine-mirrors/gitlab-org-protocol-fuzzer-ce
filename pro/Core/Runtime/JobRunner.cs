@@ -179,7 +179,7 @@ namespace Peach.Pro.Core.Runtime
 							CompleteTestEvents.Last);
 
 						var defs = PitDatabase.ParseConfig(_pitLibraryPath, pitConfig);
-						args[PitParser.DefinedValues] = defs;
+						args[PitParser.DEFINED_VALUES] = defs;
 					}
 					catch (Exception ex)
 					{
@@ -192,7 +192,7 @@ namespace Peach.Pro.Core.Runtime
 			{
 				// ParseConfig allows non-existant config files
 				var defs = PitDatabase.ParseConfig(_pitLibraryPath, pitConfig);
-				args[PitParser.DefinedValues] = defs;
+				args[PitParser.DEFINED_VALUES] = defs;
 			}
 
 			return args;

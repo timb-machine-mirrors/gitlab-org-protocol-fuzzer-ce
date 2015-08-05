@@ -841,70 +841,12 @@ namespace Peach.Pro.Test.Core.WebServices
 			{
 				defs[item.Key] = item.Value;
 			}
-			opts[PitParser.DefinedValues] = defs;
+			opts[PitParser.DEFINED_VALUES] = defs;
 
 			var parser = new PitParser();
 			var dom = parser.asParser(opts, path);
 
-			var agents = new NamedCollection<Peach.Core.Dom.Agent>();
-			foreach (var agent in cfg.Agents)
-			{
-				agents.Add(new Peach.Core.Dom.Agent
-				{
-					Name = agent.Name ?? agents.UniqueName(),
-					location = agent.AgentUrl,
-					monitors = ConvertMonitors(agent),
-				});
-			}
-
-			foreach (var test in dom.tests)
-			{
-				test.agents = agents;
-			}
-		}
-
-		NamedCollection<Peach.Core.Dom.Monitor> ConvertMonitors(Pro.Core.WebServices.Models.Agent agent)
-		{
-			var monitors = new NamedCollection<Peach.Core.Dom.Monitor>();
-			foreach (var monitor in agent.Monitors)
-			{
-				monitors.Add(new Peach.Core.Dom.Monitor
-				{
-					cls = monitor.MonitorClass,
-					Name = monitor.Name ?? monitors.UniqueName(),
-					parameters = ConvertParameters(monitor),
-				});
-			}
-			return monitors;
-		}
-
-		private static Dictionary<string, Variant> ConvertParameters(Monitor monitor)
-		{
-			var ret = new Dictionary<string, Variant>();
-			foreach (var x in monitor.Map)
-			{
-				if (x.Name == "StartMode")
-				{
-					switch (x.Value)
-					{
-						case "StartOnCall":
-							ret.Add("StartOnCall", new Variant("ExitIterationEvent"));
-							break;
-						case "RestartOnEachTest":
-							ret.Add("StartOnCall", new Variant("StartIterationEvent"));
-							ret.Add("WaitForExitOnCall", new Variant("ExitIterationEvent"));
-							break;
-						default:
-							ret.Add("RestartOnEachTest", new Variant(false));
-							break;
-					}
-				}
-				else
-				{
-					ret.Add(x.Name, new Variant(x.Value));
-				}
-			}
-			return ret;
+			PitInjector.InjectConfig(cfg, dom);
 		}
 	}
 }
