@@ -4,7 +4,7 @@ namespace Peach.Pro.Core.WebServices.Models
 {
 	public class PitConfig
 	{
-		public string Id { get; set; }
+		public string PitUrl { get; set; }
 
 		public string Name { get; set; }
 

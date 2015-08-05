@@ -44,6 +44,7 @@ using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using SharpPcap;
+using Newtonsoft.Json;
 
 namespace Peach.Pro.Core.Runtime
 {
@@ -83,6 +84,8 @@ namespace Peach.Pro.Core.Runtime
 		private bool _noweb;
 		private bool _nobrowser;
 		private static volatile bool _shouldStop;
+		private string _jsonFile;
+		private PitConfig _jsonConfig;
 
 		#region Public Properties
 
@@ -228,6 +231,24 @@ namespace Peach.Pro.Core.Runtime
 				"Disable launching browser on start.",
 				v => _nobrowser = true
 			);
+
+			// automated execution
+			options.Add(
+				"json=",
+				"Specify a configuration file for a pit",
+				v => ParseJsonConfig(v)
+			);
+		}
+
+		private void ParseJsonConfig(string filename)
+		{
+			_jsonFile = filename;
+
+			using (var textReader = File.OpenText(filename))
+			using (var jsonReader = new JsonTextReader(textReader))
+			{
+				_jsonConfig = JsonSerializer.CreateDefault().Deserialize<PitConfig>(jsonReader);
+			}
 		}
 
 		protected override bool VerifyCompatibility()
@@ -334,6 +355,12 @@ namespace Peach.Pro.Core.Runtime
 		/// </summary>
 		protected virtual void RunEngine(Peach.Core.Dom.Dom dom)
 		{
+			if (_jsonConfig != null)
+			{
+				Console.WriteLine("Using agents defined in {0}", _jsonFile);
+				PitInjector.InjectConfig(_jsonConfig, dom);
+			}
+			
 			// Add the JobLogger as necessary
 			Test test;
 
@@ -512,6 +539,20 @@ namespace Peach.Pro.Core.Runtime
 				{
 					ret.RemoveAll(i => i.Key == kv.Key);
 					ret.Add(new KeyValuePair<string, string>(kv.Key, kv.Value));
+				}
+			}
+
+			if (_jsonConfig != null)
+			{
+				Console.WriteLine("Using defines from {0}", _jsonFile);
+				foreach (var item in _jsonConfig.Config)
+				{
+					if (item.Key == "Peach.Pwd" ||
+					    item.Key == "Peach.Cwd" ||
+					    item.Key == "PitLibraryPath")
+						continue;
+					ret.RemoveAll(i => i.Key == item.Key);
+					ret.Add(new KeyValuePair<string, string>(item.Key, item.Value));
 				}
 			}
 
