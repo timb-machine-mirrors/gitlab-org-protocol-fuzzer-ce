@@ -548,11 +548,14 @@ namespace Peach.Pro.Core.Runtime
 				foreach (var item in _jsonConfig.Config)
 				{
 					if (item.Key == "Peach.Pwd" ||
-					    item.Key == "Peach.Cwd" ||
-					    item.Key == "PitLibraryPath")
+						item.Key == "Peach.Cwd" ||
+						item.Key == "PitLibraryPath")
 						continue;
-					ret.RemoveAll(i => i.Key == item.Key);
-					ret.Add(new KeyValuePair<string, string>(item.Key, item.Value));
+					var i = ret.FindIndex(x => x.Key == item.Key);
+					if (i < 0)
+						ret.Add(new KeyValuePair<string, string>(item.Key, item.Value));
+					else
+						ret[i] = new KeyValuePair<string, string>(item.Key, item.Value);
 				}
 			}
 
