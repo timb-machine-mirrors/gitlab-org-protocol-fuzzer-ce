@@ -263,10 +263,40 @@ namespace Peach.Core.IO
 		public override bool TryGetPosition(string name, out long position)
 		{
 			position = 0;
-			return ScanUntil(name, ref position);
+			return ScanUntilName(name, ref position);
 		}
 
-		protected bool ScanUntil(string name, ref long position)
+		public override bool TryGetName(long find, out string name)
+		{
+			name = "";
+			long offset = 0;
+			return ScanUntilPos(find, ref offset, ref name);
+		}
+
+		protected bool ScanUntilPos(long find, ref long offset, ref string name)
+		{
+			foreach (var child in this)
+			{
+				if (find < offset + child.LengthBits)
+				{
+					var lst = child as BitStreamList;
+					if (lst == null)
+					{
+						name = child.Name;
+						return true;
+					}
+
+					if (lst.ScanUntilPos(find, ref offset, ref name))
+						return true;
+				}
+
+				offset += child.LengthBits;
+			}
+
+			return false;
+		}
+
+		protected bool ScanUntilName(string name, ref long position)
 		{
 			if (Name == name)
 				return true;
@@ -280,7 +310,7 @@ namespace Peach.Core.IO
 
 				if (lst == null)
 					position += item.LengthBits;
-				else if (lst.ScanUntil(name, ref position))
+				else if (lst.ScanUntilName(name, ref position))
 					return true;
 			}
 
