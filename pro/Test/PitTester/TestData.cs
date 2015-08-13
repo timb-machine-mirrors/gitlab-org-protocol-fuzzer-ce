@@ -206,6 +206,10 @@ namespace PitTester
 
 			public override string ActionType { get { return "output"; } }
 
+			[XmlAttribute("ignore")]
+			[DefaultValue(false)]
+			public bool Ignore { get; set; }
+
 			[XmlIgnore]
 			public byte[] Payload { get; private set; }
 

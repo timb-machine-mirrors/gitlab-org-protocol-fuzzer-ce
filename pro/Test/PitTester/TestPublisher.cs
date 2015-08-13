@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +8,6 @@ using Peach.Core.Dom;
 using Peach.Core.IO;
 using Peach.Core.Publishers;
 using Logger = NLog.Logger;
-using System.Text;
 using String = System.String;
 
 namespace PitTester
@@ -122,12 +120,13 @@ namespace PitTester
 
 			if (Logger.IsDebugEnabled)
 				Logger.Debug("\n\n" + Utilities.HexDump(data.Payload, 0, data.Payload.Length));
-
+			Console.WriteLine("Test pass on action: {0}".Fmt(_logger.ActionName));
 		}
 
 		public override void output(DataModel dataModel)
 		{
 			var data = _logger.Verify<TestData.Output>(Name);
+
 			var expected = data.Payload;
 
 			// Only check outputs on non-fuzzing iterations
@@ -180,11 +179,20 @@ namespace PitTester
 			var cb = new ConsoleBuffer();
 			if (BinDiff(dataModel, expected, actual, skipList, cb))
 			{
-				var msg = "Test failed on action: {0}".Fmt(_logger.ActionName);
+				string msg;
+				if (data.Ignore)
+					msg = "Ignoring failed action: {0}".Fmt(_logger.ActionName);
+				else
+					msg = "Test failed on action: {0}".Fmt(_logger.ActionName);
 				using (new ForegroundColor(ConsoleColor.Red))
 					Console.WriteLine(msg);
 				cb.Print();
-				throw new PeachException(msg);
+				if (!data.Ignore)
+					throw new PeachException(msg);
+			}
+			else
+			{
+				Console.WriteLine("Test pass on action: {0}".Fmt(_logger.ActionName));
 			}
 		}
 
