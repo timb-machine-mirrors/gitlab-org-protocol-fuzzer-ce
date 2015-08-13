@@ -549,6 +549,7 @@ namespace Peach.Pro.Core.Runtime
 				{
 					if (item.Key == "Peach.Pwd" ||
 						item.Key == "Peach.Cwd" ||
+						item.Key == "Peach.LogRoot" ||
 						item.Key == "PitLibraryPath")
 						continue;
 					var i = ret.FindIndex(x => x.Key == item.Key);
