@@ -14,9 +14,8 @@ namespace Peach.Pro.Core.Transformers.Crypto
 	[Serializable]
 	public class Tls : Transformer
 	{
-		BitStream encodedData;
-
-		DataModel dataModel;
+		BitStream _encodedData;
+		DataModel _dataModel;
 
 		public byte ContentType { get; set; }
 
@@ -28,17 +27,17 @@ namespace Peach.Pro.Core.Transformers.Crypto
 
 		TlsBlockCipher GetBlockCipher()
 		{
-			if (dataModel == null)
+			if (_dataModel == null)
 			{
-				dataModel = parent.getRoot() as DataModel;
-				dataModel.ActionRun += OnActionRunEvent;
+				_dataModel = parent.getRoot() as DataModel;
+				_dataModel.ActionRun += OnActionRunEvent;
 			}
 
 			// We are not running inside an action!
-			if (dataModel.actionData == null)
+			if (_dataModel.actionData == null)
 				return null;
 
-			var ctx = dataModel.actionData.action.parent.parent.parent.context;
+			var ctx = _dataModel.actionData.action.parent.parent.parent.context;
 
 			// The Tls fixup needs to have run first or this transformer is useless
 			object obj;
@@ -46,10 +45,33 @@ namespace Peach.Pro.Core.Transformers.Crypto
 			return (TlsBlockCipher)obj;
 		}
 
+		static T GetState<T>(RunContext ctx, string key) where T : class
+		{
+			object obj;
+			if (ctx.iterationStateStore.TryGetValue(key, out obj))
+				return (T)obj;
+			return default(T);
+		}
+
 		// Called every time an output action occurs
 		void OnActionRunEvent(RunContext ctx)
 		{
 			parent.Invalidate();
+
+			object sequenceCounter;
+			if (ctx.iterationStateStore.TryGetValue("TlsSequenceCounter", out sequenceCounter))
+				ctx.iterationStateStore["TlsSequenceCounter"] = ((Int32)sequenceCounter) + 1;
+			else
+				ctx.iterationStateStore["TlsSequenceCounter"] = 0;
+		}
+
+		static int GetSequenceCounterEncode(RunContext ctx)
+		{
+			object sequenceCounter;
+			if (ctx.iterationStateStore.TryGetValue("TlsSequenceCounter", out sequenceCounter))
+				return (Int32)sequenceCounter;
+
+			return 0;
 		}
 
 		[OnCloned]
@@ -57,8 +79,8 @@ namespace Peach.Pro.Core.Transformers.Crypto
 		{
 			// The event is not serialized so we need to
 			// resubscribe when we are cloned.
-			if (dataModel != null)
-				dataModel.ActionRun += OnActionRunEvent;
+			if (_dataModel != null)
+				_dataModel.ActionRun += OnActionRunEvent;
 		}
 
 		protected override BitStream internalDecode(BitStream data)
@@ -69,17 +91,28 @@ namespace Peach.Pro.Core.Transformers.Crypto
 				return data;
 
 			// Save off the encoded data for the logging of any input data
-			encodedData = new BitStream();
-			data.CopyTo(encodedData);
-			encodedData.Seek(0, System.IO.SeekOrigin.Begin);
+			_encodedData = new BitStream();
+			data.CopyTo(_encodedData);
+			_encodedData.Seek(0, System.IO.SeekOrigin.Begin);
 
-			var len = encodedData.Length;
-			var buf = new BitReader(encodedData).ReadBytes((int)len);
-			encodedData.Seek(0, System.IO.SeekOrigin.Begin);
+			var len = _encodedData.Length;
+			var buf = new BitReader(_encodedData).ReadBytes((int)len);
+			_encodedData.Seek(0, System.IO.SeekOrigin.Begin);
 
-			var ret = cipher.DecodeCiphertext((ContentType)ContentType, buf, 0, buf.Length);
+			var root = (DataModel)parent.getRoot();
+			var context = root.actionData.action.parent.parent.parent.context;
+			var sequenceCounter = GetSequenceCounterEncode(context);
 
-			return new BitStream(ret);
+			try
+			{
+				var ret = cipher.DecodeCiphertext(sequenceCounter, ContentType, buf, 0, buf.Length);
+
+				return new BitStream(ret);
+			}
+			catch (TlsFatalAlert e)
+			{
+				throw new SoftException(e);
+			}
 		}
 
 		protected override BitwiseStream internalEncode(BitwiseStream data)
@@ -91,15 +124,27 @@ namespace Peach.Pro.Core.Transformers.Crypto
 
 			// If we got encoded data during input, just return that as to not
 			// disturb the state of the cipher
-			if (encodedData != null)
-				return encodedData;
+			if (_encodedData != null)
+				return _encodedData;
+
+			data.Position = 0;
 
 			var len = data.Length - data.Position;
 			var buf = new BitReader(data).ReadBytes((int)len);
 
-			var ret = cipher.EncodePlaintext((ContentType)ContentType, buf, 0, buf.Length);
+			var root = (DataModel)parent.getRoot();
+			var context = root.actionData.action.parent.parent.parent.context;
 
-			return new BitStream(ret);
+			try
+			{
+				var ret = cipher.EncodePlaintext(GetSequenceCounterEncode(context), ContentType, buf, 0, buf.Length);
+
+				return new BitStream(ret);
+			}
+			catch (TlsFatalAlert e)
+			{
+				throw new SoftException(e);
+			}
 		}
 	}
 }
