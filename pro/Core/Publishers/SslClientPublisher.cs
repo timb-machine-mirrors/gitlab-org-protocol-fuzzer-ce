@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
-using System.Net.Security;
 using System.Net.Sockets;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using NLog;
+using Org.BouncyCastle.Crypto.Tls;
+using Org.BouncyCastle.Security;
 using Peach.Core;
 
 namespace Peach.Pro.Core.Publishers
@@ -23,6 +23,34 @@ namespace Peach.Pro.Core.Publishers
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
 
+		#region BouncyCastle TLS Helper Classes
+
+		// Need class with TlsClient in inheritance chain
+		class MyTlsClient : DefaultTlsClient
+		{
+			public override TlsAuthentication GetAuthentication()
+			{
+				return new MyTlsAuthentication();
+			}
+		}
+
+		// Need class to handle certificate auth
+		class MyTlsAuthentication : TlsAuthentication
+		{
+			public TlsCredentials GetClientCredentials(CertificateRequest certificateRequest)
+			{
+				// return client certificate
+				return null;
+			}
+
+			public void NotifyServerCertificate(Certificate serverCertificate)
+			{
+				// validate server certificate
+			}
+		}
+
+		#endregion
+
 		public bool VerifyServer { get; protected set; }
 		public string Host { get; protected set; }
 		public string Sni { get; protected set; }
@@ -33,7 +61,8 @@ namespace Peach.Pro.Core.Publishers
 		protected EndPoint _localEp = null;
 		protected EndPoint _remoteEp = null;
 
-		private SslStream _sslStream = null;
+		private MyTlsClient _tlsClient = null;
+		private TlsClientProtocol _tlsClientHandler = null;
 
 		public SslClientPublisher(Dictionary<string, Variant> args)
 			: base(args)
@@ -90,23 +119,16 @@ namespace Peach.Pro.Core.Publishers
 				}
 			}
 
-			System.Diagnostics.Debug.Assert(_client == null);
+			Debug.Assert(_client == null);
 
 			try
 			{
-				_sslStream = new SslStream(_tcp.GetStream(),
-						   false,
-						   new RemoteCertificateValidationCallback(ValidateServerCert),
-						   null);
-				if (string.IsNullOrEmpty(Sni))
-				{
-					_sslStream.AuthenticateAsClient(Host);
-				}
-				else
-				{
-					_sslStream.AuthenticateAsClient(Sni);
-				}
-				_client = _sslStream;
+				_tlsClientHandler = new TlsClientProtocol(_tcp.GetStream(), new SecureRandom());
+				_tlsClient = new MyTlsClient();
+
+				_tlsClientHandler.Connect(_tlsClient);
+
+				_client = _tlsClientHandler.Stream;
 				_localEp = _tcp.Client.LocalEndPoint;
 				_remoteEp = _tcp.Client.RemoteEndPoint;
 				_clientName = _remoteEp.ToString();
@@ -121,18 +143,11 @@ namespace Peach.Pro.Core.Publishers
 			StartClient();
 		}
 
-		public bool ValidateServerCert(object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors sslPolicyErrors)
-		{
-			if (sslPolicyErrors == SslPolicyErrors.None || VerifyServer == false)
-				return true;
-
-			throw new SoftException("Certificate error: " + sslPolicyErrors);
-		}
-
 		protected override void ClientClose()
 		{
-			_sslStream.Close();
-			_sslStream = null;
+			_tlsClientHandler.Close();
+			_tlsClient = null;
+			_tlsClientHandler = null;
 			_tcp = null;
 			_remoteEp = null;
 			_localEp = null;
