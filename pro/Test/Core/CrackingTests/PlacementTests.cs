@@ -973,7 +973,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 		}
 
 		[Test]
-		public void AbsolutePlacement()
+		public void AbsolutePlacementBackwards()
 		{
 			const string xml = @"
 <Peach>
@@ -1011,6 +1011,77 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			Assert.AreEqual("a", (string)dom.dataModels[0][2].InternalValue);
 			Assert.AreEqual("bb", (string)dom.dataModels[0][3].InternalValue);
 			Assert.AreEqual("ccc", (string)dom.dataModels[0][4].InternalValue);
+		}
+
+		[Test]
+		public void AbsolutePlacementForwards()
+		{
+			const string xml = @"
+<Peach>
+  <DataModel name='repro'>
+    <Number size='8' name='array_count'>
+      <Relation type='count' of='array' />
+    </Number>
+
+    <Block name='array' minOccurs='0'>
+      <Number name='offset' size='8'>
+        <Relation type='offset' of='value' />
+      </Number>
+      <Number name='length' size='8'>
+        <Relation type='size' of='value' />
+      </Number>
+      <String name='value'>
+        <Placement />
+      </String>
+    </Block>
+  </DataModel>
+</Peach>
+";
+			// 3 7 1 8 2 10 3 a bb ccc
+			var dom = DataModelCollector.ParsePit(xml);
+			var data = Bits.Fmt("{0}{1}", "\x3\x7\x1\x8\x2\xa\x3", "abbccc");
+			var cracker = new DataCracker();
+
+			cracker.CrackData(dom.dataModels[0], data);
+
+			Assert.AreEqual(5, dom.dataModels[0].Count);
+			Assert.AreEqual("a", (string)dom.dataModels[0][2].InternalValue);
+			Assert.AreEqual("bb", (string)dom.dataModels[0][3].InternalValue);
+			Assert.AreEqual("ccc", (string)dom.dataModels[0][4].InternalValue);
+		}
+
+		[Test]
+		public void SimpleAbsolutePlacement()
+		{
+			const string xml = @"
+<Peach>
+  <DataModel name='repro'>
+    <Block name='header'>
+      <Number size='8' name='value_offset'>
+        <Relation type='offset' of='value' />
+      </Number>
+
+      <Number size='8' name='value_size'>
+        <Relation type='size' of='value' />
+      </Number>
+
+      <Block name='value'>
+        <Placement />
+        <String name='str' />
+      </Block>
+    </Block>
+
+  </DataModel>
+</Peach>
+";
+			var dom = DataModelCollector.ParsePit(xml);
+			var data = Bits.Fmt("{0}{1}", "\x3\x3", "_abc");
+			var cracker = new DataCracker();
+
+			cracker.CrackData(dom.dataModels[0], data);
+
+			Assert.AreEqual(2, dom.dataModels[0].Count);
+			Assert.AreEqual("abc", dom.dataModels[0][1].InternalValue.BitsToString());
 		}
 	}
 }

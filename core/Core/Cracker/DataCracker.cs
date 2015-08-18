@@ -427,15 +427,22 @@ namespace Peach.Core.Cracker
 				while (_absolutePlacement.Count > 0)
 				{
 					var first = _absolutePlacement.First();
+
+					var elem = element
+						.PreOrderTraverse(e => !_absolutePlacement.ContainsValue(e))
+						.Skip(1) // Skip root
+						.SkipWhile(e => _sizedElements[e].end < first.Key)
+						.FirstOrDefault();
+
+					if (elem == null)
+					{
+						var c = (DataElementContainer)element;
+						elem = c[c.Count - 1];
+					}
+
 					_absolutePlacement.Remove(first.Key);
 
-					var elem = element.Walk().SkipWhile(e =>
-					{
-						var p = _sizedElements[e];
-						return p.begin < first.Key;
-					}).First();
-
-					elem = placeElement(first.Value, data, elem, false, false);
+					elem = placeElement(first.Value, data, elem, true, false);
 
 					data.Position = 0;
 					handleNode(elem, data);
@@ -593,7 +600,18 @@ namespace Peach.Core.Cracker
 
 				element.placement = null;
 
-				_absolutePlacement.Add(pos.Value, element);
+				try
+				{
+					_absolutePlacement.Add(pos.Value, element);
+				}
+				catch (ArgumentException ex)
+				{
+					// Have to trigger an enter event before we throw fail
+					// so error event propigates properly
+					OnEnterHandleNodeEvent(element, data.PositionBits, data);
+
+					throw new CrackingFailure("Two elements exist at the same offset.", element, data, ex);
+				}
 			}
 		}
 

@@ -469,7 +469,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 		[DllImport("libc")]
 		private static extern IntPtr strerror(int err);
 
-		class Summary
+		internal class Summary
 		{
 			public string MajorHash { get; private set; }
 			public string MinorHash { get; private set; }
@@ -517,7 +517,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 
 				Exploitable = "UNKNOWN";
 
-				var reProp = new Regex(@"^(((?<key>\w+)=(?<value>[^:]+):)+)$", RegexOptions.Multiline);
+				var reProp = new Regex(@"^(((?<key>\w+)=(?<value>[^:]+):)+)", RegexOptions.Multiline);
 				var mProp = reProp.Match(log);
 				if (mProp.Success)
 				{
@@ -605,21 +605,8 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 					min = mProp.Value;
 				}
 
-				MajorHash = Md5(maj);
-				MinorHash = Md5(min);
-			}
-
-			private static string Md5(string input)
-			{
-				using (var md5 = new System.Security.Cryptography.MD5CryptoServiceProvider())
-				{
-					var buf = Encoding.UTF8.GetBytes(input);
-					var final = md5.ComputeHash(buf);
-					var sb = new StringBuilder();
-					foreach (var b in final)
-						sb.Append(b.ToString("X2"));
-					return sb.ToString();
-				}
+				MajorHash = Hash(maj);
+				MinorHash = Hash(min);
 			}
 		}
 	}
