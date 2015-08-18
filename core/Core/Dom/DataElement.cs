@@ -299,6 +299,32 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// Performs pre-order traversal starting with this node.
 		/// </summary>
+		/// <param name="filter">Only traverse elements that pass the predacate</param>
+		/// <returns></returns>
+		public IEnumerable<DataElement> PreOrderTraverse(Func<DataElement, bool> filter)
+		{
+			var toVisit = new List<DataElement>();
+			toVisit.Add(null);
+
+			var elem = this;
+
+			while (elem != null)
+			{
+				yield return elem;
+
+				int index = toVisit.Count;
+				foreach (var item in elem.Children().Where(filter))
+					toVisit.Insert(index, item);
+
+				index = toVisit.Count - 1;
+				elem = toVisit[index];
+				toVisit.RemoveAt(index);
+			}
+		}
+
+		/// <summary>
+		/// Performs pre-order traversal starting with this node.
+		/// </summary>
 		/// <returns></returns>
 		public IEnumerable<DataElement> PreOrderTraverse()
 		{
