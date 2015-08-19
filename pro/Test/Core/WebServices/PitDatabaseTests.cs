@@ -852,6 +852,14 @@ namespace Peach.Pro.Test.Core.WebServices
 			var monitor = agent.monitors.First();
 			Assert.AreEqual("local://", agent.location);
 			Assert.AreEqual(10000, (long)monitor.parameters.Single(x => x.Key == "WaitForExitTimeout").Value);
+
+			var config = new RunConfiguration 
+			{
+				singleIteration = true,
+			};
+
+			var e = new Engine(null);
+			e.startFuzzing(dom, config);
 		}
 	}
 }
