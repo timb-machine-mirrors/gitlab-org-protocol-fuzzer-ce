@@ -65,7 +65,7 @@ namespace Peach.Pro.Core.Transformers.Crypto
 				ctx.iterationStateStore["TlsSequenceCounter"] = 0;
 		}
 
-		static int GetSequenceCounterEncode(RunContext ctx)
+		static int GetSequenceCounter(RunContext ctx)
 		{
 			object sequenceCounter;
 			if (ctx.iterationStateStore.TryGetValue("TlsSequenceCounter", out sequenceCounter))
@@ -101,7 +101,7 @@ namespace Peach.Pro.Core.Transformers.Crypto
 
 			var root = (DataModel)parent.getRoot();
 			var context = root.actionData.action.parent.parent.parent.context;
-			var sequenceCounter = GetSequenceCounterEncode(context);
+			var sequenceCounter = GetSequenceCounter(context);
 
 			try
 			{
@@ -134,10 +134,11 @@ namespace Peach.Pro.Core.Transformers.Crypto
 
 			var root = (DataModel)parent.getRoot();
 			var context = root.actionData.action.parent.parent.parent.context;
+			var sequenceCounter = GetSequenceCounter(context);
 
 			try
 			{
-				var ret = cipher.EncodePlaintext(GetSequenceCounterEncode(context), ContentType, buf, 0, buf.Length);
+				var ret = cipher.EncodePlaintext(sequenceCounter, ContentType, buf, 0, buf.Length);
 
 				return new BitStream(ret);
 			}

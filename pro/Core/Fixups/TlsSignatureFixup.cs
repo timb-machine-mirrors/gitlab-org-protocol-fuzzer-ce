@@ -13,16 +13,17 @@ using Org.BouncyCastle.Utilities;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using Peach.Pro.Core.Transformers.Crypto;
 using Array = System.Array;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Fixups
 {
-	[Description("Tls")]
-	[Fixup("Tls", true, Internal = true)]
-	[Parameter("TlsVersion", typeof(TlsVersion), "TLS Version", "TLSv10")]
+	[Description("Sets the signature value that must be signed.")]
+	[Fixup("TlsSignature", true, Internal = true)]
+	[Parameter("TlsVersion", typeof(TlsVersion), "TLS Version", "DTLSv10")]
 	[Serializable]
-	public class TlsFixup : Peach.Core.Fixups.VolatileFixup
+	public class TlsSignature : Peach.Core.Fixups.VolatileFixup
 	{
 		#region Static Helpers For PRF()
 
@@ -134,16 +135,6 @@ namespace Peach.Pro.Core.Fixups
 				_mNonceRandom.AddSeedMaterial(Times.NanoTime());
 				_mNonceRandom.AddSeedMaterial(seed);
 			}
-
-			//static void SetPrfAlg(SecurityParameters secParms, int alg)
-			//{
-			//	var typeSecParms = typeof (Org.BouncyCastle.Crypto.Tls.SecurityParameters);
-			//	var fieldPrfAlg = typeSecParms.GetField("prfAlgorithm", BindingFlags.Instance| BindingFlags.NonPublic);
-			//	if (fieldPrfAlg == null)
-			//		throw new PeachException("Error, unable to set prfAlgorithm in BouncyCastle SecurityParameters.");
-
-			//	fieldPrfAlg.SetValue(secParms, alg);
-			//}
 
 			private static void Set(object obj, string fieldName, object fieldValue)
 			{
@@ -268,7 +259,7 @@ namespace Peach.Pro.Core.Fixups
 			}
 		}
 
-		public TlsFixup(DataElement parent, Dictionary<string, Variant> args)
+		public TlsSignature(DataElement parent, Dictionary<string, Variant> args)
 			: base(parent, args)
 		{
 			ParameterParser.Parse(this, args);
@@ -300,13 +291,10 @@ namespace Peach.Pro.Core.Fixups
 				Concat(clientRandom, serverRandom), 48);
 			tlsContext.MasterSecret = masterSecret;
 
-			ctx.iterationStateStore["TlsProtocolVersion"] = TlsVersion.ToString();
-
-			Console.Write("Master Secret: ");
-			foreach (var b in masterSecret)
+			Console.Write("Pre-Master: ");
+			foreach (var b in pms)
 				Console.Write(string.Format("{0:X2} ", b));
 			Console.WriteLine();
-
 			Console.Write("Client Random: ");
 			foreach (var b in clientRandom)
 				Console.Write(string.Format("{0:X2} ", b));
@@ -316,19 +304,55 @@ namespace Peach.Pro.Core.Fixups
 				Console.Write(string.Format("{0:X2} ", b));
 			Console.WriteLine();
 
-			ctx.iterationStateStore["TlsBlockCipher"] = new TlsBlockCipher(
-				tlsContext,
-				new CbcBlockCipher(new AesFastEngine()),
-				new CbcBlockCipher(new AesFastEngine()),
-				new Sha1Digest(),
-				new Sha1Digest(),
-				16); // AES-CBC block size
+			if (TlsVersion != TlsVersion.TLSv12)
+			{
+				var hash = new RsaSignature.CombinedHash();
+				hash.Init(null);
 
-			var verifyHash = TlsVersion == TlsVersion.TLSv12 ? GetSha256(msgs) : GetMd5Sha1(msgs);
-			var verifyData = TlsUtilities.PRF(tlsContext, masterSecret, "client finished", verifyHash, 12);
+				//hash.BlockUpdate(clientRandom, 0, clientRandom.Length);
+				//hash.BlockUpdate(serverRandom, 0, serverRandom.Length);
 
-			// Encryption of the verify_data is handled by the Tls transformer
-			return new Variant(new BitStream(verifyData));
+				foreach (var msg in msgs)
+				{
+					var bytes = ToBytes(msg);
+					hash.BlockUpdate(bytes, 0, bytes.Length);
+				}
+
+				var verifyHash = new byte[hash.GetDigestSize()];
+				hash.DoFinal(verifyHash, 0);
+
+				Console.Write("Verify Hash: ");
+				foreach (var b in verifyHash)
+					Console.Write(string.Format("{0:X2} ", b));
+				Console.WriteLine();
+
+				return new Variant(new BitStream(verifyHash));
+			}
+
+			// For TLS 1.2, just stick in the data.
+
+			var bitStream = new BitStream();
+			var bitWriter = new BitWriter(bitStream);
+
+			foreach (var msg in msgs)
+			{
+				bitWriter.WriteBytes(ToBytes(msg));
+			}
+
+			bitStream.Position = 0;
+			return new Variant(bitStream);
 		}
 	}
+
+	[Serializable]
+	public enum TlsVersion
+	{
+		SSLv3,
+		TLSv10,
+		TLSv11,
+		TLSv12,
+		DTLSv10,
+		DTLSv12
+	}
+
 }
