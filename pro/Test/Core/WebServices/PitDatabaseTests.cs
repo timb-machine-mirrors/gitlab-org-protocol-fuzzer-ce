@@ -847,6 +847,11 @@ namespace Peach.Pro.Test.Core.WebServices
 			var dom = parser.asParser(opts, path);
 
 			PitInjector.InjectConfig(cfg, dom);
+
+			var agent = dom.agents.First();
+			var monitor = agent.monitors.First();
+			Assert.AreEqual("local://", agent.location);
+			Assert.AreEqual(10000, (long)monitor.parameters.Single(x => x.Key == "WaitForExitTimeout").Value);
 		}
 	}
 }

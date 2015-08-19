@@ -12,20 +12,21 @@ namespace Peach.Pro.Core
     {
 		public static void InjectConfig(PitConfig cfg, DomObject dom)
 		{
-			var agents = new NamedCollection<DomAgent>();
 			foreach (var agent in cfg.Agents)
 			{
-				agents.Add(new Peach.Core.Dom.Agent
+				var domAgent = new Peach.Core.Dom.Agent
 				{
-					Name = agent.Name ?? agents.UniqueName(),
-					location = agent.AgentUrl,
+					Name = agent.Name ?? dom.agents.UniqueName(),
+					location = agent.AgentUrl ?? "local://",
 					monitors = ConvertMonitors(agent),
-				});
-			}
+				};
 
-			foreach (var test in dom.tests)
-			{
-				test.agents = agents;
+				dom.agents.Add(domAgent);
+
+				foreach (var test in dom.tests)
+				{
+					test.agents.Add(domAgent);
+				}
 			}
 		}
 		
@@ -67,7 +68,7 @@ namespace Peach.Pro.Core
 				}
 				else
 				{
-					ret.Add(x.Name, new Variant(x.Value));
+					ret.Add(x.Name, new Variant(x.Value ?? x.DefaultValue));
 				}
 			}
 			return ret;
