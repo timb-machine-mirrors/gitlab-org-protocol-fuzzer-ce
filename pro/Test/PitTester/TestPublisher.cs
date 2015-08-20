@@ -82,9 +82,8 @@ namespace PitTester
 
 		protected override Variant OnGetProperty(string property)
 		{
-			_logger.Verify<TestData.GetProperty>(Name);
-
-			throw new NotImplementedException();
+			var data = _logger.Verify<TestData.GetProperty>(Name);
+			return new Variant(new BitStream(data.Payload));
 		}
 
 		protected override void OnInput()
