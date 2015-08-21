@@ -845,6 +845,8 @@ namespace Peach.Pro.Core.Loggers
 			_tempTarget = new AsyncTargetWrapper(target) { Name = target.Name };
 
 			ConfigureLogging(oldTarget, _tempTarget);
+
+			Logger.Info("Writing debug.log to: {0}", logPath);
 		}
 
 		void ConfigureLogging(Target oldTarget, Target newTarget)

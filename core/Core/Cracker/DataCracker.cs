@@ -28,6 +28,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Peach.Core.Dom;
@@ -121,6 +123,16 @@ namespace Peach.Core.Cracker
 		List<DataElement> _elementsWithAnalyzer;
 
 		/// <summary>
+		/// Placements to run after current cracking phase cracking complete
+		/// </summary>
+		List<DataElement> _deferredPlacement;
+
+		/// <summary>
+		/// Absolute placements based on offset relations
+		/// </summary>
+		SortedDictionary<long, DataElement> _absolutePlacement;
+
+		/// <summary>
 		/// The string to prefix log messages with.
 		/// </summary>
 		readonly StringBuilder _logPrefix = new StringBuilder();
@@ -204,6 +216,13 @@ namespace Peach.Core.Cracker
 				_dataStack.RemoveAt(0);
 			}
 
+		}
+
+		public Position GetElementPos(DataElement elem)
+		{
+			SizedPosition ret;
+			_sizedElements.TryGetValue(elem, out ret);
+			return ret;
 		}
 
 		/// <summary>
@@ -314,18 +333,148 @@ namespace Peach.Core.Cracker
 
 		#region Handlers
 
+		internal class ElementComparer : IComparer<DataElement>
+		{
+			public static DataElement FollowingElement(DataElement elem)
+			{
+				for (var curr = elem; curr != null; curr = curr.parent)
+				{
+					var next = curr.nextSibling();
+					if (next != null)
+						return next;
+				}
+
+				return null;
+			}
+
+			public static DataElement PreceedingElement(DataElement elem)
+			{
+				for (var curr = elem; curr != null; curr = curr.parent)
+				{
+					var prev = curr.previousSibling();
+					if (prev != null)
+						return prev;
+				}
+
+				return null;
+			}
+
+
+			public static int CompareTo(DataElement lhs, DataElement rhs)
+			{
+				if (lhs == rhs)
+					return 0;
+
+				var parents = new List<DataElement>();
+
+				for (var p = lhs; p != null; p = p.parent)
+					parents.Add(p);
+
+				// rhs is a parent of lhs
+				if (parents.Contains(rhs))
+					return 1;
+
+				for (var e = rhs; e != null; e = e.parent)
+				{
+					var idx = parents.IndexOf(e.parent);
+
+					// no common parent
+					if (idx == -1)
+						continue;
+
+					// lhs is a child of rhs
+					if (idx == 0)
+						return -1;
+
+					// Found common parent, so compare the siblings
+					var sibling = parents[idx - 1];
+
+					Debug.Assert(sibling.parent == e.parent);
+
+					if (e.parent.IndexOf(sibling) < e.parent.IndexOf(e))
+						return -1;
+
+					return 1;
+				}
+
+				throw new ArgumentException("No common parent could be found.");
+			}
+
+			public int Compare(DataElement lhs, DataElement rhs)
+			{
+				return CompareTo(lhs, rhs);
+			}
+		}
+
 		#region Top Level Handlers
 
 		void handleRoot(DataElement element, BitStream data)
 		{
 			_sizedElements = new Dictionary<DataElement, SizedPosition>();
 			_elementsWithAnalyzer = new List<DataElement>();
+			_deferredPlacement = new List<DataElement>();
+			_absolutePlacement = new SortedDictionary<long, DataElement>();
 
 			// We want at least 1 byte before we begin
 			data.WantBytes(1);
 
 			// Crack the model
 			handleNode(element, data);
+
+			while (_absolutePlacement.Count > 0 || _deferredPlacement.Count > 0)
+			{
+				// Handle absolute placements first
+				while (_absolutePlacement.Count > 0)
+				{
+					var first = _absolutePlacement.First();
+
+					var elem = element
+						.PreOrderTraverse(e => !_absolutePlacement.ContainsValue(e))
+						.Skip(1) // Skip root
+						.SkipWhile(e => _sizedElements[e].end < first.Key)
+						.FirstOrDefault();
+
+					if (elem == null)
+					{
+						var c = (DataElementContainer)element;
+						elem = c[c.Count - 1];
+					}
+
+					_absolutePlacement.Remove(first.Key);
+
+					elem = placeElement(first.Value, data, elem, true, false);
+
+					data.Position = 0;
+					handleNode(elem, data);
+				}
+
+				// Need to sort based on dom walking order
+				_deferredPlacement.Sort(new ElementComparer());
+
+				// Copy current list so it doesn't get modified when iterating
+				var copy = _deferredPlacement;
+				_deferredPlacement = new List<DataElement>();
+
+				foreach (var elem in copy)
+				{
+					var prev = ElementComparer.PreceedingElement(elem);
+
+					if (prev == null)
+					{
+						data.Position = 0;
+					}
+					else
+					{
+						SizedPosition pos;
+						if (!_sizedElements.TryGetValue(prev, out pos))
+							Debug.Assert(false, "Preceeding element should have been cracked");
+						else
+							data.PositionBits = pos.end;
+					}
+
+					handleNode(elem, data);
+				}
+			}
 
 			// Handle any analyzers
 			foreach (DataElement elem in _elementsWithAnalyzer)
@@ -362,20 +511,6 @@ namespace Peach.Core.Cracker
 		void handleNode(DataElement elem, BitStream data)
 		{
 			List<BitStream> oldStack = null;
-
-			if (Logger.IsDebugEnabled)
-			{
-				if (elem is DataElementContainer)
-				{
-					Logger.Debug("{0}-+ {1} '{2}', {3}", _logPrefix, elem.elementType, elem.Name, data.Progress);
-					_logPrefix.Append(" |");
-				}
-				else
-				{
-					Logger.Debug("{0}-- {1} '{2}', {3}", _logPrefix, elem.elementType, elem.Name, data.Progress);
-					_logPrefix.Append("  ");
-				}
-			}
 
 			try
 			{
@@ -414,55 +549,9 @@ namespace Peach.Core.Cracker
 					_elementsWithAnalyzer.Add(elem);
 
 				handleNodeEnd(elem, data, pos);
-
-				if (Logger.IsDebugEnabled)
-				{
-					_logPrefix.Remove(_logPrefix.Length - 2, 2);
-
-					if (elem is DataElementContainer)
-						Logger.Debug("{0} /", _logPrefix);
-				}
 			}
 			catch (Exception e)
 			{
-				if (Logger.IsDebugEnabled)
-				{
-					_logPrefix.Remove(_logPrefix.Length - 2, 2);
-
-					var ex = e as CrackingFailure;
-					var msg = ex != null ? ex.ShortMessage : e.Message;
-
-					if (elem is DataElementContainer)
-					{
-						if (_lastError != e)
-							Logger.Debug("{0} X ({1})", _logPrefix, msg);
-						else
-							Logger.Debug("{0} X", _logPrefix);
-					}
-					else if (_lastError != e)
-					{
-						Logger.Debug("{0}   Failed: {1}", _logPrefix, msg);
-					}
-				}
-
-				if (_lastError == e)
-				{
-					// Already logged the exception
-					logger.Trace("{0} failed to crack.", elem.debugName);
-				}
-				else if (e is CrackingFailure)
-				{
-					// Cracking failures include element name in message
-					logger.Trace(e.Message);
-				}
-				else
-				{
-					logger.Trace("{0} failed to crack.", elem.debugName);
-					logger.Trace("Exception occured: {0}", e.ToString());
-				}
-
-				_lastError = e;
-
 				handleException(elem, data, e);
 				throw;
 			}
@@ -475,16 +564,67 @@ namespace Peach.Core.Cracker
 
 		void handlePlacelemt(DataElement element, BitStream data)
 		{
+			if (element.placement.after != null)
+			{
+				var target = element.find(element.placement.after);
+				if (target == null)
+					throw new CrackingFailure("Couldn't place element after '{0}', target could not be found."
+						.Fmt(element.placement.after), element, data);
+
+				placeElement(element, data, target, true, true);
+			}
+			else if (element.placement.before != null)
+			{
+				var target = element.find(element.placement.before);
+				if (target == null)
+					throw new CrackingFailure("Couldn't place element before '{0}', target could not be found."
+						.Fmt(element.placement.before), element, data);
+
+				placeElement(element, data, target, false, true);
+			}
+			else
+			{
+				var pos = GetAbsoluteOffset(element, data);
+				if (!pos.HasValue)
+					throw new CrackingFailure("Placement requires before/after attribute or an offset relation.", element, data);
+
+				// Element has an offset relation so use that when cracking
+
+				if (Logger.IsDebugEnabled)
+				{
+					Logger.Debug("{0}-- {1} '{2}'", _logPrefix, element.elementType, element.Name);
+					Logger.Debug("{0}   Placing At Offset: {1} bytes | {2} bits", _logPrefix, pos / 8, pos);
+				}
+
+				logger.Trace("handlePlacement: {0} -> Placing at offset {1} bits", element, pos);
+
+				element.placement = null;
+
+				try
+				{
+					_absolutePlacement.Add(pos.Value, element);
+				}
+				catch (ArgumentException ex)
+				{
+					// Have to trigger an enter event before we throw fail
+					// so error event propigates properly
+					OnEnterHandleNodeEvent(element, data.PositionBits, data);
+
+					throw new CrackingFailure("Two elements exist at the same offset.", element, data, ex);
+				}
+			}
+		}
+
+		DataElement placeElement(DataElement element, BitStream data, DataElement target, bool after, bool defer)
+		{
 			var fixups = new List<Tuple<Fixup, string, string>>();
-			DataElementContainer oldParent = element.parent;
 
 			// Locate relevant fixups that reference this element about to me moved
 			// or any element that is a child of the element that is going to be moved
 			// Store off fixup,ref,Full.Path.To.Element.We.Are.Placing
 			// So we can update it to New.Path.To.Placed.Element
 
-			DataElementContainer root = element.getRoot() as DataElementContainer;
-			foreach (DataElement child in root.EnumerateAllElements())
+			foreach (var child in element.getRoot().Walk())
 			{
 				if (child.fixup == null)
 					continue;
@@ -504,51 +644,77 @@ namespace Peach.Core.Cracker
 			}
 
 			// Update fixups
-			foreach (var fixup in fixups)
+			foreach (var fixup in fixups.Where(f => f.Item3 != null))
 			{
-				if (fixup.Item3 != null)
-					fixup.Item1.updateRef(fixup.Item2, fixup.Item3);
+				fixup.Item1.updateRef(fixup.Item2, fixup.Item3);
 			}
 
-			string debugName = element.debugName;
-			DataElement newElem = null;
+			var oldElem = element;
+			var oldParent = element.parent;
+			var next = element.nextSibling();
 
-			if (element.placement.after != null)
+
+			if (after)
 			{
-				var after = element.find(element.placement.after);
-				if (after == null)
-					throw new CrackingFailure("Couldn't place element after '{0}', target could not be found."
-						.Fmt(element.placement.after), element, data);
-				newElem = element.MoveAfter(after);
+				element = element.MoveAfter(target);
 			}
-			else if (element.placement.before != null)
+			else
 			{
-				DataElement before = element.find(element.placement.before);
-				if (before == null)
-					throw new CrackingFailure("Couldn't place element before '{0}', target could not be found."
-						.Fmt(element.placement.before), element, data);
-				newElem = element.MoveBefore(before);
+				element = element.MoveBefore(target);
 			}
 
 			// Update fixups
-			foreach (var fixup in fixups)
+			foreach (var fixup in fixups.Where(f => f.Item3 == null))
 			{
-				if (fixup.Item3 == null)
-					fixup.Item1.updateRef(fixup.Item2, newElem.fullName);
+				fixup.Item1.updateRef(fixup.Item2, element.fullName);
 			}
 
 			// Clear placement now that it has occured
-			newElem.placement = null;
+			element.placement = null;
 
 			if (Logger.IsDebugEnabled)
 			{
-				Logger.Debug("{0}-- {1} '{2}'", _logPrefix, element.elementType, element.Name);
-				Logger.Debug("{0}   Placed As: {1}", _logPrefix, newElem.fullName);
+				Logger.Debug("{0}-- {1} '{2}'", _logPrefix, oldElem.elementType, oldElem.Name);
+				Logger.Debug("{0}   Placed As: {1}", _logPrefix, element.fullName);
 			}
 
-			logger.Trace("handlePlacement: {0} -> {1}", debugName, newElem.fullName);
+			// We placed behind the current position if:
+			// 1) No next and newElem is a child of oldParent
+			// 2) No next element and newElem < oldParent
+			// 3) Next and newElem < next
 
-			OnPlacementEvent(element, newElem, oldParent);
+			if (!defer)
+			{
+				logger.Trace("handlePlacement: {0} -> {1}", oldElem.debugName, element.fullName);
+			}
+			else if (next == null)
+			{
+				if (element.isChildOf(oldParent) || ElementComparer.CompareTo(element, oldParent) < 0)
+				{
+					_deferredPlacement.Add(element);
+					logger.Trace("handlePlacement: {0} -> {1} (Deferring cracking, no next)", oldElem.debugName, element.fullName);
+				}
+				else
+				{
+					logger.Trace("handlePlacement: {0} -> {1} (Immediate cracking, no next)", oldElem.debugName, element.fullName);
+				}
+			}
+			else
+			{
+				if (ElementComparer.CompareTo(element, next) < 0)
+				{
+					_deferredPlacement.Add(element);
+					logger.Trace("handlePlacement: {0} -> {1} (Deferring cracking, yes next)", oldElem.debugName, element.fullName);
+				}
+				else
+				{
+					logger.Trace("handlePlacement: {0} -> {1} (Immediate cracking, yes next)", oldElem.debugName, element.fullName);
+				}
+			}
+
+			OnPlacementEvent(oldElem, element, oldParent);
+
+			return element;
 		}
 
 		#endregion
@@ -576,6 +742,44 @@ namespace Peach.Core.Cracker
 
 		void handleException(DataElement elem, BitStream data, Exception e)
 		{
+			if (Logger.IsDebugEnabled)
+			{
+				_logPrefix.Remove(_logPrefix.Length - 2, 2);
+
+				var ex = e as CrackingFailure;
+				var msg = ex != null ? ex.ShortMessage : e.Message;
+
+				if (elem is DataElementContainer)
+				{
+					if (_lastError != e)
+						Logger.Debug("{0} X ({1})", _logPrefix, msg);
+					else
+						Logger.Debug("{0} X", _logPrefix);
+				}
+				else if (_lastError != e)
+				{
+					Logger.Debug("{0}   Failed: {1}", _logPrefix, msg);
+				}
+			}
+
+			if (_lastError == e)
+			{
+				// Already logged the exception
+				logger.Trace("{0} failed to crack.", elem.debugName);
+			}
+			else if (e is CrackingFailure)
+			{
+				// Cracking failures include element name in message
+				logger.Trace(e.Message);
+			}
+			else
+			{
+				logger.Trace("{0} failed to crack.", elem.debugName);
+				logger.Trace("Exception occured: {0}", e.ToString());
+			}
+
+			_lastError = e;
+
 			var items = _sizedElements.Where(x => x.Key.isChildOf(elem)).ToList();
 
 			foreach (var item in items)
@@ -620,7 +824,32 @@ namespace Peach.Core.Cracker
 
 		SizedPosition handleNodeBegin(DataElement elem, BitStream data)
 		{
-			handleOffsetRelation(elem, data);
+			try
+			{
+				handleOffsetRelation(elem, data);
+			}
+			finally
+			{
+				// Wait to log start element until we have updated data.Progress
+				// to reflect any offset relations that might exist.
+				// We always want to log so that if an exception is thrown
+				// we will be at the right indentation level for logging
+				// in handleException()
+
+				if (Logger.IsDebugEnabled)
+				{
+					if (elem is DataElementContainer)
+					{
+						Logger.Debug("{0}-+ {1} '{2}', {3}", _logPrefix, elem.elementType, elem.Name, data.Progress);
+						_logPrefix.Append(" |");
+					}
+					else
+					{
+						Logger.Debug("{0}-- {1} '{2}', {3}", _logPrefix, elem.elementType, elem.Name, data.Progress);
+						_logPrefix.Append("  ");
+					}
+				}
+			}
 
 			System.Diagnostics.Debug.Assert(!_sizedElements.ContainsKey(elem));
 
@@ -673,6 +902,14 @@ namespace Peach.Core.Cracker
 			pos.end = data.PositionBits + getDataOffset();
 
 			OnExitHandleNodeEvent(elem, pos.end, data);
+
+			if (Logger.IsDebugEnabled)
+			{
+				_logPrefix.Remove(_logPrefix.Length - 2, 2);
+
+				if (elem is DataElementContainer)
+					Logger.Debug("{0} /", _logPrefix);
+			}
 		}
 
 		void handleCrack(DataElement elem, BitStream data, long? size)
@@ -689,9 +926,9 @@ namespace Peach.Core.Cracker
 
 		#region Calculate Element Size
 
-		long? getRelativeOffset(DataElement elem, BitStream data, long minOffset = 0)
+		long? GetAbsoluteOffset(DataElement elem, BitStream data)
 		{
-			var relations = elem.relations.Of<OffsetRelation>();
+			var relations = elem.relations.Of<OffsetRelation>().ToList();
 			if (!relations.Any())
 				return null;
 
@@ -701,11 +938,11 @@ namespace Peach.Core.Cracker
 				return null;
 
 			// Offset is in bytes
-			long offset = (long)rel.GetValue() * 8;
+			var offset = rel.GetValue() * 8;
 
 			if (rel.isRelativeOffset)
 			{
-				DataElement from = rel.From;
+				var from = rel.From;
 
 				if (rel.relativeTo != null)
 					from = from.find(rel.relativeTo);
@@ -723,6 +960,15 @@ namespace Peach.Core.Cracker
 				// Otherwise, offset is after the From element
 				offset += rel.relativeTo != null ? pos.begin : pos.end;
 			}
+
+			return offset;
+		}
+
+		long? getRelativeOffset(DataElement elem, BitStream data, long minOffset = 0)
+		{
+			var offset = GetAbsoluteOffset(elem, data);
+			if (!offset.HasValue)
+				return null;
 
 			// Adjust offset to be relative to the current BitStream
 			offset -= getDataOffset();

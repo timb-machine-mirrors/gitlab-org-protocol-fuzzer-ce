@@ -152,7 +152,7 @@ namespace PeachValidator
 
 					foreach (var node in _crackMap.Values)
 					{
-						if (node.DataElement.parent != null)
+						if (node.DataElement.parent != null && _crackMap.ContainsKey(node.DataElement.parent))
 							node.Parent = _crackMap[node.DataElement.parent];
 					}
 

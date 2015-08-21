@@ -152,85 +152,61 @@ namespace PitTester
 			public override string ActionType { get { return "setProperty"; } }
 		}
 
-		public class GetProperty : Action
+		public abstract class DataAction : Action
 		{
-			public override string ActionType { get { return "getProperty"; } }
-		}
-
-		public class Input : Action
-		{
-			public Input()
+			protected DataAction()
 			{
 				Payload = new byte[0];
 			}
 
+			[XmlIgnore]
+			public byte[] Payload { get; private set; }
+
+			[XmlText]
+			public XmlNode[] CDataSection
+			{
+				get
+				{
+					var msg = Utilities.HexDump(Payload, 0, Payload.Length);
+					return new XmlNode[] { new XmlDocument().CreateCDataSection(msg) };
+				}
+				set
+				{
+					if (value == null)
+					{
+						Payload = new byte[0];
+						return;
+					}
+
+					if (value.Length != 1)
+						throw new InvalidOperationException();
+
+					Payload = FromCData(value[0].Value);
+				}
+			}
+		}
+
+		public class GetProperty : DataAction
+		{
+			public override string ActionType { get { return "getProperty"; } }
+		}
+
+		public class Input : DataAction
+		{
 			public override string ActionType { get { return "input"; } }
 
 			[XmlAttribute("datagram")]
 			[DefaultValue(false)]
 			public bool IsDatagram { get; set; }
-
-			[XmlIgnore]
-			public byte[] Payload { get; private set; }
-
-			[XmlText]
-			public XmlNode[] CDataSection
-			{
-				get
-				{
-					var msg = Utilities.HexDump(Payload, 0, Payload.Length);
-					return new XmlNode[] { new XmlDocument().CreateCDataSection(msg) };
-				}
-				set
-				{
-					if (value == null)
-					{
-						Payload = new byte[0];
-						return;
-					}
-
-					if (value.Length != 1)
-						throw new InvalidOperationException();
-
-					Payload = FromCData(value[0].Value);
-				}
-			}
 		}
 
-		public class Output : Action
+		public class Output : DataAction
 		{
-			public Output()
-			{
-				Payload = new byte[0];
-			}
-
 			public override string ActionType { get { return "output"; } }
 
-			[XmlIgnore]
-			public byte[] Payload { get; private set; }
-
-			[XmlText]
-			public XmlNode[] CDataSection
-			{
-				get
-				{
-					var msg = Utilities.HexDump(Payload, 0, Payload.Length);
-					return new XmlNode[] { new XmlDocument().CreateCDataSection(msg) };
-				}
-				set
-				{
-					if (value == null)
-					{
-						Payload = new byte[0];
-						return;
-					}
-
-					if (value.Length != 1)
-						throw new InvalidOperationException();
-
-					Payload = FromCData(value[0].Value);
-				}
-			}
+			[XmlAttribute("ignore")]
+			[DefaultValue(false)]
+			public bool Ignore { get; set; }
 		}
 
 		[XmlElement("Define")]

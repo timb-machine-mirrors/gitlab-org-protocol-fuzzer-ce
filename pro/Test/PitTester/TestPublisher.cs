@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +8,6 @@ using Peach.Core.Dom;
 using Peach.Core.IO;
 using Peach.Core.Publishers;
 using Logger = NLog.Logger;
-using System.Text;
 using String = System.String;
 
 namespace PitTester
@@ -84,9 +82,8 @@ namespace PitTester
 
 		protected override Variant OnGetProperty(string property)
 		{
-			_logger.Verify<TestData.GetProperty>(Name);
-
-			throw new NotImplementedException();
+			var data = _logger.Verify<TestData.GetProperty>(Name);
+			return new Variant(new BitStream(data.Payload));
 		}
 
 		protected override void OnInput()
@@ -122,12 +119,13 @@ namespace PitTester
 
 			if (Logger.IsDebugEnabled)
 				Logger.Debug("\n\n" + Utilities.HexDump(data.Payload, 0, data.Payload.Length));
-
+			Console.WriteLine("Test pass on action: {0}".Fmt(_logger.ActionName));
 		}
 
 		public override void output(DataModel dataModel)
 		{
 			var data = _logger.Verify<TestData.Output>(Name);
+
 			var expected = data.Payload;
 
 			// Only check outputs on non-fuzzing iterations
@@ -177,84 +175,39 @@ namespace PitTester
 				skipList.Add(skip);
 			}
 
-			foreach (var i in skipList)
-				Console.WriteLine("Ignoring {0} from index {1} to {2}", i.Item1, i.Item2, i.Item3);
-
-			var checkLength = actual.Length > expected.Length ? expected.Length : actual.Length;
-
-			var errorMax = 15;
-			var errorCount = 0;
-			long lastItemEndPos = 0;
-
-			for (var i = 0; i < checkLength; ++i)
+			var cb = new ConsoleBuffer();
+			if (BinDiff(dataModel, expected, actual, skipList, cb))
 			{
-				var skip = skipList.Any(p => p.Item2 <= i && p.Item3 > i);
-				if (skip || expected[i] == actual[i]) continue;
+				string msg;
+				if (data.Ignore)
+					msg = "Ignoring failed action: {0}".Fmt(_logger.ActionName);
+				else
+					msg = "Test failed on action: {0}".Fmt(_logger.ActionName);
+				using (new ForegroundColor(ConsoleColor.Red))
+					Console.WriteLine(msg);
+				cb.Print();
+				if (!data.Ignore)
+					throw new PeachException(msg);
+			}
+			else
+			{
+				Console.WriteLine("Test pass on action: {0}".Fmt(_logger.ActionName));
+			}
+		}
 
-				// Don't show every byte for same element
-				if (i <= lastItemEndPos)
-					continue;
+		class ForegroundColor : IDisposable
+		{
+			readonly ConsoleColor _fg;
 
-				if (errorCount > errorMax)
-				{
-					Console.WriteLine("** Too many errors, skipping rest");
-					break;
-				}
-
-				errorCount++;
-
-				if (!Logger.IsDebugEnabled)
-					break;
-
-				var forColor = Console.ForegroundColor;
-
-				Console.ForegroundColor = ConsoleColor.Yellow;
-				Console.WriteLine("----------------------------------------------");
-				Console.ForegroundColor = forColor;
-				long posBits = 0;
-
-				foreach (var item in dataModel.Walk())
-				{
-					if (item is DataElementContainer)
-						continue;
-
-					var pos = posBits / 8;
-					var posLastBits = posBits + item.Value.LengthBits;
-					var posLast = posLastBits/8;
-
-					if (!(i >= pos && i <= posLast))
-					{
-						posBits = posLastBits;
-						continue;
-					}
-
-					Console.WriteLine("0x{1:X2}-0x{2:X2}: {0}\n\t{3}",
-						item.fullName,
-						pos,
-						posLast,
-						Utilities.HexDump(item.Value).Replace("\n", "\n\t"));
-
-					if (item is Peach.Core.Dom.String || item is Number)
-						Console.WriteLine("\tValue: " + item.InternalValue.ToString());
-
-					posBits = posLastBits;
-					lastItemEndPos = posLast;
-				}
-
-				Console.ForegroundColor = ConsoleColor.Red;
-
-				Console.WriteLine(
-					"\nTest failed on action: {0}\n\tValues differ at offset 0x{3:x8}\n\tExpected: 0x{1:x2}\n\tBut was.: 0x{2:x2}\n"
-					.Fmt(_logger.ActionName, expected[i], actual[i], i));
-
-				Console.ForegroundColor = forColor;
+			public ForegroundColor(ConsoleColor color)
+			{
+				_fg = Console.ForegroundColor;
+				Console.ForegroundColor = color;
 			}
 
-			var cb = new ConsoleBuffer();
-			if (BinDiff(expected, actual, skipList, cb))
+			public void Dispose()
 			{
-				cb.Print();
-				throw new PeachException("Values differ on action: {0}".Fmt(_logger.ActionName));
+				Console.ForegroundColor = _fg;
 			}
 		}
 
@@ -264,8 +217,10 @@ namespace PitTester
 			throw new NotSupportedException();
 		}
 
-		bool BinDiff(byte[] expected, byte[] actual, List<Tuple<string, long,long>> skipList, ConsoleBuffer cb)
+		bool BinDiff(DataModel dataModel, byte[] expected, byte[] actual, List<Tuple<string, long,long>> skipList, ConsoleBuffer cb)
 		{
+			var lst = (BitStreamList)dataModel.Value;
+
 			var ms1 = new MemoryStream(expected);
 			var ms2 = new MemoryStream(actual);
 			
@@ -288,21 +243,16 @@ namespace PitTester
 				var ascii1 = new ConsoleBuffer();
 				var ascii2 = new ConsoleBuffer();
 
+				var elements = new Dictionary<string, int>();
+
 				var lineDiff = false;
 				for (var j = 0; j < bytesPerLine; j++)
 				{
-					ConsoleColor bg;
 					var offset = i + j;
 					var skip = skipList.Any(p => p.Item2 <= offset && p.Item3 > offset);
-					if (skip)
-					{
-						bg = ConsoleColor.Blue;
-					}
-					else
-					{
-						bg = ConsoleColor.Black;
-					}
+					var bg = skip ? ConsoleColor.Blue : ConsoleColor.Black;
 
+					string elementName;
 					if (j < readLen1 && j < readLen2)
 					{
 						if (bytes1[j] == bytes2[j])
@@ -326,6 +276,10 @@ namespace PitTester
 							hex2.Append(ConsoleColor.Red, bg, "{0:X2}".Fmt(bytes2[j]));
 							hex2.Append(" ");
 							ascii2.Append(ConsoleColor.Red, bg, "{0}".Fmt(ByteToAscii(bytes2[j])));
+
+							if (lst.TryGetName(offset * 8, out elementName))
+								if (!elements.ContainsKey(elementName))
+									elements.Add(elementName, j);
 						}
 					}
 					else if (j < readLen1)
@@ -338,6 +292,10 @@ namespace PitTester
 
 						hex2.Append("   ");
 						ascii2.Append(" ");
+
+						if (lst.TryGetName(offset * 8, out elementName))
+							if (!elements.ContainsKey(elementName))
+								elements.Add(elementName, j);
 					}
 					else if (j < readLen2)
 					{
@@ -349,6 +307,10 @@ namespace PitTester
 						hex2.Append(ConsoleColor.Red, bg, "{0:X2}".Fmt(bytes2[j]));
 						hex2.Append(" ");
 						ascii2.Append(ConsoleColor.Red, bg, "{0}".Fmt(ByteToAscii(bytes2[j])));
+
+						if (lst.TryGetName(offset * 8, out elementName))
+							if (!elements.ContainsKey(elementName))
+								elements.Add(elementName, j);
 					}
 					else
 					{
@@ -375,6 +337,13 @@ namespace PitTester
 					cb.Append("  ");
 					cb.Append(ascii2);
 					cb.Append(Environment.NewLine);
+					foreach (var element in elements)
+					{
+						cb.Append("           ");
+						cb.Append(new String(' ', element.Value * 3));
+						cb.Append(element.Key);
+						cb.Append(Environment.NewLine);
+					}
 				}
 			}
 
@@ -396,7 +365,7 @@ namespace PitTester
 
 	class ConsoleBuffer
 	{
-		List<ConsoleRegion> _regions = new List<ConsoleRegion>();
+		readonly List<ConsoleRegion> _regions = new List<ConsoleRegion>();
 
 		public void Append(ConsoleColor fg, ConsoleColor bg, string str)
 		{

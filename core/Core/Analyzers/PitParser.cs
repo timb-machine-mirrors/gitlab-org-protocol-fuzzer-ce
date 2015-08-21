@@ -430,61 +430,24 @@ namespace Peach.Core.Analyzers
 
 					case "Require":
 						dom.Ruby.ImportModule(child.getAttrString("require"));
-						//Scripting.Imports.Add(child.getAttrString("require"));
 						break;
 
 					case "Import":
 						dom.Python.ImportModule(child.getAttrString("import"));
-						//if (child.hasAttr("from"))
-						//	throw new PeachException("Error, This version of Peach does not support the 'from' attribute for 'Import' elements.");
-
-						//Scripting.Imports.Add(child.getAttrString("import"));
 						break;
 
 					case "PythonPath":
 						dom.Python.AddSearchPath(child.getAttrString("path"));
-						//if (isScriptingLanguageSet &&
-						//	Scripting.DefaultScriptingEngine != ScriptingEngines.Python)
-						//{
-						//	throw new PeachException("Error, cannot mix Python and Ruby!");
-						//}
-						//Scripting.DefaultScriptingEngine = ScriptingEngines.Python;
-						//Scripting.Paths.Add(child.getAttrString("path"));
-						//isScriptingLanguageSet = true;
 						break;
 
 					case "RubyPath":
 						dom.Ruby.AddSearchPath(child.getAttrString("require"));
-						//if (isScriptingLanguageSet &&
-						//	Scripting.DefaultScriptingEngine != ScriptingEngines.Ruby)
-						//{
-						//	throw new PeachException("Error, cannot mix Python and Ruby!");
-						//}
-						//Scripting.DefaultScriptingEngine = ScriptingEngines.Ruby;
-						//Scripting.Paths.Add(child.getAttrString("require"));
-						//isScriptingLanguageSet = true;
 						break;
 
 					case "Python":
-						//if (isScriptingLanguageSet &&
-						//	Scripting.DefaultScriptingEngine != ScriptingEngines.Python)
-						//{
-						//	throw new PeachException("Error, cannot mix Python and Ruby!");
-						//}
-						//Scripting.DefaultScriptingEngine = ScriptingEngines.Python;
-						//Scripting.Exec(child.getAttrString("code"), new Dictionary<string, object>());
-						//isScriptingLanguageSet = true;
 						break;
 
 					case "Ruby":
-						//if (isScriptingLanguageSet &&
-						//	Scripting.DefaultScriptingEngine != ScriptingEngines.Ruby)
-						//{
-						//	throw new PeachException("Error, cannot mix Python and Ruby!");
-						//}
-						//Scripting.DefaultScriptingEngine = ScriptingEngines.Ruby;
-						//Scripting.Exec(child.getAttrString("code"), new Dictionary<string, object>());
-						//isScriptingLanguageSet = true;
 						break;
 
 					case "Defaults":
@@ -655,12 +618,13 @@ namespace Peach.Core.Analyzers
 
 		protected virtual Dom.Agent handleAgent(XmlNode node)
 		{
-			Dom.Agent agent = new Dom.Agent();
-
-			agent.Name = node.getAttrString("name");
-			agent.location = node.getAttr("location", null);
-			agent.password = node.getAttr("password", null);
-
+			var agent = new Dom.Agent
+			{
+				Name = node.getAttrString("name"),
+				location = node.getAttr("location", null),
+				password = node.getAttr("password", null)
+			};
+			
 			if (agent.location == null)
 				agent.location = "local://";
 
@@ -1157,8 +1121,6 @@ namespace Peach.Core.Analyzers
 				args["after"] = new Variant(node.getAttrString("after"));
 			else if (node.hasAttr("before"))
 				args["before"] = new Variant(node.getAttrString("before"));
-			else
-				throw new PeachException("Error, Placement on element \"" + element.Name + "\" is missing 'after' or 'before' attribute.");
 
 			Placement placement = new Placement(args);
 			element.placement = placement;
