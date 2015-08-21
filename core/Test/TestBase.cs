@@ -82,11 +82,11 @@ namespace Peach.Core.Test
 		}
 	}
 
-	public class TestFixture
+	public abstract class TestFixture
 	{
 		readonly Assembly _asm;
 
-		public TestFixture(Assembly asm) { _asm = asm; }
+		protected TestFixture(Assembly asm) { _asm = asm; }
 
 		[Test]
 		public void AssertWorks()

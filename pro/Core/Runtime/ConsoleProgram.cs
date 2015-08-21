@@ -44,6 +44,7 @@ using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using SharpPcap;
+using Newtonsoft.Json;
 
 namespace Peach.Pro.Core.Runtime
 {
@@ -83,6 +84,8 @@ namespace Peach.Pro.Core.Runtime
 		private bool _noweb;
 		private bool _nobrowser;
 		private static volatile bool _shouldStop;
+		private string _jsonFile;
+		private PitConfig _jsonConfig;
 
 		#region Public Properties
 
@@ -228,6 +231,24 @@ namespace Peach.Pro.Core.Runtime
 				"Disable launching browser on start.",
 				v => _nobrowser = true
 			);
+
+			// automated execution
+			options.Add(
+				"json=",
+				"Specify a configuration file for a pit",
+				v => ParseJsonConfig(v)
+			);
+		}
+
+		private void ParseJsonConfig(string filename)
+		{
+			_jsonFile = filename;
+
+			using (var textReader = File.OpenText(filename))
+			using (var jsonReader = new JsonTextReader(textReader))
+			{
+				_jsonConfig = JsonSerializer.CreateDefault().Deserialize<PitConfig>(jsonReader);
+			}
 		}
 
 		protected override bool VerifyCompatibility()
@@ -334,6 +355,12 @@ namespace Peach.Pro.Core.Runtime
 		/// </summary>
 		protected virtual void RunEngine(Peach.Core.Dom.Dom dom)
 		{
+			if (_jsonConfig != null)
+			{
+				Console.WriteLine("Using agents defined in {0}", _jsonFile);
+				PitInjector.InjectConfig(_jsonConfig, dom);
+			}
+			
 			// Add the JobLogger as necessary
 			Test test;
 
@@ -391,7 +418,7 @@ namespace Peach.Pro.Core.Runtime
 			Console.WriteLine("Starting Analyzer");
 
 			var args = new Dictionary<string, string>();
-			for (int i = 0; i < extra.Count; i++)
+			for (var i = 0; i < extra.Count; i++)
 				args[i.ToString()] = extra[i];
 
 			analyzerInstance.asCommandLine(args);
@@ -414,7 +441,7 @@ namespace Peach.Pro.Core.Runtime
 			Console.WriteLine("Starting agent server");
 
 			var args = new Dictionary<string, string>();
-			for (int i = 0; i < extra.Count; i++)
+			for (var i = 0; i < extra.Count; i++)
 				args[i.ToString()] = extra[i];
 
 			agentServer.Run(args);
@@ -512,6 +539,24 @@ namespace Peach.Pro.Core.Runtime
 				{
 					ret.RemoveAll(i => i.Key == kv.Key);
 					ret.Add(new KeyValuePair<string, string>(kv.Key, kv.Value));
+				}
+			}
+
+			if (_jsonConfig != null)
+			{
+				Console.WriteLine("Using defines from {0}", _jsonFile);
+				foreach (var item in _jsonConfig.Config)
+				{
+					if (item.Key == "Peach.Pwd" ||
+						item.Key == "Peach.Cwd" ||
+						item.Key == "Peach.LogRoot" ||
+						item.Key == "PitLibraryPath")
+						continue;
+					var i = ret.FindIndex(x => x.Key == item.Key);
+					if (i < 0)
+						ret.Add(new KeyValuePair<string, string>(item.Key, item.Value));
+					else
+						ret[i] = new KeyValuePair<string, string>(item.Key, item.Value);
 				}
 			}
 
@@ -638,7 +683,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 
 		protected void ParseRange(string arg, string v)
 		{
-			string[] parts = v.Split(',');
+			var parts = v.Split(',');
 			if (parts.Length != 2)
 				throw new PeachException("Invalid range: " + v);
 
@@ -668,7 +713,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 
 		protected void ParseParallel(string arg, string v)
 		{
-			string[] parts = v.Split(',');
+			var parts = v.Split(',');
 			if (parts.Length != 2)
 				throw new PeachException("Invalid parallel value: " + v);
 
@@ -703,12 +748,12 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 
 		protected void AddNewDefine(string arg)
 		{
-			var idx = arg.IndexOf("=");
-			if (idx < 0)
+			var parts = arg.Split('=');
+			if (parts.Length != 2)
 				throw new PeachException("Error, defined values supplied via -D/--define must have an equals sign providing a key-pair set.");
 
-			var key = arg.Substring(0, idx);
-			var value = arg.Substring(idx + 1);
+			var key = parts[0];
+			var value = parts[1];
 
 			// Allow command line options to override others
 			_definedValues.RemoveAll(i => i.Key == key);

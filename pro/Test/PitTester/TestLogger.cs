@@ -42,18 +42,17 @@ namespace PitTester
 
 				var d = testData.Actions[index++];
 
-
 				if (typeof(T) != d.GetType())
 				{
-					var msg = "Encountered unexpected action type.\nAction Name: {0}\nExpected: {1}\nGot: {2}".Fmt(ActionName, typeof(T).Name, d.GetType().Name);
+					var msg = "Encountered unexpected action type.\nAction Name: {0}\nExpected: {1}\nGot: {2}".Fmt(ActionName, d.GetType().Name, typeof(T).Name);
 					throw new SoftException(msg);
 				}
 
 				if (d.PublisherName != publisherName)
-					throw new SoftException("Publisher names didn't match. Expected {0} but got {1}".Fmt(publisherName, d.PublisherName));
+					throw new SoftException("Publisher names didn't match. Expected {0} but got {1}".Fmt(d.PublisherName, publisherName));
 
 				if (d.ActionName != ActionName)
-					throw new SoftException("Action names didn't match.\n\tExpected: {0}\n\tBut got: {1}\n".Fmt(ActionName, d.ActionName));
+					throw new SoftException("Action names didn't match.\n\tExpected: {0}\n\tBut got: {1}\n".Fmt(d.ActionName, ActionName));
 
 				return (T)d;
 			}

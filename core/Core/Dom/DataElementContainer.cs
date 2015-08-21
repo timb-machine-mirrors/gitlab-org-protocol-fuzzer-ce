@@ -106,9 +106,10 @@ namespace Peach.Core.Dom
 		{
 			BitStream sizedData = ReadSizedData(data, size);
 			long startPosition = data.PositionBits;
+			var prevCount = Count;
 
 			// Handle children, iterate over a copy since cracking can modify the list
-			for (int i = 0; i < this.Count; )
+			for (var i = 0; i < Count; )
 			{
 				var child = this[i];
 				context.CrackData(child, sizedData);
@@ -126,9 +127,33 @@ namespace Peach.Core.Dom
 					}
 				}
 
-				int idx = IndexOf(child);
-				if (idx == i)
-					i = idx + 1;
+				// if Count < prevCount, the child was placed in a different
+				// spot in the dom, so don't increment our index
+
+				if (Count == prevCount)
+				{
+					// if the child's index is previous to our current index
+					// the child was placed behind the current position.
+					// it will get cracked on a subsequent pass so just
+					// increment the index to go to the next element.
+					// if the child index is ahead of the index, this means
+					// it was placed and not cracked so keep the index the same
+					var idx = IndexOf(child);
+
+					System.Diagnostics.Debug.Assert(idx >= 0);
+
+					if (idx <= i)
+						++i;
+				}
+				else if (Count > prevCount)
+				{
+					// Cracking child caused new elements to be added to
+					// this container, so set our next index to be one
+					// after the index of the child
+					i = IndexOf(child) + 1;
+				}
+
+				prevCount = Count;
 			}
 
 			if (size.HasValue && sizedData == data)
@@ -326,6 +351,25 @@ namespace Peach.Core.Dom
 			Invalidate();
 		}
 
+		/// <summary>
+		/// Takes the element at oldIndex and moves it to newIndex.
+		/// </summary>
+		/// <param name="oldIndex"></param>
+		/// <param name="newIndex"></param>
+		public void MoveChild(int oldIndex, int newIndex)
+		{
+			if (oldIndex >= _childrenList.Count)
+				throw new ArgumentOutOfRangeException("oldIndex");
+			if (newIndex >= _childrenList.Count)
+				throw new ArgumentOutOfRangeException("newIndex");
+
+			var elem = _childrenList[oldIndex];
+
+			_childrenList.RemoveAt(oldIndex);
+			_childrenList.Insert(newIndex, elem);
+
+			Invalidate();
+		}
 
 		#region IEnumerable<Element> Members
 

@@ -48,9 +48,6 @@ namespace Peach.Core.Dom
 				after = (string)args["after"];
 			if (args.ContainsKey("before"))
 				before = (string)args["before"];
-
-			if (string.IsNullOrEmpty(after) && string.IsNullOrEmpty(before))
-				throw new PeachException("Error, Placement must have one of 'after' or 'before' defined.");
 		}
 
 		public string after
