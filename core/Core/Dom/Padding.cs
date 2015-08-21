@@ -106,7 +106,6 @@ namespace Peach.Core.Dom
 		public override void WritePit(XmlWriter pit)
 		{
 			pit.WriteStartElement("Padding");
-			pit.WriteAttributeString("name", Name);
 
 			if (alignment != 8)
 				pit.WriteAttributeString("alignment", alignment.ToString());
