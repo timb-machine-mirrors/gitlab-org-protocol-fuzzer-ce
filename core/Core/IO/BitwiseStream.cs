@@ -41,6 +41,11 @@ namespace Peach.Core.IO
 			throw new NotSupportedException("Stream does not support element positions.");
 		}
 
+		public virtual bool TryGetName(long postion, out string name)
+		{
+			throw new NotSupportedException("Stream does not support element positions.");
+		}
+
 		#endregion
 
 		#region Stream Specializations

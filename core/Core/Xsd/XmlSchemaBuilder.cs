@@ -500,7 +500,16 @@ namespace Peach.Core.Xsd
 			if (!Cache.TryGetValue(asm, out doc))
 			{
 				var file = Path.ChangeExtension(asm.CodeBase, ".xml");
-				doc = new XPathDocument(file);
+
+				try
+				{
+					doc = new XPathDocument(file);
+				}
+				catch (FileNotFoundException)
+				{
+					doc = null;
+				}
+
 				Cache.Add(asm, doc);
 			}
 
