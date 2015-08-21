@@ -40,7 +40,7 @@ namespace Peach.Pro.Core.Mutators
 
 		protected override void GetLimits(DataElement obj, out long min, out ulong max)
 		{
-			var other = obj.relations.From<SizeRelation>().First().Of;
+			var other = obj.relations.From<SizeRelation>().First(r => r.Of.InScope()).Of;
 
 			min = 0;
 			max = (ulong)Utility.SizedHelpers.MaxSize(other);
@@ -57,7 +57,7 @@ namespace Peach.Pro.Core.Mutators
 		public new static bool supportedDataElement(DataElement obj)
 		{
 			// Any mutable object with a size relation
-			if (obj.isMutable && obj.relations.From<SizeRelation>().Any())
+			if (obj.isMutable && obj.relations.From<SizeRelation>().Any(r => r.Of.InScope()))
 				return true;
 
 			return false;
@@ -65,7 +65,7 @@ namespace Peach.Pro.Core.Mutators
 
 		protected override void performMutation(DataElement obj, long value)
 		{
-			var rel = obj.relations.From<SizeRelation>().FirstOrDefault();
+			var rel = obj.relations.From<SizeRelation>().FirstOrDefault(r => r.Of.InScope());
 
 			if (rel != null)
 			{

@@ -19,7 +19,7 @@ namespace Peach.Pro.Core.Mutators.Utility
 		{
 			obj.mutationFlags = MutateOverride.Default;
 
-			var sizeRelation = obj.relations.From<SizeRelation>().FirstOrDefault();
+			var sizeRelation = obj.relations.From<SizeRelation>().FirstOrDefault(r => r.Of.InScope());
 			if (sizeRelation == null)
 			{
 				logger.Error("Error, sizeRelation == null, unable to perform mutation.");

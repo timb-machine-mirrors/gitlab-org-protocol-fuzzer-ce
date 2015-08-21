@@ -299,6 +299,32 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// Performs pre-order traversal starting with this node.
 		/// </summary>
+		/// <param name="filter">Only traverse elements that pass the predacate</param>
+		/// <returns></returns>
+		public IEnumerable<DataElement> PreOrderTraverse(Func<DataElement, bool> filter)
+		{
+			var toVisit = new List<DataElement>();
+			toVisit.Add(null);
+
+			var elem = this;
+
+			while (elem != null)
+			{
+				yield return elem;
+
+				int index = toVisit.Count;
+				foreach (var item in elem.Children().Where(filter))
+					toVisit.Insert(index, item);
+
+				index = toVisit.Count - 1;
+				elem = toVisit[index];
+				toVisit.RemoveAt(index);
+			}
+		}
+
+		/// <summary>
+		/// Performs pre-order traversal starting with this node.
+		/// </summary>
 		/// <returns></returns>
 		public IEnumerable<DataElement> PreOrderTraverse()
 		{
@@ -675,7 +701,17 @@ namespace Peach.Core.Dom
 				throw new CrackingFailure(pe.Message, this, data, pe);
 			}
 
-			context.Log("Value: {0}", DefaultValue);
+			if (context.IsLogEnabled)
+			{
+				var vt = DefaultValue.GetVariantType();
+
+				if (vt == Variant.VariantType.Int || vt == Variant.VariantType.Long)
+					context.Log("Value: {0} (0x{1:X})", DefaultValue, (long)DefaultValue);
+				else if (vt == Variant.VariantType.ULong)
+					context.Log("Value: {0} (0x{1:X})", DefaultValue, (ulong)DefaultValue);
+				else
+					context.Log("Value: {0}", DefaultValue);
+			}
 
 			logger.Trace("{0} value is: {1}", debugName, DefaultValue);
 
@@ -1699,22 +1735,20 @@ namespace Peach.Core.Dom
 
 		private DataElement MoveTo(DataElementContainer newParent, int index)
 		{
-			DataElement newElem;
-
 			var oldIndex = parent.IndexOf(this);
 
 			if (parent == newParent)
 			{
-				newElem = Clone();
-
 				if (oldIndex < index)
 					index--;
+
+				parent.MoveChild(oldIndex, index);
+
+				return this;
 			}
-			else
-			{
-				var newName = newParent.UniqueName(Name);
-				newElem = Clone(newName);
-			}
+
+			var newName = newParent.UniqueName(Name);
+			var newElem = Clone(newName);
 
 			parent.RemoveAt(oldIndex);
 			newParent.Insert(index, newElem);

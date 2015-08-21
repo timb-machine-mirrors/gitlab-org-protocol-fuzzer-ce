@@ -6,6 +6,7 @@ using System.Threading;
 using Godel.Core;
 using NLog;
 using Peach.Core;
+using Peach.Core.Analyzers;
 using Peach.Core.Dom;
 using Peach.Pro.Core.Loggers;
 using Peach.Pro.Core.Storage;
@@ -26,8 +27,6 @@ namespace Peach.Pro.Core.Runtime
 		bool _shouldStop;
 		Engine _engine;
 		Thread _currentThread;
-
-		const string DefinedValues = "DefinedValues";
 
 		public JobRunner(Job job, string pitLibraryPath, string pitFile)
 		{
@@ -180,7 +179,7 @@ namespace Peach.Pro.Core.Runtime
 							CompleteTestEvents.Last);
 
 						var defs = PitDatabase.ParseConfig(_pitLibraryPath, pitConfig);
-						args[DefinedValues] = defs;
+						args[PitParser.DEFINED_VALUES] = defs;
 					}
 					catch (Exception ex)
 					{
@@ -193,7 +192,7 @@ namespace Peach.Pro.Core.Runtime
 			{
 				// ParseConfig allows non-existant config files
 				var defs = PitDatabase.ParseConfig(_pitLibraryPath, pitConfig);
-				args[DefinedValues] = defs;
+				args[PitParser.DEFINED_VALUES] = defs;
 			}
 
 			return args;
