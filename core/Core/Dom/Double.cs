@@ -97,8 +97,6 @@ namespace Peach.Core.Dom
 		{
 			pit.WriteStartElement("Double");
 
-			pit.WriteAttributeString("name", Name);
-
 			pit.WriteAttributeString("size", lengthAsBits.ToString(CultureInfo.InvariantCulture));
 
 			if (!LittleEndian)
