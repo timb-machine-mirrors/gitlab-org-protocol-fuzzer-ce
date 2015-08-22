@@ -78,6 +78,25 @@ namespace PitTester
 		}
 
 		[Test]
+		public void QuickTest([ValueSource("AllPits")]TestCase test)
+		{
+			var fileName = test.Pit.Versions[0].Files[0].Name;
+
+			try
+			{
+				PitTester.TestPit(test.LibraryPath, fileName, true, null, true);
+			}
+			catch (FileNotFoundException)
+			{
+				Assert.Ignore("No test definition found.");
+			}
+			catch (Exception ex)
+			{
+				Assert.Fail(ex.Message);
+			}
+		}
+
+		[Test]
 		public void TestIgnoreArrayField()
 		{
 			const string xml = @"
@@ -136,7 +155,7 @@ namespace PitTester
 
 			try
 			{
-				PitTester.TestPit("", pitFile, true, null);
+				PitTester.TestPit("", pitFile, true, null, true);
 			}
 			finally
 			{
@@ -205,7 +224,7 @@ namespace PitTester
 
 			try
 			{
-				PitTester.TestPit("", pitFile, true, null);
+				PitTester.TestPit("", pitFile, true, null, true);
 			}
 			finally
 			{
@@ -280,7 +299,7 @@ namespace PitTester
 
 			try
 			{
-				PitTester.TestPit("", pitFile, true, null);
+				PitTester.TestPit("", pitFile, true, null, true);
 			}
 			finally
 			{
@@ -336,7 +355,7 @@ namespace PitTester
 			{
 				try
 				{
-					PitTester.TestPit("", pitFile, true, null);
+					PitTester.TestPit("", pitFile, true, null, true);
 				}
 				finally
 				{
@@ -412,7 +431,7 @@ namespace PitTester
 
 			try
 			{
-				PitTester.TestPit("", pitFile, false, null);
+				PitTester.TestPit("", pitFile, false, null, true);
 			}
 			finally
 			{
@@ -471,7 +490,7 @@ namespace PitTester
 
 			try
 			{
-				PitTester.TestPit("", pitFile, false, null);
+				PitTester.TestPit("", pitFile, false, null, true);
 			}
 			finally
 			{
