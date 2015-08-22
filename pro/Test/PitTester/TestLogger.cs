@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.Dom.XPath;
@@ -10,15 +11,19 @@ namespace PitTester
 {
 	public class TestLogger : Logger
 	{
-		TestData.Test testData;
-		List<string> xpathIgnore;
+		readonly TestData.Test testData;
+		readonly List<string> xpathIgnore;
 		int index;
 		Action action;
 		bool verify;
 		List<Tuple<Action, DataElement>> ignores;
 
+		public delegate void ErrorHandler(string msg);
+		public event ErrorHandler Error;
+
 		public bool ExceptionOccurred { get { return !verify; } }
 		public string ActionName { get; private set; }
+		const string ErrorFormat = "{0}\n\tAction: {1}\n\tExpected: {2}\n\tActual: {3}";
 
 		public TestLogger(TestData.Test testData, IEnumerable<string> xpathIgnore)
 		{
@@ -26,15 +31,24 @@ namespace PitTester
 			this.xpathIgnore = new List<string>(xpathIgnore);
 		}
 
+		private void FireError(string msg)
+		{
+			using (new ForegroundColor(ConsoleColor.Red))
+				Console.WriteLine(msg);
+			if (Error != null)
+				Error(msg);
+		}
+
 		public T Verify<T>(string publisherName) where T : TestData.Action
 		{
 			if (!verify)
 				return null;
 
-			//Ignore implicit closes that are called at end of state model
+			// Ignore implicit closes that are called at end of state model
 			if (action == null)
 				return null;
 
+			var errors = new List<string>();
 			try
 			{
 				if (index >= testData.Actions.Count)
@@ -43,16 +57,31 @@ namespace PitTester
 				var d = testData.Actions[index++];
 
 				if (typeof(T) != d.GetType())
-				{
-					var msg = "Encountered unexpected action type.\nAction Name: {0}\nExpected: {1}\nGot: {2}".Fmt(ActionName, d.GetType().Name, typeof(T).Name);
-					throw new SoftException(msg);
-				}
+					errors.Add(ErrorFormat.Fmt(
+						"Action type mismatch.", 
+						ActionName, 
+						d.GetType().Name, 
+						typeof(T).Name)
+					);
 
 				if (d.PublisherName != publisherName)
-					throw new SoftException("Publisher names didn't match. Expected {0} but got {1}".Fmt(d.PublisherName, publisherName));
+					errors.Add(ErrorFormat.Fmt(
+						"Publisher name mismatch.", 
+						ActionName,
+						d.PublisherName, 
+						publisherName)
+					);
 
 				if (d.ActionName != ActionName)
-					throw new SoftException("Action names didn't match.\n\tExpected: {0}\n\tBut got: {1}\n".Fmt(d.ActionName, ActionName));
+					errors.Add(ErrorFormat.Fmt(
+						"Action name mismatch.",
+						ActionName,
+						d.ActionName, 
+						ActionName)
+					);
+
+				if (errors.Any())
+					FireError(string.Join("\n", errors));
 
 				return (T)d;
 			}
@@ -67,10 +96,7 @@ namespace PitTester
 
 		public IEnumerable<Tuple<Action, DataElement>> Ignores
 		{
-			get
-			{
-				return ignores;
-			}
+			get { return ignores; }
 		}
 
 		protected override void StateModelStarting(RunContext context, StateModel model)
