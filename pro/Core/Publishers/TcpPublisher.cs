@@ -99,6 +99,34 @@ namespace Peach.Pro.Core.Publishers
 		{
 			return _tcp.Client.EndSend(asyncResult);
 		}
+
+		protected override Variant OnGetProperty(string property)
+		{
+			switch (property)
+			{
+				case "Port":
+					return new Variant(Port);
+			}
+
+			return base.OnGetProperty(property);
+		}
+
+		protected override void OnSetProperty(string property, Variant value)
+		{
+			switch (property)
+			{
+				case "Port":
+					var newPort = UShortFromVariant(value);
+					Logger.Debug("Changing Port from {0} to {1}.\n", Port, newPort);
+
+					Port = newPort;
+					OnStop();
+					OnStart();
+					return;
+			}
+
+			base.OnSetProperty(property, value);
+		}
 	}
 }
 

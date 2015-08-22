@@ -21,14 +21,12 @@
 // SOFTWARE.
 //
 
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using NLog;
 using Peach.Core;
-using Peach.Core.IO;
+using Logger = NLog.Logger;
 
 namespace Peach.Pro.Core.Publishers
 {
@@ -42,8 +40,8 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("MaxMTU", typeof(uint), "Maximum allowable MTU property value", DefaultMaxMTU)]
 	public class UdpPublisher : SocketPublisher
 	{
-		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
-		protected override NLog.Logger Logger { get { return logger; } }
+		private static Logger logger = LogManager.GetCurrentClassLogger();
+		protected override Logger Logger { get { return logger; } }
 		private IPEndPoint _remote;
 
 		public UdpPublisher(Dictionary<string, Variant> args)
@@ -110,39 +108,6 @@ namespace Peach.Pro.Core.Publishers
 			}
 
 			base.OnSetProperty(property, value);
-		}
-
-		public ushort UShortFromVariant(Variant value)
-		{
-			ushort ret = 0;
-
-			if (value.GetVariantType() == Variant.VariantType.BitStream)
-			{
-				var bs = (BitwiseStream)value;
-				bs.SeekBits(0, SeekOrigin.Begin);
-				ulong bits;
-				int len = bs.ReadBits(out bits, 16);
-				ret = Endian.Little.GetUInt16(bits, len);
-			}
-			else if (value.GetVariantType() == Variant.VariantType.ByteString)
-			{
-				byte[] buf = (byte[])value;
-				int len = Math.Min(buf.Length * 8, 16);
-				ret = Endian.Little.GetUInt16(buf, len);
-			}
-			else
-			{
-				try
-				{
-					ret = ushort.Parse((string)value);
-				}
-				catch
-				{
-					throw new SoftException("Can't convert to int, 'value' is an unsupported type.");
-				}
-			}
-
-			return ret;
 		}
 	}
 }
