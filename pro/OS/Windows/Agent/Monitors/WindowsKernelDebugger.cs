@@ -560,7 +560,9 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 						}
 					}
 
-					_thread.Join();
+					if (!_thread.Join(TimeSpan.FromSeconds(1)))
+						Logger.Debug("Failed to join debugger thread in 10 seconds");
+
 					_thread = null;
 				}
 			}
