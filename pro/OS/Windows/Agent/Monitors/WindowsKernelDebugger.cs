@@ -220,6 +220,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 				public bool IgnoreFirstChanceGuardPage { get; set; }
 				public bool IgnoreSecondChanceGuardPage { get; set; }
+				public bool IgnoreBreakpoint { get; set; }
 
 				public WinDbg(string winDbgPath)
 				{
@@ -342,7 +343,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 					{
 						if (Exception.ExceptionCode == 0x80000003)
 						{
-							handle = true;
+							handle = !IgnoreBreakpoint;
 						}
 						else if (IgnoreFirstChanceGuardPage && Exception.ExceptionCode == 0x80000001)
 						{
@@ -550,6 +551,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 							if (_connected)
 							{
 								// Stops active debugger connections
+								_winDbg.IgnoreBreakpoint = true;
 								_winDbg.DebugControl.SetInterrupt(DEBUG_INTERRUPT.ACTIVE);
 							}
 							else
@@ -560,7 +562,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 						}
 					}
 
-					if (!_thread.Join(TimeSpan.FromSeconds(1)))
+					if (!_thread.Join(TimeSpan.FromSeconds(10)))
 						Logger.Debug("Failed to join debugger thread in 10 seconds");
 
 					_thread = null;
