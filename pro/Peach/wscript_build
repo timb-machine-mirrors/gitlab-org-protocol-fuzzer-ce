@@ -20,6 +20,7 @@ app = bld(
 #	mkbundle = True,
 	ver_product = 'Peach Fuzzing Platfom',
 	install_644 = 'peach.xsd',
+	ide_content = bld.path.ant_glob('samples/**/*'),
 )
 
 # samples folder is installed to output dir by ../SDK/wscript_build

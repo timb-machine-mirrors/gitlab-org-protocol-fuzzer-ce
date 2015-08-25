@@ -27,8 +27,10 @@ urls = (
 	'/Agent/GetMonitorData',	'Agent_GetMonitorData',
 	'/Agent/SessionFinished',	'Agent_SessionFinished',
 	'/Agent/StopAllMonitors',	'Agent_StopAllMonitors',
+	'/Agent/MustStop',	'Agent_MustStop',
 	'/Agent/AgentDisconnect',	'Agent_AgentDisconnect',
 	
+	'/Agent/Publisher/CreatePublisher',	'Agent_Publisher_CreatePublisher',
 	'/Agent/Publisher/Set_Iteration',			'Agent_Publisher_Set_Iteration',
 	'/Agent/Publisher/Set_IsControlIteration',	'Agent_Publisher_Set_IsControlIteration',
 	'/Agent/Publisher/start',		'Agent_Publisher_start',
@@ -103,6 +105,15 @@ class Agent_DetectedFault:
 		
 		return json.dumps({ "Status":"true" })
 
+class Agent_MustStop:
+	def GET(self):
+		
+		# TODO - Place detected fault logic here
+		#        or return false always. The example
+		#        here will return true.
+		
+		return json.dumps({ "Status":"false" })
+
 class Agent_GetMonitorData:
 	def GET(self):
 		
@@ -166,9 +177,16 @@ class Agent_Publisher_Set_IsControlIteration:
 		
 		return json.dumps({ "error":"false", "errorString":None })
 
+class Agent_Publisher_CreatePublisher:
+	def POST(self):
+
+		# TODO - Put create logic here
+
+		return json.dumps({ "error":"false", "errorString":None })
+
 class Agent_Publisher_start:
 	def GET(self):
-		
+
 		# TODO - Put start logic here
 		
 		return json.dumps({ "error":"false", "errorString":None })
@@ -276,7 +294,7 @@ class Agent_Publisher_call:
 			data = arg['data']
 			
 			# TODO - Do something with arguments!
-		
+
 		# TODO - Do something with method call
 
 		# If method needs to return data, put 'data' member in returned object
@@ -287,10 +305,11 @@ class Agent_Publisher_call:
 
 class Agent_Publisher_stop:
 	def GET(self):
+
 		return json.dumps({ "error":"false", "errorString":None })
 
 
 if __name__ == "__main__":
-    app.run()
+	app.run()
 
 # end

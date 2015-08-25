@@ -50,14 +50,12 @@ main(
 	printf("| Peach Windows Driver Controller\n");
 	printf("| Copyright (c) Michael Eddington\n\n");
 
-	/*
 	printf("IOCTL_PEACH_METHOD_START: %u\n", IOCTL_PEACH_METHOD_START);
 	printf("IOCTL_PEACH_METHOD_STOP: %u\n", IOCTL_PEACH_METHOD_STOP);
 	printf("IOCTL_PEACH_METHOD_DATA: %u\n", IOCTL_PEACH_METHOD_DATA);
 	printf("IOCTL_PEACH_METHOD_CALL: %u\n", IOCTL_PEACH_METHOD_CALL);
 	printf("IOCTL_PEACH_METHOD_PROPERTY: %u\n", IOCTL_PEACH_METHOD_PROPERTY);
 	printf("IOCTL_PEACH_METHOD_NEXT: %u\n", IOCTL_PEACH_METHOD_NEXT);
-	*/
 
 	if(argc != 2)
 	{

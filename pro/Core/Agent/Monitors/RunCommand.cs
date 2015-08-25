@@ -23,6 +23,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Parameter("FaultOnRegex", typeof(string), "Fault if regex matches", "")]
 	[Parameter("AddressSanitizer", typeof(bool), "Enable Google AddressSanitizer support", "false")]
 	[Parameter("Timeout", typeof(int), "Fault if process takes more than 'Timeout' milliseconds to exit, where -1 means infinite timeout", "-1")]
+	[Parameter("WorkingDirectory", typeof(string), "Working directory to set when running command", "")]
 	public class RunCommand  : Monitor
 	{
 		static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
@@ -37,6 +38,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 		public bool FaultOnExitCode { get; set; }
 		public string FaultOnRegex { get; set; }
 		public bool AddressSanitizer { get; set; }
+		public string WorkingDirectory { get; set; }
 
 		static readonly Regex AsanMatch = new Regex(@"==\d+==ERROR: AddressSanitizer:");
 		static readonly Regex AsanBucket = new Regex(@"==\d+==ERROR: AddressSanitizer: ([^\s]+) on address ([0-9a-z]+) at pc ([0-9a-z]+)");
@@ -67,7 +69,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 			try
 			{
-				var p = SubProcess.Run(Command, Arguments, Timeout);
+				var p = SubProcess.Run(Command, Arguments, Timeout, null, WorkingDirectory);
 
 				var stdout = p.StdOut.ToString();
 				var stderr = p.StdErr.ToString();

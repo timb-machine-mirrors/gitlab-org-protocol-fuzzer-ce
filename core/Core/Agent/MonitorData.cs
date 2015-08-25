@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -7,11 +8,13 @@ namespace Peach.Core.Agent
 	/// The information recorded by a monitor.
 	/// This can be a fault or just an arbitrary collection of data.
 	/// </summary>
+	[Serializable] // Needed for remoting faults from side process helpers
 	public class MonitorData
 	{
 		/// <summary>
 		/// The information about a fault detected by a monitor.
 		/// </summary>
+		[Serializable] // Needed for remoting faults from side process helpers
 		public class Info
 		{
 			/// <summary>
