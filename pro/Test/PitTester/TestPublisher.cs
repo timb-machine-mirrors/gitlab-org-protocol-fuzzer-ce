@@ -28,12 +28,8 @@ namespace PitTester
 			stream = new MemoryStream();
 		}
 
-		private void FireError(string msg, ConsoleBuffer cb)
+		private void FireError(string msg)
 		{
-			using (new ForegroundColor(ConsoleColor.Red))
-				Console.WriteLine(msg);
-			if (cb != null)
-				cb.Print();
 			if (Error != null)
 				Error(msg);
 		}
@@ -80,7 +76,7 @@ namespace PitTester
 					"Error, input stream has {0} unconsumed bytes from last input action.",
 					stream.Length - stream.Position
 				);
-				FireError(msg, null);
+				FireError(msg);
 			}
 		}
 
@@ -137,7 +133,7 @@ namespace PitTester
 						"Error, input stream has {0} unconsumed bytes from last input action.",
 						stream.Length - stream.Position
 					);
-					FireError(msg, null);
+					FireError(msg);
 				}
 
 				// This is the 'Stream' publisher behavior
@@ -214,10 +210,17 @@ namespace PitTester
 			{
 				string msg;
 				if (data.Ignore)
-					msg = "Ignoring failed action: {0}".Fmt(_logger.ActionName);
+					msg = "Ignoring action: {0}".Fmt(_logger.ActionName);
 				else
 					msg = "Test failed on action: {0}".Fmt(_logger.ActionName);
-				FireError(msg, cb);
+
+				using (new ForegroundColor(ConsoleColor.Red))
+					Console.WriteLine(msg);
+				if (cb != null)
+					cb.Print();
+
+				if (!data.Ignore)
+					FireError(msg);
 			}
 		}
 
