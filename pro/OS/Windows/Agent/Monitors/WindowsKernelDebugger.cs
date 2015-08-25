@@ -4,10 +4,12 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Runtime.Remoting;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Diagnostics.Runtime.Interop;
+using Microsoft.Win32.SafeHandles;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
@@ -91,7 +93,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			if (_debugger != null)
 				_debugger.Dispose();
 
-			_debugger = new KernelDebuggerInstance
+			_debugger = new KernelDebugger
 			{
 				SymbolsPath = SymbolsPath,
 				WinDbgPath = WinDbgPath,
@@ -177,6 +179,14 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		}
 	}
 
+	public class DebuggerServer : MarshalByRefObject
+	{
+		public KernelDebuggerInstance GetKernelDebugger()
+		{
+			return new KernelDebuggerInstance();
+		}
+	}
+
 	public interface IKernelDebugger : IDisposable
 	{
 		void AcceptKernel(string kernelConnectionString);
@@ -190,9 +200,270 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		bool IgnoreSecondChanceGuardPage { get; set; }
 	}
 
+	public class KernelDebugger : IKernelDebugger
+	{
+		#region Job Object
+
+		// ReSharper disable MemberCanBePrivate.Local
+		// ReSharper disable FieldCanBeMadeReadOnly.Local
+		// ReSharper disable UnusedMember.Local
+
+		const uint JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE = 0x2000;
+
+		enum JOBOBJECTINFOCLASS
+		{
+			AssociateCompletionPortInformation = 7,
+			BasicLimitInformation = 2,
+			BasicUIRestrictions = 4,
+			EndOfJobTimeInformation = 6,
+			ExtendedLimitInformation = 9,
+			SecurityLimitInformation = 5,
+			GroupInformation = 11
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		struct JOBOBJECT_BASIC_LIMIT_INFORMATION
+		{
+			public long PerProcessUserTimeLimit;
+			public long PerJobUserTimeLimit;
+			public uint LimitFlags;
+			public IntPtr MinimumWorkingSetSize;
+			public IntPtr MaximumWorkingSetSize;
+			public uint ActiveProcessLimit;
+			public IntPtr Affinity;
+			public uint PriorityClass;
+			public uint SchedulingClass;
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		struct IO_COUNTERS
+		{
+			public ulong ReadOperationCount;
+			public ulong WriteOperationCount;
+			public ulong OtherOperationCount;
+			public ulong ReadTransferCount;
+			public ulong WriteTransferCount;
+			public ulong OtherTransferCount;
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		struct JOBOBJECT_EXTENDED_LIMIT_INFORMATION
+		{
+			public JOBOBJECT_BASIC_LIMIT_INFORMATION BasicLimitInformation;
+			public IO_COUNTERS IoInfo;
+			public IntPtr ProcessMemoryLimit;
+			public IntPtr JobMemoryLimit;
+			public IntPtr PeakProcessMemoryUsed;
+			public IntPtr PeakJobMemoryUsed;
+		}
+
+		// ReSharper restore UnusedMember.Local
+		// ReSharper restore FieldCanBeMadeReadOnly.Local
+		// ReSharper restore MemberCanBePrivate.Local
+
+		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+		static extern IntPtr CreateJobObject(IntPtr lpJobAttributes, string lpName);
+
+		[DllImport("kernel32.dll", SetLastError = true)]
+		static extern bool SetInformationJobObject(IntPtr hJob, JOBOBJECTINFOCLASS infoType, ref JOBOBJECT_EXTENDED_LIMIT_INFORMATION lpJobObjectInfo, int cbJobObjectInfoLength);
+
+		[DllImport("kernel32.dll", SetLastError = true)]
+		static extern bool AssignProcessToJobObject(IntPtr job, IntPtr process);
+
+		static readonly IntPtr _hJob;
+
+		static KernelDebugger()
+		{
+			_hJob = CreateJobObject(IntPtr.Zero, null);
+			if (_hJob == IntPtr.Zero)
+				throw new Win32Exception(Marshal.GetLastWin32Error());
+
+			var info = new JOBOBJECT_EXTENDED_LIMIT_INFORMATION
+			{
+				BasicLimitInformation = new JOBOBJECT_BASIC_LIMIT_INFORMATION
+				{
+					LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+				}
+			};
+
+			var ret = SetInformationJobObject(_hJob, JOBOBJECTINFOCLASS.ExtendedLimitInformation, ref info, Marshal.SizeOf(info));
+			if (!ret)
+				throw new Win32Exception(Marshal.GetLastWin32Error());
+		}
+
+		static void AssignProcessToJobObject(Process p)
+		{
+			// Will return ACCESS_DENIED on Vista/Win7 if PCA gets in the way:
+			// http://stackoverflow.com/questions/3342941/kill-child-process-when-parent-process-is-killed
+			var ret = AssignProcessToJobObject(_hJob, p.Handle);
+			if (!ret)
+				throw new Win32Exception(Marshal.GetLastWin32Error());
+		}
+
+		#endregion
+
+		static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
+
+		Process _process;
+		KernelDebuggerInstance _dbg;
+
+		public string KernelConnectionString
+		{
+			get { return Guard(() => _dbg.KernelConnectionString); }
+		}
+
+		public MonitorData Fault
+		{
+			get { return Guard(() => _dbg.Fault); }
+		}
+
+		public string SymbolsPath { get; set; }
+		public string WinDbgPath { get; set; }
+		public bool IgnoreFirstChanceGuardPage { get; set; }
+		public bool IgnoreSecondChanceGuardPage { get; set; }
+
+		public void Dispose()
+		{
+			_dbg = null;
+
+			if (_process == null)
+				return;
+
+			// No way to gracefully stop kernel debugger so just kill process
+
+			try
+			{
+				_process.Kill();
+			}
+			catch (InvalidOperationException)
+			{
+				// Process already exited
+			}
+
+			_process.WaitForExit();
+			_process.Dispose();
+			_process = null;
+		}
+
+		public void AcceptKernel(string kernelConnectionString)
+		{
+			if (_process != null)
+				throw new NotSupportedException("Kernel debugger is already running.");
+
+			var channel = StartProcess();
+
+			Logger.Debug("Creating KernelDebuggerInstance from {0}", channel);
+
+			try
+			{
+				var remote = (DebuggerServer)Activator.GetObject(typeof(DebuggerServer), channel);
+
+				_dbg = remote.GetKernelDebugger();
+				_dbg.SymbolsPath = SymbolsPath;
+				_dbg.WinDbgPath = WinDbgPath;
+				_dbg.IgnoreFirstChanceGuardPage = IgnoreFirstChanceGuardPage;
+				_dbg.IgnoreSecondChanceGuardPage = IgnoreSecondChanceGuardPage;
+
+				_dbg.AcceptKernel(kernelConnectionString);
+			}
+			catch (RemotingException ex)
+			{
+				throw new SoftException("Failed to initialize kernel debugger process.", ex);
+			}
+		}
+
+		public void WaitForConnection(uint timeout)
+		{
+			try
+			{
+				_dbg.WaitForConnection(timeout);
+			}
+			catch (RemotingException ex)
+			{
+				throw new SoftException("Error occured when waiting for kernel connection.", ex);
+			}
+		}
+
+		string StartProcess()
+		{
+			var guid = Guid.NewGuid().ToString();
+
+			using (var readyEvt = new EventWaitHandle(false, EventResetMode.AutoReset, "Local\\" + guid))
+			{
+				_process = new Process()
+				{
+					StartInfo = new ProcessStartInfo
+					{
+						CreateNoWindow = true,
+						UseShellExecute = false,
+						Arguments = "--timebomb=false " + guid, // No timebomb, using JobObject
+						FileName = Utilities.GetAppResourcePath("Peach.Pro.WindowsDebugInstance.exe")
+					}
+				};
+
+				if (Logger.IsTraceEnabled)
+				{
+					_process.EnableRaisingEvents = true;
+					_process.StartInfo.Arguments += " --debug";
+					_process.OutputDataReceived += LogProcessData;
+					_process.ErrorDataReceived += LogProcessData;
+					_process.StartInfo.RedirectStandardError = true;
+					_process.StartInfo.RedirectStandardOutput = true;
+				}
+
+				_process.Start();
+
+				// Add process to JobObject so it will get killed if peach crashes
+				AssignProcessToJobObject(_process);
+
+				if (Logger.IsTraceEnabled)
+				{
+					_process.BeginErrorReadLine();
+					_process.BeginOutputReadLine();
+				}
+
+				var procEvt = new ManualResetEvent(false)
+				{
+					SafeWaitHandle = new SafeWaitHandle(_process.Handle, false)
+				};
+
+				// Wait for either ready event or process exit
+				var idx = WaitHandle.WaitAny(new WaitHandle[] { readyEvt, procEvt });
+
+				if (idx == 2)
+					throw new SoftException("Debugger process prematurley exited!");
+			}
+
+			return "ipc://" + guid + "/DebuggerServer";
+		}
+
+		T Guard<T>(Func<T> func)
+		{
+			if (_dbg == null)
+				return default(T);
+
+			try
+			{
+				return func();
+			}
+			catch (RemotingException ex)
+			{
+				throw new SoftException(ex);
+			}
+		}
+
+		static void LogProcessData(object sender, DataReceivedEventArgs e)
+		{
+			if (!string.IsNullOrEmpty(e.Data))
+				Logger.Debug(e.Data);
+		}
+	}
+
 	public class KernelDebuggerInstance : MarshalByRefObject, IKernelDebugger
 	{
 		static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
+
+		#region WinDbg Wrapper
 
 		class WinDbg : IDisposable, IDebugEventCallbacks, IDebugOutputCallbacks
 		{
@@ -534,6 +805,8 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			}
 		}
 
+		#endregion
+
 		bool _connected;
 		bool _stop;
 
@@ -567,7 +840,8 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 						}
 						else
 						{
-							// TODO: Figure out how to shutdown when we timeout connecting
+							// Doesn't seem to be possible to stop the debugger
+							// when it is waiting for a connection
 							throw new InvalidOperationException("Can't dispose debugger when it is not connected.");
 						}
 					}
