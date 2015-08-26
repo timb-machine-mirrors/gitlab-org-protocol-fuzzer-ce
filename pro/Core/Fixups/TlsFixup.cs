@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Digests;
@@ -21,20 +22,26 @@ namespace Peach.Pro.Core.Fixups
 	[Description("Tls")]
 	[Fixup("Tls", true, Internal = true)]
 	[Parameter("TlsVersion", typeof(TlsVersion), "TLS Version", "TLSv10")]
+	[Parameter("IsServer", typeof(bool), "Is this the server side?", "false")]
 	[Serializable]
 	public class TlsFixup : Peach.Core.Fixups.VolatileFixup
 	{
 		#region Static Helpers For PRF()
 
-		static byte[] ToBytes(object obj)
+		internal static byte[] ToBytes(object obj, bool useValue = false, bool useDefault = false)
 		{
 			if (obj == null)
 				return null;
 
 
 			var intern = (DataElement)obj;
-			var v = intern.InternalValue;
-			var bs = (BitwiseStream)v;
+			if(useValue)
+				intern.Invalidate();
+
+			var bs = useValue ? intern.Value : (BitwiseStream)intern.InternalValue;
+			if (useDefault)
+				bs = (BitwiseStream) intern.DefaultValue;
+
 			var pos = bs.PositionBits;
 			bs.Seek(0, System.IO.SeekOrigin.Begin);
 			var ret = new byte[bs.Length];
@@ -45,7 +52,51 @@ namespace Peach.Pro.Core.Fixups
 			return ret;
 		}
 
-		static byte[] Concat(byte[] a, byte[] b)
+		/// <summary>
+		/// Build a buffer that matches the input for KeyExchange.
+		/// </summary>
+		/// <remarks>
+		/// There was no easy way to directly get this from the data model. The
+		/// inner key must still be encrypted.
+		/// </remarks>
+		/// <param name="obj"></param>
+		/// <param name="context"></param>
+		/// <returns></returns>
+		internal static byte[] KeyExchangeToBytes(object obj, RunContext context)
+		{
+			byte[] buff;
+			var payload = (DataElementContainer) obj;
+
+			var cipher = (byte[])context.iterationStateStore["ClientKeyExchangeInput"];
+
+			var lengthElem = (Number) payload["Length"];
+			var length = new Number();
+			length.length = lengthElem.length;
+			length.lengthType = lengthElem.lengthType;
+			length.LittleEndian = lengthElem.LittleEndian;
+
+			var keyLengthElem = (Number)payload.find("RSAEncryptedPreMasterSecret.PubKeyength");
+			var keyLength = new Number();
+			keyLength.length = keyLengthElem.length;
+			keyLength.lengthType = keyLengthElem.lengthType;
+			keyLength.LittleEndian = keyLengthElem.LittleEndian;
+
+			keyLength.DefaultValue = new Variant(cipher.Length);
+			length.DefaultValue = new Variant(cipher.Length + keyLength.Value.Length);
+
+			var sout = new MemoryStream();
+			buff = ToBytes(payload["HandshakeType"], true);
+			sout.Write(buff, 0, buff.Length);
+			buff = ToBytes(length, true);
+			sout.Write(buff, 0, buff.Length);
+			buff = ToBytes(keyLength, true);
+			sout.Write(buff, 0, buff.Length);
+			sout.Write(cipher, 0, cipher.Length);
+
+			return sout.ToArray();
+		}
+
+		internal static byte[] Concat(byte[] a, byte[] b)
 		{
 			byte[] c = new byte[a.Length + b.Length];
 			System.Array.Copy(a, 0, c, 0, a.Length);
@@ -53,14 +104,21 @@ namespace Peach.Pro.Core.Fixups
 			return c;
 		}
 
-		static byte[] GetMd5Sha1(IEnumerable<object> msgs)
+		static byte[] GetMd5Sha1(RunContext context, IEnumerable<object> msgs)
 		{
 			var md5 = new MD5Digest();
 			var sha1 = new Sha1Digest();
 
 			foreach (var obj in msgs)
 			{
-				var bytes = ToBytes(obj);
+				var bytes = ToBytes(obj, true);
+				if (bytes[0] == 0x10)
+					bytes = KeyExchangeToBytes(obj, context);
+
+				Console.WriteLine("Msg: ");
+				foreach (var b in bytes)
+					Console.Write(string.Format("{0:X2} ", b));
+				Console.WriteLine();
 
 				md5.BlockUpdate(bytes, 0, bytes.Length);
 				sha1.BlockUpdate(bytes, 0, bytes.Length);
@@ -73,13 +131,20 @@ namespace Peach.Pro.Core.Fixups
 			return combined;
 		}
 
-		static byte[] GetSha256(IEnumerable<object> msgs)
+		static byte[] GetSha256(RunContext context, IEnumerable<object> msgs)
 		{
 			var sha = new Sha256Digest();
 
 			foreach (var obj in msgs)
 			{
-				var bytes = ToBytes(obj);
+				var bytes = ToBytes(obj, true);
+				if (bytes[0] == 0x10)
+					bytes = KeyExchangeToBytes(obj, context);
+
+				Console.WriteLine("Msg: ");
+				foreach (var b in bytes)
+					Console.Write(string.Format("{0:X2} ", b));
+				Console.WriteLine();
 
 				sha.BlockUpdate(bytes, 0, bytes.Length);
 			}
@@ -102,7 +167,7 @@ namespace Peach.Pro.Core.Fixups
 
 		#region TlsContext
 
-		class TlsContext : TlsClientContext
+		internal class TlsContext : TlsClientContext
 		{
 			private readonly IRandomGenerator _mNonceRandom;
 
@@ -153,6 +218,14 @@ namespace Peach.Pro.Core.Fixups
 				fi.SetValue(obj, fieldValue);
 			}
 
+			private static object Get(object obj, string fieldName)
+			{
+				var fi = obj.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
+				if (fi == null)
+					throw new MissingFieldException(obj.GetType().FullName, fieldName);
+				return fi.GetValue(obj);
+			}
+
 			public byte[] MasterSecret
 			{
 				set
@@ -184,10 +257,7 @@ namespace Peach.Pro.Core.Fixups
 				get { return _mNonceRandom; }
 			}
 
-			public bool IsServer
-			{
-				get { return false; }
-			}
+			public bool IsServer { get; set; }
 
 			public ProtocolVersion ClientVersion
 			{
@@ -244,6 +314,7 @@ namespace Peach.Pro.Core.Fixups
 
 		#endregion
 
+		public bool IsServer { get; set; }
 		public TlsVersion TlsVersion { get; set; }
 
 		public ProtocolVersion ProtocolVersion
@@ -274,15 +345,8 @@ namespace Peach.Pro.Core.Fixups
 			ParameterParser.Parse(this, args);
 		}
 
-		protected override Variant OnActionRun(RunContext ctx)
+		internal static TlsContext CreateTlsContext(RunContext ctx, bool isServer, ProtocolVersion ProtocolVersion)
 		{
-			if (ctx.iterationStateStore.ContainsKey("TlsBlockCipher"))
-				throw new SoftException("Error in Tls fixup, TlsBlockCipher object already exists in the state store.");
-
-			var msgs = GetState<IEnumerable<object>>(ctx, "HandshakeMessage");
-			if (msgs == null)
-				throw new SoftException("Error in Tls fixup, no handshake messages exists in the state store.");
-
 			var pms = ToBytes(GetState<DataElement>(ctx, "PreMasterSecret"));
 			if (pms == null)
 				throw new SoftException("Error in Tls fixup, no handshake messages exists in the state store.");
@@ -298,25 +362,33 @@ namespace Peach.Pro.Core.Fixups
 			var tlsContext = new TlsContext(ProtocolVersion, clientRandom, serverRandom);
 			var masterSecret = TlsUtilities.PRF(tlsContext, pms, "master secret",
 				Concat(clientRandom, serverRandom), 48);
+			
 			tlsContext.MasterSecret = masterSecret;
+			tlsContext.IsServer = isServer;
 
-			ctx.iterationStateStore["TlsProtocolVersion"] = TlsVersion.ToString();
-
-			Console.Write("Master Secret: ");
-			foreach (var b in masterSecret)
+			//Console.WriteLine("Pre-Master: ");
+			//foreach (var b in pms)
+			//	Console.Write(string.Format("{0:X2} ", b));
+			//Console.WriteLine();
+			Console.WriteLine("Master Secret: ");
+			foreach (var b in tlsContext.SecurityParameters.MasterSecret)
+				Console.Write(string.Format("{0:X2} ", b));
+			Console.WriteLine();
+			Console.WriteLine("Client Random: ");
+			foreach (var b in tlsContext.SecurityParameters.ClientRandom)
+				Console.Write(string.Format("{0:X2} ", b));
+			Console.WriteLine();
+			Console.WriteLine("Server Random: ");
+			foreach (var b in tlsContext.SecurityParameters.ServerRandom)
 				Console.Write(string.Format("{0:X2} ", b));
 			Console.WriteLine();
 
-			Console.Write("Client Random: ");
-			foreach (var b in clientRandom)
-				Console.Write(string.Format("{0:X2} ", b));
-			Console.WriteLine();
-			Console.Write("Server Random: ");
-			foreach (var b in serverRandom)
-				Console.Write(string.Format("{0:X2} ", b));
-			Console.WriteLine();
+			return tlsContext;
+		}
 
-			ctx.iterationStateStore["TlsBlockCipher"] = new TlsBlockCipher(
+		internal static TlsBlockCipher CreateBlockCipher(RunContext ctx, TlsContext tlsContext, bool store = true)
+		{
+			var tlsBlockCipher = new TlsBlockCipher(
 				tlsContext,
 				new CbcBlockCipher(new AesFastEngine()),
 				new CbcBlockCipher(new AesFastEngine()),
@@ -324,8 +396,46 @@ namespace Peach.Pro.Core.Fixups
 				new Sha1Digest(),
 				16); // AES-CBC block size
 
-			var verifyHash = TlsVersion == TlsVersion.TLSv12 ? GetSha256(msgs) : GetMd5Sha1(msgs);
-			var verifyData = TlsUtilities.PRF(tlsContext, masterSecret, "client finished", verifyHash, 12);
+			if (store)
+			{
+				if (ctx.iterationStateStore.ContainsKey("TlsBlockCipher"))
+					throw new SoftException("Error in Tls fixup, TlsBlockCipher object already exists in the state store.");
+
+				ctx.iterationStateStore["TlsContext"] = tlsContext;
+				ctx.iterationStateStore["TlsBlockCipher"] = tlsBlockCipher;
+			}
+
+			return tlsBlockCipher;
+		}
+
+		protected override Variant OnActionRun(RunContext ctx)
+		{
+			var tlsContext = CreateTlsContext(ctx, IsServer, ProtocolVersion);
+			CreateBlockCipher(ctx, tlsContext);
+
+			ctx.iterationStateStore["TlsProtocolVersion"] = TlsVersion.ToString();
+
+			var msgs = GetState<IEnumerable<object>>(ctx, "HandshakeMessage");
+			if (msgs == null)
+				throw new SoftException("Error in Tls fixup, no handshake messages exists in the state store.");
+
+			var verifyHash = TlsVersion == TlsVersion.TLSv12 ? GetSha256(ctx, msgs) : GetMd5Sha1(ctx, msgs);
+			var verifyData = TlsUtilities.PRF(
+				tlsContext, 
+				tlsContext.SecurityParameters.MasterSecret, 
+				IsServer ? "server finished" : "client finished", 
+				verifyHash, 
+				12);
+
+			Console.WriteLine("IsServer: "+IsServer);
+			Console.WriteLine("Verify Hash: ");
+			foreach (var b in verifyHash)
+				Console.Write(string.Format("{0:X2} ", b));
+			Console.WriteLine();
+			Console.WriteLine("Verify Data: ");
+			foreach (var b in verifyData)
+				Console.Write(string.Format("{0:X2} ", b));
+			Console.WriteLine();
 
 			// Encryption of the verify_data is handled by the Tls transformer
 			return new Variant(new BitStream(verifyData));
