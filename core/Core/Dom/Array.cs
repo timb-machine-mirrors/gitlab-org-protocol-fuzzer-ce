@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Xml;
 using System.Linq;
 
@@ -73,20 +74,13 @@ namespace Peach.Core.Dom
 		//private BitwiseStream expandedValue;
 		//private int? countOverride;
 
-        public override int? CountOverride
-        {
-            set
-            {
-                countOverride = value;
-
-                if (Count == 0)
-                    ExpandedValue = OriginalElement.Value;
-                else
-                    ExpandedValue = this[Count - 1].Value;
-
-                Invalidate();
-            }
-        }
+		public override void SetCountOverride(int count, BitwiseStream value, int valueIndex)
+		{
+			if (value == null)
+				base.SetCountOverride(count, OriginalElement.Value, 0);
+			else
+				base.SetCountOverride(count, value, valueIndex);
+		}
 
 		public override int GetCountOverride()
 		{
