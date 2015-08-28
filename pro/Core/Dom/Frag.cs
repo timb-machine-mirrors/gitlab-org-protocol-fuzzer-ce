@@ -18,6 +18,10 @@ namespace Peach.Pro.Core.Dom
 	[Parameter("fragLength", typeof(int), "Fragment size in bytes")]
 	[Parameter("class", typeof(string), "Fragment extension class", "ByLength")]
 	[Parameter("constraint", typeof(string), "Scripting expression that evaluates to true or false", "")]
+	[Parameter("totalLengthField", typeof(string), "Name of total length field in template model.", "")]
+	[Parameter("fragmentLengthField", typeof(string), "Name of fragment length field in template model.", "")]
+	[Parameter("fragmentOffsetField", typeof(string), "Name of fragment offset field in template model.", "")]
+	[Parameter("fragmentIndexField", typeof(string), "Name of fragment index field in template model.", "")]
 	[Serializable]
 	public class Frag : Block
 	{
@@ -37,6 +41,10 @@ namespace Peach.Pro.Core.Dom
 
 		public string Class { get; set; }
 		public int FragLength { get; set; }
+		public string TotalLengthField { get; set; }
+		public string FragmentLengthField { get; set; }
+		public string FragmentOffsetField { get; set; }
+		public string FragmentIndexField { get; set; }
 
 		#endregion
 
@@ -60,6 +68,8 @@ namespace Peach.Pro.Core.Dom
 		/// </summary>
 		public DataElement Template { get; set; }
 
+		public FragSequence Rendering { get { return (FragSequence)this["Rendering"]; } }
+
 		public new static DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
 		{
 			if (node.Name != "Frag")
@@ -70,6 +80,10 @@ namespace Peach.Pro.Core.Dom
 
 			block.Class = node.getAttr("class", "ByLength");
 			block.FragLength = node.getAttr("fragLength", 0);
+			block.TotalLengthField = node.getAttr("totalLengthField", "");
+			block.FragmentLengthField = node.getAttr("fragmentLengthField", "");
+			block.FragmentOffsetField= node.getAttr("fragmentOffsetField", "");
+			block.FragmentIndexField = node.getAttr("fragmentIndexField", "");
 			block.isMutable = false;
 
 			var type = ClassLoader.FindTypeByAttribute<FragmentAlgorithmAttribute>((t, a) => 0 == string.Compare(a.Name, block.Class, true));
@@ -102,6 +116,30 @@ namespace Peach.Pro.Core.Dom
 			block.Template = block["Template"];
 			block.Remove(block.Template);
 
+			if (!string.IsNullOrEmpty(block.TotalLengthField))
+				if (block.Template.find(block.TotalLengthField) == null)
+					throw new PeachException(string.Format(
+						"Error, Frag '{0}' element, unable to find totalLengthField '{1}' in template model.",
+						block.Name, block.TotalLengthField));
+
+			if (!string.IsNullOrEmpty(block.FragmentLengthField))
+				if (block.Template.find(block.FragmentLengthField) == null)
+					throw new PeachException(string.Format(
+						"Error, Frag '{0}' element, unable to find fragmentLengthField '{1}' in template model.",
+						block.Name, block.FragmentLengthField));
+
+			if (!string.IsNullOrEmpty(block.FragmentOffsetField))
+				if (block.Template.find(block.FragmentOffsetField) == null)
+					throw new PeachException(string.Format(
+						"Error, Frag '{0}' element, unable to find fragmentOffsetField '{1}' in template model.",
+						block.Name, block.FragmentOffsetField));
+
+			if (!string.IsNullOrEmpty(block.FragmentIndexField))
+				if (block.Template.find(block.FragmentIndexField) == null)
+					throw new PeachException(string.Format(
+						"Error, Frag '{0}' element, unable to find fragmentIndexField '{1}' in template model.",
+						block.Name, block.FragmentIndexField));
+
 			return block;
 		}
 
@@ -113,6 +151,18 @@ namespace Peach.Pro.Core.Dom
 
 			pit.WriteAttributeString("class", Class);
 			pit.WriteAttributeString("fragLength", FragLength.ToString());
+
+			if (!string.IsNullOrEmpty(TotalLengthField))
+				pit.WriteAttributeString("totalLengthField", TotalLengthField);
+
+			if (!string.IsNullOrEmpty(FragmentLengthField))
+				pit.WriteAttributeString("fragmentLengthField", FragmentLengthField);
+
+			if (!string.IsNullOrEmpty(FragmentOffsetField))
+				pit.WriteAttributeString("fragmentOffsetField", FragmentOffsetField);
+
+			if (!string.IsNullOrEmpty(FragmentIndexField))
+				pit.WriteAttributeString("fragmentIndexField", FragmentIndexField);
 			
 			WritePitCommonAttributes(pit);
 			WritePitCommonChildren(pit);
@@ -161,6 +211,15 @@ namespace Peach.Pro.Core.Dom
 			}
 
 			return this["Rendering"].DefaultValue;
+		}
+
+		public override void Crack(DataCracker context, BitStream data, long? size)
+		{
+			if (FragmentAlg.NeedFragment())
+				throw new SoftException("Error, still waiting on fragments prior to reassembly.");
+
+			var reassembledData = FragmentAlg.Reassemble();
+			this["Payload"].Crack(context, reassembledData, reassembledData.LengthBits);
 		}
 	}
 }
