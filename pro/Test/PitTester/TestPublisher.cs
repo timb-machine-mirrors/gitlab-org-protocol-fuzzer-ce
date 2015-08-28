@@ -16,16 +16,18 @@ namespace PitTester
 	{
 		static readonly Logger ClassLogger = LogManager.GetCurrentClassLogger();
 
+		bool _singleIteration;
 		bool _datagram;
 		readonly TestLogger _logger;
 		public delegate void ErrorHandler(string msg);
 		public event ErrorHandler Error;
 
-		public TestPublisher(TestLogger logger)
+		public TestPublisher(TestLogger logger, bool singleIteration)
 			: base(new Dictionary<string, Variant>())
 		{
 			_logger = logger;
 			stream = new MemoryStream();
+			_singleIteration = singleIteration;
 		}
 
 		private void FireError(string msg)
@@ -36,7 +38,8 @@ namespace PitTester
 
 		private void Log(string action)
 		{
-			Console.WriteLine("{0,-15} {1}".Fmt(action, _logger.ActionName));
+			if (_singleIteration)
+				Console.WriteLine("{0,-15} {1}".Fmt(action, _logger.ActionName));
 		}
 
 		protected override Logger Logger
