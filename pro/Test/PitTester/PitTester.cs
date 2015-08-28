@@ -163,7 +163,7 @@ namespace PitTester
 				for (var i = 0; i < test.publishers.Count; ++i)
 				{
 					var oldPub = test.publishers[i];
-					var newPub = new TestPublisher(logger) { Name = oldPub.Name };
+					var newPub = new TestPublisher(logger, singleIteration) { Name = oldPub.Name };
 					newPub.Error += err =>
 					{
 						if (!keepGoing)
