@@ -11,7 +11,7 @@ namespace Peach.Core.Dom.Actions
 	[Serializable]
 	public class Input : Action
 	{
-		private BitStream _inputData;
+		protected BitStream _inputData;
 
 		public ActionData data { get; set; }
 
