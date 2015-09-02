@@ -117,30 +117,55 @@ namespace Peach.Core
 
 		static LicFile Read()
 		{
-			const string fileName = "Peach.license";
+			// Try several different filenames
+			// this reduces the number of support calls.
+			var fileNames = new []
+			{
+				"Peach.license",
+				"Peach.license.xml",
+				"Peach.license.txt",
+
+				"peach.license",
+				"peach.license.xml",
+				"peach.license.txt"
+			};
+
 			var peachDir = Platform.GetOS() == Platform.OS.Windows ? "Peach" : "peach";
 			var appData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
 			var asmDir = Utilities.ExecutionDirectory;
+			Exception ex = null;
 
-			// Try location of peach.exe first
-			var local = Path.Combine(asmDir, fileName);
-			var localLic = Read(local);
+			foreach (var fileName in fileNames)
+			{
+				// Try location of peach.exe first
+				var local = Path.Combine(asmDir, fileName);
+				var localLic = Read(local);
 
-			if (localLic.Exception == null)
-				return localLic;
+				if (localLic.Exception == null)
+					return localLic;
 
-			// Try common application data second
-			// Windows - C:\ProgramData\Peach\Peach.license
-			// Unix - /usr/share/peach/Peach.license
-			var global = Path.Combine(appData, peachDir, fileName);
-			var globalLic = Read(global);
+				// Try common application data second
+				// Windows - C:\ProgramData\Peach\Peach.license
+				// Unix - /usr/share/peach/Peach.license
+				var global = Path.Combine(appData, peachDir, fileName);
+				var globalLic = Read(global);
 
-			if (globalLic.Exception == null)
-				return globalLic;
+				if (globalLic.Exception == null)
+					return globalLic;
 
-			// Rethrow local exception since that is technically the first error
-			var inner = localLic.Exception;
-			var ex = (Exception)Activator.CreateInstance(inner.GetType(), inner.Message, inner);
+				// Rethrow local exception since that is technically the first error
+				var inner = localLic.Exception;
+
+				// Skip these
+				if (inner is FileNotFoundException || inner is DirectoryNotFoundException)
+					continue;
+
+				ex = (Exception) Activator.CreateInstance(inner.GetType(), inner.Message, inner);
+			}
+
+			if(ex == null)
+				throw new FileNotFoundException("Error, unable to locate license file 'Peach.license'.");
+
 			throw ex;
 		}
 
