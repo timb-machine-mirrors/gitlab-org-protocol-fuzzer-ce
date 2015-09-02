@@ -270,7 +270,8 @@ if __name__ == "__main__":
 	toAdd = filter_docs(docs, peach_docs)
 
 	for x in pkgs:
-		update_pkg(x, toAdd)
+		if 'internal' not in x:
+			update_pkg(x, toAdd)
 
 	d = datetime.datetime.now()
 
@@ -323,6 +324,9 @@ if __name__ == "__main__":
 		shutil.rmtree(tmpdir)
 
 	for x in pkgs:
+		if 'internal' in x:
+			path = os.path.join(reldir, buildtag)
+			shutil.copy(x, path)
 		try:
 			os.unlink(x)
 			os.unlink(x + '.sha1')
