@@ -54,6 +54,20 @@ namespace Peach.Core.Test
 			e.startFuzzing(dom, cfg);
 		}
 
+		protected void RunEngine(string xml, string pitFilename)
+		{
+			RunEngine(ParsePit(xml), pitFilename);
+		}
+
+		protected void RunEngine(Dom.Dom dom, string pitFilename)
+		{
+			var e = new Engine(this);
+			var cfg = new RunConfiguration();
+			cfg.pitFile = pitFilename;
+
+			e.startFuzzing(dom, cfg);
+		}
+
 		protected List<Variant> mutations = null;
 		protected List<BitwiseStream> values = null;
 		protected List<Dom.DataModel> dataModels = null;
