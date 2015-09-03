@@ -26,11 +26,10 @@ namespace Peach.Pro.Core.Mutators
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		int _count = 0;
+		readonly int _count = 0;
 		uint pos = 0;
-		Guid ElementId = Guid.Empty;
-
-		string NinjaDB = null;
+		readonly Guid ElementId = Guid.Empty;
+		readonly string NinjaDB = null;
 
 		public SampleNinja(DataElement obj)
 			: base(obj)
@@ -45,24 +44,21 @@ namespace Peach.Pro.Core.Mutators
 				// Get the total number of elements we can generate for this data element.
 				using (var cmd = new SQLiteCommand(Connection))
 				{
-					cmd.CommandText = @"
-select from count('x'), se.elementid
-	from definition d, sample s, samplelement se, element e
-	where d.Name = ?
-	and e.name = ?
-	and s.definitionid = d.definitionid
-	and se.sampleid = s.sampleid
-	and se.elementid = e.elementid
-";
+					cmd.CommandText = @"select count('x'), e.elementid from element e, sampleelement se where e.name = ? and se.elementid = e.elementid";
 
 					cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.String));
-					cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.String));
-					cmd.Parameters[0].Value = GetPitFile(obj);
-					cmd.Parameters[1].Value = obj.fullName;
+
+					if(obj.parent is Peach.Core.Dom.Array)
+						cmd.Parameters[0].Value = obj.parent.Name;
+					else
+						cmd.Parameters[0].Value = obj.Name;
 
 					using (var reader = cmd.ExecuteReader())
 					{
-						reader.NextResult();
+						if (!reader.Read())
+							throw new PeachException(string.Format("Error, failed to find element in sample ninja db: [{0}]",
+								obj.Name));
+
 						_count = reader.GetInt32(0);
 						ElementId = reader.GetGuid(1);
 					}
@@ -99,40 +95,34 @@ select from count('x'), se.elementid
 				return false;
 			}
 
-			if (obj.isMutable)
+			if (!obj.isMutable) return false;
+
+			using (var Connection = new SQLiteConnection("data source=" + ninjaDb))
 			{
-				using (var Connection = new SQLiteConnection("data source=" + ninjaDb))
+				Connection.Open();
+
+				// Get the total number of elements we can generate for this data element.
+				using (var cmd = new SQLiteCommand(Connection))
 				{
-					Connection.Open();
+					cmd.CommandText = @"select count('x') from element e where e.name = ?";
 
-					// Get the total number of elements we can generate for this data element.
-					using (var cmd = new SQLiteCommand(Connection))
-					{
-						cmd.CommandText = @"
-select count('x')
-		from definition d, sample s, sampleelement se, element e
-		where d.Name = ''
-		and e.name = ''
-		and s.definitionid = d.definitionid
-		and se.sampleid = s.sampleid
-		and se.elementid = e.elementid
-	";
+					cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.String));
 
-						cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.String));
-						cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.String));
-						cmd.Parameters[0].Value = GetPitFile(obj);
-						cmd.Parameters[1].Value = obj.fullName;
+					// For arrays, normalize to wrapper name
+					if (obj.parent is Peach.Core.Dom.Array)
+						cmd.Parameters[0].Value = obj.parent.Name;
+					else
+						cmd.Parameters[0].Value = obj.Name;
 
-						if ((int)cmd.ExecuteScalar() > 0)
-						{
-							logger.Trace("element \"" + obj.fullName + "\" not found in ninja db, not enabling.");
-							return true;
-						}
-					}
+					var ret = cmd.ExecuteScalar();
+
+					if(ret != null && (Int64)ret > 0)
+						return true;
+
+					logger.Trace("Element \"" + obj.fullName + "\" not found in ninja db, not enabling.");
+					return false;
 				}
 			}
-
-			return false;
 		}
 
 		public byte[] GetAt(uint index)
@@ -145,14 +135,14 @@ select count('x')
 				using (var cmd = new SQLiteCommand(Connection))
 				{
 					cmd.CommandText = 
-						"select from se.data from sampleelement se "+
+						"select se.data from sampleelement se "+
 						"where se.elementid = ? LIMIT 1 OFFSET " + pos + ";";
 
 					cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.Guid));
 					cmd.Parameters[0].Value = ElementId;
 
 					var reader = cmd.ExecuteReader();
-					if (!reader.NextResult())
+					if (!reader.Read())
 						throw new PeachException(string.Format("SampleNinjaMutator error getting back row.  Position: {0} Count: {1}",
 							pos, count));
 
@@ -170,7 +160,7 @@ select count('x')
 
 		public override void randomMutation(DataElement obj)
 		{
-			int index = context.Random.Next(count);
+			var index = context.Random.Next(count);
 			obj.MutatedValue = new Variant(GetAt((uint)index));
 			obj.mutationFlags = MutateOverride.Default;
 			obj.mutationFlags |= MutateOverride.TypeTransform;
@@ -179,6 +169,9 @@ select count('x')
 		private static string GetPitFile(DataElement elem)
 		{
 			var root = elem.getRoot() as DataModel;
+			if (root == null)
+				return null;
+
 			var dom = root.actionData.action.parent.parent.parent;
 			return dom.context.config.pitFile;
 		}
