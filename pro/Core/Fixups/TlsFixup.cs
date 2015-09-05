@@ -43,11 +43,11 @@ namespace Peach.Pro.Core.Fixups
 				bs = (BitwiseStream) intern.DefaultValue;
 
 			var pos = bs.PositionBits;
-			bs.Seek(0, System.IO.SeekOrigin.Begin);
+			bs.Seek(0, SeekOrigin.Begin);
 			var ret = new byte[bs.Length];
 
 			bs.Read(ret, 0, ret.Length);
-			bs.Seek(pos, System.IO.SeekOrigin.Begin);
+			bs.Seek(pos, SeekOrigin.Begin);
 
 			return ret;
 		}
@@ -98,13 +98,13 @@ namespace Peach.Pro.Core.Fixups
 
 		internal static byte[] Concat(byte[] a, byte[] b)
 		{
-			byte[] c = new byte[a.Length + b.Length];
-			System.Array.Copy(a, 0, c, 0, a.Length);
-			System.Array.Copy(b, 0, c, a.Length, b.Length);
+			var c = new byte[a.Length + b.Length];
+			Array.Copy(a, 0, c, 0, a.Length);
+			Array.Copy(b, 0, c, a.Length, b.Length);
 			return c;
 		}
 
-		static byte[] GetMd5Sha1(RunContext context, IEnumerable<object> msgs)
+		byte[] GetMd5Sha1(RunContext context, IEnumerable<object> msgs)
 		{
 			var md5 = new MD5Digest();
 			var sha1 = new Sha1Digest();
@@ -112,13 +112,13 @@ namespace Peach.Pro.Core.Fixups
 			foreach (var obj in msgs)
 			{
 				var bytes = ToBytes(obj, true);
-				if (bytes[0] == 0x10)
+				if (IsServer && bytes[0] == 0x10)
 					bytes = KeyExchangeToBytes(obj, context);
 
-				Console.WriteLine("Msg: ");
-				foreach (var b in bytes)
-					Console.Write(string.Format("{0:X2} ", b));
-				Console.WriteLine();
+				//Console.WriteLine("Msg: ");
+				//foreach (var b in bytes)
+				//	Console.Write("{0:X2} ", b);
+				//Console.WriteLine();
 
 				md5.BlockUpdate(bytes, 0, bytes.Length);
 				sha1.BlockUpdate(bytes, 0, bytes.Length);
@@ -131,20 +131,20 @@ namespace Peach.Pro.Core.Fixups
 			return combined;
 		}
 
-		static byte[] GetSha256(RunContext context, IEnumerable<object> msgs)
+		byte[] GetSha256(RunContext context, IEnumerable<object> msgs)
 		{
 			var sha = new Sha256Digest();
 
 			foreach (var obj in msgs)
 			{
 				var bytes = ToBytes(obj, true);
-				if (bytes[0] == 0x10)
+				if (IsServer && bytes[0] == 0x10)
 					bytes = KeyExchangeToBytes(obj, context);
 
-				Console.WriteLine("Msg: ");
-				foreach (var b in bytes)
-					Console.Write(string.Format("{0:X2} ", b));
-				Console.WriteLine();
+				//Console.WriteLine("Msg: ");
+				//foreach (var b in bytes)
+				//	Console.Write("{0:X2} ", b);
+				//Console.WriteLine();
 
 				sha.BlockUpdate(bytes, 0, bytes.Length);
 			}
@@ -368,20 +368,20 @@ namespace Peach.Pro.Core.Fixups
 
 			//Console.WriteLine("Pre-Master: ");
 			//foreach (var b in pms)
-			//	Console.Write(string.Format("{0:X2} ", b));
+			//	Console.Write("{0:X2} ", b);
 			//Console.WriteLine();
-			Console.WriteLine("Master Secret: ");
-			foreach (var b in tlsContext.SecurityParameters.MasterSecret)
-				Console.Write(string.Format("{0:X2} ", b));
-			Console.WriteLine();
-			Console.WriteLine("Client Random: ");
-			foreach (var b in tlsContext.SecurityParameters.ClientRandom)
-				Console.Write(string.Format("{0:X2} ", b));
-			Console.WriteLine();
-			Console.WriteLine("Server Random: ");
-			foreach (var b in tlsContext.SecurityParameters.ServerRandom)
-				Console.Write(string.Format("{0:X2} ", b));
-			Console.WriteLine();
+			//Console.WriteLine("Master Secret: ");
+			//foreach (var b in tlsContext.SecurityParameters.MasterSecret)
+			//	Console.Write("{0:X2} ", b);
+			//Console.WriteLine();
+			//Console.WriteLine("Client Random: ");
+			//foreach (var b in tlsContext.SecurityParameters.ClientRandom)
+			//	Console.Write("{0:X2} ", b);
+			//Console.WriteLine();
+			//Console.WriteLine("Server Random: ");
+			//foreach (var b in tlsContext.SecurityParameters.ServerRandom)
+			//	Console.Write("{0:X2} ", b);
+			//Console.WriteLine();
 
 			return tlsContext;
 		}
@@ -427,15 +427,15 @@ namespace Peach.Pro.Core.Fixups
 				verifyHash, 
 				12);
 
-			Console.WriteLine("IsServer: "+IsServer);
-			Console.WriteLine("Verify Hash: ");
-			foreach (var b in verifyHash)
-				Console.Write(string.Format("{0:X2} ", b));
-			Console.WriteLine();
-			Console.WriteLine("Verify Data: ");
-			foreach (var b in verifyData)
-				Console.Write(string.Format("{0:X2} ", b));
-			Console.WriteLine();
+			//Console.WriteLine("IsServer: "+IsServer);
+			//Console.WriteLine("Verify Hash: ");
+			//foreach (var b in verifyHash)
+			//	Console.Write(string.Format("{0:X2} ", b));
+			//Console.WriteLine();
+			//Console.WriteLine("Verify Data: ");
+			//foreach (var b in verifyData)
+			//	Console.Write(string.Format("{0:X2} ", b));
+			//Console.WriteLine();
 
 			// Encryption of the verify_data is handled by the Tls transformer
 			return new Variant(new BitStream(verifyData));
