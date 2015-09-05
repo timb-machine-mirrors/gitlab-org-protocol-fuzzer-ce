@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using NLog;
-using Org.BouncyCastle.Asn1;
-using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Tls;
 using Org.BouncyCastle.Crypto.Encodings;
 using Org.BouncyCastle.Crypto.Engines;
@@ -115,8 +111,6 @@ namespace Peach.Pro.Core.Transformers.Crypto
 
 				// During record prior to getting data the cert can be null
 				// in this case just return our clear text data.
-				if (rsaKey == null)
-					return data;
 			}
 			else if (PublicKey != null && PublicExponent != null)
 			{
@@ -127,7 +121,12 @@ namespace Peach.Pro.Core.Transformers.Crypto
 			}
 
 			if (rsaKey == null)
+			{
+				logger.Debug("No key found, skipping encryption!");
 				return data;
+			}
+
+			logger.Debug("Key found, encrypting");
 
 			var random = new SecureRandom();
 			var encoding = new Pkcs1Encoding(new RsaBlindedEngine());
@@ -140,11 +139,6 @@ namespace Peach.Pro.Core.Transformers.Crypto
 			}
 
 			var clear = new BitReader(data).ReadBytes((int)data.Length);
-
-			//Console.Write(string.Format("RSA ENCRYPT({0}): ", clear.Length));
-			//foreach (var b in clear)
-			//	Console.Write(string.Format("{0:X2} ", b));
-			//Console.WriteLine();
 
 			var encrypted = encoding.ProcessBlock(clear, 0, clear.Length);
 			return new BitStream(encrypted);
@@ -179,7 +173,14 @@ namespace Peach.Pro.Core.Transformers.Crypto
 			}
 
 			if (rsaKey == null)
+			{
+				logger.Debug("No key found, skipping decryption!");
 				return data;
+			}
+			else
+			{
+				logger.Debug("Key found, decrypting");
+			}
 
 			var random = new SecureRandom();
 			var encoding = new Pkcs1Encoding(new RsaBlindedEngine());
