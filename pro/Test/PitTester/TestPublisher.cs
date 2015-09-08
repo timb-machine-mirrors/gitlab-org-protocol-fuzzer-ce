@@ -16,14 +16,30 @@ namespace PitTester
 	{
 		static readonly Logger ClassLogger = LogManager.GetCurrentClassLogger();
 
+		bool _singleIteration;
 		bool _datagram;
 		readonly TestLogger _logger;
+		public delegate void ErrorHandler(string msg);
+		public event ErrorHandler Error;
 
-		public TestPublisher(TestLogger logger)
+		public TestPublisher(TestLogger logger, bool singleIteration)
 			: base(new Dictionary<string, Variant>())
 		{
 			_logger = logger;
 			stream = new MemoryStream();
+			_singleIteration = singleIteration;
+		}
+
+		private void FireError(string msg)
+		{
+			if (Error != null)
+				Error(msg);
+		}
+
+		private void Log(string action)
+		{
+			if (_singleIteration)
+				Console.WriteLine("{0,-15} {1}".Fmt(action, _logger.ActionName));
 		}
 
 		protected override Logger Logger
@@ -43,11 +59,14 @@ namespace PitTester
 
 		protected override void OnOpen()
 		{
+			Log("Open");
 			_logger.Verify<TestData.Open>(Name);
 		}
 
 		protected override void OnClose()
 		{
+			Log("Close");
+
 			_logger.Verify<TestData.Close>(Name);
 
 			// Don't verify stream positions if previous error occurred
@@ -55,12 +74,18 @@ namespace PitTester
 				return;
 
 			if (!_datagram && stream.Position != stream.Length)
-				throw new Exception(string.Format("Error, input stream has {0} unconsumed bytes from last input action.",
-					stream.Length - stream.Position));
+			{
+				var msg = string.Format(
+					"Error, input stream has {0} unconsumed bytes from last input action.",
+					stream.Length - stream.Position
+				);
+				FireError(msg);
+			}
 		}
 
 		protected override void OnAccept()
 		{
+			Log("Accept");
 			_logger.Verify<TestData.Accept>(Name);
 		}
 
@@ -77,17 +102,20 @@ namespace PitTester
 
 		protected override void OnSetProperty(string property, Variant value)
 		{
+			Log("SetProperty");
 			_logger.Verify<TestData.SetProperty>(Name);
 		}
 
 		protected override Variant OnGetProperty(string property)
 		{
+			Log("GetProperty");
 			var data = _logger.Verify<TestData.GetProperty>(Name);
 			return new Variant(new BitStream(data.Payload));
 		}
 
 		protected override void OnInput()
 		{
+			Log("Input");
 			var data = _logger.Verify<TestData.Input>(Name);
 
 			_datagram = data.IsDatagram;
@@ -103,8 +131,13 @@ namespace PitTester
 			else
 			{
 				if (stream.Position != stream.Length)
-					throw new Exception(string.Format("Error, input stream has {0} unconsumed bytes from last input action.",
-						stream.Length - stream.Position));
+				{
+					var msg = string.Format(
+						"Error, input stream has {0} unconsumed bytes from last input action.",
+						stream.Length - stream.Position
+					);
+					FireError(msg);
+				}
 
 				// This is the 'Stream' publisher behavior
 				var pos = stream.Position;
@@ -119,11 +152,11 @@ namespace PitTester
 
 			if (Logger.IsDebugEnabled)
 				Logger.Debug("\n\n" + Utilities.HexDump(data.Payload, 0, data.Payload.Length));
-			Console.WriteLine("Test pass on action: {0}".Fmt(_logger.ActionName));
 		}
 
 		public override void output(DataModel dataModel)
 		{
+			Log("Output");
 			var data = _logger.Verify<TestData.Output>(Name);
 
 			var expected = data.Payload;
@@ -180,34 +213,17 @@ namespace PitTester
 			{
 				string msg;
 				if (data.Ignore)
-					msg = "Ignoring failed action: {0}".Fmt(_logger.ActionName);
+					msg = "Ignoring action: {0}".Fmt(_logger.ActionName);
 				else
 					msg = "Test failed on action: {0}".Fmt(_logger.ActionName);
+
 				using (new ForegroundColor(ConsoleColor.Red))
 					Console.WriteLine(msg);
-				cb.Print();
+				if (cb != null)
+					cb.Print();
+
 				if (!data.Ignore)
-					throw new PeachException(msg);
-			}
-			else
-			{
-				Console.WriteLine("Test pass on action: {0}".Fmt(_logger.ActionName));
-			}
-		}
-
-		class ForegroundColor : IDisposable
-		{
-			readonly ConsoleColor _fg;
-
-			public ForegroundColor(ConsoleColor color)
-			{
-				_fg = Console.ForegroundColor;
-				Console.ForegroundColor = color;
-			}
-
-			public void Dispose()
-			{
-				Console.ForegroundColor = _fg;
+					FireError(msg);
 			}
 		}
 
@@ -353,57 +369,6 @@ namespace PitTester
 		char ByteToAscii(byte b)
 		{
 			return ((b < 32 || b > 126) ? '.' : (char)b);
-		}
-	}
-
-	class ConsoleRegion
-	{
-		public ConsoleColor ForegroundColor { get; set; }
-		public ConsoleColor BackgroundColor { get; set; }
-		public string String { get; set; }
-	}
-
-	class ConsoleBuffer
-	{
-		readonly List<ConsoleRegion> _regions = new List<ConsoleRegion>();
-
-		public void Append(ConsoleColor fg, ConsoleColor bg, string str)
-		{
-			_regions.Add(new ConsoleRegion {
-				ForegroundColor = fg,
-				BackgroundColor = bg,
-				String = str,
-			});
-		}
-
-		public void Append(string str)
-		{
-			Append(ConsoleColor.Gray, ConsoleColor.Black, str);
-		}
-
-		public void Append(ConsoleBuffer cb)
-		{
-			_regions.AddRange(cb._regions);
-		}
-
-		public void Print()
-		{
-			var fg = Console.ForegroundColor;
-			var bg = Console.BackgroundColor;
-			try
-			{
-				foreach (var region in _regions)
-				{
-					Console.ForegroundColor = region.ForegroundColor;
-					Console.BackgroundColor = region.BackgroundColor;
-					Console.Write(region.String);
-				}
-			}
-			finally
-			{
-				Console.ForegroundColor = fg;
-				Console.BackgroundColor = bg;
-			}
 		}
 	}
 }

@@ -508,6 +508,11 @@ class vsnode_cs_target(msvs.vsnode_project):
 		if wscript:
 			lst[wscript.abspath()] = source_file('None', self, wscript)
 
+		# Add app.manifest
+		manifest = getattr(tg, 'app_manifest', None)
+		if manifest:
+			lst[manifest.abspath()] = source_file('None', self, manifest)
+
 		# Add app.config
 		cfg = getattr(tg, 'app_config', None)
 		if cfg:
