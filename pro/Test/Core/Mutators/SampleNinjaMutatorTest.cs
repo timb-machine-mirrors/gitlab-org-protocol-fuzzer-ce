@@ -16,6 +16,7 @@ namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	[Peach]
+	[Quick]
 	class SampleNinjaMutatorTest : DataModelCollector
 	{
 
