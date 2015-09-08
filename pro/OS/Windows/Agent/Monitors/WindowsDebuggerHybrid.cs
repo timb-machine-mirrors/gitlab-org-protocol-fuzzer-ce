@@ -51,7 +51,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 	[Parameter("Executable", typeof(string), "Executable to launch", "")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
 	[Parameter("ProcessName", typeof(string), "Name of process to attach too.", "")]
-	[Parameter("KernelConnectionString", typeof(string), "Connection string for kernel debugging.", "")]
 	[Parameter("Service", typeof(string), "Name of Windows Service to attach to.  Service will be started if stopped or crashes.", "")]
 	[Parameter("SymbolsPath", typeof(string), "Optional Symbol path.  Default is Microsoft public symbols server.", "SRV*http://msdl.microsoft.com/download/symbols")]
 	[Parameter("WinDbgPath", typeof(string), "Path to WinDbg install.  If not provided we will try and locate it.", "")]
@@ -147,11 +146,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			else if (args.ContainsKey("ProcessName"))
 			{
 				_processName = (string)args["ProcessName"];
-			}
-			else if (args.ContainsKey("KernelConnectionString"))
-			{
-				_hybrid = false;
-				_kernelConnectionString = (string)args["KernelConnectionString"];
 			}
 			else if (args.ContainsKey("Service"))
 				_service = (string)args["Service"];

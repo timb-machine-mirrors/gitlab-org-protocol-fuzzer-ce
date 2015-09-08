@@ -846,12 +846,19 @@ namespace Peach.Pro.Test.Core.WebServices
 			var parser = new PitParser();
 			var dom = parser.asParser(opts, path);
 
-			PitInjector.InjectConfig(cfg, dom);
+			var dumb = new List<KeyValuePair<string, string>>();
+			foreach (var kv in defs)
+			{
+				dumb.Add(new KeyValuePair<string,string>(kv.Key, kv.Value));
+			}
+
+			PitInjector.InjectConfig(cfg, dumb, dom);
 
 			var agent = dom.agents.First();
 			var monitor = agent.monitors.First();
 			Assert.AreEqual("local://", agent.location);
 			Assert.AreEqual(10000, (long)monitor.parameters.Single(x => x.Key == "WaitForExitTimeout").Value);
+			Assert.AreEqual("http://127.0.0.1:89/", (string)monitor.parameters.Single(x => x.Key == "Arguments").Value);
 
 			var config = new RunConfiguration 
 			{

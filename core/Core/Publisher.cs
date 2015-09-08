@@ -27,11 +27,10 @@
 // $Id$
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
 using Peach.Core.Dom;
-using Peach.Core.Dom.Actions;
 using Peach.Core.IO;
 
 namespace Peach.Core
@@ -783,6 +782,39 @@ namespace Peach.Core
 			// Turn into a BitwiseStream where the name corresponds
 			// to the name of the parameter.
 			return new BitStreamList(new[] { param.dataModel.Value }) { Name = param.Name };
+		}
+
+		protected ushort UShortFromVariant(Variant value)
+		{
+			ushort ret = 0;
+
+			if (value.GetVariantType() == Variant.VariantType.BitStream)
+			{
+				var bs = (BitwiseStream)value;
+				bs.SeekBits(0, SeekOrigin.Begin);
+				ulong bits;
+				int len = bs.ReadBits(out bits, 16);
+				ret = Endian.Little.GetUInt16(bits, len);
+			}
+			else if (value.GetVariantType() == Variant.VariantType.ByteString)
+			{
+				byte[] buf = (byte[])value;
+				int len = Math.Min(buf.Length * 8, 16);
+				ret = Endian.Little.GetUInt16(buf, len);
+			}
+			else
+			{
+				try
+				{
+					ret = ushort.Parse((string)value);
+				}
+				catch
+				{
+					throw new SoftException("Can't convert to int, 'value' is an unsupported type.");
+				}
+			}
+
+			return ret;
 		}
 	}
 

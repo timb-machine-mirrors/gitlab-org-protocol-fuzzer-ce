@@ -534,6 +534,7 @@ namespace Peach.Pro.Core.Agent.Channels
 		static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
 		readonly string _serviceUrl;
+		bool _monitors;
 
 		#endregion
 
@@ -566,42 +567,54 @@ namespace Peach.Pro.Core.Agent.Channels
 
 		public override void StartMonitor(string monName, string cls, Dictionary<string, string> args)
 		{
+			_monitors = true;
 			Send("StartMonitor?name=" + monName + "&cls=" + cls, args);
 		}
 
 		public override void StopAllMonitors()
 		{
-			Send("StopAllMonitors");
+			if (_monitors)
+				Send("StopAllMonitors");
 		}
 
 		public override void SessionStarting()
 		{
-			Send("SessionStarting");
+			if (_monitors)
+				Send("SessionStarting");
 		}
 
 		public override void SessionFinished()
 		{
-			Send("SessionFinished");
+			if (_monitors)
+				Send("SessionFinished");
 		}
 
 		public override void IterationStarting(IterationStartingArgs args)
 		{
-			Send("IterationStarting?iterationCount=0&" + "isReproduction=" + args.IsReproduction);
+			if (_monitors)
+				Send("IterationStarting?iterationCount=0&" + "isReproduction=" + args.IsReproduction);
 		}
 
 		public override void IterationFinished()
 		{
-			Send("IterationFinished");
+			if (_monitors)
+				Send("IterationFinished");
 		}
 
 		public override bool DetectedFault()
 		{
+			if (!_monitors)
+				return false;
+
 			var json = Send("DetectedFault");
 			return ParseResponse(json);
 		}
 
 		public override IEnumerable<MonitorData> GetMonitorData()
 		{
+			if (!_monitors)
+				return new MonitorData[0];
+
 			try
 			{
 				var json = Send("GetMonitorData");

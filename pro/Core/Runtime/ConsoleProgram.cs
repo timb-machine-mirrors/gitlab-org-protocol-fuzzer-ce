@@ -243,7 +243,6 @@ namespace Peach.Pro.Core.Runtime
 		private void ParseJsonConfig(string filename)
 		{
 			_jsonFile = filename;
-
 			using (var textReader = File.OpenText(filename))
 			using (var jsonReader = new JsonTextReader(textReader))
 			{
@@ -354,13 +353,7 @@ namespace Peach.Pro.Core.Runtime
 		/// Create an engine and run the fuzzing job
 		/// </summary>
 		protected virtual void RunEngine(Peach.Core.Dom.Dom dom)
-		{
-			if (_jsonConfig != null)
-			{
-				Console.WriteLine("Using agents defined in {0}", _jsonFile);
-				PitInjector.InjectConfig(_jsonConfig, dom);
-			}
-			
+		{			
 			// Add the JobLogger as necessary
 			Test test;
 
@@ -503,6 +496,12 @@ namespace Peach.Pro.Core.Runtime
 				else
 				{
 					var dom = parser.asParser(parserArgs, _config.pitFile);
+
+					if (_jsonConfig != null)
+					{
+						Console.WriteLine("Using agents defined in {0}", _jsonFile);
+						PitInjector.InjectConfig(_jsonConfig, defs, dom);
+					}
 
 					RunEngine(dom);
 				}
