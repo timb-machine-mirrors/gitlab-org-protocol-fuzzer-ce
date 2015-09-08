@@ -425,6 +425,7 @@ namespace Peach.Core
 				}
 			}
 		}
+
 		/// <summary>
 		/// Access variant as string value.
 		/// </summary>

@@ -79,7 +79,7 @@ namespace PitTester
 				IterationStarting(context, currentIteration, totalIterations);
 		}
 
-		public static void TestPit(string libraryPath, string pitFile, bool singleIteration, uint? seed)
+		public static void TestPit(string libraryPath, string pitFile, bool singleIteration, uint? seed, bool keepGoing)
 		{
 			var testFile = pitFile + ".test";
 			if (!File.Exists(testFile))
@@ -136,6 +136,8 @@ namespace PitTester
 
 			var dom = parser.asParser(args, pitFile);
 
+			var errors = new List<string>();
+
 			foreach (var test in dom.tests)
 			{
 				// Don't run extra control iterations...
@@ -148,6 +150,12 @@ namespace PitTester
 					throw new PeachException("Error, no test definition found for pit test named '{0}'.".Fmt(test.Name));
 
 				var logger = new TestLogger(data, testData.Ignores.Select(i => i.Xpath));
+				logger.Error += err =>
+				{
+					if (!keepGoing)
+						throw new PeachException(err);
+					errors.Add(err);
+				};
 
 				test.loggers.Clear();
 				test.loggers.Add(logger);
@@ -155,7 +163,13 @@ namespace PitTester
 				for (var i = 0; i < test.publishers.Count; ++i)
 				{
 					var oldPub = test.publishers[i];
-					var newPub = new TestPublisher(logger) { Name = oldPub.Name };
+					var newPub = new TestPublisher(logger, singleIteration) { Name = oldPub.Name };
+					newPub.Error += err =>
+					{
+						if (!keepGoing)
+							throw new PeachException(err);
+						errors.Add(err);
+					};
 					test.publishers[i] = newPub;
 				}
 			}
@@ -246,6 +260,9 @@ namespace PitTester
 					ex.Message);
 				throw new PeachException(msg, ex);
 			}
+
+			if (errors.Any())
+				throw new PeachException(string.Join("\n", errors));
 		}
 
 		private static void ApplySlurps(TestData testData, Dom dom, Dictionary<string, Variant> fixupOverrides)
