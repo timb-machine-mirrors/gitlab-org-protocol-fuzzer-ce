@@ -25,6 +25,7 @@ deps = [
 	'SocketHttpListener.dll',
 	'Dapper.dll',
 	'Aspose.Words.dll',
+	'PeachSampleNinja.exe',
 ]
 
 if bld.env.TARGET == 'win':
