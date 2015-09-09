@@ -58,18 +58,29 @@ namespace Peach.Core
 
 			foreach(var param in this.GetType().GetAttributes<ParameterAttribute>(null))
 			{
-				pit.WriteStartElement("Param");
-				pit.WriteAttributeString("name", param.name);
+				var name = param.name;
+				string value = null;
 
-				if(refs.ContainsKey(param.name))
-					pit.WriteAttributeString("value", refs[param.name]);
+				if (refs.ContainsKey(param.name))
+					value = refs[param.name];
 				else
 				{
 					var prop = this.GetType().GetProperty(param.name);
-					var value = prop.GetValue(this, null).ToString();
+					if (prop == null)
+						continue;
 
-					pit.WriteAttributeString("value", value);
+					var objValue = prop.GetValue(this, null);
+
+					if (objValue == null)
+						continue;
+
+					value = objValue.ToString();
 				}
+
+				pit.WriteStartElement("Param");
+				pit.WriteAttributeString("name", name);
+				pit.WriteAttributeString("value", value);
+				pit.WriteEndElement();
 			}
 
 			pit.WriteEndElement();

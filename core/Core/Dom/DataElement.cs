@@ -769,11 +769,8 @@ namespace Peach.Core.Dom
 		/// <param name="pit"></param>
 		public void WritePitCommonChildren(XmlWriter pit)
 		{
-			foreach (Relation obj in relations)
-			{
-				if(obj.From == this)
-					obj.WritePit(pit);
-			}
+			foreach (var obj in relations.From<Relation>())
+				obj.WritePit(pit);
 
 			if (fixup != null)
 				fixup.WritePit(pit);
