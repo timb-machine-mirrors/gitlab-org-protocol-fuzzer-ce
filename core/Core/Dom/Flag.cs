@@ -118,7 +118,22 @@ namespace Peach.Core.Dom
 
 		public override void WritePit(XmlWriter pit)
 		{
-			throw new NotImplementedException();
+			pit.WriteStartElement(elementType);
+
+			if (referenceName != null)
+				pit.WriteAttributeString("ref", referenceName);
+
+			pit.WriteAttributeString("size", lengthAsBits.ToString());
+			pit.WriteAttributeString("position", position.ToString());
+
+			if (!LittleEndian)
+				pit.WriteAttributeString("endian", "big");
+
+			WritePitCommonAttributes(pit);
+			WritePitCommonChildren(pit);
+			WritePitCommonValue(pit);
+
+			pit.WriteEndElement();
 		}
 
 
