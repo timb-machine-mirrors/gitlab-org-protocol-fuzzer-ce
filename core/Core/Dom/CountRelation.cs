@@ -55,7 +55,7 @@ namespace Peach.Core.Dom
 		public override void WritePit(XmlWriter pit)
 		{
 			pit.WriteStartElement("Relation");
-			pit.WriteAttributeString("type", "offset");
+			pit.WriteAttributeString("type", "count");
 			pit.WriteAttributeString("of", OfName);
 
 			if (ExpressionGet != null)

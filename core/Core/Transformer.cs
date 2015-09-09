@@ -63,13 +63,17 @@ namespace Peach.Core
 
 			foreach (var param in this.GetType().GetAttributes<ParameterAttribute>(null))
 			{
+				var prop = this.GetType().GetProperty(param.name);
+				if (prop == null)
+					continue;
+
+				var objValue = prop.GetValue(this, null);
+				if(objValue == null)
+					continue;
+
 				pit.WriteStartElement("Param");
 				pit.WriteAttributeString("name", param.name);
-
-				var prop = this.GetType().GetProperty(param.name);
-				var value = prop.GetValue(this, null).ToString();
-
-				pit.WriteAttributeString("value", value);
+				pit.WriteAttributeString("value", objValue.ToString());
 			}
 
 			if (anotherTransformer != null)
