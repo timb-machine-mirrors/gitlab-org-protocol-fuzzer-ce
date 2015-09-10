@@ -2,6 +2,7 @@ using System.Linq;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Dom;
+using Peach.Core.Dom.Actions;
 using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Mutators
@@ -128,6 +129,73 @@ namespace Peach.Pro.Test.Core.Mutators
 
 				Assert.AreNotEqual(src, val);
 			}
+		}
+
+		[Test]
+		public void TestRelationOverflow()
+		{
+			var runner = new MutatorRunner("BlobExpandSingleRandom");
+
+			var model = new DataModel("DM")
+			{
+				new Number("num")
+				{
+					lengthType = LengthType.Bits,
+					length = 8,
+					Signed = false
+				},
+				new Blob("blob")
+				{
+					DefaultValue = new Variant(new byte[100])
+				}
+			};
+
+			// Constructor auto-adds relation to parent
+			var r = new SizeRelation(model[0]) { Of = model[1] };
+			Assert.That(model[0].relations.Contains(r));
+
+			model.actionData = new ActionData
+			{
+				action = new Output
+				{
+					parent = new State
+					{
+						parent = new Peach.Core.Dom.StateModel
+						{
+							parent = new Peach.Core.Dom.Dom
+							{
+								context = new RunContext
+								{
+									controlIteration = false
+								}
+							}
+						}
+					}
+				}
+			};
+
+
+			var m = runner.Random(100, model[1]);
+
+			var gotOverflow = false;
+
+			foreach (var val in m.Select(item => item.Element.root.Value.ToArray()))
+			{
+				Assert.NotNull(val);
+
+				if (val.Length <= 256)
+					continue;
+
+				// If mutator expanded buffer to be > 255 bytes
+				// the relation should return 0xff when we are mutating
+
+				Assert.AreEqual(0xff, val[0]);
+
+				gotOverflow = true;
+				break;
+			}
+
+			Assert.True(gotOverflow, "Mutator should have triggered overflow");
 		}
 	}
 }
