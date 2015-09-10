@@ -10,17 +10,17 @@ namespace Peach.Pro.Core.Fixups
 	[Fixup("UnixTime", true)]
 	[Parameter("Gmt", typeof(bool), "Is time in GMT?", "true")]
 	[Serializable]
-	public class UnixTime : Fixup
+	public class UnixTimeFixup : Peach.Core.Fixups.VolatileFixup
 	{
 		public bool Gmt { get; protected set; }
 
-		public UnixTime(DataElement parent, Dictionary<string, Variant> args)
+		public UnixTimeFixup(DataElement parent, Dictionary<string, Variant> args)
 			: base(parent, args)
 		{
 			ParameterParser.Parse(this, args);
 		}
 
-		protected override Variant fixupImpl()
+		protected override Variant OnActionRun(RunContext ctx)
 		{
 			var span = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0, Gmt ? DateTimeKind.Utc : DateTimeKind.Local));
 			var unixTime = (int)span.TotalSeconds;
