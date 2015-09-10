@@ -114,7 +114,7 @@ namespace Peach.Pro.Core.Dom
 					block.Name, block.Count - 1));
 
 			block.Template = block["Template"];
-			block.Remove(block.Template);
+			block.Remove(block.Template, false);
 
 			if (!string.IsNullOrEmpty(block.TotalLengthField))
 				if (block.Template.find(block.TotalLengthField) == null)
