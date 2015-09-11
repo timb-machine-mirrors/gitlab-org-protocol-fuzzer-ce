@@ -44,7 +44,7 @@ namespace Peach.Pro.Core.Fixups
 	[Fixup("Crc32Fixup")]
 	[Fixup("checksums.Crc32Fixup")]
 	[Parameter("ref", typeof(DataElement), "Reference to data element")]
-	[Parameter("type", typeof(CRCTool.CRCCode), "Type of CRC to run [CRC32, CRC16, CRC_CCITT]", "CRC32")]
+	[Parameter("type", typeof(CRCTool.CRCCode), "Type of CRC to run [CRC32, CRC16, CRC16_Modbus, CRC_CCITT]", "CRC32")]
 	[Serializable]
 	public class CrcFixup : Fixup
 	{
