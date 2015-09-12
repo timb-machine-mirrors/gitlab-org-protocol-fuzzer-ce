@@ -39,6 +39,7 @@ namespace Peach.Pro.Core.Transformers.Encode
 	[Description("Encode on output as a hex string.")]
 	[Transformer("Hex", true)]
 	[Transformer("encode.Hex")]
+	[Parameter("lowercase", typeof(bool), "Use lowercase for hex digits", "true")]
 	[Serializable]
 	public class Hex : Transformer
 	{
@@ -46,6 +47,13 @@ namespace Peach.Pro.Core.Transformers.Encode
 
 		class Encoder : ICryptoTransform
 		{
+			private bool _useLowercase;
+			
+			public Encoder(bool useLowercase)
+			{
+				_useLowercase = useLowercase;
+			}
+			
 			public bool CanReuseTransform
 			{
 				get { return true; }
@@ -93,13 +101,13 @@ namespace Peach.Pro.Core.Transformers.Encode
 
 			private byte GetChar(int nibble)
 			{
-				if (nibble > 0xf)
+				if (nibble > 0x0f)
 					throw new ArgumentOutOfRangeException("nibble");
 
 				if (nibble < 0x0a)
 					return (byte)(nibble + 0x30);
 				else
-					return (byte)(nibble - 0x0a + 0x61);
+					return (byte)(nibble - 0x0a + (_useLowercase ? 0x61 : 0x41));
 			}
 
 			public void Dispose()
@@ -187,18 +195,23 @@ namespace Peach.Pro.Core.Transformers.Encode
 		public Hex(DataElement parent, Dictionary<string, Variant> args)
 			: base(parent, args)
 		{
+			Variant value;
+			if (args.TryGetValue("lowercase", out value))
+				_useLowercase = Boolean.Parse((string)value);
+			else 
+				_useLowercase = true;
 		}
 
 		protected override BitwiseStream internalEncode(BitwiseStream data)
 		{
-			return CryptoStream(data, new Encoder(), CryptoStreamMode.Write);
+			return CryptoStream(data, new Encoder(_useLowercase), CryptoStreamMode.Write);
 		}
 
 		protected override BitStream internalDecode(BitStream data)
 		{
 			return CryptoStream(data, new Decoder(), CryptoStreamMode.Read);
 		}
+
+		private bool _useLowercase;
 	}
 }
-
-// end
