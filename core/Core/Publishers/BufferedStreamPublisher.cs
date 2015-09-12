@@ -164,7 +164,7 @@ namespace Peach.Core.Publishers
 
 		protected virtual void ClientWrite(BitwiseStream data)
 		{
-			if (Logger.IsTraceEnabled) ("Client> {0} bytes", data.Length);
+			if (Logger.IsTraceEnabled) Logger.Trace("Client> {0} bytes", data.Length);
 			data.CopyTo(_client);
 		}
 
