@@ -7,21 +7,8 @@ refs = re.compile('<reference\s+path="(.*)"\s*/>', re.M)
 
 def configure(conf):
 	v = conf.env
-<<<<<<< HEAD
-
-	v['TSC_FLAGS'] = [ '--target', 'ES5', '--module', 'commonjs', '--sourcemap' ]
-
-	try:
-		conf.find_program('tsc')
-		v.append_value('supported_features', 'tsc')
-	except Exception, e:
-		v.append_value('missing_features', 'tsc')
-		if Logs.verbose > 0:
-			Logs.warn('TypeScript compiler is not available: %s' % (e))
-=======
 	v['TSC_FLAGS'] = [ '--target', 'ES5', '--module', 'amd', '--removeComments', '--sourcemap' ]
 	conf.find_program('tsc')
->>>>>>> 4509b52ddbf27068a4ff2a1d4de5e9c5ddd0fe92
 
 @feature('tsc')
 @after_method('process_source')

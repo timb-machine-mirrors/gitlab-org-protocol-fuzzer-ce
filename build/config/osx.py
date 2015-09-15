@@ -70,7 +70,7 @@ def prepare(conf):
 
 	env['PIN_VER'] = 'pin-2.13-61206-clang.4.2-mac'
 
-	pin = j(conf.get_peach_dir(), '3rdParty', 'pin', env['PIN_VER'])
+	pin = j(conf.get_third_party(), 'pin', env['PIN_VER'])
 
 	env['EXTERNALS'] = {
 		'pin' : {
