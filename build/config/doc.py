@@ -26,6 +26,10 @@ tools = [
 	'tools.asciidoc',
 	'tools.utils',
 	'tools.doxygen',
+	'tools.webhelp',
+]
+
+optional_tools = [
 ]
 
 def prepare(conf):

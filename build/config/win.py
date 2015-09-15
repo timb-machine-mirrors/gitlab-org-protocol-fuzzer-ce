@@ -12,13 +12,17 @@ tools = [
 	'resx',
 	'midl',
 	'misc',
-	'tools.msbuild',
 	'tools.utils',
 	'tools.externals',
-	'tools.test',
 	'tools.version',
+]
+
+optional_tools = [
 	'tools.mdoc',
-	'tools.wix',
+	'tools.msbuild',
+	'tools.msi',
+	'tools.test',
+	'tools.tsc',
 	'tools.zip',
 	'tools.tsc',
 ]

@@ -7,13 +7,13 @@ from waflib.Tools import ccroot
 ccroot.lib_patterns['resource'] = ['%s']
 
 @taskgen_method
-def install_files(self, dest, files, env=None, chmod=Utils.O644, relative_trick=False, cwd=None, add=True, postpone=True):
-	inst_task = self.bld.install_files(dest, files, env, chmod, relative_trick, cwd, add, postpone)
+def install_files(self, dest, files, **kw):
+	inst_task = self.bld.install_files(dest, files, **kw)
 	save_inst_task(self, inst_task)
 
 @taskgen_method
-def install_as(self, dest, srcfile, env=None, chmod=Utils.O644, cwd=None, add=True, postpone=True):
-	inst_task = self.bld.install_as(dest, srcfile, env, chmod, cwd, add, postpone)
+def install_as(self, dest, srcfile, **kw):
+	inst_task = self.bld.install_as(dest, srcfile, **kw)
 	save_inst_task(self, inst_task)
 
 def save_inst_task(self, inst_task):
@@ -52,7 +52,7 @@ def apply_install(self):
 	do_install(self, inst_to, 'install_644', Utils.O644)
 	do_install(self, inst_to, 'install_755', Utils.O755)
 
-def do_install(self, inst_to, attr, chmod):
+def do_install(self, inst_to, attr, chmod, **kw):
 	val = getattr(self, attr, [])
 
 	if isinstance(val, dict):
@@ -316,7 +316,7 @@ class emit(Task.Task):
 	vars = [ 'EMIT_SOURCE' ]
 
 	def run(self):
-		text = self.env['EMIT_SOURCE']
+		text = str(self.env['EMIT_SOURCE'])
 		self.outputs[0].write(text)
 
 class fake_resource(Task.Task):
