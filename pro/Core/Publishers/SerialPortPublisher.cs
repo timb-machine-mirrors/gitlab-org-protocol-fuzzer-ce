@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Ports;
 using NLog;
 using Peach.Core;
@@ -69,9 +70,18 @@ namespace Peach.Pro.Core.Publishers
 
 		protected override void OnOutput(BitwiseStream data)
 		{
-			// The async API under mono doesn't seem to work with the SerialPort.
-			// Since the SerialPort has support for timeouts, we can use the synchronous API here.
-			ClientWrite(data);
+			Stream client;
+			lock (_clientLock)
+			{
+				client = _client;
+			}
+
+			if (client != null)
+			{
+				// The async API under mono doesn't seem to work with the SerialPort.
+				// Since the SerialPort has support for timeouts, we can use the synchronous API here.
+				data.CopyTo(client);
+			}
 		}
 	}
 }
