@@ -2,8 +2,12 @@ from waflib.TaskGen import feature, before_method, after_method
 from waflib import Utils, Errors, Task
 import datetime, os.path, re
 
-re_guid = re.compile('\[assembly:\s*Guid\s*\(\s*"([^"]+)"\s*\)\s*\]')
-re_com = re.compile('\[assembly:\s*ComVisible\s*\((\w+)\s*\)\s*\]')
+# Order of these is the order they get emitted in the AssemblyInfo.cs file
+cs_extras = [
+	re.compile('\[assembly:\s*(Guid)\s*\(\s*("([^"]+)")\s*\)\s*\]'),
+	re.compile('\[assembly:\s*(ComVisible)\s*\((\w+)\s*\)\s*\]'),
+	re.compile('\[assembly:\s*(InternalsVisibleTo)\s*\(\s*("([^"]+)")\s*\)\s*\]'),
+]
 
 template_cs = """
 using System.Reflection;
@@ -23,9 +27,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyInformationalVersion("{VER0}.{VER1}.{VER2}.{VER3} {VARIANT}")]
 """
 
-template_cs_com = """
-[assembly: ComVisible({COM})]
-[assembly: Guid("{GUID}")]
+template_extra = """
+[assembly: {PROPERTY}({VALUE})]
 """
 
 template_c = """
@@ -72,14 +75,14 @@ END
 def configure(conf):
 	env = conf.env
 
-	env.VER_COMPANY = 'Deja vu Security'
+	env.VER_COMPANY = 'Peach Fuzzer, LLC'
 
 	env.VER_TEMPLATE = {
 		'.c'      : template_c,
 		'.cpp'    : template_c,
 		'.cs'     : template_cs,
 		'.rc'     : template_rc,
-		'.cs_com' : template_cs_com,
+		'.extra'  : template_extra,
 	}
 
 def apply_version(self, name, inputs, exts):
@@ -196,11 +199,9 @@ class version(Task.Task):
 
 			if self.inputs:
 				src = self.inputs[0].read()
-				m = re.search(re_guid, src)
-				if m:
-				    guid = m.group(1)
-				    m = re.search(re_com, src)
-				    com = m and m.group(1) or 'false'
-				    text += self.env.VER_TEMPLATE[ext + '_com'].format(COM=com, GUID=guid)
+				
+				for r in cs_extras:
+					for m in r.finditer(src):
+						text += self.env.VER_TEMPLATE['.extra'].format(PROPERTY=m.group(1), VALUE=m.group(2))
 
 			f.write(text)

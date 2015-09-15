@@ -2,45 +2,48 @@ from waflib.Build import InstallContext
 from waflib import Task, Utils, Logs, Configure, Context, Options, Errors
 import os, zipfile, sys
 
-class ZipContext(InstallContext):
+class PkgContext(InstallContext):
+	'''create product installers'''
+
+	cmd = 'pkg'
+
+	def __init__(self, **kw):
+		super(PkgContext, self).__init__(**kw)
+		self.is_pkg = True
+
+class ZipContext(PkgContext):
 	'''zip contents of output directory'''
 
 	cmd = 'zip'
 
 	def __init__(self, **kw):
-		super(self.__class__, self).__init__(**kw)
+		super(ZipContext, self).__init__(**kw)
 		self.installed_files = []
 
 	def do_install(self, src, tgt, chmod=Utils.O644):
 		self.installed_files.append(tgt)
-		super(self.__class__, self).do_install(src, tgt, chmod)
+		super(ZipContext, self).do_install(src, tgt, chmod)
 
 	def execute(self):
-		super(self.__class__, self).execute()
+		super(ZipContext, self).execute()
 		if self.installed_files:
 			self.archive()
 
 	def archive(self):
 		env = self.env
-		version = '%s' % (env.BUILDTAG)
-		args = [ env.APPNAME, version, env.TARGET ]
-		if env.SUBARCH: args.append(env.SUBARCH)
-		if env.VARIANT: args.append(env.VARIANT)
 
-		base_path = self.path.make_node(env.BINDIR)
-		base_name = '-'.join(args).lower()
-		arch_name = '%s.zip' % (os.path.join(env.OUTPUT, base_name))
+		base_path = self.path.make_node(env.PREFIX)
 
-		Logs.warn('Creating archive: %s' % arch_name)
+		arch = self.path.make_node(env.PREFIX + '.zip')
 
-		node = self.path.make_node(arch_name)
+		Logs.warn('Creating archive: %s' % arch)
 
 		try:
-			node.delete()
+			arch.delete()
 		except Exception:
 			pass
 
-		zip = zipfile.ZipFile(node.abspath(), 'w', compression=zipfile.ZIP_DEFLATED)
+		zip = zipfile.ZipFile(arch.abspath(), 'w', compression=zipfile.ZIP_DEFLATED)
 
 		for x in self.installed_files:
 			n = self.path.find_node(x)
@@ -67,24 +70,15 @@ class ZipContext(InstallContext):
 		except ImportError:
 			from sha import sha
 
-		digest = sha(node.read()).hexdigest()
-		dgst = 	self.path.make_node(arch_name + '.sha1')
+		digest = sha(arch.read()).hexdigest()
+		dgst = arch.change_ext('.zip.sha1')
 		try:
 			dgst.delete()
 		except Exception:
 			pass
-		dgst.write('SHA1(%s.zip)= %s\n' % (base_name, digest))
+		dgst.write('SHA1(%s)= %s\n' % (arch, digest))
 
-		Logs.warn('New archive created: %s (sha1=%s)' % (arch_name, digest))
-
-class PkgContext(InstallContext):
-	'''create product installers'''
-
-	cmd = 'pkg'
-
-	def __init__(self, **kw):
-		super(self.__class__, self).__init__(**kw)
-		self.is_pkg = True
+		Logs.warn('New archive created: %s (sha1=%s)' % (arch, digest))
 
 class PkgTask(Task.Task):
 	def runnable_status(self):

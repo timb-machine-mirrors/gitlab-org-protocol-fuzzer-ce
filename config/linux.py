@@ -14,12 +14,19 @@ tools = [
 	'misc',
 	'tools.utils',
 	'tools.externals',
-	'tools.test',
 	'tools.version',
 	'tools.xcompile',
+]
+
+optional_tools = [
+	'tools.asan',
 	'tools.mdoc',
+	'tools.mkbundle',
+	'tools.test',
+	'tools.tsc',
 	'tools.zip',
 ]
+
 
 def prepare(conf):
 	env = conf.env
@@ -72,7 +79,11 @@ def prepare(conf):
 	env['TARGET_FRAMEWORK'] = 'v4.0'
 	env['TARGET_FRAMEWORK_NAME'] = '.NET Framework 4'
 
+	env['ASAN_CC'] = 'clang'
+	env['ASAN_CXX'] = 'clang++'
+
 	env.append_value('supported_features', [
+		'peach',
 		'linux',
 		'c',
 		'cstlib',
@@ -132,10 +143,18 @@ def configure(conf):
 		'-O3',
 	]
 
+	asan = [
+		'-fsanitize=address'
+	]
+
+	env.append_value('CFLAGS_asan', asan)
+	env.append_value('CXXFLAGS_asan', asan)
+	env.append_value('LINKFLAGS_asan', asan)
+
 	env.append_value('CPPFLAGS', cppflags)
 	env.append_value('CPPFLAGS_debug', cppflags_debug)
 	env.append_value('CPPFLAGS_release', cppflags_release)
-
+	
 	env.append_value('LIB', [ 'dl' ])
 
 	env['VARIANTS'] = [ 'debug', 'release' ]

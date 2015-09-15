@@ -3,7 +3,7 @@ from waflib import Task, Utils, Logs, Configure, Context, Options, Errors
 import os, zipfile, sys, stat
 
 def configure(conf):
-	conf.env.append_value('supported_features', 'zip')
+	pass
 
 @taskgen_method
 def use_zip_rec(self, name, **kw):
@@ -21,17 +21,24 @@ def use_zip_rec(self, name, **kw):
 
 	self.zip_use.append(y)
 
+	# MSI already has its dependencies, so don't recurse
+	if 'msi' in y.features:
+		return
+
 	for x in self.to_list(getattr(y, 'use', [])):
 		self.use_zip_rec(x)
 
 @taskgen_method
 def get_zip_src(self, tsk):
-	destpath = Utils.subst_vars(tsk.dest, tsk.env).replace('/', os.sep)
+	dest = tsk.dest.replace('${PKGDIR}', '${BINDIR}')
+	destpath = Utils.subst_vars(dest, tsk.env).replace('/', os.sep)
 	bindir = Utils.subst_vars('${BINDIR}', tsk.env)
 	destpath = os.path.relpath(destpath, bindir)
 
 	for src in tsk.source:
-		if not hasattr(tsk, 'relative_trick'):
+		if src.name.endswith('.pdb') or src.name.endswith('.mdb'):
+			continue
+		elif not hasattr(tsk, 'relative_trick'):
 			destfile = destpath
 		elif tsk.relative_trick:
 			destfile = os.path.join(destpath, src.path_from(tsk.path))
@@ -39,8 +46,6 @@ def get_zip_src(self, tsk):
 			destfile = os.path.join(destpath, src.name)
 
 		external_attr = tsk.chmod << 16L
-
-		destfile = os.path.normpath(destfile).replace('\\', '/')
 
 		self.zip_inputs.append((src, destfile, external_attr))
 
@@ -76,7 +81,7 @@ def apply_zip_srcs(self):
 		self.zip_task = self.create_task('zip', srcs, dest)
 		self.sha_task = self.create_task('sha', self.zip_task.outputs, dest.change_ext('.zip.sha1'))
 
-		inst_to = getattr(self, 'install_path', '${OUTPUT}')
+		inst_to = getattr(self, 'install_path', '${PKGDIR}')
 		self.install_files(inst_to, self.zip_task.outputs + self.sha_task.outputs)
 
 class zip(Task.Task):
@@ -94,6 +99,8 @@ class zip(Task.Task):
 		z = zipfile.ZipFile(f.abspath(), 'w', compression=zipfile.ZIP_DEFLATED)
 
 		for src, dest, attr in self.generator.zip_inputs:
+			dest = os.path.normpath(dest).replace('\\', '/')
+
 			z.write(src.abspath(), dest)
 
 			zi = z.getinfo(dest)

@@ -2,15 +2,18 @@ import os.path, re
 from waflib.TaskGen import feature, before_method, after_method, taskgen_method
 from waflib.Configure import conf
 from waflib import Utils, Logs, Task, Context, Errors
+from waflib.Tools import ccroot
+
+ccroot.lib_patterns['resource'] = ['%s']
 
 @taskgen_method
-def install_files(self, dest, files, env=None, chmod=Utils.O644, relative_trick=False, cwd=None, add=True, postpone=True):
-	inst_task = self.bld.install_files(dest, files, env, chmod, relative_trick, cwd, add, postpone)
+def install_files(self, dest, files, **kw):
+	inst_task = self.bld.install_files(dest, files, **kw)
 	save_inst_task(self, inst_task)
 
 @taskgen_method
-def install_as(self, dest, srcfile, env=None, chmod=Utils.O644, cwd=None, add=True, postpone=True):
-	inst_task = self.bld.install_as(dest, srcfile, env, chmod, cwd, add, postpone)
+def install_as(self, dest, srcfile, **kw):
+	inst_task = self.bld.install_as(dest, srcfile, **kw)
 	save_inst_task(self, inst_task)
 
 def save_inst_task(self, inst_task):
@@ -49,17 +52,19 @@ def apply_install(self):
 	do_install(self, inst_to, 'install_644', Utils.O644)
 	do_install(self, inst_to, 'install_755', Utils.O755)
 
-def do_install(self, inst_to, attr, chmod):
+def do_install(self, inst_to, attr, chmod, **kw):
 	val = getattr(self, attr, [])
 
 	if isinstance(val, dict):
-		for cwd,items in val.iteritems():
+		for cwd, items in val.iteritems():
+			if isinstance(cwd, str):
+				cwd = self.path.find_node(cwd)
 			do_install2(self, inst_to, cwd, items, chmod)
 	else:
 		do_install2(self, inst_to, self.path, val, chmod)
 
 def do_install2(self, inst_to, cwd, items, chmod):
-	extras = self.to_nodes(Utils.to_list(items), path=cwd)
+	extras = self.to_nodes(items, path=cwd)
 
 	if extras:
 		if not inst_to:
@@ -67,7 +72,7 @@ def do_install2(self, inst_to, cwd, items, chmod):
 		else:
 			self.install_files(inst_to, extras, env=self.env, cwd=cwd, relative_trick=True, chmod=chmod)
 
-@feature('win', 'linux', 'osx', 'debug', 'release', 'com', 'pin', 'network')
+@feature('win', 'linux', 'osx', 'debug', 'release', 'com', 'pin', 'network', 'peach')
 def dummy_platform(self):
 	# prevent warnings about features with unbound methods
 	pass
@@ -175,6 +180,16 @@ def cs_resource(self):
 		final = base + '.' + name
 		self.env.append_value('CSFLAGS', '/resource:%s,%s' % (x.abspath(), final))
 
+	embeds = self.to_list(getattr(self, 'embed', []))
+	get = self.bld.get_tgen_by_name
+	for x in embeds:
+		y = get(x)
+		y.post()
+		tsk = getattr(y, 'link_task', None)
+		self.cs_task.dep_nodes.extend(tsk.outputs) # dependency
+		final = '%s.Resources.%s' % (base, x)
+		self.env.append_value('CSFLAGS', '/resource:%s,%s' % (tsk.outputs[0].abspath(), final))
+
 	# win32 icon support
 	icon = getattr(self, 'icon', None)
 	if icon:
@@ -195,7 +210,9 @@ def cs_resource(self):
 	if cfg:
 		setattr(self, 'app_config', cfg)
 		inst_to = getattr(self, 'install_path', '${BINDIR}')
-		self.bld.install_as('%s/%s.config' % (inst_to, self.gen), cfg, env=self.env, chmod=Utils.O644)
+
+		# use the taskgen method to collect installed dependencies for zips & msis
+		self.install_as('%s/%s.config' % (inst_to, self.gen), cfg, env=self.env, chmod=Utils.O644)
 
 target_framework_template = '''using System;
 using System.Reflection;
@@ -251,8 +268,7 @@ def read_all_csshlibs(self, subdir):
 		self.read_csshlib(x.name, paths=[x.parent.path_from(self.path)])
 
 @conf
-def ensure_version(self, tool, ver_exp):
-	ver_exp = Utils.to_list(ver_exp)
+def get_version(self, tool):
 	env = self.env
 	environ = dict(self.environ)
 	environ.update(PATH = ';'.join(env['PATH']))
@@ -264,13 +280,20 @@ def ensure_version(self, tool, ver_exp):
 	if not m:
 		m = ver_re.match(err)
 	if not m:
-		raise Errors.WafError("Could not verify version of %s" % (exe))
-	ver = m.group(1)
+		return None
+	return m.group(1)
+	
+@conf
+def ensure_version(self, tool, ver_exp):
+	ver = self.get_version(tool)
+	ver_exp = Utils.to_list(ver_exp)
+	if not ver:
+		raise Errors.WafError("Could not verify version of %s" % (tool))
 	found = False
 	for v in ver_exp:
 		found = ver.startswith(v) or found
 	if not found:
-		raise Errors.WafError("Requires %s %s but found version %s" % (exe, ver_exp, ver))
+		raise Errors.WafError("Requires %s %s but found version %s" % (tool, ver_exp, ver))
 
 @feature('emit')
 @before_method('process_rule')
@@ -287,5 +310,35 @@ class emit(Task.Task):
 	vars = [ 'EMIT_SOURCE' ]
 
 	def run(self):
-		text = self.env['EMIT_SOURCE']
+		text = str(self.env['EMIT_SOURCE'])
 		self.outputs[0].write(text)
+
+class fake_resource(Task.Task):
+	"""
+	Task used for reading a foreign resource and adding the dependency on it
+	"""
+	color   = 'YELLOW'
+	inst_to = None
+
+	def runnable_status(self):
+		for x in self.outputs:
+			x.sig = Utils.h_file(x.abspath())
+		return Task.SKIP_ME
+
+@conf
+def read_resource(self, name, paths=[]):
+	"""
+	Read an external resource and register it for the *use* system::
+
+		def build(bld):
+			bld.read_external_resource('some_resource.ext', paths=[bld.env.mypath])
+			bld(features='cs', source='Hi.cs', bintype='exe', gen='hi.exe', use='some_resource.ext')
+
+	:param name: Name of the resource
+	:type name: string
+	:param paths: Folders in which the resource may be found
+	:type paths: list of string
+	:return: A task generator having the feature *fake_lib* which will call :py:func:`waflib.Tools.ccroot.process_lib`
+	:rtype: :py:class:`waflib.TaskGen.task_gen`
+	"""
+	return self(name=name, features='fake_lib', lib_paths=paths, lib_type='resource')

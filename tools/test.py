@@ -19,14 +19,16 @@ def prepare_nunit_test(self):
 	self.ut_exec.extend([
 		self.env.NUNIT,
 		'-nologo',
-		'-noshadow',
-		'-out=%s' % self.outputs[1].abspath(),
 		'-xml=%s' % self.outputs[0].abspath(),
 	])
 
 	opts = self.generator.bld.options
 	if opts.testcase:
-		self.ut_exec.extend(['/run=%s' % opts.testcase])
+		self.ut_exec.append('-run=%s' % opts.testcase)
+	if not opts.stdout:
+		self.ut_exec.append('-out=%s' % self.outputs[1].abspath())
+	else:
+		self.ut_exec.append('-labels')
 
 	self.ut_exec.extend([ x.abspath() for x in self.inputs ])
 
@@ -57,22 +59,23 @@ def make_test(self):
 
 	if getattr(self, 'cs_task', None):
 		bintype = getattr(self, 'bintype', self.gen.endswith('.dll') and 'library' or 'exe')
-		dest = getattr(self, 'install_path', bintype=='exe' and '${BINDIR}' or '${LIBDIR}')
+		dest = getattr(self, 'install_path', bintype == 'exe' and '${BINDIR}' or '${LIBDIR}')
 		inputs = [ get_inst_node(self, dest, self.cs_task.outputs[0].name) ]
 
-		if self.gen.endswith('.dll'):
-			test = getattr(self.bld, 'nunit_task', None)
-			if not test:
-				xml = get_inst_node(self, '${PREFIX}/utest', 'nunit.xml')
+		test = getattr(self.bld, 'nunit_task', None)
+		if not test:
+			xml = get_inst_node(self, '${PREFIX}/utest', 'nunit.xml')
+			outputs = [ xml ]
+			if not self.bld.options.stdout:
 				log = get_inst_node(self, '${PREFIX}/utest', 'nunit.log')
-				outputs = [ xml, log ]
-				tg = self.bld(name = '')
-				test = tg.create_task('utest', inputs, outputs)
-				run_after_last_test(self, test)
-				setattr(self.bld, 'nunit_task', test)
-				tg.ut_fun = prepare_nunit_test
-			else:
-				test.inputs.extend(inputs)
+				outputs.append(log)
+			tg = self.bld(name = '')
+			test = tg.create_task('utest', inputs, outputs)
+			run_after_last_test(self, test)
+			setattr(self.bld, 'nunit_task', test)
+			tg.ut_fun = prepare_nunit_test
+		else:
+			test.inputs.extend(inputs)
 
 	if not inputs:
 		raise Errors.WafError('No test to run at: %r' % self)
@@ -115,7 +118,16 @@ class utest(Task.Task):
 		if Logs.verbose < 0:
 			stderr = stdout = Utils.subprocess.PIPE
 
-		proc = Utils.subprocess.Popen(self.ut_exec, cwd=cwd, stderr=stderr, stdout=stdout)
+		opts = self.generator.bld.options
+
+		env = {}
+		env.update(os.environ)
+		if opts.mono_debug:
+			env.update({ 'MONO_LOG_LEVEL' : 'debug' })
+		if opts.trace:
+			env.update({ 'PEACH_TRACE' : '1' })
+
+		proc = Utils.subprocess.Popen(self.ut_exec, cwd=cwd, stderr=stderr, stdout=stdout, env=env)
 		(stdout, stderr) = proc.communicate()
 
 		tup = (self.inputs[0].name, proc.returncode)
@@ -133,21 +145,16 @@ class utest(Task.Task):
 			testlock.release()
 
 def configure(conf):
-	j = os.path.join
-
-	try:
-		conf.env['NUNIT_VER'] = 'NUnit.Runners.2.6.3'
-		nunit_path = j(conf.get_peach_dir(), '3rdParty', conf.env['NUNIT_VER'], 'tools')
-		nunit_name = '64' in conf.env.SUBARCH and 'nunit-console' or 'nunit-console-x86'
-		conf.find_program([nunit_name], var='NUNIT', exts='.exe', path_list=[nunit_path])
-		conf.env.append_value('supported_features', [ 'test' ])
-	except Exception, e:
-		conf.env.append_value('missing_features', [ 'test' ])
-		if Logs.verbose:
-			Logs.warn('Unit test feature is not available: %s' % (e))
+	conf.env['NUNIT_VER'] = 'NUnit.Runners.2.6.4'
+	nunit_path = j(conf.get_third_party(), conf.env['NUNIT_VER'], 'tools')
+	nunit_name = '64' in conf.env.SUBARCH and 'nunit-console' or 'nunit-console-x86'
+	conf.find_program([nunit_name], var='NUNIT', exts='.exe', path_list=[nunit_path])
 
 def options(opt):
 	opt.add_option('--testcase', action='store', help='Name of test case/fixture to execute')
+	opt.add_option('--stdout', action='store_true', help='Send results to stdout')
+	opt.add_option('--trace', action='store_true', help='Enable trace log level')
+	opt.add_option('--mono_debug', action='store_true', help='Enable mono debug logging')
 
 class TestContext(InstallContext):
 	'''runs the unit tests'''

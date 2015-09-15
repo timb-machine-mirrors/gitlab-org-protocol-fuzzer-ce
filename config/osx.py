@@ -14,9 +14,14 @@ tools = [
 	'misc',
 	'tools.utils',
 	'tools.externals',
-	'tools.test',
 	'tools.version',
+]
+
+optional_tools = [
+	'tools.asan',
 	'tools.mdoc',
+	'tools.test',
+	'tools.tsc',
 	'tools.zip',
 ]
 
@@ -43,8 +48,13 @@ def prepare(conf):
 	env['CC']   = 'clang'
 	env['CXX']  = 'clang++'
 
-	env['SYSROOT'] = find_directory( [ 'MacOSX10.8.sdk', 'MacOSX10.7.sdk', 'MacOSX10.6.sdk' ],
-	[
+	env['SYSROOT'] = find_directory([ 
+		'MacOSX10.10.sdk', 
+		'MacOSX10.9.sdk', 
+		'MacOSX10.8.sdk', 
+		'MacOSX10.7.sdk', 
+		'MacOSX10.6.sdk' 
+	], [
 		'/Developer/SDKs',
 		'/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs',
 	])
@@ -103,10 +113,14 @@ def prepare(conf):
 	env['TARGET_FRAMEWORK'] = 'v4.0'
 	env['TARGET_FRAMEWORK_NAME'] = '.NET Framework 4'
 
+	env['ASAN_CC'] = 'clang-3.6'
+	env['ASAN_CXX'] = 'clang++-3.6'
+
 def configure(conf):
 	env = conf.env
 
 	env.append_value('supported_features', [
+		'peach',
 		'osx',
 		'c',
 		'cstlib',
@@ -168,6 +182,14 @@ def configure(conf):
 	cppflags_release = [
 		'-O3',
 	]
+
+	asan = [
+		'-fsanitize=address'
+	]
+
+	env.append_value('CFLAGS_asan', asan)
+	env.append_value('CXXFLAGS_asan', asan)
+	env.append_value('LINKFLAGS_asan', asan)
 
 	env.append_value('CPPFLAGS', arch_flags + cppflags)
 	env.append_value('CPPFLAGS_debug', cppflags_debug)
