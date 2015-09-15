@@ -17,9 +17,6 @@ maxdepth = 1
 # appname should be the name of this build project, eg: 'Peach'
 appname = 'Peach'
 
-# peach should be the path to the Peach submodule, eg: '.'
-peach = '.'
-
 # Branch suffix to use as last portion of build tag
 branch = 1
 
@@ -28,7 +25,7 @@ ignore = []
 
 # Returns true if the variant should be supported
 def supported_variant(name):
-	return True;
+	return name in [ 'win', 'linux', 'osx', 'doc' ]
 
 def init(ctx):
 	wscript.init(ctx)
