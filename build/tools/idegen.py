@@ -522,7 +522,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 		if getattr(tg, 'ide_aspnet', False):
 			cfg = tg.path.find_resource('Web.config')
 			if not cfg:
-				self.ctx.fatal('Could not find Web.config for ide_aspnet taskgen: %s', tg)
+				self.ctx.fatal('Could not find Web.config for ide_aspnet taskgen: %r' % tg)
 			r = source_file('Content', self, cfg)
 			r.attrs['SubType'] = 'Designer'
 			lst[cfg.abspath()] = r
