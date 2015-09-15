@@ -14,15 +14,22 @@ tools = [
 	'misc',
 	'tools.utils',
 	'tools.externals',
-	'tools.test',
 	'tools.version',
 	'tools.xcompile',
+]
+
+optional_tools = [
+	'tools.asan',
 	'tools.mdoc',
+	'tools.mkbundle',
+	'tools.test',
+	'tools.tsc',
 	'tools.zip',
 	'tools.tsc',
 	'tools.mkbundle',
 	'tools.asan',
 ]
+
 
 def prepare(conf):
 	env = conf.env

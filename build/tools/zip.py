@@ -3,7 +3,7 @@ from waflib import Task, Utils, Logs, Configure, Context, Options, Errors
 import os, zipfile, sys, stat
 
 def configure(conf):
-	conf.env.append_value('supported_features', 'zip')
+	pass
 
 @taskgen_method
 def use_zip_rec(self, name, **kw):
@@ -46,8 +46,6 @@ def get_zip_src(self, tsk):
 			destfile = os.path.join(destpath, src.name)
 
 		external_attr = tsk.chmod << 16L
-
-		destfile = os.path.normpath(destfile).replace('\\', '/')
 
 		self.zip_inputs.append((src, destfile, external_attr))
 
@@ -101,6 +99,8 @@ class zip(Task.Task):
 		z = zipfile.ZipFile(f.abspath(), 'w', compression=zipfile.ZIP_DEFLATED)
 
 		for src, dest, attr in self.generator.zip_inputs:
+			dest = os.path.normpath(dest).replace('\\', '/')
+
 			z.write(src.abspath(), dest)
 
 			zi = z.getinfo(dest)

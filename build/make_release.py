@@ -22,6 +22,7 @@ releases = [
 	},
 ]
 
+<<<<<<< HEAD
 '''
 This script expects the following directory structure:
 output
@@ -40,6 +41,8 @@ output
         ${pit}.zip
 '''
 
+=======
+>>>>>>> 4509b52ddbf27068a4ff2a1d4de5e9c5ddd0fe92
 def to_JSON(self):
 	return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
@@ -270,8 +273,12 @@ if __name__ == "__main__":
 	toAdd = filter_docs(docs, peach_docs)
 
 	for x in pkgs:
+<<<<<<< HEAD
 		if 'internal' not in x:
 			update_pkg(x, toAdd)
+=======
+		update_pkg(x, toAdd)
+>>>>>>> 4509b52ddbf27068a4ff2a1d4de5e9c5ddd0fe92
 
 	d = datetime.datetime.now()
 
@@ -315,6 +322,20 @@ if __name__ == "__main__":
 			dst = os.path.join(path, 'pits', f)
 			shutil.copy(src, dst)
 
+<<<<<<< HEAD
+=======
+		# Make all zip
+		dst = os.path.join(path, r['all'] % c.__dict__)
+
+		with zipfile.ZipFile(dst, 'w', compression=zipfile.ZIP_STORED) as z:
+			for x in o.files:
+				src = os.path.join(path, x)
+				z.write(src, x)
+
+		sha1sum(dst)
+		o.files.append(os.path.basename(dst))
+
+>>>>>>> 4509b52ddbf27068a4ff2a1d4de5e9c5ddd0fe92
 		with open(rel, 'w') as f:
 			j = to_JSON(o)
 			print j
@@ -324,9 +345,12 @@ if __name__ == "__main__":
 		shutil.rmtree(tmpdir)
 
 	for x in pkgs:
+<<<<<<< HEAD
 		if 'internal' in x:
 			path = os.path.join(reldir, buildtag)
 			shutil.copy(x, path)
+=======
+>>>>>>> 4509b52ddbf27068a4ff2a1d4de5e9c5ddd0fe92
 		try:
 			os.unlink(x)
 			os.unlink(x + '.sha1')

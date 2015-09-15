@@ -141,11 +141,11 @@ def display(self):
 		colorize(tgt_str, Logs.colors.GREEN))
 
 # InstallContext
-def do_install(self, src, tgt, chmod=Utils.O644):
+def do_install(self, src, tgt, **kw):
 	if Logs.verbose <= 1 and self.progress_bar == 0:
 		self.progress_bar = -1;
 
-	ret = self.base_do_install(src, tgt, chmod)
+	ret = self.base_do_install(src, tgt, **kw)
 
 	if self.progress_bar != -1 or str(ret) == 'False':
 		return ret

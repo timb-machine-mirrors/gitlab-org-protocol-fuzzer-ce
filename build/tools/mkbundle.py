@@ -4,6 +4,7 @@ from waflib import Errors, Task, Logs, Utils
 wlock = Utils.threading.Lock()
 
 def configure(conf):
+<<<<<<< HEAD
 	v = conf.env
 	try:
 		conf.find_program('mkbundle')
@@ -12,6 +13,9 @@ def configure(conf):
 		v.append_value('missing_features', 'mkbundle')
 		if Logs.verbose > 0:
 			Logs.warn('mkbundle is not available: %s' % (e))
+=======
+	conf.find_program('mkbundle')
+>>>>>>> 4509b52ddbf27068a4ff2a1d4de5e9c5ddd0fe92
 
 @taskgen_method
 def use_bundle_rec(self, name, **kw):

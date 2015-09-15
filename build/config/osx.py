@@ -14,9 +14,14 @@ tools = [
 	'misc',
 	'tools.utils',
 	'tools.externals',
-	'tools.test',
 	'tools.version',
+]
+
+optional_tools = [
+	'tools.asan',
 	'tools.mdoc',
+	'tools.test',
+	'tools.tsc',
 	'tools.zip',
 	'tools.tsc',
 	'tools.asan',

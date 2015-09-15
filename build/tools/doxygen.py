@@ -6,6 +6,7 @@ from waflib import Task, Utils, Node, Logs
 from waflib.TaskGen import feature
 
 def configure(conf):
+<<<<<<< HEAD
 	v = conf.env
 
 	try:
@@ -16,6 +17,9 @@ def configure(conf):
 		if Logs.verbose > 0:
 			Logs.warn('Doxygen is not available: %s' % (e))
 
+=======
+	conf.find_program('doxygen', var='DOXYGEN')
+>>>>>>> 4509b52ddbf27068a4ff2a1d4de5e9c5ddd0fe92
 
 DOXY_STR = '${DOXYGEN} - '
 DOXY_FMTS = 'html latex man rft xml'.split()
