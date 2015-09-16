@@ -114,7 +114,7 @@ block:
   margin_top: 0
   margin_bottom: $vertical_rhythm
 caption:
-  align: left
+  align: center
   font_style: bold
   font_color: 7a2417
   # FIXME perhaps set line_height instead of / in addition to margins?
