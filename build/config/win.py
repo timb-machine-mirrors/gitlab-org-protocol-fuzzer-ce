@@ -24,7 +24,6 @@ optional_tools = [
 	'tools.test',
 	'tools.tsc',
 	'tools.zip',
-	'tools.tsc',
 ]
 
 def prepare(conf):
