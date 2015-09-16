@@ -72,9 +72,9 @@ literal:
   font_family: M+ 1mn
 heading:
   #font_color: 181818
-  font_color: $base_font_color
+  font_color: b93824
   font_family: $base_font_family
-  font_style: bold
+  #font_style: bold
   # h1 is used for part titles
   h1_font_size: floor($base_font_size * 2.6)
   # h2 is used for chapter titles
@@ -89,13 +89,16 @@ heading:
   margin_top: $vertical_rhythm * 0.2
   margin_bottom: $vertical_rhythm * 0.8
 title_page:
+  background_image: peach_background_image.svg
+  logo_image: peach_logo_image.svg
+  logo_align: center
   align: right
   logo:
     top: 10%
   title:
     top: 55%
     font_size: $heading_h1_font_size
-    font_color: 999999
+    font_color: $base_font_color
     line_height: 0.9
   subtitle:
     font_size: $heading_h3_font_size
@@ -112,7 +115,8 @@ block:
   margin_bottom: $vertical_rhythm
 caption:
   align: left
-  font_style: italic
+  font_style: bold
+  font_color: 7a2417
   # FIXME perhaps set line_height instead of / in addition to margins?
   margin_inside: $vertical_rhythm / 3
   #margin_inside: $vertical_rhythm / 4
@@ -185,7 +189,7 @@ thematic_break:
   margin_top: $vertical_rhythm * 0.5
   margin_bottom: $vertical_rhythm * 1.5
 description_list:
-  term_font_style: italic
+  term_font_style: bold
   term_spacing: $vertical_rhythm / 4
   description_indent: $horizontal_rhythm * 1.25
 outline_list:
@@ -195,12 +199,12 @@ outline_list:
   #marker_font_color: 404040
 table:
   background_color: $page_background_color
-  #head_background_color: <hex value>
+  head_background_color: f7f8f7
   #head_font_color: $base_font_color
   head_font_style: bold
-  even_row_background_color: f9f9f9
+  even_row_background_color: f8f8f7
   #odd_row_background_color: <hex value>
-  foot_background_color: f0f0f0
+  foot_background_color: f7f8f7
   border_color: dddddd
   border_width: $base_border_width
   # HACK accounting for line-height
@@ -233,9 +237,9 @@ footer:
   recto_content:
     #right: '{section-or-chapter-title} | {page-number}'
     #right: '{document-title} | {page-number}'
-    right: '{page-number}'
-    #center: '{page-number}'
+    #right: '{page-number}'
+    center: '{page-number}'
   verso_content:
     #left: '{page-number} | {chapter-title}'
-    left: '{page-number}'
-    #center: '{page-number}'
+    #left: '{page-number}'
+    center: '{page-number}'

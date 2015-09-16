@@ -27,9 +27,9 @@ tools = [
 ]
 
 optional_tools = [
-	'tools.asciidoc',
+	'tools.asciidoctor-pdf',
 	'tools.doxygen',
-	'tools.webhelp',
+	#'tools.webhelp',
 ]
 
 def prepare(conf):
