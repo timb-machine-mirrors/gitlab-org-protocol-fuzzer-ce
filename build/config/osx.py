@@ -7,8 +7,8 @@ host_plat = [ 'darwin' ]
 archs = [ ]
 
 tools = [
-	'gcc',
-	'gxx',
+	'clang',
+	'clang++',
 	'cs',
 	'resx',
 	'misc',
@@ -45,8 +45,6 @@ def prepare(conf):
 	]
 
 	env['MCS']  = 'dmcs'
-	env['CC']   = 'clang'
-	env['CXX']  = 'clang++'
 
 	env['SYSROOT'] = find_directory([ 
 		'MacOSX10.10.sdk', 
