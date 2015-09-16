@@ -8,7 +8,21 @@ refs = re.compile('<reference\s+path="(.*)"\s*/>', re.M)
 def configure(conf):
 	v = conf.env
 	v['TSC_FLAGS'] = [ '--target', 'ES5', '--module', 'amd', '--removeComments', '--sourcemap' ]
-	conf.find_program('tsc')
+
+	cmd = ['tsc', '--version']
+	try:
+		out, err = conf.cmd_and_log(cmd, output=0)
+	except Errors.WafError:
+		conf.fatal('Could not find tsc %r' % cmd)
+
+	version_re = re.compile(r'.*Version (?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)', re.I).search
+	match = version_re(out)
+	if match:
+		kw = match.groupdict()
+		if kw['major'] != 1 and kw['minor'] != 5:
+			conf.fatal('Wrong version for tsc. Expecting 1.5.*, got: %(major)s.%(minor)s.%(patch)s' % kw) 
+	else:
+		conf.fatal('Could not determine version for tsc.')
 
 @feature('tsc')
 @after_method('process_source')
