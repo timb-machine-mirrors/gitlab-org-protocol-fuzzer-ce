@@ -122,6 +122,9 @@ class doxygen(Task.Task):
 
 			self.pars['OUTPUT_DIRECTORY'] = self.output_dir.abspath()
 
+		# Ensure output directory is created
+		os.makedirs(self.output_dir.abspath())
+
 		self.signature()
 		return Task.Task.runnable_status(self)
 
@@ -144,7 +147,6 @@ class doxygen(Task.Task):
 			else:
 				nodes.append(node)
 
-		print self.doxy_extras
 		nodes.extend(self.doxy_extras)
 
 		return (nodes, names)
