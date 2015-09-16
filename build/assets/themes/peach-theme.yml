@@ -101,8 +101,8 @@ title_page:
     font_color: $base_font_color
     line_height: 0.9
   subtitle:
-    font_size: $heading_h3_font_size
-    font_style: bold_italic
+    font_size: $heading_h1_font_size
+    font_style: $base_font_style
     line_height: 1
   authors:
     margin_top: $base_font_size * 1.25
