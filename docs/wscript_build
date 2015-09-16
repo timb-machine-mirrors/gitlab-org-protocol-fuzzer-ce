@@ -1,16 +1,19 @@
 #!/usr/bin/env python
-from waflib.Task import Task
-from waflib.Errors import WafError
-import re
+
+if 'asciidoctor-pdf' in bld.env.supported_features:
+	# Apply the peach theme to all asciidoctor_pdf builders
+	bld.set_asciidoctor_pdf_theme('../build/assets/themes', 'peach')
+
+	# Apply the datasheet theme to all asciidoctor_html builders
+	bld.set_asciidoctor_html_theme('../build/assets/datasheet')
 
 # The following 2 entires generate the Peach Pro doc using outline of v3Q4 update
 # Commnented out while I work on User Guide structuring.
 
 book = bld(
-	features = 'asciidoc',
+	features = 'asciidoctor-pdf',
 	source = 'src.pro/book.adoc',
 	images = 'src.pro/images',
-	cover = 'src.pro/Professional_Cover.pdf',
 	name = 'Peach_Pro_Developer_Guide.pdf',
 	install_path = '${BINDIR}/sdk/docs',
 )
@@ -25,10 +28,9 @@ bld(
 
 # The following 2 entires generate the Peach Pro User Guide doc using (new in 2015)
 book = bld(
-	features = 'asciidoc',
+	features = 'asciidoctor-pdf',
 	source = 'src.pro/UserGuide.adoc',
 	images = 'src.pro/images',
-	cover = 'src.pro/User_Guide_Cover.pdf',
 	name = 'Peach_Pro_User_Guide.pdf',
 	install_path = '${BINDIR}/docs',
 )

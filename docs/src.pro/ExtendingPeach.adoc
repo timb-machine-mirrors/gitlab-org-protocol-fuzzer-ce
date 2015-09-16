@@ -75,7 +75,7 @@ General Peach plugin best practices:
 ==========================
 This example shows the arguments in the JsEncode transformer constructor.
 
-[source,c#]
+[source,java]
 ----
 [Transformer("JsEncode")]
 public class JsEncode : Transformer
@@ -92,7 +92,7 @@ public class JsEncode : Transformer
 ==========================
 This example shows the class definition for a custom fixup called "MyFixup".
 
-[source,c#]
+[source,java]
 ----
 [Fixup("MyFixup", true)]
 public class MyFixup : Peach.Core.Fixup
@@ -105,7 +105,7 @@ public class MyFixup : Peach.Core.Fixup
 ==========================
 This example shows the ParameterAttribute usage.
 
-[source,c#]
+[source,java]
 ----
 [Transformer("MyTransformer")]
 [Parameter("level", typeof(int), "Specifies the level, default: 9", "9")]
@@ -130,7 +130,7 @@ public class MyTransformer : Transformer
 ==========================
 This example shows the class definition for a custom transformer called "MyTransformer".
 
-[source,c#]
+[source,java]
 ----
 [Transformer("MyTransformer", true)]
 public class MyTransformer : Peach.Core.Transformer
@@ -143,7 +143,7 @@ public class MyTransformer : Peach.Core.Transformer
 ==========================
 This example shows the class definition for a custom publisher called "MyPublisher".
 
-[source,c#]
+[source,java]
 ----
 [Publisher("MyPublisher", true)]
 public class MyPublisher : Peach.Core.Publisher
@@ -156,7 +156,7 @@ public class MyPublisher : Peach.Core.Publisher
 ==========================
 This example shows the class definition for a custom monitor called "MyMonitor".
 
-[source,c#]
+[source,java]
 ----
 [Monitor("MyMonitor", true)]
 public class MyMonitor : Peach.Core.Monitor
@@ -194,7 +194,7 @@ The key to this dictionary is the name of the parameter (eg: 'ref') and the valu
 ==========================
 This is an example of a fixup with a single data element reference.
 
-[source,c#]
+[source,java]
 ----
 [Fixup("CustomFixupOne", true)]
 [Parameter("ref", typeof(string), "Reference to data element")]
@@ -213,7 +213,7 @@ public class CustomFixupOne : Fixup
 ==========================
 This is an example of a fixup with three data element references.
 
-[source,c#]
+[source,java]
 ----
 [Fixup("CustomFixupThree", true)]
 [Parameter("refOne", typeof(string), "Reference to first data element")]
@@ -234,7 +234,7 @@ public class CustomFixupThree : Fixup
 ==========================
 This is an example of the fixupImpl function of a Crc fixup.
 
-[source,c#]
+[source,java]
 ----
 protected override Variant fixupImpl()
 {
@@ -393,7 +393,7 @@ the developer needs to override ClientClose() and cleanup any additional resourc
 
 An example of a File publisher deriving from StreamPublisher.
 
-[source,c#]
+[source,java]
 ----
 [Publisher("File", true)]
 [Publisher("FileStream")]
@@ -435,7 +435,7 @@ public class FilePublisher : StreamPublisher
 
 An example of a Serial publisher deriving from BufferedStreamPublisher.
 
-[source,c#]
+[source,java]
 ----
 [Publisher("SerialPort", true)]
 [Parameter("PortName", typeof(string), "Com interface for the device to connect to")]
@@ -504,7 +504,7 @@ NOTE: Remote agents can host Publishers; therefore, Publishers should not direct
 
 An example of a Serial publisher deriving from BufferedStreamPublisher.
 
-[source,c#]
+[source,java]
     protected override Variant OnGetProperty(string property)
     {
         switch(property)
@@ -519,7 +519,7 @@ An example of a Serial publisher deriving from BufferedStreamPublisher.
 
 The property is then accessible in the state model using the getProperty action, or using a script as in the following:
 
-[source,c#]
+[source,java]
 Port = int(context.test.publishers[0].getProperty(‘Port’))
 
 
@@ -557,7 +557,7 @@ if the mutator can mutate the data element.
 
 An example of the supportedDataElement function for a string mutator.
 
-[source,c#]
+[source,java]
 ----
 public new static bool supportedDataElement(DataElement obj)
 {
@@ -585,7 +585,7 @@ This allows Peach to produce identical mutations when replaying the same fuzz it
 
 An example of a string mutator that mutates string elements with the values "Hello", "World" or "Hello World".
 
-[source,c#]
+[source,java]
 ----
 [Mutator("StringMutator")]
 [Description("Replace strings with hello world")]
@@ -639,7 +639,7 @@ if the mutator can mutate the data element.
 
 An example of the supportedDataElement function for a string mutator.
 
-[source,c#]
+[source,java]
 ----
 public new static bool supportedDataElement(DataElement obj)
 {
