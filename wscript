@@ -17,6 +17,9 @@ maxdepth = 1
 # appname should be the name of this build project, eg: 'Peach'
 appname = 'Peach'
 
+# Path to 3rdParty directory, eg: '3rdParty'
+third_party = '3rdParty'
+
 # Branch suffix to use as last portion of build tag
 branch = 1
 
