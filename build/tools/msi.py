@@ -22,10 +22,13 @@ def configure(conf):
 	v['HEAT_FLAGS'] = [ '-nologo', '-dr', 'INSTALLFOLDER', '-ke', '-gg' ]
 
 	pfiles = os.getenv('PROGRAMFILES(X86)', os.getenv('PROGRAMFILES'))
-	wix_path = os.path.join(pfiles, 'WiX Toolset v3.8', 'bin')
-	conf.find_program('candle', var='CANDLE', exts='.exe', path_list=[wix_path])
-	conf.find_program('light', var='LIGHT', exts='.exe', path_list=[wix_path])
-	conf.find_program('heat', var='HEAT', exts='.exe', path_list=[wix_path])
+	wix_path = [
+		os.path.join(pfiles, 'WiX Toolset v3.8', 'bin'),
+		os.path.join(pfiles, 'WiX Toolset v3.9', 'bin')
+	]
+	conf.find_program('candle', var='CANDLE', exts='.exe', path_list=wix_path)
+	conf.find_program('light', var='LIGHT', exts='.exe', path_list=wix_path)
+	conf.find_program('heat', var='HEAT', exts='.exe', path_list=wix_path)
 
 def heat_scan(task):
 	deps = task.source_dir.ant_glob('**/*')
