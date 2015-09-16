@@ -22,7 +22,7 @@ bld(
 	features = 'webhelp',
 	source = 'src.pro/book.adoc',
 	images = 'src.pro/images',
-	name = 'webhelp',
+	name = 'webhelpDevGuide',
 	install_path = '${BINDIR}/sdk/docs/webhelp',
 )
 
