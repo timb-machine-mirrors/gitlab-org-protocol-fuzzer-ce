@@ -109,12 +109,10 @@ This parameter example is from a setup that uses the CleanupRegistry monitor to 
 
 The following image shows the portion of the registry that contains the key to delete.
 
-.{nbsp}
 image::{images}/Monitor_CleanupRegistry2.png[]
 
 This monitor deleted the key. The following image shows the same area of the registry after fuzzing and using the CleanupRegistry monitor.
 
-.{nbsp}
 image::{images}/Monitor_CleanupRegistry3.png[]
 
 ==================================================
