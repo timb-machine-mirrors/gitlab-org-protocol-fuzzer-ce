@@ -122,8 +122,11 @@ class doxygen(Task.Task):
 
 			self.pars['OUTPUT_DIRECTORY'] = self.output_dir.abspath()
 
-		# Ensure output directory is created
-		os.makedirs(self.output_dir.abspath())
+		try:
+			# Ensure output directory is created
+			os.makedirs(self.output_dir.abspath())
+		except OSError:
+			pass
 
 		self.signature()
 		return Task.Task.runnable_status(self)
