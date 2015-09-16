@@ -105,8 +105,8 @@ def prepare(conf):
 	# This is lame, the resgen that vcvars for x64 finds is the .net framework 3.5 version.
 	# The .net 4 version is in the x86 search path.
 	if env.SUBARCH == 'x64':
-		env['MCS'] = getattr(conf.all_envs.get('win_x86'), 'MCS', None)
-		env['RESGEN'] = getattr(conf.all_envs.get('win_x86'), 'RESGEN', None)
+		env['MCS'] = getattr(conf.all_envs.get('win_x86'), 'MCS', [ None ])[0]
+		env['RESGEN'] = getattr(conf.all_envs.get('win_x86'), 'RESGEN', [ None ])[0]
 
 	pfiles = os.getenv('PROGRAMFILES(X86)', os.getenv('PROGRAMFILES'))
 	env['TARGET_FRAMEWORK'] = 'v4.0'
