@@ -9,6 +9,7 @@ deps = [
 	'System.Core.dll',
 	'System.Data.dll',
 	'System.Data.DataSetExtensions.dll',
+	'System.Data.SQLite.dll',
 	'System.Drawing.dll',
 	'System.Numerics.dll',
 	'System.Web.dll',
@@ -52,15 +53,6 @@ deps = [
 	'Dapper.dll',
 	'Aspose.Words.dll',
 ]
-
-if bld.env.TARGET == 'win':
-	deps.extend([
-		'System.Data.SQLite.dll',
-	])
-else:
-	deps.extend([
-		'Mono.Data.Sqlite.dll',
-	])
 
 if bld.env.TARGET in ['win']:
 	embed = 'Vix.dll'

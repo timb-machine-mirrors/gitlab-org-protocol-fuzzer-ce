@@ -2,15 +2,7 @@
 // Copyright (c) Peach Fuzzer, LLC
 //
 
-#if MONO
-using Mono.Data.Sqlite;
-
-using SQLiteCommand = Mono.Data.Sqlite.SqliteCommand;
-using SQLiteConnection = Mono.Data.Sqlite.SqliteConnection;
-using SQLiteParameter = Mono.Data.Sqlite.SqliteParameter;
-#else
 using System.Data.SQLite;
-#endif
 using System;
 using System.IO;
 using NLog;
