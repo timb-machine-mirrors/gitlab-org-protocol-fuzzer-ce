@@ -29,7 +29,7 @@ _Optional:_
 
 Port:: Port to listen for connections on. Defaults to +8080+.
 Publish:: How to publish data, base64 or URL. Defaults to +base64+.
-DataToken:: Token to replace with data in template. Defaults to +##DATA##+.
+DataToken:: Token to replace with data in template. Defaults to `##DATA##`.
 Timeout:: Time in milliseconds to wait for client response. Defaults to +60000+.
 
 === Actions

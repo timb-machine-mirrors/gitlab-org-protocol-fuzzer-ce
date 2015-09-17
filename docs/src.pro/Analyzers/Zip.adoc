@@ -312,7 +312,6 @@ Peach.Enterprise.Publishers.ZipPublisher stop()
 
 View of example in Peach Validator 
 
-.{nbsp}
 image::{images}/ZipAnalyzerOutputSimple.png["Validator Output", alt="Validator Output"]
 
 ==========================
@@ -608,7 +607,6 @@ Peach.Enterprise.Publishers.ZipPublisher stop()
 
 View of example in Peach Validator 
 
-.{nbsp}
 image::{images}/ZipAnalyzerOutputWithMap.png["Validator Output", alt="Validator Output"]
 
 ==========================
