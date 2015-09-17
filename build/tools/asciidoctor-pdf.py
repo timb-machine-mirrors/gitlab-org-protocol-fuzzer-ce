@@ -110,6 +110,8 @@ def apply_asciidoctor_pdf(self):
 
 	tsk.env.append_value('ASCIIDOCTOR_PDF_OPTS', [ '--trace' ])
 
+	self.compiled_tasks = [ tsk ]
+
 	# Store inst task in install_extras for packaging
 	try:
 		self.install_extras.append(inst)
