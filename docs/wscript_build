@@ -1,16 +1,19 @@
 #!/usr/bin/env python
-from waflib.Task import Task
-from waflib.Errors import WafError
-import re
+
+if 'asciidoctor-pdf' in bld.env.supported_features:
+	# Apply the peach theme to all asciidoctor_pdf builders
+	bld.set_asciidoctor_pdf_theme('../build/assets/themes', 'peach')
+
+	# Apply the datasheet theme to all asciidoctor_html builders
+	bld.set_asciidoctor_html_theme('../build/assets/datasheet')
 
 # The following 2 entires generate the Peach Pro doc using outline of v3Q4 update
 # Commnented out while I work on User Guide structuring.
 
 book = bld(
-	features = 'asciidoc',
+	features = 'asciidoctor-pdf',
 	source = 'src.pro/book.adoc',
 	images = 'src.pro/images',
-	cover = 'src.pro/Professional_Cover.pdf',
 	name = 'Peach_Pro_Developer_Guide.pdf',
 	install_path = '${BINDIR}/sdk/docs',
 )
@@ -19,16 +22,15 @@ bld(
 	features = 'webhelp',
 	source = 'src.pro/book.adoc',
 	images = 'src.pro/images',
-	name = 'webhelp',
+	name = 'webhelpDevGuide',
 	install_path = '${BINDIR}/sdk/docs/webhelp',
 )
 
 # The following 2 entires generate the Peach Pro User Guide doc using (new in 2015)
-book = bld(
-	features = 'asciidoc',
+ug = bld(
+	features = 'asciidoctor-pdf',
 	source = 'src.pro/UserGuide.adoc',
 	images = 'src.pro/images',
-	cover = 'src.pro/User_Guide_Cover.pdf',
 	name = 'Peach_Pro_User_Guide.pdf',
 	install_path = '${BINDIR}/docs',
 )
@@ -47,3 +49,33 @@ bld(
 	name = 'apidocs',
 	install_path = '${BINDIR}/sdk',
 )
+
+def check_sources(ctx, tgs):
+	if 'asciidoctor-pdf' not in ctx.env.supported_features:
+		return
+
+	from waflib import Logs
+	import re
+
+	srcs = set()
+	dirs = set()
+	deps = set()
+	for tg in tgs:
+		for tsk in tg.compiled_tasks:
+			dirs.update([x.parent for x in tsk.inputs])
+			deps.update(tsk.inputs)
+			deps.update(ctx.node_deps.get(tsk.uid(), []))
+
+	for d in dirs:
+		srcs.update(d.ant_glob('**/*'))
+
+	convert = lambda text: int(text) if text.isdigit() else text.lower()
+	alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key.abspath()) ]
+	extras = sorted(srcs.difference(deps), key = alphanum_key)
+
+	for e in extras:
+		Logs.warn('Unreferenced Documentation: %s' % e.path_from(bld.path))
+	if extras:
+		Logs.warn('%s Total Unreferenced Documentation Files' % len(extras))
+
+bld.add_post_fun(lambda x: check_sources(x, [book, ug]))
