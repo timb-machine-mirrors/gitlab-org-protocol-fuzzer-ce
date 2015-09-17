@@ -165,7 +165,6 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 Output in Peach Validator 
 
-.{nbsp}
 image::{images}/Asn1AnalyzerOutput.png["Validator Output", alt="Validator Output"]
 
 ==========================
@@ -307,7 +306,6 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 Output in Peach Validator 
 
-.{nbsp}
 image::{images}/Asn1AnalyzerOutput.png["Validator Output", alt="Validator Output"]
 
 ==========================
