@@ -76,6 +76,14 @@ def check_sources(ctx, tgs):
 	for e in extras:
 		Logs.warn('Unreferenced Documentation: %s' % e.path_from(bld.path))
 	if extras:
+		suffix = {}
+		for e in extras:
+			name = str(e)
+			ext = name[-len(name) + name.rfind('.'):]
+			suffix[ext] = suffix.get(ext, 0) + 1
+		for k,v in suffix.iteritems():
+			Logs.warn('Unreferenced \'*%s\' Files: %s' % (k, v))
+
 		Logs.warn('%s Total Unreferenced Documentation Files' % len(extras))
 
 bld.add_post_fun(lambda x: check_sources(x, [book, ug]))
