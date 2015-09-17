@@ -27,7 +27,7 @@ bld(
 )
 
 # The following 2 entires generate the Peach Pro User Guide doc using (new in 2015)
-book = bld(
+ug = bld(
 	features = 'asciidoctor-pdf',
 	source = 'src.pro/UserGuide.adoc',
 	images = 'src.pro/images',
@@ -49,3 +49,33 @@ bld(
 	name = 'apidocs',
 	install_path = '${BINDIR}/sdk',
 )
+
+def check_sources(ctx, tgs):
+	if 'asciidoctor-pdf' not in ctx.env.supported_features:
+		return
+
+	from waflib import Logs
+	import re
+
+	srcs = set()
+	dirs = set()
+	deps = set()
+	for tg in tgs:
+		for tsk in tg.compiled_tasks:
+			dirs.update([x.parent for x in tsk.inputs])
+			deps.update(tsk.inputs)
+			deps.update(ctx.node_deps.get(tsk.uid(), []))
+
+	for d in dirs:
+		srcs.update(d.ant_glob('**/*'))
+
+	convert = lambda text: int(text) if text.isdigit() else text.lower()
+	alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key.abspath()) ]
+	extras = sorted(srcs.difference(deps), key = alphanum_key)
+
+	for e in extras:
+		Logs.warn('Unreferenced Documentation: %s' % e.path_from(bld.path))
+	if extras:
+		Logs.warn('%s Total Unreferenced Documentation Files' % len(extras))
+
+bld.add_post_fun(lambda x: check_sources(x, [book, ug]))
