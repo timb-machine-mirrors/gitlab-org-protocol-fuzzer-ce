@@ -44,6 +44,7 @@ gemspec :path => "%s"
 	v.ASCIIDOCTOR_HTML_OPTS = []
 	v.ASCIIDOCTOR_HTML_THEME_DEPS = []
 	v.ASCIIDOCTOR_HTML_THEME_OPTS = []
+	v.ASCIIDOCTOR_OPTS = []
 
 	# Run bundler which will prepare all the prerequisites
 	conf.cmd_and_log(v.BUNDLE + [ '--gemfile=%s' % v.ASCIIDOCTOR_PDF_GEMFILE ])
@@ -109,6 +110,8 @@ def apply_asciidoctor_pdf(self):
 
 	tsk.env.append_value('ASCIIDOCTOR_PDF_OPTS', [ '--trace' ])
 
+	self.compiled_tasks = [ tsk ]
+
 	# Store inst task in install_extras for packaging
 	try:
 		self.install_extras.append(inst)
@@ -161,9 +164,16 @@ class asciidoctor_pdf(Task):
 		return super(asciidoctor_pdf, self).exec_command(cmd, **kw)
 
 class asciidoctor_html(Task):
-	run_str = '${ASCIIDOCTOR} ${ASCIIDOCTOR_OPTS} ${ASCIIDOCTOR_HTML_THEME_OPTS} -b html5 -o ${TGT} ${SRC}'
+	run_str = '${ASCIIDOCTOR} ${ASCIIDOCTOR_HTML_OPTS} ${ASCIIDOCTOR_HTML_THEME_OPTS} -b html5 -o ${TGT} ${SRC}'
 	color   = 'PINK'
 	ext_out = '.html'
 	vars    = ['ASCIIDOCTOR_HTML_OPTS', 'ASCIIDOCTOR_HTML_THEME_OPTS']
 	scan    = asciidoctor_scan
 	themes  = lambda x: x.env.ASCIIDOCTOR_HTML_THEME_DEPS
+
+class asciidoctor(Task):
+	run_str = '${ASCIIDOCTOR} ${ASCIIDOCTOR_OPTS} -o ${TGT} ${SRC}'
+	color   = 'PINK'
+	vars    = ['ASCIIDOCTOR_OPTS']
+	scan    = asciidoctor_scan
+	themes  = lambda x: []

@@ -101,20 +101,21 @@ title_page:
     font_color: $base_font_color
     line_height: 0.9
   subtitle:
-    font_size: $heading_h3_font_size
-    font_style: bold_italic
+    font_size: $heading_h1_font_size
+    font_style: $base_font_style
     line_height: 1
   authors:
     margin_top: $base_font_size * 1.25
-    font_size: $base_font_size_large
+    font_size: $heading_h3_font_size
     font_color: 181818
   revision:
     margin_top: $base_font_size * 1.25
+    font_size: $heading_h3_font_size
 block:
   margin_top: 0
   margin_bottom: $vertical_rhythm
 caption:
-  align: left
+  align: center
   font_style: bold
   font_color: 7a2417
   # FIXME perhaps set line_height instead of / in addition to margins?
