@@ -11,7 +11,7 @@ def configure(conf):
 
 	conf.find_program('tsc')
 
-	cmd = ['tsc', '--version']
+	cmd = v['TSC'] + ['--version']
 	try:
 		out, err = conf.cmd_and_log(cmd, output=0)
 	except Errors.WafError:
@@ -21,7 +21,7 @@ def configure(conf):
 	match = version_re(out)
 	if match:
 		kw = match.groupdict()
-		if kw['major'] != '1' and kw['minor'] != '5':
+		if kw['major'] != '1' or kw['minor'] != '5':
 			conf.fatal('Wrong version for tsc. Expecting 1.5.*, got: %(major)s.%(minor)s.%(patch)s' % kw) 
 	else:
 		conf.fatal('Could not determine version for tsc.')
