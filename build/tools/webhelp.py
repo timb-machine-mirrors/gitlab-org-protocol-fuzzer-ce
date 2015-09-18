@@ -1,12 +1,13 @@
 import os.path, shutil
+from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method, after_method, extension
 from waflib.Task import Task, SKIP_ME, RUN_ME, ASK_LATER, update_outputs, Task
+from waflib.Node import Node
 from waflib import Utils, Errors, Logs, Context
 
 def configure(conf):
 	j = os.path.join
 	v = conf.env
-	pub = j(conf.path.abspath(), 'docs', 'publishing')
 
 	if 'asciidoctor-pdf' not in v.supported_features:
 		raise Errors.WafError("asciidoctor-pdf feature is missing")
@@ -15,56 +16,77 @@ def configure(conf):
 	conf.find_program('xmllint')
 	conf.find_program('xsltproc')
 
-	conf.env.append_value('SGML_CATALOG_FILES', [ j(pub, 'docbook-xml-4.5', 'catalog.xml') ])
-
-	conf.env['XMLLINT_OPTS'] = [
-		'--catalogs',
-		'--nonet',
+	v['XMLLINT_OPTS'] = [
 		'--noout',
-		'--valid',
+		'--dtdvalid',
+		j(conf.get_third_party(), 'docbook-5.0', 'dtd', 'docbook.dtd')
 	]
 
-	docbook = j('docs', 'publishing', 'docbook-xsl-1.78.1')
-	conf.env['WEBHELP_DIR'] = j(docbook, 'webhelp')
-	conf.env['WEBHELP_XSL'] = j(conf.path.abspath(), docbook, 'webhelp', 'xsl', 'webhelp.xsl')
+	xsl = j(conf.get_third_party(), 'docbook-xsl-ns-1.78.1')
 
-	extensions = j(conf.path.abspath(), docbook, 'extensions')
-	xerces = j(pub, 'xerces-2_11_0')
+	v['WEBHELP_DIR'] = j(xsl, 'webhelp')
+	v['WEBHELP_XSL'] = j(xsl, 'webhelp', 'xsl', 'webhelp.xsl')
+
+	extensions = j(conf.get_third_party(), 'docbook-xsl-ns-1.78.1', 'extensions')
 
 	classes = [
 		j(extensions, 'webhelpindexer.jar'),
+		j(extensions, 'tagsoup-1.2.1.jar'),
 		j(extensions, 'lucene-analyzers-3.0.0.jar'),
 		j(extensions, 'lucene-core-3.0.0.jar'),
-		j(extensions, 'tagsoup-1.2.1.jar'),
-		j(extensions, 'saxon-65.jar'),
-		j(xerces, 'xercesImpl.jar'),
-		j(xerces, 'xml-apis.jar '),
 	]
 
 	conf.env['WEBINDEX_OPTS'] = [
-		'-DhtmlDir=docs',
+		'-DindexerLanguage=en',
+		'-DhtmlExtension=html',
+		'-DdoStem=true',
 		'-DindexerExcludedFiles=""',
 		'-Dorg.xml.sax.driver=org.ccil.cowan.tagsoup.Parser',
 		'-Djavax.xml.parsers.SAXParserFactory=org.ccil.cowan.tagsoup.jaxp.SAXFactoryImpl',
-		'-cp',
+		'-classpath',
 		os.pathsep.join(classes),
 		'com.nexwave.nquindexer.IndexerMain',
 	]
 
-def webhelp_inst_runnable_status(self):
+@conf
+def set_webhelp_theme(self, path):
+	if isinstance(path, str):
+		node = self.path.find_dir(path)
+	else:
+		node = path
+	if not node:
+		raise Errors.WafError("webhelp theme directory not found: %r in %r" % (path, self))
+
+	self.env.WEBHELP_THEME_PATH = node
+	self.env.WEBHELP_THEME_DEPS = node.ant_glob('**/*')
+
+def runnable_status(self):
 	for t in self.run_after:
 		if not t.hasrun:
 			return ASK_LATER
 
 	if not self.inputs:
 		# Get the list of files to install
-		# self.path is the same as our task generator's output_dir
 		self.source = self.inputs = self.path.ant_glob('**/*', quiet=True)
 
 	ret = Task.runnable_status(self)
 	if ret == SKIP_ME:
 		return RUN_ME
 	return ret
+
+def install_webhelp(self, inst_to, srcs, cwd, tsk = None):
+	inst = self.bld.install_files(inst_to, srcs, cwd = cwd, relative_trick = True, chmod = Utils.O644)
+
+	if inst:
+		if tsk:
+			inst.set_run_after(tsk)
+			inst.runnable_status = lambda inst=inst: runnable_status(inst)
+
+		# Store inst task in install_extras for packaging
+		try:
+			self.install_extras.append(inst)
+		except AttributeError:
+			self.install_extras = [inst]
 
 @feature('webhelp')
 @before_method('process_source')
@@ -82,47 +104,37 @@ def apply_webhelp(self):
 	name = getattr(self, 'target', None)
 	if not name: name = self.name + '.xml'
 	xml = self.path.find_or_declare(name)
+	out = xml.parent.get_bld().make_node(self.name)
+	out.mkdir()
 
-	tsk = self.create_task('asciidoctor', srcs, xml)
-	self.create_task('xmllint', xml)
+	doc = self.create_task('asciidoctor', srcs, xml)
+	lnt = self.create_task('xmllint', xml)
+	hlp = self.create_task('webhelp', xml)
+	idx = self.create_task('webindex', xml)
 
-	if getattr(self, 'dryrun', False):
-		idx = None
-	else:
-		self.create_task('webhelp', xml)
-		idx = self.create_task('webindex', xml)
+	idx.set_run_after(hlp)
+	hlp.set_run_after(lnt)
 
-	tsk.env.append_value('ASCIIDOCTOR_OPTS', [
+	self.output_dir = out
+
+	self.env.append_value('ASCIIDOCTOR_OPTS', [
 		'-v',
 		'-d',
 		'article',
 		'-b',
-		'docbook45',
+		'docbook',
+		'-a'
+		'images=images',
 	])
 
-	# xsltproc outputs to cwd
-	self.output_dir = xml.parent.find_dir(self.name)
-	if not self.output_dir:
-		self.output_dir = xml.parent.find_or_declare(self.name)
+	hlp.env['OUTPUT_DIR'] = out.path_from(self.bld.bldnode).replace('\\', '/') + '/'
+	idx.env['OUTPUT_DIR'] = '-DhtmlDir=%s' % out.path_from(self.bld.bldnode)
 
-	# docbook-xsl will puts all docs in a 'docs' subfolder
-	# so include this in our cwd so it is stripped in the BINDIR
-	cwd = self.output_dir.find_or_declare('docs/file').parent
-
+	# Set a reasonable default install_path
 	inst_to = getattr(self, 'install_path', '${BINDIR}/%s' % self.name)
-	inst = self.bld.install_files(inst_to, [], cwd = cwd, relative_trick = True, chmod = Utils.O644)
 
-	if inst and idx:
-		inst.set_run_after(idx)
-		inst.runnable_status = lambda inst=inst: webhelp_inst_runnable_status(inst)
+	install_webhelp(self, inst_to, [], out, idx)
 
-		# Store inst task in install_extras for packaging
-		try:
-			self.install_extras.append(inst)
-		except AttributeError:
-			self.install_extras = [inst]
-
-	# Set path to images relative to webroot
 	images = getattr(self, 'images', None)
 	if images:
 		if isinstance(images, str):
@@ -131,23 +143,27 @@ def apply_webhelp(self):
 			img = images
 		if not img:
 			raise Errors.WafError("image directory not found: %r in %r" % (images, self))
-		tsk.env.append_value('ASCIIDOCTOR_OPTS', [ '-a', 'images=images' ])
 
-		# Install images to bin directory
-		inst = self.bld.install_files('%s/images' % inst_to, img.ant_glob('**/*'), cwd = img, relative_trick = True, chmod = Utils.O644)
-		if inst:
-			try:
-				self.install_extras.append(inst)
-			except AttributeError:
-				self.install_extras = [inst]
+		# Install image files
+		install_webhelp(self, '%s/images' % inst_to, img.ant_glob('**/*'), img)
 
 	root = self.bld.launch_node()
 
-	# Install template files to BINDIR
-	template = root.find_dir(os.path.join(self.env.WEBHELP_DIR, 'template'))
-	inst = self.bld.install_files(inst_to, template.ant_glob('**/*', excl='favicon.ico'), cwd = template, relative_trick = True, chmod = Utils.O644)
-	if inst:
-		self.install_extras.append(inst)
+	# Install user template files
+	if self.env.WEBHELP_THEME_DEPS:
+		install_webhelp(self, inst_to, self.env.WEBHELP_THEME_DEPS, self.env.WEBHELP_THEME_PATH)
+
+	# Install template files not included by the user
+	template = os.path.relpath(os.path.join(self.env.WEBHELP_DIR, 'template'), self.path.abspath())
+	node = self.path.find_dir(template)
+	if not node:
+		raise Errors.WafError("webhelp template directory not found at %r in %r" % (template, self))
+
+	theme = [ x.path_from(self.env.WEBHELP_THEME_PATH) for x in self.env.WEBHELP_THEME_DEPS ]
+	files = [ x for x in node.ant_glob('**/*') if x.path_from(node) not in theme ]
+
+	if files:
+		install_webhelp(self, inst_to, files, node)
 
 class xmllint(Task):
 	run_str = '${XMLLINT} ${XMLLINT_OPTS} ${SRC}'
@@ -155,64 +171,45 @@ class xmllint(Task):
 	before  = [ 'webhelp' ]
 	vars    = [ 'XMLLINT_OPTS' ]
 
-	def exec_command(self, cmd, **kw):
-		env = dict(self.env.env or os.environ)
-		env.update(SGML_CATALOG_FILES = ';'.join(self.env['SGML_CATALOG_FILES']))
-		kw['env'] = env
-
-		return super(xmllint, self).exec_command(cmd, **kw)
-
+@update_outputs
 class webhelp(Task):
-	run_str = '${XSLTPROC} ${WEBHELP_XSL} ${SRC[0].abspath()}'
+	run_str = '${XSLTPROC} --stringparam base.dir ${OUTPUT_DIR} ${WEBHELP_XSL} ${SRC}'
 	color   = 'PINK'
-	vars    = [ 'WEBHELP_XSL' ]
+	vars    = [ 'WEBHELP_XSL', 'OUTPUT_DIR' ]
 	after   = [ 'xmllint' ]
 
 	def exec_command(self, cmd, **kw):
-		# webhelp outputs all files in cwd
-		self.cwd = self.generator.output_dir.abspath()
-
-		if os.path.exists(self.cwd):
+		if os.path.exists(self.generator.output_dir.abspath()):
 			try:
-				shutil.rmtree(self.cwd)
+				shutil.rmtree(self.generator.output_dir.abspath())
 			except OSError:
 				pass
 
-		os.makedirs(self.cwd)
+		os.makedirs(self.generator.output_dir.abspath())
 
-		kw['cwd'] = self.cwd
-
-		return super(webhelp, self).exec_command(cmd, **kw)
-
-@update_outputs
-class webindex(Task):
-	run_str = '${JAVA} ${WEBINDEX_OPTS}'
-	color   = 'PINK'
-	vars    = [ 'WEBINDEX_OPTS' ]
-	after   = [ 'webhelp' ]
-
-	def exec_command(self, cmd, **kw):
-		# Force 'cwd' to be output_dir
-		kw['cwd'] = self.generator.output_dir.abspath()
-		ret = super(webindex, self).exec_command(cmd, **kw)
+		ret = super(webhelp, self).exec_command(cmd, **kw)
 
 		if not ret:
-			# gather the list of output files from webhelp and webindex
-			self.outputs = self.generator.output_dir.ant_glob('**/*', quiet=True)
+			# gather the list of output files from webhelp
+			# @update_outputs will make waf generate node signatures
+			self.outputs = self.generator.output_dir.ant_glob('*', quiet=True)
 
 		return ret
 
-	
-'''	
-	inst_to = getattr(self, 'install_path', '${BINDIR}')
-	inst = self.install_files(inst_to, tsk.outputs, chmod=Utils.O644)
+@update_outputs
+class webindex(Task):
+	run_str = '${JAVA} ${OUTPUT_DIR} ${WEBINDEX_OPTS} '
+	color   = 'PINK'
+	vars    = [ 'WEBINDEX_OPTS', 'OUTPUT_DIR' ]
+	after   = [ 'webhelp' ]
 
-	tsk.env.append_value('ASCIIDOCTOR_PDF_OPTS', [ '--trace' ])
+	def exec_command(self, cmd, **kw):
+		ret = super(webindex, self).exec_command(cmd, **kw)
 
-	# Store inst task in install_extras for packaging
-	try:
-		self.install_extras.append(inst)
-	except AttributeError:
-		self.install_extras = [inst]
+		if not ret:
+			# gather the list of output files from webindex
+			# @update_outputs will make waf generate node signatures
+			self.outputs = self.generator.output_dir.ant_glob('search/*', quiet=True)
 
-'''
+		return ret
+
