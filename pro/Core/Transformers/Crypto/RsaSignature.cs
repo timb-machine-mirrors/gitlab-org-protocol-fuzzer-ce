@@ -109,10 +109,10 @@ namespace Peach.Pro.Core.Transformers.Crypto
 			sig.BlockUpdate(clear, 0, clear.Length);
 			var signature = sig.GenerateSignature();
 
-			Console.Write(string.Format("RSA SIGN({0}): ", signature.Length));
-			foreach (var b in signature)
-				Console.Write(string.Format("{0:X2} ", b));
-			Console.WriteLine();
+			//Console.Write(string.Format("RSA SIGN({0}): ", signature.Length));
+			//foreach (var b in signature)
+			//	Console.Write(string.Format("{0:X2} ", b));
+			//Console.WriteLine();
 
 			return new BitStream(signature);
 		}
