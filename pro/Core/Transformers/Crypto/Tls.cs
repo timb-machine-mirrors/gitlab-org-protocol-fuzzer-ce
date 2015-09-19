@@ -198,10 +198,10 @@ namespace Peach.Pro.Core.Transformers.Crypto
 			var context = root.actionData.action.parent.parent.parent.context;
 			var sequenceCounter = GetSequenceCounter(context);
 
-			Console.WriteLine("Verify Data (Pre-Encrypt): ");
-			foreach (var b in buf)
-				Console.Write(string.Format("{0:X2} ", b));
-			Console.WriteLine();
+			//Console.WriteLine("Verify Data (Pre-Encrypt): ");
+			//foreach (var b in buf)
+			//	Console.Write(string.Format("{0:X2} ", b));
+			//Console.WriteLine();
 
 			try
 			{
