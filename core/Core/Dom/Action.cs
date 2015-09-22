@@ -291,8 +291,8 @@ namespace Peach.Core.Dom
 				object value = parent.parent.parent.Python.Eval(when, scope);
 				if (!(value is bool))
 				{
-					logger.Warn("Run({0}): {1}: When return is not boolean, skipping. Returned: {2}", Name, GetType().Name, value);
-					return;
+					var msg = "Run({0}): {1}: When return is not boolean, skipping. Returned: {2}".Fmt(Name, GetType().Name, value);
+					throw new SoftException(msg);
 				}
 
 				if (!(bool)value)
