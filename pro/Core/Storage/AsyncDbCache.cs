@@ -125,8 +125,19 @@ namespace Peach.Pro.Core.Storage
 			}
 		}
 
+		private void CheckTask()
+		{
+			if (_task.IsFaulted)
+			{
+				Logger.Error("BackgroundTask exception: {0}".Fmt(_task.Exception.InnerException));
+				throw _task.Exception;
+			}
+		}
+
 		private void EnqueueFront(Func<Stopwatch, Job> func)
 		{
+			CheckTask();
+
 			_queueSemaphore.Wait();
 			lock (_queue)
 			{
@@ -138,8 +149,9 @@ namespace Peach.Pro.Core.Storage
 
 		private void EnqueueBack(Func<Stopwatch, Job> func)
 		{
-			_queueSemaphore.Wait();
+			CheckTask();
 
+			_queueSemaphore.Wait();
 			lock (_queue)
 			{
 				_queue.AddLast(func);

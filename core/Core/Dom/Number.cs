@@ -56,6 +56,8 @@ namespace Peach.Core.Dom
 	[Serializable]
 	public class Number : DataElement
 	{
+		static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
 		protected ulong _max = (ulong)sbyte.MaxValue;
 		protected long _min = sbyte.MinValue;
 		protected bool _signed = false;
@@ -394,16 +396,32 @@ namespace Peach.Core.Dom
 
 			if (value > 0 && (ulong)value > MaxValue)
 			{
-				string msg = string.Format("Error, {0} value '{1}' is greater than the maximum {2}-bit {3} number.", debugName, value, lengthAsBits, Signed ? "signed" : "unsigned");
-				var inner = new OverflowException(msg);
-				throw new SoftException(inner);
+				var msg = string.Format("{0} value '{1}' is greater than the maximum {2}-bit {3} number.", debugName, value, lengthAsBits, Signed ? "signed" : "unsigned");
+
+				if (isContolIteration)
+					throw new SoftException(new OverflowException(msg));
+
+				// If number is target of a relation, mutation could cause the value
+				// to be larger than the valid max.  Throwing a soft exception will cause
+				// the iteration to get skipped, this can happen a large percentage of the time
+				// so until the mutators properly scope their max size based on numerical
+				// limits of relationships, just ignore the overflow.
+				// See peach-pro issue #411
+				Logger.Trace(msg);
+
+				value = MaxValue;
 			}
 
 			if (value < 0 && (long)value < MinValue)
 			{
-				string msg = string.Format("Error, {0} value '{1}' is less than the minimum {2}-bit {3} number.", debugName, value, lengthAsBits, Signed ? "signed" : "unsigned");
-				var inner = new OverflowException(msg);
-				throw new SoftException(inner);
+				var msg = string.Format("{0} value '{1}' is less than the minimum {2}-bit {3} number.", debugName, value, lengthAsBits, Signed ? "signed" : "unsigned");
+
+				if (isContolIteration)
+					throw new SoftException(new OverflowException(msg));
+
+				Logger.Trace(msg);
+
+				value = MinValue;
 			}
 
 			ulong bits = _endian.GetBits(value, (int)lengthAsBits);
@@ -412,6 +430,15 @@ namespace Peach.Core.Dom
 			bs.WriteBits(bits, (int)lengthAsBits);
 			bs.Seek(0, System.IO.SeekOrigin.Begin);
 			return bs;
+		}
+
+		bool isContolIteration
+		{
+			get
+			{
+				var dm = root as DataModel;
+				return dm == null || dm.actionData == null || dm.actionData.action.parent.parent.parent.context.controlIteration;
+			}
 		}
 	}
 }

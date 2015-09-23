@@ -6,16 +6,7 @@ from waflib import Task, Utils, Node, Logs
 from waflib.TaskGen import feature
 
 def configure(conf):
-	v = conf.env
-
-	try:
-		conf.find_program('doxygen', var='DOXYGEN')
-		v.append_value('supported_features', 'doxygen')
-	except Exception, e:
-		v.append_value('missing_features', 'doxygen')
-		if Logs.verbose > 0:
-			Logs.warn('Doxygen is not available: %s' % (e))
-
+	conf.find_program('doxygen', var='DOXYGEN')
 
 DOXY_STR = '${DOXYGEN} - '
 DOXY_FMTS = 'html latex man rft xml'.split()
@@ -131,6 +122,12 @@ class doxygen(Task.Task):
 
 			self.pars['OUTPUT_DIRECTORY'] = self.output_dir.abspath()
 
+		try:
+			# Ensure output directory is created
+			os.makedirs(self.output_dir.abspath())
+		except OSError:
+			pass
+
 		self.signature()
 		return Task.Task.runnable_status(self)
 
@@ -153,7 +150,6 @@ class doxygen(Task.Task):
 			else:
 				nodes.append(node)
 
-		print self.doxy_extras
 		nodes.extend(self.doxy_extras)
 
 		return (nodes, names)

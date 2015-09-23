@@ -9,54 +9,54 @@ namespace Peach.Pro.Test.Core.Fixups
 	[TestFixture]
 	[Quick]
 	[Peach]
-    class LRCFixupTests : DataModelCollector
-    {
-        [Test]
-        public void Test1()
-        {
-            // standard test
+	class LRCFixupTests : DataModelCollector
+	{
+		[Test]
+		public void Test1()
+		{
+			// standard test
 
-            string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
-                "<Peach>" +
-                "   <DataModel name=\"TheDataModel\">" +
-                "       <Number name=\"CRC\" size=\"32\" signed=\"false\">" +
-                "           <Fixup class=\"LRCFixup\">" +
-                "               <Param name=\"ref\" value=\"Data\"/>" +
-                "           </Fixup>" +
-                "       </Number>" +
-                "       <Blob name=\"Data\" value=\"12345\"/>" +
-                "   </DataModel>" +
+			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
+				"<Peach>" +
+				"   <DataModel name=\"TheDataModel\">" +
+				"       <Number name=\"CRC\" size=\"32\" signed=\"false\">" +
+				"           <Fixup class=\"LRCFixup\">" +
+				"               <Param name=\"ref\" value=\"Data\"/>" +
+				"           </Fixup>" +
+				"       </Number>" +
+				"       <Blob name=\"Data\" value=\"12345\"/>" +
+				"   </DataModel>" +
 
-                "   <StateModel name=\"TheState\" initialState=\"Initial\">" +
-                "       <State name=\"Initial\">" +
-                "           <Action type=\"output\">" +
-                "               <DataModel ref=\"TheDataModel\"/>" +
-                "           </Action>" +
-                "       </State>" +
-                "   </StateModel>" +
+				"   <StateModel name=\"TheState\" initialState=\"Initial\">" +
+				"       <State name=\"Initial\">" +
+				"           <Action type=\"output\">" +
+				"               <DataModel ref=\"TheDataModel\"/>" +
+				"           </Action>" +
+				"       </State>" +
+				"   </StateModel>" +
 
-                "   <Test name=\"Default\">" +
-                "       <StateModel ref=\"TheState\"/>" +
-                "       <Publisher class=\"Null\"/>" +
-                "   </Test>" +
-                "</Peach>";
+				"   <Test name=\"Default\">" +
+				"       <StateModel ref=\"TheState\"/>" +
+				"       <Publisher class=\"Null\"/>" +
+				"   </Test>" +
+				"</Peach>";
 
-            PitParser parser = new PitParser();
+			PitParser parser = new PitParser();
 
-            Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
-            RunConfiguration config = new RunConfiguration();
-            config.singleIteration = true;
+			RunConfiguration config = new RunConfiguration();
+			config.singleIteration = true;
 
-            Engine e = new Engine(this);
-            e.startFuzzing(dom, config);
+			Engine e = new Engine(this);
+			e.startFuzzing(dom, config);
 
-            // verify values
-            // -- this is the pre-calculated result from Peach2.3 on the blob: "12345"
-            byte[] precalcResult = new byte[] { 0x01, 0x00, 0x00, 0x00 };
-            Assert.AreEqual(1, values.Count);
-            Assert.AreEqual(precalcResult, values[0].ToArray());
-        }
+			// verify values
+			// -- this is the pre-calculated result from Peach2.3 on the blob: "12345"
+			byte[] precalcResult = new byte[] { 0x01, 0x00, 0x00, 0x00 };
+			Assert.AreEqual(1, values.Count);
+			Assert.AreEqual(precalcResult, values[0].ToArray());
+		}
 
 		[Test]
 		public void TestTypes()
@@ -126,7 +126,103 @@ namespace Peach.Pro.Test.Core.Fixups
 
 			VerifyRoundTrip(xml);
 		}
-    }
-}
 
-// end
+		[Test]
+		public void TestModbus1()
+		{
+			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
+				"<Peach>" +
+				"   <DataModel name=\"TheDataModel\">" +
+				"       <Number name=\"CRC\" size=\"8\" signed=\"false\">" +
+				"           <Fixup class=\"LRCFixup\">" +
+				"               <Param name=\"ref\" value=\"Data\"/>" +
+				"           </Fixup>" +
+				"       </Number>" +
+				"       <Blob name=\"Data\" valueType=\"hex\" value=\"010300000001\"/>" +
+				"   </DataModel>" +
+
+				"   <StateModel name=\"TheState\" initialState=\"Initial\">" +
+				"       <State name=\"Initial\">" +
+				"           <Action type=\"output\">" +
+				"               <DataModel ref=\"TheDataModel\"/>" +
+				"           </Action>" +
+				"       </State>" +
+				"   </StateModel>" +
+
+				"   <Test name=\"Default\">" +
+				"       <StateModel ref=\"TheState\"/>" +
+				"       <Publisher class=\"Null\"/>" +
+				"   </Test>" +
+				"</Peach>";
+
+			PitParser parser = new PitParser();
+
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			RunConfiguration config = new RunConfiguration();
+			config.singleIteration = true;
+
+			Engine e = new Engine(this);
+			e.startFuzzing(dom, config);
+
+			// verify values
+			// -- this is the pre-calculated result from Peach2.3 on the blob: "12345"
+			byte[] precalcResult = new byte[] { 0xFB };
+			Assert.AreEqual(1, values.Count);
+			Assert.AreEqual(precalcResult, values[0].ToArray());
+		}
+
+		[Test]
+		public void TestModbus2()
+		{
+			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
+				"<Peach>" +
+				"   <DataModel name=\"TheDataModel\">" +
+						"<Block name=\"HexBlock\">" +
+							"<Block name=\"LrcBlock\">" +
+								"<Number name=\"Address\" size=\"8\" value=\"1\"/>" +
+								"<Number name=\"Function\" size=\"8\" value=\"3\"/>" +
+								"<Blob name=\"Data\" valueType=\"hex\" value=\"00000001\"/>" +
+							"</Block>" +
+							"<Number name=\"LRC\" size=\"8\" signed=\"false\">" +
+								"<Fixup class=\"LRCFixup\">" +
+									"<Param name=\"ref\" value=\"LrcBlock\"/>" +
+								"</Fixup>" +
+							"</Number>" +
+							"<Transformer class=\"Hex\">" +
+								"<Param name=\"lowercase\" value=\"false\" />" +
+							"</Transformer>" +
+						"</Block>" +
+				"   </DataModel>" +
+
+				"   <StateModel name=\"TheState\" initialState=\"Initial\">" +
+				"       <State name=\"Initial\">" +
+				"           <Action type=\"output\">" +
+				"               <DataModel ref=\"TheDataModel\"/>" +
+				"           </Action>" +
+				"       </State>" +
+				"   </StateModel>" +
+
+				"   <Test name=\"Default\">" +
+				"       <StateModel ref=\"TheState\"/>" +
+				"       <Publisher class=\"Null\"/>" +
+				"   </Test>" +
+				"</Peach>";
+
+			PitParser parser = new PitParser();
+
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			RunConfiguration config = new RunConfiguration();
+			config.singleIteration = true;
+
+			Engine e = new Engine(this);
+			e.startFuzzing(dom, config);
+
+			// verify values
+			byte[] expected = new byte[] { 0x30, 0x31, 0x30, 0x33, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x31, 0x46, 0x42 };
+			Assert.AreEqual(1, values.Count);
+			Assert.AreEqual(expected, values[0].ToArray());
+		}
+	}
+}

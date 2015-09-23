@@ -263,7 +263,7 @@ On OS X, run 'ifconfig' and look for the 'inet' field." />
         description="The target or destination port to send the network packet."/> 
 -----------------------------------
 
-These values are ready for use in the pit as "\\##TargetIPv4##" and "\\##TargetPort##". They can be used anywhere in the pit file. For example, the Publisher definition would be updated as follows:
+These values are ready for use in the pit as `##TargetIPv4##` and `##TargetPort##`. They can be used anywhere in the pit file. For example, the Publisher definition would be updated as follows:
 
 -----------------------------------
     <Publisher class="Udp">

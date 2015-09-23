@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 
-import os.path, re
+import os, os.path, re, glob
 from optparse import OptionValueError
 from waflib.TaskGen import feature, after_method, before_method
 from waflib.Build import InstallContext
 from waflib.Configure import conf
 from waflib import Utils, Logs, Configure, Context, Options, Errors
 from tools import pkg, hooks, nuget, test
-
-targets = [ 'win', 'linux', 'osx', 'doc' ]
 
 """
 Variables:
@@ -21,22 +19,16 @@ PREFIX = 'output\\win_x64_release'
 BINDIR = 'output\\win_x64_release\\bin'
 LIBDIR = 'output\\win_x64_release\\bin'
 DOCDIR = 'output\\win_x64_release\\doc'
-
+PKGDIR = 'output\\win_x64_release\\pkg'
 """
 
+cfg_files = glob.glob(os.path.join(os.path.dirname(__file__), '..', 'config', '*.py'))
+cfg_names = [ os.path.basename(f)[:-3] for f in cfg_files if not f.endswith('__init__.py')]
+
 @conf
-def get_peach_dir(self):
-	subdir = getattr(Context.g_module, 'peach', '.')
+def get_third_party(self):
+	subdir = getattr(Context.g_module, 'third_party', '3rdParty')
 	return self.path.find_dir(subdir).abspath()
-
-class MonoDocContext(InstallContext):
-	'''create api docs for .NET classes'''
-
-	cmd = 'mdoc'
-
-	def __init__(self, **kw):
-		super(MonoDocContext, self).__init__(**kw)
-		self.is_mdoc = True
 
 def store_version(option, opt, value, parser):
 	if not re.match('^\d+\.\d+\.\d+$', value):
@@ -67,7 +59,7 @@ def options(opt):
 
 def init(ctx):
 	if Logs.verbose == 0:
-		def null_msg(self, msg, result, color=None):
+		def null_msg(self, *k, **kw):
 			pass
 		setattr(Configure.ConfigurationContext, 'msg', null_msg)
 
@@ -87,7 +79,7 @@ def configure(ctx):
 	base_env.APPNAME = appname
 	base_env.OUTPUT = base_env.PREFIX = base_env.BINDIR = base_env.LIBDIR = base_env.DOCDIR = base_env.PKGDIR = inst
 	base_env.BUILDTAG = Options.options.buildtag
-	base_env.VER_BRANCH = getattr(Options.options, 'ver_branch', '0')
+	base_env.VER_BRANCH = getattr(Context.g_module, 'branch')
 
 	tool_dir =  [
 		os.path.join(Context.waf_dir, 'waflib', 'Tools'),
@@ -96,7 +88,7 @@ def configure(ctx):
 
 	platform = Utils.unversioned_sys_platform()
 
-	for tgt in targets:
+	for tgt in cfg_names:
 		try:
 			config = Context.load_tool('config.%s' % tgt)
 			ctx.msg("Loading '%s' config" % tgt, config.__file__)
@@ -104,14 +96,16 @@ def configure(ctx):
 			ctx.msg("Loading '%s' config" % tgt, 'not found', color='YELLOW')
 			continue
 
+		if not supported_variant(tgt):
+			if Logs.verbose > 0:
+				Logs.warn("Skipping '%s' for this build configuration." % tgt)
+			continue
+
 		platforms = getattr(config, 'host_plat', [])
 		archs = getattr(config, 'archs', None)
 		options = [ ('%s_%s' % (tgt, arch), arch) for arch in archs ] or [ (tgt, None) ]
 
 		for (name, arch) in options:
-			if not supported_variant(name):
-				continue
-
 			if Logs.verbose == 0:
 				Logs.pprint('NORMAL', 'Configuring variant %s :' % name.ljust(20), sep='')
 
@@ -126,13 +120,23 @@ def configure(ctx):
 				arch_env.SUBARCH = arch;
 				arch_env.PREFIX = os.path.join(base_env.PREFIX, name)
 				arch_env.BINDIR = os.path.join(base_env.BINDIR, name)
-				arch_env.PKGDIR = os.path.join(base_env.PKGDIR, name)
 				arch_env.LIBDIR = os.path.join(base_env.LIBDIR, name)
+				arch_env.PKGDIR = os.path.join(base_env.PKGDIR, name)
 				arch_env.DOCDIR = os.path.join(base_env.DOCDIR, name)
 				config.prepare(ctx)
 
 				for tool in getattr(config, 'tools', []):
 					ctx.load(tool, tool_dir)
+
+				for tool in getattr(config, 'optional_tools', []):
+					feature = tool[tool.rfind('.')+1:]
+					try:
+						ctx.load(tool, tool_dir)
+						arch_env.append_value('supported_features', feature)
+					except Exception, e:
+						arch_env.append_value('missing_features', feature)
+						if Logs.verbose > 0:
+							Logs.warn("Feature '%s' is not available: %s" % (feature, e))
 
 				config.configure(ctx)
 
@@ -209,7 +213,7 @@ def build(bld):
 	ignore = getattr(Context.g_module, 'ignore', [])
 	maxdepth = getattr(Context.g_module, 'maxdepth', 1)
 	dirs = [ x.parent for x in bld.path.ant_glob('**/wscript_build', maxdepth=maxdepth ) ]
-	subdirs = [ x.nice_path() for x in dirs if x.parent not in dirs ]
+	subdirs = [ x.path_from(bld.launch_node()) for x in dirs if x.parent not in dirs ]
 
 	# Ignore blacklisted subdirectories
 	for x in ignore:

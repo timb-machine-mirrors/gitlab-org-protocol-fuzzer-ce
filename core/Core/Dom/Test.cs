@@ -193,7 +193,7 @@ namespace Peach.Core.Dom
 		/// The maximum data size to generate for output actions.
 		/// </summary>
 		[XmlAttribute]
-		[DefaultValue(1073741824)]
+		[DefaultValue(500000000)]
 		public ulong maxOutputSize { get; set; }
 
 		/// <summary>

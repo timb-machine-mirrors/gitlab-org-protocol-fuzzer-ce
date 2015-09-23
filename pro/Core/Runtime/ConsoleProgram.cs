@@ -86,6 +86,7 @@ namespace Peach.Pro.Core.Runtime
 		private static volatile bool _shouldStop;
 		private string _jsonFile;
 		private PitConfig _jsonConfig;
+		private bool _polite;
 
 		#region Public Properties
 
@@ -136,6 +137,11 @@ namespace Peach.Pro.Core.Runtime
 				"1",
 				"Perform a single iteration",
 				v => _config.singleIteration = true
+			);
+			options.Add(
+				"polite",
+				"Disable interactive console mode, which is based on curses",
+				v => _polite = true
 			);
 			options.Add(
 				"debug",
@@ -326,7 +332,7 @@ namespace Peach.Pro.Core.Runtime
 		{
 			try
 			{
-				if (_verbosity > 0)
+				if (_verbosity > 0 || _polite)
 					return new ConsoleWatcher();
 
 				// Ensure console is interactive

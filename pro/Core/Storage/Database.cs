@@ -1,21 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SQLite;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Dapper;
-using NLog;
 using Peach.Core;
 using FileInfo = System.IO.FileInfo;
-
-#if MONO
-using Mono.Data.Sqlite;
-using SQLiteConnection = Mono.Data.Sqlite.SqliteConnection;
-using SQLiteCommand = Mono.Data.Sqlite.SqliteCommand;
-#else
-using System.Data.SQLite;
-#endif
 
 namespace Peach.Pro.Core.Storage
 {
@@ -157,7 +149,9 @@ namespace Peach.Pro.Core.Storage
 				UseWAL = useWal,
 			};
 
-			Connection = builder.Create();
+			var sqliteConnection = builder.Create();
+			sqliteConnection.SetExtendedResultCodes(true);
+			Connection = sqliteConnection;
 			Connection.Open();
 			
 			if (!IsInitialized)

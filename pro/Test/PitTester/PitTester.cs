@@ -467,8 +467,8 @@ namespace PitTester
 					}
 					catch (Exception ex)
 					{
-						throw new PeachException(string.Format("Error applying data fields '{0}' to '{1}.{2}.{3}.{4}'.",
-							data.Name, test.Name, state.Name, action.Name, actionData.dataModel.Name), ex);
+						throw new PeachException(string.Format("Error applying data fields '{0}' to '{1}.{2}.{3}.{4}'.\n{5}",
+							data.Name, test.Name, state.Name, action.Name, actionData.dataModel.Name, ex.Message), ex);
 					}
 				}
 			}
@@ -652,17 +652,20 @@ namespace PitTester
 					if (string.IsNullOrEmpty(lifetime))
 						errors.AppendLine("<Test> element is missing targetLifetime attribute.");
 
-					var parts = fileName.Split(Path.DirectorySeparatorChar);
-					var fileFuzzing = new[] { "Image", "Video", "Application" };
-					if (parts.Any(fileFuzzing.Contains) || parts.Last().Contains("Client"))
+					if (!ShouldSkipRule(it, "Skip_Lifetime"))
 					{
-						if (lifetime != "iteration")
-							errors.AppendLine("<Test> element has incorrect targetLifetime attribute. Expected 'iteration' but found '{0}'.".Fmt(lifetime));
-					}
-					else
-					{
-						if (lifetime != "session")
-							errors.AppendLine("<Test> element has incorrect targetLifetime attribute. Expected 'session' but found '{0}'.".Fmt(lifetime));
+						var parts = fileName.Split(Path.DirectorySeparatorChar);
+						var fileFuzzing = new[] { "Image", "Video", "Application" };
+						if (parts.Any(fileFuzzing.Contains) || parts.Last().Contains("Client"))
+						{
+							if (lifetime != "iteration")
+								errors.AppendLine("<Test> element has incorrect targetLifetime attribute. Expected 'iteration' but found '{0}'.".Fmt(lifetime));
+						}
+						else
+						{
+							if (lifetime != "session")
+								errors.AppendLine("<Test> element has incorrect targetLifetime attribute. Expected 'session' but found '{0}'.".Fmt(lifetime));
+						}
 					}
 
 					var loggers = it.Current.Select("p:Logger", nsMgr);

@@ -14,15 +14,19 @@ tools = [
 	'misc',
 	'tools.utils',
 	'tools.externals',
-	'tools.test',
 	'tools.version',
 	'tools.xcompile',
-	'tools.mdoc',
-	'tools.zip',
-	'tools.tsc',
-	'tools.mkbundle',
-	'tools.asan',
 ]
+
+optional_tools = [
+	'tools.asan',
+	'tools.mdoc',
+	'tools.mkbundle',
+	'tools.test',
+	'tools.tsc',
+	'tools.zip',
+]
+
 
 def prepare(conf):
 	env = conf.env
@@ -45,7 +49,7 @@ def prepare(conf):
 
 	env['PIN_VER'] = 'pin-2.13-61206-gcc.4.4.7-linux'
 
-	pin = j(conf.get_peach_dir(), '3rdParty', 'pin', env['PIN_VER'])
+	pin = j(conf.get_third_party(), 'pin', env['PIN_VER'])
 
 	env['EXTERNALS'] = {
 		'pin' : {

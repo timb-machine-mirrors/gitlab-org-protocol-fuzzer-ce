@@ -47,7 +47,7 @@ def configure(conf):
 <simpara>Test</simpara>
 </article>''')
 
-		conf.cmd_and_log([conf.env.FOPUB, test.abspath()], cwd = fopub)
+		conf.cmd_and_log(Utils.to_list(conf.env.FOPUB) + [test.abspath()], cwd = fopub)
 
 	conf.env['ASCIIDOCTOR_OPTS'] = [
 		'-v',

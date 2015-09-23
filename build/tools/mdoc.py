@@ -1,20 +1,25 @@
 from waflib.TaskGen import before_method, after_method, feature
+from waflib.Build import InstallContext
 from waflib import Errors, Task, Logs, Utils
 import os.path
 
+class MonoDocContext(InstallContext):
+	'''create api docs for .NET classes'''
+
+	cmd = 'mdoc'
+
+	def __init__(self, **kw):
+		super(MonoDocContext, self).__init__(**kw)
+		self.is_mdoc = True
+
 def configure(conf):
-	try:
-		mdoc_path = os.path.join(conf.get_peach_dir(), '3rdParty', 'mdoc-net-2010-01-04')
-		conf.find_program('mdoc', var='MDOC', exts='.exe', path_list=[mdoc_path])
-		conf.env.MDOC_ST = '--lib=%s'
-		conf.env.MDOC_OUTPUT = '${PREFIX}/apidoc'
+	mdoc_path = os.path.join(conf.get_third_party(), 'mdoc-net-2010-01-04')
+	conf.find_program('mdoc', var='MDOC', exts='.exe', path_list=[mdoc_path])
+	conf.env.MDOC_ST = '--lib=%s'
+	conf.env.MDOC_OUTPUT = '${PREFIX}/apidoc'
 
-		if (Utils.unversioned_sys_platform() != 'win32'):
-			conf.find_program('mono', var='MDOC_MONO')
-
-	except Exception, e:
-		if Logs.verbose > 0:
-			Logs.warn('C# html documentation is not available: %s' % (e))
+	if (Utils.unversioned_sys_platform() != 'win32'):
+		conf.find_program('mono', var='MDOC_MONO')
 
 @feature('cs')
 @after_method('doc_cs')

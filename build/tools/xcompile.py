@@ -17,7 +17,7 @@ def configure(conf):
 	old_end = conf.end_msg
 
 	if Logs.verbose == 0:
-		def null_msg(self, msg='', color=None, **kw):
+		def null_msg(self, *k, **kw):
 			pass
 
 		conf.start_msg = null_msg

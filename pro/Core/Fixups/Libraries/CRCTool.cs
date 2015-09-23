@@ -47,7 +47,7 @@ namespace Peach.Pro.Core.Fixups.Libraries
 		private ulong[] crctab = new ulong[256];
 
 		// Enumeration used in the init function to specify which CRC algorithm to use
-		public enum CRCCode { CRC_CCITT, CRC16, CRC32 };
+		public enum CRCCode { CRC_CCITT, CRC16, CRC32, CRC16_Modbus };
 
 		public CRCTool()
 		{
@@ -65,6 +65,9 @@ namespace Peach.Pro.Core.Fixups.Libraries
 					break;
 				case CRCCode.CRC16:
 					order = 16; direct = 1; polynom = 0x8005; crcinit = 0x0; crcxor = 0x0; refin = 1; refout = 1;
+					break;
+				case CRCCode.CRC16_Modbus:
+					order = 16; direct = 1; polynom = 0x8005; crcinit = 0xFFFF; crcxor = 0x0; refin = 1; refout = 1;
 					break;
 				case CRCCode.CRC32:
 					order = 32; direct = 1; polynom = 0x4c11db7; crcinit = 0xFFFFFFFF; crcxor = 0xFFFFFFFF; refin = 1; refout = 1;
