@@ -1,12 +1,4 @@
-﻿#if MONO
-using Mono.Data.Sqlite;
-
-using SQLiteCommand = Mono.Data.Sqlite.SqliteCommand;
-using SQLiteConnection = Mono.Data.Sqlite.SqliteConnection;
-using SQLiteParameter = Mono.Data.Sqlite.SqliteParameter;
-#else
-using System.Data.SQLite;
-#endif
+﻿using System.Data.SQLite;
 using System;
 using System.IO;
 using NUnit.Framework;
@@ -16,6 +8,7 @@ namespace Peach.Pro.Test.Core.Mutators
 {
 	[TestFixture]
 	[Peach]
+	[Quick]
 	class SampleNinjaMutatorTest : DataModelCollector
 	{
 
@@ -109,66 +102,66 @@ namespace Peach.Pro.Test.Core.Mutators
 ";
 
 		// Use this model to generate bin file.
-		string ninjaSampleXmlGenerateBin = @"<?xml version='1.0' encoding='utf-8'?>
-<Peach>
-	<!-- Used to generate bin file -->
-	<DataModel name='NinjaDmOut'>
-	
-		<Block name='Block' maxOccurs='-1'>
-			<Number name='Num16' size='16' value='600' />
-			<String name='Str' value='Peachy' token='true' />
-			<Blob name='Blob' value='Blobby' token='true' />
-			
-			<Flags name='Flgs' size='8'>
-				<Flag name='F1' size='1' position='1' />
-				<Flag name='F2' size='1' position='2' />
-			</Flags>
-		</Block>
-		
-		<Asn1Type class='2' pc='1' tag='0' name='terminationID'>
-			<String name='Value' value='Peachy'/>
-		</Asn1Type>
-		
-		<Choice name='Choice'>
-			<Number name='Num6' size='16' value='600' token='true' />
-			<Number name='Num7' size='16' value='700' token='true' />
-		</Choice>
-
-		<Json name='JsonTest'>
-			<Number name='Num16' size='16' value='600' />
-			<String name='Str' value='Peachy' />
-			<Blob name='Blob' value='Blobby' />
-			<Null name='null'/>
-			<Bool name='bool' value='1'/>
-		</Json>
-		
-		<String value='\n' token='true' />
-		
-		<Padding />
-
-	</DataModel>
-
-	<StateModel name='TheStateModel' initialState='initial'>
-		<State name='initial'>
-		  <Action type='output'>
-			<DataModel ref='NinjaDm'/>
-   			<Data>
-				<Field name='Block[0]' value='' />
-				<Field name='Block[1]' value='' />
-				<Field name='Block[2]' value='' />
-			</Data>
-		  </Action>
-		</State>
-	</StateModel>
-
-	<Test name='Default' maxOutputSize='200'>
-		<StateModel ref='TheStateModel'/>
-		<Publisher class='File'>
-			<Param name='FileName' value='ninja.bin' />
-		</Publisher>
-	</Test>
-</Peach>
-";
+//		string ninjaSampleXmlGenerateBin = @"<?xml version='1.0' encoding='utf-8'?>
+//<Peach>
+//	<!-- Used to generate bin file -->
+//	<DataModel name='NinjaDmOut'>
+//	
+//		<Block name='Block' maxOccurs='-1'>
+//			<Number name='Num16' size='16' value='600' />
+//			<String name='Str' value='Peachy' token='true' />
+//			<Blob name='Blob' value='Blobby' token='true' />
+//			
+//			<Flags name='Flgs' size='8'>
+//				<Flag name='F1' size='1' position='1' />
+//				<Flag name='F2' size='1' position='2' />
+//			</Flags>
+//		</Block>
+//		
+//		<Asn1Type class='2' pc='1' tag='0' name='terminationID'>
+//			<String name='Value' value='Peachy'/>
+//		</Asn1Type>
+//		
+//		<Choice name='Choice'>
+//			<Number name='Num6' size='16' value='600' token='true' />
+//			<Number name='Num7' size='16' value='700' token='true' />
+//		</Choice>
+//
+//		<Json name='JsonTest'>
+//			<Number name='Num16' size='16' value='600' />
+//			<String name='Str' value='Peachy' />
+//			<Blob name='Blob' value='Blobby' />
+//			<Null name='null'/>
+//			<Bool name='bool' value='1'/>
+//		</Json>
+//		
+//		<String value='\n' token='true' />
+//		
+//		<Padding />
+//
+//	</DataModel>
+//
+//	<StateModel name='TheStateModel' initialState='initial'>
+//		<State name='initial'>
+//		  <Action type='output'>
+//			<DataModel ref='NinjaDm'/>
+//   			<Data>
+//				<Field name='Block[0]' value='' />
+//				<Field name='Block[1]' value='' />
+//				<Field name='Block[2]' value='' />
+//			</Data>
+//		  </Action>
+//		</State>
+//	</StateModel>
+//
+//	<Test name='Default' maxOutputSize='200'>
+//		<StateModel ref='TheStateModel'/>
+//		<Publisher class='File'>
+//			<Param name='FileName' value='ninja.bin' />
+//		</Publisher>
+//	</Test>
+//</Peach>
+//";
 		string tmpPath;
 		string pitFile;
 		string pitSamplePath;
@@ -180,9 +173,6 @@ namespace Peach.Pro.Test.Core.Mutators
 		[SetUp]
 		public void BuildNinjaDatabase()
 		{
-			// So we don't get a compile warning
-			var foo = ninjaSampleXmlGenerateBin;
-
 			tmpPath = Path.GetTempFileName();
 			pitFile = Path.Combine(tmpPath, "ninja.xml");
 			pitSamplePath = Path.Combine(tmpPath, "samples");

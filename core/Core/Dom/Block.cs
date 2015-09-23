@@ -111,6 +111,7 @@ namespace Peach.Core.Dom
 				pit.WriteAttributeString("ref", referenceName);
 
 			WritePitCommonAttributes(pit);
+			WritePitCommonChildren(pit);
 
 			foreach (var obj in this)
 				obj.WritePit(pit);

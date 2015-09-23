@@ -372,17 +372,9 @@ namespace Peach.Pro.Test.Core
 			Assert.False(actions[2].error);
 			Assert.AreEqual(act3, actions[2].dataModel.Value.ToArray());
 
-			Assert.True(actions[3].error);
-			try
-			{
-				var x = actions[3].dataModel.Value;
-				Assert.Fail("should throw");
-				Assert.NotNull(x);
-			}
-			catch (SoftException se)
-			{
-				Assert.AreEqual("Error, Number 'foo.len' value '-1' is less than the minimum 64-bit unsigned number.", se.Message);
-			}
+			byte[] act4 = Encoding.ASCII.GetBytes("\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00");
+			Assert.False(actions[3].error);
+			Assert.AreEqual(act4, actions[3].dataModel.Value.ToArray());
 		}
 
 		Dictionary<string, object> SpeedTest(uint repeat)

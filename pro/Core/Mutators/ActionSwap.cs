@@ -112,7 +112,7 @@ namespace Peach.Pro.Core.Mutators
 			{
 				_targetActionRight = GetRandomAction(obj);
 			}
-			while(_targetActionLeft != _targetActionRight);
+			while(_targetActionLeft == _targetActionRight);
 		}
 
 		public override void randomMutation(Peach.Core.Dom.StateModel obj)
@@ -123,7 +123,7 @@ namespace Peach.Pro.Core.Mutators
 			{
 				_targetActionRight = GetRandomAction(obj);
 			}
-			while(_targetActionLeft != _targetActionRight);
+			while(_targetActionLeft == _targetActionRight);
 		}
 
 		Peach.Core.Dom.Action GetRandomAction(Peach.Core.Dom.StateModel obj)

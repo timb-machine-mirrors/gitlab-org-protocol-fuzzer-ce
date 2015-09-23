@@ -138,39 +138,45 @@ namespace Peach.Core.Publishers
 
 		protected virtual IAsyncResult ClientBeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
 		{
+			if (Logger.IsTraceEnabled) Logger.Trace("ClientBeginRead>");
 			return _client.BeginRead(buffer, offset, count, callback, state);
 		}
 
 		protected virtual int ClientEndRead(IAsyncResult asyncResult)
 		{
+			if (Logger.IsTraceEnabled) Logger.Trace("ClientEndRead>");
 			return _client.EndRead(asyncResult);
 		}
 
 		protected virtual IAsyncResult ClientBeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
 		{
+			if (Logger.IsTraceEnabled) Logger.Trace("ClientBeginWrite> offset: {0} count: {1}", offset, count);
 			_sendLen = count;
 			return _client.BeginWrite(buffer, offset, count, callback, state);
 		}
 
 		protected virtual int ClientEndWrite(IAsyncResult asyncResult)
 		{
+			if (Logger.IsTraceEnabled) Logger.Trace("ClientEndWrite>");
 			_client.EndWrite(asyncResult);
 			return _sendLen;
-
 		}
 
 		protected virtual void ClientWrite(BitwiseStream data)
 		{
+			if (Logger.IsTraceEnabled) Logger.Trace("Client> {0} bytes", data.Length);
 			data.CopyTo(_client);
 		}
 
 		protected virtual void ClientShutdown()
 		{
+			if (Logger.IsTraceEnabled) Logger.Trace("ClientShutdown>");
 			_client.Close();
 		}
 
 		protected virtual void ClientClose()
 		{
+			if (Logger.IsTraceEnabled) Logger.Trace("ClientClose>");
 			_client.Close();
 		}
 
@@ -268,7 +274,7 @@ namespace Peach.Core.Publishers
 						//Check to make sure buffer has been initilized before continuing. 
 						if (_client == null)
 						{
-							// First time through, propigate error
+							// First time through, propagate error
 							if (ar == null)
 								throw new PeachException("Error on data output, the client is not initalized.");
 
@@ -294,10 +300,14 @@ namespace Peach.Core.Publishers
 						ar = ClientBeginWrite(_sendBuf, offset, length - offset, null, null);
 					}
 
+					if (Logger.IsTraceEnabled) Logger.Trace("OnOutput> WaitOne() timeout: {0}", SendTimeout);
+
 					if (SendTimeout < 0)
 						ar.AsyncWaitHandle.WaitOne();
 					else if (!ar.AsyncWaitHandle.WaitOne(SendTimeout))
 						throw new TimeoutException();
+
+					if (Logger.IsTraceEnabled) Logger.Trace("OnOutput> WaitOne() done");
 				}
 			}
 			catch (Exception ex)

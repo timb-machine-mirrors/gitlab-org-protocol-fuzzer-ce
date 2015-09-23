@@ -203,7 +203,7 @@ is responding.
 image::{images}/TcpPort_VerifyDeviceAlive.png["TcpPort Verify the Device is Alive", scalewidth="60%"]
 
 The *Host* parameter specifies the hostname of the target or the IPv4 address of the 
-target. The `\\##TargetIPv4##` value is a configuration variable that you set to identify 
+target. The `##TargetIPv4##` value is a configuration variable that you set to identify 
 the target. Its operation is similar to operating system environment variables. 
 For more information, see <<Variables>>.
 

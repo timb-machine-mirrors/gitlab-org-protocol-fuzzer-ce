@@ -519,6 +519,8 @@ PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
 
 	<StateModel name='TheState' initialState='Initial'>
 		<State name='Initial'>
+			<!-- PitLint: Skip_StartIterationEvent -->
+			<Action type='call' method='InitializeIterationEvent' publisher='Peach.Agent' />
 			<Action type='call' method='StartIterationEvent' publisher='Peach.Agent' />
 			<Action name='Act1' type='output'>
 				<DataModel ref='DM'/>
@@ -530,7 +532,8 @@ PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
 		</State>
 	</StateModel>
 
-	<Test name='Default' maxOutputSize='65535' targetLifetime='session'>
+	<!-- PitLint: Skip_Lifetime -->
+	<Test name='Default' maxOutputSize='65535' targetLifetime='iteration'>
 		<StateModel ref='TheState'/>
 		<Publisher class='RawEther' name='pub1'>
 			<Param name='Interface' value='##Interface##'/>

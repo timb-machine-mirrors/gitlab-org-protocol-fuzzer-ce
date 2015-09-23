@@ -12,6 +12,7 @@ namespace Peach.Core.Test
 		{
 			BitwiseStream Value { get; }
 			Variant InternalValue { get; }
+			DataElement Element { get; }
 		}
 
 		class SequentialMutation : Mutation
@@ -24,6 +25,17 @@ namespace Peach.Core.Test
 			{
 				this.runner = runner;
 				this.mutation = mutation;
+			}
+
+			public DataElement Element
+			{
+				get
+				{
+					if (value == null)
+						MakeValue();
+
+					return value;
+				}
 			}
 
 			public BitwiseStream Value
@@ -53,6 +65,12 @@ namespace Peach.Core.Test
 				runner.Iteration = (uint)mutation + 1;
 				runner.Mutator.mutation = (uint)mutation;
 				value = runner.Element.root.Clone();
+
+				// If root is a DataModel, have to manually set actionData
+				var dm = value.root as DataModel;
+				if (dm != null)
+					dm.actionData = ((DataModel)runner.Element.root).actionData;
+
 				Mutate(runner.Mutator, value.find(runner.Element.fullName));
 			}
 

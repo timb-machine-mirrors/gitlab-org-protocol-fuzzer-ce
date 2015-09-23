@@ -3,14 +3,7 @@ from waflib import Logs
 
 def configure(conf):
 	v = conf.env
-
-	try:
-		conf.find_program(v['ASAN_CC'])
-		v.append_value('supported_features', 'asan')
-	except Exception, e:
-		v.append_value('missing_features', 'asan')
-		if Logs.verbose > 0:
-			Logs.warn('%s is not available: %s' % (v['ASAN_CC'], e))
+	conf.find_program(v['ASAN_CC'])
 
 @feature('asan')
 @after_method('apply_link')

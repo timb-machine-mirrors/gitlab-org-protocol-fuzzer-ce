@@ -111,7 +111,6 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 Output in Peach Validator 
 
-.{nbsp}
 image::{images}/RegexAnalyzerOutput.png["Validator Output", alt="Validator Output"]
 
 ==========================
