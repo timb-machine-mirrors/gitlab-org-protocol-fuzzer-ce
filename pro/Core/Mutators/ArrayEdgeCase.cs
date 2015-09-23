@@ -3,9 +3,11 @@
 //
 
 using System;
+using System.IO;
 using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
+using Peach.Core.IO;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Mutators
@@ -46,9 +48,9 @@ namespace Peach.Pro.Core.Mutators
 
 		protected override void performMutation(DataElement obj, long num)
 		{
-			var objasSeq = (Peach.Core.Dom.Sequence)obj;
+			var objAsSeq = (Peach.Core.Dom.Sequence)obj;
 
-			var targetElem = TargetElement(objasSeq);
+			var targetElem = TargetElement(objAsSeq);
 			if (targetElem == null)
 			{
 				logger.Trace("Skipping mutation, the sequence currently has no elements.");
@@ -66,24 +68,32 @@ namespace Peach.Pro.Core.Mutators
 				}
 			}
 
-			if (num < objasSeq.Count)
+			if (num < objAsSeq.Count)
 			{
 				// remove some items
-				for (int i = objasSeq.Count - 1; i >= num; --i)
+				for (int i = objAsSeq.Count - 1; i >= num; --i)
 				{
-					if (objasSeq[i] == null)
+					if (objAsSeq[i] == null)
 						break;
 
-					objasSeq.RemoveAt(i);
+					objAsSeq.RemoveAt(i);
 				}
 			}
-			else if (num > objasSeq.Count)
+			else if (num > objAsSeq.Count)
 			{
 				// add some items, but do it by replicating
 				// the last item over and over to save memory
 				// find random spot and replicate that item over and over
-				objasSeq.CountOverride = (int)num;
-				//objasSeq.ExpandTo((int)num);
+
+				if(objAsSeq.Count == 0)
+					objAsSeq.SetCountOverride((int)num, null, 0);
+				else
+				{
+					var index = context.Random.Next(objAsSeq.Count);
+					var value = objAsSeq[index];
+
+					objAsSeq.SetCountOverride((int)num, value.Value, index);
+				}
 			}
 		}
 

@@ -11,7 +11,7 @@ namespace Peach.Core.Dom.Actions
 	[Serializable]
 	public class Input : Action
 	{
-		private BitStream _inputData;
+		protected BitStream _inputData;
 
 		public ActionData data { get; set; }
 
@@ -49,6 +49,9 @@ namespace Peach.Core.Dom.Actions
 				cracker.CrackData(data.dataModel, new BitStream(pub));
 
 				endPos = pub.Position;
+
+				logger.Debug(string.Format("Final pos: {0} length: {1} crack consumed: {2} bytes",
+					endPos, pub.Length, endPos - startPos));
 			}
 			catch (CrackingFailure ex)
 			{
@@ -72,8 +75,6 @@ namespace Peach.Core.Dom.Actions
 					// Create a view from startPos to endPos so we can use CopyTo()
 					var slice = src.SliceBits((endPos - startPos) * 8);
 
-					Debug.Assert(endPos == pub.Position);
-
 					// Create a new input data each time so that if
 					// the action runs multiple times we don't overwrite
 					// previously collected input
@@ -85,6 +86,8 @@ namespace Peach.Core.Dom.Actions
 					slice.CopyTo(_inputData);
 
 					_inputData.Seek(0, SeekOrigin.Begin);
+
+					Debug.Assert(endPos == pub.Position);
 				}
 			}
 		}

@@ -99,7 +99,8 @@ namespace Peach.Pro.Test.Core.Mutators
 			Assert.AreEqual(1, array.Count);
 
 			array[0].DefaultValue = new Variant("Foo");
-			array.CountOverride = 2;
+			array.SetCountOverride(2, array[0].Value, 0);
+			//array.CountOverride = 2;
 
 			// Count override replicates the last element
 			Assert.AreEqual(Encoding.ASCII.GetBytes("FooFoo"), array.Value.ToArray());
