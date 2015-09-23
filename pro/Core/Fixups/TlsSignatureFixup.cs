@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Digests;
@@ -14,111 +13,55 @@ using Org.BouncyCastle.Utilities;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using Peach.Pro.Core.Transformers.Crypto;
 using Array = System.Array;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Fixups
 {
-	[Description("Tls")]
-	[Fixup("Tls", true, Internal = true)]
-	[Parameter("TlsVersion", typeof(TlsVersion), "TLS Version", "TLSv10")]
-	[Parameter("IsServer", typeof(bool), "Is this the server side?", "false")]
+	[Description("Sets the signature value that must be signed.")]
+	[Fixup("TlsSignature", true, Internal = true)]
+	[Parameter("TlsVersion", typeof(TlsVersion), "TLS Version", "DTLSv10")]
 	[Serializable]
-	public class TlsFixup : Peach.Core.Fixups.VolatileFixup
+	public class TlsSignature : Peach.Core.Fixups.VolatileFixup
 	{
 		#region Static Helpers For PRF()
 
-		internal static byte[] ToBytes(object obj, bool useValue = false, bool useDefault = false)
+		static byte[] ToBytes(object obj)
 		{
 			if (obj == null)
 				return null;
 
 
 			var intern = (DataElement)obj;
-			if(useValue)
-				intern.Invalidate();
-
-			var bs = useValue ? intern.Value : (BitwiseStream)intern.InternalValue;
-			if (useDefault)
-				bs = (BitwiseStream) intern.DefaultValue;
-
+			var v = intern.InternalValue;
+			var bs = (BitwiseStream)v;
 			var pos = bs.PositionBits;
-			bs.Seek(0, SeekOrigin.Begin);
+			bs.Seek(0, System.IO.SeekOrigin.Begin);
 			var ret = new byte[bs.Length];
 
 			bs.Read(ret, 0, ret.Length);
-			bs.Seek(pos, SeekOrigin.Begin);
+			bs.Seek(pos, System.IO.SeekOrigin.Begin);
 
 			return ret;
 		}
 
-		/// <summary>
-		/// Build a buffer that matches the input for KeyExchange.
-		/// </summary>
-		/// <remarks>
-		/// There was no easy way to directly get this from the data model. The
-		/// inner key must still be encrypted.
-		/// </remarks>
-		/// <param name="obj"></param>
-		/// <param name="context"></param>
-		/// <returns></returns>
-		internal static byte[] KeyExchangeToBytes(object obj, RunContext context)
+		static byte[] Concat(byte[] a, byte[] b)
 		{
-			byte[] buff;
-			var payload = (DataElementContainer) obj;
-
-			var cipher = (byte[])context.iterationStateStore["ClientKeyExchangeInput"];
-
-			var lengthElem = (Number) payload["Length"];
-			var length = new Number();
-			length.length = lengthElem.length;
-			length.lengthType = lengthElem.lengthType;
-			length.LittleEndian = lengthElem.LittleEndian;
-
-			var keyLengthElem = (Number)payload.find("RSAEncryptedPreMasterSecret.PubKeyength");
-			var keyLength = new Number();
-			keyLength.length = keyLengthElem.length;
-			keyLength.lengthType = keyLengthElem.lengthType;
-			keyLength.LittleEndian = keyLengthElem.LittleEndian;
-
-			keyLength.DefaultValue = new Variant(cipher.Length);
-			length.DefaultValue = new Variant(cipher.Length + keyLength.Value.Length);
-
-			var sout = new MemoryStream();
-			buff = ToBytes(payload["HandshakeType"], true);
-			sout.Write(buff, 0, buff.Length);
-			buff = ToBytes(length, true);
-			sout.Write(buff, 0, buff.Length);
-			buff = ToBytes(keyLength, true);
-			sout.Write(buff, 0, buff.Length);
-			sout.Write(cipher, 0, cipher.Length);
-
-			return sout.ToArray();
-		}
-
-		internal static byte[] Concat(byte[] a, byte[] b)
-		{
-			var c = new byte[a.Length + b.Length];
-			Array.Copy(a, 0, c, 0, a.Length);
-			Array.Copy(b, 0, c, a.Length, b.Length);
+			byte[] c = new byte[a.Length + b.Length];
+			System.Array.Copy(a, 0, c, 0, a.Length);
+			System.Array.Copy(b, 0, c, a.Length, b.Length);
 			return c;
 		}
 
-		byte[] GetMd5Sha1(RunContext context, IEnumerable<object> msgs)
+		static byte[] GetMd5Sha1(IEnumerable<object> msgs)
 		{
 			var md5 = new MD5Digest();
 			var sha1 = new Sha1Digest();
 
 			foreach (var obj in msgs)
 			{
-				var bytes = ToBytes(obj, true);
-				if (IsServer && bytes[0] == 0x10)
-					bytes = KeyExchangeToBytes(obj, context);
-
-				//Console.WriteLine("Msg: ");
-				//foreach (var b in bytes)
-				//	Console.Write("{0:X2} ", b);
-				//Console.WriteLine();
+				var bytes = ToBytes(obj);
 
 				md5.BlockUpdate(bytes, 0, bytes.Length);
 				sha1.BlockUpdate(bytes, 0, bytes.Length);
@@ -131,20 +74,13 @@ namespace Peach.Pro.Core.Fixups
 			return combined;
 		}
 
-		byte[] GetSha256(RunContext context, IEnumerable<object> msgs)
+		static byte[] GetSha256(IEnumerable<object> msgs)
 		{
 			var sha = new Sha256Digest();
 
 			foreach (var obj in msgs)
 			{
-				var bytes = ToBytes(obj, true);
-				if (IsServer && bytes[0] == 0x10)
-					bytes = KeyExchangeToBytes(obj, context);
-
-				//Console.WriteLine("Msg: ");
-				//foreach (var b in bytes)
-				//	Console.Write("{0:X2} ", b);
-				//Console.WriteLine();
+				var bytes = ToBytes(obj);
 
 				sha.BlockUpdate(bytes, 0, bytes.Length);
 			}
@@ -167,7 +103,7 @@ namespace Peach.Pro.Core.Fixups
 
 		#region TlsContext
 
-		internal class TlsContext : TlsClientContext
+		class TlsContext : TlsClientContext
 		{
 			private readonly IRandomGenerator _mNonceRandom;
 
@@ -200,30 +136,12 @@ namespace Peach.Pro.Core.Fixups
 				_mNonceRandom.AddSeedMaterial(seed);
 			}
 
-			//static void SetPrfAlg(SecurityParameters secParms, int alg)
-			//{
-			//	var typeSecParms = typeof (Org.BouncyCastle.Crypto.Tls.SecurityParameters);
-			//	var fieldPrfAlg = typeSecParms.GetField("prfAlgorithm", BindingFlags.Instance| BindingFlags.NonPublic);
-			//	if (fieldPrfAlg == null)
-			//		throw new PeachException("Error, unable to set prfAlgorithm in BouncyCastle SecurityParameters.");
-
-			//	fieldPrfAlg.SetValue(secParms, alg);
-			//}
-
 			private static void Set(object obj, string fieldName, object fieldValue)
 			{
 				var fi = obj.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
 				if (fi == null)
 					throw new MissingFieldException(obj.GetType().FullName, fieldName);
 				fi.SetValue(obj, fieldValue);
-			}
-
-			private static object Get(object obj, string fieldName)
-			{
-				var fi = obj.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
-				if (fi == null)
-					throw new MissingFieldException(obj.GetType().FullName, fieldName);
-				return fi.GetValue(obj);
 			}
 
 			public byte[] MasterSecret
@@ -257,7 +175,10 @@ namespace Peach.Pro.Core.Fixups
 				get { return _mNonceRandom; }
 			}
 
-			public bool IsServer { get; set; }
+			public bool IsServer
+			{
+				get { return false; }
+			}
 
 			public ProtocolVersion ClientVersion
 			{
@@ -314,7 +235,6 @@ namespace Peach.Pro.Core.Fixups
 
 		#endregion
 
-		public bool IsServer { get; set; }
 		public TlsVersion TlsVersion { get; set; }
 
 		public ProtocolVersion ProtocolVersion
@@ -339,14 +259,21 @@ namespace Peach.Pro.Core.Fixups
 			}
 		}
 
-		public TlsFixup(DataElement parent, Dictionary<string, Variant> args)
+		public TlsSignature(DataElement parent, Dictionary<string, Variant> args)
 			: base(parent, args)
 		{
 			ParameterParser.Parse(this, args);
 		}
 
-		internal static TlsContext CreateTlsContext(RunContext ctx, bool isServer, ProtocolVersion ProtocolVersion)
+		protected override Variant OnActionRun(RunContext ctx)
 		{
+			if (ctx.iterationStateStore.ContainsKey("TlsBlockCipher"))
+				throw new SoftException("Error in Tls fixup, TlsBlockCipher object already exists in the state store.");
+
+			var msgs = GetState<IEnumerable<object>>(ctx, "HandshakeMessage");
+			if (msgs == null)
+				throw new SoftException("Error in Tls fixup, no handshake messages exists in the state store.");
+
 			var pms = ToBytes(GetState<DataElement>(ctx, "PreMasterSecret"));
 			if (pms == null)
 				throw new SoftException("Error in Tls fixup, no handshake messages exists in the state store.");
@@ -362,83 +289,70 @@ namespace Peach.Pro.Core.Fixups
 			var tlsContext = new TlsContext(ProtocolVersion, clientRandom, serverRandom);
 			var masterSecret = TlsUtilities.PRF(tlsContext, pms, "master secret",
 				Concat(clientRandom, serverRandom), 48);
-			
 			tlsContext.MasterSecret = masterSecret;
-			tlsContext.IsServer = isServer;
 
-			//Console.WriteLine("Pre-Master: ");
-			//foreach (var b in pms)
-			//	Console.Write("{0:X2} ", b);
-			//Console.WriteLine();
-			//Console.WriteLine("Master Secret: ");
-			//foreach (var b in tlsContext.SecurityParameters.MasterSecret)
-			//	Console.Write("{0:X2} ", b);
-			//Console.WriteLine();
-			//Console.WriteLine("Client Random: ");
-			//foreach (var b in tlsContext.SecurityParameters.ClientRandom)
-			//	Console.Write("{0:X2} ", b);
-			//Console.WriteLine();
-			//Console.WriteLine("Server Random: ");
-			//foreach (var b in tlsContext.SecurityParameters.ServerRandom)
-			//	Console.Write("{0:X2} ", b);
-			//Console.WriteLine();
+			Console.Write("Pre-Master: ");
+			foreach (var b in pms)
+				Console.Write(string.Format("{0:X2} ", b));
+			Console.WriteLine();
+			Console.Write("Client Random: ");
+			foreach (var b in clientRandom)
+				Console.Write(string.Format("{0:X2} ", b));
+			Console.WriteLine();
+			Console.Write("Server Random: ");
+			foreach (var b in serverRandom)
+				Console.Write(string.Format("{0:X2} ", b));
+			Console.WriteLine();
 
-			return tlsContext;
-		}
-
-		internal static TlsBlockCipher CreateBlockCipher(RunContext ctx, TlsContext tlsContext, bool store = true)
-		{
-			var tlsBlockCipher = new TlsBlockCipher(
-				tlsContext,
-				new CbcBlockCipher(new AesFastEngine()),
-				new CbcBlockCipher(new AesFastEngine()),
-				new Sha1Digest(),
-				new Sha1Digest(),
-				16); // AES-CBC block size
-
-			if (store)
+			if (TlsVersion != TlsVersion.TLSv12)
 			{
-				if (ctx.iterationStateStore.ContainsKey("TlsBlockCipher"))
-					throw new SoftException("Error in Tls fixup, TlsBlockCipher object already exists in the state store.");
+				var hash = new RsaSignature.CombinedHash();
+				hash.Init(null);
 
-				ctx.iterationStateStore["TlsContext"] = tlsContext;
-				ctx.iterationStateStore["TlsBlockCipher"] = tlsBlockCipher;
+				//hash.BlockUpdate(clientRandom, 0, clientRandom.Length);
+				//hash.BlockUpdate(serverRandom, 0, serverRandom.Length);
+
+				foreach (var msg in msgs)
+				{
+					var bytes = ToBytes(msg);
+					hash.BlockUpdate(bytes, 0, bytes.Length);
+				}
+
+				var verifyHash = new byte[hash.GetDigestSize()];
+				hash.DoFinal(verifyHash, 0);
+
+				Console.Write("Verify Hash: ");
+				foreach (var b in verifyHash)
+					Console.Write(string.Format("{0:X2} ", b));
+				Console.WriteLine();
+
+				return new Variant(new BitStream(verifyHash));
 			}
 
-			return tlsBlockCipher;
-		}
+			// For TLS 1.2, just stick in the data.
 
-		protected override Variant OnActionRun(RunContext ctx)
-		{
-			var tlsContext = CreateTlsContext(ctx, IsServer, ProtocolVersion);
-			CreateBlockCipher(ctx, tlsContext);
+			var bitStream = new BitStream();
+			var bitWriter = new BitWriter(bitStream);
 
-			ctx.iterationStateStore["TlsProtocolVersion"] = TlsVersion.ToString();
+			foreach (var msg in msgs)
+			{
+				bitWriter.WriteBytes(ToBytes(msg));
+			}
 
-			var msgs = GetState<IEnumerable<object>>(ctx, "HandshakeMessage");
-			if (msgs == null)
-				throw new SoftException("Error in Tls fixup, no handshake messages exists in the state store.");
-
-			var verifyHash = TlsVersion == TlsVersion.TLSv12 ? GetSha256(ctx, msgs) : GetMd5Sha1(ctx, msgs);
-			var verifyData = TlsUtilities.PRF(
-				tlsContext, 
-				tlsContext.SecurityParameters.MasterSecret, 
-				IsServer ? "server finished" : "client finished", 
-				verifyHash, 
-				12);
-
-			//Console.WriteLine("IsServer: "+IsServer);
-			//Console.WriteLine("Verify Hash: ");
-			//foreach (var b in verifyHash)
-			//	Console.Write(string.Format("{0:X2} ", b));
-			//Console.WriteLine();
-			//Console.WriteLine("Verify Data: ");
-			//foreach (var b in verifyData)
-			//	Console.Write(string.Format("{0:X2} ", b));
-			//Console.WriteLine();
-
-			// Encryption of the verify_data is handled by the Tls transformer
-			return new Variant(new BitStream(verifyData));
+			bitStream.Position = 0;
+			return new Variant(bitStream);
 		}
 	}
+
+	[Serializable]
+	public enum TlsVersion
+	{
+		SSLv3,
+		TLSv10,
+		TLSv11,
+		TLSv12,
+		DTLSv10,
+		DTLSv12
+	}
+
 }
