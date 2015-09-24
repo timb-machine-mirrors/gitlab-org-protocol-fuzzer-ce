@@ -27,6 +27,7 @@ subdirs = [
 	'SuperSocket',
 	'SuperWebSocket',
 	'SocketHttpListener/SocketHttpListener',
+	'BouncyCastle.1.8-master',
 	'sqlite-3.8.11.1',
 ]
 

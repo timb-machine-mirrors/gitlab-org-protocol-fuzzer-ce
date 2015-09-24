@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Xml;
 using Peach.Core.Analyzers;
 using Peach.Core.IO;
@@ -26,7 +27,16 @@ namespace Peach.Core.Dom
 	{
 		protected bool Expanded;
 
+		/// <summary>
+		/// Value to use in array expantion
+		/// </summary>
 		protected BitwiseStream ExpandedValue;
+
+		/// <summary>
+		/// Index of value being expanded
+		/// </summary>
+		protected int ExpandedValueIndex;
+
 		// ReSharper disable once InconsistentNaming
 		protected int? countOverride;
 
@@ -36,15 +46,24 @@ namespace Peach.Core.Dom
 			{
 				return countOverride;
 			}
+		}
 
-			set
-			{
-				countOverride = value;
+		/// <summary>
+		/// Set count override.
+		/// </summary>
+		/// <param name="count">New count for sequence</param>
+		/// <param name="value">Value to use in expansion</param>
+		/// <param name="valueIndex">Index to perform expantion at</param>
+		public virtual void SetCountOverride(int count, BitwiseStream value, int valueIndex)
+		{
+			if (value == null)
+				return;
 
-				ExpandedValue = this[Count - 1].Value;
+			countOverride = count;
+			ExpandedValue = value;
+			ExpandedValueIndex = valueIndex;
 
-				Invalidate();
-			}
+			Invalidate();
 		}
 
 		public virtual int GetCountOverride()
