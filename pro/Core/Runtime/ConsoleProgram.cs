@@ -258,6 +258,9 @@ namespace Peach.Pro.Core.Runtime
 
 		protected override bool VerifyCompatibility()
 		{
+			if (!base.VerifyCompatibility())
+				return false;
+
 			var type = Type.GetType("Mono.Runtime");
 
 			// If we are not on mono, no checks need to be performed.
@@ -268,6 +271,7 @@ namespace Peach.Pro.Core.Runtime
 			{
 				Console.ForegroundColor = DefaultForground;
 				Console.ResetColor();
+				return true;
 			}
 			catch
 			{
@@ -281,8 +285,6 @@ namespace Peach.Pro.Core.Runtime
 				Console.WriteLine("Change your terminal type to 'linux', 'xterm' or 'rxvt' and try again.");
 				return false;
 			}
-
-			return base.VerifyCompatibility();
 		}
 
 		protected override void OnRun(List<string> args)
