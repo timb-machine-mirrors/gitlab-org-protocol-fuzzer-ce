@@ -357,8 +357,14 @@ namespace PitTester
 			}
 		}
 
-		public static void VerifyDataSets(string pitLibraryPath, string fileName, bool verifyBytes = true)
+		public static void VerifyDataSets(string pitLibraryPath, string fileName)
 		{
+			var testData = new TestData();
+
+			var pitTest = fileName + ".test";
+			if (File.Exists(pitTest))
+				testData = TestData.Parse(pitTest);
+
 			var defs = PitParser.parseDefines(fileName + ".config");
 			if (defs.Any(k => k.Key == "PitLibraryPath"))
 			{
@@ -381,6 +387,8 @@ namespace PitTester
 			{
 				dom.context.test = test;
 
+				var testTest = testData.Tests.FirstOrDefault(t => t.Name == test.Name);
+
 				foreach (var state in test.stateModel.states)
 				{
 					foreach (var action in state.actions)
@@ -389,7 +397,8 @@ namespace PitTester
 						{
 							foreach (var data in actionData.allData)
 							{
-								VerifyDataSet(verifyBytes, data, actionData, test, state, action, sb);
+								var verify = testTest == null || testTest.VerifyDataSets;
+								VerifyDataSet(verify, data, actionData, test, state, action, sb);
 							}
 						}
 					}

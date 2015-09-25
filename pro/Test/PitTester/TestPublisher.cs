@@ -173,7 +173,14 @@ namespace PitTester
 			// If this data model has a file data set, compare to that
 			var dataSet = dataModel.actionData.selectedData as DataFile;
 			if (dataSet != null)
+			{
+				// If data files are in use and VerifyDataSets is false, don't do a comparison
+				if (!_logger.VerifyDataSets)
+					return;
+
 				expected = File.ReadAllBytes(dataSet.FileName);
+				
+			}
 
 			if (Logger.IsDebugEnabled)
 				Logger.Debug("\n\n" + Utilities.HexDump(actual, 0, actual.Length));

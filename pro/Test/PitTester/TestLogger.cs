@@ -21,6 +21,7 @@ namespace PitTester
 		public delegate void ErrorHandler(string msg);
 		public event ErrorHandler Error;
 
+		public bool VerifyDataSets { get { return testData.VerifyDataSets; } }
 		public bool ExceptionOccurred { get { return !verify; } }
 		public string ActionName { get; private set; }
 		const string ErrorFormat = "{0}\n\tAction: {1}\n\tExpected: {2}\n\tActual: {3}";
