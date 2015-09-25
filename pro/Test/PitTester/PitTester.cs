@@ -739,6 +739,20 @@ namespace PitTester
 					if (!gotEnd)
 						errors.AppendLine(string.Format("StateModel '{0}' does not call agent with 'ExitIterationEvent'.", smName));
 				}
+
+				var when = nav.Select("/p:Peach/p:StateModel/p:State/p:Action/@when", nsMgr);
+				while (when.MoveNext())
+				{
+					var val = when.Current.Value;
+					if (val.Contains("controlIteration"))
+					{
+						var act = when.Clone();
+						act.Current.MoveToParent();
+
+						if (!ShouldSkipRule(act, "Allow_WhenControlIteration"))
+							errors.AppendLine("Action has when attribute containing controlIteration.");
+					}
+				}
 			}
 
 			try
