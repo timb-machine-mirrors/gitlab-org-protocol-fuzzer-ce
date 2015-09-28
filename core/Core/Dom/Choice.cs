@@ -316,7 +316,7 @@ namespace Peach.Core.Dom
 			return choice;
 		}
 
-		public override void RemoveAt(int index)
+		public override void RemoveAt(int index, bool cleanup)
 		{
 			// Choices only have a single child, the chosen element
 			if (index != 0 || Count != 1)
@@ -330,7 +330,7 @@ namespace Peach.Core.Dom
 			Clear();
 
 			if (this.Count == 0)
-				parent.Remove(this);
+				parent.Remove(this, cleanup);
 		}
 
 		public override void ApplyReference(DataElement newElem)
