@@ -41,13 +41,12 @@ namespace Peach.Pro.Test.Core.Publishers
 		const int IPV6_JOIN_GROUP = 0xC;
 		const int IPV6_MULTICAST_IF = 0x9;
 
+		[StructLayout(LayoutKind.Sequential)]
 		struct ipv6_mreq
 		{
 			[MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-			// ReSharper disable NotAccessedField.Local
 			public byte[] ipv6mr_multiaddr;
 			public IntPtr ipv6mr_interface;
-			// ReSharper restore NotAccessedField.Local
 		}
 
 		// ReSharper restore InconsistentNaming
