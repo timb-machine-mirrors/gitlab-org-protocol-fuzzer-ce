@@ -17,6 +17,7 @@ namespace PitTester
 		Action action;
 		bool verify;
 		List<Tuple<Action, DataElement>> ignores;
+		RunContext context;
 
 		public delegate void ErrorHandler(string msg);
 		public event ErrorHandler Error;
@@ -30,6 +31,11 @@ namespace PitTester
 		{
 			this.testData = testData;
 			this.xpathIgnore = new List<string>(xpathIgnore);
+		}
+
+		protected override void Engine_TestStarting(RunContext ctx)
+		{
+			context = ctx;
 		}
 
 		private void FireError(string msg)
@@ -49,16 +55,27 @@ namespace PitTester
 			if (action == null)
 				return null;
 
-			var errors = new List<string>();
 			try
 			{
+				var errors = new List<string>();
+
+				if (!context.controlIteration)
+				{
+					return testData.Actions
+						.OfType<T>()
+						.Where(a => a.ActionName == ActionName && a.PublisherName == publisherName)
+						.Skip((int)action.parent.runCount - 1)
+						.FirstOrDefault();
+				}
+
 				if (index >= testData.Actions.Count)
 					throw new SoftException("Missing record in test data");
 
 				var d = testData.Actions[index++];
 
+				// Wrong type means we can't cast and we can't keep going
 				if (typeof(T) != d.GetType())
-					errors.Add(ErrorFormat.Fmt(
+					throw new SoftException(ErrorFormat.Fmt(
 						"Action type mismatch.", 
 						ActionName, 
 						d.GetType().Name, 

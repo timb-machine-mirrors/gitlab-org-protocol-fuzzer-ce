@@ -80,7 +80,7 @@ namespace PitTester
 				IterationStarting(context, currentIteration, totalIterations);
 		}
 
-		public static void TestPit(string libraryPath, string pitFile, bool singleIteration, uint? seed, bool keepGoing)
+		public static void TestPit(string libraryPath, string pitFile, bool singleIteration, uint? seed, bool keepGoing, uint stop = 500)
 		{
 			var testFile = pitFile + ".test";
 			if (!File.Exists(testFile))
@@ -208,7 +208,7 @@ namespace PitTester
 			{
 				range = true,
 				rangeStart = 0,
-				rangeStop = 500,
+				rangeStop = stop,
 				pitFile = Path.GetFileName(pitFile),
 				runName = "Default",
 				singleIteration = singleIteration

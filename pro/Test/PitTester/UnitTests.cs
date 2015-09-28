@@ -571,5 +571,145 @@ PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
 				PitTester.VerifyPit(tmp.Path, pitFile, true);
 			}
 		}
+
+		[Test]
+		public void TestSkippedActions()
+		{
+			const string xml = @"
+<Peach>
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output' when='context.controlIteration' >
+				<DataModel name='DM'>
+					<String value='output' />
+				</DataModel>
+			</Action>
+			<Action type='input' when='context.controlIteration' >
+				<DataModel name='DM'>
+					<String value='input1' token='true' />
+				</DataModel>
+			</Action>
+			<Action type='input'>
+				<DataModel name='DM'>
+					<String value='input2' token='true' />
+				</DataModel>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='TheState'/>
+		<Publisher name='Pub' class='Null'/>
+	</Test>
+</Peach>
+";
+
+			const string test = @"
+<TestData>
+	<Test name='Default'>
+		<Open   action='TheState.Initial.Action' publisher='Pub'/>
+		<Output action='TheState.Initial.Action' publisher='Pub'>
+<![CDATA[
+0000   6F 75 74 70 75 74                                 output
+]]>
+		</Output>
+		<Input action='TheState.Initial.Action_1' publisher='Pub'>
+<![CDATA[
+0000   69 6E 70 75 74 31                                 input1
+]]>
+		</Input>
+		<Input action='TheState.Initial.Action_2' publisher='Pub'>
+<![CDATA[
+0000   69 6E 70 75 74 32                                 input2
+]]>
+		</Input>
+		<Close  action='TheState.Initial.Action' publisher='Pub'/>
+	</Test>
+</TestData>
+";
+
+			// Ensure we can run when there is an ignore that matches a de-selected choice
+			var pitFile = Path.GetTempFileName();
+			var pitTest = pitFile + ".test";
+
+			File.WriteAllText(pitFile, xml);
+			File.WriteAllText(pitTest, test);
+
+			try
+			{
+				PitTester.TestPit("", pitFile, false, null, false, 5);
+			}
+			finally
+			{
+				File.Delete(pitFile);
+				File.Delete(pitTest);
+			}
+		}
+
+		[Test]
+		public void TestRecursiveActions()
+		{
+			const string xml = @"
+<Peach>
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='input'>
+				<DataModel name='DM'>
+					<Blob />
+				</DataModel>
+			</Action>
+
+			<Action type='changeState' ref='Initial' when='state.actions[0].dataModel.Value.Length > 0' />
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='TheState'/>
+		<Publisher name='Pub' class='Null'/>
+	</Test>
+</Peach>
+";
+
+			const string test = @"
+<TestData>
+	<Test name='Default'>
+		<Open   action='TheState.Initial.Action' publisher='Pub'/>
+		<Input action='TheState.Initial.Action' publisher='Pub'>
+<![CDATA[
+0000   69 6E 70 75 74 31                                 input1
+]]>
+		</Input>
+		<Input action='TheState.Initial.Action' publisher='Pub'>
+<![CDATA[
+0000   69 6E 70 75 74 32                                 input2
+]]>
+		</Input>
+		<Input action='TheState.Initial.Action' publisher='Pub'>
+<![CDATA[
+]]>
+		</Input>
+		<Close  action='TheState.Initial.Action' publisher='Pub'/>
+	</Test>
+</TestData>
+";
+
+			// Ensure we can run when there is an ignore that matches a de-selected choice
+			var pitFile = Path.GetTempFileName();
+			var pitTest = pitFile + ".test";
+
+			File.WriteAllText(pitFile, xml);
+			File.WriteAllText(pitTest, test);
+
+			try
+			{
+				PitTester.TestPit("", pitFile, false, null, false, 5);
+			}
+			finally
+			{
+				File.Delete(pitFile);
+				File.Delete(pitTest);
+			}
+		}
+
 	}
 }
