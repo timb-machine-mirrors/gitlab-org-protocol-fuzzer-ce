@@ -211,7 +211,8 @@ namespace Peach.Core.Dom
 
 						sizedData.SeekBits(startPosition, System.IO.SeekOrigin.Begin);
 						context.CrackData(child, sizedData);
-						SelectedElement = child;
+						CrackSuccess(child);
+						//SelectedElement = child;
 
 						logger.Trace("handleChoice: Keeping child: {0}", child.debugName);
 						return;
@@ -249,7 +250,8 @@ namespace Peach.Core.Dom
 
 					sizedData.SeekBits(startPosition, System.IO.SeekOrigin.Begin);
 					context.CrackData(child, sizedData);
-					SelectedElement = child;
+					CrackSuccess(child);
+					//SelectedElement = child;
 
 					logger.Trace("handleChoice: Keeping child: {0}", child.debugName);
 					return;
@@ -405,6 +407,43 @@ namespace Peach.Core.Dom
 				SelectDefault();
 
 			return new Variant(new BitStreamList(new BitwiseStream[] { SelectedElement.Value }));
+		}
+
+		private void CrackSuccess(DataElement child)
+		{
+			var dm = root as DataModel;
+			if (dm != null && dm.actionData != null && dm.actionData.IsOutput && IntPtr.Size == 8)
+			{
+				// If this is an output action on a 64-bit machine,
+				// we will do normal selection and remember our alternative choices
+				SelectedElement = child;
+				return;
+			}
+
+			try
+			{
+				// Remove all references to all non-chosen choice children
+				BeginUpdate();
+
+				Clear();
+
+				foreach (var item in choiceElements.Where(kv => kv.Value != child))
+				{
+					Add(item.Value);
+					base.RemoveAt(0, true);
+				}
+
+				Add(child);
+
+				_choiceCache.Clear();
+				choiceElements.Clear();
+				choiceElements.Add(new KeyValuePair<string, DataElement>(child.Name, child));
+				_selectedElement = child;
+			}
+			finally
+			{
+				EndUpdate();
+			}
 		}
 	}
 }
