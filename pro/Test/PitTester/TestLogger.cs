@@ -109,7 +109,7 @@ namespace PitTester
 			ignores = new List<Tuple<Action, DataElement>>();
 
 			var resolver = new PeachXmlNamespaceResolver();
-			var navi = new PeachXPathNavigator(context.dom);
+			var navi = new PeachXPathNavigator(model);
 
 			foreach (var item in xpathIgnore)
 			{

@@ -21,6 +21,7 @@ using Peach.Pro.Core.WebServices.Models;
 using Action = Peach.Core.Dom.Action;
 using Dom = Peach.Core.Dom.Dom;
 using Ionic.Zip;
+using StateModel = Peach.Core.Dom.StateModel;
 
 namespace PitTester
 {
@@ -137,6 +138,7 @@ namespace PitTester
 			var dom = parser.asParser(args, pitFile);
 
 			var errors = new List<string>();
+			var fixupOverrides = new Dictionary<string, Variant>();
 
 			foreach (var test in dom.tests)
 			{
@@ -172,13 +174,11 @@ namespace PitTester
 					};
 					test.publishers[i] = newPub;
 				}
-			}
 
-			var fixupOverrides = new Dictionary<string, Variant>();
-
-			if (testData.Slurps.Count > 0)
-			{
-				ApplySlurps(testData, dom, fixupOverrides);
+				if (testData.Slurps.Count > 0)
+				{
+					ApplySlurps(testData, test.stateModel, fixupOverrides);
+				}
 			}
 
 			// See #214
@@ -241,7 +241,7 @@ namespace PitTester
 				{
 					ctx.StateModelStarting += (context, model) =>
 					{
-						ApplySlurps(testData, context.dom, null);
+						ApplySlurps(testData, model, null);
 					};
 				}
 			};
@@ -265,11 +265,11 @@ namespace PitTester
 				throw new PeachException(string.Join("\n", errors));
 		}
 
-		private static void ApplySlurps(TestData testData, Dom dom, Dictionary<string, Variant> fixupOverrides)
+		private static void ApplySlurps(TestData testData, StateModel sm, Dictionary<string, Variant> fixupOverrides)
 		{
 			var doc = new XmlDocument();
 			var resolver = new PeachXmlNamespaceResolver();
-			var navi = new PeachXPathNavigator(dom);
+			var navi = new PeachXPathNavigator(sm);
 
 			foreach (var slurp in testData.Slurps)
 			{

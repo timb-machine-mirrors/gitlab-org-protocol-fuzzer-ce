@@ -540,10 +540,16 @@ namespace Peach.Core.Dom.XPath
 			get { return _currentNode.Node; }
 		}
 
+		[Obsolete("This constructor is obsolete. Construct with a state model instead.")]
 		public PeachXPathNavigator(Dom dom)
+			: this(dom.context.test.stateModel)
+		{
+		}
+
+		public PeachXPathNavigator(StateModel sm)
 		{
 			_position = new LinkedList<Entry>();
-			_currentNode = new RootEntry(dom);
+			_currentNode = new StateModelEntry(sm);
 		}
 
 		private PeachXPathNavigator(PeachXPathNavigator other)

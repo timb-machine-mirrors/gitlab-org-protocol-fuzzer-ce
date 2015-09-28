@@ -51,10 +51,10 @@ namespace Peach.Pro.Core.Transformers.Crypto
 		/// <returns></returns>
 		protected virtual RsaKeyParameters FromCertXPath(string xpath)
 		{
-			var context = ((DataModel) parent.getRoot()).actionData.action.parent.parent.parent.context;
+			var stateModel = ((DataModel)parent.getRoot()).actionData.action.parent.parent;
 
 			var resolver = new PeachXmlNamespaceResolver();
-			var navi = new PeachXPathNavigator(context.dom);
+			var navi = new PeachXPathNavigator(stateModel);
 			var iter = navi.Select(xpath, resolver);
 
 			DataElement certElement = null;
