@@ -409,7 +409,7 @@ namespace Peach.Core.Dom
 			OnInsertItem(item);
 		}
 
-		public virtual void RemoveAt(int index)
+		public void RemoveAt(int index)
 		{
 			RemoveAt(index, true);
 		}

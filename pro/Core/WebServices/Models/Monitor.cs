@@ -80,6 +80,11 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// 
 		/// </summary>
 		public ulong? Max { get; set; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public bool Optional { get; set; }
 	}
 
 	/// <summary>

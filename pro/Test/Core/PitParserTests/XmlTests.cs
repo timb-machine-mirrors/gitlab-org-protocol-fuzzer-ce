@@ -214,8 +214,8 @@ namespace Peach.Pro.Test.Core.PitParserTests
 		
 			PitParser parser = new PitParser();
 			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			
-			PeachXPathNavigator nav = new PeachXPathNavigator(dom);
+
+			PeachXPathNavigator nav = new PeachXPathNavigator(dom.tests[0].stateModel);
 			XPathNodeIterator it = nav.Select("//TheNumber");
 			
 			List<string> res = new List<string>();
@@ -268,8 +268,8 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 			PitParser parser = new PitParser();
 			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			
-			PeachXPathNavigator nav = new PeachXPathNavigator(dom);
+
+			PeachXPathNavigator nav = new PeachXPathNavigator(dom.tests[0].stateModel);
 			XPathNodeIterator it = nav.Select("//String1");
 			
 			// Should find one element

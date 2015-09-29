@@ -21,6 +21,7 @@ using Peach.Pro.Core.WebServices.Models;
 using Action = Peach.Core.Dom.Action;
 using Dom = Peach.Core.Dom.Dom;
 using Ionic.Zip;
+using StateModel = Peach.Core.Dom.StateModel;
 
 namespace PitTester
 {
@@ -79,7 +80,7 @@ namespace PitTester
 				IterationStarting(context, currentIteration, totalIterations);
 		}
 
-		public static void TestPit(string libraryPath, string pitFile, bool singleIteration, uint? seed, bool keepGoing)
+		public static void TestPit(string libraryPath, string pitFile, bool singleIteration, uint? seed, bool keepGoing, uint stop = 500)
 		{
 			var testFile = pitFile + ".test";
 			if (!File.Exists(testFile))
@@ -137,6 +138,7 @@ namespace PitTester
 			var dom = parser.asParser(args, pitFile);
 
 			var errors = new List<string>();
+			var fixupOverrides = new Dictionary<string, Variant>();
 
 			foreach (var test in dom.tests)
 			{
@@ -172,13 +174,11 @@ namespace PitTester
 					};
 					test.publishers[i] = newPub;
 				}
-			}
 
-			var fixupOverrides = new Dictionary<string, Variant>();
-
-			if (testData.Slurps.Count > 0)
-			{
-				ApplySlurps(testData, dom, fixupOverrides);
+				if (testData.Slurps.Count > 0)
+				{
+					ApplySlurps(testData, test.stateModel, fixupOverrides);
+				}
 			}
 
 			// See #214
@@ -208,7 +208,7 @@ namespace PitTester
 			{
 				range = true,
 				rangeStart = 0,
-				rangeStop = 500,
+				rangeStop = stop,
 				pitFile = Path.GetFileName(pitFile),
 				runName = "Default",
 				singleIteration = singleIteration
@@ -241,7 +241,7 @@ namespace PitTester
 				{
 					ctx.StateModelStarting += (context, model) =>
 					{
-						ApplySlurps(testData, context.dom, null);
+						ApplySlurps(testData, model, null);
 					};
 				}
 			};
@@ -265,11 +265,11 @@ namespace PitTester
 				throw new PeachException(string.Join("\n", errors));
 		}
 
-		private static void ApplySlurps(TestData testData, Dom dom, Dictionary<string, Variant> fixupOverrides)
+		private static void ApplySlurps(TestData testData, StateModel sm, Dictionary<string, Variant> fixupOverrides)
 		{
 			var doc = new XmlDocument();
 			var resolver = new PeachXmlNamespaceResolver();
-			var navi = new PeachXPathNavigator(dom);
+			var navi = new PeachXPathNavigator(sm);
 
 			foreach (var slurp in testData.Slurps)
 			{
@@ -357,8 +357,14 @@ namespace PitTester
 			}
 		}
 
-		public static void VerifyDataSets(string pitLibraryPath, string fileName, bool verifyBytes = true)
+		public static void VerifyDataSets(string pitLibraryPath, string fileName)
 		{
+			var testData = new TestData();
+
+			var pitTest = fileName + ".test";
+			if (File.Exists(pitTest))
+				testData = TestData.Parse(pitTest);
+
 			var defs = PitParser.parseDefines(fileName + ".config");
 			if (defs.Any(k => k.Key == "PitLibraryPath"))
 			{
@@ -381,6 +387,8 @@ namespace PitTester
 			{
 				dom.context.test = test;
 
+				var testTest = testData.Tests.FirstOrDefault(t => t.Name == test.Name);
+
 				foreach (var state in test.stateModel.states)
 				{
 					foreach (var action in state.actions)
@@ -389,7 +397,8 @@ namespace PitTester
 						{
 							foreach (var data in actionData.allData)
 							{
-								VerifyDataSet(verifyBytes, data, actionData, test, state, action, sb);
+								var verify = testTest == null || testTest.VerifyDataSets;
+								VerifyDataSet(verify, data, actionData, test, state, action, sb);
 							}
 						}
 					}
@@ -738,6 +747,20 @@ namespace PitTester
 
 					if (!gotEnd)
 						errors.AppendLine(string.Format("StateModel '{0}' does not call agent with 'ExitIterationEvent'.", smName));
+				}
+
+				var when = nav.Select("/p:Peach/p:StateModel/p:State/p:Action/@when", nsMgr);
+				while (when.MoveNext())
+				{
+					var val = when.Current.Value;
+					if (val.Contains("controlIteration"))
+					{
+						var act = when.Clone();
+						act.Current.MoveToParent();
+
+						if (!ShouldSkipRule(act, "Allow_WhenControlIteration"))
+							errors.AppendLine("Action has when attribute containing controlIteration.");
+					}
 				}
 			}
 

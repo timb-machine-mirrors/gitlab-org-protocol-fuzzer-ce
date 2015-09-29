@@ -32,6 +32,11 @@ namespace Peach.Pro.Core
 
 			public abstract ParameterType ConfigType { get; }
 
+			public virtual bool Optional
+			{
+				get { return false; }
+			}
+
 			public virtual string[] Defaults
 			{
 				get { return new string[0]; }
@@ -63,9 +68,18 @@ namespace Peach.Pro.Core
 		/// </summary>
 		public class StringDefine : Define
 		{
+			[XmlAttribute("optional")]
+			[DefaultValue(false)]
+			public bool OptionalValue { get; set; }
+
 			public override ParameterType ConfigType
 			{
 				get { return ParameterType.String; }
+			}
+
+			public override bool Optional
+			{
+				get { return OptionalValue; }
 			}
 		}
 

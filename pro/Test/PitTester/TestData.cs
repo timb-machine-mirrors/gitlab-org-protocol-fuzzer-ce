@@ -64,6 +64,10 @@ namespace PitTester
 			[XmlAttribute("name")]
 			public string Name { get; set; }
 
+			[XmlAttribute("verifyDataSets")]
+			[DefaultValue(true)]
+			public bool VerifyDataSets { get; set; }
+
 			[XmlAttribute("seed")]
 			[DefaultValue("")]
 			public string Seed { get; set; }

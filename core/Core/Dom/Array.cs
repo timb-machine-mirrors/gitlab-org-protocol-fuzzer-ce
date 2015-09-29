@@ -89,7 +89,7 @@ namespace Peach.Core.Dom
 			if (!Expanded)
 				ExpandTo(occurs);
 
-			return countOverride.GetValueOrDefault(Count);
+			return CountOverride.GetValueOrDefault(Count);
 		}
 
 		private DataElement originalElement;
@@ -277,7 +277,7 @@ namespace Peach.Core.Dom
 			if (!Expanded)
 				ExpandTo(occurs);
 
-			int remain = countOverride.GetValueOrDefault(Count);
+			int remain = CountOverride.GetValueOrDefault(Count);
 
 			var stream = new BitStreamList() { Name = fullName };
 
@@ -288,7 +288,7 @@ namespace Peach.Core.Dom
 				return new Variant(stream);
 
 			// If we are here, it is because of CountOverride being set!
-			System.Diagnostics.Debug.Assert(countOverride.HasValue);
+			System.Diagnostics.Debug.Assert(CountOverride.HasValue);
 			System.Diagnostics.Debug.Assert(ExpandedValue != null);
 
 			var halves = new Stack<Tuple<long, bool>>();
