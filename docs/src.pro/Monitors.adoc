@@ -73,7 +73,7 @@ will be performed. +
 +
 Note that the developer is responsible for defining the message in the State Model 
 and for coordinating its use throughout the pit.
-OniterationEnd:: The action occurs at the end of a test case. For each test case, 
+OnIterationEnd:: The action occurs at the end of a test case. For each test case, 
 the action occurs once.
 DetectFault:: The action occurs during each test case when monitors are polled for faults.
 OnFault:: The action occurs when a fault occurs. The action occurs once for each fault.
