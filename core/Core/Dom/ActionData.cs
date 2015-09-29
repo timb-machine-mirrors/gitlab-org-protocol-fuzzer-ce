@@ -72,6 +72,16 @@ namespace Peach.Core.Dom
 		public DataModel originalDataModel { get; private set; }
 
 		/// <summary>
+		/// Is this action data part of an input/getProperty/call-result action
+		/// </summary>
+		public bool IsInput { get { return !IsOutput; } }
+
+		/// <summary>
+		/// Is this action data part of an output/setProperty/call-param action
+		/// </summary>
+		public bool IsOutput { get { return action.outputData.Contains(this); } }
+
+		/// <summary>
 		/// The name of this record.
 		/// </summary>
 		/// <remarks>

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Xml;
 using Peach.Core.Analyzers;
 using Peach.Core.IO;
@@ -38,15 +37,7 @@ namespace Peach.Core.Dom
 		protected int ExpandedValueIndex;
 
 		// ReSharper disable once InconsistentNaming
-		protected int? countOverride;
-
-		public virtual int? CountOverride
-		{
-			get
-			{
-				return countOverride;
-			}
-		}
+		protected int? CountOverride;
 
 		/// <summary>
 		/// Set count override.
@@ -59,7 +50,7 @@ namespace Peach.Core.Dom
 			if (value == null)
 				return;
 
-			countOverride = count;
+			CountOverride = count;
 			ExpandedValue = value;
 			ExpandedValueIndex = valueIndex;
 
@@ -68,7 +59,7 @@ namespace Peach.Core.Dom
 
 		public virtual int GetCountOverride()
 		{
-			return countOverride.GetValueOrDefault(Count);
+			return CountOverride.GetValueOrDefault(Count);
 		}
 
 		public Sequence()
@@ -128,7 +119,7 @@ namespace Peach.Core.Dom
 
 		protected override Variant GenerateDefaultValue()
 		{
-			var remain = countOverride.GetValueOrDefault(Count);
+			var remain = CountOverride.GetValueOrDefault(Count);
 
 			var stream = new BitStreamList { Name = fullName };
 
@@ -139,7 +130,7 @@ namespace Peach.Core.Dom
 				return new Variant(stream);
 
 			// If we are here, it is because of CountOverride being set!
-			Debug.Assert(countOverride.HasValue);
+			Debug.Assert(CountOverride.HasValue);
 			Debug.Assert(ExpandedValue != null);
 
 			var halves = new Stack<Tuple<long, bool>>();

@@ -118,6 +118,9 @@ namespace PitTester
 			Log("Input");
 			var data = _logger.Verify<TestData.Input>(Name);
 
+			if (data == null)
+				throw new SoftException("No data available, emulating timeout.");
+
 			_datagram = data.IsDatagram;
 
 			if (data.IsDatagram)
@@ -159,11 +162,11 @@ namespace PitTester
 			Log("Output");
 			var data = _logger.Verify<TestData.Output>(Name);
 
-			var expected = data.Payload;
-
 			// Only check outputs on non-fuzzing iterations
 			if (!IsControlIteration)
 				return;
+
+			var expected = data.Payload;
 
 			// Ensure we end on a byte boundary
 			var bs = dataModel.Value.PadBits();

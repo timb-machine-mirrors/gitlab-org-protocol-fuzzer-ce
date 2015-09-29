@@ -312,7 +312,7 @@ namespace Peach.Pro.Test.Core
 
 			Peach.Core.Dom.Array array = dom.tests[0].stateModel.states["State1"].actions[0].dataModel[1] as Peach.Core.Dom.Array;
 
-			PeachXPathNavigator navi = new PeachXPathNavigator(dom);
+			PeachXPathNavigator navi = new PeachXPathNavigator(dom.tests[0].stateModel);
 			var iter = navi.Select("//str");
 			if (!iter.MoveNext())
 				Assert.Fail();
