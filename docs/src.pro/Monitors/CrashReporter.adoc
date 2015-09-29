@@ -6,7 +6,7 @@
 
 *Monitor categories*: *Data collection*, *Fault detection*
 
-The _CrashReporter_ monitor collects and logs core dump information from crashes detected by the OS X System Crash Reporter. Use _CrashReporter_ when crashes can occur and you cannot use  xref:Monitors_Gdb[gdb] or xref:Monitors_CrashWrangler[CrashWrangler].
+The _CrashReporter_ monitor collects and logs core dump information from crashes detected by the OS X System Crash Reporter. Use _CrashReporter_ when crashes can occur and you cannot use xref:Monitors_CrashWrangler[CrashWrangler].
 
 The monitoring scope can focus on a single executable, specified by setting the *ProcessName* parameter. Or, the monitoring scope can include  all processes. By default, all processes are monitored.
 
