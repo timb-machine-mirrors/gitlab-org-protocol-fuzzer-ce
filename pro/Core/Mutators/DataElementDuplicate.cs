@@ -4,6 +4,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
@@ -72,6 +73,12 @@ namespace Peach.Pro.Core.Mutators
 		{
 			var limit = Utility.SizedHelpers.MaxDuplication(obj);
 
+			// For frag this can cause re-generation of fragments
+			// causing our current element to be removed from the list.
+			// Check and try to handle this nicely.
+			if (obj.parent == null)
+				return;
+
 			if (num > limit)
 			{
 				logger.Trace("Skipping mutation, duplication by {0} would exceed max output size.", num);
@@ -93,6 +100,14 @@ namespace Peach.Pro.Core.Mutators
 			{
 				// Make sure we pick a unique name
 				var newName = "{0}_{1}".Fmt(baseName, i);
+
+				// Verify we have unique names. This can occur
+				// with the duplicate mutator and Frag element
+				while (obj.parent.Any(child => child.Name == newName))
+				{
+					baseName += "_";
+					newName = "{0}_{1}".Fmt(baseName, i);
+				}
 
 				// TODO: Why not just use a blob here?
 

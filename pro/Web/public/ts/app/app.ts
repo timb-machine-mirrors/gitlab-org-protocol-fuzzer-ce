@@ -9,7 +9,10 @@ module Peach {
 	}
 
 	function registerModule(ns, app: ng.IModule) {
-		_.forOwn(ns, (component, key: string) => {
+		_.forOwn(ns,(component, key: string) => {
+			if (typeof(key) !== 'string') {
+				return;
+			}
 			var name = getComponentName(key, component);
 			if (key.endsWith('Controller')) {
 				app.controller(name, component);

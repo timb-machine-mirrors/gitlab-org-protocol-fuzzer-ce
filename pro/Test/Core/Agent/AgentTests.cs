@@ -119,6 +119,65 @@ namespace Peach.Pro.Test.Core.Agent
 		}
 
 		[Test]
+		public void TestFailedReconnect([ValueSource("ChannelNames")]string protocol)
+		{
+			if (Platform.GetOS() != Platform.OS.Windows && protocol == "legacy")
+				Assert.Ignore(".NET remoting doesn't work inside nunit on mono");
+
+			var xml = @"
+<Peach>
+	<DataModel name='TheDataModel'>
+		<String value='Hello'/>
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='TheDataModel'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Agent name='RemoteAgent' location='{0}://127.0.0.1:9001'>
+		<Monitor class='Null' />
+	</Agent>
+
+	<Test name='Default' targetLifetime='iteration'>
+		<Agent ref='RemoteAgent'/>
+		<StateModel ref='TheState'/>
+		<Publisher class='Null' />
+	</Test>
+</Peach>".Fmt(protocol);
+
+			try
+			{
+				StartAgent(protocol);
+
+				var dom = DataModelCollector.ParsePit(xml);
+				var config = new RunConfiguration { range = true, rangeStart = 0, rangeStop = 5 };
+				var e = new Engine(null);
+
+				e.TestStarting += ctx =>
+				{
+					ctx.ActionStarting += (c, a) =>
+					{
+						if (c.currentIteration == 3)
+						{
+							StopAgent();
+						}
+					};
+				};
+
+				e.startFuzzing(dom, config);
+
+			}
+			finally
+			{
+				StopAgent();
+			}
+		}
+
+		[Test]
 		public void TestReconnect([ValueSource("ChannelNames")]string protocol)
 		{
 			if (Platform.GetOS() != Platform.OS.Windows && protocol == "legacy")

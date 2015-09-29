@@ -689,6 +689,10 @@ namespace Peach.Pro.Core.MutationStrategies
 					logger.Debug("Action_Starting: Fuzzing: {0}", item.ElementName);
 					logger.Debug("Action_Starting: Mutator: {0}", mutator.Name);
 					mutator.randomMutation(elem);
+
+					// Trigger re-generation of data
+					// needed for Frag element.
+					//var obj = data.dataModel.Value;
 				}
 				else
 				{

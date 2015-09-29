@@ -5,8 +5,6 @@ using DomMonitor = Peach.Core.Dom.Monitor;
 using DomObject = Peach.Core.Dom.Dom;
 using WebAgent = Peach.Pro.Core.WebServices.Models.Agent;
 using Peach.Pro.Core.WebServices.Models;
-using Newtonsoft.Json;
-using System.IO;
 using System.Text;
 
 namespace Peach.Pro.Core

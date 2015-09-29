@@ -177,9 +177,9 @@ namespace Peach.Core
 				{
 					var err = errors.Errors.FirstOrDefault() ?? errors.Warnings.FirstOrDefault();
 					if (err == null)
-						throw new PeachException("Failed to comile expression [{0}].".Fmt(code));
+						throw new PeachException("Failed to compile expression [{0}].".Fmt(code));
 
-					throw new PeachException("Failed to comile expression [{0}], {1}".Fmt(code, err));
+					throw new PeachException("Failed to compile expression [{0}], {1}".Fmt(code, err));
 				}
 
 				if (cache)
@@ -227,6 +227,14 @@ namespace Peach.Core
 			try
 			{
 				compiled.Execute(scope);
+			}
+			catch (SoftException)
+			{
+				throw;
+			}
+			catch (PeachException)
+			{
+				throw;
 			}
 			catch (Exception ex)
 			{
@@ -283,12 +291,20 @@ namespace Peach.Core
 
 				return obj;
 			}
+			catch (SoftException)
+			{
+				throw;
+			}
+			catch (PeachException)
+			{
+				throw;
+			}
 			catch (Exception ex)
 			{
 				if (ex.GetBaseException() is ThreadAbortException)
 					throw;
 
-				throw new SoftException("Failed to evalate expression [{0}], {1}.".Fmt(code, ex.Message), ex);
+				throw new SoftException("Failed to evaluate expression [{0}], {1}.".Fmt(code, ex.Message), ex);
 			}
 		}
 

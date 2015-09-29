@@ -312,7 +312,7 @@ namespace Peach.Pro.Test.Core
 
 			Peach.Core.Dom.Array array = dom.tests[0].stateModel.states["State1"].actions[0].dataModel[1] as Peach.Core.Dom.Array;
 
-			PeachXPathNavigator navi = new PeachXPathNavigator(dom);
+			PeachXPathNavigator navi = new PeachXPathNavigator(dom.tests[0].stateModel);
 			var iter = navi.Select("//str");
 			if (!iter.MoveNext())
 				Assert.Fail();
@@ -347,7 +347,8 @@ namespace Peach.Pro.Test.Core
 			Assert.AreEqual(2, count);
 			Assert.AreEqual(1, array.Count);
 
-			array.CountOverride = 50;
+			array.SetCountOverride(50, array[0].Value, 0);
+			//array.CountOverride = 50;
 			Assert.AreEqual(50, array.GetCountOverride());
 
 			var val = array.InternalValue.BitsToString();

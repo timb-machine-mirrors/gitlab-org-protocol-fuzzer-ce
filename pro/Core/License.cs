@@ -3,6 +3,7 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Portable.Licensing.Validation;
 
 namespace Peach.Core
@@ -10,6 +11,7 @@ namespace Peach.Core
 	public static class License
 	{
 		static readonly string EulaConfig = "eulaAccepted";
+		static readonly StringBuilder eulaErrors = new StringBuilder();
 		static bool? eulaAccepted;
 		static object mutex = new object();
 
@@ -33,8 +35,10 @@ namespace Peach.Core
 			Verify();
 		}
 
+		public static string ErrorText { get { return eulaErrors.ToString(); } }
 		public static bool IsValid { get; private set; }
 		public static Feature Version { get; private set; }
+		public static DateTime Expiration { get; private set; }
 
 		public static bool EulaAccepted
 		{
@@ -187,14 +191,17 @@ namespace Peach.Core
 					.ToList();
 
 				IsValid = failures.Count == 0;
+				Expiration = license.Expiration;
 
 				if (!IsValid)
 				{
-					Console.WriteLine("License file '{0}' failed to verify.", xml.FileName);
+					eulaErrors.AppendFormat("License file '{0}' failed to verify.", xml.FileName);
+					eulaErrors.AppendLine();
 
 					foreach (var failure in failures)
 					{
-						Console.WriteLine("{0}  {1}", failure.Message, failure.HowToResolve);
+						eulaErrors.AppendFormat("{0}  {1}", failure.Message, failure.HowToResolve);
+						eulaErrors.AppendLine();
 					}
 				}
 
@@ -212,7 +219,8 @@ namespace Peach.Core
 				IsValid = false;
 				Version = Feature.Unknown;
 
-				Console.WriteLine("License verification failed.  {0}", ex.Message);
+				eulaErrors.AppendLine("License verification failed.");
+				eulaErrors.AppendLine(ex.Message);
 			}
 		}
 	}

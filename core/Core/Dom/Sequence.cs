@@ -26,30 +26,40 @@ namespace Peach.Core.Dom
 	{
 		protected bool Expanded;
 
+		/// <summary>
+		/// Value to use in array expantion
+		/// </summary>
 		protected BitwiseStream ExpandedValue;
+
+		/// <summary>
+		/// Index of value being expanded
+		/// </summary>
+		protected int ExpandedValueIndex;
+
 		// ReSharper disable once InconsistentNaming
-		protected int? countOverride;
+		protected int? CountOverride;
 
-		public virtual int? CountOverride
+		/// <summary>
+		/// Set count override.
+		/// </summary>
+		/// <param name="count">New count for sequence</param>
+		/// <param name="value">Value to use in expansion</param>
+		/// <param name="valueIndex">Index to perform expantion at</param>
+		public virtual void SetCountOverride(int count, BitwiseStream value, int valueIndex)
 		{
-			get
-			{
-				return countOverride;
-			}
+			if (value == null)
+				return;
 
-			set
-			{
-				countOverride = value;
+			CountOverride = count;
+			ExpandedValue = value;
+			ExpandedValueIndex = valueIndex;
 
-				ExpandedValue = this[Count - 1].Value;
-
-				Invalidate();
-			}
+			Invalidate();
 		}
 
 		public virtual int GetCountOverride()
 		{
-			return countOverride.GetValueOrDefault(Count);
+			return CountOverride.GetValueOrDefault(Count);
 		}
 
 		public Sequence()
@@ -109,7 +119,7 @@ namespace Peach.Core.Dom
 
 		protected override Variant GenerateDefaultValue()
 		{
-			var remain = countOverride.GetValueOrDefault(Count);
+			var remain = CountOverride.GetValueOrDefault(Count);
 
 			var stream = new BitStreamList { Name = fullName };
 
@@ -120,7 +130,7 @@ namespace Peach.Core.Dom
 				return new Variant(stream);
 
 			// If we are here, it is because of CountOverride being set!
-			Debug.Assert(countOverride.HasValue);
+			Debug.Assert(CountOverride.HasValue);
 			Debug.Assert(ExpandedValue != null);
 
 			var halves = new Stack<Tuple<long, bool>>();

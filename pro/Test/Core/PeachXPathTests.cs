@@ -70,7 +70,7 @@ namespace Peach.Pro.Test.Core
 
 			PitParser parser = new PitParser();
 			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			PeachXPathNavigator navi = new PeachXPathNavigator(dom);
+			PeachXPathNavigator navi = new PeachXPathNavigator(dom.tests[0].stateModel);
 			XPathNodeIterator iter = navi.Select("//TheNumber");
 
 			Assert.IsTrue(iter.MoveNext());
@@ -117,7 +117,7 @@ namespace Peach.Pro.Test.Core
 			DataElement findMe1 = ((DataElementContainer)((DataElementContainer)dataModel[1])[0])[0];
 			DataElement findMe2 = ((DataElementContainer)dataModel[3])[0];
 
-			PeachXPathNavigator navi = new PeachXPathNavigator(dom);
+			PeachXPathNavigator navi = new PeachXPathNavigator(dom.tests[0].stateModel);
 			XPathNodeIterator iter = navi.Select("//FindMe");
 
 			Assert.IsTrue(iter.MoveNext());
@@ -164,7 +164,7 @@ namespace Peach.Pro.Test.Core
 			var dataModel = dom.tests["Default"].stateModel.states["State1"].actions[0].dataModel;
 			DataElement findMe = ((DataElementContainer)((DataElementContainer)dataModel[1])[0])[0];
 
-			PeachXPathNavigator navi = new PeachXPathNavigator(dom);
+			PeachXPathNavigator navi = new PeachXPathNavigator(dom.tests[0].stateModel);
 			XPathNodeIterator iter = navi.Select("//Block1//FindMe");
 
 			Assert.IsTrue(iter.MoveNext());
@@ -209,7 +209,7 @@ namespace Peach.Pro.Test.Core
 			var dataModel = dom.tests["Default"].stateModel.states["State1"].actions[0].dataModel;
 			DataElement findMe = ((DataElementContainer)((DataElementContainer)dataModel[1])[0])[0];
 
-			PeachXPathNavigator navi = new PeachXPathNavigator(dom);
+			PeachXPathNavigator navi = new PeachXPathNavigator(dom.tests[0].stateModel);
 			XPathNodeIterator iter = navi.Select("//TheDataModel/Block1/Block1_1/FindMe");
 
 			Assert.IsTrue(iter.MoveNext());
@@ -254,7 +254,7 @@ namespace Peach.Pro.Test.Core
 			var dataModel = dom.tests["Default"].stateModel.states["State1"].actions[0].dataModel;
 			DataElement findMe = ((DataElementContainer)dataModel[3])[0];
 
-			PeachXPathNavigator navi = new PeachXPathNavigator(dom);
+			PeachXPathNavigator navi = new PeachXPathNavigator(dom.tests[0].stateModel);
 			XPathNodeIterator iter = navi.Select("//FindMe[@isToken='True']");
 
 			Assert.IsTrue(iter.MoveNext());
@@ -300,7 +300,7 @@ namespace Peach.Pro.Test.Core
 			DataElement findMe1 = ((DataElementContainer)((DataElementContainer)dataModel[1])[0])[0];
 			DataElement findMe2 = ((DataElementContainer)dataModel[3])[0];
 
-			PeachXPathNavigator navi = new PeachXPathNavigator(dom);
+			PeachXPathNavigator navi = new PeachXPathNavigator(dom.tests[0].stateModel);
 			XPathNodeIterator iter = navi.Select("//FindMe");
 
 			Assert.IsTrue(iter.MoveNext());
@@ -340,9 +340,9 @@ namespace Peach.Pro.Test.Core
 
 			var action = dom.tests["Default"].stateModel.states["State1"].actions[0] as Peach.Core.Dom.Actions.Call;
 			DataElement findMe1 = action.parameters[0].dataModel[0];
-			DataElement findMe2 = action.parameters[1].dataModel[0]; 
+			DataElement findMe2 = action.parameters[1].dataModel[0];
 
-			PeachXPathNavigator navi = new PeachXPathNavigator(dom);
+			PeachXPathNavigator navi = new PeachXPathNavigator(dom.tests[0].stateModel);
 			XPathNodeIterator iter = navi.Select("//FindMe");
 
 			
@@ -380,8 +380,8 @@ namespace Peach.Pro.Test.Core
 
 			var action = dom.tests["Default"].stateModel.states["State1"].actions[0] as Peach.Core.Dom.Actions.Call;
 			DataElement findMe1 = action.result.dataModel[0];
-			
-			PeachXPathNavigator navi = new PeachXPathNavigator(dom);
+
+			PeachXPathNavigator navi = new PeachXPathNavigator(dom.tests[0].stateModel);
 			XPathNodeIterator iter = navi.Select("//FindMe");
 
 			Assert.IsTrue(iter.MoveNext());
@@ -423,7 +423,7 @@ namespace Peach.Pro.Test.Core
 			var action = dom.tests["Default"].stateModel.states["State1"].actions[0] as Peach.Core.Dom.Actions.Call;
 
 
-			PeachXPathNavigator navi = new PeachXPathNavigator(dom);
+			PeachXPathNavigator navi = new PeachXPathNavigator(dom.tests[0].stateModel);
 			XPathNodeIterator iter = navi.Select("//DM_Param1//FindMe");
 			DataElement findMe = action.parameters[0].dataModel[0];
 
@@ -513,7 +513,7 @@ namespace Peach.Pro.Test.Core
 
 			dom.Name = "Peach";
 
-			var nav = new PeachXPathNavigator(dom);
+			var nav = new PeachXPathNavigator(dom.tests[0].stateModel);
 
 			Dump(nav, 0);
 		}

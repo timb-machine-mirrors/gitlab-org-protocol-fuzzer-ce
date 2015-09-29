@@ -318,7 +318,7 @@ namespace Peach.Core.Dom
 
 		public void markMutableElements()
 		{
-			var nav = new PeachXPathNavigator(parent);
+			var nav = new PeachXPathNavigator(stateModel);
 
 			foreach (var item in mutables)
 			{

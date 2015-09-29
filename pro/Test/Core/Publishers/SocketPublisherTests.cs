@@ -41,13 +41,12 @@ namespace Peach.Pro.Test.Core.Publishers
 		const int IPV6_JOIN_GROUP = 0xC;
 		const int IPV6_MULTICAST_IF = 0x9;
 
+		[StructLayout(LayoutKind.Sequential)]
 		struct ipv6_mreq
 		{
 			[MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-			// ReSharper disable NotAccessedField.Local
 			public byte[] ipv6mr_multiaddr;
 			public IntPtr ipv6mr_interface;
-			// ReSharper restore NotAccessedField.Local
 		}
 
 		// ReSharper restore InconsistentNaming
@@ -920,6 +919,106 @@ namespace Peach.Pro.Test.Core.Publishers
 					Assert.AreEqual("World", str);
 				}
 			}
+		}
+
+		[Test]
+		public void TestReceiveZeroTimeout()
+		{
+			const string xml = @"
+<Peach>
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action name='open' type='open' publisher='Rx' />
+
+			<Action type='setProperty' property='Timeout' publisher='Rx'>
+				<DataModel name='DM'>
+					<Number size='32' value='0'/>
+				</DataModel>
+			</Action>
+
+			<Action type='setProperty' property='NoReadException' publisher='Rx'>
+				<DataModel name='DM'>
+					<String value='true'/>
+				</DataModel>
+			</Action>
+
+			<Action type='input' publisher='Rx'>
+				<DataModel name='DM'>
+					<Choice>
+						<Block name='Yes'>
+							<Blob length='1'/>
+							<Blob />
+						</Block>
+						<Block name='No' />
+					</Choice>
+				</DataModel>
+			</Action>
+
+			<Action type='output' publisher='Tx'>
+				<DataModel name='DM'>
+					<Blob value='Hello World' />
+				</DataModel>
+			</Action>
+
+			<Action type='input' publisher='Rx'>
+				<DataModel name='DM'>
+					<Blob />
+				</DataModel>
+			</Action>
+
+			<!-- Ensure shutdown with pending IO works -->
+			<Action type='input' publisher='Rx'>
+				<DataModel name='DM'>
+					<Choice>
+						<Blob />
+					</Choice>
+				</DataModel>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM' />
+		<Publisher class='Udp' name='Rx'>
+			<Param name='Host' value='127.0.0.1' />
+			<Param name='SrcPort' value='0' />
+		</Publisher>
+		<Publisher class='Udp' name='Tx'>
+			<Param name='Host' value='127.0.0.1' />
+			<Param name='Port' value='0' />
+		</Publisher>
+	</Test>
+</Peach>
+";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var e = new Engine(null);
+			var cfg = new RunConfiguration { singleIteration = true };
+			e.IterationStarting += (ctx, it, tot) =>
+			{
+				ctx.ActionFinished += (c, a) =>
+				{
+					if (a.Name == "open")
+					{
+						((SocketPublisher)c.test.publishers[1]).Port = ((SocketPublisher)c.test.publishers[0]).SrcPort;
+					}
+				};
+			};
+
+			e.startFuzzing(dom, cfg);
+
+			var acts = dom.tests[0].stateModel.states[0].actions;
+
+			var ch = acts[3].dataModel[0] as Choice;
+			Assert.NotNull(ch, "Should have a choice element");
+
+			Assert.AreEqual("No", ch.SelectedElement.Name);
+
+			// Should have received hello world!
+			Assert.AreEqual("Hello World", acts[5].dataModel.InternalValue.BitsToString());
+
+			// Should have received nothing
+			Assert.AreEqual("", acts[6].dataModel.InternalValue.BitsToString());
 		}
 
 		[Test, Ignore("Issue #493")]

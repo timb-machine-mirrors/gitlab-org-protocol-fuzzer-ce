@@ -5,6 +5,7 @@ using Peach.Core.Runtime;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Peach.Pro.Core.WebServices;
 
 namespace Peach.Pro.Core.Runtime
@@ -75,8 +76,47 @@ namespace Peach.Pro.Core.Runtime
 			return ret;
 		}
 
+
+		private static bool SupportedKernel()
+		{
+			if (Platform.GetOS() != Platform.OS.Linux)
+				return true;
+
+			string osrelease;
+
+			try
+			{
+				osrelease = File.ReadAllText("/proc/sys/kernel/osrelease");
+			}
+			catch
+			{
+				return true;
+			}
+
+			var m = Regex.Match(osrelease, @"^([\d\.]+)-(\d+)-(.*)$", RegexOptions.Multiline);
+
+			if (!m.Success)
+				return true;
+
+			var rev = int.Parse(m.Groups[2].Value);
+
+			// SIGSEGVs when running certain workloads on multi-cpu VMs.
+			// https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1450584
+			if (m.Groups[1].Value == "3.13.0" && rev >= 48 && rev <= 54)
+			{
+				Console.WriteLine("Kernel version {0} is incompatible with peach.", m.Value);
+				Console.WriteLine("Please upgrade your kernel to version 3.13.0-55 or newer.");
+				return false;
+			}
+
+			return true;
+		}
+
 		protected virtual bool VerifyCompatibility()
 		{
+			if (!SupportedKernel())
+				return false;
+
 			var type = Type.GetType("Mono.Runtime");
 
 			// If we are not on mono, no checks need to be performed.

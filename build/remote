@@ -15,4 +15,4 @@ shift
 
 ssh $HOST "mkdir -p ${REMOTE}"
 rsync -avz --delete --exclude=.git --exclude-from=.gitignore "${LOCAL}/" "${HOST}:${REMOTE}/"
-ssh $HOST "export TERM=msys; cd ${REMOTE} && ./waf $*"
+ssh $HOST "cd ${REMOTE} && ./waf --color=yes $*"
