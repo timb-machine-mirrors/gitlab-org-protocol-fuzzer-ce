@@ -145,6 +145,7 @@ class utest(Task.Task):
 			testlock.release()
 
 def configure(conf):
+	j = os.path.join
 	conf.env['NUNIT_VER'] = 'NUnit.Runners.2.6.4'
 	nunit_path = j(conf.get_third_party(), conf.env['NUNIT_VER'], 'tools')
 	nunit_name = '64' in conf.env.SUBARCH and 'nunit-console' or 'nunit-console-x86'

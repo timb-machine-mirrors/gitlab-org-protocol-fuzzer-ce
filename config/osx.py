@@ -7,8 +7,8 @@ host_plat = [ 'darwin' ]
 archs = [ ]
 
 tools = [
-	'gcc',
-	'gxx',
+	'clang',
+	'clang++',
 	'cs',
 	'resx',
 	'misc',
@@ -45,10 +45,9 @@ def prepare(conf):
 	]
 
 	env['MCS']  = 'dmcs'
-	env['CC']   = 'clang'
-	env['CXX']  = 'clang++'
 
 	env['SYSROOT'] = find_directory([ 
+		'MacOSX10.11.sdk', 
 		'MacOSX10.10.sdk', 
 		'MacOSX10.9.sdk', 
 		'MacOSX10.8.sdk', 
@@ -68,7 +67,7 @@ def prepare(conf):
 
 	env['PIN_VER'] = 'pin-2.13-61206-clang.4.2-mac'
 
-	pin = j(conf.get_peach_dir(), '3rdParty', 'pin', env['PIN_VER'])
+	pin = j(conf.get_third_party(), 'pin', env['PIN_VER'])
 
 	env['EXTERNALS'] = {
 		'pin' : {

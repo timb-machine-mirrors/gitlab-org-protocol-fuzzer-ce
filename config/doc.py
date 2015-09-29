@@ -22,14 +22,14 @@ host_plat = [ 'win32', 'linux', 'darwin' ]
 archs = [ ]
 
 tools = [
-	'misc',
-	'tools.asciidoc',
-	'tools.utils',
-	'tools.doxygen',
-	'tools.webhelp',
+	'misc',        # subst
+	'tools.utils', # emit
 ]
 
 optional_tools = [
+	'tools.asciidoctor-pdf',
+	'tools.doxygen',
+	'tools.webhelp',
 ]
 
 def prepare(conf):
@@ -39,8 +39,6 @@ def configure(conf):
 	env = conf.env
 
 	env.append_value('supported_features', [
-		'asciidoc',
-		'webhelp',
 		'emit',
 		'subst',
 	])

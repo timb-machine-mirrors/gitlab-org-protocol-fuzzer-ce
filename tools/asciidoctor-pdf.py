@@ -44,6 +44,7 @@ gemspec :path => "%s"
 	v.ASCIIDOCTOR_HTML_OPTS = []
 	v.ASCIIDOCTOR_HTML_THEME_DEPS = []
 	v.ASCIIDOCTOR_HTML_THEME_OPTS = []
+	v.ASCIIDOCTOR_OPTS = []
 
 	# Run bundler which will prepare all the prerequisites
 	conf.cmd_and_log(v.BUNDLE + [ '--gemfile=%s' % v.ASCIIDOCTOR_PDF_GEMFILE ])
@@ -109,6 +110,8 @@ def apply_asciidoctor_pdf(self):
 
 	tsk.env.append_value('ASCIIDOCTOR_PDF_OPTS', [ '--trace' ])
 
+	self.compiled_tasks = [ tsk ]
+
 	# Store inst task in install_extras for packaging
 	try:
 		self.install_extras.append(inst)
@@ -125,10 +128,12 @@ def apply_asciidoctor_pdf(self):
 		if not img:
 			raise Errors.WafError("image directory not found: %r in %r" % (images, self))
 		tsk.env.append_value('ASCIIDOCTOR_PDF_OPTS', [ '-a', 'images=%s' % img.path_from(srcs[0].parent) ])
+		self.images = img
 
 def asciidoctor_scan(self):
 	depnodes = [x for x in self.themes()]
 
+	img = getattr(self.generator, 'images', None)
 	root = self.inputs[0]
 
 	node_lst = [self.inputs[0]]
@@ -141,10 +146,14 @@ def asciidoctor_scan(self):
 		code = nd.read()
 		for m in re_xi.finditer(code):
 			name = m.group(2)
+			if img and '{images}' in name:
+					name = name.replace("{images}", img.path_from(nd.parent))
 			k = nd.parent.find_resource(name)
 			if k:
 				depnodes.append(k)
 				node_lst.append(k)
+			else:
+				print 'Missing node for dependency: %s' % name
 	return [depnodes, ()]
 
 class asciidoctor_pdf(Task):
@@ -161,9 +170,16 @@ class asciidoctor_pdf(Task):
 		return super(asciidoctor_pdf, self).exec_command(cmd, **kw)
 
 class asciidoctor_html(Task):
-	run_str = '${ASCIIDOCTOR} ${ASCIIDOCTOR_OPTS} ${ASCIIDOCTOR_HTML_THEME_OPTS} -b html5 -o ${TGT} ${SRC}'
+	run_str = '${ASCIIDOCTOR} ${ASCIIDOCTOR_HTML_OPTS} ${ASCIIDOCTOR_HTML_THEME_OPTS} -b html5 -o ${TGT} ${SRC}'
 	color   = 'PINK'
 	ext_out = '.html'
 	vars    = ['ASCIIDOCTOR_HTML_OPTS', 'ASCIIDOCTOR_HTML_THEME_OPTS']
 	scan    = asciidoctor_scan
 	themes  = lambda x: x.env.ASCIIDOCTOR_HTML_THEME_DEPS
+
+class asciidoctor(Task):
+	run_str = '${ASCIIDOCTOR} ${ASCIIDOCTOR_OPTS} -o ${TGT} ${SRC}'
+	color   = 'PINK'
+	vars    = ['ASCIIDOCTOR_OPTS']
+	scan    = asciidoctor_scan
+	themes  = lambda x: []

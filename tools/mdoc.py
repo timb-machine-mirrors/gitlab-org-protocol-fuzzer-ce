@@ -1,4 +1,5 @@
 from waflib.TaskGen import before_method, after_method, feature
+from waflib.Build import InstallContext
 from waflib import Errors, Task, Logs, Utils
 import os.path
 

@@ -200,6 +200,12 @@ def cs_resource(self):
 	if 'exe' in self.cs_task.env.CSTYPE:
 		# if this is an exe, require app.config and install to ${BINDIR}
 		cfg = self.path.find_or_declare('app.config')
+		if self.env.CS_NAME != 'mono':
+			manifest = self.path.find_resource('app.manifest')
+			if manifest:
+				setattr(self, 'app_manifest', manifest)
+				self.cs_task.dep_nodes.append(manifest)
+				self.env.append_value('CSFLAGS', ['/win32manifest:%s' % manifest.path_from(self.bld.bldnode)])
 	elif self.env.CS_NAME == 'mono':
 		# if this is an assembly, app.config is optional and
 		# only supported by mono

@@ -22,6 +22,24 @@ releases = [
 	},
 ]
 
+'''
+This script expects the following directory structure:
+output
+  doc/doc.zip
+  pits/${pit}.zip
+  ${platform}_release/pkg/peach-pro-${buildtag}-${platform}_release.zip
+
+The result should be:    <--- archive to smb://nas/builds/peach-pro
+output
+  release
+    ${buildtag}          <--- publish to ssh://dl.peachfuzzer.com
+      release.json
+      peach-pro-${buildtag}-${platform}_release.zip
+      peach-pro-${buildtag}-${platform}_release.zip.sha1
+      pits
+        ${pit}.zip
+'''
+
 def to_JSON(self):
 	return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
@@ -252,7 +270,8 @@ if __name__ == "__main__":
 	toAdd = filter_docs(docs, peach_docs)
 
 	for x in pkgs:
-		update_pkg(x, toAdd)
+		if 'internal' not in x:
+			update_pkg(x, toAdd)
 
 	d = datetime.datetime.now()
 
@@ -296,17 +315,6 @@ if __name__ == "__main__":
 			dst = os.path.join(path, 'pits', f)
 			shutil.copy(src, dst)
 
-		# Make all zip
-		dst = os.path.join(path, r['all'] % c.__dict__)
-
-		with zipfile.ZipFile(dst, 'w', compression=zipfile.ZIP_STORED) as z:
-			for x in o.files:
-				src = os.path.join(path, x)
-				z.write(src, x)
-
-		sha1sum(dst)
-		o.files.append(os.path.basename(dst))
-
 		with open(rel, 'w') as f:
 			j = to_JSON(o)
 			print j
@@ -316,6 +324,9 @@ if __name__ == "__main__":
 		shutil.rmtree(tmpdir)
 
 	for x in pkgs:
+		if 'internal' in x:
+			path = os.path.join(reldir, buildtag)
+			shutil.copy(x, path)
 		try:
 			os.unlink(x)
 			os.unlink(x + '.sha1')

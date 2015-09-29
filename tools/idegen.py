@@ -50,7 +50,7 @@ MONO_PROJECT_TEMPLATE = r'''<?xml version="1.0" encoding="utf-8"?>
 
   <ItemGroup>
     ${for x in project.source}
-    <${project.get_mono_key(x)} Include='${x.path_from(project.ctx.path)}'>
+    <${project.get_mono_key(x)} Include='${project.relpath(x)}'>
       <Link>${x.path_from(project.tg.path)}</Link>
     </${project.get_mono_key(x)}>
     ${endfor}
@@ -267,6 +267,10 @@ class vsnode_target(msvs.vsnode_target):
 			self.source.append(wscript)
 
 		msvs.vsnode_target.collect_source(self)
+
+	def relpath(self, item):
+		# Have to use os.path.relpath since self.ctx.path isn't always a parent of item
+		return os.path.relpath(item.abspath(), self.ctx.path.abspath())
 
 	def get_mono_key(self, node):
 		"""
@@ -508,6 +512,11 @@ class vsnode_cs_target(msvs.vsnode_project):
 		if wscript:
 			lst[wscript.abspath()] = source_file('None', self, wscript)
 
+		# Add app.manifest
+		manifest = getattr(tg, 'app_manifest', None)
+		if manifest:
+			lst[manifest.abspath()] = source_file('None', self, manifest)
+
 		# Add app.config
 		cfg = getattr(tg, 'app_config', None)
 		if cfg:
@@ -517,7 +526,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 		if getattr(tg, 'ide_aspnet', False):
 			cfg = tg.path.find_resource('Web.config')
 			if not cfg:
-				self.ctx.fatal('Could not find Web.config for ide_aspnet taskgen: %s', tg)
+				self.ctx.fatal('Could not find Web.config for ide_aspnet taskgen: %r' % tg)
 			r = source_file('Content', self, cfg)
 			r.attrs['SubType'] = 'Designer'
 			lst[cfg.abspath()] = r

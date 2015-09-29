@@ -3,7 +3,7 @@
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method, after_method, extension, taskgen_method
 from waflib.Task import Task, SKIP_ME, RUN_ME, ASK_LATER, update_outputs
-from waflib import Utils, Errors, Logs
+from waflib import Utils, Errors, Logs, Options
 import os, shutil, re, sys, zipfile, json
 import xml.etree.ElementTree as ET
 
@@ -46,9 +46,15 @@ Suite 1064 +
 Seattle, WA 98112
 
 == ${PIT_DESCRIPTION}
-
-include::${PIT_USAGE}[]
+${PIT_USAGE}
+${EXTRA}
 '''
+
+def strict_error(msg):
+	if Options.options.strict:
+		raise Errors.WafError(msg)
+	else:
+		Logs.warn(msg)
 
 @conf
 def pit_common_export(self):
@@ -72,14 +78,16 @@ def pit_subcategory(node):
 @conf
 def pit_builder(bld, name, **kw):
 	source = Utils.to_list(kw.get('source', bld.pit_common_source()))
+	category = kw.get('category', 'Network')
 
 	# Make a builder for using the common models that doesn't make a pit zip
 	bld(
-		name = name,
+		name     = name,
 		features = 'pit',
 		export   = kw.get('export', bld.pit_common_export()),
 		doc      = kw.get('doc', bld.pit_common_doc()),
-		category = kw.get('category', 'Network'),
+		category = category,
+		catdir   = kw.get('catdir', 'Net'),
 		use      = [],
 	)
 
@@ -107,9 +115,9 @@ def pit_builder(bld, name, **kw):
 			features = 'pit',
 			source   = [ s ],
 			use      = use,
-			category = kw.get('category', 'Network'),
-			shipping = kw.get('shipping', True),
+			category = category,
 			pit      = kw.get('pit', name),
+			parent   = name,
 		)
 
 @conf
@@ -121,23 +129,24 @@ def pit_file_builder(bld, name, **kw):
 		# IE: name='PNG' and source='PNG.xml'
 		childname,ext = os.path.splitext(str(source[0]))
 		if childname != name:
-			Logs.warn("Pit inconsistency in '%s.zip' - '%s%s' should ne named '%s%s'" % (name, childname, ext, name, ext))
+			Logs.warn("Pit inconsistency in '%s.zip' - '%s%s' should be named '%s%s'" % (name, childname, ext, name, ext))
 
 	return bld(
 		name     = name,
 		target   = name + '.zip',
 		features = 'pit',
 		category = kw.get('category', 'File'),
+		catdir   = kw.get('category', 'File'),
 		source   = source,
 		use      = kw.get('use', []),
 		export   = kw.get('export', bld.pit_common_export()),
 		doc      = kw.get('doc', bld.pit_common_doc()),
-		shipping = kw.get('shipping', True),
 		pit      = kw.get('pit', name),
 	)
 
 @conf
 def pit_net_builder(bld, name, **kw):
+	kw['catdir']   = 'Net'
 	kw['category'] = 'Network'
 	return bld.pit_builder(name, **kw)
 
@@ -151,27 +160,30 @@ class pit_idx(Task):
 		cat = self.env.PIT_CATEGORY
 
 		for s in self.inputs:
-			tree = ET.parse(s.abspath())
-			root = tree.getroot()
+			try:
+				tree = ET.parse(s.abspath())
+				root = tree.getroot()
 
-			config = []
+				config = []
 
-			for section in root:
-				for item in section:
-					item.attrib['type'] = item.tag
-					if item.attrib.has_key('min'):
-						item.attrib['min'] = int(item.attrib['min'])
-					if item.attrib.has_key('max'):
-						item.attrib['max'] = int(item.attrib['max'])
-					config.append(item.attrib)
+				for section in root:
+					for item in section:
+						item.attrib['type'] = item.tag
+						if item.attrib.has_key('min'):
+							item.attrib['min'] = int(item.attrib['min'])
+						if item.attrib.has_key('max'):
+							item.attrib['max'] = int(item.attrib['max'])
+						config.append(item.attrib)
 
-			meta.append({
-				'name'   : [ cat ] + pit_subcategory(s),
-				'pit'    : s.path_from(s.parent.parent),
-				'build'  : self.env.BUILDTAG,
-				'config' : config,
-				'calls'  : [ 'StartIterationEvent', 'ExitIterationEvent' ],
-			})
+				meta.append({
+					'name'   : [ cat ] + pit_subcategory(s),
+					'pit'    : s.path_from(s.parent.parent),
+					'build'  : self.env.BUILDTAG,
+					'config' : config,
+					'calls'  : [ 'StartIterationEvent', 'ExitIterationEvent' ],
+				})
+			except Exception, e:
+				raise Errors.WafError("Error in pit_idx task on: %r\n%s" % (s, e))
 
 		with open(self.outputs[0].abspath(), "w+") as fd:
 			json.dump(meta, fd, indent = 1, sort_keys = True)
@@ -234,57 +246,90 @@ def process_pit_docs(self):
 	if not docs:
 		return
 
+	doc_names = map(lambda x: x.name, docs)
+
+	# there should be:
+	# PIT.adoc
+	# PIT_Usage.adoc
+	# PIT_Datasheet.adoc
+	# -- or --
+	# PIT.adoc
+	# PIT_Part1_Usage.adoc
+	# PIT_Part2_Usage.adoc
+	# PIT_Part1_DataSheet.adoc
+	# PIT_Part2_DataSheet.adoc
+
+	source = Utils.to_list(self.path.ant_glob('Assets/*/*.xml'))
+
 	sheet = None
-	usage = None
+	master = None
+	valid_usages = []
+	pit_usage = ''
+	target = self.path.find_or_declare(self.name + '.adoc')
+
+	for src in source:
+		childname, ext = os.path.splitext(str(src))
+		usage = '%s_Usage.adoc' % childname
+		valid_usages.append(usage)
+
+		if usage not in doc_names:
+			strict_error("No Usage guide for pit %r" % childname)
 
 	for x in docs:
-		if not sheet and x.name.endswith('_DataSheet.adoc'):
-			expected = self.name + '_DataSheet.adoc'
-			if x.name != expected:
-				Logs.warn("Inconsistent file name, found '%s' but expected '%s'" % (x.name, expected))
-			sheet = x
-		elif not usage and x.name.endswith('_Usage.adoc'):
-			expected = self.name + '_Usage.adoc'
-			if x.name != expected:
-				Logs.warn("Inconsistent file name, found '%s' but expected '%s'" % (x.name, expected))
-			usage = x
+		if x.name.endswith('_DataSheet.adoc'):
+			expected = '%s_DataSheet.adoc' % self.name
+			if x.name == expected:
+				sheet = x
+			else:
+				Logs.warn("Inconsistent file name, found %r but expected %r" % (x.name, expected))
+		elif x.name.endswith('_Usage.adoc'):
+			if x.name in valid_usages:
+				pit_usage += 'include::%s[]\n' % x.path_from(target.parent)
+			else:
+				Logs.warn("Inconsistent file name, found %r but expected one of %r" % (x.name, valid_usages))
 		else:
-			Logs.warn("Ignoring unrecognized documentation file '%s'" % (x.name))
+			if x.name == '%s.adoc' % self.name:
+				master = x
+			else:
+				Logs.warn("Ignoring unrecognized documentation file %r" % (x.name))
 
-	if not sheet:
-		raise Errors.WafError("No DataSheet for pit %s" % self.name)
+	if master is None:
+		raise Errors.WafError("No Master for pit %r" % self.name)
 
-	if not usage:
-		raise Errors.WafError("No Usage guide for pit %s" % self.name)
-
-	contents = sheet.read()
+	contents = master.read()
 
 	try:
 		v.PIT_TITLE = re_name.search(contents).group(1)
 	except AttributeError, e:
-		raise Errors.WafError("Missing :Doctitle: in datasheet '%s'" % sheet.abspath(), e)
+		raise Errors.WafError("Missing :Doctitle: in master %r" % master.abspath(), e)
 
 	try:
 		v.PIT_DESCRIPTION = re_desc.search(contents).group(1)
 	except AttributeError, e:
-		raise Errors.WafError("Missing :Description: in datasheet '%s'" % sheet.abspath(), e)
+		raise Errors.WafError("Missing :Description: in master %r" % master.abspath(), e)
 
-	target = self.path.find_or_declare(self.name + '.adoc')
 
-	v.PIT_USAGE = usage.path_from(target.parent)
+	doc_additions = '../../../../../peach/doc_additions'
+	if self.category == 'Network':
+		v.EXTRA = 'include::%s/%s[]\n' % (doc_additions, 'Getting_machine_info.adoc')
+	else:
+		v.EXTRA = ''
+
+	v.PIT_USAGE = pit_usage
 	v.EMIT_SOURCE = Utils.subst_vars(v.PIT_DOC_TEMPLATE, v)
-
-	img_path = sheet.parent.path_from(target.parent)
-	v.append_value('ASCIIDOCTOR_PDF_OPTS', [ '-a', 'images=%s' % img_path ])
 
 	tsk = self.create_task('emit', None, [ target ])
 	adoc = tsk.outputs[0]
 
 	# Make html version of datasheet
-	v.append_value('ASCIIDOCTOR_OPTS', [ '-d', 'article', '-a', 'last-update-label!' ])
-	tsk = self.create_task('asciidoctor_html', sheet, sheet.change_ext('.html'))
-	self.install_files('${BINDIR}/docs/datasheets', tsk.outputs)
+	if sheet is None:
+		strict_error("No DataSheet for pit %r" % self.name)
+	else:
+		v.append_value('ASCIIDOCTOR_OPTS', [ '-d', 'article', '-a', 'last-update-label!' ])
+		tsk = self.create_task('asciidoctor_html', sheet, sheet.change_ext('.html'))
+		self.install_files('${BINDIR}/docs/datasheets', tsk.outputs)
 
+	v.append_value('ASCIIDOCTOR_PDF_OPTS', [ '-a', 'imagesdir=%s' % doc_additions ])
 	self.pdf_task = self.create_task('asciidoctor_pdf', adoc, adoc.change_ext('.pdf'))
 	self.install_files('${BINDIR}/docs', self.pdf_task.outputs)
 
@@ -294,6 +339,8 @@ def process_pit_docs(self):
 @feature('pit')
 @after_method('process_source')
 def make_pit_zip(self):
+	v = self.env
+
 	# Only make the zip if we made a .json manifest
 	if not hasattr(self, 'idx_task'):
 		return
@@ -306,8 +353,8 @@ def make_pit_zip(self):
 	# Collecting the deps might have filled in our pdf_task
 	pdf = getattr(self, 'pdf_task', None)
 	if not pdf:
-		if getattr(self, 'shipping', True):
-			Logs.warn("No documentation for shipping pit '%s'" % self.name)
+		if self.name in v.SHIPPING_PITS:
+			Logs.warn("No documentation for shipping pit %r" % self.name)
 	else:
 		self.zip_inputs.append((pdf.outputs[0], pdf.outputs[0].name, chmod))
 
@@ -329,6 +376,8 @@ class PitList:
 
 	def __init__(self):
 		self.__pits = []
+		self.all_parts = set()
+		self.all_pits = set()
 
 	def add_pit_zip(self, tg):
 		rec = next( (x for x in self.__pits if x['name'] == tg.pit), None)
@@ -338,6 +387,10 @@ class PitList:
 			self.__pits.sort(key=lambda x: x['name'])
 		rec['archives'].append('pits/%s' % tg.zip_task.outputs[0].name)
 
+		name = os.path.splitext(tg.name)[0]
+		self.all_parts.add(name)
+		self.all_pits.add(tg.pit)
+
 def verify_shipping_packs(ctx):
 	shipping_packs = getattr(ctx, 'shipping_packs', None)
 	if not shipping_packs:
@@ -346,17 +399,31 @@ def verify_shipping_packs(ctx):
 	shipping_pits = ctx.shipping_pits_task.env.EMIT_SOURCE
 	shipping_packs = json.loads(shipping_packs.read())
 	
-	for pack in shipping_packs:
-		for pit in pack['pits']:
-			shipping_pits = [ x for x in shipping_pits if x['name'] != pit ]
+	expected = ctx.shipping_pits_task.env.SHIPPING_PITS
+	actual = shipping_pits.all_parts
+	delta = expected - actual
+	if delta:
+		strict_error('The following shipping pits are missing: %r' % ', '.join(delta))
 
-	if shipping_pits:
-		raise Errors.WafError("The following shipping pits are not referenced: %r" % shipping_pits)
+	referenced = set()
+	for pack in shipping_packs:
+		referenced.update(map(str, pack['pits']))
+
+	delta = shipping_pits.all_pits - referenced
+	if delta:
+		strict_error("The following shipping pits are not referenced: %r" % ', '.join(delta))
+
+	delta = referenced - shipping_pits.all_pits
+	if delta:
+		strict_error("The following pits are not shipping but defined in shipping_packs: %r" % ', '.join(delta))
 
 @feature('pit')
 @after_method('make_pit_zip')
 def make_shipping_pits(self):
-	if not getattr(self, 'shipping', True):
+	v = self.env
+
+	name = os.path.splitext(self.name)[0]
+	if name not in v.SHIPPING_PITS:
 		return
 
 	zip_task = getattr(self, 'zip_task', None)
@@ -412,7 +479,7 @@ def collect_pit_deps(self, name, seen, chmod):
 		if not hasattr(self, 'pdf_task'):
 			self.pdf_task = other_doc
 		elif self.pdf_task.generator != self:
-			raise Errors.WafError("Attempting to include multiple docs in pit zip %s: '%r' and '%r'" % (self.name, self.pdf_task, other_doc))
+			raise Errors.WafError("Attempting to include multiple docs in pit zip %r: %r and %r" % (self.name, self.pdf_task, other_doc))
 
 	# Recursivley collect dependencies
 	for x in self.to_list(getattr(y, 'use', [])):
