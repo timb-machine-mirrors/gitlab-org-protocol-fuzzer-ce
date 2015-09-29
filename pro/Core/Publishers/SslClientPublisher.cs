@@ -178,9 +178,9 @@ namespace Peach.Pro.Core.Publishers
 
 			protected Thread m_thread;
 			protected Stream m_stream;
-			protected byte[] m_buffer;
-			protected int m_offset;
-			protected int m_count;
+			protected byte[] m_buffer = null;
+			protected int m_offset = 0;
+			protected int m_count = 0;
 			public int m_read_count = 0;
 			protected ManualResetEvent m_event = new ManualResetEvent(false);
 			protected AsyncCallback _callback;
@@ -275,9 +275,6 @@ namespace Peach.Pro.Core.Publishers
 
 		internal class TlsAsyncWrite : IAsyncResult
 		{
-			protected byte[] m_buffer;
-			protected int m_offset;
-			protected int m_count;
 			protected ManualResetEvent m_event = new ManualResetEvent(true);
 
 			public TlsAsyncWrite(
@@ -329,7 +326,10 @@ namespace Peach.Pro.Core.Publishers
 				get { return logger; }
 			}
 
+			#pragma warning disable 414
 			private object _lock = new object();
+			#pragma warning restore  414
+
 			private int _readTimeout = -1;
 			private int _writeTimeout = -1;
 
