@@ -25,14 +25,14 @@ This recipe uses the Linux SNMP server to demonstrate the procedure.
 
 The workflow that we want to follow in the test consists of the following steps:
 
-1. Power on the device
-2. Wait for the bootstrapping process to complete.
-3. Start the virtual machine snapshot containing the test target.
-4. Fuzz the device and look for faults.
-5. When a fault occurs, do the following:
-a. Collect data.
-b. Revert to a snapshot of the system.
-6. Loop to step 4 and continue fuzzing.
+. Power on the device
+. Wait for the bootstrapping process to complete.
+. Start the virtual machine snapshot containing the test target.
+. Fuzz the device and look for faults.
+. When a fault occurs, do the following:
+.. Collect data.
+.. Revert to a snapshot of the system.
+. Loop to step 4 and continue fuzzing.
 
 The host computer does the following:
 
@@ -69,14 +69,14 @@ the network Service. On Windows environments, use the WindowsDebugger monitor in
 
 ===== Starting Peach 
 
-1. Launch Peach from the command line (type `peach` and press the Return key) to start the UI.
-2. Select a pit (test definition) of a protocol supported by the network device, so 
+. Launch Peach from the command line (type `peach` and press the Return key) to start the UI.
+. Select a pit (test definition) of a protocol supported by the network device, so 
 that Peach can communicate with device protocol during fuzzing.
 * Choose the network service.
 * Give the pit a name and a description. Peach makes a configuration file of the 
 selections you make, so that you can re-use the setup again.
-3. From the configuration menu along the left edge of the window, select Monitoring.
-4. Fill in a name for the agent. Since this agent resides within Peach, the default 
+. From the configuration menu along the left edge of the window, select Monitoring.
+. Fill in a name for the agent. Since this agent resides within Peach, the default 
 location `local` is appropriate. Then, click the`Save` button.
 
 image::{images}/Local_Agent.png["Local Agent for Network Device", scalewidth="60%"]
@@ -149,9 +149,9 @@ session files. The display filters are not compatible with Libpcap.
 The local agent is configured. Now is the time to move to the remote agent configure 
 the remaining monitors.
 
-1. If you haven't already done so, save the Monitor configuration defined so far.
-2. Add a new agent, and give the agent a name, such as `Remote`. 
-3. Since this agent will reside in the virtual machine, the location providing the tcp port address 
+. If you haven't already done so, save the Monitor configuration defined so far.
+. Add a new agent, and give the agent a name, such as `Remote`. 
+. Since this agent will reside in the virtual machine, the location providing the tcp port address 
 is appropriate. Then, click the`Save` button.
 
 image::{images}/Remote_Agent_VMSetup.png["Remote Agent for Network Device", scalewidth="60%"]

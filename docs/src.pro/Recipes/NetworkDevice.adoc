@@ -25,13 +25,13 @@ NOTE: When testing protocols in layers 2 through4 of the ISO network model, cons
 
 The workflow that we want to follow in the test consists of the following steps:
 
-1.	Power on the device.
-2.	Wait for the device to complete its boot process.
-3.	Fuzz the device and look for faults.
-4.	When a fault occurs, do the following:
-a.	Reset the device by cycling the power off and then on.
-b.	Wait for the device to complete its boot process.
-5.	Loop to step 3 and continue fuzzing.
+.	Power on the device.
+.	Wait for the device to complete its boot process.
+.	Fuzz the device and look for faults.
+.	When a fault occurs, do the following:
+..	Reset the device by cycling the power off and then on.
+..	Wait for the device to complete its boot process.
+.	Loop to step 3 and continue fuzzing.
 
 Given this, here's a diagram of connections for the test configuration.
 
@@ -72,11 +72,11 @@ completed.
 
 ===== Starting Peach 
 
-1. Launch Peach from the command line (type `peach` and press the Return key) to start the UI.
-2. Select a pit (test definition) of a protocol supported by the network device, so that Peach can communicate with the device during fuzzing.
+. Launch Peach from the command line (type `peach` and press the Return key) to start the UI.
+. Select a pit (test definition) of a protocol supported by the network device, so that Peach can communicate with the device during fuzzing.
 * Give the pit a name and a description. Peach makes a configuration file of the selections you make, so that you can re-use the setup again.
-3. From the configuration menu along the left edge of the window, select Monitoring.
-4. Fill in a name for the agent. Since this agent resides within Peach, the default 
+. From the configuration menu along the left edge of the window, select Monitoring.
+. Fill in a name for the agent. Since this agent resides within Peach, the default 
 location `local` is appropriate. Then, click the`Save` button.
 
 image::{images}/Local_Agent.png["Local agent for Network Device", scalewidth="60%"]
@@ -190,8 +190,9 @@ or an expert of the test device for the message content.
 ===== TcpPort (VerifyDeviceAlive)
 The xref:Monitors_TcpPort[TcpPort Monitor] periodically checks two things when the 
 State Model issues a `Call` event during a test case: 
-1) the state of a TCP port on the target. 
-2) the state of the service or protocol on the target, that uses the same TCP port 
+
+. The state of a TCP port on the target. 
+. The state of the service or protocol on the target, that uses the same TCP port 
 on the target. 
 
 If the status of the port is `Closed`, Peach reports an error.

@@ -21,30 +21,50 @@ At the end of the session, _LinuxCoreFile_ restores the saved state and removes 
 .*Setup Requirements*
 This monitor has the following setup requirements: +
 
-* _LinuxCoreFile_ requires root or equivalent privileges to run. +
+* _LinuxCoreFile_ requires root or equivalent privileges to run.
 The _LinuxCoreFile_ monitor registers a script with the kernel to catch core dumps of faulting processes.
-* Core files must be enabled. If the maximum core file size in the system is zero, no core files are created. +
+
+* Core files must be enabled. If the maximum core file size in the system is zero, no core files are created.
 You can enable core file generation using the following process:
 
-1. Start a shell, such as Bourne shell. +
-`/bin/sh`
-
-2. Find the current core file hard and soft limits in use by the operating system. The hard limit is an absolute maximum that, once set, cannot be increased during a session. The soft limit is the current maximum file size that you can adjust up to the value of the hard limit.
-If the hard limit or the soft limit is set to zero, core files are disabled.
-
-** You can display the core file hard limit using the following command: +
-`ulimit -Hc`
-
-** You can display the current core file soft limit using the following command: +
-`ulimit -Sc`
-
-3. Set the core file hard limit using the following command. You can specify `unlimited` or a numeric value that represents the number of 512-byte blocks to allow in a core file: +
-`ulimit -Hc unlimited`
-
-4. Set the core file soft limit using the following command. You can specify any value less than or equal to the hard limit.  +
-`ulimit -Sc unlimited` +
+. Start a shell, such as Bourne shell.
 +
-The hard and soft limits can be added to `/etc/sysctl.conf`. Then, whenever this file loads, appropriate core file limits are specified.  
+----
+/bin/sh
+----
+
+. Find the current core file hard and soft limits in use by the operating system.
+The hard limit is an absolute maximum that, once set, cannot be increased during a session. The soft limit is the current maximum file size that you can adjust up to the value of the hard limit.
+If the hard limit or the soft limit is set to zero, core files are disabled.
++
+** You can display the core file hard limit using the following command:
++
+----
+ulimit -Hc
+----
++
+** You can display the current core file soft limit using the following command:
++
+----
+ulimit -Sc
+----
+
+. Set the core file hard limit using the following command.
+You can specify `unlimited` or a numeric value that represents the number of 512-byte blocks to allow in a core file:
++
+----
+ulimit -Hc unlimited
+----
+
+. Set the core file soft limit using the following command.
+You can specify any value less than or equal to the hard limit.
++
+----
+ulimit -Sc unlimited
+----
++
+The hard and soft limits can be added to `/etc/sysctl.conf`.
+Then, whenever this file loads, appropriate core file limits are specified.  
 
 ////////////////////////////
 Restrictions exist on ulimit. 
@@ -56,7 +76,8 @@ If doing sysctrl, what values does user need to add?
 - reload the sysctrl command (which loads the file).
 ////////////////////////////
 
-* gdb must be installed to analyze the resulting core files. For information on installing gdb, see the xref:Monitors_Gdb[gdb] monitor.
+* gdb must be installed to analyze the resulting core files.
+For information on installing gdb, see the xref:Monitors_Gdb[gdb] monitor.
 
 //====
 
