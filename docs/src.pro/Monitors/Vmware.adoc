@@ -31,10 +31,7 @@ TIP: When using with vSphere/ESXi, prefix the VM image name with the storage loc
 
 _Required:_
 
-The Vmx paramter and either the SnapshotIndex or the SnapshotName parameter are required.
-
-Vmx:: Path to the virtual machine
-SnapshotIndex:: VM snapshot index. Index values are zero-based.
+Vmx:: Path to the virtual machine.
 SnapshotName:: VM Snapshot name.
 
 _Optional:_
@@ -90,7 +87,7 @@ ifdef::peachug[]
 
 This parameter example is from a setup that programmatically starts a VM. 
 
-* The monitor requires both the physical filename with path of the VM and either the +SnapshotName+ or +SnapShotIndex+ of the VM. 
+* The monitor requires both the physical filename with path of the VM and the +SnapshotName+ of the VM. 
 * The +HostType+ identifies the VMWare product that is hosting the VM. 
 * The +Headless+ parameter provides visual feedback while configuring the test setup. 
 
