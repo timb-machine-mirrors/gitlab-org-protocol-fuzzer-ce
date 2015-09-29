@@ -128,10 +128,12 @@ def apply_asciidoctor_pdf(self):
 		if not img:
 			raise Errors.WafError("image directory not found: %r in %r" % (images, self))
 		tsk.env.append_value('ASCIIDOCTOR_PDF_OPTS', [ '-a', 'images=%s' % img.path_from(srcs[0].parent) ])
+		self.images = img
 
 def asciidoctor_scan(self):
 	depnodes = [x for x in self.themes()]
 
+	img = getattr(self.generator, 'images', None)
 	root = self.inputs[0]
 
 	node_lst = [self.inputs[0]]
@@ -144,10 +146,14 @@ def asciidoctor_scan(self):
 		code = nd.read()
 		for m in re_xi.finditer(code):
 			name = m.group(2)
+			if img and '{images}' in name:
+					name = name.replace("{images}", img.path_from(nd.parent))
 			k = nd.parent.find_resource(name)
 			if k:
 				depnodes.append(k)
 				node_lst.append(k)
+			else:
+				print 'Missing node for dependency: %s' % name
 	return [depnodes, ()]
 
 class asciidoctor_pdf(Task):
