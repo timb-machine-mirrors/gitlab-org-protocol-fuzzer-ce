@@ -215,7 +215,7 @@ For example, some common port values follow: HTTP uses port 80; SSH uses port 22
 FTP uses port 21.
 
 The *Action* parameter specifies the type of action that the monitor performs. Here, 
-the value used is `FAULT`;  and causes the monitor to report a fault when the TCP 
+the value used is `Fault`;  and causes the monitor to report a fault when the TCP 
 port is closed and unresponsive.
 
 The *State* parameter specifies the fault condition. The value `Closed` indicates a 
