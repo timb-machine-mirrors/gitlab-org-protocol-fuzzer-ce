@@ -147,7 +147,7 @@ def asciidoctor_scan(self):
 		for m in re_xi.finditer(code):
 			name = m.group(2)
 			if img and '{images}' in name:
-					name = name.replace("{images}", img.path_from(nd.parent))
+				name = name.replace("{images}", img.path_from(nd.parent))
 			k = nd.parent.find_resource(name)
 			if k:
 				depnodes.append(k)
