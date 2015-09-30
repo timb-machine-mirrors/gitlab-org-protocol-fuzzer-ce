@@ -143,6 +143,7 @@ def apply_webhelp(self):
 			img = images
 		if not img:
 			raise Errors.WafError("image directory not found: %r in %r" % (images, self))
+		self.images = img
 
 		# Install image files
 		install_webhelp(self, '%s/images' % inst_to, img.ant_glob('**/*'), img)
