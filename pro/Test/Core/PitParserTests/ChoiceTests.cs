@@ -83,7 +83,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			Assert.NotNull(choice);
 			Assert.AreEqual(3, choice.choiceElements.Count);
 			Assert.AreEqual(0, choice.Count);
-			foreach (var element in choice.choiceElements.Values)
+			foreach (var element in choice.choiceElements)
 			{
 				Assert.NotNull(element.parent);
 				Assert.AreEqual(choice, element.parent);
