@@ -228,7 +228,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			string xml = @"
 <Peach>
 	<DataModel name='Base'>
-		<Block minOccurs='1'>
+		<Block name='B' minOccurs='1'>
 			<Choice name='c'>
 				<Block name='b1'>
 					<String name='s' value='Hello'/>
@@ -244,8 +244,8 @@ namespace Peach.Pro.Test.Core.PitParserTests
 	</DataModel>
 
 	<DataModel name='Derived' ref='Base'>
-		<String name='c.b1.s' value='World'/>
-		<String name='c.b3' value='.'/>
+		<String name='B.c.b1.s' value='World'/>
+		<String name='B.c.b3' value='.'/>
 	</DataModel>
 
 </Peach>";
