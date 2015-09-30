@@ -87,6 +87,8 @@ namespace PitTester
 				throw new FileNotFoundException();
 
 			var testData = TestData.Parse(testFile);
+			if (testData.Tests.Any(x => x.SingleIteration))
+				singleIteration = true;
 
 			var defs = new List<KeyValuePair<string, string>>();
 			var configFile = pitFile + ".config";
@@ -137,7 +139,7 @@ namespace PitTester
 
 			var dom = parser.asParser(args, pitFile);
 
-			var errors = new List<string>();
+			var errors = new List<Exception>();
 			var fixupOverrides = new Dictionary<string, Variant>();
 
 			foreach (var test in dom.tests)
@@ -154,9 +156,10 @@ namespace PitTester
 				var logger = new TestLogger(data, testData.Ignores.Select(i => i.Xpath));
 				logger.Error += err =>
 				{
+					var ex = new PeachException(err);
 					if (!keepGoing)
-						throw new PeachException(err);
-					errors.Add(err);
+						throw ex;
+					errors.Add(ex);
 				};
 
 				test.loggers.Clear();
@@ -168,9 +171,10 @@ namespace PitTester
 					var newPub = new TestPublisher(logger, singleIteration) { Name = oldPub.Name };
 					newPub.Error += err =>
 					{
+						var ex = new PeachException(err);
 						if (!keepGoing)
-							throw new PeachException(err);
-						errors.Add(err);
+							throw ex;
+						errors.Add(ex);
 					};
 					test.publishers[i] = newPub;
 				}
@@ -258,11 +262,11 @@ namespace PitTester
 					num,
 					config.randomSeed,
 					ex.Message);
-				throw new PeachException(msg, ex);
+				errors.Add(new PeachException(msg, ex));
 			}
 
 			if (errors.Any())
-				throw new PeachException(string.Join("\n", errors));
+				throw new AggregateException(errors);
 		}
 
 		private static void ApplySlurps(TestData testData, StateModel sm, Dictionary<string, Variant> fixupOverrides)
@@ -778,7 +782,7 @@ namespace PitTester
 			}
 			catch (Exception ex)
 			{
-				errors.AppendLine("PitParser exception: " + ex.Message);
+				errors.AppendLine("PitParser exception: " + ex);
 			}
 
 			if (errors.Length > 0)
