@@ -87,6 +87,8 @@ namespace PitTester
 				throw new FileNotFoundException();
 
 			var testData = TestData.Parse(testFile);
+			if (testData.Tests.Any(x => x.SingleIteration))
+				singleIteration = true;
 
 			var defs = new List<KeyValuePair<string, string>>();
 			var configFile = pitFile + ".config";

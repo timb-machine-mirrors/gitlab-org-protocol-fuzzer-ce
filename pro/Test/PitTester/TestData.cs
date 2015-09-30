@@ -68,6 +68,10 @@ namespace PitTester
 			[DefaultValue(true)]
 			public bool VerifyDataSets { get; set; }
 
+			[XmlAttribute("singleIteration")]
+			[DefaultValue(true)]
+			public bool SingleIteration { get; set; }
+
 			[XmlAttribute("seed")]
 			[DefaultValue("")]
 			public string Seed { get; set; }
