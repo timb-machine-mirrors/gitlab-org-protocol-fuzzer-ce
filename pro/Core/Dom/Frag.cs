@@ -15,7 +15,7 @@ namespace Peach.Pro.Core.Dom
 	[DataElement("Frag", DataElementTypes.All)]
 	[DescriptionAttribute("Fragmentation element")]
 	[Parameter("name", typeof(string), "Element name", "")]
-	[Parameter("fragLength", typeof(int), "Fragment size in bytes")]
+	[Parameter("fragLength", typeof(int), "Fragment size in bytes", "")]
 	[Parameter("class", typeof(string), "Fragment extension class", "ByLength")]
 	[Parameter("constraint", typeof(string), "Scripting expression that evaluates to true or false", "")]
 	[Parameter("totalLengthField", typeof(string), "Name of total length field in template model.", "")]
@@ -70,6 +70,8 @@ namespace Peach.Pro.Core.Dom
 
 		public FragSequence Rendering { get { return (FragSequence)this["Rendering"]; } }
 
+		public bool viewPreRendering = true;
+
 		public new static DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
 		{
 			if (node.Name != "Frag")
@@ -113,29 +115,26 @@ namespace Peach.Pro.Core.Dom
 					"Error: Frag '{0}' element has too many children. Expecting 3, found {1}.",
 					block.Name, block.Count - 1));
 
-			block.Template = block["Template"];
-			block.Remove(block.Template, false);
-
 			if (!string.IsNullOrEmpty(block.TotalLengthField))
-				if (block.Template.find(block.TotalLengthField) == null)
+				if (block["Template"].find(block.TotalLengthField) == null)
 					throw new PeachException(string.Format(
 						"Error, Frag '{0}' element, unable to find totalLengthField '{1}' in template model.",
 						block.Name, block.TotalLengthField));
 
 			if (!string.IsNullOrEmpty(block.FragmentLengthField))
-				if (block.Template.find(block.FragmentLengthField) == null)
+				if (block["Template"].find(block.FragmentLengthField) == null)
 					throw new PeachException(string.Format(
 						"Error, Frag '{0}' element, unable to find fragmentLengthField '{1}' in template model.",
 						block.Name, block.FragmentLengthField));
 
 			if (!string.IsNullOrEmpty(block.FragmentOffsetField))
-				if (block.Template.find(block.FragmentOffsetField) == null)
+				if (block["Template"].find(block.FragmentOffsetField) == null)
 					throw new PeachException(string.Format(
 						"Error, Frag '{0}' element, unable to find fragmentOffsetField '{1}' in template model.",
 						block.Name, block.FragmentOffsetField));
 
 			if (!string.IsNullOrEmpty(block.FragmentIndexField))
-				if (block.Template.find(block.FragmentIndexField) == null)
+				if (block["Template"].find(block.FragmentIndexField) == null)
 					throw new PeachException(string.Format(
 						"Error, Frag '{0}' element, unable to find fragmentIndexField '{1}' in template model.",
 						block.Name, block.FragmentIndexField));
@@ -176,21 +175,34 @@ namespace Peach.Pro.Core.Dom
 		protected override IEnumerable<DataElement> Children()
 		{
 			// Make sure we re-generate if needed
-			GenerateDefaultValue();
+			if (!viewPreRendering)
+				GenerateDefaultValue();
+			
 			return base.Children();
 		}
 
 		protected override DataElement GetChild(string name)
 		{
 			// Make sure we re-generate if needed
-			GenerateDefaultValue();
+			if (!viewPreRendering)
+				GenerateDefaultValue();
+
 			return base.GetChild(name);
 		}
 
 		protected override Variant GenerateDefaultValue()
 		{
-			if (!this._childrenDict.ContainsKey("Payload") ||
-			    !this._childrenDict.ContainsKey("Rendering"))
+			// On first call re-locate our template
+			if (Template == null)
+			{
+				Template = this["Template"];
+				Remove(Template, false);
+
+				viewPreRendering = false;
+			}
+
+			if (!_childrenDict.ContainsKey("Payload") ||
+			    !_childrenDict.ContainsKey("Rendering"))
 			{
 				return new Variant(new byte[] {});
 			}
