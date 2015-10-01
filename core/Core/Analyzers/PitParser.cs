@@ -882,14 +882,13 @@ namespace Peach.Core.Analyzers
 				PitParserDelegate delegateAction = Delegate.CreateDelegate(typeof(PitParserDelegate), pitParsableMethod) as PitParserDelegate;
 
 				// Prevent dots from being in the name for element construction, they get resolved afterwards
-				string childName = null;
-				if (child.hasAttr("name"))
-					childName = child.getAttrString("name");
+				var childName = child.getAttr("name", string.Empty);
+				var nameParts = new string[0];
 
 				if (element.isReference && !string.IsNullOrEmpty(childName))
 				{
-					var refname = childName.Split('.');
-					child.Attributes["name"].InnerText = refname[refname.Length - 1];
+					nameParts = childName.Split('.');
+					child.Attributes["name"].InnerText = nameParts[nameParts.Length - 1];
 				}
 
 				elem = delegateAction(this, child, element);
@@ -923,17 +922,34 @@ namespace Peach.Core.Analyzers
 				// then allow replacing existing elements with new
 				// elements.  This includes "deep" replacement using "."
 				// notation.
-				if (element.isReference)
+				if (element.isReference && !string.IsNullOrEmpty(childName))
 				{
 					var parent = element;
 
-					if (childName != null && childName.IndexOf(".") > -1)
+					for (var i = 0; i < nameParts.Length - 1; ++i)
 					{
-						var parentName = childName.Substring(0, childName.LastIndexOf('.'));
-						parent = element.find(parentName) as DataElementContainer;
+						DataElement newParent;
 
+						var choice = parent as Choice;
+						if (choice != null)
+							choice.choiceElements.TryGetValue(nameParts[i], out newParent);
+						else
+							parent.TryGetValue(nameParts[i], out newParent);
+
+						if (newParent == null)
+							throw new PeachException(
+								"Error parsing {0} named '{1}', {2} has no child element named '{3}'.".Fmt(
+									elem.elementType, childName, parent.debugName, nameParts[i]));
+
+						var asArray = newParent as Dom.Array;
+						if (asArray != null)
+							newParent = asArray.OriginalElement;
+
+						parent = newParent as DataElementContainer;
 						if (parent == null)
-							throw new PeachException("Error, child name has dot notation but parent element not found: '" + parentName + ".");
+							throw new PeachException(
+								"Error parsing {0} named '{1}', {2} is not a container element.".Fmt(
+									elem.elementType, childName, newParent.debugName));
 					}
 
 					parent.ApplyReference(elem);
