@@ -17,7 +17,7 @@ def prepare_nunit_test(self):
 	# Note: must use '-option' rather than '/option'
 	# for linux compatibility
 	self.ut_exec.extend([
-		self.env.NUNIT,
+		self.env.NUNIT[0],
 		'-nologo',
 		'-xml=%s' % self.outputs[0].abspath(),
 	])
