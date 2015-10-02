@@ -20,9 +20,9 @@ class ZipContext(PkgContext):
 		super(ZipContext, self).__init__(**kw)
 		self.installed_files = []
 
-	def do_install(self, src, tgt, chmod=Utils.O644):
+	def do_install(self, src, tgt, chmod=Utils.O644, **kw):
 		self.installed_files.append(tgt)
-		super(ZipContext, self).do_install(src, tgt, chmod)
+		super(ZipContext, self).do_install(src, tgt, chmod=chmod, **kw)
 
 	def execute(self):
 		super(ZipContext, self).execute()
