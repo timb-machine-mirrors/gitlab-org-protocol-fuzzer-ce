@@ -16,7 +16,7 @@ device messages.
 
 This recipe uses a router to demonstrate the procedure.
 
-image::{images}/NetDevice_Router.png["Network Device to Fuzz", scalewidth="50%"]
+image::{images}/NetDevice_Router.png["Network Device to Fuzz", scale="40"]
 
 NOTE: When testing protocols in layers 2 through4 of the ISO network model, consider using a private test network so that the testing doesn't affect other systems on the network.
 
@@ -35,7 +35,7 @@ b.	Wait for the device to complete its boot process.
 
 Given this, here's a diagram of connections for the test configuration.
 
-image::{images}/Network_Device.png["Configuration diagram Fuzzing a Network Device", scalewidth="70%"]
+image::{images}/Network_Device.png["Configuration diagram Fuzzing a Network Device", scale="50"]
 
 Peach handles communications with the device using a single, local agent. Peach also 
 connects to a programmable power supply, the IpPower 9258, that can be powered down 
@@ -79,7 +79,7 @@ completed.
 4. Fill in a name for the agent. Since this agent resides within Peach, the default 
 location `local` is appropriate. Then, click the`Save` button.
 
-image::{images}/Local_Agent.png["Local agent for Network Device", scalewidth="60%"]
+image::{images}/Local_Agent.png["Local agent for Network Device", scale="50"]
 
 ===== Supplying Monitor Details
 
@@ -109,12 +109,12 @@ For this recipe, use the monitors in the order they are presented:
 
 The xref:Monitors_IpPower9258[IpPower 9258 Monitor] controls the IpPower 9258 device to start the network device at the beginning of the fuzzing session.
 
-image::{images}/IpPower9258_Boot.png["IpPower 9258 Monitor", scalewidth="60%"]
+image::{images}/IpPower9258_Boot.png["IpPower 9258 Monitor", scale="50"]
 
 The *Port* parameter identifies the receptacle of the IpPower9258 device. Numbers range 
 from 1 to 4. Receptacle 1 is the leftmost recepticle. 
 
-image::{images}/IpPower_RearPanel2.png["IpPower 9258 Recepticles", scalewidth="60%"]
+image::{images}/IpPower_RearPanel2.png["IpPower 9258 Recepticles", scale="50"]
 
 The *When* parameter "OnStart" identifies that the power cycle occurs at the start of 
 the fuzzing session. 
@@ -123,7 +123,7 @@ the fuzzing session.
 
 The second xref:Monitors_IpPower9258[IpPower 9258 Monitor] controls the IpPower 9258 device to recycle power, ensuring that the network device starts in a clean state following a fault.
 
-image::{images}/IpPower9258_Reboot.png["IpPower 9258 Monitor", scalewidth="60%"]
+image::{images}/IpPower9258_Reboot.png["IpPower 9258 Monitor", scale="50"]
 
 The *Port* parameter identifies the receptacle of the IpPower9258 device. Numbers range from 1 to 4. Receptacle 1 is the leftmost recepticle. 
 
@@ -137,7 +137,7 @@ Peach to wait for the device to complete its boot processing before starting the
 fuzzing session. The fault detection setting causes peach to monitor the console 
 for messages that indicate a fault occurred on the device.
 
-image::{images}/Serial_WaitForBootOnStartAndFault2.png["Serial Monitor - Part I", scalewidth="60%"]
+image::{images}/Serial_WaitForBootOnStartAndFault2.png["Serial Monitor - Part I", scale="50"]
 
 The *Port* parameter identifies the serial port on the computer that receives monitoring.
 
@@ -170,7 +170,7 @@ When a fault occurs, the IpPower9258 recycles the power causing the network devi
 reboot. Then, this monitor causes Peach to wait until the network device completes its 
 boot process and becomes available for use before resuming the current fuzzing session. 
 
-image::{images}/Serial_WaitForBootAfterFault2.png["Serial Monitor - Part II", scalewidth="60%"]
+image::{images}/Serial_WaitForBootAfterFault2.png["Serial Monitor - Part II", scale="50"]
 
 The *Port* parameter identifies the serial port on the computer that receives monitoring. 
 Since only one serial port is in this fuzzing setup, the value should be identical with 
@@ -200,7 +200,7 @@ TIP: The TcpPort monitor can be used when the target runs TCP. When testing othe
 protocols,  use the Ping monitor instead to see whether the device as a whole 
 is responding.
 
-image::{images}/TcpPort_VerifyDeviceAlive.png["TcpPort Verify the Device is Alive", scalewidth="60%"]
+image::{images}/TcpPort_VerifyDeviceAlive.png["TcpPort Verify the Device is Alive", scale="50"]
 
 The *Host* parameter specifies the hostname of the target or the IPv4 address of the 
 target. The `\\##TargetIPv4##` value is a configuration variable that you set to identify 
@@ -225,7 +225,7 @@ fault occurs when the communication channel changes to `Closed`.
 The xref:Monitors_Pcap[NetworkCapture Monitor] captures network traffic (packets) sent and 
 received from the test target. 
 
-image::{images}/NetworkCapture_Interesting.png["Capture Network Packs", scalewidth="60%"]
+image::{images}/NetworkCapture_Interesting.png["Capture Network Packs", scale="50"]
 
 The *Device* parameter specifies the hostname of the target or the IPv4 address of the 
 target. The value given is `eth0`. 

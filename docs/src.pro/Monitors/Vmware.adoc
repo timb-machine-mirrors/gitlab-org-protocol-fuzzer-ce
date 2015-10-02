@@ -21,8 +21,7 @@ In the VMWare product, you can create, review, and manage the VM snapshots using
 The following illustration shows the VMWare Snapshot Manager that shows the snapshots 
 created for a specific VM.
 
-image::{images}/VMWare_Snapshot_Manager.PNG["VMWare Snapshot Manager", scalewidth="75%"]
-
+image::{images}/VMWare_Snapshot_Manager.PNG["VMWare Snapshot Manager", scale="60"]
 
 TIP: When using with vSphere/ESXi, prefix the VM image name with the storage location in brackets.  For example, "[ha-datacenter/datastore1] guest/guest.vmx"
 
@@ -59,6 +58,8 @@ Login:: Username for authentication on the remote machine.
 Password:: Password for authentication on the remote machine.
 HostPort:: TCP/IP port on the remote host.
 ResetOnFaultBeforeCollection:: Reset VM after we detect a Fault during data collection. Defaults to false.
+StopOnFaultBeforeCollection:: Stop VM after we detect a Fault and before data collection 
+starts. Defaults to false.
 WaitForToolsInGuest:: Wait for tools to start in guest. Defaults to true.
 WaitTimeout:: How many seconds to wait for guest tools. Defaults to 600.
 When:: 

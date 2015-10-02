@@ -6,7 +6,9 @@
 *Monitor Categories*: *Automation*, *Fault detection*
 
 The _Android_ monitor examines both targeted Android applications and the state of the 
-Android OS. Two expected use cases are:
+Android OS. Peach supports Andorid OS verions 4.0 to 5.1, inclusively. 
+
+Two expected use cases are:
 
 * Maintaining state while fuzzing native code
 * Launching and monitoring Android Java applications. 
