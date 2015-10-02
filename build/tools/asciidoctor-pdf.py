@@ -33,18 +33,29 @@ gem 'coderay', '1.1.0'
 gemspec :path => "%s"
 ''' % rel)
 
-	v.ASCIIDOCTOR_PDF = j(root, 'bin', 'asciidoctor-pdf')
-	v.ASCIIDOCTOR_PDF_GEMFILE = gem.abspath()
-	v.ASCIIDOCTOR_PDF_OPTS = [
+	parts = v.BUILDTAG.split('.')
+
+	v.ASCIIDOCTOR_OPTS = [
 		'-a',
 		'BUILDTAG=%s' % v.BUILDTAG,
+		'-a',
+		'VER_MAJOR=%s' % parts[0],
+		'-a',
+		'VER_MINOR=%s' % parts[1],
+		'-a',
+		'VER_BUILD=%s' % parts[2],
+		'-a',
+		'VER_BRANCH=%s' % (len(parts) == 4 and parts[3] or v.VER_BRANCH),
 	]
+
+	v.ASCIIDOCTOR_PDF = j(root, 'bin', 'asciidoctor-pdf')
+	v.ASCIIDOCTOR_PDF_GEMFILE = gem.abspath()
+	v.ASCIIDOCTOR_PDF_OPTS = v.ASCIIDOCTOR_OPTS
 	v.ASCIIDOCTOR_PDF_THEME_DEPS = []
 	v.ASCIIDOCTOR_PDF_THEME_OPTS = []
-	v.ASCIIDOCTOR_HTML_OPTS = []
+	v.ASCIIDOCTOR_HTML_OPTS = v.ASCIIDOCTOR_OPTS
 	v.ASCIIDOCTOR_HTML_THEME_DEPS = []
 	v.ASCIIDOCTOR_HTML_THEME_OPTS = []
-	v.ASCIIDOCTOR_OPTS = []
 
 	# Run bundler which will prepare all the prerequisites
 	conf.cmd_and_log(v.BUNDLE + [ '--gemfile=%s' % v.ASCIIDOCTOR_PDF_GEMFILE ])
