@@ -522,7 +522,8 @@ PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
 			<!-- PitLint: Skip_StartIterationEvent -->
 			<Action type='call' method='InitializeIterationEvent' publisher='Peach.Agent' />
 			<Action type='call' method='StartIterationEvent' publisher='Peach.Agent' />
-			<Action name='Act1' type='output'>
+			<!-- PitLint: Allow_WhenControlIteration -->
+			<Action name='Act1' type='output' when='context.controlIteration'>
 				<DataModel ref='DM'/>
 				<Data>
 					<Field name='str1' value='Hello'/>
@@ -551,9 +552,6 @@ PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
 			<!-- Comment -->
 			<!-- PitLint: Allow_MissingParamValue=MaxOutputSize -->
 		</Publisher>
-		<Logger class='File'>
-			<Param name='Path' value='##LoggerPath##'/>
-		</Logger>
 	</Test>
 </Peach>
 ";
