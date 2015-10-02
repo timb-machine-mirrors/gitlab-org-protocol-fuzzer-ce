@@ -39,6 +39,9 @@ module Peach {
 					.first()
 					.libraryUrl;
 			});
+			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
+				this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
+			});
 			return StripHttpPromise(this.$q, promise);
 		}
 
