@@ -519,7 +519,9 @@ PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
 
 	<StateModel name='TheState' initialState='Initial'>
 		<State name='Initial'>
+			<!-- before -->
 			<!-- PitLint: Skip_StartIterationEvent -->
+			<!-- after -->
 			<Action type='call' method='InitializeIterationEvent' publisher='Peach.Agent' />
 			<Action type='call' method='StartIterationEvent' publisher='Peach.Agent' />
 			<!-- PitLint: Allow_WhenControlIteration -->
@@ -529,7 +531,7 @@ PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
 					<Field name='str1' value='Hello'/>
 				</Data>
 			</Action>
-			<Action type='call' method='ExitIterationEvent' publisher='Peach.Agent' />
+			<Action type='call' method='ExitIterationEvent' publisher='Peach.Agent'/>
 		</State>
 	</StateModel>
 
