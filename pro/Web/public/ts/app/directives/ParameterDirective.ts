@@ -48,7 +48,7 @@ module Peach {
 		}
 
 		public get IsRequired(): boolean {
-			return _.isUndefined(this.$scope.param.defaultValue);
+			return _.isUndefined(this.$scope.param.optional) || !this.$scope.param.optional;
 		}
 
 		public get IsReadonly() {

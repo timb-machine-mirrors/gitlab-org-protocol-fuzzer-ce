@@ -430,6 +430,62 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.AreEqual(".", defs[1].Value);
 		}
 
+		[Test]
+		public void TestOptionalParams()
+		{
+			var pit = db.Entries.First();
+
+			var cfg = db.GetConfigByUrl(pit.PitUrl);
+
+			Assert.NotNull(cfg);
+			Assert.AreEqual(6, cfg.Count);
+
+			foreach (var item in cfg)
+				Assert.False(item.Optional, "Define should not be optional");
+
+			var file = pit.Versions[0].Files[0].Name + ".config";
+			var defs = PitDefines.Parse(file);
+
+			Assert.NotNull(defs);
+
+			// File shouldn't contain optional
+			StringAssert.DoesNotContain("optional", File.ReadAllText(file));
+
+			PitDatabase.SaveConfig(pit, cfg);
+
+			// After saving, file still shouldn't contain optional
+			StringAssert.DoesNotContain("optional", File.ReadAllText(file));
+
+			defs.Add(new PitDefines.StringDefine
+			{
+				Name = "Optional String",
+				Key = "OptStr",
+				Value = "",
+				Description = "Desc",
+				OptionalValue = true
+			});
+
+			var final = new PitDefines
+			{
+				Platforms = new List<PitDefines.Collection>(new[] {
+					new PitDefines.All
+					{
+						Defines = defs.ToList(),
+					}
+				}),
+			};
+
+			XmlTools.Serialize(file, final);
+
+			cfg = db.GetConfigByUrl(pit.PitUrl);
+			Assert.NotNull(cfg);
+			Assert.AreEqual(7, cfg.Count);
+			Assert.True(cfg[6].Optional, "Should be optional!");
+
+			var text = File.ReadAllText(file);
+			StringAssert.Contains("optional=\"true\"", text);
+			StringAssert.DoesNotContain("optional=\"false\"", text);
+		}
 
 		[Test]
 		public void HasAgents()
@@ -846,12 +902,19 @@ namespace Peach.Pro.Test.Core.WebServices
 			var parser = new PitParser();
 			var dom = parser.asParser(opts, path);
 
-			PitInjector.InjectConfig(cfg, dom);
+			var dumb = new List<KeyValuePair<string, string>>();
+			foreach (var kv in defs)
+			{
+				dumb.Add(new KeyValuePair<string,string>(kv.Key, kv.Value));
+			}
+
+			PitInjector.InjectConfig(cfg, dumb, dom);
 
 			var agent = dom.agents.First();
 			var monitor = agent.monitors.First();
 			Assert.AreEqual("local://", agent.location);
 			Assert.AreEqual(10000, (long)monitor.parameters.Single(x => x.Key == "WaitForExitTimeout").Value);
+			Assert.AreEqual("http://127.0.0.1:89/", (string)monitor.parameters.Single(x => x.Key == "Arguments").Value);
 
 			var config = new RunConfiguration 
 			{

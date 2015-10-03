@@ -3,6 +3,7 @@
 //
 
 using System;
+using System.IO;
 using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
@@ -84,7 +85,16 @@ namespace Peach.Pro.Core.Mutators
 			{
 				// add some items, but do it by replicating
 				// the last item over and over to save memory
-				objAsSeq.CountOverride = (int)num;
+
+				if (objAsSeq.Count == 0)
+					objAsSeq.SetCountOverride((int)num, null, 0);
+				else
+				{
+					var index = context.Random.Next(objAsSeq.Count);
+					var value = objAsSeq[index];
+
+					objAsSeq.SetCountOverride((int)num, value.Value, index);
+				}
 			}
 		}
 

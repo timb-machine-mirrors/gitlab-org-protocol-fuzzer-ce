@@ -60,7 +60,7 @@ namespace Peach.Core.Dom
 	public class Choice : DataElementContainer
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
-		public OrderedDictionary<string, DataElement> choiceElements = new OrderedDictionary<string, DataElement>();
+		public NamedCollection<DataElement> choiceElements = new NamedCollection<DataElement>();
 		DataElement _selectedElement = null;
 
 		public Choice()
@@ -120,7 +120,7 @@ namespace Peach.Core.Dom
 		/// </summary>
 		public void BuildCache()
 		{
-			foreach (var elem in choiceElements.Values)
+			foreach (var elem in choiceElements)
 			{
 				try
 				{
@@ -211,7 +211,8 @@ namespace Peach.Core.Dom
 
 						sizedData.SeekBits(startPosition, System.IO.SeekOrigin.Begin);
 						context.CrackData(child, sizedData);
-						SelectedElement = child;
+						CrackSuccess(child);
+						//SelectedElement = child;
 
 						logger.Trace("handleChoice: Keeping child: {0}", child.debugName);
 						return;
@@ -235,7 +236,7 @@ namespace Peach.Core.Dom
 			}
 
 			// Now try it the slow way
-			foreach (DataElement child in choiceElements.Values)
+			foreach (DataElement child in choiceElements)
 			{
 				// Skip any cache entries, already tried them
 				// Except if our cache choice failed to parse. Then 
@@ -249,7 +250,8 @@ namespace Peach.Core.Dom
 
 					sizedData.SeekBits(startPosition, System.IO.SeekOrigin.Begin);
 					context.CrackData(child, sizedData);
-					SelectedElement = child;
+					CrackSuccess(child);
+					//SelectedElement = child;
 
 					logger.Trace("handleChoice: Keeping child: {0}", child.debugName);
 					return;
@@ -270,7 +272,18 @@ namespace Peach.Core.Dom
 
 		public override void WritePit(XmlWriter pit)
 		{
-			throw new NotImplementedException();
+			pit.WriteStartElement(elementType);
+
+			if (referenceName != null)
+				pit.WriteAttributeString("ref", referenceName);
+
+			WritePitCommonAttributes(pit);
+			WritePitCommonChildren(pit);
+
+			foreach (var obj in this)
+				obj.WritePit(pit);
+
+			pit.WriteEndElement();
 		}
 
 		public void SelectDefault()
@@ -295,7 +308,7 @@ namespace Peach.Core.Dom
 			// Move children to choiceElements collection
 			foreach (DataElement elem in choice)
 			{
-				choice.choiceElements.Add(elem.Name, elem);
+				choice.choiceElements.Add(elem);
 				elem.parent = choice;
 			}
 
@@ -305,7 +318,7 @@ namespace Peach.Core.Dom
 			return choice;
 		}
 
-		public override void RemoveAt(int index)
+		public override void RemoveAt(int index, bool cleanup)
 		{
 			// Choices only have a single child, the chosen element
 			if (index != 0 || Count != 1)
@@ -319,20 +332,23 @@ namespace Peach.Core.Dom
 			Clear();
 
 			if (this.Count == 0)
-				parent.Remove(this);
+				parent.Remove(this, cleanup);
 		}
 
 		public override void ApplyReference(DataElement newElem)
 		{
 			DataElement oldChoice;
+			var idx = choiceElements.Count;
 
 			if (choiceElements.TryGetValue(newElem.Name, out oldChoice))
 			{
+				idx = choiceElements.IndexOf(oldChoice);
+				choiceElements.RemoveAt(idx);
 				oldChoice.parent = null;
 				newElem.UpdateBindings(oldChoice);
 			}
 
-			choiceElements[newElem.Name] = newElem;
+			choiceElements.Insert(idx, newElem);
 			newElem.parent = this;
 		}
 
@@ -344,7 +360,7 @@ namespace Peach.Core.Dom
 			}
 			set
 			{
-				if (!choiceElements.Values.Contains(value))
+				if (!choiceElements.Contains(value))
 					throw new KeyNotFoundException("value was not found");
 
 				Clear();
@@ -365,7 +381,7 @@ namespace Peach.Core.Dom
 			if (_selectedElement != null)
 				return base.Children();
 			else
-				return choiceElements.Values;
+				return choiceElements;
 		}
 
 		/// <summary>
@@ -375,7 +391,7 @@ namespace Peach.Core.Dom
 		/// <returns></returns>
 		public override IList<DataElement> XPathChildren()
 		{
-			return choiceElements.Select(kv => kv.Value).ToList();
+			return choiceElements;
 		}
 
 		protected override DataElement GetChild(string name)
@@ -394,6 +410,43 @@ namespace Peach.Core.Dom
 				SelectDefault();
 
 			return new Variant(new BitStreamList(new BitwiseStream[] { SelectedElement.Value }));
+		}
+
+		private void CrackSuccess(DataElement child)
+		{
+			var dm = root as DataModel;
+			if (dm != null && dm.actionData != null && dm.actionData.IsOutput && IntPtr.Size == 8)
+			{
+				// If this is an output action on a 64-bit machine,
+				// we will do normal selection and remember our alternative choices
+				SelectedElement = child;
+				return;
+			}
+
+			try
+			{
+				// Remove all references to all non-chosen choice children
+				BeginUpdate();
+
+				Clear();
+
+				foreach (var item in choiceElements.Where(i => i != child))
+				{
+					Add(item);
+					base.RemoveAt(0, true);
+				}
+
+				Add(child);
+
+				_choiceCache.Clear();
+				choiceElements.Clear();
+				choiceElements.Add(child);
+				_selectedElement = child;
+			}
+			finally
+			{
+				EndUpdate();
+			}
 		}
 	}
 }

@@ -27,6 +27,8 @@ subdirs = [
 	'SuperSocket',
 	'SuperWebSocket',
 	'SocketHttpListener/SocketHttpListener',
+	'BouncyCastle.1.8-master',
+	'sqlite-3.8.11.1',
 ]
 
 bld.recurse(subdirs)
@@ -34,6 +36,8 @@ bld.recurse(subdirs)
 if bld.env.CS_NAME == 'csc':
 	# Allow for compilation of all c# on windows
 	bld.read_csshlib('Mono.Posix.dll', paths=['Mono.2.10.9'])
+else:
+	bld.read_csshlib('System.Data.SQLite.dll', paths=['System.Data.SQLite.Mono.1.0.98.1'])
 
 if bld.env.BASENAME == 'osx':
 	bld(

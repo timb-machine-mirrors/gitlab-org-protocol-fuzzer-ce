@@ -22,13 +22,13 @@ files.
 
 The workflow that we want to follow in the test consists of the following steps:
 
-1. Peform Fuzzing.
-a. Write a file to disk that contains fuzzed data.
-b. Run the target application.
-c. Wait for the target to consume the data file.
-d. Check for faults.
-e. If a fault occurs, collect data.
-2.	Repeat step 1.
+. Peform Fuzzing.
+.. Write a file to disk that contains fuzzed data.
+.. Run the target application.
+.. Wait for the target to consume the data file.
+.. Check for faults.
+.. If a fault occurs, collect data.
+. Repeat step 1.
 
 The monitoring setup for this recipe is simple because a single monitor, the Windows 
 Debugger monitor, provides most of the functionality needed, including: fault detection, 
@@ -47,14 +47,14 @@ image::{images}/FileFuzzing2.png["Configuration for File Fuzzing", scale="60"]
 
 ===== Starting Peach 
 
-1. Start a Windows command line session with administrative privileges. +
+. Start a Windows command line session with administrative privileges. +
 Right-click on the command  prompt on the Windows menu to find the "As Administrator" 
 setting. PageHeap requires administrative (heightened) privileges.
-2. Launch Peach from the command line (type `peach` and press the Return key) to start the UI.
-3. Select a pit (test definition) of a protocol supported by the network device, such as BMP, so that Peach can communicate with device protocol during fuzzing.
+. Launch Peach from the command line (type `peach` and press the Return key) to start the UI.
+. Select a pit (test definition) of a protocol supported by the network device, such as BMP, so that Peach can communicate with device protocol during fuzzing.
 * Give the pit a name and a description. Peach makes a configuration file of the selections you make, so that you can re-use the setup again.
-4. From the configuration menu along the left edge of the window, select Monitoring.
-5. Fill in a name for the agent. Since this agent resides within Peach, the default 
+. From the configuration menu along the left edge of the window, select Monitoring.
+. Fill in a name for the agent. Since this agent resides within Peach, the default 
 location `local` is appropriate. Then, click the`Save` button.
 
 image::{images}/FileFuzzing_Monitoring.png["Local agent for File Fuzzing", scale="50"]

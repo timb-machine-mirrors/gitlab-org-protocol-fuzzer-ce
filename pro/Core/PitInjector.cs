@@ -5,20 +5,21 @@ using DomMonitor = Peach.Core.Dom.Monitor;
 using DomObject = Peach.Core.Dom.Dom;
 using WebAgent = Peach.Pro.Core.WebServices.Models.Agent;
 using Peach.Pro.Core.WebServices.Models;
+using System.Text;
 
 namespace Peach.Pro.Core
 {
     public static class PitInjector
     {
-		public static void InjectConfig(PitConfig cfg, DomObject dom)
+		public static void InjectConfig(PitConfig cfg, List<KeyValuePair<string, string>> defs, DomObject dom)
 		{
 			foreach (var agent in cfg.Agents)
 			{
 				var domAgent = new Peach.Core.Dom.Agent
 				{
-					Name = agent.Name ?? dom.agents.UniqueName(),
-					location = agent.AgentUrl ?? "local://",
-					monitors = ConvertMonitors(agent),
+					Name = Expand(defs, agent.Name) ?? dom.agents.UniqueName(),
+					location = Expand(defs, agent.AgentUrl) ?? "local://",
+					monitors = ConvertMonitors(agent, defs),
 				};
 
 				dom.agents.Add(domAgent);
@@ -29,23 +30,36 @@ namespace Peach.Pro.Core
 				}
 			}
 		}
-		
-		private static NamedCollection<DomMonitor> ConvertMonitors(WebAgent agent)
+
+		private static string Expand(List<KeyValuePair<string, string>> defs, string value)
+		{
+			if (string.IsNullOrEmpty(value))
+				return null;
+
+			var sb = new StringBuilder(value);
+			foreach (var kv in defs)
+			{
+				sb.Replace("##" + kv.Key + "##", kv.Value);
+			}
+			return sb.ToString();
+		}
+
+		private static NamedCollection<DomMonitor> ConvertMonitors(WebAgent agent, List<KeyValuePair<string, string>> defs)
 		{
 			var monitors = new NamedCollection<DomMonitor>();
 			foreach (var monitor in agent.Monitors)
 			{
 				monitors.Add(new DomMonitor
 				{
-					cls = monitor.MonitorClass,
-					Name = monitor.Name ?? monitors.UniqueName(),
-					parameters = ConvertParameters(monitor),
+					cls = Expand(defs, monitor.MonitorClass),
+					Name = Expand(defs, monitor.Name) ?? monitors.UniqueName(),
+					parameters = ConvertParameters(monitor, defs),
 				});
 			}
 			return monitors;
 		}
 
-		private static Dictionary<string, Variant> ConvertParameters(Monitor monitor)
+		private static Dictionary<string, Variant> ConvertParameters(Monitor monitor, List<KeyValuePair<string, string>> defs)
 		{
 			var ret = new Dictionary<string, Variant>();
 			foreach (var x in monitor.Map)
@@ -68,7 +82,7 @@ namespace Peach.Pro.Core
 				}
 				else
 				{
-					ret.Add(x.Name, new Variant(x.Value ?? x.DefaultValue));
+					ret.Add(x.Name, new Variant(Expand(defs, x.Value) ?? x.DefaultValue));
 				}
 			}
 			return ret;

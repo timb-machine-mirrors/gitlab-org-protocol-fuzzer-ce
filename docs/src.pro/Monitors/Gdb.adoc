@@ -40,16 +40,22 @@ WaitForExitTimeout:: WaitForExitOnCall timeout value, expressed in milliseconds.
 Installing gdb on Linux consists of using the package manager to download and install the gdb degugger and the needed support files and libraries. 
 
 * For Ubuntu systems, run the following command install gdb:
-
-    `sudo apt-get install gdb`
++
+----
+sudo apt-get install gdb
+----
 
 * For CentOS and RedHat Enterprise Linux installations, run the following command to install gdb:
-
-    `sudo yum install gdb`
++
+----
+sudo yum install gdb
+----
 
 * For SUSE Enterprise Linux installations, run the following command to install gdb:
-
-    `sudo zypper install gdb`
++
+----
+sudo zypper install gdb
+----
 
 You can also install gdb on OS X using a package manager. See the http://ntraft.com/installing-gdb-on-os-x-mavericks/[Installing GDB on OS X Mavericks] article for more information.
 

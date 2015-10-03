@@ -86,9 +86,10 @@ module Peach {
 					this.AllJobs = jobs;
 				}
 				this.pendingDelete = undefined;
-			}, (reason: ng.IHttpPromiseCallbackArg<IError>) => {
+			});
+			promise.catch((error: IError) => {
 				this.pendingDelete = undefined;
-				this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
+				this.$state.go(C.States.MainError, { message: error.errorMessage });
 			});
 		}
 		

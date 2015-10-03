@@ -21,6 +21,7 @@ using Peach.Pro.Core.WebServices.Models;
 using Action = Peach.Core.Dom.Action;
 using Dom = Peach.Core.Dom.Dom;
 using Ionic.Zip;
+using StateModel = Peach.Core.Dom.StateModel;
 
 namespace PitTester
 {
@@ -79,13 +80,15 @@ namespace PitTester
 				IterationStarting(context, currentIteration, totalIterations);
 		}
 
-		public static void TestPit(string libraryPath, string pitFile, bool singleIteration, uint? seed, bool keepGoing)
+		public static void TestPit(string libraryPath, string pitFile, bool singleIteration, uint? seed, bool keepGoing, uint stop = 500)
 		{
 			var testFile = pitFile + ".test";
 			if (!File.Exists(testFile))
 				throw new FileNotFoundException();
 
 			var testData = TestData.Parse(testFile);
+			if (testData.Tests.Any(x => x.SingleIteration))
+				singleIteration = true;
 
 			var defs = new List<KeyValuePair<string, string>>();
 			var configFile = pitFile + ".config";
@@ -136,7 +139,8 @@ namespace PitTester
 
 			var dom = parser.asParser(args, pitFile);
 
-			var errors = new List<string>();
+			var errors = new List<Exception>();
+			var fixupOverrides = new Dictionary<string, Variant>();
 
 			foreach (var test in dom.tests)
 			{
@@ -152,9 +156,10 @@ namespace PitTester
 				var logger = new TestLogger(data, testData.Ignores.Select(i => i.Xpath));
 				logger.Error += err =>
 				{
+					var ex = new PeachException(err);
 					if (!keepGoing)
-						throw new PeachException(err);
-					errors.Add(err);
+						throw ex;
+					errors.Add(ex);
 				};
 
 				test.loggers.Clear();
@@ -163,22 +168,21 @@ namespace PitTester
 				for (var i = 0; i < test.publishers.Count; ++i)
 				{
 					var oldPub = test.publishers[i];
-					var newPub = new TestPublisher(logger) { Name = oldPub.Name };
+					var newPub = new TestPublisher(logger, singleIteration) { Name = oldPub.Name };
 					newPub.Error += err =>
 					{
+						var ex = new PeachException(err);
 						if (!keepGoing)
-							throw new PeachException(err);
-						errors.Add(err);
+							throw ex;
+						errors.Add(ex);
 					};
 					test.publishers[i] = newPub;
 				}
-			}
 
-			var fixupOverrides = new Dictionary<string, Variant>();
-
-			if (testData.Slurps.Count > 0)
-			{
-				ApplySlurps(testData, dom, fixupOverrides);
+				if (testData.Slurps.Count > 0)
+				{
+					ApplySlurps(testData, test.stateModel, fixupOverrides);
+				}
 			}
 
 			// See #214
@@ -208,7 +212,7 @@ namespace PitTester
 			{
 				range = true,
 				rangeStart = 0,
-				rangeStop = 500,
+				rangeStop = stop,
 				pitFile = Path.GetFileName(pitFile),
 				runName = "Default",
 				singleIteration = singleIteration
@@ -241,7 +245,7 @@ namespace PitTester
 				{
 					ctx.StateModelStarting += (context, model) =>
 					{
-						ApplySlurps(testData, context.dom, null);
+						ApplySlurps(testData, model, null);
 					};
 				}
 			};
@@ -258,18 +262,18 @@ namespace PitTester
 					num,
 					config.randomSeed,
 					ex.Message);
-				throw new PeachException(msg, ex);
+				errors.Add(new PeachException(msg, ex));
 			}
 
 			if (errors.Any())
-				throw new PeachException(string.Join("\n", errors));
+				throw new AggregateException(errors);
 		}
 
-		private static void ApplySlurps(TestData testData, Dom dom, Dictionary<string, Variant> fixupOverrides)
+		private static void ApplySlurps(TestData testData, StateModel sm, Dictionary<string, Variant> fixupOverrides)
 		{
 			var doc = new XmlDocument();
 			var resolver = new PeachXmlNamespaceResolver();
-			var navi = new PeachXPathNavigator(dom);
+			var navi = new PeachXPathNavigator(sm);
 
 			foreach (var slurp in testData.Slurps)
 			{
@@ -357,8 +361,14 @@ namespace PitTester
 			}
 		}
 
-		public static void VerifyDataSets(string pitLibraryPath, string fileName, bool verifyBytes = true)
+		public static void VerifyDataSets(string pitLibraryPath, string fileName)
 		{
+			var testData = new TestData();
+
+			var pitTest = fileName + ".test";
+			if (File.Exists(pitTest))
+				testData = TestData.Parse(pitTest);
+
 			var defs = PitParser.parseDefines(fileName + ".config");
 			if (defs.Any(k => k.Key == "PitLibraryPath"))
 			{
@@ -381,6 +391,8 @@ namespace PitTester
 			{
 				dom.context.test = test;
 
+				var testTest = testData.Tests.FirstOrDefault(t => t.Name == test.Name);
+
 				foreach (var state in test.stateModel.states)
 				{
 					foreach (var action in state.actions)
@@ -389,7 +401,8 @@ namespace PitTester
 						{
 							foreach (var data in actionData.allData)
 							{
-								VerifyDataSet(verifyBytes, data, actionData, test, state, action, sb);
+								var verify = testTest == null || testTest.VerifyDataSets;
+								VerifyDataSet(verify, data, actionData, test, state, action, sb);
 							}
 						}
 					}
@@ -467,8 +480,8 @@ namespace PitTester
 					}
 					catch (Exception ex)
 					{
-						throw new PeachException(string.Format("Error applying data fields '{0}' to '{1}.{2}.{3}.{4}'.",
-							data.Name, test.Name, state.Name, action.Name, actionData.dataModel.Name), ex);
+						throw new PeachException(string.Format("Error applying data fields '{0}' to '{1}.{2}.{3}.{4}'.\n{5}",
+							data.Name, test.Name, state.Name, action.Name, actionData.dataModel.Name, ex.Message), ex);
 					}
 				}
 			}
@@ -498,22 +511,6 @@ namespace PitTester
 			}
 
 			var sb = new StringBuilder();
-
-			var logger = defs.Where(d => d.Key == "LoggerPath").ToArray();
-			if (logger.Length == 0)
-			{
-				sb.AppendLine("Missing a define for key 'LoggerPath'.");
-			}
-			else
-			{
-				var expected = "##Peach.LogRoot##/" + Path.GetFileNameWithoutExtension(fileName);
-
-				if (logger.Length > 1)
-					sb.AppendLine("There is more than one define for 'LoggerPath'.");
-
-				if (logger[0].Value != expected)
-					sb.AppendLine("LoggerPath is set as '" + logger[0].Value + "' but it should be '" + expected + "'.");
-			}
 
 			var noName = string.Join(", ", defs.Where(d => string.IsNullOrEmpty(d.Name)).Select(d => d.Key));
 			var noDesc = string.Join(", ", defs.Where(d => string.IsNullOrEmpty(d.Description)).Select(d => d.Key));
@@ -652,47 +649,25 @@ namespace PitTester
 					if (string.IsNullOrEmpty(lifetime))
 						errors.AppendLine("<Test> element is missing targetLifetime attribute.");
 
-					var parts = fileName.Split(Path.DirectorySeparatorChar);
-					var fileFuzzing = new[] { "Image", "Video", "Application" };
-					if (parts.Any(fileFuzzing.Contains) || parts.Last().Contains("Client"))
+					if (!ShouldSkipRule(it, "Skip_Lifetime"))
 					{
-						if (lifetime != "iteration")
-							errors.AppendLine("<Test> element has incorrect targetLifetime attribute. Expected 'iteration' but found '{0}'.".Fmt(lifetime));
-					}
-					else
-					{
-						if (lifetime != "session")
-							errors.AppendLine("<Test> element has incorrect targetLifetime attribute. Expected 'session' but found '{0}'.".Fmt(lifetime));
+						var parts = fileName.Split(Path.DirectorySeparatorChar);
+						var fileFuzzing = new[] { "Image", "Video", "Application" };
+						if (parts.Any(fileFuzzing.Contains) || parts.Last().Contains("Client"))
+						{
+							if (lifetime != "iteration")
+								errors.AppendLine("<Test> element has incorrect targetLifetime attribute. Expected 'iteration' but found '{0}'.".Fmt(lifetime));
+						}
+						else
+						{
+							if (lifetime != "session")
+								errors.AppendLine("<Test> element has incorrect targetLifetime attribute. Expected 'session' but found '{0}'.".Fmt(lifetime));
+						}
 					}
 
 					var loggers = it.Current.Select("p:Logger", nsMgr);
-					if (loggers.Count != 1)
-						errors.AppendLine("Number of <Logger> elements is " + loggers.Count + " but should be 1.");
-
-					while (loggers.MoveNext())
-					{
-						var cls = loggers.Current.GetAttribute("class", string.Empty);
-						if (cls == "Metrics")
-							errors.AppendLine("Found obsolete <Logger> element for class '" + cls + "'.");
-						else if (cls != "File")
-							errors.AppendLine("<Logger> element has class '" + cls + "' but should be 'File'.");
-
-						var parameters = loggers.Current.Select("p:Param", nsMgr);
-
-						if (parameters.Count != 1)
-							errors.AppendLine("Number of logger <Param> elements is " + parameters.Count + "but should be 1.");
-
-						while (parameters.MoveNext())
-						{
-							var name = parameters.Current.GetAttribute("name", string.Empty);
-							if (name != "Path")
-								errors.AppendLine("<Logger> element has unexpected parameter named '" + name + "'.");
-
-							var path = parameters.Current.GetAttribute("value", string.Empty);
-							if (path != "##LoggerPath##")
-								errors.AppendLine("Path parameter on <Logger> element is '" + path + "' but should be '##LoggerPath##'.");
-						}
-					}
+					if (loggers.Count != 0)
+						errors.AppendLine("Number of <Logger> elements is " + loggers.Count + " but should be 0.");
 
 					var pubs = it.Current.Select("p:Publisher", nsMgr);
 					while (pubs.MoveNext())
@@ -777,6 +752,13 @@ namespace PitTester
 					if (!gotEnd)
 						errors.AppendLine(string.Format("StateModel '{0}' does not call agent with 'ExitIterationEvent'.", smName));
 				}
+
+				var whenAction = nav.Select("/p:Peach/p:StateModel/p:State/p:Action[contains('controlIteration', @when)]", nsMgr);
+				while (whenAction.MoveNext())
+				{
+					if (!ShouldSkipRule(whenAction, "Allow_WhenControlIteration"))
+						errors.AppendLine("Action has when attribute containing controlIteration.");
+				}
 			}
 
 			try
@@ -793,7 +775,7 @@ namespace PitTester
 			}
 			catch (Exception ex)
 			{
-				errors.AppendLine("PitParser exception: " + ex.Message);
+				errors.AppendLine("PitParser exception: " + ex);
 			}
 
 			if (errors.Length > 0)

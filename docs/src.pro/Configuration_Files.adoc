@@ -26,7 +26,7 @@ You can create configuration files with default values and reuse them as needed.
 <2> This section is only for Linux
 <3> This section is only for OS X
 
-Use of the defined key's is done by wrapping them in "##". So Interface becomes +##Interface##+ as shown in the following example.
+Use of the defined key's is done by wrapping them in "##". So Interface becomes `##Interface##` as shown in the following example.
 
 [source,xml]
 ----

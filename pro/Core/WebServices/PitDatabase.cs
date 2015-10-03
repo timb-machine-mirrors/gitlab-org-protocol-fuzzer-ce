@@ -1047,6 +1047,7 @@ namespace Peach.Pro.Core.WebServices
 					Value = d.Value,
 					Name = d.Name,
 					Description = d.Description,
+					Optional = d.Optional,
 					Options = d.Defaults.ToList(),
 					Min = d.Min,
 					Max = d.Max,
@@ -1095,6 +1096,7 @@ namespace Peach.Pro.Core.WebServices
 			{
 				Name = attr.name,
 				DefaultValue = attr.required ? null : attr.defaultValue,
+				Optional = !attr.required,
 				Description = attr.description
 			};
 

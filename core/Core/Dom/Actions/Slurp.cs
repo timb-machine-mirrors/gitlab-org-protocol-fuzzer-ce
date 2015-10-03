@@ -34,7 +34,7 @@ namespace Peach.Core.Dom.Actions
 		protected override void OnRun(Publisher publisher, RunContext context)
 		{
 			var resolver = new PeachXmlNamespaceResolver();
-			var navi = new PeachXPathNavigator(context.dom);
+			var navi = new PeachXPathNavigator(parent.parent);
 			var iter = navi.Select(valueXpath, resolver);
 
 			var elems = new List<DataElement>();

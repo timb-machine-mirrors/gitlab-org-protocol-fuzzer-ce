@@ -26,7 +26,9 @@
 
 // $Id$
 
+using System;
 using System.IO;
+using System.Linq;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
@@ -696,7 +698,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 
 			try
 			{
-				cracker.CrackData(model, bs);
+				cracker.CrackData(model.Clone(), bs);
 				Assert.False(shouldFail);
 			}
 			catch (CrackingFailure)
@@ -872,6 +874,131 @@ namespace Peach.Pro.Test.Core.CrackingTests
 
 			cracker.CrackData(dom.dataModels[0], data);
 
+		}
+
+		[Test]
+		public void ClearChoices()
+		{
+			// Once cracking completes, non-selected choices should be removed
+
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Choice>
+			<Number size='32'>
+				<Relation type='size' of='data' />
+			</Number>
+			<Number size='32'>
+				<Relation type='size' of='data' />
+			</Number>
+			<Number size='32'>
+				<Relation type='size' of='data' />
+			</Number>
+			<Number size='32'>
+				<Relation type='size' of='data' />
+			</Number>
+		</Choice>
+		<Blob name='data'/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='input'>
+				<DataModel ref='DM' />
+			</Action>
+			<Action type='output'>
+				<DataModel ref='DM' />
+			</Action>
+			<Action type='getProperty' property='foo'>
+				<DataModel ref='DM' />
+			</Action>
+			<Action type='setProperty' property='foo'>
+				<DataModel ref='DM' />
+			</Action>
+		</State>
+	</StateModel>
+</Peach>
+";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			Assert.NotNull(dom);
+
+			// After pit parse, all data models should have 4 choices and 4 blob relations
+			var dm = dom.dataModels[0];
+
+			Assert.AreEqual(4, ((Choice)dm[0]).choiceElements.Count);
+			Assert.AreEqual(4, dm[1].relations.Of<Relation>().Count());
+
+
+			for (var i = 0; i < 4; ++i)
+			{
+				dm = dom.stateModels[0].states[0].actions[i].dataModel;
+
+				Assert.AreEqual(4, ((Choice)dm[0]).choiceElements.Count);
+				Assert.AreEqual(4, dm[1].relations.Of<Relation>().Count());
+			}
+
+			var bs = new BitStream(new byte[] { 0, 0, 0, 0 });
+
+			dm = dom.dataModels[0];
+			bs.Position = 0;
+			new DataCracker().CrackData(dm, bs);
+
+			// After cracking top level model, non-selected choices should be removed
+			Assert.AreEqual(1, ((Choice)dm[0]).choiceElements.Count);
+			Assert.AreEqual(1, dm[1].relations.Of<Relation>().Count());
+
+			dm = dom.stateModels[0].states[0].actions[0].dataModel;
+			bs.Position = 0;
+			new DataCracker().CrackData(dm, bs);
+
+			// After cracking input model, non-selected choices should be removed
+			Assert.AreEqual(1, ((Choice)dm[0]).choiceElements.Count);
+			Assert.AreEqual(1, dm[1].relations.Of<Relation>().Count());
+
+			dm = dom.stateModels[0].states[0].actions[1].dataModel;
+			bs.Position = 0;
+			new DataCracker().CrackData(dm, bs);
+
+			// After cracking output model, non-selected choices should be removed if we are 32-bit
+			if (IntPtr.Size == 8)
+			{
+				Assert.AreEqual(4, ((Choice)dm[0]).choiceElements.Count);
+				Assert.AreEqual(4, dm[1].relations.Of<Relation>().Count());
+			}
+			else
+			{
+				Assert.AreEqual(1, ((Choice)dm[0]).choiceElements.Count);
+				Assert.AreEqual(1, dm[1].relations.Of<Relation>().Count());
+			}
+
+			dm = dom.stateModels[0].states[0].actions[2].dataModel;
+			bs.Position = 0;
+			new DataCracker().CrackData(dm, bs);
+
+			// After cracking getProperty model, non-selected choices should be removed
+			Assert.AreEqual(1, ((Choice)dm[0]).choiceElements.Count);
+			Assert.AreEqual(1, dm[1].relations.Of<Relation>().Count());
+
+			dm = dom.stateModels[0].states[0].actions[1].dataModel;
+			bs.Position = 0;
+			new DataCracker().CrackData(dm, bs);
+
+			dm = dom.stateModels[0].states[0].actions[3].dataModel;
+			bs.Position = 0;
+			new DataCracker().CrackData(dm, bs);
+
+			// After cracking setProperty model, non-selected choices should be removed if we are 32-bit
+			if (IntPtr.Size == 8)
+			{
+				Assert.AreEqual(4, ((Choice)dm[0]).choiceElements.Count);
+				Assert.AreEqual(4, dm[1].relations.Of<Relation>().Count());
+			}
+			else
+			{
+				Assert.AreEqual(1, ((Choice)dm[0]).choiceElements.Count);
+				Assert.AreEqual(1, dm[1].relations.Of<Relation>().Count());
+			}
 		}
 	}
 }

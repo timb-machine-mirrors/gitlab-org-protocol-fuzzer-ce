@@ -62,7 +62,7 @@ namespace Peach.Pro.Core.Fixups
 			while ((b = data.ReadByte()) != -1)
 				lrc = (byte)((lrc + b) & 0xff);
 
-			lrc = (byte)(((lrc ^ 0xff) + 1) % 0xff);
+			lrc = (byte)(((lrc ^ 0xff) + 1) & 0xff);
 
 			if (parent is Peach.Core.Dom.String)
 				return new Variant(lrc.ToString());

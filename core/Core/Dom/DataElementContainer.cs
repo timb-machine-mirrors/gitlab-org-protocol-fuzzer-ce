@@ -69,17 +69,21 @@ namespace Peach.Core.Dom
 		/// Called after the item has been removed
 		/// </summary>
 		/// <param name="item"></param>
-		protected virtual void OnRemoveItem(DataElement item)
+		/// <param name="cleanup">Remove any bindings that could prevent garbage collection</param>
+		protected virtual void OnRemoveItem(DataElement item, bool cleanup = true)
 		{
 			item.parent = null;
 
-			// Clear any bindings this element has to other elements
-			foreach (var elem in item.PreOrderTraverse())
+			if (cleanup)
 			{
-				foreach (var rel in elem.relations.ToArray())
+				// Clear any bindings this element has to other elements
+				foreach (var elem in item.PreOrderTraverse())
 				{
-					rel.From.relations.Remove(rel);
-					rel.Clear();
+					foreach (var rel in elem.relations.ToArray())
+					{
+						rel.From.relations.Remove(rel);
+						rel.Clear();
+					}
 				}
 			}
 
@@ -405,7 +409,22 @@ namespace Peach.Core.Dom
 			OnInsertItem(item);
 		}
 
-		public virtual void RemoveAt(int index)
+		public void RemoveAt(int index)
+		{
+			RemoveAt(index, true);
+		}
+
+		/// <summary>
+		/// Remove child element at specific index
+		/// </summary>
+		/// <remarks>
+		/// Warning, once an item has been removed it is no longer in a useable state
+		/// unless cleanup is set to false!  By default bindings that could prevent
+		/// garbage collection such as relations are removed.
+		/// </remarks>
+		/// <param name="index"></param>
+		/// <param name="cleanup">Remove any bindings that could prevent garbage collection</param>
+		public virtual void RemoveAt(int index, bool cleanup)
 		{
 			// Index operator throws if index out of range
 			var item = _childrenList[index];
@@ -416,7 +435,7 @@ namespace Peach.Core.Dom
 			_childrenList.RemoveAt(index);
 			System.Diagnostics.Debug.Assert(removed);
 
-			OnRemoveItem(item);
+			OnRemoveItem(item, cleanup);
 		}
 
 		#endregion
@@ -476,11 +495,27 @@ namespace Peach.Core.Dom
 
 		public bool Remove(DataElement item)
 		{
+			return Remove(item, true);
+		}
+
+		/// <summary>
+		/// Remove child element
+		/// </summary>
+		/// <remarks>
+		/// Warning, once an item has been removed it is no longer in a useable state
+		/// unless cleanup is set to false!  By default bindings that could prevent
+		/// garbage collection such as relations are removed.
+		/// </remarks>
+		/// <param name="item"></param>
+		/// <param name="cleanup">Remove any bindings that could prevent garbage collection</param>
+		/// <returns></returns>
+		public bool Remove(DataElement item, bool cleanup)
+		{
 			int index = IndexOf(item);
 
 			if (index >= 0)
 			{
-				RemoveAt(index);
+				RemoveAt(index, cleanup);
 				return true;
 			}
 

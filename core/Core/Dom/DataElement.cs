@@ -769,11 +769,8 @@ namespace Peach.Core.Dom
 		/// <param name="pit"></param>
 		public void WritePitCommonChildren(XmlWriter pit)
 		{
-			foreach (Relation obj in relations)
-			{
-				if(obj.From == this)
-					obj.WritePit(pit);
-			}
+			foreach (var obj in relations.From<Relation>())
+				obj.WritePit(pit);
 
 			if (fixup != null)
 				fixup.WritePit(pit);
@@ -1058,6 +1055,25 @@ namespace Peach.Core.Dom
 					item.root = root;
 					item.fullName = item.parent.fullName + "." + item.Name;
 				}
+
+#if DEBUG && DISABLED
+				var toVisit = new List<DataElement> { null };
+				var elem = this;
+
+				while (elem != null)
+				{
+					if (elem.root != root)
+						throw new PeachException("Bad root on {0}. Expected {1} but was {2}.".Fmt(elem.debugName, root.debugName, elem.root.debugName));
+
+					var index = toVisit.Count;
+					foreach (var item in elem.XPathChildren())
+						toVisit.Insert(index, item);
+
+					index = toVisit.Count - 1;
+					elem = toVisit[index];
+					toVisit.RemoveAt(index);
+				}
+#endif
 			}
 		}
 

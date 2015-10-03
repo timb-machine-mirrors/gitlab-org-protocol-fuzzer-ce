@@ -16,31 +16,30 @@ namespace PitTester
 	{
 		static readonly Logger ClassLogger = LogManager.GetCurrentClassLogger();
 
+		bool _singleIteration;
 		bool _datagram;
 		readonly TestLogger _logger;
 		public delegate void ErrorHandler(string msg);
 		public event ErrorHandler Error;
 
-		public TestPublisher(TestLogger logger)
+		public TestPublisher(TestLogger logger, bool singleIteration)
 			: base(new Dictionary<string, Variant>())
 		{
 			_logger = logger;
 			stream = new MemoryStream();
+			_singleIteration = singleIteration;
 		}
 
-		private void FireError(string msg, ConsoleBuffer cb)
+		private void FireError(string msg)
 		{
-			using (new ForegroundColor(ConsoleColor.Red))
-				Console.WriteLine(msg);
-			if (cb != null)
-				cb.Print();
 			if (Error != null)
 				Error(msg);
 		}
 
 		private void Log(string action)
 		{
-			Console.WriteLine("{0,-15} {1}".Fmt(action, _logger.ActionName));
+			if (_singleIteration)
+				Console.WriteLine("{0,-15} {1}".Fmt(action, _logger.ActionName));
 		}
 
 		protected override Logger Logger
@@ -80,7 +79,7 @@ namespace PitTester
 					"Error, input stream has {0} unconsumed bytes from last input action.",
 					stream.Length - stream.Position
 				);
-				FireError(msg, null);
+				FireError(msg);
 			}
 		}
 
@@ -119,6 +118,9 @@ namespace PitTester
 			Log("Input");
 			var data = _logger.Verify<TestData.Input>(Name);
 
+			if (data == null)
+				throw new SoftException("No data available, emulating timeout.");
+
 			_datagram = data.IsDatagram;
 
 			if (data.IsDatagram)
@@ -137,7 +139,7 @@ namespace PitTester
 						"Error, input stream has {0} unconsumed bytes from last input action.",
 						stream.Length - stream.Position
 					);
-					FireError(msg, null);
+					FireError(msg);
 				}
 
 				// This is the 'Stream' publisher behavior
@@ -160,11 +162,11 @@ namespace PitTester
 			Log("Output");
 			var data = _logger.Verify<TestData.Output>(Name);
 
-			var expected = data.Payload;
-
 			// Only check outputs on non-fuzzing iterations
 			if (!IsControlIteration)
 				return;
+
+			var expected = data.Payload;
 
 			// Ensure we end on a byte boundary
 			var bs = dataModel.Value.PadBits();
@@ -174,7 +176,14 @@ namespace PitTester
 			// If this data model has a file data set, compare to that
 			var dataSet = dataModel.actionData.selectedData as DataFile;
 			if (dataSet != null)
+			{
+				// If data files are in use and VerifyDataSets is false, don't do a comparison
+				if (!_logger.VerifyDataSets)
+					return;
+
 				expected = File.ReadAllBytes(dataSet.FileName);
+				
+			}
 
 			if (Logger.IsDebugEnabled)
 				Logger.Debug("\n\n" + Utilities.HexDump(actual, 0, actual.Length));
@@ -214,10 +223,17 @@ namespace PitTester
 			{
 				string msg;
 				if (data.Ignore)
-					msg = "Ignoring failed action: {0}".Fmt(_logger.ActionName);
+					msg = "Ignoring action: {0}".Fmt(_logger.ActionName);
 				else
 					msg = "Test failed on action: {0}".Fmt(_logger.ActionName);
-				FireError(msg, cb);
+
+				using (new ForegroundColor(ConsoleColor.Red))
+					Console.WriteLine(msg);
+				if (cb != null)
+					cb.Print();
+
+				if (!data.Ignore)
+					FireError(msg);
 			}
 		}
 

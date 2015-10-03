@@ -86,6 +86,7 @@ namespace Peach.Pro.Core.Runtime
 		private static volatile bool _shouldStop;
 		private string _jsonFile;
 		private PitConfig _jsonConfig;
+		private bool _polite;
 
 		#region Public Properties
 
@@ -136,6 +137,11 @@ namespace Peach.Pro.Core.Runtime
 				"1",
 				"Perform a single iteration",
 				v => _config.singleIteration = true
+			);
+			options.Add(
+				"polite",
+				"Disable interactive console mode, which is based on curses",
+				v => _polite = true
 			);
 			options.Add(
 				"debug",
@@ -243,7 +249,6 @@ namespace Peach.Pro.Core.Runtime
 		private void ParseJsonConfig(string filename)
 		{
 			_jsonFile = filename;
-
 			using (var textReader = File.OpenText(filename))
 			using (var jsonReader = new JsonTextReader(textReader))
 			{
@@ -253,6 +258,9 @@ namespace Peach.Pro.Core.Runtime
 
 		protected override bool VerifyCompatibility()
 		{
+			if (!base.VerifyCompatibility())
+				return false;
+
 			var type = Type.GetType("Mono.Runtime");
 
 			// If we are not on mono, no checks need to be performed.
@@ -263,6 +271,7 @@ namespace Peach.Pro.Core.Runtime
 			{
 				Console.ForegroundColor = DefaultForground;
 				Console.ResetColor();
+				return true;
 			}
 			catch
 			{
@@ -276,8 +285,6 @@ namespace Peach.Pro.Core.Runtime
 				Console.WriteLine("Change your terminal type to 'linux', 'xterm' or 'rxvt' and try again.");
 				return false;
 			}
-
-			return base.VerifyCompatibility();
 		}
 
 		protected override void OnRun(List<string> args)
@@ -327,7 +334,7 @@ namespace Peach.Pro.Core.Runtime
 		{
 			try
 			{
-				if (_verbosity > 0)
+				if (_verbosity > 0 || _polite)
 					return new ConsoleWatcher();
 
 				// Ensure console is interactive
@@ -354,13 +361,7 @@ namespace Peach.Pro.Core.Runtime
 		/// Create an engine and run the fuzzing job
 		/// </summary>
 		protected virtual void RunEngine(Peach.Core.Dom.Dom dom)
-		{
-			if (_jsonConfig != null)
-			{
-				Console.WriteLine("Using agents defined in {0}", _jsonFile);
-				PitInjector.InjectConfig(_jsonConfig, dom);
-			}
-			
+		{			
 			// Add the JobLogger as necessary
 			Test test;
 
@@ -503,6 +504,12 @@ namespace Peach.Pro.Core.Runtime
 				else
 				{
 					var dom = parser.asParser(parserArgs, _config.pitFile);
+
+					if (_jsonConfig != null)
+					{
+						Console.WriteLine("Using agents defined in {0}", _jsonFile);
+						PitInjector.InjectConfig(_jsonConfig, defs, dom);
+					}
 
 					RunEngine(dom);
 				}
