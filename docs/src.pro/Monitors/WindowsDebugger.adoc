@@ -7,10 +7,9 @@
 
 The _WindowsDebugger_ monitor controls a windows debugger instance.  
 
-This monitor launches an executable file, a process, a service, or a kernel driver with 
-the debugger attached; or, this monitor can attach the debugger to a running executable, 
-process, or service. This monitor can also attach the debugger to kernel-mode drivers, 
-although that lies outside the scope of this documentation.
+This monitor launches an executable file, a process, or a service with the debugger 
+attached; or, this monitor can attach the debugger to a running executable, 
+process, or service.
 
 The _WindowsDebugger_ performs automation, fault detection, and data collection. 
 
@@ -25,13 +24,11 @@ data collected on faults. For more information on bucketing provided by this mon
 
 === Parameters
 
-_Exactly one of the four required parameters is needed for each instance of this monitor. 
-The other three required parameters are not used._
+_Exactly one of the three required parameters is needed for each instance of this monitor. 
+The other two required parameters are not used._
 
 Executable:: Executable to launch via the debugger. If the executable has command-line arguments,  specify these in the "Arguments" paramter.
 ProcessName:: Name of the process that the debugger attaches.
-KernelConnectionString:: Connection string for attaching the debugger to a kernel-mode 
-process (e.g. a driver).
 Service:: Name of the Windows process or service to  attach to the debugger. If the service 
 crashes or is stopped, this monitor will restart the service.
  
@@ -95,19 +92,6 @@ This parameter example is from a setup that launches an application with command
 |Arguments    |127.0.0.1 4244
 |WinDbgPath   |C:\Program Files (x86)\Debugging Tools for Windows (x86) 
 
-|==========================================================
-
-==========================
-
-.Kernel Configuration +
-
-This parameter example is from a kernel debugging setup.
-
-==========================
-[cols="2,4" options="header",halign="center"] 
-|==========================================================
-|Parameter               |Value
-|KernelConnectionString  |npipe:server=Server, pipe=PipeName [,password=Password] 
 |==========================================================
 
 ==========================
@@ -207,14 +191,6 @@ ifndef::peachug[]
 		<!--<Param name="WinDbgPath" value="C:\Program Files (x86)\Debugging Tools for Windows (x86)" />-->
 	</Monitor>
 </Agent>
-----
-==========================
-
-.Kernel Configuration
-==========================
-[source,xml]
-----
-<Param name="KernelConnectionString" value="npipe:server=Server, pipe=PipeName [,password=Password]" />
 ----
 ==========================
 
