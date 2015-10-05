@@ -40,7 +40,7 @@ namespace Peach.Pro.Core.Publishers
 	[Alias("TcpClient")]
 	[Alias("tcp.Tcp")]
 	[Parameter("Host", typeof(string), "Hostname or IP address of remote host")]
-	[Parameter("Port", typeof(ushort), "Local port to listen on")]
+	[Parameter("Port", typeof(ushort), "Remote port to connect to")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait when receiving data (default 3000)", "3000")]
 	[Parameter("SendTimeout", typeof(int), "How many milliseconds to wait when sending data (default infinite)", "-1")]
 	[Parameter("ConnectTimeout", typeof(int), "Max milliseconds to wait for connection (default 10000)", "10000")]
