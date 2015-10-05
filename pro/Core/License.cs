@@ -184,17 +184,16 @@ namespace Peach.Pro.Core
 			}
 
 			if(ex == null)
-				throw new FileNotFoundException("Error, unable to locate license file 'Peach.license'.");
+				throw new FileNotFoundException("Unable to locate license file 'Peach.license'.");
 
 			throw ex;
 		}
 
 		static bool Verify()
 		{
-			bool isValid;
-
 			Version = Feature.Unknown;
 			Expiration = DateTime.MinValue;
+
 			eulaErrors.Clear();
 
 			try
@@ -212,12 +211,16 @@ namespace Peach.Pro.Core
 					.AssertValidLicense()
 					.ToList();
 
-				isValid = failures.Count == 0;
 				Expiration = license.Expiration;
 
-				if (!isValid)
+				if (failures.OfType<LicenseExpiredValidationFailure>().Any())
 				{
-					eulaErrors.AppendFormat("License file '{0}' failed to verify.", xml.FileName);
+					eulaErrors.AppendFormat("License '{0}' has expired!", xml.FileName);
+					eulaErrors.AppendLine();
+				}
+				else if (failures.Any())
+				{
+					eulaErrors.AppendFormat("License '{0}' failed to verify.", xml.FileName);
 					eulaErrors.AppendLine();
 
 					foreach (var failure in failures)
@@ -226,26 +229,34 @@ namespace Peach.Pro.Core
 						eulaErrors.AppendLine();
 					}
 				}
+				else
+				{
+					var ver = Enum.GetNames(typeof(Feature)).FirstOrDefault(n => license.ProductFeatures.Contains(n));
+					if (string.IsNullOrEmpty(ver))
+						ver = "Unknown";
 
-				var ver = Enum.GetNames(typeof(Feature)).FirstOrDefault(n => license.ProductFeatures.Contains(n));
-				if (string.IsNullOrEmpty(ver))
-					ver = "Unknown";
+					Version = (Feature)Enum.Parse(typeof(Feature), ver);
 
-				Version = (Feature)Enum.Parse(typeof(Feature), ver);
+					if (Version != Feature.Unknown)
+					{
+						eulaErrors.Clear();
+						return true;
+					}
 
-				if (Version == Feature.Unknown)
-					throw new NotSupportedException("No supported features were found in '{0}'.".Fmt(xml.FileName));
+					eulaErrors.AppendFormat("License '{0}' does not contain any supported features.", xml.FileName);
+					eulaErrors.AppendLine();
+				}
 			}
 			catch (Exception ex)
 			{
-				isValid = false;
-				Version = Feature.Unknown;
-
-				eulaErrors.AppendLine("License verification failed.");
+				eulaErrors.AppendLine("License verification failed.  ");
 				eulaErrors.AppendLine(ex.Message);
 			}
 
-			return isValid;
+			eulaErrors.AppendLine();
+			eulaErrors.AppendLine("Please contact support@peachfuzzer.com for further assistance.");
+
+			return false;
 		}
 	}
 }
