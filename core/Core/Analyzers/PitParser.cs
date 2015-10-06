@@ -1217,9 +1217,12 @@ namespace Peach.Core.Analyzers
 
 		protected virtual StateModel handleStateModel(XmlNode node, Dom.Dom parent)
 		{
-			string name = node.getAttrString("name");
-			string initialState = node.getAttrString("initialState");
-			StateModel stateModel = CreateStateModel();
+			var name = node.getAttrString("name");
+			var initialState = node.getAttrString("initialState");
+			string finalState = null;
+			if (node.hasAttr("finalState"))
+				finalState = node.getAttrString("finalState");
+			var stateModel = CreateStateModel();
 			stateModel.Name = name;
 			stateModel.parent = parent;
 
@@ -1227,7 +1230,7 @@ namespace Peach.Core.Analyzers
 			{
 				if (child.Name == "State")
 				{
-					State state = handleState(child, stateModel);
+					var state = handleState(child, stateModel);
 
 					try
 					{
@@ -1240,11 +1243,15 @@ namespace Peach.Core.Analyzers
 
 					if (state.Name == initialState)
 						stateModel.initialState = state;
+					else if (state.Name == finalState)
+						stateModel.finalState = state;
 				}
 			}
 
 			if (stateModel.initialState == null)
 				throw new PeachException("Error, did not locate inital ('" + initialState + "') for state model '" + name + "'.");
+			if (finalState != null && stateModel.finalState == null)
+				throw new PeachException("Error, did not locate final ('" + finalState + "') for state model '" + name + "'.");
 
 			return stateModel;
 		}
@@ -1255,17 +1262,19 @@ namespace Peach.Core.Analyzers
 
 		protected virtual State handleState(XmlNode node, StateModel parent)
 		{
-			State state = new State();
-			state.parent = parent;
-			state.Name = node.getAttr("name", parent.states.UniqueName());
-			state.onStart = node.getAttr("onStart", null);
-			state.onComplete = node.getAttr("onComplete", null);
+			var state = new State
+			{
+				parent = parent,
+				Name = node.getAttr("name", parent.states.UniqueName()),
+				onStart = node.getAttr("onStart", null),
+				onComplete = node.getAttr("onComplete", null)
+			};
 
 			foreach (XmlNode child in node.ChildNodes)
 			{
 				if (child.Name == "Action")
 				{
-					Core.Dom.Action action = handleAction(child, state);
+					var action = handleAction(child, state);
 
 					try
 					{

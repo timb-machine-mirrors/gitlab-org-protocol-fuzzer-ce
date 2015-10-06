@@ -319,15 +319,12 @@ namespace Peach.Core.Dom
 		public void markMutableElements()
 		{
 			var nav = new PeachXPathNavigator(stateModel);
-
 			foreach (var item in mutables)
 			{
 				var nodeIter = nav.Select(item.xpath);
-
 				while (nodeIter.MoveNext())
 				{
 					var dataElement = ((PeachXPathNavigator)nodeIter.Current).CurrentNode as DataElement;
-
 					if (dataElement == null)
 						continue;
 
@@ -335,7 +332,21 @@ namespace Peach.Core.Dom
 						elem.isMutable = item.mutable;
 				}
 			}
+
+			// disable mutations for elements in a final state
+			if (stateModel.finalState != null)
+			{
+				foreach(var action in stateModel.finalState.actions)
+				{
+					foreach(var actionData in action.outputData)
+					{
+						foreach (var item in actionData.dataModel.PreOrderTraverse())
+						{
+							item.isMutable = false;
+						}
+					}
+				}
+			}
 		}
 	}
 }
-// END
