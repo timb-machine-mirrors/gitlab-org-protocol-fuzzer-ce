@@ -625,9 +625,13 @@ namespace PitTester
 
 			}
 
-			using (var rdr = XmlReader.Create(fileName))
+			//using (var rdr = XmlReader.Create(fileName))
 			{
-				var doc = new XPathDocument(rdr);
+				var doc = new XmlDocument();
+
+				// Must call LoadXml() so that we can catch embedded newlines!
+				doc.LoadXml(File.ReadAllText(fileName));
+
 				var nav = doc.CreateNavigator();
 				var nsMgr = new XmlNamespaceManager(nav.NameTable);
 				nsMgr.AddNamespace("p", PeachElement.Namespace);
@@ -758,6 +762,13 @@ namespace PitTester
 				{
 					if (!ShouldSkipRule(whenAction, "Allow_WhenControlIteration"))
 						errors.AppendLine("Action has when attribute containing controlIteration: {0}".Fmt(whenAction.Current.OuterXml));
+				}
+
+				var badValues = nav.Select("//*[contains(@value, '\n')]", nsMgr);
+				while (badValues.MoveNext())
+				{
+					if (badValues.Current.GetAttribute("valueType", "") != "hex")
+						errors.AppendLine("Element has value attribute with embedded newline: {0}".Fmt(badValues.Current.OuterXml));
 				}
 			}
 

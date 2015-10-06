@@ -232,6 +232,7 @@ namespace Peach.Core.Analyzers
 			var xml = readWithDefines(args, data);
 			var xmldoc = validatePit(xml, dataName);
 
+			// Must reload doc using LoadXml() to support newlines in attribute values
 			xmldoc.LoadXml(xml);
 
 			if (!parse)
