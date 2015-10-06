@@ -753,18 +753,11 @@ namespace PitTester
 						errors.AppendLine(string.Format("StateModel '{0}' does not call agent with 'ExitIterationEvent'.", smName));
 				}
 
-				var when = nav.Select("/p:Peach/p:StateModel/p:State/p:Action/@when", nsMgr);
-				while (when.MoveNext())
+				var whenAction = nav.Select("/p:Peach/p:StateModel/p:State/p:Action[contains(@when, 'controlIteration')]", nsMgr);
+				while (whenAction.MoveNext())
 				{
-					var val = when.Current.Value;
-					if (val.Contains("controlIteration"))
-					{
-						var act = when.Clone();
-						act.Current.MoveToParent();
-
-						if (!ShouldSkipRule(act, "Allow_WhenControlIteration"))
-							errors.AppendLine("Action has when attribute containing controlIteration.");
-					}
+					if (!ShouldSkipRule(whenAction, "Allow_WhenControlIteration"))
+						errors.AppendLine("Action has when attribute containing controlIteration: {0}".Fmt(whenAction.Current.OuterXml));
 				}
 			}
 
@@ -791,19 +784,18 @@ namespace PitTester
 
 		private static bool ShouldSkipRule(XPathNodeIterator it, string rule)
 		{
-			var preceding = it.Current.SelectSingleNode("preceding-sibling::comment()");
-			if (preceding == null)
-				return false;
+			var stack = new Stack<string>();
+			var preceding = it.Current.Select("preceding-sibling::*|preceding-sibling::comment()");
 
-			var skip = false;
-
-			do
+			while (preceding.MoveNext())
 			{
-				skip |= preceding.Value.Contains("PitLint: {0}".Fmt(rule));
+				if (preceding.Current.NodeType == XPathNodeType.Comment)
+					stack.Push(preceding.Current.Value);
+				else
+					stack.Clear();
 			}
-			while (!skip && preceding.MoveToNext());
 
-			return skip;
+			return stack.Any(item => item.Contains("PitLint: {0}".Fmt(rule)));
 		}
 	}
 }

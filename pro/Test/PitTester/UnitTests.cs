@@ -351,7 +351,7 @@ namespace PitTester
 			File.WriteAllText(pitFile, xml);
 			File.WriteAllText(pitTest, test);
 
-			var ex = Assert.Throws<PeachException>(() =>
+			var ex = Assert.Throws<AggregateException>(() =>
 			{
 				try
 				{
@@ -519,16 +519,19 @@ PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
 
 	<StateModel name='TheState' initialState='Initial'>
 		<State name='Initial'>
+			<!-- before -->
 			<!-- PitLint: Skip_StartIterationEvent -->
+			<!-- after -->
 			<Action type='call' method='InitializeIterationEvent' publisher='Peach.Agent' />
 			<Action type='call' method='StartIterationEvent' publisher='Peach.Agent' />
-			<Action name='Act1' type='output'>
+			<!-- PitLint: Allow_WhenControlIteration -->
+			<Action name='Act1' type='output' when='context.controlIteration'>
 				<DataModel ref='DM'/>
 				<Data>
 					<Field name='str1' value='Hello'/>
 				</Data>
 			</Action>
-			<Action type='call' method='ExitIterationEvent' publisher='Peach.Agent' />
+			<Action type='call' method='ExitIterationEvent' publisher='Peach.Agent'/>
 		</State>
 	</StateModel>
 
@@ -551,9 +554,6 @@ PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
 			<!-- Comment -->
 			<!-- PitLint: Allow_MissingParamValue=MaxOutputSize -->
 		</Publisher>
-		<Logger class='File'>
-			<Param name='Path' value='##LoggerPath##'/>
-		</Logger>
 	</Test>
 </Peach>
 ";

@@ -76,7 +76,7 @@ namespace PeachValidator
 
 			if (container is Choice)
 			{
-				foreach (var child in ((Choice)container).choiceElements.Values)
+				foreach (var child in ((Choice)container).choiceElements)
 				{
 					if (child is DataElementContainer)
 					{

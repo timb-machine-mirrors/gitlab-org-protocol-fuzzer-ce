@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
+using Peach.Pro.Core;
 using Encoding = System.Text.Encoding;
 
 namespace Peach.Pro.Test.Core

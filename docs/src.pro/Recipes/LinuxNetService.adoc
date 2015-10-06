@@ -17,7 +17,7 @@ environment. If the netowrk server crashes, the worst thing that happens is that
 the virtual machine has to restart. Peach should recover the data if the network 
 server crashes. 
 
-image::{images}/linux_tux.png["Linux Tux mascot", scalewidth="70%"]
+image::{images}/linux_tux.png["Linux Tux mascot", scale="40"]
 
 This recipe uses the Linux SNMP server to demonstrate the procedure.
 
@@ -53,7 +53,7 @@ and communicates with Peach.
 This setup uses two agents. Each agent manages two monitors. The basic layout showing the 
 monitors follows:
 
-image::{images}/LinuxNetworkService.png["Configuration for Linux Service with VM", scalewidth="70%"]
+image::{images}/LinuxNetworkService.png["Configuration for Linux Service with VM", scale="50"]
 
 Monitors in the local agent include the following:
 
@@ -79,7 +79,7 @@ selections you make, so that you can re-use the setup again.
 . Fill in a name for the agent. Since this agent resides within Peach, the default 
 location `local` is appropriate. Then, click the`Save` button.
 
-image::{images}/Local_Agent.png["Local Agent for Network Device", scalewidth="60%"]
+image::{images}/Local_Agent.png["Local Agent for Network Device", scale="40"]
 
 NOTE: The order of the agents in the list is significant. In this case, the local 
 agent comes first because the virtual machine automation occurs first from a workflow perspective. 
@@ -113,7 +113,7 @@ The xref:Monitors_Vmware[Vmware Monitor] automates the VMware virtual machine us
 this recipe. This monitor works with a snapshot of the virtual machine that provides 
 a consistent environment for the network service throughout a fuzzing session. 
 
-image::{images}/Vmware_Monitor2.png["VMWare Monitor", scalewidth="70%"]
+image::{images}/Vmware_Monitor2.png["VMWare Monitor", scale="50"]
 
 The *Vmx* parameter identifies the Linux virtual machine image. 
 Provide the path on the host system that locates the virtual machine image.
@@ -130,7 +130,7 @@ snapshots of a specific virtual machine.
 The xref:Monitors_Pcap[Netowrk Capture Monitor (InterestingPackets)] captures network packets sent 
 and received from the test target.
 
-image::{images}/NetworkCapture_VMWare2.png["Network Capture VMWare", scalewidth="70%"]
+image::{images}/NetworkCapture_VMWare2.png["Network Capture VMWare", scale="50"]
 
 The *Device* parameter specifies the hostname of the target or the IPv4 address of 
 the target. The value given is `eth0`. 
@@ -154,7 +154,7 @@ the remaining monitors.
 . Since this agent will reside in the virtual machine, the location providing the tcp port address 
 is appropriate. Then, click the`Save` button.
 
-image::{images}/Remote_Agent_VMSetup.png["Remote Agent for Network Device", scalewidth="60%"]
+image::{images}/Remote_Agent_VMSetup.png["Remote Agent for Network Device", scale="40"]
 
 Begin each monitor with a name or descriptive text. This helps identify one monitor from 
 another.
@@ -174,7 +174,7 @@ and monitors the service for exceptions. When a fault or exception occurs, _Gdb_
 collects and logs the appropriate information, including messages from stdout and stderr, 
 stack traces, and the gdb log.
 
-image::{images}/Gdb_Monitor_VM2.png["Gdb Monitor", scalewidth="70%"]
+image::{images}/Gdb_Monitor_VM2.png["Gdb Monitor", scale="50"]
 
 The *Executable* parameter identifies the application to run, concatentated with the 
 path to the executable file, such as `usr/sbin/sndpd`.  
@@ -187,7 +187,7 @@ the application.
 The xref:Monitors_SaveFile[SaveFile Monitor] saves a specified file as part of the logged 
 data when a fault occurs. A copy of the file is placed in the log folder.
 
-image::{images}/SaveFileMonitor2.png["SaveFile Monitor", scalewidth="70%"]
+image::{images}/SaveFileMonitor2.png["SaveFile Monitor", scale="50"]
 
 The *Filename* parameter identifies file to save on fault. The value includes the 
 path information. 
@@ -206,7 +206,7 @@ retrieve files from Gdb and place them in the Peach logging directories.
 
 A picture of the agents with their respective monitors listed follows:
 
-image::{images}/VM_Agents_Both.png["Test Configuration With Remote Aagent", scalewidth="70%"]
+image::{images}/VM_Agents_Both.png["Test Configuration With Remote Aagent", scale="50"]
 
 
 

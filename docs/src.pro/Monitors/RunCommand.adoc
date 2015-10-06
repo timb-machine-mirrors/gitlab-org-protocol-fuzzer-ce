@@ -63,8 +63,14 @@ FaultOnExitCode:: Generate a fault when the FaultExitCode matches the exit code 
 AddressSanitizer:: Enable support for the Google AddressSanitizer (ASan). This feature is turned off (set to false) by default.
 StartOnCall:: Launch the command when the monitor receives a specified message from  the state machine.
 FaultOnNonZeroExit:: Generate a fault if the exit code is non-zero. The default value is false.
-FaultOnRegex:: Generate a fault if the regular expression matches the command output. This feature is turned off by default. To use this feature, provide a valid regular expression using the Microsoft .NET syntax.
-Timeout:: Maximum time period, in seconds, for the process to run. Generate a fault if process runs longer than the specified value. You can turn off this feature by specifying -1 for the time period. The default value also is -1.
+FaultOnRegex:: Generate a fault if the regular expression matches the command output. This feature 
+is turned off by default. To use this feature, provide a valid regular expression using the Microsoft
+.NET syntax.
+Timeout:: Maximum time period, in seconds, for the process to run. Generate a fault if process runs
+longer than the specified value. You can turn off this feature by specifying -1 for the time period.
+The default value also is -1.
+WorkingDirectory:: Set the current working directory for the command or application launched by 
+this monitor. The default value is the Peach current working directory. The current working directory for the command is valid until the command changes the directory or ends.
 
 === Examples
 

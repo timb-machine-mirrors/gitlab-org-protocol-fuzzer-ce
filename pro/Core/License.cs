@@ -4,16 +4,18 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Peach.Core;
 using Portable.Licensing.Validation;
 
-namespace Peach.Core
+namespace Peach.Pro.Core
 {
 	public static class License
 	{
 		static readonly string EulaConfig = "eulaAccepted";
 		static readonly StringBuilder eulaErrors = new StringBuilder();
 		static bool? eulaAccepted;
-		static object mutex = new object();
+		static bool valid;
+		static readonly object mutex = new object();
 
 		public enum Feature
 		{
@@ -36,9 +38,23 @@ namespace Peach.Core
 		}
 
 		public static string ErrorText { get { return eulaErrors.ToString(); } }
-		public static bool IsValid { get; private set; }
 		public static Feature Version { get; private set; }
 		public static DateTime Expiration { get; private set; }
+
+		public static bool IsValid
+		{
+			get
+			{
+				lock (mutex)
+				{
+					if (valid)
+						return true;
+
+					valid = Verify();
+					return valid;
+				}
+			}
+		}
 
 		public static bool EulaAccepted
 		{
@@ -52,8 +68,8 @@ namespace Peach.Core
 						var str = config.AppSettings.Settings.Get(EulaConfig) ?? string.Empty;
 						bool val;
 
-						eulaAccepted = bool.TryParse(str, out val);
-						eulaAccepted &= val;
+						var parsed = bool.TryParse(str, out val);
+						eulaAccepted = parsed & val;
 					}
 					return eulaAccepted.Value;
 				}
@@ -168,13 +184,18 @@ namespace Peach.Core
 			}
 
 			if(ex == null)
-				throw new FileNotFoundException("Error, unable to locate license file 'Peach.license'.");
+				throw new FileNotFoundException("Unable to locate license file 'Peach.license'.");
 
 			throw ex;
 		}
 
-		static void Verify()
+		static bool Verify()
 		{
+			Version = Feature.Unknown;
+			Expiration = DateTime.MinValue;
+
+			eulaErrors.Clear();
+
 			try
 			{
 				const string publicKey = "MIIBKjCB4wYHKoZIzj0CATCB1wIBATAsBgcqhkjOPQEBAiEA/////wAAAAEAAAAAAAAAAAAAAAD///////////////8wWwQg/////wAAAAEAAAAAAAAAAAAAAAD///////////////wEIFrGNdiqOpPns+u9VXaYhrxlHQawzFOw9jvOPD4n0mBLAxUAxJ02CIbnBJNqZnjhE50mt4GffpAEIQNrF9Hy4SxCR/i85uVjpEDydwN9gS3rM6D0oTlF2JjClgIhAP////8AAAAA//////////+85vqtpxeehPO5ysL8YyVRAgEBA0IABBXgmINzW2CILco6ktkgF2gITUHUoQbu3r9HJSqsBuSGHHrkZ2HWgwZlmkUjTSWrUdZXeTMzhiM3AhlF2ldHvNI=";
@@ -190,12 +211,16 @@ namespace Peach.Core
 					.AssertValidLicense()
 					.ToList();
 
-				IsValid = failures.Count == 0;
 				Expiration = license.Expiration;
 
-				if (!IsValid)
+				if (failures.OfType<LicenseExpiredValidationFailure>().Any())
 				{
-					eulaErrors.AppendFormat("License file '{0}' failed to verify.", xml.FileName);
+					eulaErrors.AppendFormat("License '{0}' has expired!", xml.FileName);
+					eulaErrors.AppendLine();
+				}
+				else if (failures.Any())
+				{
+					eulaErrors.AppendFormat("License '{0}' failed to verify.", xml.FileName);
 					eulaErrors.AppendLine();
 
 					foreach (var failure in failures)
@@ -204,24 +229,34 @@ namespace Peach.Core
 						eulaErrors.AppendLine();
 					}
 				}
+				else
+				{
+					var ver = Enum.GetNames(typeof(Feature)).FirstOrDefault(n => license.ProductFeatures.Contains(n));
+					if (string.IsNullOrEmpty(ver))
+						ver = "Unknown";
 
-				var ver = Enum.GetNames(typeof(Feature)).FirstOrDefault(n => license.ProductFeatures.Contains(n));
-				if (string.IsNullOrEmpty(ver))
-					ver = "Unknown";
+					Version = (Feature)Enum.Parse(typeof(Feature), ver);
 
-				Version = (Feature)Enum.Parse(typeof(Feature), ver);
+					if (Version != Feature.Unknown)
+					{
+						eulaErrors.Clear();
+						return true;
+					}
 
-				if (Version == Feature.Unknown)
-					throw new NotSupportedException("No supported features were found in '{0}'.".Fmt(xml.FileName));
+					eulaErrors.AppendFormat("License '{0}' does not contain any supported features.", xml.FileName);
+					eulaErrors.AppendLine();
+				}
 			}
 			catch (Exception ex)
 			{
-				IsValid = false;
-				Version = Feature.Unknown;
-
-				eulaErrors.AppendLine("License verification failed.");
+				eulaErrors.AppendLine("License verification failed.  ");
 				eulaErrors.AppendLine(ex.Message);
 			}
+
+			eulaErrors.AppendLine();
+			eulaErrors.AppendLine("Please contact support@peachfuzzer.com for further assistance.");
+
+			return false;
 		}
 	}
 }
