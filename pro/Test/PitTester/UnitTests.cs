@@ -351,7 +351,7 @@ namespace PitTester
 			File.WriteAllText(pitFile, xml);
 			File.WriteAllText(pitTest, test);
 
-			var ex = Assert.Throws<PeachException>(() =>
+			var ex = Assert.Throws<AggregateException>(() =>
 			{
 				try
 				{

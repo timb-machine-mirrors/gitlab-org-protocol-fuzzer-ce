@@ -712,14 +712,14 @@ namespace Peach.Pro.Test.Core.StateModel
 	</DataModel>
 
 	<StateModel name='SM' initialState='Initial'>
-		<State name='Initial' onComplete='context.stateStore[""stateComplete""] = ""yes""'>
-			<Action type='output' onComplete='context.stateStore[""initialComplete""] = ""yes""'>
+		<State name='Initial'>
+			<Action name='Output' type='output'>
 				<DataModel ref='DM1'/>
 			</Action>
-			<Action type='changeState' ref='Second' onComplete='context.stateStore[""changeComplete""] = ""yes""' />
+			<Action name='Next' type='changeState' ref='Second'/>
 		</State>
 		<State name='Second'>
-			<Action type='output' onComplete='context.stateStore[""secondComplete""] = ""yes""'>
+			<Action name='Output' type='output'>
 				<DataModel ref='DM1'/>
 			</Action>
 		</State>
@@ -734,29 +734,168 @@ namespace Peach.Pro.Test.Core.StateModel
 			var parser = new PitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
-			var config = new RunConfiguration();
-			config.singleIteration = true;
+			var config = new RunConfiguration {singleIteration = true};
 
 			var e = new Engine(null);
 
-			var testFinished = false;
-
-			e.TestFinished += (ctx) =>
+			var expected = new List<string>
 			{
-				testFinished = true;
+				"Initial",
+				"Initial.Output",
+				"Initial.Next",
+				"Second",
+				"Second.Output",
+			};
 
-				Assert.NotNull(ctx);
-				Assert.NotNull(ctx.stateStore);
-				Assert.AreEqual(4, ctx.stateStore.Count);
-				Assert.True(ctx.stateStore.ContainsKey("stateComplete"));
-				Assert.True(ctx.stateStore.ContainsKey("initialComplete"));
-				Assert.True(ctx.stateStore.ContainsKey("changeComplete"));
-				Assert.True(ctx.stateStore.ContainsKey("secondComplete"));
+			var actual = new List<string>();
+			e.TestStarting += (ctx) =>
+			{
+				ctx.StateStarting += (inner, state) =>
+				{
+					actual.Add(state.Name);
+				};
+				ctx.ActionFinished += (inner, action) =>
+				{
+					actual.Add("{0}.{1}".Fmt(action.parent.Name, action.Name));
+				};
 			};
 
 			e.startFuzzing(dom, config);
 
-			Assert.True(testFinished, "TestFinished was never called!");
+			CollectionAssert.AreEqual(expected, actual);
+		}
+
+		[Test]
+		public void TestFinalState()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM1'>
+		<String name='str1' value='Hello'/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial' finalState='Final'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM1'/>
+			</Action>
+			<Action type='changeState' ref='Second'/>
+		</State>
+		<State name='Second'>
+			<Action type='output'>
+				<DataModel ref='DM1'/>
+			</Action>
+		</State>
+		<State name='Final'>
+			<Action type='output'>
+				<DataModel ref='DM1'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+
+			var config = new RunConfiguration {singleIteration = true};
+
+			var e = new Engine(null);
+
+			var expected = new List<string>
+			{
+				"Initial",
+				"Second",
+				"Final",
+			};
+
+			var actual = new List<string>();
+			e.TestStarting += (ctx) =>
+			{
+				ctx.StateStarting += (inner, state) => 
+				{
+					actual.Add(state.Name);
+				};
+			};
+
+			e.startFuzzing(dom, config);
+			CollectionAssert.AreEqual(expected, actual);
+		}
+
+		[Test]
+		public void TestCannotChangeStateToFinal()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM1'>
+		<String name='str1' value='Hello'/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial' finalState='Final'>
+		<State name='Initial'>
+			<Action type='changeState' ref='Final'/>
+		</State>
+		<State name='Final'>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+
+			var config = new RunConfiguration { singleIteration = true };
+
+			var e = new Engine(null);
+
+			Assert.Throws<PeachException>(() =>
+			{
+				e.startFuzzing(dom, config);
+			});
+		}
+
+		[Test]
+		public void TestFinalStateCannotChangeState()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='DM1'>
+		<String name='str1' value='Hello'/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial' finalState='Final'>
+		<State name='Initial'>
+		</State>
+		<State name='Final'>
+			<Action type='changeState' ref='Initial'/>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+
+			var config = new RunConfiguration { singleIteration = true };
+
+			var e = new Engine(null);
+
+			Assert.Throws<PeachException>(() =>
+			{
+				e.startFuzzing(dom, config);
+			});
 		}
 	}
 }

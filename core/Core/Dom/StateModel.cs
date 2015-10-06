@@ -99,6 +99,13 @@ namespace Peach.Core.Dom
 		public string initialStateName { get; set; }
 
 		/// <summary>
+		/// Name of the state to execute last.
+		/// </summary>
+		[XmlAttribute("finalState")]
+		[DefaultValue(null)]
+		public string finalStateName { get; set; }
+
+		/// <summary>
 		/// The Dom that owns this state model.
 		/// </summary>
 		public Dom parent
@@ -111,6 +118,11 @@ namespace Peach.Core.Dom
 		/// The initial state to run when state machine executes.
 		/// </summary>
 		public State initialState { get; set; }
+
+		/// <summary>
+		/// The final state to run when state machine finishes.
+		/// </summary>
+		public State finalState { get; set; }
 
 		/// <summary>
 		/// Saves the data produced/consumed by an action for future logging.
@@ -133,6 +145,8 @@ namespace Peach.Core.Dom
 		/// <param name="context"></param>
 		public void Run(RunContext context)
 		{
+			var currentState = initialState;
+
 			try
 			{
 				foreach (var publisher in context.test.publishers)
@@ -152,8 +166,6 @@ namespace Peach.Core.Dom
 				// after datasets and analyzers have been applied
 				if (context.controlRecordingIteration)
 					context.test.markMutableElements();
-
-				State currentState = initialState;
 
 				context.OnStateModelStarting(this);
 
@@ -178,6 +190,9 @@ namespace Peach.Core.Dom
 					}
 					catch (ActionChangeStateException ase)
 					{
+						if (ase.changeToState == finalState)
+							throw new PeachException("Change state actions cannot refer to final state.");
+
 						newState = context.test.strategy.MutateChangingState(ase.changeToState);
 						
 						if(newState == ase.changeToState)
@@ -197,10 +212,26 @@ namespace Peach.Core.Dom
 			}
 			finally
 			{
-				foreach (var publisher in context.test.publishers)
-					publisher.close();
+				try
+				{
+					if (finalState != null)
+					{
+						logger.Debug("Run(): Executing final state \"{0}\".", finalState.Name);
+						context.OnStateChanging(currentState, finalState);
+						finalState.Run(context);
+					}
+				}
+				catch (ActionChangeStateException)
+				{
+					throw new PeachException("A change state is not allowed in a final state.");
+				}
+				finally
+				{
+					foreach (var publisher in context.test.publishers)
+						publisher.close();
 
-				context.OnStateModelFinished(this);
+					context.OnStateModelFinished(this);
+				}
 			}
 		}
 

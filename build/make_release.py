@@ -40,12 +40,6 @@ output
         ${pit}.zip
 '''
 
-def to_JSON(self):
-	return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
-
-class Object:
-	pass
-
 def to_list(sth):
 	if isinstance(sth, str):
 		return sth.split()
@@ -161,12 +155,14 @@ def extract_pits():
 
 	with zipfile.ZipFile(pitfile, 'r') as z:
 		for i in z.infolist():
+			if i.filename.startswith('gump/'):
+				continue
 			if os.path.basename(i.filename) == 'shipping_packs.json':
 				packs = z.read(i)
 			if os.path.basename(i.filename) == 'shipping_pits.json':
 				archives = z.read(i)
 			if not i.filename.endswith('.zip'):
-				continue;
+				continue
 
 			print ' - %s' % i.filename
 			z.extract(i, pitdir)
@@ -284,17 +280,18 @@ if __name__ == "__main__":
 		print 'Generating release folder %s' % dirname
 		print ''
 
-		o = Object()
-		o.files = [ x for x in names if 'release' in x and r['filter'](x)]
-		o.product = r['product']
-		o.build = buildtag
-		o.nightly = c.nightly
-		o.version = 2
-		o.date = '%s/%s/%s' % (d.day, d.month, d.year)
-		o.pit_archives = pit_archives
-		o.packs = packs
+		manifest = dict(
+			files = [ x for x in names if 'release' in x and r['filter'](x)],
+			product = r['product'],
+			build = buildtag,
+			nightly = c.nightly,
+			version = 2,
+			date = '%s/%s/%s' % (d.day, d.month, d.year),
+			pit_archives = pit_archives,
+			packs = packs,
+		)
 
-		if not o.files:
+		if not manifest['files']:
 			print 'No files found, skipping!'
 			continue
 
@@ -304,7 +301,7 @@ if __name__ == "__main__":
 
 		rel = os.path.join(path, 'release.json')
 
-		for f in o.files:
+		for f in manifest['files']:
 			src = os.path.join(reldir, f)
 			dst = os.path.join(path, f)
 			shutil.copy(src, dst)
@@ -315,10 +312,9 @@ if __name__ == "__main__":
 			dst = os.path.join(path, 'pits', f)
 			shutil.copy(src, dst)
 
+		data = json.dumps(manifest, sort_keys=True, indent=4)
 		with open(rel, 'w') as f:
-			j = to_JSON(o)
-			print j
-			f.write(j)
+			f.write(data)
 
 	if os.path.isdir(tmpdir):
 		shutil.rmtree(tmpdir)
