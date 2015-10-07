@@ -125,7 +125,7 @@ namespace Peach.Pro.Core.Publishers
 					break;
 				case "Header":
 					var key = CleanHeaderValue(ReadString(args[0]));
-					var value = CleanHeaderValue(ReadString(args[1]));
+					var value = ReadString(args[1]);
 					Headers[key] = value;
 					break;
 			}
@@ -217,6 +217,10 @@ namespace Peach.Pro.Core.Publishers
 					{
 						_client = TryCreateClient(url, data);
 					}
+					catch (SoftException ex)
+					{
+						caught = ex;
+					}
 					catch (ProtocolViolationException ex)
 					{
 						// Happens if we try to write data and the method doesn't support it
@@ -265,26 +269,33 @@ namespace Peach.Pro.Core.Publishers
 
 			foreach (var kv in Headers)
 			{
-				if (HeaderCompare(kv.Key, "Accept"))
-					request.Accept = kv.Value;
-				else if (HeaderCompare(kv.Key, "Connection"))
-					request.Connection = kv.Value;
-				else if (HeaderCompare(kv.Key, "Content-Type"))
-					request.ContentType = kv.Value;
-				else if (HeaderCompare(kv.Key, "Date"))
-					request.Date = DateTime.Parse(kv.Value);
-				else if (HeaderCompare(kv.Key, "Expect"))
-					request.Expect = kv.Value;
-				else if (HeaderCompare(kv.Key, "If-Modified-Since"))
-					request.IfModifiedSince = DateTime.Parse(kv.Value);
-				else if (HeaderCompare(kv.Key, "Referer"))
-					request.Referer = kv.Value;
-				else if (HeaderCompare(kv.Key, "Transfer-Encoding"))
-					request.TransferEncoding = kv.Value;
-				else if (HeaderCompare(kv.Key, "User-Agent"))
-					request.UserAgent = kv.Value;
-				else if (!string.IsNullOrWhiteSpace(kv.Key))
-					request.Headers[kv.Key] = kv.Value;
+				try
+				{
+					if (HeaderCompare(kv.Key, "Accept"))
+						request.Accept = kv.Value;
+					else if (HeaderCompare(kv.Key, "Connection"))
+						request.Connection = kv.Value;
+					else if (HeaderCompare(kv.Key, "Content-Type"))
+						request.ContentType = kv.Value;
+					else if (HeaderCompare(kv.Key, "Date"))
+						request.Date = DateTime.Parse(kv.Value);
+					else if (HeaderCompare(kv.Key, "Expect"))
+						request.Expect = kv.Value;
+					else if (HeaderCompare(kv.Key, "If-Modified-Since"))
+						request.IfModifiedSince = DateTime.Parse(kv.Value);
+					else if (HeaderCompare(kv.Key, "Referer"))
+						request.Referer = kv.Value;
+					else if (HeaderCompare(kv.Key, "Transfer-Encoding"))
+						request.TransferEncoding = kv.Value;
+					else if (HeaderCompare(kv.Key, "User-Agent"))
+						request.UserAgent = kv.Value;
+					else if (!string.IsNullOrWhiteSpace(kv.Key))
+						request.Headers[kv.Key] = kv.Value;
+				}
+				catch (ArgumentException ex)
+				{
+					throw new SoftException("Unable to set the '{0}' HTTP header to '{1}'.".Fmt(kv.Key, kv.Value), ex);
+				}
 			}
 
 			if (data != null)
