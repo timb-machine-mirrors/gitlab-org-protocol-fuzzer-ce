@@ -162,6 +162,9 @@ namespace PitTester
 			Log("Output");
 			var data = _logger.Verify<TestData.Output>(Name);
 
+			if (data == null)
+				return;
+
 			// Only check outputs on non-fuzzing iterations
 			if (!IsControlIteration)
 				return;
