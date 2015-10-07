@@ -33,6 +33,7 @@ namespace PitTester
 			{ "RawV4", new[] { "MinMTU", "MaxMTU" }},
 			{ "RawV6", new[] { "MinMTU", "MaxMTU" }},
 			{ "Udp", new[] { "MinMTU", "MaxMTU" }},
+			{ "DTls", new[] { "MinMTU", "MaxMTU" }},
 			{ "File", new[] { "Append", "Overwrite" }},
 			{ "ConsoleHex", new[] { "BytesPerLine" }},
 			{ "Null", new[] { "MaxOutputSize" }}
