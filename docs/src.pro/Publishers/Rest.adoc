@@ -21,6 +21,7 @@ _Optional:_
 
 BaseUrl:: Base URL is used by some authentication types
 Username:: Username for authentication
+Password:: Optional password associated with the Username in authentication
 Domain:: Domain for authentication
 Cookies:: Enable cookie support. The default value is true.
 CookiesAcrossIterations:: Track cookies across iterations. The default value is false.
