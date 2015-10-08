@@ -2,7 +2,7 @@
 [[Publishers_Rest]]
 == Rest Publisher
 
-The _Rest_ Publisher  is an I/O adapter that communicates using the Representational State Transfer (REST) architecture. This publisher encapsulates commands and data within the Action clauses defined in the state model of a Pit.
+The _Rest_ Publisher  is an I/O adapter that communicates using the Representational State Transfer (REST) architecture. This publisher communicates using HTTP as the underlying transport. Additionally, the publisher encodes the data model into JSON before transmitting it to the server.
 
 === Syntax
 
