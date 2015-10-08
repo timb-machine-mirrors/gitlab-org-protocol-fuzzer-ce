@@ -28,10 +28,6 @@ namespace Peach.Pro.Core.Fixups
 			: base(parent, args)
 		{
 			ParameterParser.Parse(this, args);
-
-			if (!System.IO.File.Exists(Filename))
-				throw new PeachException(string.Format("Error, FromFile fixup cannot find file '{0}'.",
-					Filename));
 		}
 
 		protected BitwiseStream DecodePem(byte[] bytes)

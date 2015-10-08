@@ -250,6 +250,8 @@ namespace Peach.Pro.Core.MutationStrategies
 
 		bool stateMutations;
 
+		readonly List<string> mutationHistory = new List<string>();
+
 		public RandomStrategy(Dictionary<string, Variant> args)
 			: base(args)
 		{
@@ -379,6 +381,7 @@ namespace Peach.Pro.Core.MutationStrategies
 			stateModelMutation = null;
 			currentAction = null;
 			currentState = null;
+			mutationHistory.Clear();
 
 			if (context.controlIteration && context.controlRecordingIteration)
 			{
@@ -672,6 +675,12 @@ namespace Peach.Pro.Core.MutationStrategies
 				scopeState.ChildScopes += 1;
 		}
 
+		[Conditional("DEBUG")]
+		void RecordMutation(string instanceName, string elementName, string mutatorName)
+		{
+			mutationHistory.Add(instanceName + "." + elementName + " + " + mutatorName);
+		}
+
 		private void ApplyMutation(ActionData data)
 		{
 			var instanceName = data.instanceName;
@@ -689,6 +698,8 @@ namespace Peach.Pro.Core.MutationStrategies
 					logger.Debug("Action_Starting: Fuzzing: {0}", item.ElementName);
 					logger.Debug("Action_Starting: Mutator: {0}", mutator.Name);
 					mutator.randomMutation(elem);
+
+					RecordMutation(instanceName, item.ElementName, mutator.Name);
 
 					// Trigger re-generation of data
 					// needed for Frag element.

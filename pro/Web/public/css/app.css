@@ -188,6 +188,10 @@ ul.library li a {
 	width: 500px;
 }
 
+.peach-error-text {
+	white-space: pre-line;
+}
+
 .max-width-200 {
 	max-width: 200px;
 }

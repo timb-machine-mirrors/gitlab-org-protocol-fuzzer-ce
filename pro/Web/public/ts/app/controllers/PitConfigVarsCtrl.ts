@@ -34,6 +34,10 @@ module Peach {
 			return !this.$scope.form.$dirty && this.isSaved;
 		}
 
+		public get ShowRequired() {
+			return this.$scope.form.$pristine && this.$scope.form.$invalid;
+		}
+
 		public get ShowValidation() {
 			return this.$scope.form.$dirty && this.$scope.form.$invalid;
 		}

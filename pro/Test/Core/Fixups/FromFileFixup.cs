@@ -125,7 +125,7 @@ TGKxZ+RZEU/rDN6CjHKIsPLfOcq5
 
 				var blob = dom.dataModels[0][0];
 
-				var data = (BitwiseStream) blob.InternalValue;
+				var data = (BitwiseStream)blob.InternalValue;
 				Assert.AreEqual(405, data.Length);
 
 				data.Position = 0;
@@ -148,6 +148,46 @@ TGKxZ+RZEU/rDN6CjHKIsPLfOcq5
 				File.Delete(tempFile);
 			}
 
+		}
+
+		[Test]
+		public void VerifyNoExceptionOnLoad()
+		{
+			// Verify fixup does not exception when
+			// file is missing during parsing.
+
+			var xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
+				"<Peach>" +
+				"   <DataModel name=\"TheDataModel\">" +
+				"       <Blob name=\"Checksum\">" +
+				"           <Fixup class=\"FromFile\">" +
+				"               <Param name=\"Filename\" value=\"{0}\"/>" +
+				"               <Param name=\"Encoding\" value=\"Pem\"/>" +
+				"           </Fixup>" +
+				"       </Blob>" +
+				"       <Blob name=\"Data\" value=\"12345\"/>" +
+				"   </DataModel>" +
+
+				"   <StateModel name=\"TheState\" initialState=\"Initial\">" +
+				"       <State name=\"Initial\">" +
+				"           <Action type=\"output\">" +
+				"               <DataModel ref=\"TheDataModel\"/>" +
+				"           </Action>" +
+				"       </State>" +
+				"   </StateModel>" +
+
+				"   <Test name=\"Default\">" +
+				"       <StateModel ref=\"TheState\"/>" +
+				"       <Publisher class=\"Null\"/>" +
+				"   </Test>" +
+				"</Peach>";
+
+			var tempFile = Path.GetTempFileName();
+			File.Delete(tempFile);
+
+			xml = string.Format(xml, tempFile);
+			var parser = new PitParser();
+			parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 		}
 	}
 }
