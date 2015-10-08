@@ -260,6 +260,7 @@ namespace Peach.Pro.Core.Publishers
 			var request = (HttpWebRequest)WebRequest.Create(url);
 			request.Method = Method;
 			request.Timeout = Timeout;
+			request.ServicePoint.Expect100Continue = false;
 
 			if (Cookies)
 				request.CookieContainer = CookieJar;
