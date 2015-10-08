@@ -26,9 +26,9 @@ module Peach {
 		public get CurrentPitId() {
 			return this.$state.params['pit'];
 		}
-		
-		public get Pit(): IPit { 
-			return this.pit; 
+
+		public get Pit(): IPit {
+			return this.pit;
 		}
 
 		public LoadLibrary(): ng.IPromise<ILibrary[]> {
@@ -64,12 +64,12 @@ module Peach {
 			promise.success((pit: IPit) => this.OnSuccess(pit, true));
 			return StripHttpPromise(this.$q, promise);
 		}
-		
+
 		public SaveVars(config: IParameter[]): ng.IPromise<IPit> {
 			this.pit.config = config;
 			return this.SavePit();
 		}
-		
+
 		public SaveAgents(agents: Agent[]): ng.IPromise<IPit> {
 			this.pit.agents = agents;
 			return this.SavePit();
@@ -88,9 +88,17 @@ module Peach {
 		}
 
 		public get IsConfigured(): boolean {
-			return onlyIf(this.pit, () => _.last(this.pit.versions).configured) || false;
+			return onlyIf(this.pit, () => _.all(this.pit.config, (c: IParameter) => {
+				return c.optional || c.value !== "";
+			}));
 		}
-		
+
+		public get HasMonitors(): boolean {
+			return onlyIf(this.pit, () => _.any(this.pit.agents, (a: Agent) => {
+				return a.monitors.length > 0;
+			}));
+		}
+
 		private OnSuccess(pit: IPit, saved: boolean) {
 			var oldPit = this.pit;
 			this.pit = pit;

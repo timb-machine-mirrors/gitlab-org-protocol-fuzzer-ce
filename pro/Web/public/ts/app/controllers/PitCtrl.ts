@@ -45,16 +45,21 @@ module Peach {
 		private storage: IConfigureStorage;
 
 		public get ShowReady(): boolean {
-			return onlyIf(this.pitService.Pit, () => 
-				this.pitService.IsConfigured && this.CanStart);
+			return onlyIf(this.pitService.Pit, () =>
+				this.pitService.HasMonitors && this.CanStart);
 		}
 
 		public get ShowNotConfigured(): boolean {
 			return onlyIf(this.pitService.Pit, () => !this.pitService.IsConfigured);
 		}
 
+		public get ShowNoMonitors(): boolean {
+			return onlyIf(this.pitService.Pit, () =>
+				this.pitService.IsConfigured && !this.pitService.HasMonitors);
+		}
+
 		public get CanStart(): boolean {
-			return this.jobService.CanStart;
+			return this.pitService.IsConfigured && this.jobService.CanStart;
 		}
 
 		public Start(): void {

@@ -1,7 +1,14 @@
-<div class="alert alert-warning"
+<div class="alert alert-danger"
 		 ng-show="vm.ShowNotConfigured">
 	<strong>Warning!</strong>
-	The currently selected Pit should be configured for the environment.
+	The currently selected Pit has required configuration variables that must be set.
+	<a ui-sref="pit.wizard">Pit Configuration Quick Start</a>
+</div>
+
+<div class="alert alert-warning"
+		ng-show="vm.ShowNoMonitors">
+	<strong>Warning!</strong>
+	The currently selected Pit should be configured for monitoring the environment.
 	<a ui-sref="pit.wizard">Pit Configuration Quick Start</a>
 </div>
 
