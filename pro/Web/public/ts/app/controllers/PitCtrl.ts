@@ -59,7 +59,7 @@ module Peach {
 		}
 
 		public get CanStart(): boolean {
-			return this.pitService.IsConfigured && this.jobService.CanStart;
+			return this.pitService.IsConfigured;
 		}
 
 		public Start(): void {

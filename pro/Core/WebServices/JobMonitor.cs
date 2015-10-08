@@ -10,6 +10,7 @@ namespace Peach.Pro.Core.WebServices
 	{
 		int Pid { get; }
 		bool IsTracking(Job job);
+		bool IsControlable { get; }
 
 		Job GetJob();
 
@@ -45,6 +46,8 @@ namespace Peach.Pro.Core.WebServices
 				return _guid == job.Guid;
 			}
 		}
+
+		public bool IsControlable { get { return true; } }
 
 		public Job GetJob()
 		{

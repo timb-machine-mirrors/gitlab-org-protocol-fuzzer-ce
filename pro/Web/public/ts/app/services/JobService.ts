@@ -69,20 +69,16 @@ module Peach {
 			return this.Job && this.Job.status === JobStatus.Paused;
 		}
 
-		public get CanStart(): boolean {
-			return _.isUndefined(this.Job) || this.Job.status === JobStatus.Stopped;
-		}
-
 		public get CanContinue(): boolean {
-			return this.Job && this.Job.status === JobStatus.Paused;
+			return this.isControlable && this.Job.status === JobStatus.Paused;
 		}
 
 		public get CanPause(): boolean {
-			return this.Job && this.Job.status === JobStatus.Running;
+			return this.isControlable && this.Job.status === JobStatus.Running;
 		}
 
 		public get CanStop(): boolean {
-			return this.Job && (
+			return this.isControlable && (
 				this.Job.status === JobStatus.Starting ||
 				this.Job.status === JobStatus.Running ||
 				this.Job.status === JobStatus.Paused
@@ -90,7 +86,11 @@ module Peach {
 		}
 
 		public get CanKill(): boolean {
-			return this.Job && this.Job.status === JobStatus.Stopping;
+			return this.isControlable && this.Job.status === JobStatus.Stopping;
+		}
+
+		private get isControlable(): boolean {
+			return this.Job && !_.isUndefined(this.Job.commands);
 		}
 
 		public get RunningTime(): string {
@@ -143,14 +143,14 @@ module Peach {
 		}
 
 		public Start(job: IJobRequest): ng.IPromise<IJob> {
-			if (this.CanStart) {
-				var promise = this.$http.post(C.Api.Jobs, job)
-					.error(reason => {
-						console.log('JobService.StartJob().error>', reason);
-					})
-				;
-				return StripHttpPromise(this.$q, promise);
-			}
+			var promise = this.$http.post(C.Api.Jobs, job)
+				.error(reason => {
+					// 404 = Pit not found
+					// 403 = Job already running
+					console.log('JobService.StartJob().error>', reason);
+				})
+			;
+			return StripHttpPromise(this.$q, promise);
 		}
 
 		public Delete(job: IJob): ng.IPromise<any> {
@@ -222,8 +222,7 @@ module Peach {
 
 					this.$rootScope['job'] = this.job;
 
-					if (job.status !== JobStatus.Stopped &&
-						job.status !== JobStatus.Paused) {
+					if (job.status !== JobStatus.Stopped) {
 						this.poller = this.$timeout(() => { this.onPoll(url); }, JOB_INTERVAL);
 					}
 
