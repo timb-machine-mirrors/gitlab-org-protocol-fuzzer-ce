@@ -10,6 +10,7 @@ module Peach {
 			C.Angular.$rootScope,
 			C.Angular.$q,
 			C.Angular.$http,
+			C.Angular.$modal,
 			C.Angular.$state,
 			C.Angular.$timeout,
 			C.Services.Pit
@@ -19,6 +20,7 @@ module Peach {
 			private $rootScope: ng.IRootScopeService,
 			private $q: ng.IQService,
 			private $http: ng.IHttpService,
+			private $modal: ng.ui.bootstrap.IModalService,
 			private $state: ng.ui.IStateService,
 			private $timeout: ng.ITimeoutService
 		) {
@@ -143,13 +145,28 @@ module Peach {
 		}
 
 		public Start(job: IJobRequest): ng.IPromise<IJob> {
-			var promise = this.$http.post(C.Api.Jobs, job)
-				.error(reason => {
-					// 404 = Pit not found
-					// 403 = Job already running
+			var promise = this.$http.post(C.Api.Jobs, job);
+			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
+				var options: IAlertOptions = {
+					Title: 'Error Starting Job',
+					Body: 'Peach was unable to start a new job.',
+				};
+
+				// 404 = Pit not found
+				// 403 = Job already running
+
+				if (reason.status === 403) {
+					options.Body += "\n\nPlease ensure another job is not running and try again.";
+				} else if (reason.status === 404) {
+					options.Body += '\n\nPlease ensure the specified pit exists and try again.';
+				}
+				else {
 					console.log('JobService.StartJob().error>', reason);
-				})
-			;
+					return;
+				}
+
+				Alert(this.$modal, options);
+			});
 			return StripHttpPromise(this.$q, promise);
 		}
 
