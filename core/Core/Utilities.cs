@@ -36,6 +36,7 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
@@ -202,6 +203,8 @@ namespace Peach.Core
 	[Serializable]
 	public class HexString
 	{
+		static readonly Regex reHexWhiteSpace = new Regex(@"[h{},\s\r\n:-]+", RegexOptions.Singleline);
+
 		public byte[] Value { get; private set; }
 
 		private HexString(byte[] value)
@@ -211,8 +214,7 @@ namespace Peach.Core
 
 		public static HexString Parse(string s)
 		{
-
-			s = s.Replace(" ", "");
+			s = reHexWhiteSpace.Replace(s, "");
 			if (s.Length % 2 == 0)
 			{
 				var array = ToArray(s);

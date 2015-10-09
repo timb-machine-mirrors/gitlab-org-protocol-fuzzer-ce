@@ -780,6 +780,12 @@ namespace PitTester
 					var args = new Dictionary<string, object>();
 					var defs = PitParser.parseDefines(fileName + ".config");
 					defs.Insert(0, new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
+
+					// Some defines are expected to be empty if they are required to be
+					// set by the user.  The pit will not parse w/o them being set however
+					// so inject parsable defaults in this case
+					defs = defs.Select(PopulateRequiredDefine).ToList();
+
 					defs = PitDefines.Evaluate(defs);
 					args[PitParser.DEFINED_VALUES] = defs;
 					new GodelPitParser().asParser(args, fileName);
@@ -792,6 +798,30 @@ namespace PitTester
 
 			if (errors.Length > 0)
 				throw new ApplicationException(errors.ToString());
+		}
+
+		private static KeyValuePair<string, string> PopulateRequiredDefine(KeyValuePair<string, string> item)
+		{
+			if (!string.IsNullOrEmpty(item.Value))
+				return item;
+
+			switch (item.Key)
+			{
+				case "SourceMAC":
+				case "TargetMAC":
+					return new KeyValuePair<string,string>(item.Key, "00:00:00:00:00:00");
+				case "SourceIPv4":
+				case "TargetIPv4":
+					return new KeyValuePair<string, string>(item.Key, "0.0.0.0");
+				case "SourceIPv6":
+				case "TargetIPv6":
+					return new KeyValuePair<string, string>(item.Key, "::1");
+				case "SourcePort":
+				case "TargetPort":
+					return new KeyValuePair<string, string>(item.Key, "0");
+			}
+
+			return item;
 		}
 
 		private static bool ShouldSkipRule(XPathNodeIterator it, string rule)
