@@ -39,8 +39,6 @@ namespace PitTester
 			{ "Null", new[] { "MaxOutputSize" }}
 		};
 
-		public static event Engine.IterationStartingEventHandler IterationStarting;
-
 		public static void ExtractPack(string pack, string dir, int logLevel)
 		{
 			using (var zip = new ZipFile(pack))
@@ -77,8 +75,15 @@ namespace PitTester
 
 		public static void OnIterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
 		{
-			if (IterationStarting != null)
-				IterationStarting(context, currentIteration, totalIterations);
+			if (context.config.singleIteration)
+				return;
+
+			if (context.controlRecordingIteration)
+				Console.Write('r');
+			else if (context.controlIteration)
+				Console.Write('c');
+			else if ((currentIteration % 10) == 0)
+				Console.Write(".");
 		}
 
 		public static void TestPit(string libraryPath, string pitFile, bool singleIteration, uint? seed, bool keepGoing, uint stop = 500)
