@@ -196,7 +196,11 @@ namespace Peach.Core.Dom
 
 				while (true)
 				{
-					var currentAction = context.test.strategy.NextAction(this, lastAction, NextAction());
+					// Action that is performed w/o mutation
+					var realCurrentAction = NextAction();
+
+					// Action to perform with mutation
+					var currentAction = context.test.strategy.NextAction(this, lastAction, realCurrentAction);
 					if (currentAction == null)
 						break;
 
@@ -204,7 +208,8 @@ namespace Peach.Core.Dom
 
 					lastAction = currentAction;
 
-					if (currentAction == NextAction())
+					// Only increment if we are not mutated
+					if (realCurrentAction == currentAction)
 						MoveToNextAction();
 				}
 
