@@ -70,7 +70,13 @@ module Peach {
 					this.onPoll(job);
 				})
 				.catch((response: ng.IHttpPromiseCallbackArg<IError>) => {
-					this.setFailure(response.data.errorMessage);
+					if (response.status === 403) {
+						this.setFailure('Peach was unable to start the test. Please make sure another there are no other running tests or jobs and try again.');
+					} else if (response.status === 404) {
+						this.setFailure('Peach was unable to start the test. Please make sure the pit exists and try again.');
+					} else {
+						this.setFailure(response.data.errorMessage);
+					}
 					this.pendingResult.reject();
 				})
 			;
@@ -111,6 +117,7 @@ module Peach {
 		}
 
 		private setFailure(reason): void {
+			this.isPending = false;
 			this.testResult.status = TestStatus.Fail;
 
 			var event: ITestEvent = {
