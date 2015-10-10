@@ -12,7 +12,6 @@ namespace Peach.Pro.Core
 	public static class License
 	{
 		static readonly string EulaConfig = "eulaAccepted";
-		static readonly StringBuilder eulaErrors = new StringBuilder();
 		static bool? eulaAccepted;
 		static bool valid;
 		static readonly object mutex = new object();
@@ -37,9 +36,12 @@ namespace Peach.Pro.Core
 			Verify();
 		}
 
-		public static string ErrorText { get { return eulaErrors.ToString(); } }
+		public static string ErrorText { get; private set; }
 		public static Feature Version { get; private set; }
 		public static DateTime Expiration { get; private set; }
+		public static bool IsMissing { get; private set; }
+		public static bool IsExpired { get; private set; }
+		public static bool IsInvalid { get; private set; }
 
 		public static bool IsValid
 		{
@@ -135,7 +137,7 @@ namespace Peach.Pro.Core
 			return ret;
 		}
 
-		static LicFile Read()
+		static LicFile Read(out string licenseFile)
 		{
 			// Try several different filenames
 			// this reduces the number of support calls.
@@ -162,7 +164,10 @@ namespace Peach.Pro.Core
 				var localLic = Read(local);
 
 				if (localLic.Exception == null)
+				{
+					licenseFile = local;
 					return localLic;
+				}
 
 				// Try common application data second
 				// Windows - C:\ProgramData\Peach\Peach.license
@@ -171,7 +176,10 @@ namespace Peach.Pro.Core
 				var globalLic = Read(global);
 
 				if (globalLic.Exception == null)
+				{
+					licenseFile = global;
 					return globalLic;
+				}
 
 				// Rethrow local exception since that is technically the first error
 				var inner = localLic.Exception;
@@ -193,13 +201,20 @@ namespace Peach.Pro.Core
 		{
 			Version = Feature.Unknown;
 			Expiration = DateTime.MinValue;
+			IsInvalid = false;
+			IsExpired = false;
+			IsMissing = true;
+			ErrorText = string.Empty;
 
-			eulaErrors.Clear();
+			string licenseFile = null;
 
 			try
 			{
 				const string publicKey = "MIIBKjCB4wYHKoZIzj0CATCB1wIBATAsBgcqhkjOPQEBAiEA/////wAAAAEAAAAAAAAAAAAAAAD///////////////8wWwQg/////wAAAAEAAAAAAAAAAAAAAAD///////////////wEIFrGNdiqOpPns+u9VXaYhrxlHQawzFOw9jvOPD4n0mBLAxUAxJ02CIbnBJNqZnjhE50mt4GffpAEIQNrF9Hy4SxCR/i85uVjpEDydwN9gS3rM6D0oTlF2JjClgIhAP////8AAAAA//////////+85vqtpxeehPO5ysL8YyVRAgEBA0IABBXgmINzW2CILco6ktkgF2gITUHUoQbu3r9HJSqsBuSGHHrkZ2HWgwZlmkUjTSWrUdZXeTMzhiM3AhlF2ldHvNI=";
-				var xml = Read();
+				var xml = Read(out licenseFile);
+
+				IsMissing = false;
+
 				var license = Portable.Licensing.License.Load(xml.Contents);
 
 				var failures = license.Validate()
@@ -215,21 +230,9 @@ namespace Peach.Pro.Core
 
 				if (failures.OfType<LicenseExpiredValidationFailure>().Any())
 				{
-					eulaErrors.AppendFormat("License '{0}' has expired!", xml.FileName);
-					eulaErrors.AppendLine();
+					IsExpired = true;
 				}
-				else if (failures.Any())
-				{
-					eulaErrors.AppendFormat("License '{0}' failed to verify.", xml.FileName);
-					eulaErrors.AppendLine();
-
-					foreach (var failure in failures)
-					{
-						eulaErrors.AppendFormat("{0}  {1}", failure.Message, failure.HowToResolve);
-						eulaErrors.AppendLine();
-					}
-				}
-				else
+				else if (!failures.Any())
 				{
 					var ver = Enum.GetNames(typeof(Feature)).FirstOrDefault(n => license.ProductFeatures.Contains(n));
 					if (string.IsNullOrEmpty(ver))
@@ -238,23 +241,55 @@ namespace Peach.Pro.Core
 					Version = (Feature)Enum.Parse(typeof(Feature), ver);
 
 					if (Version != Feature.Unknown)
-					{
-						eulaErrors.Clear();
 						return true;
-					}
 
-					eulaErrors.AppendFormat("License '{0}' does not contain any supported features.", xml.FileName);
-					eulaErrors.AppendLine();
+					IsInvalid = true;
+				}
+				else
+				{
+					IsInvalid = true;
 				}
 			}
 			catch (Exception ex)
 			{
-				eulaErrors.AppendLine("License verification failed.  ");
-				eulaErrors.AppendLine(ex.Message);
+				if (!IsMissing)
+				{
+					IsInvalid = true;
+					System.Diagnostics.Debug.Assert(licenseFile != null);
+					var errorLog = Utilities.GetAppResourcePath("Peach.error.txt");
+
+					try
+					{
+						File.WriteAllText(errorLog, ex.ToString());
+					}
+					catch
+					{
+						// ignored
+					}
+
+					ErrorText = "The currently installed license is invalid.\nPlease contact Peach Support at supper@peachfuzzer.com to resolve this issue.\nPlease attach a copy of the current license \"{0}\" and the Peach error log \"{1}\" with your support request.".Fmt(licenseFile, errorLog);
+					return false;
+				}
 			}
 
-			eulaErrors.AppendLine();
-			eulaErrors.AppendLine("Please contact support@peachfuzzer.com for further assistance.");
+			if (IsMissing)
+			{
+				System.Diagnostics.Debug.Assert(!IsInvalid);
+				licenseFile = Utilities.GetAppResourcePath("Peach.license");
+				ErrorText = "Peach was unable to locate your license file.\nPlease install your license to \"{0}\" and try again.\nIf the problem persists please contact Peach Support at support@peachfuzzer.com for help in resolving this issue.".Fmt(licenseFile);
+			}
+			else if (IsExpired)
+			{
+				System.Diagnostics.Debug.Assert(!IsInvalid);
+				System.Diagnostics.Debug.Assert(licenseFile != null);
+				ErrorText = "Your license has expired.\nPlease contact the Peach Sales team at sales@peachfuzzer.com to renew your license.";
+			}
+			else
+			{
+				System.Diagnostics.Debug.Assert(IsInvalid);
+				System.Diagnostics.Debug.Assert(licenseFile != null);
+				ErrorText = "The currently installed license is invalid.\nPlease contact Peach Support at supper@peachfuzzer.com to resolve this issue.\nPlease attach a copy of the current license \"{0}\" with your support request.".Fmt(licenseFile);
+			}
 
 			return false;
 		}
