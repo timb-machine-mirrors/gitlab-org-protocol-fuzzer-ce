@@ -364,7 +364,7 @@ namespace PitTester
 				}
 			});
 
-			Assert.That(ex.Message, Is.StringStarting("Encountered an unhandled exception on iteration 1"));
+			Assert.That(ex.Message, Is.StringStarting("One or more errors occurred."));
 		}
 
 		[Test]
