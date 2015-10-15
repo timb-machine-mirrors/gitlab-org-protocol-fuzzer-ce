@@ -3,6 +3,10 @@
 
 # Native agent make file. Assumes Poco has already been build in sub folder poco.
 
+# NOTE: You may need to update the -Lpoco/lib/Linux/i686 path when building poco
+#       on different architectures.  Please check your poco build to identify the
+#       correct path to use.
+
 all: NativeAgent
 
 clean:
