@@ -56,7 +56,7 @@ module Peach {
 		}
 	}
 
-	export var IntegerDirective: ng.IDirective = {
+	export var IntegerDirective: IDirective = {
 		ComponentID: C.Directives.Integer,
 		restrict: 'A',
 		require: C.Angular.ngModel,
@@ -73,7 +73,7 @@ module Peach {
 		}
 	}
 
-	export var HexDirective: ng.IDirective = {
+	export var HexDirective: IDirective = {
 		ComponentID: C.Directives.HexString,
 		restrict: 'A',
 		require: C.Angular.ngModel,
