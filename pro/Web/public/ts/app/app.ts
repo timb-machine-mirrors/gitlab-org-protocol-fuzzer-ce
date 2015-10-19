@@ -1,5 +1,11 @@
 ﻿/// <reference path="reference.ts" />
 
+declare module angular.ui {
+	interface IState {
+		ncyBreadcrumb?: any;
+	}
+}
+
 module Peach {
 	"use strict";
 
@@ -51,7 +57,7 @@ module Peach {
 			return () => {
 				window.scrollTo(0, 0);
 			};
-		})
+		});
 	});
 
 	p.config([
