@@ -39,8 +39,6 @@ namespace PitTester
 			{ "Null", new[] { "MaxOutputSize" }}
 		};
 
-		public static event Engine.IterationStartingEventHandler IterationStarting;
-
 		public static void ExtractPack(string pack, string dir, int logLevel)
 		{
 			using (var zip = new ZipFile(pack))
@@ -77,8 +75,15 @@ namespace PitTester
 
 		public static void OnIterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
 		{
-			if (IterationStarting != null)
-				IterationStarting(context, currentIteration, totalIterations);
+			if (context.config.singleIteration)
+				return;
+
+			if (context.controlRecordingIteration)
+				Console.Write('r');
+			else if (context.controlIteration)
+				Console.Write('c');
+			else if ((currentIteration % 10) == 0)
+				Console.Write(".");
 		}
 
 		public static void TestPit(string libraryPath, string pitFile, bool singleIteration, uint? seed, bool keepGoing, uint stop = 500)
@@ -370,12 +375,7 @@ namespace PitTester
 			if (File.Exists(pitTest))
 				testData = TestData.Parse(pitTest);
 
-			var defs = PitParser.parseDefines(fileName + ".config");
-			if (defs.Any(k => k.Key == "PitLibraryPath"))
-			{
-				defs.Remove(defs.First(k => k.Key == "PitLibraryPath"));
-				defs.Add(new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
-			}
+			var defs = LoadDefines(pitLibraryPath, fileName);
 
 			var args = new Dictionary<string, object>();
 			args[PitParser.DEFINED_VALUES] = defs;
@@ -412,6 +412,24 @@ namespace PitTester
 
 			if (sb.Length > 0)
 				throw new PeachException(sb.ToString());
+		}
+
+		private static List<KeyValuePair<string, string>> LoadDefines(string pitLibraryPath, string fileName)
+		{
+			var defs = PitParser.parseDefines(fileName + ".config");
+
+			if (defs.Any(k => k.Key == "PitLibraryPath"))
+				defs.Remove(defs.First(k => k.Key == "PitLibraryPath"));
+
+			// PitLibraryPath MUST be last!
+			defs.Add(new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
+
+			// Some defines are expected to be empty if they are required to be
+			// set by the user.  The pit will not parse w/o them being set however
+			// so inject parsable defaults in this case
+			defs = defs.Select(PopulateRequiredDefine).ToList();
+
+			return defs;
 		}
 
 		private static void VerifyDataSet(
@@ -777,16 +795,8 @@ namespace PitTester
 			{
 				if (isTest)
 				{
+					var defs = LoadDefines(pitLibraryPath, fileName);
 					var args = new Dictionary<string, object>();
-					var defs = PitParser.parseDefines(fileName + ".config");
-					defs.Insert(0, new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
-
-					// Some defines are expected to be empty if they are required to be
-					// set by the user.  The pit will not parse w/o them being set however
-					// so inject parsable defaults in this case
-					defs = defs.Select(PopulateRequiredDefine).ToList();
-
-					defs = PitDefines.Evaluate(defs);
 					args[PitParser.DEFINED_VALUES] = defs;
 					new GodelPitParser().asParser(args, fileName);
 				}

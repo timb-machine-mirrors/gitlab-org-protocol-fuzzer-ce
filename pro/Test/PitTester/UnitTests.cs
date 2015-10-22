@@ -90,6 +90,16 @@ namespace PitTester
 			{
 				Assert.Ignore("No test definition found.");
 			}
+			catch (AggregateException ex)
+			{
+				var sb = new StringBuilder();
+				ex.Handle(e =>
+				{
+					sb.AppendLine(e.Message);
+					return true;
+				});
+				Assert.Fail(sb.ToString());
+			}
 			catch (Exception ex)
 			{
 				Assert.Fail(ex.Message);
@@ -364,7 +374,16 @@ namespace PitTester
 				}
 			});
 
-			Assert.That(ex.Message, Is.StringStarting("Encountered an unhandled exception on iteration 1"));
+			var sb = new StringBuilder();
+			ex.Handle(e =>
+			{
+				sb.AppendLine(e.Message);
+				return true;
+			});
+			var err = sb.ToString();
+
+			Assert.That(err, Is.StringStarting("Encountered an unhandled exception on iteration 1, seed "));
+			Assert.That(err, Is.StringContaining("Missing record in test data"));
 		}
 
 		[Test]

@@ -24,7 +24,8 @@ def configure(conf):
 	pfiles = os.getenv('PROGRAMFILES(X86)', os.getenv('PROGRAMFILES'))
 	wix_path = [
 		os.path.join(pfiles, 'WiX Toolset v3.8', 'bin'),
-		os.path.join(pfiles, 'WiX Toolset v3.9', 'bin')
+		os.path.join(pfiles, 'WiX Toolset v3.9', 'bin'),
+		os.path.join(pfiles, 'WiX Toolset v3.10', 'bin'),
 	]
 	conf.find_program('candle', var='CANDLE', exts='.exe', path_list=wix_path)
 	conf.find_program('light', var='LIGHT', exts='.exe', path_list=wix_path)
