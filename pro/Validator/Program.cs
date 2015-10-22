@@ -29,10 +29,11 @@ namespace PeachValidator
 		{
 			string pit = (args.Length > 0) ? args[0] : null;
 			string sample = (args.Length > 1) ? args[1] : null;
+			string save = (args.Length > 2) ? args[2] : null;
 
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new MainForm() { PitFileName = pit, SampleFileName = sample });
+			Application.Run(new MainForm() { PitFileName = pit, SampleFileName = sample, SaveFileName = save });
 		}
 	}
 }
