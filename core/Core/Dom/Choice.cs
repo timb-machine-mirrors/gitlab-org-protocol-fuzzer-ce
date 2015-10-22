@@ -96,15 +96,20 @@ namespace Peach.Core.Dom
 		/// </summary>
 		Dictionary<string, ChoiceCache> _choiceCache = new Dictionary<string, ChoiceCache>();
 
+		class NoChoiceCacheException : Exception { }
+
 		public IEnumerable<DataElement> EnumerateAllElementsDown(DataElementContainer start)
 		{
 			foreach (var child in start)
 			{
 				if (child is Choice || child is Array)
-					throw new Exception();
+					throw new NoChoiceCacheException();
 
 				if (child is DataElementContainer)
 				{
+					if (child.isDeterministic)
+						throw new NoChoiceCacheException();
+
 					foreach (var cchild in EnumerateAllElementsDown(child as DataElementContainer))
 						yield return cchild;
 				}
@@ -127,6 +132,9 @@ namespace Peach.Core.Dom
 					var cont = elem as DataElementContainer;
 					if (cont != null)
 					{
+						if (cont.isDeterministic)
+							throw new NoChoiceCacheException();
+
 						long offset = 0;
 						foreach (var child in EnumerateAllElementsDown(cont))
 						{
@@ -140,14 +148,14 @@ namespace Peach.Core.Dom
 							else if (child.hasLength)
 								offset += child.lengthAsBits;
 
-							else 
-								throw new Exception("BAIL!");
+							else
+								throw new NoChoiceCacheException();
 						}
 					}
 					else if (elem.isToken)
 						_choiceCache[elem.Name] = new ChoiceCache() { Offset = 0, Token = elem.Value };
 				}
-				catch
+				catch (NoChoiceCacheException)
 				{
 					// we end up here if we run info a choice element
 				}
