@@ -15,7 +15,7 @@ The captured data begins afresh for each iteration. If a fault occurs, the captu
 logged as a pcap file and returned with the fault data. The pcap file is compatible with 
 Wireshark and tcpdump. A sample capture follows:
 
-image::{images}/PacketCapture.PNG["Sample Network Traffic with Packet Captures", scalewidth="75%"]
+image::{images}/PacketCapture.png["Sample Network Traffic with Packet Captures", scalewidth="75%"]
 
 Peach supports multiple _NetworkCapture_ monitors in the same pit, as well as simple and 
 compound packet filters in a single monitor. A compound packet filter consists of more than 
