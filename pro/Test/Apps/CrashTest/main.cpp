@@ -1,0 +1,132 @@
+#include <cstdlib>
+#include <string>
+#include <iostream>
+#include <fstream>
+
+#ifdef WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#define sleep Sleep
+#define SLEEP_FACTOR 1000
+#else
+#include <unistd.h>
+#define SLEEP_FACTOR 1
+#endif
+
+void cmd_fork();
+
+int main(int /*argc*/, char** argv) {
+	std::string cmd = argv[1];
+	if (cmd == "exit") {
+		return std::atoi(argv[2]);
+	}
+	else if (cmd == "timeout") {
+		sleep(std::atoi(argv[2]) * SLEEP_FACTOR);
+	}
+	else if (cmd == "regex") {
+		std::cout << argv[2] << std::endl;
+		std::cerr << argv[3] << std::endl;
+	}
+	else if (cmd == "when") {
+		std::fstream fout(argv[2]);
+		fout << argv[3];
+		fout.close();
+	}
+	else if (cmd == "fork") {
+#ifdef WIN32
+		printf("Not supported\n");
+#else
+		cmd_fork();
+#endif
+	}
+	return 0;
+}
+
+const char* signal_str(int sig) {
+	switch (sig) {
+		case SIGHUP   : return "SIGHUP";
+		case SIGINT   : return "SIGINT";
+		case SIGQUIT  : return "SIGQUIT";
+		case SIGILL   : return "SIGILL";
+		case SIGTRAP  : return "SIGTRAP";
+		case SIGABRT  : return "SIGABRT";
+		case SIGEMT   : return "SIGEMT";
+		case SIGFPE   : return "SIGFPE";
+		case SIGKILL  : return "SIGKILL";
+		case SIGBUS   : return "SIGBUS";
+		case SIGSEGV  : return "SIGSEGV";
+		case SIGSYS   : return "SIGSYS";
+		case SIGPIPE  : return "SIGPIPE";
+		case SIGALRM  : return "SIGALRM";
+		case SIGTERM  : return "SIGTERM";
+		case SIGURG   : return "SIGURG";
+		case SIGSTOP  : return "SIGSTOP";
+		case SIGTSTP  : return "SIGTSTP";
+		case SIGCONT  : return "SIGCONT";
+		case SIGCHLD  : return "SIGCHLD";
+		case SIGTTIN  : return "SIGTTIN";
+		case SIGTTOU  : return "SIGTTOU";
+		case SIGIO    : return "SIGIO";
+		case SIGXCPU  : return "SIGXCPU";
+		case SIGXFSZ  : return "SIGXFSZ";
+		case SIGVTALRM: return "SIGVTALRM";
+		case SIGPROF  : return "SIGPROF";
+		case SIGWINCH : return "SIGWINCH";
+		case SIGINFO  : return "SIGINFO";
+		case SIGUSR1  : return "SIGUSR1";
+		case SIGUSR2  : return "SIGUSR2";
+		default:        return "<unknown>";
+	}
+}
+
+void signal_handler(int sig) {
+	printf("[%d] signal: (%d) %s\n", getpid(), sig, signal_str(sig));
+	switch (sig) {
+		case SIGTERM:
+			_exit(EXIT_SUCCESS);
+			break;
+	}
+}
+
+void cmd_fork() {
+	signal(SIGINT, signal_handler);
+	signal(SIGKILL, signal_handler);
+	signal(SIGTERM, signal_handler);
+	signal(SIGCHLD, signal_handler);
+
+	printf("Forking...\n");
+	pid_t pid = fork();
+	if (pid == -1) {
+		perror("fork() failed");
+		exit(EXIT_FAILURE);
+	}
+	if (pid == 0) {
+		printf("child: %d\n", getpid());
+		pause();
+		_exit(EXIT_SUCCESS);
+	} else {
+		printf("parent: %d\n", getpid());
+		int status;
+
+		do {
+			printf("waitpid\n");
+			int ret = waitpid(pid, &status, 0);
+			if (ret == -1) {
+				perror("waidpid() failed");
+				exit(EXIT_FAILURE);
+			}
+
+			if (WIFEXITED(status)) {
+				printf("exited, status=%d\n", WEXITSTATUS(status));
+			} else if (WIFSIGNALED(status)) {
+				printf("killed by signal %d\n", WTERMSIG(status));
+			} else if (WIFSTOPPED(status)) {
+				printf("stopped by signal %d\n", WSTOPSIG(status));
+			} else if (WIFCONTINUED(status)) {
+				printf("continued\n");
+			}
+		} while (!WIFEXITED(status) && !WIFSIGNALED(status));
+
+		exit(EXIT_SUCCESS);
+	}
+}
