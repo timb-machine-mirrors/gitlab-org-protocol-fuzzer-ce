@@ -15,6 +15,7 @@ using Peach.Core;
 using Peach.Core.Agent;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 using Monitor = System.Threading.Monitor;
+using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.OS.Windows.Agent.Monitors
 {
@@ -291,7 +292,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				throw new Win32Exception(Marshal.GetLastWin32Error());
 		}
 
-		static void AssignProcessToJobObject(Process p)
+		static void AssignProcessToJobObject(SysProcess p)
 		{
 			// Will return ACCESS_DENIED on Vista/Win7 if PCA gets in the way:
 			// http://stackoverflow.com/questions/3342941/kill-child-process-when-parent-process-is-killed
@@ -304,7 +305,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 		static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		Process _process;
+		SysProcess _process;
 		KernelDebuggerInstance _dbg;
 
 		public string KernelConnectionString
@@ -390,7 +391,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 			using (var readyEvt = new EventWaitHandle(false, EventResetMode.AutoReset, "Local\\" + guid))
 			{
-				_process = new Process()
+				_process = new SysProcess()
 				{
 					StartInfo = new ProcessStartInfo
 					{
