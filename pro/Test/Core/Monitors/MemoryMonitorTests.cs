@@ -7,6 +7,7 @@ using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Test;
+using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.Test.Core.Monitors
 {
@@ -16,7 +17,7 @@ namespace Peach.Pro.Test.Core.Monitors
 	class MemoryMonitorTests
 	{
 		string _file;
-		Process _proc;
+		SysProcess _proc;
 		string _thisPid;
 		string _thisProcessName;
 
@@ -39,7 +40,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			File.Delete(tmp);
 			File.Copy(Utilities.GetAppResourcePath(cs + suffix), _file);
 
-			_proc = new Process
+			_proc = new SysProcess
 			{
 				StartInfo = new ProcessStartInfo
 				{
