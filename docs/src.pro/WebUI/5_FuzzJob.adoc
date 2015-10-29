@@ -4,21 +4,23 @@
 
 With your Pit configured and tested, you're ready to start fuzzing!
 
-In review, you need a configured Pit to run a fuzzing session. 
+==== From the Home Page
 
-. From the Home screen, click the Library menu.
-. From your Pits Library screen, select a configuration. +
+1. From the Home screen, click the Library menu.
+2. From your Pits Library screen, select a configuration. +
 The configurations are listed in the section that follows the Pits.
-
++
 Once selected, the configured Pit displays, as in the following illustration.
-
++
 image::{images}/webui_config_selected.png[]
++
+If needed, you can change configuration settings or set some other parameters at the buttom of the page (typcially used in replaying a fuzzing session). 
 
-If needed, you can to change configuration settings or set some other parameters at the buttom of the page (typcially used in replaying a fuzzing session). Click Start to begin the fuzzing session. The Peach Dashboard displays. 
-
+3. Click Start to begin the fuzzing session. The Peach Dashboard displays. 
++
 image::{images}/webui_dashboard_oct2015.png[]
 
-The dashboard allows you to monitor Peach while your fuzzing job runs and provides launch capability for new fuzzing jobs. The Peach Dashboard provides the following information:
+The dashboard allows you to monitor progress as your fuzzing job runs and from it, you can pause, stop, resume, and replay your fuzzing session. The Peach Dashboard provides the following information:
 
 * The Configuration name, above the colored status bar
 * The time the job started
@@ -29,13 +31,15 @@ The dashboard allows you to monitor Peach while your fuzzing job runs and provid
 * Total number of faults found in this run
 * A summary of the most recent faults. 
 
-NOTES:
+[NOTE]
+=======
+*NOTES*
 
 . The seed ID influences the fuzzing that occurs during a fuzzing job. If you want to replicate a test, the seed value is required to reproduce the exact sequence of values from the random-number generator used in fuzzing.
-. The job control buttons are enabled when using a Pit from the Pit Library. Using the job control buttons on the dashboard allows you to start, stop and pause the job from the web interface.
-. The Job Control STOP button does NOT close Peach. The STOP button only allows you to stop the currently running job. 
-. If you have stopped a job and wish to start a new job using a different pit, you can only use predefined pits from the {peachweb} Dashboard.
-. The fault summary lists the most recent faults. For information about the faults generated during this fuzzing session, click the Metrics menu, then Faults on the left side of the screen . 
+. The STOP button does NOT close Peach. The STOP button only allows you to stop the currently running job. 
+. If you have stopped a job and wish to start a new job using a different pit, choose one of the Pits or Pit configurations in your Pit Library. You'll need to re-visit the Home page, and then choose the appropriate entry from the library.
+. The fault summary lists the most recent faults. For information about the faults generated during this fuzzing session, click the Metrics menu, then Faults on the left side of the screen. 
+=======
 
 <<<
 === Faults
@@ -151,16 +155,9 @@ The raw data is collected in a SQLite database that is stored in the logs folder
 IMPORTANT: Let the fuzzing job complete as well as writes to the database. Once these complete, then you can access the database without the risk of establishing a lock that could interfere with the data storage process.
 
 <<<
-=== Documentation
-
-The Documentation menu option opens the product documentation in HTML format. This documentation is also available on disk in the +docs+ folder, or in PDF format as +Peach_Pro_User_Guide.pdf+.
-
-=== Forums
-
-The Forums menu option opens the {product} support forums. More information is available in the xref:Peach_Forums[Peach Forums] section of the documentation.
-
 === Switching Pits
 
-The active Peach Pit can be changed in the {peachweb} by clicking on the Pit name in the upper right of the window. 
+The active Peach Pit can be changed in the {peachweb} by clicking on the Home icon above the menu along the left edge of the screen. Then, select the Library menu item and pick from the Pits and Configurations in your library. 
 
-If the Pit file was specified on the command line when starting Peach, it cannot be changed. You need to exit the {peachweb}, and re-launch Peach with the new Pit name to start fuzzing with the new Pit.
+image::{images}/webui_metrics_datasets.png[]
+

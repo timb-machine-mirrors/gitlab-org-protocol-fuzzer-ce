@@ -60,19 +60,20 @@ image::{images}/H1_Home.png[]
 
 From Home, you can use click entries and buttons on the left side of the page to work with your licensed Pits, view reports and details of previous fuzzing sessions, and to interact with the Peach forums. 
 
+==== Parts of the User Interface  
 The Web User Interface includesmany useful components, the most prominent are called out in the following illustration:
 
 image::{images}/H1_Annotated.png[]
 
-.1. Page Title 
+===== 1. Page Title 
 The Page title identifies the page you are on and establishes the context of your current task.
 
-.2. Menu Entries
+===== 2. Menu Entries
 Located along the left edge of the browser window, the menu entries identify the functionality immediately at your disposal. Whether you want to explore your Pit Library, investigate a completed fuzzing job, or get some assistance from Help or the Forums, the menu is there for you. 
 
 Additionally, the entries in the menu change according to the work context. For example, when you start working with a Pit, the menu entries change to accommodate editing a Pit definition. Click an entry in the menu to start working on that item.
 
-.3. Menu Icons
+===== 3. Menu Icons
 Located above the menu entries, the menu icons are always present and do not change. The icons are always:
 
 * Home Page
@@ -82,7 +83,7 @@ Located above the menu entries, the menu icons are always present and do not cha
 
 Click a menu icon to move there.
 
-.4. Breadcrumb menu
+===== 4. Breadcrumb menu
 The breadcrumb menu is above the Page Title. The breadcrumb menu identifies your position in the Peach Web UI menus. For example, when you Start the QuickStart wizard with the JPG_Test1 configuration (a sample configuration), the breadcrumb menu displays +
 `Home / Library / JPG_Test1 / Quick Start`.
 
@@ -95,19 +96,19 @@ Portions of the breadcrumb menu are links and marked appropriately by color. For
 
 This section provides a brief glimpse of the main areas of Peach that are accessible from the menu and buttons on the left edge of the page. The tour is quick: about a slide per menu item.
 
-.Library
+===== Library
 
 The _Library_ menu is where you select and configure Pits (fuzzing definitions), and run fuzzing jobs. The page lists the licensed Peach Pits first, then follows with the defined configurations that you create.
 
 image::{images}/H2_Library.png[]
 
-.Jobs
+===== Jobs
 
 The _Jobs_ menu provides access to your fuzzing job results. Click on an entry to see the report status, summary, metrics, and drill down detail of individual findings. Hmmm, no reports are avaialbe yet. It looks like a good time to start fuzzing.
 
 image::{images}/H3_Jobs.png[]
 
-.Help
+===== Help
 
 The _Help_ Menu provides access to the HTML form of the Peach User Guide. This instructional piece provides workflows for installing Peach, recipies for setting up and running various configurations, and descriptions of the Peach monitors for detecting faults (issues), collecting data, and automating the test environment.
 
@@ -117,7 +118,7 @@ NOTE: Additionally, the User's Guide is provided as a pdf file.
 
 image::{images}/H5_PdfHelp.png[]
 
-.Forums
+===== Forums
 
 Peach has user forums that serve as a knowledge base of user questions, and as an active platform to raise questions of current need or interest. Feel free to explore the forums. Note that the professional forum provides a service venue to licensed users of Peach Professional and Peach Enterprise solutions.
 
