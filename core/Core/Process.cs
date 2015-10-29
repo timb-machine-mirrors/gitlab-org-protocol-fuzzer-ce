@@ -104,14 +104,14 @@ namespace Peach.Core
 					Prefix = prefix + " out",
 					Source = process.StandardOutput,
 					Sink = stdout,
-				});
+				}, TaskCreationOptions.LongRunning);
 
 				_logger.Trace("[{0}] Run(): start stderr task".Fmt(process.Id));
 				var stderrTask = Task.Factory.StartNew(LoggerTask, new LoggerArgs { 
 					Prefix = prefix + " err",
 					Source = process.StandardError,
 					Sink = stderr,
-				});
+				}, TaskCreationOptions.LongRunning);
 
 				bool clean = false;
 				try
@@ -210,14 +210,14 @@ namespace Peach.Core
 				Prefix = prefix + " out",
 				Source = _process.StandardOutput,
 				Sink = stdout,
-			});
+			}, TaskCreationOptions.LongRunning);
 
 			_logger.Trace("[{0}] Start(): start stderr task".Fmt(_process.Id));
 			_stderrTask = Task.Factory.StartNew(LoggerTask, new LoggerArgs { 
 				Prefix = prefix + " err",
 				Source = _process.StandardError,
 				Sink = stderr,
-			});
+			}, TaskCreationOptions.LongRunning);
 
 			Thread.Sleep(100);
 			if (!IsRunning)

@@ -136,9 +136,9 @@ namespace Peach.Pro.Core.WebServices
 			{
 				Source = _process.StandardError,
 				Sink = new StreamWriter(logFile),
-			});
+			}, TaskCreationOptions.LongRunning);
 
-			_taskMonitor = Task.Factory.StartNew(MonitorTask, job);
+			_taskMonitor = Task.Factory.StartNew(MonitorTask, job, TaskCreationOptions.LongRunning);
 
 			// wait for prompt
 			_process.StandardOutput.ReadLine();
