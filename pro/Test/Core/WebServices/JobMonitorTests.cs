@@ -17,6 +17,7 @@ using Peach.Pro.Test.Core.Storage;
 using Logger = NLog.Logger;
 using Random = System.Random;
 using TestStatus = Peach.Pro.Core.WebServices.Models.TestStatus;
+using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.Test.Core.WebServices
 {
@@ -421,7 +422,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			// that manages the worker process.
 
 			int pid;
-			using (var p = Process.GetCurrentProcess())
+			using (var p = SysProcess.GetCurrentProcess())
 				pid = p.Id;
 
 			var jobRequest = new JobRequest();

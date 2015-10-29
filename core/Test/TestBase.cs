@@ -51,6 +51,11 @@ namespace Peach.Core.Test
 				config.AddTarget("console", consoleTarget);
 
 				var logLevel = LogLevel.Info;
+
+				var peachDebug = Environment.GetEnvironmentVariable("PEACH_DEBUG");
+				if (peachDebug == "1")
+					logLevel = LogLevel.Debug;
+
 				var peachTrace = Environment.GetEnvironmentVariable("PEACH_TRACE");
 				if (peachTrace == "1")
 					logLevel = LogLevel.Trace;

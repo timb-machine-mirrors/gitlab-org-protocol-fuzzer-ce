@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+
+bld(
+	features = 'c cprogram unix',
+	source = 'main.c',
+	target = 'PeachTrampoline',
+)

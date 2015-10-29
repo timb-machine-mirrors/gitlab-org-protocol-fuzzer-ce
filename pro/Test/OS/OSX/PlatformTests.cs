@@ -4,6 +4,7 @@ using NUnit.Framework;
 using Peach.Core;
 using System.Linq;
 using Peach.Core.Test;
+using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.Test.OS.OSX
 {
@@ -15,7 +16,7 @@ namespace Peach.Pro.Test.OS.OSX
 		[Test]
 		public void TestCpuUsage()
 		{
-			using (var p = Process.GetProcessById(1))
+			using (var p = SysProcess.GetProcessById(1))
 			{
 				var pi = ProcessInfo.Instance.Snapshot(p);
 				Assert.NotNull(pi);
@@ -25,7 +26,7 @@ namespace Peach.Pro.Test.OS.OSX
 				Assert.Greater(pi.UserProcessorTicks, 0);
 			}
 
-			using (var p = new Process())
+			using (var p = new SysProcess())
 			{
 				var si = new ProcessStartInfo { FileName = "/bin/ls" };
 				p.StartInfo = si;
@@ -44,7 +45,7 @@ namespace Peach.Pro.Test.OS.OSX
 			string procName;
 			int procId;
 
-			using (var self = Process.GetCurrentProcess())
+			using (var self = SysProcess.GetCurrentProcess())
 			{
 				// Use process snapshot so we are sure to get the correct name on osx
 				procName = ProcessInfo.Instance.Snapshot(self).ProcessName;

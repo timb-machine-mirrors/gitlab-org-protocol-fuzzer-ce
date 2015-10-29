@@ -28,7 +28,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Threading;
@@ -76,174 +75,23 @@ namespace Peach.Pro.Core.Agent.Monitors
 		public ProcessMonitor(string name)
 			: base(name)
 		{
-		}
-
-		private static void _LogOutput(string prefix, Func<StreamReader> stream)
-		{
-			var t = new Thread(new ThreadStart(delegate
-			{
-				try
-				{
-					using (var sr = stream())
-					{
-						while (!sr.EndOfStream)
-						{
-							var line = sr.ReadLine();
-
-							if (!string.IsNullOrEmpty(line) && Logger.IsDebugEnabled)
-								Logger.Debug("{0}: {1}", prefix, line);
-						}
-					}
-				}
-				// ReSharper disable once EmptyGeneralCatchClause
-				catch
-				{
-				}
-			}));
-
-			t.Start();
+			_process = PlatformFactory<Process>.CreateInstance(Logger);
 		}
 
 		void _Start()
 		{
-			if (_process == null || _process.HasExited)
-			{
-				if (_process != null)
-					_process.Close();
-
-				_process = new Process
-				{
-					StartInfo =
-					{
-						FileName = Executable,
-						UseShellExecute = false,
-						RedirectStandardError = true,
-						RedirectStandardOutput = true
-					}
-				};
-
-				if (!string.IsNullOrEmpty(Arguments))
-					_process.StartInfo.Arguments = Arguments;
-
-				Logger.Debug("_Start(): Starting process");
-
-				try
-				{
-					_process.Start();
-
-					var prefix = "{0} (0x{1:X})".Fmt(Path.GetFileName(Executable), _process.Id);
-
-					_LogOutput(prefix, () => _process.StandardError);
-					_LogOutput(prefix, () => _process.StandardOutput);
-
-					OnInternalEvent(EventArgs.Empty);
-				}
-				catch (Exception ex)
-				{
-					_process = null;
-					throw new PeachException("Could not start process '" + Executable + "'.  " + ex.Message + ".", ex);
-				}
-			}
-			else
-			{
-				Logger.Trace("_Start(): Process already running, ignore");
-			}
-		}
-
-		void _Stop()
-		{
-			Logger.Trace("_Stop()");
-
-			for (var i = 0; i < 100 && _IsRunning(); i++)
-			{
-				Logger.Debug("_Stop(): Killing process");
-
-				Debug.Assert(_process != null);
-
-				try
-				{
-					_process.Kill();
-					_process.WaitForExit();
-					_process.Close();
-					_process = null;
-				}
-				catch (Exception ex)
-				{
-					Logger.Error("_Stop(): {0}", ex.Message);
-				}
-			}
-
-			if (_process != null)
-			{
-				Logger.Debug("_Stop(): Closing process handle");
-				_process.Close();
-				_process = null;
-			}
-			else
-			{
-				Logger.Trace("_Stop(): _process == null, done!");
-			}
-		}
-
-		void _WaitForExit(bool useCpuKill)
-		{
-			if (!_IsRunning())
+			if (_process.IsRunning)
 				return;
-
-			if (useCpuKill && !NoCpuKill)
+			
+			try
 			{
-				const int pollInterval = 200;
-				ulong lastTime = 0;
-
-				try
-				{
-					int i;
-
-					for (i = 0; i < WaitForExitTimeout; i += pollInterval)
-					{
-						var pi = ProcessInfo.Instance.Snapshot(_process);
-
-						Logger.Trace("CpuKill: OldTicks={0} NewTicks={1}", lastTime, pi.TotalProcessorTicks);
-
-						if (i != 0 && lastTime == pi.TotalProcessorTicks)
-						{
-							Logger.Debug("Cpu is idle, stopping process.");
-							break;
-						}
-
-						lastTime = pi.TotalProcessorTicks;
-						Thread.Sleep(pollInterval);
-					}
-
-					if (i >= WaitForExitTimeout)
-						Logger.Debug("Timed out waiting for cpu idle, stopping process.");
-				}
-				catch (Exception ex)
-				{
-					Logger.Debug("Error querying cpu time: {0}", ex.Message);
-				}
-
-				_Stop();
+				_process.Start(Executable, Arguments, null, null);
+				OnInternalEvent(EventArgs.Empty);
 			}
-			else
+			catch (Exception ex)
 			{
-				Logger.Debug("WaitForExit({0})", WaitForExitTimeout == -1
-					? "INFINITE" : WaitForExitTimeout.ToString(CultureInfo.InvariantCulture));
-
-				if (!_process.WaitForExit(WaitForExitTimeout))
-				{
-					if (!useCpuKill)
-					{
-						Logger.Debug("FAULT, WaitForExit ran out of time!");
-						_data = MakeFault("FailedToExit", "Process '{0}' did not exit in {1}ms.".Fmt(Executable, WaitForExitTimeout));
-					}
-				}
+				throw new PeachException("Could not start process '{0}'. {1}.".Fmt(Executable, ex.Message), ex);
 			}
-		}
-
-		bool _IsRunning()
-		{
-			return _process != null && !_process.HasExited;
 		}
 
 		MonitorData MakeFault(string reason, string title)
@@ -266,7 +114,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			_messageExit = false;
 
 			if ((RestartAfterFault && args.LastWasFault) || RestartOnEachTest)
-				_Stop();
+				_process.Stop();
 
 			if (StartOnCall == null)
 				_Start();
@@ -290,24 +138,25 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		public override void SessionFinished()
 		{
-			_Stop();
+			_process.Stop();
 		}
 
 		public override void IterationFinished()
 		{
-			if (!_messageExit && FaultOnEarlyExit && !_IsRunning())
+			if (!_messageExit && FaultOnEarlyExit && !_process.IsRunning)
 			{
 				_data = MakeFault("ExitedEarly", "Process '{0}' exited early.".Fmt(Executable));
-				_Stop();
+				_process.Stop();
 			}
 			else  if (StartOnCall != null)
 			{
-				_WaitForExit(true);
-				_Stop();
+				Logger.Debug("IterationFinished");
+				_process.WaitForExit(WaitForExitTimeout, !NoCpuKill);
+				_process.Stop();
 			}
 			else if (RestartOnEachTest)
 			{
-				_Stop();
+				_process.Stop();
 			}
 		}
 
@@ -315,14 +164,15 @@ namespace Peach.Pro.Core.Agent.Monitors
 		{
 			if (msg == StartOnCall)
 			{
-				_Stop();
+				_process.Stop();
 				_Start();
 			}
 			else if (msg == WaitForExitOnCall)
 			{
 				_messageExit = true; 
-				_WaitForExit(false);
-				_Stop();
+				if (!_process.WaitForExit(WaitForExitTimeout, false))
+					_data = MakeFault("FailedToExit", "Process '{0}' did not exit in {1}ms.".Fmt(Executable, WaitForExitTimeout));
+				_process.Stop();
 			}
 		}
 	}

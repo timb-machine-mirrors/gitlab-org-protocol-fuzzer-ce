@@ -34,6 +34,7 @@ using Peach.Core;
 using Peach.Core.Agent;
 using Monitor = Peach.Core.Agent.Monitor2;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
+using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.OS.Windows.Agent.Monitors
 {
@@ -102,7 +103,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 		private void Run(string args)
 		{
-			using (var p = new Process())
+			using (var p = new SysProcess())
 			{
 				p.StartInfo = new ProcessStartInfo
 				{

@@ -5,6 +5,7 @@ using System.IO;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
+using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.Test.Core.Monitors
 {
@@ -37,7 +38,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			var exe = temp1.Item1;
 			var procName = temp1.Item2;
 
-			Process p = null;
+			SysProcess p = null;
 
 			try
 			{
@@ -93,8 +94,8 @@ namespace Peach.Pro.Test.Core.Monitors
 			var exe2 = temp2.Item1;
 			var procName2 = temp2.Item2;
 
-			Process p1 = null;
-			Process p2 = null;
+			SysProcess p1 = null;
+			SysProcess p2 = null;
 
 			try
 			{
@@ -158,7 +159,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			var exe = temp.Item1;
 			var procName = temp.Item2;
 
-			Process p = null;
+			SysProcess p = null;
 
 			try
 			{
@@ -207,9 +208,9 @@ namespace Peach.Pro.Test.Core.Monitors
 			return new Tuple<string, string>(fileName, procName);
 		}
 
-		static Process RunProcess(string exe, string args)
+		static SysProcess RunProcess(string exe, string args)
 		{
-			var p = new Process
+			var p = new SysProcess
 			{
 				StartInfo = new ProcessStartInfo
 				{
@@ -225,7 +226,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			return p;
 		}
 
-		static void KillProcess(Process p)
+		static void KillProcess(SysProcess p)
 		{
 			if (p == null)
 				return;
