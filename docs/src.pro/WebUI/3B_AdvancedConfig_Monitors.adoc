@@ -1,0 +1,272 @@
+<<<
+:images: ../images
+
+///////
+// [[Program_PeachWebAdvanceConfig]]
+//
+// Advanced Configuration UI
+// 
+// Part A - Variables -- (previous document)
+// Part B - Monitoring -- This document
+//
+///////
+
+==== Monitoring
+The Monitoring data entry screen defines one or more Agents and one or more Monitors for the Pit. 
+
+Agents are host processes for monitors and publishers. Local agents can reside on the same machine as Peach, and can control the test environment through monitors and publishers. Remote agents reside on the test target, and can provide remote monitors and publishers. 
+
+Monitors are components that perform one or more of the following functions: detect faults (issues), collect data associated with faults, and help manage the fuzzing job to reduce the level of human interaction througout the job.
+
+.Start Configuring Agents and Monitors
+
+To begin from the Home Page, 
+
+1. Click the Library menu entry.
+2. From the Pit Library, select a Pit or an existing configuration.
+
+* Selecting a configuration means that you revising the settings of an existing configuration. Peach displays the start screen for the configuration.
+* Selecting a Pit means that you are creating a new configuration. You will need to 
+name the configuration, optionally provide a description, and click "Submit" to reach the start screen for the configuration.
++
+image::{images}/NP2_Config_Start.png[]
+
+3. Click the "Configure Monitoring" button to define or edit agents, monitors, and the data values associated with them. The Monitoring data entry screen displays and is initially empty. 
++
+image::{images}/AC08_Monitors_Page_Empty.png["Initial Monitor/Agent definitions", scalewidth="70%"]
+
+The workflow for this data entry screen has you declare an Agent. Then, you can branch out and do the following in any order:
+
+* Declare one or more monitors for the agent
+* Fill in details for a monitor
+* Switch focus from one monitor to another
+* Declare additional agents, as needed
+* Switch focus from one agent to another
+
+In this instance, we're going to complete the agent, then add a monitor and fill in the monitor settings.
+
+.Specifying an Agent
+
+Here are the steps to add an agent to a configuration:
+
+1. Click the "Add Agent" button. Peach adds a new agent to the Monitors page, as in the following illustration.
++
+image::{images}/AC09_Mon_Pg_NewAgent.png["New Agent", scalewidth="70%"]
++
+An agent has a name and location. The location can be local or remote. 
+
+** Local agents are in-line processes that are part of the Peach platform.
+** Remote agents are separate applications that reside on the same hardware as the test target. Remote agents act as intermediaries with Peach and the test targets, passing test cases to the test target and sending test case results and data to Peach. 
++
+NOTE: If you use a remote agent, you need to specify an IP address for Location field.
+
+2. Give the agent a name, such as `LocalAgent` and click "Save".
++
+Peach saves the Agent information, provides a visual cue with a "Saved successfully." message in a banner near the top of the page.
+
+.Adding a Monitor
+
+1. click the "Add a monitor..." button. +
+Peach displays a list of monitors that you can use in your configuration.
++
+image::{images}/AC10_Mon_Pg_Monitor_DropList.png["Monitor Drop List", scalewidth="70%"]
+
+2. Scroll to the windowsDebugger entry, select it, and click the entry to add it to the local agent. 
++
+image::{images}/AC11_Mon_Pg_Added_WinDbg.png[]
+
+3. Fill in the details of monitor. +
+Configuration information for each monitor is available in the xref:Monitors[Monitors] reference section. A list of monitors appears at the start of the section that links to the individual entries.
++
+image::{images}/AC12_Mon_Windbg_Detail.png[]
+
+.Sample Agent with Multiple Monitors
+The following illustration is of an agent with multiple monitors. Note that you can show or hide the details for a monitor by clicking the arrow to the left of the monitor name. In fact, this is true for agents, too.
+
+image::{images}/AC13_LocAgnt_n_Mtrs.png[]
+
+.Sample Remote Agent
+The following illustration is of a remote agent. The location of the agent is the IP address of the remote machine, and that the address is stored in a custom variable. The agent manages multiple monitors. 
+
+image::{images}/AC14_RemAgnt_n_Mtrs.png[]
+
+
+==== Test
+In the Test section, Peach performs a test on the Pit you selected using the configuration settings you provided for variables, agents, and monitors. The Test section runs a single Pit iteration to verify the Pit runs correctly.
+
+NOTE: The test requires that the target device, service, or application be available for use. 
+
+TIP: This screen issues a warning if the pit is not configured, but lets the user run the test.
+
+image::{images}/Config_Test_checklist.png[]
+
+When the test completes, Peach reports if a failure occurs, and provides any generated log output for review. If a problem does occur, you can identify the issue by reviewing the log output and correct the issue by clicking to the appropriate configuration section in the Dashboard menu area at the left edge of the browser window.
+
+
+<<<
+=== Fuzzing Session
+
+With your Pit configured and tested, you're ready to start fuzzing!
+
+. From the Home screen, click the Library menu.
+. From your Pits Library screen, select a configuration. +
+
+The configurations are listed in the section that follows the Pits.
+
+Once selected, the configured Pit displays, as in the following illustration.
+
+image::{images}/webui_config_selected.png[]
+
+If needed, you can change configuration settings. Also, you can set some of the parameters at 
+the buttom of the page that are typcially used to replay a fuzzing session. 
+
+Click Start to begin the fuzzing session. The Peach Dashboard displays. 
+
+image::{images}/webui_dashboard_oct2015.png[]
+
+The dashboard allows you to monitor Peach while your fuzzing job runs and provides launch capability for new fuzzing jobs. The Peach Dashboard provides the following information:
+
+* The Configuration name, above the colored status bar
+* The time the job started
+* The duration that the job has been running
+* The hourly rate that Peach Pro number is completing fuzzing test cases
+* The seed ID for random number generation, in order to replicate the test
+* Number of test cases completed
+* Total number of faults found in this fuzzing job
+* A summary of the most recent faults
+
+NOTES:
+
+. The seed ID influences the fuzzing that occurs during a fuzzing job. If you want to replicate a test, the seed value is required to reproduce the exact sequence of values from the random-number generator used in fuzzing.
+. The job control buttons are enabled when using a Pit from the Pit Library and allow you to start, pause, and stop the current fuzzing job.
+. The Job Control STOP button does NOT close Peach. The STOP button only allows you to stop the currently running job. 
+. If you have stopped a job and wish to start a new job using a different pit, click the Library icon and select one of your configured Pits.
+. The fault summary lists the most recent faults. For information about the faults generated during this fuzzing session, click the Metrics menu, then Faults on the left side of the screen  
+
+<<<
+=== Faults
+
+While {product} is running, you can view all the faults generated during the session by clicking the Faults menu option on the left.
+
+Faults displays the total number of generated faults. There are two Faults views: the Summary view and the Detail view:
+
+image::{images}/Fault_summary.png[]
+
+For each session, the Faults Summary view lists a summary of information about the fault such as:
+
+* Identified fault iteration count
+* Time and date
+* Monitor that detected the fault
+* Risk (if known)
+* Unique identifiers of the fault (major and minor hashes), if available
+
+Clicking on one of the listed faults from the Summary view opens the Details view for the selected fault.
+
+image::{images}/Fault_detail.png[]
+
+Here's where you can find details about the selected fault. Additional information (such as any files collected during the data collection phase) are located in the disk log folder.
+
+<<<
+=== Metrics
+
+A number of metrics are available for viewing while {product} is running.
+
+TIP: The data grids used on many of the metrics displays support multi-column sorting using the _shift_ key and clicking on the different columns to sort.
+
+==== Bucket Timeline
+
+This metric display shows a timeline with new fault buckets listed, and total number of times the bucket was found during the fuzzing session.
+
+image::{images}/webui_metrics_timeline.png[]
+
+==== Faults Over Time
+
+This metric display shows the count of faults found by hour over the course of the fuzzing run. This is the count of all faults found, not just unique buckets.
+
+image::{images}/webui_metrics_faultsovertime.png[]
+
+==== Mutators
+
+This metric display shows statistics for each mutator by arranging the information into columns:
+
+[horizontal]
+Element Count:: The number of elements this mutator touched with mutated data.
+Iteration Count:: The number of iterations this mutator was used during the fuzzing job.
+Bucket Count:: The number of unique buckets found while this mutator was in use.
+Fault Count:: The number of faults found while this mutator was in use.
+
+image::{images}/webui_metrics_mutators.png[]
+
+==== Elements
+
+This metric display shows statistics for all of the elements in your Pit. 
+
+This display shows several columns of information:
+
+[horizontal]
+State:: The state this element belongs to
+Action:: The action this element belongs to
+Parameter:: The parameter this action belongs to (if any). Parameters are used only with actions of type _call_.
+Element:: The full name of the element and its associated DataModel.
+Mutations:: The number of mutations generated from this element.    
+Buckets:: The number of unique buckets found by sending mutating data to this element.
+Faults:: The number of faults found from the mutated data sent to this element.
+
+image::{images}/webui_metrics_elements.png[]
+
+==== States
+
+This metric display presents statistics that are relevant for pits that have state models with more than two or more states. This display shows the number of times a specific state occurred during the fuzzing session. Seldom-used states might hide issues or indicate a problem. 
+
+For example, not all states always execute. If an early-occurring state is fuzzed, the outcome of the fuzzing could prevent states that are used late in the state flow from occurring. 
+
+NOTE: Over time, the number of occurrences for most states should trend towards equality.  
+
+image::{images}/webui_metrics_states.png[]
+
+==== Data Sets
+
+This metric display shows statistics related to the use of two or more data sets in the fuzzing session. This is useful to determine the origin of unique buckets and also faults in terms of the data sources used in mutating.
+
+This display shows several columns of information:
+
+[horizontal]
+Data Set:: Name of the data set
+Iterations:: Number of fuzzing iterations performed using this data set
+Buckets:: Number of unique buckets found with this data set
+Faults:: Number of faults found with this data set
+
+image::{images}/webui_metrics_datasets.png[]
+
+==== Buckets
+
+This metric display shows the buckets encountered during the fuzzing job. Several columns of information show:
+
+[horizontal]
+Fault bucket:: Identifier of the fault that occurred
+Mutator:: The mutator that generated the fault
+Iteration count:: The number of iterations that used the mutator
+Faults count:: The number of faults that occurred while using the mutator
+
+image::{images}/webui_metrics_buckets.png[]
+
+==== Accessing Raw Metrics Data
+
+The raw data is collected in a SQLite database that is stored in the logs folder. 
+
+IMPORTANT: Let the fuzzing job complete as well as writes to the database. Once these complete, then you can access the database without the risk of establishing a lock that could interfere with the data storage process.
+
+<<<
+=== Documentation
+
+The Documentation menu option opens the product documentation in HTML format. This documentation is also available on disk in the +docs+ folder, or in PDF format as +Peach_Pro_User_Guide.pdf+.
+
+=== Forums
+
+The Forums menu option opens the {product} support forums. More information is available in the xref:Peach_Forums[Peach Forums] section of the documentation.
+
+=== Switching Pits
+
+The active Peach Pit can be changed in the {peachweb} by clicking on the Pit name in the upper right of the window. 
+
+If the Pit file was specified on the command line when starting Peach, it cannot be changed. You need to exit the {peachweb}, and re-launch Peach with the new Pit name to start fuzzing with the new Pit.
