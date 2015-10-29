@@ -2,6 +2,8 @@
 using Peach.Core;
 using System.Runtime.InteropServices;
 using System.ComponentModel;
+using SysProcess = System.Diagnostics.Process;
+using System.Threading;
 
 namespace Peach.Pro.Core
 {
@@ -24,21 +26,30 @@ namespace Peach.Pro.Core
 			return executable + " " + arguments;
 		}
 
-		protected override void Terminate()
+		protected override void Terminate(SysProcess process)
 		{
-			var ret = killpg(_process.Id, SIGTERM);
+			var ret = killpg(process.Id, SIGTERM);
 			if (ret == -1)
-				throw new Win32Exception("killpg() failed"); // reads errno internally
+				throw new Win32Exception("killpg({0}, SIGTERM) failed".Fmt(process.Id)); // reads errno internally
 		}
 
-		protected override void Kill()
+		protected override void Kill(SysProcess process)
 		{
-			var ret = killpg(_process.Id, SIGKILL);
+			var ret = killpg(process.Id, SIGKILL);
 			if (ret == -1)
-				throw new Win32Exception("killpg() failed"); // reads errno internally
+				throw new Win32Exception("killpg({0}, SIGKILL) failed".Fmt(process.Id)); // reads errno internally
+		}
+
+		protected override void WaitForProcessGroup(SysProcess process)
+		{
+			while (getpgid(process.Id) != process.Id)
+				Thread.Sleep(10);
 		}
 
 		[DllImport("libc", SetLastError = true)]
 		private static extern int killpg(int pgrp, int sig);
+
+		[DllImport("libc", SetLastError = true)]
+		private static extern int getpgid(int pid);
 	}
 }
