@@ -91,14 +91,10 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 		public bool RestartAfterFault { get; set; }
 
 		private Process _process;
-		private bool? _detectedFault;
-		// Was a fault detected
-		private bool _faultExitFail;
-		// Failed to exit within WaitForExitTimeout
-		private bool _faultExitEarly;
-		// Process exited early
-		private bool _messageExit;
-		// Process exited due to WaitForExitOnCall
+		private bool? _detectedFault;  // Was a fault detected
+		private bool _faultExitFail;   // Failed to exit within WaitForExitTimeout
+		private bool _faultExitEarly;  // Process exited early
+		private bool _messageExit;     // Process exited due to WaitForExitOnCall
 
 		public CrashWrangler(string name) : base(name)
 		{
@@ -216,8 +212,10 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			}
 			else if (StartOnCall != null)
 			{
-				_process.WaitForExit(WaitForExitTimeout, !NoCpuKill);
-				_Stop();
+				if (!NoCpuKill)
+					_process.WaitForIdle(WaitForExitTimeout);
+				else
+					_process.WaitForExit(WaitForExitTimeout);
 			}
 			else if (RestartOnEachTest)
 			{
@@ -235,12 +233,11 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			else if (msg == WaitForExitOnCall)
 			{
 				_messageExit = true;
-				if (!_process.WaitForExit(WaitForExitTimeout, false))
+				if (!_process.WaitForExit(WaitForExitTimeout))
 				{
 					_detectedFault = true;
 					_faultExitFail = true;
 				}
-				_Stop();
 			}
 		}
 
@@ -297,7 +294,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			while (File.Exists(CwLockFile))
 				Thread.Sleep(250);
 
-			_process.Stop();
+			_process.Stop(WaitForExitTimeout);
 		}
 
 		internal class Summary
