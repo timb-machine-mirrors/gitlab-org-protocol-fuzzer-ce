@@ -1,5 +1,7 @@
 <<<
 :images: ../images
+
+[[Start_Fuzzing]]
 === Fuzzing Session
 
 With your Pit configured and tested, you're ready to start fuzzing!

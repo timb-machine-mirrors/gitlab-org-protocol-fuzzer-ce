@@ -96,7 +96,7 @@ Additionally, once defined, the custom variable is added to the dropdown variabl
 
 image::{images}/AC02_Variable_DropList.png["Peach Variable List", scalewidth="70%"]
 
-.Creating a custom variable
+====== Creating a custom variable
 
 Here are the steps to add a custom variable to Peach:
 
@@ -129,7 +129,7 @@ The new value is now part of the list, and has been saved for future use.
 image::{images}/AC06_Vars_Page_Saved.png["Variable Page Saved", scalewidth="70%"]
 
 
-.Using a custom variable
+====== Using a custom variable
 
 Using a custom variable consists of typing `\\##`, the variable name, and `##` in the value of another variable. In the following illustration, the "Sample Path" variable refers to the "JPEG Sample Pictures". When parsing the configuration information, Peach inserts the value `C:\Samples\JPEG` for the value of the "Sample Path". 
 
