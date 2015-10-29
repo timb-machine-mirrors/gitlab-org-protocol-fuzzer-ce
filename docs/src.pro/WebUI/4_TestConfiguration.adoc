@@ -1,0 +1,17 @@
+<<<
+:images: ../images
+==== Test
+In the Test section, Peach performs a test on the Pit you selected using the configuration settings you provided for variables and monitors. The Test section runs a single Pit iteration to verify the Pit runs correctly.
+
+NOTE: The test requires that the target device, service, or application be available for use. 
+
+TIP: This screen issues a warning if the pit is not configured, but lets the user run the test.
+
+image::{images}/QS31_Test.png[]
+
+When the test completes, Peach reports if a failure occurs, and provides any generated log output for review. If a problem does occur, you can identify the issue by reviewing the log output and correct the issue by clicking to the appropriate configuration section in the Dashboard menu area at the left edge of the browser window.
+
+If the Pit passes, the test results display beneath the configuration summary and consist of a one-line summary in a green band, and an indicator showing that the Pit passed each checkpoint of the test.
+
+image::{images}/QS33_TestPassLogs.png[]
+
