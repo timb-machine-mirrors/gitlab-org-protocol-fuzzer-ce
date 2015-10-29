@@ -164,7 +164,7 @@ namespace Peach.Pro.Core.Runtime
 
 			var runner = new JobRunner(job, _pitLibraryPath, pitFile);
 			var evtReady = new AutoResetEvent(false);
-			var engineTask = Task.Factory.StartNew(() => runner.Run(evtReady));
+			var engineTask = Task.Factory.StartNew(() => runner.Run(evtReady), TaskCreationOptions.LongRunning);
 			if (!evtReady.WaitOne(1000))
 				throw new PeachException("Timeout waiting for job to start");
 			Loop(runner, engineTask);
@@ -177,7 +177,7 @@ namespace Peach.Pro.Core.Runtime
 			while (true)
 			{
 				Console.Write("> ");
-				var readerTask = Task.Factory.StartNew<string>(Console.ReadLine);
+				var readerTask = Task.Factory.StartNew<string>(Console.ReadLine, TaskCreationOptions.LongRunning);
 				var index = Task.WaitAny(engineTask, readerTask);
 				if (index == 0)
 				{
