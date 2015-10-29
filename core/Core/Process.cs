@@ -11,6 +11,8 @@ namespace Peach.Core
 	{
 		protected NLog.Logger _logger;
 		protected SysProcess _process;
+		protected int _pid = -1;
+		protected bool _inferior = false;
 		private Task _stdoutTask;
 		private Task _stderrTask;
 
@@ -30,6 +32,16 @@ namespace Peach.Core
 		public bool IsRunning
 		{ 
 			get { return _process != null && !_process.HasExited; } 
+		}
+
+		public void Attach(int pid)
+		{
+			if (IsRunning)
+				throw new Exception("Process already started");
+
+			_process = SysProcess.GetProcessById(pid);
+			_pid = pid;
+			_inferior = true;
 		}
 
 		public void Start(
@@ -56,7 +68,7 @@ namespace Peach.Core
 			_logger.Debug("Start(): start process");
 			_process = SysProcess.Start(si);
 
-			var prefix = "{0} ({1})".Fmt(Path.GetFileName(executable), _process.Id);
+			var prefix = "[{0}] {1}".Fmt(_process.Id, Path.GetFileName(executable));
 
 			// Close stdin so all reads return zero
 			_process.StandardInput.Close();
@@ -84,62 +96,120 @@ namespace Peach.Core
 				if (_process.ExitCode != 0)
 					throw new Exception("Process failed to start. ExitCode: {0}".Fmt(_process.ExitCode));
 			}
+
+			_pid = _process.Id;
+			_inferior = false;
 		}
 
-		public void Stop()
+		public void Stop(int timeout)
+		{
+			if (IsRunning)
+			{
+				_logger.Debug("[{0}] Stop(): SIGTERM", _pid);
+				try
+				{
+					Terminate();
+				}
+				catch (Exception ex)
+				{
+					_logger.Warn("[{0}] Stop(): Exception sending SIGTERM: {1}", _pid, ex.InnerException.Message);
+				}
+			}
+
+			if (_stdoutTask != null)
+			{
+				_logger.Debug("[{0}] Stop(): Wait for stdout/stderr to finish", _pid);
+				bool clean = false;
+				try
+				{
+					clean = Task.WaitAll(new Task[] { _stdoutTask, _stderrTask }, timeout);
+				}
+				catch (AggregateException ex)
+				{
+					_logger.Warn("[{0}] Stop(): Exception in stdout/stderr task: {1}", _pid, ex.InnerException.Message);
+				}
+
+				if (!clean)
+				{
+					_logger.Debug("[{0}] Stop(): SIGKILL", _pid);
+					try
+					{
+						Kill();
+					}
+					catch (Exception ex)
+					{
+						_logger.Warn("[{0}] Stop(): Exception sending SIGKILL: {1}", _pid, ex.InnerException.Message);
+					}
+				}
+
+				_stdoutTask = null;
+				_stderrTask = null;
+			}
+
+			if (_process != null)
+			{
+				_logger.Debug("[{0}] Stop(): WaitForExit({1})", _pid, timeout);
+				_process.WaitForExit(timeout);
+			}
+
+			Close();
+		}
+
+		public void Close()
+		{
+			if (_process != null)
+			{
+				_logger.Debug("[{0}] Close(): Closing process", _pid);
+				_process.Close();
+				_process = null;
+				_logger.Debug("[{0}] Close(): Complete", _pid);
+			}
+
+			_pid = -1;
+		}
+
+		public void Shutdown(bool force)
 		{
 			if (!IsRunning)
 				return;
 
-			_logger.Debug("Stop(): SIGTERM", _process.Id);
-
-			Terminate();
-
-			_logger.Debug("Stop(): WaitForExit(1000) after SIGTERM");
-			if (!_process.WaitForExit(1000))
-			{
-				_logger.Debug("Stop(): SIGKILL", _process.Id);
-
+			if (force)
 				Kill();
-
-				_logger.Debug("Stop(): WaitForExit(1000) after SIGKILL");
-				if (!_process.WaitForExit(1000))
-					_logger.Warn("Stop(): WaitForExit timeout");
-			}
-
-			_logger.Debug("Stop(): Closing process");
-			_process.Close();
-			_process = null;
-
-			_logger.Debug("Stop(): Wait for stdout to finish");
-			try
-			{
-				_stdoutTask.Wait(5000);
-			}
-			catch (AggregateException ex)
-			{
-				_logger.Warn("Exception in stdout task: {0}", ex.InnerException.Message);
-			}
-
-			_logger.Debug("Stop(): Wait for stderr to finish");
-			try
-			{
-				_stderrTask.Wait(5000);
-			}
-			catch (AggregateException ex)
-			{
-				_logger.Warn("Exception in stderr task: {0}", ex.InnerException.Message);
-			}
-
-			_logger.Debug("Stop(): Complete");
+			else
+				Terminate();
 		}
 
-		public bool WaitForExit(int timeout, bool useCpuKill)
+		public bool WaitForExit(int timeout)
 		{
-			if (!IsRunning)
-				return true;
+			var exited = true;
 
-			if (useCpuKill)
+			if (IsRunning)
+			{
+				_logger.Debug("[{0}] WaitForExit({1})", _pid, timeout);
+				if (_inferior)
+					exited = InferiorWaitForExit(timeout);
+				else
+					exited = _process.WaitForExit(timeout);
+			}
+
+			Stop(timeout);
+
+			return exited;
+		}
+
+		bool InferiorWaitForExit(int timeout)
+		{
+			var sw = System.Diagnostics.Stopwatch.StartNew();
+
+			while (!_process.HasExited && timeout > 0 && sw.ElapsedMilliseconds < timeout)
+				Thread.Sleep(10);
+
+			return _process.HasExited;
+		}
+
+		public void WaitForIdle(int timeout)
+		{
+			if (IsRunning)
 			{
 				const int pollInterval = 200;
 				ulong lastTime = 0;
@@ -152,11 +222,11 @@ namespace Peach.Core
 					{
 						var pi = ProcessInfo.Instance.Snapshot(_process);
 
-						_logger.Trace("WaitForExit: CpuKill: OldTicks={0} NewTicks={1}", lastTime, pi.TotalProcessorTicks);
+						_logger.Trace("[{0}] WaitForIdle(): OldTicks={1} NewTicks={2}", _pid, lastTime, pi.TotalProcessorTicks);
 
 						if (i != 0 && lastTime == pi.TotalProcessorTicks)
 						{
-							_logger.Debug("WaitForExit: Cpu is idle, stopping process.");
+							_logger.Debug("[{0}] WaitForIdle(): Cpu is idle, stopping process.", _pid);
 							break;
 						}
 
@@ -165,26 +235,16 @@ namespace Peach.Core
 					}
 
 					if (i >= timeout)
-						_logger.Debug("WaitForExit: Timed out waiting for cpu idle, stopping process.");
+						_logger.Debug("[{0}] WaitForIdle(): Timed out waiting for cpu idle, stopping process.", _pid);
 				}
 				catch (Exception ex)
 				{
-					_logger.Debug("WaitForExit: Error querying cpu time: {0}", ex.Message);
-				}
-
-				Stop();
-			}
-			else
-			{
-				_logger.Debug("WaitForExit({0})", timeout);
-				if (!_process.WaitForExit(timeout) && !useCpuKill)
-				{
-					_logger.Debug("FAULT, WaitForExit ran out of time!");
-					return false;
+					if (IsRunning)
+						_logger.Debug("[{0}] WaitForIdle(): Error querying cpu time: {1}", _pid, ex.Message);
 				}
 			}
 
-			return true;
+			Stop(timeout);
 		}
 
 		class LoggerArgs
