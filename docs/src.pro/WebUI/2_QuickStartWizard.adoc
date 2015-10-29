@@ -28,6 +28,13 @@ Peach displays a Start screen for the new configuration. From this screen, you c
 +
 image::{images}/NP2_Config_Start.png[]
 
+[NOTE]
+=========
+*Switching Pit Configurations*
+
+The active Peach Pit configuration can be changed in the {peachweb} by clicking on the Home menu icon above the menu along the left side of the screen. Then, click on the Library menu item to choose a Pit or Pit configuration in your library. 
+=========
+
 4. Click "Quick Start Wizard". + 
 The introductory screen displays. The menu along the left side of the browser window lists sections or steps of the wizard:
 +
@@ -208,20 +215,19 @@ image::{images}/QS30_Automation_Review.png[]
 If any values need to be changed or if additional automation is appropriate, click "Add More Automation" to re-visit this section. Otherwise, click "Continue to Test" to test the Pit configuration.
 
 ==== Step 6. Test the Configuration
-In the Test section of the wizard, Peach performs a test on the Pit you selected using the configuration settings you provided. The Test section runs a single Pit iteration to verify the Pit runs correctly.
-
-NOTE: The test requires that the target device, service, or application be available for use. 
+In the Test section of the wizard, Peach performs a test on the selected Pit configuration using the settings you provided. Peach identifies the readiness of the Pit configuration for testing by tracking and reporting the progress of each section of the Quick Start Wizard.
 
 image::{images}/QS31_Test.png[]
 
-Select "Begin Test" to run the test. 
+NOTE: The Test section runs a single test case without any fuzzing. +
+The test requires that the target device, service, or application be available for use. 
 
-When the test completes, Peach reports if a failure occurs, and provides any generated log output for review. If a problem does occur, you can identify the issue by reviewing the log output and correct the issue by clicking to the appropriate configuration section in the Dashboard menu area at the left edge of the browser window.
-
-If the configuration passes the test, the following illustration shows the results.
-
+* Click the Begin Test button to run the test. +
+When the test completes, Peach reports whether the Pit configuration passes the test. If the configuration passes, the following message displays:
++
 image::{images}/QS32_TestPass.png[]
 
 At the end of the wizard, you can either start a fuzzing job with your pit or return to the Dashboard. 
 
+NOTE: For more information on the test report and for addressing configuration issues, see the xref:Test_PitConfiguration[Test Pit Configuration] section.
 

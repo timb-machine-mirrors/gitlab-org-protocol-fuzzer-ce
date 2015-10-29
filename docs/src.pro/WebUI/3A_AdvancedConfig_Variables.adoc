@@ -29,6 +29,13 @@ image::{images}/NP2_Config_Start.png[]
 
 3. Click the "Configure Variables" button to define or edit the variables and their values.
 
+[NOTE]
+=========
+*Switching Pit Configurations*
+
+The active Peach Pit configuration can be changed in the {peachweb} by clicking on the Home menu icon above the menu along the left side of the screen. Then, click on the Library menu item to choose a Pit or Pit configuration in your library. 
+=========
+
 ==== Variables
 
 The variables data entry screen lists the information needed by the selected pit, as in the following illustration. Some of the information applies to the Peach environment; two examples are the Peach Installation Directory and the Pit Library Path. Other information is pit specific, such as file names used to fuzz file formats and port addresses used to fuzz network protocols.
