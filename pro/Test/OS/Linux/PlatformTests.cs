@@ -5,7 +5,6 @@ using NLog;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
-using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.Test.OS.Linux
 {
@@ -27,7 +26,7 @@ namespace Peach.Pro.Test.OS.Linux
 		[Test]
 		public void TestCpuUsage()
 		{
-			using (var p = SysProcess.GetProcessById(1))
+			using (Process p = Process.GetProcessById(1))
 			{
 				var pi = ProcessInfo.Instance.Snapshot(p);
 				Assert.NotNull(pi);
@@ -37,7 +36,7 @@ namespace Peach.Pro.Test.OS.Linux
 				Assert.Greater(pi.UserProcessorTicks, 0);
 			}
 
-			using (var p = new SysProcess())
+			using (Process p = new Process())
 			{
 				var si = new ProcessStartInfo();
 				si.FileName = "/bin/ls";
@@ -68,7 +67,7 @@ namespace Peach.Pro.Test.OS.Linux
 				{
 					if ((i % 500) == 0)
 						logger.Debug("Starting Process #{0}", i + 1);
-					using (var p = new SysProcess())
+					using (Process p = new Process())
 					{
 						p.StartInfo.FileName = "/bin/echo";
 						p.StartInfo.Arguments = "-n \"\"";

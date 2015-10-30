@@ -19,11 +19,10 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		{
 			var self = Path.Combine(Utilities.ExecutionDirectory, "Peach.exe");
 
-			var args = new Dictionary<string, string>() {
-				{ "Executable",  "CrashingFileConsumer" },
-				{ "Arguments", self },
-				{ "RestartOnEachTest", "true" },
-			};
+			var args = new Dictionary<string, string>();
+			args["Executable"] = "CrashingFileConsumer";
+			args["Arguments"] = self;
+			args["RestartOnEachTest"] = "true";
 
 			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
@@ -48,9 +47,8 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		[Test]
 		public void TestNoFault()
 		{
-			var args = new Dictionary<string, string>() {
-				{ "Executable",  "CrashingFileConsumer" },
-			};
+			var args = new Dictionary<string, string>();
+			args["Executable"] = "CrashingFileConsumer";
 
 			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
@@ -66,9 +64,8 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		[Test]
 		public void TestMissingProgram()
 		{
-			var args = new Dictionary<string, string>() {
-				{ "Executable",  "MissingProgram" },
-			};
+			var args = new Dictionary<string, string>();
+			args["Executable"] = "MissingProgram";
 
 			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
@@ -86,10 +83,9 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		[Test]
 		public void TestMissingGdb()
 		{
-			var args = new Dictionary<string, string>() {
-				{ "Executable",  "MissingProgram" },
-				{ "GdbPath", "MissingGdb" },
-			};
+			var args = new Dictionary<string, string>();
+			args["Executable"] = "MissingProgram";
+			args["GdbPath"] = "MissingGdb";
 
 			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
@@ -110,11 +106,10 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		[Test]
 		public void TestCpuKill()
 		{
-			var args = new Dictionary<string, string>() {
-				{ "Executable","CrashableServer" },
-				{ "Arguments", "127.0.0.1 12346" },
-				{ "StartOnCall", "Foo" },
-			};
+			var args = new Dictionary<string, string>();
+			args["Executable"] = "CrashableServer";
+			args["Arguments"] = "127.0.0.1 12346";
+			args["StartOnCall"] = "Foo";
 
 			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
@@ -142,12 +137,11 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		[Test]
 		public void TestNoCpuKill()
 		{
-			var args = new Dictionary<string, string> {
-				{ "Executable", "CrashableServer" },
-				{ "Arguments", "127.0.0.1 0 5" },
-				{ "StartOnCall", "Foo" },
-				{ "NoCpuKill", "true" }
-			};
+			var args = new Dictionary<string, string>();
+			args["Executable"] = "CrashableServer";
+			args["Arguments"] = "127.0.0.1 0 5";
+			args["StartOnCall"] = "Foo";
+			args["NoCpuKill"] = "true";
 
 			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
@@ -175,13 +169,12 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		[Test]
 		public void TestNoCpuKillWaitFail()
 		{
-			var args = new Dictionary<string, string>() {
-				{ "Executable", "CrashableServer" },
-				{ "Arguments","127.0.0.1 0 5" },
-				{ "StartOnCall","Foo" },
-				{ "NoCpuKill","true" },
-				{ "WaitForExitTimeout","1000" },
-			};
+			var args = new Dictionary<string, string>();
+			args["Executable"] = "CrashableServer";
+			args["Arguments"] = "127.0.0.1 0 5";
+			args["StartOnCall"] = "Foo";
+			args["NoCpuKill"] = "true";
+			args["WaitForExitTimeout"] = "1000";
 
 			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
@@ -211,10 +204,12 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		{
 			var starts = 0;
 
-			var runner = new MonitorRunner("Gdb", new Dictionary<string, string> {
+			var runner = new MonitorRunner("Gdb", new Dictionary<string, string>
+			{
 				{ "Executable", "CrashableServer" },
 				{ "Arguments", "127.0.0.1 0 1" },
-			}) {
+			})
+			{
 				StartMonitor = (m, args) =>
 				{
 					m.InternalEvent += (s, e) => ++starts;

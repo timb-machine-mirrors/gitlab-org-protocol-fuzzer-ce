@@ -6,7 +6,6 @@ using Peach.Core;
 using Peach.Pro.Core;
 using Peach.Pro.Core.Runtime;
 using Peach.Core.Test;
-using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.Test.Core
 {
@@ -17,7 +16,7 @@ namespace Peach.Pro.Test.Core
 
 		public static ushort MakePort(ushort min, ushort max)
 		{
-			var pid = SysProcess.GetCurrentProcess().Id;
+			var pid = Process.GetCurrentProcess().Id;
 			var seed = Environment.TickCount * pid;
 			var rng = new Peach.Core.Random((uint)seed);
 			var ret = (ushort)rng.Next(min, max);

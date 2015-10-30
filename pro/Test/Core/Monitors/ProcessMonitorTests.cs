@@ -30,13 +30,15 @@ namespace Peach.Pro.Test.Core.Monitors
 		{
 			var sw = new Stopwatch();
 
-			var runner = new MonitorRunner("Process", new Dictionary<string, string> {
-				{ "Executable", Utilities.GetAppResourcePath("CrashableServer") },
-				{ "Arguments", "127.0.0.1" },
+			var runner = new MonitorRunner("Process", new Dictionary<string, string>
+			{
+				{ "Executable", "CrashableServer" },
+				{ "Arguments", "127.0.0.1 0" },
 				{ "StartOnCall", "foo" },
 				{ "WaitForExitTimeout", "2000" },
 				{ "NoCpuKill", "true" },
-			}) {
+			})
+			{
 				Message = m =>
 				{
 					m.Message("foo");
@@ -64,7 +66,7 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			var runner = new MonitorRunner("Process", new Dictionary<string, string>
 			{
-				{ "Executable", Utilities.GetAppResourcePath("CrashableServer") },
+				{ "Executable", "CrashableServer" },
 				{ "Arguments", "127.0.0.1 0" },
 				{ "StartOnCall", "foo" },
 			})
@@ -94,7 +96,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		{
 			var runner = new MonitorRunner("Process", new Dictionary<string, string>
 			{
-				{ "Executable", Utilities.GetAppResourcePath("CrashingFileConsumer") },
+				{ "Executable", "CrashingFileConsumer" },
 				{ "StartOnCall", "foo" },
 				{ "WaitForExitOnCall", "bar" },
 				{ "NoCpuKill", "true" },
@@ -115,16 +117,16 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestExitOnCallFault()
 		{
-			var exe = Utilities.GetAppResourcePath("CrashableServer");
-			
-			var runner = new MonitorRunner("Process", new Dictionary<string, string> {
-				{ "Executable", exe },
+			var runner = new MonitorRunner("Process", new Dictionary<string, string>
+			{
+				{ "Executable", "CrashableServer" },
 				{ "Arguments", "127.0.0.1 0" },
 				{ "StartOnCall", "foo" },
 				{ "WaitForExitOnCall", "bar" },
 				{ "WaitForExitTimeout", "2000" },
 				{ "NoCpuKill", "true" },
-			}) {
+			})
+			{
 				Message = m =>
 				{
 					m.Message("foo");
@@ -135,9 +137,9 @@ namespace Peach.Pro.Test.Core.Monitors
 			var faults = runner.Run();
 
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("Process '{0}' did not exit in 2000ms.".Fmt(exe), faults[0].Title);
+			Assert.AreEqual("Process 'CrashableServer' did not exit in 2000ms.", faults[0].Title);
 			Assert.NotNull(faults[0].Fault);
-			Assert.AreEqual(Monitor2.Hash("Process{0}".Fmt(exe)), faults[0].Fault.MajorHash);
+			Assert.AreEqual(Monitor2.Hash("ProcessCrashableServer"), faults[0].Fault.MajorHash);
 			Assert.AreEqual(Monitor2.Hash("FailedToExit"), faults[0].Fault.MinorHash);
 		}
 
@@ -148,7 +150,7 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			var runner = new MonitorRunner("Process", new Dictionary<string, string>
 			{
-				{ "Executable", Utilities.GetAppResourcePath("CrashableServer") },
+				{ "Executable", "CrashableServer" },
 				{ "Arguments", "127.0.0.1 0" },
 				{ "RestartOnEachTest", "true" },
 			})
@@ -171,20 +173,21 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestExitEarlyFault()
 		{
-			var exe = Utilities.GetAppResourcePath("CrashingFileConsumer");
-			var runner = new MonitorRunner("Process", new Dictionary<string, string> {
-				{ "Executable",  exe },
+			var runner = new MonitorRunner("Process", new Dictionary<string, string>
+			{
+				{ "Executable", "CrashingFileConsumer" },
 				{ "FaultOnEarlyExit", "true" },
-			}) {
+			})
+			{
 				Message = m => Thread.Sleep(1000),
 			};
 
 			var faults = runner.Run();
 
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("Process '{0}' exited early.".Fmt(exe), faults[0].Title);
+			Assert.AreEqual("Process 'CrashingFileConsumer' exited early.", faults[0].Title);
 			Assert.NotNull(faults[0].Fault);
-			Assert.AreEqual(Monitor2.Hash("Process{0}".Fmt(exe)), faults[0].Fault.MajorHash);
+			Assert.AreEqual(Monitor2.Hash("ProcessCrashingFileConsumer"), faults[0].Fault.MajorHash);
 			Assert.AreEqual(Monitor2.Hash("ExitedEarly"), faults[0].Fault.MinorHash);
 		}
 
@@ -195,7 +198,7 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			var runner = new MonitorRunner("Process", new Dictionary<string, string>
 			{
-				{ "Executable", Utilities.GetAppResourcePath("CrashingFileConsumer") },
+				{ "Executable", "CrashingFileConsumer" },
 				{ "StartOnCall", "foo" },
 				{ "WaitForExitOnCall", "bar" },
 				{ "FaultOnEarlyExit", "true" },
@@ -218,14 +221,14 @@ namespace Peach.Pro.Test.Core.Monitors
 		{
 			// FaultOnEarlyExit faults when WaitForExitOnCall is used and stop message is not sent
 
-			var exe = Utilities.GetAppResourcePath("CrashingFileConsumer");
-
-			var runner = new MonitorRunner("Process", new Dictionary<string, string> {
-				{ "Executable", exe },
+			var runner = new MonitorRunner("Process", new Dictionary<string, string>
+			{
+				{ "Executable", "CrashingFileConsumer" },
 				{ "StartOnCall", "foo" },
 				{ "WaitForExitOnCall", "bar" },
 				{ "FaultOnEarlyExit", "true" },
-			}) {
+			})
+			{
 				Message = m =>
 				{
 					m.Message("foo");
@@ -236,9 +239,9 @@ namespace Peach.Pro.Test.Core.Monitors
 			var faults = runner.Run();
 
 			Assert.AreEqual(1, faults.Length);
-			Assert.AreEqual("Process '{0}' exited early.".Fmt(exe), faults[0].Title);
+			Assert.AreEqual("Process 'CrashingFileConsumer' exited early.", faults[0].Title);
 			Assert.NotNull(faults[0].Fault);
-			Assert.AreEqual(Monitor2.Hash("Process{0}".Fmt(exe)), faults[0].Fault.MajorHash);
+			Assert.AreEqual(Monitor2.Hash("ProcessCrashingFileConsumer"), faults[0].Fault.MajorHash);
 			Assert.AreEqual(Monitor2.Hash("ExitedEarly"), faults[0].Fault.MinorHash);
 		}
 
@@ -249,7 +252,7 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			var runner = new MonitorRunner("Process", new Dictionary<string, string>
 			{
-				{ "Executable", Utilities.GetAppResourcePath("CrashableServer") },
+				{ "Executable", "CrashableServer" },
 				{ "Arguments", "127.0.0.1 0" },
 				{ "StartOnCall", "foo" },
 				{ "FaultOnEarlyExit", "true" },
@@ -270,7 +273,7 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			var runner = new MonitorRunner("Process", new Dictionary<string, string>
 			{
-				{ "Executable", Utilities.GetAppResourcePath("CrashableServer") },
+				{ "Executable", "CrashableServer" },
 				{ "Arguments", "127.0.0.1 0" },
 				{ "RestartOnEachTest", "true" },
 				{ "FaultOnEarlyExit", "true" },
@@ -289,7 +292,7 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			var runner = new MonitorRunner("Process", new Dictionary<string, string>
 			{
-				{ "Executable", Utilities.GetAppResourcePath("CrashableServer") },
+				{ "Executable", "CrashableServer" },
 				{ "Arguments", "127.0.0.1 0" },
 				{ "RestartAfterFault", "true" },
 			})

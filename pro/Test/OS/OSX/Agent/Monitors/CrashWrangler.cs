@@ -58,7 +58,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			w.IterationStarting(null);
 			Thread.Sleep(1000);
 			w.IterationFinished();
-			Assert.IsFalse(w.DetectedFault());
+			Assert.AreEqual(false, w.DetectedFault());
 			w.SessionFinished();
 			w.StopMonitor();
 		}
@@ -78,7 +78,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			w.IterationStarting(null);
 			Thread.Sleep(1000);
 			w.IterationFinished();
-			Assert.IsFalse(w.DetectedFault());
+			Assert.AreEqual(false, w.DetectedFault());
 			w.SessionFinished();
 			w.StopMonitor();
 		}
@@ -107,7 +107,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 
 			var span = (after - before);
 
-			Assert.IsFalse(w.DetectedFault());
+			Assert.AreEqual(false, w.DetectedFault());
 
 			w.SessionFinished();
 			w.StopMonitor();
@@ -138,7 +138,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 
 			var span = (after - before);
 
-			Assert.IsFalse(w.DetectedFault());
+			Assert.AreEqual(false, w.DetectedFault());
 
 			w.SessionFinished();
 			w.StopMonitor();
@@ -167,7 +167,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 
 			w.IterationFinished();
 
-			Assert.IsFalse(w.DetectedFault());
+			Assert.AreEqual(false, w.DetectedFault());
 
 			w.SessionFinished();
 			w.StopMonitor();
@@ -194,7 +194,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 
 			w.IterationFinished();
 
-			Assert.IsTrue(w.DetectedFault());
+			Assert.AreEqual(true, w.DetectedFault());
 			var f = w.GetMonitorData();
 			Assert.NotNull(f);
 			Assert.NotNull(f.Fault);
@@ -226,7 +226,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 
 			var span = (after - before);
 
-			Assert.IsFalse(w.DetectedFault());
+			Assert.AreEqual(false, w.DetectedFault());
 
 			w.SessionFinished();
 			w.StopMonitor();
@@ -253,7 +253,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 
 			w.IterationFinished();
 
-			Assert.IsTrue(w.DetectedFault());
+			Assert.AreEqual(true, w.DetectedFault());
 			var f = w.GetMonitorData();
 			Assert.NotNull(f);
 			Assert.NotNull(f.Fault);
@@ -288,7 +288,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 
 			w.IterationFinished();
 
-			Assert.IsFalse(w.DetectedFault());
+			Assert.AreEqual(false, w.DetectedFault());
 
 			w.SessionFinished();
 			w.StopMonitor();
@@ -318,7 +318,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 
 			w.IterationFinished();
 
-			Assert.IsTrue(w.DetectedFault());
+			Assert.AreEqual(true, w.DetectedFault());
 			var f = w.GetMonitorData();
 			Assert.NotNull(f);
 			Assert.NotNull(f.Fault);
@@ -351,7 +351,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 
 			w.IterationFinished();
 
-			Assert.IsFalse(w.DetectedFault());
+			Assert.AreEqual(false, w.DetectedFault());
 
 			w.SessionFinished();
 			w.StopMonitor();
@@ -377,7 +377,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 
 			w.IterationFinished();
 
-			Assert.IsFalse(w.DetectedFault());
+			Assert.AreEqual(false, w.DetectedFault());
 
 			w.SessionFinished();
 			w.StopMonitor();
@@ -399,7 +399,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			w.IterationStarting(null);
 			Thread.Sleep(1000);
 			w.IterationFinished();
-			Assert.IsTrue(w.DetectedFault());
+			Assert.AreEqual(true, w.DetectedFault());
 			var fault = w.GetMonitorData();
 			Assert.NotNull(fault);
 			Assert.NotNull(fault.Fault);
@@ -425,7 +425,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			w.SessionStarting();
 			Thread.Sleep(1000);
 
-			Assert.IsFalse(w.DetectedFault());
+			Assert.AreEqual(false, w.DetectedFault());
 			w.SessionFinished();
 			w.StopMonitor();
 		}

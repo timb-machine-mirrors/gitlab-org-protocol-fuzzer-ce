@@ -137,7 +137,6 @@ def configure(conf):
 		'vnum',
 		'subst',
 		'network',
-		'unix',
 	])
 
 	env.append_value('CSFLAGS', [

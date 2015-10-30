@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using SysProcess = System.Diagnostics.Process;
 using Peach.Core;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices.Models;
@@ -13,7 +12,7 @@ namespace Peach.Pro.Core.WebServices
 {
 	public class ExternalJobMonitor : BaseJobMonitor, IJobMonitor
 	{
-		SysProcess _process;
+		Process _process;
 		Task _taskMonitor;
 		Task _taskStderr;
 		volatile bool _pendingKill;
@@ -113,7 +112,7 @@ namespace Peach.Pro.Core.WebServices
 			if (Configuration.LogLevel == NLog.LogLevel.Trace)
 				args.Add("-vv");
 
-			_process = new SysProcess
+			_process = new Process
 			{
 				StartInfo = new ProcessStartInfo
 				{

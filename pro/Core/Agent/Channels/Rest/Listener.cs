@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Principal;
 using System.Threading;
-using SysProcess = System.Diagnostics.Process;
 using NLog;
 using Peach.Core;
 using Logger = NLog.Logger;
@@ -135,7 +134,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				}
 
 				// Ensure we are allowed to listen for http connections
-				using (var p = new SysProcess())
+				using (var p = new Process())
 				{
 					var user = GetAccountName();
 

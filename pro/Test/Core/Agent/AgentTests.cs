@@ -14,7 +14,6 @@ using Peach.Core.Test;
 using Peach.Pro.Core.Publishers;
 using Encoding = Peach.Core.Encoding;
 using Logger = NLog.Logger;
-using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.Test.Core.Agent
 {
@@ -24,7 +23,7 @@ namespace Peach.Pro.Test.Core.Agent
 	public class AgentTests
 	{
 		SingleInstance _si;
-		SysProcess _process;
+		Process _process;
 
 		[SetUp]
 		public void SetUp()

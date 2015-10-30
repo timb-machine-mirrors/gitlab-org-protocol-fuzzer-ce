@@ -65,9 +65,6 @@ internal = [
 	'CrashTestDummy.exe',
 ]
 
-if bld.env.DEST_OS != 'win32':
-	internal.append('PeachTrampoline')
-
 variant = bld.variant \
 	.replace('debug', 'internal') \
 	.replace('release', 'internal')

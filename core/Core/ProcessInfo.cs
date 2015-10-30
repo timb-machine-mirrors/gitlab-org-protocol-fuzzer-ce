@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Core
 {
@@ -16,7 +15,7 @@ namespace Peach.Core
 		/// </summary>
 		/// <param name="p">Process to obtain info about.</param>
 		/// <returns>Information about the process.</returns>
-		ProcessInfo Snapshot(SysProcess p);
+		ProcessInfo Snapshot(Process p);
 
 		/// <summary>
 		/// Returns a list of Processes that match the current name.
@@ -26,7 +25,7 @@ namespace Peach.Core
 		/// </remarks>
 		/// <param name="name">Name of process.</param>
 		/// <returns>List of processes.</returns>
-		SysProcess[] GetProcessesByName(string name);
+		Process[] GetProcessesByName(string name);
 
 		/// <summary>
 		/// Kill the process and wait indefinitely for the process to exit.
@@ -35,7 +34,7 @@ namespace Peach.Core
 		/// this works around mono compatibility issues on linux/osx.
 		/// </remarks>
 		/// <param name="p">Process to kill.</param>
-		void Kill(SysProcess p);
+		void Kill(Process p);
 
 		/// <summary>
 		/// Kill the process and wait the specified time for the process to exit.
@@ -46,7 +45,7 @@ namespace Peach.Core
 		/// <param name="p">Process to kill.</param>
 		/// <param name="milliseconds">The amount of time to wait for the process to exit.</param>
 		/// <returns>True if process was killed, false if it didn't exit within the timeout.</returns>
-		bool Kill(SysProcess p, int milliseconds);
+		bool Kill(Process p, int milliseconds);
 	}
 
 	public class ProcessInfo : StaticPlatformFactory<IProcessInfo>

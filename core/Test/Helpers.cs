@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using SysProcess = System.Diagnostics.Process;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -66,10 +65,10 @@ namespace Peach.Core.Test
 			return new StreamReader(stream).ReadToEnd();
 		}
 
-		public static SysProcess StartAgent(string protocol)
+		public static Process StartAgent(string protocol)
 		{
 			var startEvent = new ManualResetEvent(false);
-			var process = new SysProcess();
+			var process = new Process();
 			var peach = Utilities.GetAppResourcePath("Peach.exe");
 
 			if (Platform.GetOS() == Platform.OS.Windows)
@@ -123,7 +122,7 @@ namespace Peach.Core.Test
 			}
 		}
 
-		public static void StopAgent(SysProcess process)
+		public static void StopAgent(Process process)
 		{
 			if (!process.HasExited)
 			{

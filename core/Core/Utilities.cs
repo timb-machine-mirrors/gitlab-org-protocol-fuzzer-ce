@@ -37,7 +37,6 @@ using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using SysProcess = System.Diagnostics.Process;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
@@ -353,14 +352,12 @@ namespace Peach.Core
 			}
 
 			throw new PeachException("Error, unable to locate '{0}'{1} '{2}' parameter.".Fmt(
-				program, 
-				path != null ? " in specified" : ", please specify using", 
-				parameter));
+				program, path != null ? " in specified" : ", please specify using", parameter));
 		}
 
 		public static int GetCurrentProcessId()
 		{
-			using (var p = SysProcess.GetCurrentProcess())
+			using (var p = Process.GetCurrentProcess())
 				return p.Id;
 		}
 

@@ -101,7 +101,6 @@ def prepare(conf):
 		'vnum',
 		'subst',
 		'network',
-		'unix',
 	])
 
 def configure(conf):

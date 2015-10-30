@@ -31,7 +31,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.IO;
 using System.Reflection;
-using SysProcess = System.Diagnostics.Process;
 using NLog;
 using System.Collections;
 using System.Threading;
@@ -269,7 +268,7 @@ namespace Peach.Core.Analysis
 				throw new PeachException("Failed to delete old pid file '{0}'.".Fmt(pidFile), ex);
 			}
 
-			using (var proc = new SysProcess())
+			using (var proc = new Process())
 			{
 				proc.StartInfo = psi;
 				proc.OutputDataReceived += proc_OutputDataReceived;
@@ -333,7 +332,7 @@ namespace Peach.Core.Analysis
 		{
 			if (e.Data == null)
 			{
-				((SysProcess)sender).CancelErrorRead();
+				((Process)sender).CancelErrorRead();
 			}
 			else
 			{
@@ -345,7 +344,7 @@ namespace Peach.Core.Analysis
 		{
 			if (e.Data == null)
 			{
-				((SysProcess)sender).CancelOutputRead();
+				((Process)sender).CancelOutputRead();
 			}
 			else
 			{

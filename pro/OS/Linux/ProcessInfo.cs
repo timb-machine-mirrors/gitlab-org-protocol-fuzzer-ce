@@ -6,7 +6,6 @@ using System.IO;
 using System.Threading;
 using NLog;
 using Peach.Core;
-using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.OS.Linux
 {
@@ -67,7 +66,7 @@ namespace Peach.Pro.OS.Linux
 			return new Tuple<string, string[]>(middle, parts);
 		}
 
-		public ProcessInfo Snapshot(SysProcess p)
+		public ProcessInfo Snapshot(Process p)
 		{
 			var tuple = ReadProc(p.Id, true);
 			if (tuple.Item1 == null)
@@ -104,14 +103,14 @@ namespace Peach.Pro.OS.Linux
 			return pi;
 		}
 
-		public SysProcess[] GetProcessesByName(string name)
+		public Process[] GetProcessesByName(string name)
 		{
 			if (name == null)
 				throw new ArgumentNullException("name");
 
-			var ret = new List<SysProcess>();
+			var ret = new List<Process>();
 
-			foreach (var p in SysProcess.GetProcesses())
+			foreach (var p in Process.GetProcesses())
 			{
 				string procName;
 
@@ -133,7 +132,7 @@ namespace Peach.Pro.OS.Linux
 			return ret.ToArray();
 		}
 
-		public void Kill(SysProcess p)
+		public void Kill(Process p)
 		{
 			if (p.HasExited)
 				return;
@@ -150,7 +149,7 @@ namespace Peach.Pro.OS.Linux
 				Thread.Sleep(10);
 		}
 
-		public bool Kill(SysProcess p, int milliseconds)
+		public bool Kill(Process p, int milliseconds)
 		{
 			if (p.HasExited)
 				return true;

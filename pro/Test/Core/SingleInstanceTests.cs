@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.Test.Core
 {
@@ -25,7 +24,7 @@ namespace Peach.Pro.Test.Core
 				path = "mono";
 			}
 			var args = string.Join(" ", argsList);
-			var proc = new SysProcess
+			var proc = new Process
 			{
 				StartInfo = new ProcessStartInfo(path, args)
 			};

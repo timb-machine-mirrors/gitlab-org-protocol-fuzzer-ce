@@ -6,7 +6,6 @@ using System.Threading;
 using Peach.Core;
 using System.Linq;
 using System.IO;
-using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.OS.OSX
 {
@@ -196,7 +195,7 @@ namespace Peach.Pro.OS.OSX
 		// Reference:
 		// http://opensource.apple.com/source/adv_cmds/adv_cmds-153/ps/print.c
 		//
-		private static string GetName(SysProcess p)
+		private static string GetName(Process p)
 		{
 			var mib = new[]
 			{
@@ -217,7 +216,7 @@ namespace Peach.Pro.OS.OSX
 			}
 		}
 
-		private static void RaiseError(SysProcess p)
+		private static void RaiseError(Process p)
 		{
 			bool hasExited;
 
@@ -236,7 +235,7 @@ namespace Peach.Pro.OS.OSX
 			throw new UnauthorizedAccessException("Can't query info for pid '{0}', ensure user has appropriate permissions".Fmt(p.Id));
 		}
 
-		public ProcessInfo Snapshot(SysProcess p)
+		public ProcessInfo Snapshot(Process p)
 		{
 			var kp = GetKernProc(p.Id);
 			if (!kp.HasValue)
@@ -265,11 +264,11 @@ namespace Peach.Pro.OS.OSX
 			return pi;
 		}
 
-		public SysProcess[] GetProcessesByName(string name)
+		public Process[] GetProcessesByName(string name)
 		{
-			var ret = new List<SysProcess>();
+			var ret = new List<Process>();
 
-			foreach (var p in SysProcess.GetProcesses())
+			foreach (var p in Process.GetProcesses())
 			{
 				if (GetName(p) == name)
 					ret.Add(p);
@@ -280,7 +279,7 @@ namespace Peach.Pro.OS.OSX
 			return ret.ToArray();
 		}
 
-		public void Kill(SysProcess p)
+		public void Kill(Process p)
 		{
 			if (p.HasExited)
 				return;
@@ -297,7 +296,7 @@ namespace Peach.Pro.OS.OSX
 				Thread.Sleep(10);
 		}
 
-		public bool Kill(SysProcess p, int milliseconds)
+		public bool Kill(Process p, int milliseconds)
 		{
 			if (p.HasExited)
 				return true;
