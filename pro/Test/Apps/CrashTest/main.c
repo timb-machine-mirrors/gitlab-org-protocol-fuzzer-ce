@@ -12,6 +12,8 @@
 #else // WIN32
 
 #include <unistd.h>
+#include <signal.h>
+#include <sys/wait.h>
 #define SLEEP_FACTOR 1
 
 void cmd_fork();
