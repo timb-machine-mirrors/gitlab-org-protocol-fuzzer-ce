@@ -1,44 +1,40 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <string>
+#include <iostream>
+#include <fstream>
 
 #ifdef WIN32
-
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #define sleep Sleep
 #define SLEEP_FACTOR 1000
-
-#else // WIN32
-
+#else
 #include <unistd.h>
+#include <signal.h>
+#include <sys/wait.h>
 #define SLEEP_FACTOR 1
+#endif
 
 void cmd_fork();
 
-#endif // WIN32
-
-int main(int argc, char** argv) {
-	if (argc < 2) {
-		printf("Missing args\n");
-		return 1;
+int main(int /*argc*/, char** argv) {
+	std::string cmd = argv[1];
+	if (cmd == "exit") {
+		return std::atoi(argv[2]);
 	}
-	if (!strcmp(argv[1], "exit")) {
-		return atoi(argv[2]);
+	else if (cmd == "timeout") {
+		sleep(std::atoi(argv[2]) * SLEEP_FACTOR);
 	}
-	else if (!strcmp(argv[1], "timeout")) {
-		sleep(atoi(argv[2]) * SLEEP_FACTOR);
+	else if (cmd == "regex") {
+		std::cout << argv[2] << std::endl;
+		std::cerr << argv[3] << std::endl;
 	}
-	else if (!strcmp(argv[1], "regex")) {
-		fprintf(stdout, "%s\n", argv[2]);
-		fprintf(stderr, "%s\n", argv[3]);
+	else if (cmd == "when") {
+		std::fstream fout(argv[2]);
+		fout << argv[3];
+		fout.close();
 	}
-	else if (!strcmp(argv[1], "when")) {
-		FILE* fout = fopen(argv[2], "w");
-		fprintf(fout, "%s", argv[3]);
-		fclose(fout);
-	}
-	else if (!strcmp(argv[1], "fork")) {
+	else if (cmd == "fork") {
 #ifdef WIN32
 		printf("Not supported\n");
 #else
@@ -88,14 +84,9 @@ const char* signal_str(int sig) {
 }
 
 void signal_handler(int sig) {
-	int* foo = (int*)0xDEADBEEF;
 	printf("[%d] signal: (%d) %s\n", getpid(), sig, signal_str(sig));
 	switch (sig) {
 		case SIGTERM:
-			for (;;) {
-				memset(foo, 1, 4*1024*1024);
-				foo += 4*1024*1024;
-			}
 			_exit(EXIT_SUCCESS);
 			break;
 	}
@@ -107,7 +98,7 @@ void cmd_fork() {
 	signal(SIGTERM, signal_handler);
 	signal(SIGCHLD, signal_handler);
 
-	printf("fork()\n");
+	printf("Forking...\n");
 	pid_t pid = fork();
 	if (pid == -1) {
 		perror("fork() failed");
@@ -122,10 +113,10 @@ void cmd_fork() {
 		int status;
 
 		do {
-			printf("waitpid(%d)\n", pid);
+			printf("waitpid\n");
 			int ret = waitpid(pid, &status, 0);
 			if (ret == -1) {
-				perror("waitpid() failed");
+				perror("waidpid() failed");
 				exit(EXIT_FAILURE);
 			}
 
