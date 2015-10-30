@@ -56,8 +56,10 @@ deps = [
 
 if bld.env.TARGET in ['win']:
 	embed = 'Vix.dll'
+	ide_use = ''
 else:
 	embed = ''
+	ide_use = 'PeachTrampoline'
 
 bld(
 	features = 'cs',
@@ -68,7 +70,7 @@ bld(
 	embed = embed,
 	content = 'IronPython.StdLib',
 	ide_content = 'WebServices/Models/Model.cd',
-	ide_use = 'PeachTrampoline',
+	ide_use = ide_use,
 	name = 'Peach.Pro.dll',
 	namespace = 'Peach.Pro.Core',
 )
