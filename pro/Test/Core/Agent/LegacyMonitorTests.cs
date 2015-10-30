@@ -211,7 +211,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 			try
 			{
-				var p = Peach.Core.Process.Run(logger, Command, Arguments, null, null, Timeout);
+				var p = SubProcess.Run(Command, Arguments, Timeout);
 
 				var stdout = p.StdOut.ToString();
 				var stderr = p.StdErr.ToString();

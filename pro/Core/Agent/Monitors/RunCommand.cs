@@ -69,10 +69,10 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 			try
 			{
-				var result = Process.Run(Logger, Command, Arguments, null, WorkingDirectory, Timeout);
+				var p = SubProcess.Run(Command, Arguments, Timeout, null, WorkingDirectory);
 
-				var stdout = result.StdOut.ToString();
-				var stderr = result.StdErr.ToString();
+				var stdout = p.StdOut.ToString();
+				var stderr = p.StdErr.ToString();
 
 				_data = new MonitorData
 				{
@@ -82,7 +82,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 				_data.Data.Add("stdout", new MemoryStream(Encoding.UTF8.GetBytes(stdout)));
 				_data.Data.Add("stderr", new MemoryStream(Encoding.UTF8.GetBytes(stderr)));
 
-				if (result.Timeout)
+				if (p.Timeout)
 				{
 					_data.Title = "Process failed to exit in allotted time.";
 					_data.Fault = new MonitorData.Info
@@ -91,22 +91,22 @@ namespace Peach.Pro.Core.Agent.Monitors
 						MinorHash = Hash("FailedToExit")
 					};
 				}
-				else if (FaultOnExitCode && result.ExitCode == FaultExitCode)
+				else if (FaultOnExitCode && p.ExitCode == FaultExitCode)
 				{
-					_data.Title = "Process exited with code {0}.".Fmt(result.ExitCode);
+					_data.Title = "Process exited with code {0}.".Fmt(p.ExitCode);
 					_data.Fault = new MonitorData.Info
 					{
 						MajorHash = Hash(Class + Command),
-						MinorHash = Hash(result.ExitCode.ToString(CultureInfo.InvariantCulture))
+						MinorHash = Hash(p.ExitCode.ToString(CultureInfo.InvariantCulture))
 					};
 				}
-				else if (FaultOnNonZeroExit && result.ExitCode != 0)
+				else if (FaultOnNonZeroExit && p.ExitCode != 0)
 				{
-					_data.Title = "Process exited with code {0}.".Fmt(result.ExitCode);
+					_data.Title = "Process exited with code {0}.".Fmt(p.ExitCode);
 					_data.Fault = new MonitorData.Info
 					{
 						MajorHash = Hash(Class + Command),
-						MinorHash = Hash(result.ExitCode.ToString(CultureInfo.InvariantCulture))
+						MinorHash = Hash(p.ExitCode.ToString(CultureInfo.InvariantCulture))
 					};
 				}
 				else if (_faultOnRegex != null)

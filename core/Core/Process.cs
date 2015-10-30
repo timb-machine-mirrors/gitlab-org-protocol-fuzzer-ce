@@ -4,18 +4,9 @@ using System.IO;
 using SysProcess = System.Diagnostics.Process;
 using System.Threading.Tasks;
 using System.Threading;
-using System.Text;
 
 namespace Peach.Core
 {
-	public struct ProcessRunResult
-	{
-		public bool Timeout;
-		public int ExitCode;
-		public StringBuilder StdErr;
-		public StringBuilder StdOut;
-	}
-	
 	public abstract class Process : PlatformFactory<Process>
 	{
 		protected NLog.Logger _logger;
@@ -30,11 +21,9 @@ namespace Peach.Core
 			_logger = logger;
 		}
 
-		protected abstract void WaitForProcessGroup(SysProcess process);
+		protected abstract void Terminate();
 
-		protected abstract void Terminate(SysProcess process);
-
-		protected abstract void Kill(SysProcess process);
+		protected abstract void Kill();
 
 		protected abstract string FileName(string executable);
 
@@ -53,119 +42,6 @@ namespace Peach.Core
 			_process = SysProcess.GetProcessById(pid);
 			_pid = pid;
 			_inferior = true;
-		}
-
-		public static ProcessRunResult Run(
-			NLog.Logger logger,
-			string executable, 
-			string arguments, 
-			Dictionary<string, string> environment, 
-			string workingDirectory,
-			int timeout)
-		{
-			var process = PlatformFactory<Process>.CreateInstance(logger);
-			return process._Run(executable, arguments, environment, workingDirectory, timeout);
-		}
-
-		ProcessRunResult _Run(
-			string executable, 
-			string arguments, 
-			Dictionary<string, string> environment, 
-			string workingDirectory,
-			int timeout)
-		{
-			var si = new System.Diagnostics.ProcessStartInfo {
-				FileName = FileName(executable),
-				Arguments = Arguments(executable, arguments),
-				UseShellExecute = false,
-				RedirectStandardInput = true,
-				RedirectStandardOutput = true,
-				RedirectStandardError = true,
-				WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden,
-				CreateNoWindow = true,
-				WorkingDirectory = workingDirectory ?? "",
-			};
-
-			if (environment != null)
-				environment.ForEach(x => si.EnvironmentVariables[x.Key] = x.Value);
-
-			_logger.Debug("Run(): {0} {1}", executable, arguments);
-			using (var process = SysProcess.Start(si))
-			{
-				var prefix = "[{0}] {1}".Fmt(process.Id, Path.GetFileName(executable));
-				var stdout = new StringWriter();
-				var stderr = new StringWriter();
-
-				// Close stdin so all reads return zero
-				process.StandardInput.Close();
-
-				_logger.Debug("[{0}] Run(): start stdout task".Fmt(process.Id));
-				var stdoutTask = Task.Factory.StartNew(LoggerTask, new LoggerArgs { 
-					Prefix = prefix + " out",
-					Source = process.StandardOutput,
-					Sink = stdout,
-				});
-
-				_logger.Debug("[{0}] Run(): start stderr task".Fmt(process.Id));
-				var stderrTask = Task.Factory.StartNew(LoggerTask, new LoggerArgs { 
-					Prefix = prefix + " err",
-					Source = process.StandardError,
-					Sink = stderr,
-				});
-
-				bool clean = false;
-				try
-				{
-					clean = process.WaitForExit(timeout);
-				}
-				catch (Exception ex)
-				{
-					_logger.Warn("[{0}] Run(): Exception in WaitForExit(): {1}", process.Id, ex.Message);
-				}
-
-				try
-				{
-					if (!clean)
-					{
-						// we could get here too fast, before the trampoline has finished
-						// so wait until the pgid matches the pid
-						WaitForProcessGroup(process);
-						Kill(process);
-						process.WaitForExit(timeout);
-					}
-				}
-				catch (Exception ex)
-				{
-					_logger.Warn("[{0}] Run(): Exception in Kill(): {1}", process.Id, ex.Message);
-				}
-
-				try
-				{
-					if (!Task.WaitAll(new Task[] { stdoutTask, stderrTask }, timeout))
-						clean = false;
-				}
-				catch (AggregateException ex)
-				{
-					clean = false;
-					_logger.Warn("[{0}] Run(): Exception in stdout/stderr task: {1}", process.Id, ex.InnerException.Message);
-				}
-				catch (Exception ex)
-				{
-					clean = false;
-					_logger.Warn("[{0}] Run(): Exception in stdout/stderr task: {1}", process.Id, ex.Message);
-				}
-
-				var result = new ProcessRunResult {
-					Timeout = !clean,
-					ExitCode = clean ? process.ExitCode : -1,
-					StdOut = stdout.GetStringBuilder(),
-					StdErr = stderr.GetStringBuilder(),
-				};
-
-				process.Close();
-
-				return result;
-			}
 		}
 
 		public void Start(
@@ -189,34 +65,28 @@ namespace Peach.Core
 			if (environment != null)
 				environment.ForEach(x => si.EnvironmentVariables[x.Key] = x.Value);
 
-			_logger.Debug("Start(): {1} {2}", executable, arguments);
+			_logger.Debug("Start(): start process");
 			_process = SysProcess.Start(si);
 
 			var prefix = "[{0}] {1}".Fmt(_process.Id, Path.GetFileName(executable));
 
-			TextWriter stdout = null;
-			TextWriter stderr = null;
-			if (!string.IsNullOrEmpty(logDir) && Directory.Exists(logDir))
-			{
-				stdout = new StreamWriter(Path.Combine(logDir, "stdout.log"));
-				stderr = new StreamWriter(Path.Combine(logDir, "stderr.log"));
-			}
-
 			// Close stdin so all reads return zero
 			_process.StandardInput.Close();
 
-			_logger.Debug("[{0}] Start(): start stdout task".Fmt(_process.Id));
+			_logger.Debug("Start(): start stdout task ({0})".Fmt(_process.Id));
 			_stdoutTask = Task.Factory.StartNew(LoggerTask, new LoggerArgs { 
 				Prefix = prefix + " out",
 				Source = _process.StandardOutput,
-				Sink = stdout,
+				LogName = "stdout.log",
+				LogDir = logDir,
 			});
 
-			_logger.Debug("[{0}] Start(): start stderr task".Fmt(_process.Id));
+			_logger.Debug("Start(): start stderr task ({0})".Fmt(_process.Id));
 			_stderrTask = Task.Factory.StartNew(LoggerTask, new LoggerArgs { 
 				Prefix = prefix + " err",
 				Source = _process.StandardError,
-				Sink = stderr,
+				LogName = "stderr.log",
+				LogDir = logDir,
 			});
 
 			Thread.Sleep(100);
@@ -238,7 +108,7 @@ namespace Peach.Core
 				_logger.Debug("[{0}] Stop(): SIGTERM", _pid);
 				try
 				{
-					Terminate(_process);
+					Terminate();
 				}
 				catch (Exception ex)
 				{
@@ -264,7 +134,7 @@ namespace Peach.Core
 					_logger.Debug("[{0}] Stop(): SIGKILL", _pid);
 					try
 					{
-						Kill(_process);
+						Kill();
 					}
 					catch (Exception ex)
 					{
@@ -304,9 +174,9 @@ namespace Peach.Core
 				return;
 
 			if (force)
-				Kill(_process);
+				Kill();
 			else
-				Terminate(_process);
+				Terminate();
 		}
 
 		public bool WaitForExit(int timeout)
@@ -377,16 +247,23 @@ namespace Peach.Core
 			Stop(timeout);
 		}
 
-		struct LoggerArgs
+		class LoggerArgs
 		{
-			public string Prefix;
-			public StreamReader Source;
-			public TextWriter Sink;
+			public string Prefix { get; set; }
+			public StreamReader Source { get; set; }
+			public string LogName { get; set; }
+			public string LogDir { get; set; }
 		}
 
 		private void LoggerTask(object obj)
 		{
 			var args = (LoggerArgs)obj;
+
+			StreamWriter writer = null;
+			if (!string.IsNullOrEmpty(args.LogDir) && Directory.Exists(args.LogDir))
+			{
+				writer = new StreamWriter(Path.Combine(args.LogDir, args.LogName));
+			}
 
 			try
 			{
@@ -397,18 +274,18 @@ namespace Peach.Core
 						var line = reader.ReadLine();
 						if (!string.IsNullOrEmpty(line) && _logger.IsDebugEnabled)
 							_logger.Debug("{0}: {1}", args.Prefix, line);
-						if (args.Sink != null)
-							args.Sink.WriteLine(line);
+						if (writer != null)
+							writer.WriteLine(line);
 					}
 					_logger.Debug("{0}: EOF", args.Prefix);
 				}
 			}
 			finally
 			{
-				if (args.Sink != null)
+				if (writer != null)
 				{
-					args.Sink.Close();
-					args.Sink.Dispose();
+					writer.Close();
+					writer.Dispose();
 				}
 			}
 		}
