@@ -10,8 +10,6 @@
 #define SLEEP_FACTOR 1000
 #else
 #include <unistd.h>
-#include <signal.h>
-#include <sys/wait.h>
 #define SLEEP_FACTOR 1
 #endif
 
@@ -44,8 +42,6 @@ int main(int /*argc*/, char** argv) {
 	return 0;
 }
 
-#ifndef WIN32
-
 const char* signal_str(int sig) {
 	switch (sig) {
 		case SIGHUP   : return "SIGHUP";
@@ -54,7 +50,7 @@ const char* signal_str(int sig) {
 		case SIGILL   : return "SIGILL";
 		case SIGTRAP  : return "SIGTRAP";
 		case SIGABRT  : return "SIGABRT";
-		// case SIGEMT   : return "SIGEMT";
+		case SIGEMT   : return "SIGEMT";
 		case SIGFPE   : return "SIGFPE";
 		case SIGKILL  : return "SIGKILL";
 		case SIGBUS   : return "SIGBUS";
@@ -76,7 +72,7 @@ const char* signal_str(int sig) {
 		case SIGVTALRM: return "SIGVTALRM";
 		case SIGPROF  : return "SIGPROF";
 		case SIGWINCH : return "SIGWINCH";
-		// case SIGINFO  : return "SIGINFO";
+		case SIGINFO  : return "SIGINFO";
 		case SIGUSR1  : return "SIGUSR1";
 		case SIGUSR2  : return "SIGUSR2";
 		default:        return "<unknown>";
@@ -134,5 +130,3 @@ void cmd_fork() {
 		exit(EXIT_SUCCESS);
 	}
 }
-
-#endif
