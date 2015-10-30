@@ -89,7 +89,7 @@ namespace Peach.Core
 			if (environment != null)
 				environment.ForEach(x => si.EnvironmentVariables[x.Key] = x.Value);
 
-			_logger.Debug("Run(): {0} {1}", executable, arguments);
+			_logger.Debug("Run(): \"{0} {1}\"", executable, arguments);
 			using (var process = SysProcess.Start(si))
 			{
 				var prefix = "[{0}] {1}".Fmt(process.Id, Path.GetFileName(executable));
@@ -99,19 +99,19 @@ namespace Peach.Core
 				// Close stdin so all reads return zero
 				process.StandardInput.Close();
 
-				_logger.Debug("[{0}] Run(): start stdout task".Fmt(process.Id));
+				_logger.Trace("[{0}] Run(): start stdout task".Fmt(process.Id));
 				var stdoutTask = Task.Factory.StartNew(LoggerTask, new LoggerArgs { 
 					Prefix = prefix + " out",
 					Source = process.StandardOutput,
 					Sink = stdout,
-				});
+				}, TaskCreationOptions.LongRunning);
 
-				_logger.Debug("[{0}] Run(): start stderr task".Fmt(process.Id));
+				_logger.Trace("[{0}] Run(): start stderr task".Fmt(process.Id));
 				var stderrTask = Task.Factory.StartNew(LoggerTask, new LoggerArgs { 
 					Prefix = prefix + " err",
 					Source = process.StandardError,
 					Sink = stderr,
-				});
+				}, TaskCreationOptions.LongRunning);
 
 				bool clean = false;
 				try
@@ -189,7 +189,7 @@ namespace Peach.Core
 			if (environment != null)
 				environment.ForEach(x => si.EnvironmentVariables[x.Key] = x.Value);
 
-			_logger.Debug("Start(): {1} {2}", executable, arguments);
+			_logger.Debug("Start(): \"{0} {1}\"", executable, arguments);
 			_process = SysProcess.Start(si);
 
 			var prefix = "[{0}] {1}".Fmt(_process.Id, Path.GetFileName(executable));
@@ -205,19 +205,19 @@ namespace Peach.Core
 			// Close stdin so all reads return zero
 			_process.StandardInput.Close();
 
-			_logger.Debug("[{0}] Start(): start stdout task".Fmt(_process.Id));
+			_logger.Trace("[{0}] Start(): start stdout task".Fmt(_process.Id));
 			_stdoutTask = Task.Factory.StartNew(LoggerTask, new LoggerArgs { 
 				Prefix = prefix + " out",
 				Source = _process.StandardOutput,
 				Sink = stdout,
-			});
+			}, TaskCreationOptions.LongRunning);
 
-			_logger.Debug("[{0}] Start(): start stderr task".Fmt(_process.Id));
+			_logger.Trace("[{0}] Start(): start stderr task".Fmt(_process.Id));
 			_stderrTask = Task.Factory.StartNew(LoggerTask, new LoggerArgs { 
 				Prefix = prefix + " err",
 				Source = _process.StandardError,
 				Sink = stderr,
-			});
+			}, TaskCreationOptions.LongRunning);
 
 			Thread.Sleep(100);
 			if (!IsRunning)
