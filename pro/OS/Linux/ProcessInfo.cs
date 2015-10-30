@@ -36,7 +36,7 @@ namespace Peach.Pro.OS.Linux
 			}
 			catch (Exception ex)
 			{
-				Logger.Trace("Failed to read \"{0}\".  {1}", path, ex.Message);
+				Logger.Info("Failed to read \"{0}\".  {1}", path, ex.Message);
 				return new Tuple<string,string[]>(null, null);
 			}
 

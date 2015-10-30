@@ -114,7 +114,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 			_messageExit = false;
 
 			if ((RestartAfterFault && args.LastWasFault) || RestartOnEachTest)
-				_process.Stop(WaitForExitTimeout);
+				_process.Stop();
 
 			if (StartOnCall == null)
 				_Start();
@@ -138,7 +138,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		public override void SessionFinished()
 		{
-			_process.Stop(WaitForExitTimeout);
+			_process.Stop();
 		}
 
 		public override void IterationFinished()
@@ -146,19 +146,17 @@ namespace Peach.Pro.Core.Agent.Monitors
 			if (!_messageExit && FaultOnEarlyExit && !_process.IsRunning)
 			{
 				_data = MakeFault("ExitedEarly", "Process '{0}' exited early.".Fmt(Executable));
-				_process.Stop(WaitForExitTimeout);
+				_process.Stop();
 			}
 			else  if (StartOnCall != null)
 			{
 				Logger.Debug("IterationFinished");
-				if (!NoCpuKill)
-					_process.WaitForIdle(WaitForExitTimeout);
-				else
-					_process.WaitForExit(WaitForExitTimeout);
+				_process.WaitForExit(WaitForExitTimeout, !NoCpuKill);
+				_process.Stop();
 			}
 			else if (RestartOnEachTest)
 			{
-				_process.Stop(WaitForExitTimeout);
+				_process.Stop();
 			}
 		}
 
@@ -166,14 +164,15 @@ namespace Peach.Pro.Core.Agent.Monitors
 		{
 			if (msg == StartOnCall)
 			{
-				_process.Stop(WaitForExitTimeout);
+				_process.Stop();
 				_Start();
 			}
 			else if (msg == WaitForExitOnCall)
 			{
 				_messageExit = true; 
-				if (!_process.WaitForExit(WaitForExitTimeout))
+				if (!_process.WaitForExit(WaitForExitTimeout, false))
 					_data = MakeFault("FailedToExit", "Process '{0}' did not exit in {1}ms.".Fmt(Executable, WaitForExitTimeout));
+				_process.Stop();
 			}
 		}
 	}

@@ -71,8 +71,7 @@ log_if_crash
 quit
 ";
 
-		Process _gdb;
-		Process _inferior;
+		Process _process;
 		MonitorData _fault;
 		bool _messageExit = false;
 		bool _secondStart = false;
@@ -101,8 +100,7 @@ quit
 		public GdbDebugger(string name)
 			: base(name)
 		{
-			_gdb = PlatformFactory<Process>.CreateInstance(logger);
-			_inferior = PlatformFactory<Process>.CreateInstance(logger);
+			_process = PlatformFactory<Process>.CreateInstance(logger);
 		}
 
 		public override void StartMonitor(Dictionary<string, string> args)
@@ -139,7 +137,7 @@ quit
 		{
 			try
 			{
-				_gdb.Start(GdbPath, "-batch -n -x {0}".Fmt(_gdbCmd), null, _tmpDir.Path);
+				_process.Start(GdbPath, "-batch -n -x {0}".Fmt(_gdbCmd), null, _tmpDir.Path);
 			}
 			catch (Exception ex)
 			{
@@ -147,31 +145,14 @@ quit
 			}
 
 			// Wait for pid file to exist, open it up and read it
-			while (!File.Exists(_gdbPid) && _gdb.IsRunning)
+			while (!File.Exists(_gdbPid) && _process.IsRunning)
 				Thread.Sleep(10);
 			
-			if (!File.Exists(_gdbPid) && !_gdb.IsRunning)
+			if (!File.Exists(_gdbPid) && !_process.IsRunning)
 				throw new PeachException("GDB was unable to start '{0}'.".Fmt(Executable));
-
-			try
-			{
-				var pid = Convert.ToInt32(File.ReadAllText(_gdbPid));
-				_inferior.Attach(pid);
-			}
-			catch (ArgumentException)
-			{
-				// inferior ran to completion
-			}
 
 			// Notify event handler the process started
 			OnInternalEvent(EventArgs.Empty);
-		}
-
-		void _Stop()
-		{
-			_inferior.Shutdown(false);
-			_gdb.WaitForIdle(WaitForExitTimeout);
-			_inferior.Close();
 		}
 
 		MonitorData MakeFault(string type, string reason)
@@ -203,12 +184,12 @@ quit
 			_messageExit = false;
 			_secondStart = true;
 
-			if ((RestartAfterFault && args.LastWasFault) || RestartOnEachTest || !_gdb.IsRunning)
-				_Stop();
+			if ((RestartAfterFault && args.LastWasFault) || RestartOnEachTest || !_process.IsRunning)
+				_process.Stop();
 			else if (firstStart)
 				return;
 
-			if (!_gdb.IsRunning && StartOnCall == null)
+			if (!_process.IsRunning && StartOnCall == null)
 				_Start();
 		}
 
@@ -219,7 +200,7 @@ quit
 
 			logger.Info("DetectedFault - Caught fault with gdb");
 
-			_Stop();
+			_process.Stop();
 
 			byte[] bytes = File.ReadAllBytes(_gdbLog);
 			string output = Encoding.UTF8.GetString(bytes);
@@ -280,28 +261,25 @@ quit
 
 		public override void SessionFinished()
 		{
-			_Stop();
+			_process.Stop();
 			_tmpDir.Dispose();
 		}
 
 		public override void IterationFinished()
 		{
-			if (!_messageExit && FaultOnEarlyExit && !_gdb.IsRunning)
+			if (!_messageExit && FaultOnEarlyExit && !_process.IsRunning)
 			{
-				_Stop(); // Stop 1st so stdout/stderr logs are closed
+				_process.Stop(); // Stop 1st so stdout/stderr logs are closed
 				_fault = MakeFault("ExitedEarly", "Process exited early.");
 			}
 			else if (StartOnCall != null)
 			{
-				if (!NoCpuKill)
-					_inferior.WaitForIdle(WaitForExitTimeout);
-				else
-					_inferior.WaitForExit(WaitForExitTimeout);
-				_gdb.Stop(WaitForExitTimeout);
+				_process.WaitForExit(WaitForExitTimeout, !NoCpuKill);
+				_process.Stop();
 			}
 			else if (RestartOnEachTest)
 			{
-				_Stop();
+				_process.Stop();
 			}
 		}
 
@@ -309,15 +287,16 @@ quit
 		{
 			if (msg == StartOnCall)
 			{
-				_Stop();
+				_process.Stop();
 				_Start();
 			}
 			else if (msg == WaitForExitOnCall)
 			{
 				_messageExit = true;
-
-				if (!_gdb.WaitForExit(WaitForExitTimeout))
+				if (!_process.WaitForExit(WaitForExitTimeout, false))
 					_fault = MakeFault("FailedToExit", "Process did not exit in " + WaitForExitTimeout + "ms.");
+
+				_process.Stop();
 			}
 		}
 	}
