@@ -22,8 +22,7 @@ TIP: When fuzzing, many security products (such as anti-virus programs) can inte
 {product} is licensed on a per-concurrent instance basis for a one year duration.
 
 Peach Fuzzer, LLC, delivers licenses via email after each purchase, typically 
-within 24 hours during the business week. The filename of the Peach Fuzzer l
-icense, _Peach.license_, is the same for all operating system platforms.
+within 24 hours during the business week. The filename of the Peach Fuzzer license, _Peach.license_, is the same for all operating system platforms.
 
 When the license arrives, place a copy of it in one of the following folders:
 
