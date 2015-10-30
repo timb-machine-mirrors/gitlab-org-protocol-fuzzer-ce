@@ -18,12 +18,16 @@ namespace Peach.Pro.Core
 
 		protected override string FileName(string executable)
 		{
-			return Utilities.GetAppResourcePath("PeachTrampoline");
+			return "python";
 		}
 
 		protected override string Arguments(string executable, string arguments)
 		{
-			return executable + " " + arguments;
+			return string.Join(" ", 
+				Utilities.GetAppResourcePath("trampoline.py"), 
+				executable,
+				arguments
+			);
 		}
 
 		protected override void Terminate(SysProcess process)
