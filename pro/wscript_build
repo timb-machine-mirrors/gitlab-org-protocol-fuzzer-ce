@@ -21,6 +21,7 @@ subdirs = [
 	'Test/Apps/CrashingProgram',
 	'Test/Apps/CrashTest',
 	'Test/Apps/CrashTestDummy',
+	'Test/Apps/SimpleHttpServer',
 	'Test/Core',
 	'Test/Godel',
 	'Test/OS/Linux',
