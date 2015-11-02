@@ -65,7 +65,7 @@ gemspec :path => "%s"
 	adr = conf.find_program('asciidoctor')
 	(out,err) = conf.cmd_and_log(adr + ['--version'], output=Context.BOTH)
 
-	if 'Asciidoctor 1.5. ' not in out:
+	if 'Asciidoctor 1.5.' not in out:
 		raise Errors.WafError("Expected Asciidoctor 1.5.x but found:\n%s" % out)
 
 	v.append_value('supported_features', 'asciidoctor-pdf')
