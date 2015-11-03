@@ -2,8 +2,8 @@
 
 deps = [
 	'System.dll',
+	'System.Runtime.Remoting.dll',
 	'System.Core.dll',
-	'System.Xml.dll',
 	'Mono.Posix.dll',
 ]
 
