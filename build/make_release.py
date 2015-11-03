@@ -106,6 +106,8 @@ def extract_pkg():
 						shutil.copy(os.path.join(path, item), reldir)
 						pkgs.append(os.path.join(reldir, item))
 
+		return pkgs
+
 def extract_doc():
 	# Lookfor output/doc.zip
 	# Extract to release/tmp/doc and make list of all files
