@@ -32,12 +32,12 @@ output
 The result should be:    <--- archive to smb://nas/builds/peach-pro
 output
   release
-    ${buildtag}          <--- publish to ssh://dl.peachfuzzer.com
-      release.json
-      peach-pro-${buildtag}-${platform}_release.zip
-      peach-pro-${buildtag}-${platform}_release.zip.sha1
-      pits
-        ${pit}.zip
+	${buildtag}          <--- publish to ssh://dl.peachfuzzer.com
+	  release.json
+	  peach-pro-${buildtag}-${platform}_release.zip
+	  peach-pro-${buildtag}-${platform}_release.zip.sha1
+	  pits
+		${pit}.zip
 '''
 
 def to_list(sth):
@@ -80,31 +80,31 @@ def sha1sum(filename):
 		f.write('SHA1(%s)= %s\n' % (os.path.basename(filename), digest))
 
 def extract_pkg():
-        # Copy for output/$CFG_release/pkg/*.zip to release folder
+		# Copy for output/$CFG_release/pkg/*.zip to release folder
 
-        print ''
-        print 'Extract packages'
-        print ''
+		print ''
+		print 'Extract packages'
+		print ''
 
-        pkgs = []
+		pkgs = []
 
-        for cfg in os.listdir(outdir):
-                if not cfg.endswith('release'):
-                        print 'IGNORING   %s' % cfg
-                        continue
+		for cfg in os.listdir(outdir):
+				if not cfg.endswith('release'):
+						print 'IGNORING   %s' % cfg
+						continue
 
-                path = os.path.join(outdir, cfg, 'pkg')
-                if not os.path.exists(path):
-                        continue
+				path = os.path.join(outdir, cfg, 'pkg')
+				if not os.path.exists(path):
+						continue
 
-                print 'PROCESSING %s' % cfg
+				print 'PROCESSING %s' % cfg
 
-                for item in os.listdir(path):
-                        if not item.endswith('.zip'):
-                                continue
-                        print ' - %s' % item
-                        shutil.copy(os.path.join(path, item), reldir)
-                        pkgs.append(os.path.join(reldir, item))
+				for item in os.listdir(path):
+						if not item.endswith('.zip'):
+								continue
+						print ' - %s' % item
+						shutil.copy(os.path.join(path, item), reldir)
+						pkgs.append(os.path.join(reldir, item))
 
 def extract_doc():
 	# Lookfor output/doc.zip
