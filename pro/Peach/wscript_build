@@ -77,6 +77,7 @@ peach_pro = common + [
 internal = common + [
 	# Internal pit testing tools
 	'nunit-console',
+	'nunit-tools',
 	'PitTester.exe',
 	'Godel.Tests.dll',
 	'Peach.Core.Test.dll',
