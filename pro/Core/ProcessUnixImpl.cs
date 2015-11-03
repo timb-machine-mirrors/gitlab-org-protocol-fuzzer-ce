@@ -1,9 +1,12 @@
-﻿using System;
-using Peach.Core;
-using System.Runtime.InteropServices;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
-using SysProcess = System.Diagnostics.Process;
+using System.Net;
+using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Threading;
+using Peach.Core;
+using Logger = NLog.Logger;
+using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.Core
 {
@@ -12,22 +15,68 @@ namespace Peach.Pro.Core
 		const int SIGKILL = 9;
 		const int SIGTERM = 15;
 
-		protected ProcessUnixImpl(NLog.Logger logger) : base(logger)
+		protected ProcessUnixImpl(Logger logger) : base(logger)
 		{
 		}
 
-		protected override string FileName(string executable)
+		protected override SysProcess CreateProcess(
+			string executable,
+			string arguments,
+			string workingDirectory,
+			Dictionary<string, string> environment)
 		{
-			return "python";
-		}
+			var listener = new TcpListener(IPAddress.Loopback, 0);
+			listener.Start();
+			var local = (IPEndPoint)listener.LocalEndpoint;
 
-		protected override string Arguments(string executable, string arguments)
-		{
-			return string.Join(" ", 
-				Utilities.GetAppResourcePath("trampoline.py"), 
+			_logger.Debug("CreateProcess(): TcpListener bound to: {0}", local);
+
+			var args = string.Join(" ",
+				"--debugger-agent=transport=dt_socket,address=127.0.0.1:{0},setpgid=y,suspend=n".Fmt(local.Port),
+				Utilities.GetAppResourcePath("PeachTrampoline.exe"),
 				executable,
 				arguments
 			);
+
+			var si = new System.Diagnostics.ProcessStartInfo
+			{
+				FileName = "mono",
+				Arguments = args,
+				UseShellExecute = false,
+				RedirectStandardInput = true,
+				RedirectStandardOutput = true,
+				RedirectStandardError = true,
+				WorkingDirectory = workingDirectory ?? "",
+			};
+
+			if (environment != null)
+				environment.ForEach(x => si.EnvironmentVariables[x.Key] = x.Value);
+
+			_logger.Debug("CreateProcess(): \"{0} {1}\"", executable, arguments);
+			var process = SysProcess.Start(si);
+
+			using (var tcp = listener.AcceptTcpClient())
+			using (var stream = tcp.GetStream())
+			{
+				var handshake = new byte[13]; // "DWP handshake"
+				var header = new byte[256];
+
+				_logger.Debug("CreateProcess(): Reading handshake...");
+				stream.Read(handshake, 0, handshake.Length);
+				_logger.Debug("CreateProcess(): Echo: {0}", Encoding.UTF8.GetString(handshake));
+				stream.Write(handshake, 0, handshake.Length);
+
+				// wait until EOF
+				while (true)
+				{
+					var ret = stream.Read(header, 0, header.Length);
+					_logger.Debug("CreateProcess(): Read {0} bytes", ret);
+					if (ret == 0)
+						break;
+				}
+			}
+
+			return process;
 		}
 
 		protected override void Terminate(SysProcess process)

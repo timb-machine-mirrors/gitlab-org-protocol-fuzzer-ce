@@ -21,7 +21,7 @@ namespace Peach.Core
 		protected NLog.Logger _logger;
 		protected SysProcess _process;
 		protected int _pid = -1;
-		protected bool _inferior = false;
+		protected bool _inferior;
 		private Task _stdoutTask;
 		private Task _stderrTask;
 
@@ -36,9 +36,31 @@ namespace Peach.Core
 
 		protected abstract void Kill(SysProcess process);
 
-		protected abstract string FileName(string executable);
+		protected virtual SysProcess CreateProcess(
+			string executable, 
+			string arguments,
+			string workingDirectory,
+			Dictionary<string, string> environment)
+		{
+			var si = new System.Diagnostics.ProcessStartInfo
+			{
+				FileName = executable,
+				Arguments = arguments,
+				UseShellExecute = false,
+				RedirectStandardInput = true,
+				RedirectStandardOutput = true,
+				RedirectStandardError = true,
+				WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden,
+				CreateNoWindow = true,
+				WorkingDirectory = workingDirectory ?? "",
+			};
 
-		protected abstract string Arguments(string executable, string arguments);
+			if (environment != null)
+				environment.ForEach(x => si.EnvironmentVariables[x.Key] = x.Value);
+
+			_logger.Debug("Start(): \"{0} {1}\"", executable, arguments);
+			return SysProcess.Start(si);
+		}
 
 		public bool IsRunning
 		{ 
@@ -63,7 +85,7 @@ namespace Peach.Core
 			string workingDirectory,
 			int timeout)
 		{
-			var process = PlatformFactory<Process>.CreateInstance(logger);
+			var process = CreateInstance(logger);
 			return process._Run(executable, arguments, environment, workingDirectory, timeout);
 		}
 
@@ -74,23 +96,8 @@ namespace Peach.Core
 			string workingDirectory,
 			int timeout)
 		{
-			var si = new System.Diagnostics.ProcessStartInfo {
-				FileName = FileName(executable),
-				Arguments = Arguments(executable, arguments),
-				UseShellExecute = false,
-				RedirectStandardInput = true,
-				RedirectStandardOutput = true,
-				RedirectStandardError = true,
-				WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden,
-				CreateNoWindow = true,
-				WorkingDirectory = workingDirectory ?? "",
-			};
-
-			if (environment != null)
-				environment.ForEach(x => si.EnvironmentVariables[x.Key] = x.Value);
-
 			_logger.Debug("Run(): \"{0} {1}\"", executable, arguments);
-			using (var process = SysProcess.Start(si))
+			using (var process = CreateProcess(executable, arguments, workingDirectory, environment))
 			{
 				var prefix = "[{0}] {1}".Fmt(process.Id, Path.GetFileName(executable));
 				var stdout = new StringWriter();
@@ -177,20 +184,7 @@ namespace Peach.Core
 			if (IsRunning)
 				throw new Exception("Process already started");
 
-			var si = new System.Diagnostics.ProcessStartInfo {
-				FileName = FileName(executable),
-				Arguments = Arguments(executable, arguments),
-				UseShellExecute = false,
-				RedirectStandardInput = true,
-				RedirectStandardOutput = true,
-				RedirectStandardError = true,
-			};
-
-			if (environment != null)
-				environment.ForEach(x => si.EnvironmentVariables[x.Key] = x.Value);
-
-			_logger.Debug("Start(): \"{0} {1}\"", executable, arguments);
-			_process = SysProcess.Start(si);
+			_process = CreateProcess(executable, arguments, null, environment);
 
 			var prefix = "[{0}] {1}".Fmt(_process.Id, Path.GetFileName(executable));
 

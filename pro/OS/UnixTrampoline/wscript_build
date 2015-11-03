@@ -1,0 +1,15 @@
+#!/usr/bin/env python
+
+deps = [
+	'System.dll',
+	'System.Core.dll',
+	'System.Xml.dll',
+	'Mono.Posix.dll',
+]
+
+bld(
+	features = 'cs',
+	use = deps,
+	source = bld.path.ant_glob('**/*.cs'),
+	name = 'PeachTrampoline.exe',
+)
