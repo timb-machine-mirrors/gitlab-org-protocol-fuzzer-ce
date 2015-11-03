@@ -39,6 +39,7 @@ common = [
 	'Peach.Pro.OS.OSX.dll',
 
 	# Include sample programs so sample pits work
+	'SimpleHttpServer',
 	'CrashableServer',
 	'CrashingFileConsumer',
 	'CrashingProgram',
