@@ -31,8 +31,6 @@ if bld.env.MCS and bld.env.DEST_OS != 'win32':
 common = [
 	# Peach
 	'Peach.exe',
-	'PeachWorker.exe',
-	'PeachService.exe',
 	'Peach.Pro.Web',
 
 	# Peach Platform Suppoort
@@ -70,6 +68,8 @@ peach_pro = common + [
 	'PeachFuzzBang.exe',
 	'PeachMinset.exe',
 	'PeachSampleNinja.exe',
+	'PeachWorker.exe',
+	'PeachService.exe',
 
 	# Basic Block Pin Tool
 	'pin',               # Pin Binaries
