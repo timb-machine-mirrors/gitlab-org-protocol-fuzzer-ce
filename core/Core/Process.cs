@@ -96,7 +96,6 @@ namespace Peach.Core
 			string workingDirectory,
 			int timeout)
 		{
-			_logger.Debug("Run(): \"{0} {1}\"", executable, arguments);
 			using (var process = CreateProcess(executable, arguments, workingDirectory, environment))
 			{
 				var prefix = "[{0}] {1}".Fmt(process.Id, Path.GetFileName(executable));
@@ -120,7 +119,7 @@ namespace Peach.Core
 					Sink = stderr,
 				}, TaskCreationOptions.LongRunning);
 
-				bool clean = false;
+				var clean = false;
 				try
 				{
 					clean = process.WaitForExit(timeout);
@@ -212,14 +211,6 @@ namespace Peach.Core
 				Source = _process.StandardError,
 				Sink = stderr,
 			}, TaskCreationOptions.LongRunning);
-
-			Thread.Sleep(100);
-			if (!IsRunning)
-			{
-				_logger.Debug("Process exited early with ExitCode: {0}", _process.ExitCode);
-				if (_process.ExitCode != 0)
-					throw new Exception("Process failed to start. ExitCode: {0}".Fmt(_process.ExitCode));
-			}
 
 			_pid = _process.Id;
 			_inferior = false;

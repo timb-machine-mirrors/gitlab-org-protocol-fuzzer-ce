@@ -65,8 +65,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 		{
 			_data = null;
 
-			Logger.Debug("_Start(): Running command " + Command + " with arguments " + Arguments);
-
 			try
 			{
 				var result = Process.Run(Logger, Command, Arguments, null, WorkingDirectory, Timeout);
