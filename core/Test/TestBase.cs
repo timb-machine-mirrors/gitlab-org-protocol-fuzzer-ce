@@ -47,6 +47,7 @@ namespace Peach.Core.Test
 					Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}"
 				};
 
+
 				var config = new LoggingConfiguration();
 				config.AddTarget("console", consoleTarget);
 
@@ -62,6 +63,20 @@ namespace Peach.Core.Test
 
 				var rule = new LoggingRule("*", logLevel, consoleTarget);
 				config.LoggingRules.Add(rule);
+
+				var peachLog = Environment.GetEnvironmentVariable("PEACH_LOG");
+				if (!string.IsNullOrEmpty(peachLog))
+				{
+					var fileTarget = new FileTarget
+					{
+						Name = "FileTarget",
+						Layout = "${longdate} ${logger} ${message}",
+						FileName = peachLog,
+						Encoding = System.Text.Encoding.UTF8,
+					};
+					config.AddTarget("file", fileTarget);
+					config.LoggingRules.Add(new LoggingRule("*", logLevel, fileTarget));
+				}
 
 				LogManager.Configuration = config;
 			}
