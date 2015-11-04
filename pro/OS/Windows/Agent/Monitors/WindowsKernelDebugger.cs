@@ -182,8 +182,10 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 	public class DebuggerServer : MarshalByRefObject
 	{
-		public KernelDebuggerInstance GetKernelDebugger()
+		public KernelDebuggerInstance GetKernelDebugger(int logLevel)
 		{
+			Utilities.ConfigureLogging(logLevel);
+
 			return new KernelDebuggerInstance();
 		}
 	}
@@ -359,7 +361,9 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			{
 				var remote = (DebuggerServer)Activator.GetObject(typeof(DebuggerServer), channel);
 
-				_dbg = remote.GetKernelDebugger();
+				var logLevel = Logger.IsTraceEnabled ? 2 : (Logger.IsDebugEnabled ? 1 : 0);
+
+				_dbg = remote.GetKernelDebugger(logLevel);
 				_dbg.SymbolsPath = SymbolsPath;
 				_dbg.WinDbgPath = WinDbgPath;
 				_dbg.IgnoreFirstChanceGuardPage = IgnoreFirstChanceGuardPage;
@@ -379,6 +383,10 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			{
 				_dbg.WaitForConnection(timeout);
 			}
+			catch (TimeoutException ex)
+			{
+				throw new SoftException(ex);
+			}
 			catch (RemotingException ex)
 			{
 				throw new SoftException("Error occured when waiting for kernel connection.", ex);
@@ -397,15 +405,14 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 					{
 						CreateNoWindow = true,
 						UseShellExecute = false,
-						Arguments = "--timebomb=false " + guid, // No timebomb, using JobObject
-						FileName = Utilities.GetAppResourcePath("Peach.Pro.WindowsDebugInstance.exe")
+						Arguments = "--ipc {0} \"{1}\"".Fmt(guid, typeof(DebuggerServer).AssemblyQualifiedName),
+						FileName = Utilities.GetAppResourcePath("PeachTrampoline.exe")
 					}
 				};
 
 				if (Logger.IsTraceEnabled)
 				{
 					_process.EnableRaisingEvents = true;
-					_process.StartInfo.Arguments += " --debug";
 					_process.OutputDataReceived += LogProcessData;
 					_process.ErrorDataReceived += LogProcessData;
 					_process.StartInfo.RedirectStandardError = true;

@@ -45,9 +45,11 @@ common = [
 	'CrashingProgram',
 	'ComTest',
 
+	# Common side-process helpers
+	'PeachTrampoline.exe',
+
 	# Linux side-process helpers
 	'PeachLinuxCrashHandler.exe',
-	'PeachTrampoline.exe',
 
 	# Windows side-process helpers
 	'Peach.Pro.ComContainer.exe',
