@@ -54,59 +54,6 @@ namespace PitTester
 		}
 
 		[Test]
-		public void Verify([ValueSource("AllPits")]TestCase test)
-		{
-			var errors = new List<Exception>();
-
-			for (int i = 0; i < test.Pit.Versions[0].Files.Count; ++i)
-			{
-				var fileName = test.Pit.Versions[0].Files[i].Name;
-
-				try
-				{
-					PitTester.VerifyPit(test.LibraryPath, fileName, i == 0);
-				}
-				catch (Exception ex)
-				{
-					errors.Add(ex);
-					Console.WriteLine("{0}", fileName);
-					Console.WriteLine(ex.ToString());
-				}
-			}
-
-			CollectionAssert.IsEmpty(errors);
-		}
-
-		[Test]
-		public void QuickTest([ValueSource("AllPits")]TestCase test)
-		{
-			var fileName = test.Pit.Versions[0].Files[0].Name;
-
-			try
-			{
-				PitTester.TestPit(test.LibraryPath, fileName, true, null, true);
-			}
-			catch (FileNotFoundException)
-			{
-				Assert.Ignore("No test definition found.");
-			}
-			catch (AggregateException ex)
-			{
-				var sb = new StringBuilder();
-				ex.Handle(e =>
-				{
-					sb.AppendLine(e.Message);
-					return true;
-				});
-				Assert.Fail(sb.ToString());
-			}
-			catch (Exception ex)
-			{
-				Assert.Fail(ex.Message);
-			}
-		}
-
-		[Test]
 		public void TestIgnoreArrayField()
 		{
 			const string xml = @"
