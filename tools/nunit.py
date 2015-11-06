@@ -52,7 +52,7 @@ def run_nunit(args, asm, name, test):
 
 def main():
 	p = argparse.ArgumentParser(description='nunit-runner')
-	p.add_argument('--timeout', type=int, default=180)
+	p.add_argument('--timeout', type=int, default=600)
 	p.add_argument('--result')
 	p.add_argument('--outdir')
 	p.add_argument('--include')
