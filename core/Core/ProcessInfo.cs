@@ -1,55 +1,78 @@
-using System.Diagnostics;
-using SysProcess = System.Diagnostics.Process;
+using System.Collections.Generic;
+using System.Text;
+using NLog;
 
 namespace Peach.Core
 {
-	/// <summary>
-	/// Helper class to get information on a process.  The built in 
-	/// methods on mono aren't 100% implemented.
-	/// </summary>
-	
-	public interface IProcessInfo
+	public struct ProcessRunResult
 	{
-		/// <summary>
-		/// Returns a populated ProcessInfo instance.
-		/// throws ArgumentException if the Process is not valid.
-		/// </summary>
-		/// <param name="p">Process to obtain info about.</param>
-		/// <returns>Information about the process.</returns>
-		ProcessInfo Snapshot(SysProcess p);
-
-		/// <summary>
-		/// Returns a list of Processes that match the current name.
-		/// </summary>
-		/// <remarks>
-		/// this works around mono compatibility issues on linux/osx.
-		/// </remarks>
-		/// <param name="name">Name of process.</param>
-		/// <returns>List of processes.</returns>
-		SysProcess[] GetProcessesByName(string name);
-
-		/// <summary>
-		/// Kill the process and wait indefinitely for the process to exit.
-		/// </summary>
-		/// <remarks>
-		/// this works around mono compatibility issues on linux/osx.
-		/// </remarks>
-		/// <param name="p">Process to kill.</param>
-		void Kill(SysProcess p);
-
-		/// <summary>
-		/// Kill the process and wait the specified time for the process to exit.
-		/// </summary>
-		/// <remarks>
-		/// this works around mono compatibility issues on linux/osx.
-		/// </remarks>
-		/// <param name="p">Process to kill.</param>
-		/// <param name="milliseconds">The amount of time to wait for the process to exit.</param>
-		/// <returns>True if process was killed, false if it didn't exit within the timeout.</returns>
-		bool Kill(SysProcess p, int milliseconds);
+		public int Pid;
+		public bool Timeout;
+		public int ExitCode;
+		public StringBuilder StdErr;
+		public StringBuilder StdOut;
 	}
 
-	public class ProcessInfo : StaticPlatformFactory<IProcessInfo>
+	public interface IProcessHelper
+	{
+		ProcessRunResult Run(NLog.Logger logger,
+			string executable,
+			string arguments,
+			Dictionary<string, string> environment,
+			string workingDirectory,
+			int timeout);
+
+		Process Start(NLog.Logger logger,
+			string executable,
+			string arguments,
+			Dictionary<string, string> environment,
+			string workingDirectory);
+
+		Process GetCurrentProcess(NLog.Logger logger);
+
+		Process GetProcessById(NLog.Logger logger, int id);
+
+		Process[] GetProcessesByName(NLog.Logger logger, string name);
+	}
+
+	public class ProcessHelper : StaticPlatformFactory<IProcessHelper>
+	{
+		static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
+
+		public static ProcessRunResult Run(string executable,
+			string arguments,
+			Dictionary<string, string> environment,
+			string workingDirectory,
+			int timeout)
+		{
+			return Instance.Run(Logger, executable, arguments, environment, workingDirectory, timeout);
+		}
+
+		public static Process Start(string executable,
+			string arguments,
+			Dictionary<string, string> environment,
+			string workingDirectory)
+		{
+			return Instance.Start(Logger, executable, arguments, environment, workingDirectory);
+		}
+
+		public static Process GetCurrentProcess()
+		{
+			return Instance.GetCurrentProcess(Logger);
+		}
+
+		public static Process GetProcessById(int id)
+		{
+			return Instance.GetProcessById(Logger, id);
+		}
+
+		public static Process[] GetProcessesByName(string name)
+		{
+			return Instance.GetProcessesByName(Logger, name);
+		}
+	}
+
+	public class ProcessInfo
 	{
 		public int Id;
 		public string ProcessName;

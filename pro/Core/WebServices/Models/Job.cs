@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reflection;
-using SysProcess = System.Diagnostics.Process;
 using Newtonsoft.Json;
 using Peach.Pro.Core.Storage;
 using System.IO;
@@ -161,9 +159,7 @@ namespace Peach.Pro.Core.WebServices.Models
 			RangeStart = request.RangeStart;
 			RangeStop = request.RangeStop;
 			DryRun = request.DryRun;
-
-			using (var p = SysProcess.GetCurrentProcess())
-				Pid = p.Id;
+			Pid = Utilities.GetCurrentProcessId();
 
 			using (var db = new NodeDatabase())
 			{
@@ -180,9 +176,11 @@ namespace Peach.Pro.Core.WebServices.Models
 			Status = JobStatus.Starting;
 			Mode = JobMode.Preparing;
 			PeachVersion = config.version;
+			Pid = Utilities.GetCurrentProcessId();
 
 			DryRun = config.singleIteration;
 			Seed = config.randomSeed;
+
 			if (config.range)
 			{
 				RangeStart = config.rangeStart;
@@ -192,9 +190,6 @@ namespace Peach.Pro.Core.WebServices.Models
 			{
 				RangeStart = config.skipToIteration;
 			}
-
-			using (var p = SysProcess.GetCurrentProcess())
-				Pid = p.Id;
 
 			using (var db = new NodeDatabase())
 			{

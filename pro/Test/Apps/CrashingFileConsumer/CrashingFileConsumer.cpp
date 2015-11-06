@@ -42,7 +42,7 @@ int _tmain(int argc, char* argv[])
 	if(argc < 2)
 	{
 		printf("Error, please supply a filename to load.\n");
-		return 0;
+		return -1;
 	}
 
 	printf("Loading file \"%s\"...\n", argv[1]);

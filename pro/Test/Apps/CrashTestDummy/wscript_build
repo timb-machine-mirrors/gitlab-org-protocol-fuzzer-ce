@@ -7,6 +7,7 @@ deps = [
 	'System.dll',
 	'System.Core.dll',
 	'System.Xml.dll',
+	'System.Windows.Forms.dll',
 ]
 
 app = bld(

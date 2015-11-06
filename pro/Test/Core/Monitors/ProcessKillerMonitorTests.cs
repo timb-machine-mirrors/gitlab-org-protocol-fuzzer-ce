@@ -14,6 +14,8 @@ namespace Peach.Pro.Test.Core.Monitors
 	[Peach]
 	class ProcessKillerMonitorTests
 	{
+		// TODO: Redo to use new Peach Process class
+
 		[Test]
 		public void TestBadProcss()
 		{
@@ -255,8 +257,8 @@ namespace Peach.Pro.Test.Core.Monitors
 
 		static bool ProcessExists(string name)
 		{
-			var procs = ProcessInfo.Instance.GetProcessesByName(name);
-			procs.ForEach(p => p.Close());
+			var procs = ProcessHelper.GetProcessesByName(name);
+			procs.ForEach(p => p.Dispose());
 			return procs.Length > 0;
 		}
 	}

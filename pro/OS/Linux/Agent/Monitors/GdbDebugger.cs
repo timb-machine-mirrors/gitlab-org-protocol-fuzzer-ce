@@ -149,7 +149,7 @@ quit
 			// Wait for pid file to exist, open it up and read it
 			while (!File.Exists(_gdbPid) && _gdb.IsRunning)
 				Thread.Sleep(10);
-			
+
 			if (!File.Exists(_gdbPid) && !_gdb.IsRunning)
 				throw new PeachException("GDB was unable to start '{0}'.".Fmt(Executable));
 
@@ -169,9 +169,9 @@ quit
 
 		void _Stop()
 		{
-			_inferior.Shutdown(false);
+			_inferior.Shutdown();
 			_gdb.WaitForIdle(WaitForExitTimeout);
-			_inferior.Close();
+			_inferior.Dispose();
 		}
 
 		MonitorData MakeFault(string type, string reason)
