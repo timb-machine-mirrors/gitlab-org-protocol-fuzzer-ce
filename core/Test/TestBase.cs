@@ -75,7 +75,7 @@ namespace Peach.Core.Test
 						Encoding = System.Text.Encoding.UTF8,
 					};
 					config.AddTarget("file", fileTarget);
-					config.LoggingRules.Add(new LoggingRule("*", logLevel, fileTarget));
+					config.LoggingRules.Add(new LoggingRule("*", LogLevel.Trace, fileTarget));
 				}
 
 				LogManager.Configuration = config;
