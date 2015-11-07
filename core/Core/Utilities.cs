@@ -678,6 +678,12 @@ namespace Peach.Core
 			return sb.ToString();
 		}
 
+		public static string HexDump(string text, int bytesPerLine = 16)
+		{
+			var buf = Encoding.UTF8.GetBytes(text);
+			return HexDump(new MemoryStream(buf), bytesPerLine);
+		}
+
 		public static string PrettyBytes(long bytes)
 		{
 			if (bytes < 0)
