@@ -1,4 +1,5 @@
 using System.IO;
+using System.Net.Sockets;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
@@ -81,7 +82,7 @@ namespace Peach.Pro.Test.Core.Publishers
 		<Publisher class=""Remote"">
 			<Param name=""Agent"" value=""LocalAgent""/>
 			<Param name=""Class"" value=""RawEther""/>
-			<Param name=""Interface"" value=""eth0""/>
+			<Param name=""Interface"" value=""{1}""/>
 		</Publisher>
 	</Test>
 </Peach>";
@@ -138,8 +139,7 @@ namespace Peach.Pro.Test.Core.Publishers
 			var parser = new PitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 
-			var config = new RunConfiguration();
-			config.singleIteration = true;
+			var config = new RunConfiguration {singleIteration = true};
 
 			var e = new Engine(null);
 			e.startFuzzing(dom, config);
@@ -176,16 +176,17 @@ namespace Peach.Pro.Test.Core.Publishers
 		}
 
 		[Test]
-		public void TestRaw([ValueSource("ChannelNames")]string protocol)
+		public void TestRaw([ValueSource("ChannelNames")] string protocol)
 		{
-			if (Platform.GetOS() != Platform.OS.Linux)
-				Assert.Ignore("Only supported on Linux");
+			if (Platform.GetOS() != Platform.OS.Windows && protocol == "legacy")
+				Assert.Ignore(".NET remoting doesn't work inside nunit on mono");
 
-			RunRemote(protocol, raw_eth.Fmt(protocol));
+			var iface = Helpers.GetPrimaryIface(AddressFamily.InterNetwork).Item1;
+			RunRemote(protocol, raw_eth.Fmt(protocol, iface));
 		}
 
 		[Test]
-		public void TestUdp([ValueSource("ChannelNames")]string protocol)
+		public void TestUdp([ValueSource("ChannelNames")] string protocol)
 		{
 			if (Platform.GetOS() != Platform.OS.Windows && protocol == "legacy")
 				Assert.Ignore(".NET remoting doesn't work inside nunit on mono");
