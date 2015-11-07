@@ -1,13 +1,19 @@
 using Peach.Core;
 using System;
+using System.Linq;
+using System.Windows.Forms;
 using System.Threading;
 
 namespace Peach.CrashTestDummy
 {
 	public class Program
 	{
+		[STAThread]
 		static int Main(string[] args)
 		{
+			if (args.Any(i => i == "--gui"))
+				return RunGui(args);
+
 			Console.WriteLine("Opening mutex...");
 			using (var mutex = SingleInstance.CreateInstance("CrashTestDummy"))
 			{
@@ -23,6 +29,45 @@ namespace Peach.CrashTestDummy
 				}
 			}
 			Console.WriteLine("Mutex released");
+			return 0;
+		}
+
+		class InvisibleForm : Form
+		{
+			readonly bool _ignore;
+
+			public InvisibleForm(bool ignore)
+			{
+				_ignore = ignore;
+				Load += InvisibleForm_Load;
+			}
+
+			void InvisibleForm_Load(object sender, EventArgs e)
+			{
+				Width = 1;
+				Height = 1;
+				Left = -200;
+				Top = -200;
+			}
+
+			protected override void WndProc(ref Message m)
+			{
+				if (m.Msg == 0x10 && _ignore)
+				{
+					Console.WriteLine("Ignoring WM_CLOSE");
+					return;
+				}
+
+				base.WndProc(ref m);
+			}
+		}
+
+		static int RunGui(string[] args)
+		{
+			Console.WriteLine("Running gui");
+			var ignore = args.Any(i => i == "--noclose");
+			Application.Run(new InvisibleForm(ignore));
+			Console.WriteLine("Exiting");
 			return 0;
 		}
 	}

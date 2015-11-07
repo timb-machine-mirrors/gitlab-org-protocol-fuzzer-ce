@@ -1,26 +1,184 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Mono.Unix;
 using Peach.Core;
 using Peach.Core.IO;
 using Logger = NLog.Logger;
 using SysProcess = System.Diagnostics.Process;
 
-namespace Peach.Pro.Core
+namespace Peach.Pro.Core.OS.Unix
 {
-	public abstract class ProcessUnixImpl : Process
+	public abstract class ProcessImpl : Process
 	{
+		#region Common Unix IProcess Implementation
 
-		protected ProcessUnixImpl(Logger logger) : base(logger)
+		public abstract class BaseUnixProcess : IProcess
+		{
+			protected abstract bool Attached { get; }
+
+			protected readonly SysProcess _process;
+
+			protected BaseUnixProcess(SysProcess process)
+			{
+				_process = process;
+			}
+
+			public void Dispose()
+			{
+				// Mirror windows behaivor of ensuring owned processes get killed
+				if (!Attached && !_process.HasExited)
+					Kill();
+				
+				_process.Close();
+			}
+
+			public int Id
+			{
+				get { return _process.Id; }
+			}
+
+			public int ExitCode
+			{
+				get { return _process.ExitCode; }
+			}
+
+			public bool HasExited
+			{
+				get { return _process.HasExited; }
+			}
+
+			public StreamWriter StandardInput
+			{
+				get { return _process.StandardInput; }
+			}
+
+			public StreamReader StandardOutput
+			{
+				get { return _process.StandardOutput; }
+			}
+
+			public StreamReader StandardError
+			{
+				get { return _process.StandardError; }
+			}
+
+			public abstract ProcessInfo Snapshot();
+
+			public void Terminate()
+			{
+				var ret = killpg(_process.Id, SIGTERM);
+				UnixMarshal.ThrowExceptionForLastErrorIf(ret);
+			}
+
+			public void Kill()
+			{
+				var ret = killpg(_process.Id, SIGKILL);
+				UnixMarshal.ThrowExceptionForLastErrorIf(ret);
+				_process.WaitForExit(-1);
+			}
+
+			public virtual bool WaitForExit(int timeout)
+			{
+				return _process.WaitForExit(timeout);
+			}
+
+			protected bool PollForExit(int timeout)
+			{
+				if (timeout == 0)
+					return _process.HasExited;
+
+				var sw = System.Diagnostics.Stopwatch.StartNew();
+
+				while (!_process.HasExited && timeout > 0 && sw.ElapsedMilliseconds < timeout)
+					Thread.Sleep(10);
+
+				return _process.HasExited;
+			}
+		}
+
+		#endregion
+
+		#region Unix Process Helper
+
+		public abstract class BaseProcessHelper : IProcessHelper
+		{
+			public ProcessRunResult Run(Logger logger, string executable, string arguments, Dictionary<string, string> environment, string workingDirectory, int timeout)
+			{
+				using (var p = NewProcess(logger))
+				{
+					return p.Run(executable, arguments, environment, workingDirectory, timeout);
+				}
+			}
+
+			public Process Start(Logger logger, string executable, string arguments, Dictionary<string, string> environment, string logDir)
+			{
+				var ret = NewProcess(logger);
+
+				try
+				{
+					ret.Start(executable, arguments, environment, logDir);
+					return ret;
+				}
+				catch
+				{
+					ret.Dispose();
+					throw;
+				}
+			}
+
+			public Process GetCurrentProcess(Logger logger)
+			{
+				return AttachProcess(logger, SysProcess.GetCurrentProcess());
+			}
+
+			public Process GetProcessById(Logger logger, int id)
+			{
+				return AttachProcess(logger, SysProcess.GetProcessById(id));
+			}
+
+			public Process[] GetProcessesByName(Logger logger, string name)
+			{
+				return GetProcessesByName(name)
+					.Select(p => AttachProcess(logger, p))
+					.OfType<Process>()
+					.ToArray();
+			}
+
+			protected ProcessImpl AttachProcess(Logger logger, SysProcess process)
+			{
+				var ret = NewProcess(logger);
+				ret._process = ret.MakeAttachedProcess(process);
+				return ret;
+			}
+
+			protected abstract ProcessImpl NewProcess(Logger logger);
+
+			protected abstract IEnumerable<SysProcess> GetProcessesByName(string name);
+		}
+
+		#endregion
+
+		protected abstract IProcess MakeOwnedProcess(SysProcess process);
+
+		protected abstract IProcess MakeAttachedProcess(SysProcess process);
+
+		protected ProcessImpl(Logger logger)
+			: base(logger)
 		{
 		}
 
-		protected override SysProcess CreateProcess(
+		protected override IProcess AttachProcess(int pid)
+		{
+			return MakeOwnedProcess(SysProcess.GetProcessById(pid));
+		}
+
+		protected override IProcess CreateProcess(
 			string executable,
 			string arguments,
 			string workingDirectory,
@@ -58,7 +216,7 @@ namespace Peach.Pro.Core
 
 			DebuggerServer(listener);
 
-			return process;
+			return MakeOwnedProcess(process);
 		}
 
 		private void DebuggerServer(TcpListener listener)
@@ -241,28 +399,10 @@ namespace Peach.Pro.Core
 			stream.Write(buf, 0, HEADER_LENGTH);
 		}
 
-		protected override void Terminate(SysProcess process)
-		{
-			var ret = killpg(process.Id, SIGTERM);
-			if (ret == -1)
-				throw new Win32Exception("killpg({0}, SIGTERM) failed".Fmt(process.Id)); // reads errno internally
-		}
-
-		protected override void Kill(SysProcess process)
-		{
-			var ret = killpg(process.Id, SIGKILL);
-			if (ret == -1)
-				throw new Win32Exception("killpg({0}, SIGKILL) failed".Fmt(process.Id)); // reads errno internally
-		}
-
-		protected override void WaitForProcessGroup(SysProcess process)
-		{
-			while (getpgid(process.Id) != process.Id)
-				Thread.Sleep(10);
-		}
-
 		const int SIGKILL = 9;
 		const int SIGTERM = 15;
+
+		// ReSharper disable UnusedMember.Local
 
 		enum CommandSet : byte
 		{
@@ -341,6 +481,8 @@ namespace Peach.Pro.Core
 			EVENT_COMPOSITE = 100,
 		}
 
+		// ReSharper restore UnusedMember.Local
+
 		struct CommandHeader
 		{
 			public int Length;
@@ -352,8 +494,5 @@ namespace Peach.Pro.Core
 
 		[DllImport("libc", SetLastError = true)]
 		private static extern int killpg(int pgrp, int sig);
-
-		[DllImport("libc", SetLastError = true)]
-		private static extern int getpgid(int pid);
 	}
 }

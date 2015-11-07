@@ -3,11 +3,8 @@
 //
 
 using System;
-using System.Diagnostics;
 using System.Linq;
-using System.Security.Principal;
 using System.Threading;
-using SysProcess = System.Diagnostics.Process;
 using NLog;
 using Peach.Core;
 using Logger = NLog.Logger;
@@ -19,9 +16,6 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 	internal class Listener : IDisposable
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
-		private const string EveryoneAccount = "Everyone";
-		private const int AccessDenied = 5;
 
 		private HttpListener _listener;
 		private ManualResetEvent _event;
@@ -56,19 +50,6 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			_listener.Start();
 
 			_event.WaitOne();
-
-			//while (true)
-			//{
-			//	var ar = _listener.BeginGetContext(null, null);
-			//	var idx = WaitHandle.WaitAny(new[] { _event, ar.AsyncWaitHandle });
-
-			//	if (idx == 0)
-			//		break;
-
-			//	var ctx = _listener.EndGetContext(ar);
-
-			//	ProcessContext(ctx);
-			//}
 		}
 
 		public void Stop()
@@ -96,67 +77,26 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			Logger.Trace("<<< {0} {1}", (int)response.StatusCode, response.StatusCode);
 		}
 
-		private static string GetAccountName()
-		{
-			try
-			{
-				var sid = new SecurityIdentifier(WellKnownSidType.WorldSid, null);
-				var account = sid.Translate(typeof(NTAccount)) as NTAccount;
-				if (account != null)
-					return account.Value;
-
-				return EveryoneAccount;
-			}
-			catch (Exception)
-			{
-				return EveryoneAccount;
-			}
-		}
-
 		private static HttpListener MakeListener(string prefix)
 		{
-			for (var reserved = false; ; reserved = true)
+			// If the listener fails to start it is disposed so we
+			// need to make a new one each time.
+			var ret = new HttpListener(new LogHook(), "");
+			ret.Prefixes.Add(prefix);
+
+			try
 			{
-				// If the listener fails to start it is disposed so we
-				// need to make a new one each time.
-				var ret = new HttpListener(new LogHook(), "");
-				ret.Prefixes.Add(prefix);
+				ret.Start();
 
-				try
-				{
-					ret.Start();
-
-					return ret;
-				}
-				catch (System.Net.HttpListenerException ex)
-				{
-					if (reserved || ex.ErrorCode != AccessDenied)
-						throw new PeachException("An error occurred starting the HTTP listener.", ex);
-				}
-
-				// Ensure we are allowed to listen for http connections
-				using (var p = new SysProcess())
-				{
-					var user = GetAccountName();
-
-					p.StartInfo = new ProcessStartInfo
-					{
-						Verb = "runas",
-						FileName = "netsh",
-						Arguments = "http add urlacl url={0} user={1}".Fmt(prefix, user),
-						UseShellExecute = true,
-						CreateNoWindow = true,
-						WindowStyle = ProcessWindowStyle.Hidden,
-					};
-
-					p.Start();
-
-					p.WaitForExit();
-
-					if (p.ExitCode != 0)
-						throw new PeachException("An error occurred reserving the prefix '{0}'.".Fmt(prefix));
-				}
+				return ret;
 			}
+			catch (System.Net.HttpListenerException ex)
+			{
+				throw new PeachException("An error occurred starting the HTTP listener.", ex);
+			}
+
+			// Because we are using SocketHttpListener we don't need to worry
+			// about reserving special ports via netsh
 		}
 
 		private class LogHook : Patterns.Logging.ILogger

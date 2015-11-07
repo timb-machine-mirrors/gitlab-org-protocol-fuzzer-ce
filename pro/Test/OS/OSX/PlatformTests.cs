@@ -3,6 +3,7 @@ using System.Diagnostics;
 using NUnit.Framework;
 using Peach.Core;
 using System.Linq;
+using System.Threading;
 using Peach.Core.Test;
 using SysProcess = System.Diagnostics.Process;
 
@@ -16,9 +17,9 @@ namespace Peach.Pro.Test.OS.OSX
 		[Test]
 		public void TestCpuUsage()
 		{
-			using (var p = SysProcess.GetProcessById(1))
+			using (var p = ProcessHelper.GetProcessById(1))
 			{
-				var pi = ProcessInfo.Instance.Snapshot(p);
+				var pi = p.Snapshot();
 				Assert.NotNull(pi);
 				Assert.AreEqual(1, pi.Id);
 				Assert.AreEqual("launchd", pi.ProcessName);
@@ -26,16 +27,13 @@ namespace Peach.Pro.Test.OS.OSX
 				Assert.Greater(pi.UserProcessorTicks, 0);
 			}
 
-			using (var p = new SysProcess())
+			using (var p = ProcessHelper.Start("/bin/ls", "", null, null))
 			{
-				var si = new ProcessStartInfo { FileName = "/bin/ls" };
-				p.StartInfo = si;
-				p.Start();
-				p.WaitForExit();
-				Assert.True(p.HasExited);
-				p.Close();
+				p.WaitForExit(Timeout.Infinite);
 
-				Assert.Throws<ArgumentException>(() => ProcessInfo.Instance.Snapshot(p));
+				Assert.False(p.IsRunning);
+
+				Assert.Throws<InvalidOperationException>(() => p.Snapshot());
 			}
 		}
 
@@ -45,21 +43,23 @@ namespace Peach.Pro.Test.OS.OSX
 			string procName;
 			int procId;
 
-			using (var self = SysProcess.GetCurrentProcess())
+			using (var self = ProcessHelper.GetCurrentProcess())
 			{
 				// Use process snapshot so we are sure to get the correct name on osx
-				procName = ProcessInfo.Instance.Snapshot(self).ProcessName;
-				procId = self.Id;
+				var pi = self.Snapshot();
+
+				procName = pi.ProcessName;
+				procId = pi.Id;
 			}
 
-			var p = ProcessInfo.Instance.GetProcessesByName(procName);
+			var p = ProcessHelper.GetProcessesByName(procName);
 
 			try
 			{
 				Assert.NotNull(p);
 				Assert.Greater(p.Length, 0);
 
-				var match = p.Where(i => i.Id == procId);
+				var match = p.Select(i => i.Snapshot()).Where(i => i.Id == procId);
 
 				Assert.AreEqual(1, match.Count());
 			}
