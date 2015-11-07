@@ -2,7 +2,6 @@
 
 import os
 import sys
-import psutil
 import tempfile
 import argparse
 import threading
@@ -11,16 +10,6 @@ import xml.etree.ElementTree as ET
 
 bindir = os.path.dirname(os.path.realpath(__file__))
 nunit = os.path.join(bindir, 'nunit-console.exe')
-
-def kill_proc_tree(pid, including_parent=True):    
-	parent = psutil.Process(pid)
-	children = parent.children(recursive=True)
-	for child in children:
-		child.kill()
-	psutil.wait_procs(children, timeout=5)
-	if including_parent:
-		parent.kill()
-		parent.wait(5)
 
 def dotnet(cmd):
 	if sys.platform != 'win32':
@@ -49,8 +38,7 @@ def run_nunit(args, asm, name, test):
 
 	def on_inactive():
 		print '%s: Timeout due to inactivity' % name
-		kill_proc_tree(proc.pid)
-		proc.wait()
+		proc.kill()
 
 	while proc.poll() is None:
 		timer = threading.Timer(args.timeout + 10, on_inactive)
@@ -64,7 +52,7 @@ def run_nunit(args, asm, name, test):
 
 def main():
 	p = argparse.ArgumentParser(description='nunit-runner')
-	p.add_argument('--timeout', type=int, default=180)
+	p.add_argument('--timeout', type=int, default=600)
 	p.add_argument('--result')
 	p.add_argument('--outdir')
 	p.add_argument('--include')
