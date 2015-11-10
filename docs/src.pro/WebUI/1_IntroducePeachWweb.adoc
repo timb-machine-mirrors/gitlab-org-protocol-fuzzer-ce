@@ -61,7 +61,7 @@ image::{images}/H1_Home.png[]
 From Home, you can use click entries and buttons on the left side of the page to work with your licensed Pits, view reports and details of previous fuzzing sessions, and to interact with the Peach forums. 
 
 ==== Parts of the User Interface  
-The Web User Interface includesmany useful components, the most prominent are called out in the following illustration:
+The Web User Interface includes many useful components, the most prominent are called out in the following illustration:
 
 image::{images}/H1_Annotated.png[]
 
