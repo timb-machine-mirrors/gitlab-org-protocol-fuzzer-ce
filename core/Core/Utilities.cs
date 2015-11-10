@@ -598,6 +598,31 @@ namespace Peach.Core
 
 		}
 
+		public static byte[] ParseHexDump(string payload)
+		{
+			var sb = new StringBuilder();
+			var rdr = new StringReader(payload);
+
+			string line;
+			while ((line = rdr.ReadLine()) != null)
+			{
+				// Expect 16 byte hex dump
+				// some chars chars, whitespace, the bytes, 16 chars
+
+				var space = line.IndexOf(' ') + 1;
+
+				if (line.Length < (space + 16))
+					continue;
+
+				var subst = line.Substring(space, line.Length - 16 - space);
+				subst = subst.Replace(" ", "");
+				sb.Append(subst);
+			}
+
+			var ret = HexString.Parse(sb.ToString()).Value;
+			return ret;
+		}
+
 		public static void HexDump(Stream input, Stream output, int bytesPerLine = 16)
 		{
 			var pos = input.Position;
