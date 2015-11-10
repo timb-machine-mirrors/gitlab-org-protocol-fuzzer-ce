@@ -27,6 +27,7 @@ deps = [
 	'Dapper.dll',
 	'Aspose.Words.dll',
 	'PeachSampleNinja.exe',
+	'Managed.Adb.dll',
 ]
 
 bld(
