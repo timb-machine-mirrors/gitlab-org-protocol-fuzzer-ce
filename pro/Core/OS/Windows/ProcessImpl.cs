@@ -147,7 +147,6 @@ namespace Peach.Pro.Core.OS.Windows
 				readonly SysProcess _p;
 
 				public Result(SysProcess p) { _p = p; }
-				public void Close() { _p.Close(); }
 
 				public int Id { get { return _p.Id; } }
 				public bool HasExited { get { return _p.HasExited; } }
@@ -341,7 +340,6 @@ namespace Peach.Pro.Core.OS.Windows
 				}
 
 				// Trampoline is now spawned and ready to launch the inferrior
-				ProcessService.Result result;
 
 				try
 				{
@@ -349,18 +347,18 @@ namespace Peach.Pro.Core.OS.Windows
 
 					_logger.Debug("Start(): \"{0} {1}\"", executable, arguments);
 
-					result = remote.CreateProcess(executable, arguments, cwd, environment);
+					p.Proxy = remote.CreateProcess(executable, arguments, cwd, environment);
 				}
 				catch (RemotingException ex)
 				{
 					throw new SoftException("Failed to initialize remote process service.", ex);
 				}
 
-				p.Id = result.Id;
+				p.Id = p.Proxy.Id;
 
 				try
 				{
-					p.Inferrior = SysProcess.GetProcessById(result.Id);
+					p.Inferrior = SysProcess.GetProcessById(p.Proxy.Id);
 				}
 				catch (ArgumentException)
 				{
@@ -368,17 +366,13 @@ namespace Peach.Pro.Core.OS.Windows
 					// but don't close anything so our stdout/stderr
 					// readers will be able to run
 
-					Debug.Assert(result.HasExited);
-					p.ExitCode = result.ExitCode;
+					Debug.Assert(p.Proxy.HasExited);
+					p.ExitCode = p.Proxy.ExitCode;
 
-					// No need to call close since we are killing the process
-					result = null;
+					p.Proxy = null;
 
 					p.Trampoline.Kill();
 				}
-
-				if (result != null)
-					result.Close();
 
 				return p;
 			}
@@ -400,11 +394,11 @@ namespace Peach.Pro.Core.OS.Windows
 
 		class CreatedProcess : IProcess
 		{
-			int _exitCode;
-
+			public ProcessService.Result Proxy { get; set; }
 			public JobObject JobObject { get; set; }
 			public SysProcess Trampoline { get; set; }
 			public SysProcess Inferrior { private get; set; }
+			public int ExitCode { get; set; }
 
 			public void Dispose()
 			{
@@ -438,11 +432,6 @@ namespace Peach.Pro.Core.OS.Windows
 				get { return Inferrior == null || Inferrior.HasExited; }
 			}
 
-			public int ExitCode
-			{
-				get { return Inferrior == null ? _exitCode : Inferrior.ExitCode; }
-				set { _exitCode = value; }
-			}
 
 			public StreamWriter StandardInput
 			{
@@ -485,7 +474,23 @@ namespace Peach.Pro.Core.OS.Windows
 
 			public bool WaitForExit(int timeout)
 			{
-				return Inferrior == null || Inferrior.WaitForExit(timeout);
+				if (Inferrior == null)
+					return true;
+
+				if (!Inferrior.WaitForExit(timeout))
+					return false;
+
+				// When the inferrior dies we need to kill the trampoline
+				// in order for stdout/stderr to return EOF.
+				// Before we do that, we need to get the exit code from the proxy
+
+				ExitCode = Proxy.ExitCode;
+				Proxy = null;
+				Inferrior.Close();
+				Inferrior = null;
+
+				Kill();
+				return true;
 			}
 		}
 
