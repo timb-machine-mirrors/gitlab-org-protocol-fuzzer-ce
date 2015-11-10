@@ -122,9 +122,6 @@ namespace Peach.Core
 					if (os == "Darwin") return true;
 				}
 			}
-			catch
-			{
-			}
 			finally
 			{
 				if (buf != IntPtr.Zero) Marshal.FreeHGlobal(buf);
