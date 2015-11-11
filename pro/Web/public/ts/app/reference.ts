@@ -8,6 +8,7 @@
 
 /** Managed references (unordered) */
 //grunt-start
+/// <reference path="controllers/AlertCtrl.ts" />
 /// <reference path="controllers/ConfirmCtrl.ts" />
 /// <reference path="controllers/ErrorCtrl.ts" />
 /// <reference path="controllers/HomeCtrl.ts" />

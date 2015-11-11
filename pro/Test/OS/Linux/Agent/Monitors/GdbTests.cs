@@ -19,10 +19,11 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		{
 			var self = Path.Combine(Utilities.ExecutionDirectory, "Peach.exe");
 
-			var args = new Dictionary<string, string>();
-			args["Executable"] = "CrashingFileConsumer";
-			args["Arguments"] = self;
-			args["RestartOnEachTest"] = "true";
+			var args = new Dictionary<string, string>() {
+				{ "Executable",  "CrashingFileConsumer" },
+				{ "Arguments", self },
+				{ "RestartOnEachTest", "true" },
+			};
 
 			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
@@ -47,8 +48,10 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		[Test]
 		public void TestNoFault()
 		{
-			var args = new Dictionary<string, string>();
-			args["Executable"] = "CrashingFileConsumer";
+			var args = new Dictionary<string, string>() {
+				{ "Executable",  "CrashableServer" },
+				{ "Arguments", "127.0.0.1 12346" },
+			};
 
 			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
@@ -56,7 +59,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			m.IterationStarting(null);
 			Thread.Sleep(5000);
 			m.IterationFinished();
-			Assert.AreEqual(false, m.DetectedFault());
+			Assert.IsFalse(m.DetectedFault());
 			m.SessionFinished();
 			m.StopMonitor();
 		}
@@ -64,8 +67,9 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		[Test]
 		public void TestMissingProgram()
 		{
-			var args = new Dictionary<string, string>();
-			args["Executable"] = "MissingProgram";
+			var args = new Dictionary<string, string>() {
+				{ "Executable",  "MissingProgram" },
+			};
 
 			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
@@ -78,14 +82,17 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			{
 				Assert.AreEqual("GDB was unable to start 'MissingProgram'.", ex.Message);
 			}
+
+			m.SessionFinished();
 		}
 
 		[Test]
 		public void TestMissingGdb()
 		{
-			var args = new Dictionary<string, string>();
-			args["Executable"] = "MissingProgram";
-			args["GdbPath"] = "MissingGdb";
+			var args = new Dictionary<string, string>() {
+				{ "Executable",  "MissingProgram" },
+				{ "GdbPath", "MissingGdb" },
+			};
 
 			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
@@ -101,15 +108,18 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 				var act = ex.Message.Substring(0, exp.Length);
 				Assert.AreEqual(exp, act);
 			}
+
+			m.SessionFinished();
 		}
 
 		[Test]
 		public void TestCpuKill()
 		{
-			var args = new Dictionary<string, string>();
-			args["Executable"] = "CrashableServer";
-			args["Arguments"] = "127.0.0.1 12346";
-			args["StartOnCall"] = "Foo";
+			var args = new Dictionary<string, string>() {
+				{ "Executable","CrashableServer" },
+				{ "Arguments", "127.0.0.1 12346" },
+				{ "StartOnCall", "Foo" },
+			};
 
 			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
@@ -126,7 +136,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			var span = (after - before);
 
 			Thread.Sleep(1000);
-			Assert.AreEqual(false, m.DetectedFault());
+			Assert.IsFalse(m.DetectedFault());
 			m.SessionFinished();
 			m.StopMonitor();
 
@@ -137,11 +147,12 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		[Test]
 		public void TestNoCpuKill()
 		{
-			var args = new Dictionary<string, string>();
-			args["Executable"] = "CrashableServer";
-			args["Arguments"] = "127.0.0.1 0 5";
-			args["StartOnCall"] = "Foo";
-			args["NoCpuKill"] = "true";
+			var args = new Dictionary<string, string> {
+				{ "Executable", "CrashableServer" },
+				{ "Arguments", "127.0.0.1 0 5" },
+				{ "StartOnCall", "Foo" },
+				{ "NoCpuKill", "true" }
+			};
 
 			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
@@ -158,7 +169,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 
 			var span = sw.Elapsed;
 
-			Assert.AreEqual(false, m.DetectedFault());
+			Assert.IsFalse(m.DetectedFault());
 			m.SessionFinished();
 			m.StopMonitor();
 
@@ -169,12 +180,13 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		[Test]
 		public void TestNoCpuKillWaitFail()
 		{
-			var args = new Dictionary<string, string>();
-			args["Executable"] = "CrashableServer";
-			args["Arguments"] = "127.0.0.1 0 5";
-			args["StartOnCall"] = "Foo";
-			args["NoCpuKill"] = "true";
-			args["WaitForExitTimeout"] = "1000";
+			var args = new Dictionary<string, string>() {
+				{ "Executable", "CrashableServer" },
+				{ "Arguments", "127.0.0.1 0 5" },
+				{ "StartOnCall", "Foo" },
+				{ "NoCpuKill", "true" },
+				{ "WaitForExitTimeout", "1000" },
+			};
 
 			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
@@ -191,7 +203,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 
 			var span = sw.Elapsed;
 
-			Assert.AreEqual(false, m.DetectedFault());
+			Assert.IsFalse(m.DetectedFault());
 			m.SessionFinished();
 			m.StopMonitor();
 
@@ -204,12 +216,10 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		{
 			var starts = 0;
 
-			var runner = new MonitorRunner("Gdb", new Dictionary<string, string>
-			{
+			var runner = new MonitorRunner("Gdb", new Dictionary<string, string> {
 				{ "Executable", "CrashableServer" },
 				{ "Arguments", "127.0.0.1 0 1" },
-			})
-			{
+			}) {
 				StartMonitor = (m, args) =>
 				{
 					m.InternalEvent += (s, e) => ++starts;
@@ -232,13 +242,11 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			var startCount = 0;
 			var iteration = 0;
 
-			var runner = new MonitorRunner("Gdb", new Dictionary<string, string>
-			{
+			var runner = new MonitorRunner("Gdb", new Dictionary<string, string> {
 				{ "Executable", "CrashableServer" },
 				{ "Arguments", "127.0.0.1 0" },
 				{ "RestartAfterFault", "true" },
-			})
-			{
+			}) {
 				StartMonitor = (m, args) =>
 				{
 					m.InternalEvent += (s, e) => ++startCount;
@@ -250,13 +258,26 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 
 					return ++iteration == 2;
 				}
-			}
-			;
+			};
 
 			var faults = runner.Run(5);
 
 			Assert.AreEqual(0, faults.Length);
 			Assert.AreEqual(2, startCount);
+		}
+
+		[Test]
+		public void TestForkingInferior()
+		{
+			var runner = new MonitorRunner("Gdb", new Dictionary<string, string> {
+				{ "Executable", "CrashTest" },
+				{ "Arguments", "fork" },
+				{ "RestartOnEachTest", "true" },
+			});
+
+			var faults = runner.Run(2);
+
+			Assert.AreEqual(0, faults.Length);
 		}
 	}
 }

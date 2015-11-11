@@ -33,12 +33,11 @@ namespace PitTester
 			{ "RawV4", new[] { "MinMTU", "MaxMTU" }},
 			{ "RawV6", new[] { "MinMTU", "MaxMTU" }},
 			{ "Udp", new[] { "MinMTU", "MaxMTU" }},
+			{ "DTls", new[] { "MinMTU", "MaxMTU" }},
 			{ "File", new[] { "Append", "Overwrite" }},
 			{ "ConsoleHex", new[] { "BytesPerLine" }},
 			{ "Null", new[] { "MaxOutputSize" }}
 		};
-
-		public static event Engine.IterationStartingEventHandler IterationStarting;
 
 		public static void ExtractPack(string pack, string dir, int logLevel)
 		{
@@ -76,8 +75,15 @@ namespace PitTester
 
 		public static void OnIterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
 		{
-			if (IterationStarting != null)
-				IterationStarting(context, currentIteration, totalIterations);
+			if (context.config.singleIteration)
+				return;
+
+			if (context.controlRecordingIteration)
+				Console.Write('r');
+			else if (context.controlIteration)
+				Console.Write('c');
+			else if ((currentIteration % 10) == 0)
+				Console.Write(".");
 		}
 
 		public static void TestPit(string libraryPath, string pitFile, bool singleIteration, uint? seed, bool keepGoing, uint stop = 500)
@@ -369,12 +375,7 @@ namespace PitTester
 			if (File.Exists(pitTest))
 				testData = TestData.Parse(pitTest);
 
-			var defs = PitParser.parseDefines(fileName + ".config");
-			if (defs.Any(k => k.Key == "PitLibraryPath"))
-			{
-				defs.Remove(defs.First(k => k.Key == "PitLibraryPath"));
-				defs.Add(new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
-			}
+			var defs = LoadDefines(pitLibraryPath, fileName);
 
 			var args = new Dictionary<string, object>();
 			args[PitParser.DEFINED_VALUES] = defs;
@@ -411,6 +412,24 @@ namespace PitTester
 
 			if (sb.Length > 0)
 				throw new PeachException(sb.ToString());
+		}
+
+		private static List<KeyValuePair<string, string>> LoadDefines(string pitLibraryPath, string fileName)
+		{
+			var defs = PitParser.parseDefines(fileName + ".config");
+
+			if (defs.Any(k => k.Key == "PitLibraryPath"))
+				defs.Remove(defs.First(k => k.Key == "PitLibraryPath"));
+
+			// PitLibraryPath MUST be last!
+			defs.Add(new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
+
+			// Some defines are expected to be empty if they are required to be
+			// set by the user.  The pit will not parse w/o them being set however
+			// so inject parsable defaults in this case
+			defs = defs.Select(PopulateRequiredDefine).ToList();
+
+			return defs;
 		}
 
 		private static void VerifyDataSet(
@@ -625,9 +644,13 @@ namespace PitTester
 
 			}
 
-			using (var rdr = XmlReader.Create(fileName))
+			//using (var rdr = XmlReader.Create(fileName))
 			{
-				var doc = new XPathDocument(rdr);
+				var doc = new XmlDocument();
+
+				// Must call LoadXml() so that we can catch embedded newlines!
+				doc.LoadXml(File.ReadAllText(fileName));
+
 				var nav = doc.CreateNavigator();
 				var nsMgr = new XmlNamespaceManager(nav.NameTable);
 				nsMgr.AddNamespace("p", PeachElement.Namespace);
@@ -753,18 +776,18 @@ namespace PitTester
 						errors.AppendLine(string.Format("StateModel '{0}' does not call agent with 'ExitIterationEvent'.", smName));
 				}
 
-				var when = nav.Select("/p:Peach/p:StateModel/p:State/p:Action/@when", nsMgr);
-				while (when.MoveNext())
+				var whenAction = nav.Select("/p:Peach/p:StateModel/p:State/p:Action[contains(@when, 'controlIteration')]", nsMgr);
+				while (whenAction.MoveNext())
 				{
-					var val = when.Current.Value;
-					if (val.Contains("controlIteration"))
-					{
-						var act = when.Clone();
-						act.Current.MoveToParent();
+					if (!ShouldSkipRule(whenAction, "Allow_WhenControlIteration"))
+						errors.AppendLine("Action has when attribute containing controlIteration: {0}".Fmt(whenAction.Current.OuterXml));
+				}
 
-						if (!ShouldSkipRule(act, "Allow_WhenControlIteration"))
-							errors.AppendLine("Action has when attribute containing controlIteration.");
-					}
+				var badValues = nav.Select("//*[contains(@value, '\n')]", nsMgr);
+				while (badValues.MoveNext())
+				{
+					if (badValues.Current.GetAttribute("valueType", "") != "hex")
+						errors.AppendLine("Element has value attribute with embedded newline: {0}".Fmt(badValues.Current.OuterXml));
 				}
 			}
 
@@ -772,10 +795,8 @@ namespace PitTester
 			{
 				if (isTest)
 				{
+					var defs = LoadDefines(pitLibraryPath, fileName);
 					var args = new Dictionary<string, object>();
-					var defs = PitParser.parseDefines(fileName + ".config");
-					defs.Insert(0, new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
-					defs = PitDefines.Evaluate(defs);
 					args[PitParser.DEFINED_VALUES] = defs;
 					new GodelPitParser().asParser(args, fileName);
 				}
@@ -789,21 +810,44 @@ namespace PitTester
 				throw new ApplicationException(errors.ToString());
 		}
 
+		private static KeyValuePair<string, string> PopulateRequiredDefine(KeyValuePair<string, string> item)
+		{
+			if (!string.IsNullOrEmpty(item.Value))
+				return item;
+
+			switch (item.Key)
+			{
+				case "SourceMAC":
+				case "TargetMAC":
+					return new KeyValuePair<string,string>(item.Key, "00:00:00:00:00:00");
+				case "SourceIPv4":
+				case "TargetIPv4":
+					return new KeyValuePair<string, string>(item.Key, "0.0.0.0");
+				case "SourceIPv6":
+				case "TargetIPv6":
+					return new KeyValuePair<string, string>(item.Key, "::1");
+				case "SourcePort":
+				case "TargetPort":
+					return new KeyValuePair<string, string>(item.Key, "0");
+			}
+
+			return item;
+		}
+
 		private static bool ShouldSkipRule(XPathNodeIterator it, string rule)
 		{
-			var preceding = it.Current.SelectSingleNode("preceding-sibling::comment()");
-			if (preceding == null)
-				return false;
+			var stack = new Stack<string>();
+			var preceding = it.Current.Select("preceding-sibling::*|preceding-sibling::comment()");
 
-			var skip = false;
-
-			do
+			while (preceding.MoveNext())
 			{
-				skip |= preceding.Value.Contains("PitLint: {0}".Fmt(rule));
+				if (preceding.Current.NodeType == XPathNodeType.Comment)
+					stack.Push(preceding.Current.Value);
+				else
+					stack.Clear();
 			}
-			while (!skip && preceding.MoveToNext());
 
-			return skip;
+			return stack.Any(item => item.Contains("PitLint: {0}".Fmt(rule)));
 		}
 	}
 }

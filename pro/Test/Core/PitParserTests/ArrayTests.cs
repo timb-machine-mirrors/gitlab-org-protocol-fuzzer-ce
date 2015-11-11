@@ -564,8 +564,8 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 	<DataModel name='DM'>
 		<Block name='Content' ref='Content'>
-			<String name='Items.Items.str1' value='New1'/>
-			<String name='Items.Items.str3' value='Value3'/>
+			<String name='Items.str1' value='New1'/>
+			<String name='Items.str3' value='Value3'/>
 		</Block>
 	</DataModel>
 
@@ -622,6 +622,140 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			};
 
 			Assert.AreEqual(names, exp);
+		}
+
+		[Test]
+		public void TestArrayRefOverrideOne()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='Item'>
+			<String name='str1' value='str1' />
+			<String name='str2' value='str2' />
+	</DataModel>
+
+	<DataModel name='ArrayModel'>
+		<Block name='Items' ref='Item' minOccurs='1' />
+	</DataModel>
+
+	<DataModel name='DerivedArrayModel' ref='ArrayModel'>
+		<Block name='Items.str2'>
+			<String name='str2a' value='str2a' />
+			<String name='str2b' value='str2b' />
+		</Block>
+	</DataModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var val = dom.dataModels[2].InternalValue.BitsToString();
+			Assert.AreEqual("str1str2astr2b", val);
+		}
+
+		[Test]
+		public void TestArrayRefOverrideTwo()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='Item'>
+			<String name='str1' value='str1' />
+			<Block name='str2'>
+				<String name='str2a' value='str2a' />
+			</Block>
+	</DataModel>
+
+	<DataModel name='ArrayModel'>
+		<Block name='Outter'>
+			<Block name='Items' ref='Item' minOccurs='1' />
+		</Block>
+	</DataModel>
+
+	<DataModel name='DerivedArrayModel' ref='ArrayModel'>
+		<String name='Outter.Items.str2.str2b' value='str2b' />
+	</DataModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var val = dom.dataModels[2].InternalValue.BitsToString();
+			Assert.AreEqual("str1str2astr2b", val);
+		}
+
+		[Test]
+		public void TestArrayRefOverrideThree()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='Item'>
+			<String name='str1' value='str1' />
+			<String name='str2' value='str2' />
+	</DataModel>
+
+	<DataModel name='ArrayModel'>
+		<Block name='Items' ref='Item' minOccurs='0' />
+	</DataModel>
+
+	<DataModel name='DerivedArrayModel' ref='ArrayModel'>
+		<Block name='Items'>
+			<String name='str2a' value='str2a' />
+			<String name='str2b' value='str2b' />
+		</Block>
+	</DataModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var val = dom.dataModels[2].InternalValue.BitsToString();
+			Assert.AreEqual("str2astr2b", val);
+		}
+
+		[Test]
+		public void TestArrayRefOverrideNotFound()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='Item'>
+			<String name='str1' value='str1' />
+			<Block name='str2'>
+				<String name='str2a' value='str2a' />
+			</Block>
+	</DataModel>
+
+	<DataModel name='ArrayModel'>
+		<Block name='Outter'>
+			<Block name='Items' ref='Item' minOccurs='1' />
+		</Block>
+	</DataModel>
+
+	<DataModel name='DerivedArrayModel' ref='ArrayModel'>
+		<String name='Items.str2.str2b' value='str2b' />
+	</DataModel>
+</Peach>";
+
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error parsing String named 'Items.str2.str2b', DataModel 'DerivedArrayModel' has no child element named 'Items'.", ex.Message);
+		}
+
+		[Test]
+		public void TestArrayRefOverrideNotContainer()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='Item'>
+			<String name='str1' value='str1' />
+			<Block name='str2'>
+				<String name='str2a' value='str2a' />
+			</Block>
+	</DataModel>
+
+	<DataModel name='ArrayModel'>
+		<Block name='Items' ref='Item' minOccurs='1' />
+	</DataModel>
+
+	<DataModel name='DerivedArrayModel' ref='ArrayModel'>
+		<String name='Items.str2.str2a.str2b' value='str2b' />
+	</DataModel>
+</Peach>";
+
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error parsing String named 'Items.str2.str2a.str2b', String 'DerivedArrayModel.Items.Items.str2.str2a' is not a container element.", ex.Message);
 		}
 	}
 }

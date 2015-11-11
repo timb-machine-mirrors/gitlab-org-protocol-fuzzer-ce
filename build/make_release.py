@@ -32,19 +32,13 @@ output
 The result should be:    <--- archive to smb://nas/builds/peach-pro
 output
   release
-    ${buildtag}          <--- publish to ssh://dl.peachfuzzer.com
-      release.json
-      peach-pro-${buildtag}-${platform}_release.zip
-      peach-pro-${buildtag}-${platform}_release.zip.sha1
-      pits
-        ${pit}.zip
+	${buildtag}          <--- publish to ssh://dl.peachfuzzer.com
+	  release.json
+	  peach-pro-${buildtag}-${platform}_release.zip
+	  peach-pro-${buildtag}-${platform}_release.zip.sha1
+	  pits
+		${pit}.zip
 '''
-
-def to_JSON(self):
-	return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
-
-class Object:
-	pass
 
 def to_list(sth):
 	if isinstance(sth, str):
@@ -86,40 +80,33 @@ def sha1sum(filename):
 		f.write('SHA1(%s)= %s\n' % (os.path.basename(filename), digest))
 
 def extract_pkg():
-	# Lookfor output/*.zip
-	# Open up archive.zip and look for zip files in the pkg directory
-	# Extract said zips to the release folder
+		# Copy for output/$CFG_release/pkg/*.zip to release folder
 
-	print ''
-	print 'Extract packages'
-	print ''
+		print ''
+		print 'Extract packages'
+		print ''
 
-	pkgs = []
+		pkgs = []
 
-	for (path, dirs, files) in os.walk(outdir):
-		for name in files:
-			f = os.path.join(path, name)
-
-			if not f.endswith('release.zip'):
-				print 'IGNORING   %s' % f
-				continue
-
-			print 'PROCESSING %s' % f
-
-			with zipfile.ZipFile(f, 'r') as z:
-				for i in z.infolist():
-					if not i.filename.startswith('pkg/'):
-						continue
-					if not i.filename.endswith('.zip'):
+		for cfg in os.listdir(outdir):
+				if not cfg.endswith('release'):
+						print 'IGNORING   %s' % cfg
 						continue
 
-					print ' - %s' % i.filename
-					i.filename = os.path.basename(i.filename)
-					z.extract(i, reldir)
-					pkgs.append(os.path.join(reldir, i.filename))
-		break
+				path = os.path.join(outdir, cfg, 'pkg')
+				if not os.path.exists(path):
+						continue
 
-	return pkgs
+				print 'PROCESSING %s' % cfg
+
+				for item in os.listdir(path):
+						if not item.endswith('.zip'):
+								continue
+						print ' - %s' % item
+						shutil.copy(os.path.join(path, item), reldir)
+						pkgs.append(os.path.join(reldir, item))
+
+		return pkgs
 
 def extract_doc():
 	# Lookfor output/doc.zip
@@ -161,12 +148,14 @@ def extract_pits():
 
 	with zipfile.ZipFile(pitfile, 'r') as z:
 		for i in z.infolist():
+			if i.filename.startswith('gump/'):
+				continue
 			if os.path.basename(i.filename) == 'shipping_packs.json':
 				packs = z.read(i)
 			if os.path.basename(i.filename) == 'shipping_pits.json':
 				archives = z.read(i)
 			if not i.filename.endswith('.zip'):
-				continue;
+				continue
 
 			print ' - %s' % i.filename
 			z.extract(i, pitdir)
@@ -284,17 +273,18 @@ if __name__ == "__main__":
 		print 'Generating release folder %s' % dirname
 		print ''
 
-		o = Object()
-		o.files = [ x for x in names if 'release' in x and r['filter'](x)]
-		o.product = r['product']
-		o.build = buildtag
-		o.nightly = c.nightly
-		o.version = 2
-		o.date = '%s/%s/%s' % (d.day, d.month, d.year)
-		o.pit_archives = pit_archives
-		o.packs = packs
+		manifest = dict(
+			files = [ x for x in names if 'release' in x and r['filter'](x)],
+			product = r['product'],
+			build = buildtag,
+			nightly = c.nightly,
+			version = 2,
+			date = '%s/%s/%s' % (d.day, d.month, d.year),
+			pit_archives = pit_archives,
+			packs = packs,
+		)
 
-		if not o.files:
+		if not manifest['files']:
 			print 'No files found, skipping!'
 			continue
 
@@ -304,7 +294,7 @@ if __name__ == "__main__":
 
 		rel = os.path.join(path, 'release.json')
 
-		for f in o.files:
+		for f in manifest['files']:
 			src = os.path.join(reldir, f)
 			dst = os.path.join(path, f)
 			shutil.copy(src, dst)
@@ -315,10 +305,9 @@ if __name__ == "__main__":
 			dst = os.path.join(path, 'pits', f)
 			shutil.copy(src, dst)
 
+		data = json.dumps(manifest, sort_keys=True, indent=4)
 		with open(rel, 'w') as f:
-			j = to_JSON(o)
-			print j
-			f.write(j)
+			f.write(data)
 
 	if os.path.isdir(tmpdir):
 		shutil.rmtree(tmpdir)

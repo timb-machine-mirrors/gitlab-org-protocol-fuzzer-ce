@@ -66,6 +66,11 @@ int main(int argc, char* argv[])
 	int timeout;
 	int retval = 0;
 
+	// disable buffering of stdout
+	setbuf(stdout, NULL);
+
+	printf("CrashableServer starting...\n");
+
 	// Do we have enough command line arguments?
 	if (argc < 2) {
 		fprintf(stderr, "usage: %s <server-address> [server-port] [timeout]\n", argv[0]);

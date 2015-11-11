@@ -65,14 +65,12 @@ namespace Peach.Pro.Core.Agent.Monitors
 		{
 			_data = null;
 
-			Logger.Debug("_Start(): Running command " + Command + " with arguments " + Arguments);
-
 			try
 			{
-				var p = SubProcess.Run(Command, Arguments, Timeout, null, WorkingDirectory);
+				var result = Process.Run(Logger, Command, Arguments, null, WorkingDirectory, Timeout);
 
-				var stdout = p.StdOut.ToString();
-				var stderr = p.StdErr.ToString();
+				var stdout = result.StdOut.ToString();
+				var stderr = result.StdErr.ToString();
 
 				_data = new MonitorData
 				{
@@ -82,7 +80,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 				_data.Data.Add("stdout", new MemoryStream(Encoding.UTF8.GetBytes(stdout)));
 				_data.Data.Add("stderr", new MemoryStream(Encoding.UTF8.GetBytes(stderr)));
 
-				if (p.Timeout)
+				if (result.Timeout)
 				{
 					_data.Title = "Process failed to exit in allotted time.";
 					_data.Fault = new MonitorData.Info
@@ -91,22 +89,22 @@ namespace Peach.Pro.Core.Agent.Monitors
 						MinorHash = Hash("FailedToExit")
 					};
 				}
-				else if (FaultOnExitCode && p.ExitCode == FaultExitCode)
+				else if (FaultOnExitCode && result.ExitCode == FaultExitCode)
 				{
-					_data.Title = "Process exited with code {0}.".Fmt(p.ExitCode);
+					_data.Title = "Process exited with code {0}.".Fmt(result.ExitCode);
 					_data.Fault = new MonitorData.Info
 					{
 						MajorHash = Hash(Class + Command),
-						MinorHash = Hash(p.ExitCode.ToString(CultureInfo.InvariantCulture))
+						MinorHash = Hash(result.ExitCode.ToString(CultureInfo.InvariantCulture))
 					};
 				}
-				else if (FaultOnNonZeroExit && p.ExitCode != 0)
+				else if (FaultOnNonZeroExit && result.ExitCode != 0)
 				{
-					_data.Title = "Process exited with code {0}.".Fmt(p.ExitCode);
+					_data.Title = "Process exited with code {0}.".Fmt(result.ExitCode);
 					_data.Fault = new MonitorData.Info
 					{
 						MajorHash = Hash(Class + Command),
-						MinorHash = Hash(p.ExitCode.ToString(CultureInfo.InvariantCulture))
+						MinorHash = Hash(result.ExitCode.ToString(CultureInfo.InvariantCulture))
 					};
 				}
 				else if (_faultOnRegex != null)

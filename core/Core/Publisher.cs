@@ -182,9 +182,9 @@ namespace Peach.Core
 		/// <summary>
 		/// Call a method on the Publishers resource using data models.
 		/// </summary>
-		/// <remak>
+		/// <remarks>
 		/// This method can be overriden by custom Publishers.
-		/// </remak>
+		/// </remarks>
 		/// <param name="method">Name of method to call</param>
 		/// <param name="args">Arguments to pass</param>
 		/// <returns>Returns resulting data</returns>

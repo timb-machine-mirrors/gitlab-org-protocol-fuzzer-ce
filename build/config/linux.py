@@ -101,6 +101,7 @@ def prepare(conf):
 		'vnum',
 		'subst',
 		'network',
+		'unix',
 	])
 
 def configure(conf):
@@ -156,6 +157,7 @@ def configure(conf):
 	env.append_value('CPPFLAGS_release', cppflags_release)
 	
 	env.append_value('LIB', [ 'dl' ])
+	env.append_value('LIB_network', [ 'pthread' ])
 
 	env['VARIANTS'] = [ 'debug', 'release' ]
 

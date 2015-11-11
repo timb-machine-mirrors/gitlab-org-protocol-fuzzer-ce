@@ -490,6 +490,28 @@ namespace Peach.Pro.Test.Core.Publishers
 			}
 		}
 
+		[Test]
+		[TestCase(" ")]
+		[TestCase("-")]
+		[TestCase(":")]
+		public void TestHexStringSep(string sep)
+		{
+			var obj = new HexPlugin();
+			var args = new Dictionary<string, Variant>();
+			args["arg"] = new Variant("00{0}01{0}02{0}03{0}04{0}05".Fmt(sep));
+
+			ParameterParser.Parse(obj, args);
+
+			Assert.NotNull(obj.arg);
+			Assert.NotNull(obj.arg.Value);
+			Assert.AreEqual(6, obj.arg.Value.Length);
+
+			for (int i = 0; i < obj.arg.Value.Length; ++i)
+			{
+				Assert.AreEqual(obj.arg.Value[i], i);
+			}
+		}
+
 		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Publisher 'HexString' could not set parameter 'arg'.  An invalid hex string was specified.")]
 		public void TestHexStringBad()
 		{

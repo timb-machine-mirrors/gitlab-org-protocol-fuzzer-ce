@@ -253,5 +253,119 @@ namespace Peach.Pro.Test.Core.Publishers
 		{
 			HttpClient(true, "POST", 10000, "<Param name='Timeout' value='15000'/>");
 		}
+
+		[Test]
+		public void TestGoodHttpHeaders()
+		{
+			using (var l = new RestPublisherTests.SimpleHttpListener())
+			{
+				var xml = @"
+<Peach>
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='call' method='Header'>
+				<Param name='Name'>
+					<DataModel name='DM'>
+						<String name='str' value='Content-Type' />
+					</DataModel>
+				</Param>
+				<Param name='Value'>
+					<DataModel name='DM'>
+						<String name='str' value='application/json' />
+					</DataModel>
+				</Param>
+			</Action>
+
+			<Action type='output'>
+				<DataModel name='DM'>
+					<String name='str' value='Hello' />
+				</DataModel>
+			</Action>
+
+			<Action type='input'>
+				<DataModel name='DM'>
+					<String name='str' />
+				</DataModel>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM' />
+		<Publisher class='Http'>
+			<Param name='Method' value='POST' />
+			<Param name='Url' value='http://127.0.0.1:{0}/foo' />
+		</Publisher>
+	</Test>
+</Peach>
+".Fmt(l.Port);
+
+				var dom = ParsePit(xml);
+				var cfg = new RunConfiguration { singleIteration = true };
+				var e = new Engine(null);
+
+				e.startFuzzing(dom, cfg);
+
+				var req = l.Request.ToString();
+				StringAssert.Contains("Content-Type: application/json\r\n", req);
+			}
+		}
+
+		[Test]
+		public void TestBadHttpHeaders()
+		{
+			using (var l = new RestPublisherTests.SimpleHttpListener())
+			{
+				var xml = @"
+<Peach>
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='call' method='Header'>
+				<Param name='Name'>
+					<DataModel name='DM'>
+						<String name='str' value='Content-Type' />
+					</DataModel>
+				</Param>
+				<Param name='Value'>
+					<DataModel name='DM'>
+						<String name='str' value='foo\r\nbar\r\n' />
+					</DataModel>
+				</Param>
+			</Action>
+
+			<Action type='output'>
+				<DataModel name='DM'>
+					<String name='str' value='Hello' />
+				</DataModel>
+			</Action>
+
+			<Action type='input'>
+				<DataModel name='DM'>
+					<String name='str' />
+				</DataModel>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM' />
+		<Publisher class='Http'>
+			<Param name='Method' value='POST' />
+			<Param name='Url' value='http://127.0.0.1:{0}/foo' />
+		</Publisher>
+	</Test>
+</Peach>
+".Fmt(l.Port);
+
+				var dom = ParsePit(xml);
+				var cfg = new RunConfiguration { singleIteration = true };
+				var e = new Engine(null);
+
+				var ex = Assert.Throws<PeachException>(() => e.startFuzzing(dom, cfg));
+
+				Assert.That(ex.InnerException, Is.TypeOf<SoftException>());
+				StringAssert.Contains("Unable to set the 'Content-Type' HTTP header to 'foo\r\nbar\r\n'.", ex.Message);
+			}
+		}
 	}
 }

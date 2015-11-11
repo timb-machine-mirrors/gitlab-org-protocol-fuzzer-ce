@@ -7,6 +7,7 @@ if 'asciidoctor-pdf' in bld.env.supported_features:
 	# Apply the datasheet theme to all asciidoctor_html builders
 	bld.set_asciidoctor_html_theme('../build/assets/datasheet')
 
+if 'webhelp' in bld.env.supported_features:
 	# Apply the peach webhelp theme to all webhelp builders
 	bld.set_webhelp_theme('../build/assets/webhelp')
 

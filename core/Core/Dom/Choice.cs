@@ -60,7 +60,7 @@ namespace Peach.Core.Dom
 	public class Choice : DataElementContainer
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
-		public OrderedDictionary<string, DataElement> choiceElements = new OrderedDictionary<string, DataElement>();
+		public NamedCollection<DataElement> choiceElements = new NamedCollection<DataElement>();
 		DataElement _selectedElement = null;
 
 		public Choice()
@@ -120,7 +120,7 @@ namespace Peach.Core.Dom
 		/// </summary>
 		public void BuildCache()
 		{
-			foreach (var elem in choiceElements.Values)
+			foreach (var elem in choiceElements)
 			{
 				try
 				{
@@ -236,7 +236,7 @@ namespace Peach.Core.Dom
 			}
 
 			// Now try it the slow way
-			foreach (DataElement child in choiceElements.Values)
+			foreach (DataElement child in choiceElements)
 			{
 				// Skip any cache entries, already tried them
 				// Except if our cache choice failed to parse. Then 
@@ -308,7 +308,7 @@ namespace Peach.Core.Dom
 			// Move children to choiceElements collection
 			foreach (DataElement elem in choice)
 			{
-				choice.choiceElements.Add(elem.Name, elem);
+				choice.choiceElements.Add(elem);
 				elem.parent = choice;
 			}
 
@@ -338,14 +338,17 @@ namespace Peach.Core.Dom
 		public override void ApplyReference(DataElement newElem)
 		{
 			DataElement oldChoice;
+			var idx = choiceElements.Count;
 
 			if (choiceElements.TryGetValue(newElem.Name, out oldChoice))
 			{
+				idx = choiceElements.IndexOf(oldChoice);
+				choiceElements.RemoveAt(idx);
 				oldChoice.parent = null;
 				newElem.UpdateBindings(oldChoice);
 			}
 
-			choiceElements[newElem.Name] = newElem;
+			choiceElements.Insert(idx, newElem);
 			newElem.parent = this;
 		}
 
@@ -357,7 +360,7 @@ namespace Peach.Core.Dom
 			}
 			set
 			{
-				if (!choiceElements.Values.Contains(value))
+				if (!choiceElements.Contains(value))
 					throw new KeyNotFoundException("value was not found");
 
 				Clear();
@@ -378,7 +381,7 @@ namespace Peach.Core.Dom
 			if (_selectedElement != null)
 				return base.Children();
 			else
-				return choiceElements.Values;
+				return choiceElements;
 		}
 
 		/// <summary>
@@ -388,7 +391,7 @@ namespace Peach.Core.Dom
 		/// <returns></returns>
 		public override IList<DataElement> XPathChildren()
 		{
-			return choiceElements.Select(kv => kv.Value).ToList();
+			return choiceElements;
 		}
 
 		protected override DataElement GetChild(string name)
@@ -427,9 +430,9 @@ namespace Peach.Core.Dom
 
 				Clear();
 
-				foreach (var item in choiceElements.Where(kv => kv.Value != child))
+				foreach (var item in choiceElements.Where(i => i != child))
 				{
-					Add(item.Value);
+					Add(item);
 					base.RemoveAt(0, true);
 				}
 
@@ -437,7 +440,7 @@ namespace Peach.Core.Dom
 
 				_choiceCache.Clear();
 				choiceElements.Clear();
-				choiceElements.Add(new KeyValuePair<string, DataElement>(child.Name, child));
+				choiceElements.Add(child);
 				_selectedElement = child;
 			}
 			finally

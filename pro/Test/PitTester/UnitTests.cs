@@ -54,49 +54,6 @@ namespace PitTester
 		}
 
 		[Test]
-		public void Verify([ValueSource("AllPits")]TestCase test)
-		{
-			var errors = new List<Exception>();
-
-			for (int i = 0; i < test.Pit.Versions[0].Files.Count; ++i)
-			{
-				var fileName = test.Pit.Versions[0].Files[i].Name;
-
-				try
-				{
-					PitTester.VerifyPit(test.LibraryPath, fileName, i == 0);
-				}
-				catch (Exception ex)
-				{
-					errors.Add(ex);
-					Console.WriteLine("{0}", fileName);
-					Console.WriteLine(ex.ToString());
-				}
-			}
-
-			CollectionAssert.IsEmpty(errors);
-		}
-
-		[Test]
-		public void QuickTest([ValueSource("AllPits")]TestCase test)
-		{
-			var fileName = test.Pit.Versions[0].Files[0].Name;
-
-			try
-			{
-				PitTester.TestPit(test.LibraryPath, fileName, true, null, true);
-			}
-			catch (FileNotFoundException)
-			{
-				Assert.Ignore("No test definition found.");
-			}
-			catch (Exception ex)
-			{
-				Assert.Fail(ex.Message);
-			}
-		}
-
-		[Test]
 		public void TestIgnoreArrayField()
 		{
 			const string xml = @"
@@ -351,7 +308,7 @@ namespace PitTester
 			File.WriteAllText(pitFile, xml);
 			File.WriteAllText(pitTest, test);
 
-			var ex = Assert.Throws<PeachException>(() =>
+			var ex = Assert.Throws<AggregateException>(() =>
 			{
 				try
 				{
@@ -364,7 +321,16 @@ namespace PitTester
 				}
 			});
 
-			Assert.That(ex.Message, Is.StringStarting("Encountered an unhandled exception on iteration 1"));
+			var sb = new StringBuilder();
+			ex.Handle(e =>
+			{
+				sb.AppendLine(e.Message);
+				return true;
+			});
+			var err = sb.ToString();
+
+			Assert.That(err, Is.StringStarting("Encountered an unhandled exception on iteration 1, seed "));
+			Assert.That(err, Is.StringContaining("Missing record in test data"));
 		}
 
 		[Test]
@@ -519,16 +485,19 @@ PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
 
 	<StateModel name='TheState' initialState='Initial'>
 		<State name='Initial'>
+			<!-- before -->
 			<!-- PitLint: Skip_StartIterationEvent -->
+			<!-- after -->
 			<Action type='call' method='InitializeIterationEvent' publisher='Peach.Agent' />
 			<Action type='call' method='StartIterationEvent' publisher='Peach.Agent' />
-			<Action name='Act1' type='output'>
+			<!-- PitLint: Allow_WhenControlIteration -->
+			<Action name='Act1' type='output' when='context.controlIteration'>
 				<DataModel ref='DM'/>
 				<Data>
 					<Field name='str1' value='Hello'/>
 				</Data>
 			</Action>
-			<Action type='call' method='ExitIterationEvent' publisher='Peach.Agent' />
+			<Action type='call' method='ExitIterationEvent' publisher='Peach.Agent'/>
 		</State>
 	</StateModel>
 
@@ -551,9 +520,6 @@ PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
 			<!-- Comment -->
 			<!-- PitLint: Allow_MissingParamValue=MaxOutputSize -->
 		</Publisher>
-		<Logger class='File'>
-			<Param name='Path' value='##LoggerPath##'/>
-		</Logger>
 	</Test>
 </Peach>
 ";
@@ -569,6 +535,76 @@ PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
 				File.WriteAllText(pitFile, xml);
 				File.WriteAllText(Path.Combine(tmp.Path, "foo.xml.config"), config);
 				PitTester.VerifyPit(tmp.Path, pitFile, true);
+			}
+		}
+
+		[Test]
+		public void TestNewlineInValue()
+		{
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+<!--
+PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
+-->
+<Peach 
+	xmlns='http://peachfuzzer.com/2012/Peach'
+	xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+	xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
+	author='Peach Fuzzer, LLC'
+	description='PIT'>
+
+	<DataModel name='DM'>
+		<String name='str1' value='new
+line' />
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='call' method='StartIterationEvent' publisher='Peach.Agent' />
+			<Action name='Act1' type='output'>
+				<DataModel ref='DM'>
+					<Blob name='blob' valueType='hex' value='00
+11' />
+					<String name='str2' value='another
+new
+line' />
+				</DataModel>
+				<Data>
+					<Field name='str1' value='Bad
+Field'/>
+				</Data>
+			</Action>
+			<Action type='call' method='ExitIterationEvent' publisher='Peach.Agent'/>
+		</State>
+	</StateModel>
+
+	<!-- PitLint: Skip_Lifetime -->
+	<Test name='Default' maxOutputSize='65535' targetLifetime='iteration'>
+		<StateModel ref='TheState'/>
+		<Publisher class='Null' name='null'>
+			<!-- Comment -->
+			<!-- PitLint: Allow_MissingParamValue=MaxOutputSize -->
+		</Publisher>
+	</Test>
+</Peach>
+";
+
+			const string config = @"<?xml version='1.0' encoding='utf-8'?>
+<PitDefines>
+</PitDefines>
+";
+
+			using (var tmp = new TempDirectory())
+			{
+				var pitFile = Path.Combine(tmp.Path, "foo.xml");
+				File.WriteAllText(pitFile, xml);
+				File.WriteAllText(Path.Combine(tmp.Path, "foo.xml.config"), config);
+				
+				var ex = Assert.Throws<ApplicationException>(() => PitTester.VerifyPit(tmp.Path, pitFile, true));
+
+				StringAssert.Contains("Element has value attribute with embedded newline: <String name=\"str1\"", ex.Message);
+				StringAssert.Contains("Element has value attribute with embedded newline: <String name=\"str2\"", ex.Message);
+				StringAssert.Contains("Element has value attribute with embedded newline: <Field name=\"str1\"", ex.Message);
+				StringAssert.DoesNotContain("Element has value attribute with embedded newline: <Blob name=\"blob\"", ex.Message);
 			}
 		}
 

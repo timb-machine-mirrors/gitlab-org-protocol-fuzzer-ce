@@ -72,12 +72,16 @@ namespace Peach.Pro.Core.Transformers.Crypto
 					}
 				}
 			}
-			else
+			else if (Modulus != null)
 			{
 				var modulus = new BigInteger(Modulus.Value);
 				var exponent = new BigInteger(Exponent.Value);
 
 				rsaServerPrivateKey = new RsaKeyParameters(false, modulus, exponent);
+			}
+			else
+			{
+				throw new PeachException("Error, the RsaSignature transformer requires either the Modulus or PrivateKey parameter to be specified.");
 			}
 
 			var clear = new BitReader(data).ReadBytes((int)data.Length);

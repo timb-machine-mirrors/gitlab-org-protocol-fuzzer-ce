@@ -36,6 +36,8 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
+using SysProcess = System.Diagnostics.Process;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
@@ -202,6 +204,8 @@ namespace Peach.Core
 	[Serializable]
 	public class HexString
 	{
+		static readonly Regex reHexWhiteSpace = new Regex(@"[h{},\s\r\n:-]+", RegexOptions.Singleline);
+
 		public byte[] Value { get; private set; }
 
 		private HexString(byte[] value)
@@ -211,8 +215,7 @@ namespace Peach.Core
 
 		public static HexString Parse(string s)
 		{
-
-			s = s.Replace(" ", "");
+			s = reHexWhiteSpace.Replace(s, "");
 			if (s.Length % 2 == 0)
 			{
 				var array = ToArray(s);
@@ -350,12 +353,14 @@ namespace Peach.Core
 			}
 
 			throw new PeachException("Error, unable to locate '{0}'{1} '{2}' parameter.".Fmt(
-				program, path != null ? " in specified" : ", please specify using", parameter));
+				program, 
+				path != null ? " in specified" : ", please specify using", 
+				parameter));
 		}
 
 		public static int GetCurrentProcessId()
 		{
-			using (var p = Process.GetCurrentProcess())
+			using (var p = SysProcess.GetCurrentProcess())
 				return p.Id;
 		}
 

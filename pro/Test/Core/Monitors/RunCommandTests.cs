@@ -324,17 +324,16 @@ namespace Peach.Pro.Test.Core.Monitors
 			}
 			else if (Platform.GetOS() == Platform.OS.Linux)
 			{
+				const string pattern = "heap-use-after-free on address ";
 				if (Platform.GetArch() == Platform.Architecture.x64)
 				{
-					const string pattern = "heap-use-after-free on address 0x61400000fe44 at pc 0x47b8ac";
 					StringAssert.StartsWith(pattern, data.Title);
 					StringAssert.Contains(pattern, data.Fault.Description);
-					Assert.AreEqual("C755DA91", data.Fault.MajorHash);
+					CollectionAssert.Contains(new[] { "C755DA91", "3BFFE0CC" }, data.Fault.MajorHash);
 					Assert.AreEqual("9DD19897", data.Fault.MinorHash);
 				}
 				else
 				{
-					const string pattern = "heap-use-after-free on address ";
 					StringAssert.StartsWith(pattern, data.Title);
 					StringAssert.Contains(pattern, data.Fault.Description);
 					Assert.AreEqual("DF8C57E3", data.Fault.MajorHash);

@@ -6,7 +6,9 @@
 *Monitor Categories*: *Automation*, *Fault detection*
 
 The _Android_ monitor examines both targeted Android applications and the state of the 
-Android OS. Two expected use cases are:
+Android OS. Peach supports Andorid OS verions 4.0 to 5.1, inclusively. 
+
+Two expected use cases are:
 
 * Maintaining state while fuzzing native code
 * Launching and monitoring Android Java applications. 
@@ -37,7 +39,7 @@ http://developer.android.com/sdk/index.html[Android Platform Tools] and either a
 physical Android device. The configuration for a physical device follows. For a configuration using 
 a virtual device, see the xref:Monitors_AndroidEmulator[Android Emulator Monitor].
 
-image::{images}/AndroidMtr.PNG["Fuzzing Configuration for Andtroid Device", scalewidth="75%"]
+image::{images}/AndroidMtr.png["Fuzzing Configuration for Andtroid Device", scalewidth="75%"]
 
 [NOTE]
 ======================

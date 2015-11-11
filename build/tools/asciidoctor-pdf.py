@@ -5,7 +5,7 @@ from waflib.Task import Task, SKIP_ME, RUN_ME, ASK_LATER, update_outputs, Task
 from waflib import Utils, Errors, Logs, Context
 import os, shutil, re
 
-re_xi = re.compile('''^(include|image)::(.*?.(adoc|png))\[''', re.M)
+re_xi = re.compile('''^(include|image)::(.*?.(adoc|png|PNG))\[''', re.M)
 
 def configure(conf):
 	j = os.path.join
@@ -33,18 +33,29 @@ gem 'coderay', '1.1.0'
 gemspec :path => "%s"
 ''' % rel)
 
-	v.ASCIIDOCTOR_PDF = j(root, 'bin', 'asciidoctor-pdf')
-	v.ASCIIDOCTOR_PDF_GEMFILE = gem.abspath()
-	v.ASCIIDOCTOR_PDF_OPTS = [
+	parts = v.BUILDTAG.split('.')
+
+	v.ASCIIDOCTOR_OPTS = [
 		'-a',
 		'BUILDTAG=%s' % v.BUILDTAG,
+		'-a',
+		'VER_MAJOR=%s' % parts[0],
+		'-a',
+		'VER_MINOR=%s' % parts[1],
+		'-a',
+		'VER_BUILD=%s' % parts[2],
+		'-a',
+		'VER_BRANCH=%s' % (len(parts) == 4 and parts[3] or v.VER_BRANCH),
 	]
+
+	v.ASCIIDOCTOR_PDF = j(root, 'bin', 'asciidoctor-pdf')
+	v.ASCIIDOCTOR_PDF_GEMFILE = gem.abspath()
+	v.ASCIIDOCTOR_PDF_OPTS = v.ASCIIDOCTOR_OPTS
 	v.ASCIIDOCTOR_PDF_THEME_DEPS = []
 	v.ASCIIDOCTOR_PDF_THEME_OPTS = []
-	v.ASCIIDOCTOR_HTML_OPTS = []
+	v.ASCIIDOCTOR_HTML_OPTS = v.ASCIIDOCTOR_OPTS
 	v.ASCIIDOCTOR_HTML_THEME_DEPS = []
 	v.ASCIIDOCTOR_HTML_THEME_OPTS = []
-	v.ASCIIDOCTOR_OPTS = []
 
 	# Run bundler which will prepare all the prerequisites
 	conf.cmd_and_log(v.BUNDLE + [ '--gemfile=%s' % v.ASCIIDOCTOR_PDF_GEMFILE ])
@@ -54,8 +65,8 @@ gemspec :path => "%s"
 	adr = conf.find_program('asciidoctor')
 	(out,err) = conf.cmd_and_log(adr + ['--version'], output=Context.BOTH)
 
-	if 'Asciidoctor 1.5.2 ' not in out:
-		raise Errors.WafError("Expected Asciidoctor 1.5.2 but found:\n%s" % out)
+	if 'Asciidoctor 1.5.' not in out:
+		raise Errors.WafError("Expected Asciidoctor 1.5.x but found:\n%s" % out)
 
 	v.append_value('supported_features', 'asciidoctor-pdf')
 

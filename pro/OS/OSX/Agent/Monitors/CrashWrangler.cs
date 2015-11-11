@@ -30,13 +30,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
+using ProcessStartInfo = System.Diagnostics.ProcessStartInfo;
+using Debug = System.Diagnostics.Debug;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using SysProcess = System.Diagnostics.Process;
 using Peach.Core;
 using Peach.Core.Agent;
 using Encoding = Peach.Core.Encoding;
@@ -88,16 +90,15 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 		public bool RestartOnEachTest { get; set; }
 		public bool RestartAfterFault { get; set; }
 
-		private Process _procHandler; // Handle to exec_handler process
-		private Process _procCommand; // Handle to inferrior process
-		private bool? _detectedFault; // Was a fault detected
-		private bool _faultExitFail;  // Failed to exit within WaitForExitTimeout
-		private bool _faultExitEarly; // Process exited early
-		private bool _messageExit;    // Process exited due to WaitForExitOnCall
+		private Process _process;
+		private bool? _detectedFault;  // Was a fault detected
+		private bool _faultExitFail;   // Failed to exit within WaitForExitTimeout
+		private bool _faultExitEarly;  // Process exited early
+		private bool _messageExit;     // Process exited due to WaitForExitOnCall
 
-		public CrashWrangler(string name)
-			: base(name)
+		public CrashWrangler(string name) : base(name)
 		{
+			_process = PlatformFactory<Process>.CreateInstance(Logger);
 		}
 
 		public override void StartMonitor(Dictionary<string, string> args)
@@ -121,10 +122,10 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			_messageExit = false;
 
 			if (RestartAfterFault && args.LastWasFault)
-				_StopProcess();
+				_Stop();
 
-			if (!_IsProcessRunning() && StartOnCall == null)
-				_StartProcess();
+			if (!_process.IsRunning && StartOnCall == null)
+				_Start();
 		}
 
 		public override bool DetectedFault()
@@ -152,8 +153,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			if (!DetectedFault())
 				return null;
 
-			var fault = new MonitorData
-			{
+			var fault = new MonitorData {
 				Data = new Dictionary<string, Stream>(),
 				Fault = new MonitorData.Info(),
 			};
@@ -195,29 +195,31 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			);
 
 			if (StartOnCall == null)
-				_StartProcess();
+				_Start();
 		}
 
 		public override void SessionFinished()
 		{
-			_StopProcess();
+			_Stop();
 		}
 
 		public override void IterationFinished()
 		{
-			if (!_messageExit && FaultOnEarlyExit && !_IsProcessRunning())
+			if (!_messageExit && FaultOnEarlyExit && !_process.IsRunning)
 			{
 				_faultExitEarly = true;
-				_StopProcess();
+				_Stop();
 			}
 			else if (StartOnCall != null)
 			{
-				_WaitForExit(true);
-				_StopProcess();
+				if (!NoCpuKill)
+					_process.WaitForIdle(WaitForExitTimeout);
+				else
+					_process.WaitForExit(WaitForExitTimeout);
 			}
 			else if (RestartOnEachTest)
 			{
-				_StopProcess();
+				_Stop();
 			}
 		}
 
@@ -225,49 +227,23 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 		{
 			if (msg == StartOnCall)
 			{
-				_StopProcess();
-				_StartProcess();
+				_Stop();
+				_Start();
 			}
 			else if (msg == WaitForExitOnCall)
 			{
 				_messageExit = true;
-				_WaitForExit(false);
-				_StopProcess();
-			}
-		}
-
-		private ulong _GetTotalCputime(Process p)
-		{
-			try
-			{
-				return ProcessInfo.Instance.Snapshot(p).TotalProcessorTicks;
-			}
-			catch
-			{
-				return 0;
-			}
-		}
-
-		private bool _IsProcessRunning()
-		{
-			return _procCommand != null && !_procCommand.HasExited && !_IsZombie(_procCommand);
-		}
-
-		private bool _IsZombie(Process p)
-		{
-			try
-			{
-				return !ProcessInfo.Instance.Snapshot(p).Responding;
-			}
-			catch
-			{
-				return false;
+				if (!_process.WaitForExit(WaitForExitTimeout))
+				{
+					_detectedFault = true;
+					_faultExitFail = true;
+				}
 			}
 		}
 
 		private bool _CommandExists()
 		{
-			using (var p = new Process())
+			using (var p = new SysProcess())
 			{
 				p.StartInfo = new ProcessStartInfo("which", "-s \"" + Executable + "\"");
 				p.Start();
@@ -276,13 +252,10 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			}
 		}
 
-		private void _StartProcess()
+		private void _Start()
 		{
 			if (!_CommandExists())
 				throw new PeachException("CrashWrangler: Could not find command \"" + Executable + "\"");
-
-			if (File.Exists(CwPidFile))
-				File.Delete(CwPidFile);
 
 			if (File.Exists(CwLogFile))
 				File.Delete(CwLogFile);
@@ -290,194 +263,51 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			if (File.Exists(CwLockFile))
 				File.Delete(CwLockFile);
 
-			var si = new ProcessStartInfo
-			{
-				FileName = ExecHandler,
-				Arguments = "\"" + Executable + "\"" + (string.IsNullOrEmpty(Arguments) ? "" : " ") + Arguments,
-				UseShellExecute = false
-			};
+			var env = new Dictionary<string, string>();
 
-			foreach (DictionaryEntry de in Environment.GetEnvironmentVariables())
-				si.EnvironmentVariables[de.Key.ToString()] = de.Value.ToString();
+			foreach (DictionaryEntry item in Environment.GetEnvironmentVariables())
+				env[item.Key.ToString()] = item.Value.ToString();
 
-			si.EnvironmentVariables["CW_NO_CRASH_REPORTER"] = "1";
-			si.EnvironmentVariables["CW_QUIET"] = "1";
-			si.EnvironmentVariables["CW_LOG_PATH"] = CwLogFile;
-			si.EnvironmentVariables["CW_PID_FILE"] = CwPidFile;
-			si.EnvironmentVariables["CW_LOCK_FILE"] = CwLockFile;
+			env["CW_NO_CRASH_REPORTER"] = "1";
+			env["CW_QUIET"] = "1";
+			env["CW_LOG_PATH"] = CwLogFile;
+			env["CW_LOCK_FILE"] = CwLockFile;
 
 			if (UseDebugMalloc)
-				si.EnvironmentVariables["CW_USE_GMAL"] = "1";
+				env["CW_USE_GMAL"] = "1";
 
 			if (ExploitableReads)
-				si.EnvironmentVariables["CW_EXPLOITABLE_READS"] = "1";
+				env["CW_EXPLOITABLE_READS"] = "1";
 
-			_procHandler = new Process { StartInfo = si };
-
-			try
-			{
-				_procHandler.Start();
-			}
-			catch (Win32Exception ex)
-			{
-
-				var err = GetLastError(ex.NativeErrorCode);
-				throw new PeachException(string.Format("CrashWrangler: Could not start handler \"{0}\" - {1}", ExecHandler, err), ex);
-			}
-
-			// Wait for pid file to exist, open it up and read it
-			while (!File.Exists(CwPidFile) && !_procHandler.HasExited)
-				Thread.Sleep(250);
-
-			var strPid = File.ReadAllText(CwPidFile);
-			var pid = Convert.ToInt32(strPid);
-
-			try
-			{
-				_procCommand = Process.GetProcessById(pid);
-			}
-			catch (ArgumentException ex)
-			{
-				if (!_procHandler.HasExited)
-					throw new PeachException("CrashWrangler: Could not open handle to command \"" + Executable + "\" with pid \"" + pid + "\"", ex);
-
-				var ret = _procHandler.ExitCode;
-				var log = File.Exists(CwLogFile);
-
-				// If the exit code non-zero and no log means it was unable to run the command
-				if (ret != 0 && !log)
-					throw new PeachException("CrashWrangler: Handler could not run command \"" + Executable + "\"", ex);
-
-				// If the exit code is 0 or there is a log, the program ran to completion
-				if (_procCommand != null)
-				{
-					_procCommand.Close();
-					_procCommand = null;
-				}
-			}
+			var args = "\"" + Executable + "\"" + (string.IsNullOrEmpty(Arguments) ? "" : " ") + Arguments;
+			_process.Start(ExecHandler, args, env, null);
 
 			OnInternalEvent(EventArgs.Empty);
 		}
 
-		private void _StopProcess()
+		private void _Stop()
 		{
-			if (_procHandler == null)
+			if (!_process.IsRunning)
 				return;
-
+			
 			// Ensure a crash report is not being generated
 			while (File.Exists(CwLockFile))
 				Thread.Sleep(250);
 
-			// Killing _procCommand will cause _procHandler to exit
-			// _procCommand might not exist if the program ran to completion
-			// prior to opening a handle to the pid
-			if (_procCommand != null)
-			{
-				if (!_procCommand.HasExited)
-				{
-					_procCommand.CloseMainWindow();
-					_procCommand.WaitForExit(500);
-
-					if (!_procCommand.HasExited)
-					{
-						try
-						{
-							_procCommand.Kill();
-						}
-						catch (InvalidOperationException)
-						{
-							// Already exited between HasEcited and Kill()
-						}
-						_procCommand.WaitForExit();
-					}
-				}
-
-				_procCommand.Close();
-				_procCommand = null;
-			}
-
-			if (!_procHandler.HasExited)
-			{
-				_procHandler.WaitForExit();
-			}
-
-			_procHandler.Close();
-			_procHandler = null;
+			_process.Stop(WaitForExitTimeout);
 		}
-
-		private void _WaitForExit(bool useCpuKill)
-		{
-			const int pollInterval = 200;
-			int i;
-
-			if (!_IsProcessRunning())
-				return;
-
-			if (useCpuKill && !NoCpuKill)
-			{
-				ulong lastTime = 0;
-
-				for (i = 0; i < WaitForExitTimeout; i += pollInterval)
-				{
-					var currTime = _GetTotalCputime(_procCommand);
-
-					if (i != 0 && lastTime == currTime)
-						break;
-
-					lastTime = currTime;
-					Thread.Sleep(pollInterval);
-				}
-
-				_StopProcess();
-			}
-			else
-			{
-				// For some reason, Process.WaitForExit is causing a SIGTERM
-				// to be delivered to the process. So we poll instead.
-
-				if (WaitForExitTimeout >= 0)
-				{
-					for (i = 0; i < WaitForExitTimeout; i += pollInterval)
-					{
-						if (!_IsProcessRunning())
-							break;
-
-						Thread.Sleep(pollInterval);
-					}
-
-					if (i >= WaitForExitTimeout && !useCpuKill)
-					{
-						_detectedFault = true;
-						_faultExitFail = true;
-					}
-				}
-				else
-				{
-					while (_IsProcessRunning())
-						Thread.Sleep(pollInterval);
-				}
-			}
-		}
-
-		private static string GetLastError(int err)
-		{
-			var ptr = strerror(err);
-			var ret = Marshal.PtrToStringAnsi(ptr);
-			return ret;
-		}
-
-		[DllImport("libc")]
-		private static extern IntPtr strerror(int err);
 
 		internal class Summary
 		{
 			public string MajorHash { get; private set; }
+
 			public string MinorHash { get; private set; }
+
 			public string Title { get; private set; }
+
 			public string Exploitable { get; private set; }
 
-			private static readonly string[] SystemModules =
-			{
+			private static readonly string[] SystemModules = {
 				"libSystem.B.dylib",
 				"libsystem_kernel.dylib",
 				"libsystem_c.dylib",
@@ -491,8 +321,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 				"???"                     // For when it doesn't exist in a known module
 			};
 
-			private static readonly string[] OffsetFunctions = 
-			{
+			private static readonly string[] OffsetFunctions = {
 				"__memcpy",
 				"__longcopy",
 				"__memmove",
@@ -611,5 +440,3 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 		}
 	}
 }
-
-// end

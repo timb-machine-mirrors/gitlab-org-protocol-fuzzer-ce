@@ -2,54 +2,13 @@
 [[Publishers_Rest]]
 == Rest Publisher
 
-The _Rest_ Publisher enables a pit to communicate to a TCP socket using the Secure Socket Layer (SSL) protocol. Peach uses _Ssl_ to fuzz protocols (such as HTTPS) that are built inside an SSL encrypted channel.
-
-Since it is easy to confuse _Ssl_ and _SslListner_, here's the difference:
-
-* The _SslListner_ Publisher accepts incoming (inward) connections, as one that listens.
-* The _Ssl_ Publisher connects outbound communications. 
+The _Rest_ Publisher  is an I/O adapter that communicates using the Representational State Transfer (REST) architecture. This publisher communicates using HTTP as the underlying transport. Additionally, the publisher encodes the data model into JSON before transmitting it to the server.
 
 === Syntax
 
 [source,xml]
 ----
-<Publisher class="Rest">
-    <Param name="Method" value="GET"/>
-    <Param name="Url" value="" />
-</Publisher>
-----
-
-[source,xml]
-----
-<Action type="call" method="GET /product/{0}">
-    <!-- {0} -->
-    <Param name="Id">
-        <DataModel ref="Id" />
-    </Param>
-</Action>
-
-<Action type="call" method="GET /invoices?start_date={0}&end_data={1}">
-    <!-- {0} -->
-    <Param name="StartDate">
-        <DataModel ref="StartDate" />
-    </Param>
-    <!-- {1} -->
-    <Param name="EndDate">
-        <DataModel ref="EndDate" />
-    </Param>
-</Action>
-
-<Action type="call" method="POST /product/{0}">
-    <!-- {0} -->
-    <Param name="Id">
-        <DataModel ref="Id" />
-    </Param>
-    
-    <!-- POST Body -->
-    <Param name="PostData">
-        <DataModel ref="PostData" />
-    </Param>
-</Action>
+<Publisher class="Rest" />
 ----
 
 === Parameters
@@ -62,6 +21,7 @@ _Optional:_
 
 BaseUrl:: Base URL is used by some authentication types
 Username:: Username for authentication
+Password:: Optional password associated with the Username in authentication
 Domain:: Domain for authentication
 Cookies:: Enable cookie support. The default value is true.
 CookiesAcrossIterations:: Track cookies across iterations. The default value is false.
@@ -83,13 +43,44 @@ One additional parameter can be provided that is used for the body of the reques
 * This example places a call that expects to receive a single parameter: +GET /product/{0}+
 * This example places a call that expects to receive two parameters: +GET /invoices?start_date={0}&end_date={1}+
 
-///////////////////////////
-=== Examples
+
+=== Example
 
 .Calling Rest Services
+
+The following example provides three fragments using the GET and POST methods.
+
 [source,xml]
 ----
-TODO -- Call public rest API (google?)
+<Action type="call" method="GET http://www.example.com/product/{0}">
+    <!-- {0} -->
+    <Param name="Id">
+        <DataModel ref="Id" />
+    </Param>
+</Action>
+
+<Action type="call" method="GET http://www.example.com/invoices?start_date={0}&end_data={1}">
+    <!-- {0} -->
+    <Param name="StartDate">
+        <DataModel ref="StartDate" />
+    </Param>
+    <!-- {1} -->
+    <Param name="EndDate">
+        <DataModel ref="EndDate" />
+    </Param>
+</Action>
+
+<Action type="call" method="POST http://www.example.com/product/{0}">
+    <!-- {0} -->
+    <Param name="Id">
+        <DataModel ref="Id" />
+    </Param>
+    
+    <!-- POST Body -->
+    <Param name="PostData">
+        <DataModel ref="PostData" />
+    </Param>
+</Action>
 ----
 
-///////////////////////////
+

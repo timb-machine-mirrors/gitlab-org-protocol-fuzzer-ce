@@ -14,6 +14,10 @@
 						class="green">
 				Saved successfully.
 			</span>
+			<span ng-show="vm.ShowRequired"
+						class="red">
+				There are required variables that must be configured.
+			</span>
 			<span ng-show="vm.ShowValidation"
 						class="red">
 				You have some validation issues to correct.
@@ -59,7 +63,7 @@
 							{{param.key}}
 						</td>
 						<td class="width-100"
-								ng-class="{'has-error': form.param.$invalid && form.param.$dirty}">
+								ng-class="{'has-error': form.param.$invalid}">
 							<peach:parameter-input param="param"
 																		 form="form">
 							</peach:parameter-input>

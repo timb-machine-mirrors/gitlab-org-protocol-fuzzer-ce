@@ -41,12 +41,16 @@ module Peach {
 			return !this.pitService.IsConfigured;
 		}
 
+		public get ShowNoMonitors(): boolean {
+			return this.pitService.IsConfigured && !this.pitService.HasMonitors;
+		}
+
 		public get CanWizardBeginTest(): boolean {
 			return this.CanBeginTest && this.IsComplete(C.Tracks.Fault);
 		}
 
 		public get CanBeginTest(): boolean {
-			return this.testService.CanBeginTest;
+			return this.pitService.IsConfigured && this.testService.CanBeginTest;
 		}
 
 		public get CanContinue(): boolean {
