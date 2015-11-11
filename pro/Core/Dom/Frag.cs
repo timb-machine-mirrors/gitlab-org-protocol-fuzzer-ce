@@ -18,6 +18,7 @@ namespace Peach.Pro.Core.Dom
 	[Parameter("fragLength", typeof(int), "Fragment size in bytes", "")]
 	[Parameter("class", typeof(string), "Fragment extension class", "ByLength")]
 	[Parameter("constraint", typeof(string), "Scripting expression that evaluates to true or false", "")]
+	[Parameter("payloadOptional", typeof(bool), "Protocol allows for null payload", "false")]
 	[Parameter("totalLengthField", typeof(string), "Name of total length field in template model.", "")]
 	[Parameter("fragmentLengthField", typeof(string), "Name of fragment length field in template model.", "")]
 	[Parameter("fragmentOffsetField", typeof(string), "Name of fragment offset field in template model.", "")]
@@ -68,6 +69,8 @@ namespace Peach.Pro.Core.Dom
 		/// </summary>
 		public DataElement Template { get; set; }
 
+		public bool PayloadOptional { get; set; }
+
 		public FragSequence Rendering { get { return (FragSequence)this["Rendering"]; } }
 
 		public bool viewPreRendering = true;
@@ -82,6 +85,7 @@ namespace Peach.Pro.Core.Dom
 
 			block.Class = node.getAttr("class", "ByLength");
 			block.FragLength = node.getAttr("fragLength", 0);
+			block.PayloadOptional = node.getAttr("payloadOptional", false);
 			block.TotalLengthField = node.getAttr("totalLengthField", "");
 			block.FragmentLengthField = node.getAttr("fragmentLengthField", "");
 			block.FragmentOffsetField= node.getAttr("fragmentOffsetField", "");
