@@ -2,6 +2,7 @@
 
 tools = [
 	'nunit.py',
+	'trampoline.py',
 ]
 
 files = [
