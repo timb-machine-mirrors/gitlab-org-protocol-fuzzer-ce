@@ -468,8 +468,17 @@ namespace Peach.Pro.Core.OS.Windows
 				// If we try and close the inferior as a non admin we will get an access denied error
 				// because it was not spawned by us. The only way to kill the inferrior is
 				// to close the job object which was created by us.
-				JobObject.Dispose();
-				JobObject = null;
+				if (JobObject != null)
+				{
+					JobObject.Dispose();
+					JobObject = null;
+
+					if (Proxy != null)
+					{
+						Proxy = null;
+						ExitCode = -1;
+					}
+				}
 			}
 
 			public bool WaitForExit(int timeout)
@@ -484,8 +493,12 @@ namespace Peach.Pro.Core.OS.Windows
 				// in order for stdout/stderr to return EOF.
 				// Before we do that, we need to get the exit code from the proxy
 
-				ExitCode = Proxy.ExitCode;
-				Proxy = null;
+				if (Proxy != null)
+				{
+					ExitCode = Proxy.ExitCode;
+					Proxy = null;
+				}
+
 				Inferrior.Close();
 				Inferrior = null;
 
