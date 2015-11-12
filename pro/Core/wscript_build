@@ -48,6 +48,7 @@ deps = [
 	'BouncyCastle.Crypto.dll',
 	'aardvark_net.dll',
 	'LibUsbDotNet.dll',
+	'Mono.Posix.dll',
 
 	'websocket-sharp.dll',
 	'Dapper.dll',

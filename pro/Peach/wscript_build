@@ -28,11 +28,10 @@ app = bld(
 if bld.env.MCS and bld.env.DEST_OS != 'win32':
 	app.install_755 = 'peach'
 
-peach_pro = [
+common = [
 	# Peach
 	'Peach.exe',
 	'Peach.Pro.Web',
-	'peach-sdk',
 
 	# Peach Platform Suppoort
 	'Peach.Pro.OS.Windows.dll',
@@ -40,17 +39,29 @@ peach_pro = [
 	'Peach.Pro.OS.OSX.dll',
 
 	# Include sample programs so sample pits work
+	'SimpleHttpServer',
 	'CrashableServer',
 	'CrashingFileConsumer',
 	'CrashingProgram',
 	'ComTest',
 
-	# Linux core file monitor
+	# Common side-process helpers
+	'PeachTrampoline.exe',
+
+	# Linux side-process helpers
 	'PeachLinuxCrashHandler.exe',
 
 	# Windows side-process helpers
 	'Peach.Pro.ComContainer.exe',
 	'Peach.Pro.WindowsDebugInstance.exe',
+
+	'IronPython.StdLib', # Python Standard Library
+	'VMware-VIX',        # VMWare VIX API
+	'CrashWrangler',     # CrashWrangler
+]
+
+peach_pro = common + [
+	'peach-sdk',
 
 	# Helper Programs
 	'PeachValidator.exe',
@@ -59,39 +70,43 @@ peach_pro = [
 	'PeachSampleNinja.exe',
 
 	# Basic Block Pin Tool
+	'pin',               # Pin Binaries
 	'bblocks',
 	'bblocks32',
 	'bblocks64',
-
-	'IronPython.StdLib', # Python Standard Library
-	'pin',               # Pin Binaries
-	'VMware-VIX',        # VMWare VIX API
-	'CrashWrangler',     # CrashWrangler
 ]
 
-tgt = '-'.join([ 'peach-pro', bld.env.BUILDTAG, bld.variant ])
+internal = common + [
+	# Internal pit testing tools
+	'nunit-console',
+	'nunit-tools',
+	'PitTester.exe',
+	'Godel.Tests.dll',
+	'PeachWorker.exe',
+	'PeachService.exe',
+	'Peach.Core.Test.dll',
+	'Peach.Pro.Test.dll',
+	'Peach.Pro.Test.OS.Linux.dll',
+	'Peach.Pro.Test.OS.OSX.dll',
+	'Peach.Pro.Test.OS.Windows.dll',
+	'Peach.Pro.Test.WebApi.dll',
+	'UseAfterFree',
+	'CrashTest',
+	'CrashTestDummy.exe',
+]
 
 bld(
 	features = 'zip',
-	name = tgt,
+	name = '-'.join([ 'peach-pro', bld.env.BUILDTAG, bld.variant ]),
 	use = peach_pro,
 )
 
-'''
-farm = [
-	'pf_admin.exe',
-	'pf_controller.exe',
-	'pf_node.exe',
-	'PeachFarmMonitor',
-	'PeachFarm.Reporting.Service.exe',
-]
-
-tgt = '-'.join([ 'peach-ent', bld.env.BUILDTAG, bld.variant ])
+internal_variant = bld.variant \
+	.replace('debug', 'internal') \
+	.replace('release', 'internal')
 
 bld(
 	features = 'zip',
-	name = tgt,
-	use = peach_pro + farm,
+	name = '-'.join([ 'peach-pro', bld.env.BUILDTAG, internal_variant ]),
+	use = internal,
 )
-'''
-

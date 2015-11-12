@@ -17,10 +17,10 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 
 		private bool Check(string exe)
 		{
-			var dbgPath = WindowsDebuggerHybrid.FindWinDbg(); ;
-			var p = SubProcess.Run(Path.Combine(dbgPath, "gflags.exe"), "/p");
+			var dbgPath = WindowsDebuggerHybrid.FindWinDbg();
+			var p = ProcessHelper.Run(Path.Combine(dbgPath, "gflags.exe"), "/p", null, null, -1);
 			var stdout = p.StdOut.ToString();
-			var lines = stdout.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+			var lines = stdout.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
 
 			bool isFirst = true;
 			foreach (var line in lines)

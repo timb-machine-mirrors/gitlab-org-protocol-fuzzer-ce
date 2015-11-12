@@ -32,12 +32,12 @@ output
 The result should be:    <--- archive to smb://nas/builds/peach-pro
 output
   release
-    ${buildtag}          <--- publish to ssh://dl.peachfuzzer.com
-      release.json
-      peach-pro-${buildtag}-${platform}_release.zip
-      peach-pro-${buildtag}-${platform}_release.zip.sha1
-      pits
-        ${pit}.zip
+	${buildtag}          <--- publish to ssh://dl.peachfuzzer.com
+	  release.json
+	  peach-pro-${buildtag}-${platform}_release.zip
+	  peach-pro-${buildtag}-${platform}_release.zip.sha1
+	  pits
+		${pit}.zip
 '''
 
 def to_list(sth):
@@ -80,40 +80,33 @@ def sha1sum(filename):
 		f.write('SHA1(%s)= %s\n' % (os.path.basename(filename), digest))
 
 def extract_pkg():
-	# Lookfor output/*.zip
-	# Open up archive.zip and look for zip files in the pkg directory
-	# Extract said zips to the release folder
+		# Copy for output/$CFG_release/pkg/*.zip to release folder
 
-	print ''
-	print 'Extract packages'
-	print ''
+		print ''
+		print 'Extract packages'
+		print ''
 
-	pkgs = []
+		pkgs = []
 
-	for (path, dirs, files) in os.walk(outdir):
-		for name in files:
-			f = os.path.join(path, name)
-
-			if not f.endswith('release.zip'):
-				print 'IGNORING   %s' % f
-				continue
-
-			print 'PROCESSING %s' % f
-
-			with zipfile.ZipFile(f, 'r') as z:
-				for i in z.infolist():
-					if not i.filename.startswith('pkg/'):
-						continue
-					if not i.filename.endswith('.zip'):
+		for cfg in os.listdir(outdir):
+				if not cfg.endswith('release'):
+						print 'IGNORING   %s' % cfg
 						continue
 
-					print ' - %s' % i.filename
-					i.filename = os.path.basename(i.filename)
-					z.extract(i, reldir)
-					pkgs.append(os.path.join(reldir, i.filename))
-		break
+				path = os.path.join(outdir, cfg, 'pkg')
+				if not os.path.exists(path):
+						continue
 
-	return pkgs
+				print 'PROCESSING %s' % cfg
+
+				for item in os.listdir(path):
+						if not item.endswith('.zip'):
+								continue
+						print ' - %s' % item
+						shutil.copy(os.path.join(path, item), reldir)
+						pkgs.append(os.path.join(reldir, item))
+
+		return pkgs
 
 def extract_doc():
 	# Lookfor output/doc.zip

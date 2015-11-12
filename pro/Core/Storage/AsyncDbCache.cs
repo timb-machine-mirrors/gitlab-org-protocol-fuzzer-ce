@@ -78,7 +78,7 @@ namespace Peach.Pro.Core.Storage
 			// Remember previous runtime so it properly accumulates on restarted jobs
 			_runtime = job.Runtime;
 
-			_task = Task.Factory.StartNew<Job>(BackgroundTask, job);
+			_task = Task.Factory.StartNew<Job>(BackgroundTask, job, TaskCreationOptions.LongRunning);
 		}
 
 		public Job Job { get; private set; }

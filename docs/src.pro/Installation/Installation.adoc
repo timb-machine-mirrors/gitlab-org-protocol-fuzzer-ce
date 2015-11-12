@@ -22,8 +22,7 @@ TIP: When fuzzing, many security products (such as anti-virus programs) can inte
 {product} is licensed on a per-concurrent instance basis for a one year duration.
 
 Peach Fuzzer, LLC, delivers licenses via email after each purchase, typically 
-within 24 hours during the business week. The filename of the Peach Fuzzer l
-icense, _Peach.license_, is the same for all operating system platforms.
+within 24 hours during the business week. The filename of the Peach Fuzzer license, _Peach.license_, is the same for all operating system platforms.
 
 When the license arrives, place a copy of it in one of the following folders:
 
@@ -48,11 +47,11 @@ NOTE: You need a copy of your Peach Fuzzer license on your system to perform the
 
 1. Using your Internet browser, navigate to https://dl.peachfuzzer.com
 +
-image::{images}/Install_Site_Home.PNG["Download Home Page", scale="30"]
+image::{images}/Install_Site_Home.png["Download Home Page",scalewidth="60%"]
  
    a. Click Browse. The Upload dialog display, allowing you to select the Peach license file. 
 +
-image::{images}/Install_LicenseUpload.PNG["Upload Dialog", scale="30"]
+image::{images}/Install_LicenseUpload.png["Upload Dialog",scalewidth="60%"]
    
    b. navigate to the location of the license
    c. Select the license (Peach.license)
@@ -60,7 +59,7 @@ image::{images}/Install_LicenseUpload.PNG["Upload Dialog", scale="30"]
       
 2. Upon return to the Peach Fuzzer download home page, click `Upload Licence`. The page listing the available images displays:
 +
-image::{images}/Install_Image_Choices.PNG["Peach Image Choices", scale="40"]
+image::{images}/Install_Image_Choices.png["Peach Image Choices",scalewidth="70%"]
 
 3. On the dowloads page, select the Peach release version and operating system to install.
 
@@ -69,7 +68,7 @@ image::{images}/Install_Image_Choices.PNG["Peach Image Choices", scale="40"]
 +
 Click `I ACCEPT` the End-User License Agreement to continue.
 +
-image::{images}/Install_EULA_Acceptance.PNG["Peach EULA Acceptance", scale="40"]
+image::{images}/Install_EULA_Acceptance.png["Peach EULA Acceptance",scalewidth="70%"]
 
 4. Save the zip file locally, and unzip the files as outlined in the following sections at your convenience.
    

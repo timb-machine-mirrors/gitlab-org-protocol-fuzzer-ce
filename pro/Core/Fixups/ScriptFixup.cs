@@ -45,7 +45,7 @@ namespace Peach.Pro.Core.Fixups
 				if (_pythonFixup == null)
 					throw new PeachException("Error, unable to create an instance of the \"" + (string)args["class"] + "\" script class.");
 
-				logger.Debug("ScriptFixup(): _pythonFixup != null");
+				logger.Trace("ScriptFixup(): _pythonFixup != null");
 			}
 			catch (Exception ex)
 			{
@@ -70,7 +70,7 @@ namespace Peach.Pro.Core.Fixups
 
 			var from = elements["ref"];
 
-			logger.Debug("fixupImpl(): ref: " + from.GetHashCode().ToString());
+			logger.Trace("fixupImpl(): ref: " + from.GetHashCode().ToString());
 
 			object data = _pythonFixup.fixup(from);
 

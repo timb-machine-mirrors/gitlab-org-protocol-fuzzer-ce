@@ -1,0 +1,8 @@
+#!/usr/bin/env python
+
+bld(
+	features = 'cxx cxxprogram debug network linux',
+	source = bld.path.ant_glob('*.c'),
+	target = 'SimpleHttpServer',
+)
+

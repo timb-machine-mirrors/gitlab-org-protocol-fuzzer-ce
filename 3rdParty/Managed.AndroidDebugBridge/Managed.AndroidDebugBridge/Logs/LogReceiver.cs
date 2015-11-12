@@ -13,6 +13,7 @@ namespace Managed.Adb.Logs {
 			Listener = listener;
 		}
 
+		private int EntryDataBegin { get; set; }
 		private int EntryDataOffset { get; set; }
 		private int EntryHeaderOffset { get; set; }
 		private byte[] EntryHeaderBuffer { get; set; }
@@ -67,9 +68,18 @@ namespace Managed.Adb.Logs {
 							offset += ENTRY_HEADER_SIZE;
 							length -= ENTRY_HEADER_SIZE;
 						}
+
+						EntryDataBegin = CurrentEntry.HeaderSize == 0 ? 0 : CurrentEntry.HeaderSize - ENTRY_HEADER_SIZE;
 					}
 				}
 
+				while (EntryDataBegin > 0 && length > 0) {
+					var eat = Math.Min(EntryDataBegin, length);
+
+					EntryDataBegin -= eat;
+					length -= eat;
+					offset += eat;
+				}
 
 				// at this point, we have an entry, and offset/length have been updated to skip
 				// the entry header.
@@ -123,9 +133,9 @@ namespace Managed.Adb.Logs {
 			LogEntry entry = new LogEntry ( );
 			entry.Length = data.SwapU16bitFromArray ( offset );
 
-			// we've read only 16 bits, but since there's also a 16 bit padding,
-			// we can skip right over both.
-			offset += 4;
+			offset += 2;
+			entry.HeaderSize = data.SwapU16bitFromArray(offset);
+			offset += 2;
 
 			entry.ProcessId = data.Swap32bitFromArray ( offset );
 			offset += 4;

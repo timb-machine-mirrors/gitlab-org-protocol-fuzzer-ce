@@ -12,6 +12,7 @@ using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.WebApi;
+using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.Test.WebApi.Controllers
 {
@@ -94,7 +95,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 		Job _runningJob;
 		Browser _browser;
 		TempDirectory _tmpDir;
-		Process _process;
+		SysProcess _process;
 
 		static string CrashableServer
 		{
@@ -114,7 +115,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 
 			Configuration.LogRoot = _tmpDir.Path;
 
-			_process = new Process()
+			_process = new SysProcess()
 			{
 				StartInfo = new ProcessStartInfo
 				{

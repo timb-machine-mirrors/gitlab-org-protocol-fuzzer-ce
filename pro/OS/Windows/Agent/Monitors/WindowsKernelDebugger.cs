@@ -15,6 +15,7 @@ using Peach.Core;
 using Peach.Core.Agent;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 using Monitor = System.Threading.Monitor;
+using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.OS.Windows.Agent.Monitors
 {
@@ -181,8 +182,10 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 	public class DebuggerServer : MarshalByRefObject
 	{
-		public KernelDebuggerInstance GetKernelDebugger()
+		public KernelDebuggerInstance GetKernelDebugger(int logLevel)
 		{
+			Utilities.ConfigureLogging(logLevel);
+
 			return new KernelDebuggerInstance();
 		}
 	}
@@ -291,7 +294,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				throw new Win32Exception(Marshal.GetLastWin32Error());
 		}
 
-		static void AssignProcessToJobObject(Process p)
+		static void AssignProcessToJobObject(SysProcess p)
 		{
 			// Will return ACCESS_DENIED on Vista/Win7 if PCA gets in the way:
 			// http://stackoverflow.com/questions/3342941/kill-child-process-when-parent-process-is-killed
@@ -304,7 +307,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 		static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		Process _process;
+		SysProcess _process;
 		KernelDebuggerInstance _dbg;
 
 		public string KernelConnectionString
@@ -358,7 +361,9 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			{
 				var remote = (DebuggerServer)Activator.GetObject(typeof(DebuggerServer), channel);
 
-				_dbg = remote.GetKernelDebugger();
+				var logLevel = Logger.IsTraceEnabled ? 2 : (Logger.IsDebugEnabled ? 1 : 0);
+
+				_dbg = remote.GetKernelDebugger(logLevel);
 				_dbg.SymbolsPath = SymbolsPath;
 				_dbg.WinDbgPath = WinDbgPath;
 				_dbg.IgnoreFirstChanceGuardPage = IgnoreFirstChanceGuardPage;
@@ -378,6 +383,10 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			{
 				_dbg.WaitForConnection(timeout);
 			}
+			catch (TimeoutException ex)
+			{
+				throw new SoftException(ex);
+			}
 			catch (RemotingException ex)
 			{
 				throw new SoftException("Error occured when waiting for kernel connection.", ex);
@@ -390,21 +399,20 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 			using (var readyEvt = new EventWaitHandle(false, EventResetMode.AutoReset, "Local\\" + guid))
 			{
-				_process = new Process()
+				_process = new SysProcess()
 				{
 					StartInfo = new ProcessStartInfo
 					{
 						CreateNoWindow = true,
 						UseShellExecute = false,
-						Arguments = "--timebomb=false " + guid, // No timebomb, using JobObject
-						FileName = Utilities.GetAppResourcePath("Peach.Pro.WindowsDebugInstance.exe")
+						Arguments = "--ipc {0} \"{1}\"".Fmt(guid, typeof(DebuggerServer).AssemblyQualifiedName),
+						FileName = Utilities.GetAppResourcePath("PeachTrampoline.exe")
 					}
 				};
 
 				if (Logger.IsTraceEnabled)
 				{
 					_process.EnableRaisingEvents = true;
-					_process.StartInfo.Arguments += " --debug";
 					_process.OutputDataReceived += LogProcessData;
 					_process.ErrorDataReceived += LogProcessData;
 					_process.StartInfo.RedirectStandardError = true;

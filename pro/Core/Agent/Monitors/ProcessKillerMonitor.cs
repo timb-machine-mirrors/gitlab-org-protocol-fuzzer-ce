@@ -30,13 +30,13 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		private static void Kill(string processName)
 		{
-			var procs = ProcessInfo.Instance.GetProcessesByName(processName);
+			var procs = ProcessHelper.GetProcessesByName(processName);
 
 			foreach (var p in procs)
 			{
 				try
 				{
-					ProcessInfo.Instance.Kill(p);
+					p.Stop(-1);
 				}
 				catch (Exception ex)
 				{
@@ -44,7 +44,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 				}
 				finally
 				{
-					p.Close();
+					p.Dispose();
 				}
 			}
 		}

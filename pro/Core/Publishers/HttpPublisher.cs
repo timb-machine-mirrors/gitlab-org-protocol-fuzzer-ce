@@ -237,15 +237,20 @@ namespace Peach.Pro.Core.Publishers
 			}
 			catch (TimeoutException ex)
 			{
-				caught = new SoftException("Timed out connecting to {0}".Fmt(url), ex);
+				caught = new SoftException("Timed out connecting to {0}".Fmt(SafeUrlString(url)), ex);
 			}
 
 			if (caught != null)
 				throw new SoftException(caught);
 
-			_clientName = url.ToString();
+			_clientName = SafeUrlString(url);
 
 			StartClient();
+		}
+
+		private static string SafeUrlString(Uri url)
+		{
+			return "{0}://{1}:{2}".Fmt(url.Scheme, url.Host, url.Port);
 		}
 
 		static bool HeaderCompare(string lhs, string rhs)
@@ -255,7 +260,7 @@ namespace Peach.Pro.Core.Publishers
 
 		private Stream TryCreateClient(Uri url, BitwiseStream data)
 		{
-			Logger.Debug("TryCreateClient> {0} {1}", Method, url);
+			Logger.Trace("TryCreateClient> {0} {1}", Method, SafeUrlString(url));
 
 			var request = (HttpWebRequest)WebRequest.Create(url);
 			request.Method = Method;

@@ -889,40 +889,53 @@ namespace Managed.Adb {
 		/// <exception cref="AdbException">failed asking for log</exception>
 		/// <exception cref="Managed.Adb.Exceptions.AdbCommandRejectedException"></exception>
 		public void RunLogService ( IPEndPoint address, Device device, String logName, LogReceiver rcvr ) {
-			try {
-				using ( var adbChan = new Socket ( AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp ) ) {
-					adbChan.Connect ( address );
-					adbChan.Blocking = true;
-					// if the device is not -1, then we first tell adb we're looking to talk
-					// to a specific device
-					SetDevice ( adbChan, device );
+			var retry = false;
 
-					var request = FormAdbRequest ( "log:" + logName );
-					if ( !Write ( adbChan, request ) ) {
-						throw new AdbException ( "failed asking for log" );
-					}
+			try
+			{
+				DoRunLogService(address, device, "log:" + logName, rcvr);
+			}
+			catch (AdbCommandRejectedException)
+			{
+				retry = true;
+			}
 
-					var resp = ReadAdbResponse ( adbChan, false /* readDiagString */);
-					if ( resp.Okay == false ) {
-						throw new AdbCommandRejectedException ( resp.Message );
-					}
+			// Can't be in catch block or we won't be able to abort properly
+			if (retry)
+				DoRunLogService(address, device, "exec:logcat -B -b " + logName, rcvr);
+		}
 
-					var buffer = new byte[4 * 1024];
+		private void DoRunLogService(IPEndPoint address, Device device, string req, LogReceiver rcvr)
+		{
+			using (var adbChan = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+			{
+				adbChan.Connect(address);
+				adbChan.Blocking = true;
+				// if the device is not -1, then we first tell adb we're looking to talk
+				// to a specific device
+				SetDevice(adbChan, device);
 
-					while ( rcvr != null && !rcvr.IsCancelled ) {
-						int count = adbChan.Receive ( buffer );
+				var request = FormAdbRequest(req);
+				if (!Write(adbChan, request))
+					throw new AdbException("failed asking for \"" + req + "\"");
 
-						if ( count < 0 ) {
-							break; // Error
-						} else if ( count == 0 ) {
-							break; // EOF
-						} else {
-							rcvr.ParseNewData(buffer, 0, count);
-						}
-					}
+				var resp = ReadAdbResponse(adbChan, false /* readDiagString */);
+				if (resp.Okay == false)
+					throw new AdbCommandRejectedException(resp.Message);
+
+				var buffer = new byte[4*1024];
+
+				while (rcvr != null && !rcvr.IsCancelled)
+				{
+					var ar = adbChan.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, null, null);
+					ar.AsyncWaitHandle.WaitOne();
+					var count = adbChan.EndReceive(ar);
+
+					if (count <= 0)
+						break; // EOF
+
+					rcvr.ParseNewData(buffer, 0, count);
 				}
-			} finally {
-
 			}
 		}
 

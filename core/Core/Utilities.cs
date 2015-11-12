@@ -37,6 +37,7 @@ using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using SysProcess = System.Diagnostics.Process;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
@@ -352,12 +353,14 @@ namespace Peach.Core
 			}
 
 			throw new PeachException("Error, unable to locate '{0}'{1} '{2}' parameter.".Fmt(
-				program, path != null ? " in specified" : ", please specify using", parameter));
+				program, 
+				path != null ? " in specified" : ", please specify using", 
+				parameter));
 		}
 
 		public static int GetCurrentProcessId()
 		{
-			using (var p = Process.GetCurrentProcess())
+			using (var p = SysProcess.GetCurrentProcess())
 				return p.Id;
 		}
 
@@ -595,6 +598,31 @@ namespace Peach.Core
 
 		}
 
+		public static byte[] ParseHexDump(string payload)
+		{
+			var sb = new StringBuilder();
+			var rdr = new StringReader(payload);
+
+			string line;
+			while ((line = rdr.ReadLine()) != null)
+			{
+				// Expect 16 byte hex dump
+				// some chars chars, whitespace, the bytes, 16 chars
+
+				var space = line.IndexOf(' ') + 1;
+
+				if (line.Length < (space + 16))
+					continue;
+
+				var subst = line.Substring(space, line.Length - 16 - space);
+				subst = subst.Replace(" ", "");
+				sb.Append(subst);
+			}
+
+			var ret = HexString.Parse(sb.ToString()).Value;
+			return ret;
+		}
+
 		public static void HexDump(Stream input, Stream output, int bytesPerLine = 16)
 		{
 			var pos = input.Position;
@@ -673,6 +701,12 @@ namespace Peach.Core
 			HexDump(inputFunc, line => sb.Append(line), bytesPerLine);
 
 			return sb.ToString();
+		}
+
+		public static string HexDump(string text, int bytesPerLine = 16)
+		{
+			var buf = Encoding.UTF8.GetBytes(text);
+			return HexDump(new MemoryStream(buf), bytesPerLine);
 		}
 
 		public static string PrettyBytes(long bytes)

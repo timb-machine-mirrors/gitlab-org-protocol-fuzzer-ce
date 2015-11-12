@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using NLog;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
+using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.Test.OS.Linux
 {
@@ -26,9 +28,9 @@ namespace Peach.Pro.Test.OS.Linux
 		[Test]
 		public void TestCpuUsage()
 		{
-			using (Process p = Process.GetProcessById(1))
+			using (var p = ProcessHelper.GetProcessById(1))
 			{
-				var pi = ProcessInfo.Instance.Snapshot(p);
+				var pi = p.Snapshot();
 				Assert.NotNull(pi);
 				Assert.AreEqual(1, pi.Id);
 				Assert.AreEqual("init", pi.ProcessName);
@@ -36,19 +38,13 @@ namespace Peach.Pro.Test.OS.Linux
 				Assert.Greater(pi.UserProcessorTicks, 0);
 			}
 
-			using (Process p = new Process())
+			using (var p = ProcessHelper.Start("/bin/ls", "", null, null))
 			{
-				var si = new ProcessStartInfo();
-				si.FileName = "/bin/ls";
-				si.UseShellExecute = false;
-				si.RedirectStandardOutput = true;
-				p.StartInfo = si;
-				p.Start();
-				p.WaitForExit();
-				Assert.True(p.HasExited);
-				p.Close();
+				p.WaitForExit(Timeout.Infinite);
 
-				Assert.Throws<ArgumentException>(delegate() { ProcessInfo.Instance.Snapshot(p); });
+				Assert.False(p.IsRunning);
+
+				Assert.Throws<InvalidOperationException>(() => p.Snapshot());
 			}
 		}
 
@@ -67,7 +63,7 @@ namespace Peach.Pro.Test.OS.Linux
 				{
 					if ((i % 500) == 0)
 						logger.Debug("Starting Process #{0}", i + 1);
-					using (Process p = new Process())
+					using (var p = new SysProcess())
 					{
 						p.StartInfo.FileName = "/bin/echo";
 						p.StartInfo.Arguments = "-n \"\"";

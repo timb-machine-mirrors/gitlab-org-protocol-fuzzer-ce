@@ -102,18 +102,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 		private void Run(string args)
 		{
-			using (var p = new Process())
-			{
-				p.StartInfo = new ProcessStartInfo
-				{
-					FileName = Path.Combine(WinDbgPath, Gflags),
-					Arguments = args,
-					CreateNoWindow = true,
-					UseShellExecute = false
-				};
-				p.Start();
-				p.WaitForExit();
-			}
+			ProcessHelper.Run(Path.Combine(WinDbgPath, Gflags), args, null, null, -1);
 		}
 	}
 }

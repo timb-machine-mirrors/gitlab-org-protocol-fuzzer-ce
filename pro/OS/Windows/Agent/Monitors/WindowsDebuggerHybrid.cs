@@ -857,9 +857,10 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			try
 			{
 				int pid = _debugger != null ? _debugger.ProcessId : _systemDebugger.ProcessId;
-				using (var proc = System.Diagnostics.Process.GetProcessById(pid))
+				using (var proc = ProcessHelper.GetProcessById(pid))
 				{
-					if (proc == null || proc.HasExited)
+					// TODO: Eventually just call proc.WaitForIdle();
+					if (proc == null || !proc.IsRunning)
 						return;
 
 					if (useCpuKill && !_noCpuKill)
@@ -872,7 +873,8 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 							// Note: Performance counters were used and removed due to speed issues.
 							//       monitoring the tick count is more reliable and less likely to cause
 							//       fuzzing slow-downs.
-							var pi = ProcessInfo.Instance.Snapshot(proc);
+							var pi = proc.Snapshot();
+							// TODO: Handle failure to take snapshot!
 
 							logger.Trace("CpuKill: OldTicks={0} NewTicks={1}", lastTime, pi.TotalProcessorTicks);
 

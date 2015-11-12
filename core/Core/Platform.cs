@@ -24,7 +24,7 @@ namespace Peach.Core
 		{
 			Platform.OS os = Platform.GetOS();
 			Type type = typeof(T);
-			var cls = ClassLoader.FindTypeByAttribute<PlatformImplAttribute>((t, a) => a.OS == os && (t.BaseType == type || t.GetInterfaces().Contains(type)));
+			var cls = ClassLoader.FindTypeByAttribute<PlatformImplAttribute>((t, a) => a.OS == os && type.IsAssignableFrom(t));
 			if (cls == null)
 				throw new TypeLoadException("Could not find an instance of '" + type.FullName + "' for the " + os + " platform.");
 			return cls;
@@ -121,9 +121,6 @@ namespace Peach.Core
 					string os = Marshal.PtrToStringAnsi(buf);
 					if (os == "Darwin") return true;
 				}
-			}
-			catch
-			{
 			}
 			finally
 			{
