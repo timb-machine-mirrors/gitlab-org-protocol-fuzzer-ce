@@ -48,6 +48,8 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Parameter("Filter", typeof(string), "PCAP Style filter", "")]
 	public class PcapMonitor : Monitor
 	{
+		static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
 		const int ReadTimeout = 1000;
 
 		private readonly string _tempFileName = Path.GetTempFileName();
@@ -137,12 +139,15 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 			if (_device == null)
 			{
-				Console.WriteLine("Found the following pcap devices: ");
-				foreach (var dev in devices.OfType<LibPcapLiveDevice>())
-				{
-					if (!string.IsNullOrEmpty(dev.Interface.FriendlyName))
-						Console.WriteLine(" " + dev.Interface.FriendlyName);
-				}
+				var devs = string.Join(Environment.NewLine,
+					devices
+						.OfType<LibPcapLiveDevice>()
+						.Select(d => d.Interface.FriendlyName)
+						.Where(s => !string.IsNullOrEmpty(s))
+					);
+
+				Logger.Debug("Found the following pcap devices:{0}{1}", Environment.NewLine, devs);
+
 				throw new PeachException("Error, PcapMonitor was unable to locate device '" + Device + "'.");
 			}
 
