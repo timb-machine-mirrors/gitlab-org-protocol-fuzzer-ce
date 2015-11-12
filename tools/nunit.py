@@ -119,17 +119,6 @@ def run_nunit(args, asm, test, outdir):
 			sys.stdout.flush()
 
 def main():
-	if sys.platform == 'win32':
-		import win32job
-		import win32process
-
-		hJob = win32job.CreateJobObject(None, "")
-		info = win32job.QueryInformationJobObject(hJob, win32job.JobObjectExtendedLimitInformation)
-		info['BasicLimitInformation']['LimitFlags'] = win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
-		win32job.SetInformationJobObject(hJob, win32job.JobObjectExtendedLimitInformation, info)
-
-		win32job.AssignProcessToJobObject(hJob, win32process.GetCurrentProcess())
-
 	p = argparse.ArgumentParser(description='nunit-runner')
 	p.add_argument('--timeout', type=int, default=600)
 	p.add_argument('--result', required=True)
