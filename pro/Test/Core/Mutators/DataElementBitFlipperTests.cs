@@ -65,6 +65,17 @@ namespace Peach.Pro.Test.Core.Mutators
 
 			blk.Add(str);
 			Assert.True(runner.IsSupported(blk));
+
+			var choice = new Choice("Choice");
+			choice.choiceElements.Add(new Peach.Core.Dom.String("String")
+			{
+				DefaultValue = new Variant("Hello"),
+				parent = choice
+			});
+			choice.SelectDefault();
+
+			Assert.False(runner.IsSupported(choice));
+			Assert.True(runner.IsSupported(choice.SelectedElement));
 		}
 
 		[Test]

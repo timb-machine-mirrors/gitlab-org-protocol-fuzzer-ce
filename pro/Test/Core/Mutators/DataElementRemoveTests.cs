@@ -24,6 +24,18 @@ namespace Peach.Pro.Test.Core.Mutators
 
 			Assert.False(runner.IsSupported(dm));
 			Assert.True(runner.IsSupported(blob));
+
+			var choice = new Choice("Choice");
+			choice.choiceElements.Add(new String("String")
+			{
+				DefaultValue = new Variant("Hello"),
+				parent = choice
+			});
+			choice.SelectDefault();
+			dm.Add(choice);
+
+			Assert.True(runner.IsSupported(choice));
+			Assert.False(runner.IsSupported(choice.SelectedElement));
 		}
 
 		[Test]
