@@ -80,10 +80,6 @@ namespace Peach.Pro.Test.Core.WebServices
 		}
 	}
 
-	[TestFixture(typeof(InternalJobMonitor))]
-	[TestFixture(typeof(ExternalJobMonitor))]
-	[Peach]
-	[Quick]
 	class JobMonitorTests<T> : BaseJobMonitorTests<T>
 		where T : IJobMonitor, new()
 	{
@@ -465,6 +461,23 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.GreaterOrEqual(job.HeartBeat, job.StopDate);
 
 			VerifyDatabase(job);
+		}
+	}
+
+	namespace JobMonitorTests
+	{
+		[TestFixture]
+		[Peach]
+		[Quick]
+		class External : JobMonitorTests<ExternalJobMonitor>
+		{
+		}
+
+		[TestFixture]
+		[Peach]
+		[Quick]
+		class Internal : JobMonitorTests<InternalJobMonitor>
+		{
 		}
 	}
 
