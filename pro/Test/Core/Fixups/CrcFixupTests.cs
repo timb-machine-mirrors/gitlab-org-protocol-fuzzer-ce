@@ -13,6 +13,16 @@ namespace Peach.Pro.Test.Core.Fixups
 	class CrcFixupTests : DataModelCollector
 	{
 		[Test]
+		public void Dnp3Crc16()
+		{
+			var buff = new byte[] {0x05, 0x64, 0x05, 0xf2, 0x01, 0x00, 0xef, 0xff };
+
+			var crc = Peach.Pro.Core.Fixups.Libraries.Crc16Dnp3.ComputeChecksum(buff);
+
+			Assert.AreEqual(0xb5bf, crc);
+		}
+
+		[Test]
 		public void TestDefault()
 		{
 			// standard test
