@@ -6,7 +6,7 @@ from waflib import Utils, Task, Logs, Options, Errors
 testlock = Utils.threading.Lock()
 
 def prepare_nunit_test(self):
-	self.ut_nunit = get_inst_node(self.generator, '${BINDIR}', 'nunit-console.exe')
+	self.ut_nunit = get_inst_node(self.generator, '${BINDIR}', 'nunit3-console.exe')
 	self.ut_cwd = self.ut_nunit.parent.abspath()
 	self.ut_exec = []
 
