@@ -508,7 +508,7 @@ namespace Peach.Pro.Test.Core.WebServices
 	</StateModel>
 
 	<Agent name='LocalAgent'>
-		<Monitor class='RandoFaulter'>
+		<Monitor class='你好RandoFaulter'>
 			<Param name='CrashAfter' value='2000'/>
 		</Monitor>
 	</Agent>
