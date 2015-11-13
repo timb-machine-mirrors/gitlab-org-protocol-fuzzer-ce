@@ -35,36 +35,21 @@ namespace Peach.Core.Test
 			Assert.False(Enc.UTF8.IsSingleByte);
 			Assert.False(Enc.UTF32.IsSingleByte);
 
+			Assert.AreEqual(2, Enc.ASCII.GetMaxByteCount(1), "ASCII");
+			Assert.AreEqual(4, Enc.BigEndianUnicode.GetMaxByteCount(1), "BigEndianUnicode");
+			Assert.AreEqual(4, Enc.Unicode.GetMaxByteCount(1), "Unicode");
+			Assert.AreEqual(5, Enc.UTF7.GetMaxByteCount(1), "UTF7");
+			Assert.AreEqual(6, Enc.UTF8.GetMaxByteCount(1), "UTF8");
+			Assert.AreEqual(8, Enc.UTF32.GetMaxByteCount(1), "UTF32");
+
 			// Why???
 			if (Platform.GetOS() == Platform.OS.Windows)
 			{
-				Assert.AreEqual(2, Enc.ASCII.GetMaxByteCount(1), "ASCII");
 				Assert.AreEqual(2, latin1.GetMaxByteCount(1), "latin1");
-				Assert.AreEqual(4, Enc.BigEndianUnicode.GetMaxByteCount(1), "BigEndianUnicode");
-				Assert.AreEqual(4, Enc.Unicode.GetMaxByteCount(1), "Unicode");
-				Assert.AreEqual(5, Enc.UTF7.GetMaxByteCount(1), "UTF7");
-				Assert.AreEqual(6, Enc.UTF8.GetMaxByteCount(1), "UTF8");
-				Assert.AreEqual(8, Enc.UTF32.GetMaxByteCount(1), "UTF32");
 			}
 			else
 			{
-				Assert.AreEqual(1, Enc.ASCII.GetMaxByteCount(1), "ASCII");
 				Assert.AreEqual(1, latin1.GetMaxByteCount(1), "latin1");
-
-				Assert.LessOrEqual(2, Enc.BigEndianUnicode.GetMaxByteCount(1), "BigEndianUnicode");
-				// mono 3.12 has 4 bytes
-				Assert.GreaterOrEqual(4, Enc.BigEndianUnicode.GetMaxByteCount(1), "BigEndianUnicode");
-
-				Assert.LessOrEqual(2, Enc.Unicode.GetMaxByteCount(1), "Unicode");
-				// mono 3.12 has 4 bytes
-				Assert.GreaterOrEqual(4, Enc.Unicode.GetMaxByteCount(1), "Unicode");
-				Assert.AreEqual(5, Enc.UTF7.GetMaxByteCount(1), "UTF7");
-
-				// mono 2.10 is 4 bytes per utf8, mono 3.x is 6 bytes per utf8
-				Assert.LessOrEqual(4, Enc.UTF8.GetMaxByteCount(1), "UTF8");
-				Assert.GreaterOrEqual(6, Enc.UTF8.GetMaxByteCount(1), "UTF8");
-
-				Assert.AreEqual(4, Enc.UTF32.GetMaxByteCount(1), "UTF32");
 			}
 		}
 
@@ -73,10 +58,7 @@ namespace Peach.Core.Test
 		{
 			Assert.Throws<EncoderFallbackException>(() => Encoding.ASCII.GetBytes("\u08abX"));
 
-			if (Platform.GetOS() == Platform.OS.Windows)
-				Assert.Throws<EncoderFallbackException>(() => Encoding.Unicode.GetBytes("\ud860"));
-			else
-				Encoding.Unicode.GetBytes("\ud860");
+			Assert.Throws<EncoderFallbackException>(() => Encoding.Unicode.GetBytes("\ud860"));
 
 			var bufD = Encoding.ISOLatin1.GetBytes("\x80");
 			Assert.AreEqual(1, bufD.Length);
@@ -154,12 +136,7 @@ namespace Peach.Core.Test
 			Assert.AreEqual(1, len);
 
 			byte[] utf32 = System.Text.Encoding.UTF32.GetBytes(high);
-
-			// Why is this different?
-			if (Platform.GetOS() == Platform.OS.Windows)
-				Assert.AreEqual(4, utf32.Length);
-			else
-				Assert.AreEqual(8, utf32.Length);
+			Assert.AreEqual(4, utf32.Length);
 
 			byte[] utf16 = System.Text.Encoding.Unicode.GetBytes(high);
 			Assert.AreEqual(4, utf16.Length);
