@@ -18,7 +18,6 @@ namespace PitTester
 		{
 			get 
 			{
-				CollectionAssert.IsNotEmpty(ThePits);
 				return ThePits;
 			}
 		}
