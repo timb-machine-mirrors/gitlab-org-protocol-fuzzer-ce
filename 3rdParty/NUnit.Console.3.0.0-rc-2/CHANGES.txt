@@ -1,4 +1,182 @@
-﻿NUnit 3.0.0 Beta 3 - July 15, 2015
+﻿NUnit 3.0.0 Release Candidate 2 - November 8, 2015
+
+Engine
+
+ * The IDriverFactory extensibility interface has been modified.
+ 
+Issues Resolved
+
+ * 970  Define PARALLEL in CF build of nunitlite
+ * 978  It should be possible to determine version of NUnit using nunit console tool
+ * 983  Inconsistent return codes depending on ProcessModel
+ * 986  Update docs for parallel execution
+ * 988  Don't run portable tests from NUnit Console
+ * 990  V2 driver is passing invalid filter elements to NUnit
+ * 991  Mono.Options should not be exposed to public directly
+ * 993  Give error message when a regex filter is used with NUnit V2
+ * 997  Add missing XML Documentation
+ * 1008 NUnitLite namespace not updated in the NuGet Packages
+
+NUnit 3.0.0 Release Candidate - November 1, 2015
+
+Framework
+
+ * The portable build now supports ASP.NET 5 and the new Core CLR.
+ 
+   NOTE: The `nunit3-console` runner cannot run tests that reference the portable build.
+   You may run such tests using NUnitLite or a platform-specific runner.
+
+ * `TestCaseAttribute` and `TestCaseData` now allow modifying the test name without replacing it entirely.
+ * The Silverlight packages are now separate downloads.
+
+NUnitLite
+
+ * The NUnitLite runner now produces the same output display and XML results as the console runner.
+ 
+Engine
+
+ * The format of the XML result file has been finalized and documented.
+
+Console Runner
+
+ * The console runner program is now called `nunit3-console`.
+ * Console runner output has been modified so that the summary comes at the end, to reduce the need for scrolling.
+
+Issues Resolved
+
+ *  59 Length of generated test names should be limited
+ *  68 Customization of test case name generation
+ * 404 Split tests between nunitlite.runner and nunit.framework
+ * 575 Add support for ASP.NET 5 and the new Core CLR
+ * 783 Package separately for Silverlight
+ * 833 Intermittent failure of WorkItemQueueTests.StopQueue_WithWorkers
+ * 859 NUnit-Console output - move Test Run Summary to end
+ * 867 Remove Warnings from Ignored tests
+ * 868 Review skipped tests
+ * 887 Move environment and settings elements to the assembly suite in the result file
+ * 899 Colors for ColorConsole on grey background are too light
+ * 904 InternalPreserveStackTrace is not supported on all Portable platforms
+ * 914 Unclear error message from console runner when assembly has no tests
+ * 916 Console runner dies when test agent dies
+ * 918 Console runner --where parameter is case sensitive
+ * 920 Remove addins\nunit.engine.api.dll from NuGet package
+ * 929 Rename nunit-console.exe
+ * 931 Remove beta warnings from NuGet packages
+ * 936 Explicit skipped tests not displayed
+ * 939 Installer complains about .NET even if already installed
+ * 940 Confirm or modify list of packages for release
+ * 947 Breaking API change in ValueSourceAttribute
+ * 949 Update copyright in NUnit Console
+ * 954 NUnitLite XML output is not consistent with the engine's
+ * 955 NUnitLite does not display the where clause
+ * 959 Restore filter options for NUnitLite portable build
+ * 960 Intermittent failure of CategoryFilterTests
+ * 967 Run Settings Report is not being displayed.
+
+NUnit 3.0.0 Beta 5 - October 16, 2015
+
+Framework
+
+ * Parameterized test cases now support nullable arguments.
+ * The NUnit framework may now be built for the .NET Core framework. Note that this is only available through building the source code. A binary will be available in the next release.
+
+Engine
+
+ * The engine now runs multiple test assemblies in parallel by default
+ * The output XML now includes more information about the test run, including the text of the command used, any engine settings and the filter used to select tests.
+ * Extensions may now specify data in an identifying attribute, for use by the engine in deciding whether to load that extension.
+
+
+Console Runner
+
+ * The console now displays all settings used by the engine to run tests as well as the filter used to select tests.
+ * The console runner accepts a new option --maxagents. If multiple assemblies are run in separate processes, this value may be used to limit the number that are executed simultaneously in parallel.
+ * The console runner no longer accepts the --include and --exclude options. Instead, the new --where option provides a more general way to express which tests will be executed, such as --where "cat==Fast && Priority==High". See the docs for details of the syntax.
+ * The new --debug option causes NUnit to break in the debugger immediately before tests are run. This simplifies debugging, especially when the test is run in a separate process.
+
+Issues Resolved
+
+ *  41	Check for zeroes in Assert messages
+ * 254	Finalize XML format for test results
+ * 275	NUnitEqualityComparer fails to compare IEquatable<T> where second object is derived from T
+ * 304	Run test Assemblies in parallel
+ * 374	New syntax for selecting tests to be run
+ * 515	OSPlatform.IsMacOSX doesn't work
+ * 573	nunit-console hangs on Mac OS X after all tests have run
+ * 669	TeamCity service message should have assembly name as a part of test name.
+ * 689	The TeamCity service message "testFinished" should have an integer value in the "duration" attribute
+ * 713	Include command information in XML
+ * 719	We have no way to configure tests for several assemblies using NUnit project file and the common installation from msi file
+ * 735	Workers number in xml report file cannot be found
+ * 784	Build Portable Framework on Linux
+ * 790	Allow Extensions to provide data through an attribute
+ * 794	Make it easier to debug tests as well as NUnit itself
+ * 801	NUnit calls Dispose multiple times
+ * 814	Support nullable types with TestCase
+ * 818	Possible error in Merge Pull Request #797
+ * 821	Wrapped method results in loss of result information
+ * 822	Test for Debugger in NUnitTestAssemblyRunner probably should not be in CF build
+ * 824	Remove unused System.Reflection using statements
+ * 826	Randomizer uniqueness tests fail randomly!
+ * 828	Merge pull request #827 (issue 826)
+ * 830	Add ability to report test results synchronously to test runners
+ * 837	Enumerators not disposed when comparing IEnumerables
+ * 840	Add missing copyright notices
+ * 844	Pull Request #835 (Issue #814) does not build in CF
+ * 847	Add new --process:inprocess and --inprocess options
+ * 850	Test runner fails if test name contains invalid xml characters
+ * 851	'Exclude' console option is not working in NUnit Lite
+ * 853	Cannot run NUnit Console from another directory
+ * 860	Use CDATA section for message, stack-trace and output elements of XML
+ * 863	Eliminate core engine
+ * 865	Intermittent failures of StopWatchTests
+ * 869	Tests that use directory separator char to determine platform misreport Linux on MaxOSX
+ * 870	NUnit Console Runtime Environment misreports on MacOSX
+ * 874	Add .NET Core Framework
+ * 878	Cannot exclude MacOSX or XBox platforms when running on CF
+ * 892	Fixed test runner returning early when executing more than one test run.
+ * 894	Give nunit.engine and nunit.engine.api assemblies strong names
+ * 896	NUnit 3.0 console runner not placing test result xml in --work directory
+
+NUnit 3.0.0 Beta 4 - August 25, 2015
+
+Framework
+
+ * A new RetryAttribute allows retrying of failing tests.
+ * New SupersetConstraint and Is.SupersetOf syntax complement SubsetConstraint.
+ * Tests skipped due to ExplicitAttribute are now reported as skipped.
+
+Engine
+
+ * We now use Cecil to examine assemblies prior to loading them.
+ * Extensions are no longer based on Mono.Addins but use our own extension framework.
+
+Issues Resolved
+
+ * 125 3rd-party dependencies should be downloaded on demand
+ * 283 What should we do when a user extension does something bad?
+ * 585 RetryAttribute
+ * 642 Restructure MSBuild script
+ * 649 Change how we zip packages
+ * 654 ReflectionOnlyLoad and ReflectionOnlyLoadFrom
+ * 664 Invalid "id" attribute in the report for case "test started"
+ * 685 In the some cases when tests cannot be started NUnit returns exit code "0"
+ * 728 Missing Assert.That overload
+ * 741 Explicit Tests get run when using --exclude
+ * 746 Framework should send events for all tests
+ * 747 NUnit should apply attributes even if test is non-runnable
+ * 749 Review Use of Mono.Addins for Engine Extensibility
+ * 750 Include Explicit Tests in Test Results
+ * 753 Feature request: Is.SupersetOf() assertion constraint
+ * 755 TimeOut attribute doesn't work with TestCaseSource Attribute
+ * 757 Implement some way to wait for execution to complete in ITestEngineRunner
+ * 760 Packaging targets do not run on Linux
+ * 766 Added overloads for True()/False() accepting booleans
+ * 778 Build and build.cmd scripts invoke nuget.exe improperly
+ * 780 Teamcity fix
+ * 782 No sources for 2.6.4
+
+NUnit 3.0.0 Beta 3 - July 15, 2015
 
 Framework
 

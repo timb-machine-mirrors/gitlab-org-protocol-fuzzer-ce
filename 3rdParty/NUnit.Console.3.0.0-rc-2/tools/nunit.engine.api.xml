@@ -102,16 +102,142 @@
             Display debug messages and higher - i.e. all messages
             </summary>
         </member>
+        <member name="T:NUnit.Engine.TestSelectionParserException">
+            <summary>
+            TestSelectionParserException is thrown when an error 
+            is found while parsing the selection expression.
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.TestSelectionParserException.#ctor(System.String)">
+            <summary>
+            Construct with a message
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.TestSelectionParserException.#ctor(System.String,System.Exception)">
+            <summary>
+            Construct with a message and inner exception
+            </summary>
+            <param name="message"></param>
+            <param name="innerException"></param>
+        </member>
+        <member name="M:NUnit.Engine.TestSelectionParserException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Serialization constructor
+            </summary>
+        </member>
+        <member name="T:NUnit.Engine.Extensibility.TypeExtensionPointAttribute">
+            <summary>
+            TypeExtensionPointAttribute is used to bind an extension point
+            to a class or interface.
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.Extensibility.TypeExtensionPointAttribute.#ctor(System.String)">
+            <summary>
+            Construct a TypeExtensionPointAttribute, specifying the path.
+            </summary>
+            <param name="path">A unique string identifying the extension point.</param>
+        </member>
+        <member name="M:NUnit.Engine.Extensibility.TypeExtensionPointAttribute.#ctor">
+            <summary>
+            Construct an TypeExtensionPointAttribute, without specifying the path.
+            The extension point will use a path constructed based on the interface
+            or class to which the attribute is applied.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.TypeExtensionPointAttribute.Path">
+            <summary>
+            The unique string identifying this ExtensionPoint. This identifier
+            is typically formatted as a path using '/' and the set of extension 
+            points is sometimes viewed as forming a tree.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.TypeExtensionPointAttribute.Description">
+            <summary>
+            An optional description of the purpose of the ExtensionPoint
+            </summary>
+        </member>
+        <member name="T:NUnit.Engine.Extensibility.ExtensionPropertyAttribute">
+            <summary>
+            The ExtensionPropertyAttribute is used to specify named properties for an extension.
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.Extensibility.ExtensionPropertyAttribute.#ctor(System.String,System.String)">
+            <summary>
+            Construct an ExtensionPropertyAttribute
+            </summary>
+            <param name="name">The name of the property</param>
+            <param name="value">The property value</param>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.ExtensionPropertyAttribute.Name">
+            <summary>
+            The name of the property.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.ExtensionPropertyAttribute.Value">
+            <summary>
+            The property value
+            </summary>
+        </member>
+        <member name="T:NUnit.Engine.Extensibility.ExtensionAttribute">
+            <summary>
+            The ExtensionAttribute is used to identify a class that is intended
+            to serve as an extension.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.ExtensionAttribute.Path">
+            <summary>
+            A unique string identifying the ExtensionPoint for which this Extension is 
+            intended. This is an optional field provided NUnit is able to deduce the
+            ExtensionPoint from the Type of the extension class.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.ExtensionAttribute.Description">
+            <summary>
+            An optional description of what the extension does.
+            </summary>
+        </member>
+        <member name="T:NUnit.Engine.Extensibility.ExtensionPointAttribute">
+            <summary>
+            ExtensionPointAttribute is used at the assembly level to identify and
+            document any ExtensionPoints supported by the assembly.
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.Extensibility.ExtensionPointAttribute.#ctor(System.String,System.Type)">
+            <summary>
+            Construct an ExtensionPointAttribute
+            </summary>
+            <param name="path">A unique string identifying the extension point.</param>
+            <param name="type">The required Type of any extension that is installed at this extension point.</param>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.ExtensionPointAttribute.Path">
+            <summary>
+            The unique string identifying this ExtensionPoint. This identifier
+            is typically formatted as a path using '/' and the set of extension 
+            points is sometimes viewed as forming a tree.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.ExtensionPointAttribute.Type">
+            <summary>
+            The required Type (usually an interface) of any extension that is 
+            installed at this ExtensionPoint.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.ExtensionPointAttribute.Description">
+            <summary>
+            An optional description of the purpose of the ExtensionPoint
+            </summary>
+        </member>
         <member name="T:NUnit.Engine.Extensibility.IDriverFactory">
             <summary>
             Interface implemented by a Type that knows how to create a driver for a test assembly.
             </summary>
         </member>
-        <member name="M:NUnit.Engine.Extensibility.IDriverFactory.IsSupportedFramework(System.Reflection.AssemblyName)">
+        <member name="M:NUnit.Engine.Extensibility.IDriverFactory.IsSupportedTestFramework(System.Reflection.AssemblyName)">
             <summary>
             Gets a flag indicating whether a given AssemblyName
             represents a test framework supported by this factory.
             </summary>
+            <param name="reference">An AssemblyName referring to the possible test framework.</param>
         </member>
         <member name="M:NUnit.Engine.Extensibility.IDriverFactory.GetDriver(System.AppDomain,System.Reflection.AssemblyName)">
             <summary>
@@ -119,7 +245,7 @@
             which the assembly is already known to reference.
             </summary>
             <param name="domain">The domain in which the assembly will be loaded</param>
-            <param name="frameworkReference">The AssemblyName of the test framework reference</param>
+            <param name="reference">An AssemblyName referring to the test framework.</param>
             <returns></returns>
         </member>
         <member name="T:NUnit.Engine.Extensibility.IProject">
@@ -210,21 +336,6 @@
             <param name="resultNode">XmlNode for the result</param>
             <param name="writer">TextWriter to which it should be written</param>
         </member>
-        <member name="T:NUnit.Engine.Extensibility.IResultWriterFactory">
-            <summary>
-            Interface implemented by objects that can create an IResultWriter for a given format.
-            </summary>
-        </member>
-        <member name="P:NUnit.Engine.Extensibility.IResultWriterFactory.Format">
-            <summary>
-            Gets the supported format
-            </summary>
-        </member>
-        <member name="M:NUnit.Engine.Extensibility.IResultWriterFactory.GetResultWriter(System.Object[])">
-            <summary>
-            Creates an IResultWriter using the args provided
-            </summary>
-        </member>
         <member name="T:NUnit.Engine.Extensibility.IFrameworkDriver">
             <summary>
             The IFrameworkDriver interface is implemented by a class that
@@ -314,6 +425,80 @@
             </summary>
             <param name="package">A TestPackage</param>
             <returns>The selected RuntimeFramework</returns>
+        </member>
+        <member name="T:NUnit.Engine.ServiceStatus">
+            <summary>
+            Enumeration representing the status of a service
+            </summary>
+        </member>
+        <member name="F:NUnit.Engine.ServiceStatus.Stopped">
+            <summary>Service was never started or has been stopped</summary>
+        </member>
+        <member name="F:NUnit.Engine.ServiceStatus.Started">
+            <summary>Started successfully</summary>
+        </member>
+        <member name="F:NUnit.Engine.ServiceStatus.Error">
+            <summary>Service failed to start and is unavailable</summary>
+        </member>
+        <member name="T:NUnit.Engine.IService">
+            <summary>
+            The IService interface is implemented by all Services. Although it
+            is extensible, it does not reside in the Extensibility namespace
+            because it is so widely used by the engine.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.IService.ServiceContext">
+            <summary>
+            The ServiceContext
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.IService.Status">
+            <summary>
+            Gets the ServiceStatus of this service
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.IService.StartService">
+            <summary>
+            Initialize the Service
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.IService.StopService">
+            <summary>
+            Do any cleanup needed before terminating the service
+            </summary>
+        </member>
+        <member name="T:NUnit.Engine.ITestFilterBuilder">
+            <summary>
+            Interface to a TestFilterBuilder, which is used to create TestFilters
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.ITestFilterBuilder.AddTest(System.String)">
+            <summary>
+            Add a test to be selected
+            </summary>
+            <param name="fullName">The full name of the test, as created by NUnit</param>
+        </member>
+        <member name="M:NUnit.Engine.ITestFilterBuilder.SelectWhere(System.String)">
+            <summary>
+            Specify what is to be included by the filter using a where clause.
+            </summary>
+            <param name="whereClause">A where clause that will be parsed by NUnit to create the filter.</param>
+        </member>
+        <member name="M:NUnit.Engine.ITestFilterBuilder.GetFilter">
+            <summary>
+            Get a TestFilter constructed according to the criteria specified by the other calls.
+            </summary>
+            <returns>A TestFilter.</returns>
+        </member>
+        <member name="T:NUnit.Engine.ITestFilterService">
+            <summary>
+            The TestFilterService provides builders that can create TestFilters
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.ITestFilterService.GetTestFilterBuilder">
+            <summary>
+            Get an uninitialized TestFilterBuilder
+            </summary>
         </member>
         <member name="T:NUnit.Engine.NUnitEngineNotFoundException">
             <summary>
@@ -663,12 +848,6 @@
             </summary>
             <param name="xmlText">The XML text that specifies the filter.</param>
         </member>
-        <member name="M:NUnit.Engine.TestFilter.#ctor(System.Xml.XmlNode)">
-            <summary>
-            Initializes a new instance of the <see cref="T:NUnit.Engine.TestFilter"/> class.
-            </summary>
-            <param name="node">The XML node that specifies the filter.</param>
-        </member>
         <member name="F:NUnit.Engine.TestFilter.Empty">
             <summary>
             The empty filter - one that always passes.
@@ -677,11 +856,6 @@
         <member name="P:NUnit.Engine.TestFilter.Text">
             <summary>
             Gets the XML representation of this filter as a string.
-            </summary>
-        </member>
-        <member name="P:NUnit.Engine.TestFilter.Xml">
-            <summary>
-            Gets the XML representation of this filter as an XmlNode
             </summary>
         </member>
         <member name="T:NUnit.Engine.TestPackage">
@@ -774,16 +948,13 @@
             </summary>
             <returns>An XmlNode representing the test run result</returns>
         </member>
-        <member name="M:NUnit.Engine.ITestRun.Stop(System.Boolean)">
+        <member name="M:NUnit.Engine.ITestRun.Wait(System.Int32)">
             <summary>
-            Stop the current test run, specifying whether to force cancellation. 
-            If no test is running, the method returns without error.
+            Blocks the current thread until the current test run completes
+            or the timeout is reached
             </summary>
-            <param name="force">If true, force the stop by cancelling all threads.</param>
-            <remarks>
-            Note that cancelling the threads is intrinsically unsafe and is only
-            provided on the assumption that tests do not impact production data.
-            </remarks>
+            <param name="timeout">A <see cref="T:System.Int32"/> that represents the number of milliseconds to wait or -1 milliseconds to wait indefinitely. </param>
+            <returns>True if the run completed</returns>
         </member>
     </members>
 </doc>

@@ -2,6 +2,7 @@
 
 import os
 import sys
+import time
 import signal
 import tempfile
 import argparse
@@ -10,7 +11,7 @@ import subprocess
 import xml.etree.ElementTree as ET
 
 bindir = os.path.dirname(os.path.realpath(__file__))
-nunit = os.path.join(bindir, 'nunit-console.exe')
+nunit = os.path.join(bindir, 'nunit3-console.exe')
 trampoline = os.path.join(bindir, 'trampoline.py')
 
 def win32_kill(pid):
@@ -38,7 +39,47 @@ def dotnet(cmd, newpg=True):
 			cmd.insert(0, 'python')
 	return cmd
 
-def run_nunit(args, asm, test, outdir):
+TEST_TEMPLATE = '''      <test-case name="{name}" duration="{duration}" result="{result}">
+        <reason>
+          <message>{message}</message>
+        </reason>
+      </test-case>'''
+
+FILE_TEMPLATE = '''<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<test-run>
+  <test-suite type="Assembly" total="{total}" duration="{duration}" failed="{failed}" skipped="{skipped}" name="{asm_name}">
+    <test-suite type="TestFixture" fullname="{fixture_fullname}">
+{testcases}
+    </test-suite>
+  </test-suite>
+</test-run>
+'''
+
+def save_failed(asm, test, fixture, filename, duration, message):
+	cases = []
+	for testcase in fixture.findall('.//test-case'):
+		cases.append(TEST_TEMPLATE.format(
+			name=testcase.attrib['name'],
+			duration=duration,
+			result='Skipped',
+			message=message,
+		))
+
+	xml = FILE_TEMPLATE.format(
+		total=fixture.attrib['testcasecount'],
+		duration=duration,
+		failed=0,
+		skipped=fixture.attrib['testcasecount'],
+		asm_name=asm,
+		fixture_fullname=test,
+		testcases='\n'.join(cases)
+	)
+
+	with open(filename, 'w') as fout:
+		fout.write(xml)
+
+def run_nunit(args, asm, fixture, outdir):
+	test = fixture.attrib['fullname']
 	result = '.'.join([
 		os.path.splitext(args.result)[0],
 		test.replace('<', '_').replace('>', '_'),
@@ -48,7 +89,7 @@ def run_nunit(args, asm, test, outdir):
 	cmd = dotnet([
 		nunit,
 		'--labels=All',
-		'--include=%s' % args.include,
+		'--where:cat==%s' % args.include,
 		'--result=%s' % result,
 		asm,
 		'--test=%s' % test,
@@ -57,15 +98,19 @@ def run_nunit(args, asm, test, outdir):
 	print ' '.join(cmd)
 	sys.stdout.flush()
 
+	start = time.time()
+	status = dict(aborted=None)
 	proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
 
 	def on_inactive():
-		print '%s: Timeout due to inactivity' % test
+		status['aborted'] = 'Timeout due to inactivity'
+		print '%s: %s' % (test, status['aborted'])
 		sys.stdout.flush()
 		kill(proc.pid)
 
 	def on_abort(signum, frame):
-		print '%s: SIGTERM' % test
+		status['aborted'] = 'SIGTERM'
+		print '%s: %s' % (test, status['aborted'])
 		sys.stdout.flush()
 		kill(proc.pid)
 		sys.exit(signal.SIGTERM)
@@ -84,6 +129,7 @@ def run_nunit(args, asm, test, outdir):
 				sys.stdout.flush()
 				fout.write(line)
 	except KeyboardInterrupt:
+		status['aborted'] = 'KeyboardInterrupt'
 		print 'kill(%d)' % proc.pid
 		sys.stdout.flush()
 		kill(proc.pid)
@@ -110,10 +156,15 @@ def run_nunit(args, asm, test, outdir):
 			sys.stdout.flush()
 
 			rc = proc.wait()
-			print 'Result: %s' % rc
+			print 'exit code: %d' % rc
 			print ''
 			print ''
 			sys.stdout.flush()
+
+			if status['aborted'] or rc < 0:
+				msg = status['aborted'] or 'nunit failed with exit code: %d' % rc
+				duration = time.time() - start
+				save_failed(asm, test, fixture, result, duration, msg)
 		except Exception, e:
 			print e
 			sys.stdout.flush()
@@ -140,7 +191,7 @@ def main():
 		explore = dotnet([
 			nunit,
 			'--explore=%s' % tmp.name,
-			'--include=%s' % args.include,
+			'--where:cat==%s' % args.include,
 		], newpg=False) + args.input
 
 	subprocess.check_call(explore)
@@ -150,13 +201,7 @@ def main():
 	for asm in xml_root.findall('test-suite[@type="Assembly"]'):
 		path = asm.attrib['name']
 
-		fixtures = []
-
 		for fixture in asm.findall('.//test-suite[@type="TestFixture"]'):
-			fullname = fixture.attrib['fullname']
-			fixtures.append(fullname)
-
-		for fixture in sorted(fixtures):
 			run_nunit(args, path, fixture, outdir)
 
 if __name__ == "__main__":
