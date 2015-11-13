@@ -80,7 +80,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		}
 	}
 
-	class JobMonitorTests<T> : BaseJobMonitorTests<T>
+	abstract class JobMonitorTests<T> : BaseJobMonitorTests<T>
 		where T : IJobMonitor, new()
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
