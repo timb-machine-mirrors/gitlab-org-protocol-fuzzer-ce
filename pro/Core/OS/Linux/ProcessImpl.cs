@@ -57,7 +57,7 @@ namespace Peach.Pro.Core.OS.Linux
 
 					try
 					{
-						procName = p.ProcessName;
+						procName = Path.GetFileName(p.ProcessName);
 					}
 					catch (InvalidOperationException)
 					{

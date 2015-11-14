@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
-using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.Test.Core.Monitors
 {
@@ -14,7 +12,51 @@ namespace Peach.Pro.Test.Core.Monitors
 	[Peach]
 	class ProcessKillerMonitorTests
 	{
-		// TODO: Redo to use new Peach Process class
+		class Target : IDisposable
+		{
+			private readonly string _fileName;
+			private Process _process;
+
+			public string ProcName { get; private set; }
+
+			public Target()
+			{
+				const string cs = "CrashableServer";
+				var suffix = Platform.GetOS() == Platform.OS.Windows ? ".exe" : "";
+				var tmp = Path.GetTempFileName();
+				var dir = Path.GetDirectoryName(tmp);
+
+				if (string.IsNullOrEmpty(dir))
+					Assert.Fail("Temp directory should not be null or empty");
+
+				ProcName = cs + "-" + Guid.NewGuid();
+				_fileName = Path.Combine(dir, ProcName + suffix);
+
+				File.Delete(tmp);
+				File.Copy(Utilities.GetAppResourcePath(cs + suffix), _fileName);
+
+				_process = ProcessHelper.Start(_fileName, "127.0.0.1 0", null, null);
+			}
+
+			public void Dispose()
+			{
+				if (_process != null)
+				{
+					// Disposing will internally kill process if needed
+					_process.Dispose();
+					_process = null;
+				}
+
+				try
+				{
+					File.Delete(_fileName);
+				}
+				catch
+				{
+					// Ignore errors
+				}
+			}
+		}
 
 		[Test]
 		public void TestBadProcss()
@@ -34,22 +76,14 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestSingleProcess()
 		{
-			const string args = "127.0.0.1 0";
-
-			var temp1 = GetTempExeName();
-			var exe = temp1.Item1;
-			var procName = temp1.Item2;
-
-			SysProcess p = null;
-
-			try
+			using (var t1 = new Target())
 			{
-				p = RunProcess(exe, args);
+				var procName = t1.ProcName;
 
 				var runner = new MonitorRunner("ProcessKiller", new Dictionary<string, string>
-					{
-						{ "ProcessNames", procName },
-					})
+				{
+					{ "ProcessNames", procName }
+				})
 				{
 					IterationFinished = m =>
 					{
@@ -58,200 +92,53 @@ namespace Peach.Pro.Test.Core.Monitors
 						m.IterationFinished();
 
 						Assert.False(ProcessExists(procName), "Process '{0}' should not exist after IterationFinished".Fmt(procName));
-					},
+					}
 				};
 
 				var faults = runner.Run();
 
 				// never faults!
 				Assert.AreEqual(0, faults.Length);
-			}
-			finally
-			{
-				KillProcess(p);
 
-				try
-				{
-					File.Delete(exe);
-				}
-				// ReSharper disable once EmptyGeneralCatchClause
-				catch
-				{
-				}
+				Assert.False(ProcessExists(procName), "Process '{0}' should not exist after test".Fmt(procName));
 			}
-
-			Assert.False(ProcessExists(procName), "Process '{0}' should not exist after test".Fmt(procName));
 		}
 
 		[Test]
 		public void TestMultiProcess()
 		{
-			const string args = "127.0.0.1 0";
-
-			var temp1 = GetTempExeName();
-			var exe1 = temp1.Item1;
-			var procName1 = temp1.Item2;
-
-			var temp2 = GetTempExeName();
-			var exe2 = temp2.Item1;
-			var procName2 = temp2.Item2;
-
-			SysProcess p1 = null;
-			SysProcess p2 = null;
-
-			try
+			using (var t1 = new Target())
 			{
-				p1 = RunProcess(exe1, args);
-				p2 = RunProcess(exe2, args);
+				using (var t2 = new Target())
+				{
+					var procName1 = t1.ProcName;
+					var procName2 = t2.ProcName;
 
-				var runner = new MonitorRunner("ProcessKiller", new Dictionary<string, string>
+					var runner = new MonitorRunner("ProcessKiller", new Dictionary<string, string>
 					{
-						{ "ProcessNames", "{0},{1},some_invalid_process".Fmt(procName1, procName2) },
+						{ "ProcessNames", "{0},{1},some_invalid_process".Fmt(procName1, procName2) }
 					})
-				{
-					IterationFinished = m =>
 					{
-						Assert.True(ProcessExists(procName1), "Process 1 '{0}' should exist before IterationFinished".Fmt(procName1));
-						Assert.True(ProcessExists(procName2), "Process 2 '{0}' should exist before IterationFinished".Fmt(procName2));
+						IterationFinished = m =>
+						{
+							Assert.True(ProcessExists(procName1), "Process 1 '{0}' should exist before IterationFinished".Fmt(procName1));
+							Assert.True(ProcessExists(procName2), "Process 2 '{0}' should exist before IterationFinished".Fmt(procName2));
 
-						m.IterationFinished();
+							m.IterationFinished();
 
-						Assert.False(ProcessExists(procName1), "Process '{0}' should not exist after IterationFinished".Fmt(procName1));
-						Assert.False(ProcessExists(procName2), "Process '{0}' should not exist after IterationFinished".Fmt(procName2));
-					},
-				};
+							Assert.False(ProcessExists(procName1), "Process '{0}' should not exist after IterationFinished".Fmt(procName1));
+							Assert.False(ProcessExists(procName2), "Process '{0}' should not exist after IterationFinished".Fmt(procName2));
+						}
+					};
 
-				var faults = runner.Run();
+					var faults = runner.Run();
 
-				// never faults!
-				Assert.AreEqual(0, faults.Length);
-			}
-			finally
-			{
-				KillProcess(p1);
-				KillProcess(p2);
+					// never faults!
+					Assert.AreEqual(0, faults.Length);
 
-				try
-				{
-					File.Delete(exe1);
+					Assert.False(ProcessExists(procName1), "Process '{0}' should not exist after test".Fmt(procName1));
+					Assert.False(ProcessExists(procName2), "Process '{0}' should not exist after test".Fmt(procName2));
 				}
-				// ReSharper disable once EmptyGeneralCatchClause
-				catch
-				{
-				}
-
-				try
-				{
-					File.Delete(exe2);
-				}
-				// ReSharper disable once EmptyGeneralCatchClause
-				catch
-				{
-				}
-			}
-
-			Assert.False(ProcessExists(procName1), "Process '{0}' should not exist after test".Fmt(procName1));
-			Assert.False(ProcessExists(procName2), "Process '{0}' should not exist after test".Fmt(procName2));
-		}
-
-		[Test]
-		public void TestKillingProcess()
-		{
-			var temp = GetTempExeName();
-			var exe = temp.Item1;
-			var procName = temp.Item2;
-
-			SysProcess p = null;
-
-			try
-			{
-				p = RunProcess(exe, "127.0.0.1 0");
-
-				p.Kill();
-				p.WaitForExit();
-
-				Assert.True(p.HasExited, "Process should have exited");
-
-				// Killing a process that has exited should throw
-				// an InvalidOperationException
-				Assert.Throws<InvalidOperationException>(() => p.Kill());
-			}
-			finally
-			{
-				KillProcess(p);
-
-				try
-				{
-					File.Delete(exe);
-				}
-				// ReSharper disable once EmptyGeneralCatchClause
-				catch
-				{
-				}
-			}
-		}
-
-		static Tuple<string, string> GetTempExeName()
-		{
-			const string cs = "CrashableServer";
-			var suffix = Platform.GetOS() == Platform.OS.Windows ? ".exe" : "";
-			var tmp = Path.GetTempFileName();
-			var dir = Path.GetDirectoryName(tmp);
-
-			if (string.IsNullOrEmpty(dir))
-				Assert.Fail("Temp directory should not be null or empty");
-
-			var procName = cs + "-" + Guid.NewGuid();
-			var fileName = Path.Combine(dir, procName + suffix);
-
-			File.Delete(tmp);
-			File.Copy(Utilities.GetAppResourcePath(cs + suffix), fileName);
-
-			return new Tuple<string, string>(fileName, procName);
-		}
-
-		static SysProcess RunProcess(string exe, string args)
-		{
-			var p = new SysProcess
-			{
-				StartInfo = new ProcessStartInfo
-				{
-					FileName = exe,
-					Arguments = args,
-					UseShellExecute = false,
-					CreateNoWindow = true,
-				}
-			};
-
-			p.Start();
-
-			return p;
-		}
-
-		static void KillProcess(SysProcess p)
-		{
-			if (p == null)
-				return;
-
-			try
-			{
-				if (p.HasExited)
-					return;
-
-				try
-				{
-					p.Kill();
-				}
-				catch (InvalidOperationException)
-				{
-				}
-
-				// Waiting is ok since we created the process
-				p.WaitForExit();
-			}
-			finally
-			{
-				p.Close();
 			}
 		}
 
