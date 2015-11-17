@@ -954,7 +954,7 @@ namespace Peach.Pro.Test.Core.Publishers
 				</DataModel>
 			</Action>
 
-			<Action type='output' publisher='Tx'>
+			<Action name='send' type='output' publisher='Tx'>
 				<DataModel name='DM'>
 					<Blob value='Hello World' />
 				</DataModel>
@@ -1001,6 +1001,10 @@ namespace Peach.Pro.Test.Core.Publishers
 					if (a.Name == "open")
 					{
 						((SocketPublisher)c.test.publishers[1]).Port = ((SocketPublisher)c.test.publishers[0]).SrcPort;
+					}
+					else if (a.Name == "send")
+					{
+						System.Threading.Thread.Sleep(1000);
 					}
 				};
 			};

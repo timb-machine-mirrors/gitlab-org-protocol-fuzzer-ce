@@ -6,31 +6,24 @@ from waflib import Utils, Task, Logs, Options, Errors
 testlock = Utils.threading.Lock()
 
 def prepare_nunit_test(self):
-	self.ut_nunit = True
+	self.ut_nunit = get_inst_node(self.generator, '${BINDIR}', 'nunit3-console.exe')
+	self.ut_cwd = self.ut_nunit.parent.abspath()
 	self.ut_exec = []
 
-	if (self.env.CS_NAME == 'mono'):
+	if self.env.CS_NAME == 'mono':
 		self.ut_exec = [ 'mono', '--debug' ]
 
-	self.outputs[0].parent.mkdir()
-
-	# Note: must use '-option' rather than '/option'
-	# for linux compatibility
 	self.ut_exec.extend([
-		self.env.NUNIT[0],
-		'-nologo',
-		'-xml=%s' % self.outputs[0].abspath(),
+		self.ut_nunit.abspath(),
+		'--labels=All',
+		'--noresult',
 	])
 
 	opts = self.generator.bld.options
 	if opts.testcase:
-		self.ut_exec.append('-run=%s' % opts.testcase)
-	if not opts.stdout:
-		self.ut_exec.append('-out=%s' % self.outputs[1].abspath())
-	else:
-		self.ut_exec.append('-labels')
+		self.ut_exec.append('--test=%s' % opts.testcase)
 
-	self.ut_exec.extend([ x.abspath() for x in self.inputs ])
+	self.ut_exec.extend([ x.name for x in self.inputs ])
 
 def get_inst_node(self, dest, name):
 	dest = Utils.subst_vars(dest, self.env)
@@ -64,13 +57,8 @@ def make_test(self):
 
 		test = getattr(self.bld, 'nunit_task', None)
 		if not test:
-			xml = get_inst_node(self, '${PREFIX}/utest', 'nunit.xml')
-			outputs = [ xml ]
-			if not self.bld.options.stdout:
-				log = get_inst_node(self, '${PREFIX}/utest', 'nunit.log')
-				outputs.append(log)
 			tg = self.bld(name = '')
-			test = tg.create_task('utest', inputs, outputs)
+			test = tg.create_task('utest', inputs, [])
 			run_after_last_test(self, test)
 			setattr(self.bld, 'nunit_task', test)
 			tg.ut_fun = prepare_nunit_test
@@ -100,13 +88,9 @@ class utest(Task.Task):
 		return ret
 
 	def run(self):
-		if not os.path.isfile(self.inputs[0].abspath()):
-			raise Errors.WafError('Could not find test input: %s' % self.inputs[0].abspath())
-
 		self.ut_exec = getattr(self, 'ut_exec', [ self.inputs[0].abspath() ])
 		if getattr(self.generator, 'ut_fun', None):
 			self.generator.ut_fun(self)
-
 		args = Utils.to_list(getattr(self.generator, 'ut_args', ''))
 		if args:
 			self.ut_exec.extend(args)
@@ -115,8 +99,6 @@ class utest(Task.Task):
 		cwd = getattr(self.generator, 'ut_cwd', '') or self.inputs[0].parent.abspath()
 
 		stderr = stdout = None
-		if Logs.verbose < 0:
-			stderr = stdout = Utils.subprocess.PIPE
 
 		opts = self.generator.bld.options
 
@@ -130,7 +112,7 @@ class utest(Task.Task):
 		proc = Utils.subprocess.Popen(self.ut_exec, cwd=cwd, stderr=stderr, stdout=stdout, env=env)
 		(stdout, stderr) = proc.communicate()
 
-		tup = (self.inputs[0].name, proc.returncode)
+		tup = (getattr(self, 'ut_nunit', self.inputs[0]).name, proc.returncode)
 		self.generator.test_result = tup
 
 		testlock.acquire()
@@ -143,13 +125,6 @@ class utest(Task.Task):
 				bld.utest_results = [tup]
 		finally:
 			testlock.release()
-
-def configure(conf):
-	j = os.path.join
-	conf.env['NUNIT_VER'] = 'NUnit.Runners.2.6.4'
-	nunit_path = j(conf.get_third_party(), conf.env['NUNIT_VER'], 'tools')
-	nunit_name = '64' in conf.env.SUBARCH and 'nunit-console' or 'nunit-console-x86'
-	conf.find_program([nunit_name], var='NUNIT', exts='.exe', path_list=[nunit_path])
 
 def options(opt):
 	opt.add_option('--testcase', action='store', help='Name of test case/fixture to execute')

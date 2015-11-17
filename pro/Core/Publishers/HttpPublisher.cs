@@ -237,15 +237,20 @@ namespace Peach.Pro.Core.Publishers
 			}
 			catch (TimeoutException ex)
 			{
-				caught = new SoftException("Timed out connecting to {0}".Fmt(url), ex);
+				caught = new SoftException("Timed out connecting to {0}".Fmt(SafeUrlString(url)), ex);
 			}
 
 			if (caught != null)
 				throw new SoftException(caught);
 
-			_clientName = url.ToString();
+			_clientName = SafeUrlString(url);
 
 			StartClient();
+		}
+
+		private static string SafeUrlString(Uri url)
+		{
+			return "{0}://{1}:{2}".Fmt(url.Scheme, url.Host, url.Port);
 		}
 
 		static bool HeaderCompare(string lhs, string rhs)
@@ -253,9 +258,55 @@ namespace Peach.Pro.Core.Publishers
 			return 0 == string.Compare(lhs, rhs, StringComparison.OrdinalIgnoreCase);
 		}
 
+		static void CheckBadChars(string value)
+		{
+			//First, check for correctly formed multi-line value
+			//Second, check for absenece of CTL characters
+			var crlf = 0;
+			foreach (var t in value)
+			{
+				var c = (char)(0x000000ff & (uint)t);
+				switch (crlf)
+				{
+					case 0:
+						if (c == '\r')
+						{
+							crlf = 1;
+						}
+						else if (c == '\n')
+						{
+							// Technically this is bad HTTP.  But it would be a breaking change to throw here.
+							// Is there an exploit?
+							crlf = 2;
+						}
+						else if (c == 127 || (c < ' ' && c != '\t'))
+						{
+							throw new ArgumentException("Specified value has invalid Control characters.", "value");
+						}
+						break;
+
+					case 1:
+						if (c == '\n')
+						{
+							crlf = 2;
+							break;
+						}
+						throw new ArgumentException("Specified value has invalid CRLF characters.", "value");
+
+					case 2:
+						if (c == ' ' || c == '\t')
+						{
+							crlf = 0;
+							break;
+						}
+						throw new ArgumentException("Specified value has invalid CRLF characters.", "value");
+				}
+			}
+		}
+
 		private Stream TryCreateClient(Uri url, BitwiseStream data)
 		{
-			Logger.Debug("TryCreateClient> {0} {1}", Method, url);
+			Logger.Trace("TryCreateClient> {0} {1}", Method, SafeUrlString(url));
 
 			var request = (HttpWebRequest)WebRequest.Create(url);
 			request.Method = Method;
@@ -272,6 +323,10 @@ namespace Peach.Pro.Core.Publishers
 			{
 				try
 				{
+					// Mono doesn't do this but Microsoft does.
+					// Ensure both behave the same way.
+					CheckBadChars(kv.Value);
+
 					if (HeaderCompare(kv.Key, "Accept"))
 						request.Accept = kv.Value;
 					else if (HeaderCompare(kv.Key, "Connection"))

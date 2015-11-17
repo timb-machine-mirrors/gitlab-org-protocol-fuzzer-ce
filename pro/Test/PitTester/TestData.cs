@@ -101,27 +101,7 @@ namespace PitTester
 
 			protected static byte[] FromCData(string payload)
 			{
-				var sb = new StringBuilder();
-				var rdr = new StringReader(payload);
-
-				var line = "";
-				while ((line = rdr.ReadLine()) != null)
-				{
-					// Expect 16 byte hex dump
-					// some chars chars, whitespace, the bytes, 16 chars
-
-					var space = line.IndexOf(' ') + 1;
-
-					if (line.Length < (space + 16))
-						continue;
-
-					var subst = line.Substring(space, line.Length - 16 - space);
-					subst = subst.Replace(" ", "");
-					sb.Append(subst);
-				}
-
-				var ret = HexString.Parse(sb.ToString()).Value;
-				return ret;
+				return Utilities.ParseHexDump(payload);
 			}
 		}
 

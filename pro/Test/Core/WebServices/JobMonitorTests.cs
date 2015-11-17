@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using NLog;
-using NLog.Config;
-using NLog.Targets;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
@@ -16,8 +13,8 @@ using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.Test.Core.Storage;
 using Logger = NLog.Logger;
 using Random = System.Random;
-using TestStatus = Peach.Pro.Core.WebServices.Models.TestStatus;
 using SysProcess = System.Diagnostics.Process;
+using TestStatus = Peach.Pro.Core.WebServices.Models.TestStatus;
 
 namespace Peach.Pro.Test.Core.WebServices
 {
@@ -66,7 +63,6 @@ namespace Peach.Pro.Test.Core.WebServices
 
 		protected void WaitForFinish()
 		{
-			Console.WriteLine("Waiting for finish");
 			Assert.IsTrue(_doneEvt.WaitOne(TimeSpan.FromSeconds(20)), "Timeout waiting for job to finish");
 		}
 
@@ -84,39 +80,19 @@ namespace Peach.Pro.Test.Core.WebServices
 		}
 	}
 
-	[TestFixture(typeof(InternalJobMonitor))]
-	[TestFixture(typeof(ExternalJobMonitor))]
-	[Peach]
-	[Quick]
-	class JobMonitorTests<T> : BaseJobMonitorTests<T>
+	abstract class JobMonitorTests<T> : BaseJobMonitorTests<T>
 		where T : IJobMonitor, new()
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 		protected TempFile _tmp;
 		protected TempDirectory _tmpDir;
-		private LoggingConfiguration _loggingConfig;
-		private LogLevel _oldLogLevel;
 
 		[SetUp]
 		public void SetUp()
 		{
 			Logger.Trace(">>> Setup");
 
-			_oldLogLevel = Configuration.LogLevel;
-			Configuration.LogLevel = LogLevel.Debug;
-
 			Configuration.UseAsyncLogging = false;
-
-			var target = new ConsoleTarget
-			{
-				Layout = "${time} ${logger} ${message}"
-			};
-
-			var config = new LoggingConfiguration();
-			var rule = new LoggingRule("*", LogLevel.Trace, target);
-			config.AddTarget("console", target);
-			config.LoggingRules.Add(rule);
-			LogManager.Configuration = config;
 
 			_doneEvt = new ManualResetEvent(false);
 
@@ -135,8 +111,6 @@ namespace Peach.Pro.Test.Core.WebServices
 			_tmpDir = new TempDirectory();
 			Configuration.LogRoot = _tmpDir.Path;
 
-			_loggingConfig = LogManager.Configuration;
-
 			Logger.Trace("<<< Setup");
 		}
 
@@ -148,10 +122,8 @@ namespace Peach.Pro.Test.Core.WebServices
 			_monitor.Dispose();
 			_tmp.Dispose();
 			_tmpDir.Dispose();
-
-			LogManager.Configuration = _loggingConfig;
+			
 			Configuration.UseAsyncLogging = true;
-			Configuration.LogLevel = _oldLogLevel;
 
 			Logger.Trace("<<< TearDown");
 		}
@@ -240,7 +212,6 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Repeat(30)]
 		public void TestKill()
 		{
-			Configuration.LogLevel = LogLevel.Trace;
 			Logger.Trace("TestKill");
 
 			var jobRequest = new JobRequest();
@@ -300,7 +271,6 @@ namespace Peach.Pro.Test.Core.WebServices
 			}
 
 			Assert.IsTrue(File.Exists(job.DebugLogPath));
-			Console.Write(File.ReadAllText(job.DebugLogPath));
 		}
 
 		[Test]
@@ -351,8 +321,6 @@ namespace Peach.Pro.Test.Core.WebServices
 
 					var logs = db.GetJobLogs(job.Guid).ToList();
 					Assert.AreEqual(2, logs.Count, "Missing JobLogs");
-					foreach (var log in logs)
-						Console.WriteLine(log.Message);
 				}
 
 				Assert.IsFalse(File.Exists(job.DatabasePath), "job.DatabasePath should not exist");
@@ -404,8 +372,6 @@ namespace Peach.Pro.Test.Core.WebServices
 
 					var logs = db.GetJobLogs(job.Guid).ToList();
 					Assert.AreEqual(2, logs.Count, "Missing JobLogs");
-					foreach (var log in logs)
-						Console.WriteLine(log.Message);
 				}
 
 				Assert.IsFalse(File.Exists(job.DatabasePath), "job.DatabasePath should not exist");
@@ -498,16 +464,32 @@ namespace Peach.Pro.Test.Core.WebServices
 		}
 	}
 
+	namespace JobMonitorTests
+	{
+		[TestFixture]
+		[Peach]
+		[Quick]
+		class External : JobMonitorTests<ExternalJobMonitor>
+		{
+		}
+
+		[TestFixture]
+		[Peach]
+		[Quick]
+		class Internal : JobMonitorTests<InternalJobMonitor>
+		{
+		}
+	}
+
 	[TestFixture]
 	[Peach]
 	[Quick]
 	class ExternalJobMonitorTests : BaseJobMonitorTests<ExternalJobMonitor>
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-		protected TempDirectory _tmpDir;
 		protected TempFile _tmp1;
 		protected TempFile _tmp2;
-		LoggingConfiguration _loggingConfig;
+		protected TempDirectory _tmpDir;
 
 		protected const string CrashPitXml =
 @"<?xml version='1.0' encoding='utf-8'?>
@@ -526,7 +508,7 @@ namespace Peach.Pro.Test.Core.WebServices
 	</StateModel>
 
 	<Agent name='LocalAgent'>
-		<Monitor class='RandoFaulter'>
+		<Monitor class='你好RandoFaulter'>
 			<Param name='CrashAfter' value='2000'/>
 		</Monitor>
 	</Agent>
@@ -564,19 +546,6 @@ namespace Peach.Pro.Test.Core.WebServices
 			_tmpDir = new TempDirectory();
 			Configuration.LogRoot = _tmpDir.Path;
 
-			_loggingConfig = LogManager.Configuration;
-
-			var target = new ConsoleTarget
-			{
-				Layout = "${time} ${logger} ${message}"
-			};
-
-			var config = new LoggingConfiguration();
-			var rule = new LoggingRule("*", LogLevel.Trace, target);
-			config.AddTarget("console", target);
-			config.LoggingRules.Add(rule);
-			LogManager.Configuration = config;
-
 			Logger.Trace("<<< Setup");
 		}
 
@@ -590,7 +559,6 @@ namespace Peach.Pro.Test.Core.WebServices
 			_tmp2.Dispose();
 			_tmpDir.Dispose();
 
-			LogManager.Configuration = _loggingConfig;
 			Configuration.UseAsyncLogging = true;
 
 			Logger.Trace("<<< TearDown");
@@ -659,8 +627,6 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var logPath = Path.Combine(Configuration.LogRoot, job.Id, "error.log");
 			Assert.IsTrue(File.Exists(logPath));
-			var log = File.ReadAllText(logPath);
-			Console.Write(log);
 
 			VerifyDatabase(job);
 		}

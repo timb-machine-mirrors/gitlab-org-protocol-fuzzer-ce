@@ -44,7 +44,7 @@ namespace Peach.Pro.Core.Fixups
 	[Fixup("Crc32Fixup")]
 	[Fixup("checksums.Crc32Fixup")]
 	[Parameter("ref", typeof(DataElement), "Reference to data element")]
-	[Parameter("type", typeof(CRCTool.CRCCode), "Type of CRC to run [CRC32, CRC16, CRC16_Modbus, CRC_CCITT]", "CRC32")]
+	[Parameter("type", typeof(CRCTool.CRCCode), "Type of CRC to run [CRC32, CRC16, CRC16_Modbus, CRC_CCITT, DNP3]", "CRC32")]
 	[Serializable]
 	public class CrcFixup : Fixup
 	{
@@ -64,7 +64,15 @@ namespace Peach.Pro.Core.Fixups
 
 			data.Seek(0, System.IO.SeekOrigin.Begin);
 
-			CRCTool crcTool = new CRCTool();
+			if (type == CRCTool.CRCCode.DNP3)
+			{
+				var buff = new byte[data.Length];
+				data.Read(buff, 0, buff.Length);
+
+				return new Variant((ushort)Crc16Dnp3.ComputeChecksum(buff));
+			}
+
+			var crcTool = new CRCTool();
 			crcTool.Init(type);
 
 			return new Variant((uint)crcTool.crctablefast(data));

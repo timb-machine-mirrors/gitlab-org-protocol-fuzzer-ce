@@ -26,8 +26,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Parameter("WorkingDirectory", typeof(string), "Working directory to set when running command", "")]
 	public class RunCommand  : Monitor
 	{
-		static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
-
 		public string Command { get; set; }
 		public string Arguments { get; set; }
 		public string StartOnCall { get; set; }
@@ -65,11 +63,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 		{
 			_data = null;
 
-			Logger.Debug("_Start(): Running command " + Command + " with arguments " + Arguments);
-
 			try
 			{
-				var result = Process.Run(Logger, Command, Arguments, null, WorkingDirectory, Timeout);
+				var result = ProcessHelper.Run(Command, Arguments, null, WorkingDirectory, Timeout);
 
 				var stdout = result.StdOut.ToString();
 				var stderr = result.StdErr.ToString();

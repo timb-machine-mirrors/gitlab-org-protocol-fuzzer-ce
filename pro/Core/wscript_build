@@ -48,6 +48,7 @@ deps = [
 	'BouncyCastle.Crypto.dll',
 	'aardvark_net.dll',
 	'LibUsbDotNet.dll',
+	'Mono.Posix.dll',
 
 	'websocket-sharp.dll',
 	'Dapper.dll',
@@ -68,7 +69,6 @@ bld(
 	embed = embed,
 	content = 'IronPython.StdLib',
 	ide_content = 'WebServices/Models/Model.cd',
-	ide_use = 'PeachTrampoline',
 	name = 'Peach.Pro.dll',
 	namespace = 'Peach.Pro.Core',
 )

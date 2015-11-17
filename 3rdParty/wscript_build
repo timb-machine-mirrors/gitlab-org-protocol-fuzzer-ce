@@ -48,7 +48,7 @@ if bld.env.BASENAME == 'osx':
 	)
 
 
-nunit_tools = bld.path.find_node('NUnit.Console.3.0.0-beta-3/tools')
+nunit_tools = bld.path.find_node('NUnit.Console.3.0.0-rc-2/tools')
 
 bld(
 	name='nunit-console',

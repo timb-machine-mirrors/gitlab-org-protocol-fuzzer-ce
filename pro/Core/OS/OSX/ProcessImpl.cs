@@ -1,19 +1,116 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Threading;
-using Peach.Core;
-using System.Linq;
 using System.IO;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using Peach.Core;
+using Logger = NLog.Logger;
 using SysProcess = System.Diagnostics.Process;
 
-namespace Peach.Pro.OS.OSX
+namespace Peach.Pro.Core.OS.OSX
 {
 	[PlatformImpl(Platform.OS.OSX)]
-	public class ProcessInfoImpl : IProcessInfo
+	public class ProcessImpl : Unix.ProcessImpl
 	{
+		class OwnedProcess : BaseUnixProcess
+		{
+			protected override bool Attached { get { return false; } }
+
+			public OwnedProcess(SysProcess process)
+				: base(process)
+			{
+			}
+
+			public override ProcessInfo Snapshot()
+			{
+				return TakeSnapshot(_process);
+			}
+		}
+
+		class AttachedProcess : OwnedProcess
+		{
+			protected override bool Attached { get { return true; } }
+
+			public AttachedProcess(SysProcess process)
+				: base(process)
+			{
+			}
+
+			public override bool WaitForExit(int timeout)
+			{
+				return PollForExit(timeout);
+			}
+		}
+
+		[PlatformImpl(Platform.OS.OSX)]
+		public class ProcessHelper : BaseProcessHelper
+		{
+			protected override Unix.ProcessImpl NewProcess(Logger logger)
+			{
+				return new ProcessImpl(logger);
+			}
+
+			protected override IEnumerable<SysProcess> GetProcessesByName(string name)
+			{
+				foreach (var p in SysProcess.GetProcesses())
+				{
+					if (GetName(p.Id) == name)
+						yield return p;
+					else
+						p.Dispose();
+				}
+			}
+		}
+
+		public ProcessImpl(Logger logger)
+			: base(logger)
+		{
+		}
+
+		protected override IProcess MakeOwnedProcess(SysProcess process)
+		{
+			return new OwnedProcess(process);
+		}
+
+		protected override IProcess MakeAttachedProcess(SysProcess process)
+		{
+			return new AttachedProcess(process);
+		}
+
+		static ProcessInfo TakeSnapshot(SysProcess p)
+		{
+			extern_proc kp;
+			if (!GetKernProc(p.Id, out kp))
+				RaiseError(p);
+
+			proc_taskinfo ti;
+			if (!GetTaskInfo(p.Id, out ti))
+				RaiseError(p);
+
+			var pi = new ProcessInfo
+			{
+				Id = p.Id,
+				ProcessName = GetName(p.Id),
+				Responding = kp.p_stat != (byte)pstat.SZOMB,
+				UserProcessorTicks = ti.pti_total_user,
+				PrivilegedProcessorTicks = ti.pti_total_system,
+
+				VirtualMemorySize64 = (long)ti.pti_virtual_size,
+				WorkingSet64 = (long)ti.pti_resident_size,
+				PrivateMemorySize64 = 0,
+				PeakVirtualMemorySize64 = 0,
+				PeakWorkingSet64 = 0,
+			};
+
+			pi.TotalProcessorTicks = pi.UserProcessorTicks + pi.PrivilegedProcessorTicks;
+
+			return pi;
+		}
+
 		#region P/Invoke Stuff
+
+		// ReSharper disable UnusedMember.Local
+		// ReSharper disable MemberCanBePrivate.Local
+		// ReSharper disable FieldCanBeMadeReadOnly.Local
 
 		// <libproc.h>
 		[DllImport("libc")]
@@ -87,14 +184,14 @@ namespace Peach.Pro.OS.OSX
 		}
 
 		// <sys/sysctl.h>
-		private static int CTL_KERN = 1;
-		private static int KERN_PROC = 14;
-		private static int KERN_PROC_PID = 1;
-		private static int KERN_ARGMAX = 8;
-		private static int KERN_PROCARGS2 = 49;
+		private const int CTL_KERN = 1;
+		private const int KERN_PROC = 14;
+		private const int KERN_PROC_PID = 1;
+		private const int KERN_ARGMAX = 8;
+		private const int KERN_PROCARGS2 = 49;
 
 		// <sys/proc.h>
-		private enum p_stat : byte
+		private enum pstat : byte
 		{
 			SIDL = 1, // Process being created by fork.
 			SRUN = 2, // Currently runnable.
@@ -106,7 +203,13 @@ namespace Peach.Pro.OS.OSX
 		[DllImport("libc")]
 		private static extern int sysctl([MarshalAs(UnmanagedType.LPArray)] int[] name, uint namelen, IntPtr oldp, ref int oldlenp, IntPtr newp, int newlen);
 
+		// ReSharper restore FieldCanBeMadeReadOnly.Local
+		// ReSharper restore MemberCanBePrivate.Local
+		// ReSharper restore UnusedMember.Local
+
 		#endregion
+
+		#region HGlobal Helper
 
 		class HGlobal : IDisposable
 		{
@@ -138,7 +241,11 @@ namespace Peach.Pro.OS.OSX
 			}
 		}
 
-		private static extern_proc? GetKernProc(int pid)
+		#endregion
+
+		#region Snapshot Helpers
+
+		static bool GetKernProc(int pid, out extern_proc val)
 		{
 			var mib = new[] {
 				CTL_KERN,
@@ -152,26 +259,36 @@ namespace Peach.Pro.OS.OSX
 			{
 				var ret = sysctl(mib, (uint)mib.Length, ptr.Pointer, ref len, IntPtr.Zero, 0);
 				if (ret == -1)
-					return null;
-				return ptr.ToStruct<extern_proc>();
+				{
+					val = new extern_proc();
+					return false;
+				}
+
+				val = ptr.ToStruct<extern_proc>();
+				return true;
 			}
 		}
 
-		private static proc_taskinfo? GetTaskInfo(int pid)
+		static bool GetTaskInfo(int pid, out proc_taskinfo val)
 		{
 			var len = Marshal.SizeOf(typeof(proc_taskinfo));
 			using (var ptr = new HGlobal(len))
 			{
 				var err = proc_pidinfo(pid, PROC_PIDTASKINFO, 0, ptr.Pointer, len);
 				if (err != len)
-					return null;
-				return ptr.ToStruct<proc_taskinfo>();
+				{
+					val = new proc_taskinfo();
+					return false;
+				}
+
+				val = ptr.ToStruct<proc_taskinfo>();
+				return true;
 			}
 		}
 
-		private static int _argmax;
+		static int _argmax;
 
-		private static int GetArgMax()
+		static int GetArgMax()
 		{
 			if (_argmax == 0)
 			{
@@ -196,13 +313,13 @@ namespace Peach.Pro.OS.OSX
 		// Reference:
 		// http://opensource.apple.com/source/adv_cmds/adv_cmds-153/ps/print.c
 		//
-		private static string GetName(SysProcess p)
+		static string GetName(int pid)
 		{
 			var mib = new[]
 			{
 				CTL_KERN,
 				KERN_PROCARGS2,
-				p.Id
+				pid
 			};
 
 			var argmax = GetArgMax();
@@ -217,7 +334,7 @@ namespace Peach.Pro.OS.OSX
 			}
 		}
 
-		private static void RaiseError(SysProcess p)
+		static void RaiseError(SysProcess p)
 		{
 			bool hasExited;
 
@@ -233,103 +350,9 @@ namespace Peach.Pro.OS.OSX
 			if (hasExited)
 				throw new ArgumentException("Can't query info for pid '{0}', it has already exited.".Fmt(p.Id));
 
-			throw new UnauthorizedAccessException("Can't query info for pid '{0}', ensure user has appropriate permissions".Fmt(p.Id));
+			throw new UnauthorizedAccessException("Can't query info for pid '{0}', ensure it is running and the user has appropriate permissions".Fmt(p.Id));
 		}
 
-		public ProcessInfo Snapshot(SysProcess p)
-		{
-			var kp = GetKernProc(p.Id);
-			if (!kp.HasValue)
-				RaiseError(p);
-
-			var ti = GetTaskInfo(p.Id);
-			if (!ti.HasValue)
-				RaiseError(p);
-
-			var pi = new ProcessInfo
-			{
-				Id = p.Id,
-				ProcessName = GetName(p),
-				Responding = kp.Value.p_stat != (byte)p_stat.SZOMB,
-				UserProcessorTicks = ti.Value.pti_total_user,
-				PrivilegedProcessorTicks = ti.Value.pti_total_system,
-
-				VirtualMemorySize64 = (long)ti.Value.pti_virtual_size,
-				WorkingSet64 = (long)ti.Value.pti_resident_size,
-				PrivateMemorySize64 = 0,
-				PeakVirtualMemorySize64 = 0,
-				PeakWorkingSet64 = 0,
-			};
-			pi.TotalProcessorTicks = pi.UserProcessorTicks + pi.PrivilegedProcessorTicks;
-
-			return pi;
-		}
-
-		public SysProcess[] GetProcessesByName(string name)
-		{
-			var ret = new List<SysProcess>();
-
-			foreach (var p in SysProcess.GetProcesses())
-			{
-				if (GetName(p) == name)
-					ret.Add(p);
-				else
-					p.Dispose();
-			}
-
-			return ret.ToArray();
-		}
-
-		public void Kill(SysProcess p)
-		{
-			if (p.HasExited)
-				return;
-
-			try
-			{
-				p.Kill();
-			}
-			catch (InvalidOperationException)
-			{
-			}
-
-			while (!p.HasExited)
-				Thread.Sleep(10);
-		}
-
-		public bool Kill(SysProcess p, int milliseconds)
-		{
-			if (p.HasExited)
-				return true;
-
-			try
-			{
-				p.Kill();
-			}
-			catch (InvalidOperationException)
-			{
-			}
-
-			// Process.WaitForExit doesn't work on processes
-			// that were not started from within mono.
-			// waitpid returns ECHILD
-
-			var sw = Stopwatch.StartNew();
-
-			if (milliseconds <= 0)
-				return p.HasExited;
-
-			while (true)
-			{
-				if (p.HasExited)
-					return true;
-
-				var remain = milliseconds - sw.ElapsedMilliseconds;
-				if (remain <= 0)
-					return false;
-
-				Thread.Sleep(Math.Min((int)remain, 10));
-			}
-		}
+		#endregion
 	}
 }

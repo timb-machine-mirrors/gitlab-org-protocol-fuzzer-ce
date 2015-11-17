@@ -17,6 +17,7 @@
 #define SLEEP_FACTOR 1
 
 void cmd_fork();
+void cmd_nosigterm();
 
 #endif // WIN32
 
@@ -40,11 +41,23 @@ int main(int argc, char** argv) {
 		fprintf(fout, "%s", argv[3]);
 		fclose(fout);
 	}
+	else if (!strcmp(argv[1], "when")) {
+		FILE* fout = fopen(argv[2], "w");
+		fprintf(fout, "%s", argv[3]);
+		fclose(fout);
+	}
 	else if (!strcmp(argv[1], "fork")) {
 #ifdef WIN32
 		printf("Not supported\n");
 #else
 		cmd_fork();
+#endif
+	}
+	else if (!strcmp(argv[1], "nosigterm")) {
+#ifdef WIN32
+		printf("Not supported\n");
+#else
+		cmd_nosigterm();
 #endif
 	}
 	return 0;
@@ -89,9 +102,20 @@ const char* signal_str(int sig) {
 	}
 }
 
+int handle_sigterm = 1;
+
 void signal_handler(int sig) {
 	int* foo = (int*)0xDEADBEEF;
 	printf("[%d] signal: (%d) %s\n", getpid(), sig, signal_str(sig));
+
+	if (!handle_sigterm) {
+		fflush(stdout);
+		close(0);
+		close(1);
+		close(2);
+		return;
+	}
+
 	switch (sig) {
 		case SIGTERM:
 			for (;;) {
@@ -144,6 +168,17 @@ void cmd_fork() {
 
 		exit(EXIT_SUCCESS);
 	}
+}
+
+void cmd_nosigterm() {
+	handle_sigterm = 0;
+	printf("Ignoring SIGTERM, closing stdout/stderr and pausing...\n");
+	signal(SIGINT, signal_handler);
+	signal(SIGKILL, signal_handler);
+	signal(SIGTERM, signal_handler);
+	signal(SIGCHLD, signal_handler);
+	pause();
+	pause();
 }
 
 #endif

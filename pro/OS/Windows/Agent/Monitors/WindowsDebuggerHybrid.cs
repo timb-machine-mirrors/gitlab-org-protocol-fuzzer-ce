@@ -359,13 +359,13 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 		public override bool DetectedFault()
 		{
-			logger.Info("DetectedFault()");
+			logger.Debug("DetectedFault()");
 
 			_fault = null;
 
 			if (_systemDebugger != null && _systemDebugger.caughtException)
 			{
-				logger.Info("DetectedFault - Using system debugger, caught exception");
+				logger.Debug("DetectedFault - Using system debugger, caught exception");
 				_fault = GetDebuggerFault(_systemDebugger.crashInfo);
 
 				_systemDebugger.StopDebugger();
@@ -373,7 +373,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			}
 			else if (_debugger != null && _hybrid)
 			{
-				logger.Info("DetectedFault - Using WinDbg, checking for fault");
+				logger.Debug("DetectedFault - Using WinDbg, checking for fault");
 
 				// Lets give windbg a chance to detect the crash.
 				// 10 seconds should be enough.
@@ -394,7 +394,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 					_fault = GetEarlyExitFault();
 
 				if(_fault != null)
-					logger.Info("DetectedFault - Caught fault with windbg");
+					logger.Debug("DetectedFault - Caught fault with windbg");
 
 				if (_debugger != null && _hybrid && _fault == null)
 				{
@@ -410,17 +410,17 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			}
 			else if (_earlyExitFault)
 			{
-				logger.Info("DetectedFault() - Fault detected, process exited early");
+				logger.Debug("DetectedFault() - Fault detected, process exited early");
 				_fault = GetEarlyExitFault();
 			}
 			else if (_waitForExitFailed)
 			{
-				logger.Info("DetectedFault() - Fault detected, WaitForExitOnCall failed");
+				logger.Debug("DetectedFault() - Fault detected, WaitForExitOnCall failed");
 				_fault = GetGeneralFault("FailedToExit", "Process did not exit in " + _waitForExitTimeout + "ms.");
 			}
 
 			if(_fault == null)
-				logger.Info("DetectedFault() - No fault detected");
+				logger.Debug("DetectedFault() - No fault detected");
 
 			return _fault != null;
 		}
@@ -857,9 +857,10 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			try
 			{
 				int pid = _debugger != null ? _debugger.ProcessId : _systemDebugger.ProcessId;
-				using (var proc = System.Diagnostics.Process.GetProcessById(pid))
+				using (var proc = ProcessHelper.GetProcessById(pid))
 				{
-					if (proc == null || proc.HasExited)
+					// TODO: Eventually just call proc.WaitForIdle();
+					if (proc == null || !proc.IsRunning)
 						return;
 
 					if (useCpuKill && !_noCpuKill)
@@ -872,7 +873,8 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 							// Note: Performance counters were used and removed due to speed issues.
 							//       monitoring the tick count is more reliable and less likely to cause
 							//       fuzzing slow-downs.
-							var pi = ProcessInfo.Instance.Snapshot(proc);
+							var pi = proc.Snapshot();
+							// TODO: Handle failure to take snapshot!
 
 							logger.Trace("CpuKill: OldTicks={0} NewTicks={1}", lastTime, pi.TotalProcessorTicks);
 
