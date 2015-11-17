@@ -4,32 +4,24 @@ using System.Xml;
 using NLog;
 using Peach.Core;
 using Peach.Core.Analyzers;
+using Peach.Core.Dom;
+using Peach.Pro.Core.Godel;
+using Action = Peach.Core.Dom.Action;
+using Logger = NLog.Logger;
+using StateModel = Peach.Pro.Core.Godel.StateModel;
 
-namespace Peach.Pro.Core.Godel
+namespace Peach.Pro.Core
 {
-	[Serializable]
-	public class Dom : Peach.Core.Dom.Dom
-	{
-		public NamedCollection<GodelContext> godel = new NamedCollection<GodelContext>();
-	}
-
-	[Serializable]
-	public class StateModel : Peach.Core.Dom.StateModel
-	{
-		[NonSerialized]
-		public NamedCollection<GodelContext> godel = new NamedCollection<GodelContext>();
-	}
-
 	/// <summary>
 	/// Extension of PitParser to add Ocl into the mix!
 	/// </summary>
-	public class GodelPitParser : PitParser
+	public class ProPitParser : PitParser
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
 		protected override Peach.Core.Dom.Dom CreateDom()
 		{
-			return new Dom();
+			return new Godel.Dom();
 		}
 
 		protected override Peach.Core.Dom.StateModel CreateStateModel()
@@ -39,7 +31,7 @@ namespace Peach.Pro.Core.Godel
 
 		protected override void handlePeach(Peach.Core.Dom.Dom dom, XmlNode node, Dictionary<string, object> args)
 		{
-			var godelDom = (Dom)dom;
+			var godelDom = (Godel.Dom)dom;
 
 			base.handlePeach(dom, node, args);
 
@@ -52,7 +44,7 @@ namespace Peach.Pro.Core.Godel
 					var refName = child.getAttr("ref", null);
 					if (refName != null)
 					{
-						var other = godelDom.getRef<GodelContext>(refName, d => ((Dom)d).godel);
+						var other = godelDom.getRef(refName, d => ((Godel.Dom)d).godel);
 						if (other == null)
 							throw new PeachException("Error, could not resolve top level <Godel> element ref attribute value '" + refName + "'.");
 
@@ -81,13 +73,14 @@ namespace Peach.Pro.Core.Godel
 				}
 			}
 
-			foreach (StateModel sm in godelDom.stateModels)
+			foreach (var stateModel in godelDom.stateModels)
 			{
+				var sm = (StateModel) stateModel;
 				foreach (var item in sm.godel)
 				{
 					if (!string.IsNullOrEmpty(item.refName))
 					{
-						var other = godelDom.getRef<GodelContext>(item.refName, d => ((Dom)d).godel);
+						var other = godelDom.getRef(item.refName, d => ((Godel.Dom)d).godel);
 						if (other == null)
 							throw new PeachException("Error, could not resolve " + item.debugName + " <Godel> element ref attribute value '" + item.refName + "'.");
 
@@ -139,7 +132,7 @@ namespace Peach.Pro.Core.Godel
 
 		private void deferParse(StateModel sm, string fullName, XmlNode node)
 		{
-			var godel = new GodelContext()
+			var godel = new GodelContext
 			{
 				debugName = "{0} '{1}'".Fmt(node.ParentNode.Name, fullName),
 				type = node.ParentNode.Name,
@@ -147,7 +140,7 @@ namespace Peach.Pro.Core.Godel
 				refName = node.getAttr("ref", null),
 				inv = node.getAttr("inv", null),
 				pre = node.getAttr("pre", null),
-				post = node.getAttr("post", null),
+				post = node.getAttr("post", null)
 			};
 
 			if (node.hasAttr("controlOnly"))
@@ -163,7 +156,7 @@ namespace Peach.Pro.Core.Godel
 			}
 		}
 
-		protected override Peach.Core.Dom.Action handleAction(System.Xml.XmlNode node, Peach.Core.Dom.State parent)
+		protected override Action handleAction(XmlNode node, State parent)
 		{
 			var action = base.handleAction(node, parent);
 
@@ -179,7 +172,7 @@ namespace Peach.Pro.Core.Godel
 			return action;
 		}
 
-		protected override Peach.Core.Dom.State handleState(System.Xml.XmlNode node, Peach.Core.Dom.StateModel parent)
+		protected override State handleState(XmlNode node, Peach.Core.Dom.StateModel parent)
 		{
 			var state = base.handleState(node, parent);
 
@@ -195,7 +188,7 @@ namespace Peach.Pro.Core.Godel
 			return state;
 		}
 
-		protected override Peach.Core.Dom.StateModel handleStateModel(System.Xml.XmlNode node, Peach.Core.Dom.Dom parent)
+		protected override Peach.Core.Dom.StateModel handleStateModel(XmlNode node, Peach.Core.Dom.Dom parent)
 		{
 			var stateModel = base.handleStateModel(node, parent);
 

@@ -798,7 +798,7 @@ namespace PitTester
 					var defs = LoadDefines(pitLibraryPath, fileName);
 					var args = new Dictionary<string, object>();
 					args[PitParser.DEFINED_VALUES] = defs;
-					new GodelPitParser().asParser(args, fileName);
+					new ProPitParser().asParser(args, fileName);
 				}
 			}
 			catch (Exception ex)

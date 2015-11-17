@@ -3,6 +3,7 @@ using System.IO;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
+using Peach.Pro.Core;
 using Peach.Pro.Core.Godel;
 
 namespace Peach.Pro.Test.Core.Godel
@@ -64,7 +65,7 @@ namespace Peach.Pro.Test.Core.Godel
 
 </Peach>
 ";
-			var parser = new GodelPitParser();
+			var parser = new ProPitParser();
 
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 
@@ -141,7 +142,7 @@ namespace Peach.Pro.Test.Core.Godel
 </Peach>
 ";
 			var e = new Engine(null);
-			var parser = new GodelPitParser();
+			var parser = new ProPitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 			var config = new RunConfiguration();
 			config.singleIteration = true;
@@ -178,7 +179,7 @@ namespace Peach.Pro.Test.Core.Godel
 ";
 			var e = new Engine(null);
 
-			var parser = new GodelPitParser();
+			var parser = new ProPitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
@@ -226,7 +227,7 @@ namespace Peach.Pro.Test.Core.Godel
 ";
 			var e = new Engine(null);
 
-			var parser = new GodelPitParser();
+			var parser = new ProPitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
@@ -277,7 +278,7 @@ namespace Peach.Pro.Test.Core.Godel
 			var e = new Engine(null);
 			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
 
-			var parser = new GodelPitParser();
+			var parser = new ProPitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
@@ -322,7 +323,7 @@ namespace Peach.Pro.Test.Core.Godel
 			var e = new Engine(null);
 			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
 
-			var parser = new GodelPitParser();
+			var parser = new ProPitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
@@ -367,7 +368,7 @@ namespace Peach.Pro.Test.Core.Godel
 			var e = new Engine(null);
 			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
 
-			var parser = new GodelPitParser();
+			var parser = new ProPitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
@@ -414,7 +415,7 @@ namespace Peach.Pro.Test.Core.Godel
 			var e = new Engine(null);
 			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
 
-			var parser = new GodelPitParser();
+			var parser = new ProPitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
@@ -461,7 +462,7 @@ namespace Peach.Pro.Test.Core.Godel
 			var e = new Engine(null);
 			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
 
-			var parser = new GodelPitParser();
+			var parser = new ProPitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
@@ -508,7 +509,7 @@ namespace Peach.Pro.Test.Core.Godel
 			var e = new Engine(null);
 			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
 
-			var parser = new GodelPitParser();
+			var parser = new ProPitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
@@ -576,7 +577,7 @@ namespace Peach.Pro.Test.Core.Godel
 				var e = new Engine(null);
 				e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
 
-				var parser = new GodelPitParser();
+				var parser = new ProPitParser();
 				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 				var config = new RunConfiguration();
 				config.range = true;

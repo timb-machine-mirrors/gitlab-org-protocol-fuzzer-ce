@@ -8,6 +8,19 @@ using Logger = NLog.Logger;
 namespace Peach.Pro.Core.Godel
 {
 	[Serializable]
+	public class Dom : Peach.Core.Dom.Dom
+	{
+		public NamedCollection<GodelContext> godel = new NamedCollection<GodelContext>();
+	}
+
+	[Serializable]
+	public class StateModel : Peach.Core.Dom.StateModel
+	{
+		[NonSerialized]
+		public NamedCollection<GodelContext> godel = new NamedCollection<GodelContext>();
+	}
+
+	[Serializable]
 	public class GodelContext : INamed
 	{
 		#region Obsolete Functions
@@ -17,7 +30,7 @@ namespace Peach.Pro.Core.Godel
 
 		#endregion
 
-		static Logger logger = LogManager.GetCurrentClassLogger();
+		static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
 		public string debugName { get; set; }
 		public string type { get; set; }
@@ -137,14 +150,16 @@ namespace Peach.Pro.Core.Godel
 
 			logger.Error(msg);
 
-			Fault fault = new Fault();
-			fault.detectionSource = "Godel";
-			fault.type = FaultType.Fault;
-			fault.title = msg;
-			fault.description = msg;
-			fault.folderName = "Godel";
-			fault.majorHash = "Godel";
-			fault.minorHash = debugName;
+			var fault = new Fault
+			{
+				detectionSource = "Godel",
+				type = FaultType.Fault,
+				title = msg,
+				description = msg,
+				folderName = "Godel",
+				majorHash = "Godel",
+				minorHash = debugName
+			};
 
 			context.faults.Add(fault);
 

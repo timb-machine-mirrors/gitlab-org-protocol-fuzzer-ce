@@ -201,7 +201,7 @@ namespace Peach.Pro.Core.Runtime
 		public Peach.Core.Dom.Dom ParsePit()
 		{
 			var args = ParseConfig();
-			var parser = new GodelPitParser();
+			var parser = new ProPitParser();
 
 			using (var db = new NodeDatabase())
 			{

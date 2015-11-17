@@ -1,6 +1,5 @@
 ﻿using Peach.Core;
 using Peach.Core.Dom;
-using StateModel = Peach.Pro.Core.Godel.StateModel;
 
 namespace Peach.Pro.Core.Godel
 {
@@ -8,10 +7,6 @@ namespace Peach.Pro.Core.Godel
 	{
 		private NamedCollection<GodelContext> Expressions { get; set; }
 		private StateModel OriginalStateModel { get; set; }
-
-		public GodelLogger()
-		{
-		}
 
 		GodelContext GetExpr(params string[] names)
 		{

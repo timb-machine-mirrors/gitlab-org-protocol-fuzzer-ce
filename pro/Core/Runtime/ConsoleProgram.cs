@@ -32,19 +32,19 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using Newtonsoft.Json;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
 using Peach.Core.Runtime;
+using Peach.Core.Xsd;
+using Peach.Pro.Core.Godel;
 using Peach.Pro.Core.Loggers;
 using Peach.Pro.Core.Publishers;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
-using SharpPcap;
-using Newtonsoft.Json;
-using Peach.Pro.Core.Godel;
 
 namespace Peach.Pro.Core.Runtime
 {
@@ -352,7 +352,7 @@ namespace Peach.Pro.Core.Runtime
 
 		protected virtual Analyzer GetParser()
 		{
-			var parser = new GodelPitParser();
+			var parser = new ProPitParser();
 			Analyzer.defaultParser = parser;
 			return Analyzer.defaultParser;
 		}
@@ -813,7 +813,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 
 				using (var stream = new FileStream("peach.xsd", FileMode.Create, FileAccess.Write))
 				{
-					Peach.Core.Xsd.SchemaBuilder.Generate(typeof(Peach.Core.Xsd.Dom), stream);
+					SchemaBuilder.Generate(typeof(Peach.Core.Xsd.Dom), stream);
 
 					Console.WriteLine("Successfully generated {0}", stream.Name);
 				}
