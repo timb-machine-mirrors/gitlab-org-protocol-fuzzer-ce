@@ -1,16 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Peach.Core;
+﻿using Peach.Core;
 using Peach.Core.Dom;
-using Microsoft.Scripting;
-using Microsoft.Scripting.Hosting;
-using IronPython;
-using IronPython.Hosting;
-using System.IO;
+using StateModel = Peach.Pro.Core.Godel.StateModel;
 
-namespace Godel.Core
+namespace Peach.Pro.Core.Godel
 {
 	public class GodelLogger : Logger
 	{
@@ -32,7 +24,7 @@ namespace Godel.Core
 
 		protected override void Engine_TestStarting(RunContext context)
 		{
-			var sm = context.test.stateModel as Godel.Core.StateModel;
+			var sm = context.test.stateModel as StateModel;
 			if (sm == null || sm.godel.Count == 0)
 				return;
 
@@ -78,14 +70,14 @@ namespace Godel.Core
 				expr.Post(model, OriginalStateModel);
 		}
 
-		protected override void StateStarting(RunContext context, Peach.Core.Dom.State state)
+		protected override void StateStarting(RunContext context, State state)
 		{
 			var expr = GetExpr(state.parent.Name, state.Name);
 			if (expr != null)
 				expr.Pre(state);
 		}
 
-		protected override void StateFinished(RunContext context, Peach.Core.Dom.State state)
+		protected override void StateFinished(RunContext context, State state)
 		{
 			var expr = GetExpr(state.parent.Name, state.Name);
 			if (expr != null)
@@ -95,14 +87,14 @@ namespace Godel.Core
 			}
 		}
 
-		protected override void ActionStarting(RunContext context, Peach.Core.Dom.Action action)
+		protected override void ActionStarting(RunContext context, Action action)
 		{
 			var expr = GetExpr(action.parent.parent.Name, action.parent.Name, action.Name);
 			if (expr != null)
 				expr.Pre(action);
 		}
 
-		protected override void ActionFinished(RunContext context, Peach.Core.Dom.Action action)
+		protected override void ActionFinished(RunContext context, Action action)
 		{
 			var expr = GetExpr(action.parent.parent.Name, action.parent.Name, action.Name);
 			if (expr != null)

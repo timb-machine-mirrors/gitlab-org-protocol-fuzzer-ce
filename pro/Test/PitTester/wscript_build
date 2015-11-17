@@ -9,7 +9,6 @@ deps = [
 	'System.dll',
 	'System.Core.dll',
 	'System.Xml.dll',
-	'Godel.Core.dll',
 	'Peach.Pro.dll',
 	'Peach.Core.Test.dll',
 	'Peach.Pro.Test.dll',

@@ -32,7 +32,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using Godel.Core;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Analyzers;
@@ -45,6 +44,7 @@ using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using SharpPcap;
 using Newtonsoft.Json;
+using Peach.Pro.Core.Godel;
 
 namespace Peach.Pro.Core.Runtime
 {
