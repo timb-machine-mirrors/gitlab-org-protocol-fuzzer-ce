@@ -1,14 +1,19 @@
 using System;
-using System.ComponentModel;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 using System.Xml.XPath;
-using System.Reflection;
-using System.Text.RegularExpressions;
+using Peach.Core.Dom;
+using Action = Peach.Core.Dom.Action;
+using ValueType = Peach.Core.Dom.ValueType;
+using XmlAttribute = System.Xml.XmlAttribute;
 
 namespace Peach.Core.Xsd
 {
@@ -17,7 +22,7 @@ namespace Peach.Core.Xsd
 	/// <summary>
 	/// Root element of a Peach XML DDL document.
 	/// </summary>
-	[XmlRoot(ElementName = "Peach", Namespace = Dom.TargetNamespace)]
+	[XmlRoot(ElementName = "Peach", Namespace = TargetNamespace)]
 	public class Dom
 	{
 		/// <summary>
@@ -88,32 +93,32 @@ namespace Peach.Core.Xsd
 		public List<Godel> Godels { get; set; }
 
 		[XmlElement("StateModel")]
-		public NamedCollection<Peach.Core.Dom.StateModel> StateModels { get; set; }
+		public NamedCollection<StateModel> StateModels { get; set; }
 
 		[XmlElement("Agent")]
-		public NamedCollection<Peach.Core.Dom.Agent> Agents { get; set; }
+		public NamedCollection<Core.Dom.Agent> Agents { get; set; }
 
 		[XmlElement("Test")]
-		public NamedCollection<Peach.Core.Dom.Test> Tests { get; set; }
+		public NamedCollection<Test> Tests { get; set; }
 	}
 
 	public class DataModel
 	{
-		[PluginElement("class", typeof(Peach.Core.Fixup))]
-		public Peach.Core.Fixup Fixup { get; set; }
+		[PluginElement("class", typeof(Fixup))]
+		public Fixup Fixup { get; set; }
 
-		[PluginElement("class", typeof(Peach.Core.Transformer))]
-		public Peach.Core.Transformer Transformer { get; set; }
+		[PluginElement("class", typeof(Transformer))]
+		public Transformer Transformer { get; set; }
 
-		[PluginElement("class", typeof(Peach.Core.Analyzer))]
-		public Peach.Core.Analyzer Analyzer { get; set; }
+		[PluginElement("class", typeof(Analyzer))]
+		public Analyzer Analyzer { get; set; }
 
-		[PluginElement("type", typeof(Peach.Core.Dom.Relation), Combine = true)]
-		public Peach.Core.Dom.Relation Relation { get; set; }
+		[PluginElement("type", typeof(Relation), Combine = true)]
+		public Relation Relation { get; set; }
 
 		[XmlElement("Hint")]
 		[DefaultValue(null)]
-		public List<Peach.Core.Dom.Hint> Hint { get; set; }
+		public List<Hint> Hint { get; set; }
 	}
 
 	public class Godel
@@ -230,8 +235,8 @@ namespace Peach.Core.Xsd
 		/// Specifies the byte order of the number.
 		/// </summary>
 		[XmlAttribute]
-		[DefaultValue(Peach.Core.Dom.EndianType.Little)]
-		public Peach.Core.Dom.EndianType endian { get; set; }
+		[DefaultValue(EndianType.Little)]
+		public EndianType endian { get; set; }
 
 		/// <summary>
 		/// Specifies if the the number signed.
@@ -244,8 +249,8 @@ namespace Peach.Core.Xsd
 		/// Specifies the format of the value attribute.
 		/// </summary>
 		[XmlAttribute]
-		[DefaultValue(Peach.Core.Dom.ValueType.String)]
-		public Peach.Core.Dom.ValueType valueType { get; set; }
+		[DefaultValue(ValueType.String)]
+		public ValueType valueType { get; set; }
 	}
 
 	/// <summary>
@@ -257,8 +262,8 @@ namespace Peach.Core.Xsd
 		/// Specifies the character encoding of the string.
 		/// </summary>
 		[XmlAttribute]
-		[DefaultValue(Peach.Core.Dom.StringType.ascii)]
-		public Peach.Core.Dom.StringType type { get; set; }
+		[DefaultValue(StringType.ascii)]
+		public StringType type { get; set; }
 
 		/// <summary>
 		/// Specifies if the string is null terminated.
@@ -281,15 +286,15 @@ namespace Peach.Core.Xsd
 		/// Specifies the units of the length attribute.
 		/// </summary>
 		[XmlAttribute]
-		[DefaultValue(Peach.Core.Dom.LengthType.Bytes)]
-		public Peach.Core.Dom.LengthType lengthType { get; set; }
+		[DefaultValue(LengthType.Bytes)]
+		public LengthType lengthType { get; set; }
 
 		/// <summary>
 		/// Specify the format of the value attribute.
 		/// </summary>
 		[XmlAttribute]
-		[DefaultValue(Peach.Core.Dom.ValueType.String)]
-		public Peach.Core.Dom.ValueType valueType { get; set; }
+		[DefaultValue(ValueType.String)]
+		public ValueType valueType { get; set; }
 	}
 
 	/// <summary>
@@ -301,8 +306,8 @@ namespace Peach.Core.Xsd
 		/// Specifies the byte order of the flag set.
 		/// </summary>
 		[XmlAttribute]
-		[DefaultValue(Peach.Core.Dom.EndianType.Little)]
-		public Peach.Core.Dom.EndianType endian { get; set; }
+		[DefaultValue(EndianType.Little)]
+		public EndianType endian { get; set; }
 
 		/// <summary>
 		/// Specifies the length in bits of the flag set.
@@ -321,15 +326,15 @@ namespace Peach.Core.Xsd
 		/// Specifies the units of the length attribute.
 		/// </summary>
 		[XmlAttribute]
-		[DefaultValue(Peach.Core.Dom.LengthType.Bytes)]
-		public Peach.Core.Dom.LengthType lengthType { get; set; }
+		[DefaultValue(LengthType.Bytes)]
+		public LengthType lengthType { get; set; }
 
 		/// <summary>
 		/// Specifies the format of the value attribute.
 		/// </summary>
 		[XmlAttribute]
-		[DefaultValue(Peach.Core.Dom.ValueType.String)]
-		public Peach.Core.Dom.ValueType valueType { get; set; }
+		[DefaultValue(ValueType.String)]
+		public ValueType valueType { get; set; }
 	}
 
 	/// <summary>
@@ -399,8 +404,8 @@ namespace Peach.Core.Xsd
 			/// Format of value attribute.
 			/// </summary>
 			[XmlAttribute]
-			[DefaultValue(Peach.Core.Dom.ValueType.String)]
-			public Peach.Core.Dom.ValueType valueType { get; set; }
+			[DefaultValue(ValueType.String)]
+			public ValueType valueType { get; set; }
 
 		}
 
@@ -572,7 +577,7 @@ namespace Peach.Core.Xsd
 		public static IEnumerable<A> GetAttributes<A>(this MemberInfo mi)
 			where A : Attribute
 		{
-			var attrs = System.Attribute.GetCustomAttributes(mi, typeof(A), false);
+			var attrs = Attribute.GetCustomAttributes(mi, typeof(A), false);
 			return attrs.OfType<A>();
 		}
 	}
@@ -595,9 +600,11 @@ namespace Peach.Core.Xsd
 
 			var root = type.GetAttributes<XmlRootAttribute>().First();
 
-			schema = new XmlSchema();
-			schema.TargetNamespace = root.Namespace;
-			schema.ElementFormDefault = XmlSchemaForm.Qualified;
+			schema = new XmlSchema
+			{
+				TargetNamespace = root.Namespace,
+				ElementFormDefault = XmlSchemaForm.Qualified
+			};
 
 			AddElement(root.ElementName, type, null);
 		}
@@ -617,7 +624,7 @@ namespace Peach.Core.Xsd
 
 		public static void Generate(Type type, Stream stream)
 		{
-			var settings = new XmlWriterSettings() { Indent = true, Encoding = System.Text.Encoding.UTF8 };
+			var settings = new XmlWriterSettings { Indent = true, Encoding = System.Text.Encoding.UTF8 };
 			var writer = XmlWriter.Create(stream, settings);
 			var compiled = new SchemaBuilder(type).Compile();
 
@@ -649,7 +656,7 @@ namespace Peach.Core.Xsd
 
 		void AddElement(string name, Type type, PluginElementAttribute pluginAttr)
 		{
-			var schemaElem = MakeItem<XmlSchemaElement>(name, type, objElemCache);
+			var schemaElem = MakeItem(name, type, objElemCache);
 
 			var complexType = new XmlSchemaComplexType();
 
@@ -673,12 +680,16 @@ namespace Peach.Core.Xsd
 			var addedAttrs = new Dictionary<string, XmlSchemaAttribute>();
 			var addedElems = new Dictionary<string, XmlSchemaElement>();
 
-			var schemaParticle = new XmlSchemaChoice();
-			schemaParticle.MinOccursString = "0";
-			schemaParticle.MaxOccursString = "unbounded";
+			var schemaParticle = new XmlSchemaChoice
+			{
+				MinOccursString = "0",
+				MaxOccursString = "unbounded"
+			};
 
-			var restrictEnum = new XmlSchemaSimpleTypeRestriction();
-			restrictEnum.BaseTypeName = new XmlQualifiedName("string", XmlSchema.Namespace);
+			var restrictEnum = new XmlSchemaSimpleTypeRestriction
+			{
+				BaseTypeName = new XmlQualifiedName("string", XmlSchema.Namespace)
+			};
 
 			foreach (var item in GetAllPlugins(pluginAttr))
 			{
@@ -718,8 +729,7 @@ namespace Peach.Core.Xsd
 					var anyAttr = pi.GetAttributes<XmlAnyAttributeAttribute>().FirstOrDefault();
 					if (anyAttr != null)
 					{
-						complexType.AnyAttribute = new XmlSchemaAnyAttribute() { ProcessContents = XmlSchemaContentProcessing.Skip };
-						continue;
+						complexType.AnyAttribute = new XmlSchemaAnyAttribute { ProcessContents = XmlSchemaContentProcessing.Skip };
 					}
 				}
 
@@ -734,13 +744,14 @@ namespace Peach.Core.Xsd
 				}
 			}
 
-			var enumType = new XmlSchemaSimpleType();
-			enumType.Content = restrictEnum;
+			var enumType = new XmlSchemaSimpleType {Content = restrictEnum};
 
-			var typeAttr = new XmlSchemaAttribute();
-			typeAttr.Name = pluginAttr.AttributeName;
-			typeAttr.Use = XmlSchemaUse.Required;
-			typeAttr.SchemaType = enumType;
+			var typeAttr = new XmlSchemaAttribute
+			{
+				Name = pluginAttr.AttributeName,
+				Use = XmlSchemaUse.Required,
+				SchemaType = enumType
+			};
 			typeAttr.Annotate("Specify the {0} of a Peach {1}.".Fmt(
 				pluginAttr.AttributeName,
 				pluginAttr.PluginName.ToLower()
@@ -774,38 +785,41 @@ namespace Peach.Core.Xsd
 				complexType.Attributes.Add(agentAttr);
 			}
 
-			var typeAttr = new XmlSchemaAttribute();
-			typeAttr.Name = pluginAttr.AttributeName;
-			typeAttr.Use = XmlSchemaUse.Required;
+			var typeAttr = new XmlSchemaAttribute
+			{
+				Name = pluginAttr.AttributeName,
+				Use = XmlSchemaUse.Required
+			};
 			typeAttr.Annotate("Specify the class name of a Peach {0}. You can implement your own {1}s as needed.".Fmt(
 				pluginAttr.PluginName,
 				pluginAttr.PluginName.ToLower()
 				));
 
-			var restrictEnum = new XmlSchemaSimpleTypeRestriction();
-			restrictEnum.BaseTypeName = new XmlQualifiedName("string", XmlSchema.Namespace);
+			var restrictEnum = new XmlSchemaSimpleTypeRestriction
+			{
+				BaseTypeName = new XmlQualifiedName("string", XmlSchema.Namespace)
+			};
 
 			foreach (var item in GetAllPlugins(pluginAttr))
 			{
 				restrictEnum.Facets.Add(MakePluginFacet(item.Key, item.Value));
 			}
 
-			var enumType = new XmlSchemaSimpleType();
-			enumType.Content = restrictEnum;
+			var enumType = new XmlSchemaSimpleType {Content = restrictEnum};
 
-			var restrictLen = new XmlSchemaSimpleTypeRestriction();
-			restrictLen.BaseTypeName = new XmlQualifiedName("string", XmlSchema.Namespace);
-			restrictLen.Facets.Add(new XmlSchemaMaxLengthFacet() { Value = "1024" });
+			var restrictLen = new XmlSchemaSimpleTypeRestriction
+			{
+				BaseTypeName = new XmlQualifiedName("string", XmlSchema.Namespace)
+			};
+			restrictLen.Facets.Add(new XmlSchemaMaxLengthFacet { Value = "1024" });
 
-			var userType = new XmlSchemaSimpleType();
-			userType.Content = restrictLen;
+			var userType = new XmlSchemaSimpleType {Content = restrictLen};
 
 			var union = new XmlSchemaSimpleTypeUnion();
 			union.BaseTypes.Add(userType);
 			union.BaseTypes.Add(enumType);
 
-			var schemaType = new XmlSchemaSimpleType();
-			schemaType.Content = union;
+			var schemaType = new XmlSchemaSimpleType {Content = union};
 
 			typeAttr.SchemaType = schemaType;
 
@@ -815,19 +829,19 @@ namespace Peach.Core.Xsd
 				AddElement("Param", typeof(PluginParam), null);
 
 
-			var schemaElem = new XmlSchemaElement();
-			schemaElem.RefName = new XmlQualifiedName("Param", schema.TargetNamespace);
+			var schemaElem = new XmlSchemaElement {RefName = new XmlQualifiedName("Param", schema.TargetNamespace)};
 
 			XmlSchemaGroupBase schemaParticle;
 
 			if (pluginAttr.PluginType == typeof(Transformer))
 			{
-				schemaParticle = new XmlSchemaChoice();
-				schemaParticle.MinOccursString = "0";
-				schemaParticle.MaxOccursString = "unbounded";
+				schemaParticle = new XmlSchemaChoice
+				{
+					MinOccursString = "0",
+					MaxOccursString = "unbounded"
+				};
 
-				var transElem = new XmlSchemaElement();
-				transElem.RefName = new XmlQualifiedName("Transformer", schema.TargetNamespace);
+				var transElem = new XmlSchemaElement {RefName = new XmlQualifiedName("Transformer", schema.TargetNamespace)};
 				schemaParticle.Items.Add(transElem);
 			}
 			else
@@ -844,17 +858,19 @@ namespace Peach.Core.Xsd
 
 		private static IEnumerable<KeyValuePair<PluginAttribute, Type>> GetAllPlugins(PluginElementAttribute pluginAttr)
 		{
-			return ClassLoader.GetAllByAttribute<PluginAttribute>((t, a) => a.Type == pluginAttr.PluginType && a.IsDefault && !a.Internal).OrderBy(a => a.Key.Name);
+			return ClassLoader.GetAllByAttribute<PluginAttribute>((t, a) => 
+				a.Type == pluginAttr.PluginType && 
+				a.IsDefault && 
+				!a.Internal).OrderBy(a => a.Key.Name);
 		}
 
 		private XmlSchemaObject MakePluginFacet(PluginAttribute pluginAttribute, Type type)
 		{
-			var facet = new XmlSchemaEnumerationFacet();
-			facet.Value = pluginAttribute.Name;
+			var facet = new XmlSchemaEnumerationFacet {Value = pluginAttribute.Name};
 
 			// Lame: For actions, everyone expects title case (SetProperty) but
 			// the schema expects camel case (setProperty).
-			if (pluginAttribute.Type == typeof(Peach.Core.Dom.Action))
+			if (pluginAttribute.Type == typeof(Action))
 				facet.Value = Char.ToLowerInvariant(facet.Value[0]) + facet.Value.Substring(1);
 
 			var descAttr = type.GetAttributes<System.ComponentModel.DescriptionAttribute>().FirstOrDefault();
@@ -896,7 +912,7 @@ namespace Peach.Core.Xsd
 				var anyAttr = pi.GetAttributes<XmlAnyAttributeAttribute>().FirstOrDefault();
 				if (anyAttr != null)
 				{
-					complexType.AnyAttribute = new XmlSchemaAnyAttribute() { ProcessContents = XmlSchemaContentProcessing.Skip };
+					complexType.AnyAttribute = new XmlSchemaAnyAttribute { ProcessContents = XmlSchemaContentProcessing.Skip };
 					continue;
 				}
 
@@ -942,8 +958,6 @@ namespace Peach.Core.Xsd
 
 					foreach (var elem in elems)
 						schemaParticle.Items.Add(elem);
-
-					continue;
 				}
 			}
 
@@ -964,9 +978,11 @@ namespace Peach.Core.Xsd
 					if (!moreThanOne && (value == "0" || value == "1"))
 					{
 						// minOccurs is "0" or "1", convert to xs:all
-						var allParticle = new XmlSchemaAll();
-						allParticle.MinOccursString = value;
-						allParticle.MaxOccursString = "1";
+						var allParticle = new XmlSchemaAll
+						{
+							MinOccursString = value,
+							MaxOccursString = "1"
+						};
 
 						foreach (var item in schemaParticle.Items)
 							allParticle.Items.Add(item);
@@ -995,8 +1011,10 @@ namespace Peach.Core.Xsd
 
 			if (type.BaseType != typeof(object) && type.BaseType != null)
 			{
-				var ext = new XmlSchemaComplexContentExtension();
-				ext.BaseTypeName = new XmlQualifiedName(type.BaseType.Name, schema.TargetNamespace);
+				var ext = new XmlSchemaComplexContentExtension
+				{
+					BaseTypeName = new XmlQualifiedName(type.BaseType.Name, schema.TargetNamespace)
+				};
 
 				foreach (var attr in complexType.Attributes)
 					ext.Attributes.Add(attr);
@@ -1006,9 +1024,11 @@ namespace Peach.Core.Xsd
 				if (schemaParticle.Items.Count > 0)
 					ext.Particle = schemaParticle;
 
-				var content = new XmlSchemaComplexContent();
-				content.IsMixed = false;
-				content.Content = ext;
+				var content = new XmlSchemaComplexContent
+				{
+					IsMixed = false,
+					Content = ext
+				};
 
 				complexType.ContentModel = content;
 			}
@@ -1020,13 +1040,13 @@ namespace Peach.Core.Xsd
 
 		void AddComplexType(string name, Type type, PluginElementAttribute pluginAttr)
 		{
-			var complexType = MakeItem<XmlSchemaComplexType>(name, type, objTypeCache);
+			var complexType = MakeItem(name, type, objTypeCache);
 
 			Populate(complexType, type, pluginAttr);
 
 			if (type.BaseType != typeof(object) && type.BaseType != null)
 			{
-				System.Diagnostics.Debug.Assert(pluginAttr == null);
+				Debug.Assert(pluginAttr == null);
 				if (!objTypeCache.ContainsKey(type.BaseType))
 					AddComplexType(type.BaseType.Name, type.BaseType, null);
 			}
@@ -1055,7 +1075,7 @@ namespace Peach.Core.Xsd
 			if (type == typeof(double))
 				return new XmlQualifiedName("decimal", XmlSchema.Namespace);
 
-			if (type == typeof(Peach.Core.Dom.DataElement))
+			if (type == typeof(DataElement))
 				return new XmlQualifiedName("string", XmlSchema.Namespace);
 
 			throw new NotImplementedException();
@@ -1068,8 +1088,7 @@ namespace Peach.Core.Xsd
 
 			var defaultValue = pi.GetAttributes<DefaultValueAttribute>().FirstOrDefault();
 
-			var attr = new XmlSchemaAttribute();
-			attr.Name = name;
+			var attr = new XmlSchemaAttribute {Name = name};
 			attr.Annotate(pi);
 
 			if (IsSimpleType(pi.PropertyType))
@@ -1123,8 +1142,7 @@ namespace Peach.Core.Xsd
 		{
 			name = paramAttr.name;
 
-			var attr = new XmlSchemaAttribute();
-			attr.Name = name;
+			var attr = new XmlSchemaAttribute {Name = name};
 			attr.Annotate(paramAttr.description);
 
 			if (IsSimpleType(paramAttr.type))
@@ -1205,22 +1223,26 @@ namespace Peach.Core.Xsd
 			if (enumTypeCache.TryGetValue(type, out ret))
 				return ret;
 
-			var content = new XmlSchemaSimpleTypeRestriction()
+			var content = new XmlSchemaSimpleTypeRestriction
 			{
-				BaseTypeName = new XmlQualifiedName("integer", XmlSchema.Namespace),
+				BaseTypeName = new XmlQualifiedName("integer", XmlSchema.Namespace)
 			};
 
-			var minFacet = new XmlSchemaMinInclusiveFacet();
-			minFacet.Value = type.GetField("MinValue", BindingFlags.Static | BindingFlags.Public).GetValue(null).ToString();
+			var minFacet = new XmlSchemaMinInclusiveFacet
+			{
+				Value = type.GetField("MinValue", BindingFlags.Static | BindingFlags.Public).GetValue(null).ToString()
+			};
 			content.Facets.Add(minFacet);
 
-			var maxFacet = new XmlSchemaMaxInclusiveFacet();
-			maxFacet.Value = type.GetField("MaxValue", BindingFlags.Static | BindingFlags.Public).GetValue(null).ToString();
+			var maxFacet = new XmlSchemaMaxInclusiveFacet
+			{
+				Value = type.GetField("MaxValue", BindingFlags.Static | BindingFlags.Public).GetValue(null).ToString()
+			};
 			content.Facets.Add(maxFacet);
 
-			ret = new XmlSchemaSimpleType()
+			ret = new XmlSchemaSimpleType
 			{
-				Content = content,
+				Content = content
 			};
 
 			enumTypeCache.Add(type, ret);
@@ -1235,25 +1257,24 @@ namespace Peach.Core.Xsd
 			if (enumTypeCache.TryGetValue(type, out ret))
 				return ret;
 
-			var content = new XmlSchemaSimpleTypeRestriction()
+			var content = new XmlSchemaSimpleTypeRestriction
 			{
-				BaseTypeName = new XmlQualifiedName("string", XmlSchema.Namespace),
+				BaseTypeName = new XmlQualifiedName("string", XmlSchema.Namespace)
 			};
 
 			foreach (var item in type.GetFields(BindingFlags.Static | BindingFlags.Public))
 			{
 				var attr = item.GetAttributes<XmlEnumAttribute>().FirstOrDefault();
 
-				var facet = new XmlSchemaEnumerationFacet();
-				facet.Value = attr != null ? attr.Name : item.Name;
+				var facet = new XmlSchemaEnumerationFacet {Value = attr != null ? attr.Name : item.Name};
 				facet.Annotate(item);
 
 				content.Facets.Add(facet);
 			}
 
-			ret = new XmlSchemaSimpleType()
+			ret = new XmlSchemaSimpleType
 			{
-				Content = content,
+				Content = content
 			};
 
 			enumTypeCache.Add(type, ret);
@@ -1332,7 +1353,7 @@ namespace Peach.Core.Xsd
 					AddElement(name, type, pluginAttr);
 			}
 
-			return new XmlSchemaElement[] { schemaElem };
+			return new[] { schemaElem };
 		}
 
 		private XmlSchemaElement[] MakeDataModel(string minOccurs, string maxOccurrs)
@@ -1356,9 +1377,7 @@ namespace Peach.Core.Xsd
 
 		XmlSchemaElement MakeDataElement(string name, Type type)
 		{
-			var schemaElem = new XmlSchemaElement();
-
-			schemaElem.RefName = new XmlQualifiedName(name, schema.TargetNamespace);
+			var schemaElem = new XmlSchemaElement {RefName = new XmlQualifiedName(name, schema.TargetNamespace)};
 
 			if (!objElemCache.ContainsKey(type))
 				AddDataElement(name, type);
@@ -1368,7 +1387,7 @@ namespace Peach.Core.Xsd
 
 		void AddDataElement(string name, Type type)
 		{
-			var schemaElem = MakeItem<XmlSchemaElement>(name, type, objElemCache);
+			var schemaElem = MakeItem(name, type, objElemCache);
 
 			var complexType = new XmlSchemaComplexType();
 
@@ -1382,13 +1401,13 @@ namespace Peach.Core.Xsd
 				complexType.Attributes.Add(attr);
 			}
 
-			var deAttr = type.GetAttributes<Peach.Core.Dom.DataElementAttribute>().First();
+			var deAttr = type.GetAttributes<DataElementAttribute>().First();
 
-			if (deAttr.elementTypes.HasFlag(Peach.Core.Dom.DataElementTypes.DataElements))
+			if (deAttr.elementTypes.HasFlag(DataElementTypes.DataElements))
 			{
-				foreach (var kv in ClassLoader.GetAllByAttribute<Peach.Core.Dom.DataElementAttribute>(null).OrderBy(a => a.Key.elementName))
+				foreach (var kv in ClassLoader.GetAllByAttribute<DataElementAttribute>(null).OrderBy(a => a.Key.elementName))
 				{
-					var parents = kv.Value.GetAttributes<Peach.Core.Dom.DataElementParentSupportedAttribute>();
+					var parents = kv.Value.GetAttributes<DataElementParentSupportedAttribute>();
 					if (parents.Any() && !parents.Any(a => a.elementName == name))
 						continue;
 
@@ -1397,19 +1416,19 @@ namespace Peach.Core.Xsd
 				}
 			}
 
-			foreach (var child in type.GetAttributes<Peach.Core.Dom.DataElementChildSupportedAttribute>().OrderBy(a => a.elementName))
+			foreach (var child in type.GetAttributes<DataElementChildSupportedAttribute>().OrderBy(a => a.elementName))
 			{
-				var childType = ClassLoader.FindTypeByAttribute<Peach.Core.Dom.DataElementAttribute>((t, a) => a.elementName == child.elementName);
+				var childType = ClassLoader.FindTypeByAttribute<DataElementAttribute>((t, a) => a.elementName == child.elementName);
 				var elem = MakeDataElement(child.elementName, childType);
 				schemaParticle.Items.Add(elem);
 			}
 
-			if (deAttr.elementTypes.HasFlag(Peach.Core.Dom.DataElementTypes.Fixup))
+			if (deAttr.elementTypes.HasFlag(DataElementTypes.Fixup))
 			{
 				PopulateDataElement(schemaParticle, "Fixup");
 			}
 
-			if (deAttr.elementTypes.HasFlag(Peach.Core.Dom.DataElementTypes.Hint))
+			if (deAttr.elementTypes.HasFlag(DataElementTypes.Hint))
 			{
 				var elems = MakeElement("Hint", null, typeof(DataModel).GetProperty("Hint"), null);
 
@@ -1421,17 +1440,17 @@ namespace Peach.Core.Xsd
 				}
 			}
 
-			if (deAttr.elementTypes.HasFlag(Peach.Core.Dom.DataElementTypes.Transformer))
+			if (deAttr.elementTypes.HasFlag(DataElementTypes.Transformer))
 			{
 				PopulateDataElement(schemaParticle, "Transformer");
 			}
 
-			if (deAttr.elementTypes.HasFlag(Peach.Core.Dom.DataElementTypes.Relation))
+			if (deAttr.elementTypes.HasFlag(DataElementTypes.Relation))
 			{
 				PopulateDataElement(schemaParticle, "Relation");
 			}
 
-			if (deAttr.elementTypes.HasFlag(Peach.Core.Dom.DataElementTypes.Analyzer))
+			if (deAttr.elementTypes.HasFlag(DataElementTypes.Analyzer))
 			{
 				PopulateDataElement(schemaParticle, "Analyzer");
 			}
