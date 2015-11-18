@@ -1,13 +1,11 @@
 using System;
-using System.Linq;
-using Peach.Core.Dom;
 using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
-using System.Collections.Generic;
-using Peach.Core;
 using NLog;
+using Peach.Core;
+using Logger = NLog.Logger;
 
-namespace Godel.Core
+namespace Peach.Pro.Core.Godel
 {
 	[Serializable]
 	public class GodelContext : INamed
@@ -19,7 +17,7 @@ namespace Godel.Core
 
 		#endregion
 
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		static Logger logger = LogManager.GetCurrentClassLogger();
 
 		public string debugName { get; set; }
 		public string type { get; set; }

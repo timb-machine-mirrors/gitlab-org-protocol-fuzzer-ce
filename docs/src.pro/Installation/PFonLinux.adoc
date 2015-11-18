@@ -19,7 +19,7 @@ When installing Peach on a Ubuntu or Debian Linux system, the operating system i
 
 [NOTE]
 ====
-Peach Fuzzer, LLC, recommends using Ubuntu Linux version 15.04 LTS, and Mono .NET runtime version 4 from the mono project. The mono project has apt packages for Ubuntu.
+Peach Fuzzer, LLC, recommends using Ubuntu Linux version 14.04 LTS, and Mono .NET runtime version 4 from the mono project. The mono project has apt packages for Ubuntu.
 
 Some Linux kernel versions have known issues with the Mono runtime. When using 
 Ubuntu 14.04 LTS, avoid using kernel versions 3.13.0-48 through 3.13.0-54 inclusive. 
@@ -45,7 +45,9 @@ sudo apt-get install mono-complete
 ----
 . Optionally, install the GNU Debugger (GDB) to enable debugging of local processes. 
 . Unzip the Peach distribution to the appropriate folder. +
-The filename begins with "peach-pro" and lists the operating system in the name, such as "peach-pro-{BUILDTAG}-linux_x86_release.zip". 
+The file is a zip file with the extension ".zip". The filename begins with "peach-pro" 
+and lists the operating system in the name, such as 
+"peach-pro-{BUILDTAG}-linux_x86_release.zip". 
 
 ==== Redhat Enterprise Linux (RHEL and CentOS)
 
@@ -81,7 +83,9 @@ sudo yum install mono-complete-3.12.1-0
 ----
 
 . Unzip the Peach distribution to the appropriate folder. +
-The filename begins with "peach-pro" and lists the operating system in the name, such as "peach-pro-{BUILDTAG}-linux_x86_release.zip". 
+The file is a zip file with the extension ".zip". The filename begins with "peach-pro" 
+and lists the operating system in the name, such as 
+"peach-pro-{BUILDTAG}-linux_x86_release.zip". 
 
 
 NOTE:
@@ -105,7 +109,9 @@ http://download.mono-project.com/repo/mono-complete.ymp
 ----
 . Optionally, install the GNU Debugger (GDB) for debugging local processes.
 . Unzip the Peach binary distribution to the appropriate folder. +
-The filename begins with "peach-pro" and lists the operating system in the name, such as "peach-pro-{BUILDTAG}-linux_x86_release.zip". 
+The file is a zip file with the extension ".zip". The filename begins with "peach-pro" 
+and lists the operating system in the name, such as 
+"peach-pro-{BUILDTAG}-linux_x86_release.zip". 
 
 
 
@@ -117,5 +123,7 @@ For other Linux versions, the installation steps are a checklist, not specific c
 . Install libpcap.
 . Install Mono runtime v3.2 through v3.12.  v3.12 is recommended.
 . Unzip the Peach distribution to an appropriate folder. +
-The filename begins with "peach-pro" and lists the operating system in the name, such as "peach-pro-{BUILDTAG}-linux_x86_release.zip". 
+The file is a zip file with the extension ".zip". The filename begins with "peach-pro" 
+and lists the operating system in the name, such as 
+"peach-pro-{BUILDTAG}-linux_x86_release.zip". 
 

@@ -81,7 +81,6 @@ internal = common + [
 	'nunit-console',
 	'nunit-tools',
 	'PitTester.exe',
-	'Godel.Tests.dll',
 	'PeachWorker.exe',
 	'PeachService.exe',
 	'Peach.Core.Test.dll',

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using Peach.Core;
-using Peach.Core.Analyzers;
 using System.Xml;
 using NLog;
+using Peach.Core;
+using Peach.Core.Analyzers;
 
-namespace Godel.Core
+namespace Peach.Pro.Core.Godel
 {
 	[Serializable]
 	public class Dom : Peach.Core.Dom.Dom

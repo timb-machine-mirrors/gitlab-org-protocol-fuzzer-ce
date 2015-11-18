@@ -1,10 +1,11 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using NUnit.Framework;
 using Peach.Core;
-using System.Collections.Generic;
 using Peach.Core.Test;
+using Peach.Pro.Core.Godel;
 
-namespace Godel.Tests
+namespace Peach.Pro.Test.Core.Godel
 {
 	[TestFixture]
 	[Quick]
@@ -63,15 +64,15 @@ namespace Godel.Tests
 
 </Peach>
 ";
-			var parser = new Godel.Core.GodelPitParser();
+			var parser = new GodelPitParser();
 
-			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 
 			Assert.NotNull(dom);
 
 			Assert.AreEqual(3, dom.godel.Count);
 
-			var sm = dom.stateModels[0] as Godel.Core.StateModel;
+			var sm = dom.stateModels[0] as Pro.Core.Godel.StateModel;
 
 			Assert.NotNull(sm);
 
@@ -140,8 +141,8 @@ namespace Godel.Tests
 </Peach>
 ";
 			var e = new Engine(null);
-			var parser = new Godel.Core.GodelPitParser();
-			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
+			var parser = new GodelPitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 			var config = new RunConfiguration();
 			config.singleIteration = true;
 			e.startFuzzing(dom, config);
@@ -177,8 +178,8 @@ namespace Godel.Tests
 ";
 			var e = new Engine(null);
 
-			var parser = new Godel.Core.GodelPitParser();
-			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
+			var parser = new GodelPitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
 			config.rangeStart = 1;
@@ -225,8 +226,8 @@ namespace Godel.Tests
 ";
 			var e = new Engine(null);
 
-			var parser = new Godel.Core.GodelPitParser();
-			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
+			var parser = new GodelPitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
 			config.rangeStart = 1;
@@ -276,8 +277,8 @@ namespace Godel.Tests
 			var e = new Engine(null);
 			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
 
-			var parser = new Godel.Core.GodelPitParser();
-			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
+			var parser = new GodelPitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
 			config.rangeStart = 1;
@@ -321,8 +322,8 @@ namespace Godel.Tests
 			var e = new Engine(null);
 			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
 
-			var parser = new Godel.Core.GodelPitParser();
-			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
+			var parser = new GodelPitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
 			config.rangeStart = 1;
@@ -366,8 +367,8 @@ namespace Godel.Tests
 			var e = new Engine(null);
 			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
 
-			var parser = new Godel.Core.GodelPitParser();
-			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
+			var parser = new GodelPitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
 			config.rangeStart = 1;
@@ -413,8 +414,8 @@ namespace Godel.Tests
 			var e = new Engine(null);
 			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
 
-			var parser = new Godel.Core.GodelPitParser();
-			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
+			var parser = new GodelPitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
 			config.rangeStart = 1;
@@ -460,8 +461,8 @@ namespace Godel.Tests
 			var e = new Engine(null);
 			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
 
-			var parser = new Godel.Core.GodelPitParser();
-			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
+			var parser = new GodelPitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
 			config.rangeStart = 1;
@@ -507,8 +508,8 @@ namespace Godel.Tests
 			var e = new Engine(null);
 			e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
 
-			var parser = new Godel.Core.GodelPitParser();
-			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
+			var parser = new GodelPitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 			var config = new RunConfiguration();
 			config.range = true;
 			config.rangeStart = 1;
@@ -575,8 +576,8 @@ namespace Godel.Tests
 				var e = new Engine(null);
 				e.Fault += (ctx, iter, stateModel, faultData) => { faults.AddRange(faultData); };
 
-				var parser = new Godel.Core.GodelPitParser();
-				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Godel.Core.Dom;
+				var parser = new GodelPitParser();
+				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
 				var config = new RunConfiguration();
 				config.range = true;
 				config.rangeStart = 1;

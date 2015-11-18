@@ -13,7 +13,8 @@ To install on OS X, first install the latest stable Mono .NET runtime, then Peac
 Peach Fuzzer, LLC, recommends using Mono .NET runtime version 4 from the mono project. The mono project has apt packages for many Linux implementations.
 
 2. Unzip the Peach distribution to an appropriate folder. +
-The filename begins with "peach-pro" and lists the operating system in the name, such as "peach-pro-{BUILDTAG}-osx_release.zip". 
+The file is a zip file with the extension ".zip". The filename begins with "peach-pro" 
+and lists the operating system in the name, such as "peach-pro-{BUILDTAG}-osx_release.zip". 
 
 3. Install CrashWrangler. 
 +

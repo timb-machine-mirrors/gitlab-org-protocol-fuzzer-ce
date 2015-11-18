@@ -7,7 +7,6 @@ using System.Text;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.XPath;
-using Godel.Core;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
@@ -21,6 +20,7 @@ using Peach.Pro.Core.WebServices.Models;
 using Action = Peach.Core.Dom.Action;
 using Dom = Peach.Core.Dom.Dom;
 using Ionic.Zip;
+using Peach.Pro.Core.Godel;
 using StateModel = Peach.Core.Dom.StateModel;
 
 namespace PitTester
