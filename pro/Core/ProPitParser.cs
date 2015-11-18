@@ -5,6 +5,7 @@ using NLog;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
+using Peach.Pro.Core.Dom.Actions;
 using Peach.Pro.Core.Godel;
 using Action = Peach.Core.Dom.Action;
 using Logger = NLog.Logger;
@@ -167,6 +168,13 @@ namespace Peach.Pro.Core
 					var fullName = string.Join(".", action.parent.parent.Name, action.parent.Name, action.Name);
 					deferParse((StateModel)parent.parent, fullName, child);
 				}
+			}
+
+			var msg = action as Message;
+			if (msg != null)
+			{
+				msg.Status = node.getAttrString("status");
+				msg.Error = node.getAttrString("error");
 			}
 
 			return action;
