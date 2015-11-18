@@ -322,12 +322,12 @@ namespace Peach.Core.Dom
 
 			if (context.controlIteration && context.controlRecordingIteration)
 			{
-				logger.Debug("Run: Adding action to controlRecordingActionsExecuted");
+				logger.Trace("Run: Adding action to controlRecordingActionsExecuted");
 				context.controlRecordingActionsExecuted.Add(this);
 			}
 			else if (context.controlIteration)
 			{
-				logger.Debug("Run: Adding action to controlActionsExecuted");
+				logger.Trace("Run: Adding action to controlActionsExecuted");
 				context.controlActionsExecuted.Add(this);
 			}
 
