@@ -58,7 +58,12 @@ An agent has a name and location. The location can be local or remote.
 ** Local agents are in-line processes that are part of the Peach platform.
 ** Remote agents are separate applications that reside on the same hardware as the test target. Remote agents act as intermediaries with Peach and the test targets, passing test cases to the test target and sending test case results and data to Peach. 
 +
-NOTE: If you use a remote agent, you need to specify an IP address for Location field.
+If you use a remote agent, you need to supply location information that consists of the following parts<Channel>://IPv4:port
+
+... Channel Specify one of the following for the channel type: 'tcp', 'sdfs', or 'asdfka'.
+... //Ipv4   Specify an IP v4 address for the id. 
+... port     Specify the port number the agent is using. If the port is well known, use the default value.
+... Example: agent using a well-know tcp channel:  tcp://192.168.127.128:9001
 
 2. Give the agent a name, such as `LocalAgent` and click "Save".
 +
