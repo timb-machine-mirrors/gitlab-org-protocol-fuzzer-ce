@@ -10,7 +10,7 @@ namespace Peach {
 			C.Angular.$rootScope,
 			C.Angular.$q,
 			C.Angular.$http,
-			C.Angular.$modal,
+			C.Angular.$uibModal,
 			C.Angular.$state,
 			C.Angular.$timeout,
 			C.Services.Pit

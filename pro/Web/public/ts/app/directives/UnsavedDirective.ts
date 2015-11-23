@@ -27,7 +27,7 @@ namespace Peach {
 	export class UnsavedController {
 		static $inject = [
 			C.Angular.$scope,
-			C.Angular.$modal,
+			C.Angular.$uibModal,
 			C.Angular.$state
 		];	
 

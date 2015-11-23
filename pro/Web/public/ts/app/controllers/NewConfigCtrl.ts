@@ -8,7 +8,7 @@ namespace Peach {
 
 		static $inject = [
 			C.Angular.$scope,
-			C.Angular.$modalInstance,
+			C.Angular.$uibModalInstance,
 			C.Services.Pit,
 			"Pit"
 		];

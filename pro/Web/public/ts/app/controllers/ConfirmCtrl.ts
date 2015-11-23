@@ -25,7 +25,7 @@ namespace Peach {
 	class ConfirmController {
 		static $inject = [
 			C.Angular.$scope,
-			C.Angular.$modalInstance,
+			C.Angular.$uibModalInstance,
 			'Options'
 		];
 

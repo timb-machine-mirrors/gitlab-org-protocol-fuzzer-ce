@@ -22,8 +22,8 @@ namespace Peach.C.Angular {
 	export const ngModel = 'ngModel';
 
 	// ui.bootstrap
-	export const $modal = '$modal';
-	export const $modalInstance = '$modalInstance';
+	export const $uibModal = '$uibModal';
+	export const $uibModalInstance = '$uibModalInstance';
 
 	// ui.router
 	export const $state = '$state';

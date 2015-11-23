@@ -6,7 +6,7 @@ namespace Peach {
 	export class ConfigureVariablesController {
 		static $inject = [
 			C.Angular.$scope,
-			C.Angular.$modal,
+			C.Angular.$uibModal,
 			C.Services.Pit
 		];
 

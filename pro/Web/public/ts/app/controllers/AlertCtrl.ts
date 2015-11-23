@@ -24,7 +24,7 @@ namespace Peach {
 	class AlertController {
 		static $inject = [
 			C.Angular.$scope,
-			C.Angular.$modalInstance,
+			C.Angular.$uibModalInstance,
 			'Options'
 		];
 

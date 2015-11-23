@@ -1,6 +1,6 @@
 ﻿<ng-form name="form">
-	<accordion-group is-open="isOpen">
-		<accordion-heading>
+	<uib-accordion-group is-open="isOpen">
+		<uib-accordion-heading>
 			<span>
 				<i class="fa"
 					 ng-class="{'fa-chevron-down': isOpen, 'fa-chevron-right': !isOpen}">
@@ -12,7 +12,7 @@
 									class="btn btn-xs btn-info"
 									ng-click="vm.OnMoveUp($event)"
 									ng-disabled="!vm.CanMoveUp"
-									tooltip="Move Agent Up"
+									uib-tooltip="Move Agent Up"
 									tooltip-append-to-body="true">
 						<i class="fa fa-chevron-up">
 						</i>
@@ -21,7 +21,7 @@
 									class="btn btn-xs btn-info"
 									ng-click="vm.OnMoveDown($event)"
 									ng-disabled="!vm.CanMoveDown"
-									tooltip="Move Agent Down"
+									uib-tooltip="Move Agent Down"
 									tooltip-append-to-body="true">
 						<i class="fa fa-chevron-down">
 						</i>
@@ -29,14 +29,14 @@
 					<button type="button"
 									class="btn btn-xs btn-danger"
 									ng-click="vm.OnRemove($event)"
-									tooltip="Remove Agent"
+									uib-tooltip="Remove Agent"
 									tooltip-append-to-body="true">
 						<i class="fa fa-remove">
 						</i>
 					</button>
 				</span>
 			</span>
-		</accordion-heading>
+		</uib-accordion-heading>
 		<div class="form-group"
 				 ng-class="{'has-error': form.name.$invalid}">
 			<label class="col-sm-3 control-label">
@@ -45,7 +45,7 @@
 			<div class="col-sm-6">
 				<div class="input-group">
 					<span class="input-group-addon"
-					      tooltip="Friendly name for your agent"
+					      uib-tooltip="Friendly name for your agent"
 					      tooltip-placement="above"
 					      tooltip-append-to-body="true">
 						<i class="fa fa-question-circle"></i>
@@ -71,7 +71,7 @@
 			<div class="col-sm-6">
 				<div class="input-group">
 					<span class="input-group-addon"
-					      tooltip="URL for the agent. Leave blank for a local agent."
+					      uib-tooltip="URL for the agent. Leave blank for a local agent."
 					      tooltip-placement="above"
 					      tooltip-append-to-body="true">
 						<i class="fa fa-question-circle"></i>
@@ -115,12 +115,12 @@
 				</ui-select>
 			</div>
 		</div>
-		<accordion ng-repeat="monitor in agent.monitors track by $index">
+		<uib-accordion ng-repeat="monitor in agent.monitors track by $index">
 			<peach:monitor monitors="agent.monitors"
 										 monitor="monitor"
 										 agent-index="agentIndex"
 										 monitor-index="$index">
 			</peach:monitor>
-		</accordion>
-	</accordion-group>
+		</uib-accordion>
+	</uib-accordion-group>
 </ng-form>
