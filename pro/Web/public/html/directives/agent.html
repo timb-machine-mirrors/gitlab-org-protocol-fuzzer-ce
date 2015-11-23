@@ -101,18 +101,11 @@
 		<div class="clearfix"
 				 style="margin-bottom: 10px">
 			<div class="pull-right">
-				<ui-select ng-model="selectedMonitor.selected"
-									 reset-search-input="true"
-									 theme="select2"
-									 class="peach-add-monitor"
-									 on-select="vm.OnAddMonitor($item)">
-					<ui-select-match placeholder="Add a monitor...">
-					</ui-select-match>
-					<ui-select-choices repeat="monitor.monitorClass as monitor in vm.PeachMonitors | filter: $select.search">
-						<div ng-bind-html="monitor.monitorClass | highlight: $select.search"></div>
-						<small ng-if="monitor.description">{{monitor.description}}</small>
-					</ui-select-choices>
-				</ui-select>
+				<button class="btn btn-xs btn-info"
+								ng-click="vm.AddMonitor()">
+					<i class="fa fa-plus"></i>
+					Add Monitor &nbsp;
+				</button>
 			</div>
 		</div>
 		<uib-accordion ng-repeat="monitor in agent.monitors track by $index">

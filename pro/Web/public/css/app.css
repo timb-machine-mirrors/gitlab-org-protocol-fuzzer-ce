@@ -26,6 +26,10 @@ pre {
 	cursor: pointer;
 }
 
+.accordion-toggle {
+	display: block; /* allow user to click entire heading to toggle */
+}
+
 .accordion-toggle span {
 	line-height: 22px;
 }

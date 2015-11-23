@@ -30,13 +30,13 @@ namespace Peach {
 	export class AgentController {
 		static $inject = [
 			C.Angular.$scope,
-			C.Angular.$timeout,
+			C.Angular.$uibModal,
 			C.Services.Pit
 		];
 
 		constructor(
 			private $scope: IAgentScope,
-			private $timeout: ng.ITimeoutService,
+			private $modal: ng.ui.bootstrap.IModalService,
 			private pitService: PitService
 		) {
 			$scope.vm = this;
@@ -90,13 +90,24 @@ namespace Peach {
 			this.$scope.form.$setDirty();
 		}
 
-		public OnAddMonitor(monitor: IMonitor): void {
-			this.$scope.agent.monitors.push(angular.copy(monitor));
-			this.$scope.form.$setDirty();
+		public AddMonitor(): void {
+			var modal = this.$modal.open({
+				templateUrl: C.Templates.Modal.AddMonitor,
+				controller: AddMonitorController
+			});
 
-			this.$timeout(() => {
-				this.$scope.selectedMonitor.selected = undefined;
+			modal.result.then((param: IParameter) => {
+				this.$scope.form.$setDirty();
 			});
 		}
+
+		// public OnAddMonitor(monitor: IMonitor): void {
+		// 	this.$scope.agent.monitors.push(angular.copy(monitor));
+		// 	this.$scope.form.$setDirty();
+
+		// 	this.$timeout(() => {
+		// 		this.$scope.selectedMonitor.selected = undefined;
+		// 	});
+		// }
 	}
 }

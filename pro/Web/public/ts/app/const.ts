@@ -156,6 +156,7 @@ namespace Peach.C {
 			export const NewVar = 'html/modal/NewVar.html';
 			export const PitLibrary = 'html/modal/PitLibrary.html';
 			export const StartJob = 'html/modal/StartJob.html';
+			export const AddMonitor = 'html/modal/AddMonitor.html';
 		}
 		export namespace Directives {
 			export const Agent = 'html/directives/agent.html';

@@ -9,7 +9,7 @@ namespace Peach {
 		link: (scope: ng.IScope, element: ng.IAugmentedJQuery) => {
 			_.delay(() => {
 				element[0].focus();
-			}, 10);
+			}, 100);
 		}
 	}
 }
