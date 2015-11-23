@@ -1,6 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
+namespace Peach {
 	"use strict";
 	
 	export var AutoFocusDirective: IDirective = {

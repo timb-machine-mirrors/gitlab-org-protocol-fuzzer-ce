@@ -1,6 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
+namespace Peach {
 	"use strict";
 
 	export interface ITestResult {
@@ -17,9 +17,9 @@ module Peach {
 		resolve: string;
 	}
 
-	export module TestStatus {
-		export var Active = "active";
-		export var Pass = "pass";
-		export var Fail = "fail";
+	export namespace TestStatus {
+		export const Active = "active";
+		export const Pass = "pass";
+		export const Fail = "fail";
 	}
 }

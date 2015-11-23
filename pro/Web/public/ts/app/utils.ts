@@ -33,7 +33,7 @@ String.prototype.paddingLeft = function (pattern: string): string {
 	return String(pattern + this).slice(-pattern.length);
 }
 
-module Peach {
+namespace Peach {
 	export interface IComponent {
 		ComponentID: string;
 	}

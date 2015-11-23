@@ -6,7 +6,7 @@ declare module angular.ui {
 	}
 }
 
-module Peach {
+namespace Peach {
 	"use strict";
 
 	function getComponentName(name: string, component: IComponent): string {

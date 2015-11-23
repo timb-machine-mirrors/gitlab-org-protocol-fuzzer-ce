@@ -1,42 +1,42 @@
 ﻿/// <reference path="reference.ts" />
 
-module Peach.C.Angular {
+namespace Peach.C.Angular {
 	"use strict";
 
-	export var $compile = '$compile';
-	export var $controller = '$controller';
-	export var $document = '$document';
-	export var $http = '$http';
-	export var $httpBackend = '$httpBackend';
-	export var $httpProvider = '$httpProvider';
-	export var $interpolate = '$interpolate';
-	export var $interval = '$interval';
-	export var $location = '$location';
-	export var $provide = '$provide';
-	export var $q = '$q';
-	export var $rootScope = '$rootScope';
-	export var $scope = '$scope';
-	export var $templateCache = '$templateCache';
-	export var $timeout = '$timeout';
-	export var $window = '$window';
-	export var ngModel = 'ngModel';
+	export const $compile = '$compile';
+	export const $controller = '$controller';
+	export const $document = '$document';
+	export const $http = '$http';
+	export const $httpBackend = '$httpBackend';
+	export const $httpProvider = '$httpProvider';
+	export const $interpolate = '$interpolate';
+	export const $interval = '$interval';
+	export const $location = '$location';
+	export const $provide = '$provide';
+	export const $q = '$q';
+	export const $rootScope = '$rootScope';
+	export const $scope = '$scope';
+	export const $templateCache = '$templateCache';
+	export const $timeout = '$timeout';
+	export const $window = '$window';
+	export const ngModel = 'ngModel';
 
 	// ui.bootstrap
-	export var $modal = '$modal';
-	export var $modalInstance = '$modalInstance';
+	export const $modal = '$modal';
+	export const $modalInstance = '$modalInstance';
 
 	// ui.router
-	export var $state = '$state';
-	export var $stateChangeStart = '$stateChangeStart';
-	export var $stateChangeSuccess = '$stateChangeSuccess';
-	export var $stateParams = '$stateParams';
-	export var $stateProvider = '$stateProvider';
-	export var $urlRouterProvider = '$urlRouterProvider';
+	export const $state = '$state';
+	export const $stateChangeStart = '$stateChangeStart';
+	export const $stateChangeSuccess = '$stateChangeSuccess';
+	export const $stateParams = '$stateParams';
+	export const $stateProvider = '$stateProvider';
+	export const $urlRouterProvider = '$urlRouterProvider';
 
 	// angular-breadcrumb
-	export var $breadcrumbProvider = '$breadcrumbProvider';
+	export const $breadcrumbProvider = '$breadcrumbProvider';
 	
 	// ngStorage
-	export var $localStorage = '$localStorage';
-	export var $sessionStorage = '$sessionStorage';
+	export const $localStorage = '$localStorage';
+	export const $sessionStorage = '$sessionStorage';
 }
