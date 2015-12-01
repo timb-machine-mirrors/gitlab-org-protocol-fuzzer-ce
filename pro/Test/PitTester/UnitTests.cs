@@ -28,7 +28,8 @@ namespace PitTester
 			if (!string.IsNullOrEmpty(LoadErrors))
 				Assert.Fail(LoadErrors);
 
-			CollectionAssert.IsNotEmpty(AllPits);
+			if (LibraryExists)
+				CollectionAssert.IsNotEmpty(AllPits);
 		}
 
 		[Test]
