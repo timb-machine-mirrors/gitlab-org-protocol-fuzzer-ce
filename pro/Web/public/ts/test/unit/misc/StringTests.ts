@@ -1,7 +1,5 @@
 /// <reference path="../reference.ts" />
 
-'use strict';
-
 describe('startsWith', () => {
 	it("'abc' startsWith 'a' is true", () => {
 		expect('abc'.startsWith('a')).toBe(true);

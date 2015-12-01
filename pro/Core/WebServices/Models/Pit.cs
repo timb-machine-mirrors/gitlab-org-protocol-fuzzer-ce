@@ -3,6 +3,12 @@ using System.Collections.Generic;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
+	public class PitMetadata
+	{
+		public List<Parameter> Defines { get; set; }
+		public List<Parameter> Monitors { get; set; } 
+	}
+
 	public class Pit : LibraryPit
 	{		
 		public bool Locked { get; set; }
@@ -14,16 +20,11 @@ namespace Peach.Pro.Core.WebServices.Models
 		public string User { get; set; }
 
 		public DateTime Timestamp { get; set; }
-	//}
-
-	//public class PitConfig : Pit
-	//{
-		public List<KeyValuePair<string, string>> PeachConfig { get; set; }
 
 		public List<Parameter> Config { get; set; }
 
 		public List<Agent> Agents { get; set; }
 
-		public List<string> Calls { get; set; }
+		public PitMetadata Metadata { get; set; }
 	}
 }

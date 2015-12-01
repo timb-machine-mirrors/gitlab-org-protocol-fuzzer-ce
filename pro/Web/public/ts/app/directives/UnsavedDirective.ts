@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
 namespace Peach {
-	"use strict";
-
 	interface IUnsavedScope extends ng.IScope {
 		ctrl: UnsavedController;
 	}

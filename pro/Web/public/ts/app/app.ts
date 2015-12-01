@@ -7,8 +7,6 @@ declare module angular.ui {
 }
 
 namespace Peach {
-	"use strict";
-
 	function getComponentName(name: string, component: IComponent): string {
 		var id = component.ComponentID;
 		return _.isUndefined(id) ? name : id;

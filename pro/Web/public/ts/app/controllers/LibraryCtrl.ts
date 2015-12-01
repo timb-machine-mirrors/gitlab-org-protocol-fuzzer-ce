@@ -1,8 +1,6 @@
 /// <reference path="../reference.ts" />
 
 namespace Peach {
-	"use strict";
-
 	class PitLibrary {
 		constructor(
 			public Name: string

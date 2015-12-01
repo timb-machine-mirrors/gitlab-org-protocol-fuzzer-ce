@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
 namespace Peach {
-	"use strict";
-
 	export interface ITimelineItem {
 		className?: string;
 		content: string;

@@ -17,6 +17,9 @@ namespace Peach.Pro.Core.WebServices.Models
 		User,
 		System,
 		Call,
+		Group,
+		Space,
+		Monitor,
 	}
 
 	/// <summary>
@@ -55,6 +58,11 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// "string"
 		/// </example>
 		public ParameterType Type { get; set; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public List<Parameter> Items { get; set; }
 
 		/// <summary>
 		/// List of values for enum types

@@ -1,8 +1,6 @@
 ﻿ /// <reference path="../reference.ts" />
 
 namespace Peach {
-	"use strict";
-
 	export var JOB_INTERVAL = 3000;
 	
 	export class JobService {

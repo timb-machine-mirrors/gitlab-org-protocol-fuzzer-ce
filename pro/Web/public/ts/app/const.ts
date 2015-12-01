@@ -1,8 +1,6 @@
 ﻿/// <reference path="reference.ts" />
 
 namespace Peach.C {
-	"use strict";
-
 	export const ViewModel = 'vm';
 
 	export namespace Vendor {
@@ -66,7 +64,6 @@ namespace Peach.C {
 		export const PitUrl = '/p/pits/:id';
 		export const Jobs = '/p/jobs';
 		export const JobUrl = '/p/jobs/:id';
-		export const PeachMonitors = '/p/pits/monitors';
 	}
 
 	export namespace Tracks {

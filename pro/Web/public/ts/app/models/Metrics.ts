@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
 namespace Peach {
-	"use strict";
-
 	export interface IFaultTimelineMetric {
 		date: Date;
 		faultCount: number;

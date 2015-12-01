@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
 namespace Peach {
-	"use strict";
-
 	export var TEST_INTERVAL = 1000;
 
 	export class TestService {

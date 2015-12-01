@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
 namespace Peach {
-	"use strict";
-
 	export var JobsDirective: IDirective = {
 		ComponentID: C.Directives.Jobs,
 		restrict: 'E',

@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
 namespace Peach {
-	"use strict";
-
 	export var FaultsDirective: IDirective = {
 		ComponentID: C.Directives.Faults,
 		restrict: 'E',

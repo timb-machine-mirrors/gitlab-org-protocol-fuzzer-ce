@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
 namespace Peach {
-	"use strict";
-
 	export var ParameterDirective: IDirective = {
 		ComponentID: C.Directives.Parameter,
 		restrict: 'E',
@@ -73,20 +71,20 @@ namespace Peach {
 		public Choices: IOption[];
 
 		private makeChoices() {
-			var options: string[];
-			var group: string;
-			if (this.$scope.param.type === 'call') {
-				options = this.pitService.Pit.calls || [];
-				options = [''].concat(options);
-				group = 'Calls';
-			} else {
-				options = this.$scope.param.options || [];
-				group = 'Choices';
-			}
-			var tuples = [];
+			// var options: string[];
+			// var group: string;
+			// if (this.$scope.param.type === 'call') {
+			// 	options = this.pitService.Pit.calls || [];
+			// 	options = [''].concat(options);
+			// 	group = 'Calls';
+			// } else {
+			let options: string[] = this.$scope.param.options || [];
+			let group = 'Choices';
+			// }
+			let tuples = [];
 
 			options.forEach(item => {
-				var option: IOption = {
+				let option: IOption = {
 					key: item,
 					text: item || '<i>Undefined</i>',
 					description: '',
@@ -104,7 +102,7 @@ namespace Peach {
 
 		private defines(): IOption[] {
 			return _.map(this.pitService.Pit.config, param => {
-				var key = '##' + param.key + '##'; 
+				let key = '##' + param.key + '##'; 
 				return <IOption> {
 					key: key,
 					text: key,

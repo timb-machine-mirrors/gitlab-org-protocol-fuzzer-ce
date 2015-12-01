@@ -305,6 +305,7 @@ namespace Peach.Pro.Core.WebServices
 			}
 
 
+			AddDefine(defs, "Peach.OS", Platform.GetOS().ToString().ToLower());
 			AddDefine(defs, "Peach.Cwd", Environment.CurrentDirectory);
 			AddDefine(defs, "Peach.Pwd", Utilities.ExecutionDirectory);
 			AddDefine(defs, "Peach.LogRoot", Configuration.LogRoot);
@@ -1003,6 +1004,14 @@ namespace Peach.Pro.Core.WebServices
 				new Parameter()
 				{
 					Type = ParameterType.System,
+					Key = "Peach.OS",
+					Name = "Peach OS",
+					Description = "The OS that Peach is locally running",
+					Value = Platform.GetOS().ToString().ToLower(),
+				},
+				new Parameter()
+				{
+					Type = ParameterType.System,
 					Key = "Peach.Pwd",
 					Name = "Peach Installation Directory",
 					Description = "Full path to Peach installation",
@@ -1031,7 +1040,7 @@ namespace Peach.Pro.Core.WebServices
 					Name = "Pit Library Path",
 					Description = "Path to root of Pit Library",
 					Value = pitLibraryPath,
-				}
+				},
 			};
 
 			foreach (var d in defines)

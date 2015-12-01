@@ -143,16 +143,14 @@ pre.peach-test-log {
 }
 
 .peach-add-monitor {
-	width: 400px;
-}
-
-.peach-add-monitor .select2-results {
 	max-height: 600px;
+	overflow-y: auto;
 }
 
 @media only screen and (max-height: 1000px) {
-	.peach-add-monitor .select2-results {
+	.peach-add-monitor {
 		max-height: 400px;
+		overflow-y: auto;
 	}
 }
 

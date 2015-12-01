@@ -1,8 +1,6 @@
 /// <reference path="../reference.ts" />
 
 namespace Peach {
-	"use strict";
-	
 	export interface IAlertOptions {
 		Title?: string;
 		Body?: string;

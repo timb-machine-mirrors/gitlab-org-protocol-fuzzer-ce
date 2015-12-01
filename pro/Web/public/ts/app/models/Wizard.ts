@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
 namespace Peach {
-	"use strict";
-
 	export namespace QuestionTypes {
 		export const String = "string";
 		export const Hex = "hex";
@@ -57,7 +55,7 @@ namespace Peach {
 
 		// dynamic values
 		isComplete?: boolean;
-		agents?: Agent[];
+		agents?: IAgent[];
 		history: number[];
 
 		Begin(): ng.IPromise<any>;

@@ -1,8 +1,6 @@
 /// <reference path="../reference.ts" />
 
 namespace Peach {
-	"use strict";
-
 	export class ErrorController {
 		static $inject = [
 			C.Angular.$scope,

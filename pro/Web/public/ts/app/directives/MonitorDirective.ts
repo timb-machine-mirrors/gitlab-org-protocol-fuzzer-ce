@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
 namespace Peach {
-	"use strict";
-
 	export var MonitorDirective: IDirective = {
 		ComponentID: C.Directives.Monitor,
 		restrict: 'E',

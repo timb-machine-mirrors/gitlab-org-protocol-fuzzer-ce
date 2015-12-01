@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
 namespace Peach {
-	"use strict";
-
 	export class ConfigureMonitorsController {
 		static $inject = [
 			C.Angular.$scope,
@@ -23,7 +21,7 @@ namespace Peach {
 		private hasLoaded: boolean = false;
 		private isSaved: boolean = false;
 
-		public Agents: Agent[];
+		public Agents: IAgent[];
 
 		public get ShowLoading(): boolean {
 			return !this.hasLoaded;
@@ -38,7 +36,7 @@ namespace Peach {
 		}
 
 		public get ShowMissingAgents(): boolean {
-			return this.hasLoaded && this.numAgents === 0;
+			return this.hasLoaded && this.NumAgents === 0;
 		}
 
 		public get CanSave(): boolean {
@@ -46,7 +44,11 @@ namespace Peach {
 		}
 
 		public AddAgent(): void {
-			this.Agents.push(new Agent());
+			this.Agents.push({
+				name: "",
+				agentUrl: "",
+				monitors: []
+			});
 			this.$scope.form.$setDirty();
 		}
 
@@ -58,7 +60,7 @@ namespace Peach {
 			});
 		}
 
-		private get numAgents(): number {
+		private get NumAgents(): number {
 			return (this.Agents && this.Agents.length) || 0;
 		}
 	}

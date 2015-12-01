@@ -1,8 +1,6 @@
 ﻿/// <reference path="reference.ts" />
 
 namespace Peach.C.Angular {
-	"use strict";
-
 	export const $compile = '$compile';
 	export const $controller = '$controller';
 	export const $document = '$document';

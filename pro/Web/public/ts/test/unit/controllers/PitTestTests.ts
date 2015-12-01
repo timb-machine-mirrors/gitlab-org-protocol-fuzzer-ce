@@ -1,7 +1,5 @@
 /// <reference path="../reference.ts" />
 
-'use strict';
-
 describe("Peach", () => {
 	var C = Peach.C;
 	beforeEach(module('Peach'));
@@ -16,14 +14,7 @@ describe("Peach", () => {
 		var pit = <Peach.IPit> {
 			id: pitId,
 			pitUrl: pitUrl,
-			name: 'My Pit',
-			versions: [
-				{
-					version: 0,
-					configured: false,
-					locked: false
-				}
-			]
+			name: 'My Pit'
 		};
 
 		beforeEach(inject(($injector: ng.auto.IInjectorService) => {
@@ -88,7 +79,6 @@ describe("Peach", () => {
 				log: '',
 				events: []
 			};
-			pit.versions[0].configured = true;
 
 			$httpBackend.expectGET(testUrl).respond(result2);
 			$httpBackend.expectDELETE(job.jobUrl).respond({});

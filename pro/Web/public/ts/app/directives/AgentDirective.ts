@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
 namespace Peach {
-	"use strict";
-
 	export var AgentDirective: IDirective = {
 		ComponentID: C.Directives.Agent,
 		restrict: 'E',
@@ -20,11 +18,10 @@ namespace Peach {
 	}
 
 	export interface IAgentScope extends IFormScope {
-		agents: Agent[];
-		agent: Agent;
+		agents: IAgent[];
+		agent: IAgent;
 		agentIndex: number;
 		isOpen: boolean;
-		selectedMonitor: ISelectable<IMonitor>;
 	}
 
 	export class AgentController {
@@ -41,15 +38,8 @@ namespace Peach {
 		) {
 			$scope.vm = this;
 			$scope.isOpen = true;
-			$scope.selectedMonitor = {
-				selected: undefined
-			};
-			pitService.LoadPeachMonitors().then((monitors: IMonitor[]) => {
-				this.PeachMonitors = monitors;
-			});
+			console.log('agent', $scope.agent);
 		}
-
-		public PeachMonitors: IMonitor[];
 
 		public get Header(): string {
 			var url = this.$scope.agent.agentUrl || 'local://';
@@ -96,18 +86,16 @@ namespace Peach {
 				controller: AddMonitorController
 			});
 
-			modal.result.then((param: IParameter) => {
+			modal.result.then((selected: IParameter) => {
+				let monitor: IMonitor = {
+					monitorClass: selected.key,
+					name: selected.name,
+					map: angular.copy(selected.items),
+					description: selected.description
+				};
+				this.$scope.agent.monitors.push(monitor);
 				this.$scope.form.$setDirty();
 			});
 		}
-
-		// public OnAddMonitor(monitor: IMonitor): void {
-		// 	this.$scope.agent.monitors.push(angular.copy(monitor));
-		// 	this.$scope.form.$setDirty();
-
-		// 	this.$timeout(() => {
-		// 		this.$scope.selectedMonitor.selected = undefined;
-		// 	});
-		// }
 	}
 }

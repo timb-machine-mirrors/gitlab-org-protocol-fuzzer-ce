@@ -42,9 +42,9 @@
 			<div class="col-sm-6">
 				<div class="input-group">
 					<span class="input-group-addon"
-					      uib-tooltip="Friendly name for your monitor"
-					      tooltip-placement="above"
-					      tooltip-append-to-body="true">
+								uib-tooltip="Friendly name for your monitor"
+								tooltip-placement="above"
+								tooltip-append-to-body="true">
 						<i class="fa fa-question-circle"></i>
 					</span>
 					<input name="name"
@@ -60,10 +60,15 @@
 				</span>
 			</div>
 		</div>
-		<div ng-repeat="param in monitor.map">
-			<peach:parameter param="param"
-											 input-group="true">
-			</peach:parameter>
-		</div>
+		<uib-accordion>
+			<uib-accordion-group ng-repeat="group in monitor.items track by $index"
+													 heading="{{group.name}}">
+				<div ng-repeat="param in group.items">
+					<peach:parameter param="param"
+													 input-group="true">
+					</peach:parameter>
+				</div>
+			</uib-accordion-group>
+		</uib-accordion>
 	</uib-accordion-group>
 </ng-form>

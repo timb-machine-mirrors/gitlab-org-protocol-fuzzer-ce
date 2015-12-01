@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
 namespace Peach {
-	"use strict";
-
 	export class PitService {
 
 		static $inject = [
@@ -45,10 +43,6 @@ namespace Peach {
 			return StripHttpPromise(this.$q, promise);
 		}
 
-		public LoadPeachMonitors(): ng.IPromise<IMonitor[]> {
-			return StripHttpPromise(this.$q, this.$http.get(C.Api.PeachMonitors));
-		}
-
 		public LoadPit(): ng.IPromise<IPit> {
 			var url = C.Api.PitUrl.replace(':id', this.CurrentPitId);
 			var promise = this.$http.get(url);
@@ -70,7 +64,7 @@ namespace Peach {
 			return this.SavePit();
 		}
 
-		public SaveAgents(agents: Agent[]): ng.IPromise<IPit> {
+		public SaveAgents(agents: IAgent[]): ng.IPromise<IPit> {
 			this.pit.agents = agents;
 			return this.SavePit();
 		}
@@ -88,14 +82,14 @@ namespace Peach {
 		}
 
 		public get IsConfigured(): boolean {
-			return onlyIf(this.pit, () => _.all(this.pit.config, (c: IParameter) => {
-				return c.optional || c.value !== "";
+			return onlyIf(this.pit, () => _.all(this.pit.config, (x: IParameter) => {
+				return x.optional || x.value !== "";
 			}));
 		}
 
 		public get HasMonitors(): boolean {
-			return onlyIf(this.pit, () => _.any(this.pit.agents, (a: Agent) => {
-				return a.monitors.length > 0;
+			return onlyIf(this.pit, () => _.any(this.pit.agents, (x: IAgent) => {
+				return x.monitors.length > 0;
 			}));
 		}
 
