@@ -231,7 +231,8 @@ namespace Peach.Pro.Test.Core.Publishers
 			HttpClient(false, "POST");
 		}
 
-		[Test, Ignore]
+		[Test]
+		[Ignore("Implement in a way that doesn't require url reservations")]
 		public void AreCertErrorsIgnored()
 		{
 			// need to set url above to something that has a self signed cert for https

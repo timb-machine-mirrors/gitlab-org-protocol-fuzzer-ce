@@ -96,12 +96,12 @@ namespace Peach.Pro.Core.Publishers
 						int waitTime = Math.Min(timeout, i);
 						timeout -= waitTime;
 
-						Logger.Warn("open: Warn, Unable to connect to remote host {0} on port {1}.  Trying again in {2}ms...", Host, Port, waitTime);
+						Logger.Trace("Unable to connect to remote host {0} on port {1}.  Trying again in {2}ms...", Host, Port, waitTime);
 						Thread.Sleep(waitTime);
 					}
 					else
 					{
-						Logger.Error("open: Error, Unable to connect to remote host {0} on port {1}.", Host, Port);
+						Logger.Debug("Unable to connect to remote host {0} on port {1}.", Host, Port);
 						throw new SoftException(ex);
 					}
 				}

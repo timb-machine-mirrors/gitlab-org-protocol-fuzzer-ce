@@ -80,11 +80,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		}
 	}
 
-	[TestFixture(typeof(InternalJobMonitor))]
-	[TestFixture(typeof(ExternalJobMonitor))]
-	[Peach]
-	[Quick]
-	class JobMonitorTests<T> : BaseJobMonitorTests<T>
+	abstract class JobMonitorTests<T> : BaseJobMonitorTests<T>
 		where T : IJobMonitor, new()
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -468,6 +464,23 @@ namespace Peach.Pro.Test.Core.WebServices
 		}
 	}
 
+	namespace JobMonitorTests
+	{
+		[TestFixture]
+		[Peach]
+		[Quick]
+		class External : JobMonitorTests<ExternalJobMonitor>
+		{
+		}
+
+		[TestFixture]
+		[Peach]
+		[Quick]
+		class Internal : JobMonitorTests<InternalJobMonitor>
+		{
+		}
+	}
+
 	[TestFixture]
 	[Peach]
 	[Quick]
@@ -495,7 +508,7 @@ namespace Peach.Pro.Test.Core.WebServices
 	</StateModel>
 
 	<Agent name='LocalAgent'>
-		<Monitor class='RandoFaulter'>
+		<Monitor class='你好RandoFaulter'>
 			<Param name='CrashAfter' value='2000'/>
 		</Monitor>
 	</Agent>

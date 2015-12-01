@@ -117,12 +117,12 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				_logger.Trace("Attempting to GET '{0}'", urlGet);
 
 				var req = (HttpWebRequest)WebRequest.Create(urlGet);
+				req.Method = "GET";
+				req.ServicePoint.Expect100Continue = false;
 				req.Timeout = 1000;
 
 				using (var resp = (HttpWebResponse)req.GetResponse())
 				{
-					resp.Close();
-
 					if (resp.StatusCode != HttpStatusCode.OK)
 						throw new PeachException("Logging service not available");
 				}

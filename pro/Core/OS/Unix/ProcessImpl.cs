@@ -175,7 +175,7 @@ namespace Peach.Pro.Core.OS.Unix
 
 		protected override IProcess AttachProcess(int pid)
 		{
-			return MakeOwnedProcess(SysProcess.GetProcessById(pid));
+			return MakeAttachedProcess(SysProcess.GetProcessById(pid));
 		}
 
 		protected override IProcess CreateProcess(

@@ -42,7 +42,6 @@ deps = [
 	'SuperWebSocket.dll',
 
 	'Peach.Core.dll',
-	'Godel.Core.dll',
 
 	'Managed.Adb.dll',
 	'BouncyCastle.Crypto.dll',

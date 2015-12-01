@@ -243,7 +243,10 @@ namespace Peach.Core
 			{
 				_logger.Debug("[{0}] Stop(): WaitForExit({1})", _process.Id, timeout);
 				if (!_process.WaitForExit(timeout))
+				{
+					_logger.Debug("[{0}] Stop(): WaitForExit timed out, killing...", _process.Id);
 					_process.Kill();
+				}
 			}
 
 			Dispose();

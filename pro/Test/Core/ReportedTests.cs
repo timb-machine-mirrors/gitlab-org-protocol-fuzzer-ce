@@ -409,7 +409,8 @@ namespace Peach.Pro.Test.Core
 
 		uint engineCount = 0;
 
-		[Test, Ignore]
+		[Test]
+		[Ignore("Data to crack is incorrect.")]
 		public void PlacementWithOffset()
 		{
 			string xml = @"

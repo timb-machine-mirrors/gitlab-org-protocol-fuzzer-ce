@@ -80,7 +80,8 @@ namespace Peach.Pro.Test.OS.Linux
 			}
 		}
 
-		[Test,Ignore]
+		[Test]
+		[Ignore("Mono can't recover from OOM properly")]
 		public void TestOutOfMemory()
 		{
 			// MONO_GC_PARAMS=max-heap-size=1g

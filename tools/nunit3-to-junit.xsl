@@ -25,9 +25,12 @@
 		<xsl:for-each select="test-case">
 			<testcase classname="{../@fullname}" name="{@name}" time="{@duration}">
 				<xsl:if test="./failure">
-					<failure type="{@label}" message="{./failure/message}">
+					<failure message="{./failure/message}">
 						<xsl:value-of select="./failure/stack-trace" />
 					</failure>
+				</xsl:if>
+				<xsl:if test="@result='Skipped'">
+					<skipped message="{./reason/message}"/>
 				</xsl:if>
 			</testcase>
 		</xsl:for-each>
