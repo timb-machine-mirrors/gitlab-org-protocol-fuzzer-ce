@@ -61,15 +61,9 @@
 			</div>
 		</div>
 		<uib-accordion close-others="false">
-			<uib-accordion-group is-open="!group.collapsed"
-													 ng-repeat="group in monitor.view.items track by $index"
-													 heading="{{group.name}}">
-				<div ng-repeat="param in group.items">
-					<peach:parameter param="param"
-													 input-group="true">
-					</peach:parameter>
-				</div>
-			</uib-accordion-group>
+			<peach:parameter ng-repeat="param in monitor.view.items track by $index"
+												param="param">
+			</peach:parameter>
 		</uib-accordion>
 	</uib-accordion-group>
 </ng-form>

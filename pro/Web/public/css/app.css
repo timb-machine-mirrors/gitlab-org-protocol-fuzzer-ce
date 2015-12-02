@@ -134,6 +134,10 @@ pre.peach-test-log {
 	overflow-y: scroll;
 }
 
+.peach-parameter-group {
+	margin-top: 10px;
+}
+
 /* turn off animation, this can screw with autofocus */
 .modal.fade .modal-dialog,
 .modal.in .modal-dialog {

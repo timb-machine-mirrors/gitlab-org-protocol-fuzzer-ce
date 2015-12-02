@@ -44,6 +44,7 @@ namespace Peach.C {
 		export const Jobs = 'JobsDirectiveController';
 		export const Monitor = 'MonitorController';
 		export const Parameter = 'ParameterController';
+		export const ParameterInput = 'ParameterInputController';
 		export const Test = 'TestController';
 		export const UniqueChannel = 'UniqueChannelController';
 		export const Unsaved = 'UnsavedController';
