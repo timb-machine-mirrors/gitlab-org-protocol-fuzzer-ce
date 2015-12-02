@@ -158,7 +158,7 @@ namespace Peach.Pro.Test.Core.Dom
 
 			var elemShort = dom.tests[0].stateModel.states[0].actions[0].dataModel[1];
 
-			Assert.AreEqual(25800, (int)elemShort.DefaultValue);
+			Assert.AreEqual(0x64c8, (int)elemShort.DefaultValue);
 		}
 
 		[Test]
