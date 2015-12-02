@@ -441,6 +441,8 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.NotNull(cfg);
 			Assert.AreEqual(6, cfg.Count);
 
+			Assert.Fail("FIXME");
+
 			//foreach (var item in cfg)
 			//	Assert.False(item.Optional, "Define should not be optional");
 
@@ -498,31 +500,34 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			db.ValidationEventHandler += (s, e) => errors.Add(e.Exception.Message);
 
-			db.GetAllMonitors(new List<string>());
+			//db.GetAllMonitors(new List<string>());
 
 			CollectionAssert.IsEmpty(errors);
+
+			Assert.Fail("FIXME");
 		}
 
 		[Test]
 		public void TestInvalidMonitor()
 		{
+			Assert.Fail("FIXME");
 			// remove test SetUp handler for this test
-			db.ValidationEventHandler -= OnValidationEvent;
+			//db.ValidationEventHandler -= OnValidationEvent;
 
-			var error = false;
-			db.ValidationEventHandler += (s, e) =>
-			{
-				error = true;
-			};
+			//var error = false;
+			//db.ValidationEventHandler += (s, e) =>
+			//{
+			//	error = true;
+			//};
 
-			var attr = new MonitorAttribute("FakeMonitor")
-			{
-				OS = Platform.OS.Unix
-			};
+			//var attr = new MonitorAttribute("FakeMonitor")
+			//{
+			//	OS = Platform.OS.Unix
+			//};
 
-			var monitor = db.MakeMonitor(attr, typeof(string), null);
-			Assert.IsTrue(error);
-			Assert.AreEqual("", monitor.OS);
+			//var monitor = db.MakeMonitor(attr, typeof(string), null);
+			//Assert.IsTrue(error);
+			//Assert.AreEqual("", monitor.OS);
 		}
 
 		[Test]

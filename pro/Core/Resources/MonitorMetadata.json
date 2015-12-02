@@ -1,0 +1,81 @@
+[
+  {
+    "Name": "Power Control",
+    "Type": "Group",
+    "Items": [
+      {
+        "Name": "Gdb",
+        "Type": "Monitor",
+        "Items": [
+          {
+            "Name": "Core Parameters",
+            "Type": "Group",
+            "Items": [
+              {
+                "Name": "Executable",
+                "Type": "Param"
+              },
+              {
+                "Name": "Executable",
+                "Type": "Param"
+              },
+              {
+                "Type": "Space"
+              },
+              {
+                "Name": "GdbPath",
+                "Type": "Param"
+              }
+            ]
+          },
+          {
+            "Name": "When To Trigger",
+            "Type": "Group",
+            "Items": [
+              {
+                "Name": "RestartOnEachTest",
+                "Type": "Param"
+              },
+              {
+                "Name": "RestartAfterFault",
+                "Type": "Param"
+              },
+              {
+                "Type": "Space"
+              },
+              {
+                "Name": "StartOnCall",
+                "Type": "Param"
+              },
+              {
+                "Name": "WaitForExitOnCall",
+                "Type": "Param"
+              }
+            ]
+          },
+          {
+            "Name": "Advanced",
+            "Type": "Group",
+            "Items": [
+              {
+                "Name": "NoCpuKill",
+                "Type": "Param"
+              },
+              {
+                "Name": "FaultOnEarlyExit",
+                "Type": "Param"
+              },
+              {
+                "Type": "Space"
+              },
+              {
+                "Name": "WaitForExitTimeout",
+                "Type": "Param"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
