@@ -30,7 +30,7 @@ namespace Peach {
 		}
 
 		public LoadLibrary(): ng.IPromise<ILibrary[]> {
-			var promise = this.$http.get(C.Api.Libraries);
+			const promise = this.$http.get(C.Api.Libraries);
 			promise.success((libs: ILibrary[]) => {
 				this.userPitLibrary = _(libs)
 					.reject({ locked: true })
@@ -44,8 +44,8 @@ namespace Peach {
 		}
 
 		public LoadPit(): ng.IPromise<IPit> {
-			var url = C.Api.PitUrl.replace(':id', this.CurrentPitId);
-			var promise = this.$http.get(url);
+			const url = C.Api.PitUrl.replace(':id', this.CurrentPitId);
+			const promise = this.$http.get(url);
 			promise.success((pit: IPit) => this.OnSuccess(pit, false));
 			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
 				this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
@@ -54,7 +54,39 @@ namespace Peach {
 		}
 
 		public SavePit(): ng.IPromise<IPit> {
-			var promise = this.$http.post(this.pit.pitUrl, this.pit);
+			const agents: IAgent[] = [];
+			for (let agent of _.get<IAgent[]>(this.pit, 'agents', [])) {
+				const monitors: IMonitor[] = [];
+				for (let monitor of agent.monitors) {
+					var map: IParameter[] = [];
+					this._Visit(monitor.view, (param: IParameter) => {
+						if (!_.isUndefined(param.value)) {
+							map.push({
+								key: param.key,
+								value: param.value
+							});
+						}
+					});
+					monitors.push({
+						monitorClass: monitor.monitorClass,
+						name: monitor.name,
+						map: map
+					});
+				}
+				agents.push({
+					name: agent.name,
+					agentUrl: agent.agentUrl,
+					monitors: monitors
+				});
+			}
+			const dto: IPit = {
+				id: this.pit.id,
+				pitUrl: this.pit.pitUrl,
+				name: this.pit.name,
+				config: angular.copy(this.pit.config),
+				agents: agents
+			};
+			const promise = this.$http.post(this.pit.pitUrl, dto);
 			promise.success((pit: IPit) => this.OnSuccess(pit, true));
 			return StripHttpPromise(this.$q, promise);
 		}
@@ -70,13 +102,13 @@ namespace Peach {
 		}
 
 		public SaveConfig(pit: IPit): ng.IHttpPromise<IPit> {
-			var request: IPitCopy = {
+			const request: IPitCopy = {
 				libraryUrl: this.userPitLibrary,
 				pitUrl: pit.pitUrl,
 				name: pit.name,
 				description: pit.description
-			}
-			var promise = this.$http.post(C.Api.Pits, request);
+			};
+			const promise = this.$http.post(C.Api.Pits, request);
 			promise.success((pit: IPit) => this.OnSuccess(pit, true));
 			return promise;
 		}
@@ -94,11 +126,76 @@ namespace Peach {
 		}
 
 		private OnSuccess(pit: IPit, saved: boolean) {
-			var oldPit = this.pit;
+			const oldPit = this.pit;
 			this.pit = pit;
 			this.$rootScope['pit'] = pit;
 			if (saved || (oldPit && oldPit.id !== pit.id)) {
 				this.$rootScope.$emit(C.Events.PitChanged, pit);
+			}
+
+			for (let agent of _.get<IAgent[]>(pit, 'agents', [])) {
+				for (let monitor of _.get<IMonitor[]>(agent, 'monitors', [])) {
+					monitor.view = this.CreateMonitorView(monitor);
+				}
+			}
+			//console.log('pit', pit);
+		}
+
+		public CreateMonitor(param: IParameter): IMonitor {
+			const monitor: IMonitor = {
+				monitorClass: param.key,
+				name: param.name,
+				map: angular.copy(param.items),
+				description: param.description
+			};
+			monitor.view = this.CreateMonitorView(monitor);
+			return monitor;
+		}
+
+		private CreateMonitorView(monitor: IMonitor): IParameter {
+			const metadata = this.FindMonitorMetadata(monitor.monitorClass);
+			const view = angular.copy(metadata);
+			this._Visit(view, (param: IParameter) => {
+				const kv = _.find(monitor.map, { key: param.key });
+				if (kv && kv.value) {
+					param.value = kv.value;
+				}
+			});
+			return view;
+		}
+
+		private FindMonitorMetadata(key: string): IParameter {
+			for (let monitor of this.pit.metadata.monitors) {
+				const ret = this._FindByTypeKey(monitor, ParameterType.Monitor, key);
+				if (ret) {
+					return ret;
+				}
+			}
+			return null;
+		}
+
+		private _FindByTypeKey(param: IParameter, type: string, key: string): IParameter {
+			if (param.type === type) {
+				if (param.key === key) {
+					return param;
+				}
+			}
+
+			for (let item of _.get<IParameter[]>(param, 'items', [])) {
+				const ret = this._FindByTypeKey(item, type, key);
+				if (ret) {
+					return ret;
+				}
+			}
+
+			return null;
+		}
+
+		private _Visit(param: IParameter, fn: (p: IParameter) => void): void {
+			fn(param);
+
+			for (let item of _.get<IParameter[]>(param, 'items', [])) {
+				this._Visit(item, fn);
 			}
 		}
 	}

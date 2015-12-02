@@ -26,18 +26,21 @@ describe("Peach", () => {
 			config: [],
 			agents: []
 		};
+		let pitPost: Peach.IPit = {
+			id: pitId,
+			name: 'My Pit',
+			pitUrl: pitUrl,
+			config: [],
+			agents: []
+		};
 
 		beforeEach(inject(($injector: ng.auto.IInjectorService) => {
-			let pitService: Peach.PitService;
-			let $templateCache: ng.ITemplateCacheService;
-
 			$controller = $injector.get(C.Angular.$controller);
 			$httpBackend = $injector.get(C.Angular.$httpBackend);
 			$rootScope = $injector.get(C.Angular.$rootScope);
 			$state = $injector.get(C.Angular.$state);
-			$templateCache = $injector.get(C.Angular.$templateCache);
-
-			pitService = $injector.get(C.Services.Pit);
+			const $templateCache: ng.ITemplateCacheService = $injector.get(C.Angular.$templateCache);
+			const pitService: Peach.PitService = $injector.get(C.Services.Pit);
 			wizardService = $injector.get(C.Services.Wizard);
 
 			$templateCache.put(C.Templates.Home, '');
@@ -119,7 +122,7 @@ describe("Peach", () => {
 				});
 
 				it("Next() will move to review", () => {
-					$httpBackend.expectPOST(pitUrl, pit).respond(pit);
+					$httpBackend.expectPOST(pitUrl, pitPost).respond(pit);
 					Next();
 					$httpBackend.flush();
 					expectState(Peach.WizardTrackReview(C.Tracks.Vars));
@@ -169,7 +172,7 @@ describe("Peach", () => {
 					expect(scope.Question.key).toBe(key);
 					expect(scope.Question.type).toBe(Peach.QuestionTypes.String);
 
-					let post = angular.copy(pit);
+					let post = angular.copy(pitPost);
 					post.config = [
 						{ key: key, name: name, value: value, type: Peach.QuestionTypes.String }
 					];

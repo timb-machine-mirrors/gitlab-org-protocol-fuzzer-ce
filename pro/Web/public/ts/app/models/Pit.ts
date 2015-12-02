@@ -22,7 +22,7 @@ namespace Peach {
 	export interface IParameter {
 		key?: string;
 		value?: any;
-		name: string;
+		name?: string;
 		type?: string;
 		items?: IParameter[];
 		options?: string[];
@@ -31,6 +31,7 @@ namespace Peach {
 		min?: number;
 		max?: number;
 		optional?: boolean;
+		collapsed?: boolean;
 	}
 
 	export interface IAgent {
@@ -43,10 +44,13 @@ namespace Peach {
 		monitorClass: string;
 		name?: string;
 		map: IParameter[];
-		description: string;
+		description?: string;
 
 		// for use by the wizard
 		path?: number[];
+
+		// only used by client-side
+		view?: IParameter;
 	}
 
 	export interface IPitMetadata {
@@ -58,8 +62,8 @@ namespace Peach {
 		id: string;
 		pitUrl: string;
 		name: string;
-		description: string;
-		tags: ITag[];
+		description?: string;
+		tags?: ITag[];
 
 		// details, not available from collection at /p/pits
 		config: IParameter[];

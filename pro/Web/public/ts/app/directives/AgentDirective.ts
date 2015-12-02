@@ -38,12 +38,11 @@ namespace Peach {
 		) {
 			$scope.vm = this;
 			$scope.isOpen = true;
-			console.log('agent', $scope.agent);
 		}
 
 		public get Header(): string {
-			var url = this.$scope.agent.agentUrl || 'local://';
-			var name = this.$scope.agent.name ? '(' + this.$scope.agent.name + ')' : '';
+			const url = this.$scope.agent.agentUrl || 'local://';
+			const name = this.$scope.agent.name ? '(' + this.$scope.agent.name + ')' : '';
 			return url + ' ' + name;
 		}
 
@@ -81,18 +80,13 @@ namespace Peach {
 		}
 
 		public AddMonitor(): void {
-			var modal = this.$modal.open({
+			const modal = this.$modal.open({
 				templateUrl: C.Templates.Modal.AddMonitor,
 				controller: AddMonitorController
 			});
 
 			modal.result.then((selected: IParameter) => {
-				let monitor: IMonitor = {
-					monitorClass: selected.key,
-					name: selected.name,
-					map: angular.copy(selected.items),
-					description: selected.description
-				};
+				const monitor = this.pitService.CreateMonitor(selected);
 				this.$scope.agent.monitors.push(monitor);
 				this.$scope.form.$setDirty();
 			});

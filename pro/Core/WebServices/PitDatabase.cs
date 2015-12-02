@@ -1103,6 +1103,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 			var p = new Parameter
 			{
+				Key = attr.name,
 				Name = attr.name,
 				DefaultValue = attr.required ? null : attr.defaultValue,
 				Optional = !attr.required,
