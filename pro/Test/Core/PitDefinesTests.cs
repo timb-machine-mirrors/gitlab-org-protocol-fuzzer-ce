@@ -19,7 +19,7 @@ namespace Peach.Pro.Test.Core
 		[Test]
 		public void TestParse()
 		{
-			string xml = @"<?xml version='1.0' encoding='utf-8'?>
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
 <PitDefines>
 	<All>
 	</All>
@@ -51,12 +51,15 @@ namespace Peach.Pro.Test.Core
 
 			var defs = XmlTools.Deserialize<PitDefines>(new StringReader(xml));
 			Assert.NotNull(defs);
+			Assert.AreEqual(6, defs.Platforms.Count);
 		}
 
 		[Test]
 		public void TestTypes()
 		{
-			string xml = @"<?xml version='1.0' encoding='utf-8'?>
+			using (var f = new TempFile())
+			{
+				File.WriteAllText(f.Path, @"<?xml version='1.0' encoding='utf-8'?>
 <PitDefines>
 	<All>
 		<String   key='key0' value='value0' name='name0' description='description0'/>
@@ -70,19 +73,23 @@ namespace Peach.Pro.Test.Core
 		<Define   key='key8' value='value8' name='name8' description='description8'/>
 	</All>
 </PitDefines>
-";
+");
 
-			var defs = PitDefines.Parse(new StringReader(xml));
-			Assert.NotNull(defs);
-			Assert.AreEqual(defs[0].ConfigType, ParameterType.String);
-			Assert.AreEqual(defs[1].ConfigType, ParameterType.Ipv4);
-			Assert.AreEqual(defs[2].ConfigType, ParameterType.Ipv6);
-			Assert.AreEqual(defs[3].ConfigType, ParameterType.Iface);
-			Assert.AreEqual(defs[4].ConfigType, ParameterType.Enum);
-			Assert.AreEqual(defs[5].ConfigType, ParameterType.Hwaddr);
-			Assert.AreEqual(defs[6].ConfigType, ParameterType.Range);
-			Assert.AreEqual(defs[7].ConfigType, ParameterType.Enum);
-			Assert.AreEqual(defs[8].ConfigType, ParameterType.User);
+				var defines = PitDefines.ParseFile(f.Path);
+				Assert.NotNull(defines);
+				Assert.AreEqual(1, defines.Platforms.Count);
+				Assert.AreEqual(Platform.OS.All, defines.Platforms[0].Platform);
+				var defs = defines.Platforms[0].Defines;
+				Assert.AreEqual(defs[0].ConfigType, ParameterType.String);
+				Assert.AreEqual(defs[1].ConfigType, ParameterType.Ipv4);
+				Assert.AreEqual(defs[2].ConfigType, ParameterType.Ipv6);
+				Assert.AreEqual(defs[3].ConfigType, ParameterType.Iface);
+				Assert.AreEqual(defs[4].ConfigType, ParameterType.Enum);
+				Assert.AreEqual(defs[5].ConfigType, ParameterType.Hwaddr);
+				Assert.AreEqual(defs[6].ConfigType, ParameterType.Range);
+				Assert.AreEqual(defs[7].ConfigType, ParameterType.Enum);
+				Assert.AreEqual(defs[8].ConfigType, ParameterType.User);
+			}
 		}
 
 		[Test]
@@ -99,140 +106,250 @@ namespace Peach.Pro.Test.Core
 		[Test]
 		public void InvalidXmlUri()
 		{
-			string xml = @"<?xml version='1.0' encoding='utf-8'?>
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
 <PitDefines></Bad>";
 
-			var tmp = Path.GetTempFileName();
-			File.WriteAllText(tmp, xml);
-
-			try
+			using (var f = new TempFile(xml))
 			{
-				XmlTools.Deserialize<PitDefines>(tmp);
-				Assert.Fail("Should throw");
-			}
-			catch (PeachException ex)
-			{
-				Assert.NotNull(ex);
-			}
-			finally
-			{
-				File.Delete(tmp);
+				Assert.Throws<PeachException>(() => XmlTools.Deserialize<PitDefines>(f.Path));
 			}
 		}
 
 		[Test]
 		public void InvalidXmlString()
 		{
-			string xml = @"<?xml version='1.0' encoding='utf-8'?>
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
 <PitDefines></Bad>";
 
-			try
+			using (var rdr = new StringReader(xml))
 			{
-				using (var rdr = new StringReader(xml))
-				{
-					XmlTools.Deserialize<PitDefines>(rdr);
-					Assert.Fail("Should throw");
-				}
+				Assert.Throws<PeachException>(() => XmlTools.Deserialize<PitDefines>(rdr));
 			}
-			catch (PeachException ex)
+		}
+
+		[Test]
+		public void TestEvaluateSimple()
+		{
+			const string xml = @"
+<PitDefines>
+	<All>
+		<Define name='k1' key='k1' value='##k2##' />
+		<Define name='k2' key='k2' value='##k3##-2' />
+		<Define name='k3' key='k3' value='##k4##-3' />
+		<Define name='k4' key='k4' value='##k5##/##k5##' />
+		<Define name='k5' key='k5' value='foo' />
+		<Define name='k6' key='k6' value='##k2##-##k3##' />
+	</All>
+</PitDefines>
+";
+
+			using (var rdr = new StringReader(xml))
 			{
-				Assert.NotNull(ex);
+				var defs = XmlTools.Deserialize<PitDefines>(rdr);
+
+				var dst = defs.Evaluate();
+
+				Assert.AreEqual(6, dst.Count);
+
+				Assert.AreEqual("k1", dst[0].Key);
+				Assert.AreEqual("foo/foo-3-2", dst[0].Value);
+				Assert.AreEqual("k2", dst[1].Key);
+				Assert.AreEqual("foo/foo-3-2", dst[1].Value);
+				Assert.AreEqual("k3", dst[2].Key);
+				Assert.AreEqual("foo/foo-3", dst[2].Value);
+				Assert.AreEqual("k4", dst[3].Key);
+				Assert.AreEqual("foo/foo", dst[3].Value);
+				Assert.AreEqual("k5", dst[4].Key);
+				Assert.AreEqual("foo", dst[4].Value);
+				Assert.AreEqual("k6", dst[5].Key);
+				Assert.AreEqual("foo/foo-3-2-foo/foo-3", dst[5].Value);
+			}
+		}
+
+		[Test]
+		public void TestEvaluateMissing()
+		{
+			const string xml = @"
+<PitDefines>
+	<All>
+		<Define name='k1' key='k1' value='##k2##' />
+	</All>
+</PitDefines>
+";
+
+			using (var rdr = new StringReader(xml))
+			{
+				var defs = XmlTools.Deserialize<PitDefines>(rdr);
+
+				var dst = defs.Evaluate();
+
+				Assert.AreEqual(1, dst.Count);
+
+				Assert.AreEqual("k1", dst[0].Key);
+				Assert.AreEqual("##k2##", dst[0].Value);
+			}
+		}
+
+		[Test]
+		public void TestEvaluatePitLibraryPath()
+		{
+			const string xml = @"
+<PitDefines>
+	<All>
+		<Define name='SamplePath' key='SamplePath' value='##PitLibraryPath##/Samples' />
+		<Define name='PitLibraryPath' key='PitLibraryPath' value='.' />
+	</All>
+</PitDefines>
+";
+
+			using (var f = new TempFile(xml))
+			{
+				var defs = PitDefines.ParseFile(f.Path, "Peach/Pits");
+
+				Assert.AreEqual(4, defs.SystemDefines.Count);
+				Assert.AreEqual(1, defs.Platforms.Count);
+				Assert.AreEqual(2, defs.Platforms[0].Defines.Count);
+
+				var dst = defs.Evaluate();
+
+				Assert.AreEqual(5, dst.Count);
+
+				// PitLibraryPath is injected as a system define
+				// and takes prededence over any .config define
+
+				Assert.AreEqual("SamplePath", dst[0].Key);
+				Assert.AreEqual("Peach/Pits/Samples", dst[0].Value);
+				Assert.AreEqual("Peach.Pwd", dst[1].Key);
+				Assert.AreEqual("Peach.Cwd", dst[2].Key);
+				Assert.AreEqual("Peach.LogRoot", dst[3].Key);
+				Assert.AreEqual("PitLibraryPath", dst[4].Key);
+				Assert.AreEqual("Peach/Pits", dst[4].Value);
+			}
+		}
+
+		[Test]
+		public void TestEvaluateOverrides()
+		{
+			const string xml = @"
+<PitDefines>
+	<All>
+		<Define name='SamplePath1' key='SamplePath1' value='##PitLibraryPath##/Samples1' />
+		<Define name='SamplePath2' key='SamplePath2' value='##PitLibraryPath##/Samples2' />
+		<Define name='PitLibraryPath' key='PitLibraryPath' value='.' />
+	</All>
+</PitDefines>
+";
+
+			var overrides = new[]
+			{
+				new KeyValuePair<string, string>("SamplePath1", "foo"),
+				new KeyValuePair<string, string>("PitLibraryPath", "bar")
+			};
+
+			using (var f = new TempFile(xml))
+			{
+				var defs = PitDefines.ParseFile(f.Path, overrides);
+
+				Assert.AreEqual(5, defs.SystemDefines.Count);
+				Assert.AreEqual(1, defs.Platforms.Count);
+				Assert.AreEqual(3, defs.Platforms[0].Defines.Count);
+
+				var dst = defs.Evaluate();
+
+				Assert.AreEqual(6, dst.Count);
+
+				// overrides get injected as system defines and
+				// take precedence over any .config define
+
+				Assert.AreEqual("SamplePath2", dst[0].Key);
+				Assert.AreEqual("bar/Samples2", dst[0].Value);
+				Assert.AreEqual("Peach.Pwd", dst[1].Key);
+				Assert.AreEqual("Peach.Cwd", dst[2].Key);
+				Assert.AreEqual("Peach.LogRoot", dst[3].Key);
+				Assert.AreEqual("SamplePath1", dst[4].Key);
+				Assert.AreEqual("foo", dst[4].Value);
+				Assert.AreEqual("PitLibraryPath", dst[5].Key);
+				Assert.AreEqual("bar", dst[5].Value);
+			}
+		}
+
+		[Test]
+		public void TestEvaluatePresedence()
+		{
+			const string xml = @"
+<PitDefines>
+	<All>
+		<Define name='SamplePath' key='SamplePath' value='foo' />
+		<Define name='SamplePath' key='SamplePath' value='bar' />
+		<Define name='Executable' key='Executable' value='foo' />
+	</All>
+	<All>
+		<Define name='Executable' key='Executable' value='bar' />
+	</All>
+</PitDefines>
+";
+
+			var overrides = new[]
+			{
+				new KeyValuePair<string, string>("Arg", "foo"),
+				new KeyValuePair<string, string>("Arg", "bar")
+			};
+
+			using (var f = new TempFile(xml))
+			{
+				var defs = PitDefines.ParseFile(f.Path, overrides);
+
+				Assert.AreEqual(5, defs.SystemDefines.Count);
+				Assert.AreEqual(2, defs.Platforms.Count);
+				Assert.AreEqual(3, defs.Platforms[0].Defines.Count);
+				Assert.AreEqual(1, defs.Platforms[1].Defines.Count);
+
+				var dst = defs.Evaluate();
+
+				Assert.AreEqual(6, dst.Count);
+
+				Assert.AreEqual("SamplePath", dst[0].Key);
+				Assert.AreEqual("bar", dst[0].Value);
+				Assert.AreEqual("Executable", dst[1].Key);
+				Assert.AreEqual("bar", dst[1].Value);
+				Assert.AreEqual("Peach.Pwd", dst[2].Key);
+				Assert.AreEqual("Peach.Cwd", dst[3].Key);
+				Assert.AreEqual("Peach.LogRoot", dst[4].Key);
+				Assert.AreEqual("Arg", dst[5].Key);
+				Assert.AreEqual("bar", dst[5].Value);
+
 			}
 		}
 
 		[Test]
 		public void IncompleteXmlUri()
 		{
-			string xml = @"<?xml version='1.0' encoding='utf-8'?>
-<PitDefines></Bad>";
-
-			var tmp = Path.GetTempFileName();
-			File.WriteAllText(tmp, xml);
-
-			try
-			{
-				XmlTools.Deserialize<PitDefines>(tmp);
-				Assert.Fail("Should throw");
-			}
-			catch (PeachException ex)
-			{
-				Assert.NotNull(ex);
-			}
-			finally
-			{
-				File.Delete(tmp);
-			}
-		}
-
-		[Test]
-		public void TestEvaluate()
-		{
-			var src = new List<KeyValuePair<string, string>>
-			{
-				new KeyValuePair<string, string>("SamplePath", "##PitLibraryPath##/Samples"),
-				new KeyValuePair<string, string>("PitLibraryPath", "Peach/Pits")
-			};
-
-			var dst = PitDefines.Evaluate(src);
-
-			Assert.AreEqual(2, dst.Count);
-			Assert.AreEqual("SamplePath", dst[0].Key);
-			Assert.AreEqual("Peach/Pits/Samples", dst[0].Value);
-			Assert.AreEqual("PitLibraryPath", dst[1].Key);
-			Assert.AreEqual("Peach/Pits", dst[1].Value);
-
-			src.Clear();
-			src.Add(new KeyValuePair<string, string>("k1", "##k2##"));
-			src.Add(new KeyValuePair<string, string>("k2", "##k3##-2"));
-			src.Add(new KeyValuePair<string, string>("k3", "##k4##-3"));
-			src.Add(new KeyValuePair<string, string>("k4", "##k5##/##k5##"));
-			src.Add(new KeyValuePair<string, string>("k5", "foo"));
-			src.Add(new KeyValuePair<string, string>("k6", "##k2##-##k3##"));
-
-			dst = PitDefines.Evaluate(src);
-
-			Assert.AreEqual(6, dst.Count);
-			Assert.AreEqual("k1", dst[0].Key);
-			Assert.AreEqual("foo/foo-3-2", dst[0].Value);
-			Assert.AreEqual("k2", dst[1].Key);
-			Assert.AreEqual("foo/foo-3-2", dst[1].Value);
-			Assert.AreEqual("k3", dst[2].Key);
-			Assert.AreEqual("foo/foo-3", dst[2].Value);
-			Assert.AreEqual("k4", dst[3].Key);
-			Assert.AreEqual("foo/foo", dst[3].Value);
-			Assert.AreEqual("k5", dst[4].Key);
-			Assert.AreEqual("foo", dst[4].Value);
-			Assert.AreEqual("k6", dst[5].Key);
-			Assert.AreEqual("foo/foo-3-2-foo/foo-3", dst[5].Value);
-
-			src.Clear();
-			src.Add(new KeyValuePair<string, string>("k1", "##missing##"));
-			dst = PitDefines.Evaluate(src);
-
-			Assert.AreEqual(src, dst);
-		}
-
-		[Test]
-		public void IncompleteXmlString()
-		{
-			string xml = @"<?xml version='1.0' encoding='utf-8'?>
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
 <PitDefines>
 	<All>
 		<Enum key='key' value='value' name='name' description='description'/>
 	</All>
 </PitDefines>";
 
-			try
+			using (var f = new TempFile(xml))
 			{
-				using (var rdr = new StringReader(xml))
-				{
-					XmlTools.Deserialize<PitDefines>(rdr);
-					Assert.Fail("Should throw");
-				}
+				Assert.Throws<PeachException>(() => XmlTools.Deserialize<PitDefines>(f.Path));
 			}
-			catch (PeachException ex)
+		}
+
+		[Test]
+		public void IncompleteXmlString()
+		{
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+<PitDefines>
+	<All>
+		<Enum key='key' value='value' name='name' description='description'/>
+	</All>
+</PitDefines>";
+
+			using (var rdr = new StringReader(xml))
 			{
-				Assert.NotNull(ex);
+				Assert.Throws<PeachException>(() => XmlTools.Deserialize<PitDefines>(rdr));
 			}
 		}
 	}

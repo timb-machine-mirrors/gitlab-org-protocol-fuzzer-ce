@@ -6,7 +6,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
-using System.Net.Sockets;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -15,11 +14,9 @@ using System.Xml.Serialization;
 using System.Xml.XPath;
 using Peach.Core;
 using Peach.Core.Agent;
-using Peach.Core.Dom;
 using Peach.Pro.Core.WebServices.Models;
 using Encoding = System.Text.Encoding;
 using File = System.IO.File;
-using Monitor = Peach.Pro.Core.WebServices.Models.Monitor;
 
 namespace Peach.Pro.Core.WebServices
 {
@@ -41,6 +38,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 		}
 
+		[XmlRoot("Test", Namespace = Namespace)]
 		public class TestElement : ChildElement
 		{
 			public class AgentReferenceElement : ChildElement
@@ -78,6 +76,7 @@ namespace Peach.Pro.Core.WebServices
 			}
 		}
 
+		[XmlRoot("Agent", Namespace = Namespace)]
 		public class AgentElement : ChildElement
 		{
 			public class MonitorElement : ChildElement
@@ -102,6 +101,7 @@ namespace Peach.Pro.Core.WebServices
 			public List<MonitorElement> Monitors { get; set; }
 		}
 
+		[XmlRoot("Param", Namespace = Namespace)]
 		public class ParamElement : ChildElement
 		{
 			[XmlAttribute("name")]
@@ -111,6 +111,7 @@ namespace Peach.Pro.Core.WebServices
 			public string Value { get; set; }
 		}
 
+		[XmlRoot("Include", Namespace = Namespace)]
 		public class IncludeElement : ChildElement
 		{
 			[XmlAttribute("ns")]
@@ -120,10 +121,13 @@ namespace Peach.Pro.Core.WebServices
 			public string Source { get; set; }
 		}
 
+		[XmlRoot("StateModel", Namespace = Namespace)]
 		public class StateModelElement : ChildElement
 		{
+			[XmlRoot("State", Namespace = Namespace)]
 			public class StateElement
 			{
+				[XmlRoot("Action", Namespace = Namespace)]
 				public class ActionElement
 				{
 					[XmlAttribute("type")]
@@ -212,6 +216,8 @@ namespace Peach.Pro.Core.WebServices
 		public static readonly string PitServicePrefix = "/p/pits";
 		public static readonly string LibraryServicePrefix = "/p/libraries";
 
+		#region Static Helpers
+
 		private static PeachElement Parse(string fileName)
 		{
 			try
@@ -271,130 +277,12 @@ namespace Peach.Pro.Core.WebServices
 			};
 		}
 
-		private static void AddDefine(IList<KeyValuePair<string, string>> list, string key, string value)
-		{
-			for (var i = 0; i < list.Count; ++i)
-			{
-				if (list[i].Key != key)
-					continue;
-
-				list[i] = new KeyValuePair<string, string>(key, value);
-				return;
-			}
-
-			list.Add(new KeyValuePair<string, string>(key, value));
-		}
-
-		/// <summary>
-		/// Parses the .config and returns the object required by the PitParser to execute a pit
-		/// </summary>
-		/// <param name="pitLibraryPath"></param>
-		/// <param name="pitConfig"></param>
-		/// <returns></returns>
-		public static List<KeyValuePair<string, string>> ParseConfig(string pitLibraryPath, string pitConfig)
-		{
-			var defs = new List<KeyValuePair<string, string>>();
-
-			// It is ok if a .config doesn't exist
-			if (File.Exists(pitConfig))
-			{
-				foreach (var d in PitDefines.Parse(pitConfig))
-				{
-					AddDefine(defs, d.Key, d.Value);
-				}
-			}
-
-
-			AddDefine(defs, "Peach.Cwd", Environment.CurrentDirectory);
-			AddDefine(defs, "Peach.Pwd", Utilities.ExecutionDirectory);
-			AddDefine(defs, "Peach.LogRoot", Configuration.LogRoot);
-			AddDefine(defs, "PitLibraryPath", pitLibraryPath);
-
-			var final = PitDefines.Evaluate(defs);
-
-			return final;
-		}
-
-		public List<Monitor> GetAllMonitors()
-		{
-			var ret = new List<Monitor>();
-
-			foreach (var kv in ClassLoader.GetAllByAttribute<MonitorAttribute>())
-			{
-#if !DEBUG
-				if (kv.Key.Internal)
-					continue;
-#endif
-
-				var m = MakeMonitor(kv.Key, kv.Value, null);
-
-				ret.Add(m);
-			}
-
-			ret.Sort(MonitorSorter);
-
-			return ret;
-		}
-
-		/// <summary>
-		/// Get the list of all available calls that can be used with the specified pit guid.
-		/// </summary>
-		/// <param name="guid">Pit guid.</param>
-		/// <returns>List of calls</returns>
-		public List<string> GetCallsById(string guid)
-		{
-			return GetCallsByUrl(PitServicePrefix + "/" + guid);
-		}
-
-		public List<string> GetCallsByUrl(string url)
-		{
-			var pit = GetPitDetailByUrl(url);
-			if (pit == null)
-				return null;
-
-			return pit.CallMethods;
-		}
-
-		internal Monitor MakeMonitor(MonitorAttribute attr, Type type, List<string> calls)
-		{
-			var os = "";
-			if (attr.OS == Platform.OS.Unix)
-			{
-				var ex = new NotSupportedException("Monitor {0} specifies unsupported OS {1}".Fmt(attr.Name, attr.OS));
-				if (ValidationEventHandler != null)
-					ValidationEventHandler(this, new ValidationEventArgs(ex, ""));
-			}
-			else if (attr.OS != Platform.OS.All)
-			{
-				os = attr.OS.ToString();
-			}
-
-			var m = new Monitor
-			{
-				Description = type.GetAttributes<System.ComponentModel.DescriptionAttribute>().Select(a => a.Description).FirstOrDefault() ?? "",
-				MonitorClass = attr.Name,
-				Map = new List<Parameter>(),
-				OS = os,
-			};
-
-			foreach (var p in type.GetAttributes<ParameterAttribute>())
-			{
-				var model = ParameterAttrToModel(attr.Name, p);
-
-				if (model.Type == ParameterType.String && model.Name.Contains("OnCall"))
-					model.Type = ParameterType.Call;
-
-				m.Map.Add(model);
-			}
-
-			m.Map.Sort(ParameterSorter);
-			return m;
-		}
+		#endregion
 
 		public PitDatabase()
 		{
 			entries = new Dictionary<string, PitDetail>();
-			libraries = new Dictionary<string, Library>();
+			libraries = new NamedCollection<LibraryDetail>();
 			interfaces = null;
 		}
 
@@ -408,12 +296,29 @@ namespace Peach.Pro.Core.WebServices
 		public event EventHandler<ValidationEventArgs> ValidationEventHandler;
 		public event EventHandler<LoadEventArgs> LoadEventHandler;
 
+		class LibraryDetail : INamed
+		{
+			public string SubDir { get; set; }
+
+			public Library Library { get; set; }
+
+			[Obsolete]
+			string INamed.name
+			{
+				get { return Library.LibraryUrl; }
+			}
+
+			string INamed.Name
+			{
+				get { return Library.LibraryUrl; }
+			}
+		}
+
 		public void Load(string path)
 		{
 			pitLibraryPath = path;
-			roots = new Dictionary<string, LibraryRoot>();
 			entries = new Dictionary<string, PitDetail>();
-			libraries = new Dictionary<string, Library>();
+			libraries = new NamedCollection<LibraryDetail>();
 			interfaces = null;
 
 			HashSet<string> old;
@@ -422,8 +327,8 @@ namespace Peach.Pro.Core.WebServices
 				old = new HashSet<string>(_cache.Keys);
 			}
 
-			AddLibrary(path, "", "Pits", true);
-			AddLibrary(path, "User", "Configurations", false);
+			AddLibrary("", "Pits", true);
+			AddLibrary("User", "Configurations", false);
 
 			lock (_cache)
 			{
@@ -454,24 +359,23 @@ namespace Peach.Pro.Core.WebServices
 			if (Path.GetFileName(name) != name)
 				throw new ArgumentException("A valid pit name is required.", "name");
 
-			var dstLib = GetLibraryByUrl(libraryUrl);
+			var dstLib = GetLibraryDetailByUrl(libraryUrl);
 			if (dstLib == null)
 				throw new KeyNotFoundException("The destination pit library could not be found.");
-			if (dstLib.Locked)
+			if (dstLib.Library.Locked)
 				throw new UnauthorizedAccessException("The destination pit library is locked.");
 
 			// Only support a single user library for now
-			Debug.Assert(dstLib.Name == "Configurations");
+			Debug.Assert(dstLib.Library.Name == "Configurations");
 
 			var srcPit = GetPitByUrl(pitUrl);
 			if (srcPit == null)
 				throw new KeyNotFoundException("The source pit could not be found.");
 
-			var dstRoot = roots[dstLib.LibraryUrl];
 			var srcFile = srcPit.Versions[0].Files[0].Name;
 			var srcCat = srcPit.Tags[0].Values[1];
 
-			var dstDir = Path.Combine(dstRoot.PitLibraryPath, dstRoot.SubDir, srcCat);
+			var dstDir = Path.Combine(pitLibraryPath, dstLib.SubDir, srcCat);
 
 			if (!Directory.Exists(dstDir))
 				Directory.CreateDirectory(dstDir);
@@ -543,162 +447,24 @@ namespace Peach.Pro.Core.WebServices
 				throw;
 			}
 
-			var item = AddEntry(dstLib.Versions[0], dstRoot.PitLibraryPath, dstFile);
+			var item = AddEntry(dstLib, dstFile);
 
 			return item.PitUrl;
 		}
 
-		/// <summary>
-		/// Save Pit Config
-		/// </summary>
-		/// <param name="pit"></param>
-		/// <param name="config"></param>
-		/// <remarks>
-		/// only allow user parameters to add/delete
-		/// only allow user parameters where the key doesn't collide with system parameters
-		/// only allow system parameter values to be updated
-		/// </remarks>
-		public static void SaveConfig(Pit pit, List<Parameter> config)
+		private void SaveConfig(PitDetail detail, List<Param> config)
 		{
-			var fileName = pit.Versions[0].Files[0].Name + ".config";
+			var defines = PitDefines.ParseFile(detail.ConfigFileName, pitLibraryPath);
 
-			var defines = new List<PitDefines.Define>();
-			var reserved = new HashSet<string>();
+			defines.ApplyWeb(config);
 
-			if (File.Exists(fileName))
-			{
-				foreach (var def in PitDefines.Parse(fileName))
-				{
-					if (def.ConfigType != ParameterType.User)
-					{
-						var param = config.SingleOrDefault(x => x.Key == def.Key && x.Type != ParameterType.System);
-						if (param != null)
-						{
-							def.Value = param.Value;
-						}
-						defines.Add(def);
-						reserved.Add(def.Key);
-					}
-				}
-			}
-
-			foreach (var param in config)
-			{
-				if (param.Type == ParameterType.User && !reserved.Contains(param.Key))
-				{
-					defines.Add(new PitDefines.UserDefine
-					{
-						Key = param.Key,
-						Name = param.Name,
-						Value = param.Value,
-						Description = param.Description
-					});
-				}
-			}
-
-			var final = new PitDefines
-			{
-				Platforms = new List<PitDefines.Collection>(new[] {
-					new PitDefines.All
-					{
-						Defines = defines.ToList(),
-					}
-				}),
-			};
-
-			XmlTools.Serialize(fileName, final);
+			XmlTools.Serialize(detail.ConfigFileName, defines);
 		}
 
-		public List<Models.Agent> GetAgentsById(string guid)
+		private void SaveAgents(PitDetail detail, List<Models.Agent> agents)
 		{
-			return GetAgentsByUrl(PitServicePrefix + "/" + guid);
-		}
+			detail.Agents = agents.FromWeb();
 
-		public List<Models.Agent> GetAgentsByUrl(string url)
-		{
-			var pit = GetPitDetailByUrl(url);
-			if (pit == null)
-				return null;
-
-			var ret = new List<Models.Agent>();
-			foreach (var agent in pit.Agents)
-			{
-				var a = new Models.Agent
-				{
-					AgentUrl = agent.Location,
-					Name = agent.Name,
-					Monitors = new List<Monitor>()
-				};
-
-				foreach (var monitor in agent.Monitors)
-				{
-					var m = new Monitor
-					{
-						Name = monitor.Name,
-						MonitorClass = monitor.Class,
-						Map = new List<Parameter>()
-					};
-
-					var monitor1 = monitor;
-					var type = ClassLoader.FindPluginByName<MonitorAttribute>(monitor1.Class);
-					if (type == null)
-					{
-						// No plugin found, make up some reasonable content
-						foreach (var param in monitor.Params)
-						{
-							m.Map.Add(new Parameter
-							{
-								Name = param.Name,
-								Value = param.Value,
-								Type = ParameterType.String,
-							});
-						}
-					}
-					else
-					{
-						m.Description = type.GetAttributes<System.ComponentModel.DescriptionAttribute>()
-							.Select(d => d.Description)
-							.FirstOrDefault() ?? "";
-
-						foreach (var attr in type.GetAttributes<ParameterAttribute>())
-						{
-							var p = ParameterAttrToModel(monitor.Class, attr);
-
-							p.Value = monitor.Params
-								.Where(i => i.Name == attr.name)
-								.Select(i => i.Value)
-								.FirstOrDefault() ?? p.Value;
-
-							m.Map.Add(p);
-						}
-					}
-
-					m.Map.Sort(ParameterSorter);
-
-					a.Monitors.Add(m);
-				}
-				ret.Add(a);
-			}
-
-			return ret;
-		}
-
-		private static int ParameterSorter(Parameter lhs, Parameter rhs)
-		{
-			if (IsRequired(lhs) == IsRequired(rhs))
-				return string.CompareOrdinal(lhs.Name, rhs.Name);
-
-			return IsRequired(lhs) ? -1 : 1;
-		}
-
-		private static int MonitorSorter(Monitor lhs, Monitor rhs)
-		{
-			return string.CompareOrdinal(lhs.MonitorClass, rhs.MonitorClass);
-		}
-
-		public static void SaveAgents(Pit pit, List<Models.Agent> agents)
-		{
-			var fileName = pit.Versions[0].Files[0].Name;
 			var doc = new XmlDocument();
 
 			var settingsRdr = new XmlReaderSettings
@@ -713,7 +479,7 @@ namespace Peach.Pro.Core.WebServices
 
 			var parserCtx = new XmlParserContext(settingsRdr.NameTable, nsMgrRdr, null, XmlSpace.Default);
 
-			using (var rdr = XmlReader.Create(fileName, settingsRdr, parserCtx))
+			using (var rdr = XmlReader.Create(detail.FileName, settingsRdr, parserCtx))
 			{
 				doc.Load(rdr);
 			}
@@ -739,89 +505,27 @@ namespace Peach.Pro.Core.WebServices
 
 			var test = nav.SelectSingleNode("/p:Peach/p:Test", nsMgr);
 			if (test == null)
-				throw new PeachException("Could not find a <Test> element in the pit '" + fileName + "'.");
+				throw new PeachException("Could not find a <Test> element in the pit '" + detail.FileName + "'.");
 
-			var final = new OrderedDictionary<string, XmlWriter>();
-			foreach (var item in agents)
+			using (var writer = test.InsertBefore())
 			{
-				XmlWriter w;
-				var agentKey = item.AgentUrl ?? "";
-				if (!final.TryGetValue(agentKey, out w))
+				var s = new XmlSerializer(typeof(PeachElement.AgentElement));
+				var fragWriter = new XmlFragmentWriter(writer);
+
+				foreach (var a in detail.Agents)
 				{
-					var agentName = "Agent" + final.Count;
-					if (!string.IsNullOrEmpty(item.Name))
-						agentName = item.Name;
+					// Serialize <Agent> element
+					s.Serialize(fragWriter, a);
 
-					w = test.InsertBefore();
-					w.WriteStartElement("Agent", PeachElement.Namespace);
-					w.WriteAttributeString("name", agentName);
-					if (!string.IsNullOrEmpty(item.AgentUrl))
-						w.WriteAttributeString("location", item.AgentUrl);
-
-					// AppendChild so the agents stay in order
+					// Add <Agent ref='xxx' /> to the <Test> element
+					// Use AppendChild so the agents stay in order
 					using (var testWriter = test.AppendChild())
 					{
 						testWriter.WriteStartElement("Agent", PeachElement.Namespace);
-						testWriter.WriteAttributeString("ref", agentName);
+						testWriter.WriteAttributeString("ref", a.Name);
 						testWriter.WriteEndElement();
-					}
-
-					final.Add(agentKey, w);
+					}	
 				}
-
-				foreach (var m in item.Monitors)
-				{
-					w.WriteStartElement("Monitor", PeachElement.Namespace);
-					w.WriteAttributeString("class", m.MonitorClass);
-					if (!string.IsNullOrEmpty(m.Name))
-						w.WriteAttributeString("name", m.Name);
-
-					foreach (var p in m.Map)
-					{
-						// TODO: don't trust user input, use reflection as canonical source of metadata
-						if (string.IsNullOrEmpty(p.Value) || p.Value == p.DefaultValue)
-							continue;
-
-						w.WriteStartElement("Param", PeachElement.Namespace);
-
-						if (p.Name == "StartMode")
-						{
-							if (p.Value == "StartOnCall") // File fzzing
-							{
-								w.WriteAttributeString("name", "StartOnCall");
-								w.WriteAttributeString("value", "ExitIterationEvent");
-							}
-							else if (p.Value == "RestartOnEachTest") // Network client
-							{
-								w.WriteAttributeString("name", "StartOnCall");
-								w.WriteAttributeString("value", "StartIterationEvent");
-								w.WriteEndElement();
-								w.WriteStartElement("Param", PeachElement.Namespace);
-								w.WriteAttributeString("name", "WaitForExitOnCall");
-								w.WriteAttributeString("value", "ExitIterationEvent");
-							}
-							else // Network server
-							{
-								w.WriteAttributeString("name", "RestartOnEachTest");
-								w.WriteAttributeString("value", "false");
-							}
-						}
-						else
-						{
-							w.WriteAttributeString("name", p.Name);
-							w.WriteAttributeString("value", p.Value);
-						}
-
-						w.WriteEndElement();
-					}
-
-					w.WriteEndElement();
-				}
-			}
-
-			foreach (var a in final)
-			{
-				a.Value.Close();
 			}
 
 			var settings = new XmlWriterSettings
@@ -831,7 +535,7 @@ namespace Peach.Pro.Core.WebServices
 				IndentChars = "  ",
 			};
 
-			using (var writer = XmlWriter.Create(fileName, settings))
+			using (var writer = XmlWriter.Create(detail.FileName, settings))
 			{
 				doc.WriteTo(writer);
 			}
@@ -850,47 +554,49 @@ namespace Peach.Pro.Core.WebServices
 			}
 		}
 
-		private void AddLibrary(string root, string subdir, string name, bool locked)
+		private void AddLibrary(string subdir, string name, bool locked)
 		{
-			var path = Path.Combine(root, subdir);
+			var path = Path.Combine(pitLibraryPath, subdir);
 
 			var guid = MakeGuid(name);
 
-			var lib = new Library
+			var lib = new LibraryDetail
 			{
-				LibraryUrl = LibraryServicePrefix + "/" + guid,
-				Name = name,
-				Description = name,
-				Locked = locked,
-				Versions = new List<LibraryVersion>(),
-				Groups = new List<Group>(),
-				User = Environment.UserName,
-				Timestamp = string.IsNullOrEmpty(path) ? new DateTime(0) : Directory.GetCreationTime(path),
+				SubDir = subdir,
+
+				Library = new Library
+				{
+					LibraryUrl = LibraryServicePrefix + "/" + guid,
+					Name = name,
+					Description = name,
+					Locked = locked,
+					Groups = new List<Group>
+					{
+						new Group
+						{
+							GroupUrl = "",
+							Access = locked ? GroupAccess.Read : GroupAccess.Read | GroupAccess.Write
+						}
+					},
+					User = Environment.UserName,
+					Versions = new List<LibraryVersion>
+					{
+						new LibraryVersion
+						{
+							Version = 1,
+							Locked = locked,
+							Pits = new List<LibraryPit>()
+						}
+					}
+				}
 			};
 
-			var ver = new LibraryVersion
-			{
-				Version = 1,
-				Locked = lib.Locked,
-				Pits = new List<LibraryPit>(),
-			};
-
-			var group = new Group
-			{
-				GroupUrl = "",
-				Access = GroupAccess.Read,
-			};
-
-			if (!ver.Locked)
-				group.Access |= GroupAccess.Write;
-
-			lib.Versions.Add(ver);
-			lib.Groups.Add(group);
-			libraries.Add(lib.LibraryUrl, lib);
-			roots.Add(lib.LibraryUrl, new LibraryRoot { PitLibraryPath = root, SubDir = subdir });
+			libraries.Add(lib);
 
 			if (!Directory.Exists(path))
 				return;
+
+			lib.Library.Timestamp = Directory.GetCreationTime(path);
 
 			foreach (var dir in Directory.EnumerateDirectories(path))
 			{
@@ -901,7 +607,7 @@ namespace Peach.Pro.Core.WebServices
 				{
 					try
 					{
-						var item = AddEntry(ver, root, file);
+						var item = AddEntry(lib, file);
 
 						if (LoadEventHandler != null)
 							LoadEventHandler(this, new LoadEventArgs(item, file));
@@ -915,7 +621,7 @@ namespace Peach.Pro.Core.WebServices
 			}
 		}
 
-		public IEnumerable<Pit> Entries
+		public IEnumerable<LibraryPit> Entries
 		{
 			get
 			{
@@ -927,7 +633,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 			get
 			{
-				return libraries.Values;
+				return libraries.Select(l => l.Library);
 			}
 		}
 
@@ -953,7 +659,8 @@ namespace Peach.Pro.Core.WebServices
 			var detail = GetPitDetailById(guid);
 			if (detail == null)
 				return null;
-			return detail.Pit;
+
+			return PopulatePit(detail);
 		}
 
 		public Pit GetPitByUrl(string url)
@@ -961,7 +668,8 @@ namespace Peach.Pro.Core.WebServices
 			var detail = GetPitDetailByUrl(url);
 			if (detail == null)
 				return null;
-			return detail.Pit;
+
+			return PopulatePit(detail);
 		}
 
 		public Library GetLibraryById(string guid)
@@ -971,193 +679,43 @@ namespace Peach.Pro.Core.WebServices
 
 		public Library GetLibraryByUrl(string url)
 		{
-			Library library;
-			libraries.TryGetValue(url, out library);
-			return library;
-		}
-
-		public List<Parameter> GetConfigById(string guid)
-		{
-			return GetConfigByUrl(PitServicePrefix + "/" + guid);
-		}
-
-		public List<Parameter> GetConfigByUrl(string url)
-		{
-			var pit = GetPitByUrl(url);
-			if (pit == null)
+			var detail = GetLibraryDetailByUrl(url);
+			if (detail == null)
 				return null;
 
-			var fileName = pit.Versions[0].Files[0].Name + ".config";
-
-			var defs = File.Exists(fileName)
-				? PitDefines.Parse(fileName)
-				: new List<PitDefines.Define>();
-
-			return MakeConfig(defs);
+			return detail.Library;
 		}
 
-		public List<Parameter> MakeConfig(List<PitDefines.Define> defines)
+		private LibraryDetail GetLibraryDetailByUrl(string url)
 		{
-			var ret = new List<Parameter>()
-			{
-				new Parameter()
-				{
-					Type = ParameterType.System,
-					Key = "Peach.Pwd",
-					Name = "Peach Installation Directory",
-					Description = "Full path to Peach installation",
-					Value = Utilities.ExecutionDirectory,
-				},
-				new Parameter()
-				{
-					Type = ParameterType.System,
-					Key = "Peach.Cwd",
-					Name = "Peach Working Directory",
-					Description = "Full path to the current working directory",
-					Value = Environment.CurrentDirectory,
-				},
-				new Parameter()
-				{
-					Type = ParameterType.System,
-					Key = "Peach.LogRoot",
-					Name = "Root Log Directory",
-					Description = "Full path to the root log directory",
-					Value = Configuration.LogRoot,
-				},
-				new Parameter()
-				{
-					Type = ParameterType.System,
-					Key = "PitLibraryPath",
-					Name = "Pit Library Path",
-					Description = "Path to root of Pit Library",
-					Value = pitLibraryPath,
-				}
-			};
-
-			foreach (var d in defines)
-			{
-				// Don't present this to the user
-				if (d.Key == "PitLibraryPath")
-					continue;
-
-				var item = new Parameter
-				{
-					Type = d.ConfigType,
-					Key = d.Key,
-					Value = d.Value,
-					Name = d.Name,
-					Description = d.Description,
-					Optional = d.Optional,
-					Options = d.Defaults.ToList(),
-					Min = d.Min,
-					Max = d.Max,
-				};
-
-				switch (item.Type)
-				{
-					case ParameterType.Hwaddr:
-						item.Options.AddRange(
-							Interfaces
-								.Select(i => i.GetPhysicalAddress().GetAddressBytes())
-								.Select(a => string.Join(":", a.Select(b => b.ToString("x2"))))
-								.Where(s => !string.IsNullOrEmpty(s)));
-						break;
-					case ParameterType.Iface:
-						item.Options.AddRange(Interfaces.Select(i => i.Name));
-						break;
-					case ParameterType.Ipv4:
-						item.Options.AddRange(
-							Interfaces
-								.SelectMany(i => i.GetIPProperties().UnicastAddresses)
-								.Where(a => a.Address.AddressFamily == AddressFamily.InterNetwork)
-								.Select(a => a.Address.ToString()));
-						break;
-					case ParameterType.Ipv6:
-						item.Options.AddRange(
-							Interfaces
-								.SelectMany(i => i.GetIPProperties().UnicastAddresses)
-								.Where(a => a.Address.AddressFamily == AddressFamily.InterNetworkV6)
-								.Select(a => a.Address.ToString()));
-						break;
-					case ParameterType.Bool:
-						item.Options.AddRange(new[] {"true", "false"});
-						break;
-				}
-
-				ret.Add(item);
-			}
-
-			return ret;
+			LibraryDetail detail;
+			libraries.TryGetValue(url, out detail);
+			return detail;
 		}
 
-		internal Parameter ParameterAttrToModel(string monitorClass, ParameterAttribute attr)
+		public Pit UpdatePitById(string guid, Pit data)
 		{
-			var p = new Parameter
-			{
-				Name = attr.name,
-				DefaultValue = attr.required ? null : attr.defaultValue,
-				Optional = !attr.required,
-				Description = attr.description
-			};
+			var detail = GetPitDetailById(guid);
+			if (detail == null)
+				throw new KeyNotFoundException();
 
-			var key = attr.type.Name;
-			if (attr.type.IsGenericType)
-			{
-				key = attr.type.GetGenericArguments().First().Name;
-			}
-			else if (attr.type.IsEnum)
-			{
-				key = "Enum";
-			}
+			//if (detail.Pit.Locked)
+			//	throw new UnauthorizedAccessException();
 
-			switch (key)
-			{
-				case "String":
-				case "String[]":
-				case "Int32[]":
-					p.Type = ParameterType.String;
-					break;
-				case "UInt16":
-					p.Type = ParameterType.Range;
-					p.Max = UInt16.MaxValue;
-					p.Min = UInt16.MinValue;
-					break;
-				case "UInt32":
-					p.Type = ParameterType.Range;
-					p.Max = UInt32.MaxValue;
-					p.Min = UInt32.MinValue;
-					break;
-				case "Int32":
-					p.Type = ParameterType.Range;
-					p.Max = Int32.MaxValue;
-					p.Min = Int32.MinValue;
-					break;
-				case "Boolean":
-					p.Type = ParameterType.Bool;
-					p.Options = new List<string> { "true", "false" };
-					break;
-				case "Enum":
-					p.Type = ParameterType.Enum;
-					p.Options = Enum.GetNames(attr.type).ToList();
-					break;
-				case "IPAddress":
-					p.Type = ParameterType.Ipv4;
-					break;
-				default:
-					p.Type = ParameterType.String;
+			if (data.Config != null)
+				SaveConfig(detail, data.Config);
 
-					var ex =
-						new NotSupportedException("Monitor {0} has invalid parameter type {1}".Fmt(monitorClass, attr.type.FullName));
-					if (ValidationEventHandler != null)
-						ValidationEventHandler(this, new ValidationEventArgs(ex, ""));
+			if (data.Agents != null)
+				SaveAgents(detail, data.Agents);
 
-					break;
-			}
+			//var fileName = detail.Pit.Versions[0].Files[0].Name;
+			//var lastModified = File.GetLastWriteTimeUtc(fileName);
 
-			if (attr.name.Contains("OnCall"))
-				p.Type = ParameterType.Call;
+			//detail = MakePitDetail(fileName, detail.Pit.Id, detail.Pit.Locked, lastModified);
 
-			return p;
+			//entries[detail.Pit.PitUrl] = detail;
+
+			return PopulatePit(detail);
 		}
 
 		private PitDetail GetPitDetailById(string guid)
@@ -1172,32 +730,18 @@ namespace Peach.Pro.Core.WebServices
 			return pit;
 		}
 
-		private static bool IsRequired(Parameter param)
-		{
-			return param.DefaultValue == null;
-		}
-
-		private static bool IsConfigured(PeachElement elem)
-		{
-			// Pit is 'configured' if there is a <Test> with an <Agent ref='xxx'/> child
-			return elem.Children.OfType<PeachElement.TestElement>().Any(e => e.AgentRefs.Any());
-		}
-
 		private bool AnyFilesStale(PitDetail detail)
 		{
-			foreach (var version in detail.Pit.Versions)
+			foreach (var file in detail.Pit.Versions.SelectMany(v => v.Files))
 			{
-				foreach (var file in version.Files)
-				{
-					var fi = new System.IO.FileInfo(file.Name);
-					if (!fi.Exists || file.Timestamp < fi.LastWriteTimeUtc)
-						return true;
-				}
+				var fi = new System.IO.FileInfo(file.Name);
+				if (!fi.Exists || file.Timestamp < fi.LastWriteTimeUtc)
+					return true;
 			}
 			return false;
 		}
 
-		private Pit AddEntry(LibraryVersion lib, string pitLibraryPath, string fileName)
+		private Pit AddEntry(LibraryDetail lib, string fileName)
 		{
 			var guid = MakeGuid(fileName);
 			var url = PitServicePrefix + "/" + guid;
@@ -1210,14 +754,14 @@ namespace Peach.Pro.Core.WebServices
 					detail.Pit.Timestamp < lastModified ||
 					AnyFilesStale(detail))
 				{
-					detail = MakePitDetail(lib, pitLibraryPath, fileName, guid, lastModified);
+					detail = MakePitDetail(fileName, guid, lib.Library.Locked, lastModified);
 					_cache[url] = detail;
 				}
 			}
 
 			entries.Add(url, detail);
 
-			lib.Pits.Add(new LibraryPit
+			lib.Library.Versions[0].Pits.Add(new LibraryPit
 			{
 				Id = detail.Pit.Id,
 				PitUrl = url,
@@ -1230,10 +774,9 @@ namespace Peach.Pro.Core.WebServices
 		}
 
 		private PitDetail MakePitDetail(
-			LibraryVersion lib, 
-			string pitLibraryPath, 
 			string fileName,
 			string guid,
+			bool locked,
 			DateTime lastModified)
 		{
 			var contents = Parse(fileName);
@@ -1244,7 +787,7 @@ namespace Peach.Pro.Core.WebServices
 				PitUrl = PitServicePrefix + "/" + guid,
 				Name = Path.GetFileNameWithoutExtension(fileName),
 				Description = contents.Description,
-				Locked = lib.Locked,
+				Locked = locked,
 				Tags = new List<Tag>(),
 				Versions = new List<PitVersion>(),
 				Peaches = new List<PeachVersion>(),
@@ -1255,14 +798,13 @@ namespace Peach.Pro.Core.WebServices
 			var ver = new PitVersion
 			{
 				Version = 1,
-				Configured = IsConfigured(contents),
 				Locked = value.Locked,
 				Files = new List<PitFile>(),
 				User = Environment.UserName,
 				Timestamp = lastModified
 			};
 
-			var detail = new PitDetail
+			var detail = new PitDetail(fileName)
 			{
 				Pit = value,
 				StateModel =
@@ -1338,24 +880,195 @@ namespace Peach.Pro.Core.WebServices
 			}
 		}
 
-		class LibraryRoot
+		private class PitDetail
 		{
-			public string PitLibraryPath { get; set; }
-			public string SubDir { get; set; }
-		}
+			public PitDetail(string fileName)
+			{
+				FileName = fileName;
+				ConfigFileName = fileName + ".config";
+			}
 
-		class PitDetail
-		{
+			public string FileName { get; private set; }
+			public string ConfigFileName { get; private set; }
+
 			public Pit Pit { get; set; }
 			public string StateModel { get; set; }
 			public List<string> CallMethods { get; set; }
 			public List<PeachElement.AgentElement> Agents { get; set; }
 		}
 
-		private Dictionary<string, LibraryRoot> roots;
 		private Dictionary<string, PitDetail> entries;
-		private Dictionary<string, Library> libraries;
+		private NamedCollection<LibraryDetail> libraries;
 		private List<NetworkInterface> interfaces;
 		private static Dictionary<string, PitDetail> _cache = new Dictionary<string, PitDetail>();
+
+		#region Pit Config/Agents/Metadata
+
+		private Pit PopulatePit(PitDetail detail)
+		{
+			var defs = PitDefines.ParseFile(detail.ConfigFileName, pitLibraryPath);
+
+			var pit = detail.Pit;
+
+
+			pit.Config = defs.Evaluate().Select(d => new Param { Key = d.Key, Value = d.Value }).ToList();
+			pit.Agents = detail.Agents.ToWeb();
+			pit.Metadata = new PitMetadata
+			{
+				Defines = defs.ToWeb(),
+				Monitors = GetAllMonitors(detail.CallMethods)
+			};
+
+			return pit;
+		}
+
+		internal ParamDetail ParameterAttrToModel(string monitorClass, ParameterAttribute attr)
+		{
+			var p = new ParamDetail
+			{
+				Key = attr.name,
+				Name = attr.name,
+				DefaultValue = attr.required ? null : attr.defaultValue,
+				Optional = !attr.required,
+				Description = attr.description
+			};
+
+			var key = attr.type.Name;
+			if (attr.type.IsGenericType)
+			{
+				key = attr.type.GetGenericArguments().First().Name;
+			}
+			else if (attr.type.IsEnum)
+			{
+				key = "Enum";
+			}
+
+			switch (key)
+			{
+				case "String":
+				case "String[]":
+				case "Int32[]":
+					p.Type = ParameterType.String;
+					break;
+				case "UInt16":
+					p.Type = ParameterType.Range;
+					p.Max = UInt16.MaxValue;
+					p.Min = UInt16.MinValue;
+					break;
+				case "UInt32":
+					p.Type = ParameterType.Range;
+					p.Max = UInt32.MaxValue;
+					p.Min = UInt32.MinValue;
+					break;
+				case "Int32":
+					p.Type = ParameterType.Range;
+					p.Max = Int32.MaxValue;
+					p.Min = Int32.MinValue;
+					break;
+				case "Boolean":
+					p.Type = ParameterType.Bool;
+					p.Options = new List<string> { "true", "false" };
+					break;
+				case "Enum":
+					p.Type = ParameterType.Enum;
+					p.Options = Enum.GetNames(attr.type).ToList();
+					break;
+				case "IPAddress":
+					p.Type = ParameterType.Ipv4;
+					break;
+				default:
+					p.Type = ParameterType.String;
+
+					var ex =
+						new NotSupportedException("Monitor {0} has invalid parameter type {1}".Fmt(monitorClass, attr.type.FullName));
+					if (ValidationEventHandler != null)
+						ValidationEventHandler(this, new ValidationEventArgs(ex, ""));
+
+					break;
+			}
+
+			if (attr.name.Contains("OnCall"))
+				p.Type = ParameterType.Call;
+
+			return p;
+		}
+
+		private static void AddDefine(IList<KeyValuePair<string, string>> list, string key, string value)
+		{
+			for (var i = 0; i < list.Count; ++i)
+			{
+				if (list[i].Key != key)
+					continue;
+
+				list[i] = new KeyValuePair<string, string>(key, value);
+				return;
+			}
+
+			list.Add(new KeyValuePair<string, string>(key, value));
+		}
+
+		internal List<ParamDetail> GetAllMonitors(List<string> calls)
+		{
+			var ret = new List<ParamDetail>();
+
+			foreach (var kv in ClassLoader.GetAllByAttribute<MonitorAttribute>())
+			{
+#if !DEBUG
+				if (kv.Key.Internal)
+					continue;
+#endif
+
+				var m = MakeMonitor(kv.Key, kv.Value, calls);
+
+				ret.Add(m);
+			}
+
+			//ret.Sort(ParameterSorter);
+
+			return ret;
+		}
+
+		internal ParamDetail MakeMonitor(MonitorAttribute attr, Type type, List<string> calls)
+		{
+			var os = "";
+			if (attr.OS == Platform.OS.Unix)
+			{
+				var ex = new NotSupportedException("Monitor {0} specifies unsupported OS {1}".Fmt(attr.Name, attr.OS));
+				if (ValidationEventHandler != null)
+					ValidationEventHandler(this, new ValidationEventArgs(ex, ""));
+			}
+			else if (attr.OS != Platform.OS.All)
+			{
+				os = attr.OS.ToString();
+			}
+
+			var m = new ParamDetail
+			{
+				Key = attr.Name,
+				Name = attr.Name,
+				Description = type.GetAttributes<System.ComponentModel.DescriptionAttribute>().Select(a => a.Description).FirstOrDefault() ?? "",
+				Items = new List<ParamDetail>(),
+				OS = os,
+			};
+
+			foreach (var p in type.GetAttributes<ParameterAttribute>())
+			{
+				var model = ParameterAttrToModel(attr.Name, p);
+
+				if (model.Type == ParameterType.String && model.Name.Contains("OnCall"))
+				{
+					model.Type = ParameterType.Call;
+					model.Options = calls;
+				}
+
+				m.Items.Add(model);
+			}
+
+			//m.Items.Sort(ParameterSorter);
+			return m;
+		}
+
+
+		#endregion
 	}
 }
