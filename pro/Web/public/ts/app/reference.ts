@@ -8,6 +8,7 @@
 
 /** Managed references (unordered) */
 //grunt-start
+/// <reference path="controllers/AddMonitorCtrl.ts" />
 /// <reference path="controllers/AlertCtrl.ts" />
 /// <reference path="controllers/ConfirmCtrl.ts" />
 /// <reference path="controllers/ErrorCtrl.ts" />
@@ -42,6 +43,7 @@
 /// <reference path="directives/JobsDirective.ts" />
 /// <reference path="directives/MonitorDirective.ts" />
 /// <reference path="directives/ParameterDirective.ts" />
+/// <reference path="directives/ParameterInputDirective.ts" />
 /// <reference path="directives/SmartTableDirective.ts" />
 /// <reference path="directives/TestDirective.ts" />
 /// <reference path="directives/UniqueDirective.ts" />
@@ -52,7 +54,6 @@
 /// <reference path="models/Library.ts" />
 /// <reference path="models/Metrics.ts" />
 /// <reference path="models/Pit.ts" />
-/// <reference path="models/PitConfig.ts" />
 /// <reference path="models/PitTest.ts" />
 /// <reference path="models/Wizard.ts" />
 /// <reference path="services/JobService.ts" />

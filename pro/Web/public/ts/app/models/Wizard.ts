@@ -1,20 +1,18 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
-	export module QuestionTypes {
-		export var String = "string";
-		export var Hex = "hex";
-		export var Range = "range";
-		export var Ipv4 = "ipv4";
-		export var Ipv6 = "ipv6";
-		export var HwAddress = "hwaddr";
-		export var Iface = "iface";
-		export var Choice = "choice";
-		export var Jump = "jump";
-		export var Intro = "intro";
-		export var Done = "done";
+namespace Peach {
+	export namespace QuestionTypes {
+		export const String = "string";
+		export const Hex = "hex";
+		export const Range = "range";
+		export const Ipv4 = "ipv4";
+		export const Ipv6 = "ipv6";
+		export const HwAddress = "hwaddr";
+		export const Iface = "iface";
+		export const Choice = "choice";
+		export const Jump = "jump";
+		export const Intro = "intro";
+		export const Done = "done";
 	}
 
 	export interface IChoice {
@@ -57,7 +55,7 @@ module Peach {
 
 		// dynamic values
 		isComplete?: boolean;
-		agents?: Agent[];
+		agents?: IAgent[];
 		history: number[];
 
 		Begin(): ng.IPromise<any>;

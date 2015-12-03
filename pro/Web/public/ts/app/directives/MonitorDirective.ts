@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	export var MonitorDirective: IDirective = {
 		ComponentID: C.Directives.Monitor,
 		restrict: 'E',
@@ -42,7 +40,7 @@ module Peach {
 
 		public get Header(): string {
 			var monitor = this.$scope.monitor.monitorClass;
-			var name = this.$scope.monitor.name ? '(' + this.$scope.monitor.name + ')' : '';
+			var name = this.$scope.monitor.name ? `(${this.$scope.monitor.name})` : '';
 			return monitor + ' ' + name;
 		}
 

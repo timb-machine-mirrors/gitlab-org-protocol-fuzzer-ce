@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	export interface IBoundScope extends ng.IScope {
 		min: IBoundFunction;
 		max: IBoundFunction;

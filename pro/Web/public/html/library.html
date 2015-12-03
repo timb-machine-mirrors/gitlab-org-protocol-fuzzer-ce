@@ -24,8 +24,8 @@
 <p>
 	Peach Pits allow testing of a data format or a network protocol against a variety of targets.
 </p>
-<accordion close-others="false">
-	<accordion-group ng-repeat="cat in vm.Pits.Categories"
+<uib-accordion close-others="false">
+	<uib-accordion-group ng-repeat="cat in vm.Pits.Categories"
 									 heading="{{cat.Name}}"
 									 is-open="true">
 		<ul class="list-inline library">
@@ -34,8 +34,8 @@
 					ng-click="vm.OnSelectPit(entry)">{{entry.Pit.name}}</a>
 			</li>
 		</ul>
-	</accordion-group>
-</accordion>
+	</uib-accordion-group>
+</uib-accordion>
 
 <div class="page-header">
 	<h3>Configurations</h3>
@@ -44,8 +44,8 @@
 	The Configurations section contains existing Peach Pit configurations. 
 	Selecting an existing configuration allows editing the configuration and starting a new fuzzing job.
 </p>
-<accordion close-others="false">
-	<accordion-group ng-repeat="cat in vm.User.Categories"
+<uib-accordion close-others="false">
+	<uib-accordion-group ng-repeat="cat in vm.User.Categories"
 									 heading="{{cat.Name}}"
 									 is-open="true">
 		<ul class="list-inline library">
@@ -54,5 +54,5 @@
 					ng-click="vm.OnSelectPit(entry)">{{entry.Pit.name}}</a>
 			</li>
 		</ul>
-	</accordion-group>
-</accordion>
+	</uib-accordion-group>
+</uib-accordion>

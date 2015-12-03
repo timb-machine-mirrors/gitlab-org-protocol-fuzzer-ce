@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	export interface IPitTestScope extends IViewModelScope {
 		Title: string;
 	}
@@ -86,7 +84,7 @@ module Peach {
 					this.wizardService.GetTrack(C.Tracks.Data).agents,
 					this.wizardService.GetTrack(C.Tracks.Auto).agents
 				];
-				var promise = this.pitService.SaveAgents(_.flatten<Agent>(agents));
+				var promise = this.pitService.SaveAgents(_.flatten<IAgent>(agents));
 				promise.then(() => {
 					this.startTest();
 				});

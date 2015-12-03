@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	export interface IUniqueScope extends ng.IScope {
 		unique: Function;
 		watch: string;

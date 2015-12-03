@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	enum WizardStep {
 		Intro = 1,
 		QandA,
@@ -116,7 +114,7 @@ module Peach {
 			return ret;
 		}
 
-		public get Agents(): Agent[] {
+		public get Agents(): IAgent[] {
 			return this.track.agents;
 		}
 

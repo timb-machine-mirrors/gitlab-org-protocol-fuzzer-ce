@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	interface IUnsavedScope extends ng.IScope {
 		ctrl: UnsavedController;
 	}
@@ -27,7 +25,7 @@ module Peach {
 	export class UnsavedController {
 		static $inject = [
 			C.Angular.$scope,
-			C.Angular.$modal,
+			C.Angular.$uibModal,
 			C.Angular.$state
 		];	
 

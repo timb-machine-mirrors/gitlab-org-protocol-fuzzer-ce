@@ -1,6 +1,6 @@
 ﻿<ng-form name="form">
-	<accordion-group is-open="isOpen">
-		<accordion-heading>
+	<uib-accordion-group is-open="isOpen">
+		<uib-accordion-heading>
 			<span>
 				<i class="fa"
 					 ng-class="{'fa-chevron-down': isOpen, 'fa-chevron-right': !isOpen}">
@@ -11,7 +11,7 @@
 					<button class="btn btn-xs btn-info"
 									ng-click="vm.OnMoveUp($event)"
 									ng-disabled="!vm.CanMoveUp"
-									tooltip="Move Monitor Up"
+									uib-tooltip="Move Monitor Up"
 									tooltip-append-to-body="true">
 						<i class="fa fa-chevron-up">
 						</i>
@@ -19,21 +19,21 @@
 					<button class="btn btn-xs btn-info"
 									ng-click="vm.OnMoveDown($event)"
 									ng-disabled="!vm.CanMoveDown"
-									tooltip="Move Monitor Down"
+									uib-tooltip="Move Monitor Down"
 									tooltip-append-to-body="true">
 						<i class="fa fa-chevron-down">
 						</i>
 					</button>
 					<button class="btn btn-xs btn-danger"
 									ng-click="vm.OnRemove($event)"
-									tooltip="Remove Monitor"
+									uib-tooltip="Remove Monitor"
 									tooltip-append-to-body="true">
 						<i class="fa fa-remove">
 						</i>
 					</button>
 				</span>
 			</span>
-		</accordion-heading>
+		</uib-accordion-heading>
 		<div class="form-group"
 				 ng-class="{'has-error': form.name.$invalid}">
 			<label class="col-sm-4 control-label">
@@ -42,9 +42,9 @@
 			<div class="col-sm-6">
 				<div class="input-group">
 					<span class="input-group-addon"
-					      tooltip="Friendly name for your monitor"
-					      tooltip-placement="above"
-					      tooltip-append-to-body="true">
+								uib-tooltip="Friendly name for your monitor"
+								tooltip-placement="above"
+								tooltip-append-to-body="true">
 						<i class="fa fa-question-circle"></i>
 					</span>
 					<input name="name"
@@ -60,10 +60,10 @@
 				</span>
 			</div>
 		</div>
-		<div ng-repeat="param in monitor.map">
-			<peach:parameter param="param"
-											 input-group="true">
+		<uib-accordion close-others="false">
+			<peach:parameter ng-repeat="param in monitor.view.items track by $index"
+												param="param">
 			</peach:parameter>
-		</div>
-	</accordion-group>
+		</uib-accordion>
+	</uib-accordion-group>
 </ng-form>

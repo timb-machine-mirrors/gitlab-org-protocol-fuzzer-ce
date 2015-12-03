@@ -1,8 +1,6 @@
 ﻿ /// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	export var JOB_INTERVAL = 3000;
 	
 	export class JobService {
@@ -10,7 +8,7 @@ module Peach {
 			C.Angular.$rootScope,
 			C.Angular.$q,
 			C.Angular.$http,
-			C.Angular.$modal,
+			C.Angular.$uibModal,
 			C.Angular.$state,
 			C.Angular.$timeout,
 			C.Services.Pit

@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	export interface IComboboxScope extends ng.IScope {
 		vm: ComboboxController;
 		data: any;

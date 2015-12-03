@@ -1,43 +1,46 @@
 /// <reference path="../reference.ts" />
 
-'use strict';
-
 describe("Peach", () => {
-	var C = Peach.C;
+	let C = Peach.C;
 	beforeEach(module('Peach'));
 
 	describe('WizardController', () => {
-		var $controller: ng.IControllerService;
-		var $httpBackend: ng.IHttpBackendService;
-		var $rootScope: ng.IRootScopeService;
-		var $state: ng.ui.IStateService;
+		let $controller: ng.IControllerService;
+		let $httpBackend: ng.IHttpBackendService;
+		let $rootScope: ng.IRootScopeService;
+		let $state: ng.ui.IStateService;
 
-		var ctrl: Peach.WizardController;
-		var scope: Peach.IWizardScope;
-		var wizardService: Peach.WizardService;
+		let ctrl: Peach.WizardController;
+		let scope: Peach.IWizardScope;
+		let wizardService: Peach.WizardService;
 
-		var WizardController = 'WizardController';
-		var pitId = 'PIT_GUID';
-		var pitUrl = C.Api.PitUrl.replace(':id', pitId);
-		var pit = {
+		let WizardController = 'WizardController';
+		let pitId = 'PIT_GUID';
+		let pitUrl = C.Api.PitUrl.replace(':id', pitId);
+		let pit: Peach.IPit = {
+			id: pitId,
+			name: 'My Pit',
+			description: 'description',
+			pitUrl: pitUrl,
+			tags: [],
+			config: [],
+			agents: []
+		};
+		let pitPost: Peach.IPit = {
 			id: pitId,
 			name: 'My Pit',
 			pitUrl: pitUrl,
-			peachConfig: [{ key: "LocalOS", value: "windows" }],
-			config: []
+			config: [],
+			agents: []
 		};
 
 		beforeEach(inject(($injector: ng.auto.IInjectorService) => {
-			var pitService: Peach.PitService;
-			var $templateCache: ng.ITemplateCacheService;
-
 			$controller = $injector.get(C.Angular.$controller);
 			$httpBackend = $injector.get(C.Angular.$httpBackend);
 			$rootScope = $injector.get(C.Angular.$rootScope);
 			$state = $injector.get(C.Angular.$state);
-			$templateCache = $injector.get(C.Angular.$templateCache);
-
-			pitService = $injector.get(C.Services.Pit);
+			const $templateCache: ng.ITemplateCacheService = $injector.get(C.Angular.$templateCache);
+			const pitService: Peach.PitService = $injector.get(C.Services.Pit);
 			wizardService = $injector.get(C.Services.Wizard);
 
 			$templateCache.put(C.Templates.Home, '');
@@ -46,7 +49,7 @@ describe("Peach", () => {
 			$templateCache.put(C.Templates.Pit.Wizard.Track, '');
 			$templateCache.put(C.Templates.Pit.Wizard.Question, '');
 
-			var tracks = [
+			let tracks = [
 				C.Tracks.Vars,
 				C.Tracks.Fault,
 				C.Tracks.Data
@@ -93,7 +96,7 @@ describe("Peach", () => {
 		}
 
 		function expectState(state, id?) {
-			var actual = $state.is(state, { pit: pitId, id: id });
+			let actual = $state.is(state, { pit: pitId, id: id });
 			expect(actual).toBe(true);
 			if (!actual) {
 				console.error('expectState', state, id);
@@ -119,7 +122,7 @@ describe("Peach", () => {
 				});
 
 				it("Next() will move to review", () => {
-					$httpBackend.expectPOST(pitUrl, pit).respond(pit);
+					$httpBackend.expectPOST(pitUrl, pitPost).respond(pit);
 					Next();
 					$httpBackend.flush();
 					expectState(Peach.WizardTrackReview(C.Tracks.Vars));
@@ -132,12 +135,18 @@ describe("Peach", () => {
 			});
 
 			describe("with variables to configure", () => {
-				var key = "Key";
-				var name = "Name";
-				var value = "Value";
+				let key = "Key";
+				let name = "Name";
+				let value = "Value";
 
 				beforeEach(() => {
 					pit.config = [
+						{
+							key: 'Peach.OS',
+							name: 'Peach.OS',
+							type: Peach.ParameterType.System,
+							value: 'windows'
+						},
 						{ key: key, name: name, type: Peach.QuestionTypes.String }
 					];
 
@@ -163,7 +172,7 @@ describe("Peach", () => {
 					expect(scope.Question.key).toBe(key);
 					expect(scope.Question.type).toBe(Peach.QuestionTypes.String);
 
-					var post = angular.copy(pit);
+					let post = angular.copy(pitPost);
 					post.config = [
 						{ key: key, name: name, value: value, type: Peach.QuestionTypes.String }
 					];
@@ -246,7 +255,7 @@ describe("Peach", () => {
 
 				expect(scope.Question.type).toBe(Peach.QuestionTypes.Done);
 
-				var expected: Peach.Agent[] = [
+				let expected: Peach.IAgent[] = [
 					{
 						"name": "",
 						"agentUrl": "local://",
@@ -258,7 +267,7 @@ describe("Peach", () => {
 									{ "name": "Executable", "value": "C:\\some\\program.exe" },
 									{ "name": "WinDbgPath", "value": "" }
 								],
-								"description": "Enable page heap debugging options for an executable. "
+								"description": "Enable page heap debugging options for an executable."
 							}, {
 								"monitorClass": "WindowsDebugger",
 								"path": [1100],
@@ -271,19 +280,19 @@ describe("Peach", () => {
 									{ "name": "StartMode", "value": "StartOnEachIteration" },
 									{ "name": "IgnoreFirstChanceGuardPage", "value": true }
 								],
-								"description": "Enable Windows debugging. "
+								"description": "Enable Windows debugging."
 							}
 						]
 					}
 				];
 				
-				var actual = wizardService.GetTrack("fault").agents;
+				let actual = wizardService.GetTrack("fault").agents;
 				expect(JSON.stringify(actual)).toEqual(JSON.stringify(expected));
 			});
 		});
 
 		describe("mocked 'data' track", () => {
-			var mockTemplate: Peach.IWizardTemplate = {
+			let mockTemplate: Peach.IWizardTemplate = {
 				qa: [
 					{
 						id: 0,
@@ -390,7 +399,7 @@ describe("Peach", () => {
 				expectState(Peach.WizardTrackReview(C.Tracks.Data));
 				expect(scope.Question.type).toBe(Peach.QuestionTypes.Done);
 
-				var expected: Peach.Agent[] = [
+				let expected: Peach.IAgent[] = [
 					{
 						"name": "",
 						"agentUrl": "local://",
@@ -407,7 +416,7 @@ describe("Peach", () => {
 					}
 				];
 
-				var actual = wizardService.GetTrack(C.Tracks.Data).agents;
+				let actual = wizardService.GetTrack(C.Tracks.Data).agents;
 				expect(JSON.stringify(actual)).toEqual(JSON.stringify(expected));
 			});
 
@@ -437,7 +446,7 @@ describe("Peach", () => {
 				expectState(Peach.WizardTrackReview(C.Tracks.Data));
 				expect(scope.Question.type).toBe(Peach.QuestionTypes.Done);
 
-				var expected1: Peach.Agent[] = [
+				let expected1: Peach.IAgent[] = [
 					{
 						"name": "",
 						"agentUrl": "local://",
@@ -454,7 +463,7 @@ describe("Peach", () => {
 					}
 				];
 
-				var actual = wizardService.GetTrack(C.Tracks.Data).agents;
+				let actual = wizardService.GetTrack(C.Tracks.Data).agents;
 				expect(JSON.stringify(actual)).toEqual(JSON.stringify(expected1));
 
 				ctrl.OnRestart();
@@ -490,7 +499,7 @@ describe("Peach", () => {
 				expectState(Peach.WizardTrackReview(C.Tracks.Data));
 				expect(scope.Question.type).toBe(Peach.QuestionTypes.Done);
 
-				var expected2: Peach.Agent[] = [
+				let expected2: Peach.IAgent[] = [
 					{
 						"name": "",
 						"agentUrl": "local://",

@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	export var JobsDirective: IDirective = {
 		ComponentID: C.Directives.Jobs,
 		restrict: 'E',
@@ -19,7 +17,7 @@ module Peach {
 		static $inject = [
 			C.Angular.$scope,
 			C.Angular.$state,
-			C.Angular.$modal,
+			C.Angular.$uibModal,
 			C.Angular.$window,
 			C.Services.Job
 		];

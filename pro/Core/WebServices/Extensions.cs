@@ -39,7 +39,7 @@ namespace Peach.Pro.Core.WebServices
 					Monitors = a.Monitors.Select(m => new PeachElement.AgentElement.MonitorElement
 					{
 						Name = m.Name,
-						Class = m.MonitorClass,
+						Class = EnsureNotEmpty(m.MonitorClass, "MonitorClass", "monitor"),
 						Params = m.Map.SelectMany(ToMonitorParam).ToList()
 					}).ToList()
 				}).ToList();

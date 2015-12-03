@@ -1,8 +1,6 @@
 /// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-	
+namespace Peach {
 	interface IConfigureStorage {
 		showCfgHelp: boolean;
 		showStartHelp: boolean;

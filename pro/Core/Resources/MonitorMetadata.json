@@ -4,6 +4,54 @@
     "Type": "Group",
     "Items": [
       {
+        "Name": "CanaKitRelay",
+        "Type": "Monitor",
+        "Items": [
+          {
+            "Name": "Core Parameters",
+            "Type": "Group",
+            "Items": [
+              {
+                "Name": "SerialPort",
+                "Type": "Param"
+              },
+              {
+                "Name": "RelayNumber",
+                "Type": "Param"
+              },
+              {
+                "Name": "Action",
+                "Type": "Param"
+              },
+              {
+                "Name": "ToggleDelay",
+                "Type": "Param"
+              }
+            ]
+          },
+          {
+            "Name": "When To Trigger",
+            "Type": "Group",
+            "Items": [
+              {
+                "Name": "When",
+                "Type": "Param"
+              },
+              {
+                "Name": "StartOnCall",
+                "Type": "Param"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "Fault Detection",
+    "Type": "Group",
+    "Items": [
+      {
         "Name": "Gdb",
         "Type": "Monitor",
         "Items": [
@@ -16,7 +64,7 @@
                 "Type": "Param"
               },
               {
-                "Name": "Executable",
+                "Name": "Arguments",
                 "Type": "Param"
               },
               {
