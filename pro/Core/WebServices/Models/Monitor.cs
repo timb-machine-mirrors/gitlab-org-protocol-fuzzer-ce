@@ -67,6 +67,11 @@ namespace Peach.Pro.Core.WebServices.Models
 		public bool Optional { get; set; }
 
 		/// <summary>
+		/// 
+		/// </summary>
+		public bool Collapsed { get; set; }
+
+		/// <summary>
 		/// The set of operating systems that this monitor supports.
 		/// </summary>
 		/// <remarks>

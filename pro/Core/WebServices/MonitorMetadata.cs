@@ -30,6 +30,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 			// ReSharper disable UnusedAutoPropertyAccessor.Local
 			public string Name { get; set; }
+			public bool Collapsed { get; set; }
 			public ItemType Type { get; set; }
 			public List<TypedItem> Items { get; set; }
 			// ReSharper restore UnusedAutoPropertyAccessor.Local
@@ -268,6 +269,7 @@ namespace Peach.Pro.Core.WebServices
 						ret.Add(new ParamDetail
 						{
 							Name = item.Name,
+							Collapsed = item.Collapsed,
 							Type = ParameterType.Group,
 							Items = AsParameter(item.Items, monitorName, parameters)
 						});

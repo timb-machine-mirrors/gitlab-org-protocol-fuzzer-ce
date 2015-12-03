@@ -90,6 +90,26 @@ namespace Peach.Pro.Test.Core.WebServices
 		}
 
 		[Test]
+		public void TestCollapsed()
+		{
+			// Verify we output "Collapsed":true when needed
+
+			var tester = new MetadataTester
+			{
+				Type = new[] { typeof(TestMonitor) },
+				Metadata = "[{'Name':'TestMonitor','Type':'Monitor','Items':[{'Name':'Group1','Type':'Group','Collapsed':true,'Items':[{'Name':'Test','Type':'Param'}]}]}]".Replace('\'', '\"')
+			};
+
+			var result = tester.Run();
+
+			var exp = "[{'Description':'Desc','Items':[{'Collapsed':true,'Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Name':'Group1','Type':'Group'}],'Key':'TestMonitor','Name':'TestMonitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
+
+			Assert.AreEqual(exp, result);
+
+			Assert.AreEqual(0, tester.Errors.Count);
+		}
+
+		[Test]
 		public void TestMissingMetadata()
 		{
 			// If metadata resource can't be found, all monitors end up in "Other" group
