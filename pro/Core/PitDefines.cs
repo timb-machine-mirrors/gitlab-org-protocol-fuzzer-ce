@@ -228,6 +228,14 @@ namespace Peach.Pro.Core
 			}
 		}
 
+		public class SystemDefine : Define
+		{
+			public override ParameterType ConfigType
+			{
+				get { return ParameterType.System; }
+			}
+		}
+
 		#endregion
 
 		#region Platforms
@@ -317,6 +325,7 @@ namespace Peach.Pro.Core
 		public PitDefines()
 		{
 			Platforms = new List<Collection>();
+			SystemDefines = new List<Define>();
 		}
 
 		[XmlElement("None", Type = typeof(None))]
@@ -327,42 +336,107 @@ namespace Peach.Pro.Core
 		[XmlElement("All", Type = typeof(All))]
 		public List<Collection> Platforms { get; set; }
 
+		[XmlIgnore]
+		public List<Define> SystemDefines { get; set; }
+
 		#endregion
 
 		#region Parse
 
-		public static List<Define> Parse(string inputUri)
+		public static PitDefines ParseFile(string fileName)
 		{
-			return Parse(XmlTools.Deserialize<PitDefines>(inputUri));
+			return ParseFile(fileName, null, null);
 		}
 
-		public static List<Define> Parse(Stream stream)
+		public static PitDefines ParseFile(string fileName, string pitLibraryPath)
 		{
-			return Parse(XmlTools.Deserialize<PitDefines>(stream));
+			if (pitLibraryPath == null)
+				throw new ArgumentNullException("pitLibraryPath");
+
+			return ParseFile(fileName, pitLibraryPath, null);
 		}
 
-		public static List<Define> Parse(TextReader textReader)
+		public static PitDefines ParseFile(string fileName, IEnumerable<KeyValuePair<string, string>> overrides)
 		{
-			return Parse(XmlTools.Deserialize<PitDefines>(textReader));
+			if (overrides == null)
+				throw new ArgumentNullException("overrides");
+
+			return ParseFile(fileName, null, overrides);
 		}
 
-		private static List<Define> Parse(PitDefines defs)
+		private static PitDefines ParseFile(string fileName, string pitLibraryPath, IEnumerable<KeyValuePair<string, string>> overrides)
 		{
-			var os = Platform.GetOS();
+			var defs = File.Exists(fileName) ? XmlTools.Deserialize<PitDefines> (fileName) : new PitDefines();
 
-			return defs.Platforms
-				.Where(a => a.Platform.HasFlag(os))
-				.SelectMany(a => a.Defines)
-				.ToList();
+			defs.SystemDefines.AddRange(new Define[]
+			{
+				new SystemDefine
+				{
+					Key = "Peach.Pwd",
+					Name = "Peach Installation Directory",
+					Description = "Full path to Peach installation",
+					Value = Utilities.ExecutionDirectory,
+				},
+				new SystemDefine
+				{
+					Key = "Peach.Cwd",
+					Name = "Peach Working Directory",
+					Description = "Full path to the current working directory",
+					Value = Environment.CurrentDirectory,
+				},
+				new SystemDefine
+				{
+					Key = "Peach.LogRoot",
+					Name = "Root Log Directory",
+					Description = "Full path to the root log directory",
+					Value = Configuration.LogRoot,
+				}
+			});
+
+			if (pitLibraryPath != null)
+			{
+				defs.SystemDefines.Add(new SystemDefine
+				{
+					Key = "PitLibraryPath",
+					Name = "Pit Library Path",
+					Description = "Path to root of Pit Library",
+					Value = pitLibraryPath,
+				});
+			}
+
+			if (overrides != null)
+			{
+				defs.SystemDefines.AddRange(
+					overrides.Select(kv => new SystemDefine
+					{
+						Name = kv.Key,
+						Key = kv.Key,
+						Value = kv.Value
+					})
+				);
+			}
+
+			return defs;
 		}
 
 		#endregion
 
 		#region Evaluate
 
-		public static List<KeyValuePair<string, string>> Evaluate(List<KeyValuePair<string, string>> defs)
+		public List<KeyValuePair<string, string>> Evaluate()
 		{
-			var ret = new List<KeyValuePair<string, string>>(defs);
+			var os = Platform.GetOS();
+
+			var ret = Platforms
+					.Where(a => a.Platform.HasFlag(os))
+					.SelectMany(a => a.Defines)
+					.Concat(SystemDefines)
+					.Reverse()
+					.Distinct(DefineComparer.Instance)
+					.Select(d => new KeyValuePair<string, string>(d.Key, d.Value))
+					.ToList();
+
+			ret.Reverse();
 
 			var re = new Regex("##(\\w+?)##");
 
@@ -383,12 +457,27 @@ namespace Peach.Pro.Core
 				var newVal = re.Replace(oldVal, evaluator);
 
 				if (oldVal != newVal)
-					ret[i] = new KeyValuePair<string, string>(ret[i].Key, newVal);
+					ret[i] = new KeyValuePair<string,string>(ret[i].Key, newVal);
 				else
 					++i;
 			}
 
 			return ret;
+		}
+
+		class DefineComparer : IEqualityComparer<Define>
+		{
+			public static readonly DefineComparer Instance = new DefineComparer();
+
+			public bool Equals(Define lhs, Define rhs)
+			{
+				return lhs.Key.Equals(rhs.Key);
+			}
+
+			public int GetHashCode(Define obj)
+			{
+				return obj.Key.GetHashCode();
+			}
 		}
 
 		#endregion

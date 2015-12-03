@@ -5,14 +5,12 @@ namespace Peach.Pro.Core.WebServices.Models
 {
 	public class PitMetadata
 	{
-		public List<Parameter> Defines { get; set; }
-		public List<Parameter> Monitors { get; set; } 
+		public List<ParamDetail> Defines { get; set; }
+		public List<ParamDetail> Monitors { get; set; }
 	}
 
 	public class Pit : LibraryPit
 	{		
-		public bool Locked { get; set; }
-
 		public List<PitVersion> Versions { get; set; }
 
 		public List<PeachVersion> Peaches { get; set; }
@@ -21,7 +19,7 @@ namespace Peach.Pro.Core.WebServices.Models
 
 		public DateTime Timestamp { get; set; }
 
-		public List<Parameter> Config { get; set; }
+		public List<Param> Config { get; set; }
 
 		public List<Agent> Agents { get; set; }
 

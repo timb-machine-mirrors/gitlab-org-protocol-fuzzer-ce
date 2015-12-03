@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
@@ -24,33 +23,10 @@ namespace Peach.Pro.Core.WebServices.Models
 
 	/// <summary>
 	/// A configuration parameter passed to a monitor.
+	/// Parameter is a more verbose param.
 	/// </summary>
-	public class Parameter
+	public class ParamDetail : Param
 	{
-		/// <summary>
-		/// The key of this param used by the wizard
-		/// </summary>
-		/// <example>
-		/// "PcapDevice"
-		/// </example>
-		public string Key { get; set; }
-
-		/// <summary>
-		/// The name of the parameter given to the monitor
-		/// </summary>
-		/// <example>
-		/// "Device"
-		/// </example>
-		public string Name { get; set; }
-
-		/// <summary>
-		/// The value of the parameter
-		/// </summary>
-		/// <example>
-		/// "Local Area Connection"
-		/// </example>
-		public string Value { get; set; }
-
 		/// <summary>
 		/// The type of the parameter
 		/// </summary>
@@ -62,7 +38,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// 
 		/// </summary>
-		public List<Parameter> Items { get; set; }
+		public List<ParamDetail> Items { get; set; }
 
 		/// <summary>
 		/// List of values for enum types
@@ -73,11 +49,6 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// Is this parameter required?
 		/// </summary>
 		public string DefaultValue { get; set; }
-
-		/// <summary>
-		/// Description of the parameter
-		/// </summary>
-		public string Description { get; set; }
 
 		/// <summary>
 		/// 
@@ -93,6 +64,47 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// 
 		/// </summary>
 		public bool Optional { get; set; }
+
+		/// <summary>
+		/// The set of operating systems that this monitor supports.
+		/// </summary>
+		/// <remarks>
+		/// Only used with ParamterType.Monitor
+		/// </remarks>
+		public string OS { get; set; }
+	}
+
+	/// <summary>
+	/// The most basic key/value pair used for all parameters.
+	/// </summary>
+	public class Param
+	{
+		/// <summary>
+		/// Machine name used by peach.
+		/// This wil not include spaces.
+		/// </summary>
+		/// <example>
+		/// "Peach.Cwd" or GdbPath"
+		/// </example>
+		public string Key { get; set; }
+
+		/// <summary>
+		/// The human name of this parameter.
+		/// </summary>
+		/// <example>
+		/// "Pcap Device" or "Peach Installation Directory"
+		/// </example>
+		public string Name { get; set; }
+
+		/// <summary>
+		/// Description of the parameter
+		/// </summary>
+		public string Description { get; set; }
+
+		/// <summary>
+		/// Parameter value.
+		/// </summary>
+		public string Value { get; set; }
 	}
 
 	/// <summary>
@@ -109,27 +121,14 @@ namespace Peach.Pro.Core.WebServices.Models
 		public string MonitorClass { get; set; }
 
 		/// <summary>
-		/// The parameters to the monitor
-		/// </summary>
-		public List<Parameter> Map { get; set; }
-
-		/// <summary>
-		/// The description of the monitor instance
-		/// </summary>
-		/// <example>
-		/// "Network capture on interface {PcapDevice} using {PcapFilter}"
-		/// </example>
-		public string Description { get; set; }
-
-		/// <summary>
 		/// User friendly name of the monitor instance
 		/// </summary>
 		public string Name { get; set; }
 
-		/// <summary>
-		/// The set of operating systems that this monitor supports.
-		/// </summary>
-		public string OS { get; set; }
+		///// <summary>
+		///// The parameters to the monitor
+		///// </summary>
+		public List<Param> Map { get; set; }
 	}
 
 	/// <summary>

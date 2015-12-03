@@ -96,47 +96,33 @@ namespace PitTester
 			if (testData.Tests.Any(x => x.SingleIteration))
 				singleIteration = true;
 
-			var defs = new List<KeyValuePair<string, string>>();
-			var configFile = pitFile + ".config";
-			if (File.Exists(configFile))
+			var defs = PitDefines.ParseFile(pitFile + ".config", libraryPath).Evaluate();
+
+			var testDefs = testData.Defines.ToDictionary(x => x.Key, x => x.Value);
+
+			for (var i = 0; i < defs.Count; ++i)
 			{
-				var baseDefs = PitParser.parseDefines(configFile);
-				baseDefs.Insert(0, new KeyValuePair<string, string>("PitLibraryPath", libraryPath));
-
-				var testDefs = testData.Defines.ToDictionary(x => x.Key, x => x.Value);
-
-				foreach (var item in baseDefs)
+				string value;
+				if (testDefs.TryGetValue(defs[i].Key, out value))
 				{
-					string value;
-					if (testDefs.TryGetValue(item.Key, out value))
+					if (value == defs[i].Value)
 					{
-						if (value == item.Value)
-						{
-							Console.WriteLine("Warning, .test and .config value are identical for PitDefine named: \"{0}\"",
-								item.Key
-							);
-						}
-						defs.Add(new KeyValuePair<string, string>(item.Key, value));
-						testDefs.Remove(item.Key);
+						Console.WriteLine("Warning, .test and .config value are identical for PitDefine named: \"{0}\"",
+							defs[i].Key
+						);
 					}
-					else
-						defs.Add(item);
-				}
 
-				if (testDefs.Count > 0)
-				{
-					throw new PeachException("Error, PitDefine(s) in .test not found in .config: {0}".Fmt(
-						string.Join(", ", testDefs.Keys))
-					);
+					defs[i] = new KeyValuePair<string, string>(defs[i].Key, value);
+					testDefs.Remove(defs[i].Key);
 				}
 			}
-			else
+
+			if (testDefs.Count > 0)
 			{
-				defs.Add(new KeyValuePair<string, string>("PitLibraryPath", libraryPath));
-				defs.AddRange(testData.Defines.Select(item => new KeyValuePair<string, string>(item.Key, item.Value)));
+				throw new PeachException("Error, PitDefine(s) in .test not found in .config: {0}".Fmt(
+					string.Join(", ", testDefs.Keys))
+				);
 			}
-
-			defs = PitDefines.Evaluate(defs);
 
 			var args = new Dictionary<string, object>();
 			args[PitParser.DEFINED_VALUES] = defs;

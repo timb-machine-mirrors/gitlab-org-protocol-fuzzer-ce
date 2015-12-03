@@ -64,7 +64,7 @@ namespace Peach.Pro.Core
 			var ret = new Dictionary<string, Variant>();
 			foreach (var x in monitor.Map)
 			{
-				if (x.Name == "StartMode")
+				if (x.Key == "StartMode")
 				{
 					switch (x.Value)
 					{
@@ -80,9 +80,9 @@ namespace Peach.Pro.Core
 						break;
 					}
 				}
-				else
+				else if (x.Value != null)
 				{
-					ret.Add(x.Name, new Variant(Expand(defs, x.Value) ?? x.DefaultValue));
+					ret.Add(x.Key, new Variant(Expand(defs, x.Value)));
 				}
 			}
 			return ret;
