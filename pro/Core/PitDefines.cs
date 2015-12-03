@@ -370,6 +370,13 @@ namespace Peach.Pro.Core
 
 			defs.SystemDefines.AddRange(new Define[]
 			{
+				new SystemDefine 
+				{
+					Key = "Peach.OS",
+					Name = "Peach OS",
+					Description = "Operating System that Peach is running on",
+					Value = Platform.GetOS().ToString().ToLower()
+				},
 				new SystemDefine
 				{
 					Key = "Peach.Pwd",
