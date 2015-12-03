@@ -109,16 +109,16 @@ namespace Peach.Pro.Test.Core.Dom
 
 		[Test]
 		[Category("Peach")]
-		public void InputByteTest()
+		public void InputBytesTest()
 		{
 			var xml =
 				"<?xml version='1.0' encoding='utf-8'?>\n" +
 				"<Peach>\n" +
 				" <DataModel name='Example1'>\n" +
 				"	 <Number size='8'>" +
-				"       <Relation type='size' of='byte' />"+
+				"       <Relation type='size' of='short' />"+
 				"    </Number>"+
-				"    <Asn1Integer name='byte'  value='1' /> " +
+				"    <Asn1Integer name='short'  value='1' /> " +
 				"  </DataModel>\n" +
 				"  \n" +
 				"  <StateModel name='TheStateModel' initialState='initial'>\n" +
@@ -143,8 +143,9 @@ namespace Peach.Pro.Test.Core.Dom
 
 			var bs = new BitStream();
 			var writer = new BitWriter(bs);
-			writer.WriteByte(1);
-			writer.WriteByte(100);
+			writer.WriteByte(2);
+			writer.WriteByte(0x64);
+			writer.WriteByte(0xc8);
 			bs.Position = 0;
 			bs.CopyTo(pub.InputData[0]);
 
@@ -155,9 +156,9 @@ namespace Peach.Pro.Test.Core.Dom
 
 			e.startFuzzing(dom, config);
 
-			var elemByte = dom.tests[0].stateModel.states[0].actions[0].dataModel[1];
+			var elemShort = dom.tests[0].stateModel.states[0].actions[0].dataModel[1];
 
-			Assert.AreEqual(100, (int)elemByte.DefaultValue);
+			Assert.AreEqual(0x64c8, (int)elemShort.DefaultValue);
 		}
 
 		[Test]
