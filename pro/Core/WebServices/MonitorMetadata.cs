@@ -46,7 +46,7 @@ namespace Peach.Pro.Core.WebServices
 		private MonitorMetadata(List<string> calls)
 		{
 			var groupings = GetGroupings();
-			var monitors = new NamedCollection<MonitorInfo>(GetAllMonitors());
+//			var monitors = new NamedCollection<MonitorInfo>(GetAllMonitors());
 
 			_calls = calls;
 			_details = AsParameter(groupings, null);

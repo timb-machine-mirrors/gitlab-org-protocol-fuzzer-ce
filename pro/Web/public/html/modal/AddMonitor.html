@@ -7,7 +7,7 @@
 	</div>
 	<div class="modal-body">
 		<div class="form-group input-group">
-			<input name="search"
+			<input ng-model="search"
 						 type="text"
 						 class="form-control"
 						 placeholder="Search for monitor..."
@@ -21,13 +21,14 @@
 		</div>
 
 		<div class="peach-add-monitor">
-			<uib-accordion close-others="true">
-				<uib-accordion-group ng-repeat="group in vm.Monitors track by $index"
+			<uib-accordion close-others="false">
+				<uib-accordion-group is-open="true"
+														 ng-repeat="group in vm.Monitors track by $index"
 														 heading="{{group.name}}">
 					<div class="list-group">
 						<a href="" 
 								class="list-group-item"
-								ng-repeat="item in group.items"
+								ng-repeat="item in group.items | filter: { name: search }"
 								ng-click="vm.OnSelect(item)">
 							<h4 class="list-group-item-heading">{{item.name}}</h4>
 							<p class="list-group-item-text">{{item.description}}</p>

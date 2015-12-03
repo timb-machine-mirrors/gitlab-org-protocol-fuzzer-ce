@@ -1,6 +1,10 @@
 ﻿/// <reference path="../reference.ts" />
 
 namespace Peach {
+	export interface IAddMonitorScope extends IViewModelScope {
+		search: string;
+	}
+
 	export class AddMonitorController {
 		static $inject = [
 			C.Angular.$scope,
@@ -9,17 +13,33 @@ namespace Peach {
 		];
 
 		private selected: IParameter;
-		public Monitors: IParameter[];
 
 		constructor(
-			$scope: IViewModelScope,
+			private $scope: IAddMonitorScope,
 			private $modalInstance: ng.ui.bootstrap.IModalServiceInstance,
 			private pitService: PitService
 		) {
 			$scope.vm = this;
-			this.Monitors = pitService.Pit.metadata.monitors;
 		}
 
+		public get Monitors(): IParameter[] {
+			if (this.$scope.search) {
+				let search = this.$scope.search.toLowerCase();
+				let monitors: IParameter[] = [];
+				for (let group of this.pitService.Pit.metadata.monitors) {
+					if (_.any(group.items, (item: IParameter) => {
+						let name = item.name.toLowerCase();
+						let pos = name.indexOf(search);
+						return pos != -1;
+					})) {
+						monitors.push(group);
+					}
+				}
+				return monitors;
+			}
+			return this.pitService.Pit.metadata.monitors;
+		}
+		
 		public get CanAccept(): boolean {
 			return !_.isUndefined(this.selected);
 		}
