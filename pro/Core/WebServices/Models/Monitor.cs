@@ -4,6 +4,7 @@ namespace Peach.Pro.Core.WebServices.Models
 {
 	public enum ParameterType
 	{
+		None,
 		String,
 		Hex,
 		Range,

@@ -12,21 +12,32 @@ namespace Peach.Pro.Core.WebServices
 {
 	public class MonitorMetadata
 	{
+		public event ErrorEventHandler ErrorEventHandler;
+
 		public static List<ParamDetail> Generate(List<string> calls)
 		{
-			return new MonitorMetadata(calls)._details;
+			var m = new MonitorMetadata();
+			var ret = m.Load(calls);
+			return ret;
 		}
 
-		enum ItemType { Group, Space, Monitor, Param }
+		#region JSON Metatata DTOs
 
-		class TypedItem
+		private enum ItemType { Group, Space, Monitor, Param }
+
+		[Serializable]
+		private class TypedItem
 		{
+			// ReSharper disable UnusedAutoPropertyAccessor.Local
 			public string Name { get; set; }
 			public ItemType Type { get; set; }
 			public List<TypedItem> Items { get; set; }
+			// ReSharper restore UnusedAutoPropertyAccessor.Local
 		}
 
-		class MonitorInfo : INamed
+		#endregion
+
+		private class MonitorInfo : INamed
 		{
 			[Obsolete]
 			string INamed.name { get { return Key; } }
@@ -40,47 +51,148 @@ namespace Peach.Pro.Core.WebServices
 			public bool Visited { get; set; }
 		}
 
-		private readonly List<string> _calls;
-		private readonly List<ParamDetail> _details;
-
-		private MonitorMetadata(List<string> calls)
+		private class ParamInfo : INamed
 		{
-			var groupings = GetGroupings();
-			var monitors = new NamedCollection<MonitorInfo>(GetAllMonitors());
+			[Obsolete]
+			string INamed.name { get { return Attr.name; } }
+			string INamed.Name { get { return Attr.name; } }
 
-			_calls = calls;
-			_details = AsParameter(groupings, null);
+			public string Monitor { get; set; }
+			public ParameterAttribute Attr { get; set; }
+			public int Usage { get; set; }
 		}
 
-		private static List<TypedItem> GetGroupings()
+		private List<string> _calls;
+		private NamedCollection<MonitorInfo> _monitors;
+
+		internal MonitorMetadata()
+		{
+		}
+
+		protected virtual TextReader OpenMetadataStream()
 		{
 			var asm = Assembly.GetExecutingAssembly();
+			var strm = asm.GetManifestResourceStream("Peach.Pro.Core.Resources.MonitorMetadata.json");
 
-			using (var strm = asm.GetManifestResourceStream("Peach.Pro.Core.Resources.MonitorMetadata.json"))
+			if (strm == null)
+				return null;
+
+			return new StreamReader(strm, System.Text.Encoding.UTF8);
+		}
+
+		protected virtual IEnumerable<KeyValuePair<MonitorAttribute, Type>> GetAllMonitors()
+		{
+			return ClassLoader.GetAllByAttribute<MonitorAttribute>();
+		}
+
+		public List<ParamDetail> Load(List<string> calls)
+		{
+			var groupings = GetGroupings();
+
+			try
 			{
-				if (strm == null)
-					return new List<TypedItem>();
+				_calls = calls;
+				_monitors = GetMonitorInfo();
 
-				var rdr = new JsonTextReader(new StreamReader(strm));
-				var s = new JsonSerializer();
+				var ret = AsParameter(groupings, null, null);
 
-				return s.Deserialize<List<TypedItem>>(rdr);
+				var missing = _monitors.Where(m => !m.Visited).ToList();
+
+				if (missing.Count > 0)
+				{
+					missing.Sort(MonitorSorter);
+
+					// If GetGroupings() failed we already raised ErrorEventHandler
+					if (ret == null)
+						ret = new List<ParamDetail>();
+					else if (ErrorEventHandler != null)
+						ErrorEventHandler(this, new ErrorEventArgs(new ApplicationException("Missing metadata entries for the following monitors: '{0}'.".Fmt(string.Join("', '", missing.Select(m => m.Key))))));
+
+					var grp = new ParamDetail
+					{
+							Name = "Other",
+							Type = ParameterType.Group,
+							Items = new List<ParamDetail>()
+					};
+
+					foreach (var monitor in missing)
+					{
+						var parameters = GetParamInfo(monitor.Type, monitor.Key);
+						var items = parameters.Select(ParameterAttrToModel).ToList();
+
+						items.Sort(ParameterSorter);
+
+						grp.Items.Add(MakeMonitor(monitor, items));
+					}
+
+					ret.Add(grp);
+				}
+
+				return ret;
+			}
+			finally
+			{
+				_calls = null;
+				_monitors = null;
 			}
 		}
 
-		private static IEnumerable<MonitorInfo> GetAllMonitors()
+		private List<TypedItem> GetGroupings()
 		{
-			return ClassLoader.GetAllByAttribute<MonitorAttribute>()
-				.Where(FilterInternal)
-				.Select(kv => new MonitorInfo
+			using (var strm = OpenMetadataStream())
+			{
+				if (strm == null)
 				{
-					Key = kv.Key.Name,
-					Name = KeyToName(kv.Key.Name),
-					Description = GetDescription(kv.Value),
-					OS = GetOS(kv.Key),
-					Type = kv.Value,
-					Visited = false
-				});
+					if (ErrorEventHandler != null)
+						ErrorEventHandler(this, new ErrorEventArgs(new ApplicationException("Unable to locate monitor metadata resource.")));
+
+					return null;
+				}
+
+				var rdr = new JsonTextReader(strm);
+				var s = new JsonSerializer();
+
+				try
+				{
+					return s.Deserialize<List<TypedItem>>(rdr) ?? new List<TypedItem>();
+				}
+				catch (Exception ex)
+				{
+					if (ErrorEventHandler != null)
+						ErrorEventHandler(this, new ErrorEventArgs(new ApplicationException("Unable to parse monitor metadata resource.", ex)));
+
+					return null;
+				}
+			}
+		}
+
+		private NamedCollection<MonitorInfo> GetMonitorInfo()
+		{
+			return new NamedCollection<MonitorInfo>(
+				GetAllMonitors()
+					.Where(FilterInternal)
+					.Select(kv => new MonitorInfo
+					{
+						Key = kv.Key.Name,
+						Name = KeyToName(kv.Key.Name),
+						Description = GetDescription(kv),
+						OS = GetOS(kv.Key),
+						Type = kv.Value,
+						Visited = false
+					}));
+		}
+
+		private NamedCollection<ParamInfo> GetParamInfo(Type type, string name)
+		{
+			return new NamedCollection<ParamInfo>(
+				type
+					.GetAttributes<ParameterAttribute>()
+					.Select(a => new ParamInfo
+					{
+						Attr = a,
+						Monitor = name,
+						Usage = 0
+					}));
 		}
 
 		private static bool FilterInternal(KeyValuePair<MonitorAttribute, Type> kv)
@@ -98,31 +210,50 @@ namespace Peach.Pro.Core.WebServices
 			return key;
 		}
 
-		private static string GetDescription(Type t)
+		private static int MonitorSorter(MonitorInfo lhs, MonitorInfo rhs)
 		{
-			return t
-				.GetAttributes<System.ComponentModel.DescriptionAttribute>()
-				.Select(a => a.Description)
-				.FirstOrDefault() ?? "";
+			return string.CompareOrdinal(lhs.Key, rhs.Key);
 		}
 
-		private static string GetOS(MonitorAttribute attr)
+		private static int ParameterSorter(ParamDetail lhs, ParamDetail rhs)
 		{
-			//var os = "";
-			//if (attr.OS == Platform.OS.Unix)
-			//{
-			//	var ex = new NotSupportedException("Monitor {0} specifies unsupported OS {1}".Fmt(attr.Name, attr.OS));
-			//	if (ValidationEventHandler != null)
-			//		ValidationEventHandler(this, new ValidationEventArgs(ex, ""));
-			//}
-			//else if (attr.OS != Platform.OS.All)
-			//{
-			//	os = attr.OS.ToString();
-			//}
+			if (lhs.Optional == rhs.Optional)
+				return string.CompareOrdinal(lhs.Key, rhs.Key);
+
+			return lhs.Optional ? 1 : -1;
+		}
+
+		private string GetDescription(KeyValuePair<MonitorAttribute, Type> kv)
+		{
+			var desc = kv.Value
+				.GetAttributes<System.ComponentModel.DescriptionAttribute>()
+				.Select(a => a.Description)
+				.FirstOrDefault();
+
+			if (!string.IsNullOrEmpty(desc))
+				return desc;
+
+			if (ErrorEventHandler != null)
+				ErrorEventHandler(this, new ErrorEventArgs(new ApplicationException("Monitor {0} does not have a description.".Fmt(kv.Key.Name))));
+
 			return "";
 		}
 
-		private List<ParamDetail> AsParameter(List<TypedItem> items, List<ParameterAttribute> parameters)
+		private string GetOS(MonitorAttribute attr)
+		{
+			if (attr.OS == Platform.OS.Unix)
+			{
+				if (ErrorEventHandler != null)
+					ErrorEventHandler(this, new ErrorEventArgs(new NotSupportedException("Monitor {0} specifies unsupported OS '{1}'.".Fmt(attr.Name, attr.OS))));
+			}
+			else if (attr.OS != Platform.OS.All)
+			{
+				return attr.OS.ToString();
+			}
+			return "";
+		}
+
+		private List<ParamDetail> AsParameter(List<TypedItem> items, string monitorName, NamedCollection<ParamInfo> parameters)
 		{
 			if (items == null)
 				return null;
@@ -138,24 +269,43 @@ namespace Peach.Pro.Core.WebServices
 						{
 							Name = item.Name,
 							Type = ParameterType.Group,
-							Items = AsParameter(item.Items, parameters)
+							Items = AsParameter(item.Items, monitorName, parameters)
 						});
 
 						break;
 					case ItemType.Monitor:
-						var monitor = ClassLoader.FindPluginByName<MonitorAttribute>(item.Name);
-						if (monitor == null)
-							throw new NotSupportedException();
-
-						parameters = monitor.GetAttributes<ParameterAttribute>().ToList();
-
-						ret.Add(new ParamDetail
+						MonitorInfo monitor;
+						if (!_monitors.TryGetValue(item.Name, out monitor))
 						{
-							Name = item.Name,
-							Type = ParameterType.Monitor,
-							Description = monitor.GetAttributes<System.ComponentModel.DescriptionAttribute>().Select(d => d.Description).FirstOrDefault() ?? "",
-							Items = AsParameter(item.Items, parameters)
-						});
+							if (ErrorEventHandler != null)
+								ErrorEventHandler(this, new ErrorEventArgs(new NotSupportedException("Ignoring metadata entry for monitor '" + item.Name + "', no plugin exists with that name.")));
+
+							break;
+						}
+
+						monitor.Visited = true;
+
+						parameters = GetParamInfo(monitor.Type, monitor.Key);
+
+						ret.Add(MakeMonitor(monitor, AsParameter(item.Items, monitor.Key, parameters)));
+
+						if (ErrorEventHandler != null)
+						{
+							var omitted = parameters.Where(p => p.Usage == 0).Select(p => p.Attr.name).ToList();
+							if (omitted.Count != 0)
+							{
+								omitted.Sort();
+								ErrorEventHandler(this, new ErrorEventArgs(new NotSupportedException("Monitor {0} had the following parameters omitted from the metadata: '{1}'.".Fmt(monitor.Key, string.Join("', '", omitted)))));
+							}
+
+							var duped = parameters.Where(p => p.Usage > 1).Select(p => p.Attr.name).ToList();
+							if (duped.Count != 0)
+							{
+								duped.Sort();
+								ErrorEventHandler(this, new ErrorEventArgs(new NotSupportedException("Monitor {0} had the following parameters duplicated in the metadata: '{1}'.".Fmt(monitor.Key, string.Join("', '", duped)))));
+							}
+						}
+
 						break;
 
 					case ItemType.Space:
@@ -163,8 +313,17 @@ namespace Peach.Pro.Core.WebServices
 						break;
 
 					case ItemType.Param:
-						var param = parameters.First(p => p.name == item.Name);
-						ret.Add(ParameterAttrToModel(param));
+						ParamInfo param;
+						if (string.IsNullOrEmpty(item.Name) || !parameters.TryGetValue(item.Name, out param))
+						{
+							if (ErrorEventHandler != null)
+								ErrorEventHandler(this, new ErrorEventArgs(new NotSupportedException("Ignoring metadata entry for parameter '" + item.Name + "' on monitor '" + monitorName + "', no parameter exists with that name.")));
+						}
+						else
+						{
+							ret.Add(ParameterAttrToModel(param));
+						}
+
 						break;
 				}
 			}
@@ -172,8 +331,23 @@ namespace Peach.Pro.Core.WebServices
 			return ret;
 		}
 
-		private ParamDetail ParameterAttrToModel(/*string monitorClass, */ParameterAttribute attr)
+		private static ParamDetail MakeMonitor(MonitorInfo monitor, List<ParamDetail> items)
 		{
+			return new ParamDetail
+			{
+				Key = monitor.Key,
+				Name = monitor.Name,
+				Type = ParameterType.Monitor,
+				Description = monitor.Description,
+				OS = monitor.OS,
+				Items = items
+			};
+		}
+
+		private ParamDetail ParameterAttrToModel(ParamInfo info)
+		{
+			var attr = info.Attr;
+
 			var p = new ParamDetail
 			{
 				Key = attr.name,
@@ -202,18 +376,18 @@ namespace Peach.Pro.Core.WebServices
 					break;
 				case "UInt16":
 					p.Type = ParameterType.Range;
-					p.Max = UInt16.MaxValue;
-					p.Min = UInt16.MinValue;
+					p.Max = ushort.MaxValue;
+					p.Min = ushort.MinValue;
 					break;
 				case "UInt32":
 					p.Type = ParameterType.Range;
-					p.Max = UInt32.MaxValue;
-					p.Min = UInt32.MinValue;
+					p.Max = uint.MaxValue;
+					p.Min = uint.MinValue;
 					break;
 				case "Int32":
 					p.Type = ParameterType.Range;
-					p.Max = Int32.MaxValue;
-					p.Min = Int32.MinValue;
+					p.Max = int.MaxValue;
+					p.Min = int.MinValue;
 					break;
 				case "Boolean":
 					p.Type = ParameterType.Bool;
@@ -229,10 +403,8 @@ namespace Peach.Pro.Core.WebServices
 				default:
 					p.Type = ParameterType.String;
 
-					//var ex =
-					//	new NotSupportedException("Monitor {0} has invalid parameter type {1}".Fmt(monitorClass, attr.type.FullName));
-					//if (ValidationEventHandler != null)
-					//	ValidationEventHandler(this, new ValidationEventArgs(ex, ""));
+					if (ErrorEventHandler != null)
+						ErrorEventHandler(this, new ErrorEventArgs(new NotSupportedException("Monitor {0} has invalid parameter type '{1}'.".Fmt(info.Monitor, attr.type.FullName))));
 
 					break;
 			}
@@ -243,8 +415,9 @@ namespace Peach.Pro.Core.WebServices
 				p.Options = _calls;
 			}
 
+			info.Usage++;
+
 			return p;
 		}
-
 	}
 }
