@@ -12,16 +12,20 @@
 				</span>
 			</uib-accordion-heading>
 			<div ng-repeat="item in param.items"
-						ng-form="form"
-						class="form-group"
-						ng-class="{'has-error': form.param.$invalid}">
-				<label class="col-sm-4 control-label">
-					{{item.name | peachParameterName}}
-				</label>
-				<div class="col-sm-6">
-					<peach:parameter-input param="item"
-																	form="form">
-					</peach:parameter-input>
+					 ng-switch="item.type">
+				<hr ng-switch-when="space"/>
+				<div ng-switch-default
+						 ng-form="form"
+						 class="form-group"
+						 ng-class="{'has-error': form.param.$invalid}">
+					<label class="col-sm-4 control-label">
+						{{item.name | peachParameterName}}
+					</label>
+					<div class="col-sm-6">
+						<peach:parameter-input param="item"
+																	 form="form">
+						</peach:parameter-input>
+					</div>
 				</div>
 			</div>
 		</uib-accordion-group>

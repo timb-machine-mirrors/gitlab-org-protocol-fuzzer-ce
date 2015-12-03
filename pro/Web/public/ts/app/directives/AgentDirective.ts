@@ -42,7 +42,7 @@ namespace Peach {
 
 		public get Header(): string {
 			const url = this.$scope.agent.agentUrl || 'local://';
-			const name = this.$scope.agent.name ? '(' + this.$scope.agent.name + ')' : '';
+			const name = this.$scope.agent.name ? `(${this.$scope.agent.name})` : '';
 			return url + ' ' + name;
 		}
 

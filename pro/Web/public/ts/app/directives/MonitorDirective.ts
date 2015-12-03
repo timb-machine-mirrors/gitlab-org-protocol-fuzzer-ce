@@ -40,7 +40,7 @@ namespace Peach {
 
 		public get Header(): string {
 			var monitor = this.$scope.monitor.monitorClass;
-			var name = this.$scope.monitor.name ? '(' + this.$scope.monitor.name + ')' : '';
+			var name = this.$scope.monitor.name ? `(${this.$scope.monitor.name})` : '';
 			return monitor + ' ' + name;
 		}
 

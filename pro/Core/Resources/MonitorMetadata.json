@@ -16,7 +16,7 @@
                 "Type": "Param"
               },
               {
-                "Name": "Executable",
+                "Name": "Arguments",
                 "Type": "Param"
               },
               {

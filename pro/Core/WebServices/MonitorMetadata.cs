@@ -151,7 +151,8 @@ namespace Peach.Pro.Core.WebServices
 
 						ret.Add(new ParamDetail
 						{
-							Name = item.Name,
+							Key = item.Name,
+							Name = KeyToName(item.Name),
 							Type = ParameterType.Monitor,
 							Description = monitor.GetAttributes<System.ComponentModel.DescriptionAttribute>().Select(d => d.Description).FirstOrDefault() ?? "",
 							Items = AsParameter(item.Items, parameters)
