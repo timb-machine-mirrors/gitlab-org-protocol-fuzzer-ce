@@ -75,7 +75,7 @@ namespace Peach.Pro.Test.Core.Dom
 				"<?xml version='1.0' encoding='utf-8'?>\n" +
 				"<Peach>\n" +
 				" <DataModel name='Example1'>\n" +
-				"    <Asn1Integer name='byte'  value='1' /> " +
+				"    <Asn1Integer name='byte'  value='0' /> " +
 				"    <Asn1Integer name='short' value='32766' /> " +
 				"    <Asn1Integer name='int'   value='2147483647' /> " +
 				"    <Asn1Integer name='long'  value='223372036854775807' /> " +
