@@ -50,6 +50,7 @@ namespace Peach.Pro.Core.WebServices
 			public string OS { get; set; }
 			public Type Type { get; set; }
 			public bool Visited { get; set; }
+			public bool Internal { get; set; }
 		}
 
 		private class ParamInfo : INamed
@@ -106,8 +107,8 @@ namespace Peach.Pro.Core.WebServices
 					// If GetGroupings() failed we already raised ErrorEventHandler
 					if (ret == null)
 						ret = new List<ParamDetail>();
-					else if (ErrorEventHandler != null)
-						ErrorEventHandler(this, new ErrorEventArgs(new ApplicationException("Missing metadata entries for the following monitors: '{0}'.".Fmt(string.Join("', '", missing.Select(m => m.Key))))));
+					else if (ErrorEventHandler != null && missing.Any(m => !m.Internal))
+							ErrorEventHandler(this, new ErrorEventArgs(new ApplicationException("Missing metadata entries for the following monitors: '{0}'.".Fmt(string.Join("', '", missing.Where(m => !m.Internal).Select(m => m.Key))))));
 
 					var grp = new ParamDetail
 					{
@@ -179,6 +180,7 @@ namespace Peach.Pro.Core.WebServices
 						Description = GetDescription(kv),
 						OS = GetOS(kv.Key),
 						Type = kv.Value,
+						Internal = kv.Key.Internal,
 						Visited = false
 					}));
 		}
