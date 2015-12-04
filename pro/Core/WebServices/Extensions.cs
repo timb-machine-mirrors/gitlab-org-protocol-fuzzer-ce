@@ -1,12 +1,36 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using Peach.Pro.Core.WebServices.Models;
 
 namespace Peach.Pro.Core.WebServices
 {
 	internal static class Extensions
 	{
+		private class OrderedContractResolver : DefaultContractResolver
+		{
+			protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
+			{
+				return base.CreateProperties(type, memberSerialization).OrderBy(p => p.PropertyName).ToList();
+			}
+		}
+
+		internal static string ToJson(this List<ParamDetail> details)
+		{
+			var json = JsonConvert.SerializeObject(details, Formatting.Indented, new JsonSerializerSettings
+			{
+				Converters = new List<JsonConverter> { new StringEnumConverter() },
+				NullValueHandling = NullValueHandling.Ignore,
+				DefaultValueHandling = DefaultValueHandling.Ignore,
+				ContractResolver = new OrderedContractResolver()
+			});
+
+			return json;
+		}
+
 		public static List<Models.Agent> ToWeb(this List<PeachElement.AgentElement> agents)
 		{
 			return agents.Select(a =>
@@ -47,7 +71,7 @@ namespace Peach.Pro.Core.WebServices
 
 		static string EnsureNotEmpty(string value, string name, string type)
 		{
-			if (string.IsNullOrEmpty(value))
+			if (String.IsNullOrEmpty(value))
 				throw new ArgumentException("Required parameter '" + name + "' was not specified for entry in "+ type + " list.");
 
 			return value;
@@ -59,7 +83,7 @@ namespace Peach.Pro.Core.WebServices
 			// Peach 3.7 posts name/value, Peach 3.8 posts key/value
 			var key = EnsureNotEmpty(p.Key ?? p.Name, "Key", "monitor parameter");
 
-			if (string.IsNullOrEmpty(p.Value))
+			if (String.IsNullOrEmpty(p.Value))
 				return new PeachElement.ParamElement[0];
 
 			if (key != "StartMode")
@@ -104,7 +128,11 @@ namespace Peach.Pro.Core.WebServices
 
 		public static List<ParamDetail> ToWeb(this PitDefines defines)
 		{
-			var ret = DefineToParamDetail(defines.Children);
+			var reserved = defines.SystemDefines.Select(d => d.Key).ToList();
+
+			var ret = DefineToParamDetail(defines.Children, reserved) ?? new List<ParamDetail>();
+
+			reserved = new List<string>();
 
 			ret.Add(new ParamDetail
 			{
@@ -114,7 +142,7 @@ namespace Peach.Pro.Core.WebServices
 				Type = ParameterType.Group,
 				Collapsed = true,
 				OS = "",
-				Items = defines.SystemDefines.Select(DefineToParamDetail).ToList()
+				Items = defines.SystemDefines.Select(d => DefineToParamDetail(d, reserved)).ToList()
 			});
 
 			return ret;
@@ -174,17 +202,20 @@ namespace Peach.Pro.Core.WebServices
 			//};
 		}
 
-		private static List<ParamDetail> DefineToParamDetail(IEnumerable<PitDefines.Define> defines)
+		private static List<ParamDetail> DefineToParamDetail(IEnumerable<PitDefines.Define> defines, List<string> reserved)
 		{
 			if (defines == null)
 				return null;
 
-			var ret = defines.Select(DefineToParamDetail).ToList();
+			var ret = defines
+				.Where(d => !reserved.Contains(d.Key))
+				.Select(d => DefineToParamDetail(d, reserved))
+				.ToList();
 
 			return ret.Count > 0 ? ret : null;
 		}
 
-		private static ParamDetail DefineToParamDetail(PitDefines.Define define)
+		private static ParamDetail DefineToParamDetail(PitDefines.Define define, List<string> reserved)
 		{
 			var grp = define as PitDefines.Collection;
 
@@ -196,11 +227,12 @@ namespace Peach.Pro.Core.WebServices
 				Optional = define.Optional,
 				Options = define.Defaults != null ? define.Defaults.ToList() : null,
 				OS = grp != null ? grp.Platform.ToString() : null,
+				Collapsed = grp != null ? grp.Collapsed : false,
 				Type = define.ConfigType,
 				Min = define.Min,
 				Max = define.Max,
 				Description = define.Description,
-				Items = DefineToParamDetail(define.Defines)
+				Items = DefineToParamDetail(define.Defines, reserved)
 			};
 		}
 	}

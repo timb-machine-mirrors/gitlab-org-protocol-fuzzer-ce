@@ -66,7 +66,10 @@ namespace Peach.Pro.Core
 			{
 				get { return ParameterType.Group; }
 			}
-			
+
+			[XmlIgnore]
+			public bool Collapsed { get; set; }
+
 			[XmlIgnore]
 			public abstract Platform.OS Platform { get; }
 
@@ -115,6 +118,22 @@ namespace Peach.Pro.Core
 			{ 
 				get { return Name; }
 				set { Name = value; }
+			}
+
+			[XmlAttribute("collapsed")]
+			[DefaultValue(false)]
+			public bool CollapsedAttr
+			{
+				get { return Collapsed; }
+				set { Collapsed = value; }
+			}
+
+			[XmlAttribute("description")]
+			[DefaultValue("")]
+			public string DescriptionAttr
+			{
+				get { return Description; }
+				set { Description = value; }
 			}
 
 			public override Platform.OS Platform

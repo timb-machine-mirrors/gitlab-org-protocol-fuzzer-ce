@@ -6,6 +6,7 @@ using System.Xml;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Pro.Core;
+using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using File = System.IO.File;
 using Peach.Core.Test;
@@ -400,6 +401,113 @@ namespace Peach.Pro.Test.Core
 				Assert.AreEqual("foo", dst[1].Value);
 				Assert.AreEqual("key0", dst[2].Key);
 				Assert.AreEqual("value0", dst[2].Value);
+			}
+		}
+
+		[Test]
+		public void TestNoSystem()
+		{
+			const string xml = @"
+<PitDefines>
+	<All>
+		<String key='key0' value='value0' name='name0' description='description0' />
+		<String key='PitLibraryPath' value='.' name='Pit Library Path' description='Path to pit library' />
+	</All>
+</PitDefines>
+";
+
+			using (var tmp = new TempFile(xml))
+			{
+				var defs = PitDefines.ParseFile(tmp.Path, "/path/to/pits");
+
+				var web = defs.ToWeb();
+
+				Assert.AreEqual(2, web.Count);
+				Assert.AreEqual("All", web[0].Name);
+				Assert.AreEqual(1, web[0].Items.Count);
+				Assert.AreEqual("key0", web[0].Items[0].Key);
+			}
+		}
+
+		[Test]
+		public void TestJson()
+		{
+			const string xml = @"
+<PitDefines>
+	<Group name='Outter'>
+		<Group name='Inner' collapsed='true' description='innerDesc'>
+			<Define name='k1' key='k1' value='##k2##' />
+			<Space />
+			<Define name='k2' key='k2' value='foo' />
+		</Group>
+		<String key='key0' value='value0' name='name0' description='description0'/>
+	</Group>
+</PitDefines>
+";
+
+			using (var rdr = new StringReader(xml))
+			{
+				var defs = XmlTools.Deserialize<PitDefines>(rdr);
+				var web = defs.ToWeb();
+				var json = web.ToJson();
+
+				var exp = @"[
+  {
+    ""Description"": """",
+    ""Items"": [
+      {
+        ""Collapsed"": true,
+        ""Description"": ""innerDesc"",
+        ""Items"": [
+          {
+            ""Description"": """",
+            ""Key"": ""k1"",
+            ""Name"": ""k1"",
+            ""Options"": [],
+            ""Type"": ""User"",
+            ""Value"": ""##k2##""
+          },
+          {
+            ""Type"": ""Space""
+          },
+          {
+            ""Description"": """",
+            ""Key"": ""k2"",
+            ""Name"": ""k2"",
+            ""Options"": [],
+            ""Type"": ""User"",
+            ""Value"": ""foo""
+          }
+        ],
+        ""Name"": ""Inner"",
+        ""OS"": ""All"",
+        ""Type"": ""Group""
+      },
+      {
+        ""Description"": ""description0"",
+        ""Key"": ""key0"",
+        ""Name"": ""name0"",
+        ""Options"": [],
+        ""Type"": ""String"",
+        ""Value"": ""value0""
+      }
+    ],
+    ""Name"": ""Outter"",
+    ""OS"": ""All"",
+    ""Type"": ""Group""
+  },
+  {
+    ""Collapsed"": true,
+    ""Description"": ""These values are controlled by Peach."",
+    ""Items"": [],
+    ""Key"": ""SystemDefines"",
+    ""Name"": ""System Defines"",
+    ""OS"": """",
+    ""Type"": ""Group""
+  }
+]".Replace("\r\n", Environment.NewLine);
+
+				Assert.AreEqual(exp, json);
 			}
 		}
 	}
