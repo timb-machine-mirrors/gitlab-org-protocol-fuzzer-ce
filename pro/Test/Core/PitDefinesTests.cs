@@ -372,6 +372,7 @@ namespace Peach.Pro.Test.Core
 	<None>
 		<Group name='Group'>
 			<Define name='k1' key='k1' value='bar' />
+			<Space />
 			<Define name='k2' key='k2' value='baz' />
 		</Group>
 	</None>

@@ -81,11 +81,30 @@ namespace Peach.Pro.Core
 			[XmlElement("Enum", Type = typeof(EnumDefine))]
 			[XmlElement("Define", Type = typeof(UserDefine))]
 			[XmlElement("Bool", Type = typeof(BoolDefine))]
+			[XmlElement("Space", Type = typeof(Space))]
 			[XmlElement("Group", Type = typeof(Group))]
 			public List<Define> Children
 			{
 				get { return Defines; }
 				set { Defines = value; }
+			}
+
+			public override string[] Defaults
+			{
+				get { return null; }
+			}
+		}
+
+		public class Space : Define
+		{
+			public override ParameterType ConfigType
+			{
+				get { return ParameterType.Space; }
+			}
+
+			public override string[] Defaults
+			{
+				get { return null; }
 			}
 		}
 

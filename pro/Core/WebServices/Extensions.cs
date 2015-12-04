@@ -194,7 +194,7 @@ namespace Peach.Pro.Core.WebServices
 				Name = define.Name,
 				Value = define.Value,
 				Optional = define.Optional,
-				Options = grp != null ? null : define.Defaults.ToList(),
+				Options = define.Defaults != null ? define.Defaults.ToList() : null,
 				OS = grp != null ? grp.Platform.ToString() : null,
 				Type = define.ConfigType,
 				Min = define.Min,
