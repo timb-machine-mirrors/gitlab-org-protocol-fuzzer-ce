@@ -104,7 +104,31 @@ namespace Peach.Pro.Core.WebServices
 
 		public static List<ParamDetail> ToWeb(this PitDefines defines)
 		{
-			return new List<ParamDetail>();
+			var ret = defines.Platforms.Select(item => new ParamDetail
+			{
+				Key = item.Platform.ToString(),
+				Name = item.Platform.ToString() + " Defines",
+				Description = "",
+				Type = ParameterType.Group,
+				OS = item.Platform.ToString(),
+				Items = item.Defines
+					.Where(d => defines.SystemDefines.All(i => d.Key != i.Key))
+					.Select(DefineToParamDetail)
+					.ToList()
+			}).ToList();
+
+			ret.Add(new ParamDetail
+			{
+				Key = "SystemDefines",
+				Name = "System Defines",
+				Description = "These values are controlled by Peach.",
+				Type = ParameterType.Group,
+				Collapsed = true,
+				OS = "",
+				Items = defines.SystemDefines.Select(DefineToParamDetail).ToList()
+			});
+
+			return ret;
 		}
 
 		public static void ApplyWeb(this PitDefines defines, List<Param> config)
@@ -159,6 +183,22 @@ namespace Peach.Pro.Core.WebServices
 			//		}
 			//	}),
 			//};
+		}
+
+		private static ParamDetail DefineToParamDetail(PitDefines.Define define)
+		{
+			return new ParamDetail
+			{
+				Key = define.Key,
+				Name = define.Name,
+				Value = define.Value,
+				Optional = define.Optional,
+				Options = define.Defaults.ToList(),
+				Type = define.ConfigType,
+				Min = define.Min,
+				Max = define.Max,
+				Description = define.Description
+			};
 		}
 	}
 }
