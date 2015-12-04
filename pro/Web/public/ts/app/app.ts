@@ -215,7 +215,7 @@ namespace Peach {
 					views: {
 						'@': {
 							templateUrl: C.Templates.Pit.Advanced.Variables,
-							controller: ConfigureVariablesController,
+							controller: ConfigureDefinesController,
 							controllerAs: C.ViewModel
 						}
 					},

@@ -15,6 +15,7 @@ namespace Peach.C {
 		export const Agent = 'peachAgent';
 		export const AutoFocus = 'peachAutoFocus';
 		export const Combobox = 'peachCombobox';
+		export const Defines = 'peachDefines';
 		export const Faults = 'peachFaults';
 		export const Jobs = 'peachJobs';
 		export const Monitor = 'peachMonitor';
@@ -40,6 +41,7 @@ namespace Peach.C {
 	export namespace Controllers {
 		export const Agent = 'AgentController';
 		export const Combobox = 'ComboboxController';
+		export const Defines = 'DefinesController';
 		export const Faults = 'FaultsDirectiveController';
 		export const Jobs = 'JobsDirectiveController';
 		export const Monitor = 'MonitorController';
@@ -159,6 +161,7 @@ namespace Peach.C {
 		export namespace Directives {
 			export const Agent = 'html/directives/agent.html';
 			export const Combobox = 'html/directives/combobox.html';
+			export const Defines = 'html/directives/defines.html';
 			export const Faults = 'html/directives/faults.html';
 			export const Jobs = 'html/directives/jobs.html';
 			export const Monitor = 'html/directives/monitor.html';

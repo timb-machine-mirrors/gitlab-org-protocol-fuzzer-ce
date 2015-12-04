@@ -17,25 +17,27 @@ namespace Peach.Pro.Core
 
 		public abstract class Define
 		{
-			[XmlAttribute("key")]
-			public string Key { get; set; }
-
-			[XmlAttribute("value")]
-			public string Value { get; set; }
-
-			[XmlAttribute("name")]
-			public string Name { get; set; }
-
-			[XmlAttribute("description")]
-			[DefaultValue("")]
-			public string Description { get; set; }
+			protected Define()
+			{
+				Defines = new List<Define>();
+			}
 
 			public abstract ParameterType ConfigType { get; }
 
-			public virtual bool Optional
-			{
-				get { return false; }
-			}
+			[XmlIgnore]
+			public string Key { get; set; }
+
+			[XmlIgnore]
+			public string Value { get; set; }
+
+			[XmlIgnore]
+			public string Description { get; set; }
+
+			[XmlIgnore]
+			public string Name { get; set; }
+
+			[XmlIgnore]
+			public bool Optional { get; set; }
 
 			public virtual string[] Defaults
 			{
@@ -53,9 +55,105 @@ namespace Peach.Pro.Core
 			{
 				get { return null; }
 			}
+
+			[XmlIgnore]
+			public virtual List<Define> Defines { get; set; }
 		}
 
-		public class UserDefine : Define
+		public abstract class Collection : Define
+		{
+			public override ParameterType ConfigType
+			{
+				get { return ParameterType.Group; }
+			}
+			
+			[XmlIgnore]
+			public abstract Platform.OS Platform { get; }
+
+			[XmlElement("String", Type = typeof(StringDefine))]
+			[XmlElement("Hex", Type = typeof(HexDefine))]
+			[XmlElement("Range", Type = typeof(RangeDefine))]
+			[XmlElement("Ipv4", Type = typeof(Ipv4Define))]
+			[XmlElement("Ipv6", Type = typeof(Ipv6Define))]
+			[XmlElement("Hwaddr", Type = typeof(HwaddrDefine))]
+			[XmlElement("Iface", Type = typeof(IfaceDefine))]
+			[XmlElement("Strategy", Type = typeof(StrategyDefine))]
+			[XmlElement("Enum", Type = typeof(EnumDefine))]
+			[XmlElement("Define", Type = typeof(UserDefine))]
+			[XmlElement("Bool", Type = typeof(BoolDefine))]
+			[XmlElement("Group", Type = typeof(Group))]
+			public List<Define> Children
+			{
+				get { return base.Defines; }
+				set { base.Defines = value; }
+			}
+		}
+
+		public class Group : Define
+		{
+			public override ParameterType ConfigType
+			{
+				get { return ParameterType.Group; }
+			}
+
+			[XmlAttribute("name")]
+			public string NameAttr 
+			{ 
+				get { return base.Name; }
+				set { base.Name = value; } 
+			}
+
+			[XmlElement("String", Type = typeof(StringDefine))]
+			[XmlElement("Hex", Type = typeof(HexDefine))]
+			[XmlElement("Range", Type = typeof(RangeDefine))]
+			[XmlElement("Ipv4", Type = typeof(Ipv4Define))]
+			[XmlElement("Ipv6", Type = typeof(Ipv6Define))]
+			[XmlElement("Hwaddr", Type = typeof(HwaddrDefine))]
+			[XmlElement("Iface", Type = typeof(IfaceDefine))]
+			[XmlElement("Strategy", Type = typeof(StrategyDefine))]
+			[XmlElement("Enum", Type = typeof(EnumDefine))]
+			[XmlElement("Define", Type = typeof(UserDefine))]
+			[XmlElement("Bool", Type = typeof(BoolDefine))]
+			public List<Define> Children
+			{
+				get { return base.Defines; }
+				set { base.Defines = value; }
+			}
+		}
+
+		public abstract class PrimitiveDefine : Define
+		{
+			[XmlAttribute("name")]
+			public string NameAttr 
+			{ 
+				get { return base.Name; }
+				set { base.Name = value; } 
+			}
+
+			[XmlAttribute("key")]
+			public string KeyAttr 
+			{ 
+				get { return base.Key; }
+				set { base.Key = value; } 
+			}
+
+			[XmlAttribute("value")]
+			public string ValueAttr 
+			{ 
+				get { return base.Value; }
+				set { base.Value = value; } 
+			}
+
+			[XmlAttribute("description")]
+			[DefaultValue("")]
+			public string DescriptionAttr 
+			{ 
+				get { return base.Description; }
+				set { base.Description = value; } 
+			}
+		}
+
+		public class UserDefine : PrimitiveDefine
 		{
 			public override ParameterType ConfigType
 			{
@@ -66,24 +164,23 @@ namespace Peach.Pro.Core
 		/// <summary>
 		/// Free form string
 		/// </summary>
-		public class StringDefine : Define
+		public class StringDefine : PrimitiveDefine
 		{
 			[XmlAttribute("optional")]
 			[DefaultValue(false)]
-			public bool OptionalValue { get; set; }
+			public bool OptionalAttr 
+			{ 
+				get { return base.Optional; }
+				set { base.Optional = value; }
+			}
 
 			public override ParameterType ConfigType
 			{
 				get { return ParameterType.String; }
 			}
-
-			public override bool Optional
-			{
-				get { return OptionalValue; }
-			}
 		}
 
-		public class HexDefine : Define
+		public class HexDefine : PrimitiveDefine
 		{
 			public override ParameterType ConfigType
 			{
@@ -91,7 +188,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public class RangeDefine : Define
+		public class RangeDefine : PrimitiveDefine
 		{
 			[XmlAttribute("min")]
 			public long MinValue { get; set; }
@@ -115,7 +212,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public class Ipv4Define : Define
+		public class Ipv4Define : PrimitiveDefine
 		{
 			public override ParameterType ConfigType
 			{
@@ -123,7 +220,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public class Ipv6Define : Define
+		public class Ipv6Define : PrimitiveDefine
 		{
 			public override ParameterType ConfigType
 			{
@@ -131,7 +228,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public class HwaddrDefine : Define
+		public class HwaddrDefine : PrimitiveDefine
 		{
 			public override ParameterType ConfigType
 			{
@@ -139,7 +236,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public class IfaceDefine : Define
+		public class IfaceDefine : PrimitiveDefine
 		{
 			public override ParameterType ConfigType
 			{
@@ -147,7 +244,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public class BoolDefine : Define
+		public class BoolDefine : PrimitiveDefine
 		{
 			public override ParameterType ConfigType
 			{
@@ -163,7 +260,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public class StrategyDefine : Define
+		public class StrategyDefine : PrimitiveDefine
 		{
 			public override ParameterType ConfigType
 			{
@@ -183,7 +280,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public class EnumDefine : Define
+		public class EnumDefine : PrimitiveDefine
 		{
 			[XmlIgnore]
 			public Type EnumType { get; protected set; }
@@ -228,7 +325,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public class SystemDefine : Define
+		public class SystemDefine : PrimitiveDefine
 		{
 			public override ParameterType ConfigType
 			{
@@ -239,30 +336,6 @@ namespace Peach.Pro.Core
 		#endregion
 
 		#region Platforms
-
-		public abstract class Collection
-		{
-			protected Collection()
-			{
-				Defines = new List<Define>();
-			}
-
-			[XmlIgnore]
-			public abstract Platform.OS Platform { get; }
-
-			[XmlElement("String", Type = typeof(StringDefine))]
-			[XmlElement("Hex", Type = typeof(HexDefine))]
-			[XmlElement("Range", Type = typeof(RangeDefine))]
-			[XmlElement("Ipv4", Type = typeof(Ipv4Define))]
-			[XmlElement("Ipv6", Type = typeof(Ipv6Define))]
-			[XmlElement("Hwaddr", Type = typeof(HwaddrDefine))]
-			[XmlElement("Iface", Type = typeof(IfaceDefine))]
-			[XmlElement("Strategy", Type = typeof(StrategyDefine))]
-			[XmlElement("Enum", Type = typeof(EnumDefine))]
-			[XmlElement("Define", Type = typeof(UserDefine))]
-			[XmlElement("Bool", Type = typeof(BoolDefine))]
-			public List<Define> Defines { get; set; }
-		}
 
 		public class None : Collection
 		{
@@ -435,13 +508,14 @@ namespace Peach.Pro.Core
 			var os = Platform.GetOS();
 
 			var ret = Platforms
-					.Where(a => a.Platform.HasFlag(os))
-					.SelectMany(a => a.Defines)
-					.Concat(SystemDefines)
-					.Reverse()
-					.Distinct(DefineComparer.Instance)
-					.Select(d => new KeyValuePair<string, string>(d.Key, d.Value))
-					.ToList();
+				.Where(x => x.Platform.HasFlag(os))
+				.SelectMany(x => x.Defines.SelectMany(y => new List<Define>{ y }.Concat(y.Defines)))
+				.SkipWhile(x => x.ConfigType == ParameterType.Group)
+				.Concat(SystemDefines)
+				.Reverse()
+				.Distinct(DefineComparer.Instance)
+				.Select(x => new KeyValuePair<string, string>(x.Key, x.Value))
+				.ToList();
 
 			ret.Reverse();
 
@@ -450,7 +524,7 @@ namespace Peach.Pro.Core
 			var evaluator = new MatchEvaluator(delegate(Match m)
 			{
 				var key = m.Groups[1].Value;
-				var val = ret.Where(_ => _.Key == key).Select(_ => _.Value).FirstOrDefault();
+				var val = ret.Where(x => x.Key == key).Select(x => x.Value).FirstOrDefault();
 
 				return val ?? m.Groups[0].Value;
 			});

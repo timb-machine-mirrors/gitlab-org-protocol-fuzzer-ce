@@ -69,6 +69,9 @@ namespace Peach {
 		config: IParameter[];
 		agents: IAgent[];
 		metadata?: IPitMetadata;
+	
+		// only used by client-side
+		definesView?: IParameter[];
 	}
 
 	export interface IPitCopy {

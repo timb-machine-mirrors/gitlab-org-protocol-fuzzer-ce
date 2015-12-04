@@ -1,7 +1,7 @@
 ﻿/// <reference path="../reference.ts" />
 
 namespace Peach {
-	export class ConfigureVariablesController {
+	export class ConfigureDefinesController {
 		static $inject = [
 			C.Angular.$scope,
 			C.Angular.$uibModal,
@@ -15,14 +15,14 @@ namespace Peach {
 		) {
 			var promise = pitService.LoadPit();
 			promise.then((pit: IPit) => {
-				this.Config = pit.config;
+				this.View = pit.definesView;
 				this.hasLoaded = true;
 			});
 		}
 
 		private hasLoaded: boolean = false;
 		private isSaved: boolean = false;
-		public Config: IParameter[];
+		public View: IParameter[];
 
 		public get ShowLoading(): boolean {
 			return !this.hasLoaded;
@@ -49,7 +49,7 @@ namespace Peach {
 		}
 
 		public OnSave(): void {
-			var promise = this.pitService.SaveVars(this.Config);
+			var promise = this.pitService.SaveVars(this.View);
 			promise.then(() => {
 				this.isSaved = true;
 				this.$scope.form.$setPristine();
@@ -63,13 +63,13 @@ namespace Peach {
 			});
 
 			modal.result.then((param: IParameter) => {
-				this.Config.push(param);
+				// this.Config.push(param);
 				this.$scope.form.$setDirty();
 			});
 		}
 
 		public OnRemove(index: number) {
-			this.Config.splice(index, 1);
+			// this.Config.splice(index, 1);
 			this.$scope.form.$setDirty();
 		}
 	}
