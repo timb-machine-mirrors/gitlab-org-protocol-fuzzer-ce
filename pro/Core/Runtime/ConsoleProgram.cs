@@ -532,7 +532,7 @@ namespace Peach.Pro.Core.Runtime
 				var cfg = XmlTools.Deserialize<PitDefines>(normalized);
 
 				// Add defines from extra config files in order
-				defs.Platforms.AddRange(cfg.Platforms);
+				defs.Children.AddRange(cfg.Children);
 			}
 
 			var ret = defs.Evaluate();

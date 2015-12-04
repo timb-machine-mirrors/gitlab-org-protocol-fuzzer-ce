@@ -57,7 +57,7 @@ namespace Peach.Pro.Core
 			}
 
 			[XmlIgnore]
-			public virtual List<Define> Defines { get; set; }
+			public List<Define> Defines { get; set; }
 		}
 
 		public abstract class Collection : Define
@@ -84,40 +84,23 @@ namespace Peach.Pro.Core
 			[XmlElement("Group", Type = typeof(Group))]
 			public List<Define> Children
 			{
-				get { return base.Defines; }
-				set { base.Defines = value; }
+				get { return Defines; }
+				set { Defines = value; }
 			}
 		}
 
-		public class Group : Define
+		public class Group : Collection
 		{
-			public override ParameterType ConfigType
-			{
-				get { return ParameterType.Group; }
-			}
-
 			[XmlAttribute("name")]
 			public string NameAttr 
 			{ 
-				get { return base.Name; }
-				set { base.Name = value; } 
+				get { return Name; }
+				set { Name = value; }
 			}
 
-			[XmlElement("String", Type = typeof(StringDefine))]
-			[XmlElement("Hex", Type = typeof(HexDefine))]
-			[XmlElement("Range", Type = typeof(RangeDefine))]
-			[XmlElement("Ipv4", Type = typeof(Ipv4Define))]
-			[XmlElement("Ipv6", Type = typeof(Ipv6Define))]
-			[XmlElement("Hwaddr", Type = typeof(HwaddrDefine))]
-			[XmlElement("Iface", Type = typeof(IfaceDefine))]
-			[XmlElement("Strategy", Type = typeof(StrategyDefine))]
-			[XmlElement("Enum", Type = typeof(EnumDefine))]
-			[XmlElement("Define", Type = typeof(UserDefine))]
-			[XmlElement("Bool", Type = typeof(BoolDefine))]
-			public List<Define> Children
+			public override Platform.OS Platform
 			{
-				get { return base.Defines; }
-				set { base.Defines = value; }
+				get { return Peach.Core.Platform.OS.All; }
 			}
 		}
 
@@ -126,30 +109,30 @@ namespace Peach.Pro.Core
 			[XmlAttribute("name")]
 			public string NameAttr 
 			{ 
-				get { return base.Name; }
-				set { base.Name = value; } 
+				get { return Name; }
+				set { Name = value; } 
 			}
 
 			[XmlAttribute("key")]
 			public string KeyAttr 
 			{ 
-				get { return base.Key; }
-				set { base.Key = value; } 
+				get { return Key; }
+				set { Key = value; } 
 			}
 
 			[XmlAttribute("value")]
 			public string ValueAttr 
 			{ 
-				get { return base.Value; }
-				set { base.Value = value; } 
+				get { return Value; }
+				set { Value = value; } 
 			}
 
 			[XmlAttribute("description")]
 			[DefaultValue("")]
 			public string DescriptionAttr 
 			{ 
-				get { return base.Description; }
-				set { base.Description = value; } 
+				get { return Description; }
+				set { Description = value; } 
 			}
 		}
 
@@ -170,8 +153,8 @@ namespace Peach.Pro.Core
 			[DefaultValue(false)]
 			public bool OptionalAttr 
 			{ 
-				get { return base.Optional; }
-				set { base.Optional = value; }
+				get { return Optional; }
+				set { Optional = value; }
 			}
 
 			public override ParameterType ConfigType
@@ -339,6 +322,11 @@ namespace Peach.Pro.Core
 
 		public class None : Collection
 		{
+			public None()
+			{
+				Name = "None";
+			}
+
 			[XmlIgnore]
 			public override Platform.OS Platform
 			{
@@ -348,6 +336,11 @@ namespace Peach.Pro.Core
 
 		public class Windows : Collection
 		{
+			public Windows()
+			{
+				Name = "Windows";
+			}
+
 			[XmlIgnore]
 			public override Platform.OS Platform
 			{
@@ -357,6 +350,11 @@ namespace Peach.Pro.Core
 
 		public class OSX : Collection
 		{
+			public OSX()
+			{
+				Name = "OSX";
+			}
+
 			[XmlIgnore]
 			public override Platform.OS Platform
 			{
@@ -366,6 +364,11 @@ namespace Peach.Pro.Core
 
 		public class Linux : Collection
 		{
+			public Linux()
+			{
+				Name = "Linux";
+			}
+
 			[XmlIgnore]
 			public override Platform.OS Platform
 			{
@@ -375,6 +378,11 @@ namespace Peach.Pro.Core
 
 		public class Unix : Collection
 		{
+			public Unix()
+			{
+				Name = "Unix";
+			}
+
 			[XmlIgnore]
 			public override Platform.OS Platform
 			{
@@ -384,6 +392,11 @@ namespace Peach.Pro.Core
 
 		public class All : Collection
 		{
+			public All()
+			{
+				Name = "All";
+			}
+
 			[XmlIgnore]
 			public override Platform.OS Platform
 			{
@@ -397,7 +410,7 @@ namespace Peach.Pro.Core
 
 		public PitDefines()
 		{
-			Platforms = new List<Collection>();
+			Children = new List<Collection>();
 			SystemDefines = new List<Define>();
 		}
 
@@ -407,10 +420,14 @@ namespace Peach.Pro.Core
 		[XmlElement("Linux", Type = typeof(Linux))]
 		[XmlElement("Unix", Type = typeof(Unix))]
 		[XmlElement("All", Type = typeof(All))]
-		public List<Collection> Platforms { get; set; }
+		[XmlElement("Group", Type = typeof(Group))]
+		public List<Collection> Children { get; set; }
 
 		[XmlIgnore]
 		public List<Define> SystemDefines { get; set; }
+
+		[XmlIgnore]
+		public List<Collection> Platforms { get { return Children; } }
 
 		#endregion
 
@@ -507,7 +524,7 @@ namespace Peach.Pro.Core
 		{
 			var os = Platform.GetOS();
 
-			var ret = Platforms
+			var ret = Children
 				.Where(x => x.Platform.HasFlag(os))
 				.SelectMany(x => x.Defines.SelectMany(y => new List<Define>{ y }.Concat(y.Defines)))
 				.SkipWhile(x => x.ConfigType == ParameterType.Group)

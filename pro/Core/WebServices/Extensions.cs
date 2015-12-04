@@ -104,18 +104,7 @@ namespace Peach.Pro.Core.WebServices
 
 		public static List<ParamDetail> ToWeb(this PitDefines defines)
 		{
-			var ret = defines.Platforms.Select(item => new ParamDetail
-			{
-				Key = item.Platform.ToString(),
-				Name = item.Platform.ToString() + " Defines",
-				Description = "",
-				Type = ParameterType.Group,
-				OS = item.Platform.ToString(),
-				Items = item.Defines
-					.Where(d => defines.SystemDefines.All(i => d.Key != i.Key))
-					.Select(DefineToParamDetail)
-					.ToList()
-			}).ToList();
+			var ret = DefineToParamDetail(defines.Children);
 
 			ret.Add(new ParamDetail
 			{
@@ -185,19 +174,33 @@ namespace Peach.Pro.Core.WebServices
 			//};
 		}
 
+		private static List<ParamDetail> DefineToParamDetail(IEnumerable<PitDefines.Define> defines)
+		{
+			if (defines == null)
+				return null;
+
+			var ret = defines.Select(DefineToParamDetail).ToList();
+
+			return ret.Count > 0 ? ret : null;
+		}
+
 		private static ParamDetail DefineToParamDetail(PitDefines.Define define)
 		{
+			var grp = define as PitDefines.Collection;
+
 			return new ParamDetail
 			{
 				Key = define.Key,
 				Name = define.Name,
 				Value = define.Value,
 				Optional = define.Optional,
-				Options = define.Defaults.ToList(),
+				Options = grp != null ? null : define.Defaults.ToList(),
+				OS = grp != null ? grp.Platform.ToString() : null,
 				Type = define.ConfigType,
 				Min = define.Min,
 				Max = define.Max,
-				Description = define.Description
+				Description = define.Description,
+				Items = DefineToParamDetail(define.Defines)
 			};
 		}
 	}

@@ -470,7 +470,7 @@ namespace Peach.Pro.Test.Core.WebServices
 				Key = "OptStr",
 				Value = "",
 				Description = "Desc",
-				OptionalValue = true
+				OptionalAttr = true
 			});
 
 			XmlTools.Serialize(file, defs);
