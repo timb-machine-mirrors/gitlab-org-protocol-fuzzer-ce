@@ -539,14 +539,34 @@ namespace Peach.Pro.Core
 
 		#region Evaluate
 
+		private static IEnumerable<Define> Flatten(Define defines)
+		{
+			var toVisit = new List<Define> { null };
+
+			var it = defines;
+
+			while (it != null)
+			{
+				yield return it;
+
+				var index = toVisit.Count;
+				foreach (var item in it.Defines)
+					toVisit.Insert(index, item);
+
+				index = toVisit.Count - 1;
+				it = toVisit[index];
+				toVisit.RemoveAt(index);
+			}
+		}
+
 		public List<KeyValuePair<string, string>> Evaluate()
 		{
 			var os = Platform.GetOS();
 
 			var ret = Children
 				.Where(x => x.Platform.HasFlag(os))
-				.SelectMany(x => x.Defines.SelectMany(y => new List<Define>{ y }.Concat(y.Defines)))
-				.SkipWhile(x => x.ConfigType == ParameterType.Group)
+				.SelectMany(Flatten)
+				.Where(x => x.ConfigType != ParameterType.Group && x.ConfigType != ParameterType.Space)
 				.Concat(SystemDefines)
 				.Reverse()
 				.Distinct(DefineComparer.Instance)

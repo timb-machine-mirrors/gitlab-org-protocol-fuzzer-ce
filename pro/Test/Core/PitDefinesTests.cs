@@ -365,6 +365,7 @@ namespace Peach.Pro.Test.Core
 	<All>
 		<Group name='Group'>
 			<Define name='k1' key='k1' value='##k2##' />
+			<Space />
 			<Define name='k2' key='k2' value='foo' />
 		</Group>
 		<String key='key0' value='value0' name='name0' description='description0'/>
@@ -372,7 +373,6 @@ namespace Peach.Pro.Test.Core
 	<None>
 		<Group name='Group'>
 			<Define name='k1' key='k1' value='bar' />
-			<Space />
 			<Define name='k2' key='k2' value='baz' />
 		</Group>
 	</None>
@@ -386,7 +386,8 @@ namespace Peach.Pro.Test.Core
 				Assert.AreEqual(Platform.OS.All, defs.Platforms[0].Platform);
 				Assert.AreEqual(defs.Platforms[0].Defines[0].ConfigType, ParameterType.Group);
 				Assert.AreEqual(defs.Platforms[0].Defines[0].Defines[0].ConfigType, ParameterType.User);
-				Assert.AreEqual(defs.Platforms[0].Defines[0].Defines[1].ConfigType, ParameterType.User);
+				Assert.AreEqual(defs.Platforms[0].Defines[0].Defines[1].ConfigType, ParameterType.Space);
+				Assert.AreEqual(defs.Platforms[0].Defines[0].Defines[2].ConfigType, ParameterType.User);
 				Assert.AreEqual(defs.Platforms[0].Defines[1].ConfigType, ParameterType.String);
 
 				var dst = defs.Evaluate();
