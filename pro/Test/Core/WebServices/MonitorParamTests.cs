@@ -82,7 +82,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Description':'Desc','Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Key':'TestMonitor','Name':'TestMonitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
+			var exp = "[{'Description':'Desc','Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Key':'TestMonitor','Name':'Test Monitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
 
 			Assert.AreEqual(exp, result);
 
@@ -102,7 +102,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Description':'Desc','Items':[{'Collapsed':true,'Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Name':'Group1','Type':'Group'}],'Key':'TestMonitor','Name':'TestMonitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
+			var exp = "[{'Description':'Desc','Items':[{'Collapsed':true,'Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Name':'Group1','Type':'Group'}],'Key':'TestMonitor','Name':'Test Monitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
 
 			Assert.AreEqual(exp, result);
 
@@ -122,7 +122,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Items':[{'Description':'Desc','Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Key':'TestMonitor','Name':'TestMonitor','OS':'','Type':'Monitor'}],'Name':'Other','Type':'Group'}]".Replace('\'', '\"');
+			var exp = "[{'Items':[{'Description':'Desc','Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Key':'TestMonitor','Name':'Test Monitor','OS':'','Type':'Monitor'}],'Name':'Other','Type':'Group'}]".Replace('\'', '\"');
 
 			Assert.AreEqual(exp, result);
 
@@ -143,7 +143,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Items':[{'Description':'Desc','Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Key':'TestMonitor','Name':'TestMonitor','OS':'','Type':'Monitor'}],'Name':'Other','Type':'Group'}]".Replace('\'', '\"');
+			var exp = "[{'Items':[{'Description':'Desc','Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Key':'TestMonitor','Name':'Test Monitor','OS':'','Type':'Monitor'}],'Name':'Other','Type':'Group'}]".Replace('\'', '\"');
 
 			Assert.AreEqual(exp, result);
 
@@ -164,7 +164,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Items':[{'Description':'Desc','Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Key':'TestMonitor','Name':'TestMonitor','OS':'','Type':'Monitor'},{'Description':'Desc','Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'TestTwo','Name':'TestTwo','Optional':true,'Type':'String'}],'Key':'TestTwoMonitor','Name':'TestTwoMonitor','OS':'','Type':'Monitor'}],'Name':'Other','Type':'Group'}]".Replace('\'', '\"');
+			var exp = "[{'Items':[{'Description':'Desc','Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Key':'TestMonitor','Name':'Test Monitor','OS':'','Type':'Monitor'},{'Description':'Desc','Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'TestTwo','Name':'Test Two','Optional':true,'Type':'String'}],'Key':'TestTwoMonitor','Name':'Test Two Monitor','OS':'','Type':'Monitor'}],'Name':'Other','Type':'Group'}]".Replace('\'', '\"');
 
 			Assert.AreEqual(exp, result);
 
@@ -185,7 +185,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Description':'Desc','Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Key':'TestMonitor','Name':'TestMonitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
+			var exp = "[{'Description':'Desc','Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Key':'TestMonitor','Name':'Test Monitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
 
 			Assert.AreEqual(exp, result);
 
@@ -206,7 +206,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Description':'Desc','Items':[],'Key':'TestThreeMonitor','Name':'TestThreeMonitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
+			var exp = "[{'Description':'Desc','Items':[],'Key':'TestThreeMonitor','Name':'Test Three Monitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
 
 			Assert.AreEqual(exp, result);
 
@@ -227,7 +227,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Description':'Desc','Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'TestTwo','Name':'TestTwo','Optional':true,'Type':'String'},{'DefaultValue':'Foo','Description':'Desc','Key':'TestTwo','Name':'TestTwo','Optional':true,'Type':'String'},{'DefaultValue':'Foo','Description':'Desc','Key':'TestTwo','Name':'TestTwo','Optional':true,'Type':'String'}],'Key':'TestTwoMonitor','Name':'TestTwoMonitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
+			var exp = "[{'Description':'Desc','Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'TestTwo','Name':'Test Two','Optional':true,'Type':'String'},{'DefaultValue':'Foo','Description':'Desc','Key':'TestTwo','Name':'Test Two','Optional':true,'Type':'String'},{'DefaultValue':'Foo','Description':'Desc','Key':'TestTwo','Name':'Test Two','Optional':true,'Type':'String'}],'Key':'TestTwoMonitor','Name':'Test Two Monitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
 
 			Assert.AreEqual(exp, result);
 
@@ -248,7 +248,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Description':'Desc','Items':[],'Key':'NoParamMonitor','Name':'NoParamMonitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
+			var exp = "[{'Description':'Desc','Items':[],'Key':'NoParamMonitor','Name':'No Param Monitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
 
 			Assert.AreEqual(exp, result);
 
@@ -269,7 +269,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Description':'Desc','Items':[{'DefaultValue':'','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Key':'InvalidParamMonitor','Name':'InvalidParamMonitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
+			var exp = "[{'Description':'Desc','Items':[{'DefaultValue':'','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Key':'InvalidParamMonitor','Name':'Invalid Param Monitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
 
 			Assert.AreEqual(exp, result);
 
@@ -291,7 +291,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Description':'Desc','Key':'NoParamMonitor','Name':'NoParamMonitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
+			var exp = "[{'Description':'Desc','Key':'NoParamMonitor','Name':'No Param Monitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
 
 			Assert.AreEqual(exp, result);
 
@@ -312,7 +312,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Description':'','Key':'NoDescriptionMonitor','Name':'NoDescriptionMonitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
+			var exp = "[{'Description':'','Key':'NoDescriptionMonitor','Name':'No Description Monitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
 
 			Assert.AreEqual(exp, result);
 

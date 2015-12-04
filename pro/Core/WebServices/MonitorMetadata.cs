@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Peach.Core;
 using Peach.Core.Agent;
@@ -209,8 +210,7 @@ namespace Peach.Pro.Core.WebServices
 
 		private static string KeyToName(string key)
 		{
-			// TODO: Change "CamelCase" to "Camel Case"
-			return key;
+			return Regex.Replace(key, "[A-Z]+", " $&").Trim();
 		}
 
 		private static int MonitorSorter(MonitorInfo lhs, MonitorInfo rhs)
@@ -355,7 +355,7 @@ namespace Peach.Pro.Core.WebServices
 			var p = new ParamDetail
 			{
 				Key = attr.name,
-				Name = attr.name,
+				Name = KeyToName(attr.name),
 				DefaultValue = attr.required ? null : attr.defaultValue,
 				Optional = !attr.required,
 				Description = attr.description
