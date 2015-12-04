@@ -6,7 +6,6 @@ using System.Reflection;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using Peach.Core;
-using Peach.Core.Agent;
 using Peach.Core.Analyzers;
 using Peach.Pro.Core;
 using Peach.Pro.Core.WebServices;
@@ -490,46 +489,11 @@ namespace Peach.Pro.Test.Core.WebServices
 			//var text = File.ReadAllText(file);
 			//StringAssert.Contains("optional=\"true\"", text);
 			//StringAssert.DoesNotContain("optional=\"false\"", text);
-		}
 
-		[Test]
-		public void TestAllMonitors()
-		{
-			var errors = new List<string>();
 
-			// remove test SetUp handler for this test
-			db.ValidationEventHandler -= OnValidationEvent;
 
-			db.ValidationEventHandler += (s, e) => errors.Add(e.Exception.Message);
 
-			//db.GetAllMonitors(new List<string>());
 
-			CollectionAssert.IsEmpty(errors);
-
-			Assert.Fail("FIXME");
-		}
-
-		[Test]
-		public void TestInvalidMonitor()
-		{
-			Assert.Fail("FIXME");
-			// remove test SetUp handler for this test
-			//db.ValidationEventHandler -= OnValidationEvent;
-
-			//var error = false;
-			//db.ValidationEventHandler += (s, e) =>
-			//{
-			//	error = true;
-			//};
-
-			//var attr = new MonitorAttribute("FakeMonitor")
-			//{
-			//	OS = Platform.OS.Unix
-			//};
-
-			//var monitor = db.MakeMonitor(attr, typeof(string), null);
-			//Assert.IsTrue(error);
-			//Assert.AreEqual("", monitor.OS);
 		}
 
 		[Test]
