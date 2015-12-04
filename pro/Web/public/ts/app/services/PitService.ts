@@ -92,7 +92,22 @@ namespace Peach {
 		}
 
 		public SaveVars(config: IParameter[]): ng.IPromise<IPit> {
-			this.pit.config = config;
+			this.pit.config = [];
+			for (let param of config) {
+				if (param.type === ParameterType.Group) {
+					for (let item of param.items) {
+						this.pit.config.push({
+							key: item.key,
+							value: item.value
+						});
+					}
+				} else {
+					this.pit.config.push({
+						key: param.key,
+						value: param.value
+					});
+				}
+			}
 			return this.SavePit();
 		}
 
@@ -138,7 +153,10 @@ namespace Peach {
 					monitor.view = this.CreateMonitorView(monitor);
 				}
 			}
-			//console.log('pit', pit);
+
+			if (pit.metadata) {
+				pit.definesView = this.CreateDefinesView();
+			}
 		}
 
 		public CreateMonitor(param: IParameter): IMonitor {
@@ -150,6 +168,19 @@ namespace Peach {
 			};
 			monitor.view = this.CreateMonitorView(monitor);
 			return monitor;
+		}
+
+		private CreateDefinesView(): IParameter[] {
+			const view = angular.copy(this.pit.metadata.defines);
+			for (let group of view) {
+				for (let param of group.items) {
+					const config = _.find(this.pit.config, { key: param.key });
+					if (config && config.value) {
+						param.value = config.value;
+					}
+				}
+			}
+			return view;
 		}
 
 		private CreateMonitorView(monitor: IMonitor): IParameter {

@@ -4,23 +4,36 @@ describe("Peach", () => {
 	var C = Peach.C;
 	beforeEach(module('Peach'));
 
-	describe('ConfigureVariablesController', () => {
+	describe('ConfigureDefinesController', () => {
 		var $httpBackend: ng.IHttpBackendService;
 		var $controller: ng.IControllerService;
 		var $scope;
 
 		var service: Peach.PitService;
-		var ctrl: Peach.ConfigureVariablesController;
+		var ctrl: Peach.ConfigureDefinesController;
 
 		var pitId = 'PIT_GUID';
 		var pitUrl = C.Api.PitUrl.replace(':id', pitId);
-		var pit = {
+		var pit: Peach.IPit = {
 			id: pitId,
 			name: 'My Pit',
 			pitUrl: pitUrl,
 			config: [
-				{ key: 'Key', name: 'Name', value: 'Value' }
-			]
+				{ key: 'Key', value: 'Value' }
+			],
+			agents: [],
+			metadata: {
+				defines: [
+					{
+						type: Peach.ParameterType.Group,
+						name: 'Group',
+						items: [
+							{ key: 'Key', name: 'Name' }
+						]
+					}
+				],
+				monitors: []
+			}
 		};
 
 		beforeEach(inject(($injector: ng.auto.IInjectorService) => {
@@ -38,7 +51,7 @@ describe("Peach", () => {
 			$state.params['pit'] = pitId;
 
 			$httpBackend.whenGET(pitUrl).respond(pit);
-			ctrl = $controller('ConfigureVariablesController', {
+			ctrl = $controller('ConfigureDefinesController', {
 				$scope: $scope,
 				PitService: service
 			});
@@ -55,7 +68,7 @@ describe("Peach", () => {
 		});
 
 		it("PitConfig is valid", () => {
-			expect(_.isObject(ctrl.Config)).toBe(true);
+			expect(_.isObject(ctrl.View)).toBe(true);
 		});
 
 		it("PitConfig can be saved", () => {
