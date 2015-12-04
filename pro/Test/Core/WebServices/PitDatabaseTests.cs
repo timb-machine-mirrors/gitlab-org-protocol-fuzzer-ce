@@ -437,63 +437,68 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			var ent = db.Entries.First();
 			var pit = db.GetPitById(ent.Id);
-			var cfg = pit.Config;
 
-			Assert.NotNull(cfg);
-			Assert.AreEqual(7, cfg.Count);
+			Assert.NotNull(pit.Config);
+			Assert.NotNull(pit.Metadata);
+			Assert.NotNull(pit.Metadata.Defines);
 
-			Assert.Fail("FIXME");
+			Assert.AreEqual(7, pit.Config.Count);
+			Assert.AreEqual(2, pit.Metadata.Defines.Count);
 
-			//foreach (var item in cfg)
-			//	Assert.False(item.Optional, "Define should not be optional");
+			foreach (var item in pit.Metadata.Defines.SelectMany(d => d.Items)) 
+				Assert.False(item.Optional, "Define should not be optional");
 
-			//var file = pit.Versions[0].Files[0].Name + ".config";
-			//var defs = PitDefines.Parse(file);
+			var file = pit.Versions[0].Files[0].Name + ".config";
+			var defs = PitDefines.ParseFile(file);
 
-			//Assert.NotNull(defs);
+			Assert.NotNull(defs);
 
-			//// File shouldn't contain optional
-			//StringAssert.DoesNotContain("optional", File.ReadAllText(file));
+			// File shouldn't contain optional
+			StringAssert.DoesNotContain("optional", File.ReadAllText(file));
 
-			//PitDatabase.SaveConfig(pit, cfg);
+			db.UpdatePitById(ent.Id, pit);
 
-			//// After saving, file still shouldn't contain optional
-			//StringAssert.DoesNotContain("optional", File.ReadAllText(file));
+			// After saving, file still shouldn't contain optional
+			StringAssert.DoesNotContain("optional", File.ReadAllText(file));
 
-			//defs.Add(new PitDefines.StringDefine
-			//{
-			//	Name = "Optional String",
-			//	Key = "OptStr",
-			//	Value = "",
-			//	Description = "Desc",
-			//	OptionalValue = true
-			//});
+			Assert.NotNull(defs.Platforms);
+			Assert.AreEqual(1, defs.Platforms.Count);
 
-			//var final = new PitDefines
-			//{
-			//	Platforms = new List<PitDefines.Collection>(new[] {
-			//		new PitDefines.All
-			//		{
-			//			Defines = defs.ToList(),
-			//		}
-			//	}),
-			//};
+			defs.Platforms[0].Defines.Add(new PitDefines.StringDefine
+			{
+				Name = "Optional String",
+				Key = "OptStr",
+				Value = "",
+				Description = "Desc",
+				OptionalValue = true
+			});
 
-			//XmlTools.Serialize(file, final);
+			XmlTools.Serialize(file, defs);
 
-			//cfg = db.GetConfigByUrl(pit.PitUrl);
-			//Assert.NotNull(cfg);
-			//Assert.AreEqual(7, cfg.Count);
-			////Assert.True(cfg[6].Optional, "Should be optional!");
+			pit = db.GetPitById(ent.Id);
 
-			//var text = File.ReadAllText(file);
-			//StringAssert.Contains("optional=\"true\"", text);
-			//StringAssert.DoesNotContain("optional=\"false\"", text);
+			Assert.NotNull(pit.Config);
+			Assert.NotNull(pit.Metadata);
+			Assert.NotNull(pit.Metadata.Defines);
 
+			Assert.AreEqual(8, pit.Config.Count);
+			Assert.AreEqual(2, pit.Metadata.Defines.Count);
 
+			var seq = pit.Metadata.Defines.SelectMany(d => d.Items).ToList();
 
+			Assert.AreEqual(8, seq.Count);
 
+			for (var i = 0; i < seq.Count; ++i)
+			{
+				if (i == 2)
+					Assert.True(seq[i].Optional, "seq[{0}] should be optional".Fmt(i));
+				else
+					Assert.False(seq[i].Optional, "seq[{0}] should not be optional".Fmt(i));
+			}
 
+			var text = File.ReadAllText(file);
+			StringAssert.Contains("optional=\"true\"", text);
+			StringAssert.DoesNotContain("optional=\"false\"", text);
 		}
 
 		[Test]
