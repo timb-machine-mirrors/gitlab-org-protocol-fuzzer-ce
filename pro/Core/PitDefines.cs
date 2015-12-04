@@ -15,22 +15,122 @@ namespace Peach.Pro.Core
 	{
 		#region Defines
 
-		public abstract class Define
+		public abstract class BaseDefine
 		{
-			[XmlAttribute("key")]
+			protected BaseDefine()
+			{
+				Defines = new List<BaseDefine>();
+			}
+
+			public abstract ParameterType ConfigType { get; }
+
+			[XmlIgnore]
 			public string Key { get; set; }
 
-			[XmlAttribute("value")]
+			[XmlIgnore]
 			public string Value { get; set; }
 
-			[XmlAttribute("name")]
+			[XmlIgnore]
+			public string Description { get; set; }
+
+			[XmlIgnore]
 			public string Name { get; set; }
+
+			[XmlIgnore]
+			public virtual List<BaseDefine> Defines { get; set; }
+		}
+
+		public abstract class Collection : BaseDefine
+		{
+			public override ParameterType ConfigType
+			{
+				get { return ParameterType.Group; }
+			}
+			
+			[XmlIgnore]
+			public abstract Platform.OS Platform { get; }
+
+			[XmlElement("String", Type = typeof(StringDefine))]
+			[XmlElement("Hex", Type = typeof(HexDefine))]
+			[XmlElement("Range", Type = typeof(RangeDefine))]
+			[XmlElement("Ipv4", Type = typeof(Ipv4Define))]
+			[XmlElement("Ipv6", Type = typeof(Ipv6Define))]
+			[XmlElement("Hwaddr", Type = typeof(HwaddrDefine))]
+			[XmlElement("Iface", Type = typeof(IfaceDefine))]
+			[XmlElement("Strategy", Type = typeof(StrategyDefine))]
+			[XmlElement("Enum", Type = typeof(EnumDefine))]
+			[XmlElement("Define", Type = typeof(UserDefine))]
+			[XmlElement("Bool", Type = typeof(BoolDefine))]
+			[XmlElement("Group", Type = typeof(Group))]
+			public List<BaseDefine> Children
+			{
+				get { return base.Defines; }
+				set { base.Defines = value; }
+			}
+		}
+
+		public class Group : BaseDefine
+		{
+			public override ParameterType ConfigType
+			{
+				get { return ParameterType.Group; }
+			}
+
+			[XmlAttribute("name")]
+			public string NameAttr 
+			{ 
+				get { return base.Name; }
+				set { base.Name = value; } 
+			}
+
+			[XmlElement("String", Type = typeof(StringDefine))]
+			[XmlElement("Hex", Type = typeof(HexDefine))]
+			[XmlElement("Range", Type = typeof(RangeDefine))]
+			[XmlElement("Ipv4", Type = typeof(Ipv4Define))]
+			[XmlElement("Ipv6", Type = typeof(Ipv6Define))]
+			[XmlElement("Hwaddr", Type = typeof(HwaddrDefine))]
+			[XmlElement("Iface", Type = typeof(IfaceDefine))]
+			[XmlElement("Strategy", Type = typeof(StrategyDefine))]
+			[XmlElement("Enum", Type = typeof(EnumDefine))]
+			[XmlElement("Define", Type = typeof(UserDefine))]
+			[XmlElement("Bool", Type = typeof(BoolDefine))]
+			public List<BaseDefine> Children
+			{
+				get { return base.Defines; }
+				set { base.Defines = value; }
+			}
+		}
+
+		public abstract class Define : BaseDefine
+		{
+			[XmlAttribute("name")]
+			public string NameAttr 
+			{ 
+				get { return base.Name; }
+				set { base.Name = value; } 
+			}
+
+			[XmlAttribute("key")]
+			public string KeyAttr 
+			{ 
+				get { return base.Key; }
+				set { base.Key = value; } 
+			}
+
+			[XmlAttribute("value")]
+			public string ValueAttr 
+			{ 
+				get { return base.Value; }
+				set { base.Value = value; } 
+			}
 
 			[XmlAttribute("description")]
 			[DefaultValue("")]
-			public string Description { get; set; }
-
-			public abstract ParameterType ConfigType { get; }
+			public string DescriptionAttr 
+			{ 
+				get { return base.Description; }
+				set { base.Description = value; } 
+			}
 
 			public virtual bool Optional
 			{
@@ -240,30 +340,6 @@ namespace Peach.Pro.Core
 
 		#region Platforms
 
-		public abstract class Collection
-		{
-			protected Collection()
-			{
-				Defines = new List<Define>();
-			}
-
-			[XmlIgnore]
-			public abstract Platform.OS Platform { get; }
-
-			[XmlElement("String", Type = typeof(StringDefine))]
-			[XmlElement("Hex", Type = typeof(HexDefine))]
-			[XmlElement("Range", Type = typeof(RangeDefine))]
-			[XmlElement("Ipv4", Type = typeof(Ipv4Define))]
-			[XmlElement("Ipv6", Type = typeof(Ipv6Define))]
-			[XmlElement("Hwaddr", Type = typeof(HwaddrDefine))]
-			[XmlElement("Iface", Type = typeof(IfaceDefine))]
-			[XmlElement("Strategy", Type = typeof(StrategyDefine))]
-			[XmlElement("Enum", Type = typeof(EnumDefine))]
-			[XmlElement("Define", Type = typeof(UserDefine))]
-			[XmlElement("Bool", Type = typeof(BoolDefine))]
-			public List<Define> Defines { get; set; }
-		}
-
 		public class None : Collection
 		{
 			[XmlIgnore]
@@ -435,13 +511,14 @@ namespace Peach.Pro.Core
 			var os = Platform.GetOS();
 
 			var ret = Platforms
-					.Where(a => a.Platform.HasFlag(os))
-					.SelectMany(a => a.Defines)
-					.Concat(SystemDefines)
-					.Reverse()
-					.Distinct(DefineComparer.Instance)
-					.Select(d => new KeyValuePair<string, string>(d.Key, d.Value))
-					.ToList();
+				.Where(x => x.Platform.HasFlag(os))
+				.SelectMany(x => x.Defines.SelectMany(y => new List<BaseDefine>{ y }.Concat(y.Defines)))
+				.SkipWhile(x => x.ConfigType == ParameterType.Group)
+				.Concat(SystemDefines)
+				.Reverse()
+				.Distinct(DefineComparer.Instance)
+				.Select(d => new KeyValuePair<string, string>(d.Key, d.Value))
+				.ToList();
 
 			ret.Reverse();
 
@@ -472,16 +549,16 @@ namespace Peach.Pro.Core
 			return ret;
 		}
 
-		class DefineComparer : IEqualityComparer<Define>
+		class DefineComparer : IEqualityComparer<BaseDefine>
 		{
 			public static readonly DefineComparer Instance = new DefineComparer();
 
-			public bool Equals(Define lhs, Define rhs)
+			public bool Equals(BaseDefine lhs, BaseDefine rhs)
 			{
 				return lhs.Key.Equals(rhs.Key);
 			}
 
-			public int GetHashCode(Define obj)
+			public int GetHashCode(BaseDefine obj)
 			{
 				return obj.Key.GetHashCode();
 			}

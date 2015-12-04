@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -101,6 +102,7 @@ namespace Peach.Pro.Test.Core
 			schema.Write(wr);
 			var asStr = sb.ToString();
 			Assert.NotNull(asStr);
+			Console.WriteLine(asStr);
 		}
 
 		[Test]
@@ -352,6 +354,50 @@ namespace Peach.Pro.Test.Core
 			using (var rdr = new StringReader(xml))
 			{
 				Assert.Throws<PeachException>(() => XmlTools.Deserialize<PitDefines>(rdr));
+			}
+		}
+
+		[Test]
+		public void TestGroup()
+		{
+			const string xml = @"
+<PitDefines>
+	<All>
+		<Group name='Group'>
+			<Define name='k1' key='k1' value='##k2##' />
+			<Define name='k2' key='k2' value='foo' />
+		</Group>
+		<String key='key0' value='value0' name='name0' description='description0'/>
+	</All>
+	<None>
+		<Group name='Group'>
+			<Define name='k1' key='k1' value='bar' />
+			<Define name='k2' key='k2' value='baz' />
+		</Group>
+	</None>
+</PitDefines>
+";
+
+			using (var rdr = new StringReader(xml))
+			{
+				var defs = XmlTools.Deserialize<PitDefines>(rdr);
+				Assert.AreEqual(2, defs.Platforms.Count);
+				Assert.AreEqual(Platform.OS.All, defs.Platforms[0].Platform);
+				Assert.AreEqual(defs.Platforms[0].Defines[0].ConfigType, ParameterType.Group);
+				Assert.AreEqual(defs.Platforms[0].Defines[0].Defines[0].ConfigType, ParameterType.User);
+				Assert.AreEqual(defs.Platforms[0].Defines[0].Defines[1].ConfigType, ParameterType.User);
+				Assert.AreEqual(defs.Platforms[0].Defines[1].ConfigType, ParameterType.String);
+
+				var dst = defs.Evaluate();
+
+				Assert.AreEqual(3, dst.Count);
+
+				Assert.AreEqual("k1", dst[0].Key);
+				Assert.AreEqual("foo", dst[0].Value);
+				Assert.AreEqual("k2", dst[1].Key);
+				Assert.AreEqual("foo", dst[1].Value);
+				Assert.AreEqual("key0", dst[2].Key);
+				Assert.AreEqual("value0", dst[2].Value);
 			}
 		}
 	}
