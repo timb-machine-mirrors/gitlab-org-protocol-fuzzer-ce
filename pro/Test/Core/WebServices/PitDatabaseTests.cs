@@ -216,14 +216,15 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var pit2 = db.GetPitByUrl(imgCopy.PitUrl);
 			var cfg2 = pit2.Config;
-			Assert.AreEqual(4, cfg2.Count);
+			Assert.AreEqual(5, cfg2.Count);
 
 			// Should include system defines
 
-			Assert.AreEqual("Peach.Pwd", cfg2[0].Key);
-			Assert.AreEqual("Peach.Cwd", cfg2[1].Key);
-			Assert.AreEqual("Peach.LogRoot", cfg2[2].Key);
-			Assert.AreEqual("PitLibraryPath", cfg2[3].Key);
+			Assert.AreEqual("Peach.OS", cfg2[0].Key);
+			Assert.AreEqual("Peach.Pwd", cfg2[1].Key);
+			Assert.AreEqual("Peach.Cwd", cfg2[2].Key);
+			Assert.AreEqual("Peach.LogRoot", cfg2[3].Key);
+			Assert.AreEqual("PitLibraryPath", cfg2[4].Key);
 
 			// Saving should create the file
 			var cfg = pit2.Versions[0].Files[0].Name + ".config";
@@ -381,18 +382,19 @@ namespace Peach.Pro.Test.Core.WebServices
 			var cfg = pit.Config;
 
 			Assert.NotNull(cfg);
-			Assert.AreEqual(6, cfg.Count);
+			Assert.AreEqual(7, cfg.Count);
 
 			Assert.AreEqual("Strategy", cfg[0].Key);
 			Assert.AreEqual("SomeMiscVariable", cfg[1].Key);
-			Assert.AreEqual("Peach.Pwd", cfg[2].Key);
-			Assert.AreEqual("Peach.Cwd", cfg[3].Key);
-			Assert.AreEqual("Peach.LogRoot", cfg[4].Key);
+			Assert.AreEqual("Peach.OS", cfg[2].Key);
+			Assert.AreEqual("Peach.Pwd", cfg[3].Key);
+			Assert.AreEqual("Peach.Cwd", cfg[4].Key);
+			Assert.AreEqual("Peach.LogRoot", cfg[5].Key);
 
 			// PitLibraryPath is special, and gets turned into a System type
 			// regardless of what is in the pit .config
-			Assert.AreEqual("PitLibraryPath", cfg[5].Key);
-			Assert.AreNotEqual(".", cfg[5].Value);
+			Assert.AreEqual("PitLibraryPath", cfg[6].Key);
+			Assert.AreNotEqual(".", cfg[6].Value);
 		}
 
 		[Test]
@@ -403,7 +405,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			var cfg = pit.Config;
 
 			Assert.NotNull(cfg);
-			Assert.AreEqual(6, cfg.Count);
+			Assert.AreEqual(7, cfg.Count);
 			Assert.AreEqual("SomeMiscVariable", cfg[1].Key);
 			Assert.AreNotEqual("Foo Bar Baz", cfg[1].Value);
 			cfg[1].Value = "Foo Bar Baz";
@@ -439,7 +441,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			var cfg = pit.Config;
 
 			Assert.NotNull(cfg);
-			Assert.AreEqual(6, cfg.Count);
+			Assert.AreEqual(7, cfg.Count);
 
 			Assert.Fail("FIXME");
 
@@ -904,12 +906,13 @@ namespace Peach.Pro.Test.Core.WebServices
 			var cfg = pit.Config;
 			Assert.NotNull(cfg);
 
-			Assert.AreEqual(4, cfg.Count);
+			Assert.AreEqual(5, cfg.Count);
 
-			Assert.AreEqual("Peach.Pwd", cfg[0].Key);
-			Assert.AreEqual("Peach.Cwd", cfg[1].Key);
-			Assert.AreEqual("Peach.LogRoot", cfg[2].Key);
-			Assert.AreEqual("PitLibraryPath", cfg[3].Key);
+			Assert.AreEqual("Peach.OS", cfg[0].Key);
+			Assert.AreEqual("Peach.Pwd", cfg[1].Key);
+			Assert.AreEqual("Peach.Cwd", cfg[2].Key);
+			Assert.AreEqual("Peach.LogRoot", cfg[3].Key);
+			Assert.AreEqual("PitLibraryPath", cfg[4].Key);
 		}
 
 		[Test]
@@ -933,7 +936,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			var cfg = pit.Config;
 			Assert.NotNull(cfg);
 
-			Assert.AreEqual(4, cfg.Count);
+			Assert.AreEqual(5, cfg.Count);
 
 			File.Delete(path);
 
