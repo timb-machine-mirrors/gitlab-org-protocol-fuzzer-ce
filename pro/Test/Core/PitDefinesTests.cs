@@ -510,5 +510,59 @@ namespace Peach.Pro.Test.Core
 				Assert.AreEqual(exp, json);
 			}
 		}
+
+		[Test]
+		public void TestUpdate()
+		{
+			const string xml = @"
+<PitDefines>
+	<Group name='Outter'>
+		<Group name='Inner' collapsed='true' description='innerDesc'>
+			<Range name='k1' key='k1' value='##k2##' min='1' max='1000' description='desc_k1' />
+			<Space />
+			<String name='k2' key='k2' value='foo' />
+		</Group>
+		<String key='key0' value='value0' name='name0' description='description0'/>
+		<String key='PitLibraryPath' value='.' name='Pit Library Path' description=''/>
+	</Group>
+</PitDefines>
+";
+
+			using (var tmp = new TempFile(xml))
+			{
+				var defs = PitDefines.ParseFile(tmp.Path, "/path/to/pits");
+
+				defs.ApplyWeb(new List<Param>
+				{
+					new Param { Key = "k1", Value = "v1", Name = "xxx", Description = "yyy" },
+					new Param { Key = "PitLibraryPath", Value = "PitLibraryPath" },
+				});
+
+				Assert.AreEqual(1, defs.Children.Count);
+				Assert.AreEqual(3, defs.Children[0].Defines.Count);
+
+				// Wasn't posted so shouldn't change
+				Assert.AreEqual("key0", defs.Children[0].Defines[1].Key);
+				Assert.AreEqual("value0", defs.Children[0].Defines[1].Value);
+
+				// Should not get updated even though it was posted
+				Assert.AreEqual("PitLibraryPath", defs.Children[0].Defines[2].Key);
+				Assert.AreEqual(".", defs.Children[0].Defines[2].Value);
+
+				Assert.AreEqual(3, defs.Children[0].Defines[0].Defines.Count);
+
+				//Should be updated!
+				Assert.AreEqual("k1", defs.Children[0].Defines[0].Defines[0].Key);
+				Assert.AreEqual("v1", defs.Children[0].Defines[0].Defines[0].Value);
+
+				// Name & Description are not altered!
+				Assert.AreEqual("k1", defs.Children[0].Defines[0].Defines[0].Name);
+				Assert.AreEqual("desc_k1", defs.Children[0].Defines[0].Defines[0].Description);
+
+				// Wasn't posted so shouldn't change
+				Assert.AreEqual("k2", defs.Children[0].Defines[0].Defines[2].Key);
+				Assert.AreEqual("foo", defs.Children[0].Defines[0].Defines[2].Value);
+			}
+		}
 	}
 }

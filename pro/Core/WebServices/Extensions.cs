@@ -150,6 +150,21 @@ namespace Peach.Pro.Core.WebServices
 
 		public static void ApplyWeb(this PitDefines defines, List<Param> config)
 		{
+			var reserved = defines.SystemDefines.Select(d => d.Key).ToList();
+
+			foreach (var def in defines.Walk())
+			{
+				if (reserved.Contains(def.Key))
+					continue;
+
+				if (def.ConfigType == ParameterType.Space || def.ConfigType == ParameterType.Group)
+					continue;
+
+				var cfg = config.FirstOrDefault(i => i.Key == def.Key);
+				if (cfg != null)
+					def.Value = cfg.Value;
+			}
+
 			//var reserved = new HashSet<string>();
 
 			//foreach (var def in defines.Platforms.SelectMany(p => p.Defines))
@@ -227,7 +242,7 @@ namespace Peach.Pro.Core.WebServices
 				Optional = define.Optional,
 				Options = define.Defaults != null ? define.Defaults.ToList() : null,
 				OS = grp != null ? grp.Platform.ToString() : null,
-				Collapsed = grp != null ? grp.Collapsed : false,
+				Collapsed = grp != null && grp.Collapsed,
 				Type = define.ConfigType,
 				Min = define.Min,
 				Max = define.Max,

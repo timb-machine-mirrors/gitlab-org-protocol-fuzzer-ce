@@ -409,7 +409,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.AreNotEqual("Foo Bar Baz", cfg[1].Value);
 			cfg[1].Value = "Foo Bar Baz";
 
-			//db.SaveConfig(pit, cfg);
+			db.UpdatePitById(ent.Id, pit);
 
 			var file = pit.Versions[0].Files[0].Name + ".config";
 			var defines = PitDefines.ParseFile(file);

@@ -578,13 +578,16 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public List<KeyValuePair<string, string>> Evaluate()
+		public IEnumerable<Define> Walk()
 		{
 			var os = Platform.GetOS();
 
-			var ret = Children
-				.Where(x => x.Platform.HasFlag(os))
-				.SelectMany(Flatten)
+			return Children.Where(x => x.Platform.HasFlag(os)).SelectMany(Flatten);
+		}
+
+		public List<KeyValuePair<string, string>> Evaluate()
+		{
+			var ret = Walk()
 				.Where(x => x.ConfigType != ParameterType.Group && x.ConfigType != ParameterType.Space)
 				.Concat(SystemDefines)
 				.Reverse()
