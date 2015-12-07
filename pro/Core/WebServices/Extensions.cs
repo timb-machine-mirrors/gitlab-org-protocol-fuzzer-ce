@@ -150,10 +150,17 @@ namespace Peach.Pro.Core.WebServices
 
 		public static void ApplyWeb(this PitDefines defines, List<Param> config)
 		{
+			const string UserDefinesName = "User Defines";
+			const string UserDefinesDesc = "User provided configuration variables";
+
+			var visited = new HashSet<string>();
+			var missing = new HashSet<string>();
 			var reserved = defines.SystemDefines.Select(d => d.Key).ToList();
 
 			foreach (var def in defines.Walk())
 			{
+				visited.Add(def.Key);
+
 				if (reserved.Contains(def.Key))
 					continue;
 
@@ -163,58 +170,43 @@ namespace Peach.Pro.Core.WebServices
 				var cfg = config.FirstOrDefault(i => i.Key == def.Key);
 				if (cfg != null)
 					def.Value = cfg.Value;
+				else
+					missing.Add(def.Key);
 			}
 
-			//var reserved = new HashSet<string>();
+			var newDefines = config.Where(c => !visited.Contains(c.Key)).ToList();
+			var userDefines = defines.Children.LastOrDefault();
 
-			//foreach (var def in defines.Platforms.SelectMany(p => p.Defines))
-			//{
-			//	var param = config.SingleOrDefault(x => x.Key == def.Key);
-			//	if (param != null)
-			//		def.Value = param.Value;
+			if (newDefines.Count > 0)
+			{
+				if (userDefines == null || userDefines.Name != UserDefinesName)
+				{
+					userDefines = new PitDefines.Group { Name = UserDefinesName };
 
-			//}
+					defines.Children.Add(userDefines);
+				}
 
-			//if (File.Exists(fileName))
-			//{
-			//	foreach (var def in PitDefines.Parse(fileName))
-			//	{
-			//		if (def.ConfigType != ParameterType.User && def.ConfigType != ParameterType.System)
-			//		{
-			//			var param = config.SingleOrDefault(x => x.Key == def.Key);
-			//			if (param != null)
-			//			{
-			//				def.Value = param.Value;
-			//			}
-			//			defines.Add(def);
-			//			reserved.Add(def.Key);
-			//		}
-			//	}
-			//}
+				foreach (var def in newDefines)
+				{
+					userDefines.Children.Add(new PitDefines.UserDefine
+					{
+						Key = def.Key,
+						Name = def.Name,
+						Value = def.Value,
+						Description = def.Description
+					});
+				}
+			}
 
-			//foreach (var param in config)
-			//{
-			//	if (!reserved.Contains(param.Key))
-			//	{
-			//		defines.Add(new PitDefines.UserDefine
-			//		{
-			//			Key = param.Key,
-			//			Name = param.Key,
-			//			Value = param.Value,
-			//			Description = ""
-			//		});
-			//	}
-			//}
+			if (userDefines != null && userDefines.Name == UserDefinesName)
+			{
+				userDefines.Description = UserDefinesDesc;
 
-			//var final = new PitDefines
-			//{
-			//	Platforms = new List<PitDefines.Collection>(new[] {
-			//		new PitDefines.All
-			//		{
-			//			Defines = defines.ToList(),
-			//		}
-			//	}),
-			//};
+				userDefines.Children.RemoveAll(d => missing.Contains(d.Key));
+
+				if (userDefines.Children.Count == 0)
+					defines.Children.Remove(userDefines);
+			}
 		}
 
 		private static List<ParamDetail> DefineToParamDetail(IEnumerable<PitDefines.Define> defines, List<string> reserved)
