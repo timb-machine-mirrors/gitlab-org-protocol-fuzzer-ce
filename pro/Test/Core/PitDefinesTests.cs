@@ -645,6 +645,7 @@ namespace Peach.Pro.Test.Core
 				defs.ApplyWeb(new List<Param>
 				{
 					new Param { Key = "u1", Value = "new_u1" },
+					new Param { Key = "Peach.Cwd", Value = "new_u1" },
 					new Param { Key = "u3", Value = "new_u3", Name = "User Define 3", Description = "3" }
 				});
 

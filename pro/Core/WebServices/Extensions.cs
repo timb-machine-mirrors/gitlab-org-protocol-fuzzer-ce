@@ -188,6 +188,9 @@ namespace Peach.Pro.Core.WebServices
 
 				foreach (var def in newDefines)
 				{
+					if (reserved.Contains(def.Key))
+						continue;
+
 					userDefines.Children.Add(new PitDefines.UserDefine
 					{
 						Key = def.Key,
