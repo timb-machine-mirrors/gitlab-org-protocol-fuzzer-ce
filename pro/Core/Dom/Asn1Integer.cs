@@ -27,7 +27,7 @@ namespace Peach.Pro.Core.Dom
 			lengthType = LengthType.Bits;
 			length = 64;
 			Signed = false;
-			LittleEndian = true;
+			LittleEndian = false;
 		}
 
 		public Asn1Integer(string name)
@@ -37,7 +37,7 @@ namespace Peach.Pro.Core.Dom
 			lengthType = LengthType.Bits;
 			length = 64;
 			Signed = false;
-			LittleEndian = true;
+			LittleEndian = false;
 		}
 
 		public override long length
@@ -280,6 +280,11 @@ namespace Peach.Pro.Core.Dom
 			var n = 0;
 			for (var tmp = value; tmp > 0; tmp >>= 8)
 				++n;
+
+			if (n == 0)
+			{
+				++n;
+			}
 
 			for (var i = 0; i < n; ++i)
 			{
