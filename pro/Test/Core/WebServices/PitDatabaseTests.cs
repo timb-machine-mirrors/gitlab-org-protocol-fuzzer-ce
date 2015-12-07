@@ -597,7 +597,6 @@ namespace Peach.Pro.Test.Core.WebServices
 				{ ""name"":""Executable"", ""value"":""Foo.exe"" },
 				{ ""name"":""WinDbgPath"", ""value"":""C:\\WinDbg""  }
 			],
-			""description"": ""Page Heap: {WinDbgExecutable} {WinDbgPath}""
 		},
 		{
 			""monitorClass"":""WindowsDebugger"",
@@ -606,26 +605,7 @@ namespace Peach.Pro.Test.Core.WebServices
 				{ ""name"":""Arguments"", ""value"":""--arg"" },
 				{ ""name"":""IgnoreFirstChanceGuardPage"", ""value"":""true"" }
 			],
-			""description"": ""Windows Debugger: {WinDbgExecutable} {WinDbgPath} {WinDbgProcessName} {WinDbgService} {WinDbgStart} {WinDbgIgnoreFirstChanceGuardPage}""
-		}
-	]
-},
-{
-	""agentUrl"":""tcp://remotehostname"",
-	""monitors"": [
-		{
-			""monitorClass"":""Pcap"",
-			""map"": [
-				{""name"":""Device"", ""value"":""eth0"" },
-				{""name"":""Filter"", ""value"":""tcp port 80"" }
-			],
-			""description"":""Network capture on {AgentUrl}, interface {PcapDevice} using {PcapFilter}.""
-		}
-	]
-},
-{
-	""agentUrl"":""local://"",
-	""monitors"": [
+		},
 		{
 			""monitorClass"":""CanaKit"",
 			""map"": [
@@ -636,6 +616,27 @@ namespace Peach.Pro.Test.Core.WebServices
 	]
 },
 {
+	""name"":""Agent1"",
+	""agentUrl"":""tcp://remotehostname"",
+	""monitors"": [
+		{
+			""monitorClass"":""Pcap"",
+			""map"": [
+				{""name"":""Device"", ""value"":""eth0"" },
+				{""name"":""Filter"", ""value"":""tcp port 80"" }
+			],
+		},
+		{
+			""monitorClass"":""Pcap"",
+			""map"": [
+				{""name"":""Device"", ""value"":""eth0"" },
+				{""name"":""Filter"", ""value"":""tcp port 8080"" }
+			],
+		},
+	]
+},
+{
+	""name"":""Agent2"",
 	""agentUrl"":""tcp://remotehostname2"",
 	""monitors"": [
 		{
@@ -644,21 +645,7 @@ namespace Peach.Pro.Test.Core.WebServices
 				{""name"":""Device"", ""value"":""eth0"" },
 				{""name"":""Filter"", ""value"":""tcp port 80"" }
 			],
-			""description"":""Network capture on {AgentUrl}, interface {PcapDevice} using {PcapFilter}.""
 		}
-	]
-},
-{
-	""agentUrl"":""tcp://remotehostname"",
-	""monitors"": [
-		{
-			""monitorClass"":""Pcap"",
-			""map"": [
-				{""name"":""Device"", ""value"":""eth0"" },
-				{""name"":""Filter"", ""value"":""tcp port 8080"" }
-			],
-			""description"":""Network capture on {AgentUrl}, interface {PcapDevice} using {PcapFilter}.""
-		},
 	]
 }
 ]";
@@ -692,20 +679,20 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			VerifyMonitor(agents[0].Monitors[0], dom.tests[0].agents[0].monitors[0]);
 			VerifyMonitor(agents[0].Monitors[1], dom.tests[0].agents[0].monitors[1]);
-			VerifyMonitor(agents[2].Monitors[0], dom.tests[0].agents[0].monitors[2]);
+			VerifyMonitor(agents[0].Monitors[2], dom.tests[0].agents[0].monitors[2]);
 
 			Assert.AreEqual("Agent1", dom.tests[0].agents[1].Name);
 			Assert.AreEqual("tcp://remotehostname", dom.tests[0].agents[1].location);
 			Assert.AreEqual(2, dom.tests[0].agents[1].monitors.Count);
 
 			VerifyMonitor(agents[1].Monitors[0], dom.tests[0].agents[1].monitors[0]);
-			VerifyMonitor(agents[4].Monitors[0], dom.tests[0].agents[1].monitors[1]);
+			VerifyMonitor(agents[1].Monitors[1], dom.tests[0].agents[1].monitors[1]);
 
 			Assert.AreEqual("Agent2", dom.tests[0].agents[2].Name);
 			Assert.AreEqual("tcp://remotehostname2", dom.tests[0].agents[2].location);
 			Assert.AreEqual(1, dom.tests[0].agents[2].monitors.Count);
 
-			VerifyMonitor(agents[3].Monitors[0], dom.tests[0].agents[2].monitors[0]);
+			VerifyMonitor(agents[2].Monitors[0], dom.tests[0].agents[2].monitors[0]);
 		}
 
 		private void VerifyMonitor(Monitor jsonMon, Peach.Core.Dom.Monitor domMon)

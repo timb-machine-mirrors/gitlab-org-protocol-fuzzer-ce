@@ -1,10 +1,10 @@
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
 	public enum ParameterType
 	{
-		None,
 		String,
 		Hex,
 		Range,
@@ -34,6 +34,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <example>
 		/// "string"
 		/// </example>
+		[JsonProperty(DefaultValueHandling = DefaultValueHandling.Include)]
 		public ParameterType Type { get; set; }
 
 		/// <summary>
