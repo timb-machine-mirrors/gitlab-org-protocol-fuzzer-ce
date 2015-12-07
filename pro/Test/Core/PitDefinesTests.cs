@@ -6,6 +6,7 @@ using System.Xml;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Pro.Core;
+using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using File = System.IO.File;
 using Peach.Core.Test;
@@ -365,6 +366,7 @@ namespace Peach.Pro.Test.Core
 	<All>
 		<Group name='Group'>
 			<Define name='k1' key='k1' value='##k2##' />
+			<Space />
 			<Define name='k2' key='k2' value='foo' />
 		</Group>
 		<String key='key0' value='value0' name='name0' description='description0'/>
@@ -372,7 +374,6 @@ namespace Peach.Pro.Test.Core
 	<None>
 		<Group name='Group'>
 			<Define name='k1' key='k1' value='bar' />
-			<Space />
 			<Define name='k2' key='k2' value='baz' />
 		</Group>
 	</None>
@@ -386,7 +387,8 @@ namespace Peach.Pro.Test.Core
 				Assert.AreEqual(Platform.OS.All, defs.Platforms[0].Platform);
 				Assert.AreEqual(defs.Platforms[0].Defines[0].ConfigType, ParameterType.Group);
 				Assert.AreEqual(defs.Platforms[0].Defines[0].Defines[0].ConfigType, ParameterType.User);
-				Assert.AreEqual(defs.Platforms[0].Defines[0].Defines[1].ConfigType, ParameterType.User);
+				Assert.AreEqual(defs.Platforms[0].Defines[0].Defines[1].ConfigType, ParameterType.Space);
+				Assert.AreEqual(defs.Platforms[0].Defines[0].Defines[2].ConfigType, ParameterType.User);
 				Assert.AreEqual(defs.Platforms[0].Defines[1].ConfigType, ParameterType.String);
 
 				var dst = defs.Evaluate();
@@ -399,6 +401,316 @@ namespace Peach.Pro.Test.Core
 				Assert.AreEqual("foo", dst[1].Value);
 				Assert.AreEqual("key0", dst[2].Key);
 				Assert.AreEqual("value0", dst[2].Value);
+			}
+		}
+
+		[Test]
+		public void TestNoSystem()
+		{
+			const string xml = @"
+<PitDefines>
+	<All>
+		<String key='key0' value='value0' name='name0' description='description0' />
+		<String key='PitLibraryPath' value='.' name='Pit Library Path' description='Path to pit library' />
+	</All>
+</PitDefines>
+";
+
+			using (var tmp = new TempFile(xml))
+			{
+				var defs = PitDefines.ParseFile(tmp.Path, "/path/to/pits");
+
+				var web = defs.ToWeb();
+
+				Assert.AreEqual(2, web.Count);
+				Assert.AreEqual("All", web[0].Name);
+				Assert.AreEqual(1, web[0].Items.Count);
+				Assert.AreEqual("key0", web[0].Items[0].Key);
+			}
+		}
+
+		[Test]
+		public void TestJson()
+		{
+			const string xml = @"
+<PitDefines>
+	<Group name='Outter'>
+		<Group name='Inner' collapsed='true' description='innerDesc'>
+			<Define name='k1' key='k1' value='##k2##' />
+			<Space />
+			<Define name='k2' key='k2' value='foo' />
+		</Group>
+		<String key='key0' value='value0' name='name0' description='description0'/>
+	</Group>
+</PitDefines>
+";
+
+			using (var rdr = new StringReader(xml))
+			{
+				var defs = XmlTools.Deserialize<PitDefines>(rdr);
+				var web = defs.ToWeb();
+				var json = web.ToJson();
+
+				var exp = @"[
+  {
+    ""Description"": """",
+    ""Items"": [
+      {
+        ""Collapsed"": true,
+        ""Description"": ""innerDesc"",
+        ""Items"": [
+          {
+            ""Description"": """",
+            ""Key"": ""k1"",
+            ""Name"": ""k1"",
+            ""Options"": [],
+            ""Type"": ""User"",
+            ""Value"": ""##k2##""
+          },
+          {
+            ""Type"": ""Space""
+          },
+          {
+            ""Description"": """",
+            ""Key"": ""k2"",
+            ""Name"": ""k2"",
+            ""Options"": [],
+            ""Type"": ""User"",
+            ""Value"": ""foo""
+          }
+        ],
+        ""Name"": ""Inner"",
+        ""OS"": ""All"",
+        ""Type"": ""Group""
+      },
+      {
+        ""Description"": ""description0"",
+        ""Key"": ""key0"",
+        ""Name"": ""name0"",
+        ""Options"": [],
+        ""Type"": ""String"",
+        ""Value"": ""value0""
+      }
+    ],
+    ""Name"": ""Outter"",
+    ""OS"": ""All"",
+    ""Type"": ""Group""
+  },
+  {
+    ""Collapsed"": true,
+    ""Description"": ""These values are controlled by Peach."",
+    ""Items"": [],
+    ""Key"": ""SystemDefines"",
+    ""Name"": ""System Defines"",
+    ""OS"": """",
+    ""Type"": ""Group""
+  }
+]".Replace("\r\n", Environment.NewLine);
+
+				Assert.AreEqual(exp, json);
+			}
+		}
+
+		[Test]
+		public void TestUpdate()
+		{
+			const string xml = @"
+<PitDefines>
+	<Group name='Outter'>
+		<Group name='Inner' collapsed='true' description='innerDesc'>
+			<Range name='k1' key='k1' value='##k2##' min='1' max='1000' description='desc_k1' />
+			<Space />
+			<String name='k2' key='k2' value='foo' />
+		</Group>
+		<String key='key0' value='value0' name='name0' description='description0'/>
+		<String key='PitLibraryPath' value='.' name='Pit Library Path' description=''/>
+	</Group>
+</PitDefines>
+";
+
+			using (var tmp = new TempFile(xml))
+			{
+				var defs = PitDefines.ParseFile(tmp.Path, "/path/to/pits");
+
+				defs.ApplyWeb(new List<Param>
+				{
+					new Param { Key = "k1", Value = "v1", Name = "xxx", Description = "yyy" },
+					new Param { Key = "PitLibraryPath", Value = "PitLibraryPath" },
+				});
+
+				Assert.AreEqual(1, defs.Children.Count);
+				Assert.AreEqual(3, defs.Children[0].Defines.Count);
+
+				// Wasn't posted so shouldn't change
+				Assert.AreEqual("key0", defs.Children[0].Defines[1].Key);
+				Assert.AreEqual("value0", defs.Children[0].Defines[1].Value);
+
+				// Should not get updated even though it was posted
+				Assert.AreEqual("PitLibraryPath", defs.Children[0].Defines[2].Key);
+				Assert.AreEqual(".", defs.Children[0].Defines[2].Value);
+
+				Assert.AreEqual(3, defs.Children[0].Defines[0].Defines.Count);
+
+				//Should be updated!
+				Assert.AreEqual("k1", defs.Children[0].Defines[0].Defines[0].Key);
+				Assert.AreEqual("v1", defs.Children[0].Defines[0].Defines[0].Value);
+
+				// Name & Description are not altered!
+				Assert.AreEqual("k1", defs.Children[0].Defines[0].Defines[0].Name);
+				Assert.AreEqual("desc_k1", defs.Children[0].Defines[0].Defines[0].Description);
+
+				// Wasn't posted so shouldn't change
+				Assert.AreEqual("k2", defs.Children[0].Defines[0].Defines[2].Key);
+				Assert.AreEqual("foo", defs.Children[0].Defines[0].Defines[2].Value);
+			}
+		}
+
+		[Test]
+		public void TestAddUser()
+		{
+			const string xml = @"
+<PitDefines>
+	<Group name='Group'>
+		<Range name='k1' key='k1' value='##k2##' min='1' max='1000' />
+		<String key='key0' value='value0' name='name0' description='description0'/>
+		<String key='PitLibraryPath' value='.' name='Pit Library Path' description=''/>
+	</Group>
+</PitDefines>
+";
+
+			using (var tmp = new TempFile(xml))
+			{
+				var defs = PitDefines.ParseFile(tmp.Path, "/path/to/pits");
+
+				defs.ApplyWeb(new List<Param>
+				{
+					new Param { Key = "k1", Value = "v1" },
+					new Param { Key = "PitLibraryPath", Value = "PitLibraryPath" },
+					new Param { Key = "Def", Value = "Value", Name = "User", Description = "Desc" }
+				});
+
+				Assert.AreEqual(2, defs.Children.Count);
+
+				Assert.AreEqual(3, defs.Children[0].Defines.Count);
+
+				Assert.AreEqual("k1", defs.Children[0].Defines[0].Key);
+				Assert.AreEqual("v1", defs.Children[0].Defines[0].Value);
+
+				Assert.AreEqual("key0", defs.Children[0].Defines[1].Key);
+				Assert.AreEqual("value0", defs.Children[0].Defines[1].Value);
+
+				Assert.AreEqual("PitLibraryPath", defs.Children[0].Defines[2].Key);
+				Assert.AreEqual(".", defs.Children[0].Defines[2].Value);
+
+				Assert.AreEqual("User Defines", defs.Children[1].Name);
+				Assert.AreEqual(1, defs.Children[1].Defines.Count);
+
+				Assert.AreEqual("Def", defs.Children[1].Defines[0].Key);
+				Assert.AreEqual("Value", defs.Children[1].Defines[0].Value);
+				Assert.AreEqual("User", defs.Children[1].Defines[0].Name);
+				Assert.AreEqual("Desc", defs.Children[1].Defines[0].Description);
+
+				XmlTools.Serialize(tmp.Path, defs);
+
+				var final = File.ReadAllText(tmp.Path);
+
+				Assert.NotNull(final);
+
+				Console.WriteLine(final);
+			}
+		}
+
+		[Test]
+		public void TestUpdateUser()
+		{
+			const string xml = @"
+<PitDefines>
+	<Group name='Outter'>
+		<Range name='k1' key='k1' value='##k2##' min='1' max='1000' />
+		<String key='key0' value='value0' name='name0' description='description0'/>
+		<String key='PitLibraryPath' value='.' name='Pit Library Path' description=''/>
+	</Group>
+
+	<Group name='User Defines'>
+		<Define key='u1' name='name_u1' value='v1' description='desc_u1' />
+		<Define key='u2' name='name_u2' value='v2' description='desc_u2' />
+	</Group>
+</PitDefines>
+";
+
+			using (var tmp = new TempFile(xml))
+			{
+				var defs = PitDefines.ParseFile(tmp.Path, "/path/to/pits");
+
+				defs.ApplyWeb(new List<Param>
+				{
+					new Param { Key = "u1", Value = "new_u1" },
+					new Param { Key = "u3", Value = "new_u3", Name = "User Define 3", Description = "3" }
+				});
+
+				Assert.AreEqual(2, defs.Children.Count);
+
+				Assert.AreEqual("User Defines", defs.Children[1].Name);
+				Assert.AreEqual(2, defs.Children[1].Defines.Count);
+
+				Assert.AreEqual("u1", defs.Children[1].Defines[0].Key);
+				Assert.AreEqual("new_u1", defs.Children[1].Defines[0].Value);
+				Assert.AreEqual("name_u1", defs.Children[1].Defines[0].Name);
+				Assert.AreEqual("desc_u1", defs.Children[1].Defines[0].Description);
+
+				Assert.AreEqual("u3", defs.Children[1].Defines[1].Key);
+				Assert.AreEqual("new_u3", defs.Children[1].Defines[1].Value);
+				Assert.AreEqual("User Define 3", defs.Children[1].Defines[1].Name);
+				Assert.AreEqual("3", defs.Children[1].Defines[1].Description);
+
+				XmlTools.Serialize(tmp.Path, defs);
+
+				var final = File.ReadAllText(tmp.Path);
+
+				Assert.NotNull(final);
+
+				Console.WriteLine(final);
+			}
+		}
+
+		[Test]
+		public void TestDeleteUser()
+		{
+			const string xml = @"
+<PitDefines>
+	<Group name='Outter'>
+		<Group name='Inner' collapsed='true' description='innerDesc'>
+			<Range name='k1' key='k1' value='##k2##' min='1' max='1000' />
+			<Space />
+			<String name='k2' key='k2' value='foo' />
+		</Group>
+		<String key='key0' value='value0' name='name0' description='description0'/>
+		<String key='PitLibraryPath' value='.' name='Pit Library Path' description=''/>
+	</Group>
+
+	<Group name='User Defines'>
+		<Define key='u1' name='name_u1' value='v1' description='desc_u1' />
+		<Define key='u2' name='name_u2' value='v2' description='desc_u2' />
+	</Group>
+</PitDefines>
+";
+
+			using (var tmp = new TempFile(xml))
+			{
+				var defs = PitDefines.ParseFile(tmp.Path, "/path/to/pits");
+
+				defs.ApplyWeb(new List<Param>());
+
+				Assert.AreEqual(1, defs.Children.Count);
+				Assert.AreEqual("Outter", defs.Children[0].Name);
+
+				XmlTools.Serialize(tmp.Path, defs);
+
+				var final = File.ReadAllText(tmp.Path);
+
+				Assert.NotNull(final);
+
+				Console.WriteLine(final);
 			}
 		}
 	}

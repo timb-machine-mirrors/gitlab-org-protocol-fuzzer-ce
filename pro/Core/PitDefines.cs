@@ -66,7 +66,10 @@ namespace Peach.Pro.Core
 			{
 				get { return ParameterType.Group; }
 			}
-			
+
+			[XmlIgnore]
+			public bool Collapsed { get; set; }
+
 			[XmlIgnore]
 			public abstract Platform.OS Platform { get; }
 
@@ -115,6 +118,22 @@ namespace Peach.Pro.Core
 			{ 
 				get { return Name; }
 				set { Name = value; }
+			}
+
+			[XmlAttribute("collapsed")]
+			[DefaultValue(false)]
+			public bool CollapsedAttr
+			{
+				get { return Collapsed; }
+				set { Collapsed = value; }
+			}
+
+			[XmlAttribute("description")]
+			[DefaultValue("")]
+			public string DescriptionAttr
+			{
+				get { return Description; }
+				set { Description = value; }
 			}
 
 			public override Platform.OS Platform
@@ -539,14 +558,37 @@ namespace Peach.Pro.Core
 
 		#region Evaluate
 
-		public List<KeyValuePair<string, string>> Evaluate()
+		private static IEnumerable<Define> Flatten(Define defines)
+		{
+			var toVisit = new List<Define> { null };
+
+			var it = defines;
+
+			while (it != null)
+			{
+				yield return it;
+
+				var index = toVisit.Count;
+				foreach (var item in it.Defines)
+					toVisit.Insert(index, item);
+
+				index = toVisit.Count - 1;
+				it = toVisit[index];
+				toVisit.RemoveAt(index);
+			}
+		}
+
+		public IEnumerable<Define> Walk()
 		{
 			var os = Platform.GetOS();
 
-			var ret = Children
-				.Where(x => x.Platform.HasFlag(os))
-				.SelectMany(x => x.Defines.SelectMany(y => new List<Define>{ y }.Concat(y.Defines)))
-				.SkipWhile(x => x.ConfigType == ParameterType.Group)
+			return Children.Where(x => x.Platform.HasFlag(os)).SelectMany(Flatten);
+		}
+
+		public List<KeyValuePair<string, string>> Evaluate()
+		{
+			var ret = Walk()
+				.Where(x => x.ConfigType != ParameterType.Group && x.ConfigType != ParameterType.Space)
 				.Concat(SystemDefines)
 				.Reverse()
 				.Distinct(DefineComparer.Instance)

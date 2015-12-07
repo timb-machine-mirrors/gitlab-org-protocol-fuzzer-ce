@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Agent;
@@ -82,7 +81,25 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Description':'Desc','Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Key':'TestMonitor','Name':'Test Monitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
+			var exp = @"[
+  {
+    ""Description"": ""Desc"",
+    ""Items"": [
+      {
+        ""DefaultValue"": ""Foo"",
+        ""Description"": ""Desc"",
+        ""Key"": ""Test"",
+        ""Name"": ""Test"",
+        ""Optional"": true,
+        ""Type"": ""String""
+      }
+    ],
+    ""Key"": ""TestMonitor"",
+    ""Name"": ""Test Monitor"",
+    ""OS"": """",
+    ""Type"": ""Monitor""
+  }
+]".Replace("\r\n", Environment.NewLine);
 
 			Assert.AreEqual(exp, result);
 
@@ -102,7 +119,32 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Description':'Desc','Items':[{'Collapsed':true,'Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Name':'Group1','Type':'Group'}],'Key':'TestMonitor','Name':'Test Monitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
+			var exp = @"[
+  {
+    ""Description"": ""Desc"",
+    ""Items"": [
+      {
+        ""Collapsed"": true,
+        ""Items"": [
+          {
+            ""DefaultValue"": ""Foo"",
+            ""Description"": ""Desc"",
+            ""Key"": ""Test"",
+            ""Name"": ""Test"",
+            ""Optional"": true,
+            ""Type"": ""String""
+          }
+        ],
+        ""Name"": ""Group1"",
+        ""Type"": ""Group""
+      }
+    ],
+    ""Key"": ""TestMonitor"",
+    ""Name"": ""Test Monitor"",
+    ""OS"": """",
+    ""Type"": ""Monitor""
+  }
+]".Replace("\r\n", Environment.NewLine);
 
 			Assert.AreEqual(exp, result);
 
@@ -122,7 +164,31 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Items':[{'Description':'Desc','Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Key':'TestMonitor','Name':'Test Monitor','OS':'','Type':'Monitor'}],'Name':'Other','Type':'Group'}]".Replace('\'', '\"');
+			var exp = @"[
+  {
+    ""Items"": [
+      {
+        ""Description"": ""Desc"",
+        ""Items"": [
+          {
+            ""DefaultValue"": ""Foo"",
+            ""Description"": ""Desc"",
+            ""Key"": ""Test"",
+            ""Name"": ""Test"",
+            ""Optional"": true,
+            ""Type"": ""String""
+          }
+        ],
+        ""Key"": ""TestMonitor"",
+        ""Name"": ""Test Monitor"",
+        ""OS"": """",
+        ""Type"": ""Monitor""
+      }
+    ],
+    ""Name"": ""Other"",
+    ""Type"": ""Group""
+  }
+]".Replace("\r\n", Environment.NewLine);
 
 			Assert.AreEqual(exp, result);
 
@@ -143,7 +209,31 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Items':[{'Description':'Desc','Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Key':'TestMonitor','Name':'Test Monitor','OS':'','Type':'Monitor'}],'Name':'Other','Type':'Group'}]".Replace('\'', '\"');
+			var exp = @"[
+  {
+    ""Items"": [
+      {
+        ""Description"": ""Desc"",
+        ""Items"": [
+          {
+            ""DefaultValue"": ""Foo"",
+            ""Description"": ""Desc"",
+            ""Key"": ""Test"",
+            ""Name"": ""Test"",
+            ""Optional"": true,
+            ""Type"": ""String""
+          }
+        ],
+        ""Key"": ""TestMonitor"",
+        ""Name"": ""Test Monitor"",
+        ""OS"": """",
+        ""Type"": ""Monitor""
+      }
+    ],
+    ""Name"": ""Other"",
+    ""Type"": ""Group""
+  }
+]".Replace("\r\n", Environment.NewLine);
 
 			Assert.AreEqual(exp, result);
 
@@ -164,7 +254,48 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Items':[{'Description':'Desc','Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Key':'TestMonitor','Name':'Test Monitor','OS':'','Type':'Monitor'},{'Description':'Desc','Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'TestTwo','Name':'Test Two','Optional':true,'Type':'String'}],'Key':'TestTwoMonitor','Name':'Test Two Monitor','OS':'','Type':'Monitor'}],'Name':'Other','Type':'Group'}]".Replace('\'', '\"');
+			var exp = @"[
+  {
+    ""Items"": [
+      {
+        ""Description"": ""Desc"",
+        ""Items"": [
+          {
+            ""DefaultValue"": ""Foo"",
+            ""Description"": ""Desc"",
+            ""Key"": ""Test"",
+            ""Name"": ""Test"",
+            ""Optional"": true,
+            ""Type"": ""String""
+          }
+        ],
+        ""Key"": ""TestMonitor"",
+        ""Name"": ""Test Monitor"",
+        ""OS"": """",
+        ""Type"": ""Monitor""
+      },
+      {
+        ""Description"": ""Desc"",
+        ""Items"": [
+          {
+            ""DefaultValue"": ""Foo"",
+            ""Description"": ""Desc"",
+            ""Key"": ""TestTwo"",
+            ""Name"": ""Test Two"",
+            ""Optional"": true,
+            ""Type"": ""String""
+          }
+        ],
+        ""Key"": ""TestTwoMonitor"",
+        ""Name"": ""Test Two Monitor"",
+        ""OS"": """",
+        ""Type"": ""Monitor""
+      }
+    ],
+    ""Name"": ""Other"",
+    ""Type"": ""Group""
+  }
+]".Replace("\r\n", Environment.NewLine);
 
 			Assert.AreEqual(exp, result);
 
@@ -185,7 +316,25 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Description':'Desc','Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Key':'TestMonitor','Name':'Test Monitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
+			var exp = @"[
+  {
+    ""Description"": ""Desc"",
+    ""Items"": [
+      {
+        ""DefaultValue"": ""Foo"",
+        ""Description"": ""Desc"",
+        ""Key"": ""Test"",
+        ""Name"": ""Test"",
+        ""Optional"": true,
+        ""Type"": ""String""
+      }
+    ],
+    ""Key"": ""TestMonitor"",
+    ""Name"": ""Test Monitor"",
+    ""OS"": """",
+    ""Type"": ""Monitor""
+  }
+]".Replace("\r\n", Environment.NewLine);
 
 			Assert.AreEqual(exp, result);
 
@@ -206,7 +355,16 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Description':'Desc','Items':[],'Key':'TestThreeMonitor','Name':'Test Three Monitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
+			var exp = @"[
+  {
+    ""Description"": ""Desc"",
+    ""Items"": [],
+    ""Key"": ""TestThreeMonitor"",
+    ""Name"": ""Test Three Monitor"",
+    ""OS"": """",
+    ""Type"": ""Monitor""
+  }
+]".Replace("\r\n", Environment.NewLine);
 
 			Assert.AreEqual(exp, result);
 
@@ -227,7 +385,41 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Description':'Desc','Items':[{'DefaultValue':'Foo','Description':'Desc','Key':'TestTwo','Name':'Test Two','Optional':true,'Type':'String'},{'DefaultValue':'Foo','Description':'Desc','Key':'TestTwo','Name':'Test Two','Optional':true,'Type':'String'},{'DefaultValue':'Foo','Description':'Desc','Key':'TestTwo','Name':'Test Two','Optional':true,'Type':'String'}],'Key':'TestTwoMonitor','Name':'Test Two Monitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
+			var exp = @"[
+  {
+    ""Description"": ""Desc"",
+    ""Items"": [
+      {
+        ""DefaultValue"": ""Foo"",
+        ""Description"": ""Desc"",
+        ""Key"": ""TestTwo"",
+        ""Name"": ""Test Two"",
+        ""Optional"": true,
+        ""Type"": ""String""
+      },
+      {
+        ""DefaultValue"": ""Foo"",
+        ""Description"": ""Desc"",
+        ""Key"": ""TestTwo"",
+        ""Name"": ""Test Two"",
+        ""Optional"": true,
+        ""Type"": ""String""
+      },
+      {
+        ""DefaultValue"": ""Foo"",
+        ""Description"": ""Desc"",
+        ""Key"": ""TestTwo"",
+        ""Name"": ""Test Two"",
+        ""Optional"": true,
+        ""Type"": ""String""
+      }
+    ],
+    ""Key"": ""TestTwoMonitor"",
+    ""Name"": ""Test Two Monitor"",
+    ""OS"": """",
+    ""Type"": ""Monitor""
+  }
+]".Replace("\r\n", Environment.NewLine);
 
 			Assert.AreEqual(exp, result);
 
@@ -248,7 +440,16 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Description':'Desc','Items':[],'Key':'NoParamMonitor','Name':'No Param Monitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
+			var exp = @"[
+  {
+    ""Description"": ""Desc"",
+    ""Items"": [],
+    ""Key"": ""NoParamMonitor"",
+    ""Name"": ""No Param Monitor"",
+    ""OS"": """",
+    ""Type"": ""Monitor""
+  }
+]".Replace("\r\n", Environment.NewLine);
 
 			Assert.AreEqual(exp, result);
 
@@ -269,7 +470,25 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Description':'Desc','Items':[{'DefaultValue':'','Description':'Desc','Key':'Test','Name':'Test','Optional':true,'Type':'String'}],'Key':'InvalidParamMonitor','Name':'Invalid Param Monitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
+			var exp = @"[
+  {
+    ""Description"": ""Desc"",
+    ""Items"": [
+      {
+        ""DefaultValue"": """",
+        ""Description"": ""Desc"",
+        ""Key"": ""Test"",
+        ""Name"": ""Test"",
+        ""Optional"": true,
+        ""Type"": ""String""
+      }
+    ],
+    ""Key"": ""InvalidParamMonitor"",
+    ""Name"": ""Invalid Param Monitor"",
+    ""OS"": """",
+    ""Type"": ""Monitor""
+  }
+]".Replace("\r\n", Environment.NewLine);
 
 			Assert.AreEqual(exp, result);
 
@@ -291,7 +510,15 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Description':'Desc','Key':'NoParamMonitor','Name':'No Param Monitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
+			var exp = @"[
+  {
+    ""Description"": ""Desc"",
+    ""Key"": ""NoParamMonitor"",
+    ""Name"": ""No Param Monitor"",
+    ""OS"": """",
+    ""Type"": ""Monitor""
+  }
+]".Replace("\r\n", Environment.NewLine);
 
 			Assert.AreEqual(exp, result);
 
@@ -312,7 +539,15 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var result = tester.Run();
 
-			var exp = "[{'Description':'','Key':'NoDescriptionMonitor','Name':'No Description Monitor','OS':'','Type':'Monitor'}]".Replace('\'', '\"');
+			var exp = @"[
+  {
+    ""Description"": """",
+    ""Key"": ""NoDescriptionMonitor"",
+    ""Name"": ""No Description Monitor"",
+    ""OS"": """",
+    ""Type"": ""Monitor""
+  }
+]".Replace("\r\n", Environment.NewLine);
 
 			Assert.AreEqual(exp, result);
 
@@ -356,14 +591,6 @@ namespace Peach.Pro.Test.Core.WebServices
 
 		private class MetadataTester : MonitorMetadata
 		{
-			private class OrderedContractResolver : DefaultContractResolver
-			{
-				protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
-				{
-					return base.CreateProperties(type, memberSerialization).OrderBy(p => p.PropertyName).ToList();
-				}
-			}
-
 			public List<string> Errors { get; private set; }
 
 			public string Metadata { private get; set; }
@@ -383,13 +610,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 				var details = Load(new List<string>());
 
-				var json = JsonConvert.SerializeObject(details, Formatting.None, new JsonSerializerSettings
-				{
-					Converters = new List<JsonConverter> { new StringEnumConverter() },
-					NullValueHandling = NullValueHandling.Ignore,
-					DefaultValueHandling = DefaultValueHandling.Ignore,
-					ContractResolver = new OrderedContractResolver()
-				});
+				var json = details.ToJson();
 
 				return json;
 			}
