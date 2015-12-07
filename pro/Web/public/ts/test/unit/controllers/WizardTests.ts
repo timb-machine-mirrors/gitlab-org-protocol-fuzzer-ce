@@ -337,21 +337,21 @@ describe("Peach", () => {
 								"monitorClass": "PageHeap",
 								"path": [1110],
 								"map": [
-									{ "name": "Executable", "value": "C:\\some\\program.exe" },
-									{ "name": "WinDbgPath", "value": "" }
+									{ "key": "Executable", "value": "C:\\some\\program.exe" },
+									{ "key": "WinDbgPath", "value": "" }
 								],
 								"description": "Enable page heap debugging options for an executable."
 							}, {
 								"monitorClass": "WindowsDebugger",
 								"path": [1100],
 								"map": [
-									{ "name": "Executable", "value": "C:\\some\\program.exe" },
-									{ "name": "Arguments", "value": "/args" },
-									{ "name": "ProcessName" },
-									{ "name": "Service" },
-									{ "name": "WinDbgPath", "value": "" },
-									{ "name": "StartMode", "value": "StartOnEachIteration" },
-									{ "name": "IgnoreFirstChanceGuardPage", "value": true }
+									{ "key": "Executable", "value": "C:\\some\\program.exe" },
+									{ "key": "Arguments", "value": "/args" },
+									{ "key": "ProcessName" },
+									{ "key": "Service" },
+									{ "key": "WinDbgPath", "value": "" },
+									{ "key": "StartMode", "value": "StartOnEachIteration" },
+									{ "key": "IgnoreFirstChanceGuardPage", "value": true }
 								],
 								"description": "Enable Windows debugging."
 							}
@@ -481,7 +481,7 @@ describe("Peach", () => {
 								"monitorClass": "FooMonitor",
 								"path": [1000],
 								"map": [
-									{ "name": "Param", "value": "FooValue" }
+									{ "key": "Param", "value": "FooValue" }
 								],
 								"description": "Foo monitor."
 							}
@@ -528,7 +528,7 @@ describe("Peach", () => {
 								"monitorClass": "FooMonitor",
 								"path": [1000],
 								"map": [
-									{ "name": "Param", "value": "FooValue" }
+									{ "key": "Param", "value": "FooValue" }
 								],
 								"description": "Foo monitor."
 							}
@@ -581,7 +581,7 @@ describe("Peach", () => {
 								"monitorClass": "FooMonitor",
 								"path": [1000],
 								"map": [
-									{ "name": "Param", "value": "FooValue" }
+									{ "key": "Param", "value": "FooValue" }
 								],
 								"description": "Foo monitor."
 							}
@@ -595,7 +595,7 @@ describe("Peach", () => {
 								"monitorClass": "BarMonitor",
 								"path": [2000],
 								"map": [
-									{ "name": "Param", "value": "BarValue" }
+									{ "key": "Param", "value": "BarValue" }
 								],
 								"description": "Bar monitor."
 							}

@@ -104,27 +104,29 @@ namespace Peach {
 		result?: string;
 	}
 
-	export namespace JobStatus {
+	export var JobStatus = {
 		// client-side states
-		export const StartPending = "startPending";
-		export const PausePending = "pausePending";
-		export const ContinuePending = "continuePending";
-		export const StopPending = "stopPending";
-		export const KillPending = "killPending";
+		StartPending    : '',
+		PausePending    : '',
+		ContinuePending : '',
+		StopPending     : '',
+		KillPending     : '',
 
 		// server-side states
-		export const Stopped = "stopped";
-		export const Starting = "starting";
-		export const Running = "running";
-		export const Paused = "paused";
-		export const Stopping = "stopping";
+		Stopped  : '',
+		Starting : '',
+		Running  : '',
+		Paused   : '',
+		Stopping : ''
 	}
+	MakeLowerEnum(JobStatus);
 
-	export namespace JobMode {
-		const Preparing = "preparing";
-		const Fuzzing = "fuzzing";
-		const Searching = "searching";
-		const Reproducing = "reproducing";
-		const Reporting = "reporting";
-	}
+	export var JobMode = {
+		Preparing   : '',
+		Fuzzing     : '',
+		Searching   : '',
+		Reproducing : '',
+		Reporting   : ''
+	};
+	MakeLowerEnum(JobMode);
 }

@@ -88,6 +88,7 @@ namespace Peach {
 				type: QuestionTypes.Done
 			};
 
+			// TODO: use WizardView
 			this.$scope.Defines = this.pitService.Pit.config;
 			this.$scope.NextPrompt = this.track.nextPrompt;
 			this.$scope.BackPrompt = this.track.backPrompt;
@@ -220,6 +221,7 @@ namespace Peach {
 		}
 
 		private prepareQuestion(): void {
+			// TODO: use WizardView
 			this.$scope.Defines = this.pitService.Pit.config;
 
 			// special stuff to do based on the next question

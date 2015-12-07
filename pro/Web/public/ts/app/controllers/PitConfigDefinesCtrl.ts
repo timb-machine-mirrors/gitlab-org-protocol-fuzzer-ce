@@ -45,7 +45,7 @@ namespace Peach {
 		}
 
 		public CanRemove(param: IParameter) {
-			return param.type === 'user';
+			return param.type === ParameterType.User;
 		}
 
 		public OnSave(): void {

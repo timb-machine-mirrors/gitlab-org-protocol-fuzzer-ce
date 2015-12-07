@@ -43,17 +43,15 @@ namespace Peach {
 		private storage: IConfigureStorage;
 
 		public get ShowReady(): boolean {
-			return onlyIf(this.pitService.Pit, () =>
-				this.pitService.HasMonitors && this.CanStart);
+			return this.pitService.HasMonitors && this.CanStart;
 		}
 
 		public get ShowNotConfigured(): boolean {
-			return onlyIf(this.pitService.Pit, () => !this.pitService.IsConfigured);
+			return this.pitService.IsConfigured;
 		}
 
 		public get ShowNoMonitors(): boolean {
-			return onlyIf(this.pitService.Pit, () =>
-				this.pitService.IsConfigured && !this.pitService.HasMonitors);
+			return this.pitService.IsConfigured && !this.pitService.HasMonitors;
 		}
 
 		public get CanStart(): boolean {

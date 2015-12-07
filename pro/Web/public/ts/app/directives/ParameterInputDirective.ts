@@ -30,7 +30,7 @@ namespace Peach {
 			private pitService: PitService
 		) {
 			$scope.vm = this;
-			this.makeChoices();
+			this.MakeChoices();
 		}
 
 		get IsRequired(): boolean {
@@ -58,7 +58,7 @@ namespace Peach {
 
 		Choices: IOption[];
 
-		private makeChoices() {
+		private MakeChoices() {
 			const tuples = [];
 			const options = this.$scope.param.options || [];
 			let group: string;
@@ -82,10 +82,10 @@ namespace Peach {
 					tuples.push(option);
 				}
 			});
-			this.Choices = tuples.concat(this.defines());
+			this.Choices = tuples.concat(this.Defines());
 		}
 
-		private defines(): IOption[] {
+		private Defines(): IOption[] {
 			return _.map(this.pitService.Pit.config, param => {
 				const key = `##${param.key}##`;
 				return <IOption> {

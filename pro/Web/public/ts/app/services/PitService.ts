@@ -53,20 +53,50 @@ namespace Peach {
 			return StripHttpPromise(this.$q, promise);
 		}
 
-		public SavePit(): ng.IPromise<IPit> {
+		private SavePit(): ng.IPromise<IPit> {
+			const config: IParameter[] = [];
+			for (let param of this.pit.config) {
+				if (param.type === ParameterType.Group) {
+					for (let item of param.items) {
+						if (item.value && item.type !== ParameterType.System) {
+							config.push({
+								key: item.key,
+								value: item.value
+							});
+						}
+					}
+				} else {
+					if (param.value && param.type !== ParameterType.System) {
+						config.push({
+							key: param.key,
+							value: param.value
+						});
+					}
+				}
+			}
+
 			const agents: IAgent[] = [];
 			for (let agent of _.get<IAgent[]>(this.pit, 'agents', [])) {
 				const monitors: IMonitor[] = [];
 				for (let monitor of agent.monitors) {
 					var map: IParameter[] = [];
-					this._Visit(monitor.view, (param: IParameter) => {
-						if (!_.isUndefined(param.value)) {
+					if (monitor.view) {
+						this._Visit(monitor.view, (param: IParameter) => {
+							if (!_.isUndefined(param.value)) {
+								map.push({
+									key: param.key,
+									value: param.value
+								});
+							}
+						});
+					} else {
+						for (let param of monitor.map) {
 							map.push({
 								key: param.key,
 								value: param.value
 							});
 						}
-					});
+					}
 					monitors.push({
 						monitorClass: monitor.monitorClass,
 						name: monitor.name,
@@ -79,35 +109,22 @@ namespace Peach {
 					monitors: monitors
 				});
 			}
+
 			const dto: IPit = {
 				id: this.pit.id,
 				pitUrl: this.pit.pitUrl,
 				name: this.pit.name,
-				config: angular.copy(this.pit.config),
+				config: config,
 				agents: agents
 			};
+
 			const promise = this.$http.post(this.pit.pitUrl, dto);
 			promise.success((pit: IPit) => this.OnSuccess(pit, true));
 			return StripHttpPromise(this.$q, promise);
 		}
 
 		public SaveVars(config: IParameter[]): ng.IPromise<IPit> {
-			this.pit.config = [];
-			for (let param of config) {
-				if (param.type === ParameterType.Group) {
-					for (let item of param.items) {
-						this.pit.config.push({
-							key: item.key,
-							value: item.value
-						});
-					}
-				} else {
-					this.pit.config.push({
-						key: param.key,
-						value: param.value
-					});
-				}
-			}
+			this.pit.config = config;
 			return this.SavePit();
 		}
 
@@ -187,6 +204,9 @@ namespace Peach {
 			const metadata = this.FindMonitorMetadata(monitor.monitorClass);
 			const view = angular.copy(metadata);
 			this._Visit(view, (param: IParameter) => {
+				if (param.type === ParameterType.Monitor) {
+					return;
+				}
 				const kv = _.find(monitor.map, { key: param.key });
 				if (kv && kv.value) {
 					param.value = kv.value;

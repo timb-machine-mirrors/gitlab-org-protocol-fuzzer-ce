@@ -79,12 +79,17 @@ namespace Peach {
 		public OnBeginTest() {
 			if (this.isWizard) {
 				this.track.isComplete = false;
-				var agents = [
+				const agents = _.flatten<IAgent>([
 					this.wizardService.GetTrack(C.Tracks.Fault).agents,
 					this.wizardService.GetTrack(C.Tracks.Data).agents,
 					this.wizardService.GetTrack(C.Tracks.Auto).agents
-				];
-				var promise = this.pitService.SaveAgents(_.flatten<IAgent>(agents));
+				]);
+				let count = 0;
+				for (let agent of agents) {
+					count++;
+					agent.name = `Agent${count}`;
+				}
+				const promise = this.pitService.SaveAgents(agents);
 				promise.then(() => {
 					this.startTest();
 				});
@@ -94,7 +99,7 @@ namespace Peach {
 		}
 
 		private startTest() {
-			var promise = this.testService.BeginTest();
+			const promise = this.testService.BeginTest();
 			promise.then(() => {
 				if (this.isWizard) {
 					this.track.isComplete = true;

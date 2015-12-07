@@ -15,9 +15,10 @@ namespace Peach {
 		resolve: string;
 	}
 
-	export namespace TestStatus {
-		export const Active = "active";
-		export const Pass = "pass";
-		export const Fail = "fail";
-	}
+	export var TestStatus = {
+		Active : '',
+		Pass   : '',
+		Fail   : ''
+	};
+	MakeLowerEnum(TestStatus);
 }

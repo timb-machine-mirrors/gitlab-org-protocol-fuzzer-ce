@@ -5,7 +5,6 @@
 interface String {
 	startsWith(str: string): boolean;
 	endsWith(str: string): boolean;
-	format(...args: any[]): string;
 	paddingLeft(pattern: string): string;
 }
 
@@ -21,12 +20,6 @@ String.prototype.startsWith = function (prefix: string): boolean {
 
 String.prototype.endsWith = function (suffix: string): boolean {
 	return this.indexOf(suffix, this.length - suffix.length) !== -1;
-}
-
-String.prototype.format = function (...args: any[]): string {
-	return this.replace(/{(\d+)}/g,(match, i) => {
-		return !_.isUndefined(args[i]) ? args[i] : match;
-	});
 }
 
 String.prototype.paddingLeft = function (pattern: string): string {
@@ -52,6 +45,14 @@ namespace Peach {
 
 	export interface IFormScope extends IViewModelScope {
 		form: ng.IFormController;
+	}
+
+	export function MakeEnum(obj: any) {
+		Object.keys(obj).map(key => obj[key] = key);
+	}
+	
+	export function MakeLowerEnum(obj: any) {
+		Object.keys(obj).map(key => obj[key] = key.toLowerCase());
 	}
 	
 	export function onlyWith<T, R>(obj: T, fn: (T) => R): R {

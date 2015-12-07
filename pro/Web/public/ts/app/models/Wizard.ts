@@ -1,19 +1,20 @@
 ﻿/// <reference path="../reference.ts" />
 
 namespace Peach {
-	export namespace QuestionTypes {
-		export const String = "string";
-		export const Hex = "hex";
-		export const Range = "range";
-		export const Ipv4 = "ipv4";
-		export const Ipv6 = "ipv6";
-		export const HwAddress = "hwaddr";
-		export const Iface = "iface";
-		export const Choice = "choice";
-		export const Jump = "jump";
-		export const Intro = "intro";
-		export const Done = "done";
-	}
+	export var QuestionTypes = {
+		String    : '',
+		Hex       : '',
+		Range     : '',
+		Ipv4      : '',
+		Ipv6      : '',
+		HwAddress : '',
+		Iface     : '',
+		Choice    : '',
+		Jump      : '',
+		Intro     : '',
+		Done      : ''
+	};
+	MakeLowerEnum(QuestionTypes);
 
 	export interface IChoice {
 		a?: string;

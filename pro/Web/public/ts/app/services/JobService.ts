@@ -97,19 +97,17 @@ namespace Peach {
 			if (_.isUndefined(this.Job)) {
 				return undefined;
 			}
-			var duration = moment.duration(this.job.runtime, 'seconds');
+
+			const duration = moment.duration(this.job.runtime, 'seconds');
+			const days = Math.floor(duration.asDays());
+			const hours = duration.hours().toString().paddingLeft('00');
+			const minutes = duration.minutes().toString().paddingLeft('00');
+			const seconds = duration.seconds().toString().paddingLeft('00');
+
 			if (duration.asDays() >= 1) {
-				return '{0}d {1}h {2}m'.format(
-					Math.floor(duration.asDays()),
-					duration.hours().toString().paddingLeft('00'),
-					duration.minutes().toString().paddingLeft('00')
-				);
+				return `${days}d ${hours}h ${minutes}m`;
 			} else {
-				return '{0}h {1}m {2}s'.format(
-					duration.hours().toString().paddingLeft('00'),
-					duration.minutes().toString().paddingLeft('00'),
-					duration.seconds().toString().paddingLeft('00')
-				);
+				return `${hours}h ${minutes}m ${seconds}s`;
 			}
 		}
 

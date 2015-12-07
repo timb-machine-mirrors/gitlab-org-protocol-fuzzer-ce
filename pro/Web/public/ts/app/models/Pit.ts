@@ -1,23 +1,24 @@
-﻿ /// <reference path="../reference.ts" />
+ /// <reference path="../reference.ts" />
 
 namespace Peach {
-	export namespace ParameterType {
-		export const String = 'string';
-		export const Hex = 'hex';
-		export const Range = 'range';
-		export const Ipv4 = 'ipv4';
-		export const Ipv6 = 'ipv6';
-		export const Hwaddr = 'hwaddr';
-		export const Iface = 'iface';
-		export const Enum = 'enum';
-		export const Bool = 'bool';
-		export const User = 'user';
-		export const System = 'system';
-		export const Call = 'call';
-		export const Group = 'group';
-		export const Space = 'space';
-		export const Monitor = 'monitor';
-	}
+	export var ParameterType = {
+		String  : '',
+		Hex     : '',
+		Range   : '',
+		Ipv4    : '',
+		Ipv6    : '',
+		Hwaddr  : '',
+		Iface   : '',
+		Enum    : '',
+		Bool    : '',
+		User    : '',
+		System  : '',
+		Call    : '',
+		Group   : '',
+		Space   : '',
+		Monitor : ''
+	};
+	MakeLowerEnum(ParameterType);
 
 	export interface IParameter {
 		key?: string;
