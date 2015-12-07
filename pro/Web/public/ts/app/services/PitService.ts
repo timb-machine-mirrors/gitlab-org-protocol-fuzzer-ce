@@ -146,14 +146,14 @@ namespace Peach {
 		}
 
 		public get IsConfigured(): boolean {
-			return onlyIf(this.pit, () => _.all(this.pit.config, (x: IParameter) => {
-				return x.optional || x.value !== "";
+			return onlyIf(this.pit, () => _.all(this.CreateFlatDefinesView(), (param: IParameter) => {
+				return param.optional || param.value !== "";
 			}));
 		}
 
 		public get HasMonitors(): boolean {
-			return onlyIf(this.pit, () => _.any(this.pit.agents, (x: IAgent) => {
-				return x.monitors.length > 0;
+			return onlyIf(this.pit, () => _.any(this.pit.agents, (agent: IAgent) => {
+				return agent.monitors.length > 0;
 			}));
 		}
 
@@ -189,13 +189,38 @@ namespace Peach {
 
 		private CreateDefinesView(): IParameter[] {
 			const view = angular.copy(this.pit.metadata.defines);
+			// const found = [];
 			for (let group of view) {
 				for (let param of group.items) {
 					const config = _.find(this.pit.config, { key: param.key });
 					if (config && config.value) {
 						param.value = config.value;
 					}
+					// found.push(param.key);
 				}
+			}
+			// for (let param of this.pit.config) {
+			// 	if (!_.contains(found, param.key)) {
+			// 	}
+			// }
+			return view;
+		}
+
+		private CreateFlatDefinesView(): IParameter[] {
+			const skip = [
+				ParameterType.Group,
+				ParameterType.Monitor,
+				ParameterType.Space
+			];
+			const view: IParameter[] = [];
+			for (let root of this.CreateDefinesView()) {
+				this._Visit(root, (param: IParameter) => {
+					// console.log('CreateFlatDefinesView', param);
+					if (_.contains(skip, param.type)) {
+						return;
+					}
+					view.push(param);
+				});
 			}
 			return view;
 		}

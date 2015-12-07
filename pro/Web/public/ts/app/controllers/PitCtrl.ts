@@ -47,15 +47,17 @@ namespace Peach {
 		}
 
 		public get ShowNotConfigured(): boolean {
-			return this.pitService.IsConfigured;
+			return onlyIf(this.pitService.Pit, () => !this.pitService.IsConfigured);
 		}
 
 		public get ShowNoMonitors(): boolean {
-			return this.pitService.IsConfigured && !this.pitService.HasMonitors;
+			return onlyIf(this.pitService.Pit, () => 
+				this.pitService.IsConfigured && !this.pitService.HasMonitors
+			);
 		}
 
 		public get CanStart(): boolean {
-			return this.pitService.IsConfigured;
+			return onlyIf(this.pitService.Pit, () => this.pitService.IsConfigured);
 		}
 
 		public Start(): void {

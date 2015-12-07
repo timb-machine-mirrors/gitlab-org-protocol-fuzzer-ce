@@ -35,7 +35,7 @@ namespace Peach.Pro.Core.WebServices.Models
 	// * Result
 	// * ReportUrl
 	// * All associated TestEvents
-	
+
 	public enum JobMode
 	{
 		Preparing,
@@ -374,11 +374,13 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// The status of this job record
 		/// </summary>
+		[JsonProperty(DefaultValueHandling = DefaultValueHandling.Include)]
 		public JobStatus Status { get; set; }
 
 		/// <summary>
 		/// The mode that this job is operating under
 		/// </summary>
+		[JsonProperty(DefaultValueHandling = DefaultValueHandling.Include)]
 		public JobMode Mode { get; set; }
 
 		/// <summary>

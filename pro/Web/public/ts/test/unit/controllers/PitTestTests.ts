@@ -11,10 +11,16 @@ describe("Peach", () => {
 
 		var pitId = 'PIT_GUID';
 		var pitUrl = C.Api.PitUrl.replace(':id', pitId);
-		var pit = <Peach.IPit> {
+		var pit: Peach.IPit = {
 			id: pitId,
 			pitUrl: pitUrl,
-			name: 'My Pit'
+			name: 'My Pit',
+			config: [],
+			agents: [],
+			metadata: {
+				defines: [],
+				monitors: []
+			}
 		};
 
 		beforeEach(inject(($injector: ng.auto.IInjectorService) => {
