@@ -1,7 +1,7 @@
 ﻿ /// <reference path="../reference.ts" />
 
 namespace Peach {
-	export var JOB_INTERVAL = 3000;
+	export const JOB_INTERVAL = 3000;
 	
 	export class JobService {
 		static $inject = [
@@ -112,7 +112,7 @@ namespace Peach {
 		}
 
 		private doLoadFaultDetail(defer: ng.IDeferred<IFaultDetail>, id: string) {
-			var fault = _.find(this.faults, { iteration: id });
+			const fault = _.find(this.faults, { iteration: id });
 			if (_.isUndefined(fault)) {
 				defer.reject();
 			} else {
@@ -134,16 +134,19 @@ namespace Peach {
 		}
 
 		public GetJobs(): ng.IPromise<IJob[]> {
-			var params = { dryrun: false };
-			var promise = this.$http.get(C.Api.Jobs, { params: params })
-				.success((jobs: IJob[]) => this.jobs = jobs);
+			const params = { dryrun: false };
+			const promise = this.$http.get(C.Api.Jobs, { params: params });
+			promise.success((jobs: IJob[]) => this.jobs = jobs);
+			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
+				this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
+			});
 			return StripHttpPromise(this.$q, promise);
 		}
 
 		public Start(job: IJobRequest): ng.IPromise<IJob> {
-			var promise = this.$http.post(C.Api.Jobs, job);
+			const promise = this.$http.post(C.Api.Jobs, job);
 			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
-				var options: IAlertOptions = {
+				const options: IAlertOptions = {
 					Title: 'Error Starting Job',
 					Body: 'Peach was unable to start a new job.',
 				};
@@ -203,14 +206,12 @@ namespace Peach {
 		private sendCommand(check: boolean, status: string, url: string): void {
 			if (check) {
 				this.job.status = status;
-				this.$http.get(url)
-					.success(() => this.onPoll(this.job.jobUrl))
-					.error(reason => this.onError(reason));
+				const promise = this.$http.get(url);
+				promise.success(() => this.onPoll(this.job.jobUrl));
+				promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
+					this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
+				});
 			}
-		}
-
-		private onError(error: any): void {
-			console.log('onError', error);
 		}
 
 		private onPoll(url: string): void {
@@ -219,10 +220,10 @@ namespace Peach {
 					if (!this.isActive)
 						return undefined;
 
-					var stopPending = (this.job && this.job.status === JobStatus.StopPending);
-					var killPending = (this.job && this.job.status === JobStatus.KillPending);
+					const stopPending = (this.job && this.job.status === JobStatus.StopPending);
+					const killPending = (this.job && this.job.status === JobStatus.KillPending);
 
-					var job = response.data;
+					const job = response.data;
 					this.job = job;
 
 					if (this.job.status !== JobStatus.Stopped) {
@@ -259,11 +260,14 @@ namespace Peach {
 		}
 
 		private reloadFaults(): ng.IHttpPromise<IFaultSummary[]> {
-			return this.$http.get(this.job.faultsUrl)
-				.success((faults: IFaultSummary[]) => {
-					this.faults = faults;
-				})
-				.error(reason => this.onError(reason));
+			const promise = this.$http.get(this.job.faultsUrl);
+			promise.success((faults: IFaultSummary[]) => {
+				this.faults = faults;
+			});
+			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
+				this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
+			});
+			return promise;
 		}
 
 		public LoadMetric<T>(metric: string): ng.IHttpPromise<T> {

@@ -108,6 +108,9 @@ namespace Peach {
 
 			const promise = this.$http.post(this.pit.pitUrl, dto);
 			promise.success((pit: IPit) => this.OnSuccess(pit, true));
+			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
+				this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
+			});
 			return StripHttpPromise(this.$q, promise);
 		}
 
@@ -130,6 +133,9 @@ namespace Peach {
 			};
 			const promise = this.$http.post(C.Api.Pits, request);
 			promise.success((pit: IPit) => this.OnSuccess(pit, true));
+			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
+				this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
+			});
 			return promise;
 		}
 

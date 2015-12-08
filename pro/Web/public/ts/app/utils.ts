@@ -74,7 +74,7 @@ namespace Peach {
 
 	export function ArrayItemUp<T>(array: T[], i: number): T[] {
 		if (i > 0) {
-			var x = array[i - 1];
+			const x = array[i - 1];
 			array[i - 1] = array[i];
 			array[i] = x;
 		}
@@ -83,7 +83,7 @@ namespace Peach {
 
 	export function ArrayItemDown<T>(array: T[], i: number): T[] {
 		if (i < array.length - 1) {
-			var x = array[i + 1];
+			const x = array[i + 1];
 			array[i + 1] = array[i];
 			array[i] = x;
 		}
@@ -91,7 +91,7 @@ namespace Peach {
 	}
 
 	export function StripHttpPromise<T>($q: ng.IQService, promise: ng.IHttpPromise<T>): ng.IPromise<T> {
-		var deferred = $q.defer<T>();
+		const deferred = $q.defer<T>();
 		promise.success((data: T) => {
 			deferred.resolve(data);
 		});

@@ -8,7 +8,7 @@ declare module angular.ui {
 
 namespace Peach {
 	function getComponentName(name: string, component: IComponent): string {
-		var id = component.ComponentID;
+		const id = component.ComponentID;
 		return _.isUndefined(id) ? name : id;
 	}
 
@@ -17,7 +17,7 @@ namespace Peach {
 			if (typeof(key) !== 'string') {
 				return;
 			}
-			var name = getComponentName(key, component);
+			const name = getComponentName(key, component);
 			if (key.endsWith('Controller')) {
 				app.controller(name, component);
 			}
@@ -32,18 +32,18 @@ namespace Peach {
 		});
 	}
 
-	var p = angular.module("Peach", [
-		"ngMessages",
+	const p = angular.module("Peach", [
 		"angular-loading-bar",
 		"chart.js",
 		"ncy-angular-breadcrumb",
+		"ngMessages",
 		"ngSanitize",
 		"ngStorage",
 		"ngVis",
 		"smart-table",
 		"ui.bootstrap",
-		"ui.select",
-		"ui.router"
+		"ui.router",
+		"ui.select"
 	]);
 
 	registerModule(Peach, p);
@@ -246,7 +246,7 @@ namespace Peach {
 			;
 
 			_.forEach(C.MetricsList,(metric: C.IMetric) => {
-				var state = [C.States.JobMetrics, metric.id].join('.');
+				const state = [C.States.JobMetrics, metric.id].join('.');
 				$stateProvider.state(state, {
 					url: '/' + metric.id,
 					views: {
@@ -265,7 +265,7 @@ namespace Peach {
 				if (track.skip)
 					return;
 
-				var views = {
+				const views = {
 					'@': {
 						templateUrl: C.Templates.Pit.Wizard.Track,
 						controller: WizardController,
@@ -302,7 +302,7 @@ namespace Peach {
 	]);
 
 	p.filter('filesize', () => {
-		var units = [
+		const units = [
 			'bytes',
 			'KB',
 			'MB',
@@ -324,14 +324,14 @@ namespace Peach {
 				precision = 1;
 			}
 
-			var unit = 0;
+			let unit = 0;
 
 			while (bytes >= 1024) {
 				bytes /= 1024;
 				unit++;
 			}
 
-			var value = bytes.toFixed(precision);
+			const value = bytes.toFixed(precision);
 			return (value.match(/\.0*$/) ? value.substr(0, value.indexOf('.')) : value) + ' ' + units[unit];
 		};
 	});
@@ -350,11 +350,11 @@ namespace Peach {
 
 	export function Startup() {
 		window.onerror = (message, url, lineNo) => {
-			console.log('Error: ' + message + '\n' + 'Line Number: ' + lineNo);
+			console.log(`Error: ${message}\nLine Number: ${lineNo}`);
 			return true;
 		};
 
-		var version = getHtmlVer();
+		const version = getHtmlVer();
 		if (version < 5) {
 			alert(
 				"This application requires an HTML 5 and ECMAScript 5 capable browser. " +
@@ -363,9 +363,9 @@ namespace Peach {
 		}
 
 		function getHtmlVer() {
-			var cName = navigator.appCodeName;
-			var uAgent: any = navigator.userAgent;
-			var htmlVer: any = 0.0;
+			const cName = navigator.appCodeName;
+			let uAgent: any = navigator.userAgent;
+			let htmlVer: any = 0.0;
 			// Remove start of string in UAgent upto CName or end of string if not found.
 			uAgent = uAgent.substring((uAgent + cName).toLowerCase().indexOf(cName.toLowerCase()));
 			// Remove CName from start of string. (Eg. '/5.0 (Windows; U...)
@@ -375,9 +375,9 @@ namespace Peach {
 				uAgent = uAgent.substring(1);
 			}
 			// Remove the end of the string from first characrer that is not a number or point etc.
-			var pointer = 0;
+			let pointer = 0;
 			while ("0123456789.+-".indexOf((uAgent + "?").substring(pointer, pointer + 1)) >= 0) {
-				pointer = pointer + 1;
+				pointer++;
 			}
 			uAgent = uAgent.substring(0, pointer);
 
