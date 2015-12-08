@@ -22,6 +22,7 @@ subdirs = [
 	'pin',
 	'Renci.SshNet',
 	'TotalPhase/aardvark',
+	'TotalPhase/komodo',
 	'Managed.AndroidDebugBridge',
 	'VMware-VIX-1.13.0-1295980',
 	'SuperSocket',
