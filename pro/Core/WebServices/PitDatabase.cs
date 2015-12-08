@@ -95,6 +95,7 @@ namespace Peach.Pro.Core.WebServices
 			public string Name { get; set; }
 
 			[XmlAttribute("location")]
+			[DefaultValue("")]
 			public string Location { get; set; }
 
 			[XmlElement("Monitor", typeof(MonitorElement))]
