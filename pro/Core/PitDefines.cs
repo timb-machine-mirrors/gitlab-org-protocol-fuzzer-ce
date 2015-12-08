@@ -585,7 +585,7 @@ namespace Peach.Pro.Core
 			return Children.Where(x => x.Platform.HasFlag(os)).SelectMany(Flatten);
 		}
 
-		public List<KeyValuePair<string, string>> Evaluate()
+		public List<KeyValuePair<string, string>> Flatten()
 		{
 			var ret = Walk()
 				.Where(x => x.ConfigType != ParameterType.Group && x.ConfigType != ParameterType.Space)
@@ -593,9 +593,14 @@ namespace Peach.Pro.Core
 				.Reverse()
 				.Distinct(DefineComparer.Instance)
 				.Select(x => new KeyValuePair<string, string>(x.Key, x.Value))
+				.Reverse()
 				.ToList();
+			return ret;
+		}
 
-			ret.Reverse();
+		public List<KeyValuePair<string, string>> Evaluate()
+		{
+			var ret = Flatten();
 
 			var re = new Regex("##(\\w+?)##");
 

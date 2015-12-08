@@ -910,8 +910,7 @@ namespace Peach.Pro.Core.WebServices
 
 			var pit = detail.Pit;
 
-
-			pit.Config = defs.Evaluate().Select(d => new Param { Key = d.Key, Value = d.Value }).ToList();
+			pit.Config = defs.Flatten().Select(d => new Param { Key = d.Key, Value = d.Value }).ToList();
 			pit.Agents = detail.Agents.ToWeb();
 			pit.Metadata = new PitMetadata
 			{
