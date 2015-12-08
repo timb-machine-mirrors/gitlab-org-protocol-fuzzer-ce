@@ -367,8 +367,8 @@ describe("Peach", () => {
 									{ "key": "ProcessName" },
 									{ "key": "Service" },
 									{ "key": "WinDbgPath", "value": "" },
-									{ "key": "RestartOnEachTest", "value": false },
-									{ "key": "IgnoreFirstChanceGuardPage", "value": true }
+									{ "key": "RestartOnEachTest", "value": "false" },
+									{ "key": "IgnoreFirstChanceGuardPage", "value": "true" }
 								],
 								"description": "Enable Windows debugging.",
 								"view": []
