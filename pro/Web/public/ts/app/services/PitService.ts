@@ -111,7 +111,7 @@ namespace Peach {
 			return StripHttpPromise(this.$q, promise);
 		}
 
-		public SaveVars(config: IParameter[]): ng.IPromise<IPit> {
+		public SaveDefines(config: IParameter[]): ng.IPromise<IPit> {
 			this.pit.config = config;
 			return this.SavePit();
 		}

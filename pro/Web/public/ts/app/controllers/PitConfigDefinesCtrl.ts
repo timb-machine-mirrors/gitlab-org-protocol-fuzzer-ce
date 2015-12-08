@@ -67,7 +67,7 @@ namespace Peach {
 		}
 
 		public OnSave(): void {
-			var promise = this.pitService.SaveVars(this.View);
+			var promise = this.pitService.SaveDefines(this.View);
 			promise.then(() => {
 				this.isSaved = true;
 				this.$scope.form.$setPristine();
