@@ -92,12 +92,12 @@ namespace Peach {
 		}
 
 		public OnEdit(): void {
-			var pitId = _.last(this.Job.pitUrl.split('/'));
+			const pitId = _.last(this.Job.pitUrl.split('/'));
 			this.$state.go(C.States.Pit, { pit: pitId });
 		}
 
 		public OnReplay(): void {
-			var pitId = _.last(this.Job.pitUrl.split('/'));
+			const pitId = _.last(this.Job.pitUrl.split('/'));
 			this.$state
 				.go(C.States.Pit, {
 					pit: pitId,

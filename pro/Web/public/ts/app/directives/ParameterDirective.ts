@@ -1,7 +1,7 @@
 ﻿/// <reference path="../reference.ts" />
 
 namespace Peach {
-	export var ParameterDirective: IDirective = {
+	export const ParameterDirective: IDirective = {
 		ComponentID: C.Directives.Parameter,
 		restrict: "E",
 		replace: true,

@@ -1,7 +1,7 @@
 ﻿/// <reference path="../reference.ts" />
 
 namespace Peach {
-	export var JobsDirective: IDirective = {
+	export const JobsDirective: IDirective = {
 		ComponentID: C.Directives.Jobs,
 		restrict: 'E',
 		templateUrl: C.Templates.Directives.Jobs,
@@ -57,7 +57,7 @@ namespace Peach {
 			$event.preventDefault();
 			$event.stopPropagation();
 			
-			var options: IConfirmOptions = {
+			const options: IConfirmOptions = {
 				SubmitPrompt: 'Delete Job'
 			};
 			Confirm(this.$modal, options).result

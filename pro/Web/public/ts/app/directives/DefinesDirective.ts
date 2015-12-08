@@ -1,7 +1,7 @@
 ﻿/// <reference path="../reference.ts" />
 
 namespace Peach {
-	export var DefinesDirective: IDirective = {
+	export const DefinesDirective: IDirective = {
 		ComponentID: C.Directives.Defines,
 		restrict: "E",
 		templateUrl: C.Templates.Directives.Defines,

@@ -14,7 +14,7 @@ namespace Peach {
 			private pitService: PitService
 		) {
 			const UserDefinesName = "User Defines";
-			var promise = pitService.LoadPit();
+			const promise = pitService.LoadPit();
 			promise.then((pit: IPit) => {
 				this.View = pit.definesView;
 
@@ -67,7 +67,7 @@ namespace Peach {
 		}
 
 		public OnSave(): void {
-			var promise = this.pitService.SaveDefines(this.View);
+			const promise = this.pitService.SaveDefines(this.View);
 			promise.then(() => {
 				this.isSaved = true;
 				this.$scope.form.$setPristine();
@@ -75,7 +75,7 @@ namespace Peach {
 		}
 
 		public OnAdd(): void {
-			var modal = this.$modal.open({
+			const modal = this.$modal.open({
 				templateUrl: C.Templates.Modal.NewVar,
 				controller: NewVarController
 			});

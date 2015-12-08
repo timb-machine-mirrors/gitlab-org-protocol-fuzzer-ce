@@ -11,7 +11,7 @@ namespace Peach {
 			private $scope: IFormScope,
 			private pitService: PitService
 		) {
-			var promise = pitService.LoadPit();
+			const promise = pitService.LoadPit();
 			promise.then((pit: IPit) => {
 				this.Agents = pit.agents;
 				this.hasLoaded = true;
@@ -53,7 +53,7 @@ namespace Peach {
 		}
 
 		public Save(): void {
-			var promise = this.pitService.SaveAgents(this.Agents);
+			const promise = this.pitService.SaveAgents(this.Agents);
 			promise.then(() => {
 				this.isSaved = true;
 				this.$scope.form.$setPristine();

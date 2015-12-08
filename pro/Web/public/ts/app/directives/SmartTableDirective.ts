@@ -5,14 +5,14 @@ namespace Peach {
 		stRatio: number;
 	}
 
-	export var SmartTableRatioDirective: IDirective = {
+	export const SmartTableRatioDirective: IDirective = {
 		ComponentID: C.Directives.Ratio,
 		restrict: 'A',
 		scope: {
 			stRatio: '='
 		},
 		link: (scope: IRatioScope, element: ng.IAugmentedJQuery) => {
-			element.css('width', scope.stRatio + '%');
+			element.css('width', `${scope.stRatio}%`);
 		}
 	}
 }

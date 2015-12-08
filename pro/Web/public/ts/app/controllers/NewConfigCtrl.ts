@@ -35,10 +35,10 @@ namespace Peach {
 					this.pending = false;
 					switch (response.status) {
 						case 400:
-							this.Error = this.Pit.name + " already exists, please choose a new name.";
+							this.Error = `${this.Pit.name} already exists, please choose a new name.`;
 							break;
 						default:
-							this.Error = "Error: " + response.statusText;
+							this.Error = `Error: ${response.statusText}`;
 							break;
 					}
 				});

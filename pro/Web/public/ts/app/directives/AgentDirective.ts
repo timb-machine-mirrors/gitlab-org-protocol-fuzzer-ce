@@ -1,7 +1,7 @@
 ﻿/// <reference path="../reference.ts" />
 
 namespace Peach {
-	export var AgentDirective: IDirective = {
+	export const AgentDirective: IDirective = {
 		ComponentID: C.Directives.Agent,
 		restrict: 'E',
 		templateUrl: C.Templates.Directives.Agent,
@@ -43,7 +43,7 @@ namespace Peach {
 		public get Header(): string {
 			const url = this.$scope.agent.agentUrl || 'local://';
 			const name = this.$scope.agent.name ? `(${this.$scope.agent.name})` : '';
-			return url + ' ' + name;
+			return `${url} ${name}`;
 		}
 
 		public get CanMoveUp(): boolean {

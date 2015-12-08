@@ -63,7 +63,7 @@ namespace Peach {
 		];
 
 		public IsCollapsed(state): boolean {
-			var subMenu = _.find(this.subMenus, { state: state });
+			const subMenu = _.find(this.subMenus, { state: state });
 			return subMenu.collapsed;
 		}
 
@@ -79,7 +79,7 @@ namespace Peach {
 		}
 
 		public get FaultCount(): any {
-			var count = 0;
+			let count = 0;
 			if (this.$scope.job) {
 				count = this.$scope.job.faultCount;
 			}
@@ -120,14 +120,14 @@ namespace Peach {
 		}
 
 		public MetricUrl(metric: C.IMetric): string {
-			var state = [C.States.JobMetrics, metric.id].join('.');
-			var params = { job: this.JobId };
+			const state = [C.States.JobMetrics, metric.id].join('.');
+			const params = { job: this.JobId };
 			return this.$state.href(state, params);
 		}
 		
 		public MetricActive(metric: C.IMetric) {
-			var state = [C.States.JobMetrics, metric.id].join('.');
-			var params = { job: this.JobId };
+			const state = [C.States.JobMetrics, metric.id].join('.');
+			const params = { job: this.JobId };
 			if (this.$state.is(state, params)) {
 				return 'active';
 			}

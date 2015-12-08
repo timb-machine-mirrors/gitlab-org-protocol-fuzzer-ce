@@ -24,13 +24,13 @@ namespace Peach {
 
 		public get Monitors(): IParameter[] {
 			if (this.$scope.search) {
-				let search = this.$scope.search.toLowerCase();
-				let monitors: IParameter[] = [];
+				const search = this.$scope.search.toLowerCase();
+				const monitors: IParameter[] = [];
 				for (let group of this.pitService.Pit.metadata.monitors) {
 					if (_.any(group.items, (item: IParameter) => {
-						let name = item.name.toLowerCase();
-						let pos = name.indexOf(search);
-						return pos != -1;
+						const name = item.name.toLowerCase();
+						const pos = name.indexOf(search);
+						return pos !== -1;
 					})) {
 						monitors.push(group);
 					}

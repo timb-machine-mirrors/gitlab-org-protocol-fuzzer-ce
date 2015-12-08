@@ -41,14 +41,14 @@ namespace Peach {
 			this.init();
 		}
 
-		public Pits: PitLibrary;
-		public User: PitLibrary;
+		private Pits: PitLibrary;
+		private User: PitLibrary;
 		
 		private init() {
-			var promise = this.pitService.LoadLibrary();
+			const promise = this.pitService.LoadLibrary();
 			promise.then((data: ILibrary[]) => {
 				data.forEach((lib: ILibrary) => {
-					var pitLib = new PitLibrary(lib.name);
+					const pitLib = new PitLibrary(lib.name);
 					if (lib.locked) {
 						this.Pits = pitLib;
 					} else {
@@ -57,11 +57,11 @@ namespace Peach {
 					
 					lib.versions.forEach((version: ILibraryVersion) => {
 						version.pits.forEach((pit: IPit) => {
-							var category = _.find(pit.tags, (tag: ITag) =>
+							const category = _.find(pit.tags, (tag: ITag) =>
 								tag.name.startsWith("Category")
 							).values[1];
 							
-							var pitCategory = _.find(pitLib.Categories, { 'Name': category });
+							let pitCategory = _.find(pitLib.Categories, { 'Name': category });
 							if (!pitCategory) {
 								pitCategory = new PitCategory(category);
 								pitLib.Categories.push(pitCategory);
@@ -74,7 +74,7 @@ namespace Peach {
 			});
 		}
 
-		public OnSelectPit(entry: PitEntry) {
+		private OnSelectPit(entry: PitEntry) {
 			if (entry.Library.locked) {
 				this.$modal.open({
 					templateUrl: C.Templates.Modal.NewConfig,

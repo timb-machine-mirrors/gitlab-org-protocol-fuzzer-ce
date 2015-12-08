@@ -5,7 +5,7 @@ namespace Peach {
 		ctrl: UnsavedController;
 	}
 
-	export var UnsavedDirective: IDirective = {
+	export const UnsavedDirective: IDirective = {
 		ComponentID: C.Directives.Unsaved,
 		restrict: 'A',
 		require: '^form',
@@ -37,7 +37,7 @@ namespace Peach {
 		}
 
 		public Link(form: ng.IFormController) {
-			var onRouteChangeOff = this.$scope.$root.$on(C.Angular.$stateChangeStart, (
+			const onRouteChangeOff = this.$scope.$root.$on(C.Angular.$stateChangeStart, (
 				event: ng.IAngularEvent,
 				toState: ng.ui.IState,
 				toParams: any,
@@ -51,7 +51,7 @@ namespace Peach {
 
 				event.preventDefault();
 				
-				var options: IConfirmOptions = {
+				const options: IConfirmOptions = {
 					Title: 'Unsaved Changes',
 					Body: 'You have unsaved changes. Do you want to leave the page?',
 					SubmitPrompt: 'Ignore Changes'

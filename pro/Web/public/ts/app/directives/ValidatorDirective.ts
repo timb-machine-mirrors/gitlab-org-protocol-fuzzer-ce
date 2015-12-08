@@ -20,14 +20,14 @@ namespace Peach {
 		predicate: IValidatePredicate
 	) {
 		ctrl.$validators[name] = (modelValue, viewValue) => {
-			var value = modelValue || viewValue;
+			const value = modelValue || viewValue;
 			return _.isUndefined(value)
 				|| (_.isString(value) && _.isEmpty(value))
 				|| predicate(value);
 		};
 	}
 
-	export var RangeDirective: IDirective = {
+	export const RangeDirective: IDirective = {
 		ComponentID: C.Directives.Range,
 		restrict: 'A',
 		require: C.Angular.ngModel,
@@ -42,19 +42,19 @@ namespace Peach {
 			ctrl: ng.INgModelController
 		) => {
 			predicateValidation(C.Validation.RangeMin, ctrl, (value: string) => {
-				var int = parseInt(value);
-				var min = scope.min();
+				const int = parseInt(value);
+				const min = scope.min();
 				return _.isUndefined(min) || (!_.isNaN(int) && int >= min);
 			});
 			predicateValidation(C.Validation.RangeMax, ctrl, (value: string) => {
-				var int = parseInt(value);
-				var max = scope.max();
+				const int = parseInt(value);
+				const max = scope.max();
 				return _.isUndefined(max) || (!_.isNaN(int) && int <= max);
 			});
 		}
 	}
 
-	export var IntegerDirective: IDirective = {
+	export const IntegerDirective: IDirective = {
 		ComponentID: C.Directives.Integer,
 		restrict: 'A',
 		require: C.Angular.ngModel,
@@ -64,14 +64,14 @@ namespace Peach {
 			attrs: ng.IAttributes,
 			ctrl: ng.INgModelController
 		) => {
-			var pattern = /^(\-|\+)?\d+$/;
+			const pattern = /^(\-|\+)?\d+$/;
 			predicateValidation(C.Validation.Integer, ctrl,
 				(value: string) => pattern.test(value)
 			);
 		}
 	}
 
-	export var HexDirective: IDirective = {
+	export const HexDirective: IDirective = {
 		ComponentID: C.Directives.HexString,
 		restrict: 'A',
 		require: C.Angular.ngModel,
@@ -81,7 +81,7 @@ namespace Peach {
 			attrs: ng.IAttributes,
 			ctrl: ng.INgModelController
 		) => {
-			var pattern = /^[0-9A-Fa-f]+$/;
+			const pattern = /^[0-9A-Fa-f]+$/;
 			predicateValidation(C.Validation.HexString, ctrl,
 				(value: string) => pattern.test(value)
 			);

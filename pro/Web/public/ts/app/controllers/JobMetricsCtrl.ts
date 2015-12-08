@@ -80,7 +80,7 @@ namespace Peach {
 			if (this.jobService.Job) {
 				this.update();
 			} else {
-				var unwatch = $scope.$watch(() => jobService.Job,(newVal, oldVal) => {
+				const unwatch = $scope.$watch(() => jobService.Job,(newVal, oldVal) => {
 					if (newVal !== oldVal) {
 						this.update();
 						unwatch();
@@ -123,16 +123,16 @@ namespace Peach {
 				if (item.content) {
 					return item.content;
 				}
-				var html = this.$templateCache.get(C.Templates.Job.BucketTimelineItem);
+				const html = this.$templateCache.get(C.Templates.Job.BucketTimelineItem);
 				return this.$interpolate(html)({ item: item });
 			}
 		}
 
 		private update(): void {
-			var promise = this.jobService.LoadMetric(this.$scope.metric);
+			const promise = this.jobService.LoadMetric(this.$scope.metric);
 			switch (this.$scope.metric) {
 			case C.Metrics.BucketTimeline.id:
-				var items = new this.VisDataSet();
+				const items = new this.VisDataSet();
 
 				if (_.isUndefined(this.BucketTimelineData)) {
 					this.BucketTimelineData = {

@@ -30,7 +30,7 @@ namespace Peach {
 			private pitService: PitService,
 			private wizardService: WizardService
 		) {
-			var trackId = this.$state.current.data.track;
+			const trackId = this.$state.current.data.track;
 			this.track = wizardService.GetTrack(trackId);
 			this.$scope.Title = this.track.name;
 
@@ -50,7 +50,7 @@ namespace Peach {
 				this.unregister();
 			}
 
-			var next = this.track.next;
+			const next = this.track.next;
 			this.$state.go(next.state, next.params);
 		}
 
@@ -62,7 +62,7 @@ namespace Peach {
 			} else if (this.$state.is(this.track.finish)) {
 				this.initReview();
 			} else {
-				var id = this.$state.params['id'];
+				const id = this.$state.params['id'];
 				this.$scope.Step = WizardStep.QandA;
 				this.loadQuestion(id);
 			}
@@ -104,8 +104,8 @@ namespace Peach {
 		}
 
 		public get FaultAgentDescription(): string {
-			var agent = this.wizardService.GetTrack(C.Tracks.Fault).agents[0];
-			var ret = '';
+			const agent = this.wizardService.GetTrack(C.Tracks.Fault).agents[0];
+			let ret = '';
 			agent.monitors.forEach((item: IMonitor) => {
 				if (!ret) {
 					ret += ' ';
@@ -138,10 +138,10 @@ namespace Peach {
 			}
 
 			if (this.$scope.Question.type === QuestionTypes.Intro) {
-				var promise = this.track.Begin();
+				const promise = this.track.Begin();
 				if (promise) {
 					promise.then(() => {
-						var first = this.track.GetQuestionById(1);
+						const first = this.track.GetQuestionById(1);
 						if (_.isUndefined(first)) {
 							this.$state.go(this.track.finish);
 						} else {
@@ -156,7 +156,7 @@ namespace Peach {
 				this.track.history.push(this.$scope.Question.id);
 			}
 
-			var nextId = this.getNextId(this.$scope.Question);
+			const nextId = this.getNextId(this.$scope.Question);
 
 			if (_.isUndefined(nextId)) {
 				// no more questions, this track is complete
@@ -172,7 +172,7 @@ namespace Peach {
 				return;
 			}
 
-			var previousId = 0;
+			let previousId = 0;
 			if (this.track.history.length > 0) {
 				previousId = this.track.history.pop();
 			}
@@ -197,7 +197,7 @@ namespace Peach {
 			if (q.type === QuestionTypes.Choice ||
 				q.type === QuestionTypes.Jump) {
 				// get next id from selected choice
-				var choice = _.find(q.choice, e => {
+				const choice = _.find(q.choice, e => {
 					if (_.isUndefined(e.value) && !_.isUndefined(e.next)) {
 						return e.next.toString() === q.value.toString();
 					} else if (!_.isUndefined(e.value) && !_.isUndefined(q.value)) {
@@ -235,7 +235,7 @@ namespace Peach {
 					// if the first choice doesn't have a value it's a un-keyed choice, set default to 0
 					// look at q-choice.html to see how its binding works
 					if (_.isUndefined(this.$scope.Question.value)) {
-						var first = _.first(this.$scope.Question.choice);
+						const first = _.first(this.$scope.Question.choice);
 						if (_.isUndefined(first.value)) {
 							this.$scope.Question.value = first.next;
 						} else {
@@ -275,13 +275,13 @@ namespace Peach {
 			if (_.isUndefined(this.$scope.Question)) {
 				return "";
 			}
-			var types = [
+			const types = [
 				QuestionTypes.HwAddress,
 				QuestionTypes.Iface,
 				QuestionTypes.Ipv4,
 				QuestionTypes.Ipv6
 			];
-			var template = this.$scope.Question.type;
+			let template = this.$scope.Question.type;
 			if (_.contains(types, template)) {
 				template = 'combo';
 			}

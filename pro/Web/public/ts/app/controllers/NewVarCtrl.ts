@@ -45,7 +45,7 @@ namespace Peach {
 		}
 
 		public OnNameChanged() {
-			var value = this.Param.name;
+			const value = this.Param.name;
 			if (!this.hasBlurred) {
 				if (_.isString(value)) {
 					this.Param.key = value.replace(new RegExp(' ', 'g'), '');

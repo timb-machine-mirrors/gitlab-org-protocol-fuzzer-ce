@@ -248,7 +248,7 @@ namespace Peach {
 			_.forEach(C.MetricsList,(metric: C.IMetric) => {
 				const state = [C.States.JobMetrics, metric.id].join('.');
 				$stateProvider.state(state, {
-					url: '/' + metric.id,
+					url: `/${metric.id}`,
 					views: {
 						'@': {
 							templateUrl: C.Templates.Job.MetricPage.replace(':metric', metric.id),
@@ -273,13 +273,13 @@ namespace Peach {
 					}
 				};
 
-				views['@pit.wizard.' + track.id] = {
+				views[`@pit.wizard.${track.id}`] = {
 					templateUrl: C.Templates.Pit.Wizard.TrackIntro.replace(':track', track.id)
 				};
 
 				$stateProvider
 					.state([C.States.PitWizard, track.id].join('.'), {
-						url: '/' + track.id,
+						url: `/${track.id}`,
 						views: views,
 						data: { track: track.id },
 						ncyBreadcrumb: { label: track.name }
