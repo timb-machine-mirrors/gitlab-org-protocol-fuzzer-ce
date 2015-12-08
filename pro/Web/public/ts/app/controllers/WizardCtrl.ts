@@ -299,7 +299,7 @@ namespace Peach {
 			if (_.isUndefined(this.$scope.Question.value)) {
 				this.$scope.Question.value = "";
 			}
-			this.$scope.Question.value += "##" + def.key + "##";
+			this.$scope.Question.value += `##${def.key}##`;
 		}
 	}
 }

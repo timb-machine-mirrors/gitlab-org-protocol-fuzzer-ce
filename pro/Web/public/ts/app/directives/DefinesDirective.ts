@@ -6,7 +6,10 @@ namespace Peach {
 		restrict: "E",
 		templateUrl: C.Templates.Directives.Defines,
 		controller: C.Controllers.Defines,
-		scope: { group: "=" }
+		scope: { 
+			form: "=",
+			group: "=" 
+		}
 	}
 
 	export interface IDefinesScope extends IFormScope {
@@ -28,6 +31,19 @@ namespace Peach {
 			if (!$scope.group.collapsed) {
 				$scope.isOpen = true;
 			}
+		}
+
+		public get ShowGroup(): boolean {
+			return !_.isEmpty(this.$scope.group.items);
+		}
+	
+		public get CanRemove(): boolean {
+			return this.$scope.group.name === "User Defines";
+		}
+
+		public OnRemove(index: number): void {
+			this.$scope.group.items.splice(index, 1);
+			this.$scope.form.$setDirty();
 		}
 	}
 }

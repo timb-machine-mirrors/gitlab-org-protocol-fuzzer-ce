@@ -55,48 +55,36 @@ namespace Peach {
 
 		private SavePit(): ng.IPromise<IPit> {
 			const config: IParameter[] = [];
-			for (let param of this.pit.config) {
-				if (param.type === ParameterType.Group) {
-					for (let item of param.items) {
-						if (item.value && item.type !== ParameterType.System) {
-							config.push({
-								key: item.key,
-								value: item.value
-							});
-						}
-					}
-				} else {
-					if (param.value && param.type !== ParameterType.System) {
-						config.push({
-							key: param.key,
-							value: param.value
-						});
-					}
+			const view = this.CreateFlatDefinesView(this.pit.config);
+			for (let param of view) {
+				if (param.type === ParameterType.User) {
+					config.push({
+						name: param.name,
+						description: param.description,
+						key: param.key,
+						value: param.value
+					});
+				} else if (param.type !== ParameterType.System) {
+					config.push({
+						key: param.key,
+						value: param.value
+					});
 				}
 			}
 
 			const agents: IAgent[] = [];
-			for (let agent of _.get<IAgent[]>(this.pit, 'agents', [])) {
+			for (let agent of this.pit.agents) {
 				const monitors: IMonitor[] = [];
 				for (let monitor of agent.monitors) {
 					var map: IParameter[] = [];
-					if (monitor.view) {
-						this._Visit(monitor.view, (param: IParameter) => {
-							if (!_.isUndefined(param.value)) {
-								map.push({
-									key: param.key,
-									value: param.value
-								});
-							}
-						});
-					} else {
-						for (let param of monitor.map) {
+					this.Visit(monitor.view, (param: IParameter) => {
+						if (!_.isUndefined(param.value)) {
 							map.push({
 								key: param.key,
 								value: param.value
 							});
 						}
-					}
+					});
 					monitors.push({
 						monitorClass: monitor.monitorClass,
 						name: monitor.name,
@@ -146,7 +134,7 @@ namespace Peach {
 		}
 
 		public get IsConfigured(): boolean {
-			return onlyIf(this.pit, () => _.all(this.CreateFlatDefinesView(), (param: IParameter) => {
+			return onlyIf(this.pit, () => _.all(this.CreateFlatDefinesView(this.CreateDefinesView()), (param: IParameter) => {
 				return param.optional || param.value !== "";
 			}));
 		}
@@ -165,8 +153,8 @@ namespace Peach {
 				this.$rootScope.$emit(C.Events.PitChanged, pit);
 			}
 
-			for (let agent of _.get<IAgent[]>(pit, 'agents', [])) {
-				for (let monitor of _.get<IMonitor[]>(agent, 'monitors', [])) {
+			for (let agent of pit.agents) {
+				for (let monitor of agent.monitors) {
 					monitor.view = this.CreateMonitorView(monitor);
 				}
 			}
@@ -189,49 +177,37 @@ namespace Peach {
 
 		private CreateDefinesView(): IParameter[] {
 			const view = angular.copy(this.pit.metadata.defines);
-			// const found = [];
 			for (let group of view) {
 				for (let param of group.items) {
 					const config = _.find(this.pit.config, { key: param.key });
 					if (config && config.value) {
 						param.value = config.value;
 					}
-					// found.push(param.key);
 				}
 			}
-			// for (let param of this.pit.config) {
-			// 	if (!_.contains(found, param.key)) {
-			// 	}
-			// }
 			return view;
 		}
 
-		private CreateFlatDefinesView(): IParameter[] {
+		private CreateFlatDefinesView(src: IParameter[]): IParameter[] {
 			const skip = [
 				ParameterType.Group,
 				ParameterType.Monitor,
 				ParameterType.Space
 			];
 			const view: IParameter[] = [];
-			for (let root of this.CreateDefinesView()) {
-				this._Visit(root, (param: IParameter) => {
-					// console.log('CreateFlatDefinesView', param);
-					if (_.contains(skip, param.type)) {
-						return;
-					}
-					view.push(param);
-				});
-			}
+			this.Visit(src, (param: IParameter) => {
+				if (_.contains(skip, param.type)) {
+					return;
+				}
+				view.push(param);
+			});
 			return view;
 		}
 
-		private CreateMonitorView(monitor: IMonitor): IParameter {
+		public CreateMonitorView(monitor: IMonitor): IParameter[] {
 			const metadata = this.FindMonitorMetadata(monitor.monitorClass);
-			const view = angular.copy(metadata);
-			this._Visit(view, (param: IParameter) => {
-				if (param.type === ParameterType.Monitor) {
-					return;
-				}
+			const view = angular.copy(metadata.items);
+			this.Visit(view, (param: IParameter) => {
 				const kv = _.find(monitor.map, { key: param.key });
 				if (kv && kv.value) {
 					param.value = kv.value;
@@ -267,11 +243,10 @@ namespace Peach {
 			return null;
 		}
 
-		private _Visit(param: IParameter, fn: (p: IParameter) => void): void {
-			fn(param);
-
-			for (let item of _.get<IParameter[]>(param, 'items', [])) {
-				this._Visit(item, fn);
+		private Visit(params: IParameter[], fn: (p: IParameter) => void): void {
+			for (let param of params) {
+				fn(param);
+				this.Visit(param.items || [], fn);
 			}
 		}
 	}

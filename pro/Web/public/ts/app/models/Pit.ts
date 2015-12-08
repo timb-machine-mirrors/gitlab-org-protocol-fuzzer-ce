@@ -51,7 +51,7 @@ namespace Peach {
 		path?: number[];
 
 		// only used by client-side
-		view?: IParameter;
+		view?: IParameter[];
 	}
 
 	export interface IPitMetadata {

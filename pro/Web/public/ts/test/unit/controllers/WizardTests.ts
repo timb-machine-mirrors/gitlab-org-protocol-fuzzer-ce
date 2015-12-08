@@ -15,6 +15,46 @@ describe("Peach", () => {
 	const name = "Name";
 	const value = "Value";
 
+	const SystemDefines = {
+		type: Peach.ParameterType.Group,
+		name: 'System',
+		items: [
+			{
+				key: 'Peach.OS',
+				name: 'Peach OS',
+				value: 'windows',
+				type: Peach.ParameterType.System
+			}
+		]
+	};
+
+	const AllMonitors = {
+		type: Peach.ParameterType.Group,
+		name: 'All',
+		items: [
+			{
+				type: Peach.ParameterType.Monitor,
+				key: 'PageHeap',
+				items: []
+			},
+			{
+				type: Peach.ParameterType.Monitor,
+				key: 'WindowsDebugger',
+				items: []
+			},
+			{
+				type: Peach.ParameterType.Monitor,
+				key: 'FooMonitor',
+				items: []
+			},
+			{
+				type: Peach.ParameterType.Monitor,
+				key: 'BarMonitor',
+				items: []
+			}
+		]
+	};
+
 	function MakeTestCase(id: string, pit: Peach.IPit, post: Peach.IPit): ITestCase {
 		const url = C.Api.PitUrl.replace(':id', id);
 		pit.id = id;
@@ -38,21 +78,8 @@ describe("Peach", () => {
 		config: [],
 		agents: [],
 		metadata: {
-			defines: [
-				{
-					type: Peach.ParameterType.Group,
-					name: 'System',
-					items: [
-						{
-							key: 'Peach.OS',
-							name: 'Peach OS',
-							value: 'windows',
-							type: Peach.ParameterType.System
-						}
-					]
-				}
-			],
-			monitors: []
+			defines: [ SystemDefines ],
+			monitors: [ AllMonitors ]
 		}
 	}, {
 		id: null,
@@ -71,19 +98,8 @@ describe("Peach", () => {
 		config: [],
 		agents: [],
 		metadata: {
-			defines: [
-				{
-					type: Peach.ParameterType.Group,
-					name: 'System',
-					items: [
-						{
-							key: 'Peach.OS',
-							name: 'Peach OS',
-							value: 'windows',
-							type: Peach.ParameterType.System
-						}
-					]
-				},
+			defines: [ 
+				SystemDefines,
 				{
 					type: Peach.ParameterType.Group,
 					name: 'Group',
@@ -96,7 +112,7 @@ describe("Peach", () => {
 					]
 				}
 			],
-			monitors: []
+			monitors: [ AllMonitors ]
 		}
 	}, {
 		id: null,
@@ -340,7 +356,8 @@ describe("Peach", () => {
 									{ "key": "Executable", "value": "C:\\some\\program.exe" },
 									{ "key": "WinDbgPath", "value": "" }
 								],
-								"description": "Enable page heap debugging options for an executable."
+								"description": "Enable page heap debugging options for an executable.",
+								"view": []
 							}, {
 								"monitorClass": "WindowsDebugger",
 								"path": [1100],
@@ -350,10 +367,11 @@ describe("Peach", () => {
 									{ "key": "ProcessName" },
 									{ "key": "Service" },
 									{ "key": "WinDbgPath", "value": "" },
-									{ "key": "StartMode", "value": "StartOnEachIteration" },
+									{ "key": "RestartOnEachTest", "value": false },
 									{ "key": "IgnoreFirstChanceGuardPage", "value": true }
 								],
-								"description": "Enable Windows debugging."
+								"description": "Enable Windows debugging.",
+								"view": []
 							}
 						]
 					}
@@ -483,7 +501,8 @@ describe("Peach", () => {
 								"map": [
 									{ "key": "Param", "value": "FooValue" }
 								],
-								"description": "Foo monitor."
+								"description": "Foo monitor.",
+								"view": []
 							}
 						]
 					}
@@ -530,7 +549,8 @@ describe("Peach", () => {
 								"map": [
 									{ "key": "Param", "value": "FooValue" }
 								],
-								"description": "Foo monitor."
+								"description": "Foo monitor.",
+								"view": []
 							}
 						]
 					}
@@ -583,7 +603,8 @@ describe("Peach", () => {
 								"map": [
 									{ "key": "Param", "value": "FooValue" }
 								],
-								"description": "Foo monitor."
+								"description": "Foo monitor.",
+								"view": []
 							}
 						]
 					},
@@ -597,7 +618,8 @@ describe("Peach", () => {
 								"map": [
 									{ "key": "Param", "value": "BarValue" }
 								],
-								"description": "Bar monitor."
+								"description": "Bar monitor.",
+								"view": []
 							}
 						]
 					}

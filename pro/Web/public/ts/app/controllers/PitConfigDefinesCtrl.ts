@@ -13,39 +13,57 @@ namespace Peach {
 			private $modal: ng.ui.bootstrap.IModalService,
 			private pitService: PitService
 		) {
+			const UserDefinesName = "User Defines";
 			var promise = pitService.LoadPit();
 			promise.then((pit: IPit) => {
 				this.View = pit.definesView;
+
+				for (let group of this.View) {
+					if (group.type === ParameterType.Group && 
+						group.name === UserDefinesName) {
+						this.UserDefines = group;
+					}
+				};
+
+				if (!this.UserDefines) {
+					this.UserDefines = {
+						type: ParameterType.Group,
+						name: UserDefinesName,
+						items: []
+					};
+				
+					let systemDefines = this.View.pop();
+					this.View.push(this.UserDefines);
+					this.View.push(systemDefines);
+				}
+
 				this.hasLoaded = true;
 			});
 		}
 
-		private hasLoaded: boolean = false;
-		private isSaved: boolean = false;
+		private hasLoaded = false;
+		private isSaved = false;
 		public View: IParameter[];
+		public UserDefines: IParameter;
 
 		public get ShowLoading(): boolean {
 			return !this.hasLoaded;
 		}
 
-		public get ShowSaved() {
+		public get ShowSaved(): boolean {
 			return !this.$scope.form.$dirty && this.isSaved;
 		}
 
-		public get ShowRequired() {
+		public get ShowRequired(): boolean {
 			return this.$scope.form.$pristine && this.$scope.form.$invalid;
 		}
 
-		public get ShowValidation() {
+		public get ShowValidation(): boolean {
 			return this.$scope.form.$dirty && this.$scope.form.$invalid;
 		}
 
-		public get CanSave() {
+		public get CanSave(): boolean {
 			return this.$scope.form.$dirty && !this.$scope.form.$invalid;
-		}
-
-		public CanRemove(param: IParameter) {
-			return param.type === ParameterType.User;
 		}
 
 		public OnSave(): void {
@@ -56,21 +74,16 @@ namespace Peach {
 			});
 		}
 
-		public OnAdd() {
+		public OnAdd(): void {
 			var modal = this.$modal.open({
 				templateUrl: C.Templates.Modal.NewVar,
 				controller: NewVarController
 			});
 
 			modal.result.then((param: IParameter) => {
-				// this.Config.push(param);
+				this.UserDefines.items.push(param);
 				this.$scope.form.$setDirty();
 			});
-		}
-
-		public OnRemove(index: number) {
-			// this.Config.splice(index, 1);
-			this.$scope.form.$setDirty();
 		}
 	}
 }

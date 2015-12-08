@@ -20,7 +20,7 @@ namespace Peach {
 				value: "",
 				name: "",
 				description: 'User-defined variable',
-				type: 'user'
+				type: ParameterType.User
 			};
 		}
 
