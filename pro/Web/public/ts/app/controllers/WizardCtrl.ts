@@ -276,17 +276,17 @@ namespace Peach {
 				return "";
 			}
 			const types = [
-				QuestionTypes.HwAddress,
+				QuestionTypes.Hwaddr,
 				QuestionTypes.Iface,
 				QuestionTypes.Ipv4,
 				QuestionTypes.Ipv6
 			];
 			let template = this.$scope.Question.type;
 			if (_.contains(types, template)) {
-				template = 'combo';
+				template = QuestionTypes.Combo;
 			}
-			if (template === 'user') {
-				template = 'string';
+			if (template === QuestionTypes.User) {
+				template = QuestionTypes.String;
 			}
 			return C.Templates.Pit.Wizard.QuestionType.replace(':type', template);
 		}

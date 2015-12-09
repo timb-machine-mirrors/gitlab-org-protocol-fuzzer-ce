@@ -2,17 +2,21 @@
 
 namespace Peach {
 	export var QuestionTypes = {
-		String    : '',
-		Hex       : '',
-		Range     : '',
-		Ipv4      : '',
-		Ipv6      : '',
-		HwAddress : '',
-		Iface     : '',
-		Choice    : '',
-		Jump      : '',
-		Intro     : '',
-		Done      : ''
+		String : '',
+		Hex    : '',
+		Range  : '',
+		Ipv4   : '',
+		Ipv6   : '',
+		Hwaddr : '',
+		Iface  : '',
+		Enum   : '',
+		Bool   : '',
+		User   : '',
+		Choice : '',
+		Jump   : '',
+		Intro  : '',
+		Done   : '',
+		Combo  : ''
 	};
 	MakeLowerEnum(QuestionTypes);
 
