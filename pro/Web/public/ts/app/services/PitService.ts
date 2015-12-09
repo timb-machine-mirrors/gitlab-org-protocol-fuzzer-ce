@@ -134,7 +134,9 @@ namespace Peach {
 			const promise = this.$http.post(C.Api.Pits, request);
 			promise.success((pit: IPit) => this.OnSuccess(pit, true));
 			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
-				this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
+				if (reason.status >= 500) {
+					this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
+				}
 			});
 			return promise;
 		}
@@ -212,6 +214,18 @@ namespace Peach {
 
 		public CreateMonitorView(monitor: IMonitor): IParameter[] {
 			const metadata = this.FindMonitorMetadata(monitor.monitorClass);
+			if (!metadata) {
+				const view: IParameter[] = [];
+				for (let param of monitor.map) {
+					view.push({
+						key: param.key,
+						name: param.key,
+						value: param.value
+					})
+				}
+				return view;
+			}
+
 			const view = angular.copy(metadata.items);
 			this.Visit(view, (param: IParameter) => {
 				const kv = _.find(monitor.map, { key: param.key });
