@@ -79,17 +79,15 @@ namespace Peach {
 		public OnBeginTest() {
 			if (this.isWizard) {
 				this.track.isComplete = false;
+
 				const agents = _.flatten<IAgent>([
 					this.wizardService.GetTrack(C.Tracks.Fault).agents,
 					this.wizardService.GetTrack(C.Tracks.Data).agents,
 					this.wizardService.GetTrack(C.Tracks.Auto).agents
 				]);
-				let count = 0;
-				for (let agent of agents) {
-					count++;
-					agent.name = `Agent${count}`;
-				}
-				const promise = this.pitService.SaveAgents(agents);
+
+				const merged = this.wizardService.MergeAgents(agents);
+				const promise = this.pitService.SaveAgents(merged);
 				promise.then(() => {
 					this.startTest();
 				});

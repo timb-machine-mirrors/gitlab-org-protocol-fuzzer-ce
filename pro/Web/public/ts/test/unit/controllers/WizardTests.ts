@@ -629,5 +629,156 @@ describe("Peach", () => {
 				expect(JSON.stringify(actual)).toEqual(JSON.stringify(expected2));
 			});
 		});
+
+		describe("merge agents", () => {
+			it("works", () => {
+				const agents: Peach.IAgent[] = [
+					{
+						name: "",
+						agentUrl: "local://",
+						monitors: [
+							{
+								monitorClass: "PageHeap",
+								map: [
+									{ key: "Executable", value: "Foo.exe" }
+								]
+							},
+							{
+								monitorClass: "WindowsDebugger",
+								map: [
+									{ key: "Executable", value: "Foo.exe" }
+								]
+							}
+						]
+					},
+					{
+						name: "",
+						agentUrl: "tcp://remote",
+						monitors: [
+							{
+								monitorClass: "Pcap",
+								map: [
+									{ key: "Device", value: "eth0" }
+								]
+							}
+						]
+					},
+					{
+						name: "",
+						agentUrl: "local://",
+						monitors: [
+							{
+								monitorClass: "CanaKit",
+								map: [
+									{ key: "SerialPort", value: "COM1" }
+								]
+							}
+						]
+					},
+					{
+						name: "",
+						agentUrl: "tcp://remote2",
+						monitors: [
+							{
+								monitorClass: "Pcap",
+								map: [
+									{ key: "Device", value: "eth0" }
+								]
+							}
+						]
+					},
+					{
+						name: "",
+						agentUrl: "tcp://remote",
+						monitors: [
+							{
+								monitorClass: "Pcap",
+								map: [
+									{ key: "Device", value: "eth0" }
+								]
+							}
+						]
+					},
+					{
+						name: "",
+						agentUrl: "tcp://remote",
+						monitors: [
+							{
+								monitorClass: "CanaKit",
+								map: [
+									{ key: "SerialPort", value: "COM1" }
+								]
+							}
+						]
+					}
+				];
+
+				const expected: Peach.IAgent[] = [
+					{
+						name: "Agent1",
+						agentUrl: "local://",
+						monitors: [
+							{
+								monitorClass: "PageHeap",
+								map: [
+									{ key: "Executable", value: "Foo.exe" }
+								]
+							},
+							{
+								monitorClass: "WindowsDebugger",
+								map: [
+									{ key: "Executable", value: "Foo.exe" }
+								]
+							},
+							{
+								monitorClass: "CanaKit",
+								map: [
+									{ key: "SerialPort", value: "COM1" }
+								]
+							}
+						]
+					},
+					{
+						name: "Agent2",
+						agentUrl: "tcp://remote",
+						monitors: [
+							{
+								monitorClass: "Pcap",
+								map: [
+									{ key: "Device", value: "eth0" }
+								]
+							},
+							{
+								monitorClass: "Pcap",
+								map: [
+									{ key: "Device", value: "eth0" }
+								]
+							},
+							{
+								monitorClass: "CanaKit",
+								map: [
+									{ key: "SerialPort", value: "COM1" }
+								]
+							}
+						]
+					},
+					{
+						name: "Agent3",
+						agentUrl: "tcp://remote2",
+						monitors: [
+							{
+								monitorClass: "Pcap",
+								map: [
+									{ key: "Device", value: "eth0" }
+								]
+							}
+						]
+					}
+				];
+
+				const actual = wizardService.MergeAgents(agents);
+				expect(JSON.stringify(actual)).toEqual(JSON.stringify(expected));
+			});
+		});
 	});
 });
