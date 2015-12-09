@@ -138,6 +138,10 @@ pre.peach-test-log {
 	margin-top: 10px;
 }
 
+td div.peach-parameter-input {
+	top: 5px;
+}
+
 /* turn off animation, this can screw with autofocus */
 .modal.fade .modal-dialog,
 .modal.in .modal-dialog {
