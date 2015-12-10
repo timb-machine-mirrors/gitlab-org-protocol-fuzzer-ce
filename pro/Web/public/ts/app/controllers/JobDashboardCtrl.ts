@@ -1,8 +1,6 @@
 /// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	export class DashboardController {
 
 		static $inject = [
@@ -94,12 +92,12 @@ module Peach {
 		}
 
 		public OnEdit(): void {
-			var pitId = _.last(this.Job.pitUrl.split('/'));
+			const pitId = _.last(this.Job.pitUrl.split('/'));
 			this.$state.go(C.States.Pit, { pit: pitId });
 		}
 
 		public OnReplay(): void {
-			var pitId = _.last(this.Job.pitUrl.split('/'));
+			const pitId = _.last(this.Job.pitUrl.split('/'));
 			this.$state
 				.go(C.States.Pit, {
 					pit: pitId,

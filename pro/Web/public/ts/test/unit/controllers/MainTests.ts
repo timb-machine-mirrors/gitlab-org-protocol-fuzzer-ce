@@ -1,7 +1,5 @@
 /// <reference path="../reference.ts" />
 
-'use strict';
-
 describe("Peach", () => {
 	var C = Peach.C;
 	beforeEach(module('Peach'));

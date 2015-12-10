@@ -1,5 +1,6 @@
 using System;
 using Peach.Pro.Core.Storage;
+using Newtonsoft.Json;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
@@ -43,6 +44,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// Status of event
 		/// </summary>
+		[JsonProperty(DefaultValueHandling = DefaultValueHandling.Include)]
 		public TestStatus Status { get; set; }
 
 		/// <summary>

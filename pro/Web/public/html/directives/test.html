@@ -26,8 +26,8 @@
 				<span ng-switch-default>({{vm.TestTime}})</span>
 			</span>
 		</h3>
-		<tabset>
-			<tab heading="Summary">
+		<uib-tabset>
+			<uib-tab heading="Summary">
 				<table class="table table-striped table-hover table-bordered">
 					<thead>
 						<tr>
@@ -60,10 +60,10 @@
 						</tr>
 					</tbody>
 				</table>
-			</tab>
-			<tab heading="Log">
+			</uib-tab>
+			<uib-tab heading="Log">
 				<pre class="peach-test-log">{{vm.TestLog}}</pre>
-			</tab>
-		</tabset>
+			</uib-tab>
+		</uib-tabset>
 	</div>
 </div>

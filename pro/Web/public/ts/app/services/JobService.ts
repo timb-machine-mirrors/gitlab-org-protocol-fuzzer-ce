@@ -1,16 +1,14 @@
 ﻿ /// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
-	export var JOB_INTERVAL = 3000;
+namespace Peach {
+	export const JOB_INTERVAL = 3000;
 	
 	export class JobService {
 		static $inject = [
 			C.Angular.$rootScope,
 			C.Angular.$q,
 			C.Angular.$http,
-			C.Angular.$modal,
+			C.Angular.$uibModal,
 			C.Angular.$state,
 			C.Angular.$timeout,
 			C.Services.Pit
@@ -99,24 +97,22 @@ module Peach {
 			if (_.isUndefined(this.Job)) {
 				return undefined;
 			}
-			var duration = moment.duration(this.job.runtime, 'seconds');
+
+			const duration = moment.duration(this.job.runtime, 'seconds');
+			const days = Math.floor(duration.asDays());
+			const hours = duration.hours().toString().paddingLeft('00');
+			const minutes = duration.minutes().toString().paddingLeft('00');
+			const seconds = duration.seconds().toString().paddingLeft('00');
+
 			if (duration.asDays() >= 1) {
-				return '{0}d {1}h {2}m'.format(
-					Math.floor(duration.asDays()),
-					duration.hours().toString().paddingLeft('00'),
-					duration.minutes().toString().paddingLeft('00')
-				);
+				return `${days}d ${hours}h ${minutes}m`;
 			} else {
-				return '{0}h {1}m {2}s'.format(
-					duration.hours().toString().paddingLeft('00'),
-					duration.minutes().toString().paddingLeft('00'),
-					duration.seconds().toString().paddingLeft('00')
-				);
+				return `${hours}h ${minutes}m ${seconds}s`;
 			}
 		}
 
 		private doLoadFaultDetail(defer: ng.IDeferred<IFaultDetail>, id: string) {
-			var fault = _.find(this.faults, { iteration: id });
+			const fault = _.find(this.faults, { iteration: id });
 			if (_.isUndefined(fault)) {
 				defer.reject();
 			} else {
@@ -138,16 +134,19 @@ module Peach {
 		}
 
 		public GetJobs(): ng.IPromise<IJob[]> {
-			var params = { dryrun: false };
-			var promise = this.$http.get(C.Api.Jobs, { params: params })
-				.success((jobs: IJob[]) => this.jobs = jobs);
+			const params = { dryrun: false };
+			const promise = this.$http.get(C.Api.Jobs, { params: params });
+			promise.success((jobs: IJob[]) => this.jobs = jobs);
+			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
+				this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
+			});
 			return StripHttpPromise(this.$q, promise);
 		}
 
 		public Start(job: IJobRequest): ng.IPromise<IJob> {
-			var promise = this.$http.post(C.Api.Jobs, job);
+			const promise = this.$http.post(C.Api.Jobs, job);
 			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
-				var options: IAlertOptions = {
+				const options: IAlertOptions = {
 					Title: 'Error Starting Job',
 					Body: 'Peach was unable to start a new job.',
 				};
@@ -207,14 +206,12 @@ module Peach {
 		private sendCommand(check: boolean, status: string, url: string): void {
 			if (check) {
 				this.job.status = status;
-				this.$http.get(url)
-					.success(() => this.onPoll(this.job.jobUrl))
-					.error(reason => this.onError(reason));
+				const promise = this.$http.get(url);
+				promise.success(() => this.onPoll(this.job.jobUrl));
+				promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
+					this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
+				});
 			}
-		}
-
-		private onError(error: any): void {
-			console.log('onError', error);
 		}
 
 		private onPoll(url: string): void {
@@ -223,10 +220,10 @@ module Peach {
 					if (!this.isActive)
 						return undefined;
 
-					var stopPending = (this.job && this.job.status === JobStatus.StopPending);
-					var killPending = (this.job && this.job.status === JobStatus.KillPending);
+					const stopPending = (this.job && this.job.status === JobStatus.StopPending);
+					const killPending = (this.job && this.job.status === JobStatus.KillPending);
 
-					var job = response.data;
+					const job = response.data;
 					this.job = job;
 
 					if (this.job.status !== JobStatus.Stopped) {
@@ -263,11 +260,14 @@ module Peach {
 		}
 
 		private reloadFaults(): ng.IHttpPromise<IFaultSummary[]> {
-			return this.$http.get(this.job.faultsUrl)
-				.success((faults: IFaultSummary[]) => {
-					this.faults = faults;
-				})
-				.error(reason => this.onError(reason));
+			const promise = this.$http.get(this.job.faultsUrl);
+			promise.success((faults: IFaultSummary[]) => {
+				this.faults = faults;
+			});
+			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
+				this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
+			});
+			return promise;
 		}
 
 		public LoadMetric<T>(metric: string): ng.IHttpPromise<T> {

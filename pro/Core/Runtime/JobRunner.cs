@@ -178,7 +178,7 @@ namespace Peach.Pro.Core.Runtime
 							"Loading pit config", "Loading configuration file '{0}'".Fmt(pitConfig),
 							CompleteTestEvents.Last);
 
-						var defs = PitDatabase.ParseConfig(_pitLibraryPath, pitConfig);
+						var defs = PitDefines.ParseFile(pitConfig, _pitLibraryPath).Evaluate();
 						args[PitParser.DEFINED_VALUES] = defs;
 					}
 					catch (Exception ex)
@@ -191,7 +191,7 @@ namespace Peach.Pro.Core.Runtime
 			else
 			{
 				// ParseConfig allows non-existant config files
-				var defs = PitDatabase.ParseConfig(_pitLibraryPath, pitConfig);
+				var defs = PitDefines.ParseFile(pitConfig, _pitLibraryPath).Evaluate();
 				args[PitParser.DEFINED_VALUES] = defs;
 			}
 

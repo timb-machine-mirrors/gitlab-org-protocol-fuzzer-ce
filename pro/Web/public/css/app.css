@@ -26,6 +26,10 @@ pre {
 	cursor: pointer;
 }
 
+.accordion-toggle {
+	display: block; /* allow user to click entire heading to toggle */
+}
+
 .accordion-toggle span {
 	line-height: 22px;
 }
@@ -130,6 +134,14 @@ pre.peach-test-log {
 	overflow-y: scroll;
 }
 
+.peach-parameter-group {
+	margin-top: 10px;
+}
+
+td div.peach-parameter-input {
+	top: 5px;
+}
+
 /* turn off animation, this can screw with autofocus */
 .modal.fade .modal-dialog,
 .modal.in .modal-dialog {
@@ -139,16 +151,14 @@ pre.peach-test-log {
 }
 
 .peach-add-monitor {
-	width: 400px;
-}
-
-.peach-add-monitor .select2-results {
 	max-height: 600px;
+	overflow-y: auto;
 }
 
 @media only screen and (max-height: 1000px) {
-	.peach-add-monitor .select2-results {
+	.peach-add-monitor {
 		max-height: 400px;
+		overflow-y: auto;
 	}
 }
 

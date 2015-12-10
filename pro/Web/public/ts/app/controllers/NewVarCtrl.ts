@@ -1,12 +1,10 @@
 /// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-	
+namespace Peach {
 	export class NewVarController {
 		static $inject = [
 			C.Angular.$scope,
-			C.Angular.$modalInstance,
+			C.Angular.$uibModalInstance,
 			C.Services.Pit
 		];
 
@@ -22,7 +20,7 @@ module Peach {
 				value: "",
 				name: "",
 				description: 'User-defined variable',
-				type: 'user'
+				type: ParameterType.User
 			};
 		}
 
@@ -47,7 +45,7 @@ module Peach {
 		}
 
 		public OnNameChanged() {
-			var value = this.Param.name;
+			const value = this.Param.name;
 			if (!this.hasBlurred) {
 				if (_.isString(value)) {
 					this.Param.key = value.replace(new RegExp(' ', 'g'), '');

@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	export interface ITestResult {
 		status: string;
 		events: ITestEvent[];
@@ -17,9 +15,10 @@ module Peach {
 		resolve: string;
 	}
 
-	export module TestStatus {
-		export var Active = "active";
-		export var Pass = "pass";
-		export var Fail = "fail";
-	}
+	export var TestStatus = {
+		Active : '',
+		Pass   : '',
+		Fail   : ''
+	};
+	MakeLowerEnum(TestStatus);
 }

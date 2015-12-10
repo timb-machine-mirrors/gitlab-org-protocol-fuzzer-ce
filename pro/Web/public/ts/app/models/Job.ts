@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	export interface IJobCommands {
 		stopUrl: string;
 		continueUrl: string;
@@ -106,27 +104,29 @@ module Peach {
 		result?: string;
 	}
 
-	export class JobStatus {
+	export var JobStatus = {
 		// client-side states
-		public static StartPending: string = "startPending";
-		public static PausePending: string = "pausePending";
-		public static ContinuePending: string = "continuePending";
-		public static StopPending: string = "stopPending";
-		public static KillPending: string = "killPending";
+		StartPending    : '',
+		PausePending    : '',
+		ContinuePending : '',
+		StopPending     : '',
+		KillPending     : '',
 
 		// server-side states
-		public static Stopped: string = "stopped";
-		public static Starting: string = "starting";
-		public static Running: string = "running";
-		public static Paused: string = "paused";
-		public static Stopping: string = "stopping";
+		Stopped  : '',
+		Starting : '',
+		Running  : '',
+		Paused   : '',
+		Stopping : ''
 	}
+	MakeLowerEnum(JobStatus);
 
-	export class JobMode {
-		public static Preparing: string = "preparing";
-		public static Fuzzing: string = "fuzzing";
-		public static Searching: string = "searching";
-		public static Reproducing: string = "reproducing";
-		public static Reporting: string = "reporting";
-	}
+	export var JobMode = {
+		Preparing   : '',
+		Fuzzing     : '',
+		Searching   : '',
+		Reproducing : '',
+		Reporting   : ''
+	};
+	MakeLowerEnum(JobMode);
 }

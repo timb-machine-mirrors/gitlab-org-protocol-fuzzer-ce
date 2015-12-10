@@ -1,14 +1,12 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	export class MainController {
 
 		static $inject = [
 			C.Angular.$scope,
 			C.Angular.$state,
-			C.Angular.$modal,
+			C.Angular.$uibModal,
 			C.Angular.$window,
 			C.Services.Wizard
 		];
@@ -65,7 +63,7 @@ module Peach {
 		];
 
 		public IsCollapsed(state): boolean {
-			var subMenu = _.find(this.subMenus, { state: state });
+			const subMenu = _.find(this.subMenus, { state: state });
 			return subMenu.collapsed;
 		}
 
@@ -81,7 +79,7 @@ module Peach {
 		}
 
 		public get FaultCount(): any {
-			var count = 0;
+			let count = 0;
 			if (this.$scope.job) {
 				count = this.$scope.job.faultCount;
 			}
@@ -122,14 +120,14 @@ module Peach {
 		}
 
 		public MetricUrl(metric: C.IMetric): string {
-			var state = [C.States.JobMetrics, metric.id].join('.');
-			var params = { job: this.JobId };
+			const state = [C.States.JobMetrics, metric.id].join('.');
+			const params = { job: this.JobId };
 			return this.$state.href(state, params);
 		}
 		
 		public MetricActive(metric: C.IMetric) {
-			var state = [C.States.JobMetrics, metric.id].join('.');
-			var params = { job: this.JobId };
+			const state = [C.States.JobMetrics, metric.id].join('.');
+			const params = { job: this.JobId };
 			if (this.$state.is(state, params)) {
 				return 'active';
 			}

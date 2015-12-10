@@ -65,13 +65,13 @@
 				<button class="btn btn-xs btn-default"
 								ng-disabled="vm.IsReportDisabled(row)"
 								ng-click="vm.OnViewReport($event, row)"
-								tooltip="View Report">
+								uib-tooltip="View Report">
 					<i class="fa fa-lg fa-file-pdf-o"></i>
 				</button>
 				<button class="btn btn-xs btn-default"
 								ng-disabled="vm.IsRemoveDisabled(row)"
 								ng-click="vm.OnRemove($event, row)"
-								tooltip="Delete Job">
+								uib-tooltip="Delete Job">
 					<i class="fa fa-lg"
 						ng-class="vm.RemoveIconClass(row)"></i>
 				</button>

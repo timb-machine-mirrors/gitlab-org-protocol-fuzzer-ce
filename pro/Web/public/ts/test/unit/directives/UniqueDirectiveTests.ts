@@ -1,7 +1,5 @@
 /// <reference path="../reference.ts" />
 
-'use strict';
-
 interface ITestItem {
 	key: string;
 	value: string;

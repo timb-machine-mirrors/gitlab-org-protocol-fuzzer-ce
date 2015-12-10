@@ -41,43 +41,18 @@
 			 ng-show="vm.ShowLoading">
 		Loading configuration...
 	</div>
+
 	<div class="row"
 			 ng-hide="vm.ShowLoading">
+		<uib-accordion close-others="false"
+									 class="col-xs-12">
+			<peach:defines ng-repeat="group in vm.View track by $index"
+										 group="group"
+										 form="form">
+			</peach:defines>
+		</uib-accordion>
+
 		<div class="col-xs-12">
-			<table class="table table-striped table-hover table-bordered">
-				<thead>
-					<tr>
-						<th class="nowrap">Name</th>
-						<th class="nowrap">Key</th>
-						<th class="width-100">Value</th>
-						<th class="center nowrap">Remove</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr ng-repeat="param in vm.Config"
-							ng-form="form">
-						<td class="nowrap align-middle">
-							{{param.name}}
-						</td>
-						<td class="nowrap align-middle">
-							{{param.key}}
-						</td>
-						<td class="width-100"
-								ng-class="{'has-error': form.param.$invalid}">
-							<peach:parameter-input param="param"
-																		 form="form">
-							</peach:parameter-input>
-						</td>
-						<td class="center nowrap align-middle">
-							<button class="btn btn-xs btn-danger"
-											ng-show="vm.CanRemove(param)"
-											ng-click="vm.OnRemove($index)">
-								<i class="fa fa-remove"></i>
-							</button>
-						</td>
-					</tr>
-				</tbody>
-			</table>
 		</div>
 	</div>
 </form>

@@ -152,8 +152,10 @@ namespace Peach.Pro.Core
 				"peach.license.txt"
 			};
 
-			var peachDir = Platform.GetOS() == Platform.OS.Windows ? "Peach" : "peach";
-			var appData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+			var peachDir = Platform.GetOS() == Platform.OS.Linux ? "peach" : "Peach";
+			var appData = Platform.GetOS() == Platform.OS.OSX ? 
+				"/Library/Application Support" : 
+				Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
 			var asmDir = Utilities.ExecutionDirectory;
 			Exception ex = null;
 
@@ -171,7 +173,8 @@ namespace Peach.Pro.Core
 
 				// Try common application data second
 				// Windows - C:\ProgramData\Peach\Peach.license
-				// Unix - /usr/share/peach/Peach.license
+				// Linux - /usr/share/peach/Peach.license
+				// OSX - /Library/Application Support/Peach/Peach.license
 				var global = Path.Combine(appData, peachDir, fileName);
 				var globalLic = Read(global);
 
