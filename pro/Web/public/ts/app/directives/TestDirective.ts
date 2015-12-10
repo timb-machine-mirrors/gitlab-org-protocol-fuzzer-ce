@@ -1,9 +1,7 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
-	export var TestDirective: IDirective = {
+namespace Peach {
+	export const TestDirective: IDirective = {
 		ComponentID: C.Directives.Test,
 		restrict: 'E',
 		templateUrl: C.Templates.Directives.Test,

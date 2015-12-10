@@ -1,13 +1,11 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	interface IUnsavedScope extends ng.IScope {
 		ctrl: UnsavedController;
 	}
 
-	export var UnsavedDirective: IDirective = {
+	export const UnsavedDirective: IDirective = {
 		ComponentID: C.Directives.Unsaved,
 		restrict: 'A',
 		require: '^form',
@@ -27,7 +25,7 @@ module Peach {
 	export class UnsavedController {
 		static $inject = [
 			C.Angular.$scope,
-			C.Angular.$modal,
+			C.Angular.$uibModal,
 			C.Angular.$state
 		];	
 
@@ -39,7 +37,7 @@ module Peach {
 		}
 
 		public Link(form: ng.IFormController) {
-			var onRouteChangeOff = this.$scope.$root.$on(C.Angular.$stateChangeStart, (
+			const onRouteChangeOff = this.$scope.$root.$on(C.Angular.$stateChangeStart, (
 				event: ng.IAngularEvent,
 				toState: ng.ui.IState,
 				toParams: any,
@@ -53,7 +51,7 @@ module Peach {
 
 				event.preventDefault();
 				
-				var options: IConfirmOptions = {
+				const options: IConfirmOptions = {
 					Title: 'Unsaved Changes',
 					Body: 'You have unsaved changes. Do you want to leave the page?',
 					SubmitPrompt: 'Ignore Changes'

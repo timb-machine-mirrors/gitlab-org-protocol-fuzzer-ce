@@ -14,6 +14,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 	[Monitor("ButtonClicker")]
 	[Parameter("WindowText", typeof(string), "Text to search for")]
 	[Parameter("ButtonName", typeof(string), "Name of button to click")]
+	[System.ComponentModel.Description("Automatically dismisses popup dialogs.")]
 	public class ButtonClicker : Monitor
 	{
 		[return: MarshalAs(UnmanagedType.Bool)]

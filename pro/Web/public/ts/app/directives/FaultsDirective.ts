@@ -1,9 +1,7 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
-	export var FaultsDirective: IDirective = {
+namespace Peach {
+	export const FaultsDirective: IDirective = {
 		ComponentID: C.Directives.Faults,
 		restrict: 'E',
 		templateUrl: C.Templates.Directives.Faults,
@@ -51,7 +49,7 @@ module Peach {
 		} 
 
 		public OnFaultSelected(fault: IFaultSummary) {
-			var params = {
+			const params = {
 				bucket: this.bucket,
 				id: fault.iteration
 			};
@@ -59,12 +57,12 @@ module Peach {
 		}
 
 		private RefreshFaults() {
-			var faults: IFaultSummary[];
+			let faults: IFaultSummary[];
 			if (this.bucket === 'all') {
 				faults = this.jobService.Faults;
 			} else {
 				faults = _.filter(this.jobService.Faults, (fault: IFaultSummary) => {
-					return this.bucket === (fault.majorHash + '_' + fault.minorHash);
+					return this.bucket === (`${fault.majorHash} ${fault.minorHash}`);
 				});
 			}
 

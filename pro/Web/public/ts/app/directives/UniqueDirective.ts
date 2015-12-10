@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	export interface IUniqueScope extends ng.IScope {
 		unique: Function;
 		watch: string;
@@ -13,12 +11,12 @@ module Peach {
 		ignore: string;
 	}
 
-	export var UniqueDirective: IDirective = {
+	export const UniqueDirective: IDirective = {
 		ComponentID: C.Directives.Unique,
 		restrict: 'A',
 		require: C.Angular.ngModel,
 		scope: {
-			unique: '&' + C.Directives.Unique,
+			unique: `&${C.Directives.Unique}`,
 			watch: '@peachUniqueWatch',
 			defaultValue: '@peachUniqueDefault'
 		},
@@ -28,8 +26,8 @@ module Peach {
 			attrs: ng.IAttributes,
 			ctrl: ng.INgModelController
 		) => {
-			var validate = (modelValue, viewValue) => {
-				var collection = scope.unique();
+			const validate = (modelValue, viewValue) => {
+				const collection = scope.unique();
 				return !_.contains(collection, viewValue || scope.defaultValue);
 			};
 
@@ -45,14 +43,14 @@ module Peach {
 		}
 	}
 
-	export var UniqueChannelDirective: IDirective = {
+	export const UniqueChannelDirective: IDirective = {
 		ComponentID: C.Directives.UniqueChannel,
 		restrict: 'A',
 		require: C.Angular.ngModel,
 		controller: C.Controllers.UniqueChannel,
 		controllerAs: 'ctrl',
 		scope: {
-			channel: '@' + C.Directives.UniqueChannel,
+			channel: `@${C.Directives.UniqueChannel}`,
 			defaultValue: '@peachUniqueDefault',
 			ignore: '@peachUniqueIgnore'
 		},
@@ -85,7 +83,7 @@ module Peach {
 
 			this.service.Register(this.$scope);
 
-			var validate = value => {
+			const validate = value => {
 				this.service.IsUnique(this.$scope, value);
 				return value;
 			}
@@ -109,10 +107,10 @@ module Peach {
 
 	export class UniqueService {
 		public IsUnique(scope: IUniqueScope, value: any): boolean {
-			var isUnique;
-			var channel = this.getChannel(scope.channel);
+			let isUnique;
+			const channel = this.getChannel(scope.channel);
 			_.forEach(channel, (item: IUniqueScope, id: string) => {
-				var isDuplicate = this.isDuplicate(item, item.ngModel.$modelValue);
+				const isDuplicate = this.isDuplicate(item, item.ngModel.$modelValue);
 				item.ngModel.$setValidity('unique', !isDuplicate);
 				if (id === scope.$id.toString()) {
 					isUnique = !isDuplicate;
@@ -122,12 +120,12 @@ module Peach {
 		}
 
 		public Register(scope: IUniqueScope) {
-			var channel = this.getChannel(scope.channel);
+			const channel = this.getChannel(scope.channel);
 			channel[scope.$id.toString()] = scope;
 		}
 
 		public Unregister(scope: IUniqueScope) {
-			var channel = this.getChannel(scope.channel);
+			const channel = this.getChannel(scope.channel);
 			delete channel[scope.$id.toString()];
 			if (_.isEmpty(channel)) {
 				delete this.channels[scope.channel];
@@ -137,26 +135,26 @@ module Peach {
 		}
 
 		private isDuplicate(scope: IUniqueScope, value: any): boolean {
-			var myValue = (value || scope.defaultValue);
+			const myValue = (value || scope.defaultValue);
 			if (scope.ignore) {
-				var reIgnore: RegExp = new RegExp(scope.ignore);
+				const reIgnore: RegExp = new RegExp(scope.ignore);
 				if (reIgnore.test(myValue)) {
 					return false;
 				}
 			} 
 
-			var channel = this.getChannel(scope.channel);
+			const channel = this.getChannel(scope.channel);
 			return _.some(channel, (other: IUniqueScope, id: string) => {
 				if (scope.$id.toString() === id) {
 					return false;
 				}
-				var otherValue = other.ngModel.$modelValue;
+				const otherValue = other.ngModel.$modelValue;
 				return (myValue === (otherValue || other.defaultValue));
 			});
 		}
 
 		private getChannel(name: string): UniqueChannel {
-			var channel = this.channels[name];
+			let channel = this.channels[name];
 			if (_.isUndefined(channel)) {
 				channel = {};
 				this.channels[name] = channel;

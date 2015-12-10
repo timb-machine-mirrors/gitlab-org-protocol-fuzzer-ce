@@ -1,7 +1,5 @@
 ﻿/// <reference path="../reference.ts" />
 
-'use strict';
-
 describe("Peach", () => {
 	var C = Peach.C;
 	beforeEach(module('Peach'));
@@ -40,9 +38,9 @@ describe("Peach", () => {
 				expect(service.CurrentPitId).toBe(undefined);
 			});
 
-			it("IsConfigured is false", () => {
-				expect(service.IsConfigured).toBe(false);
-			});
+			// it("IsConfigured is false", () => {
+			// 	expect(service.IsConfigured).toBe(false);
+			// });
 		});
 
 		describe('when a Pit is selected', () => {
@@ -50,8 +48,7 @@ describe("Peach", () => {
 			var pitUrl = C.Api.PitUrl.replace(':id', pitId);
 			var pit = {
 				pitUrl: pitUrl,
-				name: 'My Pit',
-				versions: [{ configured: false }]
+				name: 'My Pit'
 			};
 			
 			beforeEach(() => {
@@ -68,34 +65,25 @@ describe("Peach", () => {
 					$httpBackend.flush();
 				});
 
-				it("get IsConfigured is false", () => {
-					expect(service.IsConfigured).toBe(false);
-				});
-
-				it('has one version', () => {
-					expect(service.Pit.versions.length).toBe(1);
-				});
+				// it("get IsConfigured is false", () => {
+				// 	expect(service.IsConfigured).toBe(false);
+				// });
 			});
 
 			describe('which is already configured', () => {
 				beforeEach(() => {
 					pit = {
 						pitUrl: pitUrl,
-						name: 'My Pit',
-						versions: [{ configured: true }]
+						name: 'My Pit'
 					};
 					$httpBackend.expectGET(pitUrl).respond(pit);
 					service.LoadPit();
 					$httpBackend.flush();
 				});
 
-				it("get IsConfigured is true", () => {
-					expect(service.IsConfigured).toBe(true);
-				});
-
-				it('has one version', () => {
-					expect(service.Pit.versions.length).toBe(1);
-				});
+				// it("get IsConfigured is true", () => {
+				// 	expect(service.IsConfigured).toBe(true);
+				// });
 			});
 		});
 	});

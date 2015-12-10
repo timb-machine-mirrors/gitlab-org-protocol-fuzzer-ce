@@ -1,7 +1,5 @@
 /// <reference path="../reference.ts" />
 
-'use strict';
-
 describe('startsWith', () => {
 	it("'abc' startsWith 'a' is true", () => {
 		expect('abc'.startsWith('a')).toBe(true);
@@ -20,20 +18,6 @@ describe('startsWith', () => {
 	});
 	it("'abc' startsWith '' is true", () => {
 		expect('abc'.startsWith('')).toBe(true);
-	});
-});
-
-describe('format',() => {
-	it('{0}h {1}m {2}s',() => {
-		expect('{0}h {1}m {2}s'.format(1, 2, 3)).toBe('1h 2m 3s');
-	});
-
-	it('prefix {0} suffix',() => {
-		expect('prefix {0} suffix'.format('body')).toBe('prefix body suffix');
-	});
-
-	it('{0} {0}',() => {
-		expect('{0} {0}'.format('foo')).toBe('foo foo');
 	});
 });
 

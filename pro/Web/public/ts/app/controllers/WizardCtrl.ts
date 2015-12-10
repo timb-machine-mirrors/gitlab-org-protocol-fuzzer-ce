@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	enum WizardStep {
 		Intro = 1,
 		QandA,
@@ -32,7 +30,7 @@ module Peach {
 			private pitService: PitService,
 			private wizardService: WizardService
 		) {
-			var trackId = this.$state.current.data.track;
+			const trackId = this.$state.current.data.track;
 			this.track = wizardService.GetTrack(trackId);
 			this.$scope.Title = this.track.name;
 
@@ -52,7 +50,7 @@ module Peach {
 				this.unregister();
 			}
 
-			var next = this.track.next;
+			const next = this.track.next;
 			this.$state.go(next.state, next.params);
 		}
 
@@ -64,7 +62,7 @@ module Peach {
 			} else if (this.$state.is(this.track.finish)) {
 				this.initReview();
 			} else {
-				var id = this.$state.params['id'];
+				const id = this.$state.params['id'];
 				this.$scope.Step = WizardStep.QandA;
 				this.loadQuestion(id);
 			}
@@ -90,6 +88,7 @@ module Peach {
 				type: QuestionTypes.Done
 			};
 
+			// TODO: use WizardView
 			this.$scope.Defines = this.pitService.Pit.config;
 			this.$scope.NextPrompt = this.track.nextPrompt;
 			this.$scope.BackPrompt = this.track.backPrompt;
@@ -105,8 +104,8 @@ module Peach {
 		}
 
 		public get FaultAgentDescription(): string {
-			var agent = this.wizardService.GetTrack(C.Tracks.Fault).agents[0];
-			var ret = '';
+			const agent = this.wizardService.GetTrack(C.Tracks.Fault).agents[0];
+			let ret = '';
 			agent.monitors.forEach((item: IMonitor) => {
 				if (!ret) {
 					ret += ' ';
@@ -116,7 +115,7 @@ module Peach {
 			return ret;
 		}
 
-		public get Agents(): Agent[] {
+		public get Agents(): IAgent[] {
 			return this.track.agents;
 		}
 
@@ -139,10 +138,10 @@ module Peach {
 			}
 
 			if (this.$scope.Question.type === QuestionTypes.Intro) {
-				var promise = this.track.Begin();
+				const promise = this.track.Begin();
 				if (promise) {
 					promise.then(() => {
-						var first = this.track.GetQuestionById(1);
+						const first = this.track.GetQuestionById(1);
 						if (_.isUndefined(first)) {
 							this.$state.go(this.track.finish);
 						} else {
@@ -157,7 +156,7 @@ module Peach {
 				this.track.history.push(this.$scope.Question.id);
 			}
 
-			var nextId = this.getNextId(this.$scope.Question);
+			const nextId = this.getNextId(this.$scope.Question);
 
 			if (_.isUndefined(nextId)) {
 				// no more questions, this track is complete
@@ -173,7 +172,7 @@ module Peach {
 				return;
 			}
 
-			var previousId = 0;
+			let previousId = 0;
 			if (this.track.history.length > 0) {
 				previousId = this.track.history.pop();
 			}
@@ -198,7 +197,7 @@ module Peach {
 			if (q.type === QuestionTypes.Choice ||
 				q.type === QuestionTypes.Jump) {
 				// get next id from selected choice
-				var choice = _.find(q.choice, e => {
+				const choice = _.find(q.choice, e => {
 					if (_.isUndefined(e.value) && !_.isUndefined(e.next)) {
 						return e.next.toString() === q.value.toString();
 					} else if (!_.isUndefined(e.value) && !_.isUndefined(q.value)) {
@@ -222,6 +221,7 @@ module Peach {
 		}
 
 		private prepareQuestion(): void {
+			// TODO: use WizardView
 			this.$scope.Defines = this.pitService.Pit.config;
 
 			// special stuff to do based on the next question
@@ -235,7 +235,7 @@ module Peach {
 					// if the first choice doesn't have a value it's a un-keyed choice, set default to 0
 					// look at q-choice.html to see how its binding works
 					if (_.isUndefined(this.$scope.Question.value)) {
-						var first = _.first(this.$scope.Question.choice);
+						const first = _.first(this.$scope.Question.choice);
 						if (_.isUndefined(first.value)) {
 							this.$scope.Question.value = first.next;
 						} else {
@@ -275,18 +275,18 @@ module Peach {
 			if (_.isUndefined(this.$scope.Question)) {
 				return "";
 			}
-			var types = [
-				QuestionTypes.HwAddress,
+			const types = [
+				QuestionTypes.Hwaddr,
 				QuestionTypes.Iface,
 				QuestionTypes.Ipv4,
 				QuestionTypes.Ipv6
 			];
-			var template = this.$scope.Question.type;
+			let template = this.$scope.Question.type;
 			if (_.contains(types, template)) {
-				template = 'combo';
+				template = QuestionTypes.Combo;
 			}
-			if (template === 'user') {
-				template = 'string';
+			if (template === QuestionTypes.User) {
+				template = QuestionTypes.String;
 			}
 			return C.Templates.Pit.Wizard.QuestionType.replace(':type', template);
 		}
@@ -299,7 +299,7 @@ module Peach {
 			if (_.isUndefined(this.$scope.Question.value)) {
 				this.$scope.Question.value = "";
 			}
-			this.$scope.Question.value += "##" + def.key + "##";
+			this.$scope.Question.value += `##${def.key}##`;
 		}
 	}
 }

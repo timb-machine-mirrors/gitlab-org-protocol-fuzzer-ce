@@ -1,8 +1,6 @@
 /// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-	
+namespace Peach {
 	export interface IAlertOptions {
 		Title?: string;
 		Body?: string;
@@ -24,7 +22,7 @@ module Peach {
 	class AlertController {
 		static $inject = [
 			C.Angular.$scope,
-			C.Angular.$modalInstance,
+			C.Angular.$uibModalInstance,
 			'Options'
 		];
 

@@ -17,25 +17,27 @@ namespace Peach.Pro.Core
 
 		public abstract class Define
 		{
-			[XmlAttribute("key")]
-			public string Key { get; set; }
-
-			[XmlAttribute("value")]
-			public string Value { get; set; }
-
-			[XmlAttribute("name")]
-			public string Name { get; set; }
-
-			[XmlAttribute("description")]
-			[DefaultValue("")]
-			public string Description { get; set; }
+			protected Define()
+			{
+				Defines = new List<Define>();
+			}
 
 			public abstract ParameterType ConfigType { get; }
 
-			public virtual bool Optional
-			{
-				get { return false; }
-			}
+			[XmlIgnore]
+			public string Key { get; set; }
+
+			[XmlIgnore]
+			public string Value { get; set; }
+
+			[XmlIgnore]
+			public string Description { get; set; }
+
+			[XmlIgnore]
+			public string Name { get; set; }
+
+			[XmlIgnore]
+			public bool Optional { get; set; }
 
 			public virtual string[] Defaults
 			{
@@ -53,9 +55,126 @@ namespace Peach.Pro.Core
 			{
 				get { return null; }
 			}
+
+			[XmlIgnore]
+			public List<Define> Defines { get; set; }
 		}
 
-		public class UserDefine : Define
+		public abstract class Collection : Define
+		{
+			public override ParameterType ConfigType
+			{
+				get { return ParameterType.Group; }
+			}
+
+			[XmlIgnore]
+			public bool Collapsed { get; set; }
+
+			[XmlIgnore]
+			public abstract Platform.OS Platform { get; }
+
+			[XmlElement("String", Type = typeof(StringDefine))]
+			[XmlElement("Hex", Type = typeof(HexDefine))]
+			[XmlElement("Range", Type = typeof(RangeDefine))]
+			[XmlElement("Ipv4", Type = typeof(Ipv4Define))]
+			[XmlElement("Ipv6", Type = typeof(Ipv6Define))]
+			[XmlElement("Hwaddr", Type = typeof(HwaddrDefine))]
+			[XmlElement("Iface", Type = typeof(IfaceDefine))]
+			[XmlElement("Strategy", Type = typeof(StrategyDefine))]
+			[XmlElement("Enum", Type = typeof(EnumDefine))]
+			[XmlElement("Define", Type = typeof(UserDefine))]
+			[XmlElement("Bool", Type = typeof(BoolDefine))]
+			[XmlElement("Space", Type = typeof(Space))]
+			[XmlElement("Group", Type = typeof(Group))]
+			public List<Define> Children
+			{
+				get { return Defines; }
+				set { Defines = value; }
+			}
+
+			public override string[] Defaults
+			{
+				get { return null; }
+			}
+		}
+
+		public class Space : Define
+		{
+			public override ParameterType ConfigType
+			{
+				get { return ParameterType.Space; }
+			}
+
+			public override string[] Defaults
+			{
+				get { return null; }
+			}
+		}
+
+		public class Group : Collection
+		{
+			[XmlAttribute("name")]
+			public string NameAttr 
+			{ 
+				get { return Name; }
+				set { Name = value; }
+			}
+
+			[XmlAttribute("collapsed")]
+			[DefaultValue(false)]
+			public bool CollapsedAttr
+			{
+				get { return Collapsed; }
+				set { Collapsed = value; }
+			}
+
+			[XmlAttribute("description")]
+			[DefaultValue("")]
+			public string DescriptionAttr
+			{
+				get { return Description; }
+				set { Description = value; }
+			}
+
+			public override Platform.OS Platform
+			{
+				get { return Peach.Core.Platform.OS.All; }
+			}
+		}
+
+		public abstract class PrimitiveDefine : Define
+		{
+			[XmlAttribute("name")]
+			public string NameAttr 
+			{ 
+				get { return Name; }
+				set { Name = value; } 
+			}
+
+			[XmlAttribute("key")]
+			public string KeyAttr 
+			{ 
+				get { return Key; }
+				set { Key = value; } 
+			}
+
+			[XmlAttribute("value")]
+			public string ValueAttr 
+			{ 
+				get { return Value; }
+				set { Value = value; } 
+			}
+
+			[XmlAttribute("description")]
+			[DefaultValue("")]
+			public string DescriptionAttr 
+			{ 
+				get { return Description; }
+				set { Description = value; } 
+			}
+		}
+
+		public class UserDefine : PrimitiveDefine
 		{
 			public override ParameterType ConfigType
 			{
@@ -66,24 +185,23 @@ namespace Peach.Pro.Core
 		/// <summary>
 		/// Free form string
 		/// </summary>
-		public class StringDefine : Define
+		public class StringDefine : PrimitiveDefine
 		{
 			[XmlAttribute("optional")]
 			[DefaultValue(false)]
-			public bool OptionalValue { get; set; }
+			public bool OptionalAttr 
+			{ 
+				get { return Optional; }
+				set { Optional = value; }
+			}
 
 			public override ParameterType ConfigType
 			{
 				get { return ParameterType.String; }
 			}
-
-			public override bool Optional
-			{
-				get { return OptionalValue; }
-			}
 		}
 
-		public class HexDefine : Define
+		public class HexDefine : PrimitiveDefine
 		{
 			public override ParameterType ConfigType
 			{
@@ -91,7 +209,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public class RangeDefine : Define
+		public class RangeDefine : PrimitiveDefine
 		{
 			[XmlAttribute("min")]
 			public long MinValue { get; set; }
@@ -115,7 +233,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public class Ipv4Define : Define
+		public class Ipv4Define : PrimitiveDefine
 		{
 			public override ParameterType ConfigType
 			{
@@ -123,7 +241,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public class Ipv6Define : Define
+		public class Ipv6Define : PrimitiveDefine
 		{
 			public override ParameterType ConfigType
 			{
@@ -131,7 +249,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public class HwaddrDefine : Define
+		public class HwaddrDefine : PrimitiveDefine
 		{
 			public override ParameterType ConfigType
 			{
@@ -139,7 +257,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public class IfaceDefine : Define
+		public class IfaceDefine : PrimitiveDefine
 		{
 			public override ParameterType ConfigType
 			{
@@ -147,7 +265,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public class BoolDefine : Define
+		public class BoolDefine : PrimitiveDefine
 		{
 			public override ParameterType ConfigType
 			{
@@ -163,7 +281,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public class StrategyDefine : Define
+		public class StrategyDefine : PrimitiveDefine
 		{
 			public override ParameterType ConfigType
 			{
@@ -183,7 +301,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public class EnumDefine : Define
+		public class EnumDefine : PrimitiveDefine
 		{
 			[XmlIgnore]
 			public Type EnumType { get; protected set; }
@@ -228,36 +346,25 @@ namespace Peach.Pro.Core
 			}
 		}
 
+		public class SystemDefine : PrimitiveDefine
+		{
+			public override ParameterType ConfigType
+			{
+				get { return ParameterType.System; }
+			}
+		}
+
 		#endregion
 
 		#region Platforms
 
-		public abstract class Collection
-		{
-			protected Collection()
-			{
-				Defines = new List<Define>();
-			}
-
-			[XmlIgnore]
-			public abstract Platform.OS Platform { get; }
-
-			[XmlElement("String", Type = typeof(StringDefine))]
-			[XmlElement("Hex", Type = typeof(HexDefine))]
-			[XmlElement("Range", Type = typeof(RangeDefine))]
-			[XmlElement("Ipv4", Type = typeof(Ipv4Define))]
-			[XmlElement("Ipv6", Type = typeof(Ipv6Define))]
-			[XmlElement("Hwaddr", Type = typeof(HwaddrDefine))]
-			[XmlElement("Iface", Type = typeof(IfaceDefine))]
-			[XmlElement("Strategy", Type = typeof(StrategyDefine))]
-			[XmlElement("Enum", Type = typeof(EnumDefine))]
-			[XmlElement("Define", Type = typeof(UserDefine))]
-			[XmlElement("Bool", Type = typeof(BoolDefine))]
-			public List<Define> Defines { get; set; }
-		}
-
 		public class None : Collection
 		{
+			public None()
+			{
+				Name = "None";
+			}
+
 			[XmlIgnore]
 			public override Platform.OS Platform
 			{
@@ -267,6 +374,11 @@ namespace Peach.Pro.Core
 
 		public class Windows : Collection
 		{
+			public Windows()
+			{
+				Name = "Windows";
+			}
+
 			[XmlIgnore]
 			public override Platform.OS Platform
 			{
@@ -276,6 +388,11 @@ namespace Peach.Pro.Core
 
 		public class OSX : Collection
 		{
+			public OSX()
+			{
+				Name = "OSX";
+			}
+
 			[XmlIgnore]
 			public override Platform.OS Platform
 			{
@@ -285,6 +402,11 @@ namespace Peach.Pro.Core
 
 		public class Linux : Collection
 		{
+			public Linux()
+			{
+				Name = "Linux";
+			}
+
 			[XmlIgnore]
 			public override Platform.OS Platform
 			{
@@ -294,6 +416,11 @@ namespace Peach.Pro.Core
 
 		public class Unix : Collection
 		{
+			public Unix()
+			{
+				Name = "Unix";
+			}
+
 			[XmlIgnore]
 			public override Platform.OS Platform
 			{
@@ -303,6 +430,11 @@ namespace Peach.Pro.Core
 
 		public class All : Collection
 		{
+			public All()
+			{
+				Name = "All";
+			}
+
 			[XmlIgnore]
 			public override Platform.OS Platform
 			{
@@ -316,7 +448,8 @@ namespace Peach.Pro.Core
 
 		public PitDefines()
 		{
-			Platforms = new List<Collection>();
+			Children = new List<Collection>();
+			SystemDefines = new List<Define>();
 		}
 
 		[XmlElement("None", Type = typeof(None))]
@@ -325,51 +458,156 @@ namespace Peach.Pro.Core
 		[XmlElement("Linux", Type = typeof(Linux))]
 		[XmlElement("Unix", Type = typeof(Unix))]
 		[XmlElement("All", Type = typeof(All))]
-		public List<Collection> Platforms { get; set; }
+		[XmlElement("Group", Type = typeof(Group))]
+		public List<Collection> Children { get; set; }
+
+		[XmlIgnore]
+		public List<Define> SystemDefines { get; set; }
+
+		[XmlIgnore]
+		public List<Collection> Platforms { get { return Children; } }
 
 		#endregion
 
 		#region Parse
 
-		public static List<Define> Parse(string inputUri)
+		public static PitDefines ParseFile(string fileName)
 		{
-			return Parse(XmlTools.Deserialize<PitDefines>(inputUri));
+			return ParseFile(fileName, null, null);
 		}
 
-		public static List<Define> Parse(Stream stream)
+		public static PitDefines ParseFile(string fileName, string pitLibraryPath)
 		{
-			return Parse(XmlTools.Deserialize<PitDefines>(stream));
+			if (pitLibraryPath == null)
+				throw new ArgumentNullException("pitLibraryPath");
+
+			return ParseFile(fileName, pitLibraryPath, null);
 		}
 
-		public static List<Define> Parse(TextReader textReader)
+		public static PitDefines ParseFile(string fileName, IEnumerable<KeyValuePair<string, string>> overrides)
 		{
-			return Parse(XmlTools.Deserialize<PitDefines>(textReader));
+			if (overrides == null)
+				throw new ArgumentNullException("overrides");
+
+			return ParseFile(fileName, null, overrides);
 		}
 
-		private static List<Define> Parse(PitDefines defs)
+		private static PitDefines ParseFile(string fileName, string pitLibraryPath, IEnumerable<KeyValuePair<string, string>> overrides)
 		{
-			var os = Platform.GetOS();
+			var defs = File.Exists(fileName) ? XmlTools.Deserialize<PitDefines> (fileName) : new PitDefines();
 
-			return defs.Platforms
-				.Where(a => a.Platform.HasFlag(os))
-				.SelectMany(a => a.Defines)
-				.ToList();
+			defs.SystemDefines.AddRange(new Define[]
+			{
+				new SystemDefine 
+				{
+					Key = "Peach.OS",
+					Name = "Peach OS",
+					Description = "Operating System that Peach is running on",
+					Value = Platform.GetOS().ToString().ToLower()
+				},
+				new SystemDefine
+				{
+					Key = "Peach.Pwd",
+					Name = "Peach Installation Directory",
+					Description = "Full path to Peach installation",
+					Value = Utilities.ExecutionDirectory,
+				},
+				new SystemDefine
+				{
+					Key = "Peach.Cwd",
+					Name = "Peach Working Directory",
+					Description = "Full path to the current working directory",
+					Value = Environment.CurrentDirectory,
+				},
+				new SystemDefine
+				{
+					Key = "Peach.LogRoot",
+					Name = "Root Log Directory",
+					Description = "Full path to the root log directory",
+					Value = Configuration.LogRoot,
+				}
+			});
+
+			if (pitLibraryPath != null)
+			{
+				defs.SystemDefines.Add(new SystemDefine
+				{
+					Key = "PitLibraryPath",
+					Name = "Pit Library Path",
+					Description = "Path to root of Pit Library",
+					Value = pitLibraryPath,
+				});
+			}
+
+			if (overrides != null)
+			{
+				defs.SystemDefines.AddRange(
+					overrides.Select(kv => new SystemDefine
+					{
+						Name = kv.Key,
+						Key = kv.Key,
+						Value = kv.Value
+					})
+				);
+			}
+
+			return defs;
 		}
 
 		#endregion
 
 		#region Evaluate
 
-		public static List<KeyValuePair<string, string>> Evaluate(List<KeyValuePair<string, string>> defs)
+		private static IEnumerable<Define> Flatten(Define defines)
 		{
-			var ret = new List<KeyValuePair<string, string>>(defs);
+			var toVisit = new List<Define> { null };
+
+			var it = defines;
+
+			while (it != null)
+			{
+				yield return it;
+
+				var index = toVisit.Count;
+				foreach (var item in it.Defines)
+					toVisit.Insert(index, item);
+
+				index = toVisit.Count - 1;
+				it = toVisit[index];
+				toVisit.RemoveAt(index);
+			}
+		}
+
+		public IEnumerable<Define> Walk()
+		{
+			var os = Platform.GetOS();
+
+			return Children.Where(x => x.Platform.HasFlag(os)).SelectMany(Flatten);
+		}
+
+		public List<KeyValuePair<string, string>> Flatten()
+		{
+			var ret = Walk()
+				.Where(x => x.ConfigType != ParameterType.Group && x.ConfigType != ParameterType.Space)
+				.Concat(SystemDefines)
+				.Reverse()
+				.Distinct(DefineComparer.Instance)
+				.Select(x => new KeyValuePair<string, string>(x.Key, x.Value))
+				.Reverse()
+				.ToList();
+			return ret;
+		}
+
+		public List<KeyValuePair<string, string>> Evaluate()
+		{
+			var ret = Flatten();
 
 			var re = new Regex("##(\\w+?)##");
 
 			var evaluator = new MatchEvaluator(delegate(Match m)
 			{
 				var key = m.Groups[1].Value;
-				var val = ret.Where(_ => _.Key == key).Select(_ => _.Value).FirstOrDefault();
+				var val = ret.Where(x => x.Key == key).Select(x => x.Value).FirstOrDefault();
 
 				return val ?? m.Groups[0].Value;
 			});
@@ -383,12 +621,27 @@ namespace Peach.Pro.Core
 				var newVal = re.Replace(oldVal, evaluator);
 
 				if (oldVal != newVal)
-					ret[i] = new KeyValuePair<string, string>(ret[i].Key, newVal);
+					ret[i] = new KeyValuePair<string,string>(ret[i].Key, newVal);
 				else
 					++i;
 			}
 
 			return ret;
+		}
+
+		class DefineComparer : IEqualityComparer<Define>
+		{
+			public static readonly DefineComparer Instance = new DefineComparer();
+
+			public bool Equals(Define lhs, Define rhs)
+			{
+				return lhs.Key.Equals(rhs.Key);
+			}
+
+			public int GetHashCode(Define obj)
+			{
+				return obj.Key.GetHashCode();
+			}
 		}
 
 		#endregion

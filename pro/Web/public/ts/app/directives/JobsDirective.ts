@@ -1,9 +1,7 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
-	export var JobsDirective: IDirective = {
+namespace Peach {
+	export const JobsDirective: IDirective = {
 		ComponentID: C.Directives.Jobs,
 		restrict: 'E',
 		templateUrl: C.Templates.Directives.Jobs,
@@ -19,7 +17,7 @@ module Peach {
 		static $inject = [
 			C.Angular.$scope,
 			C.Angular.$state,
-			C.Angular.$modal,
+			C.Angular.$uibModal,
 			C.Angular.$window,
 			C.Services.Job
 		];
@@ -59,7 +57,7 @@ module Peach {
 			$event.preventDefault();
 			$event.stopPropagation();
 			
-			var options: IConfirmOptions = {
+			const options: IConfirmOptions = {
 				SubmitPrompt: 'Delete Job'
 			};
 			Confirm(this.$modal, options).result

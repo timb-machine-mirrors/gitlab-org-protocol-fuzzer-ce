@@ -1,8 +1,6 @@
 /// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-	
+namespace Peach {
 	interface IConfigureStorage {
 		showCfgHelp: boolean;
 		showStartHelp: boolean;
@@ -45,8 +43,7 @@ module Peach {
 		private storage: IConfigureStorage;
 
 		public get ShowReady(): boolean {
-			return onlyIf(this.pitService.Pit, () =>
-				this.pitService.HasMonitors && this.CanStart);
+			return this.pitService.HasMonitors && this.CanStart;
 		}
 
 		public get ShowNotConfigured(): boolean {
@@ -54,12 +51,13 @@ module Peach {
 		}
 
 		public get ShowNoMonitors(): boolean {
-			return onlyIf(this.pitService.Pit, () =>
-				this.pitService.IsConfigured && !this.pitService.HasMonitors);
+			return onlyIf(this.pitService.Pit, () => 
+				this.pitService.IsConfigured && !this.pitService.HasMonitors
+			);
 		}
 
 		public get CanStart(): boolean {
-			return this.pitService.IsConfigured;
+			return onlyIf(this.pitService.Pit, () => this.pitService.IsConfigured);
 		}
 
 		public Start(): void {

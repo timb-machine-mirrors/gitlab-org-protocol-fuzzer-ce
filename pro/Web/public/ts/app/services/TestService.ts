@@ -1,9 +1,7 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
-	export var TEST_INTERVAL = 1000;
+namespace Peach {
+	export const TEST_INTERVAL = 1000;
 
 	export class TestService {
 
@@ -23,7 +21,7 @@ module Peach {
 			private pitService: PitService
 		) {
 			$rootScope.$on(C.Events.PitChanged,() => {
-				this.reset();
+				this.Reset();
 			});
 		}
 
@@ -53,29 +51,29 @@ module Peach {
 		}
 
 		public BeginTest(): ng.IPromise<any> {
-			this.reset();
+			this.Reset();
 
 			this.pendingResult = this.$q.defer<any>();
 			this.isPending = true;
 
 			this.testTime = moment().format("h:mm a");
 
-			var request: IJobRequest = {
+			const request: IJobRequest = {
 				pitUrl: this.pitService.Pit.pitUrl,
 				dryRun: true
 			};
 
 			this.$http.post(C.Api.Jobs, request)
 				.success((job: IJob) => {
-					this.onPoll(job);
+					this.OnPoll(job);
 				})
 				.catch((response: ng.IHttpPromiseCallbackArg<IError>) => {
 					if (response.status === 403) {
-						this.setFailure('Peach was unable to start the test. Please make sure another there are no other running tests or jobs and try again.');
+						this.SetFailure('Peach was unable to start the test. Please make sure another there are no other running tests or jobs and try again.');
 					} else if (response.status === 404) {
-						this.setFailure('Peach was unable to start the test. Please make sure the pit exists and try again.');
+						this.SetFailure('Peach was unable to start the test. Please make sure the pit exists and try again.');
 					} else {
-						this.setFailure(response.data.errorMessage);
+						this.SetFailure(response.data.errorMessage);
 					}
 					this.pendingResult.reject();
 				})
@@ -84,7 +82,7 @@ module Peach {
 			return this.pendingResult.promise;
 		}
 
-		private reset(): void {
+		private Reset(): void {
 			this.testTime = "";
 			this.testResult = {
 				status: "",
@@ -93,12 +91,12 @@ module Peach {
 			};
 		}
 
-		private onPoll(job: IJob): void {
+		private OnPoll(job: IJob): void {
 			this.$http.get(job.firstNodeUrl)
 				.success((data: ITestResult) => {
 					this.testResult = data;
 					if (data.status === TestStatus.Active) {
-						this.$timeout(() => { this.onPoll(job); }, TEST_INTERVAL);
+						this.$timeout(() => { this.OnPoll(job); }, TEST_INTERVAL);
 					} else {
 						if (data.status === TestStatus.Pass) {
 							this.pendingResult.resolve();
@@ -110,24 +108,21 @@ module Peach {
 					}
 				})
 				.catch((response: ng.IHttpPromiseCallbackArg<IError>) => {
-					this.setFailure(response.data.errorMessage);
+					this.SetFailure(response.data.errorMessage);
 					this.pendingResult.reject();
 				})
 			;
 		}
 
-		private setFailure(reason): void {
+		private SetFailure(reason): void {
 			this.isPending = false;
 			this.testResult.status = TestStatus.Fail;
-
-			var event: ITestEvent = {
+			this.testResult.events.push({
 				id: this.testResult.events.length + 1,
 				status: TestStatus.Fail,
 				description: 'Test execution failure.',
 				resolve: reason
-			};
-
-			this.testResult.events.push(event);
+			});
 		}
 	}
 }
