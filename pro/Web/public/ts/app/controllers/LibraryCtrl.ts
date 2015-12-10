@@ -79,7 +79,7 @@ namespace Peach {
 				this.$modal.open({
 					templateUrl: C.Templates.Modal.NewConfig,
 					controller: NewConfigController,
-					resolve: { Pit: () => entry.Pit }
+					resolve: { Pit: () => angular.copy(entry.Pit) }
 				}).result.then((copied: IPit) => {
 					this.GoToPit(copied);
 				});

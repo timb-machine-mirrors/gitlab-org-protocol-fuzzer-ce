@@ -2,8 +2,6 @@
 
 namespace Peach {
 	export class NewConfigController {
-		public Error: string = "";
-
 		static $inject = [
 			C.Angular.$scope,
 			C.Angular.$uibModalInstance,
@@ -18,9 +16,12 @@ namespace Peach {
 			public Pit: IPit
 		) {
 			$scope.vm = this;
+			this.OriginalName = Pit.name;
 		}
 
 		private pending: boolean = false;
+		private OriginalName: string;
+		public Error: string = "";
 
 		public Submit() {
 			this.Error = "";
