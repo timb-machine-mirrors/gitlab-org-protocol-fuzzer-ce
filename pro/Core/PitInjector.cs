@@ -9,8 +9,8 @@ using System.Text;
 
 namespace Peach.Pro.Core
 {
-    public static class PitInjector
-    {
+	public static class PitInjector
+	{
 		public static void InjectConfig(PitConfig cfg, List<KeyValuePair<string, string>> defs, DomObject dom)
 		{
 			foreach (var agent in cfg.Agents)
@@ -64,29 +64,11 @@ namespace Peach.Pro.Core
 			var ret = new Dictionary<string, Variant>();
 			foreach (var x in monitor.Map)
 			{
-				if (x.Key == "StartMode")
-				{
-					switch (x.Value)
-					{
-					case "StartOnCall":
-						ret.Add("StartOnCall", new Variant("ExitIterationEvent"));
-						break;
-					case "RestartOnEachTest":
-						ret.Add("StartOnCall", new Variant("StartIterationEvent"));
-						ret.Add("WaitForExitOnCall", new Variant("ExitIterationEvent"));
-						break;
-					default:
-						ret.Add("RestartOnEachTest", new Variant(false));
-						break;
-					}
-				}
-				else if (x.Value != null)
-				{
-					ret.Add(x.Key, new Variant(Expand(defs, x.Value)));
-				}
+				if (x.Value != null)
+					ret.Add(x.Key ?? x.Name, new Variant(Expand(defs, x.Value)));
 			}
 			return ret;
 		}
-    }
+	}
 }
 
