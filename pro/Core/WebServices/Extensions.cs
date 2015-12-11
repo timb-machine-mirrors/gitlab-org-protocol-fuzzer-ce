@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -128,9 +130,10 @@ namespace Peach.Pro.Core.WebServices
 
 		public static List<ParamDetail> ToWeb(this PitDefines defines)
 		{
+			var ifaces = new IfaceOptions();
 			var reserved = defines.SystemDefines.Select(d => d.Key).ToList();
 
-			var ret = DefineToParamDetail(defines.Children, reserved) ?? new List<ParamDetail>();
+			var ret = DefineToParamDetail(defines.Children, reserved, ifaces) ?? new List<ParamDetail>();
 
 			reserved = new List<string>();
 
@@ -142,7 +145,7 @@ namespace Peach.Pro.Core.WebServices
 				Type = ParameterType.Group,
 				Collapsed = true,
 				OS = "",
-				Items = defines.SystemDefines.Select(d => DefineToParamDetail(d, reserved)).ToList()
+				Items = defines.SystemDefines.Select(d => DefineToParamDetail(d, reserved, ifaces)).ToList()
 			});
 
 			return ret;
@@ -212,24 +215,46 @@ namespace Peach.Pro.Core.WebServices
 			}
 		}
 
-		private static List<ParamDetail> DefineToParamDetail(IEnumerable<PitDefines.Define> defines, List<string> reserved)
+		private class IfaceOptions
+		{
+			private List<NetworkInterface> interfaces;
+
+			public IEnumerable<NetworkInterface> Interfaces
+			{
+				get
+				{
+					// ReSharper disable once ConvertIfStatementToNullCoalescingExpression
+					if (interfaces == null)
+						interfaces = NetworkInterface.GetAllNetworkInterfaces()
+							.Where(i => i.OperationalStatus == OperationalStatus.Up)
+							.Where(i => i.NetworkInterfaceType == NetworkInterfaceType.Ethernet
+								|| i.NetworkInterfaceType == NetworkInterfaceType.Wireless80211
+								|| i.NetworkInterfaceType == NetworkInterfaceType.Loopback)
+							.ToList();
+
+					return interfaces;
+				}
+			}
+		}
+
+		private static List<ParamDetail> DefineToParamDetail(IEnumerable<PitDefines.Define> defines, List<string> reserved, IfaceOptions ifaces)
 		{
 			if (defines == null)
 				return null;
 
 			var ret = defines
 				.Where(d => !reserved.Contains(d.Key))
-				.Select(d => DefineToParamDetail(d, reserved))
+				.Select(d => DefineToParamDetail(d, reserved, ifaces))
 				.ToList();
 
 			return ret.Count > 0 ? ret : null;
 		}
 
-		private static ParamDetail DefineToParamDetail(PitDefines.Define define, List<string> reserved)
+		private static ParamDetail DefineToParamDetail(PitDefines.Define define, List<string> reserved, IfaceOptions ifaces)
 		{
 			var grp = define as PitDefines.Collection;
 
-			return new ParamDetail
+			var ret = new ParamDetail
 			{
 				Key = define.Key,
 				Name = define.Name,
@@ -242,8 +267,38 @@ namespace Peach.Pro.Core.WebServices
 				Min = define.Min,
 				Max = define.Max,
 				Description = define.Description,
-				Items = DefineToParamDetail(define.Defines, reserved)
+				Items = DefineToParamDetail(define.Defines, reserved, ifaces)
 			};
+
+			switch (ret.Type)
+			{
+				case ParameterType.Hwaddr:
+					ret.Options.AddRange(
+						ifaces.Interfaces
+							.Select(i => i.GetPhysicalAddress().GetAddressBytes())
+							.Select(a => string.Join(":", a.Select(b => b.ToString("x2"))))
+							.Where(s => !string.IsNullOrEmpty(s)));
+					break;
+				case ParameterType.Iface:
+					ret.Options.AddRange(ifaces.Interfaces.Select(i => i.Name));
+					break;
+				case ParameterType.Ipv4:
+					ret.Options.AddRange(
+						ifaces.Interfaces
+							.SelectMany(i => i.GetIPProperties().UnicastAddresses)
+							.Where(a => a.Address.AddressFamily == AddressFamily.InterNetwork)
+							.Select(a => a.Address.ToString()));
+					break;
+				case ParameterType.Ipv6:
+					ret.Options.AddRange(
+						ifaces.Interfaces
+							.SelectMany(i => i.GetIPProperties().UnicastAddresses)
+							.Where(a => a.Address.AddressFamily == AddressFamily.InterNetworkV6)
+							.Select(a => a.Address.ToString()));
+					break;
+			}
+
+			return ret;
 		}
 	}
 }
