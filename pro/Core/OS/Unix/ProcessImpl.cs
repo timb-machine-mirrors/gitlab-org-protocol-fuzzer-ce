@@ -72,14 +72,28 @@ namespace Peach.Pro.Core.OS.Unix
 
 			public void Terminate()
 			{
-				var ret = killpg(_process.Id, SIGTERM);
-				UnixMarshal.ThrowExceptionForLastErrorIf(ret);
+				if (Attached)
+				{
+					_process.CloseMainWindow();
+				}
+				else
+				{
+					var ret = killpg(_process.Id, SIGTERM);
+					UnixMarshal.ThrowExceptionForLastErrorIf(ret);
+				}
 			}
 
 			public void Kill()
 			{
-				var ret = killpg(_process.Id, SIGKILL);
-				UnixMarshal.ThrowExceptionForLastErrorIf(ret);
+				if (Attached)
+				{
+					_process.Kill();
+				}
+				else
+				{
+					var ret = killpg(_process.Id, SIGKILL);
+					UnixMarshal.ThrowExceptionForLastErrorIf(ret);
+				}
 				_process.WaitForExit(-1);
 			}
 

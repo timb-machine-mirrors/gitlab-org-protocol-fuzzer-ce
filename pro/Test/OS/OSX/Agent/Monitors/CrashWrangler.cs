@@ -14,6 +14,8 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 	[Peach]
 	public class CrashWranglerTest
 	{
+		const string ExecHandler = "/usr/local/bin/exc_handler";
+		
 		[Test]
 		public void BadHandler()
 		{
@@ -34,6 +36,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 		{
 			var args = new Dictionary<string, string>
 			{
+				{ "ExecHandler", ExecHandler },
 				{ "Executable", "foo" },
 			};
 
@@ -48,6 +51,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 		{
 			var args = new Dictionary<string, string>
 			{
+				{ "ExecHandler", ExecHandler },
 				{ "Executable", "echo" },
 				{ "Arguments", "hello" },
 			};
@@ -68,6 +72,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 		{
 			var args = new Dictionary<string, string>
 			{
+				{ "ExecHandler", ExecHandler },
 				{ "Executable", "nc" },
 				{ "Arguments", "-l 12345" },
 			};
@@ -88,6 +93,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 		{
 			var args = new Dictionary<string, string>
 			{
+				{ "ExecHandler", ExecHandler },
 				{ "Executable", "nc" },
 				{ "Arguments", "-l 12345" },
 				{ "StartOnCall", "foo" },
@@ -121,6 +127,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 		{
 			var args = new Dictionary<string, string>
 			{
+				{ "ExecHandler", ExecHandler },
 				{ "Executable", "nc" },
 				{ "Arguments", "-l 12345" },
 				{ "StartOnCall", "foo" },
@@ -152,6 +159,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 		{
 			var args = new Dictionary<string, string>
 			{
+				{ "ExecHandler", ExecHandler },
 				{ "Executable", "echo" },
 				{ "Arguments", "hello" },
 				{ "StartOnCall", "foo" },
@@ -178,6 +186,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 		{
 			var args = new Dictionary<string, string>
 			{
+				{ "ExecHandler", ExecHandler },
 				{ "Executable", "nc" },
 				{ "Arguments", "-l 12345" },
 				{ "StartOnCall", "foo" },
@@ -210,6 +219,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 		{
 			var args = new Dictionary<string, string>
 			{
+				{ "ExecHandler", ExecHandler },
 				{ "Executable", "nc" },
 				{ "Arguments", "-l 12345" },
 				{ "RestartOnEachTest", "true" },
@@ -232,7 +242,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			w.StopMonitor();
 
 			Assert.GreaterOrEqual(span.TotalSeconds, 0.0);
-			Assert.LessOrEqual(span.TotalSeconds, 0.1);
+			Assert.LessOrEqual(span.TotalSeconds, 0.25);
 		}
 
 		[Test]
@@ -240,6 +250,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 		{
 			var args = new Dictionary<string, string>
 			{
+				{ "ExecHandler", ExecHandler },
 				{ "Executable", "echo" },
 				{ "Arguments", "hello" },
 				{ "FaultOnEarlyExit", "true" },
@@ -271,6 +282,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 
 			var args = new Dictionary<string, string>
 			{
+				{ "ExecHandler", ExecHandler },
 				{ "Executable", "echo" },
 				{ "Arguments", "hello" },
 				{ "StartOnCall", "foo" },
@@ -301,6 +313,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 
 			var args = new Dictionary<string, string>
 			{
+				{ "ExecHandler", ExecHandler },
 				{ "Executable", "echo" },
 				{ "Arguments", "hello" },
 				{ "StartOnCall", "foo" },
@@ -336,6 +349,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 
 			var args = new Dictionary<string, string>
 			{
+				{ "ExecHandler", ExecHandler },
 				{ "Executable", "nc" },
 				{ "Arguments", "-l 12345" },
 				{ "StartOnCall", "foo" },
@@ -364,6 +378,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 
 			var args = new Dictionary<string, string>
 			{
+				{ "ExecHandler", ExecHandler },
 				{ "Executable", "nc" },
 				{ "Arguments", "-l 12345" },
 				{ "RestartOnEachTest", "true" },
@@ -388,6 +403,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 		{
 			var args = new Dictionary<string, string>
 			{
+				{ "ExecHandler", ExecHandler },
 				{ "Executable", Utilities.GetAppResourcePath("CrashingProgram") },
 			};
 
@@ -414,6 +430,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 		{
 			var args = new Dictionary<string, string>
 			{
+				{ "ExecHandler", ExecHandler },
 				{ "Executable", "/Applications/QuickTime Player.app/Contents/MacOS/QuickTime Player" },
 				{ "Arguments", "" },
 				{ "RestartOnEachTest", "true" },
@@ -438,6 +455,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 
 			var runner = new MonitorRunner("CrashWrangler", new Dictionary<string, string>
 			{
+				{ "ExecHandler", ExecHandler },
 				{ "Executable", Utilities.GetAppResourcePath("CrashableServer") },
 				{ "Arguments", "127.0.0.1 0" },
 				{ "RestartAfterFault", "true" },
