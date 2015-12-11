@@ -13,7 +13,6 @@ using System.Xml;
 using System.Xml.Serialization;
 using System.Xml.XPath;
 using Peach.Core;
-using Peach.Core.Agent;
 using Peach.Pro.Core.WebServices.Models;
 using Encoding = System.Text.Encoding;
 using File = System.IO.File;
@@ -284,7 +283,6 @@ namespace Peach.Pro.Core.WebServices
 		{
 			entries = new Dictionary<string, PitDetail>();
 			libraries = new NamedCollection<LibraryDetail>();
-			interfaces = null;
 		}
 
 		public PitDatabase(string libraryPath)
@@ -320,7 +318,6 @@ namespace Peach.Pro.Core.WebServices
 			pitLibraryPath = path;
 			entries = new Dictionary<string, PitDetail>();
 			libraries = new NamedCollection<LibraryDetail>();
-			interfaces = null;
 
 			HashSet<string> old;
 			lock (_cache)
@@ -638,23 +635,6 @@ namespace Peach.Pro.Core.WebServices
 			}
 		}
 
-		private IEnumerable<NetworkInterface> Interfaces
-		{
-			get
-			{
-				// ReSharper disable once ConvertIfStatementToNullCoalescingExpression
-				if (interfaces == null)
-					interfaces = NetworkInterface.GetAllNetworkInterfaces()
-						.Where(i => i.OperationalStatus == OperationalStatus.Up)
-						.Where(i => i.NetworkInterfaceType == NetworkInterfaceType.Ethernet
-							|| i.NetworkInterfaceType == NetworkInterfaceType.Wireless80211
-							|| i.NetworkInterfaceType == NetworkInterfaceType.Loopback)
-						.ToList();
-
-				return interfaces;
-			}
-		}
-
 		public Pit GetPitById(string guid)
 		{
 			var detail = GetPitDetailById(guid);
@@ -900,7 +880,7 @@ namespace Peach.Pro.Core.WebServices
 
 		private Dictionary<string, PitDetail> entries;
 		private NamedCollection<LibraryDetail> libraries;
-		private List<NetworkInterface> interfaces;
+
 		private static Dictionary<string, PitDetail> _cache = new Dictionary<string, PitDetail>();
 
 		#region Pit Config/Agents/Metadata
