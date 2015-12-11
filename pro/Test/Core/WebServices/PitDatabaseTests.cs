@@ -907,47 +907,51 @@ namespace Peach.Pro.Test.Core.WebServices
 		public void TestConfigInjection()
 		{
 			var path = Path.Combine(root.Path, "Image", "inject.xml");
-			File.WriteAllText(path, pitNoConfig);
+			File.WriteAllText(path, pitExample);
 
 			var asm = Assembly.GetExecutingAssembly();
 			var json = Utilities.LoadStringResource(asm, "Peach.Pro.Test.Core.Resources.pit.json");
 			var cfg = JsonConvert.DeserializeObject<PitConfig>(json);
 
+			var cfgFile = Path.Combine(root.Path, "Image", "IMG.xml.config");
+			var extras = new List<KeyValuePair<string, string>>();
+			var defs = PitDefines.ParseFile(cfgFile, extras);
+
+			var evaluated = defs.Evaluate();
+			PitInjector.InjectDefines(cfg, defs, evaluated);
+
 			var opts = new Dictionary<string, object>();
-			var defs = new Dictionary<string, string>
+			opts[PitParser.DEFINED_VALUES] = evaluated;
+
+
+			var cwd = Directory.GetCurrentDirectory();
+			try
 			{
-				{"PitLibraryPath", root.Path},
-			};
-			foreach (var item in cfg.Config)
-			{
-				defs[item.Key] = item.Value;
+				Directory.SetCurrentDirectory(root.Path);
+
+				var parser = new PitParser();
+				var dom = parser.asParser(opts, path);
+
+				PitInjector.InjectAgents(cfg, evaluated, dom);
+
+				var agent = dom.agents.First();
+				var monitor = agent.monitors.First();
+				Assert.AreEqual("local://", agent.location);
+				Assert.AreEqual(false, monitor.parameters.Any(x => x.Key == "WaitForExitTimeout"), "WaitForExitTimeout should be omitted");
+				Assert.AreEqual("http://127.0.0.1:89/", (string)monitor.parameters.Single(x => x.Key == "Arguments").Value);
+
+				var config = new RunConfiguration
+				{
+					singleIteration = true,
+				};
+
+				var e = new Engine(null);
+				e.startFuzzing(dom, config);
 			}
-			opts[PitParser.DEFINED_VALUES] = defs;
-
-			var parser = new PitParser();
-			var dom = parser.asParser(opts, path);
-
-			var dumb = new List<KeyValuePair<string, string>>();
-			foreach (var kv in defs)
+			finally
 			{
-				dumb.Add(new KeyValuePair<string,string>(kv.Key, kv.Value));
+				Directory.SetCurrentDirectory(cwd);
 			}
-
-			PitInjector.InjectConfig(cfg, dumb, dom);
-
-			var agent = dom.agents.First();
-			var monitor = agent.monitors.First();
-			Assert.AreEqual("local://", agent.location);
-			Assert.AreEqual(false, monitor.parameters.Any(x => x.Key == "WaitForExitTimeout"), "WaitForExitTimeout should be omitted");
-			Assert.AreEqual("http://127.0.0.1:89/", (string)monitor.parameters.Single(x => x.Key == "Arguments").Value);
-
-			var config = new RunConfiguration 
-			{
-				singleIteration = true,
-			};
-
-			var e = new Engine(null);
-			e.startFuzzing(dom, config);
 		}
 	}
 }

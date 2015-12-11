@@ -495,7 +495,7 @@ namespace Peach.Pro.Core.Runtime
 					if (_jsonConfig != null)
 					{
 						Console.WriteLine("Using agents defined in {0}", _jsonFile);
-						PitInjector.InjectConfig(_jsonConfig, defs, dom);
+						PitInjector.InjectAgents(_jsonConfig, defs, dom);
 					}
 
 					RunEngine(dom);
@@ -540,17 +540,7 @@ namespace Peach.Pro.Core.Runtime
 			if (_jsonConfig != null)
 			{
 				Console.WriteLine("Using defines from {0}", _jsonFile);
-				foreach (var item in _jsonConfig.Config)
-				{
-					if (defs.SystemDefines.Any(d => d.Key == item.Key))
-						continue;
-
-					var i = ret.FindIndex(x => x.Key == item.Key);
-					if (i < 0)
-						ret.Add(new KeyValuePair<string, string>(item.Key, item.Value));
-					else
-						ret[i] = new KeyValuePair<string, string>(item.Key, item.Value);
-				}
+				PitInjector.InjectDefines(_jsonConfig, defs, ret);
 			}
 
 			return ret;
