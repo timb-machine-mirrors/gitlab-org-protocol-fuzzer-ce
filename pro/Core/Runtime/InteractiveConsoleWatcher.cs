@@ -271,6 +271,22 @@ namespace Peach.Pro.Core.Runtime
 				Console.SetCursorPosition(Console.WindowWidth - _copyright.Length, 0);
 				Console.Write(_copyright);
 
+				// Optionally display license expiration warning
+
+				if (License.IsNearingExpiration)
+				{
+					Console.ForegroundColor = ConsoleColor.Black;
+					Console.BackgroundColor = ConsoleColor.Yellow;
+
+					Console.SetCursorPosition(0, 1);
+					for (int i = 0; i < Console.WindowWidth; i++)
+						Console.Write(" ");
+
+					var center = (Console.WindowWidth / 2) - (License.ExpirationWarning.Length / 2);
+					Console.SetCursorPosition(center, 1);
+					Console.Write(License.ExpirationWarning, License.ExpirationInDays);
+				}
+
 				Console.ForegroundColor = ConsoleColor.Gray;
 				Console.BackgroundColor = ConsoleColor.Black;
 

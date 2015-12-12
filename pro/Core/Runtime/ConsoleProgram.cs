@@ -301,6 +301,12 @@ namespace Peach.Pro.Core.Runtime
 				Console.Write("[[ ");
 				Console.ForegroundColor = ConsoleColor.DarkCyan;
 				Console.WriteLine(Copyright);
+				if (License.IsNearingExpiration)
+				{
+					Console.ForegroundColor = ConsoleColor.Yellow;
+					Console.WriteLine();
+					Console.WriteLine(License.ExpirationWarning, License.ExpirationInDays);
+				}
 				Console.ForegroundColor = DefaultForground;
 				Console.WriteLine();
 

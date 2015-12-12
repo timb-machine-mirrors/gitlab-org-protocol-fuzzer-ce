@@ -3,7 +3,6 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using Peach.Core;
 using Portable.Licensing.Validation;
 
@@ -11,6 +10,7 @@ namespace Peach.Pro.Core
 {
 	public static class License
 	{
+		public const string ExpirationWarning = "Warning: Peach expires in {0} days";
 		static readonly string EulaConfig = "eulaAccepted";
 		static bool? eulaAccepted;
 		static bool valid;
@@ -42,6 +42,16 @@ namespace Peach.Pro.Core
 		public static bool IsMissing { get; private set; }
 		public static bool IsExpired { get; private set; }
 		public static bool IsInvalid { get; private set; }
+
+		public static bool IsNearingExpiration
+		{
+			get { return Expiration < DateTime.Now.AddDays(30); }
+		}
+
+		public static int ExpirationInDays
+		{
+			get { return (Expiration - DateTime.Now).Days; }
+		}
 
 		public static bool IsValid
 		{
