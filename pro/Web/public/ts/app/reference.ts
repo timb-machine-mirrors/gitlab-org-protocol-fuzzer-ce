@@ -53,6 +53,7 @@
 /// <reference path="models/Fault.ts" />
 /// <reference path="models/Job.ts" />
 /// <reference path="models/Library.ts" />
+/// <reference path="models/License.ts" />
 /// <reference path="models/Metrics.ts" />
 /// <reference path="models/Pit.ts" />
 /// <reference path="models/PitTest.ts" />

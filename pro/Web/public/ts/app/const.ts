@@ -62,6 +62,7 @@ namespace Peach.C {
 	}
 
 	export namespace Api {
+		export const License = '/p/license';
 		export const Libraries = '/p/libraries';
 		export const Pits = '/p/pits';
 		export const PitUrl = '/p/pits/:id';

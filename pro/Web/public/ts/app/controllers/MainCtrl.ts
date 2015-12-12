@@ -8,6 +8,7 @@ namespace Peach {
 			C.Angular.$state,
 			C.Angular.$uibModal,
 			C.Angular.$window,
+			C.Services.Pit,
 			C.Services.Wizard
 		];
 
@@ -16,6 +17,7 @@ namespace Peach {
 			private $state: ng.ui.IStateService,
 			private $modal: ng.ui.bootstrap.IModalService,
 			private $window: ng.IWindowService,
+			private pitService: PitService,
 			private wizardService: WizardService
 		) {
 			$scope.vm = this;
@@ -28,12 +30,33 @@ namespace Peach {
 					}
 				});
 			});
+
+			const promise = pitService.LoadLicense();
+			promise.then((license: ILicense) => {
+				this.license = license;
+			});
 		}
 
 		private showSidebar: boolean = false;
 		private isMenuMin: boolean = false;
+		private license: ILicense;
 		public Metrics = C.MetricsList;
 		public WizardTracks = Peach.WizardTracks;
+
+		private get LicenseExpiration(): moment.Moment {
+			if (_.isUndefined(this.license)) {
+				return moment().add({ days: 60 });
+			}
+			return moment(this.license.expiration);
+		}
+
+		public get LicenseExpirationDiff(): number {
+			return this.LicenseExpiration.diff(moment());
+		}
+
+		public get LicenseExpirationFromNow(): string {
+			return this.LicenseExpiration.fromNow();
+		}
 
 		public get JobId(): number {
 			return this.$state.params['job'];
@@ -154,6 +177,12 @@ namespace Peach {
 
 		public OnHelp() {
 			this.$window.open('/docs', '_blank');
+		}
+
+		public get ShowLicenseWarning(): boolean {
+			return onlyIf(this.LicenseExpiration, () =>
+				this.LicenseExpiration.diff(moment(), 'days') < 30
+			);
 		}
 	}
 }
