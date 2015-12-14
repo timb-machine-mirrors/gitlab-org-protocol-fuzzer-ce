@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
@@ -151,7 +152,19 @@ namespace Peach.Pro.Core
 		{
 			// Try several different filenames
 			// this reduces the number of support calls.
-			var fileNames = new []
+
+			var searchPaths = new List<string>
+			{
+				Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+			};
+
+			var peachDirs = new[]
+			{
+				"peach",
+				"Peach",
+			};
+
+			var fileNames = new[]
 			{
 				"Peach.license",
 				"Peach.license.xml",
@@ -162,10 +175,14 @@ namespace Peach.Pro.Core
 				"peach.license.txt"
 			};
 
-			var peachDir = Platform.GetOS() == Platform.OS.Linux ? "peach" : "Peach";
-			var appData = Platform.GetOS() == Platform.OS.OSX ? 
-				"/Library/Application Support" : 
-				Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+			if (Platform.GetOS() == Platform.OS.OSX)
+			{
+				// This is to allow users to install Peach.license on El Capitan.
+				// El Capitan introduced SIP which prevents users from creating files
+				// in "system" directories, such as "/usr/share".
+				searchPaths.Add("/Library/Application Support");
+			}
+
 			var asmDir = Utilities.ExecutionDirectory;
 			Exception ex = null;
 
@@ -182,16 +199,23 @@ namespace Peach.Pro.Core
 				}
 
 				// Try common application data second
-				// Windows - C:\ProgramData\Peach\Peach.license
-				// Linux - /usr/share/peach/Peach.license
-				// OSX - /Library/Application Support/Peach/Peach.license
-				var global = Path.Combine(appData, peachDir, fileName);
-				var globalLic = Read(global);
-
-				if (globalLic.Exception == null)
+				// Windows   C:\ProgramData\Peach\Peach.license
+				// Linux     /usr/share/peach/Peach.license
+				// OSX       /usr/share/peach/Peach.license
+				//           /Library/Application Support/Peach/Peach.license
+				foreach (var rootDir in searchPaths)
 				{
-					licenseFile = global;
-					return globalLic;
+					foreach (var peachDir in peachDirs)
+					{
+						var global = Path.Combine(rootDir, peachDir, fileName);
+						var globalLic = Read(global);
+
+						if (globalLic.Exception == null)
+						{
+							licenseFile = global;
+							return globalLic;
+						}
+					}
 				}
 
 				// Rethrow local exception since that is technically the first error
