@@ -8,11 +8,14 @@ using Newtonsoft.Json.Converters;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Agent;
+using Peach.Core.Test;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 
 namespace Peach.Pro.Test.Core.WebServices
 {
+	[Peach]
+	[Quick]
 	[TestFixture]
 	class MonitorParamTests
 	{
