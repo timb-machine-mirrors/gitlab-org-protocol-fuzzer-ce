@@ -6,7 +6,7 @@
 
 /** Unordered deps */
 //grunt-start
-/// <reference path="controllers/ConfigVarsTests.ts" />
+/// <reference path="controllers/ConfigDefinesTests.ts" />
 /// <reference path="controllers/DashboardTests.ts" />
 /// <reference path="controllers/MainTests.ts" />
 /// <reference path="controllers/PitTestTests.ts" />

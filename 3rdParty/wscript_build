@@ -21,7 +21,8 @@ bld.read_csshlib('Be.Windows.Forms.HexBox.dll', paths=['Be.HexEditor.150/bin'])
 subdirs = [
 	'pin',
 	'Renci.SshNet',
-	'TotalPhase-5.13',
+	'TotalPhase/aardvark',
+	'TotalPhase/komodo',
 	'Managed.AndroidDebugBridge',
 	'VMware-VIX-1.13.0-1295980',
 	'SuperSocket',

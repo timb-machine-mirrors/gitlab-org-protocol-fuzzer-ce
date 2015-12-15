@@ -1,7 +1,5 @@
 /// <reference path="../reference.ts" />
 
-'use strict';
-
 interface ITestValidatorsScope extends ng.IScope {
 	form: ng.IFormController;
 	model: any;

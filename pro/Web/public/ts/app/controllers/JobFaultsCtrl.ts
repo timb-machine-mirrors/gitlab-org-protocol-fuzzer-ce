@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	export interface IFaultDetailScope extends IFaultSummaryScope {
 		FaultDetailTitle: string;
 	}
@@ -25,9 +23,9 @@ module Peach {
 		) {
 			$scope.FaultSummaryTitle = FaultsTitle($state.params['bucket']);
 
-			var id = $state.params['id'];
+			const id = $state.params['id'];
 			$scope.FaultDetailTitle = 'Iteration: ' + id;
-			var promise = jobService.LoadFaultDetail(id);
+			const promise = jobService.LoadFaultDetail(id);
 			promise.then((detail: IFaultDetail) => {
 				this.Fault = detail;
 			}, () => {

@@ -35,12 +35,12 @@ image::{images}/NP2_Config_Start.png[]
 The active Peach Pit configuration can be changed in the {peachweb} by clicking on the Home menu icon above the menu along the left side of the screen. Then, click on the Library menu item to choose a Pit or Pit configuration in your library. 
 =========
 
-4. Click "Quick Start Wizard". + 
+1. Click "Quick Start Wizard". + 
 The introductory screen displays. The menu along the left side of the browser window lists sections or steps of the wizard:
 +
 image::{images}/QS01_QuickStart.png[]
 
-5. Click the "Begin" button to start describing your fuzzing configuration.
+2. Click the "Begin" button to start describing your fuzzing configuration.
 
 ==== Step 2. Set Variables
 

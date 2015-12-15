@@ -36,6 +36,7 @@ using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using Peach.Core.Publishers;
 
 namespace Peach.Pro.Core.Agent.Channels
 {
@@ -261,7 +262,7 @@ namespace Peach.Pro.Core.Agent.Channels
 
 		#region Publisher Proxy
 
-		class RestProxyPublisher : Publisher
+		class RestProxyPublisher : StreamPublisher
 		{
 			private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 			protected override NLog.Logger Logger { get { return logger; } }
@@ -280,6 +281,7 @@ namespace Peach.Pro.Core.Agent.Channels
 				: base(new Dictionary<string, Variant>())
 			{
 				Args = args;
+				stream = new MemoryStream();
 			}
 
 			public string Send(string query)
@@ -473,57 +475,33 @@ namespace Peach.Pro.Core.Agent.Channels
 			protected override void OnInput()
 			{
 				Send("input");
-				ReadAllBytes();
+
+				stream.Position = 0;
+				stream.SetLength(0);
+
+				// No need to call WantBytes(1) since the cracker will do this for us!
 			}
 
 			public override void WantBytes(long count)
 			{
+				var needed = count - stream.Length + stream.Position;
+
+				if (needed <= 0)
+					return;
+
 				var request = new WantBytesRequest();
-				request.count = count;
+				request.count = needed;
 
-				Send("WantBytes", JsonConvert.SerializeObject(request));
-				ReadAllBytes();
-			}
-
-			public byte[] ReadBytes(int count)
-			{
-				var request = new ReadBytesRequest();
-				request.count = count;
-
-				var json = Send("ReadBytes", JsonConvert.SerializeObject(request));
+				var json = Send("WantBytes", JsonConvert.SerializeObject(request));
 				var response = JsonConvert.DeserializeObject<ReadBytesResponse>(json);
 
-				return response.data;
-			}
+				if (response.data == null)
+					return;
 
-			public override int Read(byte[] buffer, int offset, int count)
-			{
-				var request = new ReadRequest();
-				request.offset = offset;
-				request.count = count;
-
-				var json = Send("Read", JsonConvert.SerializeObject(request));
-				var response = JsonConvert.DeserializeObject<ReadResponse>(json);
-
-				System.Array.Copy(response.data, buffer, response.count);
-
-				return response.count;
-			}
-
-			public override int ReadByte()
-			{
-				var json = Send("ReadByte");
-				var response = JsonConvert.DeserializeObject<ReadByteResponse>(json);
-
-				return response.data;
-			}
-
-			public byte[] ReadAllBytes()
-			{
-				var json = Send("ReadAllBytes");
-				var response = JsonConvert.DeserializeObject<ReadBytesResponse>(json);
-
-				return response.data;
+				var pos = stream.Position;
+				stream.Seek(0, SeekOrigin.End);
+				stream.Write(response.data, 0, response.data.Length);
+				stream.Seek(pos, SeekOrigin.Begin);
 			}
 		}
 

@@ -45,6 +45,7 @@ using Peach.Pro.Core.WebServices.Models;
 using Encoding = Peach.Core.Encoding;
 using Logger = Peach.Core.Logger;
 using System.Diagnostics;
+using Peach.Pro.Core.Dom.Actions;
 using Action = Peach.Core.Dom.Action;
 using State = Peach.Core.Dom.State;
 
@@ -88,6 +89,7 @@ namespace Peach.Pro.Core.Loggers
 		int _agentConnect;
 		Exception _caught;
 		Target _tempTarget;
+		Message _lastMessage;
 
 		enum Category { Faults, Reproducing, NonReproducible }
 
@@ -396,6 +398,20 @@ namespace Peach.Pro.Core.Loggers
 
 		protected override void ActionFinished(RunContext context, Action action)
 		{
+			var msg = action as Message;
+			if (msg != null)
+			{
+				_lastMessage = msg;
+				using (var db = new NodeDatabase())
+				{
+					AddEvent(db,
+						context.config.id,
+						msg.Status,
+						msg.Status,
+						CompleteTestEvents.Last);
+				}
+			}
+
 			var rec = _states.Last().actions.Last();
 			if (rec.models == null)
 				return;
@@ -786,6 +802,12 @@ namespace Peach.Pro.Core.Loggers
 
 		public void EventFail(NodeDatabase db, string resolve)
 		{
+			if (_lastMessage != null)
+			{
+				resolve = "{0}: {1}".Fmt(_lastMessage.Error, resolve);
+				Logger.Debug("EventFail: {0}", resolve);
+			}
+
 			db.UpdateTestEvents(_events.LastEnumerable().Select(x =>
 			{
 				x.Status = TestStatus.Fail;
@@ -796,6 +818,11 @@ namespace Peach.Pro.Core.Loggers
 
 		public void JobFail(Guid id, string message)
 		{
+			if (_lastMessage != null)
+			{
+				message = "{0}: {1}".Fmt(_lastMessage.Error, message);
+				Logger.Debug("JobFail: {0}", message);
+			}
 			JobHelper.Fail(id, _ => _events, message);
 		}
 

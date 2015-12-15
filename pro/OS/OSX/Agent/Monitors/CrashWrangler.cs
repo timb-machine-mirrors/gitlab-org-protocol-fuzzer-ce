@@ -90,7 +90,8 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 		public bool RestartOnEachTest { get; set; }
 		public bool RestartAfterFault { get; set; }
 
-		private Process _process;
+		private Process _wrangler;
+		private Process _inferior;
 		private bool? _detectedFault;  // Was a fault detected
 		private bool _faultExitFail;   // Failed to exit within WaitForExitTimeout
 		private bool _faultExitEarly;  // Process exited early
@@ -98,7 +99,8 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 
 		public CrashWrangler(string name) : base(name)
 		{
-			_process = PlatformFactory<Process>.CreateInstance(Logger);
+			_wrangler = PlatformFactory<Process>.CreateInstance(Logger);
+			_inferior = PlatformFactory<Process>.CreateInstance(Logger);
 		}
 
 		public override void StartMonitor(Dictionary<string, string> args)
@@ -124,7 +126,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			if (RestartAfterFault && args.LastWasFault)
 				_Stop();
 
-			if (!_process.IsRunning && StartOnCall == null)
+			if (!_wrangler.IsRunning && StartOnCall == null)
 				_Start();
 		}
 
@@ -205,7 +207,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 
 		public override void IterationFinished()
 		{
-			if (!_messageExit && FaultOnEarlyExit && !_process.IsRunning)
+			if (!_messageExit && FaultOnEarlyExit && !_wrangler.IsRunning)
 			{
 				_faultExitEarly = true;
 				_Stop();
@@ -213,9 +215,10 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			else if (StartOnCall != null)
 			{
 				if (!NoCpuKill)
-					_process.WaitForIdle(WaitForExitTimeout);
+					_inferior.WaitForIdle(WaitForExitTimeout);
 				else
-					_process.WaitForExit(WaitForExitTimeout);
+					_inferior.WaitForExit(WaitForExitTimeout);
+				_wrangler.Stop(WaitForExitTimeout);
 			}
 			else if (RestartOnEachTest)
 			{
@@ -233,7 +236,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			else if (msg == WaitForExitOnCall)
 			{
 				_messageExit = true;
-				if (!_process.WaitForExit(WaitForExitTimeout))
+				if (!_wrangler.WaitForExit(WaitForExitTimeout))
 				{
 					_detectedFault = true;
 					_faultExitFail = true;
@@ -263,6 +266,9 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			if (File.Exists(CwLockFile))
 				File.Delete(CwLockFile);
 
+			if (File.Exists(CwPidFile))
+				File.Delete(CwPidFile);
+
 			var env = new Dictionary<string, string>();
 
 			foreach (DictionaryEntry item in Environment.GetEnvironmentVariables())
@@ -271,6 +277,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 			env["CW_NO_CRASH_REPORTER"] = "1";
 			env["CW_QUIET"] = "1";
 			env["CW_LOG_PATH"] = CwLogFile;
+			env["CW_PID_FILE"] = CwPidFile;
 			env["CW_LOCK_FILE"] = CwLockFile;
 
 			if (UseDebugMalloc)
@@ -280,21 +287,41 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 				env["CW_EXPLOITABLE_READS"] = "1";
 
 			var args = "\"" + Executable + "\"" + (string.IsNullOrEmpty(Arguments) ? "" : " ") + Arguments;
-			_process.Start(ExecHandler, args, env, null);
+			_wrangler.Start(ExecHandler, args, env, null);
+
+			// Wait for pid file to exist, open it up and read it
+			while (!File.Exists(CwPidFile) && _wrangler.IsRunning)
+				Thread.Sleep(10);
+
+			if (!File.Exists(CwPidFile) && !_wrangler.IsRunning)
+				throw new PeachException("CrashWrangler was unable to start '{0}'.".Fmt(Executable));
+
+			try
+			{
+				var pid = Convert.ToInt32(File.ReadAllText(CwPidFile));
+				_inferior.Attach(pid);
+			}
+			catch (ArgumentException)
+			{
+				// inferior ran to completion
+			}
 
 			OnInternalEvent(EventArgs.Empty);
 		}
 
 		private void _Stop()
 		{
-			if (!_process.IsRunning)
+			if (!_wrangler.IsRunning)
 				return;
 			
+			_inferior.Shutdown();
+
 			// Ensure a crash report is not being generated
 			while (File.Exists(CwLockFile))
 				Thread.Sleep(250);
 
-			_process.Stop(WaitForExitTimeout);
+			_wrangler.WaitForIdle(WaitForExitTimeout);
+			_inferior.Dispose();
 		}
 
 		internal class Summary

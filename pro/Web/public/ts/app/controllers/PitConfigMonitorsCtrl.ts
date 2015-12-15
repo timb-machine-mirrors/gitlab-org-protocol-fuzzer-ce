@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	export class ConfigureMonitorsController {
 		static $inject = [
 			C.Angular.$scope,
@@ -13,7 +11,7 @@ module Peach {
 			private $scope: IFormScope,
 			private pitService: PitService
 		) {
-			var promise = pitService.LoadPit();
+			const promise = pitService.LoadPit();
 			promise.then((pit: IPit) => {
 				this.Agents = pit.agents;
 				this.hasLoaded = true;
@@ -23,7 +21,7 @@ module Peach {
 		private hasLoaded: boolean = false;
 		private isSaved: boolean = false;
 
-		public Agents: Agent[];
+		public Agents: IAgent[];
 
 		public get ShowLoading(): boolean {
 			return !this.hasLoaded;
@@ -38,7 +36,7 @@ module Peach {
 		}
 
 		public get ShowMissingAgents(): boolean {
-			return this.hasLoaded && this.numAgents === 0;
+			return this.hasLoaded && this.NumAgents === 0;
 		}
 
 		public get CanSave(): boolean {
@@ -46,19 +44,23 @@ module Peach {
 		}
 
 		public AddAgent(): void {
-			this.Agents.push(new Agent());
+			this.Agents.push({
+				name: "",
+				agentUrl: "",
+				monitors: []
+			});
 			this.$scope.form.$setDirty();
 		}
 
 		public Save(): void {
-			var promise = this.pitService.SaveAgents(this.Agents);
+			const promise = this.pitService.SaveAgents(this.Agents);
 			promise.then(() => {
 				this.isSaved = true;
 				this.$scope.form.$setPristine();
 			});
 		}
 
-		private get numAgents(): number {
+		private get NumAgents(): number {
 			return (this.Agents && this.Agents.length) || 0;
 		}
 	}

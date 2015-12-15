@@ -1,9 +1,7 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
-	export var AgentDirective: IDirective = {
+namespace Peach {
+	export const AgentDirective: IDirective = {
 		ComponentID: C.Directives.Agent,
 		restrict: 'E',
 		templateUrl: C.Templates.Directives.Agent,
@@ -20,41 +18,32 @@ module Peach {
 	}
 
 	export interface IAgentScope extends IFormScope {
-		agents: Agent[];
-		agent: Agent;
+		agents: IAgent[];
+		agent: IAgent;
 		agentIndex: number;
 		isOpen: boolean;
-		selectedMonitor: ISelectable<IMonitor>;
 	}
 
 	export class AgentController {
 		static $inject = [
 			C.Angular.$scope,
-			C.Angular.$timeout,
+			C.Angular.$uibModal,
 			C.Services.Pit
 		];
 
 		constructor(
 			private $scope: IAgentScope,
-			private $timeout: ng.ITimeoutService,
+			private $modal: ng.ui.bootstrap.IModalService,
 			private pitService: PitService
 		) {
 			$scope.vm = this;
 			$scope.isOpen = true;
-			$scope.selectedMonitor = {
-				selected: undefined
-			};
-			pitService.LoadPeachMonitors().then((monitors: IMonitor[]) => {
-				this.PeachMonitors = monitors;
-			});
 		}
 
-		public PeachMonitors: IMonitor[];
-
 		public get Header(): string {
-			var url = this.$scope.agent.agentUrl || 'local://';
-			var name = this.$scope.agent.name ? '(' + this.$scope.agent.name + ')' : '';
-			return url + ' ' + name;
+			const url = this.$scope.agent.agentUrl || 'local://';
+			const name = this.$scope.agent.name ? `(${this.$scope.agent.name})` : '';
+			return `${url} ${name}`;
 		}
 
 		public get CanMoveUp(): boolean {
@@ -90,12 +79,16 @@ module Peach {
 			this.$scope.form.$setDirty();
 		}
 
-		public OnAddMonitor(monitor: IMonitor): void {
-			this.$scope.agent.monitors.push(angular.copy(monitor));
-			this.$scope.form.$setDirty();
+		public AddMonitor(): void {
+			const modal = this.$modal.open({
+				templateUrl: C.Templates.Modal.AddMonitor,
+				controller: AddMonitorController
+			});
 
-			this.$timeout(() => {
-				this.$scope.selectedMonitor.selected = undefined;
+			modal.result.then((selected: IParameter) => {
+				const monitor = this.pitService.CreateMonitor(selected);
+				this.$scope.agent.monitors.push(monitor);
+				this.$scope.form.$setDirty();
 			});
 		}
 	}

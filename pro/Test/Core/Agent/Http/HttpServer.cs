@@ -25,7 +25,9 @@ namespace Peach.Pro.Test.Core.Agent.Http
 		/// <summary>
 		/// Rest calls in order made.
 		/// </summary>
-		public List<string> RestCalls = new List<string>();  
+		public List<string> RestCalls = new List<string>();
+
+		public Func<long, byte[]> WantBytes { get; set; }
 
 		private Listener _listener;
 
@@ -147,7 +149,7 @@ namespace Peach.Pro.Test.Core.Agent.Http
 
 			try
 			{
-				using (new HttpChannelHandler(_listener.Routes, RestCalls))
+				using (new HttpChannelHandler(_listener.Routes, RestCalls, WantBytes))
 				{
 					if (Started != null)
 						Started(this, EventArgs.Empty);

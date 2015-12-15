@@ -1,8 +1,6 @@
 /// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	class PitLibrary {
 		constructor(
 			public Name: string
@@ -30,7 +28,7 @@ module Peach {
 		static $inject = [
 			C.Angular.$scope,
 			C.Angular.$state,
-			C.Angular.$modal,
+			C.Angular.$uibModal,
 			C.Services.Pit
 		];
 
@@ -43,14 +41,14 @@ module Peach {
 			this.init();
 		}
 
-		public Pits: PitLibrary;
-		public User: PitLibrary;
+		private Pits: PitLibrary;
+		private User: PitLibrary;
 		
 		private init() {
-			var promise = this.pitService.LoadLibrary();
+			const promise = this.pitService.LoadLibrary();
 			promise.then((data: ILibrary[]) => {
 				data.forEach((lib: ILibrary) => {
-					var pitLib = new PitLibrary(lib.name);
+					const pitLib = new PitLibrary(lib.name);
 					if (lib.locked) {
 						this.Pits = pitLib;
 					} else {
@@ -59,11 +57,11 @@ module Peach {
 					
 					lib.versions.forEach((version: ILibraryVersion) => {
 						version.pits.forEach((pit: IPit) => {
-							var category = _.find(pit.tags, (tag: ITag) =>
+							const category = _.find(pit.tags, (tag: ITag) =>
 								tag.name.startsWith("Category")
 							).values[1];
 							
-							var pitCategory = _.find(pitLib.Categories, { 'Name': category });
+							let pitCategory = _.find(pitLib.Categories, { 'Name': category });
 							if (!pitCategory) {
 								pitCategory = new PitCategory(category);
 								pitLib.Categories.push(pitCategory);
@@ -76,12 +74,12 @@ module Peach {
 			});
 		}
 
-		public OnSelectPit(entry: PitEntry) {
+		private OnSelectPit(entry: PitEntry) {
 			if (entry.Library.locked) {
 				this.$modal.open({
 					templateUrl: C.Templates.Modal.NewConfig,
 					controller: NewConfigController,
-					resolve: { Pit: () => entry.Pit }
+					resolve: { Pit: () => angular.copy(entry.Pit) }
 				}).result.then((copied: IPit) => {
 					this.GoToPit(copied);
 				});

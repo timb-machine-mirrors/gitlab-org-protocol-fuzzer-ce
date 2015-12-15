@@ -5,7 +5,6 @@
 interface String {
 	startsWith(str: string): boolean;
 	endsWith(str: string): boolean;
-	format(...args: any[]): string;
 	paddingLeft(pattern: string): string;
 }
 
@@ -23,17 +22,11 @@ String.prototype.endsWith = function (suffix: string): boolean {
 	return this.indexOf(suffix, this.length - suffix.length) !== -1;
 }
 
-String.prototype.format = function (...args: any[]): string {
-	return this.replace(/{(\d+)}/g,(match, i) => {
-		return !_.isUndefined(args[i]) ? args[i] : match;
-	});
-}
-
 String.prototype.paddingLeft = function (pattern: string): string {
 	return String(pattern + this).slice(-pattern.length);
 }
 
-module Peach {
+namespace Peach {
 	export interface IComponent {
 		ComponentID: string;
 	}
@@ -52,6 +45,14 @@ module Peach {
 
 	export interface IFormScope extends IViewModelScope {
 		form: ng.IFormController;
+	}
+
+	export function MakeEnum(obj: any) {
+		Object.keys(obj).map(key => obj[key] = key);
+	}
+	
+	export function MakeLowerEnum(obj: any) {
+		Object.keys(obj).map(key => obj[key] = key.toLowerCase());
 	}
 	
 	export function onlyWith<T, R>(obj: T, fn: (T) => R): R {
@@ -73,7 +74,7 @@ module Peach {
 
 	export function ArrayItemUp<T>(array: T[], i: number): T[] {
 		if (i > 0) {
-			var x = array[i - 1];
+			const x = array[i - 1];
 			array[i - 1] = array[i];
 			array[i] = x;
 		}
@@ -82,7 +83,7 @@ module Peach {
 
 	export function ArrayItemDown<T>(array: T[], i: number): T[] {
 		if (i < array.length - 1) {
-			var x = array[i + 1];
+			const x = array[i + 1];
 			array[i + 1] = array[i];
 			array[i] = x;
 		}
@@ -90,7 +91,7 @@ module Peach {
 	}
 
 	export function StripHttpPromise<T>($q: ng.IQService, promise: ng.IHttpPromise<T>): ng.IPromise<T> {
-		var deferred = $q.defer<T>();
+		const deferred = $q.defer<T>();
 		promise.success((data: T) => {
 			deferred.resolve(data);
 		});

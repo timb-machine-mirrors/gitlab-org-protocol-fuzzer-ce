@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	export interface IComboboxScope extends ng.IScope {
 		vm: ComboboxController;
 		data: any;
@@ -13,9 +11,10 @@ module Peach {
 		highlighted?: number;
 		$model: ng.INgModelController;
 		$element: ng.IAugmentedJQuery;
+		description: string;
 	}
 
-	var KEY = {
+	const KEY = {
 		TAB: 9,
 		ENTER: 13,
 		ESC: 27,
@@ -23,7 +22,7 @@ module Peach {
 		DOWN: 40
 	};
 
-	export var ComboboxDirective: IDirective = {
+	export const ComboboxDirective: IDirective = {
 		ComponentID: C.Directives.Combobox,
 		restrict: 'E',
 		require: [C.Directives.Combobox, C.Angular.ngModel],
@@ -41,7 +40,7 @@ module Peach {
 			attrs: ng.IAttributes,
 			ctrls: any
 		) => {
-			var ctrl: ComboboxController = ctrls[0];
+			const ctrl: ComboboxController = ctrls[0];
 			ctrl.Link(element, attrs, ctrls[1]);
 		}
 	}
@@ -99,7 +98,7 @@ module Peach {
 				this.setSelected(this.$model.$viewValue);
 			});
 
-			var hideOptions = this.hideOptions.bind(this);
+			const hideOptions = this.hideOptions.bind(this);
 			this.$document.on('click', hideOptions);
 			this.$element.on('$destroy', () => {
 				this.$document.off('click', hideOptions);
@@ -178,9 +177,9 @@ module Peach {
 		}
 
 		private hideOptions(event) {
-			var isChild = this.$element.has(event.target).length > 0;
-			var isSelf = this.$element[0] == event.target;
-			var isInside = isChild || isSelf;
+			const isChild = this.$element.has(event.target).length > 0;
+			const isSelf = this.$element[0] == event.target;
+			const isInside = isChild || isSelf;
 
 			if (!isInside) {
 				this.$scope.$apply(() => {

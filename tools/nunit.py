@@ -61,15 +61,15 @@ def save_failed(asm, test, fixture, filename, duration, message):
 		cases.append(TEST_TEMPLATE.format(
 			name=testcase.attrib['name'],
 			duration=duration,
-			result='Skipped',
+			result='Failed',
 			message=message,
 		))
 
 	xml = FILE_TEMPLATE.format(
 		total=fixture.attrib['testcasecount'],
 		duration=duration,
-		failed=0,
-		skipped=fixture.attrib['testcasecount'],
+		failed=fixture.attrib['testcasecount'],
+		skipped=0,
 		asm_name=asm,
 		fixture_fullname=test,
 		testcases='\n'.join(cases)

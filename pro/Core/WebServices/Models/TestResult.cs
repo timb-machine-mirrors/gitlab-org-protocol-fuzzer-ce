@@ -8,6 +8,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// The overall status of the test result
 		/// </summary>
+		[JsonProperty(DefaultValueHandling = DefaultValueHandling.Include)]
 		public TestStatus Status { get; set; }
 
 		/// <summary>

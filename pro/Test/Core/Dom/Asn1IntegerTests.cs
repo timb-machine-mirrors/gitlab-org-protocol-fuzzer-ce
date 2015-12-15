@@ -69,13 +69,14 @@ namespace Peach.Pro.Test.Core.Dom
 
 		[Test]
 		[Category("Peach")]
-		public void OutputSizeTest()
+		public void OutputSizeAndValueTest()
 		{
 			var xml =
 				"<?xml version='1.0' encoding='utf-8'?>\n" +
 				"<Peach>\n" +
 				" <DataModel name='Example1'>\n" +
-				"    <Asn1Integer name='byte'  value='1' /> " +
+				"    <Asn1Integer name='byte0'  value='0' /> " +
+				"    <Asn1Integer name='byte1'  value='1' /> " +
 				"    <Asn1Integer name='short' value='32766' /> " +
 				"    <Asn1Integer name='int'   value='2147483647' /> " +
 				"    <Asn1Integer name='long'  value='223372036854775807' /> " +
@@ -96,29 +97,37 @@ namespace Peach.Pro.Test.Core.Dom
 				"</Peach>\n";
 
 			var dom = ParsePit(xml);
-			var elemByte = dom.dataModels["Example1"][0];
-			var elemShort = dom.dataModels["Example1"][1];
-			var elemInt = dom.dataModels["Example1"][2];
-			var elemLong = dom.dataModels["Example1"][3];
+			var elemByte0 = dom.dataModels["Example1"][0];
+			var elemByte1 = dom.dataModels["Example1"][1];
+			var elemShort = dom.dataModels["Example1"][2];
+			var elemInt = dom.dataModels["Example1"][3];
+			var elemLong = dom.dataModels["Example1"][4];
 
-			Assert.AreEqual(1, elemByte.Value.Length);
+			Assert.AreEqual(1, elemByte0.Value.Length);
+			Assert.AreEqual(1, elemByte1.Value.Length);
 			Assert.AreEqual(2, elemShort.Value.Length);
 			Assert.AreEqual(4, elemInt.Value.Length);
 			Assert.AreEqual(8, elemLong.Value.Length);
+
+			Assert.AreEqual(0u, (ulong)elemByte0.DefaultValue);
+			Assert.AreEqual(1u, (ulong)elemByte1.DefaultValue);
+			Assert.AreEqual(32766u, (ulong)elemShort.DefaultValue);
+			Assert.AreEqual(2147483647u, (ulong)elemInt.DefaultValue);
+			Assert.AreEqual(223372036854775807u, (ulong)elemLong.DefaultValue);
 		}
 
 		[Test]
 		[Category("Peach")]
-		public void InputByteTest()
+		public void InputBytesTest()
 		{
 			var xml =
 				"<?xml version='1.0' encoding='utf-8'?>\n" +
 				"<Peach>\n" +
 				" <DataModel name='Example1'>\n" +
 				"	 <Number size='8'>" +
-				"       <Relation type='size' of='byte' />"+
+				"       <Relation type='size' of='short' />"+
 				"    </Number>"+
-				"    <Asn1Integer name='byte'  value='1' /> " +
+				"    <Asn1Integer name='short'  value='1' /> " +
 				"  </DataModel>\n" +
 				"  \n" +
 				"  <StateModel name='TheStateModel' initialState='initial'>\n" +
@@ -143,8 +152,9 @@ namespace Peach.Pro.Test.Core.Dom
 
 			var bs = new BitStream();
 			var writer = new BitWriter(bs);
-			writer.WriteByte(1);
-			writer.WriteByte(100);
+			writer.WriteByte(2);
+			writer.WriteByte(0x64);
+			writer.WriteByte(0xc8);
 			bs.Position = 0;
 			bs.CopyTo(pub.InputData[0]);
 
@@ -155,9 +165,9 @@ namespace Peach.Pro.Test.Core.Dom
 
 			e.startFuzzing(dom, config);
 
-			var elemByte = dom.tests[0].stateModel.states[0].actions[0].dataModel[1];
+			var elemShort = dom.tests[0].stateModel.states[0].actions[0].dataModel[1];
 
-			Assert.AreEqual(100, (int)elemByte.DefaultValue);
+			Assert.AreEqual(0x64c8, (int)elemShort.DefaultValue);
 		}
 
 		[Test]

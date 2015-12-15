@@ -6,7 +6,6 @@ using System.Reflection;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using Peach.Core;
-using Peach.Core.Agent;
 using Peach.Core.Analyzers;
 using Peach.Pro.Core;
 using Peach.Pro.Core.WebServices;
@@ -22,6 +21,14 @@ namespace Peach.Pro.Test.Core.WebServices
 	[Peach]
 	public class PitDatabaseTests
 	{
+		/*
+		 * ArgumentException for posting bad pit.config and pit.agents
+		 * UnauthorizedAccessException for posting to locked pit
+		 * Verify posting agents with same name/location properly get merged (wizard result)
+		 * Verify Param StartMode gets translated properly
+		 * POST monitor map name vs key
+		 */
+
 		TempDirectory root;
 		PitDatabase db;
 
@@ -184,8 +191,6 @@ namespace Peach.Pro.Test.Core.WebServices
 			var p = db.GetPitByUrl(libs[0].Versions[0].Pits[0].PitUrl);
 			Assert.NotNull(p);
 
-			Assert.AreEqual(true, p.Versions[0].Configured);
-
 			Assert.False(libs[1].Locked);
 			Assert.AreEqual(1, libs[1].Versions.Count);
 			Assert.False(libs[1].Versions[0].Locked);
@@ -203,40 +208,43 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var img = ent.First(e => e.Name == "IMG");
 
-			var cfg1 = db.GetConfigByUrl(img.PitUrl);
-			Assert.NotNull(cfg1);
+			var pit1 = db.GetPitByUrl(img.PitUrl);
+			Assert.NotNull(pit1);
 
 			var imgCopy = ent.First(e => e.Name == "IMG Copy");
 
-			var cfg2 = db.GetConfigByUrl(imgCopy.PitUrl);
-			Assert.NotNull(cfg2);
-			Assert.AreEqual(4, cfg2.Count);
+			var pit2 = db.GetPitByUrl(imgCopy.PitUrl);
+			var cfg2 = pit2.Config;
+			Assert.AreEqual(5, cfg2.Count);
 
 			// Should include system defines
 
-			Assert.AreEqual("Peach.Pwd", cfg2[0].Key);
-			Assert.AreEqual("Peach.Cwd", cfg2[1].Key);
-			Assert.AreEqual("Peach.LogRoot", cfg2[2].Key);
-			Assert.AreEqual("PitLibraryPath", cfg2[3].Key);
+			Assert.AreEqual("Peach.OS", cfg2[0].Key);
+			Assert.AreEqual("Peach.Pwd", cfg2[1].Key);
+			Assert.AreEqual("Peach.Cwd", cfg2[2].Key);
+			Assert.AreEqual("Peach.LogRoot", cfg2[3].Key);
+			Assert.AreEqual("PitLibraryPath", cfg2[4].Key);
 
 			// Saving should create the file
-			var cfg = imgCopy.Versions[0].Files[0].Name + ".config";
+			var cfg = pit2.Versions[0].Files[0].Name + ".config";
 			Assert.False(File.Exists(cfg), ".config file should not exist");
 
-			PitDatabase.SaveConfig(imgCopy, cfg2);
+			db.UpdatePitById(pit2.Id, new Pit { Config = cfg2 });
 
 			// System defines should not be in the file
 			Assert.True(File.Exists(cfg), ".config file should exist");
 
-			var defs = PitDefines.Parse(cfg);
-			Assert.AreEqual(0, defs.Count);
+			var defs = PitDefines.ParseFile(cfg);
+			Assert.AreEqual(0, defs.Platforms.Count);
+			Assert.AreNotEqual(0, defs.SystemDefines.Count);
 		}
 
 		[Test]
 		public void TestCopyPro()
 		{
-			var pit = db.Entries.ElementAt(0);
+			var ent = db.Entries.ElementAt(0);
 			var lib = db.Libraries.ElementAt(1);
+			var pit = db.GetPitById(ent.Id);
 
 			var newName = "IMG Copy";
 			var newDesc = "My copy of the img pit";
@@ -246,7 +254,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.NotNull(newUrl);
 
 			Assert.AreEqual(2, db.Entries.Count());
-			Assert.AreEqual(1, lib.Versions[0].Pits.Count());
+			Assert.AreEqual(1, lib.Versions[0].Pits.Count);
 
 			var newPit = db.GetPitByUrl(newUrl);
 
@@ -288,7 +296,6 @@ namespace Peach.Pro.Test.Core.WebServices
 		}
 
 		[Test]
-		[ExpectedException]
 		public void TestCopyPathInFilename()
 		{
 			var pit = db.Entries.ElementAt(0);
@@ -297,7 +304,8 @@ namespace Peach.Pro.Test.Core.WebServices
 			var newName = "../../../Foo";
 			var newDesc = "My copy of the img pit";
 
-			db.CopyPit(lib.LibraryUrl, pit.PitUrl, newName, newDesc);
+			var ex = Assert.Throws<ArgumentException>(() => db.CopyPit(lib.LibraryUrl, pit.PitUrl, newName, newDesc));
+			Assert.AreEqual("name", ex.ParamName);
 		}
 
 		[Test]
@@ -331,8 +339,9 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void TestCopyUser()
 		{
-			var pit = db.Entries.ElementAt(0);
+			var ent = db.Entries.ElementAt(0);
 			var lib = db.Libraries.ElementAt(1);
+			var pit = db.GetPitById(ent.Id);
 
 			var newUrl1 = db.CopyPit(lib.LibraryUrl, pit.PitUrl, "IMG Copy 1", "Img desc 1");
 			Assert.NotNull(newUrl1);
@@ -342,7 +351,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 
 			Assert.AreEqual(3, db.Entries.Count());
-			Assert.AreEqual(2, lib.Versions[0].Pits.Count());
+			Assert.AreEqual(2, lib.Versions[0].Pits.Count);
 
 			var newPit = db.GetPitByUrl(newUrl2);
 
@@ -367,53 +376,46 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void TestGetPitConfig()
 		{
-			var pit = db.Entries.First();
-
-			var cfg = db.GetConfigByUrl(pit.PitUrl);
+			var ent = db.Entries.First();
+			var pit = db.GetPitById(ent.Id);
+			var cfg = pit.Config;
 
 			Assert.NotNull(cfg);
-			Assert.AreEqual(6, cfg.Count);
+			Assert.AreEqual(7, cfg.Count);
 
-			// Always are 3 system types at the beginning!
-			Assert.AreEqual("Peach.Pwd", cfg[0].Key);
-			Assert.AreEqual(ParameterType.System, cfg[0].Type);
-			Assert.AreEqual("Peach.Cwd", cfg[1].Key);
-			Assert.AreEqual(ParameterType.System, cfg[1].Type);
-			Assert.AreEqual("Peach.LogRoot", cfg[2].Key);
-			Assert.AreEqual(ParameterType.System, cfg[2].Type);
+			Assert.AreEqual("Strategy", cfg[0].Key);
+			Assert.AreEqual("SomeMiscVariable", cfg[1].Key);
+			Assert.AreEqual("Peach.OS", cfg[2].Key);
+			Assert.AreEqual("Peach.Pwd", cfg[3].Key);
+			Assert.AreEqual("Peach.Cwd", cfg[4].Key);
+			Assert.AreEqual("Peach.LogRoot", cfg[5].Key);
 
 			// PitLibraryPath is special, and gets turned into a System type
 			// regardless of what is in the pit .config
-			Assert.AreEqual("PitLibraryPath", cfg[3].Key);
-			Assert.AreNotEqual(".", cfg[3].Value);
-			Assert.AreEqual(ParameterType.System, cfg[3].Type);
-
-			Assert.AreEqual("Strategy", cfg[4].Key);
-			Assert.AreEqual(ParameterType.Enum, cfg[4].Type);
-
-			Assert.AreEqual("SomeMiscVariable", cfg[5].Key);
-			Assert.AreEqual(ParameterType.String, cfg[5].Type);
+			Assert.AreEqual("PitLibraryPath", cfg[6].Key);
+			Assert.AreNotEqual(".", cfg[6].Value);
 		}
 
 		[Test]
 		public void TestSetPitConfig()
 		{
-			var pit = db.Entries.First();
-
-			var cfg = db.GetConfigByUrl(pit.PitUrl);
-
+			var ent = db.Entries.First();
+			var pit = db.GetPitById(ent.Id);
+			var cfg = pit.Config;
 
 			Assert.NotNull(cfg);
-			Assert.AreEqual(6, cfg.Count);
-			Assert.AreEqual("SomeMiscVariable", cfg[5].Key);
-			Assert.AreEqual(ParameterType.String, cfg[5].Type);
-			Assert.AreNotEqual("Foo Bar Baz", cfg[5].Value);
-			cfg[5].Value = "Foo Bar Baz";
+			Assert.AreEqual(7, cfg.Count);
+			Assert.AreEqual("SomeMiscVariable", cfg[1].Key);
+			Assert.AreNotEqual("Foo Bar Baz", cfg[1].Value);
+			cfg[1].Value = "Foo Bar Baz";
 
-			PitDatabase.SaveConfig(pit, cfg);
+			db.UpdatePitById(ent.Id, pit);
 
 			var file = pit.Versions[0].Files[0].Name + ".config";
-			var defs = PitDefines.Parse(file);
+			var defines = PitDefines.ParseFile(file);
+			Assert.NotNull(defines);
+			Assert.AreEqual(1, defines.Platforms.Count);
+			var defs = defines.Platforms[0].Defines;
 			Assert.NotNull(defs);
 
 			// Peach.Pwd and Peach.Cwd do not get saved
@@ -433,54 +435,66 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void TestOptionalParams()
 		{
-			var pit = db.Entries.First();
+			var ent = db.Entries.First();
+			var pit = db.GetPitById(ent.Id);
 
-			var cfg = db.GetConfigByUrl(pit.PitUrl);
+			Assert.NotNull(pit.Config);
+			Assert.NotNull(pit.Metadata);
+			Assert.NotNull(pit.Metadata.Defines);
 
-			Assert.NotNull(cfg);
-			Assert.AreEqual(6, cfg.Count);
+			Assert.AreEqual(7, pit.Config.Count);
+			Assert.AreEqual(2, pit.Metadata.Defines.Count);
 
-			foreach (var item in cfg)
+			foreach (var item in pit.Metadata.Defines.SelectMany(d => d.Items)) 
 				Assert.False(item.Optional, "Define should not be optional");
 
 			var file = pit.Versions[0].Files[0].Name + ".config";
-			var defs = PitDefines.Parse(file);
+			var defs = PitDefines.ParseFile(file);
 
 			Assert.NotNull(defs);
 
 			// File shouldn't contain optional
 			StringAssert.DoesNotContain("optional", File.ReadAllText(file));
 
-			PitDatabase.SaveConfig(pit, cfg);
+			db.UpdatePitById(ent.Id, pit);
 
 			// After saving, file still shouldn't contain optional
 			StringAssert.DoesNotContain("optional", File.ReadAllText(file));
 
-			defs.Add(new PitDefines.StringDefine
+			Assert.NotNull(defs.Platforms);
+			Assert.AreEqual(1, defs.Platforms.Count);
+
+			defs.Platforms[0].Defines.Add(new PitDefines.StringDefine
 			{
 				Name = "Optional String",
 				Key = "OptStr",
 				Value = "",
 				Description = "Desc",
-				OptionalValue = true
+				OptionalAttr = true
 			});
 
-			var final = new PitDefines
+			XmlTools.Serialize(file, defs);
+
+			pit = db.GetPitById(ent.Id);
+
+			Assert.NotNull(pit.Config);
+			Assert.NotNull(pit.Metadata);
+			Assert.NotNull(pit.Metadata.Defines);
+
+			Assert.AreEqual(8, pit.Config.Count);
+			Assert.AreEqual(2, pit.Metadata.Defines.Count);
+
+			var seq = pit.Metadata.Defines.SelectMany(d => d.Items).ToList();
+
+			Assert.AreEqual(8, seq.Count);
+
+			for (var i = 0; i < seq.Count; ++i)
 			{
-				Platforms = new List<PitDefines.Collection>(new[] {
-					new PitDefines.All
-					{
-						Defines = defs.ToList(),
-					}
-				}),
-			};
-
-			XmlTools.Serialize(file, final);
-
-			cfg = db.GetConfigByUrl(pit.PitUrl);
-			Assert.NotNull(cfg);
-			Assert.AreEqual(7, cfg.Count);
-			Assert.True(cfg[6].Optional, "Should be optional!");
+				if (i == 2)
+					Assert.True(seq[i].Optional, "seq[{0}] should be optional".Fmt(i));
+				else
+					Assert.False(seq[i].Optional, "seq[{0}] should not be optional".Fmt(i));
+			}
 
 			var text = File.ReadAllText(file);
 			StringAssert.Contains("optional=\"true\"", text);
@@ -488,84 +502,93 @@ namespace Peach.Pro.Test.Core.WebServices
 		}
 
 		[Test]
-		public void HasAgents()
+		public void TestSaveMonitorsOmitDefaults()
 		{
-			string noAgents =
-@"<?xml version='1.0' encoding='utf-8'?>
-<Peach xmlns='http://peachfuzzer.com/2012/Peach'
-       xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
-       xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
-       author='Pit Author Name'
-       description='File'
-       version='0.0.1'>
+			// Ensure default monitor parameters are not written to xml
 
-	<Test name='Default'>
-		<Publisher class='Null'/>
-	</Test>
-</Peach>
-";
+			var ent = db.Entries.First();
+			Assert.NotNull(ent);
 
-			File.WriteAllText(Path.Combine(root.Path, "Image", "File.xml"), noAgents);
-
-			db = new PitDatabase(root.Path);
-			Assert.NotNull(db);
-			Assert.AreEqual(2, db.Entries.Count());
-
-			var file = db.Entries.FirstOrDefault(e => e.Name == "File");
-			Assert.NotNull(file);
-			Assert.False(file.Versions[0].Configured);
-
-			var img = db.Entries.FirstOrDefault(e => e.Name == "IMG");
-			Assert.NotNull(img);
-			Assert.True(img.Versions[0].Configured);
+			const string json = @"
+{
+	""agents"" : [
+		{
+			""name"":""Agent0"",
+			""agentUrl"":""local://"",
+			""monitors"": [
+				{
+					""monitorClass"":""Process"",
+					""map"": [
+						{ ""name"":""Executable"", ""value"":""foo"" },
+						{ ""name"":""StartOnCall"", ""value"":"""" },
+						{ ""name"":""WaitForExitOnCall"", ""value"":null },
+						{ ""name"":""NoCpuKill"", ""value"":""false"" }
+					],
+				}
+			]
 		}
+	]
+}";
 
-		[Test]
-		public void TestAllMonitors()
-		{
-			var errors = new List<string>();
+			var data = JsonConvert.DeserializeObject<Pit>(json);
 
-			// remove test SetUp handler for this test
-			db.ValidationEventHandler -= OnValidationEvent;
+			var pit = db.UpdatePitById(ent.Id, data);
 
-			db.ValidationEventHandler += (s, e) => errors.Add(e.Exception.Message);
+			var parser = new PitParser();
 
-			db.GetAllMonitors();
-
-			CollectionAssert.IsEmpty(errors);
-		}
-
-		[Test]
-		public void TestInvalidMonitor()
-		{
-			// remove test SetUp handler for this test
-			db.ValidationEventHandler -= OnValidationEvent;
-
-			var error = false;
-			db.ValidationEventHandler += (s, e) =>
+			var opts = new Dictionary<string, object>();
+			var defs = new Dictionary<string, string>
 			{
-				error = true;
+				{"PitLibraryPath", root.Path},
+				{"Strategy", "Random"}
 			};
+			opts[PitParser.DEFINED_VALUES] = defs;
 
-			var attr = new MonitorAttribute("FakeMonitor")
-			{
-				OS = Platform.OS.Unix
-			};
+			var dom = parser.asParser(opts, pit.Versions[0].Files[0].Name);
 
-			var monitor = db.MakeMonitor(attr, typeof(string), null);
-			Assert.IsTrue(error);
-			Assert.AreEqual("", monitor.OS);
+			Assert.AreEqual(1, dom.tests[0].agents.Count);
+
+			Assert.AreEqual("Agent0", dom.tests[0].agents[0].Name);
+			Assert.AreEqual("local://", dom.tests[0].agents[0].location);
+			Assert.AreEqual(1, dom.tests[0].agents[0].monitors.Count);
+
+			var mon = dom.tests[0].agents[0].monitors[0];
+			Assert.AreEqual("Process", mon.cls);
+			Assert.AreEqual(2, mon.parameters.Count);
+			Assert.True(mon.parameters.ContainsKey("Executable"), "Should contain key Executable");
+			Assert.AreEqual("foo", mon.parameters["Executable"].ToString());
+			Assert.True(mon.parameters.ContainsKey("NoCpuKill"), "Should contain key NoCpuKill");
+			Assert.AreEqual("false", mon.parameters["NoCpuKill"].ToString());
+
+			Assert.NotNull(pit);
+			Assert.NotNull(pit.Agents);
+
+			Assert.AreEqual(1, pit.Agents.Count);
+			Assert.AreEqual("Agent0", pit.Agents[0].Name);
+			Assert.AreEqual("local://", pit.Agents[0].AgentUrl);
+			Assert.AreEqual(1, pit.Agents[0].Monitors.Count);
+			Assert.AreEqual(2, pit.Agents[0].Monitors[0].Map.Count);
+			Assert.AreEqual("Executable", pit.Agents[0].Monitors[0].Map[0].Key);
+			Assert.AreEqual("foo", pit.Agents[0].Monitors[0].Map[0].Value);
+			Assert.AreEqual("NoCpuKill", pit.Agents[0].Monitors[0].Map[1].Key);
+			Assert.AreEqual("false", pit.Agents[0].Monitors[0].Map[1].Value);
+
+			// Only Key/Value are expected to be set
+			// Name/Description come from pit.metadata.monitors
+			Assert.AreEqual(null, pit.Agents[0].Monitors[0].Map[0].Name);
+			Assert.AreEqual(null, pit.Agents[0].Monitors[0].Map[0].Description);
 		}
 
 		[Test]
 		public void TestSaveMonitors()
 		{
-			var pit = db.Entries.First();
-			Assert.NotNull(pit);
+			var ent = db.Entries.First();
+			Assert.NotNull(ent);
 
 			var json = @"
 [
 {
+	""name"":""Agent0"",
 	""agentUrl"":""local://"",
 	""monitors"": [
 		{
@@ -574,35 +597,15 @@ namespace Peach.Pro.Test.Core.WebServices
 				{ ""name"":""Executable"", ""value"":""Foo.exe"" },
 				{ ""name"":""WinDbgPath"", ""value"":""C:\\WinDbg""  }
 			],
-			""description"": ""Page Heap: {WinDbgExecutable} {WinDbgPath}""
 		},
 		{
 			""monitorClass"":""WindowsDebugger"",
 			""map"": [
 				{ ""name"":""Executable"", ""value"":""Foo.exe"" },
 				{ ""name"":""Arguments"", ""value"":""--arg"" },
-				{ ""name"":""IgnoreFirstChanceGuardPage"", ""value"":""false"" }
+				{ ""name"":""IgnoreFirstChanceGuardPage"", ""value"":""true"" }
 			],
-			""description"": ""Windows Debugger: {WinDbgExecutable} {WinDbgPath} {WinDbgProcessName} {WinDbgService} {WinDbgStart} {WinDbgIgnoreFirstChanceGuardPage}""
-		}
-	]
-},
-{
-	""agentUrl"":""tcp://remotehostname"",
-	""monitors"": [
-		{
-			""monitorClass"":""Pcap"",
-			""map"": [
-				{""name"":""Device"", ""value"":""eth0"" },
-				{""name"":""Filter"", ""value"":""tcp port 80"" }
-			],
-			""description"":""Network capture on {AgentUrl}, interface {PcapDevice} using {PcapFilter}.""
-		}
-	]
-},
-{
-	""agentUrl"":""local://"",
-	""monitors"": [
+		},
 		{
 			""monitorClass"":""CanaKit"",
 			""map"": [
@@ -613,6 +616,27 @@ namespace Peach.Pro.Test.Core.WebServices
 	]
 },
 {
+	""name"":""Agent1"",
+	""agentUrl"":""tcp://remotehostname"",
+	""monitors"": [
+		{
+			""monitorClass"":""Pcap"",
+			""map"": [
+				{""name"":""Device"", ""value"":""eth0"" },
+				{""name"":""Filter"", ""value"":""tcp port 80"" }
+			],
+		},
+		{
+			""monitorClass"":""Pcap"",
+			""map"": [
+				{""name"":""Device"", ""value"":""eth0"" },
+				{""name"":""Filter"", ""value"":""tcp port 8080"" }
+			],
+		},
+	]
+},
+{
+	""name"":""Agent2"",
 	""agentUrl"":""tcp://remotehostname2"",
 	""monitors"": [
 		{
@@ -621,29 +645,16 @@ namespace Peach.Pro.Test.Core.WebServices
 				{""name"":""Device"", ""value"":""eth0"" },
 				{""name"":""Filter"", ""value"":""tcp port 80"" }
 			],
-			""description"":""Network capture on {AgentUrl}, interface {PcapDevice} using {PcapFilter}.""
 		}
-	]
-},
-{
-	""agentUrl"":""tcp://remotehostname"",
-	""monitors"": [
-		{
-			""monitorClass"":""Pcap"",
-			""map"": [
-				{""name"":""Device"", ""value"":""eth0"" },
-				{""name"":""Filter"", ""value"":""tcp port 8080"" }
-			],
-			""description"":""Network capture on {AgentUrl}, interface {PcapDevice} using {PcapFilter}.""
-		},
 	]
 }
 ]";
 
-			var monitors = JsonConvert.DeserializeObject<List<Pro.Core.WebServices.Models.Agent>>(json);
-			Assert.NotNull(monitors);
+			var agents = JsonConvert.DeserializeObject<List<Pro.Core.WebServices.Models.Agent>>(json);
+			Assert.NotNull(agents);
 
-			PitDatabase.SaveAgents(pit, monitors);
+			var pit = db.UpdatePitById(ent.Id, new Pit { Agents = agents });
+			Assert.NotNull(pit);
 
 			var parser = new PitParser();
 
@@ -666,22 +677,22 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.AreEqual("local://", dom.tests[0].agents[0].location);
 			Assert.AreEqual(3, dom.tests[0].agents[0].monitors.Count);
 
-			VerifyMonitor(monitors[0].Monitors[0], dom.tests[0].agents[0].monitors[0]);
-			VerifyMonitor(monitors[0].Monitors[1], dom.tests[0].agents[0].monitors[1]);
-			VerifyMonitor(monitors[2].Monitors[0], dom.tests[0].agents[0].monitors[2]);
+			VerifyMonitor(agents[0].Monitors[0], dom.tests[0].agents[0].monitors[0]);
+			VerifyMonitor(agents[0].Monitors[1], dom.tests[0].agents[0].monitors[1]);
+			VerifyMonitor(agents[0].Monitors[2], dom.tests[0].agents[0].monitors[2]);
 
 			Assert.AreEqual("Agent1", dom.tests[0].agents[1].Name);
 			Assert.AreEqual("tcp://remotehostname", dom.tests[0].agents[1].location);
 			Assert.AreEqual(2, dom.tests[0].agents[1].monitors.Count);
 
-			VerifyMonitor(monitors[1].Monitors[0], dom.tests[0].agents[1].monitors[0]);
-			VerifyMonitor(monitors[4].Monitors[0], dom.tests[0].agents[1].monitors[1]);
+			VerifyMonitor(agents[1].Monitors[0], dom.tests[0].agents[1].monitors[0]);
+			VerifyMonitor(agents[1].Monitors[1], dom.tests[0].agents[1].monitors[1]);
 
 			Assert.AreEqual("Agent2", dom.tests[0].agents[2].Name);
 			Assert.AreEqual("tcp://remotehostname2", dom.tests[0].agents[2].location);
 			Assert.AreEqual(1, dom.tests[0].agents[2].monitors.Count);
 
-			VerifyMonitor(monitors[3].Monitors[0], dom.tests[0].agents[2].monitors[0]);
+			VerifyMonitor(agents[2].Monitors[0], dom.tests[0].agents[2].monitors[0]);
 		}
 
 		private void VerifyMonitor(Monitor jsonMon, Peach.Core.Dom.Monitor domMon)
@@ -691,19 +702,22 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			foreach (var item in jsonMon.Map)
 			{
-				Assert.True(domMon.parameters.ContainsKey(item.Name));
-				Assert.AreEqual(item.Value, (string)domMon.parameters[item.Name]);
+				var key = item.Key ?? item.Name;
+				Assert.True(domMon.parameters.ContainsKey(key));
+				Assert.AreEqual(item.Value, (string)domMon.parameters[key]);
 			}
 		}
 
 		[Test]
 		public void TestSaveProcessMonitors()
 		{
-			var pit = db.Entries.First();
+			var ent = db.Entries.First();
+			Assert.NotNull(ent);
 
 			const string json = @"
 [
 	{
+		""name"":""Agent0"",
 		""agentUrl"":""local://"",
 		""monitors"": [
 			{
@@ -730,7 +744,9 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var agents = JsonConvert.DeserializeObject<List<Pro.Core.WebServices.Models.Agent>>(json);
 
-			PitDatabase.SaveAgents(pit, agents);
+			var pit = db.UpdatePitById(ent.Id, new Pit { Agents = agents });
+
+			Assert.NotNull(pit);
 
 			var parser = new PitParser();
 
@@ -779,7 +795,9 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var file = db.Entries.FirstOrDefault(e => e.Name == "Remote");
 			Assert.NotNull(file);
-			Assert.AreEqual(1, file.Versions[0].Files.Count);
+			var pit = db.GetPitById(file.Id);
+			Assert.NotNull(pit);
+			Assert.AreEqual(1, pit.Versions[0].Files.Count);
 		}
 
 		[Test]
@@ -793,7 +811,7 @@ namespace Peach.Pro.Test.Core.WebServices
 	</DataModel>
 </Peach>
 ";
-			string pit =
+			string xml =
 @"<?xml version='1.0' encoding='utf-8'?>
 <Peach>
 	<Include ns='DM' src='file:##PitLibraryPath##/_Common/Models/Image/My_Data.xml' />
@@ -814,7 +832,7 @@ namespace Peach.Pro.Test.Core.WebServices
 </Peach>
 ";
 			File.WriteAllText(Path.Combine(root.Path, "_Common", "Models", "Image", "My_Data.xml"), data);
-			File.WriteAllText(Path.Combine(root.Path, "Image", "My.xml"), pit);
+			File.WriteAllText(Path.Combine(root.Path, "Image", "My.xml"), xml);
 
 			db = new PitDatabase(root.Path);
 			Assert.NotNull(db);
@@ -822,7 +840,9 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var file = db.Entries.FirstOrDefault(e => e.Name == "My");
 			Assert.NotNull(file);
-			Assert.AreEqual(2, file.Versions[0].Files.Count);
+			var pit = db.GetPitById(file.Id);
+			Assert.NotNull(pit);
+			Assert.AreEqual(2, pit.Versions[0].Files.Count);
 		}
 
 		[Test]
@@ -837,15 +857,18 @@ namespace Peach.Pro.Test.Core.WebServices
 			var file = db.Entries.FirstOrDefault(e => e.Name == "My");
 			Assert.NotNull(file);
 
-			var cfg = db.GetConfigByUrl(file.PitUrl);
+			var pit = db.GetPitByUrl(file.PitUrl);
+			Assert.NotNull(pit);
+			var cfg = pit.Config;
 			Assert.NotNull(cfg);
 
-			Assert.AreEqual(4, cfg.Count);
+			Assert.AreEqual(5, cfg.Count);
 
-			Assert.AreEqual("Peach.Pwd", cfg[0].Key);
-			Assert.AreEqual("Peach.Cwd", cfg[1].Key);
-			Assert.AreEqual("Peach.LogRoot", cfg[2].Key);
-			Assert.AreEqual("PitLibraryPath", cfg[3].Key);
+			Assert.AreEqual("Peach.OS", cfg[0].Key);
+			Assert.AreEqual("Peach.Pwd", cfg[1].Key);
+			Assert.AreEqual("Peach.Cwd", cfg[2].Key);
+			Assert.AreEqual("Peach.LogRoot", cfg[3].Key);
+			Assert.AreEqual("PitLibraryPath", cfg[4].Key);
 		}
 
 		[Test]
@@ -864,10 +887,12 @@ namespace Peach.Pro.Test.Core.WebServices
 			var file = db.Entries.FirstOrDefault(e => e.Name == "My");
 			Assert.NotNull(file);
 
-			var cfg = db.GetConfigByUrl(file.PitUrl);
+			var pit = db.GetPitByUrl(file.PitUrl);
+			Assert.NotNull(pit);
+			var cfg = pit.Config;
 			Assert.NotNull(cfg);
 
-			Assert.AreEqual(4, cfg.Count);
+			Assert.AreEqual(5, cfg.Count);
 
 			File.Delete(path);
 
@@ -881,48 +906,52 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void TestConfigInjection()
 		{
-			var path = Path.Combine(root.Path, "Image", "inject.xml");
-			File.WriteAllText(path, pitNoConfig);
-
-			var asm = Assembly.GetExecutingAssembly();
-			var json = Utilities.LoadStringResource(asm, "Peach.Pro.Test.Core.Resources.pit.json");
-			var cfg = JsonConvert.DeserializeObject<PitConfig>(json);
-
-			var opts = new Dictionary<string, object>();
-			var defs = new Dictionary<string, string>
+			var cwd = Directory.GetCurrentDirectory();
+			try
 			{
-				{"PitLibraryPath", root.Path},
-			};
-			foreach (var item in cfg.Config)
-			{
-				defs[item.Key] = item.Value;
+				Directory.SetCurrentDirectory(root.Path);
+
+				var path = Path.Combine(root.Path, "Image", "inject.xml");
+				File.WriteAllText(path, pitExample);
+
+				var asm = Assembly.GetExecutingAssembly();
+				var json = Utilities.LoadStringResource(asm, "Peach.Pro.Test.Core.Resources.pit.json");
+				var cfg = JsonConvert.DeserializeObject<PitConfig>(json);
+
+				var cfgFile = Path.Combine(root.Path, "Image", "IMG.xml.config");
+				var extras = new List<KeyValuePair<string, string>>();
+				var defs = PitDefines.ParseFile(cfgFile, extras);
+
+				var evaluated = defs.Evaluate();
+				PitInjector.InjectDefines(cfg, defs, evaluated);
+
+				var opts = new Dictionary<string, object>();
+				opts[PitParser.DEFINED_VALUES] = evaluated;
+
+
+				var parser = new PitParser();
+				var dom = parser.asParser(opts, path);
+
+				PitInjector.InjectAgents(cfg, evaluated, dom);
+
+				var agent = dom.agents.First();
+				var monitor = agent.monitors.First();
+				Assert.AreEqual("local://", agent.location);
+				Assert.AreEqual(false, monitor.parameters.Any(x => x.Key == "WaitForExitTimeout"), "WaitForExitTimeout should be omitted");
+				Assert.AreEqual("http://127.0.0.1:89/", (string)monitor.parameters.Single(x => x.Key == "Arguments").Value);
+
+				var config = new RunConfiguration
+				{
+					singleIteration = true,
+				};
+
+				var e = new Engine(null);
+				e.startFuzzing(dom, config);
 			}
-			opts[PitParser.DEFINED_VALUES] = defs;
-
-			var parser = new PitParser();
-			var dom = parser.asParser(opts, path);
-
-			var dumb = new List<KeyValuePair<string, string>>();
-			foreach (var kv in defs)
+			finally
 			{
-				dumb.Add(new KeyValuePair<string,string>(kv.Key, kv.Value));
+				Directory.SetCurrentDirectory(cwd);
 			}
-
-			PitInjector.InjectConfig(cfg, dumb, dom);
-
-			var agent = dom.agents.First();
-			var monitor = agent.monitors.First();
-			Assert.AreEqual("local://", agent.location);
-			Assert.AreEqual(10000, (long)monitor.parameters.Single(x => x.Key == "WaitForExitTimeout").Value);
-			Assert.AreEqual("http://127.0.0.1:89/", (string)monitor.parameters.Single(x => x.Key == "Arguments").Value);
-
-			var config = new RunConfiguration 
-			{
-				singleIteration = true,
-			};
-
-			var e = new Engine(null);
-			e.startFuzzing(dom, config);
 		}
 	}
 }

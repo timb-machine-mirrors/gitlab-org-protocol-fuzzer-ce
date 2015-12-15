@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Peach.Core;
 using DomAgent = Peach.Core.Dom.Agent;
 using DomMonitor = Peach.Core.Dom.Monitor;
@@ -9,10 +10,32 @@ using System.Text;
 
 namespace Peach.Pro.Core
 {
-    public static class PitInjector
-    {
-		public static void InjectConfig(PitConfig cfg, List<KeyValuePair<string, string>> defs, DomObject dom)
+	public static class PitInjector
+	{
+		public static void InjectDefines(PitConfig cfg, PitDefines defs, List<KeyValuePair<string, string>> ret)
 		{
+			foreach (var item in cfg.Config)
+			{
+				if (item.Key == "PitLibraryPath" || 
+					defs.SystemDefines.Any(d => d.Key == item.Key))
+					continue;
+
+				var i = ret.FindIndex(x => x.Key == item.Key);
+				if (i < 0)
+					ret.Add(new KeyValuePair<string, string>(item.Key, item.Value));
+				else
+					ret[i] = new KeyValuePair<string, string>(item.Key, item.Value);
+			}
+		}
+
+		public static void InjectAgents(PitConfig cfg, List<KeyValuePair<string, string>> defs, DomObject dom)
+		{
+			dom.agents.Clear();
+			foreach (var test in dom.tests)
+			{
+				test.agents.Clear();
+			}
+
 			foreach (var agent in cfg.Agents)
 			{
 				var domAgent = new Peach.Core.Dom.Agent
@@ -64,29 +87,11 @@ namespace Peach.Pro.Core
 			var ret = new Dictionary<string, Variant>();
 			foreach (var x in monitor.Map)
 			{
-				if (x.Name == "StartMode")
-				{
-					switch (x.Value)
-					{
-					case "StartOnCall":
-						ret.Add("StartOnCall", new Variant("ExitIterationEvent"));
-						break;
-					case "RestartOnEachTest":
-						ret.Add("StartOnCall", new Variant("StartIterationEvent"));
-						ret.Add("WaitForExitOnCall", new Variant("ExitIterationEvent"));
-						break;
-					default:
-						ret.Add("RestartOnEachTest", new Variant(false));
-						break;
-					}
-				}
-				else
-				{
-					ret.Add(x.Name, new Variant(Expand(defs, x.Value) ?? x.DefaultValue));
-				}
+				if (x.Value != null)
+					ret.Add(x.Key ?? x.Name, new Variant(Expand(defs, x.Value)));
 			}
 			return ret;
 		}
-    }
+	}
 }
 

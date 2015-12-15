@@ -50,8 +50,7 @@ namespace Peach.Core.Dom.Actions
 
 				endPos = pub.Position;
 
-				logger.Debug(string.Format("Final pos: {0} length: {1} crack consumed: {2} bytes",
-					endPos, pub.Length, endPos - startPos));
+				logger.Debug("Final pos: {0} length: {1} crack consumed: {2} bytes", endPos, pub.Length, endPos - startPos);
 			}
 			catch (CrackingFailure ex)
 			{

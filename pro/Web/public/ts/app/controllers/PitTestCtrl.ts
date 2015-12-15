@@ -1,8 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	export interface IPitTestScope extends IViewModelScope {
 		Title: string;
 	}
@@ -81,12 +79,15 @@ module Peach {
 		public OnBeginTest() {
 			if (this.isWizard) {
 				this.track.isComplete = false;
-				var agents = [
+
+				const agents = _.flatten<IAgent>([
 					this.wizardService.GetTrack(C.Tracks.Fault).agents,
 					this.wizardService.GetTrack(C.Tracks.Data).agents,
 					this.wizardService.GetTrack(C.Tracks.Auto).agents
-				];
-				var promise = this.pitService.SaveAgents(_.flatten<Agent>(agents));
+				]);
+
+				const merged = this.wizardService.MergeAgents(agents);
+				const promise = this.pitService.SaveAgents(merged);
 				promise.then(() => {
 					this.startTest();
 				});
@@ -96,7 +97,7 @@ module Peach {
 		}
 
 		private startTest() {
-			var promise = this.testService.BeginTest();
+			const promise = this.testService.BeginTest();
 			promise.then(() => {
 				if (this.isWizard) {
 					this.track.isComplete = true;

@@ -53,12 +53,12 @@
 
 	<div class="row">
 		<div class="col-xs-12">
-			<accordion ng-repeat="agent in vm.Agents track by $index">
+			<uib-accordion ng-repeat="agent in vm.Agents track by $index">
 				<peach:agent agents="vm.Agents"
 										 agent="agent"
 										 agent-index="$index">
 				</peach:agent>
-			</accordion>
+			</uib-accordion>
 		</div>
 	</div>
 

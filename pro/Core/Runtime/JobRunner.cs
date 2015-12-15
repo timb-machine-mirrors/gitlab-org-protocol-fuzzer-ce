@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using Godel.Core;
 using NLog;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
+using Peach.Pro.Core.Godel;
 using Peach.Pro.Core.Loggers;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices;
@@ -178,7 +178,7 @@ namespace Peach.Pro.Core.Runtime
 							"Loading pit config", "Loading configuration file '{0}'".Fmt(pitConfig),
 							CompleteTestEvents.Last);
 
-						var defs = PitDatabase.ParseConfig(_pitLibraryPath, pitConfig);
+						var defs = PitDefines.ParseFile(pitConfig, _pitLibraryPath).Evaluate();
 						args[PitParser.DEFINED_VALUES] = defs;
 					}
 					catch (Exception ex)
@@ -191,7 +191,7 @@ namespace Peach.Pro.Core.Runtime
 			else
 			{
 				// ParseConfig allows non-existant config files
-				var defs = PitDatabase.ParseConfig(_pitLibraryPath, pitConfig);
+				var defs = PitDefines.ParseFile(pitConfig, _pitLibraryPath).Evaluate();
 				args[PitParser.DEFINED_VALUES] = defs;
 			}
 
@@ -201,7 +201,7 @@ namespace Peach.Pro.Core.Runtime
 		public Peach.Core.Dom.Dom ParsePit()
 		{
 			var args = ParseConfig();
-			var parser = new GodelPitParser();
+			var parser = new ProPitParser();
 
 			using (var db = new NodeDatabase())
 			{

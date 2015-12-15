@@ -1,15 +1,14 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	export class MainController {
 
 		static $inject = [
 			C.Angular.$scope,
 			C.Angular.$state,
-			C.Angular.$modal,
+			C.Angular.$uibModal,
 			C.Angular.$window,
+			C.Services.Pit,
 			C.Services.Wizard
 		];
 
@@ -18,6 +17,7 @@ module Peach {
 			private $state: ng.ui.IStateService,
 			private $modal: ng.ui.bootstrap.IModalService,
 			private $window: ng.IWindowService,
+			private pitService: PitService,
 			private wizardService: WizardService
 		) {
 			$scope.vm = this;
@@ -30,12 +30,33 @@ module Peach {
 					}
 				});
 			});
+
+			const promise = pitService.LoadLicense();
+			promise.then((license: ILicense) => {
+				this.license = license;
+			});
 		}
 
 		private showSidebar: boolean = false;
 		private isMenuMin: boolean = false;
+		private license: ILicense;
 		public Metrics = C.MetricsList;
 		public WizardTracks = Peach.WizardTracks;
+
+		private get LicenseExpiration(): moment.Moment {
+			if (_.isUndefined(this.license)) {
+				return moment().add({ days: 60 });
+			}
+			return moment(this.license.expiration);
+		}
+
+		public get LicenseExpirationDiff(): number {
+			return this.LicenseExpiration.diff(moment());
+		}
+
+		public get LicenseExpirationFromNow(): string {
+			return this.LicenseExpiration.fromNow();
+		}
 
 		public get JobId(): number {
 			return this.$state.params['job'];
@@ -65,7 +86,7 @@ module Peach {
 		];
 
 		public IsCollapsed(state): boolean {
-			var subMenu = _.find(this.subMenus, { state: state });
+			const subMenu = _.find(this.subMenus, { state: state });
 			return subMenu.collapsed;
 		}
 
@@ -81,7 +102,7 @@ module Peach {
 		}
 
 		public get FaultCount(): any {
-			var count = 0;
+			let count = 0;
 			if (this.$scope.job) {
 				count = this.$scope.job.faultCount;
 			}
@@ -122,14 +143,14 @@ module Peach {
 		}
 
 		public MetricUrl(metric: C.IMetric): string {
-			var state = [C.States.JobMetrics, metric.id].join('.');
-			var params = { job: this.JobId };
+			const state = [C.States.JobMetrics, metric.id].join('.');
+			const params = { job: this.JobId };
 			return this.$state.href(state, params);
 		}
 		
 		public MetricActive(metric: C.IMetric) {
-			var state = [C.States.JobMetrics, metric.id].join('.');
-			var params = { job: this.JobId };
+			const state = [C.States.JobMetrics, metric.id].join('.');
+			const params = { job: this.JobId };
 			if (this.$state.is(state, params)) {
 				return 'active';
 			}
@@ -156,6 +177,12 @@ module Peach {
 
 		public OnHelp() {
 			this.$window.open('/docs', '_blank');
+		}
+
+		public get ShowLicenseWarning(): boolean {
+			return onlyIf(this.LicenseExpiration, () =>
+				this.LicenseExpiration.diff(moment(), 'days') < 30
+			);
 		}
 	}
 }

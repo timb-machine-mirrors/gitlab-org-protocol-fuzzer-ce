@@ -1,8 +1,6 @@
 /// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-	
+namespace Peach {
 	export interface IConfirmOptions {
 		Title?: string;
 		Body?: string;
@@ -25,7 +23,7 @@ module Peach {
 	class ConfirmController {
 		static $inject = [
 			C.Angular.$scope,
-			C.Angular.$modalInstance,
+			C.Angular.$uibModalInstance,
 			'Options'
 		];
 

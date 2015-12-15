@@ -26,6 +26,7 @@ namespace PeachValidator
 	    readonly string _windowTitleSample = "Peach Validator v" + Assembly.GetAssembly(typeof(Peach.Core.Engine)).GetName().Version + " - None - {0}";
 		public string SampleFileName = null;
 		public string PitFileName = null;
+		public string SaveFileName = null;
 	    readonly Dictionary<string, object> _parserArgs = new Dictionary<string, object>();
 		CrackModel crackModel = new CrackModel();
 	    readonly Dictionary<DataElement, CrackNode> _crackMap = new Dictionary<DataElement, CrackNode>();
@@ -120,7 +121,17 @@ namespace PeachValidator
 
 						try
 						{
-							cracker.CrackData(holder.MakeCrackModel(), data);
+							var dm = holder.MakeCrackModel();
+							cracker.CrackData(dm, data);
+
+							if (!string.IsNullOrEmpty(SaveFileName))
+							{
+								using (var f = File.Open(SaveFileName, FileMode.Create))
+								{
+									var val = dm.Value;
+									val.CopyTo(f);
+								}
+							}
 						}
 						catch (CrackingFailure ex)
 						{

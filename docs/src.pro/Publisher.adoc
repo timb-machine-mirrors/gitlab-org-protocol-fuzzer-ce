@@ -54,6 +54,7 @@ More information on creating a customer publisher can be found in the xref:Exten
 ==== Publishers
 
  * xref:Publishers_AndroidMonkey[AndroidMonkey]
+ * xref:Publishers_CAN[CAN]
  * xref:Publishers_Com[Com]
  * xref:Publishers_Console[Console]
  * xref:Publishers_ConsoleHex[ConsoleHex]

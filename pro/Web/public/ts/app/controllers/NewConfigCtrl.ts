@@ -1,14 +1,10 @@
 ﻿/// <reference path="../reference.ts" />
 
-module Peach {
-	"use strict";
-
+namespace Peach {
 	export class NewConfigController {
-		public Error: string = "";
-
 		static $inject = [
 			C.Angular.$scope,
-			C.Angular.$modalInstance,
+			C.Angular.$uibModalInstance,
 			C.Services.Pit,
 			"Pit"
 		];
@@ -20,9 +16,12 @@ module Peach {
 			public Pit: IPit
 		) {
 			$scope.vm = this;
+			this.OriginalName = Pit.name;
 		}
 
 		private pending: boolean = false;
+		private OriginalName: string;
+		public Error: string = "";
 
 		public Submit() {
 			this.Error = "";
@@ -37,10 +36,10 @@ module Peach {
 					this.pending = false;
 					switch (response.status) {
 						case 400:
-							this.Error = this.Pit.name + " already exists, please choose a new name.";
+							this.Error = `${this.Pit.name} already exists, please choose a new name.`;
 							break;
 						default:
-							this.Error = "Error: " + response.statusText;
+							this.Error = `Error: ${response.statusText}`;
 							break;
 					}
 				});

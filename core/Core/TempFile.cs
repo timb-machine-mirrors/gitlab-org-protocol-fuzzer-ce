@@ -14,6 +14,15 @@ namespace Peach.Core
 				"Peach-{0}".Fmt(Guid.NewGuid()));
 		}
 
+		public TempFile(string contents)
+		{
+			Path = System.IO.Path.Combine(
+				System.IO.Path.GetTempPath(),
+				"Peach-{0}".Fmt(Guid.NewGuid()));
+
+			File.WriteAllText(Path, contents);
+		}
+
 		public void Dispose()
 		{
 			try { File.Delete(Path); }

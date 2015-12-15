@@ -1,7 +1,5 @@
 ﻿/// <reference path="../reference.ts" />
 
-'use strict';
-
 describe("Peach", () => {
 	beforeEach(module('Peach'));
 
@@ -14,7 +12,7 @@ describe("Peach", () => {
 		};
 
 		beforeEach(inject(($injector: ng.auto.IInjectorService) => {
-			$modal = $injector.get(Peach.C.Angular.$modal);
+			$modal = $injector.get(Peach.C.Angular.$uibModal);
 			var $rootScope = <ng.IRootScopeService> $injector.get(Peach.C.Angular.$rootScope);
 			var $controller = <ng.IControllerService> $injector.get(Peach.C.Angular.$controller);
 			var jobService = $injector.get(Peach.C.Services.Job);

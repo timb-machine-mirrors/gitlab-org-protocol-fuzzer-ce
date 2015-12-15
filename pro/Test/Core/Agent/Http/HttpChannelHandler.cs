@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 using NLog;
 using NLog.Targets.Wrappers;
 using Peach.Core;
@@ -21,11 +22,19 @@ namespace Peach.Pro.Test.Core.Agent.Http
 {
 	internal class HttpChannelHandler : IDisposable
 	{
+		[Serializable]
+		class WantBytesRequest
+		{
+			public long count { get; set; }
+		}
+
+		private readonly Func<long, byte[]> _wantBytes;
 		private readonly RouteHandler _routes;
 		private readonly List<string> _restCalls; 
 
-		public HttpChannelHandler(RouteHandler routes, List<string> restCalls )
+		public HttpChannelHandler(RouteHandler routes, List<string> restCalls, Func<long, byte[]> wantBytes)
 		{
+			_wantBytes = wantBytes;
 			_restCalls = restCalls;
 
 			_routes = routes;
@@ -53,11 +62,7 @@ namespace Peach.Pro.Test.Core.Agent.Http
 			_routes.Add(HttpServer.PublisherPath + "/getProperty", "POST", OnHandler);
 			_routes.Add(HttpServer.PublisherPath + "/output", "POST", OnHandler);
 			_routes.Add(HttpServer.PublisherPath + "/input", "GET", OnHandler);
-			_routes.Add(HttpServer.PublisherPath + "/WantBytes", "GET", OnHandler);
-			_routes.Add(HttpServer.PublisherPath + "/ReadBytes", "GET", OnHandler);
-			_routes.Add(HttpServer.PublisherPath + "/Read", "GET", OnHandler);
-			_routes.Add(HttpServer.PublisherPath + "/ReadByte", "GET", OnHandler);
-			_routes.Add(HttpServer.PublisherPath + "/ReadAllBytes", "GET", OnHandler);
+			_routes.Add(HttpServer.PublisherPath + "/WantBytes", "POST", OnWantBytesHandler);
 		}
 
 		public void Dispose()
@@ -78,6 +83,29 @@ namespace Peach.Pro.Test.Core.Agent.Http
 			return RouteResponse.AsJson(resp, HttpStatusCode.OK);
 		}
 
+		private RouteResponse OnWantBytesHandler(HttpListenerRequest req)
+		{
+			string data;
+
+			using (var sr = new StreamReader(req.InputStream))
+				data = sr.ReadToEnd();
+
+			_restCalls.Add(req.Url.PathAndQuery + " " + data);
+
+			var obj = JsonConvert.DeserializeObject<WantBytesRequest>(data);
+
+			var resp = new JsonResponse
+			{
+				Status = "true",
+				Data = null,
+				Results = null
+			};
+
+			if (_wantBytes != null)
+				resp.Data = _wantBytes(obj.count);
+
+			return RouteResponse.AsJson(resp, HttpStatusCode.OK);
+		}
 		private RouteResponse OnHandlerFalse(HttpListenerRequest req)
 		{
 			_restCalls.Add(req.Url.PathAndQuery);
@@ -96,7 +124,7 @@ namespace Peach.Pro.Test.Core.Agent.Http
 		class JsonResponse
 		{
 			public string Status { get; set; }
-			public string Data { get; set; }
+			public byte[] Data { get; set; }
 			public Dictionary<string, object> Results { get; set; }
 		}
 

@@ -1,9 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using Peach.Core;
 using Portable.Licensing.Validation;
 
@@ -11,6 +11,7 @@ namespace Peach.Pro.Core
 {
 	public static class License
 	{
+		public const string ExpirationWarning = "Warning: Peach expires in {0} days";
 		static readonly string EulaConfig = "eulaAccepted";
 		static bool? eulaAccepted;
 		static bool valid;
@@ -42,6 +43,16 @@ namespace Peach.Pro.Core
 		public static bool IsMissing { get; private set; }
 		public static bool IsExpired { get; private set; }
 		public static bool IsInvalid { get; private set; }
+
+		public static bool IsNearingExpiration
+		{
+			get { return Expiration < DateTime.Now.AddDays(30); }
+		}
+
+		public static int ExpirationInDays
+		{
+			get { return (Expiration - DateTime.Now).Days; }
+		}
 
 		public static bool IsValid
 		{
@@ -141,7 +152,19 @@ namespace Peach.Pro.Core
 		{
 			// Try several different filenames
 			// this reduces the number of support calls.
-			var fileNames = new []
+
+			var searchPaths = new List<string>
+			{
+				Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+			};
+
+			var peachDirs = new[]
+			{
+				"peach",
+				"Peach",
+			};
+
+			var fileNames = new[]
 			{
 				"Peach.license",
 				"Peach.license.xml",
@@ -152,8 +175,14 @@ namespace Peach.Pro.Core
 				"peach.license.txt"
 			};
 
-			var peachDir = Platform.GetOS() == Platform.OS.Windows ? "Peach" : "peach";
-			var appData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+			if (Platform.GetOS() == Platform.OS.OSX)
+			{
+				// This is to allow users to install Peach.license on El Capitan.
+				// El Capitan introduced SIP which prevents users from creating files
+				// in "system" directories, such as "/usr/share".
+				searchPaths.Add("/Library/Application Support");
+			}
+
 			var asmDir = Utilities.ExecutionDirectory;
 			Exception ex = null;
 
@@ -170,15 +199,23 @@ namespace Peach.Pro.Core
 				}
 
 				// Try common application data second
-				// Windows - C:\ProgramData\Peach\Peach.license
-				// Unix - /usr/share/peach/Peach.license
-				var global = Path.Combine(appData, peachDir, fileName);
-				var globalLic = Read(global);
-
-				if (globalLic.Exception == null)
+				// Windows   C:\ProgramData\Peach\Peach.license
+				// Linux     /usr/share/peach/Peach.license
+				// OSX       /usr/share/peach/Peach.license
+				//           /Library/Application Support/Peach/Peach.license
+				foreach (var rootDir in searchPaths)
 				{
-					licenseFile = global;
-					return globalLic;
+					foreach (var peachDir in peachDirs)
+					{
+						var global = Path.Combine(rootDir, peachDir, fileName);
+						var globalLic = Read(global);
+
+						if (globalLic.Exception == null)
+						{
+							licenseFile = global;
+							return globalLic;
+						}
+					}
 				}
 
 				// Rethrow local exception since that is technically the first error

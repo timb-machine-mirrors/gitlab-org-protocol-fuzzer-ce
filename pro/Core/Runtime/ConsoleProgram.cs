@@ -32,19 +32,18 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using Godel.Core;
+using Newtonsoft.Json;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
 using Peach.Core.Runtime;
+using Peach.Core.Xsd;
 using Peach.Pro.Core.Loggers;
 using Peach.Pro.Core.Publishers;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
-using SharpPcap;
-using Newtonsoft.Json;
 
 namespace Peach.Pro.Core.Runtime
 {
@@ -242,7 +241,7 @@ namespace Peach.Pro.Core.Runtime
 			options.Add(
 				"json=",
 				"Specify a configuration file for a pit",
-				v => ParseJsonConfig(v)
+				ParseJsonConfig
 			);
 		}
 
@@ -302,6 +301,12 @@ namespace Peach.Pro.Core.Runtime
 				Console.Write("[[ ");
 				Console.ForegroundColor = ConsoleColor.DarkCyan;
 				Console.WriteLine(Copyright);
+				if (License.IsNearingExpiration)
+				{
+					Console.ForegroundColor = ConsoleColor.Yellow;
+					Console.WriteLine();
+					Console.WriteLine(License.ExpirationWarning, License.ExpirationInDays);
+				}
 				Console.ForegroundColor = DefaultForground;
 				Console.WriteLine();
 
@@ -352,7 +357,7 @@ namespace Peach.Pro.Core.Runtime
 
 		protected virtual Analyzer GetParser()
 		{
-			var parser = new GodelPitParser();
+			var parser = new ProPitParser();
 			Analyzer.defaultParser = parser;
 			return Analyzer.defaultParser;
 		}
@@ -410,6 +415,7 @@ namespace Peach.Pro.Core.Runtime
 				throw new PeachException("Error, unable to locate analyzer called '" + analyzer + "'.\n");
 
 			var field = analyzerType.GetField("supportCommandLine", BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy);
+			System.Diagnostics.Debug.Assert(field != null);
 			if ((bool)field.GetValue(null) == false)
 				throw new PeachException("Error, analyzer not configured to run from command line.");
 
@@ -474,20 +480,7 @@ namespace Peach.Pro.Core.Runtime
 				if (extra.Count > 1)
 					_config.runName = extra[1];
 
-				AddNewDefine("Peach.Cwd=" + Environment.CurrentDirectory);
-				AddNewDefine("Peach.Pwd=" + Utilities.ExecutionDirectory);
-				AddNewDefine("Peach.LogRoot=" + Configuration.LogRoot);
-
-				// Do we have pit.xml.config file?
-				// If so load it as the first defines file.
-				if (extra.Count > 0 && File.Exists(extra[0]) &&
-					extra[0].ToLower().EndsWith(".xml") &&
-					File.Exists(extra[0] + ".config"))
-				{
-					_configFiles.Insert(0, extra[0] + ".config");
-				}
-
-				var defs = ParseDefines();
+				var defs = ParseDefines(extra[0] + ".config");
 
 				var parserArgs = new Dictionary<string, object>();
 				parserArgs[PitParser.DEFINED_VALUES] = defs;
@@ -508,7 +501,7 @@ namespace Peach.Pro.Core.Runtime
 					if (_jsonConfig != null)
 					{
 						Console.WriteLine("Using agents defined in {0}", _jsonFile);
-						PitInjector.InjectConfig(_jsonConfig, defs, dom);
+						PitInjector.InjectAgents(_jsonConfig, defs, dom);
 					}
 
 					RunEngine(dom);
@@ -528,46 +521,35 @@ namespace Peach.Pro.Core.Runtime
 		/// Command line arguments override any .config file's defines
 		/// </summary>
 		/// <returns></returns>
-		protected virtual List<KeyValuePair<string, string>> ParseDefines()
+		protected virtual List<KeyValuePair<string, string>> ParseDefines(string pitConfig)
 		{
-			var items = _configFiles.Select(PitParser.parseDefines).ToList();
+			// Parse pit.xml.config to poopulate system defines and add
+			// -D command line overrides.
+			// This will succeed even if pitConfig doesn't exist.
+			var defs = PitDefines.ParseFile(pitConfig, _definedValues);
 
-			// Add .config files in order
-
-			// Add -D command line options last
-			items.Add(_definedValues);
-
-			var ret = new List<KeyValuePair<string, string>>();
-
-			// Foreach #define, save it, overwriting and previous value
-			foreach (var defs in items)
+			foreach (var item in _configFiles)
 			{
-				foreach (var kv in defs)
-				{
-					ret.RemoveAll(i => i.Key == kv.Key);
-					ret.Add(new KeyValuePair<string, string>(kv.Key, kv.Value));
-				}
+				var normalized = Path.GetFullPath(item);
+
+				if (!File.Exists(normalized))
+					throw new PeachException("Error, defined values file \"" + item + "\" does not exist.");
+
+				var cfg = XmlTools.Deserialize<PitDefines>(normalized);
+
+				// Add defines from extra config files in order
+				defs.Children.AddRange(cfg.Children);
 			}
+
+			var ret = defs.Evaluate();
 
 			if (_jsonConfig != null)
 			{
 				Console.WriteLine("Using defines from {0}", _jsonFile);
-				foreach (var item in _jsonConfig.Config)
-				{
-					if (item.Key == "Peach.Pwd" ||
-						item.Key == "Peach.Cwd" ||
-						item.Key == "Peach.LogRoot" ||
-						item.Key == "PitLibraryPath")
-						continue;
-					var i = ret.FindIndex(x => x.Key == item.Key);
-					if (i < 0)
-						ret.Add(new KeyValuePair<string, string>(item.Key, item.Value));
-					else
-						ret[i] = new KeyValuePair<string, string>(item.Key, item.Value);
-				}
+				PitInjector.InjectDefines(_jsonConfig, defs, ret);
 			}
 
-			return PitDefines.Evaluate(ret);
+			return ret;
 		}
 
 		/// <summary>
@@ -813,7 +795,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 
 				using (var stream = new FileStream("peach.xsd", FileMode.Create, FileAccess.Write))
 				{
-					Peach.Core.Xsd.SchemaBuilder.Generate(typeof(Peach.Core.Xsd.Dom), stream);
+					SchemaBuilder.Generate(typeof(Peach.Core.Xsd.Dom), stream);
 
 					Console.WriteLine("Successfully generated {0}", stream.Name);
 				}

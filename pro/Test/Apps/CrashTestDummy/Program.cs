@@ -35,6 +35,7 @@ namespace Peach.CrashTestDummy
 		class InvisibleForm : Form
 		{
 			readonly bool _ignore;
+			const int WM_CLOSE = 0x10;
 
 			public InvisibleForm(bool ignore)
 			{
@@ -52,7 +53,7 @@ namespace Peach.CrashTestDummy
 
 			protected override void WndProc(ref Message m)
 			{
-				if (m.Msg == 0x10 && _ignore)
+				if (m.Msg == WM_CLOSE && _ignore)
 				{
 					Console.WriteLine("Ignoring WM_CLOSE");
 					return;

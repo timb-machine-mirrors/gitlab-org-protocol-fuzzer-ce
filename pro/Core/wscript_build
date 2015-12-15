@@ -42,11 +42,11 @@ deps = [
 	'SuperWebSocket.dll',
 
 	'Peach.Core.dll',
-	'Godel.Core.dll',
 
 	'Managed.Adb.dll',
 	'BouncyCastle.Crypto.dll',
 	'aardvark_net.dll',
+	'komodo_net.dll',
 	'LibUsbDotNet.dll',
 	'Mono.Posix.dll',
 
