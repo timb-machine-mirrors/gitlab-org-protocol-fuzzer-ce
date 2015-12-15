@@ -525,19 +525,15 @@ namespace Peach.Pro.Core
 					Name = "Root Log Directory",
 					Description = "Full path to the root log directory",
 					Value = Configuration.LogRoot,
-				}
-			});
-
-			if (pitLibraryPath != null)
-			{
-				defs.SystemDefines.Add(new SystemDefine
+				},
+				new SystemDefine
 				{
 					Key = "PitLibraryPath",
 					Name = "Pit Library Path",
 					Description = "Path to root of Pit Library",
-					Value = pitLibraryPath,
-				});
-			}
+					Value = pitLibraryPath ?? Environment.CurrentDirectory,
+				}
+			});
 
 			if (overrides != null)
 			{

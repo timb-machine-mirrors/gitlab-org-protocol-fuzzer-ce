@@ -906,28 +906,28 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void TestConfigInjection()
 		{
-			var path = Path.Combine(root.Path, "Image", "inject.xml");
-			File.WriteAllText(path, pitExample);
-
-			var asm = Assembly.GetExecutingAssembly();
-			var json = Utilities.LoadStringResource(asm, "Peach.Pro.Test.Core.Resources.pit.json");
-			var cfg = JsonConvert.DeserializeObject<PitConfig>(json);
-
-			var cfgFile = Path.Combine(root.Path, "Image", "IMG.xml.config");
-			var extras = new List<KeyValuePair<string, string>>();
-			var defs = PitDefines.ParseFile(cfgFile, extras);
-
-			var evaluated = defs.Evaluate();
-			PitInjector.InjectDefines(cfg, defs, evaluated);
-
-			var opts = new Dictionary<string, object>();
-			opts[PitParser.DEFINED_VALUES] = evaluated;
-
-
 			var cwd = Directory.GetCurrentDirectory();
 			try
 			{
 				Directory.SetCurrentDirectory(root.Path);
+
+				var path = Path.Combine(root.Path, "Image", "inject.xml");
+				File.WriteAllText(path, pitExample);
+
+				var asm = Assembly.GetExecutingAssembly();
+				var json = Utilities.LoadStringResource(asm, "Peach.Pro.Test.Core.Resources.pit.json");
+				var cfg = JsonConvert.DeserializeObject<PitConfig>(json);
+
+				var cfgFile = Path.Combine(root.Path, "Image", "IMG.xml.config");
+				var extras = new List<KeyValuePair<string, string>>();
+				var defs = PitDefines.ParseFile(cfgFile, extras);
+
+				var evaluated = defs.Evaluate();
+				PitInjector.InjectDefines(cfg, defs, evaluated);
+
+				var opts = new Dictionary<string, object>();
+				opts[PitParser.DEFINED_VALUES] = evaluated;
+
 
 				var parser = new PitParser();
 				var dom = parser.asParser(opts, path);

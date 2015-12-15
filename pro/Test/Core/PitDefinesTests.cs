@@ -255,7 +255,7 @@ namespace Peach.Pro.Test.Core
 			{
 				var defs = PitDefines.ParseFile(f.Path, overrides);
 
-				Assert.AreEqual(6, defs.SystemDefines.Count);
+				Assert.AreEqual(7, defs.SystemDefines.Count);
 				Assert.AreEqual(1, defs.Platforms.Count);
 				Assert.AreEqual(3, defs.Platforms[0].Defines.Count);
 
@@ -305,14 +305,14 @@ namespace Peach.Pro.Test.Core
 			{
 				var defs = PitDefines.ParseFile(f.Path, overrides);
 
-				Assert.AreEqual(6, defs.SystemDefines.Count);
+				Assert.AreEqual(7, defs.SystemDefines.Count);
 				Assert.AreEqual(2, defs.Platforms.Count);
 				Assert.AreEqual(3, defs.Platforms[0].Defines.Count);
 				Assert.AreEqual(1, defs.Platforms[1].Defines.Count);
 
 				var dst = defs.Evaluate();
 
-				Assert.AreEqual(7, dst.Count);
+				Assert.AreEqual(8, dst.Count);
 
 				Assert.AreEqual("SamplePath", dst[0].Key);
 				Assert.AreEqual("bar", dst[0].Value);
@@ -322,8 +322,9 @@ namespace Peach.Pro.Test.Core
 				Assert.AreEqual("Peach.Pwd", dst[3].Key);
 				Assert.AreEqual("Peach.Cwd", dst[4].Key);
 				Assert.AreEqual("Peach.LogRoot", dst[5].Key);
-				Assert.AreEqual("Arg", dst[6].Key);
-				Assert.AreEqual("bar", dst[6].Value);
+				Assert.AreEqual("PitLibraryPath", dst[6].Key);
+				Assert.AreEqual("Arg", dst[7].Key);
+				Assert.AreEqual("bar", dst[7].Value);
 			}
 		}
 
