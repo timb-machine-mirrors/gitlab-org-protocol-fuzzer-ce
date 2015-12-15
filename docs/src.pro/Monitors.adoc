@@ -28,7 +28,7 @@ The following table lists each monitor by name, function type (Fault detection, 
 |xref:Monitors_IpPower9258[IpPower9258]          |    |    |X   |
 |xref:Monitors_LinuxCoreFile[LinuxCoreFile]      |X   |X   |    |Linux
 |xref:Monitors_MemoryMonitor[Memory]             |X   |    |    |
-|xref:Monitors_Pcap[NetworkCapture Network]      |X   |X   |    |
+|xref:Monitors_Pcap[NetworkCapture]              |X   |X   |    |
 |xref:Monitors_PageHeap[Page Heap]               |X   |    |    |Windows
 |xref:Monitors_Ping[Ping]                        |X   |    |    |
 |xref:Monitors_PopupWatcher[Popup Watcher]       |X   |    |X   |Windows
