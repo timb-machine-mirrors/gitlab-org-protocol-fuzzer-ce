@@ -148,7 +148,7 @@ namespace Peach.Pro.Core.WebServices
 				Items = defines.SystemDefines.Select(d => DefineToParamDetail(d, reserved, ifaces)).ToList()
 			});
 
-			return ret;
+			return ret.Where(d => d.Type != ParameterType.Group || d.Items != null).ToList();
 		}
 
 		public static void ApplyWeb(this PitDefines defines, List<Param> config)
