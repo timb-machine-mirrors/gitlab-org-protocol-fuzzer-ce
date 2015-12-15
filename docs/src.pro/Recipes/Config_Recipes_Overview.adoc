@@ -1,0 +1,38 @@
+:images: ../images
+:peachweb: Peach Web Interface
+:peachcomd: Peach Command Line Interface
+:peachug: Peach User Guide
+
+[[Configuration_Recipes]]
+
+== Configuration Recipes
+
+The Peach Fuzzing Platform is very flexible and can accommodate configurations that 
+involve multiple machines. Simple configurations, such as file fuzzing, require a 
+single machine. More advanced configurations, such as network protocols, involve two 
+or more machines. 
+
+This section provides configuration recipes to use in your fuzzing projects. 
+You can follow a recipe to the letter to examine the test target. Or, use a recipe 
+as a starting point, then augment and adjust the recipe to arrive at a configuration 
+that precisely fits the monitoring requirements of the project.
+
+All of the recipes here follow a common process:
+
+1.	Define the workflow for the fuzzing session.
+2.	Define the Peach components to use in configuring the fuzzing setup. 
+This step focuses on the monitoring needs and the agents that house the monitors. 
+3.	Provide configuration settings used to fuzz a sample test target using the recipe.
+
+[NOTE]
+=======
+*NOTE*: Assumptions/Givens in each recipe include the following:
+
+* A Pit, pre-defined or custom, is ready to use.
+* Peach is installed and ready to run.
+* All software modules needed to perform the fuzzing job are available for use.
+=======
+
+.What’s left to do?
+When you finish developing a recipe, it’s time to fill out and test the configuration, then run the fuzzing job. 
+
