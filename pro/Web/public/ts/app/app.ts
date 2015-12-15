@@ -274,7 +274,7 @@ namespace Peach {
 				};
 
 				views[`@pit.wizard.${track.id}`] = {
-					templateUrl: C.Templates.Pit.Wizard.TrackIntro.replace(':track', track.id)
+					templateUrl: C.Templates.Pit.Wizard.TrackIntro.replace(':track', track.id.toLowerCase())
 				};
 
 				$stateProvider
@@ -286,7 +286,7 @@ namespace Peach {
 					})
 					.state([C.States.PitWizard, track.id, 'review'].join('.'), {
 						url: '/review',
-						templateUrl: C.Templates.Pit.Wizard.TrackDone.replace(':track', track.id),
+						templateUrl: C.Templates.Pit.Wizard.TrackDone.replace(':track', track.id.toLowerCase()),
 						ncyBreadcrumb: { label: 'Review' }
 					})
 					.state([C.States.PitWizard, track.id, 'steps'].join('.'), {
