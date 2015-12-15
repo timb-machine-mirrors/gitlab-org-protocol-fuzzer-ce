@@ -194,10 +194,12 @@ namespace Peach {
 		private CreateDefinesView(): IParameter[] {
 			const view = angular.copy(this.pit.metadata.defines);
 			for (let group of view) {
-				for (let param of group.items) {
-					const config = _.find(this.pit.config, { key: param.key });
-					if (config && config.value) {
-						param.value = config.value;
+				if (group.items) {
+					for (let param of group.items) {
+						const config = _.find(this.pit.config, { key: param.key });
+						if (config && config.value) {
+							param.value = config.value;
+						}
 					}
 				}
 			}

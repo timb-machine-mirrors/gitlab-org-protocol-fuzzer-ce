@@ -5,15 +5,16 @@
 	                        param="param">
 	</peach:parameter-select>
 	<peach:parameter-combo ng-switch-when="combo"
-												 ng-model="param.value"
-												 ng-required="vm.IsRequired"
-												 data="param.options"
+	                       ng-model="param.value"
+	                       ng-required="vm.IsRequired"
+	                       data="param.options"
 	                       description="param.description"
-												 placeholder="param.value">
+	                       placeholder="param.value">
 	</peach:parameter-combo>
+	<div ng-switch-when="space"></div>
 	<peach:parameter-string ng-switch-default
-													form="form"
-													param="param">
+	                        form="form"
+	                        param="param">
 	</peach:parameter-string>
 	<span class="help-block"
 				ng-messages="form.param.$error"

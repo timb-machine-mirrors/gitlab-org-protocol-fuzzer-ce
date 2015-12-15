@@ -101,6 +101,8 @@ namespace Peach {
 				case ParameterType.Ipv4:
 				case ParameterType.Ipv6:
 					return "combo";
+				case ParameterType.Space:
+					return "space";
 				default:
 					return "string";
 			}
