@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using NUnit.Framework;
@@ -712,6 +713,46 @@ namespace Peach.Pro.Test.Core
 				Assert.NotNull(final);
 
 				Console.WriteLine(final);
+			}
+		}
+
+
+		[Test]
+		public void TestEmptyGroups()
+		{
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+<PitDefines>
+	<Group name='Group'>
+		<String key='key' name='name' value='value' />
+	</Group>
+	<Group name='Empty' />
+	<All>
+		<String key='PitLibraryPath' name='Pit Library Path' value='.'/>
+	</All>
+</PitDefines>
+";
+
+			using (var tmp = new TempFile(xml))
+			{
+				var defs = PitDefines.ParseFile(tmp.Path, "/path/to/pits");
+				Assert.NotNull(defs);
+
+				Assert.AreEqual(3, defs.Children.Count);
+
+				var web = defs.ToWeb();
+				Assert.AreEqual(2, web.Count);
+
+				// Don't include empty groups in the web model
+
+				Assert.AreEqual("Group", web[0].Name);
+				Assert.AreEqual("System Defines", web[1].Name);
+
+				defs.ApplyWeb(web[0].Items.OfType<Param>().ToList());
+
+				Assert.AreEqual(3, defs.Children.Count);
+				Assert.AreEqual("Group", defs.Children[0].Name);
+				Assert.AreEqual("Empty", defs.Children[1].Name);
+				Assert.AreEqual("All", defs.Children[2].Name);
 			}
 		}
 	}
