@@ -21,6 +21,9 @@ namespace Peach.C {
 		export const Monitor = 'peachMonitor';
 		export const Parameter = 'peachParameter';
 		export const ParameterInput = 'peachParameterInput';
+		export const ParameterCombo = 'peachParameterCombo';
+		export const ParameterSelect = 'peachParameterSelect';
+		export const ParameterString = 'peachParameterString';
 		export const Test = 'peachTest';
 		export const Unique = 'peachUnique';
 		export const UniqueChannel = 'peachUniqueChannel';
@@ -167,9 +170,12 @@ namespace Peach.C {
 			export const Jobs = 'html/directives/jobs.html';
 			export const Monitor = 'html/directives/monitor.html';
 			export const Parameter = 'html/directives/parameter.html';
-			export const ParameterInput = 'html/directives/parameter-input.html';
 			export const Question = 'html/directives/question.html';
 			export const Test = 'html/directives/test.html';
+			export const ParameterCombo = 'html/directives/parameter/combo.html';
+			export const ParameterInput = 'html/directives/parameter/input.html';
+			export const ParameterSelect = 'html/directives/parameter/select.html';
+			export const ParameterString = 'html/directives/parameter/string.html';
 		}
 	}
 

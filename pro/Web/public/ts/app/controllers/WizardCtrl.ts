@@ -285,8 +285,12 @@ namespace Peach {
 			if (_.contains(types, template)) {
 				template = QuestionTypes.Combo;
 			}
-			if (template === QuestionTypes.User) {
+			if (template === QuestionTypes.User ||
+				template === QuestionTypes.Hex) {
 				template = QuestionTypes.String;
+			}
+			if (template === QuestionTypes.Bool) {
+				template = QuestionTypes.Enum;
 			}
 			return C.Templates.Pit.Wizard.QuestionType.replace(':type', template);
 		}

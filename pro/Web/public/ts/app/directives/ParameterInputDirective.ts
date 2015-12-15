@@ -12,7 +12,52 @@ namespace Peach {
 		}
 	}
 
-	export interface IOption {
+	export const ParameterComboDirective: IDirective = {
+		ComponentID: C.Directives.ParameterCombo,
+		restrict: 'E',
+		require: [C.Directives.ParameterCombo, C.Angular.ngModel],
+		controller: C.Controllers.Combobox,
+		controllerAs: 'vm',
+		templateUrl: C.Templates.Directives.ParameterCombo,
+		scope: {
+			data: '=',
+			description: '=',
+			placeholder: '='
+		},
+		link: (
+			scope: IComboboxScope,
+			element: ng.IAugmentedJQuery,
+			attrs: ng.IAttributes,
+			ctrls: any
+		) => {
+			const ctrl: ComboboxController = ctrls[0];
+			ctrl.Link(element, attrs, ctrls[1]);
+		}
+	}
+
+	export const ParameterSelectDirective: IDirective = {
+		ComponentID: C.Directives.ParameterSelect,
+		restrict: "E",
+		templateUrl: C.Templates.Directives.ParameterSelect,
+		controller: C.Controllers.ParameterInput,
+		scope: {
+			param: "=",
+			form: "="
+		}
+	}
+
+	export const ParameterStringDirective: IDirective = {
+		ComponentID: C.Directives.ParameterString,
+		restrict: "E",
+		templateUrl: C.Templates.Directives.ParameterString,
+		controller: C.Controllers.ParameterInput,
+		scope: {
+			param: "=",
+			form: "="
+		}
+	}
+
+	interface IOption {
 		key: string;
 		text: string;
 		description: string;
@@ -51,12 +96,17 @@ namespace Peach {
 				case ParameterType.Bool:
 				case ParameterType.Call:
 					return "select";
+				case ParameterType.Hwaddr:
+				case ParameterType.Iface:
+				case ParameterType.Ipv4:
+				case ParameterType.Ipv6:
+					return "combo";
 				default:
 					return "string";
 			}
 		}
 
-		Choices: IOption[];
+		private Choices: IOption[];
 
 		private MakeChoices() {
 			const tuples = [];

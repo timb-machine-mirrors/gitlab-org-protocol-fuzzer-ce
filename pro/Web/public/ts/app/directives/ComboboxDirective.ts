@@ -11,6 +11,7 @@ namespace Peach {
 		highlighted?: number;
 		$model: ng.INgModelController;
 		$element: ng.IAugmentedJQuery;
+		description: string;
 	}
 
 	const KEY = {
