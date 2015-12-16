@@ -50,9 +50,12 @@ _Optional:_
 Password:: Password for SSH account, defaults to "".
 KeyPath:: Path to SSH key, defaults to "".
 CheckValue:: Regex to match the command response, defaults to "".
-FaultOnMatch:: Trigger a fault if the CheckValue regex matches, defaults to true.
-StartOnCall:: Run when signaled by the state machine.
 
+//FaultOnMatch:: Trigger a fault if the CheckValue regex matches, defaults to true.
+FaultOnMatch:: Trigger a fault if the CheckValue regex matches, defaults to false. +
+FaultOnMatch triggers a fault in a second case--when FaultOnMatch is false and Peach does not find a match for the CheckValue regex.
+
+StartOnCall:: Run when signaled by the state machine.
 
 When::
 +
