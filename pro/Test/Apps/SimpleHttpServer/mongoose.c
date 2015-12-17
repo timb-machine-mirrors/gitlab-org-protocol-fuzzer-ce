@@ -18,7 +18,9 @@
 #undef _UNICODE                 // Use multibyte encoding on Windows
 #define _MBCS                   // Use multibyte encoding on Windows
 #define _INTEGRAL_MAX_BITS 64   // Enable _stati64() on Windows
+#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS // Disable deprecation warning in VS2005+
+#endif
 #undef WIN32_LEAN_AND_MEAN      // Let windows.h always include winsock2.h
 #define _XOPEN_SOURCE 600       // For flockfile() on Linux
 #define __STDC_FORMAT_MACROS    // <inttypes.h> wants this for C++
@@ -29,6 +31,13 @@
 #ifdef _MSC_VER
 #pragma warning (disable : 4127)  // FD_SET() emits warning, disable it
 #pragma warning (disable : 4204)  // missing c99 support
+#pragma warning (disable : 4244)  // Coversion has possible loss of data
+#pragma warning (disable : 4267)  // Coversion has possible loss of data
+#pragma warning (disable : 4245)  // Conversion has signed/unsigned mismatch
+#pragma warning (disable : 4996)  // POSIX name for this item is deprecated
+#pragma warning (disable : 4100)  // Unreferenced formal parameter
+#pragma warning (disable : 4055)  // type_cast from data pointer to function pointer
+#pragma warning (disable : 4054)  // type_cast from fucntion pointer to data pointer
 #endif
 
 #include <sys/types.h>
