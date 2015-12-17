@@ -10,49 +10,8 @@ namespace PitTester
 {
 	[TestFixture]
 	[Quick]
-	class UnitTests : TestBase
+	internal class UnitTests
 	{
-		// ValueSource attribute doesn't resolve properties
-		// on the base class so expose the pit list here.
-		public static List<TestCase> AllPits
-		{
-			get 
-			{
-				return ThePits;
-			}
-		}
-
-		[Test]
-		public void LoadLibrary()
-		{
-			if (!string.IsNullOrEmpty(LoadErrors))
-				Assert.Fail(LoadErrors);
-
-			if (LibraryExists)
-				CollectionAssert.IsNotEmpty(AllPits);
-		}
-
-		[Test]
-		public void VerifyConfig([ValueSource("AllPits")]TestCase test)
-		{
-			var errors = new StringBuilder();
-			var fileName = test.Pit.Versions[0].Files[0].Name;
-
-			try
-			{
-				PitTester.VerifyPitConfig(test.Pit.Versions[0]);
-			}
-			catch (Exception ex)
-			{
-				errors.AppendFormat("{0}.config", fileName);
-				errors.AppendLine();
-				errors.AppendLine(ex.Message);
-			}
-
-			if (errors.Length > 0)
-				Assert.Fail(errors.ToString());
-		}
-
 		[Test]
 		public void TestIgnoreArrayField()
 		{
