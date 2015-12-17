@@ -308,12 +308,7 @@ namespace PitTester
 
 		public static void ProfilePit(string pitLibraryPath, string fileName)
 		{
-			var defs = PitParser.parseDefines(fileName + ".config");
-			if (defs.Any(k => k.Key == "PitLibraryPath"))
-			{
-				defs.Remove(defs.First(k => k.Key == "PitLibraryPath"));
-				defs.Add(new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
-			}
+			var defs = PitDefines.ParseFile(fileName + ".config", pitLibraryPath).Evaluate();
 
 			var args = new Dictionary<string, object>();
 			args[PitParser.DEFINED_VALUES] = defs;
@@ -402,13 +397,7 @@ namespace PitTester
 
 		private static List<KeyValuePair<string, string>> LoadDefines(string pitLibraryPath, string fileName)
 		{
-			var defs = PitParser.parseDefines(fileName + ".config");
-
-			if (defs.Any(k => k.Key == "PitLibraryPath"))
-				defs.Remove(defs.First(k => k.Key == "PitLibraryPath"));
-
-			// PitLibraryPath MUST be last!
-			defs.Add(new KeyValuePair<string, string>("PitLibraryPath", pitLibraryPath));
+			var defs = PitDefines.ParseFile(fileName + ".config", pitLibraryPath).Evaluate();
 
 			// Some defines are expected to be empty if they are required to be
 			// set by the user.  The pit will not parse w/o them being set however
@@ -498,27 +487,15 @@ namespace PitTester
 
 		public static void VerifyPitConfig(PitVersion version)
 		{
-			var os = Platform.GetOS();
 			var fileName = version.Files[0].Name;
-			var raw = XmlTools.Deserialize<PitDefines>(fileName + ".config");
-			var defs = raw.Platforms.Where(a => a.Platform.HasFlag(os)).SelectMany(a => a.Defines).ToList();
-			var old = PitParser.parseDefines(fileName + ".config");
 
-			if (defs.Count != old.Count)
-				throw new ApplicationException(string.Format("PitParser didn't properly parse defines file.  Expected '{0}' defines, got '{1}' defines.", defs.Count, old.Count));
-
-			for (int i = 0; i < defs.Count; ++i)
-			{
-				if (defs[i].Key != old[i].Key)
-					throw new ApplicationException(string.Format("PitParser didn't properly parse defines file. Expected '{1}' defines, got '{2}' for key at index {0}.", i, defs[i].Key, old[i].Key));
-				if (defs[i].Value != old[i].Value)
-					throw new ApplicationException(string.Format("PitParser didn't properly parse defines file. Expected '{1}' defines, got '{2}' for value at index {0}.", i, defs[i].Value, old[i].Value));
-			}
+			var raw = PitDefines.ParseFile(fileName + ".config");
+			var defs = raw.Walk().ToList();
 
 			var sb = new StringBuilder();
 
-			var noName = string.Join(", ", defs.Where(d => string.IsNullOrEmpty(d.Name)).Select(d => d.Key));
-			var noDesc = string.Join(", ", defs.Where(d => string.IsNullOrEmpty(d.Description)).Select(d => d.Key));
+			var noName = string.Join(", ", defs.Where(d => d.ConfigType != ParameterType.Space && string.IsNullOrEmpty(d.Name)).Select(d => d.Key));
+			var noDesc = string.Join(", ", defs.Where(d => d.ConfigType != ParameterType.Space && string.IsNullOrEmpty(d.Description)).Select(d => d.Key));
 
 			if (noName.Length > 0)
 				sb.AppendFormat("The following keys have an empty name: {0}", noName);
@@ -542,12 +519,14 @@ namespace PitTester
 					break;
 			}
 
+			defs.RemoveAll(d => d.ConfigType == ParameterType.Space || d.ConfigType == ParameterType.Group);
+
 			var extraDefs = string.Join(", ", defs.Select(d => d.Key));
 			if (extraDefs.Length > 0)
 				sb.AppendFormat("The following keys are not used by the pit: {0}", extraDefs);
 
-			if (raw.Platforms.Count > 1 || raw.Platforms[0].Platform != Platform.OS.All)
-				sb.AppendFormat("Config file should only have a single <All> element.");
+			if (raw.Platforms.Any(p => p.Platform != Platform.OS.All))
+				sb.AppendFormat("Config file should not have platform specific defines.");
 
 			if (sb.Length > 0)
 				throw new ApplicationException(sb.ToString());
