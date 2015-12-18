@@ -42,6 +42,8 @@ static int index_html(struct mg_connection *conn) {
   return 0;
 }
 
+int stop = 0;
+
 int main(void) {
   struct mg_server *server;
 
@@ -52,7 +54,7 @@ int main(void) {
 
   // Serve request. Hit Ctrl-C to terminate the program
   printf("Starting on port %s\n", mg_get_option(server, "listening_port"));
-  for (;;) {
+  while (!stop) {
     mg_poll_server(server, 1000);
   }
 
