@@ -706,5 +706,103 @@ Field'/>
 			}
 		}
 
+		[Test]
+		public void TestFromFileFixup()
+		{
+			const string config = @"
+<PitDefines>
+	<All>
+		<Define name='Pre' key='Pre' value='' />
+		<Define name='Post' key='Post' value='' />
+		<Define name='MyTextFile' key='MyTextFile' value='' />
+		<Define name='MyHexFile' key='MyHexFile' value='' />
+	</All>
+</PitDefines>
+";
+
+			const string xml = @"
+<Peach>
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel name='DM'>
+					<String value='##Pre##' />
+					<Blob>
+						<Fixup class='FromFile'>
+							<Param name='Filename' value='##MyTextFile##' />
+							<Param name='Encoding' value='Pem' />
+						</Fixup>
+					</Blob>
+					<Blob>
+						<Fixup class='FromFile'>
+							<Param name='Filename' value='##MyHexFile##' />
+						</Fixup>
+					</Blob>
+					<String value='##Post##' />
+				</DataModel>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='TheState'/>
+		<Publisher name='Pub' class='Null'/>
+	</Test>
+</Peach>
+";
+
+			const string test = @"
+<TestData>
+
+	<Define key='Pre' value='foo' />
+
+	<TextFile key='MyTextFile'>
+<![CDATA[
+-----BEGIN CERTIFICATE-----
+SGVsbG8=
+-----END CERTIFICATE-----
+]]>
+	</TextFile>
+
+	<Define key='Post' value='bar' />
+
+	<HexFile key='MyHexFile'>
+<![CDATA[
+0000   69 6E 70 75 74 31                                 input1
+]]>
+	</HexFile>
+
+	<Test name='Default'>
+		<Open   action='TheState.Initial.Action' publisher='Pub'/>
+		<Output action='TheState.Initial.Action' publisher='Pub'>
+<![CDATA[
+0000   66 6F 6F 48 65 6C 6C 6F 69 6E 70 75 74 31 62 61   fooHelloinput1ba
+0010   72                                                r               
+]]>
+		</Output>
+	</Test>
+</TestData>
+";
+
+			// Ensure we can run when there is an ignore that matches a de-selected choice
+			var pitFile = Path.GetTempFileName();
+			var pitTest = pitFile + ".test";
+			var pitConfig = pitFile + ".config";
+
+			File.WriteAllText(pitFile, xml);
+			File.WriteAllText(pitTest, test);
+			File.WriteAllText(pitConfig, config);
+
+			try
+			{
+				PitTester.TestPit("", pitFile, true, null, false, 1);
+			}
+			finally
+			{
+				File.Delete(pitFile);
+				File.Delete(pitTest);
+				File.Delete(pitConfig);
+			}
+		}
 	}
 }

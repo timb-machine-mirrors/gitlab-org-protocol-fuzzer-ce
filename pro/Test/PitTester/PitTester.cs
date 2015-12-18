@@ -93,6 +93,28 @@ namespace PitTester
 				throw new FileNotFoundException();
 
 			var testData = TestData.Parse(testFile);
+
+			var cleanme = new List<IDisposable>();
+
+			try
+			{
+				foreach (var tmp in testData.Defines.OfType<TestData.TempFileDefine>())
+				{
+					cleanme.Add(tmp);
+					tmp.Populate();
+				}
+
+				DoTestPit(testData, libraryPath, pitFile, singleIteration, seed, keepGoing, stop);
+			}
+			finally
+			{
+				foreach (var item in cleanme)
+					item.Dispose();
+			}
+		}
+
+		private static void DoTestPit(TestData testData, string libraryPath, string pitFile, bool singleIteration, uint? seed, bool keepGoing, uint stop = 500)
+		{
 			if (testData.Tests.Any(x => x.SingleIteration))
 				singleIteration = true;
 
