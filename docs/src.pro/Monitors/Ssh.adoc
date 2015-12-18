@@ -59,7 +59,7 @@ StartOnCall:: Run when signaled by the state machine.
 
 When::
 +
-Period when the command should be run. Defaults to +OnCall+
+Period when the command should be run. Defaults to +DetectFault+.
 +
 // [horizontal]   - commented out because labels and descriptions overlap on some entries.
 // DetectFault::: Run command to check for faulting condition. Requires regex be set. Original and default mode of operation.
