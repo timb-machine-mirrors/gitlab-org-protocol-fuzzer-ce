@@ -38,6 +38,8 @@
 #pragma warning (disable : 4100)  // Unreferenced formal parameter
 #pragma warning (disable : 4055)  // type_cast from data pointer to function pointer
 #pragma warning (disable : 4054)  // type_cast from fucntion pointer to data pointer
+#pragma warning (disable : 4305)  // 'type cast' : truncation from 'HANDLE' to 'pid_t'
+#pragma warning (disable : 4306)  // 'type cast' : conversion from 'int' to 'HANDLE' of greater size
 #endif
 
 #include <sys/types.h>
