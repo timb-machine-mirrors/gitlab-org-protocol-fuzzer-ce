@@ -378,7 +378,37 @@ namespace PitTester
 			if (File.Exists(pitTest))
 				testData = TestData.Parse(pitTest);
 
-			var defs = LoadDefines(pitLibraryPath, fileName);
+			var cleanme = new List<IDisposable>();
+
+			try
+			{
+				foreach (var tmp in testData.Defines.OfType<TestData.TempFileDefine>())
+				{
+					cleanme.Add(tmp);
+					tmp.Populate();
+				}
+
+				DoVerifyDataSets(testData, pitLibraryPath, fileName);
+			}
+			finally
+			{
+				foreach (var item in cleanme)
+					item.Dispose();
+			}
+		}
+
+		private static void DoVerifyDataSets(TestData testData, string pitLibraryPath, string fileName)
+		{
+			var defs = PitDefines.ParseFile(fileName + ".config", pitLibraryPath).Evaluate();
+
+			var testDefs = testData.Defines.ToDictionary(x => x.Key, x => x.Value);
+
+			for (var i = 0; i < defs.Count; ++i)
+			{
+				string value;
+				if (testDefs.TryGetValue(defs[i].Key, out value))
+					defs[i] = new KeyValuePair<string, string>(defs[i].Key, value);
+			}
 
 			var args = new Dictionary<string, object>();
 			args[PitParser.DEFINED_VALUES] = defs;
