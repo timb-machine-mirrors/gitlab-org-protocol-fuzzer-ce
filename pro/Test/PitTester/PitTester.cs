@@ -791,6 +791,8 @@ namespace PitTester
 				case "SourceIPv6":
 				case "TargetIPv6":
 					return new KeyValuePair<string, string>(item.Key, "::1");
+				case "Source":
+				case "Destination":
 				case "ListenPort":
 				case "SourcePort":
 				case "TargetPort":
