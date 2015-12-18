@@ -402,7 +402,7 @@ namespace PitTester
 
 		private static void DoVerifyDataSets(TestData testData, string pitLibraryPath, string fileName)
 		{
-			var defs = PitDefines.ParseFile(fileName + ".config", pitLibraryPath).Evaluate();
+			var defs = LoadDefines(pitLibraryPath, fileName);
 
 			var testDefs = testData.Defines.ToDictionary(x => x.Key, x => x.Value);
 
