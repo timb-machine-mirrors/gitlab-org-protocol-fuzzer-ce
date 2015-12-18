@@ -187,6 +187,10 @@ namespace PitTester
 			[DefaultValue(false)]
 			public bool SingleIteration { get; set; }
 
+			[XmlAttribute("skip")]
+			[DefaultValue(true)]
+			public bool Skip { get; set; }
+
 			[XmlAttribute("seed")]
 			[DefaultValue("")]
 			public string Seed { get; set; }

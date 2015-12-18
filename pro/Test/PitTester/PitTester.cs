@@ -94,6 +94,9 @@ namespace PitTester
 
 			var testData = TestData.Parse(testFile);
 
+			if (testData.Tests.Any(x => x.Skip))
+				throw new FileNotFoundException();
+
 			var cleanme = new List<IDisposable>();
 
 			try
