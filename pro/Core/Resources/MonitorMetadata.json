@@ -1,589 +1,254 @@
-[
-  {
-    "Name": "Power Control",
-    "Type": "Group",
-    "Items": [
+{
+  "Groups": [
+    {
+      "Name": "Automation - Power",
+      "Items": [ 
+        "CanaKitRelay"
+      ]
+    },
+    {
+      "Name": "Android",
+      "Items": [ 
+        "Android",
+        "AndroidEmulator"
+      ]
+    },
+    {
+      "Name": "Fault Detection - Process",
+      "Items": [ 
+        "WindowsDebugger",
+        "Gdb",
+        "Process",
+        "CrashWrangler"
+      ]
+    }
+  ],
+  "Parameters": {
+    "CanaKitRelay": [
       {
-        "Name": "CanaKitRelay",
-        "Type": "Monitor",
+        "Name": "Core Parameters",
         "Items": [
-          {
-            "Name": "Core Parameters",
-            "Type": "Group",
-            "Items": [
-              {
-                "Name": "SerialPort",
-                "Type": "Param"
-              },
-              {
-                "Name": "RelayNumber",
-                "Type": "Param"
-              },
-              {
-                "Name": "Action",
-                "Type": "Param"
-              },
-              {
-                "Name": "ToggleDelay",
-                "Type": "Param"
-              }
-            ]
-          },
-          {
-            "Name": "When To Trigger",
-            "Type": "Group",
-            "Items": [
-              {
-                "Name": "When",
-                "Type": "Param"
-              },
-              {
-                "Name": "StartOnCall",
-                "Type": "Param"
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "Name": "Fault Detection",
-    "Type": "Group",
-    "Items": [
-        {
-            "Name": "WindowsDebugger",
-            "Type": "Monitor",
-            "Items": [
-                {
-                    "Name": "Core Parameters",
-                    "Type": "Group",
-                    "Items": [
-                        {
-                            "Name": "Executable",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "Arguments",
-                            "Type": "Param"
-                        },
-                        {
-                            "Type": "Space"
-                        },
-                        {
-                            "Name": "ProcessName",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "Service",
-                            "Type": "Param"
-                        },
-                        {
-                            "Type": "Space"
-                        },
-                        {
-                            "Name": "WinDbgPath",
-                            "Type": "Param"
-                        }
-                    ]
-                },
-                {
-                    "Name": "When To Trigger",
-                    "Type": "Group",
-                    "Items": [
-                        {
-                            "Name": "RestartOnEachTest",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "RestartAfterFault",
-                            "Type": "Param"
-                        },
-                        {
-                            "Type": "Space"
-                        },
-                        {
-                            "Name": "StartOnCall",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "WaitForExitOnCall",
-                            "Type": "Param"
-                        }
-                    ]
-                },
-                {
-                    "Name": "Advanced",
-                    "Type": "Group",
-                    "Collapsed": true,
-                    "Items": [
-                        {
-                            "Name": "NoCpuKill",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "FaultOnEarlyExit",
-                            "Type": "Param"
-                        },
-                        {
-                            "Type": "Space"
-                        },
-                        {
-                            "Name": "WaitForExitTimeout",
-                            "Type": "Param"
-                        },
-                        {
-                            "Type": "Space"
-                        },
-                        {
-                            "Name": "SymbolsPath",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "IgnoreFirstChanceGuardPage",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "IgnoreSecondChanceGuardPage",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "CpuPollInterval",
-                            "Type": "Param"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "Name": "CrashWrangler",
-            "Type": "Monitor",
-            "Items": [
-                {
-                    "Name": "Core Parameters",
-                    "Type": "Group",
-                    "Items": [
-                        {
-                            "Name": "Executable",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "Arguments",
-                            "Type": "Param"
-                        },
-                        {
-                            "Type": "Space"
-                        },
-                        {
-                            "Name": "ExecHandler",
-                            "Type": "Param"
-                        }
-                    ]
-                },
-                {
-                    "Name": "When To Trigger",
-                    "Type": "Group",
-                    "Items": [
-                        {
-                            "Name": "RestartOnEachTest",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "RestartAfterFault",
-                            "Type": "Param"
-                        },
-                        {
-                            "Type": "Space"
-                        },
-                        {
-                            "Name": "StartOnCall",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "WaitForExitOnCall",
-                            "Type": "Param"
-                        }
-                    ]
-                },
-                {
-                    "Name": "Advanced",
-                    "Type": "Group",
-                    "Collapsed": true,
-                    "Items": [
-                        {
-                            "Name": "NoCpuKill",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "FaultOnEarlyExit",
-                            "Type": "Param"
-                        },
-                        {
-                            "Type": "Space"
-                        },
-                        {
-                            "Name": "WaitForExitTimeout",
-                            "Type": "Param"
-                        },
-                        {
-                            "Type": "Space"
-                        },
-                        {
-                            "Name": "UseDebugMalloc",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "ExploitableReads",
-                            "Type": "Param"
-                        },
-                        {
-                            "Type": "Space"
-                        },
-                        {
-                            "Name": "CwLogFile",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "CwLockFile",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "CwPidFile",
-                            "Type": "Param"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "Name": "Process",
-            "Type": "Monitor",
-            "Items": [
-                {
-                    "Name": "Core Parameters",
-                    "Type": "Group",
-                    "Items": [
-                        {
-                            "Name": "Executable",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "Arguments",
-                            "Type": "Param"
-                        }
-                    ]
-                },
-                {
-                    "Name": "When To Trigger",
-                    "Type": "Group",
-                    "Items": [
-                        {
-                            "Name": "RestartOnEachTest",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "RestartAfterFault",
-                            "Type": "Param"
-                        },
-                        {
-                            "Type": "Space"
-                        },
-                        {
-                            "Name": "StartOnCall",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "WaitForExitOnCall",
-                            "Type": "Param"
-                        }
-                    ]
-                },
-                {
-                    "Name": "Advanced",
-                    "Type": "Group",
-                    "Collapsed": true,
-                    "Items": [
-                        {
-                            "Name": "NoCpuKill",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "FaultOnEarlyExit",
-                            "Type": "Param"
-                        },
-                        {
-                            "Type": "Space"
-                        },
-                        {
-                            "Name": "WaitForExitTimeout",
-                            "Type": "Param"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "Name": "Gdb",
-            "Type": "Monitor",
-            "Items": [
-                {
-                    "Name": "Core Parameters",
-                    "Type": "Group",
-                    "Items": [
-                        {
-                            "Name": "Executable",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "Arguments",
-                            "Type": "Param"
-                        },
-                        {
-                            "Type": "Space"
-                        },
-                        {
-                            "Name": "GdbPath",
-                            "Type": "Param"
-                        }
-                    ]
-                },
-                {
-                    "Name": "When To Trigger",
-                    "Type": "Group",
-                    "Items": [
-                        {
-                            "Name": "RestartOnEachTest",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "RestartAfterFault",
-                            "Type": "Param"
-                        },
-                        {
-                            "Type": "Space"
-                        },
-                        {
-                            "Name": "StartOnCall",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "WaitForExitOnCall",
-                            "Type": "Param"
-                        }
-                    ]
-                },
-                {
-                    "Name": "Advanced",
-                    "Type": "Group",
-                    "Collapsed": true,
-                    "Items": [
-                        {
-                            "Name": "NoCpuKill",
-                            "Type": "Param"
-                        },
-                        {
-                            "Name": "FaultOnEarlyExit",
-                            "Type": "Param"
-                        },
-                        {
-                            "Type": "Space"
-                        },
-                        {
-                            "Name": "WaitForExitTimeout",
-                            "Type": "Param"
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
-  },
-  {
-    "Name": "Android Monitors",
-    "Type": "Group",
-    "Items": [
-      {
-        "Name": "Android",
-        "Type": "Monitor",
-        "Items": [
-          {
-            "Name": "Core Parameters",
-            "Type": "Group",
-            "Items": [
-              {
-                "Name": "ApplicationName",
-                "Type": "Param"
-              },
-              {
-                "Name": "ActivityName",
-                "Type": "Param"
-              },
-              {
-                "Type": "Space"
-              },
-              {
-                "Name": "DeviceSerial",
-                "Type": "Param"
-              },
-              {
-                "Name": "DeviceMonitor",
-                "Type": "Param"
-              },
-              {
-                "Type": "Space"
-              },
-              {
-                "Name": "AdbPath",
-                "Type": "Param"
-              }
-            ]
-          },
-          {
-              "Name": "When To Trigger",
-              "Type": "Group",
-              "Items": [
-                  {
-                      "Name": "RestartEveryIteration",
-                      "Type": "Param"
-                  },
-                  {
-                      "Type": "Space"
-                  },
-                  {
-                      "Name": "StartOnCall",
-                      "Type": "Param"
-                  },
-                  {
-                      "Name": "WaitForReadyOnCall",
-                      "Type": "Param"
-                  }
-              ]
-          },
-          {
-              "Name": "Advanced",
-              "Type": "Group",
-              "Collapsed": true,
-              "Items": [
-                  {
-                      "Name": "ClearAppData",
-                      "Type": "Param"
-                  },
-                  {
-                      "Name": "ClearAppDataOnFault",
-                      "Type": "Param"
-                  },
-                  {
-                      "Name": "RebootEveryN",
-                      "Type": "Param"
-                  },
-                  {
-                      "Name": "RebootOnFault",
-                      "Type": "Param"
-                  },
-                  {
-                      "Type": "Space"
-                  },
-                  {
-                      "Name": "ConnectTimeout",
-                      "Type": "Param"
-                  },
-                  {
-                      "Name": "ReadyTimeout",
-                      "Type": "Param"
-                  },
-                  {
-                      "Name": "CommandTimeout",
-                      "Type": "Param"
-                  },
-                  {
-                      "Name": "FaultWaitTime",
-                      "Type": "Param"
-                  },
-                  {
-                      "Type": "Space"
-                  },
-                  {
-                      "Name": "FaultRegex",
-                      "Type": "Param"
-                  },
-                  {
-                      "Name": "IgnoreRegex",
-                      "Type": "Param"
-                  },
-                  {
-                      "Name": "MustStopRegex",
-                      "Type": "Param"
-                  }
-              ]
-          }
+          "SerialPort",
+          "RelayNumber",
+          "Action",
+          "ToggleDelay"
         ]
       },
       {
-        "Name": "AndroidEmulator",
-        "Type": "Monitor",
+        "Name": "When To Trigger",
         "Items": [
-          {
-            "Name": "Core Parameters",
-            "Type": "Group",
-            "Items": [
-              {
-                "Name": "Avd",
-                "Type": "Param"
-              },
-              {
-                "Type": "Space"
-              },
-              {
-                "Name": "EmulatorPath",
-                "Type": "Param"
-              }
-            ]
-          },
-          {
-              "Name": "When To Trigger",
-              "Type": "Group",
-              "Items": [
-                  {
-                      "Name": "RestartEveryIteration",
-                      "Type": "Param"
-                  },
-                  {
-                      "Name": "RestartAfterFault",
-                      "Type": "Param"
-                  },
-                  {
-                      "Type": "Space"
-                  },
-                  {
-                      "Name": "StartOnCall",
-                      "Type": "Param"
-                  }
-              ]
-          },
-          {
-              "Name": "Advanced",
-              "Type": "Group",
-              "Collapsed": true,
-              "Items": [
-                  {
-                      "Name": "StartTimeout",
-                      "Type": "Param"
-                  },
-                  {
-                      "Name": "StopTimeout",
-                      "Type": "Param"
-                  },
-                  {
-                      "Type": "Space"
-                  },
-                  {
-                      "Name": "Headless",
-                      "Type": "Param"
-                  }
-              ]
-          }
+          "When",
+          "StartOnCall"
+        ]
+      }
+    ],
+    "WindowsDebugger": [
+      {
+        "Name": "Core Parameters",
+        "Items": [
+          "Executable",
+          "Arguments",
+          "",
+          "ProcessName",
+          "Service",
+          "",
+          "WinDbgPath"
+        ]
+      },
+      {
+        "Name": "When To Trigger",
+        "Items": [
+          "RestartOnEachTest",
+          "RestartAfterFault",
+          "",
+          "StartOnCall",
+          "WaitForExitOnCall"
+        ]
+      },
+      {
+        "Name": "Advanced",
+        "Collapsed": true,
+        "Items": [
+          "NoCpuKill",
+          "FaultOnEarlyExit",
+          "",
+          "WaitForExitTimeout",
+          "",
+          "SymbolsPath",
+          "IgnoreFirstChanceGuardPage",
+          "IgnoreSecondChanceGuardPage",
+          "CpuPollInterval"
+        ]
+      }
+    ],
+    "CrashWrangler": [
+      {
+        "Name": "Core Parameters",
+        "Items": [
+          "Executable",
+          "Arguments",
+          "",
+          "ExecHandler"
+        ]
+      },
+      {
+        "Name": "When To Trigger",
+        "Items": [
+          "RestartOnEachTest",
+          "RestartAfterFault",
+          "",
+          "StartOnCall",
+          "WaitForExitOnCall"
+        ]
+      },
+      {
+        "Name": "Advanced",
+        "Collapsed": true,
+        "Items": [
+          "NoCpuKill",
+          "FaultOnEarlyExit",
+          "",
+          "WaitForExitTimeout",
+          "",
+          "UseDebugMalloc",
+          "ExploitableReads",
+          "",
+          "CwLogFile",
+          "CwLockFile",
+          "CwPidFile"
+        ]
+      }
+    ],
+    "Process": [
+      {
+        "Name": "Core Parameters",
+        "Items": [
+          "Executable",
+          "Arguments"
+        ]
+      },
+      {
+        "Name": "When To Trigger",
+        "Items": [
+          "RestartOnEachTest",
+          "RestartAfterFault",
+          "",
+          "StartOnCall",
+          "WaitForExitOnCall"
+        ]
+      },
+      {
+        "Name": "Advanced",
+        "Collapsed": true,
+        "Items": [
+          "NoCpuKill",
+          "FaultOnEarlyExit",
+          "",
+          "WaitForExitTimeout"
+        ]
+      }
+    ],
+    "Gdb": [
+      {
+        "Name": "Core Parameters",
+        "Items": [
+          "Executable",
+          "Arguments",
+          "",
+          "GdbPath"
+        ]
+      },
+      {
+        "Name": "When To Trigger",
+        "Items": [
+          "RestartOnEachTest",
+          "RestartAfterFault",
+          "",
+          "StartOnCall",
+          "WaitForExitOnCall"
+        ]
+      },
+      {
+        "Name": "Advanced",
+        "Collapsed": true,
+        "Items": [
+          "NoCpuKill",
+          "FaultOnEarlyExit",
+          "",
+          "WaitForExitTimeout"
+        ]
+      }
+    ],
+    "Android": [
+      {
+        "Name": "Core Parameters",
+        "Items": [
+          "ApplicationName",
+          "ActivityName",
+          "",
+          "DeviceSerial",
+          "DeviceMonitor",
+          "",
+          "AdbPath"
+        ]
+      },
+      {
+        "Name": "When To Trigger",
+        "Items": [
+          "RestartEveryIteration",
+          "",
+          "StartOnCall",
+          "WaitForReadyOnCall"
+        ]
+      },
+      {
+        "Name": "Advanced",
+        "Collapsed": true,
+        "Items": [
+          "ClearAppData",
+          "ClearAppDataOnFault",
+          "RebootEveryN",
+          "RebootOnFault",
+          "",
+          "ConnectTimeout",
+          "ReadyTimeout",
+          "CommandTimeout",
+          "FaultWaitTime",
+          "",
+          "FaultRegex",
+          "IgnoreRegex",
+          "MustStopRegex"
+        ]
+      }
+    ],
+    "AndroidEmulator": [
+      {
+        "Name": "Core Parameters",
+        "Items": [
+          "Avd",
+          "",
+          "EmulatorPath"
+        ]
+      },
+      {
+        "Name": "When To Trigger",
+        "Items": [
+          "RestartEveryIteration",
+          "RestartAfterFault",
+          "",
+          "StartOnCall"
+        ]
+      },
+      {
+        "Name": "Advanced",
+        "Collapsed": true,
+        "Items": [
+          "StartTimeout",
+          "StopTimeout",
+          "",
+          "Headless"
         ]
       }
     ]
   }
-]
+}

@@ -37,6 +37,26 @@ namespace Peach.Pro.Core.WebServices
 			// ReSharper restore UnusedAutoPropertyAccessor.Local
 		}
 
+		[Serializable]
+		private class NamedItem
+		{
+			// ReSharper disable UnusedAutoPropertyAccessor.Local
+			public string Name { get; set; }
+			public bool Collapsed { get; set; }
+			public List<string> Items { get; set; }
+			// ReSharper restore UnusedAutoPropertyAccessor.Local
+		}
+
+
+		[Serializable]
+		private class GroupInfo
+		{
+			// ReSharper disable UnusedAutoPropertyAccessor.Local
+			public List<NamedItem> Groups { get; set; }
+			public Dictionary<string, List<NamedItem>> Parameters { get; set; }
+			// ReSharper restore UnusedAutoPropertyAccessor.Local
+		}
+
 		#endregion
 
 		private class MonitorInfo : INamed
@@ -140,7 +160,7 @@ namespace Peach.Pro.Core.WebServices
 			}
 		}
 
-		private List<TypedItem> GetGroupings()
+		private GroupInfo GetGroupInfo()
 		{
 			using (var strm = OpenMetadataStream())
 			{
@@ -157,7 +177,7 @@ namespace Peach.Pro.Core.WebServices
 
 				try
 				{
-					return s.Deserialize<List<TypedItem>>(rdr) ?? new List<TypedItem>();
+					return s.Deserialize<GroupInfo>(rdr) ?? new GroupInfo { Groups = new List<NamedItem>(), Parameters = new Dictionary<string, List<NamedItem>>() };
 				}
 				catch (Exception ex)
 				{
@@ -167,6 +187,65 @@ namespace Peach.Pro.Core.WebServices
 					return null;
 				}
 			}
+		}
+
+		private List<TypedItem> GetGroupings()
+		{
+			var info = GetGroupInfo();
+
+			if (info == null)
+				return null;
+
+			var ret = new List<TypedItem>();
+
+			if (info.Groups == null || info.Parameters == null)
+				return ret;
+
+			foreach (var grp in info.Groups)
+			{
+				var g = new TypedItem
+				{
+					Name = grp.Name,
+					Type = ItemType.Group,
+					Items = new List<TypedItem>()
+				};
+
+				foreach (var name in grp.Items)
+				{
+					List<NamedItem> paramGroups;
+					if (!info.Parameters.TryGetValue(name, out paramGroups))
+					{
+						if (ErrorEventHandler != null)
+							ErrorEventHandler(this, new ErrorEventArgs(new ApplicationException("No parameter entry for monitor '{0}' referenced in group '{1}'.".Fmt(name, grp.Name))));
+
+						continue;
+					}
+
+					var m = new TypedItem
+					{
+						Name = name,
+						Type = ItemType.Monitor,
+						Items = paramGroups.Select(paramGroup => new TypedItem
+						{
+							Name = paramGroup.Name,
+							Type = ItemType.Group,
+							Collapsed = paramGroup.Collapsed,
+							Items = paramGroup.Items.Select(i => new TypedItem
+							{
+								Name = string.IsNullOrEmpty(i) ? null : i,
+								Type = string.IsNullOrEmpty(i) ? ItemType.Space : ItemType.Param
+							}).ToList()
+						}).Where(i => i.Items.Count > 0).ToList()
+					};
+
+					g.Items.Add(m);
+				}
+
+				if (g.Items.Count > 0)
+					ret.Add(g);
+			}
+
+			return ret;
 		}
 
 		private NamedCollection<MonitorInfo> GetMonitorInfo()
