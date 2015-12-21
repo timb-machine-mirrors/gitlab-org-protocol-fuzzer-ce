@@ -16,7 +16,7 @@ timeout duration.
 * The utility command exits with a nonzero exit code.
 * The utility command exits with a specified exit code.
 * The monitor matches a specified text string with messages in standard out and standard error.
-* The address sanitizer is enabled and an error message fro it appears in the standard error log.
+* The address sanitizer is enabled and an error message from it appears in the standard error log.
 
 This monitor provides bucketing for faults generated from the address sanitizer messages. Major hash, minor hash, and risk values are provide for these faults.
 
