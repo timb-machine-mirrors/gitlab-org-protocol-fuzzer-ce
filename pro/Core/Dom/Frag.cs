@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Xml;
+using NLog;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
@@ -8,6 +11,7 @@ using Peach.Core.Dom;
 using Peach.Core.IO;
 using Array = Peach.Core.Dom.Array;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
+using Logger = NLog.Logger;
 
 namespace Peach.Pro.Core.Dom
 {
@@ -26,6 +30,8 @@ namespace Peach.Pro.Core.Dom
 	[Serializable]
 	public class Frag : Block
 	{
+		protected static Logger Logger = LogManager.GetCurrentClassLogger();
+
 		public Frag()
 			: base()
 		{
@@ -226,16 +232,59 @@ namespace Peach.Pro.Core.Dom
 				FragmentAlg.Fragment(Template, this["Payload"], this["Rendering"] as Sequence);
 			}
 
-			return this["Rendering"].DefaultValue;
+			return new Variant(this["Rendering"].Value);
 		}
 
 		public override void Crack(DataCracker context, BitStream data, long? size)
 		{
-			if (FragmentAlg.NeedFragment())
-				throw new SoftException("Error, still waiting on fragments prior to reassembly.");
+			if (Rendering.Count > 0)
+			{
+				Logger.Debug("Rendering sequence populated, cracking Payload.");
 
-			var reassembledData = FragmentAlg.Reassemble();
-			this["Payload"].Crack(context, reassembledData, reassembledData.LengthBits);
+				if (FragmentAlg.NeedFragment())
+					throw new SoftException("Error, still waiting on fragments prior to reassembly.");
+
+				var reassembledData = FragmentAlg.Reassemble();
+				this["Payload"].Crack(context, reassembledData, reassembledData.LengthBits);
+			}
+			else
+			{
+				Logger.Debug("Empty Rendering sequence, cracking fragments and payload.");
+
+				var noPayload = false;
+				var startPos = data.Position;
+				var endPos = startPos;
+				var template = Template ?? this["Template"];
+
+				var fragment = template.Clone("Frag_0");
+				Rendering.Add(fragment);
+
+				var cracker = new DataCracker();
+				cracker.CrackData(fragment, data);
+
+				endPos = data.Position;
+
+				var fragDataElement = fragment.find("FragData");
+				if (fragDataElement == null && PayloadOptional)
+				{
+					Logger.Debug("FragData not found, optional payload enabled.");
+					noPayload = true;
+				}
+				else if (fragDataElement == null)
+					throw new SoftException("Unable to locate FragData element during infrag action.");
+
+				Logger.Debug("Fragment {3}: pos: {0} length: {1} crack consumed: {2} bytes",
+					endPos, data.Length, endPos - startPos, 0);
+
+				if (FragmentAlg.NeedFragment())
+					throw new SoftException("Error, still waiting on fragments prior to reassembly.");
+
+				if (noPayload)
+					return;
+
+				var reassembledData = FragmentAlg.Reassemble();
+				this["Payload"].Crack(context, reassembledData, reassembledData.LengthBits);
+			}
 		}
 	}
 }
