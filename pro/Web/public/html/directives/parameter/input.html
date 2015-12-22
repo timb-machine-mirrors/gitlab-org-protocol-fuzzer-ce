@@ -5,11 +5,8 @@
 	                        param="param">
 	</peach:parameter-select>
 	<peach:parameter-combo ng-switch-when="combo"
-	                       ng-model="param.value"
-	                       ng-required="vm.IsRequired"
-	                       data="param.options"
-	                       description="param.description"
-	                       placeholder="param.value">
+	                       form="form"
+	                       param="param">
 	</peach:parameter-combo>
 	<div ng-switch-when="space"></div>
 	<peach:parameter-string ng-switch-default

@@ -349,11 +349,6 @@ namespace Peach {
 	});
 
 	export function Startup() {
-		window.onerror = (message, url, lineNo) => {
-			console.log(`Error: ${message}\nLine Number: ${lineNo}`);
-			return true;
-		};
-
 		const version = getHtmlVer();
 		if (version < 5) {
 			alert(
@@ -362,7 +357,7 @@ namespace Peach {
 			);
 		}
 
-		function getHtmlVer() {
+		function getHtmlVer(): number {
 			const cName = navigator.appCodeName;
 			let uAgent: any = navigator.userAgent;
 			let htmlVer: any = 0.0;

@@ -112,7 +112,7 @@ namespace Peach {
 
 		public OnKeyDown(event: KeyboardEvent) {
 			if (event.keyCode === KEY.ENTER ||
-				event.keyCode == KEY.TAB) {
+				event.keyCode === KEY.TAB) {
 				if (!_.isNull(this.$scope.highlighted)) {
 					this.SelectOption(this.$scope.options[this.$scope.highlighted]);
 					this.$scope.highlighted = null;
@@ -178,7 +178,7 @@ namespace Peach {
 
 		private hideOptions(event) {
 			const isChild = this.$element.has(event.target).length > 0;
-			const isSelf = this.$element[0] == event.target;
+			const isSelf = this.$element[0] === event.target;
 			const isInside = isChild || isSelf;
 
 			if (!isInside) {
