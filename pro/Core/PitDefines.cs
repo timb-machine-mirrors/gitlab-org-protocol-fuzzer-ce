@@ -471,11 +471,28 @@ namespace Peach.Pro.Core
 
 		#region Parse
 
+		/// <summary>
+		/// Deserialize a pit defines file.
+		/// 1. If the file does not exist, it will be treated as an empty file.
+		/// 2. The returned object will include all the SystemDefines.
+		/// 3. PitLibraryPath system define will be set to Peach.Cwd
+		/// </summary>
+		/// <param name="fileName">Config file to deserialize.</param>
+		/// <returns></returns>
 		public static PitDefines ParseFile(string fileName)
 		{
 			return ParseFile(fileName, null, null);
 		}
 
+		/// <summary>
+		/// Deserialize a pit defines file.
+		/// 1. If the file does not exist, an empty defines object will be returned.
+		/// 2. The returned object will include all the SystemDefines.
+		/// 3. PitLibraryPath system define will be set to pitLibraryPath argument.
+		/// </summary>
+		/// <param name="fileName">Config file to deserialize.</param>
+		/// <param name="pitLibraryPath">Value of PitLibraryPath system define.</param>
+		/// <returns></returns>
 		public static PitDefines ParseFile(string fileName, string pitLibraryPath)
 		{
 			if (pitLibraryPath == null)
@@ -484,6 +501,16 @@ namespace Peach.Pro.Core
 			return ParseFile(fileName, pitLibraryPath, null);
 		}
 
+		/// <summary>
+		/// Deserialize a pit defines file.
+		/// 1. If the file does not exist, it will be treated as an empty file.
+		/// 2. The returned object will include all the SystemDefines.
+		/// 3. PitLibraryPath system define will be set to Peach.Cwd
+		/// 4. All K/V in overrides will be considered system defines
+		/// </summary>
+		/// <param name="fileName">Config file to deserialize.</param>
+		/// <param name="overrides">Command line overrides.</param>
+		/// <returns></returns>
 		public static PitDefines ParseFile(string fileName, IEnumerable<KeyValuePair<string, string>> overrides)
 		{
 			if (overrides == null)
@@ -594,6 +621,15 @@ namespace Peach.Pro.Core
 			return ret;
 		}
 
+		/// <summary>
+		/// Returns a list of key/value pairs that can be passed to the PitParser.
+		/// This function will:
+		/// 1) Flatten all groups.
+		/// 2) Substitute defines in defines.
+		/// 3) Ensure all keys are unique.
+		/// 4) If duplicate keys are found, the last key/value pair is returned.
+		/// </summary>
+		/// <returns></returns>
 		public List<KeyValuePair<string, string>> Evaluate()
 		{
 			var ret = Flatten();

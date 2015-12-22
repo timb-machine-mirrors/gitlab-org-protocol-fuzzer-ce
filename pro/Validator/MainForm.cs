@@ -14,12 +14,12 @@ using Peach.Core.Analyzers;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using NLog;
+using Peach.Pro.Core;
 
 namespace PeachValidator
 {
 	public partial class MainForm : Form
 	{
-		public Dictionary<string, string> DefinedValues = new Dictionary<string, string>();
 	    readonly string _windowTitle = "Peach Validator v" + Assembly.GetAssembly(typeof(Peach.Core.Engine)).GetName().Version;
 	    readonly string _windowTitlePit = "Peach Validator v" + Assembly.GetAssembly(typeof(Peach.Core.Engine)).GetName().Version + " - {0}";
 	    readonly string _windowTitlePitSample = "Peach Validator v" + Assembly.GetAssembly(typeof(Peach.Core.Engine)).GetName().Version + " - {0} - {1}";
@@ -37,9 +37,6 @@ namespace PeachValidator
 			InitializeComponent();
 
 			setTitle();
-			AddNewDefine("Peach.Pwd=" + Utilities.ExecutionDirectory);
-			AddNewDefine("Peach.Cwd=" + Environment.CurrentDirectory);
-			AddNewDefine("PitLibraryPath=" + Environment.CurrentDirectory);
 
            var nconfig = new LoggingConfiguration();
             logTarget = new MemoryTarget();
@@ -50,15 +47,6 @@ namespace PeachValidator
             nconfig.LoggingRules.Add(rule);
 
             LogManager.Configuration = nconfig;
-		}
-
-		public void AddNewDefine(string value)
-		{
-			if (value.IndexOf("=") < 0)
-				throw new PeachException("Error, defined values supplied via -D/--define must have an equals sign providing a key-pair set.");
-
-			var kv = value.Split('=');
-			DefinedValues[kv[0]] = kv[1];
 		}
 
 		protected void setTitle()
@@ -276,7 +264,7 @@ namespace PeachValidator
             List<KeyValuePair<string, string>> defs;
             if (File.Exists(PitFileName + ".config"))
             {
-                defs = PitParser.parseDefines(PitFileName + ".config");
+                defs = PitDefines.ParseFile(PitFileName + ".config").Evaluate();
             }
 			else if (getDefs && File.Exists(PitFileName) && re.IsMatch(File.ReadAllText(PitFileName)))
             {
@@ -286,21 +274,14 @@ namespace PeachValidator
 	            if (ofd.ShowDialog() != System.Windows.Forms.DialogResult.OK)
 		            return;
 
-	            defs = PitParser.parseDefines(ofd.FileName);
+				defs = PitDefines.ParseFile(ofd.FileName).Evaluate();
             }
             else
             {
                 defs = new List<KeyValuePair<string, string>>();
             }
 
-			foreach (var kv in defs)
-			{
-				// Allow command line to override values in XML file.
-				if (!DefinedValues.ContainsKey(kv.Key))
-					DefinedValues.Add(kv.Key, kv.Value);
-			}
-
-			_parserArgs[PitParser.DEFINED_VALUES] = DefinedValues;
+			_parserArgs[PitParser.DEFINED_VALUES] = defs;
 			toolStripButtonRefreshPit_Click(null, null);
 		}
 

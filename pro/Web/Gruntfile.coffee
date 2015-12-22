@@ -39,7 +39,6 @@ module.exports = (grunt) ->
 					'public/lib/lodash'              : 'lodash:main'
 					'public/lib/moment'              : 'moment:main'
 					'public/lib/ngstorage'           : 'ngstorage:main'
-					'public/lib/select2'             : 'select2:main'
 
 			mainless:
 				options:

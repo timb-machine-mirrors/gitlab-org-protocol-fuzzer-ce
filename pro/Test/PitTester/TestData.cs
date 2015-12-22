@@ -28,11 +28,126 @@ namespace PitTester
 
 		public class Define
 		{
-			[XmlAttribute("key")]
+			[XmlIgnore]
 			public string Key { get; set; }
 
-			[XmlAttribute("value")]
+			[XmlIgnore]
 			public string Value { get; set; }
+		}
+
+		public class ValueDefine : Define
+		{
+			[XmlAttribute("key")]
+			public string KeyAttr
+			{
+				get { return Key; }
+				set { Key = value; }
+			}
+
+			[XmlAttribute("value")]
+			public string ValueAttr
+			{
+				get { return Value; }
+				set { Value = value; }
+			}
+		}
+
+		public abstract class TempFileDefine : Define, IDisposable
+		{
+			[XmlAttribute("key")]
+			public string KeyAttr
+			{
+				get { return Key; }
+				set { Key = value; }
+			}
+
+			public abstract void Populate();
+
+			public void Dispose()
+			{
+				if (!string.IsNullOrEmpty(Value))
+				{
+					try
+					{
+						File.Delete(Value);
+					}
+					catch
+					{
+						// Ignore errors
+					}
+				}
+			}
+		}
+
+		public class TextFileDefine : TempFileDefine
+		{
+			[XmlIgnore]
+			public string Payload { get; private set; }
+
+			[XmlText]
+			public XmlNode[] CDataSection
+			{
+				get
+				{
+					return new XmlNode[] { new XmlDocument().CreateCDataSection(Payload) };
+				}
+				set
+				{
+					if (value == null)
+					{
+						Payload = string.Empty;
+						return;
+					}
+
+					if (value.Length != 1)
+						throw new InvalidOperationException();
+
+					Payload = value[0].Value;
+				}
+			}
+
+			public override void Populate()
+			{
+				Value = Path.GetTempFileName();
+
+				File.WriteAllText(Value, Payload);
+			}
+		}
+
+		public class HexFileDefine : TempFileDefine
+		{
+			[XmlIgnore]
+			public byte[] Payload { get; private set; }
+
+			[XmlText]
+			public XmlNode[] CDataSection
+			{
+				get
+				{
+					var msg = Utilities.HexDump(Payload, 0, Payload.Length);
+					return new XmlNode[] { new XmlDocument().CreateCDataSection(msg) };
+				}
+				set
+				{
+					if (value == null)
+					{
+						Payload = new byte[0];
+						return;
+					}
+
+					if (value.Length != 1)
+						throw new InvalidOperationException();
+
+					Payload = Action.FromCData(value[0].Value);
+				}
+			}
+
+			public override void Populate()
+			{
+				Value = Path.GetTempFileName();
+
+				File.WriteAllBytes(Value, Payload);
+			}
 		}
 
 		public class Slurp
@@ -72,6 +187,10 @@ namespace PitTester
 			[DefaultValue(false)]
 			public bool SingleIteration { get; set; }
 
+			[XmlAttribute("skip")]
+			[DefaultValue(false)]
+			public bool Skip { get; set; }
+
 			[XmlAttribute("seed")]
 			[DefaultValue("")]
 			public string Seed { get; set; }
@@ -99,7 +218,7 @@ namespace PitTester
 			[XmlAttribute("publisher")]
 			public string PublisherName { get; set; }
 
-			protected static byte[] FromCData(string payload)
+			internal static byte[] FromCData(string payload)
 			{
 				return Utilities.ParseHexDump(payload);
 			}
@@ -197,7 +316,9 @@ namespace PitTester
 			public bool Ignore { get; set; }
 		}
 
-		[XmlElement("Define")]
+		[XmlElement("Define", Type = typeof(ValueDefine))]
+		[XmlElement("TextFile", Type = typeof(TextFileDefine))]
+		[XmlElement("HexFile", Type = typeof(HexFileDefine))]
 		public List<Define> Defines { get; set; }
 
 		[XmlElement("Ignore")]

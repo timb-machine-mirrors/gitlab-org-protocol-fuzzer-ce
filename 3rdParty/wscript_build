@@ -28,7 +28,8 @@ subdirs = [
 	'SuperSocket',
 	'SuperWebSocket',
 	'SocketHttpListener/SocketHttpListener',
-	'BouncyCastle.1.8-master',
+	'BouncyCastle/crypto',
+	'BouncyCastle/crypto/test',
 	'sqlite-3.8.11.1',
 	'Portable.Licensing',
 ]
@@ -49,7 +50,7 @@ if bld.env.BASENAME == 'osx':
 	)
 
 
-nunit_tools = bld.path.find_node('NUnit.Console.3.0.0-rc-2/tools')
+nunit_tools = bld.path.find_node('NUnit.Console.3.0.1/tools')
 
 bld(
 	name='nunit-console',

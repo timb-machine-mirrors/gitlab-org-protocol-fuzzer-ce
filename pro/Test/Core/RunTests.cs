@@ -9,6 +9,10 @@ using Peach.Core.Dom;
 using Peach.Core.Test;
 using Peach.Pro.Core.Publishers;
 
+
+// Disable obsolete warnings so we can test PitParser.parseDefines()
+#pragma warning disable 618
+
 namespace Peach.Pro.Test.Core
 {
 	[TestFixture]

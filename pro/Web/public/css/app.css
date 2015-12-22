@@ -221,3 +221,11 @@ ul.library li a {
 		max-width: 300px;
 	}
 }
+
+.ui-select-bootstrap > .ui-select-choices {
+	max-height: 400px;
+}
+
+.ui-select-toggle {
+	text-align: left;
+}

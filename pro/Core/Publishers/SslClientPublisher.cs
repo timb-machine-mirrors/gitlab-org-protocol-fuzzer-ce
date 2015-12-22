@@ -519,7 +519,7 @@ namespace Peach.Pro.Core.Publishers
 
 				_tlsClientHandler.Connect(_tlsClient);
 
-				_client = new MyTlsStream(_tlsClientHandler.Stream);
+				_client = _tlsClientHandler.Stream;
 				_localEp = _tcp.Client.LocalEndPoint;
 				_remoteEp = _tcp.Client.RemoteEndPoint;
 				_clientName = _remoteEp.ToString();
@@ -568,6 +568,77 @@ namespace Peach.Pro.Core.Publishers
 			ClientShutdown();
 
 			_client = null;
+		}
+
+		protected override void OnOutput(BitwiseStream data)
+		{
+			IAsyncResult ar = null;
+			int offset = 0;
+			int length = 0;
+
+			try
+			{
+				while (true)
+				{
+					Stream tmp;
+
+					lock (_clientLock)
+					{
+						//Check to make sure buffer has been initilized before continuing. 
+						if (_client == null)
+						{
+							// First time through, propagate error
+							if (ar == null)
+								throw new PeachException("Error on data output, the client is not initalized.");
+
+							// Client has been closed!
+							return;
+						}
+
+						if (Logger.IsDebugEnabled && ar == null)
+							Logger.Debug("\n\n" + Utilities.HexDump(data));
+
+						if (ar != null)
+							offset += ClientEndWrite(ar);
+
+						if (offset == length)
+						{
+							offset = 0;
+							length = data.Read(_sendBuf, 0, _sendBuf.Length);
+
+							if (length == 0)
+								return;
+						}
+
+						tmp = _client;
+					}
+
+					// Can't call BeginWrite when the lock is held or deadlocks are possible
+
+					ar = ClientBeginWrite(tmp, _sendBuf, offset, length - offset, null, null);
+
+					if (Logger.IsTraceEnabled) Logger.Trace("OnOutput> WaitOne() timeout: {0}", SendTimeout);
+
+					if (SendTimeout < 0)
+						ar.AsyncWaitHandle.WaitOne();
+					else if (!ar.AsyncWaitHandle.WaitOne(SendTimeout))
+						throw new TimeoutException();
+
+					if (Logger.IsTraceEnabled) Logger.Trace("OnOutput> WaitOne() done");
+				}
+			}
+			catch (Exception ex)
+			{
+				Logger.Error("output: Error during send.  " + ex.Message);
+				throw new SoftException(ex);
+			}
+		}
+
+		private IAsyncResult ClientBeginWrite(Stream stream, byte[] buffer, int offset, int count, AsyncCallback callback, object state)
+		{
+			if (Logger.IsTraceEnabled) Logger.Trace("ClientBeginWrite> offset: {0} count: {1}", offset, count);
+			_sendLen = count;
+			return stream.BeginWrite(buffer, offset, count, callback, state);
 		}
 	}
 }

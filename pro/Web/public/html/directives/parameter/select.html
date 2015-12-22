@@ -7,8 +7,7 @@
 	</span>
 	<ui-select ng-model="param.value"
 						 ng-required="vm.IsRequired"
-						 name="param"
-						 reset-search-input="true">
+						 name="param">
 		<ui-select-match placeholder="{{param.defaultValue}}">
 			{{$select.selected.key}}
 		</ui-select-match>
