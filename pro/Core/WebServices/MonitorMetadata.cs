@@ -128,7 +128,7 @@ namespace Peach.Pro.Core.WebServices
 					// If GetGroupings() failed we already raised ErrorEventHandler
 					if (ret == null)
 						ret = new List<ParamDetail>();
-					else if (ErrorEventHandler != null && missing.Any(m => !m.Internal))
+					else if (ErrorEventHandler != null && missing.Any(m => !m.Internal && m.Name != "Null"))
 							ErrorEventHandler(this, new ErrorEventArgs(new ApplicationException("Missing metadata entries for the following monitors: '{0}'.".Fmt(string.Join("', '", missing.Where(m => !m.Internal).Select(m => m.Key))))));
 
 					var grp = new ParamDetail
