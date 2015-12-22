@@ -57,8 +57,11 @@ namespace Peach.Pro.Core.Publishers
 		{
 			if (Lifetime == Test.Lifetime.Session)
 			{
-				if (_client == null)
-					base.OnClose();
+				lock (_clientLock)
+				{
+					if (_client == null)
+						base.OnClose();
+				}
 
 				return;
 			}
@@ -74,8 +77,11 @@ namespace Peach.Pro.Core.Publishers
 
 		protected override void OnAccept()
 		{
-			if (Lifetime == Test.Lifetime.Session && _client != null && _tcp != null)
-				return;
+			lock (_clientLock)
+			{
+				if (Lifetime == Test.Lifetime.Session && _client != null && _tcp != null)
+					return;
+			}
 
 			// Ensure any open stream is closed...
 			base.OnClose();

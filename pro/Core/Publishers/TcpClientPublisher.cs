@@ -133,8 +133,11 @@ namespace Peach.Pro.Core.Publishers
 			// but not OnClose.
 			// Note: CloseClient can happen after OnClose is called
 			//  so this code is required in both OnOpen and OnClose.
-			if (_client == null && _buffer != null)
-				base.OnClose();
+			lock (_clientLock)
+			{
+				if (_client == null && _buffer != null)
+					base.OnClose();
+			}
 
 			if (Lifetime == Test.Lifetime.Iteration || _tcp == null ||  _tcp.Connected == false)
 			{
@@ -150,8 +153,11 @@ namespace Peach.Pro.Core.Publishers
 
 			// _client will be null if CloseClient was called
 			// so we need to complete the shutdown
-			if(_client == null)
-				base.OnClose();
+			lock (_clientLock)
+			{
+				if (_client == null)
+					base.OnClose();
+			}
 		}
 	}
 }
