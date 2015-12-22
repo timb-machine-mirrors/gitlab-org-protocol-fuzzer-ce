@@ -126,8 +126,9 @@ namespace Peach.Core.Publishers
 		{
 			lock (_clientLock)
 			{
-				System.Diagnostics.Debug.Assert(_client != null);
-				System.Diagnostics.Debug.Assert(_clientName != null);
+				if (_client == null || _clientName == null)
+					return;
+
 				Logger.Debug("Closing connection to {0}", _clientName);
 				ClientClose();
 				_client = null;
@@ -313,6 +314,10 @@ namespace Peach.Core.Publishers
 			catch (Exception ex)
 			{
 				Logger.Error("output: Error during send.  " + ex.Message);
+
+				// Shutdown socket on error to support Lifetime parameter
+				CloseClient();
+
 				throw new SoftException(ex);
 			}
 		}

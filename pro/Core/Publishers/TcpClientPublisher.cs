@@ -33,6 +33,7 @@ using System.Net.Sockets;
 using System.Threading;
 using NLog;
 using Peach.Core;
+using Peach.Core.Dom;
 
 namespace Peach.Pro.Core.Publishers
 {
@@ -41,6 +42,7 @@ namespace Peach.Pro.Core.Publishers
 	[Alias("tcp.Tcp")]
 	[Parameter("Host", typeof(string), "Hostname or IP address of remote host")]
 	[Parameter("Port", typeof(ushort), "Remote port to connect to")]
+	[Parameter("Lifetime", typeof(Test.Lifetime), "Lifetime of connection (Iteration, Session)", "Iteration")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait when receiving data (default 3000)", "3000")]
 	[Parameter("SendTimeout", typeof(int), "How many milliseconds to wait when sending data (default infinite)", "-1")]
 	[Parameter("ConnectTimeout", typeof(int), "Max milliseconds to wait for connection (default 10000)", "10000")]
@@ -51,16 +53,15 @@ namespace Peach.Pro.Core.Publishers
 
 		public string Host { get; protected set; }
 		public int ConnectTimeout { get; protected set; }
+		public Test.Lifetime Lifetime { get; protected set; }
 
 		public TcpClientPublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
 		}
 
-		protected override void OnOpen()
+		protected void Connect()
 		{
-			base.OnOpen();
-
 			var timeout = ConnectTimeout;
 			var sw = new Stopwatch();
 
@@ -108,6 +109,49 @@ namespace Peach.Pro.Core.Publishers
 			}
 
 			StartClient();
+		}
+
+		protected override void OnStart()
+		{
+			base.OnStart();
+
+			if (Lifetime == Test.Lifetime.Session)
+				Connect();
+		}
+
+		protected override void OnStop()
+		{
+			base.OnStop();
+
+			if (Lifetime == Test.Lifetime.Session)
+				base.OnClose();
+		}
+
+		protected override void OnOpen()
+		{
+			// Complete socket shutdown if CloseClient was called
+			// but not OnClose.
+			// Note: CloseClient can happen after OnClose is called
+			//  so this code is required in both OnOpen and OnClose.
+			if (_client == null && _buffer != null)
+				base.OnClose();
+
+			if (Lifetime == Test.Lifetime.Iteration || _tcp == null ||  _tcp.Connected == false)
+			{
+				base.OnOpen();
+				Connect();
+			}
+		}
+
+		protected override void OnClose()
+		{
+			if (Lifetime == Test.Lifetime.Iteration)
+				base.OnClose();
+
+			// _client will be null if CloseClient was called
+			// so we need to complete the shutdown
+			if(_client == null)
+				base.OnClose();
 		}
 	}
 }
