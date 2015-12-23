@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using NLog;
 using Peach.Core;
+using Peach.Core.Dom;
 
 namespace Peach.Pro.Core.Publishers
 {
@@ -11,6 +12,7 @@ namespace Peach.Pro.Core.Publishers
 	[Alias("tcp.TcpListener")]
 	[Parameter("Interface", typeof(IPAddress), "IP of interface to bind to")]
 	[Parameter("Port", typeof(ushort), "Local port to listen on")]
+	[Parameter("Lifetime", typeof(Test.Lifetime), "Lifetime of connection (Iteration, Session)", "Iteration")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait when receiving data (default 3000)", "3000")]
 	[Parameter("SendTimeout", typeof(int), "How many milliseconds to wait when sending data (default infinite)", "-1")]
 	[Parameter("AcceptTimeout", typeof(int), "How many milliseconds to wait for a connection (default 3000)", "3000")]
@@ -21,6 +23,7 @@ namespace Peach.Pro.Core.Publishers
 
 		public IPAddress Interface { get; protected set; }
 		public int AcceptTimeout { get; protected set; }
+		public Test.Lifetime Lifetime { get; protected set; }
 
 		protected TcpListener _listener = null;
 
@@ -31,6 +34,9 @@ namespace Peach.Pro.Core.Publishers
 
 		protected override void OnOpen()
 		{
+			if (Lifetime == Test.Lifetime.Session && _listener != null)
+				return;
+
 			System.Diagnostics.Debug.Assert(_listener == null);
 
 			try
@@ -49,6 +55,17 @@ namespace Peach.Pro.Core.Publishers
 
 		protected override void OnClose()
 		{
+			if (Lifetime == Test.Lifetime.Session)
+			{
+				lock (_clientLock)
+				{
+					if (_client == null)
+						base.OnClose();
+				}
+
+				return;
+			}
+
 			if (_listener != null)
 			{
 				_listener.Stop();
@@ -60,6 +77,12 @@ namespace Peach.Pro.Core.Publishers
 
 		protected override void OnAccept()
 		{
+			lock (_clientLock)
+			{
+				if (Lifetime == Test.Lifetime.Session && _client != null && _tcp != null)
+					return;
+			}
+
 			// Ensure any open stream is closed...
 			base.OnClose();
 

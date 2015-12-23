@@ -93,6 +93,31 @@ namespace PitTester
 				throw new FileNotFoundException();
 
 			var testData = TestData.Parse(testFile);
+
+			if (testData.Tests.Any(x => x.Skip))
+				throw new FileNotFoundException();
+
+			var cleanme = new List<IDisposable>();
+
+			try
+			{
+				foreach (var tmp in testData.Defines.OfType<TestData.TempFileDefine>())
+				{
+					cleanme.Add(tmp);
+					tmp.Populate();
+				}
+
+				DoTestPit(testData, libraryPath, pitFile, singleIteration, seed, keepGoing, stop);
+			}
+			finally
+			{
+				foreach (var item in cleanme)
+					item.Dispose();
+			}
+		}
+
+		private static void DoTestPit(TestData testData, string libraryPath, string pitFile, bool singleIteration, uint? seed, bool keepGoing, uint stop = 500)
+		{
 			if (testData.Tests.Any(x => x.SingleIteration))
 				singleIteration = true;
 
@@ -356,7 +381,37 @@ namespace PitTester
 			if (File.Exists(pitTest))
 				testData = TestData.Parse(pitTest);
 
+			var cleanme = new List<IDisposable>();
+
+			try
+			{
+				foreach (var tmp in testData.Defines.OfType<TestData.TempFileDefine>())
+				{
+					cleanme.Add(tmp);
+					tmp.Populate();
+				}
+
+				DoVerifyDataSets(testData, pitLibraryPath, fileName);
+			}
+			finally
+			{
+				foreach (var item in cleanme)
+					item.Dispose();
+			}
+		}
+
+		private static void DoVerifyDataSets(TestData testData, string pitLibraryPath, string fileName)
+		{
 			var defs = LoadDefines(pitLibraryPath, fileName);
+
+			var testDefs = testData.Defines.ToDictionary(x => x.Key, x => x.Value);
+
+			for (var i = 0; i < defs.Count; ++i)
+			{
+				string value;
+				if (testDefs.TryGetValue(defs[i].Key, out value))
+					defs[i] = new KeyValuePair<string, string>(defs[i].Key, value);
+			}
 
 			var args = new Dictionary<string, object>();
 			args[PitParser.DEFINED_VALUES] = defs;
@@ -791,6 +846,8 @@ namespace PitTester
 				case "SourceIPv6":
 				case "TargetIPv6":
 					return new KeyValuePair<string, string>(item.Key, "::1");
+				case "Source":
+				case "Destination":
 				case "ListenPort":
 				case "SourcePort":
 				case "TargetPort":
