@@ -1,5 +1,4 @@
-Providing_Sample_Data.adoc
-
+[Providing_Sample_Data]
 
 == Providing Sample Data
 

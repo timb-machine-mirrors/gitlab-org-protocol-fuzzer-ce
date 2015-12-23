@@ -19,7 +19,7 @@ consists of the following parts:
 1.	The workflow for the fuzzing session
 2.	The Peach components to use in configuring the fuzzing setup
 This section focuses on the monitoring needs and the agents that house the monitors. 
-3.	Configuration settings used to fuzz a service client (snmpwalk) running this workflow
+3.	Configuration settings used to fuzz a service client (snmpget) running this workflow
 
 IMPORTANT: Assumptions/Givens in this recipe are that a Pit is ready to use, Peach is ready to run, and any software module needed to perform the fuzzing job is installed.
 
@@ -123,21 +123,21 @@ The local agent is simple to implement. All that’s needed is to define the age
 
 The remote monitor is a little more involved. Like the local agent, the remote agent needs to be defined, then specify the appropriate monitors and monitor settings used with the remote agent. Second, the remote agent needs to run on the same OS as the test target. This step can be done separately from specifying the configuration details. In this recipe, a VM snapshot is used. See the previous section, Using Virtual Machines, for information on setting up the VM snapshot.
 
-==== Sample configuration Using snmpwalk 
+==== Sample Configuration Using snmpget 
 
-This section shows the recipe implemented for snmpwalk, an SNMP network service client. Using the Peach Web UI, the recipe shows the agents used, the monitors housed in or managed by each agent, and the settings for the Pit variables, the agents, and the monitors.
+This section shows the recipe implemented for snmpget, an SNMP network service client. Using the Peach Web UI, the recipe shows the agents used, the monitors housed in or managed by each agent, and the settings for the Pit variables, the agents, and the monitors. The section ends with a brief discussion of the _NoCpuKill_ option that gives network clients an opportunity to run to completion. The _NoCpuKill_ option is present in the Peach debugging monitors. 
 
 [NOTE]
 =======
 The configurations for the network client and the network service are very similar. Two significant differences exist:
 
-* The network client configuration uses a client app, snmpwalk, instead of the network service agent snmpd.
+* The network client configuration uses a client app, snmpget, instead of the network service agent snmpd.
 * In the network client configuration, the test target initiates the action instead of
 responding to a request. The client contacts Peach, acting as the network service, then waits for Peach to provide a response to the query. The debug monitor has additional configuration options that are set to drive this configuration. 
 =======
 
 
-===== SNMPD Service Setup 
+===== Setup Preliminaries
 
 Perform the following task on the VM before taking a snapshot of the VM.
 
@@ -258,11 +258,11 @@ image::{images}/Recipe_LinuxSvc_Cli_Gdb.png["Gdb Monitor", scale="50"]
 
 The most significant paramters follow:
 
-Executable name:: Identifies the full path to the SNMP Linux client, snmpwalk. The client resides on the remote matchine; so, the full path is for the Linux file system.
+Executable name:: Identifies the full path to the SNMP Linux client, snmpget. The client resides on the remote matchine; so, the full path is for the Linux file system.
 
-Arguments:: Arguments for the executable. Here, the snmpwalk arguments consist of the authentication version, the community string, and the destination prot of the client queries.
+Arguments:: Arguments for the executable. Here, the snmpget arguments consist of the authentication version, the community string, the IPv4 address of the host, and a request OID for information about the SNMP service.
 
-No Cpu Kill:: Controls whether the process stays alive if its CPU usage drops to zero. Specify `true` to keep the process running and to allow the process to release or close its resources before exiting. For more information, see section XXX.
+No Cpu Kill:: Controls whether the process stays alive if its CPU usage drops to zero. Specify `true` to keep the process running and to allow the process to release or close its resources before exiting. For more information, see the following section Closing the Client Process.
 
 Start On Call:: Controls when the test target launches, and in turn, initiates contact with the service (Peach). Specify `StartIterationEvent` to launch the client at the start of the test case. 
 
@@ -276,4 +276,24 @@ image::{images}/SaveFileMonitor2.png["SaveFile Monitor", scale="50"]
 The most significant paramter follows:
 
 Filename:: Specifies the full path to the Linux logging system used by GDB. 
+
+==== Closing the Client Process
+
+The Peach debug monitor NoCpuKill option addresses how Peach behaves at the end of a test case, after execution completes and Peach starts to close out the test case. During this time, the “StartOnCall” parameter causes one of two actions to occur:
+
+* If NoCpuKill is true, Peach waits for the process to exit OR for a time to elapse specified by the WaitForExitTimeout parameter.
+* If NoCpuKill is false, Peach waits for the CPU usage of the process to reach zero percent OR for the process to exit OR for a time to elapse specified by the WaitForExitTimeout parameter. The default setting is `false`.
+
+NOTE: If the waiting period ends, peach kills the target process if it is still running and starts the next iteration.
+
+So, when do you need to let a process with zero CPU activity continue to execute?
+
+Set “NoCpuKill” to `true` when you’re fuzzing a network service client. In this scenario, Peach Fuzzer starts the network client using the “Start on Call” parameter to initiate contact with the service. When the client receives and processes the reply, Peach waits for the client to run to completion and watches for any faults that occur before the client exits.
+
+Scenarios exempt from the NoCpuKill CPU option include the following:
+
+* Fuzzing network service servers typically do not use the “Start On Call” option, so the “NoCpuKill” option isn’t needed.
+* Fuzzing file formats require “Start on Call” to start the fuzzing target once the fuzzed data file is generated. The “NoCpuKill” can be used here; however, Peach can save precious time in the test case by letting the process terminate if the CPU usage falls to zero. In file fuzzing, the faults occur when the target opens the file. So, not using “NoCpuKill” is a time optimization that is realized with each test case in the fuzzing job.
+* Embedded devices. Fuzzing configurations for these devices do not use the Peach debugging monitors for Gdb, the WindowsDebugger, or CrashWrangler. So, the “NoCpuKill” option isn’t needed.
+* Kernel-mode debugging. Kernel-mode debugging has its own set of requirements. The “NoCpuKill” is not used here. 
 
