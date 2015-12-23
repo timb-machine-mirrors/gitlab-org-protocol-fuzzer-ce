@@ -244,11 +244,11 @@ namespace Peach.Pro.Test.Core.Publishers
 			ScheduleRead(_socket);
 		}
 
-		private void StartRawEcho(IPAddress localIp)
+		private void StartRawEcho(IPAddress localIp, int protocol)
 		{
 			try
 			{
-				_socket = new Socket(localIp.AddressFamily, SocketType.Raw, ProtocolType.Pup);
+				_socket = new Socket(localIp.AddressFamily, SocketType.Raw, (ProtocolType)protocol);
 			}
 			catch (SocketException ex)
 			{
@@ -418,24 +418,6 @@ namespace Peach.Pro.Test.Core.Publishers
 			Assert.AreEqual("Recv 11 bytes!", state.actions[1].dataModel.InternalValue.BitsToString());
 		}
 
-		[Test]
-		[TestCase("RawV6", "127.0.0.1")]
-		[TestCase("RawV4", "::1")]
-		[TestCase("RawIPv4", "::1")]
-		public void BadAddressFamily(string pub, string host)
-		{
-			var ex = Assert.Throws<PeachException>(() => RunEngine(pub, new Dictionary<string, string>
-			{
-				{ "Host", host },
-				{ "Protocol", "17" },
-			}));
-
-			var res = new IPEndPoint(IPAddress.Parse(host), 0).ToString();
-			var exp = "The resolved IP '{0}' for host '{1}' is not compatible with the {2} publisher.".Fmt(res, host, pub);
-
-			Assert.AreEqual(exp, ex.Message);
-		}
-
 		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Could not resolve scope id for interface with address 'fe80::'.")]
 		public void TestMissingLocalScopeId()
 		{
@@ -495,6 +477,68 @@ namespace Peach.Pro.Test.Core.Publishers
 
 			Assert.AreEqual("Hello World", state.actions[0].dataModel.InternalValue.BitsToString());
 			Assert.AreEqual("Recv 11 bytes!", state.actions[1].dataModel.InternalValue.BitsToString());
+		}
+
+		[Test]
+		[TestCase("RawV6", "127.0.0.1")]
+		[TestCase("RawV4", "::1")]
+		[TestCase("RawIPv4", "::1")]
+		public void BadAddressFamily(string pub, string host)
+		{
+			var ex = Assert.Throws<PeachException>(() => RunEngine(pub, new Dictionary<string, string>
+			{
+				{ "Host", host },
+				{ "Protocol", "17" },
+			}));
+
+			var res = new IPEndPoint(IPAddress.Parse(host), 0).ToString();
+			var exp = "The resolved IP '{0}' for host '{1}' is not compatible with the {2} publisher.".Fmt(res, host, pub);
+
+			Assert.AreEqual(exp, ex.Message);
+		}
+
+		[Test]
+		[TestCase("RawV4", AddressFamily.InterNetwork, 3)]
+		[TestCase("RawV4", AddressFamily.InterNetwork, 12)]
+		[TestCase("RawIPv4", AddressFamily.InterNetwork, 12)]
+		[TestCase("RawV4", AddressFamily.InterNetwork, 22)]
+		// FIXME: unclear why, but these protocols don't work with RawIPv4 yet
+		// [TestCase("RawIPv4", AddressFamily.InterNetwork, 3)]
+		// [TestCase("RawIPv4", AddressFamily.InterNetwork, 22)]
+		public void RawEcho(string pub, AddressFamily family, int protocol)
+		{
+			// Ensure basic send/recv functionality
+			var self = Helpers.GetPrimaryIface(family);
+
+			StartRawEcho(self.Item2, protocol);
+
+			var dom = RunEngine(pub, new Dictionary<string, string>
+			{
+				{ "Host", self.Item2.ToString() },
+				{ "Protocol", protocol.ToString() },
+			});
+
+			Assert.NotNull(dom);
+
+			var state = dom.tests[0].stateModel.states[0];
+
+			var req = state.actions[0].dataModel.find("Data");
+			Assert.NotNull(req);
+			Assert.AreEqual("Hello World", req.InternalValue.ToString());
+
+			// Because we are sending a test packet to ourselves, the first
+			// input action is a copy of the "Hello World" packet that was
+			// sent by the publisher.
+			var resp1 = state.actions[1].dataModel.find("Data");
+			Assert.NotNull(resp1);
+			Assert.AreEqual("Hello World", resp1.InternalValue.ToString());
+
+			// The second packet the publisher receives is the echo response
+			// packet.  The value is 11 bytes of "Hello World" plus the 20
+			// byte IP header for a total of 31 bytes.
+			var resp2 = state.actions[2].dataModel.find("Data");
+			Assert.NotNull(resp2);
+			Assert.AreEqual("Recv 31 bytes!", resp2.InternalValue.ToString());
 		}
 
 		[Test]
@@ -639,45 +683,6 @@ namespace Peach.Pro.Test.Core.Publishers
 
 			Assert.AreEqual("Hello World", state.actions[0].dataModel.InternalValue.BitsToString());
 			Assert.AreEqual("Recv 11 bytes!", state.actions[1].dataModel.InternalValue.BitsToString());
-		}
-
-		[Test]
-		[TestCase("RawV4", AddressFamily.InterNetwork)]
-		[TestCase("RawIPv4", AddressFamily.InterNetwork)]
-		public void RawEcho(string pub, AddressFamily family)
-		{
-			// Ensure basic send/recv functionality
-			var self = Helpers.GetPrimaryIface(family);
-
-			StartRawEcho(self.Item2);
-
-			var dom = RunEngine(pub, new Dictionary<string, string>
-			{
-				{ "Host", self.Item2.ToString() },
-				{ "Protocol", "12" },
-			});
-
-			Assert.NotNull(dom);
-
-			var state = dom.tests[0].stateModel.states[0];
-
-			var req = state.actions[0].dataModel.find("Data");
-			Assert.NotNull(req);
-			Assert.AreEqual("Hello World", req.InternalValue.ToString());
-
-			// Because we are sending a test packet to ourselves, the first
-			// input action is a copy of the "Hello World" packet that was
-			// sent by the publisher.
-			var resp1 = state.actions[1].dataModel.find("Data");
-			Assert.NotNull(resp1);
-			Assert.AreEqual("Hello World", resp1.InternalValue.ToString());
-
-			// The second packet the publisher receives is the echo response
-			// packet.  The value is 11 bytes of "Hello World" plus the 20
-			// byte IP header for a total of 31 bytes.
-			var resp2 = state.actions[2].dataModel.find("Data");
-			Assert.NotNull(resp2);
-			Assert.AreEqual("Recv 31 bytes!", resp2.InternalValue.ToString());
 		}
 
 		[Test]
