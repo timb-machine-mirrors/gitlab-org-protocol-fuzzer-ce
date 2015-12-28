@@ -239,7 +239,7 @@ namespace Peach.Pro.Core.Dom
 		{
 			if (Rendering.Count > 0)
 			{
-				Logger.Debug("Rendering sequence populated, cracking Payload.");
+				context.Log("Cracking Payload");
 
 				if (FragmentAlg.NeedFragment())
 					throw new SoftException("Error, still waiting on fragments prior to reassembly.");
@@ -249,7 +249,7 @@ namespace Peach.Pro.Core.Dom
 			}
 			else
 			{
-				Logger.Debug("Empty Rendering sequence, cracking fragments and payload.");
+				context.Log("Cracking Fragments");
 
 				var noPayload = false;
 				var startPos = data.Position;
@@ -259,7 +259,7 @@ namespace Peach.Pro.Core.Dom
 				var fragment = template.Clone("Frag_0");
 				Rendering.Add(fragment);
 
-				var cracker = new DataCracker();
+				var cracker = context.Clone();
 				cracker.CrackData(fragment, data);
 
 				endPos = data.Position;
@@ -267,13 +267,13 @@ namespace Peach.Pro.Core.Dom
 				var fragDataElement = fragment.find("FragData");
 				if (fragDataElement == null && PayloadOptional)
 				{
-					Logger.Debug("FragData not found, optional payload enabled.");
+					Logger.Trace("FragData not found, optional payload enabled.");
 					noPayload = true;
 				}
 				else if (fragDataElement == null)
 					throw new SoftException("Unable to locate FragData element during infrag action.");
 
-				Logger.Debug("Fragment {3}: pos: {0} length: {1} crack consumed: {2} bytes",
+				Logger.Trace("Fragment {3}: pos: {0} length: {1} crack consumed: {2} bytes",
 					endPos, data.Length, endPos - startPos, 0);
 
 				if (FragmentAlg.NeedFragment())
@@ -282,6 +282,7 @@ namespace Peach.Pro.Core.Dom
 				if (noPayload)
 					return;
 
+				context.Log("Cracking Payload");
 				var reassembledData = FragmentAlg.Reassemble();
 				this["Payload"].Crack(context, reassembledData, reassembledData.LengthBits);
 			}
