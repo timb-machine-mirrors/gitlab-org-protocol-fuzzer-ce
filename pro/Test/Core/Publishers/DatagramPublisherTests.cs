@@ -22,7 +22,7 @@ namespace Peach.Pro.Test.Core.Publishers
 	[TestFixture]
 	[Quick]
 	[Peach]
-	class SocketPublisherTests
+	class DatagramPublisherTests
 	{
 		#region OSX Multicast IPV6 Declarations
 
@@ -666,7 +666,7 @@ namespace Peach.Pro.Test.Core.Publishers
 
 			// Can't do IPv6 multicast on loopback on linux
 			if (Platform.GetOS() == Platform.OS.Linux && localIp.Equals(IPAddress.IPv6Loopback))
-				Assert.Pass();
+				Assert.Ignore();
 
 			StartMulticast(localIp, groupIp);
 
@@ -1005,7 +1005,7 @@ namespace Peach.Pro.Test.Core.Publishers
 				{
 					if (a.Name == "open")
 					{
-						((SocketPublisher)c.test.publishers[1]).Port = ((SocketPublisher)c.test.publishers[0]).SrcPort;
+						((DatagramPublisher)c.test.publishers[1]).Port = ((DatagramPublisher)c.test.publishers[0]).SrcPort;
 					}
 					else if (a.Name == "send")
 					{
