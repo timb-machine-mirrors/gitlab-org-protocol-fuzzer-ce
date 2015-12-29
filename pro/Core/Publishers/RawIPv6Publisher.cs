@@ -1,5 +1,4 @@
-﻿
-//
+﻿//
 // Copyright (c) Michael Eddington
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
@@ -49,7 +48,7 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default 3000)", "3000")]
 	[Parameter("MinMTU", typeof(uint), "Minimum allowable MTU property value", DefaultMinMTU)]
 	[Parameter("MaxMTU", typeof(uint), "Maximum allowable MTU property value", DefaultMaxMTU)]
-	public class RawV6Publisher : SocketPublisher
+	public class RawV6Publisher : DatagramPublisher
 	{
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
@@ -59,15 +58,14 @@ namespace Peach.Pro.Core.Publishers
 		{
 		}
 
-		protected override bool AddressFamilySupported(AddressFamily af)
+		protected override bool IsAddressFamilySupported(AddressFamily af)
 		{
 			return af == AddressFamily.InterNetworkV6;
 		}
 
-		protected override Socket OpenSocket(EndPoint remote)
+		protected override SocketType SocketType
 		{
-			Socket s = OpenRawSocket(AddressFamily.InterNetworkV6, Protocol);
-			return s;
+			get { return SocketType.Raw; }
 		}
 	}
 }
