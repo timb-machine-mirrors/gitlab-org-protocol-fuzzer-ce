@@ -135,7 +135,7 @@ namespace Peach.Core.Cracker
 		/// <summary>
 		/// The string to prefix log messages with.
 		/// </summary>
-		readonly StringBuilder _logPrefix = new StringBuilder();
+		readonly StringBuilder _logPrefix;
 
 		/// <summary>
 		/// The last error we logged
@@ -184,6 +184,28 @@ namespace Peach.Core.Cracker
 		#endregion
 
 		#region Public Methods
+
+		private DataCracker(string logPrefix)
+		{
+			_logPrefix = new StringBuilder(logPrefix);
+		}
+
+		/// <summary>
+		/// Constructs a DataCracker
+		/// </summary>
+		public DataCracker()
+		{
+			_logPrefix = new StringBuilder();
+		}
+
+		/// <summary>
+		/// Returns a new DataCracker with the log prefix maintained.
+		/// </summary>
+		/// <returns></returns>
+		public DataCracker Clone()
+		{
+			return new DataCracker(_logPrefix.ToString());
+		}
 
 		/// <summary>
 		/// Main entry method that will take a data stream and parse it into a data model.

@@ -240,10 +240,49 @@ namespace PitTester
 			}
 		}
 
-		protected override void OnOutput(BitwiseStream data)
+		protected override void OnOutput(BitwiseStream actualStream)
 		{
-			// Handled with the override for output()
-			throw new NotSupportedException();
+			// most of the time output(datamodel) should be called instead of this.
+			// however, with outfrag this is not possible.
+
+			var data = _logger.Verify<TestData.Output>(Name);
+
+			if (data == null)
+				return;
+
+			// Only check outputs on non-fuzzing iterations
+			if (!IsControlIteration)
+				return;
+
+			var expected = data.Payload;
+
+			// Ensure we end on a byte boundary
+			var bs = actualStream.PadBits();
+			bs.Seek(0, SeekOrigin.Begin);
+			var actual = new BitReader(bs).ReadBytes((int)bs.Length);
+
+			// If data files are in use and VerifyDataSets is false, don't do a comparison
+			if (!_logger.VerifyDataSets)
+				return;
+
+			if (Logger.IsDebugEnabled)
+				Logger.Debug("\n\n" + Utilities.HexDump(actual, 0, actual.Length));
+
+			var cb = new ConsoleBuffer();
+			if (BinDiff(new DataModel(), expected, actual, new List<Tuple<string, long, long>>(), cb))
+			{
+				string msg;
+				if (data.Ignore)
+					msg = "Ignoring action: {0}".Fmt(_logger.ActionName);
+				else
+					msg = "Test failed on action: {0}".Fmt(_logger.ActionName);
+
+				using (new ForegroundColor(ConsoleColor.Red))
+					Console.WriteLine(msg);
+				
+				cb.Print();
+			}
+
 		}
 
 		bool BinDiff(DataModel dataModel, byte[] expected, byte[] actual, List<Tuple<string, long,long>> skipList, ConsoleBuffer cb)

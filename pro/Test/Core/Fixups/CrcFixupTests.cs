@@ -15,16 +15,17 @@ namespace Peach.Pro.Test.Core.Fixups
 		[Test]
 		public void Dnp3Crc16()
 		{
+			// From sample packet capture
+
 			var buff = new byte[] {0x05, 0x64, 0x05, 0xf2, 0x01, 0x00, 0xef, 0xff };
-
 			var crc = Pro.Core.Fixups.Libraries.Crc16Dnp3.ComputeChecksum(buff);
-
 			Assert.AreEqual(0xb5bf, crc);
 
-			buff = new byte[] { 0x05, 0x64, 0x0B, 0xC4, 0x03, 0x00, 0x04, 0x00, 0x00, 0x00 };
-			crc = Pro.Core.Fixups.Libraries.Crc16Dnp3.ComputeChecksum(buff);
+			// From DNP3 specification
 
-			Assert.AreEqual(0x7AEF, crc);
+			buff = new byte[] { 0x05, 0x64, 0x05, 0xF2, 0x01, 0x00, 0xEF, 0xFF };
+			crc = Pro.Core.Fixups.Libraries.Crc16Dnp3.ComputeChecksum(buff);
+			Assert.AreEqual(0xB5BF, crc);
 		}
 
 		[Test]
