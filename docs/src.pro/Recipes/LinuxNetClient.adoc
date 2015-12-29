@@ -7,7 +7,7 @@
 
 === Recipe: Monitoring a Linux Network Service Client
 
-image::{images}/linux_Tux_small.png["Linux Tux mascot", scale="40"]
+image::{images}/Linux_Tux_small.png["Linux Tux mascot", scale="40"]
 
 This recipe describes the base setup needed to fuzz a client of a Linux network service. 
 When fuzzing a network client, Peach impersonates the network service, the other endpoint of the network connection.
