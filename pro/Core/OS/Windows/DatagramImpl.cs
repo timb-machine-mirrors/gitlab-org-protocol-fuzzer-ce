@@ -107,7 +107,7 @@ namespace Peach.Pro.Core.OS.Windows
 				catch (Exception ex)
 				{
 					// ignored
-					Logger.Trace("OnClose> Exception: {0}", ex);
+					Logger.Trace("OnClose> Exception: {0}", ex.Message);
 				}
 			}
 
@@ -116,17 +116,15 @@ namespace Peach.Pro.Core.OS.Windows
 			_socket = null;
 		}
 
-		public void Send(IPEndPoint remoteEp, byte[] buf, int len, int timeout)
+		public int Send(IPEndPoint remoteEp, byte[] buf, int len, int timeout)
 		{
 			Debug.Assert(_socket != null);
 
 			var ar = _socket.BeginSendTo(buf, 0, len, SocketFlags.None, remoteEp, null, null);
 			if (!ar.AsyncWaitHandle.WaitOne(TimeSpan.FromMilliseconds(timeout)))
 				throw new TimeoutException();
-			var ret = _socket.EndSendTo(ar);
 
-			if (ret != len)
-				throw new Exception(string.Format("Only sent {0} of {1} byte {2} packet.", ret, len, _publisher));
+			return _socket.EndSendTo(ar);
 		}
 
 		public IPEndPoint Receive(IPEndPoint expected, byte[] buf, out int len, int timeout)
@@ -237,37 +235,6 @@ namespace Peach.Pro.Core.OS.Windows
 				return (ProtocolType)protocol;
 			default:
 				throw new PeachException("Error, the {0} publisher does not support protocol type 0x{1:X2}.".Fmt(_publisher, protocol));
-			}
-		}
-
-		private static SocketError WSAGetLastError()
-		{
-			int err = Marshal.GetLastWin32Error();
-
-			switch (err)
-			{
-			case 1:  // EPERM -> WSAEACCESS
-				return SocketError.AccessDenied;
-			case 13: // EACCES -> WSAEACCESS
-				return SocketError.AccessDenied;
-			case 97: // EAFNOSUPPORT -> WSAEAFNOSUPPORT
-				return SocketError.AddressFamilyNotSupported;
-			case 22: // EINVAL -> WSAEINVAL
-				return SocketError.InvalidArgument;
-			case 24: // EMFILE -> WSAEPROCLIM
-				return SocketError.ProcessLimit;
-			case 23: // ENFILE -> WSAEMFILE
-				return SocketError.TooManyOpenSockets;
-			case 105: // ENOBUFS -> WSAENOBUFS
-				return SocketError.NoBufferSpaceAvailable;
-			case 12: // ENOMEM -> WSAENOBUFS
-				return SocketError.NoBufferSpaceAvailable;
-			case 93: //Linux: EPROTONOTSUPPORT -> WSAEPROTONOSUPPORT
-				return SocketError.ProtocolNotSupported;
-			case 41: //OSX: EPROTONOTSUPPORT -> WSAEPROTONOSUPPORT
-				return SocketError.ProtocolNotSupported;
-			default:
-				return SocketError.SocketError;
 			}
 		}
 	}

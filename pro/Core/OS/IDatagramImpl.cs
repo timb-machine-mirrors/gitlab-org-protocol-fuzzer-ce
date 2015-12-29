@@ -20,7 +20,7 @@ namespace Peach.Pro.Core.OS
 
 		void Close();
 
-		void Send(IPEndPoint remoteEp, byte[] buf, int len, int timeout);
+		int Send(IPEndPoint remoteEp, byte[] buf, int len, int timeout);
 
 		IPEndPoint Receive(IPEndPoint expected, byte[] buf, out int len, int timeout);
 	}

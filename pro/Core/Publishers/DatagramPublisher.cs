@@ -46,7 +46,7 @@ namespace Peach.Pro.Core.Publishers
 		/// </remarks>
 		public bool NoReadException { get; set; }
 
-		const int MaxSendSize = 65000;
+		const int MaxBufSize = 65000;
 
 		private IPEndPoint _localEp = null;
 		protected IPEndPoint _remoteEp = null;
@@ -254,7 +254,7 @@ namespace Peach.Pro.Core.Publishers
 			_ifaceName = ifaceName;
 			_mtu = mtu;
 			_origMtu = mtu;
-			_stream = new MemoryStream(MaxSendSize);
+			_stream = new MemoryStream(MaxBufSize);
 		}
 
 		protected override void OnStop()
@@ -291,7 +291,7 @@ namespace Peach.Pro.Core.Publishers
 					_remoteEp, 
 					_iface, 
 					_ifaceName,
-					MaxSendSize
+					MaxBufSize
 				);
 			}
 			catch (Exception ex)
@@ -364,14 +364,16 @@ namespace Peach.Pro.Core.Publishers
 			if (Logger.IsDebugEnabled)
 				Logger.Debug("\n\n" + Utilities.HexDump(data));
 
-			var buf = new byte[MaxSendSize];
+			var buf = new byte[MaxBufSize];
 			var len = data.Read(buf, 0, buf.Length);
 
 			FilterOutput(buf, 0, len);
 
 			try
 			{
-				_impl.Send(_remoteEp, buf, len, Timeout);
+				var sent = _impl.Send(_remoteEp, buf, len, Timeout);
+				if (sent != data.Length)
+					throw new Exception(string.Format("Only sent {0} of {1} byte {2} packet.", sent, data.Length, _type));
 			}
 			catch (Exception ex)
 			{

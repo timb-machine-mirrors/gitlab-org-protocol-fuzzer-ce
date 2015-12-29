@@ -109,7 +109,7 @@ namespace Peach.Pro.Core.OS.Unix
 			}
 		}
 
-		public void Send(IPEndPoint remoteEp, byte[] buf, int len, int timeout)
+		public int Send(IPEndPoint remoteEp, byte[] buf, int len, int timeout)
 		{
 			var fds = new Pollfd[1];
 			fds[0].fd = _fd;
@@ -154,10 +154,7 @@ namespace Peach.Pro.Core.OS.Unix
 						continue;
 					UnixMarshal.ThrowExceptionForLastErrorIf(ret);
 
-					if (ret != len)
-						throw new Exception("Only sent {0} of {1} byte packet.".Fmt(ret, len));
-
-					break;
+					return ret;
 				}
 				catch (Exception ex)
 				{
