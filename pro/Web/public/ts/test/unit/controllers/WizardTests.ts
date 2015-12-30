@@ -158,10 +158,10 @@ describe("Peach", () => {
 			];
 			for (let track of tracks) {
 				$templateCache.put(
-					C.Templates.Pit.Wizard.TrackIntro.replace(':track', track), ''
+					C.Templates.Pit.Wizard.TrackIntro.replace(':track', track.toLowerCase()), ''
 				);
 				$templateCache.put(
-					C.Templates.Pit.Wizard.TrackDone.replace(':track', track), ''
+					C.Templates.Pit.Wizard.TrackDone.replace(':track', track.toLowerCase()), ''
 				);
 			}
 			

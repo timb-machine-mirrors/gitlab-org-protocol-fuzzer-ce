@@ -44,7 +44,6 @@ namespace Peach.Pro.Test.Core.WebServices
 				Assert.Fail(sb.ToString());
 		}
 
-
 		[Test]
 		public void TestOnCall()
 		{
@@ -76,31 +75,65 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			// When metadata syncs up with types, no errors are produced
 
+			const string metadata = @"
+{
+  'Groups': [
+    {
+      'Name': 'GroupName',
+      'Items': [ 
+        'TestMonitor'
+      ]
+    }
+  ],
+  'Parameters': {
+    'TestMonitor': [
+      {
+        'Name': 'Group1',
+        'Items': [
+          'Test'
+        ]
+      }
+    ]
+  }
+}";
+
 			var tester = new MetadataTester
 			{
 				Type = new[] { typeof(TestMonitor) },
-				Metadata = "[{'Name':'TestMonitor','Type':'Monitor','Items':[{'Name':'Test','Type':'Param'}]}]".Replace('\'', '\"')
+				Metadata = metadata.Replace('\'', '\"')
 			};
 
 			var result = tester.Run();
 
 			var exp = @"[
   {
-    ""Description"": ""Desc"",
     ""Items"": [
       {
-        ""DefaultValue"": ""Foo"",
         ""Description"": ""Desc"",
-        ""Key"": ""Test"",
-        ""Name"": ""Test"",
-        ""Optional"": true,
-        ""Type"": ""String""
+        ""Items"": [
+          {
+            ""Items"": [
+              {
+                ""DefaultValue"": ""Foo"",
+                ""Description"": ""Desc"",
+                ""Key"": ""Test"",
+                ""Name"": ""Test"",
+                ""Optional"": true,
+                ""Type"": ""String""
+              }
+            ],
+            ""Name"": ""Group1"",
+            ""Type"": ""Group""
+          }
+        ],
+        ""Key"": ""TestMonitor"",
+        ""Name"": ""Test Monitor"",
+        ""OS"": """",
+        ""Type"": ""Monitor""
       }
     ],
-    ""Key"": ""TestMonitor"",
-    ""Name"": ""Test Monitor"",
-    ""OS"": """",
-    ""Type"": ""Monitor""
+    ""Name"": ""GroupName"",
+    ""Type"": ""Group""
   }
 ]".Replace("\r\n", Environment.NewLine);
 
@@ -114,38 +147,67 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			// Verify we output "Collapsed":true when needed
 
+			const string metadata = @"
+{
+  'Groups': [
+    {
+      'Name': 'GroupName',
+      'Items': [ 
+        'TestMonitor'
+      ]
+    }
+  ],
+  'Parameters': {
+    'TestMonitor': [
+      {
+        'Name': 'Group1',
+        'Collapsed': 'true',
+        'Items': [
+          'Test'
+        ]
+      }
+    ]
+  }
+}";
+
 			var tester = new MetadataTester
 			{
 				Type = new[] { typeof(TestMonitor) },
-				Metadata = "[{'Name':'TestMonitor','Type':'Monitor','Items':[{'Name':'Group1','Type':'Group','Collapsed':true,'Items':[{'Name':'Test','Type':'Param'}]}]}]".Replace('\'', '\"')
+				Metadata = metadata.Replace('\'', '\"')
 			};
 
 			var result = tester.Run();
 
 			var exp = @"[
   {
-    ""Description"": ""Desc"",
     ""Items"": [
       {
-        ""Collapsed"": true,
+        ""Description"": ""Desc"",
         ""Items"": [
           {
-            ""DefaultValue"": ""Foo"",
-            ""Description"": ""Desc"",
-            ""Key"": ""Test"",
-            ""Name"": ""Test"",
-            ""Optional"": true,
-            ""Type"": ""String""
+            ""Collapsed"": true,
+            ""Items"": [
+              {
+                ""DefaultValue"": ""Foo"",
+                ""Description"": ""Desc"",
+                ""Key"": ""Test"",
+                ""Name"": ""Test"",
+                ""Optional"": true,
+                ""Type"": ""String""
+              }
+            ],
+            ""Name"": ""Group1"",
+            ""Type"": ""Group""
           }
         ],
-        ""Name"": ""Group1"",
-        ""Type"": ""Group""
+        ""Key"": ""TestMonitor"",
+        ""Name"": ""Test Monitor"",
+        ""OS"": """",
+        ""Type"": ""Monitor""
       }
     ],
-    ""Key"": ""TestMonitor"",
-    ""Name"": ""Test Monitor"",
-    ""OS"": """",
-    ""Type"": ""Monitor""
+    ""Name"": ""GroupName"",
+    ""Type"": ""Group""
   }
 ]".Replace("\r\n", Environment.NewLine);
 
@@ -252,7 +314,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			var tester = new MetadataTester
 			{
 				Type = new[] { typeof(TestMonitor), typeof(TestTwoMonitor) },
-				Metadata = "[]"
+				Metadata = "{}"
 			};
 
 			var result = tester.Run();
@@ -311,31 +373,74 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			// Ignore monitors that are referenced in metadata but don't exist
 
+			const string metadata = @"
+{
+  'Groups': [
+    {
+      'Name': 'GroupName',
+      'Items': [ 
+        'MissingMonitor',
+        'TestMonitor'
+      ]
+    }
+  ],
+  'Parameters': {
+    'MissingMonitor': [
+      {
+        'Name': 'Group1',
+        'Items': [
+          'Test'
+        ]
+      }
+    ],
+    'TestMonitor': [
+      {
+        'Name': 'Group1',
+        'Items': [
+          'Test'
+        ]
+      }
+    ]
+  }
+}";
+
 			var tester = new MetadataTester
 			{
 				Type = new[] { typeof(TestMonitor) },
-				Metadata = "[{'Name':'MissingMonitor','Type':'Monitor','Items':[]},{'Name':'TestMonitor','Type':'Monitor','Items':[{'Name':'Test','Type':'Param'}]}]".Replace('\'', '\"')
+				Metadata = metadata.Replace('\'', '\"')
 			};
 
 			var result = tester.Run();
 
 			var exp = @"[
   {
-    ""Description"": ""Desc"",
     ""Items"": [
       {
-        ""DefaultValue"": ""Foo"",
         ""Description"": ""Desc"",
-        ""Key"": ""Test"",
-        ""Name"": ""Test"",
-        ""Optional"": true,
-        ""Type"": ""String""
+        ""Items"": [
+          {
+            ""Items"": [
+              {
+                ""DefaultValue"": ""Foo"",
+                ""Description"": ""Desc"",
+                ""Key"": ""Test"",
+                ""Name"": ""Test"",
+                ""Optional"": true,
+                ""Type"": ""String""
+              }
+            ],
+            ""Name"": ""Group1"",
+            ""Type"": ""Group""
+          }
+        ],
+        ""Key"": ""TestMonitor"",
+        ""Name"": ""Test Monitor"",
+        ""OS"": """",
+        ""Type"": ""Monitor""
       }
     ],
-    ""Key"": ""TestMonitor"",
-    ""Name"": ""Test Monitor"",
-    ""OS"": """",
-    ""Type"": ""Monitor""
+    ""Name"": ""GroupName"",
+    ""Type"": ""Group""
   }
 ]".Replace("\r\n", Environment.NewLine);
 
@@ -350,22 +455,44 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			// Raise warning if metadata has an omitted paraameter for a monitor
 
+			const string metadata = @"
+{
+  'Groups': [
+    {
+      'Name': 'GroupName',
+      'Items': [ 
+        'TestThreeMonitor'
+      ]
+    }
+  ],
+  'Parameters': {
+    'TestThreeMonitor': [
+    ]
+  }
+}";
+
 			var tester = new MetadataTester
 			{
 				Type = new[] { typeof(TestThreeMonitor) },
-				Metadata = "[{'Name':'TestThreeMonitor','Type':'Monitor','Items':[]}]".Replace('\'', '\"')
+				Metadata = metadata.Replace('\'', '\"')
 			};
 
 			var result = tester.Run();
 
 			var exp = @"[
   {
-    ""Description"": ""Desc"",
-    ""Items"": [],
-    ""Key"": ""TestThreeMonitor"",
-    ""Name"": ""Test Three Monitor"",
-    ""OS"": """",
-    ""Type"": ""Monitor""
+    ""Items"": [
+      {
+        ""Description"": ""Desc"",
+        ""Items"": [],
+        ""Key"": ""TestThreeMonitor"",
+        ""Name"": ""Test Three Monitor"",
+        ""OS"": """",
+        ""Type"": ""Monitor""
+      }
+    ],
+    ""Name"": ""GroupName"",
+    ""Type"": ""Group""
   }
 ]".Replace("\r\n", Environment.NewLine);
 
@@ -380,47 +507,91 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			// Raise warning if metadata has duplicated paraameter for a monitor
 
+			const string metadata = @"
+{
+  'Groups': [
+    {
+      'Name': 'GroupName',
+      'Items': [ 
+        'TestTwoMonitor'
+      ]
+    }
+  ],
+  'Parameters': {
+    'TestTwoMonitor': [
+      {
+        'Name': 'Group1',
+        'Items': [
+          'TestTwo',
+          '',
+          'TestTwo',
+          '',
+          'TestTwo'
+        ]
+      }
+    ]
+  }
+}";
+
 			var tester = new MetadataTester
 			{
 				Type = new[] { typeof(TestTwoMonitor) },
-				Metadata = "[{'Name':'TestTwoMonitor','Type':'Monitor','Items':[{'Name':'TestTwo','Type':'Param'},{'Name':'TestTwo','Type':'Param'},{'Name':'TestTwo','Type':'Param'}]}]".Replace('\'', '\"')
+				Metadata = metadata.Replace('\'', '\"')
 			};
 
 			var result = tester.Run();
 
 			var exp = @"[
   {
-    ""Description"": ""Desc"",
     ""Items"": [
       {
-        ""DefaultValue"": ""Foo"",
         ""Description"": ""Desc"",
-        ""Key"": ""TestTwo"",
-        ""Name"": ""Test Two"",
-        ""Optional"": true,
-        ""Type"": ""String""
-      },
-      {
-        ""DefaultValue"": ""Foo"",
-        ""Description"": ""Desc"",
-        ""Key"": ""TestTwo"",
-        ""Name"": ""Test Two"",
-        ""Optional"": true,
-        ""Type"": ""String""
-      },
-      {
-        ""DefaultValue"": ""Foo"",
-        ""Description"": ""Desc"",
-        ""Key"": ""TestTwo"",
-        ""Name"": ""Test Two"",
-        ""Optional"": true,
-        ""Type"": ""String""
+        ""Items"": [
+          {
+            ""Items"": [
+              {
+                ""DefaultValue"": ""Foo"",
+                ""Description"": ""Desc"",
+                ""Key"": ""TestTwo"",
+                ""Name"": ""Test Two"",
+                ""Optional"": true,
+                ""Type"": ""String""
+              },
+              {
+                ""Type"": ""Space""
+              },
+              {
+                ""DefaultValue"": ""Foo"",
+                ""Description"": ""Desc"",
+                ""Key"": ""TestTwo"",
+                ""Name"": ""Test Two"",
+                ""Optional"": true,
+                ""Type"": ""String""
+              },
+              {
+                ""Type"": ""Space""
+              },
+              {
+                ""DefaultValue"": ""Foo"",
+                ""Description"": ""Desc"",
+                ""Key"": ""TestTwo"",
+                ""Name"": ""Test Two"",
+                ""Optional"": true,
+                ""Type"": ""String""
+              }
+            ],
+            ""Name"": ""Group1"",
+            ""Type"": ""Group""
+          }
+        ],
+        ""Key"": ""TestTwoMonitor"",
+        ""Name"": ""Test Two Monitor"",
+        ""OS"": """",
+        ""Type"": ""Monitor""
       }
     ],
-    ""Key"": ""TestTwoMonitor"",
-    ""Name"": ""Test Two Monitor"",
-    ""OS"": """",
-    ""Type"": ""Monitor""
+    ""Name"": ""GroupName"",
+    ""Type"": ""Group""
   }
 ]".Replace("\r\n", Environment.NewLine);
 
@@ -433,24 +604,58 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void TestMissingParameter()
 		{
-			// Raise warning if metadata has paraameter for a monitor that doesn't exist
+			// Raise warning if metadata has parameter for a monitor that doesn't exist
+
+			const string metadata = @"
+{
+  'Groups': [
+    {
+      'Name': 'GroupName',
+      'Items': [ 
+        'NoParamMonitor'
+      ]
+    }
+  ],
+  'Parameters': {
+    'NoParamMonitor': [
+      {
+        'Name': 'Group1',
+        'Items': [
+          'TestTwo'
+        ]
+      }
+    ]
+  }
+}";
 
 			var tester = new MetadataTester
 			{
 				Type = new[] { typeof(NoParamMonitor) },
-				Metadata = "[{'Name':'NoParamMonitor','Type':'Monitor','Items':[{'Name':'TestTwo','Type':'Param'}]}]".Replace('\'', '\"')
+				Metadata = metadata.Replace('\'', '\"')
 			};
 
 			var result = tester.Run();
 
 			var exp = @"[
   {
-    ""Description"": ""Desc"",
-    ""Items"": [],
-    ""Key"": ""NoParamMonitor"",
-    ""Name"": ""No Param Monitor"",
-    ""OS"": """",
-    ""Type"": ""Monitor""
+    ""Items"": [
+      {
+        ""Description"": ""Desc"",
+        ""Items"": [
+          {
+            ""Items"": [],
+            ""Name"": ""Group1"",
+            ""Type"": ""Group""
+          }
+        ],
+        ""Key"": ""NoParamMonitor"",
+        ""Name"": ""No Param Monitor"",
+        ""OS"": """",
+        ""Type"": ""Monitor""
+      }
+    ],
+    ""Name"": ""GroupName"",
+    ""Type"": ""Group""
   }
 ]".Replace("\r\n", Environment.NewLine);
 
@@ -465,31 +670,65 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			// Unsupported ParameterType triggers a warning and defaults to a string type.
 
+			const string metadata = @"
+{
+  'Groups': [
+    {
+      'Name': 'GroupName',
+      'Items': [ 
+        'InvalidParamMonitor'
+      ]
+    }
+  ],
+  'Parameters': {
+    'InvalidParamMonitor': [
+      {
+        'Name': 'Group1',
+        'Items': [
+          'Test'
+        ]
+      }
+    ]
+  }
+}";
+
 			var tester = new MetadataTester
 			{
 				Type = new[] { typeof(InvalidParamMonitor) },
-				Metadata = "[{'Name':'InvalidParamMonitor','Type':'Monitor','Items':[{'Name':'Test','Type':'Param'}]}]".Replace('\'', '\"')
+				Metadata = metadata.Replace('\'', '\"')
 			};
 
 			var result = tester.Run();
 
 			var exp = @"[
   {
-    ""Description"": ""Desc"",
     ""Items"": [
       {
-        ""DefaultValue"": """",
         ""Description"": ""Desc"",
-        ""Key"": ""Test"",
-        ""Name"": ""Test"",
-        ""Optional"": true,
-        ""Type"": ""String""
+        ""Items"": [
+          {
+            ""Items"": [
+              {
+                ""DefaultValue"": """",
+                ""Description"": ""Desc"",
+                ""Key"": ""Test"",
+                ""Name"": ""Test"",
+                ""Optional"": true,
+                ""Type"": ""String""
+              }
+            ],
+            ""Name"": ""Group1"",
+            ""Type"": ""Group""
+          }
+        ],
+        ""Key"": ""InvalidParamMonitor"",
+        ""Name"": ""Invalid Param Monitor"",
+        ""OS"": """",
+        ""Type"": ""Monitor""
       }
     ],
-    ""Key"": ""InvalidParamMonitor"",
-    ""Name"": ""Invalid Param Monitor"",
-    ""OS"": """",
-    ""Type"": ""Monitor""
+    ""Name"": ""GroupName"",
+    ""Type"": ""Group""
   }
 ]".Replace("\r\n", Environment.NewLine);
 
@@ -504,22 +743,44 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			// Invalid OS on monitor triggers warning but emits empty string
 
+			const string metadata = @"
+{
+  'Groups': [
+    {
+      'Name': 'GroupName',
+      'Items': [ 
+        'NoParamMonitor'
+      ]
+    }
+  ],
+  'Parameters': {
+    'NoParamMonitor': []
+  }
+}";
+
 			var tester = new MetadataTester
 			{
 				OS = Platform.OS.Unix,
 				Type = new[] { typeof(NoParamMonitor) },
-				Metadata = "[{'Name':'NoParamMonitor','Type':'Monitor'}]".Replace('\'', '\"')
+				Metadata = metadata.Replace('\'', '\"')
 			};
 
 			var result = tester.Run();
 
 			var exp = @"[
   {
-    ""Description"": ""Desc"",
-    ""Key"": ""NoParamMonitor"",
-    ""Name"": ""No Param Monitor"",
-    ""OS"": """",
-    ""Type"": ""Monitor""
+    ""Items"": [
+      {
+        ""Description"": ""Desc"",
+        ""Items"": [],
+        ""Key"": ""NoParamMonitor"",
+        ""Name"": ""No Param Monitor"",
+        ""OS"": """",
+        ""Type"": ""Monitor""
+      }
+    ],
+    ""Name"": ""GroupName"",
+    ""Type"": ""Group""
   }
 ]".Replace("\r\n", Environment.NewLine);
 
@@ -534,21 +795,43 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			// No description causes json to output empty string
 
+			const string metadata = @"
+{
+  'Groups': [
+    {
+      'Name': 'GroupName',
+      'Items': [ 
+        'NoDescriptionMonitor'
+      ]
+    }
+  ],
+  'Parameters': {
+    'NoDescriptionMonitor': []
+  }
+}";
+
 			var tester = new MetadataTester
 			{
 				Type = new[] { typeof(NoDescriptionMonitor) },
-				Metadata = "[{'Name':'NoDescriptionMonitor','Type':'Monitor'}]".Replace('\'', '\"')
+				Metadata = metadata.Replace('\'', '\"')
 			};
 
 			var result = tester.Run();
 
 			var exp = @"[
   {
-    ""Description"": """",
-    ""Key"": ""NoDescriptionMonitor"",
-    ""Name"": ""No Description Monitor"",
-    ""OS"": """",
-    ""Type"": ""Monitor""
+    ""Items"": [
+      {
+        ""Description"": """",
+        ""Items"": [],
+        ""Key"": ""NoDescriptionMonitor"",
+        ""Name"": ""No Description Monitor"",
+        ""OS"": """",
+        ""Type"": ""Monitor""
+      }
+    ],
+    ""Name"": ""GroupName"",
+    ""Type"": ""Group""
   }
 ]".Replace("\r\n", Environment.NewLine);
 
@@ -556,6 +839,85 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			Assert.AreEqual(1, tester.Errors.Count);
 			Assert.AreEqual("Monitor NoDescriptionMonitor does not have a description.", tester.Errors[0]);
+		}
+
+		[Test]
+		public void TestGroupUnknownMonitor()
+		{
+			// If the 'Group' list references a monitor that is not in 'Parameters' dict the item is ignored
+
+			const string metadata = @"
+{
+  'Groups': [
+    {
+      'Name': 'MissingGroupName',
+      'Items': [ 
+        'FooBar'
+      ]
+    },
+    {
+      'Name': 'GroupName',
+      'Items': [ 
+        'TestMonitor'
+      ]
+    }
+  ],
+  'Parameters': {
+    'TestMonitor': [
+      {
+        'Name': 'Group1',
+        'Items': [
+          'Test'
+        ]
+      }
+    ]
+  }
+}";
+
+			var tester = new MetadataTester
+			{
+				Type = new[] { typeof(TestMonitor) },
+				Metadata = metadata.Replace('\'', '\"')
+			};
+
+			var result = tester.Run();
+
+			var exp = @"[
+  {
+    ""Items"": [
+      {
+        ""Description"": ""Desc"",
+        ""Items"": [
+          {
+            ""Items"": [
+              {
+                ""DefaultValue"": ""Foo"",
+                ""Description"": ""Desc"",
+                ""Key"": ""Test"",
+                ""Name"": ""Test"",
+                ""Optional"": true,
+                ""Type"": ""String""
+              }
+            ],
+            ""Name"": ""Group1"",
+            ""Type"": ""Group""
+          }
+        ],
+        ""Key"": ""TestMonitor"",
+        ""Name"": ""Test Monitor"",
+        ""OS"": """",
+        ""Type"": ""Monitor""
+      }
+    ],
+    ""Name"": ""GroupName"",
+    ""Type"": ""Group""
+  }
+]".Replace("\r\n", Environment.NewLine);
+
+			Assert.AreEqual(exp, result);
+
+			Assert.AreEqual(1, tester.Errors.Count);
+			Assert.AreEqual("No parameter entry for monitor 'FooBar' referenced in group 'MissingGroupName'.", tester.Errors[0]);
 		}
 
 		class NoDescriptionMonitor

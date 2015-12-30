@@ -32,6 +32,11 @@ using System.Net;
 using System.Net.Sockets;
 using NLog;
 using Peach.Core;
+using Mono.Unix;
+using Mono.Unix.Native;
+using System.Runtime.InteropServices;
+using System.IO;
+using Peach.Core.IO;
 
 namespace Peach.Pro.Core.Publishers
 {
@@ -72,26 +77,14 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default 3000)", "3000")]
 	[Parameter("MinMTU", typeof(uint), "Minimum allowable MTU property value", DefaultMinMTU)]
 	[Parameter("MaxMTU", typeof(uint), "Maximum allowable MTU property value", DefaultMaxMTU)]
-	public class RawV4Publisher : SocketPublisher
+	public class RawV4Publisher : DatagramPublisher
 	{
-		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
-		protected override NLog.Logger Logger { get { return logger; } }
+		private static NLog.Logger _logger = LogManager.GetCurrentClassLogger();
+		protected override NLog.Logger Logger { get { return _logger; } }
 
 		public RawV4Publisher(Dictionary<string, Variant> args)
 			: base("RawV4", args)
 		{
-		}
-
-		protected override bool AddressFamilySupported(AddressFamily af)
-		{
-			return af == AddressFamily.InterNetwork;
-		}
-
-		protected override Socket OpenSocket(EndPoint remote)
-		{
-			Socket s = OpenRawSocket(AddressFamily.InterNetwork, Protocol);
-			s.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.HeaderIncluded, 0);
-			return s;
 		}
 
 		protected override void FilterInput(byte[] buffer, int offset, int count)
@@ -102,6 +95,16 @@ namespace Peach.Pro.Core.Publishers
 			// On OSX, ip_len is in host order and does not include the ip header
 			// http://cseweb.ucsd.edu/~braghava/notes/freebsd-sockets.txt
 			RawHelpers.SetLength(buffer, offset, count);
+		}
+
+		protected override bool IsAddressFamilySupported(AddressFamily af)
+		{
+			return af == AddressFamily.InterNetwork;
+		}
+
+		protected override SocketType SocketType
+		{
+			get { return SocketType.Raw; }
 		}
 	}
 
@@ -124,7 +127,7 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default 3000)", "3000")]
 	[Parameter("MinMTU", typeof(uint), "Minimum allowable MTU property value", DefaultMinMTU)]
 	[Parameter("MaxMTU", typeof(uint), "Maximum allowable MTU property value", DefaultMaxMTU)]
-	public class RawIPv4Publisher : SocketPublisher
+	public class RawIPv4Publisher : DatagramPublisher
 	{
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
@@ -134,16 +137,16 @@ namespace Peach.Pro.Core.Publishers
 		{
 		}
 
-		protected override bool AddressFamilySupported(AddressFamily af)
+		protected override bool IpHeaderInclude { get { return true; } }
+
+		protected override bool IsAddressFamilySupported(AddressFamily af)
 		{
 			return af == AddressFamily.InterNetwork;
 		}
 
-		protected override Socket OpenSocket(EndPoint remote)
+		protected override SocketType SocketType
 		{
-			Socket s = OpenRawSocket(AddressFamily.InterNetwork, Protocol);
-			s.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.HeaderIncluded, 1);
-			return s;
+			get { return SocketType.Raw; }
 		}
 
 		protected override void FilterInput(byte[] buffer, int offset, int count)
@@ -160,7 +163,6 @@ namespace Peach.Pro.Core.Publishers
 		{
 			if (Platform.GetOS() != Platform.OS.OSX)
 				return;
-
 
 			if (count < RawHelpers.IpHeaderLen)
 				return;

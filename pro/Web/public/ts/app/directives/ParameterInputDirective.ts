@@ -15,23 +15,11 @@ namespace Peach {
 	export const ParameterComboDirective: IDirective = {
 		ComponentID: C.Directives.ParameterCombo,
 		restrict: 'E',
-		require: [C.Directives.ParameterCombo, C.Angular.ngModel],
-		controller: C.Controllers.Combobox,
-		controllerAs: 'vm',
+		controller: C.Controllers.ParameterInput,
 		templateUrl: C.Templates.Directives.ParameterCombo,
 		scope: {
-			data: '=',
-			description: '=',
-			placeholder: '='
-		},
-		link: (
-			scope: IComboboxScope,
-			element: ng.IAugmentedJQuery,
-			attrs: ng.IAttributes,
-			ctrls: any
-		) => {
-			const ctrl: ComboboxController = ctrls[0];
-			ctrl.Link(element, attrs, ctrls[1]);
+			param: "=",
+			form: "="
 		}
 	}
 
@@ -60,8 +48,12 @@ namespace Peach {
 	interface IOption {
 		key: string;
 		text: string;
-		description: string;
+		description?: string;
 		group: string;
+	}
+
+	export interface IParameterInputScope extends IParameterScope {
+		NewChoice: Function;
 	}
 
 	export class ParameterInputController {
@@ -71,10 +63,16 @@ namespace Peach {
 		];
 
 		constructor(
-			private $scope: IParameterScope,
+			private $scope: IParameterInputScope,
 			private pitService: PitService
 		) {
 			$scope.vm = this;
+			$scope.NewChoice = (item: string) => this.NewChoice(item);
+			this.LastValue = {
+				key: this.$scope.param.value,
+				text: this.$scope.param.value,
+				group: "Last Value"
+			};
 			this.MakeChoices();
 		}
 
@@ -109,6 +107,9 @@ namespace Peach {
 		}
 
 		private Choices: IOption[];
+		private LastValue: IOption;
+		private NewValue: IOption;
+		private EmptyValue: IOption;
 
 		private MakeChoices() {
 			const tuples = [];
@@ -124,7 +125,6 @@ namespace Peach {
 				const option: IOption = {
 					key: item,
 					text: item || "<i>Undefined</i>",
-					description: "",
 					group: group
 				};
 				if (item === this.$scope.param.defaultValue) {
@@ -135,6 +135,22 @@ namespace Peach {
 				}
 			});
 			this.Choices = tuples.concat(this.Defines());
+
+			if (!this.IsRequired && !this.$scope.param.defaultValue) {
+				this.Choices.unshift({
+					key: "",
+					text: "<i>Undefined</i>",
+					group: group
+				});
+			}
+
+			if (this.LastValue && this.LastValue.key) {
+				this.Choices.unshift(this.LastValue);
+			}
+		
+			if (this.NewValue && this.NewValue.key) {
+				this.Choices.unshift(this.NewValue);
+			}
 		}
 
 		private Defines(): IOption[] {
@@ -147,6 +163,16 @@ namespace Peach {
 					group: "Defines"
 				};
 			});
+		}
+
+		private NewChoice(item: string): IOption {
+			this.NewValue = {
+				key: item,
+				text: item,
+				group: "New Value"
+			};
+			this.MakeChoices();
+			return this.NewValue;
 		}
 	}
 }

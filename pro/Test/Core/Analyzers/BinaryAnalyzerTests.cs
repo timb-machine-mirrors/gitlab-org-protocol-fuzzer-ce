@@ -27,6 +27,7 @@
 // $Id$
 
 using System.IO;
+using System.Linq;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
@@ -94,6 +95,41 @@ namespace Peach.Pro.Test.Core.Analyzers
             Assert.IsTrue(block[11] is Peach.Core.Dom.String);
             Assert.AreEqual("Peach Fuzzer|", (string)block[11].InternalValue);
         }
+
+		[Test]
+		public void StableNames()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Blob name='Val'>
+			<Analyzer class='Binary'/>
+		</Blob>
+	</DataModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var bs = Bits.Fmt("{0:B16}{1}{2:B16}{3}{4:B16}", 0, "HelloWorld", 1, "FooBar", 2);
+			var cracker = new DataCracker();
+
+			cracker.CrackData(dom.dataModels[0], bs);
+
+			var names = dom.dataModels[0].Walk().Select(e => e.Name).ToList();
+
+			var expected = new[]
+			{
+				"DM",
+				"Val",
+				"Elem_0",
+				"Elem_1",
+				"Elem_2",
+				"Elem_3",
+				"Elem_4"
+			};
+
+			Assert.AreEqual(expected, names);
+		}
+
     }
 }
 

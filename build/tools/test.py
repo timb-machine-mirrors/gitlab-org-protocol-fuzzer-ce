@@ -98,21 +98,20 @@ class utest(Task.Task):
 		Logs.debug('runner: %r' % self.ut_exec)
 		cwd = getattr(self.generator, 'ut_cwd', '') or self.inputs[0].parent.abspath()
 
-		stderr = stdout = None
-
 		opts = self.generator.bld.options
 
 		env = {}
 		env.update(os.environ)
+		del env['TERM'] # fixes "System.ArgumentNullException: Value cannot be null." when running under mono
+
 		if opts.mono_debug:
 			env.update({ 'MONO_LOG_LEVEL' : 'debug' })
 		if opts.trace:
 			env.update({ 'PEACH_TRACE' : '1' })
 
-		proc = Utils.subprocess.Popen(self.ut_exec, cwd=cwd, stderr=stderr, stdout=stdout, env=env)
-		(stdout, stderr) = proc.communicate()
+		retcode = Utils.subprocess.call(self.ut_exec, cwd=cwd, env=env)
 
-		tup = (getattr(self, 'ut_nunit', self.inputs[0]).name, proc.returncode)
+		tup = (getattr(self, 'ut_nunit', self.inputs[0]).name, retcode)
 		self.generator.test_result = tup
 
 		testlock.acquire()
@@ -128,7 +127,6 @@ class utest(Task.Task):
 
 def options(opt):
 	opt.add_option('--testcase', action='store', help='Name of test case/fixture to execute')
-	opt.add_option('--stdout', action='store_true', help='Send results to stdout')
 	opt.add_option('--trace', action='store_true', help='Enable trace log level')
 	opt.add_option('--mono_debug', action='store_true', help='Enable mono debug logging')
 

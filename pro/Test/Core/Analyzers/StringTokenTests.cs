@@ -29,6 +29,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
@@ -261,6 +262,48 @@ namespace Peach.Pro.Test.Core.Analyzers
 			};
 
 			Assert.AreEqual(expected, history.ToArray());
+		}
+
+		[Test]
+		public void StableNames()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='Val'>
+			<Analyzer class='StringToken'/>
+		</String>
+	</DataModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var bs = Bits.Fmt("{0}", "?k1=v1&k2=v2");
+			var cracker = new DataCracker();
+
+			cracker.CrackData(dom.dataModels[0], bs);
+
+			var names = dom.dataModels[0].Walk().Select(e => e.Name).ToList();
+
+			var expected = new[]
+			{
+				"DM",
+				"Val",
+				"Val",
+				"Pre",
+				"Token",
+				"Post",
+				"Pre",
+				"Pre",
+				"Token",
+				"Post",
+				"Token",
+				"Post",
+				"Pre",
+				"Token",
+				"Post",
+			};
+
+			Assert.AreEqual(expected, names);
 		}
     }
 }
