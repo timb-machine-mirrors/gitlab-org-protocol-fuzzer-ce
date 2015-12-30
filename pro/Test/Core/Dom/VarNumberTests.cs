@@ -12,7 +12,7 @@ namespace Peach.Pro.Test.Core.Dom
 {
 	[TestFixture]
 	[Quick]
-	class Asn1IntegerTests : DataModelCollector
+	class VarNumberTests : DataModelCollector
 	{
 		class TestPublisher : StreamPublisher
 		{
@@ -75,11 +75,11 @@ namespace Peach.Pro.Test.Core.Dom
 				"<?xml version='1.0' encoding='utf-8'?>\n" +
 				"<Peach>\n" +
 				" <DataModel name='Example1'>\n" +
-				"    <Asn1Integer name='byte0'  value='0' /> " +
-				"    <Asn1Integer name='byte1'  value='1' /> " +
-				"    <Asn1Integer name='short' value='32766' /> " +
-				"    <Asn1Integer name='int'   value='2147483647' /> " +
-				"    <Asn1Integer name='long'  value='223372036854775807' /> " +
+				"    <VarNumber name='byte0'  value='0' /> " +
+				"    <VarNumber name='byte1'  value='1' /> " +
+				"    <VarNumber name='short' value='32766' /> " +
+				"    <VarNumber name='int'   value='2147483647' /> " +
+				"    <VarNumber name='long'  value='223372036854775807' /> " +
 				"  </DataModel>\n" +
 				"  \n" +
 				"  <StateModel name='TheStateModel' initialState='initial'>\n" +
@@ -127,7 +127,7 @@ namespace Peach.Pro.Test.Core.Dom
 				"	 <Number size='8'>" +
 				"       <Relation type='size' of='short' />"+
 				"    </Number>"+
-				"    <Asn1Integer name='short'  value='1' /> " +
+				"    <VarNumber name='short'  value='1' /> " +
 				"  </DataModel>\n" +
 				"  \n" +
 				"  <StateModel name='TheStateModel' initialState='initial'>\n" +
@@ -178,10 +178,10 @@ namespace Peach.Pro.Test.Core.Dom
 				"<?xml version='1.0' encoding='utf-8'?>\n" +
 				"<Peach>\n" +
 				" <DataModel name='Example1'>\n" +
-				"    <Asn1Integer name='byte'  value='1' /> " +
-				"    <Asn1Integer name='short' value='32766' /> " +
-				"    <Asn1Integer name='int'   value='2147483647' /> " +
-				"    <Asn1Integer name='long'  value='223372036854775807' /> " +
+				"    <VarNumber name='byte'  value='1' /> " +
+				"    <VarNumber name='short' value='32766' /> " +
+				"    <VarNumber name='int'   value='2147483647' /> " +
+				"    <VarNumber name='long'  value='223372036854775807' /> " +
 				"  </DataModel>\n" +
 				"  \n" +
 				"  <StateModel name='TheStateModel' initialState='initial'>\n" +
