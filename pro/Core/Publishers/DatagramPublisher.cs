@@ -57,6 +57,7 @@ namespace Peach.Pro.Core.Publishers
 		private string _ifaceName = null;
 		private uint? _origMtu = null;
 		private uint? _mtu = null;
+		private byte[] _rxBuf = new byte[MaxBufSize];
 		private MemoryStream _stream = new MemoryStream();
 		protected IDatagramImpl _impl;
 
@@ -254,7 +255,6 @@ namespace Peach.Pro.Core.Publishers
 			_ifaceName = ifaceName;
 			_mtu = mtu;
 			_origMtu = mtu;
-			_stream = new MemoryStream(MaxBufSize);
 		}
 
 		protected override void OnStop()
@@ -321,15 +321,10 @@ namespace Peach.Pro.Core.Publishers
 
 		protected override void OnInput()
 		{
-			_stream.Seek(0, SeekOrigin.Begin);
-			_stream.SetLength(_stream.Capacity);
-
-			var buf = _stream.GetBuffer();
-
 			int len = 0;
 			try
 			{
-				_lastRxEp = _impl.Receive(_remoteEp, buf, out len, Timeout);
+				_lastRxEp = _impl.Receive(_remoteEp, _rxBuf, out len, Timeout);
 			}
 			catch (Exception ex)
 			{
@@ -350,13 +345,13 @@ namespace Peach.Pro.Core.Publishers
 			finally 
 			{
 				// Ensure user always sees an empty stream in the case of an error!
-				_stream.SetLength(len);
+				_stream = new MemoryStream(_rxBuf, 0, len, false);
 			}
 
-			FilterInput(buf, 0, len);
+			FilterInput(_rxBuf, 0, len);
 
 			if (Logger.IsDebugEnabled)
-				Logger.Debug("\n\n" + Utilities.HexDump(buf, 0, len));
+				Logger.Debug("\n\n" + Utilities.HexDump(_rxBuf, 0, len));
 		}
 
 		protected override void OnOutput(BitwiseStream data)
