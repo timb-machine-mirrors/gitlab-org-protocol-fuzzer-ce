@@ -177,9 +177,9 @@ namespace Peach.Pro.Core.Analyzers
 					return;
 				}
 
-				var preString = new Peach.Core.Dom.String() { stringType = strEl.stringType };
-				var tokenString = new Peach.Core.Dom.String() { stringType = strEl.stringType };
-				var postString = new Peach.Core.Dom.String() { stringType = strEl.stringType };
+				var preString = new Peach.Core.Dom.String("Pre") { stringType = strEl.stringType };
+				var tokenString = new Peach.Core.Dom.String("Token") { stringType = strEl.stringType };
+				var postString = new Peach.Core.Dom.String("Post") { stringType = strEl.stringType };
 
 				preString.stringType = encodingType;
 				tokenString.stringType = encodingType;
