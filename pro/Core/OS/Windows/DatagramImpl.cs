@@ -1,7 +1,6 @@
 ﻿using System;
 using Peach.Core;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Diagnostics;
@@ -12,12 +11,12 @@ namespace Peach.Pro.Core.OS.Windows
 	[PlatformImpl(Platform.OS.Windows)]
 	public class DatagramImpl : IDatagramImpl
 	{
-		private static NLog.Logger Logger = LogManager.GetCurrentClassLogger();
+		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		private string _publisher;
+		private readonly string _publisher;
 		private EndPoint _pendingEp;
 		private IAsyncResult _pendingRx;
-		private Socket _socket = null;
+		private Socket _socket;
 
 		public DatagramImpl(string publisher)
 		{
@@ -55,7 +54,7 @@ namespace Peach.Pro.Core.OS.Windows
 					var opt = new MulticastOption(remoteEp.Address, localEp.Address);
 					_socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, opt);
 
-					if (localEp.Address != IPAddress.Any)
+					if (!Equals(localEp.Address, IPAddress.Any))
 					{
 						Logger.Trace("Setting multicast interface for {0} socket to {1}.", _publisher, localEp.Address);
 						_socket.SetSocketOption(
@@ -69,7 +68,7 @@ namespace Peach.Pro.Core.OS.Windows
 				{
 					_socket.Bind(new IPEndPoint(IPAddress.IPv6Any, localEp.Port));
 
-					if (localEp.Address != IPAddress.IPv6Any)
+					if (!Equals(localEp.Address, IPAddress.IPv6Any))
 					{
 						var opt = new IPv6MulticastOption(remoteEp.Address, localEp.Address.ScopeId);
 						_socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.AddMembership, opt);
@@ -172,7 +171,7 @@ namespace Peach.Pro.Core.OS.Windows
 					{
 						if (expected.Port == 0)
 						{
-							if (!IPAddress.Equals(expected.Address, actual.Address))
+							if (!Equals(expected.Address, actual.Address))
 							{
 								Logger.Debug("Ignoring received packet from {0}, want packets from {1}.", actual, expected);
 								continue;
@@ -184,7 +183,7 @@ namespace Peach.Pro.Core.OS.Windows
 								expected.Port = actual.Port;
 							}
 						}
-						else if (!IPEndPoint.Equals(actual, expected))
+						else if (!Equals(actual, expected))
 						{
 							Logger.Debug("Ignoring received packet from {0}, want packets from {1}.", actual, expected);
 							continue;

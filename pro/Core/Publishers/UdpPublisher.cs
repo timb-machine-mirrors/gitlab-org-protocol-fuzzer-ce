@@ -21,7 +21,6 @@
 // SOFTWARE.
 //
 
-using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
@@ -41,7 +40,7 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("MaxMTU", typeof(uint), "Maximum allowable MTU property value", DefaultMaxMTU)]
 	public class UdpPublisher : DatagramPublisher
 	{
-		private static Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 		protected override Logger Logger { get { return logger; } }
 
 		public UdpPublisher(Dictionary<string, Variant> args)
@@ -83,7 +82,7 @@ namespace Peach.Pro.Core.Publishers
 		{
 			ushort newPort;
 
-			switch(property)
+			switch (property)
 			{
 				case "Port":
 					newPort = UShortFromVariant(value);
@@ -93,7 +92,6 @@ namespace Peach.Pro.Core.Publishers
 					OnStop();
 					OnStart();
 					return;
-
 				case "SrcPort":
 					newPort = UShortFromVariant(value);
 					Logger.Debug("Changing SrcPort from {0} to {1}.\n", SrcPort, newPort);

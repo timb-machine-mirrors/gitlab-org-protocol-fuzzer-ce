@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 using System.Net;
 using System.Net.NetworkInformation;
 using Peach.Core;
-using Peach.Pro;
 using System.Net.Sockets;
 using NLog;
 using Mono.Unix;
@@ -30,14 +29,14 @@ namespace Peach.Pro.Core.OS.Unix
 			IPEndPoint EndPoint { get; }
 		}
 
-		private static NLog.Logger Logger = LogManager.GetCurrentClassLogger();
+		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
 		protected string _publisher;
 		protected int _fd = -1;
 		protected string _ifaceName;
 		protected IPEndPoint _bindEp;
 
-		public DatagramImpl(string publisher)
+		protected DatagramImpl(string publisher)
 		{
 			_publisher = publisher;
 		}
@@ -208,7 +207,7 @@ namespace Peach.Pro.Core.OS.Unix
 						{
 							if (expected.Port == 0)
 							{
-								if (!IPAddress.Equals(expected.Address, actual.Address))
+								if (!Equals(expected.Address, actual.Address))
 								{
 									Logger.Debug("Ignoring received packet from {0}, want packets from {1}.", actual, expected);
 									continue;
@@ -220,7 +219,7 @@ namespace Peach.Pro.Core.OS.Unix
 									expected.Port = actual.Port;
 								}
 							}
-							else if (!IPEndPoint.Equals(actual, expected))
+							else if (!Equals(actual, expected))
 							{
 								Logger.Debug("Ignoring received packet from {0}, want packets from {1}.", actual, expected);
 								continue;
