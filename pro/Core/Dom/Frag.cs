@@ -35,12 +35,14 @@ namespace Peach.Pro.Core.Dom
 		public Frag()
 			: base()
 		{
+			InputModel = false;
 			Add(new FragSequence("Rendering"));
 		}
 
 		public Frag(string name)
 			: base(name)
 		{
+			InputModel = false;
 			Add(new FragSequence("Rendering"));
 		}
 
@@ -74,6 +76,8 @@ namespace Peach.Pro.Core.Dom
 		/// Template to use for fragments
 		/// </summary>
 		public DataElement Template { get; set; }
+
+		public bool InputModel { get; set; }
 
 		public bool PayloadOptional { get; set; }
 
@@ -263,12 +267,12 @@ namespace Peach.Pro.Core.Dom
 			}
 
 			// Only perform regeneration if payload is invalidated
-			if (_payloadInvalidated || !_generatedFragments)
+			if (!InputModel && (_payloadInvalidated || !_generatedFragments))
 			{
 				_generatedFragments = true;
 				_payloadInvalidated = false;
 
-				Logger.Debug("Generating fragments...");
+				Logger.Debug("Generating fragments: ", fullName);
 				FragmentAlg.Fragment(Template, this["Payload"], this["Rendering"] as Sequence);
 			}
 
