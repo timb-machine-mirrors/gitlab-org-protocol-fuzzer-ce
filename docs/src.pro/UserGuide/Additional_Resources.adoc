@@ -1,7 +1,12 @@
 
 === Additional Resources
 
-More information about Peach can be found on our http://peachfuzzer.com[website] and the https://forums.peachfuzzer.com[user forums].
+More information about Peach is available on the Web:
+
+* http://peachfuzzer.com[Peach Fuzzer website]
+* http://www.peachfuzzer.com/products/peach-pits/[Current Pits and Pit Packs]
+* https://forums.peachfuzzer.com[Peach User Forums]
+* https://vimeo.com/148176046[Installing Peach Fuzzer Software video] 
 
 === Bug Reporting Guidelines
 
