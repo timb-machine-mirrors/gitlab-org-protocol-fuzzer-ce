@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Digests;
@@ -48,9 +49,9 @@ namespace Peach.Pro.Core.Fixups
 
 		static byte[] Concat(byte[] a, byte[] b)
 		{
-			byte[] c = new byte[a.Length + b.Length];
-			System.Array.Copy(a, 0, c, 0, a.Length);
-			System.Array.Copy(b, 0, c, a.Length, b.Length);
+			var c = new byte[a.Length + b.Length];
+			Array.Copy(a, 0, c, 0, a.Length);
+			Array.Copy(b, 0, c, a.Length, b.Length);
 			return c;
 		}
 
@@ -170,7 +171,7 @@ namespace Peach.Pro.Core.Fixups
 				set;
 			}
 
-			public Org.BouncyCastle.Crypto.Prng.IRandomGenerator NonceRandomGenerator
+			public IRandomGenerator NonceRandomGenerator
 			{
 				get { return _mNonceRandom; }
 			}
@@ -293,15 +294,15 @@ namespace Peach.Pro.Core.Fixups
 
 			Console.Write("Pre-Master: ");
 			foreach (var b in pms)
-				Console.Write(string.Format("{0:X2} ", b));
+				Console.Write("{0:X2} ", b);
 			Console.WriteLine();
 			Console.Write("Client Random: ");
 			foreach (var b in clientRandom)
-				Console.Write(string.Format("{0:X2} ", b));
+				Console.Write("{0:X2} ", b);
 			Console.WriteLine();
 			Console.Write("Server Random: ");
 			foreach (var b in serverRandom)
-				Console.Write(string.Format("{0:X2} ", b));
+				Console.Write("{0:X2} ", b);
 			Console.WriteLine();
 
 			if (TlsVersion != TlsVersion.TLSv12)
@@ -315,6 +316,53 @@ namespace Peach.Pro.Core.Fixups
 				foreach (var msg in msgs)
 				{
 					var bytes = ToBytes(msg);
+
+					if (TlsVersion == TlsVersion.DTLSv10 || TlsVersion == TlsVersion.DTLSv12)
+					{
+						try
+						{
+							Console.WriteLine("----- msg: {0}", ((DataElement)msg).fullName);
+
+							var frag = (Dom.Frag)((DataElement)msg).parent;
+							var rendering = (Dom.FragSequence) ((DataElementContainer) frag["Rendering"]);
+							var message = (DataElementContainer)((DataElementContainer)rendering[0])["Message"];
+							var bitstream = new BitStream();
+							var fragBitWriter = new BitWriter(bitstream);
+
+							var def = new Number() {DefaultValue = new Variant(0)};
+
+							var type = message.find("HandshakeType") ?? def;
+							var length = message.find("Length") ?? def;
+							var seq = message.find("MessageSequence") ?? def;
+
+							fragBitWriter.WriteByte((byte)((int)type.DefaultValue));
+							fragBitWriter.WriteBits((ulong)length.DefaultValue, 24);
+							fragBitWriter.WriteUInt16((ushort)((int)seq.DefaultValue));
+							fragBitWriter.WriteBits(0, 24);  //epoc?
+							fragBitWriter.WriteBits((ulong)length.DefaultValue, 24);
+
+							var buf = new MemoryStream();
+							bitstream.Position = 0;
+							bitstream.CopyTo(buf);
+
+							var bufArray = buf.ToArray();
+							hash.BlockUpdate(bufArray, 0, bufArray.Length);
+
+							Console.WriteLine("bitestream: {0} bufArray: {1}", bitstream.Length, bufArray.Length);
+
+							foreach (var b in bufArray)
+								Console.Write("{0:X2} ", b);
+							foreach (var b in bytes)
+								Console.Write("{0:X2} ", b);
+							Console.WriteLine();
+						}
+						catch (Exception ex)
+						{
+							Console.Error.WriteLine("\nEXCEPTION: " + ex.Message);
+							throw;
+						}
+					}
+
 					hash.BlockUpdate(bytes, 0, bytes.Length);
 				}
 
@@ -323,7 +371,7 @@ namespace Peach.Pro.Core.Fixups
 
 				Console.Write("Verify Hash: ");
 				foreach (var b in verifyHash)
-					Console.Write(string.Format("{0:X2} ", b));
+					Console.Write("{0:X2} ", b);
 				Console.WriteLine();
 
 				return new Variant(new BitStream(verifyHash));

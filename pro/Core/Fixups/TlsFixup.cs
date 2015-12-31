@@ -187,7 +187,6 @@ namespace Peach.Pro.Core.Fixups
 
 				ProtocolVersion = protocolVersion;
 
-				//Set(SecurityParameters, "masterSecret", masterSecret);
 				Set(SecurityParameters, "clientRandom", clientRandom);
 				Set(SecurityParameters, "serverRandom", serverRandom);
 
@@ -195,7 +194,7 @@ namespace Peach.Pro.Core.Fixups
 				var seed = new byte[d.GetDigestSize()];
 				SecureRandom.NextBytes(seed);
 
-				this._mNonceRandom = new DigestRandomGenerator(d);
+				_mNonceRandom = new DigestRandomGenerator(d);
 				_mNonceRandom.AddSeedMaterial(Times.NanoTime());
 				_mNonceRandom.AddSeedMaterial(seed);
 			}
@@ -252,7 +251,7 @@ namespace Peach.Pro.Core.Fixups
 				set;
 			}
 
-			public Org.BouncyCastle.Crypto.Prng.IRandomGenerator NonceRandomGenerator
+			public IRandomGenerator NonceRandomGenerator
 			{
 				get { return _mNonceRandom; }
 			}
@@ -366,22 +365,22 @@ namespace Peach.Pro.Core.Fixups
 			tlsContext.MasterSecret = masterSecret;
 			tlsContext.IsServer = isServer;
 
-			//Console.WriteLine("Pre-Master: ");
-			//foreach (var b in pms)
-			//	Console.Write("{0:X2} ", b);
-			//Console.WriteLine();
-			//Console.WriteLine("Master Secret: ");
-			//foreach (var b in tlsContext.SecurityParameters.MasterSecret)
-			//	Console.Write("{0:X2} ", b);
-			//Console.WriteLine();
-			//Console.WriteLine("Client Random: ");
-			//foreach (var b in tlsContext.SecurityParameters.ClientRandom)
-			//	Console.Write("{0:X2} ", b);
-			//Console.WriteLine();
-			//Console.WriteLine("Server Random: ");
-			//foreach (var b in tlsContext.SecurityParameters.ServerRandom)
-			//	Console.Write("{0:X2} ", b);
-			//Console.WriteLine();
+			Console.WriteLine("Pre-Master: ");
+			foreach (var b in pms)
+				Console.Write("{0:X2} ", b);
+			Console.WriteLine();
+			Console.WriteLine("Master Secret: ");
+			foreach (var b in tlsContext.SecurityParameters.MasterSecret)
+				Console.Write("{0:X2} ", b);
+			Console.WriteLine();
+			Console.WriteLine("Client Random: ");
+			foreach (var b in tlsContext.SecurityParameters.ClientRandom)
+				Console.Write("{0:X2} ", b);
+			Console.WriteLine();
+			Console.WriteLine("Server Random: ");
+			foreach (var b in tlsContext.SecurityParameters.ServerRandom)
+				Console.Write("{0:X2} ", b);
+			Console.WriteLine();
 
 			return tlsContext;
 		}

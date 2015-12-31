@@ -100,8 +100,26 @@ namespace Peach.Pro.Core.Transformers.Crypto
 				ctx.iterationStateStore["TlsSequenceCounter"] = 0;
 		}
 
-		static int GetSequenceCounter(RunContext ctx)
+		long GetSequenceCounter(RunContext ctx)
 		{
+			if (TlsVersion == TlsVersion.DTLSv10 || TlsVersion == TlsVersion.DTLSv12)
+			{
+				var def = new Number() {DefaultValue = new Variant(0)};
+				var epoc = _dataModel.find("Epoc") ?? def;
+				var seq = _dataModel.find("SequenceNumber") ?? def;
+
+				var bitstream = new BitStream();
+				var writer = new BitWriter(bitstream);
+				var reader = new BitReader(bitstream);
+
+				writer.WriteBits((ulong)epoc.DefaultValue, 16);
+				writer.WriteBits((ulong) seq.DefaultValue, 48);
+
+				bitstream.Position = 0;
+
+				return reader.ReadInt64();
+			}
+
 			object sequenceCounter;
 			if (ctx.iterationStateStore.TryGetValue("TlsSequenceCounter", out sequenceCounter))
 				return (Int32)sequenceCounter;
@@ -198,10 +216,10 @@ namespace Peach.Pro.Core.Transformers.Crypto
 			var context = root.actionData.action.parent.parent.parent.context;
 			var sequenceCounter = GetSequenceCounter(context);
 
-			//Console.WriteLine("Verify Data (Pre-Encrypt): ");
-			//foreach (var b in buf)
-			//	Console.Write(string.Format("{0:X2} ", b));
-			//Console.WriteLine();
+			Console.WriteLine("Verify Data (Pre-Encrypt): ");
+			foreach (var b in buf)
+				Console.Write("{0:X2} ", b);
+			Console.WriteLine();
 
 			try
 			{
