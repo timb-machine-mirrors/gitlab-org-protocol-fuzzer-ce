@@ -32,11 +32,6 @@ using System.Net;
 using System.Net.Sockets;
 using NLog;
 using Peach.Core;
-using Mono.Unix;
-using Mono.Unix.Native;
-using System.Runtime.InteropServices;
-using System.IO;
-using Peach.Core.IO;
 
 namespace Peach.Pro.Core.Publishers
 {
@@ -50,7 +45,7 @@ namespace Peach.Pro.Core.Publishers
 				return;
 
 			// Get in host order
-			ushort ip_len = BitConverter.ToUInt16(buffer, offset + 2);
+			var ip_len = BitConverter.ToUInt16(buffer, offset + 2);
 			ip_len += (ushort)(((ushort)(buffer[offset] & 0x0f)) << 2);
 			// Set in network order
 			buffer[offset + 2] = (byte)(ip_len >> 8);
@@ -79,7 +74,7 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("MaxMTU", typeof(uint), "Maximum allowable MTU property value", DefaultMaxMTU)]
 	public class RawV4Publisher : DatagramPublisher
 	{
-		private static NLog.Logger _logger = LogManager.GetCurrentClassLogger();
+		private static readonly NLog.Logger _logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return _logger; } }
 
 		public RawV4Publisher(Dictionary<string, Variant> args)
@@ -129,7 +124,7 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("MaxMTU", typeof(uint), "Maximum allowable MTU property value", DefaultMaxMTU)]
 	public class RawIPv4Publisher : DatagramPublisher
 	{
-		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
 
 		public RawIPv4Publisher(Dictionary<string, Variant> args)
@@ -170,10 +165,8 @@ namespace Peach.Pro.Core.Publishers
 			// On OSX, ip_len and ip_off need to be in host order
 			// http://cseweb.ucsd.edu/~braghava/notes/freebsd-sockets.txt
 
-			byte tmp;
-
 			// Swap ip_len
-			tmp = buffer[offset + 2];
+			var tmp = buffer[offset + 2];
 			buffer[offset + 2] = buffer[offset + 3];
 			buffer[offset + 3] = tmp;
 

@@ -40,6 +40,7 @@ xref:String[String]
 === Parameters
 
 Group:: Designates a group name that bundles a single fixup to multiple data elements. The result coordinates the incrementing process with the members of the group.  The default value is "".
+InitialValue:: Sets the initial value for the first iteration. The default value is 1, and the sequence using the default value starts with 1, 2, 3. If InitialValue is set to the value 57, the sequence starts with 57, 58, 59. 
 Offset:: Sets the initial value each iteration to Offset * (Iteration - 1). The default value is null.
 Once:: Increment the value once per iteration. The default value is false.
 

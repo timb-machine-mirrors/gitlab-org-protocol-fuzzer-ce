@@ -44,6 +44,7 @@ The dashboard allows you to monitor progress as your fuzzing job runs and from i
 =======
 
 <<<
+[[Report_Faults]]
 === Faults
 
 While {product} is running, you can view all the faults generated during the session by clicking the Faults menu option on the left.
@@ -67,6 +68,7 @@ image::{images}/Fault_detail.png[]
 Here's where you can find details about the selected fault. Additional information (such as any files collected during the data collection phase) are located in the disk log folder.
 
 <<<
+[[Report_Metrics]]
 === Metrics
 
 A number of metrics are available for viewing while {product} is running.

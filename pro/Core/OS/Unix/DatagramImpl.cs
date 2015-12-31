@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 using System.Net;
 using System.Net.NetworkInformation;
 using Peach.Core;
-using Peach.Pro;
 using System.Net.Sockets;
 using NLog;
 using Mono.Unix;
@@ -13,12 +12,6 @@ namespace Peach.Pro.Core.OS.Unix
 {
 	public abstract class DatagramImpl : IDatagramImpl
 	{
-		public static ushort Swap16(int x)
-		{
-			var ret = ((x & 0xff00) >> 8) | ((x & 0x00ff) << 8);
-			return (ushort)ret;
-		}
-
 		protected interface IAddress : IDisposable
 		{
 			ushort AddressFamily { get; }
@@ -30,14 +23,14 @@ namespace Peach.Pro.Core.OS.Unix
 			IPEndPoint EndPoint { get; }
 		}
 
-		private static NLog.Logger Logger = LogManager.GetCurrentClassLogger();
+		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
 		protected string _publisher;
 		protected int _fd = -1;
 		protected string _ifaceName;
 		protected IPEndPoint _bindEp;
 
-		public DatagramImpl(string publisher)
+		protected DatagramImpl(string publisher)
 		{
 			_publisher = publisher;
 		}
@@ -72,7 +65,7 @@ namespace Peach.Pro.Core.OS.Unix
 			using (var sa = CreateAddress(bindEp))
 			{
 				_fd = socket(sa.AddressFamily, (int)socketType, protocol);
-				UnixMarshal.ThrowExceptionForLastErrorIf(_fd);
+				ThrowPeachExceptionIf(_fd, "Error, socket() failed.");
 
 				if (ipHeaderInclude)
 					IncludeIpHeader(_fd);
@@ -86,7 +79,7 @@ namespace Peach.Pro.Core.OS.Unix
 				else
 				{
 					var ret = bind(_fd, sa.Ptr, sa.Length);
-					UnixMarshal.ThrowExceptionForLastErrorIf(ret);
+					ThrowPeachExceptionIf(ret, "Error, bind() failed.");
 				}
 			}
 
@@ -94,7 +87,7 @@ namespace Peach.Pro.Core.OS.Unix
 			{
 				var salen = sa.Length;
 				var ret = getsockname(_fd, sa.Ptr, ref salen);
-				UnixMarshal.ThrowExceptionForLastErrorIf(ret);
+				ThrowPeachExceptionIf(ret, "Error, getsockname() failed.");
 
 				return sa.EndPoint;
 			}
@@ -128,7 +121,7 @@ namespace Peach.Pro.Core.OS.Unix
 					if (UnixMarshal.ShouldRetrySyscall(ret))
 						continue;
 
-					UnixMarshal.ThrowExceptionForLastErrorIf(ret);
+					ThrowPeachExceptionIf(ret, "poll() failed in Send.");
 					if (ret == 0)
 						throw new TimeoutException();
 
@@ -152,7 +145,7 @@ namespace Peach.Pro.Core.OS.Unix
 
 					if (UnixMarshal.ShouldRetrySyscall(ret))
 						continue;
-					UnixMarshal.ThrowExceptionForLastErrorIf(ret);
+					ThrowPeachExceptionIf(ret, "sendto() failed.");
 
 					return ret;
 				}
@@ -186,7 +179,7 @@ namespace Peach.Pro.Core.OS.Unix
 					if (UnixMarshal.ShouldRetrySyscall(ret))
 						continue;
 
-					UnixMarshal.ThrowExceptionForLastErrorIf(ret);
+					ThrowPeachExceptionIf(ret, "poll() failed in Receive.");
 					if (ret == 0)
 						throw new TimeoutException();
 
@@ -200,7 +193,7 @@ namespace Peach.Pro.Core.OS.Unix
 
 						if (UnixMarshal.ShouldRetrySyscall(len))
 							continue;
-						UnixMarshal.ThrowExceptionForLastErrorIf(len);
+						ThrowPeachExceptionIf(ret, "recvfrom() failed.");
 
 						var actual = sa.EndPoint;
 
@@ -208,7 +201,7 @@ namespace Peach.Pro.Core.OS.Unix
 						{
 							if (expected.Port == 0)
 							{
-								if (!IPAddress.Equals(expected.Address, actual.Address))
+								if (!Equals(expected.Address, actual.Address))
 								{
 									Logger.Debug("Ignoring received packet from {0}, want packets from {1}.", actual, expected);
 									continue;
@@ -220,7 +213,7 @@ namespace Peach.Pro.Core.OS.Unix
 									expected.Port = actual.Port;
 								}
 							}
-							else if (!IPEndPoint.Equals(actual, expected))
+							else if (!Equals(actual, expected))
 							{
 								Logger.Debug("Ignoring received packet from {0}, want packets from {1}.", actual, expected);
 								continue;

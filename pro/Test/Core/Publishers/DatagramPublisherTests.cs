@@ -498,13 +498,9 @@ namespace Peach.Pro.Test.Core.Publishers
 		}
 
 		[Test]
-		[TestCase("RawV4", AddressFamily.InterNetwork, 3)]
-		[TestCase("RawV4", AddressFamily.InterNetwork, 12)]
-		[TestCase("RawIPv4", AddressFamily.InterNetwork, 12)]
-		[TestCase("RawV4", AddressFamily.InterNetwork, 22)]
-		// FIXME: unclear why, but these protocols don't work with RawIPv4 yet
-		// [TestCase("RawIPv4", AddressFamily.InterNetwork, 3)]
-		// [TestCase("RawIPv4", AddressFamily.InterNetwork, 22)]
+		// PUP
+		[TestCase("RawV4", AddressFamily.InterNetwork, ProtocolType.Pup)]
+		[TestCase("RawIPv4", AddressFamily.InterNetwork, ProtocolType.Pup)]
 		public void RawEcho(string pub, AddressFamily family, int protocol)
 		{
 			// Ensure basic send/recv functionality
