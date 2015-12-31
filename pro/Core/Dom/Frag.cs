@@ -255,9 +255,14 @@ namespace Peach.Pro.Core.Dom
 			if (Template == null)
 			{
 				Template = this["Template"];
+
 				Remove(Template, false);
+				Template.parent = this;
 
 				viewPreRendering = false;
+
+				var value = Template.Value;
+				Debug.Assert(value != null);
 			}
 
 			if (!_childrenDict.ContainsKey("Payload") ||

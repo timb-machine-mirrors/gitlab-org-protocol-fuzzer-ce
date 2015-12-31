@@ -75,6 +75,13 @@ namespace Peach.Pro.Core.Fixups
 			if (!(parent is Number) && !(parent is Peach.Core.Dom.String && parent.Hints.ContainsKey("NumericalString")))
 				throw new PeachException("SequenceIncrementFixup has non numeric parent '" + parent.fullName + "'.");
 
+			if (!parent.InScope())
+			{
+				Console.WriteLine("fullName: " + parent.fullName);
+				Console.WriteLine("out of scope");
+				return parent.DefaultValue;
+			}
+
 			var increment = true;
 			ulong max = parent is Number ? ((Number)parent).MaxValue : ulong.MaxValue;
 			ulong value = 0;
