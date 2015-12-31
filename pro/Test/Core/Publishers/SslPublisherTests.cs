@@ -398,5 +398,47 @@ qLk0TB3QXaoHknsz7EhRnw==
 				e.startFuzzing(dom, cfg);
 			}
 		}
+
+		[Test]
+		[Ignore]
+		public void TestOpenssl()
+		{
+			const string xml = @"
+<Peach>
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel name='DM'>
+					<String value='GET / HTTP/1.0\r\n\r\n' />
+				</DataModel>
+			</Action>
+			<Action type='input'>
+				<DataModel name='DM'>
+					<String />
+				</DataModel>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM' />
+		<Publisher class='Ssl'>
+			<Param name='Host' value='127.0.0.1' />
+			<Param name='Port' value='44330' />
+		</Publisher>
+	</Test>
+</Peach>
+";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var cfg = new RunConfiguration { singleIteration = true };
+			var e = new Engine(null);
+
+			e.startFuzzing(dom, cfg);
+
+			var dm = dom.tests[0].stateModel.states[0].actions[1].dataModel;
+
+			Console.WriteLine(dm.InternalValue.BitsToString());
+		}
 	}
 }
