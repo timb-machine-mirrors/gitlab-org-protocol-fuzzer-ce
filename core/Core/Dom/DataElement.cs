@@ -1292,6 +1292,7 @@ namespace Peach.Core.Dom
         /// <summary>
         /// Get the Internal Value of this data element
         /// </summary>
+		[DebuggerDisplay("{InternalValueDebugName}")]
 		public Variant InternalValue
 		{
 			get
@@ -1338,6 +1339,14 @@ namespace Peach.Core.Dom
 			}
 		}
 
+		private string InternalValueDebugName
+		{
+			get
+			{
+				return _internalValue != null ? _internalValue.ToString() : null;
+			}
+		}
+
 		/// <summary>
 		/// Returns the final value without any transformers being applied
 		/// </summary>
@@ -1361,6 +1370,7 @@ namespace Peach.Core.Dom
         /// <summary>
         /// Get the final Value of this data element
         /// </summary>
+		[DebuggerDisplay("{ValueDebugName}")]
 		public BitwiseStream Value
 		{
 			get
@@ -1400,6 +1410,14 @@ namespace Peach.Core.Dom
 					_writeValueCache = oldWriteCache;
 					_readValueCache = oldReadCache;
 				}
+			}
+		}
+
+		private string ValueDebugName
+		{
+			get
+			{
+				return _value != null ? _value.ToString() : null;
 			}
 		}
 
