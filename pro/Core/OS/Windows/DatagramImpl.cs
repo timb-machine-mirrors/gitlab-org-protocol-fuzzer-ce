@@ -44,6 +44,9 @@ namespace Peach.Pro.Core.OS.Windows
 
 			_socket = new Socket(remoteEp.AddressFamily, socketType, protocolType);
 
+			if (ipHeaderInclude)
+				_socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.HeaderIncluded, true);
+			
 			if (remoteEp.Address.IsMulticast())
 			{
 				// Multicast needs to bind to INADDR_ANY on windows
