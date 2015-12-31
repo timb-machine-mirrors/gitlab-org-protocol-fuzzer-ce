@@ -835,26 +835,19 @@ namespace PitTester
 			if (!string.IsNullOrEmpty(item.Value))
 				return item;
 
-			switch (item.Key)
-			{
-				case "SourceMAC":
-				case "TargetMAC":
-					return new KeyValuePair<string,string>(item.Key, "00:00:00:00:00:00");
-				case "SourceIPv4":
-				case "TargetIPv4":
-					return new KeyValuePair<string, string>(item.Key, "0.0.0.0");
-				case "SourceIPv6":
-				case "TargetIPv6":
-					return new KeyValuePair<string, string>(item.Key, "::1");
-				case "Source":
-				case "Destination":
-				case "ListenPort":
-				case "SourcePort":
-				case "TargetPort":
-					return new KeyValuePair<string, string>(item.Key, "0");
-			}
+			if (item.Key.EndsWith("MAC"))
+				return new KeyValuePair<string, string>(item.Key, "00:00:00:00:00:00");
 
-			return item;
+			if (item.Key.EndsWith("IPv4"))
+				return new KeyValuePair<string, string>(item.Key, "0.0.0.0");
+
+			if (item.Key.EndsWith("IPv6"))
+				return new KeyValuePair<string, string>(item.Key, "::1");
+
+			if (item.Key.EndsWith("Port"))
+				return new KeyValuePair<string, string>(item.Key, "0");
+
+			return new KeyValuePair<string, string>(item.Key, "0");
 		}
 
 		private static bool ShouldSkipRule(XPathNodeIterator it, string rule)
