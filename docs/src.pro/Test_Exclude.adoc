@@ -4,11 +4,13 @@
 
 // TODO - Merge with Test/Exclude
 
+When used in the 'Test' element of a Pit, the Exclude and xref:Test_Include[Include] 
+elements allows for including or excluding various data elements from mutation. 
+One use case of these elements is to fuzz encapsulated data without fuzzing the container. 
+
 By default, Peach fuzzes all data elements.  Exclude prevents Peach from fuzzing all or specific data elements. XPath is used to identify the excluded elements. 
 
-The Exclude and xref:Test_Include[Include] elements allows for excluding or including various data elements from mutation. 
-
-NOTE: Even though a data element is excluded it may appear to still be fuzzed. This is due to other elements being fuzzed. However, the excluded element does not have any specific mutations performed directly to it.
+NOTE: Even though a data element is excluded, it may appear to still be fuzzed. This is due to other elements being fuzzed. However, the excluded element does not have any specific mutations performed directly to it.
 
 .XPath Further Reading
 ****
@@ -24,22 +26,18 @@ The following links provide additional information regarding XPath.
 
 [source,xml]
 ----
-<Test>
+<!-- Exclude all data elements -->
+<Exclude />
 
-	<!-- Exclude all data elements -->
-	<Exclude />
-
-	<!-- Exclude specific elements -->
-	<Exclude xpath="//Value" />
-
-</Test>
+<!-- Exclude specific elements -->
+<Exclude xpath="//Value" />
 ----
 
 === Attributes
 
 _Required:_
 
-There are no required parameters for this publisher.
+None. If no attributes are specified, Peach excludes all data elements from fuzzing. 
 
 _Optional:_
 
