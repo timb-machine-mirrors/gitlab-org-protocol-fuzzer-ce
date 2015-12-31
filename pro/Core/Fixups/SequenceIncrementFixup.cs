@@ -82,7 +82,7 @@ namespace Peach.Pro.Core.Fixups
 			var initialValue = false;
 
 			var fullName = parent.fullName;
-			var dataModel = (DataModel)parent.getRoot();
+			var dataModel = parent.getRoot() as DataModel;
 			if (dataModel != null && dataModel.actionData != null && dataModel.actionData.action != null)
 				fullName = dataModel.actionData.action.Name + "." + fullName;
 
