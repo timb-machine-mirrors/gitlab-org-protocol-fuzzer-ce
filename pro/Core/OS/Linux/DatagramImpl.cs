@@ -225,7 +225,7 @@ namespace Peach.Pro.Core.OS.Linux
 					Marshal.PtrToStructure(ptr, sa);
 					return new IPEndPoint(
 						new IPAddress(sa.sin_addr), 
-						Endian.Big.GetInt32(sa.sin_port, 16)
+						Endian.Big.GetUInt16(sa.sin_port, 16)
 					);
 				}
 			}
@@ -266,7 +266,7 @@ namespace Peach.Pro.Core.OS.Linux
 					Marshal.PtrToStructure(ptr, sa);
 					return new IPEndPoint(
 						new IPAddress(sa.sin6_addr, sa.sin6_scope_id), 
-						Endian.Big.GetInt32(sa.sin6_port, 16)
+						Endian.Big.GetUInt16(sa.sin6_port, 16)
 					);
 				}
 			}
