@@ -403,6 +403,9 @@ qLk0TB3QXaoHknsz7EhRnw==
 		[Ignore]
 		public void TestOpenssl()
 		{
+			// openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes
+			// openssl s_server -key key.pem -cert cert.pem -accept 44330 -www
+
 			const string xml = @"
 <Peach>
 	<StateModel name='SM' initialState='Initial'>
