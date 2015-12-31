@@ -35,9 +35,10 @@ IMPORTANT: Fixups should be run after fuzzing and before processing fuzzed data.
 |xref:Fixups_SHA256Fixup[Sha256]||Y||
 |xref:Fixups_SHA384Fixup[Sha384]||Y||
 |xref:Fixups_SHA512Fixup[Sha512]||Y||
-|xref:Fixups_SspiFixup[Sspi]|||Y|
 |xref:Fixups_TCPChecksumFixup[TCP Checksum] |Y|||
 |xref:Fixups_UDPChecksumFixup[UDP Checksum]|Y|||
 |=======================================================
+
+// insert once topic is ready:  |xref:Fixups_SspiFixup[Sspi]|||Y|
 
 HashFixup is the base class used by the other hashing fixups.
