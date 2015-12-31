@@ -50,7 +50,7 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("MaxMTU", typeof(uint), "Maximum allowable MTU property value", DefaultMaxMTU)]
 	public class RawV6Publisher : DatagramPublisher
 	{
-		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
 
 		public RawV6Publisher(Dictionary<string, Variant> args)

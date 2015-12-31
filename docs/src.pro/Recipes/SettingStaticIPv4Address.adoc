@@ -19,13 +19,13 @@ This consists of changing the Internet Protocol Version 4 settings for network a
 Control Panel -> Netowrk and Internet -> Network Connections
 2. Select the appropriate network adapter. 
 3. Right-click and select Properties from the shortcut menu.
-4. Select the Internet Protocol Version 4 (IPv4) entry and click “Properties”.
+4. Select the Internet Protocol Version 4 (IPv4) entry and click "Properties".
 +
-The following properties dialogs for the IP v4 protocol display settings for a dynamic IP assignment on the left. The static values are displayed on the right. Values specified for the static IP v4 address are fictitious. Use the values provided by running the “ipconfig –all” command in a command processor.
+The following properties dialogs for the IP v4 protocol display settings for a dynamic IP assignment on the left. The static values are displayed on the right. Values specified for the static IP v4 address are fictitious. Use the values provided by running the `ipconfig –all` command in a command processor.
 +
 image::{images}/IPv4_Chg_to_Static.png["Static IPv4 settings", scale="50"]
 +
-Click “Use the following IP address”, and fill in the values for the IP address, submask, and gateway, as well as the entries for DNS servers.
+Click "Use the following IP address", and fill in the values for the IP address, submask, and gateway, as well as the entries for DNS servers.
 5.	When finished, click OK.
 
 ===== Linux
@@ -44,6 +44,10 @@ iface lo inet loopback +
 iface eth0 inet dynamic
 =========
 +
+.. Change the first line of the interface entry (here, the eth0 interface) by replacing `dynamic` with `static`.
+.. Supply the address of the interface to the entry listed by ifconfig.
+.. Supply the gateway address that is the address of the router.
++
 Edited settings (Changes applied)
 +
 =========
@@ -58,14 +62,7 @@ iface eth0 inet static +
 
 2. Save the changes.
 
-[NOTE]
-=======
-1.	Change the first line of the interface entry by replacing “dynamic” with “static”.
-2.	Supply the address of the interface to the entry listed by ifconfig.
-3.	Supply the gateway address that is the address of the router.
-=======
-
-3.	Configure the DNS server.
+3. Configure the DNS server.
 +
 The DNS nameservers need to be updated. 
 
@@ -85,9 +82,9 @@ Example: Using the Google DNS servers, these lines would be:
 **    nameserver 8.8.8.8
 **    nameserver 8.8.4.4
 =========
-5. Save the change.
+4. Save the change.
 
-6.	Restart the network service.
+5. Restart the network service.
 + 
 As with the DNS servers, 2 permutations exist. 
 ** For ubuntu systems version 14.04 and greater, use the following command: +

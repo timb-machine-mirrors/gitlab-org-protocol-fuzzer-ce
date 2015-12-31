@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using Peach.Core;
 using Peach.Core.IO;
 using Peach.Pro.Core.OS;
@@ -48,16 +46,16 @@ namespace Peach.Pro.Core.Publishers
 
 		const int MaxBufSize = 65000;
 
-		private IPEndPoint _localEp = null;
-		protected IPEndPoint _remoteEp = null;
-		private IPEndPoint _lastRxEp = null;
-		private IPEndPoint _bindEp = null;
-		private string _type = null;
-		private NetworkInterface _iface = null;
-		private string _ifaceName = null;
-		private uint? _origMtu = null;
-		private uint? _mtu = null;
-		private byte[] _rxBuf = new byte[MaxBufSize];
+		private IPEndPoint _localEp;
+		protected IPEndPoint _remoteEp;
+		private IPEndPoint _lastRxEp;
+		private IPEndPoint _bindEp;
+		private readonly string _type;
+		private NetworkInterface _iface;
+		private string _ifaceName;
+		private uint? _origMtu;
+		private uint? _mtu;
+		private readonly byte[] _rxBuf = new byte[MaxBufSize];
 		private MemoryStream _stream = new MemoryStream();
 		protected IDatagramImpl _impl;
 
@@ -76,7 +74,7 @@ namespace Peach.Pro.Core.Publishers
 		internal IPEndPoint LocalEndPoint { get { return _localEp;  } }
 		internal IPEndPoint RemoteEndPoint { get { return _remoteEp; } }
 
-		public DatagramPublisher(string type, Dictionary<string, Variant> args)
+		protected DatagramPublisher(string type, Dictionary<string, Variant> args)
 			: base(args)
 		{
 			_type = type;
@@ -85,7 +83,7 @@ namespace Peach.Pro.Core.Publishers
 
 		private IPEndPoint ResolveHost()
 		{
-			IPAddress[] entries = Dns.GetHostAddresses(Host);
+			var entries = Dns.GetHostAddresses(Host);
 			foreach (var ip in entries)
 			{
 				if (ip.ToString() != Host)
@@ -111,16 +109,16 @@ namespace Peach.Pro.Core.Publishers
 				throw new ArgumentException("ip");
 
 			var results = new List<Tuple<string, IPAddress>>();
-			NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
-			foreach (NetworkInterface adapter in nics)
+			var nics = NetworkInterface.GetAllNetworkInterfaces();
+			foreach (var adapter in nics)
 			{
 				foreach (var addr in adapter.GetIPProperties().UnicastAddresses)
 				{
 					if (!addr.Address.IsIPv6LinkLocal)
 						continue;
 
-					IPAddress candidate = new IPAddress(addr.Address.GetAddressBytes(), 0);
-					if (IPAddress.Equals(candidate, ip))
+					var candidate = new IPAddress(addr.Address.GetAddressBytes(), 0);
+					if (Equals(candidate, ip))
 					{
 						results.Add(new Tuple<string, IPAddress>(adapter.Name, addr.Address));
 					}
@@ -145,7 +143,7 @@ namespace Peach.Pro.Core.Publishers
 		/// <returns></returns>
 		protected static IPAddress GetLocalIp(IPEndPoint remote)
 		{
-			using (Socket s = new Socket(remote.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
+			using (var s = new Socket(remote.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
 			{
 				try
 				{
@@ -158,7 +156,7 @@ namespace Peach.Pro.Core.Publishers
 
 					throw;
 				}
-				IPEndPoint local = s.LocalEndPoint as IPEndPoint;
+				var local = s.LocalEndPoint as IPEndPoint;
 				return local.Address;
 			}
 		}
@@ -172,7 +170,7 @@ namespace Peach.Pro.Core.Publishers
 			{
 				foreach (var ifaceIp in iface.GetIPProperties().UnicastAddresses)
 				{
-					if (IPAddress.Equals(ifaceIp.Address, Ip))
+					if (Equals(ifaceIp.Address, Ip))
 					{
 						return iface;
 					}
@@ -224,7 +222,7 @@ namespace Peach.Pro.Core.Publishers
 					}
 					catch (Exception ex)
 					{
-						string msg = ex.Message;
+						var msg = ex.Message;
 						if (ex is TypeInitializationException || ex is TargetInvocationException)
 							msg = ex.InnerException.Message;
 
@@ -234,7 +232,7 @@ namespace Peach.Pro.Core.Publishers
 				}
 				catch (Exception ex)
 				{
-					string msg = ex.Message;
+					var msg = ex.Message;
 					if (ex is TypeInitializationException || ex is TargetInvocationException)
 						msg = ex.InnerException.Message;
 
@@ -296,7 +294,7 @@ namespace Peach.Pro.Core.Publishers
 			}
 			catch (Exception ex)
 			{
-				SocketException se = ex as SocketException;
+				var se = ex as SocketException;
 				if (se != null && se.SocketErrorCode == SocketError.AccessDenied)
 					throw new PeachException(string.Format("Access denied when trying open a {0} socket.  Ensure the user has the appropriate permissions.", _type), ex);
 
@@ -321,7 +319,7 @@ namespace Peach.Pro.Core.Publishers
 
 		protected override void OnInput()
 		{
-			int len = 0;
+			var len = 0;
 			try
 			{
 				_lastRxEp = _impl.Receive(_remoteEp, _rxBuf, out len, Timeout);
@@ -405,8 +403,7 @@ namespace Peach.Pro.Core.Publishers
 			{
 				if (_lastRxEp == null)
 					return new Variant(new BitStream());
-				else
-					return new Variant(new BitStream(_lastRxEp.Address.GetAddressBytes()));
+				return new Variant(new BitStream(_lastRxEp.Address.GetAddressBytes()));
 			}
 
 			if (property == "Timeout")
@@ -422,25 +419,28 @@ namespace Peach.Pro.Core.Publishers
 		{
 			if (property == "MTU")
 			{
-				uint mtu = 0;
+				uint mtu;
 
-				if (value.GetVariantType() == Variant.VariantType.BitStream)
+				switch (value.GetVariantType())
 				{
-					var bs = (BitwiseStream)value;
-					bs.SeekBits(0, SeekOrigin.Begin);
-					ulong bits;
-					int len = bs.ReadBits(out bits, 32);
-					mtu = Endian.Little.GetUInt32(bits, len);
-				}
-				else if (value.GetVariantType() == Variant.VariantType.ByteString)
-				{
-					byte[] buf = (byte[])value;
-					int len = Math.Min(buf.Length * 8, 32);
-					mtu = Endian.Little.GetUInt32(buf, len);
-				}
-				else
-				{
-					throw new SoftException("Can't set MTU, 'value' is an unsupported type.");
+					case Variant.VariantType.BitStream:
+						{
+							var bs = (BitwiseStream)value;
+							bs.SeekBits(0, SeekOrigin.Begin);
+							ulong bits;
+							var len = bs.ReadBits(out bits, 32);
+							mtu = Endian.Little.GetUInt32(bits, len);
+						}
+						break;
+					case Variant.VariantType.ByteString:
+						{
+							var buf = (byte[])value;
+							var len = Math.Min(buf.Length * 8, 32);
+							mtu = Endian.Little.GetUInt32(buf, len);
+						}
+						break;
+					default:
+						throw new SoftException("Can't set MTU, 'value' is an unsupported type.");
 				}
 
 				if (MaxMTU >= mtu && mtu >= MinMTU)
@@ -453,11 +453,11 @@ namespace Peach.Pro.Core.Publishers
 						}
 						catch (Exception ex)
 						{
-							string msg = ex.Message;
+							var msg = ex.Message;
 							if (ex is TypeInitializationException || ex is TargetInvocationException)
 								msg = ex.InnerException.Message;
 
-							string err = "Failed to change MTU of '{0}' to {1}. {2}".Fmt(_ifaceName, mtu, msg);
+							var err = "Failed to change MTU of '{0}' to {1}. {2}".Fmt(_ifaceName, mtu, msg);
 							Logger.Error(err);
 							var se = new SoftException(err, ex);
 							throw new SoftException(se);
@@ -467,14 +467,11 @@ namespace Peach.Pro.Core.Publishers
 
 						if (!_mtu.HasValue || _mtu.Value != mtu)
 						{
-							string err = "Failed to change MTU of '{0}' to {1}. The change did not take effect.".Fmt(_ifaceName, mtu);
+							var err = "Failed to change MTU of '{0}' to {1}. The change did not take effect.".Fmt(_ifaceName, mtu);
 							Logger.Error(err);
 							throw new SoftException(err);
 						}
-						else
-						{
-							Logger.Debug("Changed MTU of '{0}' to {1}.", _ifaceName, mtu);
-						}
+						Logger.Debug("Changed MTU of '{0}' to {1}.", _ifaceName, mtu);
 					}
 				}
 				else
@@ -484,60 +481,66 @@ namespace Peach.Pro.Core.Publishers
 			}
 			else if (property == "Timeout")
 			{
-				if (value.GetVariantType() == Variant.VariantType.BitStream)
+				switch (value.GetVariantType())
 				{
-					var bs = (BitwiseStream)value;
-					bs.SeekBits(0, SeekOrigin.Begin);
-					ulong bits;
-					int len = bs.ReadBits(out bits, 32);
-					Timeout = Endian.Little.GetInt32(bits, len);
-				}
-				else if (value.GetVariantType() == Variant.VariantType.ByteString)
-				{
-					byte[] buf = (byte[])value;
-					int len = Math.Min(buf.Length * 8, 32);
-					Timeout = Endian.Little.GetInt32(buf, len);
-				}
-				else
-				{
-					try
-					{
-						Timeout = (int)value;
-					}
-					catch
-					{
-						throw new SoftException("Can't set Timeout, 'value' is an unsupported type.");
-					}
+					case Variant.VariantType.BitStream:
+						{
+							var bs = (BitwiseStream)value;
+							bs.SeekBits(0, SeekOrigin.Begin);
+							ulong bits;
+							var len = bs.ReadBits(out bits, 32);
+							Timeout = Endian.Little.GetInt32(bits, len);
+						}
+						break;
+					case Variant.VariantType.ByteString:
+						{
+							var buf = (byte[])value;
+							var len = Math.Min(buf.Length * 8, 32);
+							Timeout = Endian.Little.GetInt32(buf, len);
+						}
+						break;
+					default:
+						try
+						{
+							Timeout = (int)value;
+						}
+						catch
+						{
+							throw new SoftException("Can't set Timeout, 'value' is an unsupported type.");
+						}
+						break;
 				}
 			}
 			else if (property == "NoReadException")
 			{
-				string val = null;
-				if (value.GetVariantType() == Variant.VariantType.BitStream)
+				string val;
+				switch (value.GetVariantType())
 				{
-					var stream = (BitwiseStream)value;
-					stream.Position = 0;
-					byte[] buff = new byte[stream.Length];
-					for (int cnt = 0; cnt < stream.Length; cnt++)
-						buff[cnt] = (byte) stream.ReadByte();
+					case Variant.VariantType.BitStream:
+						var stream = (BitwiseStream)value;
+						stream.Position = 0;
+						var buff = new byte[stream.Length];
+						for (var cnt = 0; cnt < stream.Length; cnt++)
+							buff[cnt] = (byte)stream.ReadByte();
 
-					val = Encoding.UTF8.GetString(buff);
-				}
-				else if (value.GetVariantType() == Variant.VariantType.ByteString)
-					val = Encoding.UTF8.GetString((byte[])value);
-				else
-				{
-					try
-					{
-						val = (string)value;
-					}
-					catch
-					{
-						throw new SoftException("Can't set NoReadException, 'value' is an unsupported type.");
-					}
+						val = Encoding.UTF8.GetString(buff);
+						break;
+					case Variant.VariantType.ByteString:
+						val = Encoding.UTF8.GetString((byte[])value);
+						break;
+					default:
+						try
+						{
+							val = (string)value;
+						}
+						catch
+						{
+							throw new SoftException("Can't set NoReadException, 'value' is an unsupported type.");
+						}
+						break;
 				}
 
-				NoReadException = val.ToLower() == "true" ? true : false;
+				NoReadException = (val.ToLower() == "true");
 			}
 			else
 			{
