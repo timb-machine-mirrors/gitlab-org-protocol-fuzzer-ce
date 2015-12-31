@@ -20,7 +20,8 @@ IMPORTANT: Fixups should be run after fuzzing and before processing fuzzed data.
 |xref:Fixups_CrcDualFixup[CrcDual]|Y|||
 |xref:Fixups_CrcFixup[Crc]|Y|||
 |xref:Fixups_ExpressionFixup[Expression] |||Y|
-|xref:Fixups_CopyValueFixup[CopyValue]|||Y|
+|xref:Fixups_FillValueFixup[FillValue]|||Y|
+|xref:Fixups_FromFileFixup[FromFile]|||Y|
 |xref:Fixups_HMACFixup[Hmac]||Y||
 |xref:Fixups_IcmpChecksumFixup[Icmp Checksum]|Y|||
 |xref:Fixups_IcmpV6ChecksumFixup[IcmpV6 Checksum]|Y|||
@@ -34,6 +35,7 @@ IMPORTANT: Fixups should be run after fuzzing and before processing fuzzed data.
 |xref:Fixups_SHA256Fixup[Sha256]||Y||
 |xref:Fixups_SHA384Fixup[Sha384]||Y||
 |xref:Fixups_SHA512Fixup[Sha512]||Y||
+|xref:Fixups_SspiFixup[Sspi]|||Y|
 |xref:Fixups_TCPChecksumFixup[TCP Checksum] |Y|||
 |xref:Fixups_UDPChecksumFixup[UDP Checksum]|Y|||
 |=======================================================
