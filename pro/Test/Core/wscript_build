@@ -29,6 +29,7 @@ deps = [
 	'PeachSampleNinja.exe',
 	'Managed.Adb.dll',
 	'komodo_net.dll',
+	'Mono.Posix.dll',
 ]
 
 bld(
