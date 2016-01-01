@@ -71,6 +71,7 @@ _Resharper*
 # make use of this .gitignore
 /pro/Web/[Bb]in/
 /pro/Web/[Oo]bj/
+/pro/Web/dist/
 /pro/Web/public/js/app/
 /pro/Web/public/js/test/
 /pro/Web/public/tests.html

@@ -29,6 +29,13 @@
     "typescript": "~1.6"
   },
   "scripts": {
-    "install": "webdriver-manager update"
+    "install": "webdriver-manager update",
+    "clean:osx": "rm -rf ./dist/osx",
+    "pack:osx": "npm run clean:osx && electron-packager ./electron \"Peach\" --out=dist/osx --platform=darwin --arch=x64 --version=0.36.1 --icon=assets/osx/peach.icns",
+    "build:osx": "npm run pack:osx && electron-builder \"dist/osx/Peach-darwin-x64/Peach.app\" --platform=osx --out=\"dist/osx\" --config=builder.json"
+  },
+  "devDependencies": {
+    "electron-builder": "^2.5.0",
+    "electron-packager": "^5.2.0"
   }
 }

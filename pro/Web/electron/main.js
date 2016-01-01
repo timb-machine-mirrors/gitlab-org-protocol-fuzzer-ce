@@ -1,9 +1,9 @@
-﻿var os = require('os');
-var app = require('app');
-var BrowserWindow = require('browser-window');
-var spawn = require('child_process').spawn;
-var StringDecoder = require('string_decoder').StringDecoder;
-var decoder = new StringDecoder('utf8');
+﻿const os = require('os');
+const app = require('app');
+const BrowserWindow = require('browser-window');
+const spawn = require('child_process').spawn;
+const StringDecoder = require('string_decoder').StringDecoder;
+const decoder = new StringDecoder('utf8');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the javascript object is GCed.
@@ -11,36 +11,39 @@ var mainWindow = null;
 
 console.log('type:', os.type());
 console.log('platform:', os.platform());
+console.log('pwd:', app.getAppPath());
 
-var cwd = 'C:\\Users\\frank\\src\\peach-pro\\';
-var args = [ '--pits', 'pits/pro' ];
+// const cwd = 'C:\\Users\\frank\\src\\peach-pro\\';
+// const args = [ '--pits', 'pits/pro' ];
 
-if (os.platform() === 'win32') {
-	var cmd = cwd + 'output\\win_x64_debug\\bin\\Peach.exe';
-} else {
-	var cmd = 'mono';
-	args = ['--gc=sgen', 'Peach.exe'].concat(args);
-}
+// if (os.platform() === 'win32') {
+// 	var cmd = cwd + 'output\\win_x64_debug\\bin\\Peach.exe';
+// } else {
+// 	var cmd = 'mono';
+// 	args = ['--gc=sgen', 'Peach.exe'].concat(args);
+// }
 
-var peach = spawn(cmd, args, { cwd: cwd });
+// const peach = spawn(cmd, args, { cwd: cwd });
 
-peach.stdout.on('data', function (data) {
-	console.log(decoder.write(data));
-});
+// peach.stdout.on('data', function (data) {
+// 	console.log(decoder.write(data));
+// });
 
 app.on('window-all-closed', function () {
 	app.quit();
 });
 
 app.on('quit', function () {
-	peach.kill();
+	// peach.kill();
 });
 
 app.on('ready', function () {
 	mainWindow = new BrowserWindow({ width: 1024, height: 768 });
 
+	mainWindow.webContents.openDevTools();
+
 	setTimeout(function () {
-		mainWindow.loadUrl('http://localhost:8888/');
+		mainWindow.loadURL('http://localhost:8888/');
 	}, 1000);
 
 	mainWindow.on('closed', function () {
