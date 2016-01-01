@@ -85,7 +85,7 @@ Period when the command should be run. Defaults to +DetectFault+.
 |==========================================================
 +
 .When Choices for Running a Command
-image::{images}/Timings_SSH.PNG["When Run Command Choices", scalewidth="75%"]
+image::{images}/Timings_SSH.png["When Run Command Choices", scalewidth="75%"]
 
 === Examples
 
