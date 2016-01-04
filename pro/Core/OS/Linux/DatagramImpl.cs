@@ -44,6 +44,13 @@ namespace Peach.Pro.Core.OS.Linux
 			ThrowPeachExceptionIf(ret, "setsockopt(SOL_SOCKET, SO_RCVBUF) failed.");
 		}
 
+		protected override void EnableReuseAddr(int fd)
+		{
+			var opt = 1;
+			var ret = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, ref opt, sizeof(int));
+			ThrowPeachExceptionIf(ret, "setsockopt(SOL_SOCKET, SO_REUSEADDR) failed.");
+		}
+
 		protected override void OpenMulticast(
 			int fd,
 			IPEndPoint localEp, 
@@ -115,6 +122,7 @@ namespace Peach.Pro.Core.OS.Linux
 		private const ushort AF_INET6 = 10;
 
 		private const int SOL_SOCKET = 1;
+		private const int SO_REUSEADDR = 2;
 		private const int SO_SNDBUF = 7;
 		private const int SO_RCVBUF = 8;
 

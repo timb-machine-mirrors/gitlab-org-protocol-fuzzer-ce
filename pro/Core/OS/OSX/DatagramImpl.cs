@@ -42,6 +42,13 @@ namespace Peach.Pro.Core.OS.OSX
 			ThrowPeachExceptionIf(ret, "setsockopt(SOL_SOCKET, SO_RCVBUF) failed.");
 		}
 
+		protected override void EnableReuseAddr(int fd)
+		{
+			var opt = 1;
+			var ret = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, ref opt, sizeof(int));
+			ThrowPeachExceptionIf(ret, "setsockopt(SOL_SOCKET, SO_REUSEADDR) failed.");
+		}
+
 		protected override void OpenMulticast(
 			int fd,
 			IPEndPoint localEp, 
@@ -115,6 +122,7 @@ namespace Peach.Pro.Core.OS.OSX
 		private const ushort AF_INET6 = 30;
 
 		private const int SOL_SOCKET = 0xffff;
+		private const int SO_REUSEADDR = 0x0004;
 		private const int SO_SNDBUF = 0x1001;
 		private const int SO_RCVBUF = 0x1002;
 

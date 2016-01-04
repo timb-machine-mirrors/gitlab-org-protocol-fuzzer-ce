@@ -35,6 +35,7 @@ namespace Peach.Pro.Core.OS.Unix
 			_publisher = publisher;
 		}
 
+		protected abstract void EnableReuseAddr(int fd);
 		protected abstract void SetBufferSize(int fd, int bufSize);
 		protected abstract void IncludeIpHeader(int fd);
 		protected abstract IAddress CreateAddress(IPEndPoint ep);
@@ -74,6 +75,7 @@ namespace Peach.Pro.Core.OS.Unix
 					if (ipHeaderInclude)
 						IncludeIpHeader(_fd);
 
+					EnableReuseAddr(_fd);
 					SetBufferSize(_fd, bufSize);
 
 					if (remoteEp.Address.IsMulticast())
