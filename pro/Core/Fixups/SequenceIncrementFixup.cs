@@ -92,6 +92,8 @@ namespace Peach.Pro.Core.Fixups
 			var dataModel = parent.getRoot() as DataModel;
 			if (dataModel != null && dataModel.actionData != null && dataModel.actionData.action != null)
 				fullName = dataModel.actionData.action.Name + "." + fullName;
+			else
+				increment = false;
 
 			if (ctx.stateStore.TryGetValue(_stateKey, out obj))
 				value = (ulong)obj;
