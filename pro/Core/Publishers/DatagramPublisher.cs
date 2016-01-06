@@ -281,6 +281,9 @@ namespace Peach.Pro.Core.Publishers
 
 			try
 			{
+				// reset the port so that the next OnReceive in a new iteration will accept packets from a new port
+				_remoteEp.Port = Port;
+
 				_localEp = _impl.Open(
 					SocketType, 
 					Protocol, 
@@ -314,9 +317,6 @@ namespace Peach.Pro.Core.Publishers
 
 		protected override void OnClose()
 		{
-			// reset the port so that the next OnReceive in a new iteration will accept packets from a new port
-			_remoteEp.Port = 0;
-
 			_impl.Close();
 		}
 
