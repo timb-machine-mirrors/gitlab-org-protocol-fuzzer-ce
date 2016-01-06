@@ -1,5 +1,8 @@
-Providing_Sample_Data.adoc
+:images: ../images
+:peachweb: Peach Web Interface
+:peachcomd: Peach Command Line Interface
 
+[[Providing_Sample_Data]]
 
 == Providing Sample Data
 

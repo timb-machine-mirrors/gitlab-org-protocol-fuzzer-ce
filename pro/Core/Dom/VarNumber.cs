@@ -9,8 +9,8 @@ using Peach.Core.IO;
 
 namespace Peach.Pro.Core.Dom
 {
-	[PitParsable("Asn1Integer")]
-	[DataElement("Asn1Integer", DataElementTypes.NonDataElements)]
+	[PitParsable("VarNumber")]
+	[DataElement("VarNumber", DataElementTypes.NonDataElements)]
 	[Parameter("name", typeof(string), "Element name", "")]
 	[Parameter("value", typeof(string), "Default value", "")]
 	[Parameter("valueType", typeof(Peach.Core.Dom.ValueType), "Format of value attribute", "string")]
@@ -18,9 +18,9 @@ namespace Peach.Pro.Core.Dom
 	[Parameter("mutable", typeof(bool), "Is element mutable", "true")]
 	[Parameter("constraint", typeof(string), "Scripting expression that evaluates to true or false", "")]
 	[Serializable]
-	public class Asn1Integer : Number
+	public class VarNumber : Number
 	{
-		public Asn1Integer()
+		public VarNumber()
 			: base()
 		{
 			// Signed is true since C# streams use long for sizes
@@ -30,7 +30,7 @@ namespace Peach.Pro.Core.Dom
 			LittleEndian = false;
 		}
 
-		public Asn1Integer(string name)
+		public VarNumber(string name)
 			: base(name)
 		{
 			// Signed is true since C# streams use long for sizes
@@ -97,10 +97,10 @@ namespace Peach.Pro.Core.Dom
 
 		public static new DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
 		{
-			if (node.Name != "Asn1Integer")
+			if (node.Name != "VarNumber")
 				return null;
 
-			var len = Generate<Asn1Integer>(node, parent);
+			var len = Generate<VarNumber>(node, parent);
 
 			context.handleCommonDataElementAttributes(node, len);
 			context.handleCommonDataElementChildren(node, len);
@@ -111,7 +111,7 @@ namespace Peach.Pro.Core.Dom
 
 		public override void WritePit(XmlWriter pit)
 		{
-			pit.WriteStartElement("Asn1Integer");
+			pit.WriteStartElement("VarNumber");
 
 			WritePitCommonAttributes(pit);
 			WritePitCommonChildren(pit);

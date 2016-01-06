@@ -62,7 +62,7 @@ Parameter that specifies when to start monitoring. Choose from the following set
 |==========================================================
 +
 .When Choices for Running a Command
-image::{images}/Timings_All.PNG["When Run Command Choices", scalewidth="75%"]
+image::{images}/Timings_All.png["When Run Command Choices", scalewidth="75%"]
 
 === Examples
 
