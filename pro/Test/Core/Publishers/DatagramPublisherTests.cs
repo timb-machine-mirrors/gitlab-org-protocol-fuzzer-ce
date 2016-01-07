@@ -16,6 +16,7 @@ using Peach.Core.Test;
 using Peach.Pro.Core.Publishers;
 using Array = Peach.Core.Dom.Array;
 using Encoding = Peach.Core.Encoding;
+using Mono.Unix;
 
 namespace Peach.Pro.Test.Core.Publishers
 {
@@ -26,52 +27,48 @@ namespace Peach.Pro.Test.Core.Publishers
 	{
 		#region OSX Multicast IPV6 Declarations
 
-		[DllImport("libc")]
+		[DllImport("libc", SetLastError = true)]
 		static extern uint if_nametoindex(string ifname);
 
-		[DllImport("libc")]
+		[DllImport("libc", SetLastError = true)]
 		static extern int setsockopt(int socket, int level, int optname, ref ipv6_mreq opt, int optlen);
 
-		[DllImport("libc")]
-		static extern int setsockopt(int socket, int level, int optname, ref IntPtr opt, int optlen);
+		[DllImport("libc", SetLastError = true)]
+		static extern int setsockopt(int socket, int level, int optname, ref int opt, int optlen);
 
 		// ReSharper disable InconsistentNaming
 
-		const int IPPROTO_IPV6 = 0x29;
-		const int IPV6_JOIN_GROUP = 0xC;
-		const int IPV6_MULTICAST_IF = 0x9;
+		const int IPPROTO_IPV6 = 41;
+		const int IPV6_MULTICAST_IF = 9;
+		const int IPV6_JOIN_GROUP = 12;
 
 		[StructLayout(LayoutKind.Sequential)]
 		struct ipv6_mreq
 		{
 			[MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
 			public byte[] ipv6mr_multiaddr;
-			public IntPtr ipv6mr_interface;
+			public int    ipv6mr_interface;
 		}
 
 		// ReSharper restore InconsistentNaming
 
-		void JoinGroupV6(IPAddress group, long ifindex)
+		void JoinGroupV6(IPAddress group, int ifindex)
 		{
 			System.Diagnostics.Debug.Assert(_socket.Handle != IntPtr.Zero);
 			System.Diagnostics.Debug.Assert(group.AddressFamily == AddressFamily.InterNetworkV6);
 			System.Diagnostics.Debug.Assert(ifindex != 0);
 
-			var ptr = new IntPtr((int)ifindex);
-
 			var mr = new ipv6_mreq
 			{
 				ipv6mr_multiaddr = group.GetAddressBytes(),
-				ipv6mr_interface = ptr
+				ipv6mr_interface = ifindex,
 			};
 
 			var ret = setsockopt(_socket.Handle.ToInt32(), IPPROTO_IPV6, IPV6_JOIN_GROUP, ref mr, Marshal.SizeOf(mr));
-			if (ret != 0)
-				throw new PeachException("Error, failed to join group '{0}' on interface number '{1}', error {2}.".Fmt(group, ifindex, ret));
+			UnixMarshal.ThrowExceptionForLastErrorIf(ret);
 
-			ret = setsockopt(_socket.Handle.ToInt32(), IPPROTO_IPV6, IPV6_MULTICAST_IF, ref ptr, Marshal.SizeOf(typeof(IntPtr)));
-			if (ret != 0)
-				throw new PeachException("Error, failed to set outgoing interface number '{1}' for group '{0}', error {2}.".Fmt(group, ifindex, ret));
+			ret = setsockopt(_socket.Handle.ToInt32(), IPPROTO_IPV6, IPV6_MULTICAST_IF, ref ifindex, sizeof(int));
+			UnixMarshal.ThrowExceptionForLastErrorIf(ret);
 		}
 
 		#endregion
@@ -205,6 +202,18 @@ namespace Peach.Pro.Test.Core.Publishers
 			}
 		}
 
+		private IPAddress GetSelf(AddressFamily family)
+		{
+			var peachIface = Environment.GetEnvironmentVariable("PEACH_SELF");
+			if (!string.IsNullOrEmpty(peachIface))
+			{
+				var adapter = NetworkInterface.GetAllNetworkInterfaces().Single(x => x.Name == peachIface);
+				var addrs = adapter.GetIPProperties().UnicastAddresses;
+				return addrs.First(a => a.Address.AddressFamily == family).Address;
+			}
+			return Helpers.GetPrimaryIface(family).Item2;
+		}
+		
 		private static IEnumerable<Tuple<string, IPAddress>> GetAllLinkLocalIPv6()
 		{
 			// ReSharper disable once LoopCanBeConvertedToQuery
@@ -276,29 +285,22 @@ namespace Peach.Pro.Test.Core.Publishers
 				{
 					// Multicast needs to bind to INADDR_ANY on windows
 					_socket.Bind(new IPEndPoint(IPAddress.Any, 0));
-
-					var opt = new MulticastOption(groupIp, localIp);
-					_socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, opt);
-					_socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface, localIp.GetAddressBytes());
 				}
 				else if (Platform.GetOS() == Platform.OS.OSX)
 				{
-					// Multicast needs to bind to the group on osx
-					_socket.Bind(new IPEndPoint(groupIp, 0));
-
-					var opt = new MulticastOption(groupIp, localIp);
-					_socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, opt);
-					_socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface, localIp.GetAddressBytes());
+					// Multicast needs to bind to INADDR_ANY on osx 
+					// the group address works for older versions of OSX
+					_socket.Bind(new IPEndPoint(IPAddress.Any, 0));
 				}
 				else
 				{
 					// Multicast needs to bind to the group on linux
 					_socket.Bind(new IPEndPoint(groupIp, 0));
-
-					var opt = new MulticastOption(groupIp, localIp);
-					_socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, opt);
-					_socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface, localIp.GetAddressBytes());
 				}
+
+				var opt = new MulticastOption(groupIp, localIp);
+				_socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, opt);
+				_socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface, localIp.GetAddressBytes());
 			}
 			else
 			{
@@ -315,9 +317,9 @@ namespace Peach.Pro.Test.Core.Publishers
 				{
 					// ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
 					if (localIp.Equals(IPAddress.IPv6Loopback))
-						JoinGroupV6(groupIp, if_nametoindex("lo0"));
+						JoinGroupV6(groupIp, (int)if_nametoindex("lo0"));
 					else
-						JoinGroupV6(groupIp, localIp.ScopeId);
+						JoinGroupV6(groupIp, (int)localIp.ScopeId);
 				}
 				else
 				{
@@ -504,13 +506,13 @@ namespace Peach.Pro.Test.Core.Publishers
 		public void RawEcho(string pub, AddressFamily family, int protocol)
 		{
 			// Ensure basic send/recv functionality
-			var self = Helpers.GetPrimaryIface(family);
+			var self = GetSelf(family);
 
-			StartRawEcho(self.Item2, protocol);
+			StartRawEcho(self, protocol);
 
 			var dom = RunEngine(pub, new Dictionary<string, string>
 			{
-				{ "Host", self.Item2.ToString() },
+				{ "Host", self.ToString() },
 				{ "Protocol", protocol.ToString() },
 			});
 
@@ -656,9 +658,7 @@ namespace Peach.Pro.Test.Core.Publishers
 		public void MulticastUdp(string local, string group)
 		{
 			var groupIp = IPAddress.Parse(group);
-			var localIp = string.IsNullOrEmpty(local)
-				? Helpers.GetPrimaryIface(groupIp.AddressFamily).Item2
-				: IPAddress.Parse(local);
+			var localIp = string.IsNullOrEmpty(local) ? GetSelf(groupIp.AddressFamily) : IPAddress.Parse(local);
 
 			// Can't do IPv6 multicast on loopback on linux
 			if (Platform.GetOS() == Platform.OS.Linux && localIp.Equals(IPAddress.IPv6Loopback))
@@ -727,7 +727,7 @@ namespace Peach.Pro.Test.Core.Publishers
 		[Test]
 		public void TestMtuInterface()
 		{
-			var self = Helpers.GetPrimaryIface(AddressFamily.InterNetwork).Item2;
+			var self = GetSelf(AddressFamily.InterNetwork);
 
 			var pub = new UdpPublisher(new Dictionary<string, Variant>
 			{

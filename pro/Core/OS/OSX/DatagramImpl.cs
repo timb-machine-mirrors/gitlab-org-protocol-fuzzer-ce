@@ -28,28 +28,25 @@ namespace Peach.Pro.Core.OS.OSX
 
 		protected override void IncludeIpHeader(int fd)
 		{
-			const int opt = 1;
-			var ptr = GCHandle.Alloc(opt, GCHandleType.Pinned);
-			var ret = setsockopt(fd, IPPROTO_IP, IP_HDRINCL, ptr.AddrOfPinnedObject(), sizeof(int));
-			ptr.Free();
+			var opt = 1;
+			var ret = setsockopt(fd, IPPROTO_IP, IP_HDRINCL, ref opt, sizeof(int));
 			ThrowPeachExceptionIf(ret, "setsockopt(IPPROTO_IP, IP_HDRINCL) failed.");
 		}
 
 		protected override void SetBufferSize(int fd, int bufSize)
 		{
-			var ptr = GCHandle.Alloc(bufSize, GCHandleType.Pinned);
-			try
-			{
-				var ret = setsockopt(fd, SOL_SOCKET, SO_SNDBUF, ptr.AddrOfPinnedObject(), sizeof(int));
-				ThrowPeachExceptionIf(ret, "setsockopt(SOL_SOCKET, SO_SNDBUF) failed.");
+			var ret = setsockopt(fd, SOL_SOCKET, SO_SNDBUF, ref bufSize, sizeof(int));
+			ThrowPeachExceptionIf(ret, "setsockopt(SOL_SOCKET, SO_SNDBUF) failed.");
 
-				ret = setsockopt(fd, SOL_SOCKET, SO_RCVBUF, ptr.AddrOfPinnedObject(), sizeof(int));
-				ThrowPeachExceptionIf(ret, "setsockopt(SOL_SOCKET, SO_RCVBUF) failed.");
-			}
-			finally
-			{
-				ptr.Free();
-			}
+			ret = setsockopt(fd, SOL_SOCKET, SO_RCVBUF, ref bufSize, sizeof(int));
+			ThrowPeachExceptionIf(ret, "setsockopt(SOL_SOCKET, SO_RCVBUF) failed.");
+		}
+
+		protected override void EnableReuseAddr(int fd)
+		{
+			var opt = 1;
+			var ret = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, ref opt, sizeof(int));
+			ThrowPeachExceptionIf(ret, "setsockopt(SOL_SOCKET, SO_REUSEADDR) failed.");
 		}
 
 		protected override void OpenMulticast(
@@ -65,7 +62,7 @@ namespace Peach.Pro.Core.OS.OSX
 				int ret;
 
 				Logger.Debug("Binding to {0}", remoteEp.Address);
-				using (var sa = CreateAddress(new IPEndPoint(remoteEp.Address, localEp.Port)))
+				using (var sa = CreateAddress(new IPEndPoint(IPAddress.Any, localEp.Port)))
 				{
 					ret = bind(fd, sa.Ptr, sa.Length);
 					ThrowPeachExceptionIf(ret, "bind() failed.");
@@ -99,7 +96,7 @@ namespace Peach.Pro.Core.OS.OSX
 				if (ifaceName == null)
 					throw new PeachException("Error, could not resolve local interface name for local IP '{0}'.".Fmt(localEp.Address));
 
-				var ifindex = if_nametoindex(ifaceName);
+				var ifindex = (int)if_nametoindex(ifaceName);
 				if (ifindex == 0)
 					throw new PeachException("Error, could not resolve interface index for interface name '{0}'.".Fmt(ifaceName));
 
@@ -113,9 +110,7 @@ namespace Peach.Pro.Core.OS.OSX
 				ThrowPeachExceptionIf(ret, "Error, failed to join group '{0}' on interface '{1}'.".Fmt(remoteEp.Address, ifaceName));
 
 				Logger.Trace("Setting multicast interface for {0} socket to {1}.", _publisher, localEp.Address);
-				var ptr = GCHandle.Alloc(ifindex, GCHandleType.Pinned);
-				ret = setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_IF, ptr.AddrOfPinnedObject(), sizeof(int));
-				ptr.Free();
+				ret = setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_IF, ref ifindex, sizeof(int));
 
 				ThrowPeachExceptionIf(ret, "Error, failed to set outgoing interface to '{1}' for group '{0}'.".Fmt(remoteEp.Address, ifaceName));
 			}
@@ -127,6 +122,7 @@ namespace Peach.Pro.Core.OS.OSX
 		private const ushort AF_INET6 = 30;
 
 		private const int SOL_SOCKET = 0xffff;
+		private const int SO_REUSEADDR = 0x0004;
 		private const int SO_SNDBUF = 0x1001;
 		private const int SO_RCVBUF = 0x1002;
 
@@ -179,7 +175,7 @@ namespace Peach.Pro.Core.OS.OSX
 		{
 			[MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
 			public byte[] ipv6mr_multiaddr;
-			public uint ipv6mr_interface;
+			public int    ipv6mr_interface;
 		}
 
 		[DllImport("libc", SetLastError = true)]

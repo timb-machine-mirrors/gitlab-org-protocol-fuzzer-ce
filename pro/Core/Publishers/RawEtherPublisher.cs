@@ -83,7 +83,7 @@ namespace Peach.Pro.Core.Publishers
 		{
 			lock (_queue)
 			{
-				Logger.Debug("OnPacketArrival> {0}", _deviceName);
+				Logger.Trace("OnPacketArrival> {0}", _deviceName);
 				_queue.Enqueue(buf);
 				Monitor.Pulse(_queue);
 			}
@@ -133,7 +133,7 @@ namespace Peach.Pro.Core.Publishers
 			_deviceTx = Devices().First(d => d.Interface.FriendlyName == Interface);
 			_deviceTx.Open();
 
-			Logger.Debug("Starting Capture on {0} (filter: {1}, timeout: {2}", _deviceName, Filter, PcapTimeout);
+			Logger.Debug("Starting Capture on {0} (filter: '{1}', timeout: {2})", _deviceName, Filter, PcapTimeout);
 
 			_deviceRx.StartCapture();
 

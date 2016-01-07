@@ -28,10 +28,8 @@ namespace Peach.Pro.Core.OS.Linux
 
 		protected override void IncludeIpHeader(int fd)
 		{
-			const int opt = 1;
-			var ptr = GCHandle.Alloc(opt, GCHandleType.Pinned);
-			var ret = setsockopt(fd, IPPROTO_IP, IP_HDRINCL, ptr.AddrOfPinnedObject(), sizeof(int));
-			ptr.Free();
+			var opt = 1;
+			var ret = setsockopt(fd, IPPROTO_IP, IP_HDRINCL, ref opt, sizeof(int));
 			ThrowPeachExceptionIf(ret, "setsockopt(IPPROTO_IP, IP_HDRINCL) failed.");
 		}
 
@@ -39,19 +37,18 @@ namespace Peach.Pro.Core.OS.Linux
 		{
 			bufSize /= 2;
 
-			var ptr = GCHandle.Alloc(bufSize, GCHandleType.Pinned);
-			try
-			{
-				var ret = setsockopt(fd, SOL_SOCKET, SO_SNDBUF, ptr.AddrOfPinnedObject(), sizeof(int));
-				ThrowPeachExceptionIf(ret, "setsockopt(SOL_SOCKET, SO_SNDBUF) failed.");
+			var ret = setsockopt(fd, SOL_SOCKET, SO_SNDBUF, ref bufSize, sizeof(int));
+			ThrowPeachExceptionIf(ret, "setsockopt(SOL_SOCKET, SO_SNDBUF) failed.");
 
-				ret = setsockopt(fd, SOL_SOCKET, SO_RCVBUF, ptr.AddrOfPinnedObject(), sizeof(int));
-				ThrowPeachExceptionIf(ret, "setsockopt(SOL_SOCKET, SO_RCVBUF) failed.");
-			}
-			finally
-			{
-				ptr.Free();
-			}
+			ret = setsockopt(fd, SOL_SOCKET, SO_RCVBUF, ref bufSize, sizeof(int));
+			ThrowPeachExceptionIf(ret, "setsockopt(SOL_SOCKET, SO_RCVBUF) failed.");
+		}
+
+		protected override void EnableReuseAddr(int fd)
+		{
+			var opt = 1;
+			var ret = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, ref opt, sizeof(int));
+			ThrowPeachExceptionIf(ret, "setsockopt(SOL_SOCKET, SO_REUSEADDR) failed.");
 		}
 
 		protected override void OpenMulticast(
@@ -113,9 +110,7 @@ namespace Peach.Pro.Core.OS.Linux
 				ThrowPeachExceptionIf(ret, "Error, failed to join group '{0}' on interface '{1}'.".Fmt(remoteEp.Address, ifaceName));
 
 				Logger.Trace("Setting multicast interface for {0} socket to {1}.", _publisher, localEp.Address);
-				var ptr = GCHandle.Alloc(ifindex, GCHandleType.Pinned);
-				ret = setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_IF, ptr.AddrOfPinnedObject(), sizeof(int));
-				ptr.Free();
+				ret = setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_IF, ref ifindex, sizeof(int));
 
 				ThrowPeachExceptionIf(ret, "Error, failed to set outgoing interface to '{1}' for group '{0}'.".Fmt(remoteEp.Address, ifaceName));
 			}
@@ -127,6 +122,7 @@ namespace Peach.Pro.Core.OS.Linux
 		private const ushort AF_INET6 = 10;
 
 		private const int SOL_SOCKET = 1;
+		private const int SO_REUSEADDR = 2;
 		private const int SO_SNDBUF = 7;
 		private const int SO_RCVBUF = 8;
 

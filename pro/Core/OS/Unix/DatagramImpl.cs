@@ -35,6 +35,7 @@ namespace Peach.Pro.Core.OS.Unix
 			_publisher = publisher;
 		}
 
+		protected abstract void EnableReuseAddr(int fd);
 		protected abstract void SetBufferSize(int fd, int bufSize);
 		protected abstract void IncludeIpHeader(int fd);
 		protected abstract IAddress CreateAddress(IPEndPoint ep);
@@ -62,34 +63,42 @@ namespace Peach.Pro.Core.OS.Unix
 			_ifaceName = ifaceName;
 			_bindEp = bindEp;
 
-			using (var sa = CreateAddress(bindEp))
+			try
 			{
-				_fd = socket(sa.AddressFamily, (int)socketType, protocol);
-				ThrowPeachExceptionIf(_fd, "Error, socket() failed.");
-
-				if (ipHeaderInclude)
-					IncludeIpHeader(_fd);
-
-				SetBufferSize(_fd, bufSize);
-
-				if (remoteEp.Address.IsMulticast())
+				using (var sa = CreateAddress(bindEp))
 				{
-					OpenMulticast(_fd, bindEp, remoteEp, iface, ifaceName);
-				}
-				else
-				{
-					var ret = bind(_fd, sa.Ptr, sa.Length);
-					ThrowPeachExceptionIf(ret, "Error, bind() failed.");
+					int ret;
+
+					_fd = socket(sa.AddressFamily, (int)socketType, protocol);
+					ThrowPeachExceptionIf(_fd, "Error, socket() failed.");
+
+					if (ipHeaderInclude)
+						IncludeIpHeader(_fd);
+
+					EnableReuseAddr(_fd);
+					SetBufferSize(_fd, bufSize);
+
+					if (remoteEp.Address.IsMulticast())
+					{
+						OpenMulticast(_fd, bindEp, remoteEp, iface, ifaceName);
+					}
+					else
+					{
+						ret = bind(_fd, sa.Ptr, sa.Length);
+						ThrowPeachExceptionIf(ret, "Error, bind() failed.");
+					}
+
+					var salen = sa.Length;
+					ret = getsockname(_fd, sa.Ptr, ref salen);
+					ThrowPeachExceptionIf(ret, "Error, getsockname() failed.");
+
+					return sa.EndPoint;
 				}
 			}
-
-			using (var sa = CreateAddress(bindEp))
+			catch (Exception)
 			{
-				var salen = sa.Length;
-				var ret = getsockname(_fd, sa.Ptr, ref salen);
-				ThrowPeachExceptionIf(ret, "Error, getsockname() failed.");
-
-				return sa.EndPoint;
+				Close();
+				throw;
 			}
 		}
 
@@ -255,7 +264,7 @@ namespace Peach.Pro.Core.OS.Unix
 		protected static extern int setsockopt(int socket, int level, int optname, byte[] opt, int optlen);
 
 		[DllImport("libc", SetLastError = true)]
-		protected static extern int setsockopt(int socket, int level, int optname, IntPtr opt, int optlen);
+		protected static extern int setsockopt(int socket, int level, int optname, ref int opt, int optlen);
 
 		[DllImport("libc", SetLastError = true)]
 		protected static extern int getsockname(int socket, IntPtr addr, ref int addrlen);
