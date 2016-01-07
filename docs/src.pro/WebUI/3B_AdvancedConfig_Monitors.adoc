@@ -72,7 +72,7 @@ Peach saves the Agent information, provides a visual cue with a "Saved successfu
 ===== Adding a Monitor
 
 1. click the "Add a monitor..." button. +
-Peach displays a list of monitors that you can use in your configuration.
+Peach displays a list of monitors that you can use in your configuration. The monitors are categorized by usage. Fault detection monitors appear first, then data collection, automation, android, and lastly, other monitors.
 +
 image::{images}/AC10_Mon_Pg_Monitor_DropList.png["Monitor Drop List", scalewidth="70%"]
 

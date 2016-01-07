@@ -38,11 +38,34 @@ The active Peach Pit configuration can be changed in the {peachweb} by clicking 
 
 ==== Variables
 
-The variables data entry screen lists the information needed by the selected pit, as in the following illustration. Some of the information applies to the Peach environment; two examples are the Peach Installation Directory and the Pit Library Path. Other information is pit specific, such as file names used to fuzz file formats and port addresses used to fuzz network protocols.
+The variables data entry screen lists the information needed by the selected pit, as in the following illustration. Some information is pit specific, such as file names used to fuzz file formats and port addresses used to fuzz network protocols. Other information applies to the Peach environment; two examples are the Peach Installation Directory and the Pit Library Path. 
 
 image::{images}/AC01_Variables_Init.png[]
 
+==== Pit-specific Variables
+
+In the illustration, three variables are specific to the BMP Pit. Because the variables have default values, you can use the supplied values during the fuzzing job. 
+
+* If a variable is labeled optional or has a default value, you need not supply a value to enable the configuration to run.
+
+* If a variable lacks a default value and is not marked optional, you need to supply a value for the variable before you can fuzz the target.
+
+When entering a data value, type the value into the appropriate text box of the form. 
+If you'd like to use the value of another variable, type `\\##`, the name of the 
+variable that contains the value you want to use, and `##` to end the variable name.
+
+The default value of the "Sample Path" variable in the previous illustration uses another variable ("PitLibraryPath") as part of its value. 
+
+TIP: The values for some variables, such as "Seed File", allow wild card characters, allowing you to glob several items in the specification. With the globbed "Seed File" in the fuzzing jbo, Peach will evenly distribute the use of each file that matches the file specification 
+in the fuzzing job.
+
+==== System-defined Variables
+
 The Peach environment variables includes the following entries:
+
+* Peach OS
++
+The Peach OS identifies the operating system that the Peach Fuzzer is using. The value is selected when downloading the Peach distribution image. 
 
 * Peach Installation Directory 
 +
@@ -63,23 +86,6 @@ TIP: Each pit has its own logs that appear as subdirectories of the logger Path.
 The Pit library path is is the full path of the folder in the Peach installation directory that contains your licensed Peach Pits and Pit Packs. The folder name is "pits", and contains subdirectories that hold your licensed Pits, Pit configurations, and Peach-supplied sample files. 
 
 For descriptions on the pit-specific variables, see the documentation for the individual pit.
-
-==== Pit-specific Variables
-
-In the previous illustration, the last three variables are specific to the JPG-JFIF Pit. Because the variables have default values, you can use the supplied values during the fuzzing job. 
-
-* If a variable is labeled optional or has a default value, you need not supply a value to enable the configuration to run.
-
-* If a variable lacks a default value and is not marked optional, you need to supply a value for the variable before you can fuzz the target.
-
-When entering a data value, type the value into the appropriate text box of the form. 
-If you'd like to use the value of another variable, type `\\##`, the name of the 
-variable that contains the value you want to use, and `##` to end the variable name.
-
-The default value of the "Sample Path" variable in the previous illustration uses another variable ("PitLibraryPath") as part of its value. 
-
-TIP: The values for some variables, such as "Seed File", allow wild card characters, allowing you to glob several items in the specification. With the globbed "Seed File" in the fuzzing jbo, Peach will evenly distribute the use of each file that matches the file specification 
-in the fuzzing job.
 
 ===== Custom Variables 
 
@@ -131,6 +137,6 @@ image::{images}/AC06_Vars_Page_Saved.png["Variable Page Saved", scalewidth="70%"
 
 ====== Using a custom variable
 
-Using a custom variable consists of typing `\\##`, the variable name, and `##` in the value of another variable. In the following illustration, the "Sample Path" variable refers to the "JPEG Sample Pictures". When parsing the configuration information, Peach inserts the value `C:\Samples\JPEG` for the value of the "Sample Path". 
+Using a custom variable consists of typing `\\##`, the variable name, and `##` in the value of another variable. In the following illustration, the "Sample Path" variable refers to the "JPEG Sample Pictures". When parsing the configuration information, Peach inserts the value `C:\\Samples\\JPEG` for the value of the "Sample Path". 
 
 image::{images}/AC07_Vars_Page_Using.png["Using a New Variable", scalewidth="70%"]

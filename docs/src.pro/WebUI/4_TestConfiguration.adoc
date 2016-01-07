@@ -8,8 +8,8 @@ In the Test section, Peach runs a test case on the selected Pit configuration *w
 You can access the Test screen from the following places:
 
 * At the end of the Quick Start Wizard, after completing the automation section.
-* From the Test menu that is a second-tier menu of the Quick Start menu.
-* From the Test menu that is a second-tier menu of the Configuration menu.
+* From the Test menu entry of the Quick Start menu.
+* From the Test menu entry of the Configuration menu.
 
 NOTE: The test requires that the target device, service, or application be available for use. 
 
