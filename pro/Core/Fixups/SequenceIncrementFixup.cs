@@ -42,12 +42,14 @@ namespace Peach.Pro.Core.Fixups
 	[Parameter("Offset", typeof(uint?), "Sets the per-iteration initial value to Offset * (Iteration - 1)", "")]
 	[Parameter("Once", typeof(bool), "Only increment once per iteration", "false")]
 	[Parameter("Group", typeof(string), "Name of group to increment", "")]
+	[Parameter("InitialValue", typeof(uint), "Initial number to start at", "1")]
 	[Serializable]
 	public class SequenceIncrementFixup : Peach.Core.Fixups.VolatileFixup
 	{
 		public uint? Offset { get; private set; }
 		public bool Once { get; private set; }
 		public string Group { get; private set; }
+		public uint InitialValue { get; private set; }
 
 		string _stateKey = null;
 
@@ -70,13 +72,16 @@ namespace Peach.Pro.Core.Fixups
 			if (!(parent is Peach.Core.Dom.Number) && !(parent is Peach.Core.Dom.String && parent.Hints.ContainsKey("NumericalString")))
 				throw new PeachException("SequenceIncrementFixup has non numeric parent '" + parent.fullName + "'.");
 
-			bool increment = true;
-			ulong max = parent is Peach.Core.Dom.Number ? ((Peach.Core.Dom.Number)parent).MaxValue : ulong.MaxValue;
+			var increment = true;
+			ulong max = parent is Number ? ((Number)parent).MaxValue : ulong.MaxValue;
 			ulong value = 0;
 			object obj = null;
+			var initialValue = false;
 
 			if (ctx.stateStore.TryGetValue(_stateKey, out obj))
 				value = (ulong)obj;
+			else
+				initialValue = true;
 
 			if (ctx.iterationStateStore.ContainsKey(_stateKey))
 				increment &= !Once;
@@ -94,7 +99,12 @@ namespace Peach.Pro.Core.Fixups
 
 			if (increment)
 			{
-				if (++value > max)
+				if (initialValue)
+					value = InitialValue;
+				else
+					value ++;
+
+				if (value > max)
 					value -= max;
 
 				ctx.stateStore[_stateKey] = value;

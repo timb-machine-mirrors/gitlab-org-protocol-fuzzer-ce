@@ -200,6 +200,51 @@ namespace Peach.Pro.Core.Dom
 			return base.GetChild(name);
 		}
 
+		protected virtual void OnPayloadInvalidated(object o, EventArgs e)
+		{
+			_payloadInvalidated = true;
+		}
+
+		protected override void OnInsertItem(DataElement item)
+		{
+			if (item.Name == "Payload")
+			{
+				Logger.Debug(">>OnInsertItem");
+				var payload = this["Payload"];
+				if(payload != null)
+					payload.Invalidated -= OnPayloadInvalidated;
+
+				item.Invalidated += OnPayloadInvalidated;
+			}
+
+			base.OnInsertItem(item);
+		}
+
+		protected override void OnRemoveItem(DataElement item, bool cleanup = true)
+		{
+			if (item.Name == "Payload")
+				item.Invalidated -= OnPayloadInvalidated;
+
+			base.OnRemoveItem(item, cleanup);
+		}
+
+		protected override void OnSetItem(DataElement oldItem, DataElement newItem)
+		{
+			if (oldItem.Name == "Payload")
+			{
+				oldItem.Invalidated -= OnPayloadInvalidated;
+				newItem.Invalidated += OnPayloadInvalidated;
+			}
+
+			base.OnSetItem(oldItem, newItem);
+		}
+
+		[OnCloned]
+		private void OnCloned(Frag original, object context)
+		{
+			this["Payload"].Invalidated += OnPayloadInvalidated;
+		}
+
 		protected override Variant GenerateDefaultValue()
 		{
 			// On first call re-locate our template
@@ -217,18 +262,13 @@ namespace Peach.Pro.Core.Dom
 				return new Variant(new byte[] {});
 			}
 
-			// Subscribe to this event once
-			if (!_generatedFragments)
-			{
-				this["Payload"].Invalidated += (sender, args) => { _payloadInvalidated = true; };
-			}
-
 			// Only perform regeneration if payload is invalidated
 			if (_payloadInvalidated || !_generatedFragments)
 			{
 				_generatedFragments = true;
 				_payloadInvalidated = false;
 
+				Logger.Debug("Generating fragments...");
 				FragmentAlg.Fragment(Template, this["Payload"], this["Rendering"] as Sequence);
 			}
 
@@ -245,7 +285,7 @@ namespace Peach.Pro.Core.Dom
 					throw new SoftException("Error, still waiting on fragments prior to reassembly.");
 
 				var reassembledData = FragmentAlg.Reassemble();
-				this["Payload"].Crack(context, reassembledData, reassembledData.LengthBits);
+				context.CrackData(this["Payload"], reassembledData);
 			}
 			else
 			{
@@ -284,7 +324,7 @@ namespace Peach.Pro.Core.Dom
 
 				context.Log("Cracking Payload");
 				var reassembledData = FragmentAlg.Reassemble();
-				this["Payload"].Crack(context, reassembledData, reassembledData.LengthBits);
+				context.CrackData(this["Payload"], reassembledData);
 			}
 		}
 	}
