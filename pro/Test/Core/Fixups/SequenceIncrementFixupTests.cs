@@ -56,6 +56,50 @@ namespace Peach.Pro.Test.Core.Fixups
 		}
 
 		[Test]
+		public void TestInitialValue()
+		{
+			// standard test
+
+			var xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
+				"<Peach>" +
+				"   <DataModel name=\"TheDataModel\">" +
+				"       <Number name=\"num1\" size=\"32\" signed=\"false\">" +
+				"           <Fixup class=\"SequenceIncrementFixup\">" +
+				"				<Param name='InitialValue' value='0' />"+
+				"			</Fixup>"+
+				"       </Number>" +
+				"   </DataModel>" +
+
+				"   <StateModel name=\"TheState\" initialState=\"Initial\">" +
+				"       <State name=\"Initial\">" +
+				"           <Action type=\"output\">" +
+				"               <DataModel ref=\"TheDataModel\"/>" +
+				"           </Action>" +
+				"       </State>" +
+				"   </StateModel>" +
+
+				"   <Test name=\"Default\">" +
+				"       <StateModel ref=\"TheState\"/>" +
+				"       <Publisher class=\"Null\"/>" +
+				"   </Test>" +
+				"</Peach>";
+
+			var parser = new PitParser();
+
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			var config = new RunConfiguration();
+			config.singleIteration = true;
+
+			var e = new Engine(this);
+			e.startFuzzing(dom, config);
+
+			// verify values
+			Assert.AreEqual(1, values.Count);
+			Assert.AreEqual(0, BitConverter.ToUInt32(values[0].ToArray(), 0));
+		}
+
+		[Test]
 		public void TestRefDataModel()
 		{
 			// standard test

@@ -69,7 +69,9 @@ namespace PitTester
 				}
 
 				if (index >= testData.Actions.Count)
-					throw new SoftException("Missing record in test data");
+					throw new SoftException(string.Format("Missing record in test data: {1}: {0}",
+						ActionName,
+						typeof(T).Name));
 
 				var d = testData.Actions[index++];
 
@@ -78,24 +80,27 @@ namespace PitTester
 					throw new SoftException(ErrorFormat.Fmt(
 						"Action type mismatch.", 
 						ActionName, 
-						d.GetType().Name, 
-						typeof(T).Name)
+						typeof(T).Name,
+						d.GetType().Name
+						)
 					);
 
 				if (d.PublisherName != publisherName)
 					errors.Add(ErrorFormat.Fmt(
 						"Publisher name mismatch.", 
 						ActionName,
-						d.PublisherName, 
-						publisherName)
+						publisherName,
+						d.PublisherName 
+						)
 					);
 
 				if (d.ActionName != ActionName)
 					errors.Add(ErrorFormat.Fmt(
 						"Action name mismatch.",
 						ActionName,
-						d.ActionName, 
-						ActionName)
+						ActionName,
+						d.ActionName
+						)
 					);
 
 				if (errors.Any())
