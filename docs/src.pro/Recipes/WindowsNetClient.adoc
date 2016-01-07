@@ -1,3 +1,5 @@
+<<<
+
 :images: ../images
 :peachweb: Peach Web Interface
 :peachcomd: Peach Command Line Interface
@@ -7,8 +9,6 @@
 
 === Recipe: Monitoring a Windows Network Service Client
 
-image::{images}/winlogo.jpg["Windows logo - obscure usage", scale="40"]
-
 This recipe describes the base setup needed to fuzz a client of a Windows network service. 
 When fuzzing a network client, Peach impersonates the network service, the other endpoint of the network connection.
 
@@ -16,10 +16,10 @@ The recipe is a model that you can follow closely. Or, use the model as
 a starting point and augment the model for your specific situation. This recipe 
 consists of the following parts: 
 
-1.	The workflow for the fuzzing session
-2.	The Peach components to use in configuring the fuzzing setup
+1. The workflow for the fuzzing session
+2. The Peach components to use in configuring the fuzzing setup
 This section focuses on the monitoring needs and the agents that house the monitors. 
-3.	Configuration settings used to fuzz a service client (snmpget) running this workflow
+3. Configuration settings used to fuzz a service client running this workflow
 
 IMPORTANT: Assumptions/Givens in this recipe are that a Pit is ready to use, Peach is ready to run, and any software module needed to perform the fuzzing job is installed.
 
@@ -51,7 +51,7 @@ Defining the Peach components divides in two parts: identifying the monitors to 
 
 This part of the recipe revisits each step of the workflow to identify the monitors needed to implement the configuration:
 
-1. Revert to a snapshot of a virtual machine. 
+====== 1. Revert to a snapshot of a virtual machine. 
 +
 Peach needs to automate the test environment and remove human interaction during the fuzzing job. We place the service in a virtual machine (VM) because Peach can use a VM monitor to automatically start and reset the test environment when needed. 
 +
@@ -59,11 +59,11 @@ The VM snapshot is taken while the guest OS and the Peach agent are running. Usi
 +
 The monitor for the VM environment, xref:Monitors_Vmware[VMware] monitor, resides on the host machine.
 
-2. Wait for the machine to boot up.
+====== 2. Wait for the machine to boot up.
 +
 Peach waits for the VM snapshot to resume.
 
-3. Perform fuzzing, checking for faults.
+====== 3. Perform fuzzing, checking for faults.
 
 .. Launch the network client. 
 +
@@ -83,15 +83,15 @@ The WindowsDebugger monitor watches the internals of the services and detects fa
 +
 When a fault occurs, the packets involved with the fault are interesting. Peach captures the packets using a network capture monitor. This monitor resides on the local machine with Peach Fuzzer.
 
-4. Revert to the VM snapshot.
+.. Revert to the VM snapshot.
 +
 This step uses the VM monitor and VM snapshot from step one to refresh the test 
 environment, and the debug monitor from step three to start the network service in 
 the refreshed environment. No additional monitors are needed for this step.
 
-5. Resume fuzzing.
+====== 4. Resume fuzzing.
 +
-Loop to step three. 
+Loop to step three, perform fuzzing. 
 
 
 ===== Identifying Agents
@@ -123,25 +123,33 @@ The local agent is simple to implement. All that’s needed is to define the age
 
 The remote monitor is a little more involved. Like the local agent, the remote agent needs to be defined, then specify the appropriate monitors and monitor settings used with the remote agent. Second, the remote agent needs to run on the same OS as the test target. This step can be done separately from specifying the configuration details. In this recipe, a VM snapshot is used. See xref:VM_Setup[Using Virtual Machines], for information on setting up the VM snapshot.
 
-==== Sample Configuration Using snmpget 
+==== Sample Network Client Configuration 
 
-This section shows the recipe implemented for snmpget, an SNMP network service client. Using the Peach Web UI, the recipe shows the agents used, the monitors housed in or managed by each agent, and the settings for the Pit variables, the agents, and the monitors. The section ends with a brief discussion of the _NoCpuKill_ parameter that gives network clients an opportunity to run to completion. The _NoCpuKill_ parameter is present in the Peach debugging monitors. 
+This section shows the recipe implemented for a Windows network service client and consists of the following items:
+
+* Setup Preliminaries (on the Linux VM)
+* Pit variables 
+* Peach agents
+* Peach monitors
+* Debug monitor "No Cpu Kill" parameter
+* Configuration test
 
 [NOTE]
 =======
 The configurations for the network client and the network service are very similar. Two significant differences exist:
 
-* The network client configuration uses a client app, snmpget, instead of the network service agent snmpd.
+* The network client configuration uses a client application instead of the network service.
 * In the network client configuration, the test target initiates the action instead of
 responding to a request. The client contacts Peach, a surroage network service, then waits for Peach to provide a response to the query. The debug monitor has additional configuration options that are set to drive this configuration. 
 =======
-
 
 ===== Setup Preliminaries
 
 Perform the following task on the VM before taking a snapshot of the VM.
 
-* Run the Peach agent from a shell with root access. +
+* Run the Peach agent from a command processor as an administrator. +
+Within the command processor, navigate to the peach folder and execute the following command: +
+`peach -a tcp` + 
 When Peach starts the VM, the Peach agent is running in a root shell. 
 
 Perform the following item on the local system. 
@@ -150,31 +158,24 @@ Perform the following item on the local system.
 
 ===== Pit Variables 
 
-The following UI display identifies data values needed by the Pit, regardless of the monitors used in the configuration. The screen is modified slightly to focus solely on the Pit-specifc variables.
+The following UI display identifies data values typically needed by a network 
+protocol Pit. The variables and values are independent of the monitors used in 
+the configuration. Pit variables are unique to the Pit and might differ with those 
+in the example illustration.
 
 image::{images}/Recipe_WinSvc_Cli_PitVars.png["Pit-specific Variabls for SNMP Client with a Windows VM", scale="50"]
 
-The Pit User Guides describe the Pit-specific variables. In this sample, the SNMP Peach Pit User Guide provides the following descriptions. _Annotations for the variables are italicized_:
+The Pit User Guides describe the Pit-specific variables.
 
-SNMP Community String:: Community string used for authentication. The default value is "public". Peach and the network client must use the same community string.
-+
-_Check the SNMP server documentation for consistency of this value. If needed, change the value here to coincide with the value expected by the test target._
+Community String (Authentication):: Community string used for authentication. Peach and the network client must use the same community string. Check the server documentation for consistency of this value. If needed, change the value here to coincide with the value expected by the test target.
 
-Source Port:: Port number of the local machine that sends packets to the server. The default value is 162. 
-+
-_Port 162 is a well-known port value and can be left as is._
+Source Port:: Port number of the local machine that sends packets to the server. Serveral services use well-known ports that usually can be left unedited.
 
-Target IPv4 Address:: IPv4 address of the target machine (client). The default value is 127.0.0.1. For information on obtaining the IP v4 address, see Retrieving Machine Information.
-+
-_Use the IPv4 address reported by ipconfig for one of the interfaces in the VM, such as "Local Area Connection". For more information, see the Retrieving Machine Information section of the *SNMP Peach Pit User Guide*._
+Target IPv4 Address:: IPv4 address of the target machine (client). For information on obtaining the IP v4 address, see Retrieving Machine Information section of the Pit User Guide.
 
-Target Port:: SNMP port number of the remote machine that sends and receives packets. The default value is 161.
-+
-_Port 161 is a well-known port value and can be left as is._
+Target Port:: SNMP port number of the remote machine that sends and receives packets. Serveral services use well-known ports that usually can be left unedited.
 
-Timeout:: Duration, in milliseconds, to wait for incoming data. A value of -1 extends the duration to infinity. The default value is 1000 ms. During fuzzing, a timeout failure causes the fuzzer to skip to the next test case.
-+
-_Use the default value, as it is sufficient for most implementations._
+Timeout:: Duration, in milliseconds, to wait for incoming data. During fuzzing, a timeout failure causes the fuzzer to skip to the next test case.
 
 ===== Agents 
 
@@ -193,40 +194,16 @@ The monitor list within each agent is significant, as the monitors are launched 
 
 ===== Monitors 
 
-This recipe uses four monitors, two on the machine with Peach and two on the remote machine. The recipe shows each monitor and describes its roles (fault detection, data collection, and automation), applicable operating systems, and the most important data fields. 
-
-TIP: The important monitor parameters are identified using the stylized Peach logo adjacent to the entry.
+This recipe uses four monitors, two on the machine with Peach and two on the remote machine. The recipe shows each monitor and describes its roles: fault detection, data collection, and automation. 
 
 ====== Vmware (Remote Client Manager)
 
-The xref:Monitors_Vmware[Vmware] monitor controls setting up and starting the virtual machine and uses the settings in the following illustration:
-
-image::{images}/Recipe_WinSvc_Cli_Vmware_Mon.png["VMWare Monitor", scale="50"]
-
-The most significant parameters for the VMware monitor follow:
-
-Vmx:: Identifies the full path of the virtual machine image. Peach loads the snapshot of the VM image at the start of the fuzzing job and after a fault occurs.
-
-Headless:: Identifies whether the VM has a window associated with it. When developing a configuration, set this parameter to false. When the configuration is complete, change Headless to true. 
-
-Host Type:: Specifies the VMware product used in the configuration.
-
-Snapshot Name:: Identifies the snapshot to use for the specific image.
+The xref:Monitors_Vmware[Vmware] monitor controls setting up and starting the virtual machine.
 
 ===== Network Capture (InterestingPackets)
 
 The xref:Monitors_Pcap[Netowrk Capture Monitor] (InterestingPackets) captures network packets 
 sent and received from the test target. When a fault occurs, Peach stores the packets immediately surrounding the fault in the log of the test case.
-
-image::{images}/Recipe_WinSvc_Cli_NetCapture_Mon.png["Network Capture Monitor", scale="50"]
-
-The most significant parameters for the network capture  monitor follow:
-
-Device:: Specifies the name of the interface on the local machine (the machine 
-with Peach) used to communicate with the test target. Use ipconfig to identify 
-the interface(s) available for use. 
-
-Filter:: Helps capture only those packets associated with the fuzzing session. The filter adheres to the syntax and requirements of the Pcap filter specification.
 
 [NOTE]
 =======
@@ -248,11 +225,7 @@ with Libpcap.
 
 The xref:Monitors_PageHeap[PageHeap] monitor manages registry settings that enables the Windows debugger to perform heap analysis. This monitor sets the appropriate registry values at the start of a fuzzing session and clears them at the session’s end. The monitor is housed by the remote agent.
 
-image::{images}/Recipe_WinSvc_Cli_PgHeap_Mon.png["PageHeap Monitor", scale="50"]
-
-The most significant paramter follows:
-
-Executable:: Specifies the file name and file extension of the test target.
+NOTE: PageHeap requires administrative privileges to run correctly.
 
 ===== WindowsDebugger 
 
@@ -261,15 +234,7 @@ The xref:Monitors_WindowsDebugger[WindowsDebugger] debugger monitor performs two
 * Starts the network client at the start of a fuzzing job and restarts the client when the VM snapshot refreshes.
 * Detects faults internal to the client.
 
-The WindowsDebugger monitor uses the settings in the following illustration:
-
-image::{images}/Recipe_WinSvc_Cli_Windbg_Mon.png["WindowsDebugger Monitor", scale="50"]
-
-The most significant paramters follow:
-
-Executable:: Identifies the full path to the SNMP Windows client, snmpget. The client resides on the remote matchine; so, the full path is for the Windows file system.
-
-Arguments:: Arguments for the executable. Here, the snmpget arguments consist of the authentication version, the community string, the IPv4 address of the host, and a request OID for information about the SNMP service.
+Two parameters are worth calling out in this recipe: "No Cpu Kill" and "Start On Call":
 
 No Cpu Kill:: Controls whether the process stays alive if its CPU usage drops to zero. Specify `true` to keep the process running and to allow the process to release or close its resources before exiting. For more information, see the following section _Closing the Client Process_.
 
@@ -295,3 +260,8 @@ Scenarios exempt from the "No Cpu Kill" option include the following:
 * Embedded devices. Fuzzing configurations for these devices do not use the Peach debugging monitors: GDB, WindowsDebugger, or CrashWrangler. So, the "No Cpu Kill" option isn’t needed.
 * Kernel-mode debugging. Kernel-mode debugging has its own set of requirements. "No Cpu Kill" is not used here. 
 
+===== Configuration Test
+
+Once the monitors and associated parameters are part of the configuration, you can test the configuration. From the Configuration menu along the left edge of the window, click on `Test` to run a single iteration (test case) on the configuration. Note that the test checks the connections and communications. It does NOT do any fuzzing. 
+
+For more information on testing a configuration, see xref:Test_PitConfiguration[Test Pit Configuration].  
