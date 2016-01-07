@@ -27,9 +27,19 @@ LocalAgent (local)::
 TCP REMOTING (tcp):: 
 	The external Peach agent communicates using REST api calls over TCP. Peach can run as a TCP remoting agent using the +-a tcp+ argument.
 
-REST JSON (http)::
-	The agent protocol uses REST style calls over HTTP. This channel is best suited for custom Peach agents. For more information, see the _Peach Professional Developer Guide_.
+ifdef::peachug[]
 
+REST JSON (http)::
+	The agent protocol uses REST style calls over HTTP. This channel is best suited for custom Peach agents. For more information, see the +Agent+ topic in the +Extending Peach+ section of the _Peach Professional Developer Guide_.
+
+endif::peachug[]
+
+ifndef::peachug[]
+
+REST JSON (http)::
+	The agent protocol uses REST style calls over HTTP. This channel is best suited for custom Peach agents. For more information, see the xref:Extend_Agent[Agent] topic in xref:Extending[Extending Peach].
+
+endif::peachug[]
 
 ==== Local Agent
 
