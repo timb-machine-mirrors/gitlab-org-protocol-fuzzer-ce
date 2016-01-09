@@ -5,7 +5,7 @@
 
 [[Configuration_Recipes]]
 
-== Configuration Recipes
+== Monitoring Recipes
 
 Peach Fuzzer has very powerful monitoring capabilities that allow you to 
 configure the test environment to detect faults that occur in the test 
@@ -30,11 +30,11 @@ This step focuses on the monitoring needs and the agents that house the monitors
 * All software modules needed to perform the fuzzing job are available for use.
 =======
 
-=== What’s left to do?
+*What’s left to do?* +
 When you finish developing a recipe, it’s time to fill out and test the 
 configuration, then run the fuzzing job. 
 
-* See the xref:JumpStart[Quick Start Guide] for the workflow to run a fuzzing job.
+* See the xref:JumpStart[Getting Started with the Peach Fuzzer Platform] for the workflow to run a fuzzing job.
 
 The remainder of this section provides the following monitor recipes:
 
