@@ -47,7 +47,10 @@ namespace Peach.Core.Dom
 	[Parameter("lengthType", typeof(LengthType), "Units to compute the size in", "bytes")]
 	public class SizeRelation : Relation
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger(); 
+		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+
+		// This massive hack is to allow the SnmpFixup to initialize itself
+		public static bool DisableRecursionCheck = false;
 
 		protected bool _isRecursing = false;
 		protected LengthType _lengthType = LengthType.Bytes;
@@ -85,7 +88,7 @@ namespace Peach.Core.Dom
 
 		public override long GetValue()
 		{
-			if (_isRecursing)
+			if (_isRecursing && !DisableRecursionCheck)
 				return 0;
 
 			try
@@ -117,7 +120,7 @@ namespace Peach.Core.Dom
 
 		public override Variant CalculateFromValue()
 		{
-			if (_isRecursing)
+			if (_isRecursing && !DisableRecursionCheck)
 				return new Variant(0);
 
 			try
