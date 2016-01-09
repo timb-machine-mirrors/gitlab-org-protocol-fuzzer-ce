@@ -152,9 +152,9 @@ xref:Action_when[when]:: Perform the action if the provided expression evaluates
 xref:DataModel[DataModel]:: DataModel to fuzz.
 xref:Data[Data]:: Set of initial data to crack into the DataModel before fuzzing.
 xref:Param[Param]:: Argument passed with the call. The argument will be fuzzed.
-xref:Result[Result]:: Output of the call Action.  The result will be cracked into a DataModel.
+xref:Result[Result]:: Output of the call Action. The result will be cracked into a DataModel.
 
-// 01/27/2015 RAB - This is vestigal and will be removed from User Guide and Developer Guide.
+// 01/27/2015 RAB - This is vestigial and will be removed from User Guide and Developer Guide.
 // 
 // When already exists in v3/when.txt
 //=== when

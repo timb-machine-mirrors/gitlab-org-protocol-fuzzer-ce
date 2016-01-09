@@ -108,12 +108,13 @@ def apply_webhelp(self):
 	out.mkdir()
 
 	doc = self.create_task('asciidoctor', srcs, xml)
-	lnt = self.create_task('xmllint', xml)
+	# Disable xmllint until dtd verification for docbook 5 is fixed with asciidoctor 1.5.4
+	#lnt = self.create_task('xmllint', xml)
 	hlp = self.create_task('webhelp', xml)
 	idx = self.create_task('webindex', xml)
 
 	idx.set_run_after(hlp)
-	hlp.set_run_after(lnt)
+	#hlp.set_run_after(lnt)
 
 	self.output_dir = out
 
