@@ -54,7 +54,8 @@ namespace Peach.Pro.Core.Publishers
 			}
 			catch (Exception ex)
 			{
-				throw new PeachException("Error, unable to load certificate: ", ex);
+				throw new PeachException(string.Format("Error, unable to load certificate '{0}': ",
+					ServerCertPath), ex);
 			}
 
 		}
