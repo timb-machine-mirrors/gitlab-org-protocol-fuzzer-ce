@@ -83,7 +83,20 @@ image::{images}/AC11_Mon_Pg_Added_WinDbg.png[]
 3. Fill in the details of monitor. +
 Configuration information for each monitor is available in the xref:Monitors[Monitors] reference section. A list of monitors appears at the start of the section that links to the individual entries.
 +
+The monitor parameters divide into three groups: "Core", "When To Trigger", and "Advanced". 
++
 image::{images}/AC12_Mon_Windbg_Detail.png[]
+
+** The "Core" parameters consist of parameters that you should check when creating or editing a configuration. This monitor provides a choice of what to monitor: an executable file, a running process, or a service.
++
+image::{images}/AC12A_Mon_WinDbg_Core.png[]
+** The "When To Trigger" address timing-related issues, such as restarting the test target at the end of an iteration. This is common for file fuzzing, where Peach creates a fuzzed data file, then starts the target with the fuzzed file as input. 
++
+image::{images}/AC12B_Mon_WinDbg_Trigger.png[]
+** The "Advanced" parameters are items that seldom need to be specified; the default values of these parameters are usually sufficient as is. Yet, once in a while you might need to access one of these parameters. When fuzzing a network client, the "No Cpu Kill" parameter needs to be set to true to give the client an opportunity to close cleanly. 
++
+image::{images}/AC12C_Mon_WinDbg_Advanced.png[]
+
 
 ===== Sample Agent with Multiple Monitors
 The following illustration is of an agent with multiple monitors. Note that you can show or hide the details for a monitor by clicking the arrow to the left of the monitor name. In fact, this is true for agents, too.
