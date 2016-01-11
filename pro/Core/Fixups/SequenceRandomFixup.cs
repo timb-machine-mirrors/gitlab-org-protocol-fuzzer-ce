@@ -55,6 +55,9 @@ namespace Peach.Pro.Core.Fixups
 
 			if (parent is Peach.Core.Dom.String)
 				parent.DefaultValue = new Variant(0);
+
+			if (MaxValue.HasValue && MaxValue.Value < long.MaxValue && (long)MaxValue.Value < MinValue)
+				throw new ArgumentOutOfRangeException("MaxValue", "MaxValue must be greater than MinValue");
 		}
 
 		protected override Variant OnActionRun(RunContext ctx)
@@ -108,8 +111,12 @@ namespace Peach.Pro.Core.Fixups
 				max = MaxValue.HasValue ? MaxValue.Value : int.MaxValue;
 			}
 
+			if (max < long.MaxValue)
+				return new Variant(rng.Next(min, (long)(max + 1)));
+
 			if (max > long.MaxValue)
 				return new Variant(rng.Next((ulong)min, max));
+
 			return new Variant(rng.Next(min, (long)max));
 		}
 	}
