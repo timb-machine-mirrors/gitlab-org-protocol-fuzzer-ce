@@ -845,9 +845,6 @@ namespace Peach.Pro.Core.WebServices
 			{
 				var otherName = inc.Source;
 
-				if (!otherName.StartsWith("file:"))
-					continue;
-
 				otherName = otherName.Replace("file:", "");
 				otherName = otherName.Replace("##PitLibraryPath##", pitLibraryPath);
 
