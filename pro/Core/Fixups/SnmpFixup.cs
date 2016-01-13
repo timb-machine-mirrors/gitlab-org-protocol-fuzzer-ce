@@ -24,10 +24,14 @@ namespace Peach.Pro.Core.Fixups
 		public DataElement _Message { get; protected set; }
 		public DataElement _EngineId { get; protected set; }
 
+		private byte[] _preKey;
+
 		public SnmpFixup(DataElement parent, Dictionary<string, Variant> args) 
 			: base(parent, args, "Message", "EngineId")
 		{
 			ParameterParser.Parse(this, args);
+
+			_preKey = PasswordToKeyStep1(Password);
 		}
 
 		protected override Variant fixupImpl()
@@ -41,7 +45,7 @@ namespace Peach.Pro.Core.Fixups
 
 			var engineId = elements["EngineId"];
 			var algorithm = KeyedHashAlgorithm.Create("HMACMD5");
-			algorithm.Key = PasswordToKey(Password, engineId.Value);
+			algorithm.Key = PasswordToKeyStep2(_preKey, engineId.Value);
 
 			var digest = ComputeHash(algorithm, msg, parent);
 
@@ -69,13 +73,6 @@ namespace Peach.Pro.Core.Fixups
 			{
 				SizeRelation.DisableRecursionCheck = false;
 			}
-		}
-
-		internal static byte[] PasswordToKey(string password, Stream engineId)
-		{
-			var key1 = PasswordToKeyStep1(password);
-			var key2 = PasswordToKeyStep2(key1, engineId);
-			return key2;
 		}
 
 		internal static byte[] PasswordToKeyStep1(string password)

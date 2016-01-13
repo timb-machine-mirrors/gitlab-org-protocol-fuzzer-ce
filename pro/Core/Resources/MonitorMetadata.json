@@ -593,7 +593,7 @@
         "Name": "When To Trigger",
         "Items": [
           "When",
-          "WaitOnCall",
+          "WaitOnCall"
         ]
       },
       {

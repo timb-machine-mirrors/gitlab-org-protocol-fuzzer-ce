@@ -6,7 +6,7 @@
 // Updates
 // - 12/30/2015 RAB: Original 
 
-== Quick Start Peach Fuzzer
+== Getting Started with the Peach Fuzzer Platform
 
 This section provides a workflow that identify the steps involved in setting up and running a fuzzing session. Stepping through the Peach fuzzing workflow is the quickest way to begin fuzzing. 
 
@@ -88,7 +88,7 @@ Specifying a configuration consists of setting variables specific to the selecte
 
 Variables are used to configure and target a Pit. This includes information such as IP addresses and port numbers for network Pits and any configuration required a specific Pit. Many of the variables you already know or can obtain quickly. Sometimes, the value of a variable depends on the monitoring setup, so some tweaking might be appropriate once you select the monitors to use.
 
-Several configuration recipes are included to provide base monitor configurations for the different fuzzing targets. Monitors focus on detecting faults, collecting data, and automating the test environment. The configuration recipes also are great starting points for developing your own configurations that precisely monitor the test target for your needs. The recipes in this release consist of the following:
+Several monitoring recipes are included to provide base monitor configurations for the different fuzzing targets. Monitors focus on detecting faults, collecting data, and automating the test environment. The monitoring recipes also are great starting points for developing your own configurations that precisely monitor the test target for your needs. The recipes in this release consist of the following:
 
 * xref:Recipe_FileFuzzing[Monitoring a File Consumer (File Fomat)]
 * xref:Recipe_LinuxNetServer[Monitoring a Linux Network Service]
