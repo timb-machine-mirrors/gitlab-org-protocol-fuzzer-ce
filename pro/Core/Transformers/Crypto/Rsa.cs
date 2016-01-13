@@ -100,111 +100,125 @@ namespace Peach.Pro.Core.Transformers.Crypto
 
 		protected override BitwiseStream internalEncode(BitwiseStream data)
 		{
-			if (Action == TlsAction.Decrypt)
-				return data;
-
-			RsaKeyParameters rsaKey = null;
-
-			if (!string.IsNullOrEmpty(CertXpath))
+			try
 			{
-				rsaKey = FromCertXPath(CertXpath);
+				if (Action == TlsAction.Decrypt)
+					return data;
 
-				// During record prior to getting data the cert can be null
-				// in this case just return our clear text data.
+				RsaKeyParameters rsaKey = null;
+
+				if (!string.IsNullOrEmpty(CertXpath))
+				{
+					rsaKey = FromCertXPath(CertXpath);
+
+					// During record prior to getting data the cert can be null
+					// in this case just return our clear text data.
+				}
+				else if (PublicKey != null && PublicExponent != null)
+				{
+					var modulus = new BigInteger(PublicKey.Value);
+					var exponent = new BigInteger(PublicExponent.Value);
+
+					rsaKey = new RsaKeyParameters(false, modulus, exponent);
+				}
+
+				if (rsaKey == null)
+				{
+					logger.Debug("No key found, skipping encryption!");
+					return data;
+				}
+
+				logger.Debug("Key found, encrypting");
+
+				var random = new SecureRandom();
+				var encoding = new Pkcs1Encoding(new RsaBlindedEngine());
+				encoding.Init(true, new ParametersWithRandom(rsaKey, random));
+
+				if (data.Length > encoding.GetInputBlockSize())
+				{
+					logger.Error("Data length greater than block size, returning unencrypted data");
+					return data;
+				}
+
+				var clear = new BitReader(data).ReadBytes((int)data.Length);
+
+				var encrypted = encoding.ProcessBlock(clear, 0, clear.Length);
+				return new BitStream(encrypted);
 			}
-			else if (PublicKey != null && PublicExponent != null)
+			catch (Exception ex)
 			{
-				var modulus = new BigInteger(PublicKey.Value);
-				var exponent = new BigInteger(PublicExponent.Value);
-
-				rsaKey = new RsaKeyParameters(false, modulus, exponent);
+				throw new SoftException(ex);
 			}
-
-			if (rsaKey == null)
-			{
-				logger.Debug("No key found, skipping encryption!");
-				return data;
-			}
-
-			logger.Debug("Key found, encrypting");
-
-			var random = new SecureRandom();
-			var encoding = new Pkcs1Encoding(new RsaBlindedEngine());
-			encoding.Init(true, new ParametersWithRandom(rsaKey, random));
-
-			if (data.Length > encoding.GetInputBlockSize())
-			{
-				logger.Error("Data length greater than block size, returning unencrypted data");
-				return data;
-			}
-
-			var clear = new BitReader(data).ReadBytes((int)data.Length);
-
-			var encrypted = encoding.ProcessBlock(clear, 0, clear.Length);
-			return new BitStream(encrypted);
 		}
 
 		protected override BitStream internalDecode(BitStream data)
 		{
-			if (Action == TlsAction.Encrypt)
-				return data;
-
-			if (!string.IsNullOrEmpty(StorePreDecode))
+			try
 			{
-				var root = (DataModel)parent.getRoot();
-				var context = root.actionData.action.parent.parent.parent.context;
+				if (Action == TlsAction.Encrypt)
+					return data;
 
-				context.iterationStateStore[StorePreDecode] = data;
+				if (!string.IsNullOrEmpty(StorePreDecode))
+				{
+					var root = (DataModel)parent.getRoot();
+					var context = root.actionData.action.parent.parent.parent.context;
+
+					context.iterationStateStore[StorePreDecode] = data;
+				}
+
+				RsaKeyParameters rsaKey = null;
+
+				if (!string.IsNullOrEmpty(PrivateKey))
+				{
+					using (var reader = File.OpenText(PrivateKey))
+						rsaKey = (RsaKeyParameters)new PemReader(reader).ReadObject();
+				}
+				else if (PublicKey != null && PublicExponent != null)
+				{
+					var modulus = new BigInteger(PublicKey.Value);
+					var exponent = new BigInteger(PublicExponent.Value);
+
+					rsaKey = new RsaKeyParameters(false, modulus, exponent);
+				}
+
+				if (rsaKey == null)
+				{
+					logger.Debug("No key found, skipping decryption!");
+					return data;
+				}
+				else
+				{
+					logger.Debug("Key found, decrypting");
+				}
+
+				var random = new SecureRandom();
+				var encoding = new Pkcs1Encoding(new RsaBlindedEngine());
+				encoding.Init(false, new ParametersWithRandom(rsaKey, random));
+
+				if (data.Length > encoding.GetInputBlockSize())
+				{
+					logger.Error("Data length greater than block size, returning encrypted data");
+					return data;
+				}
+
+				var cipher = new BitReader(data).ReadBytes((int)data.Length);
+
+				if (!string.IsNullOrEmpty(StorePreDecode))
+				{
+					var root = (DataModel)parent.getRoot();
+					var context = root.actionData.action.parent.parent.parent.context;
+
+					context.iterationStateStore[StorePreDecode] = cipher;
+				}
+
+				var clear = encoding.ProcessBlock(cipher, 0, cipher.Length);
+
+				return new BitStream(clear);
 			}
-
-			RsaKeyParameters rsaKey = null;
-
-			if (!string.IsNullOrEmpty(PrivateKey))
+			catch (Exception ex)
 			{
-				using (var reader = File.OpenText(PrivateKey))
-					rsaKey = (RsaKeyParameters)new PemReader(reader).ReadObject();
+				throw new SoftException(ex);
 			}
-			else if (PublicKey != null && PublicExponent != null)
-			{
-				var modulus = new BigInteger(PublicKey.Value);
-				var exponent = new BigInteger(PublicExponent.Value);
-
-				rsaKey = new RsaKeyParameters(false, modulus, exponent);
-			}
-
-			if (rsaKey == null)
-			{
-				logger.Debug("No key found, skipping decryption!");
-				return data;
-			}
-			else
-			{
-				logger.Debug("Key found, decrypting");
-			}
-
-			var random = new SecureRandom();
-			var encoding = new Pkcs1Encoding(new RsaBlindedEngine());
-			encoding.Init(false, new ParametersWithRandom(rsaKey, random));
-
-			if (data.Length > encoding.GetInputBlockSize())
-			{
-				logger.Error("Data length greater than block size, returning encrypted data");
-				return data;
-			}
-
-			var cipher = new BitReader(data).ReadBytes((int)data.Length);
-
-			if (!string.IsNullOrEmpty(StorePreDecode))
-			{
-				var root = (DataModel)parent.getRoot();
-				var context = root.actionData.action.parent.parent.parent.context;
-
-				context.iterationStateStore[StorePreDecode] = cipher;
-			}
-
-			var clear = encoding.ProcessBlock(cipher, 0, cipher.Length);
-
-			return new BitStream(clear);
 		}
 	}
 }

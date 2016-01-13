@@ -267,80 +267,88 @@ namespace Peach.Pro.Core.Fixups
 
 		protected override Variant OnActionRun(RunContext ctx)
 		{
-			if (ctx.iterationStateStore.ContainsKey("TlsBlockCipher"))
-				throw new SoftException("Error in Tls fixup, TlsBlockCipher object already exists in the state store.");
-
-			var msgs = GetState<IEnumerable<object>>(ctx, "HandshakeMessage");
-			if (msgs == null)
-				throw new SoftException("Error in Tls fixup, no handshake messages exists in the state store.");
-
-			var pms = ToBytes(GetState<DataElement>(ctx, "PreMasterSecret"));
-			if (pms == null)
-				throw new SoftException("Error in Tls fixup, no handshake messages exists in the state store.");
-
-			var clientRandom = ToBytes(GetState<DataElement>(ctx, "ClientRandom"));
-			if (clientRandom == null)
-				throw new SoftException("Error in Tls fixup, client random doesn't exist in the state store.");
-
-			var serverRandom = ToBytes(GetState<DataElement>(ctx, "ServerRandom"));
-			if (serverRandom == null)
-				throw new SoftException("Error in Tls fixup, server random doesn't exist in the state store.");
-
-			var tlsContext = new TlsContext(ProtocolVersion, clientRandom, serverRandom);
-			var masterSecret = TlsUtilities.PRF(tlsContext, pms, "master secret",
-				Concat(clientRandom, serverRandom), 48);
-			tlsContext.MasterSecret = masterSecret;
-
-			Console.Write("Pre-Master: ");
-			foreach (var b in pms)
-				Console.Write(string.Format("{0:X2} ", b));
-			Console.WriteLine();
-			Console.Write("Client Random: ");
-			foreach (var b in clientRandom)
-				Console.Write(string.Format("{0:X2} ", b));
-			Console.WriteLine();
-			Console.Write("Server Random: ");
-			foreach (var b in serverRandom)
-				Console.Write(string.Format("{0:X2} ", b));
-			Console.WriteLine();
-
-			if (TlsVersion != TlsVersion.TLSv12)
+			try
 			{
-				var hash = new RsaSignature.CombinedHash();
-				hash.Init(null);
+				if (ctx.iterationStateStore.ContainsKey("TlsBlockCipher"))
+					throw new SoftException("Error in Tls fixup, TlsBlockCipher object already exists in the state store.");
 
-				//hash.BlockUpdate(clientRandom, 0, clientRandom.Length);
-				//hash.BlockUpdate(serverRandom, 0, serverRandom.Length);
+				var msgs = GetState<IEnumerable<object>>(ctx, "HandshakeMessage");
+				if (msgs == null)
+					throw new SoftException("Error in Tls fixup, no handshake messages exists in the state store.");
+
+				var pms = ToBytes(GetState<DataElement>(ctx, "PreMasterSecret"));
+				if (pms == null)
+					throw new SoftException("Error in Tls fixup, no handshake messages exists in the state store.");
+
+				var clientRandom = ToBytes(GetState<DataElement>(ctx, "ClientRandom"));
+				if (clientRandom == null)
+					throw new SoftException("Error in Tls fixup, client random doesn't exist in the state store.");
+
+				var serverRandom = ToBytes(GetState<DataElement>(ctx, "ServerRandom"));
+				if (serverRandom == null)
+					throw new SoftException("Error in Tls fixup, server random doesn't exist in the state store.");
+
+				var tlsContext = new TlsContext(ProtocolVersion, clientRandom, serverRandom);
+				var masterSecret = TlsUtilities.PRF(tlsContext, pms, "master secret",
+					Concat(clientRandom, serverRandom), 48);
+				tlsContext.MasterSecret = masterSecret;
+
+				//Console.Write("Pre-Master: ");
+				//foreach (var b in pms)
+				//	Console.Write(string.Format("{0:X2} ", b));
+				//Console.WriteLine();
+				//Console.Write("Client Random: ");
+				//foreach (var b in clientRandom)
+				//	Console.Write(string.Format("{0:X2} ", b));
+				//Console.WriteLine();
+				//Console.Write("Server Random: ");
+				//foreach (var b in serverRandom)
+				//	Console.Write(string.Format("{0:X2} ", b));
+				//Console.WriteLine();
+
+				if (TlsVersion != TlsVersion.TLSv12)
+				{
+					var hash = new RsaSignature.CombinedHash();
+					hash.Init(null);
+
+					//hash.BlockUpdate(clientRandom, 0, clientRandom.Length);
+					//hash.BlockUpdate(serverRandom, 0, serverRandom.Length);
+
+					foreach (var msg in msgs)
+					{
+						var bytes = ToBytes(msg);
+						hash.BlockUpdate(bytes, 0, bytes.Length);
+					}
+
+					var verifyHash = new byte[hash.GetDigestSize()];
+					hash.DoFinal(verifyHash, 0);
+
+					Console.Write("Verify Hash: ");
+					foreach (var b in verifyHash)
+						Console.Write(string.Format("{0:X2} ", b));
+					Console.WriteLine();
+
+					return new Variant(new BitStream(verifyHash));
+				}
+
+				// For TLS 1.2, just stick in the data.
+
+				var bitStream = new BitStream();
+				var bitWriter = new BitWriter(bitStream);
 
 				foreach (var msg in msgs)
 				{
-					var bytes = ToBytes(msg);
-					hash.BlockUpdate(bytes, 0, bytes.Length);
+					bitWriter.WriteBytes(ToBytes(msg));
 				}
 
-				var verifyHash = new byte[hash.GetDigestSize()];
-				hash.DoFinal(verifyHash, 0);
-
-				Console.Write("Verify Hash: ");
-				foreach (var b in verifyHash)
-					Console.Write(string.Format("{0:X2} ", b));
-				Console.WriteLine();
-
-				return new Variant(new BitStream(verifyHash));
+				bitStream.Position = 0;
+				return new Variant(bitStream);
 			}
-
-			// For TLS 1.2, just stick in the data.
-
-			var bitStream = new BitStream();
-			var bitWriter = new BitWriter(bitStream);
-
-			foreach (var msg in msgs)
+			catch (Exception ex)
 			{
-				bitWriter.WriteBytes(ToBytes(msg));
+				throw new SoftException(ex);
 			}
 
-			bitStream.Position = 0;
-			return new Variant(bitStream);
 		}
 	}
 
