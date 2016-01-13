@@ -27,6 +27,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using Peach.Core;
+using Peach.Core.IO;
 
 namespace Peach.Pro.Core.Publishers
 {
@@ -106,6 +107,8 @@ namespace Peach.Pro.Core.Publishers
 			{
 				case "Port":
 					return new Variant(Port);
+				case "NoWriteException":
+					return new Variant(NoWriteException ? "True" : "False");
 			}
 
 			return base.OnGetProperty(property);
@@ -123,9 +126,45 @@ namespace Peach.Pro.Core.Publishers
 					OnStop();
 					OnStart();
 					return;
+
+				case "NoWriteException":
+					_SetNoWriteException(value);
+					return;
 			}
 
 			base.OnSetProperty(property, value);
+		}
+
+		void _SetNoWriteException(Variant value)
+		{
+			string val;
+
+			if (value.GetVariantType() == Variant.VariantType.BitStream)
+			{
+				var rdr = new BitReader((BitwiseStream)value, true)
+				{
+					BaseStream = { Position = 0 }
+				};
+
+				val = rdr.ReadString(Encoding.UTF8);
+			}
+			else if (value.GetVariantType() == Variant.VariantType.ByteString)
+			{
+				val = Encoding.UTF8.GetString((byte[])value);
+			}
+			else
+			{
+				try
+				{
+					val = (string)value;
+				}
+				catch
+				{
+					throw new SoftException("Can't set NoWriteException, 'value' is an unsupported type.");
+				}
+			}
+
+			NoWriteException = val.ToLower() == "true";
 		}
 	}
 }

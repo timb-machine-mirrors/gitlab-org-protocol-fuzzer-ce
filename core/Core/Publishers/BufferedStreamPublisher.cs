@@ -24,6 +24,7 @@ namespace Peach.Core.Publishers
 		}
 
 		public int Timeout { get; set; }
+		public bool NoWriteException { get; set; }
 
 		protected int _sendTimeout = -1;
 		protected int _sendLen = 0;
@@ -40,6 +41,7 @@ namespace Peach.Core.Publishers
 		protected BufferedStreamPublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
+			NoWriteException = false;
 		}
 
 		#region Async Read Operations
@@ -318,7 +320,9 @@ namespace Peach.Core.Publishers
 				// Shutdown socket on error to support Lifetime parameter
 				CloseClient();
 
-				throw new SoftException(ex);
+				// Allow pit to eat write exception
+				if(!NoWriteException)
+					throw new SoftException(ex);
 			}
 		}
 
