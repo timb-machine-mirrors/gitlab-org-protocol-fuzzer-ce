@@ -22,7 +22,7 @@ namespace Peach.Pro.Core.Runtime
 			// Ensure pit library exists
 			var pits = FindPitLibrary(_pitLibraryPath);
 
-			if (RunWeb != null)
+			if (CreateWeb != null)
 				RunWeb(pits, false, new ExternalJobMonitor());
 		}
 	}
