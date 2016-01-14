@@ -378,14 +378,14 @@ namespace Peach.Pro.Core.Runtime
 			if (userLogger != null || !_noweb)
 				job = new Job(_config);
 
-			if (_noweb || AttachWeb == null)
+			if (_noweb || CreateWeb == null)
 			{
 				var e = new Engine(GetUIWatcher());
 				e.startFuzzing(dom, _config);
 				return;
 			}
 
-			using (var svc = AttachWeb(new ConsoleJobMonitor(job)))
+			using (var svc = CreateWeb("", new ConsoleJobMonitor(job)))
 			{
 				svc.Start();
 
@@ -507,7 +507,7 @@ namespace Peach.Pro.Core.Runtime
 					RunEngine(dom);
 				}
 			}
-			else if (!_noweb && RunWeb != null)
+			else if (!_noweb && CreateWeb != null)
 			{
 				// Ensure pit library exists
 				var pits = FindPitLibrary(_pitLibraryPath);
