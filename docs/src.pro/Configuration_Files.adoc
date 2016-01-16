@@ -1,7 +1,7 @@
 
 == Configuration Files
 
-Most Peach pits contain configurable information. For example a network Pit might store source and destination IP addresses for the network. Some configuration settings apply to a specific operating system. 
+Most Peach pits contain configurable information. For example, a network Pit might store source and destination IP addresses for the network. Some configuration settings apply to a specific operating system. 
 
 Peach uses configuration files that allow different settings based on operating system. The information stored in a configuration file is typically used many times in a single definition and rarely stays the same. The presence of a configuration file eases the burden of supplying configurable settings by hand, an awkward and error-prone task. 
 
@@ -26,7 +26,7 @@ You can create configuration files with default values and reuse them as needed.
 <2> This section is only for Linux
 <3> This section is only for OS X
 
-Use of the defined key's is done by wrapping them in "##". So Interface becomes `##Interface##` as shown in the following example.
+Using a defined key consists of encasing the key with the two-character sequence `\\##`. So, the key _Interface_ becomes `##Interface##`, as shown in the following example.
 
 [source,xml]
 ----
@@ -40,7 +40,7 @@ Use of the defined key's is done by wrapping them in "##". So Interface becomes 
 </Publisher>
 ----
 
-Overriding one configuration file with a second (or another) configuration file requires using the +--config+ command-line argument. The values in file specified on the command line override the values listed in the default .config file.
+Overriding one configuration file with a second (or another) configuration file requires using the +--config+ command-line argument. The values in the file specified on the command line override the values listed in the default .config file.
 
 ----
 Peach.exe --config=CommonConfig.xml MyPit.xml
@@ -56,9 +56,24 @@ Peach.exe -DTargetIp=10.1.1.1 MyPit.xml
 
 Peach includes several predefined configuration keys that can be used in your Pits.
 
-Peach.Cwd:: Defined as the current working directory.
+Peach.Cwd:: Peach current working directory. While this directory is usually the 
+directory containing Peach, the directory can be another location on your system. 
+The Peach Working Directory is set by launching Peach from the shell command line. 
+The value is the current working directory of the command shell when you start Peach.
 
-Peach.Pwd:: Defined as the directory containing the Peach executable.
+PitLibraryPath:: The Pit library path is the full path of the folder in the 
+Peach installation directory that contains your licensed Peach Pits and Pit Packs. 
+The folder name is "pits", and contains subdirectories that hold your licensed 
+Pits, Pit configurations, and Peach-supplied sample files.
+
+Peach.LogRoot:: Full path of the directory where Peach stores logging information 
+from each fuzzing session. The default log root location is a subdirectory of 
+the Peach Installation Directory. The default name of this directory is "Logs".
+
+Peach.OS:: Operating system that hosts the Peach Fuzzer platform. The value is 
+selected when downloading the Peach distribution image.
+
+Peach.Pwd:: Peach installation directory. This directory contains the Peach executable, and usually is named "peach".
 
 // TODO - Configuration files
 //  * Basic usage
