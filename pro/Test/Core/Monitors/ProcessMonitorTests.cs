@@ -313,5 +313,66 @@ namespace Peach.Pro.Test.Core.Monitors
 			Assert.AreEqual(0, faults.Length);
 			Assert.AreEqual(2, startCount);
 		}
+
+		[Test]
+		[Repeat(30)]
+		public void TestAddressSanitizer()
+		{
+			if (Platform.GetOS() == Platform.OS.Windows)
+				Assert.Ignore("ASAN is not supported on Windows");
+
+			var runner = new MonitorRunner("Process", new Dictionary<string, string>
+			{
+				{ "Executable", Utilities.GetAppResourcePath("UseAfterFree") },
+				{ "AddressSanitizer", "true" },
+			})
+			{
+				Message = m =>
+				{
+					Thread.Sleep(10);
+				}
+			};
+
+			var faults = runner.Run(10);
+
+			Assert.NotNull(faults);
+
+			Assert.Greater(faults.Length, 0);
+
+			foreach (var data in faults)
+			{
+				Assert.AreEqual("Process", data.DetectionSource);
+				Assert.AreEqual("heap-use-after-free", data.Fault.Risk);
+				Assert.IsFalse(data.Fault.MustStop);
+				StringAssert.Contains("Shadow bytes", data.Fault.Description);
+
+				if (Platform.GetOS() == Platform.OS.OSX)
+				{
+					const string pattern = "heap-use-after-free on address 0x61400000fe44 at pc 0x000100001b8f";
+					StringAssert.StartsWith(pattern, data.Title);
+					StringAssert.Contains(pattern, data.Fault.Description);
+					Assert.AreEqual("02133A7E", data.Fault.MajorHash);
+					Assert.AreEqual("9DD19897", data.Fault.MinorHash);
+				}
+				else if (Platform.GetOS() == Platform.OS.Linux)
+				{
+					const string pattern = "heap-use-after-free on address ";
+					if (Platform.GetArch() == Platform.Architecture.x64)
+					{
+						StringAssert.StartsWith(pattern, data.Title);
+						StringAssert.Contains(pattern, data.Fault.Description);
+						CollectionAssert.Contains(new[] { "C755DA91", "3BFFE0CC" }, data.Fault.MajorHash);
+						Assert.AreEqual("9DD19897", data.Fault.MinorHash);
+					}
+					else
+					{
+						StringAssert.StartsWith(pattern, data.Title);
+						StringAssert.Contains(pattern, data.Fault.Description);
+						CollectionAssert.Contains(new[] { "DF8C57E3", "7938DA7F" }, data.Fault.MajorHash);
+						CollectionAssert.Contains(new[] { "6B08385F", "552648B1" }, data.Fault.MinorHash);
+					}
+				}
+			}
+		}
 	}
 }
