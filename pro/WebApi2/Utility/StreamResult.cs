@@ -7,7 +7,7 @@ using System.Web.Http;
 
 namespace Peach.Pro.WebApi2.Utility
 {
-	public class StreamResult : IHttpActionResult
+	internal class StreamResult : IHttpActionResult
 	{
 		private readonly Stream _strm;
 

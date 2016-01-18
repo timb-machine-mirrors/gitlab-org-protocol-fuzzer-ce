@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Web.Http.Description;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.WebApi2.Controllers;
@@ -28,6 +29,13 @@ namespace Peach.Pro.WebApi2.Utility
 				description = "Invalid or expired license"
 			});
 
+			var attr = apiDescription.GetControllerAndActionAttributes<ResultFileAttribute>().FirstOrDefault();
+
+			if (attr != null)
+			{
+				operation.produces = new[] { attr.ContentType };
+				operation.responses["200"].schema = new Schema { type = "file" };
+			}
 		}
 	}
 }

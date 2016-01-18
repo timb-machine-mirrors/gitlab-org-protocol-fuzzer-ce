@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Peach.Pro.WebApi2.Utility
 {
-	class TimeSpanJsonConverter : JsonConverter
+	internal class TimeSpanJsonConverter : JsonConverter
 	{
 		public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
 		{

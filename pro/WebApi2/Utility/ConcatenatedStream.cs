@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Peach.Pro.WebApi2.Utility
 {
-	class ConcatenatedStream : Stream
+	internal class ConcatenatedStream : Stream
 	{
 		readonly Queue<Stream> _streams;
 		readonly long _length;

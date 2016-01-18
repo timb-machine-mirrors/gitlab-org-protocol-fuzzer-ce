@@ -6,6 +6,7 @@ deps = [
 	'System.dll',
 	'System.Core.dll',
 	'System.Net.Http.dll',
+	'System.Web.dll',
 	'Microsoft.CSharp.dll',
 
 	'Peach.Core.dll',
@@ -38,5 +39,10 @@ bld(
 	resource = bld.path.ant_glob('Resources/**/* Views/**/*'),
 	name = 'Peach.Pro.WebApi2.dll',
 	csflags = [
+		# The following are remapped in Peach's app.config:
+		# System.Web.Http v5.2.2 -> v5.2.3
+		# System.Net.Http.Formatting v5.2.2 -> v5.2.3
+		# Microsoft.Owin v2.0.2 -> v3.0.1
+		'/nowarn:1701', # The two assembly references have differing build and/or revision numbers
 		'/nowarn:1702', # The two assembly references have differing build and/or revision numbers
 	],)

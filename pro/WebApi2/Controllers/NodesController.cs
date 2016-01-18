@@ -14,6 +14,11 @@ namespace Peach.Pro.WebApi2.Controllers
 	{
 		public const string Prefix = "p/nodes";
 
+		public static string MakeUrl(params string[] args)
+		{
+			return string.Join("/", "", Prefix, string.Join("/", args));
+		}
+
 		public NodesController()
 			: base(null)
 		{
@@ -42,7 +47,7 @@ namespace Peach.Pro.WebApi2.Controllers
 
 			return new Node
 			{
-				NodeUrl = "/" + Prefix + "/" + NodeGuid,
+				NodeUrl = MakeUrl(NodeGuid),
 				Name = Environment.MachineName,
 				Mac = "00:00:00:00:00:00",
 				Ip = "0.0.0.0",

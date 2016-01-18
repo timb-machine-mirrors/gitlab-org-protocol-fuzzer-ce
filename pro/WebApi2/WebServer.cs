@@ -1,5 +1,9 @@
 using System;
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
+using System.Reflection;
+using System.Text;
 using Owin;
 using System.Web.Http;
 using Microsoft.Owin;
@@ -14,11 +18,19 @@ using Peach.Pro.Core.Runtime;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.WebApi2.Utility;
 using Swashbuckle.Application;
+using Swashbuckle.Swagger;
 
 namespace Peach.Pro.WebApi2
 {
 	public class WebServer : IWebStatus
 	{
+		// http://msdn.microsoft.com/en-us/library/windows/desktop/ms681382.aspx
+		// ReSharper disable InconsistentNaming
+		private const int ERROR_ACCESS_DENIED = 5;
+		private const int ERROR_SHARING_VIOLATION = 32;
+		private const int ERROR_ALREADY_EXISTS = 183;
+		// ReSharper restore InconsistentNaming
+
 		readonly WebContext _context;
 		IDisposable _server;
 
@@ -29,26 +41,83 @@ namespace Peach.Pro.WebApi2
 
 		public void Start()
 		{
-			// TODO: Handle non-admin trying to start the listener
+			Start(8888);
+		}
 
-			// Mirror Nancy's self host code that tries to start the web listener
-			// and if it gets an access denied error, runs the following as admin:
-			// netsh http add urlacl url=\"{0}\" user=\"{1}\"
+		public void Start(int port)
+		{
+			var added = false;
 
-			// TODO: Handle port in use and increment until first available port is found
+			while (_server == null)
+			{
+				var url = "http://+:{0}/".Fmt(port);
 
-			// TODO: Ensure mono uses '*' and windows uses '+' for any prefix
+				try
+				{
+					_server = WebApp.Start(url, OnStartup);
 
-			// On mono, the HttpListener tries to resolve "+" which makes
-			// startup/shutdown extremly slow.
+					Uri = new Uri("http://{0}:{1}/".Fmt(GetLocalIp(), port));
+				}
+				catch (Exception ex)
+				{
+					var inner = ex.GetBaseException();
 
-			// Mono tries to resolve any string that is not a parsable IP or '*'.
-			// In order to receive requests on all interfaces with mono the
-			// prefix needs to be '*'.
+					var lex = inner as HttpListenerException;
+					if (lex != null)
+					{
+						if (lex.ErrorCode == ERROR_ACCESS_DENIED)
+						{
+							var error = added;
 
-			_server = WebApp.Start("http://+:8888/", OnStartup);
+							if (!added)
+								error = !UacHelpers.AddUrl(url);
 
-			Uri = new Uri("http://localhost:8888");
+							if (!error)
+							{
+								// UAC reservation added, don't increment port
+								added = true;
+								continue;
+							}
+
+							var sb = new StringBuilder();
+
+							sb.AppendFormat("Access was denied when starts the web server at url '{0}'.", url);
+							sb.AppendLine();
+							sb.AppendLine();
+							sb.AppendLine("Please create the url reservations by executing the following");
+							sb.AppendLine("from a command prompt with elevated privileges:");
+							sb.AppendFormat("{0} {1}", UacHelpers.Command, UacHelpers.GetArguments(url));
+
+							throw new TargetInvocationException(new PeachException(sb.ToString(), ex));
+						}
+
+						// Windows gives ERROR_SHARING_VIOLATION when port in use
+						// Windows gives ERROR_ALREADY_EXISTS when two http instances are running
+						// Mono raises "Prefix already in use" message
+						if (lex.ErrorCode == ERROR_SHARING_VIOLATION ||
+							lex.ErrorCode == ERROR_ALREADY_EXISTS ||
+							lex.Message == "Prefix already in use.")
+						{
+							// Try the next port
+							++port;
+							added = false;
+							continue;
+						}
+					}
+
+					// Mono gives AddressAlreadyInUse when port in use
+					var sex = inner as SocketException;
+					if (sex != null && sex.SocketErrorCode == SocketError.AddressAlreadyInUse)
+					{
+						// Try the next port
+						++port;
+						added = false;
+						continue;
+					}
+
+					throw new TargetInvocationException(new PeachException("Unable to start the web server: " + inner.Message + ".", ex));
+				}
+			}
 		}
 
 		public Uri Uri
@@ -104,10 +173,14 @@ namespace Peach.Pro.WebApi2
 				c.IncludeXmlComments(Utilities.GetAppResourcePath("Peach.Pro.WebApi2.xml"));
 				c.OperationFilter<CommonResponseFilter>();
 				c.SchemaFilter<RequiredParameterFilter>();
+				c.MapType<TimeSpan>(() => new Schema { type = "integer", format = "int64" });
 
 			}).EnableSwaggerUi();
 
 			app.UseWebApi(cfg);
+
+			// We don't need to do any favicon.ico specific stuff.
+			// It will properly get served off disk as static content.
 
 			AddStaticContent(app, "", "public");
 
@@ -115,15 +188,6 @@ namespace Peach.Pro.WebApi2
 
 			// TODO: Replace this with dependency injection
 			cfg.Properties["WebContext"] = _context;
-
-			// TODO: Ensure favicon.ico works
-			// TODO: Ensure Response.ContentType = "text/html; charset=utf8"
-			// TODO: Implelemt Response.AsZip()
-			// TODO: Implelemt Response.AsFile()
-
-			// TODO: For REST responses, veryfy caching.  With NancyFX we needed to:
-			// TODO: Ensure Response.Headers["Cache-Control"] = "no-cache";
-			// TODO: Ensure Response.Headers["Pragma"] = "no-cache";
 
 			// TODO: Do we need to redirect / to /{version}/ to fix caching issues still?
 			// TODO: For /version/index.html response, verify caching. With NancyFX we needed to:
@@ -144,6 +208,23 @@ namespace Peach.Pro.WebApi2
 				EnableDefaultFiles = true,
 				EnableDirectoryBrowsing = false,
 			});
+		}
+
+		private static string GetLocalIp()
+		{
+			try
+			{
+				using (var s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+				{
+					s.Connect(new IPAddress(0x01010101), 1);
+					
+					return ((IPEndPoint)s.LocalEndPoint).Address.ToString();
+				}
+			}
+			catch
+			{
+				return "localhost";
+			}
 		}
 	}
 }
