@@ -5,17 +5,14 @@
 
 [[Configuration_Recipes]]
 
-== Configuration Recipes
+== Monitoring Recipes
 
-The Peach Fuzzing Platform is very flexible and can accommodate configurations that 
-involve multiple machines. Simple configurations, such as file fuzzing, require a 
-single machine. More advanced configurations, such as network protocols, involve two 
-or more machines. 
-
-This section provides configuration recipes to use in your fuzzing projects. 
-You can follow a recipe to the letter to examine the test target. Or, use a recipe 
-as a starting point, then augment and adjust the recipe to arrive at a configuration 
-that precisely fits the monitoring requirements of the project.
+Peach Fuzzer has very powerful monitoring capabilities that allow you to 
+configure the test environment to detect faults that occur in the test 
+target, collect data surrounding each fault, and automate the test 
+environment. This section provides some monitoring configurations for 
+different types of targets. These recipes can be used as-is or just as a 
+starting point for a custom configuration.
 
 All of the recipes here follow a common process:
 
@@ -33,6 +30,17 @@ This step focuses on the monitoring needs and the agents that house the monitors
 * All software modules needed to perform the fuzzing job are available for use.
 =======
 
-.What’s left to do?
-When you finish developing a recipe, it’s time to fill out and test the configuration, then run the fuzzing job. 
+*What’s left to do?* +
+When you finish developing a recipe, it’s time to fill out and test the 
+configuration, then run the fuzzing job. 
 
+* See the xref:JumpStart[Getting Started with the Peach Fuzzer Platform] for the workflow to run a fuzzing job.
+
+The remainder of this section provides the following monitor recipes:
+
+* xref:Recipe_FileFuzzing[Monitoring a File Consumer (File Fomat)]
+* xref:Recipe_LinuxNetServer[Monitoring a Linux Network Service]
+* xref:Recipe_LinuxNetClient[Monitoring a Linux Network Client]
+* xref:Recipe_NetDevice[Monitoring a Network Device]
+* xref:Recipe_WindowsNetServer[Monitoring a Windows Network Service]
+* xref:Recipe_WindowsNetClient[Monitoring a Windows Network Client]

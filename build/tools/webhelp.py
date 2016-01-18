@@ -18,8 +18,8 @@ def configure(conf):
 
 	v['XMLLINT_OPTS'] = [
 		'--noout',
-		'--dtdvalid',
-		j(conf.get_third_party(), 'docbook-5.0', 'dtd', 'docbook.dtd')
+		'--schema',
+		j(conf.get_third_party(), 'docbook-5.0', 'xsd', 'docbook.xsd')
 	]
 
 	xsl = j(conf.get_third_party(), 'docbook-xsl-ns-1.78.1')

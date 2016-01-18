@@ -53,15 +53,18 @@ namespace Peach.Pro.Core.Fixups
 		protected override Variant fixupImpl()
 		{
 			var from = elements["ref"];
-			string expression = (string)args["expression"];
+			var expression = (string)args["expression"];
 
-			Dictionary<string, object> state = new Dictionary<string, object>();
+			var state = new Dictionary<string, object>();
 			state["self"] = this;
 			state["ref"] = from;
 			state["data"] = from.Value;
 			try
 			{
 				object value = parent.EvalExpression(expression, state);
+
+				if (value is byte[])
+					return new Variant((byte[])value);
 
 				if (value is string)
 				{
@@ -73,19 +76,19 @@ namespace Peach.Pro.Core.Fixups
 
 					return new Variant(strbytes);
 				}
-				else if (value is int)
-					return new Variant(Convert.ToInt32(value));
-				else
-				{
-					throw new PeachException(
-						string.Format("ExpressionFixup expected a return value of string or int but got '{0}'", value.GetType().Name));
-				}
 
+				if (value is int)
+					return new Variant(Convert.ToInt32(value));
+
+				throw new PeachException(
+					"ExpressionFixup expected a return value of string or int but got '{0}'".Fmt(value.GetType().Name)
+				);
 			}
 			catch (System.Exception ex)
 			{
 				throw new PeachException(
-					string.Format("ExpressionFixup expression threw an exception!\nExpression: {0}\n Exception: {1}", expression, ex.ToString()), ex);
+					"ExpressionFixup expression threw an exception!\nExpression: {0}\n Exception: {1}".Fmt(expression, ex.ToString()), ex
+				);
 			}
 		}
 	}

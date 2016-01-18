@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -46,12 +47,16 @@ namespace Peach.Pro.Core
 
 		public static bool IsNearingExpiration
 		{
-			get { return Expiration < DateTime.Now.AddDays(30); }
+			get { return IsValid && Expiration < DateTime.Now.AddDays(30); }
 		}
 
 		public static int ExpirationInDays
 		{
-			get { return (Expiration - DateTime.Now).Days; }
+			get
+			{
+				Debug.Assert(IsValid);
+				return (Expiration - DateTime.Now).Days;
+			}
 		}
 
 		public static bool IsValid
@@ -292,7 +297,7 @@ namespace Peach.Pro.Core
 				if (!IsMissing)
 				{
 					IsInvalid = true;
-					System.Diagnostics.Debug.Assert(licenseFile != null);
+					Debug.Assert(licenseFile != null);
 					var errorLog = Utilities.GetAppResourcePath("Peach.error.txt");
 
 					try
@@ -311,20 +316,20 @@ namespace Peach.Pro.Core
 
 			if (IsMissing)
 			{
-				System.Diagnostics.Debug.Assert(!IsInvalid);
+				Debug.Assert(!IsInvalid);
 				licenseFile = Utilities.GetAppResourcePath("Peach.license");
 				ErrorText = "Peach was unable to locate your license file.\nPlease install your license to \"{0}\" and try again.\nIf the problem persists please contact Peach Support at support@peachfuzzer.com for help in resolving this issue.".Fmt(licenseFile);
 			}
 			else if (IsExpired)
 			{
-				System.Diagnostics.Debug.Assert(!IsInvalid);
-				System.Diagnostics.Debug.Assert(licenseFile != null);
+				Debug.Assert(!IsInvalid);
+				Debug.Assert(licenseFile != null);
 				ErrorText = "Your license has expired.\nPlease contact the Peach Sales team at sales@peachfuzzer.com to renew your license.";
 			}
 			else
 			{
-				System.Diagnostics.Debug.Assert(IsInvalid);
-				System.Diagnostics.Debug.Assert(licenseFile != null);
+				Debug.Assert(IsInvalid);
+				Debug.Assert(licenseFile != null);
 				ErrorText = "The currently installed license is invalid.\nPlease contact Peach Support at supper@peachfuzzer.com to resolve this issue.\nPlease attach a copy of the current license \"{0}\" with your support request.".Fmt(licenseFile);
 			}
 

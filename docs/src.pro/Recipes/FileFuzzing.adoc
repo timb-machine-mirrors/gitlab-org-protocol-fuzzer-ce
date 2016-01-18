@@ -3,6 +3,8 @@
 :peachcomd: Peach Command Line Interface
 :peachug: Peach User Guide
 
+<<< 
+
 [[Recipe_FileFuzzing]]
 
 === Recipe: Monitoring a File Consumer (File Fuzzing)
@@ -10,8 +12,6 @@
 This recipe identifies the monitors and associated settings suitable for testing a 
 file consumer. When fuzzing a file consumer, Peach creates malformed data files, 
 and then has the file consumer open and access the data from the malformed files.
-
-image::{images}/Document.png["A File to Consume", scale="40"]
 
 TIP: Using one common approach, Peach can fuzz file consumers of all types, whether 
 the file types are multimedia--sound, images, or video; documents--word processing, 
@@ -55,7 +55,7 @@ setting. PageHeap requires administrative (heightened) privileges.
 * Give the pit a name and a description. Peach makes a configuration file of the selections you make, so that you can re-use the setup again.
 . From the configuration menu along the left edge of the window, select Monitoring.
 . Fill in a name for the agent. Since this agent resides within Peach, the default 
-location `local` is appropriate. Then, click the`Save` button.
+location `local` is appropriate.
 
 image::{images}/FileFuzzing_Monitoring.png["Local agent for File Fuzzing", scale="50"]
 
@@ -113,4 +113,6 @@ from an administrative console. A snapshot of the agent setup follows:
 
 image::{images}/FileFuzz_AgentSummary.png["File Fuzzing Agent Summary", scale="50"]
 
+When ready, test the configuration. See xref:Test_PitConfiguration[Text Pit Configuration] for more information. 
 
+Also, see xref:Start_Fuzzing[Fuzzing Session] for information on running a fuzzing job.

@@ -43,7 +43,81 @@ The dashboard allows you to monitor progress as your fuzzing job runs and from i
 . The fault summary lists the most recent faults. For information about the faults generated during this fuzzing session, click the Metrics menu, then Faults on the left side of the screen. 
 =======
 
+[[PassTest_and_Fuzz]]
+==== From a Configuration Test
+
+When your Pit configuration passes the validation test, the following screeen displays 
+with the green banner and the message "Testing Passed. Click Continue." 
+
+image::{images}/QS32_TestPass.png[scalewidth="75%"]
+
+From here, you can start a fuzzing session with two clicks of the mouse. 
+
+1. Click Continue. Peach displays the Pit configuration page. 
++
+image::{images}/webui_config_selected.png[scalewidth="75%"]
+
+2. Click Start in the "Start Options" section at the bottom of the page to start a fuzzing job.
++
+The Peach dashboard displays and the fuzzing job starts. 
++
+image::{images}/webui_dashboard_oct2015.png[]
+
+[[Re-Fuzzing]]
+==== Re-running a Fuzzing Job
+
+Peach allows you to re-run fuzzing sessions in whole or in part, meaning that exactly the same tests run using exactly the same data values. If you run an entire fuzzing job, all of the test cases are performed. 
+
+If you run a partial job, the test cases you specify run, again in exactly the same order as in the original fuzzing job using exactly the same data values.
+
+What is needed to re-run a fuzzing job?
+
+* Seed value 
+* Start test case number
+* Stop test case number
+
+Supply the seed value and appropriate Start and Stop Test Case values in the "Start Options" on the Pit Configuration page that follows, and click Start to begine a repeat of the fuzzing session. 
+
+image::{images}/webui_config_selected.png[]
+
+The next two sections provide information about the Seed Value and the Test Case number used in recreating a fuzzing job. 
+
+[[About_SeedValue]]
+===== Seed Value
+
+The seed value of a fuzzing job is located in the following places:
+
+* For a running job, the seed is part of the dashboard display when a fuzzing job is running. See entry 2 of the right column of the dashboard.
+* For a completed job, click on the Jobs menu and again on the entry in the Jobs list. This brings up the dashboard for the fuzzing job, where the seed is entry 2 of the right column.
+* For a completed job, view the generated report, a .pdf file. The seed is the last table entry in the Summary section (section 1) of the report. 
+
+A seed is a common technique used in scientific and computer experiments to provide reproduceable results when a random set of data values is needed. The seed feeds into a random-number generator that produces a sequence of "random numbers". Each time the seed is used, the same sequence of "random numbers" is generated. 
+
+Peach uses the "random numbers" in determining the mutators to use in a test case, the sequence of mutators, the data elements to fuzz, and the fuzzed data values. Having the seed value guarantees that the same sequence of numbers is generated and used throughout a fuzzing job.
+
+[[About_TestCaseNumbers]]
+===== Start/Stop Test Case
+
+The Start Test Case number identifies the first test case to perform in a fuzzing job. 
+The Stop Test Case number identifies the last test case to perform in a fuzzing job.
+Together, the Start and Stop Test Case numbers identify a range or a sequence of fuzzing test cases to run, whether the fuzzing job is new or is a re-run. 
+
+The number of a specific test case is present in the detail or drill-down report for a specific fault. In this report, the value is at the top of the report and is labeled "Iteration". The value represents the iteration number (or test case number) in a fuzzing job.
+
+Main uses of specifying start and/or stop test case numbers in a fuzzing job are 
+to confirm that an issue reliably occurs, to assist in tracking down an issue, or 
+to verify that an issue is fixed. 
+
+If the issue reliably occurs, then when fixed, the effectiveness of the correction is simple to confirm. 
+
+If the issue does not reproduce, the issue will be more difficult to solve and might be a HEAP-related memory issue in which the addressable memory layout can have a large impact on the bug occurrence. In short, tracking down the root cause and verifying a fix for an issue will require running Peach for a long time to see whether the issue recurs. 
+There is no easy way to guarantee an effective fix in this case.
+
+TIP: Once a fix is in place, run a new fuzzing job to regress around the fix and to determine whether any residual faults surface. 
+
+
 <<<
+[[Report_Faults]]
 === Faults
 
 While {product} is running, you can view all the faults generated during the session by clicking the Faults menu option on the left.
@@ -67,6 +141,7 @@ image::{images}/Fault_detail.png[]
 Here's where you can find details about the selected fault. Additional information (such as any files collected during the data collection phase) are located in the disk log folder.
 
 <<<
+[[Report_Metrics]]
 === Metrics
 
 A number of metrics are available for viewing while {product} is running.

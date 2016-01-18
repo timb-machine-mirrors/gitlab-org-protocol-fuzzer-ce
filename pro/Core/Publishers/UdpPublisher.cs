@@ -38,35 +38,31 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("SrcPort", typeof(ushort), "Source port number", "0")]
 	[Parameter("MinMTU", typeof(uint), "Minimum allowable MTU property value", DefaultMinMTU)]
 	[Parameter("MaxMTU", typeof(uint), "Maximum allowable MTU property value", DefaultMaxMTU)]
-	public class UdpPublisher : SocketPublisher
+	public class UdpPublisher : DatagramPublisher
 	{
-		private static Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 		protected override Logger Logger { get { return logger; } }
-		private IPEndPoint _remote;
 
 		public UdpPublisher(Dictionary<string, Variant> args)
 			: base("Udp", args)
 		{
+			Protocol = (byte)ProtocolType.Udp;
 		}
 
-		protected override bool AddressFamilySupported(AddressFamily af)
+		protected override SocketType SocketType
+		{
+			get { return SocketType.Dgram; }
+		}
+
+		protected override bool IsAddressFamilySupported(AddressFamily af)
 		{
 			return (af == AddressFamily.InterNetwork) || (af == AddressFamily.InterNetworkV6);
 		}
 
-		protected override Socket OpenSocket(EndPoint remote)
-		{
-			_remote = (IPEndPoint)remote;
-			Socket s = new Socket(remote.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
-			return s;
-		}
-
 		protected override void FilterOutput(byte[] buffer, int offset, int count)
 		{
-			base.FilterOutput(buffer, offset, count);
-
-			if (_remote.Port == 0)
-				throw new PeachException("Error sending a Udp packet to " + _remote.Address + ", the port was not specified.");
+			if (_remoteEp.Port == 0)
+				throw new PeachException("Error sending a Udp packet to {0}, the port was not specified.".Fmt(_remoteEp.Address));
 		}
 
 		protected override Variant OnGetProperty(string property)
@@ -86,7 +82,7 @@ namespace Peach.Pro.Core.Publishers
 		{
 			ushort newPort;
 
-			switch(property)
+			switch (property)
 			{
 				case "Port":
 					newPort = UShortFromVariant(value);
@@ -96,7 +92,6 @@ namespace Peach.Pro.Core.Publishers
 					OnStop();
 					OnStart();
 					return;
-
 				case "SrcPort":
 					newPort = UShortFromVariant(value);
 					Logger.Debug("Changing SrcPort from {0} to {1}.\n", SrcPort, newPort);

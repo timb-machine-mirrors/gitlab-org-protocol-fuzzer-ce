@@ -16,62 +16,59 @@ using Peach.Core.Test;
 using Peach.Pro.Core.Publishers;
 using Array = Peach.Core.Dom.Array;
 using Encoding = Peach.Core.Encoding;
+using Mono.Unix;
 
 namespace Peach.Pro.Test.Core.Publishers
 {
 	[TestFixture]
 	[Quick]
 	[Peach]
-	class SocketPublisherTests
+	class DatagramPublisherTests
 	{
 		#region OSX Multicast IPV6 Declarations
 
-		[DllImport("libc")]
+		[DllImport("libc", SetLastError = true)]
 		static extern uint if_nametoindex(string ifname);
 
-		[DllImport("libc")]
+		[DllImport("libc", SetLastError = true)]
 		static extern int setsockopt(int socket, int level, int optname, ref ipv6_mreq opt, int optlen);
 
-		[DllImport("libc")]
-		static extern int setsockopt(int socket, int level, int optname, ref IntPtr opt, int optlen);
+		[DllImport("libc", SetLastError = true)]
+		static extern int setsockopt(int socket, int level, int optname, ref int opt, int optlen);
 
 		// ReSharper disable InconsistentNaming
 
-		const int IPPROTO_IPV6 = 0x29;
-		const int IPV6_JOIN_GROUP = 0xC;
-		const int IPV6_MULTICAST_IF = 0x9;
+		const int IPPROTO_IPV6 = 41;
+		const int IPV6_MULTICAST_IF = 9;
+		const int IPV6_JOIN_GROUP = 12;
 
 		[StructLayout(LayoutKind.Sequential)]
 		struct ipv6_mreq
 		{
 			[MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
 			public byte[] ipv6mr_multiaddr;
-			public IntPtr ipv6mr_interface;
+			public int    ipv6mr_interface;
 		}
 
 		// ReSharper restore InconsistentNaming
 
-		void JoinGroupV6(IPAddress group, long ifindex)
+		void JoinGroupV6(IPAddress group, int ifindex)
 		{
 			System.Diagnostics.Debug.Assert(_socket.Handle != IntPtr.Zero);
 			System.Diagnostics.Debug.Assert(group.AddressFamily == AddressFamily.InterNetworkV6);
 			System.Diagnostics.Debug.Assert(ifindex != 0);
 
-			var ptr = new IntPtr((int)ifindex);
-
 			var mr = new ipv6_mreq
 			{
 				ipv6mr_multiaddr = group.GetAddressBytes(),
-				ipv6mr_interface = ptr
+				ipv6mr_interface = ifindex,
 			};
 
 			var ret = setsockopt(_socket.Handle.ToInt32(), IPPROTO_IPV6, IPV6_JOIN_GROUP, ref mr, Marshal.SizeOf(mr));
-			if (ret != 0)
-				throw new PeachException("Error, failed to join group '{0}' on interface number '{1}', error {2}.".Fmt(group, ifindex, ret));
+			UnixMarshal.ThrowExceptionForLastErrorIf(ret);
 
-			ret = setsockopt(_socket.Handle.ToInt32(), IPPROTO_IPV6, IPV6_MULTICAST_IF, ref ptr, Marshal.SizeOf(typeof(IntPtr)));
-			if (ret != 0)
-				throw new PeachException("Error, failed to set outgoing interface number '{1}' for group '{0}', error {2}.".Fmt(group, ifindex, ret));
+			ret = setsockopt(_socket.Handle.ToInt32(), IPPROTO_IPV6, IPV6_MULTICAST_IF, ref ifindex, sizeof(int));
+			UnixMarshal.ThrowExceptionForLastErrorIf(ret);
 		}
 
 		#endregion
@@ -205,6 +202,18 @@ namespace Peach.Pro.Test.Core.Publishers
 			}
 		}
 
+		private IPAddress GetSelf(AddressFamily family)
+		{
+			var peachIface = Environment.GetEnvironmentVariable("PEACH_SELF");
+			if (!string.IsNullOrEmpty(peachIface))
+			{
+				var adapter = NetworkInterface.GetAllNetworkInterfaces().Single(x => x.Name == peachIface);
+				var addrs = adapter.GetIPProperties().UnicastAddresses;
+				return addrs.First(a => a.Address.AddressFamily == family).Address;
+			}
+			return Helpers.GetPrimaryIface(family).Item2;
+		}
+		
 		private static IEnumerable<Tuple<string, IPAddress>> GetAllLinkLocalIPv6()
 		{
 			// ReSharper disable once LoopCanBeConvertedToQuery
@@ -244,11 +253,11 @@ namespace Peach.Pro.Test.Core.Publishers
 			ScheduleRead(_socket);
 		}
 
-		private void StartRawEcho(IPAddress localIp)
+		private void StartRawEcho(IPAddress localIp, int protocol)
 		{
 			try
 			{
-				_socket = new Socket(localIp.AddressFamily, SocketType.Raw, ProtocolType.Pup);
+				_socket = new Socket(localIp.AddressFamily, SocketType.Raw, (ProtocolType)protocol);
 			}
 			catch (SocketException ex)
 			{
@@ -276,29 +285,22 @@ namespace Peach.Pro.Test.Core.Publishers
 				{
 					// Multicast needs to bind to INADDR_ANY on windows
 					_socket.Bind(new IPEndPoint(IPAddress.Any, 0));
-
-					var opt = new MulticastOption(groupIp, localIp);
-					_socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, opt);
-					_socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface, localIp.GetAddressBytes());
 				}
 				else if (Platform.GetOS() == Platform.OS.OSX)
 				{
-					// Multicast needs to bind to the group on osx
-					_socket.Bind(new IPEndPoint(groupIp, 0));
-
-					var opt = new MulticastOption(groupIp, localIp);
-					_socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, opt);
-					_socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface, localIp.GetAddressBytes());
+					// Multicast needs to bind to INADDR_ANY on osx 
+					// the group address works for older versions of OSX
+					_socket.Bind(new IPEndPoint(IPAddress.Any, 0));
 				}
 				else
 				{
 					// Multicast needs to bind to the group on linux
 					_socket.Bind(new IPEndPoint(groupIp, 0));
-
-					var opt = new MulticastOption(groupIp, localIp);
-					_socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, opt);
-					_socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface, localIp.GetAddressBytes());
 				}
+
+				var opt = new MulticastOption(groupIp, localIp);
+				_socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, opt);
+				_socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface, localIp.GetAddressBytes());
 			}
 			else
 			{
@@ -315,9 +317,9 @@ namespace Peach.Pro.Test.Core.Publishers
 				{
 					// ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
 					if (localIp.Equals(IPAddress.IPv6Loopback))
-						JoinGroupV6(groupIp, if_nametoindex("lo0"));
+						JoinGroupV6(groupIp, (int)if_nametoindex("lo0"));
 					else
-						JoinGroupV6(groupIp, localIp.ScopeId);
+						JoinGroupV6(groupIp, (int)localIp.ScopeId);
 				}
 				else
 				{
@@ -418,24 +420,6 @@ namespace Peach.Pro.Test.Core.Publishers
 			Assert.AreEqual("Recv 11 bytes!", state.actions[1].dataModel.InternalValue.BitsToString());
 		}
 
-		[Test]
-		[TestCase("RawV6", "127.0.0.1")]
-		[TestCase("RawV4", "::1")]
-		[TestCase("RawIPv4", "::1")]
-		public void BadAddressFamily(string pub, string host)
-		{
-			var ex = Assert.Throws<PeachException>(() => RunEngine(pub, new Dictionary<string, string>
-			{
-				{ "Host", host },
-				{ "Protocol", "17" },
-			}));
-
-			var res = new IPEndPoint(IPAddress.Parse(host), 0).ToString();
-			var exp = "The resolved IP '{0}' for host '{1}' is not compatible with the {2} publisher.".Fmt(res, host, pub);
-
-			Assert.AreEqual(exp, ex.Message);
-		}
-
 		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Could not resolve scope id for interface with address 'fe80::'.")]
 		public void TestMissingLocalScopeId()
 		{
@@ -495,6 +479,64 @@ namespace Peach.Pro.Test.Core.Publishers
 
 			Assert.AreEqual("Hello World", state.actions[0].dataModel.InternalValue.BitsToString());
 			Assert.AreEqual("Recv 11 bytes!", state.actions[1].dataModel.InternalValue.BitsToString());
+		}
+
+		[Test]
+		[TestCase("RawV6", "127.0.0.1")]
+		[TestCase("RawV4", "::1")]
+		[TestCase("RawIPv4", "::1")]
+		public void BadAddressFamily(string pub, string host)
+		{
+			var ex = Assert.Throws<PeachException>(() => RunEngine(pub, new Dictionary<string, string>
+			{
+				{ "Host", host },
+				{ "Protocol", "17" },
+			}));
+
+			var res = new IPEndPoint(IPAddress.Parse(host), 0).ToString();
+			var exp = "The resolved IP '{0}' for host '{1}' is not compatible with the {2} publisher.".Fmt(res, host, pub);
+
+			Assert.AreEqual(exp, ex.Message);
+		}
+
+		[Test]
+		// PUP
+		[TestCase("RawV4", AddressFamily.InterNetwork, ProtocolType.Pup)]
+		[TestCase("RawIPv4", AddressFamily.InterNetwork, ProtocolType.Pup)]
+		public void RawEcho(string pub, AddressFamily family, int protocol)
+		{
+			// Ensure basic send/recv functionality
+			var self = GetSelf(family);
+
+			StartRawEcho(self, protocol);
+
+			var dom = RunEngine(pub, new Dictionary<string, string>
+			{
+				{ "Host", self.ToString() },
+				{ "Protocol", protocol.ToString() },
+			});
+
+			Assert.NotNull(dom);
+
+			var state = dom.tests[0].stateModel.states[0];
+
+			var req = state.actions[0].dataModel.find("Data");
+			Assert.NotNull(req);
+			Assert.AreEqual("Hello World", req.InternalValue.ToString());
+
+			// Because we are sending a test packet to ourselves, the first
+			// input action is a copy of the "Hello World" packet that was
+			// sent by the publisher.
+			var resp1 = state.actions[1].dataModel.find("Data");
+			Assert.NotNull(resp1);
+			Assert.AreEqual("Hello World", resp1.InternalValue.ToString());
+
+			// The second packet the publisher receives is the echo response
+			// packet.  The value is 11 bytes of "Hello World" plus the 20
+			// byte IP header for a total of 31 bytes.
+			var resp2 = state.actions[2].dataModel.find("Data");
+			Assert.NotNull(resp2);
+			Assert.AreEqual("Recv 31 bytes!", resp2.InternalValue.ToString());
 		}
 
 		[Test]
@@ -616,13 +658,11 @@ namespace Peach.Pro.Test.Core.Publishers
 		public void MulticastUdp(string local, string group)
 		{
 			var groupIp = IPAddress.Parse(group);
-			var localIp = string.IsNullOrEmpty(local)
-				? Helpers.GetPrimaryIface(groupIp.AddressFamily).Item2
-				: IPAddress.Parse(local);
+			var localIp = string.IsNullOrEmpty(local) ? GetSelf(groupIp.AddressFamily) : IPAddress.Parse(local);
 
 			// Can't do IPv6 multicast on loopback on linux
 			if (Platform.GetOS() == Platform.OS.Linux && localIp.Equals(IPAddress.IPv6Loopback))
-				Assert.Pass();
+				Assert.Ignore();
 
 			StartMulticast(localIp, groupIp);
 
@@ -639,45 +679,6 @@ namespace Peach.Pro.Test.Core.Publishers
 
 			Assert.AreEqual("Hello World", state.actions[0].dataModel.InternalValue.BitsToString());
 			Assert.AreEqual("Recv 11 bytes!", state.actions[1].dataModel.InternalValue.BitsToString());
-		}
-
-		[Test]
-		[TestCase("RawV4", AddressFamily.InterNetwork)]
-		[TestCase("RawIPv4", AddressFamily.InterNetwork)]
-		public void RawEcho(string pub, AddressFamily family)
-		{
-			// Ensure basic send/recv functionality
-			var self = Helpers.GetPrimaryIface(family);
-
-			StartRawEcho(self.Item2);
-
-			var dom = RunEngine(pub, new Dictionary<string, string>
-			{
-				{ "Host", self.Item2.ToString() },
-				{ "Protocol", "12" },
-			});
-
-			Assert.NotNull(dom);
-
-			var state = dom.tests[0].stateModel.states[0];
-
-			var req = state.actions[0].dataModel.find("Data");
-			Assert.NotNull(req);
-			Assert.AreEqual("Hello World", req.InternalValue.ToString());
-
-			// Because we are sending a test packet to ourselves, the first
-			// input action is a copy of the "Hello World" packet that was
-			// sent by the publisher.
-			var resp1 = state.actions[1].dataModel.find("Data");
-			Assert.NotNull(resp1);
-			Assert.AreEqual("Hello World", resp1.InternalValue.ToString());
-
-			// The second packet the publisher receives is the echo response
-			// packet.  The value is 11 bytes of "Hello World" plus the 20
-			// byte IP header for a total of 31 bytes.
-			var resp2 = state.actions[2].dataModel.find("Data");
-			Assert.NotNull(resp2);
-			Assert.AreEqual("Recv 31 bytes!", resp2.InternalValue.ToString());
 		}
 
 		[Test]
@@ -726,7 +727,7 @@ namespace Peach.Pro.Test.Core.Publishers
 		[Test]
 		public void TestMtuInterface()
 		{
-			var self = Helpers.GetPrimaryIface(AddressFamily.InterNetwork).Item2;
+			var self = GetSelf(AddressFamily.InterNetwork);
 
 			var pub = new UdpPublisher(new Dictionary<string, Variant>
 			{
@@ -1000,7 +1001,7 @@ namespace Peach.Pro.Test.Core.Publishers
 				{
 					if (a.Name == "open")
 					{
-						((SocketPublisher)c.test.publishers[1]).Port = ((SocketPublisher)c.test.publishers[0]).SrcPort;
+						((DatagramPublisher)c.test.publishers[1]).Port = ((DatagramPublisher)c.test.publishers[0]).SrcPort;
 					}
 					else if (a.Name == "send")
 					{

@@ -13,6 +13,7 @@ using Org.BouncyCastle.Crypto.Tls;
 using Org.BouncyCastle.Security;
 using Peach.Core;
 using Peach.Core.IO;
+using Peach.Pro.Core.Mutators;
 using PemReader = Org.BouncyCastle.Utilities.IO.Pem.PemReader;
 
 namespace Peach.Pro.Core.Publishers
@@ -48,6 +49,253 @@ namespace Peach.Pro.Core.Publishers
 			public override TlsAuthentication GetAuthentication()
 			{
 				return new MyTlsAuthentication(cert, key, this.mContext);
+			}
+
+			public override int[] GetCipherSuites()
+			{
+				var baseSuites = base.GetCipherSuites();
+				var extraSuites =  new int[]
+				{
+					CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+					CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
+					CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA,
+					CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA,
+					CipherSuite.TLS_DHE_PSK_WITH_AES_128_CBC_SHA,
+					CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,
+					CipherSuite.TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA,
+					CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,
+					CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
+					CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+					CipherSuite.TLS_PSK_WITH_AES_128_CBC_SHA,
+					CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA,
+					CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
+					CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA,
+					CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA,
+					CipherSuite.TLS_SRP_SHA_WITH_AES_128_CBC_SHA,
+					CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA256,
+					CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA256,
+					CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA256,
+					CipherSuite.TLS_DHE_PSK_WITH_AES_128_CBC_SHA256,
+					CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,
+					CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256,
+					CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,
+					CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
+					CipherSuite.TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256,
+					CipherSuite.TLS_PSK_WITH_AES_128_CBC_SHA256,
+					CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA256,
+					CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256,
+					CipherSuite.TLS_DHE_PSK_WITH_AES_128_CCM,
+					CipherSuite.TLS_DHE_RSA_WITH_AES_128_CCM,
+					CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CCM,
+					CipherSuite.TLS_PSK_WITH_AES_128_CCM,
+					CipherSuite.TLS_RSA_WITH_AES_128_CCM,
+					CipherSuite.TLS_DHE_RSA_WITH_AES_128_CCM_8,
+					CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8,
+					CipherSuite.TLS_PSK_DHE_WITH_AES_128_CCM_8,
+					CipherSuite.TLS_PSK_WITH_AES_128_CCM_8,
+					CipherSuite.TLS_RSA_WITH_AES_128_CCM_8,
+					CipherSuite.TLS_DH_DSS_WITH_AES_128_GCM_SHA256,
+					CipherSuite.TLS_DH_RSA_WITH_AES_128_GCM_SHA256,
+					CipherSuite.TLS_DHE_DSS_WITH_AES_128_GCM_SHA256,
+					CipherSuite.TLS_DHE_PSK_WITH_AES_128_GCM_SHA256,
+					CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
+					CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,
+					CipherSuite.TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256,
+					CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+					CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+					CipherSuite.TLS_PSK_WITH_AES_128_GCM_SHA256,
+					CipherSuite.TLS_RSA_PSK_WITH_AES_128_GCM_SHA256,
+					CipherSuite.TLS_RSA_WITH_AES_128_GCM_SHA256,
+					CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA,
+					CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA,
+					CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA,
+					CipherSuite.TLS_DHE_PSK_WITH_AES_256_CBC_SHA,
+					CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
+					CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA,
+					CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA,
+					CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
+					CipherSuite.TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA,
+					CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+					CipherSuite.TLS_PSK_WITH_AES_256_CBC_SHA,
+					CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA,
+					CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
+					CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA,
+					CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA,
+					CipherSuite.TLS_SRP_SHA_WITH_AES_256_CBC_SHA,
+					CipherSuite.TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA,
+					CipherSuite.TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA,
+					CipherSuite.TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA,
+					CipherSuite.TLS_DHE_PSK_WITH_3DES_EDE_CBC_SHA,
+					CipherSuite.TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA,
+					CipherSuite.TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA,
+					CipherSuite.TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA,
+					CipherSuite.TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA,
+					CipherSuite.TLS_ECDHE_PSK_WITH_3DES_EDE_CBC_SHA,
+					CipherSuite.TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,
+					CipherSuite.TLS_PSK_WITH_3DES_EDE_CBC_SHA,
+					CipherSuite.TLS_RSA_PSK_WITH_3DES_EDE_CBC_SHA,
+					CipherSuite.TLS_RSA_WITH_3DES_EDE_CBC_SHA,
+					CipherSuite.TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA,
+					CipherSuite.TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA,
+					CipherSuite.TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA,
+					CipherSuite.TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+					CipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+					CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+					CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA,
+					CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA256,
+					CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256,
+					CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA256,
+					CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,
+					CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256,
+					CipherSuite.TLS_DHE_PSK_WITH_AES_256_CBC_SHA384,
+					CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384,
+					CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384,
+					CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
+					CipherSuite.TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA384,
+					CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
+					CipherSuite.TLS_PSK_WITH_AES_256_CBC_SHA384,
+					CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA384,
+					CipherSuite.TLS_DHE_PSK_WITH_AES_256_CCM,
+					CipherSuite.TLS_DHE_RSA_WITH_AES_256_CCM,
+					CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CCM,
+					CipherSuite.TLS_PSK_WITH_AES_256_CCM,
+					CipherSuite.TLS_RSA_WITH_AES_256_CCM,
+					CipherSuite.TLS_DHE_RSA_WITH_AES_256_CCM_8,
+					CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CCM_8,
+					CipherSuite.TLS_PSK_DHE_WITH_AES_256_CCM_8,
+					CipherSuite.TLS_PSK_WITH_AES_256_CCM_8,
+					CipherSuite.TLS_RSA_WITH_AES_256_CCM_8,
+					CipherSuite.TLS_DH_DSS_WITH_AES_256_GCM_SHA384,
+					CipherSuite.TLS_DH_RSA_WITH_AES_256_GCM_SHA384,
+					CipherSuite.TLS_DHE_DSS_WITH_AES_256_GCM_SHA384,
+					CipherSuite.TLS_DHE_PSK_WITH_AES_256_GCM_SHA384,
+					CipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
+					CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384,
+					CipherSuite.TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384,
+					CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+					CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+					CipherSuite.TLS_PSK_WITH_AES_256_GCM_SHA384,
+					CipherSuite.TLS_RSA_PSK_WITH_AES_256_GCM_SHA384,
+					CipherSuite.TLS_RSA_WITH_AES_256_GCM_SHA384,
+					CipherSuite.TLS_DH_DSS_WITH_CAMELLIA_128_CBC_SHA,
+					CipherSuite.TLS_DH_RSA_WITH_CAMELLIA_128_CBC_SHA,
+					CipherSuite.TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA,
+					CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA,
+					CipherSuite.TLS_RSA_WITH_CAMELLIA_128_CBC_SHA,
+					CipherSuite.TLS_DH_DSS_WITH_CAMELLIA_128_CBC_SHA256,
+					CipherSuite.TLS_DH_RSA_WITH_CAMELLIA_128_CBC_SHA256,
+					CipherSuite.TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA256,
+					CipherSuite.TLS_DHE_PSK_WITH_CAMELLIA_128_CBC_SHA256,
+					CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA256,
+					CipherSuite.TLS_ECDH_ECDSA_WITH_CAMELLIA_128_CBC_SHA256,
+					CipherSuite.TLS_ECDH_RSA_WITH_CAMELLIA_128_CBC_SHA256,
+					CipherSuite.TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_CBC_SHA256,
+					CipherSuite.TLS_ECDHE_PSK_WITH_CAMELLIA_128_CBC_SHA256,
+					CipherSuite.TLS_ECDHE_RSA_WITH_CAMELLIA_128_CBC_SHA256,
+					CipherSuite.TLS_PSK_WITH_CAMELLIA_128_CBC_SHA256,
+					CipherSuite.TLS_RSA_PSK_WITH_CAMELLIA_128_CBC_SHA256,
+					CipherSuite.TLS_RSA_WITH_CAMELLIA_128_CBC_SHA256,
+					CipherSuite.TLS_DH_DSS_WITH_CAMELLIA_128_GCM_SHA256,
+					CipherSuite.TLS_DH_RSA_WITH_CAMELLIA_128_GCM_SHA256,
+					CipherSuite.TLS_DHE_DSS_WITH_CAMELLIA_128_GCM_SHA256,
+					CipherSuite.TLS_DHE_PSK_WITH_CAMELLIA_128_GCM_SHA256,
+					CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_128_GCM_SHA256,
+					CipherSuite.TLS_ECDH_ECDSA_WITH_CAMELLIA_128_GCM_SHA256,
+					CipherSuite.TLS_ECDH_RSA_WITH_CAMELLIA_128_GCM_SHA256,
+					CipherSuite.TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_GCM_SHA256,
+					CipherSuite.TLS_ECDHE_RSA_WITH_CAMELLIA_128_GCM_SHA256,
+					CipherSuite.TLS_PSK_WITH_CAMELLIA_128_GCM_SHA256,
+					CipherSuite.TLS_RSA_PSK_WITH_CAMELLIA_128_GCM_SHA256,
+					CipherSuite.TLS_RSA_WITH_CAMELLIA_128_GCM_SHA256,
+					CipherSuite.TLS_DH_DSS_WITH_CAMELLIA_256_CBC_SHA,
+					CipherSuite.TLS_DH_RSA_WITH_CAMELLIA_256_CBC_SHA,
+					CipherSuite.TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA,
+					CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA,
+					CipherSuite.TLS_RSA_WITH_CAMELLIA_256_CBC_SHA,
+					CipherSuite.TLS_DH_DSS_WITH_CAMELLIA_256_CBC_SHA256,
+					CipherSuite.TLS_DH_RSA_WITH_CAMELLIA_256_CBC_SHA256,
+					CipherSuite.TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA256,
+					CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA256,
+					CipherSuite.TLS_RSA_WITH_CAMELLIA_256_CBC_SHA256,
+					CipherSuite.TLS_DHE_PSK_WITH_CAMELLIA_256_CBC_SHA384,
+					CipherSuite.TLS_ECDH_ECDSA_WITH_CAMELLIA_256_CBC_SHA384,
+					CipherSuite.TLS_ECDH_RSA_WITH_CAMELLIA_256_CBC_SHA384,
+					CipherSuite.TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_CBC_SHA384,
+					CipherSuite.TLS_ECDHE_PSK_WITH_CAMELLIA_256_CBC_SHA384,
+					CipherSuite.TLS_ECDHE_RSA_WITH_CAMELLIA_256_CBC_SHA384,
+					CipherSuite.TLS_PSK_WITH_CAMELLIA_256_CBC_SHA384,
+					CipherSuite.TLS_RSA_PSK_WITH_CAMELLIA_256_CBC_SHA384,
+					CipherSuite.TLS_DH_DSS_WITH_CAMELLIA_256_GCM_SHA384,
+					CipherSuite.TLS_DH_RSA_WITH_CAMELLIA_256_GCM_SHA384,
+					CipherSuite.TLS_DHE_DSS_WITH_CAMELLIA_256_GCM_SHA384,
+					CipherSuite.TLS_DHE_PSK_WITH_CAMELLIA_256_GCM_SHA384,
+					CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_256_GCM_SHA384,
+					CipherSuite.TLS_ECDH_ECDSA_WITH_CAMELLIA_256_GCM_SHA384,
+					CipherSuite.TLS_ECDH_RSA_WITH_CAMELLIA_256_GCM_SHA384,
+					CipherSuite.TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_GCM_SHA384,
+					CipherSuite.TLS_ECDHE_RSA_WITH_CAMELLIA_256_GCM_SHA384,
+					CipherSuite.TLS_PSK_WITH_CAMELLIA_256_GCM_SHA384,
+					CipherSuite.TLS_RSA_PSK_WITH_CAMELLIA_256_GCM_SHA384,
+					CipherSuite.TLS_RSA_WITH_CAMELLIA_256_GCM_SHA384,
+					CipherSuite.TLS_DHE_PSK_WITH_ESTREAM_SALSA20_SHA1,
+					CipherSuite.TLS_DHE_RSA_WITH_ESTREAM_SALSA20_SHA1,
+					CipherSuite.TLS_ECDHE_ECDSA_WITH_ESTREAM_SALSA20_SHA1,
+					CipherSuite.TLS_ECDHE_PSK_WITH_ESTREAM_SALSA20_SHA1,
+					CipherSuite.TLS_ECDHE_RSA_WITH_ESTREAM_SALSA20_SHA1,
+					CipherSuite.TLS_PSK_WITH_ESTREAM_SALSA20_SHA1,
+					CipherSuite.TLS_RSA_PSK_WITH_ESTREAM_SALSA20_SHA1,
+					CipherSuite.TLS_RSA_WITH_ESTREAM_SALSA20_SHA1,
+					CipherSuite.TLS_RSA_WITH_NULL_MD5,
+					CipherSuite.TLS_DHE_PSK_WITH_NULL_SHA,
+					CipherSuite.TLS_ECDH_ECDSA_WITH_NULL_SHA,
+					CipherSuite.TLS_ECDH_RSA_WITH_NULL_SHA,
+					CipherSuite.TLS_ECDHE_ECDSA_WITH_NULL_SHA,
+					CipherSuite.TLS_ECDHE_PSK_WITH_NULL_SHA,
+					CipherSuite.TLS_ECDHE_RSA_WITH_NULL_SHA,
+					CipherSuite.TLS_PSK_WITH_NULL_SHA,
+					CipherSuite.TLS_RSA_PSK_WITH_NULL_SHA,
+					CipherSuite.TLS_RSA_WITH_NULL_SHA,
+					CipherSuite.TLS_DHE_PSK_WITH_NULL_SHA256,
+					CipherSuite.TLS_ECDHE_PSK_WITH_NULL_SHA256,
+					CipherSuite.TLS_PSK_WITH_NULL_SHA256,
+					CipherSuite.TLS_RSA_PSK_WITH_NULL_SHA256,
+					CipherSuite.TLS_RSA_WITH_NULL_SHA256,
+					CipherSuite.TLS_DHE_PSK_WITH_NULL_SHA384,
+					CipherSuite.TLS_ECDHE_PSK_WITH_NULL_SHA384,
+					CipherSuite.TLS_PSK_WITH_NULL_SHA384,
+					CipherSuite.TLS_RSA_PSK_WITH_NULL_SHA384,
+					CipherSuite.TLS_DH_anon_WITH_RC4_128_MD5,
+					CipherSuite.TLS_RSA_WITH_RC4_128_MD5,
+					CipherSuite.TLS_DHE_PSK_WITH_RC4_128_SHA,
+					CipherSuite.TLS_ECDH_anon_WITH_RC4_128_SHA,
+					CipherSuite.TLS_ECDH_ECDSA_WITH_RC4_128_SHA,
+					CipherSuite.TLS_ECDH_RSA_WITH_RC4_128_SHA,
+					CipherSuite.TLS_ECDHE_ECDSA_WITH_RC4_128_SHA,
+					CipherSuite.TLS_ECDHE_PSK_WITH_RC4_128_SHA,
+					CipherSuite.TLS_ECDHE_RSA_WITH_RC4_128_SHA,
+					CipherSuite.TLS_PSK_WITH_RC4_128_SHA,
+					CipherSuite.TLS_RSA_WITH_RC4_128_SHA,
+					CipherSuite.TLS_RSA_PSK_WITH_RC4_128_SHA,
+					CipherSuite.TLS_DHE_PSK_WITH_SALSA20_SHA1,
+					CipherSuite.TLS_DHE_RSA_WITH_SALSA20_SHA1,
+					CipherSuite.TLS_ECDHE_ECDSA_WITH_SALSA20_SHA1,
+					CipherSuite.TLS_ECDHE_PSK_WITH_SALSA20_SHA1,
+					CipherSuite.TLS_ECDHE_RSA_WITH_SALSA20_SHA1,
+					CipherSuite.TLS_PSK_WITH_SALSA20_SHA1,
+					CipherSuite.TLS_RSA_PSK_WITH_SALSA20_SHA1,
+					CipherSuite.TLS_RSA_WITH_SALSA20_SHA1,
+					CipherSuite.TLS_DH_DSS_WITH_SEED_CBC_SHA,
+					CipherSuite.TLS_DH_RSA_WITH_SEED_CBC_SHA,
+					CipherSuite.TLS_DHE_DSS_WITH_SEED_CBC_SHA,
+					CipherSuite.TLS_DHE_RSA_WITH_SEED_CBC_SHA,
+					CipherSuite.TLS_RSA_WITH_SEED_CBC_SHA
+				};
+
+				var allSuites = new int[baseSuites.Length + extraSuites.Length];
+				baseSuites.CopyTo(allSuites, 0);
+				extraSuites.CopyTo(allSuites, baseSuites.Length);
+
+				return allSuites;
 			}
 		}
 
@@ -439,6 +687,70 @@ namespace Peach.Pro.Core.Publishers
 
 		#endregion
 
+		#region Stream Passthru
+
+		class StreamMux : Stream
+		{
+			private readonly Stream _stream;
+
+			public StreamMux(Stream stream)
+			{
+				_stream = stream;
+			}
+
+			public override void Flush()
+			{
+				_stream.Flush();
+			}
+
+			public override long Seek(long offset, SeekOrigin origin)
+			{
+				return _stream.Seek(offset, origin);
+			}
+
+			public override void SetLength(long value)
+			{
+				_stream.SetLength(value);
+			}
+
+			public override int Read(byte[] buffer, int offset, int count)
+			{
+				return _stream.Read(buffer, offset, count);
+			}
+
+			public override void Write(byte[] buffer, int offset, int count)
+			{
+				_stream.Write(buffer, offset, count);
+			}
+
+			public override bool CanRead
+			{
+				get { return _stream.CanRead; }
+			}
+
+			public override bool CanSeek
+			{
+				get { return _stream.CanSeek; }
+			}
+
+			public override bool CanWrite
+			{
+				get { return _stream.CanWrite; }
+			}
+
+			public override long Length
+			{
+				get { return _stream.Length; }
+			}
+
+			public override long Position
+			{
+				get { return _stream.Position; }
+				set { _stream.Position = value; }
+			}
+		}
+
+		#endregion
 
 		public bool VerifyServer { get; protected set; }
 		public string Host { get; protected set; }
@@ -452,6 +764,7 @@ namespace Peach.Pro.Core.Publishers
 		protected EndPoint _localEp = null;
 		protected EndPoint _remoteEp = null;
 
+		private StreamMux _writeStream = null;
 		private MyTlsClient _tlsClient = null;
 		private TlsClientProtocol _tlsClientHandler = null;
 
@@ -524,6 +837,17 @@ namespace Peach.Pro.Core.Publishers
 				_remoteEp = _tcp.Client.RemoteEndPoint;
 				_clientName = _remoteEp.ToString();
 
+				// .NET includes a helper to allow BeginRead() and BeginWrite()
+				// to perform async operations on streams that only expose Read() and Write().
+				// Unfortunatley, it only allows one outstanding async operation to be pending
+				// meaning if a call to BeginRead() has completed, a call to BeginWrite()
+				// will not return until EndRead() is called.
+				// To work artound this we just wrap the client stream in another stream
+				// object allowing us to have independent async read and write operations.
+
+				// See BeginReadInternal semaphore.Wait() in the Stream.cs reference sources
+
+				_writeStream = new StreamMux(_client);
 			}
 			catch (Exception ex)
 			{
@@ -540,6 +864,8 @@ namespace Peach.Pro.Core.Publishers
 			{
 				if (_client != null)
 					_client.Close();
+				if (_writeStream != null)
+					_writeStream.Close();
 				if (_tlsClientHandler != null)
 					_tlsClientHandler.Close();
 				if (_tcp != null)
@@ -555,6 +881,7 @@ namespace Peach.Pro.Core.Publishers
 				// BufferedStream will check.
 				//_client = null;
 
+				_writeStream = null;
 				_tlsClient = null;
 				_tlsClientHandler = null;
 				_tcp = null;
@@ -570,75 +897,17 @@ namespace Peach.Pro.Core.Publishers
 			_client = null;
 		}
 
-		protected override void OnOutput(BitwiseStream data)
-		{
-			IAsyncResult ar = null;
-			int offset = 0;
-			int length = 0;
-
-			try
-			{
-				while (true)
-				{
-					Stream tmp;
-
-					lock (_clientLock)
-					{
-						//Check to make sure buffer has been initilized before continuing. 
-						if (_client == null)
-						{
-							// First time through, propagate error
-							if (ar == null)
-								throw new PeachException("Error on data output, the client is not initalized.");
-
-							// Client has been closed!
-							return;
-						}
-
-						if (Logger.IsDebugEnabled && ar == null)
-							Logger.Debug("\n\n" + Utilities.HexDump(data));
-
-						if (ar != null)
-							offset += ClientEndWrite(ar);
-
-						if (offset == length)
-						{
-							offset = 0;
-							length = data.Read(_sendBuf, 0, _sendBuf.Length);
-
-							if (length == 0)
-								return;
-						}
-
-						tmp = _client;
-					}
-
-					// Can't call BeginWrite when the lock is held or deadlocks are possible
-
-					ar = ClientBeginWrite(tmp, _sendBuf, offset, length - offset, null, null);
-
-					if (Logger.IsTraceEnabled) Logger.Trace("OnOutput> WaitOne() timeout: {0}", SendTimeout);
-
-					if (SendTimeout < 0)
-						ar.AsyncWaitHandle.WaitOne();
-					else if (!ar.AsyncWaitHandle.WaitOne(SendTimeout))
-						throw new TimeoutException();
-
-					if (Logger.IsTraceEnabled) Logger.Trace("OnOutput> WaitOne() done");
-				}
-			}
-			catch (Exception ex)
-			{
-				Logger.Error("output: Error during send.  " + ex.Message);
-				throw new SoftException(ex);
-			}
-		}
-
-		private IAsyncResult ClientBeginWrite(Stream stream, byte[] buffer, int offset, int count, AsyncCallback callback, object state)
+		protected override IAsyncResult ClientBeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
 		{
 			if (Logger.IsTraceEnabled) Logger.Trace("ClientBeginWrite> offset: {0} count: {1}", offset, count);
 			_sendLen = count;
-			return stream.BeginWrite(buffer, offset, count, callback, state);
+			return _writeStream.BeginWrite(buffer, offset, count, callback, state);
+		}
+
+		protected override int ClientEndWrite(IAsyncResult asyncResult)
+		{
+			_writeStream.EndWrite(asyncResult);
+			return _sendLen;
 		}
 	}
 }

@@ -409,35 +409,42 @@ namespace Peach.Pro.Core.Fixups
 
 		protected override Variant OnActionRun(RunContext ctx)
 		{
-			var tlsContext = CreateTlsContext(ctx, IsServer, ProtocolVersion);
-			CreateBlockCipher(ctx, tlsContext);
+			try
+			{
+				var tlsContext = CreateTlsContext(ctx, IsServer, ProtocolVersion);
+				CreateBlockCipher(ctx, tlsContext);
 
-			ctx.iterationStateStore["TlsProtocolVersion"] = TlsVersion.ToString();
+				ctx.iterationStateStore["TlsProtocolVersion"] = TlsVersion.ToString();
 
-			var msgs = GetState<IEnumerable<object>>(ctx, "HandshakeMessage");
-			if (msgs == null)
-				throw new SoftException("Error in Tls fixup, no handshake messages exists in the state store.");
+				var msgs = GetState<IEnumerable<object>>(ctx, "HandshakeMessage");
+				if (msgs == null)
+					throw new SoftException("Error in Tls fixup, no handshake messages exists in the state store.");
 
-			var verifyHash = TlsVersion == TlsVersion.TLSv12 ? GetSha256(ctx, msgs) : GetMd5Sha1(ctx, msgs);
-			var verifyData = TlsUtilities.PRF(
-				tlsContext, 
-				tlsContext.SecurityParameters.MasterSecret, 
-				IsServer ? "server finished" : "client finished", 
-				verifyHash, 
-				12);
+				var verifyHash = TlsVersion == TlsVersion.TLSv12 ? GetSha256(ctx, msgs) : GetMd5Sha1(ctx, msgs);
+				var verifyData = TlsUtilities.PRF(
+					tlsContext, 
+					tlsContext.SecurityParameters.MasterSecret, 
+					IsServer ? "server finished" : "client finished", 
+					verifyHash, 
+					12);
 
-			//Console.WriteLine("IsServer: "+IsServer);
-			//Console.WriteLine("Verify Hash: ");
-			//foreach (var b in verifyHash)
-			//	Console.Write(string.Format("{0:X2} ", b));
-			//Console.WriteLine();
-			//Console.WriteLine("Verify Data: ");
-			//foreach (var b in verifyData)
-			//	Console.Write(string.Format("{0:X2} ", b));
-			//Console.WriteLine();
+				//Console.WriteLine("IsServer: "+IsServer);
+				//Console.WriteLine("Verify Hash: ");
+				//foreach (var b in verifyHash)
+				//	Console.Write(string.Format("{0:X2} ", b));
+				//Console.WriteLine();
+				//Console.WriteLine("Verify Data: ");
+				//foreach (var b in verifyData)
+				//	Console.Write(string.Format("{0:X2} ", b));
+				//Console.WriteLine();
 
-			// Encryption of the verify_data is handled by the Tls transformer
-			return new Variant(new BitStream(verifyData));
+				// Encryption of the verify_data is handled by the Tls transformer
+				return new Variant(new BitStream(verifyData));
+			}
+			catch (Exception ex)
+			{
+				throw new SoftException(ex);
+			}
 		}
 	}
 }

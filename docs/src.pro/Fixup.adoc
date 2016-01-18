@@ -6,36 +6,37 @@
 
 // - -3/27/2014 Turned fixup links into a table and updated file names
 
-It is possible that after Peach has fuzzed a file, some non-data elements may have changed enough that the file won't get past system edits. In order to prevent this and to facilitate downstream processing, Peach provides the ability to "fix up" certain header and checksum fields that may have been fuzzed. 
+A data that has been fuzzed might fail internal checks because integrity fields, such as checksums, are no longer valid. Fixups provide mechanisms to update the integrity fields and facilitate downstream processing. Peach provides "Fixups" to recalculate integrity-related items such as checksums, CRCs, and hash values. 
  
 IMPORTANT: Fixups should be run after fuzzing and before processing fuzzed data.
 
 
 .Default Fixups
-[options="header",halign="center"] 
+[cols="2,^1,^1,^1,^1",options="header",halign="center"] 
 |=======================================================
 |Fixup|Checksum|Hashing|Utility|Sequencing
-|xref:Fixups_CiscoFixup[CiscoCdp Checksum]|Y|||
-|xref:Fixups_CopyValueFixup[CopyValue]|||Y|
-|xref:Fixups_CrcDualFixup[CrcDual]|Y|||
-|xref:Fixups_CrcFixup[Crc]|Y|||
-|xref:Fixups_ExpressionFixup[Expression] |||Y|
-|xref:Fixups_CopyValueFixup[CopyValue]|||Y|
-|xref:Fixups_HMACFixup[Hmac]||Y||
-|xref:Fixups_IcmpChecksumFixup[Icmp Checksum]|Y|||
-|xref:Fixups_IcmpV6ChecksumFixup[IcmpV6 Checksum]|Y|||
-|xref:Fixups_LRCFixup[Lrc]|Y|||
-|xref:Fixups_MD5Fixup[Md5] ||Y||
-|xref:Fixups_ScriptFixup[Script]|||Y|
-|xref:Fixups_SequenceIncrementFixup[Sequence Increment]||||Y
-|xref:Fixups_SequenceRandomFixup[Sequence Random]||||Y
-|xref:Fixups_SHA1Fixup[Sha]||Y||
-|xref:Fixups_SHA224Fixup[Sha224]||Y||
-|xref:Fixups_SHA256Fixup[Sha256]||Y||
-|xref:Fixups_SHA384Fixup[Sha384]||Y||
-|xref:Fixups_SHA512Fixup[Sha512]||Y||
-|xref:Fixups_TCPChecksumFixup[TCP Checksum] |Y|||
-|xref:Fixups_UDPChecksumFixup[UDP Checksum]|Y|||
+|xref:Fixups_CiscoFixup[CiscoCdp Checksum]|X|||
+|xref:Fixups_CopyValueFixup[CopyValue]|||X|
+|xref:Fixups_CrcDualFixup[CrcDual]|X|||
+|xref:Fixups_CrcFixup[Crc]|X|||
+|xref:Fixups_ExpressionFixup[Expression] |||X|
+|xref:Fixups_FillValueFixup[FillValue]|||X|
+|xref:Fixups_FromFileFixup[FromFile]|||X|
+|xref:Fixups_HMACFixup[Hmac]||X||
+|xref:Fixups_IcmpChecksumFixup[Icmp Checksum]|X|||
+|xref:Fixups_IcmpV6ChecksumFixup[IcmpV6 Checksum]|X|||
+|xref:Fixups_LRCFixup[Lrc]|X|||
+|xref:Fixups_MD5Fixup[Md5] ||X||
+|xref:Fixups_ScriptFixup[Script]|||X|
+|xref:Fixups_SequenceIncrementFixup[Sequence Increment]||||X
+|xref:Fixups_SequenceRandomFixup[Sequence Random]||||X
+|xref:Fixups_SHA1Fixup[Sha]||X||
+|xref:Fixups_SHA224Fixup[Sha224]||X||
+|xref:Fixups_SHA256Fixup[Sha256]||X||
+|xref:Fixups_SHA384Fixup[Sha384]||X||
+|xref:Fixups_SHA512Fixup[Sha512]||X||
+|xref:Fixups_TCPChecksumFixup[TCP Checksum] |X|||
+|xref:Fixups_UDPChecksumFixup[UDP Checksum]|X|||
 |=======================================================
 
-HashFixup is the base class used by the other hashing fixups.
+// insert once topic is ready:  |xref:Fixups_SspiFixup[Sspi]|||Y|

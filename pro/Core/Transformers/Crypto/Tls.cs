@@ -154,30 +154,30 @@ namespace Peach.Pro.Core.Transformers.Crypto
 			if (Action == TlsAction.Encrypt)
 				return data;
 
-			// Get the cipher.  If it is null, this means we are not in a running action
-			var cipher = GetBlockCipher();
-			if (cipher == null)
-			{
-				cipher = CreateBlockCipher(_dataModel.actionData.action.parent.parent.parent.context);
-				if (cipher == null)
-					return data;
-			}
-
-			// Save off the encoded data for the logging of any input data
-			_encodedData = new BitStream();
-			data.CopyTo(_encodedData);
-			_encodedData.Seek(0, System.IO.SeekOrigin.Begin);
-
-			var len = _encodedData.Length;
-			var buf = new BitReader(_encodedData).ReadBytes((int)len);
-			_encodedData.Seek(0, System.IO.SeekOrigin.Begin);
-
-			var root = (DataModel)parent.getRoot();
-			var context = root.actionData.action.parent.parent.parent.context;
-			var sequenceCounter = GetSequenceCounter(context);
-
 			try
 			{
+				// Get the cipher.  If it is null, this means we are not in a running action
+				var cipher = GetBlockCipher();
+				if (cipher == null)
+				{
+					cipher = CreateBlockCipher(_dataModel.actionData.action.parent.parent.parent.context);
+					if (cipher == null)
+						return data;
+				}
+
+				// Save off the encoded data for the logging of any input data
+				_encodedData = new BitStream();
+				data.CopyTo(_encodedData);
+				_encodedData.Seek(0, System.IO.SeekOrigin.Begin);
+
+				var len = _encodedData.Length;
+				var buf = new BitReader(_encodedData).ReadBytes((int)len);
+				_encodedData.Seek(0, System.IO.SeekOrigin.Begin);
+
+				var root = (DataModel)parent.getRoot();
+				var context = root.actionData.action.parent.parent.parent.context;
+				var sequenceCounter = GetSequenceCounter(context);
+
 				var ret = cipher.DecodeCiphertext(sequenceCounter, ContentType, buf, 0, buf.Length);
 
 				return new BitStream(ret);
@@ -193,36 +193,36 @@ namespace Peach.Pro.Core.Transformers.Crypto
 			if (Action == TlsAction.Decrypt)
 				return data;
 
-			// Get the cipher.  If it is null, this means we are not in a running action
-			var cipher = GetBlockCipher();
-			if (cipher == null)
-			{
-				cipher = CreateBlockCipher(_dataModel.actionData.action.parent.parent.parent.context);
-				if (cipher == null)
-					return data;
-			}
-
-			// If we got encoded data during input, just return that as to not
-			// disturb the state of the cipher
-			if (_encodedData != null)
-				return _encodedData;
-
-			data.Position = 0;
-
-			var len = data.Length - data.Position;
-			var buf = new BitReader(data).ReadBytes((int)len);
-
-			var root = (DataModel)parent.getRoot();
-			var context = root.actionData.action.parent.parent.parent.context;
-			var sequenceCounter = GetSequenceCounter(context);
-
-			Console.WriteLine("Verify Data (Pre-Encrypt): ");
-			foreach (var b in buf)
-				Console.Write("{0:X2} ", b);
-			Console.WriteLine();
-
 			try
 			{
+				// Get the cipher.  If it is null, this means we are not in a running action
+				var cipher = GetBlockCipher();
+				if (cipher == null)
+				{
+					cipher = CreateBlockCipher(_dataModel.actionData.action.parent.parent.parent.context);
+					if (cipher == null)
+						return data;
+				}
+
+				// If we got encoded data during input, just return that as to not
+				// disturb the state of the cipher
+				if (_encodedData != null)
+					return _encodedData;
+
+				data.Position = 0;
+
+				var len = data.Length - data.Position;
+				var buf = new BitReader(data).ReadBytes((int)len);
+
+				var root = (DataModel)parent.getRoot();
+				var context = root.actionData.action.parent.parent.parent.context;
+				var sequenceCounter = GetSequenceCounter(context);
+
+				Console.WriteLine("Verify Data (Pre-Encrypt): ");
+				foreach (var b in buf)
+					Console.Write("{0:X2} ", b);
+				Console.WriteLine();
+
 				var ret = cipher.EncodePlaintext(sequenceCounter, ContentType, buf, 0, buf.Length);
 
 				return new BitStream(ret);

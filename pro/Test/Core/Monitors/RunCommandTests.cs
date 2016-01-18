@@ -336,7 +336,7 @@ namespace Peach.Pro.Test.Core.Monitors
 				{
 					StringAssert.StartsWith(pattern, data.Title);
 					StringAssert.Contains(pattern, data.Fault.Description);
-					Assert.AreEqual("DF8C57E3", data.Fault.MajorHash);
+					CollectionAssert.Contains(new []{ "DF8C57E3", "7938DA7F" }, data.Fault.MajorHash);
 					CollectionAssert.Contains(new []{ "6B08385F", "552648B1" }, data.Fault.MinorHash);
 				}
 			}

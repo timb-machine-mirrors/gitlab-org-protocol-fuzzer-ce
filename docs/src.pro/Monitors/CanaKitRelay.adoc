@@ -111,7 +111,7 @@ Details on when to perform a specfied action. Specify one of the following value
 |==========================================================
 +
 .When Choices for Performing an Action
-image::{images}/Timings_SSH.PNG["When Run Command Choices", scalewidth="75%"]
+image::{images}/Timings_SSH.png["When Run Command Choices", scalewidth="75%"]
 
 
 === Examples

@@ -13,7 +13,7 @@ Peach is supported on three implementations of Linux; Peach might run on other L
 * SUSE Enterprise Linux (SLES)
 
 
-==== Unbuntu/Debian Linux
+==== Ubuntu/Debian Linux
 
 When installing Peach on a Ubuntu or Debian Linux system, the operating system is ready for Peach without modification. So, the installation starts with the Mono .NET runtime, then Peach. If you want to attach a debugger to a target process, install GDB when the Mono installation completes. 
 

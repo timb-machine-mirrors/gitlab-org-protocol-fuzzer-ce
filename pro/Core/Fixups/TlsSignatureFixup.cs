@@ -268,127 +268,135 @@ namespace Peach.Pro.Core.Fixups
 
 		protected override Variant OnActionRun(RunContext ctx)
 		{
-			if (ctx.iterationStateStore.ContainsKey("TlsBlockCipher"))
-				throw new SoftException("Error in Tls fixup, TlsBlockCipher object already exists in the state store.");
-
-			var msgs = GetState<IEnumerable<object>>(ctx, "HandshakeMessage");
-			if (msgs == null)
-				throw new SoftException("Error in Tls fixup, no handshake messages exists in the state store.");
-
-			var pms = ToBytes(GetState<DataElement>(ctx, "PreMasterSecret"));
-			if (pms == null)
-				throw new SoftException("Error in Tls fixup, no handshake messages exists in the state store.");
-
-			var clientRandom = ToBytes(GetState<DataElement>(ctx, "ClientRandom"));
-			if (clientRandom == null)
-				throw new SoftException("Error in Tls fixup, client random doesn't exist in the state store.");
-
-			var serverRandom = ToBytes(GetState<DataElement>(ctx, "ServerRandom"));
-			if (serverRandom == null)
-				throw new SoftException("Error in Tls fixup, server random doesn't exist in the state store.");
-
-			var tlsContext = new TlsContext(ProtocolVersion, clientRandom, serverRandom);
-			var masterSecret = TlsUtilities.PRF(tlsContext, pms, "master secret",
-				Concat(clientRandom, serverRandom), 48);
-			tlsContext.MasterSecret = masterSecret;
-
-			Console.Write("Pre-Master: ");
-			foreach (var b in pms)
-				Console.Write("{0:X2} ", b);
-			Console.WriteLine();
-			Console.Write("Client Random: ");
-			foreach (var b in clientRandom)
-				Console.Write("{0:X2} ", b);
-			Console.WriteLine();
-			Console.Write("Server Random: ");
-			foreach (var b in serverRandom)
-				Console.Write("{0:X2} ", b);
-			Console.WriteLine();
-
-			if (TlsVersion != TlsVersion.TLSv12)
+			try
 			{
-				var hash = new RsaSignature.CombinedHash();
-				hash.Init(null);
+				if (ctx.iterationStateStore.ContainsKey("TlsBlockCipher"))
+					throw new SoftException("Error in Tls fixup, TlsBlockCipher object already exists in the state store.");
 
-				//hash.BlockUpdate(clientRandom, 0, clientRandom.Length);
-				//hash.BlockUpdate(serverRandom, 0, serverRandom.Length);
+				var msgs = GetState<IEnumerable<object>>(ctx, "HandshakeMessage");
+				if (msgs == null)
+					throw new SoftException("Error in Tls fixup, no handshake messages exists in the state store.");
 
-				foreach (var msg in msgs)
-				{
-					var bytes = ToBytes(msg);
+				var pms = ToBytes(GetState<DataElement>(ctx, "PreMasterSecret"));
+				if (pms == null)
+					throw new SoftException("Error in Tls fixup, no handshake messages exists in the state store.");
 
-					if (TlsVersion == TlsVersion.DTLSv10 || TlsVersion == TlsVersion.DTLSv12)
-					{
-						try
-						{
-							Console.WriteLine("----- msg: {0}", ((DataElement)msg).fullName);
+				var clientRandom = ToBytes(GetState<DataElement>(ctx, "ClientRandom"));
+				if (clientRandom == null)
+					throw new SoftException("Error in Tls fixup, client random doesn't exist in the state store.");
 
-							var frag = (Dom.Frag)((DataElement)msg).parent;
-							var rendering = (Dom.FragSequence) ((DataElementContainer) frag["Rendering"]);
-							var message = (DataElementContainer)((DataElementContainer)rendering[0])["Message"];
-							var bitstream = new BitStream();
-							var fragBitWriter = new BitWriter(bitstream);
+				var serverRandom = ToBytes(GetState<DataElement>(ctx, "ServerRandom"));
+				if (serverRandom == null)
+					throw new SoftException("Error in Tls fixup, server random doesn't exist in the state store.");
 
-							var def = new Number() {DefaultValue = new Variant(0)};
+				var tlsContext = new TlsContext(ProtocolVersion, clientRandom, serverRandom);
+				var masterSecret = TlsUtilities.PRF(tlsContext, pms, "master secret",
+					Concat(clientRandom, serverRandom), 48);
+				tlsContext.MasterSecret = masterSecret;
 
-							var type = message.find("HandshakeType") ?? def;
-							var length = message.find("Length") ?? def;
-							var seq = message.find("MessageSequence") ?? def;
-
-							fragBitWriter.WriteByte((byte)((int)type.DefaultValue));
-							fragBitWriter.WriteBits((ulong)length.DefaultValue, 24);
-							fragBitWriter.WriteUInt16((ushort)((int)seq.DefaultValue));
-							fragBitWriter.WriteBits(0, 24);  //epoc?
-							fragBitWriter.WriteBits((ulong)length.DefaultValue, 24);
-
-							var buf = new MemoryStream();
-							bitstream.Position = 0;
-							bitstream.CopyTo(buf);
-
-							var bufArray = buf.ToArray();
-							hash.BlockUpdate(bufArray, 0, bufArray.Length);
-
-							Console.WriteLine("bitestream: {0} bufArray: {1}", bitstream.Length, bufArray.Length);
-
-							foreach (var b in bufArray)
-								Console.Write("{0:X2} ", b);
-							foreach (var b in bytes)
-								Console.Write("{0:X2} ", b);
-							Console.WriteLine();
-						}
-						catch (Exception ex)
-						{
-							Console.Error.WriteLine("\nEXCEPTION: " + ex.Message);
-							throw;
-						}
-					}
-
-					hash.BlockUpdate(bytes, 0, bytes.Length);
-				}
-
-				var verifyHash = new byte[hash.GetDigestSize()];
-				hash.DoFinal(verifyHash, 0);
-
-				Console.Write("Verify Hash: ");
-				foreach (var b in verifyHash)
+				Console.Write("Pre-Master: ");
+				foreach (var b in pms)
+					Console.Write("{0:X2} ", b);
+				Console.WriteLine();
+				Console.Write("Client Random: ");
+				foreach (var b in clientRandom)
+					Console.Write("{0:X2} ", b);
+				Console.WriteLine();
+				Console.Write("Server Random: ");
+				foreach (var b in serverRandom)
 					Console.Write("{0:X2} ", b);
 				Console.WriteLine();
 
-				return new Variant(new BitStream(verifyHash));
+				if (TlsVersion != TlsVersion.TLSv12)
+				{
+					var hash = new RsaSignature.CombinedHash();
+					hash.Init(null);
+
+					//hash.BlockUpdate(clientRandom, 0, clientRandom.Length);
+					//hash.BlockUpdate(serverRandom, 0, serverRandom.Length);
+
+					foreach (var msg in msgs)
+					{
+						var bytes = ToBytes(msg);
+
+						if (TlsVersion == TlsVersion.DTLSv10 || TlsVersion == TlsVersion.DTLSv12)
+						{
+							try
+							{
+								Console.WriteLine("----- msg: {0}", ((DataElement)msg).fullName);
+
+								var frag = (Dom.Frag)((DataElement)msg).parent;
+								var rendering = (Dom.FragSequence) ((DataElementContainer) frag["Rendering"]);
+								var message = (DataElementContainer)((DataElementContainer)rendering[0])["Message"];
+								var bitstream = new BitStream();
+								var fragBitWriter = new BitWriter(bitstream);
+
+								var def = new Number() {DefaultValue = new Variant(0)};
+
+								var type = message.find("HandshakeType") ?? def;
+								var length = message.find("Length") ?? def;
+								var seq = message.find("MessageSequence") ?? def;
+
+								fragBitWriter.WriteByte((byte)((int)type.DefaultValue));
+								fragBitWriter.WriteBits((ulong)length.DefaultValue, 24);
+								fragBitWriter.WriteUInt16((ushort)((int)seq.DefaultValue));
+								fragBitWriter.WriteBits(0, 24);  //epoc?
+								fragBitWriter.WriteBits((ulong)length.DefaultValue, 24);
+
+								var buf = new MemoryStream();
+								bitstream.Position = 0;
+								bitstream.CopyTo(buf);
+
+								var bufArray = buf.ToArray();
+								hash.BlockUpdate(bufArray, 0, bufArray.Length);
+
+								Console.WriteLine("bitestream: {0} bufArray: {1}", bitstream.Length, bufArray.Length);
+
+								foreach (var b in bufArray)
+									Console.Write("{0:X2} ", b);
+								foreach (var b in bytes)
+									Console.Write("{0:X2} ", b);
+								Console.WriteLine();
+							}
+							catch (Exception ex)
+							{
+								Console.Error.WriteLine("\nEXCEPTION: " + ex.Message);
+								throw;
+							}
+						}
+
+						hash.BlockUpdate(bytes, 0, bytes.Length);
+					}
+
+					var verifyHash = new byte[hash.GetDigestSize()];
+					hash.DoFinal(verifyHash, 0);
+
+					Console.Write("Verify Hash: ");
+					foreach (var b in verifyHash)
+						Console.Write("{0:X2} ", b);
+					Console.WriteLine();
+
+					return new Variant(new BitStream(verifyHash));
+				}
+
+				// For TLS 1.2, just stick in the data.
+
+				var bitStream = new BitStream();
+				var bitWriter = new BitWriter(bitStream);
+
+				foreach (var msg in msgs)
+				{
+					bitWriter.WriteBytes(ToBytes(msg));
+				}
+
+				bitStream.Position = 0;
+				return new Variant(bitStream);
 			}
-
-			// For TLS 1.2, just stick in the data.
-
-			var bitStream = new BitStream();
-			var bitWriter = new BitWriter(bitStream);
-
-			foreach (var msg in msgs)
+			catch (Exception ex)
 			{
-				bitWriter.WriteBytes(ToBytes(msg));
+				throw new SoftException(ex);
 			}
 
-			bitStream.Position = 0;
-			return new Variant(bitStream);
 		}
 	}
 
