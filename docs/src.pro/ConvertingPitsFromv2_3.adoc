@@ -114,7 +114,7 @@ In Peach v3.x, the Test element block identifies the Agent, StateModel (and, by 
 +
 NOTE: In the example, the name for the Test element is `Default`. This is the default name for the Test element. At runtime, Peach v3.x automatically looks for and runs the default Test, unless you specify a Test name on the command line.
 
-* The parameter names for Monitors and Publishers now use CamelCasing. In the previous example, the param names `"Host"` and `"Port"` for the publisher have changed slightly due to CamelCasing. You can use the Peach DOM reference or the developer's guide to check parameters that fail validation. Use the following command to genereate the DOM reference.
+* The parameter names for Monitors and Publishers now use CamelCasing. In the previous example, the parameter names `"Host"` and `"Port"` for the publisher have changed slightly due to CamelCasing. You can use the Peach DOM reference or the developer's guide to check parameters that fail validation. Use the following command to genereate the DOM reference.
 +
 -----------------------------------
 peach --showenv
