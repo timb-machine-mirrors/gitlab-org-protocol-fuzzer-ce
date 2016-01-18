@@ -27,7 +27,7 @@ Modeling relationships provides several benefits:
 
 . It allows the fuzzer to update the relationships during fuzzing.
 . If a string is lengthened, the associated length field can be updated to match. That way, the fuzzing data can penetrate deeper into the logic of the target application.
-. mutators can mutate several fields together, providing much smarter data mutations.
+. Mutators can mutate several fields together, providing much smarter data mutations.
 --
 
 // TODO xref:DataModeling_Fixups[Fixups]::
@@ -36,14 +36,14 @@ xref:Fixup[Fixups]::
 --
 Fixups are special utility classes that calculate new checksums, CRC's and other operations that rely on data from another data element.
 
-By fixing up data features (such as checksums), it's more likely that the data will pass initial validation checks and exercise the data consumer's core logic.
+By fixing data features such as checksums, the values in the data model have a greater chance to pass initial validation checks and exercise the data consumer's core logic.
 --
 
 // TODO xref:DataModeling_Transfomers[Transformers]::
 xref:Transformer[Transformers]::
 +
 --
-In addition to fixups, Peach provides the ability to perform static transformations such encoding/decoding and compression/decompression on data. Static transformations can be added and removed; the transformers can decode on input and encode on output. 
+In addition to fixups, Peach provides the ability to perform static transformations such as encoding/decoding and compression/decompression on data. Static transformations can be added and removed; the transformers can decode on input and encode on output. 
 
 Transformers are useful when a format contains data that is encoded or compressed before it reaches the fuzzer. The transformer can decode the data, apply the fuzzing elements to the data, then encode the result so that the fuzzing target receives encoded data as it normally would.
 --
