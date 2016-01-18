@@ -22,9 +22,9 @@ You can create configuration files with default values and reuse them as needed.
   </OSX>
 </PitDefines>
 ----
-<1> This section is common to all operating systems
-<2> This section is only for Linux
-<3> This section is only for OS X
+<1> This section is common to all operating systems.
+<2> This section is only for Linux.
+<3> This section is only for OS X.
 
 Using a defined key consists of encasing the key with the two-character sequence `\\##`. So, the key _Interface_ becomes `##Interface##`, as shown in the following example.
 
