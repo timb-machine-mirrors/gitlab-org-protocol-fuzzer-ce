@@ -30,6 +30,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Text;
 using System.Threading;
 using NLog;
 using Peach.Core;
@@ -54,10 +55,12 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Parameter("StartOnCall", typeof(string), "Start command on state model call", "")]
 	[Parameter("WaitForExitOnCall", typeof(string), "Wait for process to exit on state model call and fault if timeout is reached", "")]
 	[Parameter("WaitForExitTimeout", typeof(int), "Wait for exit timeout value in milliseconds (-1 is infinite)", "10000")]
+	[Parameter("AddressSanitizer", typeof(bool), "Enable Google AddressSanitizer support", "false")]
 	public class ProcessMonitor : Monitor
 	{
 		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
+		StringBuilder _asanResult;
 		Process _process;
 		MonitorData _data;
 		bool _messageExit;
@@ -71,6 +74,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 		public string StartOnCall { get; set; }
 		public string WaitForExitOnCall { get; set; }
 		public int WaitForExitTimeout { get; set; }
+		public bool AddressSanitizer { get; set; }
 
 		public ProcessMonitor(string name)
 			: base(name)
@@ -85,6 +89,24 @@ namespace Peach.Pro.Core.Agent.Monitors
 			
 			try
 			{
+				var sb = new StringBuilder();
+
+				if (AddressSanitizer)
+				{
+					_process.StandardError = line =>
+					{
+						lock (sb)
+						{
+							if (sb.Length > 0 || RunCommand.AsanMatch.IsMatch(line))
+							{
+								sb.AppendLine(line);
+							}
+						}
+					};
+				}
+
+				_asanResult = sb;
+
 				_process.Start(Executable, Arguments, null, null);
 				OnInternalEvent(EventArgs.Empty);
 			}
@@ -92,6 +114,46 @@ namespace Peach.Pro.Core.Agent.Monitors
 			{
 				throw new PeachException("Could not start process '{0}'. {1}.".Fmt(Executable, ex.Message), ex);
 			}
+		}
+
+		bool _CheckAsan()
+		{
+			if (!AddressSanitizer)
+				return false;
+
+			lock (_asanResult)
+			{
+				if (_asanResult.Length == 0)
+					return false;
+			}
+
+			// ASAN kills the process, so just wait for it to exit.
+			// Don't SIGKILL when asan is in the middle of writing
+			// its output to stderr or we will miss lost of information.
+			_process.WaitForExit(WaitForExitTimeout);
+
+			lock (_asanResult)
+			{
+				var stderr = _asanResult.ToString();
+				var title = RunCommand.AsanTitle.Match(stderr);
+				var bucket = RunCommand.AsanBucket.Match(stderr);
+				var desc = RunCommand.AsanMessage.Match(stderr);
+
+				_data = new MonitorData
+				{
+					Data = new Dictionary<string, Stream>(),
+					Title = title.Groups[1].Value,
+					Fault = new MonitorData.Info
+					{
+						Description = stderr.Substring(desc.Index, desc.Length),
+						MajorHash = Hash(bucket.Groups[3].Value),
+						MinorHash = Hash(bucket.Groups[2].Value),
+						Risk = bucket.Groups[1].Value,
+					}
+				};
+			}
+
+			return true;
 		}
 
 		MonitorData MakeFault(string reason, string title)
@@ -122,7 +184,10 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		public override bool DetectedFault()
 		{
-			return _data != null;
+			if (_data != null)
+				return true;
+
+			return _CheckAsan();
 		}
 
 		public override MonitorData GetMonitorData()
@@ -143,6 +208,10 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		public override void IterationFinished()
 		{
+			// ASAN faults trump all other early-exit faults
+			if (_CheckAsan())
+				return;
+
 			if (!_messageExit && FaultOnEarlyExit && !_process.IsRunning)
 			{
 				_data = MakeFault("ExitedEarly", "Process '{0}' exited early.".Fmt(Executable));
