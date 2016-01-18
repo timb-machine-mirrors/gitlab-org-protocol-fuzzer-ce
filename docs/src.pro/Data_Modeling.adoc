@@ -56,5 +56,7 @@ In many cases (like structured data such as ASN.1 or XML), it is easier to write
 
 Cracking occurs when loading a sample file or when performing on input actions (such as _input_, _getProperty_, and the result from a _call_ action). We use Analyzers to crack data into a model.
 
-Although Analyzers are fairly easy to add since they directly deal with the data model, implementing an analyzer requires greater knowledge of Peach internals than other data modeling components.
+Although Analyzers are moderately easy to add since they directly deal with the 
+data model, implementing an analyzer requires greater knowledge of Peach internals 
+than other data modeling components.
 --
