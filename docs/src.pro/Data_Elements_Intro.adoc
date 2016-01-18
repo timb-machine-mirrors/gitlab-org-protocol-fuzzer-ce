@@ -79,7 +79,7 @@ The _Null_ element defines an element that has no value. This element is most us
 xref:Number[Number]::
 +
 --
-_Number_ defines a binary integer type. _Numbers_ are always packed down to bit/byte representation with byte order (endian-ness). For ASCII strings, use the _String_ element instead of a _Number_.
+_Number_ defines a binary integer type. _Numbers_ are always packed to bit/byte representation with byte order (endian-ness). For ASCII strings, use the _String_ element instead of a _Number_.
 --
 
 xref:Padding[Padding]::
@@ -91,10 +91,10 @@ _Padding_ defines padding of one or more characters for a _Block_ or a _DataMode
 xref:Sequence[Sequence]::
 +
 --
-_Sequence_ elements are used to construct arrays with all of the array elements predefined. 
-A _Sequence_ is able to contain multiple data types at once. Unlike regular arrays 
-in Peach, the size of the Sequence it determined by the number of elements within 
-the sequence.
+_Sequence_ elements are used to construct arrays consisting of predefined data 
+elements. A _Sequence_ is able to contain multiple data types at once. Unlike 
+regular arrays in Peach, the size of the Sequence is determined by the number 
+of elements within the sequence.
 --
 
 xref:Stream[Stream]::
