@@ -28,7 +28,7 @@ TIP: Constraints are typically slower than using either xref:Choice[Choice] or t
 
 The following special variables are available to the expression:
 
-element:: The data element instance
+element:: The data element instance.
 value:: The value of the data cracked into the data element.  This value is cast to a string or to a byte array.
 
 
