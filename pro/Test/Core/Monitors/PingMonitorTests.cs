@@ -12,6 +12,9 @@ namespace Peach.Pro.Test.Core.Monitors
 	[Peach]
 	class PingMonitorTests
 	{
+		// TEST-NET-3 from RFC5737
+		const string InvalidAddress = "203.0.113.0";
+
 		private static void Verify(MonitorData[] faults, string title, bool isFault)
 		{
 			Assert.AreEqual(1, faults.Length);
@@ -56,7 +59,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		{
 			var runner = new MonitorRunner("Ping", new Dictionary<string, string>
 			{
-				{ "Host", "234.5.6.7" },
+				{ "Host", InvalidAddress },
 			});
 
 			var faults = runner.Run();
@@ -69,7 +72,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		{
 			var runner = new MonitorRunner("Ping", new Dictionary<string, string>
 			{
-				{ "Host", "234.5.6.7" },
+				{ "Host", InvalidAddress },
 				{ "FaultOnSuccess", "true" },
 			});
 
@@ -119,7 +122,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		{
 			var runner = new MonitorRunner("Ping", new Dictionary<string, string>
 			{
-				{ "Host", "234.5.6.7" },
+				{ "Host", InvalidAddress },
 				{ "FaultOnSuccess", "true" },
 			})
 			{
@@ -182,7 +185,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		{
 			var runner = new MonitorRunner("Ping", new Dictionary<string, string>
 			{
-				{ "Host", "234.5.6.7" },
+				{ "Host", InvalidAddress },
 				{ "Timeout", timeout.ToString(CultureInfo.InvariantCulture) },
 			})
 			{
