@@ -33,13 +33,16 @@ If your target has something in its data model that Peach does not support (like
 Peach plugins take a C# dictionary as a construction argument.
 This argument dictionary is populated with the Param elements names and values defined in the Peach Pit.
 
-To see a list of all detected plugins and their parameters, run 'peach --showenv'.
+To see a list of all detected plugins and their parameters, run `peach --showenv`.
 
 Peach plugins use ParameterAttribute to define all of their supported configuration arguments (name, type, description, and optional default value).
 
  * The name and type specified in the ParameterAttribute must match a public property on the plugin class.
  * If the name parameter happens to be a C# reserved keyword, prefix the associated class property with an underscore.
- * The default value is always provided as a string, regardless of the type of the parameter. If the default value is omitted from the ParameterAttribute, Peach treats the parameter as required.
+ 
+ * The default value is always given as a string, regardless of the type of the parameter. 
+ 
+NOTE: If the default value is omitted from the ParameterAttribute, Peach treats the parameter as required.
 
 ParameterParser.Parse() uses the arguments dictionary to automatically populate all plugin properties.
 
@@ -48,26 +51,26 @@ ParameterParser.Parse() uses the arguments dictionary to automatically populate 
 
 This method uses reflection to:
 
- * Enforce missing required parameters
- * Initialize optional parameters from default value
- * Type conversion from string to concrete type
- * Validation on all type conversion
- ** -100 is valid int
- ** -100 is not a valid byte
+ * Enforce missing required parameters.
+ * Initialize optional parameters from default values.
+ * Convert types from string to a concrete type.
+ * Validate all type conversions
+ ** -100 is valid int.
+ ** -100 is not a valid byte.
 
 General Peach plugin best practices:
 
- * Use stream operations whenever possible
- * Avoid using large arrays of contiguous data
- * Validate parameter types in the plugin constructors
- * Provide useful error messages
+ * Use stream operations whenever possible.
+ * Avoid using large arrays of contiguous data.
+ * Validate parameter types in the plugin constructors.
+ * Provide useful error messages.
  * Throw PeachException() when non-recoverable errors occur such as:
- ** Parameter is out of range
- ** User lacks appropriate permissions
+ ** A parameter is out of range.
+ ** A user lacks appropriate permissions.
  * Throw SoftException when recoverable errors occur such as:
- ** File in use
- ** Error starting process
- ** Socket connection refused
+ ** A file is in use.
+ ** An error occurs when starting a process.
+ ** A socket connection is refused.
 
 ==== Examples
 
@@ -169,11 +172,10 @@ public class MyMonitor : Peach.Core.Monitor
 [[Extend_Fixup]]
 === Fixup
 
-Fixups compute a value based on other elements.  
+A fixup computes a value based on one or more data elements.Since the value is  
+based on other elements, each fixup tracks whenever a referenced element changes so it  can recompute its value. For example, the Crc32 fixup needs to know whenever the referenced element changes, so that a new CRC can be computed. 
 
-Since their values are based on other elements, fixups track whenever a referenced element changes so they can recompute their values. For example, the Crc32 fixup needs to know whenever the referenced element changes, so that a new CRC can be computed. 
-
-Fixup implementations tell the base Fixup class which parameters are other data elements by passing their data element parameters' names as arguments to their base class constructor.
+Each Fixup implementation tells the base Fixup class which parameters are other data elements by passing their data element parameters' names as arguments to its base class constructor.
 
 Each fixup implementation needs to implement a single function: fixupImpl().
 This function returns the result of the fixup computation.
@@ -293,38 +295,40 @@ It allows the monitor to pause the execution of the StateModel at a specific poi
 For example, a custom monitor could use the Message function to wait until a proprietary embedded device
 has rebooted and is ready to accept input data.
 
-It is important to note that call actions on the "Peach.Agent" publisher results in the Message function
-being called on every monitor.
-Each monitor must filter for their desired messages, ignoring all unexpected message calls by returning null.
+It is important to note that call actions on the "Peach.Agent" publisher result in 
+the Message function being called on every monitor. Each monitor must filter for 
+their desired messages, ignoring all unexpected message calls by returning null.
 
-The DetectedFault and GetMonitorData functions are used to report faults back to Peach.
-At the end of each iteration, the Peach engine calls DetectedFault() on every monitor.
-If any monitor reports that a fault occurred, Peach calls GetMonitorData() on every monitor.
-The GetMonitorData function returns a Fault record, and the type of the record can be either Fault or Data.
+The DetectedFault and GetMonitorData functions are used to report faults back to 
+Peach. At the end of each iteration, the Peach engine calls DetectedFault() on 
+every monitor. If any monitor reports that a fault occurred, Peach calls 
+GetMonitorData() on every monitor. The GetMonitorData function returns a Fault record, and the type of the record can be either Fault or Data.
+
+
 
 Fault Detection:
 
- * Return true from DetectedFault()
- * If any ONE monitor detects a fault, ALL monitors get called to return monitor data
- * GetMonitorData() returns applicable data
- * Returned fault can be +fault+ or +data+
- ** Debugger stack trace is +fault+
- ** Network packet capture is +data+
- ** Log file is +data+
- * Faults can include a hash for bucketing information
+ * Return true from DetectedFault().
+ * Any monitor that detects a fault causes Peach to call ALL monitors to return monitor data.
+ * GetMonitorData() returns applicable data.
+ * Returned fault can be +fault+ or +data+.
+ ** Debugger stack trace is +fault+.
+ ** Network packet capture is +data+.
+ ** Log file is +data+.
+ * Faults can include a hash for bucketing information.
 
 Monitor best practices:
 
- * Indicate errors with SoftExceptions()
- * Keep monitors simple
- * Prefer multiple small monitors
- * Agent/Monitor order within a pit is honored by Peach
- ** Starting functions are called in order
- ** Finished functions are called in reverse order
- * Avoid one large complicated monitor
- * Remember monitors can run in remote agents
- * Maintain cross platform compatibility
- ** Windows Peach with Linux Agent
+ * Indicate errors with SoftExceptions().
+ * Keep monitors simple.
+ * Prefer multiple small monitors.
+ * Agent/Monitor order within a pit is honored by Peach.
+ ** Starting functions are called in order.
+ ** Finished functions are called in reverse order.
+ * Avoid one large complicated monitor.
+ * Remember monitors can run in remote agents.
+ * Maintain cross platform compatibility.
+ ** Windows Peach with Linux Agent.
 
 <<<
 [[Extend_Publisher]]
@@ -335,13 +339,13 @@ Publishers support both a 'stream' view (open, input, output, close) and a 'func
 Each publisher method corresponds to a single action type used in the StateModel.
 While publishers can support all action types, most do not need to.  For example, the File publisher does not
 implement call, accept, setProperty and getProperty.
-It is up to the developer to implement the functions that are appropriate.
+It is up to the developer to implement the appropriate set of functions.
 
 All of the publisher's public functions are implemented in the base class.
-The public functions ensure the publisher is in the proper state and if needed
-call the protected implementation functions.  For example, the public open function
-calls the protected OnOpen function only when the publisher is not already opened.
-When developers implement custom publishers they override the protected functions.
+The public functions ensure the publisher is in the proper state and 
+that they call the protected implementation functions when needed. For example, the public open function
+calls the protected OnOpen function only when the publisher is not open.
+When developers implement custom publishers, they override the protected functions.
 The default implementation of these protected functions is to throw a NotImplementedException().
 
 The list of user overridable functions are:
@@ -357,39 +361,37 @@ The list of user overridable functions are:
  * OnSetProperty()
  * OnGetProperty()
 
-The OnStart and OnStop functions are used to perform initialization and teardown.
+The OnStart and OnStop functions perform initialization and teardown.
 These functions are normally called once per test.
 The Peach engine automatically calls stop on all publishers when the test
-completes.  The OnOpen and OnClose functions are used to control access to the underlying resource.
+completes. The OnOpen and OnClose functions control access to the underlying resource.
 These functions are normally called once per iteration.
 The Peach engine automatically calls close on all publishers when each iteration completes.
 
-The OnOutput function is used to write all the provided data to the underlying resource.
-The data is provided in a stream, and it is best to write the data to the resource block at a time
-instead of making a single large contiguous buffer.
-If the underlying resource only consumes data in a single contiguous buffer it is best to have a
-configurable maximum size and truncate data that exceeds it.
+The OnOutput function writes all the provided data to the underlying resource.
+The data is provided in a stream, and it is best to write the data to the resource one block at a time instead of making a single large contiguous buffer.
+If the underlying resource only consumes data in a single contiguous buffer, it is best to have a configurable maximum size and truncate data that exceeds it.
 
 The OnInput function tells the publisher to read data from the underlying resource.
-The data is then stored internally in a seekable stream and used be Peach for cracking the data model.
+The data is then stored internally in a seekable stream and used by Peach for cracking the data model.
 If the underlying resource already provides a seekable stream (eg: a file stream) then OnInput doesn't have to do anything.
-However, for publishers like Udp the OnInput function causes the next packet to be received.
+However, for publishers like Udp, the OnInput function causes the next packet to be received.
 When implementing the OnInput function for publishers that block, it is best to expose a user configurable input timeout.
 If no data is received from the underlying resource after the timeout interval, a SoftException() should be thrown to
 indicate to the Peach engine that the action did not complete successfully.
 
 To assist developers in quickly writing publishers, Peach comes with two helper classes: StreamPublisher and BufferedStreamPublisher.
 Both of these classes make it easy to quickly write publishers for IO interfaces that already implement the C# System.IO.Stream interface.
-The StreamPublisher is used when the underlying stream supports the Seek() function (eg: file streams).
-The BufferedStreamPublisher is used when the underlying stream does not support the Seek() function (eg: TCP Streams, SerialPort).
-The BufferedStreamPublisher automatically performs asynchronous reads on the underlying stream, and buffers the accumulated data in a seekable stream.
-To use the StreamPublisher, the developer only needs to override OnOpen() and set the 'this.stream' property.
-To use the BufferedStreamPublisher, the developer needs to do two things. First, they need to override
-OnOpen() and set this._client to the System.IO.Stream and call the StartClient() function.
-Second, if extra cleanup code is required other than simply closing the stream
-the developer needs to override ClientClose() and cleanup any additional resources acquired during OnOpen().
 
+* StreamPublisher is used when the underlying stream supports the Seek() function (eg: file streams). To use the StreamPublisher, the developer only needs to override OnOpen() and set the 'this.stream' property.
 
+* BufferedStreamPublisher is used when the underlying stream does not support the Seek() function (eg: TCP Streams, SerialPort). The BufferedStreamPublisher automatically performs asynchronous reads on the underlying stream, and buffers the accumulated data in a seekable stream.
++
+To use the BufferedStreamPublisher, the developer needs to do two things. 
+
+.. Override OnOpen() and set this._client to the System.IO.Stream and call the StartClient() function.
+.. If extra cleanup code is required other than simply closing the stream,
+the developer needs to override ClientClose() and clean up any additional resources acquired during OnOpen().
 
 An example of a File publisher deriving from StreamPublisher.
 
@@ -528,15 +530,15 @@ Port = int(context.test.publishers[0].getProperty(‘Port’))
 === Transformer
 
 Peach includes support for common encoding transformations such as encryption and compression.
-Custom transformers are used whenever the target requires special encoding of the data that is not included with Peach.
+Custom transformers are used whenever the target requires special encoding of the data not included with Peach.
 Custom transformer implementations must implement two functions: internalEncode and internalDecode.
 
-The internalEncode function is called by Peach when outputting data to a publisher.
+Peach calls the internalEncode function when outputting data to a publisher.
 Inside this function, the provided source data of the parent data element is transformed into a new stream and the new stream is returned to Peach.
 For example, the AES transformer's implementation of this function encrypts the source data and returns the encrypted data.
 
-The internalDecode function is called by Peach when cracking input data into the transformer's parent data element.
-This can occur as a result of an input action, or a DataSet being applied.
+Peach calls the internalDecode function when cracking input data into the transformer's parent data element.
+This function call results from an input action or from a DataSet being applied.
 The internalDecode function is given a stream of encoded data.
 The function performs the necessary decoding logic and returns a new stream of decoded data.
 The decoded data is then used by the transformer's parent element for cracking.
@@ -548,7 +550,7 @@ For example, the AES transformer's implementation of this function decrypts the 
 
 Peach includes mutators for common data types and patterns.  Occasionally it is necessary
 to extend the mutation capabilities with a custom mutator.  Custom mutators follow a similar pattern
-to all other Peach plug-ins, implement a class that derives from the base Peach.Core.Mutator class and
+to all other Peach plug-ins, implement a class that derives from the base class,  Peach.Core.Mutator class, and
 decorate the class with a MutatorAttribute.
 
 In order for Peach to select a mutator when fuzzing, every mutator must implement a static supportedDataElement function.
@@ -574,8 +576,8 @@ The supported mutation count is provided with the 'count' property.
 
 Each mutator implements two functions for performing the actual mutation: sequentialMutation and randomMutation.
 These functions correspond to the type of mutation strategy defined in the Peach pit.
-When Peach is configured to use the Random strategy, the randomMutation function will be called to perform mutations.
-When Peach is configured to use the Sequential strategy, the mutator's 'mutation' attribute will be set to the desired value (between 0 and count) and the sequentialMutation function will be called to perform mutations.
+When the Peach configuration uses the Random strategy, the randomMutation function performs mutations.
+When the Peach configuration uses the Sequential strategy, the mutator's 'mutation' attribute will be set to the desired value (between 0 and count) and the sequentialMutation function performs mutations.
 
 When picking random numbers inside the mutator, it is important to use the random number generator provided by the mutation strategy.
 Mutators access the random number generator with the 'this.context.Random' variable.
@@ -634,7 +636,7 @@ public class HelloWorldMutator : Peach.Core.Mutator
 ----
 
 In order for Peach to select a mutator when fuzzing, every mutator must implement a static supportedDataElement function.
-This function gets called with every data element in the DOM and returns true
+This function is called with every data element in the DOM and returns true
 if the mutator can mutate the data element.
 
 An example of the supportedDataElement function for a string mutator.
