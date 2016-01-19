@@ -203,6 +203,7 @@ namespace Peach.Pro.Core.OS.OSX
 					sin_family = (byte)AddressFamily,
 					sin_addr = ep.Address.GetAddressBytes(),
 					sin_port = Endian.Big.GetBytes(ep.Port, 16),
+					sin_padding = new byte[8] // Must be zeroed out!
 				};
 
 				ptr = Marshal.AllocHGlobal(Length);
