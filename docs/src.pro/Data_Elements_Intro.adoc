@@ -14,7 +14,7 @@ Data contained in _Blobs_ will be dumb fuzzed.
 xref:Block[Block]::
 +
 --
-The _Block_ element is a container for other data elements. By themselves, _Blocks_ do not have any size or contain other data. They group other data elements so all the items in the group can be referenced or operated on as a single unit. 
+The _Block_ element is a container for other data elements. By itself, a _Block_ does not have any size or contain other data. It simply groups other data elements and, by using the Block name, provides a mechanism to reference or operate on the group as a single unit.
 
 For example, if two data elements are included in a checksum calculation, they can be placed in a  _Block_ element and then the fixup can perform its function by referencing the _Block_. Both items in the group will be included in the fixup operation.
 --
@@ -35,8 +35,8 @@ xref:DataModel[DataModel]::
 +
 --
 The _DataModel_ element is a top-level element that defines a data model.
-Multiple _DataModels_ can be defined in a pit file.
-_DataModels_ by themselves have no size and should simply be considered containers for other data elements.
+Multiple _DataModels_ can be exist in a pit file. _DataModels_ by themselves have no
+size and are containers for other data elements.
 --
 
 xref:Double[Double]::
@@ -44,7 +44,7 @@ xref:Double[Double]::
 --
 _Double_ defines a floating-point number of 32 or 64 bits conforming to the IEEE 754 standard. Floating point values are packed into a byte representation with a byte order of little or big endian.
 
-_Doubles_ are always packed down to bit/byte representation with byte order (endian-ness). For ASCII strings, use the _String_ element instead of a _Number_.
+_Doubles_ are always packed to bit/byte representation with byte order (endian-ness). For ASCII strings, use the _String_ element instead of a _Number_.
 --
 
 xref:Flags[Flags]::
@@ -52,7 +52,7 @@ xref:Flags[Flags]::
 --
 _Flags_ defines a set of flags and is a container for _Flag_ elements. The _Flags_ container  can provide a nice shortcut when dealing with a flag set that has many unused positions. 
 
-Tip: The _Number_ element supports unaligned sizes and can also be used to define flags.
+Tip: The _Number_ element supports unaligned sizes and can be used to define flags.
 --
 
 xref:Flag[Flag]::
@@ -64,22 +64,22 @@ _Flag_ defines a specific _Flag_ in a flag set. _Flag_ elements have a bit posit
 xref:Json[Json]::
 +
 --
-The _Json_ element is a container for other data elements. By themselves, _Jsons_ do not 
-have any size or contain other data. They group other data elements that will be represented 
-in JSON in attribute-value pairs. The output of a _Json_ element is a valid JSON string 
-enclosed with the `{` and `}` characters. 
+The _Json_ element is a container for other data elements. By themselves, 
+_Json_ elements do not have any size or contain other data. They group other data 
+elements that will be represented in JSON in attribute-value pairs. The output of 
+a _Json_ element is a valid JSON string enclosed with the `{` and `}` characters. 
 --
 
 xref:Null[Null]::
 +
 --
-The _Null_ element defines an element which has no value. This element is most useful when used as a child of a xref:Json[Json] element.
+The _Null_ element defines an element that has no value. This element is most useful when used as a child of a xref:Json[Json] element.
 --
 
 xref:Number[Number]::
 +
 --
-_Number_ defines a binary integer type. _Numbers_ are always packed down to bit/byte representation with byte order (endian-ness). For ASCII strings, use the _String_ element instead of a _Number_.
+_Number_ defines a binary integer type. _Numbers_ are always packed to bit/byte representation with byte order (endian-ness). For ASCII strings, use the _String_ element instead of a _Number_.
 --
 
 xref:Padding[Padding]::
@@ -91,10 +91,10 @@ _Padding_ defines padding of one or more characters for a _Block_ or a _DataMode
 xref:Sequence[Sequence]::
 +
 --
-_Sequence_ elements are used to construct arrays with all of the array elements predefined. 
-A _Sequence_ is able to contain multiple data types at once. Unlike regular arrays 
-in Peach, the size of the Sequence it determined by the number of elements within 
-the sequence.
+_Sequence_ elements are used to construct arrays consisting of predefined data 
+elements. A _Sequence_ is able to contain multiple data types at once. Unlike 
+regular arrays in Peach, the size of the Sequence is determined by the number 
+of elements within the sequence.
 --
 
 xref:Stream[Stream]::
