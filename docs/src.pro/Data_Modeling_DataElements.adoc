@@ -3,23 +3,23 @@
 === Data Elements
 
 Data elements describe the intrinsic types that begin to model the data. Typically data are comprised of several data types (such as numbers and string).
-Providing the correct data elements is critical to the success of a fuzzer. Since mutators are specifically written to operate on data elements, if a data element is incorrect, less effective mutations will occur.
+Providing the correct data elements is critical to the success of a fuzzer. Since mutators operate on specific types of data elements, if a data element is incorrect, less effective mutations will occur.
 
 Common data elements:
 
 xref:DataModel[DataModel]::
 +
 --
-The _DataModel_ element is a top level element used to define a data model.
+The _DataModel_ element is a top-level element that defines a data model.
 
-Multiple _DataModels_ can be defined in a pit file.
-_DataModels_ by themselves have no size and should simply be considered containers for other data elements.
+Multiple _DataModels_ can exist in a pit file. _DataModels_ by themselves 
+have no size and are containers for other data elements.
 --
 
 xref:Blob[Blob]::
 +
 --
-A Blob is a container for unstructured data (think byte array). The term Blob is borrowed from the relational database field for a column that holds raw binary data. 
+A Blob is a container for unstructured data (think of a byte array). The term Blob is borrowed from the relational database field for a column that holds raw binary data. 
 
 Data held in Blobs will be dumb fuzzed.
 --
@@ -41,9 +41,10 @@ The choice element allows switch-like conditional statements in Peach data model
 xref:Flags[Flags]::
 +
 --
-Flags defines a set of flags.
+The Flags element defines a set of flags.
 
-Flags is a container for Flag elements, which define the individual flags. This can be a nice shortcut when dealing with a flag set that has many unused positions.
+Flags is a container for Flag elements that define the individual flags. This can 
+be a nice shortcut when dealing with a flag set that has many unused positions.
 
 The _Number_ element supports unaligned sizes and can also be used to define flags.
 --
@@ -59,7 +60,7 @@ xref:Number[Number]::
 --
 Defines a binary integer.
 
-Numbers are always packed down to bit/byte representation with byte order (endian-ness). For ASCII strings, use the String element.
+Numbers are packed to bit/byte representation with byte order (endian-ness). For ASCII strings, use the String element.
 --
 
 xref:Padding[Padding]::
@@ -115,8 +116,8 @@ This example does not provide any business logic or constraints on the data. It 
 
 When fuzzing XML documents, you have a choice of fuzzing targets:
 
- * The consumer of the data stored in the XML document
- * The XML parser
+ * The consumer of the data stored in the XML document.
+ * The XML parser.
 
 The first target is the most common and is the focus of this section. The second target fuzzes the XML parser.
 

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 using NUnit.Framework;
 using Peach.Core;
@@ -20,8 +22,37 @@ namespace Peach.Pro.Test.Core
 			var pid = SysProcess.GetCurrentProcess().Id;
 			var seed = Environment.TickCount * pid;
 			var rng = new Peach.Core.Random((uint)seed);
-			var ret = (ushort)rng.Next(min, max);
-			return ret;
+
+			while (true)
+			{
+				var ret = (ushort)rng.Next(min, max);
+
+				using (var s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+				{
+					try
+					{
+						s.Bind(new IPEndPoint(IPAddress.Any, ret));
+					}
+					catch
+					{
+						continue;
+					}
+				}
+
+				using (var s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+				{
+					try
+					{
+						s.Bind(new IPEndPoint(IPAddress.Any, ret));
+					}
+					catch
+					{
+						continue;
+					}
+				}
+
+				return ret;
+			}
 		}
 
 		protected override void OnSetUp()

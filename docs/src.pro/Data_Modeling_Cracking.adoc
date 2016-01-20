@@ -1,3 +1,5 @@
+:images: ../images
+
 
 [[Cracking]]
 === Cracking Data into the Data Model
@@ -33,7 +35,7 @@ Placement is used in conjunction with the xref:Relations_Offset[offset] relation
 xref:Analyzers[Analyzers] element::
 +
 --
-Analyzers provide code that generate or modify a data model. When compared to generating a _DataModel_ manually, analyzers usually reduce the time and effort needed to create a data model (especially in self describing formats such as ASN.1 and XML). 
+Analyzers provide code that generate or modify a data model. When compared to generating a _DataModel_ manually, analyzers usually reduce the time and effort needed to create a data model (especially in self-describing formats such as ASN.1 and XML). 
 --
 
 +--debug+ argument::
@@ -57,7 +59,10 @@ The combination of these tools provides enough information to debug and to valid
 
 The following example explains the output of +--debug+, and the debugging process. 
 
-The focus of this example is the first part of a PNG Pit, and writing the debug output to the console. PNG is a common image file format. A full definition for this format is included in the Peach Pit Library.
+The focus of this example is the first part of a PNG Pit, and writing the debug 
+output to the console. PNG is a common image file format. A full fuzzing definition 
+of this format is available from Peach as a stand-alone Pit or as part of the 
+Image Pit Pack. 
 
 [source,xml]
 ----
@@ -91,7 +96,7 @@ The focus of this example is the first part of a PNG Pit, and writing the debug 
 </Peach>
 ----
 
-When run with the +--debug+ argument it produces the following output:
+When run with the +--debug+ argument, it produces the following output:
 
 ----
 > peach -1 --debug example.xml
@@ -131,10 +136,10 @@ Peach.Core.Publishers.FilePublisher stop()
 ----
 <1> Debug messages are prefixed with the full class name they originate from. For cracking messages, you see a combination of DataCracker and DataElements. +
 The long dashed line indicates the start of a new data element
-<2> The element type and element name are provided. This is the current data offset in bytes and also bits.
+<2> The element type and element name are provided. This is the current data offset in bytes and in bits.
 <3> The long dashed line indicates the start of a new data element
-<4> Again, the element type and element name are provided. This is the current data offset in bytes and also bits. Since we have not yet read any bytes, we are still at offset zero.
-<5> The amount of data in bits to load into our element and also the current byte and bit position.
+<4> Again, the element type and element name are provided. This is the current data offset in bytes and in bits. Since we have not yet read any bytes, we are still at offset zero.
+<5> The amount of data, in bits, to load into our element; and the current position, in bytes and in bits.
 <6> After cracking data into an element, the value is displayed. If the value is long, the display of the value might be truncated. Also, the total size in bytes is provided.
 <7> The total size sent as output to the Publisher. This should match the size of our input file.
 
@@ -152,7 +157,7 @@ As part of data validation, verify that the amount of data being sent and cracke
                1 File(s)         33,546 bytes
 ----
 
-In this case the sizes match. 
+In this case, the sizes match. 
 
 We can also use the Peach Validator to get a visual representation of what is happening. Launch Peach Validator and load _example.xml_ via the toolbar. Notice the tree view on the bottom half of the window. This is the data model and data elements. Because no data has been loaded, the values are all empty. Notice the _DataElement_0_ element; this is the unnamed xref:Blob[Blob] element. Peach assigned it a default name.
 
@@ -645,4 +650,4 @@ To complete this fuzzing definition, the following would need to be done:
 . Finish flushing out the data models. For each chunk type, create a custom _Data_ model.
 . Configure logging. For simplicity, this pit does not have logging configured.
 . Configure monitoring. Once a target is selected, monitoring is needed to detect faulting conditions.
-. Sample sets. A large set of PNG images is needed and should be run through xref:Program_PeachMinset[minset] to pair it down to the optimal set of images to fuzz with.
+. Sample sets. Peach needs a large, non-redundant set of PNG images to use. Once the set or collection exists, run xref:Program_PeachMinset[minset] on the collection to pare it down to the optimal set of images to use for fuzzing.

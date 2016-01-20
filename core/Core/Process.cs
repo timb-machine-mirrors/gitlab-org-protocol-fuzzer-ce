@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using SysProcess = System.Diagnostics.Process;
 using System.Threading.Tasks;
 using System.Threading;
 
@@ -144,6 +143,18 @@ namespace Peach.Core
 			get { return _process != null && !_process.HasExited; }
 		}
 
+		public Action<string> StandardOutput
+		{
+			get;
+			set;
+		}
+
+		public Action<string> StandardError
+		{
+			get;
+			set;
+		}
+
 		public ProcessInfo Snapshot()
 		{
 			if (_process == null)
@@ -180,6 +191,7 @@ namespace Peach.Core
 				Prefix = "[{0}:out]".Fmt(_process.Id),
 				Source = _process.StandardOutput,
 				Sink = stdout,
+				Callback = StandardOutput
 			}, TaskCreationOptions.LongRunning);
 
 			_logger.Trace("[{0}] Start(): start stderr task".Fmt(_process.Id));
@@ -188,6 +200,7 @@ namespace Peach.Core
 				Prefix = "[{0}:err]".Fmt(_process.Id),
 				Source = _process.StandardError,
 				Sink = stderr,
+				Callback = StandardError
 			}, TaskCreationOptions.LongRunning);
 		}
 
@@ -341,6 +354,7 @@ namespace Peach.Core
 			public string Prefix;
 			public StreamReader Source;
 			public TextWriter Sink;
+			public Action<string> Callback;
 		}
 
 		private void LoggerTask(object obj)
@@ -358,6 +372,8 @@ namespace Peach.Core
 							_logger.Debug("{0} {1}", args.Prefix, line);
 						if (args.Sink != null)
 							args.Sink.WriteLine(line);
+						if (args.Callback != null)
+							args.Callback(line);
 					}
 					_logger.Debug("{0} EOF", args.Prefix);
 				}
