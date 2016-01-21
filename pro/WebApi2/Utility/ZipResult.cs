@@ -1,6 +1,4 @@
-using System;
 using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
@@ -26,20 +24,22 @@ namespace Peach.Pro.WebApi2.Utility
 		{
 			var resp = new HttpResponseMessage
 			{
-				Content = new PushStreamContent((a,b,c) => WriteToStream(a, b, c))
+				Content = new PushStreamContent((a,b,c) => WriteToStream(a))
 			};
 
-			var filename = Uri.EscapeDataString(_fileName);
-			var contentDisposition = string.Format("attachment; filename*=utf-8''{0}", filename);
 			var contentType = MimeMapping.GetMimeMapping(_fileName);
+			var contentDisposition = new ContentDispositionHeaderValue("attachment")
+			{
+				FileNameStar = _fileName
+			};
 
-			resp.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue(contentDisposition);
+			resp.Content.Headers.ContentDisposition = contentDisposition;
 			resp.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
 
 			return Task.FromResult(resp);
 		}
 
-		private void WriteToStream(Stream stream, HttpContent content, TransportContext context)
+		private void WriteToStream(Stream stream)
 		{
 			try
 			{
