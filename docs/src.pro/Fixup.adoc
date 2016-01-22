@@ -17,8 +17,8 @@ IMPORTANT: Fixups should be run after fuzzing and before processing fuzzed data.
 |Fixup|Checksum|Hashing|Utility|Sequencing
 |xref:Fixups_CiscoFixup[CiscoCdp Checksum]|X|||
 |xref:Fixups_CopyValueFixup[CopyValue]|||X|
-|xref:Fixups_CrcDualFixup[CrcDual]|X|||
 |xref:Fixups_CrcFixup[Crc]|X|||
+|xref:Fixups_CrcDualFixup[CrcDual]|X|||
 |xref:Fixups_ExpressionFixup[Expression] |||X|
 |xref:Fixups_FillValueFixup[FillValue]|||X|
 |xref:Fixups_FromFileFixup[FromFile]|||X|

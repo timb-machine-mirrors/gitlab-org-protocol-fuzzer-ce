@@ -12,11 +12,11 @@ A single Godel element can be placed as a child of xref:StateModel[StateModel], 
 * When a Godel element is a child of xref:State[State], the expression evaluates when the State starts and when the State finishes.
 * When a Godel element is a child of xref:Action[Action], the expression evaluate when the Action starts and finishes.
 
-Godel elements support three scripting expressions:
+Godel elements support the following scripting expressions:
 
-. 'inv' - An invariant expression that evaluates both at the start and at the finish of the appropriate level of the StateModel (StateModel, State, or Action) 
-. 'pre' - An expression evaluates at start of the appropriate level of the StateModel
-. 'post' - A expression that is evaluated upon completion of the appropriate level of the StateModel 
+* 'inv' - An invariant expression that evaluates both at the start and at the finish of the appropriate level of the StateModel (StateModel, State, or Action) 
+* 'pre' - An expression evaluates at start of the appropriate level of the StateModel
+* 'post' - A expression that is evaluated upon completion of the appropriate level of the StateModel 
 
 === Syntax
 

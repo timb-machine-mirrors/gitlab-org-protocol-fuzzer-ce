@@ -1,30 +1,30 @@
 
 == Introduction to Peach
 
-Peach is a hybrid fuzzer combining part of both mutation and generational fuzzing.
+Peach is a hybrid fuzzer, combining part of both mutation and generational fuzzing.
 
 Fuzzing with Peach centers on the three M's of Peach: model, mutate, and monitor.
 
  * Model - We model the data format and data/state flow.
- * Mutate - The fuzzing engine uses the data and state models to intelligently mutate data to send to the target.
+ * Mutate - The fuzzing engine uses the data and state models to mutate data intelligently, in preparation of sending the malformed data to the target.
  * Monitor - We monitor our test target and the test environment to identify fault conditions and to collect information used to investigate and remediate the faults.
 
-A Peach fuzzing definition is comprised of the data and state models, monitoring declarations, and specifics about the test environment. Even though fuzzing definitions included with Peach have all of these components, you still need to describe the monitoring details, based on your test target and operating system.
+A Peach fuzzing definition consists of the data and state models, monitoring declarations, and specifics about the test environment. Even though fuzzing definitions included with Peach have all of these components, you still need to describe the monitoring details, based on your test target and operating system.
 
 Peach specifically targets data consumers. The data could be a file format, a network protocol, or an argument to an RPC interface.
 
-Peach has the following high level concepts:
+Peach has the following high-level concepts:
 
 Pit::
 +
 --
-Fuzzing definitions in Peach are called Pits.
+Fuzzing definitions in Peach are Pits.
 Peach Pits are XML files that contain all the information Peach needs to perform a fuzzing operation.
 This includes data models, state models, agent configurations (agents host the monitors), and test details. 
 
-Peach includes a Pit Library that provides Pits for more than 25 network protocols , and for some file formats. To fuzz with a Pit from the Pit Library, you can run the Peach Web interface to configure the Pit, and then immediately use it.
+Peach includes one or more licensed Pits purchased individually or in themed groups called Pit Packs. Peach offers Pits for more than 25 network protocols, and for some file formats. To fuzz with a Pit, you can run the Peach Web interface to configure the Pit, and then immediately use it.
 
-If your needs extend beyond the fuzzing definitions in the Pit Library, you can create a fuzzing definition.
+If your needs extend beyond the available Pits offered by Peach, you can create a fuzzing definition for a custom file format, a proprietary network protocol, an embedded device, a kernel driver, and more.
 
 --
 
@@ -33,7 +33,10 @@ Modeling::
 --
 Peach operates by fuzzing data and state models of the test targets. Because security testing (fuzzing) focuses on what happens when inappropriate data enters or appears in a system or when inappropriate state transitions occur, Peach focuses heavily on data modeling and state modeling.
 
-For the average Peach user, most of the human time and energy is spent defining and solidifying the data and state models. The level of detail placed into the models will distinguish a dumb fuzzer from a smart fuzzer.
+For the average Peach user, most of the human time and energy now goes into analyzing fuzzing job results and fixing bugs. This is due to the availability of pre-made, 
+off-the-shelf Pits, and the Peach Web UI. 
+
+In most cases, gone are the days of time-consuming activities, such as defining and solidifying the data and state models of a fuzzing definition.
 --
 
 Publisher::
@@ -41,14 +44,20 @@ Publisher::
 --
 Publishers are I/O interfaces. 	They take abstract concepts such as input, output, and call (used in state modeling) and provide the actual transport or implementation.
 
-Peach includes a number of Publishers so you can write to files; connect to other devices using TCP, UDP or other network protocols; make web requests; or even call COM object. 
+Peach includes a number of Publishers so your pits and test configurations can perform the following tasks:
+
+* write to files, 
+* connect to other devices using TCP, UDP or other network protocols,
+* make web requests, or
+* call COM objects. 
+
 If you need a custom Publisher, it is one of the simplest Peach components to create.
 --
 
 Fuzzing Strategy::
 +
 --
-The fuzzing strategy is the logic that describes the test approach for a fuzzing session. Some of the questions that the fuzzing strategy addresses follow:
+The fuzzing strategy is the logic that describes the test approach for a fuzzing session. The fuzzing strategy addresses some fundamental questions that impact a fuzzing session that include the following:
 
 * Do we want Peach to test each element of the data and state models individually?
 * Do we want Peach to test more than one element at a time?
@@ -73,8 +82,8 @@ Mutators tend to contain very simple logic and should perform a single type of m
 Agents::
 +
 --
-Agents are special Peach processes that can run locally or remotely and host one or more Monitors or remote Publishers.
-Agents are the basis for the robust monitor facility provided by the Peach Fuzzing Platform and allow for monitoring simple fuzzing configurations through very complex systems that have a many tiers.
+Agents are special Peach processes that can run locally or remotely, and host one or more Monitors or remote Publishers.
+Agents are the basis for the robust monitor facility provided by the Peach Fuzzing Platform and allow for monitoring simple fuzzing configurations through very complex systems that have many tiers.
 
 A Peach fuzzer can use zero or more agents.
 

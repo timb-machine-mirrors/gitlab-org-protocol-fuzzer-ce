@@ -7,7 +7,7 @@ The Field element specifies the data that replaces the default value in a DataMo
 
 _Required:_
 
-xref:name[name]:: Name of the DataModel element
+xref:name[name]:: Name of the DataModel element.
 
 _Optional:_
 
