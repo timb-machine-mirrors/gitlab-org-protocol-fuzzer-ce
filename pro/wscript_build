@@ -30,7 +30,7 @@ subdirs = [
 	'Test/PitTester',
 	'Test/WebApi',
 	'Validator',
-	'Web',
+	'Web2',
 	'WebApi',
 	'WebApi2',
 	'WindowsDebugInstance',

@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonJs",
+    "jsx": "preserve",
+    "outDir": "dist",
+    "removeComments": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "sourceMap": true
+  }
+}
