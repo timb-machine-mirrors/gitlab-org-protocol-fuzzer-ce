@@ -220,7 +220,16 @@ namespace Peach.Core.Agent
 				type = FaultType.Data,
 			};
 
-			ret.collectedData.AddRange(data.Data.Select(d => new Fault.Data {Key = d.Key, Value = ToByteArray(d.Value)}));
+			if (data.Data != null)
+			{
+				ret.collectedData.AddRange(
+					data.Data.Select(d => new Fault.Data
+					{
+						Key = d.Key, Value = ToByteArray(d.Value)
+					
+					})
+				);
+			}
 
 			if (data.Fault != null)
 			{

@@ -10,7 +10,7 @@ clr.AddReference("Peach.Pro")
 import Peach.Core
 from Peach.Core import Variant, Fixup
 from Peach.Core.Dom import Block, String, DataElement
-from Peach.Pro.Fixups import BasePythonFixup
+from Peach.Pro.Core.Fixups import BasePythonFixup
 
 # Add the special assembly that our Python extensions will 
 # appear in. This is the list of assemblies that Peach checks
@@ -27,14 +27,14 @@ ParameterAttr = clrtype.attribute(Peach.Core.ParameterAttribute)
 class PythonFixup(BasePythonFixup):
 	'''
 	Example of adding a custom Fixup to Peach using only Python.
-	
+
 	BasePythonFixup is a special base class needed to create
 	pure python Fixups.
 	'''
-	
+
 	__metaclass__ = clrtype.ClrClass
 	_clrnamespace = "PythonExamples"   
-	
+
 	# This array sets the class attributes to use. This
 	# is like saying [Fixup(...)] in c#
 	_clrclassattribs = [
@@ -42,16 +42,16 @@ class PythonFixup(BasePythonFixup):
 		FixupAttr("PythonFixup", True),
 		DescriptionAttr("Example Analyzer in Python"),
 	]
-	
+
 	@clrtype.accepts(DataElement, System.Collections.Generic.Dictionary[clr.GetClrType(str), Variant])
 	def __init__(self, parent, args):
 		pass
-	
+
 	@clrtype.accepts()
 	@clrtype.returns(Variant)
 	def fixupImpl(self):
 		return Variant("hello from python fixup\n")
-	
+
 
 # end
 

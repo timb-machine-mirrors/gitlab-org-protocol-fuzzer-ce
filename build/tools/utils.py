@@ -155,7 +155,7 @@ def cs_helpers(self):
 		setattr(self, 'platform', self.env.CSPLATFORM)
 
 	# ensure install_path is set
-	if not getattr(self, 'install_path', None):
+	if not hasattr(self, 'install_path'):
 		setattr(self, 'install_path', '${BINDIR}')
 
 @feature('cs')

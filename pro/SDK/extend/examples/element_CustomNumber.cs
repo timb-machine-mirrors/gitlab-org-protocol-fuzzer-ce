@@ -75,6 +75,8 @@ namespace CustomNumber
 			var val = (ulong)_number.InternalValue;
 			var ret = new BitStream();
 			// TODO: encode val as bytes and store in ret
+			var buf = Endian.Big.GetBytes(val, 64);
+			ret.Write(buf, 0, buf.Length);
 			ret.Seek(0, SeekOrigin.Begin);
 			return ret;
 		}
