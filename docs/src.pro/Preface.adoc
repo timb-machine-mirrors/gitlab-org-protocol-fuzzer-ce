@@ -1,10 +1,25 @@
 [[Preface]]
 == Preface
 
+This document is one of two books that together form the official documentation of {product}  {version}. This documentation set is written by the {product} team, and represents a concerted effort to document fully all of the {product} features.
+
+This book, the {product} Developer Guide, focuses on developer needs such as advanced configurations, building custom fuzzing definitions, and extending the various areas of Peach. Topics of interest include Modeling, Providing Sample Data, Running Peach, Tutorials, and Extending Peach. The reference section is comprehensive. 
+
+The primary audience for this guide is a software developer who is familiar with C, Python, and XML. Also needed is intimate knowledge of the test target because that drives design decisions. 
+
+Day-to-day activities are located in the {product} User Guide that focuses on running Peach with the Web user interface, reading fuzzing results, and setting up monitors from a set of recipes.
+
+Peach Fuzzer has been in active development through three major revisions since 2004. Until 2014, no complete documentation existed. The current Developer Guide and User Guide bear witness that documenting Peach is an on-going effort. 
+
+///////
+         Re-writing to bring up-to-date.
+
 This book is the official documentation of {product}. Written by the {product} team, this documentation represents a concerted effort to fully document all of the {product} features.
 
 Peach Fuzzer has been in active development through three major revisions since 2004. Since then, no complete documentation has existed.
 Documenting Peach is an on-going effort. The majority of effort has been placed in documenting the most common uses of {product}.
+
+///////
 
 === What is {product}?
 
@@ -56,7 +71,12 @@ Peach is currently developed and maintained by Peach Fuzzer, LLC, in Seattle, WA
 
 === Additional Resources
 
-More information about Peach can be found on our http://peachfuzzer.com[website] and the https://forums.peachfuzzer.com[user forums].
+More information about Peach is available on the Web:
+
+* http://peachfuzzer.com[Peach Fuzzer website]
+* http://www.peachfuzzer.com/products/peach-pits/[Current Pits and Pit Packs]
+* https://forums.peachfuzzer.com[Peach User Forums]
+* https://vimeo.com/148176046[Installing Peach Fuzzer Software video] 
 
 === Bug Reporting Guidelines
 

@@ -35,7 +35,8 @@ When the fuzzer is running, all xref:Action[Actions] (except xref:Action_changeS
 
 Different publishers support a different set of Action types.  For example, the xref:Publishers_File[File] publisher supports input for reading from a file, output for writing to a file, but does not support xref:Action_accept[accept] or xref:Action_call[call]. This differs from the xref:Publishers_Com[COM] publisher which supports xref:Action_call[call], but not xref:Action_input[input], xref:Action_output[output], or xref:Action_accept[accept]. 
 
-All fuzzing definitions must use at least one Publisher and (optionally) can use multiple Publishers.  When using multiple Publishers, each Action must specify which Publisher it is referencing by including the Publisher's +name+ attribute in the Action's +publisher+ attribute. If the +publisher+ attribute is missing, the Action is performed using the first Publisher defined in the Test.
+All fuzzing definitions must use at least one Publisher and (optionally) can use multiple Publishers.  When using multiple Publishers, each Action must specify which Publisher it is referencing by including the Publisher's +name+ attribute in the Action's +publisher+ attribute. If the +publisher+ attribute is missing, Peach 
+performs the Action using the first Publisher defined in the Test.
 
 ==== Network Publishers
 
@@ -62,8 +63,6 @@ More information on creating a customer publisher can be found in the xref:Exten
  * xref:Publishers_FilePerIteration[FilePerIteration]
  * xref:Publishers_Http[Http]
  * xref:Publishers_I2C[I2C] 
-// MIKE: Do not include the null publisher in documentation.
-// * xref:Publishers_Null[Null]
  * xref:Publishers_RawEther[RawEther]
  * xref:Publishers_RawIPv4[RawIPv4]
  * xref:Publishers_RawV4[RawV4]
@@ -79,8 +78,6 @@ More information on creating a customer publisher can be found in the xref:Exten
  * xref:Publishers_WebService[WebService]
  * xref:Publishers_WebSocket[WebSocket]
  * xref:Publishers_Zip[Zip]
- 
-// TODO
 
 NOTE: A full list of publishers and parameter information for any
 specific version can be found in the output of `peach --showenv`
@@ -103,9 +100,9 @@ specific version can be found in the output of `peach --showenv`
 
 .Multiple Publishers
 ====================
-Though many pits may use a single publisher, there is no limit on the number of publishers that you can use.
+Many of the licensed Pits use a single publisher; and, some Pits use multiple publishers. Peach imposes no limit on the number of publishers to use in a Pit.
 
-You might use multiple publishers to communicate with a network service that listens on multiple ports:
+For example, you might use multiple publishers to communicate with a network service that listens on multiple ports:
 
 [source,xml]
 ----

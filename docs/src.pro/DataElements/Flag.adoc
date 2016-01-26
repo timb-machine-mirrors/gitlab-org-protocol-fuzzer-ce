@@ -26,7 +26,7 @@ See also parent element xref:Flags[Flags].
 _Required:_
 
 xref:size[size]:: Size in bits
-xref:position[position]:: Position (zero based) flag starts
+position:: Location of the flag. _Position_ identifies the location of the first bit of a flag. The value is a zero-based index.
 
 _Optional:_
 
