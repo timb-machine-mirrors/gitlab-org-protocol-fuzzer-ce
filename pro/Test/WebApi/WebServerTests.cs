@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using Peach.Core;
 using Peach.Core.Test;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
@@ -30,14 +31,14 @@ namespace Peach.Pro.Test.WebApi
 
 				using (var web = new WebServer("", new InternalJobMonitor()))
 				{
-					web.Start("localhost", port);
+					web.Start(port, true);
 
 					var actualPort = web.Uri.Port;
 					Assert.Greater(actualPort, port);
 
 					using (var web2 = new WebServer("", new InternalJobMonitor()))
 					{
-						web2.Start("localhost", actualPort);
+						web2.Start(actualPort, true);
 						Assert.Greater(web2.Uri.Port, actualPort);
 					}
 				}
@@ -48,6 +49,31 @@ namespace Peach.Pro.Test.WebApi
 			}
 		}
 
+		[Test]
+		public void SpecicPortInUse()
+		{
+			var listener = new TcpListener(IPAddress.Any, 0);
+
+			try
+			{
+				listener.Start();
+				var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+				Assert.AreNotEqual(0, port);
+
+				using (var web = new WebServer("", new InternalJobMonitor()))
+				{
+					var ex = Assert.Throws<PeachException>(() =>
+						web.Start(port, false));
+
+					var expected = "Unable to start the web server at http://localhost:{0}/ because the port is currently in use.".Fmt(port);
+					Assert.AreEqual(expected, ex.Message);
+				}
+			}
+			finally
+			{
+				listener.Stop();
+			}
+		}
 
 		[Test]
 		public void JsonTests()

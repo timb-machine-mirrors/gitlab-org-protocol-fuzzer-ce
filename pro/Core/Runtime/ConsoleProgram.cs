@@ -236,6 +236,11 @@ namespace Peach.Pro.Core.Runtime
 				"Disable launching browser on start.",
 				v => _nobrowser = true
 			);
+			options.Add(
+				"webport=",
+				"Specifies port web interface runs on.",
+				(int v) => _webPort = v
+			);
 
 			// automated execution
 			options.Add(
@@ -378,16 +383,16 @@ namespace Peach.Pro.Core.Runtime
 			if (userLogger != null || !_noweb)
 				job = new Job(_config);
 
-			if (_noweb || AttachWeb == null)
+			if (_noweb || CreateWeb == null)
 			{
 				var e = new Engine(GetUIWatcher());
 				e.startFuzzing(dom, _config);
 				return;
 			}
 
-			using (var svc = AttachWeb(new ConsoleJobMonitor(job)))
+			using (var svc = CreateWeb("", new ConsoleJobMonitor(job)))
 			{
-				svc.Start();
+				svc.Start(_webPort);
 
 				_webUri = svc.Uri;
 
@@ -507,7 +512,7 @@ namespace Peach.Pro.Core.Runtime
 					RunEngine(dom);
 				}
 			}
-			else if (!_noweb && RunWeb != null)
+			else if (!_noweb && CreateWeb != null)
 			{
 				// Ensure pit library exists
 				var pits = FindPitLibrary(_pitLibraryPath);
