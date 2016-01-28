@@ -87,6 +87,7 @@ namespace Peach.Core.Publishers
 						lock (_bufferLock)
 						{
 							long pos = _buffer.Position;
+							long prevLen = _buffer.Length;
 							_buffer.Seek(0, SeekOrigin.End);
 							_buffer.Write(_recvBuf, 0, len);
 							_buffer.Position = pos;
@@ -95,7 +96,7 @@ namespace Peach.Core.Publishers
 							_timeout = false;
 
 							if (Logger.IsDebugEnabled)
-								Logger.Debug("\n\n" + Utilities.HexDump(_recvBuf, 0, len, startAddress: (int)pos));
+								Logger.Debug("\n\n" + Utilities.HexDump(_recvBuf, 0, len, startAddress: prevLen));
 						}
 
 						ScheduleRead();
