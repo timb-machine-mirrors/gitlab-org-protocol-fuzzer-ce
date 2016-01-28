@@ -95,7 +95,7 @@ namespace Peach.Core.Publishers
 							_timeout = false;
 
 							if (Logger.IsDebugEnabled)
-								Logger.Debug("\n\n" + Utilities.HexDump(_recvBuf, 0, len));
+								Logger.Debug("\n\n" + Utilities.HexDump(_recvBuf, 0, len, startAddress: (int)pos));
 						}
 
 						ScheduleRead();

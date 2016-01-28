@@ -154,7 +154,30 @@ namespace Peach.Core.Test
 			str = Utilities.HexDump(ms);
 			Assert.AreEqual(1, ms.Position);
 			Assert.AreEqual(expected, str);
+		}
 
+		[Test]
+		public void TestHexDumpWithNonZeroStartAddress()
+		{
+			var output = new MemoryStream();
+			var ms = new MemoryStream(Encoding.ASCII.GetBytes("0Hello World Hello World Hello World"));
+			ms.Position = 1;
+			Utilities.HexDump(ms, output, startAddress: 0x5555);
+			Assert.AreEqual(1, ms.Position);
+			Assert.AreEqual(output.Position, output.Length);
+			output.Seek(0, SeekOrigin.Begin);
+			var str = Encoding.ASCII.GetString(output.GetBuffer(), 0, (int)output.Length);
+			string expected = string.Join(Environment.NewLine, new [] {
+				"00005555   48 65 6C 6C 6F 20 57 6F  72 6C 64 20 48 65 6C 6C   Hello World Hell",
+				"00005565   6F 20 57 6F 72 6C 64 20  48 65 6C 6C 6F 20 57 6F   o World Hello Wo",
+				"00005575   72 6C 64                                           rld             ",
+				"",
+			});
+			Assert.AreEqual(expected, str);
+
+			str = Utilities.HexDump(ms, startAddress: 0x5555);
+			Assert.AreEqual(1, ms.Position);
+			Assert.AreEqual(expected, str);
 		}
 
 		[Test]
