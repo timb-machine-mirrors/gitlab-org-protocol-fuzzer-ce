@@ -200,7 +200,7 @@ namespace Peach.Core.Dom
 		{
 			BitStream sizedData = ReadSizedData(data, size);
 			long startPosition = sizedData.PositionBits;
-			bool isTryAfterFailure = false;
+			string isTryAfterFailure = null;
 
 			Clear();
 			_selectedElement = null;
@@ -231,7 +231,7 @@ namespace Peach.Core.Dom
 						// there are two tokens in a row and the first one is not deterministic.
 						logger.Trace("handleChoice: Failed to crack child using cache. Retrying with slow method...: {0}", child.debugName);
 						context.Log("Cache failed, falling back to slow method");
-						isTryAfterFailure = true;
+						isTryAfterFailure = item.Key;
 
 						break;
 					}
@@ -248,8 +248,11 @@ namespace Peach.Core.Dom
 			{
 				// Skip any cache entries, already tried them
 				// Except if our cache choice failed to parse. Then 
-				// try all options.
-				if (!isTryAfterFailure && _choiceCache.ContainsKey(child.Name))
+				// try all options except the one we already tried.
+				if (isTryAfterFailure == null && _choiceCache.ContainsKey(child.Name))
+					continue;
+
+				if (isTryAfterFailure == child.Name)
 					continue;
 
 				try

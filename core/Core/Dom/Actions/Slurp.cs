@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Peach.Core.Dom.XPath;
 using System.Xml.Serialization;
 using System.ComponentModel;
+using System.Xml.XPath;
 
 namespace Peach.Core.Dom.Actions
 {
@@ -35,7 +36,7 @@ namespace Peach.Core.Dom.Actions
 		{
 			var resolver = new PeachXmlNamespaceResolver();
 			var navi = new PeachXPathNavigator(parent.parent);
-			var iter = navi.Select(valueXpath, resolver);
+			var iter = Select(navi, resolver, valueXpath, "valueXpath");
 
 			var elems = new List<DataElement>();
 
@@ -55,7 +56,7 @@ namespace Peach.Core.Dom.Actions
 			if (elems.Count != 1)
 				throw new SoftException("Error, slurp valueXpath returned multiple values. [" + valueXpath + "]");
 
-			iter = navi.Select(setXpath, resolver);
+			iter = Select(navi, resolver, setXpath, "setXpath");
 
 			if (!iter.MoveNext())
 				throw new SoftException("Error, slurp setXpath returned no values. [" + setXpath + "]");
@@ -70,6 +71,18 @@ namespace Peach.Core.Dom.Actions
 				setElement.DefaultValue = elems[0].DefaultValue;
 			}
 			while (iter.MoveNext());
+		}
+
+		private static XPathNodeIterator Select(PeachXPathNavigator navi, PeachXmlNamespaceResolver resolver, string xpath, string kind)
+		{
+			try
+			{
+				return navi.Select(xpath, resolver);
+			}
+			catch (XPathException ex)
+			{
+				throw new PeachException("Error, slurp {0} is not a valid xpath selector. [{1}]".Fmt(kind, xpath), ex);
+			}
 		}
 	}
 }
