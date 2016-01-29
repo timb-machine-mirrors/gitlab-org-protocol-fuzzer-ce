@@ -27,6 +27,7 @@
 // $Id$
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
@@ -1039,6 +1040,50 @@ namespace Peach.Pro.Test.Core.CrackingTests
 
 			Assert.AreEqual(expected, actual);
 		}
+
+		[Test]
+		public void CacheMissFallback()
+		{
+			// If cracking fails on a choice path where the cracker
+			// has successfully cracked an element with an analyzer
+			// we need to make sure the analyzr doesn't try to run
+			// after the model has completed cracking
+
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Choice name='C'>
+			<Block name='C1'>
+				<String name='Foo' value='Foo' token='true' />
+				<String name='Bar' value='Bar' token='true' />
+			</Block>
+			<Blob name='C2' />
+		</Choice>
+	</DataModel>
+</Peach>
+";
+			var dom = DataModelCollector.ParsePit(xml);
+
+			var bs = Bits.Fmt("{0}", "FooFoo");
+
+			var cracker = new DataCracker();
+
+			var visited = new List<string>();
+
+			cracker.EnterHandleNodeEvent += (e, p, d) => visited.Add(e.Name);
+
+			cracker.CrackData(dom.dataModels[0], bs);
+
+			var expected = new[] { "DM", "DM.C", "DM.C.C2" };
+			var actual = dom.dataModels[0].PreOrderTraverse().Select(e => e.fullName).ToList();
+
+			CollectionAssert.AreEqual(expected, actual);
+
+			expected = new[] { "DM", "C", "C1", "Foo", "Bar", "C2" };
+
+			CollectionAssert.AreEqual(expected, visited);
+		}
+
 
 		[Test]
 		[Ignore("See PF-270")]
