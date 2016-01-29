@@ -11,6 +11,8 @@
 	
 	<StateModel name="State" initialState="State1" >
 		<State name="State1"  >
+			<Action type="call" method="ScoobySnacks" publisher="Peach.Agent" />
+
 			<Action type="output" >
 				<DataModel ref="TheDataModel"/>
 			</Action>

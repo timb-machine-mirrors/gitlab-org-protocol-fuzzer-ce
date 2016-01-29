@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -7,8 +6,9 @@ using System.Xml;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
-namespace Peach.Pro.Analyzers
+namespace Peach.Pro.Core.Analyzers
 {
     [Analyzer("Regex", true)]
     [Description("Break up a string using a regex. Each group will become strings. The group name will be used as the element name.")]
@@ -31,7 +31,7 @@ namespace Peach.Pro.Analyzers
         {
             ParameterParser.Parse(this, args);
         }
-		
+
 		public override void asCommandLine(Dictionary<string, string> args)
 		{
 			var extra = new List<string>();
@@ -78,9 +78,12 @@ namespace Peach.Pro.Analyzers
             if (!(parent is Peach.Core.Dom.String))
                 throw new SoftException("Error, Regex analyzer can only be used with String elements. Element '" + parent.fullName + "' is a '" + parent.elementType + "'.");
 
-            var regex = new System.Text.RegularExpressions.Regex(Regex);
-
             var data = (string)parent.DefaultValue;
+			if (string.IsNullOrEmpty(data) && positions == null)
+				return;
+
+            var regex = new System.Text.RegularExpressions.Regex(Regex, RegexOptions.Singleline);
+
             var match = regex.Match(data);
             if (!match.Success)
                 throw new SoftException("The Regex analyzer failed to match.");
@@ -88,7 +91,7 @@ namespace Peach.Pro.Analyzers
             var sorted = new SortedDictionary<int, Peach.Core.Dom.String>();
 
             // Create the Block element that will contain the matched strings
-            var block = new Block(parent.name);
+			var block = new Block(parent.Name);
 
             // The order of groups does not always match order from string
             // we will add them into a sorted dictionary to order them correctly
@@ -96,7 +99,8 @@ namespace Peach.Pro.Analyzers
             {
                 var group = match.Groups[i];
                 var str = new Peach.Core.Dom.String(regex.GroupNameFromNumber(i));
-                str.DefaultValue = new Variant(group.Value);
+				var value = data.Substring(group.Index, group.Length);
+                str.DefaultValue = new Variant(value);
                 sorted[group.Index] = str;
             }
 
@@ -105,7 +109,7 @@ namespace Peach.Pro.Analyzers
                 block.Add(sorted[item]);
 
             // Replace our current element (String) with the Block of matched strings
-            parent.parent[parent.name] = block;
+			parent.parent[parent.Name] = block;
         }
     }
 }

@@ -387,7 +387,14 @@ namespace Peach.Pro.Core.Storage
 				}
 				catch (Exception ex)
 				{
-					Logger.Error("An unexpected error occured saving the job report.", ex);
+					if (ex is PeachException)
+					{
+						Logger.Error(ex.Message);
+					}
+					else
+					{
+						Logger.Error("An unexpected error occured saving the job report. {0}", ex.Message);
+					}
 
 					try
 					{
