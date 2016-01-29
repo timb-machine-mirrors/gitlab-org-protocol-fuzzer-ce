@@ -1039,6 +1039,49 @@ namespace Peach.Pro.Test.Core.CrackingTests
 
 			Assert.AreEqual(expected, actual);
 		}
+
+		[Test]
+		[Ignore("See PF-270")]
+		public void TestChoiceNoPlacement()
+		{
+			// TODO: Need a test for before, after and absolute placement!
+
+			// If cracking fails on a choice path where the cracker
+			// has successfully placed an element we need to
+			// clean up our placed elements when trying the next option
+
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Choice name='C'>
+			<Block name='Array' occurs='2'>
+				<String name='Key' />
+				<String name='Delim' value=':' token='true' />
+				<String name='Value' />
+				<String name='EOL' value='\n' token='true' />
+				<String name='Body' length='5'>
+					<Placement before='Marker' />
+				</String>
+			</Block>
+			<Blob name='Default' />
+		</Choice>
+		<Block name='Marker' />
+	</DataModel>
+</Peach>
+";
+			var dom = DataModelCollector.ParsePit(xml);
+
+			var bs = Bits.Fmt("{0}", "Item1:The-Value\n");
+
+			var cracker = new DataCracker();
+
+			cracker.CrackData(dom.dataModels[0], bs);
+
+			var expected = new[] { "DM", "DM.C", "DM.C.Default", "DM.Marker" };
+			var actual = dom.dataModels[0].PreOrderTraverse().Select(e => e.fullName).ToList();
+
+			Assert.AreEqual(expected, actual);
+		}
 	}
 }
 
