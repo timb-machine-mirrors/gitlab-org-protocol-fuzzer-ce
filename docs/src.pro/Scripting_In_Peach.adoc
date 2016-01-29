@@ -48,7 +48,7 @@ External Python files can be included into a pit so that predefined functions ma
 
 === Importing External Files
 
-When importing Python files into the Peach name space, define both the xref:PythonPath[PythonPath] and xref:Import[Import] elements. The _PythonPath_ element defines where to find the Python files. The _Import_ element specifies the file to import; the .py filename extention is not used in the declaration, as it is implied. Multiple files can be imported.
+When importing Python files into the Peach name space, define both the xref:PythonPath[PythonPath] and the xref:Import[Import] elements. The _PythonPath_ element defines where to find the Python files. The _Import_ element specifies the file to import; the .py filename extention is not used in the declaration, as it is implied. Multiple files can be imported.
 
 [source,xml]
 ----
@@ -68,7 +68,7 @@ When importing Python files into the Peach name space, define both the xref:Pyth
 
 === Scriptable Areas in Peach
 
-When fuzzing, Peach can run a script for a state or for an action. Further, the script can run at the beginning or at the end of the action or state. The xref:State_onStart[onStart] or  xref:State_onComplete[onComplete] attributes specify when the script runs. Include the attribute in the _Action_ or _State_ definition to associate the script with the _action_ or _state_. The most common script usages alter data or set a program into an expected state before or after fuzzing.
+When fuzzing, Peach can run a script for a state or for an action. Further, the script can run at the beginning or at the end of the action or state. The xref:State_onStart[onStart] and  xref:State_onComplete[onComplete] attributes specify when the script runs. Include the attribute in the _Action_ or _State_ definition to associate the script with the _action_ or _state_. The most common script usages alter data or set a program into an expected state before or after fuzzing.
 
 You can control when an action executes with the evaluation expression 'xref:Action_when[when]'. The _when_ attribute allows the action to execute when the given expression evaluates to true. This attribute is very useful when state changes depend on received data.
 
@@ -153,7 +153,7 @@ Other places  evaluation expressions occur in relations:
 
 === Accessing Data
 
-Scripts running in Peach have can access all DataModels, StateModels and Tests.  Data is accessed by traversing the DOM to locate the target element.
+Scripts running in Peach have access to all DataModels, StateModels and Tests. Data is accessed by traversing the DOM to locate the target element.
 
 .SNMP Python File for Copying Incoming Data
 [source,python]
@@ -186,17 +186,17 @@ def set_variables(ctx): <2>
 
 Data elements expose ways of accessing data associated with a data element.
 
-DefaultValue:: This property allows you to access the default, unmutated value. This is the value produced when this element is not being fuzzed.
+DefaultValue:: This property provides access to the default, unmutated value. The default value is produced when this element is not being fuzzed.
 
-InternalValue:: This property contains the value (fuzzed or default) to use when generating the final value. The field type is a variant of the internal typing, such as "int" or "string". the field is used during scripting. 
+InternalValue:: This property contains the value (fuzzed or default) to use when generating the final value. The field type is a variant of the internal typing, such as "int" or "string". The InternalValue property is used during scripting. 
 
-Value:: This is the final binary value that will be used. This is the InternalValue packed into binary form. For a _Number_ element of size 32, this is 4 contiguous bytes of data with correct endian-ness.
+Value:: This is the final, generated binary value. The Value property is the InternalValue packed into binary form. For a _Number_ element of size 32, this is 4 contiguous bytes of data with correct endian-ness.
 
-The data and state models in Peach are tree object graphs with a parent child relationship. Parents are accessible using the _parent_ property.
+The data and state models in Peach are tree-object graphs with a parent-child relationship. Parents are accessible using the -_parent property.
 
 === Returning Peach Types
 
-When a script overwrites the _DefaultValue_ for any element, the value type must be a Peach Variant. A Peach Variant can accept integers, strings, and arrays.
+When a script overwrites the DefaultValue for any element, the value type must be a Peach Variant. A Peach Variant accepts integers, strings, and arrays.
 
 [source,python]
 ----
@@ -216,7 +216,7 @@ def some_func(ctx):
 
 === Debugging
 
-You can debug Python code loaded from a file by using the InteractiveConsole from the code module. When the function is executed and hits the +code.InteractiveConsole+ line, control over the function is transferred to the user until the function returns. This allows each line of code that follows to be manually entered to ensure the expected behavior is happening.
+You can debug Python code loaded from a file by using the InteractiveConsole from the code module. When the function executes and reaches the +code.InteractiveConsole+ line, control over the function transfers to the user until the function ends. This approach allows each line in the function to be manually entered to ensure the expected behavior is happening.
 
 [source,python]
 ----
