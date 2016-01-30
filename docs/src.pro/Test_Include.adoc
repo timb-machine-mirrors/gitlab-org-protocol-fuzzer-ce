@@ -33,12 +33,13 @@ The following links provide additional information regarding XPath.
 
 _Required:_
 
-None. If no attributes are specified, Peach fuzzes all data elements. 
+None.
 
 _Optional:_
 
 xpath:: Provide an xpath query to select elements to include. 
 
+TIP: Peach interprets the statement _<Include />_ as all-inclusive, and fuzzes all data elements. 
 === Examples
 
 .Include via xpath

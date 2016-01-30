@@ -22,6 +22,24 @@ A token is a data element that Peach seeks when parsing incoming data.  Tokens d
 
 // TODO
 
+/////////
+RAB - 01/29/2016
+New description - pending Seth's OK.
+    
+A token is a data element that Peach seeks when parsing incoming data. A token acts as a marker when cracking incoming data. Typical usage is to mark the end of an unsized data element or to specify a "choice" in branch processing. 
+
+The token attribute designates a data element as a token. The data element with the token attribute is still a data element that receives all applicable mutations over the course of a test session. Being a token does not change the mutations performed on the data element. Tokens are visible to custom mutators, to use or ignore as appropriate. 
+
+A data element that receives the token attribute must have a default value specified in the XML. It must always have a value.
+
+A token represents a specific value that Peach searches for in the input stream, and can be summed up by the question, “Is the data value as equal or not equal to the token?” A constraint represents a similar, but broader expression that evaluates as `true` or `false`. A constraint is syntactically a python expression that can perform `true` / `false` comparison, such as a case-insensitive comparison of input data with a defined character string. 
+
+A token will assign length to the associated data element; a constraint does not permit the data element to specify a size or a length.
+
+
+
+/////////
+
 === Examples
 
 // Expand on examples with some working examples parsing text.

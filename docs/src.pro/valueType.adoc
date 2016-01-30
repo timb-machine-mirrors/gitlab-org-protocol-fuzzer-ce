@@ -17,6 +17,20 @@
 The _valueType_ attribute specifies what type of data is contained in the _value_ attribute.
 Valid values are +string+, +hex+, and +literal+.
 
+
+//////// 
+RAB 1/29/2016
+
+Base description refined. 
+Need to incorporate more of what Mike and Seth have outlined above.
+Also need to get squared away on examples. Right now, they don't look right. 
+
+Here's new base description. Needs approval.
+
+The valueType attribute specifies how Peach interprets the data contained in the value attribute of a data element. The The valueType attribute is an enumeration with the following values: string, hex, and literal.
+
+//////// 
+
 string::
 	String is the default _valueType_. + 
 	The value provided is a string value.
@@ -31,7 +45,7 @@ literal::
 	Specify a python or ruby statement that evaluates to the wanted value. + 
 	The evaluation occurs only once when the Pit is parsed into an internal DOM tree.
 	
-WARNING: Literal should *NOT* be used in place of a xref:Relation[Relation] or a xref:Fixup[Fixup]. Literals are only to be used for quick one-time expressions.
+WARNING: A literal should *not* be used in place of a xref:Relation[Relation] or a xref:Fixup[Fixup]. Literals are only to be used for quick one-time expressions.
 
 
 === Examples
