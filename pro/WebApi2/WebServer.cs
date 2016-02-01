@@ -39,12 +39,15 @@ namespace Peach.Pro.WebApi2
 			_context = new WebContext(pitLibraryPath, jobMonitor);
 		}
 
-		public void Start()
+		public void Start(int? port)
 		{
-			Start(8888);
+			if (port.HasValue)
+				Start(port.Value, false);
+			else
+				Start(8888, true);
 		}
 
-		public void Start(int port)
+		public void Start(int port, bool keepGoing)
 		{
 			var added = false;
 
@@ -88,7 +91,7 @@ namespace Peach.Pro.WebApi2
 							sb.AppendLine("from a command prompt with elevated privileges:");
 							sb.AppendFormat("{0} {1}", UacHelpers.Command, UacHelpers.GetArguments(url));
 
-							throw new TargetInvocationException(new PeachException(sb.ToString(), ex));
+							throw new PeachException(sb.ToString(), ex);
 						}
 
 						// Windows gives ERROR_SHARING_VIOLATION when port in use
@@ -98,6 +101,9 @@ namespace Peach.Pro.WebApi2
 							lex.ErrorCode == ERROR_ALREADY_EXISTS ||
 							lex.Message == "Prefix already in use.")
 						{
+							if (!keepGoing)
+								throw new PeachException("Unable to start the web server at http://localhost:{0}/ because the port is currently in use.".Fmt(port));
+
 							// Try the next port
 							++port;
 							added = false;
@@ -109,13 +115,16 @@ namespace Peach.Pro.WebApi2
 					var sex = inner as SocketException;
 					if (sex != null && sex.SocketErrorCode == SocketError.AddressAlreadyInUse)
 					{
+						if (!keepGoing)
+							throw new PeachException("Unable to start the web server at http://localhost:{0}/ because the port is currently in use.".Fmt(port));
+
 						// Try the next port
 						++port;
 						added = false;
 						continue;
 					}
 
-					throw new TargetInvocationException(new PeachException("Unable to start the web server: " + inner.Message + ".", ex));
+					throw new PeachException("Unable to start the web server: " + inner.Message + ".", ex);
 				}
 			}
 		}
