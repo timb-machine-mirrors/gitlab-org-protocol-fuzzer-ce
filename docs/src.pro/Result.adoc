@@ -36,7 +36,7 @@ This data can then be slurped into other DataModels and re-used for various purp
 
 _Attributes:_
 
-xref:name[name]:: Name of parameter [optional]
+xref:name[name]:: Name of parameter [optional].
 
 _Valid Child Elements:_
 

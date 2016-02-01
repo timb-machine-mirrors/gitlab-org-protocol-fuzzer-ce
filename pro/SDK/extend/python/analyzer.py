@@ -10,7 +10,7 @@ clr.AddReference("Peach.Pro")
 import Peach.Core
 from Peach.Core import Analyzer, Variant
 from Peach.Core.Dom import Block, String, DataElement
-from Peach.Pro.Analyzers import BasePythonAnalyzer
+from Peach.Pro.Core.Analyzers import BasePythonAnalyzer
 
 # Add the special assembly that our Python extensions will 
 # appear in. This is the list of assemblies that Peach checks
@@ -26,32 +26,32 @@ ParameterAttr = clrtype.attribute(Peach.Core.ParameterAttribute)
 
 class PythonAnalyzer(BasePythonAnalyzer, System.Runtime.Serialization.ISerializable):
 	'''Example of adding a custom Analyzer to Peach using only Python'''
-	
+
 	__metaclass__ = clrtype.ClrClass
 	_clrnamespace = "PythonExamples"
-	
+
 	_clrclassattribs = [
 		System.SerializableAttribute,
 		AnalyzerAttr("PythonAnalyzer", True),
 		DescriptionAttr("Example Analyzer in Python"),
 	]
-	
+
 	@clrtype.accepts()
 	def __init__(self):
 		pass
-	
+
 	@clrtype.accepts(System.Collections.Generic.Dictionary[clr.GetClrType(str), Variant])
 	def __init__(self, args):
 		pass
-	
+
 	@clrtype.accepts(DataElement, System.Collections.Generic.Dictionary[DataElement, Peach.Core.Cracker.Position])
 	def asDataElement(self, parent, args):
 		s = String()
 		s.DefaultValue = Variant("Hello From Analyzer\n")
-		
+
 		block = Block(parent.name)
 		block.Add(s)
-		
+
 		parent.parent[parent.name] = block
 
 # end

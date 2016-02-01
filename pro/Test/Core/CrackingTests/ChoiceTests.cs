@@ -27,6 +27,7 @@
 // $Id$
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
@@ -999,6 +1000,132 @@ namespace Peach.Pro.Test.Core.CrackingTests
 				Assert.AreEqual(1, ((Choice)dm[0]).choiceElements.Count);
 				Assert.AreEqual(1, dm[1].relations.Of<Relation>().Count());
 			}
+		}
+
+		[Test]
+		public void TestChoiceNoAnalyzer()
+		{
+			// If cracking fails on a choice path where the cracker
+			// has successfully cracked an element with an analyzer
+			// we need to make sure the analyzr doesn't try to run
+			// after the model has completed cracking
+
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Choice name='C'>
+			<Block name='Array' occurs='2'>
+				<String name='Key' />
+				<String name='Delim' value=':' token='true' />
+				<String name='Value'>
+					<Analyzer class='StringToken' />
+				</String>
+				<String name='EOL' value='\n' token='true' />
+			</Block>
+			<Blob name='Default' />
+		</Choice>
+	</DataModel>
+</Peach>
+";
+			var dom = DataModelCollector.ParsePit(xml);
+
+			var bs = Bits.Fmt("{0}", "Item1:The-Value\n");
+
+			var cracker = new DataCracker();
+
+			cracker.CrackData(dom.dataModels[0], bs);
+
+			var expected = new[] { "DM", "DM.C", "DM.C.Default" };
+			var actual = dom.dataModels[0].PreOrderTraverse().Select(e => e.fullName).ToList();
+
+			Assert.AreEqual(expected, actual);
+		}
+
+		[Test]
+		public void CacheMissFallback()
+		{
+			// If cracking fails on a choice path where the cracker
+			// has successfully cracked an element with an analyzer
+			// we need to make sure the analyzr doesn't try to run
+			// after the model has completed cracking
+
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Choice name='C'>
+			<Block name='C1'>
+				<String name='Foo' value='Foo' token='true' />
+				<String name='Bar' value='Bar' token='true' />
+			</Block>
+			<Blob name='C2' />
+		</Choice>
+	</DataModel>
+</Peach>
+";
+			var dom = DataModelCollector.ParsePit(xml);
+
+			var bs = Bits.Fmt("{0}", "FooFoo");
+
+			var cracker = new DataCracker();
+
+			var visited = new List<string>();
+
+			cracker.EnterHandleNodeEvent += (e, p, d) => visited.Add(e.Name);
+
+			cracker.CrackData(dom.dataModels[0], bs);
+
+			var expected = new[] { "DM", "DM.C", "DM.C.C2" };
+			var actual = dom.dataModels[0].PreOrderTraverse().Select(e => e.fullName).ToList();
+
+			CollectionAssert.AreEqual(expected, actual);
+
+			expected = new[] { "DM", "C", "C1", "Foo", "Bar", "C2" };
+
+			CollectionAssert.AreEqual(expected, visited);
+		}
+
+
+		[Test]
+		[Ignore("See PF-270")]
+		public void TestChoiceNoPlacement()
+		{
+			// TODO: Need a test for before, after and absolute placement!
+
+			// If cracking fails on a choice path where the cracker
+			// has successfully placed an element we need to
+			// clean up our placed elements when trying the next option
+
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Choice name='C'>
+			<Block name='Array' occurs='2'>
+				<String name='Key' />
+				<String name='Delim' value=':' token='true' />
+				<String name='Value' />
+				<String name='EOL' value='\n' token='true' />
+				<String name='Body' length='5'>
+					<Placement before='Marker' />
+				</String>
+			</Block>
+			<Blob name='Default' />
+		</Choice>
+		<Block name='Marker' />
+	</DataModel>
+</Peach>
+";
+			var dom = DataModelCollector.ParsePit(xml);
+
+			var bs = Bits.Fmt("{0}", "Item1:The-Value\n");
+
+			var cracker = new DataCracker();
+
+			cracker.CrackData(dom.dataModels[0], bs);
+
+			var expected = new[] { "DM", "DM.C", "DM.C.Default", "DM.Marker" };
+			var actual = dom.dataModels[0].PreOrderTraverse().Select(e => e.fullName).ToList();
+
+			Assert.AreEqual(expected, actual);
 		}
 	}
 }

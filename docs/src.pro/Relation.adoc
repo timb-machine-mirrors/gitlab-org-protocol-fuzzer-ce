@@ -17,8 +17,8 @@ Peach allows data relationship modeling and provides three types of Relations: S
 
 Each Relation element has two required attributes:
 
-type::  Declares whether the relationship to model (Size, Count, Offset).
-of:: Names the relationship element in the data model.
+type::  Declares the relationship type to model (Size, Count, Offset).
+of:: Names the first data element of the relationship in the data model.
 
 [[Relations_Size]]
 === Size-of Relation
@@ -29,9 +29,9 @@ of:: Names the relationship element in the data model.
 // Unicode/wchar
 // Multiple relations on same elements
 
-The Size relationship type specifies "X is the size of Y."
+The Size relationship type specifies that "X is the size of Y" where "X" is the parent element of the relation element; and "Y" is the first data element of the relationship, specified as the value of the _of_ attribute.
 
-The Number element is the byte count of the relationship element. Unicode characters may be multi-byte and the Number value reflects the additional size.
+The Number element, the parent element of "Relation", is the byte count of the relation element. Unicode characters may be multi-byte and the Number value reflects the additional size.
 
 In this example, the value of the number element indicates the size of the string element named _TheValue_ in bytes. 
 
@@ -73,7 +73,7 @@ expressionSet:: Produces a value for the publisher.  In the prior example, +size
 // * size-of works, but not when inside the array (need to verify)
 // * expressionGet/Set
 
-The Count relationship type specifies "X is the count of Y." It only applies to arrays.
+The Count relationship type specifies that "X is the count of Y" where "X" is the parent element of the relation. "Y" is the relationship element; "Y" is specified as the value of _of_; and, "Y" is an array. The Count relationship only applies to arrays.
 
 The Number element is the byte count of the relationship array. 
 Because Count applies to arrays, specify either xref:minOccurs[minOccurs] or xref:maxOccurs[maxOccurs] after the String name.

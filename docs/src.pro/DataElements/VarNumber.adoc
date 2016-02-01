@@ -1,0 +1,13 @@
+<<<
+[[VarNumber]]
+== VarNumber
+
+
+// 01/22/2016: RAB Found this in DOM for 3.8, but not in docs.
+//             Trying to flesh out.
+//             Logged jira for Mike/Seth to provide info.
+
+// 01/22/2016: from Peach DOM 3.8 
+
+// Might be able to use Number data element as boilerplate, but the fit is so-so.
+// Scheduled for 3.9.

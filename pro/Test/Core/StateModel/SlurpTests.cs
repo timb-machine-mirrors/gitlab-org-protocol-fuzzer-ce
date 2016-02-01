@@ -481,5 +481,69 @@ namespace Peach.Pro.Test.Core.StateModel
 
 			Assert.That(pos, Is.EqualTo(names));
 		}
+
+		[Test]
+		public void SlurpBadValueXpathName()
+		{
+			const string xml = @"
+<Peach>
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel name='DM'>
+					<String name='Str' />
+				</DataModel>
+			</Action> 
+
+			<Action type='slurp' valueXpath='//01-source' setXpath='//target' />
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var config = new RunConfiguration { singleIteration = true };
+			var engine = new Engine(null);
+			
+			var ex = Assert.Throws<PeachException>(() => engine.startFuzzing(dom, config));
+
+			Assert.AreEqual("Error, slurp valueXpath is not a valid xpath selector. [//01-source]", ex.Message);
+		}
+
+		[Test]
+		public void SlurpBadSetXpathName()
+		{
+			const string xml = @"
+<Peach>
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel name='DM'>
+					<String name='Str' />
+				</DataModel>
+			</Action> 
+
+			<Action type='slurp' valueXpath='//Str' setXpath='//01-target' />
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var config = new RunConfiguration { singleIteration = true };
+			var engine = new Engine(null);
+
+			var ex = Assert.Throws<PeachException>(() => engine.startFuzzing(dom, config));
+
+			Assert.AreEqual("Error, slurp setXpath is not a valid xpath selector. [//01-target]", ex.Message);
+		}
 	}
 }

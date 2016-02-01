@@ -15,7 +15,12 @@ namespace Peach.Pro.Core.Runtime
 {
 	public interface IWebStatus : IDisposable
 	{
-		void Start();
+		/// <summary>
+		/// Starts the web server.
+		/// </summary>
+		/// <param name="port">If not specified an unused port will be picked.</param>
+		void Start(int? port);
+
 		Uri Uri { get; }
 	}
 
@@ -26,6 +31,7 @@ namespace Peach.Pro.Core.Runtime
 
 		protected OptionSet _options;
 		protected int _verbosity;
+		protected int? _webPort;
 
 		// this is static so it can be re-used by unit tests
 		public static void LoadPlatformAssembly()
@@ -339,7 +345,7 @@ namespace Peach.Pro.Core.Runtime
 
 				using (var svc = CreateWeb(pitLibraryPath, jobMonitor))
 				{
-					svc.Start();
+					svc.Start(_webPort);
 
 					if (!Debugger.IsAttached && shouldStartBrowser)
 					{

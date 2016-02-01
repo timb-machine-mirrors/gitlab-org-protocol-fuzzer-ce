@@ -8,7 +8,7 @@
 //  * Hint is wrong
 //  * Expand description and how it works
 
-The Sample Ninja mutation engine swaps elements between sample files to generate a new mutated file. Sample Ninja is made up of two components, a command line program that builds and maintains the database, and a mutator that is enabled when a sample ninja database exists.
+The Sample Ninja mutation engine swaps elements among sample files to generate a new mutated file. Sample Ninja is made up of two components, a command line program that builds and maintains the database, and a mutator that is enabled when a sample ninja database exists.
 
 === Process
 

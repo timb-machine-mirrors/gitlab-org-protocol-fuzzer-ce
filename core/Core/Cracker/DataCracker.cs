@@ -802,12 +802,17 @@ namespace Peach.Core.Cracker
 
 			_lastError = e;
 
-			var items = _sizedElements.Where(x => x.Key.isChildOf(elem)).ToList();
+			var items = _sizedElements.Where(x => x.Key.isChildOf(elem)).Select(x => x.Key).ToList();
 
 			foreach (var item in items)
-				_sizedElements.Remove(item.Key);
+				_sizedElements.Remove(item);
 
 			_sizedElements.Remove(elem);
+
+			items = _elementsWithAnalyzer.Where(x => x.isChildOf(elem)).ToList();
+
+			foreach (var item in items)
+				_elementsWithAnalyzer.Remove(item);
 
 			OnExceptionHandleNodeEvent(elem, data.PositionBits, data, e);
 		}

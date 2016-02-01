@@ -26,11 +26,11 @@ ParameterAttr = clrtype.attribute(Peach.Core.ParameterAttribute)
 
 class PythonPublisher(Publisher):
 	'''Example of adding a custom Monitor to Peach using only Python'''
-	
+
 	__metaclass__ = clrtype.ClrClass
-	_clrnamespace = "PythonExamples"   
-	
-	
+	_clrnamespace = "PythonExamples"
+
+
 	_clrclassattribs = [
 		System.SerializableAttribute,
 		PublisherAttr("PythonPublisher", True),
@@ -38,29 +38,29 @@ class PythonPublisher(Publisher):
 	]
 
 	logger = None
-	
+
 	@property
 	@clrtype.accepts()
 	@clrtype.returns(NLog.Logger)
 	def Logger(self):
 		if self.logger == None:
-			self.logger = NLog.LogManager.GetCurrentClassLogger()
+			self.logger = NLog.LogManager.GetLogger("PythonPublisher")
 		return self.logger
- 
+
 	@clrtype.accepts(System.Collections.Generic.Dictionary[clr.GetClrType(str), Variant])
 	def __init__(self, args):
 		pass
-		
+
 	@clrtype.accepts(BitwiseStream)
 	def OnOutput(self, data):
 		'''Output data as a json string'''
-		
+
 		out = ""
 		for i in range(data.Length):
 			out += chr(data.ReadByte())
-			
+
 		print json.dumps(out)
-		
+
 # end
 
 

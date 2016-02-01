@@ -11,3 +11,17 @@ bld(
 		peach    : peach.ant_glob('samples/*'),
 	}
 )
+
+bld(
+	name = 'ExtendExamples.dll',
+	features = 'cs',
+	source = bld.path.ant_glob('extend/examples/*.cs'),
+	use = [
+		'NLog.dll',
+		'System.dll',
+		'System.Core.dll',
+		'System.Xml.dll',
+		'Peach.Core.dll',
+	],
+	install_path = None, # Compile only, don't install in ${BINDIR}
+)

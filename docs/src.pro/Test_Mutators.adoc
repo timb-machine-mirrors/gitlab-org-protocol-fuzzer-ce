@@ -6,11 +6,11 @@ The Mutators element, a child element of Test, specifies either a list of mutato
 	
 By default, Peach includes all mutations in a fuzzing run. 
 
-When specifying mutators to include in a test, Peach uses only the supplied list of mutators 
+When specifying mutators to include in a test, Peach uses the supplied list of mutators 
 in the test. If a mutator name is not listed, peach does not include that mutator in the test run.
 
 When specifying the mutators to exclude from a test, Peach uses all mutators in the test except those 
-supplied in the list. If a mutator name is not listed, peach keeps it included in the test run.
+supplied in the list. If a mutator name is not listed, peach keeps the mutator included in the test session.
 
 NOTE: A test can include at most one list of mutators: an include list or an exclude list.
 

@@ -1,9 +1,9 @@
 [[ReproducingFaults]]
 == Reproducing Faults
 
-A fault that occurs in a fuzzing session needs to be reproduced so that it can be investigated, understood, and  mitigated. 
+A fault that occurs in a fuzzing session needs to be reproduceible so that it can be investigated, understood, and  mitigated. 
 
-Peach Pro has the following features that aid in recreating faults that occur during fuzzing:
+Peach has the following features that aid in recreating faults that occur during fuzzing:
 
 * Replay the fuzzing session
 * Let Peach search to reproduce the fault
@@ -25,7 +25,7 @@ If the command line does not specify an iteration range or a starting iteration,
 :leveloffset: 1
 == Let Peach Search to Reproduce the Fault
 
-This is new behavior. When Peach detects a fault, it attempts to reproduce the fault. The idea is to automate the search to determine whether a fault consistently reproduces. The following steps describe the major elements of the search:
+When Peach detects a fault, it attempts to reproduce the fault. The idea is to automate the search to determine whether a fault consistently reproduces. The following steps describe the major elements of the search:
 
 . Replay the last iteration, the most recent test. This typically is where the fault surfaces. +
 If the fault reproduces, the system logs the information and the search finishes. +
@@ -35,9 +35,9 @@ Otherwise, continue with step 2.
 If the fault reproduces, the system logs the information and the search finishes. Otherwise, continue with step 3.
 . Double the number of iterations, and run them in the same sequence as in the fuzzing session. +
 If the fault reproduces, the system logs the information and the search finishes. If not, continue the search, each time doubling the number of iterations to run. The criteria for stopping follows: +
-* reproduce the fault
-* encounter a critical point in the data; the effort to recreate the fault encountered another fault that peach found and logged during the test session
-* encounter a user-specified limit for the search
+* Reproduce the fault.
+* Encounter a critical point in the data; the effort to recreate the fault encountered another fault that peach found and logged during the test session.
+* Encounter a user-specified limit for the search.
 
 Using a search limit of 200, the following sets of iterations would run until the limit is reached: 
 
@@ -59,7 +59,7 @@ Some additional considerations about automated fault reproduction include the fo
 :leveloffset: 1
 == How to Implement the Automated Fault Reproduction
 
-First, if you use a Pit from the current Peach Pit library, the appropriate automated settings are already included in the fuzzing definition. 
+First, if you use a licensed Peach Pit, the appropriate automated settings are already included in the fuzzing definition. 
 
 If you need to change the setting or if you are defining your own pit, the _Test_ element in the pit has two attributes that apply to Automated Fault Reproduction: _targetLifetime_ and _maxBackSearch_.
 
