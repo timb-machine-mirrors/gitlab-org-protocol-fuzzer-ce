@@ -156,8 +156,8 @@ namespace Peach.Pro.WebApi2
 			};
 
 			json.NullValueHandling = NullValueHandling.Ignore;
-			json.DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate;
 			json.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+			// NOTE: Don't ignore default values so integers and booleans get included in json
 
 			json.Converters.Insert(0, new StringEnumConverter { CamelCaseText = true });
 			json.Converters.Insert(0, new TimeSpanJsonConverter());
