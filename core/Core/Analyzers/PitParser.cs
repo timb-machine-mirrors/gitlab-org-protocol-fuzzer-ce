@@ -760,6 +760,9 @@ namespace Peach.Core.Analyzers
 		/// <param name="element">Element to set attributes on</param>
 		public void handleCommonDataElementAttributes(XmlNode node, DataElement element)
 		{
+			if (node.hasAttr("fieldId"))
+				element.FieldId = node.getAttrString("fieldId");
+
 			if (node.hasAttr("token"))
 				element.isToken = node.getAttrBool("token");
 
@@ -1268,6 +1271,7 @@ namespace Peach.Core.Analyzers
 			{
 				parent = parent,
 				Name = node.getAttr("name", parent.states.UniqueName()),
+				FieldId = node.getAttr("fieldId", null),
 				onStart = node.getAttr("onStart", null),
 				onComplete = node.getAttr("onComplete", null)
 			};
@@ -1323,6 +1327,7 @@ namespace Peach.Core.Analyzers
 			{
 				action = action,
 				type = type,
+				FieldId = node.getAttr("fieldId", null)
 			};
 
 			// 'Out' params are input and can't have <Data>
@@ -1494,6 +1499,7 @@ namespace Peach.Core.Analyzers
 
 			action.Name = name;
 			action.parent = parent;
+			action.FieldId = node.getAttr("fieldId", null);
 			action.when = node.getAttr("when",null);
 			action.publisher = node.getAttr("publisher", null);
 			action.onStart = node.getAttr("onStart", null);

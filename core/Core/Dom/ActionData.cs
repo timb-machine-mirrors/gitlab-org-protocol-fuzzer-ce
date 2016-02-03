@@ -101,7 +101,7 @@ namespace Peach.Core.Dom
 		/// </remarks>
 		[XmlAttribute("fieldId")]
 		[DefaultValue(null)]
-		public string FieldId { get; protected set; }
+		public string FieldId { get; set; }
 
 		/// <summary>
 		/// Full name of this record when viewed as input data

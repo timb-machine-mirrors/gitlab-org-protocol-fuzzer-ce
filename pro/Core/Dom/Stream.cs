@@ -106,6 +106,8 @@ namespace Peach.Pro.Core.Dom
 				stream.parent = parent;
 			}
 
+			stream.FieldId = node.getAttr("fieldId", null);
+
 			var nameElem = stream["Name"];
 			nameElem.DefaultValue = new Variant(node.getAttrString("streamName"));
 			nameElem.isMutable = node.getAttr("mutable", nameElem.isMutable);
@@ -118,6 +120,8 @@ namespace Peach.Pro.Core.Dom
 			context.handleCommonDataElementAttributes(node, contentElem);
 			context.handleCommonDataElementChildren(node, contentElem);
 			context.handleDataElementContainer(node, contentElem);
+
+			contentElem.FieldId = null;
 
 			return stream;
 		}
