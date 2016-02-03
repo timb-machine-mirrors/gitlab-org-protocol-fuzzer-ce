@@ -14,6 +14,7 @@ namespace Peach.Pro.Core.Dom
 	[DataElement("Stream")]
 	[PitParsable("Stream")]
 	[Parameter("name", typeof(string), "Element name", "")]
+	[Parameter("fieldId", typeof(string), "Element field ID", "")]
 	[Parameter("ref", typeof(string), "Element to reference", "")]
 	[Parameter("streamName", typeof(string), "Stream name")]
 	[Parameter("streamAttribute", typeof(int), "Stream attributes", "0")]

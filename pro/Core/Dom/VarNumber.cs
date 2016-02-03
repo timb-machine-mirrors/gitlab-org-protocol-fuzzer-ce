@@ -12,6 +12,7 @@ namespace Peach.Pro.Core.Dom
 	[PitParsable("VarNumber")]
 	[DataElement("VarNumber", DataElementTypes.NonDataElements)]
 	[Parameter("name", typeof(string), "Element name", "")]
+	[Parameter("fieldId", typeof(string), "Element field ID", "")]
 	[Parameter("value", typeof(string), "Default value", "")]
 	[Parameter("valueType", typeof(Peach.Core.Dom.ValueType), "Format of value attribute", "string")]
 	[Parameter("token", typeof(bool), "Is element a token", "false")]

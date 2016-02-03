@@ -36,6 +36,7 @@ namespace Peach.Core.Dom
 	[DataElement("XmlAttribute")]
 	[PitParsable("XmlAttribute")]
 	[Parameter("name", typeof(string), "Name of element", "")]
+	[Parameter("fieldId", typeof(string), "Element field ID", "")]
 	[Parameter("attributeName", typeof(string), "Name of XML attribute")]
 	[Parameter("ns", typeof(string), "XML Namespace", "")]
 	[Parameter("length", typeof(uint?), "Length in data element", "")]

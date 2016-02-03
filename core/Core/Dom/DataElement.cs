@@ -620,6 +620,12 @@ namespace Peach.Core.Dom
 			get { return _name; }
 		}
 
+		public string FieldId
+		{
+			get;
+			set;
+		}
+
 		public bool isMutable = true;
 		public MutateOverride mutationFlags = MutateOverride.None;
 		public bool isToken = false;

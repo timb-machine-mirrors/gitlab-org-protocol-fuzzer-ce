@@ -36,6 +36,7 @@ namespace Peach.Core.Dom
 	[DataElement("Flag", DataElementTypes.NonDataElements)]
 	[DataElementParentSupported("Flags")]
 	[Parameter("name", typeof(string), "Element name", "")]
+	[Parameter("fieldId", typeof(string), "Element field ID", "")]
 	[Parameter("position", typeof(int), "Bit position of flag")]
 	[Parameter("size", typeof(int), "size in bits")]
 	[Parameter("value", typeof(string), "Default value", "")]

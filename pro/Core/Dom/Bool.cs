@@ -15,6 +15,7 @@ namespace Peach.Pro.Core.Dom
 	[DataElementChildSupported("Placement")]
 	[PitParsable("Bool")]
 	[Parameter("name", typeof(string), "Name of element", "")]
+	[Parameter("fieldId", typeof(string), "Element field ID", "")]
 	[Parameter("mutable", typeof(bool), "Is element mutable", "true")]
 	[Parameter("value", typeof(string), "Default value", "")]
 	[Parameter("constraint", typeof(string), "Scripting expression that evaluates to true or false", "")]

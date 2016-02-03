@@ -40,6 +40,7 @@ namespace Peach.Core.Dom
 	[DataElement("Block")]
 	[PitParsable("Block")]
 	[Parameter("name", typeof(string), "Element name", "")]
+	[Parameter("fieldId", typeof(string), "Element field ID", "")]
 	[Parameter("ref", typeof(string), "Element to reference", "")]
 	[Parameter("length", typeof(uint?), "Length in data element", "")]
 	[Parameter("lengthType", typeof(LengthType), "Units of the length attribute", "bytes")]

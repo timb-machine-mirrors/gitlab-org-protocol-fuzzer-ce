@@ -42,6 +42,7 @@ namespace Peach.Core.Dom
 	[PitParsable("Blob")]
 	[DataElementChildSupported("Placement")]
 	[Parameter("name", typeof(string), "Element name", "")]
+	[Parameter("fieldId", typeof(string), "Element field ID", "")]
 	[Parameter("length", typeof(uint?), "Length in data element", "")]
 	[Parameter("lengthType", typeof(LengthType), "Units of the length attribute", "bytes")]
 	[Parameter("value", typeof(string), "Default value", "")]

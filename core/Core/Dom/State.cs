@@ -78,6 +78,13 @@ namespace Peach.Core.Dom
 		public string Name { get; set; }
 
 		/// <summary>
+		/// The field id of this state.
+		/// </summary>
+		[XmlAttribute("fieldId")]
+		[DefaultValue(null)]
+		public string FieldId { get; set; }
+
+		/// <summary>
 		/// Expression to run when state is starting
 		/// </summary>
 		[XmlAttribute]

@@ -40,6 +40,7 @@ namespace Peach.Core.Dom
 	[DataElementParentSupported(null)]
 	[PitParsable("DataModel", topLevel = true)]
 	[Parameter("name", typeof(string), "Model name", "")]
+	[Parameter("fieldId", typeof(string), "Field ID", "")]
 	[Parameter("ref", typeof(string), "Model to reference", "")]
 	[Parameter("mutable", typeof(bool), "Is element mutable", "true")]
 	public class DataModel : Block, IOwned<Dom>, IOwned<ActionData>
