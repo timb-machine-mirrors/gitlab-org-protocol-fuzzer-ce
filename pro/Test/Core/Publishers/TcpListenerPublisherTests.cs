@@ -1,8 +1,11 @@
 ﻿using System.IO;
+using System.Net;
+using System.Net.Sockets;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Test;
+using Peach.Pro.Core.Publishers;
 
 namespace Peach.Pro.Test.Core.Publishers
 {
@@ -167,6 +170,71 @@ namespace Peach.Pro.Test.Core.Publishers
 			Engine e = new Engine(this);
 
 			e.startFuzzing(dom, config);
+		}
+
+		[Test]
+		public void TestSessionStop()
+		{
+			const string xml = @"
+<Peach>
+	<StateModel name='SM' initialState='InitialState'>
+		<State name='InitialState'>
+			<Action type='open' name='open' />
+			<Action type='accept' name='accept' />
+			<Action type='input' name='input'>
+				<DataModel name='DM'>
+					<Blob />
+				</DataModel>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+
+		<Publisher class='TcpListener'>
+			<Param name='Interface' value='127.0.0.1'/>
+			<Param name='Port' value='0'/>
+			<Param name='Lifetime' value='session'/>
+		</Publisher>
+	</Test>
+</Peach>";
+
+			var dom = ParsePit(xml);
+			var cfg = new RunConfiguration { singleIteration = true };
+			var e = new Engine(null);
+			var localEp = new IPEndPoint(IPAddress.Loopback, 0);
+			var tcp = new TcpClient();
+
+			e.TestStarting += ctx =>
+			{
+				ctx.ActionFinished += (c, a) =>
+				{
+					if (a.Name == "open")
+					{
+						localEp.Port = ((TcpListenerPublisher)ctx.test.publishers[0]).Port;
+
+						tcp.Connect(localEp);
+					}
+					else if (a.Name == "accept")
+					{
+						tcp.Client.Send(Encoding.ASCII.GetBytes("Hello"));
+					}
+				};
+			};
+
+			e.startFuzzing(dom, cfg);
+
+			tcp.Close();
+
+			Assert.AreNotEqual(0, localEp.Port, "Port should be non-zero");
+
+			// Ensure port was properly closed, bind should be successful
+
+			using (var s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+			{
+				s.Bind(localEp);
+			}
 		}
 	}
 }

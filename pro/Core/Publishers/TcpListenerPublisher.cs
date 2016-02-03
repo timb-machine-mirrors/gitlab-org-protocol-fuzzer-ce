@@ -43,6 +43,8 @@ namespace Peach.Pro.Core.Publishers
 			{
 				_listener = new TcpListener(Interface, Port);
 				_listener.Start();
+
+				Port = (ushort)((IPEndPoint)_listener.LocalEndpoint).Port;
 			}
 			catch (Exception ex)
 			{
@@ -73,6 +75,22 @@ namespace Peach.Pro.Core.Publishers
 			}
 
 			base.OnClose();
+		}
+
+		protected override void OnStop()
+		{
+			if (Lifetime == Test.Lifetime.Session)
+			{
+				base.OnClose();
+
+				if (_listener != null)
+				{
+					_listener.Stop();
+					_listener = null;
+				}
+			}
+
+			base.OnStop();
 		}
 
 		protected override void OnAccept()

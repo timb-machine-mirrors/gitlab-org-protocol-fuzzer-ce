@@ -7,6 +7,7 @@ using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Test;
+using Peach.Pro.Core.Publishers;
 
 namespace Peach.Pro.Test.Core.Publishers
 {
@@ -546,5 +547,84 @@ namespace Peach.Pro.Test.Core.Publishers
 			listener.Stop();
 			StringAssert.Contains("The operation has timed", ex.Message);
 		}
+
+
+		[Test]
+		public void TestSessionStop()
+		{
+			const string xml = @"
+<Peach>
+	<StateModel name='SM' initialState='InitialState'>
+		<State name='InitialState'>
+			<Action type='open' name='open' />
+			<Action type='output' name='output'>
+				<DataModel name='DM'>
+					<Blob value='Hello' />
+				</DataModel>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+
+		<Publisher class='Tcp'>
+			<Param name='Host' value='127.0.0.1'/>
+			<Param name='Port' value='0'/>
+			<Param name='Lifetime' value='session'/>
+		</Publisher>
+	</Test>
+</Peach>";
+
+			var dom = ParsePit(xml);
+			var cfg = new RunConfiguration { singleIteration = true };
+			var e = new Engine(null);
+			var localEp = new IPEndPoint(IPAddress.Loopback, 0);
+			var l = new TcpListener(localEp);
+
+			byte[] rx = null;
+			Socket cli = null;
+			var len = 0;
+
+			l.Start();
+			localEp.Port = ((IPEndPoint)l.LocalEndpoint).Port;
+
+			((TcpClientPublisher)dom.tests[0].publishers[0]).Port = (ushort)localEp.Port;
+
+			e.TestStarting += ctx =>
+			{
+				ctx.ActionFinished += (c, a) =>
+				{
+					if (a.Name == "open")
+					{
+						cli = l.AcceptSocket();
+					}
+					else if (a.Name == "output")
+					{
+						Assert.NotNull(cli, "Client should be non-null");
+
+						rx = new byte[5];
+						len = cli.Receive(rx);
+
+						cli.Shutdown(SocketShutdown.Send);
+					}
+				};
+			};
+
+			e.startFuzzing(dom, cfg);
+
+			Assert.NotNull(cli, "Should have gotten connection");
+			Assert.NotNull(rx, "Should have gotten msg");
+
+			Assert.AreEqual(rx.Length, len);
+
+			len = cli.Receive(rx);
+
+			Assert.AreEqual(0, len, "Remote side should have closed");
+
+			cli.Close();
+			l.Stop();
+		}
+
 	}
 }
