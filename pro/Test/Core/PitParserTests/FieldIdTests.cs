@@ -1,7 +1,10 @@
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.Dom.Actions;
+using Peach.Core.Dom.XPath;
 using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.PitParserTests
@@ -142,6 +145,59 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			};
 
 			Assert.AreEqual(exp, fields);
+		}
+
+		[Test]
+		public void TestXpath()
+		{
+			const string xml = @"
+<Peach>
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial' />
+		<State name='a' fieldId='a'>
+			<Action type='output' name='b' fieldId='b'>
+				<DataModel name='DM' />
+			</Action>
+
+			<Action type='output'>
+				<DataModel name='c' fieldId='c' />
+			</Action>
+
+			<Action type='call' name='d' fieldId='d' method='foo'>
+				<Param>
+					<DataModel name='e' fieldId='e'>
+						<Blob />
+						<Block name='f' fieldId='f'>
+							<String name='g' fieldId='g' />
+						</Block>
+					</DataModel>
+				</Param>
+			</Action>
+		</State>
+	</StateModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+
+			Assert.NotNull(dom);
+
+			var resolver = new PeachXmlNamespaceResolver();
+			var navi = new PeachXPathNavigator(dom.stateModels[0]);
+			var iter = navi.Select("//*[@fieldId]", resolver);
+
+			var result = new List<string>();
+
+			while (iter.MoveNext())
+			{
+				var curr = (INamed)((PeachXPathNavigator)iter.Current).CurrentNode;
+
+				result.Add(curr.Name);
+			}
+
+			CollectionAssert.IsNotEmpty(result);
+
+			var exp = new[] { "a", "b", "c", "d", "e", "f", "g" };
+			Assert.AreEqual(exp, result);
 		}
 	}
 }

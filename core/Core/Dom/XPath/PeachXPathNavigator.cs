@@ -256,6 +256,60 @@ namespace Peach.Core.Dom.XPath
 
 				return new StateEntry(states[next], next);
 			}
+
+			public override Entry GetFirstAttr()
+			{
+				return new StateAttrEntry(_state, 0);
+			}
+		}
+
+		#endregion
+
+		#region State Attributes
+
+		class StateAttrEntry : Entry
+		{
+			private readonly State _state;
+
+			public StateAttrEntry(State state, int index)
+				: base(state, index, Attrs[index].Item1, XPathNodeType.Attribute)
+			{
+				_state = state;
+			}
+
+			static readonly List<Tuple<string, Func<State, string>>> Attrs = new List<Tuple<string, Func<State, string>>>
+			(
+				new[]
+				{
+					new Tuple<string, Func<State, string>>("name", a => a.Name),
+					new Tuple<string, Func<State, string>>("fieldId", a => a.FieldId)
+				}
+			);
+
+			public override string Value
+			{
+				get { return Attrs[Index].Item2(_state); }
+			}
+
+			public override Entry GetNextAttr()
+			{
+				var next = Index;
+
+				while (true)
+				{
+					++next;
+
+					if (next == Attrs.Count)
+						return null;
+
+					var val = Attrs[next].Item2(_state);
+
+					if (!string.IsNullOrEmpty(val))
+						break;
+				}
+
+				return new StateAttrEntry(_state, next);
+			}
 		}
 
 		#endregion
@@ -330,7 +384,8 @@ namespace Peach.Core.Dom.XPath
 					new Tuple<string, Func<Action, string>>("name", a => a.Name),
 					new Tuple<string, Func<Action, string>>("type", a => a.type),
 					new Tuple<string, Func<Action, string>>("method", GetMethod),
-					new Tuple<string, Func<Action, string>>("property", GetProperty)
+					new Tuple<string, Func<Action, string>>("property", GetProperty),
+					new Tuple<string, Func<Action, string>>("fieldId", a => a.FieldId)
 				}
 			);
 
@@ -357,9 +412,20 @@ namespace Peach.Core.Dom.XPath
 
 			public override Entry GetNextAttr()
 			{
-				var next = Index + 1;
-				if (next == Attrs.Count)
-					return null;
+				var next = Index;
+
+				while (true)
+				{
+					++next;
+
+					if (next == Attrs.Count)
+						return null;
+
+					var val = Attrs[next].Item2(_action);
+
+					if (!string.IsNullOrEmpty(val))
+						break;
+				}
 
 				return new ActionAttrEntry(_action, next);
 			}
@@ -499,7 +565,8 @@ namespace Peach.Core.Dom.XPath
 				{
 					new Tuple<string, Func<DataElement, string>>("name", e => e.Name),
 					new Tuple<string, Func<DataElement, string>>("isMutable", e => e.isMutable.ToString()),
-					new Tuple<string, Func<DataElement, string>>("isToken", e => e.isToken.ToString())
+					new Tuple<string, Func<DataElement, string>>("isToken", e => e.isToken.ToString()),
+					new Tuple<string, Func<DataElement, string>>("fieldId", e => e.FieldId)
 				}
 			);
 
@@ -510,9 +577,20 @@ namespace Peach.Core.Dom.XPath
 
 			public override Entry GetNextAttr()
 			{
-				var next = Index + 1;
-				if (next == Attrs.Count)
-					return null;
+				var next = Index;
+
+				while (true)
+				{
+					++next;
+
+					if (next == Attrs.Count)
+						return null;
+
+					var val = Attrs[next].Item2(_element);
+
+					if (!string.IsNullOrEmpty(val))
+						break;
+				}
 
 				return new ElementAttrEntry(_element, next);
 			}
