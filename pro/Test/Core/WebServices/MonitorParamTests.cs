@@ -920,12 +920,91 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.AreEqual("No parameter entry for monitor 'FooBar' referenced in group 'MissingGroupName'.", tester.Errors[0]);
 		}
 
+		[Test]
+		public void TestCollapsedGroup()
+		{
+			// If there is a collapsed group that contains required parameters
+			// don't collapse and raise a validation error
+
+			const string metadata = @"
+{
+  'Groups': [
+    {
+      'Name': 'GroupName',
+      'Items': [ 
+        'ReqParamMonitor'
+      ]
+    }
+  ],
+  'Parameters': {
+    'ReqParamMonitor': [
+      {
+        'Name': 'Group1',
+        'Collapsed' : true,
+        'Items': [
+          'Test'
+        ]
+      }
+    ]
+  }
+}";
+
+			var tester = new MetadataTester
+			{
+				Type = new[] { typeof(ReqParamMonitor) },
+				Metadata = metadata.Replace('\'', '\"')
+			};
+
+			var result = tester.Run();
+
+			var exp = @"[
+  {
+    ""Items"": [
+      {
+        ""Description"": ""Desc"",
+        ""Items"": [
+          {
+            ""Items"": [
+              {
+                ""Description"": ""Desc"",
+                ""Key"": ""Test"",
+                ""Name"": ""Test"",
+                ""Type"": ""String""
+              }
+            ],
+            ""Name"": ""Group1"",
+            ""Type"": ""Group""
+          }
+        ],
+        ""Key"": ""ReqParamMonitor"",
+        ""Name"": ""Req Param Monitor"",
+        ""OS"": """",
+        ""Type"": ""Monitor""
+      }
+    ],
+    ""Name"": ""GroupName"",
+    ""Type"": ""Group""
+  }
+]".Replace("\r\n", Environment.NewLine);
+
+			Assert.AreEqual(exp, result);
+
+			Assert.AreEqual(1, tester.Errors.Count);
+			Assert.AreEqual("Group 'Group1' for monitor 'ReqParamMonitor' is collapsed but contains required parameters.", tester.Errors[0]);
+		}
+
 		class NoDescriptionMonitor
 		{
 		}
 
 		[System.ComponentModel.DescriptionAttribute("Desc")]
 		class NoParamMonitor
+		{
+		}
+
+		[System.ComponentModel.DescriptionAttribute("Desc")]
+		[Parameter("Test", typeof(string), "Desc")]
+		class ReqParamMonitor
 		{
 		}
 
