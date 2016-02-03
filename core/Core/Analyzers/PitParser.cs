@@ -1327,7 +1327,6 @@ namespace Peach.Core.Analyzers
 			{
 				action = action,
 				type = type,
-				FieldId = node.getAttr("fieldId", null)
 			};
 
 			// 'Out' params are input and can't have <Data>

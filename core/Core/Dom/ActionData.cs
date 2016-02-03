@@ -93,17 +93,6 @@ namespace Peach.Core.Dom
 		public string Name { get; protected set; }
 
 		/// <summary>
-		/// The field id of this record.
-		/// </summary>
-		/// <remarks>
-		/// Non-null when actions have multiple data models
-		/// (Action.Call) and null otherwise (Input/Output/SetProperty/GetProperty).
-		/// </remarks>
-		[XmlAttribute("fieldId")]
-		[DefaultValue(null)]
-		public string FieldId { get; set; }
-
-		/// <summary>
 		/// Full name of this record when viewed as input data
 		/// </summary>
 		public virtual string inputName

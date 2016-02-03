@@ -34,7 +34,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			</Action>
 
 			<Action type='call' fieldId='b' method='foo'>
-				<Param fieldId='w'>
+				<Param>
 					<DataModel name='DM' fieldId='c'>
 						<Stream streamName='foo' fieldId='d' />
 
@@ -94,12 +94,10 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 			Assert.AreEqual("a", s.FieldId);
 			Assert.AreEqual("z", s.actions[0].FieldId);
-			Assert.Null(s.actions[0].outputData.First().FieldId);
 			Assert.Null(s.actions[0].outputData.First().dataModel.FieldId);
 
 			var a = (Call)s.actions[1];
 			Assert.AreEqual("b", a.FieldId);
-			Assert.AreEqual("w", a.parameters[0].FieldId);
 
 			var fields = a.parameters[0].dataModel.PreOrderTraverse().Select(e => e.FieldId).ToList();
 
