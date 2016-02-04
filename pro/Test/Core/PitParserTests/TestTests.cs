@@ -681,7 +681,12 @@ namespace Peach.Pro.Test.Core.PitParserTests
 		<State name='initial'>
 			<Action type='output'>
 				<DataModel name='DM'>
-					<String name='foo' />
+					<Block name='foo'>
+						<String name='bar' />
+					</Block>
+					<Block name='bar'>
+						<String name='baz' />
+					</Block>
 				</DataModel>
 			</Action> 
 		</State>
@@ -691,7 +696,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 		<StateModel ref='StateModel'/>
 		<Publisher class='Null'/>
 
-		<Weight xpath='//foo' weight='Lowest' />
+		<Weight xpath='//bar' weight='Lowest' />
 	</Test>
 </Peach>
 ";
@@ -701,6 +706,15 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			var e = new Engine(null);
 
 			e.startFuzzing(dom, cfg);
+
+			var dm = dom.tests[0].stateModel.states[0].actions[0].dataModel;
+			foreach (var item in dm.PreOrderTraverse())
+			{
+				if (item.Name == "bar" || item.Name == "baz")
+					Assert.AreEqual(ElementWeight.Lowest, item.Weight);
+				else
+					Assert.AreEqual(ElementWeight.Normal, item.Weight);
+			}
 		}
 	}
 }
