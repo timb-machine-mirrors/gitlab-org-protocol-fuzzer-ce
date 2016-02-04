@@ -275,14 +275,11 @@ namespace Peach.Core
 		{
 			get
 			{
-				// Scale the mutator' weight by the element's weight
-				var ret = weight * (int)_elementWeight;
-
 				// TODO: How do we want to weight down elements with fixups & relations
 				if (hasFixup || hasRelation)
-					return (int)(Math.Sqrt(ret));
+					return (int)(Math.Sqrt(weight));
 
-				return ret;
+				return weight;
 			}
 		}
 
