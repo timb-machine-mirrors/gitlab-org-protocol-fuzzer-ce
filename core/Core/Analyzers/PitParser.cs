@@ -1751,6 +1751,19 @@ namespace Peach.Core.Analyzers
 					test.mutables.Add(new ExcludeMutable() { xpath = attr });
 				}
 
+				// Weight
+				if (child.Name == "Weight")
+				{
+					var attr = child.getAttrString("xpath");
+					var val = child.getAttrString("weight");
+
+					ElementWeight weight;
+					if (!Enum.TryParse(val, out weight))
+						throw new PeachException("Error, '{0}' is an invalid enumeration value for weight attribute.".Fmt(val));
+
+					test.mutables.Add(new WeightMutable { xpath = attr, Weight = weight });
+				}
+
 				// Strategy
 				if (child.Name == "Strategy")
 				{

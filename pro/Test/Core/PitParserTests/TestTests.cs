@@ -609,7 +609,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 	<Agent name='OsxAgent' />
 	<Agent name='LinuxAgent' />
 
-	<Test name='Default' {0}>
+	<Test name='Default'>
 		<Agent ref='NoneAgent' platform='none' />
 		<Agent ref='AllAgent' platform='all' />
 		<Agent ref='WindowsAgent' platform='windows' />
@@ -622,7 +622,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 </Peach>
 ";
 
-			var dom1 = DataModelCollector.ParsePit(xml.Fmt(""));
+			var dom1 = DataModelCollector.ParsePit(xml);
 			Assert.AreEqual(5, dom1.tests[0].agents.Count);
 
 			Assert.AreEqual("NoneAgent", dom1.tests[0].agents[0].Name);
@@ -639,6 +639,68 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 			Assert.AreEqual("LinuxAgent", dom1.tests[0].agents[4].Name);
 			Assert.AreEqual(Platform.OS.Linux, dom1.tests[0].agents[4].platform);
+		}
+
+		[Test]
+		public void TestWeights()
+		{
+			const string xml = @"
+<Peach>
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel name='DM'/>
+			</Action> 
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+
+		<Include xpath='//foo' />
+		<Include xpath='//bar' />
+		<Weight xpath='//*/*' weight='BelowNormal' />
+		<Weight xpath='/foo' weight='Highest' />
+		<Weight xpath='/foo/*' weight='Off' />
+
+	</Test>
+</Peach>
+";
+
+			var dom1 = DataModelCollector.ParsePit(xml);
+			Assert.AreEqual(5, dom1.tests[0].mutables.Count);
+		}
+
+		[Test]
+		public void TestWeightTwo()
+		{
+			const string xml = @"
+<Peach>
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel name='DM'>
+					<String name='foo' />
+				</DataModel>
+			</Action> 
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+
+		<Weight xpath='//foo' weight='Lowest' />
+	</Test>
+</Peach>
+";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var cfg = new RunConfiguration { singleIteration = true };
+			var e = new Engine(null);
+
+			e.startFuzzing(dom, cfg);
 		}
 	}
 }

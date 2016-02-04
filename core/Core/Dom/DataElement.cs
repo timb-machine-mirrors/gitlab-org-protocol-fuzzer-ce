@@ -172,6 +172,16 @@ namespace Peach.Core.Dom
 		Default = Fixup,
 	}
 
+	public enum ElementWeight
+	{
+		Off = 0,
+		Lowest,
+		BelowNormal,
+		Normal,
+		AboveNormal,
+		Highest
+	}
+
 	#endregion
 
 	public delegate void InvalidatedEventHandler(object sender, EventArgs e);
@@ -626,6 +636,12 @@ namespace Peach.Core.Dom
 			set;
 		}
 
+		public ElementWeight Weight
+		{
+			get;
+			set;
+		}
+
 		public bool isMutable = true;
 		public MutateOverride mutationFlags = MutateOverride.None;
 		public bool isToken = false;
@@ -898,6 +914,7 @@ namespace Peach.Core.Dom
 			_name = name;
 			fullName = name;
 			root = this;
+			Weight = ElementWeight.Normal;
 		}
 
 		public static T Generate<T>(XmlNode node, DataElementContainer parent) where T : DataElement, new()

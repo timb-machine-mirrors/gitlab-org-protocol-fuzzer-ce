@@ -175,7 +175,7 @@ namespace Peach.Core.Dom
 			}
 
 			var dict = predicate(this);
-			T value = default(T);
+			T value;
 			if (dict.TryGetValue(refName, out value))
 				return value;
 			return default(T);

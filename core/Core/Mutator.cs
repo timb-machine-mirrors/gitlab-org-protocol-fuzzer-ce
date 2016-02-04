@@ -111,11 +111,13 @@ namespace Peach.Core
 
 		bool hasRelation;
 		bool hasFixup;
+		private readonly ElementWeight _elementWeight;
 
 		public Mutator(DataElement obj)
 		{
 			hasRelation = obj.relations.HasOf();
 			hasFixup = obj.fixup != null;
+			_elementWeight = obj.Weight;
 		}
 
 		public Mutator(StateModel obj)
@@ -273,11 +275,14 @@ namespace Peach.Core
 		{
 			get
 			{
+				// Scale the mutator' weight by the element's weight
+				var ret = weight * (int)_elementWeight;
+
 				// TODO: How do we want to weight down elements with fixups & relations
 				if (hasFixup || hasRelation)
-					return (int)(Math.Sqrt(weight));
+					return (int)(Math.Sqrt(ret));
 
-				return weight;
+				return ret;
 			}
 		}
 
