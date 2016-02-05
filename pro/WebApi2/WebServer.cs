@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Text;
 using Owin;
 using System.Web.Http;
@@ -166,16 +165,16 @@ namespace Peach.Pro.WebApi2
 
 			cfg.EnableSwagger(c =>
 			{
-				c.SingleApiVersion("v1", "A title for your API")
-					.Description("A sample API for testing and prototyping Swashbuckle features")
-					.TermsOfService("Some terms")
+				c.SingleApiVersion("v1", "Peach Fuzzer API")
+					.Description("The REST API used for controlling the fuzzer.")
+					.TermsOfService("End User License Agreement")
 					.Contact(cc => cc
-						.Name("Some contact")
-						.Url("http://tempuri.org/contact")
-						.Email("some.contact@tempuri.org"))
+						.Name("Peach Fuzzer")
+						.Url("http://www.peachfuzzer.com/contact/")
+						.Email("support@peachfuzzer.com"))
 					.License(lc => lc
-						.Name("Some License")
-						.Url("http://tempuri.org/license"));
+						.Name("EULA")
+						.Url("http://www.peachfuzzer.com/contact/eula/"));
 
 				c.DescribeAllEnumsAsStrings(true);
 				c.IncludeXmlComments(Utilities.GetAppResourcePath("Peach.Pro.xml"));
