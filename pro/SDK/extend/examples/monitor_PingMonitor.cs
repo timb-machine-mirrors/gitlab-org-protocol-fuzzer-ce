@@ -13,7 +13,7 @@ using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Agent.Monitors
 {
-	[Monitor("Ping")]
+	[Monitor("PingExample")]
 	[Description("Uses ICMP to verify whether a device is functional")]
 	[Parameter("Host", typeof(string), "Host to ping")]
 	[Parameter("Timeout", typeof(int), "Ping timeout in milliseconds", "1000")]
