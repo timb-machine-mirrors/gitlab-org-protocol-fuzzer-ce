@@ -130,6 +130,13 @@ namespace Peach.Core.Dom
 		public string Name { get; set; }
 
 		/// <summary>
+		/// The field id of this action.
+		/// </summary>
+		[XmlAttribute("fieldId")]
+		[DefaultValue(null)]
+		public string FieldId { get; set; }
+
+		/// <summary>
 		/// Name of publisher to use
 		/// </summary>
 		[XmlAttribute]

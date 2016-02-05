@@ -92,6 +92,11 @@ namespace Peach.Core.Dom
 		[DefaultValue(null)]
 		public string Name { get; protected set; }
 
+		public string FullFieldId
+		{
+			get { return DataElement.FieldIdConcat(action.parent.FieldId, action.FieldId); }
+		}
+
 		/// <summary>
 		/// Full name of this record when viewed as input data
 		/// </summary>

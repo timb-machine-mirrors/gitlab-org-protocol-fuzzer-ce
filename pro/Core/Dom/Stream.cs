@@ -14,6 +14,7 @@ namespace Peach.Pro.Core.Dom
 	[DataElement("Stream")]
 	[PitParsable("Stream")]
 	[Parameter("name", typeof(string), "Element name", "")]
+	[Parameter("fieldId", typeof(string), "Element field ID", "")]
 	[Parameter("ref", typeof(string), "Element to reference", "")]
 	[Parameter("streamName", typeof(string), "Stream name")]
 	[Parameter("streamAttribute", typeof(int), "Stream attributes", "0")]
@@ -105,6 +106,8 @@ namespace Peach.Pro.Core.Dom
 				stream.parent = parent;
 			}
 
+			stream.FieldId = node.getAttr("fieldId", null);
+
 			var nameElem = stream["Name"];
 			nameElem.DefaultValue = new Variant(node.getAttrString("streamName"));
 			nameElem.isMutable = node.getAttr("mutable", nameElem.isMutable);
@@ -117,6 +120,8 @@ namespace Peach.Pro.Core.Dom
 			context.handleCommonDataElementAttributes(node, contentElem);
 			context.handleCommonDataElementChildren(node, contentElem);
 			context.handleDataElementContainer(node, contentElem);
+
+			contentElem.FieldId = null;
 
 			return stream;
 		}

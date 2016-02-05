@@ -760,6 +760,9 @@ namespace Peach.Core.Analyzers
 		/// <param name="element">Element to set attributes on</param>
 		public void handleCommonDataElementAttributes(XmlNode node, DataElement element)
 		{
+			if (node.hasAttr("fieldId"))
+				element.FieldId = node.getAttrString("fieldId");
+
 			if (node.hasAttr("token"))
 				element.isToken = node.getAttrBool("token");
 
@@ -1268,6 +1271,7 @@ namespace Peach.Core.Analyzers
 			{
 				parent = parent,
 				Name = node.getAttr("name", parent.states.UniqueName()),
+				FieldId = node.getAttr("fieldId", null),
 				onStart = node.getAttr("onStart", null),
 				onComplete = node.getAttr("onComplete", null)
 			};
@@ -1494,6 +1498,7 @@ namespace Peach.Core.Analyzers
 
 			action.Name = name;
 			action.parent = parent;
+			action.FieldId = node.getAttr("fieldId", null);
 			action.when = node.getAttr("when",null);
 			action.publisher = node.getAttr("publisher", null);
 			action.onStart = node.getAttr("onStart", null);
@@ -1744,6 +1749,19 @@ namespace Peach.Core.Analyzers
 						attr = "//*";
 
 					test.mutables.Add(new ExcludeMutable() { xpath = attr });
+				}
+
+				// Weight
+				if (child.Name == "Weight")
+				{
+					var attr = child.getAttrString("xpath");
+					var val = child.getAttrString("weight");
+
+					ElementWeight weight;
+					if (!Enum.TryParse(val, out weight))
+						throw new PeachException("Error, '{0}' is an invalid enumeration value for weight attribute.".Fmt(val));
+
+					test.mutables.Add(new WeightMutable { xpath = attr, Weight = weight });
 				}
 
 				// Strategy

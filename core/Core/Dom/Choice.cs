@@ -49,6 +49,7 @@ namespace Peach.Core.Dom
 	[DataElement("Choice")]
 	[PitParsable("Choice")]
 	[Parameter("name", typeof(string), "Element name", "")]
+	[Parameter("fieldId", typeof(string), "Element field ID", "")]
 	[Parameter("length", typeof(uint?), "Length in data element", "")]
 	[Parameter("lengthType", typeof(LengthType), "Units of the length attribute", "bytes")]
 	[Parameter("mutable", typeof(bool), "Is element mutable", "true")]

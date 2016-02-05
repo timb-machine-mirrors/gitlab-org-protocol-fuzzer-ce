@@ -86,6 +86,7 @@ namespace Peach.Core.Dom
 	[PitParsable("String")]
 	[DataElementChildSupported("Placement")]
 	[Parameter("name", typeof(string), "Element name", "")]
+	[Parameter("fieldId", typeof(string), "Element field ID", "")]
 	[Parameter("length", typeof(uint?), "Length in data element", "")]
 	[Parameter("lengthType", typeof(LengthType), "Units of the length attribute", "bytes")]
 	[Parameter("nullTerminated", typeof(bool), "Is string null terminated?", "false")]

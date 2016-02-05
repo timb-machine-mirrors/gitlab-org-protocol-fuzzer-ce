@@ -11,6 +11,7 @@ namespace Peach.Core.Dom
 	[DataElement("Double")]
 	[PitParsable("Double")]
 	[Parameter("name", typeof(string), "Name of element", "")]
+	[Parameter("fieldId", typeof(string), "Element field ID", "")]
 	[Parameter("size", typeof(uint), "Size in bits")]
 	[Parameter("endian", typeof(EndianType), "Byte order of number", "little")]
 	[Parameter("mutable", typeof(bool), "Is element mutable", "true")]

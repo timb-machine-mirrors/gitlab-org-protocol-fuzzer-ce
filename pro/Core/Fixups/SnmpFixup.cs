@@ -10,7 +10,7 @@ using System.IO;
 
 namespace Peach.Pro.Core.Fixups
 {
-	[Fixup("SNMPv3", true)]
+	[Fixup("SNMPv3", true, Internal = true)]
 	[Parameter("Message", typeof(DataElement), "Reference to whole message")]
 	[Parameter("EngineId", typeof(DataElement), "Reference to engine ID")]
 	[Parameter("Password", typeof(string), "Authentication password")]

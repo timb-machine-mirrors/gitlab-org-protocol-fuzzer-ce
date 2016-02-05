@@ -42,6 +42,7 @@ namespace Peach.Core.Dom
 	[PitParsable("Number")]
 	[DataElementChildSupported("Placement")]
 	[Parameter("name", typeof(string), "Element name", "")]
+	[Parameter("fieldId", typeof(string), "Element field ID", "")]
 	[Parameter("size", typeof(uint), "Size in bits")]
 	[Parameter("signed", typeof(bool), "Is number signed", "false")]
 	[Parameter("endian", typeof(EndianType), "Byte order of number", "little")]
