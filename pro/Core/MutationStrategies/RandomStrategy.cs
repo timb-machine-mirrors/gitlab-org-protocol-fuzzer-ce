@@ -652,6 +652,9 @@ namespace Peach.Pro.Core.MutationStrategies
 
 				foreach (var elem in allElements)
 				{
+					if (elem.Weight == ElementWeight.Off)
+						continue;
+
 					var rec = new MutableItem(item.instanceName, elem.fullName, elem.Weight);
 					var e = elem;
 
