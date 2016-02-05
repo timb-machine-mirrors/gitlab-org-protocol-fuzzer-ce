@@ -111,13 +111,11 @@ namespace Peach.Core
 
 		bool hasRelation;
 		bool hasFixup;
-		private readonly ElementWeight _elementWeight;
 
 		public Mutator(DataElement obj)
 		{
 			hasRelation = obj.relations.HasOf();
 			hasFixup = obj.fixup != null;
-			_elementWeight = obj.Weight;
 		}
 
 		public Mutator(StateModel obj)
