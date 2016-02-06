@@ -46,6 +46,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		Reporting,
 	}
 
+	[Serializable]
 	public class JobCommands
 	{
 		/// <summary>
@@ -81,23 +82,55 @@ namespace Peach.Pro.Core.WebServices.Models
 		public string KillUrl { get; set; }
 	}
 
+	[Serializable]
 	public class JobMetrics
 	{
+		/// <summary>
+		/// The URL of bucket timeline metrics.
+		/// </summary>
 		public string BucketTimeline { get; set; }
+
+		/// <summary>
+		/// The URL of fault timeline metrics.
+		/// </summary>
 		public string FaultTimeline { get; set; }
+
+		/// <summary>
+		/// The URL of mutator metrics.
+		/// </summary>
 		public string Mutators { get; set; }
+
+		/// <summary>
+		/// The URL of fuzzed elements metrics.
+		/// </summary>
 		public string Elements { get; set; }
+
+		/// <summary>
+		/// The URL of selected data sets metrics.
+		/// </summary>
 		public string Dataset { get; set; }
+
+		/// <summary>
+		/// The URL of state execution metrics.
+		/// </summary>
 		public string States { get; set; }
+
+		/// <summary>
+		/// The URL of fault bucket metrics.
+		/// </summary>
 		public string Buckets { get; set; }
+
+		/// <summary>
+		/// The URL of iteration metrics.
+		/// </summary>
 		public string Iterations { get; set; }
 	}
 
+	[Serializable]
 	public class JobRequest
 	{
 		/// <summary>
 		/// The URL of the specific version of the pit for this job
-		/// TODO: Include version in the URL
 		/// </summary>
 		/// <example>
 		/// "/p/pits/{id}"
@@ -345,7 +378,6 @@ namespace Peach.Pro.Core.WebServices.Models
 
 		/// <summary>
 		/// The URL of the specific version of peach for this job
-		/// TODO: Include version in the URL
 		/// </summary>
 		/// <example>
 		/// "/p/peaches/{id}"

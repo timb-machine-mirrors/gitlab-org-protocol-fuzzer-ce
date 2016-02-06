@@ -44,7 +44,7 @@ def prepare(conf):
 		'/usr/local/bin',
 	]
 
-	env['MCS']  = 'dmcs'
+	env['MCS']  = 'mcs'
 
 	env['SYSROOT'] = find_directory([ 
 		'MacOSX10.11.sdk', 
@@ -109,8 +109,8 @@ def prepare(conf):
 		},
 	}
 
-	env['TARGET_FRAMEWORK'] = 'v4.0'
-	env['TARGET_FRAMEWORK_NAME'] = '.NET Framework 4'
+	env['TARGET_FRAMEWORK'] = 'v4.5'
+	env['TARGET_FRAMEWORK_NAME'] = '.NET Framework 4.5'
 
 	env['ASAN_CC'] = 'clang-3.6'
 	env['ASAN_CXX'] = 'clang++-3.6'
@@ -141,6 +141,7 @@ def configure(conf):
 	])
 
 	env.append_value('CSFLAGS', [
+		'/sdk:4.5',
 		'/warn:4',
 		'/define:PEACH,UNIX,MONO',
 		'/warnaserror',

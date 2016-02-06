@@ -675,6 +675,19 @@ namespace Peach.Pro.Core.WebServices
 
 		public Pit UpdatePitById(string guid, Pit data)
 		{
+			var cfg = new PitConfig
+			{
+				Id = data.Id,
+				Name = data.Name,
+				Agents = data.Agents,
+				Config = data.Config
+			};
+
+			return UpdatePitById(guid, cfg);
+		}
+
+		public Pit UpdatePitById(string guid, PitConfig data)
+		{
 			var detail = GetPitDetailById(guid);
 			if (detail == null)
 				throw new KeyNotFoundException();
