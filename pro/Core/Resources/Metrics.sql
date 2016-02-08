@@ -18,6 +18,7 @@ SELECT
 	a.Name AS [Action],
 	p.Name AS Parameter,
 	e.Name AS Element,
+	f.Name AS Field,
 	m.Name AS Mutator,
 	d.Name AS Dataset,
 	x.IterationCount
@@ -27,6 +28,7 @@ JOIN NamedItem AS sn ON sn.Id = s.NameId
 JOIN NamedItem AS a  ON a.Id  = x.ActionId
 JOIN NamedItem AS p  ON p.Id  = x.ParameterId
 JOIN NamedItem AS e  ON e.Id  = x.ElementId
+LEFT JOIN NamedItem AS f  ON f.Id  = x.FieldId
 JOIN NamedItem AS m  ON m.Id  = x.MutatorId
 JOIN NamedItem AS d  ON d.Id  = x.DatasetId;
 -- Iterations <<<
@@ -42,6 +44,7 @@ SELECT
 	ELSE
 		e.Name
 	END AS [Element],
+	f.Name as Field,
 	m.Name AS Mutator,
 	d.Name AS Dataset,
 	x.Iteration
@@ -51,6 +54,7 @@ JOIN NamedItem AS sn ON sn.Id = s.NameId
 JOIN NamedItem AS a  ON a.Id  = x.ActionId
 JOIN NamedItem AS p  ON p.Id  = x.ParameterId
 JOIN NamedItem AS e  ON e.Id  = x.ElementId
+LEFT JOIN NamedItem AS f  ON f.Id  = x.FieldId
 JOIN NamedItem AS m  ON m.Id  = x.MutatorId
 JOIN NamedItem AS d  ON d.Id  = x.DatasetId;
 -- Faults <<<
@@ -274,6 +278,45 @@ ORDER BY
 	[Element]
 ;
 -- Elements <<<
+
+-- Fields >>>
+CREATE VIEW ViewFieldsByIteration AS
+SELECT
+	x.FieldId,
+	SUM(x.IterationCount) AS IterationCount
+FROM Mutation AS x
+GROUP BY 
+	x.FieldId
+;
+
+CREATE VIEW ViewFieldsByFault AS
+SELECT
+	x.FieldId,
+	COUNT(DISTINCT(x.Iteration)) AS FaultCount,
+	COUNT(DISTINCT(x.MajorHash)) AS BucketCount
+FROM FaultMetric AS x
+GROUP BY
+	x.FieldId
+;
+
+CREATE VIEW ViewFields AS
+SELECT 
+	vei.IterationCount,
+	vef.BucketCount,
+	vef.FaultCount,
+	f.Name as Field
+FROM ViewFieldsByIteration AS vei
+LEFT JOIN ViewFieldsByFault AS vef ON
+	(vef.FieldId IS NULL and vei.FieldId IS NULL) OR
+	(vef.FieldId = vei.FieldId)
+LEFT JOIN NamedItem AS f ON f.Id = vei.FieldId
+ORDER BY
+	BucketCount DESC,
+	FaultCount DESC,
+	IterationCount DESC,
+	Field
+;
+-- Fields <<<
 
 -- Datasets >>>
 CREATE VIEW ViewDatasetsByIteration AS
