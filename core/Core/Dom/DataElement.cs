@@ -816,6 +816,9 @@ namespace Peach.Core.Dom
 			if (!Name.StartsWith("DataElement_"))
 				pit.WriteAttributeString("name", Name);
 
+			if (FieldId != null)
+				pit.WriteAttributeString("fieldId", FieldId);
+
 			if (isToken)
 				pit.WriteAttributeString("token", "true");
 
