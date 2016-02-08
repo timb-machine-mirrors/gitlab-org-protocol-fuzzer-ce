@@ -9,6 +9,7 @@ import { R } from '../../routes';
 import { Route } from '../../models/Router';
 import { Job, JobStatus, JobMode } from '../../models/Job';
 import FaultsTable from '../../components/FaultsTable';
+import LinkContainer from '../../components/LinkContainer';
 import { formatDate } from '../../utils';
 
 interface DashboardProps extends Props<Dashboard> {
@@ -43,9 +44,20 @@ const statusTable = {
 class Dashboard extends Component<DashboardProps, {}> {
 	render() {
 		const { job } = this.props;
-		const showLimited = false;
-		const showStatus = true;
-		const showCommands = true;
+		const stopButton = (job.status === JobStatus.Stopping) ?
+			{ icon: 'power-off', label: 'Abort' } :
+			{ icon: 'stop'     , label: 'Stop'  };
+		const showLimited = _.isEmpty(job.pitUrl);
+		const pitId = _.last(job.pitUrl.split('/'));
+		const editParams = {
+			pit: pitId
+		};
+		const replayParams = {
+			pit: pitId,
+			seed: job.seed,
+			rangeStart: job.rangeStart,
+			rangeStop: job.rangeStop
+		};
 
 		return <div>
 			{showLimited &&
@@ -57,7 +69,7 @@ class Dashboard extends Component<DashboardProps, {}> {
 				</Alert>
 			}
 
-			{showStatus &&
+			{job.status &&
 				<Alert bsStyle="info">
 					{this.renderStatus(job)}
 				</Alert>
@@ -79,7 +91,7 @@ class Dashboard extends Component<DashboardProps, {}> {
 			<div className="space-6"></div>
 
 			<Row className="text-center">
-				{showCommands &&
+				{job.status !== JobStatus.Stopped &&
 					<ButtonToolbar>
 						<Button bsStyle="success">
 							<Icon name="play" /> &nbsp; Start
@@ -88,19 +100,23 @@ class Dashboard extends Component<DashboardProps, {}> {
 							<Icon name="pause" /> &nbsp; Pause
 						</Button>
 						<Button bsStyle="danger">
-							<Icon name="stop" /> &nbsp; Stop
+							<Icon name={stopButton.icon} /> &nbsp; {stopButton.label}
 						</Button>
 					</ButtonToolbar>
 				}
 
-				{!showCommands && 
+				{job.status === JobStatus.Stopped && 
 					<ButtonToolbar>
-						<Button bsStyle="primary">
-							<Icon name="edit" /> &nbsp; Edit Configuration
-						</Button>
-						<Button bsStyle="primary">
-							<Icon name="replay" /> &nbsp; Replay Job
-						</Button>
+						<LinkContainer to={R.Pit} params={editParams}>
+							<Button bsStyle="primary">
+								<Icon name="edit" /> &nbsp; Edit Configuration
+							</Button>
+						</LinkContainer>
+						<LinkContainer to={R.Pit} params={replayParams}>
+							<Button bsStyle="primary">
+								<Icon name="repeat" /> &nbsp; Replay Job
+							</Button>
+						</LinkContainer>
 					</ButtonToolbar>
 				}
 			</Row>
@@ -113,39 +129,34 @@ class Dashboard extends Component<DashboardProps, {}> {
 		</div>
 	}
 
-	renderStatus(data: Job) {
-		const result = data.result ? data.result : "This job has completed.";
-		if (!data.status)
-			return <span />;
-
-		if (data.status === JobStatus.Stopped) {
-			return (
-				<span>
-					{result}
-					&nbsp;
-					{data && data.reportUrl &&
-						<span>
-							Click &nbsp;
-							<a href={data.reportUrl}>
-								<Icon name="file-pdf-o" size="lg" /> here 
-							</a>
-							&nbsp; to view the final report.
-						</span>
-					}
-				</span>
-			)
+	renderStatus(job: Job) {
+		if (job.status === JobStatus.Stopped) {
+			const result = _.get(job, 'result', "This job has completed.");
+			return <span>
+				{result}
+				&nbsp;
+				{job && job.reportUrl &&
+					<span>
+						Click &nbsp;
+						<a href={job.reportUrl}>
+							<Icon name="file-pdf-o" size="lg" /> here 
+						</a>
+						&nbsp; to view the final report.
+					</span>
+				}
+			</span>
 		}
 
-		let next = statusTable[data.status];
+		let next = statusTable[job.status];
 		if (_.isString)
 			return next;
 
-		return _.get(next, data.mode, next['default']);
+		return _.get(next, job.mode, next['default']);
 	}
 
-	renderInfobox(data, content: string, color: string = 'blue') {
+	renderInfobox(job, content: string, color: string = 'blue') {
 		const klass = `infobox infobox-${color}`;
-		const final = _.isNull(data) ? '---' : data;
+		const final = _.isNull(job) ? '---' : job;
 		return <div className={klass}>
 			<div className="infobox-data">
 				<span className="infobox-data-number">

@@ -233,3 +233,14 @@ ul.library li a {
 .ui-select-toggle {
 	text-align: left;
 }
+
+.tree-node {
+	margin-left: 20px;
+}
+
+.tree-node-label {
+	margin-left: 5px;
+	padding: 1px;
+	border: 1px solid #fff;
+	font-weight: normal;
+}
