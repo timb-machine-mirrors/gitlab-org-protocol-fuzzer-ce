@@ -8,6 +8,7 @@
 /// <reference path="_local/router5.d.ts" />
 /// <reference path="_local/router5-history.d.ts" />
 /// <reference path="_local/router5-listeners.d.ts" />
+/// <reference path='../node_modules/immutable/dist/Immutable.d.ts'/>
 
 /// <reference path="mocha/mocha.d.ts" />
 /// <reference path="react-redux/react-redux.d.ts" />

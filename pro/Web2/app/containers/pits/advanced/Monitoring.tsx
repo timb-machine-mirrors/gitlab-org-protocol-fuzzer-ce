@@ -88,7 +88,6 @@ interface MonitoringProps extends Props<Monitoring> {
 
 interface MonitoringState {
 	isSaved?: boolean;
-	isDirty?: boolean;
 }
 
 @connect(state => ({ pit: state.pit }))

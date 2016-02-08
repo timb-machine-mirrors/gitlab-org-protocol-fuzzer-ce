@@ -24,6 +24,7 @@ import CPitWizardAutoIntro from './containers/pits/wizard/auto/Intro';
 import CPitWizardTest from './containers/pits/wizard/Test';
 import CPitAdvancedVariables from './containers/pits/advanced/Variables';
 import CPitAdvancedMonitoring from './containers/pits/advanced/Monitoring';
+import CPitAdvancedTuning from './containers/pits/advanced/Tuning';
 import CPitAdvancedTest from './containers/pits/advanced/Test';
 
 import CJobsMenu from './containers/jobs/JobsMenu';
@@ -148,6 +149,12 @@ export const R = {
 		path: '/monitoring',
 		parts: [CPitsMenu, CPitMount, CPitAdvancedMonitoring],
 		displayName: 'Monitoring'
+	},
+	PitAdvancedTuning: {
+		name: 'root.pits.pit.advanced.tuning',
+		path: '/tuning',
+		parts: [CPitsMenu, CPitMount, CPitAdvancedTuning],
+		displayName: 'Tuning'
 	},
 	PitAdvancedTest: {
 		name: 'root.pits.pit.advanced.test',

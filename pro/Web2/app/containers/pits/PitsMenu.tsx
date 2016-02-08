@@ -19,6 +19,7 @@ class PitsMenu extends Component<Props<PitsMenu>, {}> {
 			<MenuItem to={R.PitAdvanced}>
 				<MenuItem to={R.PitAdvancedVariables} />
 				<MenuItem to={R.PitAdvancedMonitoring} />
+				<MenuItem to={R.PitAdvancedTuning} />
 				<MenuItem to={R.PitAdvancedTest} />
 			</MenuItem>
 		</Menu>
