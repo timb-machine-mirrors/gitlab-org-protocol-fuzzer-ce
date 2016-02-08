@@ -365,6 +365,14 @@ namespace Peach.Pro.WebApi2.Controllers
 			return Query<ElementMetric>(id);
 		}
 
+		[Route("{id}/metrics/fields")]
+		[ResponseType(typeof(IEnumerable<FieldMetric>))]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		public IHttpActionResult GetFieldMetric(Guid id)
+		{
+			return Query<FieldMetric>(id);
+		}
+
 		[Route("{id}/metrics/states")]
 		[ResponseType(typeof(IEnumerable<StateMetric>))]
 		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]

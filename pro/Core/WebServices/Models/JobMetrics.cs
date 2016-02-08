@@ -94,6 +94,28 @@ namespace Peach.Pro.Core.WebServices.Models
 		}
 	}
 
+	[Table("ViewFields")]
+	public class FieldMetric
+	{
+		public string Field { get; set; }
+		public long IterationCount { get; set; }
+		public long BucketCount { get; set; }
+		public long FaultCount { get; set; }
+
+		public FieldMetric() { }
+		public FieldMetric(
+			string field,
+			long iterationCount,
+			long bucketCount,
+			long faultCount)
+		{
+			Field = field;
+			IterationCount = iterationCount;
+			BucketCount = bucketCount;
+			FaultCount = faultCount;
+		}
+	}
+
 	[Table("ViewStates")]
 	public class StateMetric
 	{
