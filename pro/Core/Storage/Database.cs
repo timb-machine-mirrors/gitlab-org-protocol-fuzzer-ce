@@ -224,6 +224,9 @@ namespace Peach.Pro.Core.Storage
 						Migrations[i]();
 						CurrentVersion = i + 1;
 					}
+
+					if (Scripts != null)
+						Transaction(() => Scripts.ForEach(s => Connection.Execute(s)));
 				}
 
 				if (CurrentVersion != RequiredVersion)

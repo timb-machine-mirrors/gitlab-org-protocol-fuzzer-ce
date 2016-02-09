@@ -1,4 +1,5 @@
 ﻿-- States >>>
+DROP VIEW IF EXISTS ViewStates;
 CREATE VIEW ViewStates AS 
 SELECT
 	n.Name || '_' || s.RunCount AS [State],
@@ -12,6 +13,7 @@ ORDER BY
 -- States <<<
 
 -- Iterations >>>
+DROP VIEW IF EXISTS ViewIterations;
 CREATE VIEW ViewIterations AS 
 SELECT
 	sn.Name || '_' || s.RunCount AS [State],
@@ -34,6 +36,7 @@ JOIN NamedItem AS d  ON d.Id  = x.DatasetId;
 -- Iterations <<<
 
 -- Faults >>>
+DROP VIEW IF EXISTS ViewFaults;
 CREATE VIEW ViewFaults AS 
 SELECT
 	sn.Name || '_' || s.RunCount AS [State],
@@ -60,6 +63,7 @@ JOIN NamedItem AS d  ON d.Id  = x.DatasetId;
 -- Faults <<<
 
 -- Buckets >>>
+DROP VIEW IF EXISTS ViewBuckets;
 CREATE VIEW ViewBuckets AS
 SELECT
 	x.MajorHash || '_' || x.MinorHash AS Bucket,
@@ -120,6 +124,7 @@ ORDER BY
 -- Buckets <<<
 
 -- Bucket Details >>>
+DROP VIEW IF EXISTS ViewBucketDetails;
 CREATE VIEW ViewBucketDetails AS
 SELECT
 	COUNT(*) as FaultCount,
@@ -138,6 +143,7 @@ ORDER BY
 -- Bucket Details <<<
 
 -- BucketTimeline >>>
+DROP VIEW IF EXISTS ViewBucketTimeline;
 CREATE VIEW ViewBucketTimeline AS
 SELECT
 	x.MajorHash || '_' || x.MinorHash AS Label,
@@ -152,6 +158,7 @@ GROUP BY
 -- BucketTimeline <<<
 
 -- FaultTimeline >>>
+DROP VIEW IF EXISTS ViewFaultTimeline;
 CREATE VIEW ViewFaultTimeline AS
 SELECT
 	x.[Timestamp] AS [Date],
@@ -161,6 +168,7 @@ GROUP BY x.[Hour];
 -- FaultTimeline <<<
 
 -- Mutators >>>
+DROP VIEW IF EXISTS ViewDistinctElements;
 CREATE VIEW ViewDistinctElements AS
 SELECT DISTINCT
 	MutatorId,
@@ -170,6 +178,7 @@ SELECT DISTINCT
 	ElementId
 FROM Mutation;
 
+DROP VIEW IF EXISTS ViewMutatorsByElement;
 CREATE VIEW ViewMutatorsByElement AS
 SELECT 
 	MutatorId,
@@ -177,6 +186,7 @@ SELECT
 FROM ViewDistinctElements
 GROUP BY MutatorId;
 
+DROP VIEW IF EXISTS ViewMutatorsByIteration;
 CREATE VIEW ViewMutatorsByIteration AS
 SELECT 
 	vme.MutatorId,
@@ -186,6 +196,7 @@ FROM ViewMutatorsByElement AS vme
 JOIN Mutation AS x ON vme.MutatorId = x.MutatorId
 GROUP BY x.MutatorId;
 
+DROP VIEW IF EXISTS ViewMutatorsByFault;
 CREATE VIEW ViewMutatorsByFault AS
 SELECT 
 	x.MutatorId,
@@ -194,6 +205,7 @@ SELECT
 FROM FaultMetric AS x
 GROUP BY x.MutatorId;
 	
+DROP VIEW IF EXISTS ViewMutators;
 CREATE VIEW ViewMutators AS
 SELECT
 	n.Name AS Mutator,
@@ -214,6 +226,7 @@ ORDER BY
 -- Mutators <<<
 
 -- Elements >>>
+DROP VIEW IF EXISTS ViewElementsByIteration;
 CREATE VIEW ViewElementsByIteration AS
 SELECT
 	x.StateId,
@@ -229,6 +242,7 @@ GROUP BY
 	x.ElementId
 ;
 
+DROP VIEW IF EXISTS ViewElementsByFault;
 CREATE VIEW ViewElementsByFault AS
 SELECT
 	x.StateId,
@@ -245,6 +259,7 @@ GROUP BY
 	x.ElementId
 ;
 
+DROP VIEW IF EXISTS ViewElements;
 CREATE VIEW ViewElements AS
 SELECT 
 	sn.Name || '_' || s.RunCount AS [State],
@@ -280,6 +295,7 @@ ORDER BY
 -- Elements <<<
 
 -- Fields >>>
+DROP VIEW IF EXISTS ViewFieldsByIteration;
 CREATE VIEW ViewFieldsByIteration AS
 SELECT
 	x.FieldId,
@@ -289,6 +305,7 @@ GROUP BY
 	x.FieldId
 ;
 
+DROP VIEW IF EXISTS ViewFieldsByFault;
 CREATE VIEW ViewFieldsByFault AS
 SELECT
 	x.FieldId,
@@ -299,6 +316,7 @@ GROUP BY
 	x.FieldId
 ;
 
+DROP VIEW IF EXISTS ViewFields;
 CREATE VIEW ViewFields AS
 SELECT 
 	vei.IterationCount,
@@ -319,6 +337,7 @@ ORDER BY
 -- Fields <<<
 
 -- Datasets >>>
+DROP VIEW IF EXISTS ViewDatasetsByIteration;
 CREATE VIEW ViewDatasetsByIteration AS
 SELECT
 	x.StateId,
@@ -334,6 +353,7 @@ GROUP BY
 	x.DatasetId
 ;
 
+DROP VIEW IF EXISTS ViewDatasetsByFault;
 CREATE VIEW ViewDatasetsByFault AS
 SELECT
 	x.StateId,
@@ -350,6 +370,7 @@ GROUP BY
 	x.DatasetId
 ;
 
+DROP VIEW IF EXISTS ViewDatasets;
 CREATE VIEW ViewDatasets AS
 SELECT
 	CASE WHEN length(p.name) > 0 THEN
