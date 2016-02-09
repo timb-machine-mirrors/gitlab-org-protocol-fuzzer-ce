@@ -63,7 +63,7 @@ namespace Peach.Pro.Test.Core.Storage
 			cache.StateStarting("S1", 1);
 			cache.ActionStarting("Action");
 			cache.ActionStarting("A1");
-			cache.DataMutating("", "TheDataModel.Length", null, "SizedEdgeCase", "Data");
+			cache.DataMutating("", "TheDataModel.Length", "", "SizedEdgeCase", "Data");
 			cache.ActionStarting("A2");
 			cache.ActionStarting("A3");
 			cache.ActionStarting("A4");
@@ -82,7 +82,7 @@ namespace Peach.Pro.Test.Core.Storage
 			cache.ActionStarting("A3");
 			cache.ActionStarting("A4");
 			cache.ActionStarting("ACALL");
-			cache.DataMutating("P3", "TheDataModel.Data.Type", null, "StringUtf8BomLength", "Data");
+			cache.DataMutating("P3", "TheDataModel.Data.Type", "", "StringUtf8BomLength", "Data");
 			cache.ActionStarting("A5");
 			cache.StateStarting("S4", 1);
 			cache.ActionStarting("A1");
@@ -90,8 +90,8 @@ namespace Peach.Pro.Test.Core.Storage
 			cache.ActionStarting("A3");
 			cache.ActionStarting("A4");
 			cache.ActionStarting("ACALL");
-			cache.DataMutating("P2", "TheDataModel.Length", null, "NumberVariance", "Data");
-			cache.DataMutating("P3", "TheDataModel.Length", null, "SizedDataEdgeCase", "Data");
+			cache.DataMutating("P2", "TheDataModel.Length", "", "NumberVariance", "Data");
+			cache.DataMutating("P3", "TheDataModel.Length", "", "SizedDataEdgeCase", "Data");
 			cache.IterationFinished();
 			cache.TestFinished();
 		}

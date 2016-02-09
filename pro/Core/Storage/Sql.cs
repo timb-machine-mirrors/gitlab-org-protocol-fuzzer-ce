@@ -334,8 +334,17 @@ ADD COLUMN
 ";
 
 		public const string JobMigrateV3 = @"
+BEGIN TRANSACTION;
+
+INSERT OR IGNORE INTO NamedItem(Name) VALUES('');
+
 Alter TABLE Mutation ADD COLUMN FieldId INTEGER;
+UPDATE Mutation SET FieldId=(SELECT Id from NamedItem WHERE Name='') WHERE FieldId IS NULL;
+
 Alter TABLE FaultMetric ADD COLUMN FieldId INTEGER;
+UPDATE FaultMetric SET FieldId=(SELECT Id from NamedItem WHERE Name='') WHERE FieldId IS NULL;
+
+COMMIT;
 ";
 
 		public const string JobMigrateV2 = @"

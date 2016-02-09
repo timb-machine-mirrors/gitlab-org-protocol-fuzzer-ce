@@ -243,9 +243,7 @@ namespace Peach.Pro.Core.Storage
 			_mutation.ElementId = _nameCache.Add(element);
 			_mutation.MutatorId = _nameCache.Add(mutator);
 			_mutation.DatasetId = _nameCache.Add(dataset);
-
-			if (!string.IsNullOrEmpty(field))
-				_mutation.FieldId = _nameCache.Add(field);
+			_mutation.FieldId = _nameCache.Add(field);
 
 			_mutations.Add(_mutation);
 

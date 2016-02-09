@@ -63,7 +63,7 @@ namespace Peach.Pro.Core.Storage
 
 		// TODO: Figure out what indices we need to have
 		[ForeignKey(typeof(NamedItem), Name = "FK_Mutation_Field")]
-		public long? FieldId { get; set; }
+		public long FieldId { get; set; }
 
 		[Index("IX_Mutation")]
 		[Index("UX_Mutation", IsUnique = true)]
@@ -113,7 +113,7 @@ namespace Peach.Pro.Core.Storage
 		public long ElementId { get; set; }
 
 		[ForeignKey(typeof(NamedItem), Name = "FK_FaultMetric_Field")]
-		public long? FieldId { get; set; }
+		public long FieldId { get; set; }
 
 		[ForeignKey(typeof(NamedItem), Name = "FK_FaultMetric_Mutator")]
 		public long MutatorId { get; set; }
