@@ -7,12 +7,15 @@ namespace Peach.Pro.WebApi2.Utility
 	{
 		public override void OnActionExecuted(HttpActionExecutedContext context)
 		{
-			context.Response.Headers.CacheControl = new CacheControlHeaderValue
+			if (context.Response != null)
 			{
-				NoCache = true
-			};
+				context.Response.Headers.CacheControl = new CacheControlHeaderValue
+				{
+					NoCache = true
+				};
 
-			context.Response.Headers.Pragma.Add(new NameValueHeaderValue("no-cache"));
+				context.Response.Headers.Pragma.Add(new NameValueHeaderValue("no-cache"));
+			}
 
 			base.OnActionExecuted(context);
 		}
