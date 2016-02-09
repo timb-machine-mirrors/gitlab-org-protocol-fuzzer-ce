@@ -31,7 +31,7 @@ class JobComponent extends Component<JobComponentProps, {}> {
 
 	render() {
 		const { job } = this.props;
-		if (job)
+		if (job.name)
 			return <Segment part={2} />
 		return <div />
 	}

@@ -1,4 +1,4 @@
-import Router5 from 'router5';
+import { Router5 } from 'router5';
 import { createStore, applyMiddleware, compose } from 'redux';
 import { middleware as awaitMiddleware } from 'redux-await';
 import { router5Middleware } from 'redux-router5';

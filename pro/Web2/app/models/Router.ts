@@ -1,5 +1,5 @@
 import { PropTypes } from 'react';
-import Router5 from 'router5';
+import { Router5 } from 'router5';
 
 export interface Route {
 	name: string;
