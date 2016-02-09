@@ -1,89 +1,126 @@
 import React = require('react');
-import { Component } from 'react';
-import { Tabs, Tab } from 'react-bootstrap';
+import Icon = require('react-fa');
+import { Component, Props } from 'react';
+import { connect } from 'redux-await';
+import { Tabs, Tab, Row, Col, Alert, Table } from 'react-bootstrap';
 
-class PitTest extends Component<{}, {}> {
+import { TestState, TestEvent, TestStatus } from '../models/PitTest';
+
+interface PitTestProps extends Props<PitTest> {
+	// injected
+	test?: TestState;
+}
+
+@connect(state => ({ test: state.test }))
+class PitTest extends Component<PitTestProps, {}> {
 	render() {
-		const testTime = 0;
-		const testLog = 'nothing here';
-		const testEvents = [
-			{ description: 'event1', resolve: 'resolve1' }
-		];
-		return (
-			<div className="row"
-				ng-if="vm.IsAvailable">
+		const { test } = this.props;
 
+		return (
+			<Row>
 				<hr />
 
-				<div className="col-md-12">
-					<div className="alert alert-info"
-						ng-show="vm.ShowTestPending">
-						Testing is in progress.
-					</div>
+				<Col md={12}>
+					{test.isPending &&
+						<Alert bsStyle='info'>
+							Testing is in progress.
+						</Alert>
+					}
 
-					<div className="alert alert-success"
-						ng-show="vm.ShowTestPass">
-						Testing passed, click Continue.
-					</div>
+					{test.result && test.result.status === TestStatus.Pass &&
+						<Alert bsStyle='success'>
+							Testing passed, click Continue.
+						</Alert>
+					}
 
-					<div className="alert alert-danger"
-						ng-show="vm.ShowTestFail">
-						Testing failed, please correct the errors described and return to this page to test again.
-					</div>
+					{test.result && test.result.status === TestStatus.Fail &&
+						<Alert bsStyle='danger'>
+							Testing failed, please correct the errors described and 
+							return to this page to test again.
+						</Alert>
+					}
 
 					<h3>
 						Test Output
-						<span ng-switch="vm.TestTime.length">
-							<span ng-switch-when="0" />
-							<span ng-switch-default>({testTime}) </span>
-						</span>
 					</h3>
 					<Tabs defaultActiveKey={1}>
-						<Tab title="Summary"
-							eventKey={1}>
-							<table className="table table-striped table-hover table-bordered">
-								<thead>
-									<tr>
-										<th><i ng-className="vm.StatusClass(null)"></i></th>
-										<th className="width-100">Message</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<td className="text-center"
-											colSpan={2}
-											ng-if="vm.TestEvents.length === 0">
-											Waiting for test events...
-										</td>
-									</tr>
-									{testEvents.map((item, index) => {
-										<tr>
-											<td>
-												<i ng-className="vm.StatusClass(row)"></i>
-											</td>
-											<td className="width-100">
-												<span>
-													{item.description}
-												</span>
-												<span className="red"
-													ng-show="row.resolve">
-													<br />
-													{item.resolve}
-												</span>
-											</td>
-										</tr>
-									})}
-								</tbody>
-							</table>
-						</Tab>
-						<Tab title="Log"
-							eventKey={2}>
-							<pre className="peach-test-log">{testLog}</pre>
-						</Tab>
+						{this.renderSummary()}
+						{this.renderLog()}
 					</Tabs>
-				</div>
-			</div>
+				</Col>
+			</Row>
 		)
+	}
+
+	renderSummary() {
+		const { test } = this.props;
+		const events = test.result ? test.result.events : [];
+		const status = test.result ? test.result.status : TestStatus.Fail;
+		return <Tab eventKey={1} title="Summary">
+			<Table striped hover bordered>
+				<thead>
+					<tr>
+						<th>
+							{this.renderStatusIcon(status)}
+						</th>
+						<th style={{ width: '100%' }}>
+							Message
+						</th>
+						</tr>
+					</thead>
+				<tbody>
+					{_.isEmpty(events) &&
+						<tr>
+							<td style={{ textAlign: 'center' }}
+								colSpan={2}>
+								Waiting for test events...
+							</td>
+						</tr>
+					}
+					{events.map(this.renderTestEvent)}
+				</tbody>
+			</Table>
+		</Tab>
+	}
+
+	renderLog() {
+		const { test } = this.props;
+		const log = test.result ? test.result.log : '';
+		return <Tab eventKey={2} title="Log">
+			<pre className="peach-test-log">
+				{log}
+			</pre>
+		</Tab>
+	}
+
+	renderTestEvent = (item: TestEvent, index: number) => {
+		return <tr key={index}>
+			<td>
+				{this.renderStatusIcon(item.status)}
+			</td>
+			<td style={{ width: '100%' }}>
+				<span>
+					{item.description}
+				</span>
+				{item.resolve &&
+					<span className="red">
+						<br />
+						{item.resolve}
+					</span>
+				}
+			</td>
+		</tr>
+	}
+
+	renderStatusIcon(status: string) {
+		switch (status) {
+			case TestStatus.Pass:
+				return <Icon name='check' className='green' />
+			case TestStatus.Fail:
+				return <Icon name='ban' className='red' />
+			default:
+				return <Icon name='spinner' pulse />
+		}
 	}
 }
 

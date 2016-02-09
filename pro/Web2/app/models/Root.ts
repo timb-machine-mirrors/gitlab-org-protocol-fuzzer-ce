@@ -2,6 +2,7 @@ import { RouterState } from './Router';
 import { LibraryState } from './Library';
 import { Pit } from './Pit';
 import { Job } from './Job';
+import { TestState } from './PitTest';
 import { FaultSummary, FaultDetail } from './Fault';
 
 export interface StateContainer<T> {
@@ -15,6 +16,7 @@ interface RootState {
 	library?: LibraryState;
 	router?: RouterState;
 	pit?: Pit;
+	test?: TestState;
 	job?: Job;
 	jobs?: Job[];
 	faults?: FaultSummary[];
@@ -24,6 +26,7 @@ interface RootState {
 			library: string;
 			router: string;
 			pit: string;
+			test: string;
 			jobs: string;
 			job: string;
 			faults: string;

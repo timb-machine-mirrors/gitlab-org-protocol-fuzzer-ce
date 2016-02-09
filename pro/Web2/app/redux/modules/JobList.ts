@@ -21,14 +21,18 @@ export default function reducer(state: Job[] = [], action): Job[] {
 
 export function fetch() {
 	return (dispatch: Dispatch, getState: Function) => {
-		dispatch({
-			type: types.JOBS_FETCH,
-			AWAIT_MARKER,
-			payload: {
-				jobs: doFetch()
-			}
-		});
+		dispatchFetch(dispatch);
 	}
+}
+
+export function dispatchFetch(dispatch: Dispatch) {
+	dispatch({
+		type: types.JOBS_FETCH,
+		AWAIT_MARKER,
+		payload: {
+			jobs: doFetch()
+		}
+	});
 }
 
 function doFetch() {

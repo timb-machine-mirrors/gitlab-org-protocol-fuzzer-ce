@@ -2,16 +2,18 @@ import { Dispatch } from 'redux';
 import { AWAIT_MARKER } from 'redux-await';
 import superagent = require('superagent');
 
-import { Job, JobStatus } from '../../models/Job';
+import { Job, JobStatus, JobRequest } from '../../models/Job';
 import RootState from '../../models/Root';
 import { MakeEnum } from '../../utils';
+import { dispatchFetch as fetchJobs } from './JobList';
 
 const JOB_INTERVAL = 3000;
 
 const types = {
 	JOB_FETCH: '',
 	JOB_FETCH_TIMER_START: '',
-	JOB_FETCH_TIMER_CLEAR: ''
+	JOB_FETCH_TIMER_CLEAR: '',
+	JOB_DELETE: ''
 };
 MakeEnum(types);
 
@@ -35,11 +37,11 @@ export default function reducer(state: Job = initial, action): Job {
 				timer: action.timer
 			});
 		case types.JOB_FETCH_TIMER_CLEAR:
-			if (state.timer)
-				clearTimeout(state.timer);
 			return Object.assign({}, state, {
 				timer: null
 			});
+		case types.JOB_DELETE:
+			return initial;
 		default:
 			return state;
 	}
@@ -50,14 +52,50 @@ export function startPolling(id: string) {
 		const state: RootState = getState();
 		if (state.job.timer)
 			clearTimeout(state.job.timer);
+		
 		dispatchFetch(dispatch, id);
 	};
 }
 
 export function stopPolling() {
 	return (dispatch: Dispatch, getState: Function) => {
+		const state: RootState = getState();
+		if (state.job.timer)
+			clearTimeout(state.job.timer);
+		
 		dispatch({
 			type: types.JOB_FETCH_TIMER_CLEAR
+		});
+	};
+}
+
+export function startJob(request: JobRequest) {
+}
+
+export function stopJob(job: Job) {
+}
+
+export function pauseJob(job: Job) {
+}
+
+export function continueJob(job: Job) {
+}
+
+export function killJob(job: Job) {
+}
+
+export function deleteJob(job: Job) {
+	return (dispatch: Dispatch, getState: Function) => {
+		const state: RootState = getState();
+		if (state.job.timer)
+			clearTimeout(state.job.timer);
+		
+		dispatch({
+			type: types.JOB_DELETE,
+			AWAIT_MARKER,
+			payload: {
+				job: doDelete(dispatch, job)
+			}
 		});
 	};
 }
@@ -85,6 +123,21 @@ function doFetch(dispatch: Dispatch, id: string) {
 					if (job.status !== JobStatus.Stopped) {
 						doTimerStart(dispatch, id);
 					}
+				}
+			})
+		;
+	});
+}
+
+function doDelete(dispatch: Dispatch, job: Job) {
+	return new Promise((resolve, reject) => {
+		superagent.delete(job.jobUrl)
+			.end((err, res) => {
+				if (err) {
+					reject(`Job failed to delete: ${err.message}`);
+				} else {
+					resolve();
+					fetchJobs(dispatch);
 				}
 			})
 		;

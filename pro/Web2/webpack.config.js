@@ -16,6 +16,7 @@ var entry = {
 		"react-bootstrap-table/css/react-bootstrap-table.css",
 		"babel-polyfill",
 		"classnames",
+		"immutable",
 		"lodash",
 		"moment",
 		"react",

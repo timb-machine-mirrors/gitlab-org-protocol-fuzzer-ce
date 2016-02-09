@@ -30,8 +30,7 @@ class AddMonitorModal extends Component<AddMonitorModalProps, AddMonitorModalSta
 		const { selected } = this.state;
 
 		return <Modal show={true} 
-			onHide={this.onCancel}
-			autoFocus>
+			onHide={this.onCancel}>
 			<Modal.Header closeButton>
 				<Modal.Title>
 					Add Monitor

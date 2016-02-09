@@ -1,4 +1,12 @@
 ﻿import { MakeLowerEnum } from '../utils';
+import { Job } from './Job';
+
+export interface TestState {
+	job: Job;
+	result: TestResult;
+	timer: NodeJS.Timer;
+	isPending: boolean;
+}
 
 export interface TestResult {
 	status: string;
