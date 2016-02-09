@@ -389,20 +389,20 @@ namespace Peach.Pro.Test.Core.Storage
 			{
 				DatabaseTests.AssertResult(db.LoadTable<FaultMutation>(), new[]
 				{
-					new FaultMutation(1, "S2_1", "A2", "P1.E1", "M1", ""),
-					new FaultMutation(3, "S3_1", "A3", "P3.E3", "M3", "D3"),
-					new FaultMutation(4, "S4_1", "A4", "P4.E4", "M4", "D4"),
-					new FaultMutation(4, "S4_1", "A5", "P4.E5", "M9", "D9"),
-					new FaultMutation(5, "S5_1", "A5", "P5.E5", "M5", "D5"),
-					new FaultMutation(5, "S5_2", "A5", "P5.E5", "M5", "D5"),
-					new FaultMutation(6, "S3_1", "A3", "P3.E3", "M3", "D8"),
-					new FaultMutation(8, "S3_1", "A3", "P3.E3", "M3", "D3"),
+					new FaultMutation(1, "S2_1", "A2", "P1.E1", "", "M1", ""),
+					new FaultMutation(3, "S3_1", "A3", "P3.E3", "", "M3", "D3"),
+					new FaultMutation(4, "S4_1", "A4", "P4.E4", "Field2", "M4", "D4"),
+					new FaultMutation(4, "S4_1", "A5", "P4.E5", "", "M9", "D9"),
+					new FaultMutation(5, "S5_1", "A5", "P5.E5", "Field2", "M5", "D5"),
+					new FaultMutation(5, "S5_2", "A5", "P5.E5", "Field2", "M5", "D5"),
+					new FaultMutation(6, "S3_1", "A3", "P3.E3", "", "M3", "D8"),
+					new FaultMutation(8, "S3_1", "A3", "P3.E3", "", "M3", "D3"),
 				});
 
 				DatabaseTests.AssertResult(db.GetFaultMutations(5), new[]
 				{
-					new FaultMutation(5, "S5_1", "A5", "P5.E5", "M5", "D5"),
-					new FaultMutation(5, "S5_2", "A5", "P5.E5", "M5", "D5"),
+					new FaultMutation(5, "S5_1", "A5", "P5.E5", "Field2", "M5", "D5"),
+					new FaultMutation(5, "S5_2", "A5", "P5.E5", "Field2", "M5", "D5"),
 				});
 			}
 		}
