@@ -28,7 +28,13 @@ namespace Peach {
 		action: string;
 		element: string;
 		iterationCount: number;
-		mutationCount: number;
+		bucketCount: number;
+		faultCount: number;
+	}
+
+	export interface IFieldMetric {
+		field: string;
+		iterationCount: number;
 		bucketCount: number;
 		faultCount: number;
 	}
