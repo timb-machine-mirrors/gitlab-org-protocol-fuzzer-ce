@@ -6,6 +6,8 @@ import { Component, Props } from 'react';
 import { reduxForm, ReduxFormProps, FormData, FieldProp } from 'redux-form';
 import { Alert, Accordion, Row, Col, Button, ButtonToolbar } from 'react-bootstrap';
 
+import { R } from '../../../routes';
+import { Route, RouterContext, injectRouter } from '../../../models/Router';
 import PitAgent from '../../../components/PitAgent';
 import { Pit, AgentsFormData, Parameter, ParameterType } from '../../../models/Pit';
 import { validationMessages } from '../../../utils';
@@ -104,12 +106,23 @@ interface MonitoringState {
 	propNamespace: 'formProps',
 	validate
 }, state => ({ initialValues: mapAgentsToView(state.pit) }))
+@injectRouter
 class Monitoring extends Component<MonitoringProps, MonitoringState> {
+	context: RouterContext;
+	
 	constructor(props, context) {
 		super(props, context);
 		this.state = {
 			isSaved: false
 		};
+	}
+
+	componentDidUpdate() {
+		const { pit, formProps } = this.props;
+		const { router } = this.context;
+		const pristine = _.isEqual(mapAgentsToView(pit), formProps.values);
+		console.log('canDeactivate', pristine);
+		// router.canDeactivate(R.PitAdvancedMonitoring.name, pristine);
 	}
 
 	render() {
