@@ -905,6 +905,9 @@ namespace Peach.Core.Dom
 
 		public DataElement(string name)
 		{
+			if (name == null)
+				name = "DataElement_" + (_uniqueName++);
+
 			if (name.IndexOf('.') > -1)
 				throw new PeachException("Error, DataElements cannot contain a period in their name. \"" + name + "\"");
 
