@@ -6,6 +6,7 @@ import { reducer as await } from 'redux-await';
 import error from './Error';
 import library from './Library';
 import pit from './Pit';
+import test from './PitTest';
 import job from './Job';
 import jobs from './JobList';
 import faults from './FaultList';
@@ -19,6 +20,7 @@ const root = combineReducers({
 	router,
 	library,
 	pit,
+	test,
 	job,
 	jobs,
 	faults,

@@ -1,21 +1,32 @@
 import React = require('react');
 import Icon = require('react-fa');
 import { Component, Props } from 'react';
+import { Dispatch } from 'redux';
 import { Alert, Button, ButtonToolbar } from 'react-bootstrap';
 import { connect } from 'react-redux';
 
 import PitTest from '../../../components/PitTest';
 import { Pit } from '../../../models/Pit';
+import { TestState, TestStatus } from '../../../models/PitTest';
+import { startTest, stopTest } from '../../../redux/modules/PitTest';
 
 interface TestProps extends Props<Test> {
 	// injected
 	pit?: Pit;
+	test?: TestState;
+	dispatch?: Dispatch;
 }
 
-@connect(state => ({ pit: state.pit }))
+@connect(state => ({ 
+	pit: state.pit,
+	test: state.test
+}))
 class Test extends Component<TestProps, {}> {
 	render() {
-		const { pit } = this.props;
+		const { pit, test } = this.props;
+		const canContinue = !test.isPending && 
+			test.result && test.result.status === TestStatus.Pass;
+
 		return <div>
 			<p>
 				This section validates the configuration by executing one test iteration,
@@ -48,12 +59,12 @@ class Test extends Component<TestProps, {}> {
 				<ButtonToolbar>
 					<Button bsStyle='success' bsSize='sm'
 						onClick={this.onContinue}
-						ng-disabled="!vm.CanContinue">
+						disabled={!canContinue}>
 						Continue &nbsp; <Icon name='arrow-right' />
 					</Button>
 					<Button bsStyle='warning' bsSize='sm'
 						onClick={this.onBeginTest}
-						disabled={!pit.isConfigured}>
+						disabled={test.isPending || !pit.isConfigured}>
 						<Icon name='bolt' /> &nbsp; Begin Test
 					</Button>
 				</ButtonToolbar>
@@ -67,6 +78,8 @@ class Test extends Component<TestProps, {}> {
 	}
 
 	onBeginTest = () => {
+		const { pit, dispatch } = this.props;
+		dispatch(startTest(pit));
 	}
 }
 
