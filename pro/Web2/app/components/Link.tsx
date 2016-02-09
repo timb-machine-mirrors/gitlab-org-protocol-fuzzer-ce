@@ -1,5 +1,5 @@
 import React = require('react');
-import Router5 from 'router5';
+import { Router5 } from 'router5';
 import { Component, Props, EventHandler, MouseEvent, ReactType, createElement } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';

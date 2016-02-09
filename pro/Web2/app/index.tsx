@@ -1,4 +1,4 @@
-/// <reference path="../typings/tsd.d.ts"/>
+/// <reference path="../typings/browser.d.ts"/>
 
 import React = require('react');
 import { render } from 'react-dom';

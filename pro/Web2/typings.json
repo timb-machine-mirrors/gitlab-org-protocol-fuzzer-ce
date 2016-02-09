@@ -1,0 +1,32 @@
+{
+  "ambientDependencies": {
+    "classnames": "github:DefinitelyTyped/DefinitelyTyped/classnames/classnames.d.ts#7b3d5a6ea5acda4a81f71309f1cc62354e63b681",
+    "immutable": "npm:immutable",
+    "lodash": "github:DefinitelyTyped/DefinitelyTyped/lodash/lodash.d.ts#7b3d5a6ea5acda4a81f71309f1cc62354e63b681",
+    "mocha": "github:DefinitelyTyped/DefinitelyTyped/mocha/mocha.d.ts#7b3d5a6ea5acda4a81f71309f1cc62354e63b681",
+    "moment": "github:DefinitelyTyped/DefinitelyTyped/moment/moment.d.ts#5d0f2126c8dac8fce0ff020218aea06607213b0d",
+    "moment-node": "github:DefinitelyTyped/DefinitelyTyped/moment/moment-node.d.ts#5d0f2126c8dac8fce0ff020218aea06607213b0d",
+    "node": "github:DefinitelyTyped/DefinitelyTyped/node/node.d.ts#7b3d5a6ea5acda4a81f71309f1cc62354e63b681",
+    "react": "github:DefinitelyTyped/DefinitelyTyped/react/react.d.ts#d6c51c607bd90c8bf0e065fabc41bc3f937425df",
+    "react-bootstrap": "github:flaub/DefinitelyTyped/react-bootstrap/react-bootstrap.d.ts#225253155ee589059faece160ea31d8ef1b882d5",
+    "react-bootstrap-table": "github:DefinitelyTyped/DefinitelyTyped/react-bootstrap-table/react-bootstrap-table.d.ts#ae60c84b9225eeb5278ebdc4e1df4aec8f8602f9",
+    "react-dom": "github:DefinitelyTyped/DefinitelyTyped/react/react-dom.d.ts#7b3d5a6ea5acda4a81f71309f1cc62354e63b681",
+    "react-fa": "github:DefinitelyTyped/DefinitelyTyped/react-fa/react-fa.d.ts#f318fbd33149ef0921b84657996ad31dab1e3241",
+    "react-redux": "github:DefinitelyTyped/DefinitelyTyped/react-redux/react-redux.d.ts#a513c4df6eb8505da8eef432891c8b69b73535d9",
+    "react-router5": "github:flaub/typescript-definitions/react-router5",
+    "redux": "github:DefinitelyTyped/DefinitelyTyped/redux/redux.d.ts#a820bbdead70913f0c750802b367ed54cb99b442",
+    "redux-actions": "github:DefinitelyTyped/DefinitelyTyped/redux-actions/redux-actions.d.ts#7b3d5a6ea5acda4a81f71309f1cc62354e63b681",
+    "redux-await": "github:flaub/typescript-definitions/redux-await",
+    "redux-devtools": "github:DefinitelyTyped/DefinitelyTyped/redux-devtools/redux-devtools.d.ts#7b3d5a6ea5acda4a81f71309f1cc62354e63b681",
+    "redux-devtools-dock-monitor": "github:DefinitelyTyped/DefinitelyTyped/redux-devtools-dock-monitor/redux-devtools-dock-monitor.d.ts#7b3d5a6ea5acda4a81f71309f1cc62354e63b681",
+    "redux-devtools-log-monitor": "github:DefinitelyTyped/DefinitelyTyped/redux-devtools-log-monitor/redux-devtools-log-monitor.d.ts#7b3d5a6ea5acda4a81f71309f1cc62354e63b681",
+    "redux-form": "github:DefinitelyTyped/DefinitelyTyped/redux-form/redux-form.d.ts#d6c51c607bd90c8bf0e065fabc41bc3f937425df",
+    "redux-logger": "github:DefinitelyTyped/DefinitelyTyped/redux-logger/redux-logger.d.ts#7b3d5a6ea5acda4a81f71309f1cc62354e63b681",
+    "redux-router5": "github:flaub/typescript-definitions/redux-router5",
+    "router5": "github:flaub/typescript-definitions/router5#193de05c443d63d947b01639effb9d32066ec946",
+    "router5-history": "github:flaub/typescript-definitions/router5-history",
+    "router5-listeners": "github:flaub/typescript-definitions/router5-listeners",
+    "superagent": "github:DefinitelyTyped/DefinitelyTyped/superagent/superagent.d.ts#7b3d5a6ea5acda4a81f71309f1cc62354e63b681"
+  },
+  "dependencies": {}
+}
