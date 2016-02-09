@@ -106,11 +106,21 @@ namespace Peach.Pro.Core.Storage
 					if (fault == null)
 						return null;
 					fault.Files = multi.Read<FaultFile>().ToList();
+					fault.Mutations = GetFaultMutations(fault.Iteration);
 					return fault;
 				}
 			}
-			return Connection.Query<FaultDetail>(Sql.SelectFaultDetailById, new { Id = id })
+
+			var ret = Connection
+				.Query<FaultDetail>(Sql.SelectFaultDetailById, new { Id = id })
 				.SingleOrDefault();
+
+			if (ret != null)
+			{
+				ret.Mutations = GetFaultMutations(ret.Iteration);
+			}
+
+			return ret;
 		}
 
 		public FaultFile GetFaultFileById(long id)
