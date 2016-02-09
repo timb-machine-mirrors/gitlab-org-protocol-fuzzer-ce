@@ -125,8 +125,8 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				"n",  // Choice
 				"o",  // Number
 				"p",  // Padding
-				null, // Array
-				"q",  //String
+				"q",  // Array
+				null, //String
 				"r",  // Flags
 				"s",  // Flag
 				"t",  // XmlElement

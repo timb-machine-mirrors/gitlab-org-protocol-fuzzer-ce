@@ -920,6 +920,14 @@ namespace Peach.Core.Analyzers
 					foreach (var key in elem.Hints.Keys)
 						array.Hints[key] = elem.Hints[key];
 
+					// Move the field id up to the  array element so that
+					// mutations on the array get correlated to the field id
+					array.FieldId = elem.FieldId;
+
+					// Clear the field id on the element so it doesn't get duplicated
+					// when using the FullFieldId property.
+					elem.FieldId = null;
+
 					elem = array;
 				}
 
