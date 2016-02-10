@@ -24,10 +24,21 @@ namespace Peach {
 		description: string;
 		seed: number;
 		files: IFaultFile[];
+		mutations: IFaultMutation[];
 
 		// range of search when fault was found
 		iterationStart: number;
 		iterationStop: number;
+	}
+
+	export interface IFaultMutation {
+		iteration: number;
+		state: string;
+		action: string;
+		element: string;
+		field: string;
+		mutator: string;
+		dataset: string;
 	}
 
 	export interface IFaultFile {
