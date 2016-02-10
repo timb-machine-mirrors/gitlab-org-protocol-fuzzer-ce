@@ -254,6 +254,10 @@ ul.library li a {
 	/*font-weight: bold;*/
 }
 
+.rc-tree-switcher {
+	background-color: white;
+}
+
 .bg-weight-0 {
 	background-color: #ffdf80;
 }
