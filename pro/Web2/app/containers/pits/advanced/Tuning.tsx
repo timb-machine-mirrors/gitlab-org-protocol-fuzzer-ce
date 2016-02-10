@@ -1,7 +1,7 @@
 import React = require('react');
 import Icon = require('react-fa');
-import { Component, Props } from 'react';
-import { Badge, Table, ButtonGroup, Button } from 'react-bootstrap';
+import { CSSProperties, Component, Props } from 'react';
+import { Badge, Table, ButtonGroup, Button, Input } from 'react-bootstrap';
 import Immutable = require('immutable');
 
 interface Node {
@@ -26,96 +26,121 @@ interface TreeNodeProps extends Props<TreeNode> {
 interface TreeNodeState {
 }
 
+interface SelectProps extends Props<Select> {
+	value: string;
+}
+
+class Select extends Component<any, any> {
+	render() {
+		const { value } = this.props;
+		const style: CSSProperties = {
+			position: 'relative',
+			borderRadius: 4,
+			border: '1px solid #ccc',
+			cursor: 'pointer'
+		};
+		const picker: CSSProperties = {
+			position: 'absolute',
+			right: 0,
+			top: 0,
+			width: '1.9em',
+			lineHeight: '2em'
+		};
+		const input: CSSProperties = {
+			paddingTop: 0,
+			paddingBottom: 0,
+			paddingRight: 0,
+			paddingLeft: 10,
+			textAlign: 'left',
+			lineHeight: '2em'
+		};
+		return <div style={style}>
+			<span style={picker}>
+				<Icon name='caret-down' />
+			</span>
+			<div style={input}>
+				{value}
+			</div>
+		</div>
+	}
+}
+
+class Weight extends Component<any, any> {
+	render() {
+		const { item } = this.props;
+		return <span style={{ backgroundColor: item.color }}>
+			{item.name}
+		</span>
+	}
+}
+
 class TreeNode extends Component<TreeNodeProps, TreeNodeState> {
 	render() {
-		return this.renderRow();
-	}
-
-	renderRow() {
 		const { node, onToggleExpand } = this.props;
 		const { name, depth, weight, expanded, visible } = node;
-		const fontWeight = 100 + weight * 100;
-		const fontSize = this.getFontSize(weight);
-		const expandIcon = expanded ? 'chevron-down' : 'chevron-right';
+		const expandIcon = expanded ? 'minus' : 'plus';
 		const className = visible ? '' : 'collapse';
+		const weights = [
+			{ value: 0, label: 'Exclude' },
+			{ value: 1, label: 'Lowest', color: 'green' },
+			{ value: 2, label: 'Low' },
+			{ value: 3, label: 'Normal', color: 'yellow' },
+			{ value: 4, label: 'High' },
+			{ value: 5, label: 'Highest', color: 'red' }
+		];
+		const colors = [
+			'#ffdf80',
+			'#ebfaeb',
+			'#c2f0c2',
+			'#99e699',
+			'#70db70',
+			'#47d147',
+		];
 
 		return <tr className={className}>
-			<td style={{ width: 80, textAlign: 'center', verticalAlign: 'middle' }}>
+			<td style={{ width: 40, textAlign: 'center', verticalAlign: 'middle' }}>
 				&nbsp;
-				<ButtonGroup bsSize='xs'>
-					<Button>
-						<Icon name='minus' />
-					</Button>
-					<Button>
-						<Icon name='plus' />
-					</Button>
-					<Button>
-						<Icon name='remove' />
-					</Button>
-				</ButtonGroup>
+				<input type='checkbox' />
 			</td>
-			<td style={{ width: 50, textAlign: 'center', verticalAlign: 'middle' }}>
-				<Badge>
-					{weight ? weight : 0}
-				</Badge>
+			<td style={{ width: 100, textAlign: 'center' }}>
+				<Select value={weights[weight].label} />
 			</td>
-			<td>
-				<span style={{ marginLeft: 10 + depth * 20 }}>
+			<td style={{ backgroundColor: colors[weight], verticalAlign: 'middle', position: 'relative' }}>
+				{this.renderLine(depth, 5)}
+				<div style={{ paddingLeft: 10 + depth * 20, paddingRight: 50, whiteSpace: 'nowrap' }}>
 					<Button bsSize='xs' onClick={onToggleExpand}>
 						<Icon name={expandIcon} />
 					</Button>
-					<label style={{ marginLeft: 5, fontWeight }}>
+					<label style={{ marginLeft: 5 }}>
 						{name}
 					</label>
-				</span>
+				</div>
 			</td>
 		</tr>
 	}
 
-	// renderNode() {
-	// 	const { label, children, weight } = this.props;
-	// 	// const fontWeight = weight ? 400 + (weight * 200) : 400;
-	// 	const fontSize = this.getFontSize(weight);
-	// 	const fontWeight = 'normal';
-	// 	return <div className='tree-node'>
-	// 		<Icon name='chevron-down' />
-	// 		&nbsp;
-	// 		<span className='tree-node-collapse-toggle' />
-	// 		<span>
-	// 			<input type='checkbox'
-	// 				className='tree-node-checkbox'
-	// 				checked={false} />
-	// 			<label className='tree-node-label'>
-	// 				{label}
-	// 			</label>
-	// 			<Badge>
-	// 				{weight ? weight : 0}
-	// 			</Badge>
-	// 		</span>
-	// 		<div className='tree-node-children'>
-	// 			{children}
-	// 		</div>
-	// 	</div>
-	// }
+	renderValue(option) {
+		return <strong style={{ color: option.color }}>{option.label}</strong>;
+	}
 
-	getFontSize(weight: number) {
-		switch (weight) {
-			case 0:
-				return 'xx-small';
-			case 1:
-				return 'x-small';
-			case 2:
-				return 'small';
-			case 3:
-			default:
-				return 'medium';
-			case 4:
-				return 'large';
-			case 5:
-				return 'x-large';
-			case 6:
-				return 'xx-large';
+	renderLine(depth, offset = 0) {
+		const style: CSSProperties = {
+			left: offset + 19,
+			content: '',
+			display: 'block',
+			position: 'absolute',
+			top: 0,
+			bottom: 0,
+			border: '1px dotted #9dbdd6',
+			borderWidth: '0 0 0 1px'
+		};
+		
+		if (depth == 0) {
+			return null;
 		}
+		return <div style={style}>
+			{this.renderLine(depth - 1)}
+		</div>
 	}
 }
 
@@ -137,38 +162,30 @@ class TreeView extends Component<TreeViewProps, TreeViewState> {
 	}
 	
 	render() {
-		return this.renderTable();
-	}
-
-	// renderTree() {
-	// 	const { children } = this.props;
-	// 	return <div className='tree'>
-	// 		{children}
-	// 	</div>
-	// }
-
-	renderTable() {
 		const { nodes } = this.state;
-		return <Table condensed hover bordered>
-			<thead>
-				<th style={{ width: 80, textAlign: 'center' }}>
-					Actions
-				</th>
-				<th style={{ width: 50, textAlign: 'center' }}>
-					Weight
-				</th>
-				<th>
-					Field
-				</th>
-			</thead>
-			<tbody>
-				{nodes.map((node, index) => {
-					return <TreeNode key={index} 
-						node={node} 
-						onToggleExpand={() => this.onToggleExpand(index)} />
-				})}
-			</tbody>
-		</Table>
+		return <div style={{ overflow: 'scroll' }}>
+			<Table condensed hover bordered>
+				<thead>
+					<tr>
+						<th style={{ width: 40, textAlign: 'center' }}>
+						</th>
+						<th style={{ width: 100, textAlign: 'center' }}>
+							Weight
+						</th>
+						<th>
+							Field
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					{nodes.map((node, index) => {
+						return <TreeNode key={index} 
+							node={node} 
+							onToggleExpand={() => this.onToggleExpand(index)} />
+					})}
+				</tbody>
+			</Table>
+		</div>
 	}
 
 	onToggleExpand = (index: number) => {
@@ -213,8 +230,8 @@ class Tuning extends Component<TuningProps, TuningState> {
 			{ name: 'S1_1', kids: [
 				{ name: 'A3', kids: [
 					{ name: 'TheDataModel', kids: [
-						{ name: 'Header', weight: 6, kids: [
-							{ name: 'Depth', weight: 6 }
+						{ name: 'Header', weight: 5, kids: [
+							{ name: 'Depth', weight: 5 }
 						]},
 						{ name: 'Data', kids: [
 							{ name: 'Type', weight: 4 }
@@ -227,7 +244,151 @@ class Tuning extends Component<TuningProps, TuningState> {
 							{ name: 'Depth', weight: 5 }
 						]},
 						{ name: 'Data', kids: [
-							{ name: 'Type', weight: 4 }
+							{ name: 'Type', weight: 4, kids: [
+								{
+									name: 'S1_1', kids: [
+										{
+											name: 'A3', kids: [
+												{
+													name: 'TheDataModel', kids: [
+														{
+															name: 'Header', weight: 5, kids: [
+																{ name: 'Depth', weight: 5 }
+															]
+														},
+														{
+															name: 'Data', kids: [
+																{ name: 'Type', weight: 4 }
+															]
+														}
+													]
+												}
+											]
+										},
+										{
+											name: 'A4', weight: 2, kids: [
+												{
+													name: 'TheDataModel', kids: [
+														{
+															name: 'Header', weight: 1, kids: [
+																{ name: 'Depth', weight: 5 }
+															]
+														},
+														{
+															name: 'Data', kids: [
+																{ name: 'Type', weight: 4, kids: [
+																	{
+																		name: 'S1_1', kids: [
+																			{
+																				name: 'A3', kids: [
+																					{
+																						name: 'TheDataModel', kids: [
+																							{
+																								name: 'Header', weight: 5, kids: [
+																									{ name: 'Depth', weight: 5 }
+																								]
+																							},
+																							{
+																								name: 'Data', kids: [
+																									{ name: 'Type', weight: 4, kids: [
+																										{
+																											name: 'S1_1', kids: [
+																												{
+																													name: 'A3', kids: [
+																														{
+																															name: 'TheDataModel', kids: [
+																																{
+																																	name: 'Header', weight: 5, kids: [
+																																		{ name: 'Depth', weight: 5 }
+																																	]
+																																},
+																																{
+																																	name: 'Data', kids: [
+																																		{ name: 'Type', weight: 4 }
+																																	]
+																																}
+																															]
+																														}
+																													]
+																												},
+																												{
+																													name: 'A4', weight: 2, kids: [
+																														{
+																															name: 'TheDataModel', kids: [
+																																{
+																																	name: 'Header', weight: 1, kids: [
+																																		{ name: 'Depth', weight: 5 }
+																																	]
+																																},
+																																{
+																																	name: 'Data', kids: [
+																																		{ name: 'Type', weight: 4 }
+																																	]
+																																}
+																															]
+																														}
+																													]
+																												}
+																											]
+																										},
+																										{
+																											name: 'S4_1', kids: [
+																												{ name: 'Item1', weight: 1 },
+																												{ name: 'Item2', weight: 0 }
+																											]
+																										}
+
+																									] }
+																								]
+																							}
+																						]
+																					}
+																				]
+																			},
+																			{
+																				name: 'A4', weight: 2, kids: [
+																					{
+																						name: 'TheDataModel', kids: [
+																							{
+																								name: 'Header', weight: 1, kids: [
+																									{ name: 'Depth', weight: 5 }
+																								]
+																							},
+																							{
+																								name: 'Data', kids: [
+																									{ name: 'Type', weight: 4 }
+																								]
+																							}
+																						]
+																					}
+																				]
+																			}
+																		]
+																	},
+																	{
+																		name: 'S4_1', kids: [
+																			{ name: 'Item1', weight: 1 },
+																			{ name: 'Item2', weight: 0 }
+																		]
+																	}
+
+																] }
+															]
+														}
+													]
+												}
+											]
+										}
+									]
+								},
+								{
+									name: 'S4_1', kids: [
+										{ name: 'Item1', weight: 1 },
+										{ name: 'Item2', weight: 0 }
+									]
+								}
+
+							]}
 						]}
 					]}
 				]}

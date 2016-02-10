@@ -1,4 +1,6 @@
 /// <reference path="../typings/browser.d.ts"/>
+/// <reference path="typings/react-select.d.ts"/>
+/// <reference path="typings/react-widgets.d.ts"/>
 
 import React = require('react');
 import { render } from 'react-dom';
