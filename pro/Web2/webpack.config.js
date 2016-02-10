@@ -14,6 +14,7 @@ var entry = {
 		"font-awesome/css/font-awesome.css",
 		"react-bootstrap-table/css/toastr.css",
 		"react-bootstrap-table/css/react-bootstrap-table.css",
+		"react-widgets/dist/css/react-widgets.css",
 		"babel-polyfill",
 		"classnames",
 		"immutable",
@@ -98,6 +99,7 @@ var config = {
 				"ts" 
 			]},
 			{ test: /\.css(.*)$/,    loader: ExtractTextPlugin.extract("style-loader", "css-loader") },
+			{ test: /\.gif$/,        loader: "url-loader?mimetype=image/gif" },
 			// handle web fonts
 			{ test: /\.eot(.*)$/,    loader: "file" },
 			{ test: /\.woff2?(.*)$/, loader: "url?prefix=font/&limit=5000" },
