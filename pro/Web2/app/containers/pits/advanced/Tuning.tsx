@@ -3,6 +3,7 @@ import Icon = require('react-fa');
 import { CSSProperties, Component, Props } from 'react';
 import { Badge, Table, ButtonGroup, Button, Input } from 'react-bootstrap';
 import Immutable = require('immutable');
+import Tree = require('rc-tree');
 
 interface Node {
 	name: string;
@@ -399,7 +400,55 @@ class Tuning extends Component<TuningProps, TuningState> {
 			]}
 		];
 
-		return <TreeView data={data} />
+		function recurseChecked(data, prefix) {
+			return _.flatMap(data, item => {
+				const key = `${prefix}.${item.name}`;
+				const weight = _.get(item, 'weight', 3);
+				const checked = weight > 0;
+				const result = [];
+				if (checked) {
+					result.push(key);
+				}
+				return result.concat(recurseChecked(item.kids || [], key));
+			});
+		}
+
+		function recurseNodes(data, prefix) {
+			return data.map(item => {
+				const key = `${prefix}.${item.name}`;
+				const weight = _.get(item, 'weight', 3);
+				const className = `bg-weight-${weight}`;
+				const title = <div style={{ width: 400 }}>
+					<span style={{ float: 'left' }}>
+						{item.name}
+					</span>
+					<span style={{float: 'right'}}>
+						Something
+					</span>
+				</div>
+				if (item.kids) {
+					return <Tree.TreeNode title={title} key={key} className={className}>
+						{recurseNodes(item.kids, key) }
+					</Tree.TreeNode>
+				}
+				return <Tree.TreeNode title={title} key={key} className={className} />;
+			});
+		}
+
+		const checked = recurseChecked(data, '$');
+		const nodes = recurseNodes(data, '$');
+
+		return <div>
+			<Tree showLine 
+				checkable 
+				showIcon={false} 
+				defaultExpandAll 
+				selectable={false} 
+				defaultCheckedKeys={checked}>
+				{nodes}
+			</Tree>
+			<TreeView data={data} />
+		</div>
 	}
 }
 
