@@ -95,9 +95,6 @@ namespace Peach {
 		public ElementData: IElementMetric[] = [];
 		public AllElementData: IElementMetric[] = [];
 
-		public FieldData: IFieldMetric[] = [];
-		public AllFieldData: IFieldMetric[] = [];
-
 		public DatasetData: IDatasetMetric[] = [];
 		public AllDatasetData: IDatasetMetric[] = [];
 
@@ -196,11 +193,6 @@ namespace Peach {
 			case C.Metrics.Elements.id:
 				promise.success((data: IElementMetric[]) => {
 					this.AllElementData = data;
-				});
-				break;
-			case C.Metrics.Fields.id:
-				promise.success((data: IFieldMetric[]) => {
-					this.AllFieldData = data;
 				});
 				break;
 			case C.Metrics.Dataset.id:

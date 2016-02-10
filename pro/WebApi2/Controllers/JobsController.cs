@@ -556,7 +556,6 @@ namespace Peach.Pro.WebApi2.Controllers
 				Dataset = MakeUrl(id, "metrics", "dataset"),
 				Buckets = MakeUrl(id, "metrics", "buckets"),
 				Iterations = MakeUrl(id, "metrics", "iterations"),
-				Fields = MakeUrl(id, "metrics", "fields"),
 			};
 
 			return job;

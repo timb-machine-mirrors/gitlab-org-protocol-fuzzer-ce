@@ -100,9 +100,6 @@ namespace Peach.C {
 		export const Elements: IMetric = {
 			id: 'elements', name: 'Elements'
 		};
-		export const Fields: IMetric = {
-			id: 'fields', name: 'Fields'
-		};
 		export const States: IMetric = {
 			id: 'states', name: 'States'
 		};
@@ -119,7 +116,6 @@ namespace Peach.C {
 		Metrics.FaultTimeline,
 		Metrics.Mutators,
 		Metrics.Elements,
-		Metrics.Fields,
 		Metrics.States,
 		Metrics.Dataset,
 		Metrics.Buckets

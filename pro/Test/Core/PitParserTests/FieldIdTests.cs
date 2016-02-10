@@ -146,10 +146,6 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			};
 
 			Assert.AreEqual(exp, fields);
-
-			// NOTE: We DON'T want to promote fieldId on an item with minOccurs to the
-			// encapsulating array element otherwise the fieldId will get duplicated
-			// when evaulating the elements FullFieldName
 		}
 
 		[Test]
