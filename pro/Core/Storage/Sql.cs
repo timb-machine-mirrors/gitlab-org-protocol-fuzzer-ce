@@ -168,7 +168,6 @@ INSERT OR REPLACE INTO Mutation (
 	ActionId,
 	ParameterId,
 	ElementId,
-	FieldId,
 	MutatorId,
 	DatasetId,
 	IterationCount
@@ -177,7 +176,6 @@ INSERT OR REPLACE INTO Mutation (
 	@ActionId,
 	@ParameterId,
 	@ElementId,
-	@FieldId,
 	@MutatorId,
 	@DatasetId,
 	COALESCE((
@@ -217,7 +215,6 @@ INSERT INTO FaultMetric (
 	ActionId,
 	ParameterId,
 	ElementId,
-	FieldId,
 	MutatorId,
 	DatasetId
 ) VALUES (
@@ -230,7 +227,6 @@ INSERT INTO FaultMetric (
 	@ActionId,
 	@ParameterId,
 	@ElementId,
-	@FieldId,
 	@MutatorId,
 	@DatasetId
 );";
@@ -331,11 +327,6 @@ ALTER TABLE FaultDetail
 ADD COLUMN 
 	Flags INTEGER NOT NULL DEFAULT 0
 ;
-";
-
-		public const string JobMigrateV3 = @"
-Alter TABLE Mutation ADD COLUMN FieldId INTEGER;
-Alter TABLE FaultMetric ADD COLUMN FieldId INTEGER;
 ";
 
 		public const string JobMigrateV2 = @"

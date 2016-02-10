@@ -448,9 +448,7 @@ namespace Peach.Pro.Core.Loggers
 				mutator = mutator.Name
 			});
 
-			var fieldId = DataElement.FieldIdConcat(data.FullFieldId, element.FullFieldId);
-
-			_cache.DataMutating(tgtParam, element.fullName, fieldId, mutator.Name, tgtDataSet);
+			_cache.DataMutating(tgtParam, element.fullName, mutator.Name, tgtDataSet);
 		}
 
 		protected override void Engine_ReproFault(

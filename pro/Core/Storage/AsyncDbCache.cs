@@ -232,7 +232,6 @@ namespace Peach.Pro.Core.Storage
 		public void DataMutating(
 			string parameter,
 			string element,
-			string field,
 			string mutator,
 			string dataset)
 		{
@@ -243,9 +242,6 @@ namespace Peach.Pro.Core.Storage
 			_mutation.ElementId = _nameCache.Add(element);
 			_mutation.MutatorId = _nameCache.Add(mutator);
 			_mutation.DatasetId = _nameCache.Add(dataset);
-
-			if (!string.IsNullOrEmpty(field))
-				_mutation.FieldId = _nameCache.Add(field);
 
 			_mutations.Add(_mutation);
 
@@ -319,7 +315,6 @@ namespace Peach.Pro.Core.Storage
 				ActionId = x.ActionId,
 				ParameterId = x.ParameterId,
 				ElementId = x.ElementId,
-				FieldId = x.FieldId,
 				MutatorId = x.MutatorId,
 				DatasetId = x.DatasetId,
 			});
