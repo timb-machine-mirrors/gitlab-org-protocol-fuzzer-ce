@@ -49,6 +49,12 @@ namespace Peach.Core.Dom
 			get;
 			set;
 		}
+
+		public string FieldId
+		{
+			get;
+			set;
+		}
 	}
 }
 

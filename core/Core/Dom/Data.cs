@@ -51,6 +51,8 @@ namespace Peach.Core.Dom
 		/// looking for a new data set to switch to.
 		/// </summary>
 		bool Ignore { get; set; }
+
+		string FieldId { get; }
 	}
 
 	/// <summary>
@@ -137,10 +139,17 @@ namespace Peach.Core.Dom
 		public DataField(DataSet dataSet)
 		{
 			Name = dataSet.Name;
+			FieldId = dataSet.FieldId;
 			Fields = new FieldCollection();
 		}
 
 		public string Name
+		{
+			get;
+			protected set;
+		}
+
+		public string FieldId
 		{
 			get;
 			protected set;

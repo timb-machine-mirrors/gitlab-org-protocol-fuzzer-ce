@@ -1554,6 +1554,7 @@ namespace Peach.Core.Analyzers
 			}
 
 			dataSet.Name = node.getAttr("name", uniqueName);
+			dataSet.FieldId = node.getAttr("fieldId", null);
 
 			if (node.hasAttr("fileName"))
 			{
