@@ -29,16 +29,18 @@ interface TreeNodeState {
 
 interface SelectProps extends Props<Select> {
 	value: string;
+	color: string;
 }
 
 class Select extends Component<any, any> {
 	render() {
-		const { value } = this.props;
+		const { value, color } = this.props;
 		const style: CSSProperties = {
 			position: 'relative',
 			borderRadius: 4,
 			border: '1px solid #ccc',
-			cursor: 'pointer'
+			cursor: 'pointer',
+			backgroundColor: color
 		};
 		const picker: CSSProperties = {
 			position: 'absolute',
@@ -53,7 +55,8 @@ class Select extends Component<any, any> {
 			paddingRight: 0,
 			paddingLeft: 10,
 			textAlign: 'left',
-			lineHeight: '2em'
+			lineHeight: '2em',
+			fontWeight: 'bold'
 		};
 		return <div style={style}>
 			<span style={picker}>
@@ -99,20 +102,15 @@ class TreeNode extends Component<TreeNodeProps, TreeNodeState> {
 		];
 
 		return <tr className={className}>
-			<td style={{ width: 40, textAlign: 'center', verticalAlign: 'middle' }}>
-				&nbsp;
-				<input type='checkbox' />
-			</td>
 			<td style={{ width: 100, textAlign: 'center' }}>
-				<Select value={weights[weight].label} />
+				<Select value={weights[weight].label} color={colors[weight]} />
 			</td>
-			<td style={{ backgroundColor: colors[weight], verticalAlign: 'middle', position: 'relative' }}>
-				{this.renderLine(depth, 5)}
+			<td style={{ verticalAlign: 'middle', position: 'relative' }}>
 				<div style={{ paddingLeft: 10 + depth * 20, paddingRight: 50, whiteSpace: 'nowrap' }}>
 					<Button bsSize='xs' onClick={onToggleExpand}>
 						<Icon name={expandIcon} />
 					</Button>
-					<label style={{ marginLeft: 5 }}>
+					<label style={{ marginLeft: 5, fontWeight: 'normal' }}>
 						{name}
 					</label>
 				</div>
@@ -165,11 +163,9 @@ class TreeView extends Component<TreeViewProps, TreeViewState> {
 	render() {
 		const { nodes } = this.state;
 		return <div style={{ overflow: 'scroll' }}>
-			<Table condensed hover bordered>
+			<table>
 				<thead>
 					<tr>
-						<th style={{ width: 40, textAlign: 'center' }}>
-						</th>
 						<th style={{ width: 100, textAlign: 'center' }}>
 							Weight
 						</th>
@@ -185,7 +181,7 @@ class TreeView extends Component<TreeViewProps, TreeViewState> {
 							onToggleExpand={() => this.onToggleExpand(index)} />
 					})}
 				</tbody>
-			</Table>
+			</table>
 		</div>
 	}
 
@@ -418,20 +414,15 @@ class Tuning extends Component<TuningProps, TuningState> {
 				const key = `${prefix}.${item.name}`;
 				const weight = _.get(item, 'weight', 3);
 				const className = `bg-weight-${weight}`;
-				const title = <div style={{ width: 400 }}>
-					<span style={{ float: 'left' }}>
-						{item.name}
-					</span>
-					<span style={{float: 'right'}}>
-						Something
-					</span>
+				const title = <div style={{ width: 200 }}>
+					{item.name}
 				</div>
 				if (item.kids) {
-					return <Tree.TreeNode title={title} key={key} className={className}>
+					return <Tree.TreeNode title={title} key={key}>
 						{recurseNodes(item.kids, key) }
 					</Tree.TreeNode>
 				}
-				return <Tree.TreeNode title={title} key={key} className={className} />;
+				return <Tree.TreeNode title={title} key={key} />;
 			});
 		}
 
@@ -439,9 +430,7 @@ class Tuning extends Component<TuningProps, TuningState> {
 		const nodes = recurseNodes(data, '$');
 
 		return <div>
-			<Tree showLine 
-				checkable 
-				showIcon={false} 
+			<Tree showIcon={false} 
 				defaultExpandAll 
 				selectable={false} 
 				defaultCheckedKeys={checked}>

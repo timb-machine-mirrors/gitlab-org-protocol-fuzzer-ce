@@ -14,7 +14,7 @@ content = [
 
 bld(
 	name ='Peach.Pro.Web2',
-	features = 'peach',
+	features = 'peach npm',
 	install_path = '${BINDIR}/public',
 	ide_content = content,
 	install_644 = {
