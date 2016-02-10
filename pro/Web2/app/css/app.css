@@ -244,3 +244,60 @@ ul.library li a {
 	border: 1px solid #fff;
 	font-weight: normal;
 }
+
+.rc-tree {
+	overflow-x: scroll;
+}
+
+.rc-tree li a {
+	color: black;
+	/*font-weight: bold;*/
+}
+
+.bg-weight-0 {
+	background-color: #ffdf80;
+}
+
+.bg-weight-1 {
+	background-color: #ebfaeb;
+}
+
+.bg-weight-2 {
+	background-color: #c2f0c2;
+}
+
+.bg-weight-3 {
+	background-color: #99e699;
+}
+
+.bg-weight-4 {
+	background-color: #70db70;
+}
+
+.bg-weight-5 {
+	background-color: #47d147;
+}
+
+.bg-weight-0 > ul {
+	background-color: white !important;
+}
+
+.bg-weight-1 > ul {
+	background-color: white !important;
+}
+
+.bg-weight-2 > ul {
+	background-color: white !important;
+}
+
+.bg-weight-3 > ul {
+	background-color: white !important;
+}
+
+.bg-weight-4 > ul {
+	background-color: white !important;
+}
+
+.bg-weight-5 > ul {
+	background-color: white !important;
+}
