@@ -1172,9 +1172,12 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 		<State name='initial'>
 			<Action type='output'>
 				<DataModel name='DM'>
-					<String name='foo' />
-					<String name='bar' />
-					<String name='baz' />
+					<String name='off' />
+					<String name='lowest' />
+					<String name='low' />
+					<String name='normal' />
+					<String name='high' />
+					<String name='highest' />
 				</DataModel>
 			</Action> 
 		</State>
@@ -1187,8 +1190,11 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 			<Param name='MaxFieldsToMutate' value='1' />
 		</Strategy>
 
-		<Weight xpath='//foo' weight='Lowest' />
-		<Weight xpath='//baz' weight='Highest' />
+		<Weight xpath='//off' weight='Off' />
+		<Weight xpath='//lowest' weight='Lowest' />
+		<Weight xpath='//low' weight='BelowNormal' />
+		<Weight xpath='//high' weight='AboveNormal' />
+		<Weight xpath='//highest' weight='Highest' />
 	</Test>
 </Peach>
 ";
@@ -1224,8 +1230,12 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 			foreach (var x in count)
 				Console.WriteLine("Elem: {0}, Count: {1}", x.Key, x.Value);
 
-			Assert.Less(count["foo"], count["bar"]);
-			Assert.Less(count["bar"], count["baz"]);
+			Assert.Less(count["lowest"], count["low"]);
+			Assert.Less(count["low"], count["normal"]);
+			Assert.Less(count["normal"], count["high"]);
+			Assert.Less(count["high"], count["highest"]);
+
+			Assert.False(count.ContainsKey("off"), "off shouldn't be mutated");
 		}
 	}
 }

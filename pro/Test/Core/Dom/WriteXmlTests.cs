@@ -20,7 +20,7 @@ namespace Peach.Pro.Test.Core.Dom
 			var pit = @"<?xml version='1.0' encoding='utf-8'?>
 <Peach>
 	<DataModel name='Example1'>
-		<String name='Str' value='Foo:Bar'>
+		<String fieldId='Foo-Bar' name='Str' value='Foo:Bar'>
 			<Hint name='Hinty' value='things' />
 		</String>
 		<Number size='32'>
@@ -86,6 +86,7 @@ namespace Peach.Pro.Test.Core.Dom
 
 				var pitOut = UTF8Encoding.UTF8.GetString(sout.ToArray());
 
+				StringAssert.Contains("<String name=\"Str\" fieldId=\"Foo-Bar\" value=\"Foo:Bar\">", pitOut);
 				Assert.Less(-1, pitOut.IndexOf("Analyzer class=\"StringToken\""));
 				Assert.Less(-1, pitOut.IndexOf("Transformer class=\"Base64Encode\""));
 				Assert.Less(-1, pitOut.IndexOf("Hint name=\"Hinty\""));

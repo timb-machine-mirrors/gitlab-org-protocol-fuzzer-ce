@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -234,9 +233,9 @@ namespace Peach.Pro.Core.WebServices
 
 				var parserCtx = new XmlParserContext(settingsRdr.NameTable, nsMgrRdr, null, XmlSpace.Default);
 
-				var s = new XmlSerializer(typeof(PeachElement));
 				using (var rdr = XmlReader.Create(fileName, settingsRdr, parserCtx))
 				{
+					var s = XmlTools.GetSerializer(typeof(PeachElement));
 					var elem = (PeachElement)s.Deserialize(rdr);
 					return elem;
 				}
@@ -675,6 +674,19 @@ namespace Peach.Pro.Core.WebServices
 		}
 
 		public Pit UpdatePitById(string guid, Pit data)
+		{
+			var cfg = new PitConfig
+			{
+				Id = data.Id,
+				Name = data.Name,
+				Agents = data.Agents,
+				Config = data.Config
+			};
+
+			return UpdatePitById(guid, cfg);
+		}
+
+		public Pit UpdatePitById(string guid, PitConfig data)
 		{
 			var detail = GetPitDetailById(guid);
 			if (detail == null)

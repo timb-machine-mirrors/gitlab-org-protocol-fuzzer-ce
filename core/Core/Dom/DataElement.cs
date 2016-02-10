@@ -624,16 +624,12 @@ namespace Peach.Core.Dom
 		#endregion
 
 		private string _name;
+		private string _fieldId;
+		private string _fullFieldId;
 
 		public string Name
 		{
 			get { return _name; }
-		}
-
-		public string FieldId
-		{
-			get;
-			set;
 		}
 
 		public ElementWeight Weight
@@ -820,6 +816,9 @@ namespace Peach.Core.Dom
 			if (!Name.StartsWith("DataElement_"))
 				pit.WriteAttributeString("name", Name);
 
+			if (FieldId != null)
+				pit.WriteAttributeString("fieldId", FieldId);
+
 			if (isToken)
 				pit.WriteAttributeString("token", "true");
 
@@ -986,6 +985,43 @@ namespace Peach.Core.Dom
 			}
 		}
 
+		public string FieldId
+		{
+			get
+			{
+				return _fieldId;
+			}
+			set
+			{
+				_fieldId = value;
+
+				var newFullFieldId = parent == null ? FieldId : FieldIdConcat(parent.FullFieldId, FieldId);
+
+				if (FullFieldId == newFullFieldId)
+					return;
+
+				FullFieldId = newFullFieldId;
+
+				foreach (var item in PreOrderTraverse().Skip(1))
+				{
+					item.FullFieldId = FieldIdConcat(item.parent.FullFieldId, item.FieldId);
+				}
+			}
+		}
+
+		public string FullFieldId
+		{
+			get
+			{
+				return _fullFieldId;
+			}
+			private set
+			{
+				_fullFieldId = value;
+			}
+		}
+
+
 		public DataElement root
 		{
 			get;
@@ -1065,21 +1101,39 @@ namespace Peach.Core.Dom
 
 				_parent = value;
 
+				string newFieldId;
+
 				if (parent == null)
 				{
 					root = this;
 					fullName = Name;
+					newFieldId = FieldId;
 				}
 				else
 				{
 					root = parent.root;
 					fullName = parent.fullName + "." + Name;
+					newFieldId = FieldIdConcat(_parent.FullFieldId, FieldId);
 				}
 
-				foreach (var item in PreOrderTraverse().Skip(1))
+				if (FullFieldId != newFieldId)
 				{
-					item.root = root;
-					item.fullName = item.parent.fullName + "." + item.Name;
+					FullFieldId = newFieldId;
+
+					foreach (var item in PreOrderTraverse().Skip(1))
+					{
+						item.root = root;
+						item.fullName = item.parent.fullName + "." + item.Name;
+						item.FullFieldId = FieldIdConcat(item.parent.FullFieldId, item.FieldId);
+					}
+				}
+				else
+				{
+					foreach (var item in PreOrderTraverse().Skip(1))
+					{
+						item.root = root;
+						item.fullName = item.parent.fullName + "." + item.Name;
+					}
 				}
 
 #if DEBUG && DISABLED
@@ -1101,6 +1155,17 @@ namespace Peach.Core.Dom
 				}
 #endif
 			}
+		}
+
+		public static string FieldIdConcat(string lhs, string rhs)
+		{
+			if (string.IsNullOrEmpty(lhs))
+				return rhs;
+
+			if (string.IsNullOrEmpty(rhs))
+				return lhs;
+
+			return lhs + "." + rhs;
 		}
 
 		public DataElement getRoot()
