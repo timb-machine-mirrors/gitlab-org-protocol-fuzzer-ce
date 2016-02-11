@@ -223,9 +223,11 @@ namespace Peach.Pro.Test.Core.Publishers
 
 		private TcpClient _tcp;
 		private TlsServerProtocol _protocol;
+		private bool _timeClose = false;
 
-		public TlsListener(IPEndPoint localEp)
+		public TlsListener(IPEndPoint localEp, bool timeClose = false)
 		{
+			_timeClose = timeClose;
 			_tmp = new TempDirectory();
 			_listener = new TcpListener(localEp);
 
@@ -340,14 +342,17 @@ qLk0TB3QXaoHknsz7EhRnw==
 			_protocol = new TlsServerProtocol(_tcp.GetStream(), _server.SecureRandom);
 			_protocol.Accept(_server);
 
-			var buf = Encoding.ASCII.GetBytes("Hello World");
+			if (_timeClose)
+			{
+				var buf = Encoding.ASCII.GetBytes("Hello World");
 
-			_protocol.Stream.Write(buf, 0, buf.Length);
+				_protocol.Stream.Write(buf, 0, buf.Length);
 
-			System.Threading.Thread.Sleep(10);
+				System.Threading.Thread.Sleep(10);
 
-			_protocol.Close();
-			_tcp.Close();
+				_protocol.Close();
+				_tcp.Close();
+			}
 
 			_listener.BeginAcceptTcpClient(OnAccept, null);
 		}
@@ -360,6 +365,7 @@ qLk0TB3QXaoHknsz7EhRnw==
 	{
 		[Test]
 		[Ignore]
+		[ExpectedException(typeof(PeachException))]
 		public void Test()
 		{
 			const string xml = @"
