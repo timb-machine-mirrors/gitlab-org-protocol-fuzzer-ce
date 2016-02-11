@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 using Peach.Pro.Core.Storage;
 
 namespace Peach.Pro.Core.WebServices.Models
@@ -69,6 +70,9 @@ namespace Peach.Pro.Core.WebServices.Models
 	[Table("ViewElements")]
 	public class ElementMetric
 	{
+		[JsonIgnore]
+		public NameKind Kind { get; set; }
+
 		public string State { get; set; }
 		public string Action { get; set; }
 		public string Element { get; set; }
@@ -97,19 +101,25 @@ namespace Peach.Pro.Core.WebServices.Models
 	[Table("ViewFields")]
 	public class FieldMetric
 	{
-		public string Field { get; set; }
+		public string State { get; set; }
+		public string Action { get; set; }
+		public string Element { get; set; }
 		public long IterationCount { get; set; }
 		public long BucketCount { get; set; }
 		public long FaultCount { get; set; }
 
 		public FieldMetric() { }
 		public FieldMetric(
-			string field,
+			string state,
+			string action,
+			string element,
 			long iterationCount,
 			long bucketCount,
 			long faultCount)
 		{
-			Field = field;
+			State = state;
+			Action = action;
+			Element = element;
 			IterationCount = iterationCount;
 			BucketCount = bucketCount;
 			FaultCount = faultCount;
@@ -119,6 +129,9 @@ namespace Peach.Pro.Core.WebServices.Models
 	[Table("ViewStates")]
 	public class StateMetric
 	{
+		[JsonIgnore]
+		public NameKind Kind { get; set; }
+
 		public string State { get; set; }
 		public long ExecutionCount { get; set; }
 
@@ -135,6 +148,9 @@ namespace Peach.Pro.Core.WebServices.Models
 	[Table("ViewDatasets")]
 	public class DatasetMetric
 	{
+		[JsonIgnore]
+		public NameKind Kind { get; set; }
+
 		public string Dataset { get; set; }
 		public long IterationCount { get; set; }
 		public long BucketCount { get; set; }
@@ -157,6 +173,9 @@ namespace Peach.Pro.Core.WebServices.Models
 	[Table("ViewBuckets")]
 	public class BucketMetric
 	{
+		[JsonIgnore]
+		public NameKind Kind { get; set; }
+
 		public string Bucket { get; set; }
 		public string Mutator { get; set; }
 		public string Element { get; set; }
@@ -182,6 +201,9 @@ namespace Peach.Pro.Core.WebServices.Models
 	[Table("ViewIterations")]
 	public class IterationMetric
 	{
+		[JsonIgnore]
+		public NameKind Kind { get; set; }
+
 		public string State { get; set; }
 		public string Action { get; set; }
 		public string Parameter { get; set; }

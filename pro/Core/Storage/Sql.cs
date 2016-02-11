@@ -168,18 +168,18 @@ INSERT OR REPLACE INTO Mutation (
 	ActionId,
 	ParameterId,
 	ElementId,
-	FieldId,
 	MutatorId,
 	DatasetId,
+	Kind,
 	IterationCount
 ) VALUES (
 	@StateId,
 	@ActionId,
 	@ParameterId,
 	@ElementId,
-	@FieldId,
 	@MutatorId,
 	@DatasetId,
+	@Kind,
 	COALESCE((
 		SELECT IterationCount + 1
 		FROM Mutation
@@ -189,7 +189,8 @@ INSERT OR REPLACE INTO Mutation (
 			ParameterId = @ParameterId AND
 			ElementId = @ElementId AND
 			MutatorId = @MutatorId AND
-			DatasetId = @DatasetId
+			DatasetId = @DatasetId AND
+			Kind = @Kind
 	), 1)
 );";
 
@@ -217,9 +218,10 @@ INSERT INTO FaultMetric (
 	ActionId,
 	ParameterId,
 	ElementId,
-	FieldId,
 	MutatorId,
-	DatasetId
+	DatasetId,
+	FaultDetailId,
+	Kind
 ) VALUES (
 	@Iteration,
 	@MajorHash,
@@ -230,9 +232,10 @@ INSERT INTO FaultMetric (
 	@ActionId,
 	@ParameterId,
 	@ElementId,
-	@FieldId,
 	@MutatorId,
-	@DatasetId
+	@DatasetId,
+	@FaultDetailId,
+	@Kind
 );";
 
 		public const string InsertFaultDetail = @"
@@ -305,6 +308,12 @@ FROM ViewFaults
 WHERE Iteration = @Iteration;
 ";
 
+		public const string SelectMutationByFaultId = @"
+SELECT * 
+FROM ViewFaults
+WHERE FaultDetailId = @Id;
+";
+
 		public const string InsertNames = @"
 INSERT INTO NamedItem (
 	Id, 
@@ -333,22 +342,32 @@ ADD COLUMN
 ;
 ";
 
-		public const string JobMigrateV3 = @"
-BEGIN TRANSACTION;
-
-INSERT OR IGNORE INTO NamedItem(Name) VALUES('');
-
-Alter TABLE Mutation ADD COLUMN FieldId INTEGER;
-UPDATE Mutation SET FieldId=(SELECT Id from NamedItem WHERE Name='') WHERE FieldId IS NULL;
-
-Alter TABLE FaultMetric ADD COLUMN FieldId INTEGER;
-UPDATE FaultMetric SET FieldId=(SELECT Id from NamedItem WHERE Name='') WHERE FieldId IS NULL;
-
-COMMIT;
-";
-
 		public const string JobMigrateV2 = @"
 DROP TABLE Job;
+";
+
+		public const string JobMigrateV3 = @"
+Alter TABLE Mutation
+ADD COLUMN
+	Kind INTEGER NOT NULL DEFAULT 0
+;
+
+Alter TABLE FaultMetric
+ADD COLUMN
+	Kind INTEGER NOT NULL DEFAULT 0
+;
+
+Alter TABLE FaultMetric
+ADD COLUMN
+	FaultDetailId INTEGER
+;
+
+UPDATE FaultMetric
+SET FaultDetailId = (
+	SELECT Id
+	FROM FaultDetail
+	WHERE Iteration = FaultMetric.Iteration
+);
 ";
 
 		public const string NodeMigrateV1 = @"

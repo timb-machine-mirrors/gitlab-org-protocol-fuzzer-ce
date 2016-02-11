@@ -36,7 +36,6 @@ namespace Peach {
 		state: string;
 		action: string;
 		element: string;
-		field: string;
 		mutator: string;
 		dataset: string;
 	}

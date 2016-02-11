@@ -101,23 +101,38 @@ namespace Peach.Pro.Core.Storage
 
 			if (loadFiles)
 			{
-				const string sql = Sql.SelectFaultDetailById + Sql.SelectFaultFilesByFaultId;
+				const string sql =
+					Sql.SelectFaultDetailById +
+					Sql.SelectMutationByFaultId +
+					Sql.SelectFaultFilesByFaultId;
+
 				using (var multi = Connection.QueryMultiple(sql, new { Id = id }))
 				{
 					fault = multi.Read<FaultDetail>().SingleOrDefault();
+
 					if (fault != null)
+					{
+						fault.Mutations = multi.Read<FaultMutation>().ToList();
 						fault.Files = multi.Read<FaultFile>().ToList();
+					}
 				}
 			}
 			else
 			{
-				fault = Connection
-					.Query<FaultDetail>(Sql.SelectFaultDetailById, new { Id = id })
-					.SingleOrDefault();
-			}
+				const string sql =
+					Sql.SelectFaultDetailById +
+					Sql.SelectMutationByFaultId;
 
-			if (fault != null)
-				fault.Mutations = GetFaultMutations(fault.Iteration);
+				using (var multi = Connection.QueryMultiple(sql, new { Id = id }))
+				{
+					fault = multi.Read<FaultDetail>().SingleOrDefault();
+
+					if (fault != null)
+					{
+						fault.Mutations = multi.Read<FaultMutation>().ToList();
+					}
+				}
+			}
 
 			return fault;
 		}

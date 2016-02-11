@@ -217,11 +217,13 @@ namespace Peach.Pro.Core.WebServices.Models
 	[Table("ViewFaults")]
 	public class FaultMutation
 	{
+		[JsonIgnore]
+		public NameKind Kind { get; set; }
+
 		public long Iteration { get; set; }
 		public string State { get; set; }
 		public string Action { get; set; }
 		public string Element { get; set; }
-		public string Field { get; set; }
 		public string Mutator { get; set; }
 		public string Dataset { get; set; }
 
@@ -231,7 +233,6 @@ namespace Peach.Pro.Core.WebServices.Models
 			string state,
 			string action,
 			string element,
-			string field,
 			string mutator,
 			string dataset)
 		{
@@ -239,7 +240,6 @@ namespace Peach.Pro.Core.WebServices.Models
 			State = state;
 			Action = action;
 			Element = element;
-			Field = field;
 			Mutator = mutator;
 			Dataset = dataset;
 		}

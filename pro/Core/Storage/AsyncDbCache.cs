@@ -59,7 +59,8 @@ namespace Peach.Pro.Core.Storage
 		Dictionary<Tuple<long, long>, State> _pendingStates;
 		List<Mutation> _mutations;
 		long _nextStateId;
-		Mutation _mutation;
+		long[] _stateId = new long[2];
+		long[] _actionId = new long[2];
 		int _maxQueueDepth;
 		JobStatus _status;
 
@@ -166,7 +167,6 @@ namespace Peach.Pro.Core.Storage
 
 			_pendingStates = new Dictionary<Tuple<long, long>, State>();
 			_mutations = new List<Mutation>();
-			_mutation = new Mutation();
 
 			_nextStateId = _stateCache.Count + 1;
 
@@ -182,7 +182,7 @@ namespace Peach.Pro.Core.Storage
 			}
 		}
 
-		public void StateStarting(string name, uint runCount)
+		private long DoStateStarting(string name, uint runCount)
 		{
 			//Console.WriteLine("cache.StateStarting(\"{0}\", {1});", name, runCount);
 
@@ -219,39 +219,47 @@ namespace Peach.Pro.Core.Storage
 				_pendingStates.Add(key, state);
 			}
 
-			_mutation.StateId = state.Id;
+			return state.Id;
 		}
 
-		public void ActionStarting(string name)
+		public void StateStarting(string machineName, string humanName, uint runCount)
+		{
+			_stateId[(int)NameKind.Machine] = DoStateStarting(machineName, runCount);
+
+			// For the human name we ignore the run count
+			_stateId[(int)NameKind.Human] = DoStateStarting(humanName, 0);
+		}
+
+		public void ActionStarting(string machineName, string humanName)
 		{
 			//Console.WriteLine("cache.ActionStarting(\"{0}\");", name);
 
-			_mutation.ActionId = _nameCache.Add(name);
+			_actionId[(int)NameKind.Machine] = _nameCache.Add(machineName);
+			_actionId[(int)NameKind.Human] = _nameCache.Add(humanName);
 		}
 
 		public void DataMutating(
+			NameKind kind,
 			string parameter,
 			string element,
-			string field,
 			string mutator,
 			string dataset)
 		{
 			//Console.WriteLine("cache.DataMutating(\"{0}\", \"{1}\", \"{2}\", \"{3}\");",
 			//	parameter, element, mutator, dataset);
 
-			_mutation.ParameterId = _nameCache.Add(parameter);
-			_mutation.ElementId = _nameCache.Add(element);
-			_mutation.MutatorId = _nameCache.Add(mutator);
-			_mutation.DatasetId = _nameCache.Add(dataset);
-			_mutation.FieldId = _nameCache.Add(field);
-
-			_mutations.Add(_mutation);
-
-			_mutation = new Mutation
+			var mutation = new Mutation
 			{
-				StateId = _mutation.StateId,
-				ActionId = _mutation.ActionId,
+				Kind = kind,
+				StateId = _stateId[(int)kind],
+				ActionId = _actionId[(int)kind],
+				ParameterId = _nameCache.Add(parameter),
+				ElementId = _nameCache.Add(element),
+				MutatorId = _nameCache.Add(mutator),
+				DatasetId = _nameCache.Add(dataset),
 			};
+
+			_mutations.Add(mutation);
 		}
 
 		public void IterationFinished()
@@ -317,9 +325,9 @@ namespace Peach.Pro.Core.Storage
 				ActionId = x.ActionId,
 				ParameterId = x.ParameterId,
 				ElementId = x.ElementId,
-				FieldId = x.FieldId,
 				MutatorId = x.MutatorId,
 				DatasetId = x.DatasetId,
+				Kind = x.Kind,
 			});
 
 			// Ensure that the queue is drained before proceeding
@@ -333,7 +341,12 @@ namespace Peach.Pro.Core.Storage
 						{
 							db.InsertNames(names);
 							db.InsertFault(detail);
-							db.InsertFaultMetrics(faults);
+							db.InsertFaultMetrics(faults.Select(f =>
+							{
+								// Inserting the fault detail will set the id
+								f.FaultDetailId = detail.Id;
+								return f;
+							}));
 						});
 					}
 					DoUpdateRunningJob(sw, copy);

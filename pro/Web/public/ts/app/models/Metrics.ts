@@ -32,13 +32,6 @@ namespace Peach {
 		faultCount: number;
 	}
 
-	export interface IFieldMetric {
-		field: string;
-		iterationCount: number;
-		bucketCount: number;
-		faultCount: number;
-	}
-
 	export interface IStateMetric {
 		state: string;
 		executionCount: number;

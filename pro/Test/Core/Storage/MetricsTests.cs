@@ -24,44 +24,50 @@ namespace Peach.Pro.Test.Core.Storage
 			
 			// NORMAL
 			cache.IterationStarting(JobMode.Fuzzing);
-			cache.StateStarting("S1", 1);
-			cache.StateStarting("S2", 1);
-			cache.ActionStarting("A1");
-			cache.ActionStarting("A2");
-			cache.DataMutating("P1", "E1", "", "M1", "");
-			cache.ActionStarting("A3");
-			cache.StateStarting("S3", 1);
-			cache.ActionStarting("A3");
-			cache.DataMutating("P1", "E1", "", "M1", "");
-			cache.DataMutating("P2", "E2", "Field1", "M2", "D2");
+			cache.StateStarting("S1", "", 1);
+			cache.StateStarting("S2", "", 1);
+			cache.ActionStarting("A1", "");
+			cache.ActionStarting("A2", "");
+			cache.DataMutating(NameKind.Machine, "P1", "E1", "M1", "");
+			cache.DataMutating(NameKind.Human, "", "", "M1", "");
+			cache.ActionStarting("A3", "");
+			cache.StateStarting("S3", "", 1);
+			cache.ActionStarting("A3", "");
+			cache.DataMutating(NameKind.Machine, "P1", "E1", "M1", "");
+			cache.DataMutating(NameKind.Human, "", "", "M1", "");
+			cache.DataMutating(NameKind.Machine, "P2", "E2", "M2", "D2");
+			cache.DataMutating(NameKind.Human, "", "Field1", "M2", "D2");
 			cache.IterationFinished();
 
 			// NORMAL
 			cache.IterationStarting(JobMode.Fuzzing);
-			cache.StateStarting("S1", 1);
-			cache.StateStarting("S2", 1);
-			cache.ActionStarting("A1");
-			cache.ActionStarting("A2");
-			cache.DataMutating("P1", "E1", "", "M3", "D1");
+			cache.StateStarting("S1", "", 1);
+			cache.StateStarting("S2", "", 1);
+			cache.ActionStarting("A1", "");
+			cache.ActionStarting("A2", "");
+			cache.DataMutating(NameKind.Machine, "P1", "E1", "M3", "D1");
+			cache.DataMutating(NameKind.Human, "", "", "M3", "D1");
 			cache.IterationFinished();
 
 			// REPRO FAIL
 			cache.IterationStarting(JobMode.Reproducing);
-			cache.StateStarting("S1", 1);
-			cache.StateStarting("S2", 1);
-			cache.ActionStarting("A1");
-			cache.ActionStarting("A2");
-			cache.DataMutating("P1", "E1", "", "M3", "D1");
+			cache.StateStarting("S1", "", 1);
+			cache.StateStarting("S2", "", 1);
+			cache.ActionStarting("A1", "");
+			cache.ActionStarting("A2", "");
+			cache.DataMutating(NameKind.Machine, "P1", "E1", "M3", "D1");
+			cache.DataMutating(NameKind.Human, "", "", "M3", "D1");
 			// no iteration finished because we're reproducing
 
 			// REPRO SUCCESS
 			cache.IterationStarting(JobMode.Searching);
-			cache.StateStarting("S1", 1);
-			cache.StateStarting("S2", 1);
-			cache.ActionStarting("A1");
-			cache.ActionStarting("A2");
-			cache.DataMutating("P1", "E1", "", "M1", "");
-			cache.ActionStarting("A3");
+			cache.StateStarting("S1", "", 1);
+			cache.StateStarting("S2", "", 1);
+			cache.ActionStarting("A1", "");
+			cache.ActionStarting("A2", "");
+			cache.DataMutating(NameKind.Machine, "P1", "E1", "M1", "");
+			cache.DataMutating(NameKind.Human, "", "", "M1", "");
+			cache.ActionStarting("A3", "");
 			// Simulate S2_A3 soft exception, so we don't run S3
 			cache.OnFault(new FaultDetail
 			{
@@ -79,16 +85,18 @@ namespace Peach.Pro.Test.Core.Storage
 
 			// NORMAL
 			cache.IterationStarting(JobMode.Fuzzing);
-			cache.StateStarting("S3", 1);
-			cache.ActionStarting("A3");
-			cache.DataMutating("P3", "E3", "", "M3", "D3");
+			cache.StateStarting("S3", "", 1);
+			cache.ActionStarting("A3", "");
+			cache.DataMutating(NameKind.Machine, "P3", "E3", "M3", "D3");
+			cache.DataMutating(NameKind.Human, "", "", "M3", "");
 			cache.IterationFinished();
 
 			// REPRO SUCCESS
 			cache.IterationStarting(JobMode.Reproducing);
-			cache.StateStarting("S3", 1);
-			cache.ActionStarting("A3");
-			cache.DataMutating("P3", "E3", "", "M3", "D3");
+			cache.StateStarting("S3", "", 1);
+			cache.ActionStarting("A3", "");
+			cache.DataMutating(NameKind.Machine, "P3", "E3", "M3", "D3");
+			cache.DataMutating(NameKind.Human, "", "", "M3", "");
 			cache.OnFault(new FaultDetail
 			{
 				Iteration = 3,
@@ -105,18 +113,21 @@ namespace Peach.Pro.Test.Core.Storage
 
 			// NORMAL
 			cache.IterationStarting(JobMode.Fuzzing);
-			cache.StateStarting("S4", 1);
-			cache.ActionStarting("A4");
-			cache.DataMutating("P4", "E4", "Field2", "M4", "D4");
+			cache.StateStarting("S4", "", 1);
+			cache.ActionStarting("A4", "");
+			cache.DataMutating(NameKind.Machine, "P4", "E4", "M4", "D4");
+			cache.DataMutating(NameKind.Human, "", "Field2", "M4", "");
 			cache.IterationFinished();
 
 			// REPRO SUCCESS
 			cache.IterationStarting(JobMode.Reproducing);
-			cache.StateStarting("S4", 1);
-			cache.ActionStarting("A4");
-			cache.DataMutating("P4", "E4", "Field2", "M4", "D4");
-			cache.ActionStarting("A5");
-			cache.DataMutating("P4", "E5", "", "M9", "D9");
+			cache.StateStarting("S4", "", 1);
+			cache.ActionStarting("A4", "");
+			cache.DataMutating(NameKind.Machine, "P4", "E4", "M4", "D4");
+			cache.DataMutating(NameKind.Human, "", "Field2", "M4", "");
+			cache.ActionStarting("A5", "");
+			cache.DataMutating(NameKind.Machine, "P4", "E5", "M9", "D9");
+			cache.DataMutating(NameKind.Human, "", "", "M9", "");
 			cache.OnFault(new FaultDetail
 			{
 				Iteration = 4,
@@ -133,22 +144,26 @@ namespace Peach.Pro.Test.Core.Storage
 
 			// NORMAL
 			cache.IterationStarting(JobMode.Fuzzing);
-			cache.StateStarting("S5", 1);
-			cache.ActionStarting("A5");
-			cache.DataMutating("P5", "E5", "Field2", "M5", "D5");
-			cache.StateStarting("S5", 2);
-			cache.ActionStarting("A5");
-			cache.DataMutating("P5", "E5", "Field2", "M5", "D5");
+			cache.StateStarting("S5", "", 1);
+			cache.ActionStarting("A5", "");
+			cache.DataMutating(NameKind.Machine, "P5", "E5", "M5", "D5");
+			cache.DataMutating(NameKind.Human, "", "Field2", "M5", "");
+			cache.StateStarting("S5", "", 2);
+			cache.ActionStarting("A5", "");
+			cache.DataMutating(NameKind.Machine, "P5", "E5", "M5", "D5");
+			cache.DataMutating(NameKind.Human, "", "Field2", "M5", "");
 			cache.IterationFinished();
 
 			// REPRO SUCCESS
 			cache.IterationStarting(JobMode.Reproducing);
-			cache.StateStarting("S5", 1);
-			cache.ActionStarting("A5");
-			cache.DataMutating("P5", "E5", "Field2", "M5", "D5");
-			cache.StateStarting("S5", 2);
-			cache.ActionStarting("A5");
-			cache.DataMutating("P5", "E5", "Field2", "M5", "D5");
+			cache.StateStarting("S5", "", 1);
+			cache.ActionStarting("A5", "");
+			cache.DataMutating(NameKind.Machine, "P5", "E5","M5", "D5");
+			cache.DataMutating(NameKind.Human, "", "Field2", "M5", "");
+			cache.StateStarting("S5", "", 2);
+			cache.ActionStarting("A5", "");
+			cache.DataMutating(NameKind.Machine, "P5", "E5", "M5", "D5");
+			cache.DataMutating(NameKind.Human, "", "Field2", "M5", "");
 			cache.OnFault(new FaultDetail
 			{
 				Iteration = 5,
@@ -165,15 +180,17 @@ namespace Peach.Pro.Test.Core.Storage
 
 			// NORMAL
 			cache.IterationStarting(JobMode.Fuzzing);
-			cache.StateStarting("S3", 1);
-			cache.ActionStarting("A3");
-			cache.DataMutating("P3", "E3", "", "M3", "D8");
+			cache.StateStarting("S3", "", 1);
+			cache.ActionStarting("A3", "");
+			cache.DataMutating(NameKind.Machine, "P3", "E3", "M3", "D8");
+			cache.DataMutating(NameKind.Human, "", "", "M3", "");
 			cache.IterationFinished();
 
 			cache.IterationStarting(JobMode.Reproducing);
-			cache.StateStarting("S3", 1);
-			cache.ActionStarting("A3");
-			cache.DataMutating("P3", "E3", "", "M3", "D8");
+			cache.StateStarting("S3", "", 1);
+			cache.ActionStarting("A3", "");
+			cache.DataMutating(NameKind.Machine, "P3", "E3", "M3", "D8");
+			cache.DataMutating(NameKind.Human, "", "", "M3", "");
 			cache.OnFault(new FaultDetail
 			{
 				Iteration = 6,
@@ -190,22 +207,25 @@ namespace Peach.Pro.Test.Core.Storage
 
 			// NORMAL
 			cache.IterationStarting(JobMode.Fuzzing);
-			cache.StateStarting("S3", 1);
-			cache.ActionStarting("A3");
-			cache.DataMutating("P3", "E3", "", "M3", "D3");
+			cache.StateStarting("S3", "", 1);
+			cache.ActionStarting("A3", "");
+			cache.DataMutating(NameKind.Machine, "P3", "E3", "M3", "D3");
+			cache.DataMutating(NameKind.Human, "", "", "M3", "");
 			cache.IterationFinished();
 
 			// NORMAL
 			cache.IterationStarting(JobMode.Fuzzing);
-			cache.StateStarting("S3", 1);
-			cache.ActionStarting("A3");
-			cache.DataMutating("P3", "E3", "", "M3", "D3");
+			cache.StateStarting("S3", "", 1);
+			cache.ActionStarting("A3", "");
+			cache.DataMutating(NameKind.Machine, "P3", "E3", "M3", "D3");
+			cache.DataMutating(NameKind.Human, "", "", "M3", "");
 			cache.IterationFinished();
 
 			cache.IterationStarting(JobMode.Reproducing);
-			cache.StateStarting("S3", 1);
-			cache.ActionStarting("A3");
-			cache.DataMutating("P3", "E3", "", "M3", "D3");
+			cache.StateStarting("S3", "", 1);
+			cache.ActionStarting("A3", "");
+			cache.DataMutating(NameKind.Machine, "P3", "E3", "M3", "D3");
+			cache.DataMutating(NameKind.Human, "", "", "M3", "");
 			cache.OnFault(new FaultDetail
 			{
 				Iteration = 8,
@@ -389,20 +409,20 @@ namespace Peach.Pro.Test.Core.Storage
 			{
 				DatabaseTests.AssertResult(db.LoadTable<FaultMutation>(), new[]
 				{
-					new FaultMutation(1, "S2_1", "A2", "P1.E1", "", "M1", ""),
-					new FaultMutation(3, "S3_1", "A3", "P3.E3", "", "M3", "D3"),
-					new FaultMutation(4, "S4_1", "A4", "P4.E4", "Field2", "M4", "D4"),
-					new FaultMutation(4, "S4_1", "A5", "P4.E5", "", "M9", "D9"),
-					new FaultMutation(5, "S5_1", "A5", "P5.E5", "Field2", "M5", "D5"),
-					new FaultMutation(5, "S5_2", "A5", "P5.E5", "Field2", "M5", "D5"),
-					new FaultMutation(6, "S3_1", "A3", "P3.E3", "", "M3", "D8"),
-					new FaultMutation(8, "S3_1", "A3", "P3.E3", "", "M3", "D3"),
+					new FaultMutation(1, "S2_1", "A2", "P1.E1", "M1", ""),
+					new FaultMutation(3, "S3_1", "A3", "P3.E3", "M3", "D3"),
+					new FaultMutation(4, "S4_1", "A4", "P4.E4", "M4", "D4"),
+					new FaultMutation(4, "S4_1", "A5", "P4.E5", "M9", "D9"),
+					new FaultMutation(5, "S5_1", "A5", "P5.E5", "M5", "D5"),
+					new FaultMutation(5, "S5_2", "A5", "P5.E5", "M5", "D5"),
+					new FaultMutation(6, "S3_1", "A3", "P3.E3", "M3", "D8"),
+					new FaultMutation(8, "S3_1", "A3", "P3.E3", "M3", "D3"),
 				});
 
 				DatabaseTests.AssertResult(db.GetFaultMutations(5), new[]
 				{
-					new FaultMutation(5, "S5_1", "A5", "P5.E5", "Field2", "M5", "D5"),
-					new FaultMutation(5, "S5_2", "A5", "P5.E5", "Field2", "M5", "D5"),
+					new FaultMutation(5, "S5_1", "A5", "P5.E5", "M5", "D5"),
+					new FaultMutation(5, "S5_2", "A5", "P5.E5", "M5", "D5"),
 				});
 			}
 		}
@@ -414,9 +434,9 @@ namespace Peach.Pro.Test.Core.Storage
 			{
 				DatabaseTests.AssertResult(db.LoadTable<FieldMetric>(), new[]
 				{
-					new FieldMetric("", 7, 2, 5),
-					new FieldMetric("Field2", 3, 2, 2),
-					new FieldMetric("Field1", 1, 0, 0),
+					new FieldMetric("", "", "", 7, 2, 5),
+					new FieldMetric("", "", "Field2", 3, 2, 2),
+					new FieldMetric("", "", "Field1", 1, 0, 0),
 				});
 			}
 		}

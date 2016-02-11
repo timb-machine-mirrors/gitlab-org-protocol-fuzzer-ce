@@ -3,13 +3,22 @@ using Peach.Pro.Core.WebServices.Models;
 
 namespace Peach.Pro.Core.Storage
 {
+	public enum NameKind
+	{
+		Machine = 0,
+		Human = 1
+	}
+
 	public class NamedItem
 	{
 		[Key]
 		public long Id { get; set; }
 
-		[Unique]
+		[Index("UX_NamedItem", IsUnique = true)]
 		public string Name { get; set; }
+
+		[Index("UX_NamedItem", IsUnique = true)]
+		public string Field { get; set; }
 	}
 
 	public class State
@@ -61,10 +70,6 @@ namespace Peach.Pro.Core.Storage
 		[ForeignKey(typeof(NamedItem), Name = "FK_Mutation_Element")]
 		public long ElementId { get; set; }
 
-		// TODO: Figure out what indices we need to have
-		[ForeignKey(typeof(NamedItem), Name = "FK_Mutation_Field")]
-		public long FieldId { get; set; }
-
 		[Index("IX_Mutation")]
 		[Index("UX_Mutation", IsUnique = true)]
 		[Index("IX_Mutation_Mutator")]
@@ -76,6 +81,11 @@ namespace Peach.Pro.Core.Storage
 		[Index("IX_Mutation_Dataset")]
 		[ForeignKey(typeof(NamedItem), Name = "FK_Mutation_Dataset")]
 		public long DatasetId { get; set; }
+
+		[Index("IX_Mutation")]
+		[Index("UX_Mutation", IsUnique = true)]
+		[Index("IX_Mutation_Kind")]
+		public NameKind Kind { get; set; }
 	}
 
 	/// <summary>
@@ -85,6 +95,9 @@ namespace Peach.Pro.Core.Storage
 	{
 		[Key]
 		public long Id { get; set; }
+
+		[ForeignKey(typeof(FaultDetail))]
+		public long FaultDetailId { get; set; }
 
 		[Index("IX_FaultMetric_Iteration")]
 		public long Iteration { get; set; }
@@ -112,13 +125,15 @@ namespace Peach.Pro.Core.Storage
 		[ForeignKey(typeof(NamedItem), Name = "FK_FaultMetric_Element")]
 		public long ElementId { get; set; }
 
-		[ForeignKey(typeof(NamedItem), Name = "FK_FaultMetric_Field")]
-		public long FieldId { get; set; }
-
 		[ForeignKey(typeof(NamedItem), Name = "FK_FaultMetric_Mutator")]
 		public long MutatorId { get; set; }
 
 		[ForeignKey(typeof(NamedItem), Name = "FK_FaultMetric_Dataset")]
 		public long DatasetId { get; set; }
+
+		[Index("IX_Mutation")]
+		[Index("UX_Mutation", IsUnique = true)]
+		[Index("IX_Mutation_Kind")]
+		public NameKind Kind { get; set; }
 	}
 }
