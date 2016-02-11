@@ -397,6 +397,14 @@ namespace Peach.Pro.WebApi2.Controllers
 			return Query<IterationMetric>(id);
 		}
 
+		[Route("{id}/metrics/fields")]
+		[ResponseType(typeof(IEnumerable<FieldMetric>))]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		public IHttpActionResult GetFieldnMetric(Guid id)
+		{
+			return Query<FieldMetric>(id);
+		}
+
 		#endregion
 
 		#region Pause / Continue / Stop / Kill
@@ -548,6 +556,7 @@ namespace Peach.Pro.WebApi2.Controllers
 				Dataset = MakeUrl(id, "metrics", "dataset"),
 				Buckets = MakeUrl(id, "metrics", "buckets"),
 				Iterations = MakeUrl(id, "metrics", "iterations"),
+				Fields = MakeUrl(id, "metrics", "fields"),
 			};
 
 			return job;
