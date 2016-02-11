@@ -124,11 +124,6 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// The URL of iteration metrics.
 		/// </summary>
 		public string Iterations { get; set; }
-
-		/// <summary>
-		/// The URL of fields metrics.
-		/// </summary>
-		public string Fields { get; set; }
 	}
 
 	[Serializable]
