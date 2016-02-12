@@ -70,7 +70,11 @@ if (is_dev) {
 		filename: "[file].map",
 		exclude: ['vendor.js']
 	}));
-	plugins.push(new webpack.optimize.UglifyJsPlugin());
+	plugins.push(new webpack.optimize.UglifyJsPlugin({
+		compress: {
+			warnings: false
+		}
+	}));
 	plugins.push(new webpack.optimize.DedupePlugin());
 }
 
@@ -103,13 +107,13 @@ var config = {
 				"ts" 
 			]},
 			{ test: /\.css(.*)$/,    loader: ExtractTextPlugin.extract("style-loader", "css-loader") },
-			{ test: /\.gif$/,        loader: "url-loader?mimetype=image/gif" },
+			{ test: /\.gif$/,        loader: "file?name=[name].[ext]" },
 			// handle web fonts
-			{ test: /\.eot(.*)$/,    loader: "file" },
-			{ test: /\.woff2?(.*)$/, loader: "url?prefix=font/&limit=5000" },
-			{ test: /\.otf(.*)$/,    loader: "url?limit=10000&mimetype=application/octet-stream" },
-			{ test: /\.tt(.*)$/,     loader: "url?limit=10000&mimetype=application/octet-stream" },
-			{ test: /\.svg(.*)$/,    loader: "url?limit=10000&mimetype=image/svg+xml" }
+			{ test: /\.eot(.*)$/,    loader: "file?name=[name].[ext]" },
+			{ test: /\.woff2?(.*)$/, loader: "file?name=[name].[ext]" },
+			{ test: /\.otf(.*)$/,    loader: "file?name=[name].[ext]" },
+			{ test: /\.tt(.*)$/,     loader: "file?name=[name].[ext]" },
+			{ test: /\.svg(.*)$/,    loader: "file?name=[name].[ext]" }
 		],
 		noParse: []
 	},

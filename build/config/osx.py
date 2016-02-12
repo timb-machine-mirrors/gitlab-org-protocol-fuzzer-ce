@@ -20,6 +20,7 @@ tools = [
 optional_tools = [
 	'tools.asan',
 	'tools.mdoc',
+	'tools.npm',
 	'tools.test',
 	'tools.tsc',
 	'tools.zip',

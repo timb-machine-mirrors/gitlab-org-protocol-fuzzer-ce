@@ -7,7 +7,7 @@
   "description": "Peach Fuzzer UI",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --progress",
+    "build": "webpack",
     "start": "webpack-dev-server --inline"
   },
   "repository": {
