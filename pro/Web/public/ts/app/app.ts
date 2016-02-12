@@ -232,6 +232,17 @@ namespace Peach {
 					},
 					ncyBreadcrumb: { label: 'Monitoring' }
 				})
+				.state(C.States.PitAdvancedTuning, {
+					url: '/tuning',
+					views: {
+						'@': {
+							templateUrl: C.Templates.Pit.Advanced.Tuning,
+							controller: ConfigureTuningController,
+							controllerAs: C.ViewModel
+						}
+					},
+					ncyBreadcrumb: { label: 'Tuning' }
+				})
 				.state(C.States.PitAdvancedTest, {
 					url: '/test',
 					views: {

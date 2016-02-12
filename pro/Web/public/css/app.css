@@ -1,4 +1,5 @@
-﻿.skin-1 .nav-list > li.disabled > a > .menu-text,
+﻿
+.skin-1 .nav-list > li.disabled > a > .menu-text,
 .skin-1 .nav-list > li.disabled > a > i,
 .skin-1 .nav-list > li.disabled > a > .arrow {
 	color: #595D60;
@@ -228,4 +229,37 @@ ul.library li a {
 
 .ui-select-toggle {
 	text-align: left;
+}
+
+.tuning {
+}
+
+.tuning .weights {
+	padding: 0;
+}
+
+.tuning .weights div {
+	width: 150px;
+	padding: 11px 0px 11px 10px;
+}
+
+.tuning .weights i {
+	padding: 2px 2px;
+}
+
+.tuning .elements {
+	padding-left: 30px;
+}
+
+.tuning .elements .expander {
+	float: left;
+	margin-left: -35px;
+	margin-right: 5px;
+}
+
+.tuning .elements > div {
+	border: 1px solid black;
+	border-radius: 3px;
+	padding: 7px;
+	margin-right: 5px;
 }

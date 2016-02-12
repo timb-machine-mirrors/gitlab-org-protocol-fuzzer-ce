@@ -150,13 +150,13 @@ namespace Peach {
 		}
 
 		public get IsConfigured(): boolean {
-			return onlyIf(this.pit, () => _.all(this.CreateFlatDefinesView(this.CreateDefinesView()), (param: IParameter) => {
+			return onlyIf(this.pit, () => _.every(this.CreateFlatDefinesView(this.CreateDefinesView()), (param: IParameter) => {
 				return param.optional || param.value !== "";
 			}));
 		}
 
 		public get HasMonitors(): boolean {
-			return onlyIf(this.pit, () => _.any(this.pit.agents, (agent: IAgent) => {
+			return onlyIf(this.pit, () => _.some(this.pit.agents, (agent: IAgent) => {
 				return agent.monitors.length > 0;
 			}));
 		}
@@ -214,7 +214,7 @@ namespace Peach {
 			];
 			const view: IParameter[] = [];
 			this.Visit(src, (param: IParameter) => {
-				if (_.contains(skip, param.type)) {
+				if (_.includes(skip, param.type)) {
 					return;
 				}
 				view.push(param);
