@@ -18,10 +18,10 @@ tools = [
 ]
 
 optional_tools = [
-	'tools.npm',
 	'tools.mdoc',
 	'tools.msbuild',
 	'tools.msi',
+	'tools.npm',
 	'tools.test',
 	'tools.tsc',
 	'tools.zip',

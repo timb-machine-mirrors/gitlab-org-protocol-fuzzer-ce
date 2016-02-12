@@ -22,6 +22,7 @@ optional_tools = [
 	'tools.asan',
 	'tools.mdoc',
 	'tools.mkbundle',
+	'tools.npm',
 	'tools.test',
 	'tools.tsc',
 	'tools.zip',

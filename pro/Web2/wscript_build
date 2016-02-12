@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-dist = bld.path.find_node('dist')
 assets = bld.path.find_node('assets')
-
 content = [
 	'LICENSE.txt',
 	'package.json',
@@ -12,13 +10,52 @@ content = [
 	bld.path.ant_glob('app/**/*') + \
 	bld.path.ant_glob('typings/**/*')
 
+npm_source = map(lambda x: bld.path.ant_glob(x), [
+	'app/**/*',
+	'node_modules/**/*',
+	'typings/**/*',
+	'webpack.config.js',
+])
+# flatten the list
+npm_source = [item for sublist in npm_source for item in sublist]
+
+npm_target = [
+	'dist/app.css',
+	'dist/app.css.map',
+	'dist/app.js',
+	'dist/app.js.map',
+	'dist/vendor.css',
+	'dist/vendor.css.map',
+	'dist/vendor.js',
+	'dist/loader-big.gif',
+	'dist/loading.gif',
+	'dist/fontawesome-webfont.ttf',
+	'dist/fontawesome-webfont.woff',
+	'dist/fontawesome-webfont.woff2',
+	'dist/fontawesome-webfont.eot',
+	'dist/fontawesome-webfont.svg',
+	'dist/glyphicons-halflings-regular.woff',
+	'dist/glyphicons-halflings-regular.woff2',
+	'dist/glyphicons-halflings-regular.eot',
+	'dist/glyphicons-halflings-regular.svg',
+	'dist/glyphicons-halflings-regular.ttf',
+	'dist/rw-widgets.eot',
+	'dist/rw-widgets.svg',
+	'dist/rw-widgets.woff',
+	'dist/rw-widgets.ttf',
+]
+
+npm_output = bld.path.make_node('dist')
+
 bld(
 	name ='Peach.Pro.Web2',
 	features = 'peach npm',
+	npm_source = npm_source,
+	npm_target = npm_target,
+	npm_outdir = npm_output,
 	install_path = '${BINDIR}/public',
 	ide_content = content,
 	install_644 = {
-		dist   : dist.ant_glob('**/*'),
 		assets : assets.ant_glob('**/*'),
 	}
 )
