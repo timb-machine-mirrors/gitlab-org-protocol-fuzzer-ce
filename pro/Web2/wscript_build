@@ -10,14 +10,12 @@ content = [
 	bld.path.ant_glob('app/**/*') + \
 	bld.path.ant_glob('typings/**/*')
 
-npm_source = map(lambda x: bld.path.ant_glob(x), [
+npm_source = bld.path.ant_glob([
+	'package.json',
 	'app/**/*',
-	'node_modules/**/*',
 	'typings/**/*',
 	'webpack.config.js',
 ])
-# flatten the list
-npm_source = [item for sublist in npm_source for item in sublist]
 
 npm_target = [
 	'dist/app.css',
@@ -27,8 +25,8 @@ npm_target = [
 	'dist/vendor.css',
 	'dist/vendor.css.map',
 	'dist/vendor.js',
-	'dist/loader-big.gif',
-	'dist/loading.gif',
+	# 'dist/loader-big.gif',
+	# 'dist/loading.gif',
 	'dist/fontawesome-webfont.ttf',
 	'dist/fontawesome-webfont.woff',
 	'dist/fontawesome-webfont.woff2',
@@ -39,20 +37,17 @@ npm_target = [
 	'dist/glyphicons-halflings-regular.eot',
 	'dist/glyphicons-halflings-regular.svg',
 	'dist/glyphicons-halflings-regular.ttf',
-	'dist/rw-widgets.eot',
-	'dist/rw-widgets.svg',
-	'dist/rw-widgets.woff',
-	'dist/rw-widgets.ttf',
+	# 'dist/rw-widgets.eot',
+	# 'dist/rw-widgets.svg',
+	# 'dist/rw-widgets.woff',
+	# 'dist/rw-widgets.ttf',
 ]
-
-npm_output = bld.path.make_node('dist')
 
 bld(
 	name ='Peach.Pro.Web2',
 	features = 'peach npm',
 	npm_source = npm_source,
 	npm_target = npm_target,
-	npm_outdir = npm_output,
 	install_path = '${BINDIR}/public',
 	ide_content = content,
 	install_644 = {

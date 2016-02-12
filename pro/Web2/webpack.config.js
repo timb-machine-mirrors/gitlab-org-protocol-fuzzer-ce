@@ -12,10 +12,10 @@ var entry = {
 	vendor: [
 		"bootstrap/dist/css/bootstrap.css",
 		"font-awesome/css/font-awesome.css",
-		"rc-tree/assets/index.css",
+		// "rc-tree/assets/index.css",
 		"react-bootstrap-table/css/toastr.css",
 		"react-bootstrap-table/css/react-bootstrap-table.css",
-		"react-widgets/dist/css/react-widgets.css",
+		// "react-widgets/dist/css/react-widgets.css",
 		"babel-polyfill",
 		"classnames",
 		"immutable",
@@ -48,10 +48,6 @@ var plugins = [
 		'process.env.NODE_ENV': is_dev ? '"development"' : '"production"'
 	}),
 	new ExtractTextPlugin("[name].css"),
-	// new webpack.DllReferencePlugin({
-	// 	context: __dirname,
-	// 	manifest: require("./assets/vendor-manifest.json")
-	// })
 	new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: 'vendor.js' })
 ];
 
