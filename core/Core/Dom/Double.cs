@@ -22,14 +22,13 @@ namespace Peach.Core.Dom
 	[Parameter("maxOccurs", typeof(int), "Maximum occurances", "1")]
 	[Parameter("occurs", typeof(int), "Actual occurances", "1")]
 	[Serializable]
-	public class Double : DataElement
+	public class Double : Number
 	{
 		protected double Max = double.MaxValue;
 		protected double Min = double.MinValue;
-		protected bool IsLittleEndian = true;
-		protected Endian Endian = Endian.Little;
 
 		public Double()
+			: base(false)
 		{
 			lengthType = LengthType.Bits;
 			length = 64;
@@ -37,14 +36,14 @@ namespace Peach.Core.Dom
 		}
 
 		public Double(string name)
-			: base(name)
+			: base(false, name)
 		{
 			lengthType = LengthType.Bits;
 			length = 64;
 			DefaultValue = new Variant(0.0);
 		}
 
-		public static DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
+		public static new DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
 		{
 			if (node.Name != "Double")
 				return null;
@@ -157,17 +156,6 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		public override Variant DefaultValue
-		{
-			get
-			{
-				return base.DefaultValue;
-			}
-			set
-			{
-				base.DefaultValue = Sanitize(value);
-			}
-		}
 
 		#region Sanitize
 
@@ -216,13 +204,13 @@ namespace Peach.Core.Dom
 			var len = bs.Read(b, 0, b.Length);
 			Debug.Assert(len == lengthAsBits / 8);
 
-			if (BitConverter.IsLittleEndian != IsLittleEndian)
+			if (BitConverter.IsLittleEndian != LittleEndian)
 				System.Array.Reverse(b);
 
 			return BitConverter.ToDouble(b, 0);
 		}
 
-		private Variant Sanitize(Variant variant)
+		protected override Variant Sanitize(Variant variant)
 		{
 			var value = GetNumber(variant);
 
@@ -268,26 +256,12 @@ namespace Peach.Core.Dom
 
 		#endregion
 
-		public bool LittleEndian
-		{
-			get { return IsLittleEndian; }
-			set
-			{
-				if (IsLittleEndian != value)
-				{
-					IsLittleEndian = value;
-					Endian = value ? Endian.Little : Endian.Big;
-					Invalidate();
-				}
-			}
-		}
-
-		public double MaxValue
+		public new double MaxValue
 		{
 			get { return Max; }
 		}
 
-		public double MinValue
+		public new double MinValue
 		{
 			get { return Min; }
 		}
@@ -312,7 +286,7 @@ namespace Peach.Core.Dom
 
 			var b = length == 32 ? BitConverter.GetBytes((float)value) : BitConverter.GetBytes(value);
 
-			if (BitConverter.IsLittleEndian != IsLittleEndian)
+			if (BitConverter.IsLittleEndian != LittleEndian)
 				System.Array.Reverse(b);
 
 			var bs = new BitStream();

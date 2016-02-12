@@ -69,6 +69,7 @@ namespace Peach {
 		public ConfigSteps = [
 			{ id: C.States.PitAdvancedVariables, name: 'Variables' },
 			{ id: C.States.PitAdvancedMonitoring, name: 'Monitoring' },
+			{ id: C.States.PitAdvancedTuning, name: 'Tuning' },
 			{ id: C.States.PitAdvancedTest, name: 'Test' }
 		];
 

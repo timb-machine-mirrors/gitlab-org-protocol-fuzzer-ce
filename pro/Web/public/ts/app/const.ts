@@ -154,6 +154,7 @@ namespace Peach.C {
 			export namespace Advanced {
 				export const Variables = 'html/pit/advanced/variables.html';
 				export const Monitoring = 'html/pit/advanced/monitoring.html';
+				export const Tuning = 'html/pit/advanced/tuning.html';
 				export const Test = 'html/pit/advanced/test.html';
 			}
 		}
@@ -203,6 +204,7 @@ namespace Peach.C {
 		export const PitAdvanced = 'pit.advanced';
 		export const PitAdvancedVariables = 'pit.advanced.variables';
 		export const PitAdvancedMonitoring = 'pit.advanced.monitoring';
+		export const PitAdvancedTuning = 'pit.advanced.tuning';
 		export const PitAdvancedTest = 'pit.advanced.test';
 	}
 }

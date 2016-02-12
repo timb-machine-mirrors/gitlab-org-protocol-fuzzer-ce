@@ -1,0 +1,32 @@
+<div class="tuning">
+	<div>
+		<table>
+			<tbody>
+				<tr ng-repeat="node in vm.flat"
+					ng-show="vm.ShowNode(node)">
+					<th>
+						<i class="fa fa-lg pointer" 
+							ng-class="vm.WeightIcon(node, 0)"
+							ng-click="vm.OnSelectWeight(node, 0)"></i>
+						&nbsp;
+						<i class="fa fa-lg pointer" 
+							ng-repeat="weight in [1, 2, 3, 4, 5]"
+							ng-class="vm.WeightIcon(node, weight)"
+							ng-click="vm.OnSelectWeight(node, weight)"></i>
+					</th>
+					<td>
+						<div ng-style="vm.NodeShift(node)">
+							<span class="expander pointer"
+								ng-click="vm.OnToggleExpand(node)">
+								<i class="fa"
+									ng-class="vm.ExpanderIcon(node)"
+									ng-show="vm.ShowExpander(node)"/>
+							</span>
+							{{node.name}}
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

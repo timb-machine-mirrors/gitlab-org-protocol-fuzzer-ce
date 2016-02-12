@@ -184,7 +184,7 @@ namespace Peach {
 						this.FaultsOverTimeData = [[0]];
 					} else {
 						this.FaultsOverTimeLabels = data.map(x => moment(x.date).format("M/D h a")),
-						this.FaultsOverTimeData = [_.pluck(data, 'faultCount')];
+						this.FaultsOverTimeData = [_.map<IFaultTimelineMetric, number>(data, 'faultCount')];
 					}
 				});
 				break;

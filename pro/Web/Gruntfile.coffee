@@ -36,7 +36,6 @@ module.exports = (grunt) ->
 					'public/lib/angular-ui-select'   : 'angular-ui-select:main'
 					'public/lib/angular-visjs'       : 'angular-visjs:main'
 					'public/lib/jquery'              : 'jquery:main'
-					'public/lib/lodash'              : 'lodash:main'
 					'public/lib/moment'              : 'moment:main'
 					'public/lib/ngstorage'           : 'ngstorage:main'
 
@@ -51,6 +50,7 @@ module.exports = (grunt) ->
 					'chartjs'                     : 'Chart.js/Chart.js'
 					'fontawesome/css'             : 'fontawesome/css/font-awesome.css'
 					'fontawesome/fonts'           : 'fontawesome/fonts/*'
+					'lodash'                      : 'lodash/lodash.js'
 					'pithy'                       : 'pithy/lib/pithy.js'
 					'vis/img'                     : 'vis/dist/img/*'
 					'vis/vis.css'                 : 'vis/dist/vis.css'
@@ -241,7 +241,7 @@ module.exports = (grunt) ->
 
 	grunt.registerTask 'server', [
 		'configureProxies'
-		'http:accept_eula'
+		# 'http:accept_eula'
 		'connect:livereload'
 	]
 

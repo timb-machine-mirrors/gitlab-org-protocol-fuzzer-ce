@@ -14,6 +14,7 @@ using Org.BouncyCastle.Security;
 using Peach.Core;
 using Peach.Core.IO;
 using Peach.Pro.Core.Mutators;
+using Peach.Pro.Core.Publishers.Ssl;
 using PemReader = Org.BouncyCastle.Utilities.IO.Pem.PemReader;
 
 namespace Peach.Pro.Core.Publishers
@@ -296,6 +297,68 @@ namespace Peach.Pro.Core.Publishers
 				extraSuites.CopyTo(allSuites, baseSuites.Length);
 
 				return allSuites;
+			}
+
+			public override TlsKeyExchange GetKeyExchange()
+			{
+				int keyExchangeAlgorithm = TlsUtilities.GetKeyExchangeAlgorithm(mSelectedCipherSuite);
+
+				switch (keyExchangeAlgorithm)
+				{
+					case KeyExchangeAlgorithm.DH_DSS:
+					case KeyExchangeAlgorithm.DH_RSA:
+						return CreateDHKeyExchange(keyExchangeAlgorithm);
+
+					case KeyExchangeAlgorithm.DHE_DSS:
+					case KeyExchangeAlgorithm.DHE_RSA:
+						return CreateDheKeyExchange(keyExchangeAlgorithm);
+
+					case KeyExchangeAlgorithm.ECDH_ECDSA:
+					case KeyExchangeAlgorithm.ECDH_RSA:
+						return CreateECDHKeyExchange(keyExchangeAlgorithm);
+
+					case KeyExchangeAlgorithm.ECDHE_ECDSA:
+					case KeyExchangeAlgorithm.ECDHE_RSA:
+						return CreateECDheKeyExchange(keyExchangeAlgorithm);
+
+					case KeyExchangeAlgorithm.RSA:
+						return CreateRsaKeyExchange();
+
+					default:
+						/*
+							* Note: internal error here; the TlsProtocol implementation verifies that the
+							* server-selected cipher suite was in the list of client-offered cipher suites, so if
+							* we now can't produce an implementation, we shouldn't have offered it!
+							*/
+						throw new TlsFatalAlert(AlertDescription.internal_error);
+				}
+			}
+			
+			protected override TlsKeyExchange CreateDHKeyExchange(int keyExchange)
+			{
+				return new PeachyTlsDHKeyExchange(keyExchange, mSupportedSignatureAlgorithms, null);
+			}
+
+			protected override TlsKeyExchange CreateDheKeyExchange(int keyExchange)
+			{
+				return new PeachyTlsDheKeyExchange(keyExchange, mSupportedSignatureAlgorithms, null);
+			}
+
+			protected override TlsKeyExchange CreateECDHKeyExchange(int keyExchange)
+			{
+				return new PeachyTlsECDHKeyExchange(keyExchange, mSupportedSignatureAlgorithms, mNamedCurves, mClientECPointFormats,
+					mServerECPointFormats);
+			}
+
+			protected override TlsKeyExchange CreateECDheKeyExchange(int keyExchange)
+			{
+				return new PeachyTlsECDheKeyExchange(keyExchange, mSupportedSignatureAlgorithms, mNamedCurves, mClientECPointFormats,
+					mServerECPointFormats);
+			}
+
+			protected override TlsKeyExchange CreateRsaKeyExchange()
+			{
+				return new PeachyTlsRsaKeyExchange(mSupportedSignatureAlgorithms);
 			}
 		}
 
