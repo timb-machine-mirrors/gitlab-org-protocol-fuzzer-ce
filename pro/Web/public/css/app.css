@@ -232,34 +232,44 @@ ul.library li a {
 }
 
 .tuning {
+	position: relative;
 }
 
-.tuning .weights {
-	padding: 0;
+.tuning > div {
+	overflow-x: auto;
+	overflow-y: visible;
+	margin-left: 150px;
 }
 
-.tuning .weights div {
+.tuning table {
+	width: 100%;
+}
+
+.tuning th {
+	position: absolute;
 	width: 150px;
-	padding: 11px 0px 11px 10px;
+	left: 0;
+	padding: 10px 0px 10px 10px;
 }
 
-.tuning .weights i {
-	padding: 2px 2px;
+.tuning th i {
+	padding: 2px;
 }
 
-.tuning .elements {
-	padding-left: 30px;
+.tuning td {
+	padding: 2px 2px 2px 30px;
 }
 
-.tuning .elements .expander {
+.tuning td .expander {
 	float: left;
 	margin-left: -35px;
 	margin-right: 5px;
 }
 
-.tuning .elements > div {
+.tuning td > div {
 	border: 1px solid black;
 	border-radius: 3px;
 	padding: 7px;
 	margin-right: 5px;
+	white-space: nowrap;
 }

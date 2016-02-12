@@ -1,6 +1,8 @@
 ﻿/// <reference path="../reference.ts" />
 
 namespace Peach {
+	const SHIFT_WIDTH = 20;
+
 	interface Node {
 		name: string;
 		weight?: number;
@@ -73,7 +75,81 @@ namespace Peach {
 			{ name: 'B', weight: 1, kids: [
 				{ name: 'B1', weight: 2, kids: [
 					{ name: 'X', kids: [
-						{ name: 'Z' }
+						{ name: 'Z', kids: [
+							{ name: 'A', weight: 0 },
+							{
+								name: 'B', weight: 1, kids: [
+									{
+										name: 'B1', weight: 2, kids: [
+											{
+												name: 'X', kids: [
+													{ name: 'Z', kids: [
+														{ name: 'A', weight: 0 },
+														{
+															name: 'B', weight: 1, kids: [
+																{
+																	name: 'B1', weight: 2, kids: [
+																		{
+																			name: 'X', kids: [
+																				{
+																					name: 'Z', kids: [
+																						{ name: 'A', weight: 0 },
+																						{
+																							name: 'B', weight: 1, kids: [
+																								{
+																									name: 'B1', weight: 2, kids: [
+																										{
+																											name: 'X', kids: [
+																												{ name: 'A big long name that goes to the side very far' }
+																											]
+																										},
+																										{ name: 'Y' }
+																									]
+																								},
+																								{ name: 'B2', weight: 3 }
+																							]
+																						},
+																						{
+																							name: 'C', weight: 4, kids: [
+																								{ name: 'C1', weight: 5 },
+																								{ name: 'C2', weight: 5 }
+																							]
+																						}
+
+																					]
+																				}
+																			]
+																		},
+																		{ name: 'Y' }
+																	]
+																},
+																{ name: 'B2', weight: 3 }
+															]
+														},
+														{
+															name: 'C', weight: 4, kids: [
+																{ name: 'C1', weight: 5 },
+																{ name: 'C2', weight: 5 }
+															]
+														}
+
+													] }
+												]
+											},
+											{ name: 'Y' }
+										]
+									},
+									{ name: 'B2', weight: 3 }
+								]
+							},
+							{
+								name: 'C', weight: 4, kids: [
+									{ name: 'C1', weight: 5 },
+									{ name: 'C2', weight: 5 }
+								]
+							}
+
+						]}
 					]},
 					{ name: 'Y' }
 				]},
@@ -111,7 +187,7 @@ namespace Peach {
 
 		NodeShift(node: FlatNode) {
 			return {
-				'margin-left': node.depth * 30
+				'margin-left': node.depth * SHIFT_WIDTH
 			}
 		}
 
