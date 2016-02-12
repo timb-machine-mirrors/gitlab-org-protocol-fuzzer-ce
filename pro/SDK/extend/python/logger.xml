@@ -22,7 +22,9 @@
 		<Publisher class="Console" />
 		
 		<!--Use our Logger like normal -->
-		<Logger class="PythonLogger" />
+		<Logger class="PythonLogger">
+			<Param name="Param1" value="Test" />
+		</Logger>
 	</Test>
 
 </Peach>

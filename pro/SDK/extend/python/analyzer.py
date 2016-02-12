@@ -34,6 +34,8 @@ class PythonAnalyzer(BasePythonAnalyzer, System.Runtime.Serialization.ISerializa
 		System.SerializableAttribute,
 		AnalyzerAttr("PythonAnalyzer", True),
 		DescriptionAttr("Example Analyzer in Python"),
+		ParameterAttr("Param1", clr.GetClrType(str), "Example parameter"),
+		ParameterAttr("Param2", clr.GetClrType(str), "Optional parameter", "DefaultValue"),
 	]
 
 	@clrtype.accepts()
@@ -42,6 +44,7 @@ class PythonAnalyzer(BasePythonAnalyzer, System.Runtime.Serialization.ISerializa
 
 	@clrtype.accepts(System.Collections.Generic.Dictionary[clr.GetClrType(str), Variant])
 	def __init__(self, args):
+		print '>>> ANALYZER INIT Param1=%s' % (str(args['Param1']))
 		pass
 
 	@clrtype.accepts(DataElement, System.Collections.Generic.Dictionary[DataElement, Peach.Core.Cracker.Position])

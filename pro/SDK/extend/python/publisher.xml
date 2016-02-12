@@ -20,7 +20,9 @@
 	<Test name="Default">
 		<StateModel ref="State"/>
 		<!-- Use out Python Publisher as normal -->
-		<Publisher class="PythonPublisher" />
+		<Publisher class="PythonPublisher">
+			<Param name="Param1" value="Test" />
+		</Publisher>
 	</Test>
 
 </Peach>
