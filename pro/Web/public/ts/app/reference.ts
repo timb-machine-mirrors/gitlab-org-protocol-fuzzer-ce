@@ -23,6 +23,7 @@
 /// <reference path="controllers/NewVarCtrl.ts" />
 /// <reference path="controllers/PitConfigDefinesCtrl.ts" />
 /// <reference path="controllers/PitConfigMonitorsCtrl.ts" />
+/// <reference path="controllers/PitConfigTuningCtrl.ts" />
 /// <reference path="controllers/PitCtrl.ts" />
 /// <reference path="controllers/PitTestCtrl.ts" />
 /// <reference path="controllers/WizardCtrl.ts" />

@@ -121,18 +121,6 @@ namespace Peach.Pro.Core.Dom
 			pit.WriteEndElement();
 		}
 
-		public override Variant DefaultValue
-		{
-			get
-			{
-				return base.DefaultValue;
-			}
-			set
-			{
-				base.DefaultValue = Sanitize(value);
-			}
-		}
-
 		#region Sanitize
 
 		private dynamic SanitizeString(string str)
@@ -197,7 +185,7 @@ namespace Peach.Pro.Core.Dom
 			return _endian.GetUInt64(bits, len);
 		}
 
-		private Variant Sanitize(Variant variant)
+		protected override Variant Sanitize(Variant variant)
 		{
 			dynamic value = GetNumber(variant);
 

@@ -27,7 +27,7 @@ namespace Peach {
 				const search = this.$scope.search.toLowerCase();
 				const monitors: IParameter[] = [];
 				for (let group of this.pitService.Pit.metadata.monitors) {
-					if (_.any(group.items, (item: IParameter) => {
+					if (_.some(group.items, (item: IParameter) => {
 						const name = item.name.toLowerCase();
 						const pos = name.indexOf(search);
 						return pos !== -1;

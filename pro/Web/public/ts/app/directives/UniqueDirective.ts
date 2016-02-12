@@ -28,7 +28,7 @@ namespace Peach {
 		) => {
 			const validate = (modelValue, viewValue) => {
 				const collection = scope.unique();
-				return !_.contains(collection, viewValue || scope.defaultValue);
+				return !_.includes(collection, viewValue || scope.defaultValue);
 			};
 
 			ctrl.$validators['unique'] = validate;
