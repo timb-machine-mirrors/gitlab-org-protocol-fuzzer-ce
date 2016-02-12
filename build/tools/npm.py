@@ -6,6 +6,7 @@ from waflib import Task, Utils
 
 def configure(conf):
 	conf.find_program('npm')
+	conf.env.append_value('supported_features', 'npm')
 
 @feature('npm')
 def process_npm(self):

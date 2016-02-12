@@ -12,15 +12,15 @@ tools = [
 	'cs',
 	'resx',
 	'misc',
-	'tools.utils',
 	'tools.externals',
+	'tools.npm',
+	'tools.utils',
 	'tools.version',
 ]
 
 optional_tools = [
 	'tools.asan',
 	'tools.mdoc',
-	'tools.npm',
 	'tools.test',
 	'tools.tsc',
 	'tools.zip',

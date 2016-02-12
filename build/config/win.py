@@ -12,8 +12,9 @@ tools = [
 	'resx',
 	'midl',
 	'misc',
-	'tools.utils',
 	'tools.externals',
+	'tools.npm',
+	'tools.utils',
 	'tools.version',
 ]
 
@@ -21,7 +22,6 @@ optional_tools = [
 	'tools.mdoc',
 	'tools.msbuild',
 	'tools.msi',
-	'tools.npm',
 	'tools.test',
 	'tools.tsc',
 	'tools.zip',
