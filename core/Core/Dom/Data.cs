@@ -65,6 +65,10 @@ namespace Peach.Core.Dom
 		{
 			Name = "{0}/{1}".Fmt(dataSet.Name, Path.GetFileName(fileName));
 			FileName = fileName;
+
+			// If fieldId is omitted, default it to the filename
+			if (string.IsNullOrEmpty(FieldId))
+				FieldId = Path.GetFileName(FileName);
 		}
 
 		public override void Apply(DataModel model)
