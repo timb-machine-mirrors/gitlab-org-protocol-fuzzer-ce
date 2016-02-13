@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Xml;
-using System.Xml.Resolvers;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
@@ -99,7 +98,6 @@ namespace Peach.Pro.Test.Core.CrackingTests
 
 			Assert.AreEqual(@"<DataModel name=""TheDataModel""><Sequence><String name=""FooString"" lengthType=""bytes"" length=""12"" value=""Hello World!"" /></Sequence></DataModel>", xmlString);
 		}
-
 	}
 
 	[Test]
