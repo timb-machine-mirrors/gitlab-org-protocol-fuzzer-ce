@@ -1,6 +1,6 @@
 import superagent = require('superagent');
 import { AWAIT_MARKER } from 'redux-await';
-import { take, put, call, fork, cancel, SagaCancellationException } from 'redux-saga'
+import { take, put, call, fork, cancel } from 'redux-saga/effects';
 
 import RootState, { GetState } from '../../models/Root';
 import { Job } from '../../models/Job';

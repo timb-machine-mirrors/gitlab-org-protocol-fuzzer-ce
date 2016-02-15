@@ -1,6 +1,7 @@
 import superagent = require('superagent');
 import { AWAIT_MARKER } from 'redux-await';
-import { take, put, call, fork, cancel, CANCEL, SagaCancellationException } from 'redux-saga'
+import { isCancelError } from 'redux-saga';
+import { take, put, call, fork, cancel } from 'redux-saga/effects';
 
 import RootState, { GetState } from '../../models/Root';
 import { Job, JobStatus, JobRequest } from '../../models/Job';
@@ -166,7 +167,7 @@ function* poll(getState: GetState, id: string) {
 			yield call(wait, POLL_INTERVAL);
 		}
 	} catch (error) {
-		if (!(error instanceof SagaCancellationException))
+		if (!isCancelError(error))
 			throw error;
 	}
 }
