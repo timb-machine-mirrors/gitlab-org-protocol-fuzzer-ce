@@ -1,20 +1,17 @@
 import React = require('react');
 import { Component, Props } from 'react';
 import { connect } from 'react-redux';
-import { bindActionCreators, Dispatch } from 'redux';
+import { Dispatch } from 'redux';
 
-import { Actions } from '../redux/modules/Error';
+import { clearError } from '../redux/modules/Error';
 
 interface ErrorProps extends Props<Error> {
 	// injected
 	error?: string;
-	actions?: Actions;
+	dispatch?: Dispatch;
 }
 
-@connect(
-	state => ({ error: state.error }),
-	dispatch => ({ actions: new Actions(dispatch) })
-)
+@connect(state => ({ error: state.error }))
 class Error extends Component<ErrorProps, {}> {
 	render() {
 		const error = this.props.error || 'An unknown error has occured.';

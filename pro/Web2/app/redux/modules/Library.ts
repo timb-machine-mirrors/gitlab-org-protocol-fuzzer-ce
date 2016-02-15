@@ -1,6 +1,5 @@
-import { Dispatch } from 'redux';
-import { AWAIT_MARKER } from 'redux-await';
 import superagent = require('superagent');
+import { AWAIT_MARKER } from 'redux-await';
 
 import { Library, LibraryState, Category } from '../../models/Library';
 import { MakeEnum } from '../../utils';
@@ -25,16 +24,14 @@ export default function reducer(state: LibraryState = initial, action): LibraryS
 	}
 }
 
-export function fetch() {
-	return (dispatch: Dispatch, getState: Function) => {
-		dispatch({
-			type: types.LIBRARY_FETCH,
-			AWAIT_MARKER,
-			payload: {
-				library: doFetch()
-			}
-		})
-	}
+export function fetchLibrary() {
+	return {
+		type: types.LIBRARY_FETCH,
+		AWAIT_MARKER,
+		payload: {
+			library: doFetch()
+		}
+	};
 }
 
 function doFetch() {
@@ -51,7 +48,6 @@ function doFetch() {
 		;
 	});
 }
-
 
 function mapLibrary(data: Library[]): Category[] {
 	let ret: Category[] = [];

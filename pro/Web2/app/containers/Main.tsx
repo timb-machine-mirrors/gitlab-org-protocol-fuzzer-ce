@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch } from 'redux';
 
 import { R, RouteSpec } from '../routes';
-import { Actions } from '../redux/modules/Error';
+import { clearError } from '../redux/modules/Error';
 import { injectRouter, RouterContext } from '../models/Router';
 import Breadcrumbs from '../components/Breadcrumbs';
 import BreadcrumbLeaf from '../components/BreadcrumbLeaf';
@@ -17,17 +17,14 @@ import NavBar from '../components/NavBar';
 interface MainProps extends Props<Main> {
 	// injected
 	error?: string;
-	actions?: Actions;
+	dispatch?: Dispatch;
 }
 
 interface MainState {
 	isSidebarCollapsed?: boolean;
 }
 
-@connect(
-	state => ({ error: state.error }),
-	dispatch => ({ actions: new Actions(dispatch) })
-)
+@connect(state => ({ error: state.error }))
 @injectRouter
 class Main extends Component<MainProps, MainState> {
 	context: RouterContext;
@@ -39,7 +36,7 @@ class Main extends Component<MainProps, MainState> {
 		};
 
 		this.context.router.addListener(() => {
-			this.props.actions.clear();
+			this.props.dispatch(clearError());
 		});
 	}
 

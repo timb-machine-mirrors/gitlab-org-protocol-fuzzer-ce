@@ -5,12 +5,13 @@ import { connect } from 'redux-await';
 import { Row, Col, Table } from 'react-bootstrap';
 
 import { R } from '../../routes';
-import { FaultState, FaultListState, FaultDetail } from '../../models/Fault';
+import { FaultDetail } from '../../models/Fault';
 import { formatDate, formatFileSize } from '../../utils';
-import { fetch } from '../../redux/modules/Fault';
+import { fetchFault } from '../../redux/modules/Fault';
 import { Route } from '../../models/Router';
 
 const NullFault: FaultDetail = {
+	id: null,
 	faultUrl: null,
 	archiveUrl: null,
 	reproducible: null,
@@ -32,14 +33,19 @@ const NullFault: FaultDetail = {
 interface FaultsDetailProps extends Props<FaultsDetail> {
 	// injected
 	fault?: FaultDetail;
+	route?: Route;
 	dispatch?: Dispatch;
 	statuses?: any;
 }
 
-@connect(state => ({ fault: state.fault }))
+@connect(state => ({ 
+	fault: state.fault,
+	route: state.router.route
+}))
 class FaultsDetail extends Component<FaultsDetailProps, {}> {
 	componentDidMount(): void {
-		this.props.dispatch(fetch());
+		const { route } = this.props;
+		this.props.dispatch(fetchFault(route.params));
 	}
 	
 	render() {

@@ -1,12 +1,17 @@
 import React = require('react');
-import { Component, Props } from 'react';
-import { connect } from 'react-redux';
-import { Alert, Button, ButtonToolbar, Input, Panel } from 'react-bootstrap';
 import Icon = require('react-fa');
+import superagent = require('superagent');
+import { Component, Props } from 'react';
+import { Dispatch } from 'redux';
+import { connect } from 'redux-await';
+import { Alert, Button, ButtonToolbar, Input, Panel } from 'react-bootstrap';
+import { actions } from 'redux-router5';
+import { reduxForm, ReduxFormProps, FormData } from 'redux-form';
 
 import { R } from '../../routes';
 import { Route } from '../../models/Router';
 import { Pit, Parameter, ParameterType } from '../../models/Pit';
+import { JobRequest, Job } from '../../models/Job';
 import Link from '../../components/Link';
 import LinkContainer from '../../components/LinkContainer';
 
@@ -14,6 +19,9 @@ interface DashboardProps extends Props<Dashboard> {
 	// injected
 	route?: Route;
 	pit?: Pit;
+	formProps?: ReduxFormProps;
+	dispatch?: Dispatch;
+	statuses?: any;
 }
 
 interface DashboardState {
@@ -25,6 +33,15 @@ interface DashboardState {
 	route: state.router.route,
 	pit: state.pit
 }))
+@reduxForm({
+	form: 'PitDashboard',
+	fields: [
+		'seed',
+		'start',
+		'stop'
+	],
+	propNamespace: 'formProps'
+}, state => ({ initialValues: state.router.route.params }))
 class Dashboard extends Component<DashboardProps, DashboardState> {
 	constructor(props: DashboardProps, context) {
 		super(props, context);
@@ -37,9 +54,9 @@ class Dashboard extends Component<DashboardProps, DashboardState> {
 	}
 
 	render() {
-		const { params } = this.props.route;
-		const { pit } = this.props;
+		const { pit, formProps, route: { params } } = this.props;
 		const { showCfgHelp, showStartHelp } = this.state;
+		const { handleSubmit, fields } = formProps;
 		const name = pit.name ? pit.name : "Loading...";
 
 		return <div>
@@ -117,6 +134,7 @@ class Dashboard extends Component<DashboardProps, DashboardState> {
 						labelClassName="col-sm-4"
 						wrapperClassName="col-sm-6" 
 						placeholder='Random Seed'
+						{...fields['seed']}
 						// peach:range
 						// peach:range-min="0"
 						// peach:range-max="4294967295"
@@ -127,6 +145,7 @@ class Dashboard extends Component<DashboardProps, DashboardState> {
 						labelClassName="col-sm-4"
 						wrapperClassName="col-sm-6" 
 						placeholder='1'
+						{...fields['start']}
 						// peach:range
 						// peach:range-min="1"
 						// peach:range-max="4294967295"
@@ -137,6 +156,7 @@ class Dashboard extends Component<DashboardProps, DashboardState> {
 						labelClassName="col-sm-4"
 						wrapperClassName="col-sm-6" 
 						placeholder='Default'
+						{...fields['stop']}
 						// peach:range
 						// peach:range-min="1"
 						// peach:range-max="4294967295"
@@ -144,7 +164,8 @@ class Dashboard extends Component<DashboardProps, DashboardState> {
 
 					<ButtonToolbar className="center">
 						<Button bsStyle="primary"
-							disabled={!pit.isConfigured}>
+							disabled={!pit.isConfigured}
+							onClick={handleSubmit(this.onStart)}>
 							<Icon name="play" />
 							&nbsp; Start
 						</Button>
@@ -255,6 +276,35 @@ class Dashboard extends Component<DashboardProps, DashboardState> {
 		localStorage.setItem(name, JSON.stringify(value));
 		this.setState({
 			[name]: value
+		});
+	}
+
+	onStart = (data: FormData) => {
+		const { pit, dispatch } = this.props;
+		const { seed, start, stop } = data;
+		const request: JobRequest = {
+			pitUrl: pit.pitUrl,
+			seed,
+			rangeStart: start,
+			rangeStop: stop
+		};
+		const to = R.Job.name;
+		return new Promise((resolve, reject) => {
+			superagent.post('/p/jobs')
+				.type('json')
+				.accept('json')
+				.send(request)
+				.end((err, res) => {
+					if (err) {
+						reject({ _error: err.toString() });
+					} else {
+						resolve();
+						const job: Job = res.body;
+						const params = { job: job.id };
+						dispatch(actions.navigateTo(to, params));
+					}
+				})
+			;
 		});
 	}
 }

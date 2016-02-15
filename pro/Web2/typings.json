@@ -23,6 +23,7 @@
     "redux-form": "github:DefinitelyTyped/DefinitelyTyped/redux-form/redux-form.d.ts#d6c51c607bd90c8bf0e065fabc41bc3f937425df",
     "redux-logger": "github:DefinitelyTyped/DefinitelyTyped/redux-logger/redux-logger.d.ts#7b3d5a6ea5acda4a81f71309f1cc62354e63b681",
     "redux-router5": "github:flaub/typescript-definitions/redux-router5",
+    "redux-saga": "github:DefinitelyTyped/DefinitelyTyped/redux-saga/redux-saga.d.ts#14700203a4c18ec5f7739dc7478e7508069ad9fb",
     "router5": "github:flaub/typescript-definitions/router5#193de05c443d63d947b01639effb9d32066ec946",
     "router5-history": "github:flaub/typescript-definitions/router5-history",
     "router5-listeners": "github:flaub/typescript-definitions/router5-listeners",

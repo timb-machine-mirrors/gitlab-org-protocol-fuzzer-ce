@@ -19,10 +19,6 @@ class Pit extends Component<PitProps, {}> {
 		this.load(this.props);
 	}
 
-	// componentWillReceiveProps(next) {
-	// 	this.load(next);
-	// }
-
 	load(props: PitProps) {
 		const { dispatch, route } = props;
 		const { pit } = route.params;

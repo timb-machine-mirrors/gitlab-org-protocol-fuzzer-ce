@@ -1,15 +1,15 @@
 import React = require('react');
+import Icon = require('react-fa');
 import { Component, Props } from 'react';
 import { Dispatch } from 'redux';
 import { connect } from 'redux-await';
 import { Button, ButtonToolbar } from 'react-bootstrap';
-import Icon = require('react-fa');
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import { actions } from 'redux-router5';
 
 import { Job } from '../models/Job';
 import { FaultListState, FaultSummary } from '../models/Fault';
-import { fetch } from '../redux/modules/FaultList';
+import { startPolling, stopPolling } from '../redux/modules/FaultList';
 import { R } from '../routes';
 import { formatDate } from '../utils';
 
@@ -17,9 +17,8 @@ interface FaultsTableProps extends Props<FaultsTable> {
 	limit?: number;
 	// injected
 	job?: Job;
-	faults?: FaultSummary[];
+	faults?: FaultListState;
 	dispatch?: Dispatch;
-	statuses?: any;
 }
 
 @connect(state => ({ 
@@ -28,25 +27,16 @@ interface FaultsTableProps extends Props<FaultsTable> {
 }))
 class FaultsTable extends Component<FaultsTableProps, {}> {
 	componentDidMount() {
-		this.load(this.props);
+		this.props.dispatch(startPolling());
 	}
 
-	componentWillReceiveProps(next: FaultsTableProps): void {
-		this.load(next);
-	}
-
-	load(props: FaultsTableProps) {
-		const { job, faults, dispatch, statuses } = props;
-		if (statuses.job === 'success' && 
-			statuses.faults !== 'pending' && 
-			job.faultCount !== faults.length) {
-			dispatch(fetch(job));
-		}
+	componentWillUnmount(): void {
+		this.props.dispatch(stopPolling());
 	}
 	
 	render() {
 		const { limit, faults } = this.props;
-		const data = limit ? _.takeRight(faults, limit) : faults;
+		const data = limit ? _.takeRight(faults.data, limit) : faults.data;
 		return <div>
 			<BootstrapTable data={data}
 				trClassName='pointer'
@@ -97,7 +87,7 @@ class FaultsTable extends Component<FaultsTableProps, {}> {
 	onRowClick = (fault: FaultSummary) => {
 		const { job, dispatch } = this.props;
 		const to = R.JobFaultsDetail.name;
-		const params = { job: job.id, fault: fault.iteration };
+		const params = { job: job.id, fault: fault.id };
 		dispatch(actions.navigateTo(to, params));
 	}
 }

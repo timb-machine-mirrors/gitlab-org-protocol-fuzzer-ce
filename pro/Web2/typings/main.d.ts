@@ -20,6 +20,7 @@
 /// <reference path="main/ambient/redux-form/redux-form.d.ts" />
 /// <reference path="main/ambient/redux-logger/redux-logger.d.ts" />
 /// <reference path="main/ambient/redux-router5/redux-router5.d.ts" />
+/// <reference path="main/ambient/redux-saga/redux-saga.d.ts" />
 /// <reference path="main/ambient/redux/redux.d.ts" />
 /// <reference path="main/ambient/router5-history/router5-history.d.ts" />
 /// <reference path="main/ambient/router5-listeners/router5-listeners.d.ts" />

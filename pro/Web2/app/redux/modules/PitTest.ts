@@ -1,122 +1,147 @@
+import superagent = require('superagent');
 import { Dispatch } from 'redux';
 import { AWAIT_MARKER } from 'redux-await';
-import superagent = require('superagent');
+import { take, put, call } from 'redux-saga'
 
+import RootState, { GetState } from '../../models/Root';
 import { Pit } from '../../models/Pit';
 import { Job, JobStatus, JobRequest } from '../../models/Job';
 import { TestState, TestStatus, TestResult } from '../../models/PitTest';
-import RootState from '../../models/Root';
-import { MakeEnum } from '../../utils';
+import { MakeEnum, wait } from '../../utils';
 
 const POLL_INTERVAL = 1000;
 
 const types = {
 	TEST_START: '',
-	TEST_POLL: '',
 	TEST_STOP: '',
-	TEST_TIMER: ''
+	TEST_FETCH: '',
+	TEST_DELETE: '',
+	TEST_RESET: ''
 };
 MakeEnum(types);
 
 const initial: TestState = {
+	isPending: false,
 	job: null,
-	result: null,
-	timer: null,
-	isPending: false
+	result: null
 };
+
+function update(state: TestState, fragment: TestState): TestState {
+	return Object.assign({}, state, fragment);
+}
 
 export default function reducer(state: TestState = initial, action): TestState {
 	switch (action.type) {
 		case types.TEST_START:
-			return Object.assign({}, state, {
-				job: action.payload.test,
-				isPending: true
+			return update(state, {
+				isPending: true,
+				job: action.payload.testJob
 			});
-		case types.TEST_POLL:
-			return onPoll(state, action);
-		case types.TEST_STOP:
-			return Object.assign({}, state, {
-				timer: null
+		case types.TEST_FETCH:
+			return onFetch(state, action);
+		case types.TEST_DELETE:
+			return update(state, {
+				job: null
 			});
-		case types.TEST_TIMER:
-			return Object.assign({}, state, {
-				timer: action.timer
-			});
+		case types.TEST_RESET:
+			return initial;
 		default:
 			return state;
 	}
 }
 
+export function* saga(getState: GetState) {
+	while (true) {
+		const action = yield take(types.TEST_START);
+		const job: Job = action.payload.testJob;
+		yield call(poll, job);
+		yield put(deleteJob(job));
+	}
+}
+
 export function startTest(pit: Pit) {
-	return (dispatch: Dispatch, getState: Function) => {
-		const state: RootState = getState();
-		if (!_.isNull(state.test.timer))
-			clearTimeout(state.test.timer);
-
-		dispatch({
-			type: types.TEST_START,
-			AWAIT_MARKER,
-			payload: {
-				test: doStart(dispatch, pit)
-			}
-		});
+	return {
+		type: types.TEST_START,
+		AWAIT_MARKER,
+		payload: {
+			testJob: doStart(pit)
+		}
 	};
 }
 
-export function stopTest() {
-	return (dispatch: Dispatch, getState: Function) => {
-		const state: RootState = getState();
-		if (!_.isNull(state.test.timer))
-			clearTimeout(state.test.timer);
-
-		dispatch({
-			type: types.TEST_STOP,
-			AWAIT_MARKER,
-			payload: {
-				test: doStop(dispatch)
-			}
-		});
+export function stopTest(job: Job) {
+	return {
+		type: types.TEST_START,
+		AWAIT_MARKER,
+		payload: {
+			testJob: doStop(job)
+		}
 	};
 }
 
-function doStart(dispatch: Dispatch, pit: Pit) {
+export function resetTest() {
+	return { type: types.TEST_RESET };
+}
+
+function* poll(job: Job) {
+	while (true) {
+		yield put(fetchResult(job));
+		const action = yield take(types.TEST_FETCH);
+		const result: TestResult = action.payload.testResult;
+		if (result.status !== TestStatus.Active) {
+			break;
+		}
+		yield call(wait, POLL_INTERVAL);
+	}
+}
+
+function doStart(pit: Pit) {
 	const request: JobRequest = {
 		pitUrl: pit.pitUrl,
 		dryRun: true
 	};
 	return new Promise<Job>((resolve, reject) => {
 		superagent.post('/p/jobs')
+			.type('json')
 			.accept('json')
 			.send(request)
 			.end((err, res) => {
 				if (err) {
 					reject(`Test failed to start: ${err.message}`);
 				} else {
-					const job: Job = res.body;
-					resolve(job);
-					dispatchPoll(dispatch, job);
+					resolve(res.body);
 				}
 			})
 		;
 	});
 }
 
-function doStop(dispatch: Dispatch) {
-	return new Promise<Job>((resolve, reject) => {
+function doStop(job: Job) {
+	return new Promise((resolve, reject) => {
+		superagent.get(job.commands.stopUrl)
+			.accept('json')
+			.end((err, res) => {
+				if (err) {
+					reject(`Test failed to start: ${err.message}`);
+				} else {
+					resolve(res.body);
+				}
+			})
+		;
 	});
 }
 
-function dispatchPoll(dispatch: Dispatch, job: Job) {
-	dispatch({
-		type: types.TEST_POLL,
+function fetchResult(job: Job) {
+	return {
+		type: types.TEST_FETCH,
 		AWAIT_MARKER,
 		payload: {
-			test: doPoll(dispatch, job)
+			testResult: doFetch(job)
 		}
-	});
+	};
 }
 
-function doPoll(dispatch: Dispatch, job: Job) {
+function doFetch(job: Job) {
 	return new Promise<TestResult>((resolve, reject) => {
 		superagent.get(job.firstNodeUrl)
 			.accept('json')
@@ -124,34 +149,42 @@ function doPoll(dispatch: Dispatch, job: Job) {
 				if (err) {
 					reject(`Test result failed to load: ${err.message}`);
 				} else {
-					const result: TestResult = res.body;
-					resolve(result);
-					if (result.status === TestStatus.Active) {
-						doTimerStart(dispatch, job);
-					} else {
-						superagent.delete(job.jobUrl).end();
-					}
+					resolve(res.body);
 				}
 			})
 		;
 	});
 }
 
-function doTimerStart(dispatch: Dispatch, job: Job) {
-	const timer = setTimeout(() => dispatchPoll(dispatch, job), POLL_INTERVAL);
-	dispatch({
-		type: types.TEST_TIMER,
-		timer
+function deleteJob(job: Job) {
+	return {
+		type: types.TEST_DELETE,
+		AWAIT_MARKER,
+		payload: {
+			testDelete: doDelete(job)
+		}
+	};
+}
+
+function doDelete(job: Job) {
+	return new Promise((resolve, reject) => {
+		superagent.delete(job.jobUrl)
+			.end((err, res) => {
+				if (err) {
+					reject(`Test job failed to delete: ${err.message}`);
+				} else {
+					resolve();
+				}
+			});
+		;
 	});
 }
 
-function onPoll(state: TestState, action) {
-	const result: TestResult = action.payload.test;
+function onFetch(state: TestState, action) {
+	const result: TestResult = action.payload.testResult;
 	const isPending = (result.status === TestStatus.Active);
-	const timer = null;
-	return Object.assign({}, state, {
-		result,
+	return update(state, {
 		isPending,
-		timer
+		result
 	});
 }

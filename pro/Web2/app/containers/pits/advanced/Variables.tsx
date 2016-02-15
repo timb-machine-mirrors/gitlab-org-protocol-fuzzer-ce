@@ -4,7 +4,7 @@ import { Dispatch } from 'redux';
 import { Component, Props } from 'react';
 import { connect } from 'redux-await';
 import { Alert, Accordion, Button, ButtonToolbar, Row, Col } from 'react-bootstrap';
-import { reduxForm, ReduxFormProps, FormData, FieldProp } from 'redux-form';
+import { reduxForm, ReduxFormProps, FormData } from 'redux-form';
 
 import PitDefines from '../../../components/PitDefines';
 import { Pit, Parameter, ParameterType, DefinesFormData } from '../../../models/Pit';

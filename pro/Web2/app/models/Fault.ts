@@ -1,9 +1,10 @@
-﻿import { StateContainer } from './Root';
-
-export type FaultListState = StateContainer<FaultSummary[]>;
-export type FaultState = StateContainer<FaultDetail>;
+﻿export interface FaultListState {
+	isPolling?: boolean;
+	data?: FaultSummary[];
+}
 
 export interface FaultSummary {
+	id: number;
 	faultUrl: string;
 	archiveUrl: string;
 	reproducible: boolean;

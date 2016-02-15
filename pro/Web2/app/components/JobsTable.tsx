@@ -1,14 +1,14 @@
 import React = require('react');
+import Icon = require('react-fa');
 import { Component, Props, MouseEvent } from 'react';
 import { Dispatch } from 'redux';
 import { connect } from 'redux-await';
 import { Button, ButtonToolbar } from 'react-bootstrap';
-import Icon = require('react-fa');
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import { actions } from 'redux-router5';
 
 import { Job, JobStatus } from '../models/Job';
-import { fetch } from '../redux/modules/JobList';
+import { fetchJobs } from '../redux/modules/JobList';
 import { deleteJob } from '../redux/modules/Job';
 import { R } from '../routes';
 import { formatDate } from '../utils';
@@ -37,7 +37,7 @@ class JobsTable extends Component<JobsTableProps, JobsTableState> {
 	}
 	
 	componentDidMount() {
-		this.props.dispatch(fetch());
+		this.props.dispatch(fetchJobs());
 	}
 	
 	render() {

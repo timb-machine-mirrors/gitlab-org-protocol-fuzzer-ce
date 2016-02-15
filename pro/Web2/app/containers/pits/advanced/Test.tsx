@@ -4,7 +4,9 @@ import { Component, Props } from 'react';
 import { Dispatch } from 'redux';
 import { Alert, Button, ButtonToolbar } from 'react-bootstrap';
 import { connect } from 'react-redux';
+import { actions } from 'redux-router5';
 
+import { R } from '../../../routes';
 import PitTest from '../../../components/PitTest';
 import { Pit } from '../../../models/Pit';
 import { TestState, TestStatus } from '../../../models/PitTest';
@@ -62,11 +64,19 @@ class Test extends Component<TestProps, {}> {
 						disabled={!canContinue}>
 						Continue &nbsp; <Icon name='arrow-right' />
 					</Button>
-					<Button bsStyle='warning' bsSize='sm'
-						onClick={this.onBeginTest}
-						disabled={test.isPending || !pit.isConfigured}>
-						<Icon name='bolt' /> &nbsp; Begin Test
-					</Button>
+					{!test.isPending &&
+						<Button bsStyle='warning' bsSize='sm'
+							onClick={this.onBeginTest}
+							disabled={!pit.isConfigured}>
+							<Icon name='bolt' /> &nbsp; Begin Test
+						</Button>
+					}
+					{test.isPending &&
+						<Button bsStyle='danger' bsSize='sm'
+							onClick={this.onAbortTest}>
+							<Icon name='stop' /> &nbsp; Abort Test
+						</Button>
+					}
 				</ButtonToolbar>
 			</div>
 
@@ -75,11 +85,20 @@ class Test extends Component<TestProps, {}> {
 	}
 
 	onContinue = () => {
+		const { dispatch, pit } = this.props;
+		const to = R.Pit.name;
+		const params = { pit: pit.id };
+		dispatch(actions.navigateTo(to, params));
 	}
 
 	onBeginTest = () => {
 		const { pit, dispatch } = this.props;
 		dispatch(startTest(pit));
+	}
+
+	onAbortTest = () => {
+		const { test, dispatch } = this.props;
+		dispatch(stopTest(test.job));
 	}
 }
 

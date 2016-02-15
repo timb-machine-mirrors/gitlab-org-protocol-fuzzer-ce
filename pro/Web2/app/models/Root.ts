@@ -3,13 +3,7 @@ import { LibraryState } from './Library';
 import { Pit } from './Pit';
 import { Job } from './Job';
 import { TestState } from './PitTest';
-import { FaultSummary, FaultDetail } from './Fault';
-
-export interface StateContainer<T> {
-	isFetching: boolean;
-	lastUpdated?: number;
-	data?: T;
-}
+import { FaultListState, FaultDetail } from './Fault';
 
 interface RootState {
 	error?: string;
@@ -19,7 +13,7 @@ interface RootState {
 	test?: TestState;
 	job?: Job;
 	jobs?: Job[];
-	faults?: FaultSummary[];
+	faults?: FaultListState;
 	fault?: FaultDetail;
 	await?: {
 		statuses: {
@@ -35,6 +29,10 @@ interface RootState {
 		errors: {
 		};
 	};
+}
+
+export interface GetState {
+	(): RootState;
 }
 
 export default RootState;

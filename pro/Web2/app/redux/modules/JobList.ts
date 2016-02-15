@@ -1,6 +1,5 @@
-import { Dispatch } from 'redux';
-import { AWAIT_MARKER } from 'redux-await';
 import superagent = require('superagent');
+import { AWAIT_MARKER } from 'redux-await';
 
 import { Job } from '../../models/Job';
 import { MakeEnum } from '../../utils';
@@ -19,20 +18,14 @@ export default function reducer(state: Job[] = [], action): Job[] {
 	}
 }
 
-export function fetch() {
-	return (dispatch: Dispatch, getState: Function) => {
-		dispatchFetch(dispatch);
-	}
-}
-
-export function dispatchFetch(dispatch: Dispatch) {
-	dispatch({
+export function fetchJobs() {
+	return {
 		type: types.JOBS_FETCH,
 		AWAIT_MARKER,
 		payload: {
 			jobs: doFetch()
 		}
-	});
+	};
 }
 
 function doFetch() {

@@ -1,4 +1,3 @@
-import { StateContainer } from './Root';
 import { MakeLowerEnum } from '../utils';
 import { Tag } from './Pit';
 
@@ -103,9 +102,6 @@ export interface Job extends JobRequest {
 	groups?: any[];
 
 	result?: string;
-
-	// client-side only
-	timer?: NodeJS.Timer;
 }
 
 export const JobStatus = {

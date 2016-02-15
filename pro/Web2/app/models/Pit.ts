@@ -1,4 +1,3 @@
-import { StateContainer } from './Root';
 import { MakeLowerEnum } from '../utils';
 
 export const ParameterType = {
