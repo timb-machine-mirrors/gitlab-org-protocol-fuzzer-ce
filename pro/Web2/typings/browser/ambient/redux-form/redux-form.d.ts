@@ -1,4 +1,4 @@
-// Compiled using typings@0.6.6
+// Compiled using typings@0.6.8
 // Source: https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/d6c51c607bd90c8bf0e065fabc41bc3f937425df/redux-form/redux-form.d.ts
 // Type definitions for redux-form v4.0.3
 // Project: https://github.com/erikras/redux-form

@@ -1,4 +1,4 @@
-// Compiled using typings@0.6.6
+// Compiled using typings@0.6.8
 // Source: https://raw.githubusercontent.com/flaub/typescript-definitions/master/react-router5/react-router5.d.ts
 // Type definitions for react-router5 v2.0.0
 

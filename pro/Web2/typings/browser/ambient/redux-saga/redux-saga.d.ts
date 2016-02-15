@@ -1,10 +1,9 @@
 // Compiled using typings@0.6.8
-// Source: https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/14700203a4c18ec5f7739dc7478e7508069ad9fb/redux-saga/redux-saga.d.ts
-// Type definitions for redux-saga 0.6.0
+// Source: https://raw.githubusercontent.com/flaub/typescript-definitions/master/redux-saga/redux-saga.d.ts
+// Type definitions for redux-saga 0.8.0
 // Project: https://github.com/yelouafi/redux-saga
-// Definitions by: Daniel Lytkin <https://github.com/aikoven>
+// Definitions by: Frank Laub <https://github.com/flaub>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
-
 
 declare module 'redux-saga' {
   import {Middleware} from 'redux';
