@@ -1,6 +1,5 @@
-import { Dispatch } from 'redux';
-import { AWAIT_MARKER } from 'redux-await';
 import superagent = require('superagent');
+import { AWAIT_MARKER } from 'redux-await';
 
 import { MetricsState } from '../../models/Metrics';
 import { Job } from '../../models/Job';
@@ -31,14 +30,12 @@ export default function reducer(state: MetricsState = initial, action): MetricsS
 }
 
 export function fetch(job: Job, metric: string) {
-	return (dispatch: Dispatch, getState: Function) => {
-		dispatch({
-			type: types.METRICS_FETCH,
-			AWAIT_MARKER,
-			payload: {
-				metrics: doFetch(job, metric)
-			}
-		});
+	return {
+		type: types.METRICS_FETCH,
+		AWAIT_MARKER,
+		payload: {
+			metrics: doFetch(job, metric)
+		}
 	};
 }
 

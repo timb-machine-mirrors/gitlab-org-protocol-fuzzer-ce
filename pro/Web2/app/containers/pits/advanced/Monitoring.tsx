@@ -3,7 +3,7 @@ import Icon = require('react-fa');
 import { Dispatch } from 'redux';
 import { connect } from 'redux-await';
 import { Component, Props } from 'react';
-import { reduxForm, ReduxFormProps, FormData, FieldProp } from 'redux-form';
+import { reduxForm, ReduxFormProps, FormData } from 'redux-form';
 import { Alert, Accordion, Row, Col, Button, ButtonToolbar } from 'react-bootstrap';
 
 import { R } from '../../../routes';

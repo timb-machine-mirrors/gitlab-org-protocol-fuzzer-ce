@@ -27,19 +27,22 @@ const router = new Router5(routes)
 	})
 ;
 
-
-router.start((err, state) => {
-	const store = createStore(router, state);
-
-	render(
-		<Provider store={store}>
+function rootRender(store) {
+	try {
+		return <Provider store={store}>
 			<div>
 				<RouterProvider router={router}>
 					<Main />
 				</RouterProvider>
 				<DevTools />
 			</div>
-		</Provider>,
-		document.getElementById('app')
-	);
+		</Provider>	
+	} catch (error) {
+		console.log('rootRender>', error);
+	}
+}
+
+router.start((err, state) => {
+	const store = createStore(router, state);
+	render(rootRender(store), document.getElementById('app'));
 });

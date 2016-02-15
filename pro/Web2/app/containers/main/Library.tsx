@@ -8,7 +8,7 @@ import { actions } from 'redux-router5';
 import { injectRouter, RouterContext } from '../../models/Router';
 import { LibraryState, Category } from '../../models/Library';
 import { Pit } from '../../models/Pit';
-import { fetch } from '../../redux/modules/Library';
+import { fetchLibrary } from '../../redux/modules/Library';
 import { R } from '../../routes';
 import NewPitModal from '../../components/NewPitModal';
 import FoldingPanel from '../../components/FoldingPanel';
@@ -44,7 +44,7 @@ class Library extends Component<LibraryProps, ModalState> {
 	}
 
 	componentDidMount() {
-		this.props.dispatch(fetch());
+		this.props.dispatch(fetchLibrary());
 	}
 
 	render() {

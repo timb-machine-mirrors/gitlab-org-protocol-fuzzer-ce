@@ -4,8 +4,8 @@ import { connect } from 'redux-await';
 import { Dispatch } from 'redux';
 
 import { Route } from '../../models/Router';
-import Segment from '../../components/Segment';
 import { Job } from '../../models/Job';
+import Segment from '../../components/Segment';
 import { startPolling, stopPolling } from '../../redux/modules/Job';
 
 interface JobComponentProps extends Props<JobComponent> {

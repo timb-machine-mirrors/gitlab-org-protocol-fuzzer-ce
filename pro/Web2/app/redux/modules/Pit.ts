@@ -1,13 +1,15 @@
 import superagent = require('superagent');
 import { AWAIT_MARKER } from 'redux-await';
-import { Dispatch } from 'redux';
 import { FormData } from 'redux-form';
+import { fork, take, put } from 'redux-saga'
 
+import RootState, { GetState } from '../../models/Root';
 import { 
 	Pit, Parameter, ParameterType, Monitor, Agent, 
 	DefinesFormData, AgentsFormData 
 } from '../../models/Pit';
 import { MakeEnum, validationMessages } from '../../utils';
+import { resetTest } from './PitTest';
 
 const types = {
 	PIT_FETCH: '',
@@ -36,44 +38,58 @@ export default function reducer(state: Pit = initial, action): Pit {
 	}
 }
 
+export function* saga(getState: GetState) {
+	yield fork(watchSave, getState);
+	yield fork(watchFetch, getState);
+}
+
 export function fetch(id: string) {
-	return (dispatch: Dispatch, getState: Function) => {
-		dispatch({
-			type: types.PIT_FETCH,
-			AWAIT_MARKER,
-			payload: {
-				pit: doFetch(id)
-			}
-		});
+	return {
+		type: types.PIT_FETCH,
+		AWAIT_MARKER,
+		payload: {
+			pit: doFetch(id)
+		}
 	};
 }
 
 export function saveDefines(pit: Pit, data: FormData) {
-	return (dispatch: Dispatch, getState: Function) => {
-		const dto = _.pick(pit, 'id', 'pitUrl', 'name', 'agents') as Pit;
-		dto.config = mapDefinesFromView(pit.definesView, data as DefinesFormData);
-		dispatch({
-			type: types.PIT_FETCH,
-			AWAIT_MARKER,
-			payload: {
-				pit: doSavePit(dto)
-			}
-		});
-	}
+	const dto = _.pick(pit, 'id', 'pitUrl', 'name', 'agents') as Pit;
+	dto.config = mapDefinesFromView(pit.definesView, data as DefinesFormData);
+	return savePit(dto);
 }
 
 export function saveAgents(pit: Pit, data: FormData) {
-	return (dispatch: Dispatch, getState: Function) => {
-		const dto = _.pick(pit, 'id', 'pitUrl', 'name', 'config') as Pit;
-		dto.agents = mapAgentsFromView(pit, data as AgentsFormData);
-		dispatch({
-			type: types.PIT_FETCH,
-			AWAIT_MARKER,
-			payload: {
-				pit: doSavePit(dto)
-			}
-		});
+	const dto = _.pick(pit, 'id', 'pitUrl', 'name', 'config') as Pit;
+	dto.agents = mapAgentsFromView(pit, data as AgentsFormData);
+	return savePit(dto);
+}
+
+function* watchSave() {
+	while (true) {
+		yield take(types.PIT_SAVE);
+		yield put(resetTest());
 	}
+}
+
+function* watchFetch(getState: GetState) {
+	while (true) {
+		const { pit } = getState();
+		const action = yield take(types.PIT_FETCH);
+		if (pit.id !== action.payload.pit.id) {
+			yield put(resetTest());
+		}
+	}
+}
+
+function savePit(pit: Pit) {
+	return {
+		type: types.PIT_SAVE,
+		AWAIT_MARKER,
+		payload: {
+			pit: doSavePit(pit)
+		}
+	};
 }
 
 function doFetch(id: string) {

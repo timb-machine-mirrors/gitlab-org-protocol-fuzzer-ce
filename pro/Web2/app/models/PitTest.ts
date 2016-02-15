@@ -2,10 +2,9 @@
 import { Job } from './Job';
 
 export interface TestState {
-	job: Job;
-	result: TestResult;
-	timer: NodeJS.Timer;
-	isPending: boolean;
+	isPending?: boolean;
+	job?: Job;
+	result?: TestResult;
 }
 
 export interface TestResult {

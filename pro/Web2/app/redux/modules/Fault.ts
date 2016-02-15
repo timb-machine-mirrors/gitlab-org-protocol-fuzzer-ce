@@ -1,11 +1,9 @@
-import { Dispatch } from 'redux';
-import { AWAIT_MARKER } from 'redux-await';
 import superagent = require('superagent');
+import { AWAIT_MARKER } from 'redux-await';
 
-import { FaultState, FaultSummary, FaultDetail } from '../../models/Fault';
+import { FaultSummary, FaultDetail } from '../../models/Fault';
 import RootState from '../../models/Root';
 import { MakeEnum } from '../../utils';
-import { doFetch as fetchFaults } from './FaultList';
 
 const types = {
 	FAULT_FETCH: ''
@@ -21,46 +19,21 @@ export default function reducer(state: FaultDetail = null, action): FaultDetail 
 	}
 }
 
-export function fetch(fault: FaultSummary = null) {
-	return async (dispatch: Dispatch, getState: Function) => {
-		if (fault) {
-			return fetchAction(dispatch, fault);
-		}
-
-		const state: RootState = getState();
-		let { faults } = state;
-		const { router, job } = state;
-		const params = router.route.params;
-		const iteration = parseInt(params.fault);
-		if (_.isEmpty(faults)) {
-			faults = await fetchFaults(job);
-		}
-		findFault(dispatch, faults, iteration);
-	}
-}
-
-function findFault(dispatch: Dispatch, faults: FaultSummary[], iteration: number) {
-	const found = _.find(faults, { iteration });
-	if (found) {
-		fetchAction(dispatch, found);
-	} else {
-		console.log('not found');
-	}
-}
-
-function fetchAction(dispatch: Dispatch, fault: FaultSummary) {
-	dispatch({
+export function fetchFault(params) {
+	return {
 		type: types.FAULT_FETCH,
 		AWAIT_MARKER,
 		payload: {
-			fault: doFetch(fault)
+			fault: doFetch(params)
 		}
-	})
+	}
 }
 
-async function doFetch(fault: FaultSummary) {
+function doFetch(params) {
+	const { job, fault } = params;
+	const url = `/p/jobs/${job}/faults/${fault}`;
 	return new Promise<FaultDetail>((resolve, reject) => {
-		superagent.get(fault.faultUrl)
+		superagent.get(url)
 			.accept('json')
 			.end((err, res) => {
 				if (err) {

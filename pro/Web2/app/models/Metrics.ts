@@ -1,6 +1,4 @@
-﻿import { StateContainer } from './Root';
-
-export interface MetricsState {
+﻿export interface MetricsState {
 	faultTimeline: FaultTimelineMetric[];
 	bucketTimeline: BucketTimelineMetric[];
 	mutators: MutatorMetric[];

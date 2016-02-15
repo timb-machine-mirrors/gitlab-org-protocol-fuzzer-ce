@@ -1,10 +1,9 @@
-import { StateContainer } from './Root';
 import { Pit } from './Pit';
 
 export interface LibraryState {
 	libraryUrl?: string;
-	pits: Category[];
-	configurations: Category[];
+	pits?: Category[];
+	configurations?: Category[];
 }
 
 export interface Library {

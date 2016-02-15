@@ -1,6 +1,6 @@
 import moment = require('moment');
-import { Dispatch } from 'redux';
 import { FieldProp } from 'redux-form';
+import { CANCEL } from 'redux-saga'
 
 export function MakeEnum(obj: any) {
 	Object.keys(obj).map(key => obj[key] = key);
@@ -55,3 +55,12 @@ export const validationMessages = {
 	rangeMax: 'Value is greater than maximum allowed',
 	editable: 'Invalid value'
 };
+
+export function wait(ms: number) {
+	let timer;
+	const promise = new Promise(resolve => {
+		timer = setTimeout(() => resolve(), ms);
+	});
+	promise[CANCEL] = () => clearTimeout(timer);
+	return promise;
+}

@@ -69,7 +69,15 @@ class PitTest extends Component<PitTestProps, {}> {
 						</tr>
 					</thead>
 				<tbody>
-					{_.isEmpty(events) &&
+					{!test.isPending && _.isEmpty(events) &&
+						<tr>
+							<td style={{ textAlign: 'center' }}
+								colSpan={2}>
+								Test has not been started.
+							</td>
+						</tr>
+					}
+					{test.isPending && _.isEmpty(events) &&
 						<tr>
 							<td style={{ textAlign: 'center' }}
 								colSpan={2}>
@@ -77,7 +85,7 @@ class PitTest extends Component<PitTestProps, {}> {
 							</td>
 						</tr>
 					}
-					{events.map(this.renderTestEvent)}
+					{events.map(this.renderTestEvent) }
 				</tbody>
 			</Table>
 		</Tab>

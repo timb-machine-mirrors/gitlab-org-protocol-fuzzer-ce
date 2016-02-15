@@ -1,21 +1,22 @@
 import React = require('react');
-import { Component, Props } from 'react';
-import { connect } from 'react-redux';
-import { Alert, Button, ButtonToolbar, Row, Col } from 'react-bootstrap';
 import Icon = require('react-fa');
 import moment = require('moment');
+import { Component, Props } from 'react';
+import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
+import { Alert, Button, ButtonToolbar, Row, Col } from 'react-bootstrap';
 
 import { R } from '../../routes';
-import { Route } from '../../models/Router';
 import { Job, JobStatus, JobMode } from '../../models/Job';
+import { stopJob, pauseJob, continueJob, killJob } from '../../redux/modules/Job';
 import FaultsTable from '../../components/FaultsTable';
 import LinkContainer from '../../components/LinkContainer';
 import { formatDate } from '../../utils';
 
 interface DashboardProps extends Props<Dashboard> {
 	// injected
-	route?: Route;
 	job?: Job;
+	dispatch?: Dispatch;
 }
 
 const statusTable = {
@@ -38,7 +39,6 @@ const statusTable = {
 };
 
 @connect(state => ({ 
-	route: state.router.route,
 	job: state.job
 }))
 class Dashboard extends Component<DashboardProps, {}> {
@@ -55,8 +55,8 @@ class Dashboard extends Component<DashboardProps, {}> {
 		const replayParams = {
 			pit: pitId,
 			seed: job.seed,
-			rangeStart: job.rangeStart,
-			rangeStop: job.rangeStop
+			start: job.rangeStart,
+			stop: job.rangeStop
 		};
 
 		return <div>
@@ -93,13 +93,16 @@ class Dashboard extends Component<DashboardProps, {}> {
 			<Row className="text-center">
 				{job.status !== JobStatus.Stopped &&
 					<ButtonToolbar>
-						<Button bsStyle="success">
+						<Button bsStyle="success"
+							onClick={this.onContinue}>
 							<Icon name="play" /> &nbsp; Start
 						</Button>
-						<Button bsStyle="primary">
+						<Button bsStyle="primary"
+							onClick={this.onPause}>
 							<Icon name="pause" /> &nbsp; Pause
 						</Button>
-						<Button bsStyle="danger">
+						<Button bsStyle="danger"
+							onClick={this.onStop}>
 							<Icon name={stopButton.icon} /> &nbsp; {stopButton.label}
 						</Button>
 					</ButtonToolbar>
@@ -147,8 +150,8 @@ class Dashboard extends Component<DashboardProps, {}> {
 			</span>
 		}
 
-		let next = statusTable[job.status];
-		if (_.isString)
+		const next = statusTable[job.status];
+		if (_.isString(next))
 			return next;
 
 		return _.get(next, job.mode, next['default']);
@@ -186,6 +189,23 @@ class Dashboard extends Component<DashboardProps, {}> {
 		} else {
 			return `${hours}h ${minutes}m ${seconds}s`;
 		}
+	}
+
+	onPause = () => {
+		const { job, dispatch } = this.props;
+		dispatch(pauseJob(job));
+	}
+	
+	onContinue = () => {
+		const { job, dispatch } = this.props;
+		dispatch(continueJob(job));
+	}
+	
+	onStop = () => {
+		const { job, dispatch } = this.props;
+		dispatch(job.status === JobStatus.Stopping ? 
+			killJob(job) : stopJob(job)
+		);
 	}
 }
 

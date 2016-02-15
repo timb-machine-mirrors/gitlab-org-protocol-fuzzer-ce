@@ -169,8 +169,8 @@ export const R = {
 		label: 'Dashboard',
 		icon: 'dashboard',
 		displayName: (route, state: RootState) =>
-			(state.await.statuses.job === 'success') ? 
-				state.job.name : 
+			(state.await.statuses.job === 'success') ?
+				state.job.name :
 				'Loading...'
 	},
 	JobFaults: {
