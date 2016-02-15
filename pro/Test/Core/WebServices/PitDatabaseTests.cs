@@ -46,11 +46,10 @@ namespace Peach.Pro.Test.Core.WebServices
 
 	<Test name='Default'>
 		<Agent ref='TheAgent'/>
-		<Strategy class='##Strategy##'/>
+		<Strategy class='Random'/>
 		<StateModel ref='SM:SM' />
 		<Publisher class='Null'/>
 	</Test>
-</Peach>
 </Peach>
 ";
 
@@ -96,7 +95,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 	<Test name='Default'>
 		<Agent ref='TheAgent'/>
-		<Strategy class='##Strategy##'/>
+		<Strategy class='Random'/>
 		<StateModel ref='SM' />
 		<Publisher class='Null'/>
 	</Test>
@@ -132,7 +131,7 @@ namespace Peach.Pro.Test.Core.WebServices
 	</StateModel>
 
 	<Test name='Default'>
-		<Strategy class='##Strategy##'/>
+		<Strategy class='Random'/>
 		<StateModel ref='SM' />
 		<Publisher class='Null'/>
 	</Test>
@@ -826,7 +825,7 @@ namespace Peach.Pro.Test.Core.WebServices
 	</StateModel>
 
 	<Test name='Default'>
-		<Strategy class='##Strategy##'/>
+		<Strategy class='Random'/>
 		<StateModel ref='SM' />
 		<Publisher class='Null'/>
 	</Test>

@@ -15,6 +15,7 @@ using Peach.Core;
 using Peach.Pro.Core.WebServices.Models;
 using Encoding = System.Text.Encoding;
 using File = System.IO.File;
+using Peach.Core.Analyzers;
 
 namespace Peach.Pro.Core.WebServices
 {
@@ -915,10 +916,43 @@ namespace Peach.Pro.Core.WebServices
 			pit.Metadata = new PitMetadata
 			{
 				Defines = defs.ToWeb(),
-				Monitors = MonitorMetadata.Generate(detail.CallMethods)
+				Monitors = MonitorMetadata.Generate(detail.CallMethods),
+				Fields = MakeFields(detail),
 			};
 
 			return pit;
+		}
+
+		private List<PitField> MakeFields(PitDetail detail)
+		{
+			var args = new Dictionary<string, object>();
+			var defs = PitDefines.ParseFile(null, pitLibraryPath).Evaluate();
+			args[PitParser.DEFINED_VALUES] = defs;
+
+			var parser = new ProPitParser();
+			var dom = parser.asParser(args, detail.FileName);
+			foreach (var test in dom.tests)
+			{
+				foreach (var state in test.stateModel.states)
+				{
+					foreach (var action in state.actions)
+					{
+						foreach (var actionData in action.outputData)
+						{
+							foreach (var data in actionData.allData)
+							{
+								data.Apply(actionData.dataModel);
+							}
+
+							foreach (var element in actionData.dataModel.Walk())
+							{
+								Console.WriteLine("{0} -> {1}", element.Name, element.FieldId);
+							}
+						}
+					}
+				}
+			}
+			return null;
 		}
 
 		#endregion
