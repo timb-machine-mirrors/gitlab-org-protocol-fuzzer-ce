@@ -1,4 +1,4 @@
-import { SagaCancellationException } from 'redux-saga'
+import { isCancelError } from 'redux-saga'
 import { Dispatch } from 'redux';
 
 import { MakeEnum } from '../../utils';
@@ -12,7 +12,7 @@ export default function reducer(state = null, action): Error {
 	const { type, error } = action;
 	if (type === types.ERROR_RESET) {
 		return null;
-	} else if (error && !(error instanceof SagaCancellationException)) {
+	} else if (error && !isCancelError(error)) {
 		console.log('error', error);
 		return error;
 	}

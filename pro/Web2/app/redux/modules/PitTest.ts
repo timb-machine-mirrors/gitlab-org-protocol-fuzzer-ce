@@ -1,7 +1,7 @@
 import superagent = require('superagent');
 import { Dispatch } from 'redux';
 import { AWAIT_MARKER } from 'redux-await';
-import { take, put, call } from 'redux-saga'
+import { take, put, call } from 'redux-saga/effects';
 
 import RootState, { GetState } from '../../models/Root';
 import { Pit } from '../../models/Pit';

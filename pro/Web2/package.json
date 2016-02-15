@@ -50,7 +50,7 @@
     "redux-form": "^4.1.9",
     "redux-logger": "^2.4.0",
     "redux-router5": "^2.0.0",
-    "redux-saga": "^0.7.0",
+    "redux-saga": "^0.8.0",
     "router5": "^2.0.1",
     "router5-history": "^2.0.0",
     "router5-listeners": "^2.0.0",

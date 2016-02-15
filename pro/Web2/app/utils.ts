@@ -1,6 +1,6 @@
 import moment = require('moment');
 import { FieldProp } from 'redux-form';
-import { CANCEL } from 'redux-saga'
+import { CANCEL } from 'redux-saga/utils';
 
 export function MakeEnum(obj: any) {
 	Object.keys(obj).map(key => obj[key] = key);
