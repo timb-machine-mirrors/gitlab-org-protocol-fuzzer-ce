@@ -28,18 +28,14 @@ const router = new Router5(routes)
 ;
 
 function rootRender(store) {
-	try {
-		return <Provider store={store}>
-			<div>
-				<RouterProvider router={router}>
-					<Main />
-				</RouterProvider>
-				<DevTools />
-			</div>
-		</Provider>	
-	} catch (error) {
-		console.log('rootRender>', error);
-	}
+	return <Provider store={store}>
+		<div>
+			<RouterProvider router={router}>
+				<Main />
+			</RouterProvider>
+			<DevTools />
+		</div>
+	</Provider>	
 }
 
 router.start((err, state) => {
