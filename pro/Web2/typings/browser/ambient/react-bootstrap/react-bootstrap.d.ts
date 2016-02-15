@@ -1,4 +1,4 @@
-// Compiled using typings@0.6.6
+// Compiled using typings@0.6.8
 // Source: https://raw.githubusercontent.com/flaub/DefinitelyTyped/225253155ee589059faece160ea31d8ef1b882d5/react-bootstrap/react-bootstrap.d.ts
 // Type definitions for react-bootstrap 
 // Project: https://github.com/react-bootstrap/react-bootstrap

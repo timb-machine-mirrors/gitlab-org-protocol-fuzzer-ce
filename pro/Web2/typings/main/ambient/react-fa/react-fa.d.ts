@@ -1,4 +1,4 @@
-// Compiled using typings@0.6.6
+// Compiled using typings@0.6.8
 // Source: https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/f318fbd33149ef0921b84657996ad31dab1e3241/react-fa/react-fa.d.ts
 // Type definitions for react-fa v4.0.0
 // Project: https://github.com/andreypopp/react-fa

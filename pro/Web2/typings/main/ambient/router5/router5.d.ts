@@ -1,4 +1,4 @@
-// Compiled using typings@0.6.6
+// Compiled using typings@0.6.8
 // Source: https://raw.githubusercontent.com/flaub/typescript-definitions/193de05c443d63d947b01639effb9d32066ec946/router5/router5.d.ts
 // Type definitions for router5
 // Project: https://github.com/router5/router5

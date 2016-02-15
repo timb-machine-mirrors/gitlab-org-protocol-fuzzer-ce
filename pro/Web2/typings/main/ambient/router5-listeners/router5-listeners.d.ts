@@ -1,4 +1,4 @@
-// Compiled using typings@0.6.6
+// Compiled using typings@0.6.8
 // Source: https://raw.githubusercontent.com/flaub/typescript-definitions/master/router5-listeners/router5-listeners.d.ts
 // Type definitions for router5-listeners v2.0.0
 
