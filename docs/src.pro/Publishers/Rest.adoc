@@ -12,6 +12,8 @@ This publisher shupports sending body data as:
 
 Additionally, the publisher encodes the data model into JSON before transmitting it to the server.
 
+TIP: SSL/TLS is supported, just use +https+ as the protocol in the URL.
+
 === Syntax
 
 [source,xml]
@@ -66,6 +68,16 @@ The following example provides three fragments using the GET and POST methods.
 
 [source,xml]
 ----
+
+<DataModel name="PostData">
+    <JsonObject>
+        <JsonString propertyName="Name" value="Widget" />
+        <JsonDouble propertyName="Price" value="1.99" />
+        <JsonInteger propertyName="Quantify" value="1" />
+    </JsonOject>
+</DataModel>
+
+
 <Action type="call" method="GET http://www.example.com/product/{0}">
     <!-- {0} -->
     <Param name="Id">
@@ -95,6 +107,75 @@ The following example provides three fragments using the GET and POST methods.
         <DataModel ref="PostData" />
     </Param>
 </Action>
+----
+
+.Posting XML
+
+The following example provides three fragments using the GET and POST methods.
+
+[source,xml]
+----
+
+<DataModel name="PostData">
+    <XmlElement elementName="Product">
+        <XmlAttribute attributeName="Name">
+            <String value="Widget" />
+        </XmlAttribute>
+        <XmlAttribute attributeName="Price">
+            <Double value="1.99" />
+        </XmlAttribute>
+        <XmlAttribute attributeName="Quantity">
+            <Number value="1" />
+        </XmlAttribute>
+    </XmlElement>
+</DataModel>
+
+
+<Action type="call" method="POST http://www.example.com/product/{0}">
+    <!-- {0} -->
+    <Param name="Id">
+        <DataModel ref="Id" />
+    </Param>
+    
+    <!-- POST Body -->
+    <Param name="PostData">
+        <DataModel ref="PostData" />
+    </Param>
+</Action>
+----
+
+
+.Posting Binary
+
+The following example provides three fragments using the GET and POST methods.
+
+[source,xml]
+----
+
+<DataModel name="PostData">
+    <Blob />
+</DataModel>
+
+<Action type="call" method="POST http://www.example.com/product/{0}/image">
+    <!-- {0} -->
+    <Param name="Id">
+        <DataModel ref="Id" />
+    </Param>
+    
+    <!-- POST Body -->
+    <Param name="PostData">
+        <DataModel ref="PostData" />
+        <Data fileName="image.png" />
+    </Param>
+</Action>
+
+<Test name="Default">
+
+    <Publisher class="Rest">
+        <Param name="ContentType" value="application/octet-stream" />
+    </Publisher>
+
+</Test>
 ----
 
 
