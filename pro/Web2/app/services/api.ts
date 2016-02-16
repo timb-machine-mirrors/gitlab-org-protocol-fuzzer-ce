@@ -2,7 +2,7 @@ import superagent = require('superagent');
 
 import { Library } from '../models/Library';
 import { Job, JobRequest } from '../models/Job';
-import { Pit } from '../models/Pit';
+import { Pit, PitCopy } from '../models/Pit';
 import { TestResult } from '../models/PitTest';
 import { FaultSummary, FaultDetail } from '../models/Fault';
 
@@ -13,11 +13,14 @@ function request<T>(method: string, url: string, errHeader: string, data?, query
 			.type('json')
 			.accept('json')
 			.send(data)
-			.end((err, res) => {
+			.end((err, response) => {
 				if (err) {
-					reject(`${errHeader}: ${err.message}`);
+					reject({
+						response,
+						message: `${errHeader}: ${err.message}`
+					});
 				} else {
-					resolve(res.body);
+					resolve(response.body);
 				}
 			})
 		;
@@ -25,7 +28,11 @@ function request<T>(method: string, url: string, errHeader: string, data?, query
 }
 
 export function fetchLibraries() {
-	return request('get', '/p/libraries', 'Failed to start libraries');
+	return request('get', '/p/libraries', 'Failed to load libraries');
+}
+
+export function createPit(proto: PitCopy) {
+	return request<Pit>('post', '/p/pits', 'Failed to copy pit', proto);
 }
 
 export function fetchPit(id: string) {
@@ -37,7 +44,7 @@ export function savePit(pit: Pit) {
 }
 
 export function fetchTestResult(job: Job) {
-	return request<TestResult>('get', job.firstNodeUrl, 'Test result failed to load');
+	return request<TestResult>('get', job.firstNodeUrl, 'Failed to load test result');
 }
 
 export function fetchJobs() {
@@ -65,17 +72,17 @@ export function sendJobCommand(cmd: string, url: string) {
 }
 
 export function deleteJob(job: Job) {
-	return request('delete', job.jobUrl, 'Job failed to delete');
+	return request('delete', job.jobUrl, 'Failed to delete job');
 }
 
 export function fetchFaults(job: Job) {
-	return request<FaultSummary[]>('get', job.faultsUrl, 'Fault listing failed to load');
+	return request<FaultSummary[]>('get', job.faultsUrl, 'Failed to load fault listing');
 }
 
 export function fetchFault(params) {
 	const { job, fault } = params;
 	const url = `/p/jobs/${job}/faults/${fault}`;
-	return request<FaultDetail>('get', url, 'Fault failed to load');
+	return request<FaultDetail>('get', url, 'Failed to load fault');
 }
 
 export function fetchMetric(job: Job, metric: string) {
@@ -83,13 +90,16 @@ export function fetchMetric(job: Job, metric: string) {
 		const url = job.metrics[metric];
 		superagent.get(url)
 			.accept('json')
-			.end((err, res) => {
+			.end((err, response) => {
 				if (err) {
-					reject(`Metric '${metric}' failed to load: ${err.message}`);
+					reject({
+						response,
+						message: `Failed to load ${metric}: ${err.message}`
+					});
 				} else {
 					resolve({
 						metric,
-						data: res.body
+						data: response.body
 					});
 				}
 			})
