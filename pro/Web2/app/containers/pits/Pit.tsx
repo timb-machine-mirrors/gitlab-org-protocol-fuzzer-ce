@@ -5,7 +5,7 @@ import { Dispatch } from 'redux';
 
 import { Route } from '../../models/Router';
 import Segment from '../../components/Segment';
-import { fetch } from '../../redux/modules/Pit';
+import { fetchPit } from '../../redux/modules/Pit';
 
 interface PitProps extends Props<Pit> {
 	// injected
@@ -22,7 +22,7 @@ class Pit extends Component<PitProps, {}> {
 	load(props: PitProps) {
 		const { dispatch, route } = props;
 		const { pit } = route.params;
-		dispatch(fetch(pit));
+		dispatch(fetchPit(pit));
 	}
 	
 	render() {

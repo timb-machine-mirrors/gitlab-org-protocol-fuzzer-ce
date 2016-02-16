@@ -1,8 +1,8 @@
-import superagent = require('superagent');
 import { AWAIT_MARKER } from 'redux-await';
 
 import { Job } from '../../models/Job';
 import { MakeEnum } from '../../utils';
+import { api } from '../../services';
 
 const types = {
 	JOBS_FETCH: ''
@@ -23,23 +23,7 @@ export function fetchJobs() {
 		type: types.JOBS_FETCH,
 		AWAIT_MARKER,
 		payload: {
-			jobs: doFetch()
+			jobs: api.fetchJobs()
 		}
 	};
-}
-
-function doFetch() {
-	return new Promise<Job[]>((resolve, reject) => {
-		superagent.get('/p/jobs')
-			.query({ dryrun: false })
-			.accept('json')
-			.end((err, res) => {
-				if (err) {
-					reject(`Job listing failed to load: ${err.message}`);
-				} else {
-					resolve(res.body);
-				}
-			})
-		;
-	});
 }

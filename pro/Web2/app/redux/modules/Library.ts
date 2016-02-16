@@ -1,8 +1,8 @@
-import superagent = require('superagent');
 import { AWAIT_MARKER } from 'redux-await';
 
 import { Library, LibraryState, Category } from '../../models/Library';
 import { MakeEnum } from '../../utils';
+import { api } from '../../services';
 
 const types = {
 	LIBRARY_FETCH: ''
@@ -24,29 +24,14 @@ export default function reducer(state: LibraryState = initial, action): LibraryS
 	}
 }
 
-export function fetchLibrary() {
+export function fetchLibraries() {
 	return {
 		type: types.LIBRARY_FETCH,
 		AWAIT_MARKER,
 		payload: {
-			library: doFetch()
+			library: api.fetchLibraries()
 		}
 	};
-}
-
-function doFetch() {
-	return new Promise<Library[]>((resolve, reject) => {
-		superagent.get('/p/libraries')
-			.accept('json')
-			.end((err, res) => {
-				if (err) {
-					reject(`Libraries failed to load: ${err.message}`);
-				} else {
-					resolve(res.body);
-				}
-			})
-		;
-	});
 }
 
 function mapLibrary(data: Library[]): Category[] {
