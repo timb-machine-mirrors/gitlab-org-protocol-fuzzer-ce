@@ -1,4 +1,3 @@
-import superagent = require('superagent');
 import { AWAIT_MARKER } from 'redux-await';
 import { isCancelError } from 'redux-saga';
 import { take, put, call, fork, cancel } from 'redux-saga/effects';

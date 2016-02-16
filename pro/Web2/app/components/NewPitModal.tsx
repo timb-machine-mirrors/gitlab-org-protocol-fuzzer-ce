@@ -1,13 +1,13 @@
 import React = require('react');
-import superagent = require('superagent');
 import { Component, Props } from 'react';
-import { reduxForm, ReduxFormProps, FormData, FieldProp } from 'redux-form';
+import { reduxForm, ReduxFormProps, FormData } from 'redux-form';
 import { Dispatch } from 'redux';
 import { Button, Input, Label, Modal } from 'react-bootstrap';
 
 import { LibraryState } from '../models/Library';
 import { Pit, PitCopy } from '../models/Pit';
 import { validationState } from '../utils';
+import { api } from '../services';
 
 interface NewModalProps extends Props<NewPitModal> {
 	pit: Pit;
@@ -74,15 +74,15 @@ class NewPitModal extends Component<NewModalProps, {}> {
 							bsStyle={validationState(description)}
 							help={description.error} 
 						/>
-					</Modal.Body>
-					<Modal.Footer>
 						{error &&
-							<h4 className="pull-left">
+							<h4>
 								<Label bsStyle="danger">
 									{error}
 								</Label>
 							</h4>
 						}
+					</Modal.Body>
+					<Modal.Footer>
 						<Button bsStyle="default"
 							onClick={this.onCancel}>
 							Cancel
@@ -113,16 +113,17 @@ class NewPitModal extends Component<NewModalProps, {}> {
 		};
 
 		return new Promise((resolve, reject) => {
-			superagent.post('/p/pits')
-				.type('json')
-				.accept('json')
-				.send(request)
-				.end((err, res) => {
-					if (err) {
-						reject({_error: err.toString()});
+			api.createPit(request)
+				.then(pit => {
+					resolve();
+					this.props.onComplete(pit);
+				}, err => {
+					if (err.response.status === 400) {
+						reject({
+							_error: `${name} already exists, please choose a new name.`
+						});
 					} else {
-						resolve();
-						this.props.onComplete(res.body);
+						reject({ _error: err.message });
 					}
 				})
 			;

@@ -296,7 +296,7 @@ class Dashboard extends Component<DashboardProps, DashboardState> {
 					const params = { job: job.id };
 					dispatch(actions.navigateTo(to, params));
 				}, reason => {
-					reject({ _error: reason });
+					reject({ _error: reason.message });
 				})
 			;
 		});
