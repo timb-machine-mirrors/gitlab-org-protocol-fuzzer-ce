@@ -8,6 +8,7 @@ import { Job, JobStatus, JobRequest } from '../../models/Job';
 import { MakeEnum, wait } from '../../utils';
 import { fetchJobs } from './JobList';
 import { fetchFaults, resetFaults } from './FaultList';
+import { api } from '../../services';
 
 const POLL_INTERVAL = 3000;
 
@@ -64,64 +65,30 @@ export function startPolling(id: string) {
 }
 
 export function stopPolling() {
-	return {
-		type: types.JOB_POLL_STOP
-	}
-}
-
-function fetchJob(id: string) {
-	return {
-		type: types.JOB_FETCH,
-		AWAIT_MARKER,
-		payload: {
-			job: doFetch(id)
-		}
-	};
-}
-
-function commandRequest(status: string, url: string) {
-	return {
-		type: types.JOB_CMD_REQUEST,
-		request: {
-			status,
-			url
-		}
-	}
-}
-
-function commandExecute(url: string) {
-	return {
-		type: types.JOB_CMD_EXECUTE,
-		AWAIT_MARKER,
-		payload: {
-			job: doCommand(url)
-		}
-	}
+	return { type: types.JOB_POLL_STOP }
 }
 
 export function stopJob(job: Job) {
-	return commandRequest(JobStatus.StopPending, job.commands.stopUrl);
+	return commandRequest('stop', JobStatus.StopPending, job.commands.stopUrl);
 }
 
 export function pauseJob(job: Job) {
-	return commandRequest(JobStatus.PausePending, job.commands.pauseUrl);
+	return commandRequest('pause', JobStatus.PausePending, job.commands.pauseUrl);
 }
 
 export function continueJob(job: Job) {
-	return commandRequest(JobStatus.ContinuePending, job.commands.continueUrl);
+	return commandRequest('continue', JobStatus.ContinuePending, job.commands.continueUrl);
 }
 
 export function killJob(job: Job) {
-	return commandRequest(JobStatus.KillPending, job.commands.killUrl);
+	return commandRequest('kill', JobStatus.KillPending, job.commands.killUrl);
 }
 
 export function deleteJob(job: Job) {
 	return {
 		type: types.JOB_DELETE,
 		AWAIT_MARKER,
-		payload: {
-			job: doDelete(job)
-		}
+		payload: { job: api.deleteJob(job) }
 	}
 }
 
@@ -135,7 +102,7 @@ function* watchDelete() {
 function* watchCommand() {
 	while (true) {
 		const { request } = yield take(types.JOB_CMD_REQUEST);
-		yield put(commandExecute(request.url));
+		yield put(commandExecute(request.cmd, request.url));
 	}
 }
 
@@ -172,48 +139,31 @@ function* poll(getState: GetState, id: string) {
 	}
 }
 
-function doFetch(id: string) {
-	return new Promise<Job>((resolve, reject) => {
-		superagent.get(`/p/jobs/${id}`)
-			.accept('json')
-			.end((err, res) => {
-				if (err) {
-					reject(`Job failed to load: ${err.message}`);
-				} else {
-					resolve(res.body);
-				}
-			})
-		;
-	});
+function fetchJob(id: string) {
+	return {
+		type: types.JOB_FETCH,
+		AWAIT_MARKER,
+		payload: { job: api.fetchJob(id) }
+	};
 }
 
-function doDelete(job: Job) {
-	return new Promise((resolve, reject) => {
-		superagent.delete(job.jobUrl)
-			.end((err, res) => {
-				if (err) {
-					reject(`Job failed to delete: ${err.message}`);
-				} else {
-					resolve();
-				}
-			})
-		;
-	});
+function commandRequest(cmd: string, status: string, url: string) {
+	return {
+		type: types.JOB_CMD_REQUEST,
+		request: {
+			cmd,
+			status,
+			url
+		}
+	}
 }
 
-function doCommand(url: string) {
-	return new Promise<Job>((resolve, reject) => {
-		superagent.get(url)
-			.accept('json')
-			.end((err, res) => {
-				if (err) {
-					reject(`Job command failed: ${err.message}`);
-				} else {
-					resolve(res.body);
-				}
-			})
-		;
-	});
+function commandExecute(cmd: string, url: string) {
+	return {
+		type: types.JOB_CMD_EXECUTE,
+		AWAIT_MARKER,
+		payload: { job: api.sendJobCommand(cmd, url) }
+	}
 }
 
 function onReceive(cur: Job, action): Job {

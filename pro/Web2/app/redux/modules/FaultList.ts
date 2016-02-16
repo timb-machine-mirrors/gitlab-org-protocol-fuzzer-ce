@@ -1,4 +1,3 @@
-import superagent = require('superagent');
 import { AWAIT_MARKER } from 'redux-await';
 import { take, put, call, fork, cancel } from 'redux-saga/effects';
 
@@ -6,6 +5,7 @@ import RootState, { GetState } from '../../models/Root';
 import { Job } from '../../models/Job';
 import { FaultListState, FaultSummary } from '../../models/Fault';
 import { MakeEnum } from '../../utils';
+import { api } from '../../services';
 
 const types = {
 	FAULTS_POLL_START: '',
@@ -58,26 +58,11 @@ export function fetchFaults(job: Job) {
 		type: types.FAULTS_FETCH,
 		AWAIT_MARKER,
 		payload: {
-			faults: doFetch(job)
+			faults: api.fetchFaults(job)
 		}
 	};
 }
 
 export function resetFaults() {
 	return { type: types.FAULTS_RESET };
-}
-
-function doFetch(job: Job) {
-	return new Promise<FaultSummary[]>((resolve, reject) => {
-		superagent.get(job.faultsUrl)
-			.accept('json')
-			.end((err, res) => {
-				if (err) {
-					reject(`Fault listing failed to load: ${err.message}`);
-				} else {
-					resolve(res.body);
-				}
-			})
-		;
-	});
 }

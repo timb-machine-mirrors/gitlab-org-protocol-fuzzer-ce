@@ -1,12 +1,12 @@
-import superagent = require('superagent');
 import { AWAIT_MARKER } from 'redux-await';
 
 import { MetricsState } from '../../models/Metrics';
 import { Job } from '../../models/Job';
 import { MakeEnum } from '../../utils';
+import { api } from '../../services';
 
 const types = {
-	METRICS_FETCH: '',
+	METRICS_FETCH: ''
 };
 MakeEnum(types);
 
@@ -29,33 +29,14 @@ export default function reducer(state: MetricsState = initial, action): MetricsS
 	}
 }
 
-export function fetch(job: Job, metric: string) {
+export function fetchMetric(job: Job, metric: string) {
 	return {
 		type: types.METRICS_FETCH,
 		AWAIT_MARKER,
 		payload: {
-			metrics: doFetch(job, metric)
+			metrics: api.fetchMetric(job, metric)
 		}
 	};
-}
-
-function doFetch(job: Job, metric: string) {
-	return new Promise((resolve, reject) => {
-		const url = job.metrics[metric];
-		superagent.get(url)
-			.accept('json')
-			.end((err, res) => {
-				if (err) {
-					reject(`Metric '${metric}' failed to load: ${err.message}`);
-				} else {
-					resolve({
-						metric,
-						data: res.body 
-					});
-				}
-			})
-		;
-	});
 }
 
 function onReceive(state: MetricsState, action): MetricsState {

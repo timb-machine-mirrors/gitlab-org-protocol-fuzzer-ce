@@ -1,9 +1,9 @@
-import superagent = require('superagent');
 import { AWAIT_MARKER } from 'redux-await';
 
 import { FaultSummary, FaultDetail } from '../../models/Fault';
 import RootState from '../../models/Root';
 import { MakeEnum } from '../../utils';
+import { api } from '../../services';
 
 const types = {
 	FAULT_FETCH: ''
@@ -24,24 +24,7 @@ export function fetchFault(params) {
 		type: types.FAULT_FETCH,
 		AWAIT_MARKER,
 		payload: {
-			fault: doFetch(params)
+			fault: api.fetchFault(params)
 		}
 	}
-}
-
-function doFetch(params) {
-	const { job, fault } = params;
-	const url = `/p/jobs/${job}/faults/${fault}`;
-	return new Promise<FaultDetail>((resolve, reject) => {
-		superagent.get(url)
-			.accept('json')
-			.end((err, res) => {
-				if (err) {
-					reject(`Fault failed to load: ${err.message}`);
-				} else {
-					resolve(res.body);
-				}
-			})
-		;
-	});
 }

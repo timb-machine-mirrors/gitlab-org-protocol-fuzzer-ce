@@ -1,4 +1,3 @@
-import superagent = require('superagent');
 import { AWAIT_MARKER } from 'redux-await';
 import { FormData } from 'redux-form';
 import { fork, take, put } from 'redux-saga/effects';
@@ -10,6 +9,7 @@ import {
 } from '../../models/Pit';
 import { MakeEnum, validationMessages } from '../../utils';
 import { resetTest } from './PitTest';
+import { api } from '../../services';
 
 const types = {
 	PIT_FETCH: '',
@@ -43,12 +43,12 @@ export function* saga(getState: GetState) {
 	yield fork(watchFetch, getState);
 }
 
-export function fetch(id: string) {
+export function fetchPit(id: string) {
 	return {
 		type: types.PIT_FETCH,
 		AWAIT_MARKER,
 		payload: {
-			pit: doFetch(id)
+			pit: api.fetchPit(id)
 		}
 	};
 }
@@ -87,41 +87,9 @@ function savePit(pit: Pit) {
 		type: types.PIT_SAVE,
 		AWAIT_MARKER,
 		payload: {
-			pit: doSavePit(pit)
+			pit: api.savePit(pit)
 		}
 	};
-}
-
-function doFetch(id: string) {
-	return new Promise<Pit>((resolve, reject) => {
-		superagent.get(`/p/pits/${id}`)
-			.accept('json')
-			.end((err, res) => {
-				if (err) {
-					reject(`Pit failed to load: ${err.message}`);
-				} else {
-					resolve(res.body);
-				}
-			})
-		;
-	});
-}
-
-function doSavePit(pit: Pit) {
-	return new Promise<Pit>((resolve, reject) => {
-		superagent.post(pit.pitUrl)
-			.type('json')
-			.accept('json')
-			.send(pit)
-			.end((err, res) => {
-				if (err) {
-					reject(`Pit failed to save: ${err.message}`);
-				} else {
-					resolve(res.body);
-				}
-			})
-		;
-	})
 }
 
 function onReceive(state: Pit, action): Pit {

@@ -1,4 +1,3 @@
-import superagent = require('superagent');
 import { Dispatch } from 'redux';
 import { AWAIT_MARKER } from 'redux-await';
 import { take, put, call } from 'redux-saga/effects';
@@ -8,6 +7,7 @@ import { Pit } from '../../models/Pit';
 import { Job, JobStatus, JobRequest } from '../../models/Job';
 import { TestState, TestStatus, TestResult } from '../../models/PitTest';
 import { MakeEnum, wait } from '../../utils';
+import { api } from '../../services';
 
 const POLL_INTERVAL = 1000;
 
@@ -64,7 +64,7 @@ export function startTest(pit: Pit) {
 		type: types.TEST_START,
 		AWAIT_MARKER,
 		payload: {
-			testJob: doStart(pit)
+			testJob: api.startTest(pit)
 		}
 	};
 }
@@ -74,7 +74,7 @@ export function stopTest(job: Job) {
 		type: types.TEST_START,
 		AWAIT_MARKER,
 		payload: {
-			testJob: doStop(job)
+			testJob: api.stopTest(job)
 		}
 	};
 }
@@ -95,65 +95,14 @@ function* poll(job: Job) {
 	}
 }
 
-function doStart(pit: Pit) {
-	const request: JobRequest = {
-		pitUrl: pit.pitUrl,
-		dryRun: true
-	};
-	return new Promise<Job>((resolve, reject) => {
-		superagent.post('/p/jobs')
-			.type('json')
-			.accept('json')
-			.send(request)
-			.end((err, res) => {
-				if (err) {
-					reject(`Test failed to start: ${err.message}`);
-				} else {
-					resolve(res.body);
-				}
-			})
-		;
-	});
-}
-
-function doStop(job: Job) {
-	return new Promise((resolve, reject) => {
-		superagent.get(job.commands.stopUrl)
-			.accept('json')
-			.end((err, res) => {
-				if (err) {
-					reject(`Test failed to start: ${err.message}`);
-				} else {
-					resolve(res.body);
-				}
-			})
-		;
-	});
-}
-
 function fetchResult(job: Job) {
 	return {
 		type: types.TEST_FETCH,
 		AWAIT_MARKER,
 		payload: {
-			testResult: doFetch(job)
+			testResult: api.fetchTestResult(job)
 		}
 	};
-}
-
-function doFetch(job: Job) {
-	return new Promise<TestResult>((resolve, reject) => {
-		superagent.get(job.firstNodeUrl)
-			.accept('json')
-			.end((err, res) => {
-				if (err) {
-					reject(`Test result failed to load: ${err.message}`);
-				} else {
-					resolve(res.body);
-				}
-			})
-		;
-	});
 }
 
 function deleteJob(job: Job) {
@@ -161,23 +110,9 @@ function deleteJob(job: Job) {
 		type: types.TEST_DELETE,
 		AWAIT_MARKER,
 		payload: {
-			testDelete: doDelete(job)
+			testDelete: api.deleteJob(job)
 		}
 	};
-}
-
-function doDelete(job: Job) {
-	return new Promise((resolve, reject) => {
-		superagent.delete(job.jobUrl)
-			.end((err, res) => {
-				if (err) {
-					reject(`Test job failed to delete: ${err.message}`);
-				} else {
-					resolve();
-				}
-			});
-		;
-	});
 }
 
 function onFetch(state: TestState, action) {

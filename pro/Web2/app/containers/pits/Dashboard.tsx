@@ -1,6 +1,5 @@
 import React = require('react');
 import Icon = require('react-fa');
-import superagent = require('superagent');
 import { Component, Props } from 'react';
 import { Dispatch } from 'redux';
 import { connect } from 'redux-await';
@@ -14,6 +13,7 @@ import { Pit, Parameter, ParameterType } from '../../models/Pit';
 import { JobRequest, Job } from '../../models/Job';
 import Link from '../../components/Link';
 import LinkContainer from '../../components/LinkContainer';
+import { api } from '../../services';
 
 interface DashboardProps extends Props<Dashboard> {
 	// injected
@@ -290,19 +290,13 @@ class Dashboard extends Component<DashboardProps, DashboardState> {
 		};
 		const to = R.Job.name;
 		return new Promise((resolve, reject) => {
-			superagent.post('/p/jobs')
-				.type('json')
-				.accept('json')
-				.send(request)
-				.end((err, res) => {
-					if (err) {
-						reject({ _error: err.toString() });
-					} else {
-						resolve();
-						const job: Job = res.body;
-						const params = { job: job.id };
-						dispatch(actions.navigateTo(to, params));
-					}
+			api.startJob(request)
+				.then(job => {
+					resolve();
+					const params = { job: job.id };
+					dispatch(actions.navigateTo(to, params));
+				}, reason => {
+					reject({ _error: reason });
 				})
 			;
 		});

@@ -6,7 +6,7 @@ import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 
 import { Job } from '../../../models/Job';
 import { MetricsState } from '../../../models/Metrics';
-import { fetch } from '../../../redux/modules/Metrics';
+import { fetchMetric } from '../../../redux/modules/Metrics';
 
 interface MetricsProps extends Props<Metrics> {
 	// injected
@@ -22,7 +22,7 @@ interface MetricsProps extends Props<Metrics> {
 class Metrics extends Component<MetricsProps, {}> {
 	componentDidMount() {
 		const { job, metrics, dispatch } = this.props;
-		dispatch(fetch(job, 'buckets'));
+		dispatch(fetchMetric(job, 'buckets'));
 	}
 
 	render() {
