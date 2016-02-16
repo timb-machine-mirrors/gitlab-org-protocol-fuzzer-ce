@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Peach.Core;
 using Peach.Core.Dom;
 
-namespace Peach.Pro.Core.Fixups
+namespace Peach.Pro.Core.Transformers
 {
-	public abstract class BasePythonFixup : Fixup
+	public abstract class BasePythonTransformer : Transformer
 	{
-		protected BasePythonFixup(DataElement parent, Dictionary<string, Variant> args)
+		public BasePythonTransformer(DataElement parent, Dictionary<string, Variant> args)
 			: base(parent, args)
 		{
 			__init__(parent, args);

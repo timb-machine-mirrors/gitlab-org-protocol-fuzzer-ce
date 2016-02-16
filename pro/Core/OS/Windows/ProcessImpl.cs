@@ -495,8 +495,18 @@ namespace Peach.Pro.Core.OS.Windows
 
 				if (Proxy != null)
 				{
-					ExitCode = Proxy.ExitCode;
-					Proxy = null;
+					try
+					{
+						ExitCode = Proxy.ExitCode;
+					}
+					catch
+					{
+						ExitCode = -1;
+					}
+					finally
+					{
+						Proxy = null;
+					}
 				}
 
 				Inferrior.Close();

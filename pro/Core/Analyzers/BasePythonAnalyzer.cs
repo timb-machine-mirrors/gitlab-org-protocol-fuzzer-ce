@@ -7,11 +7,21 @@ namespace Peach.Pro.Core.Analyzers
 	[Serializable]
 	public abstract class BasePythonAnalyzer : Analyzer
 	{
-		public BasePythonAnalyzer()
+		protected BasePythonAnalyzer()
+		{
+			__init__();
+		}
+
+		protected virtual void __init__()
 		{
 		}
 
-		public BasePythonAnalyzer(Dictionary<string, Variant> args)
+		protected BasePythonAnalyzer(Dictionary<string, Variant> args)
+		{
+			__init__(args);
+		}
+
+		protected virtual void __init__(Dictionary<string, Variant> args)
 		{
 		}
 

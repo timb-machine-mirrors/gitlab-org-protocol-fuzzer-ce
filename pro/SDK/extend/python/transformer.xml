@@ -3,14 +3,14 @@
 	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
 
 	<!-- Import our Python module -->
-	<Import import="fixup" />
+	<Import import="transformer" />
 
 	<DataModel name="TheDataModel">
 		<String name="Value" value="Hello World">
-			<!-- Use our fixup like normal -->
-			<Fixup class="PythonFixup">
+			<!-- Use our transformer like normal -->
+			<Transformer class="PythonTransformer">
 				<Param name="Param1" value="Test" />
-			</Fixup>
+			</Transformer>
 		</String>
 	</DataModel>
 
@@ -24,7 +24,7 @@
 
 	<Test name="Default">
 		<StateModel ref="State"/>
-		<Publisher class="Console" />
+		<Publisher class="ConsoleHex" />
 	</Test>
 
 </Peach>

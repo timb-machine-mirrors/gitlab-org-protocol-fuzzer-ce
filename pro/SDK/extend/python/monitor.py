@@ -2,12 +2,14 @@
 import clr, clrtype
 
 clr.AddReference("Peach.Core")
+clr.AddReference("Peach.Pro")
 
 import System
 import Peach.Core
 from Peach.Core import Variant
-from Peach.Core.Agent import Monitor2, IterationStartingArgs, MonitorData
+from Peach.Core.Agent import IterationStartingArgs, MonitorData
 from Peach.Core.Agent.MonitorData import Info
+from Peach.Pro.Core.Agent.Monitors import BasePythonMonitor
 
 # Add the special assembly that our Python extensions will 
 # appear in. This is the list of assemblies that Peach checks
@@ -21,7 +23,7 @@ MonitorAttr = clrtype.attribute(Peach.Core.Agent.MonitorAttribute)
 DescriptionAttr = clrtype.attribute(Peach.Core.DescriptionAttribute)
 ParameterAttr = clrtype.attribute(Peach.Core.ParameterAttribute)
 
-class PythonMonitor(Monitor2):
+class PythonMonitor(BasePythonMonitor):
 	'''Example of adding a custom Monitor to Peach using only Python'''
 
 	__metaclass__ = clrtype.ClrClass
@@ -31,7 +33,13 @@ class PythonMonitor(Monitor2):
 		MonitorAttr("PythonMonitor"),
 		DescriptionAttr("Example Monitor in Python"),
 		ParameterAttr("Param1", clr.GetClrType(str), "Example parameter"),
+		ParameterAttr("Param2", clr.GetClrType(str), "Optional parameter", "DefaultValue"),
 	]
+
+	@clrtype.accepts(clr.GetClrType(str))
+	def __init__(self, name):
+		print ">>>> MONITOR INIT %s" % name
+		pass
 
 	@clrtype.accepts(System.Collections.Generic.Dictionary[clr.GetClrType(str), clr.GetClrType(str)])
 	def StartMonitor(self, args):
