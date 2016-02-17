@@ -917,6 +917,7 @@ namespace Peach.Pro.Core.WebServices
 			{
 				Defines = defs.ToWeb(),
 				Monitors = MonitorMetadata.Generate(detail.CallMethods),
+				Fields = FieldTreeGenerator.MakeFields(pitLibraryPath, detail.FileName),
 			};
 
 			return pit;

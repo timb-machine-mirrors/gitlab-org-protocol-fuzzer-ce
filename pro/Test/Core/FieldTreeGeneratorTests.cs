@@ -54,8 +54,7 @@ namespace Peach.Pro.Test.Core
 </Peach>
 ";
 
-			var generator = new FieldTreeGenerator();
-			var tree = generator.MakeFields(".", new StringReader(xml));
+			var tree = FieldTreeGenerator.MakeFields(".", new StringReader(xml));
 			var actual = JsonConvert.SerializeObject(tree);
 			var expected = JsonConvert.SerializeObject(new[] {
 				new PitField { Id = "Initial", Fields = {
@@ -181,8 +180,7 @@ namespace Peach.Pro.Test.Core
 	</Test>
 </Peach>";
 
-			var generator = new FieldTreeGenerator();
-			var tree = generator.MakeFields(".", new StringReader(xml));
+			var tree = FieldTreeGenerator.MakeFields(".", new StringReader(xml));
 			var actual = JsonConvert.SerializeObject(tree);
 			var expected = JsonConvert.SerializeObject(new[] {
 				new PitField { Id = "a", Fields = {
