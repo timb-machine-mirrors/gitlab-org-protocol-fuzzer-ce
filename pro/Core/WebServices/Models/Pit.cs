@@ -1,14 +1,17 @@
 using System;
 using System.Collections.Generic;
-using Peach.Core.Dom;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
 	public class PitField 
 	{
+		public PitField()
+		{
+			Fields = new List<PitField>();
+		}
+
 		public string Id { get; set; }
-		public ElementWeight Weight { get; set; }
-		public List<PitField> Kids { get; set; }
+		public List<PitField> Fields { get; set; }
 	}
 	
 	public class PitMetadata

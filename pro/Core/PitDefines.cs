@@ -577,6 +577,38 @@ namespace Peach.Pro.Core
 			return defs;
 		}
 
+		public static List<KeyValuePair<string, string>> ParseFileWithDefaults(string pitLibraryPath, string fileName)
+		{
+			var defs = ParseFile(fileName + ".config", pitLibraryPath).Evaluate();
+
+			// Some defines are expected to be empty if they are required to be
+			// set by the user.  The pit will not parse w/o them being set however
+			// so inject parsable defaults in this case
+			defs = defs.Select(PopulateRequiredDefine).ToList();
+
+			return defs;
+		}
+
+		private static KeyValuePair<string, string> PopulateRequiredDefine(KeyValuePair<string, string> item)
+		{
+			if (!String.IsNullOrEmpty(item.Value))
+				return item;
+
+			if (item.Key.EndsWith("MAC"))
+				return new KeyValuePair<string, string>(item.Key, "00:00:00:00:00:00");
+
+			if (item.Key.EndsWith("IPv4"))
+				return new KeyValuePair<string, string>(item.Key, "0.0.0.0");
+
+			if (item.Key.EndsWith("IPv6"))
+				return new KeyValuePair<string, string>(item.Key, "::1");
+
+			if (item.Key.EndsWith("Port"))
+				return new KeyValuePair<string, string>(item.Key, "0");
+
+			return new KeyValuePair<string, string>(item.Key, "0");
+		}
+
 		#endregion
 
 		#region Evaluate
@@ -653,7 +685,7 @@ namespace Peach.Pro.Core
 				var newVal = re.Replace(oldVal, evaluator);
 
 				if (oldVal != newVal)
-					ret[i] = new KeyValuePair<string,string>(ret[i].Key, newVal);
+					ret[i] = new KeyValuePair<string, string>(ret[i].Key, newVal);
 				else
 					++i;
 			}

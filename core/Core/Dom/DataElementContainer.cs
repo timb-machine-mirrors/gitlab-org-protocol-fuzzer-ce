@@ -446,9 +446,9 @@ namespace Peach.Core.Dom
 		{
 			try
 			{
-			// Add throws if key already exists
+				// Add throws if key already exists
 				_childrenDict.Add(item.Name, item);
-			_childrenList.Add(item);
+				_childrenList.Add(item);
 			}
 			catch (System.ArgumentException ex)
 			{

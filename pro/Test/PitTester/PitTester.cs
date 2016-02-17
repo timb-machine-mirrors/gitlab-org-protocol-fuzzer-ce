@@ -402,7 +402,7 @@ namespace PitTester
 
 		private static void DoVerifyDataSets(TestData testData, string pitLibraryPath, string fileName)
 		{
-			var defs = LoadDefines(pitLibraryPath, fileName);
+			var defs = PitDefines.ParseFileWithDefaults(pitLibraryPath, fileName);
 
 			var testDefs = testData.Defines.ToDictionary(x => x.Key, x => x.Value);
 
@@ -448,18 +448,6 @@ namespace PitTester
 
 			if (sb.Length > 0)
 				throw new PeachException(sb.ToString());
-		}
-
-		private static List<KeyValuePair<string, string>> LoadDefines(string pitLibraryPath, string fileName)
-		{
-			var defs = PitDefines.ParseFile(fileName + ".config", pitLibraryPath).Evaluate();
-
-			// Some defines are expected to be empty if they are required to be
-			// set by the user.  The pit will not parse w/o them being set however
-			// so inject parsable defaults in this case
-			defs = defs.Select(PopulateRequiredDefine).ToList();
-
-			return defs;
 		}
 
 		private static void VerifyDataSet(
@@ -819,7 +807,7 @@ namespace PitTester
 			//{
 			//	if (isTest)
 			//	{
-			//		var defs = LoadDefines(pitLibraryPath, fileName);
+			//		var defs = PitDefines.ParseFileWithDefaults(pitLibraryPath, fileName);
 			//		var args = new Dictionary<string, object>();
 			//		args[PitParser.DEFINED_VALUES] = defs;
 			//		new ProPitParser().asParser(args, fileName);
@@ -832,26 +820,6 @@ namespace PitTester
 
 			if (errors.Length > 0)
 				throw new ApplicationException(errors.ToString());
-		}
-
-		private static KeyValuePair<string, string> PopulateRequiredDefine(KeyValuePair<string, string> item)
-		{
-			if (!string.IsNullOrEmpty(item.Value))
-				return item;
-
-			if (item.Key.EndsWith("MAC"))
-				return new KeyValuePair<string, string>(item.Key, "00:00:00:00:00:00");
-
-			if (item.Key.EndsWith("IPv4"))
-				return new KeyValuePair<string, string>(item.Key, "0.0.0.0");
-
-			if (item.Key.EndsWith("IPv6"))
-				return new KeyValuePair<string, string>(item.Key, "::1");
-
-			if (item.Key.EndsWith("Port"))
-				return new KeyValuePair<string, string>(item.Key, "0");
-
-			return new KeyValuePair<string, string>(item.Key, "0");
 		}
 
 		private static bool ShouldSkipRule(XPathNodeIterator it, string rule)
