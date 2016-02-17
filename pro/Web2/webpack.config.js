@@ -36,6 +36,8 @@ var entry = {
 		"redux-form",
 		"redux-router5",
 		"redux-saga",
+		"redux-saga/effects",
+		"redux-saga/utils",
 		"router5",
 		"router5-history",
 		"router5-listeners",
