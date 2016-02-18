@@ -127,6 +127,7 @@ pre.peach-test-log {
 
 .peach-fault-detail pre {
 	min-height: 250px;
+	max-height: 600px;
 	overflow: auto;
 }
 
@@ -179,7 +180,9 @@ noscript {
 }
 
 .peach-library {
+	-moz-column-width: 200px;
 	-webkit-column-width: 200px;
+	column-width: 200px;
 }
 
 .peach-library ul > li {
