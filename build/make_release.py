@@ -32,12 +32,17 @@ output
 The result should be:    <--- archive to smb://nas/builds/peach-pro
 output
   release
-	${buildtag}          <--- publish to ssh://dl.peachfuzzer.com
-	  release.json
-	  peach-pro-${buildtag}-${platform}_release.zip
-	  peach-pro-${buildtag}-${platform}_release.zip.sha1
-	  pits
-		${pit}.zip
+  ${buildtag}          <--- publish to ssh://dl.peachfuzzer.com
+    release.json
+    peach-pro-${buildtag}-${platform}_release.zip
+    peach-pro-${buildtag}-${platform}_release.zip.sha1
+    pits
+      ${pit}.zip
+    datasheets
+      html
+        ${pit}.html
+      pdf
+        ${pit}.pdf
 '''
 
 def to_list(sth):
@@ -154,12 +159,18 @@ def extract_pits():
 				packs = z.read(i)
 			if os.path.basename(i.filename) == 'shipping_pits.json':
 				archives = z.read(i)
-			if not i.filename.endswith('.zip'):
-				continue
+			if i.filename.endswith('.zip'):
+				print ' - %s' % i.filename
+				z.extract(i, pitdir)
+				files.append(os.path.join(i.filename))
+			if i.filename.startswith('docs/datasheets'):
+				# Eat the 'docs/' prefix
+				dst = i.filename[5:]
+				print ' - %s' % dst
+				z.extract(i, os.path.join(pitdir, dst))
+				files.append(dst)
 
-			print ' - %s' % i.filename
-			z.extract(i, pitdir)
-			files.append(os.path.join(i.filename))
+	# TODO Filter docs based on shipping pits
 
 	packs = json.loads(packs)
 	archives = json.loads(archives)
