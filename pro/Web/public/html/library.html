@@ -18,6 +18,20 @@
 	</dd>
 </dl>
 
+<div class="form-group input-group">
+	<input ng-model="search"
+				 type="text"
+				 class="form-control"
+				 placeholder="Search for pit..."
+				 peach:auto-focus/>
+	<span class="input-group-btn">
+		<button class="btn btn-default"
+						type="submit">
+			<i class="fa fa-search"></i>
+		</button>
+	</span>
+</div>
+
 <div class="page-header">
 	<h3>Pits</h3>
 </div>
@@ -25,15 +39,19 @@
 	Peach Pits allow testing of a data format or a network protocol against a variety of targets.
 </p>
 <uib-accordion close-others="false">
-	<uib-accordion-group ng-repeat="cat in vm.Pits.Categories"
+	<uib-accordion-group ng-repeat="cat in vm.Pits.Categories | filter: filterCategory(search)"
 									 heading="{{cat.Name}}"
 									 is-open="true">
-		<ul class="list-inline library">
-			<li ng-repeat="entry in cat.Pits">
-				<a href=""
-					ng-click="vm.OnSelectPit(entry)">{{entry.Pit.name}}</a>
-			</li>
-		</ul>
+		<div class="peach-library">
+			<ul class="list-inline">
+				<li ng-repeat="entry in cat.Pits | filter: { Pit: { name: search } }">
+					<a href=""
+						ng-click="vm.OnSelectPit(entry)">
+							{{entry.Pit.name | peachPitName}}
+						</a>
+				</li>
+			</ul>
+		</div>
 	</uib-accordion-group>
 </uib-accordion>
 
@@ -45,14 +63,18 @@
 	Selecting an existing configuration allows editing the configuration and starting a new fuzzing job.
 </p>
 <uib-accordion close-others="false">
-	<uib-accordion-group ng-repeat="cat in vm.User.Categories"
+	<uib-accordion-group ng-repeat="cat in vm.User.Categories | filter: filterCategory(search)"
 									 heading="{{cat.Name}}"
 									 is-open="true">
-		<ul class="list-inline library">
-			<li ng-repeat="entry in cat.Pits">
-				<a href=""
-					ng-click="vm.OnSelectPit(entry)">{{entry.Pit.name}}</a>
-			</li>
-		</ul>
+		<div class="peach-library">
+			<ul class="list-inline">
+				<li ng-repeat="entry in cat.Pits | filter: { Pit: { name: search } }">
+					<a href=""
+						ng-click="vm.OnSelectPit(entry)">
+							{{entry.Pit.name | peachPitName}}
+						</a>
+				</li>
+			</ul>
+		</div>
 	</uib-accordion-group>
 </uib-accordion>

@@ -178,9 +178,12 @@ noscript {
 	font-size: large;
 }
 
-ul.library li a {
-	/*background-color: #dddddd;*/
-	padding: 1px 3px;
+.peach-library {
+	-webkit-column-width: 200px;
+}
+
+.peach-library ul > li {
+	width: 100%;
 }
 
 .breadcrumb {
