@@ -107,6 +107,16 @@ namespace Peach.Core
 		public DateTime runDateTime = DateTime.Now;
 
 		/// <summary>
+		/// How long to run the fuzzer for.
+		/// </summary>
+		public TimeSpan Duration = TimeSpan.MaxValue;
+
+		/// <summary>
+		/// How long to wait for the engine to stop before giving up and aborting.
+		/// </summary>
+		public TimeSpan AbortTimeout = TimeSpan.FromMinutes(1);
+
+		/// <summary>
 		/// Random number generator SEED
 		/// </summary>
 		/// <remarks>

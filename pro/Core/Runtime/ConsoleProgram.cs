@@ -160,6 +160,11 @@ namespace Peach.Pro.Core.Runtime
 				v => ParseRange("range", v)
 			);
 			options.Add(
+				"duration=",
+				"How long to run the fuzzer for.",
+				(TimeSpan v) => _config.Duration = v
+			);
+			options.Add(
 				"c|count",
 				"Count test cases",
 				v => _config.countOnly = true
@@ -882,6 +887,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 		}
 
 		#region Not Implemented
+
 		public Job Start(string pitLibraryPath, string pitFile, JobRequest jobRequest)
 		{
 			throw new NotImplementedException();
@@ -911,6 +917,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 		{
 			set { throw new NotImplementedException(); }
 		}
+
 		#endregion
 	}
 }
