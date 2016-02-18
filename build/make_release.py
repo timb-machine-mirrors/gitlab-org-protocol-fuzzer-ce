@@ -314,7 +314,10 @@ if __name__ == "__main__":
 		for f in pit_files:
 			src = os.path.join(tmpdir, 'pits', f)
 			dst = os.path.join(path, 'pits', f)
-			shutil.copy(src, dst)
+			if os.path.isdir(src):
+				os.makedirs(dst)
+			else:
+				shutil.copy(src, dst)
 
 		data = json.dumps(manifest, sort_keys=True, indent=4)
 		with open(rel, 'w') as f:
