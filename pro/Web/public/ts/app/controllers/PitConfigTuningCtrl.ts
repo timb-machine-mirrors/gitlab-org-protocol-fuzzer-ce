@@ -10,6 +10,10 @@ namespace Peach {
 		depth: number;
 		visible: boolean;
 		expanded: boolean;
+		style: any;
+		weightIcons: string[];
+		expanderIcon: string;
+		showExpander: boolean;
 	}
 
 	function defaultWeight(node: IPitFieldNode) {
@@ -18,16 +22,28 @@ namespace Peach {
 
 	function flatten(nodes: IPitFieldNode[], depth: number, parent: FlatNode) {
 		return _.flatMap(nodes, (node: IPitFieldNode) => {
-			const expanded = _.isUndefined(node.expanded) ? true : node.expanded;
+			const expanded = _.isUndefined(node.expanded) ? 
+				depth < 2 : 
+				node.expanded;
 			const visible = !parent || parent.expanded && parent.visible;
+			const weight = defaultWeight(node);
+			const icons = _.range(6).map(i => {
+				return (weight === i) ? 'fa-circle' : 
+					(!expanded && matchWeight(node, i)) ? 'fa-dot-circle-o' :
+						'fa-circle-o';
+			});
 			const flat: FlatNode = {
 				node: node,
 				id: node.id,
-				weight: defaultWeight(node),
+				weight: weight,
 				depth: depth,
 				visible: visible,
-				expanded: expanded
-			};			
+				expanded: expanded,
+				style: { 'margin-left': depth * SHIFT_WIDTH },
+				weightIcons: icons,
+				expanderIcon: expanded ? 'fa-minus' : 'fa-plus',
+				showExpander: !_.isEmpty(node.fields)
+			};
 			return [flat].concat(flatten(node.fields, depth + 1, flat));
 		});
 	}
@@ -53,10 +69,15 @@ namespace Peach {
 			private $scope: IViewModelScope,
 			private pitService: PitService
 		) {
+			console.time('load');
 			const promise = pitService.LoadPit();
 			promise.then((pit: IPit) => {
+				console.timeEnd('load');
 				this.tree = _.cloneDeep(pit.metadata.fields);
+				console.time('flatten');
 				this.flat = flatten(this.tree, 0, null);
+				console.timeEnd('flatten');
+				console.log('nodes', this.flat.length);
 				this.hasLoaded = true;
 			});
 		}
@@ -65,44 +86,18 @@ namespace Peach {
 		private flat: FlatNode[];
 		private tree: IPitFieldNode[] = [];
 
-		ShowNode(node: FlatNode) {
-			return node.visible;
-		}
-
-		WeightIcon(node: FlatNode, weight: number) {
-			return {
-				'fa-circle': (node.weight === weight),
-				'fa-circle-o': (node.weight !== weight),
-				'fa-dot-circle-o': (node.weight !== weight) && 
-					!node.expanded && matchWeight(node.node, weight)
-			}
-		}
-
-		ShowExpander(node: FlatNode) {
-			return node.node.fields;
-		}
-
-		ExpanderIcon(node: FlatNode) {
-			return {
-				'fa-minus': node.expanded,
-				'fa-plus': !node.expanded
-			}
-		}
-
-		NodeShift(node: FlatNode) {
-			return {
-				'margin-left': node.depth * SHIFT_WIDTH
-			}
-		}
-
 		OnToggleExpand(node: FlatNode) {
 			node.node.expanded = !node.expanded;
+			console.time('expand');
 			this.flat = flatten(this.tree, 0, null);
+			console.timeEnd('expand');
 		}
 
 		OnSelectWeight(node: FlatNode, weight: number) {
 			selectWeight(node.node, weight);
+			console.time('select');
 			this.flat = flatten(this.tree, 0, null);
+			console.timeEnd('select');
 		}
 	}
 }

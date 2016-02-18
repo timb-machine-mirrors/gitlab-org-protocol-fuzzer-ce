@@ -4,6 +4,7 @@ using NUnit.Framework;
 using Peach.Core.Test;
 using Peach.Pro.Core;
 using Peach.Pro.Core.WebServices.Models;
+using Peach.Core;
 
 namespace Peach.Pro.Test.Core
 {
@@ -12,6 +13,20 @@ namespace Peach.Pro.Test.Core
 	[Peach]
 	class FieldTreeGeneratorTests
 	{
+		TempDirectory root;
+
+		[SetUp]
+		public void Setup()
+		{
+			root = new TempDirectory();
+		}
+
+		[TearDown]
+		public void Teardown()
+		{
+			root.Dispose();
+		}
+
 		[Test]
 		public void TestElements()
 		{
@@ -40,25 +55,63 @@ namespace Peach.Pro.Test.Core
 
 	<StateModel name='SM' initialState='Initial'>
 		<State name='Initial'>
-			<Action type='output'>
+			<Action type='call' method='StartIterationEvent' publisher='Peach.Agent' />
+
+			<Action name='Open' type='open' publisher='tcp' />
+
+			<Action name='Output' type='output'>
+				<DataModel ref='DM'/>
+				<Data fileName='##SamplePath##/##Seed##' />
+			</Action>
+
+			<Action type='input'>
 				<DataModel ref='DM'/>
 			</Action>
+
+			<Action name='MessageId' type='slurp' valueXpath='//Request//messageId/Value' setXpath='//messageId/Value' />
+
+			<Action type='message' status='foo' error='bar' />
+
+			<Action name='Close' type='close' publisher='tcp' />
+
+			<Action type='call' method='ExitIterationEvent' publisher='Peach.Agent' />
+		</State>
+
+		<State name='Blank'>
 		</State>
 	</StateModel>
 
 	<Test name='Default'>
 		<Strategy class='Random'/>
 		<StateModel ref='SM' />
-		<Publisher class='Null'/>
+		<Publisher class='TcpListener'>
+			<Param name='Interface' value='0.0.0.0' />
+			<Param name='Port' value='##ListenPort##' />
+		</Publisher>
 	</Test>
 </Peach>
 ";
+			var config = @"
+<PitDefines>
+	<All>
+		<String key='SamplePath' name='SamplePath' value='##PitLibraryPath##/_Common/Samples/Image'/>
+		<String key='Seed' name='Seed' value='*.PNG'/>
+		<String key='ListenPort' name='ListenPort' value='31337'/>
+	</All>
+</PitDefines>
+";
+			var filename = Path.Combine(root.Path, "TestElements.xml");
+			File.WriteAllText(filename, xml);
+			File.WriteAllText(filename + ".config", config);
+			var samplesDir = Path.Combine(root.Path, "_Common", "Samples", "Image");
+			Directory.CreateDirectory(samplesDir);
+			File.WriteAllText(Path.Combine(samplesDir, "foo.PNG"), "nothing here");
 
-			var tree = FieldTreeGenerator.MakeFields(".", new StringReader(xml));
+			var tree = FieldTreeGenerator.MakeFields(root.Path, filename);
 			var actual = JsonConvert.SerializeObject(tree);
 			var expected = JsonConvert.SerializeObject(new[] {
 				new PitField { Id = "Initial", Fields = {
-					new PitField { Id = "Action", Fields = {
+					new PitField { Id = "Output", Fields = {
 						new PitField { Id = "DM", Fields = {
 							new PitField { Id = "DataElement_0" },
 							new PitField { Id = "Choice", Fields = {
@@ -100,13 +153,29 @@ namespace Peach.Pro.Test.Core
 		<Blob name='Blob' fieldId='C' />
 	</DataModel>
 
+	<DataModel name='DM3'>
+		<Blob name='Blob' />
+	</DataModel>
+
 	<StateModel name='SM' initialState='Initial'>
-		<State name='Initial' fieldId='a'>
-			<Action type='output' fieldId='z'>
+		<State name='Initial' fieldId='state'>
+			<Action type='call' method='StartIterationEvent' publisher='Peach.Agent' />
+
+			<Action name='Open' type='open' publisher='tcp' />
+
+			<Action type='output' fieldId='action1'>
 				<DataModel ref='DM1' />
 			</Action>
 
-			<Action type='call' fieldId='b' method='foo'>
+			<Action type='input'>
+				<DataModel ref='DM1' />
+			</Action>
+
+			<Action name='ActionWithNoFieldId' type='output'>
+				<DataModel ref='DM1' />
+			</Action>
+
+			<Action type='call' fieldId='action2' method='foo'>
 				<Param>
 					<DataModel name='DM2' fieldId='c'>
 						<Stream streamName='foo' fieldId='d' />
@@ -170,6 +239,18 @@ namespace Peach.Pro.Test.Core
 					</DataModel>
 				</Param>
 			</Action>
+
+			<Action name='ActionWithDMWithNoFieldIds' type='output'>
+				<DataModel ref='DM3'/>
+			</Action>
+
+			<Action name='MessageId' type='slurp' valueXpath='//Request//messageId/Value' setXpath='//messageId/Value' />
+
+			<Action type='message' status='foo' error='bar' />
+
+			<Action name='Close' type='close' publisher='tcp' />
+
+			<Action type='call' method='ExitIterationEvent' publisher='Peach.Agent' />
 		</State>
 	</StateModel>
 
@@ -180,65 +261,77 @@ namespace Peach.Pro.Test.Core
 	</Test>
 </Peach>";
 
-			var tree = FieldTreeGenerator.MakeFields(".", new StringReader(xml));
+			var filename = Path.Combine(root.Path, "TestFields.xml");
+			File.WriteAllText(filename, xml);
+
+			var tree = FieldTreeGenerator.MakeFields(root.Path, filename);
 			var actual = JsonConvert.SerializeObject(tree);
 			var expected = JsonConvert.SerializeObject(new[] {
-				new PitField { Id = "a", Fields = {
-					new PitField { Id = "z", Fields = {
+				new PitField { Id = "state", Fields = {
+					new PitField { Id = "action1", Fields = {
 						new PitField { Id = "B" },
 						new PitField { Id = "C" },
-						new PitField { Id = "b", Fields = {
-							new PitField { Id = "c", Fields = {
-								new PitField { Id = "d" },
-								new PitField { Id = "e", Fields = {
-									new PitField { Id = "f" },
-									new PitField { Id = "g", Fields = {
-										new PitField { Id = "h" },
-										new PitField { Id = "i" },
-									}},
+					}},
+					new PitField { Id = "ActionWithNoFieldId", Fields = {
+						new PitField { Id = "B" },
+						new PitField { Id = "C" },
+					}},
+					new PitField { Id = "action2", Fields = {
+						new PitField { Id = "c", Fields = {
+							new PitField { Id = "d" },
+							new PitField { Id = "e", Fields = {
+								new PitField { Id = "f" },
+								new PitField { Id = "g", Fields = {
+									new PitField { Id = "h" },
+									new PitField { Id = "i" },
 								}},
-								new PitField { Id = "j", Fields = {
-									new PitField { Id = "k" },
-									new PitField { Id = "l" },
+							}},
+							new PitField { Id = "j", Fields = {
+								new PitField { Id = "k" },
+								new PitField { Id = "l" },
+							}},
+							new PitField { Id = "m" },
+							new PitField { Id = "n", Fields = {
+								new PitField { Id = "n1", Fields = {
+									new PitField { Id = "n1c", Fields = {
+										new PitField { Id = "n1c1" },
+										new PitField { Id = "n1c2" },
+									}}
 								}},
-								new PitField { Id = "m" },
-								new PitField { Id = "n", Fields = {
-									new PitField { Id = "n1", Fields = {
-										new PitField { Id = "n1c", Fields = {
-											new PitField { Id = "n1c1" },
-											new PitField { Id = "n1c2" },
-										}}
-									}},
-									new PitField { Id = "n2", Fields = {
-										new PitField { Id = "n2c", Fields = {
-											new PitField { Id = "n2c1" },
-											new PitField { Id = "n2c2" },
-										}}
-									}},
+								new PitField { Id = "n2", Fields = {
+									new PitField { Id = "n2c", Fields = {
+										new PitField { Id = "n2c1" },
+										new PitField { Id = "n2c2" },
+									}}
 								}},
-								new PitField { Id = "o" },
-								new PitField { Id = "p" },
-								new PitField { Id = "q", Fields = {
-									new PitField { Id = "qq" },
-								}},
-								new PitField { Id = "r", Fields = {
-									new PitField { Id = "s" },
-								}},
-								new PitField { Id = "t", Fields = {
-									new PitField { Id = "u" },
-									new PitField { Id = "t2" },
-								}},
-								new PitField { Id = "v" },
-								new PitField { Id = "w" },
-								new PitField { Id = "x" },
-								new PitField { Id = "y" },
-								new PitField { Id = "z" },
-								new PitField { Id = "kk" },
-								new PitField { Id = "ll" },
-							}}
-						}}
-					}}
-				}}
+							}},
+							new PitField { Id = "o" },
+							new PitField { Id = "p" },
+							new PitField { Id = "q", Fields = {
+								new PitField { Id = "qq" },
+							}},
+							new PitField { Id = "r", Fields = {
+								new PitField { Id = "s" },
+							}},
+							new PitField { Id = "t", Fields = {
+								new PitField { Id = "u" },
+								new PitField { Id = "t2" },
+							}},
+							new PitField { Id = "v" },
+							new PitField { Id = "w" },
+							new PitField { Id = "x" },
+							new PitField { Id = "y" },
+							new PitField { Id = "z" },
+							new PitField { Id = "kk" },
+							new PitField { Id = "ll" },
+						}},
+					}},
+					new PitField { Id = "ActionWithDMWithNoFieldIds", Fields = {
+						new PitField { Id = "DM3", Fields = {
+							new PitField { Id = "Blob" }
+						}},
+					}},
+				}},
 			});
 			Assert.AreEqual(expected, actual);
 		}
