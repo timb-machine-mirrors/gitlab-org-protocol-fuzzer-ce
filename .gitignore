@@ -82,6 +82,7 @@ _Resharper*
 /pro/Web.baseDir.ts
 /pro/Web/Gruntfile.js*
 /pro/Web/Gruntfile.min*
+/pro/Web2
 
 # NUnit files
 TestResult.xml

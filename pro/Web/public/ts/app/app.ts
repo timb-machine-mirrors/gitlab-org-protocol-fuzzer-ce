@@ -359,6 +359,12 @@ namespace Peach {
 		};
 	});
 
+	p.filter('peachPitName', () => {
+		return (value: string): string => {
+			return value.replace(/_/g, ' ');
+		};
+	});
+
 	export function Startup() {
 		const version = getHtmlVer();
 		if (version < 5) {
