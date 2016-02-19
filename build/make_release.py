@@ -162,13 +162,11 @@ def extract_pits():
 			if i.filename.endswith('.zip'):
 				print ' - %s' % i.filename
 				z.extract(i, pitdir)
-				files.append(os.path.join(i.filename))
+				files.append(i.filename)
 			if i.filename.startswith('docs/datasheets'):
-				# Eat the 'docs/' prefix
-				dst = i.filename[5:]
-				print ' - %s' % dst
-				z.extract(i, os.path.join(pitdir, dst))
-				files.append(dst)
+				print ' - %s' % i.filename
+				z.extract(i, pitdir)
+				files.append(i.filename)
 
 	# TODO Filter docs based on shipping pits
 
@@ -313,11 +311,14 @@ if __name__ == "__main__":
 
 		for f in pit_files:
 			src = os.path.join(tmpdir, 'pits', f)
+			# Eat the 'docs/' prefix
+			if (f.startswith('docs/')):
+				f = f[5:]
 			dst = os.path.join(path, 'pits', f)
-			if os.path.isdir(src):
-				os.makedirs(dst)
-			else:
-				shutil.copy(src, dst)
+			d = os.path.dirname(dst)
+			if not os.path.isdir(d):
+				os.makedirs(d)
+			shutil.copy(src, dst)
 
 		data = json.dumps(manifest, sort_keys=True, indent=4)
 		with open(rel, 'w') as f:
