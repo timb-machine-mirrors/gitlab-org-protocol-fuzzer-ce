@@ -68,18 +68,6 @@ struct StaticAssert<true>
 	static void assert() {}
 };
 
-
-static std::string MakeFileName(const std::string& fullName)
-{
-#ifdef TARGET_WINDOWS
-	char sep = '\\';
-#else
-	char sep = '/';
-#endif
-	size_t idx = fullName.rfind(sep);
-	return fullName.substr(idx + 1);
-}
-
 class NonCopyable
 {
 protected:
@@ -91,21 +79,6 @@ private:
 	NonCopyable operator=(const NonCopyable&);
 };
 
-class ImageRec;
-
-class ImageName : NonCopyable
-{
-public:
-	typedef const std::string& key_type;
-
-	ImageName(const ImageRec* pImg);
-
-	const ImageRec*    record;
-	size_t             keylen;
-	const char*        key;
-	UT_hash_handle     hh;
-};
-
 class ImageRec : NonCopyable
 {
 private:
@@ -115,10 +88,10 @@ public:
 
 	ImageRec(IMG img)
 		: fullName(IMG_Name(img))
-		, fileName(MakeFileName(fullName))
 		, lowAddress(IMG_LowAddress(img))
 		, highAddress(IMG_HighAddress(img))
-		, conflict(NULL)
+		, startAddress(IMG_StartAddress(img))
+		, loadOffset(IMG_LoadOffset(img))
 		, key(IMG_Id(img))
 	{
 	}
@@ -129,73 +102,61 @@ public:
 	}
 
 	const std::string fullName;    // Full absolute path to file
-	const std::string fileName;    // Just the name of the file
 	const ADDRINT     lowAddress;
 	const ADDRINT     highAddress;
-	const ImageName*  conflict;
+	const ADDRINT     startAddress;
+	const ADDRINT     loadOffset;
 
 	size_t            key;
 	UT_hash_handle    hh;
 };
 
-ImageName::ImageName(const ImageRec* pImg)
-	: record(pImg)
-	, keylen(pImg->fileName.size())
-	, key(pImg->fileName.c_str())
-{
-}
-
 class BlockRec : NonCopyable
 {
 public:
-	typedef size_t key_type;
-
-	BlockRec(ADDRINT addr)
-		: countRun(0)
-		, countAdd(1)
-		, key(addr)
+	BlockRec(const ImageRec* i, BBL b)
+		: image(i)
+		, executed(0)
+		, address(BBL_Address(b))
+		, next(NULL)
 	{
 	}
 
-	std::string MakeTrace(const ImageRec& img) const
-	{
-		std::stringstream ss;
-		ss << img.fileName << ": " << (key - img.lowAddress) << std::endl;
-		return ss.str();
-	}
+	const ImageRec* image;
+	size_t          executed;
+	size_t          address;
 
-	const BlockRec* Next() const
-	{
-		return (const BlockRec*)hh.next;
-	}
-
-	size_t             countRun; // Count of BlockExecuted()
-	size_t             countAdd; // Count of Trace()
-	size_t             key;
-	UT_hash_handle     hh;
+	BlockRec       *next;
 };
 
-class StringRec : NonCopyable
+template<typename TVal>
+class List : NonCopyable
 {
 public:
-	typedef const std::string key_type;
-
-	StringRec(const std::string& val)
-		: value(val)
-		, keylen(value.size())
-		, key(value.c_str())
+	List()
+		: next(NULL)
 	{
 	}
 
-	const StringRec* Next() const
+	~List()
 	{
-		return (const StringRec*)hh.next;
+		TVal* item = next;
+
+		while (item != NULL)
+		{
+			TVal* tmp = item;
+			item = item->next;
+			delete tmp;
+		}
 	}
 
-	const std::string value;
-	size_t            keylen;
-	const char*       key;
-	UT_hash_handle    hh;
+	void Insert(TVal* item)
+	{
+		item->next = next;
+		next = item;
+	}
+
+	TVal *next;
 };
 
 template<typename TVal>
@@ -367,14 +328,8 @@ private:
 	FILE* m_pFile;
 };
 
-typedef HashTable<StringRec> Strings_t;
-typedef HashTable<BlockRec> Blocks_t;
-typedef HashTable<ImageRec> Images_t;
-typedef HashTable<ImageName> ImageNames_t;
-
-static ImageNames_t includedImages;
-static Blocks_t blocks;
-static Images_t images;
+static HashTable<ImageRec> images;
+static List<BlockRec> blocks;
 
 File fileDbg;
 INT pid = 0;
@@ -396,37 +351,6 @@ void File::OpenSuccess(const std::string& name)
 	DBG(("Successfully opened file '%s'.", name.c_str()));
 }
 
-const ImageRec* FindImageByAddr(ADDRINT addr)
-{
-	for (const ImageRec* it = images.Head(); it != NULL; it = it->Next())
-	{
-		if (it->lowAddress <= addr && addr <= it->highAddress)
-			return it;
-	}
-
-	return NULL;
-}
-
-bool ReadAllLines(const std::string& fileName, Strings_t& lines)
-{
-	std::ifstream fin(fileName.c_str(), std::ifstream::binary);
-	if (!fin)
-		return false;
-
-	std::string line;
-	while (std::getline(fin, line))
-	{
-		size_t end = line.size() - 1;
-		if (end > 0 && line[end] == '\r')
-			line.resize(end);
-
-		if (!lines.Find(line))
-			lines.Add(new StringRec(line));
-	}
-
-	return !fin.bad();
-}
-
 // Prints the usage and exits
 INT32 Usage()
 {
@@ -436,12 +360,9 @@ INT32 Usage()
 }
 
 // Called whenever a basic block is executed
-VOID PIN_FAST_ANALYSIS_CALL BlockExecuted(BlockRec* pBlock)
+VOID PIN_FAST_ANALYSIS_CALL BlockExecuted(size_t* executed)
 {
-	// Keep conditionals and lookups out of this
-	// callback so pin can inline it
-
-	pBlock->countRun++;
+	*executed = 1;
 }
 
 // Called every time a new image is loaded
@@ -449,77 +370,55 @@ VOID Image(IMG img, VOID* v)
 {
 	UNUSED_ARG(v);
 
+	// Using the IMG_xxx functions at the end of the tool doesn't
+	// appear to work so gather all the relavant information about
+	// the image at load time.
+
 	ImageRec* pImg = new ImageRec(img);
-	pImg->conflict = includedImages.Find(pImg->fileName);
 
 	images.Add(pImg);
 
-	if (pImg->conflict)
-	{
-		const ImageRec* pOther = pImg->conflict->record;
-
-		if (pImg->fullName == pOther->fullName)
-		{
-			// Add for tracking - is the same fullName
-			DBG(("Duplicate image names detected: %s", pImg->fileName.c_str()));
-			includedImages.Add(new ImageName(pImg));
-		}
-		else
-		{
-			// Ignore, since we have two different fullNames
-			DBG(("Conflicting image names detected: %s", pImg->fileName.c_str()));
-		}
-
-		DBG(("  Id: %lu, Name: %s", (unsigned long)pOther->key, pOther->fullName.c_str()));
-		DBG(("  Id: %lu, Name: %s", (unsigned long)pImg->key, pOther->fullName.c_str()));
-	}
-	else
-	{
-		includedImages.Add(new ImageName(pImg));
-		DBG(("Loaded image: %s [%llu -> %llu]", pImg->fullName.c_str(),
-			pImg->lowAddress, pImg->highAddress));
-	}
+	DBG(("Loaded image %s", pImg->fullName.c_str()));
+	DBG(("  Id:            " IFMT, pImg->key));
+	DBG(("  Load Offset:   " XFMT, pImg->loadOffset));
+	DBG(("  Low Address:   " XFMT, pImg->lowAddress));
+	DBG(("  High Address:  " XFMT, pImg->highAddress));
+	DBG(("  Start Address: " XFMT, pImg->startAddress));
 }
 
 // Called every time a new trace is encountered
+// A trace is a single enterance, multiple exit sequence of instructions
 VOID Trace(TRACE trace, VOID *v)
 {
 	UNUSED_ARG(v);
 
+	RTN rtn = TRACE_Rtn(trace);
+	if (!RTN_Valid(rtn))
+		return;
+
+	IMG img = SEC_Img(RTN_Sec(rtn));
+	IMG_TYPE imgType = IMG_Type(img);
+
+	if ((imgType != IMG_TYPE_STATIC) &&    ///< Main image, linked with -static
+		(imgType != IMG_TYPE_SHARED) &&    ///< Main image, linked against shared libraries
+		(imgType != IMG_TYPE_SHAREDLIB) && ///< Shared library or main image linked with -pie
+		(imgType != IMG_TYPE_RELOCATABLE)) ///< Relocatble object (.o file)
+	{
+		return;
+	}
+
+	const ImageRec* image = images.Find(IMG_Id(img));
+
 	for (BBL bbl = TRACE_BblHead(trace); BBL_Valid(bbl); bbl = BBL_Next(bbl))
 	{
-		// Grab the first instruction of the block
-		INS ins = BBL_InsHead(bbl);
-		if (!ins.is_valid())
-		{
-			DBG(("Could not get 1st instruction for basic block: %zu", (size_t)BBL_Address(bbl)));
-			continue;
-		}
+		// Pin uniquely identifies each code block using both the starting address
+		// and the register mapping upon entry to that block.  This means its possible
+		// to see duplications in the starting addresses because those two blocks have
+		// different register states upon entry.
 
-		ADDRINT addr = INS_Address(ins);
+		BlockRec* item = new BlockRec(image, bbl);
 
-		// If we have visited this basic block before, ignore
-		BlockRec* pBlock = blocks.Find(addr);
-		if (pBlock != NULL)
-		{
-			//if (!pBlock->existing && !pBlock->excluded)
-			//{
-			//	DBG(("Ignoring duplicate trace for basic block '%s: %llu'",
-			//		pBlock->fileName.c_str(), (unsigned long long)pBlock->key));
-			//}
-
-			pBlock->countAdd++;
-			continue;
-		}
-
-		// We can't resolve the image this address belongs to,
-		// because there is a chance it has not been loaded yet.
-
-		// Build a record for tracking this basic block
-		pBlock = new BlockRec(addr);
-
-		// Ensure we are tracking this basic block record
-		blocks.Add(pBlock);
+		blocks.Insert(item);
 
 		// Record basic block when it is executed
 		BBL_InsertCall(
@@ -528,7 +427,7 @@ VOID Trace(TRACE trace, VOID *v)
 			AFUNPTR(BlockExecuted),
 			IARG_FAST_ANALYSIS_CALL,
 			IARG_PTR,
-			pBlock,
+			&item->executed,
 			IARG_END);
 	}
 }
@@ -565,37 +464,33 @@ VOID Fini(INT32 code, VOID *v)
 	File fileOut;
 	fileOut.Open(OutFileBase + ".out", "wb");
 
-	unsigned long unresolved = 0, dupes = 0, run = 0;
+	size_t total = 0, unresolved = 0, inavlid = 0, run = 0;
 
-	for (const BlockRec* it = blocks.Head(); it != NULL; it = it->Next())
+	for (const BlockRec* it = blocks.next; it != NULL; it = it->next)
 	{
-		if (it->countAdd > 1)
-			++dupes;
+		++total;
 
-		if (it->countRun > 0)
+		if (it->image == NULL)
 		{
-			++run;
-
-			const ImageRec* pImg = FindImageByAddr(it->key);
-
-			if (NULL == pImg)
-			{
-				DBG(("Could not get image for basic block: %llu", (unsigned long long)it->key));
-				++unresolved;
-			}
+			++unresolved;
+		}
+		else if (it->executed)
+		{
+			if (it->image->loadOffset > it->address)
+				++inavlid;
 			else
-			{
-				fileOut.Write(it->MakeTrace(*pImg));
-			}
+				++run;
+
+			fileOut.Write(XFMT " %s\n", it->address - it->image->loadOffset, it->image->fullName.c_str());
 		}
 	}
 
 	DBG(("Application finished, pid: %d", PIN_GetPid()));
-	DBG((" All Images     : %lu", (unsigned long)images.Count()));
-	DBG((" Basic Blocks   : %lu", (unsigned long)blocks.Count()));
-	DBG(("  Executed      : %lu", run));
-	DBG(("  Unresolved    : %lu", unresolved));
-	DBG(("  Duplicates    : %lu", dupes));
+	DBG((" All Images     : " IFMT, images.Count()));
+	DBG((" Basic Blocks   : " IFMT, total));
+	DBG(("  Executed      : " IFMT, run));
+	DBG(("  Unresolved    : " IFMT, unresolved));
+	DBG(("  Invalid       : " IFMT, inavlid));
 }
 
 // Internal worker thread
