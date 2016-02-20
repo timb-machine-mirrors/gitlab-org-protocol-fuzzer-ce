@@ -49,7 +49,7 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("Cookies", typeof(bool), "Track cookies (defaults to true)", "true")]
 	[Parameter("CookiesAcrossIterations", typeof(bool), "Track cookies across iterations (defaults to false)", "false")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default 3000)", "3000")]
-	[Parameter("IgnoreCertErrors", typeof(bool), "Allow https regardless of cert status (defaults to false)", "false")]
+	[Parameter("IgnoreCertErrors", typeof(bool), "Allow https regardless of cert status (defaults to true)", "true")]
 	public class HttpPublisher : Peach.Core.Publishers.BufferedStreamPublisher
 	{
 		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
