@@ -4,7 +4,7 @@ import { Dispatch } from 'redux';
 import { connect } from 'redux-await';
 import { Row, Col, Table } from 'react-bootstrap';
 
-import { R } from '../../routes';
+import { R } from '../../containers';
 import { FaultDetail } from '../../models/Fault';
 import { formatDate, formatFileSize } from '../../utils';
 import { fetchFault } from '../../redux/modules/Fault';

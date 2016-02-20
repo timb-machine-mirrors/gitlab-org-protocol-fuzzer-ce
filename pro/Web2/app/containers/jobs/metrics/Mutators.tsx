@@ -2,7 +2,7 @@ import React = require('react');
 import { Component, Props } from 'react';
 import { connect } from 'react-redux';
 
-import { R } from '../../../routes';
+import { R } from '../../../containers';
 import { Route } from '../../../models/Router';
 
 interface MetricsProps extends Props<Metrics> {

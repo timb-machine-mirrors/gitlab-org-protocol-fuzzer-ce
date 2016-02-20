@@ -2,7 +2,7 @@ import React = require('react');
 import { Component, Props } from 'react';
 
 import { Menu, MenuItem } from '../../components/Menu';
-import { R } from '../../routes';
+import { R } from '../../containers';
 
 class PitsMenu extends Component<Props<PitsMenu>, {}> {
 	render() {

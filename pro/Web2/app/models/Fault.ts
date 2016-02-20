@@ -1,5 +1,6 @@
 ﻿export interface FaultListState {
 	isPolling?: boolean;
+	isReset?: boolean;
 	data?: FaultSummary[];
 }
 

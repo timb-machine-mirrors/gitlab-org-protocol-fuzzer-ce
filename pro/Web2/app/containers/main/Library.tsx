@@ -10,7 +10,7 @@ import { injectRouter, RouterContext } from '../../models/Router';
 import { LibraryState, Category } from '../../models/Library';
 import { Pit } from '../../models/Pit';
 import { fetchLibraries } from '../../redux/modules/Library';
-import { R } from '../../routes';
+import { R } from '../../containers';
 import NewPitModal from '../../components/NewPitModal';
 import FoldingPanel from '../../components/FoldingPanel';
 

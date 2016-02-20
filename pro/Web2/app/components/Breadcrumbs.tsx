@@ -4,7 +4,7 @@ import { Breadcrumb } from 'react-bootstrap';
 import { connect } from 'react-redux';
 
 import { Route, RouterContext, injectRouter } from '../models/Router';
-import { DisplayNameFunc, RouteSpec, segments } from '../routes';
+import { DisplayNameFunc, RouteSpec, segments } from '../containers';
 import Link from './Link';
 import RootState from '../models/Root';
 
@@ -25,30 +25,28 @@ class Breadcrumbs extends Component<BreadcrumbsProps, {}> {
 			return null;
 		}
 
-		return (
-			<Breadcrumb>
-				{_.keys(route._meta).map((item, index) => {
-					const spec = _.get<RouteSpec>(segments, item);
-					
-					let name = spec.displayName;
-					if (_.isFunction(name)) {
-						name = (name as DisplayNameFunc)(route, state);
-					}
+		return <Breadcrumb>
+			{_.keys(route._meta).map((item, index) => {
+				const spec = _.get<RouteSpec>(segments, item);
+				
+				let name = spec.displayName;
+				if (_.isFunction(name)) {
+					name = (name as DisplayNameFunc)(state);
+				}
 
-					if (spec.abstract) {
-						return <li key={index}>{name}</li>;
-					}
+				if (spec.abstract) {
+					return <li key={index}>{name}</li>;
+				}
 
-					return (
-						<Link key={index} 
-							to={spec} params={route.params} 
-							activeComponent="li">
-							{name}
-						</Link>
-					)
-				})}
-			</Breadcrumb>
-		)
+				return (
+					<Link key={index} 
+						to={spec} params={route.params} 
+						activeComponent="li">
+						{name}
+					</Link>
+				)
+			})}
+		</Breadcrumb>
 	}
 }
 

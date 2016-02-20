@@ -1,46 +1,47 @@
 import React = require('react');
-import { ComponentClass } from 'react';
+import { ComponentClass, ReactNode } from 'react';
+import { Badge } from 'react-bootstrap';
 
-import RootState from './models/root';
-import { Route } from './models/Router';
+import RootState from '../models/root';
 
-import CMain from './containers/Main';
-import CError from './containers/Error';
+import CMain from './Main';
+import CError from './Error';
 
-import CMainMenu from './containers/main/MainMenu';
-import CHome from './containers/main/Home';
-import CLibrary from './containers/main/Library';
-import CJobs from './containers/main/Jobs';
+import CMainMenu from './main/MainMenu';
+import CHome from './main/Home';
+import CLibrary from './main/Library';
+import CJobs from './main/Jobs';
 
-import CPitsMenu from './containers/pits/PitsMenu';
-import CPitMount from './containers/pits/Pit';
-import CPitDashboard from './containers/pits/Dashboard';
-import CPitWizardIntro from './containers/pits/wizard/Intro';
-import CPitWizardTrack from './containers/pits/wizard/Track';
-import CPitWizardVarsIntro from './containers/pits/wizard/vars/Intro';
-import CPitWizardFaultIntro from './containers/pits/wizard/fault/Intro';
-import CPitWizardDataIntro from './containers/pits/wizard/data/Intro';
-import CPitWizardAutoIntro from './containers/pits/wizard/auto/Intro';
-import CPitWizardTest from './containers/pits/wizard/Test';
-import CPitAdvancedVariables from './containers/pits/advanced/Variables';
-import CPitAdvancedMonitoring from './containers/pits/advanced/Monitoring';
-import CPitAdvancedTuning from './containers/pits/advanced/Tuning';
-import CPitAdvancedTest from './containers/pits/advanced/Test';
+import CPitsMenu from './pits/PitsMenu';
+import CPitMount from './pits/Pit';
+import CPitDashboard from './pits/Dashboard';
+import CPitWizardIntro from './pits/wizard/Intro';
+import CPitWizardTrack from './pits/wizard/Track';
+import CPitWizardVarsIntro from './pits/wizard/vars/Intro';
+import CPitWizardFaultIntro from './pits/wizard/fault/Intro';
+import CPitWizardDataIntro from './pits/wizard/data/Intro';
+import CPitWizardAutoIntro from './pits/wizard/auto/Intro';
+import CPitWizardTest from './pits/wizard/Test';
+import CPitAdvancedVariables from './pits/advanced/Variables';
+import CPitAdvancedMonitoring from './pits/advanced/Monitoring';
+import CPitAdvancedTuning from './pits/advanced/Tuning';
+import CPitAdvancedTest from './pits/advanced/Test';
 
-import CJobsMenu from './containers/jobs/JobsMenu';
-import CJob from './containers/jobs/Job';
-import CJobDashboard from './containers/jobs/Dashboard';
-import CJobFaults from './containers/jobs/Faults';
-import CJobFaultsDetail from './containers/jobs/FaultsDetail';
-import CBucketTimeline from './containers/jobs/metrics/BucketTimeline';
-import CFaultTimeline from './containers/jobs/metrics/FaultTimeline';
-import CMutators from './containers/jobs/metrics/Mutators';
-import CElements from './containers/jobs/metrics/Elements';
-import CStates from './containers/jobs/metrics/States';
-import CDataset from './containers/jobs/metrics/Dataset';
-import CBuckets from './containers/jobs/metrics/Buckets';
+import CJobsMenu from './jobs/JobsMenu';
+import CJob from './jobs/Job';
+import CJobDashboard from './jobs/Dashboard';
+import CJobFaults from './jobs/Faults';
+import CJobFaultsDetail from './jobs/FaultsDetail';
+import CBucketTimeline from './jobs/metrics/BucketTimeline';
+import CFaultTimeline from './jobs/metrics/FaultTimeline';
+import CMutators from './jobs/metrics/Mutators';
+import CElements from './jobs/metrics/Elements';
+import CStates from './jobs/metrics/States';
+import CDataset from './jobs/metrics/Dataset';
+import CBuckets from './jobs/metrics/Buckets';
 
-export type DisplayNameFunc = (route: Route, state: RootState) => string;
+export type DisplayNameFunc = (state: RootState) => string;
+export type ExtraFunc = (state: RootState) => ReactNode;
 
 export interface RouteSpec {
 	name?: string;
@@ -51,6 +52,7 @@ export interface RouteSpec {
 	displayName?: string | DisplayNameFunc;
 	redirect?: string;
 	abstract?: boolean;
+	extra?: ExtraFunc;
 }
 
 export const NotFound: RouteSpec = {
@@ -87,9 +89,9 @@ export const R = {
 		parts: [CPitsMenu, CPitMount, CPitDashboard],
 		label: 'Pit',
 		icon: 'sliders',
-		displayName: (route, state: RootState) => (
+		displayName: (state: RootState) => (
 			(state.await.statuses.pit === 'success') ?
-				state.pit.name : 
+				state.pit.name :
 				'Loading...'
 		)
 	},
@@ -168,7 +170,7 @@ export const R = {
 		parts: [CJobsMenu, CJob, CJobDashboard],
 		label: 'Dashboard',
 		icon: 'dashboard',
-		displayName: (route, state: RootState) =>
+		displayName: (state: RootState) =>
 			(state.await.statuses.job === 'success') ?
 				state.job.name :
 				'Loading...'
@@ -178,15 +180,18 @@ export const R = {
 		path: '/faults',
 		parts: [CJobsMenu, CJob, CJobFaults],
 		displayName: 'Faults',
-		icon: 'flag'
+		icon: 'flag',
+		extra: (state: RootState) => <Badge>
+			{state.faults.data.length}
+		</Badge>
 	},
 	JobFaultsDetail: {
 		name: 'root.jobs.job.faults.detail',
 		path: '/:fault',
 		parts: [CJobsMenu, CJob, CJobFaultsDetail],
-		displayName: (route, state: RootState) => 
-			(state.await.statuses.fault === 'success') ? 
-				`Test Case #${state.fault.iteration}` : 
+		displayName: (state: RootState) =>
+			(state.await.statuses.fault === 'success') ?
+				`Test Case #${state.fault.iteration}` :
 				'Loading...'
 	},
 	JobMetrics: {

@@ -7,7 +7,7 @@ import { Alert, Button, ButtonToolbar, Input, Panel } from 'react-bootstrap';
 import { actions } from 'redux-router5';
 import { reduxForm, ReduxFormProps, FormData } from 'redux-form';
 
-import { R } from '../../routes';
+import { R } from '../../containers';
 import { Route } from '../../models/Router';
 import { Pit, Parameter, ParameterType } from '../../models/Pit';
 import { JobRequest, Job } from '../../models/Job';

@@ -17,6 +17,7 @@ MakeEnum(types);
 
 const initial: FaultListState = {
 	isPolling: false,
+	isReset: true,
 	data: []
 };
 
@@ -36,6 +37,7 @@ export default function reducer(state: FaultListState = initial, action): FaultL
 			});
 		case types.FAULTS_FETCH:
 			return update(state, {
+				isReset: false,
 				data: action.payload.faults
 			});
 		case types.FAULTS_RESET:

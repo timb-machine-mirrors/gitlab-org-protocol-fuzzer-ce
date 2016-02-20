@@ -3,9 +3,8 @@ import { ComponentClass, Component, Props, createElement } from 'react';
 import { connect } from 'react-redux';
 
 import { Route } from '../models/Router';
-import { segments, RouteSpec } from '../routes';
+import { segments, RouteSpec, NotFound } from '../containers';
 import Error from '../containers/Error';
-import { NotFound } from '../routes';
 
 interface SegmentProps extends Props<Segment> {
 	part: number;
