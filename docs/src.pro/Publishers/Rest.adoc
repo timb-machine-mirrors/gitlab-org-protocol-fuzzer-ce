@@ -2,13 +2,28 @@
 [[Publishers_Rest]]
 == Rest Publisher
 
-The _Rest_ Publisher  is an I/O adapter that communicates using the Representational State Transfer (REST) architecture. This publisher communicates using HTTP as the underlying transport. Additionally, the publisher encodes the data model into JSON before transmitting it to the server.
+The _Rest_ Publisher  is an I/O adapter that communicates using the Representational State Transfer (REST) architecture. This publisher communicates using HTTP as the underlying transport.
+
+This publisher shupports sending body data as:
+
+ * JSON when models contain Json elements (JsonString, JsonObject, etc.) or the depricated Json element.
+ * XML when models contain XmlElement
+ * As raw binary data when a custom content type is provided
+
+Additionally, the publisher encodes the data model into JSON before transmitting it to the server.
+
+TIP: SSL/TLS is supported, just use +https+ as the protocol in the URL.
 
 === Syntax
 
 [source,xml]
 ----
-<Publisher class="Rest" />
+<Publisher class="Rest"/>
+
+<!-- Custom content type header -->
+<Publisher class="Rest">
+    <Param name="ContentType" value="application/octet-stream" />
+</Publisher>
 ----
 
 === Parameters
@@ -16,9 +31,10 @@ The _Rest_ Publisher  is an I/O adapter that communicates using the Representati
 _Required:_
 
 There are no required parameters.
-    
+
 _Optional:_
 
+ContentType:: Value for content-type header.  Set this to allow sending of binary data.
 BaseUrl:: Base URL is used by some authentication types
 Username:: Username for authentication
 Password:: Optional password associated with the Username in authentication
@@ -52,6 +68,16 @@ The following example provides three fragments using the GET and POST methods.
 
 [source,xml]
 ----
+
+<DataModel name="PostData">
+    <JsonObject>
+        <JsonString propertyName="Name" value="Widget" />
+        <JsonDouble propertyName="Price" value="1.99" />
+        <JsonInteger propertyName="Quantify" value="1" />
+    </JsonOject>
+</DataModel>
+
+
 <Action type="call" method="GET http://www.example.com/product/{0}">
     <!-- {0} -->
     <Param name="Id">
@@ -81,6 +107,75 @@ The following example provides three fragments using the GET and POST methods.
         <DataModel ref="PostData" />
     </Param>
 </Action>
+----
+
+.Posting XML
+
+The following example provides three fragments using the GET and POST methods.
+
+[source,xml]
+----
+
+<DataModel name="PostData">
+    <XmlElement elementName="Product">
+        <XmlAttribute attributeName="Name">
+            <String value="Widget" />
+        </XmlAttribute>
+        <XmlAttribute attributeName="Price">
+            <Double value="1.99" />
+        </XmlAttribute>
+        <XmlAttribute attributeName="Quantity">
+            <Number value="1" />
+        </XmlAttribute>
+    </XmlElement>
+</DataModel>
+
+
+<Action type="call" method="POST http://www.example.com/product/{0}">
+    <!-- {0} -->
+    <Param name="Id">
+        <DataModel ref="Id" />
+    </Param>
+    
+    <!-- POST Body -->
+    <Param name="PostData">
+        <DataModel ref="PostData" />
+    </Param>
+</Action>
+----
+
+
+.Posting Binary
+
+The following example provides three fragments using the GET and POST methods.
+
+[source,xml]
+----
+
+<DataModel name="PostData">
+    <Blob />
+</DataModel>
+
+<Action type="call" method="POST http://www.example.com/product/{0}/image">
+    <!-- {0} -->
+    <Param name="Id">
+        <DataModel ref="Id" />
+    </Param>
+    
+    <!-- POST Body -->
+    <Param name="PostData">
+        <DataModel ref="PostData" />
+        <Data fileName="image.png" />
+    </Param>
+</Action>
+
+<Test name="Default">
+
+    <Publisher class="Rest">
+        <Param name="ContentType" value="application/octet-stream" />
+    </Publisher>
+
+</Test>
 ----
 
 
