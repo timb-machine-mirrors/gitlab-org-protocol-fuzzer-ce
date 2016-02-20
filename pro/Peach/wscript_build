@@ -81,6 +81,7 @@ internal = common + [
 	# Internal pit testing tools
 	'nunit-console',
 	'nunit-tools',
+	'pitc.exe',
 	'PitTester.exe',
 	'PeachWorker.exe',
 	'PeachService.exe',
