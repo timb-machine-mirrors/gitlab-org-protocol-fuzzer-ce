@@ -68,10 +68,10 @@ class FaultsTable extends Component<FaultsTableProps, {}> {
 					Risk
 				</TableHeaderColumn>
 				<TableHeaderColumn dataField="majorHash" dataSort={true}>
-					Major Hash
+					Major Bucket
 				</TableHeaderColumn>
 				<TableHeaderColumn dataField="minorHash" dataSort={true}>
-					Minor Hash
+					Minor Bucket
 				</TableHeaderColumn>
 				<TableHeaderColumn dataField="archiveUrl" dataFormat={this.formatDownload}>
 					Download

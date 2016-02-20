@@ -34,7 +34,7 @@ class Metrics extends Component<MetricsProps, {}> {
 								Element
 							</th>
 							<th st-sort="iterationCount">
-								Iterations
+								Test Cases
 							</th>
 							<th st-sort="bucketCount">
 								Buckets

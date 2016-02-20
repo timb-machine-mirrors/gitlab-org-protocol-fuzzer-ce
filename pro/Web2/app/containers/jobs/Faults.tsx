@@ -16,7 +16,7 @@ class Faults extends Component<{}, {}> {
 				<li>Time and date</li>
 				<li>Monitor that detected the fault</li>
 				<li>Risk (if known) </li>
-				<li>Bucket identifiers of the fault (major and minor hashes), if available</li>
+				<li>Major and minor bucket identifiers of the fault, if available</li>
 			</ul>
 
 			<Row>

@@ -27,17 +27,17 @@ class Metrics extends Component<MetricsProps, {}> {
 							Mutator
 						</th>
 						<th st-sort="elementCount">
-							Element Count
+							Elements
 						</th>
 						<th st-sort="iterationCount">
-							Iteration Count
+							Test Cases
 						</th>
 						<th st-sort="bucketCount">
-							Bucket Count
+							Buckets
 						</th>
 						<th st-sort="faultCount"
 							st-sort-default="reverse">
-							Fault Count
+							Faults
 						</th>
 					</tr>
 				</thead>

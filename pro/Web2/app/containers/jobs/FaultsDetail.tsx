@@ -61,7 +61,7 @@ class FaultsDetail extends Component<FaultsDetailProps, {}> {
 						</tr>
 						{data.iterationStop !== data.iterationStop &&
 							<tr>
-								<td>Iteration Range</td>
+								<td>Test Case Range</td>
 								<td>{data.iterationStart} - {data.iterationStop}</td>
 							</tr>
 						}

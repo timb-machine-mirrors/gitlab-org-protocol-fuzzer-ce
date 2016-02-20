@@ -26,7 +26,7 @@ class Test extends Component<TestProps, {}> {
 				you can validate the fuzzing definition for correctness.
 			</p>
 			<p>
-				This section performs a test that runs a single iteration of the Pit,
+				This section runs a single test case of the Pit,
 				outputs the results of the test, and issues log messages as appropriate.
 				You can fine tune a configuration or address any problems that arise with
 				a configuration by re-visiting the appropriate section of the configuration,
