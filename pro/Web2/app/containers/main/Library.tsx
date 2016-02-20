@@ -1,8 +1,9 @@
 import React = require('react');
-import { Component, Props, MouseEvent } from 'react';
+import Icon = require('react-fa');
+import { Component, Props, MouseEvent, FormEvent } from 'react';
 import { Dispatch } from 'redux';
 import { connect } from 'redux-await';
-import { Panel } from 'react-bootstrap';
+import { Button, Input, Panel } from 'react-bootstrap';
 import { actions } from 'redux-router5';
 
 import { injectRouter, RouterContext } from '../../models/Router';
@@ -18,13 +19,14 @@ interface NewPitValues {
 	description: string;
 }
 
-interface ModalState {
+interface CLibraryState {
 	showModal?: boolean;
 	newPitValues?: NewPitValues;
 	pit?: Pit;
+	search?: string;
 }
 
-interface LibraryProps extends Props<Library> {
+interface CLibraryProps extends Props<CLibrary> {
 	// injected
 	library?: LibraryState;
 	dispatch?: Dispatch;
@@ -33,7 +35,7 @@ interface LibraryProps extends Props<Library> {
 
 @connect(state => ({ library: state.library }))
 @injectRouter
-class Library extends Component<LibraryProps, ModalState> {
+class CLibrary extends Component<CLibraryProps, CLibraryState> {
 	context: RouterContext;
 
 	constructor(props, context) {
@@ -70,6 +72,12 @@ class Library extends Component<LibraryProps, ModalState> {
 				</dd>
 			</dl>
 
+			<Input type='text'
+				placeholder='Search for monitor...'
+				buttonAfter={this.renderAfter() }
+				onChange={this.onChange}
+				autoFocus />
+
 			<div className="page-header">
 				<h3>Pits</h3>
 			</div>
@@ -99,6 +107,12 @@ class Library extends Component<LibraryProps, ModalState> {
 		</div>
 	}
 
+	renderAfter() {
+		return <Button bsStyle='default'>
+			<Icon name='search' />
+		</Button>
+	}
+	
 	renderSection(data: Category[], isLocked: boolean) {
 		const { statuses } = this.props;
 		const isFetching = statuses.library === 'pending';
@@ -109,7 +123,9 @@ class Library extends Component<LibraryProps, ModalState> {
 
 			{data.length > 0 && 
 				<div style={{ opacity: isFetching ? 0.5 : 1 }}>
-					{data.map((item, index) => this.renderCategory(item, index, isLocked))}
+					{this.filterCategories(data).map((item, i) =>
+						this.renderCategory(item, i, isLocked))
+					}
 				</div>
 			}
 		</div>
@@ -118,9 +134,13 @@ class Library extends Component<LibraryProps, ModalState> {
 	renderCategory(category: Category, index: number, isLocked: boolean) {
 		return <FoldingPanel key={index}
 			header={() => category.name}>
-			<ul className="list-inline library">
-				{category.pits.map((x, y) => this.renderLink(x, y, isLocked))}
-			</ul>
+			<div className="peach-library">
+				<ul className="list-inline">
+					{this.filterPits(category.pits).map((x, i) => 
+						this.renderLink(x, i, isLocked))
+					}
+				</ul>
+			</div>
 		</FoldingPanel>
 	}
 
@@ -140,7 +160,7 @@ class Library extends Component<LibraryProps, ModalState> {
 
 		return <li key={index}>
 			<a href={href} onClick={onClick}>
-				{pit.name}
+				{pit.name.replace(/_/g, ' ')}
 			</a>
 		</li>
 	}
@@ -164,12 +184,36 @@ class Library extends Component<LibraryProps, ModalState> {
 		}
 	}
 
+	onChange = (event: FormEvent) => {
+		const target = event.target as HTMLInputElement;
+		const search = target.value.toLowerCase();
+		this.setState({ search })
+	}
+
 	navigateToPit(pit: Pit) {
 		const to = R.Pit.name;
 		const params = { pit: pit.id };
 		const { dispatch } = this.props;
 		dispatch(actions.navigateTo(to, params));
 	}
+
+	filterCategories(categories: Category[]) {
+		const { search } = this.state;
+		if (_.isEmpty(search))
+			return categories;
+		return _.reject(categories, x =>
+			_.isEmpty(this.filterPits(x.pits))
+		);
+	}
+
+	filterPits(pits: Pit[]) {
+		const { search } = this.state;
+		if (_.isEmpty(search))
+			return pits;
+		return _.filter(pits, x =>
+			x.name.toLowerCase().indexOf(search) !== -1
+		);
+	}
 }
 
-export default Library;
+export default CLibrary;
