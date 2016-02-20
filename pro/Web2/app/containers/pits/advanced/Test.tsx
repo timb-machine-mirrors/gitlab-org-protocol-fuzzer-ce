@@ -6,7 +6,7 @@ import { Alert, Button, ButtonToolbar } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import { actions } from 'redux-router5';
 
-import { R } from '../../../routes';
+import { R } from '../../../containers';
 import PitTest from '../../../components/PitTest';
 import { Pit } from '../../../models/Pit';
 import { TestState, TestStatus } from '../../../models/PitTest';

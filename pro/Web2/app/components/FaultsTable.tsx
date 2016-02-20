@@ -10,7 +10,7 @@ import { actions } from 'redux-router5';
 import { Job } from '../models/Job';
 import { FaultListState, FaultSummary } from '../models/Fault';
 import { startPolling, stopPolling } from '../redux/modules/FaultList';
-import { R } from '../routes';
+import { R } from '../containers';
 import { formatDate } from '../utils';
 
 interface FaultsTableProps extends Props<FaultsTable> {

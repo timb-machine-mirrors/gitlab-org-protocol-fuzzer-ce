@@ -10,7 +10,7 @@ import { actions } from 'redux-router5';
 import { Job, JobStatus } from '../models/Job';
 import { fetchJobs } from '../redux/modules/JobList';
 import { deleteJob } from '../redux/modules/Job';
-import { R } from '../routes';
+import { R } from '../containers';
 import { formatDate } from '../utils';
 import ConfirmModal from './ConfirmModal';
 

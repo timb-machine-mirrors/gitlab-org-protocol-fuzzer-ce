@@ -6,7 +6,6 @@ import createSagaMiddleware from 'redux-saga';
 
 import DevTools from '../containers/DevTools';
 import { rootReducer, rootSaga } from './modules/root';
-import thunk from './middleware/thunk';
 
 function doCreateStore(router: Router5, state) {
 	// const createLogger = require('redux-logger');
@@ -14,7 +13,6 @@ function doCreateStore(router: Router5, state) {
 
 	const finalCreateStore = compose(
 		applyMiddleware(
-			thunk,
 			awaitMiddleware,
 			createSagaMiddleware(rootSaga),
 			// logger,

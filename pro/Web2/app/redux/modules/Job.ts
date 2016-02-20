@@ -124,8 +124,10 @@ function* poll(getState: GetState, id: string) {
 			const job: Job = action.payload.job;
 
 			const { faults } = getState();
-			if (faults.isPolling && faults.data.length !== job.faultCount)
+			if ((faults.isReset || faults.isPolling) && 
+				faults.data.length !== job.faultCount) {
 				yield put(fetchFaults(job));
+			}
 
 			if (job.status === JobStatus.Stopped) {
 				break;

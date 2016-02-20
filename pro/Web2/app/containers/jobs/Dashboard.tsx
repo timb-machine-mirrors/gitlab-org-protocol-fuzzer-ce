@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Alert, Button, ButtonToolbar, Row, Col } from 'react-bootstrap';
 
-import { R } from '../../routes';
+import { R } from '../../containers';
 import { Job, JobStatus, JobMode } from '../../models/Job';
 import { stopJob, pauseJob, continueJob, killJob } from '../../redux/modules/Job';
 import FaultsTable from '../../components/FaultsTable';

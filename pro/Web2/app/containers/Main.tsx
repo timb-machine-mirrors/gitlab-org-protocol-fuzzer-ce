@@ -1,12 +1,12 @@
 import React = require('react');
-import { Component, MouseEvent, Props } from 'react';
 import Icon = require('react-fa');
 import classNames = require('classnames');
+import { Component, MouseEvent, Props } from 'react';
 import { Alert, OverlayTrigger, Tooltip, Grid } from 'react-bootstrap';
 import { connect } from 'react-redux';
-import { bindActionCreators, Dispatch } from 'redux';
+import { Dispatch } from 'redux';
 
-import { R, RouteSpec } from '../routes';
+import { R, RouteSpec } from '../containers';
 import { clearError } from '../redux/modules/Error';
 import { injectRouter, RouterContext } from '../models/Router';
 import Breadcrumbs from '../components/Breadcrumbs';
@@ -90,7 +90,7 @@ class Main extends Component<MainProps, MainState> {
 		const overlay = (<Tooltip id={`tt-${id}`}>{tooltip}</Tooltip>);
 		const { router } = this.context;
 		return (
-			// <OverlayTrigger placement="top" overlay={overlay}>
+			<OverlayTrigger placement="top" overlay={overlay}>
 				<button 
 					className="btn"
 					href={to.path}
@@ -103,7 +103,7 @@ class Main extends Component<MainProps, MainState> {
 					}}>
 					<Icon name={icon} />
 				</button>
-			// </OverlayTrigger>
+			</OverlayTrigger>
 		)
 	}
 

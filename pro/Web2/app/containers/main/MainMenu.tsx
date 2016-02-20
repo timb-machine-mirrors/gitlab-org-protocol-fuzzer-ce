@@ -2,7 +2,7 @@ import React = require('react');
 import { Component } from 'react';
 
 import { Menu, MenuItem } from '../../components/Menu';
-import { R } from '../../routes';
+import { R } from '../../containers';
 
 class MainMenu extends Component<{}, {}> {
 	render() {

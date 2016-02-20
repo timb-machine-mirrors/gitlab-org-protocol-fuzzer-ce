@@ -6,7 +6,7 @@ import { Component, Props } from 'react';
 import { reduxForm, ReduxFormProps, FormData } from 'redux-form';
 import { Alert, Accordion, Row, Col, Button, ButtonToolbar } from 'react-bootstrap';
 
-import { R } from '../../../routes';
+import { R } from '../../../containers';
 import { Route, RouterContext, injectRouter } from '../../../models/Router';
 import PitAgent from '../../../components/PitAgent';
 import { Pit, AgentsFormData, Parameter, ParameterType } from '../../../models/Pit';

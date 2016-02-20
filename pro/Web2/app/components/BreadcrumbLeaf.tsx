@@ -2,7 +2,7 @@ import React = require('react');
 import { Component, Props } from 'react';
 import { connect } from 'react-redux';
 
-import { DisplayNameFunc, RouteSpec, segments } from '../routes';
+import { DisplayNameFunc, RouteSpec, segments } from '../containers';
 import RootState from '../models/Root';
 
 interface BreadcrumbLeafProps extends Props<BreadcrumbLeaf> {
@@ -22,7 +22,7 @@ class BreadcrumbLeaf extends Component<BreadcrumbLeafProps, {}> {
 		const segment = _.get<RouteSpec>(segments, route.name);
 		let name = segment.displayName;
 		if (_.isFunction(name)) {
-			name = (name as DisplayNameFunc)(route, state);
+			name = (name as DisplayNameFunc)(state);
 		}
 		return <h1>{ name }</h1>;
 	}

@@ -13,7 +13,7 @@ import listenersPlugin = require('router5-listeners');
 
 import Main from './containers/Main';
 import DevTools from './containers/DevTools';
-import { R, routes } from './routes';
+import { R, routes } from './containers';
 import createStore from './redux/create';
 
 const router = new Router5(routes)
