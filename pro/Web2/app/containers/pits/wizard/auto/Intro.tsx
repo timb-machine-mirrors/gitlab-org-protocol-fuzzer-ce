@@ -6,7 +6,7 @@ class Intro extends Component<{}, {}> {
 		return <div>
 			<p>
 				The Pit Automation section allows you to set up actions that Peach will perform
-				during fuzzing iterations to automate the test environment.
+				during fuzzing test cases to automate the test environment.
 			</p>
 
 			<p>Some sample automation actions include the following: </p>

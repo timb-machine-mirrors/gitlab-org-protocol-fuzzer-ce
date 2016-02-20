@@ -31,9 +31,9 @@ class Test extends Component<TestProps, {}> {
 
 		return <div>
 			<p>
-				This section validates the configuration by executing one test iteration,
+				This section validates the configuration by executing one test case,
 				and exposes issues that would hinder a fuzzing session.The output will
-				display any warnings and errors that surface in the control iteration.
+				display any warnings and errors that surface in the control test case.
 				Detailed log messages are provided to help diagnose issues with the
 				configuration.
 			</p>
