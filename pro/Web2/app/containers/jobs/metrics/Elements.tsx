@@ -1,93 +1,65 @@
 import React = require('react');
 import { Component, Props } from 'react';
-import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
+import { connect } from 'redux-await';
+import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 
-import { R } from '../../../containers';
-import { Route } from '../../../models/Router';
+import { Job } from '../../../models/Job';
+import { MetricsState } from '../../../models/Metrics';
+import { fetchMetric } from '../../../redux/modules/Metrics';
 
 interface MetricsProps extends Props<Metrics> {
-	route?: Route;
+	// injected
+	job?: Job;
+	metrics?: MetricsState;
+	dispatch?: Dispatch;
 }
 
-@connect(state => ({ route: state.router.route }))
+@connect(state => ({
+	job: state.job,
+	metrics: state.metrics
+}))
 class Metrics extends Component<MetricsProps, {}> {
+	componentDidMount() {
+		const { job, metrics, dispatch } = this.props;
+		dispatch(fetchMetric(job, 'elements'));
+	}
+
 	render() {
-		return (
-			<div>
-				<p>
-					This metric display shows statistics for all of the elements in your Pit.
-				</p>
-				<table
-					st-table="vm.ElementData"
-					st-safe-src="vm.AllElementData"
-					className="table table-striped table-bordered table-hover peach-table">
-					<thead>
-						<tr>
-							<th st-sort="state">
-								State
-							</th>
-							<th st-sort="action">
-								Action
-							</th>
-							<th st-sort="element"
-								className="width-100">
-								Element
-							</th>
-							<th st-sort="iterationCount">
-								Test Cases
-							</th>
-							<th st-sort="bucketCount">
-								Buckets
-							</th>
-							<th st-sort="faultCount"
-									st-sort-default="reverse">
-								Faults
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td className="text-center"
-									colSpan={7}
-									ng-if="vm.AllElementData.length === 0">
-								No data is available
-							</td>
-						</tr>
-						<tr ng-repeat="row in vm.ElementData">
-							<td className="max-width-200 break-word">
-								row.state
-							</td>
-							<td className="max-width-200 break-word">
-								row.action
-							</td>
-							<td className="max-width-500 width-100 break-word">
-								row.element
-							</td>
-							<td>
-								row.iterationCount
-							</td>
-							<td>
-								row.bucketCount
-							</td>
-							<td>
-								row.faultCount
-							</td>
-						</tr>
-					</tbody>
-					<tfoot>
-						<tr ng-if="vm.AllElementData.length > 25">
-							<td colSpan={7}
-									className="text-center">
-								<div st-pagination
-											st-items-by-page="25"
-											st-displayed-pages="10">
-								</div>
-							</td>
-						</tr>
-					</tfoot>
-				</table>
-			</div>
-		)
+		const { elements } = this.props.metrics;
+		return <div>
+			<p>
+				This metric display shows statistics for all of the elements in your Pit.
+			</p>
+			<BootstrapTable data={elements}
+				striped={true}
+				hover={true}
+				condensed={true}
+				pagination={true}
+				options={{
+					sortName: 'faultCount',
+					sortOrder: 'desc',
+					paginationSize: 25,
+					sizePerPageList: [10, 25, 50, 100]
+				}}>
+				<TableHeaderColumn dataField='id' isKey hidden={true} />
+				<TableHeaderColumn dataField='state' dataSort={true}>
+					State
+				</TableHeaderColumn>
+				<TableHeaderColumn dataField='action' dataSort={true}>
+					Action
+				</TableHeaderColumn>
+				<TableHeaderColumn dataField='element' dataSort={true}>
+					Element
+				</TableHeaderColumn>
+				<TableHeaderColumn dataField='bucketCount' dataSort={true}>
+					Buckets
+				</TableHeaderColumn>
+				<TableHeaderColumn dataField='faultCount' dataSort={true}>
+					Faults
+				</TableHeaderColumn>
+			</BootstrapTable>
+		</div>;
 	}
 }
 

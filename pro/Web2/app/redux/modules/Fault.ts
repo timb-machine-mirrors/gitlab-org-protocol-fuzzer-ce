@@ -26,5 +26,5 @@ export function fetchFault(params) {
 		payload: {
 			fault: api.fetchFault(params)
 		}
-	}
+	};
 }

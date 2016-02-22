@@ -2,7 +2,7 @@ import { combineReducers } from 'redux';
 import { router5Reducer as router } from 'redux-router5';
 import { reducer as form } from 'redux-form';
 import { reducer as await } from 'redux-await';
-import { fork } from 'redux-saga/effects'
+import { fork } from 'redux-saga/effects';
 
 import error from './Error';
 import library from './Library';

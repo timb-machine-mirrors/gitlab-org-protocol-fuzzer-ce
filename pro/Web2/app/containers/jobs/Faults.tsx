@@ -24,7 +24,7 @@ class Faults extends Component<{}, {}> {
 					<FaultsTable />
 				</Col>
 			</Row>
-		</div>
+		</div>;
 	}
 }
 

@@ -23,21 +23,21 @@ class PitMonitor extends Component<PitMonitorProps, {}> {
 		return <FoldingPanel header={this.renderHeader}>
 			<Input type='text'
 				label='Name'
-				labelClassName='col-sm-4' 
+				labelClassName='col-sm-4'
 				wrapperClassName='col-sm-6'
-				addonBefore={this.renderBefore()} 
-				hasFeedback 
-				help={self.name.error} 
-				bsStyle={validationState(self.name)} 
+				addonBefore={this.renderBefore()}
+				hasFeedback
+				help={self.name.error}
+				bsStyle={validationState(self.name)}
 				{...self.name} />
 
-				{monitor.items.map((param, index) => 
-					<PitParameterTree key={index} 
+				{monitor.items.map((param, index) =>
+					<PitParameterTree key={index}
 						param={param}
 						fields={self}
 						index={index} />
 				)}
-		</FoldingPanel>
+		</FoldingPanel>;
 	}
 
 	renderHeader = (isOpen: boolean) => {
@@ -55,29 +55,29 @@ class PitMonitor extends Component<PitMonitorProps, {}> {
 				<Button bsStyle='info' bsSize='xs'
 					onClick={this.onMoveUp}
 					disabled={index === 0}
-					uib-tooltip="Move Agent Up"
-					tooltip-append-to-body="true">
-					<Icon name="chevron-up" /> 
+					uib-tooltip='Move Agent Up'
+					tooltip-append-to-body='true'>
+					<Icon name='chevron-up' />
 				</Button>
 				<Button bsStyle='info' bsSize='xs'
 					onClick={this.onMoveDown}
 					disabled={index === (fields.length - 1)}
-					uib-tooltip="Move Agent Down"
-					tooltip-append-to-body="true">
-					<Icon name="chevron-down" />
+					uib-tooltip='Move Agent Down'
+					tooltip-append-to-body='true'>
+					<Icon name='chevron-down' />
 				</Button>
 				<Button bsStyle='danger' bsSize='xs'
 					onClick={this.onRemove}
-					uib-tooltip="Remove Agent"
-					tooltip-append-to-body="true">
-					<Icon name="remove" />
+					uib-tooltip='Remove Agent'
+					tooltip-append-to-body='true'>
+					<Icon name='remove' />
 				</Button>
 			</ButtonGroup>
-		</span>
-	}
+		</span>;
+	};
 
 	renderBefore() {
-		return <Icon name='question-circle' />
+		return <Icon name='question-circle' />;
 	}
 
 	onMoveUp = (event: MouseEvent) => {
@@ -85,21 +85,21 @@ class PitMonitor extends Component<PitMonitorProps, {}> {
 		event.preventDefault();
 		const { fields, index } = this.props;
 		fields.swapFields(index, index - 1);
-	}
+	};
 
 	onMoveDown = (event: MouseEvent) => {
 		event.stopPropagation();
 		event.preventDefault();
 		const { fields, index } = this.props;
 		fields.swapFields(index, index + 1);
-	}
+	};
 
 	onRemove = (event: MouseEvent) => {
 		event.stopPropagation();
 		event.preventDefault();
 		const { fields, index } = this.props;
 		fields.removeField(index);
-	}
+	};
 }
 
 export default PitMonitor;

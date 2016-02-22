@@ -1,85 +1,65 @@
 import React = require('react');
 import { Component, Props } from 'react';
-import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
+import { connect } from 'redux-await';
+import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 
-import { R } from '../../../containers';
-import { Route } from '../../../models/Router';
+import { Job } from '../../../models/Job';
+import { MetricsState } from '../../../models/Metrics';
+import { fetchMetric } from '../../../redux/modules/Metrics';
 
 interface MetricsProps extends Props<Metrics> {
-	route?: Route;
+	// injected
+	job?: Job;
+	metrics?: MetricsState;
+	dispatch?: Dispatch;
 }
 
-@connect(state => ({ route: state.router.route }))
+@connect(state => ({
+	job: state.job,
+	metrics: state.metrics
+}))
 class Metrics extends Component<MetricsProps, {}> {
+	componentDidMount() {
+		const { job, metrics, dispatch } = this.props;
+		dispatch(fetchMetric(job, 'mutators'));
+	}
+
 	render() {
+		const { mutators } = this.props.metrics;
 		return <div>
 			<p>
 				This metric display shows statistics for each mutator.
 			</p>
-			<table
-				st-table="vm.MutatorData"
-				st-safe-src="vm.AllMutatorData"
-				className="table table-striped table-bordered table-hover peach-table">
-				<thead>
-					<tr>
-						<th st-sort="mutator"
-							className="width-100">
-							Mutator
-						</th>
-						<th st-sort="elementCount">
-							Elements
-						</th>
-						<th st-sort="iterationCount">
-							Test Cases
-						</th>
-						<th st-sort="bucketCount">
-							Buckets
-						</th>
-						<th st-sort="faultCount"
-							st-sort-default="reverse">
-							Faults
-						</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td className="text-center"
-								colSpan={5}
-								ng-if="vm.AllMutatorData.length === 0">
-							No data is available
-						</td>
-					</tr>
-					<tr ng-repeat="row in vm.MutatorData">
-						<td className="width-100">
-							row.mutator
-						</td>
-						<td>
-							row.elementCount
-						</td>
-						<td>
-							row.iterationCount
-						</td>
-						<td>
-							row.bucketCount
-						</td>
-						<td>
-							row.faultCount
-						</td>
-					</tr>
-				</tbody>
-				<tfoot>
-					<tr ng-if="vm.AllMutatorData.length > 25">
-						<td colSpan={5}
-								className="text-center">
-							<div st-pagination
-										st-items-by-page="25"
-										st-displayed-pages="10">
-							</div>
-						</td>
-					</tr>
-				</tfoot>
-			</table>
-		</div>
+			<BootstrapTable data={mutators}
+				striped={true}
+				hover={true}
+				condensed={true}
+				pagination={true}
+				options={{
+					sortName: 'faultCount',
+					sortOrder: 'desc',
+					paginationSize: 25,
+					sizePerPageList: [10, 25, 50, 100]
+				}}>
+				<TableHeaderColumn dataField='id' isKey hidden={true} />
+				<TableHeaderColumn dataField='mutator' dataSort={true}>
+					Mutator
+				</TableHeaderColumn>
+				<TableHeaderColumn dataField='elementCount' dataSort={true}>
+					Elements
+				</TableHeaderColumn>
+				<TableHeaderColumn dataField='iterationCount' dataSort={true}>
+					Test Cases
+				</TableHeaderColumn>
+				<TableHeaderColumn dataField='bucketCount' dataSort={true}>
+					Buckets
+				</TableHeaderColumn>
+				<TableHeaderColumn dataField='faultCount' dataSort={true}>
+					Faults
+				</TableHeaderColumn>
+			</BootstrapTable>
+		</div>;
 	}
 }
 

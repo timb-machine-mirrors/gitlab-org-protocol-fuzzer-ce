@@ -29,7 +29,7 @@ interface DashboardState {
 	showStartHelp?: boolean;
 }
 
-@connect(state => ({ 
+@connect(state => ({
 	route: state.router.route,
 	pit: state.pit
 }))
@@ -57,15 +57,15 @@ class Dashboard extends Component<DashboardProps, DashboardState> {
 		const { pit, formProps, route: { params } } = this.props;
 		const { showCfgHelp, showStartHelp } = this.state;
 		const { handleSubmit, fields } = formProps;
-		const name = pit.name ? pit.name : "Loading...";
+		const name = pit.name ? pit.name : 'Loading...';
 
 		return <div>
-			{!pit.isConfigured && 
-				<Alert bsStyle="danger">
+			{!pit.isConfigured &&
+				<Alert bsStyle='danger'>
 					<strong>Error!</strong>
-					&nbsp; 
+					&nbsp;
 					The currently selected Pit has required configuration variables that must be set.
-					&nbsp; 
+					&nbsp;
 					<Link to={R.PitWizard} params={params}>
 						Pit Configuration Quick Start
 					</Link>
@@ -73,11 +73,11 @@ class Dashboard extends Component<DashboardProps, DashboardState> {
 			}
 
 			{pit.isConfigured && !pit.hasMonitors &&
-				<Alert bsStyle="warning">
+				<Alert bsStyle='warning'>
 					<strong>Warning!</strong>
-					&nbsp; 
+					&nbsp;
 					The currently selected Pit should be configured for monitoring the environment.
-					&nbsp; 
+					&nbsp;
 					<Link to={R.PitWizard} params={params}>
 						Pit Configuration Quick Start
 					</Link>
@@ -85,14 +85,14 @@ class Dashboard extends Component<DashboardProps, DashboardState> {
 			}
 
 			{pit.isConfigured && pit.hasMonitors &&
-				<Alert bsStyle="success">
+				<Alert bsStyle='success'>
 					The Pit is configured and ready for use.
 					Click the START button below to begin fuzzing.
 				</Alert>
 			}
 
 			<p>
-				This configuration uses the <code>{name}</code> pit and 
+				This configuration uses the <code>{name}</code> pit and
 				includes configuration data for your test setup.
 			</p>
 
@@ -100,24 +100,24 @@ class Dashboard extends Component<DashboardProps, DashboardState> {
 				header={this.renderHeader('showCfgHelp', 'Configuration Options') }>
 				{showCfgHelp && this.renderCfgHelp()}
 
-				<ButtonToolbar className="center">
+				<ButtonToolbar className='center'>
 					<LinkContainer to={R.PitWizard} params={params}>
-						<Button bsStyle="primary">
-							<Icon name="rocket" />
+						<Button bsStyle='primary'>
+							<Icon name='rocket' />
 							&nbsp; Quick Start Wizard
 						</Button>
 					</LinkContainer>
 
 					<LinkContainer to={R.PitAdvancedVariables} params={params}>
-						<Button bsStyle="primary">
-							<Icon name="wrench" />
+						<Button bsStyle='primary'>
+							<Icon name='wrench' />
 							&nbsp; Configure Variables
 						</Button>
 					</LinkContainer>
 
 					<LinkContainer to={R.PitAdvancedMonitoring} params={params}>
-						<Button bsStyle="primary">
-							<Icon name="wrench" />
+						<Button bsStyle='primary'>
+							<Icon name='wrench' />
 							&nbsp; Configure Monitoring
 						</Button>
 					</LinkContainer>
@@ -126,53 +126,53 @@ class Dashboard extends Component<DashboardProps, DashboardState> {
 
 			<Panel bsStyle='default'
 				header={this.renderHeader('showStartHelp', 'Start Options') }>
-				<form className="form-horizontal">
+				<form className='form-horizontal'>
 					{showStartHelp && this.renderStartHelp() }
 
-					<Input type="number"
-						label="Seed"
-						labelClassName="col-sm-4"
-						wrapperClassName="col-sm-6" 
+					<Input type='number'
+						label='Seed'
+						labelClassName='col-sm-4'
+						wrapperClassName='col-sm-6'
 						placeholder='Random Seed'
 						{...fields['seed']}
-						// peach:range
-						// peach:range-min="0"
-						// peach:range-max="4294967295"
+						// peach-range
+						// peach-range-min='0'
+						// peach-range-max='4294967295'
 					/>
 
-					<Input type="number"
-						label="Start Test Case"
-						labelClassName="col-sm-4"
-						wrapperClassName="col-sm-6" 
+					<Input type='number'
+						label='Start Test Case'
+						labelClassName='col-sm-4'
+						wrapperClassName='col-sm-6'
 						placeholder='1'
 						{...fields['start']}
 						// peach:range
-						// peach:range-min="1"
-						// peach:range-max="4294967295"
+						// peach:range-min='1'
+						// peach:range-max='4294967295'
 					/>
 
-					<Input type="number"
-						label="Stop Test Case"
-						labelClassName="col-sm-4"
-						wrapperClassName="col-sm-6" 
+					<Input type='number'
+						label='Stop Test Case'
+						labelClassName='col-sm-4'
+						wrapperClassName='col-sm-6'
 						placeholder='Default'
 						{...fields['stop']}
 						// peach:range
-						// peach:range-min="1"
-						// peach:range-max="4294967295"
+						// peach:range-min='1'
+						// peach:range-max='4294967295'
 					/>
 
-					<ButtonToolbar className="center">
-						<Button bsStyle="primary"
+					<ButtonToolbar className='center'>
+						<Button bsStyle='primary'
 							disabled={!pit.isConfigured}
 							onClick={handleSubmit(this.onStart)}>
-							<Icon name="play" />
+							<Icon name='play' />
 							&nbsp; Start
 						</Button>
 					</ButtonToolbar>
 				</form>
 			</Panel>
-		</div>
+		</div>;
 	}
 
 	renderHeader(name: string, title: string) {
@@ -181,14 +181,14 @@ class Dashboard extends Component<DashboardProps, DashboardState> {
 			<span>
 				{title}
 			</span>
-			<span className= "pull-right">
-				<Button bsSize="xs"
+			<span className= 'pull-right'>
+				<Button bsSize='xs'
 					onClick={() => this.onToggleHelp(name)}
 					active={toggle}>
-					<Icon name="question-circle" /> &nbsp; {toggle ? 'Hide' : 'Help'}
+					<Icon name='question-circle' /> &nbsp; {toggle ? 'Hide' : 'Help'}
 				</Button>
 			</span>
-		</span>
+		</span>;
 	}
 
 	renderCfgHelp() {
@@ -196,7 +196,7 @@ class Dashboard extends Component<DashboardProps, DashboardState> {
 			<p>
 				Set or change the test configuration using the following buttons:
 			</p>
-			<dl className="dl-horizontal">
+			<dl className='dl-horizontal'>
 				<dt>
 					Quick Start Wizard
 				</dt>
@@ -224,7 +224,7 @@ class Dashboard extends Component<DashboardProps, DashboardState> {
 					fault detection, data collection, and automation.
 				</dd>
 			</dl>
-		</div>
+		</div>;
 	}
 
 	renderStartHelp() {
@@ -268,7 +268,7 @@ class Dashboard extends Component<DashboardProps, DashboardState> {
 			</p>
 
 			<br/>
-		</div>
+		</div>;
 	}
 
 	onToggleHelp(name: string) {
@@ -300,7 +300,7 @@ class Dashboard extends Component<DashboardProps, DashboardState> {
 				})
 			;
 		});
-	}
+	};
 }
 
 export default Dashboard;

@@ -41,12 +41,10 @@ class Main extends Component<MainProps, MainState> {
 	}
 
 	render() {
-		return (
-			<div>
-				<NavBar />
-				{this.renderMainContainer()}
-			</div>
-		)
+		return <div>
+			<NavBar />
+			{this.renderMainContainer()}
+		</div>;
 	}
 
 	renderMainContainer() {
@@ -54,91 +52,84 @@ class Main extends Component<MainProps, MainState> {
 			'menu-min': this.state.isSidebarCollapsed
 		});
 
-		const sidebarCollapseIcon = this.state.isSidebarCollapsed ? 
-			'angle-double-right' : 
+		const sidebarCollapseIcon = this.state.isSidebarCollapsed ?
+			'angle-double-right' :
 			'angle-double-left';
 
-		return (
-			<div className="main-container">
-				<div className="main-container-inner">
-					<div className={sidebarClass}>
-						<div className="sidebar-shortcuts">
-							<div className="sidebar-shortcuts-large">
-								{this.renderShortcut('home', R.Root, 'Home', 'home') }
-								{this.renderShortcut('libs', R.Library, 'Library', 'book') }
-								{this.renderShortcut('jobs', R.Jobs, 'Jobs', 'history') }
-								{this.renderShortcut('help', R.Docs, 'Help', 'question', true) }
-							</div>
-						</div>
-
-						<Segment part={0} />
-
-						<div 
-							className="sidebar-collapse" 
-							onClick={this.onToggleSidebar}>
-							<Icon name={sidebarCollapseIcon} />
+		return <div className='main-container'>
+			<div className='main-container-inner'>
+				<div className={sidebarClass}>
+					<div className='sidebar-shortcuts'>
+						<div className='sidebar-shortcuts-large'>
+							{this.renderShortcut('home', R.Root, 'Home', 'home') }
+							{this.renderShortcut('libs', R.Library, 'Library', 'book') }
+							{this.renderShortcut('jobs', R.Jobs, 'Jobs', 'history') }
+							{this.renderShortcut('help', R.Docs, 'Help', 'question', true)}
 						</div>
 					</div>
 
-					{this.renderMainContent()}
+					<Segment part={0} />
+
+					<div className='sidebar-collapse'
+						onClick={this.onToggleSidebar}>
+						<Icon name={sidebarCollapseIcon} />
+					</div>
 				</div>
+
+				{this.renderMainContent()}
 			</div>
-		)
+		</div>;
 	}
 
 	renderShortcut(id: string, to: RouteSpec, tooltip: string, icon: string, isExternal: boolean = false) {
 		const overlay = (<Tooltip id={`tt-${id}`}>{tooltip}</Tooltip>);
 		const { router } = this.context;
-		return (
-			<OverlayTrigger placement="top" overlay={overlay}>
-				<button 
-					className="btn"
-					href={to.path}
-					onClick={() => {
-						if (isExternal) {
-							open(to.path, '_blank');
-						} else {
-							router.navigate(to.name);
-						}
-					}}>
-					<Icon name={icon} />
-				</button>
-			</OverlayTrigger>
-		)
+		return <OverlayTrigger placement='top' overlay={overlay}>
+			<button
+				className='btn'
+				href={to.path}
+				onClick={() => {
+					if (isExternal) {
+						open(to.path, '_blank');
+					} else {
+						router.navigate(to.name);
+					}
+				}}>
+				<Icon name={icon} />
+			</button>
+		</OverlayTrigger>;
 	}
 
 	renderMainContent() {
 		const { error } = this.props;
-		return (
-			<div className="main-content">
-				<div className="page-content">
-					<Breadcrumbs />
+		return <div className='main-content'>
+			<div className='page-content'>
+				<Breadcrumbs />
 
-					<div className="page-header">
-						<BreadcrumbLeaf />
-					</div>
-	
-					{error &&
-						<Alert bsStyle="danger">
-							<strong>Error!</strong>
-							&nbsp; {error}
-						</Alert>
-					}
-
-					<Grid fluid>
-						<Segment part={1} />
-					</Grid>
-
+				<div className='page-header'>
+					<BreadcrumbLeaf />
 				</div>
+
+				{error &&
+					<Alert bsStyle='danger'>
+						<strong>Error!</strong>
+						&nbsp; {error}
+					</Alert>
+				}
+
+				<Grid fluid>
+					<Segment part={1} />
+				</Grid>
+
 			</div>
-		)
+		</div>;
 	}
 
 	onToggleSidebar = (evt: MouseEvent) => {
-		this.setState({ 
+		this.setState({
 			isSidebarCollapsed: !this.state.isSidebarCollapsed
 		});
-	}
+	};
 }
 
 export default Main;

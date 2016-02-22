@@ -32,40 +32,38 @@ class PitParameterTree extends Component<PitParameterTreeProps, {}> {
 	}
 
 	renderGroup(group: Parameter, field: FieldProp, index: number) {
-		return <div key={index} className="peach-parameter-group">
+		return <div key={index} className='peach-parameter-group'>
 			<FoldingPanel defaultCollapsed={group.collapsed}
 				header={isOpen => this.renderHeader(isOpen, group.name)}>
-				{group.items.map((param, index) => 
+				{group.items.map((param, index) =>
 					this.renderTree(param, field, index)
 				)}
 			</FoldingPanel>
-		</div>
+		</div>;
 	}
 
 	renderSpace(index: number) {
-		return <hr key={index} />
+		return <hr key={index} />;
 	}
 
 	renderLeaf(param: Parameter, field: FieldProp, index: number) {
 		const options = {
-			showLabel: true, 
+			showLabel: true,
 			labelClassName: 'col-sm-4',
 			wrapperClassName: 'col-sm-6'
 		};
 		return <PitParameter key={index}
-			param={param} 
-			field={field} 
-			options={options} />
+			param={param}
+			field={field}
+			options={options} />;
 	}
 
 	renderHeader(isOpen: boolean, name: string) {
-		return (
-			<span>
-				<Icon name={isOpen ? 'chevron-down' : 'chevron-right'} />
-				&nbsp;
-				{name}
-			</span>
-		)
+		return <span>
+			<Icon name={isOpen ? 'chevron-down' : 'chevron-right'} />
+			&nbsp;
+			{name}
+		</span>;
 	}
 }
 

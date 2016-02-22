@@ -21,7 +21,7 @@ interface FaultsTableProps extends Props<FaultsTable> {
 	dispatch?: Dispatch;
 }
 
-@connect(state => ({ 
+@connect(state => ({
 	job: state.job,
 	faults: state.faults
 }))
@@ -33,7 +33,7 @@ class FaultsTable extends Component<FaultsTableProps, {}> {
 	componentWillUnmount(): void {
 		this.props.dispatch(stopPolling());
 	}
-	
+
 	render() {
 		const { limit, faults } = this.props;
 		const data = limit ? _.takeRight(faults.data, limit) : faults.data;
@@ -46,8 +46,8 @@ class FaultsTable extends Component<FaultsTableProps, {}> {
 				pagination={!limit}
 				keyField='iteration'
 				selectRow={{
-					mode: 'radio', 
-					clickToSelect: true, 
+					mode: 'radio',
+					clickToSelect: true,
 					hideSelectColumn: true
 				}}
 				options={{
@@ -55,33 +55,33 @@ class FaultsTable extends Component<FaultsTableProps, {}> {
 					sortOrder: limit ? 'desc' : 'asc',
 					onRowClick: this.onRowClick
 				}}>
-				<TableHeaderColumn dataField="iteration" dataSort={true}>
+				<TableHeaderColumn dataField='iteration' dataSort={true}>
 					#
 				</TableHeaderColumn>
-				<TableHeaderColumn dataField="timeStamp" dataSort={true} dataFormat={formatDate}>
+				<TableHeaderColumn dataField='timeStamp' dataSort={true} dataFormat={formatDate}>
 					When
 				</TableHeaderColumn>
-				<TableHeaderColumn dataField="source" dataSort={true}>
+				<TableHeaderColumn dataField='source' dataSort={true}>
 					Monitor
 				</TableHeaderColumn>
-				<TableHeaderColumn dataField="exploitability" dataSort={true}>
+				<TableHeaderColumn dataField='exploitability' dataSort={true}>
 					Risk
 				</TableHeaderColumn>
-				<TableHeaderColumn dataField="majorHash" dataSort={true}>
+				<TableHeaderColumn dataField='majorHash' dataSort={true}>
 					Major Bucket
 				</TableHeaderColumn>
-				<TableHeaderColumn dataField="minorHash" dataSort={true}>
+				<TableHeaderColumn dataField='minorHash' dataSort={true}>
 					Minor Bucket
 				</TableHeaderColumn>
-				<TableHeaderColumn dataField="archiveUrl" dataFormat={this.formatDownload}>
+				<TableHeaderColumn dataField='archiveUrl' dataFormat={this.formatDownload}>
 					Download
 				</TableHeaderColumn>
 			</BootstrapTable>
-		</div>
+		</div>;
 	}
 
 	formatDownload(archiveUrl) {
-		return <a href={archiveUrl}>Download</a>
+		return <a href={archiveUrl}>Download</a>;
 	}
 
 	onRowClick = (fault: FaultSummary) => {
@@ -89,7 +89,7 @@ class FaultsTable extends Component<FaultsTableProps, {}> {
 		const to = R.JobFaultsDetail.name;
 		const params = { job: job.id, fault: fault.id };
 		dispatch(actions.navigateTo(to, params));
-	}
+	};
 }
 
 export default FaultsTable;

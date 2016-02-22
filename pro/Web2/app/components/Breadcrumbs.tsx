@@ -10,7 +10,7 @@ import RootState from '../models/Root';
 
 interface BreadcrumbsProps extends Props<Breadcrumbs> {
 	// injected
-	state?: RootState
+	state?: RootState;
 }
 
 @connect(state => ({ state }))
@@ -28,7 +28,7 @@ class Breadcrumbs extends Component<BreadcrumbsProps, {}> {
 		return <Breadcrumb>
 			{_.keys(route._meta).map((item, index) => {
 				const spec = _.get<RouteSpec>(segments, item);
-				
+
 				let name = spec.displayName;
 				if (_.isFunction(name)) {
 					name = (name as DisplayNameFunc)(state);
@@ -38,15 +38,13 @@ class Breadcrumbs extends Component<BreadcrumbsProps, {}> {
 					return <li key={index}>{name}</li>;
 				}
 
-				return (
-					<Link key={index} 
-						to={spec} params={route.params} 
-						activeComponent="li">
-						{name}
-					</Link>
-				)
+				return <Link key={index}
+					to={spec} params={route.params}
+					activeComponent='li'>
+					{name}
+				</Link>;
 			})}
-		</Breadcrumb>
+		</Breadcrumb>;
 	}
 }
 

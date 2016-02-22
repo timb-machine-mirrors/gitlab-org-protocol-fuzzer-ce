@@ -35,7 +35,7 @@ function rootRender(store) {
 			</RouterProvider>
 			<DevTools />
 		</div>
-	</Provider>	
+	</Provider>;
 }
 
 router.start((err, state) => {

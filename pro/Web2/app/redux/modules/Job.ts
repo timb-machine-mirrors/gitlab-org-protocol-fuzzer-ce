@@ -60,11 +60,11 @@ export function startPolling(id: string) {
 	return {
 		type: types.JOB_POLL_START,
 		id
-	}
+	};
 }
 
 export function stopPolling() {
-	return { type: types.JOB_POLL_STOP }
+	return { type: types.JOB_POLL_STOP };
 }
 
 export function stopJob(job: Job) {
@@ -88,7 +88,7 @@ export function deleteJob(job: Job) {
 		type: types.JOB_DELETE,
 		AWAIT_MARKER,
 		payload: { job: api.deleteJob(job) }
-	}
+	};
 }
 
 function* watchDelete() {
@@ -124,7 +124,7 @@ function* poll(getState: GetState, id: string) {
 			const job: Job = action.payload.job;
 
 			const { faults } = getState();
-			if ((faults.isReset || faults.isPolling) && 
+			if ((faults.isReset || faults.isPolling) &&
 				faults.data.length !== job.faultCount) {
 				yield put(fetchFaults(job));
 			}
@@ -156,7 +156,7 @@ function commandRequest(cmd: string, status: string, url: string) {
 			status,
 			url
 		}
-	}
+	};
 }
 
 function commandExecute(cmd: string, url: string) {
@@ -164,7 +164,7 @@ function commandExecute(cmd: string, url: string) {
 		type: types.JOB_CMD_EXECUTE,
 		AWAIT_MARKER,
 		payload: { job: api.sendJobCommand(cmd, url) }
-	}
+	};
 }
 
 function onReceive(cur: Job, action): Job {

@@ -16,47 +16,45 @@ class PitTest extends Component<PitTestProps, {}> {
 	render() {
 		const { test } = this.props;
 
-		return (
-			<Row>
-				<hr />
+		return <Row>
+			<hr />
 
-				<Col md={12}>
-					{test.isPending &&
-						<Alert bsStyle='info'>
-							Testing is in progress.
-						</Alert>
-					}
+			<Col md={12}>
+				{test.isPending &&
+					<Alert bsStyle='info'>
+						Testing is in progress.
+					</Alert>
+				}
 
-					{test.result && test.result.status === TestStatus.Pass &&
-						<Alert bsStyle='success'>
-							Testing passed, click Continue.
-						</Alert>
-					}
+				{test.result && test.result.status === TestStatus.Pass &&
+					<Alert bsStyle='success'>
+						Testing passed, click Continue.
+					</Alert>
+				}
 
-					{test.result && test.result.status === TestStatus.Fail &&
-						<Alert bsStyle='danger'>
-							Testing failed, please correct the errors described and 
-							return to this page to test again.
-						</Alert>
-					}
+				{test.result && test.result.status === TestStatus.Fail &&
+					<Alert bsStyle='danger'>
+						Testing failed, please correct the errors described and
+						return to this page to test again.
+					</Alert>
+				}
 
-					<h3>
-						Test Output
-					</h3>
-					<Tabs defaultActiveKey={1}>
-						{this.renderSummary()}
-						{this.renderLog()}
-					</Tabs>
-				</Col>
-			</Row>
-		)
+				<h3>
+					Test Output
+				</h3>
+				<Tabs defaultActiveKey={1}>
+					{this.renderSummary()}
+					{this.renderLog()}
+				</Tabs>
+			</Col>
+		</Row>;
 	}
 
 	renderSummary() {
 		const { test } = this.props;
 		const events = test.result ? test.result.events : [];
 		const status = test.result ? test.result.status : TestStatus.Fail;
-		return <Tab eventKey={1} title="Summary">
+		return <Tab eventKey={1} title='Summary'>
 			<Table striped hover bordered>
 				<thead>
 					<tr>
@@ -88,17 +86,17 @@ class PitTest extends Component<PitTestProps, {}> {
 					{events.map(this.renderTestEvent) }
 				</tbody>
 			</Table>
-		</Tab>
+		</Tab>;
 	}
 
 	renderLog() {
 		const { test } = this.props;
 		const log = test.result ? test.result.log : '';
-		return <Tab eventKey={2} title="Log">
-			<pre className="peach-test-log">
+		return <Tab eventKey={2} title='Log'>
+			<pre className='peach-test-log'>
 				{log}
 			</pre>
-		</Tab>
+		</Tab>;
 	}
 
 	renderTestEvent = (item: TestEvent, index: number) => {
@@ -111,23 +109,23 @@ class PitTest extends Component<PitTestProps, {}> {
 					{item.description}
 				</span>
 				{item.resolve &&
-					<span className="red">
+					<span className='red'>
 						<br />
 						{item.resolve}
 					</span>
 				}
 			</td>
-		</tr>
-	}
+		</tr>;
+	};
 
 	renderStatusIcon(status: string) {
 		switch (status) {
 			case TestStatus.Pass:
-				return <Icon name='check' className='green' />
+				return <Icon name='check' className='green' />;
 			case TestStatus.Fail:
-				return <Icon name='ban' className='red' />
+				return <Icon name='ban' className='red' />;
 			default:
-				return <Icon name='spinner' pulse />
+				return <Icon name='spinner' pulse />;
 		}
 	}
 }

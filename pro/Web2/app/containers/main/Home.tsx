@@ -29,7 +29,7 @@ class Home extends Component<{}, {}> {
 				</li>
 			</ul>
 			<p>
-				To begin, click on the <Icon name="book" /> Library on the left and
+				To begin, click on the <Icon name='book' /> Library on the left and
 				select a pit to configure, then run in a new fuzzing job.
 			</p>
 
@@ -45,17 +45,17 @@ class Home extends Component<{}, {}> {
 			</p>
 			<ul>
 				<li>
-					Click the <Icon name="file-pdf-o" /> icon
+					Click the <Icon name='file-pdf-o' /> icon
 					to view the report generated for the fuzzing session.
 				</li>
 				<li>
-					Click the <Icon name="remove" /> icon
+					Click the <Icon name='remove' /> icon
 					to delete the job.
 				</li>
 			</ul>
 
 			<JobsTable limit={10} />
-		</div>
+		</div>;
 	}
 }
 

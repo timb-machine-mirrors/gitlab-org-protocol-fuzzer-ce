@@ -38,7 +38,7 @@ function validate(values: DefinesFormData, props: VariablesProps): any {
 					.map(param => validateParameter(param[0], param[1]))
 					.value()
 			}))
-		}
+		};
 	}
 	return {};
 }
@@ -67,7 +67,7 @@ class Variables extends Component<VariablesProps, VariablesState> {
 		super(props, context);
 		this.state = {
 			isSaved: false
-		}
+		};
 	}
 
 	render() {
@@ -95,27 +95,27 @@ class Variables extends Component<VariablesProps, VariablesState> {
 				such as port addresses for a network protocol or source files for a file format.
 			</p>
 
-			<Row className="margin-bottom-10">
+			<Row className='margin-bottom-10'>
 				<Col xs={6}>
 					{pristine && isSaved &&
-						<span className="green">
+						<span className='green'>
 							Saved successfully.
 						</span>
 					}
 					{pristine && invalid &&
-						<span className="red">
+						<span className='red'>
 							There are required variables that must be configured.
 						</span>
 					}
 					{dirty && invalid &&
-						<span className="red">
+						<span className='red'>
 							You have some validation issues to correct.
 						</span>
 					}
 				</Col>
-				<Col xs={6} className="text-right">
+				<Col xs={6} className='text-right'>
 					<ButtonToolbar>
-						<Button bsStyle='danger' bsSize='xs' 
+						<Button bsStyle='danger' bsSize='xs'
 							disabled={pristine || invalid || submitting}
 							onClick={handleSubmit(this.onSave)}>
 							<Icon name='save' />&nbsp; Save
@@ -132,7 +132,7 @@ class Variables extends Component<VariablesProps, VariablesState> {
 			{statuses.pit === 'pending' &&
 				<Row>
 					<Col xs={12}>
-						<Alert bsStyle="info">
+						<Alert bsStyle='info'>
 							Loading configuration...
 						</Alert>
 					</Col>
@@ -143,24 +143,24 @@ class Variables extends Component<VariablesProps, VariablesState> {
 					<Col xs={12}>
 						<Accordion>
 							{pairs.map((item, index) =>
-								<PitDefines key={index} 
-									param={item.param} 
+								<PitDefines key={index}
+									param={item.param}
 									fields={item.fields} />
 							)}
 						</Accordion>
 					</Col>
 				</Row>
 			}
-		</div>
+		</div>;
 	}
 
 	onSave = (data: FormData) => {
 		const { pit, dispatch } = this.props;
 		dispatch(saveDefines(pit, data));
-	}
+	};
 
 	onAdd = () => {
-	}
+	};
 }
 
 export default Variables;

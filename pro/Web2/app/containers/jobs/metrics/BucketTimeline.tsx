@@ -1,20 +1,34 @@
 import React = require('react');
 import { Component, Props } from 'react';
-import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
+import { connect } from 'redux-await';
+import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 
-import { R } from '../../../containers';
-import { Route } from '../../../models/Router';
+import { Job } from '../../../models/Job';
+import { MetricsState } from '../../../models/Metrics';
+import { fetchMetric } from '../../../redux/modules/Metrics';
 
 interface MetricsProps extends Props<Metrics> {
-	route?: Route;
+	// injected
+	job?: Job;
+	metrics?: MetricsState;
+	dispatch?: Dispatch;
 }
 
-@connect(state => ({ route: state.router.route }))
+@connect(state => ({
+	job: state.job,
+	metrics: state.metrics
+}))
 class Metrics extends Component<MetricsProps, {}> {
+	componentDidMount() {
+		const { job, dispatch } = this.props;
+		dispatch(fetchMetric(job, 'bucketTimeline'));
+	}
+
 	render() {
 		return <div>
 			<p>
-				This metric display shows a timeline with new fault buckets listed, 
+				This metric display shows a timeline with new fault buckets listed,
 				and total number of times the bucket was found during the fuzzing session.
 			</p>
 
@@ -24,16 +38,16 @@ class Metrics extends Component<MetricsProps, {}> {
 			</p>
 
 			{/*
-			<vis-timeline ng-show="vm.BucketTimelineLoaded" 
-			              data="vm.BucketTimelineData" 
-			              options="vm.BucketTimelineOptions">
+			<vis-timeline ng-show='vm.BucketTimelineLoaded' 
+				data='vm.BucketTimelineData'
+				options='vm.BucketTimelineOptions'>
 			</vis-timeline>
 			*/}
 
-			<script type="text/ng-template"
-			        id="bucketTimelineItem.html">
+			<script type='text/ng-template'
+					id='bucketTimelineItem.html'>
 				<div>
-					<a href="{{item.data.href}}">
+					<a href='{{item.data.href}}'>
 						item.data.label
 					</a>
 					<br />
@@ -43,7 +57,7 @@ class Metrics extends Component<MetricsProps, {}> {
 					<br />
 				</div>
 			</script>
-		</div>
+		</div>;
 	}
 }
 

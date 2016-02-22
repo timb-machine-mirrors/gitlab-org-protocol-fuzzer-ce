@@ -38,7 +38,7 @@ interface FaultsDetailProps extends Props<FaultsDetail> {
 	statuses?: any;
 }
 
-@connect(state => ({ 
+@connect(state => ({
 	fault: state.fault,
 	route: state.router.route
 }))
@@ -47,13 +47,13 @@ class FaultsDetail extends Component<FaultsDetailProps, {}> {
 		const { route } = this.props;
 		this.props.dispatch(fetchFault(route.params));
 	}
-	
+
 	render() {
 		const { fault, statuses } = this.props;
 		const data = (fault && statuses.fault === 'success') ? fault : NullFault;
 		return <Row>
 			<Col xs={12}>
-				<Table className="peach-fault-detail">
+				<Table className='peach-fault-detail'>
 					<tbody>
 						<tr>
 							<td>Test Case</td>
@@ -94,13 +94,13 @@ class FaultsDetail extends Component<FaultsDetailProps, {}> {
 							<td>{data.minorHash}</td>
 						</tr>
 						<tr>
-							<td className="align-top">Description</td>
+							<td className='align-top'>Description</td>
 							<td>
 								<pre>{data.description}</pre>
 							</td>
 						</tr>
 						<tr>
-							<td className="align-top">Generated Files</td>
+							<td className='align-top'>Generated Files</td>
 							<td>
 								{this.renderFilesTable(data) }
 							</td>
@@ -108,18 +108,17 @@ class FaultsDetail extends Component<FaultsDetailProps, {}> {
 					</tbody>
 				</Table>
 			</Col>
-		</Row>
+		</Row>;
 	}
 
 	renderFilesTable(fault: FaultDetail) {
 		return <Table hover={true} bordered={true}>
 			<thead>
 				<tr>
-					<th st-ratio="85">
+					<th>
 						Name
 					</th>
-					<th st-ratio="15"
-						className="align-right">
+					<th className='align-right'>
 						Size
 					</th>
 				</tr>
@@ -140,13 +139,13 @@ class FaultsDetail extends Component<FaultsDetailProps, {}> {
 								{file.fullName}
 							</a>
 						</td>
-						<td className="align-right">
+						<td className='align-right'>
 							{formatFileSize(file.size, 2)}
 						</td>
 					</tr>
 				))}
 			</tbody>
-		</Table>
+		</Table>;
 	}
 }
 

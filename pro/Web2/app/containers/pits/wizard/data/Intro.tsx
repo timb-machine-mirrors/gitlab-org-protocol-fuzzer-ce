@@ -20,8 +20,8 @@ class Intro extends Component<{}, {}> {
 				you choose not to capture the data.
 			</p>
 
-			<div ng-switch="vm.Agents.length">
-				<div ng-switch-when="0"></div>
+			<div ng-switch='vm.Agents.length'>
+				<div ng-switch-when='0'></div>
 				<div ng-switch-default>
 					<h4>
 						Items Already Added
@@ -29,34 +29,34 @@ class Intro extends Component<{}, {}> {
 					{this.renderTable()}
 				</div>
 			</div>
-		</div>
+		</div>;
 	}
 
 	renderTable() {
 		const monitor = { description: 'foo' };
-		return <table className="table table-striped table-hover table-bordered">
+		return <table className='table table-striped table-hover table-bordered'>
 			<thead>
 				<tr>
-					<th className="peach-icon-cell"></th>
+					<th className='peach-icon-cell'></th>
 					<th>Data Collection Monitors</th>
 				</tr>
 			</thead>
 			<tbody>
-				<tr ng-repeat="agent in vm.Agents">
-					<td className="peach-icon-cell center">
-						<button className="btn btn-xs btn-danger"
-							ng-click="vm.OnRemoveAgent($index)">
-							<i className="fa fa-remove"></i>
+				<tr ng-repeat='agent in vm.Agents'>
+					<td className='peach-icon-cell center'>
+						<button className='btn btn-xs btn-danger'
+							ng-click='vm.OnRemoveAgent($index)'>
+							<i className='fa fa-remove'></i>
 						</button>
 					</td>
 					<td style={{ verticalAlign: 'middle' }}>
-						<div ng-repeat="monitor in agent.monitors">
+						<div ng-repeat='monitor in agent.monitors'>
 							{monitor.description}
 						</div>
 					</td>
 				</tr>
 			</tbody>
-		</table>
+		</table>;
 	}
 }
 

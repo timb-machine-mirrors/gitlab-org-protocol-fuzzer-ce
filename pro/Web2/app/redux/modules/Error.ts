@@ -1,4 +1,4 @@
-import { isCancelError } from 'redux-saga'
+import { isCancelError } from 'redux-saga';
 import { Dispatch } from 'redux';
 
 import { MakeEnum } from '../../utils';

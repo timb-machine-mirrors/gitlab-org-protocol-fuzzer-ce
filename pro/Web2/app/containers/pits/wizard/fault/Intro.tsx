@@ -32,7 +32,7 @@ class Intro extends Component<{}, {}> {
 					process or service.
 				</li>
 			</ul>
-		</div>
+		</div>;
 	}
 }
 

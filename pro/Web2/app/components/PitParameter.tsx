@@ -22,24 +22,24 @@ interface ParameterProps {
 class SelectParam extends Component<{}, {}> {
 	render() {
 		return (
-			<div className="input-group">
-				<span className="input-group-addon"
-					uib-tooltip="{{param.description}}"
-					tooltip-placement="above"
-					tooltip-append-to-body="true">
-					<i className="fa fa-question-circle"></i>
+			<div className='input-group'>
+				<span className='input-group-addon'
+					uib-tooltip='{{param.description}}'
+					tooltip-placement='above'
+					tooltip-append-to-body='true'>
+					<i className='fa fa-question-circle'></i>
 				</span>
-				<input type="select">
-					<option value=""></option>
+				<input type='select'>
+					<option value=''></option>
 				</input>
 			</div>
-		)
+		);
 	}
 }
 
 class ComboParam extends Component<{}, {}> {
 	render() {
-		return <div />
+		return <div />;
 	}
 }
 
@@ -53,7 +53,7 @@ class StringParam extends Component<StringParamProps, {}> {
 		const isReadonly = param.type === ParameterType.System;
 		const isRequired = false;
 
-		return <Input type="text" 
+		return <Input type='text'
 			label={showLabel ? param.name : undefined}
 			labelClassName={options && options.labelClassName}
 			wrapperClassName={options && options.wrapperClassName}
@@ -64,11 +64,11 @@ class StringParam extends Component<StringParamProps, {}> {
 			help={field.error}
 			bsStyle={validationState(field)}
 			{...field}
-		/>
+		/>;
 	}
 
 	renderBefore() {
-		return <Icon name='question-circle' />
+		return <Icon name='question-circle' />;
 	}
 }
 

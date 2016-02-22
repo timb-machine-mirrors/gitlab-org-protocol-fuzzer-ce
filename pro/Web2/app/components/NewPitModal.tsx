@@ -18,7 +18,7 @@ interface NewModalProps extends Props<NewPitModal> {
 	library?: LibraryState;
 }
 
-const validate = values => {
+function validate(values) {
 	const errors: any = {};
 	if (!values.name) {
 		errors.name = 'Required';
@@ -40,68 +40,66 @@ class NewPitModal extends Component<NewModalProps, {}> {
 			handleSubmit,
 			submitting
 		} = this.props.formProps;
-		return (
-			<Modal show={true}
-				onHide={this.onCancel}
-				autoFocus>
-				<form className="form-horizontal">
-					<Modal.Header closeButton>
-						<Modal.Title>
-							New Pit Configuration
-						</Modal.Title>
-					</Modal.Header>
-					<Modal.Body>
-						<p>
-							This will create a new configuration for the <code>{name.initialValue}</code> pit.
-							You will then be able to edit the configuration and start a new fuzzing job.
-						</p>
-						<Input {...name}
-							type="text"
-							label="Name"
-							labelClassName="col-sm-2"
-							wrapperClassName="col-sm-8"
-							hasFeedback
-							bsStyle={validationState(name)}
-							help={name.error}
-							autoFocus
-						/>
-						<Input {...description}
-							type="text"
-							label="Description"
-							labelClassName="col-sm-2"
-							wrapperClassName="col-sm-8"
-							hasFeedback
-							bsStyle={validationState(description)}
-							help={description.error} 
-						/>
-						{error &&
-							<h4>
-								<Label bsStyle="danger">
-									{error}
-								</Label>
-							</h4>
-						}
-					</Modal.Body>
-					<Modal.Footer>
-						<Button bsStyle="default"
-							onClick={this.onCancel}>
-							Cancel
-						</Button>
-						<Button type="submit"
-							bsStyle="primary"
-							disabled={submitting}
-							onClick={handleSubmit(this.onSubmit)}>
-							Submit
-						</Button>
-					</Modal.Footer>
-				</form>
-			</Modal>
-		)
+		return <Modal show={true}
+			onHide={this.onCancel}
+			autoFocus>
+			<form className='form-horizontal'>
+				<Modal.Header closeButton>
+					<Modal.Title>
+						New Pit Configuration
+					</Modal.Title>
+				</Modal.Header>
+				<Modal.Body>
+					<p>
+						This will create a new configuration for the <code>{name.initialValue}</code> pit.
+						You will then be able to edit the configuration and start a new fuzzing job.
+					</p>
+					<Input {...name}
+						type='text'
+						label='Name'
+						labelClassName='col-sm-2'
+						wrapperClassName='col-sm-8'
+						hasFeedback
+						bsStyle={validationState(name)}
+						help={name.error}
+						autoFocus
+					/>
+					<Input {...description}
+						type='text'
+						label='Description'
+						labelClassName='col-sm-2'
+						wrapperClassName='col-sm-8'
+						hasFeedback
+						bsStyle={validationState(description)}
+						help={description.error}
+					/>
+					{error &&
+						<h4>
+							<Label bsStyle='danger'>
+								{error}
+							</Label>
+						</h4>
+					}
+				</Modal.Body>
+				<Modal.Footer>
+					<Button bsStyle='default'
+						onClick={this.onCancel}>
+						Cancel
+					</Button>
+					<Button type='submit'
+						bsStyle='primary'
+						disabled={submitting}
+						onClick={handleSubmit(this.onSubmit)}>
+						Submit
+					</Button>
+				</Modal.Footer>
+			</form>
+		</Modal>;
 	}
 
 	onCancel = () => {
 		this.props.onComplete(null);
-	}
+	};
 
 	onSubmit = (data: FormData) => {
 		const { name, description } = data;
@@ -128,7 +126,7 @@ class NewPitModal extends Component<NewModalProps, {}> {
 				})
 			;
 		});
-	}
+	};
 }
 
 export default NewPitModal;

@@ -29,7 +29,7 @@ class AddMonitorModal extends Component<AddMonitorModalProps, AddMonitorModalSta
 		const { monitors } = this.props;
 		const { selected } = this.state;
 
-		return <Modal show={true} 
+		return <Modal show={true}
 			onHide={this.onCancel}>
 			<Modal.Header closeButton>
 				<Modal.Title>
@@ -43,12 +43,12 @@ class AddMonitorModal extends Component<AddMonitorModalProps, AddMonitorModalSta
 					onChange={this.onChange}
 					autoFocus />
 
-				<div className="peach-add-monitor">
-					{this.filterGroups().map((group, i) => 
-						<FoldingPanel key={i} 
+				<div className='peach-add-monitor'>
+					{this.filterGroups().map((group, i) =>
+						<FoldingPanel key={i}
 							header={() => group.name}>
 							<ListGroup>
-								{this.filterMonitors(group).map((monitor, j) => 
+								{this.filterMonitors(group).map((monitor, j) =>
 									<ListGroupItem key={j}
 										header={monitor.name}
 										onClick={() => this.onSelect(monitor)}>
@@ -62,57 +62,57 @@ class AddMonitorModal extends Component<AddMonitorModalProps, AddMonitorModalSta
 
 			</Modal.Body>
 			<Modal.Footer>
-				<Button bsStyle="default"
+				<Button bsStyle='default'
 					onClick={this.onCancel}>
 					Cancel
 				</Button>
-				<Button type="submit"
-					bsStyle="primary"
+				<Button type='submit'
+					bsStyle='primary'
 					disabled={_.isNull(selected)}
 					onClick={this.onOK}>
 					OK
 				</Button>
 			</Modal.Footer>
-		</Modal>
+		</Modal>;
 	}
 
 	renderAfter() {
 		return <Button bsStyle='default'>
 			<Icon name='search' />
-		</Button>
+		</Button>;
 	}
 
 	filterGroups() {
 		const { monitors } = this.props;
-		return _.reject(monitors, x => 
+		return _.reject(monitors, x =>
 			_.isEmpty(this.filterMonitors(x))
 		);
 	}
 
 	filterMonitors(group: Parameter) {
 		const { search } = this.state;
-		return _.filter(group.items, x => 
+		return _.filter(group.items, x =>
 			x.name.toLowerCase().indexOf(search) !== -1
 		);
 	}
 
 	onOK = () => {
 		this.props.onComplete(this.state.selected);
-	}
+	};
 
 	onCancel = () => {
 		this.props.onComplete(null);
-	}
+	};
 
 	onSelect = (monitor: Parameter) => {
 		this.setState({ selected: monitor });
-	}
+	};
 
 	onChange = (event: FormEvent) => {
 		const target = event.target as HTMLInputElement;
 		const search = target.value.toLowerCase();
-		this.setState({ search })
-	}
+		this.setState({ search });
+	};
 }
 
 export default AddMonitorModal;
