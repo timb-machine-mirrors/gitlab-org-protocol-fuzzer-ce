@@ -2,12 +2,6 @@
 [[Publishers_Ssl]]
 == Ssl Publisher
 
-// Updates:
-// 2/17/2014: Mick
-// added description
-// added params and actions
-// added example
-
 The _Ssl_ Publisher enables a pit to communicate via an SSL over TCP socket.
 
 _Ssl_ is used to fuzz protocols built inside an SSL encrypted channel (such as HTTPS).
@@ -21,16 +15,47 @@ Since it is easy to confuse _Ssl_ and _SslListner_, here's the difference:
 
 [source,xml]
 ----
+<Publisher class="Ssl">
+	<Param name="Host" value="192.168.48.128" />
+	<Param name="Port" value="433" />
+</Publisher>
+
+<Publisher class="Ssl">
+	<Param name="Host" value="192.168.48.128" />
+	<Param name="Port" value="433" />
+	<Param name="Alpn" value="h2;spdy/3.1;http/1.1" />
+</Publisher>
 ----
 
 === Parameters
 
+_Required:_
+
 Host:: Hostname to connect to.
 Port:: Port to connect to.
-ConnectTimeout:: Max milliseconds to wait for connection (default 10000). default="10000"
-Sni:: Sni to use for SSL connection. Uses Host by default. default=""
-Timeout:: How many milliseconds to wait for data (default 3000). default="3000"
-VerifyServer:: Verify the server certificate. default="false"
+
+_Optional:_
+
+ClientCert::
+    Provide client certificate for server verification.
+    Path to client certificate in PEM format
+    
+ClientKey::
+    Provide client key for server verification.
+    Path to client private key in PEM format
+
+Alpn::
+    Enable ALPN TLS extension (RFC 7301).
+    Example value: +h2;spdy/3.1;http/1.1+
+
+VerifyServer::
+    Verify the server certificate. Defaults to false.
+
+ConnectTimeout::
+    Max milliseconds to wait for connection (default 10000).
+    
+Timeout::
+    How many milliseconds to wait for data (default 3000).
 
 === Actions
 
