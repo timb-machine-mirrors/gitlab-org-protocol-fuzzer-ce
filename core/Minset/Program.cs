@@ -38,13 +38,13 @@ using Peach.Core.Runtime;
 
 namespace PeachMinset
 {
-	class Program
+	internal class Program
 	{
-		static void Main(string[] args)
+		private static int Main(string[] args)
 		{
 			try
 			{
-				new Program(args);
+				return new Program().Run(args);
 			}
 			catch (OptionException ex)
 			{
@@ -69,22 +69,22 @@ namespace PeachMinset
 				// HACK - Required on Mono with NLog 2.0
 				Utilities.ConfigureLogging(-1);
 			}
+
+			return -1;
 		}
 
-		private Stopwatch sw = new Stopwatch();
+		private readonly Stopwatch sw = new Stopwatch();
 
-		public Program(string[] args)
+		public int Run(string[] args)
 		{
 			Console.WriteLine();
 			Console.WriteLine("] Peach Minset v" + Assembly.GetExecutingAssembly().GetName().Version);
 			Console.WriteLine("] {0}\n", Assembly.GetExecutingAssembly().GetCopyright());
 
-			int verbose = 0;
+			var kill = false;
+			var verbose = 0;
 			string samples = null;
 			string traces = null;
-			bool kill = false;
-			string executable = null;
-			string arguments = null;
 			string minset = null;
 
 			var p = new OptionSet()
@@ -98,9 +98,8 @@ namespace PeachMinset
 				};
 
 			var extra = p.Parse(args);
-
-			executable = extra.FirstOrDefault();
-			arguments = string.Join(" ", extra.Skip(1));
+			var executable = extra.FirstOrDefault();
+			var arguments = string.Join(" ", extra.Skip(1));
 
 			if (args.Length == 0)
 				throw new SyntaxException("Error, missing arguments.");
@@ -114,7 +113,7 @@ namespace PeachMinset
 			if (minset == null && executable == null)
 				throw new SyntaxException("Error, 'minset' or command argument is required.");
 
-			if (executable != null && arguments.IndexOf("%s") == -1)
+			if (executable != null && !arguments.Contains("%s"))
 				throw new SyntaxException("Error, command argument missing '%s'.");
 
 			Utilities.ConfigureLogging(verbose);
@@ -131,6 +130,7 @@ namespace PeachMinset
 
 			var ms = new Minset();
 
+			sw.Reset();
 			sw.Start();
 
 			if (verbose == 0)
@@ -138,6 +138,7 @@ namespace PeachMinset
 				ms.TraceCompleted += ms_TraceCompleted;
 				ms.TraceStarting += ms_TraceStarting;
 				ms.TraceFailed += ms_TraceFailed;
+				ms.TraceMessage += ms_TraceMessage;
 			}
 
 			if (minset != null && executable != null)
@@ -152,117 +153,76 @@ namespace PeachMinset
 				Console.WriteLine("\n[{0}] Finished\n", sw.Elapsed);
 			}
 
-			if (minset != null)
+			if (minset == null)
+				return 0;
+
+			var traceFiles = GetFiles(traces, "trace");
+
+			Console.WriteLine("[*] Running coverage analysis...");
+
+			var minsetFiles = ms.RunCoverage(sampleFiles, traceFiles);
+
+			Console.WriteLine("[-]   {0} files were selected from a total of {1}.", minsetFiles.Length, sampleFiles.Length);
+
+			if (minsetFiles.Length > 0)
+				Console.WriteLine("[*] Copying over selected files...");
+
+			foreach (var src in minsetFiles)
 			{
-				var traceFiles = GetFiles(traces, "trace");
+				var file = Path.GetFileName(src);
 
-				Console.WriteLine("[*] Running coverage analysis...");
+				Debug.Assert(file != null);
 
-				ValidateTraces(ref sampleFiles, ref traceFiles);
+				var dst = Path.Combine(minset, file);
 
-				var minsetFiles = ms.RunCoverage(sampleFiles, traceFiles);
+				Console.Write("[-]   {0} -> {1}", src, dst);
 
-				Console.WriteLine("[-]   {0} files were selected from a total of {1}.", minsetFiles.Length, sampleFiles.Length);
-
-				if (minsetFiles.Length > 0)
-					Console.WriteLine("[*] Copying over selected files...");
-
-				foreach (var src in minsetFiles)
+				try
 				{
-					var file = Path.GetFileName(src);
-					var dst = Path.Combine(minset, file);
-
-					Console.Write("[-]   {0} -> {1}", src, dst);
-
-					try
-					{
-						File.Copy(src, dst, true);
-						Console.WriteLine();
-					}
-					catch (Exception ex)
-					{
-						Console.WriteLine(" failed: {0}", ex.Message);
-					}
+					File.Copy(src, dst, true);
+					Console.WriteLine();
 				}
-
-				Console.WriteLine("\n[{0}] Finished\n", sw.Elapsed);
-			}
-		}
-
-		bool ValidateTraces(ref string[] samples, ref string[] traces)
-		{
-			// Arrays are already sorted before this function
-			var newSamples = new List<string>();
-			var badSamples = new List<string>();
-			var newTraces = new List<string>();
-			var badTraces = new List<string>();
-
-			int s = 0;
-			int t = 0;
-
-			while (s < samples.Length || t < traces.Length)
-			{
-				var sample = s == samples.Length ? "" : Path.GetFileName(samples[s]) + ".trace";
-				var trace = t == traces.Length ? "" : Path.GetFileName(traces[t]);
-				var cmp = string.Compare(sample, trace);
-
-				if (trace == "" || (sample != "" && cmp < 0))
+				catch (Exception ex)
 				{
-					badSamples.Add(samples[s++]);
-				}
-				else if (sample == "" || (trace != "" && cmp > 0))
-				{
-					badTraces.Add(traces[t++]);
-				}
-				else
-				{
-					newSamples.Add(samples[s++]);
-					newTraces.Add(traces[t++]);
+					Console.WriteLine(" failed: {0}", ex.Message);
 				}
 			}
 
-			if (badSamples.Count > 0)
-				Console.WriteLine("[-] Ignoring samples because of missing trace files: '{0}'", string.Join("', '", badSamples));
+			Console.WriteLine("\n[{0}] Finished\n", sw.Elapsed);
 
-			if (badTraces.Count > 0)
-				Console.WriteLine("[-] Ignoring traces because of missing sample files: '{0}'", string.Join("', '", badTraces));
-
-			samples = newSamples.ToArray();
-			traces = newTraces.ToArray();
-
-			return badSamples.Count == 0 && badTraces.Count == 0;
+			return 0;
 		}
 
-		void ms_TraceStarting(Minset sender, string fileName, int count, int totalCount)
+		private void ms_TraceStarting(object sender, string fileName, int count, int totalCount)
 		{
-			Console.Write("[{0}] ({1}:{2}) Converage trace of {3}...", 
+			Console.Write("[{0}] ({1}:{2}) Coverage trace of {3}...", 
 				sw.Elapsed, count, totalCount, fileName);
 		}
 
-		void ms_TraceCompleted(Minset sender, string fileName, int count, int totalCount)
+		private static void ms_TraceCompleted(object sender, string fileName, int count, int totalCount)
 		{
 			Console.WriteLine(" Completed");
 		}
 
-		void ms_TraceFailed(Minset sender, string fileName, int count, int totalCount)
+		private static void ms_TraceFailed(object sender, string fileName, int count, int totalCount)
 		{
 			Console.WriteLine(" Failed");
 		}
 
-		static string[] GetFiles(string path, string what)
+		private static void ms_TraceMessage(object sender, string message)
+		{
+			Console.WriteLine("[-] {0}", message);
+		}
+
+		private static string[] GetFiles(string path, string what)
 		{
 			string[] fileNames;
 
 			try
 			{
-				if (path.IndexOf("*") > -1)
-				{
-					fileNames = Directory.GetFiles(Path.GetDirectoryName(path), Path.GetFileName(path));
-				}
-				else
-				{
-					fileNames = Directory.GetFiles(path);
-				}
+				fileNames = path.Contains("*")
+					? Directory.GetFiles(Path.GetDirectoryName(path) ?? Environment.CurrentDirectory, Path.GetFileName(path))
+					: Directory.GetFiles(path);
 			}
 			catch (IOException ex)
 			{
@@ -280,7 +240,7 @@ namespace PeachMinset
 			return fileNames;
 		}
 
-		static void VerifyDirectory(string path)
+		private static void VerifyDirectory(string path)
 		{
 			try
 			{
@@ -297,7 +257,7 @@ namespace PeachMinset
 			}
 		}
 
-		static void Syntax()
+		private static void Syntax()
 		{
 			Console.WriteLine(@"
 
