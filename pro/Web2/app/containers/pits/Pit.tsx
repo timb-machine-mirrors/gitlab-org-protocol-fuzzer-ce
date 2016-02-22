@@ -24,9 +24,9 @@ class Pit extends Component<PitProps, {}> {
 		const { pit } = route.params;
 		dispatch(fetchPit(pit));
 	}
-	
+
 	render() {
-		return <Segment part={2} />
+		return <Segment part={2} />;
 	}
 }
 

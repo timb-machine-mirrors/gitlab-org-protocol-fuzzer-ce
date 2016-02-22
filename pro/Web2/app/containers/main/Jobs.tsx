@@ -15,17 +15,17 @@ class Jobs extends Component<{}, {}> {
 			</p>
 			<ul>
 				<li>
-					Click the <Icon name="file-pdf-o" /> icon
+					Click the <Icon name='file-pdf-o' /> icon
 					to view the report generated for the fuzzing session.
 				</li>
 				<li>
-					Click the <Icon name="remove" /> icon
+					Click the <Icon name='remove' /> icon
 					to delete the job.
 				</li>
 			</ul>
 
 			<JobsTable />
-		</div>
+		</div>;
 	}
 }
 

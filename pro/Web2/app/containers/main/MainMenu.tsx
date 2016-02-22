@@ -10,7 +10,7 @@ class MainMenu extends Component<{}, {}> {
 			<MenuItem to={R.Root} />
 			<MenuItem to={R.Library} />
 			<MenuItem to={R.Jobs} />
-		</Menu>
+		</Menu>;
 	}
 }
 

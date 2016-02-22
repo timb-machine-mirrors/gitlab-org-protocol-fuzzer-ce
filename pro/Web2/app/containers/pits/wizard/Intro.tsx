@@ -28,12 +28,12 @@ class Intro extends Component<{}, {}> {
 				</ul>
 			</Col>
 
-			<div className="wizard-actions">
-				<Button bsStyle="success" bsSize="sm">
+			<div className='wizard-actions'>
+				<Button bsStyle='success' bsSize='sm'>
 					Begin &rarr;
 				</Button>
 			</div>
-		</Row >
+		</Row >;
 	}
 }
 

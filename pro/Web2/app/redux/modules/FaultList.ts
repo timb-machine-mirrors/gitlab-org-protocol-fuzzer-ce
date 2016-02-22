@@ -48,11 +48,11 @@ export default function reducer(state: FaultListState = initial, action): FaultL
 }
 
 export function startPolling() {
-	return { type: types.FAULTS_POLL_START }
+	return { type: types.FAULTS_POLL_START };
 }
 
 export function stopPolling() {
-	return { type: types.FAULTS_POLL_STOP }
+	return { type: types.FAULTS_POLL_STOP };
 }
 
 export function fetchFaults(job: Job) {

@@ -40,7 +40,7 @@ function mapLibrary(data: Library[]): Category[] {
 		for (const version of lib.versions) {
 			for (const pit of version.pits) {
 				const name = _.find(pit.tags, tag =>
-					_.startsWith(tag.name, "Category")
+					_.startsWith(tag.name, 'Category')
 				).values[1];
 
 				let category = _.find(ret, { name: name });

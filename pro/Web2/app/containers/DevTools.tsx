@@ -4,10 +4,10 @@ let DevTools;
 
 declare var __DEV__;
 if (__DEV__) {
-	var devtools = require('redux-devtools');
-	var LogMonitor = require('redux-devtools-log-monitor').default;
-	var DockMonitor = require('redux-devtools-dock-monitor').default;
-	
+	const devtools = require('redux-devtools');
+	const LogMonitor = require('redux-devtools-log-monitor').default;
+	const DockMonitor = require('redux-devtools-dock-monitor').default;
+
 	DevTools = devtools.createDevTools(
 		<DockMonitor
 			defaultIsVisible={false}
@@ -25,7 +25,7 @@ if (__DEV__) {
 		static instrument() {
 			return next => action => {
 				return next(action);
-			}
+			};
 		}
 	}
 

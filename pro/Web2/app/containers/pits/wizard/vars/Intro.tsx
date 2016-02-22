@@ -20,7 +20,7 @@ class Intro extends Component<{}, {}> {
 				Documentation.This document is included in the Pits zip archive.The
 				Pit_Library.pdf file resides in the Pit Library directory.
 			</p>
-		</div>
+		</div>;
 	}
 }
 

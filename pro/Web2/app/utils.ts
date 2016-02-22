@@ -37,6 +37,7 @@ export function formatFileSize(bytes: number, precision: number = 1): string {
 		unit++;
 	}
 
+
 	const value = bytes.toFixed(precision);
 	return (value.match(/\.0*$/) ? value.substr(0, value.indexOf('.')) : value) + ' ' + units[unit];
 }

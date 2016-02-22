@@ -65,7 +65,7 @@ class Select extends Component<any, any> {
 			<div style={input}>
 				{value}
 			</div>
-		</div>
+		</div>;
 	}
 }
 
@@ -74,7 +74,7 @@ class Weight extends Component<any, any> {
 		const { item } = this.props;
 		return <span style={{ backgroundColor: item.color }}>
 			{item.name}
-		</span>
+		</span>;
 	}
 }
 
@@ -115,7 +115,7 @@ class TreeNode extends Component<TreeNodeProps, TreeNodeState> {
 					</label>
 				</div>
 			</td>
-		</tr>
+		</tr>;
 	}
 
 	renderValue(option) {
@@ -133,13 +133,13 @@ class TreeNode extends Component<TreeNodeProps, TreeNodeState> {
 			border: '1px dotted #9dbdd6',
 			borderWidth: '0 0 0 1px'
 		};
-		
-		if (depth == 0) {
+
+		if (depth === 0) {
 			return null;
 		}
 		return <div style={style}>
 			{this.renderLine(depth - 1)}
-		</div>
+		</div>;
 	}
 }
 
@@ -157,9 +157,9 @@ class TreeView extends Component<TreeViewProps, TreeViewState> {
 		super(props, context);
 		this.state = {
 			nodes: Immutable.List(flatten(this.props.data, 0))
-		}
+		};
 	}
-	
+
 	render() {
 		const { nodes } = this.state;
 		return <div style={{ overflow: 'scroll' }}>
@@ -176,13 +176,13 @@ class TreeView extends Component<TreeViewProps, TreeViewState> {
 				</thead>
 				<tbody>
 					{nodes.map((node, index) => {
-						return <TreeNode key={index} 
-							node={node} 
-							onToggleExpand={() => this.onToggleExpand(index)} />
+						return <TreeNode key={index}
+							node={node}
+							onToggleExpand={() => this.onToggleExpand(index)} />;
 					})}
 				</tbody>
 			</table>
-		</div>
+		</div>;
 	}
 
 	onToggleExpand = (index: number) => {
@@ -196,10 +196,10 @@ class TreeView extends Component<TreeViewProps, TreeViewState> {
 				}
 				next.visible = node.expanded;
 				newNodes = newNodes.set(index + 1 + key, next);
-			})
+			});
 			return { nodes: newNodes };
 		});
-	}
+	};
 }
 
 function flatten(nodes: Node[], depth: number) {
@@ -416,11 +416,11 @@ class Tuning extends Component<TuningProps, TuningState> {
 				const className = `bg-weight-${weight}`;
 				const title = <div style={{ width: 200 }}>
 					{item.name}
-				</div>
+				</div>;
 				if (item.kids) {
 					return <Tree.TreeNode title={title} key={key}>
 						{recurseNodes(item.kids, key) }
-					</Tree.TreeNode>
+					</Tree.TreeNode>;
 				}
 				return <Tree.TreeNode title={title} key={key} />;
 			});
@@ -430,14 +430,14 @@ class Tuning extends Component<TuningProps, TuningState> {
 		const nodes = recurseNodes(data, '$');
 
 		return <div>
-			<Tree showIcon={false} 
-				defaultExpandAll 
-				selectable={false} 
+			<Tree showIcon={false}
+				defaultExpandAll
+				selectable={false}
 				defaultCheckedKeys={checked}>
 				{nodes}
 			</Tree>
 			<TreeView data={data} />
-		</div>
+		</div>;
 	}
 }
 

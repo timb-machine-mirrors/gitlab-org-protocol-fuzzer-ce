@@ -22,7 +22,7 @@ class PitDefines extends Component<PitDefinesProps, {}> {
 			field: item[1] as FieldProp
 		}));
 
-		return <FoldingPanel 
+		return <FoldingPanel
 			header={this.renderHeader}
 			defaultCollapsed={param.collapsed}>
 			<Table striped={true}
@@ -30,29 +30,28 @@ class PitDefines extends Component<PitDefinesProps, {}> {
 				bordered={true}>
 				<thead>
 					<tr>
-						<th className="nowrap">Name</th>
-						<th className="nowrap">Key</th>
-						<th className="width-100">Value</th>
+						<th className='nowrap'>Name</th>
+						<th className='nowrap'>Key</th>
+						<th className='width-100'>Value</th>
 						{canRemove &&
-							<th className="center nowrap">Remove</th>
+							<th className='center nowrap'>Remove</th>
 						}
 					</tr>
 				</thead>
 				<tbody>
 					{pairs.map((item, index) =>
 						<tr key={index}>
-							<td className="nowrap align-middle">
+							<td className='nowrap align-middle'>
 								{item.param.name}
 							</td>
-							<td className="nowrap align-middle">
+							<td className='nowrap align-middle'>
 								{item.param.key}
 							</td>
-							<td className="width-100"
-								ng-className="{'has-error': form.param.$invalid}">
+							<td className='width-100'>
 								<PitParameter param={item.param} field={item.field} />
 							</td>
 							{canRemove &&
-								<td className="center nowrap align-middle">
+								<td className='center nowrap align-middle'>
 									<Button bsStyle='danger' bsSize='xs'
 										onClick={() => this.onRemove(index)}>
 										<Icon name='remove' />
@@ -63,7 +62,7 @@ class PitDefines extends Component<PitDefinesProps, {}> {
 					)}
 				</tbody>
 			</Table>
-		</FoldingPanel>
+		</FoldingPanel>;
 	}
 
 	renderHeader = (isOpen: boolean) => {
@@ -71,8 +70,8 @@ class PitDefines extends Component<PitDefinesProps, {}> {
 		return <span>
 			<Icon name={isOpen ? 'chevron-down' : 'chevron-right'} />
 			&nbsp; {param.name}
-		</span>
-	}
+		</span>;
+	};
 
 	onRemove(index: number) {
 	}

@@ -33,7 +33,7 @@ class Test extends Component<TestProps, {}> {
 				adjusting the settings that you want to edit, and re-run the test.
 			</p>
 
-			<dl className="dl-horizontal">
+			<dl className='dl-horizontal'>
 				{tracks.map((item, index) => (
 					<div key={index}>
 						<dt>
@@ -43,7 +43,7 @@ class Test extends Component<TestProps, {}> {
 							<Label bsStyle='success'>
 								{item.msg}
 								&nbsp;
-								<a ui-sref="{{item.start}}({track: item.id})"
+								<a ui-sref='{{item.start}}({track: item.id})'
 									style={{ color: 'white' }}>
 									<b>{item.link}</b>
 								</a>
@@ -53,30 +53,30 @@ class Test extends Component<TestProps, {}> {
 				))}
 			</dl>
 
-			<div className="wizard-actions">
+			<div className='wizard-actions'>
 				<ButtonToolbar>
-					<Button bsStyle="success" bsSize="sm"
+					<Button bsStyle='success' bsSize='sm'
 						onClick={this.onContinue}
-						ng-disabled="!vm.CanContinue">
-						Continue &nbsp; <Icon name="arrow-right" />
+						ng-disabled='!vm.CanContinue'>
+						Continue &nbsp; <Icon name='arrow-right' />
 					</Button>
-					<Button bsStyle="warning" bsSize="sm"
+					<Button bsStyle='warning' bsSize='sm'
 						onClick={this.onBeginTest}
 						disabled={!pit.isConfigured}>
-						<Icon name="bolt" /> &nbsp; Begin Test
+						<Icon name='bolt' /> &nbsp; Begin Test
 					</Button>
 				</ButtonToolbar>
 			</div>
 
 			<PitTest />
-		</div>
+		</div>;
 	}
 
 	onContinue = () => {
-	}
+	};
 
 	onBeginTest = () => {
-	}
+	};
 }
 
 export default Test;

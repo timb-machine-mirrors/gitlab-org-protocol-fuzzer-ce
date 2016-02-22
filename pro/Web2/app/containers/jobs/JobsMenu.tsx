@@ -18,7 +18,7 @@ class JobsMenu extends Component<Props<JobsMenu>, {}> {
 				<MenuItem to={R.JobMetricsDataset} />
 				<MenuItem to={R.JobMetricsBuckets} />
 			</MenuItem>
-		</Menu>
+		</Menu>;
 	}
 }
 

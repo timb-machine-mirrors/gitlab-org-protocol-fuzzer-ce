@@ -7,7 +7,7 @@ import RootState from '../models/Root';
 
 interface BreadcrumbLeafProps extends Props<BreadcrumbLeaf> {
 	// injected
-	state?: RootState
+	state?: RootState;
 }
 
 @connect(state => ({ state }))

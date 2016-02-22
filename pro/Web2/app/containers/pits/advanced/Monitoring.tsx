@@ -11,7 +11,7 @@ import { Route, RouterContext, injectRouter } from '../../../models/Router';
 import PitAgent from '../../../components/PitAgent';
 import { Pit, AgentsFormData, Parameter, ParameterType } from '../../../models/Pit';
 import { validationMessages } from '../../../utils';
-import { 
+import {
 	saveAgents, mapAgentsToView, findMonitorMetadata, validateParameter
 } from '../../../redux/modules/Pit';
 
@@ -36,7 +36,7 @@ function validateField(rule: ValidationRule, value: string): string {
 		}
 		rule.unique.push(actual);
 	}
-	
+
 	return null;
 }
 
@@ -51,7 +51,7 @@ function validate(values: AgentsFormData, props: MonitoringProps): any {
 				const monitorNames = [];
 				return {
 					name: validateField({ required: true, unique: agentNames }, agent.name),
-					location: validateField({ 
+					location: validateField({
 						unique: agentLocations,
 						uniqueDefault: 'local://',
 						uniqueIgnore: /^local:\/\//
@@ -59,23 +59,23 @@ function validate(values: AgentsFormData, props: MonitoringProps): any {
 					monitors: agent.monitors.map((monitor, i) => {
 						const schema = findMonitorMetadata(pit, monitor.monitorClass);
 						return {
-							name: validateField({ 
-								unique: monitorNames, 
-								uniqueDefault: `Monitor${i}` 
+							name: validateField({
+								unique: monitorNames,
+								uniqueDefault: `Monitor${i}`
 							}, monitor.name),
-							params: monitor.params.map((param, j) => 
+							params: monitor.params.map((param, j) =>
 								validateParameter(schema.items[j], param)
 							),
 							groups: monitor.groups.map((group, j) => ({
-								params: group.params.map((param, k) => 
+								params: group.params.map((param, k) =>
 									validateParameter(schema.items[j].items[k], param)
 								)
 							}))
-						}
+						};
 					})
 				};
 			})
-		}
+		};
 	}
 	return {};
 }
@@ -109,7 +109,7 @@ interface MonitoringState {
 @injectRouter
 class Monitoring extends Component<MonitoringProps, MonitoringState> {
 	context: RouterContext;
-	
+
 	constructor(props, context) {
 		super(props, context);
 		this.state = {
@@ -132,7 +132,7 @@ class Monitoring extends Component<MonitoringProps, MonitoringState> {
 		const fields = formProps.fields['agents'] as any;
 		const pristine = _.isEqual(mapAgentsToView(pit), formProps.values);
 
-		return <form className="form-horizontal" autoComplete="off">
+		return <form className='form-horizontal' autoComplete='off'>
 			<p>
 				The Monitoring data entry screen defines one or more Agents and one or more Monitors for the Pit.
 			</p>
@@ -142,19 +142,19 @@ class Monitoring extends Component<MonitoringProps, MonitoringState> {
 				and can control the test environment through monitors and publishers.
 				Remote agents reside on the test target, and can provide remote monitors and publishers.
 			</p>
-			
-			<Row className="margin-bottom-10">
+
+			<Row className='margin-bottom-10'>
 				<Col xs={6}>
 					{this.renderStatus(pristine) }
 				</Col>
-				<Col xs={6} className="text-right">
+				<Col xs={6} className='text-right'>
 					<ButtonToolbar>
-						<Button bsStyle="danger" bsSize="xs"
+						<Button bsStyle='danger' bsSize='xs'
 							disabled={pristine || invalid || submitting}
 							onClick={handleSubmit(this.onSave)}>
 							<Icon name='save' /> &nbsp; Save
 						</Button>
-						<Button bsStyle="info" bsSize="xs"
+						<Button bsStyle='info' bsSize='xs'
 							disabled={submitting}
 							onClick={this.onAddAgent}>
 							Add Agent &nbsp; <Icon name='plus' />
@@ -166,18 +166,18 @@ class Monitoring extends Component<MonitoringProps, MonitoringState> {
 			{statuses.pit === 'pending' &&
 				<Row>
 					<Col xs={12}>
-						<Alert bsStyle="info">
+						<Alert bsStyle='info'>
 							Loading configuration...
 							</Alert>
 						</Col>
 				</Row>
 			}
-			{statuses.pit === 'success' && !!fields.length && 
+			{statuses.pit === 'success' && !!fields.length &&
 				<Row>
 					<Col xs={12}>
 						<Accordion>
-							{fields.map((agent, index) => 
-								<PitAgent key={index} 
+							{fields.map((agent, index) =>
+								<PitAgent key={index}
 									pit={pit}
 									fields={fields}
 									index={index} />
@@ -186,7 +186,7 @@ class Monitoring extends Component<MonitoringProps, MonitoringState> {
 					</Col>
 				</Row>
 			}
-		</form>
+		</form>;
 	}
 
 	renderStatus(pristine: boolean) {
@@ -196,17 +196,17 @@ class Monitoring extends Component<MonitoringProps, MonitoringState> {
 		const fields = formProps.fields['agents'] as any;
 
 		if (statuses.pit === 'success' && !fields.length) {
-			return <span className="red">
+			return <span className='red'>
 				<strong>Warning!</strong> &nbsp; No agents have been configured.
-			</span>
-		} else if(!pristine && invalid) {
-			return <span className="red">
+			</span>;
+		} else if (!pristine && invalid) {
+			return <span className='red'>
 				Save is disabled until validation issues are fixed.
-			</span>
+			</span>;
 		} else if (pristine && isSaved && statuses.pit === 'success') {
-			return <span className="green">
+			return <span className='green'>
 				Saved successfully.
-			</span>
+			</span>;
 		}
 	}
 
@@ -214,19 +214,19 @@ class Monitoring extends Component<MonitoringProps, MonitoringState> {
 		const { pit, dispatch } = this.props;
 		dispatch(saveAgents(pit, data));
 		this.setState({ isSaved: true });
-	}
+	};
 
 	onAddAgent = () => {
 		const { formProps } = this.props;
 		const fields = formProps.fields['agents'] as any;
 		fields.addField();
-	}
+	};
 
 	onRemoveAgent = (index: number) => {
 		const { formProps } = this.props;
 		const fields = formProps.fields['agents'] as any;
 		fields.removeField(index);
-	}
+	};
 }
 
 export default Monitoring;

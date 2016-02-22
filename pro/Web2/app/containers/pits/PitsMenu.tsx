@@ -22,7 +22,7 @@ class PitsMenu extends Component<Props<PitsMenu>, {}> {
 				<MenuItem to={R.PitAdvancedTuning} />
 				<MenuItem to={R.PitAdvancedTest} />
 			</MenuItem>
-		</Menu>
+		</Menu>;
 	}
 }
 

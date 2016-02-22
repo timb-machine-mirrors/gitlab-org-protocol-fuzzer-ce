@@ -3,9 +3,9 @@ import { FormData } from 'redux-form';
 import { fork, take, put } from 'redux-saga/effects';
 
 import RootState, { GetState } from '../../models/Root';
-import { 
-	Pit, Parameter, ParameterType, Monitor, Agent, 
-	DefinesFormData, AgentsFormData 
+import {
+	Pit, Parameter, ParameterType, Monitor, Agent,
+	DefinesFormData, AgentsFormData
 } from '../../models/Pit';
 import { MakeEnum, validationMessages } from '../../utils';
 import { resetTest } from './PitTest';
@@ -103,8 +103,8 @@ function onReceive(state: Pit, action): Pit {
 }
 
 function mapDefinesToView(pit: Pit): Parameter[] {
-	return _.map(pit.metadata.defines, g => 
-		_.assign({}, g, { 
+	return _.map(pit.metadata.defines, g =>
+		_.assign({}, g, {
 			items: _.reduce(g.items, (result, param) => {
 				const config = _.find(pit.config, { key: param.key });
 				if (config && config.value) {
@@ -126,7 +126,7 @@ function mapDefinesFromView(view: Parameter[], data: DefinesFormData): Parameter
 		ParameterType.System
 	];
 
-	return _.flatMap(_.zip<any>(view, data.groups), g => 
+	return _.flatMap(_.zip<any>(view, data.groups), g =>
 		_(_.zip<any>(g[0].items, g[1].params))
 			.reject(p => _.includes(skip, p[0].type))
 			.map(p => ({
@@ -181,8 +181,8 @@ export function mapAgentsToView(pit: Pit): {} {
 		return { groups: [] };
 
 	const { agents } = pit;
-	return { 
-		agents: agents.map(agent => ({ 
+	return {
+		agents: agents.map(agent => ({
 			name: agent.name,
 			location: agent.agentUrl,
 			monitors: agent.monitors.map(monitor => {
@@ -218,7 +218,7 @@ function mapAgentsFromView(pit: Pit, data: AgentsFormData): Agent[] {
 								key: param.key,
 								value: value || undefined
 							};
-						})
+						});
 					})
 				).filter(param => !_.isUndefined(param.value))
 			};

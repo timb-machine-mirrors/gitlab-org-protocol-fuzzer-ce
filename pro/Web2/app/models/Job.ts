@@ -49,7 +49,7 @@ export interface Job extends JobRequest {
 	// version of peach used by job, fully qualified
 	peachUrl?: string;
 
-	//"/p/files/ID",
+	// /p/files/ID
 	reportUrl?: string;
 
 	// grid fs url to package
@@ -118,7 +118,7 @@ export const JobStatus = {
 	Running  : '',
 	Paused   : '',
 	Stopping : ''
-}
+};
 MakeLowerEnum(JobStatus);
 
 export const JobMode = {

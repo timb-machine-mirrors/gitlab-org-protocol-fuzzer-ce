@@ -23,13 +23,13 @@ class FoldingPanel extends Component<FoldingPanelProps, FoldingPanelState> {
 	render() {
 		const { isOpen } = this.state;
 		const { header, children } = this.props;
-		const collapseClass = classNames('panel-collapse', 'collapse', { 'in': isOpen })
+		const collapseClass = classNames('panel-collapse', 'collapse', { 'in': isOpen });
 
 		return <div className='panel panel-default'>
 			<div className='panel-heading'>
 				<h4 className='panel-title'>
-					<a href='' 
-						className='accordion-toggle' 
+					<a href=''
+						className='accordion-toggle'
 						onClick={this.onClick}>
 						{header(isOpen)}
 					</a>
@@ -40,14 +40,14 @@ class FoldingPanel extends Component<FoldingPanelProps, FoldingPanelState> {
 					{children}
 				</div>
 			</div>
-		</div>
+		</div>;
 	}
 
 	onClick = (event: MouseEvent) => {
 		event.preventDefault();
 		const { isOpen } = this.state;
 		this.setState({ isOpen: !isOpen });
-	}
+	};
 }
 
 export default FoldingPanel;

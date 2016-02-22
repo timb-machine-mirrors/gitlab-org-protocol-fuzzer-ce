@@ -20,25 +20,25 @@ interface DashboardProps extends Props<Dashboard> {
 }
 
 const statusTable = {
-	[JobStatus.StartPending]    : "Peach is starting...",
-	[JobStatus.PausePending]    : "Peach is pausing...",
-	[JobStatus.ContinuePending] : "Peach is continuing...",
-	[JobStatus.StopPending]     : "Peach is stopping...",
-	[JobStatus.KillPending]     : "Peach is aborting...",
-	[JobStatus.Starting]        : "Peach is starting...",
-	[JobStatus.Paused]          : "Peach is currently paused.",
+	[JobStatus.StartPending]    : 'Peach is starting...',
+	[JobStatus.PausePending]    : 'Peach is pausing...',
+	[JobStatus.ContinuePending] : 'Peach is continuing...',
+	[JobStatus.StopPending]     : 'Peach is stopping...',
+	[JobStatus.KillPending]     : 'Peach is aborting...',
+	[JobStatus.Starting]        : 'Peach is starting...',
+	[JobStatus.Paused]          : 'Peach is currently paused.',
 	[JobStatus.Running]: {
-		[JobMode.Fuzzing]       : "Peach is currently fuzzing...",
-		[JobMode.Reproducing]   : "Fault detected, attempting to reproduce.",
-		[JobMode.Searching]     : "Fault detected. Peach is searching test cases leading to the fault. This action could take a while to complete.",
+		[JobMode.Fuzzing]       : 'Peach is currently fuzzing...',
+		[JobMode.Reproducing]   : 'Fault detected, attempting to reproduce.',
+		[JobMode.Searching]     : 'Fault detected. Peach is searching test cases leading to the fault. This action could take a while to complete.',
 	},
 	[JobStatus.Stopping]: {
-		"default"               : "Peach is stopping...",
-		[JobMode.Reporting]     : "Generating report..."
+		'default'               : 'Peach is stopping...',
+		[JobMode.Reporting]     : 'Generating report...'
 	}
 };
 
-@connect(state => ({ 
+@connect(state => ({
 	job: state.job
 }))
 class Dashboard extends Component<DashboardProps, {}> {
@@ -61,7 +61,7 @@ class Dashboard extends Component<DashboardProps, {}> {
 
 		return <div>
 			{showLimited &&
-				<Alert bsStyle="warning">
+				<Alert bsStyle='warning'>
 					<strong>Note: </strong> &nbsp;
 					The current Pit was specified from the command line,
 					which limits activities to viewing faults that occur.
@@ -70,71 +70,71 @@ class Dashboard extends Component<DashboardProps, {}> {
 			}
 
 			{job.status &&
-				<Alert bsStyle="info">
+				<Alert bsStyle='info'>
 					{this.renderStatus(job)}
 				</Alert>
 			}
 
 			<Row>
 				<Col md={2} />
-				<Col md={8} className="infobox-container">
-					{this.renderInfobox(formatDate(job.startDate), "Start Time") }
-					{this.renderInfobox(this.runningTime, "Running Time")}
-					{this.renderInfobox(job.speed, "Test Cases/Hour") }
-					{this.renderInfobox(job.seed, "Seed") }
-					{this.renderInfobox(job.iterationCount, "Test Cases Executed") }
-					{this.renderInfobox(job.faultCount, "Total Faults", 'red') }
+				<Col md={8} className='infobox-container'>
+					{this.renderInfobox(formatDate(job.startDate), 'Start Time') }
+					{this.renderInfobox(this.runningTime, 'Running Time')}
+					{this.renderInfobox(job.speed, 'Test Cases/Hour') }
+					{this.renderInfobox(job.seed, 'Seed') }
+					{this.renderInfobox(job.iterationCount, 'Test Cases Executed') }
+					{this.renderInfobox(job.faultCount, 'Total Faults', 'red') }
 				</Col>
 				<Col md={2} />
 			</Row>
 
-			<div className="space-6"></div>
+			<div className='space-6'></div>
 
-			<Row className="text-center">
+			<Row className='text-center'>
 				{job.status !== JobStatus.Stopped &&
 					<ButtonToolbar>
-						<Button bsStyle="success"
+						<Button bsStyle='success'
 							onClick={this.onContinue}>
-							<Icon name="play" /> &nbsp; Start
+							<Icon name='play' /> &nbsp; Start
 						</Button>
-						<Button bsStyle="primary"
+						<Button bsStyle='primary'
 							onClick={this.onPause}>
-							<Icon name="pause" /> &nbsp; Pause
+							<Icon name='pause' /> &nbsp; Pause
 						</Button>
-						<Button bsStyle="danger"
+						<Button bsStyle='danger'
 							onClick={this.onStop}>
 							<Icon name={stopButton.icon} /> &nbsp; {stopButton.label}
 						</Button>
 					</ButtonToolbar>
 				}
 
-				{job.status === JobStatus.Stopped && 
+				{job.status === JobStatus.Stopped &&
 					<ButtonToolbar>
 						<LinkContainer to={R.Pit} params={editParams}>
-							<Button bsStyle="primary">
-								<Icon name="edit" /> &nbsp; Edit Configuration
+							<Button bsStyle='primary'>
+								<Icon name='edit' /> &nbsp; Edit Configuration
 							</Button>
 						</LinkContainer>
 						<LinkContainer to={R.Pit} params={replayParams}>
-							<Button bsStyle="primary">
-								<Icon name="repeat" /> &nbsp; Replay Job
+							<Button bsStyle='primary'>
+								<Icon name='repeat' /> &nbsp; Replay Job
 							</Button>
 						</LinkContainer>
 					</ButtonToolbar>
 				}
 			</Row>
-			
+
 			<hr />
 
 			<h4>Recent Faults</h4>
 
 			<FaultsTable limit={10} />
-		</div>
+		</div>;
 	}
 
 	renderStatus(job: Job) {
 		if (job.status === JobStatus.Stopped) {
-			const result = _.get(job, 'result', "This job has completed.");
+			const result = _.get(job, 'result', 'This job has completed.');
 			return <span>
 				{result}
 				&nbsp;
@@ -142,12 +142,12 @@ class Dashboard extends Component<DashboardProps, {}> {
 					<span>
 						Click &nbsp;
 						<a href={job.reportUrl}>
-							<Icon name="file-pdf-o" size="lg" /> here 
+							<Icon name='file-pdf-o' size='lg' /> here
 						</a>
 						&nbsp; to view the final report.
 					</span>
 				}
-			</span>
+			</span>;
 		}
 
 		const next = statusTable[job.status];
@@ -161,15 +161,15 @@ class Dashboard extends Component<DashboardProps, {}> {
 		const klass = `infobox infobox-${color}`;
 		const final = _.isNull(job) ? '---' : job;
 		return <div className={klass}>
-			<div className="infobox-data">
-				<span className="infobox-data-number">
+			<div className='infobox-data'>
+				<span className='infobox-data-number'>
 					{final}
 				</span>
-				<div className="infobox-content">
+				<div className='infobox-content'>
 					{content}
 				</div>
 			</div>
-		</div>
+		</div>;
 	}
 
 	get runningTime() {
@@ -194,19 +194,19 @@ class Dashboard extends Component<DashboardProps, {}> {
 	onPause = () => {
 		const { job, dispatch } = this.props;
 		dispatch(pauseJob(job));
-	}
-	
+	};
+
 	onContinue = () => {
 		const { job, dispatch } = this.props;
 		dispatch(continueJob(job));
-	}
-	
+	};
+
 	onStop = () => {
 		const { job, dispatch } = this.props;
-		dispatch(job.status === JobStatus.Stopping ? 
+		dispatch(job.status === JobStatus.Stopping ?
 			killJob(job) : stopJob(job)
 		);
-	}
+	};
 }
 
 export default Dashboard;

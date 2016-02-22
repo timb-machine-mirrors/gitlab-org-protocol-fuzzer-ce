@@ -14,24 +14,22 @@ interface ErrorProps extends Props<Error> {
 @connect(state => ({ error: state.error }))
 class Error extends Component<ErrorProps, {}> {
 	render() {
-		const error = this.props.error || 'An unknown error has occured.';
-		return (
-			<div className="text-center">
-				<h3>
-					We're sorry.
-				</h3>
-				<p>
-					<img style={{ width: 500 }}
-						src="/img/peach-happy-sad.svg" />
-				</p>
-				
-				<hr />
-				
-				<h4 style={{ whiteSpace: 'pre-line' }}>
-					{error}
-				</h4>
-			</div>
-		)
+		const error = this.props.error || 'An unknown error has occurred.';
+		return <div className='text-center'>
+			<h3>
+				We're sorry.
+			</h3>
+			<p>
+				<img style={{ width: 500 }}
+					src='/img/peach-happy-sad.svg' />
+			</p>
+
+			<hr />
+
+			<h4 style={{ whiteSpace: 'pre-line' }}>
+				{error}
+			</h4>
+		</div>;
 	}
 }
 

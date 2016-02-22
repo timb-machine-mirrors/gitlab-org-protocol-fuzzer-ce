@@ -39,23 +39,23 @@ class PitAgent extends Component<PitAgentProps, PitAgentState> {
 		return <FoldingPanel header={this.renderHeader}>
 			<Input type='text'
 				label='Name'
-				labelClassName='col-sm-3' 
+				labelClassName='col-sm-3'
 				wrapperClassName='col-sm-6'
-				addonBefore={this.renderBefore()} 
-				hasFeedback 
-				help={agent.name.error} 
-				bsStyle={validationState(agent.name)} 
+				addonBefore={this.renderBefore()}
+				hasFeedback
+				help={agent.name.error}
+				bsStyle={validationState(agent.name)}
 				{...agent.name} />
 
 			<Input type='text'
 				label='Location'
-				labelClassName='col-sm-3' 
+				labelClassName='col-sm-3'
 				wrapperClassName='col-sm-6'
-				addonBefore={this.renderBefore()} 
-				hasFeedback 
+				addonBefore={this.renderBefore()}
+				hasFeedback
 				placeholder='local://'
-				help={agent.location.error} 
-				bsStyle={validationState(agent.location)} 
+				help={agent.location.error}
+				bsStyle={validationState(agent.location)}
 				{...agent.location} />
 
 			{!agent.monitors.length &&
@@ -64,20 +64,20 @@ class PitAgent extends Component<PitAgentProps, PitAgentState> {
 				</Alert>
 			}
 
-			<div className="clearfix"
+			<div className='clearfix'
 				style={{ marginBottom: 10 }}>
-				<div className="pull-right">
+				<div className='pull-right'>
 					<Button bsStyle='info' bsSize='xs'
 						onClick={this.onAddMonitor}>
-						Add Monitor &nbsp; <Icon name="plus" />
+						Add Monitor &nbsp; <Icon name='plus' />
 					</Button>
 				</div>
 			</div>
 			<Accordion>
-				{agent.monitors.map((monitor, index) => 
+				{agent.monitors.map((monitor, index) =>
 					<PitMonitor key={index}
 						monitor={this.getMonitorMetadata(monitor)}
-						fields={agent.monitors} 
+						fields={agent.monitors}
 						index={index} />
 				)}
 			</Accordion>
@@ -86,11 +86,11 @@ class PitAgent extends Component<PitAgentProps, PitAgentState> {
 				<AddMonitorModal monitors={monitors}
 					onComplete={this.onAddMonitorComplete} />
 			}
-		</FoldingPanel>
+		</FoldingPanel>;
 	}
 
 	renderBefore() {
-		return <Icon name='question-circle' />
+		return <Icon name='question-circle' />;
 	}
 
 	renderHeader = (isOpen) => {
@@ -107,26 +107,26 @@ class PitAgent extends Component<PitAgentProps, PitAgentState> {
 				<Button bsStyle='info' bsSize='xs'
 					onClick={this.onMoveUp}
 					disabled={index === 0}
-					uib-tooltip="Move Agent Up"
-					tooltip-append-to-body="true">
-					<Icon name="chevron-up" /> 
+					uib-tooltip='Move Agent Up'
+					tooltip-append-to-body='true'>
+					<Icon name='chevron-up' />
 				</Button>
 				<Button bsStyle='info' bsSize='xs'
 					onClick={this.onMoveDown}
 					disabled={index === (fields.length - 1)}
-					uib-tooltip="Move Agent Down"
-					tooltip-append-to-body="true">
-					<Icon name="chevron-down" />
+					uib-tooltip='Move Agent Down'
+					tooltip-append-to-body='true'>
+					<Icon name='chevron-down' />
 				</Button>
 				<Button bsStyle='danger' bsSize='xs'
 					onClick={this.onRemove}
-					uib-tooltip="Remove Agent"
-					tooltip-append-to-body="true">
-					<Icon name="remove" />
+					uib-tooltip='Remove Agent'
+					tooltip-append-to-body='true'>
+					<Icon name='remove' />
 				</Button>
 			</ButtonGroup>
-		</span>
-	}
+		</span>;
+	};
 
 	getMonitorMetadata(monitor): Parameter {
 		const { pit } = this.props;
@@ -136,7 +136,7 @@ class PitAgent extends Component<PitAgentProps, PitAgentState> {
 
 	onAddMonitor = () => {
 		this.setState({ showModal: true });
-	}
+	};
 
 	onAddMonitorComplete = (metadata: Parameter) => {
 		this.setState({ showModal: false });
@@ -159,28 +159,28 @@ class PitAgent extends Component<PitAgentProps, PitAgentState> {
 			'groups[].params[]'
 		];
 		fields[index].monitors.addField(view, undefined, subset);
-	}
+	};
 
 	onMoveUp = (event: MouseEvent) => {
 		event.stopPropagation();
 		event.preventDefault();
 		const { fields, index } = this.props;
 		fields.swapFields(index, index - 1);
-	}
+	};
 
 	onMoveDown = (event: MouseEvent) => {
 		event.stopPropagation();
 		event.preventDefault();
 		const { fields, index } = this.props;
 		fields.swapFields(index, index + 1);
-	}
+	};
 
 	onRemove = (event: MouseEvent) => {
 		event.stopPropagation();
 		event.preventDefault();
 		const { fields, index } = this.props;
 		fields.removeField(index);
-	}
+	};
 }
 
 export default PitAgent;

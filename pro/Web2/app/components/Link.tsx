@@ -43,7 +43,7 @@ export function createLinkDescriptor(router: Router5, props: BaseLinkProps): Lin
 @injectRouter
 class Link extends Component<LinkProps, {}> {
 	context: RouterContext;
-	
+
 	render() {
 		const { activeComponent, children } = this.props;
 		const { href, onClick, active } = createLinkDescriptor(this.context.router, this.props);
@@ -54,12 +54,12 @@ class Link extends Component<LinkProps, {}> {
 				<a href={href} onClick={onClick}>
 					{ children }
 				</a>
-			)
+			);
 		}
 
 		return <a href={href} onClick={onClick} className={className}>
 			{ children }
-		</a>
+		</a>;
 	}
 }
 

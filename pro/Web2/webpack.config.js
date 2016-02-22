@@ -91,6 +91,9 @@ var config = {
 		alias: {}
 	},
 	module: {
+		preLoaders: [
+			{ test: /\.tsx?$/, loader: 'tslint' }
+		],
 		loaders: [
 			{
 				test: /\.js$/,
@@ -126,6 +129,8 @@ var config = {
 		proxy: {
 			'/p/*': 'http://localhost:8888'
 		}
+	},
+	tslint: {
 	}
 };
 

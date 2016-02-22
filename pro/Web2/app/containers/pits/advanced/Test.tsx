@@ -19,14 +19,14 @@ interface TestProps extends Props<Test> {
 	dispatch?: Dispatch;
 }
 
-@connect(state => ({ 
+@connect(state => ({
 	pit: state.pit,
 	test: state.test
 }))
 class Test extends Component<TestProps, {}> {
 	render() {
 		const { pit, test } = this.props;
-		const canContinue = !test.isPending && 
+		const canContinue = !test.isPending &&
 			test.result && test.result.status === TestStatus.Pass;
 
 		return <div>
@@ -57,7 +57,7 @@ class Test extends Component<TestProps, {}> {
 				</Alert>
 			}
 
-			<div className="wizard-actions">
+			<div className='wizard-actions'>
 				<ButtonToolbar>
 					<Button bsStyle='success' bsSize='sm'
 						onClick={this.onContinue}
@@ -81,7 +81,7 @@ class Test extends Component<TestProps, {}> {
 			</div>
 
 			<PitTest />
-		</div>
+		</div>;
 	}
 
 	onContinue = () => {
@@ -89,17 +89,17 @@ class Test extends Component<TestProps, {}> {
 		const to = R.Pit.name;
 		const params = { pit: pit.id };
 		dispatch(actions.navigateTo(to, params));
-	}
+	};
 
 	onBeginTest = () => {
 		const { pit, dispatch } = this.props;
 		dispatch(startTest(pit));
-	}
+	};
 
 	onAbortTest = () => {
 		const { test, dispatch } = this.props;
 		dispatch(stopTest(test.job));
-	}
+	};
 }
 
 export default Test;
