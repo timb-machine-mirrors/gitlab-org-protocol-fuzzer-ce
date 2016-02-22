@@ -163,7 +163,7 @@ def extract_pits():
 				print ' - %s' % i.filename
 				z.extract(i, pitdir)
 				files.append(i.filename)
-			if i.filename.startswith('docs/datasheets'):
+			if i.filename.startswith('docs/datasheets') and not i.filename.endswith('/'):
 				print ' - %s' % i.filename
 				z.extract(i, pitdir)
 				files.append(i.filename)
