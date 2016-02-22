@@ -65,7 +65,7 @@ def prepare(conf):
 	if '10.6' in env['SYSROOT']:
 		return
 
-	env['PIN_VER'] = 'pin-2.13-61206-clang.4.2-mac'
+	env['PIN_VER'] = 'pin-2.14-71313-clang.5.1-mac'
 
 	pin = j(conf.get_third_party(), 'pin', env['PIN_VER'])
 
@@ -81,23 +81,23 @@ def prepare(conf):
 			'CPPFLAGS'  : [
 				'-Xarch_i386',   '-DTARGET_IA32',
 				'-Xarch_i386',   '-DHOST_IA32',
-				'-Xarch_i386',   '-I%s' % j(pin, 'extras', 'xed2-ia32', 'include'),
+				'-Xarch_i386',   '-I%s' % j(pin, 'extras', 'xed-ia32', 'include'),
 
 				'-Xarch_x86_64', '-DTARGET_IA32E',
 				'-Xarch_x86_64', '-DHOST_IA32E',
-				'-Xarch_x86_64', '-I%s' % j(pin, 'extras', 'xed2-intel64', 'include'),
+				'-Xarch_x86_64', '-I%s' % j(pin, 'extras', 'xed-intel64', 'include'),
 			],
 			'LINKFLAGS' : [
 				'-Xarch_i386',   '-L%s' % j(pin, 'ia32', 'lib'),
 				'-Xarch_i386',   '-L%s' % j(pin, 'ia32', 'lib-ext'),
-				'-Xarch_i386',   '-L%s' % j(pin, 'extras', 'xed2-ia32', 'lib'),
+				'-Xarch_i386',   '-L%s' % j(pin, 'extras', 'xed-ia32', 'lib'),
 				'-Xarch_i386',   '-l-lpin',
 				'-Xarch_i386',   '-l-lxed',
 				'-Xarch_i386',   '-l-lpindwarf',
 
 				'-Xarch_x86_64', '-L%s' % j(pin, 'intel64', 'lib'),
 				'-Xarch_x86_64', '-L%s' % j(pin, 'intel64', 'lib-ext'),
-				'-Xarch_x86_64', '-L%s' % j(pin, 'extras', 'xed2-intel64', 'lib'),
+				'-Xarch_x86_64', '-L%s' % j(pin, 'extras', 'xed-intel64', 'lib'),
 				'-Xarch_x86_64', '-l-lpin',
 				'-Xarch_x86_64', '-l-lxed',
 				'-Xarch_x86_64', '-l-lpindwarf',
