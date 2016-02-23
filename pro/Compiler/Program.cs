@@ -100,9 +100,13 @@ namespace PitCompiler
 				Fields = FieldTreeGenerator.MakeFields(pitLibraryPath, pitPath)
 			};
 
+			var serializer = new JsonSerializer();
 			using (var stream = new StreamWriter(output))
 			using (var writer = new JsonTextWriter(stream))
-				writer.WriteValue(metadata);
+			{
+				writer.Formatting = Formatting.Indented;
+				serializer.Serialize(writer, metadata);
+			}
 		}
 	}
 }

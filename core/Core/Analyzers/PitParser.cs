@@ -1842,53 +1842,7 @@ namespace Peach.Core.Analyzers
 				// Publisher
 				if (child.Name == "Publisher")
 				{
-					var cls = child.getAttrString("class");
-					var agent = child.getAttr("agent", null);
-
-					Publisher pub;
-
-					if (agent == null && cls != "Remote")
-					{
-						pub = handlePlugin<Publisher, PublisherAttribute>(child, null, false);
-					}
-					else
-					{
-						var arg = handleParams(child);
-
-						if (cls == "Remote")
-						{
-							Variant val;
-							if (!arg.TryGetValue("Agent", out val))
-								throw new PeachException("Publisher 'RemotePublisher' is missing required parameter 'Agent'.");
-
-							agent = (string)val;
-							arg.Remove("Agent");
-
-							if (!arg.TryGetValue("Class", out val))
-								throw new PeachException("Publisher 'RemotePublisher' is missing required parameter 'Class'.");
-
-							cls = (string)val;
-							arg.Remove("Class");
-						}
-
-						pub = new RemotePublisher
-						{
-							Agent = agent,
-							Class = cls,
-							Args = arg.ToDictionary(i => i.Key, i => (string)i.Value)
-						};
-					}
-					
-					pub.Name = child.getAttr("name", null) ?? test.publishers.UniqueName();
-
-					try
-					{
-						test.publishers.Add(pub);
-					}
-					catch (ArgumentException)
-					{
-						throw new PeachException("Error, a <Publisher> element named '{0}' already exists in test '{1}'.".Fmt(pub.Name, test.Name));
-					}
+					handlePublishers(child, test);
 				}
 
 				// Mutator
@@ -1924,6 +1878,57 @@ namespace Peach.Core.Analyzers
 			}
 
 			return test;
+		}
+
+		protected virtual void handlePublishers(XmlNode node, Dom.Test parent)
+		{
+			var cls = node.getAttrString("class");
+			var agent = node.getAttr("agent", null);
+
+			Publisher pub;
+
+			if (agent == null && cls != "Remote")
+			{
+				pub = handlePlugin<Publisher, PublisherAttribute>(node, null, false);
+			}
+			else
+			{
+				var arg = handleParams(node);
+
+				if (cls == "Remote")
+				{
+					Variant val;
+					if (!arg.TryGetValue("Agent", out val))
+						throw new PeachException("Publisher 'RemotePublisher' is missing required parameter 'Agent'.");
+
+					agent = (string)val;
+					arg.Remove("Agent");
+
+					if (!arg.TryGetValue("Class", out val))
+						throw new PeachException("Publisher 'RemotePublisher' is missing required parameter 'Class'.");
+
+					cls = (string)val;
+					arg.Remove("Class");
+				}
+
+				pub = new RemotePublisher
+				{
+					Agent = agent,
+					Class = cls,
+					Args = arg.ToDictionary(i => i.Key, i => (string)i.Value)
+				};
+			}
+
+			pub.Name = node.getAttr("name", null) ?? parent.publishers.UniqueName();
+
+			try
+			{
+				parent.publishers.Add(pub);
+			}
+			catch (ArgumentException)
+			{
+				throw new PeachException("Error, a <Publisher> element named '{0}' already exists in test '{1}'.".Fmt(pub.Name, parent.Name));
+			}
 		}
 
 		#endregion
