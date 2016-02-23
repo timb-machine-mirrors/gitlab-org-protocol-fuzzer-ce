@@ -30,7 +30,6 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.IO;
-using System.Reflection;
 using SysProcess = System.Diagnostics.Process;
 using NLog;
 using System.Collections;
@@ -47,9 +46,9 @@ namespace Peach.Core.Analysis
 	/// </remarks>
 	public class Coverage
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		static string Quote(string str)
+		private static string Quote(string str)
 		{
 			if (str.Contains(' '))
 				return "\"" + str + "\"";
@@ -57,14 +56,14 @@ namespace Peach.Core.Analysis
 			return str;
 		}
 
-		static void VerifyExists(string file, string type)
+		private static void VerifyExists(string file, string type)
 		{
 			if (!File.Exists(file))
 				throw new FileNotFoundException("Error, can not locate the {0} '{1}'.".Fmt(type, file));
 		}
 
-		protected ProcessStartInfo StartInfo { get; private set; }
-		protected bool NeedsKilling { get; private set; }
+		private readonly ProcessStartInfo StartInfo;
+		private readonly bool NeedsKilling;
 
 		public Coverage(string executable, string arguments, bool needsKilling)
 		{
@@ -98,7 +97,7 @@ namespace Peach.Core.Analysis
 			StartInfo.UseShellExecute = false;
 			StartInfo.CreateNoWindow = true;
 
-			logger.Debug("Using: {0} {1}", StartInfo.FileName, StartInfo.Arguments);
+			Logger.Debug("Using: {0} {1}", StartInfo.FileName, StartInfo.Arguments);
 		}
 
 		#region Platform Setup Functions
@@ -107,7 +106,7 @@ namespace Peach.Core.Analysis
 		{
 			var arch = FileInfo.Instance.GetArch(executable);
 
-			logger.Debug("Target Architecture: {0}", arch);
+			Logger.Debug("Target Architecture: {0}", arch);
 
 			string pinPath;
 			string pinTool;
@@ -129,14 +128,16 @@ namespace Peach.Core.Analysis
 			pinTool = Path.Combine(pwd, pinTool);
 			VerifyExists(pinTool, "pin tool");
 
-			var psi = new ProcessStartInfo();
-			psi.FileName = pinPath;
-			psi.Arguments = "-t {0} -cpukill {1} -debug {2} -- {3} {4}".Fmt(
-				Quote(pinTool),
-				NeedsKilling ? "1" : "0",
-				logger.IsDebugEnabled ? "1" : "0",
-				Quote(executable),
-				arguments);
+			var psi = new ProcessStartInfo
+			{
+				FileName = pinPath,
+				Arguments = "-t {0} -cpukill {1} -debug {2} -- {3} {4}".Fmt(
+					Quote(pinTool),
+					NeedsKilling ? "1" : "0",
+					Logger.IsDebugEnabled ? "1" : "0",
+					Quote(executable),
+					arguments)
+			};
 
 			return psi;
 		}
@@ -145,7 +146,7 @@ namespace Peach.Core.Analysis
 		{
 			var arch = FileInfo.Instance.GetArch(executable);
 
-			logger.Debug("Target Architecture: {0}", arch);
+			Logger.Debug("Target Architecture: {0}", arch);
 
 			string pinPath;
 			string pinTool;
@@ -167,14 +168,16 @@ namespace Peach.Core.Analysis
 			pinTool = Path.Combine(pwd, pinTool);
 			VerifyExists(pinTool, "pin tool");
 
-			var psi = new ProcessStartInfo();
-			psi.FileName = pinPath;
-			psi.Arguments = "-t {0} -cpukill {1} -debug {2} -- {3} {4}".Fmt(
-				Quote(pinTool),
-				NeedsKilling ? "1" : "0",
-				logger.IsDebugEnabled ? "1" : "0",
-				Quote(executable),
-				arguments);
+			var psi = new ProcessStartInfo
+			{
+				FileName = pinPath,
+				Arguments = "-t {0} -cpukill {1} -debug {2} -- {3} {4}".Fmt(
+					Quote(pinTool),
+					NeedsKilling ? "1" : "0",
+					Logger.IsDebugEnabled ? "1" : "0",
+					Quote(executable),
+					arguments)
+			};
 
 			foreach (DictionaryEntry de in Environment.GetEnvironmentVariables())
 				psi.EnvironmentVariables[de.Key.ToString()] = de.Value.ToString();
@@ -187,7 +190,7 @@ namespace Peach.Core.Analysis
 
 			var libs = "";
 			if (psi.EnvironmentVariables.ContainsKey("LD_LIBRARY_PATH"))
-				libs = psi.EnvironmentVariables["LD_LIBRARY_PATH"].ToString();
+				libs = psi.EnvironmentVariables["LD_LIBRARY_PATH"];
 
 			psi.EnvironmentVariables["LD_LIBRARY_PATH"] = elf_libs + cpp_libs + libs;
 			psi.EnvironmentVariables["PIN_VM_LD_LIBRARY_PATH"] = elf_libs + cpp_libs + glibc_libs + libs;
@@ -206,15 +209,17 @@ namespace Peach.Core.Analysis
 			var pinTool = Path.Combine(pwd, "bblocks.dylib");
 			VerifyExists(pinTool, "pin tool");
 
-			var psi = new ProcessStartInfo();
-			psi.FileName = pin32;
-			psi.Arguments = "-p64 {0} -t {1} -cpukill {2} -debug {3} -- {4} {5}".Fmt(
-				Quote(pin64),
-				Quote(pinTool),
-				NeedsKilling ? "1" : "0",
-				logger.IsDebugEnabled ? "1" : "0",
-				Quote(executable),
-				arguments);
+			var psi = new ProcessStartInfo
+			{
+				FileName = pin32,
+				Arguments = "-p64 {0} -t {1} -cpukill {2} -debug {3} -- {4} {5}".Fmt(
+					Quote(pin64),
+					Quote(pinTool),
+					NeedsKilling ? "1" : "0",
+					Logger.IsDebugEnabled ? "1" : "0",
+					Quote(executable),
+					arguments)
+			};
 
 			foreach (DictionaryEntry de in Environment.GetEnvironmentVariables())
 				psi.EnvironmentVariables[de.Key.ToString()] = de.Value.ToString();
@@ -232,22 +237,24 @@ namespace Peach.Core.Analysis
 		/// <param name="traceFile">Name of result trace file to generate.</param>
 		public void Run(string sampleFile, string traceFile)
 		{
-			var outFile = "bblocks.out";
-			var pidFile = "bblocks.pid";
+			const string outFile = "bblocks.out";
+			const string pidFile = "bblocks.pid";
 
-			var psi = new ProcessStartInfo();
-			psi.Arguments = StartInfo.Arguments.Replace("%s", Quote(sampleFile));
-			psi.FileName = StartInfo.FileName;
-			psi.RedirectStandardError = StartInfo.RedirectStandardError;
-			psi.RedirectStandardOutput = StartInfo.RedirectStandardOutput;
-			psi.UseShellExecute = StartInfo.UseShellExecute;
-			psi.CreateNoWindow = StartInfo.CreateNoWindow;
+			var psi = new ProcessStartInfo
+			{
+				Arguments = StartInfo.Arguments.Replace("%s", Quote(sampleFile)),
+				FileName = StartInfo.FileName,
+				RedirectStandardError = StartInfo.RedirectStandardError,
+				RedirectStandardOutput = StartInfo.RedirectStandardOutput,
+				UseShellExecute = StartInfo.UseShellExecute,
+				CreateNoWindow = StartInfo.CreateNoWindow
+			};
 
 			foreach (DictionaryEntry de in StartInfo.EnvironmentVariables)
 				psi.EnvironmentVariables[de.Key.ToString()] = de.Value.ToString();
 
-			logger.Debug("Using sample {0}", sampleFile);
-			logger.Debug("{0} {1}", psi.FileName, psi.Arguments);
+			Logger.Debug("Using sample {0}", sampleFile);
+			Logger.Debug("{0} {1}", psi.FileName, psi.Arguments);
 
 			try
 			{
@@ -272,8 +279,8 @@ namespace Peach.Core.Analysis
 			using (var proc = new SysProcess())
 			{
 				proc.StartInfo = psi;
-				proc.OutputDataReceived += proc_OutputDataReceived;
-				proc.ErrorDataReceived += proc_ErrorDataReceived;
+				proc.OutputDataReceived += OutputDataReceived;
+				proc.ErrorDataReceived += ErrorDataReceived;
 
 				try
 				{
@@ -293,11 +300,11 @@ namespace Peach.Core.Analysis
 				if (proc.HasExited)
 					throw new PeachException("Pin exited without starting the target process.");
 
-				logger.Debug("Waiting for pin process to exit.");
+				Logger.Debug("Waiting for pin process to exit.");
 
 				proc.WaitForExit();
 
-				logger.Debug("Pin process exited.");
+				Logger.Debug("Pin process exited.");
 			}
 
 			if (!File.Exists(outFile))
@@ -329,7 +336,7 @@ namespace Peach.Core.Analysis
 			}
 		}
 
-		void proc_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+		private static void ErrorDataReceived(object sender, DataReceivedEventArgs e)
 		{
 			if (e.Data == null)
 			{
@@ -337,11 +344,11 @@ namespace Peach.Core.Analysis
 			}
 			else
 			{
-				logger.Debug(e.Data);
+				Logger.Debug(e.Data);
 			}
 		}
 
-		void proc_OutputDataReceived(object sender, DataReceivedEventArgs e)
+		private static void OutputDataReceived(object sender, DataReceivedEventArgs e)
 		{
 			if (e.Data == null)
 			{
@@ -349,7 +356,7 @@ namespace Peach.Core.Analysis
 			}
 			else
 			{
-				logger.Debug(e.Data);
+				Logger.Debug(e.Data);
 			}
 		}
 	}

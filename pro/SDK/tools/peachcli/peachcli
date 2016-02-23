@@ -219,7 +219,7 @@ class App(cmd2.Cmd):
         for url in urls:
             print "\n-- %s --" % url
             
-            response = requests.get(url + '/p/jobs')
+            response = requests.get(url + '/p/jobs?dryrun=false')
             jobs = response.json()
             
             fmt = "%-20s %-10s %-20s %-20s %-10s %-6s"
@@ -267,7 +267,7 @@ class App(cmd2.Cmd):
             
             nodeCounted = False
             
-            response = requests.get(url + '/p/jobs')
+            response = requests.get(url + '/p/jobs?dryrun=false')
             jobs = response.json()
             
             pitUrl = self.getPitUrl(url, "Configurations", pit)
@@ -337,7 +337,7 @@ class App(cmd2.Cmd):
         
         for url in urls:
             
-            response = requests.get(url + '/p/jobs')
+            response = requests.get(url + '/p/jobs?dryrun=false')
             jobs = response.json()
             
             pitUrl = self.getPitUrl(url, "Configurations", pit)
@@ -415,7 +415,7 @@ class App(cmd2.Cmd):
         
         for url in urls:
             print "  Purging: %s" % url
-            response = requests.get(url + '/p/jobs')
+            response = requests.get(url + '/p/jobs?dryrun=false')
             jobs = response.json()
             
             for job in jobs:
@@ -474,7 +474,7 @@ class App(cmd2.Cmd):
                 print "Error, unable to find pit on %s" % url
                 return
             
-            response = requests.get(url + '/p/jobs')
+            response = requests.get(url + '/p/jobs?dryrun=false')
             response.raise_for_status()
             jobs = response.json()
             
@@ -512,7 +512,7 @@ class App(cmd2.Cmd):
                 print "Error, unable to find pit on %s" % url
                 return
             
-            response = requests.get(url + '/p/jobs')
+            response = requests.get(url + '/p/jobs?dryrun=false')
             response.raise_for_status()
             jobs = response.json()
             

@@ -47,7 +47,7 @@ def prepare(conf):
 
 	env['ARCH_ST'] = '-m%s'
 
-	env['PIN_VER'] = 'pin-2.13-61206-gcc.4.4.7-linux'
+	env['PIN_VER'] = 'pin-2.14-71313-gcc.4.4.7-linux'
 
 	pin = j(conf.get_third_party(), 'pin', env['PIN_VER'])
 
@@ -57,23 +57,24 @@ def prepare(conf):
 				j(pin, 'source', 'include', 'pin'),
 				j(pin, 'source', 'include', 'pin', 'gen'),
 				j(pin, 'extras', 'components', 'include'),
-				j(pin, 'extras', 'xed2-%s' % pin_tgt, 'include'),
+				j(pin, 'extras', 'xed-%s' % pin_tgt, 'include'),
 			],
 			'HEADERS'   : [],
 			'STLIBPATH' : [
 				j(pin, pin_tgt, 'lib'),
 				j(pin, pin_tgt, 'lib-ext'),
-				j(pin, 'extras', 'xed2-%s' % pin_tgt, 'lib'),
+				j(pin, 'extras', 'xed-%s' % pin_tgt, 'lib'),
 			],
 			'LIBPATH'   : [],
 			'LIB'       : [],
-			'STLIB'     : [ 'pin', 'xed', 'dwarf', 'elf' ],
+			'STLIB'     : [ 'pin', 'xed', 'pindwarf' ],
 			'DEFINES'   : [ 'BIGARRAY_MULTIPLIER=1', 'TARGET_LINUX', 'TARGET_%s' % pin_def, 'HOST_%s' % pin_def, 'USING_XED', ],
 			'CFLAGS'    : [],
 			'CXXFLAGS'  : [ '-fno-stack-protector', '-fomit-frame-pointer', '-fno-strict-aliasing' ],
 			'LINKFLAGS' : [],
 			'ENV'       : { 'STLIB_MARKER' : '-Wl,-Bsymbolic', 'SHLIB_MARKER' : '-Wl,-Bsymbolic', 'cxxshlib_PATTERN' : '%s.so' },
 		},
+
 	}
 
 	env['TARGET_FRAMEWORK'] = 'v4.5'
