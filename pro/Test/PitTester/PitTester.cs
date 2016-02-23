@@ -15,12 +15,9 @@ using Peach.Core.Fixups;
 using Peach.Core.IO;
 using Peach.Pro.Core;
 using Peach.Pro.Core.MutationStrategies;
-using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using Action = Peach.Core.Dom.Action;
-using Dom = Peach.Core.Dom.Dom;
 using Ionic.Zip;
-using Peach.Pro.Core.Godel;
 using StateModel = Peach.Core.Dom.StateModel;
 
 namespace PitTester

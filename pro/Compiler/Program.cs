@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using Newtonsoft.Json;
 using Peach.Core;
 using Peach.Core.Runtime;
 using Peach.Pro.Core;
-using Peach.Pro.Core.WebServices.Models;
 
 namespace PitCompiler
 {
@@ -54,6 +51,12 @@ namespace PitCompiler
 
 				return 0;
 			}
+			catch (Exception ex)
+			{
+				Console.Error.WriteLine("Error: {0}", ex.Message);
+				NLog.LogManager.GetLogger("pitc").Debug(ex);
+				return -1;
+			}
 			finally
 			{
 				// for debugging use.
@@ -83,6 +86,8 @@ namespace PitCompiler
 
 		static void Run(string pitPath)
 		{
+			Console.WriteLine("pitc: {0}", pitPath);
+
 			string pitLibraryPath;
 			if (!_defines.TryGetValue("PitLibraryPath", out pitLibraryPath))
 				pitLibraryPath = ".";
