@@ -15,7 +15,6 @@ namespace PitCompiler
 		static int _logLevel;
 		static OptionSet _options;
 		static readonly Dictionary<string, string> _defines = new Dictionary<string, string>();
-		static string _output;
 
 		static int Main(string[] args)
 		{
@@ -43,11 +42,6 @@ namespace PitCompiler
 						"Specify a pit define.",
 						AddDefine
 					},
-					{
-						"o|output=",
-						"Specify output",
-						v => _output = v
-					}
 				};
 
 				var extra = _options.Parse(args);
@@ -89,24 +83,11 @@ namespace PitCompiler
 
 		static void Run(string pitPath)
 		{
-			var output = _output ?? Path.ChangeExtension(pitPath, ".meta.json");
-
 			string pitLibraryPath;
 			if (!_defines.TryGetValue("PitLibraryPath", out pitLibraryPath))
 				pitLibraryPath = ".";
 
-			var metadata = new PitMetadata
-			{
-				Fields = FieldTreeGenerator.MakeFields(pitLibraryPath, pitPath)
-			};
-
-			var serializer = new JsonSerializer();
-			using (var stream = new StreamWriter(output))
-			using (var writer = new JsonTextWriter(stream))
-			{
-				writer.Formatting = Formatting.Indented;
-				serializer.Serialize(writer, metadata);
-			}
+			FieldTreeGenerator.Save(pitPath, pitLibraryPath);
 		}
 	}
 }

@@ -910,6 +910,7 @@ namespace Peach.Pro.Core.WebServices
 			var defs = PitDefines.ParseFile(detail.ConfigFileName, pitLibraryPath);
 
 			var pit = detail.Pit;
+			var metadata = FieldTreeGenerator.Load(detail.FileName);
 
 			pit.Config = defs.Flatten().Select(d => new Param { Key = d.Key, Value = d.Value }).ToList();
 			pit.Agents = detail.Agents.ToWeb();
@@ -917,7 +918,7 @@ namespace Peach.Pro.Core.WebServices
 			{
 				Defines = defs.ToWeb(),
 				Monitors = MonitorMetadata.Generate(detail.CallMethods),
-				Fields = FieldTreeGenerator.MakeFields(pitLibraryPath, detail.FileName),
+				Fields = metadata != null ? metadata.Fields : null,
 			};
 
 			return pit;
