@@ -861,7 +861,13 @@ namespace Peach.Pro.Core.WebServices
 				otherName = otherName.Replace("##PitLibraryPath##", pitLibraryPath);
 
 				Uri uri;
-				if (!Uri.TryCreate(otherName, UriKind.RelativeOrAbsolute, out uri) || uri.Scheme != "file")
+				if (!Uri.TryCreate(otherName, UriKind.Absolute, out uri))
+				{
+					if (!Uri.TryCreate(new Uri(Environment.CurrentDirectory), otherName, out uri))
+						continue;
+				}
+
+				if (uri.Scheme != "file")
 					continue;
 
 				// Normalize the path
