@@ -93,13 +93,11 @@ namespace Peach.Pro.WebApi2.Controllers
 			if (string.IsNullOrEmpty(request.PitUrl))
 				return BadRequest();
 
-			var pit = PitDatabase.GetPitByUrl(request.PitUrl);
+			var pit = PitDatabase.GetPitDetailByUrl(request.PitUrl);
 			if (pit == null)
 				return NotFound();
 
-			var pitFile = pit.Versions[0].Files[0].Name;
-
-			var job = JobMonitor.Start(PitLibraryPath, pitFile, request);
+			var job = JobMonitor.Start(PitLibraryPath, pit.Path, request);
 			if (job == null)
 				return Forbidden();
 
