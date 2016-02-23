@@ -46,7 +46,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		/// <returns>Library details</returns>
 		[Route("{id}")]
 		[ResponseType(typeof(Library))]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified library does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified library does not exist")]
 		public IHttpActionResult Get(string id)
 		{
 			var lib = PitDatabase.GetLibraryById(id);

@@ -27,6 +27,9 @@ namespace PitTester
 {
 	public class PitTester
 	{
+		const string Namespace = "http://peachfuzzer.com/2012/Peach";
+		const string SchemaLocation = "http://peachfuzzer.com/2012/Peach peach.xsd";		
+
 		static readonly Dictionary<string, string[]> OptionalParams = new Dictionary<string, string[]>
 		{
 			{ "RawEther", new[] { "MinMTU", "MaxMTU", "MinFrameSize", "MaxFrameSize", "PcapTimeout" }},
@@ -626,19 +629,15 @@ namespace PitTester
 						else if (author != rdr.Value)
 							errors.AppendLine("Pit author is '" + rdr.Value + "' but should be '" + author + "'.");
 
-						var ns = PeachElement.Namespace;
-
 						if (!rdr.MoveToAttribute("xmlns"))
 							errors.AppendLine("Pit is missing xmlns attribute.");
-						else if (ns != rdr.Value)
-							errors.AppendLine("Pit xmlns is '" + rdr.Value + "' but should be '" + ns + "'.");
-
-						var schema = PeachElement.SchemaLocation;
+						else if (Namespace != rdr.Value)
+							errors.AppendLine("Pit xmlns is '" + rdr.Value + "' but should be '" + Namespace + "'.");
 
 						if (!rdr.MoveToAttribute("schemaLocation", XmlSchema.InstanceNamespace))
 							errors.AppendLine("Pit is missing xsi:schemaLocation attribute.");
-						else if (schema != rdr.Value)
-							errors.AppendLine("Pit xsi:schemaLocation is '" + rdr.Value + "' but should be '" + schema + "'.");
+						else if (SchemaLocation != rdr.Value)
+							errors.AppendLine("Pit xsi:schemaLocation is '" + rdr.Value + "' but should be '" + SchemaLocation + "'.");
 
 						break;
 					}
@@ -661,7 +660,7 @@ namespace PitTester
 
 				var nav = doc.CreateNavigator();
 				var nsMgr = new XmlNamespaceManager(nav.NameTable);
-				nsMgr.AddNamespace("p", PeachElement.Namespace);
+				nsMgr.AddNamespace("p", Namespace);
 
 				var it = nav.Select("/p:Peach/p:Test", nsMgr);
 

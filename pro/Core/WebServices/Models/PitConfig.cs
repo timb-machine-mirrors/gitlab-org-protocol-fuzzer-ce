@@ -11,5 +11,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		public List<Param> Config { get; set; }
 
 		public List<Agent> Agents { get; set; }
+
+		public List<PitWeight> Weights { get; set; }
 	}
 }

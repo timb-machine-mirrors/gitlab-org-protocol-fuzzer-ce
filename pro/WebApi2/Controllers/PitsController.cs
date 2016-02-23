@@ -38,7 +38,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		/// <returns>The newly created pit configuration.</returns>
 		[Route("")]
 		[ResponseType(typeof(Pit))]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified pit or library does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified pit or library does not exist")]
 		[SwaggerResponse(HttpStatusCode.BadRequest, Description = "Request did not contain a valid PitCopy")]
 		[SwaggerResponse(HttpStatusCode.Forbidden, Description = "Access denied when saving config")]
 		public IHttpActionResult Post([FromBody]PitCopy data)
@@ -78,7 +78,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		/// <returns></returns>
 		[Route("{id}")]
 		[ResponseType(typeof(Pit))]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified pit does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified pit does not exist")]
 		public IHttpActionResult Get(string id)
 		{
 			var pit = PitDatabase.GetPitById(id);
@@ -99,7 +99,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		/// <returns>The pit with its updated configuration.</returns>
 		[Route("{id}")]
 		[ResponseType(typeof(Pit))]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified pit does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified pit does not exist")]
 		[SwaggerResponse(HttpStatusCode.BadRequest, Description = "Request did not contain a valid PitConfig")]
 		[SwaggerResponse(HttpStatusCode.Forbidden, Description = "Access denied when saving config")]
 		public IHttpActionResult Post(string id, [FromBody]PitConfig config)
