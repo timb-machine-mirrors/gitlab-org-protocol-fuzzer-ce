@@ -308,13 +308,39 @@ namespace Peach.Core.Dom
 
 		/// <summary>
 		/// Performs pre-order traversal starting with this node.
+		/// Returns only children we want to display to the user.
+		/// Each element controls the children to return by
+		/// overriding the DisplayChildren function.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<DataElement> DisplayTraverse()
+		{
+			var toVisit = new List<DataElement> { null };
+
+			var elem = this;
+
+			while (elem != null)
+			{
+				yield return elem;
+
+				int index = toVisit.Count;
+				foreach (var item in elem.DisplayChildren())
+					toVisit.Insert(index, item);
+
+				index = toVisit.Count - 1;
+				elem = toVisit[index];
+				toVisit.RemoveAt(index);
+			}
+		}
+
+		/// <summary>
+		/// Performs pre-order traversal starting with this node.
 		/// </summary>
 		/// <param name="filter">Only traverse elements that pass the predacate</param>
 		/// <returns></returns>
 		public IEnumerable<DataElement> PreOrderTraverse(Func<DataElement, bool> filter)
 		{
-			var toVisit = new List<DataElement>();
-			toVisit.Add(null);
+			var toVisit = new List<DataElement> { null };
 
 			var elem = this;
 
@@ -338,8 +364,7 @@ namespace Peach.Core.Dom
 		/// <returns></returns>
 		public IEnumerable<DataElement> PreOrderTraverse()
 		{
-			var toVisit = new List<DataElement>();
-			toVisit.Add(null);
+			var toVisit = new List<DataElement> { null };
 
 			var elem = this;
 
@@ -456,6 +481,15 @@ namespace Peach.Core.Dom
 		}
 
 		protected virtual IEnumerable<DataElement> Children()
+		{
+			return new DataElement[0];
+		}
+
+		/// <summary>
+		/// Returns an enumeration of children that are diplayed to the user.
+		/// </summary>
+		/// <returns></returns>
+		protected virtual IEnumerable<DataElement> DisplayChildren()
 		{
 			return new DataElement[0];
 		}

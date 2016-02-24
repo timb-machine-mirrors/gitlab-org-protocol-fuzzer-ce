@@ -396,6 +396,11 @@ namespace Peach.Core.Dom
 				return choiceElements;
 		}
 
+		protected override IEnumerable<DataElement> DisplayChildren()
+		{
+			return choiceElements;
+		}
+
 		/// <summary>
 		/// Returns a list of children for use in XPath navigation.
 		/// Should not be called directly.

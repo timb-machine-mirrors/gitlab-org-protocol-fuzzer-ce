@@ -233,6 +233,15 @@ namespace Peach.Core.Dom
 		}
 
 		/// <summary>
+		/// Returns an enumeration of children that are diplayed to the user.
+		/// </summary>
+		/// <returns></returns>
+		protected override IEnumerable<DataElement> DisplayChildren()
+		{
+			return this;
+		}
+
+		/// <summary>
 		/// Returns a list of children for use in XPath navigation.
 		/// Should not be called directly.
 		/// </summary>
