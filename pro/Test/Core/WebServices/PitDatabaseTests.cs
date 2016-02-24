@@ -281,7 +281,6 @@ namespace Peach.Pro.Test.Core.WebServices
 		public void TestCopyBadFilename()
 		{
 			var pit = db.Entries.ElementAt(0);
-			var lib = db.Libraries.ElementAt(1);
 
 			var newName = "****";
 			var newDesc = "My copy of the img pit";
