@@ -176,6 +176,7 @@ namespace Peach.Pro.Core.Loggers
 				job.Status = JobStatus.Running;
 				job.HeartBeat = DateTime.Now;
 				job.Seed = context.config.randomSeed;
+				job.MetricKind = HasFieldIds(context.test.stateModel) ? NameKind.Human : NameKind.Machine;
 			}
 
 			if (job.DatabasePath == null)
@@ -910,6 +911,29 @@ namespace Peach.Pro.Core.Loggers
 			}
 
 			LogManager.Configuration = nconfig;
+		}
+
+		private static bool HasFieldIds(StateModel sm)
+		{
+			foreach (var state in sm.states)
+			{
+				if (!string.IsNullOrEmpty(state.FieldId))
+					return true;
+
+				foreach (var action in state.actions)
+				{
+					if (!string.IsNullOrEmpty(action.FieldId))
+						return true;
+
+					foreach (var actionData in action.outputData)
+					{
+						if (actionData.dataModel.PreOrderTraverse().Any(e => !string.IsNullOrEmpty(e.FieldId)))
+							return true;
+					}
+				}
+			}
+
+			return false;
 		}
 	}
 }
