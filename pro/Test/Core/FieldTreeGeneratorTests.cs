@@ -45,6 +45,9 @@ namespace Peach.Pro.Test.Core
 				<Choice name='Choice'>
 					<Blob name='BA' />
 					<Blob name='BB' />
+					<Asn1Type name='ASN' tag='0'>
+						<Block name='V' />
+					</Asn1Type>
 				</Choice>
 			</Block>
 		</Choice>
@@ -124,7 +127,11 @@ namespace Peach.Pro.Test.Core
 								new PitField { Id = "B", Fields = {
 									new PitField { Id = "Choice", Fields = {
 										new PitField { Id = "BA" },
-										new PitField { Id = "BB" }
+										new PitField { Id = "BB" },
+										new PitField { Id = "ASN", Fields =
+										{
+											new PitField { Id = "V" }
+										}},
 									}},
 								}},
 							}},
