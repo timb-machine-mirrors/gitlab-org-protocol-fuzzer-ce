@@ -8,6 +8,7 @@ using System.Linq;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using Peach.Pro.Core.Dom;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Mutators
@@ -38,6 +39,9 @@ namespace Peach.Pro.Core.Mutators
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
+			if (obj is IJsonElement && obj.parent is JsonObject)
+					return false;
+
 			if (obj.isMutable && obj.parent != null && !(obj.parent is Choice) && !(obj is Flag) && !(obj is XmlAttribute) && obj.Value.LengthBits > 0)
 				return true;
 
