@@ -179,28 +179,39 @@ namespace Peach.Pro.Core.Runtime
 		{
 			var pitConfigFile = _config.pitFile + ".config";
 
-			using (var db = new NodeDatabase())
+			if (File.Exists(pitConfigFile))
 			{
-				try
+				using (var db = new NodeDatabase())
 				{
-					_jobLogger.AddEvent(db,
-						_config.id,
-						"Loading pit config", "Loading configuration file '{0}'".Fmt(pitConfigFile),
-						CompleteTestEvents.Last
-					);
+					try
+					{
+						_jobLogger.AddEvent(db,
+							_config.id,
+							"Loading pit config", "Loading configuration file '{0}'".Fmt(pitConfigFile),
+							CompleteTestEvents.Last
+						);
 
-					var defs = PitDefines.ParseFile(pitConfigFile, _pitLibraryPath);
-					var evaluated = defs.Evaluate();
-					PitInjector.InjectDefines(_pitConfig, defs, evaluated);
+						var defs = PitDefines.ParseFile(pitConfigFile, _pitLibraryPath);
+						var evaluated = defs.Evaluate();
+						PitInjector.InjectDefines(_pitConfig, defs, evaluated);
 
-					return evaluated;
-				}
-				catch (Exception ex)
-				{
-					_jobLogger.EventFail(db, ex.Message);
-					throw;
+						return evaluated;
+
+					}
+					catch (Exception ex)
+					{
+						_jobLogger.EventFail(db, ex.Message);
+						throw;
+					}
 				}
 			}
+			else
+			{
+				var defs = PitDefines.ParseFile(pitConfigFile, _pitLibraryPath);
+				var evaluated = defs.Evaluate();
+				return evaluated;
+			}
+
 		}
 
 		public Peach.Core.Dom.Dom ParsePit()
