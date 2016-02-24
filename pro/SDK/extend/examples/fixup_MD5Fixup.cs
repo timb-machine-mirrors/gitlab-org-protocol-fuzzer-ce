@@ -9,9 +9,7 @@ using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 namespace Peach.Pro.Core.Fixups
 {
 	[Description("Standard MD5 checksum.")]
-	[Fixup("Md5", true)]
-	[Fixup("MD5Fixup")]
-	[Fixup("checksums.MD5Fixup")]
+	[Fixup("Md5Example", true)]
 	[Parameter("ref", typeof(DataElement), "Reference to data element")]
 	[Parameter("DefaultValue", typeof(HexString), "Default value to use when recursing (default is parent's DefaultValue)", "")]
 	[Serializable]
