@@ -1,6 +1,8 @@
 <<<
 [[Json]]
-== Json
+== Json (DEPRICATED)
+
+WARNING: This element is depricated and should not be used.  Instead please use the xref:JsonObject[JsonObject], xref:JsonString[JsonString], xref:JsonArray[JsonArray], xref:JsonInteger[JsonInteger], xref:JsonDouble[JsonDouble], and xref:JsonBool[JsonBool] elements.
 
 The _Json_ element is a container for other data elements that will be represented 
 in JSON in attribute-value pairs. The output of a _Json_ element is a valid JSON string 
