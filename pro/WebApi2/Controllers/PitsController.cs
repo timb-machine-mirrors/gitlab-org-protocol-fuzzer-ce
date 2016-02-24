@@ -46,7 +46,6 @@ namespace Peach.Pro.WebApi2.Controllers
 			try
 			{
 				var newUrl = PitDatabase.CopyPit(
-					data.LibraryUrl,
 					data.PitUrl,
 					data.Name,
 					data.Description

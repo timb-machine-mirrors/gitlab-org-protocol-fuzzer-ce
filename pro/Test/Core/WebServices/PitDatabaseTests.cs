@@ -214,223 +214,164 @@ namespace Peach.Pro.Test.Core.WebServices
 			var imgCopy = ent.First(e => e.Name == "IMG Copy");
 
 			var pit2 = db.GetPitByUrl(imgCopy.PitUrl);
-			var cfg2 = pit2.Config;
-			Assert.IsNull(cfg2);
-
-			// Should include system defines
-
-//			Assert.AreEqual("Peach.OS", cfg2[0].Key);
-//			Assert.AreEqual("Peach.Pwd", cfg2[1].Key);
-//			Assert.AreEqual("Peach.Cwd", cfg2[2].Key);
-//			Assert.AreEqual("Peach.LogRoot", cfg2[3].Key);
-//			Assert.AreEqual("PitLibraryPath", cfg2[4].Key);
-
-//			// Saving should create the file
-//			var cfg = pit2.Versions[0].Files[0].Name + ".config";
-//			Assert.False(File.Exists(cfg), ".config file should not exist");
-//
-//			db.UpdatePitById(pit2.Id, new Pit { Config = new List<Param>() });
-//
-//			// System defines should not be in the file
-//			Assert.True(File.Exists(cfg), ".config file should exist");
-
-//			var defs = PitDefines.ParseFile(cfg);
-//			Assert.AreEqual(0, defs.Platforms.Count);
-//			Assert.AreNotEqual(0, defs.SystemDefines.Count);
+			Assert.IsNull(pit2.Config);
+			Assert.IsNull(pit2.Agents);
+			Assert.IsNull(pit2.Weights);
 		}
 
 		[Test]
 		public void TestCopyPro()
 		{
-//			var ent = db.Entries.ElementAt(0);
-//			var lib = db.Libraries.ElementAt(1);
-//			var pit = db.GetPitById(ent.Id);
-//
-//			var newName = "IMG Copy";
-//			var newDesc = "My copy of the img pit";
-//
-//			var newUrl = db.CopyPit(lib.LibraryUrl, pit.PitUrl, newName, newDesc);
-//
-//			Assert.NotNull(newUrl);
-//
-//			Assert.AreEqual(2, db.Entries.Count());
-//			Assert.AreEqual(1, lib.Versions[0].Pits.Count);
-//
-//			var newPit = db.GetPitByUrl(newUrl);
-//
-//			Assert.NotNull(newPit);
-//
-//			var newXml = File.ReadAllText(newPit.Versions[0].Files[0].Name);
-//			Assert.NotNull(newXml);
-//
-//			Assert.AreEqual(newName, newPit.Name);
-//			Assert.AreEqual(newDesc, newPit.Description);
-//			Assert.AreEqual(Environment.UserName, newPit.User);
-//
-//			var expName = Path.Combine(root.Path, "User", "Image", "IMG Copy.xml");
-//			Assert.AreEqual(2, newPit.Versions[0].Files.Count);
-//			Assert.AreEqual(expName, newPit.Versions[0].Files[0].Name);
-//
-//			Assert.True(File.Exists(expName));
-//			Assert.True(File.Exists(expName + ".config"));
-//
-//			var srcCfg = File.ReadAllText(pit.Versions[0].Files[0].Name + ".config");
-//			var newCfg = File.ReadAllText(expName + ".config");
-//
-//			Assert.AreEqual(srcCfg, newCfg);
+			var ent = db.Entries.ElementAt(0);
+			var lib = db.Libraries.ElementAt(1);
+			var pit = db.GetPitById(ent.Id);
+
+			var newName = "IMG Copy";
+			var newDesc = "My copy of the img pit";
+
+			var newUrl = db.CopyPit(pit.PitUrl, newName, newDesc);
+
+			Assert.NotNull(newUrl);
+
+			Assert.AreEqual(2, db.Entries.Count());
+			Assert.AreEqual(1, lib.Versions[0].Pits.Count);
+
+			var newPit = db.GetPitDetailByUrl(newUrl);
+			Assert.NotNull(newPit);
+
+			var expName = Path.Combine(root.Path, "User", "Image", "IMG Copy.pit");
+			Assert.AreEqual(expName, newPit.Path);
+			Assert.True(File.Exists(expName));
+
+			var newPitFile = File.ReadAllText(newPit.Path);
+			Assert.NotNull(newPitFile);
+
+			Assert.AreEqual(newName, newPit.Pit.Name);
+			Assert.AreEqual(newDesc, newPit.Pit.Description);
+			Assert.AreEqual(Environment.UserName, newPit.Pit.User);
 		}
 
 		[Test]
 		public void TestCopyDotInName()
 		{
-//			var pit = db.Entries.ElementAt(0);
-//			var lib = db.Libraries.ElementAt(1);
-//
-//			var newName = "Foo.Mine";
-//			var newDesc = "My copy of the img pit";
-//
-//			var newUrl = db.CopyPit(lib.LibraryUrl, pit.PitUrl, newName, newDesc);
-//			var newPit = db.GetPitByUrl(newUrl);
-//
-//			Assert.AreEqual(newName, newPit.Name);
+			var pit = db.Entries.ElementAt(0);
+
+			var newName = "Foo.Mine";
+			var newDesc = "My copy of the img pit";
+
+			var newUrl = db.CopyPit(pit.PitUrl, newName, newDesc);
+			var newPit = db.GetPitByUrl(newUrl);
+
+			Assert.AreEqual(newName, newPit.Name);
 		}
 
 		[Test]
 		public void TestCopyPathInFilename()
 		{
-//			var pit = db.Entries.ElementAt(0);
-//			var lib = db.Libraries.ElementAt(1);
-//
-//			var newName = "../../../Foo";
-//			var newDesc = "My copy of the img pit";
-//
-//			var ex = Assert.Throws<ArgumentException>(() => db.CopyPit(lib.LibraryUrl, pit.PitUrl, newName, newDesc));
-//			Assert.AreEqual("name", ex.ParamName);
+			var pit = db.Entries.ElementAt(0);
+
+			var newName = "../../../Foo";
+			var newDesc = "My copy of the img pit";
+
+			var ex = Assert.Throws<ArgumentException>(() => db.CopyPit(pit.PitUrl, newName, newDesc));
+			Assert.AreEqual("name", ex.ParamName);
 		}
 
 		[Test]
 		public void TestCopyBadFilename()
 		{
-//			var pit = db.Entries.ElementAt(0);
-//			var lib = db.Libraries.ElementAt(1);
-//
-//			var newName = "****";
-//			var newDesc = "My copy of the img pit";
-//
-//			try
-//			{
-//				// Linux lets everything but '/' be in a file name
-//				db.CopyPit(lib.LibraryUrl, pit.PitUrl, newName, newDesc);
-//
-//				if (Platform.GetOS() == Platform.OS.Windows)
-//					Assert.Fail("Should throw");
-//				else
-//					Assert.Pass();
-//			}
-//			catch (ArgumentException)
-//			{
-//				if (Platform.GetOS() == Platform.OS.Windows)
-//					Assert.Pass();
-//				else
-//					Assert.Fail("Should not throw");
-//			}
+			var pit = db.Entries.ElementAt(0);
+			var lib = db.Libraries.ElementAt(1);
+
+			var newName = "****";
+			var newDesc = "My copy of the img pit";
+
+			try
+			{
+				// Linux lets everything but '/' be in a file name
+				db.CopyPit(pit.PitUrl, newName, newDesc);
+
+				if (Platform.GetOS() == Platform.OS.Windows)
+					Assert.Fail("Should throw");
+				else
+					Assert.Pass();
+			}
+			catch (ArgumentException)
+			{
+				if (Platform.GetOS() == Platform.OS.Windows)
+					Assert.Pass();
+				else
+					Assert.Fail("Should not throw");
+			}
 		}
 
 		[Test]
 		public void TestCopyUser()
 		{
-//			var ent = db.Entries.ElementAt(0);
-//			var lib = db.Libraries.ElementAt(1);
-//			var pit = db.GetPitById(ent.Id);
-//
-//			var newUrl1 = db.CopyPit(lib.LibraryUrl, pit.PitUrl, "IMG Copy 1", "Img desc 1");
-//			Assert.NotNull(newUrl1);
-//
-//			var newUrl2 = db.CopyPit(lib.LibraryUrl, newUrl1, "IMG Copy 2", "Img desc 2");
-//			Assert.NotNull(newUrl2);
-//
-//
-//			Assert.AreEqual(3, db.Entries.Count());
-//			Assert.AreEqual(2, lib.Versions[0].Pits.Count);
-//
-//			var newPit = db.GetPitByUrl(newUrl2);
-//
-//			Assert.NotNull(newPit);
-//
-//			var newXml = File.ReadAllText(newPit.Versions[0].Files[0].Name);
-//			Assert.NotNull(newXml);
-//
-//			var expName = Path.Combine(root.Path, "User", "Image", "IMG Copy 2.xml");
-//			Assert.AreEqual(2, newPit.Versions[0].Files.Count);
-//			Assert.AreEqual(expName, newPit.Versions[0].Files[0].Name);
-//
-//			Assert.True(File.Exists(expName));
-//			Assert.True(File.Exists(expName + ".config"));
-//
-//			var srcCfg = File.ReadAllText(pit.Versions[0].Files[0].Name + ".config");
-//			var newCfg = File.ReadAllText(expName + ".config");
-//
-//			Assert.AreEqual(srcCfg, newCfg);
+			var ent = db.Entries.ElementAt(0);
+			var lib = db.Libraries.ElementAt(1);
+			var pit = db.GetPitById(ent.Id);
+
+			var newUrl1 = db.CopyPit(pit.PitUrl, "IMG Copy 1", "Img desc 1");
+			Assert.NotNull(newUrl1);
+
+			var newUrl2 = db.CopyPit(newUrl1, "IMG Copy 2", "Img desc 2");
+			Assert.NotNull(newUrl2);
+
+
+			Assert.AreEqual(3, db.Entries.Count());
+			Assert.AreEqual(2, lib.Versions[0].Pits.Count);
+
+			var newPit = db.GetPitDetailByUrl(newUrl2);
+
+			Assert.NotNull(newPit);
+
+			var newXml = File.ReadAllText(newPit.Path);
+			Assert.NotNull(newXml);
+
+			var expName = Path.Combine(root.Path, "User", "Image", "IMG Copy 2.pit");
+			Assert.AreEqual(expName, newPit.Path);
+
+			Assert.True(File.Exists(expName));
 		}
 
-		[Test]
-		public void TestGetPitConfig()
-		{
-//			var ent = db.Entries.First();
-//			var pit = db.GetPitById(ent.Id);
-//			var cfg = pit.Config;
-//
-//			Assert.NotNull(cfg);
-//			Assert.AreEqual(7, cfg.Count);
-//
-//			Assert.AreEqual("Strategy", cfg[0].Key);
-//			Assert.AreEqual("SomeMiscVariable", cfg[1].Key);
-//			Assert.AreEqual("Peach.OS", cfg[2].Key);
-//			Assert.AreEqual("Peach.Pwd", cfg[3].Key);
-//			Assert.AreEqual("Peach.Cwd", cfg[4].Key);
-//			Assert.AreEqual("Peach.LogRoot", cfg[5].Key);
-//
-//			// PitLibraryPath is special, and gets turned into a System type
-//			// regardless of what is in the pit .config
-//			Assert.AreEqual("PitLibraryPath", cfg[6].Key);
-//			Assert.AreNotEqual(".", cfg[6].Value);
-		}
+		//[Test]
+		//public void TestSetPitConfig()
+		//{
+		//	var ent = db.Entries.First();
+		//	var pitUrl = db.CopyPit(ent.Id);
+		//	var cfg = new PitConfig
+		//	{
+		//	};
 
-		[Test]
-		public void TestSetPitConfig()
-		{
-//			var ent = db.Entries.First();
-//			var pit = db.GetPitById(ent.Id);
-//			var cfg = pit.Config;
-//
-//			Assert.NotNull(cfg);
-//			Assert.AreEqual(7, cfg.Count);
-//			Assert.AreEqual("SomeMiscVariable", cfg[1].Key);
-//			Assert.AreNotEqual("Foo Bar Baz", cfg[1].Value);
-//			cfg[1].Value = "Foo Bar Baz";
-//
-//			db.UpdatePitById(ent.Id, pit);
-//
-//			var file = pit.Versions[0].Files[0].Name + ".config";
-//			var defines = PitDefines.ParseFile(file);
-//			Assert.NotNull(defines);
-//			Assert.AreEqual(1, defines.Platforms.Count);
-//			var defs = defines.Platforms[0].Defines;
-//			Assert.NotNull(defs);
-//
-//			// Peach.Pwd and Peach.Cwd do not get saved
-//			Assert.AreEqual(3, defs.Count);
-//
-//			Assert.AreEqual("Strategy", defs[0].Key);
-//			Assert.AreEqual("Random", defs[0].Value);
-//
-//			Assert.AreEqual("SomeMiscVariable", defs[2].Key);
-//			Assert.AreEqual("Foo Bar Baz", defs[2].Value);
-//
-//			// PitLibraryPath should NOT be updated, it is set automagically by the runtime
-//			Assert.AreEqual("PitLibraryPath", defs[1].Key);
-//			Assert.AreEqual(".", defs[1].Value);
-		}
+		//	Assert.NotNull(cfg);
+		//	Assert.AreEqual(7, cfg.Count);
+		//	Assert.AreEqual("SomeMiscVariable", cfg[1].Key);
+		//	Assert.AreNotEqual("Foo Bar Baz", cfg[1].Value);
+		//	cfg[1].Value = "Foo Bar Baz";
+
+		//	db.UpdatePitById(ent.Id, pit);
+
+		//	var file = pit.Path + ".config";
+		//	var defines = PitDefines.ParseFile(file);
+		//	Assert.NotNull(defines);
+		//	Assert.AreEqual(1, defines.Platforms.Count);
+		//	var defs = defines.Platforms[0].Defines;
+		//	Assert.NotNull(defs);
+
+		//	// Peach.Pwd and Peach.Cwd do not get saved
+		//	Assert.AreEqual(3, defs.Count);
+
+		//	Assert.AreEqual("Strategy", defs[0].Key);
+		//	Assert.AreEqual("Random", defs[0].Value);
+
+		//	Assert.AreEqual("SomeMiscVariable", defs[2].Key);
+		//	Assert.AreEqual("Foo Bar Baz", defs[2].Value);
+
+		//	// PitLibraryPath should NOT be updated, it is set automagically by the runtime
+		//	Assert.AreEqual("PitLibraryPath", defs[1].Key);
+		//	Assert.AreEqual(".", defs[1].Value);
+		//}
 
 		[Test]
 		public void TestOptionalParams()
@@ -448,7 +389,7 @@ namespace Peach.Pro.Test.Core.WebServices
 //			foreach (var item in pit.Metadata.Defines.SelectMany(d => d.Items)) 
 //				Assert.False(item.Optional, "Define should not be optional");
 //
-//			var file = pit.Versions[0].Files[0].Name + ".config";
+			//			var file = pit.Path + ".config";
 //			var defs = PitDefines.ParseFile(file);
 //
 //			Assert.NotNull(defs);
@@ -544,7 +485,7 @@ namespace Peach.Pro.Test.Core.WebServices
 //			};
 //			opts[PitParser.DEFINED_VALUES] = defs;
 //
-//			var dom = parser.asParser(opts, pit.Versions[0].Files[0].Name);
+			//			var dom = parser.asParser(opts, pit.Path);
 //
 //			Assert.AreEqual(1, dom.tests[0].agents.Count);
 //
@@ -669,7 +610,7 @@ namespace Peach.Pro.Test.Core.WebServices
 //				{PitParser.DEFINED_VALUES, defs}
 //			};
 //
-//			var dom = parser.asParser(opts, pit.Versions[0].Files[0].Name);
+			//			var dom = parser.asParser(opts, pit.Path);
 //
 //			Assert.AreEqual(3, dom.tests[0].agents.Count);
 //
@@ -758,7 +699,7 @@ namespace Peach.Pro.Test.Core.WebServices
 //			};
 //			opts[PitParser.DEFINED_VALUES] = defs;
 //
-//			var dom = parser.asParser(opts, pit.Versions[0].Files[0].Name);
+			//			var dom = parser.asParser(opts, pit.Path);
 //
 //			Assert.AreEqual(1, dom.tests[0].agents.Count);
 //

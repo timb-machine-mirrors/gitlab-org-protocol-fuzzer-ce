@@ -1,18 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using Peach.Core;
 using Peach.Pro.Core.WebServices.Models;
 using Encoding = System.Text.Encoding;
 using File = System.IO.File;
-using Peach.Core.Analyzers;
 using Newtonsoft.Json;
 
 namespace Peach.Pro.Core.WebServices
@@ -251,6 +246,7 @@ namespace Peach.Pro.Core.WebServices
 				Locked = true,
 				Tags = new List<Tag> { tag },
 				Timestamp = lastModified,
+				User = Environment.UserName,
 			};
 
 			return new PitDetail {
@@ -269,7 +265,9 @@ namespace Peach.Pro.Core.WebServices
 			using (var reader = new JsonTextReader(stream))
 				pit = serializer.Deserialize<Pit>(reader);
 
+			pit.User = Environment.UserName;
 			pit.Timestamp = lastModified;
+
 			return new PitDetail {
 				Path = fileName,
 				Pit = pit,
@@ -332,12 +330,11 @@ namespace Peach.Pro.Core.WebServices
 		///   KeyNotFoundException if libraryUrl/pitUtl is not valid.
 		///   ArgumentException if a pit with the specified name already exists.
 		/// </summary>
-		/// <param name="libraryUrl">The destination library to save the pit in.</param>
 		/// <param name="pitUrl">The url of the source pit to copy.</param>
 		/// <param name="name">The name of the newly copied pit.</param>
 		/// <param name="description">The description of the newly copied pit.</param>
 		/// <returns>The url of the newly copied pit.</returns>
-		public string CopyPit(string libraryUrl, string pitUrl, string name, string description)
+		public string CopyPit(string pitUrl, string name, string description)
 		{
 			if (string.IsNullOrEmpty(name))
 				throw new ArgumentException("A non-empty pit name is required.", "name");
