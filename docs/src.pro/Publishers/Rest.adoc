@@ -42,7 +42,7 @@ Domain:: Domain for authentication
 Cookies:: Enable cookie support. The default value is true.
 CookiesAcrossIterations:: Track cookies across iterations. The default value is false.
 Timeout:: How long to wait in milliseconds for data/connection. the default value is 3,000.
-IgnoreCertErrors:: Allow HTTPS regardless of cert status. The default value is false.
+IgnoreCertErrors:: Allow HTTPS regardless of cert status. The default value is true.
 
 === Actions
 

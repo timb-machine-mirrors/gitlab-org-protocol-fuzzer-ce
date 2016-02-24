@@ -83,6 +83,7 @@ namespace Peach.Pro.Core.Storage
 				return new MigrationHandler[]
 				{
 					() => { Connection.Execute(Sql.NodeMigrateV1); },
+					() => { Connection.Execute(Sql.NodeMigrateV2); },
 				};
 			}
 		}

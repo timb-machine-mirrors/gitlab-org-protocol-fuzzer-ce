@@ -50,6 +50,7 @@ INSERT INTO [Job] (
 	FaultCount,
 	RangeStart,
 	RangeStop,
+	Duration,
 	DryRun,
 	PitUrl,
 	LogPath,
@@ -72,6 +73,7 @@ INSERT INTO [Job] (
 	@FaultCount,
 	@RangeStart,
 	@RangeStop,
+	@Duration,
 	@DryRun,
 	@PitUrl,
 	@LogPath,
@@ -110,6 +112,7 @@ SET
 	FaultCount = @FaultCount,
 	RangeStart = @RangeStart,
 	RangeStop = @RangeStop,
+	Duration = @Duration,
 	LogPath = @LogPath,
 	PeachVersion = @PeachVersion
 WHERE
@@ -458,5 +461,11 @@ COMMIT;
 
 PRAGMA foreign_keys=ON;
 ";
+
+		public const string NodeMigrateV2 = @"
+ALTER TABLE Job 
+ADD COLUMN 
+	Duration INTEGER
+;";
 	}
 }
