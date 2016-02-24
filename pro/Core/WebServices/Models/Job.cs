@@ -153,6 +153,11 @@ namespace Peach.Pro.Core.WebServices.Models
 		public long? RangeStop { get; set; }
 
 		/// <summary>
+		/// Optional duration for how long to run the fuzzer.
+		/// </summary>
+		public TimeSpan? Duration { get; set; }
+
+		/// <summary>
 		/// Determines whether the job is a test run or an actual fuzzing session.
 		/// </summary>
 		public bool DryRun { get; set; }
@@ -191,6 +196,7 @@ namespace Peach.Pro.Core.WebServices.Models
 			Seed = request.Seed;
 			RangeStart = request.RangeStart;
 			RangeStop = request.RangeStop;
+			Duration = request.Duration;
 			DryRun = request.DryRun;
 			Pid = Utilities.GetCurrentProcessId();
 
@@ -223,6 +229,9 @@ namespace Peach.Pro.Core.WebServices.Models
 			{
 				RangeStart = config.skipToIteration;
 			}
+
+			if (config.Duration < TimeSpan.MaxValue)
+				Duration = config.Duration;
 
 			using (var db = new NodeDatabase())
 			{

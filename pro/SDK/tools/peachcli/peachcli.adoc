@@ -5,7 +5,7 @@ This tool is used to control multiple Peach instances at once.
 The tool can be used via the command line or as an interactive
 tool.
 
-The tool utalizes the Peach REST API to perform all actions.
+The tool utilizes the Peach REST API to perform all actions.
 
 == Installation
 
@@ -152,7 +152,7 @@ push HTTP_Server-Test all
 The push command will copy a configuration from the master instance to a group of remote instances.
 The pit configuration name must follow a specific naming convention to use this command. The name
 has two parts. The first part is the source pit name, for example "HTTP_Server". The second part
-is the configuration name, for example "Test". They are joined with a hifen (-). The resulting
+is the configuration name, for example "Test". They are joined with a hyphen (-). The resulting
 name would be "HTTP_Server-Test".
 
 === status: Status of all related jobs

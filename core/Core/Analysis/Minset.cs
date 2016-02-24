@@ -29,11 +29,14 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using NLog;
 
 namespace Peach.Core.Analysis
 {
-	public delegate void TraceEventHandler(Minset sender, string fileName, int count, int totalCount);
+	public delegate void TraceEventHandler(object sender, string fileName, int count, int totalCount);
+	public delegate void TraceEventMessage(object sender, string message);
 
 	/// <summary>
 	/// Perform analysis on sample sets to identify the smallest sample set
@@ -41,11 +44,12 @@ namespace Peach.Core.Analysis
 	/// </summary>
 	public class Minset
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
 		public event TraceEventHandler TraceStarting;
 		public event TraceEventHandler TraceCompleted;
 		public event TraceEventHandler TraceFailed;
+		public event TraceEventMessage TraceMessage;
 
 		protected void OnTraceStarting(string fileName, int count, int totalCount)
 		{
@@ -65,6 +69,49 @@ namespace Peach.Core.Analysis
 				TraceFailed(this, fileName, count, totalCount);
 		}
 
+		private void ValidateTraces(List<string> samples, List<string> traces)
+		{
+			samples.Sort(string.CompareOrdinal);
+			traces.Sort(string.CompareOrdinal);
+
+			var i = 0;
+
+			while (i < samples.Count || i < traces.Count)
+			{
+				int cmp;
+
+				if (i == samples.Count)
+					cmp = 1;
+				else if (i == traces.Count)
+					cmp = -1;
+				else
+					cmp = string.CompareOrdinal(Path.GetFileName(samples[i] + ".trace"), Path.GetFileName(traces[i]));
+
+				if (cmp < 0)
+				{
+					if (TraceMessage != null)
+						TraceMessage(this, "Ignoring sample '{0}' becaues of mising trace file.".Fmt(samples[i]));
+
+					Logger.Debug("Ignoring sample '{0}' becaues of mising trace file.".Fmt(samples[i]));
+
+					samples.RemoveAt(i);
+				}
+				else if (cmp > 0)
+				{
+					if (TraceMessage != null)
+						TraceMessage(this, "Ignoring trace '{0}' becaues of mising sample file.".Fmt(traces[i]));
+
+					Logger.Debug("Ignoring trace '{0}' becaues of mising sample file.".Fmt(traces[i]));
+
+					traces.RemoveAt(i);
+				}
+				else
+				{
+					++i;
+				}
+			}
+		}
+
 		/// <summary>
 		/// Perform coverage analysis of trace files.
 		/// </summary>
@@ -76,40 +123,103 @@ namespace Peach.Core.Analysis
 		/// <returns>Returns the minimum set of smaple files.</returns>
 		public string[] RunCoverage(string [] sampleFiles, string [] traceFiles)
 		{
+			var samples = sampleFiles.ToList();
+			var traces = traceFiles.ToList();
+
 			// Expect samples and traces to correlate 1 <-> 1
-			if (sampleFiles.Length != traceFiles.Length)
-				throw new ArgumentException();
+			ValidateTraces(samples, traces);
 
-			var ret = new List<string>();
-			var lines = new HashSet<string>();
-			string line;
+			Debug.Assert(samples.Count == traces.Count);
 
-			for (int i = 0; i < traceFiles.Length; ++i)
+			var coverage = new Dictionary<string, long>();
+			var db = new Dictionary<string, HashSet<string>>();
+
+			if (TraceMessage != null)
+				TraceMessage(this, "Loading {0} trace files...".Fmt(traces.Count));
+
+			for (var i = 0; i < traces.Count; ++i)
 			{
-				bool unique = false;
+				var trace = traces[i];
+				var sample = samples[i];
 
-				try
+				Logger.Debug("Loading '{0}'", trace);
+
+				coverage.Add(sample, 0);
+
+				using (var rdr = new StreamReader(trace))
 				{
-					using (var rdr = new StreamReader(traceFiles[i]))
+					string line;
+
+					while ((line = rdr.ReadLine()) != null)
 					{
-						for (int cnt = 0; (line = rdr.ReadLine()) != null; ++cnt)
+						HashSet<string> v;
+
+						if (db.TryGetValue(line, out v))
 						{
-							if (lines.Add(line) && !unique)
-							{
-								logger.Debug("Including '{0}', unique at line #{1}: {2}", traceFiles[i], cnt + 1, line);
-								unique = true;
-							}
+							v.Add(sample);
+						}
+						else
+						{
+							db.Add(line, new HashSet<string> { sample });
 						}
 					}
-
-					if (unique)
-						ret.Add(sampleFiles[i]);
-				}
-				catch (Exception ex)
-				{
-					logger.Debug("Error processing trace {0}\n{1}", traceFiles[i], ex);
 				}
 			}
+
+			if (TraceMessage != null)
+				TraceMessage(this, "Computing minimum set coverage...".Fmt(traces.Count));
+
+			Logger.Debug("Loaded {0} files, starting minset computation", traces.Count);
+
+			var total = db.Count;
+			var ret = new List<string>();
+
+			while (coverage.Count > 0)
+			{
+				// Find trace with greatest coverage
+				foreach (var t in db.SelectMany(row => row.Value))
+					coverage[t] += 1;
+
+				var max = coverage.Max(kv => kv.Value);
+				var keep = coverage.First(kv => kv.Value == max).Key;
+
+				if (max == 0)
+					break;
+
+				Logger.Debug("Keeping '{0}' with coverage {1}/{2}", keep, max, total);
+
+				if (max < 10)
+				{
+					foreach (var l in db.Where(kv => kv.Value.Contains(keep)))
+						Logger.Debug(l.Key);
+				}
+
+				ret.Add(keep);
+
+				// Don't track selected trace anymore
+				coverage.Remove(keep);
+
+				// Reset coverage counts to 0
+				foreach (var k in coverage.Keys.ToList())
+					coverage[k] = 0;
+
+				// Select all rows that are now covered
+				var prune = db
+					.Where(kv => kv.Value.Remove(keep))
+					.Select(kv => kv.Key)
+					.ToList();
+
+				// Remvoe all covered rows
+				foreach (var p in prune)
+					db.Remove(p);
+			}
+
+			Logger.Debug("Removing {0} sample files", coverage.Count);
+
+			foreach (var kv in coverage)
+				Logger.Debug(" - {0}", kv.Key);
+
+			Logger.Debug("Done");
 
 			return ret.ToArray();
 		}
@@ -134,12 +244,12 @@ namespace Peach.Core.Analysis
 				var cov = new Coverage(executable, arguments, needsKilling);
 				var ret = new List<string>();
 
-				for (int i = 0; i < sampleFiles.Length; ++i)
+				for (var i = 0; i < sampleFiles.Length; ++i)
 				{
 					var sampleFile = sampleFiles[i];
 					var traceFile = Path.Combine(tracesFolder, Path.GetFileName(sampleFile) + ".trace");
 
-					logger.Debug("Starting trace [{0}:{1}] {2}", i + 1, sampleFiles.Length, sampleFile);
+					Logger.Debug("Starting trace [{0}:{1}] {2}", i + 1, sampleFiles.Length, sampleFile);
 
 					OnTraceStarting(sampleFile, i + 1, sampleFiles.Length);
 
@@ -147,12 +257,12 @@ namespace Peach.Core.Analysis
 					{
 						cov.Run(sampleFile, traceFile);
 						ret.Add(traceFile);
-						logger.Debug("Successfully created trace {0}", traceFile);
+						Logger.Debug("Successfully created trace {0}", traceFile);
 						OnTraceCompleted(sampleFile, i + 1, sampleFiles.Length);
 					}
 					catch (Exception ex)
 					{
-						logger.Debug("Failed to generate trace.\n{0}", ex);
+						Logger.Debug("Failed to generate trace.\n{0}", ex);
 						OnTraceFaled(sampleFile, i + 1, sampleFiles.Length);
 					}
 				}
@@ -161,7 +271,7 @@ namespace Peach.Core.Analysis
 			}
 			catch (Exception ex)
 			{
-				logger.Debug("Failed to create coverage.\n{0}", ex);
+				Logger.Debug("Failed to create coverage.\n{0}", ex);
 
 				throw new PeachException(ex.Message, ex);
 			}

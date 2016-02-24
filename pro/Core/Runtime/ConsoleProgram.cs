@@ -160,6 +160,11 @@ namespace Peach.Pro.Core.Runtime
 				v => ParseRange("range", v)
 			);
 			options.Add(
+				"duration=",
+				"How long to run the fuzzer for.",
+				(TimeSpan v) => _config.Duration = v
+			);
+			options.Add(
 				"c|count",
 				"Count test cases",
 				v => _config.countOnly = true
@@ -371,7 +376,14 @@ namespace Peach.Pro.Core.Runtime
 		/// Create an engine and run the fuzzing job
 		/// </summary>
 		protected virtual void RunEngine(Peach.Core.Dom.Dom dom)
-		{			
+		{
+			// Ensure the database has been migrated prior to
+			// creating the Job, as it will insert itself.
+			using (var db = new NodeDatabase())
+			{
+				db.Migrate();
+			}
+
 			// Add the JobLogger as necessary
 			Test test;
 
@@ -848,11 +860,6 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 		public ConsoleJobMonitor(Job job)
 		{
 			_guid = job.Guid;
-
-			using (var db = new NodeDatabase())
-			{
-				db.Migrate();
-			}
 		}
 
 		public void Dispose()
@@ -880,6 +887,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 		}
 
 		#region Not Implemented
+
 		public Job Start(string pitLibraryPath, string pitFile, JobRequest jobRequest)
 		{
 			throw new NotImplementedException();
@@ -909,6 +917,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 		{
 			set { throw new NotImplementedException(); }
 		}
+
 		#endregion
 	}
 }
