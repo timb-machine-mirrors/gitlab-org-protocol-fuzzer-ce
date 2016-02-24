@@ -44,6 +44,7 @@ namespace Peach.Core
 		public static Dictionary<string, Assembly> AssemblyCache = new Dictionary<string, Assembly>();
 		static Dictionary<Type, object[]> AttributeCache = new Dictionary<Type, object[]>();
 		static string[] searchPath = GetSearchPath();
+		static readonly string pluginsPath = GetPluginsPath();
 
 		#region Exclude List
 
@@ -149,6 +150,15 @@ namespace Peach.Core
 			return ret.Distinct().ToArray();
 		}
 
+		static string GetPluginsPath()
+		{
+			var config = Utilities.GetUserConfig();
+			var path =
+				config.AppSettings.Settings.Get("Plugins") ??
+				Utilities.GetAppResourcePath("Plugins");
+			return Path.GetFullPath(path);
+		}
+
 		static ClassLoader()
 		{
 			foreach (var path in searchPath)
@@ -174,6 +184,29 @@ namespace Peach.Core
 					{
 						logger.Trace("ClassLoader skipping \"{0}\", {1}", file, ex.Message);
 					}
+				}
+			}
+
+			if (!Directory.Exists(pluginsPath))
+				return;
+
+			var pys = Directory.GetFiles(pluginsPath, "*.py");
+			if (pys.Length == 0)
+				return;
+
+			var s = new PythonScripting();
+
+			s.AddSearchPath(pluginsPath);
+
+			foreach (var py in pys)
+			{
+				try
+				{
+					s.ImportModule(Path.GetFileNameWithoutExtension(py));
+				}
+				catch (Exception ex)
+				{
+					logger.Warn("ClassLoader skipping \"{0}\", {1}", py, ex.Message);
 				}
 			}
 		}
