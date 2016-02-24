@@ -54,8 +54,8 @@ namespace Peach.Pro.Core.Mutators
 			var asDouble = obj as Double;
 			if (asDouble != null)
 			{
-				var supported = !double.IsNaN((double)asDouble.DefaultValue);
-				supported = supported && !double.IsInfinity((double)asDouble.DefaultValue);
+				var supported = !double.IsNaN((double)asDouble.InternalValue);
+				supported = supported && !double.IsInfinity((double)asDouble.InternalValue);
 				
 				return obj.isMutable && supported;
 			}
