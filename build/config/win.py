@@ -53,9 +53,9 @@ def prepare(conf):
 				j(pin, 'extras', 'xed2-ia32', 'lib'),
 			],
 			'STLIB'     : [ 'pin', 'ntdll-32', 'pinvm', 'libxed' ],
-			'DEFINES'   : [ 'BIGARRAY_MULTIPLIER=1', '_SECURE_SCL=0', 'TARGET_WINDOWS', 'TARGET_IA32', 'HOST_IA32', 'USING_XED', ],
-			'CFLAGS'    : [ '/MT' ],
-			'CXXFLAGS'  : [ '/MT' ],
+			'DEFINES'   : [ 'BIGARRAY_MULTIPLIER=1', '_SECURE_SCL=0', 'TARGET_WINDOWS', 'TARGET_IA32', 'HOST_IA32', 'USING_XED', '_HAS_EXCEPTIONS=0' ],
+			'CFLAGS'    : [ '/MT', '/GS-', '/GR-', '/EHs-', '/EHa-' ],
+			'CXXFLAGS'  : [ '/MT', '/GS-', '/GR-', '/EHs-', '/EHa-' ],
 			'LINKFLAGS' : [ '/EXPORT:main', '/ENTRY:Ptrace_DllMainCRTStartup@12', '/BASE:0x55000000' ],
 		},
 		'com' : {
@@ -84,9 +84,9 @@ def prepare(conf):
 				j(pin, 'extras', 'xed2-intel64', 'lib'),
 			],
 			'STLIB'     : [ 'pin', 'ntdll-64', 'pinvm', 'libxed' ],
-			'DEFINES'   : [ 'BIGARRAY_MULTIPLIER=1', '_SECURE_SCL=0', 'TARGET_WINDOWS', 'TARGET_IA32E', 'HOST_IA32E', 'USING_XED', ],
-			'CFLAGS'    : [ '/MT' ],
-			'CXXFLAGS'  : [ '/MT' ],
+			'DEFINES'   : [ 'BIGARRAY_MULTIPLIER=1', '_SECURE_SCL=0', 'TARGET_WINDOWS', 'TARGET_IA32E', 'HOST_IA32E', 'USING_XED', '_HAS_EXCEPTIONS=0' ],
+			'CFLAGS'    : [ '/MT', '/GS-', '/GR-', '/EHs-', '/EHa-' ],
+			'CXXFLAGS'  : [ '/MT', '/GS-', '/GR-', '/EHs-', '/EHa-' ],
 			'LINKFLAGS' : [ '/EXPORT:main', '/ENTRY:Ptrace_DllMainCRTStartup', '/BASE:0xC5000000' ],
 		},
 		'com' : {
@@ -163,7 +163,7 @@ def configure(conf):
 	env.append_value('CPPFLAGS_debug', cppflags_debug)
 	env.append_value('CPPFLAGS_release', cppflags_release)
 
-	env.append_value('CXXFLAGS', [ '/EHsc' ])
+	env.append_value('CXXFLAGS_com', [ '/EHsc' ])
 
 	env.append_value('DEFINES', [
 		'WIN32',
