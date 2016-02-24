@@ -57,13 +57,13 @@ xref:Choice[Choice]:: Indicates that all of the sub-elements are valid; but, onl
 xref:Fixup[Fixup]:: Are dynamic transformations such as checksums and CRCs.
 xref:Hint[Hint]:: Provides information to mutators.
 
-xref:JsonArray[JsonArray]:: Json string element.
-xref:JsonBool[JsonBool]:: Json string element.
-xref:JsonBlob[JsonBlob]:: Json string element.
-xref:JsonDouble[JsonDouble]:: Json string element.
-xref:JsonInteger[JsonInteger]:: Json string element.
-xref:JsonObject[JsonObject]:: Json string element.
-xref:JsonString[JsonString]:: Json string element.
+xref:JsonArray[JsonArray]:: Json array
+xref:JsonBool[JsonBool]:: Json boolean
+xref:JsonBlob[JsonBlob]:: Json blob
+xref:JsonDouble[JsonDouble]:: Json double/float
+xref:JsonInteger[JsonInteger]:: Json integer
+xref:JsonObject[JsonObject]:: Json object
+xref:JsonString[JsonString]:: Json string
 
 xref:Placement[Placement]:: Relocates an element after it has been cracked.
 xref:Transformer[Transformer]:: Performs static transformations such as compression or encoding.
