@@ -2,7 +2,7 @@
 
 === Relationships in Data
 
-Data formats usually have related values. If you understand the basic data relationships types, it will be easier for you to correctly fuzz your data.
+Data formats usually have related values. If you understand the basic data relationships types, it will be easier for you to fuzz your data correctly.
 
 The basic relationships supported in Peach are _size of_ (sometimes called ``length of''), _count of_, and _offset of_. These basic relationships often produce some of the most interesting mutations during fuzzing as they directly tie to parsing the target data. These basic relationships also form the smallest set of relationships required to correctly output, mutate, and crack most data formats.
 
@@ -25,7 +25,7 @@ xref:Relations_Offset[offset]::
 --
 Offset relations are the least common data format relationship. Offset relations are used in data formats where one element provides the offset to some data.
 
-When offsets appear they are usually arrays of offsets to arrays of data. Peach has a special way of handling this. See the xref:DataModeling_Placement[arrays of offsets to data] for more information.
+When offsets appear, they are usually arrays of offsets to arrays of data. Peach has a special way of handling this. See the xref:DataModeling_Placement[arrays of offsets to data] for more information.
 --
 
 
@@ -46,7 +46,17 @@ When offsets appear they are usually arrays of offsets to arrays of data. Peach 
 
 ==== Adjusting Relation Values
 
+/////////
+ RAB. Old 1/18/2016
+
 At some point, you will come across a format that will require you to modify the relation value in some way. Perhaps the relation value must be masked, or the value doubled. Relations in Peach allow you to associate Python expressions with both the reading and the setting of the value. The attributes _expressionGet_ and _expressionSet_ perform this function. The value is exposed as _size_, _count_, or _offset_ depending on the relation type.
+
+RAB. End of Old 1/18/2016
+///////// 
+
+At some point, you will come across a format that will require a modification to the relation value. Perhaps the value requires a mask, or perhaps you need to double the value specified in the relation. 
+
+Relations in Peach allow you to associate Python expressions when reading and when setting the value of the relation. The attributes _expressionGet_ and _expressionSet_ perform this function. The relation value is exposed as _size_ for a size relation, _count_ for a count relation, or _offset_ for an offset relation.
 
 .Example of expressionGet and expressionSet
 ===========================================
@@ -68,9 +78,11 @@ For more information about _expressionGet_ and _expressionSet_ with each relatio
 
 A common data pattern seen is arrays of offsets to data.
 
-When cracking this type of data in Peach, the offset relation and its corresponding data are both cracked as Peach parses each element in the array.
-This creates a situation where the corresponding data will end up in the wrong place (offset).
-To handle this, Peach uses _Placement_, a child-element, to move the parent data element post-cracking.
+When cracking this type of data, Peach cracks both the offset relation and 
+its corresponding data when parsing the array element. This creates a situation 
+where the corresponding data will end up in the wrong place--not at the offset.
+Peach provides _Placement_, a child-element, to move the parent data element to 
+the correct location post-cracking.
 
 Consider the following data model:
 
@@ -113,7 +125,7 @@ The structure of data formed when cracking data into the model looks like:
 
 However, the data does not actually look like this. The format should instead 
 look like the following layout, with the Data element located where the _OffsetOfData_ 
-points to. 
+specifies. 
 In this second layout, the data directly follows the array of lengths and offsets.
 
 * ArrayOfOffsets
@@ -130,7 +142,7 @@ In this second layout, the data directly follows the array of lengths and offset
 * Data-1
 * Data-N
 
-Peach can achieve this format through the use of _Placement_. Here is the modified XML 
+Peach can achieve this format using the _Placement_ element. Here is the modified XML 
 that produces the correct data model:
 
 [source,xml]
@@ -175,4 +187,4 @@ The resulting data model looks like the following:
 * Data-N
 * PlaceDataHere
 
-The block named PlaceDataHere is a zero-length data element and does not produce any actual data. It is used solely as a point to place our data.
+The block named PlaceDataHere is a zero-length data element and does not produce any actual data. It serves solely as a point to place our data.

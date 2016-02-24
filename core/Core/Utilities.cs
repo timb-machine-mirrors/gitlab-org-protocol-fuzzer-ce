@@ -535,7 +535,7 @@ namespace Peach.Core
 		private delegate void HexOutputFunc(char[] line);
 		private delegate int HexInputFunc(byte[] buf, int max);
 
-		private static void HexDump(HexInputFunc input, HexOutputFunc output, int bytesPerLine = 16)
+		private static void HexDump(HexInputFunc input, HexOutputFunc output, int bytesPerLine = 16, long startAddress = 0)
 		{
 			var bytes = new byte[bytesPerLine];
 			var HexChars = "0123456789ABCDEF".ToCharArray();
@@ -555,7 +555,7 @@ namespace Peach.Core
 
 			var line = (new String(' ', lineLength - Environment.NewLine.Length) + Environment.NewLine).ToCharArray();
 
-			for (var i = 0; ; i += bytesPerLine)
+			for (var i = startAddress; ; i += bytesPerLine)
 			{
 				var readLen = input(bytes, bytesPerLine);
 				if (readLen == 0)
@@ -623,7 +623,7 @@ namespace Peach.Core
 			return ret;
 		}
 
-		public static void HexDump(Stream input, Stream output, int bytesPerLine = 16)
+		public static void HexDump(Stream input, Stream output, int bytesPerLine = 16, long startAddress = 0)
 		{
 			var pos = input.Position;
 
@@ -638,12 +638,12 @@ namespace Peach.Core
 				output.Write(buf, 0, buf.Length);
 			};
 
-			HexDump(inputFunc, outputFunc, bytesPerLine);
+			HexDump(inputFunc, outputFunc, bytesPerLine, startAddress: startAddress);
 
 			input.Seek(pos, SeekOrigin.Begin);
 		}
 
-		public static void HexDump(byte[] buffer, int offset, int count, Stream output, int bytesPerLine = 16)
+		public static void HexDump(byte[] buffer, int offset, int count, Stream output, int bytesPerLine = 16, long startAddress = 0)
 		{
 			HexInputFunc inputFunc = (buf, max) =>
 			{
@@ -660,10 +660,10 @@ namespace Peach.Core
 				output.Write(buf, 0, buf.Length);
 			};
 
-			HexDump(inputFunc, outputFunc, bytesPerLine);
+			HexDump(inputFunc, outputFunc, bytesPerLine, startAddress: startAddress);
 		}
 
-		public static string HexDump(Stream input, int bytesPerLine = 16, int maxOutputSize = 1024*8)
+		public static string HexDump(Stream input, int bytesPerLine = 16, int maxOutputSize = 1024*8, long startAddress = 0)
 		{
 			var sb = new StringBuilder();
 			var pos = input.Position;
@@ -675,7 +675,7 @@ namespace Peach.Core
 				return len;
 			};
 
-			HexDump(inputFunc, line => sb.Append(line), bytesPerLine);
+			HexDump(inputFunc, line => sb.Append(line), bytesPerLine, startAddress: startAddress);
 
 			if (input.Position != input.Length)
 				sb.AppendFormat("---- TRUNCATED (Total Length: {0} bytes) ----", input.Length);
@@ -685,7 +685,7 @@ namespace Peach.Core
 			return sb.ToString();
 		}
 
-		public static string HexDump(byte[] buffer, int offset, int count, int bytesPerLine = 16)
+		public static string HexDump(byte[] buffer, int offset, int count, int bytesPerLine = 16, long startAddress = 0)
 		{
 			var sb = new StringBuilder();
 
@@ -698,15 +698,15 @@ namespace Peach.Core
 				return len;
 			};
 
-			HexDump(inputFunc, line => sb.Append(line), bytesPerLine);
+			HexDump(inputFunc, line => sb.Append(line), bytesPerLine, startAddress: startAddress);
 
 			return sb.ToString();
 		}
 
-		public static string HexDump(string text, int bytesPerLine = 16)
+		public static string HexDump(string text, int bytesPerLine = 16, long startAddress = 0)
 		{
 			var buf = Encoding.UTF8.GetBytes(text);
-			return HexDump(new MemoryStream(buf), bytesPerLine);
+			return HexDump(new MemoryStream(buf), bytesPerLine, startAddress: startAddress);
 		}
 
 		public static string PrettyBytes(long bytes)

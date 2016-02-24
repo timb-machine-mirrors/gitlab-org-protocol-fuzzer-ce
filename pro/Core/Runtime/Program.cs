@@ -4,26 +4,34 @@ using Peach.Core;
 using Peach.Core.Runtime;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Peach.Pro.Core.WebServices;
+using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.Core.Runtime
 {
 	public interface IWebStatus : IDisposable
 	{
-		void Start();
+		/// <summary>
+		/// Starts the web server.
+		/// </summary>
+		/// <param name="port">If not specified an unused port will be picked.</param>
+		void Start(int? port);
+
 		Uri Uri { get; }
 	}
 
 	public abstract class Program
 	{
-		// PitLibraryPath, StrtBrowser, IJobMonitor
-		public Func<string, bool, IJobMonitor, int> RunWeb { get; set; }
-		public Func<IJobMonitor, IWebStatus> AttachWeb { get; set; }
+		// PitLibraryPath, IJobMonitor
+		public Func<string, IJobMonitor, IWebStatus> CreateWeb { get; set; }
 
 		protected OptionSet _options;
 		protected int _verbosity;
+		protected int? _webPort;
 
 		// this is static so it can be re-used by unit tests
 		public static void LoadPlatformAssembly()
@@ -249,7 +257,7 @@ namespace Peach.Pro.Core.Runtime
 
 		protected virtual int ReportError(bool showUsage, Exception ex)
 		{
-			if (ex.InnerException != null)
+			if (ex is TargetInvocationException && ex.InnerException != null)
 				ex = ex.InnerException;
 
 			if (_verbosity > 1)
@@ -318,6 +326,58 @@ namespace Peach.Pro.Core.Runtime
 					"The specified Peach Pit Library location '{0}' does not exist.".Fmt(
 						pitLibraryPath));
 			return Path.GetFullPath(pitLibraryPath);
+		}
+
+		protected int RunWeb(string pitLibraryPath, bool shouldStartBrowser, IJobMonitor jobMonitor)
+		{
+			// Don't try and open the browser on linux hosts as this can cause lynx to start
+			if (Platform.GetOS() == Platform.OS.Linux)
+				shouldStartBrowser = false;
+
+			using (var evt = new AutoResetEvent(false))
+			{
+				ConsoleCancelEventHandler handler = (s, e) =>
+				{
+					// ReSharper disable once AccessToDisposedClosure
+					evt.Set();
+					e.Cancel = true;
+				};
+
+				using (var svc = CreateWeb(pitLibraryPath, jobMonitor))
+				{
+					svc.Start(_webPort);
+
+					if (!Debugger.IsAttached && shouldStartBrowser)
+					{
+						try
+						{
+							SysProcess.Start(svc.Uri.ToString());
+						}
+						catch
+						{
+							// Eat exceptions
+						}
+					}
+
+					ConsoleWatcher.WriteInfoMark();
+					Console.WriteLine("Web site running at: {0}", svc.Uri);
+
+					ConsoleWatcher.WriteInfoMark();
+					Console.WriteLine("Press Ctrl-C to exit.");
+
+					try
+					{
+						Console.CancelKeyPress += handler;
+						evt.WaitOne();
+					}
+					finally
+					{
+						Console.CancelKeyPress -= handler;
+					}
+
+					return 0;
+				}
+			}
 		}
 	}
 }

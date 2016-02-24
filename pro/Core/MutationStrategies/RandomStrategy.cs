@@ -62,9 +62,10 @@ namespace Peach.Pro.Core.MutationStrategies
 
 			#endregion
 
-			public MutableItem(string instanceName, string elementName)
+			public MutableItem(string instanceName, string elementName, ElementWeight weight)
 				: this(instanceName, elementName, new Mutator[0])
 			{
+				Weight = (int)weight;
 			}
 
 			public MutableItem(string instanceName, string elementName, ICollection<Mutator> mutators)
@@ -72,9 +73,11 @@ namespace Peach.Pro.Core.MutationStrategies
 				InstanceName = instanceName;
 				ElementName = elementName;
 				Mutators = new WeightedList<Mutator>(mutators);
+				Weight = 1;
 			}
 
 			public string Name { get { return InstanceName; } }
+			public int Weight { get; set; }
 			public string InstanceName { get; private set; }
 			public string ElementName { get; private set; }
 			public WeightedList<Mutator> Mutators { get; private set; }
@@ -82,7 +85,7 @@ namespace Peach.Pro.Core.MutationStrategies
 
 			public int TransformWeight(Func<int, int> how)
 			{
-				return Mutators.TransformWeight(how);
+				return Weight * Mutators.TransformWeight(how);
 			}
 		}
 
@@ -649,7 +652,10 @@ namespace Peach.Pro.Core.MutationStrategies
 
 				foreach (var elem in allElements)
 				{
-					var rec = new MutableItem(item.instanceName, elem.fullName);
+					if (elem.Weight == ElementWeight.Off)
+						continue;
+
+					var rec = new MutableItem(item.instanceName, elem.fullName, elem.Weight);
 					var e = elem;
 
 					rec.Mutators.AddRange(dataMutators

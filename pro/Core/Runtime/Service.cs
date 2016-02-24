@@ -15,6 +15,11 @@ namespace Peach.Pro.Core.Runtime
 				"Pit Library Path",
 				v => _pitLibraryPath = v
 			);
+			options.Add(
+				"webport=",
+				"Specifies port web interface runs on.",
+				(int v) => _webPort = v
+			);
 		}
 
 		protected override void OnRun(List<string> args)
@@ -22,7 +27,7 @@ namespace Peach.Pro.Core.Runtime
 			// Ensure pit library exists
 			var pits = FindPitLibrary(_pitLibraryPath);
 
-			if (RunWeb != null)
+			if (CreateWeb != null)
 				RunWeb(pits, false, new ExternalJobMonitor());
 		}
 	}

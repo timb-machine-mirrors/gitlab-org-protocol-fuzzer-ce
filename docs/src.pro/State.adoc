@@ -17,9 +17,9 @@
 //  talked about initial state and changing states
 //  added example
 
-State elements reside in xref:StateModel[StateModels]. Each state element contains a logical Peach work unit.
+State elements reside in xref:StateModel[StateModels]. Each State element contains a logical Peach work unit.
 
-Each xref:StateModel[StateModel] must contain at least one state element. If you wish to model complex protocols or systems, use multiple state elements within your xref:StateModel[StateModel].
+Each xref:StateModel[StateModel] must contain at least one State element. If you wish to model complex protocols or systems, use multiple State elements within your xref:StateModel[StateModel].
 
 === Syntax
 
@@ -40,27 +40,30 @@ Each xref:StateModel[StateModel] must contain at least one state element. If you
 </StateModel>
 ----
 
-State elements contain one or more action elements. Each action element can perform tasks related to how the individual state element consolidates logic.
+State elements contain one or more Action elements. Each Action element can perform tasks related to how the individual State element consolidates logic.
 
-Actions are performed sequentially from top to bottom.
+Within a State element, actions execute in sequence from top to bottom, in the same order they appear in the State definition. 
 
-Multiple state elements may not be performed in the order in which they appear in the xref:StateModel[StateModel]. This is most common in fuzzing scenarios where input is received and the response is determined by what was in the input.
+State elements can occur linearly by chaining from one state to another. Yet, 
+Peach supports state changes that permit branching and looping among the State 
+elements. Branches and loops in the StateModel are common in fuzzing scenarios 
+where the input drives a response or a choice of responses.
 
-* The 'intitialState' attribute in the xref:StateModel[StateModel] declaration determines which is the first state element to be executed. 
+* The 'intitialState' attribute in the xref:StateModel[StateModel] declaration determines the first State element of the xref:StateModel[StateModel] to run. 
 * Peach transitions into a new State after a 'changeState' action.
 
-If the same action elements execute in the order occurs every time, we recommend keeping all the actions in one state element.
+TIP: If a set of Action elements always executes in the same order, place the set of actions in a single State element.
 
 === Attributes
 
 _Required:_
 
-xref:name[name]:: The name of the state 
+xref:name[name]:: The name of the State element.
 
 _Optional:_
 
-xref:State_onStart[onStart]:: Scripting statement run prior to any actions
-xref:State_onComplete[onComplete]:: Scripting statement run after explicit actions
+xref:State_onStart[onStart]:: Scripting statement run prior to any actions.
+xref:State_onComplete[onComplete]:: Scripting statement run after explicit actions.
 
 === Child Elements
 

@@ -1,4 +1,9 @@
+:images: ./images
+:peachweb: Peach Web Interface
+:peachcomd: Peach Command Line Interface
+:peachug: Peach User Guide
 
+<<<
 [[Intro_to_FuzzingBrand_new_items]]
 == Introduction to Fuzzing
 
@@ -12,15 +17,15 @@ _What is our goal when we fuzz?_
 
 Our goal is to find new, previously unknown security vulnerabilities. Finding vulnerabilities is limited only by our ability to detect them automatically.
 
-The most common target for fuzzing is a data consumer such a network service or a web browser. For a data consumer, the unexpected actions consist of sending data to the consumer that is malformed in some way. When the target consumes the fuzzed data, the malformed data could trigger a target vulnerability. The likelihood that a single change causes a vulnerability might not be high, but when the act of sending fuzzed data repeats over and over, a very good chance exists that the target will misbehave in some interesting manner.
+The most common target for fuzzing is a data consumer such a network service or a web browser. For a data consumer, the unexpected actions consist of sending data to the consumer that is malformed in some way. When the target consumes the fuzzed data, the malformed data could trigger a target vulnerability. The likelihood that a single change causes a vulnerability might not be high, but when the act of sending fuzzed data repeats over 100,000 times, a very good chance exists that the target will misbehave in some interesting manner.
 
-Fuzzers submit hundreds, thousands, even millions of data samples malformed in some way; fuzzers call the malformed data mutations. Once written, fuzzers typically run for long periods of time finding more and more vulnerabilities, called faults.
+Fuzzers submit thousands, hundreds of thousands, and even millions of data samples malformed in some way; fuzzers call the malformed data mutations. Once written, fuzzers typically run for long time periods finding more and more vulnerabilities, called faults.
 
 Consider the following C structure and corresponding data shown in hex:
 
 image::{images}/struct_with_hex.png[]
 
-The data is parsed by the data consumer into the structure. The data and structure are color coded to show which parts of the data are loaded into each member of the structure _Header_. Following the structure, two lines of code occur that use the _Header_ structure. Looking at that code, we can identify several issues that could likely lead to crashing our program that we could trigger by changing our input data.
+The data consumer or test target parses data into the structure. The data and structure are color coded to show which parts of the data are loaded into each member of the structure _Header_. Following the structure, two lines of code occur that use the _Header_ structure. Looking at that code, we can identify several issues that could likely lead to crashing our program that we could trigger by changing our input data.
 
 The first thing we could do is change the _len_ in our data from 0x0021 to 0x0001. This would cause the memory allocation to return a smaller amount of memory than what is needed for copying data using the _strcpy_ function. Once _strcpy_ executes, we will have written past the end of _msg_data_, possibly causing the target process to crash.
 

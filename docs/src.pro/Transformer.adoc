@@ -7,12 +7,16 @@
 
 Transformers perform static transforms or encoding on the parent element. 
 
-Transforms are typically two directional: encode and decode.  Examples include ZIP compression, Base64 encoding, and HTML encoding.
+Transformers most often occur in pairs, as encoding and decoding functions. The decoding function is the inverse of the encoding function. In this sense, they are 
+bi-directional. Examples include ZIP compression, Base64 encoding, and HTML encoding.
+
+Some transformers lack a decoding function; they are unidirectional. For example, 
+the MD5 transformer is a unidirectional transformer that creates a hash.  
 
 Transformers are different than Fixups:
 
- * Transformers only operate on the parent element 
- * Fixups reference another element's data.
+ * Transformers operate on the parent data element. 
+ * Fixups generate their outputs by using values from other data elements.
 
 === Example
 
@@ -61,6 +65,6 @@ The output of the above data model is 0x01<len(b64(Data))><b64(Data)>.
 |xref:Transformers_Sha256Transformer[Sha256] ||X|
 |xref:Transformers_SidStringToBytesTransformer[SidStringToBytes]|||X
 |xref:Transformers_TripleDesTransformer[TripleDes]||X|
-|xref:Transformers_UrlEncodeTransformer[UrlEncode]|||X
 |xref:Transformers_UnixMd5CryptTransformer[UnixMd5Crypt]||X|
+|xref:Transformers_UrlEncodeTransformer[UrlEncode]|||X
 |===================================================

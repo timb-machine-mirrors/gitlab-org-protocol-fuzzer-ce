@@ -38,10 +38,10 @@ namespace Peach.Pro.Core.Agent.Monitors
 		public bool AddressSanitizer { get; set; }
 		public string WorkingDirectory { get; set; }
 
-		static readonly Regex AsanMatch = new Regex(@"==\d+==ERROR: AddressSanitizer:");
-		static readonly Regex AsanBucket = new Regex(@"==\d+==ERROR: AddressSanitizer: ([^\s]+) on address ([0-9a-z]+) at pc ([0-9a-z]+)");
-		static readonly Regex AsanMessage = new Regex(@"(==\d+==ERROR: AddressSanitizer:.*==\d+==ABORTING)", RegexOptions.Singleline);
-		static readonly Regex AsanTitle = new Regex(@"==\d+==ERROR: AddressSanitizer: ([^\r\n]+)");
+		internal static readonly Regex AsanMatch = new Regex(@"==\d+==ERROR: AddressSanitizer:");
+		internal static readonly Regex AsanBucket = new Regex(@"==\d+==ERROR: AddressSanitizer: ([^\s]+) on address ([0-9a-z]+) at pc ([0-9a-z]+)");
+		internal static readonly Regex AsanMessage = new Regex(@"(==\d+==ERROR: AddressSanitizer:.*==\d+==ABORTING)", RegexOptions.Singleline);
+		internal static readonly Regex AsanTitle = new Regex(@"==\d+==ERROR: AddressSanitizer: ([^\r\n]+)");
 
 		private Regex _faultOnRegex;
 		private MonitorData _data;

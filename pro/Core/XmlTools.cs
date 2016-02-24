@@ -18,6 +18,22 @@ namespace Peach.Pro.Core
 
 		static Dictionary<string, XmlSchemaSimpleType> simpleTypes = MakeSimpleTypes();
 
+		private static readonly Dictionary<Type, XmlSerializer> serializers = new Dictionary<Type, XmlSerializer>();
+
+		public static XmlSerializer GetSerializer(Type t)
+		{
+			lock (serializers)
+			{
+				XmlSerializer ret;
+				if (!serializers.TryGetValue(t, out ret))
+				{
+					ret = new XmlSerializer(t);
+					serializers.Add(t, ret);
+				}
+				return ret;
+			}
+		}
+
 		public static XmlSchema GetSchema(Type type)
 		{
 			var xmlRoot = type.GetAttributes<XmlRootAttribute>(null).FirstOrDefault();
@@ -265,7 +281,7 @@ namespace Peach.Pro.Core
 			{
 				try
 				{
-					var s = new XmlSerializer(typeof(T));
+					var s = GetSerializer(typeof(T));
 					var o = s.Deserialize(xmlReader);
 					var r = (T)o;
 
@@ -360,7 +376,7 @@ namespace Peach.Pro.Core
 
 			public void Serialize(T obj)
 			{
-				var s = new XmlSerializer(typeof(T));
+				var s = GetSerializer(typeof(T));
 				s.Serialize(xmlWriter, obj);
 			}
 

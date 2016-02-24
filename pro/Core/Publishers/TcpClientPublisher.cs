@@ -121,10 +121,10 @@ namespace Peach.Pro.Core.Publishers
 
 		protected override void OnStop()
 		{
-			base.OnStop();
-
 			if (Lifetime == Test.Lifetime.Session)
 				base.OnClose();
+
+			base.OnStop();
 		}
 
 		protected override void OnOpen()

@@ -8,7 +8,9 @@
 	<DataModel name="TheDataModel">
 		<String name="Value" value="Hello World">
 			<!-- Use our fixup like normal -->
-			<Fixup class="PythonFixup"/>
+			<Fixup class="PythonFixup">
+				<Param name="Param1" value="Test" />
+			</Fixup>
 		</String>
 	</DataModel>
 

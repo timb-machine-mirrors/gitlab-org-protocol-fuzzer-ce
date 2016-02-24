@@ -19,6 +19,7 @@ namespace Peach.Pro.Core.Dom
 	[DataElement("Frag", DataElementTypes.All)]
 	[DescriptionAttribute("Fragmentation element")]
 	[Parameter("name", typeof(string), "Element name", "")]
+	[Parameter("fieldId", typeof(string), "Element field ID", "")]
 	[Parameter("fragLength", typeof(int), "Fragment size in bytes", "")]
 	[Parameter("class", typeof(string), "Fragment extension class", "ByLength")]
 	[Parameter("constraint", typeof(string), "Scripting expression that evaluates to true or false", "")]

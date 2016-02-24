@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -13,8 +14,7 @@ using Org.BouncyCastle.Crypto.Tls;
 using Org.BouncyCastle.Security;
 using Peach.Core;
 using Peach.Core.IO;
-using Peach.Pro.Core.Mutators;
-using PemReader = Org.BouncyCastle.Utilities.IO.Pem.PemReader;
+using Peach.Pro.Core.Publishers.Ssl;
 
 namespace Peach.Pro.Core.Publishers
 {
@@ -27,6 +27,7 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("Sni", typeof(string), "Sni to use for SSL connection. Will use Host by default", "")]
 	[Parameter("ClientCert", typeof(string), "Path to client certificate in PEM format", "")]
 	[Parameter("ClientKey", typeof(string), "Path to client private key in PEM format", "")]
+	[Parameter("Alpn", typeof(string), "ALPN TLS extension, example value: h2;spdy/3.1;http/1.1", "")]
 	public class SslClientPublisher : Peach.Core.Publishers.BufferedStreamPublisher
 	{
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
@@ -40,10 +41,13 @@ namespace Peach.Pro.Core.Publishers
 			private readonly string cert;
 			private readonly string key;
 
+			public string Alpn { get; set; }
+
 			public MyTlsClient(string clientCert, string clientKey)
 			{
 				cert = clientCert;
 				key = clientKey;
+				Alpn = null;
 			}
 
 			public override TlsAuthentication GetAuthentication()
@@ -296,6 +300,100 @@ namespace Peach.Pro.Core.Publishers
 				extraSuites.CopyTo(allSuites, baseSuites.Length);
 
 				return allSuites;
+			}
+
+			public override TlsKeyExchange GetKeyExchange()
+			{
+				int keyExchangeAlgorithm = TlsUtilities.GetKeyExchangeAlgorithm(mSelectedCipherSuite);
+
+				switch (keyExchangeAlgorithm)
+				{
+					case KeyExchangeAlgorithm.DH_DSS:
+					case KeyExchangeAlgorithm.DH_RSA:
+						return CreateDHKeyExchange(keyExchangeAlgorithm);
+
+					case KeyExchangeAlgorithm.DHE_DSS:
+					case KeyExchangeAlgorithm.DHE_RSA:
+						return CreateDheKeyExchange(keyExchangeAlgorithm);
+
+					case KeyExchangeAlgorithm.ECDH_ECDSA:
+					case KeyExchangeAlgorithm.ECDH_RSA:
+						return CreateECDHKeyExchange(keyExchangeAlgorithm);
+
+					case KeyExchangeAlgorithm.ECDHE_ECDSA:
+					case KeyExchangeAlgorithm.ECDHE_RSA:
+						return CreateECDheKeyExchange(keyExchangeAlgorithm);
+
+					case KeyExchangeAlgorithm.RSA:
+						return CreateRsaKeyExchange();
+
+					default:
+						/*
+							* Note: internal error here; the TlsProtocol implementation verifies that the
+							* server-selected cipher suite was in the list of client-offered cipher suites, so if
+							* we now can't produce an implementation, we shouldn't have offered it!
+							*/
+						throw new TlsFatalAlert(AlertDescription.internal_error);
+				}
+			}
+
+			public override IDictionary GetClientExtensions()
+			{
+				var clientExtensions = base.GetClientExtensions();
+
+				if (!string.IsNullOrEmpty(Alpn))
+				{
+					clientExtensions = TlsExtensionsUtilities.EnsureExtensionsInitialised(clientExtensions);
+
+					var protocols = Alpn.Split(new [] {';'}, StringSplitOptions.RemoveEmptyEntries);
+					var innerStream = new MemoryStream();
+
+					foreach (var s in protocols)
+					{
+						var buff = UTF8Encoding.UTF8.GetBytes(s);
+						TlsUtilities.WriteUint8((byte)buff.Length, innerStream);
+						innerStream.Write(buff, 0, buff.Length);
+					}
+
+					var innerBuff = innerStream.ToArray();
+					var stream = new MemoryStream();
+
+					// Write ALPN length
+					TlsUtilities.WriteUint16(innerBuff.Length, stream);
+					// Write ALPN array
+					stream.Write(innerBuff, 0, innerBuff.Length);
+
+					clientExtensions[0x10] = stream.ToArray();
+				}
+
+				return clientExtensions;
+			}
+			
+			protected override TlsKeyExchange CreateDHKeyExchange(int keyExchange)
+			{
+				return new PeachyTlsDHKeyExchange(keyExchange, mSupportedSignatureAlgorithms, null);
+			}
+
+			protected override TlsKeyExchange CreateDheKeyExchange(int keyExchange)
+			{
+				return new PeachyTlsDheKeyExchange(keyExchange, mSupportedSignatureAlgorithms, null);
+			}
+
+			protected override TlsKeyExchange CreateECDHKeyExchange(int keyExchange)
+			{
+				return new PeachyTlsECDHKeyExchange(keyExchange, mSupportedSignatureAlgorithms, mNamedCurves, mClientECPointFormats,
+					mServerECPointFormats);
+			}
+
+			protected override TlsKeyExchange CreateECDheKeyExchange(int keyExchange)
+			{
+				return new PeachyTlsECDheKeyExchange(keyExchange, mSupportedSignatureAlgorithms, mNamedCurves, mClientECPointFormats,
+					mServerECPointFormats);
+			}
+
+			protected override TlsKeyExchange CreateRsaKeyExchange()
+			{
+				return new PeachyTlsRsaKeyExchange(mSupportedSignatureAlgorithms);
 			}
 		}
 
@@ -759,6 +857,7 @@ namespace Peach.Pro.Core.Publishers
 		public ushort Port { get; protected set; }
 		public string ClientKey { get; protected set; }
 		public string ClientCert { get; protected set; }
+		public string Alpn { get; protected set; }
 
 		protected TcpClient _tcp = null;
 		protected EndPoint _localEp = null;
@@ -829,6 +928,7 @@ namespace Peach.Pro.Core.Publishers
 			{
 				_tlsClientHandler = new TlsClientProtocol(_tcp.GetStream(), new SecureRandom());
 				_tlsClient = new MyTlsClient(ClientCert, ClientKey);
+				_tlsClient.Alpn = Alpn;
 
 				_tlsClientHandler.Connect(_tlsClient);
 

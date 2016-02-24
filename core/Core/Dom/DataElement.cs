@@ -172,6 +172,16 @@ namespace Peach.Core.Dom
 		Default = Fixup,
 	}
 
+	public enum ElementWeight
+	{
+		Off = 0,
+		Lowest,
+		BelowNormal,
+		Normal,
+		AboveNormal,
+		Highest
+	}
+
 	#endregion
 
 	public delegate void InvalidatedEventHandler(object sender, EventArgs e);
@@ -614,10 +624,18 @@ namespace Peach.Core.Dom
 		#endregion
 
 		private string _name;
+		private string _fieldId;
+		private string _fullFieldId;
 
 		public string Name
 		{
 			get { return _name; }
+		}
+
+		public ElementWeight Weight
+		{
+			get;
+			set;
 		}
 
 		public bool isMutable = true;
@@ -798,6 +816,9 @@ namespace Peach.Core.Dom
 			if (!Name.StartsWith("DataElement_"))
 				pit.WriteAttributeString("name", Name);
 
+			if (FieldId != null)
+				pit.WriteAttributeString("fieldId", FieldId);
+
 			if (isToken)
 				pit.WriteAttributeString("token", "true");
 
@@ -883,6 +904,9 @@ namespace Peach.Core.Dom
 
 		public DataElement(string name)
 		{
+			if (name == null)
+				name = "DataElement_" + (_uniqueName++);
+
 			if (name.IndexOf('.') > -1)
 				throw new PeachException("Error, DataElements cannot contain a period in their name. \"" + name + "\"");
 
@@ -892,6 +916,7 @@ namespace Peach.Core.Dom
 			_name = name;
 			fullName = name;
 			root = this;
+			Weight = ElementWeight.Normal;
 		}
 
 		public static T Generate<T>(XmlNode node, DataElementContainer parent) where T : DataElement, new()
@@ -959,6 +984,43 @@ namespace Peach.Core.Dom
 				debugName = "{0} '{1}'".Fmt(elementType, value);
 			}
 		}
+
+		public string FieldId
+		{
+			get
+			{
+				return _fieldId;
+			}
+			set
+			{
+				_fieldId = value;
+
+				var newFullFieldId = parent == null ? FieldId : FieldIdConcat(parent.FullFieldId, FieldId);
+
+				if (FullFieldId == newFullFieldId)
+					return;
+
+				FullFieldId = newFullFieldId;
+
+				foreach (var item in PreOrderTraverse().Skip(1))
+				{
+					item.FullFieldId = FieldIdConcat(item.parent.FullFieldId, item.FieldId);
+				}
+			}
+		}
+
+		public string FullFieldId
+		{
+			get
+			{
+				return _fullFieldId;
+			}
+			private set
+			{
+				_fullFieldId = value;
+			}
+		}
+
 
 		public DataElement root
 		{
@@ -1039,21 +1101,39 @@ namespace Peach.Core.Dom
 
 				_parent = value;
 
+				string newFieldId;
+
 				if (parent == null)
 				{
 					root = this;
 					fullName = Name;
+					newFieldId = FieldId;
 				}
 				else
 				{
 					root = parent.root;
 					fullName = parent.fullName + "." + Name;
+					newFieldId = FieldIdConcat(_parent.FullFieldId, FieldId);
 				}
 
-				foreach (var item in PreOrderTraverse().Skip(1))
+				if (FullFieldId != newFieldId)
 				{
-					item.root = root;
-					item.fullName = item.parent.fullName + "." + item.Name;
+					FullFieldId = newFieldId;
+
+					foreach (var item in PreOrderTraverse().Skip(1))
+					{
+						item.root = root;
+						item.fullName = item.parent.fullName + "." + item.Name;
+						item.FullFieldId = FieldIdConcat(item.parent.FullFieldId, item.FieldId);
+					}
+				}
+				else
+				{
+					foreach (var item in PreOrderTraverse().Skip(1))
+					{
+						item.root = root;
+						item.fullName = item.parent.fullName + "." + item.Name;
+					}
 				}
 
 #if DEBUG && DISABLED
@@ -1075,6 +1155,17 @@ namespace Peach.Core.Dom
 				}
 #endif
 			}
+		}
+
+		public static string FieldIdConcat(string lhs, string rhs)
+		{
+			if (string.IsNullOrEmpty(lhs))
+				return rhs;
+
+			if (string.IsNullOrEmpty(rhs))
+				return lhs;
+
+			return lhs + "." + rhs;
 		}
 
 		public DataElement getRoot()

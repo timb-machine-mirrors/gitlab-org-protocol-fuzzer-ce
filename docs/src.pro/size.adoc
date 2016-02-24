@@ -18,7 +18,7 @@
 // * Number
 // * if you did 24bit little endian.... Seth says "It's crazy"
 
-The _size_ attribute is always specified in BITS and typically deals with xref:Number[Number] or bit xref:Flags[Flags].
+The _size_ attribute speicifies the size of a data element in BITS. Size typically applies to xref:Number[Number] or bit xref:Flags[Flags] elements.
 
 // TODO
 

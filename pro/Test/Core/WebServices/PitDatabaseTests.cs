@@ -42,6 +42,7 @@ namespace Peach.Pro.Test.Core.WebServices
        version='0.0.1'>
 
 	<Include ns='SM' src='http://foo.com/_Common/Models/Image/IMG_Data.xml' />
+	<Include ns='SM' src='file:##PitLibraryPath##/_Common/Models/Image/IMG_Data.xml' />
 
 	<Test name='Default'>
 		<Agent ref='TheAgent'/>
@@ -797,7 +798,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.NotNull(file);
 			var pit = db.GetPitById(file.Id);
 			Assert.NotNull(pit);
-			Assert.AreEqual(1, pit.Versions[0].Files.Count);
+			Assert.AreEqual(2, pit.Versions[0].Files.Count);
 		}
 
 		[Test]

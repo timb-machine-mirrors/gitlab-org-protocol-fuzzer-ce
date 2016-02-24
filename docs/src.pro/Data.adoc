@@ -12,7 +12,7 @@ Data is cracked in a DataModel the same way that we crack an xref:Action_input[i
 * via a python expression
 * by setting values field by field
 
-The _Data_ element is a valid top-level element (child of <Peach>) when defining data sets that will be referenced during later processing.  It is also a valid child of xref:Action[Action] and xref:Param[Param] when used to both define data or reference an existing top level definition.
+The _Data_ element is a valid top-level element (child of <Peach>) when defining data sets that will be referenced during later processing.  It is also a valid child of xref:Action[Action] and xref:Param[Param] when used to define data or to reference an existing top level definition.
 
 === Data and _switchCount_
 
@@ -43,12 +43,12 @@ The following example illustrates this using two _Data_ elements. Peach fuzzes w
 
 _Required:_
 
-This element does not support any required attributes.
+None.
 
 _Optional:_
 
-xref:name[name]:: Name of the Data
-xref:fileName[fileName]:: Name of file to load, or folder with files to cycle through
+xref:name[name]:: Name of the Data.
+xref:fileName[fileName]:: Name of file to load, or folder with files to cycle through.
 
 === Child Elements
 
@@ -58,7 +58,7 @@ xref:fileName[fileName]:: Name of file to load, or folder with files to cycle th
 
 .Basic Usage Example
 ====================
-Multiple Data elements switched after _switchCount_ iterations
+Multiple Data elements switch after _switchCount_ iterations.
 
 [source,xml]
 ----

@@ -1,7 +1,7 @@
 [[StateModeling]]
 == State Modeling
 
-Once the data has been modeled, modeling shifts to describe the flow of that data to the target system. In {product} this is called _state modeling_. State models can range from very simple to very complex. 
+Once the data model is complete, modeling shifts to describe the flow of that data to the target system. In {product} this is called _state modeling_. State models can range from very simple to very complex. 
 
 TIP: Use the minimal amount of state model complexity needed for successful testing. 
 
@@ -10,22 +10,24 @@ State models consist of three elements:
 xref:StateModel[StateModel]::
 +
 --
-Top level element that defines a complete state model. The _StateModel_ element defines the entry state to start the execution.
+Top level element that defines a complete state model. The _StateModel_ element defines the entry state to start the execution. 
 --
 
 xref:State[State]::
 +
 --
-A child of _StateModel_ that defines a specific state that occurs. The _StateModel_ element define the entry, or _initial_ state. Execution of a state model begins with the initial state. If the initial state does not trigger other states into occurring using the xref:Action_changeState[changeState action], then the initial state also ends the execution.
+A child of _StateModel_ that defines a specific state that occurs. The _StateModel_ element defines the entry, or _initial_ state. Execution of a state model begins with the initial state. If the initial state does not trigger other states into occurring using the xref:Action_changeState[changeState action], then the initial state also ends the execution.
 --
 
 xref:Action[Action]::
 +
 --
-Action elements perform an action on a publisher (I/O adapter), agent/monitor, or data model. A State consists of one or more Action elements executed in order. Examples of actions include: sending output, receiving input, and changing to another state. Scripting expressions can be used to indicate whether an action is performed by specifying the _when_ attribute. Actions also support executing scripting expressions before an action begins and after an action completes.
+Action elements perform an action on a publisher (I/O adapter), agent/monitor, or data model. A State consists of one or more Action elements executed in order. Examples of actions include: sending output, receiving input, and changing to another state. +
+
+Scripting expressions can be used to indicate whether an action is performed by specifying the _when_ attribute. Actions also support executing scripting expressions before an action begins and after an action completes.
 --
 
-Many fuzzing tasks can be accomplished using a single xref:State[State] with a series of xref:Action[Actions].
+NOTE: Many fuzzing tasks can be accomplished using a single xref:State[State] with a series of xref:Action[Actions].
 
 .File State Model
 ====================

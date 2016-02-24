@@ -42,6 +42,15 @@ namespace Peach.Pro.Core.Runtime
 			if (job.Seed.HasValue)
 				_config.randomSeed = (uint)job.Seed.Value;
 
+			if (job.Duration.HasValue)
+			{
+				// This duration needs to take into account total duration and runtime
+				_config.Duration = job.Duration.Value - job.Runtime;
+
+				if (_config.Duration < TimeSpan.Zero)
+					_config.Duration = TimeSpan.Zero;
+			}
+
 			if (job.DryRun)
 			{
 				_config.singleIteration = true;

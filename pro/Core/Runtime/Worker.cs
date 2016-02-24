@@ -22,6 +22,7 @@ namespace Peach.Pro.Core.Runtime
 		Guid? _guid;
 		uint? _start;
 		uint? _stop;
+		TimeSpan? _duration;
 		uint? _seed;
 		bool _init;
 		bool? _test;
@@ -53,6 +54,11 @@ namespace Peach.Pro.Core.Runtime
 				"stop=",
 				"The iteration to stop fuzzing",
 				(uint v) => _stop = v
+			);
+			options.Add(
+				"duration=",
+				"How long to run the fuzzer for",
+				(TimeSpan v) => _duration = v
 			);
 			options.Add(
 				"init",
@@ -141,8 +147,9 @@ namespace Peach.Pro.Core.Runtime
 					Mode = JobMode.Preparing,
 					PeachVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString(),
 
-					RangeStart = _start.HasValue ? _start.Value : 0,
+					RangeStart = _start ?? 0,
 					RangeStop = _stop,
+					Duration = _duration,
 					Seed = _seed,
 					DryRun = _test.HasValue && _test.Value,
 				};

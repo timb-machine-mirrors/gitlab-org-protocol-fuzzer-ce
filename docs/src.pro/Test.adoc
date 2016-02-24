@@ -25,7 +25,7 @@ Test configures a specific fuzzing occurrence that combines a StateModel with a 
 
 One pit can contain multiple Test elements; simply provide the test element names on the Peach command line. 
 
-NOTE: When running Peach, the Test element named "Default" is used if a test name is not provided on the command line.
+NOTE: If the command-line for launching Peach does not inlcude a test name, Peach uses the Test element named "Default" for the fuzzing session.
 
 === Syntax
 
@@ -67,13 +67,13 @@ NOTE: When running Peach, the Test element named "Default" is used if a test nam
 
 _Required:_
 
-xref:name[name]:: Name of the test, use "Default" for default test 
+xref:name[name]:: Name of the test, use "Default" for the default test. 
 
 _Optional:_
 
-waitTime:: Time to wait in between each test case (Defaults to zero (0))
-faultWaitTime:: Time to wait for a fault to occur before starting next iteration. (Defaults to 0)
-controlIteration:: How often should we perform control iterations.  (Defaults to 0)
+waitTime:: Time to wait between adjacent test cases--The default value is zero (0).
+faultWaitTime:: Time to wait for a fault to occur before starting next iteration. The default value is zero (0).
+controlIteration:: Specifies the number of test cases that run before Peach performs the next control iteration. The default value is 0, a special value that means Peach is not using control iterations.
 
 targetLifetime:: Specifies when the target restarts to a known, stable state. +
 * "session" indicates the original target is used throughout the entire fuzzing session. This is the default value.
@@ -87,12 +87,9 @@ For example, if the default value is used, the search potentially re-runs the 80
 
 maxOutputSize::
 +
-Sets the maximum size of data that Peach generates. This is on an Action by Action basis meaning
-if your StateModel has two actions, each of them can produce data up to maxOutputSize. The default value is
-unlimited.
+Sets the maximum size of data that Peach generates. This is on an Action by Action basis, meaning that if your StateModel contains two actions, each action can produce data up to maxOutputSize. The default value is unlimited.
 +
-When using Publishers that have a maximum output size, such as UDP, it's recommended this attribute
-be used to set maximum size to correspond with this limit.
+When using Publishers that have a maximum output size, such as UDP, it's recommended this attribute be used to set maximum size to correspond with this limit.
 
 nonDeterministicActions::
 +

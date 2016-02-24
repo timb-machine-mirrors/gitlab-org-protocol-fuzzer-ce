@@ -6,17 +6,16 @@
 
 == Providing Sample Data
 
-To fuzz effectively with Peach, create a set of sample data to use as a fuzzing mutation base. Peach provides three ways to load sample data into a fuzzing session:
+To fuzz effectively with Peach, create a set of sample data to use as a fuzzing mutation base. Peach provides two ways to load sample data into a fuzzing session:
 
 * Specify initial values using the xref:Data[Data] element
 * Specify initial values in data files
-* Generate initial values by running a script
 
-Specify initial values using the xref:Data[Data] element. 
+=== Specifying Initial Values Using the Data Element
 
 You can provide sample data by specifying the information for each element, one at a time. This can be useful when no sample exists with the wanted values or for testing formats with a small number of fields, such as some network protocols. In this case, the xref:Data[Data] element is used along with the _Field_ child-element. See the xref:Data[Data] reference section for examples.
 
-Specify initial values in data files 
+=== Specifying Initial Values in Data Files 
 
 The most common way to provide sample data is via disk files. For example, when fuzzing a graphics format such as PNG you might use a set of 1,000 sample images. This method can also be used for network fuzzing by providing samples of each output as files and referencing them.
 

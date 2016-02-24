@@ -37,9 +37,29 @@ namespace Peach.Core.Dom
 	/// <summary>
 	/// Mark state model/data models as mutable at runtime.
 	/// </summary>
+	public class WeightMutable : MarkMutable
+	{
+		/// <summary>
+		/// Name of element to mark as mutable/non-mutable.
+		/// </summary>
+		[XmlAttribute("weight")]
+		public ElementWeight Weight { get; set; }
+
+		public override void Apply(DataElement elem)
+		{
+			elem.Weight = Weight;
+		}
+	}
+
+	/// <summary>
+	/// Mark state model/data models as mutable at runtime.
+	/// </summary>
 	public class IncludeMutable : MarkMutable
 	{
-		public override bool mutable { get { return true; } }
+		public override void Apply(DataElement elem)
+		{
+			elem.isMutable = true;
+		}
 	}
 
 	/// <summary>
@@ -47,7 +67,10 @@ namespace Peach.Core.Dom
 	/// </summary>
 	public class ExcludeMutable : MarkMutable
 	{
-		public override bool mutable { get { return false; } }
+		public override void Apply(DataElement elem)
+		{
+			elem.isMutable = false;
+		}
 	}
 
 	/// <summary>
@@ -55,8 +78,7 @@ namespace Peach.Core.Dom
 	/// </summary>
 	public abstract class MarkMutable
 	{
-		[XmlIgnore]
-		public abstract bool mutable { get; }
+		public abstract void Apply(DataElement elem);
 
 		/// <summary>
 		/// Name of element to mark as mutable/non-mutable.
@@ -87,8 +109,8 @@ namespace Peach.Core.Dom
 		[XmlAttribute]
 		public Mode mode { get; set; }
 
-		[PluginElement("class", typeof(Peach.Core.Mutator))]
-		public List<Peach.Core.Mutator> Mutators { get; set; }
+		[PluginElement("class", typeof(Mutator))]
+		public List<Mutator> Mutators { get; set; }
 	}
 
 	public class AgentRef
@@ -220,6 +242,8 @@ namespace Peach.Core.Dom
 		#endregion
 
 		[OnCloning]
+		// ReSharper disable once UnusedMember.Local
+		// ReSharper disable once UnusedParameter.Local
 		private bool OnCloning(object context)
 		{
 			// We should not ever get here.  This means
@@ -236,6 +260,7 @@ namespace Peach.Core.Dom
 
 		[XmlElement("Include", typeof(IncludeMutable))]
 		[XmlElement("Exclude", typeof(ExcludeMutable))]
+		[XmlElement("Weight", typeof(WeightMutable))]
 		[DefaultValue(null)]
 		public List<MarkMutable> mutables { get; set; }
 
@@ -329,7 +354,7 @@ namespace Peach.Core.Dom
 						continue;
 
 					foreach (var elem in dataElement.PreOrderTraverse())
-						elem.isMutable = item.mutable;
+						item.Apply(elem);
 				}
 			}
 

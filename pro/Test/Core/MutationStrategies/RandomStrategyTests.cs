@@ -1161,6 +1161,82 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 
 			RunSwitchTest(xml, 1, 100);
 		}
+
+
+		[Test]
+		public void TestWeights()
+		{
+			const string xml = @"
+<Peach>
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel name='DM'>
+					<String name='off' />
+					<String name='lowest' />
+					<String name='low' />
+					<String name='normal' />
+					<String name='high' />
+					<String name='highest' />
+				</DataModel>
+			</Action> 
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='StateModel'/>
+		<Publisher class='Null'/>
+		<Strategy class='Random'>
+			<Param name='MaxFieldsToMutate' value='1' />
+		</Strategy>
+
+		<Weight xpath='//off' weight='Off' />
+		<Weight xpath='//lowest' weight='Lowest' />
+		<Weight xpath='//low' weight='BelowNormal' />
+		<Weight xpath='//high' weight='AboveNormal' />
+		<Weight xpath='//highest' weight='Highest' />
+	</Test>
+</Peach>
+";
+
+			var dom = ParsePit(xml);
+			var cfg = new RunConfiguration
+			{
+				range = true,
+				rangeStart = 0,
+				rangeStop = 10000
+			};
+
+			var e = new Engine(null);
+
+			var count = new Dictionary<string, int>();
+
+			e.TestStarting += ctx =>
+			{
+				ctx.DataMutating += (c, actionData, element, mutator) =>
+				{
+					int cnt;
+					if (!count.TryGetValue(element.Name, out cnt))
+						cnt = 0;
+					else
+						++cnt;
+
+					count[element.Name] = cnt;
+				};
+			};
+
+			e.startFuzzing(dom, cfg);
+
+			foreach (var x in count)
+				Console.WriteLine("Elem: {0}, Count: {1}", x.Key, x.Value);
+
+			Assert.Less(count["lowest"], count["low"]);
+			Assert.Less(count["low"], count["normal"]);
+			Assert.Less(count["normal"], count["high"]);
+			Assert.Less(count["high"], count["highest"]);
+
+			Assert.False(count.ContainsKey("off"), "off shouldn't be mutated");
+		}
 	}
 }
 

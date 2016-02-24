@@ -19,9 +19,11 @@
 
 _occurs_ is a combination of xref:minOccurs[minOccurs] and xref:maxOccurs[maxOccurs]. 
 
-The _occurs_ value (for the specified data element) is the exact number of element occurrences Peach treats _occurs_ as an array.
+The _occurs_ value (for the specified data element) is the exact number of element occurrences. Peach treats _occurs_ as an array.
 
-=== Examples
+=== Example
+
+The following block is an array that occurs a fixed number of times.     
 
 [source,xml]
 ----

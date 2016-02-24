@@ -62,7 +62,7 @@ Values for this parameter follow:
 
 OnStart:: The action occurs once, at the start of a fuzzing session.
 OnIterationStart:: The action occurs at the start of a fuzzing iteration or test 
-case. For each test case, the action occurs once.+
+case. For each test case, the action occurs once.
 OnIterationStartAfterFault:: The action occurs after a fault, at the start of the 
 test case that immediately follows the fault. The fault is the trigger for the action 
 that follows shortly afterwards.
@@ -75,7 +75,7 @@ Note that the developer is responsible for defining the message in the State Mod
 and for coordinating its use throughout the pit.
 OnIterationEnd:: The action occurs at the end of a test case. For each test case, 
 the action occurs once.
-DetectFault:: The action occurs during each test case when monitors are polled for faults.
+DetectFault:: The action occurs during each test case when Peach polls the monitors for faults.
 OnFault:: The action occurs when a fault occurs. The action occurs once for each fault.
 OnEnd:: The action occurs once, at the end of a fuzzing session.
 

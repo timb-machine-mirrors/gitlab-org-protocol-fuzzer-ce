@@ -335,9 +335,9 @@ namespace Peach.Pro.Core.Agent.Channels
 							var jsonResponse = streamReader.ReadToEnd();
 							var response = JsonConvert.DeserializeObject<RestProxyPublisherResponse>(jsonResponse);
 
-							if (response.error)
+							if (response.error && restart)
 							{
-								logger.Warn("Query \"" + query + "\" error: " + response.errorString);
+								logger.Warn("Query \"" + query + "\" error, attempting to restart remote publisher: " + response.errorString);
 								RestartRemotePublisher();
 
 								jsonResponse = Send(query, json, false);
@@ -349,14 +349,17 @@ namespace Peach.Pro.Core.Agent.Channels
 									throw new SoftException("Query \"" + query + "\" error: " + response.errorString);
 								}
 							}
+							else if (response.error)
+							{
+								logger.Error("Query \"" + query + "\" error: " + response.errorString);
+								throw new SoftException("Query \"" + query + "\" error: " + response.errorString);
+							}
 
 							return jsonResponse;
 						}
 					}
-					else
-					{
-						return "";
-					}
+
+					return "";
 				}
 				catch (SoftException)
 				{
@@ -381,7 +384,7 @@ namespace Peach.Pro.Core.Agent.Channels
 				request.Cls = Class;
 				request.args = Args;
 
-				Send("CreatePublisher", JsonConvert.SerializeObject(request));
+				Send("CreatePublisher", JsonConvert.SerializeObject(request), false);
 
 				isCreated = true;
 			}

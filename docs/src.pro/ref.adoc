@@ -19,7 +19,7 @@
 // * If no name attribute, will get the datamodel's name or a unique derivative
 // * Replacing an element loses fixups, relations, transformers.
 
-The ref attribute specifies a reference to another element by either a name or class structure.  References can be relative or fully qualified. 
+The ref attribute specifies a reference to another element by name or by class structure.  References can be relative or fully qualified. 
 
 // TODO
 

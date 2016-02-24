@@ -1,4 +1,5 @@
-﻿.skin-1 .nav-list > li.disabled > a > .menu-text,
+﻿
+.skin-1 .nav-list > li.disabled > a > .menu-text,
 .skin-1 .nav-list > li.disabled > a > i,
 .skin-1 .nav-list > li.disabled > a > .arrow {
 	color: #595D60;
@@ -126,6 +127,7 @@ pre.peach-test-log {
 
 .peach-fault-detail pre {
 	min-height: 250px;
+	max-height: 600px;
 	overflow: auto;
 }
 
@@ -177,9 +179,14 @@ noscript {
 	font-size: large;
 }
 
-ul.library li a {
-	/*background-color: #dddddd;*/
-	padding: 1px 3px;
+.peach-library {
+	-moz-column-width: 200px;
+	-webkit-column-width: 200px;
+	column-width: 200px;
+}
+
+.peach-library ul > li {
+	width: 100%;
 }
 
 .breadcrumb {
@@ -228,4 +235,47 @@ ul.library li a {
 
 .ui-select-toggle {
 	text-align: left;
+}
+
+.tuning {
+	position: relative;
+}
+
+.tuning > div {
+	overflow-x: auto;
+	overflow-y: visible;
+	margin-left: 150px;
+}
+
+.tuning table {
+	width: 100%;
+}
+
+.tuning th {
+	position: absolute;
+	width: 150px;
+	left: 0;
+	padding: 10px 0px 10px 10px;
+}
+
+.tuning th i {
+	padding: 2px;
+}
+
+.tuning td {
+	padding: 2px 2px 2px 30px;
+}
+
+.tuning td .expander {
+	float: left;
+	margin-left: -35px;
+	margin-right: 5px;
+}
+
+.tuning td > div {
+	border: 1px solid black;
+	border-radius: 3px;
+	padding: 7px;
+	margin-right: 5px;
+	white-space: nowrap;
 }

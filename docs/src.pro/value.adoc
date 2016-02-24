@@ -14,7 +14,7 @@
 // * List supported elements (e.g. not supported by containers such as block, choice, xmlelement, xmlattribute, etc.)
 
 
-The _value_ attribute specifies a default value for a field when Peach is not mutating its contents. 
+The _value_ attribute specifies a default value for a data element when Peach is not mutating the element. 
 
 All Peach data element types support  _value_.  
 

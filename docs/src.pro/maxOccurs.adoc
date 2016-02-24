@@ -5,13 +5,11 @@
 
 == Maximum Occurrence Attribute
 
-_maxOccurs_ specifies the maximum number of times an element can occur.  
+_maxOccurs_ specifies the maximum number of times an element can occur. Peach treats a data element with _maxOccurs_ as an array.
 
-Peach treats a data element with _maxOccurs_ as an array.
+Peach uses the occurrence attributes in cracking, producing, and mutating data. 
 
-Occurrence attributes are used when cracking, producing, and mutating data; they define how often an element can occur. 
-
-The occurrence attributes _maxOccurs_ and xref:minOccurs[minOccurs] can be combined to provide an element's occurrence range.  
+The _maxOccurs_ attribute specifies an upper limit on the number of array elements that can occur. A similar attribute, the xref:minOccurs[minOccurs] attribute specifies a lower limit on the number of array elements that can occur. When used together, these two attributes define a range of an element’s occurrence.
 
 Related attributes: xref:minOccurs[minOccurs], xref:occurs[occurs].
 

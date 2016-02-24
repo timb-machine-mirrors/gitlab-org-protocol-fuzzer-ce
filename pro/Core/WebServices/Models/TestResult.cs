@@ -12,12 +12,18 @@ namespace Peach.Pro.Core.WebServices.Models
 		public TestStatus Status { get; set; }
 
 		/// <summary>
-		/// The events that mae up the test reslt
+		/// The events that make up the test reslt
 		/// </summary>
 		public IEnumerable<TestEvent> Events { get; set; }
 
+		/// <summary>
+		/// The debug log from the test run
+		/// </summary>
 		public string Log { get; set; }
 
+		/// <summary>
+		/// URL to the debug log from the test run
+		/// </summary>
 		public string LogUrl { get; set; }
 	}
 }

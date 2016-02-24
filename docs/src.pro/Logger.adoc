@@ -10,7 +10,7 @@ IMPORTANT: If a logger is not configured, this information will not be stored.
 [[Loggers_File]]
 === File
 
-The file system logger needs a specified path.  Peach creates a folder containing the run name and time stamp.  Inside of this folder are the actual logs.  Until a fault is detected very little information is logged to conserve disk space.
+The file system logger needs a specified path.  Peach creates a folder containing the run name and time stamp.  Inside of this folder are the actual logs.  Until the first fault emberges, Peach logs very little information to conserve disk space.
 
 [source,xml]
 ----

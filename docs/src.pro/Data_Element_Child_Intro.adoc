@@ -1,4 +1,4 @@
 
 === Data Element Children
 
-This section contains information about data element child elements.  Child elements modify or clarify the use and scope of the data elements. See also xref:Fixup[Fixups] and xref:Transformer[Transformers].
+This section contains information about data elements specified as child elements of another element. Child elements modify or clarify the use and scope of the data element. See also xref:Fixup[Fixups] and xref:Transformer[Transformers].

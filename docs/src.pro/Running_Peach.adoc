@@ -1,7 +1,9 @@
 
 == Running Peach
 
-Peach comes with a number of executables. In most instances, running Peach from the command line can meet your needs. This includes using the Peach Web Interface, that launches by running Peach from the command line without any parameters or switches. 
+Peach Fuzzer Professional includes a number of executable files. In most instances, running Peach from the command line can meet your needs. This includes using the Peach Web Interface, that launches by running Peach from the command line without any parameters or switches. 
+
+The following list identifies the support applications included with Peach Fuzzer Professional.
 
 [options="header"]
 |=======================

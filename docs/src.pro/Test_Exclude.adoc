@@ -10,7 +10,7 @@ One use case of these elements is to fuzz encapsulated data without fuzzing the 
 
 By default, Peach fuzzes all data elements.  Exclude prevents Peach from fuzzing all or specific data elements. XPath is used to identify the excluded elements. 
 
-NOTE: Even though a data element is excluded, it may appear to still be fuzzed. This is due to other elements being fuzzed. However, the excluded element does not have any specific mutations performed directly to it.
+NOTE: Even though a data element is excluded, it still may appear to be fuzzed. This is due to other elements being fuzzed. However, the excluded element does not have any specific mutations performed directly to it.
 
 .XPath Further Reading
 ****
@@ -37,11 +37,13 @@ The following links provide additional information regarding XPath.
 
 _Required:_
 
-None. If no attributes are specified, Peach excludes all data elements from fuzzing. 
+None.
 
 _Optional:_
 
-xpath:: Provide an xpath query to select elements to exclude. 
+xpath:: Provides an xpath query to select elements to exclude. 
+
+TIP: Peach interprets the statement _<Exclude />_ as all exclusive, and fuzzes no data elements. 
 
 === Examples
 

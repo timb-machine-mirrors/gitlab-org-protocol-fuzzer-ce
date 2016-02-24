@@ -41,6 +41,7 @@ namespace Peach.Core.Dom
 	[DataElementChildSupported("Flag")]
 	[DataElementChildSupported("Placement")]
 	[Parameter("name", typeof(string), "Element name", "")]
+	[Parameter("fieldId", typeof(string), "Element field ID", "")]
 	[Parameter("size", typeof(uint), "size in bits.  Typically [8, 16, 24, 32, 64]")]
 	[Parameter("endian", typeof(string), "Byte order of number (default 'little')", "little")]
 	[Parameter("token", typeof(bool), "Is element a token", "false")]

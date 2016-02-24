@@ -60,7 +60,7 @@ ifndef::peachug[]
 
 // TODO - Document each rest call
 
-This agent is intended to communicate with custom remote agents written in other languages
+This agent is intended to communicate with custom remote agents written in other languages.
 
 .Example configuration with remote publisher
 [source,xml]

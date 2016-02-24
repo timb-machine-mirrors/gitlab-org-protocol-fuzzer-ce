@@ -87,6 +87,7 @@ namespace Peach.Core.Publishers
 						lock (_bufferLock)
 						{
 							long pos = _buffer.Position;
+							long prevLen = _buffer.Length;
 							_buffer.Seek(0, SeekOrigin.End);
 							_buffer.Write(_recvBuf, 0, len);
 							_buffer.Position = pos;
@@ -95,7 +96,7 @@ namespace Peach.Core.Publishers
 							_timeout = false;
 
 							if (Logger.IsDebugEnabled)
-								Logger.Debug("\n\n" + Utilities.HexDump(_recvBuf, 0, len));
+								Logger.Debug("\n\n" + Utilities.HexDump(_recvBuf, 0, len, startAddress: prevLen));
 						}
 
 						ScheduleRead();
@@ -321,8 +322,13 @@ namespace Peach.Core.Publishers
 				CloseClient();
 
 				// Allow pit to eat write exception
-				if(!NoWriteException)
+				if (!NoWriteException)
+				{
+					if(ex is NotSupportedException && ex.Message == "Stream does not support writing.")
+						throw new SoftException("Error, remote side closed connection early.", ex);
+
 					throw new SoftException(ex);
+				}
 			}
 		}
 

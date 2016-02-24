@@ -2,7 +2,7 @@
 [[Include]]
 == Include
 
-The Include element allows you to include other Pit files in namespaces (the name that gets pre-appended to everything in the pit) so they can be used by the current Pit file.  
+The Include element allows you to include other Pit files in namespaces (the name that is pre-appended to everything in the pit) so they can be used by the current Pit file.  
 
 When referencing included Pit files, prefix element names with the namespace and a colon (:) _foo:datamodel_.
 
@@ -17,12 +17,12 @@ When referencing included Pit files, prefix element names with the namespace and
 
 _Required:_
 
-ns:: Namespace prefix
-src:: Source URL, use "+file:+" prefix for filenames
+ns:: Namespace prefix.
+src:: Source URL, use "+file:+" prefix for filenames.
 
 _Optional:_
 
-There are no optional attributes for this element.
+None.
 
 === Examples
 

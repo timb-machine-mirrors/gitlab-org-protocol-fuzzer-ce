@@ -86,6 +86,7 @@ namespace Peach.Core.Dom
 	[PitParsable("String")]
 	[DataElementChildSupported("Placement")]
 	[Parameter("name", typeof(string), "Element name", "")]
+	[Parameter("fieldId", typeof(string), "Element field ID", "")]
 	[Parameter("length", typeof(uint?), "Length in data element", "")]
 	[Parameter("lengthType", typeof(LengthType), "Units of the length attribute", "bytes")]
 	[Parameter("nullTerminated", typeof(bool), "Is string null terminated?", "false")]
@@ -261,10 +262,10 @@ namespace Peach.Core.Dom
 				str.padCharacter = context.getDefaultAttr(typeof(String), "padCharacter", str.padCharacter);
 
 			if (node.hasAttr("tokens")) // This item has a default!
-				throw new NotSupportedException("Tokens attribute is depricated in Peach 3.  Use parameter to StringToken analyzer isntead.");
+				throw new NotSupportedException("Tokens attribute is deprecated in Peach 3.  Use parameter to StringToken analyzer isntead.");
 
 			if (node.hasAttr("analyzer")) // this should be passed via a child element me things!
-				throw new NotSupportedException("Analyzer attribute is depricated in Peach 3.  Use a child element instead.");
+				throw new NotSupportedException("Analyzer attribute is deprecated in Peach 3.  Use a child element instead.");
 
 			context.handleCommonDataElementAttributes(node, str);
 			context.handleCommonDataElementChildren(node, str);

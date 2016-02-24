@@ -38,7 +38,7 @@ The following example has unique names for each element.
 </Block>
 ----
 
-The following example does not provide names for all values which is also okay (as long as you don't want to access a particular element).
+The following example does not provide names for all values. This practice is okay, as long as you don't want to access the unnamed element.
 
 [source,xml]
 ----

@@ -18,14 +18,14 @@ Hints are a xref:Mutators[Mutator] extension; they can be attached to data eleme
 _Available Hints_:
 
  * ArrayVarianceMutator-N
- * DWORDSliderMutator
  * BitFlipperMutator-N
- * NumericalVarianceMutator-N
- * NumericalEdgeCaseMutator-N
+ * DWORDSliderMutator
  * FiniteRandomNumbersMutator-N
- * SizedVaranceMutator-N
- * SizedNumericalEdgeCasesMutator-N
- * SizedDataVaranceMutator-N
+ * NumericalEdgeCaseMutator-N
+ * NumericalVarianceMutator-N
  * SizedDataNumericalEdgeCasesMutator-N
+ * SizedDataVaranceMutator-N
+ * SizedNumericalEdgeCasesMutator-N
+ * SizedVaranceMutator-N
  * type
  * ValidValues 

@@ -96,10 +96,20 @@ namespace Peach.Pro.Core.WebServices
 			_runner = new JobRunner(job, PitLibraryPath, PitFile);
 			_thread = new Thread(() =>
 			{
-				_runner.Run(evtReady);
+				try
+				{
+					_runner.Run(evtReady);
+				}
+				catch
+				{
+					// Eat all exceptions on the worker thread of the internal job monitor
+				}
+				finally
+				{
 
-				Logger.Trace("runner.Run() done");
-				_runner = null;
+					Logger.Trace("runner.Run() done");
+					_runner = null;
+				}
 
 				if (InternalEvent != null)
 					InternalEvent(this, EventArgs.Empty);

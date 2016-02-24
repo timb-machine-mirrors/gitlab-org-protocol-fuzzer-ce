@@ -12,6 +12,7 @@ namespace Peach.Pro.Core.Dom
 	[PitParsable("VarNumber")]
 	[DataElement("VarNumber", DataElementTypes.NonDataElements)]
 	[Parameter("name", typeof(string), "Element name", "")]
+	[Parameter("fieldId", typeof(string), "Element field ID", "")]
 	[Parameter("value", typeof(string), "Default value", "")]
 	[Parameter("valueType", typeof(Peach.Core.Dom.ValueType), "Format of value attribute", "string")]
 	[Parameter("token", typeof(bool), "Is element a token", "false")]
@@ -120,18 +121,6 @@ namespace Peach.Pro.Core.Dom
 			pit.WriteEndElement();
 		}
 
-		public override Variant DefaultValue
-		{
-			get
-			{
-				return base.DefaultValue;
-			}
-			set
-			{
-				base.DefaultValue = Sanitize(value);
-			}
-		}
-
 		#region Sanitize
 
 		private dynamic SanitizeString(string str)
@@ -196,7 +185,7 @@ namespace Peach.Pro.Core.Dom
 			return _endian.GetUInt64(bits, len);
 		}
 
-		private Variant Sanitize(Variant variant)
+		protected override Variant Sanitize(Variant variant)
 		{
 			dynamic value = GetNumber(variant);
 

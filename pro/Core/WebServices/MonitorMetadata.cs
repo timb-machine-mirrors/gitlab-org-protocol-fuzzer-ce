@@ -347,14 +347,23 @@ namespace Peach.Pro.Core.WebServices
 				switch (item.Type)
 				{
 					case ItemType.Group:
-						ret.Add(new ParamDetail
+						var detail = new ParamDetail
 						{
 							Name = item.Name,
 							Collapsed = item.Collapsed,
 							Type = ParameterType.Group,
 							Items = AsParameter(item.Items, monitorName, parameters)
-						});
+						};
 
+						if (detail.Items.Any(i => i.Type != ParameterType.Space && !i.Optional) && detail.Collapsed)
+						{
+							if (ErrorEventHandler != null)
+								ErrorEventHandler(this, new ErrorEventArgs(new NotSupportedException("Group '" + detail.Name + "' for monitor '" + monitorName + "' is collapsed but contains required parameters.")));
+
+							detail.Collapsed = false;
+						}
+
+						ret.Add(detail);
 						break;
 					case ItemType.Monitor:
 						MonitorInfo monitor;

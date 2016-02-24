@@ -58,5 +58,50 @@ namespace Peach.Core.Test
 
 			Assert.AreEqual(0, ofElement.relations.Count);
 		}
+
+
+		[Test]
+		[Category("Peach")]
+		public void SetItemByName()
+		{
+			var pit = @"<?xml version='1.0' encoding='utf-8'?>
+<Peach>
+	<DataModel name='Example1'>
+		<Block name='Item1'/>
+		<String name='Item2'/>
+		<Block name='Item3'/>
+		<Block name='Item4'/>
+	</DataModel>
+
+	<StateModel name='TheStateModel' initialState='initial'>
+		<State name='initial'>
+		  <Action name='A1' type='output'>
+			<DataModel name='foo'><String value='1' /></DataModel>
+		  </Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default' maxOutputSize='200'>
+		<StateModel ref='TheStateModel'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>
+";
+			var dom = ParsePit(pit);
+			var item2 = dom.dataModels[0]["Item2"];
+			var newItem2 = new Block(item2.Name);
+
+			Assert.AreEqual("Item1", dom.dataModels[0][0].Name);
+			Assert.AreEqual("Item2", dom.dataModels[0][1].Name);
+			Assert.AreEqual("Item3", dom.dataModels[0][2].Name);
+			Assert.AreEqual("Item4", dom.dataModels[0][3].Name);
+
+			item2.parent[item2.Name] = newItem2;
+
+			Assert.AreEqual("Item1", dom.dataModels[0][0].Name);
+			Assert.AreEqual("Item2", dom.dataModels[0][1].Name);
+			Assert.AreEqual("Item3", dom.dataModels[0][2].Name);
+			Assert.AreEqual("Item4", dom.dataModels[0][3].Name);
+		}
 	}
 }

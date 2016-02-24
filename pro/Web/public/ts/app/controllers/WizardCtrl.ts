@@ -282,7 +282,7 @@ namespace Peach {
 				QuestionTypes.Ipv6
 			];
 			let template = this.$scope.Question.type;
-			if (_.contains(types, template)) {
+			if (_.includes(types, template)) {
 				template = QuestionTypes.Combo;
 			}
 			if (template === QuestionTypes.User ||

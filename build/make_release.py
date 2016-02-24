@@ -32,12 +32,17 @@ output
 The result should be:    <--- archive to smb://nas/builds/peach-pro
 output
   release
-	${buildtag}          <--- publish to ssh://dl.peachfuzzer.com
-	  release.json
-	  peach-pro-${buildtag}-${platform}_release.zip
-	  peach-pro-${buildtag}-${platform}_release.zip.sha1
-	  pits
-		${pit}.zip
+  ${buildtag}          <--- publish to ssh://dl.peachfuzzer.com
+    release.json
+    peach-pro-${buildtag}-${platform}_release.zip
+    peach-pro-${buildtag}-${platform}_release.zip.sha1
+    pits
+      ${pit}.zip
+    datasheets
+      html
+        ${pit}.html
+      pdf
+        ${pit}.pdf
 '''
 
 def to_list(sth):
@@ -154,12 +159,16 @@ def extract_pits():
 				packs = z.read(i)
 			if os.path.basename(i.filename) == 'shipping_pits.json':
 				archives = z.read(i)
-			if not i.filename.endswith('.zip'):
-				continue
+			if i.filename.endswith('.zip'):
+				print ' - %s' % i.filename
+				z.extract(i, pitdir)
+				files.append(i.filename)
+			if i.filename.startswith('docs/datasheets') and not i.filename.endswith('/'):
+				print ' - %s' % i.filename
+				z.extract(i, pitdir)
+				files.append(i.filename)
 
-			print ' - %s' % i.filename
-			z.extract(i, pitdir)
-			files.append(os.path.join(i.filename))
+	# TODO Filter docs based on shipping pits
 
 	packs = json.loads(packs)
 	archives = json.loads(archives)
@@ -302,7 +311,13 @@ if __name__ == "__main__":
 
 		for f in pit_files:
 			src = os.path.join(tmpdir, 'pits', f)
+			# Eat the 'docs/' prefix
+			if (f.startswith('docs/')):
+				f = f[5:]
 			dst = os.path.join(path, 'pits', f)
+			d = os.path.dirname(dst)
+			if not os.path.isdir(d):
+				os.makedirs(d)
 			shutil.copy(src, dst)
 
 		data = json.dumps(manifest, sort_keys=True, indent=4)
