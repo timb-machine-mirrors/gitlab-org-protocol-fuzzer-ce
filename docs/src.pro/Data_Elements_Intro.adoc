@@ -19,12 +19,6 @@ The _Block_ element is a container for other data elements. By itself, a _Block_
 For example, if two data elements are included in a checksum calculation, they can be placed in a  _Block_ element and then the fixup can perform its function by referencing the _Block_. Both items in the group will be included in the fixup operation.
 --
 
-xref:Bool[Bool]::
-+
---
-The Bool element defines a Boolean value (values 0 or 1) that represents either true or false. The intended use of _Bool_ is in JSON strings, where the values `true` and `false` are assigned to variables upon parsing with the JSON analzyer.
---
-
 xref:Choice[Choice]::
 +
 --
@@ -61,19 +55,46 @@ xref:Flag[Flag]::
 _Flag_ defines a specific _Flag_ in a flag set. _Flag_ elements have a bit position and bit length.
 --
 
-xref:Json[Json]::
+xref:JsonArray[JsonArray]::
 +
 --
-The _Json_ element is a container for other data elements. By themselves, 
-_Json_ elements do not have any size or contain other data. They group other data 
-elements that will be represented in JSON in attribute-value pairs. The output of 
-a _Json_ element is a valid JSON string enclosed with the `{` and `}` characters. 
+Json array
 --
 
-xref:Null[Null]::
+xref:JsonBool[JsonBool]::
 +
 --
-The _Null_ element defines an element that has no value. This element is most useful when used as a child of a xref:Json[Json] element.
+Json boolean
+--
+
+xref:JsonBlob[JsonBlob]::
++
+--
+Json blob
+--
+
+xref:JsonDouble[JsonDouble]::
++
+--
+Json double/float
+--
+
+xref:JsonInteger[JsonInteger]::
++
+--
+Json integer
+--
+
+xref:JsonObject[JsonObject]::
++
+--
+Json object
+--
+
+xref:JsonString[JsonString]::
++
+--
+Json string
 --
 
 xref:Number[Number]::

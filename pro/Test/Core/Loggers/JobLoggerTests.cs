@@ -471,6 +471,107 @@ namespace Peach.Pro.Test.Core.Loggers
 		}
 
 		[Test]
+		public void TestMetricKindMachine()
+		{
+			const string xml = @"
+<Peach>
+	<!-- Only fieldIds on elements used by the state model effect Job.MetricKind -->
+	<DataModel name='Unused'>
+		<String fieldId='Test' />
+	</DataModel>
+
+	<DataModel name='DM'>
+		<String value='Hello World'/>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM' />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default' faultWaitTime='0' controlIteration='2'>
+		<StateModel ref='SM' />
+		<Publisher class='Null' />
+		<Logger class='File' />
+	</Test>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var cfg = new RunConfiguration { singleIteration = true, pitFile = "test" };
+
+			var e = new Engine(null);
+
+			Job job = null;
+
+			e.IterationStarting += (ctx, it, tot) =>
+			{
+				// Job.MetricKind is set in TestStarting so ensure it is correct
+				// by the first call to IterationStarting
+				using (var db = new NodeDatabase())
+				{
+					job = db.GetJob(cfg.id);
+				}
+
+			};
+
+			e.startFuzzing(dom, cfg);
+
+			Assert.NotNull(job);
+			Assert.AreEqual(NameKind.Machine, job.MetricKind);
+		}
+
+		[Test]
+		public void TestMetricKindHuman()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String value='Hello World' fieldId='Test' />
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM' />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default' faultWaitTime='0' controlIteration='2'>
+		<StateModel ref='SM' />
+		<Publisher class='Null' />
+		<Logger class='File' />
+	</Test>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var cfg = new RunConfiguration { singleIteration = true, pitFile = "test" };
+
+			var e = new Engine(null);
+
+			Job job = null;
+
+			e.IterationStarting += (ctx, it, tot) =>
+			{
+				// Job.MetricKind is set in TestStarting so ensure it is correct
+				// by the first call to IterationStarting
+				using (var db = new NodeDatabase())
+				{
+					job = db.GetJob(cfg.id);
+				}
+
+			};
+
+			e.startFuzzing(dom, cfg);
+
+			Assert.NotNull(job);
+			Assert.AreEqual(NameKind.Human, job.MetricKind);
+		}
+
+		[Test]
 		public void TestSaveActionData()
 		{
 			string xml = @"

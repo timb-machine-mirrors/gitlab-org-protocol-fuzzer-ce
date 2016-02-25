@@ -36,7 +36,7 @@ namespace Peach.Pro.Core.Mutators
 				signed = asNum.Signed;
 				min = asNum.MinValue;
 				max = (long)asNum.MaxValue;
-				value = signed ? (long)asNum.DefaultValue : (long)(ulong)asNum.DefaultValue;
+				value = signed ? (long)asNum.InternalValue : (long)(ulong)asNum.InternalValue;
 			}
 			else
 			{
@@ -45,7 +45,7 @@ namespace Peach.Pro.Core.Mutators
 				signed = true;
 				min = long.MinValue;
 				max = long.MaxValue;
-				value = (long)obj.DefaultValue;
+				value = (long)obj.InternalValue;
 			}
 		}
 

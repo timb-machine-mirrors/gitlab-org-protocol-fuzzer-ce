@@ -56,7 +56,7 @@ namespace Peach.Pro.Core.Mutators.Utility
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			if (obj is Peach.Core.Dom.Blob && obj.isMutable)
+			if (obj is Blob && obj.isMutable)
 				return true;
 
 			return false;
@@ -64,7 +64,7 @@ namespace Peach.Pro.Core.Mutators.Utility
 
 		protected static bool supportedNonEmptyDataElement(DataElement obj)
 		{
-			if (obj is Peach.Core.Dom.Blob && obj.isMutable)
+			if (obj is Blob && obj.isMutable)
 				return ((BitwiseStream)obj.InternalValue).Length > 0;
 
 			return false;

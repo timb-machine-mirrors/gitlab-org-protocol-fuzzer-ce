@@ -57,7 +57,10 @@ namespace Peach.Core
 		private readonly Watcher _watcher;
 		private readonly RunContext _context;
 		private readonly Thread _currentThread;
+		private readonly Timer _timer;
+		private int _timerCount;
 
+		private object _timerSync = new object();
 		private object _canAbortSync = new object();
 		private object _hasAbortedSync = new object();
 
@@ -216,6 +219,8 @@ namespace Peach.Core
 			{
 				engine = this,
 			};
+			_timer = new Timer(OnTimer);
+			_timerCount = 0;
 		}
 
 		/// <summary>
@@ -304,6 +309,9 @@ namespace Peach.Core
 				if (_watcher != null)
 					_watcher.Finalize(this, _context);
 
+				using (var evt = new AutoResetEvent(false))
+					_timer.Dispose(evt);
+
 				_context.dom.context = null;
 				_context.dom = null;
 				_context.test = null;
@@ -331,6 +339,31 @@ namespace Peach.Core
 			}
 
 			logger.Trace("<<< Abort");
+		}
+
+		protected void OnTimer(object arg)
+		{
+			int cnt;
+
+			lock (_timerSync)
+			{
+				cnt = ++_timerCount;
+			}
+
+			logger.Trace(">> Timer Expired (#{0})", cnt);
+
+			if (cnt == 1)
+			{
+				logger.Debug("Requested fuzzing duration reached, stopping after this iteration completes");
+				_context.continueFuzzing = false;
+			}
+			else if (cnt == 2)
+			{
+				logger.Debug("Failed to gracefully stop after {0} seconds, aborting the job", _context.config.AbortTimeout.TotalSeconds);
+				Abort();
+			}
+
+			logger.Trace("<< Timer Expired");
 		}
 
 		protected void StartTest()
@@ -427,6 +460,15 @@ namespace Peach.Core
 					context.config.skipToIteration);
 
 				iterationStart = context.config.skipToIteration;
+			}
+
+			if (context.config.Duration < TimeSpan.MaxValue)
+			{
+				logger.Debug("runTest: context.config.Duration == {0} ({1} seconds)",
+					context.config.Duration, context.config.Duration.TotalSeconds);
+
+				// Fire in Duration Time, and disable periodic signaling
+				_timer.Change(context.config.Duration, context.config.AbortTimeout);
 			}
 
 			iterationStart = Math.Max(1, iterationStart);
