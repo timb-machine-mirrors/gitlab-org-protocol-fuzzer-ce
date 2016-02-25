@@ -137,9 +137,12 @@ namespace Peach.Pro.Core.Storage
 
 		private void EnqueueFront(Func<Stopwatch, Job> func)
 		{
-			CheckTask();
+			do
+			{
+				CheckTask();
+			}
+			while (!_queueSemaphore.Wait(TimeSpan.FromSeconds(1)));
 
-			_queueSemaphore.Wait();
 			lock (_queue)
 			{
 				_queue.AddFirst(func);
@@ -150,9 +153,12 @@ namespace Peach.Pro.Core.Storage
 
 		private void EnqueueBack(Func<Stopwatch, Job> func)
 		{
-			CheckTask();
+			do
+			{
+				CheckTask();
+			}
+			while (!_queueSemaphore.Wait(TimeSpan.FromSeconds(1)));
 
-			_queueSemaphore.Wait();
 			lock (_queue)
 			{
 				_queue.AddLast(func);
