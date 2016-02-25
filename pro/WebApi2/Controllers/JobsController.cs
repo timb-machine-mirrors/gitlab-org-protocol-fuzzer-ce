@@ -268,7 +268,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		{
 			return WithJobDatabase(id, (job, db) =>
 			{
-				var fault = db.GetFaultById(faultId);
+				var fault = db.GetFaultById(faultId, job.MetricKind);
 				if (fault == null)
 					return NotFound();
 
@@ -283,7 +283,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		{
 			return WithJobDatabase(id, (job, db) =>
 			{
-				var fault = db.GetFaultById(faultId, false);
+				var fault = db.GetFaultById(faultId, job.MetricKind, false);
 				if (fault == null)
 					return NotFound();
 
@@ -307,7 +307,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		{
 			return WithJobDatabase(id, (job, db) =>
 			{
-				var fault = db.GetFaultById(faultId, false);
+				var fault = db.GetFaultById(faultId, job.MetricKind, false);
 				var filename = "Fault-{0}.zip".Fmt(fault.Iteration);
 				var dir = new DirectoryInfo(Path.Combine(job.LogPath, fault.FaultPath));
 				return new ZipResult(filename, dir);
@@ -362,7 +362,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
 		public IHttpActionResult GetElementMetric(Guid id)
 		{
-			return Query<ElementMetric>(id);
+			return QueryKind<ElementMetric>(id);
 		}
 
 		[Route("{id}/metrics/states")]
@@ -370,7 +370,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
 		public IHttpActionResult GetStateMetric(Guid id)
 		{
-			return Query<StateMetric>(id);
+			return QueryKind<StateMetric>(id);
 		}
 
 		[Route("{id}/metrics/dataset")]
@@ -378,7 +378,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
 		public IHttpActionResult GetDatasetMetric(Guid id)
 		{
-			return Query<DatasetMetric>(id);
+			return QueryKind<DatasetMetric>(id);
 		}
 
 		[Route("{id}/metrics/buckets")]
@@ -386,7 +386,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
 		public IHttpActionResult GetBucketMetric(Guid id)
 		{
-			return Query<BucketMetric>(id);
+			return QueryKind<BucketMetric>(id);
 		}
 
 		[Route("{id}/metrics/iterations")]
@@ -394,15 +394,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
 		public IHttpActionResult GetIterationMetric(Guid id)
 		{
-			return Query<IterationMetric>(id);
-		}
-
-		[Route("{id}/metrics/fields")]
-		[ResponseType(typeof(IEnumerable<FieldMetric>))]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
-		public IHttpActionResult GetFieldnMetric(Guid id)
-		{
-			return Query<FieldMetric>(id);
+			return QueryKind<IterationMetric>(id);
 		}
 
 		#endregion
@@ -456,6 +448,16 @@ namespace Peach.Pro.WebApi2.Controllers
 				if (!db.IsInitialized)
 					return NotFound();
 				return Ok(db.LoadTable<T>());
+			}, Ok(Enumerable.Empty<T>()));
+		}
+
+		private IHttpActionResult QueryKind<T>(Guid guid)
+		{
+			return WithJobDatabase(guid, (job, db) =>
+			{
+				if (!db.IsInitialized)
+					return NotFound();
+				return Ok(db.LoadTableKind<T>(job.MetricKind));
 			}, Ok(Enumerable.Empty<T>()));
 		}
 

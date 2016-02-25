@@ -308,16 +308,16 @@ FROM FaultFile
 WHERE Id = @Id;
 ";
 
-		public const string SelectMutationByIteration = @"
+		public const string SelectMutationByIterationAndKind = @"
 SELECT * 
 FROM ViewFaults 
-WHERE Iteration = @Iteration;
+WHERE Iteration = @Iteration AND Kind = @Kind;
 ";
 
-		public const string SelectMutationByFaultId = @"
+		public const string SelectMutationByFaultIdAndKind = @"
 SELECT * 
 FROM ViewFaults
-WHERE FaultDetailId = @Id;
+WHERE FaultDetailId = @Id AND Kind = @Kind;
 ";
 
 		public const string InsertNames = @"

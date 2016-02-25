@@ -115,7 +115,7 @@ namespace Peach.Pro.Test.Core.Loggers
 				{
 					Assert.True(!Path.IsPathRooted(fault.FaultPath), "Fault's FaultPath should be relative");
 
-					var detail = db.GetFaultById(fault.Id);
+					var detail = db.GetFaultById(fault.Id, NameKind.Machine);
 					Assert.NotNull(detail);
 					Assert.Greater(detail.Files.Count, 0);
 

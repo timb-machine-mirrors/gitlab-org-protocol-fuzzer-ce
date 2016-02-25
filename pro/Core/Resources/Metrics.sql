@@ -1,6 +1,6 @@
 ﻿-- States >>>
-DROP VIEW IF EXISTS ViewAllStates;
-CREATE VIEW ViewAllStates AS 
+DROP VIEW IF EXISTS ViewStates;
+CREATE VIEW ViewStates AS 
 SELECT
 	CASE WHEN s.RunCount = 0 THEN
 		-- If RunCount is 0, it is Human (All runs collapse into single entry)
@@ -16,19 +16,18 @@ SELECT
 	s.[Count] AS [ExecutionCount]
 FROM [State] AS s
 JOIN NamedItem n ON s.NameId = n.Id
+WHERE
+	length(n.Name) > 0
 ORDER BY
 	ExecutionCount DESC,
 	[State]
 ;
 
-DROP VIEW IF EXISTS ViewStates;
-CREATE VIEW ViewStates AS 
-SELECT * FROM ViewAllStates WHERE Kind = 0;
 -- States <<<
 
 -- Iterations >>>
-DROP VIEW IF EXISTS ViewAllIterations;
-CREATE VIEW ViewAllIterations AS 
+DROP VIEW IF EXISTS ViewIterations;
+CREATE VIEW ViewIterations AS 
 SELECT
 	x.Kind,
 	CASE WHEN x.Kind = 0 THEN
@@ -52,14 +51,11 @@ JOIN NamedItem AS m  ON m.Id  = x.MutatorId
 JOIN NamedItem AS d  ON d.Id  = x.DatasetId
 ;
 
-DROP VIEW IF EXISTS ViewIterations;
-CREATE VIEW ViewIterations AS 
-SELECT * FROM ViewAllIterations WHERE Kind = 0;
 -- Iterations <<<
 
 -- Faults >>>
-DROP VIEW IF EXISTS ViewAllFaults;
-CREATE VIEW ViewAllFaults AS 
+DROP VIEW IF EXISTS ViewFaults;
+CREATE VIEW ViewFaults AS 
 SELECT
 	x.Kind,
 	CASE WHEN x.Kind = 0 THEN
@@ -88,14 +84,11 @@ JOIN NamedItem AS m  ON m.Id  = x.MutatorId
 JOIN NamedItem AS d  ON d.Id  = x.DatasetId
 ;
 
-DROP VIEW IF EXISTS ViewFaults;
-CREATE VIEW ViewFaults AS 
-SELECT * FROM ViewAllFaults WHERE Kind = 0;
 -- Faults <<<
 
 -- Buckets >>>
-DROP VIEW IF EXISTS ViewAllBuckets;
-CREATE VIEW ViewAllBuckets AS
+DROP VIEW IF EXISTS ViewBuckets;
+CREATE VIEW ViewBuckets AS
 SELECT
 	x.MajorHash || '_' || x.MinorHash AS Bucket,
 	m.Name AS Mutator,
@@ -185,13 +178,6 @@ ORDER BY
 	Element
 ;
 
-DROP VIEW IF EXISTS ViewBuckets;
-CREATE VIEW ViewBuckets AS
-SELECT * FROM ViewAllBuckets WHERE Kind = 0;
-
-DROP VIEW IF EXISTS ViewFieldBuckets;
-CREATE VIEW ViewFieldBuckets AS
-SELECT * FROM ViewAllBuckets WHERE Kind = 1;
 -- Buckets <<<
 
 -- Bucket Details >>>
@@ -336,8 +322,8 @@ GROUP BY
 	x.Kind
 ;
 
-DROP VIEW IF EXISTS ViewAllElements;
-CREATE VIEW ViewAllElements AS
+DROP VIEW IF EXISTS ViewElements;
+CREATE VIEW ViewElements AS
 SELECT 
 	CASE WHEN vei.Kind = 0 THEN
 		sn.Name || '_' || s.RunCount
@@ -376,13 +362,6 @@ ORDER BY
 	[Element]
 ;
 
-DROP VIEW IF EXISTS ViewElements;
-CREATE VIEW ViewElements AS
-SELECT * FROM ViewAllElements WHERE Kind = 0;
-
-DROP VIEW IF EXISTS ViewFields;
-CREATE VIEW ViewFields AS
-SELECT * FROM ViewAllElements WHERE Kind = 1;
 -- Elements <<<
 
 
@@ -424,8 +403,8 @@ GROUP BY
 	x.Kind
 ;
 
-DROP VIEW IF EXISTS ViewAllDatasets;
-CREATE VIEW ViewAllDatasets AS
+DROP VIEW IF EXISTS ViewDatasets;
+CREATE VIEW ViewDatasets AS
 SELECT
 	vdi.Kind AS Kind,
 	CASE WHEN vdi.Kind = 0 THEN
@@ -481,7 +460,4 @@ ORDER BY
 	Dataset
 ;
 
-DROP VIEW IF EXISTS ViewDatasets;
-CREATE VIEW ViewDatasets AS
-SELECT * FROM ViewAllDatasets WHERE Kind = 0;
 -- Datasets <<<

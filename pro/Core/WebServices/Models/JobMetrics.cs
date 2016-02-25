@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Newtonsoft.Json;
 using Peach.Pro.Core.Storage;
 
@@ -96,33 +97,25 @@ namespace Peach.Pro.Core.WebServices.Models
 			BucketCount = bucketCount;
 			FaultCount = faultCount;
 		}
-	}
 
-	[Table("ViewFields")]
-	public class FieldMetric
-	{
-		public string State { get; set; }
-		public string Action { get; set; }
-		public string Element { get; set; }
-		public long IterationCount { get; set; }
-		public long BucketCount { get; set; }
-		public long FaultCount { get; set; }
-
-		public FieldMetric() { }
-		public FieldMetric(
-			string state,
-			string action,
-			string element,
-			long iterationCount,
-			long bucketCount,
-			long faultCount)
+		/// <summary>
+		/// Used by reporting.  Is the concatentation of
+		/// State, Action, Element with empty strings omitted
+		/// </summary>
+		[JsonIgnore]
+		public string FullElementName
 		{
-			State = state;
-			Action = action;
-			Element = element;
-			IterationCount = iterationCount;
-			BucketCount = bucketCount;
-			FaultCount = faultCount;
+			get
+			{
+				var ret = string.Join(".", new[]
+				{
+					State,
+					Action,
+					Element
+				}.Where(s => !string.IsNullOrEmpty(s)));
+
+				return !string.IsNullOrEmpty(ret) ? ret : "Other";
+			}
 		}
 	}
 
@@ -195,6 +188,18 @@ namespace Peach.Pro.Core.WebServices.Models
 			Element = element;
 			IterationCount = iterationCount;
 			FaultCount = faultCount;
+		}
+
+		/// <summary>
+		/// Used by reporting.
+		/// </summary>
+		[JsonIgnore]
+		public string FullElementName
+		{
+			get
+			{
+				return !string.IsNullOrEmpty(Element) ? Element : "Other";
+			}
 		}
 	}
 

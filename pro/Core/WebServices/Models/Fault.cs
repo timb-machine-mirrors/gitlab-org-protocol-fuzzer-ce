@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 using Peach.Pro.Core.Storage;
 
@@ -242,6 +243,26 @@ namespace Peach.Pro.Core.WebServices.Models
 			Element = element;
 			Mutator = mutator;
 			Dataset = dataset;
+		}
+
+		/// <summary>
+		/// Used by reporting.  Is the concatentation of
+		/// State, Action, Element with empty strings omitted
+		/// </summary>
+		[JsonIgnore]
+		public string FullElementName
+		{
+			get
+			{
+				var ret = string.Join(".", new[]
+				{
+					State,
+					Action,
+					Element
+				}.Where(s => !string.IsNullOrEmpty(s)));
+
+				return !string.IsNullOrEmpty(ret) ? ret : "Other";
+			}
 		}
 	}
 }
