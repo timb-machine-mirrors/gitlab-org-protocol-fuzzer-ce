@@ -44,8 +44,14 @@ namespace Peach.Core
 
 		public void Dispose()
 		{
-			try { Directory.Delete(Path, true); }
-			catch { }
+			try 
+			{ 
+				Directory.Delete(Path, true); 
+			}
+			catch(Exception ex) 
+			{
+				Console.WriteLine("{0}: {1}", Path, ex.Message);
+			}
 		}
 	}
 }

@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using Newtonsoft.Json;
 using Peach.Core;
 using Peach.Core.Runtime;
 using Peach.Pro.Core;
-using Peach.Pro.Core.WebServices.Models;
+using System.Reflection;
+using System.IO;
+using System.Security.Cryptography;
 
 namespace PitCompiler
 {
@@ -25,7 +25,12 @@ namespace PitCompiler
 					{ 
 						"h|?|help", 
 						"Show this help",
-						v => Syntax() 
+						v => Syntax(false) 
+					},
+					{
+						"V|version",
+						"Show the current version of this tool",
+						v => Version()
 					},
 					{ 
 						"debug", 
@@ -46,13 +51,19 @@ namespace PitCompiler
 
 				var extra = _options.Parse(args);
 				if (extra.Count != 1)
-					Syntax();
+					Syntax(true);
 
 				Utilities.ConfigureLogging(_logLevel);
 
 				Run(extra[0]);
 
 				return 0;
+			}
+			catch (Exception ex)
+			{
+				Console.Error.WriteLine("Error: {0}", ex.Message);
+				NLog.LogManager.GetLogger("pitc").Debug(ex);
+				return -1;
 			}
 			finally
 			{
@@ -62,11 +73,58 @@ namespace PitCompiler
 			}
 		}
 
-		static void Syntax()
+		static void Syntax(bool error)
 		{
 			Console.WriteLine("Usage: {0} [OPTION...] pit_path", Utilities.ExecutableName);
 			_options.WriteOptionDescriptions(Console.Out);
-			Environment.Exit(-1);
+			Environment.Exit(error ? -1 : 0);
+		}
+
+		static void Version()
+		{
+			Console.WriteLine("{0}: v{1} ({2})",
+				Utilities.ExecutableName,
+				Assembly.GetExecutingAssembly().GetName().Version,
+				ComputeVersionHash()
+			);
+			Environment.Exit(0);
+		}
+
+		static string ComputeVersionHash()
+		{
+			using (var algorithm = HashAlgorithm.Create("MD5"))
+			using (var cs = new CryptoStream(Stream.Null, algorithm, CryptoStreamMode.Write))
+			{
+				ComputeVersionHash(Assembly.GetEntryAssembly(), cs, new HashSet<string>());
+				cs.FlushFinalBlock();
+				return BitConverter.ToString(algorithm.Hash).Replace("-", string.Empty);
+			}
+		}
+
+		static void ComputeVersionHash(Assembly asm, CryptoStream cs, HashSet<string> seen)
+		{
+			if (seen.Contains(asm.Location) || asm.GlobalAssemblyCache)
+				return;
+			seen.Add(asm.Location);
+
+			try
+			{
+				using (var stream = new FileStream(asm.Location, FileMode.Open))
+					stream.CopyTo(cs);
+			}
+			catch (Exception)
+			{
+				// this can happen when trying to read mscorlib.dll
+				// ignore it since we don't care if system assemblies change versions
+				return;
+			}
+
+//			Console.WriteLine(asm.FullName);
+
+			foreach (var asmRef in asm.GetReferencedAssemblies())
+			{
+				ComputeVersionHash(Assembly.Load(asmRef), cs, seen);
+			}
 		}
 
 		static void AddDefine(string arg)
@@ -83,6 +141,8 @@ namespace PitCompiler
 
 		static void Run(string pitPath)
 		{
+			Console.WriteLine("pitc: {0}", pitPath);
+
 			string pitLibraryPath;
 			if (!_defines.TryGetValue("PitLibraryPath", out pitLibraryPath))
 				pitLibraryPath = ".";

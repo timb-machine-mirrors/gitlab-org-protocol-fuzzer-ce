@@ -86,20 +86,18 @@ namespace Peach.Pro.WebApi2.Controllers
 		[Route("")]
 		[ResponseType(typeof(Job))]
 		[SwaggerResponse(HttpStatusCode.BadRequest, Description = "Invalid job request")]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		[SwaggerResponse(HttpStatusCode.Forbidden, Description = "Unable to start the job")]
 		public IHttpActionResult Post([FromBody]JobRequest request)
 		{
 			if (string.IsNullOrEmpty(request.PitUrl))
 				return BadRequest();
 
-			var pit = PitDatabase.GetPitByUrl(request.PitUrl);
+			var pit = PitDatabase.GetPitDetailByUrl(request.PitUrl);
 			if (pit == null)
 				return NotFound();
 
-			var pitFile = pit.Versions[0].Files[0].Name;
-
-			var job = JobMonitor.Start(PitLibraryPath, pitFile, request);
+			var job = JobMonitor.Start(PitLibraryPath, pit.Path, request);
 			if (job == null)
 				return Forbidden();
 
@@ -108,7 +106,7 @@ namespace Peach.Pro.WebApi2.Controllers
 
 		[Route("{id}")]
 		[ResponseType(typeof(Job))]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		public IHttpActionResult Get(Guid id)
 		{
 			using (var db = new NodeDatabase())
@@ -127,7 +125,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		}
 
 		[Route("{id}")]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		public IHttpActionResult Delete(Guid id)
 		{
 			var liveJob = JobMonitor.GetJob();
@@ -160,7 +158,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		[Obsolete]
 		[Route("{id}/nodes")]
 		[ResponseType(typeof(string[]))]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		public IHttpActionResult GetNodes(Guid id)
 		{
 			return WithActiveJob(id, () => Ok(new[]
@@ -171,7 +169,7 @@ namespace Peach.Pro.WebApi2.Controllers
 
 		[Route("{id}/nodes/first")]
 		[ResponseType(typeof(TestResult))]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		public IHttpActionResult GetNodesFirst(Guid id)
 		{
 			using (var db = new NodeDatabase())
@@ -212,7 +210,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		[Obsolete]
 		[Route("{id}/nodes/{nodeId}/log")]
 		[ResultFile(".txt")]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		public IHttpActionResult GetNodesLog(Guid id, Guid nodeId)
 		{
 			var streams = new List<Stream>();
@@ -250,7 +248,7 @@ namespace Peach.Pro.WebApi2.Controllers
 
 		[Route("{id}/faults")]
 		[ResponseType(typeof(IEnumerable<FaultSummary>))]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		public IHttpActionResult GetFaults(Guid id)
 		{
 			return WithJobDatabase(id, (job, db) =>
@@ -263,7 +261,7 @@ namespace Peach.Pro.WebApi2.Controllers
 
 		[Route("{id}/faults/{faultId}")]
 		[ResponseType(typeof(Fault))]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job or fault does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job or fault does not exist")]
 		public IHttpActionResult GetFault(Guid id, long faultId)
 		{
 			return WithJobDatabase(id, (job, db) =>
@@ -278,7 +276,7 @@ namespace Peach.Pro.WebApi2.Controllers
 
 		[Route("{id}/faults/{faultId}/data/{fileId}")]
 		[ResultFile(".*")]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job, fault or file does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job, fault or file does not exist")]
 		public IHttpActionResult GetFaultFile(Guid id, long faultId, long fileId)
 		{
 			return WithJobDatabase(id, (job, db) =>
@@ -302,7 +300,7 @@ namespace Peach.Pro.WebApi2.Controllers
 
 		[Route("{id}/faults/{faultId}/archive")]
 		[ResultFile(".zip")]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job or fault does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job or fault does not exist")]
 		public IHttpActionResult GetFaultArchive(Guid id, long faultId)
 		{
 			return WithJobDatabase(id, (job, db) =>
@@ -316,7 +314,7 @@ namespace Peach.Pro.WebApi2.Controllers
 
 		[Route("{id}/report")]
 		[ResultFile(".pdf")]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		public IHttpActionResult GetReport(Guid id)
 		{
 			return WithJobDatabase(id, (job, db) =>
@@ -335,7 +333,7 @@ namespace Peach.Pro.WebApi2.Controllers
 
 		[Route("{id}/metrics/faultTimeline")]
 		[ResponseType(typeof(IEnumerable<FaultTimelineMetric>))]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		public IHttpActionResult GetFaultTimelineMetric(Guid id)
 		{
 			return Query<FaultTimelineMetric>(id);
@@ -343,7 +341,7 @@ namespace Peach.Pro.WebApi2.Controllers
 
 		[Route("{id}/metrics/bucketTimeline")]
 		[ResponseType(typeof(IEnumerable<BucketTimelineMetric>))]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		public IHttpActionResult GetBucketTimelineMetric(Guid id)
 		{
 			return Query<BucketTimelineMetric>(id);
@@ -351,7 +349,7 @@ namespace Peach.Pro.WebApi2.Controllers
 
 		[Route("{id}/metrics/mutators")]
 		[ResponseType(typeof(IEnumerable<MutatorMetric>))]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		public IHttpActionResult GetMutatorMetric(Guid id)
 		{
 			return Query<MutatorMetric>(id);
@@ -359,7 +357,7 @@ namespace Peach.Pro.WebApi2.Controllers
 
 		[Route("{id}/metrics/elements")]
 		[ResponseType(typeof(IEnumerable<ElementMetric>))]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		public IHttpActionResult GetElementMetric(Guid id)
 		{
 			return QueryKind<ElementMetric>(id);
@@ -367,7 +365,7 @@ namespace Peach.Pro.WebApi2.Controllers
 
 		[Route("{id}/metrics/states")]
 		[ResponseType(typeof(IEnumerable<StateMetric>))]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		public IHttpActionResult GetStateMetric(Guid id)
 		{
 			return QueryKind<StateMetric>(id);
@@ -375,7 +373,7 @@ namespace Peach.Pro.WebApi2.Controllers
 
 		[Route("{id}/metrics/dataset")]
 		[ResponseType(typeof(IEnumerable<DatasetMetric>))]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		public IHttpActionResult GetDatasetMetric(Guid id)
 		{
 			return QueryKind<DatasetMetric>(id);
@@ -383,7 +381,7 @@ namespace Peach.Pro.WebApi2.Controllers
 
 		[Route("{id}/metrics/buckets")]
 		[ResponseType(typeof(IEnumerable<BucketMetric>))]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		public IHttpActionResult GetBucketMetric(Guid id)
 		{
 			return QueryKind<BucketMetric>(id);
@@ -391,7 +389,7 @@ namespace Peach.Pro.WebApi2.Controllers
 
 		[Route("{id}/metrics/iterations")]
 		[ResponseType(typeof(IEnumerable<IterationMetric>))]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		public IHttpActionResult GetIterationMetric(Guid id)
 		{
 			return QueryKind<IterationMetric>(id);
@@ -402,7 +400,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		#region Pause / Continue / Stop / Kill
 
 		[Route("{id}/pause")]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		[SwaggerResponse(HttpStatusCode.Forbidden, Description = "Job state doesn't allow operation")]
 		public IHttpActionResult GetPauseJob(Guid id)
 		{
@@ -411,7 +409,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		}
 
 		[Route("{id}/continue")]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		[SwaggerResponse(HttpStatusCode.Forbidden, Description = "Job state doesn't allow operation")]
 		public IHttpActionResult GetContinueJob(Guid id)
 		{
@@ -420,7 +418,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		}
 
 		[Route("{id}/stop")]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		[SwaggerResponse(HttpStatusCode.Forbidden, Description = "Job state doesn't allow operation")]
 		public IHttpActionResult GetStopJob(Guid id)
 		{
@@ -429,7 +427,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		}
 
 		[Route("{id}/kill")]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		[SwaggerResponse(HttpStatusCode.Forbidden, Description = "Job state doesn't allow operation")]
 		public IHttpActionResult GetKillJob(Guid id)
 		{
