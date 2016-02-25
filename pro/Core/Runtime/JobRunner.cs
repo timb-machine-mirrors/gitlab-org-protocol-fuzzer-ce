@@ -34,11 +34,7 @@ namespace Peach.Pro.Core.Runtime
 		public JobRunner(Job job, string pitLibraryPath, string pitFile)
 		{
 			_pitLibraryPath = pitLibraryPath;
-
-			var serializer = new JsonSerializer();
-			using (var stream = new StreamReader(pitFile))
-			using (var reader = new JsonTextReader(stream))
-				_pit = serializer.Deserialize<Pit>(reader);
+			_pit = PitDatabase.LoadPit(pitFile);
 
 			_pitConfig = new PitConfig {
 				Config = _pit.Config,

@@ -9,6 +9,8 @@ using Peach.Pro.Core.WebServices.Models;
 using Encoding = System.Text.Encoding;
 using File = System.IO.File;
 using Newtonsoft.Json;
+using System.Reflection;
+using System.Globalization;
 
 namespace Peach.Pro.Core.WebServices
 {
@@ -55,6 +57,20 @@ namespace Peach.Pro.Core.WebServices
 					sb.Append(b.ToString("x2"));
 				return sb.ToString();
 			}
+		}
+
+		private static readonly PeachVersion Version = MakePeachVer();
+		private static PeachVersion MakePeachVer()
+		{
+			var ver = Assembly.GetExecutingAssembly().GetName().Version;
+
+			return new PeachVersion {
+				PeachUrl = "",
+				Major = ver.Major.ToString(CultureInfo.InvariantCulture),
+				Minor = ver.Minor.ToString(CultureInfo.InvariantCulture),
+				Build = ver.Build.ToString(CultureInfo.InvariantCulture),
+				Revision = ver.Revision.ToString(CultureInfo.InvariantCulture),
+			};
 		}
 
 		#endregion
@@ -247,6 +263,7 @@ namespace Peach.Pro.Core.WebServices
 				Tags = new List<Tag> { tag },
 				Timestamp = lastModified,
 				User = Environment.UserName,
+				Peaches = new List<PeachVersion> { Version },
 			};
 
 			return new PitDetail {
@@ -259,11 +276,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 			var lastModified = File.GetLastWriteTimeUtc(fileName);
 
-			Pit pit;
-			var serializer = new JsonSerializer();
-			using (var stream = new StreamReader(fileName))
-			using (var reader = new JsonTextReader(stream))
-				pit = serializer.Deserialize<Pit>(reader);
+			Pit pit = LoadPit(fileName);
 
 			pit.User = Environment.UserName;
 			pit.Timestamp = lastModified;
@@ -366,17 +379,13 @@ namespace Peach.Pro.Core.WebServices
 				Description = description,
 				Locked = false,
 				Tags = srcPit.Pit.Tags,
+				Peaches = new List<PeachVersion> { Version },
 				Config = new List<Param>(),
 				Agents = new List<Models.Agent>(),
 				Weights = new List<PitWeight>(),
 			};
 
-			var serializer = new JsonSerializer {
-				Formatting = Formatting.Indented
-			};
-			using (var stream = new StreamWriter(dstFile))
-			using (var writer = new JsonTextWriter(stream))
-				serializer.Serialize(writer, pit);
+			SavePit(dstFile, pit);
 
 			var item = AddEntry(userLibrary, dstFile);
 
@@ -396,14 +405,16 @@ namespace Peach.Pro.Core.WebServices
 			detail.Pit.Agents = data.Agents;
 			detail.Pit.Weights = data.Weights;
 
-			var serializer = new JsonSerializer {
-				Formatting = Formatting.Indented
-			};
-			using (var stream = new StreamWriter(detail.Path))
-			using (var writer = new JsonTextWriter(stream))
-				serializer.Serialize(writer, detail.Pit);
+			SavePit(detail.Path, detail.Pit);
 
 			return PopulatePit(detail);
+		}
+
+		public Pit UpdatePitByUrl(string url, PitConfig data)
+		{
+			PitDetail pit;
+			entries.TryGetValue(url, out pit);
+			return UpdatePitById(pit.Pit.Id, data);
 		}
 
 		private PitDetail GetPitDetailById(string guid)
@@ -416,6 +427,24 @@ namespace Peach.Pro.Core.WebServices
 			PitDetail pit;
 			entries.TryGetValue(url, out pit);
 			return pit;
+		}
+
+		public static Pit LoadPit(string path)
+		{
+			var serializer = new JsonSerializer();
+			using (var stream = new StreamReader(path))
+			using (var reader = new JsonTextReader(stream))
+				return serializer.Deserialize<Pit>(reader);
+		}
+
+		public static void SavePit(string path, Pit pit)
+		{
+			var serializer = new JsonSerializer {
+				Formatting = Formatting.Indented
+			};
+			using (var stream = new StreamWriter(path))
+			using (var writer = new JsonTextWriter(stream))
+				serializer.Serialize(writer, pit);
 		}
 
 		#region Pit Config/Agents/Metadata
