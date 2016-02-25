@@ -400,7 +400,7 @@ namespace Peach.Pro.Core.Loggers
 		protected override void ActionFinished(RunContext context, Action action)
 		{
 			var msg = action as Message;
-			if (msg != null)
+			if (msg != null && context.controlRecordingIteration)
 			{
 				_lastMessage = msg;
 				using (var db = new NodeDatabase())
