@@ -20,7 +20,7 @@ namespace Peach.Pro.Core.Mutators
 		public DoubleVariance(DataElement obj)
 			: base(obj)
 		{
-			var val = (double)obj.InternalValue;
+			var val = (double)GetValue(obj);
 			var abs = Math.Abs(val);
 
 			double max;
@@ -45,6 +45,38 @@ namespace Peach.Pro.Core.Mutators
 			_gen = new DoubleVarianceGenerator(val, min, max, maxRange);
 		}
 
+		/// <summary>
+		/// Get the numbers value via InternalValue or DefaultValue
+		/// </summary>
+		/// <remarks>
+		/// If InternalValue returns a non-int/long/ulong then fallback to DefaultValue
+		/// </remarks>
+		/// <param name="number"></param>
+		/// <returns></returns>
+		private static Variant GetValue(DataElement number)
+		{
+			var value = number.InternalValue;
+
+			switch (value.GetVariantType())
+			{
+				case Variant.VariantType.Double:
+				case Variant.VariantType.Int:
+				case Variant.VariantType.Long:
+				case Variant.VariantType.ULong:
+					return value;
+
+				case Variant.VariantType.String:
+					double result;
+
+					if (System.Double.TryParse((string)value, out result))
+						return value;
+
+					break;
+			}
+
+			return number.DefaultValue;
+		}
+
 		// ReSharper disable once InconsistentNaming
 		public new static bool supportedDataElement(DataElement obj)
 		{
@@ -54,8 +86,8 @@ namespace Peach.Pro.Core.Mutators
 			var asDouble = obj as Double;
 			if (asDouble != null)
 			{
-				var supported = !double.IsNaN((double)asDouble.InternalValue);
-				supported = supported && !double.IsInfinity((double)asDouble.InternalValue);
+				var supported = !double.IsNaN((double)GetValue(asDouble));
+				supported = supported && !double.IsInfinity((double)GetValue(asDouble));
 				
 				return obj.isMutable && supported;
 			}
