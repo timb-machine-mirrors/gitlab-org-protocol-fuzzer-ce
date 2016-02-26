@@ -1,8 +1,17 @@
-<div class="tuning">
+<div class="alert alert-info"
+		 ng-show="!hasLoaded">
+	Loading data...
+</div>
+<div class="alert alert-info"
+		 ng-show="isTruncated">
+	This view has been truncated to {{MAX_NODES}} nodes.
+</div>
+<div class="tuning" 
+	ng-show='hasLoaded'>
 	<div>
 		<table>
 			<tbody>
-				<tr ng-repeat="node in vm.flat track by $index"
+				<tr ng-repeat="node in flat track by $index"
 					ng-show="node.visible">
 					<th>
 						<i class="fa fa-lg pointer {{node.weightIcons[0]}}" 
@@ -26,7 +35,7 @@
 								<i class="fa {{node.expanderIcon}}"
 									ng-show="node.showExpander"/>
 							</span>
-							{{node.id}}
+							{{::node.id}}
 						</div>
 					</td>
 				</tr>

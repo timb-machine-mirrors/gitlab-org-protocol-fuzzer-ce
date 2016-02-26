@@ -2,6 +2,7 @@
 
 namespace Peach {
 	const SHIFT_WIDTH = 20;
+	const MAX_NODES = 2000;
 
 	interface FlatNode {
 		node: IPitFieldNode;
@@ -59,45 +60,69 @@ namespace Peach {
 		fields.forEach(field => selectWeight(field, weight));
 	}
 
+	interface ITuningScope extends IViewModelScope {
+		flat: FlatNode[];
+		hasLoaded: boolean;
+		isTruncated: boolean;
+		MAX_NODES: number;
+	}
+
 	export class ConfigureTuningController {
 		static $inject = [
 			C.Angular.$scope,
 			C.Services.Pit
 		];
 
+		private tree: IPitFieldNode[] = [];
+
 		constructor(
-			private $scope: IViewModelScope,
+			private $scope: ITuningScope,
 			private pitService: PitService
 		) {
+			this.$scope.hasLoaded = false;
+			this.$scope.isTruncated = false;
+			this.$scope.MAX_NODES = MAX_NODES;
+
 			console.time('load');
 			const promise = pitService.LoadPit();
 			promise.then((pit: IPit) => {
-				console.timeEnd('load');
 				this.tree = _.cloneDeep(pit.metadata.fields);
-				console.time('flatten');
-				this.flat = flatten(this.tree, 0, null);
-				console.timeEnd('flatten');
-				console.log('nodes', this.flat.length);
-				this.hasLoaded = true;
+				this.flatten();
+				this.$scope.hasLoaded = true;
+				setTimeout(() => console.timeEnd('load'));
 			});
 		}
 
-		private hasLoaded: boolean = false;
-		private flat: FlatNode[];
-		private tree: IPitFieldNode[] = [];
+		flatten() {
+			console.time('flatten');
+			const flat = flatten(this.tree, 0, null);
+			console.timeEnd('flatten');
+
+			console.log('nodes', flat.length);
+			this.$scope.isTruncated = (flat.length > MAX_NODES);
+			this.$scope.flat = _.take(flat, MAX_NODES);
+		}
 
 		OnToggleExpand(node: FlatNode) {
 			node.node.expanded = !node.expanded;
-			console.time('expand');
-			this.flat = flatten(this.tree, 0, null);
-			console.timeEnd('expand');
+			node.expanderIcon = 'fa-spin fa-spinner';
+			setTimeout(() => {
+				this.flatten();
+				setTimeout(() => {
+					this.$scope.$apply();
+				});
+			}, 100);
 		}
 
 		OnSelectWeight(node: FlatNode, weight: number) {
+			node.weightIcons[weight] = 'fa-spin fa-spinner';
 			selectWeight(node.node, weight);
-			console.time('select');
-			this.flat = flatten(this.tree, 0, null);
-			console.timeEnd('select');
+			setTimeout(() => {
+				this.flatten();
+				setTimeout(() => {
+					this.$scope.$apply();
+				});
+			}, 100);
 		}
 	}
 }
