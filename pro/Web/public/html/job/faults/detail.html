@@ -38,6 +38,33 @@
 				<td>{{vm.Fault.minorHash}}</td>
 			</tr>
 			<tr>
+				<td class="align-top">Tested Fields</td>
+				<td>
+					<table class="table table-hover table-bordered">
+						<thead>
+							<tr>
+								<th st-ratio="60" class="align-left">
+									Field
+								</th>
+								<th st-ratio="40" class="align-left">
+									Mutator
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="fm in vm.Fault.mutations">
+								<td class="align-left">
+									{{fm.element || 'Other'}}
+								</td>
+								<td class="align-left">
+									{{fm.mutator}}
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+			<tr>
 				<td class="align-top">Description</td>
 				<td>
 					<pre>{{vm.Fault.description}}</pre>

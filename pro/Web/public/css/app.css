@@ -253,7 +253,7 @@ noscript {
 
 .tuning th {
 	position: absolute;
-	width: 150px;
+	width: 160px;
 	left: 0;
 	padding: 10px 0px 10px 10px;
 }
@@ -263,7 +263,7 @@ noscript {
 }
 
 .tuning td {
-	padding: 2px 2px 2px 30px;
+	padding: 2px 2px 2px 45px;
 }
 
 .tuning td .expander {

@@ -28,7 +28,6 @@ namespace Peach {
 		action: string;
 		element: string;
 		iterationCount: number;
-		mutationCount: number;
 		bucketCount: number;
 		faultCount: number;
 	}

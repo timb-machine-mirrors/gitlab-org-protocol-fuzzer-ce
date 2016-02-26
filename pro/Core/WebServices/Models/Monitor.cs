@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using System.ComponentModel;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
@@ -101,11 +102,15 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <example>
 		/// "Pcap Device" or "Peach Installation Directory"
 		/// </example>
+		[JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+		[DefaultValue(null)]
 		public string Name { get; set; }
 
 		/// <summary>
 		/// Description of the parameter
 		/// </summary>
+		[JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+		[DefaultValue(null)]
 		public string Description { get; set; }
 
 		/// <summary>

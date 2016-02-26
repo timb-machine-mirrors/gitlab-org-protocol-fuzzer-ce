@@ -424,6 +424,13 @@ namespace Peach.Core.Xsd
 		public string name { get; set; }
 
 		/// <summary>
+		/// Field ID of the data template.
+		/// </summary>
+		[XmlAttribute]
+		[DefaultValue(null)]
+		public string fieldId { get; set; }
+
+		/// <summary>
 		/// Use contents of file to populate data model.
 		/// Peach will try and crack the file  based on the data model.
 		/// </summary>

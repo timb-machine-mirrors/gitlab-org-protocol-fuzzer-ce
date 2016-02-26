@@ -84,6 +84,7 @@ namespace Peach.Pro.Core.Storage
 				{
 					() => { Connection.Execute(Sql.NodeMigrateV1); },
 					() => { Connection.Execute(Sql.NodeMigrateV2); },
+					() => { Connection.Execute(Sql.NodeMigrateV3); },
 				};
 			}
 		}

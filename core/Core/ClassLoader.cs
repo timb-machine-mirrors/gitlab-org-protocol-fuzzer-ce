@@ -43,6 +43,7 @@ namespace Peach.Core
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		public static Dictionary<string, Assembly> AssemblyCache = new Dictionary<string, Assembly>();
 		static Dictionary<Type, object[]> AttributeCache = new Dictionary<Type, object[]>();
+		static Dictionary<Type, IEnumerable<Type>> AllByAttributeCache = new Dictionary<Type, IEnumerable<Type>>();
 		static string[] searchPath = GetSearchPath();
 		static readonly string pluginsPath = GetPluginsPath();
 
@@ -283,10 +284,7 @@ namespace Peach.Core
 
 		public static string[] SearchPaths
 		{
-			get
-			{
-				return searchPath;
-			}
+			get { return searchPath; }
 		}
 
 		public static string FindFile(string fileName)
@@ -393,17 +391,34 @@ namespace Peach.Core
 		public static IEnumerable<KeyValuePair<A, Type>> GetAllByAttribute<A>(Func<Type, A, bool> predicate)
 			where A : Attribute
 		{
-			foreach (var asm in AssemblyCache.Values)
+			IEnumerable<Type> types;
+			lock (AllByAttributeCache)
 			{
-				foreach (var type in asm.GetTypes())
+				if (!AllByAttributeCache.TryGetValue(typeof(A), out types))
 				{
-					if (!type.IsClass || (!type.IsPublic && !type.IsNestedPublic))
-						continue;
-
-					foreach (var x in type.GetAttributes<A>(predicate))
+					var typesList = new List<Type>();
+					foreach (var asm in AssemblyCache.Values)
 					{
-						yield return new KeyValuePair<A, Type>(x, type);
+						foreach (var type in asm.GetTypes())
+						{
+							if (!type.IsClass || (!type.IsPublic && !type.IsNestedPublic))
+								continue;
+
+							if (type.GetCustomAttributes<A>().Any())
+								typesList.Add(type);
+						}
 					}
+
+					AllByAttributeCache.Add(typeof(A), typesList);
+					types = typesList;
+				}
+			}
+
+			foreach (var type in types)
+			{
+				foreach (var x in type.GetAttributes<A>(predicate))
+				{
+					yield return new KeyValuePair<A, Type>(x, type);
 				}
 			}
 		}

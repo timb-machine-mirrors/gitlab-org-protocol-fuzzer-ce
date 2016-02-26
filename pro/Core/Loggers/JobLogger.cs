@@ -176,6 +176,7 @@ namespace Peach.Pro.Core.Loggers
 				job.Status = JobStatus.Running;
 				job.HeartBeat = DateTime.Now;
 				job.Seed = context.config.randomSeed;
+				job.MetricKind = HasFieldIds(context.test.stateModel) ? NameKind.Human : NameKind.Machine;
 			}
 
 			if (job.DatabasePath == null)
@@ -365,12 +366,12 @@ namespace Peach.Pro.Core.Loggers
 				actions = new List<Fault.Action>()
 			});
 
-			_cache.StateStarting(state.Name, state.runCount);
+			_cache.StateStarting(state.Name, state.FieldId ?? "", state.runCount);
 		}
 
 		protected override void ActionStarting(RunContext context, Action action)
 		{
-			_cache.ActionStarting(action.Name);
+			_cache.ActionStarting(action.Name, action.FieldId ?? "");
 
 			var rec = new Fault.Action
 			{
@@ -399,7 +400,7 @@ namespace Peach.Pro.Core.Loggers
 		protected override void ActionFinished(RunContext context, Action action)
 		{
 			var msg = action as Message;
-			if (msg != null)
+			if (msg != null && context.controlRecordingIteration)
 			{
 				_lastMessage = msg;
 				using (var db = new NodeDatabase())
@@ -448,7 +449,11 @@ namespace Peach.Pro.Core.Loggers
 				mutator = mutator.Name
 			});
 
-			_cache.DataMutating(tgtParam, element.fullName, mutator.Name, tgtDataSet);
+			_cache.DataMutating(NameKind.Machine, tgtParam, element.fullName, mutator.Name, tgtDataSet);
+
+			var fieldId = data.selectedData != null ? data.selectedData.FieldId ?? "" : "";
+
+			_cache.DataMutating(NameKind.Human, "", element.FullFieldId ?? "", mutator.Name, fieldId);
 		}
 
 		protected override void Engine_ReproFault(
@@ -906,6 +911,29 @@ namespace Peach.Pro.Core.Loggers
 			}
 
 			LogManager.Configuration = nconfig;
+		}
+
+		private static bool HasFieldIds(StateModel sm)
+		{
+			foreach (var state in sm.states)
+			{
+				if (!string.IsNullOrEmpty(state.FieldId))
+					return true;
+
+				foreach (var action in state.actions)
+				{
+					if (!string.IsNullOrEmpty(action.FieldId))
+						return true;
+
+					foreach (var actionData in action.outputData)
+					{
+						if (actionData.dataModel.PreOrderTraverse().Any(e => !string.IsNullOrEmpty(e.FieldId)))
+							return true;
+					}
+				}
+			}
+
+			return false;
 		}
 	}
 }

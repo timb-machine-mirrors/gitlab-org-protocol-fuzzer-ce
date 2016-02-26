@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using Newtonsoft.Json;
 using Peach.Pro.Core.Storage;
 
 namespace Peach.Pro.Core.WebServices.Models
@@ -69,6 +71,9 @@ namespace Peach.Pro.Core.WebServices.Models
 	[Table("ViewElements")]
 	public class ElementMetric
 	{
+		[JsonIgnore]
+		public NameKind Kind { get; set; }
+
 		public string State { get; set; }
 		public string Action { get; set; }
 		public string Element { get; set; }
@@ -92,11 +97,34 @@ namespace Peach.Pro.Core.WebServices.Models
 			BucketCount = bucketCount;
 			FaultCount = faultCount;
 		}
+
+		/// <summary>
+		/// Used by reporting.  Is the concatentation of
+		/// State, Action, Element with empty strings omitted
+		/// </summary>
+		[JsonIgnore]
+		public string FullElementName
+		{
+			get
+			{
+				var ret = string.Join(".", new[]
+				{
+					State,
+					Action,
+					Element
+				}.Where(s => !string.IsNullOrEmpty(s)));
+
+				return !string.IsNullOrEmpty(ret) ? ret : "Other";
+			}
+		}
 	}
 
 	[Table("ViewStates")]
 	public class StateMetric
 	{
+		[JsonIgnore]
+		public NameKind Kind { get; set; }
+
 		public string State { get; set; }
 		public long ExecutionCount { get; set; }
 
@@ -113,6 +141,9 @@ namespace Peach.Pro.Core.WebServices.Models
 	[Table("ViewDatasets")]
 	public class DatasetMetric
 	{
+		[JsonIgnore]
+		public NameKind Kind { get; set; }
+
 		public string Dataset { get; set; }
 		public long IterationCount { get; set; }
 		public long BucketCount { get; set; }
@@ -135,6 +166,9 @@ namespace Peach.Pro.Core.WebServices.Models
 	[Table("ViewBuckets")]
 	public class BucketMetric
 	{
+		[JsonIgnore]
+		public NameKind Kind { get; set; }
+
 		public string Bucket { get; set; }
 		public string Mutator { get; set; }
 		public string Element { get; set; }
@@ -155,11 +189,26 @@ namespace Peach.Pro.Core.WebServices.Models
 			IterationCount = iterationCount;
 			FaultCount = faultCount;
 		}
+
+		/// <summary>
+		/// Used by reporting.
+		/// </summary>
+		[JsonIgnore]
+		public string FullElementName
+		{
+			get
+			{
+				return !string.IsNullOrEmpty(Element) ? Element : "Other";
+			}
+		}
 	}
 
 	[Table("ViewIterations")]
 	public class IterationMetric
 	{
+		[JsonIgnore]
+		public NameKind Kind { get; set; }
+
 		public string State { get; set; }
 		public string Action { get; set; }
 		public string Parameter { get; set; }

@@ -2,27 +2,31 @@
 	<div>
 		<table>
 			<tbody>
-				<tr ng-repeat="node in vm.flat"
-					ng-show="vm.ShowNode(node)">
+				<tr ng-repeat="node in vm.flat track by $index"
+					ng-show="node.visible">
 					<th>
-						<i class="fa fa-lg pointer" 
-							ng-class="vm.WeightIcon(node, 0)"
+						<i class="fa fa-lg pointer {{node.weightIcons[0]}}" 
 							ng-click="vm.OnSelectWeight(node, 0)"></i>
 						&nbsp;
-						<i class="fa fa-lg pointer" 
-							ng-repeat="weight in [1, 2, 3, 4, 5]"
-							ng-class="vm.WeightIcon(node, weight)"
-							ng-click="vm.OnSelectWeight(node, weight)"></i>
+						<i class="fa fa-lg pointer {{node.weightIcons[1]}}" 
+							ng-click="vm.OnSelectWeight(node, 1)"></i>
+						<i class="fa fa-lg pointer {{node.weightIcons[2]}}" 
+							ng-click="vm.OnSelectWeight(node, 2)"></i>
+						<i class="fa fa-lg pointer {{node.weightIcons[3]}}" 
+							ng-click="vm.OnSelectWeight(node, 3)"></i>
+						<i class="fa fa-lg pointer {{node.weightIcons[4]}}" 
+							ng-click="vm.OnSelectWeight(node, 4)"></i>
+						<i class="fa fa-lg pointer {{node.weightIcons[5]}}" 
+							ng-click="vm.OnSelectWeight(node, 5)"></i>
 					</th>
 					<td>
-						<div ng-style="vm.NodeShift(node)">
+						<div ng-style="node.style">
 							<span class="expander pointer"
 								ng-click="vm.OnToggleExpand(node)">
-								<i class="fa"
-									ng-class="vm.ExpanderIcon(node)"
-									ng-show="vm.ShowExpander(node)"/>
+								<i class="fa {{node.expanderIcon}}"
+									ng-show="node.showExpander"/>
 							</span>
-							{{node.name}}
+							{{node.id}}
 						</div>
 					</td>
 				</tr>
