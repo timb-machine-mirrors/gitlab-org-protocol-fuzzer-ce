@@ -879,6 +879,12 @@ namespace Peach.Pro.Core.Publishers
 			var timeout = ConnectTimeout;
 			var sw = new Stopwatch();
 
+			if (_tcp != null || _client != null)
+			{
+				Logger.Warn("open: Found non-null _tcp or _client object. Cleaning up.");
+				ClientShutdown();
+			}
+
 			for (int i = 1; _tcp == null; i *= 2)
 			{
 				try
