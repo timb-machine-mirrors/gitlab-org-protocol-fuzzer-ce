@@ -145,14 +145,22 @@ namespace PitCompiler
 			if (!_defines.TryGetValue("PitLibraryPath", out pitLibraryPath))
 				pitLibraryPath = ".";
 
-			bool hasErrors = false;
-
 			var compiler = new Peach.Pro.Core.PitCompiler(pitLibraryPath, pitPath);
 			var errors = compiler.Run();
+
+			bool hasErrors = false;
 			foreach (var error in errors)
 			{
 				hasErrors = true;
 				Console.Error.WriteLine(error);
+			}
+
+			if (compiler.TotalNodes > 1000)
+			{
+				Console.Error.WriteLine("pitc: '{0}' has too many nodes: {1}", 
+					Path.GetFileName(pitPath), 
+					compiler.TotalNodes
+				);
 			}
 
 			return hasErrors ? -1 : 0;

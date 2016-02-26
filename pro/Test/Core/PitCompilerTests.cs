@@ -14,18 +14,18 @@ namespace Peach.Pro.Test.Core
 	[Peach]
 	class PitCompilerTests
 	{
-		TempDirectory root;
+		TempDirectory _root;
 
 		[SetUp]
 		public void Setup()
 		{
-			root = new TempDirectory();
+			_root = new TempDirectory();
 		}
 
 		[TearDown]
 		public void Teardown()
 		{
-			root.Dispose();
+			_root.Dispose();
 		}
 
 		[Test]
@@ -104,14 +104,14 @@ namespace Peach.Pro.Test.Core
 	</All>
 </PitDefines>
 ";
-			var filename = Path.Combine(root.Path, "TestElements.xml");
+			var filename = Path.Combine(_root.Path, "TestElements.xml");
 			File.WriteAllText(filename, xml);
 			File.WriteAllText(filename + ".config", config);
-			var samplesDir = Path.Combine(root.Path, "_Common", "Samples", "Image");
+			var samplesDir = Path.Combine(_root.Path, "_Common", "Samples", "Image");
 			Directory.CreateDirectory(samplesDir);
 			File.WriteAllText(Path.Combine(samplesDir, "foo.PNG"), "nothing here");
 
-			var compiler = new PitCompiler(root.Path, filename);
+			var compiler = new PitCompiler(_root.Path, filename);
 			compiler.Parse(false, false);
 			var tree = compiler.MakeFields();
 			var actual = JsonConvert.SerializeObject(tree);
@@ -271,10 +271,10 @@ namespace Peach.Pro.Test.Core
 	</Test>
 </Peach>";
 
-			var filename = Path.Combine(root.Path, "TestFields.xml");
+			var filename = Path.Combine(_root.Path, "TestFields.xml");
 			File.WriteAllText(filename, xml);
 
-			var compiler = new PitCompiler(root.Path, filename);
+			var compiler = new PitCompiler(_root.Path, filename);
 			compiler.Parse(false, false);
 			var tree = compiler.MakeFields();
 			var actual = JsonConvert.SerializeObject(tree);
@@ -364,10 +364,10 @@ namespace Peach.Pro.Test.Core
 </Peach>
 ";
 
-			var filename = Path.Combine(root.Path, "TestNoConfig.xml");
+			var filename = Path.Combine(_root.Path, "TestNoConfig.xml");
 			File.WriteAllText(filename, xml);
 
-			var compiler = new PitCompiler(root.Path, filename);
+			var compiler = new PitCompiler(_root.Path, filename);
 			var errors = compiler.Run(true, false);
 
 			CollectionAssert.IsEmpty(errors);
@@ -399,13 +399,13 @@ namespace Peach.Pro.Test.Core
 </PitDefines>
 ";
 
-			var xmlPath = Path.Combine(root.Path, "TestConfigNoErrors.xml");
+			var xmlPath = Path.Combine(_root.Path, "TestConfigNoErrors.xml");
 			File.WriteAllText(xmlPath, xml);
 
-			var xmlConfigPath = Path.Combine(root.Path, "TestConfigNoErrors.xml.config");
+			var xmlConfigPath = Path.Combine(_root.Path, "TestConfigNoErrors.xml.config");
 			File.WriteAllText(xmlConfigPath, xmlConfig);
 
-			var compiler = new PitCompiler(root.Path, xmlPath);
+			var compiler = new PitCompiler(_root.Path, xmlPath);
 			var actual = compiler.Run(true, false);
 
 			actual.ForEach(x => Console.WriteLine(x));
@@ -442,13 +442,13 @@ namespace Peach.Pro.Test.Core
 </PitDefines>
 ";
 
-			var xmlPath = Path.Combine(root.Path, "TestConfigErrors.xml");
+			var xmlPath = Path.Combine(_root.Path, "TestConfigErrors.xml");
 			File.WriteAllText(xmlPath, xml);
 
-			var xmlConfigPath = Path.Combine(root.Path, "TestConfigErrors.xml.config");
+			var xmlConfigPath = Path.Combine(_root.Path, "TestConfigErrors.xml.config");
 			File.WriteAllText(xmlConfigPath, xmlConfig);
 
-			var compiler = new PitCompiler(root.Path, xmlPath);
+			var compiler = new PitCompiler(_root.Path, xmlPath);
 			var actual = compiler.Run(true, false);
 
 			actual.ForEach(x => Console.WriteLine(x));
@@ -527,13 +527,13 @@ PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
 </PitDefines>
 ";
 			
-			var xmlPath = Path.Combine(root.Path, "TestPitLintIgnore.xml");
+			var xmlPath = Path.Combine(_root.Path, "TestPitLintIgnore.xml");
 			File.WriteAllText(xmlPath, xml);
 
-			var xmlConfigPath = Path.Combine(root.Path, "TestPitLintIgnore.xml.config");
+			var xmlConfigPath = Path.Combine(_root.Path, "TestPitLintIgnore.xml.config");
 			File.WriteAllText(xmlConfigPath, xmlConfig);
 
-			var compiler = new PitCompiler(root.Path, xmlPath);
+			var compiler = new PitCompiler(_root.Path, xmlPath);
 			var actual = compiler.Run();
 
 			actual.ForEach(x => Console.WriteLine(x));
@@ -595,13 +595,13 @@ Field'/>
 </PitDefines>
 
 ";
-			var xmlPath = Path.Combine(root.Path, "TestNewlineInValue.xml");
+			var xmlPath = Path.Combine(_root.Path, "TestNewlineInValue.xml");
 			File.WriteAllText(xmlPath, xml);
 
-			var xmlConfigPath = Path.Combine(root.Path, "TestNewlineInValue.xml.config");
+			var xmlConfigPath = Path.Combine(_root.Path, "TestNewlineInValue.xml.config");
 			File.WriteAllText(xmlConfigPath, xmlConfig);
 
-			var compiler = new PitCompiler(root.Path, xmlPath);
+			var compiler = new PitCompiler(_root.Path, xmlPath);
 			var actual = compiler.Run();
 
 			var expected = new string[] {

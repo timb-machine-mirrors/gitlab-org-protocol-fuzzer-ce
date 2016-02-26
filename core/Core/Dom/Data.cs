@@ -99,16 +99,13 @@ namespace Peach.Core.Dom
 			}
 			catch (CrackingFailure ex)
 			{
-				throw new PeachException("Error, failed to crack \"" + FileName +
-					"\" into \"" + model.fullName + "\": " + ex.Message, ex);
+				throw new PeachException("Error, failed to crack \"{0}\" into \"{1}\": {2}".Fmt(
+					FileName, model.fullName, ex.Message
+				), ex);
 			}
 		}
 
-		public string FileName
-		{
-			get;
-			private set;
-		}
+		public string FileName { get; private set; }
 	}
 
 	/// <summary>
@@ -147,29 +144,13 @@ namespace Peach.Core.Dom
 			Fields = new FieldCollection();
 		}
 
-		public string Name
-		{
-			get;
-			protected set;
-		}
+		public string Name { get; protected set; }
 
-		public string FieldId
-		{
-			get;
-			protected set;
-		}
+		public string FieldId { get; protected set; }
 
-		public FieldCollection Fields
-		{
-			get;
-			protected set;
-		}
+		public FieldCollection Fields { get; protected set; }
 
-		public bool Ignore
-		{
-			get;
-			set;
-		}
+		public bool Ignore { get; set; }
 
 		public virtual void Apply(DataModel model)
 		{
@@ -205,11 +186,15 @@ namespace Peach.Core.Dom
 					int index = int.Parse(m.Groups[2].Value);
 
 					if (!container.TryGetValue(name, out elem))
-						throw new PeachException("Error, unable to resolve field \"" + field + "\" against \"" + model.fullName + "\".");
+						throw new PeachException(
+							"Error, unable to resolve field \"{0}\" against \"{1}\".".Fmt(field, model.fullName)
+						);
 
 					var seq = elem as Sequence;
 					if (seq == null)
-						throw new PeachException("Error, cannot use array index syntax on field name unless target element is an array. Field: " + field);
+						throw new PeachException(
+							"Error, cannot use array index syntax on field name unless target element is an array. Field: {0}".Fmt(field)
+						);
 					
 					var array = elem as Array;
 					if (array != null)
@@ -218,7 +203,9 @@ namespace Peach.Core.Dom
 						if (index == -1)
 						{
 							if (array.minOccurs > 0)
-								throw new PeachException("Error, cannot set array to zero elements when minOccurs > 0. Field: " + field + " Element: " + array.fullName);
+								throw new PeachException(
+									"Error, cannot set array to zero elements when minOccurs > 0. Field: {0} Element: {1}".Fmt(field, array.fullName)
+								);
 
 							// Mark array as expanded
 							array.ExpandTo(0);
@@ -232,7 +219,9 @@ namespace Peach.Core.Dom
 						}
 
 						if (array.maxOccurs != -1 && index > array.maxOccurs)
-							throw new PeachException("Error, index larger that maxOccurs.  Field: " + field + " Element: " + array.fullName);
+							throw new PeachException(
+								"Error, index larger that maxOccurs.  Field: {0} Element: {1}".Fmt(field, array.fullName)
+							);
 
 						// Add elements up to our index
 						array.ExpandTo(index + 1);
@@ -253,7 +242,9 @@ namespace Peach.Core.Dom
 					elem = null;
 					var choice = container as Choice;
 					if (!choice.choiceElements.TryGetValue(name, out elem))
-						throw new PeachException("Error, unable to resolve field \"" + field + "\" against \"" + model.fullName + "\".");
+						throw new PeachException(
+							"Error, unable to resolve field \"{0}\" against \"{1}\".".Fmt(field, model.fullName)
+						);
 
 					container = elem as DataElementContainer;
 
@@ -262,7 +253,9 @@ namespace Peach.Core.Dom
 				else
 				{
 					if (container == null || !container.TryGetValue(name, out elem))
-						throw new PeachException("Error, unable to resolve field \"" + field + "\" against \"" + model.fullName + "\".");
+						throw new PeachException(
+							"Error, unable to resolve field \"{0}\" against \"{1}\".".Fmt(field, model.fullName)
+						);
 
 					container = elem as DataElementContainer;
 				}
@@ -281,4 +274,3 @@ namespace Peach.Core.Dom
 		}
 	}
 }
-

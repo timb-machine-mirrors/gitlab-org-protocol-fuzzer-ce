@@ -61,6 +61,8 @@ namespace Peach.Pro.Core
 			}
 		}
 
+		public int TotalNodes { get; private set; }
+
 		public IEnumerable<string> Run(bool verifyConfig = true, bool doLint = true)
 		{
 			try
@@ -170,6 +172,8 @@ namespace Peach.Pro.Core
 
 		internal List<PitField> MakeFields()
 		{
+			TotalNodes = 0;
+
 			var root = new List<PitField>();
 
 			foreach (var state in _dom.context.test.stateModel.states)
@@ -178,6 +182,7 @@ namespace Peach.Pro.Core
 				{
 					Id = state.FieldId ?? state.Name 
 				};
+				TotalNodes++;
 
 				var isFirst = true;
 				foreach (var action in state.actions)
@@ -186,14 +191,17 @@ namespace Peach.Pro.Core
 					{
 						Id = action.FieldId ?? action.Name
 					};
+					TotalNodes++;
 
 					var hasData = false;
 					var elementNodes = new List<PitField>();
 					var fieldNodes = new List<PitField>();
+					int totalFields = 0;
+					int totalElements = 0;
 					foreach (var actionData in action.outputData)
 					{
-						CollectNodes(actionData.dataModel.DisplayTraverse(), elementNodes, x => x.fullName);
-						CollectNodes(actionData.dataModel.PreOrderTraverse(), fieldNodes, x => x.FullFieldId);
+						totalElements += CollectNodes(actionData.dataModel.DisplayTraverse(), elementNodes, x => x.fullName);
+						totalFields += CollectNodes(actionData.dataModel.PreOrderTraverse(), fieldNodes, x => x.FullFieldId);
 						hasData = true;
 					}
 
@@ -206,7 +214,16 @@ namespace Peach.Pro.Core
 						}
 
 						stateNode.Fields.Add(actionNode);
-						actionNode.Fields = fieldNodes.Any() ? fieldNodes : elementNodes;
+						if (fieldNodes.Any())
+						{
+							TotalNodes += totalFields;
+							actionNode.Fields = fieldNodes;
+						}
+						else
+						{
+							TotalNodes += totalElements;
+							actionNode.Fields = elementNodes;
+						}
 					}
 				}
 			}
@@ -214,11 +231,13 @@ namespace Peach.Pro.Core
 			return root;
 		}
 
-		private void CollectNodes(
+		private int CollectNodes(
 			IEnumerable<DataElement> elements,
 			List<PitField> rootFields,
 			Func<DataElement, string> selector)
 		{
+			int total = 0;
+
 			var fullNames = elements
 				.Select(selector)
 				.Distinct()
@@ -235,10 +254,13 @@ namespace Peach.Pro.Core
 					{
 						next = new PitField { Id = part };
 						parentFields.Add(next);
+						total++;
 					}
 					parentFields = next.Fields;
 				}
 			}
+
+			return total;
 		}
 
 		private void VerifyPit(string fileName, bool isTest)
