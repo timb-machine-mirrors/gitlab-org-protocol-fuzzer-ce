@@ -322,8 +322,13 @@ namespace Peach.Core.Publishers
 				CloseClient();
 
 				// Allow pit to eat write exception
-				if(!NoWriteException)
+				if (!NoWriteException)
+				{
+					if(ex is NotSupportedException && ex.Message == "Stream does not support writing.")
+						throw new SoftException("Error, remote side closed connection early.", ex);
+
 					throw new SoftException(ex);
+				}
 			}
 		}
 

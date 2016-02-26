@@ -202,6 +202,8 @@ namespace Peach.Pro.Test.Core.Mutators
 					Directory.Delete(tmpPath, true);
 				if (File.Exists(tmpPath))
 					File.Delete(tmpPath);
+
+				throw;
 			}
 		}
 
