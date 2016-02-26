@@ -75,6 +75,9 @@ namespace Peach.Pro.Test.Core.PitParserTests
 						<BACnetTag fieldId='y' />
 						<VarNumber fieldId='z' />
 					</DataModel>
+					<Data fieldId='Foo'>
+						<Field name='n' value='v' />
+					</Data>
 				</Param>
 			</Action>
 		</State>
@@ -105,6 +108,9 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 			var fields = a.parameters[0].dataModel.PreOrderTraverse().Select(e => e.FieldId).ToList();
 
+			foreach (var i in a.parameters[0].allData)
+				Assert.AreEqual("Foo", i.FieldId);
+
 			var exp = new[]
 			{
 				"c",  // DataModel
@@ -125,8 +131,8 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				"n",  // Choice
 				"o",  // Number
 				"p",  // Padding
-				null, // Array
-				"q",  //String
+				"q",  // Array
+				null, //String
 				"r",  // Flags
 				"s",  // Flag
 				"t",  // XmlElement

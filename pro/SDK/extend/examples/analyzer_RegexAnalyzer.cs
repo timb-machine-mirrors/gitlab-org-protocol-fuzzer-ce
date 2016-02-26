@@ -10,7 +10,7 @@ using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Analyzers
 {
-    [Analyzer("Regex", true)]
+    [Analyzer("RegexExample", true)]
     [Description("Break up a string using a regex. Each group will become strings. The group name will be used as the element name.")]
     [Parameter("Regex", typeof(string), "The regex to use")]
     [Serializable]

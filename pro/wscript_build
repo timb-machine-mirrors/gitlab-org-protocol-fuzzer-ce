@@ -2,6 +2,7 @@
 
 subdirs = [
 	'ComContainer',
+	'Compiler',
 	'Core',
 	'FuzzBang',
 	'LinuxCrashHandler',

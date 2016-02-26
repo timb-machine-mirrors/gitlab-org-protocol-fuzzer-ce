@@ -49,6 +49,7 @@ namespace Peach.Pro.Core.Storage
 				{
 					() => { Connection.Execute(Sql.JobMigrateV1); },
 					() => { Connection.Execute(Sql.JobMigrateV2); },
+					() => { Connection.Execute(Sql.JobMigrateV3); },
 				};
 			}
 		}
@@ -94,22 +95,46 @@ namespace Peach.Pro.Core.Storage
 			Connection.Execute(Sql.InsertFaultFile, fault.Files);
 		}
 
-		public FaultDetail GetFaultById(long id, bool loadFiles = true)
+		public FaultDetail GetFaultById(long id, NameKind kind, bool loadFiles = true)
 		{
+			FaultDetail fault;
+
 			if (loadFiles)
 			{
-				const string sql = Sql.SelectFaultDetailById + Sql.SelectFaultFilesByFaultId;
-				using (var multi = Connection.QueryMultiple(sql, new { Id = id }))
+				const string sql =
+					Sql.SelectFaultDetailById +
+					Sql.SelectMutationByFaultIdAndKind +
+					Sql.SelectFaultFilesByFaultId;
+
+				using (var multi = Connection.QueryMultiple(sql, new { Id = id, Kind = kind }))
 				{
-					var fault = multi.Read<FaultDetail>().SingleOrDefault();
-					if (fault == null)
-						return null;
-					fault.Files = multi.Read<FaultFile>().ToList();
-					return fault;
+					fault = multi.Read<FaultDetail>().SingleOrDefault();
+
+					if (fault != null)
+					{
+						fault.Mutations = multi.Read<FaultMutation>().ToList();
+						fault.Files = multi.Read<FaultFile>().ToList();
+					}
 				}
 			}
-			return Connection.Query<FaultDetail>(Sql.SelectFaultDetailById, new { Id = id })
-				.SingleOrDefault();
+			else
+			{
+				const string sql =
+					Sql.SelectFaultDetailById +
+					Sql.SelectMutationByFaultIdAndKind;
+
+				using (var multi = Connection.QueryMultiple(sql, new { Id = id, Kind= kind }))
+				{
+					fault = multi.Read<FaultDetail>().SingleOrDefault();
+
+					if (fault != null)
+					{
+						fault.Mutations = multi.Read<FaultMutation>().ToList();
+					}
+				}
+			}
+
+			return fault;
 		}
 
 		public FaultFile GetFaultFileById(long id)
@@ -118,11 +143,11 @@ namespace Peach.Pro.Core.Storage
 				.SingleOrDefault();
 		}
 
-		public IEnumerable<FaultMutation> GetFaultMutations(long iteration)
+		public IEnumerable<FaultMutation> GetFaultMutations(long iteration, NameKind kind)
 		{
 			return Connection.Query<FaultMutation>(
-				Sql.SelectMutationByIteration,
-				new { Iteration = iteration }
+				Sql.SelectMutationByIterationAndKind,
+				new { Iteration = iteration, Kind = kind }
 			);
 		}
 
@@ -135,14 +160,14 @@ namespace Peach.Pro.Core.Storage
 				BucketDetails = LoadTable<BucketDetail>()
 					.Select(m =>
 					{
-						m.Mutations = GetFaultMutations(m.Iteration);
+						m.Mutations = GetFaultMutations(m.Iteration, job.MetricKind);
 						return m;
 					}),
 				MutatorMetrics = LoadTable<MutatorMetric>(),
-				ElementMetrics = LoadTable<ElementMetric>(),
-				StateMetrics = LoadTable<StateMetric>(),
-				DatasetMetrics = LoadTable<DatasetMetric>(),
-				BucketMetrics = LoadTable<BucketMetric>(),
+				ElementMetrics = LoadTableKind<ElementMetric>(job.MetricKind),
+				StateMetrics = LoadTableKind<StateMetric>(job.MetricKind),
+				DatasetMetrics = LoadTableKind<DatasetMetric>(job.MetricKind),
+				BucketMetrics = LoadTableKind<BucketMetric>(job.MetricKind),
 			};
 
 			return report;

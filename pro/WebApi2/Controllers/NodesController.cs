@@ -32,7 +32,7 @@ namespace Peach.Pro.WebApi2.Controllers
 
 		[Route("{id}")]
 		[ResponseType(typeof(Node))]
-		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified node does not exits")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified node does not exist")]
 		public IHttpActionResult Get(string id)
 		{
 			if (id != NodeGuid)

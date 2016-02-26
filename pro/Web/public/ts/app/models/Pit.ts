@@ -54,9 +54,17 @@ namespace Peach {
 		view?: IParameter[];
 	}
 
+	export interface IPitFieldNode {
+		id: string;
+		fields: IPitFieldNode[];
+		weight?: number;
+		expanded?: boolean;
+	}
+
 	export interface IPitMetadata {
 		defines: IParameter[];
 		monitors: IParameter[];
+		fields: IPitFieldNode[];
 	}
 	
 	export interface IPit {
