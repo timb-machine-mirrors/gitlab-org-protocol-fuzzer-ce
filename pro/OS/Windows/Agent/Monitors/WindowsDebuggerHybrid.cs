@@ -64,6 +64,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 	[Parameter("WaitForExitTimeout", typeof(int), "Wait for exit timeout value in milliseconds (-1 is infinite)", "10000")]
 	[Parameter("RestartOnEachTest", typeof(bool), "Restart process for each interation", "false")]
 	[Parameter("RestartAfterFault", typeof(bool), "Restart process after any fault occurs", "false")]
+	[Parameter("ServiceStartTimeout", typeof(int), "How many seconds to wait for target windows service to start", "60")]
 	public class WindowsDebuggerHybrid : Monitor
 	{
 		protected static NLog.Logger logger = LogManager.GetCurrentClassLogger();
@@ -80,6 +81,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 		int _waitForExitTimeout = 10000;
 		int _cpuPollInterval = 200;
+		int _serviceStartTimeout = 60;
 
 		bool _ignoreFirstChanceGuardPage = false;
 		bool _ignoreSecondChanceGuardPage = false;
@@ -160,6 +162,8 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				_waitForExitOnCall = (string)args["WaitForExitOnCall"];
 			if (args.ContainsKey("WaitForExitTimeout") && !int.TryParse((string)args["WaitForExitTimeout"], out _waitForExitTimeout))
 				throw new PeachException("Error, 'WaitForExitTimeout' is not a valid number.");
+			if (args.ContainsKey("ServiceStartTimeout") && !int.TryParse(args["ServiceStartTimeout"], out _serviceStartTimeout))
+				throw new PeachException("Error, 'ServiceStartTimeout' is not a valid number.");
 
 			if (args.ContainsKey("WinDbgPath"))
 			{
@@ -542,6 +546,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 					_systemDebugger.commandLine = _commandLine;
 					_systemDebugger.processName = _processName;
 					_systemDebugger.service = _service;
+					_systemDebugger.serviceStartTimeout = _serviceStartTimeout;
 					_systemDebugger.ignoreFirstChanceGuardPage = _ignoreFirstChanceGuardPage;
 					_systemDebugger.ignoreSecondChanceGuardPage = _ignoreSecondChanceGuardPage;
 					_systemDebugger.noCpuKill = _noCpuKill;
@@ -614,6 +619,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 					_debugger.processName = _processName;
 					_debugger.kernelConnectionString = _kernelConnectionString;
 					_debugger.service = _service;
+					_debugger.serviceStartTimeout = _serviceStartTimeout;
 					_debugger.symbolsPath = _symbolsPath;
 					_debugger.startOnCall = _startOnCall;
 					_debugger.ignoreFirstChanceGuardPage = _ignoreFirstChanceGuardPage;

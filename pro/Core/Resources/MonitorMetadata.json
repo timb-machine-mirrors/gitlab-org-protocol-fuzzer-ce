@@ -639,6 +639,7 @@
           "SymbolsPath",
           "IgnoreFirstChanceGuardPage",
           "IgnoreSecondChanceGuardPage",
+          "ServiceStartTimeout",
           "CpuPollInterval"
         ]
       }

@@ -67,6 +67,9 @@ This argument defaults to false.
 
 RestartOnEachTest:: Restarts the process for each iteration, defaults to false.
 
+ServiceStartTimeout:: When debugging a windows service, this specifies, expressed in seconds,
+how long the monitor should wait for the service to start. The default value is 60 seconds.
+
 WaitForExitOnCall:: Exits the target upon receiving a call from the state model. If the 
 call fails to occur within an acceptable  waiting period, issue a fault and then exit. The 
 WaitForExitTimeout parameter specifies the waiting period.
