@@ -55,9 +55,7 @@ namespace PitCompiler
 
 				Utilities.ConfigureLogging(_logLevel);
 
-				Run(extra[0]);
-
-				return 0;
+				return Run(extra[0]);
 			}
 			catch (Exception ex)
 			{
@@ -139,7 +137,7 @@ namespace PitCompiler
 			_defines[key] = value;
 		}
 
-		static void Run(string pitPath)
+		static int Run(string pitPath)
 		{
 			Console.WriteLine("pitc: {0}", pitPath);
 
@@ -147,7 +145,17 @@ namespace PitCompiler
 			if (!_defines.TryGetValue("PitLibraryPath", out pitLibraryPath))
 				pitLibraryPath = ".";
 
-			FieldTreeGenerator.Save(pitPath, pitLibraryPath);
+			bool hasErrors = false;
+
+			var compiler = new Peach.Pro.Core.PitCompiler(pitLibraryPath, pitPath);
+			var errors = compiler.Run();
+			foreach (var error in errors)
+			{
+				hasErrors = true;
+				Console.Error.WriteLine(error);
+			}
+
+			return hasErrors ? -1 : 0;
 		}
 	}
 }

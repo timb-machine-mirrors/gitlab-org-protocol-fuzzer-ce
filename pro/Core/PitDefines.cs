@@ -433,6 +433,7 @@ namespace Peach.Pro.Core
 			public All()
 			{
 				Name = "All";
+				Description = "All";
 			}
 
 			[XmlIgnore]
@@ -589,7 +590,7 @@ namespace Peach.Pro.Core
 			return defs;
 		}
 
-		private static KeyValuePair<string, string> PopulateRequiredDefine(KeyValuePair<string, string> item)
+		public static KeyValuePair<string, string> PopulateRequiredDefine(KeyValuePair<string, string> item)
 		{
 			if (!String.IsNullOrEmpty(item.Value))
 				return item;

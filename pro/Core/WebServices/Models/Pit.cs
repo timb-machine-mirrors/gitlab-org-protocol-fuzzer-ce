@@ -30,8 +30,6 @@ namespace Peach.Pro.Core.WebServices.Models
 
 	public class Pit : LibraryPit
 	{
-		public List<PitVersion> Versions { get; set; }
-
 		public List<PeachVersion> Peaches { get; set; }
 
 		public string OriginalPit { get; set; }

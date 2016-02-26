@@ -40,6 +40,23 @@ namespace Peach.Pro.Core.WebServices
 		public string FileName { get; private set; }
 	}
 
+	public class PitDetail : INamed
+	{
+		public string Path { get; set; }
+		public Pit Pit { get; set; }
+
+		[Obsolete]
+		string INamed.name
+		{
+			get { return Pit.PitUrl; }
+		}
+
+		string INamed.Name
+		{
+			get { return Pit.PitUrl; }
+		}
+	}
+
 	public class PitDatabase
 	{
 		public static readonly string PitServicePrefix = "/p/pits";
@@ -109,23 +126,6 @@ namespace Peach.Pro.Core.WebServices
 			string INamed.Name
 			{
 				get { return Library.LibraryUrl; }
-			}
-		}
-
-		public class PitDetail : INamed
-		{
-			public string Path { get; set; }
-			public Pit Pit { get; set; }
-
-			[Obsolete]
-			string INamed.name
-			{
-				get { return Pit.PitUrl; }
-			}
-
-			string INamed.Name
-			{
-				get { return Pit.PitUrl; }
 			}
 		}
 
@@ -285,6 +285,11 @@ namespace Peach.Pro.Core.WebServices
 				Path = fileName,
 				Pit = pit,
 			};
+		}
+
+		public IEnumerable<PitDetail> PitDetails
+		{
+			get { return entries; }
 		}
 
 		public IEnumerable<LibraryPit> Entries
@@ -456,7 +461,7 @@ namespace Peach.Pro.Core.WebServices
 			var defs = PitDefines.ParseFile(pitConfig, pitLibraryPath);
 
 			var pit = detail.Pit;
-			var metadata = FieldTreeGenerator.Load(pitXml);
+			var metadata = PitCompiler.LoadMetadata(pitXml);
 
 			var calls = new List<string>(); // TODO: get actual calls
 			pit.Metadata = new PitMetadata

@@ -62,6 +62,7 @@ namespace Peach.Core.Analyzers
 		/// args key for passing a dictionary of defined values to replace.
 		/// </summary>
 		public static string DEFINED_VALUES = "DefinedValues";
+		public static string USED_DEFINED_VALUES = "UsedDefinedValues";
 
 		static readonly string PEACH_NAMESPACE_URI = "http://peachfuzzer.com/2012/Peach";
 
@@ -263,14 +264,27 @@ namespace Peach.Core.Analyzers
 			if (args != null && args.TryGetValue(DEFINED_VALUES, out obj))
 			{
 				var definedValues = (IEnumerable<KeyValuePair<string, string>>)obj;
-				var sb = new StringBuilder(xml);
 
 				foreach (var kv in definedValues)
 				{
-					sb.Replace("##" + kv.Key + "##", kv.Value);
+					var newXml = xml.Replace("##" + kv.Key + "##", kv.Value);
+					if (xml != newXml)
+					{
+						HashSet<string> used;
+						object objUsed;
+						if (!args.TryGetValue(USED_DEFINED_VALUES, out objUsed))
+						{
+							used = new HashSet<string>();
+							args.Add(USED_DEFINED_VALUES, used);
+						}
+						else
+						{
+							used = (HashSet<string>)objUsed;
+						}
+						used.Add(kv.Key);
+						xml = newXml;
+					}
 				}
-
-				xml = sb.ToString();
 			}
 
 			return xml;
