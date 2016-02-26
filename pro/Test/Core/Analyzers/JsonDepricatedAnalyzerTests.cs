@@ -14,7 +14,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 	[TestFixture]
 	[Category("Peach")]
 	[Quick]
-	class JsonDepricatedAnalyzerTests : DataModelCollector
+	class JsonDeprecatedAnalyzerTests : DataModelCollector
 	{
 		[Test]
 		public void SimpleTest()
@@ -24,7 +24,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 	<DataModel name=""TheDataModel"">
 
 		<String value=""{}"">
-			<Analyzer class=""JsonDepricated""/>
+			<Analyzer class=""JsonDeprecated""/>
 		</String>
 
 	</DataModel>
@@ -51,7 +51,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 	<DataModel name=""TheDataModel"">
 
 		<String value='{""string"":""peachy"",""bool"":true,""null"":null,""array"":[1,2,3,4]}'>
-			<Analyzer class=""JsonDepricated""/>
+			<Analyzer class=""JsonDeprecated""/>
 		</String>
 
 	</DataModel>
@@ -86,7 +86,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 	<DataModel name=""TheDataModel"">
 
 		<String value='{""Foo"":""Bar""}'>
-			<Analyzer class=""JsonDepricated""/>
+			<Analyzer class=""JsonDeprecated""/>
 		</String>
 
 	</DataModel>
@@ -115,7 +115,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 	<DataModel name=""TheDataModel"">
 
 		<String value='{""Foo"":""Bar"",""Foo2"":""Bar2""}'>
-			<Analyzer class=""JsonDepricated""/>
+			<Analyzer class=""JsonDeprecated""/>
 		</String>
 
 	</DataModel>
@@ -145,7 +145,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 	<DataModel name=""TheDataModel"">
 
 		<String value='{""Foo"":1}'>
-			<Analyzer class=""JsonDepricated""/>
+			<Analyzer class=""JsonDeprecated""/>
 		</String>
 
 	</DataModel>
@@ -174,7 +174,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 	<DataModel name=""TheDataModel"">
 
 		<String value='{""Foo"":-1}'>
-			<Analyzer class=""JsonDepricated""/>
+			<Analyzer class=""JsonDeprecated""/>
 		</String>
 
 	</DataModel>
@@ -203,7 +203,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 	<DataModel name=""TheDataModel"">
 
 		<String value='{""Foo"":18446744073709551615'>
-			<Analyzer class=""JsonDepricated""/>
+			<Analyzer class=""JsonDeprecated""/>
 		</String>
 
 	</DataModel>
@@ -232,7 +232,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 	<DataModel name=""TheDataModel"">
 
 		<String value='{""Foo"":0'>
-			<Analyzer class=""JsonDepricated""/>
+			<Analyzer class=""JsonDeprecated""/>
 		</String>
 
 	</DataModel>
@@ -261,7 +261,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 	<DataModel name=""TheDataModel"">
 
 		<String value='{""Foo"":-9223372036854775808'>
-			<Analyzer class=""JsonDepricated""/>
+			<Analyzer class=""JsonDeprecated""/>
 		</String>
 
 	</DataModel>
@@ -290,7 +290,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 	<DataModel name=""TheDataModel"">
 
 		<String value='{""Foo"":[""Bar"",""Baz""]}'>
-			<Analyzer class=""JsonDepricated""/>
+			<Analyzer class=""JsonDeprecated""/>
 		</String>
 
 	</DataModel>
@@ -323,7 +323,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 	<DataModel name=""TheDataModel"">
 
 		<String value='{""Foo"":[""Bar"",1]}'>
-			<Analyzer class=""JsonDepricated""/>
+			<Analyzer class=""JsonDeprecated""/>
 		</String>
 
 	</DataModel>
@@ -357,7 +357,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 	<DataModel name=""TheDataModel"">
 
 		<String value='{""Foo"":{""Bar"":""Baz""}}'>
-			<Analyzer class=""JsonDepricated""/>
+			<Analyzer class=""JsonDeprecated""/>
 		</String>
 
 	</DataModel>
@@ -391,7 +391,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 	<DataModel name=""TheDataModel"">
 
 		<String value='{""Foo"":{""Bar"":[""Foo"",""Baz""]}}'>
-			<Analyzer class=""JsonDepricated""/>
+			<Analyzer class=""JsonDeprecated""/>
 		</String>
 
 	</DataModel>
@@ -428,7 +428,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 	<DataModel name=""TheDataModel"">
 
 		<String value='{""Foo"":[{""Foo"":""Baz""}]}'>
-			<Analyzer class=""JsonDepricated""/>
+			<Analyzer class=""JsonDeprecated""/>
 		</String>
 
 	</DataModel>
@@ -465,7 +465,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 	<DataModel name=""TheDataModel"">
 
 		<String value='{""Foo"":null}'>
-			<Analyzer class=""JsonDepricated""/>
+			<Analyzer class=""JsonDeprecated""/>
 		</String>
 
 	</DataModel>
@@ -495,7 +495,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 	<DataModel name=""TheDataModel"">
 
 		<String value='{""Foo"":[null]}'>
-			<Analyzer class=""JsonDepricated""/>
+			<Analyzer class=""JsonDeprecated""/>
 		</String>
 
 	</DataModel>
@@ -527,7 +527,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 	<DataModel name=""TheDataModel"">
 
 		<String value='{""Foo"":true}'>
-			<Analyzer class=""JsonDepricated""/>
+			<Analyzer class=""JsonDeprecated""/>
 		</String>
 
 	</DataModel>
@@ -557,7 +557,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 	<DataModel name=""TheDataModel"">
 
 		<String value='{""Foo"":false}'>
-			<Analyzer class=""JsonDepricated""/>
+			<Analyzer class=""JsonDeprecated""/>
 		</String>
 
 	</DataModel>
@@ -587,7 +587,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 	<DataModel name=""TheDataModel"">
 
 		<String value='{""Foo"":[false]}'>
-			<Analyzer class=""JsonDepricated""/>
+			<Analyzer class=""JsonDeprecated""/>
 		</String>
 
 	</DataModel>
@@ -703,7 +703,7 @@ namespace Peach.Pro.Test.Core.Analyzers
     ]
   }
 }'>
-			<Analyzer class=""JsonDepricated""/>
+			<Analyzer class=""JsonDeprecated""/>
 		</String>
 
 	</DataModel>
