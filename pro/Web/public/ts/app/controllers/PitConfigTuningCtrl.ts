@@ -129,7 +129,9 @@ namespace Peach {
 		}
 
 		RowHover(node: FlatNode) {
-			return (node === this.nodeHover) ? 'tuning-row-hover' : '';
+			return !_.isNull(this.nodeHover) && (node.node === this.nodeHover.node) ? 
+				'tuning-row-hover' : 
+				'';
 		}
 
 		OnRowEnter(node: FlatNode) {
