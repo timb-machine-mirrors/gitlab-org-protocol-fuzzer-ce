@@ -1,3 +1,105 @@
+<table>
+	<tbody>
+		<tr>
+			<td width="200">
+				<div class="tuning-legend-text">
+					<span ng-class="vm.LegendText(0)">Exclude</span>
+				</div>
+
+				<div class="tuning-legend-text">
+					<span class="line"/>
+					&nbsp;
+					&nbsp;
+					<span ng-class="vm.LegendText(1)">Lowest</span>
+				</div>
+
+				<div class="tuning-legend-text">
+					<span class="line"/>
+					&nbsp;
+					<span class="line"/>
+					&nbsp;
+					<span ng-class="vm.LegendText(2)">Low</span>
+				</div>
+
+				<div class="tuning-legend-text">
+					<span class="line"/>
+					&nbsp;
+					<span class="line"/>
+					<span class="line"/>
+					&nbsp;
+					<span ng-class="vm.LegendText(3)">Normal</span>
+				</div>
+
+				<div class="tuning-legend-text">
+					<span class="line"/>
+					&nbsp;
+					<span class="line"/>
+					<span class="line"/>
+					<span class="line"/>
+					&nbsp;
+					<span ng-class="vm.LegendText(4)">High</span>
+				</div>
+
+				<div class="tuning-legend-text">
+					<span class="line"/>
+					&nbsp;
+					<span class="line"/>
+					<span class="line"/>
+					<span class="line"/>
+					<span class="line"/>
+					&nbsp;
+					<span ng-class="vm.LegendText(5)">Highest</span>
+				</div>
+
+				<div class="tuning-legend-text">
+					<span class="line"/>
+					&nbsp;
+					<span class="line"/>
+					<span class="line"/>
+					<span class="line"/>
+					<span class="line"/>
+					<span class="line"/>
+				</div>
+
+				<div class="tuning-legend">
+					<span>
+						<i class="fa fa-lg pointer"
+							ng-class="vm.LegendIcon(0)"
+							ng-mouseenter="vm.OnLegendEnter(0)"
+							ng-mouseleave="vm.OnLegendLeave(0)"></i>
+						&nbsp;
+						<i class="fa fa-lg pointer"
+							ng-class="vm.LegendIcon(1)"
+							ng-mouseenter="vm.OnLegendEnter(1)"
+							ng-mouseleave="vm.OnLegendLeave(1)"></i>
+						<i class="fa fa-lg pointer"
+							ng-class="vm.LegendIcon(2)"
+							ng-mouseenter="vm.OnLegendEnter(2)"
+							ng-mouseleave="vm.OnLegendLeave(2)"></i>
+						<i class="fa fa-lg pointer"
+							ng-class="vm.LegendIcon(3)"
+							ng-mouseenter="vm.OnLegendEnter(3)"
+							ng-mouseleave="vm.OnLegendLeave(3)"></i>
+						<i class="fa fa-lg pointer"
+							ng-class="vm.LegendIcon(4)"
+							ng-mouseenter="vm.OnLegendEnter(4)"
+							ng-mouseleave="vm.OnLegendLeave(4)"></i>
+						<i class="fa fa-lg pointer"
+							ng-class="vm.LegendIcon(5)"
+							ng-mouseenter="vm.OnLegendEnter(5)"
+							ng-mouseleave="vm.OnLegendLeave(5)"></i>
+					</span>
+				</div>
+			</td>
+			<td>
+				A bunch of text goes here.
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<hr />
+
 <div class="alert alert-info"
 		 ng-show="!hasLoaded">
 	Loading data...
@@ -6,27 +108,37 @@
 		 ng-show="isTruncated">
 	This view has been truncated to {{MAX_NODES}} nodes.
 </div>
+
 <div class="tuning" 
 	ng-show='hasLoaded'>
 	<div>
 		<table>
 			<tbody>
 				<tr ng-repeat="node in flat track by $index"
+					ng-class="vm.RowHover(node)"
+					ng-mouseenter="vm.OnRowEnter(node)"
+					ng-mouseleave="vm.OnRowLeave(node)"
 					ng-show="node.visible">
-					<th>
+					<th ng-class="vm.RowHover(node)">
 						<i class="fa fa-lg pointer {{node.weightIcons[0]}}" 
-							ng-click="vm.OnSelectWeight(node, 0)"></i>
+							ng-click="vm.OnSelectWeight(node, 0)"
+							uib-tooltip="Exclude"></i>
 						&nbsp;
 						<i class="fa fa-lg pointer {{node.weightIcons[1]}}" 
-							ng-click="vm.OnSelectWeight(node, 1)"></i>
+							ng-click="vm.OnSelectWeight(node, 1)"
+							uib-tooltip="Lowest"></i>
 						<i class="fa fa-lg pointer {{node.weightIcons[2]}}" 
-							ng-click="vm.OnSelectWeight(node, 2)"></i>
+							ng-click="vm.OnSelectWeight(node, 2)"
+							uib-tooltip="Low"></i>
 						<i class="fa fa-lg pointer {{node.weightIcons[3]}}" 
-							ng-click="vm.OnSelectWeight(node, 3)"></i>
+							ng-click="vm.OnSelectWeight(node, 3)"
+							uib-tooltip="Normal"></i>
 						<i class="fa fa-lg pointer {{node.weightIcons[4]}}" 
-							ng-click="vm.OnSelectWeight(node, 4)"></i>
+							ng-click="vm.OnSelectWeight(node, 4)"
+							uib-tooltip="High"></i>
 						<i class="fa fa-lg pointer {{node.weightIcons[5]}}" 
-							ng-click="vm.OnSelectWeight(node, 5)"></i>
+							ng-click="vm.OnSelectWeight(node, 5)"
+							uib-tooltip="Highest"></i>
 					</th>
 					<td>
 						<div ng-style="node.style">

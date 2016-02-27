@@ -74,6 +74,15 @@ namespace Peach {
 		];
 
 		private tree: IPitFieldNode[] = [];
+		private nodeHover: FlatNode = null;
+		private hovers: boolean[] = [
+			false,
+			false,
+			false,
+			false,
+			false,
+			false
+		];
 
 		constructor(
 			private $scope: ITuningScope,
@@ -101,6 +110,34 @@ namespace Peach {
 			console.log('nodes', flat.length);
 			this.$scope.isTruncated = (flat.length > MAX_NODES);
 			this.$scope.flat = _.take(flat, MAX_NODES);
+		}
+
+		LegendText(i: number) {
+			return this.hovers[i] ? 'bold' : '';
+		}
+
+		LegendIcon(i: number) {
+			return this.hovers[i] ? 'fa-circle' : 'fa-circle-o';
+		}
+
+		OnLegendEnter(i: number) {
+			this.hovers[i] = true;
+		}
+
+		OnLegendLeave(i: number) {
+			this.hovers[i] = false;
+		}
+
+		RowHover(node: FlatNode) {
+			return (node === this.nodeHover) ? 'tuning-row-hover' : '';
+		}
+
+		OnRowEnter(node: FlatNode) {
+			this.nodeHover = node;
+		}
+
+		OnRowLeave(node: FlatNode) {
+			this.nodeHover = null;
 		}
 
 		OnToggleExpand(node: FlatNode) {
