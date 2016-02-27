@@ -113,7 +113,7 @@ namespace Peach {
 		}
 
 		LegendText(i: number) {
-			return this.hovers[i] ? 'bold' : '';
+			return this.hovers[i] ? 'text bold' : 'text';
 		}
 
 		LegendIcon(i: number) {

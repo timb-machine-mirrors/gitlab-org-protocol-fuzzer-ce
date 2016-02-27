@@ -7,53 +7,42 @@
 				</div>
 
 				<div class="tuning-legend-text">
-					<span class="line"/>
-					&nbsp;
-					&nbsp;
+					<span class="line first"/>
 					<span ng-class="vm.LegendText(1)">Lowest</span>
 				</div>
 
 				<div class="tuning-legend-text">
+					<span class="line first"/>
 					<span class="line"/>
-					&nbsp;
-					<span class="line"/>
-					&nbsp;
 					<span ng-class="vm.LegendText(2)">Low</span>
 				</div>
 
 				<div class="tuning-legend-text">
+					<span class="line first"/>
 					<span class="line"/>
-					&nbsp;
 					<span class="line"/>
-					<span class="line"/>
-					&nbsp;
 					<span ng-class="vm.LegendText(3)">Normal</span>
 				</div>
 
 				<div class="tuning-legend-text">
-					<span class="line"/>
-					&nbsp;
-					<span class="line"/>
+					<span class="line first"/>
 					<span class="line"/>
 					<span class="line"/>
-					&nbsp;
+					<span class="line"/>
 					<span ng-class="vm.LegendText(4)">High</span>
 				</div>
 
 				<div class="tuning-legend-text">
-					<span class="line"/>
-					&nbsp;
-					<span class="line"/>
+					<span class="line first"/>
 					<span class="line"/>
 					<span class="line"/>
 					<span class="line"/>
-					&nbsp;
+					<span class="line"/>
 					<span ng-class="vm.LegendText(5)">Highest</span>
 				</div>
 
 				<div class="tuning-legend-text">
-					<span class="line"/>
-					&nbsp;
+					<span class="line first"/>
 					<span class="line"/>
 					<span class="line"/>
 					<span class="line"/>
@@ -63,11 +52,10 @@
 
 				<div class="tuning-legend">
 					<span>
-						<i class="fa fa-lg"
+						<i class="fa fa-lg first"
 							ng-class="vm.LegendIcon(0)"
 							ng-mouseenter="vm.OnLegendEnter(0)"
 							ng-mouseleave="vm.OnLegendLeave(0)"></i>
-						&nbsp;
 						<i class="fa fa-lg"
 							ng-class="vm.LegendIcon(1)"
 							ng-mouseenter="vm.OnLegendEnter(1)"
@@ -120,10 +108,9 @@
 					ng-mouseleave="vm.OnRowLeave(node)"
 					ng-show="node.visible">
 					<th ng-class="vm.RowHover(node)">
-						<i class="fa fa-lg pointer {{node.weightIcons[0]}}" 
+						<i class="fa fa-lg pointer {{node.weightIcons[0]}} first"
 							ng-click="vm.OnSelectWeight(node, 0)"
 							uib-tooltip="Exclude"></i>
-						&nbsp;
 						<i class="fa fa-lg pointer {{node.weightIcons[1]}}" 
 							ng-click="vm.OnSelectWeight(node, 1)"
 							uib-tooltip="Lowest"></i>
