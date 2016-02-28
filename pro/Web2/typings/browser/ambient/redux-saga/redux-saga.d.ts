@@ -1,6 +1,6 @@
 // Compiled using typings@0.6.8
 // Source: https://raw.githubusercontent.com/flaub/typescript-definitions/master/redux-saga/redux-saga.d.ts
-// Type definitions for redux-saga 0.8.0
+// Type definitions for redux-saga 0.9.0
 // Project: https://github.com/yelouafi/redux-saga
 // Definitions by: Frank Laub <https://github.com/flaub>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
@@ -32,6 +32,7 @@ declare module 'redux-saga/effects' {
   export type Effect = {};
 
   type Predicate = (action: any) => boolean;
+  type Selector<T> = (state, ...args: any[]) => T;
   
   export interface Task<T> {
     name: string;
@@ -60,6 +61,8 @@ declare module 'redux-saga/effects' {
   export function join(task: Task<any>): Effect;
 
   export function cancel(task: Task<any>): Effect;
+
+  export function select<T>(selector?: Selector<T>, ...args: any[]): T;
 }
 
 
