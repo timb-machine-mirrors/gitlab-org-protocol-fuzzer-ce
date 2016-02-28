@@ -1,8 +1,8 @@
 import { AWAIT_MARKER } from 'redux-await';
 import { FormData } from 'redux-form';
-import { fork, take, put } from 'redux-saga/effects';
+import { fork, take, put, select } from 'redux-saga/effects';
 
-import RootState, { GetState } from '../../models/Root';
+import RootState from '../../models/Root';
 import {
 	Pit, Parameter, ParameterType, Monitor, Agent,
 	DefinesFormData, AgentsFormData
@@ -38,9 +38,9 @@ export default function reducer(state: Pit = initial, action): Pit {
 	}
 }
 
-export function* saga(getState: GetState) {
-	yield fork(watchSave, getState);
-	yield fork(watchFetch, getState);
+export function* saga() {
+	yield fork(watchSave);
+	yield fork(watchFetch);
 }
 
 export function fetchPit(id: string) {
@@ -72,9 +72,9 @@ function* watchSave() {
 	}
 }
 
-function* watchFetch(getState: GetState) {
+function* watchFetch() {
 	while (true) {
-		const { pit } = getState();
+		const { pit } = yield select<RootState>();
 		const action = yield take(types.PIT_FETCH);
 		if (pit.id !== action.payload.pit.id) {
 			yield put(resetTest());

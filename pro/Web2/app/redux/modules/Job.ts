@@ -1,8 +1,8 @@
 import { AWAIT_MARKER } from 'redux-await';
 import { isCancelError } from 'redux-saga';
-import { take, put, call, fork, cancel } from 'redux-saga/effects';
+import { take, put, call, fork, cancel, select } from 'redux-saga/effects';
 
-import RootState, { GetState } from '../../models/Root';
+import RootState from '../../models/Root';
 import { Job, JobStatus, JobRequest } from '../../models/Job';
 import { MakeEnum, wait } from '../../utils';
 import { fetchJobs } from './JobList';
@@ -50,10 +50,10 @@ export default function reducer(state: Job = initial, action): Job {
 	}
 }
 
-export function* saga(getState: GetState) {
-	yield fork(watchDelete, getState);
-	yield fork(watchPoll, getState);
-	yield fork(watchCommand, getState);
+export function* saga() {
+	yield fork(watchDelete);
+	yield fork(watchPoll);
+	yield fork(watchCommand);
 }
 
 export function startPolling(id: string) {
@@ -105,17 +105,17 @@ function* watchCommand() {
 	}
 }
 
-function* watchPoll(getState: GetState) {
+function* watchPoll() {
 	while (true) {
 		const { id } = yield take(types.JOB_POLL_START);
 		yield put(resetFaults());
-		const task = yield fork(poll, getState, id);
+		const task = yield fork(poll, id);
 		yield take(types.JOB_POLL_STOP);
 		yield cancel(task);
 	}
 }
 
-function* poll(getState: GetState, id: string) {
+function* poll(id: string) {
 	try {
 		while (true) {
 			yield put(fetchJob(id));
@@ -123,7 +123,7 @@ function* poll(getState: GetState, id: string) {
 			const action = yield take(types.JOB_FETCH);
 			const job: Job = action.payload.job;
 
-			const { faults } = getState();
+			const { faults } = yield select<RootState>();
 			if ((faults.isReset || faults.isPolling) &&
 				faults.data.length !== job.faultCount) {
 				yield put(fetchFaults(job));

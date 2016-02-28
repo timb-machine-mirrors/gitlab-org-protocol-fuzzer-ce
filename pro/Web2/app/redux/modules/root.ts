@@ -29,8 +29,8 @@ export const rootReducer = combineReducers({
 	metrics
 });
 
-export function* rootSaga(getState) {
-	yield fork(jobSaga, getState);
-	yield fork(testSaga, getState);
-	yield fork(pitSaga, getState);
+export function* rootSaga() {
+	yield fork(jobSaga);
+	yield fork(testSaga);
+	yield fork(pitSaga);
 }
