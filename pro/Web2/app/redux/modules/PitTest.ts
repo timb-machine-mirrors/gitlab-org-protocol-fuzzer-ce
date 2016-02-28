@@ -2,7 +2,7 @@ import { Dispatch } from 'redux';
 import { AWAIT_MARKER } from 'redux-await';
 import { take, put, call } from 'redux-saga/effects';
 
-import RootState, { GetState } from '../../models/Root';
+import RootState from '../../models/Root';
 import { Pit } from '../../models/Pit';
 import { Job, JobStatus, JobRequest } from '../../models/Job';
 import { TestState, TestStatus, TestResult } from '../../models/PitTest';
@@ -50,7 +50,7 @@ export default function reducer(state: TestState = initial, action): TestState {
 	}
 }
 
-export function* saga(getState: GetState) {
+export function* saga() {
 	while (true) {
 		const action = yield take(types.TEST_START);
 		const job: Job = action.payload.testJob;
