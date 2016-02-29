@@ -21,10 +21,6 @@
 	display: block !important;
 }
 
-a.disabled {
-	cursor: not-allowed;
-}
-
 .timeline.vis .box.item {
 	cursor: pointer;
 }
@@ -93,29 +89,6 @@ pre.peach-test-log {
 	cursor: pointer;
 }
 
-.peach-table th[st-sort] {
-	cursor: pointer;
-	white-space: nowrap;
-}
-
-.peach-table th[st-sort]::before {
-	content: "\f0dc";
-	display: inline-block;
-	color: #555;
-	font-family: FontAwesome;
-	font-size: 13px;
-	font-weight: normal;
-	margin-right: 2px;
-}
-
-.peach-table th.st-sort-descent::before {
-	content: "\f0dd";
-}
-
-.peach-table th.st-sort-ascent::before {
-	content: "\f0de";
-}
-
 .nowrap {
 	white-space: nowrap;
 }
@@ -158,14 +131,6 @@ td div.peach-parameter-input .input-group {
 	top: 5px;
 }
 
-/* turn off animation, this can screw with autofocus */
-.modal.fade .modal-dialog,
-.modal.in .modal-dialog {
-	-webkit-transform: translate(0, 0);
-	-ms-transform: translate(0, 0);
-	transform: translate(0, 0);
-}
-
 .peach-add-monitor {
 	max-height: 600px;
 	overflow-y: auto;
@@ -176,10 +141,6 @@ td div.peach-parameter-input .input-group {
 		max-height: 400px;
 		overflow-y: auto;
 	}
-}
-
-#loading-bar .bar {
-	background: orange;
 }
 
 noscript {
@@ -199,114 +160,6 @@ noscript {
 	width: 100%;
 }
 
-.breadcrumb {
-	background-color: transparent;
-}
-
-.badge-transparent {
-	background-color: transparent;
-}
-
 .submenu .badge {
 	padding: 1px 7px;
-}
-
-.max-width-200 {
-	max-width: 200px;
-}
-
-.max-width-500 {
-	max-width: 500px;
-}
-
-@media only screen and (max-width: 1260px) {
-	.max-width-500 {
-		max-width: 400px;
-	}
-}
-
-@media only screen and (max-width: 1199px) {
-	.max-width-500 {
-		max-width: 300px;
-	}
-}
-
-.ui-select-bootstrap > .ui-select-choices {
-	max-height: 400px;
-}
-
-.ui-select-toggle {
-	text-align: left;
-}
-
-.tree-node {
-	margin-left: 20px;
-}
-
-.tree-node-label {
-	margin-left: 5px;
-	padding: 1px;
-	border: 1px solid #fff;
-	font-weight: normal;
-}
-
-.rc-tree {
-	overflow-x: scroll;
-}
-
-.rc-tree li a {
-	color: black;
-	/*font-weight: bold;*/
-}
-
-.rc-tree-switcher {
-	background-color: white;
-}
-
-.bg-weight-0 {
-	background-color: #ffdf80;
-}
-
-.bg-weight-1 {
-	background-color: #ebfaeb;
-}
-
-.bg-weight-2 {
-	background-color: #c2f0c2;
-}
-
-.bg-weight-3 {
-	background-color: #99e699;
-}
-
-.bg-weight-4 {
-	background-color: #70db70;
-}
-
-.bg-weight-5 {
-	background-color: #47d147;
-}
-
-.bg-weight-0 > ul {
-	background-color: white !important;
-}
-
-.bg-weight-1 > ul {
-	background-color: white !important;
-}
-
-.bg-weight-2 > ul {
-	background-color: white !important;
-}
-
-.bg-weight-3 > ul {
-	background-color: white !important;
-}
-
-.bg-weight-4 > ul {
-	background-color: white !important;
-}
-
-.bg-weight-5 > ul {
-	background-color: white !important;
 }

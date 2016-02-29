@@ -1,7 +1,6 @@
 var _ = require("lodash");
 var path = require("path");
 var webpack = require("webpack");
-var ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 var is_dev = _.some(process.argv, function(item) {
 	return item.includes("webpack-dev-server");
@@ -12,16 +11,13 @@ var entry = {
 	vendor: [
 		"bootstrap/dist/css/bootstrap.css",
 		"font-awesome/css/font-awesome.css",
-		// "rc-tree/assets/index.css",
 		"react-bootstrap-table/css/toastr.css",
 		"react-bootstrap-table/css/react-bootstrap-table.css",
-		// "react-widgets/dist/css/react-widgets.css",
 		"babel-polyfill",
 		"classnames",
 		"immutable",
 		"lodash",
 		"moment",
-		"rc-tree",
 		"react",
 		"react-bootstrap",
 		"react-bootstrap-table",
@@ -29,8 +25,6 @@ var entry = {
 		"react-fa",
 		"react-redux",
 		"react-router5",
-		"react-select",
-		"react-widgets",
 		"redux",
 		"redux-await",
 		"redux-form",
@@ -50,7 +44,6 @@ var plugins = [
 		__DEV__: is_dev,
 		'process.env.NODE_ENV': is_dev ? '"development"' : '"production"'
 	}),
-	new ExtractTextPlugin("[name].css"),
 	new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: 'vendor.js' })
 ];
 
@@ -108,7 +101,7 @@ var config = {
 				"babel?presets[]=es2015&presets[]=react", 
 				"ts" 
 			]},
-			{ test: /\.css(.*)$/,    loader: ExtractTextPlugin.extract("style-loader", "css-loader") },
+			{ test: /\.css(.*)$/,    loaders: [ "style", "css" ] },
 			{ test: /\.gif$/,        loader: "file?name=[name].[ext]" },
 			// handle web fonts
 			{ test: /\.eot(.*)$/,    loader: "file?name=[name].[ext]" },
@@ -116,8 +109,7 @@ var config = {
 			{ test: /\.otf(.*)$/,    loader: "file?name=[name].[ext]" },
 			{ test: /\.tt(.*)$/,     loader: "file?name=[name].[ext]" },
 			{ test: /\.svg(.*)$/,    loader: "file?name=[name].[ext]" }
-		],
-		noParse: []
+		]
 	},
 	debug: is_dev,
 	plugins: plugins,
@@ -125,12 +117,12 @@ var config = {
 		port: 9000,
 		contentBase: "./assets",
 		hot: true,
+		inline: true,
+		progress: true,
 		historyApiFallback: true,
 		proxy: {
 			'/p/*': 'http://localhost:8888'
 		}
-	},
-	tslint: {
 	}
 };
 
