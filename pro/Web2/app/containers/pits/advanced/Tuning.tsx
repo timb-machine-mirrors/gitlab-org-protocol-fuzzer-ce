@@ -1,444 +1,282 @@
 import React = require('react');
 import Icon = require('react-fa');
-import { CSSProperties, Component, Props } from 'react';
-import { Badge, Table, ButtonGroup, Button, Input } from 'react-bootstrap';
 import Immutable = require('immutable');
-import Tree = require('rc-tree');
+import { CSSProperties, Component, Props } from 'react';
+import { Alert, Badge, Table, ButtonGroup, Button, Input } from 'react-bootstrap';
+import { connect } from 'redux-await';
 
-interface Node {
-	name: string;
-	weight?: number;
-	kids?: Node[];
-}
+import { Pit, PitFieldNode } from '../../../models/Pit';
+
+const SHIFT_WIDTH = 20;
 
 interface FlatNode {
-	name: string;
-	weight: number;
+	node: PitFieldNode;
 	depth: number;
 	visible: boolean;
 	expanded: boolean;
 }
 
-interface TreeNodeProps extends Props<TreeNode> {
-	node: FlatNode;
-	onToggleExpand: Function;
+function flatten(tree: PitFieldNode[]): FlatNode[] {
+	console.time('flatten');
+	const flat = _flatten(tree, 0, null);
+	console.timeEnd('flatten');
+	return flat;
 }
 
-interface TreeNodeState {
-}
-
-interface SelectProps extends Props<Select> {
-	value: string;
-	color: string;
-}
-
-class Select extends Component<any, any> {
-	render() {
-		const { value, color } = this.props;
-		const style: CSSProperties = {
-			position: 'relative',
-			borderRadius: 4,
-			border: '1px solid #ccc',
-			cursor: 'pointer',
-			backgroundColor: color
+function _flatten(nodes: PitFieldNode[], depth: number, parent: FlatNode) {
+	return _.flatMap(nodes, (node: PitFieldNode) => {
+		const expanded = _.isUndefined(node.expanded) ?
+			depth < 2 :
+			node.expanded;
+		const visible = !parent || parent.expanded && parent.visible;
+		const flat: FlatNode = {
+			node,
+			depth,
+			visible,
+			expanded
 		};
-		const picker: CSSProperties = {
-			position: 'absolute',
-			right: 0,
-			top: 0,
-			width: '1.9em',
-			lineHeight: '2em'
-		};
-		const input: CSSProperties = {
-			paddingTop: 0,
-			paddingBottom: 0,
-			paddingRight: 0,
-			paddingLeft: 10,
-			textAlign: 'left',
-			lineHeight: '2em',
-			fontWeight: 'bold'
-		};
-		return <div style={style}>
-			<span style={picker}>
-				<Icon name='caret-down' />
-			</span>
-			<div style={input}>
-				{value}
-			</div>
-		</div>;
-	}
-}
-
-class Weight extends Component<any, any> {
-	render() {
-		const { item } = this.props;
-		return <span style={{ backgroundColor: item.color }}>
-			{item.name}
-		</span>;
-	}
-}
-
-class TreeNode extends Component<TreeNodeProps, TreeNodeState> {
-	render() {
-		const { node, onToggleExpand } = this.props;
-		const { name, depth, weight, expanded, visible } = node;
-		const expandIcon = expanded ? 'minus' : 'plus';
-		const className = visible ? '' : 'collapse';
-		const weights = [
-			{ value: 0, label: 'Exclude' },
-			{ value: 1, label: 'Lowest', color: 'green' },
-			{ value: 2, label: 'Low' },
-			{ value: 3, label: 'Normal', color: 'yellow' },
-			{ value: 4, label: 'High' },
-			{ value: 5, label: 'Highest', color: 'red' }
-		];
-		const colors = [
-			'#ffdf80',
-			'#ebfaeb',
-			'#c2f0c2',
-			'#99e699',
-			'#70db70',
-			'#47d147',
-		];
-
-		return <tr className={className}>
-			<td style={{ width: 100, textAlign: 'center' }}>
-				<Select value={weights[weight].label} color={colors[weight]} />
-			</td>
-			<td style={{ verticalAlign: 'middle', position: 'relative' }}>
-				<div style={{ paddingLeft: 10 + depth * 20, paddingRight: 50, whiteSpace: 'nowrap' }}>
-					<Button bsSize='xs' onClick={onToggleExpand}>
-						<Icon name={expandIcon} />
-					</Button>
-					<label style={{ marginLeft: 5, fontWeight: 'normal' }}>
-						{name}
-					</label>
-				</div>
-			</td>
-		</tr>;
-	}
-
-	renderValue(option) {
-		return <strong style={{ color: option.color }}>{option.label}</strong>;
-	}
-
-	renderLine(depth, offset = 0) {
-		const style: CSSProperties = {
-			left: offset + 19,
-			content: '',
-			display: 'block',
-			position: 'absolute',
-			top: 0,
-			bottom: 0,
-			border: '1px dotted #9dbdd6',
-			borderWidth: '0 0 0 1px'
-		};
-
-		if (depth === 0) {
-			return null;
-		}
-		return <div style={style}>
-			{this.renderLine(depth - 1)}
-		</div>;
-	}
-}
-
-interface TreeViewProps extends Props<TreeView> {
-	data: Node[];
-	// injected
-}
-
-interface TreeViewState {
-	nodes: Immutable.List<FlatNode>;
-}
-
-class TreeView extends Component<TreeViewProps, TreeViewState> {
-	constructor(props: TreeViewProps, context) {
-		super(props, context);
-		this.state = {
-			nodes: Immutable.List(flatten(this.props.data, 0))
-		};
-	}
-
-	render() {
-		const { nodes } = this.state;
-		return <div style={{ overflow: 'scroll' }}>
-			<table>
-				<thead>
-					<tr>
-						<th style={{ width: 100, textAlign: 'center' }}>
-							Weight
-						</th>
-						<th>
-							Field
-						</th>
-					</tr>
-				</thead>
-				<tbody>
-					{nodes.map((node, index) => {
-						return <TreeNode key={index}
-							node={node}
-							onToggleExpand={() => this.onToggleExpand(index)} />;
-					})}
-				</tbody>
-			</table>
-		</div>;
-	}
-
-	onToggleExpand = (index: number) => {
-		this.setState(({nodes}) => {
-			const node = nodes.get(index);
-			node.expanded = !node.expanded;
-			let newNodes = nodes.set(index, node);
-			nodes.skip(index + 1).forEach((next, key) => {
-				if (next.depth <= node.depth) {
-					return false;
-				}
-				next.visible = node.expanded;
-				newNodes = newNodes.set(index + 1 + key, next);
-			});
-			return { nodes: newNodes };
-		});
-	};
-}
-
-function flatten(nodes: Node[], depth: number) {
-	return _.flatMap(nodes, (node: Node) => {
-		return [{
-			name: node.name,
-			weight: _.isUndefined(node.weight) ? 3 : node.weight,
-			depth: depth,
-			visible: true,
-			expanded: true
-		}].concat(flatten(node.kids, depth + 1));
+		return [flat].concat(_flatten(node.fields, depth + 1, flat));
 	});
 }
 
+function defaultWeight(node: PitFieldNode) {
+	return _.isUndefined(node.weight) ? 3 : node.weight;
+}
+
+function matchWeight(node: PitFieldNode, weight: number) {
+	return (defaultWeight(node) === weight) ||
+		_.some(node.fields, field => matchWeight(field, weight));
+}
+
+function selectWeight(node: PitFieldNode, weight: number) {
+	node.weight = weight;
+	const fields = node.fields || [];
+	fields.forEach(field => selectWeight(field, weight));
+}
+
+const outerStyle: CSSProperties = {
+	position: 'relative',
+};
+
+const innerStyle: CSSProperties = {
+	overflowX: 'auto',
+	overflowY: 'visible',
+	marginLeft: 140
+};
+
+const headerStyle: CSSProperties = {
+	position: 'absolute',
+	left: 0,
+	padding: '10px 0px 10px 10px'
+};
+
+const iconStyle: CSSProperties = {
+	cursor: 'pointer',
+	padding: 2
+};
+
+const iconStyleFirst: CSSProperties = Object.assign({}, iconStyle, {
+	paddingRight: 10
+});
+
+const cellStyle: CSSProperties = {
+	padding: '2px 2px 2px 35px'
+};
+
+const spanStyle: CSSProperties = {
+	float: 'left',
+	cursor: 'pointer',
+	marginLeft: -35
+};
+
+const nodeGenericStyle: CSSProperties = {
+	border: '1px solid black',
+	borderRadius: '3px',
+	padding: 7,
+	marginRight: 5,
+	whiteSpace: 'nowrap'
+};
+
 interface TuningProps extends Props<Tuning> {
 	// injected
+	tree?: PitFieldNode[];
 }
 
 interface TuningState {
+	tree?: PitFieldNode[];
+	nodes?: FlatNode[];
 }
 
+@connect(state => ({ tree: state.pit.metadata.fields }))
 class Tuning extends Component<TuningProps, TuningState> {
-	render() {
-		const data = [
-			{ name: 'S1_1', kids: [
-				{ name: 'A3', kids: [
-					{ name: 'TheDataModel', kids: [
-						{ name: 'Header', weight: 5, kids: [
-							{ name: 'Depth', weight: 5 }
-						]},
-						{ name: 'Data', kids: [
-							{ name: 'Type', weight: 4 }
-						]}
-					]}
-				]},
-				{ name: 'A4', weight: 2, kids: [
-					{ name: 'TheDataModel', kids: [
-						{ name: 'Header', weight: 1, kids: [
-							{ name: 'Depth', weight: 5 }
-						]},
-						{ name: 'Data', kids: [
-							{ name: 'Type', weight: 4, kids: [
-								{
-									name: 'S1_1', kids: [
-										{
-											name: 'A3', kids: [
-												{
-													name: 'TheDataModel', kids: [
-														{
-															name: 'Header', weight: 5, kids: [
-																{ name: 'Depth', weight: 5 }
-															]
-														},
-														{
-															name: 'Data', kids: [
-																{ name: 'Type', weight: 4 }
-															]
-														}
-													]
-												}
-											]
-										},
-										{
-											name: 'A4', weight: 2, kids: [
-												{
-													name: 'TheDataModel', kids: [
-														{
-															name: 'Header', weight: 1, kids: [
-																{ name: 'Depth', weight: 5 }
-															]
-														},
-														{
-															name: 'Data', kids: [
-																{ name: 'Type', weight: 4, kids: [
-																	{
-																		name: 'S1_1', kids: [
-																			{
-																				name: 'A3', kids: [
-																					{
-																						name: 'TheDataModel', kids: [
-																							{
-																								name: 'Header', weight: 5, kids: [
-																									{ name: 'Depth', weight: 5 }
-																								]
-																							},
-																							{
-																								name: 'Data', kids: [
-																									{ name: 'Type', weight: 4, kids: [
-																										{
-																											name: 'S1_1', kids: [
-																												{
-																													name: 'A3', kids: [
-																														{
-																															name: 'TheDataModel', kids: [
-																																{
-																																	name: 'Header', weight: 5, kids: [
-																																		{ name: 'Depth', weight: 5 }
-																																	]
-																																},
-																																{
-																																	name: 'Data', kids: [
-																																		{ name: 'Type', weight: 4 }
-																																	]
-																																}
-																															]
-																														}
-																													]
-																												},
-																												{
-																													name: 'A4', weight: 2, kids: [
-																														{
-																															name: 'TheDataModel', kids: [
-																																{
-																																	name: 'Header', weight: 1, kids: [
-																																		{ name: 'Depth', weight: 5 }
-																																	]
-																																},
-																																{
-																																	name: 'Data', kids: [
-																																		{ name: 'Type', weight: 4 }
-																																	]
-																																}
-																															]
-																														}
-																													]
-																												}
-																											]
-																										},
-																										{
-																											name: 'S4_1', kids: [
-																												{ name: 'Item1', weight: 1 },
-																												{ name: 'Item2', weight: 0 }
-																											]
-																										}
+	constructor(props, context) {
+		super(props, context);
+		this.state = {
+			tree: null,
+			nodes: []
+		};
 
-																									] }
-																								]
-																							}
-																						]
-																					}
-																				]
-																			},
-																			{
-																				name: 'A4', weight: 2, kids: [
-																					{
-																						name: 'TheDataModel', kids: [
-																							{
-																								name: 'Header', weight: 1, kids: [
-																									{ name: 'Depth', weight: 5 }
-																								]
-																							},
-																							{
-																								name: 'Data', kids: [
-																									{ name: 'Type', weight: 4 }
-																								]
-																							}
-																						]
-																					}
-																				]
-																			}
-																		]
-																	},
-																	{
-																		name: 'S4_1', kids: [
-																			{ name: 'Item1', weight: 1 },
-																			{ name: 'Item2', weight: 0 }
-																		]
-																	}
-
-																] }
-															]
-														}
-													]
-												}
-											]
-										}
-									]
-								},
-								{
-									name: 'S4_1', kids: [
-										{ name: 'Item1', weight: 1 },
-										{ name: 'Item2', weight: 0 }
-									]
-								}
-
-							]}
-						]}
-					]}
-				]}
-			]},
-			{ name: 'S4_1', kids: [
-				{ name: 'Item1', weight: 1 },
-				{ name: 'Item2', weight: 0 }
-			]}
-		];
-
-		function recurseChecked(data, prefix) {
-			return _.flatMap(data, item => {
-				const key = `${prefix}.${item.name}`;
-				const weight = _.get(item, 'weight', 3);
-				const checked = weight > 0;
-				const result = [];
-				if (checked) {
-					result.push(key);
-				}
-				return result.concat(recurseChecked(item.kids || [], key));
-			});
-		}
-
-		function recurseNodes(data, prefix) {
-			return data.map(item => {
-				const key = `${prefix}.${item.name}`;
-				const weight = _.get(item, 'weight', 3);
-				const className = `bg-weight-${weight}`;
-				const title = <div style={{ width: 200 }}>
-					{item.name}
-				</div>;
-				if (item.kids) {
-					return <Tree.TreeNode title={title} key={key}>
-						{recurseNodes(item.kids, key) }
-					</Tree.TreeNode>;
-				}
-				return <Tree.TreeNode title={title} key={key} />;
-			});
-		}
-
-		const checked = recurseChecked(data, '$');
-		const nodes = recurseNodes(data, '$');
-
-		return <div>
-			<Tree showIcon={false}
-				defaultExpandAll
-				selectable={false}
-				defaultCheckedKeys={checked}>
-				{nodes}
-			</Tree>
-			<TreeView data={data} />
-		</div>;
+		setTimeout(() => {
+			console.time('load');
+			const tree = _.cloneDeep(props.tree);
+			const nodes = flatten(tree);
+			this.setState({ tree, nodes });
+			console.timeEnd('load');
+			console.log('nodes', nodes.length);
+		});
 	}
+
+	render() {
+		const { tree, nodes } = this.state;
+		console.time('render');
+		const ret = <div>
+			{this.renderLegend()}
+			<hr />
+			{_.isNull(tree) &&
+				<Alert bsStyle='info'>
+					Loading data...
+				</Alert>
+			}
+			<div style={outerStyle}>
+				<div style={innerStyle}>
+					<table style={{ width: '100%' }}>
+						<tbody>
+							{nodes.map((node, index) => node.visible &&
+								this.renderNode(node, index)
+							)}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>;
+		console.timeEnd('render');
+		return ret;
+	}
+
+	renderLegend() {
+		const texts = [
+			'Exclude',
+			'Lowest',
+			'Low',
+			'Normal',
+			'High',
+			'Highest'
+		];
+		const divStyle: CSSProperties = {
+			lineHeight: 1.2
+		};
+		const spanStyle: CSSProperties = {
+			padding: 10
+		};
+		const textStyle: CSSProperties = {
+			paddingLeft: 9
+		};
+		const lineStyle: CSSProperties = {
+			border: '1px solid black',
+			borderWidth: '0 0 0 1px'
+		};
+		const spaceStyle = (i: number): CSSProperties => (
+			(i === 0) ? {
+				paddingLeft: 19,
+				paddingRight: 8
+			} : {
+				paddingLeft: 19
+			}
+		);
+		return <table>
+			<tbody>
+				<tr>
+					<td>
+						{_.range(7).map(i => <div style={divStyle}>
+							{_.range(0, i).map(j => (
+								<span style={spaceStyle(j)}>
+									<span style={lineStyle} />
+								</span>
+							))}
+							<span style={textStyle}>{texts[i]}</span>
+						</div>)}
+						<div>
+							<span style={spanStyle}>
+								{_.range(6).map(i => <Icon key={i}
+									style={(i === 0) ? iconStyleFirst : iconStyle}
+									name='circle-o'
+									size='lg'
+								/>)}
+							</span>
+						</div>
+					</td>
+					<td>
+						{this.renderLegendDescription()}
+					</td>
+				</tr>
+			</tbody>
+		</table>;
+	}
+
+	renderLegendDescription() {
+		return <p>
+			A bunch of text goes here.
+		</p>;
+	}
+
+	renderNode(node: FlatNode, key: number) {
+		return <tr key={key}>
+			{this.renderRowHeader(node)}
+			{this.renderRowCell(node)}
+		</tr>;
+	}
+
+	renderRowHeader(node: FlatNode) {
+		const weight = defaultWeight(node.node);
+		const icons = _.range(6).map(i =>
+			(weight === i) ? 'circle' :
+				(!node.expanded && matchWeight(node.node, i)) ?
+					'dot-circle-o' :
+					'circle-o'
+		);
+		return <th style={headerStyle}>
+			{_.range(6).map(i => <Icon key={i}
+				style={(i === 0) ? iconStyleFirst : iconStyle}
+				name={icons[i]}
+				size='lg'
+				onClick={() => this.onSelectWeight(node, i)}
+			/>)}
+		</th>;
+	}
+
+	renderRowCell(node: FlatNode) {
+		const nodeStyle = Object.assign({}, nodeGenericStyle, {
+			marginLeft: node.depth * SHIFT_WIDTH,
+		});
+		const expanderIcon = node.expanded ? 'minus' : 'plus';
+
+		return <td style={cellStyle}>
+			<div style={nodeStyle}>
+				<span style={spanStyle} onClick={() => this.onToggleExpand(node)}>
+					{!_.isEmpty(node.node.fields) &&
+						<Icon name={expanderIcon} />
+					}
+				</span>
+				{node.node.id}
+			</div>
+		</td>;
+	}
+
+	onToggleExpand = (node: FlatNode) => {
+		const { tree } = this.state;
+		node.node.expanded = !node.expanded;
+		this.setState({
+			nodes: flatten(tree)
+		});
+	};
+
+	onSelectWeight = (node: FlatNode, weight: number) => {
+		const { tree } = this.state;
+		selectWeight(node.node, weight);
+		this.setState({
+			nodes: flatten(tree)
+		});
+	};
 }
 
 export default Tuning;
