@@ -11,7 +11,7 @@
     "react-bootstrap": "github:flaub/DefinitelyTyped/react-bootstrap/react-bootstrap.d.ts#225253155ee589059faece160ea31d8ef1b882d5",
     "react-bootstrap-table": "github:DefinitelyTyped/DefinitelyTyped/react-bootstrap-table/react-bootstrap-table.d.ts#ae60c84b9225eeb5278ebdc4e1df4aec8f8602f9",
     "react-dom": "github:DefinitelyTyped/DefinitelyTyped/react/react-dom.d.ts#7b3d5a6ea5acda4a81f71309f1cc62354e63b681",
-    "react-fa": "github:DefinitelyTyped/DefinitelyTyped/react-fa/react-fa.d.ts#f318fbd33149ef0921b84657996ad31dab1e3241",
+    "react-fa": "github:flaub/typescript-definitions/react-fa",
     "react-redux": "github:DefinitelyTyped/DefinitelyTyped/react-redux/react-redux.d.ts#a513c4df6eb8505da8eef432891c8b69b73535d9",
     "react-router5": "github:flaub/typescript-definitions/react-router5",
     "redux": "github:DefinitelyTyped/DefinitelyTyped/redux/redux.d.ts#a820bbdead70913f0c750802b367ed54cb99b442",
