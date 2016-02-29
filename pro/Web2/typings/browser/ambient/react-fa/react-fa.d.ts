@@ -1,17 +1,16 @@
 // Compiled using typings@0.6.8
-// Source: https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/f318fbd33149ef0921b84657996ad31dab1e3241/react-fa/react-fa.d.ts
+// Source: https://raw.githubusercontent.com/flaub/typescript-definitions/master/react-fa/react-fa.d.ts
 // Type definitions for react-fa v4.0.0
 // Project: https://github.com/andreypopp/react-fa
 // Definitions by: Frank Laub <https://github.com/flaub>
-// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
-
 
 declare module "react-fa" {
-	import { ComponentClass, Props } from 'react';
+	import { ComponentClass, CSSProperties, DOMAttributes, Props } from 'react';
 
-	interface IconProps extends Props<Icon> {
+	interface IconProps extends DOMAttributes, Props<Icon> {
 		name: string;
 		className?: string;
+		style?: CSSProperties;
 		size?: string;
 		spin?: boolean;
 		rotate?: string;
