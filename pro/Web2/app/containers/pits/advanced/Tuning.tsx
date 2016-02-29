@@ -1,8 +1,7 @@
 import React = require('react');
 import Icon = require('react-fa');
-import Immutable = require('immutable');
 import { CSSProperties, Component, Props } from 'react';
-import { Alert, Badge, Table, ButtonGroup, Button, Input } from 'react-bootstrap';
+import { Alert } from 'react-bootstrap';
 import { connect } from 'redux-await';
 
 import { Pit, PitFieldNode } from '../../../models/Pit';
