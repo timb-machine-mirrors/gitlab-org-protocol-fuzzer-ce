@@ -50,9 +50,17 @@ export interface Monitor {
 	path?: number[];
 }
 
+export interface PitFieldNode {
+	id: string;
+	fields: PitFieldNode[];
+	weight?: number;
+	expanded?: boolean;
+}
+
 export interface PitMetadata {
 	defines: Parameter[];
 	monitors: Parameter[];
+	fields: PitFieldNode[];
 }
 
 export interface Tag {
