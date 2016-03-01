@@ -198,8 +198,21 @@ namespace Peach.Pro.Core
 					var totalElements = 0;
 					foreach (var actionData in action.outputData)
 					{
-						totalElements += CollectNodes(actionData.dataModel.DisplayTraverse(), elementNodes, x => x.fullName);
-						totalFields += CollectNodes(actionData.dataModel.PreOrderTraverse(), fieldNodes, x => x.FullFieldId);
+						foreach(var mask in actionData.allData.OfType<DataFieldMask>())
+						{
+							mask.Apply(actionData.dataModel);
+						}
+
+						totalElements += CollectNodes(
+							actionData.dataModel.DisplayTraverse(), 
+							elementNodes, 
+							x => x.fullName
+						);
+						totalFields += CollectNodes(
+							actionData.dataModel.DisplayTraverse(), 
+							fieldNodes, 
+							x => x.FullFieldId
+						);
 						hasData = true;
 					}
 

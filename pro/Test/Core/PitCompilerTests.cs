@@ -6,6 +6,7 @@ using Peach.Pro.Core;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Core;
 using System;
+using System.Linq;
 
 namespace Peach.Pro.Test.Core
 {
@@ -349,6 +350,180 @@ namespace Peach.Pro.Test.Core
 		}
 
 		[Test]
+		public void TestMaskElements()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Choice name='Choice'>
+			<Block name='A'>
+				<Choice name='Choice'>
+					<Block name='AA' />
+					<Block name='AB' />
+				</Choice>
+			</Block>
+			<Block name='B'>
+				<Choice name='ChoiceArray' minOccurs='1'>
+					<Block name='BA' />
+					<Block name='BB' />
+					<Block name='BC' />
+				</Choice>
+			</Block>
+		</Choice>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action name='Action1' type='output'>
+				<DataModel ref='DM' />
+				<Data>
+					<FieldMask select='Choice.A.Choice.AB' />
+				</Data>
+			</Action>
+
+			<Action name='Action2' type='output'>
+				<DataModel ref='DM' />
+				<Data>
+					<FieldMask select='Choice.B.ChoiceArray.BB' />
+					<FieldMask select='Choice.B.ChoiceArray.BC' />
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<Strategy class='Random'/>
+		<StateModel ref='SM' />
+		<Publisher class='Null'/>
+	</Test>
+</Peach>";
+
+			var filename = Path.Combine(_root.Path, "TestFieldMask.xml");
+			File.WriteAllText(filename, xml);
+
+			var compiler = new PitCompiler(_root.Path, filename);
+			compiler.Parse(false, false);
+			var tree = compiler.MakeFields();
+			var actual = JsonConvert.SerializeObject(tree);
+			var expected = JsonConvert.SerializeObject(new[] {
+				new PitField { Id = "Initial", Fields = {
+					new PitField { Id = "Action1", Fields = {
+						new PitField { Id = "DM", Fields = {
+							new PitField { Id = "Choice", Fields = {
+								new PitField { Id = "A", Fields = {
+									new PitField { Id = "Choice", Fields = {
+										new PitField { Id = "AB" }
+									}},
+								}}
+							}},
+						}},
+					}},
+					new PitField { Id = "Action2", Fields = {
+						new PitField { Id = "DM", Fields = {
+							new PitField { Id = "Choice", Fields = {
+								new PitField { Id = "B", Fields = {
+									new PitField { Id = "ChoiceArray", Fields = {
+										new PitField { Id = "ChoiceArray", Fields = {
+											new PitField { Id = "BB" },
+											new PitField { Id = "BC" }
+										}},
+									}},
+								}},
+							}},
+						}},
+					}},
+				}},
+			});
+			Assert.AreEqual(expected, actual);
+		}
+
+		[Test]
+		public void TestMaskFields()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM' fieldId='F_DM'>
+		<Choice name='Choice' fieldId='F_Choice'>
+			<Block name='A' fieldId='F_A'>
+				<Choice name='Choice' fieldId='F_Choice'>
+					<Block name='AA' fieldId='F_AA' />
+					<Block name='AB' fieldId='F_AB' />
+				</Choice>
+			</Block>
+			<Block name='B' fieldId='F_B'>
+				<Choice name='ChoiceArray' minOccurs='1' fieldId='F_ChoiceArray'>
+					<Block name='BA' fieldId='F_BA' />
+					<Block name='BB' fieldId='F_BB' />
+					<Block name='BC' fieldId='F_BC' />
+				</Choice>
+			</Block>
+		</Choice>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action name='Action1' type='output'>
+				<DataModel ref='DM' />
+				<Data>
+					<FieldMask select='Choice.A.Choice.AB' />
+				</Data>
+			</Action>
+
+			<Action name='Action2' type='output'>
+				<DataModel ref='DM' />
+				<Data>
+					<FieldMask select='Choice.B.ChoiceArray.BB' />
+					<FieldMask select='Choice.B.ChoiceArray.BC' />
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<Strategy class='Random'/>
+		<StateModel ref='SM' />
+		<Publisher class='Null'/>
+	</Test>
+</Peach>";
+
+			var filename = Path.Combine(_root.Path, "TestFieldMask.xml");
+			File.WriteAllText(filename, xml);
+
+			var compiler = new PitCompiler(_root.Path, filename);
+			compiler.Parse(false, false);
+			var tree = compiler.MakeFields();
+			var actual = JsonConvert.SerializeObject(tree);
+			var expected = JsonConvert.SerializeObject(new[] {
+				new PitField { Id = "Initial", Fields = {
+					new PitField { Id = "Action1", Fields = {
+						new PitField { Id = "F_DM", Fields = {
+							new PitField { Id = "F_Choice", Fields = {
+								new PitField { Id = "F_A", Fields = {
+									new PitField { Id = "F_Choice", Fields = {
+										new PitField { Id = "F_AB" }
+									}},
+								}}
+							}},
+						}},
+					}},
+					new PitField { Id = "Action2", Fields = {
+						new PitField { Id = "F_DM", Fields = {
+							new PitField { Id = "F_Choice", Fields = {
+								new PitField { Id = "F_B", Fields = {
+									new PitField { Id = "F_ChoiceArray", Fields = {
+										new PitField { Id = "F_BB" },
+										new PitField { Id = "F_BC" }
+									}},
+								}},
+							}},
+						}},
+					}},
+				}},
+			});
+			Assert.AreEqual(expected, actual);
+		}
+
+		[Test]
 		public void TestNoConfig()
 		{
 			const string xml = @"
@@ -406,9 +581,9 @@ namespace Peach.Pro.Test.Core
 			File.WriteAllText(xmlConfigPath, xmlConfig);
 
 			var compiler = new PitCompiler(_root.Path, xmlPath);
-			var actual = compiler.Run(true, false);
+			var actual = compiler.Run(true, false).ToArray();
 
-			actual.ForEach(x => Console.WriteLine(x));
+			actual.ForEach(Console.WriteLine);
 			CollectionAssert.IsEmpty(actual);
 		}
 
@@ -449,17 +624,16 @@ namespace Peach.Pro.Test.Core
 			File.WriteAllText(xmlConfigPath, xmlConfig);
 
 			var compiler = new PitCompiler(_root.Path, xmlPath);
-			var actual = compiler.Run(true, false);
+			var actual = compiler.Run(true, false).ToArray();
 
-			actual.ForEach(x => Console.WriteLine(x));
-
-			var expected = new string[] {
+			var expected = new[] {
 				"Detected unused PitDefine: 'SamplePath'.",
 				"PitDefine 'Group' missing 'Description' attribute.",
 				"PitDefine 'Executable' missing 'Description' attribute.",
 				"Configuration file should not have platform specific defines.",
 			};
 
+			actual.ForEach(Console.WriteLine);
 			CollectionAssert.AreEquivalent(expected, actual);
 		}
 
@@ -534,9 +708,9 @@ PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
 			File.WriteAllText(xmlConfigPath, xmlConfig);
 
 			var compiler = new PitCompiler(_root.Path, xmlPath);
-			var actual = compiler.Run();
+			var actual = compiler.Run().ToArray();
 
-			actual.ForEach(x => Console.WriteLine(x));
+			actual.ForEach(Console.WriteLine);
 			CollectionAssert.IsEmpty(actual);
 		}
 
@@ -602,15 +776,15 @@ Field'/>
 			File.WriteAllText(xmlConfigPath, xmlConfig);
 
 			var compiler = new PitCompiler(_root.Path, xmlPath);
-			var actual = compiler.Run();
+			var actual = compiler.Run().ToArray();
 
-			var expected = new string[] {
+			var expected = new[] {
 				"Element has value attribute with embedded newline: <String name=\"str1\" value=\"new&#xD;&#xA;line\" xmlns=\"http://peachfuzzer.com/2012/Peach\" />",
 				"Element has value attribute with embedded newline: <String name=\"str2\" value=\"another&#xD;&#xA;new&#xD;&#xA;line\" xmlns=\"http://peachfuzzer.com/2012/Peach\" />",
 				"Element has value attribute with embedded newline: <Field name=\"str1\" value=\"Bad&#xD;&#xA;Field\" xmlns=\"http://peachfuzzer.com/2012/Peach\" />",
 			};
 
-			actual.ForEach(x => Console.WriteLine(x));
+			actual.ForEach(Console.WriteLine);
 			CollectionAssert.AreEquivalent(expected, actual);
 		}
 	}

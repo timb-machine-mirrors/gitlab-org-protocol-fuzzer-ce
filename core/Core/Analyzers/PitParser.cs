@@ -1632,9 +1632,11 @@ namespace Peach.Core.Analyzers
 				}
 			}
 
-			if (node.ChildNodes.AsEnumerable().Any(n => n.Name == "Field"))
+			var children = node.ChildNodes.AsEnumerable().ToArray();
+			var fields = children.Where(x => x.Name == "Field").ToArray();
+			if (fields.Any())
 			{
-				// If this ref'd an existing Data element, clear all non FieldData children
+				// If this ref'd an existing Data element, clear all non DataField children
 				if (dataSet.Any(o => !(o is DataField)))
 					dataSet.Clear();
 
@@ -1644,32 +1646,38 @@ namespace Peach.Core.Analyzers
 
 				var dupes = new HashSet<string>();
 
-				foreach (XmlNode child in node.ChildNodes)
+				foreach (var child in fields)
 				{
-					if (child.Name == "Field")
+					var name = child.getAttrString("name");
+					if (!dupes.Add(name))
+						throw new PeachException("Error, Data element has multiple entries for field '" + name + "'.");
+
+					DataElement tmp;
+					if (child.getAttr("valueType", "string").ToLower() == "string")
+						tmp = new Dom.String { stringType = StringType.utf8 };
+					else
+						tmp = new Blob();
+
+					// Hack to call common value parsing code.
+					handleCommonDataElementValue(child, tmp);
+
+					foreach (var fieldData in dataSet.OfType<DataField>())
 					{
-						string name = child.getAttrString("name");
-
-						if (!dupes.Add(name))
-							throw new PeachException("Error, Data element has multiple entries for field '" + name + "'.");
-
-						DataElement tmp;
-
-						if (child.getAttr("valueType", "string").ToLower() == "string")
-							tmp = new Dom.String { stringType = StringType.utf8 };
-						else
-							tmp = new Blob();
-
-						// Hack to call common value parsing code.
-						handleCommonDataElementValue(child, tmp);
-
-						foreach (var fieldData in dataSet.OfType<DataField>())
+						fieldData.Fields.Remove(name);
+						fieldData.Fields.Add(new DataField.Field
 						{
-							fieldData.Fields.Remove(name);
-							fieldData.Fields.Add(new DataField.Field() { Name = name, Value = tmp.DefaultValue });
-						}
+							Name = name, 
+							Value = tmp.DefaultValue
+						});
 					}
 				}
+			}
+
+			var masks = children.Where(x => x.Name == "FieldMask");
+			foreach (var child in masks)
+			{
+				var selector = child.getAttrString("select");
+				dataSet.Add(new DataFieldMask(selector));
 			}
 
 			if (dataSet.Count == 0)

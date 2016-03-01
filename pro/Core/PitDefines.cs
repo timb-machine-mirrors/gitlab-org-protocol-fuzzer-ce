@@ -362,7 +362,7 @@ namespace Peach.Pro.Core
 		{
 			public None()
 			{
-				Name = "None";
+				Name = Description = "None";
 			}
 
 			[XmlIgnore]
@@ -376,7 +376,7 @@ namespace Peach.Pro.Core
 		{
 			public Windows()
 			{
-				Name = "Windows";
+				Name = Description = "Windows";
 			}
 
 			[XmlIgnore]
@@ -390,7 +390,7 @@ namespace Peach.Pro.Core
 		{
 			public OSX()
 			{
-				Name = "OSX";
+				Name = Description = "OSX";
 			}
 
 			[XmlIgnore]
@@ -404,7 +404,7 @@ namespace Peach.Pro.Core
 		{
 			public Linux()
 			{
-				Name = "Linux";
+				Name = Description = "Linux";
 			}
 
 			[XmlIgnore]
@@ -418,7 +418,7 @@ namespace Peach.Pro.Core
 		{
 			public Unix()
 			{
-				Name = "Unix";
+				Name = Description = "Unix";
 			}
 
 			[XmlIgnore]
@@ -432,8 +432,7 @@ namespace Peach.Pro.Core
 		{
 			public All()
 			{
-				Name = "All";
-				Description = "All";
+				Name = Description = "All";
 			}
 
 			[XmlIgnore]

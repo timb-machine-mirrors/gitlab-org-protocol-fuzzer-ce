@@ -406,7 +406,18 @@ namespace Peach.Core.Xsd
 			[XmlAttribute]
 			[DefaultValue(ValueType.String)]
 			public ValueType valueType { get; set; }
+		}
 
+		/// <summary>
+		/// Constrains field enumeration to specified choices.
+		/// </summary>
+		public class FieldMask
+		{
+			/// <summary>
+			/// Specify selection of choices
+			/// </summary>
+			[XmlAttribute]
+			public string select { get; set; }
 		}
 
 		/// <summary>
@@ -441,6 +452,10 @@ namespace Peach.Core.Xsd
 		[XmlElement("Field")]
 		[DefaultValue(null)]
 		public List<Field> Fields { get; set; }
+
+		[XmlElement("FieldMask")]
+		[DefaultValue(null)]
+		public List<FieldMask> FieldMasks { get; set; }
 	}
 
 	#endregion
