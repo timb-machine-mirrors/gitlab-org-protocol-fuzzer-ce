@@ -5,7 +5,6 @@ using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
 using Peach.Pro.Core.WebServices.Models;
-using Array = Peach.Core.Dom.Array;
 using Peach.Pro.Core.Publishers;
 using Newtonsoft.Json;
 using System.IO;
@@ -18,17 +17,17 @@ namespace Peach.Pro.Core
 {
 	public class PitCompiler
 	{
-		private static NLog.Logger Logger = LogManager.GetCurrentClassLogger();
-		private string _pitLibraryPath;
-		private string _pitPath;
-		private string _pitMetaPath;
+		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
+		private readonly string _pitLibraryPath;
+		private readonly string _pitPath;
+		private readonly string _pitMetaPath;
 		private Peach.Core.Dom.Dom _dom;
-		private List<string> _errors = new List<string>();
-		
-		const string Namespace = "http://peachfuzzer.com/2012/Peach";
-		const string SchemaLocation = "http://peachfuzzer.com/2012/Peach peach.xsd";		
+		private readonly List<string> _errors = new List<string>();
 
-		static readonly Dictionary<string, string[]> OptionalParams = new Dictionary<string, string[]>
+		private const string Namespace = "http://peachfuzzer.com/2012/Peach";
+		private const string SchemaLocation = "http://peachfuzzer.com/2012/Peach peach.xsd";
+
+		private static readonly Dictionary<string, string[]> OptionalParams = new Dictionary<string, string[]>
 		{
 			{ "RawEther", new[] { "MinMTU", "MaxMTU", "MinFrameSize", "MaxFrameSize", "PcapTimeout" }},
 			{ "RawV4", new[] { "MinMTU", "MaxMTU" }},
@@ -96,7 +95,7 @@ namespace Peach.Pro.Core
 
 		class CustomParser : ProPitParser
 		{
-			protected override void handlePublishers(System.Xml.XmlNode node, Test parent)
+			protected override void handlePublishers(XmlNode node, Test parent)
 			{
 				// ignore publishers
 				var args = new Dictionary<string, Variant>();
@@ -124,8 +123,7 @@ namespace Peach.Pro.Core
 
 			var parser = new CustomParser();
 			_dom = parser.asParser(args, _pitPath);
-			_dom.context = new RunContext();
-			_dom.context.test = _dom.tests.First();
+			_dom.context = new RunContext {test = _dom.tests.First()};
 
 			if (verifyConfig)
 				VerifyConfig(defs, args);
@@ -134,7 +132,7 @@ namespace Peach.Pro.Core
 				VerifyPitFiles(_dom, true);
 		}
 
-		private void VerifyConfig(PitDefines defs, Dictionary<string, object> args)
+		private void VerifyConfig(PitDefines defs, IReadOnlyDictionary<string, object> args)
 		{
 			var defsList = defs.Walk().ToList();
 			_errors.AddRange(defsList
@@ -196,8 +194,8 @@ namespace Peach.Pro.Core
 					var hasData = false;
 					var elementNodes = new List<PitField>();
 					var fieldNodes = new List<PitField>();
-					int totalFields = 0;
-					int totalElements = 0;
+					var totalFields = 0;
+					var totalElements = 0;
 					foreach (var actionData in action.outputData)
 					{
 						totalElements += CollectNodes(actionData.dataModel.DisplayTraverse(), elementNodes, x => x.fullName);
@@ -236,7 +234,7 @@ namespace Peach.Pro.Core
 			List<PitField> rootFields,
 			Func<DataElement, string> selector)
 		{
-			int total = 0;
+			var total = 0;
 
 			var fullNames = elements
 				.Select(selector)
@@ -265,9 +263,9 @@ namespace Peach.Pro.Core
 
 		private void VerifyPit(string fileName, bool isTest)
 		{
-			int idxDeclaration = 0;
-			int idxCopyright = 0;
-			int idx = 0;
+			var idxDeclaration = 0;
+			var idxCopyright = 0;
+			var idx = 0;
 
 			using (var rdr = XmlReader.Create(fileName))
 			{
@@ -444,8 +442,8 @@ namespace Peach.Pro.Core
 
 					var actions = sm.Current.Select("//p:Action[@type='call' and @publisher='Peach.Agent']", nsMgr);
 
-					bool gotStart = false;
-					bool gotEnd = false;
+					var gotStart = false;
+					var gotEnd = false;
 
 					while (actions.MoveNext())
 					{

@@ -10,7 +10,7 @@ namespace Peach.Core.Test
 	public class TestElement
 	{
 		[PluginElement("class", typeof(IMonitor))]
-		public NamedCollection<Peach.Core.Dom.Monitor> Monitors { get; set; }
+		public NamedCollection<Dom.Monitor> Monitors { get; set; }
 	}
 
 	public class TestObject : INamed
@@ -42,11 +42,11 @@ namespace Peach.Core.Test
 		public uint UnsignedLong { get; set; }
 
 		[XmlAttribute]
-		public Peach.Core.Dom.Test.Lifetime Endian { get; set; }
+		public Dom.Test.Lifetime Endian { get; set; }
 	}
 	public abstract class TestAbstract
 	{
-		public TestAbstract()
+		protected TestAbstract()
 		{
 			Objects = new System.Collections.Generic.List<TestObject>();
 		}
@@ -103,7 +103,7 @@ namespace Peach.Core.Test
 		public TestObject def { get; set; }
 
 		[XmlElement("Object")]
-		public Peach.Core.NamedCollection<TestObject> Objects { get; set; }
+		public NamedCollection<TestObject> Objects { get; set; }
 	}
 
 	public class SchemaTests
@@ -128,7 +128,7 @@ namespace Peach.Core.Test
 
 		public void Test1()
 		{
-			TestType(typeof(Peach.Core.Xsd.Dom));
+			TestType(typeof(Xsd.Dom));
 		}
 
 		public void Test2()
@@ -148,10 +148,14 @@ namespace Peach.Core.Test
 
 		public void Test5()
 		{
-			var obj = new ComplexObjext();
-			obj.Objects = new NamedCollection<TestObject>();
-			obj.Objects.Add(new TestObject() { Name = "Foo" });
-			obj.Objects.Add(new TestObject() { Name = "Bar" });
+			var obj = new ComplexObjext
+			{
+				Objects = new NamedCollection<TestObject>
+				{
+					new TestObject() {Name = "Foo"}, 
+					new TestObject() {Name = "Bar"}
+				}
+			};
 			obj.def = obj.Objects[0];
 
 			Serialize(obj);

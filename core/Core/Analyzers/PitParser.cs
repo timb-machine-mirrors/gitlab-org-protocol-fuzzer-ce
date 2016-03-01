@@ -325,10 +325,12 @@ namespace Peach.Core.Analyzers
 				set.Add(PEACH_NAMESPACE_URI, tr);
 			}
 
-			var settings = new XmlReaderSettings();
-			settings.ValidationType = ValidationType.Schema;
-			settings.Schemas = set;
-			settings.NameTable = new NameTable();
+			var settings = new XmlReaderSettings
+			{
+				ValidationType = ValidationType.Schema,
+				Schemas = set,
+				NameTable = new NameTable()
+			};
 			settings.ValidationEventHandler += delegate(object sender, ValidationEventArgs e)
 			{
 				var ex = e.Exception;
@@ -1550,13 +1552,13 @@ namespace Peach.Core.Analyzers
 
 		protected virtual DataSet handleData(XmlNode node, Dom.Dom dom, string uniqueName)
 		{
-			DataSet dataSet = null;
+			DataSet dataSet;
 
 			if (node.hasAttr("ref"))
 			{
 				string refName = node.getAttrString("ref");
 
-				var other = dom.getRef<DataSet>(refName, a => a.datas);
+				var other = dom.getRef(refName, a => a.datas);
 				if (other == null)
 					throw new PeachException("Error, could not resolve Data element ref attribute value '" + refName + "'.");
 
@@ -1630,10 +1632,10 @@ namespace Peach.Core.Analyzers
 				}
 			}
 
-			if (node.ChildNodes.AsEnumerable().Where(n => n.Name == "Field").Any())
+			if (node.ChildNodes.AsEnumerable().Any(n => n.Name == "Field"))
 			{
 				// If this ref'd an existing Data element, clear all non FieldData children
-				if (dataSet.Where(o => !(o is DataField)).Any())
+				if (dataSet.Any(o => !(o is DataField)))
 					dataSet.Clear();
 
 				// Ensure there is a field data record we can populate

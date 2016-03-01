@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Xml;
 using NLog;
 using Peach.Core;
@@ -9,7 +7,6 @@ using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using Array = Peach.Core.Dom.Array;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 using Logger = NLog.Logger;
 
