@@ -288,6 +288,7 @@ namespace Peach.Core.Dom
 							System.Diagnostics.Debug.Assert(array.Count == 0);
 
 							yield return null;
+							yield break;
 						}
 
 						if (array.maxOccurs != -1 && index > array.maxOccurs)
