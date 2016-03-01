@@ -59,6 +59,7 @@ namespace Peach.Core
 			"BouncyCastle.Crypto.dll", 
 			"ComTest.dll", 
 			"EasyHook.dll", 
+			"ExtendExamples.dll",
 			"Godel.Tests.dll", 
 			"Ionic.Zip.dll", 
 			"IronPython.dll", 
@@ -137,6 +138,7 @@ namespace Peach.Core
 			"pf_controller.exe", 
 			"pf_node.exe", 
 			"PitTester.exe",
+			"pitc.exe",
 		};
 
 		#endregion
