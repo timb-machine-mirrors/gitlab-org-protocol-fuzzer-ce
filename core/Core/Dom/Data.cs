@@ -231,24 +231,27 @@ namespace Peach.Core.Dom
 		}
 
 		internal static IEnumerable<DataElement> EnumerateElements(
-			DataElementContainer container, 
+			DataElementContainer model, 
 			string field,
 			bool skipArray)
 		{
 			var parts = field.Split('.');
+			var container = model;
 
 			foreach (var part in parts)
 			{
 				var name = part;
 				var m = Regex.Match(name, @"(.*)\[(-?\d+)\]$");
 
-				var resolutionError = new PeachException(
+				var bestContainer = container ?? model;
+				var resolutionError = (
 					"Error, unable to resolve field \"{0}\" of \"{1}\" against \"{2}\" ({3}).".Fmt(
-					part,
-					field,
-					container.fullName,
-					container.GetType().Name
-				));
+						part,
+						field,
+						bestContainer.fullName,
+						bestContainer.GetType().Name
+					)
+				);
 
 				DataElement elem;
 				if (m.Success)
@@ -257,7 +260,7 @@ namespace Peach.Core.Dom
 					var index = int.Parse(m.Groups[2].Value);
 
 					if (!container.TryGetValue(name, out elem))
-						throw resolutionError;
+						throw new PeachException(resolutionError);
 
 					var seq = elem as Sequence;
 					if (seq == null)
@@ -314,7 +317,7 @@ namespace Peach.Core.Dom
 				{
 					var choice = container as Choice;
 					if (!choice.choiceElements.TryGetValue(name, out elem))
-						throw resolutionError;
+						throw new PeachException(resolutionError);
 
 					container = elem as DataElementContainer;
 
@@ -323,7 +326,7 @@ namespace Peach.Core.Dom
 				else
 				{
 					if (container == null || !container.TryGetValue(name, out elem))
-						throw resolutionError;
+						throw new PeachException(resolutionError);
 
 					var array = elem as Array;
 					if (skipArray && array != null)
