@@ -294,7 +294,7 @@ noscript {
 	position: absolute;
 	width: 160px;
 	left: 0;
-	padding: 10px 0px 10px 10px;
+	padding: 10px 0 10px 10px;
 }
 
 .tuning th i {
@@ -306,7 +306,7 @@ noscript {
 }
 
 .tuning td {
-	padding: 2px 2px 2px 45px;
+	padding: 2px 0 2px 45px;
 }
 
 .tuning td .expander {
@@ -319,7 +319,6 @@ noscript {
 	border: 1px solid black;
 	border-radius: 3px;
 	padding: 7px;
-	margin-right: 5px;
 	white-space: nowrap;
 }
 

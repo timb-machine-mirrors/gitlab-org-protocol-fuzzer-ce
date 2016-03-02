@@ -188,7 +188,7 @@ namespace Peach.Pro.Core.WebServices
 					if (Path.GetDirectoryName(dir) == "User")
 						continue;
 
-					string searchPattern = locked ? "*.xml" : "*.pit";
+					var searchPattern = locked ? "*.xml" : "*.peach";
 					foreach (var file in Directory.EnumerateFiles(dir, searchPattern))
 					{
 						try
@@ -212,11 +212,9 @@ namespace Peach.Pro.Core.WebServices
 
 		private Pit AddEntry(LibraryDetail lib, string fileName)
 		{
-			PitDetail detail;
-			if (lib.Library.Locked)
-				detail = MakePitDetail(fileName);
-			else
-				detail = LoadPitDetail(fileName);
+			var detail = lib.Library.Locked ? 
+				MakePitDetail(fileName) : 
+				LoadPitDetail(fileName);
 			entries.Add(detail);
 
 			lib.Library.Versions[0].Pits.Add(new LibraryPit {
@@ -276,7 +274,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 			var lastModified = File.GetLastWriteTimeUtc(fileName);
 
-			Pit pit = LoadPit(fileName);
+			var pit = LoadPit(fileName);
 
 			pit.User = Environment.UserName;
 			pit.Timestamp = lastModified;
@@ -371,7 +369,7 @@ namespace Peach.Pro.Core.WebServices
 			if (!Directory.Exists(dstDir))
 				Directory.CreateDirectory(dstDir);
 
-			var dstFile = Path.Combine(dstDir, name + ".pit");
+			var dstFile = Path.Combine(dstDir, name + ".peach");
 			if (File.Exists(dstFile))
 				throw new ArgumentException("A pit already exists with the specified name.");
 

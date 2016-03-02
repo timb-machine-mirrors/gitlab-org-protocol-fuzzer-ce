@@ -4,7 +4,7 @@ namespace Peach {
 	const SHIFT_WIDTH = 20;
 	const MAX_NODES = 2000;
 
-	interface FlatNode {
+	export interface FlatNode {
 		node: IPitFieldNode;
 		id: string;
 		weight: number;
@@ -15,6 +15,7 @@ namespace Peach {
 		weightIcons: string[];
 		expanderIcon: string;
 		showExpander: boolean;
+		direct: boolean;
 	}
 
 	function defaultWeight(node: IPitFieldNode) {
@@ -43,7 +44,8 @@ namespace Peach {
 				style: { 'margin-left': depth * SHIFT_WIDTH },
 				weightIcons: icons,
 				expanderIcon: expanded ? 'fa-minus' : 'fa-plus',
-				showExpander: !_.isEmpty(node.fields)
+				showExpander: !_.isEmpty(node.fields),
+				direct: false
 			};
 			return [flat].concat(flatten(node.fields, depth + 1, flat));
 		});
@@ -60,11 +62,42 @@ namespace Peach {
 		fields.forEach(field => selectWeight(field, weight));
 	}
 
-	interface ITuningScope extends IViewModelScope {
+	export interface ITuningScope extends IViewModelScope {
 		flat: FlatNode[];
 		hasLoaded: boolean;
 		isTruncated: boolean;
 		MAX_NODES: number;
+	}
+
+	function applyWeights(weights: IPitWeight[], fields: IPitFieldNode[]) {
+		for (const rule of weights) {
+			const parts = rule.id.split('.');
+			applyWeight(fields, parts, rule.weight);
+		}
+	}
+
+	function applyWeight(fields: IPitFieldNode[], parts: string[], weight: number) {
+		const next = parts.shift();
+		for (const node of fields) {
+			if (node.id === next) {
+				console.log('applyWeight', node.id, parts, next);
+				if (parts.length === 0) {
+					node.weight = weight;
+				} else {
+					applyWeight(node.fields, parts, weight);
+				}
+			}
+		}
+	}
+
+	function extractWeights(prefix: string, tree: IPitFieldNode[], collect: IPitWeight[]) {
+		for (const node of tree) {
+			const here = `${prefix}${node.id}`;
+			if (defaultWeight(node) !== 3) {
+				collect.push({id: here, weight: node.weight});
+			}
+			extractWeights(`${here}.`, node.fields, collect);
+		}
 	}
 
 	export class ConfigureTuningController {
@@ -73,6 +106,8 @@ namespace Peach {
 			C.Services.Pit
 		];
 
+		private isSaved = false;
+		private isDirty = false;
 		private tree: IPitFieldNode[] = [];
 		private nodeHover: FlatNode = null;
 		private hovers: boolean[] = [
@@ -96,6 +131,11 @@ namespace Peach {
 			const promise = pitService.LoadPit();
 			promise.then((pit: IPit) => {
 				this.tree = _.cloneDeep(pit.metadata.fields);
+
+				pit.weights.push({ id: 'S1.A1.TheDataModel', weight: 5 });
+				applyWeights(pit.weights, this.tree);
+				console.log(this.tree);
+
 				this.flatten();
 				this.$scope.hasLoaded = true;
 				setTimeout(() => console.timeEnd('load'));
@@ -158,10 +198,30 @@ namespace Peach {
 			selectWeight(node.node, weight);
 			setTimeout(() => {
 				this.flatten();
+				this.isDirty = true;
 				setTimeout(() => {
 					this.$scope.$apply();
 				});
 			}, 100);
+		}
+
+		public get ShowSaved(): boolean {
+			return !this.isDirty  && this.isSaved;
+		}
+
+		public get CanSave(): boolean {
+			return this.isDirty;
+		}
+
+		public OnSave(): void {
+			const weights = [];
+			extractWeights('', this.tree, weights);
+			console.log(weights);
+			//const promise = this.pitService.SaveDefines(this.View);
+			//promise.then(() => {
+			//	this.isSaved = true;
+			//	this.$scope.form.$setPristine();
+			//});
 		}
 	}
 }
