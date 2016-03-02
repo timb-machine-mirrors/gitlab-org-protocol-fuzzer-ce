@@ -1,4 +1,4 @@
-﻿/// <reference path="../reference.ts" />
+/// <reference path="../reference.ts" />
 
 namespace Peach {
 	const SHIFT_WIDTH = 20;
@@ -22,17 +22,18 @@ namespace Peach {
 		return _.isUndefined(node.weight) ? 3 : node.weight;
 	}
 
-	function flatten(nodes: IPitFieldNode[], depth: number, parent: FlatNode) {
-		return _.flatMap(nodes, (node: IPitFieldNode) => {
-			const expanded = _.isUndefined(node.expanded) ? 
-				depth < 2 : 
+	function flatten(nodes: IPitFieldNode[], depth: number, parent: FlatNode, collect: FlatNode[]) {
+		nodes.forEach(node => {
+			const expanded = _.isUndefined(node.expanded) ?
+				depth < 2 :
 				node.expanded;
 			const visible = !parent || parent.expanded && parent.visible;
 			const weight = defaultWeight(node);
 			const icons = _.range(6).map(i => {
-				return (weight === i) ? 'fa-circle' : 
-					(!expanded && matchWeight(node, i)) ? 'fa-dot-circle-o' :
-						'fa-circle-o';
+				return (weight === i) ? 'fa-circle' :
+					(!expanded && matchWeight(node, i)) ? 
+						'fa-dot-circle-o' :
+						'fa-circle-thin';
 			});
 			const flat: FlatNode = {
 				node: node,
@@ -47,7 +48,8 @@ namespace Peach {
 				showExpander: !_.isEmpty(node.fields),
 				direct: false
 			};
-			return [flat].concat(flatten(node.fields, depth + 1, flat));
+			collect.push(flat);
+			flatten(node.fields, depth + 1, flat, collect);
 		});
 	}
 
@@ -62,7 +64,7 @@ namespace Peach {
 		fields.forEach(field => selectWeight(field, weight));
 	}
 
-	export interface ITuningScope extends IViewModelScope {
+	export interface ITuningScope extends IFormScope {
 		flat: FlatNode[];
 		hasLoaded: boolean;
 		isTruncated: boolean;
@@ -70,17 +72,18 @@ namespace Peach {
 	}
 
 	function applyWeights(weights: IPitWeight[], fields: IPitFieldNode[]) {
+		console.time('applyWeights');
 		for (const rule of weights) {
 			const parts = rule.id.split('.');
 			applyWeight(fields, parts, rule.weight);
 		}
+		console.timeEnd('applyWeights');
 	}
 
 	function applyWeight(fields: IPitFieldNode[], parts: string[], weight: number) {
 		const next = parts.shift();
 		for (const node of fields) {
 			if (node.id === next) {
-				console.log('applyWeight', node.id, parts, next);
 				if (parts.length === 0) {
 					node.weight = weight;
 				} else {
@@ -100,6 +103,13 @@ namespace Peach {
 		}
 	}
 
+	function cloneFields(fields: IPitFieldNode[]): IPitFieldNode[] {
+		return fields.map(item => ({ 
+			id: item.id, 
+			fields: cloneFields(item.fields) 
+		}));
+	}
+
 	export class ConfigureTuningController {
 		static $inject = [
 			C.Angular.$scope,
@@ -107,7 +117,6 @@ namespace Peach {
 		];
 
 		private isSaved = false;
-		private isDirty = false;
 		private tree: IPitFieldNode[] = [];
 		private nodeHover: FlatNode = null;
 		private hovers: boolean[] = [
@@ -130,11 +139,10 @@ namespace Peach {
 			console.time('load');
 			const promise = pitService.LoadPit();
 			promise.then((pit: IPit) => {
-				this.tree = _.cloneDeep(pit.metadata.fields);
-
-				pit.weights.push({ id: 'S1.A1.TheDataModel', weight: 5 });
+				console.time('clone');
+				this.tree = cloneFields(pit.metadata.fields);
+				console.timeEnd('clone');
 				applyWeights(pit.weights, this.tree);
-				console.log(this.tree);
 
 				this.flatten();
 				this.$scope.hasLoaded = true;
@@ -144,7 +152,8 @@ namespace Peach {
 
 		flatten() {
 			console.time('flatten');
-			const flat = flatten(this.tree, 0, null);
+			const flat = [];
+			flatten(this.tree, 0, null, flat);
 			console.timeEnd('flatten');
 
 			console.log('nodes', flat.length);
@@ -157,7 +166,7 @@ namespace Peach {
 		}
 
 		LegendIcon(i: number) {
-			return this.hovers[i] ? 'fa-circle' : 'fa-circle-o';
+			return this.hovers[i] ? 'fa-circle' : 'fa-circle-thin';
 		}
 
 		OnLegendEnter(i: number) {
@@ -184,7 +193,7 @@ namespace Peach {
 
 		OnToggleExpand(node: FlatNode) {
 			node.node.expanded = !node.expanded;
-			node.expanderIcon = 'fa-spin fa-spinner';
+			node.expanderIcon = 'fa-spin fa-clock-o';
 			setTimeout(() => {
 				this.flatten();
 				setTimeout(() => {
@@ -194,11 +203,11 @@ namespace Peach {
 		}
 
 		OnSelectWeight(node: FlatNode, weight: number) {
-			node.weightIcons[weight] = 'fa-spin fa-spinner';
+			node.weightIcons[weight] = 'fa-spin fa-clock-o';
 			selectWeight(node.node, weight);
 			setTimeout(() => {
 				this.flatten();
-				this.isDirty = true;
+				this.$scope.form.$setDirty();
 				setTimeout(() => {
 					this.$scope.$apply();
 				});
@@ -206,22 +215,25 @@ namespace Peach {
 		}
 
 		public get ShowSaved(): boolean {
-			return !this.isDirty  && this.isSaved;
+			return !this.$scope.form.$dirty  && this.isSaved;
 		}
 
 		public get CanSave(): boolean {
-			return this.isDirty;
+			return this.$scope.form.$dirty;
 		}
 
 		public OnSave(): void {
 			const weights = [];
+			console.time('extractWeights');
 			extractWeights('', this.tree, weights);
-			console.log(weights);
-			//const promise = this.pitService.SaveDefines(this.View);
-			//promise.then(() => {
-			//	this.isSaved = true;
-			//	this.$scope.form.$setPristine();
-			//});
+			console.timeEnd('extractWeights');
+			console.log(weights.length);
+
+			const promise = this.pitService.SaveWeights(weights);
+			promise.then(() => {
+				this.isSaved = true;
+				this.$scope.form.$setPristine();
+			});
 		}
 	}
 }

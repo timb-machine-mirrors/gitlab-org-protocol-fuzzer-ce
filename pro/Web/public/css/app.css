@@ -241,25 +241,17 @@ noscript {
 	padding: 10px;	
 }
 
-.tuning-legend span i {
-	padding: 2px;
-}
-
-.tuning-legend span i.first {
-	padding-right: 10px;
-}
-
 .tuning-legend-text {
 	line-height: 1.2;
 }
 
 .tuning-legend-text span.line.first {
-	padding-left: 20px;
-	padding-right: 3px;
+	padding-left: 19px;
+	padding-right: 4px;
 }
 
 .tuning-legend-text span.line {
-	padding-left: 23px;
+	padding-left: 21px;
 }
 
 .tuning-legend-text span.line:before {
@@ -269,7 +261,7 @@ noscript {
 }
 
 .tuning-legend-text span.text {
-	padding-left: 9px;
+	padding-left: 8px;
 }
 
 .tuning {
@@ -287,7 +279,7 @@ noscript {
 }
 
 .tuning-row-hover {
-	background-color: #cccccc;
+	background-color: #EEE;
 }
 
 .tuning th {
@@ -297,12 +289,24 @@ noscript {
 	padding: 10px 0 10px 10px;
 }
 
+.tuning-legend span i,
 .tuning th i {
-	padding: 2px;
+	font-size: 133%;
+	line-height: 0.75em;
+	vertical-align: -15%;
+	margin: 1px;
+	color: #AAA;
 }
 
+.tuning-legend span i.fa-circle,
+.tuning th i.fa-circle,
+.tuning th i.fa-dot-circle-o {
+	color: #2091cf;
+}
+
+.tuning-legend span i.first,
 .tuning th i.first {
-	padding-right: 10px;
+	margin-right: 10px;
 }
 
 .tuning td {
