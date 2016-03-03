@@ -95,8 +95,19 @@ namespace Peach.Pro.Core.Fixups
 			else
 				increment = false;
 
+			Console.WriteLine("_stateKey: " + _stateKey);
 			if (ctx.stateStore.TryGetValue(_stateKey, out obj))
-				value = (ulong)obj;
+			{
+				try
+				{
+					value = (ulong)obj;
+				}
+				catch (InvalidCastException)
+				{
+					var l = (long) obj;
+					value = (ulong)l;
+				}
+			}
 			else
 				initialValue = true;
 

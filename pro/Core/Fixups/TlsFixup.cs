@@ -115,11 +115,11 @@ namespace Peach.Pro.Core.Fixups
 				if (IsServer && bytes[0] == 0x10)
 					bytes = KeyExchangeToBytes(obj, context);
 
-				//Console.WriteLine("Msg: ");
-				//foreach (var b in bytes)
-				//	Console.Write("{0:X2} ", b);
-				//Console.WriteLine();
-
+				Console.WriteLine("Msg: ");
+				foreach (var b in bytes)
+					Console.Write("{0:X2} ", b);
+				Console.WriteLine();
+				
 				md5.BlockUpdate(bytes, 0, bytes.Length);
 				sha1.BlockUpdate(bytes, 0, bytes.Length);
 			}
@@ -141,10 +141,10 @@ namespace Peach.Pro.Core.Fixups
 				if (IsServer && bytes[0] == 0x10)
 					bytes = KeyExchangeToBytes(obj, context);
 
-				//Console.WriteLine("Msg: ");
-				//foreach (var b in bytes)
-				//	Console.Write("{0:X2} ", b);
-				//Console.WriteLine();
+				Console.WriteLine("Msg: ");
+				foreach (var b in bytes)
+					Console.Write("{0:X2} ", b);
+				Console.WriteLine();
 
 				sha.BlockUpdate(bytes, 0, bytes.Length);
 			}
@@ -329,9 +329,8 @@ namespace Peach.Pro.Core.Fixups
 					case TlsVersion.TLSv12:
 						return ProtocolVersion.TLSv12;
 					case TlsVersion.DTLSv10:
-						return ProtocolVersion.DTLSv10;
 					case TlsVersion.DTLSv12:
-						return ProtocolVersion.DTLSv12;
+						throw new PeachException("Tls fixup does not support DTLS. Use DTls fixup instead.");
 					default:
 						throw new PeachException("TlsFixup does not yet support selected TlsVersion.");
 				}

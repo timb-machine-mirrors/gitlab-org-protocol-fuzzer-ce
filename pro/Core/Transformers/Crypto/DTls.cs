@@ -4,6 +4,8 @@ using Org.BouncyCastle.Crypto.Tls;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using Peach.Pro.Core.Dom;
+using Peach.Pro.Core.Fixups;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Transformers.Crypto
@@ -11,13 +13,38 @@ namespace Peach.Pro.Core.Transformers.Crypto
 	[Description("DTls Transformer")]
 	[Transformer("DTls", true, Internal = true)]
 	[Parameter("ContentType", typeof(byte), "Type of message to encrypt/decrypt")]
+	[Parameter("IsServer", typeof(bool), "Is server?", "false")]
+	[Parameter("Action", typeof(TlsAction), "Action to perform [Both, Encrypt, Decrypt]", "Both")]
+	[Parameter("TlsVersion", typeof(TlsVersion), "TLS Version", "DTLSv10")]
 	[Serializable]
 	public class DTls : Transformer
 	{
 		BitStream _encodedData;
 		DataModel _dataModel;
 
+		public TlsAction Action { get; set; }
+		public bool IsServer { get; set; }
 		public byte ContentType { get; set; }
+		public TlsVersion TlsVersion { get; set; }
+		public ProtocolVersion ProtocolVersion
+		{
+			get
+			{
+				switch (TlsVersion)
+				{
+					case TlsVersion.TLSv10:
+					case TlsVersion.TLSv11:
+					case TlsVersion.TLSv12:
+						throw new PeachException("DTls transformer only supports DTLS versions.");
+					case TlsVersion.DTLSv10:
+						return ProtocolVersion.DTLSv10;
+					case TlsVersion.DTLSv12:
+						return ProtocolVersion.DTLSv12;
+					default:
+						throw new PeachException("DTls transformer does not yet support selected TlsVersion.");
+				}
+			}
+		}
 
 		public DTls(DataElement parent, Dictionary<string, Variant> args)
 			: base(parent, args)
@@ -45,13 +72,13 @@ namespace Peach.Pro.Core.Transformers.Crypto
 			return (TlsBlockCipher)obj;
 		}
 
-		//static T GetState<T>(RunContext ctx, string key) where T : class
-		//{
-		//	object obj;
-		//	if (ctx.iterationStateStore.TryGetValue(key, out obj))
-		//		return (T)obj;
-		//	return default(T);
-		//}
+		static T GetState<T>(RunContext ctx, string key) where T : class
+		{
+			object obj;
+			if (ctx.iterationStateStore.TryGetValue(key, out obj))
+				return (T)obj;
+			return default(T);
+		}
 
 		// Called every time an output action occurs
 		void OnActionRunEvent(RunContext ctx)
@@ -59,28 +86,52 @@ namespace Peach.Pro.Core.Transformers.Crypto
 			parent.Invalidate();
 		}
 
-		long GetSequenceCounter()
+		long GetSequenceCounter(RunContext ctx)
 		{
-			var epochElement = parent.getRoot().find("Epoch");
+			DataElement epochElement;
+			DataElement seqElement;
+
+			try
+			{
+				var frag = (Frag)((DataElementContainer)parent.getRoot())["FragPacket"];
+
+				if (Action == TlsAction.Encrypt || Action== TlsAction.Both)
+				{
+					epochElement = ((DataElementContainer) frag.Template)["Epoch"];
+					seqElement = ((DataElementContainer) frag.Template)["SequenceNumber"];
+				}
+				else
+				{
+					epochElement = parent.getRoot().find("Epoch");
+					seqElement = parent.getRoot().find("SequenceNumber");
+				}
+			}
+			catch (Exception)
+			{
+				epochElement = parent.getRoot().find("Epoch");
+				seqElement = parent.getRoot().find("SequenceNumber");
+			}
+
 			if (epochElement == null)
 				throw new SoftException("DTls transformer can't find Epoch element.");
 
 			var epoch = (int)epochElement.InternalValue;
 
-			var seqElement = parent.getRoot().find("SequenceNumber");
 			if (seqElement == null)
 				throw new SoftException("DTls transfomer can't find SequenceNumber element.");
 
 			var sequenceNumber = (int)seqElement.InternalValue;
 
-			var bitStream = new BitStream(new byte[8]);
+			var bitStream = new BitStream();
 			var writer = new BitWriter(bitStream);
+			writer.BigEndian();
 
 			writer.WriteUInt16((ushort)epoch);
 			writer.WriteBits((ulong)sequenceNumber, 48);
 
 			bitStream.Position = 0;
 			var reader = new BitReader(bitStream);
+			reader.BigEndian();
 
 			return reader.ReadInt64();
 		}
@@ -94,26 +145,48 @@ namespace Peach.Pro.Core.Transformers.Crypto
 				_dataModel.ActionRun += OnActionRunEvent;
 		}
 
+		protected TlsBlockCipher CreateBlockCipher(RunContext ctx)
+		{
+			try
+			{
+				var tlsContext = TlsFixup.CreateTlsContext(ctx, IsServer, ProtocolVersion);
+				return TlsFixup.CreateBlockCipher(ctx, tlsContext, false);
+			}
+			catch (Exception)
+			{
+				return null;
+			}
+		}
+
 		protected override BitStream internalDecode(BitStream data)
 		{
-			// Get the cipher.  If it is null, this means we are not in a running action
-			var cipher = GetBlockCipher();
-			if (cipher == null)
+			if (Action == TlsAction.Encrypt)
 				return data;
-
-			// Save off the encoded data for the logging of any input data
-			_encodedData = new BitStream();
-			data.CopyTo(_encodedData);
-			_encodedData.Seek(0, System.IO.SeekOrigin.Begin);
-
-			var len = _encodedData.Length;
-			var buf = new BitReader(_encodedData).ReadBytes((int)len);
-			_encodedData.Seek(0, System.IO.SeekOrigin.Begin);
-
-			var sequenceCounter = GetSequenceCounter();
 
 			try
 			{
+				// Get the cipher.  If it is null, this means we are not in a running action
+				var cipher = GetBlockCipher();
+				if (cipher == null)
+				{
+					cipher = CreateBlockCipher(_dataModel.actionData.action.parent.parent.parent.context);
+					if (cipher == null)
+						return data;
+				}
+
+				// Save off the encoded data for the logging of any input data
+				_encodedData = new BitStream();
+				data.CopyTo(_encodedData);
+				_encodedData.Seek(0, System.IO.SeekOrigin.Begin);
+
+				var len = _encodedData.Length;
+				var buf = new BitReader(_encodedData).ReadBytes((int)len);
+				_encodedData.Seek(0, System.IO.SeekOrigin.Begin);
+
+				var root = (DataModel)parent.getRoot();
+				var context = root.actionData.action.parent.parent.parent.context;
+				var sequenceCounter = GetSequenceCounter(context);
+
 				var ret = cipher.DecodeCiphertext(sequenceCounter, ContentType, buf, 0, buf.Length);
 
 				return new BitStream(ret);
@@ -126,24 +199,40 @@ namespace Peach.Pro.Core.Transformers.Crypto
 
 		protected override BitwiseStream internalEncode(BitwiseStream data)
 		{
-			// Get the cipher.  If it is null, this means we are not in a running action
-			var cipher = GetBlockCipher();
-			if (cipher == null)
+			if (Action == TlsAction.Decrypt)
 				return data;
-
-			// If we got encoded data during input, just return that as to not
-			// disturb the state of the cipher
-			if (_encodedData != null)
-				return _encodedData;
-
-			data.Position = 0;
-
-			var len = data.Length - data.Position;
-			var buf = new BitReader(data).ReadBytes((int)len);
 
 			try
 			{
-				var ret = cipher.EncodePlaintext(GetSequenceCounter(), ContentType, buf, 0, buf.Length);
+				// Get the cipher.  If it is null, this means we are not in a running action
+				var cipher = GetBlockCipher();
+				if (cipher == null)
+				{
+					cipher = CreateBlockCipher(_dataModel.actionData.action.parent.parent.parent.context);
+					if (cipher == null)
+						return data;
+				}
+
+				// If we got encoded data during input, just return that as to not
+				// disturb the state of the cipher
+				if (_encodedData != null)
+					return _encodedData;
+
+				data.Position = 0;
+
+				var len = data.Length - data.Position;
+				var buf = new BitReader(data).ReadBytes((int)len);
+
+				var root = (DataModel)parent.getRoot();
+				var context = root.actionData.action.parent.parent.parent.context;
+				var sequenceCounter = GetSequenceCounter(context);
+
+				//Console.WriteLine("Verify Data (Pre-Encrypt): ");
+				//foreach (var b in buf)
+				//	Console.Write("{0:X2} ", b);
+				//Console.WriteLine();
+
+				var ret = cipher.EncodePlaintext(sequenceCounter, ContentType, buf, 0, buf.Length);
 
 				return new BitStream(ret);
 			}
