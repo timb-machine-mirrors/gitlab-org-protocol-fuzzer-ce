@@ -3,54 +3,73 @@
 namespace Peach {
 	const SHIFT_WIDTH = 20;
 	const MAX_NODES = 2000;
+	const DELAY = 500;
 
 	export interface FlatNode {
 		node: IPitFieldNode;
+		parent: FlatNode;
 		id: string;
-		weight: number;
+		fullId: string;
 		depth: number;
-		visible: boolean;
-		expanded: boolean;
 		style: any;
-		weightIcons: string[];
-		expanderIcon: string;
 		showExpander: boolean;
-		direct: boolean;
+		display: string;
+		weight?: number;
+		visible?: boolean;
+		expanded?: boolean;
+		weightIcons?: string[];
+		expanderIcon?: string;
+		include?: boolean;
 	}
 
 	function defaultWeight(node: IPitFieldNode) {
 		return _.isUndefined(node.weight) ? 3 : node.weight;
 	}
 
-	function flatten(nodes: IPitFieldNode[], depth: number, parent: FlatNode, collect: FlatNode[]) {
+	interface Result {
+		nodes: FlatNode[];
+		total: number;
+	}
+
+	function flatten(
+		nodes: IPitFieldNode[], 
+		depth: number, 
+		prefix: string,
+		parent: FlatNode, 
+		result: Result) {
 		nodes.forEach(node => {
-			const expanded = _.isUndefined(node.expanded) ?
-				depth < 2 :
-				node.expanded;
-			const visible = !parent || parent.expanded && parent.visible;
-			const weight = defaultWeight(node);
-			const icons = _.range(6).map(i => {
-				return (weight === i) ? 'fa-circle' :
-					(!expanded && matchWeight(node, i)) ? 
-						'fa-dot-circle-o' :
-						'fa-circle-thin';
-			});
+			const here = `${prefix}${node.id}`;
 			const flat: FlatNode = {
 				node: node,
+				parent: parent,
 				id: node.id,
-				weight: weight,
+				fullId: here,
 				depth: depth,
-				visible: visible,
-				expanded: expanded,
 				style: { 'margin-left': depth * SHIFT_WIDTH },
-				weightIcons: icons,
-				expanderIcon: expanded ? 'fa-minus' : 'fa-plus',
 				showExpander: !_.isEmpty(node.fields),
-				direct: false
+				display: node.id
 			};
-			collect.push(flat);
-			flatten(node.fields, depth + 1, flat, collect);
+
+			result.nodes.push(flat);
+			result.total++;
+
+			flatten(node.fields, depth + 1, `${flat.fullId}.`, flat, result);
 		});
+	}
+
+	function includeNode(node: FlatNode) {
+		if (_.isNull(node) || node.include)
+			return;
+		node.include = true;
+		// node.node.expanded = true;
+		includeNode(node.parent);
+	}
+
+	function expandNode(node: FlatNode) {
+		if (_.isNull(node) || node.node.expanded)
+			return;
+		node.node.expanded = true;
+		expandNode(node.parent);
 	}
 
 	function matchWeight(node: IPitFieldNode, weight: number) {
@@ -62,13 +81,6 @@ namespace Peach {
 		node.weight = weight;
 		const fields = node.fields || [];
 		fields.forEach(field => selectWeight(field, weight));
-	}
-
-	export interface ITuningScope extends IFormScope {
-		flat: FlatNode[];
-		hasLoaded: boolean;
-		isTruncated: boolean;
-		MAX_NODES: number;
 	}
 
 	function applyWeights(weights: IPitWeight[], fields: IPitFieldNode[]) {
@@ -110,14 +122,27 @@ namespace Peach {
 		}));
 	}
 
+	export interface ITuningScope extends IFormScope {
+		flat: FlatNode[];
+		hasLoaded: boolean;
+		isTruncated: boolean;
+		MAX_NODES: number;
+		search: string;
+		lastSearch: string;
+	}
+	
 	export class ConfigureTuningController {
 		static $inject = [
 			C.Angular.$scope,
 			C.Services.Pit
 		];
 
+		private DelayedOnSearch: Function;
+		private pit: IPit = null;
 		private isSaved = false;
 		private tree: IPitFieldNode[] = [];
+		private source: FlatNode[] = [];
+		private total: number = 0;
 		private nodeHover: FlatNode = null;
 		private hovers: boolean[] = [
 			false,
@@ -132,33 +157,132 @@ namespace Peach {
 			private $scope: ITuningScope,
 			private pitService: PitService
 		) {
+			this.$scope.search = '';
+			this.$scope.lastSearch = '';
 			this.$scope.hasLoaded = false;
 			this.$scope.isTruncated = false;
 			this.$scope.MAX_NODES = MAX_NODES;
+			this.DelayedOnSearch = _.debounce(() => this.OnSearch(), DELAY);
 
 			console.time('load');
 			const promise = pitService.LoadPit();
 			promise.then((pit: IPit) => {
-				console.time('clone');
-				this.tree = cloneFields(pit.metadata.fields);
-				console.timeEnd('clone');
-				applyWeights(pit.weights, this.tree);
-
-				this.flatten();
+				this.pit = pit;
+				this.init();
+				this.update();
 				this.$scope.hasLoaded = true;
 				setTimeout(() => console.timeEnd('load'));
 			});
 		}
 
-		flatten() {
+		init() {
+			console.time('clone');
+			this.tree = cloneFields(this.pit.metadata.fields);
+			console.timeEnd('clone');
+			applyWeights(this.pit.weights, this.tree);
+		
+			const result: Result = {
+				nodes: [],
+				total: 0
+			};
 			console.time('flatten');
-			const flat = [];
-			flatten(this.tree, 0, null, flat);
+			flatten(this.tree, 0, '', null, result);
 			console.timeEnd('flatten');
 
-			console.log('nodes', flat.length);
-			this.$scope.isTruncated = (flat.length > MAX_NODES);
-			this.$scope.flat = _.take(flat, MAX_NODES);
+			this.source = result.nodes;
+			this.total = result.total;
+		}
+
+		update() {
+			console.time('update');
+
+			this.source.forEach(node => {
+				const parent = node.parent;
+				const inner = node.node;
+				node.visible = !parent || (parent.expanded && parent.visible);
+				node.expanded = _.isUndefined(inner.expanded) ?
+					node.depth < 2 :
+					inner.expanded;
+				node.expanderIcon = node.expanded ? 'fa-minus' : 'fa-plus';
+				node.weight = defaultWeight(inner);
+				node.weightIcons = _.range(6).map(i => (
+					(node.weight === i) ? 'fa-circle' :
+						(!node.expanded && matchWeight(inner, i)) ?
+							'fa-dot-circle-o' :
+							'fa-circle-thin'
+				));
+			});
+
+			const visible = _.filter(this.source, 'visible');
+			this.$scope.isTruncated = (visible.length > MAX_NODES);
+			this.$scope.flat = _.take(visible, MAX_NODES);
+
+			console.timeEnd('update');
+		
+			console.log('nodes', this.total, this.$scope.flat.length);
+		}
+
+		search(search: string) {
+			console.time('search');
+
+			this.init();
+
+			const parts = search.split('.').reverse();
+			const lastPart = parts.shift();
+			const partial = new RegExp(`(${lastPart})`, 'gi');
+			const starting = new RegExp(`^(${lastPart})`, 'i');
+
+			this.source.forEach(node => {
+				const id = node.id.toLowerCase();
+				const fullId = node.fullId.toLowerCase();
+				if (_.isEmpty(parts)) {
+					// use partial search of leaf
+					if (_.includes(fullId, lastPart)) {
+						includeNode(node);
+					}
+					if (_.includes(id, lastPart)) {
+						expandNode(node.parent);
+						node.display = node.id.replace(partial, '<strong>$1</strong>');
+					}
+				} else {
+					// a dot appears in the search, match structure
+					if (_.startsWith(id, lastPart)) {
+						// match parents
+						let cur = node.parent;
+						for (const part of parts) {
+							if (_.isNull(cur)) {
+								return;
+							}
+							if (cur.id.toLowerCase() !== part) {
+								return;
+							}
+							cur = cur.parent;
+						}
+
+						// if we get this far, we've found a full match
+						includeNode(node);
+						expandNode(node.parent);
+
+						// highlight the leaf
+						node.display = node.id.replace(starting, '<strong>$1</strong>');
+
+						// highlight parents
+						cur = node.parent;
+						for (const part of parts) {
+							cur.display = `<strong>${cur.id}</strong>`;
+							cur = cur.parent;
+						}
+					}
+				}
+			});
+
+			this.source = _.filter(this.source, 'include');
+
+			console.timeEnd('search');
+		}
+
+		DelayedApply() {
+			setTimeout(() => this.$scope.$apply(), 100);
 		}
 
 		LegendText(i: number) {
@@ -177,10 +301,12 @@ namespace Peach {
 			this.hovers[i] = false;
 		}
 
+		isHovered(node: FlatNode) {
+			return !_.isNull(this.nodeHover) && (node.node === this.nodeHover.node);
+		}
+		
 		RowHover(node: FlatNode) {
-			return !_.isNull(this.nodeHover) && (node.node === this.nodeHover.node) ? 
-				'tuning-row-hover' : 
-				'';
+			return this.isHovered(node) ? 'tuning-row-hover' : '';
 		}
 
 		OnRowEnter(node: FlatNode) {
@@ -192,37 +318,36 @@ namespace Peach {
 		}
 
 		OnToggleExpand(node: FlatNode) {
+			if (!node.showExpander)
+				return;
+
 			node.node.expanded = !node.expanded;
 			node.expanderIcon = 'fa-spin fa-clock-o';
 			setTimeout(() => {
-				this.flatten();
-				setTimeout(() => {
-					this.$scope.$apply();
-				});
-			}, 100);
+				this.update();
+				this.DelayedApply();
+			});
 		}
 
 		OnSelectWeight(node: FlatNode, weight: number) {
 			node.weightIcons[weight] = 'fa-spin fa-clock-o';
 			selectWeight(node.node, weight);
 			setTimeout(() => {
-				this.flatten();
+				this.update();
 				this.$scope.form.$setDirty();
-				setTimeout(() => {
-					this.$scope.$apply();
-				});
-			}, 100);
+				this.DelayedApply();
+			});
 		}
 
-		public get ShowSaved(): boolean {
+		get ShowSaved(): boolean {
 			return !this.$scope.form.$dirty  && this.isSaved;
 		}
 
-		public get CanSave(): boolean {
+		get CanSave(): boolean {
 			return this.$scope.form.$dirty;
 		}
 
-		public OnSave(): void {
+		OnSave(): void {
 			const weights = [];
 			console.time('extractWeights');
 			extractWeights('', this.tree, weights);
@@ -234,6 +359,42 @@ namespace Peach {
 				this.isSaved = true;
 				this.$scope.form.$setPristine();
 			});
+		}
+
+		OnSearch(): void {
+			this.$scope.hasLoaded = false;
+			setTimeout(() => {
+				const search = this.$scope.search.toLowerCase();
+				this.$scope.lastSearch = search;
+				if (_.isEmpty(search)) {
+					this.init();
+				} else {
+					this.search(search);
+				}
+
+				this.update();
+
+				this.$scope.hasLoaded = true;
+				this.DelayedApply();
+			});
+		}
+
+		OnSearchChange(): void {
+			if (this.total < MAX_NODES) {
+				this.DelayedOnSearch();
+			}
+		}
+
+		OnSearchKeyPress(event: KeyboardEvent): void {
+			if (event.which === 13) {
+				this.OnSearch();
+			}
+		}
+
+		DirtySearch(): string {
+			return this.$scope.search.toLowerCase() === this.$scope.lastSearch ? 
+				'' : 
+				'dirty-search';
 		}
 	}
 }
