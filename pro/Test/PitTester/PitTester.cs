@@ -344,7 +344,7 @@ namespace PitTester
 								{
 									var clone = (DataModel)dm.Clone();
 									clone.actionData = actionData;
-									data.Apply(clone);
+									data.Apply(action, clone);
 								}
 
 								return;

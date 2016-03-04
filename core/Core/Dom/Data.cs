@@ -45,8 +45,9 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// Applies the Data to the specified data model
 		/// </summary>
+		/// <param name="action"></param>
 		/// <param name="model"></param>
-		void Apply(DataModel model);
+		void Apply(Action action, DataModel model);
 
 		/// <summary>
 		/// Will this data set be ignored by the engine when
@@ -76,18 +77,14 @@ namespace Peach.Core.Dom
 
 		public string Name { get; private set; }
 
-		public void Apply(DataModel model)
+		public void Apply(Action action, DataModel model)
 		{
 			DataElement parent = model;
-			foreach (var elem in DataField.EnumerateElements(model, Name, true))
+			foreach (var elem in DataField.EnumerateElements(action, model, Name, true))
 			{
 				var choice = parent as Choice;
-				if (choice != null)
-				{
-					Console.WriteLine("Selecting choice: '{0}' for '{1}'", elem.Name, choice.fullName);
-					if (!choice.MaskedElements.ContainsKey(elem.Name))
-						choice.MaskedElements.Add(elem);
-				}
+				if (choice != null && !choice.MaskedElements.ContainsKey(elem.Name))
+					choice.MaskedElements.Add(elem);
 
 				parent = elem;
 			}
@@ -114,7 +111,7 @@ namespace Peach.Core.Dom
 				FieldId = Path.GetFileName(FileName);
 		}
 
-		public override void Apply(DataModel model)
+		public override void Apply(Action action, DataModel model)
 		{
 			try
 			{
@@ -137,7 +134,7 @@ namespace Peach.Core.Dom
 					cracker.CrackData(model, new BitStream(strm));
 
 					// Apply field values
-					base.Apply(model);
+					base.Apply(action, model);
 				}
 			}
 			catch (CrackingFailure ex)
@@ -195,7 +192,7 @@ namespace Peach.Core.Dom
 
 		public bool Ignore { get; set; }
 
-		public virtual void Apply(DataModel model)
+		public virtual void Apply(Action action, DataModel model)
 		{
 			// Examples of valid field names:
 			//
@@ -206,15 +203,15 @@ namespace Peach.Core.Dom
 
 			foreach (var kv in Fields)
 			{
-				ApplyField(model, kv.Name, kv.Value);
+				ApplyField(action, model, kv.Name, kv.Value);
 			}
 
 			model.evaulateAnalyzers();
 		}
 
-		protected static void ApplyField(DataElementContainer model, string field, Variant value)
+		protected static void ApplyField(Action action, DataElementContainer model, string field, Variant value)
 		{
-			var elem = EnumerateElements(model, field, false).Last();
+			var elem = EnumerateElements(action, model, field, false).Last();
 			if (elem == null)
 				return;
 
@@ -231,6 +228,7 @@ namespace Peach.Core.Dom
 		}
 
 		internal static IEnumerable<DataElement> EnumerateElements(
+			Action action,
 			DataElementContainer model, 
 			string field,
 			bool skipArray)
@@ -245,7 +243,9 @@ namespace Peach.Core.Dom
 
 				var bestContainer = container ?? model;
 				var resolutionError = (
-					"Error, unable to resolve field \"{0}\" of \"{1}\" against \"{2}\" ({3}).".Fmt(
+					"Error, action \"{0}.{1}\" unable to resolve field \"{2}\" of \"{3}\" against \"{4}\" ({5}).".Fmt(
+						action.parent.Name,
+						action.Name,
 						part,
 						field,
 						bestContainer.fullName,

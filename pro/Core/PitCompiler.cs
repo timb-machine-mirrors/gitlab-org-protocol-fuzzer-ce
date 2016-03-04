@@ -200,7 +200,7 @@ namespace Peach.Pro.Core
 					{
 						foreach(var mask in actionData.allData.OfType<DataFieldMask>())
 						{
-							mask.Apply(actionData.dataModel);
+							mask.Apply(action, actionData.dataModel);
 						}
 
 						totalElements += CollectNodes(
