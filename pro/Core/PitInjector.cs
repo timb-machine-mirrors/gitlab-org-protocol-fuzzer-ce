@@ -28,7 +28,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public static void InjectAgents(PitConfig cfg, List<KeyValuePair<string, string>> defs, DomObject dom)
+		public static void InjectAgents(PitConfig cfg, IEnumerable<KeyValuePair<string, string>> defs, DomObject dom)
 		{
 			dom.agents.Clear();
 			foreach (var test in dom.tests)
@@ -54,7 +54,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		private static string Expand(List<KeyValuePair<string, string>> defs, string value)
+		private static string Expand(IEnumerable<KeyValuePair<string, string>> defs, string value)
 		{
 			if (string.IsNullOrEmpty(value))
 				return null;
@@ -67,7 +67,7 @@ namespace Peach.Pro.Core
 			return sb.ToString();
 		}
 
-		private static NamedCollection<DomMonitor> ConvertMonitors(WebAgent agent, List<KeyValuePair<string, string>> defs)
+		private static NamedCollection<DomMonitor> ConvertMonitors(WebAgent agent, IEnumerable<KeyValuePair<string, string>> defs)
 		{
 			var monitors = new NamedCollection<DomMonitor>();
 			foreach (var monitor in agent.Monitors)
@@ -82,12 +82,12 @@ namespace Peach.Pro.Core
 			return monitors;
 		}
 
-		private static Dictionary<string, Variant> ConvertParameters(Monitor monitor, List<KeyValuePair<string, string>> defs)
+		private static Dictionary<string, Variant> ConvertParameters(Monitor monitor, IEnumerable<KeyValuePair<string, string>> defs)
 		{
 			var ret = new Dictionary<string, Variant>();
 			foreach (var x in monitor.Map)
 			{
-				if (x.Value != null)
+				if (!string.IsNullOrEmpty(x.Value))
 					ret.Add(x.Key ?? x.Name, new Variant(Expand(defs, x.Value)));
 			}
 			return ret;

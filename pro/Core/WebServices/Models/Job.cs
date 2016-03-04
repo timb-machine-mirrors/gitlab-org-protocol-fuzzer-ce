@@ -124,6 +124,11 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// The URL of iteration metrics.
 		/// </summary>
 		public string Iterations { get; set; }
+
+		/// <summary>
+		/// The URL of field metrics.
+		/// </summary>
+		public string Fields { get; set; }
 	}
 
 	[Serializable]
@@ -521,5 +526,11 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// </summary>
 		[NotMapped]
 		public bool HasMetrics { get { return File.Exists(DatabasePath); } }
+
+		/// <summary>
+		/// What kind of metrics are available (machine/human)
+		/// </summary>
+		[JsonIgnore]
+		public NameKind MetricKind { get; set; }
 	}
 }

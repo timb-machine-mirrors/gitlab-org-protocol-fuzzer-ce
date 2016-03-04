@@ -111,7 +111,8 @@ namespace Peach {
 				pitUrl: this.pit.pitUrl,
 				name: this.pit.name,
 				config: config,
-				agents: agents
+				agents: agents,
+				weights: this.pit.weights
 			};
 
 			const promise = this.$http.post(this.pit.pitUrl, dto);
@@ -129,6 +130,11 @@ namespace Peach {
 
 		public SaveAgents(agents: IAgent[]): ng.IPromise<IPit> {
 			this.pit.agents = agents;
+			return this.SavePit();
+		}
+
+		public SaveWeights(weights: IPitWeight[]): ng.IPromise<IPit> {
+			this.pit.weights = weights;
 			return this.SavePit();
 		}
 

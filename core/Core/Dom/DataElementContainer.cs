@@ -233,6 +233,15 @@ namespace Peach.Core.Dom
 		}
 
 		/// <summary>
+		/// Returns an enumeration of children that are diplayed to the user.
+		/// </summary>
+		/// <returns></returns>
+		protected override IEnumerable<DataElement> DisplayChildren()
+		{
+			return this;
+		}
+
+		/// <summary>
 		/// Returns a list of children for use in XPath navigation.
 		/// Should not be called directly.
 		/// </summary>
@@ -446,9 +455,9 @@ namespace Peach.Core.Dom
 		{
 			try
 			{
-			// Add throws if key already exists
+				// Add throws if key already exists
 				_childrenDict.Add(item.Name, item);
-			_childrenList.Add(item);
+				_childrenList.Add(item);
 			}
 			catch (System.ArgumentException ex)
 			{

@@ -62,7 +62,7 @@ namespace Peach {
 				faults = this.jobService.Faults;
 			} else {
 				faults = _.filter(this.jobService.Faults, (fault: IFaultSummary) => {
-					return this.bucket === (`${fault.majorHash} ${fault.minorHash}`);
+					return this.bucket === (`${fault.majorHash}_${fault.minorHash}`);
 				});
 			}
 

@@ -9,7 +9,8 @@ namespace Peach.Pro.WebApi2.Utility
 		{
 			if (context.Response != null)
 			{
-				context.Response.Headers.CacheControl = new CacheControlHeaderValue {
+				context.Response.Headers.CacheControl = new CacheControlHeaderValue
+				{
 					NoCache = true
 				};
 

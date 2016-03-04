@@ -237,6 +237,33 @@ noscript {
 	text-align: left;
 }
 
+.tuning-legend span {
+	padding: 10px;	
+}
+
+.tuning-legend-text {
+	line-height: 1.2;
+}
+
+.tuning-legend-text span.line.first {
+	padding-left: 19px;
+	padding-right: 4px;
+}
+
+.tuning-legend-text span.line {
+	padding-left: 21px;
+}
+
+.tuning-legend-text span.line:before {
+	content: "";
+	border: 1px solid black;
+	border-width: 0 0 0 1px;
+}
+
+.tuning-legend-text span.text {
+	padding-left: 8px;
+}
+
 .tuning {
 	position: relative;
 }
@@ -251,19 +278,39 @@ noscript {
 	width: 100%;
 }
 
-.tuning th {
-	position: absolute;
-	width: 150px;
-	left: 0;
-	padding: 10px 0px 10px 10px;
+.tuning-row-hover {
+	background-color: #EEE;
 }
 
+.tuning th {
+	position: absolute;
+	width: 160px;
+	left: 0;
+	padding: 10px 0 10px 10px;
+}
+
+.tuning-legend span i,
 .tuning th i {
-	padding: 2px;
+	font-size: 133%;
+	line-height: 0.75em;
+	vertical-align: -15%;
+	margin: 1px;
+	color: #AAA;
+}
+
+.tuning-legend span i.fa-circle,
+.tuning th i.fa-circle,
+.tuning th i.fa-dot-circle-o {
+	color: #2091cf;
+}
+
+.tuning-legend span i.first,
+.tuning th i.first {
+	margin-right: 10px;
 }
 
 .tuning td {
-	padding: 2px 2px 2px 30px;
+	padding: 2px 0 2px 45px;
 }
 
 .tuning td .expander {
@@ -272,10 +319,19 @@ noscript {
 	margin-right: 5px;
 }
 
-.tuning td > div {
+.tuning td div.node {
 	border: 1px solid black;
 	border-radius: 3px;
 	padding: 7px;
-	margin-right: 5px;
 	white-space: nowrap;
 }
+
+.bold {
+	font-weight: bold;
+}
+
+.dirty-search {
+	border-color: red !important;
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(255, 0, 0, .6) !important;
+}
+

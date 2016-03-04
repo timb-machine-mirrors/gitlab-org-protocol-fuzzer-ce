@@ -43,7 +43,9 @@ namespace Peach.Core
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		public static Dictionary<string, Assembly> AssemblyCache = new Dictionary<string, Assembly>();
 		static Dictionary<Type, object[]> AttributeCache = new Dictionary<Type, object[]>();
+		static Dictionary<Type, IEnumerable<Type>> AllByAttributeCache = new Dictionary<Type, IEnumerable<Type>>();
 		static string[] searchPath = GetSearchPath();
+		static readonly string pluginsPath = GetPluginsPath();
 
 		#region Exclude List
 
@@ -57,6 +59,7 @@ namespace Peach.Core
 			"BouncyCastle.Crypto.dll", 
 			"ComTest.dll", 
 			"EasyHook.dll", 
+			"ExtendExamples.dll",
 			"Godel.Tests.dll", 
 			"Ionic.Zip.dll", 
 			"IronPython.dll", 
@@ -135,6 +138,7 @@ namespace Peach.Core
 			"pf_controller.exe", 
 			"pf_node.exe", 
 			"PitTester.exe",
+			"pitc.exe",
 		};
 
 		#endregion
@@ -147,6 +151,15 @@ namespace Peach.Core
 			};
 
 			return ret.Distinct().ToArray();
+		}
+
+		static string GetPluginsPath()
+		{
+			var config = Utilities.GetUserConfig();
+			var path =
+				config.AppSettings.Settings.Get("Plugins") ??
+				Utilities.GetAppResourcePath("Plugins");
+			return Path.GetFullPath(path);
 		}
 
 		static ClassLoader()
@@ -174,6 +187,29 @@ namespace Peach.Core
 					{
 						logger.Trace("ClassLoader skipping \"{0}\", {1}", file, ex.Message);
 					}
+				}
+			}
+
+			if (!Directory.Exists(pluginsPath))
+				return;
+
+			var pys = Directory.GetFiles(pluginsPath, "*.py");
+			if (pys.Length == 0)
+				return;
+
+			var s = new PythonScripting();
+
+			s.AddSearchPath(pluginsPath);
+
+			foreach (var py in pys)
+			{
+				try
+				{
+					s.ImportModule(Path.GetFileNameWithoutExtension(py));
+				}
+				catch (Exception ex)
+				{
+					logger.Warn("ClassLoader skipping \"{0}\", {1}", py, ex.Message);
 				}
 			}
 		}
@@ -250,10 +286,7 @@ namespace Peach.Core
 
 		public static string[] SearchPaths
 		{
-			get
-			{
-				return searchPath;
-			}
+			get { return searchPath; }
 		}
 
 		public static string FindFile(string fileName)
@@ -360,17 +393,34 @@ namespace Peach.Core
 		public static IEnumerable<KeyValuePair<A, Type>> GetAllByAttribute<A>(Func<Type, A, bool> predicate)
 			where A : Attribute
 		{
-			foreach (var asm in AssemblyCache.Values)
+			IEnumerable<Type> types;
+			lock (AllByAttributeCache)
 			{
-				foreach (var type in asm.GetTypes())
+				if (!AllByAttributeCache.TryGetValue(typeof(A), out types))
 				{
-					if (!type.IsClass || (!type.IsPublic && !type.IsNestedPublic))
-						continue;
-
-					foreach (var x in type.GetAttributes<A>(predicate))
+					var typesList = new List<Type>();
+					foreach (var asm in AssemblyCache.Values)
 					{
-						yield return new KeyValuePair<A, Type>(x, type);
+						foreach (var type in asm.GetTypes())
+						{
+							if (!type.IsClass || (!type.IsPublic && !type.IsNestedPublic))
+								continue;
+
+							if (type.GetCustomAttributes<A>().Any())
+								typesList.Add(type);
+						}
 					}
+
+					AllByAttributeCache.Add(typeof(A), typesList);
+					types = typesList;
+				}
+			}
+
+			foreach (var type in types)
+			{
+				foreach (var x in type.GetAttributes<A>(predicate))
+				{
+					yield return new KeyValuePair<A, Type>(x, type);
 				}
 			}
 		}

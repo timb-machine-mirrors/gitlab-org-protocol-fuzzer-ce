@@ -63,6 +63,7 @@ namespace Peach.Core.Dom
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		public NamedCollection<DataElement> choiceElements = new NamedCollection<DataElement>();
 		DataElement _selectedElement = null;
+		readonly NamedCollection<DataElement> maskedElements = new NamedCollection<DataElement>();
 
 		public Choice()
 		{
@@ -382,6 +383,8 @@ namespace Peach.Core.Dom
 			}
 		}
 
+		internal NamedCollection<DataElement> MaskedElements { get { return maskedElements; } }
+
 		protected override bool InScope(DataElement child)
 		{
 			return child == SelectedElement;
@@ -392,8 +395,14 @@ namespace Peach.Core.Dom
 			// Return choices if we haven't chosen yet
 			if (_selectedElement != null)
 				return base.Children();
-			else
-				return choiceElements;
+			return choiceElements;
+		}
+
+		protected override IEnumerable<DataElement> DisplayChildren()
+		{
+			if (maskedElements.Any())
+				return maskedElements;
+			return choiceElements;
 		}
 
 		/// <summary>
@@ -421,7 +430,7 @@ namespace Peach.Core.Dom
 			if (SelectedElement == null)
 				SelectDefault();
 
-			return new Variant(new BitStreamList(new BitwiseStream[] { SelectedElement.Value }));
+			return new Variant(new BitStreamList(new[] { SelectedElement.Value }));
 		}
 
 		private void CrackSuccess(DataElement child)

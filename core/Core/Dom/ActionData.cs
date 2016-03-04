@@ -201,7 +201,7 @@ namespace Peach.Core.Dom
 			// Work in a clean copy of the original
 			var copy = sourceDataModel.Clone() as DataModel;
 			copy.actionData = this;
-			option.Apply(copy);
+			option.Apply(action, copy);
 
 			// Evaulate the full dataModel prior to saving as the original
 			var val = copy.Value;

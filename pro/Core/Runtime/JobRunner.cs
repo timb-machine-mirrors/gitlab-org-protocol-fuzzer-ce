@@ -13,6 +13,7 @@ using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using Logger = NLog.Logger;
+using Newtonsoft.Json;
 
 namespace Peach.Pro.Core.Runtime
 {
@@ -24,6 +25,8 @@ namespace Peach.Pro.Core.Runtime
 		readonly ManualResetEvent _pausedEvt = new ManualResetEvent(true);
 		readonly RunConfiguration _config;
 		readonly string _pitLibraryPath;
+		readonly Pit _pit;
+		readonly PitConfig _pitConfig;
 		bool _shouldStop;
 		Engine _engine;
 		Thread _currentThread;
@@ -31,11 +34,18 @@ namespace Peach.Pro.Core.Runtime
 		public JobRunner(Job job, string pitLibraryPath, string pitFile)
 		{
 			_pitLibraryPath = pitLibraryPath;
+			_pit = PitDatabase.LoadPit(pitFile);
+
+			_pitConfig = new PitConfig {
+				Config = _pit.Config,
+				Agents = _pit.Agents,
+				Weights = _pit.Weights,
+			};
 
 			_config = new RunConfiguration
 			{
 				id = job.Guid,
-				pitFile = pitFile,
+				pitFile = Path.Combine(_pitLibraryPath, _pit.OriginalPit),
 				shouldStop = ShouldStop,
 			};
 
@@ -170,13 +180,11 @@ namespace Peach.Pro.Core.Runtime
 			Logger.Trace("<<< Abort");
 		}
 
-		Dictionary<string, object> ParseConfig()
+		List<KeyValuePair<string, string>> ParseConfig()
 		{
-			var args = new Dictionary<string, object>();
-			var pitConfig = _config.pitFile + ".config";
+			var pitConfigFile = _config.pitFile + ".config";
 
-			// It is ok if a .config doesn't exist
-			if (File.Exists(pitConfig))
+			if (File.Exists(pitConfigFile))
 			{
 				using (var db = new NodeDatabase())
 				{
@@ -184,11 +192,16 @@ namespace Peach.Pro.Core.Runtime
 					{
 						_jobLogger.AddEvent(db,
 							_config.id,
-							"Loading pit config", "Loading configuration file '{0}'".Fmt(pitConfig),
-							CompleteTestEvents.Last);
+							"Loading pit config", "Loading configuration file '{0}'".Fmt(pitConfigFile),
+							CompleteTestEvents.Last
+						);
 
-						var defs = PitDefines.ParseFile(pitConfig, _pitLibraryPath).Evaluate();
-						args[PitParser.DEFINED_VALUES] = defs;
+						var defs = PitDefines.ParseFile(pitConfigFile, _pitLibraryPath);
+						var evaluated = defs.Evaluate();
+						PitInjector.InjectDefines(_pitConfig, defs, evaluated);
+
+						return evaluated;
+
 					}
 					catch (Exception ex)
 					{
@@ -199,17 +212,19 @@ namespace Peach.Pro.Core.Runtime
 			}
 			else
 			{
-				// ParseConfig allows non-existant config files
-				var defs = PitDefines.ParseFile(pitConfig, _pitLibraryPath).Evaluate();
-				args[PitParser.DEFINED_VALUES] = defs;
+				var defs = PitDefines.ParseFile(pitConfigFile, _pitLibraryPath);
+				var evaluated = defs.Evaluate();
+				return evaluated;
 			}
 
-			return args;
 		}
 
 		public Peach.Core.Dom.Dom ParsePit()
 		{
-			var args = ParseConfig();
+			var args = new Dictionary<string, object>();
+			var defs = ParseConfig();
+			args[PitParser.DEFINED_VALUES] = defs;
+
 			var parser = new ProPitParser();
 
 			using (var db = new NodeDatabase())
@@ -217,11 +232,14 @@ namespace Peach.Pro.Core.Runtime
 				_jobLogger.AddEvent(db,
 					_config.id,
 					"Loading pit file", "Loading pit file '{0}'".Fmt(_config.pitFile),
-					CompleteTestEvents.Last);
+					CompleteTestEvents.Last
+				);
 
 				try
 				{
-					return parser.asParser(args, _config.pitFile);
+					var dom = parser.asParser(args, _config.pitFile);
+					PitInjector.InjectAgents(_pitConfig, defs, dom);
+					return dom;
 				}
 				catch (Exception ex)
 				{

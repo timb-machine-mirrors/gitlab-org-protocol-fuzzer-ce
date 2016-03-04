@@ -28,7 +28,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Xml;
 using System.Linq;
 
@@ -98,21 +97,21 @@ namespace Peach.Core.Dom
 		/// The original elements that was marked with the occurs, minOccurs, or maxOccurs
 		/// attributes.
 		/// </summary>
-        public DataElement OriginalElement
-        {
-            get
-            {
-                return originalElement;
-            }
-            set
-            {
-                if (value == null)
-                    throw new ArgumentNullException("value");
+		public DataElement OriginalElement
+		{
+			get
+			{
+				return originalElement;
+			}
+			set
+			{
+				if (value == null)
+					throw new ArgumentNullException("value");
 
-                originalElement = value;
-                originalElement.parent = this;
-            }
-        }
+				originalElement = value;
+				originalElement.parent = this;
+			}
+		}
 
 		public Array()
 		{
@@ -145,6 +144,15 @@ namespace Peach.Core.Dom
 
 			// Mutation might have removed our original element
 			return new DataElement[0];
+		}
+
+		/// <summary>
+		/// Returns an enumeration of children that are diplayed to the user.
+		/// </summary>
+		/// <returns></returns>
+		protected override IEnumerable<DataElement> DisplayChildren()
+		{
+			return new[] { OriginalElement };
 		}
 
 		/// <summary>
@@ -251,7 +259,7 @@ namespace Peach.Core.Dom
 				}
 				catch (CrackingFailure ex)
 				{
-					logger.Trace("Crack: {0} Failed on #{1}", debugName, i+1);
+					logger.Trace("Crack: {0} Failed on #{1}", debugName, i + 1);
 
 					// If we couldn't satisfy the minimum propigate failure
 					if (i < min)

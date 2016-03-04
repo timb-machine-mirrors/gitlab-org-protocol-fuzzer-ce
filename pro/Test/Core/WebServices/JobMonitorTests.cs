@@ -46,6 +46,24 @@ namespace Peach.Pro.Test.Core.WebServices
 </Peach>
 ";
 
+		protected const string PitConfig = @"
+{
+	'OriginalPit': 'Test.xml',
+	'Config': [],
+	'Agents': []
+}
+";
+
+		protected const string PitXmlFail = PitXml + "xxx";
+
+		protected const string PitConfigFail = @"
+{
+	'OriginalPit': 'TestFail.xml',
+	'Config': [],
+	'Agents': []
+}
+";
+		
 		protected bool WaitUntil(params JobStatus[] status)
 		{
 			// waits up to 20 seconds
@@ -84,15 +102,21 @@ namespace Peach.Pro.Test.Core.WebServices
 		where T : IJobMonitor, new()
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-		protected TempFile _tmp;
 		protected TempDirectory _tmpDir;
+		protected string _pitXmlPath;
+		protected string _pitConfigPath;
+		protected string _pitXmlFailPath;
+		protected string _pitConfigFailPath;
 
 		[SetUp]
 		public void SetUp()
 		{
 			Logger.Trace(">>> Setup");
 
+			_tmpDir = new TempDirectory();
+
 			Configuration.UseAsyncLogging = false;
+			Configuration.LogRoot = _tmpDir.Path;
 
 			_doneEvt = new ManualResetEvent(false);
 
@@ -105,11 +129,17 @@ namespace Peach.Pro.Test.Core.WebServices
 				}
 			};
 
-			_tmp = new TempFile();
-			File.WriteAllText(_tmp.Path, PitXml);
+			_pitXmlPath = Path.Combine(_tmpDir.Path, "Test.xml");
+			_pitConfigPath = Path.Combine(_tmpDir.Path, "Test.pit");
 
-			_tmpDir = new TempDirectory();
-			Configuration.LogRoot = _tmpDir.Path;
+			File.WriteAllText(_pitXmlPath, PitXml);
+			File.WriteAllText(_pitConfigPath, PitConfig);
+
+			_pitXmlFailPath = Path.Combine(_tmpDir.Path, "TestFail.xml");
+			_pitConfigFailPath = Path.Combine(_tmpDir.Path, "TestFail.pit");
+
+			File.WriteAllText(_pitXmlFailPath, PitXmlFail);
+			File.WriteAllText(_pitConfigFailPath, PitConfigFail);
 
 			Logger.Trace("<<< Setup");
 		}
@@ -120,7 +150,6 @@ namespace Peach.Pro.Test.Core.WebServices
 			Logger.Trace(">>> TearDown");
 
 			_monitor.Dispose();
-			_tmp.Dispose();
 			_tmpDir.Dispose();
 			
 			Configuration.UseAsyncLogging = true;
@@ -137,7 +166,7 @@ namespace Peach.Pro.Test.Core.WebServices
 				RangeStop = 1,
 			};
 
-			var job = _monitor.Start(_tmp.Path, _tmp.Path, jobRequest);
+			var job = _monitor.Start(_tmpDir.Path, _pitConfigPath, jobRequest);
 			Assert.IsNotNull(job);
 			WaitForFinish();
 
@@ -155,7 +184,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			var jobRequest = new JobRequest();
 
-			var job = _monitor.Start(_tmp.Path, _tmp.Path, jobRequest);
+			var job = _monitor.Start(_tmpDir.Path, _pitConfigPath, jobRequest);
 			Assert.IsNotNull(job);
 
 			job = _monitor.GetJob();
@@ -180,7 +209,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			var jobRequest = new JobRequest();
 
-			var job = _monitor.Start(_tmp.Path, _tmp.Path, jobRequest);
+			var job = _monitor.Start(_tmpDir.Path, _pitConfigPath, jobRequest);
 			Assert.IsNotNull(job);
 			Assert.IsTrue(WaitUntil(JobStatus.Running), "Timeout waiting for Running");
 
@@ -216,7 +245,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var jobRequest = new JobRequest();
 
-			var job = _monitor.Start(_tmp.Path, _tmp.Path, jobRequest);
+			var job = _monitor.Start(_tmpDir.Path, _pitConfigPath, jobRequest);
 			Assert.IsNotNull(job);
 
 			job = _monitor.GetJob();
@@ -245,7 +274,7 @@ namespace Peach.Pro.Test.Core.WebServices
 				DryRun = true,
 			};
 
-			var job = _monitor.Start(_tmp.Path, _tmp.Path, jobRequest);
+			var job = _monitor.Start(_tmpDir.Path, _pitConfigPath, jobRequest);
 			Assert.IsNotNull(job);
 			WaitForFinish();
 
@@ -260,7 +289,7 @@ namespace Peach.Pro.Test.Core.WebServices
 				DatabaseTests.AssertResult(db.GetTestEventsByJob(job.Guid), new[]
 				{
 					new TestEvent(1, job.Guid, TestStatus.Pass, "Loading pit file", 
-						"Loading pit file '{0}'".Fmt(_tmp.Path), null),
+						"Loading pit file '{0}'".Fmt(_pitXmlPath), null),
 					new TestEvent(2, job.Guid, TestStatus.Pass, "Starting fuzzing engine", 
 						"Starting fuzzing engine", null),
 					new TestEvent(3, job.Guid, TestStatus.Pass, "Running iteration", 
@@ -276,103 +305,85 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void TestPitParseFailureDuringTest()
 		{
-			using (var xmlFile = new TempFile())
+			var jobRequest = new JobRequest
 			{
-				File.WriteAllText(xmlFile.Path, PitXml + "xxx");
+				DryRun = true,
+			};
 
-				var jobRequest = new JobRequest
+			var job = _monitor.Start(_tmpDir.Path, _pitConfigFailPath, jobRequest);
+			Assert.IsNotNull(job);
+			WaitForFinish();
+
+			job = _monitor.GetJob();
+			Assert.AreEqual(JobStatus.Stopped, job.Status);
+
+			using (var db = new NodeDatabase())
+			{
+				DatabaseTests.AssertResult(db.GetTestEventsByJob(job.Guid), new[]
 				{
-					DryRun = true,
-				};
-
-				var job = _monitor.Start(xmlFile.Path, xmlFile.Path, jobRequest);
-				Assert.IsNotNull(job);
-				WaitForFinish();
-
-				job = _monitor.GetJob();
-				Assert.AreEqual(JobStatus.Stopped, job.Status);
-
-				using (var db = new NodeDatabase())
-				{
-					DatabaseTests.AssertResult(db.GetTestEventsByJob(job.Guid), new[]
-					{
+					new TestEvent(
+						1, 
+						job.Guid, 
+						TestStatus.Fail, 
+						"Loading pit file", 
+						"Loading pit file '{0}'".Fmt(_pitXmlFailPath), 
+						"Error: XML Failed to load: Data at the root level is invalid. Line 21, position 1."),
 						new TestEvent(
-							1, 
+							2, 
 							job.Guid, 
-							TestStatus.Fail, 
-							"Loading pit file", 
-							"Loading pit file '{0}'".Fmt(xmlFile.Path), 
-#if MONO
-							"Error: XML Failed to load: Text node cannot appear in this state.  Line 21, position 1."),
-#else
-							"Error: XML Failed to load: Data at the root level is invalid. Line 21, position 1."),
-#endif
-							new TestEvent(
-								2, 
-								job.Guid, 
-								TestStatus.Pass, 
-								"Flushing logs.", 
-								"Flushing logs.", 
-								null),
-					});
+							TestStatus.Pass, 
+							"Flushing logs.", 
+							"Flushing logs.", 
+							null),
+				});
 
-					job = db.GetJob(job.Guid);
-					Assert.IsNotNull(job);
+				job = db.GetJob(job.Guid);
+				Assert.IsNotNull(job);
 
-					var logs = db.GetJobLogs(job.Guid).ToList();
-					Assert.AreEqual(2, logs.Count, "Missing JobLogs");
-				}
-
-				Assert.IsFalse(File.Exists(job.DatabasePath), "job.DatabasePath should not exist");
-				Assert.IsFalse(File.Exists(job.DebugLogPath), "job.DebugLogPath should not exist");
+				var logs = db.GetJobLogs(job.Guid).ToList();
+				Assert.AreEqual(2, logs.Count, "Missing JobLogs");
 			}
+
+			Assert.IsFalse(File.Exists(job.DatabasePath), "job.DatabasePath should not exist");
+			Assert.IsFalse(File.Exists(job.DebugLogPath), "job.DebugLogPath should not exist");
 		}
 
 		[Test]
 		public void TestPitParseFailureDuringRun()
 		{
-			using (var xmlFile = new TempFile())
+			var jobRequest = new JobRequest();
+			var job = _monitor.Start(_tmpDir.Path, _pitConfigFailPath, jobRequest);
+			Assert.IsNotNull(job);
+			WaitForFinish();
+
+			job = _monitor.GetJob();
+			Assert.AreEqual(JobStatus.Stopped, job.Status);
+
+			using (var db = new NodeDatabase())
 			{
-				File.WriteAllText(xmlFile.Path, PitXml + "xxx");
-
-				var jobRequest = new JobRequest();
-				var job = _monitor.Start(xmlFile.Path, xmlFile.Path, jobRequest);
-				Assert.IsNotNull(job);
-				WaitForFinish();
-
-				job = _monitor.GetJob();
-				Assert.AreEqual(JobStatus.Stopped, job.Status);
-
-				using (var db = new NodeDatabase())
+				DatabaseTests.AssertResult(db.GetTestEventsByJob(job.Guid), new[]
 				{
-					DatabaseTests.AssertResult(db.GetTestEventsByJob(job.Guid), new[]
-					{
-						 new TestEvent(
-							1, 
+					 new TestEvent(
+						1, 
+						job.Guid, 
+						TestStatus.Fail, 
+						"Loading pit file", 
+						"Loading pit file '{0}'".Fmt(_pitXmlFailPath),
+						"Error: XML Failed to load: Data at the root level is invalid. Line 21, position 1."),
+						new TestEvent(
+							2, 
 							job.Guid, 
-							TestStatus.Fail, 
-							"Loading pit file", 
-							"Loading pit file '{0}'".Fmt(xmlFile.Path),
-#if MONO
-							"Error: XML Failed to load: Text node cannot appear in this state.  Line 21, position 1."),
-#else
-							"Error: XML Failed to load: Data at the root level is invalid. Line 21, position 1."),
-#endif
-							new TestEvent(
-								2, 
-								job.Guid, 
-								TestStatus.Pass, 
-								"Flushing logs.", 
-								"Flushing logs.", 
-								null),
-					});
+							TestStatus.Pass, 
+							"Flushing logs.", 
+							"Flushing logs.", 
+							null),
+				});
 
-					job = db.GetJob(job.Guid);
-					Assert.IsNotNull(job);
+				job = db.GetJob(job.Guid);
+				Assert.IsNotNull(job);
 
-					var logs = db.GetJobLogs(job.Guid).ToList();
-					Assert.AreEqual(2, logs.Count, "Missing JobLogs");
-				}
+				var logs = db.GetJobLogs(job.Guid).ToList();
+				Assert.AreEqual(2, logs.Count, "Missing JobLogs");
 
 				Assert.IsFalse(File.Exists(job.DatabasePath), "job.DatabasePath should not exist");
 				Assert.IsFalse(File.Exists(job.DebugLogPath), "job.DebugLogPath should not exist");
@@ -393,7 +404,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var jobRequest = new JobRequest();
 
-			var job = _monitor.Start(_tmp.Path, _tmp.Path, jobRequest);
+			var job = _monitor.Start(_tmpDir.Path, _pitConfigPath, jobRequest);
 			Assert.IsNotNull(job);
 			Assert.IsTrue(WaitUntil(JobStatus.Running), "Timeout waiting for Running");
 
@@ -419,7 +430,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			var jobRequest = new JobRequest();
 
-			var job = _monitor.Start(_tmp.Path, _tmp.Path, jobRequest);
+			var job = _monitor.Start(_tmpDir.Path, _pitConfigPath, jobRequest);
 			Assert.IsNotNull(job);
 			Assert.IsTrue(WaitUntil(JobStatus.Running), "Timeout waiting for Running");
 
@@ -487,11 +498,13 @@ namespace Peach.Pro.Test.Core.WebServices
 	class ExternalJobMonitorTests : BaseJobMonitorTests<ExternalJobMonitor>
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-		protected TempFile _tmp1;
-		protected TempFile _tmp2;
 		protected TempDirectory _tmpDir;
+		protected string _pitXmlPath;
+		protected string _pitConfigPath;
+		protected string _pitXmlCrashPath;
+		protected string _pitConfigCrashPath;
 
-		protected const string CrashPitXml =
+		protected const string PitXmlCrash =
 @"<?xml version='1.0' encoding='utf-8'?>
 <Peach>
 
@@ -521,12 +534,23 @@ namespace Peach.Pro.Test.Core.WebServices
 </Peach>
 ";
 
+		protected const string PitConfigCrash = @"
+{
+	'OriginalPit': 'TestCrash.xml',
+	'Config': [],
+	'Agents': []
+}
+";
+		
 		[SetUp]
 		public void SetUp()
 		{
 			Logger.Trace(">>> Setup");
 
+			_tmpDir = new TempDirectory();
+
 			Configuration.UseAsyncLogging = false;
+			Configuration.LogRoot = _tmpDir.Path;
 
 			_doneEvt = new ManualResetEvent(false);
 			_monitor = new ExternalJobMonitor
@@ -538,13 +562,17 @@ namespace Peach.Pro.Test.Core.WebServices
 				}
 			};
 
-			_tmp1 = new TempFile();
-			_tmp2 = new TempFile();
-			File.WriteAllText(_tmp1.Path, PitXml);
-			File.WriteAllText(_tmp2.Path, CrashPitXml);
+			_pitXmlPath = Path.Combine(_tmpDir.Path, "Test.xml");
+			_pitConfigPath = Path.Combine(_tmpDir.Path, "Test.pit");
 
-			_tmpDir = new TempDirectory();
-			Configuration.LogRoot = _tmpDir.Path;
+			File.WriteAllText(_pitXmlPath, PitXml);
+			File.WriteAllText(_pitConfigPath, PitConfig);
+
+			_pitXmlCrashPath = Path.Combine(_tmpDir.Path, "TestCrash.xml");
+			_pitConfigCrashPath = Path.Combine(_tmpDir.Path, "TestCrash.pit");
+
+			File.WriteAllText(_pitXmlCrashPath, PitXmlCrash);
+			File.WriteAllText(_pitConfigCrashPath, PitConfigCrash);
 
 			Logger.Trace("<<< Setup");
 		}
@@ -555,8 +583,6 @@ namespace Peach.Pro.Test.Core.WebServices
 			Logger.Trace(">>> TearDown");
 
 			_monitor.Dispose();
-			_tmp1.Dispose();
-			_tmp2.Dispose();
 			_tmpDir.Dispose();
 
 			Configuration.UseAsyncLogging = true;
@@ -569,7 +595,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			var jobRequest = new JobRequest();
 
-			var job = _monitor.Start(_tmp1.Path, _tmp1.Path, jobRequest);
+			var job = _monitor.Start(_tmpDir.Path, _pitConfigPath, jobRequest);
 			Assert.IsNotNull(job);
 			Assert.IsTrue(WaitUntil(JobStatus.Running), "Timeout waiting for Running");
 
@@ -600,7 +626,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			var jobRequest = new JobRequest();
 
-			var job = _monitor.Start(_tmp2.Path, _tmp2.Path, jobRequest);
+			var job = _monitor.Start(_tmpDir.Path, _pitConfigCrashPath, jobRequest);
 			Assert.IsNotNull(job);
 			Assert.IsTrue(WaitUntil(JobStatus.Running), "Timeout waiting for Running");
 
