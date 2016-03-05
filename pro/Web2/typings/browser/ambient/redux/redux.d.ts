@@ -1,4 +1,4 @@
-// Compiled using typings@0.6.8
+// Compiled using typings@0.6.10
 // Source: https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/a820bbdead70913f0c750802b367ed54cb99b442/redux/redux.d.ts
 // Type definitions for Redux v1.0.0
 // Project: https://github.com/rackt/redux

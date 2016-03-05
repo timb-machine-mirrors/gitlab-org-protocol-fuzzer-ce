@@ -1,4 +1,4 @@
-// Compiled using typings@0.6.8
+// Compiled using typings@0.6.10
 // Source: node_modules/immutable/dist/immutable.d.ts
 /**
  *  Copyright (c) 2014-2015, Facebook, Inc.

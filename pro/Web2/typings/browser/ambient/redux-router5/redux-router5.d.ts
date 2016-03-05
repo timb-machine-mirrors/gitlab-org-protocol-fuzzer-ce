@@ -1,4 +1,4 @@
-// Compiled using typings@0.6.8
+// Compiled using typings@0.6.10
 // Source: https://raw.githubusercontent.com/flaub/typescript-definitions/master/redux-router5/redux-router5.d.ts
 // Type definitions for redux-router5 v2.0.0
 

@@ -1,4 +1,4 @@
-// Compiled using typings@0.6.8
+// Compiled using typings@0.6.10
 // Source: https://raw.githubusercontent.com/flaub/typescript-definitions/master/redux-await/redux-await.d.ts
 // Type definitions for redux-await v5.0.0
 

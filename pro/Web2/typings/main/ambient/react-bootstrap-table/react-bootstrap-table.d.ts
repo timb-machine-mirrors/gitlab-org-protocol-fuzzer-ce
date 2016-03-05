@@ -1,4 +1,4 @@
-// Compiled using typings@0.6.8
+// Compiled using typings@0.6.10
 // Source: https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/ae60c84b9225eeb5278ebdc4e1df4aec8f8602f9/react-bootstrap-table/react-bootstrap-table.d.ts
 // Type definitions for react-bootstrap-table v1.4.6
 // Project: https://github.com/AllenFang/react-bootstrap-table
