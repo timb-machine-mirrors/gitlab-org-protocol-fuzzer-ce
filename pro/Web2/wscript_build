@@ -18,15 +18,9 @@ npm_source = bld.path.ant_glob([
 ])
 
 npm_target = [
-	'dist/app.css',
-	'dist/app.css.map',
 	'dist/app.js',
 	'dist/app.js.map',
-	'dist/vendor.css',
-	'dist/vendor.css.map',
 	'dist/vendor.js',
-	# 'dist/loader-big.gif',
-	# 'dist/loading.gif',
 	'dist/fontawesome-webfont.ttf',
 	'dist/fontawesome-webfont.woff',
 	'dist/fontawesome-webfont.woff2',
@@ -37,10 +31,6 @@ npm_target = [
 	'dist/glyphicons-halflings-regular.eot',
 	'dist/glyphicons-halflings-regular.svg',
 	'dist/glyphicons-halflings-regular.ttf',
-	# 'dist/rw-widgets.eot',
-	# 'dist/rw-widgets.svg',
-	# 'dist/rw-widgets.woff',
-	# 'dist/rw-widgets.ttf',
 ]
 
 bld(
