@@ -5,8 +5,8 @@ import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import Router5, { loggerPlugin } from 'router5';
 import { RouterProvider } from 'react-router5';
-import historyPlugin = require('router5-history');
-import listenersPlugin = require('router5-listeners');
+import historyPlugin  from 'router5-history';
+import listenersPlugin from 'router5-listeners';
 
 import Main from './containers/Main';
 import DevTools from './containers/DevTools';
