@@ -1,5 +1,5 @@
 // Compiled using typings@0.6.10
-// Source: https://raw.githubusercontent.com/flaub/typescript-definitions/193de05c443d63d947b01639effb9d32066ec946/router5/router5.d.ts
+// Source: https://raw.githubusercontent.com/flaub/typescript-definitions/master/router5/router5.d.ts
 // Type definitions for router5
 // Project: https://github.com/router5/router5
 // Definitions by: Matthew Dahl <https://github.com/sandersky>
@@ -53,7 +53,7 @@ declare module 'router5' {
         buildState(route: string, params: Object): string;
         buildUrl(route: string, params: Object): string;
         canActivate(name: string, canActivate: Function): Router5;
-        canDeactivate(name: string, canDeactivate: boolean): any;
+        canDeactivate(name: string, canDeactivate: Function | boolean): any;
         cancel(): void;
         getAdditionalArgs(): Array<any>;
         getState(): Object;

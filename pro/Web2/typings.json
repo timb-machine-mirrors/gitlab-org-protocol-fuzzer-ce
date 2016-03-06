@@ -8,7 +8,7 @@
     "moment-node": "github:DefinitelyTyped/DefinitelyTyped/moment/moment-node.d.ts#5d0f2126c8dac8fce0ff020218aea06607213b0d",
     "node": "github:DefinitelyTyped/DefinitelyTyped/node/node.d.ts#7b3d5a6ea5acda4a81f71309f1cc62354e63b681",
     "react": "github:DefinitelyTyped/DefinitelyTyped/react/react.d.ts#d6c51c607bd90c8bf0e065fabc41bc3f937425df",
-    "react-bootstrap": "github:flaub/DefinitelyTyped/react-bootstrap/react-bootstrap.d.ts#225253155ee589059faece160ea31d8ef1b882d5",
+    "react-bootstrap": "github:flaub/typescript-definitions/react-bootstrap",
     "react-bootstrap-table": "github:DefinitelyTyped/DefinitelyTyped/react-bootstrap-table/react-bootstrap-table.d.ts#ae60c84b9225eeb5278ebdc4e1df4aec8f8602f9",
     "react-dom": "github:DefinitelyTyped/DefinitelyTyped/react/react-dom.d.ts#7b3d5a6ea5acda4a81f71309f1cc62354e63b681",
     "react-fa": "github:flaub/typescript-definitions/react-fa",
@@ -24,7 +24,7 @@
     "redux-logger": "github:DefinitelyTyped/DefinitelyTyped/redux-logger/redux-logger.d.ts#7b3d5a6ea5acda4a81f71309f1cc62354e63b681",
     "redux-router5": "github:flaub/typescript-definitions/redux-router5",
     "redux-saga": "github:flaub/typescript-definitions/redux-saga",
-    "router5": "github:flaub/typescript-definitions/router5#193de05c443d63d947b01639effb9d32066ec946",
+    "router5": "github:flaub/typescript-definitions/router5",
     "router5-history": "github:flaub/typescript-definitions/router5-history",
     "router5-listeners": "github:flaub/typescript-definitions/router5-listeners",
     "superagent": "github:DefinitelyTyped/DefinitelyTyped/superagent/superagent.d.ts#7b3d5a6ea5acda4a81f71309f1cc62354e63b681"
