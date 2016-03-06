@@ -7,7 +7,7 @@
     "moment": "github:DefinitelyTyped/DefinitelyTyped/moment/moment.d.ts#5d0f2126c8dac8fce0ff020218aea06607213b0d",
     "moment-node": "github:DefinitelyTyped/DefinitelyTyped/moment/moment-node.d.ts#5d0f2126c8dac8fce0ff020218aea06607213b0d",
     "node": "github:DefinitelyTyped/DefinitelyTyped/node/node.d.ts#7b3d5a6ea5acda4a81f71309f1cc62354e63b681",
-    "react": "github:DefinitelyTyped/DefinitelyTyped/react/react.d.ts#d6c51c607bd90c8bf0e065fabc41bc3f937425df",
+    "react": "github:DefinitelyTyped/DefinitelyTyped/react/react.d.ts#945ebfe049964e429c2530971b9081f3c0f611df",
     "react-bootstrap": "github:flaub/typescript-definitions/react-bootstrap",
     "react-bootstrap-table": "github:DefinitelyTyped/DefinitelyTyped/react-bootstrap-table/react-bootstrap-table.d.ts#ae60c84b9225eeb5278ebdc4e1df4aec8f8602f9",
     "react-dom": "github:DefinitelyTyped/DefinitelyTyped/react/react-dom.d.ts#7b3d5a6ea5acda4a81f71309f1cc62354e63b681",
