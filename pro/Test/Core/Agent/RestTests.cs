@@ -978,7 +978,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 			protected override void Write(LogEventInfo logEvent)
 			{
-				// Ignore mogs from the channel for the test, we only are interested
+				// Ignore logs from the channel for the test, we only are interested
 				// in monitor and publisher log messages.
 				if (logEvent.LoggerName.Contains("Peach.Pro.Core.Agent.Channels.Rest"))
 					return;

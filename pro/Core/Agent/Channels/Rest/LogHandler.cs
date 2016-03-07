@@ -134,9 +134,13 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				{
 					var id = _counter++;
 					logEvent.Properties["ID"] = id;
-					for (int i = 0; i < logEvent.Parameters.Length; i++)
+					if (logEvent.Parameters != null)
 					{
-						logEvent.Parameters[i] = logEvent.Parameters[i].ToString();
+						for (int i = 0; i < logEvent.Parameters.Length; i++)
+						{
+							if (logEvent.Parameters[i] != null)
+								logEvent.Parameters[i] = logEvent.Parameters[i].ToString();
+						}
 					}
 
 					var json = JsonConvert.SerializeObject(logEvent, NLogLevelConverter.Instance);

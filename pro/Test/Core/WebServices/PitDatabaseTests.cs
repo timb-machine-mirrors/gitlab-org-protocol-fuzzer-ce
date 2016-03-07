@@ -219,7 +219,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			var newPit = _db.GetPitDetailByUrl(newUrl);
 			Assert.NotNull(newPit);
 
-			var expName = Path.Combine(_root.Path, "User", "Image", "IMG Copy.pit");
+			var expName = Path.Combine(_root.Path, "User", "Image", "IMG Copy.peach");
 			Assert.AreEqual(expName, newPit.Path);
 			Assert.True(File.Exists(expName));
 
@@ -308,7 +308,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			var newXml = File.ReadAllText(newPit.Path);
 			Assert.NotNull(newXml);
 
-			var expName = Path.Combine(_root.Path, "User", "Image", "IMG Copy 2.pit");
+			var expName = Path.Combine(_root.Path, "User", "Image", "IMG Copy 2.peach");
 			Assert.AreEqual(expName, newPit.Path);
 
 			Assert.True(File.Exists(expName));
