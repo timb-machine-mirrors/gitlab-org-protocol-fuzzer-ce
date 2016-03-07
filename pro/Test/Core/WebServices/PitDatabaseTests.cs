@@ -599,7 +599,7 @@ namespace Peach.Pro.Test.Core.WebServices
 				var json = Utilities.LoadStringResource(asm, "Peach.Pro.Test.Core.Resources.pit.json");
 				var cfg = JsonConvert.DeserializeObject<PitConfig>(json);
 
-					var cfgFile = Path.Combine(_root.Path, "Image", "IMG.xml.config");
+				var cfgFile = Path.Combine(_root.Path, "Image", "IMG.xml.config");
 				var extras = new List<KeyValuePair<string, string>>();
 				var defs = PitDefines.ParseFile(cfgFile, extras);
 

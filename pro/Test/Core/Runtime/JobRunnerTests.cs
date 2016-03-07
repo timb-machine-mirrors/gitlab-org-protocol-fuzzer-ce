@@ -14,6 +14,10 @@ using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.Test.Core.Storage;
 using TestStatus = Peach.Pro.Core.WebServices.Models.TestStatus;
+using Newtonsoft.Json;
+using Peach.Pro.Core.WebServices;
+using System.Collections.Generic;
+using MAgent = Peach.Pro.Core.WebServices.Models.Agent;
 
 namespace Peach.Pro.Test.Core.Runtime
 {
@@ -23,53 +27,54 @@ namespace Peach.Pro.Test.Core.Runtime
 	class JobRunnerTests
 	{
 		TempDirectory _tmpDir;
-		LoggingConfiguration _loggingConfig;
+//		LoggingConfiguration _loggingConfig;
 		string _pitXmlPath;
-		string _pitConfigPath;
 		string _pitXmlFailPath;
-		string _pitConfigFailPath;
 
 		const string PitXml =
-@"<?xml version='1.0' encoding='utf-8'?>
+			@"<?xml version='1.0' encoding='utf-8'?>
 <Peach>
-
-	<DataModel name='DM'>
-		<String value='Hello World' />
-	</DataModel>
-
-	<StateModel name='SM' initialState='Initial'>
-		<State name='Initial'>
+	<StateModel name='StateModel' initialState='initial'>
+		<State name='initial'>
 			<Action type='output'>
-				<DataModel name='DM'/>
-			</Action>
+				<DataModel name='DM'>
+					<String name='off' />
+					<String name='lowest' />
+					<String name='low' />
+					<String name='normal' />
+					<String name='high' />
+					<String name='highest' />
+				</DataModel>
+			</Action> 
 		</State>
 	</StateModel>
 
 	<Test name='Default'>
-		<StateModel ref='SM' />
+		<StateModel ref='StateModel' />
 		<Publisher class='Null'/>
+		<Strategy class='Random'>
+			<Param name='MaxFieldsToMutate' value='1' />
+		</Strategy>
 	</Test>
 </Peach>
 ";
 
-		const string PitConfig = @"
-{
-	'OriginalPit': 'Test.xml',
-	'Config': [],
-	'Agents': []
-}
-";
-
 		const string PitXmlFail = PitXml + "xxx";
 
-		const string PitConfigFail = @"
-{
-	'OriginalPit': 'TestFail.xml',
-	'Config': [],
-	'Agents': []
-}
-";
-				
+		static readonly Pit PitDefault = new Pit {
+			OriginalPit = "Test.xml",
+			Config = new List<Param>(),
+			Agents = new List<MAgent>(),
+			Weights = new List<PitWeight>(),
+		};
+
+		static readonly Pit PitFail = new Pit {
+			OriginalPit = "TestFail.xml",
+			Config = new List<Param>(),
+			Agents = new List<MAgent>(),
+			Weights = new List<PitWeight>(),
+		};
+
 		[SetUp]
 		public void SetUp()
 		{
@@ -77,29 +82,22 @@ namespace Peach.Pro.Test.Core.Runtime
 			Configuration.LogRoot = _tmpDir.Path;
 
 			_pitXmlPath = Path.Combine(_tmpDir.Path, "Test.xml");
-			_pitConfigPath = Path.Combine(_tmpDir.Path, "Test.pit");
-
 			File.WriteAllText(_pitXmlPath, PitXml);
-			File.WriteAllText(_pitConfigPath, PitConfig);
 
 			_pitXmlFailPath = Path.Combine(_tmpDir.Path, "TestFail.xml");
-			_pitConfigFailPath = Path.Combine(_tmpDir.Path, "TestFail.pit");
-
 			File.WriteAllText(_pitXmlFailPath, PitXmlFail);
-			File.WriteAllText(_pitConfigFailPath, PitConfigFail);
 
-			_loggingConfig = LogManager.Configuration;
+//			_loggingConfig = LogManager.Configuration;
+//
+//			var target = new ConsoleTarget {
+//				Layout = "${time} ${logger} ${message}"
+//			};
 
-			var target = new ConsoleTarget
-			{
-				Layout = "${time} ${logger} ${message}"
-			};
-
-			var config = new LoggingConfiguration();
-			var rule = new LoggingRule("*", LogLevel.Trace, target);
-			config.AddTarget("console", target);
-			config.LoggingRules.Add(rule);
-			LogManager.Configuration = config;
+//			var config = new LoggingConfiguration();
+//			var rule = new LoggingRule("*", LogLevel.Trace, target);
+//			config.AddTarget("console", target);
+//			config.LoggingRules.Add(rule);
+//			LogManager.Configuration = config;
 		}
 
 		[TearDown]
@@ -107,26 +105,31 @@ namespace Peach.Pro.Test.Core.Runtime
 		{
 			_tmpDir.Dispose();
 
-			LogManager.Configuration = _loggingConfig;
+//			LogManager.Configuration = _loggingConfig;
 		}
 
 		class SafeRunner : IDisposable
 		{
 			readonly Job _job;
+
 			public JobRunner JobRunner { get; private set; }
+
 			readonly Thread _thread;
 			Exception _caught;
+			AutoResetEvent _evtReady = new AutoResetEvent(false);
 
-			public SafeRunner(string pitLibraryPath, string pitFile, JobRequest jobRequest)
+			public SafeRunner(string pitLibraryPath, Pit pit, JobRequest jobRequest, Action<Engine> hooker = null)
 			{
-				var evtReady = new AutoResetEvent(false);
-				_job = new Job(jobRequest, pitFile);
-				JobRunner = new JobRunner(_job, pitLibraryPath, pitFile);
+				var pitPath = Path.Combine(pitLibraryPath, "Test.peach");
+				PitDatabase.SavePit(pitPath, pit);
+
+				_job = new Job(jobRequest, pitPath);
+				JobRunner = new JobRunner(_job, pitLibraryPath, pitPath);
 				_thread = new Thread(() =>
 				{
 					try
 					{
-						JobRunner.Run(evtReady);
+						JobRunner.Run(_evtReady, hooker);
 					}
 					catch (Exception ex)
 					{
@@ -136,7 +139,7 @@ namespace Peach.Pro.Test.Core.Runtime
 					}
 				});
 				_thread.Start();
-				if (!evtReady.WaitOne(1000))
+				if (!_evtReady.WaitOne(1000))
 					throw new PeachException("Timeout waiting for job to start");
 			}
 
@@ -202,11 +205,10 @@ namespace Peach.Pro.Test.Core.Runtime
 		[Test]
 		public void TestBasic()
 		{
-			var jobRequest = new JobRequest
-			{
+			var jobRequest = new JobRequest {
 				RangeStop = 1,
 			};
-			using (var runner = new SafeRunner(_tmpDir.Path, _pitConfigPath, jobRequest))
+			using (var runner = new SafeRunner(_tmpDir.Path, PitDefault, jobRequest))
 			{
 				runner.WaitForFinish();
 				runner.VerifyDatabase(1);
@@ -217,7 +219,7 @@ namespace Peach.Pro.Test.Core.Runtime
 		public void TestStop()
 		{
 			var jobRequest = new JobRequest();
-			using (var runner = new SafeRunner(_tmpDir.Path, _pitConfigPath, jobRequest))
+			using (var runner = new SafeRunner(_tmpDir.Path, PitDefault, jobRequest))
 			{
 				runner.WaitUntil(JobStatus.Running);
 				Console.WriteLine("Stop");
@@ -232,7 +234,7 @@ namespace Peach.Pro.Test.Core.Runtime
 		public void TestPauseContinue()
 		{
 			var jobRequest = new JobRequest();
-			using (var runner = new SafeRunner(_tmpDir.Path, _pitConfigPath, jobRequest))
+			using (var runner = new SafeRunner(_tmpDir.Path, PitDefault, jobRequest))
 			{
 				runner.WaitUntil(JobStatus.Running);
 				runner.JobRunner.Pause();
@@ -249,18 +251,16 @@ namespace Peach.Pro.Test.Core.Runtime
 		[Repeat(2)]
 		public void TestPitTester()
 		{
-			var jobRequest = new JobRequest
-			{
+			var jobRequest = new JobRequest {
 				DryRun = true,
 			};
-			using (var runner = new SafeRunner(_tmpDir.Path, _pitConfigPath, jobRequest))
+			using (var runner = new SafeRunner(_tmpDir.Path, PitDefault, jobRequest))
 			{
 				runner.WaitForFinish();
 
 				using (var db = new NodeDatabase())
 				{
-					DatabaseTests.AssertResult(db.GetTestEventsByJob(runner.Id), new[]
-					{
+					DatabaseTests.AssertResult(db.GetTestEventsByJob(runner.Id), new[] {
 						new TestEvent(1, runner.Id, TestStatus.Pass, 
 							"Loading pit file", "Loading pit file '{0}'".Fmt(_pitXmlPath), null),
 						new TestEvent(2, runner.Id, TestStatus.Pass, 
@@ -281,25 +281,23 @@ namespace Peach.Pro.Test.Core.Runtime
 		[Test]
 		public void TestPitParseFailure()
 		{
-			var jobRequest = new JobRequest
-			{
+			var jobRequest = new JobRequest {
 				DryRun = true,
 			};
-			using (var runner = new SafeRunner(_tmpDir.Path, _pitConfigFailPath, jobRequest))
+			using (var runner = new SafeRunner(_tmpDir.Path, PitFail, jobRequest))
 			{
 				runner.WaitForFinish();
 
 				using (var db = new NodeDatabase())
 				{
-					DatabaseTests.AssertResult(db.GetTestEventsByJob(runner.Id), new[]
-					{
+					DatabaseTests.AssertResult(db.GetTestEventsByJob(runner.Id), new[] {
 						new TestEvent(
 							1, 
 							runner.Id, 
 							TestStatus.Fail, 
 							"Loading pit file", 
 							"Loading pit file '{0}'".Fmt(_pitXmlFailPath), 
-							"Error: XML Failed to load: Data at the root level is invalid. Line 21, position 1."),
+							"Error: XML Failed to load: Data at the root level is invalid. Line 26, position 1."),
 						new TestEvent(
 							2, 
 							runner.Id, 
@@ -318,6 +316,63 @@ namespace Peach.Pro.Test.Core.Runtime
 				var job = runner.GetJob();
 				Assert.IsFalse(File.Exists(job.DebugLogPath));
 			}
+		}
+
+		[Test]
+		public void TestWeights()
+		{
+			var pit = new Pit {
+				OriginalPit = "Test.xml",
+				Config = new List<Param>(),
+				Agents = new List<MAgent>(),
+				Weights = new List<PitWeight> {
+					new PitWeight { Id = "DM.off", Weight = 0 },
+					new PitWeight { Id = "DM.lowest", Weight = 1 },
+					new PitWeight { Id = "DM.low", Weight = 2 },
+					new PitWeight { Id = "DM.normal", Weight = 3 },
+					new PitWeight { Id = "DM.high", Weight = 4 },
+					new PitWeight { Id = "DM.highest", Weight = 5 },
+				}
+			};
+
+			var count = new Dictionary<string, int>();
+
+			Action<Engine> hooker = (Engine engine) =>
+			{
+				engine.TestStarting += ctx =>
+				{
+					ctx.DataMutating += (c, actionData, element, mutator) =>
+					{
+						int cnt;
+						if (!count.TryGetValue(element.Name, out cnt))
+							cnt = 0;
+						else
+							++cnt;
+
+						count[element.Name] = cnt;
+					};
+				};
+			};
+
+			var jobRequest = new JobRequest {
+				Seed = 0,
+				RangeStop = 1000,
+			};
+			using (var runner = new SafeRunner(_tmpDir.Path, pit, jobRequest, hooker))
+			{
+				runner.WaitForFinish();
+				runner.VerifyDatabase(1);
+			}
+
+			foreach (var x in count)
+				Console.WriteLine("Elem: {0}, Count: {1}", x.Key, x.Value);
+
+			Assert.Less(count["lowest"], count["low"]);
+			Assert.Less(count["low"], count["normal"]);
+			Assert.Less(count["normal"], count["high"]);
+			Assert.Less(count["high"], count["highest"]);
+
+			Assert.False(count.ContainsKey("off"), "off shouldn't be mutated");
 		}
 	}
 }
