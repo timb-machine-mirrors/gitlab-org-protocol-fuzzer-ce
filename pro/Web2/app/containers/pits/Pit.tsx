@@ -16,11 +16,7 @@ interface PitProps extends Props<Pit> {
 @connect(state => ({ route: state.router.route }))
 class Pit extends Component<PitProps, {}> {
 	componentDidMount() {
-		this.load(this.props);
-	}
-
-	load(props: PitProps) {
-		const { dispatch, route } = props;
+		const { dispatch, route } = this.props;
 		const { pit } = route.params;
 		dispatch(fetchPit(pit));
 	}

@@ -4,37 +4,66 @@ import { CSSProperties, Component, Props } from 'react';
 import { Alert } from 'react-bootstrap';
 import { connect } from 'redux-await';
 
-import { Pit, PitFieldNode } from '../../../models/Pit';
+import { Pit, PitFieldNode, PitWeight } from '../../../models/Pit';
 
 const SHIFT_WIDTH = 20;
 
 interface FlatNode {
 	node: PitFieldNode;
+	parent: FlatNode;
+	fullId: string;
 	depth: number;
 	visible: boolean;
 	expanded: boolean;
+	display: string;
 }
 
-function flatten(tree: PitFieldNode[]): FlatNode[] {
+interface Result {
+	nodes: FlatNode[];
+	total: number;
+}
+
+function flatten(tree: PitFieldNode[]): Result {
 	console.time('flatten');
-	const flat = _flatten(tree, 0, null);
+
+	const result: Result = {
+		nodes: [],
+		total: 0
+	};
+
+	_flatten(tree, 0, '', null, result);
+
 	console.timeEnd('flatten');
-	return flat;
+
+	return result;
 }
 
-function _flatten(nodes: PitFieldNode[], depth: number, parent: FlatNode) {
-	return _.flatMap(nodes, (node: PitFieldNode) => {
+function _flatten(
+	nodes: PitFieldNode[],
+	depth: number,
+	prefix: string,
+	parent: FlatNode,
+	result: Result) {
+	nodes.forEach(node => {
+		const fullId = `${prefix}${node.id}`;
 		const expanded = _.isUndefined(node.expanded) ?
 			depth < 2 :
 			node.expanded;
 		const visible = !parent || parent.expanded && parent.visible;
 		const flat: FlatNode = {
 			node,
+			parent,
+			fullId,
 			depth,
 			visible,
-			expanded
+			expanded,
+			display: node.id
 		};
-		return [flat].concat(_flatten(node.fields, depth + 1, flat));
+
+		result.nodes.push(flat);
+		result.total++;
+
+		_flatten(node.fields, depth + 1, `${fullId}.`, flat, result);
 	});
 }
 
@@ -47,58 +76,54 @@ function matchWeight(node: PitFieldNode, weight: number) {
 		_.some(node.fields, field => matchWeight(field, weight));
 }
 
+function cloneFields(fields: PitFieldNode[]): PitFieldNode[] {
+	return fields.map(item => ({
+		id: item.id,
+		fields: cloneFields(item.fields)
+	}));
+}
+
 function selectWeight(node: PitFieldNode, weight: number) {
 	node.weight = weight;
 	const fields = node.fields || [];
 	fields.forEach(field => selectWeight(field, weight));
 }
 
-const outerStyle: CSSProperties = {
-	position: 'relative',
-};
+function applyWeights(weights: PitWeight[], fields: PitFieldNode[]) {
+	console.time('applyWeights');
+	for (const rule of weights) {
+		const parts = rule.id.split('.');
+		applyWeight(fields, parts, rule.weight);
+	}
+	console.timeEnd('applyWeights');
+}
 
-const innerStyle: CSSProperties = {
-	overflowX: 'auto',
-	overflowY: 'visible',
-	marginLeft: 140
-};
+function applyWeight(fields: PitFieldNode[], parts: string[], weight: number) {
+	const next = parts.shift();
+	for (const node of fields) {
+		if (node.id === next) {
+			if (parts.length === 0) {
+				node.weight = weight;
+			} else {
+				applyWeight(node.fields, parts, weight);
+			}
+		}
+	}
+}
 
-const headerStyle: CSSProperties = {
-	position: 'absolute',
-	left: 0,
-	padding: '10px 0px 10px 10px'
-};
-
-const iconStyle: CSSProperties = {
-	cursor: 'pointer',
-	padding: 2
-};
-
-const iconStyleFirst: CSSProperties = Object.assign({}, iconStyle, {
-	paddingRight: 10
-});
-
-const cellStyle: CSSProperties = {
-	padding: '2px 2px 2px 35px'
-};
-
-const spanStyle: CSSProperties = {
-	float: 'left',
-	cursor: 'pointer',
-	marginLeft: -35
-};
-
-const nodeGenericStyle: CSSProperties = {
-	border: '1px solid black',
-	borderRadius: '3px',
-	padding: 7,
-	marginRight: 5,
-	whiteSpace: 'nowrap'
-};
+function extractWeights(prefix: string, tree: PitFieldNode[], collect: PitWeight[]) {
+	for (const node of tree) {
+		const here = `${prefix}${node.id}`;
+		if (defaultWeight(node) !== 3) {
+			collect.push({ id: here, weight: node.weight });
+		}
+		extractWeights(`${here}.`, node.fields, collect);
+	}
+}
 
 interface TuningProps extends Props<Tuning> {
 	// injected
-	tree?: PitFieldNode[];
+	pit?: Pit;
 }
 
 interface TuningState {
@@ -106,7 +131,7 @@ interface TuningState {
 	nodes?: FlatNode[];
 }
 
-@connect(state => ({ tree: state.pit.metadata.fields }))
+@connect(state => ({ pit: state.pit }))
 class Tuning extends Component<TuningProps, TuningState> {
 	constructor(props, context) {
 		super(props, context);
@@ -116,12 +141,15 @@ class Tuning extends Component<TuningProps, TuningState> {
 		};
 
 		setTimeout(() => {
+			const { pit } = this.props;
 			console.time('load');
-			const tree = _.cloneDeep(props.tree);
-			const nodes = flatten(tree);
-			this.setState({ tree, nodes });
+			const tree = cloneFields(pit.metadata.fields);
+			applyWeights(pit.weights, tree);
+
+			const result = flatten(tree);
+			this.setState({ tree, nodes: result.nodes });
 			console.timeEnd('load');
-			console.log('nodes', nodes.length);
+			console.log('nodes', result.total);
 		});
 	}
 
@@ -136,9 +164,9 @@ class Tuning extends Component<TuningProps, TuningState> {
 					Loading data...
 				</Alert>
 			}
-			<div style={outerStyle}>
-				<div style={innerStyle}>
-					<table style={{ width: '100%' }}>
+			<div className='tuning'>
+				<div>
+					<table>
 						<tbody>
 							{nodes.map((node, index) => node.visible &&
 								this.renderNode(node, index)
@@ -161,44 +189,25 @@ class Tuning extends Component<TuningProps, TuningState> {
 			'High',
 			'Highest'
 		];
-		const divStyle: CSSProperties = {
-			lineHeight: 1.2
-		};
-		const spanStyle: CSSProperties = {
-			padding: 10
-		};
 		const textStyle: CSSProperties = {
-			paddingLeft: 9
 		};
-		const lineStyle: CSSProperties = {
-			border: '1px solid black',
-			borderWidth: '0 0 0 1px'
-		};
-		const spaceStyle = (i: number): CSSProperties => (
-			(i === 0) ? {
-				paddingLeft: 19,
-				paddingRight: 8
-			} : {
-				paddingLeft: 19
-			}
-		);
 		return <table>
 			<tbody>
 				<tr>
 					<td>
-						{_.range(7).map(i => <div style={divStyle}>
+						{_.range(7).map(i => <div key={i} className='tuning-legend-text'>
 							{_.range(0, i).map(j => (
-								<span style={spaceStyle(j)}>
-									<span style={lineStyle} />
-								</span>
+								<span key={j} className={(j === 0) ? 'line first' : 'line'} />
 							))}
-							<span style={textStyle}>{texts[i]}</span>
+							<span className='text' style={textStyle}>
+								{texts[i]}
+							</span>
 						</div>)}
-						<div>
-							<span style={spanStyle}>
+						<div className='tuning-legend'>
+							<span>
 								{_.range(6).map(i => <Icon key={i}
-									style={(i === 0) ? iconStyleFirst : iconStyle}
-									name='circle-o'
+									className={(i === 0) ? 'radio first' : 'radio'}
+									name='circle-thin'
 									size='lg'
 								/>)}
 							</span>
@@ -231,11 +240,11 @@ class Tuning extends Component<TuningProps, TuningState> {
 			(weight === i) ? 'circle' :
 				(!node.expanded && matchWeight(node.node, i)) ?
 					'dot-circle-o' :
-					'circle-o'
+					'circle-thin'
 		);
-		return <th style={headerStyle}>
+		return <th>
 			{_.range(6).map(i => <Icon key={i}
-				style={(i === 0) ? iconStyleFirst : iconStyle}
+				className={(i === 0) ? 'radio first' : 'radio'}
 				name={icons[i]}
 				size='lg'
 				onClick={() => this.onSelectWeight(node, i)}
@@ -244,14 +253,17 @@ class Tuning extends Component<TuningProps, TuningState> {
 	}
 
 	renderRowCell(node: FlatNode) {
-		const nodeStyle = Object.assign({}, nodeGenericStyle, {
+		const nodeStyle: CSSProperties = {
 			marginLeft: node.depth * SHIFT_WIDTH,
-		});
+			cursor: _.isEmpty(node.node.fields) ? '' : 'pointer'
+		};
 		const expanderIcon = node.expanded ? 'minus' : 'plus';
 
-		return <td style={cellStyle}>
-			<div style={nodeStyle}>
-				<span style={spanStyle} onClick={() => this.onToggleExpand(node)}>
+		return <td>
+			<div className='node'
+				style={nodeStyle}
+				onClick={() => this.onToggleExpand(node)}>
+				<span className='expander'>
 					{!_.isEmpty(node.node.fields) &&
 						<Icon name={expanderIcon} />
 					}
@@ -264,17 +276,15 @@ class Tuning extends Component<TuningProps, TuningState> {
 	onToggleExpand = (node: FlatNode) => {
 		const { tree } = this.state;
 		node.node.expanded = !node.expanded;
-		this.setState({
-			nodes: flatten(tree)
-		});
+		const { nodes } = flatten(tree);
+		this.setState({ nodes });
 	};
 
 	onSelectWeight = (node: FlatNode, weight: number) => {
 		const { tree } = this.state;
 		selectWeight(node.node, weight);
-		this.setState({
-			nodes: flatten(tree)
-		});
+		const { nodes } = flatten(tree);
+		this.setState({ nodes });
 	};
 }
 
