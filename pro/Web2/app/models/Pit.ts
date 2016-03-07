@@ -63,6 +63,11 @@ export interface PitMetadata {
 	fields: PitFieldNode[];
 }
 
+export interface PitWeight {
+	id: string;
+	weight: number;
+}
+
 export interface Tag {
 	name: string;
 	values: string[];
@@ -78,6 +83,7 @@ export interface Pit {
 	// details, not available from collection at /p/pits
 	config: Parameter[];
 	agents: Agent[];
+	weights?: PitWeight[];
 	metadata?: PitMetadata;
 
 	// only used by client-side
