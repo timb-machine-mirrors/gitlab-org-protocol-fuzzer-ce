@@ -7,6 +7,7 @@ deps = [
 	'Peach.Core.dll',
 	'Peach.Pro.dll',
 	'Peach.Pro.WebApi.dll',
+	'Peach.Pro.WebApi2.dll',
 	'System.dll',
 	'System.Core.dll',
 	'System.Xml.dll',
@@ -80,6 +81,7 @@ internal = common + [
 	# Internal pit testing tools
 	'nunit-console',
 	'nunit-tools',
+	'pitc.exe',
 	'PitTester.exe',
 	'PeachWorker.exe',
 	'PeachService.exe',

@@ -224,6 +224,9 @@ namespace Peach.Pro.Core.Storage
 						Migrations[i]();
 						CurrentVersion = i + 1;
 					}
+
+					if (Scripts != null)
+						Transaction(() => Scripts.ForEach(s => Connection.Execute(s)));
 				}
 
 				if (CurrentVersion != RequiredVersion)
@@ -248,6 +251,19 @@ namespace Peach.Pro.Core.Storage
 			var table = (attr != null) ? attr.Name : type.Name;
 			var sql = "SELECT * FROM {0}".Fmt(table);
 			return Connection.Query<T>(sql);
+		}
+
+		public IEnumerable<T> LoadTableKind<T>(NameKind kind)
+		{
+			var type = typeof(T);
+
+			var attr = type.GetCustomAttributes(typeof(TableAttribute), true)
+				.OfType<TableAttribute>()
+				.FirstOrDefault();
+
+			var table = (attr != null) ? attr.Name : type.Name;
+			var sql = "SELECT * FROM {0} WHERE Kind=@Kind".Fmt(table);
+			return Connection.Query<T>(sql, new { Kind = kind });
 		}
 
 		public static void Dump<T>(IEnumerable<T> data)

@@ -54,9 +54,22 @@ namespace Peach {
 		view?: IParameter[];
 	}
 
+	export interface IPitFieldNode {
+		id: string;
+		fields: IPitFieldNode[];
+		weight?: number;
+		expanded?: boolean;
+	}
+
 	export interface IPitMetadata {
 		defines: IParameter[];
 		monitors: IParameter[];
+		fields: IPitFieldNode[];
+	}
+
+	export interface IPitWeight {
+		id: string;
+		weight: number;
 	}
 	
 	export interface IPit {
@@ -69,6 +82,7 @@ namespace Peach {
 		// details, not available from collection at /p/pits
 		config: IParameter[];
 		agents: IAgent[];
+		weights?: IPitWeight[];
 		metadata?: IPitMetadata;
 	
 		// only used by client-side

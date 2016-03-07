@@ -29,7 +29,7 @@ namespace Peach {
 		public Param: IParameter;
 
 		public get ParamKeys(): string[] {
-			return _.pluck(this.pitService.Pit.config, 'key');
+			return _.map<IParameter, string>(this.pitService.Pit.config, 'key');
 		}
 		
 		public Cancel() {

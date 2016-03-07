@@ -9,7 +9,7 @@ using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 namespace Peach.Pro.Core.Transformers.Encode
 {
 	[Description("Encode on output as Base64.")]
-	[Transformer("Base64Encode", true)]
+	[Transformer("Base64EncodeExample", true)]
 	[Transformer("encode.Base64Encode")]
 	[Serializable]
 	public class Base64Encode : Transformer

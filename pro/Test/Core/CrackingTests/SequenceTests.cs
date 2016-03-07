@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Xml;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
@@ -64,6 +65,39 @@ namespace Peach.Pro.Test.Core.CrackingTests
 		cracker.CrackData(dom.dataModels[0], data);
 
 		Assert.AreEqual("Hello World!", (string)dom.dataModels[0].find("FooString").DefaultValue);
+	}
+
+	[Test]
+	public void CrackWritePitTest()
+	{
+		const string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
+							"	<DataModel name=\"TheDataModel\">" +
+							"		<Sequence>" +
+							"					<String name=\"FooString\" length=\"12\" />" +
+							"		</Sequence>" +
+							"	</DataModel>" +
+							"</Peach>";
+
+		var parser = new PitParser();
+		var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+
+		var data = Bits.Fmt("{0}", "Hello World!");
+
+		var cracker = new DataCracker();
+		cracker.CrackData(dom.dataModels[0], data);
+
+		Assert.AreEqual("Hello World!", (string)dom.dataModels[0].find("FooString").DefaultValue);
+
+		using(var swriter = new StringWriter())
+		using (var xmlWriter = new XmlTextWriter(swriter))
+		{
+			dom.dataModels[0].WritePit(xmlWriter);
+
+			xmlWriter.Flush();
+			var xmlString = swriter.ToString();
+
+			Assert.AreEqual(@"<DataModel name=""TheDataModel""><Sequence><String name=""FooString"" lengthType=""bytes"" length=""12"" value=""Hello World!"" /></Sequence></DataModel>", xmlString);
+		}
 	}
 
 	[Test]

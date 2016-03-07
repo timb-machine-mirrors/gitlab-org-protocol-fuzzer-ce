@@ -50,9 +50,11 @@ INSERT INTO [Job] (
 	FaultCount,
 	RangeStart,
 	RangeStop,
+	Duration,
 	DryRun,
 	PitUrl,
 	LogPath,
+	MetricKind,
 	PeachVersion
 ) VALUES (
 	@Id,
@@ -72,9 +74,11 @@ INSERT INTO [Job] (
 	@FaultCount,
 	@RangeStart,
 	@RangeStop,
+	@Duration,
 	@DryRun,
 	@PitUrl,
 	@LogPath,
+	@MetricKind,
 	@PeachVersion
 );";
 
@@ -110,7 +114,9 @@ SET
 	FaultCount = @FaultCount,
 	RangeStart = @RangeStart,
 	RangeStop = @RangeStop,
+	Duration = @Duration,
 	LogPath = @LogPath,
+	MetricKind = @MetricKind,
 	PeachVersion = @PeachVersion
 WHERE
 	Id = @Id
@@ -170,6 +176,7 @@ INSERT OR REPLACE INTO Mutation (
 	ElementId,
 	MutatorId,
 	DatasetId,
+	Kind,
 	IterationCount
 ) VALUES (
 	@StateId,
@@ -178,6 +185,7 @@ INSERT OR REPLACE INTO Mutation (
 	@ElementId,
 	@MutatorId,
 	@DatasetId,
+	@Kind,
 	COALESCE((
 		SELECT IterationCount + 1
 		FROM Mutation
@@ -187,7 +195,8 @@ INSERT OR REPLACE INTO Mutation (
 			ParameterId = @ParameterId AND
 			ElementId = @ElementId AND
 			MutatorId = @MutatorId AND
-			DatasetId = @DatasetId
+			DatasetId = @DatasetId AND
+			Kind = @Kind
 	), 1)
 );";
 
@@ -216,7 +225,9 @@ INSERT INTO FaultMetric (
 	ParameterId,
 	ElementId,
 	MutatorId,
-	DatasetId
+	DatasetId,
+	FaultDetailId,
+	Kind
 ) VALUES (
 	@Iteration,
 	@MajorHash,
@@ -228,7 +239,9 @@ INSERT INTO FaultMetric (
 	@ParameterId,
 	@ElementId,
 	@MutatorId,
-	@DatasetId
+	@DatasetId,
+	@FaultDetailId,
+	@Kind
 );";
 
 		public const string InsertFaultDetail = @"
@@ -295,10 +308,16 @@ FROM FaultFile
 WHERE Id = @Id;
 ";
 
-		public const string SelectMutationByIteration = @"
+		public const string SelectMutationByIterationAndKind = @"
 SELECT * 
 FROM ViewFaults 
-WHERE Iteration = @Iteration;
+WHERE Iteration = @Iteration AND Kind = @Kind;
+";
+
+		public const string SelectMutationByFaultIdAndKind = @"
+SELECT * 
+FROM ViewFaults
+WHERE FaultDetailId = @Id AND Kind = @Kind;
 ";
 
 		public const string InsertNames = @"
@@ -331,6 +350,30 @@ ADD COLUMN
 
 		public const string JobMigrateV2 = @"
 DROP TABLE Job;
+";
+
+		public const string JobMigrateV3 = @"
+Alter TABLE Mutation
+ADD COLUMN
+	Kind INTEGER NOT NULL DEFAULT 0
+;
+
+Alter TABLE FaultMetric
+ADD COLUMN
+	Kind INTEGER NOT NULL DEFAULT 0
+;
+
+Alter TABLE FaultMetric
+ADD COLUMN
+	FaultDetailId INTEGER
+;
+
+UPDATE FaultMetric
+SET FaultDetailId = (
+	SELECT Id
+	FROM FaultDetail
+	WHERE Iteration = FaultMetric.Iteration
+);
 ";
 
 		public const string NodeMigrateV1 = @"
@@ -421,5 +464,17 @@ COMMIT;
 
 PRAGMA foreign_keys=ON;
 ";
+
+		public const string NodeMigrateV2 = @"
+ALTER TABLE Job 
+ADD COLUMN 
+	Duration INTEGER
+;";
+
+		public const string NodeMigrateV3 = @"
+ALTER TABLE Job 
+ADD COLUMN 
+	MetricKind INTEGER NOT NULL DEFAULT 0
+;";
 	}
 }

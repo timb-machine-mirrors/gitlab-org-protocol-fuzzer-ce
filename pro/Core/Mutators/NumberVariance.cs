@@ -2,10 +2,12 @@
 // Copyright (c) Peach Fuzzer, LLC
 //
 
+using System;
 using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
+using String = Peach.Core.Dom.String;
 
 namespace Peach.Pro.Core.Mutators
 {
@@ -28,33 +30,67 @@ namespace Peach.Pro.Core.Mutators
 			}
 		}
 
+		/// <summary>
+		/// Get the numbers value via InternalValue or DefaultValue
+		/// </summary>
+		/// <remarks>
+		/// If InternalValue returns a non-int/long/ulong then fallback to DefaultValue
+		/// </remarks>
+		/// <param name="number"></param>
+		/// <param name="signed"></param>
+		/// <returns></returns>
+		private static Variant GetValue(DataElement number, bool signed)
+		{
+			var value = number.InternalValue;
+
+			switch (value.GetVariantType())
+			{
+				case Variant.VariantType.Double:
+				case Variant.VariantType.Int:
+				case Variant.VariantType.Long:
+				case Variant.VariantType.ULong:
+					return value;
+
+				case Variant.VariantType.String:
+					long longResult;
+					ulong ulongResult;
+
+					if ((signed && Int64.TryParse((string) value, out longResult)) || UInt64.TryParse((string) value, out ulongResult))
+						return value;
+
+					break;
+			}
+
+			return number.DefaultValue;
+		}
+
 		protected override void GetLimits(DataElement obj, out bool signed, out long value, out long min, out long max)
 		{
-			var asNum = obj as Peach.Core.Dom.Number;
+			var asNum = obj as Number;
 			if (asNum != null)
 			{
 				signed = asNum.Signed;
 				min = asNum.MinValue;
 				max = (long)asNum.MaxValue;
-				value = signed ? (long)asNum.DefaultValue : (long)(ulong)asNum.DefaultValue;
+				value = signed ? (long)GetValue(asNum, true) : (long)(ulong)GetValue(asNum, false);
 			}
 			else
 			{
-				System.Diagnostics.Debug.Assert(obj is Peach.Core.Dom.String);
+				System.Diagnostics.Debug.Assert(obj is String);
 
 				signed = true;
 				min = long.MinValue;
 				max = long.MaxValue;
-				value = (long)obj.DefaultValue;
+				value = (long) GetValue(obj, true);
 			}
 		}
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			if (obj is Peach.Core.Dom.String && obj.isMutable)
+			if (obj is String && obj.isMutable)
 				return obj.Hints.ContainsKey("NumericalString");
 
-			return obj is Peach.Core.Dom.Number && obj.isMutable;
+			return obj is Number && obj.isMutable;
 		}
 
 		protected override void performMutation(DataElement obj, long value)

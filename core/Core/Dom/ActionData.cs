@@ -92,6 +92,11 @@ namespace Peach.Core.Dom
 		[DefaultValue(null)]
 		public string Name { get; protected set; }
 
+		public string FullFieldId
+		{
+			get { return DataElement.FieldIdConcat(action.parent.FieldId, action.FieldId); }
+		}
+
 		/// <summary>
 		/// Full name of this record when viewed as input data
 		/// </summary>
@@ -196,7 +201,7 @@ namespace Peach.Core.Dom
 			// Work in a clean copy of the original
 			var copy = sourceDataModel.Clone() as DataModel;
 			copy.actionData = this;
-			option.Apply(copy);
+			option.Apply(action, copy);
 
 			// Evaulate the full dataModel prior to saving as the original
 			var val = copy.Value;

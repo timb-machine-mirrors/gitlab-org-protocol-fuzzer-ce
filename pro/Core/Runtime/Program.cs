@@ -257,7 +257,7 @@ namespace Peach.Pro.Core.Runtime
 
 		protected virtual int ReportError(bool showUsage, Exception ex)
 		{
-			if (ex.InnerException != null)
+			if (ex is TargetInvocationException && ex.InnerException != null)
 				ex = ex.InnerException;
 
 			if (_verbosity > 1)

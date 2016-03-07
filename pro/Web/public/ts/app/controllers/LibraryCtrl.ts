@@ -39,6 +39,7 @@ namespace Peach {
 			private pitService: PitService
 		) {
 			this.init();
+			$scope['filterCategory'] = this.filterCategory;
 		}
 
 		private Pits: PitLibrary;
@@ -90,6 +91,17 @@ namespace Peach {
 
 		private GoToPit(pit: IPit) {
 			this.$state.go(C.States.Pit, { pit: pit.id });
+		}
+
+		private filterCategory(search: string) {
+			return function(category: PitCategory) {
+				if (_.isEmpty(search)) {
+					return true;
+				}
+				return _.some(category.Pits, entry => {
+					return _.includes(entry.Pit.name.toLowerCase(), search.toLowerCase());
+				});
+			}
 		}
 	}
 }

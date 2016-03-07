@@ -35,10 +35,13 @@ class PythonLogger(BasePythonLogger):
 		SerializableAttr(),
 		LoggerAttr("PythonLogger", True),
 		DescriptionAttr("Example Logger in Python"),
+		ParameterAttr("Param1", clr.GetClrType(str), "Example parameter"),
+		ParameterAttr("Param2", clr.GetClrType(str), "Optional parameter", "DefaultValue"),
 	]
 
 	@clrtype.accepts(System.Collections.Generic.Dictionary[clr.GetClrType(str), Variant])
-	def __init__(self, parent, args):
+	def __init__(self, args):
+		print '>>> INIT Param1=%s' % (str(args['Param1']))
 		pass
 
 	@clrtype.accepts(RunContext)

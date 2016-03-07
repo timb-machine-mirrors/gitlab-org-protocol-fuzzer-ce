@@ -74,6 +74,9 @@ namespace Peach.Pro.Test.Core.PitParserTests
 						<BACnetTag fieldId='y' />
 						<VarNumber fieldId='z' />
 					</DataModel>
+					<Data fieldId='Foo'>
+						<Field name='n' value='v' />
+					</Data>
 				</Param>
 			</Action>
 		</State>
@@ -104,6 +107,9 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 			var fields = a.parameters[0].dataModel.PreOrderTraverse().Select(e => e.FieldId).ToList();
 
+			foreach (var i in a.parameters[0].allData)
+				Assert.AreEqual("Foo", i.FieldId);
+
 			var exp = new[]
 			{
 				"c",  // DataModel
@@ -124,8 +130,8 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				"n",  // Choice
 				"o",  // Number
 				"p",  // Padding
-				null, // Array
-				"q",  //String
+				"q",  // Array
+				null, //String
 				"r",  // Flags
 				"s",  // Flag
 				"t",  // XmlElement
@@ -198,6 +204,116 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 			var exp = new[] { "a", "b", "c", "d", "e", "f", "g" };
 			Assert.AreEqual(exp, result);
+		}
+
+		[Test]
+		public void TestFullFieldId()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='pre' />
+		<Block name='item' fieldId='row' >
+			<String name='key' />
+			<String name='value' fieldId='value' />
+		</Block>
+		<String name='post' />
+	</DataModel>
+
+	<StateModel name='SM' initialState='S1'>
+		<State name='S1'>
+			<Action type='output'>
+				<DataModel ref='DM' />
+			</Action>
+		</State>
+
+		<State name='S2'>
+			<Action type='output'>
+				<DataModel ref='DM' fieldId='S2' />
+			</Action>
+		</State>
+
+		<State name='S3'>
+			<Action type='output' fieldId='S3'>
+				<DataModel ref='DM' />
+			</Action>
+		</State>
+
+		<State name='S4' fieldId='S4'>
+			<Action type='output'>
+				<DataModel ref='DM' />
+			</Action>
+		</State>
+
+		<State name='S5' fieldId='S5'>
+			<Action type='output' fieldId='A'>
+				<DataModel ref='DM' fieldId='DM' />
+			</Action>
+		</State>
+	</StateModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			Assert.NotNull(dom);
+
+			var result = new List<string>();
+
+			foreach (var item in dom.dataModels[0].Walk())
+			{
+				result.Add(string.Format("{0} -> {1}", item.fullName, item.FullFieldId ?? ""));
+			}
+
+			foreach (var s in dom.stateModels[0].states)
+			{
+				var data = s.actions[0].outputData.First();
+
+				foreach (var item in data.dataModel.Walk())
+				{
+					result.Add(string.Format("{0} -> {1}", item.fullName, DataElement.FieldIdConcat(data.FullFieldId, item.FullFieldId)));
+				}
+			}
+
+			var expected = new[]
+			{
+				"DM -> ",
+				"DM.pre -> ",
+				"DM.item -> row",
+				"DM.item.key -> row",
+				"DM.item.value -> row.value",
+				"DM.post -> ",
+				"DM -> ",
+				"DM.pre -> ",
+				"DM.item -> row",
+				"DM.item.key -> row",
+				"DM.item.value -> row.value",
+				"DM.post -> ",
+				"DM -> S2",
+				"DM.pre -> S2",
+				"DM.item -> S2.row",
+				"DM.item.key -> S2.row",
+				"DM.item.value -> S2.row.value",
+				"DM.post -> S2",
+				"DM -> S3",
+				"DM.pre -> S3",
+				"DM.item -> S3.row",
+				"DM.item.key -> S3.row",
+				"DM.item.value -> S3.row.value",
+				"DM.post -> S3",
+				"DM -> S4",
+				"DM.pre -> S4",
+				"DM.item -> S4.row",
+				"DM.item.key -> S4.row",
+				"DM.item.value -> S4.row.value",
+				"DM.post -> S4",
+				"DM -> S5.A.DM",
+				"DM.pre -> S5.A.DM",
+				"DM.item -> S5.A.DM.row",
+				"DM.item.key -> S5.A.DM.row",
+				"DM.item.value -> S5.A.DM.row.value",
+				"DM.post -> S5.A.DM"
+			};
+
+			CollectionAssert.AreEqual(expected, result);
 		}
 	}
 }

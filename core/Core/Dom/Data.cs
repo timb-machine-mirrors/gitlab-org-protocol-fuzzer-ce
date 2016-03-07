@@ -26,8 +26,10 @@
 // $Id$
 
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 using Peach.Core.Cracker;
@@ -43,29 +45,73 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// Applies the Data to the specified data model
 		/// </summary>
+		/// <param name="action"></param>
 		/// <param name="model"></param>
-		void Apply(DataModel model);
+		void Apply(Action action, DataModel model);
 
 		/// <summary>
 		/// Will this data set be ignored by the engine when
 		/// looking for a new data set to switch to.
 		/// </summary>
 		bool Ignore { get; set; }
+
+		string FieldId { get; }
+	}
+
+	[Serializable]
+	public class DataFieldMask : Data
+	{
+		public DataFieldMask(string selector)
+		{
+			Name = selector;
+			FieldId = null;
+			Ignore = true;
+		}
+
+		#region Obsolete Functions
+
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		#endregion
+
+		public string Name { get; private set; }
+
+		public void Apply(Action action, DataModel model)
+		{
+			DataElement parent = model;
+			foreach (var elem in DataField.EnumerateElements(action, model, Name, true))
+			{
+				var choice = parent as Choice;
+				if (choice != null && !choice.MaskedElements.ContainsKey(elem.Name))
+					choice.MaskedElements.Add(elem);
+
+				parent = elem;
+			}
+		}
+
+		public bool Ignore { get; set; }
+		public string FieldId { get; private set; }
 	}
 
 	/// <summary>
 	/// Data that comes from a file
 	/// </summary>
 	[Serializable]
-    public class DataFile : DataField
+	public class DataFile : DataField
 	{
-		public DataFile(DataSet dataSet, string fileName) : base(dataSet)
+		public DataFile(DataSet dataSet, string fileName)
+			: base(dataSet)
 		{
 			Name = "{0}/{1}".Fmt(dataSet.Name, Path.GetFileName(fileName));
 			FileName = fileName;
+
+			// If fieldId is omitted, default it to the filename
+			if (string.IsNullOrEmpty(FieldId))
+				FieldId = Path.GetFileName(FileName);
 		}
 
-		public override void Apply(DataModel model)
+		public override void Apply(Action action, DataModel model)
 		{
 			try
 			{
@@ -87,22 +133,19 @@ namespace Peach.Core.Dom
 					var cracker = new DataCracker();
 					cracker.CrackData(model, new BitStream(strm));
 
-                    // Apply field values
-                    base.Apply(model);
-                }
+					// Apply field values
+					base.Apply(action, model);
+				}
 			}
 			catch (CrackingFailure ex)
 			{
-				throw new PeachException("Error, failed to crack \"" + FileName +
-					"\" into \"" + model.fullName + "\": " + ex.Message, ex);
+				throw new PeachException("Error, failed to crack \"{0}\" into \"{1}\": {2}".Fmt(
+					FileName, model.fullName, ex.Message
+				), ex);
 			}
 		}
 
-		public string FileName
-		{
-			get;
-			private set;
-		}
+		public string FileName { get; private set; }
 	}
 
 	/// <summary>
@@ -137,28 +180,19 @@ namespace Peach.Core.Dom
 		public DataField(DataSet dataSet)
 		{
 			Name = dataSet.Name;
+			FieldId = dataSet.FieldId;
 			Fields = new FieldCollection();
 		}
 
-		public string Name
-		{
-			get;
-			protected set;
-		}
+		public string Name { get; protected set; }
 
-		public FieldCollection Fields
-		{
-			get;
-			protected set;
-		}
+		public string FieldId { get; protected set; }
 
-		public bool Ignore
-		{
-			get;
-			set;
-		}
+		public FieldCollection Fields { get; protected set; }
 
-		public virtual void Apply(DataModel model)
+		public bool Ignore { get; set; }
+
+		public virtual void Apply(Action action, DataModel model)
 		{
 			// Examples of valid field names:
 			//
@@ -169,91 +203,17 @@ namespace Peach.Core.Dom
 
 			foreach (var kv in Fields)
 			{
-				ApplyField(model, kv.Name, kv.Value);
+				ApplyField(action, model, kv.Name, kv.Value);
 			}
 
 			model.evaulateAnalyzers();
 		}
 
-		static protected void ApplyField(DataElementContainer model, string field, Variant value)
+		protected static void ApplyField(Action action, DataElementContainer model, string field, Variant value)
 		{
-			DataElement elem = model;
-			DataElementContainer container = model;
-			var names = field.Split('.');
-
-			for (int i = 0; i < names.Length; i++)
-			{
-				string name = names[i];
-				Match m = Regex.Match(name, @"(.*)\[(-?\d+)\]$");
-
-				if (m.Success)
-				{
-					name = m.Groups[1].Value;
-					int index = int.Parse(m.Groups[2].Value);
-
-					if (!container.TryGetValue(name, out elem))
-						throw new PeachException("Error, unable to resolve field \"" + field + "\" against \"" + model.fullName + "\".");
-
-					var seq = elem as Sequence;
-					if (seq == null)
-						throw new PeachException("Error, cannot use array index syntax on field name unless target element is an array. Field: " + field);
-					
-					var array = elem as Array;
-					if (array != null)
-					{
-						// Are we disabling this array?
-						if (index == -1)
-						{
-							if (array.minOccurs > 0)
-								throw new PeachException("Error, cannot set array to zero elements when minOccurs > 0. Field: " + field + " Element: " + array.fullName);
-
-							// Mark array as expanded
-							array.ExpandTo(0);
-
-							// The field should be applied to a template data model so
-							// the array should have never had any elements in it.
-							// Only the original element should be set.
-							System.Diagnostics.Debug.Assert(array.Count == 0);
-
-							return;
-						}
-
-						if (array.maxOccurs != -1 && index > array.maxOccurs)
-							throw new PeachException("Error, index larger that maxOccurs.  Field: " + field + " Element: " + array.fullName);
-
-						// Add elements up to our index
-						array.ExpandTo(index + 1);
-					}
-					else
-					{
-						if (index < 0)
-							throw new PeachException("Error, index must be equal to or greater than 0");
-						if (index > seq.Count - 1)
-							throw new PeachException("Error, array index greater than the number of elements in sequence");
-					}
-
-					elem = seq[index];
-					container = elem as DataElementContainer;
-				}
-				else if (container is Choice)
-				{
-					elem = null;
-					var choice = container as Choice;
-					if (!choice.choiceElements.TryGetValue(name, out elem))
-						throw new PeachException("Error, unable to resolve field \"" + field + "\" against \"" + model.fullName + "\".");
-
-					container = elem as DataElementContainer;
-
-					choice.SelectedElement = elem;
-				}
-				else
-				{
-					if (container == null || !container.TryGetValue(name, out elem))
-						throw new PeachException("Error, unable to resolve field \"" + field + "\" against \"" + model.fullName + "\".");
-
-					container = elem as DataElementContainer;
-				}
-			}
+			var elem = EnumerateElements(action, model, field, false).Last();
+			if (elem == null)
+				return;
 
 			if (elem.parent is Choice && string.IsNullOrEmpty(value.ToString()))
 				return;
@@ -266,6 +226,120 @@ namespace Peach.Core.Dom
 				elem.DefaultValue = value;
 			}
 		}
+
+		internal static IEnumerable<DataElement> EnumerateElements(
+			Action action,
+			DataElementContainer model, 
+			string field,
+			bool skipArray)
+		{
+			var parts = field.Split('.');
+			var container = model;
+
+			foreach (var part in parts)
+			{
+				var name = part;
+				var m = Regex.Match(name, @"(.*)\[(-?\d+)\]$");
+
+				var bestContainer = container ?? model;
+				var resolutionError = (
+					"Error, action \"{0}.{1}\" unable to resolve field \"{2}\" of \"{3}\" against \"{4}\" ({5}).".Fmt(
+						action.parent.Name,
+						action.Name,
+						part,
+						field,
+						bestContainer.fullName,
+						bestContainer.GetType().Name
+					)
+				);
+
+				DataElement elem;
+				if (m.Success)
+				{
+					name = m.Groups[1].Value;
+					var index = int.Parse(m.Groups[2].Value);
+
+					if (!container.TryGetValue(name, out elem))
+						throw new PeachException(resolutionError);
+
+					var seq = elem as Sequence;
+					if (seq == null)
+						throw new PeachException(
+							"Error, cannot use array index syntax on field name unless target element is an array. Field: {0}".Fmt(field)
+						);
+
+					var array = elem as Array;
+					if (array != null)
+					{
+						// Are we disabling this array?
+						if (index == -1)
+						{
+							if (array.minOccurs > 0)
+								throw new PeachException(
+									"Error, cannot set array to zero elements when minOccurs > 0. Field: {0} Element: {1}".Fmt(field, array.fullName)
+								);
+
+							// Mark array as expanded
+							array.ExpandTo(0);
+
+							// The field should be applied to a template data model so
+							// the array should have never had any elements in it.
+							// Only the original element should be set.
+							System.Diagnostics.Debug.Assert(array.Count == 0);
+
+							yield return null;
+							yield break;
+						}
+
+						if (array.maxOccurs != -1 && index > array.maxOccurs)
+							throw new PeachException(
+								"Error, index larger that maxOccurs.  Field: {0} Element: {1}".Fmt(field, array.fullName)
+							);
+
+						// Add elements up to our index
+						array.ExpandTo(index + 1);
+					}
+					else
+					{
+						if (index < 0)
+							throw new PeachException(
+								"Error, index must be equal to or greater than 0"
+							);
+						if (index > seq.Count - 1)
+							throw new PeachException(
+								"Error, array index greater than the number of elements in sequence"
+							);
+					}
+
+					elem = seq[index];
+					container = elem as DataElementContainer;
+				}
+				else if (container is Choice)
+				{
+					var choice = container as Choice;
+					if (!choice.choiceElements.TryGetValue(name, out elem))
+						throw new PeachException(resolutionError);
+
+					container = elem as DataElementContainer;
+
+					choice.SelectedElement = elem;
+				}
+				else
+				{
+					if (container == null || !container.TryGetValue(name, out elem))
+						throw new PeachException(resolutionError);
+
+					var array = elem as Array;
+					if (skipArray && array != null)
+					{
+						elem = array.OriginalElement;
+					}
+
+					container = elem as DataElementContainer;
+				}
+
+				yield return elem;
+			}
+		}
 	}
 }
-

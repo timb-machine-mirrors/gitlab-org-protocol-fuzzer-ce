@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
@@ -510,6 +511,138 @@ namespace Peach.Pro.Test.Core
 			e.startFuzzing(dom, config);
 
 			Assert.True(ran);
+		}
+
+		[Test]
+		public void TestRunDuration()
+		{
+			var totalIterations = 0;
+			Exception caught = null;
+
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='Value' value='Hello World' />
+	</DataModel>
+
+	<StateModel name='SM' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>";
+
+			var th = new Thread(() =>
+			{
+				try
+				{
+				var dom = DataModelCollector.ParsePit(xml);
+				var cfg = new RunConfiguration
+				{
+					Duration = TimeSpan.FromSeconds(2)
+				};
+
+				var e = new Engine(null);
+
+				e.IterationFinished += (ctx, i) =>
+				{
+					++totalIterations;
+				};
+
+				e.startFuzzing(dom, cfg);
+					
+				}
+				catch (Exception ex)
+				{
+					caught = ex;
+				}
+			});
+
+			th.Start();
+
+			if (!th.Join(TimeSpan.FromSeconds(10)))
+			{
+				th.Abort();
+				Assert.Fail("Engine did not copmlete within 10 seconds");
+			}
+
+			Assert.Null(caught);
+
+			Assert.Greater(totalIterations, 10);
+		}
+
+		[Test]
+		public void TestRunDurationAbort()
+		{
+			var totalIterations = 0;
+			Exception caught = null;
+
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='Value' value='Hello World' />
+	</DataModel>
+
+	<StateModel name='SM' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>";
+
+			var th = new Thread(() =>
+			{
+				try
+				{
+					var dom = DataModelCollector.ParsePit(xml);
+					var cfg = new RunConfiguration
+					{
+						Duration = TimeSpan.FromSeconds(1),
+						AbortTimeout = TimeSpan.FromSeconds(1)
+					};
+
+					var e = new Engine(null);
+
+					e.IterationStarting += (ctx, i, t) =>
+					{
+						Thread.Sleep(TimeSpan.FromSeconds(30));
+						++totalIterations;
+					};
+
+					e.startFuzzing(dom, cfg);
+
+				}
+				catch (Exception ex)
+				{
+					caught = ex;
+				}
+			});
+
+			th.Start();
+
+			if (!th.Join(TimeSpan.FromSeconds(10)))
+			{
+				th.Abort();
+				Assert.Fail("Engine did not copmlete within 10 seconds");
+			}
+
+			Assert.Null(caught);
+
+			Assert.AreEqual(totalIterations, 0);
 		}
 	}
 }

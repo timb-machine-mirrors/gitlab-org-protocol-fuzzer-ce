@@ -46,6 +46,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		Reporting,
 	}
 
+	[Serializable]
 	public class JobCommands
 	{
 		/// <summary>
@@ -81,23 +82,60 @@ namespace Peach.Pro.Core.WebServices.Models
 		public string KillUrl { get; set; }
 	}
 
+	[Serializable]
 	public class JobMetrics
 	{
+		/// <summary>
+		/// The URL of bucket timeline metrics.
+		/// </summary>
 		public string BucketTimeline { get; set; }
+
+		/// <summary>
+		/// The URL of fault timeline metrics.
+		/// </summary>
 		public string FaultTimeline { get; set; }
+
+		/// <summary>
+		/// The URL of mutator metrics.
+		/// </summary>
 		public string Mutators { get; set; }
+
+		/// <summary>
+		/// The URL of fuzzed elements metrics.
+		/// </summary>
 		public string Elements { get; set; }
+
+		/// <summary>
+		/// The URL of selected data sets metrics.
+		/// </summary>
 		public string Dataset { get; set; }
+
+		/// <summary>
+		/// The URL of state execution metrics.
+		/// </summary>
 		public string States { get; set; }
+
+		/// <summary>
+		/// The URL of fault bucket metrics.
+		/// </summary>
 		public string Buckets { get; set; }
+
+		/// <summary>
+		/// The URL of iteration metrics.
+		/// </summary>
 		public string Iterations { get; set; }
+
+		/// <summary>
+		/// The URL of field metrics.
+		/// </summary>
+		public string Fields { get; set; }
 	}
 
+	[Serializable]
 	public class JobRequest
 	{
 		/// <summary>
 		/// The URL of the specific version of the pit for this job
-		/// TODO: Include version in the URL
 		/// </summary>
 		/// <example>
 		/// "/p/pits/{id}"
@@ -118,6 +156,11 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// Optional ending iteration number
 		/// </summary>
 		public long? RangeStop { get; set; }
+
+		/// <summary>
+		/// Optional duration for how long to run the fuzzer.
+		/// </summary>
+		public TimeSpan? Duration { get; set; }
 
 		/// <summary>
 		/// Determines whether the job is a test run or an actual fuzzing session.
@@ -158,6 +201,7 @@ namespace Peach.Pro.Core.WebServices.Models
 			Seed = request.Seed;
 			RangeStart = request.RangeStart;
 			RangeStop = request.RangeStop;
+			Duration = request.Duration;
 			DryRun = request.DryRun;
 			Pid = Utilities.GetCurrentProcessId();
 
@@ -190,6 +234,9 @@ namespace Peach.Pro.Core.WebServices.Models
 			{
 				RangeStart = config.skipToIteration;
 			}
+
+			if (config.Duration < TimeSpan.MaxValue)
+				Duration = config.Duration;
 
 			using (var db = new NodeDatabase())
 			{
@@ -345,7 +392,6 @@ namespace Peach.Pro.Core.WebServices.Models
 
 		/// <summary>
 		/// The URL of the specific version of peach for this job
-		/// TODO: Include version in the URL
 		/// </summary>
 		/// <example>
 		/// "/p/peaches/{id}"
@@ -480,5 +526,11 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// </summary>
 		[NotMapped]
 		public bool HasMetrics { get { return File.Exists(DatabasePath); } }
+
+		/// <summary>
+		/// What kind of metrics are available (machine/human)
+		/// </summary>
+		[JsonIgnore]
+		public NameKind MetricKind { get; set; }
 	}
 }

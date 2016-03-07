@@ -111,7 +111,8 @@ namespace Peach {
 				pitUrl: this.pit.pitUrl,
 				name: this.pit.name,
 				config: config,
-				agents: agents
+				agents: agents,
+				weights: this.pit.weights
 			};
 
 			const promise = this.$http.post(this.pit.pitUrl, dto);
@@ -129,6 +130,11 @@ namespace Peach {
 
 		public SaveAgents(agents: IAgent[]): ng.IPromise<IPit> {
 			this.pit.agents = agents;
+			return this.SavePit();
+		}
+
+		public SaveWeights(weights: IPitWeight[]): ng.IPromise<IPit> {
+			this.pit.weights = weights;
 			return this.SavePit();
 		}
 
@@ -150,13 +156,13 @@ namespace Peach {
 		}
 
 		public get IsConfigured(): boolean {
-			return onlyIf(this.pit, () => _.all(this.CreateFlatDefinesView(this.CreateDefinesView()), (param: IParameter) => {
+			return onlyIf(this.pit, () => _.every(this.CreateFlatDefinesView(this.CreateDefinesView()), (param: IParameter) => {
 				return param.optional || param.value !== "";
 			}));
 		}
 
 		public get HasMonitors(): boolean {
-			return onlyIf(this.pit, () => _.any(this.pit.agents, (agent: IAgent) => {
+			return onlyIf(this.pit, () => _.some(this.pit.agents, (agent: IAgent) => {
 				return agent.monitors.length > 0;
 			}));
 		}
@@ -214,7 +220,7 @@ namespace Peach {
 			];
 			const view: IParameter[] = [];
 			this.Visit(src, (param: IParameter) => {
-				if (_.contains(skip, param.type)) {
+				if (_.includes(skip, param.type)) {
 					return;
 				}
 				view.push(param);

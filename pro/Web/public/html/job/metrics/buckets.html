@@ -18,7 +18,7 @@
 				Element
 			</th>
 			<th st-sort="iterationCount">
-				Iterations
+				Test Cases
 			</th>
 			<th st-sort="faultCount"
 				st-sort-default="reverse">
@@ -42,7 +42,7 @@
 				{{row.mutator}}
 			</td>
 			<td class="max-width-500 width-100 break-word">
-				{{row.element}}
+				{{row.element || 'Other'}}
 			</td>
 			<td>
 				{{row.iterationCount}}

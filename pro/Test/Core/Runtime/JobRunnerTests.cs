@@ -23,8 +23,11 @@ namespace Peach.Pro.Test.Core.Runtime
 	class JobRunnerTests
 	{
 		TempDirectory _tmpDir;
-		TempFile _tmp;
 		LoggingConfiguration _loggingConfig;
+		string _pitXmlPath;
+		string _pitConfigPath;
+		string _pitXmlFailPath;
+		string _pitConfigFailPath;
 
 		const string PitXml =
 @"<?xml version='1.0' encoding='utf-8'?>
@@ -49,14 +52,41 @@ namespace Peach.Pro.Test.Core.Runtime
 </Peach>
 ";
 
+		const string PitConfig = @"
+{
+	'OriginalPit': 'Test.xml',
+	'Config': [],
+	'Agents': []
+}
+";
+
+		const string PitXmlFail = PitXml + "xxx";
+
+		const string PitConfigFail = @"
+{
+	'OriginalPit': 'TestFail.xml',
+	'Config': [],
+	'Agents': []
+}
+";
+				
 		[SetUp]
 		public void SetUp()
 		{
-			_tmp = new TempFile();
-			File.WriteAllText(_tmp.Path, PitXml);
-
 			_tmpDir = new TempDirectory();
 			Configuration.LogRoot = _tmpDir.Path;
+
+			_pitXmlPath = Path.Combine(_tmpDir.Path, "Test.xml");
+			_pitConfigPath = Path.Combine(_tmpDir.Path, "Test.pit");
+
+			File.WriteAllText(_pitXmlPath, PitXml);
+			File.WriteAllText(_pitConfigPath, PitConfig);
+
+			_pitXmlFailPath = Path.Combine(_tmpDir.Path, "TestFail.xml");
+			_pitConfigFailPath = Path.Combine(_tmpDir.Path, "TestFail.pit");
+
+			File.WriteAllText(_pitXmlFailPath, PitXmlFail);
+			File.WriteAllText(_pitConfigFailPath, PitConfigFail);
 
 			_loggingConfig = LogManager.Configuration;
 
@@ -76,7 +106,6 @@ namespace Peach.Pro.Test.Core.Runtime
 		public void TearDown()
 		{
 			_tmpDir.Dispose();
-			_tmp.Dispose();
 
 			LogManager.Configuration = _loggingConfig;
 		}
@@ -88,11 +117,11 @@ namespace Peach.Pro.Test.Core.Runtime
 			readonly Thread _thread;
 			Exception _caught;
 
-			public SafeRunner(string xmlFile, JobRequest jobRequest)
+			public SafeRunner(string pitLibraryPath, string pitFile, JobRequest jobRequest)
 			{
 				var evtReady = new AutoResetEvent(false);
-				_job = new Job(jobRequest, xmlFile);
-				JobRunner = new JobRunner(_job, "", xmlFile);
+				_job = new Job(jobRequest, pitFile);
+				JobRunner = new JobRunner(_job, pitLibraryPath, pitFile);
 				_thread = new Thread(() =>
 				{
 					try
@@ -177,7 +206,7 @@ namespace Peach.Pro.Test.Core.Runtime
 			{
 				RangeStop = 1,
 			};
-			using (var runner = new SafeRunner(_tmp.Path, jobRequest))
+			using (var runner = new SafeRunner(_tmpDir.Path, _pitConfigPath, jobRequest))
 			{
 				runner.WaitForFinish();
 				runner.VerifyDatabase(1);
@@ -188,7 +217,7 @@ namespace Peach.Pro.Test.Core.Runtime
 		public void TestStop()
 		{
 			var jobRequest = new JobRequest();
-			using (var runner = new SafeRunner(_tmp.Path, jobRequest))
+			using (var runner = new SafeRunner(_tmpDir.Path, _pitConfigPath, jobRequest))
 			{
 				runner.WaitUntil(JobStatus.Running);
 				Console.WriteLine("Stop");
@@ -203,7 +232,7 @@ namespace Peach.Pro.Test.Core.Runtime
 		public void TestPauseContinue()
 		{
 			var jobRequest = new JobRequest();
-			using (var runner = new SafeRunner(_tmp.Path, jobRequest))
+			using (var runner = new SafeRunner(_tmpDir.Path, _pitConfigPath, jobRequest))
 			{
 				runner.WaitUntil(JobStatus.Running);
 				runner.JobRunner.Pause();
@@ -224,7 +253,7 @@ namespace Peach.Pro.Test.Core.Runtime
 			{
 				DryRun = true,
 			};
-			using (var runner = new SafeRunner(_tmp.Path, jobRequest))
+			using (var runner = new SafeRunner(_tmpDir.Path, _pitConfigPath, jobRequest))
 			{
 				runner.WaitForFinish();
 
@@ -233,7 +262,7 @@ namespace Peach.Pro.Test.Core.Runtime
 					DatabaseTests.AssertResult(db.GetTestEventsByJob(runner.Id), new[]
 					{
 						new TestEvent(1, runner.Id, TestStatus.Pass, 
-							"Loading pit file", "Loading pit file '{0}'".Fmt(_tmp.Path), null),
+							"Loading pit file", "Loading pit file '{0}'".Fmt(_pitXmlPath), null),
 						new TestEvent(2, runner.Id, TestStatus.Pass, 
 							"Starting fuzzing engine", "Starting fuzzing engine", null),
 						new TestEvent(3, runner.Id, TestStatus.Pass, 
@@ -252,51 +281,42 @@ namespace Peach.Pro.Test.Core.Runtime
 		[Test]
 		public void TestPitParseFailure()
 		{
-			using (var xmlFile = new TempFile())
+			var jobRequest = new JobRequest
 			{
-				File.WriteAllText(xmlFile.Path, PitXml + "xxx");
+				DryRun = true,
+			};
+			using (var runner = new SafeRunner(_tmpDir.Path, _pitConfigFailPath, jobRequest))
+			{
+				runner.WaitForFinish();
 
-				var jobRequest = new JobRequest
+				using (var db = new NodeDatabase())
 				{
-					DryRun = true,
-				};
-				using (var runner = new SafeRunner(xmlFile.Path, jobRequest))
-				{
-					runner.WaitForFinish();
-
-					using (var db = new NodeDatabase())
+					DatabaseTests.AssertResult(db.GetTestEventsByJob(runner.Id), new[]
 					{
-						DatabaseTests.AssertResult(db.GetTestEventsByJob(runner.Id), new[]
-						{
-							new TestEvent(
-								1, 
-								runner.Id, 
-								TestStatus.Fail, 
-								"Loading pit file", 
-								"Loading pit file '{0}'".Fmt(xmlFile.Path), 
-#if MONO
-								"Error: XML Failed to load: Text node cannot appear in this state.  Line 21, position 1."),
-#else
-								"Error: XML Failed to load: Data at the root level is invalid. Line 21, position 1."),
-#endif
-							new TestEvent(
-								2, 
-								runner.Id, 
-								TestStatus.Pass, 
-								"Flushing logs.", 
-								"Flushing logs.", 
-								null),
-						});
+						new TestEvent(
+							1, 
+							runner.Id, 
+							TestStatus.Fail, 
+							"Loading pit file", 
+							"Loading pit file '{0}'".Fmt(_pitXmlFailPath), 
+							"Error: XML Failed to load: Data at the root level is invalid. Line 21, position 1."),
+						new TestEvent(
+							2, 
+							runner.Id, 
+							TestStatus.Pass, 
+							"Flushing logs.", 
+							"Flushing logs.", 
+							null),
+					});
 
-						var logs = db.GetJobLogs(runner.Id).ToList();
-						Assert.AreEqual(2, logs.Count, "Missing JobLogs");
-						foreach (var log in logs)
-							Console.WriteLine(log.Message);
-					}
-
-					var job = runner.GetJob();
-					Assert.IsFalse(File.Exists(job.DebugLogPath));
+					var logs = db.GetJobLogs(runner.Id).ToList();
+					Assert.AreEqual(2, logs.Count, "Missing JobLogs");
+					foreach (var log in logs)
+						Console.WriteLine(log.Message);
 				}
+
+				var job = runner.GetJob();
+				Assert.IsFalse(File.Exists(job.DebugLogPath));
 			}
 		}
 	}

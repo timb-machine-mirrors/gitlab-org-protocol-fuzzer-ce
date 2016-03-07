@@ -62,6 +62,7 @@ namespace Peach.Core.Analyzers
 		/// args key for passing a dictionary of defined values to replace.
 		/// </summary>
 		public static string DEFINED_VALUES = "DefinedValues";
+		public static string USED_DEFINED_VALUES = "UsedDefinedValues";
 
 		static readonly string PEACH_NAMESPACE_URI = "http://peachfuzzer.com/2012/Peach";
 
@@ -263,14 +264,27 @@ namespace Peach.Core.Analyzers
 			if (args != null && args.TryGetValue(DEFINED_VALUES, out obj))
 			{
 				var definedValues = (IEnumerable<KeyValuePair<string, string>>)obj;
-				var sb = new StringBuilder(xml);
 
 				foreach (var kv in definedValues)
 				{
-					sb.Replace("##" + kv.Key + "##", kv.Value);
+					var newXml = xml.Replace("##" + kv.Key + "##", kv.Value);
+					if (xml != newXml)
+					{
+						HashSet<string> used;
+						object objUsed;
+						if (!args.TryGetValue(USED_DEFINED_VALUES, out objUsed))
+						{
+							used = new HashSet<string>();
+							args.Add(USED_DEFINED_VALUES, used);
+						}
+						else
+						{
+							used = (HashSet<string>)objUsed;
+						}
+						used.Add(kv.Key);
+						xml = newXml;
+					}
 				}
-
-				xml = sb.ToString();
 			}
 
 			return xml;
@@ -311,10 +325,12 @@ namespace Peach.Core.Analyzers
 				set.Add(PEACH_NAMESPACE_URI, tr);
 			}
 
-			var settings = new XmlReaderSettings();
-			settings.ValidationType = ValidationType.Schema;
-			settings.Schemas = set;
-			settings.NameTable = new NameTable();
+			var settings = new XmlReaderSettings
+			{
+				ValidationType = ValidationType.Schema,
+				Schemas = set,
+				NameTable = new NameTable()
+			};
 			settings.ValidationEventHandler += delegate(object sender, ValidationEventArgs e)
 			{
 				var ex = e.Exception;
@@ -919,6 +935,14 @@ namespace Peach.Core.Analyzers
 					// Copy over hints, some may be for array
 					foreach (var key in elem.Hints.Keys)
 						array.Hints[key] = elem.Hints[key];
+
+					// Move the field id up to the  array element so that
+					// mutations on the array get correlated to the field id
+					array.FieldId = elem.FieldId;
+
+					// Clear the field id on the element so it doesn't get duplicated
+					// when using the FullFieldId property.
+					elem.FieldId = null;
 
 					elem = array;
 				}
@@ -1528,13 +1552,13 @@ namespace Peach.Core.Analyzers
 
 		protected virtual DataSet handleData(XmlNode node, Dom.Dom dom, string uniqueName)
 		{
-			DataSet dataSet = null;
+			DataSet dataSet;
 
 			if (node.hasAttr("ref"))
 			{
 				string refName = node.getAttrString("ref");
 
-				var other = dom.getRef<DataSet>(refName, a => a.datas);
+				var other = dom.getRef(refName, a => a.datas);
 				if (other == null)
 					throw new PeachException("Error, could not resolve Data element ref attribute value '" + refName + "'.");
 
@@ -1546,6 +1570,7 @@ namespace Peach.Core.Analyzers
 			}
 
 			dataSet.Name = node.getAttr("name", uniqueName);
+			dataSet.FieldId = node.getAttr("fieldId", null);
 
 			if (node.hasAttr("fileName"))
 			{
@@ -1607,10 +1632,12 @@ namespace Peach.Core.Analyzers
 				}
 			}
 
-			if (node.ChildNodes.AsEnumerable().Where(n => n.Name == "Field").Any())
+			var children = node.ChildNodes.AsEnumerable().ToArray();
+			var fields = children.Where(x => x.Name == "Field").ToArray();
+			if (fields.Any())
 			{
-				// If this ref'd an existing Data element, clear all non FieldData children
-				if (dataSet.Where(o => !(o is DataField)).Any())
+				// If this ref'd an existing Data element, clear all non DataField children
+				if (dataSet.Any(o => !(o is DataField)))
 					dataSet.Clear();
 
 				// Ensure there is a field data record we can populate
@@ -1619,32 +1646,38 @@ namespace Peach.Core.Analyzers
 
 				var dupes = new HashSet<string>();
 
-				foreach (XmlNode child in node.ChildNodes)
+				foreach (var child in fields)
 				{
-					if (child.Name == "Field")
+					var name = child.getAttrString("name");
+					if (!dupes.Add(name))
+						throw new PeachException("Error, Data element has multiple entries for field '" + name + "'.");
+
+					DataElement tmp;
+					if (child.getAttr("valueType", "string").ToLower() == "string")
+						tmp = new Dom.String { stringType = StringType.utf8 };
+					else
+						tmp = new Blob();
+
+					// Hack to call common value parsing code.
+					handleCommonDataElementValue(child, tmp);
+
+					foreach (var fieldData in dataSet.OfType<DataField>())
 					{
-						string name = child.getAttrString("name");
-
-						if (!dupes.Add(name))
-							throw new PeachException("Error, Data element has multiple entries for field '" + name + "'.");
-
-						DataElement tmp;
-
-						if (child.getAttr("valueType", "string").ToLower() == "string")
-							tmp = new Dom.String { stringType = StringType.utf8 };
-						else
-							tmp = new Blob();
-
-						// Hack to call common value parsing code.
-						handleCommonDataElementValue(child, tmp);
-
-						foreach (var fieldData in dataSet.OfType<DataField>())
+						fieldData.Fields.Remove(name);
+						fieldData.Fields.Add(new DataField.Field
 						{
-							fieldData.Fields.Remove(name);
-							fieldData.Fields.Add(new DataField.Field() { Name = name, Value = tmp.DefaultValue });
-						}
+							Name = name, 
+							Value = tmp.DefaultValue
+						});
 					}
 				}
+			}
+
+			var masks = children.Where(x => x.Name == "FieldMask");
+			foreach (var child in masks)
+			{
+				var selector = child.getAttrString("select");
+				dataSet.Add(new DataFieldMask(selector));
 			}
 
 			if (dataSet.Count == 0)
@@ -1833,53 +1866,7 @@ namespace Peach.Core.Analyzers
 				// Publisher
 				if (child.Name == "Publisher")
 				{
-					var cls = child.getAttrString("class");
-					var agent = child.getAttr("agent", null);
-
-					Publisher pub;
-
-					if (agent == null && cls != "Remote")
-					{
-						pub = handlePlugin<Publisher, PublisherAttribute>(child, null, false);
-					}
-					else
-					{
-						var arg = handleParams(child);
-
-						if (cls == "Remote")
-						{
-							Variant val;
-							if (!arg.TryGetValue("Agent", out val))
-								throw new PeachException("Publisher 'RemotePublisher' is missing required parameter 'Agent'.");
-
-							agent = (string)val;
-							arg.Remove("Agent");
-
-							if (!arg.TryGetValue("Class", out val))
-								throw new PeachException("Publisher 'RemotePublisher' is missing required parameter 'Class'.");
-
-							cls = (string)val;
-							arg.Remove("Class");
-						}
-
-						pub = new RemotePublisher
-						{
-							Agent = agent,
-							Class = cls,
-							Args = arg.ToDictionary(i => i.Key, i => (string)i.Value)
-						};
-					}
-					
-					pub.Name = child.getAttr("name", null) ?? test.publishers.UniqueName();
-
-					try
-					{
-						test.publishers.Add(pub);
-					}
-					catch (ArgumentException)
-					{
-						throw new PeachException("Error, a <Publisher> element named '{0}' already exists in test '{1}'.".Fmt(pub.Name, test.Name));
-					}
+					handlePublishers(child, test);
 				}
 
 				// Mutator
@@ -1915,6 +1902,57 @@ namespace Peach.Core.Analyzers
 			}
 
 			return test;
+		}
+
+		protected virtual void handlePublishers(XmlNode node, Dom.Test parent)
+		{
+			var cls = node.getAttrString("class");
+			var agent = node.getAttr("agent", null);
+
+			Publisher pub;
+
+			if (agent == null && cls != "Remote")
+			{
+				pub = handlePlugin<Publisher, PublisherAttribute>(node, null, false);
+			}
+			else
+			{
+				var arg = handleParams(node);
+
+				if (cls == "Remote")
+				{
+					Variant val;
+					if (!arg.TryGetValue("Agent", out val))
+						throw new PeachException("Publisher 'RemotePublisher' is missing required parameter 'Agent'.");
+
+					agent = (string)val;
+					arg.Remove("Agent");
+
+					if (!arg.TryGetValue("Class", out val))
+						throw new PeachException("Publisher 'RemotePublisher' is missing required parameter 'Class'.");
+
+					cls = (string)val;
+					arg.Remove("Class");
+				}
+
+				pub = new RemotePublisher
+				{
+					Agent = agent,
+					Class = cls,
+					Args = arg.ToDictionary(i => i.Key, i => (string)i.Value)
+				};
+			}
+
+			pub.Name = node.getAttr("name", null) ?? parent.publishers.UniqueName();
+
+			try
+			{
+				parent.publishers.Add(pub);
+			}
+			catch (ArgumentException)
+			{
+				throw new PeachException("Error, a <Publisher> element named '{0}' already exists in test '{1}'.".Fmt(pub.Name, parent.Name));
+			}
 		}
 
 		#endregion

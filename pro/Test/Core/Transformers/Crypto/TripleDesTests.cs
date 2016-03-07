@@ -27,12 +27,7 @@ namespace Peach.Pro.Test.Core.Transformers.Crypto
         [Test, ExpectedException(typeof(PeachException))]
         public void WrongSizedKeyTest()
         {
-            string msg;
-
-            if (Platform.GetOS() == Platform.OS.Windows)
-                msg = "Error, unable to create instance of 'Transformer' named 'TripleDes'.\nExtended error: Exception during object creation: Specified key is not a valid size for this algorithm.";
-            else
-                msg = "Error, unable to create instance of 'Transformer' named 'TripleDes'.\nExtended error: Exception during object creation: Wrong Key Length";
+            string msg = "Error, unable to create instance of 'Transformer' named 'TripleDes'.\nExtended error: Exception during object creation: Specified key is not a valid size for this algorithm.";
 
             try
             {
@@ -48,12 +43,7 @@ namespace Peach.Pro.Test.Core.Transformers.Crypto
         [Test, ExpectedException(typeof(PeachException))]
         public void WeakKeyTest()
         {
-            string msg;
-
-            if (Platform.GetOS() == Platform.OS.Windows)
-                msg = "Error, unable to create instance of 'Transformer' named 'TripleDes'.\nExtended error: Exception during object creation: Specified key is a known weak key for 'TripleDES' and cannot be used.";
-            else
-                msg = "Error, unable to create instance of 'Transformer' named 'TripleDes'.\nExtended error: Exception during object creation: Weak Key";
+            string msg = "Error, unable to create instance of 'Transformer' named 'TripleDes'.\nExtended error: Exception during object creation: Specified key is a known weak key for 'TripleDES' and cannot be used.";
 
             try
             {
@@ -69,12 +59,7 @@ namespace Peach.Pro.Test.Core.Transformers.Crypto
         [Test, ExpectedException(typeof(PeachException))]
         public void WrongSizedIV()
         {
-            string msg;
-
-            if (Platform.GetOS() == Platform.OS.Windows)
-                msg = "Error, unable to create instance of 'Transformer' named 'TripleDes'.\nExtended error: Exception during object creation: Specified initialization vector (IV) does not match the block size for this algorithm.";
-            else
-                msg = "Error, unable to create instance of 'Transformer' named 'TripleDes'.\nExtended error: Exception during object creation: IV length is different than block size";
+            string msg = "Error, unable to create instance of 'Transformer' named 'TripleDes'.\nExtended error: Exception during object creation: Specified initialization vector (IV) does not match the block size for this algorithm.";
 
             try
             {

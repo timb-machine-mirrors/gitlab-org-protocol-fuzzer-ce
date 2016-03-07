@@ -6,8 +6,13 @@ namespace Peach.Pro.Core.Fixups
 {
 	public abstract class BasePythonFixup : Fixup
 	{
-		public BasePythonFixup(DataElement parent, Dictionary<string, Variant> args)
+		protected BasePythonFixup(DataElement parent, Dictionary<string, Variant> args)
 			: base(parent, args)
+		{
+			__init__(parent, args);
+		}
+
+		protected virtual void __init__(DataElement parent, Dictionary<string, Variant> args)
 		{
 		}
 

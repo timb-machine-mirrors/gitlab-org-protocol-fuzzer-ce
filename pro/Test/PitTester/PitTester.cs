@@ -5,8 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using System.Xml.Schema;
-using System.Xml.XPath;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
@@ -15,30 +13,14 @@ using Peach.Core.Fixups;
 using Peach.Core.IO;
 using Peach.Pro.Core;
 using Peach.Pro.Core.MutationStrategies;
-using Peach.Pro.Core.WebServices;
-using Peach.Pro.Core.WebServices.Models;
 using Action = Peach.Core.Dom.Action;
-using Dom = Peach.Core.Dom.Dom;
 using Ionic.Zip;
-using Peach.Pro.Core.Godel;
 using StateModel = Peach.Core.Dom.StateModel;
 
 namespace PitTester
 {
 	public class PitTester
 	{
-		static readonly Dictionary<string, string[]> OptionalParams = new Dictionary<string, string[]>
-		{
-			{ "RawEther", new[] { "MinMTU", "MaxMTU", "MinFrameSize", "MaxFrameSize", "PcapTimeout" }},
-			{ "RawV4", new[] { "MinMTU", "MaxMTU" }},
-			{ "RawV6", new[] { "MinMTU", "MaxMTU" }},
-			{ "Udp", new[] { "MinMTU", "MaxMTU" }},
-			{ "DTls", new[] { "MinMTU", "MaxMTU" }},
-			{ "File", new[] { "Append", "Overwrite" }},
-			{ "ConsoleHex", new[] { "BytesPerLine" }},
-			{ "Null", new[] { "MaxOutputSize" }}
-		};
-
 		public static void ExtractPack(string pack, string dir, int logLevel)
 		{
 			using (var zip = new ZipFile(pack))
@@ -362,7 +344,7 @@ namespace PitTester
 								{
 									var clone = (DataModel)dm.Clone();
 									clone.actionData = actionData;
-									data.Apply(clone);
+									data.Apply(action, clone);
 								}
 
 								return;
@@ -402,7 +384,7 @@ namespace PitTester
 
 		private static void DoVerifyDataSets(TestData testData, string pitLibraryPath, string fileName)
 		{
-			var defs = LoadDefines(pitLibraryPath, fileName);
+			var defs = PitDefines.ParseFileWithDefaults(pitLibraryPath, fileName);
 
 			var testDefs = testData.Defines.ToDictionary(x => x.Key, x => x.Value);
 
@@ -448,18 +430,6 @@ namespace PitTester
 
 			if (sb.Length > 0)
 				throw new PeachException(sb.ToString());
-		}
-
-		private static List<KeyValuePair<string, string>> LoadDefines(string pitLibraryPath, string fileName)
-		{
-			var defs = PitDefines.ParseFile(fileName + ".config", pitLibraryPath).Evaluate();
-
-			// Some defines are expected to be empty if they are required to be
-			// set by the user.  The pit will not parse w/o them being set however
-			// so inject parsable defaults in this case
-			defs = defs.Select(PopulateRequiredDefine).ToList();
-
-			return defs;
 		}
 
 		private static void VerifyDataSet(
@@ -538,336 +508,6 @@ namespace PitTester
 			{
 				sb.AppendLine(ಠ_ಠ.Message);
 			}
-		}
-
-		public static void VerifyPitConfig(PitVersion version)
-		{
-			var fileName = version.Files[0].Name;
-
-			var raw = PitDefines.ParseFile(fileName + ".config");
-			var defs = raw.Walk().ToList();
-
-			var sb = new StringBuilder();
-
-			var noName = string.Join(", ", defs.Where(d => d.ConfigType != ParameterType.Space && string.IsNullOrEmpty(d.Name)).Select(d => d.Key));
-			var noDesc = string.Join(", ", defs.Where(d => d.ConfigType != ParameterType.Space && string.IsNullOrEmpty(d.Description)).Select(d => d.Key));
-
-			if (noName.Length > 0)
-				sb.AppendFormat("The following keys have an empty name: {0}", noName);
-			if (sb.Length > 0)
-				sb.AppendLine();
-			if (noDesc.Length > 0)
-				sb.AppendFormat("The following keys have an empty description: {0}", noDesc);
-
-			foreach (var pitFile in version.Files)
-			{
-				var contents = File.ReadAllText(pitFile.Name);
-
-				for (var i = defs.Count - 1; i >= 0; i--)
-				{
-					var key = "##{0}##".Fmt(defs[i].Key);
-					if (contents.Contains(key))
-						defs.RemoveAt(i);
-				}
-
-				if (defs.Count == 0)
-					break;
-			}
-
-			defs.RemoveAll(d => d.ConfigType == ParameterType.Space || d.ConfigType == ParameterType.Group);
-
-			var extraDefs = string.Join(", ", defs.Select(d => d.Key));
-			if (extraDefs.Length > 0)
-				sb.AppendFormat("The following keys are not used by the pit: {0}", extraDefs);
-
-			if (raw.Platforms.Any(p => p.Platform != Platform.OS.All))
-				sb.AppendFormat("Config file should not have platform specific defines.");
-
-			if (sb.Length > 0)
-				throw new ApplicationException(sb.ToString());
-		}
-
-		public static void VerifyPit(string pitLibraryPath, string fileName, bool isTest)
-		{
-			var errors = new StringBuilder();
-
-			int idxDeclaration = 0;
-			int idxCopyright = 0;
-			int idx = 0;
-
-			using (var rdr = XmlReader.Create(fileName))
-			{
-				while (++idx > 0)
-				{
-					do
-					{
-						if (!rdr.Read())
-							throw new ApplicationException("Failed to read xml.");
-					}
-					while (rdr.NodeType == XmlNodeType.Whitespace);
-
-					if (rdr.NodeType == XmlNodeType.XmlDeclaration)
-					{
-						idxDeclaration = idx;
-					}
-					else if (rdr.NodeType == XmlNodeType.Comment)
-					{
-						idxCopyright = idx;
-
-						var split = rdr.Value.Split('\n');
-						if (split.Length <= 1)
-							errors.AppendLine("Long form copyright message is missing.");
-					}
-					else if (rdr.NodeType == XmlNodeType.Element)
-					{
-						if (rdr.Name != "Peach")
-						{
-							errors.AppendLine("The first xml element is not <Peach>.");
-							break;
-						}
-
-						if (!rdr.MoveToAttribute("description"))
-							errors.AppendLine("Pit is missing description attribute.");
-						else if (string.IsNullOrEmpty(rdr.Value))
-							errors.AppendLine("Pit description is empty.");
-
-						const string author = "Peach Fuzzer, LLC";
-
-						if (!rdr.MoveToAttribute("author"))
-							errors.AppendLine("Pit is missing author attribute.");
-						else if (author != rdr.Value)
-							errors.AppendLine("Pit author is '" + rdr.Value + "' but should be '" + author + "'.");
-
-						var ns = PeachElement.Namespace;
-
-						if (!rdr.MoveToAttribute("xmlns"))
-							errors.AppendLine("Pit is missing xmlns attribute.");
-						else if (ns != rdr.Value)
-							errors.AppendLine("Pit xmlns is '" + rdr.Value + "' but should be '" + ns + "'.");
-
-						var schema = PeachElement.SchemaLocation;
-
-						if (!rdr.MoveToAttribute("schemaLocation", XmlSchema.InstanceNamespace))
-							errors.AppendLine("Pit is missing xsi:schemaLocation attribute.");
-						else if (schema != rdr.Value)
-							errors.AppendLine("Pit xsi:schemaLocation is '" + rdr.Value + "' but should be '" + schema + "'.");
-
-						break;
-					}
-				}
-
-				if (idxDeclaration != 1)
-					errors.AppendLine("Pit is missing xml declaration.");
-
-				if (idxCopyright == 0)
-					errors.AppendLine("Pit is missing top level copyright message.");
-
-			}
-
-			//using (var rdr = XmlReader.Create(fileName))
-			{
-				var doc = new XmlDocument();
-
-				// Must call LoadXml() so that we can catch embedded newlines!
-				doc.LoadXml(File.ReadAllText(fileName));
-
-				var nav = doc.CreateNavigator();
-				var nsMgr = new XmlNamespaceManager(nav.NameTable);
-				nsMgr.AddNamespace("p", PeachElement.Namespace);
-
-				var it = nav.Select("/p:Peach/p:Test", nsMgr);
-
-				var expected = isTest ? 1 : 0;
-
-				if (it.Count != expected)
-					errors.AppendLine("Number of <Test> elements is " + it.Count + " but should be " + expected + ".");
-
-				while (it.MoveNext())
-				{
-					var maxSize = it.Current.GetAttribute("maxOutputSize", string.Empty);
-					if (string.IsNullOrEmpty(maxSize))
-						errors.AppendLine("<Test> element is missing maxOutputSize attribute.");
-
-					var lifetime = it.Current.GetAttribute("targetLifetime", string.Empty);
-					if (string.IsNullOrEmpty(lifetime))
-						errors.AppendLine("<Test> element is missing targetLifetime attribute.");
-
-					if (!ShouldSkipRule(it, "Skip_Lifetime"))
-					{
-						var parts = fileName.Split(Path.DirectorySeparatorChar);
-						var fileFuzzing = new[] { "Image", "Video", "Application" };
-						if (parts.Any(fileFuzzing.Contains) || parts.Last().Contains("Client"))
-						{
-							if (lifetime != "iteration")
-								errors.AppendLine("<Test> element has incorrect targetLifetime attribute. Expected 'iteration' but found '{0}'.".Fmt(lifetime));
-						}
-						else
-						{
-							if (lifetime != "session")
-								errors.AppendLine("<Test> element has incorrect targetLifetime attribute. Expected 'session' but found '{0}'.".Fmt(lifetime));
-						}
-					}
-
-					var loggers = it.Current.Select("p:Logger", nsMgr);
-					if (loggers.Count != 0)
-						errors.AppendLine("Number of <Logger> elements is " + loggers.Count + " but should be 0.");
-
-					var pubs = it.Current.Select("p:Publisher", nsMgr);
-					while (pubs.MoveNext())
-					{
-						var cls = pubs.Current.GetAttribute("class", string.Empty);
-						var parms = new List<string>();
-
-						var parameters = pubs.Current.Select("p:Param", nsMgr);
-						while (parameters.MoveNext())
-						{
-							var name = parameters.Current.GetAttribute("name", string.Empty);
-							var value = parameters.Current.GetAttribute("value", string.Empty);
-							if (!ShouldSkipRule(parameters, "Allow_HardCodedParamValue") &&
-								(!value.StartsWith("##") || !value.EndsWith("##")))
-							{
-								errors.AppendLine(
-									"<Publisher> parameter '{0}' is hard-coded, use a PitDefine ".Fmt(name) +
-									"(suppress with 'Allow_HardCodedParamValue')"
-								);
-							}
-
-							parms.Add(name);
-						}
-
-						var comments = pubs.Current.SelectChildren(XPathNodeType.Comment);
-						while (comments.MoveNext())
-						{
-							var value = comments.Current.Value.Trim();
-							const string ignore = "PitLint: Allow_MissingParamValue=";
-							if (value.StartsWith(ignore))
-								parms.Add(value.Substring(ignore.Length));
-						}
-
-						var pub = ClassLoader.FindPluginByName<PublisherAttribute>(cls);
-						if (pub == null)
-						{
-							errors.AppendLine("<Publisher> class '{0}' is not recognized.".Fmt(cls));
-						}
-						else
-						{
-							var pri = pub.GetAttributes<PublisherAttribute>().First();
-							if (pri.Name != cls)
-								errors.AppendLine("'{0}' <Publisher> is referenced with deprecated name '{1}'.".Fmt(pri.Name, cls));
-
-							string[] optionalParams;
-							if (!OptionalParams.TryGetValue(pri.Name, out optionalParams))
-								optionalParams = new string[0];
-
-							foreach (var attr in pub.GetAttributes<ParameterAttribute>())
-							{
-								if (!optionalParams.Contains(attr.name) && !parms.Contains(attr.name))
-									errors.AppendLine("{0} publisher missing configuration for parameter '{1}'.".Fmt(pri.Name, attr.name));
-							}
-						}
-					}
-				}
-
-				var sm = nav.Select("/p:Peach/p:StateModel", nsMgr);
-				while (sm.MoveNext())
-				{
-					var smName = sm.Current.GetAttribute("name", "") ?? "<unknown>";
-
-					var actions = sm.Current.Select("//p:Action[@type='call' and @publisher='Peach.Agent']", nsMgr);
-
-					bool gotStart = false;
-					bool gotEnd = false;
-
-					while (actions.MoveNext())
-					{
-						var meth = actions.Current.GetAttribute("method", "");
-						if (meth == "StartIterationEvent")
-							gotStart = true;
-						else if (meth == "ExitIterationEvent")
-							gotEnd = true;
-						else if (!gotStart && !ShouldSkipRule(actions, "Skip_StartIterationEvent"))
-							errors.AppendLine(string.Format("StateModel '{0}' has an unexpected call action.  Method is '{1}' and should be 'StartIterationEvent' or 'ExitIterationEvent'.", smName, meth));
-					}
-
-					if (!gotStart)
-						errors.AppendLine(string.Format("StateModel '{0}' does not call agent with 'StartIterationEvent'.", smName));
-
-					if (!gotEnd)
-						errors.AppendLine(string.Format("StateModel '{0}' does not call agent with 'ExitIterationEvent'.", smName));
-				}
-
-				var whenAction = nav.Select("/p:Peach/p:StateModel/p:State/p:Action[contains(@when, 'controlIteration')]", nsMgr);
-				while (whenAction.MoveNext())
-				{
-					if (!ShouldSkipRule(whenAction, "Allow_WhenControlIteration"))
-						errors.AppendLine("Action has when attribute containing controlIteration: {0}".Fmt(whenAction.Current.OuterXml));
-				}
-
-				var badValues = nav.Select("//*[contains(@value, '\n')]", nsMgr);
-				while (badValues.MoveNext())
-				{
-					if (badValues.Current.GetAttribute("valueType", "") != "hex")
-						errors.AppendLine("Element has value attribute with embedded newline: {0}".Fmt(badValues.Current.OuterXml));
-				}
-			}
-
-			// This test is broken as it does not set defines correctly.
-			// Specifically the file stuff does not occur leading to errors
-			// To ship 3.8 this is getting commented out. We already parse
-			// the pit several times, so this is really extra.
-			//try
-			//{
-			//	if (isTest)
-			//	{
-			//		var defs = LoadDefines(pitLibraryPath, fileName);
-			//		var args = new Dictionary<string, object>();
-			//		args[PitParser.DEFINED_VALUES] = defs;
-			//		new ProPitParser().asParser(args, fileName);
-			//	}
-			//}
-			//catch (Exception ex)
-			//{
-			//	errors.AppendLine("PitParser exception: " + ex);
-			//}
-
-			if (errors.Length > 0)
-				throw new ApplicationException(errors.ToString());
-		}
-
-		private static KeyValuePair<string, string> PopulateRequiredDefine(KeyValuePair<string, string> item)
-		{
-			if (!string.IsNullOrEmpty(item.Value))
-				return item;
-
-			if (item.Key.EndsWith("MAC"))
-				return new KeyValuePair<string, string>(item.Key, "00:00:00:00:00:00");
-
-			if (item.Key.EndsWith("IPv4"))
-				return new KeyValuePair<string, string>(item.Key, "0.0.0.0");
-
-			if (item.Key.EndsWith("IPv6"))
-				return new KeyValuePair<string, string>(item.Key, "::1");
-
-			if (item.Key.EndsWith("Port"))
-				return new KeyValuePair<string, string>(item.Key, "0");
-
-			return new KeyValuePair<string, string>(item.Key, "0");
-		}
-
-		private static bool ShouldSkipRule(XPathNodeIterator it, string rule)
-		{
-			var stack = new Stack<string>();
-			var preceding = it.Current.Select("preceding-sibling::*|preceding-sibling::comment()");
-
-			while (preceding.MoveNext())
-			{
-				if (preceding.Current.NodeType == XPathNodeType.Comment)
-					stack.Push(preceding.Current.Value);
-				else
-					stack.Clear();
-			}
-
-			return stack.Any(item => item.Contains("PitLint: {0}".Fmt(rule)));
 		}
 	}
 }

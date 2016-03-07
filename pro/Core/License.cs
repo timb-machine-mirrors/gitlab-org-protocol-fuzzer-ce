@@ -139,7 +139,14 @@ namespace Peach.Pro.Core
 
 			try
 			{
-				ret.Contents = File.ReadAllText(path);
+				if (!File.Exists(path))
+				{
+					ret.Exception = new FileNotFoundException("Could not find file '" + path + "'.", path);
+				}
+				else
+				{
+					ret.Contents = File.ReadAllText(path);
+				}
 			}
 			catch (FileNotFoundException ex)
 			{

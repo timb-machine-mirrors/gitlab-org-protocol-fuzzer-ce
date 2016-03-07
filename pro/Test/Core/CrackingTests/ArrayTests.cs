@@ -587,7 +587,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 
 			var ex = Assert.Throws<PeachException>(() => e.startFuzzing(dom, config));
 
-			Assert.AreEqual("Error, unable to resolve field \"Root.data.str2\" against \"DM\".", ex.Message);
+			Assert.AreEqual("Error, action \"Initial.Action\" unable to resolve field \"str2\" of \"Root.data.str2\" against \"DM\" (DataModel).", ex.Message);
 		}
 
 		class DeferredPublisher : StreamPublisher

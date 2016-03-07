@@ -2,6 +2,7 @@
 import clr, clrtype
 
 clr.AddReference("Peach.Core")
+clr.AddReference("Peach.Pro")
 clr.AddReference("NLog")
 
 import System
@@ -9,8 +10,9 @@ import NLog
 import json
 
 import Peach.Core
-from Peach.Core import Publisher, Variant
+from Peach.Core import Variant
 from Peach.Core.IO import BitwiseStream
+from Peach.Pro.Core.Publishers import BasePythonPublisher
 
 # Add the special assembly that our Python extensions will 
 # appear in. This is the list of assemblies that Peach checks
@@ -24,7 +26,7 @@ PublisherAttr = clrtype.attribute(Peach.Core.PublisherAttribute)
 DescriptionAttr = clrtype.attribute(Peach.Core.DescriptionAttribute)
 ParameterAttr = clrtype.attribute(Peach.Core.ParameterAttribute)
 
-class PythonPublisher(Publisher):
+class PythonPublisher(BasePythonPublisher):
 	'''Example of adding a custom Monitor to Peach using only Python'''
 
 	__metaclass__ = clrtype.ClrClass
@@ -35,9 +37,35 @@ class PythonPublisher(Publisher):
 		System.SerializableAttribute,
 		PublisherAttr("PythonPublisher", True),
 		DescriptionAttr("Example Publisher in Python"),
+		ParameterAttr("Param1", clr.GetClrType(str), "Example parameter"),
+		ParameterAttr("Param2", clr.GetClrType(str), "Optional parameter", "DefaultValue"),
 	]
 
 	logger = None
+
+	@property
+	@clrtype.accepts()
+	@clrtype.returns(clr.GetClrType(str))
+	def Param1(self):
+		return self.param1
+
+	@Param1.setter
+	@clrtype.accepts(clr.GetClrType(str))
+	@clrtype.returns()
+	def Param1(self, value):
+		self.param1 = value
+
+	@property
+	@clrtype.accepts()
+	@clrtype.returns(clr.GetClrType(str))
+	def Param2(self):
+		return self.param2
+
+	@Param1.setter
+	@clrtype.accepts(clr.GetClrType(str))
+	@clrtype.returns()
+	def Param2(self, value):
+		self.param2 = value
 
 	@property
 	@clrtype.accepts()
@@ -47,8 +75,11 @@ class PythonPublisher(Publisher):
 			self.logger = NLog.LogManager.GetLogger("PythonPublisher")
 		return self.logger
 
-	@clrtype.accepts(System.Collections.Generic.Dictionary[clr.GetClrType(str), Variant])
-	def __init__(self, args):
+	@clrtype.accepts()
+	def __init__(self):
+		print '>>> INIT'
+		print '>>>  Param1: %s' % self.param1
+		print '>>>  Param2: %s' % self.param2
 		pass
 
 	@clrtype.accepts(BitwiseStream)

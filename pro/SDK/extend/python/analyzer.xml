@@ -8,7 +8,9 @@
 	<DataModel name="TheDataModel">
 		<String name="Value" value="Hello World">
 			<!-- Use analyzer like normal -->
-			<Analyzer class="PythonAnalyzer"/>
+			<Analyzer class="PythonAnalyzer">
+				<Param name="Param1" value="Test" />
+			</Analyzer>
 		</String>
 	</DataModel>
 	

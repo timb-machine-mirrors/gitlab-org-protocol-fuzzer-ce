@@ -18,7 +18,7 @@
 				Element
 			</th>
 			<th st-sort="iterationCount">
-				Iterations
+				Test Cases
 			</th>
 			<th st-sort="bucketCount">
 				Buckets
@@ -45,7 +45,7 @@
 				{{row.action}}
 			</td>
 			<td class="max-width-500 width-100 break-word">
-				{{row.element}}
+				{{row.element || 'Other'}}
 			</td>
 			<td>
 				{{row.iterationCount}}

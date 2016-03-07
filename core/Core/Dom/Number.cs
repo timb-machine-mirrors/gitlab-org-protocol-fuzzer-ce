@@ -81,6 +81,29 @@ namespace Peach.Core.Dom
 			DefaultValue = new Variant(0);
 		}
 
+		/// <summary>
+		/// In the case of Double the values set
+		/// by Number will cause an exception. This
+		/// contructor is added as a work arround.
+		/// </summary>
+		/// <param name="nullCtor"></param>
+		protected Number(bool nullCtor)
+		{
+			
+		}
+
+		/// <summary>
+		/// In the case of Double the values set
+		/// by Number will cause an exception. This
+		/// contructor is added as a work arround.
+		/// </summary>
+		/// <param name="nullCtor"></param>
+		/// <param name="name"></param>
+		public Number(bool nullCtor, string name)
+			: base(name)
+		{
+		}
+
 		public static DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
 		{
 			if (node.Name != "Number")
@@ -277,7 +300,7 @@ namespace Peach.Core.Dom
 				return _endian.GetUInt64(bits, (int)lengthAsBits);
 		}
 
-		private Variant Sanitize(Variant variant)
+		protected virtual Variant Sanitize(Variant variant)
 		{
 			dynamic value = GetNumber(variant);
 
