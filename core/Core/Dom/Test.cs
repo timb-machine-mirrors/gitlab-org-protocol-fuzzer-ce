@@ -375,28 +375,11 @@ namespace Peach.Core.Dom
 			foreach (var state in stateModel.states)
 			{
 				var parts = new List<string>();
-				if (hasFieldIds)
-				{
-					if (!string.IsNullOrEmpty(state.FieldId))
-						parts.Add(state.FieldId);
-				}
-				else
-				{
-					parts.Add(state.Name);
-				}
+				AddPart(hasFieldIds, parts, state);
 
 				foreach (var action in state.actions)
 				{
-					if (hasFieldIds)
-					{
-						if (!string.IsNullOrEmpty(action.FieldId))
-							parts.Add(action.FieldId);
-					}
-					else
-					{
-						parts.Add(action.Name);
-					}
-
+					AddPart(hasFieldIds, parts, action);
 					var prefix = string.Join(".", parts);
 
 					foreach (var actionData in action.outputData)
@@ -425,6 +408,19 @@ namespace Peach.Core.Dom
 						}
 					}
 				}
+			}
+		}
+
+		void AddPart(bool hasFieldIds, List<string> parts, IFieldNamed node)
+		{
+			if (hasFieldIds)
+			{
+				if (!string.IsNullOrEmpty(node.FieldId))
+					parts.Add(node.FieldId);
+			}
+			else
+			{
+				parts.Add(node.Name);
 			}
 		}
 	}

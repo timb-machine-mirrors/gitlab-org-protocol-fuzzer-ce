@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
-	[Serializable]
 	public class PitField 
 	{
 		public PitField()
