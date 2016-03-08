@@ -21,8 +21,8 @@ def configure(conf):
 	match = version_re(out)
 	if match:
 		kw = match.groupdict()
-		if kw['major'] != '1' or kw['minor'] != '6':
-			conf.fatal('Wrong version for tsc. Expecting 1.6.*, got: %(major)s.%(minor)s.%(patch)s' % kw) 
+		if int(kw['major']) != 1 or int(kw['minor']) < 6:
+			conf.fatal('Wrong version for tsc. Expecting 1.6+, got: %(major)s.%(minor)s.%(patch)s' % kw) 
 	else:
 		conf.fatal('Could not determine version for tsc.')
 

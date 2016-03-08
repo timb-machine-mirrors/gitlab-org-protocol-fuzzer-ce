@@ -59,7 +59,7 @@ namespace Peach.Core.Dom
 	/// </summary>
 	[DebuggerDisplay("{name}: {type}")]
 	[Serializable]
-	public abstract class Action : INamed
+	public abstract class Action : INamed, IFieldNamed
 	{
 		#region Obsolete Functions
 

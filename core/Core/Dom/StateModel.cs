@@ -195,7 +195,7 @@ namespace Peach.Core.Dom
 
 						newState = context.test.strategy.MutateChangingState(ase.changeToState);
 						
-						if(newState == ase.changeToState)
+						if (newState == ase.changeToState)
 							logger.Debug("Run(): Changing to state \"{0}\".", newState.Name);
 						else
 							logger.Debug("Run(): Changing state mutated.  Switching to \"{0}\" instead of \"{1}\".",
@@ -240,6 +240,32 @@ namespace Peach.Core.Dom
 		{
 			foreach (var item in states)
 				item.parent = this;
+		}
+
+		public bool HasFieldIds
+		{
+			get
+			{
+				foreach (var state in states)
+				{
+					if (!string.IsNullOrEmpty(state.FieldId))
+						return true;
+
+					foreach (var action in state.actions)
+					{
+						if (!string.IsNullOrEmpty(action.FieldId))
+							return true;
+
+						foreach (var actionData in action.outputData)
+						{
+							if (actionData.dataModel.DisplayTraverse().Any(e => !string.IsNullOrEmpty(e.FieldId)))
+								return true;
+						}
+					}
+				}
+
+				return false;
+			}
 		}
 	}
 }

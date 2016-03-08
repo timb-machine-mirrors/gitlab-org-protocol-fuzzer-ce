@@ -43,7 +43,7 @@ namespace Peach.Core.Dom
 	/// by attaching python expressions to actions via the onStart/onComplete/when attributes.
 	/// </summary>
 	[Serializable]
-	public class State : INamed
+	public class State : INamed, IFieldNamed
 	{
 		#region Obsolete Functions
 

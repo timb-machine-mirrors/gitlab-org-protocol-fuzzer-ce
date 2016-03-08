@@ -95,6 +95,16 @@ namespace Peach.Core.Dom
 		public string xpath { get; set; }
 	}
 
+	public class SelectWeight : INamed
+	{
+		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
+		public string name { get { return Name; } }
+
+		public string Name { get; set; }
+
+		public ElementWeight Weight { get; set; }
+	}
+
 	public class MutatorFilter
 	{
 		public enum Mode
@@ -310,6 +320,9 @@ namespace Peach.Core.Dom
 		[NonSerialized]
 		public NamedCollection<Agent> agents = new NamedCollection<Agent>();
 
+		[NonSerialized]
+		public NamedCollection<SelectWeight> weights = new NamedCollection<SelectWeight>();
+
 		/// <summary>
 		/// List of mutators to include in run
 		/// </summary>
@@ -358,12 +371,35 @@ namespace Peach.Core.Dom
 				}
 			}
 
+			var hasFieldIds = stateModel.HasFieldIds;
+			foreach (var state in stateModel.states)
+			{
+				foreach (var action in state.actions)
+				{
+					var parts = new List<string>();
+					AddPart(hasFieldIds, parts, state);
+					AddPart(hasFieldIds, parts, action);
+					var prefix = string.Join(".", parts);
+
+					foreach (var actionData in action.outputData)
+					{
+						foreach (var element in actionData.dataModel.PreOrderTraverse())
+						{
+							var key = string.Join(".", prefix, hasFieldIds ? element.FullFieldId : element.fullName);
+							SelectWeight item;
+							if (weights.TryGetValue(key, out item))
+								element.Weight = item.Weight;
+						}
+					}
+				}
+			}
+
 			// disable mutations for elements in a final state
 			if (stateModel.finalState != null)
 			{
-				foreach(var action in stateModel.finalState.actions)
+				foreach (var action in stateModel.finalState.actions)
 				{
-					foreach(var actionData in action.outputData)
+					foreach (var actionData in action.outputData)
 					{
 						foreach (var item in actionData.dataModel.PreOrderTraverse())
 						{
@@ -371,6 +407,19 @@ namespace Peach.Core.Dom
 						}
 					}
 				}
+			}
+		}
+
+		void AddPart(bool hasFieldIds, List<string> parts, IFieldNamed node)
+		{
+			if (hasFieldIds)
+			{
+				if (!string.IsNullOrEmpty(node.FieldId))
+					parts.Add(node.FieldId);
+			}
+			else
+			{
+				parts.Add(node.Name);
 			}
 		}
 	}
