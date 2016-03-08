@@ -60,7 +60,7 @@ namespace Peach.Pro.Test.Core
 
 	<StateModel name='SM' initialState='Initial'>
 		<State name='Initial'>
-			<Action type='call' method='StartIterationEvent' publisher='Peach.Agent' />
+			<Action name='StartIterationEvent' type='call' method='StartIterationEvent' publisher='Peach.Agent' />
 
 			<Action name='Open' type='open' publisher='tcp' />
 
@@ -69,17 +69,17 @@ namespace Peach.Pro.Test.Core
 				<Data fileName='##SamplePath##/##Seed##' />
 			</Action>
 
-			<Action type='input'>
+			<Action name='Input' type='input'>
 				<DataModel ref='DM'/>
 			</Action>
 
-			<Action name='MessageId' type='slurp' valueXpath='//Request//messageId/Value' setXpath='//messageId/Value' />
+			<Action name='Slurp' type='slurp' valueXpath='//Request//messageId/Value' setXpath='//messageId/Value' />
 
-			<Action type='message' status='foo' error='bar' />
+			<Action name='Message' type='message' status='foo' error='bar' />
 
 			<Action name='Close' type='close' publisher='tcp' />
 
-			<Action type='call' method='ExitIterationEvent' publisher='Peach.Agent' />
+			<Action name='ExitIterationEvent' type='call' method='ExitIterationEvent' publisher='Peach.Agent' />
 		</State>
 
 		<State name='Blank'>
@@ -118,35 +118,45 @@ namespace Peach.Pro.Test.Core
 			var actual = JsonConvert.SerializeObject(tree);
 			var expected = JsonConvert.SerializeObject(new[] {
 				new PitField { Id = "Initial", Fields = {
-					new PitField { Id = "Output", Fields = {
-						new PitField { Id = "DM", Fields = {
-							new PitField { Id = "DataElement_0" },
-							new PitField { Id = "Choice", Fields = {
-								new PitField { Id = "A", Fields = {
-									new PitField { Id = "Choice", Fields = {
-										new PitField { Id = "AA" },
-										new PitField { Id = "AB" }
-									}},
-								}},
-								new PitField { Id = "B", Fields = {
-									new PitField { Id = "Choice", Fields = {
-										new PitField { Id = "BA" },
-										new PitField { Id = "BB" },
-										new PitField { Id = "ASN", Fields =
-										{
-											new PitField { Id = "V" }
-										}},
-									}},
-								}},
-							}},
-							new PitField { Id = "Array", Fields = {
-								new PitField { Id = "Array", Fields = {
-									new PitField { Id = "Item" }
-								}}
-							}}
-						}}
-					}}
-				}}
+						new PitField { Id = "Output", Fields = {
+								new PitField { Id = "DM", Fields = {
+										new PitField { Id = "DataElement_0" },
+										new PitField { Id = "Choice", Fields = {
+												new PitField { Id = "A", Fields = {
+														new PitField { Id = "Choice", Fields = {
+																new PitField { Id = "AA" },
+																new PitField { Id = "AB" }
+															}
+														},
+													}
+												},
+												new PitField { Id = "B", Fields = {
+														new PitField { Id = "Choice", Fields = {
+																new PitField { Id = "BA" },
+																new PitField { Id = "BB" },
+																new PitField { Id = "ASN", Fields = {
+																		new PitField { Id = "V" }
+																	}
+																},
+															}
+														},
+													}
+												},
+											}
+										},
+										new PitField { Id = "Array", Fields = {
+												new PitField { Id = "Array", Fields = {
+														new PitField { Id = "Item" }
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 			});
 			Assert.AreEqual(expected, actual);
 		}
@@ -179,10 +189,6 @@ namespace Peach.Pro.Test.Core
 			</Action>
 
 			<Action type='input'>
-				<DataModel ref='DM1' />
-			</Action>
-
-			<Action name='ActionWithNoFieldId' type='output'>
 				<DataModel ref='DM1' />
 			</Action>
 
@@ -263,6 +269,7 @@ namespace Peach.Pro.Test.Core
 
 			<Action type='call' method='ExitIterationEvent' publisher='Peach.Agent' />
 		</State>
+
 	</StateModel>
 
 	<Test name='Default'>
@@ -281,70 +288,186 @@ namespace Peach.Pro.Test.Core
 			var actual = JsonConvert.SerializeObject(tree);
 			var expected = JsonConvert.SerializeObject(new[] {
 				new PitField { Id = "state", Fields = {
-					new PitField { Id = "action1", Fields = {
+						new PitField { Id = "action1", Fields = {
+								new PitField { Id = "B" },
+								new PitField { Id = "C" },
+							}
+						},
+						new PitField { Id = "action2", Fields = {
+								new PitField { Id = "c", Fields = {
+										new PitField { Id = "d" },
+										new PitField { Id = "e", Fields = {
+												new PitField { Id = "f" },
+												new PitField { Id = "g", Fields = {
+														new PitField { Id = "h" },
+														new PitField { Id = "i" },
+													}
+												},
+											}
+										},
+										new PitField { Id = "j", Fields = {
+												new PitField { Id = "k" },
+												new PitField { Id = "l" },
+											}
+										},
+										new PitField { Id = "m" },
+										new PitField { Id = "n", Fields = {
+												new PitField { Id = "n1", Fields = {
+														new PitField { Id = "n1c", Fields = {
+																new PitField { Id = "n1c1" },
+																new PitField { Id = "n1c2" },
+															}
+														}
+													}
+												},
+												new PitField { Id = "n2", Fields = {
+														new PitField { Id = "n2c", Fields = {
+																new PitField { Id = "n2c1" },
+																new PitField { Id = "n2c2" },
+															}
+														}
+													}
+												},
+											}
+										},
+										new PitField { Id = "o" },
+										new PitField { Id = "p" },
+										new PitField { Id = "q", Fields = {
+												new PitField { Id = "qq" },
+											}
+										},
+										new PitField { Id = "r", Fields = {
+												new PitField { Id = "s" },
+											}
+										},
+										new PitField { Id = "t", Fields = {
+												new PitField { Id = "u" },
+												new PitField { Id = "t2" },
+											}
+										},
+										new PitField { Id = "v" },
+										new PitField { Id = "w" },
+										new PitField { Id = "x" },
+										new PitField { Id = "y" },
+										new PitField { Id = "z" },
+										new PitField { Id = "kk" },
+										new PitField { Id = "ll" },
+									}
+								},
+							}
+						},
+					}
+				},
+			});
+			Assert.AreEqual(expected, actual);
+		}
+
+		[Test]
+		public void TestMergeFields()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM1'>
+		<Blob name='Blob' fieldId='A' />
+	</DataModel>
+
+	<DataModel name='DM2'>
+		<Blob name='Blob' fieldId='B' />
+	</DataModel>
+
+	<DataModel name='DM3'>
+		<Blob name='Blob' fieldId='C' />
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial' fieldId='state'>
+			<Action type='output' fieldId='action'>
+				<DataModel ref='DM1' />
+			</Action>
+			<Action type='output' fieldId='action'>
+				<DataModel ref='DM2' />
+			</Action>
+		</State>
+		<State name='Merged' fieldId='state'>
+			<Action type='output' fieldId='action'>
+				<DataModel ref='DM3' />
+			</Action>
+		</State>
+		<State name='Another' fieldId='another'>
+			<Action type='output' fieldId='action'>
+				<DataModel ref='DM1' />
+			</Action>
+		</State>
+
+		<State name='SomeState1' fieldId='some'>
+			<Action type='output'>
+				<DataModel ref='DM1' />
+			</Action>
+			<Action type='output'>
+				<DataModel ref='DM2' />
+			</Action>
+		</State>
+		<State name='SomeState2' fieldId='some'>
+			<Action type='output'>
+				<DataModel ref='DM3' />
+			</Action>
+		</State>
+
+		<State name='NoFieldId1'>
+			<Action type='output'>
+				<DataModel ref='DM1' />
+			</Action>
+			<Action type='output'>
+				<DataModel ref='DM2' />
+			</Action>
+		</State>
+		<State name='NoFieldId2'>
+			<Action type='output'>
+				<DataModel ref='DM3' />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<Strategy class='Random'/>
+		<StateModel ref='SM' />
+		<Publisher class='Null'/>
+	</Test>
+</Peach>";
+
+			var filename = Path.Combine(_root.Path, "TestMergeFields.xml");
+			File.WriteAllText(filename, xml);
+
+			var compiler = new PitCompiler(_root.Path, filename);
+			compiler.Parse(false, false);
+			var tree = compiler.MakeFields();
+			var actual = JsonConvert.SerializeObject(tree);
+			var expected = JsonConvert.SerializeObject(new[] {
+				new PitField { Id = "state", Fields = {
+						new PitField { Id = "action", Fields = {
+								new PitField { Id = "A" },
+								new PitField { Id = "B" },
+								new PitField { Id = "C" },
+							}
+						},
+					}
+				},
+				new PitField { Id = "another", Fields = {
+						new PitField { Id = "action", Fields = {
+								new PitField { Id = "A" },
+							}
+						},
+					}
+				},
+				new PitField { Id = "some", Fields = {
+						new PitField { Id = "A" },
 						new PitField { Id = "B" },
 						new PitField { Id = "C" },
-					}},
-					new PitField { Id = "ActionWithNoFieldId", Fields = {
-						new PitField { Id = "B" },
-						new PitField { Id = "C" },
-					}},
-					new PitField { Id = "action2", Fields = {
-						new PitField { Id = "c", Fields = {
-							new PitField { Id = "d" },
-							new PitField { Id = "e", Fields = {
-								new PitField { Id = "f" },
-								new PitField { Id = "g", Fields = {
-									new PitField { Id = "h" },
-									new PitField { Id = "i" },
-								}},
-							}},
-							new PitField { Id = "j", Fields = {
-								new PitField { Id = "k" },
-								new PitField { Id = "l" },
-							}},
-							new PitField { Id = "m" },
-							new PitField { Id = "n", Fields = {
-								new PitField { Id = "n1", Fields = {
-									new PitField { Id = "n1c", Fields = {
-										new PitField { Id = "n1c1" },
-										new PitField { Id = "n1c2" },
-									}}
-								}},
-								new PitField { Id = "n2", Fields = {
-									new PitField { Id = "n2c", Fields = {
-										new PitField { Id = "n2c1" },
-										new PitField { Id = "n2c2" },
-									}}
-								}},
-							}},
-							new PitField { Id = "o" },
-							new PitField { Id = "p" },
-							new PitField { Id = "q", Fields = {
-								new PitField { Id = "qq" },
-							}},
-							new PitField { Id = "r", Fields = {
-								new PitField { Id = "s" },
-							}},
-							new PitField { Id = "t", Fields = {
-								new PitField { Id = "u" },
-								new PitField { Id = "t2" },
-							}},
-							new PitField { Id = "v" },
-							new PitField { Id = "w" },
-							new PitField { Id = "x" },
-							new PitField { Id = "y" },
-							new PitField { Id = "z" },
-							new PitField { Id = "kk" },
-							new PitField { Id = "ll" },
-						}},
-					}},
-					new PitField { Id = "ActionWithDMWithNoFieldIds", Fields = {
-						new PitField { Id = "DM3", Fields = {
-							new PitField { Id = "Blob" }
-						}},
-					}},
-				}},
+					}
+				},
+				new PitField { Id = "A" },
+				new PitField { Id = "B" },
+				new PitField { Id = "C" },
 			});
 			Assert.AreEqual(expected, actual);
 		}
@@ -407,32 +530,44 @@ namespace Peach.Pro.Test.Core
 			var actual = JsonConvert.SerializeObject(tree);
 			var expected = JsonConvert.SerializeObject(new[] {
 				new PitField { Id = "Initial", Fields = {
-					new PitField { Id = "Action1", Fields = {
-						new PitField { Id = "DM", Fields = {
-							new PitField { Id = "Choice", Fields = {
-								new PitField { Id = "A", Fields = {
-									new PitField { Id = "Choice", Fields = {
-										new PitField { Id = "AB" }
-									}},
-								}}
-							}},
-						}},
-					}},
-					new PitField { Id = "Action2", Fields = {
-						new PitField { Id = "DM", Fields = {
-							new PitField { Id = "Choice", Fields = {
-								new PitField { Id = "B", Fields = {
-									new PitField { Id = "ChoiceArray", Fields = {
-										new PitField { Id = "ChoiceArray", Fields = {
-											new PitField { Id = "BB" },
-											new PitField { Id = "BC" }
-										}},
-									}},
-								}},
-							}},
-						}},
-					}},
-				}},
+						new PitField { Id = "Action1", Fields = {
+								new PitField { Id = "DM", Fields = {
+										new PitField { Id = "Choice", Fields = {
+												new PitField { Id = "A", Fields = {
+														new PitField { Id = "Choice", Fields = {
+																new PitField { Id = "AB" }
+															}
+														},
+													}
+												}
+											}
+										},
+									}
+								},
+							}
+						},
+						new PitField { Id = "Action2", Fields = {
+								new PitField { Id = "DM", Fields = {
+										new PitField { Id = "Choice", Fields = {
+												new PitField { Id = "B", Fields = {
+														new PitField { Id = "ChoiceArray", Fields = {
+																new PitField { Id = "ChoiceArray", Fields = {
+																		new PitField { Id = "BB" },
+																		new PitField { Id = "BC" }
+																	}
+																},
+															}
+														},
+													}
+												},
+											}
+										},
+									}
+								},
+							}
+						},
+					}
+				},
 			});
 			Assert.AreEqual(expected, actual);
 		}
@@ -461,15 +596,15 @@ namespace Peach.Pro.Test.Core
 	</DataModel>
 
 	<StateModel name='SM' initialState='Initial'>
-		<State name='Initial'>
-			<Action name='Action1' type='output'>
+		<State name='Initial' fieldId='Initial'>
+			<Action name='Action1' type='output' fieldId='Action1'>
 				<DataModel ref='DM' />
 				<Data>
 					<FieldMask select='Choice.A.Choice.AB' />
 				</Data>
 			</Action>
 
-			<Action name='Action2' type='output'>
+			<Action name='Action2' type='output' fieldId='Action2'>
 				<DataModel ref='DM' />
 				<Data>
 					<FieldMask select='Choice.B.ChoiceArray.BB' />
@@ -495,30 +630,41 @@ namespace Peach.Pro.Test.Core
 			var actual = JsonConvert.SerializeObject(tree);
 			var expected = JsonConvert.SerializeObject(new[] {
 				new PitField { Id = "Initial", Fields = {
-					new PitField { Id = "Action1", Fields = {
-						new PitField { Id = "F_DM", Fields = {
-							new PitField { Id = "F_Choice", Fields = {
-								new PitField { Id = "F_A", Fields = {
-									new PitField { Id = "F_Choice", Fields = {
-										new PitField { Id = "F_AB" }
-									}},
-								}}
-							}},
-						}},
-					}},
-					new PitField { Id = "Action2", Fields = {
-						new PitField { Id = "F_DM", Fields = {
-							new PitField { Id = "F_Choice", Fields = {
-								new PitField { Id = "F_B", Fields = {
-									new PitField { Id = "F_ChoiceArray", Fields = {
-										new PitField { Id = "F_BB" },
-										new PitField { Id = "F_BC" }
-									}},
-								}},
-							}},
-						}},
-					}},
-				}},
+						new PitField { Id = "Action1", Fields = {
+								new PitField { Id = "F_DM", Fields = {
+										new PitField { Id = "F_Choice", Fields = {
+												new PitField { Id = "F_A", Fields = {
+														new PitField { Id = "F_Choice", Fields = {
+																new PitField { Id = "F_AB" }
+															}
+														},
+													}
+												}
+											}
+										},
+									}
+								},
+							}
+						},
+						new PitField { Id = "Action2", Fields = {
+								new PitField { Id = "F_DM", Fields = {
+										new PitField { Id = "F_Choice", Fields = {
+												new PitField { Id = "F_B", Fields = {
+														new PitField { Id = "F_ChoiceArray", Fields = {
+																new PitField { Id = "F_BB" },
+																new PitField { Id = "F_BC" }
+															}
+														},
+													}
+												},
+											}
+										},
+									}
+								},
+							}
+						},
+					}
+				},
 			});
 			Assert.AreEqual(expected, actual);
 		}

@@ -371,15 +371,39 @@ namespace Peach.Core.Dom
 				}
 			}
 
+			var hasFieldIds = stateModel.HasFieldIds;
 			foreach (var state in stateModel.states)
 			{
+				var parts = new List<string>();
+				if (hasFieldIds)
+				{
+					if (!string.IsNullOrEmpty(state.FieldId))
+						parts.Add(state.FieldId);
+				}
+				else
+				{
+					parts.Add(state.Name);
+				}
+
 				foreach (var action in state.actions)
 				{
+					if (hasFieldIds)
+					{
+						if (!string.IsNullOrEmpty(action.FieldId))
+							parts.Add(action.FieldId);
+					}
+					else
+					{
+						parts.Add(action.Name);
+					}
+
+					var prefix = string.Join(".", parts);
+
 					foreach (var actionData in action.outputData)
 					{
 						foreach (var element in actionData.dataModel.PreOrderTraverse())
 						{
-							var key = stateModel.HasFieldIds ? element.FullFieldId : element.fullName;
+							var key = string.Join(".", prefix, hasFieldIds ? element.FullFieldId : element.fullName);
 							SelectWeight item;
 							if (weights.TryGetValue(key, out item))
 								element.Weight = item.Weight;

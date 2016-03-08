@@ -36,7 +36,7 @@ namespace Peach.Pro.Test.Core.Runtime
 <Peach>
 	<StateModel name='StateModel' initialState='initial'>
 		<State name='initial'>
-			<Action type='output'>
+			<Action name='output' type='output'>
 				<DataModel name='DM'>
 					<String name='off' />
 					<String name='lowest' />
@@ -326,12 +326,12 @@ namespace Peach.Pro.Test.Core.Runtime
 				Config = new List<Param>(),
 				Agents = new List<MAgent>(),
 				Weights = new List<PitWeight> {
-					new PitWeight { Id = "DM.off", Weight = 0 },
-					new PitWeight { Id = "DM.lowest", Weight = 1 },
-					new PitWeight { Id = "DM.low", Weight = 2 },
-					new PitWeight { Id = "DM.normal", Weight = 3 },
-					new PitWeight { Id = "DM.high", Weight = 4 },
-					new PitWeight { Id = "DM.highest", Weight = 5 },
+					new PitWeight { Id = "initial.output.DM.off", Weight = 0 },
+					new PitWeight { Id = "initial.output.DM.lowest", Weight = 1 },
+					new PitWeight { Id = "initial.output.DM.low", Weight = 2 },
+					new PitWeight { Id = "initial.output.DM.normal", Weight = 3 },
+					new PitWeight { Id = "initial.output.DM.high", Weight = 4 },
+					new PitWeight { Id = "initial.output.DM.highest", Weight = 5 },
 				}
 			};
 

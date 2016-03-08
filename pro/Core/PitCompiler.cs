@@ -27,16 +27,15 @@ namespace Peach.Pro.Core
 		private const string Namespace = "http://peachfuzzer.com/2012/Peach";
 		private const string SchemaLocation = "http://peachfuzzer.com/2012/Peach peach.xsd";
 
-		private static readonly Dictionary<string, string[]> OptionalParams = new Dictionary<string, string[]>
-		{
-			{ "RawEther", new[] { "MinMTU", "MaxMTU", "MinFrameSize", "MaxFrameSize", "PcapTimeout" }},
-			{ "RawV4", new[] { "MinMTU", "MaxMTU" }},
-			{ "RawV6", new[] { "MinMTU", "MaxMTU" }},
-			{ "Udp", new[] { "MinMTU", "MaxMTU" }},
-			{ "DTls", new[] { "MinMTU", "MaxMTU" }},
-			{ "File", new[] { "Append", "Overwrite" }},
-			{ "ConsoleHex", new[] { "BytesPerLine" }},
-			{ "Null", new[] { "MaxOutputSize" }}
+		private static readonly Dictionary<string, string[]> OptionalParams = new Dictionary<string, string[]> {
+			{ "RawEther", new[] { "MinMTU", "MaxMTU", "MinFrameSize", "MaxFrameSize", "PcapTimeout" } },
+			{ "RawV4", new[] { "MinMTU", "MaxMTU" } },
+			{ "RawV6", new[] { "MinMTU", "MaxMTU" } },
+			{ "Udp", new[] { "MinMTU", "MaxMTU" } },
+			{ "DTls", new[] { "MinMTU", "MaxMTU" } },
+			{ "File", new[] { "Append", "Overwrite" } },
+			{ "ConsoleHex", new[] { "BytesPerLine" } },
+			{ "Null", new[] { "MaxOutputSize" } }
 		};
 
 		public PitCompiler(string pitLibraryPath, string pitPath)
@@ -79,8 +78,7 @@ namespace Peach.Pro.Core
 
 		internal void SaveMetadata()
 		{
-			var metadata = new PitMetadata
-			{
+			var metadata = new PitMetadata {
 				Fields = MakeFields()
 			};
 
@@ -99,8 +97,7 @@ namespace Peach.Pro.Core
 			{
 				// ignore publishers
 				var args = new Dictionary<string, Variant>();
-				var pub = new NullPublisher(args)
-				{
+				var pub = new NullPublisher(args) {
 					Name = node.getAttr("name", null) ?? parent.publishers.UniqueName()
 				};
 				parent.publishers.Add(pub);
@@ -118,12 +115,12 @@ namespace Peach.Pro.Core
 			var defsWithDefaults = defs.Evaluate().Select(PitDefines.PopulateRequiredDefine);
 
 			var args = new Dictionary<string, object> {
-				{PitParser.DEFINED_VALUES, defsWithDefaults }
+				{ PitParser.DEFINED_VALUES, defsWithDefaults }
 			};
 
 			var parser = new CustomParser();
 			_dom = parser.asParser(args, _pitPath);
-			_dom.context = new RunContext {test = _dom.tests.First()};
+			_dom.context = new RunContext { test = _dom.tests.First() };
 
 			if (verifyConfig)
 				VerifyConfig(defs, args);
@@ -172,74 +169,86 @@ namespace Peach.Pro.Core
 		{
 			TotalNodes = 0;
 
-			var root = new List<PitField>();
+			var root = new PitField();
+			var stateModel = _dom.context.test.stateModel;
+			var hasFieldIds = stateModel.HasFieldIds;
 
-			foreach (var state in _dom.context.test.stateModel.states)
+			foreach (var state in stateModel.states)
 			{
-				var stateNode = new PitField 
-				{
-					Id = state.FieldId ?? state.Name 
-				};
-				TotalNodes++;
-
-				var isFirst = true;
 				foreach (var action in state.actions)
 				{
-					var actionNode = new PitField 
-					{
-						Id = action.FieldId ?? action.Name
-					};
-					TotalNodes++;
-
-					var hasData = false;
-					var elementNodes = new List<PitField>();
-					var fieldNodes = new List<PitField>();
-					var totalFields = 0;
-					var totalElements = 0;
+					var fields = new List<PitField>();
 					foreach (var actionData in action.outputData)
 					{
-						foreach(var mask in actionData.allData.OfType<DataFieldMask>())
+						foreach (var mask in actionData.allData.OfType<DataFieldMask>())
 						{
 							mask.Apply(action, actionData.dataModel);
 						}
 
-						totalElements += CollectNodes(
+						TotalNodes += CollectNodes(
 							actionData.dataModel.DisplayTraverse(), 
-							elementNodes, 
-							x => x.fullName
+							fields,
+							x => hasFieldIds ? x.FullFieldId : x.fullName
 						);
-						totalFields += CollectNodes(
-							actionData.dataModel.DisplayTraverse(), 
-							fieldNodes, 
-							x => x.FullFieldId
-						);
-						hasData = true;
 					}
 
-					if (hasData)
+					if (fields.Any())
 					{
-						if (isFirst)
-						{
-							root.Add(stateNode);
-							isFirst = false;
-						}
-
-						stateNode.Fields.Add(actionNode);
-						if (fieldNodes.Any())
-						{
-							TotalNodes += totalFields;
-							actionNode.Fields = fieldNodes;
-						}
-						else
-						{
-							TotalNodes += totalElements;
-							actionNode.Fields = elementNodes;
-						}
+						var parent = AddParent(hasFieldIds, root, state);
+						parent = AddParent(hasFieldIds, parent, action);
+						MergeFields(parent.Fields, fields);
 					}
 				}
 			}
 
-			return root;
+			return root.Fields;
+		}
+
+		private void MergeFields(List<PitField> lhs, List<PitField> rhs)
+		{
+			foreach (var item in rhs)
+			{
+				var node = lhs.SingleOrDefault(x => x.Id == item.Id);
+				if (node == null)
+				{
+					lhs.Add(item);
+				}
+				else
+				{
+					MergeFields(node.Fields, item.Fields);
+				}
+			}
+		}
+
+		private PitField AddParent(bool hasFieldIds, PitField parent, IFieldNamed node)
+		{
+			if (hasFieldIds)
+			{
+				if (!string.IsNullOrEmpty(node.FieldId))
+				{
+					var newParent = parent.Fields.SingleOrDefault(x => x.Id == node.FieldId);
+					if (newParent == null)
+					{
+						newParent = new PitField{ Id = node.FieldId };
+						parent.Fields.Add(newParent);
+						TotalNodes++;
+					}
+					return newParent;
+				}
+			}
+			else
+			{
+				var newParent = parent.Fields.SingleOrDefault(x => x.Id == node.Name);
+				if (newParent == null)
+				{
+					newParent = new PitField{ Id = node.Name };
+					parent.Fields.Add(newParent);
+					TotalNodes++;
+				}
+				return newParent;
+			}
+
+			return parent;
 		}
 
 		private int CollectNodes(
@@ -288,8 +297,7 @@ namespace Peach.Pro.Core
 					{
 						if (!rdr.Read())
 							throw new ApplicationException("Failed to read xml.");
-					}
-					while (rdr.NodeType == XmlNodeType.Whitespace);
+					} while (rdr.NodeType == XmlNodeType.Whitespace);
 
 					if (rdr.NodeType == XmlNodeType.XmlDeclaration)
 					{
@@ -404,7 +412,7 @@ namespace Peach.Pro.Core
 							var name = parameters.Current.GetAttribute("name", string.Empty);
 							var value = parameters.Current.GetAttribute("value", string.Empty);
 							if (!ShouldSkipRule(parameters, "Allow_HardCodedParamValue") &&
-								(!value.StartsWith("##") || !value.EndsWith("##")))
+							    (!value.StartsWith("##") || !value.EndsWith("##")))
 							{
 								_errors.Add(
 									"<Publisher> parameter '{0}' is hard-coded, use a PitDefine ".Fmt(name) +
