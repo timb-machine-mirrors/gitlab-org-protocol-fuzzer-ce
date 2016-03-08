@@ -374,11 +374,10 @@ namespace Peach.Core.Dom
 			var hasFieldIds = stateModel.HasFieldIds;
 			foreach (var state in stateModel.states)
 			{
-				var parts = new List<string>();
-				AddPart(hasFieldIds, parts, state);
-
 				foreach (var action in state.actions)
 				{
+					var parts = new List<string>();
+					AddPart(hasFieldIds, parts, state);
 					AddPart(hasFieldIds, parts, action);
 					var prefix = string.Join(".", parts);
 

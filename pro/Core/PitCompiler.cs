@@ -177,7 +177,7 @@ namespace Peach.Pro.Core
 			{
 				foreach (var action in state.actions)
 				{
-					var fields = new List<PitField>();
+					var node = new PitField();
 					foreach (var actionData in action.outputData)
 					{
 						foreach (var mask in actionData.allData.OfType<DataFieldMask>())
@@ -185,18 +185,18 @@ namespace Peach.Pro.Core
 							mask.Apply(action, actionData.dataModel);
 						}
 
-						TotalNodes += CollectNodes(
+						CollectNodes(
 							actionData.dataModel.DisplayTraverse(), 
-							fields,
+							node,
 							x => hasFieldIds ? x.FullFieldId : x.fullName
 						);
 					}
 
-					if (fields.Any())
+					if (node.Fields.Any())
 					{
 						var parent = AddParent(hasFieldIds, root, state);
 						parent = AddParent(hasFieldIds, parent, action);
-						MergeFields(parent.Fields, fields);
+						MergeFields(parent.Fields, node.Fields);
 					}
 				}
 			}
@@ -226,38 +226,34 @@ namespace Peach.Pro.Core
 			{
 				if (!string.IsNullOrEmpty(node.FieldId))
 				{
-					var newParent = parent.Fields.SingleOrDefault(x => x.Id == node.FieldId);
-					if (newParent == null)
-					{
-						newParent = new PitField{ Id = node.FieldId };
-						parent.Fields.Add(newParent);
-						TotalNodes++;
-					}
-					return newParent;
+					return AddNode(parent, node.FieldId);
 				}
 			}
 			else
 			{
-				var newParent = parent.Fields.SingleOrDefault(x => x.Id == node.Name);
-				if (newParent == null)
-				{
-					newParent = new PitField{ Id = node.Name };
-					parent.Fields.Add(newParent);
-					TotalNodes++;
-				}
-				return newParent;
+				return AddNode(parent, node.Name);
 			}
 
 			return parent;
 		}
 
-		private int CollectNodes(
+		private PitField AddNode(PitField parent, string name)
+		{
+			var next = parent.Fields.SingleOrDefault(x => x.Id == name);
+			if (next == null)
+			{
+				next = new PitField { Id = name };
+				parent.Fields.Add(next);
+				TotalNodes++;
+			}
+			return next;
+		}
+
+		private void CollectNodes(
 			IEnumerable<DataElement> elements,
-			List<PitField> rootFields,
+			PitField root,
 			Func<DataElement, string> selector)
 		{
-			var total = 0;
-
 			var fullNames = elements
 				.Select(selector)
 				.Distinct()
@@ -265,22 +261,13 @@ namespace Peach.Pro.Core
 
 			foreach (var fullName in fullNames)
 			{
-				var parentFields = rootFields;
+				var parent = root;
 				var parts = fullName.Split('.');
 				foreach (var part in parts)
 				{
-					var next = parentFields.SingleOrDefault(x => x.Id == part);
-					if (next == null)
-					{
-						next = new PitField { Id = part };
-						parentFields.Add(next);
-						total++;
-					}
-					parentFields = next.Fields;
+					parent = AddNode(parent, part);
 				}
 			}
-
-			return total;
 		}
 
 		private void VerifyPit(string fileName, bool isTest)

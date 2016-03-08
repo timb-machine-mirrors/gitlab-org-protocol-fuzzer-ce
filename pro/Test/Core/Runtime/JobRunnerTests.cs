@@ -36,7 +36,17 @@ namespace Peach.Pro.Test.Core.Runtime
 <Peach>
 	<StateModel name='StateModel' initialState='initial'>
 		<State name='initial'>
-			<Action name='output' type='output'>
+			<Action name='output1' type='output'>
+				<DataModel name='DM'>
+					<String name='off' />
+					<String name='lowest' />
+					<String name='low' />
+					<String name='normal' />
+					<String name='high' />
+					<String name='highest' />
+				</DataModel>
+			</Action> 
+			<Action name='output2' type='output'>
 				<DataModel name='DM'>
 					<String name='off' />
 					<String name='lowest' />
@@ -326,12 +336,18 @@ namespace Peach.Pro.Test.Core.Runtime
 				Config = new List<Param>(),
 				Agents = new List<MAgent>(),
 				Weights = new List<PitWeight> {
-					new PitWeight { Id = "initial.output.DM.off", Weight = 0 },
-					new PitWeight { Id = "initial.output.DM.lowest", Weight = 1 },
-					new PitWeight { Id = "initial.output.DM.low", Weight = 2 },
-					new PitWeight { Id = "initial.output.DM.normal", Weight = 3 },
-					new PitWeight { Id = "initial.output.DM.high", Weight = 4 },
-					new PitWeight { Id = "initial.output.DM.highest", Weight = 5 },
+					new PitWeight { Id = "initial.output1.DM.off", Weight = 0 },
+					new PitWeight { Id = "initial.output1.DM.lowest", Weight = 1 },
+					new PitWeight { Id = "initial.output1.DM.low", Weight = 2 },
+					new PitWeight { Id = "initial.output1.DM.normal", Weight = 3 },
+					new PitWeight { Id = "initial.output1.DM.high", Weight = 4 },
+					new PitWeight { Id = "initial.output1.DM.highest", Weight = 5 },
+					new PitWeight { Id = "initial.output2.DM.off", Weight = 0 },
+					new PitWeight { Id = "initial.output2.DM.lowest", Weight = 1 },
+					new PitWeight { Id = "initial.output2.DM.low", Weight = 2 },
+					new PitWeight { Id = "initial.output2.DM.normal", Weight = 3 },
+					new PitWeight { Id = "initial.output2.DM.high", Weight = 4 },
+					new PitWeight { Id = "initial.output2.DM.highest", Weight = 5 },
 				}
 			};
 
