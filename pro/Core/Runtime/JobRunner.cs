@@ -42,8 +42,7 @@ namespace Peach.Pro.Core.Runtime
 				Weights = _pit.Weights,
 			};
 
-			_config = new RunConfiguration
-			{
+			_config = new RunConfiguration {
 				id = job.Guid,
 				pitFile = Path.Combine(_pitLibraryPath, _pit.OriginalPit),
 				shouldStop = ShouldStop,
@@ -77,7 +76,7 @@ namespace Peach.Pro.Core.Runtime
 			}
 		}
 
-		public void Run(EventWaitHandle evtReady)
+		public void Run(EventWaitHandle evtReady, Action<Engine> hooker = null)
 		{
 			try
 			{
@@ -90,9 +89,13 @@ namespace Peach.Pro.Core.Runtime
 				var dom = ParsePit();
 
 				Test test;
-
 				if (!dom.tests.TryGetValue(_config.runName, out test))
 					throw new PeachException("Unable to locate test named '{0}'.".Fmt(_config.runName));
+
+				foreach (var item in _pit.Weights)
+				{
+					test.weights.Add(new SelectWeight{ Name = item.Id, Weight = (ElementWeight)item.Weight });
+				}
 
 				var userLogger = test.loggers.OfType<JobLogger>().FirstOrDefault();
 				if (userLogger != null)
@@ -102,6 +105,8 @@ namespace Peach.Pro.Core.Runtime
 				}
 
 				_engine = new Engine(_jobLogger);
+				if (hooker != null) // this is used for unit testing
+					hooker(_engine);
 				_engine.startFuzzing(dom, _config);
 			}
 			catch (ApplicationException ex) // PeachException or SoftException

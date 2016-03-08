@@ -182,7 +182,7 @@ class Peach2Jira:
         
         return None
     
-    def _exportFault(self, fault):
+    def _exportFault(self, fault, pitName):
         
         bucket = fault["majorHash"]
         if JIRA_BUCKET_MINOR:
@@ -190,11 +190,6 @@ class Peach2Jira:
         
         if bucket in self.SeenBuckets:
             return
-        
-        try:
-            pit = self._getPit(fault["pitUrl"])
-        except:
-            pit = {"name": "missing (%s)"%fault["pitUrl"]}
         
         issue = self._jiraBucketCheck(bucket)
         if issue:
@@ -212,7 +207,7 @@ Issue reproduced by Peach Fuzzer
 |Major Bucket:|{7}|
 |Minor Bucket:|{8}|
 """.format(
-    pit["name"],
+    pitName,
     fault["iterationStart"],
     fault["iterationStop"],
     fault["seed"],
@@ -245,7 +240,7 @@ Issue identified by Peach Fuzzer
 {9}
 {{noformat}}
 """.format(
-    pit["name"],
+    pitName,
     fault["iterationStart"],
     fault["iterationStop"],
     fault["seed"],
@@ -290,7 +285,8 @@ Issue identified by Peach Fuzzer
         job = self._getLatestJob()
         faultsUrl = job["faultsUrl"]
         faultCount = int(job["faultCount"])
-        
+        pitName = job["name"]
+
         if faultCount == 0:
             self._print(" - No faults found, exiting")
             return 0
@@ -305,7 +301,7 @@ Issue identified by Peach Fuzzer
             
             self._print("  - Fault: %d" % faultDetails["iteration"])
             
-            self._exportFault(faultDetails)
+            self._exportFault(faultDetails, pitName)
             #return 0
 
 if __name__ == '__main__':
