@@ -175,7 +175,10 @@ namespace Peach.Pro.Core.Analyzers
 		/// <param name="positions">Positions of the returned DataElement and the DataElements it contains.</param>
 		internal DataElement Eval(string name, Dictionary<DataElement, Peach.Core.Cracker.Position> positions) {
 			var element = this.DoEval(name, positions);
-			positions[element] = this._position;
+			if (positions != null)
+			{
+				positions[element] = this._position;
+			}
 			return element;
 		}
 
@@ -192,12 +195,12 @@ namespace Peach.Pro.Core.Analyzers
 		/// <param name="end">(Exclusive) end index of str to include in parse.</param>
 		internal static TokenTree Parse(string str, char[] tokens, int tokenIndex=0, int start=-1, int end=-1)
 		{
-			if (end == -1)
+			if (end < 0)
 			{
 				end = str.Length;
 			}
 
-			var position = new Position(start < 0 ? 0 : (start + 1) * 8, end < 0 ? 0 : end * 8);
+			var position = new Position(start < 0 ? 0 : (start + 1) * 8, end * 8);
 
 			while (true)
 			{
@@ -228,7 +231,7 @@ namespace Peach.Pro.Core.Analyzers
 	/// <summary>
 	/// Node of a TokenTree representing a string with no tokens.
 	/// </summary>
-	internal class TokenLeaf : TokenTree {
+	sealed internal class TokenLeaf : TokenTree {
 		readonly string _string;
 
 		internal TokenLeaf(string str, Position position)
@@ -248,7 +251,7 @@ namespace Peach.Pro.Core.Analyzers
 	/// <summary>
 	/// Node of a TokenTree representing a token and the TokenTrees before and after that token.
 	/// </summary>
-	internal class TokenBranch : TokenTree {
+	sealed internal class TokenBranch : TokenTree {
 		readonly TokenTree _pre;
 		readonly TokenTree _token;
 		readonly TokenTree _post;
