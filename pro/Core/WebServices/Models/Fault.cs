@@ -182,18 +182,19 @@ namespace Peach.Pro.Core.WebServices.Models
 		public long FaultDetailId { get; set; }
 
 		/// <summary>
-		///  The name of the file.
+		///  The display name of the file.
 		/// </summary>
 		/// <example>
-		/// "WinAgent.Monitor.WindowsDebugEngine.description.txt"
+		/// "description.txt"
 		/// </example>
 		public string Name { get; set; }
 
 		/// <summary>
-		///  The full name of the file including path.
+		///  The actual name of the file including path from root of fault directory.
 		/// </summary>
 		/// <example>
-		/// "Faults/PROBABLY_EXPLOITABLE_0x63103514_0x32621b6f/13/WinAgent.Monitor.WindowsDebugEngine.description.txt"
+		/// "WinAgent.Monitor.WindowsDebugEngine.description.txt"
+		/// "Initial\\5\\WinAgent.Monitor.WindowsDebugEngine.description.txt"
 		/// </example>
 		public string FullName { get; set; }
 
@@ -213,6 +214,50 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// 1024
 		/// </example>
 		public long Size { get; set; }
+
+		/// <summary>
+		/// Is the file part of the initial fault or reproduction
+		/// </summary>
+		public bool Initial { get; set; }
+
+		/// <summary>
+		/// What type of file asset is it: Monitor, OutputData, InputData?
+		/// </summary>
+		public FaultFileType Type { get; set; }
+
+		/// <summary>
+		/// Name of agent that file came from.
+		/// </summary>
+		/// /<remarks>
+		/// If grouping information is available then AgentName/MonitorName/MonitorClass are all provided.
+		/// If no grouping information is available, the value is null.
+		/// </remarks>
+		public string AgentName { get; set; }
+
+		/// <summary>
+		/// Name of monitor that file came from.
+		/// </summary>
+		/// /<remarks>
+		/// If grouping information is available then AgentName/MonitorName/MonitorClass are all populated.
+		/// If no grouping information is available, the value is null.
+		/// </remarks>
+		public string MonitorName { get; set; }
+
+		/// <summary>
+		/// Type of monitor that file came from.
+		/// </summary>
+		/// /<remarks>
+		/// If grouping information is available then AgentName/MonitorName/MonitorClass are all populated.
+		/// If no grouping information is available, the value is null.
+		/// </remarks>
+		public string MonitorClass { get; set; }
+	}
+
+	public enum FaultFileType
+	{
+		Asset,
+		Ouput,
+		Input
 	}
 
 	[Table("ViewFaults")]
