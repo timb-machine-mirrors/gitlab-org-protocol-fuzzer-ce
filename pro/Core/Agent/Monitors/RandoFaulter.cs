@@ -103,8 +103,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 			// Avoid faulting on first run of the monitor
 			if (_startCount < 2)
 				return false;
-			 
-			if (!_isControl && _rnd.Next() % Fault == 0)
+
+			// Let -1 turn off faulting
+			if (!_isControl && Fault > 0 && _rnd.Next() % Fault == 0)
 				return true;
 
 			return false;
