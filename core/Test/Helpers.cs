@@ -141,7 +141,8 @@ namespace Peach.Core.Test
 				type = FaultType.Fault,
 				detectionSource = "UnitTest",
 				folderName = "UnitTest",
-				title = "UnitTest"
+				title = "UnitTest",
+				description = "UnitTest"
 			});
 		}
 
