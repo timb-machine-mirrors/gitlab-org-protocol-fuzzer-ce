@@ -281,10 +281,8 @@ namespace Peach.Pro.Test.Core.Storage
 					new StateMetric("S5_2", 1),
 				});
 
-				DatabaseTests.AssertResult(db.LoadTableKind<StateMetric>(NameKind.Human), new[]
-				{
-					new StateMetric("", 12) { Kind = NameKind.Human },
-				});
+				// If fieldIds are being used, don't show states w/o fieldId attribute
+				DatabaseTests.AssertResult(db.LoadTableKind<StateMetric>(NameKind.Human), new StateMetric[0]);
 			}
 		}
 
@@ -417,7 +415,7 @@ namespace Peach.Pro.Test.Core.Storage
 
 				DatabaseTests.AssertResult(db.LoadTableKind<DatasetMetric>(NameKind.Human), new[]
 				{
-					new DatasetMetric("", 9, 2, 6) { Kind = NameKind.Human },
+					// If fieldIds are being used, don't show data sets w/o fieldId attribute
 					new DatasetMetric("D1", 1, 0, 0) { Kind = NameKind.Human },
 					new DatasetMetric("D2", 1, 0, 0) { Kind = NameKind.Human },
 				});
