@@ -174,20 +174,6 @@ namespace Peach.Core
 		// Note: We can't use a Dictionary<> since it won't remote between mono and .net correctly
 
 		/// <summary>
-		/// The final data the logger writes out.  Is not set by monitors
-		/// and is filled in from the 'collectedData' property of all faults
-		/// collected on a given iteration.
-		/// </summary>
-		[NonSerialized]
-		public Dictionary<string, Stream> toSave = new Dictionary<string, Stream>();
-
-		/// <summary>
-		/// Set by the File logger to be the path to the root fault folder
-		/// where this fault is going to be saved.
-		/// </summary>
-		public string rootPath = null;
-
-		/// <summary>
 		/// List of all states run when fault was detected.
 		/// </summary>
 		public ICollection<State> states = new List<State>();
