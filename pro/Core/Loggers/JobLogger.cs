@@ -79,6 +79,7 @@ namespace Peach.Pro.Core.Loggers
 				public string DisplayName { get; set; }
 				public Stream Value { get; set; }
 				public bool Initial { get; set; }
+				public FaultFileType Type { get; set; }
 
 				[Obsolete]
 				string INamed.name
@@ -535,7 +536,8 @@ namespace Peach.Pro.Core.Loggers
 						Initial = true,
 						MonitorClass = item.MonitorClass,
 						MonitorName = item.MonitorName,
-						Value = item.Value
+						Value = item.Value,
+						Type = item.Type
 					});
 				}
 
@@ -595,7 +597,14 @@ namespace Peach.Pro.Core.Loggers
 			foreach (var item in stateModel.dataActions)
 			{
 				Logger.Debug("Saving data from action: " + item.Key);
-				//ret.toSave.Add(item.Key, item.Value);
+
+				ret.Assets.Add(new MergedFault.Asset
+				{
+					DisplayName = item.Name,
+					FileName = item.Key,
+					Value = item.Value,
+					Type = item.IsInput ? FaultFileType.Input : FaultFileType.Ouput
+				});
 			}
 
 			// Write out all collected data information
@@ -630,7 +639,8 @@ namespace Peach.Pro.Core.Loggers
 			{
 				DisplayName = "fault.json",
 				FileName = "fault.json",
-				Value = new MemoryStream(Encoding.UTF8.GetBytes(json))
+				Value = new MemoryStream(Encoding.UTF8.GetBytes(json)),
+				Type = FaultFileType.Asset
 			});
 
 			// Copy over information from the core fault
@@ -703,7 +713,8 @@ namespace Peach.Pro.Core.Loggers
 				{
 					DisplayName = fileName,
 					FileName = fileName,
-					Value = new MemoryStream(value)
+					Value = new MemoryStream(value),
+					Type = FaultFileType.Asset
 				};
 			}
 
@@ -714,7 +725,8 @@ namespace Peach.Pro.Core.Loggers
 				MonitorName = fault.monitorName,
 				DisplayName = name,
 				FileName = string.Join(".", parts),
-				Value = new MemoryStream(value)
+				Value = new MemoryStream(value),
+				Type = FaultFileType.Asset
 			};
 		}
 
@@ -807,7 +819,7 @@ namespace Peach.Pro.Core.Loggers
 					AgentName = kv.AgentName,
 					MonitorClass = kv.MonitorClass,
 					MonitorName = kv.MonitorName,
-					Type = FaultFileType.Asset
+					Type = kv.Type
 				});
 			}
 

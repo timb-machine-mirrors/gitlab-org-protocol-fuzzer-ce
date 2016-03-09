@@ -354,7 +354,7 @@ namespace Peach.Core.Dom
 
 				// Save output data
 				foreach (var item in outputData)
-					parent.parent.SaveData(item.outputName, item.dataModel.Value);
+					parent.parent.SaveData(item.outputName, item.dataModel.Value, false);
 
 				try
 				{
@@ -364,7 +364,7 @@ namespace Peach.Core.Dom
 				{
 					// Save input data
 					foreach (var item in inputData)
-						parent.parent.SaveData(item.Name, item);
+						parent.parent.SaveData(item.Name, item, true);
 				}
 			}
 			catch (ActionChangeStateException)

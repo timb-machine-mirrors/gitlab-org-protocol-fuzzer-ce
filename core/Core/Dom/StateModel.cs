@@ -46,6 +46,14 @@ namespace Peach.Core.Dom
 	[Serializable]
 	public class StateModel : INamed, IOwned<Dom>
 	{
+		public class PublishedData
+		{
+			public bool IsInput { get; set; }
+			public string Name { get; set; }
+			public string Key { get; set; }
+			public BitwiseStream Value { get; set; }
+		}
+
 		#region Obsolete Functions
 
 		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
@@ -63,15 +71,9 @@ namespace Peach.Core.Dom
 			states = new NamedCollection<State>();
 		}
 
-		protected Dictionary<string, BitwiseStream> _dataActions = new Dictionary<string, BitwiseStream>();
+		protected readonly List<PublishedData> _dataActions = new List<PublishedData>();
 
-		public IEnumerable<KeyValuePair<string, BitwiseStream>> dataActions
-		{
-			get
-			{
-				return _dataActions.AsEnumerable();
-			}
-		}
+		public IEnumerable<PublishedData> dataActions { get { return _dataActions; } }
 
 		/// <summary>
 		/// Currently unused.  Exists for schema generation.
@@ -127,13 +129,20 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// Saves the data produced/consumed by an action for future logging.
 		/// </summary>
-		/// <param name="name"></param>
+		/// <param name="dataName"></param>
 		/// <param name="value"></param>
-		public void SaveData(string name, BitwiseStream value)
+		/// <param name="isInput"></param>
+		public void SaveData(string dataName, BitwiseStream value, bool isInput)
 		{
-			var key = "{0}.{1}.bin".Fmt(_dataActions.Count + 1, name);
+			var item = new PublishedData
+			{
+				Key = "{0}.{1}.bin".Fmt(_dataActions.Count + 1, dataName),
+				Name = dataName,
+				Value = value,
+				IsInput = isInput
+			};
 
-			_dataActions.Add(key, value);
+			_dataActions.Add(item);
 		}
 
 		/// <summary>
