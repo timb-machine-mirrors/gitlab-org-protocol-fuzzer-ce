@@ -36,6 +36,7 @@ using Peach.Core.Cracker;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 using Encoding = Peach.Core.Encoding;
+using System.Diagnostics;
 
 namespace Peach.Pro.Core.Analyzers
 {
@@ -131,23 +132,16 @@ namespace Peach.Pro.Core.Analyzers
 			{
 				this.positions = positions;
 
-				Peach.Core.Dom.Block block = new Block(str.Name);
+				var block = new Block(str.Name);
 				str.parent[str.Name] = block;
-				block.Add(str);
+				var tokenTree = TokenTree.Parse(val, tokens.ToCharArray());
+				block.Add(tokenTree.Eval(parent.Name, positions));
 
-				// Mark the position of the block
-				if (positions != null)
+				if (positions != null) 
 				{
 					var end = str.Value.LengthBits;
 					positions[block] = new Position(0, end);
 					positions[str] = new Position(0, end);
-				}
-
-				// Start splitting string.
-				foreach (char token in tokens)
-				{
-					long offset = 0;
-					splitOnToken(block, token, ref offset);
 				}
 			}
 			finally
@@ -155,78 +149,124 @@ namespace Peach.Pro.Core.Analyzers
 				this.positions = null;
 			}
 		}
+	}
+
+	/// <summary>
+	/// Tree representing the hierarchical structure of a string with token characters.
+	/// 
+	/// Designed to avoid costly intermediary string and DataElement allocations, by only 
+	/// allocating the ones that are strictly needed.
+	/// </summary>
+	internal abstract class TokenTree {
+		internal readonly Position _position;
+
+		internal TokenTree(Position position) {
+			_position = position;
+		}
+
+		protected internal abstract DataElement DoEval(string name, Dictionary<DataElement, Peach.Core.Cracker.Position> positions);
 
 		/// <summary>
-		/// Split on token recursively
+		/// Evaluate the tree, converting it into a Peach DataElement representation.
+		/// 
+		/// Tracks the bit positions of every allocated DataElement.
 		/// </summary>
-		/// <param name="el"></param>
-		/// <param name="token"></param>
-		/// <param name="offset"></param>
-		protected void splitOnToken(DataElement el, char token, ref long offset)
+		/// <param name="name">Name of the DataElement.</param>
+		/// <param name="positions">Positions of the returned DataElement and the DataElements it contains.</param>
+		internal DataElement Eval(string name, Dictionary<DataElement, Peach.Core.Cracker.Position> positions) {
+			var element = this.DoEval(name, positions);
+			positions[element] = this._position;
+			return element;
+		}
+
+		/// <summary>
+		/// Recursively build a tree by splitting on every token.
+		/// 
+		/// To avoid exponentially allocating strings, new strings are only allocated for 
+		/// substrings with no tokens (at the leaves).
+		/// </summary>
+		/// <param name="str">String to parse into a tree.</param>
+		/// <param name="tokens">Array of tokens to split on</param>
+		/// <param name="tokenIndex">Current token index. Starts at 0 and increases.</param>
+		/// <param name="start">(Exclusive) start index of str include in parse.</param>
+		/// <param name="end">(Exclusive) end index of str to include in parse.</param>
+		internal static TokenTree Parse(string str, char[] tokens, int tokenIndex=0, int start=-1, int end=-1)
 		{
-			if (el is Peach.Core.Dom.String)
+			if (end == -1)
 			{
-				var strEl = (Peach.Core.Dom.String)el;
-				var str = (string) el.DefaultValue;
-				var tokenIndex = str.IndexOf(token);
+				end = str.Length;
+			}
 
-				if (tokenIndex == -1)
+			var position = new Position(start < 0 ? 0 : (start + 1) * 8, end < 0 ? 0 : end * 8);
+
+			while (true)
+			{
+				if (tokenIndex >= tokens.Length)
 				{
-					if (positions != null)
-						offset = positions[el].end;
-					return;
+					var count = end - start - 1;
+					return new TokenLeaf(str.Substring(start + 1, count), position);
 				}
 
-				var preString = new Peach.Core.Dom.String("Pre") { stringType = strEl.stringType };
-				var tokenString = new Peach.Core.Dom.String("Token") { stringType = strEl.stringType };
-				var postString = new Peach.Core.Dom.String("Post") { stringType = strEl.stringType };
-
-				preString.stringType = encodingType;
-				tokenString.stringType = encodingType;
-				postString.stringType = encodingType;
-
-				preString.DefaultValue = new Variant(str.Substring(0, tokenIndex));
-				tokenString.DefaultValue = new Variant(token.ToString());
-				postString.DefaultValue = new Variant(str.Substring(tokenIndex + 1));
-
-				var block = new Peach.Core.Dom.Block(el.Name);
-				block.Add(preString);
-				block.Add(tokenString);
-				block.Add(postString);
-				el.parent[el.Name] = block;
-
-				if (positions != null)
+				var matchIndex = str.IndexOf(tokens[tokenIndex], start + 1);
+				if (matchIndex >= 0 && matchIndex < end)
 				{
-					var lenPre = 8 * encoding.GetByteCount((string)preString.DefaultValue);
-					var lenToken = 8 * encoding.GetByteCount((string)tokenString.DefaultValue);
-					var lenPost = 8 * encoding.GetByteCount((string)postString.DefaultValue);
-
-					var prePos = new Position() { begin = offset, end = offset + lenPre };
-					var tokenPos = new Position() { begin = prePos.end, end = prePos.end + lenToken };
-					var postPos = new Position() { begin = tokenPos.end, end = tokenPos.end + lenPost };
-					var blockPos = new Position() { begin = prePos.begin, end = postPos.end };
-
-					positions.Remove(el);
-					positions[block] = blockPos;
-					positions[preString] = prePos;
-					positions[tokenString] = tokenPos;
-					positions[postString] = postPos;
-
-					offset = postPos.begin;
+					return new TokenBranch(
+						TokenTree.Parse(str, tokens, tokenIndex, start, matchIndex),
+						tokens[tokenIndex],
+						TokenTree.Parse(str, tokens, tokenIndex, matchIndex, end),
+						position);
 				}
-
-				splitOnToken(postString, token, ref offset);
+				else
+				{
+					// skip tokens that aren't in str
+					tokenIndex++;
+				}
 			}
-			else if (el is Peach.Core.Dom.Block)
+		}
+	}
+
+	/// <summary>
+	/// Node of a TokenTree representing a string with no tokens.
+	/// </summary>
+	internal class TokenLeaf : TokenTree {
+		readonly string _string;
+
+		internal TokenLeaf(string str, Position position)
+			: base(position)
+		{
+			_string = str;
+		}
+
+		protected internal override DataElement DoEval(string name, Dictionary<DataElement, Position> positions) {
+			return new Peach.Core.Dom.String(name)
 			{
-				List<DataElement> children = new List<DataElement>();
+				DefaultValue = new Variant(_string)
+			};
+		}
+	}
 
-				foreach (DataElement child in ((Block)el))
-					children.Add(child);
+	/// <summary>
+	/// Node of a TokenTree representing a token and the TokenTrees before and after that token.
+	/// </summary>
+	internal class TokenBranch : TokenTree {
+		readonly TokenTree _pre;
+		readonly TokenTree _token;
+		readonly TokenTree _post;
 
-				foreach (DataElement child in children)
-					splitOnToken(child, token, ref offset);
-			}
+		internal TokenBranch(TokenTree pre, char token, TokenTree post, Position position)
+			: base(position)
+		{
+			_pre = pre;
+			_token = new TokenLeaf(token.ToString(), new Position(pre._position.end, pre._position.end + 8));
+			_post = post;
+		}
+
+		protected internal override DataElement DoEval(string name, Dictionary<DataElement, Position> positions) {
+			var block = new Peach.Core.Dom.Block(name);
+			block.Add(_pre.Eval("Pre", positions));
+			block.Add(_token.Eval("Token", positions));
+			block.Add(_post.Eval("Post", positions));
+			return block;
 		}
 	}
 }
