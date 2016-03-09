@@ -90,10 +90,12 @@
 						 ng-change="vm.OnSearchChange()"
 						 ng-keypress="vm.OnSearchKeyPress($event)"
 						 ng-class="vm.DirtySearch()"
-						 peach:auto-focus/>
+						 ng-disabled="!vm.CanSearch"
+						 peach:auto-focus />
 			<span class="input-group-btn">
 				<button class="btn btn-default"
 								ng-click="vm.OnSearch()"
+								ng-disabled="!vm.CanSearch"
 								type="submit">
 					<i class="fa fa-search"></i>
 				</button>
@@ -128,12 +130,16 @@
 			     ng-show="!hasLoaded">
 				Loading data...
 			</div>
+			<div class="alert alert-warning"
+					 ng-show="hasLoaded && !hasData">
+				This pit cannot be tuned.
+			</div>
 			<div class="alert alert-info"
-			     ng-show="hasLoaded && isTruncated">
+			     ng-show="hasLoaded && hasData && isTruncated">
 				This view has been truncated to {{MAX_NODES}} nodes.
 			</div>
 			<div class="alert alert-info"
-			     ng-show="hasLoaded && flat.length === 0">
+			     ng-show="hasLoaded && hasData && flat.length === 0">
 			  Search results are empty.
 			</div>
 			<div class="tuning"

@@ -61,7 +61,6 @@ namespace Peach {
 		if (_.isNull(node) || node.include)
 			return;
 		node.include = true;
-		// node.node.expanded = true;
 		includeNode(node.parent);
 	}
 
@@ -125,6 +124,7 @@ namespace Peach {
 	export interface ITuningScope extends IFormScope {
 		flat: FlatNode[];
 		hasLoaded: boolean;
+		hasData: boolean;
 		isTruncated: boolean;
 		MAX_NODES: number;
 		search: string;
@@ -160,6 +160,7 @@ namespace Peach {
 			this.$scope.search = '';
 			this.$scope.lastSearch = '';
 			this.$scope.hasLoaded = false;
+			this.$scope.hasData = false;
 			this.$scope.isTruncated = false;
 			this.$scope.MAX_NODES = MAX_NODES;
 			this.DelayedOnSearch = _.debounce(() => this.OnSearch(), DELAY);
@@ -168,8 +169,11 @@ namespace Peach {
 			const promise = pitService.LoadPit();
 			promise.then((pit: IPit) => {
 				this.pit = pit;
-				this.init();
-				this.update();
+				if (pit.metadata.fields) {
+					this.init();
+					this.update();
+					this.$scope.hasData = true;
+				}
 				this.$scope.hasLoaded = true;
 				setTimeout(() => console.timeEnd('load'));
 			});
@@ -345,6 +349,10 @@ namespace Peach {
 
 		get CanSave(): boolean {
 			return this.$scope.form.$dirty;
+		}
+
+		get CanSearch(): boolean {
+			return this.$scope.hasData;
 		}
 
 		OnSave(): void {
