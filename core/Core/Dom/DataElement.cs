@@ -336,6 +336,34 @@ namespace Peach.Core.Dom
 			}
 		}
 
+		public IEnumerable<KeyValuePair<string, DataElement>> TuningTraverse(bool useFieldIds)
+		{
+			var key = useFieldIds ? FullFieldId : fullName;
+			var toVisit = new List<KeyValuePair<string, DataElement>>
+			{
+				new KeyValuePair<string, DataElement>(key, this)
+			};
+
+			while (toVisit.Any())
+			{
+				var index = toVisit.Count - 1;
+				var node = toVisit[index];
+				toVisit.RemoveAt(index);
+
+				yield return node;
+
+				index = toVisit.Count;
+				foreach (var child in node.Value.Children())
+				{
+					key = useFieldIds ? 
+						child.FullFieldId : 
+						node.Key + node.Value.GetDisplaySuffix(child);
+					var next = new KeyValuePair<string, DataElement>(key, child);
+					toVisit.Insert(index, next);
+				}
+			}
+		}
+
 		/// <summary>
 		/// Performs pre-order traversal starting with this node.
 		/// </summary>
@@ -492,7 +520,7 @@ namespace Peach.Core.Dom
 		/// Returns an enumeration of children that are diplayed to the user.
 		/// </summary>
 		/// <returns></returns>
-		protected virtual IEnumerable<DataElement> DisplayChildren()
+		public virtual IEnumerable<DataElement> DisplayChildren()
 		{
 			return new DataElement[0];
 		}
@@ -1024,24 +1052,18 @@ namespace Peach.Core.Dom
 			}
 		}
 
+		protected virtual string GetDisplaySuffix(DataElement child)
+		{
+			return "." + child.Name;
+		}
+
 		public string FullFieldId
 		{
-			get
-			{
-				return _fullFieldId;
-			}
-			private set
-			{
-				_fullFieldId = value;
-			}
+			get { return _fullFieldId; }
+			private set { _fullFieldId = value; }
 		}
 
-
-		public DataElement root
-		{
-			get;
-			private set;
-		}
+		public DataElement root { get; private set; }
 
 		/// <summary>
 		/// Recursively execute analyzers

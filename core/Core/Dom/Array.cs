@@ -124,6 +124,11 @@ namespace Peach.Core.Dom
 			originalElement.WritePit(pit);
 		}
 
+		protected override string GetDisplaySuffix(DataElement child)
+		{
+			return "";
+		}
+
 		protected override bool InScope(DataElement child)
 		{
 			return child != OriginalElement;
@@ -147,9 +152,9 @@ namespace Peach.Core.Dom
 		/// Returns an enumeration of children that are diplayed to the user.
 		/// </summary>
 		/// <returns></returns>
-		protected override IEnumerable<DataElement> DisplayChildren()
+		public override IEnumerable<DataElement> DisplayChildren()
 		{
-			return new[] { OriginalElement };
+			return OriginalElement.DisplayChildren();
 		}
 
 		/// <summary>

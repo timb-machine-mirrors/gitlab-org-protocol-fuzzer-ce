@@ -372,55 +372,24 @@ namespace Peach.Core.Dom
 				}
 			}
 
-			var hasFieldIds = stateModel.HasFieldIds;
-			foreach (var state in stateModel.states)
+			foreach (var element in stateModel.TuningTraverse())
 			{
-				foreach (var action in state.actions)
-				{
-					var parts = new List<string>();
-					AddPart(hasFieldIds, parts, state);
-					AddPart(hasFieldIds, parts, action);
-					var prefix = string.Join(".", parts);
-
-					foreach (var actionData in action.outputData)
-					{
-						foreach (var element in actionData.dataModel.PreOrderTraverse())
-						{
-							var key = string.Join(".", prefix, hasFieldIds ? element.FullFieldId : element.fullName);
-							SelectWeight item;
-							if (weights.TryGetValue(key, out item))
-								element.Weight = item.Weight;
-						}
-					}
-				}
+				SelectWeight item;
+				if (weights.TryGetValue(element.Key, out item))
+					element.Value.Weight = item.Weight;
 			}
 
 			// disable mutations for elements in a final state
 			if (stateModel.finalState != null)
 			{
-				foreach (var action in stateModel.finalState.actions)
+				foreach (var item in 
+					from action in stateModel.finalState.actions 
+					from actionData in action.outputData 
+					from item in actionData.dataModel.PreOrderTraverse() 
+					select item)
 				{
-					foreach (var actionData in action.outputData)
-					{
-						foreach (var item in actionData.dataModel.PreOrderTraverse())
-						{
-							item.isMutable = false;
-						}
-					}
+					item.isMutable = false;
 				}
-			}
-		}
-
-		void AddPart(bool hasFieldIds, List<string> parts, IFieldNamed node)
-		{
-			if (hasFieldIds)
-			{
-				if (!string.IsNullOrEmpty(node.FieldId))
-					parts.Add(node.FieldId);
-			}
-			else
-			{
-				parts.Add(node.Name);
 			}
 		}
 	}
