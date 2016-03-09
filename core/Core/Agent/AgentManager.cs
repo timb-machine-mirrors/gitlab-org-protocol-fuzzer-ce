@@ -189,12 +189,12 @@ namespace Peach.Core.Agent
 
 			foreach (var agent in _agents)
 			{
-				Logger.Debug("DetectedFault: {0}", agent.Name);
+				Logger.Debug("DetectedFault: checking for fault in agent {0}", agent.Name);
 				Context.OnDetectedFault(agent);
 				Guard(agent, "DetectedFault", a => ret |= a.DetectedFault());
 			}
 
-			Logger.Trace("DetectedFault: {0}", ret);
+			Logger.Trace("DetectedFault: any faults? {0}", ret);
 
 			return ret;
 		}
