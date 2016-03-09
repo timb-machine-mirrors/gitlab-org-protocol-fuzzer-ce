@@ -227,17 +227,20 @@ namespace Peach.Core.Dom
 
 			public DataElement root
 			{
-				get; private set;
+				get;
+				private set;
 			}
 
 			public string name
 			{
-				get; private set;
+				get;
+				private set;
 			}
 
 			public List<DataElement> rename
 			{
-				get; private set;
+				get;
+				private set;
 			}
 
 			public string UpdateRefName(DataElement parent, DataElement elem, string name)
@@ -246,12 +249,12 @@ namespace Peach.Core.Dom
 					return name;
 
 				// Expect parent and element to be in the source object graph
-				System.Diagnostics.Debug.Assert(InSourceGraph(parent));
+				Debug.Assert(InSourceGraph(parent));
 
 				if (elem == null)
 					elem = parent.find(name);
 				else
-					System.Diagnostics.Debug.Assert(InSourceGraph(elem));
+					Debug.Assert(InSourceGraph(elem));
 
 				return rename.Contains(elem) ? this.name : name;
 			}
@@ -270,7 +273,7 @@ namespace Peach.Core.Dom
 		public virtual DataElement Clone()
 		{
 			// If we have a parent, we need a CloneContext
-			if (this.parent != null)
+			if (parent != null)
 				return Clone(Name);
 
 			// Slight optimization for cloning. No CloneContext is needed since
@@ -288,7 +291,7 @@ namespace Peach.Core.Dom
 		{
 			var ret = ObjectCopier.Clone(this, new CloneContext(this, name));
 
-			if (this.Name != name)
+			if (Name != name)
 			{
 				if (ret.parent == null)
 					ret.fullName = ret.Name;
@@ -323,7 +326,7 @@ namespace Peach.Core.Dom
 			{
 				yield return elem;
 
-				int index = toVisit.Count;
+				var index = toVisit.Count;
 				foreach (var item in elem.DisplayChildren())
 					toVisit.Insert(index, item);
 
@@ -348,7 +351,7 @@ namespace Peach.Core.Dom
 			{
 				yield return elem;
 
-				int index = toVisit.Count;
+				var index = toVisit.Count;
 				foreach (var item in elem.Children().Where(filter))
 					toVisit.Insert(index, item);
 
@@ -372,7 +375,7 @@ namespace Peach.Core.Dom
 			{
 				yield return elem;
 
-				int index = toVisit.Count;
+				var index = toVisit.Count;
 				foreach (var item in elem.Children())
 					toVisit.Insert(index, item);
 
@@ -558,7 +561,7 @@ namespace Peach.Core.Dom
 
 			foreach (var item in Walk())
 			{
-				int index = 0;
+				var index = 0;
 
 				if (item.Name != parts[index++])
 					continue;
@@ -590,7 +593,7 @@ namespace Peach.Core.Dom
 
 			foreach (var item in EnumerateUpTree())
 			{
-				int index = 0;
+				var index = 0;
 
 				if (item.Name != parts[index++])
 					continue;
@@ -616,7 +619,7 @@ namespace Peach.Core.Dom
 		{
 			return null;
 		}
-	
+
 		#endregion
 
 		/// <summary>
@@ -666,11 +669,7 @@ namespace Peach.Core.Dom
 			get { return _name; }
 		}
 
-		public ElementWeight Weight
-		{
-			get;
-			set;
-		}
+		public ElementWeight Weight { get; set; }
 
 		public bool isMutable = true;
 		public MutateOverride mutationFlags = MutateOverride.None;
@@ -784,13 +783,13 @@ namespace Peach.Core.Dom
 			if (DefaultValue.GetVariantType() == Variant.VariantType.ByteString)
 			{
 				var sb = new StringBuilder();
-				foreach(var b in (byte[])DefaultValue)
+				foreach (var b in (byte[])DefaultValue)
 					sb.Append(b.ToString("x2"));
 
 				pit.WriteAttributeString("valueType", "hex");
 				pit.WriteAttributeString("value", sb.ToString());
 			}
-			else if(DefaultValue.GetVariantType() == Variant.VariantType.BitStream)
+			else if (DefaultValue.GetVariantType() == Variant.VariantType.BitStream)
 			{
 				var stream = (BitStream)DefaultValue;
 				var sb = new StringBuilder();
@@ -923,11 +922,7 @@ namespace Peach.Core.Dom
 		/// <remarks>
 		/// Any objects added to properties must be serializable!
 		/// </remarks>
-		public Dictionary<string, object> Properties
-		{
-			get;
-			set;
-		}
+		public Dictionary<string, object> Properties { get; set; }
 
 		protected static uint _uniqueName = 0;
 
@@ -990,28 +985,17 @@ namespace Peach.Core.Dom
 			return ret;
 		}
 
-		public string elementType
-		{
-			get;
-			private set;
-		}
+		public string elementType { get; private set; }
 
-		public string debugName
-		{
-			get;
-			private set;
-		}
+		public string debugName { get; private set; }
 
 		/// <summary>
-		/// Full qualified name of DataElement to
+		/// Fully qualified name of DataElement to
 		/// root DataElement.
 		/// </summary>
 		public string fullName
 		{
-			get
-			{
-				return _fullName;
-			}
+			get { return _fullName; }
 			private set
 			{
 				_fullName = value;
@@ -1021,10 +1005,7 @@ namespace Peach.Core.Dom
 
 		public string FieldId
 		{
-			get
-			{
-				return _fieldId;
-			}
+			get { return _fieldId; }
 			set
 			{
 				_fieldId = value;
@@ -1124,10 +1105,7 @@ namespace Peach.Core.Dom
 
 		public DataElementContainer parent
 		{
-			get
-			{
-				return _parent;
-			}
+			get { return _parent; }
 			set
 			{
 				if (value == parent)
@@ -1216,7 +1194,7 @@ namespace Peach.Core.Dom
 			if (parent == null)
 				return null;
 
-			int nextIndex = parent.IndexOf(this) + 1;
+			var nextIndex = parent.IndexOf(this) + 1;
 			if (nextIndex >= parent.Count)
 				return null;
 
@@ -1232,7 +1210,7 @@ namespace Peach.Core.Dom
 			if (parent == null)
 				return null;
 
-			int priorIndex = parent.IndexOf(this) - 1;
+			var priorIndex = parent.IndexOf(this) - 1;
 			if (priorIndex < 0)
 				return null;
 
@@ -1315,7 +1293,7 @@ namespace Peach.Core.Dom
 							throw new NotSupportedException("Length type of Chars not supported by DataElement.");
 					}
 				}
-				else  if (isToken && DefaultValue != null)
+				else if (isToken && DefaultValue != null)
 				{
 					switch (_lengthType)
 					{
@@ -1414,9 +1392,9 @@ namespace Peach.Core.Dom
 			}
 		}
 
-        /// <summary>
-        /// Get the Internal Value of this data element
-        /// </summary>
+		/// <summary>
+		/// Get the Internal Value of this data element
+		/// </summary>
 		public Variant InternalValue
 		{
 			get
@@ -1483,9 +1461,9 @@ namespace Peach.Core.Dom
 			}
 		}
 
-        /// <summary>
-        /// Get the final Value of this data element
-        /// </summary>
+		/// <summary>
+		/// Get the final Value of this data element
+		/// </summary>
 		public BitwiseStream Value
 		{
 			get
@@ -1538,12 +1516,10 @@ namespace Peach.Core.Dom
 				if (_fixup != null)
 				{
 					// The root can't have a fixup!
-					System.Diagnostics.Debug.Assert(parent != null);
+					Debug.Assert(parent != null);
 
-
-					//// We can only have a valid fixup value when the parent
-					//// has not recursed onto itself
-
+					// We can only have a valid fixup value when the parent
+					// has not recursed onto itself
 					foreach (var elem in _fixup.dependents)
 					{
 						// If elem is in our parent heirarchy, we are invalid any
@@ -1602,16 +1578,13 @@ namespace Peach.Core.Dom
 		protected virtual Variant GenerateInternalValue()
 		{
 			// 1. Default value
-
-			var value = MutatedValue != null ? MutatedValue : GenerateDefaultValue();
+			var value = MutatedValue ?? GenerateDefaultValue();
 
 			// 2. Check for type transformations
-
 			if (MutatedValue != null && mutationFlags.HasFlag(MutateOverride.TypeTransform))
 				return MutatedValue;
 
 			// 3. Relations
-
 			if (MutatedValue != null && mutationFlags.HasFlag(MutateOverride.Relations))
 				return MutatedValue;
 
@@ -1627,7 +1600,6 @@ namespace Peach.Core.Dom
 			}
 
 			// 4. Fixup
-
 			if (MutatedValue != null && mutationFlags.HasFlag(MutateOverride.Fixup))
 				return MutatedValue;
 
@@ -1730,9 +1702,9 @@ namespace Peach.Core.Dom
 				throw new CrackingFailure("Length is {0} bits but already read {1} bits."
 					.Fmt(size.Value, read), this, data);
 
-			long needed = size.Value - read;
+			var needed = size.Value - read;
 			data.WantBytes((needed + 7) / 8);
-			long remain = data.LengthBits - data.PositionBits;
+			var remain = data.LengthBits - data.PositionBits;
 
 			if (needed > remain)
 			{
@@ -1745,7 +1717,7 @@ namespace Peach.Core.Dom
 			}
 
 			var slice = data.SliceBits(needed);
-			System.Diagnostics.Debug.Assert(slice != null);
+			Debug.Assert(slice != null);
 
 			var ret = new BitStream();
 			slice.CopyTo(ret);
@@ -1829,16 +1801,16 @@ namespace Peach.Core.Dom
 		public void UpdateBindings(DataElement oldElem)
 		{
 			var oldParent = oldElem.parent;
-			var newParent = this.parent;
+			var newParent = parent;
 
 			oldElem.parent = null;
-			this.parent = null;
+			parent = null;
 
 			foreach (var elem in oldElem.PreOrderTraverse())
 				UpdateBindings(oldElem, elem);
 
 			oldElem.parent = oldParent;
-			this.parent = newParent;
+			parent = newParent;
 		}
 
 		private void UpdateBindings(DataElement oldElem, DataElement child)
@@ -1855,7 +1827,7 @@ namespace Peach.Core.Dom
 				{
 					// The other half of the binding is not a child of oldChild, so attempt fixing
 
-					var other = this.find(child.fullName);
+					var other = find(child.fullName);
 
 					if (child == other)
 						continue;
@@ -1914,19 +1886,19 @@ namespace Peach.Core.Dom
 		[OnCloning]
 		private bool OnCloning(object context)
 		{
-			DataElement.CloneContext ctx = context as DataElement.CloneContext;
+			var ctx = context as CloneContext;
 
 			// If this element is under the root, clone it.
-			return ctx == null ? true : ctx.root == this || isChildOf(ctx.root);
+			return ctx == null || (ctx.root == this || isChildOf(ctx.root));
 		}
 
 		[OnCloned]
 		private void OnCloned(DataElement original, object context)
 		{
-			DataElement.CloneContext ctx = context as DataElement.CloneContext;
+			var ctx = context as CloneContext;
 
 			if (ctx != null && ctx.rename.Contains(original))
-				this._name = ctx.name;
+				_name = ctx.name;
 		}
 	}
 }

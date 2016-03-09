@@ -194,7 +194,7 @@ namespace Peach.Core.Dom
 							throw new PeachException("Change state actions cannot refer to final state.");
 
 						newState = context.test.strategy.MutateChangingState(ase.changeToState);
-						
+
 						if (newState == ase.changeToState)
 							logger.Debug("Run(): Changing to state \"{0}\".", newState.Name);
 						else
@@ -256,10 +256,13 @@ namespace Peach.Core.Dom
 						if (!string.IsNullOrEmpty(action.FieldId))
 							return true;
 
-						foreach (var actionData in action.outputData)
+						if (action.outputData.Any(
+							actionData => actionData.dataModel
+								.DisplayTraverse()
+								.Any(e => !string.IsNullOrEmpty(e.FieldId))
+							))
 						{
-							if (actionData.dataModel.DisplayTraverse().Any(e => !string.IsNullOrEmpty(e.FieldId)))
-								return true;
+							return true;
 						}
 					}
 				}

@@ -50,7 +50,7 @@ namespace Peach.Core.Dom
 	[Parameter("maxOccurs", typeof(int), "Maximum occurances", "1")]
 	[Parameter("occurs", typeof(int), "Actual occurances", "1")]
 	[Serializable]
-	public class Block : DataElementContainer, IPitSerializable
+	public class Block : DataElementContainer
 	{
 		public Block()
 		{
@@ -93,7 +93,7 @@ namespace Peach.Core.Dom
 			}
 			else
 			{
-				block = DataElement.Generate<Block>(node, parent);
+				block = Generate<Block>(node, parent);
 				block.parent = parent;
 			}
 
