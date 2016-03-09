@@ -398,7 +398,7 @@ namespace Peach.Core.Dom
 			return choiceElements;
 		}
 
-		protected override IEnumerable<DataElement> DisplayChildren()
+		public override IEnumerable<DataElement> DisplayChildren()
 		{
 			if (maskedElements.Any())
 				return maskedElements;

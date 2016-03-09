@@ -315,5 +315,223 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 			CollectionAssert.AreEqual(expected, result);
 		}
+
+		[Test]
+		public void TestTuningTraverseNoFieldIds()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='pre' />
+		<Block name='item' occurs='1'>
+			<String name='key' />
+			<Block name='value'>
+				<String name='nested' />
+			</Block>
+		</Block>
+		<String name='post' />
+		<Asn1Type name='Asn1Type' tag='1'>
+			<String name='value' />
+		</Asn1Type>
+	</DataModel>
+
+	<StateModel name='SM' initialState='S1'>
+		<State name='S1'>
+			<Action type='output'>
+				<DataModel ref='DM' />
+			</Action>
+		</State>
+	</StateModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			Assert.NotNull(dom);
+
+			var result = dom.stateModels[0]
+				.TuningTraverse()
+				.Select(x => "{0} -> {1}".Fmt(x.Value.fullName, x.Key))
+				.ToList();
+
+			var expected = new[]
+			{
+				"DM -> S1.Action.DM",
+				"DM.pre -> S1.Action.DM.pre",
+				"DM.item -> S1.Action.DM.item",
+				"DM.item.item -> S1.Action.DM.item",
+				"DM.item.item.key -> S1.Action.DM.item.key",
+				"DM.item.item.value -> S1.Action.DM.item.value",
+				"DM.item.item.value.nested -> S1.Action.DM.item.value.nested",
+				"DM.post -> S1.Action.DM.post",
+				"DM.Asn1Type -> S1.Action.DM.Asn1Type",
+				"DM.Asn1Type.class -> S1.Action.DM.Asn1Type",
+				"DM.Asn1Type.pc -> S1.Action.DM.Asn1Type",
+				"DM.Asn1Type.tag -> S1.Action.DM.Asn1Type",
+				"DM.Asn1Type.length -> S1.Action.DM.Asn1Type",
+				"DM.Asn1Type.value -> S1.Action.DM.Asn1Type.value",
+			};
+
+			CollectionAssert.AreEqual(expected, result);
+		}
+
+		[Test]
+		public void TestTuningTraverseWithFieldIds()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='pre' />
+		<Block name='item' occurs='1' fieldId='row'>
+			<String name='key' />
+			<String name='value' fieldId='value' />
+		</Block>
+		<String name='post' />
+		<Asn1Type name='Asn1Type' tag='1' fieldId='foo'>
+			<String name='value' fieldId='inner' />
+		</Asn1Type>
+	</DataModel>
+
+	<StateModel name='SM' initialState='S1'>
+		<State name='S1'>
+			<Action type='output'>
+				<DataModel ref='DM' />
+			</Action>
+		</State>
+	</StateModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			Assert.NotNull(dom);
+
+			var result = dom.stateModels[0]
+				.TuningTraverse()
+				.Select(x => "{0} -> {1}".Fmt(x.Value.fullName, x.Key))
+				.ToList();
+
+			var expected = new[]
+			{
+				"DM -> ",
+				"DM.pre -> ",
+				"DM.item -> row",
+				"DM.item.item -> row",
+				"DM.item.item.key -> row",
+				"DM.item.item.value -> row.value",
+				"DM.post -> ",
+				"DM.Asn1Type -> foo",
+				"DM.Asn1Type.class -> foo",
+				"DM.Asn1Type.pc -> foo",
+				"DM.Asn1Type.tag -> foo",
+				"DM.Asn1Type.length -> foo",
+				"DM.Asn1Type.value -> foo.inner",
+			};
+
+			CollectionAssert.AreEqual(expected, result);
+		}
+
+		[Test]
+		public void TestDisplayTraverseNoFieldIds()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='pre' />
+		<Block name='item' occurs='1'>
+			<String name='key' />
+			<Block name='value'>
+				<String name='nested' />
+			</Block>
+		</Block>
+		<String name='post' />
+		<Asn1Type name='Asn1Type' tag='1'>
+			<String name='value' />
+		</Asn1Type>
+	</DataModel>
+
+	<StateModel name='SM' initialState='S1'>
+		<State name='S1'>
+			<Action type='output'>
+				<DataModel ref='DM' />
+			</Action>
+		</State>
+	</StateModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			Assert.NotNull(dom);
+
+			var result = (
+				from state in dom.stateModels[0].states
+				from action in state.actions
+				from data in action.outputData
+				from element in data.dataModel.DisplayTraverse()
+				select element.fullName
+			).ToList();
+
+			var expected = new[]
+			{
+				"DM",
+				"DM.pre",
+				"DM.item",
+				"DM.item.item.key",
+				"DM.item.item.value",
+				"DM.item.item.value.nested",
+				"DM.post",
+				"DM.Asn1Type",
+				"DM.Asn1Type.value",
+			};
+
+			CollectionAssert.AreEqual(expected, result);
+		}
+
+		[Test]
+		public void TestDisplayTraverseWithFieldIds()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='pre' />
+		<Block name='item' occurs='1' fieldId='row'>
+			<String name='key' />
+			<String name='value' fieldId='value' />
+		</Block>
+		<String name='post' />
+		<Asn1Type name='Asn1Type' tag='1' fieldId='foo'>
+			<String name='value' fieldId='inner' />
+		</Asn1Type>
+	</DataModel>
+
+	<StateModel name='SM' initialState='S1'>
+		<State name='S1'>
+			<Action type='output'>
+				<DataModel ref='DM' />
+			</Action>
+		</State>
+	</StateModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			Assert.NotNull(dom);
+
+			var result = (
+				from state in dom.stateModels[0].states
+				from action in state.actions
+				from data in action.outputData
+				from element in data.dataModel.DisplayTraverse()
+				select element.fullName
+			).ToList();
+
+			var expected = new[]
+			{
+				"DM",
+				"DM.pre",
+				"DM.item",
+				"DM.item.item.key",
+				"DM.item.item.value",
+				"DM.post",
+				"DM.Asn1Type",
+				"DM.Asn1Type.value",
+			};
+
+			CollectionAssert.AreEqual(expected, result);
+		}
 	}
 }

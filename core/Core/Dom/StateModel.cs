@@ -203,7 +203,7 @@ namespace Peach.Core.Dom
 							throw new PeachException("Change state actions cannot refer to final state.");
 
 						newState = context.test.strategy.MutateChangingState(ase.changeToState);
-						
+
 						if (newState == ase.changeToState)
 							logger.Debug("Run(): Changing to state \"{0}\".", newState.Name);
 						else
@@ -265,15 +265,57 @@ namespace Peach.Core.Dom
 						if (!string.IsNullOrEmpty(action.FieldId))
 							return true;
 
-						foreach (var actionData in action.outputData)
+						if (action.outputData.Any(
+							actionData => actionData.dataModel
+								.DisplayTraverse()
+								.Any(e => !string.IsNullOrEmpty(e.FieldId))
+							))
 						{
-							if (actionData.dataModel.DisplayTraverse().Any(e => !string.IsNullOrEmpty(e.FieldId)))
-								return true;
+							return true;
 						}
 					}
 				}
 
 				return false;
+			}
+		}
+
+		public IEnumerable<KeyValuePair<string, DataElement>> TuningTraverse()
+		{
+			var useFieldIds = HasFieldIds;
+			foreach (var state in states)
+			{
+				foreach (var action in state.actions)
+				{
+					var parts = new List<string>();
+					AddPart(useFieldIds, parts, state);
+					AddPart(useFieldIds, parts, action);
+					var prefix = string.Join(".", parts);
+
+					foreach (var actionData in action.outputData)
+					{
+						foreach (var element in actionData.dataModel.TuningTraverse(useFieldIds))
+						{
+							var key = element.Key;
+							if (!string.IsNullOrEmpty(element.Key) && !string.IsNullOrEmpty(prefix))
+								key = string.Join(".", prefix, element.Key);
+							yield return new KeyValuePair<string, DataElement>(key, element.Value);
+						}
+					}
+				}
+			}
+		}
+
+		void AddPart(bool useFieldIds, List<string> parts, IFieldNamed node)
+		{
+			if (useFieldIds)
+			{
+				if (!string.IsNullOrEmpty(node.FieldId))
+					parts.Add(node.FieldId);
+			}
+			else
+			{
+				parts.Add(node.Name);
 			}
 		}
 	}

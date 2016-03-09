@@ -2,9 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Threading;
-using NLog;
-using NLog.Config;
-using NLog.Targets;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
@@ -14,9 +11,11 @@ using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.Test.Core.Storage;
 using TestStatus = Peach.Pro.Core.WebServices.Models.TestStatus;
-using Newtonsoft.Json;
 using Peach.Pro.Core.WebServices;
 using System.Collections.Generic;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
 using MAgent = Peach.Pro.Core.WebServices.Models.Agent;
 
 namespace Peach.Pro.Test.Core.Runtime
@@ -27,7 +26,7 @@ namespace Peach.Pro.Test.Core.Runtime
 	class JobRunnerTests
 	{
 		TempDirectory _tmpDir;
-//		LoggingConfiguration _loggingConfig;
+		LoggingConfiguration _loggingConfig;
 		string _pitXmlPath;
 		string _pitXmlFailPath;
 
@@ -45,21 +44,23 @@ namespace Peach.Pro.Test.Core.Runtime
 					<String name='high' />
 					<String name='highest' />
 				</DataModel>
-			</Action> 
+			</Action>
 			<Action name='output2' type='output'>
 				<DataModel name='DM'>
-					<String name='off' />
-					<String name='lowest' />
-					<String name='low' />
-					<String name='normal' />
-					<String name='high' />
-					<String name='highest' />
+					<Block name='array' occurs='1'>
+						<String name='off' />
+						<String name='lowest' />
+						<String name='low' />
+						<String name='normal' />
+						<String name='high' />
+						<String name='highest' />
+					</Block>
 				</DataModel>
-			</Action> 
+			</Action>
 		</State>
 	</StateModel>
 
-	<Test name='Default'>
+	<Test name='Default' maxOutputSize='100'>
 		<StateModel ref='StateModel' />
 		<Publisher class='Null'/>
 		<Strategy class='Random'>
@@ -69,7 +70,7 @@ namespace Peach.Pro.Test.Core.Runtime
 </Peach>
 ";
 
-		const string PitXmlFail = PitXml + "xxx";
+		const string PitXmlFail = "xxx" + PitXml;
 
 		static readonly Pit PitDefault = new Pit {
 			OriginalPit = "Test.xml",
@@ -97,17 +98,18 @@ namespace Peach.Pro.Test.Core.Runtime
 			_pitXmlFailPath = Path.Combine(_tmpDir.Path, "TestFail.xml");
 			File.WriteAllText(_pitXmlFailPath, PitXmlFail);
 
-//			_loggingConfig = LogManager.Configuration;
-//
-//			var target = new ConsoleTarget {
-//				Layout = "${time} ${logger} ${message}"
-//			};
+			_loggingConfig = LogManager.Configuration;
 
-//			var config = new LoggingConfiguration();
-//			var rule = new LoggingRule("*", LogLevel.Trace, target);
-//			config.AddTarget("console", target);
-//			config.LoggingRules.Add(rule);
-//			LogManager.Configuration = config;
+			var target = new ConsoleTarget
+			{
+				Layout = "${time} ${logger} ${message}"
+			};
+
+			var config = new LoggingConfiguration();
+			var rule = new LoggingRule("*", LogLevel.Debug, target);
+			config.AddTarget("console", target);
+			config.LoggingRules.Add(rule);
+			LogManager.Configuration = config;
 		}
 
 		[TearDown]
@@ -115,7 +117,7 @@ namespace Peach.Pro.Test.Core.Runtime
 		{
 			_tmpDir.Dispose();
 
-//			LogManager.Configuration = _loggingConfig;
+			LogManager.Configuration = _loggingConfig;
 		}
 
 		class SafeRunner : IDisposable
@@ -126,7 +128,7 @@ namespace Peach.Pro.Test.Core.Runtime
 
 			readonly Thread _thread;
 			Exception _caught;
-			AutoResetEvent _evtReady = new AutoResetEvent(false);
+			readonly AutoResetEvent _evtReady = new AutoResetEvent(false);
 
 			public SafeRunner(string pitLibraryPath, Pit pit, JobRequest jobRequest, Action<Engine> hooker = null)
 			{
@@ -173,10 +175,10 @@ namespace Peach.Pro.Test.Core.Runtime
 				Assert.Fail("Timeout");
 			}
 
-			public void WaitForFinish()
+			public void WaitForFinish(int timeout = 20)
 			{
 				Console.WriteLine("Waiting for finish");
-				var ret = _thread.Join(TimeSpan.FromSeconds(20));
+				var ret = _thread.Join(TimeSpan.FromSeconds(timeout));
 				Console.WriteLine("Done");
 				Assert.IsTrue(ret, "Timeout waiting for job to finish");
 				Assert.AreEqual(JobStatus.Stopped, GetJob().Status);
@@ -208,7 +210,9 @@ namespace Peach.Pro.Test.Core.Runtime
 
 			public void Dispose()
 			{
-				_thread.Abort();
+				JobRunner.Stop();
+				if (!_thread.Join(TimeSpan.FromSeconds(2)))
+					_thread.Abort();
 			}
 		}
 
@@ -307,7 +311,7 @@ namespace Peach.Pro.Test.Core.Runtime
 							TestStatus.Fail, 
 							"Loading pit file", 
 							"Loading pit file '{0}'".Fmt(_pitXmlFailPath), 
-							"Error: XML Failed to load: Data at the root level is invalid. Line 26, position 1."),
+							"Error: XML Failed to load: Data at the root level is invalid. Line 1, position 1."),
 						new TestEvent(
 							2, 
 							runner.Id, 
@@ -342,18 +346,18 @@ namespace Peach.Pro.Test.Core.Runtime
 					new PitWeight { Id = "initial.output1.DM.normal", Weight = 3 },
 					new PitWeight { Id = "initial.output1.DM.high", Weight = 4 },
 					new PitWeight { Id = "initial.output1.DM.highest", Weight = 5 },
-					new PitWeight { Id = "initial.output2.DM.off", Weight = 0 },
-					new PitWeight { Id = "initial.output2.DM.lowest", Weight = 1 },
-					new PitWeight { Id = "initial.output2.DM.low", Weight = 2 },
-					new PitWeight { Id = "initial.output2.DM.normal", Weight = 3 },
-					new PitWeight { Id = "initial.output2.DM.high", Weight = 4 },
-					new PitWeight { Id = "initial.output2.DM.highest", Weight = 5 },
+					new PitWeight { Id = "initial.output2.DM.array.off", Weight = 0 },
+					new PitWeight { Id = "initial.output2.DM.array.lowest", Weight = 1 },
+					new PitWeight { Id = "initial.output2.DM.array.low", Weight = 2 },
+					new PitWeight { Id = "initial.output2.DM.array.normal", Weight = 3 },
+					new PitWeight { Id = "initial.output2.DM.array.high", Weight = 4 },
+					new PitWeight { Id = "initial.output2.DM.array.highest", Weight = 5 },
 				}
 			};
 
 			var count = new Dictionary<string, int>();
 
-			Action<Engine> hooker = (Engine engine) =>
+			Action<Engine> hooker = engine =>
 			{
 				engine.TestStarting += ctx =>
 				{
@@ -372,11 +376,11 @@ namespace Peach.Pro.Test.Core.Runtime
 
 			var jobRequest = new JobRequest {
 				Seed = 0,
-				RangeStop = 1000,
+				RangeStop = 100,
 			};
 			using (var runner = new SafeRunner(_tmpDir.Path, pit, jobRequest, hooker))
 			{
-				runner.WaitForFinish();
+				runner.WaitForFinish(60);
 				runner.VerifyDatabase(1);
 			}
 

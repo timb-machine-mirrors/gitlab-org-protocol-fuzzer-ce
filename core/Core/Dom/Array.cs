@@ -99,10 +99,7 @@ namespace Peach.Core.Dom
 		/// </summary>
 		public DataElement OriginalElement
 		{
-			get
-			{
-				return originalElement;
-			}
+			get { return originalElement; }
 			set
 			{
 				if (value == null)
@@ -125,6 +122,11 @@ namespace Peach.Core.Dom
 		public override void WritePit(XmlWriter pit)
 		{
 			originalElement.WritePit(pit);
+		}
+
+		protected override string GetDisplaySuffix(DataElement child)
+		{
+			return "";
 		}
 
 		protected override bool InScope(DataElement child)
@@ -150,9 +152,9 @@ namespace Peach.Core.Dom
 		/// Returns an enumeration of children that are diplayed to the user.
 		/// </summary>
 		/// <returns></returns>
-		protected override IEnumerable<DataElement> DisplayChildren()
+		public override IEnumerable<DataElement> DisplayChildren()
 		{
-			return new[] { OriginalElement };
+			return OriginalElement.DisplayChildren();
 		}
 
 		/// <summary>
@@ -272,7 +274,7 @@ namespace Peach.Core.Dom
 				}
 			}
 
-			if (this.Count < min)
+			if (Count < min)
 				throw new CrackingFailure("Only cracked {0} of {1} array entries."
 					.Fmt(Count, min), this, data);
 
@@ -333,7 +335,7 @@ namespace Peach.Core.Dom
 
 		public new static DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
 		{
-			var array = DataElement.Generate<Array>(node, parent);
+			var array = Generate<Array>(node, parent);
 
 			if (node.hasAttr("minOccurs"))
 			{
@@ -366,7 +368,7 @@ namespace Peach.Core.Dom
 		[OnCloning]
 		private bool OnCloning(object context)
 		{
-			DataElement.CloneContext ctx = context as DataElement.CloneContext;
+			CloneContext ctx = context as CloneContext;
 
 			if (ctx != null)
 			{

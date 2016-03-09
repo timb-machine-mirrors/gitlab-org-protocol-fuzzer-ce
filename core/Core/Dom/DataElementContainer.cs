@@ -29,6 +29,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections;
+using System.Linq;
 using System.Text;
 using Peach.Core.IO;
 using Peach.Core.Cracker;
@@ -217,13 +218,7 @@ namespace Peach.Core.Dom
 				if (!base.CacheValue)
 					return false;
 
-				foreach (var elem in this)
-				{
-					if (!elem.CacheValue)
-						return false;
-				}
-
-				return true;
+				return this.All(elem => elem.CacheValue);
 			}
 		}
 
@@ -236,7 +231,7 @@ namespace Peach.Core.Dom
 		/// Returns an enumeration of children that are diplayed to the user.
 		/// </summary>
 		/// <returns></returns>
-		protected override IEnumerable<DataElement> DisplayChildren()
+		public override IEnumerable<DataElement> DisplayChildren()
 		{
 			return this;
 		}
