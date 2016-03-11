@@ -232,7 +232,7 @@ namespace Peach.Core.Agent.Channels
 
 					if (data == null)
 						return;
-
+					data.AgentName = Name;
 					data.MonitorName = m.Name;
 					data.DetectionSource = data.DetectionSource ?? m.Class;
 

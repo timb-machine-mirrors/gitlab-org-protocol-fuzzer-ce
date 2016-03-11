@@ -46,6 +46,14 @@ namespace Peach.Core.Dom
 	[Serializable]
 	public class StateModel : INamed, IOwned<Dom>
 	{
+		public class PublishedData
+		{
+			public bool IsInput { get; set; }
+			public string Name { get; set; }
+			public string Key { get; set; }
+			public BitwiseStream Value { get; set; }
+		}
+
 		#region Obsolete Functions
 
 		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
@@ -63,15 +71,9 @@ namespace Peach.Core.Dom
 			states = new NamedCollection<State>();
 		}
 
-		protected Dictionary<string, BitwiseStream> _dataActions = new Dictionary<string, BitwiseStream>();
+		protected readonly List<PublishedData> _dataActions = new List<PublishedData>();
 
-		public IEnumerable<KeyValuePair<string, BitwiseStream>> dataActions
-		{
-			get
-			{
-				return _dataActions.AsEnumerable();
-			}
-		}
+		public IEnumerable<PublishedData> dataActions { get { return _dataActions; } }
 
 		/// <summary>
 		/// Currently unused.  Exists for schema generation.
@@ -127,13 +129,20 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// Saves the data produced/consumed by an action for future logging.
 		/// </summary>
-		/// <param name="name"></param>
+		/// <param name="dataName"></param>
 		/// <param name="value"></param>
-		public void SaveData(string name, BitwiseStream value)
+		/// <param name="isInput"></param>
+		public void SaveData(string dataName, BitwiseStream value, bool isInput)
 		{
-			var key = "{0}.{1}.bin".Fmt(_dataActions.Count + 1, name);
+			var item = new PublishedData
+			{
+				Key = "{0}.{1}.bin".Fmt(_dataActions.Count + 1, dataName),
+				Name = dataName,
+				Value = value,
+				IsInput = isInput
+			};
 
-			_dataActions.Add(key, value);
+			_dataActions.Add(item);
 		}
 
 		/// <summary>
@@ -194,7 +203,7 @@ namespace Peach.Core.Dom
 							throw new PeachException("Change state actions cannot refer to final state.");
 
 						newState = context.test.strategy.MutateChangingState(ase.changeToState);
-						
+
 						if (newState == ase.changeToState)
 							logger.Debug("Run(): Changing to state \"{0}\".", newState.Name);
 						else
@@ -256,15 +265,57 @@ namespace Peach.Core.Dom
 						if (!string.IsNullOrEmpty(action.FieldId))
 							return true;
 
-						foreach (var actionData in action.outputData)
+						if (action.outputData.Any(
+							actionData => actionData.dataModel
+								.DisplayTraverse()
+								.Any(e => !string.IsNullOrEmpty(e.FieldId))
+							))
 						{
-							if (actionData.dataModel.DisplayTraverse().Any(e => !string.IsNullOrEmpty(e.FieldId)))
-								return true;
+							return true;
 						}
 					}
 				}
 
 				return false;
+			}
+		}
+
+		public IEnumerable<KeyValuePair<string, DataElement>> TuningTraverse()
+		{
+			var useFieldIds = HasFieldIds;
+			foreach (var state in states)
+			{
+				foreach (var action in state.actions)
+				{
+					var parts = new List<string>();
+					AddPart(useFieldIds, parts, state);
+					AddPart(useFieldIds, parts, action);
+					var prefix = string.Join(".", parts);
+
+					foreach (var actionData in action.outputData)
+					{
+						foreach (var element in actionData.dataModel.TuningTraverse(useFieldIds))
+						{
+							var key = element.Key;
+							if (!string.IsNullOrEmpty(element.Key) && !string.IsNullOrEmpty(prefix))
+								key = string.Join(".", prefix, element.Key);
+							yield return new KeyValuePair<string, DataElement>(key, element.Value);
+						}
+					}
+				}
+			}
+		}
+
+		void AddPart(bool useFieldIds, List<string> parts, IFieldNamed node)
+		{
+			if (useFieldIds)
+			{
+				if (!string.IsNullOrEmpty(node.FieldId))
+					parts.Add(node.FieldId);
+			}
+			else
+			{
+				parts.Add(node.Name);
 			}
 		}
 	}

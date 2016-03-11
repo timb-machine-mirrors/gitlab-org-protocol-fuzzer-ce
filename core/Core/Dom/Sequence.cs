@@ -72,7 +72,7 @@ namespace Peach.Core.Dom
 		{
 		}
 
-		public static new DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
+		public new static DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
 		{
 			if (node.Name != "Sequence")
 				return null;

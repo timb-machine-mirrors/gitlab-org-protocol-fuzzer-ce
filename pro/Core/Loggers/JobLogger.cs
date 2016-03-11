@@ -67,6 +67,36 @@ namespace Peach.Pro.Core.Loggers
 	[Parameter("Path", typeof(string), "Log folder", "")]
 	public class JobLogger : Logger
 	{
+		private class MergedFault : Fault
+		{
+			public class Asset : INamed
+			{
+				public string FileName { get; set; }
+
+				public string AgentName { get; set; }
+				public string MonitorName { get; set; }
+				public string MonitorClass { get; set; }
+				public string DisplayName { get; set; }
+				public Stream Value { get; set; }
+				public bool Initial { get; set; }
+				public FaultFileType Type { get; set; }
+
+				[Obsolete]
+				string INamed.name
+				{
+					get { throw new NotImplementedException(); }
+				}
+
+				[Obsolete]
+				string INamed.Name
+				{
+					get { return FileName; }
+				}
+			}
+
+			public readonly List<Asset> Assets = new List<Asset>();
+		}
+
 		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
 		const string DebugLogLayout = "${longdate} ${logger} ${message}";
@@ -83,7 +113,7 @@ namespace Peach.Pro.Core.Loggers
 		readonly List<Fault.State> _states = new List<Fault.State>();
 		readonly List<TestEvent> _events = new List<TestEvent>();
 		readonly List<LoggingRule> _tempRules = new List<LoggingRule>();
-		Fault _reproFault;
+		MergedFault _reproFault;
 		TextWriter _log;
 		AsyncDbCache _cache;
 		int _agentConnect;
@@ -490,14 +520,25 @@ namespace Peach.Pro.Core.Loggers
 
 			if (_reproFault != null)
 			{
-				// Save reproFault toSave in fault
-				foreach (var kv in _reproFault.toSave)
+				// Save reproFault assets in fault
+				foreach (var item in _reproFault.Assets)
 				{
-					var key = Path.Combine("Initial",
-						_reproFault.iteration.ToString(CultureInfo.InvariantCulture),
-						kv.Key);
+					var fileName = Path.Combine(
+						"Initial",
+						_reproFault.iteration.ToString(),
+						item.FileName);
 
-					fault.toSave.Add(key, kv.Value);
+					fault.Assets.Add(new MergedFault.Asset
+					{
+						FileName = fileName,
+						DisplayName = item.DisplayName,
+						AgentName = item.AgentName,
+						Initial = true,
+						MonitorClass = item.MonitorClass,
+						MonitorName = item.MonitorName,
+						Value = item.Value,
+						Type = item.Type
+					});
 				}
 
 				_reproFault = null;
@@ -529,10 +570,10 @@ namespace Peach.Pro.Core.Loggers
 			}
 		}
 
-		private Fault CombineFaults(uint currentIteration, StateModel stateModel, Fault[] faults)
+		private MergedFault CombineFaults(uint currentIteration, StateModel stateModel, Fault[] faults)
 		{
-			// The combined fault will use toSave and not collectedData
-			var ret = new Fault { collectedData = null };
+			// The combined fault will use Assets and not collectedData
+			var ret = new MergedFault { collectedData = null };
 
 			Fault coreFault = null;
 			var dataFaults = new List<Fault>();
@@ -556,7 +597,14 @@ namespace Peach.Pro.Core.Loggers
 			foreach (var item in stateModel.dataActions)
 			{
 				Logger.Debug("Saving data from action: " + item.Key);
-				ret.toSave.Add(item.Key, item.Value);
+
+				ret.Assets.Add(new MergedFault.Asset
+				{
+					DisplayName = item.Name,
+					FileName = item.Key,
+					Value = item.Value,
+					Type = item.IsInput ? FaultFileType.Input : FaultFileType.Ouput
+				});
 			}
 
 			// Write out all collected data information
@@ -564,28 +612,16 @@ namespace Peach.Pro.Core.Loggers
 			{
 				Logger.Debug("Saving fault: " + fault.title);
 
-				foreach (var kv in fault.collectedData)
-				{
-					var fileName = string.Join(".", new[]
-					{
-						fault.agentName, 
-						fault.monitorName, 
-						fault.detectionSource, 
-						kv.Key
-					}.Where(a => !string.IsNullOrEmpty(a)));
-					ret.toSave.Add(fileName, new MemoryStream(kv.Value));
-				}
-
+				// Put description at beginning of list
 				if (!string.IsNullOrEmpty(fault.description))
 				{
-					var fileName = string.Join(".", new[]
-					{
-						fault.agentName, 
-						fault.monitorName, 
-						fault.detectionSource, 
-						"description.txt"
-					}.Where(a => !string.IsNullOrEmpty(a)));
-					ret.toSave.Add(fileName, new MemoryStream(Encoding.UTF8.GetBytes(fault.description)));
+					ret.Assets.Add(MakeFileAsset(fault, "description.txt", Encoding.UTF8.GetBytes(fault.description)));
+				}
+
+				// Put collected data second
+				foreach (var kv in fault.collectedData)
+				{
+					ret.Assets.Add(MakeFileAsset(fault, kv.Key, kv.Value));
 				}
 			}
 
@@ -599,7 +635,13 @@ namespace Peach.Pro.Core.Loggers
 				}
 			);
 
-			ret.toSave.Add("fault.json", new MemoryStream(Encoding.UTF8.GetBytes(json)));
+			ret.Assets.Add(new MergedFault.Asset
+			{
+				DisplayName = "fault.json",
+				FileName = "fault.json",
+				Value = new MemoryStream(Encoding.UTF8.GetBytes(json)),
+				Type = FaultFileType.Asset
+			});
 
 			// Copy over information from the core fault
 			ret.folderName = coreFault.folderName;
@@ -651,7 +693,44 @@ namespace Peach.Pro.Core.Loggers
 			return ret;
 		}
 
-		void SaveFault(RunContext context, Category category, Fault fault)
+		private static MergedFault.Asset MakeFileAsset(Fault fault, string name, byte[] value)
+		{
+			var parts = new[]
+			{
+				fault.agentName,
+				fault.monitorName,
+				fault.detectionSource,
+				name
+			};
+
+
+			if (parts.Any(string.IsNullOrEmpty))
+			{
+				// If agentName, detectionSource or monitorName is missing treat asset as "Other"
+				var fileName = string.Join(".", parts.Where(a => !string.IsNullOrEmpty(a)));
+
+				return new MergedFault.Asset
+				{
+					DisplayName = fileName,
+					FileName = fileName,
+					Value = new MemoryStream(value),
+					Type = FaultFileType.Asset
+				};
+			}
+
+			return new MergedFault.Asset
+			{
+				AgentName = fault.agentName,
+				MonitorClass = fault.detectionSource,
+				MonitorName = fault.monitorName,
+				DisplayName = name,
+				FileName = string.Join(".", parts),
+				Value = new MemoryStream(value),
+				Type = FaultFileType.Asset
+			};
+		}
+
+		void SaveFault(RunContext context, Category category, MergedFault fault)
 		{
 			var now = DateTime.Now;
 
@@ -727,15 +806,20 @@ namespace Peach.Pro.Core.Loggers
 
 			var subDir = Path.Combine(_cache.Job.LogPath, faultPath);
 
-			foreach (var kv in fault.toSave)
+			foreach (var kv in fault.Assets)
 			{
-				var fileName = Path.Combine(subDir, kv.Key);
+				var fileName = Path.Combine(subDir, kv.FileName);
 				var size = SaveFile(fileName, kv.Value);
 				faultDetail.Files.Add(new FaultFile
 				{
-					Name = Path.GetFileName(fileName),
-					FullName = kv.Key,
+					Name = kv.DisplayName,
+					FullName = kv.FileName,
 					Size = size,
+					Initial = kv.Initial,
+					AgentName = kv.AgentName,
+					MonitorClass = kv.MonitorClass,
+					MonitorName = kv.MonitorName,
+					Type = kv.Type
 				});
 			}
 
@@ -912,6 +996,5 @@ namespace Peach.Pro.Core.Loggers
 
 			LogManager.Configuration = nconfig;
 		}
-
 	}
 }

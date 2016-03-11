@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Sockets;
 using System.Threading;
 using Peach.Core.IO;
 
@@ -104,7 +105,12 @@ namespace Peach.Core.Publishers
 				}
 				catch (Exception ex)
 				{
-					Logger.Debug("Unable to complete reading data from {0}.  {1}", _clientName, ex.Message);
+					var baseEx = ex.GetBaseException() as SocketException;
+					if (baseEx != null && baseEx.SocketErrorCode == SocketError.Interrupted)
+						Logger.Debug("Read from {0} interrupted, closing client connection.", _clientName);
+					else
+						Logger.Debug("Unable to complete reading data from {0}.  {1}", _clientName, ex.Message);
+
 					CloseClient();
 				}
 			}

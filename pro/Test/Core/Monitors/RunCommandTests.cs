@@ -288,7 +288,6 @@ namespace Peach.Pro.Test.Core.Monitors
 			var runner = new MonitorRunner("RunCommand", new Dictionary<string, string>
 			{
 				{ "Command", Utilities.GetAppResourcePath("UseAfterFree") },
-				{ "AddressSanitizer", "true" },
 				{ "When", "OnStart" },
 			})
 			{

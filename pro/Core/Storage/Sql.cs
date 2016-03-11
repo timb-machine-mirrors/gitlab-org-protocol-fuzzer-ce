@@ -282,11 +282,21 @@ INSERT INTO FaultFile (
 	FaultDetailId,
 	Name,
 	FullName,
+	Initial,
+	Type,
+	AgentName,
+	MonitorName,
+	MonitorClass,
 	Size
 ) VALUES (
 	@FaultDetailId,
 	@Name,
 	@FullName,
+	@Initial,
+	@Type,
+	@AgentName,
+	@MonitorName,
+	@MonitorClass,
 	@Size
 );" + GetLastRowId;
 
@@ -374,6 +384,33 @@ SET FaultDetailId = (
 	FROM FaultDetail
 	WHERE Iteration = FaultMetric.Iteration
 );
+";
+
+		public const string JobMigrateV4 = @"
+Alter TABLE FaultFile
+ADD COLUMN
+	Type INTEGER NOT NULL DEFAULT 0
+;
+
+Alter TABLE FaultFile
+ADD COLUMN
+	Initial INTEGER NOT NULL DEFAULT 0
+;
+
+Alter TABLE FaultFile
+ADD COLUMN
+	AgentName TEXT
+;
+
+Alter TABLE FaultFile
+ADD COLUMN
+	MonitorName TEXT
+;
+
+Alter TABLE FaultFile
+ADD COLUMN
+	MonitorClass TEXT
+;
 ";
 
 		public const string NodeMigrateV1 = @"

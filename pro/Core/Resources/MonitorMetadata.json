@@ -401,9 +401,7 @@
           "NoCpuKill",
           "FaultOnEarlyExit",
           "",
-          "WaitForExitTimeout",
-          "",
-          "AddressSanitizer"
+          "WaitForExitTimeout"
         ]
       }
     ],
@@ -432,9 +430,7 @@
           "FaultOnExitCode",
           "FaultOnNonZeroExit",
           "FaultExitCode",
-          "Timeout",
-          "",
-          "AddressSanitizer"
+          "Timeout"
          ]
       }
     ],
@@ -639,6 +635,7 @@
           "SymbolsPath",
           "IgnoreFirstChanceGuardPage",
           "IgnoreSecondChanceGuardPage",
+          "ServiceStartTimeout",
           "CpuPollInterval"
         ]
       }

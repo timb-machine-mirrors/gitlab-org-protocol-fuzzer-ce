@@ -4,7 +4,7 @@ namespace Peach.Pro.Core.WebServices.Models
 {
 	public class LibraryVersion
 	{
-		public uint Version { get; set; }
+		public int Version { get; set; }
 
 		public bool Locked { get; set; }
 

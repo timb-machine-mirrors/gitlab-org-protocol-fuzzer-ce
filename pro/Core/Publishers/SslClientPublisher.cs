@@ -864,7 +864,6 @@ namespace Peach.Pro.Core.Publishers
 		protected EndPoint _remoteEp = null;
 
 		private StreamMux _writeStream = null;
-		private MyTlsClient _tlsClient = null;
 		private TlsClientProtocol _tlsClientHandler = null;
 
 		public SslClientPublisher(Dictionary<string, Variant> args)
@@ -933,33 +932,53 @@ namespace Peach.Pro.Core.Publishers
 			try
 			{
 				_tlsClientHandler = new TlsClientProtocol(_tcp.GetStream(), new SecureRandom());
-				_tlsClient = new MyTlsClient(ClientCert, ClientKey);
-				_tlsClient.Alpn = Alpn;
 
-				_tlsClientHandler.Connect(_tlsClient);
+				var tlsClient = new MyTlsClient(ClientCert, ClientKey)
+				{
+					Alpn = Alpn
+				};
 
-				_client = _tlsClientHandler.Stream;
-				_localEp = _tcp.Client.LocalEndPoint;
-				_remoteEp = _tcp.Client.RemoteEndPoint;
-				_clientName = _remoteEp.ToString();
+				_tlsClientHandler.Connect(tlsClient);
 
-				// .NET includes a helper to allow BeginRead() and BeginWrite()
-				// to perform async operations on streams that only expose Read() and Write().
-				// Unfortunatley, it only allows one outstanding async operation to be pending
-				// meaning if a call to BeginRead() has completed, a call to BeginWrite()
-				// will not return until EndRead() is called.
-				// To work artound this we just wrap the client stream in another stream
-				// object allowing us to have independent async read and write operations.
-
-				// See BeginReadInternal semaphore.Wait() in the Stream.cs reference sources
-
-				_writeStream = new StreamMux(_client);
 			}
 			catch (Exception ex)
 			{
-				Logger.Error("open: Error, Unable to start tcp client reader. {0}.", ex.Message);
+				Logger.Error("open: Error, Unable to perform TLS connection. {0}.", ex.Message);
+
+				try
+				{
+					_tlsClientHandler.Close();
+					_tlsClientHandler = null;
+				}
+				catch
+				{
+					// Ignore anything bouncy castle would throw at us
+				}
+
+				Debug.Assert(_tcp != null);
+
+				_tcp.Close();
+				_tcp = null;
+
 				throw new SoftException(ex);
 			}
+
+			_client = _tlsClientHandler.Stream;
+			_localEp = _tcp.Client.LocalEndPoint;
+			_remoteEp = _tcp.Client.RemoteEndPoint;
+			_clientName = _remoteEp.ToString();
+
+			// .NET includes a helper to allow BeginRead() and BeginWrite()
+			// to perform async operations on streams that only expose Read() and Write().
+			// Unfortunatley, it only allows one outstanding async operation to be pending
+			// meaning if a call to BeginRead() has completed, a call to BeginWrite()
+			// will not return until EndRead() is called.
+			// To work artound this we just wrap the client stream in another stream
+			// object allowing us to have independent async read and write operations.
+
+			// See BeginReadInternal semaphore.Wait() in the Stream.cs reference sources
+
+			_writeStream = new StreamMux(_client);
 
 			StartClient();
 		}
@@ -988,7 +1007,6 @@ namespace Peach.Pro.Core.Publishers
 				//_client = null;
 
 				_writeStream = null;
-				_tlsClient = null;
 				_tlsClientHandler = null;
 				_tcp = null;
 				_remoteEp = null;

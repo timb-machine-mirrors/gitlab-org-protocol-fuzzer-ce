@@ -50,6 +50,7 @@ namespace Peach.Pro.Core.Storage
 					() => { Connection.Execute(Sql.JobMigrateV1); },
 					() => { Connection.Execute(Sql.JobMigrateV2); },
 					() => { Connection.Execute(Sql.JobMigrateV3); },
+					() => { Connection.Execute(Sql.JobMigrateV4); },
 				};
 			}
 		}

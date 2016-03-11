@@ -1,14 +1,23 @@
 /// <reference path="../reference.ts" />
 
 namespace Peach {
+	const LibText = {
+		Pits: 'Peach Pits allow testing of a data format or a network protocol against a variety of targets.',
+		Configurations: 'The Configurations section contains existing Peach Pit configurations. Selecting an existing configuration allows editing the configuration and starting a new fuzzing job.',
+		Legacy: ''
+	};
+	
 	class PitLibrary {
 		constructor(
 			public Name: string
-		) {}
+		) {
+			this.Text = LibText[Name];
+		}
 
+		public Text: string;
 		public Categories: PitCategory[] = [];
 	}
-	
+
 	class PitCategory {
 		constructor(
 			public Name: string
@@ -42,22 +51,17 @@ namespace Peach {
 			$scope['filterCategory'] = this.filterCategory;
 		}
 
-		private Pits: PitLibrary;
-		private User: PitLibrary;
+		private Libs: PitLibrary[] = [];
 		
 		private init() {
 			const promise = this.pitService.LoadLibrary();
 			promise.then((data: ILibrary[]) => {
-				data.forEach((lib: ILibrary) => {
+				for (var lib of data) {
 					const pitLib = new PitLibrary(lib.name);
-					if (lib.locked) {
-						this.Pits = pitLib;
-					} else {
-						this.User = pitLib;
-					}
+					let hasPits = false;
 					
-					lib.versions.forEach((version: ILibraryVersion) => {
-						version.pits.forEach((pit: IPit) => {
+					for (var version of lib.versions) {
+						for (var pit of version.pits) {
 							const category = _.find(pit.tags, (tag: ITag) =>
 								tag.name.startsWith("Category")
 							).values[1];
@@ -69,9 +73,14 @@ namespace Peach {
 							}
 							
 							pitCategory.Pits.push(new PitEntry(lib, pit));
-						});
-					});
-				});
+							hasPits = true;
+						};
+					};
+
+					if (pitLib.Name !== 'Legacy' || hasPits) {
+						this.Libs.push(pitLib);
+					}
+				}
 			});
 		}
 

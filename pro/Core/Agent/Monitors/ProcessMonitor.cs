@@ -1,32 +1,4 @@
-﻿
-//
-// Copyright (c) Michael Eddington
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy 
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights 
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-// copies of the Software, and to permit persons to whom the Software is 
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in	
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-//
-
-// Authors:
-//   Michael Eddington (mike@dejavusecurity.com)
-
-// $Id$
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -55,7 +27,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Parameter("StartOnCall", typeof(string), "Start command on state model call", "")]
 	[Parameter("WaitForExitOnCall", typeof(string), "Wait for process to exit on state model call and fault if timeout is reached", "")]
 	[Parameter("WaitForExitTimeout", typeof(int), "Wait for exit timeout value in milliseconds (-1 is infinite)", "10000")]
-	[Parameter("AddressSanitizer", typeof(bool), "Enable Google AddressSanitizer support", "false")]
 	public class ProcessMonitor : Monitor
 	{
 		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
@@ -74,7 +45,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 		public string StartOnCall { get; set; }
 		public string WaitForExitOnCall { get; set; }
 		public int WaitForExitTimeout { get; set; }
-		public bool AddressSanitizer { get; set; }
 
 		public ProcessMonitor(string name)
 			: base(name)
@@ -91,19 +61,16 @@ namespace Peach.Pro.Core.Agent.Monitors
 			{
 				var sb = new StringBuilder();
 
-				if (AddressSanitizer)
+				_process.StandardError = line =>
 				{
-					_process.StandardError = line =>
+					lock (sb)
 					{
-						lock (sb)
+						if (sb.Length > 0 || RunCommand.AsanMatch.IsMatch(line))
 						{
-							if (sb.Length > 0 || RunCommand.AsanMatch.IsMatch(line))
-							{
-								sb.AppendLine(line);
-							}
+							sb.AppendLine(line);
 						}
-					};
-				}
+					}
+				};
 
 				_asanResult = sb;
 
@@ -118,9 +85,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		bool _CheckAsan()
 		{
-			if (!AddressSanitizer)
-				return false;
-
 			lock (_asanResult)
 			{
 				if (_asanResult.Length == 0)
@@ -184,10 +148,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		public override bool DetectedFault()
 		{
-			if (_data != null)
-				return true;
+			// NOTE: Always check ASAN first.
 
-			return _CheckAsan();
+			return _CheckAsan() || _data != null;
 		}
 
 		public override MonitorData GetMonitorData()

@@ -104,19 +104,10 @@ namespace PitCompiler
 				return;
 			seen.Add(asm.Location);
 
-			try
-			{
-				using (var stream = new FileStream(asm.Location, FileMode.Open))
-					stream.CopyTo(cs);
-			}
-			catch (Exception)
-			{
-				// this can happen when trying to read mscorlib.dll
-				// ignore it since we don't care if system assemblies change versions
-				return;
-			}
+			using (var stream = new FileStream(asm.Location, FileMode.Open, FileAccess.Read, FileShare.Read))
+				stream.CopyTo(cs);
 
-//			Console.WriteLine(asm.FullName);
+			//Console.WriteLine(asm.FullName);
 
 			foreach (var asmRef in asm.GetReferencedAssemblies())
 			{

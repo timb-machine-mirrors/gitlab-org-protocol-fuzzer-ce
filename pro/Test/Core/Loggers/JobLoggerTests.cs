@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NLog;
@@ -569,6 +570,254 @@ namespace Peach.Pro.Test.Core.Loggers
 
 			Assert.NotNull(job);
 			Assert.AreEqual(NameKind.Human, job.MetricKind);
+		}
+
+		[Test]
+		public void TestFaultFile()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='Value' value='Hello' />
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action name='act1' type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+			<Action name='act2' type='input'>
+				<DataModel ref='DM'/>
+			</Action>
+			<Action name='act3' type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Agent name='Agent1'>
+		<Monitor class='你好RandoFaulter'>
+			<Param name='Fault' value='-1' />
+		</Monitor>
+	</Agent>
+
+	<Test name='Default' faultWaitTime='0'>
+		<Publisher class='Null'/>
+		<StateModel ref='SM'/>
+		<Logger class='File' />
+		<Agent ref='Agent1' />
+	</Test>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			dom.tests[0].publishers[0] = new TestPub();
+
+			var config = new RunConfiguration
+			{
+				range = true,
+				rangeStart = 1,
+				rangeStop = 3,
+				pitFile = "LoggerTest"
+			};
+
+			var e = new Engine(null);
+
+			e.IterationStarting += (ctx, it, tot) =>
+			{
+				if (it == 2)
+					ctx.InjectFault();
+			};
+
+			e.startFuzzing(dom, config);
+
+			Job job;
+
+			using (var db = new NodeDatabase())
+			{
+				job = db.GetJob(config.id);
+			}
+
+			Assert.AreEqual(1, job.FaultCount);
+
+			using (var db = new JobDatabase(job.DatabasePath))
+			{
+				var faults = db.LoadTable<FaultSummary>().ToList();
+
+				Assert.AreEqual(job.FaultCount, faults.Count);
+
+				var f = db.GetFaultById(faults[0].Id, NameKind.Machine);
+
+				var files = f.Files.ToList();
+
+				// When only DetectionSource is specified, the logger can't provide
+				// AgentName/MonitorClass/MonitorName grouping for the asset
+
+				var expected = new[]
+				{
+					new SavedFile("1.Initial.act1.bin",
+						null,
+						null,
+						null,
+						"Initial.act1",
+						false, FaultFileType.Ouput),
+					new SavedFile("2.Initial.act2.bin",
+						null,
+						null,
+						null,
+						"Initial.act2",
+						false, FaultFileType.Input),
+					new SavedFile("3.Initial.act3.bin",
+						null,
+						null,
+						null,
+						"Initial.act3",
+						false, FaultFileType.Ouput),
+					new SavedFile("UnitTest.description.txt",
+						null,
+						null,
+						null,
+						"UnitTest.description.txt",
+						false, FaultFileType.Asset),
+					new SavedFile("Agent1.Monitor.你好RandoFaulter.description.txt",
+						"Agent1",
+						"你好RandoFaulter",
+						"Monitor",
+						"description.txt",
+						false, FaultFileType.Asset),
+					new SavedFile("Agent1.Monitor.你好RandoFaulter.NetworkCapture1.pcap",
+						"Agent1",
+						"你好RandoFaulter",
+						"Monitor",
+						"NetworkCapture1.pcap",
+						false, FaultFileType.Asset),
+					new SavedFile("Agent1.Monitor.你好RandoFaulter.NetworkCapture2.pcapng",
+						"Agent1",
+						"你好RandoFaulter",
+						"Monitor",
+						"NetworkCapture2.pcapng",
+						false, FaultFileType.Asset),
+					new SavedFile("Agent1.Monitor.你好RandoFaulter.BinaryData.bin",
+						"Agent1",
+						"你好RandoFaulter",
+						"Monitor",
+						"BinaryData.bin",
+						false, FaultFileType.Asset),
+					new SavedFile("Agent1.Monitor.你好RandoFaulter.機除拍禁響地章手棚国歳違不.pcap",
+						"Agent1",
+						"你好RandoFaulter",
+						"Monitor",
+						"機除拍禁響地章手棚国歳違不.pcap",
+						false, FaultFileType.Asset),
+					new SavedFile("fault.json",
+						null,
+						null,
+						null,
+						"fault.json",
+						false, FaultFileType.Asset),
+					new SavedFile("Initial\\2\\1.Initial.act1.bin",
+						null,
+						null,
+						null,
+						"Initial.act1",
+						true, FaultFileType.Ouput),
+					new SavedFile("Initial\\2\\2.Initial.act2.bin",
+						null,
+						null,
+						null,
+						"Initial.act2",
+						true, FaultFileType.Input),
+					new SavedFile("Initial\\2\\3.Initial.act3.bin",
+						null,
+						null,
+						null,
+						"Initial.act3",
+						true, FaultFileType.Ouput),
+					new SavedFile("Initial\\2\\UnitTest.description.txt",
+						null,
+						null,
+						null,
+						"UnitTest.description.txt",
+						true, FaultFileType.Asset),
+					new SavedFile("Initial\\2\\Agent1.Monitor.你好RandoFaulter.description.txt",
+						"Agent1",
+						"你好RandoFaulter",
+						"Monitor",
+						"description.txt",
+						true, FaultFileType.Asset),
+					new SavedFile("Initial\\2\\Agent1.Monitor.你好RandoFaulter.NetworkCapture1.pcap",
+						"Agent1",
+						"你好RandoFaulter",
+						"Monitor",
+						"NetworkCapture1.pcap",
+						true, FaultFileType.Asset),
+					new SavedFile("Initial\\2\\Agent1.Monitor.你好RandoFaulter.NetworkCapture2.pcapng",
+						"Agent1",
+						"你好RandoFaulter",
+						"Monitor",
+						"NetworkCapture2.pcapng",
+						true, FaultFileType.Asset),
+					new SavedFile("Initial\\2\\Agent1.Monitor.你好RandoFaulter.BinaryData.bin",
+						"Agent1",
+						"你好RandoFaulter",
+						"Monitor",
+						"BinaryData.bin",
+						true, FaultFileType.Asset),
+					new SavedFile("Initial\\2\\Agent1.Monitor.你好RandoFaulter.機除拍禁響地章手棚国歳違不.pcap",
+						"Agent1",
+						"你好RandoFaulter",
+						"Monitor",
+						"機除拍禁響地章手棚国歳違不.pcap",
+						true, FaultFileType.Asset),
+					new SavedFile("Initial\\2\\fault.json",
+						null,
+						null,
+						null,
+						"fault.json",
+						true, FaultFileType.Asset),
+				};
+
+
+				Assert.AreEqual(expected.Length, files.Count);
+
+				for (var i = 0; i < expected.Length; ++i)
+				{
+					Assert.AreEqual(expected[i].FullName.Replace('\\', Path.DirectorySeparatorChar), files[i].FullName);
+					Assert.AreEqual(expected[i].AgentName, files[i].AgentName);
+					Assert.AreEqual(expected[i].MonitorClass, files[i].MonitorClass);
+					Assert.AreEqual(expected[i].MonitorName, files[i].MonitorName);
+					Assert.AreEqual(expected[i].Name, files[i].Name);
+					Assert.AreEqual(expected[i].Initial, files[i].Initial);
+					Assert.AreEqual(expected[i].Type, files[i].Type);
+				}
+			}
+		}
+
+		class SavedFile
+		{
+			public readonly string FullName;
+			public readonly string AgentName;
+			public readonly string MonitorClass;
+			public readonly string MonitorName;
+			public readonly string Name;
+			public readonly bool Initial;
+			public readonly FaultFileType Type;
+
+			public SavedFile(string fullName,
+			                 string agentName,
+			                 string monitorClass,
+			                 string monitorName,
+			                 string name,
+			                 bool initial,
+			                 FaultFileType type)
+			{
+				FullName = fullName;
+				AgentName = agentName;
+				MonitorClass = monitorClass;
+				MonitorName = monitorName;
+				Name = name;
+				Initial = initial;
+				Type = type;
+			}
 		}
 
 		[Test]
