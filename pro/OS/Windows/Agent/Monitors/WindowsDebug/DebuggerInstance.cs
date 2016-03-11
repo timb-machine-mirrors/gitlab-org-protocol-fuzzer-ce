@@ -68,6 +68,8 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors.WindowsDebug
 		public bool dbgExited = false;
 		public bool caughtException = false;
 
+		public int serviceStartTimeout;
+
 		public Fault crashInfo = null;
 
 		public DebuggerInstance()
@@ -197,21 +199,9 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors.WindowsDebug
 					}
 					else if (service != null)
 					{
-						int processId = 0;
+						var pid = SystemDebuggerInstance.GetServicePid(service, TimeSpan.FromSeconds(serviceStartTimeout));
 
-						using (ServiceController srv = new ServiceController(service))
-						{
-							if (srv.Status == ServiceControllerStatus.Stopped)
-								srv.Start();
-
-							using (ManagementObject manageService = new ManagementObject(@"Win32_service.Name='" + srv.ServiceName + "'"))
-							{
-								object o = manageService.GetPropertyValue("ProcessId");
-								processId = (int)((UInt32)o);
-							}
-						}
-
-						_dbg.AttachProcess(processId);
+						_dbg.AttachProcess(pid);
 					}
 
 					if (_dbg.handledException.WaitOne(0, false))
