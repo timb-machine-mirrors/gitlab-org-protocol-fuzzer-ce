@@ -90,8 +90,7 @@ namespace Peach {
 	}
 
 	export interface IPitCopy {
-		// Url of the destination Pit Library
-		libraryUrl: string;
+		legacyPitUrl?: string;
 		pitUrl: string;
 		name: string;
 		description: string;

@@ -19,7 +19,6 @@ namespace Peach {
 		}
 
 		private pit: IPit;
-		private userPitLibrary: string;
 
 		public get CurrentPitId() {
 			return this.$state.params['pit'];
@@ -39,12 +38,6 @@ namespace Peach {
 
 		public LoadLibrary(): ng.IPromise<ILibrary[]> {
 			const promise = this.$http.get(C.Api.Libraries);
-			promise.success((libs: ILibrary[]) => {
-				this.userPitLibrary = _(libs)
-					.reject({ locked: true })
-					.first()
-					.libraryUrl;
-			});
 			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
 				this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
 			});
@@ -140,7 +133,6 @@ namespace Peach {
 
 		public SaveConfig(pit: IPit): ng.IHttpPromise<IPit> {
 			const request: IPitCopy = {
-				libraryUrl: this.userPitLibrary,
 				pitUrl: pit.pitUrl,
 				name: pit.name,
 				description: pit.description

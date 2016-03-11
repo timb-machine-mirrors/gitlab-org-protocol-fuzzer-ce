@@ -1,5 +1,5 @@
 ﻿<p>
-	Welcome to the Peach Pit library. This page consists of two main parts:
+	Welcome to the Peach Pit library. This page consists of the following sections:
 </p>
 
 <dl class="dl-horizontal">
@@ -15,6 +15,13 @@
 	</dt>
 	<dd>
 		Saved pit configurations
+	</dd>
+
+	<dt>
+		Legacy
+	</dt>
+	<dd>
+		Pits from an older version of Peach that require migration so they can be used in the latest version.
 	</dd>
 </dl>
 
@@ -32,14 +39,12 @@
 	</span>
 </div>
 
-<div class="page-header">
-	<h3>Pits</h3>
-</div>
-<p>
-	Peach Pits allow testing of a data format or a network protocol against a variety of targets.
-</p>
+<div class="page-header"
+	ng-repeat="lib in vm.Libs">
+	<h3>{{lib.Name}}</h3>
+<p>{{lib.Text}}</p>
 <uib-accordion close-others="false">
-	<uib-accordion-group ng-repeat="cat in vm.Pits.Categories | filter: filterCategory(search)"
+	<uib-accordion-group ng-repeat="cat in lib.Categories | filter: filterCategory(search)"
 									 heading="{{cat.Name}}"
 									 is-open="true">
 		<div class="peach-library">
@@ -54,27 +59,4 @@
 		</div>
 	</uib-accordion-group>
 </uib-accordion>
-
-<div class="page-header">
-	<h3>Configurations</h3>
 </div>
-<p>
-	The Configurations section contains existing Peach Pit configurations. 
-	Selecting an existing configuration allows editing the configuration and starting a new fuzzing job.
-</p>
-<uib-accordion close-others="false">
-	<uib-accordion-group ng-repeat="cat in vm.User.Categories | filter: filterCategory(search)"
-									 heading="{{cat.Name}}"
-									 is-open="true">
-		<div class="peach-library">
-			<ul class="list-inline">
-				<li ng-repeat="entry in cat.Pits | filter: { Pit: { name: search } }">
-					<a href=""
-						ng-click="vm.OnSelectPit(entry)">
-							{{entry.Pit.name | peachPitName}}
-						</a>
-				</li>
-			</ul>
-		</div>
-	</uib-accordion-group>
-</uib-accordion>
