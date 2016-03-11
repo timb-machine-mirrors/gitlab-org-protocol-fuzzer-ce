@@ -57,6 +57,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		ServiceController _sc;
 		MonitorData _data;
 		TimeSpan _timeout;
+		bool _firstRun;
 
 		public WindowsService(string name)
 			: base(name)
@@ -77,17 +78,20 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 			_timeout = TimeSpan.FromMinutes(StartTimeout);
 
-			if (string.IsNullOrEmpty(MachineName))
+			_sc = string.IsNullOrEmpty(MachineName)
+				? new ServiceController(Service)
+				: new ServiceController(Service, MachineName);
+
+			try
 			{
-				_sc = new ServiceController(Service);
-				if (_sc == null)
-					throw new PeachException("WindowsService monitor was unable to connect to service '{0}'.".Fmt(Service));
+				_sc.Refresh();
 			}
-			else
+			catch (Exception ex)
 			{
-				_sc = new ServiceController(Service, MachineName);
-				if (_sc == null)
-					throw new PeachException("WindowsService monitor was unable to connect to service '{0}' on computer '{1}'.".Fmt(Service, MachineName));
+				if (string.IsNullOrEmpty(MachineName))
+					throw new PeachException("WindowsService monitor was unable to connect to service '{0}'.".Fmt(Service), ex);
+
+				throw new PeachException("WindowsService monitor was unable to connect to service '{0}' on computer '{1}'.".Fmt(Service, MachineName), ex);
 			}
 		}
 
@@ -100,9 +104,28 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			}
 		}
 
+		public override void SessionStarting()
+		{
+			if (Restart)
+			{
+				_firstRun = false;
+			}
+			else
+			{
+				_firstRun = true;
+				StartService();
+			}
+		}
+
 		public override void IterationStarting(IterationStartingArgs args)
 		{
 			_data = null;
+
+			if (_firstRun)
+			{
+				_firstRun = false;
+				return;
+			}
 
 			if (Restart)
 				StopService();
