@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Xml;
 using NLog;
 using Peach.Core;
@@ -211,7 +212,6 @@ namespace Peach.Pro.Core.Dom
 		{
 			if (item.Name == "Payload")
 			{
-				Logger.Debug(">>OnInsertItem");
 				var payload = this["Payload"];
 				if(payload != null)
 					payload.Invalidated -= OnPayloadInvalidated;

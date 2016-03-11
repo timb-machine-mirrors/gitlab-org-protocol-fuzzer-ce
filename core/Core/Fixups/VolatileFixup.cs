@@ -33,9 +33,6 @@ namespace Peach.Core.Fixups
 				_dataModel.ActionRun += OnActionRunEvent;
 			}
 
-			Console.Error.WriteLine("fixupImpl({0}): {1}", parent.fullName,
-				_defaultValue ?? parent.DefaultValue);
-
 			return _defaultValue ?? parent.DefaultValue;
 		}
 

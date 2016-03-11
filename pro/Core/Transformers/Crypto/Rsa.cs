@@ -137,13 +137,17 @@ namespace Peach.Pro.Core.Transformers.Crypto
 				if (data.Length > encoding.GetInputBlockSize())
 				{
 					logger.Error("Data length greater than block size, returning unencrypted data");
-					return data;
+					throw new SoftException("No key found, skipping encryption!");
 				}
 
-				var clear = new BitReader(data).ReadBytes((int)data.Length);
+				var clear = new BitReader(data).ReadBytes((int) data.Length);
 
 				var encrypted = encoding.ProcessBlock(clear, 0, clear.Length);
 				return new BitStream(encrypted);
+			}
+			catch (SoftException)
+			{
+				throw;
 			}
 			catch (Exception ex)
 			{

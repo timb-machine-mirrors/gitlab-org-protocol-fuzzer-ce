@@ -112,28 +112,42 @@ namespace Peach.Pro.Core.Transformers.Crypto
 				seqElement = parent.getRoot().find("SequenceNumber");
 			}
 
-			if (epochElement == null)
-				throw new SoftException("DTls transformer can't find Epoch element.");
+			try
+			{
 
-			var epoch = (int)epochElement.InternalValue;
+				if (epochElement == null)
+					throw new SoftException("DTls transformer can't find Epoch element.");
 
-			if (seqElement == null)
-				throw new SoftException("DTls transfomer can't find SequenceNumber element.");
+				var epoch = (int)epochElement.InternalValue;
 
-			var sequenceNumber = (int)seqElement.InternalValue;
+				if (seqElement == null)
+					throw new SoftException("DTls transfomer can't find SequenceNumber element.");
 
-			var bitStream = new BitStream();
-			var writer = new BitWriter(bitStream);
-			writer.BigEndian();
+				var sequenceNumber = (ulong)seqElement.InternalValue;
 
-			writer.WriteUInt16((ushort)epoch);
-			writer.WriteBits((ulong)sequenceNumber, 48);
+				var bitStream = new BitStream();
+				var writer = new BitWriter(bitStream);
+				writer.BigEndian();
 
-			bitStream.Position = 0;
-			var reader = new BitReader(bitStream);
-			reader.BigEndian();
+				writer.WriteUInt16((ushort)epoch);
+				writer.WriteBits(sequenceNumber, 48);
 
-			return reader.ReadInt64();
+				bitStream.Position = 0;
+				var reader = new BitReader(bitStream);
+				reader.BigEndian();
+
+				return reader.ReadInt64();
+			}
+			catch (NotSupportedException)
+			{
+				// Thrown when trying to convert Variant to int
+				return 0;
+			}
+			catch (ApplicationException)
+			{
+				// Thrown when conversion would losse information
+				return 0;
+			}
 		}
 
 		[OnCloned]

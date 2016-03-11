@@ -1,32 +1,4 @@
 ﻿
-//
-// Copyright (c) Michael Eddington
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy 
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights 
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-// copies of the Software, and to permit persons to whom the Software is 
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in	
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-//
-
-// Authors:
-//   Michael Eddington (mike@dejavusecurity.com)
-//   Ross Salpino (rsal42@gmail.com)
-
-// $Id$
-
 using System;
 using System.Collections.Generic;
 using Peach.Core;
@@ -76,11 +48,7 @@ namespace Peach.Pro.Core.Fixups
 				throw new PeachException("SequenceIncrementFixup has non numeric parent '" + parent.fullName + "'.");
 
 			if (!parent.InScope())
-			{
-				Console.WriteLine("fullName: " + parent.fullName);
-				Console.WriteLine("out of scope");
 				return parent.DefaultValue;
-			}
 
 			var increment = true;
 			ulong max = parent is Number ? ((Number)parent).MaxValue : ulong.MaxValue;
@@ -95,8 +63,7 @@ namespace Peach.Pro.Core.Fixups
 			else
 				increment = false;
 
-			Console.WriteLine("_stateKey: " + _stateKey);
-			if (ctx.stateStore.TryGetValue(_stateKey, out obj))
+			if (ctx.iterationStateStore.TryGetValue(_stateKey, out obj))
 			{
 				try
 				{
@@ -127,9 +94,6 @@ namespace Peach.Pro.Core.Fixups
 			if (value > max)
 				value = value % max;
 
-			Console.WriteLine("fullName: " + fullName);
-			Console.WriteLine("increment: " + increment);
-
 			if (increment)
 			{
 				if (initialValue)
@@ -140,14 +104,12 @@ namespace Peach.Pro.Core.Fixups
 				if (value > max)
 					value -= max;
 
-				ctx.stateStore[_stateKey] = value;
 				ctx.iterationStateStore[_stateKey] = value;
 				ctx.iterationStateStore[fullName] = value;
 			}
 
 			parent.Invalidate();
 
-			Console.WriteLine("value: " + value);
 			return new Variant(value);
 		}
 	}
