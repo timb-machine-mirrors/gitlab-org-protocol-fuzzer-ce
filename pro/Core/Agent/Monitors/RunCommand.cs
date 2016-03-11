@@ -21,7 +21,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Parameter("FaultExitCode", typeof(int), "Exit code to fault on", "1")]
 	[Parameter("FaultOnNonZeroExit", typeof(bool), "Fault if exit code is non-zero", "false")]
 	[Parameter("FaultOnRegex", typeof(string), "Fault if regex matches", "")]
-	[Parameter("AddressSanitizer", typeof(bool), "Enable Google AddressSanitizer support", "false")]
 	[Parameter("Timeout", typeof(int), "Fault if process takes more than 'Timeout' milliseconds to exit, where -1 means infinite timeout", "-1")]
 	[Parameter("WorkingDirectory", typeof(string), "Working directory to set when running command", "")]
 	public class RunCommand  : Monitor
@@ -35,7 +34,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 		public int FaultExitCode { get; set; }
 		public bool FaultOnExitCode { get; set; }
 		public string FaultOnRegex { get; set; }
-		public bool AddressSanitizer { get; set; }
 		public string WorkingDirectory { get; set; }
 
 		// NOTE: Output from GCC can be slightly different than CLANG
@@ -80,31 +78,19 @@ namespace Peach.Pro.Core.Agent.Monitors
 				_data.Data.Add("stdout", new MemoryStream(Encoding.UTF8.GetBytes(stdout)));
 				_data.Data.Add("stderr", new MemoryStream(Encoding.UTF8.GetBytes(stderr)));
 
-				if (result.Timeout)
+				if (AsanMatch.IsMatch(stderr))
 				{
-					_data.Title = "Process failed to exit in allotted time.";
+					var title = AsanTitle.Match(stderr);
+					var bucket = AsanBucket.Match(stderr);
+					var desc = AsanMessage.Match(stderr);
+
+					_data.Title = title.Groups[1].Value;
 					_data.Fault = new MonitorData.Info
 					{
-						MajorHash = Hash(Class + Command),
-						MinorHash = Hash("FailedToExit")
-					};
-				}
-				else if (FaultOnExitCode && result.ExitCode == FaultExitCode)
-				{
-					_data.Title = "Process exited with code {0}.".Fmt(result.ExitCode);
-					_data.Fault = new MonitorData.Info
-					{
-						MajorHash = Hash(Class + Command),
-						MinorHash = Hash(result.ExitCode.ToString(CultureInfo.InvariantCulture))
-					};
-				}
-				else if (FaultOnNonZeroExit && result.ExitCode != 0)
-				{
-					_data.Title = "Process exited with code {0}.".Fmt(result.ExitCode);
-					_data.Fault = new MonitorData.Info
-					{
-						MajorHash = Hash(Class + Command),
-						MinorHash = Hash(result.ExitCode.ToString(CultureInfo.InvariantCulture))
+						Description = stderr.Substring(desc.Index, desc.Length),
+						MajorHash = Hash(bucket.Groups[3].Value),
+						MinorHash = Hash(bucket.Groups[2].Value),
+						Risk = bucket.Groups[1].Value,
 					};
 				}
 				else if (_faultOnRegex != null)
@@ -137,19 +123,31 @@ namespace Peach.Pro.Core.Agent.Monitors
 						}
 					}
 				}
-				else if (AddressSanitizer && AsanMatch.IsMatch(stderr))
+				else if (result.Timeout)
 				{
-					var title = AsanTitle.Match(stderr);
-					var bucket = AsanBucket.Match(stderr);
-					var desc = AsanMessage.Match(stderr);
-
-					_data.Title = title.Groups[1].Value;
+					_data.Title = "Process failed to exit in allotted time.";
 					_data.Fault = new MonitorData.Info
 					{
-						Description = stderr.Substring(desc.Index, desc.Length),
-						MajorHash = Hash(bucket.Groups[3].Value),
-						MinorHash = Hash(bucket.Groups[2].Value),
-						Risk = bucket.Groups[1].Value,
+						MajorHash = Hash(Class + Command),
+						MinorHash = Hash("FailedToExit")
+					};
+				}
+				else if (FaultOnExitCode && result.ExitCode == FaultExitCode)
+				{
+					_data.Title = "Process exited with code {0}.".Fmt(result.ExitCode);
+					_data.Fault = new MonitorData.Info
+					{
+						MajorHash = Hash(Class + Command),
+						MinorHash = Hash(result.ExitCode.ToString(CultureInfo.InvariantCulture))
+					};
+				}
+				else if (FaultOnNonZeroExit && result.ExitCode != 0)
+				{
+					_data.Title = "Process exited with code {0}.".Fmt(result.ExitCode);
+					_data.Fault = new MonitorData.Info
+					{
+						MajorHash = Hash(Class + Command),
+						MinorHash = Hash(result.ExitCode.ToString(CultureInfo.InvariantCulture))
 					};
 				}
 			}
