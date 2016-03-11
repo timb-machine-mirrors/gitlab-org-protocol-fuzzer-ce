@@ -60,7 +60,6 @@ image::{images}/Timings_All.png["When Timing Choices", scalewidth="75%"]
 
 FaultExitCode:: Exit code value of interest. If the specified exit code occurs, the monitor generates a fault. The default exit code value is 1.
 FaultOnExitCode:: Generate a fault when the FaultExitCode matches the exit code of the launched command. The default value is false.
-AddressSanitizer:: Enable support for the Google AddressSanitizer (ASan). This feature is turned off (set to false) by default.
 StartOnCall:: Launch the command when the monitor receives a specified message from  the state machine.
 FaultOnNonZeroExit:: Generate a fault if the exit code is non-zero. The default value is false.
 FaultOnRegex:: Generate a fault if the regular expression matches the command output. This feature 
