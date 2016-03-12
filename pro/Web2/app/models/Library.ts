@@ -1,9 +1,7 @@
 import { Pit } from './Pit';
 
 export interface LibraryState {
-	libraryUrl?: string;
-	pits?: Category[];
-	configurations?: Category[];
+	[name: string]: Category[];
 }
 
 export interface Library {

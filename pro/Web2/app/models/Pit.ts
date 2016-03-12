@@ -93,8 +93,7 @@ export interface Pit {
 }
 
 export interface PitCopy {
-	// Url of the destination Pit Library
-	libraryUrl: string;
+	legacyPitUrl?: string;
 	pitUrl: string;
 	name: string;
 	description: string;

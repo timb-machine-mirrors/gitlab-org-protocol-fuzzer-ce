@@ -104,7 +104,6 @@ class NewPitModal extends Component<NewModalProps, {}> {
 	onSubmit = (data: FormData) => {
 		const { name, description } = data;
 		const request: PitCopy = {
-			libraryUrl: this.props.library.libraryUrl,
 			pitUrl: this.props.pit.pitUrl,
 			name: name,
 			description: description

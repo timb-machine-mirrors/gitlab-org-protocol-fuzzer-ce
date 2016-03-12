@@ -50,7 +50,7 @@ class CLibrary extends Component<CLibraryProps, CLibraryState> {
 	}
 
 	render() {
-		const { pits, configurations } = this.props.library;
+		const { library } = this.props;
 		return <div>
 			<p>
 				Welcome to the Peach Pit library. This page consists of two main parts:
@@ -70,6 +70,13 @@ class CLibrary extends Component<CLibraryProps, CLibraryState> {
 				<dd>
 					Saved pit configurations
 				</dd>
+
+				<dt>
+					Legacy
+				</dt>
+				<dd>
+					Legacy pits
+				</dd>
 			</dl>
 
 			<Input type='text'
@@ -85,7 +92,7 @@ class CLibrary extends Component<CLibraryProps, CLibraryState> {
 				Peach Pits allow testing of a data format or a network protocol against a variety of targets.
 			</p>
 
-			{this.renderSection(pits, true)}
+			{this.renderSection(library['Pits'], pit => this.openNewPitModal(pit))}
 
 			<div className='page-header'>
 				<h3>Configurations</h3>
@@ -95,7 +102,16 @@ class CLibrary extends Component<CLibraryProps, CLibraryState> {
 				Selecting an existing configuration allows editing the configuration and starting a new fuzzing job.
 			</p>
 
-			{this.renderSection(configurations, false)}
+			{this.renderSection(library['Configurations'], pit => this.navigateToPit(pit))}
+
+			<div className='page-header'>
+				<h3>Legacy</h3>
+			</div>
+			<p>
+				Legacy stuff.
+			</p>
+
+			{this.renderSection(library['Legacy'], pit => this.migratePit(pit))}
 
 			{this.state.showModal &&
 				<NewPitModal
@@ -113,49 +129,45 @@ class CLibrary extends Component<CLibraryProps, CLibraryState> {
 		</Button>;
 	}
 
-	renderSection(data: Category[], isLocked: boolean) {
+	renderSection(data: Category[], handler: Function) {
 		const { statuses } = this.props;
 		const isFetching = statuses.library === 'pending';
 		return <div>
-			{isFetching && data.length === 0 &&
+			{isFetching && !data &&
 				<h4>Loading...</h4>
 			}
 
-			{data.length > 0 &&
+			{data && data.length > 0 &&
 				<div style={{ opacity: isFetching ? 0.5 : 1 }}>
 					{this.filterCategories(data).map((item, i) =>
-						this.renderCategory(item, i, isLocked))
+						this.renderCategory(item, i, handler))
 					}
 				</div>
 			}
 		</div>;
 	}
 
-	renderCategory(category: Category, index: number, isLocked: boolean) {
+	renderCategory(category: Category, index: number, handler: Function) {
 		return <FoldingPanel key={index}
 			header={() => category.name}>
 			<div className='peach-library'>
 				<ul className='list-inline'>
 					{this.filterPits(category.pits).map((x, i) =>
-						this.renderLink(x, i, isLocked))
+						this.renderLink(x, i, handler))
 					}
 				</ul>
 			</div>
 		</FoldingPanel>;
 	}
 
-	renderLink(pit: Pit, index: number, isLocked: boolean) {
+	renderLink(pit: Pit, index: number, handler: Function) {
 		const params = { pit: pit.id };
 		const { router } = this.context;
 		const href = router.buildUrl(R.Pit.name, params);
 
 		const onClick = (evt: MouseEvent) => {
 			evt.preventDefault();
-			if (isLocked) {
-				this.openNewPitModal(pit);
-			} else {
-				this.navigateToPit(pit);
-			}
+			handler(pit);
 		};
 
 		return <li key={index}>
@@ -212,6 +224,10 @@ class CLibrary extends Component<CLibraryProps, CLibraryState> {
 		return _.filter(pits, x =>
 			x.name.toLowerCase().indexOf(search) !== -1
 		);
+	}
+
+	migratePit(pit: Pit) {
+		console.log('Migrate', pit);
 	}
 }
 

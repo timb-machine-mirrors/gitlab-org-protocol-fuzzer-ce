@@ -9,11 +9,7 @@ const types = {
 };
 MakeEnum(types);
 
-const initial: LibraryState = {
-	libraryUrl: null,
-	pits: [],
-	configurations: []
-};
+const initial: LibraryState = {};
 
 export default function reducer(state: LibraryState = initial, action): LibraryState {
 	switch (action.type) {
@@ -34,41 +30,42 @@ export function fetchLibraries() {
 	};
 }
 
-function mapLibrary(data: Library[]): Category[] {
+function mapLibrary(lib: Library): Category[] {
 	let ret: Category[] = [];
-	for (const lib of data) {
-		for (const version of lib.versions) {
-			for (const pit of version.pits) {
-				const name = _.find(pit.tags, tag =>
-					_.startsWith(tag.name, 'Category')
-				).values[1];
+	for (const version of lib.versions) {
+		for (const pit of version.pits) {
+			const name = _.find(pit.tags, tag =>
+				_.startsWith(tag.name, 'Category')
+			).values[1];
 
-				let category = _.find(ret, { name: name });
-				if (!category) {
-					category = {
-						name: name,
-						pits: []
-					};
-					ret.push(category);
-				}
-				category.pits.push(pit);
+			let category = _.find(ret, { name: name });
+			if (!category) {
+				category = {
+					name: name,
+					pits: []
+				};
+				ret.push(category);
 			}
+			category.pits.push(pit);
 		}
+	}
+	return ret;
+}
+
+interface DictIteratee<T> {
+	(item: T): any[];
+}
+
+function dict<T>(collection: T[], iteratee: DictIteratee<T>) {
+	const ret = {};
+	for (const item of collection) {
+		const pair = iteratee(item);
+		ret[pair[0]] = pair[1];
 	}
 	return ret;
 }
 
 function onReceive(state: LibraryState, action): LibraryState {
 	const library: Library[] = action.payload.library;
-	const libraryUrl = _(library)
-		.reject({ locked: true })
-		.first()
-		.libraryUrl;
-	const pits = _.filter(library, 'locked');
-	const configurations = _.reject(library, 'locked');
-	return {
-		libraryUrl: libraryUrl,
-		pits: mapLibrary(pits),
-		configurations: mapLibrary(configurations)
-	};
+	return <LibraryState>dict(library, lib => [lib.name, mapLibrary(lib)]);
 }
