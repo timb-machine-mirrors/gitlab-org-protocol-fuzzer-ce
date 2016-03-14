@@ -585,14 +585,8 @@ namespace Peach.Pro.Core.WebServices
 			return detail;
 		}
 
-		public PitDetail MigratePit(string legacyPitUrl, string pitUrl, string name, string description)
+		public PitDetail MigratePit(string legacyPitUrl, string pitUrl)
 		{
-			if (string.IsNullOrEmpty(name))
-				throw new ArgumentException("A non-empty pit name is required.", "name");
-
-			if (Path.GetFileName(name) != name)
-				throw new ArgumentException("A valid pit name is required.", "name");
-
 			var legacyPit = GetPitDetailByUrl(legacyPitUrl);
 			if (legacyPit == null)
 				throw new KeyNotFoundException("The legacy pit could not be found.");
@@ -600,13 +594,14 @@ namespace Peach.Pro.Core.WebServices
 			var legacyFile = legacyPit.Path;
 			var legacyConfigFile = legacyFile + ".config";
 			var legacyFileName = Path.GetFileName(legacyFile);
+			var legacyName = Path.GetFileNameWithoutExtension(legacyFile);
 			var legacyCat = GetCategory(legacyFile);
 
 			var cfgDir = Path.Combine(_pitLibraryPath, ConfigsDir, legacyCat);
 			if (!Directory.Exists(cfgDir))
 				Directory.CreateDirectory(cfgDir);
 
-			var cfgFile = Path.Combine(cfgDir, name + ".peach");
+			var cfgFile = Path.Combine(cfgDir, legacyName + ".peach");
 			if (File.Exists(cfgFile))
 				throw new ArgumentException("A pit already exists with the specified name.");
 
@@ -649,8 +644,8 @@ namespace Peach.Pro.Core.WebServices
 				OriginalPit = originalPitPath,
 				Id = guid,
 				PitUrl = PitServicePrefix + "/" + guid,
-				Name = name,
-				Description = description,
+				Name = legacyName,
+				Description = contents.Description,
 				Locked = false,
 				Tags = legacyPit.Pit.Tags,
 				Peaches = new List<PeachVersion> { Version },
@@ -685,7 +680,7 @@ namespace Peach.Pro.Core.WebServices
 				throw new UnauthorizedAccessException();
 
 			detail.Pit.Config = data.Config; // TODO: defines.ApplyWeb(config);
-			detail.Pit.Agents = data.Agents;
+			detail.Pit.Agents = data.Agents.FromWeb();
 			detail.Pit.Weights = data.Weights;
 
 			SavePit(detail.Path, detail.Pit);

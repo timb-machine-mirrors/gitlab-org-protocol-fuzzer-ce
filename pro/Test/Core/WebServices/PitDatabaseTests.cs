@@ -302,6 +302,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			var ent = _db.Entries.First();
 			var newPit = _db.CopyPit(ent.PitUrl, "IMG Copy", "Desc");
 			var cfg = new PitConfig {
+				Agents = new List<MAgent>(),
 				Config = new List<Param> {
 					new Param { Key = "SomeMiscVariable", Value = "Foo Bar Baz" }
 				},
@@ -391,16 +392,16 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.AreEqual("Agent0", pit.Agents[0].Name);
 			Assert.AreEqual("local://", pit.Agents[0].AgentUrl);
 			Assert.AreEqual(1, pit.Agents[0].Monitors.Count);
-//			Assert.AreEqual(2, pit.Agents[0].Monitors[0].Map.Count);
-//			Assert.AreEqual("Executable", pit.Agents[0].Monitors[0].Map[0].Key);
-//			Assert.AreEqual("foo", pit.Agents[0].Monitors[0].Map[0].Value);
-//			Assert.AreEqual("NoCpuKill", pit.Agents[0].Monitors[0].Map[1].Key);
-//			Assert.AreEqual("false", pit.Agents[0].Monitors[0].Map[1].Value);
+			Assert.AreEqual(2, pit.Agents[0].Monitors[0].Map.Count);
+			Assert.AreEqual("Executable", pit.Agents[0].Monitors[0].Map[0].Key);
+			Assert.AreEqual("foo", pit.Agents[0].Monitors[0].Map[0].Value);
+			Assert.AreEqual("NoCpuKill", pit.Agents[0].Monitors[0].Map[1].Key);
+			Assert.AreEqual("false", pit.Agents[0].Monitors[0].Map[1].Value);
 
 			// Only Key/Value are expected to be set
 			// Name/Description come from pit.metadata.monitors
-//			Assert.AreEqual(null, pit.Agents[0].Monitors[0].Map[0].Name);
-//			Assert.AreEqual(null, pit.Agents[0].Monitors[0].Map[0].Description);
+			Assert.AreEqual(null, pit.Agents[0].Monitors[0].Map[0].Name);
+			Assert.AreEqual(null, pit.Agents[0].Monitors[0].Map[0].Description);
 		}
 
 		[Test]
@@ -624,9 +625,6 @@ namespace Peach.Pro.Test.Core.WebServices
 			File.WriteAllText(Path.Combine(legacyDir, "IMG.xml"), pitExample);
 			File.WriteAllText(Path.Combine(legacyDir, "IMG.xml.config"), configExample);
 
-			Directory.EnumerateFiles(_root.Path, "*", SearchOption.AllDirectories)
-				.ForEach(x => Console.WriteLine(x));
-
 			_db.Load(_root.Path);
 
 			Assert.AreEqual(2, _db.Entries.Count());
@@ -640,14 +638,10 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.NotNull(pitDetail);
 
 			var originalPit = _db.Entries.ElementAt(0);
-			var newName = "new";
-			var newDesc = "desc";
 
-			var newPit = _db.MigratePit(pit.PitUrl, originalPit.PitUrl, newName, newDesc);
-			Assert.AreEqual(newName, newPit.Pit.Name);
-			Assert.AreEqual(newDesc, newPit.Pit.Description);
+			var newPit = _db.MigratePit(pit.PitUrl, originalPit.PitUrl);
 
-			var expectedPath = Path.Combine(_root.Path, PitDatabase.ConfigsDir, category, newName + ".peach");
+			var expectedPath = Path.Combine(_root.Path, PitDatabase.ConfigsDir, category, "IMG.peach");
 			Assert.AreEqual(expectedPath, newPit.Path);
 			Assert.True(File.Exists(expectedPath));
 			Assert.True(File.Exists(Path.Combine(_root.Path, PitDatabase.ConfigsDir, category, "IMG.xml")));
@@ -688,9 +682,6 @@ namespace Peach.Pro.Test.Core.WebServices
 			File.WriteAllText(Path.Combine(legacyDir, "IMG.xml"), pitExample);
 			File.WriteAllText(Path.Combine(legacyDir, "IMG.xml.config"), configExample);
 
-			Directory.EnumerateFiles(_root.Path, "*", SearchOption.AllDirectories)
-				.ForEach(x => Console.WriteLine(x));
-
 			_db.Load(_root.Path);
 
 			Assert.AreEqual(2, _db.Entries.Count());
@@ -703,14 +694,9 @@ namespace Peach.Pro.Test.Core.WebServices
 			var pitDetail = _db.GetPitDetailByUrl(pit.PitUrl);
 			Assert.NotNull(pitDetail);
 
-			var newName = "new";
-			var newDesc = "desc";
+			var newPit = _db.MigratePit(pit.PitUrl, pit.PitUrl);
 
-			var newPit = _db.MigratePit(pit.PitUrl, pit.PitUrl, newName, newDesc);
-			Assert.AreEqual(newName, newPit.Pit.Name);
-			Assert.AreEqual(newDesc, newPit.Pit.Description);
-
-			var expectedPath = Path.Combine(_root.Path, PitDatabase.ConfigsDir, category, newName + ".peach");
+			var expectedPath = Path.Combine(_root.Path, PitDatabase.ConfigsDir, category, "IMG.peach");
 			Assert.AreEqual(expectedPath, newPit.Path);
 			Assert.True(File.Exists(expectedPath));
 
@@ -744,19 +730,14 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void TestMigrateDotInName()
 		{
-			Assert.Fail("TODO");
-		}
+			File.WriteAllText(Path.Combine(_root.Path, "Image", "Foo.Mine.xml"), pitExample);
 
-		[Test]
-		public void TestMigratePathInName()
-		{
-			Assert.Fail("TODO");
-		}
+			_db.Load(_root.Path);
 
-		[Test]
-		public void TestMigrateBadName()
-		{
-			Assert.Fail("TODO");
+			var pit = _db.Entries.ElementAt(0);
+			var originalPit = _db.Entries.ElementAt(1);
+			var newPit = _db.MigratePit(pit.PitUrl, originalPit.PitUrl);
+			Assert.AreEqual("Foo.Mine", newPit.Pit.Name);
 		}
 	}
 }

@@ -92,9 +92,12 @@ namespace Peach.Pro.Core.Runtime
 				if (!dom.tests.TryGetValue(_config.runName, out test))
 					throw new PeachException("Unable to locate test named '{0}'.".Fmt(_config.runName));
 
-				foreach (var item in _pit.Weights)
+				if (_pit.Weights != null)
 				{
-					test.weights.Add(new SelectWeight{ Name = item.Id, Weight = (ElementWeight)item.Weight });
+					foreach (var item in _pit.Weights)
+					{
+						test.weights.Add(new SelectWeight { Name = item.Id, Weight = (ElementWeight)item.Weight });
+					}
 				}
 
 				var userLogger = test.loggers.OfType<JobLogger>().FirstOrDefault();
