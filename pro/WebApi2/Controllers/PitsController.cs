@@ -49,12 +49,7 @@ namespace Peach.Pro.WebApi2.Controllers
 				PitDetail pit;
 				if (!string.IsNullOrEmpty(data.LegacyPitUrl))
 				{
-					pit = PitDatabase.MigratePit(
-						data.LegacyPitUrl,
-						data.PitUrl,
-						data.Name,
-						data.Description
-					);
+					pit = PitDatabase.MigratePit(data.LegacyPitUrl, data.PitUrl);
 				}
 				else
 				{

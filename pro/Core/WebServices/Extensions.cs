@@ -54,7 +54,35 @@ namespace Peach.Pro.Core.WebServices
 				}).ToList()
 			}).ToList();
 		}
+		
+		public static List<Models.Agent> FromWeb(this List<Models.Agent> agents)
+		{
+			return agents.Select(a =>
+				new Models.Agent
+				{
+					Name = a.Name,
+					AgentUrl = a.AgentUrl,
+					Monitors = a.Monitors.Select(m => new Monitor
+					{
+						Name = m.Name,
+						MonitorClass = EnsureNotEmpty(m.MonitorClass, "MonitorClass", "monitor"),
+						Map = m.Map.SelectMany(ToMonitorParam).ToList()
+					}).ToList()
+				}).ToList();
+		}
 
+		static Param[] ToMonitorParam(Param p)
+		{
+			// For backwards compatibility:
+			// Peach 3.7 posts name/value, Peach 3.8 posts key/value
+			var key = EnsureNotEmpty(p.Key ?? p.Name, "Key", "monitor parameter");
+
+			if (String.IsNullOrEmpty(p.Value))
+				return new Param[0];
+
+			return new[] { new Param { Key = key, Value = p.Value } };
+		}
+		
 		static string EnsureNotEmpty(string value, string name, string type)
 		{
 			if (String.IsNullOrEmpty(value))
