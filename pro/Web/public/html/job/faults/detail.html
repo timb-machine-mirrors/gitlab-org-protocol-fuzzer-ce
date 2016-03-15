@@ -75,6 +75,116 @@
 				<td>
 					<table class="table table-hover table-bordered">
 						<thead>
+						<tr>
+							<th st-ratio="85">
+								Name
+							</th>
+							<th st-ratio="15"
+							    class="align-right">
+								Size
+							</th>
+						</tr>
+						</thead>
+						<tbody>
+						<tr>
+							<td>
+								<a href="{{vm.Fault.archiveUrl}}">
+									Full Archive
+								</a>
+							</td>
+							<td></td>
+						</tr>
+						<tr ng-repeat="file in vm.Fault.files">
+							<td>
+								<a href="{{file.fileUrl}}">
+									{{file.fullName}}
+								</a>
+							</td>
+							<td class="align-right">
+								{{file.size | filesize:2}}
+							</td>
+						</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+			<!--
+			<tr>
+				<td class="align-top">Test Case I/O</td>
+				<td>
+					<table class="table table-hover table-bordered">
+						<thead>
+							<tr>
+								<th st-ratio="85">
+									Name
+								</th>
+								<th st-ratio="15"
+									class="align-right">
+									Size
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="file in vm.Files.TestData">
+								<td>
+									<a href="{{file.fileUrl}}">
+										{{file.displayName}}
+									</a>
+								</td>
+								<td class="align-right">
+									{{file.size | filesize:2}}
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td class="align-top">
+					<div style="padding-bottom:20px">Monitoring Assets</div>
+				</td>
+				<td>
+					<uib-tabset active="active">
+						<uib-tab ng-repeat="agent in vm.Files.GroupedMonitorAssets">
+							<uib-tab-heading>
+								{{agent.agentName}}
+							</uib-tab-heading>
+
+							<uib-accordion close-others="false">
+								<uib-accordion-group is-open="true"
+													 heading="{{mon.monitorClass}} ({{mon.monitorName}})"
+													 ng-repeat="mon in agent.children">
+									<table style="width:100%">
+										<thead>
+											<tr>
+												<th st-ratio="85" />
+												<th st-ratio="15" class="align-right" />
+											</tr>
+										</thead>
+										<tbody>
+											<tr ng-repeat="file in mon.children">
+												<td>
+													<a href="{{file.fileUrl}}">
+														{{file.name}}
+													</a>
+												</td>
+												<td class="align-right">
+													{{file.size | filesize:2}}
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</uib-accordion-group>
+							</uib-accordion>
+						</uib-tab>
+					</uib-tabset>
+				</td>
+			</tr>
+			<tr>
+				<td class="align-top">Other Assets</td>
+				<td>
+					<table class="table table-hover table-bordered">
+						<thead>
 							<tr>
 								<th st-ratio="85">
 									Name
@@ -94,7 +204,57 @@
 								</td>
 								<td></td>
 							</tr>
-							<tr ng-repeat="file in vm.Fault.files">
+							<tr ng-repeat="file in vm.Files.Other">
+								<td>
+									<a href="{{file.fileUrl}}">
+										{{file.displayName}}
+									</a>
+								</td>
+								<td class="align-right">
+									{{file.size | filesize:2}}
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td class="align-top">Initial Assets</td>
+				<td>
+					<table class="table table-hover table-bordered">
+						<thead>
+							<tr>
+								<th st-ratio="85">
+									Name
+								</th>
+								<th st-ratio="15"
+									class="align-right">
+									Size
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="file in vm.Initial.TestData">
+								<td>
+									<a href="{{file.fileUrl}}">
+										{{file.fullName}}
+									</a>
+								</td>
+								<td class="align-right">
+									{{file.size | filesize:2}}
+								</td>
+							</tr>
+							<tr ng-repeat="file in vm.Initial.FlatMonitorAssets">
+								<td>
+									<a href="{{file.fileUrl}}">
+										{{file.fullName}}
+									</a>
+								</td>
+								<td class="align-right">
+									{{file.size | filesize:2}}
+								</td>
+							</tr>
+							<tr ng-repeat="file in vm.Initial.Other">
 								<td>
 									<a href="{{file.fileUrl}}">
 										{{file.fullName}}
@@ -108,6 +268,7 @@
 					</table>
 				</td>
 			</tr>
+			-->
 		</table>
 	</div>
 </div>

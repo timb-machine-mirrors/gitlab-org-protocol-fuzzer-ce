@@ -41,9 +41,26 @@ namespace Peach {
 	}
 
 	export interface IFaultFile {
-		name: string;
-		fullName: string;
-		fileUrl: string;
-		size: number;
+		name?: string;
+		fullName?: string;
+		fileUrl?: string;
+		size?: number;
+		initial?: boolean;
+		type?: string;
+		agentName?: string;
+		monitorName?: string;
+		monitorClass?: string;
+
+		// client-side only
+		displayName?: string;
+		children?: IFaultFile[];
 	}
+
+	export var FaultFileType = {
+		Asset: '',
+		Output: '',
+		Input: ''
+	}
+	MakeLowerEnum(FaultFileType);
+
 }
