@@ -739,5 +739,62 @@ namespace Peach.Pro.Test.Core.WebServices
 			var newPit = _db.MigratePit(pit.PitUrl, originalPit.PitUrl);
 			Assert.AreEqual("Foo.Mine", newPit.Pit.Name);
 		}
+
+		[Test]
+		public void TestMigrateDuplicate()
+		{
+			var category = "Image";
+			var legacyDir = Path.Combine(_root.Path, PitDatabase.LegacyDir, category);
+			Directory.CreateDirectory(legacyDir);
+
+			File.WriteAllText(Path.Combine(legacyDir, "IMG.xml"), pitExample);
+			File.WriteAllText(Path.Combine(legacyDir, "IMG.xml.config"), configExample);
+
+			_db.Load(_root.Path);
+
+			Assert.AreEqual(2, _db.Entries.Count());
+			Assert.AreEqual(3, _db.Libraries.Count());
+
+			var libs = _db.Libraries.ToList();
+			Assert.AreEqual(1, libs[2].Versions[0].Pits.Count);
+
+			var pit = _db.Entries.ElementAt(1);
+			var pitDetail = _db.GetPitDetailByUrl(pit.PitUrl);
+			Assert.NotNull(pitDetail);
+
+			var newPit = _db.MigratePit(pit.PitUrl, pit.PitUrl);
+
+			var expectedPath = Path.Combine(_root.Path, PitDatabase.ConfigsDir, category, "IMG.peach");
+			Assert.AreEqual(expectedPath, newPit.Path);
+			Assert.True(File.Exists(expectedPath));
+
+			Assert.True(File.Exists(Path.Combine(_root.Path, category, "IMG.xml")));
+			Assert.True(File.Exists(Path.Combine(_root.Path, category, "IMG.xml.config")));
+			Assert.True(File.Exists(Path.Combine(_root.Path, category, "IMG-Legacy-1.xml")));
+			Assert.True(File.Exists(Path.Combine(_root.Path, category, "IMG-Legacy-1.xml.config")));
+			Assert.False(File.Exists(Path.Combine(_root.Path, PitDatabase.LegacyDir, category, "IMG.xml")));
+			Assert.False(File.Exists(Path.Combine(_root.Path, PitDatabase.LegacyDir, category, "IMG.xml.config")));
+
+			var newPitPit = PitDatabase.LoadPit(expectedPath);
+			Assert.NotNull(newPitPit);
+			Assert.AreEqual(Path.Combine(category, "IMG-Legacy-1.xml"), newPit.Pit.OriginalPit);
+			Assert.AreEqual(2, newPitPit.Config.Count);
+			Assert.AreEqual("Strategy", newPitPit.Config[0].Key);
+			Assert.AreEqual("Random", newPitPit.Config[0].Value);
+			Assert.AreEqual("SomeMiscVariable", newPitPit.Config[1].Key);
+			Assert.AreEqual("Foo", newPitPit.Config[1].Value);
+
+			Assert.AreEqual(1, newPitPit.Agents.Count);
+			Assert.AreEqual("TheAgent", newPitPit.Agents[0].Name);
+			Assert.IsNull(newPitPit.Agents[0].AgentUrl);
+			Assert.AreEqual(1, newPitPit.Agents[0].Monitors.Count);
+			Assert.IsNull(newPitPit.Agents[0].Monitors[0].Name);
+			Assert.AreEqual("RunCommand", newPitPit.Agents[0].Monitors[0].MonitorClass);
+			Assert.AreEqual(2, newPitPit.Agents[0].Monitors[0].Map.Count);
+			Assert.AreEqual("Command", newPitPit.Agents[0].Monitors[0].Map[0].Key);
+			Assert.AreEqual("Foo", newPitPit.Agents[0].Monitors[0].Map[0].Value);
+			Assert.AreEqual("StartOnCall", newPitPit.Agents[0].Monitors[0].Map[1].Key);
+			Assert.AreEqual("Foo", newPitPit.Agents[0].Monitors[0].Map[1].Value);
+		}
 	}
 }

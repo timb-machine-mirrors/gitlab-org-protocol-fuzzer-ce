@@ -586,17 +586,15 @@ namespace Peach.Pro.Core.WebServices
 			return detail;
 		}
 
-		private string MakeUniquePath(string dir, string fullName)
+		private string MakeUniquePath(string dir, string name, string ext)
 		{
-			var name = Path.GetFileNameWithoutExtension(fullName);
-			var ext = Path.GetExtension(fullName);
 			var unique = "";
 			var counter = 1;
 			var path = Path.Combine(dir, name + unique + ext);
 			while (File.Exists(path))
 			{
 				unique = "-Legacy-{0}".Fmt(counter++);
-				path = Path.Combine(dir, name + ext);
+				path = Path.Combine(dir, name + unique + ext);
 			}
 			return path;
 		}
@@ -609,7 +607,6 @@ namespace Peach.Pro.Core.WebServices
 
 			var legacyFile = legacyPit.Path;
 			var legacyConfigFile = legacyFile + ".config";
-			var legacyFileName = Path.GetFileName(legacyFile);
 			var legacyName = Path.GetFileNameWithoutExtension(legacyFile);
 			var legacyCat = GetCategory(legacyFile);
 
@@ -621,9 +618,9 @@ namespace Peach.Pro.Core.WebServices
 			if (!Directory.Exists(xmlDir))
 				Directory.CreateDirectory(xmlDir);
 
-			var cfgFile = MakeUniquePath(cfgDir, legacyName + ".peach");
-			var xmlFile = MakeUniquePath(xmlDir, legacyFileName);
-			var xmlConfigFile = MakeUniquePath(xmlDir, legacyFileName + ".config");
+			var cfgFile = MakeUniquePath(cfgDir, legacyName, ".peach");
+			var xmlFile = MakeUniquePath(xmlDir, legacyName, ".xml");
+			var xmlConfigFile = MakeUniquePath(xmlDir, legacyName, ".xml.config");
 
 			var originalPit = GetPitDetailByUrl(pitUrl);
 			if (originalPit == null)

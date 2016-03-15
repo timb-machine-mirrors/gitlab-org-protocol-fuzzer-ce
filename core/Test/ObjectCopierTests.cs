@@ -8,6 +8,7 @@ using System.Collections;
 using System.Runtime.Serialization;
 using System.Reflection;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Peach.Core.Test
 {
@@ -401,25 +402,16 @@ namespace Peach.Core.Test
 		[Test]
 		public void EnsureSerializable()
 		{
-			var fails = new List<string>();
-
-			foreach (var kv in ClassLoader.AssemblyCache)
-			{
-				if (!kv.Value.GetName().FullName.StartsWith("Peach"))
-					continue;
-
-				foreach (var type in kv.Value.GetTypes())
-				{
-					if (type.IsSerializable)
-					{
-						foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-						{
-							if (!VerifyField(field, field.FieldType))
-								fails.Add("{0}.{1}".Fmt(type.FullName, field.Name));
-						}
-					}
-				}
-			}
+			var fails = (
+				from kv in ClassLoader.AssemblyCache
+				where kv.Value.GetName().FullName.StartsWith("Peach")
+				from type in kv.Value.GetTypes()
+				where type.IsSerializable
+				from field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+				where !VerifyField(field, field.FieldType)
+				select "{0}.{1}".Fmt(type.FullName, field.Name)
+			).ToList();
+			//CollectionAssert.IsEmpty(fails);
 		}
 	}
 }
