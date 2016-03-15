@@ -18,6 +18,7 @@ namespace PitTester
 
 		bool _singleIteration;
 		bool _datagram;
+		bool _seenInput = false;
 		readonly TestLogger _logger;
 		public delegate void ErrorHandler(string msg);
 		public event ErrorHandler Error;
@@ -116,6 +117,8 @@ namespace PitTester
 		protected override void OnInput()
 		{
 			Log("Input");
+			_seenInput = true;
+
 			var data = _logger.Verify<TestData.Input>(Name);
 
 			if (data == null)
@@ -178,7 +181,7 @@ namespace PitTester
 
 			// If this data model has a file data set, compare to that
 			var dataSet = dataModel.actionData.selectedData as DataFile;
-			if (dataSet != null)
+			if (dataSet != null && !_seenInput)
 			{
 				// If data files are in use and VerifyDataSets is false, don't do a comparison
 				if (!_logger.VerifyDataSets)
