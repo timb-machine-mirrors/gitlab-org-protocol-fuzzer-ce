@@ -19,6 +19,7 @@
 /// <reference path="controllers/JobsCtrl.ts" />
 /// <reference path="controllers/LibraryCtrl.ts" />
 /// <reference path="controllers/MainCtrl.ts" />
+/// <reference path="controllers/MigratePitCtrl.ts" />
 /// <reference path="controllers/NewConfigCtrl.ts" />
 /// <reference path="controllers/NewVarCtrl.ts" />
 /// <reference path="controllers/PitConfigDefinesCtrl.ts" />

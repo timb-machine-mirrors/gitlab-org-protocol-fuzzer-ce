@@ -7,7 +7,7 @@ namespace Peach {
 		Legacy: ''
 	};
 	
-	class PitLibrary {
+	export class PitLibrary {
 		constructor(
 			public Name: string
 		) {
@@ -18,7 +18,7 @@ namespace Peach {
 		public Categories: PitCategory[] = [];
 	}
 
-	class PitCategory {
+	export class PitCategory {
 		constructor(
 			public Name: string
 		) {}
@@ -26,7 +26,7 @@ namespace Peach {
 		public Pits: PitEntry[] = [];
 	}
 
-	class PitEntry {
+	export class PitEntry {
 		constructor(
 			public Library: ILibrary,
 			public Pit: IPit
@@ -48,7 +48,6 @@ namespace Peach {
 			private pitService: PitService
 		) {
 			this.init();
-			$scope['filterCategory'] = this.filterCategory;
 		}
 
 		private Libs: PitLibrary[] = [];
@@ -56,12 +55,12 @@ namespace Peach {
 		private init() {
 			const promise = this.pitService.LoadLibrary();
 			promise.then((data: ILibrary[]) => {
-				for (var lib of data) {
+				for (const lib of data) {
 					const pitLib = new PitLibrary(lib.name);
 					let hasPits = false;
 					
-					for (var version of lib.versions) {
-						for (var pit of version.pits) {
+					for (const version of lib.versions) {
+						for (const pit of version.pits) {
 							const category = _.find(pit.tags, (tag: ITag) =>
 								tag.name.startsWith("Category")
 							).values[1];
@@ -85,7 +84,18 @@ namespace Peach {
 		}
 
 		private OnSelectPit(entry: PitEntry) {
-			if (entry.Library.locked) {
+			if (entry.Library.versions[0].version === 1) {
+				this.$modal.open({
+					templateUrl: C.Templates.Modal.MigratePit,
+					controller: MigratePitController,
+					resolve: {
+						Lib: () => _.find(this.Libs, { Name: 'Pits' }),
+						Pit: () => angular.copy(entry.Pit)
+					}
+				}).result.then((newPit: IPit) => {
+					this.GoToPit(newPit);
+				});
+			} else if (entry.Library.locked) {
 				this.$modal.open({
 					templateUrl: C.Templates.Modal.NewConfig,
 					controller: NewConfigController,
@@ -103,7 +113,7 @@ namespace Peach {
 		}
 
 		private filterCategory(search: string) {
-			return function(category: PitCategory) {
+			return (category: PitCategory) => {
 				if (_.isEmpty(search)) {
 					return true;
 				}

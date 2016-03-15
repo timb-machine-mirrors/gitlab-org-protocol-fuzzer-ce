@@ -44,7 +44,7 @@
 	<h3>{{lib.Name}}</h3>
 <p>{{lib.Text}}</p>
 <uib-accordion close-others="false">
-	<uib-accordion-group ng-repeat="cat in lib.Categories | filter: filterCategory(search)"
+	<uib-accordion-group ng-repeat="cat in lib.Categories | filter: vm.filterCategory(search)"
 									 heading="{{cat.Name}}"
 									 is-open="true">
 		<div class="peach-library">

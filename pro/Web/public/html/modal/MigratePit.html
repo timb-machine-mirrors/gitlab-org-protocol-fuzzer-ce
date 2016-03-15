@@ -1,0 +1,75 @@
+﻿<form name="form"
+		novalidate>
+	<div class="modal-header">
+		<h3 class="modal-title">
+			Pit Upgrade
+		</h3>
+		<p>
+			Select a pit.
+		</p>
+	</div>
+	<div class="modal-body">
+		<div class="form-group input-group">
+			<input ng-model="search"
+						 type="text"
+						 class="form-control"
+						 placeholder="Search for pit..."
+						 peach:auto-focus/>
+			<span class="input-group-btn">
+				<button class="btn btn-default"
+								type="submit">
+					<i class="fa fa-search"></i>
+				</button>
+			</span>
+		</div>
+
+		<div class="peach-add-monitor">
+			<uib-accordion close-others="false">
+				<uib-accordion-group is-open="true"
+				                     ng-repeat="cat in vm.Lib.Categories | filter: vm.filterCategory(search)"
+				                     heading="{{cat.Name}}">
+					<div class="list-group">
+						<a href=""
+						   class="list-group-item"
+						   ng-repeat="entry in cat.Pits | filter: { Pit: { name: search } }"
+						   ng-click="vm.OnSelect(entry)">
+							{{entry.Pit.name | peachPitName}}
+						</a>
+					</div>
+				</uib-accordion-group>
+			</uib-accordion>
+		</div>
+		<hr/>
+		<div>
+			<h4>
+				For Custom Pits
+			</h4>
+			<p>
+				For custom pits in the Users folder, the Pit and Configuration will need to be split to utalize
+				our new configuration format.  To peform this operation click the following link.
+			</p>
+			<a href=""
+				 ng-click="vm.OnCustom()">
+				Promote to custom pit and configuration.
+			</a>
+		</div>
+	</div>
+	<div class="modal-footer">
+		<span class="label label-danger"
+					ng-show="vm.Error"
+					style="margin-right: 20px">
+			{{vm.Error}}
+		</span>
+		<button type="button"
+						class="btn btn-default"
+						ng-click="vm.Cancel()">
+			Cancel
+		</button>
+		<button type="submit"
+						class="btn btn-primary"
+						ng-click="vm.Accept()"
+						ng-disabled="!vm.CanAccept">
+			OK
+		</button>
+	</div>
+</form>
