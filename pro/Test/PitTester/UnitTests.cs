@@ -713,7 +713,6 @@ SGVsbG8=
 
 			File.WriteAllBytes(datasetFile, new byte[] { 0x00 });
 
-			// Ensure we can run when there is an ignore that matches a de-selected choice
 			var pitFile = Path.GetTempFileName();
 			var pitTest = pitFile + ".test";
 
