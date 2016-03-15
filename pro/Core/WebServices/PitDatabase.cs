@@ -421,7 +421,7 @@ namespace Peach.Pro.Core.WebServices
 			return (Path.GetDirectoryName(path) ?? "").Split(Path.DirectorySeparatorChar).Last();
 		}
 
-		private string GetOriginalPit(string path)
+		private string GetRelativePath(string path)
 		{
 			var len = _pitLibraryPath.Length;
 			if (!_pitLibraryPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
@@ -431,7 +431,8 @@ namespace Peach.Pro.Core.WebServices
 
 		private PitDetail MakePitDetail(string fileName)
 		{
-			var guid = MakeGuid(fileName);
+			var relativePath = GetRelativePath(fileName);
+			var guid = MakeGuid(relativePath);
 			var lastModified = File.GetLastWriteTimeUtc(fileName);
 			var dir = GetCategory(fileName);
 			var tag = new Tag {
@@ -440,7 +441,7 @@ namespace Peach.Pro.Core.WebServices
 			};
 
 			var pit = new Pit {
-				OriginalPit = GetOriginalPit(fileName),
+				OriginalPit = relativePath,
 				Id = guid,
 				PitUrl = PitServicePrefix + "/" + guid,
 				Name = Path.GetFileNameWithoutExtension(fileName),
@@ -561,7 +562,7 @@ namespace Peach.Pro.Core.WebServices
 			if (File.Exists(dstFile))
 				throw new ArgumentException("A pit already exists with the specified name.");
 
-			var guid = MakeGuid(dstFile);
+			var guid = MakeGuid(GetRelativePath(dstFile));
 			var pit = new Pit {
 				OriginalPit = srcPit.Pit.OriginalPit,
 				Id = guid,
@@ -585,6 +586,21 @@ namespace Peach.Pro.Core.WebServices
 			return detail;
 		}
 
+		private string MakeUniquePath(string dir, string fullName)
+		{
+			var name = Path.GetFileNameWithoutExtension(fullName);
+			var ext = Path.GetExtension(fullName);
+			var unique = "";
+			var counter = 1;
+			var path = Path.Combine(dir, name + unique + ext);
+			while (File.Exists(path))
+			{
+				unique = "-Legacy-{0}".Fmt(counter++);
+				path = Path.Combine(dir, name + ext);
+			}
+			return path;
+		}
+
 		public PitDetail MigratePit(string legacyPitUrl, string pitUrl)
 		{
 			var legacyPit = GetPitDetailByUrl(legacyPitUrl);
@@ -601,27 +617,19 @@ namespace Peach.Pro.Core.WebServices
 			if (!Directory.Exists(cfgDir))
 				Directory.CreateDirectory(cfgDir);
 
-			var cfgFile = Path.Combine(cfgDir, legacyName + ".peach");
-			if (File.Exists(cfgFile))
-				throw new ArgumentException("A pit already exists with the specified name.");
-
 			var xmlDir = (legacyPitUrl == pitUrl) ? Path.Combine(_pitLibraryPath, legacyCat) : cfgDir;
 			if (!Directory.Exists(xmlDir))
 				Directory.CreateDirectory(xmlDir);
 
-			var xmlFile = Path.Combine(xmlDir, legacyFileName);
-			if (File.Exists(xmlFile))
-				throw new ArgumentException("A pit already exists with the specified name.");
-
-			var xmlConfigFile = Path.Combine(xmlDir, legacyFileName + ".config");
-			if (File.Exists(xmlConfigFile))
-				throw new ArgumentException("A pit already exists with the specified name.");
+			var cfgFile = MakeUniquePath(cfgDir, legacyName + ".peach");
+			var xmlFile = MakeUniquePath(xmlDir, legacyFileName);
+			var xmlConfigFile = MakeUniquePath(xmlDir, legacyFileName + ".config");
 
 			var originalPit = GetPitDetailByUrl(pitUrl);
 			if (originalPit == null)
 				throw new KeyNotFoundException("The original pit could not be found.");
 
-			var originalPitPath = (legacyPitUrl == pitUrl) ? GetOriginalPit(xmlFile) : originalPit.Pit.OriginalPit;
+			var originalPitPath = (legacyPitUrl == pitUrl) ? GetRelativePath(xmlFile) : originalPit.Pit.OriginalPit;
 
 			// 1. Parse legacyPit.xml.config
 			var defs = PitDefines.ParseFile(legacyConfigFile, _pitLibraryPath, false);
@@ -639,7 +647,7 @@ namespace Peach.Pro.Core.WebServices
 			var agents = contents.Children.OfType<PeachElement.AgentElement>();
 
 			// 5. Write new .peach
-			var guid = MakeGuid(cfgFile);
+			var guid = MakeGuid(GetRelativePath(cfgFile));
 			var pit = new Pit {
 				OriginalPit = originalPitPath,
 				Id = guid,
