@@ -15,7 +15,7 @@ namespace Peach.Pro.Core.Fixups
 	}
 
 	[Description("Load data from a file into data element.")]
-	[Fixup("FromFile", true, Internal = true)]
+	[Fixup("FromFile", true)]
 	[Parameter("Filename", typeof(string), "Filename to load data from")]
 	[Parameter("Encoding", typeof(FromFileEncoding), "File encoding [Raw, Pem]", "Raw")]
 	[Serializable]

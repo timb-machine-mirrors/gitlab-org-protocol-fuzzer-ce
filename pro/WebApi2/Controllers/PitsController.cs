@@ -5,6 +5,7 @@ using System.Web.Http;
 using System.Web.Http.Description;
 using Peach.Pro.Core.WebServices.Models;
 using Swashbuckle.Swagger.Annotations;
+using Peach.Pro.Core.WebServices;
 
 namespace Peach.Pro.WebApi2.Controllers
 {
@@ -45,13 +46,20 @@ namespace Peach.Pro.WebApi2.Controllers
 		{
 			try
 			{
-				var newUrl = PitDatabase.CopyPit(
-					data.PitUrl,
-					data.Name,
-					data.Description
-				);
-				var pit = PitDatabase.GetPitByUrl(newUrl);
-				return Ok(pit);
+				PitDetail pit;
+				if (!string.IsNullOrEmpty(data.LegacyPitUrl))
+				{
+					pit = PitDatabase.MigratePit(data.LegacyPitUrl, data.PitUrl);
+				}
+				else
+				{
+					pit = PitDatabase.CopyPit(
+						data.PitUrl,
+						data.Name,
+						data.Description
+					);
+				}
+				return Ok(pit.Pit);
 			}
 			catch (KeyNotFoundException)
 			{

@@ -50,7 +50,8 @@ namespace Peach.Pro.Test.Core.WebServices
 {
 	'OriginalPit': 'Test.xml',
 	'Config': [],
-	'Agents': []
+	'Agents': [],
+	'Weights': []
 }
 ";
 
@@ -60,7 +61,8 @@ namespace Peach.Pro.Test.Core.WebServices
 {
 	'OriginalPit': 'TestFail.xml',
 	'Config': [],
-	'Agents': []
+	'Agents': [],
+	'Weights': []
 }
 ";
 		
@@ -538,7 +540,8 @@ namespace Peach.Pro.Test.Core.WebServices
 {
 	'OriginalPit': 'TestCrash.xml',
 	'Config': [],
-	'Agents': []
+	'Agents': [],
+	'Weights': []
 }
 ";
 		

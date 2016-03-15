@@ -33,6 +33,64 @@ namespace Peach.Pro.Core.WebServices
 			return json;
 		}
 
+		public static List<Models.Agent> ToWeb(this IEnumerable<PeachElement.AgentElement> agents)
+		{
+			return agents.Select(a =>
+				new Models.Agent
+			{
+				AgentUrl = a.Location,
+				Name = EnsureNotEmpty(a.Name, "Name", "agent"),
+				Monitors = a.Monitors.Select(m =>
+					new Monitor
+				{
+					Name = m.Name,
+					MonitorClass = m.Class,
+					Map = m.Params.Select(p =>
+						new Param
+					{
+						Key = p.Name,
+						Value = p.Value
+					}).ToList()
+				}).ToList()
+			}).ToList();
+		}
+		
+		public static List<Models.Agent> FromWeb(this List<Models.Agent> agents)
+		{
+			return agents.Select(a =>
+				new Models.Agent
+				{
+					Name = a.Name,
+					AgentUrl = a.AgentUrl,
+					Monitors = a.Monitors.Select(m => new Monitor
+					{
+						Name = m.Name,
+						MonitorClass = EnsureNotEmpty(m.MonitorClass, "MonitorClass", "monitor"),
+						Map = m.Map.SelectMany(ToMonitorParam).ToList()
+					}).ToList()
+				}).ToList();
+		}
+
+		static Param[] ToMonitorParam(Param p)
+		{
+			// For backwards compatibility:
+			// Peach 3.7 posts name/value, Peach 3.8 posts key/value
+			var key = EnsureNotEmpty(p.Key ?? p.Name, "Key", "monitor parameter");
+
+			if (String.IsNullOrEmpty(p.Value))
+				return new Param[0];
+
+			return new[] { new Param { Key = key, Value = p.Value } };
+		}
+		
+		static string EnsureNotEmpty(string value, string name, string type)
+		{
+			if (String.IsNullOrEmpty(value))
+				throw new ArgumentException("Required parameter '" + name + "' was not specified for entry in "+ type + " list.");
+
+			return value;
+		}
+
 		public static List<ParamDetail> ToWeb(this PitDefines defines)
 		{
 			var ifaces = new IfaceOptions();

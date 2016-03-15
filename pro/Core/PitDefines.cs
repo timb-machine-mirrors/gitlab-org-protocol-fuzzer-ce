@@ -492,13 +492,14 @@ namespace Peach.Pro.Core
 		/// </summary>
 		/// <param name="fileName">Config file to deserialize.</param>
 		/// <param name="pitLibraryPath">Value of PitLibraryPath system define.</param>
+		/// <param name="includeSystemDefs">Whether to include system defines</param>
 		/// <returns></returns>
-		public static PitDefines ParseFile(string fileName, string pitLibraryPath)
+		public static PitDefines ParseFile(string fileName, string pitLibraryPath, bool includeSystemDefs = true)
 		{
 			if (pitLibraryPath == null)
 				throw new ArgumentNullException("pitLibraryPath");
 
-			return ParseFile(fileName, pitLibraryPath, null);
+			return ParseFile(fileName, pitLibraryPath, null, includeSystemDefs);
 		}
 
 		/// <summary>
@@ -519,48 +520,49 @@ namespace Peach.Pro.Core
 			return ParseFile(fileName, null, overrides);
 		}
 
-		private static PitDefines ParseFile(string fileName, string pitLibraryPath, IEnumerable<KeyValuePair<string, string>> overrides)
+		private static PitDefines ParseFile(
+			string fileName, 
+			string pitLibraryPath, 
+			IEnumerable<KeyValuePair<string, string>> overrides,
+			bool includeSystemDefs = true)
 		{
 			var defs = File.Exists(fileName) ? XmlTools.Deserialize<PitDefines> (fileName) : new PitDefines();
 
-			defs.SystemDefines.AddRange(new Define[]
+			if (includeSystemDefs)
 			{
-				new SystemDefine 
-				{
-					Key = "Peach.OS",
-					Name = "Peach OS",
-					Description = "Operating System that Peach is running on",
-					Value = Platform.GetOS().ToString().ToLower()
-				},
-				new SystemDefine
-				{
-					Key = "Peach.Pwd",
-					Name = "Peach Installation Directory",
-					Description = "Full path to Peach installation",
-					Value = Utilities.ExecutionDirectory,
-				},
-				new SystemDefine
-				{
-					Key = "Peach.Cwd",
-					Name = "Peach Working Directory",
-					Description = "Full path to the current working directory",
-					Value = Environment.CurrentDirectory,
-				},
-				new SystemDefine
-				{
-					Key = "Peach.LogRoot",
-					Name = "Root Log Directory",
-					Description = "Full path to the root log directory",
-					Value = Configuration.LogRoot,
-				},
-				new SystemDefine
-				{
-					Key = "PitLibraryPath",
-					Name = "Pit Library Path",
-					Description = "Path to root of Pit Library",
-					Value = pitLibraryPath ?? Environment.CurrentDirectory,
-				}
-			});
+				defs.SystemDefines.AddRange(new Define[] {
+					new SystemDefine {
+						Key = "Peach.OS",
+						Name = "Peach OS",
+						Description = "Operating System that Peach is running on",
+						Value = Platform.GetOS().ToString().ToLower()
+					},
+					new SystemDefine {
+						Key = "Peach.Pwd",
+						Name = "Peach Installation Directory",
+						Description = "Full path to Peach installation",
+						Value = Utilities.ExecutionDirectory,
+					},
+					new SystemDefine {
+						Key = "Peach.Cwd",
+						Name = "Peach Working Directory",
+						Description = "Full path to the current working directory",
+						Value = Environment.CurrentDirectory,
+					},
+					new SystemDefine {
+						Key = "Peach.LogRoot",
+						Name = "Root Log Directory",
+						Description = "Full path to the root log directory",
+						Value = Configuration.LogRoot,
+					},
+					new SystemDefine {
+						Key = "PitLibraryPath",
+						Name = "Pit Library Path",
+						Description = "Path to root of Pit Library",
+						Value = pitLibraryPath ?? Environment.CurrentDirectory,
+					}
+				});
+			}
 
 			if (overrides != null)
 			{

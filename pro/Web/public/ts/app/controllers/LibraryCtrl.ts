@@ -1,15 +1,24 @@
 /// <reference path="../reference.ts" />
 
 namespace Peach {
-	class PitLibrary {
+	const LibText = {
+		Pits: 'Peach Pits allow testing of a data format or a network protocol against a variety of targets.',
+		Configurations: 'The Configurations section contains existing Peach Pit configurations. Selecting an existing configuration allows editing the configuration and starting a new fuzzing job.',
+		Legacy: ''
+	};
+	
+	export class PitLibrary {
 		constructor(
 			public Name: string
-		) {}
+		) {
+			this.Text = LibText[Name];
+		}
 
+		public Text: string;
 		public Categories: PitCategory[] = [];
 	}
-	
-	class PitCategory {
+
+	export class PitCategory {
 		constructor(
 			public Name: string
 		) {}
@@ -17,7 +26,7 @@ namespace Peach {
 		public Pits: PitEntry[] = [];
 	}
 
-	class PitEntry {
+	export class PitEntry {
 		constructor(
 			public Library: ILibrary,
 			public Pit: IPit
@@ -39,25 +48,19 @@ namespace Peach {
 			private pitService: PitService
 		) {
 			this.init();
-			$scope['filterCategory'] = this.filterCategory;
 		}
 
-		private Pits: PitLibrary;
-		private User: PitLibrary;
+		private Libs: PitLibrary[] = [];
 		
 		private init() {
 			const promise = this.pitService.LoadLibrary();
 			promise.then((data: ILibrary[]) => {
-				data.forEach((lib: ILibrary) => {
+				for (const lib of data) {
 					const pitLib = new PitLibrary(lib.name);
-					if (lib.locked) {
-						this.Pits = pitLib;
-					} else {
-						this.User = pitLib;
-					}
+					let hasPits = false;
 					
-					lib.versions.forEach((version: ILibraryVersion) => {
-						version.pits.forEach((pit: IPit) => {
+					for (const version of lib.versions) {
+						for (const pit of version.pits) {
 							const category = _.find(pit.tags, (tag: ITag) =>
 								tag.name.startsWith("Category")
 							).values[1];
@@ -69,14 +72,30 @@ namespace Peach {
 							}
 							
 							pitCategory.Pits.push(new PitEntry(lib, pit));
-						});
-					});
-				});
+							hasPits = true;
+						};
+					};
+
+					if (pitLib.Name !== 'Legacy' || hasPits) {
+						this.Libs.push(pitLib);
+					}
+				}
 			});
 		}
 
 		private OnSelectPit(entry: PitEntry) {
-			if (entry.Library.locked) {
+			if (entry.Library.versions[0].version === 1) {
+				this.$modal.open({
+					templateUrl: C.Templates.Modal.MigratePit,
+					controller: MigratePitController,
+					resolve: {
+						Lib: () => _.find(this.Libs, { Name: 'Pits' }),
+						Pit: () => angular.copy(entry.Pit)
+					}
+				}).result.then((newPit: IPit) => {
+					this.GoToPit(newPit);
+				});
+			} else if (entry.Library.locked) {
 				this.$modal.open({
 					templateUrl: C.Templates.Modal.NewConfig,
 					controller: NewConfigController,
@@ -94,7 +113,7 @@ namespace Peach {
 		}
 
 		private filterCategory(search: string) {
-			return function(category: PitCategory) {
+			return (category: PitCategory) => {
 				if (_.isEmpty(search)) {
 					return true;
 				}

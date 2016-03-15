@@ -158,6 +158,7 @@ namespace Peach.C {
 			export const Confirm = 'html/modal/Confirm.html';
 			export const Alert = 'html/modal/Alert.html';
 			export const NewConfig = 'html/modal/NewConfig.html';
+			export const MigratePit = 'html/modal/MigratePit.html';
 			export const NewVar = 'html/modal/NewVar.html';
 			export const PitLibrary = 'html/modal/PitLibrary.html';
 			export const StartJob = 'html/modal/StartJob.html';
