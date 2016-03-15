@@ -400,6 +400,7 @@ namespace Peach.Core.Test
 		}
 
 		[Test]
+		[Ignore]
 		public void EnsureSerializable()
 		{
 			var fails = (
@@ -411,7 +412,7 @@ namespace Peach.Core.Test
 				where !VerifyField(field, field.FieldType)
 				select "{0}.{1}".Fmt(type.FullName, field.Name)
 			).ToList();
-			//CollectionAssert.IsEmpty(fails);
+			CollectionAssert.IsEmpty(fails);
 		}
 	}
 }
