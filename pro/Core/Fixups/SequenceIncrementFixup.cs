@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Peach.Core;
 using Peach.Core.Dom;
@@ -20,7 +19,6 @@ namespace Peach.Pro.Core.Fixups
 	{
 		public uint? Offset { get; private set; }
 		public bool Once { get; private set; }
-		public bool OncePerInstance { get; private set; }
 		public string Group { get; private set; }
 		public uint InitialValue { get; private set; }
 
@@ -31,24 +29,19 @@ namespace Peach.Pro.Core.Fixups
 		{
 			ParameterParser.Parse(this, args);
 
-			if(string.IsNullOrEmpty(Group))
+			if (string.IsNullOrEmpty(Group))
 				_stateKey = "Peach.SequenceIncrementFixup." + parent.fullName;
 			else
 				_stateKey = "Peach.SequenceIncrementFixup.Group." + Group;
 
 			if (parent is Peach.Core.Dom.String)
 				parent.DefaultValue = new Variant(0);
-
-			OncePerInstance = true;
 		}
 
 		protected override Variant OnActionRun(RunContext ctx)
 		{
-			if (!(parent is Number) && !(parent is Peach.Core.Dom.String && parent.Hints.ContainsKey("NumericalString")))
+			if (!(parent is Peach.Core.Dom.Number) && !(parent is Peach.Core.Dom.String && parent.Hints.ContainsKey("NumericalString")))
 				throw new PeachException("SequenceIncrementFixup has non numeric parent '" + parent.fullName + "'.");
-
-			if (!parent.InScope())
-				return parent.DefaultValue;
 
 			var increment = true;
 			ulong max = parent is Number ? ((Number)parent).MaxValue : ulong.MaxValue;
@@ -56,32 +49,13 @@ namespace Peach.Pro.Core.Fixups
 			object obj = null;
 			var initialValue = false;
 
-			var fullName = parent.fullName;
-			var dataModel = parent.getRoot() as DataModel;
-			if (dataModel != null && dataModel.actionData != null && dataModel.actionData.action != null)
-				fullName = dataModel.actionData.action.Name + "." + fullName;
-			else
-				increment = false;
-
-			if (ctx.iterationStateStore.TryGetValue(_stateKey, out obj))
-			{
-				try
-				{
-					value = (ulong)obj;
-				}
-				catch (InvalidCastException)
-				{
-					var l = (long) obj;
-					value = (ulong)l;
-				}
-			}
+			if (ctx.stateStore.TryGetValue(_stateKey, out obj))
+				value = (ulong)obj;
 			else
 				initialValue = true;
 
-			if (Once && ctx.iterationStateStore.ContainsKey(_stateKey))
-				increment = false;
-			else if (OncePerInstance && ctx.iterationStateStore.ContainsKey(fullName))
-				increment = false;
+			if (ctx.iterationStateStore.ContainsKey(_stateKey))
+				increment &= !Once;
 			else if (Offset.HasValue)
 				value = (ulong)Offset.Value * (ctx.currentIteration - 1);
 
@@ -99,16 +73,14 @@ namespace Peach.Pro.Core.Fixups
 				if (initialValue)
 					value = InitialValue;
 				else
-					value ++;
+					value++;
 
 				if (value > max)
 					value -= max;
 
+				ctx.stateStore[_stateKey] = value;
 				ctx.iterationStateStore[_stateKey] = value;
-				ctx.iterationStateStore[fullName] = value;
 			}
-
-			parent.Invalidate();
 
 			return new Variant(value);
 		}
