@@ -178,36 +178,35 @@ namespace PitTester
 			// Determine expected value
 			var expected = new byte[] {};
 			var dataSet = dataModel.actionData.selectedData as DataFile;
-			if (data.VerifyAgainst == TestData.ExpectedOutputSource.dataFile && dataSet != null)
-			{
-				if ((data.Payload == null || data.Payload.Length == 0))
-				{
-					expected = File.ReadAllBytes(dataSet.FileName);
-				}
-				else
-				{
-					var msg = string.Format(
-						"Unexpected CDATA set for '{0}' output action in pit test when `verifyAgainst='dataFile'`!", 
-						data.ActionName);
-					FireError(msg);
-				}
-			}
-			else if (data.VerifyAgainst == TestData.ExpectedOutputSource.cdata)
-			{
-				if (!data.Ignore)
-				{
-					if ((data.Payload == null || data.Payload.Length == 0))
+			var cdataAvailable = !(data.Payload == null || data.Payload.Length == 0);
+			switch (data.VerifyAgainst) {
+				case TestData.ExpectedOutputSource.dataFile:
+					if (cdataAvailable && !data.Ignore)
+					{
+						var msg = string.Format(
+							"Unexpected CDATA set for '{0}' output action in pit test when `verifyAgainst='dataFile'`!", 
+							data.ActionName);
+						FireError(msg);
+					}
+
+					if (dataSet != null)
+					{
+						expected = File.ReadAllBytes(dataSet.FileName);
+					}
+					break;
+				case TestData.ExpectedOutputSource.cdata:
+					if (!cdataAvailable && !data.Ignore)
 					{
 						var msg = string.Format(
 							"CDATA missing from '{0}' output action in pit test!", 
 							data.ActionName);
 						FireError(msg);
 					}
-					else
-					{
-						expected = data.Payload;
-					}
-				}
+
+					expected = data.Payload;
+					break;
+				default:
+					break;
 			}
 
 			if (Logger.IsDebugEnabled)

@@ -663,7 +663,7 @@ SGVsbG8=
 		}
 
 		[Test]
-		public void FavorExplicitCDATAOverDataSetFileWhenFollowingInputs() 
+		public void ComparePublishedOutputAgainstExplicitCDATA() 
 		{
 			string datasetFile = Path.GetTempFileName();
 
@@ -844,6 +844,74 @@ SGVsbG8=
 					{
 						var peachEx = (PeachException)innerEx;
 						caughtExpectedException = peachEx.Message.Contains("Unexpected CDATA");
+					}
+				}
+			}
+			finally
+			{
+				File.Delete(pitFile);
+				File.Delete(pitTest);
+				File.Delete(datasetFile);
+
+				Assert.IsTrue(caughtExpectedException);
+			}
+		}
+
+		[Test]
+		public void RequireOutputCDATAWhenVerifyingAgainstCDATA() 
+		{
+			string datasetFile = Path.GetTempFileName();
+
+			string xml = string.Format(@"
+<Peach>
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action name='Out' type='output'>
+				<DataModel name='Out'>
+					<Number name='Byte' size='8'/>
+				</DataModel>
+				<Data fileName='{0}'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='TheState'/>
+		<Publisher name='Pub' class='Null'/>
+	</Test>
+</Peach>
+", datasetFile);
+
+			const string test = @"
+<TestData>
+	<Test name='Default'>
+		<Open   action='TheState.Initial.Out' publisher='Pub'/>
+		<Output action='TheState.Initial.Out' verifyAgainst='cdata' publisher='Pub'/>
+	</Test>
+</TestData>
+";
+
+			File.WriteAllBytes(datasetFile, new byte[] { 0x00 });
+
+			var pitFile = Path.GetTempFileName();
+			var pitTest = pitFile + ".test";
+
+			File.WriteAllText(pitFile, xml);
+			File.WriteAllText(pitTest, test);
+
+			bool caughtExpectedException = false;
+			try
+			{
+				PitTester.TestPit("", pitFile, true, null, false, 1);
+			}
+			catch (AggregateException ex)
+			{
+				foreach (var innerEx in ex.InnerExceptions)
+				{
+					if (innerEx is PeachException)
+					{
+						var peachEx = (PeachException)innerEx;
+						caughtExpectedException = peachEx.Message.Contains("CDATA missing");
 					}
 				}
 			}
