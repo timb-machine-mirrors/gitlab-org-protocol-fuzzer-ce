@@ -308,8 +308,11 @@ namespace PitTester
 		}
 
 		public enum ExpectedOutputSource {
-			cdata,
-			dataFile,
+			[XmlEnum("cdata")]
+			CData,
+
+			[XmlEnum("dataFile")]
+			DataFile,
 		}
 
 		public class Output : DataAction
@@ -321,7 +324,7 @@ namespace PitTester
 			public bool Ignore { get; set; }
 
 			[XmlAttribute("verifyAgainst")]
-			[DefaultValue(ExpectedOutputSource.cdata)]
+			[DefaultValue(ExpectedOutputSource.CData)]
 			public ExpectedOutputSource VerifyAgainst { get; set; }
 		}
 

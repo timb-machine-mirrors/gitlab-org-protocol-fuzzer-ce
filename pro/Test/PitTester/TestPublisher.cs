@@ -180,7 +180,7 @@ namespace PitTester
 			var dataSet = dataModel.actionData.selectedData as DataFile;
 			var cdataAvailable = !(data.Payload == null || data.Payload.Length == 0);
 			switch (data.VerifyAgainst) {
-				case TestData.ExpectedOutputSource.dataFile:
+				case TestData.ExpectedOutputSource.DataFile:
 					if (cdataAvailable && !data.Ignore)
 					{
 						var msg = string.Format(
@@ -194,7 +194,7 @@ namespace PitTester
 						expected = File.ReadAllBytes(dataSet.FileName);
 					}
 					break;
-				case TestData.ExpectedOutputSource.cdata:
+				case TestData.ExpectedOutputSource.CData:
 					if (!cdataAvailable && !data.Ignore)
 					{
 						var msg = string.Format(
