@@ -366,17 +366,30 @@ namespace Peach.Core.Test
 		[Test]
 		public void LotsOfObjects2()
 		{
-			var list = new List<SimpleClass>();
-			for (int i = 0; i < 2000000; ++i)
-				list.Add(new ComplexClass() { member = i });
+			var list1 = new List<SimpleClass>();
+			for (var i = 0; i < 20000; ++i)
+				list1.Add(new ComplexClass() {member = i});
 
 			var sw = new Stopwatch();
 			sw.Start();
-			var copy = ObjectCopier.Clone(list, "Foo");
+			var copy = ObjectCopier.Clone(list1, "Foo");
+			sw.Stop();
+			var list1Elaps = sw.ElapsedMilliseconds;
+
+			Assert.NotNull(copy);
+			Assert.AreEqual(copy.Count, list1.Count);
+
+			var list2 = new List<SimpleClass>();
+			for (var i = 0; i < 2000000; ++i)
+				list2.Add(new ComplexClass() {member = i});
+
+			sw = new Stopwatch();
+			sw.Start();
+			copy = ObjectCopier.Clone(list2, "Foo");
 			sw.Stop();
 			Assert.NotNull(copy);
-			Assert.AreEqual(copy.Count, list.Count);
-			Assert.LessOrEqual(sw.ElapsedMilliseconds, 5500);
+			Assert.AreEqual(copy.Count, list2.Count);
+			Assert.LessOrEqual(sw.ElapsedMilliseconds, list1Elaps*2);
 		}
 
 		bool VerifyField(FieldInfo field, Type type)

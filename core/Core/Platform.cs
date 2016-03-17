@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Linq;
+using System.Reflection;
 using System.Xml.Serialization;
 
 namespace Peach.Core
@@ -80,6 +81,8 @@ namespace Peach.Core
 			All = 7
 		};
 
+		public readonly static Version MonoRuntimeVersion = GetMonoVersion();
+
 		public enum Architecture { x64, x86 };
 
 		public static Architecture GetArch()
@@ -132,6 +135,43 @@ namespace Peach.Core
 		public static bool IsRunningOnMono()
 		{
 			return Type.GetType("Mono.Runtime") != null;
+		}
+
+		private static Version GetMonoVersion()
+		{
+			var type = Type.GetType("Mono.Runtime");
+
+			// If we are not on mono, no checks need to be performed.
+			if (type == null)
+				return null;
+
+			var mi = type.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static);
+
+			if (mi == null)
+				return null;
+			var str = mi.Invoke(null, null) as string;
+
+			if (str == null)
+				return null;
+
+			return ParseMonoVersion(str);
+		}
+
+		private static Version ParseMonoVersion(string str)
+		{
+			// Example version string:
+			// 3.2.8 (Debian 3.2.8+dfsg-4ubuntu1)
+
+			var idx = str.IndexOf(' ');
+			if (idx < 0)
+				return null;
+
+			var part = str.Substring(0, idx);
+
+			Version ret;
+			Version.TryParse(part, out ret);
+
+			return ret;
 		}
 	}
 }
