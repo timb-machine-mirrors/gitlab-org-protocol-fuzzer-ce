@@ -185,7 +185,7 @@ namespace Peach.Pro.Core.Dom
 			pit.WriteEndElement();
 		}
 
-		protected override IEnumerable<DataElement> Children()
+		public override IEnumerable<DataElement> Children(bool forDisplay = false)
 		{
 			// Make sure we re-generate if needed
 			if (!viewPreRendering)

@@ -171,7 +171,7 @@ namespace Peach.Pro.Core
 
 			var root = new PitField();
 			var stateModel = _dom.context.test.stateModel;
-			var hasFieldIds = stateModel.HasFieldIds;
+			var useFieldIds = stateModel.HasFieldIds;
 
 			foreach (var state in stateModel.states)
 			{
@@ -185,17 +185,25 @@ namespace Peach.Pro.Core
 							mask.Apply(action, actionData.dataModel);
 						}
 
-						CollectNodes(
-							actionData.dataModel.DisplayTraverse(), 
-							node,
-							x => hasFieldIds ? x.FullFieldId : x.fullName
-						);
+						var kvs = actionData.dataModel
+							.TuningTraverse(useFieldIds, true)
+							.Where(x => x.Key != null);
+
+						foreach (var kv in kvs)
+						{
+							var parent = node;
+							var parts = kv.Key.Split('.');
+							foreach (var part in parts)
+							{
+								parent = AddNode(parent, part);
+							}
+						}
 					}
 
 					if (node.Fields.Any())
 					{
-						var parent = AddParent(hasFieldIds, root, state);
-						parent = AddParent(hasFieldIds, parent, action);
+						var parent = AddParent(useFieldIds, root, state);
+						parent = AddParent(useFieldIds, parent, action);
 						MergeFields(parent.Fields, node.Fields);
 					}
 				}
@@ -249,25 +257,8 @@ namespace Peach.Pro.Core
 			return next;
 		}
 
-		private void CollectNodes(
-			IEnumerable<DataElement> elements,
-			PitField root,
-			Func<DataElement, string> selector)
+		private void CollectNodes(IEnumerable<DataElement> elements, PitField root)
 		{
-			var fullNames = elements
-				.Select(selector)
-				.Distinct()
-				.Where(x => x != null);
-
-			foreach (var fullName in fullNames)
-			{
-				var parent = root;
-				var parts = fullName.Split('.');
-				foreach (var part in parts)
-				{
-					parent = AddNode(parent, part);
-				}
-			}
 		}
 
 		private void VerifyPit(string fileName, bool isTest)

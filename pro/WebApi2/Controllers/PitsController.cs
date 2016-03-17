@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Net;
 using System.Web.Http;
@@ -29,7 +30,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		[Route("")]
 		public IEnumerable<LibraryPit> Get()
 		{
-			return PitDatabase.Entries;
+			return PitDatabase.LibraryPits;
 		}
 
 		/// <summary>
@@ -46,20 +47,20 @@ namespace Peach.Pro.WebApi2.Controllers
 		{
 			try
 			{
-				PitDetail pit;
+				Tuple<Pit, PitDetail> tuple;
 				if (!string.IsNullOrEmpty(data.LegacyPitUrl))
 				{
-					pit = PitDatabase.MigratePit(data.LegacyPitUrl, data.PitUrl);
+					tuple = PitDatabase.MigratePit(data.LegacyPitUrl, data.PitUrl);
 				}
 				else
 				{
-					pit = PitDatabase.CopyPit(
+					tuple = PitDatabase.CopyPit(
 						data.PitUrl,
 						data.Name,
 						data.Description
 					);
 				}
-				return Ok(pit.Pit);
+				return Ok(tuple.Item1);
 			}
 			catch (KeyNotFoundException)
 			{

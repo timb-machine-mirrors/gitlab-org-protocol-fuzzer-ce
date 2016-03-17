@@ -35,15 +35,15 @@ namespace Peach.Pro.Core.Runtime
 {
 	public class ConsoleWatcher : Watcher
 	{
-		Stopwatch timer = new Stopwatch();
-		uint startIteration = 0;
-		bool reproducing = false;
+		private readonly Stopwatch timer = new Stopwatch();
+		private uint startIteration;
+		private bool reproducing;
 
-		protected override void Engine_ReproFault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faultData)
+		protected override void Engine_ReproFault(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faultData)
 		{
 			var color = Console.ForegroundColor;
 			Console.ForegroundColor = ConsoleColor.Yellow;
-			Console.WriteLine(string.Format("\n -- Caught fault at iteration {0}, trying to reproduce --\n", currentIteration));
+			Console.WriteLine("\n -- Caught fault at iteration {0}, trying to reproduce --\n", currentIteration);
 			Console.ForegroundColor = color;
 			reproducing = true;
 		}
@@ -52,17 +52,16 @@ namespace Peach.Pro.Core.Runtime
 		{
 			var color = Console.ForegroundColor;
 			Console.ForegroundColor = ConsoleColor.Red;
-			Console.WriteLine(string.Format("\n -- Could not reproduce fault at iteration {0} --\n", currentIteration));
+			Console.WriteLine("\n -- Could not reproduce fault at iteration {0} --\n", currentIteration);
 			Console.ForegroundColor = color;
 			reproducing = false;
 		}
 
-		protected override void Engine_Fault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faultData)
+		protected override void Engine_Fault(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faultData)
 		{
 			var color = Console.ForegroundColor;
 			Console.ForegroundColor = ConsoleColor.Red;
-			Console.WriteLine(string.Format("\n -- {1} fault at iteration {0} --\n", currentIteration,
-				reproducing ? "Reproduced" : "Caught"));
+			Console.WriteLine("\n -- {1} fault at iteration {0} --\n", currentIteration, reproducing ? "Reproduced" : "Caught");
 			Console.ForegroundColor = color;
 			reproducing = false;
 		}
@@ -90,14 +89,14 @@ namespace Peach.Pro.Core.Runtime
 
 		protected override void Engine_IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
 		{
-			string controlIteration = "";
+			var controlIteration = "";
 			if (context.controlIteration && context.controlRecordingIteration)
 				controlIteration = "R";
 			else if (context.controlIteration)
 				controlIteration = "C";
 
-			string strTotal = "-";
-			string strEta = "-";
+			var strTotal = "-";
+			var strEta = "-";
 
 
 			if (!timer.IsRunning)
@@ -132,7 +131,7 @@ namespace Peach.Pro.Core.Runtime
 			Console.ForegroundColor = ConsoleColor.DarkGray;
 			Console.Write("\n[");
 			Console.ForegroundColor = ConsoleColor.Gray;
-			Console.Write(string.Format("{0}{1},{2},{3}", controlIteration, currentIteration, strTotal, strEta));
+			Console.Write("{0}{1},{2},{3}", controlIteration, currentIteration, strTotal, strEta);
 			Console.ForegroundColor = ConsoleColor.DarkGray;
 			Console.Write("] ");
 			Console.ForegroundColor = ConsoleColor.DarkGreen;

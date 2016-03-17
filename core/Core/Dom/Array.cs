@@ -134,7 +134,7 @@ namespace Peach.Core.Dom
 			return child != OriginalElement;
 		}
 
-		protected override IEnumerable<DataElement> Children()
+		public override IEnumerable<DataElement> Children(bool forDisplay = false)
 		{
 			// If we have entries, just return them
 			if (Expanded)
@@ -146,15 +146,6 @@ namespace Peach.Core.Dom
 
 			// Mutation might have removed our original element
 			return new DataElement[0];
-		}
-
-		/// <summary>
-		/// Returns an enumeration of children that are diplayed to the user.
-		/// </summary>
-		/// <returns></returns>
-		public override IEnumerable<DataElement> DisplayChildren()
-		{
-			return OriginalElement.DisplayChildren();
 		}
 
 		/// <summary>

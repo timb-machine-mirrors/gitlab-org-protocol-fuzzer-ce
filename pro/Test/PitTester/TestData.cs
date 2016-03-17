@@ -307,6 +307,14 @@ namespace PitTester
 			public bool IsDatagram { get; set; }
 		}
 
+		public enum ExpectedOutputSource {
+			[XmlEnum("cdata")]
+			CData,
+
+			[XmlEnum("dataFile")]
+			DataFile,
+		}
+
 		public class Output : DataAction
 		{
 			public override string ActionType { get { return "output"; } }
@@ -314,6 +322,10 @@ namespace PitTester
 			[XmlAttribute("ignore")]
 			[DefaultValue(false)]
 			public bool Ignore { get; set; }
+
+			[XmlAttribute("verifyAgainst")]
+			[DefaultValue(ExpectedOutputSource.CData)]
+			public ExpectedOutputSource VerifyAgainst { get; set; }
 		}
 
 		[XmlElement("Define", Type = typeof(ValueDefine))]

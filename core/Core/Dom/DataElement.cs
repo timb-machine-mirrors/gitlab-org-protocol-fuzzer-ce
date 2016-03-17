@@ -311,32 +311,10 @@ namespace Peach.Core.Dom
 
 		/// <summary>
 		/// Performs pre-order traversal starting with this node.
-		/// Returns only children we want to display to the user.
-		/// Each element controls the children to return by
-		/// overriding the DisplayChildren function.
+		/// If forDisplay is true, returns only children we want to display to the user.
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<DataElement> DisplayTraverse()
-		{
-			var toVisit = new List<DataElement> { null };
-
-			var elem = this;
-
-			while (elem != null)
-			{
-				yield return elem;
-
-				var index = toVisit.Count;
-				foreach (var item in elem.DisplayChildren())
-					toVisit.Insert(index, item);
-
-				index = toVisit.Count - 1;
-				elem = toVisit[index];
-				toVisit.RemoveAt(index);
-			}
-		}
-
-		public IEnumerable<KeyValuePair<string, DataElement>> TuningTraverse(bool useFieldIds)
+		public IEnumerable<KeyValuePair<string, DataElement>> TuningTraverse(bool useFieldIds, bool forDisplay)
 		{
 			var key = useFieldIds ? FullFieldId : fullName;
 			var toVisit = new List<KeyValuePair<string, DataElement>>
@@ -353,7 +331,7 @@ namespace Peach.Core.Dom
 				yield return node;
 
 				index = toVisit.Count;
-				foreach (var child in node.Value.Children())
+				foreach (var child in node.Value.Children(forDisplay))
 				{
 					key = useFieldIds ? 
 						child.FullFieldId : 
@@ -511,7 +489,7 @@ namespace Peach.Core.Dom
 			yield return skip;
 		}
 
-		protected virtual IEnumerable<DataElement> Children()
+		public virtual IEnumerable<DataElement> Children(bool forDisplay = false)
 		{
 			return new DataElement[0];
 		}

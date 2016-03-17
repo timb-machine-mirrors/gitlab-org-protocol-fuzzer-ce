@@ -199,17 +199,20 @@ namespace Peach.Pro.Core.WebServices
 	public class PitDetail : INamed
 	{
 		public string Path { get; set; }
-		public Pit Pit { get; set; }
+		public string PitUrl { get; set; }
+		public List<Tag> Tags { get; set; }
+		public PitConfig PitConfig { get; set; }
+		public bool Locked { get; set; }
 
 		[Obsolete]
 		string INamed.name
 		{
-			get { return Pit.PitUrl; }
+			get { return PitUrl; }
 		}
 
 		string INamed.Name
 		{
-			get { return Pit.PitUrl; }
+			get { return PitUrl; }
 		}
 	}
 
@@ -400,17 +403,16 @@ namespace Peach.Pro.Core.WebServices
 
 		private PitDetail AddEntry(LibraryDetail lib, string fileName)
 		{
-			var detail = lib.Library.Locked ? 
-				MakePitDetail(fileName) : 
-				LoadPitDetail(fileName);
+			var detail = MakePitDetail(fileName, lib.Library.Locked);
 			_entries.Add(detail);
 
 			lib.Library.Versions[0].Pits.Add(new LibraryPit {
-				Id = detail.Pit.Id,
-				PitUrl = detail.Pit.PitUrl,
-				Name = detail.Pit.Name,
-				Description = detail.Pit.Description,
-				Tags = detail.Pit.Tags,
+				Id = detail.PitConfig.Id,
+				PitUrl = detail.PitUrl,
+				Name = detail.PitConfig.Name,
+				Description = detail.PitConfig.Description,
+				Tags = detail.Tags,
+				Locked = detail.Locked,
 			});
 
 			return detail;
@@ -429,48 +431,47 @@ namespace Peach.Pro.Core.WebServices
 			return path.Substring(len);
 		}
 
-		private PitDetail MakePitDetail(string fileName)
+		public string MakePitUrl(string path)
+		{
+			var relativePath = GetRelativePath(path);
+			var guid = MakeGuid(relativePath);
+			return PitServicePrefix + "/" + guid;
+		}
+
+		private PitDetail MakePitDetail(string fileName, bool locked)
 		{
 			var relativePath = GetRelativePath(fileName);
 			var guid = MakeGuid(relativePath);
-			var lastModified = File.GetLastWriteTimeUtc(fileName);
 			var dir = GetCategory(fileName);
 			var tag = new Tag {
 				Name = "Category." + dir,
 				Values = new List<string> { "Category", dir },
 			};
 
-			var pit = new Pit {
-				OriginalPit = relativePath,
-				Id = guid,
+			PitConfig pitConfig;
+			if (locked)
+			{
+				pitConfig = new PitConfig {
+					Id = guid,
+					OriginalPit = relativePath,
+					Name = Path.GetFileNameWithoutExtension(fileName),
+					Description = "", // TODO: get actual description
+					Config = new List<Param>(),
+					Agents = new List<Models.Agent>(),
+					Weights = new List<PitWeight>(),
+				};
+			}
+			else
+			{
+				pitConfig = LoadPitConfig(fileName);
+			}
+
+			return new PitDetail {
+				Path = fileName,
 				PitUrl = PitServicePrefix + "/" + guid,
-				Name = Path.GetFileNameWithoutExtension(fileName),
-				Description = "", // TODO: get actual description
-				Locked = true,
 				Tags = new List<Tag> { tag },
-				Timestamp = lastModified,
-				User = Environment.UserName,
-				Peaches = new List<PeachVersion> { Version },
-			};
-
-			return new PitDetail {
-				Path = fileName,
-				Pit = pit,
-			};
-		}
-
-		private PitDetail LoadPitDetail(string fileName)
-		{
-			var lastModified = File.GetLastWriteTimeUtc(fileName);
-
-			var pit = LoadPit(fileName);
-
-			pit.User = Environment.UserName;
-			pit.Timestamp = lastModified;
-
-			return new PitDetail {
-				Path = fileName,
-				Pit = pit,
+				PitConfig = pitConfig,
+				Locked = locked,
 			};
 		}
 
@@ -479,9 +480,24 @@ namespace Peach.Pro.Core.WebServices
 			get { return _entries; }
 		}
 
-		public IEnumerable<LibraryPit> Entries
+		public IEnumerable<PitDetail> Entries
 		{
-			get { return _entries.Select(item => item.Pit); }
+			get { return _entries; }
+		}
+
+		public IEnumerable<LibraryPit> LibraryPits 
+		{
+			get
+			{
+				return _entries.Select(x => new LibraryPit {
+					Id = x.PitConfig.Id,
+					PitUrl = x.PitUrl,
+					Name = x.PitConfig.Name,
+					Description = x.PitConfig.Description,
+					Tags = x.Tags,
+					Locked = x.Locked,
+				});
+			}
 		}
 
 		public IEnumerable<Library> Libraries
@@ -495,7 +511,7 @@ namespace Peach.Pro.Core.WebServices
 			if (detail == null)
 				return null;
 
-			return PopulatePit(detail);
+			return MakePit(detail);
 		}
 
 		public Pit GetPitByUrl(string url)
@@ -504,7 +520,7 @@ namespace Peach.Pro.Core.WebServices
 			if (detail == null)
 				return null;
 
-			return PopulatePit(detail);
+			return MakePit(detail);
 		}
 
 		public Library GetLibraryById(string guid)
@@ -539,7 +555,7 @@ namespace Peach.Pro.Core.WebServices
 		/// <param name="name">The name of the newly copied pit.</param>
 		/// <param name="description">The description of the newly copied pit.</param>
 		/// <returns>The newly copied pit.</returns>
-		public PitDetail CopyPit(string pitUrl, string name, string description)
+		public Tuple<Pit, PitDetail> CopyPit(string pitUrl, string name, string description)
 		{
 			if (string.IsNullOrEmpty(name))
 				throw new ArgumentException("A non-empty pit name is required.", "name");
@@ -563,27 +579,21 @@ namespace Peach.Pro.Core.WebServices
 				throw new ArgumentException("A pit already exists with the specified name.");
 
 			var guid = MakeGuid(GetRelativePath(dstFile));
-			var pit = new Pit {
-				OriginalPit = srcPit.Pit.OriginalPit,
+			var pitConfig = new PitConfig {
 				Id = guid,
-				PitUrl = PitServicePrefix + "/" + guid,
 				Name = name,
 				Description = description,
-				Locked = false,
-				Tags = srcPit.Pit.Tags,
-				Peaches = new List<PeachVersion> { Version },
+				OriginalPit = srcPit.PitConfig.OriginalPit,
 				Config = new List<Param>(),
 				Agents = new List<Models.Agent>(),
 				Weights = new List<PitWeight>(),
 			};
 
-			SavePit(dstFile, pit);
+			SavePitConfig(dstFile, pitConfig);
 
 			var detail = AddEntry(_configsLib, dstFile);
 
-			PopulatePit(detail);
-
-			return detail;
+			return new Tuple<Pit, PitDetail>(MakePit(detail), detail);
 		}
 
 		private string MakeUniquePath(string dir, string name, string ext)
@@ -599,7 +609,7 @@ namespace Peach.Pro.Core.WebServices
 			return path;
 		}
 
-		public PitDetail MigratePit(string legacyPitUrl, string pitUrl)
+		public Tuple<Pit, PitDetail> MigratePit(string legacyPitUrl, string pitUrl)
 		{
 			var legacyPit = GetPitDetailByUrl(legacyPitUrl);
 			if (legacyPit == null)
@@ -626,7 +636,9 @@ namespace Peach.Pro.Core.WebServices
 			if (originalPit == null)
 				throw new KeyNotFoundException("The original pit could not be found.");
 
-			var originalPitPath = (legacyPitUrl == pitUrl) ? GetRelativePath(xmlFile) : originalPit.Pit.OriginalPit;
+			var originalPitPath = (legacyPitUrl == pitUrl) ? 
+				GetRelativePath(xmlFile) : 
+				originalPit.PitConfig.OriginalPit;
 
 			// 1. Parse legacyPit.xml.config
 			var defs = PitDefines.ParseFile(legacyConfigFile, _pitLibraryPath, false);
@@ -645,20 +657,16 @@ namespace Peach.Pro.Core.WebServices
 
 			// 5. Write new .peach
 			var guid = MakeGuid(GetRelativePath(cfgFile));
-			var pit = new Pit {
-				OriginalPit = originalPitPath,
+			var pitConfig = new PitConfig {
 				Id = guid,
-				PitUrl = PitServicePrefix + "/" + guid,
 				Name = legacyName,
 				Description = contents.Description,
-				Locked = false,
-				Tags = legacyPit.Pit.Tags,
-				Peaches = new List<PeachVersion> { Version },
+				OriginalPit = originalPitPath,
 				Config = cfg,
 				Agents = agents.ToWeb(),
 				Weights = new List<PitWeight>(),
 			};
-			SavePit(cfgFile, pit);
+			SavePitConfig(cfgFile, pitConfig);
 
 			// 6. Move legacyPit.xml to target dir
 			// TODO: strip <Agent></Agent> and <Test><Agent ref='XXX'/></Test>
@@ -670,9 +678,7 @@ namespace Peach.Pro.Core.WebServices
 
 			var detail = AddEntry(_configsLib, cfgFile);
 
-			PopulatePit(detail);
-
-			return detail;
+			return new Tuple<Pit, PitDetail>(MakePit(detail), detail);
 		}
 
 		public Pit UpdatePitById(string guid, PitConfig data)
@@ -681,23 +687,23 @@ namespace Peach.Pro.Core.WebServices
 			if (detail == null)
 				throw new KeyNotFoundException();
 
-			if (detail.Pit.Locked)
+			if (detail.Locked)
 				throw new UnauthorizedAccessException();
 
-			detail.Pit.Config = data.Config; // TODO: defines.ApplyWeb(config);
-			detail.Pit.Agents = data.Agents.FromWeb();
-			detail.Pit.Weights = data.Weights;
+			detail.PitConfig.Config = data.Config; // TODO: defines.ApplyWeb(config);
+			detail.PitConfig.Agents = data.Agents.FromWeb();
+			detail.PitConfig.Weights = data.Weights;
 
-			SavePit(detail.Path, detail.Pit);
+			SavePitConfig(detail.Path, detail.PitConfig);
 
-			return PopulatePit(detail);
+			return MakePit(detail);
 		}
 
 		public Pit UpdatePitByUrl(string url, PitConfig data)
 		{
 			PitDetail pit;
 			_entries.TryGetValue(url, out pit);
-			return UpdatePitById(pit.Pit.Id, data);
+			return UpdatePitById(pit.PitConfig.Id, data);
 		}
 
 		private PitDetail GetPitDetailById(string guid)
@@ -712,15 +718,15 @@ namespace Peach.Pro.Core.WebServices
 			return pit;
 		}
 
-		public static Pit LoadPit(string path)
+		public static PitConfig LoadPitConfig(string path)
 		{
 			var serializer = new JsonSerializer();
 			using (var stream = new StreamReader(path))
 			using (var reader = new JsonTextReader(stream))
-				return serializer.Deserialize<Pit>(reader);
+				return serializer.Deserialize<PitConfig>(reader);
 		}
 
-		public static void SavePit(string path, Pit pit)
+		public static void SavePitConfig(string path, PitConfig pit)
 		{
 			var serializer = new JsonSerializer {
 				Formatting = Newtonsoft.Json.Formatting.Indented
@@ -732,21 +738,33 @@ namespace Peach.Pro.Core.WebServices
 
 		#region Pit Config/Agents/Metadata
 
-		private Pit PopulatePit(PitDetail detail)
+		private Pit MakePit(PitDetail detail)
 		{
-			var pitXml = Path.Combine(_pitLibraryPath, detail.Pit.OriginalPit);
+			var pitXml = Path.Combine(_pitLibraryPath, detail.PitConfig.OriginalPit);
 			var pitConfig = pitXml + ".config";
 			var defs = PitDefines.ParseFile(pitConfig, _pitLibraryPath);
-
-			var pit = detail.Pit;
 			var metadata = PitCompiler.LoadMetadata(pitXml);
-
 			var calls = new List<string>(); // TODO: get actual calls
-			pit.Metadata = new PitMetadata
-			{
-				Defines = defs.ToWeb(),
-				Monitors = MonitorMetadata.Generate(calls),
-				Fields = metadata != null ? metadata.Fields : null,
+			var lastModified = File.GetLastWriteTimeUtc(detail.Path);
+
+			var pit = new Pit {
+				Id = detail.PitConfig.Id,
+				PitUrl = detail.PitUrl,
+				Name = detail.PitConfig.Name,
+				Description = detail.PitConfig.Description,
+				Tags = detail.Tags,
+				Locked = detail.Locked,
+				Peaches = new List<PeachVersion> { Version },
+				User = Environment.UserName,
+				Timestamp = lastModified,
+				Config = detail.PitConfig.Config,
+				Agents = detail.PitConfig.Agents,
+				Weights = detail.PitConfig.Weights,
+				Metadata = new PitMetadata {
+					Defines = defs.ToWeb(),
+					Monitors = MonitorMetadata.Generate(calls),
+					Fields = metadata != null ? metadata.Fields : null,
+				}
 			};
 
 			return pit;
