@@ -886,7 +886,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 			}
 		}
 
-		public bool IsControlable { get { return false; } }
+		public bool IsControllable { get { return false; } }
 
 		public Job GetJob()
 		{

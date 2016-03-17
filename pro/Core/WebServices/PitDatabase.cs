@@ -431,6 +431,13 @@ namespace Peach.Pro.Core.WebServices
 			return path.Substring(len);
 		}
 
+		public string MakePitUrl(string path)
+		{
+			var relativePath = GetRelativePath(path);
+			var guid = MakeGuid(relativePath);
+			return PitServicePrefix + "/" + guid;
+		}
+
 		private PitDetail MakePitDetail(string fileName, bool locked)
 		{
 			var relativePath = GetRelativePath(fileName);
