@@ -193,6 +193,13 @@ namespace PitTester
 					{
 						expected = File.ReadAllBytes(dataSet.FileName);
 					}
+					else
+					{
+						var msg = string.Format(
+							"No data set available for the '{0}' output action, which was configured to `verifyAgainst='dataFile'`.",
+							data.ActionName);
+						throw new PeachException(msg);
+					}
 					break;
 				case TestData.ExpectedOutputSource.CData:
 					if (!cdataAvailable && !data.Ignore)
