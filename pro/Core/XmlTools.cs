@@ -55,7 +55,7 @@ namespace Peach.Pro.Core
 
 			foreach (XmlSchemaObject obj in schema[0].Items)
 			{
-				if (obj is XmlSchemaElement)
+				if (obj is XmlSchemaElement || obj is XmlSchemaSimpleType)
 					continue;
 
 				var asType = (XmlSchemaComplexType)obj;

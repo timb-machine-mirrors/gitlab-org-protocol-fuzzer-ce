@@ -32,8 +32,6 @@ namespace Peach.Pro.Core.WebServices.Models
 	{
 		public List<PeachVersion> Peaches { get; set; }
 
-		public string OriginalPit { get; set; }
-
 		public string User { get; set; }
 
 		public DateTime Timestamp { get; set; }

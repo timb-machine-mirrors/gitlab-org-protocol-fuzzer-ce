@@ -55,7 +55,7 @@ namespace Peach.Pro.Core.Runtime
 
 			reproducing = false;
 
-			foreach (Fault fault in faultData)
+			foreach (var fault in faultData)
 			{
 				if (fault.type == FaultType.Fault)
 				{
@@ -172,8 +172,8 @@ namespace Peach.Pro.Core.Runtime
 
 		public static void ClearCurrentConsoleLine()
 		{
-			int currentLineCursor = Console.CursorTop;
-			int currentColumn = Console.CursorLeft;
+			var currentLineCursor = Console.CursorTop;
+			var currentColumn = Console.CursorLeft;
 			Console.SetCursorPosition(0, Console.CursorTop);
 			Console.Write(new string(' ', Console.WindowWidth));
 			Console.SetCursorPosition(currentColumn, currentLineCursor);
@@ -181,8 +181,8 @@ namespace Peach.Pro.Core.Runtime
 
 		public static void ClearCurrentConsoleLineFromCursor()
 		{
-			int currentLineCursor = Console.CursorTop;
-			int currentColumn = Console.CursorLeft;
+			var currentLineCursor = Console.CursorTop;
+			var currentColumn = Console.CursorLeft;
 			Console.Write(new string(' ', Console.WindowWidth - Console.CursorLeft));
 			Console.SetCursorPosition(currentColumn, currentLineCursor);
 		}
@@ -263,7 +263,7 @@ namespace Peach.Pro.Core.Runtime
 				Console.BackgroundColor = ConsoleColor.Blue;
 
 				Console.SetCursorPosition(0, 0);
-				for (int i = 0; i < Console.WindowWidth; i++)
+				for (var i = 0; i < Console.WindowWidth; i++)
 					Console.Write(" ");
 
 				Console.SetCursorPosition(0, 0);
@@ -279,7 +279,7 @@ namespace Peach.Pro.Core.Runtime
 					Console.BackgroundColor = ConsoleColor.Yellow;
 
 					Console.SetCursorPosition(0, 1);
-					for (int i = 0; i < Console.WindowWidth; i++)
+					for (var i = 0; i < Console.WindowWidth; i++)
 						Console.Write(" ");
 
 					var center = (Console.WindowWidth / 2) - (License.ExpirationWarning.Length / 2);
@@ -350,7 +350,7 @@ namespace Peach.Pro.Core.Runtime
 				Console.Write(_status);
 
 				// Clear rest of line
-				for (int i = Console.CursorLeft; i < Console.WindowLeft; i++)
+				for (var i = Console.CursorLeft; i < Console.WindowLeft; i++)
 					Console.Write(' ');
 
 				// Display faults
@@ -368,14 +368,14 @@ namespace Peach.Pro.Core.Runtime
 				Console.ForegroundColor = ConsoleColor.DarkYellow;
 				Console.Write(" ]");
 				Console.ForegroundColor = ConsoleColor.DarkGray;
-				for (int i = Console.CursorLeft; i < Console.WindowWidth; i++)
+				for (var i = Console.CursorLeft; i < Console.WindowWidth; i++)
 					Console.Write("-");
 
 				Console.ForegroundColor = ConsoleColor.Gray;
 
-				int x = 9;
+				var x = 9;
 
-				for (int cnt = 0; cnt < _faults.Count && (x + cnt + 1) <= Console.WindowHeight; cnt++)
+				for (var cnt = 0; cnt < _faults.Count && (x + cnt + 1) <= Console.WindowHeight; cnt++)
 				{
 					var fault = _faults[_faults.Count - (cnt + 1)];
 

@@ -145,10 +145,7 @@ namespace Peach.Pro.Test.Core
 											}
 										},
 										new PitField { Id = "Array", Fields = {
-												new PitField { Id = "Array", Fields = {
-														new PitField { Id = "Item" }
-													}
-												}
+												new PitField { Id = "Item" }
 											}
 										}
 									}
@@ -551,14 +548,11 @@ namespace Peach.Pro.Test.Core
 										new PitField { Id = "Choice", Fields = {
 												new PitField { Id = "B", Fields = {
 														new PitField { Id = "ChoiceArray", Fields = {
-																new PitField { Id = "ChoiceArray", Fields = {
-																		new PitField { Id = "BB" },
-																		new PitField { Id = "BC" }
-																	}
-																},
+																new PitField { Id = "BB" },
+																new PitField { Id = "BC" }
 															}
 														},
-													}
+													},
 												},
 											}
 										},

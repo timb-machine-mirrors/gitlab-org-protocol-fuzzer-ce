@@ -522,6 +522,13 @@ namespace Peach.Pro.WebApi2.Controllers
 		{
 			var id = job.Id;
 
+			if (!string.IsNullOrEmpty(job.PitUrl))
+			{
+				// This ensures that legacy jobs that used absolute paths for the basis of the PitUrl 
+				// always return relative-path-based PitUrls
+				job.PitUrl = PitDatabase.MakePitUrl(job.PitFile);
+			}
+
 			job.JobUrl = MakeUrl(id);
 			job.FaultsUrl = MakeUrl(id, "faults");
 			job.NodesUrl = MakeUrl(id, "nodes");
@@ -535,7 +542,7 @@ namespace Peach.Pro.WebApi2.Controllers
 			//PeachUrl = "",
 			//PackageFileUrl = "",
 
-			if (JobMonitor.IsControlable && JobMonitor.IsTracking(job))
+			if (JobMonitor.IsControllable && JobMonitor.IsTracking(job))
 			{
 				job.Commands = new JobCommands
 				{

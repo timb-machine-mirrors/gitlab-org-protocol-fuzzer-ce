@@ -424,7 +424,7 @@ namespace Peach.Core.Analyzers
 							string newFileName = Utilities.GetAppResourcePath(fileName);
 							normalized = Path.GetFullPath(newFileName);
 							if (!File.Exists(normalized))
-								throw new PeachException("Error, Unable to locate Pit file [" + fileName + "].\n");
+								throw new PeachException("Error, Unable to locate Pit file [" + normalized + "].\n");
 							fileName = newFileName;
 						}
 

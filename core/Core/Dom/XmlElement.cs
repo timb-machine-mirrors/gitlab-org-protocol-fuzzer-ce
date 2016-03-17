@@ -35,6 +35,7 @@ using Peach.Core.IO;
 using NLog;
 using System.Security;
 using System.IO;
+using System.Reflection;
 
 namespace Peach.Core.Dom
 {
@@ -244,6 +245,18 @@ namespace Peach.Core.Dom
 
 		class PeachXmlWriter : XmlTextWriter
 		{
+#if MONO
+			private static readonly bool MonoRawMethod = false;
+
+			static PeachXmlWriter()
+			{
+				var version = Platform.MonoRuntimeVersion;
+
+				if (version.Major > 4 || (version.Major == 4 && version.Minor >= 2))
+					MonoRawMethod = true;
+			}
+#endif
+
 			public PeachXmlWriter(BitStream stream, string encoding)
 				: base(stream, Encoding.GetEncoding(encoding).RawEncoding)
 			{
@@ -252,7 +265,17 @@ namespace Peach.Core.Dom
 			public override void WriteString(string text)
 			{
 #if MONO
-				base.WriteString(text);
+				if(MonoRawMethod)
+				{
+					var encoded = SecurityElement.Escape(text);
+					char[] raw = encoded.ToCharArray();
+
+					WriteRaw(raw, 0, raw.Length);
+				}
+				else
+				{
+					base.WriteString(text);
+				}
 #else
 				var encoded = SecurityElement.Escape(text);
 				char[] raw = encoded.ToCharArray();
