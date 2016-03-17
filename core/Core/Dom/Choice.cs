@@ -390,18 +390,18 @@ namespace Peach.Core.Dom
 			return child == SelectedElement;
 		}
 
-		protected override IEnumerable<DataElement> Children()
+		public override IEnumerable<DataElement> Children(bool forDisplay = false)
 		{
+			if (forDisplay)
+			{
+				if (maskedElements.Any())
+					return maskedElements;
+				return choiceElements;
+			}
+
 			// Return choices if we haven't chosen yet
 			if (_selectedElement != null)
 				return base.Children();
-			return choiceElements;
-		}
-
-		public override IEnumerable<DataElement> DisplayChildren()
-		{
-			if (maskedElements.Any())
-				return maskedElements;
 			return choiceElements;
 		}
 
