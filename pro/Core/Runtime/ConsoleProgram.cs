@@ -505,14 +505,8 @@ namespace Peach.Pro.Core.Runtime
 						_pitLibraryPath = FindPitLibrary(_pitLibraryPath);
 						_definedValues[PitLibraryPath] = _pitLibraryPath;
 
-						var pit = PitDatabase.LoadPit(pitPath);
-						pitPath = Path.Combine(_pitLibraryPath, pit.OriginalPit);
-						pitConfig = new PitConfig
-						{
-							Config = pit.Config,
-							Agents = pit.Agents,
-							Weights = pit.Weights,
-						};
+						pitConfig = PitDatabase.LoadPitConfig(pitPath);
+						pitPath = Path.Combine(_pitLibraryPath, pitConfig.OriginalPit);
 					}
 				}
 

@@ -23,7 +23,6 @@ namespace Peach.Pro.Core.Runtime
 		readonly ManualResetEvent _pausedEvt = new ManualResetEvent(true);
 		readonly RunConfiguration _config;
 		readonly string _pitLibraryPath;
-		readonly Pit _pit;
 		readonly PitConfig _pitConfig;
 		bool _shouldStop;
 		Engine _engine;
@@ -32,17 +31,11 @@ namespace Peach.Pro.Core.Runtime
 		public JobRunner(Job job, string pitLibraryPath, string pitFile)
 		{
 			_pitLibraryPath = pitLibraryPath;
-			_pit = PitDatabase.LoadPit(pitFile);
-
-			_pitConfig = new PitConfig {
-				Config = _pit.Config,
-				Agents = _pit.Agents,
-				Weights = _pit.Weights,
-			};
+			_pitConfig = PitDatabase.LoadPitConfig(pitFile);
 
 			_config = new RunConfiguration {
 				id = job.Guid,
-				pitFile = Path.Combine(_pitLibraryPath, _pit.OriginalPit),
+				pitFile = Path.Combine(_pitLibraryPath, _pitConfig.OriginalPit),
 				shouldStop = ShouldStop,
 			};
 
@@ -90,9 +83,9 @@ namespace Peach.Pro.Core.Runtime
 				if (!dom.tests.TryGetValue(_config.runName, out test))
 					throw new PeachException("Unable to locate test named '{0}'.".Fmt(_config.runName));
 
-				if (_pit.Weights != null)
+				if (_pitConfig.Weights != null)
 				{
-					foreach (var item in _pit.Weights)
+					foreach (var item in _pitConfig.Weights)
 					{
 						test.weights.Add(new SelectWeight { Name = item.Id, Weight = (ElementWeight)item.Weight });
 					}

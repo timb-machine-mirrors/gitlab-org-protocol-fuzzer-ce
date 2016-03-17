@@ -72,14 +72,14 @@ namespace Peach.Pro.Test.Core.Runtime
 
 		const string PitXmlFail = "xxx" + PitXml;
 
-		static readonly Pit PitDefault = new Pit {
+		static readonly PitConfig PitDefault = new PitConfig {
 			OriginalPit = "Test.xml",
 			Config = new List<Param>(),
 			Agents = new List<MAgent>(),
 			Weights = new List<PitWeight>(),
 		};
 
-		static readonly Pit PitFail = new Pit {
+		static readonly PitConfig PitFail = new PitConfig {
 			OriginalPit = "TestFail.xml",
 			Config = new List<Param>(),
 			Agents = new List<MAgent>(),
@@ -130,10 +130,10 @@ namespace Peach.Pro.Test.Core.Runtime
 			Exception _caught;
 			readonly AutoResetEvent _evtReady = new AutoResetEvent(false);
 
-			public SafeRunner(string pitLibraryPath, Pit pit, JobRequest jobRequest, Action<Engine> hooker = null)
+			public SafeRunner(string pitLibraryPath, PitConfig pitConfig, JobRequest jobRequest, Action<Engine> hooker = null)
 			{
 				var pitPath = Path.Combine(pitLibraryPath, "Test.peach");
-				PitDatabase.SavePit(pitPath, pit);
+				PitDatabase.SavePitConfig(pitPath, pitConfig);
 
 				_job = new Job(jobRequest, pitPath);
 				JobRunner = new JobRunner(_job, pitLibraryPath, pitPath);
@@ -335,7 +335,7 @@ namespace Peach.Pro.Test.Core.Runtime
 		[Test]
 		public void TestWeights()
 		{
-			var pit = new Pit {
+			var pit = new PitConfig {
 				OriginalPit = "Test.xml",
 				Config = new List<Param>(),
 				Agents = new List<MAgent>(),
