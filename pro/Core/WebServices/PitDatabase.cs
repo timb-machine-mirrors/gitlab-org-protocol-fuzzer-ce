@@ -412,6 +412,7 @@ namespace Peach.Pro.Core.WebServices
 				Name = detail.PitConfig.Name,
 				Description = detail.PitConfig.Description,
 				Tags = detail.Tags,
+				Locked = detail.Locked,
 			});
 
 			return detail;
@@ -475,6 +476,21 @@ namespace Peach.Pro.Core.WebServices
 		public IEnumerable<PitDetail> Entries
 		{
 			get { return _entries; }
+		}
+
+		public IEnumerable<LibraryPit> LibraryPits 
+		{
+			get
+			{
+				return _entries.Select(x => new LibraryPit {
+					Id = x.PitConfig.Id,
+					PitUrl = x.PitUrl,
+					Name = x.PitConfig.Name,
+					Description = x.PitConfig.Description,
+					Tags = x.Tags,
+					Locked = x.Locked,
+				});
+			}
 		}
 
 		public IEnumerable<Library> Libraries

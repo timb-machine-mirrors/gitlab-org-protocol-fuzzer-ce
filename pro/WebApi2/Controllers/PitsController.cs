@@ -30,14 +30,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		[Route("")]
 		public IEnumerable<LibraryPit> Get()
 		{
-			return PitDatabase.Entries.Select(x => new LibraryPit {
-				Id = x.PitConfig.Id,
-				PitUrl = x.PitUrl,
-				Name = x.PitConfig.Name,
-				Description = x.PitConfig.Description,
-				Tags = x.Tags,
-				Locked = x.Locked,
-			});
+			return PitDatabase.LibraryPits;
 		}
 
 		/// <summary>
