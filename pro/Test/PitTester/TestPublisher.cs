@@ -116,6 +116,7 @@ namespace PitTester
 		protected override void OnInput()
 		{
 			Log("Input");
+
 			var data = _logger.Verify<TestData.Input>(Name);
 
 			if (data == null)
@@ -169,23 +170,50 @@ namespace PitTester
 			if (!IsControlIteration)
 				return;
 
-			var expected = data.Payload;
-
 			// Ensure we end on a byte boundary
 			var bs = dataModel.Value.PadBits();
 			bs.Seek(0, SeekOrigin.Begin);
 			var actual = new BitReader(bs).ReadBytes((int)bs.Length);
 
-			// If this data model has a file data set, compare to that
+			// Determine expected value
+			var expected = new byte[] {};
 			var dataSet = dataModel.actionData.selectedData as DataFile;
-			if (dataSet != null)
-			{
-				// If data files are in use and VerifyDataSets is false, don't do a comparison
-				if (!_logger.VerifyDataSets)
-					return;
+			var cdataAvailable = !(data.Payload == null || data.Payload.Length == 0);
+			switch (data.VerifyAgainst) {
+				case TestData.ExpectedOutputSource.DataFile:
+					if (cdataAvailable && !data.Ignore)
+					{
+						var msg = string.Format(
+							"Unexpected CDATA set for '{0}' output action in pit test when `verifyAgainst='dataFile'`!", 
+							data.ActionName);
+						FireError(msg);
+					}
 
-				expected = File.ReadAllBytes(dataSet.FileName);
-				
+					if (dataSet != null)
+					{
+						expected = File.ReadAllBytes(dataSet.FileName);
+					}
+					else
+					{
+						var msg = string.Format(
+							"No data set available for the '{0}' output action, which was configured to `verifyAgainst='dataFile'`.",
+							data.ActionName);
+						throw new PeachException(msg);
+					}
+					break;
+				case TestData.ExpectedOutputSource.CData:
+					if (!cdataAvailable && !data.Ignore)
+					{
+						var msg = string.Format(
+							"CDATA missing from '{0}' output action in pit test!", 
+							data.ActionName);
+						FireError(msg);
+					}
+
+					expected = data.Payload;
+					break;
+				default:
+					break;
 			}
 
 			if (Logger.IsDebugEnabled)
