@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.ComponentModel;
+using System;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
@@ -85,6 +86,7 @@ namespace Peach.Pro.Core.WebServices.Models
 	/// <summary>
 	/// The most basic key/value pair used for all parameters.
 	/// </summary>
+	[Serializable]
 	public class Param
 	{
 		/// <summary>
@@ -122,6 +124,7 @@ namespace Peach.Pro.Core.WebServices.Models
 	/// <summary>
 	/// Represents a single monitor instance.
 	/// </summary>
+	[Serializable]
 	public class Monitor
 	{
 		/// <summary>
@@ -147,6 +150,7 @@ namespace Peach.Pro.Core.WebServices.Models
 	/// Represents an agent in a pit file.
 	/// Contains agent the location and list of monitors.
 	/// </summary>
+	[Serializable]
 	public class Agent
 	{
 		/// <summary>

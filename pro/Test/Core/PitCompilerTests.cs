@@ -114,7 +114,7 @@ namespace Peach.Pro.Test.Core
 
 			var compiler = new PitCompiler(_root.Path, filename);
 			compiler.Parse(false, false);
-			var tree = compiler.MakeFields();
+			var tree = compiler.MakeMetadata().Fields;
 			var actual = JsonConvert.SerializeObject(tree);
 			var expected = JsonConvert.SerializeObject(new[] {
 				new PitField { Id = "Initial", Fields = {
@@ -281,7 +281,7 @@ namespace Peach.Pro.Test.Core
 
 			var compiler = new PitCompiler(_root.Path, filename);
 			compiler.Parse(false, false);
-			var tree = compiler.MakeFields();
+			var tree = compiler.MakeMetadata().Fields;
 			var actual = JsonConvert.SerializeObject(tree);
 			var expected = JsonConvert.SerializeObject(new[] {
 				new PitField { Id = "state", Fields = {
@@ -437,7 +437,7 @@ namespace Peach.Pro.Test.Core
 
 			var compiler = new PitCompiler(_root.Path, filename);
 			compiler.Parse(false, false);
-			var tree = compiler.MakeFields();
+			var tree = compiler.MakeMetadata().Fields;
 			var actual = JsonConvert.SerializeObject(tree);
 			var expected = JsonConvert.SerializeObject(new[] {
 				new PitField { Id = "state", Fields = {
@@ -523,7 +523,7 @@ namespace Peach.Pro.Test.Core
 
 			var compiler = new PitCompiler(_root.Path, filename);
 			compiler.Parse(false, false);
-			var tree = compiler.MakeFields();
+			var tree = compiler.MakeMetadata().Fields;
 			var actual = JsonConvert.SerializeObject(tree);
 			var expected = JsonConvert.SerializeObject(new[] {
 				new PitField { Id = "Initial", Fields = {
@@ -620,7 +620,7 @@ namespace Peach.Pro.Test.Core
 
 			var compiler = new PitCompiler(_root.Path, filename);
 			compiler.Parse(false, false);
-			var tree = compiler.MakeFields();
+			var tree = compiler.MakeMetadata().Fields;
 			var actual = JsonConvert.SerializeObject(tree);
 			var expected = JsonConvert.SerializeObject(new[] {
 				new PitField { Id = "Initial", Fields = {
@@ -926,6 +926,67 @@ Field'/>
 
 			actual.ForEach(Console.WriteLine);
 			CollectionAssert.AreEquivalent(expected, actual);
+		}
+
+		[Test]
+		public void TestCalls()
+		{
+			var xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String value='Hello World' />
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action name='StartIterationEvent' type='call' method='StartIterationEvent' publisher='Peach.Agent' />
+
+			<Action name='Open' type='open' publisher='tcp' />
+
+			<Action name='Output' type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+
+			<Action name='Input' type='input'>
+				<DataModel ref='DM'/>
+			</Action>
+
+			<Action name='Slurp' type='slurp' valueXpath='//Request//messageId/Value' setXpath='//messageId/Value' />
+
+			<Action name='Message' type='message' status='foo' error='bar' />
+
+			<Action name='Close' type='close' publisher='tcp' />
+
+			<Action name='ExitIterationEvent' type='call' method='ExitIterationEvent' publisher='Peach.Agent' />
+		</State>
+
+		<State name='Blank'>
+			<Action name='StartIterationEvent' type='call' method='StartIterationEvent' publisher='Peach.Agent' />
+			<Action name='Call' type='call' method='Call' publisher='Peach.Agent' />
+			<Action name='ExitIterationEvent' type='call' method='ExitIterationEvent' publisher='Peach.Agent' />
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<Strategy class='Random'/>
+		<StateModel ref='SM' />
+		<Publisher class='Null' />
+	</Test>
+</Peach>
+";
+
+			var filename = Path.Combine(_root.Path, "TestCalls.xml");
+			File.WriteAllText(filename, xml);
+
+			var compiler = new PitCompiler(_root.Path, filename);
+			compiler.Parse(false, false);
+			var expected = new[] {
+				"StartIterationEvent",
+				"ExitIterationEvent",
+				"Call",
+			};
+			var actual = compiler.MakeMetadata().Calls;
+			CollectionAssert.AreEqual(expected, actual);
 		}
 	}
 }

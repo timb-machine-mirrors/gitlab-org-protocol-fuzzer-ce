@@ -196,6 +196,7 @@ namespace Peach.Pro.Core.WebServices
 		public string FileName { get; private set; }
 	}
 
+	[Serializable]
 	public class PitDetail : INamed
 	{
 		public string Path { get; set; }
@@ -323,7 +324,7 @@ namespace Peach.Pro.Core.WebServices
 
 		public void Load(string path)
 		{
-			_pitLibraryPath = path;
+			_pitLibraryPath = Path.GetFullPath(path);
 
 			_entries = new NamedCollection<PitDetail>();
 			_libraries = new NamedCollection<LibraryDetail>();
@@ -406,6 +407,12 @@ namespace Peach.Pro.Core.WebServices
 			var detail = MakePitDetail(fileName, lib.Library.Locked);
 			_entries.Add(detail);
 
+			// To maintain compatibility with older jobs, we need to continue
+			// to map absolute paths to PitDetails
+			var absDetail = ObjectCopier.Clone(detail);
+			absDetail.PitUrl = PitServicePrefix + "/" + MakeGuid(fileName);
+			_entries.Add(absDetail);
+
 			lib.Library.Versions[0].Pits.Add(new LibraryPit {
 				Id = detail.PitConfig.Id,
 				PitUrl = detail.PitUrl,
@@ -429,13 +436,6 @@ namespace Peach.Pro.Core.WebServices
 			if (!_pitLibraryPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
 				len++;
 			return path.Substring(len);
-		}
-
-		public string MakePitUrl(string path)
-		{
-			var relativePath = GetRelativePath(path);
-			var guid = MakeGuid(relativePath);
-			return PitServicePrefix + "/" + guid;
 		}
 
 		private PitDetail MakePitDetail(string fileName, bool locked)
@@ -744,8 +744,10 @@ namespace Peach.Pro.Core.WebServices
 			var pitConfig = pitXml + ".config";
 			var defs = PitDefines.ParseFile(pitConfig, _pitLibraryPath);
 			var metadata = PitCompiler.LoadMetadata(pitXml);
-			var calls = new List<string>(); // TODO: get actual calls
-			var lastModified = File.GetLastWriteTimeUtc(detail.Path);
+
+			var calls = new List<string>();
+			if (metadata != null && metadata.Calls != null)
+				calls = metadata.Calls;
 
 			var pit = new Pit {
 				Id = detail.PitConfig.Id,
@@ -756,7 +758,7 @@ namespace Peach.Pro.Core.WebServices
 				Locked = detail.Locked,
 				Peaches = new List<PeachVersion> { Version },
 				User = Environment.UserName,
-				Timestamp = lastModified,
+				Timestamp = File.GetLastWriteTimeUtc(detail.Path),
 				Config = detail.PitConfig.Config,
 				Agents = detail.PitConfig.Agents,
 				Weights = detail.PitConfig.Weights,

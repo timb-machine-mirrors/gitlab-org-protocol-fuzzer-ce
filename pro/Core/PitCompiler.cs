@@ -4,6 +4,7 @@ using System.Linq;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
+using Peach.Core.Dom.Actions;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.Core.Publishers;
 using Newtonsoft.Json;
@@ -78,10 +79,7 @@ namespace Peach.Pro.Core
 
 		internal void SaveMetadata()
 		{
-			var metadata = new PitMetadata {
-				Fields = MakeFields()
-			};
-
+			var metadata = MakeMetadata();
 			var serializer = new JsonSerializer();
 			using (var stream = new StreamWriter(_pitMetaPath))
 			using (var writer = new JsonTextWriter(stream))
@@ -165,10 +163,11 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		internal List<PitField> MakeFields()
+		internal PitMetadata MakeMetadata()
 		{
 			TotalNodes = 0;
 
+			var calls = new List<string>();
 			var root = new PitField();
 			var stateModel = _dom.context.test.stateModel;
 			var useFieldIds = stateModel.HasFieldIds;
@@ -206,10 +205,17 @@ namespace Peach.Pro.Core
 						parent = AddParent(useFieldIds, parent, action);
 						MergeFields(parent.Fields, node.Fields);
 					}
+
+					var callAction = action as Call;
+					if (callAction != null && !calls.Contains(callAction.method))
+						calls.Add(callAction.method);
 				}
 			}
 
-			return root.Fields;
+			return new PitMetadata {
+				Calls = calls,
+				Fields = root.Fields,
+			};
 		}
 
 		private void MergeFields(List<PitField> lhs, List<PitField> rhs)
@@ -255,10 +261,6 @@ namespace Peach.Pro.Core
 				TotalNodes++;
 			}
 			return next;
-		}
-
-		private void CollectNodes(IEnumerable<DataElement> elements, PitField root)
-		{
 		}
 
 		private void VerifyPit(string fileName, bool isTest)

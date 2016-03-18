@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
+	[Serializable]
 	public class PitConfig
 	{
 		public string Id { get; set; }
