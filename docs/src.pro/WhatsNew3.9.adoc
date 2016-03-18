@@ -47,12 +47,25 @@ iSCSI, which stands for Internet Small Computer System Interface, works on top o
 
 ==== New Configuration Format
 
+
+
 ==== Updates to minset Tool
+
+The minset tool has been updated to use an improved minsetting algorithm.  Additionally several bugs have been fixed that caused minset to use incorrectly calculated addresses.
 
 ==== New +duration+ Command Line Switch
 
+A new command line argument +--duration+ has been added in this release to make CI integrations easier.  The duration argument will cause Peach to run for a specific length of time and then exit.  Duration is specified in days, hours and minutes.
 
-=== Enterprise/Developer
+==== Address Sanitizer
+
+Several changes to support for Address Sanitizer compile time instrumentation has occured:
+
+* SSH Command monitor now supports ASAN
+* ASAN is now enabled by default for SSH Command, Process, and Run Command monitors.
+* Support for GCC integrated ASAN has been added
+
+=== Developer
 
 ==== Improved Python Extension Support
 
@@ -64,7 +77,7 @@ iSCSI, which stands for Internet Small Computer System Interface, works on top o
 
 ==== SSL Publisher ALPN Support
 
-==== Rest Publisher
+==== Rest Publisher Extensions
 
-==== SSH Monitor ASAN support
+The REST publisher has been updated to support Web APIs that require XML instead of JSON content types. Additionally, the content type can now be customized, allowing support for non-standard payloads, binary data, etc.
 
