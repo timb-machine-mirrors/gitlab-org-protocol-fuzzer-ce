@@ -1,0 +1,70 @@
+<<<
+
+[[Brand_new_items]]
+== What's new in Peach Platform v3.9 (2016 Q1)
+
+Peach Pits are the main focus of this release. You'll find that new Pits are available, existing pits are improved and incorporate bug fixes, the Peach Web UI now groups Pit variables for an improved user experience, and supporting documentation reflects the update.
+
+The following items are new features for the Peach Professional v3.9 release.
+
+=== Fuzzing Definitions (Pits)
+
+Descriptions of the new Pits follow:
+
+==== DICOM File
+
+Digitial Image and Communications in Medical (DICOM) is an image
+format based on formerly the NEMA medical industry standard. It is
+commonly used for medical images in a large variety of medical
+equipment.
+
+==== DICOM Network
+
+Digitial Image and Communications in Medical (DICOM) is an image
+format based on formerly the NEMA medical industry standard. It is
+commonly used for medical images in a large variety of medical
+equipment.
+
+==== HL7 Version 2
+
+Health Level Seven (HL7) is a data format commonly used in the medical
+industry. Patient records and other data relevant to running a medical
+operation are included.
+
+==== DTLS Server
+
+DTLS is a derivation of SSL protocol. It provides the same security services (integrity, authentification and confidentiality) but under the UDP protocol.
+
+==== iSCSI
+
+iSCSI, which stands for Internet Small Computer System Interface, works on top of the Transport Control Protocol (TCP) and allows the SCSI command to be sent end-to-end over local-area networks (LANs), wide-area networks (WANs) or the Internet.
+
+=== Professional/Enterprise
+
+==== Tuning Weights UI
+
+==== Library UI Improvements
+
+==== New Configuration Format
+
+==== Updates to minset Tool
+
+==== New +duration+ Command Line Switch
+
+
+=== Enterprise/Developer
+
+==== Improved Python Extension Support
+
+==== Control Peach Clusters via Command Line
+
+==== Jira Integration Scripts
+
+==== Integrated REST API Documentation
+
+==== SSL Publisher ALPN Support
+
+==== Rest Publisher
+
+==== SSH Monitor ASAN support
+

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -57,6 +58,17 @@ namespace Peach.Pro.WebApi2
 				try
 				{
 					_server = WebApp.Start(url, OnStartup);
+
+					// Owin adds a TextWriterTraceListener during startup
+					// we need to remove it to avoid spewing to console
+					for (var cnt = 0; cnt < Trace.Listeners.Count; cnt++)
+					{
+						if (Trace.Listeners[cnt] is TextWriterTraceListener)
+						{
+							Trace.Listeners.RemoveAt(cnt);
+							break;
+						}
+					}
 
 					Uri = new Uri("http://{0}:{1}/".Fmt(GetLocalIp(), port));
 				}

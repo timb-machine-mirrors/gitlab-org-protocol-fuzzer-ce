@@ -389,7 +389,7 @@ namespace Peach.Core.Test
 			sw.Stop();
 			Assert.NotNull(copy);
 			Assert.AreEqual(copy.Count, list2.Count);
-			Assert.LessOrEqual(sw.ElapsedMilliseconds, list1Elaps*2);
+			Assert.LessOrEqual(sw.ElapsedMilliseconds, list1Elaps*list1Elaps);
 		}
 
 		bool VerifyField(FieldInfo field, Type type)
