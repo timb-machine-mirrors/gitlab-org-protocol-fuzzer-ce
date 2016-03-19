@@ -3,9 +3,7 @@
 [[Brand_new_items]]
 == What's new in Peach Platform v3.9 (2016 Q1)
 
-Peach Pits are the main focus of this release. You'll find that new Pits are available, existing pits are improved and incorporate bug fixes, the Peach Web UI now groups Pit variables for an improved user experience, and supporting documentation reflects the update.
-
-The following items are new features for the Peach Professional v3.9 release.
+This is our first release of 2016 with a good mix of new features, improvements and new Pits.  The new Pits are available for licensing singularly or as part of a Pit Pack. If a new Pit has been added to an existing Pit Pack already licensed, the new Pit will automatically be made available for your use.
 
 === Fuzzing Definitions (Pits)
 
@@ -31,9 +29,9 @@ Health Level Seven (HL7) is a data format commonly used in the medical
 industry. Patient records and other data relevant to running a medical
 operation are included.
 
-==== DTLS Server
+==== DTLS Server (SSL)
 
-DTLS is a derivation of SSL protocol. It provides the same security services (integrity, authentification and confidentiality) but under the UDP protocol.
+DTLS is a derivation of SSL protocol. It provides the same security services (integrity, authentification and confidentiality) but under the UDP protocol. This pit is available as part of SSL.
 
 ==== iSCSI
 
@@ -41,13 +39,26 @@ iSCSI, which stands for Internet Small Computer System Interface, works on top o
 
 === Professional/Enterprise
 
+Descriptions of new features and improvements for Professional and Enterprise follow:
+
 ==== Tuning Weights UI
+
+A new configuration option has been added to allow tuning the messages and fields being fuzzed. Options include increasing or decreasin the focus of testing and also excluding testing altogether.  The feature is available from the configuration screen menu as "Tuning".
 
 ==== Library UI Improvements
 
+The Library screen in the Peach application has several changes to improve usability.  The Pits are now displayed in a column view and a search/filter feature has been added to allow quick access.
+
 ==== New Configuration Format
 
+This quarter we are introdcuing a new configuration file with an extension of +.peach+.  Going forward the Web UI will create and save these +.peach+ files.  From the command line you have the option of directly running a Pit (+.xml+ files) or running a +.peach+ configuration.
 
+Existing users will notice the Library page will list any existing configurations in a "Legecy" section.  Clicking on a legacy configuration will prompt a conversion workflow to generate a new +.peach+ file.
+
+==== Fault Details UI Changes
+
+Some minor changes have been made to the fault detail page.  The field and mutation algorithms in used whent he fualt
+occured are now displayed.
 
 ==== Updates to minset Tool
 
@@ -65,19 +76,46 @@ Several changes to support for Address Sanitizer compile time instrumentation ha
 * ASAN is now enabled by default for SSH Command, Process, and Run Command monitors.
 * Support for GCC integrated ASAN has been added
 
-=== Developer
+==== Peach Multi-Node CLI Tool
 
-==== Improved Python Extension Support
+A new command line tool has been added that allows the control of multiple Peach instances.  The tool is available in the +sdk/tools/peachcli+ folder.
 
-==== Control Peach Clusters via Command Line
+* Push configurations from a master node to slave nodes
+* Group multiple nodes by name so they can be operated on together
+* Start, stop and pause jobs by group or specific node
+* Pull all faults into a common log folder
 
 ==== Jira Integration Scripts
 
-==== Integrated REST API Documentation
+A python based tool +peach2jira+ has been added to export faults into Jira tickets.  This is useful when integrating Peach into CI or traditional build systems.  The tool is available in the +sdk/tools/peach2jira+ folder.
+
+=== Developer
+
+The following features require a developer license and are intended for advanced users who are creating custom Peach Pits.
+
+==== Interactive REST API Documentation
+
+Interactive REST API documentation has been added into Peach using the Swagger system.  The interactive REST API documentation provides forms to call the APIs and also show any available documentation.  The documentation is available from a running Peach instance at +/swagger+. Example: +http://127.0.0.1:8888/swagger+.
 
 ==== SSL Publisher ALPN Support
+
+Support for the Application-Layer Protocol Negotiation Extension (ALPN) has been added to the SSL Publisher.  ALPN is needed to fuzz protocols such as HTTP v2.  ALPN is exposed as a parameter, see the SSL Publisher documentation for additional information.
 
 ==== Rest Publisher Extensions
 
 The REST publisher has been updated to support Web APIs that require XML instead of JSON content types. Additionally, the content type can now be customized, allowing support for non-standard payloads, binary data, etc.
+
+==== New Json Elements
+
+New JSON elements have been added in an effort to improve JSON support in Peach.  These elements are now recommended over the older Json element.
+
+The following new data elements are available for modeling JSON documents:
+
+* JsonObject
+* JsonArray
+* JsonString
+* JsonInteger
+* JsonDouble
+* JsonBool
+* JsonBlob
 
