@@ -61,12 +61,6 @@ _Resharper*
 .depproj/
 /WebEssentials-Settings.json
 
-# These are ignored by asciidoctor-fopub subtree however
-# put them here too so the build/remote script won't try
-# and rsync the folders when doing a remote build
-/docs/publishing/asciidoctor-fopub/.gradle/
-/docs/publishing/asciidoctor-fopub/build/
-
 # ignore these are root level since remote builds
 # make use of this .gitignore
 /pro/Web/[Bb]in/
@@ -88,4 +82,7 @@ _Resharper*
 TestResult.xml
 *.VisualState.xml
 
-
+# local doc previews
+/docs/Gemfile.lock
+/docs/src.pro/DevGuide/DevGuide.html
+/docs/src.pro/UserGuide/UserGuide.html

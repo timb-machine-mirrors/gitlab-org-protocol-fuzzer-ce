@@ -1,0 +1,136 @@
+<<<
+[[Monitors_Gdb]]
+== Gdb Monitor (Linux, OS X)
+
+*Monitor Categories*: *Automation*, *Data collection*, *Fault detection*
+
+The _Gdb_ monitor uses GDB to launch an executable and monitors the executing process for exceptions. _Gdb_ is the main debugger for Linux and OS X operating systems.
+
+When a fault or exception occurs, _Gdb_ collects and logs the appropriate information, including messages from stdout and stderr, stack traces, and the gdb log. Fault detection includes the conditions of 1) the early exit of a process, as well as 2) a process that does not exit.
+
+_Gdb_ supports bucketing of crashes, and basic risk ranking that is based on
+exploitability of the fault. Bucketing uses categories for major and minor issuess.
+Exploitability evaluation is similar to the !exploitable debugging extension for .NET.
+
+NOTE: The _Gdb_ monitor requires a recent version of GDB.
+
+=== Parameters
+
+_Required:_
+
+Executable:: Executable to launch
+
+_Optional:_
+
+Arguments:: Command line arguments for the executable.
+FaultOnEarlyExit:: Trigger a fault if the process exits prematurely, defaults to false.
+GdbPath:: Path to gdb, defaults to +/usr/bin/gdb+.
+NoCpuKill:: Disable process killing when the CPU usage nears zero, default false.
+RestartAfterFault:: If "true", restarts the target when any monitor detects a fault.
+If "false", restarts the target if the process exits or crashes. +
+This argument defaults to false.
+RestartOnEachTest:: Restarts the process for each iteration, defaults to false.
+StartOnCall:: Start the executable on a state model call.
+WaitForExitOnCall:: Wait for the process to exit on a state model call and fault if a timeout is reached.
+WaitForExitTimeout:: WaitForExitOnCall timeout value, expressed in milliseconds. -1 is infinite, defaults to 10000.
+
+=== Gdb Installation
+
+Installing gdb on Linux consists of using the package manager to download and install the gdb degugger and the needed support files and libraries.
+
+* For Ubuntu systems, run the following command install gdb:
++
+----
+sudo apt-get install gdb
+----
+
+* For CentOS and RedHat Enterprise Linux installations, run the following command to install gdb:
++
+----
+sudo yum install gdb
+----
+
+* For SUSE Enterprise Linux installations, run the following command to install gdb:
++
+----
+sudo zypper install gdb
+----
+
+You can also install gdb on OS X using a package manager. See the http://ntraft.com/installing-gdb-on-os-x-mavericks/[Installing GDB on OS X Mavericks] article for more information.
+
+=== Examples
+
+ifdef::peachug[]
+
+.Base Usage Example+
+====================
+
+This parameter example is from a typical setup where a state model call triggers launching of the executable.
+
+[cols="2,4" options="header",halign="center"]
+|==========================================================
+|Parameter    |Value
+|Executable   |/usr/bin/curl
+|Arguments    |http://localhost
+|StartOnCall  |ScoobySnacks
+|==========================================================
+====================
+
+endif::peachug[]
+
+ifndef::peachug[]
+
+.Basic Usage Example
+======================
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <Number size="32" signed="false" value="31337" />
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial" >
+    <State name="Initial">
+
+      <Action type="call" method="ScoobySnacks" publisher="Peach.Agent"/>
+
+      <Action type="accept"/>
+      <Action type="input">
+          <DataModel ref="TheDataModel"/>
+      </Action>
+
+      <Action type="output">
+           <DataModel ref="TheDataModel"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Agent name="Local">
+    <Monitor class="Gdb">
+      <Param name="Executable" value="/usr/bin/curl"/>
+      <Param name="Arguments" value="http://localhost"/>
+      <Param name="StartOnCall" value="ScoobySnacks"/>
+    </Monitor>
+  </Agent>
+
+ <Test name="Default">
+    <StateModel ref="State"/>
+    <Agent ref="Local" />
+
+    <Publisher class="TcpListener">
+      <Param name="Interface" value="127.0.0.1" />
+      <Param name="Port" value="80"/>
+    </Publisher>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
+----
+======================
+
+endif::peachug[]

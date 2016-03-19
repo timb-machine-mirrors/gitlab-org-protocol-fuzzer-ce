@@ -1,0 +1,213 @@
+<<<
+[[Monitors_AndroidEmulator]]
+== AndroidEmulator Monitor
+
+*Monitor Categories*: *Automation*, *Fault detection*
+
+The _AndroidEmulator_ monitor handles setup and tear-down for Android Virtual Devices (AVDs)
+running within the Android Emulator. This monitor detects faults related to the emulator
+operation, not fuzzing results.
+
+The monitor provides the following functionality:
+
+* Start a virtual device at the start of a fuzzing run.
+* Start a virtual device at the start of each test iteration.
+* Start a virtual device when called from the state model.
+* Start a virutal device at the beginning of an iteration that immediately follows a fault.
+* Shuts down at the end of a fuzzing session.
+* Logs timeout messages when querying the emulator for the device serial number.
+* Logs timeout messages when shutting down the emulator.
+* logs messages sent to StdErr.
+* Logs messages sent to StdOut.
+
+This monitor requires the following items to run:
+
+* The Android monitor that watches the OS and application being fuzzed.
+* The http://developer.android.com/tools/help/emulator.html[Android Emulator]
+* The http://developer.android.com/sdk/index.html[Android Platform Tools].
+
+The fuzzing configuration for a virtual or emulated device follows. For a configuration using a phsycial device, see the xref:Monitors_Android[Android Monitor].
+
+image::{images}/AndroidEmMtr.png["Fuzzing Configuration for Emulated Andtroid Device", scalewidth="75%"]
+
+=== Parameters
+
+_Required:_
+
+Avd:: Android virtual device.
+
+_Optional:_
+
+EmulatorPath:: Directory containing the Android emulator. If not provided, Peach searches the
+directories in the PATH variable for the installed emulator.
+Headless:: If true, runs the emulator *without a display*. Defaults to false.
+RestartAfterFault:: Restart emulator after a fault. Defaults to true.
+RestartEveryIteration:: Restart emulator on every iteration. Defaults to false.
+StartOnCall:: Start the emulator when notified by the state machine.
+StartTimeout:: How many seconds to wait for emulator to start running. Defaults to 30.
+StopTimeout:: How many seconds to wait for emulator to exit. Defaults to 30.
+
+=== Examples
+
+ifdef::peachug[]
+
+.Basic Usage Example +
+====================
+
+This parameter example is from a setup that the BadBehaviorActivity, sending random taps to generate
+different types of exceptions and crashes. The setup is for a virtual device that uses the Android
+Emulator Monitor, as well as the Android monitor.
+
+In order to run the Android emulator, set the EmulatorPath in the Android Emulator Monitor to the
+adb tools directory, and set the Avd parameter to the name of an Android virtual device.
+Here the name of the virtual device is "Nexus4".
+
+In the Android monitor, set the AdbPath to the platform-tools directory containing the adb (Android Debug Bridge).
+
++Android Emulator (Emu) Monitor Parameters+
+[cols="2,4" options="header",halign="center"]
+|==========================================================
+|Parameter        |Value
+|Avd              |Nexus4
+|EmulatorPath     |C:\adt-bundle-windows-x86_64-20131030\sdk\tools
+|==========================================================
+
++Android Monitor (App) Parameters+
+[cols="2,4" options="header",halign="center"]
+|==========================================================
+|Parameter        |Value
+|ApplicationName  |com.android.development
+|ActivityName     |.BadBehaviorActivity
+|AdbPath          |C:\adt-bundle-windows-x86_64-20131030\sdk\platform-tools
+|DeviceMonitor    |Emu
+|==========================================================
+====================
+
+NOTE: Position the Android Emulator Monitor before (above) the Android monitor in your Pit,
+so that, at run time, the virtual device exists when adb tries to connect to it. Peach
+executes the monitors in the order that they are listed in the fuzzing definition.
+
+endif::peachug[]
+
+
+ifndef::peachug[]
+
+.Basic Usage Example
+=======================
+Runs the BadBehaviorActivity, sending random taps to generate different types of exceptions and crashes.
+
+To run the Android emulator, set your AdbPath to the directory containing the adb
+(Android Debug Bridge) platform-tools directory and point the EmulatorPath to the
+adb tools directory.
+
+NOTE: Position the Android Emulator Monitor before (above) the Android monitor in your Pit,
+so that, at run time, the virtual device exists when adb tries to connect to it. Peach
+executes the monitors in the order that they are listed in the fuzzing definition.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+	<DataModel name="TheDataModel">
+		<Number size='32' signed="false" value="31337" />
+	</DataModel>
+
+	<DataModel name="X">
+		<Number size='32' signed="false" value="100" />
+	</DataModel>
+
+	<DataModel name="Y">
+		<Number size='32' signed="false" value="0" />
+	</DataModel>
+
+	<StateModel name="State" initialState="Initial" >
+		<State name="Initial"  >
+			<Action type="call" method="tap">
+				<Param>
+					<DataModel ref="X"/>
+				</Param>
+				<Param>
+					<DataModel ref="Y"/>
+				</Param>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Agent name="TheAgent">
+		<Monitor name="Emu" class="AndroidEmulator">
+			<Param name="Avd" value="Nexus4" />
+			<Param name="EmulatorPath" value="C:\adt-bundle-windows-x86_64-20130717\sdk\tools"/>
+		</Monitor>
+
+		<Monitor name="App" class="Android">
+			<Param name="ApplicationName" value="com.android.development" />
+			<Param name="ActivityName" value=".BadBehaviorActivity" />
+			<Param name="AdbPath" value="C:\adt-bundle-windows-x86_64-20130717\sdk\platform-tools"/>
+			<Param name="DeviceMonitor" value="Emu" />
+		</Monitor>
+	</Agent>
+
+	<Test name="Default">
+		<StateModel ref="State"/>
+		<Agent ref="TheAgent" />
+
+		<Publisher class="AndroidMonkey">
+			<Param name="DeviceMonitor" value="App"/>
+		</Publisher>
+
+		<Logger class="File">
+			<Param name="Path" value="logs"/>
+		</Logger>
+	</Test>
+</Peach>
+----
+
+Output for this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Peach Fuzzer LLC
+
+[*] Test 'Default' starting with random seed 3054.
+Peach.Core.Agent.Agent StartMonitor: Emu AndroidEmulator
+Peach.Core.Agent.Agent StartMonitor: App Android
+Peach.Core.Agent.Agent SessionStarting: Emu
+Peach.Enterprise.Agent.Monitors.AndroidEmulator Starting android emulator
+Peach.Enterprise.Agent.Monitors.AndroidEmulator Resolved emulator instance to android device 'emulator-5554'
+Peach.Enterprise.Agent.Monitors.AndroidEmulator Android emulator 'emulator-5554' successfully started
+Peach.Core.Agent.Agent SessionStarting: App
+Peach.Enterprise.AndroidBridge Initializing android debug bridge.
+Peach.Enterprise.AndroidBridge Android debug bridge initialized.
+Peach.Enterprise.Agent.Monitors.AndroidMonitor Resolved device 'emulator-5554' from monitor 'Emu'.
+Peach.Enterprise.AndroidDevice Waiting for device 'emulator-5554' to become ready
+Peach.Enterprise.AndroidDevice Device 'emulator-5554' is now ready
+Peach.Enterprise.AndroidDevice Executing command on 'emulator-5554': am start -W -S -n com.android.development/.BadBehaviorActivity
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Call
+Peach.Enterprise.Publishers.AndroidMonkeyPublisher start()
+Peach.Enterprise.Publishers.AndroidMonkeyPublisher call(tap, System.Collections.Generic.List`1[Peach.Core.Dom.ActionParameter])
+Peach.Core.Agent.AgentManager Message: App => DeviceSerial
+Peach.Enterprise.Publishers.AndroidMonkeyPublisher Resolved device 'emulator-5554' from monitor 'App'.
+Peach.Enterprise.AndroidDevice Executing command on 'emulator-5554': input tap 100 0
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Enterprise.Publishers.AndroidMonkeyPublisher stop()
+Peach.Core.Agent.Agent SessionFinished: App
+Peach.Enterprise.AndroidBridge Terminating android debug bridge.
+Peach.Core.Agent.Agent SessionFinished: Emu
+Peach.Enterprise.Agent.Monitors.AndroidEmulator Sending stop command to emulator 'emulator-5554'
+Peach.Enterprise.Agent.Monitors.AndroidEmulator Waiting for emulator 'emulator-5554' to exit
+Peach.Enterprise.Agent.Monitors.AndroidEmulator Emulator 'emulator-5554' exited with code: 0
+Peach.Enterprise.Agent.Monitors.AndroidEmulator Emulator 'emulator-5554' exited
+
+[*] Test 'Default' finished.
+----
+=======================
+
+endif::peachug[]

@@ -1,0 +1,35 @@
+[[Extending]]
+== Extending Peach
+
+Peach uses custom implementations of xref:Fixup[Fixups], xref:Transformer[Transformers], xref:Publisher[Publishers], and xref:Monitors[Monitors] to extend its functionality.
+
+All extensions follow the same paradigm:
+--
+. Create a C# class that derives from the appropriate Peach base class.
+. Decorate the class with the appropriate plugin attribute.
+. Compile the class into an assembly and place the assembly in the Peach directory.
+--
+When Peach runs, it will automatically reflect all assemblies to generate the list of xref:Fixup[Fixups], xref:Transformer[Transformers], xref:Publisher[Publishers], and xref:Monitors[Monitors].
+
+// TODO - Analyzer
+// TODO - Logger
+
+{product} was designed to be extended, allowing  you to increase Peach's capabilities. The most common reasons for extending Peach include:
+--
+* Custom validation algorithms (such as checksums)
+* Custom publishers (I/O adapters),
+* Monitoring
+--
+Peach allows you to write custom agents, loggers, analyzers, and strategies.
+
+This section covers the most common types of extensions to Peach.
+
+include::01_PlugIns.adoc[]
+include::02_Fixup.adoc[]
+include::03_Monitor.adoc[]
+include::04_Publisher.adoc[]
+include::05_Transformer.adoc[]
+include::06_Mutator.adoc[]
+include::07_Agent.adoc[]
+
+// end

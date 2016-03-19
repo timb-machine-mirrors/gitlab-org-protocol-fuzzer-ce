@@ -1,0 +1,96 @@
+[[Monitors]]
+== Monitors
+
+xref:Agent[Agents] are special Peach processes that can be run locally or remote. These processes host one or more Monitors that can perform such actions as attaching debuggers, watching memory consumption, and detecting faults.
+
+The following table lists each monitor by name, function type (Fault detection, Data collection, Automation), and by the operating systems that support the monitor. If the operating systems column is blank for an entry, that monitor is available in all supported operating systems.
+
+// Table categories:
+//    * Monitor Name
+//    * Monitor functions (Fault detection, Data collection, Automation)
+//    * Operating systems (Linux, OS X, Windows)
+
+.Monitors
+
+[cols="3,1,1,2,3" options="header",halign="center"]
+|==========================================================
+|Monitor    |Detect Fault  |Collect Data  |Automate  |Operating Systems footnote:[When an operating system is listed, the monitor is available only for the listed operating system. A blank entry indicates the monitor is available for Windows, Linux, and OS X operating systems.]
+|xref:Monitors_Android[Android]                  |X   |    |X   |
+|xref:Monitors_AndroidEmulator[Android Emulator] |X   |    |X   |
+|xref:Monitors_ButtonClicker[ButtonClicker]      |    |    |X   |Windows
+|xref:Monitors_CanaKitRelay[CanaKit Relay]       |    |    |X   |
+|xref:Monitors_CleanupFolder[Cleanup Folder]     |    |    |X   |
+|xref:Monitors_CleanupRegistry[Cleanup Registry] |    |    |X   |Windows
+|xref:Monitors_CrashReporter[Crash Reporter]     |X   |X   |    |OS X
+|xref:Monitors_CrashWrangler[Crash Wrangler]     |X   |X   |X   |OS X
+|xref:Monitors_Gdb[Gdb]                          |X   |X   |X   |Linux, OS X
+|xref:Monitors_IpPower9258[IpPower9258]          |    |    |X   |
+|xref:Monitors_LinuxCoreFile[LinuxCoreFile]      |X   |X   |    |Linux
+|xref:Monitors_MemoryMonitor[Memory]             |X   |    |    |
+|xref:Monitors_Pcap[NetworkCapture]              |X   |X   |    |
+|xref:Monitors_PageHeap[Page Heap]               |X   |    |    |Windows
+|xref:Monitors_Ping[Ping]                        |X   |    |    |
+|xref:Monitors_PopupWatcher[Popup Watcher]       |X   |    |X   |Windows
+|xref:Monitors_Process[Process Launcher]         |X   |    |X   |
+|xref:Monitors_ProcessKiller[Process Killer]     |    |    |X   |
+|xref:Monitors_RunCommand[Run Command]           |X   |X   |X   |
+|xref:Monitors_SaveFile[Save File]               |    |X   |X   |
+|xref:Monitors_Serial[Serial Port]               |X   |X   |X   |
+|xref:Monitors_Socket[Socket Listener]           |X   |    |    |
+|xref:Monitors_SshCommand[SSH Command]           |X   |X   |X   |
+|xref:Monitors_SshDownloader[SSH Downloader]     |    |X   |X   |
+|xref:Monitors_Syslog[Syslog]                    |X   |X   |    |
+|xref:Monitors_TcpPort[TcpPort]                  |X   |X   |X   |
+|xref:Monitors_Vmware[Vmware Control]            |X   |    |X   |
+|xref:Monitors_WindowsDebugger[Windows Debugger] |X   |X   |X   |Windows
+|xref:Monitors_WindowsService[Windows Service]   |X   |    |X   |Windows
+|==========================================================
+
+
+=== Monitor Parameters When and Wait When
+
+Several monitors have two automation parameters that affect when the monitor
+performs a specific action or when the monitor temporarily suspends processing
+so that another process has time to complete (such as bootstrapping a device or
+establishing a network connection.)
+
+==== When Parameter
+The `When` parameter is automation oriented, and identifies when to perform an action.
+Values for this parameter follow:
+
+
+OnStart:: The action occurs once, at the start of a fuzzing session.
+OnIterationStart:: The action occurs at the start of a fuzzing iteration or test
+case. For each test case, the action occurs once.
+OnIterationStartAfterFault:: The action occurs after a fault, at the start of the
+test case that immediately follows the fault. The fault is the trigger for the action
+that follows shortly afterwards.
+OnCall:: The action occurs upon receipt of a message sent from the State Model.
+If the message is defined in the state model of the pit and if the test case enters
+the state containing the message, the action associated with the `When` parameter
+will be performed. +
++
+Note that the developer is responsible for defining the message in the State Model
+and for coordinating its use throughout the pit.
+OnIterationEnd:: The action occurs at the end of a test case. For each test case,
+the action occurs once.
+DetectFault:: The action occurs during each test case when Peach polls the monitors for faults.
+OnFault:: The action occurs when a fault occurs. The action occurs once for each fault.
+OnEnd:: The action occurs once, at the end of a fuzzing session.
+
+[NOTE]
+==========
+
+The `When` actions occur at different points in a test case and can produce different results, depending what else is happening in the test case.
+
+* The action *OnIterationStart* occur at the beginning of a test case.
+* The action *DetectFault* occur in the latter part of the test case.
+* The action *OnIterationEnd* occur at the end of a test case.
+==========
+
+
+==== Wait When Parameter
+
+The `Wait When` parameter is automation oriented, and identifies when to pause from an activity. The operation is analogous to `Wait` and uses the same values.
+
+// end

@@ -1,4 +1,0 @@
-
-=== Data Element Children
-
-This section contains information about data elements specified as child elements of another element. Child elements modify or clarify the use and scope of the data element. See also xref:Fixup[Fixups] and xref:Transformer[Transformers].

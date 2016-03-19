@@ -1,0 +1,124 @@
+<<<
+[[Monitors_ProcessKiller]]
+== ProcessKiller Monitor
+
+*Monitor Category*: *Automation*
+
+The _ProcessKiller_ monitor kills (terminates) specified processes after each iteration.
+
+=== Parameters
+
+_Required:_
+
+ProcessNames::
+    Comma separated list of the processes to kill.
+
+[NOTE]
+=======================================
+The process name is usually the executable filename without the +.exe+. For example, +notepad.exe+ will
+be +Notepad+ or +notepad+. For the Windows operating systems, the process name can be found by using
+the +tasklist.exe+ command.
+
+The comma-delimited list should not contain any white space characters.
+=======================================
+
+_Optional:_
+
+None.
+
+=== Examples
+
+ifdef::peachug[]
+
+.Terminate the Notepad and mspaint processes whenever they run. +
+====================
+
+This parameter example is from a setup that terminates the notepad and the paint processes whenever they run.
+
+[cols="2,4" options="header",halign="center"]
+|==========================================================
+|Parameter     |Value
+|ProcessNames  |notepad,mspaint
+|==========================================================
+====================
+
+endif::peachug[]
+
+
+ifndef::peachug[]
+
+
+.Terminate two processes
+========================
+Before running this example, open notepad.exe.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <Number size="32" signed="false" value="31337" />
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial" >
+    <State name="Initial">
+      <Action type="output">
+          <DataModel ref="TheDataModel"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Agent name="Local">
+    <Monitor class="ProcessKiller">
+      <Param name="ProcessNames" value="Notepad" />
+    </Monitor>
+  </Agent>
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+    <Agent ref="Local" />
+
+    <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
+----
+
+Output for this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Peach Fuzzer LLC
+
+[*] Test 'Default' starting with random seed 41446.
+Peach.Core.Agent.Agent StartMonitor: Monitor ProcessKiller
+Peach.Core.Agent.Agent SessionStarting: Monitor
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(4 bytes)
+00000000   69 7A 00 00                                        iz??
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+Peach.Core.Agent.Agent SessionFinished: Monitor
+
+[*] Test 'Default' finished.
+----
+
+In this example, peach kills the +notepad+ process whenever it runs.
+
+========================
+
+endif::peachug[]

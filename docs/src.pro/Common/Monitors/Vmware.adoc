@@ -1,0 +1,152 @@
+<<<
+[[Monitors_Vmware]]
+== Vmware Monitor
+
+*Monitor Categories*: *Automation*, *Fault detection*
+
+The _Vmware_ monitor can control a VMware virtual machine (VM). This monitor works with a
+snapshot of the VM that provides a consistent VM environment throughout a fuzzing session.
+_Vmware_ can start a VM snapshot and, optionally, reset the VM to a snapshot configuration
+each iteration.
+
+The _Vmware_ monitor is primarily an automation monitor that manages the VM environment;
+yet, the monitor includes in its log, the non-OK result codes and exceptions reported from
+the VM environment.
+
+When a fault occurs, _Vmware_ resets the VM to the specified snapshot.  Fault detection is
+not bucketed for this monitor.
+
+In the VMWare product, you can create, review, and manage the VM snapshots using the VM menu.
+The following illustration shows the VMWare Snapshot Manager that shows the snapshots
+created for a specific VM.
+
+image::{images}/VMWare_Snapshot_Manager.png["VMWare Snapshot Manager", scale="60"]
+
+TIP: When using with vSphere/ESXi, prefix the VM image name with the storage location in brackets.  For example, "[ha-datacenter/datastore1] guest/guest.vmx"
+
+
+=== Parameters
+
+_Required:_
+
+Vmx:: Path to the virtual machine.
+SnapshotName:: VM Snapshot name.
+
+_Optional:_
+
+Host:: Name of the host machine.
+HostType::
++
+Type of remote host, defaults to _Default_
++
+[cols="1,2" options="header",halign="center"]
+|==========================================================
+|VM Product           |Description
+|*VIServer*           |vCenter Server, ESX/ESXi hosts, VMWare Server 2.0
+|*Workstation*        |VMWare Workstation
+|*WorkstationShared*  |VMWare Workstation (Shared Mode)
+|*Player*             |VMWare Player
+|*Server*             |VMWare Server 1.0.x
+|*Default*            |Default
+|==========================================================
+
+Login:: Username for authentication on the remote machine.
+Password:: Password for authentication on the remote machine.
+HostPort:: TCP/IP port on the remote host.
+ResetOnFaultBeforeCollection:: Reset VM after we detect a Fault during data collection. Defaults to false.
+StopOnFaultBeforeCollection:: Stop VM after we detect a Fault and before data collection
+starts. Defaults to false.
+WaitForToolsInGuest:: Wait for tools to start in guest. Defaults to true.
+WaitTimeout:: How many seconds to wait for guest tools. Defaults to 600.
+When::
++
+Details on when to perform a specfied action. Specify one of the following values:
++
+[cols="1,2" options="header",halign="center"]
+|==========================================================
+|"When" Setting              |Description
+|DetectFault                 |Perform the action when checking for the faulting condition. Requires a regex expression in the +CheckValue+ parameter. Default mode of operation.
+|OnStart                     |Run the command when fuzzing session starts. Command runs once per session.
+|OnEnd                       |Run the command when fuzzing session stops. Command runs run once per session.
+|OnIterationStart            |Run the command at start of each iteration.
+|OnIterationEnd              |Run the command at end of each iteration.
+|OnFault                     |Run the command when Peach detects a fault.
+|OnIterationStartAfterFault  |Run the command at start of an iteration that immediately follows a fault detection.
+|OnCall                      |Trigger the command to run from the state model. The command runs when the _StartOnCall_ message is received.
+|==========================================================
++
+.When Choices for Performing an Action
+image::{images}/Timings_SSH.png["When Run Command Choices", scalewidth="75%"]
+
+=== Examples
+
+ifdef::peachug[]
+
+.Start Virtual Machine  +
+====================
+
+This parameter example is from a setup that programmatically starts a VM.
+
+* The monitor requires both the physical filename with path of the VM and the +SnapshotName+ of the VM.
+* The +HostType+ identifies the VMWare product that is hosting the VM.
+* The +Headless+ parameter provides visual feedback while configuring the test setup.
+
+[cols="2,4" options="header",halign="center"]
+|==========================================================
+|Parameter     |Value
+|Vmx           |D:\VirtualMachines\OfficeWebTest\OfficeWebTest.vmx
+|HostType      |Workstation
+|SnapshotName  |Fuzzing
+|Headless      |false
+|==========================================================
+
+====================
+
+
+.Start Virtual Machine hosted on ESXi  +
+====================
+
+This parameter example is from a setup that programmatically starts a VM.
+
+[cols="2,4" options="header",halign="center"]
+|==========================================================
+|Parameter     |Value
+|Vmx           |[ha-datacenter/datastore1] guest/guest.vmx
+|SnapshotName  |Fuzzing
+|==========================================================
+====================
+
+endif::peachug[]
+
+
+ifndef::peachug[]
+
+
+.Start Virtual Machine
+======================
+[source,xml]
+----
+<Agent name="Local">
+	<Monitor class="Vmware">
+		<Param name="Vmx" value="D:\VirtualMachines\OfficeWebTest\OfficeWebTest.vmx" />
+		<Param name="HostType" value="Workstation" />
+		<Param name="SnapshotName" value="Fuzzing" />
+	</Monitor>
+</Agent>
+----
+======================
+
+.Start Virtual Machine hosted on ESXi
+======================
+[source,xml]
+----
+<Agent name="Local">
+	<Monitor class="Vmware">
+		<Param name="Vmx" value="[ha-datacenter/datastore1] guest/guest.vmx" />
+		<Param name="SnapshotName" value="Fuzzing" />
+	</Monitor>
+</Agent>
+----
+======================
+
+endif::peachug[]

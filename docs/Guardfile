@@ -1,0 +1,26 @@
+Bundler.require(:default)
+
+guard :bundler do
+	watch('Gemfile')
+end
+
+guard :shell do
+	watch(/^.+\.adoc$/) {|m|
+		puts m[0] + " has changed."
+		%x(
+			asciidoctor \
+				src.pro/DevGuide/DevGuide.adoc \
+				src.pro/UserGuide/UserGuide.adoc \
+				-a images=#{Dir.pwd}/src.pro/images \
+				-a BUILDTAG=3.9.0.0 \
+				-a VER_MAJOR=3 \
+				-a VER_MINOR=9 \
+				-a VER_BUILD=0 \
+				-a VER_BRANCH=0
+		) 
+	}
+end
+
+guard :livereload do
+	watch(%r{^.+\.(css|js|html)$})
+end

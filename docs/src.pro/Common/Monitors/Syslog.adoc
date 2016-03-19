@@ -1,0 +1,173 @@
+<<<
+[[Monitors_Syslog]]
+== Syslog Monitor
+
+*Monitor Categories*: *Data collection*, *Fault detection*
+
+The _Syslog_ monitor listens on a specified port for incoming syslog messages. This monitor
+is capable of performing data collection and fault detection. The default operation is
+data collection.
+
+Fault detection can be enabled by setting the FaultRegex parameter. If the FaultRegex
+matches an incoming syslog message, a fault is generated. Faults are bucketed at the
+major level with the value="SYSLOG". Other bucketing components--minor hash and risk
+evaluation--are not used.
+
+Several options exist to specify when to start the _syslog_ monior. Interesting points to start this monitor include the following:
+
+* At the start or end of a fuzzing run
+* At the start or end of each test iteration
+* After detecting a fault
+* At the start of an iteration that immediately follows a fault
+* When called from the StateModel
+
+=== Parameters
+
+_Required:_
+
+None.
+
+_Optional:_
+
+Port:: Port number to listen on. The default value is 514.
+Interface:: Interface to listen on. The default value is 0.0.0.0, which listens on all interfaces.
+FaultRegex:: Generate a fault when the input matches the specified regular expression.
+WaitRegex:: Wait until the regex matches received data.
+WaitOnCall:: Call message to trigger the start of monitoring. This parameter only applies to
+the OnCall setting.
+WaitWhen::
++
+Parameter that specifies when to start monitoring. Choose from the following settings:
++
+// [horizontal] - labels and descriptions overlappint. Removing
+// OnCall::: Monitoring begins upon receipt of a message from the state machine.
+// OnStart::: Monitoring occurs once at the start of the fuzzing session. This is the default setting.
+// OnEnd::: Monitoring occurs once at the end of the fuzzing session.
+// OnIterationStart::: Monitoring occurs at the start of every iteration.
+// OnIterationEnd::: Monitoring occurs at the end of every iteration.
+// OnFault::: Monitoring occurs immediately following a fault.
+// OnIterationStartAfterFault::: Monitoring occurs following a fault. Note that after the fault occurs, the current iteration completes. Then, at the start of the next iteration, monitoring begins.
++
+[cols="1,2" options="header",halign="center"]
+|==========================================================
+|"When" Setting              |Description
+|OnStart                     |Monitoring occurs once at the start of the fuzzing session, default.
+|OnEnd                       |Monitoring occurs once at the end of the fuzzing session.
+|OnIterationStart            |Monitoring occurs at the start of every iteration.
+|OnIterationEnd              |Monitoring occurs at the end of every iteration.
+|OnFault                     |Monitoring occurs immediately following a fault.
+|OnIterationStartAfterFault  |After the fault occurs, the current iteration completes. Then, at the start of the next iteration, monitoring begins.
+|OnCall                      |Monitoring begins upon receipt of a message from the state machine.
+|==========================================================
++
+.When Choices for Running a Command
+image::{images}/Timings_All.png["When Run Command Choices", scalewidth="75%"]
+
+=== Examples
+
+ifdef::peachug[]
+
+.Collect Syslog Messages +
+====================
+
+This parameter example is from a setup that uses the _Syslog_ monitor to listen on the default port for incoming messages. When a fault occurs, all messages are saved. Default values are used; no values are specified. So, a table isn't needed for this example.
+
+
+// [cols="2,4" options="header",halign="center"]
+// |==========================================================
+// |Parameter    |Value
+// |==========================================================
+====================
+
+endif::peachug[]
+
+
+ifndef::peachug[]
+
+.Collect Syslog Messages
+========================
+
+This example shows the _Syslog_ monitor listening on the default port for incoming messages. When a fault occurs, all messages are saved.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <Number size="32" signed="false" value="31337" />
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial" >
+    <State name="Initial">
+      <Action type="output">
+          <DataModel ref="TheDataModel"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Agent name="Local">
+    <Monitor class="Syslog"/>
+  </Agent>
+
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+
+    <Agent ref="Local" />
+
+    <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
+----
+========================
+
+
+.Fault on Syslog Message
+========================
+
+This example shows the _Syslog_ monitor listening on the default port for incoming messages. _Syslog_ compares the  expression with each incoming message; when a match occurs, the monitor generates a fault and saves the syslog data.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <Number size="32" signed="false" value="31337" />
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial" >
+    <State name="Initial">
+      <Action type="output">
+          <DataModel ref="TheDataModel"/>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Agent name="Local">
+    <Monitor class="Syslog"/>
+  </Agent>
+
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+
+    <Agent ref="Local" />
+
+    <Publisher class="ConsoleHex"/>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
+----
+
+========================
+
+endif::peachug[]

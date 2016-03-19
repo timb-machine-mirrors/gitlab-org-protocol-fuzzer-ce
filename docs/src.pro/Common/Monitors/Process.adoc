@@ -1,0 +1,437 @@
+<<<
+[[Monitors_Process]]
+== Process Monitor
+
+*Monitor Categories*: *Automation*, *Fault detection*
+
+The _Process_ monitor controls a process during a fuzzing run. This monitor provides automation
+by controlling when the process starts, restarts and ends, and whether the process should be
+killed. This monitor also provides fault detection for early exit and failure to exit. Finally,
+the _Process_ monitor provides data collection by copying messages from standard out and standard error.
+
+The _Process_ monitor provides the following functionality:
+
+ * Starts a monitor at the session start or at other designated times.
+ * Start or restart a process on every iteration.
+ * Start a process in response to a call from the state model (control when the process starts).
+ * Restart a process when it dies.
+ * Exit the process in response to a call from the state model (control when the process ends).
+ * Terminates a process if the CPU usage is low.
+ * Logs a fault if a process exits early.
+ * Logs a fault if a process fails to exit.
+
+
+The _Process_ monitor detects faults for a process that exits prematurely or fails to
+exit. These faults generate bucket information with values for major hash set to "FailedToExit" and "ExitedEarly". Neither the minor hash nor the risk level is used for these faults.
+
+=== Parameters
+
+_Required:_
+
+Executable:: Executable to launch
+
+_Optional:_
+
+Arguments:: Command line arguments
+FaultOnEarlyExit:: Trigger fault if process exits, defaults to false.
+NoCpuKill:: Disable process killing when the CPU usage nears zero, defaults to false.
+RestartAfterFault:: If "true", restarts the target when any monitor detects a fault.
+If "false", restarts the target if the process exits or crashes. +
+This argument defaults to false.
+StartOnCall:: Start process on a call action from the state model (this value and the
+method value must match.)
+WaitForExitOnCall:: Wait for process to exit on a call from the state model (this value
+and the method value must match.)
+WaitForExitTimeout:: Wait timeout value, expressed in milliseconds.  Triggers a fault
+when the timeout period expires. Defaults to 10000 ms. Use -1 for infinite, no timeout.
+
+=== Examples
+
+ifdef::peachug[]
+
+The following parameter examples are from different uses of the _Process_ monitor. While not exhaustive, the examples  provide a good base for comparing and contrasting paramter settings for the various uses of this monitor.
+
+.Start a Process at the Start of a Session
+====================
+
+The following parameter example is from a setup that starts a process at the beginning of a fuzzing session.
+
+[cols="2,4" options="header",halign="center"]
+|==========================================================
+|Parameter    |Value
+|Executable   |notepad.exe
+|Arguments    |fuzzed.txt
+|==========================================================
+====================
+
+
+.Start a Process at the Start of each Iteration
+====================
+
+The following parameter example is from a setup that starts a process at the beginning of each test iteration.
+
+[cols="2,4" options="header",halign="center"]
+|==========================================================
+|Parameter          |Value
+|Executable         |notepad.exe
+|Arguments          |fuzzed.txt
+|RestartOnEachTest  |true
+|==========================================================
+
+====================
+
+
+.Start a Process When Called from the State Model (Delayed Start)
+====================
+
+The following parameter example is from a setup that starts a process when caled from the state model, amid a test iteration.
+
+[cols="2,4" options="header",halign="center"]
+|==========================================================
+|Parameter     |Value
+|Executable    |notepad.exe
+|Arguments     |fuzzed.txt
+|StartOnCall   |ScoobySnacks
+|==========================================================
+
+====================
+
+
+.Suspend Fuzzing Until a Process Closes
+====================
+
+The following parameter example is from a setup that interrupts fuzzing and waits for a process to close before resuming. The dynamics occur inside a test iteration.
+
+[cols="2,4" options="header",halign="center"]
+|==========================================================
+|Parameter          |Value
+|Executable         |notepad.exe
+|Arguments          |fuzzed.txt
+|WaitForExitOnCall  |UriahSnacks
+|==========================================================
+
+====================
+
+endif::peachug[]
+
+
+ifndef::peachug[]
+
+
+.Start Process
+=================
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <String length="32" value="31337"/>
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial" >
+    <State name="Initial">
+      <Action type="output">
+          <DataModel ref="TheDataModel"/>
+      </Action>
+
+      <Action type="close"/>
+    </State>
+  </StateModel>
+
+  <Agent name="Local">
+  <Monitor class="Process">
+    <Param name="Executable" value="notepad.exe" />
+    <Param name="Arguments" value="fuzzed.txt" />
+  </Monitor>
+  </Agent>
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+    <Agent ref="Local" />
+
+    <Publisher class="File">
+      <Param name="FileName" value="fuzzed.txt"/>
+    </Publisher>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
+----
+
+Output for this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Peach Fuzzer LLC
+
+[*] Test 'Default' starting with random seed 20172.
+Peach.Core.Agent.Agent StartMonitor: Monitor Process
+Peach.Core.Agent.Agent SessionStarting: Monitor
+Peach.Core.Agent.Monitors.Process _Start(): Starting process
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.FilePublisher start()
+Peach.Core.Publishers.FilePublisher open()
+Peach.Core.Publishers.FilePublisher output(32 bytes)
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Close
+Peach.Core.Publishers.FilePublisher close()
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Call
+Peach.Core.Agent.AgentManager Message: Action.Call => launchProgram
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.FilePublisher stop()
+Peach.Core.Agent.Agent SessionFinished: Monitor
+Peach.Core.Agent.Monitors.Process _Stop(): Killing process
+
+[*] Test 'Default' finished.
+----
+
+When running this example, notepad opens when the session starts and closes when the session finishes.
+
+=================
+
+.Restart Process on Each Test
+=================
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <String length="32" value="31337" />
+  </DataModel>
+
+  <StateModel name="State" initialState="Initial" >
+    <State name="Initial">
+      <Action type="output">
+          <DataModel ref="TheDataModel"/>
+      </Action>
+      <Action type="close"/>
+    </State>
+  </StateModel>
+
+  <Agent name="Local">
+	<Monitor class="Process">
+		<Param name="Executable" value="notepad.exe" />
+		<Param name="Arguments" value="fuzzed.txt" />
+		<Param name="RestartOnEachTest" value="true" />
+	</Monitor>
+  </Agent>
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+    <Agent ref="Local" />
+
+    <Publisher class="File">
+      <Param name="FileName" value="fuzzed.txt"/>
+    </Publisher>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
+----
+
+Output for this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Peach Fuzzer LLC
+
+[*] Test 'Default' starting with random seed 40308.
+Peach.Core.Agent.Agent StartMonitor: Monitor Process
+Peach.Core.Agent.Agent SessionStarting: Monitor
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Agent.Monitors.Process _Start(): Starting process
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.FilePublisher start()
+Peach.Core.Publishers.FilePublisher open()
+Peach.Core.Publishers.FilePublisher output(32 bytes)
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Close
+Peach.Core.Publishers.FilePublisher close()
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Call
+Peach.Core.Agent.AgentManager Message: Action.Call => launchProgram
+Peach.Core.Agent.Monitors.Process _Stop(): Killing process
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.FilePublisher stop()
+Peach.Core.Agent.Agent SessionFinished: Monitor
+
+[*] Test 'Default' finished.
+----
+
+When running this example, notepad repeatedly opens and closes.
+
+=================
+
+.Start Process From State Model
+=================
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <String length="32" value="31337" />
+  </DataModel>
+
+<StateModel name="State" initialState="Initial" >
+  <State name="Initial">
+    <Action type="call" method="ScoobySnacks" publisher="Peach.Agent" />
+  </State>
+</StateModel>
+
+<Agent name="Local">
+  <Monitor class="Process">
+    <Param name="Executable" value="notepad.exe" />
+    <Param name="Arguments" value="fuzzed.txt" />
+    <Param name="StartOnCall" value="ScoobySnacks" />
+  </Monitor>
+</Agent>
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+    <Agent ref="Local" />
+
+    <Publisher class="File">
+      <Param name="FileName" value="fuzzed.txt"/>
+    </Publisher>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
+----
+
+Output for this example.
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Peach Fuzzer LLC
+
+[*] Test 'Default' starting with random seed 63117.
+Peach.Core.Agent.Agent StartMonitor: Monitor Process
+Peach.Core.Agent.Agent SessionStarting: Monitor
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Call
+Peach.Core.Publishers.FilePublisher start()
+Peach.Core.Agent.AgentManager Message: Action.Call => ScoobySnacks
+Peach.Core.Agent.Monitors.Process _Start(): Starting process
+Peach.Core.Agent.Monitors.Process Cpu is idle, stopping process.
+Peach.Core.Agent.Monitors.Process _Stop(): Killing process
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.FilePublisher stop()
+Peach.Core.Agent.Agent SessionFinished: Monitor
+
+[*] Test 'Default' finished.
+----
+
+When running this example, notepad repeatedly opens and closes.
+
+=================
+
+.Wait for process to exit in state model
+=================
+For this example to complete, you must close notepad when it opens.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
+
+  <DataModel name="TheDataModel">
+    <String length="32" value="31337" />
+  </DataModel>
+
+
+  <StateModel name="State" initialState="Initial">
+    <State name="Initial">
+      <!-- This action will block until process exits -->
+      <Action type="call" method="ScoobySnacks" publisher="Peach.Agent" />
+    </State>
+  </StateModel>
+
+  <Agent name="Local">
+    <Monitor class="Process">
+      <Param name="Executable" value="notepad.exe" />
+      <Param name="Arguments" value="fuzzed.txt" />
+      <Param name="WaitForExitOnCall" value="ScoobySnacks" />
+    </Monitor>
+  </Agent>
+
+  <Test name="Default">
+    <StateModel ref="State"/>
+    <Agent ref="Local" />
+
+    <Publisher class="File">
+      <Param name="FileName" value="fuzzed.txt"/>
+    </Publisher>
+
+    <Logger class="File">
+      <Param name="Path" value="logs"/>
+    </Logger>
+  </Test>
+</Peach>
+----
+
+Output from this example
+
+----
+>peach -1 --debug example.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Peach Fuzzer LLC
+
+[*] Test 'Default' starting with random seed 6946.
+Peach.Core.Agent.Agent StartMonitor: Monitor Process
+Peach.Core.Agent.Agent SessionStarting: Monitor
+Peach.Core.Agent.Monitors.Process _Start(): Starting process
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Call
+Peach.Core.Publishers.FilePublisher start()
+Peach.Core.Agent.AgentManager Message: Action.Call => ScoobySnacks
+Peach.Core.Agent.Monitors.Process WaitForExit(10000)
+Peach.Core.Agent.Monitors.Process _Stop(): Closing process handle
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.FilePublisher stop()
+Peach.Core.Agent.Agent SessionFinished: Monitor
+
+[*] Test 'Default' finished.
+----
+
+Since notepad doesn't close automatically, remember to close notepad after each iteration.
+
+Use WaitForExitOnCall when you want to halt fuzzing until the process closes.
+
+=================
+
+endif::peachug[]
