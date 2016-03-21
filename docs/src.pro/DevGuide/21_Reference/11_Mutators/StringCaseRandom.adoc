@@ -11,3 +11,5 @@ This mutator produces test cases by randomly changing the case of a string.
 === Hints
 
 This mutator does not support hints.
+
+// end

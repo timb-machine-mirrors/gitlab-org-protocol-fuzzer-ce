@@ -55,7 +55,7 @@ Details on when to launch the command. Specify one of the following launch trigg
 |==========================================================
 +
 .WaitWhen Choices
-image::{images}/Timings_All.png["When Timing Choices", scalewidth="75%"]
+image::{images}/Common/Monitors/Timings_All.png[scalewidth="75%"]
 
 FaultExitCode:: Exit code value of interest. If the specified exit code occurs, the monitor generates a fault. The default exit code value is 1.
 FaultOnExitCode:: Generate a fault when the FaultExitCode matches the exit code of the launched command. The default value is false.

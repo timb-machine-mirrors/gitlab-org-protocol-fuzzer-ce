@@ -20,7 +20,7 @@ In the VMWare product, you can create, review, and manage the VM snapshots using
 The following illustration shows the VMWare Snapshot Manager that shows the snapshots
 created for a specific VM.
 
-image::{images}/VMWare_Snapshot_Manager.png["VMWare Snapshot Manager", scale="60"]
+image::{images}/Common/Monitors/Vmware_SnapshotManager.png[scale="60"]
 
 TIP: When using with vSphere/ESXi, prefix the VM image name with the storage location in brackets.  For example, "[ha-datacenter/datastore1] guest/guest.vmx"
 
@@ -76,7 +76,7 @@ Details on when to perform a specfied action. Specify one of the following value
 |==========================================================
 +
 .When Choices for Performing an Action
-image::{images}/Timings_SSH.png["When Run Command Choices", scalewidth="75%"]
+image::{images}/Common/Monitors/Timings_SSH.png[scalewidth="75%"]
 
 === Examples
 

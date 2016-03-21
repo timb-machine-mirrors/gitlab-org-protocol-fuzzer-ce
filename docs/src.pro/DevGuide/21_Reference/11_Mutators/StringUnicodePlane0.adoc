@@ -4,7 +4,7 @@
 
 This mutator produces test cases for Unicode String elements by generating new strings and populating the strings with randomly-selected values from Unicode plane 0 (basic multilingual plane) characters. The lengths of the generated strings form a distribution that centers on the length of the current string and ranges from 1 to 65K (ushort max) Unicode characters.
 
-This mutator requires Strings that have a Unicode encoding type: UTF-8, UTF-16, or UTF-32. 
+This mutator requires Strings that have a Unicode encoding type: UTF-8, UTF-16, or UTF-32.
 
 === Supported Elements
 
@@ -13,3 +13,5 @@ This mutator requires Strings that have a Unicode encoding type: UTF-8, UTF-16, 
 === Hints
 
 This mutator does not support hints.
+
+// end

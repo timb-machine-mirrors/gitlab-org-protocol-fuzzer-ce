@@ -11,13 +11,13 @@ The configurations are listed in the section that follows the Pits.
 +
 Once selected, the configured Pit displays, as in the following illustration.
 +
-image::{images}/webui_config_selected.png[]
+image::{images}/Common/WebUI/config_selected.png[]
 +
 If needed, you can change configuration settings or set some other parameters at the buttom of the page (typcially used in replaying a fuzzing session).
 
 3. Click Start to begin the fuzzing session. The Peach Dashboard displays.
 +
-image::{images}/webui_dashboard_oct2015.png[]
+image::{images}/Common/WebUI/dashboard_oct2015.png[]
 
 The dashboard allows you to monitor progress as your fuzzing job runs and from it, you can pause, stop, resume, and replay your fuzzing session. The Peach Dashboard provides the following information:
 
@@ -46,19 +46,19 @@ The dashboard allows you to monitor progress as your fuzzing job runs and from i
 When your Pit configuration passes the validation test, the following screeen displays
 with the green banner and the message "Testing Passed. Click Continue."
 
-image::{images}/QS32_TestPass.png[scalewidth="75%"]
+image::{images}/Common/WebUI/QS32_TestPass.png[scalewidth="75%"]
 
 From here, you can start a fuzzing session with two clicks of the mouse.
 
 1. Click Continue. Peach displays the Pit configuration page.
 +
-image::{images}/webui_config_selected.png[scalewidth="75%"]
+image::{images}/Common/WebUI/config_selected.png[scalewidth="75%"]
 
 2. Click Start in the "Start Options" section at the bottom of the page to start a fuzzing job.
 +
 The Peach dashboard displays and the fuzzing job starts.
 +
-image::{images}/webui_dashboard_oct2015.png[]
+image::{images}/Common/WebUI/dashboard_oct2015.png[]
 
 [[Re-Fuzzing]]
 ==== Re-running a Fuzzing Job
@@ -75,7 +75,7 @@ What is needed to re-run a fuzzing job?
 
 Supply the seed value and appropriate Start and Stop Test Case values in the "Start Options" on the Pit Configuration page that follows, and click Start to begine a repeat of the fuzzing session.
 
-image::{images}/webui_config_selected.png[]
+image::{images}/Common/WebUI/config_selected.png[]
 
 The next two sections provide information about the Seed Value and the Test Case number used in recreating a fuzzing job.
 
@@ -121,7 +121,7 @@ While {product} is running, you can view all the faults generated during the ses
 
 Faults displays the total number of generated faults. There are two Faults views: the Summary view and the Detail view:
 
-image::{images}/Fault_summary.png[]
+image::{images}/Common/WebUI/Fault_summary.png[]
 
 For each session, the Faults Summary view lists a summary of information about the fault such as:
 
@@ -133,7 +133,7 @@ For each session, the Faults Summary view lists a summary of information about t
 
 Clicking on one of the listed faults from the Summary view opens the Details view for the selected fault.
 
-image::{images}/Fault_detail.png[]
+image::{images}/Common/WebUI/Fault_detail.png[]
 
 Here's where you can find details about the selected fault. Additional information (such as any files collected during the data collection phase) are located in the disk log folder.
 
@@ -149,13 +149,13 @@ TIP: The data grids used on many of the metrics displays support multi-column so
 
 This metric display shows a timeline with new fault buckets listed, and total number of times the bucket was found during the fuzzing session.
 
-image::{images}/webui_metrics_timeline.png[]
+image::{images}/Common/WebUI/metrics_timeline.png[]
 
 ==== Faults Over Time
 
 This metric display shows the count of faults found by hour over the course of the fuzzing run. This is the count of all faults found, not just unique buckets.
 
-image::{images}/webui_metrics_faultsovertime.png[]
+image::{images}/Common/WebUI/metrics_faultsovertime.png[]
 
 ==== Mutators
 
@@ -167,7 +167,7 @@ Iteration Count:: The number of iterations this mutator was used during the fuzz
 Bucket Count:: The number of unique buckets found while this mutator was in use.
 Fault Count:: The number of faults found while this mutator was in use.
 
-image::{images}/webui_metrics_mutators.png[]
+image::{images}/Common/WebUI/metrics_mutators.png[]
 
 ==== Elements
 
@@ -184,7 +184,7 @@ Mutations:: The number of mutations generated from this element.
 Buckets:: The number of unique buckets found by sending mutating data to this element.
 Faults:: The number of faults found from the mutated data sent to this element.
 
-image::{images}/webui_metrics_elements.png[]
+image::{images}/Common/WebUI/metrics_elements.png[]
 
 ==== States
 
@@ -194,7 +194,7 @@ For example, not all states always execute. If an early-occurring state is fuzze
 
 NOTE: Over time, the number of occurrences for most states should trend towards equality.
 
-image::{images}/webui_metrics_states.png[]
+image::{images}/Common/WebUI/metrics_states.png[]
 
 ==== Data Sets
 
@@ -208,7 +208,7 @@ Iterations:: Number of fuzzing iterations performed using this data set
 Buckets:: Number of unique buckets found with this data set
 Faults:: Number of faults found with this data set
 
-image::{images}/webui_metrics_datasets.png[]
+image::{images}/Common/WebUI/metrics_datasets.png[]
 
 ==== Buckets
 
@@ -220,7 +220,7 @@ Mutator:: The mutator that generated the fault
 Iteration count:: The number of iterations that used the mutator
 Faults count:: The number of faults that occurred while using the mutator
 
-image::{images}/webui_metrics_buckets.png[]
+image::{images}/Common/WebUI/metrics_buckets.png[]
 
 ==== Accessing Raw Metrics Data
 
@@ -232,6 +232,4 @@ IMPORTANT: Let the fuzzing job complete as well as writes to the database. Once 
 === Switching Pits
 
 The active Peach Pit can be changed in the {peachweb} by clicking on the Home icon above the menu along the left edge of the screen. Then, select the Library menu item and pick from the Pits and Configurations in your library.
-
-image::{images}/webui_metrics_datasets.png[]
 

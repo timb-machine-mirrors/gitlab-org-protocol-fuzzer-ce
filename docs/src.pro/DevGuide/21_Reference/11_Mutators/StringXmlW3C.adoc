@@ -14,3 +14,4 @@ This mutator is enabled for String elements that have the +XML+ hint.
 
 XML:: Enables W3C XML tests.  The hint name is "XML". The hint value is "xml".
 
+// end

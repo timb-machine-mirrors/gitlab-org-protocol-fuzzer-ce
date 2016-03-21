@@ -21,7 +21,7 @@ method to use. However, in many cases, dumb fuzzing does not work. One example
 that prevents a dumb fuzzer from working is the use of checksums in the data format.
 Checksums validate integrity of the data during transmission or storage. Any change to the data will result in a checksum that does not match, as shown in the following image:
 
-image::{images}/crc_missmatch.png[]
+image::{images}/DevGuide/FuzzingIntro/crc_missmatch.png[]
 
 The highlighted `FF` in the data stream is a byte that was changed during fuzzing. The new checksum value does not match the one that already exists in the file.
 

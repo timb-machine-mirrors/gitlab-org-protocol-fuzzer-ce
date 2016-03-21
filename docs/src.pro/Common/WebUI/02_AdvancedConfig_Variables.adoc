@@ -14,7 +14,7 @@ To begin from the Home Page,
 * Selecting a Pit means that you are creating a new configuration. You will need to
 name the configuration, optionally provide a description, and click "Submit" to reach the start screen for the configuration.
 +
-image::{images}/NP2_Config_Start.png[]
+image::{images}/Common/WebUI/NP2_Config_Start.png[]
 
 3. Click the "Configure Variables" button to define or edit the variables and their values.
 
@@ -29,7 +29,7 @@ The active Peach Pit configuration can be changed in the {peachweb} by clicking 
 
 The variables data entry screen lists the information needed by the selected pit, as in the following illustration. Some information is pit specific, such as file names used to fuzz file formats and port addresses used to fuzz network protocols. Other information applies to the Peach environment; two examples are the Peach Installation Directory and the Pit Library Path.
 
-image::{images}/AC01_Variables_Init.png[]
+image::{images}/Common/WebUI/AC01_Variables_Init.png[]
 
 ==== Pit-specific Variables
 
@@ -89,7 +89,7 @@ values for Pit variables and monitor variables.
 
 Additionally, once defined, the custom variable is added to the dropdown variable list. The list of variables displays during data entry when a `#` is typed as the sole character in a data field, as shown in the following illustration.
 
-image::{images}/AC02_Variable_DropList.png["Peach Variable List", scalewidth="70%"]
+image::{images}/Common/WebUI/AC02_Variable_DropList.png["Peach Variable List", scalewidth="70%"]
 
 ====== Creating a custom variable
 
@@ -97,13 +97,13 @@ Here are the steps to add a custom variable to Peach:
 
 . Begin on the Variables page.
 +
-image::{images}/AC03_Vars_AddVar.png["Variables_page2", scalewidth="70%"]
+image::{images}/Common/WebUI/AC03_Vars_AddVar.png["Variables_page2", scalewidth="70%"]
 
 . Click the "Add Variable" button immediately above and to the right of list of variables.
 +
 The "Add Variable" pop-up dialog displays.
 +
-image::{images}/AC04_AddVar_Popup.png["New Variable Definition", scalewidth="70%"]
+image::{images}/Common/WebUI/AC04_AddVar_Popup.png["New Variable Definition", scalewidth="70%"]
 
 . Fill in values for the name, key, and value fields. The following illustration shows a variable locating a JPEG repository.
 +
@@ -114,18 +114,18 @@ punctuation. This is the name to search on if you want to edit the value of the 
 +
 ** The *Value* parameter stores the value that Peach uses when processing the pit.
 +
-image::{images}/AC05_AddVar_FilledIn.png["Variable Definition Entered", scalewidth="70%"]
+image::{images}/Common/WebUI/AC05_AddVar_FilledIn.png["Variable Definition Entered", scalewidth="70%"]
 
 . Click OK.
 
 . Click save. +
 The new value is now part of the list, and has been saved for future use.
 +
-image::{images}/AC06_Vars_Page_Saved.png["Variable Page Saved", scalewidth="70%"]
+image::{images}/Common/WebUI/AC06_Vars_Page_Saved.png["Variable Page Saved", scalewidth="70%"]
 
 
 ====== Using a custom variable
 
 Using a custom variable consists of typing `\\##`, the variable name, and `##` in the value of another variable. In the following illustration, the "Sample Path" variable refers to the "JPEG Sample Pictures". When parsing the configuration information, Peach inserts the value `C:\\Samples\\JPEG` for the value of the "Sample Path".
 
-image::{images}/AC07_Vars_Page_Using.png["Using a New Variable", scalewidth="70%"]
+image::{images}/Common/WebUI/AC07_Vars_Page_Using.png["Using a New Variable", scalewidth="70%"]

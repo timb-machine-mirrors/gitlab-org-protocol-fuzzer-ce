@@ -158,15 +158,15 @@ In this case, the sizes match.
 
 We can also use the Peach Validator to get a visual representation of what is happening. Launch Peach Validator and load _example.xml_ via the toolbar. Notice the tree view on the bottom half of the window. This is the data model and data elements. Because no data has been loaded, the values are all empty. Notice the _DataElement_0_ element; this is the unnamed xref:Blob[Blob] element. Peach assigned it a default name.
 
-image::{images}/Cracking_Validator1.png[]
+image::{images}/DevGuide/DataModeling/Cracking_Validator1.png[]
 
 Next, load the sample file _snail.png_ and see the result of the crack.
 
-image::{images}/Cracking_Validator2.png[]
+image::{images}/DevGuide/DataModeling/Cracking_Validator2.png[]
 
 The data model now contains data. Click on the _DataElement_0_ item to highlight the corresponding data in the hex view.
 
-image::{images}/Cracking_Validator3.png[]
+image::{images}/DevGuide/DataModeling/Cracking_Validator3.png[]
 
 This definition is considered a dumb fuzzing model for PNG. The next step expands the model based on the PNG specification.
 
@@ -225,11 +225,11 @@ PNG files consist of a piece of file magic and then multiple T-L-V (type, length
 
 The preceding Pit definition produces the following in Peach Validator before cracking any data.
 
-image::{images}/Cracking_Validator4.png[]
+image::{images}/DevGuide/DataModeling/Cracking_Validator4.png[]
 
 When we try and crack the sample, an error message states that cracking failed. An error message also displays that might help in locating and resolving the issue.
 
-image::{images}/Cracking_Validator5.png[]
+image::{images}/DevGuide/DataModeling/Cracking_Validator5.png[]
 
 The next step is to review the +--debug+ output and see if we can spot the issue.
 
@@ -636,7 +636,7 @@ Peach.Core.Publishers.FilePublisher stop()
 
 The output looks good and the model outputted the correct number of bytes. Time to review things inside the Peach Validator.
 
-image::{images}/Cracking_Validator6.png[]
+image::{images}/DevGuide/DataModeling/Cracking_Validator6.png[]
 
 Reviewing the cracked model, it looks like everything is good.
 

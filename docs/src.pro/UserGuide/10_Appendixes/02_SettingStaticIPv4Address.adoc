@@ -18,7 +18,7 @@ Control Panel -> Netowrk and Internet -> Network Connections
 +
 The following properties dialogs for the IP v4 protocol display settings for a dynamic IP assignment on the left. The static values are displayed on the right. Values specified for the static IP v4 address are fictitious. Use the values provided by running the `ipconfig –all` command in a command processor.
 +
-image::{images}/IPv4_Chg_to_Static.png["Static IPv4 settings", scale="50"]
+image::{images}/UserGuide/IPv4_Chg_to_Static.png[scale="50"]
 +
 Click "Use the following IP address", and fill in the values for the IP address, submask, and gateway, as well as the entries for DNS servers.
 5.	When finished, click OK.

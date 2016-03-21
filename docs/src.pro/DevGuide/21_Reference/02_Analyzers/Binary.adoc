@@ -4,15 +4,15 @@
 
 The Binary analyzer applies to Blob data elements and provides an easy way to improve fuzzing of unknown binary data.
 
-The analyzer searches for known types (such as strings) in the Blob data and constructs a DataModel of the Blob. If a string type occurs in the Blob data, Peach runs the StringToken analyzer on each string found. 
+The analyzer searches for known types (such as strings) in the Blob data and constructs a DataModel of the Blob. If a string type occurs in the Blob data, Peach runs the StringToken analyzer on each string found.
 
-IMPORTANT: The Binary analyzer requires data from a Blob data type. 
+IMPORTANT: The Binary analyzer requires data from a Blob data type.
 
 === Syntax
 
 [source,xml]
 ----
-<Blob name="BinaryData"> 
+<Blob name="BinaryData">
 	<Analyzer class="Binary" />
 </Blob>
 ----
@@ -29,14 +29,14 @@ None.
 
 === Parameters
 
-Tokens:: List of characters to pass to the StringToken analyzer. 
-AnalyzeStrings:: Calls the StringToken analyzer on string elements. The default value is true. 
+Tokens:: List of characters to pass to the StringToken analyzer.
+AnalyzeStrings:: Calls the StringToken analyzer on string elements. The default value is true.
 
 === Examples
 
 .Simple Hello World Example
 ==========================
-This example uses the binary analyzer on inline Blob data.  
+This example uses the binary analyzer on inline Blob data.
 
 [source,xml]
 ----
@@ -62,7 +62,7 @@ This example uses the binary analyzer on inline Blob data.
 		<Publisher class="ConsoleHex" />
 
 		<Logger class="File">
-			<Param name="Path" value="logs"/> 
+			<Param name="Path" value="logs"/>
 		</Logger>
 	</Test>
 </Peach>
@@ -95,17 +95,17 @@ Peach.Core.Engine runTest: context.config.singleIteration == true
 Peach.Core.Publishers.ConsolePublisher stop()
 
 [*] Test 'Default' finished.
----- 
+----
 
 
-Output in Peach Validator 
+Output in Peach Validator
 
-image::{images}/BinaryAnalyzerOutput.png["Validator Output", alt="Validator Output"]
+image::{images}/DevGuide/Analyzers/Binary_Output.png[]
 
 ==========================
 
 
-.Load From File Example 
+.Load From File Example
 ==========================
 This example uses the binary analyzer on an external file of Blob data (example.bin).
 
@@ -115,7 +115,7 @@ This example uses the binary analyzer on an external file of Blob data (example.
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
 
 	<DataModel name="TheModel">
-		<Blob name="BinaryData"> 
+		<Blob name="BinaryData">
 			<Analyzer class="Binary" />
 		</Blob>
 	</DataModel>
@@ -124,7 +124,7 @@ This example uses the binary analyzer on an external file of Blob data (example.
 		<State name="initial">
 			<Action type="output">
 				<DataModel ref="TheModel" />
-				<Data name="SampleData1" fileName="example.bin"/> 
+				<Data name="SampleData1" fileName="example.bin"/>
 			</Action>
 		</State>
 	</StateModel>
@@ -134,7 +134,7 @@ This example uses the binary analyzer on an external file of Blob data (example.
 		<Publisher class="ConsoleHex" />
 
 		<Logger class="File">
-			<Param name="Path" value="logs"/> 
+			<Param name="Path" value="logs"/>
 		</Logger>
 	</Test>
 </Peach>
@@ -188,19 +188,19 @@ Peach.Core.Engine runTest: context.config.singleIteration == true
 Peach.Core.Publishers.ConsolePublisher stop()
 
 [*] Test 'Default' finished.
----- 
+----
 
 
-Output in Peach Validator 
+Output in Peach Validator
 
-image::{images}/BinaryAnalyzerOutput.png["Validator Output", alt="Validator Output"]
+image::{images}/DevGuide/Analyzers/Binary_Output.png[]
 
 ==========================
 
 
-.Custom String Tokens Example 
+.Custom String Tokens Example
 ==========================
-This example uses the binary analyzer on a value with a custom set of tokens defined.  
+This example uses the binary analyzer on a value with a custom set of tokens defined.
 
 [source,xml]
 ----
@@ -210,7 +210,7 @@ This example uses the binary analyzer on a value with a custom set of tokens def
   <DataModel name="TheModel">
     <Blob name="BinaryData" valueType="hex" value="28 54 65 73 74 69 6E 67 20 48 65 6C 6C 6F 57 29 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F 7B 50 65 61 63 68 46 75 7A 7A 65 72 7D BB CC ">
       <Analyzer class="Binary">
-        <Param name="Tokens" value="(){}"/>  
+        <Param name="Tokens" value="(){}"/>
       </Analyzer>
     </Blob>
   </DataModel>
@@ -228,7 +228,7 @@ This example uses the binary analyzer on a value with a custom set of tokens def
     <Publisher class="ConsoleHex" />
 
     <Logger class="File">
-      <Param name="Path" value="logs"/> 
+      <Param name="Path" value="logs"/>
     </Logger>
   </Test>
 </Peach>
@@ -260,10 +260,10 @@ Peach.Core.Engine runTest: context.config.singleIteration == true
 Peach.Core.Publishers.ConsolePublisher stop()
 
 [*] Test 'Default' finished.
----- 
+----
 
-Output in Peach Validator 
+Output in Peach Validator
 
-image::{images}/BinaryAnalyzerTokensOutput.png["Validator Output", alt="Validator Output"]
+image::{images}/DevGuide/Analyzers/Binary_TokensOutput.png[]
 
 ==========================

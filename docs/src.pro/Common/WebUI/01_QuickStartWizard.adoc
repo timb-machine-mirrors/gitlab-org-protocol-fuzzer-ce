@@ -5,7 +5,7 @@ The Quick Start Wizard helps configure individual Peach Pits from your library o
 
 When the Quick Start Wizard finishes, you have accomplished the items as they are listed in the Wizard's start screen. You can start a fuzzing job with your configured pit or return to the Dashboard.
 
-image::{images}/QS01_QuickStart.png[]
+image::{images}/Common/WebUI/QS01_QuickStart.png[]
 
 ==== Step 1. Start the Wizard
 
@@ -14,17 +14,17 @@ This step starts at the Home page and guides you through selecting a Pit and sta
 1. Select the library menu item along the left edge of the Home page. +
 Your licensed Pits and Pit Configurations display. Select a Pit to create a new configuration. Or, you could select a Configuration to update its details.
 +
-image::{images}/H2_Library.png[]
+image::{images}/Common/WebUI/H2_Library.png[]
 
 2. Click on the Pit that you want to configure, such as JPG. +
 The following popup window displays:
 +
-image::{images}/NP1_NewPit_Popup.png[]
+image::{images}/Common/WebUI/NP1_NewPit_Popup.png[]
 
 3. Give the configuration a unique name--such as JPG_Test1, provide a description (optional), and click "Submit". +
 Peach displays a Start screen for the new configuration. From this screen, you can Launch the Quick Start Wizard, edit the configuration using advanced dialogs, or start a fuzzing job.
 +
-image::{images}/NP2_Config_Start.png[]
+image::{images}/Common/WebUI/NP2_Config_Start.png[]
 
 [NOTE]
 =========
@@ -36,7 +36,7 @@ The active Peach Pit configuration can be changed in the {peachweb} by clicking 
 1. Click "Quick Start Wizard". +
 The introductory screen displays. The menu along the left side of the browser window lists sections or steps of the wizard:
 +
-image::{images}/QS01_QuickStart.png[]
+image::{images}/Common/WebUI/QS01_QuickStart.png[]
 
 2. Click the "Begin" button to start describing your fuzzing configuration.
 
@@ -48,29 +48,29 @@ For example, file Pits need names of the files used to seed and fuzz the test ta
 
 At the end of Step 1, you clicked on the "Begin" button on the initial screen of the wizard, causing the "Set Variables" introductory screen to display. Notice the breadcrumb menu under the Peach Fuzzer banner that indicates where you are: `Home / Library / JPG_Test1 / Quick Start / Set Variables`.
 
-image::{images}/QS02_SetVariables.png[]
+image::{images}/Common/WebUI/QS02_SetVariables.png[]
 
 1. Click "Next" to continue. +
 The wizard asks for a name to call the fuzzed data file that Peach generates and feeds the test target. You can specify a unique file name or use the default.
 +
-image::{images}/QS03_QA_FuzzedFile.png[]
+image::{images}/Common/WebUI/QS03_QA_FuzzedFile.png[]
 
 2. Click "Next" to continue. +
 The wizard displays the next screen that asks for the name of a seed to use in the fuzzing session. Peach blends fuzzed data with the data in a seed file to produce the fuzzed data file named on the previous screen. You can provide a single name or glob a group of names by providing a filename with wildcard characters.
 +
 Only the file name is needed. The path the seed file(s) is specified in the next screen.
 +
-image::{images}/QS04_QA_SeedFile.png[]
+image::{images}/Common/WebUI/QS04_QA_SeedFile.png[]
 
 3. Click "Next" to continue. +
 The wizard next asks for the path or location of the seed file(s) to use during fuzzing. Note that all files used as seed files must be in the same folder or directory. The default location contains sample files provided by Peach Fuzzer, LLC.
 +
-image::{images}/QS05_QA_SamplePath.png[]
+image::{images}/Common/WebUI/QS05_QA_SamplePath.png[]
 
 4. Click "Next" to continue. +
 The variables are defined and the wizard displays the variables and the values to use in fuzzing jobs.
 +
-image::{images}/QS06_Variable_Review.png[]
+image::{images}/Common/WebUI/QS06_Variable_Review.png[]
 +
 If any of the values need to be changed, click "Redo Set Variables" to redo this section. Otherwise, click "Continue to Fault Detection" to specify what faults (issues) to look for and how to implement their detection.
 
@@ -80,40 +80,40 @@ The fault detection section of the wizard configures monitoring to detect faults
 
 At the end of Step 2, you clicked on "Continue to Fault Detection", causing the "Fault Detection" screen to display.
 
-image::{images}/QS07_Fault.png[]
+image::{images}/Common/WebUI/QS07_Fault.png[]
 
 1. Click "Next" to continue. +
 The first Questions & Answers screen displays, asking whether to perform fault detection on the local machine or a remote machine. Note that the local machine runs Peach and contains the test target. In our example, use the default value.
 +
-image::{images}/QS08_QA_Local.png[]
+image::{images}/Common/WebUI/QS08_QA_Local.png[]
 
 2. Click "Next" to continue. +
 The wizard asks what you want to call a fault: a process or service that masbehaves (crashes, exits prematurely, or reports an exception), a non-responsive remote device, an error message commumicated from a remote machine using a serial port, or an error message reported by the system logging mechanism.+
 Here, use the default response--Detect whether a process or service has misbehaved.
 +
-image::{images}/QS09_QA_DetectHow.png[]
+image::{images}/Common/WebUI/QS09_QA_DetectHow.png[]
 
 3. Click "Next" to continue. +
 You communicated what you want to call a fault. Now, the wizard wants to know which process or service should serve as sentry to detect the fault. With file fuzzing, only the first choice is valid, so select "User process started by command line."
 +
-image::{images}/QS10_QA_ProcessOrService.png[]
+image::{images}/Common/WebUI/QS10_QA_ProcessOrService.png[]
 
 4. Click "Next" to continue. +
 Zeroing in on the process to detect faults, the wizard asks for the full executable file name that consists of the path the name of the executable file, and the file extension. Because we're fuzzing the JPEG file for the mspaint application, the screen contains the full  file name for the mspaint application.
 +
-image::{images}/QS11B_QA_TargetDefined.png[]
+image::{images}/Common/WebUI/QS11B_QA_TargetDefined.png[]
 
 5. Click "Next" to continue. +
 Often, the application has command-line arguments. In our example, mspaint.exe specifies the name of the fuzzed data file as a command-line argument.
 +
 The fuzzed data file was specified in the Set Variables section and is already defined, so we can either retype the file name here, or reference the name of the variable, as does default data value uses. You can add the variable to the wizard's input box by clicking on the blue button to the right of "Fuzzed Data FIle" in the variables listing.
 +
-image::{images}/QS12_QA_TargetArguments.png[]
+image::{images}/Common/WebUI/QS12_QA_TargetArguments.png[]
 
 6. Click "Next" to continue. +
 The wizard asks when, withing the test case execution, you want to start the process or service. For our example (file fuzzing), select "At the end of every iteration."
 +
-image::{images}/QS13_QA_StartTarget.png[]
+image::{images}/Common/WebUI/QS13_QA_StartTarget.png[]
 +
 With Peach, you can specify that you'd like the process to start once per fuzzing session which is typical for protocols because you'd like to minimize the overall time that the fuzzing session needs to run in its entirety. Or, you can start the application or service either at the beginning or end of each test case execution. Other options might be avaiable.
 
@@ -121,22 +121,22 @@ With Peach, you can specify that you'd like the process to start once per fuzzin
 Peach usually uses a debugger during test case execution because it can detect crashes and other fault conditions, and provides data that is useful in understanding and fixing the cause of a fault. Enter the path that contains the executable file of the debugger. +
 *The file name is not needed*.
 +
-image::{images}/QS14_QA_DebugLocation.png[]
+image::{images}/Common/WebUI/QS14_QA_DebugLocation.png[]
 
 8. Click "Next" to continue. +
 If a program ends early, it sometimes indicates that a problem exists. Other times such as in file fuzzing, it's not important. In our example, we don't consider it a fault if the application or service exits prematurely. Select "No, it's okay if my process/service exits early."
 +
-image::{images}/QS15_QA_ExitFault.png[]
+image::{images}/Common/WebUI/QS15_QA_ExitFault.png[]
 
 9. Click "Next" to continue. +
 The wizard asks about guardpage exceptions next. A guardpage is an unused page of memory that marks the end of a data structure, such as an array. In our example, select "No, do not ignore them."
 +
-image::{images}/QS16_QA_GuardPage1.png[]
+image::{images}/Common/WebUI/QS16_QA_GuardPage1.png[]
 
 10. Click "Next" to continue. +
 Fault detection is defined and the wizard provides a brief message and indicates additional action that, based on your responses, are relevant. Here, the PageHeap monitor will also be used with the Windows Debug Monitor.
 +
-image::{images}/QS17_Fault_Review.png[]
+image::{images}/Common/WebUI/QS17_Fault_Review.png[]
 +
 If any of the values need to be changed, click "Redo Fault Detection" to redo this section. Otherwise, click "Continue to Data Collection" to specify the fault-related data that Peach should capture during test case execution.
 
@@ -145,27 +145,27 @@ In data collection section of the wizard, you can specify whether to store addit
 
 At the end of Step 3, you clicked "Continue to Data Collection", causing the "Data Collection" screen to display.
 
-image::{images}/QS18_DataCollection.png[]
+image::{images}/Common/WebUI/QS18_DataCollection.png[]
 
 1. Click "Next" to continue. +
 Where do you want to perform data collection? You can store data on the local machine or a remote machine/location. Use the default value, "From a local machine."
 +
-image::{images}/QS19_QA_Local.png[]
+image::{images}/Common/WebUI/QS19_QA_Local.png[]
 
 2. Click "Next" to continue. +
 What type of data should be collected? The only applicable response for our situation is "Save a file generated locally to the machine performing data collection."
 +
-image::{images}/QS20_TypeOfCollecting.png[]
+image::{images}/Common/WebUI/QS20_TypeOfCollecting.png[]
 
 3. Click "Next" to continue. +
 The wizard asks for the name of the file to save. If we find a fault, let's save the "Fuzzed Data File" that generated the fault, so we can recreate the issue easily.
 +
-image::{images}/QS21_FileToSave.png[]
+image::{images}/Common/WebUI/QS21_FileToSave.png[]
 
 4. Click "Next" to continue. +
 We finished the Data Collection section, and the wizard states what additional data we're going to collect.
 +
-image::{images}/QS22_DataColl_Review.png[]
+image::{images}/Common/WebUI/QS22_DataColl_Review.png[]
 +
 If any values need to be changed or if additional data items are appropriate to collect, click "Add More Data Collection" to re-visit this section. Otherwise, click "Continue to Automation" to specify instrumentation that can reduce human intervention during the fuzzing session.
 
@@ -173,49 +173,49 @@ If any values need to be changed or if additional data items are appropriate to 
 
 At the end of Step 3, you clicked "Continue to Automation", causing the "Automation" screen to display. This section allows you to automate specific actions that peach takes during a fuzzing job to reduce human intervention in the fuzzing session. The autoamtion section is optional.
 
-image::{images}/QS23_Automation.png[]
+image::{images}/Common/WebUI/QS23_Automation.png[]
 
 1. Click "Next" to continue. +
 The first "Questions & Answers" screen requests whether you want perform automation and which machine will control automation. In our example, select "From local machine."
 +
-image::{images}/QS24_QA_Local.png[]
+image::{images}/Common/WebUI/QS24_QA_Local.png[]
 
 2. Click "Next" to continue. +
 The wizard requests information about the type of automation to perform. In our example, select "Control a process running locally on the machine performing automation tasks." We're not controlling power to the machine nor using a serial port to log messages.
 +
-image::{images}/QS25_QA_TaskDef.png[]
+image::{images}/Common/WebUI/QS25_QA_TaskDef.png[]
 
 3. Click "Next" to continue. +
 The wizard asks for the executable file to run. Here, we'll simply restart mspaint.
 +
-image::{images}/QS26_QA_Executable.png[]
+image::{images}/Common/WebUI/QS26_QA_Executable.png[]
 
 4. Click "Next" to continue. +
 Peach requests command-line arguments to specify when launching the executable file. Select the "Fuzzed Data File" by clicking the blue box to the right of the variables list beneath the input text box.
 +
-image::{images}/QS27_QA_ExeArguments.png[]
+image::{images}/Common/WebUI/QS27_QA_ExeArguments.png[]
 
 5. Click "Next" to continue. +
 The wizard wants to know when to launch the executable file: at the beginning of the fuzzing session, or at the start or end of each test case.
 +
-image::{images}/QS28_QA_RestartWhen.png[]
+image::{images}/Common/WebUI/QS28_QA_RestartWhen.png[]
 
 6. Click "Next" to continue. +
 The wizard asks how to treat the event when the process exits prematurely. Select "No. It's okay if my process/service exits early." Our example is about fuzzing JPEG files.
 +
-image::{images}/QS29_QA_EarlyExit.png[]
+image::{images}/Common/WebUI/QS29_QA_EarlyExit.png[]
 
 7. Click "Next" to continue. +
 The Automation Review screen displays and shows that we added information to control a process.
 +
-image::{images}/QS30_Automation_Review.png[]
+image::{images}/Common/WebUI/QS30_Automation_Review.png[]
 +
 If any values need to be changed or if additional automation is appropriate, click "Add More Automation" to re-visit this section. Otherwise, click "Continue to Test" to test the Pit configuration.
 
 ==== Step 6. Test the Configuration
 In the Test section of the wizard, Peach performs a test on the selected Pit configuration using the settings you provided. Peach identifies the readiness of the Pit configuration for testing by tracking and reporting the progress of each section of the Quick Start Wizard.
 
-image::{images}/QS31_Test.png[]
+image::{images}/Common/WebUI/QS31_Test.png[]
 
 NOTE: The Test section runs a single test case without any fuzzing. +
 The test requires that the target device, service, or application be available for use.
@@ -223,7 +223,7 @@ The test requires that the target device, service, or application be available f
 * Click the Begin Test button to run the test. +
 When the test completes, Peach reports whether the Pit configuration passes the test. If the configuration passes, the following message displays:
 +
-image::{images}/QS32_TestPass.png[]
+image::{images}/Common/WebUI/QS32_TestPass.png[]
 
 At the end of the wizard, you can either start a fuzzing job with your pit or return to the Dashboard.
 

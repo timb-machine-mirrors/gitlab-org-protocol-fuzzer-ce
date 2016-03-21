@@ -9,9 +9,6 @@ The _StringUtf8BomLength_ mutator produces test cases for ASCII and Unicode UTF-
 
 BOMs are not considered characters, and using them can cause buffer length calculations to be incorrect.
 
-//RAB - 12/19/14. Hiding for now because hint is currently internal.
-//NOTE: StringUtf8BomLength does not run on data elements that specify the hint *Peach.TypeTransform=false*.
-//
 === Supported Elements
 
  * xref:String[String]
@@ -19,3 +16,5 @@ BOMs are not considered characters, and using them can cause buffer length calcu
 === Hints
 
 This mutator does not support any hints.
+
+// end

@@ -1,3 +1,4 @@
+<<<
 [[Mutators_StringCaseLower]]
 == StringCaseLower
 
@@ -11,4 +12,4 @@ This mutator produces a single test case by making the characters in the string 
 
 This mutator does not support hints.
 
-<<<
+// end

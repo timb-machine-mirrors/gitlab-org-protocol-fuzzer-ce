@@ -13,7 +13,7 @@ Each _IpPower9258_ monitor switches an individual outlet. Use one monitor per ou
 * After detecting a fault
 * At the start of an iteration that immediately follows a fault
 
-image::{images}/IP9258Mtr.png["Fuzzing Configuration Using an IP 9258 Network Power Controller", scalewidth="75%"]
+image::{images}/Common/Monitors/IpPower9258.png[scalewidth="75%"]
 
 
 [NOTE]
@@ -58,7 +58,7 @@ Details on when to perform a specfied action. Specify one of the following value
 |==========================================================
 +
 .When Choices for Performing an Action
-image::{images}/Timings_SSH.png["When Run Command Choices", scalewidth="75%"]
+image::{images}/Common/Monitors/Timings_SSH.png[scalewidth="75%"]
 
 
 

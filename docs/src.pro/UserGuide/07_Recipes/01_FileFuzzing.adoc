@@ -33,7 +33,7 @@ allocation settings normally leads to finding more faults during testing.
 
 Here's a diagram of connections for the test configuration.
 
-image::{images}/FileFuzzing2.png["Configuration for File Fuzzing", scale="60"]
+image::{images}/UserGuide/Recipes/FileFuzzing.png[scale="60"]
 
 ==== Setting up Monitors Using the Peach Web UI
 
@@ -49,7 +49,7 @@ setting. PageHeap requires administrative (heightened) privileges.
 . Fill in a name for the agent. Since this agent resides within Peach, the default
 location `local` is appropriate.
 
-image::{images}/FileFuzzing_Monitoring.png["Local agent for File Fuzzing", scale="50"]
+image::{images}/UserGuide/Recipes/FileFuzzing_Monitoring.png[scale="50"]
 
 ===== Supplying Monitor Details
 
@@ -75,7 +75,7 @@ For this recipe, use the monitors in the order they are presented:
 The xref:Monitors_PageHeap[PageHeap Monitor] enables heap allocation monitoring for
 an executable through the Windows debugger. Peach sets and clears the parameters used for monitoring heap allocation at the beginning and end of the fuzzing session.
 
-image::{images}/PageHeap2.png["PageHeap Monitor", scale="50"]
+image::{images}/UserGuide/Recipes/FileFuzzing_PageHeap.png[scale="50"]
 
 The *Executable* parameter identifies the application or executable file that is the fuzzing target. Specify the file name, with the file extension. The path is not needed nor wanted.
 
@@ -87,7 +87,7 @@ a kernel driver with the debugger attached; or, this monitor can attach the debu
 to a running executable, process, or service. This monitor can also attach the
 debugger to kernel-mode drivers, although that lies outside the scope of this documentation.
 
-image::{images}/WinDebugger2.png["Windows Debugger Monitor", scale="50"]
+image::{images}/UserGuide/Recipes/FileFuzzing_WinDebugger.png[scale="50"]
 
 The *Arguments* parameter identifies command-line arguments for the executable file. The value of this parameter provides command-line switches and data file names needed to launch the executable file.
 
@@ -103,7 +103,7 @@ call to the monitor to begin. Upon receiving the call, the debugger starts the p
 When fuzzing files on Windows, you need two monitors: PageHeap for heap allocation and the Windows Debugger that performs the vast majority of work. You also need to launch Peach
 from an administrative console. A snapshot of the agent setup follows:
 
-image::{images}/FileFuzz_AgentSummary.png["File Fuzzing Agent Summary", scale="50"]
+image::{images}/UserGuide/Recipes/FileFuzzing_AgentSummary.png[scale="50"]
 
 When ready, test the configuration. See xref:Test_PitConfiguration[Text Pit Configuration] for more information.
 

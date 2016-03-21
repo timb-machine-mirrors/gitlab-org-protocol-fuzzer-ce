@@ -34,7 +34,7 @@ None.
 
 === Parameters
 
-Map:: Controls mapping of stream names to the corresponding data models. 
+Map:: Controls mapping of stream names to the corresponding data models.
 This parameter consists of a comma-separated list of mappings. Each mapping consists of a tuple containing a regular expression and a corresponding DataModel name. The parts of a tuple are delineated with a forward slash character, similar to the substitution regular expression pattern.
 
 When the regular expression matches the file name in the zip archive, Peach uses the corresponding DataModel on the file contents.
@@ -46,7 +46,7 @@ For example, to use the data model +TextModel+ for all files ending in +.txt+, s
 
 .Analyzing a .docx file
 ==========================
-This example uses the zip analyzer to decompose a .docx file into its underlying streams. 
+This example uses the zip analyzer to decompose a .docx file into its underlying streams.
 
 [source,xml]
 ----
@@ -76,15 +76,15 @@ This example uses the zip analyzer to decompose a .docx file into its underlying
 		</Publisher>
 
 		<Logger class="File">
-			<Param name="Path" value="logs"/> 
+			<Param name="Path" value="logs"/>
 		</Logger>
 	</Test>
 </Peach>
 ----
 
-Output from the example that decomposes a .docx file into its underlying streams. 
+Output from the example that decomposes a .docx file into its underlying streams.
 ----
->peach -1 --debug example.xml 
+>peach -1 --debug example.xml
 
 [[ Peach Pro v3.1.0.0
 [[ Copyright (c) Peach Fuzzer LLC
@@ -310,9 +310,9 @@ Peach.Enterprise.Publishers.ZipPublisher stop()
 [*] Test 'Default' finished.
 ----
 
-View of example in Peach Validator 
+View of example in Peach Validator
 
-image::{images}/ZipAnalyzerOutputSimple.png["Validator Output", alt="Validator Output"]
+image::{images}/DevGuide/Analyzers/Zip_Simple.png[]
 
 ==========================
 
@@ -357,7 +357,7 @@ This example also maps all '.xml' files to the data model 'XmlModel' that furthe
 		</Publisher>
 
 		<Logger class="File">
-			<Param name="Path" value="logs"/> 
+			<Param name="Path" value="logs"/>
 		</Logger>
 	</Test>
 </Peach>
@@ -605,8 +605,8 @@ Peach.Enterprise.Publishers.ZipPublisher stop()
 [*] Test 'Default' finished.
 ----
 
-View of example in Peach Validator 
+View of example in Peach Validator
 
-image::{images}/ZipAnalyzerOutputWithMap.png["Validator Output", alt="Validator Output"]
+image::{images}/DevGuide/Analyzers/Zip_Map.png[]
 
 ==========================

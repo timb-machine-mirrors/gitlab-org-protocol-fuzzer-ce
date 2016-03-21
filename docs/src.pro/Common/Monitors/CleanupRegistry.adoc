@@ -32,7 +32,7 @@ improve the experience of selecting a file for the application to open.
 The Windows registry consists of five hierarchies called hives, as shown in
 the following illustration. Each hive consists of keys and values.
 
-image::{images}/WindowsRegistry.png["Windows 8.1 Registry with Hives", scalewidth="75%"]
+image::{images}/Common/Monitors/CleanupRegistry_Hives.png[scalewidth="75%"]
 
 * A key is a container that can contain other keys and values. A key has a name,
 a type, and optionally, a data value. The following illustration shows a selected
@@ -41,7 +41,7 @@ key. The complete name for this key is reported in the lower left corner.
 optionally, a name. In the following illustration, the named values defined for the
 selected key are listed in the right side of the window.
 
-image::{images}/WindowsRegKey_n_Values.png["Registry Key with Named Values", scalewidth="75%"]
+image::{images}/Common/Monitors/CleanupRegistry_Values.png[scalewidth="75%"]
 
 Each hive has one root key that is the entry point to the hive. These root keys
 are the prefixes described for the _CleanupRegistry_ `Key` parameter. The hives
@@ -108,11 +108,11 @@ This parameter example is from a setup that uses the CleanupRegistry monitor to 
 
 The following image shows the portion of the registry that contains the key to delete.
 
-image::{images}/Monitor_CleanupRegistry2.png[]
+image::{images}/Common/Monitors/CleanupRegistry_Delete.png[]
 
 This monitor deleted the key. The following image shows the same area of the registry after fuzzing and using the CleanupRegistry monitor.
 
-image::{images}/Monitor_CleanupRegistry3.png[]
+image::{images}/Common/Monitors/CleanupRegistry_AfterDelete.png[]
 
 ==================================================
 

@@ -17,17 +17,17 @@ Fuzzers submit hundreds, thousands, even millions of data samples malformed in s
 
 Consider the following C structure and corresponding data shown in hex:
 
-image::{images}/struct_with_hex.png[]
+image::{images}/DevGuide/FuzzingIntro/struct_with_hex.png[]
 
 The data is parsed by the data consumer into the structure. The data and structure are color coded to show which parts of the data are loaded into each member of the structure _Header_. Following the structure, two lines of code occur that use the _Header_ structure. Looking at that code, we can identify several issues that could likely lead to crashing our program that we could trigger by changing our input data.
 
 The first thing we could do is change the _len_ in our data from 0x0021 to 0x0001. This would cause the memory allocation to return a smaller amount of memory than what is needed for copying data using the _strcpy_ function. Once _strcpy_ executes, we will have written past the end of _msg_data_, possibly causing the target process to crash.
 
-image::{images}/struct_with_hex_len.png[]
+image::{images}/DevGuide/FuzzingIntro/struct_with_hex_len.png[]
 
 Another change we could make to the data is to remove or change the null byte that terminates the string _data_. In C, string functions operate on data up to the null character. If the null byte is changed, the _strcpy_ function  copies more than 33 bytes into _msg_data_. This could cause the target process to crash.
 
-image::{images}/struct_with_hex_data.png[]
+image::{images}/DevGuide/FuzzingIntro/struct_with_hex_data.png[]
 
 The two changes we made to trigger two similar but different bugs in the code is something we look to automate with fuzzing. Taking this input data and randomly changing a byte to a random value, would, over the course of many attempts, eventually find both of these issues.
 

@@ -11,18 +11,18 @@ and does not affect any files or directories that predate the fuzzing session.
 
 . The directory, clean2, initially contains a single file.
 +
-image::{images}/Monitor_CleanFolder_PreFuzz.png["Folder Before Fuzzing", scalewidth="75%"]
+image::{images}/Common/Monitors/CleanupFolder_PreFuzz.png[scalewidth="75%"]
 . Before each iteration, the CleanupFolder monitor deletes from the specified folder
 all files that were generated in the previous fuzzing iteration.
 . During each iteration, the File publisher creates a fuzzed file.
 
 . The following image shows the output from a file fuzzing session that uses _CleanupFolder_ on the clean2 directory. The session duration is 5 iterations.
 +
-image::{images}/Monitor_CleanFolder_Cleaned.png["Folder With Monitor", scalewidth="75%"]
+image::{images}/Common/Monitors/CleanupFolder_Cleaned.png[scalewidth="75%"]
 
 . The following image shows the clean2 directory with output from a file fuzzing session that does _not_ use _CleanupFolder_, but is otherwise identical to the pit used for the previous diagram. Files generated in the fuzzing session are highlighted.
 +
-image::{images}/Monitor_CleanFolder_NotCleaned.png["Folder Without Monitor", scalewidth="75%"]
+image::{images}/Common/Monitors/CleanupFolder_NotCleaned.png[scalewidth="75%"]
 
 NOTE: The FilePerIteration publisher, that generates a new filename for each fuzzed file, produced the fuzzed output files for both of the previous images.
 

@@ -109,7 +109,7 @@ In addition, a data collection monitor collects log files after a fault occurs i
 
 The result is that we end up with the following configuration:
 
-image::{images}/LinuxNetworkService.png["Configuration for Linux Service with VM", scale="50"]
+image::{images}/UserGuide/Recipes/VM_Remote_Agent.png[scale="50"]
 
 Peach is located on one machine with a local agent that houses the VM monitor and the Network capture monitor. A second agent resides on the remote machine with the service. The remote agent houses the Gdb debug monitor and the SaveFile monitor.
 
@@ -148,7 +148,7 @@ protocol Pit. The variables and values are independent of the monitors used in
 the configuration. Pit variables are unique to the Pit and might differ with those
 in the example illustration.
 
-image::{images}/NetSvcRecipe_PitVars.png["Pit-specific Variabls for Linux Service with VM", scale="50"]
+image::{images}/UserGuide/Recipes/LinuxNetService_PitVariables.png[scale="50"]
 
 The Pit User Guides describe the Pit-specific variables.
 
@@ -166,7 +166,7 @@ Timeout:: Duration, in milliseconds, to wait for incoming data.During fuzzing, a
 
 The following UI diagram acts as an overview, showing the Peach agents and the monitors within each agent. Peach uses the ordering within the agent to determine the order in which to load and run monitors.
 
-image::{images}/NetSvcRecipe_Agents.png["Agents and Monitors for Linux Service with VM", scale="50"]
+image::{images}/UserGuide/Recipes/LinuxNetService_Agents.png[scale="50"]
 
 The local agent is defined first and lists the default information for both name and location. This definition for a local agent is typical and, otherwise, unremarkable. The Vmware monitor, that starts the virtual machine, is the first monitor listed, as that action is not dependent on actions from another monitor.
 
@@ -185,7 +185,7 @@ This recipe uses four monitors, two on the machine with Peach and two on the rem
 
 The xref:Monitors_Vmware[Vmware] monitor controls setting up and starting the virtual machine.
 
-image::{images}/Vmware_Monitor2.png["Agents and Monitors for Linux Service with VM", scale="50"]
+image::{images}/UserGuide/Recipes/LinuxNetService_Vmware.png[scale="50"]
 
 The most significant parameters for the VMware monitor follow:
 
@@ -207,7 +207,7 @@ network packets sent and received from the test target. When a fault occurs,
 Peach stores the packets immediately surrounding the fault in the log of the
 test case.
 
-image::{images}/NetworkCapture_PCap2.png["Network Capture Monitor", scale="50"]
+image::{images}/UserGuide/Recipes/LinuxNetService_NetworkCapture.png[scale="50"]
 
 The most significant parameters for the network capture monitor follow:
 
@@ -241,7 +241,7 @@ The xref:Monitors_Gdb[Gdb] debugger monitor performs two main functions in this 
 when the VM snapshot refreshes.
 * Detects faults internal to the service.
 
-image::{images}/Gdb_Monitor_VM2.png["GDB Monitor for Linux Service with VM", scale="50"]
+image::{images}/UserGuide/Recipes/LinuxNetService_Gdb.png[scale="50"]
 
 The most significant parameters follow:
 
@@ -255,7 +255,7 @@ Arguments:: Arguments for the executable.
 
 The xref:Monitors_SaveFile[SaveFile] monitor collects log files from the remote test target and copies them ito the Peach Logging folder. The monitor is housed by the remote agent.
 
-image::{images}/SaveFileMonitor2.png["SaveFile Monitor Detail", scale="50"]
+image::{images}/UserGuide/Recipes/LinuxNetService_SaveFile.png[scale="50"]
 
 The most significant paramter follows:
 

@@ -40,14 +40,14 @@ None.
 === Parameters
 
 Regex::
-    Regular expression. Only groups are kept. Group names are used to name specific 
+    Regular expression. Only groups are kept. Group names are used to name specific
     elements and cannot be duplicated.
 
 === Examples
 
 .Simple HTTP GET Url Example
 ==========================
-This example uses the string tokenizer on an inline value.  
+This example uses the string tokenizer on an inline value.
 
 [source,xml]
 ----
@@ -83,10 +83,10 @@ This example uses the string tokenizer on an inline value.
 
 Output from the example using the string tokenizer and an inline value.
 ----
-> peach -1 --debug RegexAnalyzer.xml  
-                                                                                                                   
-[[ Peach Pro v0.0.0.0                                                                                              
-[[ Copyright (c) Peach Fuzzer LLC                                                                                  
+> peach -1 --debug RegexAnalyzer.xml
+
+[[ Peach Pro v0.0.0.0
+[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Web site running at: http://localhost:8889/
 
@@ -107,11 +107,11 @@ Peach.Core.Engine runTest: context.config.singleIteration == true
 Peach.Core.Publishers.ConsolePublisher stop()
 
 [*] Test 'Default' finished.
----- 
+----
 
-Output in Peach Validator 
+Output in Peach Validator
 
-image::{images}/RegexAnalyzerOutput.png["Validator Output", alt="Validator Output"]
+image::{images}/DevGuide/Analyzers/Regex_Output.png[]
 
 ==========================
 

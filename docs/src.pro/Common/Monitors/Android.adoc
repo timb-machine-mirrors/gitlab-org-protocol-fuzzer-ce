@@ -38,7 +38,7 @@ http://developer.android.com/sdk/index.html[Android Platform Tools] and either a
 physical Android device. The configuration for a physical device follows. For a configuration using
 a virtual device, see the xref:Monitors_AndroidEmulator[Android Emulator Monitor].
 
-image::{images}/AndroidMtr.png["Fuzzing Configuration for Andtroid Device", scalewidth="75%"]
+image::{images}/Common/Monitors/Android.png[scalewidth="75%"]
 
 [NOTE]
 ======================

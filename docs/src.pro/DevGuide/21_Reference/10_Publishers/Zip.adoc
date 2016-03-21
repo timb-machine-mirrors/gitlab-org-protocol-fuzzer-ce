@@ -64,6 +64,6 @@ xref:Action_output[output]:: Data to be written to file
 
 View of fuzzed.zip in 7Zip
 
-image::{images}/ZipPublisherContents.png["Fuzzed Output", alt="Fuzzed Output"]
+image::{images}/DevGuide/Publishers/Zip.png[]
 
 ===============

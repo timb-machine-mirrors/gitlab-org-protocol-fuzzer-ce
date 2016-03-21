@@ -7,12 +7,9 @@ The _StringUtf8BomStatic_ mutator produces test cases for ASCII and Unicode UTF-
 * Create a string using the xref:StringStatic[StringStatic] mutator
 * Inject 1 to 6 Unicode Byte Ordering Marks (BOMs) in arbitrary places in the string
 
-BOMs are not considered characters, and injecting BOMs into a string that might be filtered could cause 
+BOMs are not considered characters, and injecting BOMs into a string that might be filtered could cause
 the filtering not to work and the string would be accepted.
 
-//RAB - 12/19/14. Hiding for now because hint is currently internal.
-//NOTE: StringUtf8BomStatic does not run on data elements that specify the hint *Peach.TypeTransform=false*.
-//
 === Supported Elements
 
  * xref:String[String]
@@ -20,3 +17,5 @@ the filtering not to work and the string would be accepted.
 === Hints
 
 This mutator does not support any hints.
+
+// end

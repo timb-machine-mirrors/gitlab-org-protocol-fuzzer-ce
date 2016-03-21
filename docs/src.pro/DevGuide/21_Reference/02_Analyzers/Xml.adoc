@@ -1,13 +1,13 @@
 [[Analyzers_Xml]]
 == Xml Analyzer
 
-The XML Analyzer consumes an XML document or fragment and converts it into a tree structure of xref:XmlElement[XmlElement] and xref:XmlAttribute[XmlAttribute] elements. 
+The XML Analyzer consumes an XML document or fragment and converts it into a tree structure of xref:XmlElement[XmlElement] and xref:XmlAttribute[XmlAttribute] elements.
 
 When run using the command line, the results of the generated model are saved to disk. Once saved, you can use and modify the results as needed.
 
-This analyzer can be attached to a string. 
+This analyzer can be attached to a string.
 
-TIP: XML special characters (such as < = &lt;, > = &gt;, " = &quot;, & = &amp;) must be encoded if they are inline values. 
+TIP: XML special characters (such as < = &lt;, > = &gt;, " = &quot;, & = &amp;) must be encoded if they are inline values.
 
 === Syntax
 
@@ -33,7 +33,7 @@ None.
 
 .Simple Hello World Example
 ==========================
-This example uses the XML analyzer on an inline value.  
+This example uses the XML analyzer on an inline value.
 
 [source,xml]
 ----
@@ -59,7 +59,7 @@ This example uses the XML analyzer on an inline value.
 		<Publisher class="ConsoleHex" />
 
 		<Logger class="File">
-			<Param name="Path" value="logs"/> 
+			<Param name="Path" value="logs"/>
 		</Logger>
 	</Test>
 </Peach>
@@ -67,7 +67,7 @@ This example uses the XML analyzer on an inline value.
 
 Output of the example using an inline value.
 ----
->peach -1 --debug example.xml 
+>peach -1 --debug example.xml
 
 [[ Peach Pro v0.0.0.0
 [[ Copyright (c) Peach Fuzzer LLC
@@ -90,15 +90,15 @@ Peach.Core.Publishers.ConsolePublisher stop()
 [*] Test 'Default' finished.
 ----
 
-Output in Peach Validator 
+Output in Peach Validator
 
-image::{images}/XmlAnalyzerOutputHelloWorld.png["Validator Output", alt="Validator Output"]
+image::{images}/DevGuide/Analyzers/Xml_HelloWorld.png[]
 
 ==========================
 
-.Inline XML Inline Encoding Example 
+.Inline XML Inline Encoding Example
 ==========================
-This example uses the Xml analyzer on an inline value with encoded Xml characters.  
+This example uses the Xml analyzer on an inline value with encoded Xml characters.
 
 [source,xml]
 ----
@@ -124,7 +124,7 @@ This example uses the Xml analyzer on an inline value with encoded Xml character
 		<Publisher class="ConsoleHex" />
 
 		<Logger class="File">
-			<Param name="Path" value="logs"/> 
+			<Param name="Path" value="logs"/>
 		</Logger>
 	</Test>
 </Peach>
@@ -132,7 +132,7 @@ This example uses the Xml analyzer on an inline value with encoded Xml character
 
 Output from the example using an inline value with encoded Xml characters.
 ----
->peach -1 --debug example.xml 
+>peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0.0
 [[ Copyright (c) Peach Fuzzer LLC
@@ -156,15 +156,15 @@ Peach.Core.Publishers.ConsolePublisher stop()
 [*] Test 'Default' finished.
 ----
 
-Output in Peach Validator 
+Output in Peach Validator
 
-image::{images}/XmlAnalyzerOutputEncodingExample.png["Peach Validator Output", alt="Xml Validator Output"]
+image::{images}/DevGuide/Analyzers/Xml_EncodingExample.png[]
 
 ==========================
 
-.Load XML From File Example 
+.Load XML From File Example
 ==========================
-This example uses the Xml analyzer on itself. 
+This example uses the Xml analyzer on itself.
 
 [source,xml]
 ----
@@ -172,7 +172,7 @@ This example uses the Xml analyzer on itself.
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
 
 	<DataModel name="TheModel">
-		<String> 
+		<String>
 			<Analyzer class="Xml" />
 		</String>
 	</DataModel>
@@ -181,7 +181,7 @@ This example uses the Xml analyzer on itself.
 		<State name="initial">
 			<Action type="output">
 				<DataModel ref="TheModel" />
-				<Data name="TheData" fileName="example.xml"/> 
+				<Data name="TheData" fileName="example.xml"/>
 			</Action>
 		</State>
 	</StateModel>
@@ -191,7 +191,7 @@ This example uses the Xml analyzer on itself.
 		<Publisher class="ConsoleHex" />
 
 		<Logger class="File">
-			<Param name="Path" value="logs"/> 
+			<Param name="Path" value="logs"/>
 		</Logger>
 	</Test>
 </Peach>
@@ -199,7 +199,7 @@ This example uses the Xml analyzer on itself.
 
 Output from the example that uses the Xml analyzer on itself.
 ----
->peach -1 --debug example.xml 
+>peach -1 --debug example.xml
 
 [[ Peach Pro v3.0.0.0
 [[ Copyright (c) Peach Fuzzer LLC
@@ -277,8 +277,8 @@ Peach.Core.Publishers.ConsolePublisher stop()
 [*] Test 'Default' finished.
 ----
 
-Output in Peach Validator 
+Output in Peach Validator
 
-image::{images}/XmlAnalyzerOutputFromFileExample.png["Peach Validator Output", alt="Xml Validator Output"]
+image::{images}/DevGuide/Analyzers/Xml_FileExample.png[]
 
 ==========================

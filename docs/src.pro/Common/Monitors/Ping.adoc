@@ -8,7 +8,7 @@ The _Ping_ monitor verifies whether a device is functioning by sending a packet 
 and waiting for a response from the device. _Ping_ continues to monitor until either a _Timeout_ occurs
 or a response from the target device reaches the _Ping_ monitor. Ping runs at the end of each iteration.
 
-image::{images}/PingInteraction_v2.png["Ping Monitor Interaction with Target", scalewidth="50%"]
+image::{images}/Common/Monitors/Ping.png[scalewidth="50%"]
 
 In the first scenario (left), Ping successfully interacts with the test target.
 

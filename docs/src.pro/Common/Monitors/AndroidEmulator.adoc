@@ -28,7 +28,7 @@ This monitor requires the following items to run:
 
 The fuzzing configuration for a virtual or emulated device follows. For a configuration using a phsycial device, see the xref:Monitors_Android[Android Monitor].
 
-image::{images}/AndroidEmMtr.png["Fuzzing Configuration for Emulated Andtroid Device", scalewidth="75%"]
+image::{images}/Common/Monitors/AndroidEmulator.png[scalewidth="75%"]
 
 === Parameters
 

@@ -32,7 +32,7 @@ The steps to create a VM snapshot for Peach follows:
 3.	Using the VMware menu on the host OS, select VM -> Snapshot -> Take Snapshot.
 The following dialog appears. The title bar identifies image used in the snapshot.
 +
-image::{images}/VM_Snapshot_Ubuntu.png["VM Snapshot Manager", scale="50"]
+image::{images}/UserGuide/VM_Snapshot_Ubuntu.png[scale="50"]
 
 4.	Fill in the following information in the dialog:
 ..	Name: The name must be unique.

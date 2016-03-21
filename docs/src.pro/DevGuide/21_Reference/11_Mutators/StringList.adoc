@@ -13,3 +13,5 @@ This mutator is enabled for String elements that have the +StringList+ hint, pro
 === Hints
 
 StringList:: Name of a file that contains one or more strings. The format of the file requires the placement of one string per line.
+
+// end

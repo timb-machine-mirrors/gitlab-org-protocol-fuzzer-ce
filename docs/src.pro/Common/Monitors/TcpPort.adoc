@@ -56,7 +56,7 @@ Event that specifies when to perform monitoring. The default setting is _OnCall_
 |==========================================================
 +
 .WaitWhen Choices
-image::{images}/Timings_All.png["When Timing Choices", scalewidth="75%"]
+image::{images}/Common/Monitors/Timings_All.png[scalewidth="75%"]
 
 WaitOnCall:: Call message to start monitoring. This parameter only applies to the _OnCall_ setting.
 

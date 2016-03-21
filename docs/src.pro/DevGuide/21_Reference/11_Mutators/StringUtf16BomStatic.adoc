@@ -7,14 +7,11 @@ The _StringUtf16BomStatic_ mutator produces test cases for Unicode UTF-16 string
 * Create a string using the xref:StringStatic[StringStatic] mutator
 * Inject 1 to 6 Unicode Byte Ordering Marks (BOMs) in arbitrary places in the string
 
-BOM are not considered characters, and injecting BOMs into a string that might be filtered could cause 
+BOM are not considered characters, and injecting BOMs into a string that might be filtered could cause
 the filtering not to work and the string would be accepted.
 
 BOM marks, whether for Big Endian-ness or for Little Endian-ness, are selected arbitrarily.
 
-//RAB - 12/19/14. Hiding for now because hint is currently internal.
-//NOTE: StringUtf16BomStatic does not run on data elements that specify the hint *Peach.TypeTransform=false*.
-//
 === Supported Elements
 
  * xref:String[String]
@@ -22,3 +19,5 @@ BOM marks, whether for Big Endian-ness or for Little Endian-ness, are selected a
 === Hints
 
 This mutator does not support any hints.
+
+// end

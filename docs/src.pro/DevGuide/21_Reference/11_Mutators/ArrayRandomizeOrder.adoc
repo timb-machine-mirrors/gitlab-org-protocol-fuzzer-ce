@@ -8,7 +8,7 @@ _Operation with deterministic strategies_
 
 With deterministic strategies, the number of test cases this mutator generates is the lessor of 100, or the factorial of the number of array items.
 
-You can repeat this mutator with a different seed value to produce different randomized array orders. 
+You can repeat this mutator with a different seed value to produce different randomized array orders.
 
 _Operation with non-deterministic strategies_
 
@@ -28,3 +28,5 @@ This mutator supports any array element. Array elements are those that have the 
 This mutator does not support hints.
 
 NOTE:  A previous version of this mutator supported a hint. An update to the underlying algorithm removed the need for a hint.
+
+// end

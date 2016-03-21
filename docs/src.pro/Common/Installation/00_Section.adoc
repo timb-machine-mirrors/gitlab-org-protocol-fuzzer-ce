@@ -36,11 +36,11 @@ NOTE: You need a copy of your Peach Fuzzer license on your system to perform the
 
 1. Using your Internet browser, navigate to https://dl.peachfuzzer.com
 +
-image::{images}/Install_Site_Home.png["Download Home Page",scalewidth="60%"]
+image::{images}/Common/Installation/Site_Home.png[scalewidth="60%"]
 
    a. Click Browse. The Upload dialog display, allowing you to select the Peach license file.
 +
-image::{images}/Install_LicenseUpload.png["Upload Dialog",scalewidth="60%"]
+image::{images}/Common/Installation/LicenseUpload.png[scalewidth="60%"]
 
    b. navigate to the location of the license
    c. Select the license (Peach.license)
@@ -48,7 +48,7 @@ image::{images}/Install_LicenseUpload.png["Upload Dialog",scalewidth="60%"]
 
 2. Upon return to the Peach Fuzzer download home page, click `Upload Licence`. The page listing the available images displays:
 +
-image::{images}/Install_Image_Choices.png["Peach Image Choices",scalewidth="70%"]
+image::{images}/Common/Installation/Image_Choices.png[scalewidth="70%"]
 
 3. On the dowloads page, select the Peach release version and operating system to install.
 
@@ -57,7 +57,7 @@ image::{images}/Install_Image_Choices.png["Peach Image Choices",scalewidth="70%"
 +
 Click `I ACCEPT` the End-User License Agreement to continue.
 +
-image::{images}/Install_EULA_Acceptance.png["Peach EULA Acceptance",scalewidth="70%"]
+image::{images}/Common/Installation/EULA_Acceptance.png[scalewidth="70%"]
 
 4. Save the zip file locally, and unzip the files as outlined in the following sections at your convenience.
 

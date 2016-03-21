@@ -104,7 +104,7 @@ The remote agent houses the xref:Monitors_WindowsService[WindowsService], the xr
 
 The result is that we end up with the following configuration:
 
-image::{images}/LinuxNetworkService.png["Configuration for Windows Service with VM", scale="50"]
+image::{images}/UserGuide/Recipes/VM_Remote_Agent.png[scale="50"]
 
 Peach is located on one machine with a local agent that houses the VM monitor and the Network capture monitor. A second agent resides on the remote machine with the service. The remote agent houses the PageHeap, the WindowsDebugger, and the WindowsService monitors.
 
@@ -157,7 +157,7 @@ protocol Pit. The variables and values are independent of the monitors used in
 the configuration. Pit variables are unique to the Pit and might differ with those
 in the example illustration.
 
-image::{images}/Recipe_WinSrvc_SNMP_Vars.png["Pit-specific Variabls for Windows Service with VM", scale="50"]
+image::{images}/UserGuide/Recipes/WindowsNetService_PitVars.png[scale="50"]
 
 The Pit User Guides describe the Pit-specific variables.
 
@@ -175,7 +175,7 @@ Timeout:: Duration, in milliseconds, to wait for incoming data. During fuzzing, 
 
 The following UI diagram acts as an overview, showing the Peach agents and the monitors within each agent. Peach uses the ordering within the agent to determine the order in which to load and run monitors.
 
-image::{images}/Recipe_WinSvc_Agents_N_Mons.png["Agents and Monitors for Windows Service with VM", scale="50"]
+image::{images}/UserGuide/Recipes/WindowsNetService_Agents.png[scale="50"]
 
 The local agent is defined first and lists the default information for both name and location. This definition for a local agent is typical and, otherwise, unremarkable. The monitor list includes the NetworkCapture and the Vmware monitors that are independent of each other.
 
@@ -204,7 +204,7 @@ TIP: When specifying a backslash (\) in the Peach Web user interface, double the
 
 The xref:Monitors_Pcap[Netowrk Capture Monitor (InterestingPackets)] monitor captures network packets when a fault occurs and stores them in the log for the test case that generates the fault.
 
-image::{images}/Recipe_WindowsSvc_NetCapture_Mon.png["Agents and Monitors for Windows Service with VM", scale="50"]
+image::{images}/UserGuide/Recipes/WindowsNetService_NetworkCapture.png[scale="50"]
 
 The most signification parameters for the network capture monitor follow:
 
@@ -234,7 +234,7 @@ session files. The display filters are not compatible with Libpcap.
 
 The xref:Monitors_Vmware[Vmware] monitor controls setting up and starting the virtual machine and uses the settings in the following illustration:
 
-image::{images}/Recipe_WindowsSvc_Vmware_Mon.png["Agents and Monitors for Windows Service with VM", scale="50"]
+image::{images}/UserGuide/Recipes/WindowsNetService_Vmware.png[scale="50"]
 
 The most significant parameters for the VMware monitor follow:
 
@@ -257,7 +257,7 @@ NOTE: PageHeap requires administrative privileges to run correctly.
 
 The PageHeap monitor uses the settings in the following illustration:
 
-image::{images}/Recipe_WindowsSvc_PageHeap_Mon.png["Agents and Monitors for Windows Service with VM", scale="50"]
+image::{images}/UserGuide/Recipes/WindowsNetService_PageHeap.png[scale="50"]
 
 The most significant parameters for the PageHeap monitor follow:
 
@@ -275,7 +275,7 @@ The xref:Monitors_WindowsService[WindowsService] monitor manages a Windows servi
 
 The WindowsService monitor uses the settings in the following illustration:
 
-image::{images}/Recipe_WIndowsSvc_WinSvc_Mon.png["Agents and Monitors for Windows Service with VM", scale="50"]
+image::{images}/UserGuide/Recipes/WindowsNetService_WinService.png[scale="50"]
 
 The most significant parameter for the WindowsService monitor is “Service” that
 specifies the name of the Windows service to monitor.
@@ -289,7 +289,7 @@ The xref:Monitors_WindowsDebugger[WindowsDebugger] debugger monitor performs two
 
 The WindowsDebugger monitor uses the settings in the following illustration:
 
-image::{images}/Recipe_WindowsSvc_WinDbg_Mon.png["Agents and Monitors for Windows Service with VM", scale="50"]
+image::{images}/UserGuide/Recipes/WindowsNetService_WinDebugger.png[scale="50"]
 
 The most significant parameters for the WindowsDebugger monitor follow:
 

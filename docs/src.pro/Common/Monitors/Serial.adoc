@@ -85,7 +85,7 @@ When to wait. Defaults to OnStart.
 |==========================================================
 +
 .WaitWhen Choices
-image::{images}/Timings_All.png["When Timing Choices", scalewidth="75%"]
+image::{images}/Common/Monitors/Timings_All.png[scalewidth="75%"]
 
 === Examples
 

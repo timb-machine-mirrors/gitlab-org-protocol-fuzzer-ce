@@ -39,7 +39,7 @@ You can start Peach from a command line with two actions:
 . Open a command shell with administrative privileges.
 . On the command line, type Peach and press RETURN. The following illustration shows starting Peach in Windows.
 
-image::{images}/P1_Starting_Peach.png[]
+image::{images}/Common/WebUI/P1_Starting_Peach.png[]
 
 The {peachweb} is the default mode of operation for the command line. Launching the {peachweb} performs the following tasks:
 
@@ -48,20 +48,20 @@ The {peachweb} is the default mode of operation for the command line. Launching 
 +
 On the first launch of Peach, a licensing page displays.
 +
-image::{images}/P2_EULA_Details.png[]
+image::{images}/Common/WebUI/P2_EULA_Details.png[]
 +
 When you are ready to proceed, click 'Accept'.
 
 . Displays the Peach Home Page
 
-image::{images}/H1_Home.png[]
+image::{images}/Common/WebUI/H1_Home.png[]
 
 From Home, you can use click entries and buttons on the left side of the page to work with your licensed Pits, view reports and details of previous fuzzing sessions, and to interact with the Peach forums.
 
 ==== Parts of the User Interface
 The Web User Interface includes many useful components, the most prominent are called out in the following illustration:
 
-image::{images}/H1_Annotated.png[]
+image::{images}/Common/WebUI/H1_Annotated.png[]
 
 ===== 1. Page Title
 The Page title identifies the page you are on and establishes the context of your current task.
@@ -85,7 +85,7 @@ Click a menu icon to move there.
 The breadcrumb menu is above the Page Title. The breadcrumb menu identifies your position in the Peach Web UI menus. For example, when you Start the QuickStart wizard with the JPG_Test1 configuration (a sample configuration), the breadcrumb menu displays +
 `Home / Library / JPG_Test1 / Quick Start`.
 
-image::{images}/QS01_QuickStart.png[]
+image::{images}/Common/WebUI/QS01_QuickStart.png[]
 
 Portions of the breadcrumb menu are links and marked appropriately by color. For example, the
 `Home`, `Library`, and `JPG_Test1` entries of the menu are links when you launch the QuickStart Wizard. Click an entry in the menu to start working on that item.
@@ -98,29 +98,29 @@ This section provides a brief glimpse of the main areas of Peach that are access
 
 The _Library_ menu is where you select and configure Pits (fuzzing definitions), and run fuzzing jobs. The page lists the licensed Peach Pits first, then follows with the defined configurations that you create.
 
-image::{images}/H2_Library.png[]
+image::{images}/Common/WebUI/H2_Library.png[]
 
 ===== Jobs
 
 The _Jobs_ menu provides access to your fuzzing job results. Click on an entry to see the report status, summary, metrics, and drill down detail of individual findings. Hmmm, no reports are avaialbe yet. It looks like a good time to start fuzzing.
 
-image::{images}/H3_Jobs.png[]
+image::{images}/Common/WebUI/H3_Jobs.png[]
 
 ===== Help
 
 The _Help_ Menu provides access to the HTML form of the Peach User Guide. This instructional piece provides workflows for installing Peach, recipies for setting up and running various configurations, and descriptions of the Peach monitors for detecting faults (issues), collecting data, and automating the test environment.
 
-image::{images}/H4_HTMLHelp.png[]
+image::{images}/Common/WebUI/H4_HTMLHelp.png[]
 
 NOTE: Additionally, the User's Guide is provided as a pdf file.
 
-image::{images}/H5_PdfHelp.png[]
+image::{images}/Common/WebUI/H5_PdfHelp.png[]
 
 ===== Forums
 
 Peach has user forums that serve as a knowledge base of user questions, and as an active platform to raise questions of current need or interest. Feel free to explore the forums. Note that the professional forum provides a service venue to licensed users of Peach Professional and Peach Enterprise solutions.
 
-image::{images}/H6_PeachForums.png[]
+image::{images}/Common/WebUI/H6_PeachForums.png[]
 
 include::01_QuickStartWizard.adoc[]
 include::02_AdvancedConfig_Variables.adoc[]

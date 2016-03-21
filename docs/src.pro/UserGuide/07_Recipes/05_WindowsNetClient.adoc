@@ -107,7 +107,7 @@ restart the service in the refreshed environment after a fault. The WindowsDebug
 
 The result is that we end up with the following configuration:
 
-image::{images}/LinuxNetworkService.png["Configuration for Windows Service with VM", scale="50"]
+image::{images}/UserGuide/Recipes/VM_Remote_Agent.png[scale="50"]
 
 Peach is located on one machine with a local agent that houses the VM monitor and the Network capture monitor. A second agent resides on the remote machine with the service. The remote agent houses the PageHeap and WindowsDebugger monitors.
 
@@ -151,7 +151,7 @@ protocol Pit. The variables and values are independent of the monitors used in
 the configuration. Pit variables are unique to the Pit and might differ with those
 in the example illustration.
 
-image::{images}/Recipe_WinSvc_Cli_PitVars.png["Pit-specific Variabls for SNMP Client with a Windows VM", scale="50"]
+image::{images}/UserGuide/Recipes/WindowsNetClient_PitVars.png[scale="50"]
 
 The Pit User Guides describe the Pit-specific variables.
 
@@ -169,7 +169,7 @@ Timeout:: Duration, in milliseconds, to wait for incoming data. During fuzzing, 
 
 The following UI diagram acts as an overview, showing the Peach agents and the monitors within each agent. Peach uses the ordering within the agent to determine the order in which to load and run monitors.
 
-image::{images}/Recipe_WinSvc_Cli_Agents_n_Monitors.png["Agents and Monitors for Windows Service with VM", scale="50"]
+image::{images}/UserGuide/Recipes/WindowsNetClient_Agents.png[scale="50"]
 
 The local agent is defined first and lists the default information for both name and location. This definition for a local agent is typical and, otherwise, unremarkable. The NetworkCapture and Vmware monitors are independent of one another, allowing either monitor to top the list.
 
@@ -188,7 +188,7 @@ This recipe uses four monitors, two on the machine with Peach and two on the rem
 
 The xref:Monitors_Vmware[Vmware] monitor controls setting up and starting the virtual machine.
 
-image::{images}/Recipe_WinSvc_Cli_Vmware_Mon.png["Agents and Monitors for Linux Service with VM", scale="50"]
+image::{images}/UserGuide/Recipes/WindowsNetClient_Vmware.png[scale="50"]
 
 The most significant parameters for the VMware monitor follow:
 
@@ -208,7 +208,7 @@ Snapshot Name:: Identifies the snapshot to use for the specific image.
 The xref:Monitors_Pcap[Netowrk Capture Monitor] (InterestingPackets) captures network packets
 sent and received from the test target. When a fault occurs, Peach stores the packets immediately surrounding the fault in the log of the test case.
 
-image::{images}/Recipe_WinSvc_Cli_NetCapture_Mon.png["Agents and Monitors for Linux Service with VM", scale="50"]
+image::{images}/UserGuide/Recipes/WindowsNetClient_NetworkCapture.png[scale="50"]
 
 The most signification parameters for the network capture monitor follow:
 
@@ -240,7 +240,7 @@ The xref:Monitors_PageHeap[PageHeap] monitor manages registry settings that enab
 
 NOTE: PageHeap requires administrative privileges to run correctly.
 
-image::{images}/Recipe_WinSvc_Cli_PgHeap_Mon.png["Agents and Monitors for Linux Service with VM", scale="50"]
+image::{images}/UserGuide/Recipes/WindowsNetClient_PageHeap.png[scale="50"]
 
 The most significant parameter follows:
 
@@ -255,7 +255,7 @@ The xref:Monitors_WindowsDebugger[WindowsDebugger] debugger monitor performs two
 
 The WindowsDebugger monitor uses the settings in the following illustration:
 
-image::{images}/Recipe_WinSvc_Cli_Windbg_Mon.png["Agents and Monitors for Linux Service with VM", scale="50"]
+image::{images}/UserGuide/Recipes/WindowsNetClient_WinDebugger.png[scale="50"]
 
 The most significant paramters follow:
 

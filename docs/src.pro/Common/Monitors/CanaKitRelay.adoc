@@ -42,13 +42,13 @@ the relay at the following times:
 
 The following diagram shows a sample configuration that controls power through Relay 1.
 
-image::{images}/CanaKitMtr.png["Fuzzing Configuration Using a CanaKit Relay", scalewidth="75%"]
+image::{images}/Common/Monitors/CanaKitRelay.png[scalewidth="75%"]
 
 Each relay supplies three terminals: Normally Open (NO), Common (COM), and Normally Closed (NC). Basic configurations will connect the hot wire to Common and the other wire to either NO or NC. For DC connections, attach the anode (+) to the Common terminal.
 
 NO provides an open circuit when the relay is off. NC provides a closed circuit when the relay is off, giving opposite on/off states from NO. The following diagram shows the terminal layout and imagines that Relay 1 is On.
 
-image::{images}/CanaRelayTerminals.png["CanaKit Relay Terminal Layout", scalewidth="75%"]
+image::{images}/Common/Monitors/CanaKitRelay_Terminals.png[scalewidth="75%"]
 
 TIP: The CanaKit Relay requires a driver that is available at the supplier's website.
 At the time of this writing, the driver is unsigned, which forces you to turn off Driver
@@ -110,7 +110,7 @@ Details on when to perform a specfied action. Specify one of the following value
 |==========================================================
 +
 .When Choices for Performing an Action
-image::{images}/Timings_SSH.png["When Run Command Choices", scalewidth="75%"]
+image::{images}/Common/Monitors/Timings_SSH.png[scalewidth="75%"]
 
 
 === Examples
