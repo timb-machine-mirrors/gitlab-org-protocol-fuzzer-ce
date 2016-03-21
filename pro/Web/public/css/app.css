@@ -164,6 +164,18 @@ td div.peach-parameter-input .input-group {
 	}
 }
 
+.peach-migrate-pit {
+	max-height: 600px;
+	overflow-y: auto;
+}
+
+@media only screen and (max-height: 1000px) {
+	.peach-migrate-pit {
+		max-height: 250px;
+		overflow-y: auto;
+	}
+}
+
 #loading-bar .bar {
 	background: orange;
 }

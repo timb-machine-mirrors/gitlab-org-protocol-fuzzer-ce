@@ -1,17 +1,10 @@
 /// <reference path="../reference.ts" />
 
 namespace Peach {
-	const LibText = {
-		Pits: 'Peach Pits allow testing of a data format or a network protocol against a variety of targets.',
-		Configurations: 'The Configurations section contains existing Peach Pit configurations. Selecting an existing configuration allows editing the configuration and starting a new fuzzing job.',
-		Legacy: ''
-	};
-	
 	export class PitLibrary {
 		constructor(
 			public Name: string
 		) {
-			this.Text = LibText[Name];
 		}
 
 		public Text: string;

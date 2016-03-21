@@ -2,10 +2,14 @@
 		novalidate>
 	<div class="modal-header">
 		<h3 class="modal-title">
-			Pit Upgrade
+			Pit Upgrade (<code>{{vm.Pit.name}}</code>)
 		</h3>
+		<h4>
+		</h4>
 		<p>
-			Select a pit.
+			Peach needs to upgrade your Pit configuration.
+			Please select the Pit (test module) that matches this configuration. 
+			Once you have selected the matching Pit file, click OK to continue.
 		</p>
 	</div>
 	<div class="modal-body">
@@ -23,7 +27,7 @@
 			</span>
 		</div>
 
-		<div class="peach-add-monitor">
+		<div class="peach-migrate-pit">
 			<uib-accordion close-others="false">
 				<uib-accordion-group is-open="true"
 				                     ng-repeat="cat in vm.Lib.Categories | filter: vm.filterCategory(search)"
@@ -45,8 +49,7 @@
 				For Custom Pits
 			</h4>
 			<p>
-				For custom pits in the Users folder, the Pit and Configuration will need to be split to utalize
-				our new configuration format.  To peform this operation click the following link.
+				If this is a custom Pit with no matching entry in the Pit list, please click the link below.
 			</p>
 			<a href=""
 				 ng-click="vm.OnCustom()">
