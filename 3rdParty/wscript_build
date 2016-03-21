@@ -15,6 +15,22 @@ bld.read_nuget('packages.config', excl=excludes, mapping=mapping)
 # Be.HexBox is not nugetable yet
 bld.read_csshlib('Be.Windows.Forms.HexBox.dll', paths=['Be.HexEditor.150/bin'])
 
+flexnet = 'flexnet_client-2015.09.0'
+
+bld.read_csshlib('FlxClientCommon.dll', paths=[ flexnet ])
+bld.read_csshlib('FlxLicensingClient.dll', paths=[ flexnet ])
+
+if bld.env.CS_NAME:
+	bld(
+		name='flexnet',
+		features=bld.env.BASENAME,
+		install_path = '${BINDIR}',
+		install_755 = {
+			bld.path.find_or_declare(flexnet + '/' + bld.env.BASENAME) :
+			bld.path.ant_glob(flexnet + '/' + bld.env.BASENAME + '/**')
+		}
+	)
+
 # SuperSocket, SuperWebSocket and SocketHttpListener nuget packages
 # are for .NET 4.5 so we need to build them from source to target .NET 4.0
 

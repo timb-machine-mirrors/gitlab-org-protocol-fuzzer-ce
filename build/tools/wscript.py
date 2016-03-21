@@ -144,6 +144,8 @@ def configure(ctx):
 				if missing and Options.options.strict:
 					raise Exception('Missing Features: %s' % ','.join(missing))
 
+				arch_env.append_value('supported_features', name)
+
 				cfgs = ctx.env.VARIANTS
 
 				if not cfgs:
