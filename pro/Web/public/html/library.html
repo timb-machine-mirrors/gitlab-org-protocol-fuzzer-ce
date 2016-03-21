@@ -42,6 +42,7 @@
 <div class="page-header"
 	ng-repeat="lib in vm.Libs">
 	<h3>{{lib.Name}}</h3>
+	<p>{{lib.Text}}</p>
 	<uib-accordion close-others="false">
 		<uib-accordion-group ng-repeat="cat in lib.Categories | filter: vm.filterCategory(search)"
 										 heading="{{cat.Name}}"
