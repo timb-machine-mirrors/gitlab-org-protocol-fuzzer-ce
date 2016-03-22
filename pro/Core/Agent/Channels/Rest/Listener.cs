@@ -81,7 +81,11 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		{
 			// If the listener fails to start it is disposed so we
 			// need to make a new one each time.
-			var ret = new HttpListener(new LogHook(), "");
+			var ret = new HttpListener(new LogHook(), "")
+			{
+				IgnoreWriteExceptions = true
+			};
+
 			ret.Prefixes.Add(prefix);
 
 			try
