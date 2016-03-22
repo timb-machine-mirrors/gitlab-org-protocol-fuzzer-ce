@@ -8,6 +8,7 @@ namespace Peach {
 			C.Angular.$state,
 			C.Angular.$uibModal,
 			C.Angular.$window,
+			C.Services.Eula,
 			C.Services.Pit,
 			C.Services.Wizard
 		];
@@ -17,6 +18,7 @@ namespace Peach {
 			private $state: ng.ui.IStateService,
 			private $modal: ng.ui.bootstrap.IModalService,
 			private $window: ng.IWindowService,
+			private eulaService: EulaService,
 			private pitService: PitService,
 			private wizardService: WizardService
 		) {
@@ -31,8 +33,7 @@ namespace Peach {
 				});
 			});
 
-			const promise = pitService.LoadLicense();
-			promise.then((license: ILicense) => {
+			this.eulaService.Verify().then((license : ILicense) => {
 				this.license = license;
 			});
 		}

@@ -28,14 +28,6 @@ namespace Peach {
 			return this.pit;
 		}
 
-		public LoadLicense(): ng.IPromise<ILicense> {
-			const promise = this.$http.get(C.Api.License);
-			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
-				this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
-			});
-			return StripHttpPromise(this.$q, promise);
-		}
-
 		public LoadLibrary(): ng.IPromise<ILibrary[]> {
 			const promise = this.$http.get(C.Api.Libraries);
 			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
