@@ -1,10 +1,17 @@
 /// <reference path="../reference.ts" />
 
 namespace Peach {
+	const LibText = {
+		Pits: 'The Pits section contains all of your licensed test modules. Custom Pits will also be shown in this section.',
+		Configurations: 'The Configurations section contains existing Peach Pit configurations. Selecting an existing configuration allows editing the configuration and starting a new fuzzing job.',
+		Legacy: 'The Legacy section contains configurations that have not yet been upgraded to Peach’s new configuration format. To upgrade a legacy configuration simply click on the configuration link below.'
+	};
+
 	export class PitLibrary {
 		constructor(
 			public Name: string
 		) {
+			this.Text = LibText[Name];
 		}
 
 		public Text: string;
