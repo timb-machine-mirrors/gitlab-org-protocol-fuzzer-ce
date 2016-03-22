@@ -22,6 +22,7 @@ namespace Peach.Pro.WebApi2.Controllers
 	/// <remarks>
 	/// Contains all functionality needed to control jobs
 	/// </remarks>
+	[RestrictedApi]
 	[RoutePrefix(Prefix)]
 	public class JobsController : BaseController
 	{

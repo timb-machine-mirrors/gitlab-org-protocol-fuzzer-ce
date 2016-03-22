@@ -10,11 +10,12 @@ namespace Peach.Pro.WebApi2.Utility
 	{
 		public override void OnActionExecuting(HttpActionContext context)
 		{
-			if (!License.IsValid)
-			{
-				context.Response = new HttpResponseMessage(HttpStatusCode.PaymentRequired);
-			}
-			else if (!License.EulaAccepted)
+			//if (!License.IsValid)
+			//{
+			//	context.Response = new HttpResponseMessage(HttpStatusCode.PaymentRequired);
+			//}
+			//else
+			if (!License.EulaAccepted)
 			{
 				context.Response = new HttpResponseMessage(HttpStatusCode.Unauthorized);
 			}

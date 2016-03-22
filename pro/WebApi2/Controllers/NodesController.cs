@@ -5,10 +5,12 @@ using System.Reflection;
 using System.Web.Http;
 using System.Web.Http.Description;
 using Peach.Pro.Core.WebServices.Models;
+using Peach.Pro.WebApi2.Utility;
 using Swashbuckle.Swagger.Annotations;
 
 namespace Peach.Pro.WebApi2.Controllers
 {
+	[RestrictedApi]
 	[RoutePrefix(Prefix)]
 	public class NodesController : BaseController
 	{
