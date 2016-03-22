@@ -22,7 +22,7 @@ created for a specific VM.
 
 image::{images}/Common/Monitors/Vmware_SnapshotManager.png[scale="60"]
 
-TIP: When using with vSphere/ESXi, prefix the VM image name with the storage location in brackets.  For example, "[ha-datacenter/datastore1] guest/guest.vmx"
+TIP: When using with vSphere/ESXi, prefix the VM image name with the storage location in brackets.  For example, +[ha-datacenter/datastore1] guest/guest.vmx+
 
 
 === Parameters
@@ -60,12 +60,12 @@ WaitForToolsInGuest:: Wait for tools to start in guest. Defaults to true.
 WaitTimeout:: How many seconds to wait for guest tools. Defaults to 600.
 When::
 +
-Details on when to perform a specfied action. Specify one of the following values:
+Details on when to perform a specified action. Specify one of the following values:
 +
 [cols="1,2" options="header",halign="center"]
 |==========================================================
 |"When" Setting              |Description
-|DetectFault                 |Perform the action when checking for the faulting condition. Requires a regex expression in the +CheckValue+ parameter. Default mode of operation.
+|DetectFault                 |Perform the action when checking for the faulting condition. Requires a regular expression in the +CheckValue+ parameter. Default mode of operation.
 |OnStart                     |Run the command when fuzzing session starts. Command runs once per session.
 |OnEnd                       |Run the command when fuzzing session stops. Command runs run once per session.
 |OnIterationStart            |Run the command at start of each iteration.
@@ -94,10 +94,10 @@ This parameter example is from a setup that programmatically starts a VM.
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter     |Value
-|Vmx           |D:\VirtualMachines\OfficeWebTest\OfficeWebTest.vmx
-|HostType      |Workstation
-|SnapshotName  |Fuzzing
-|Headless      |false
+|Vmx           |`D:\VirtualMachines\OfficeWebTest\OfficeWebTest.vmx`
+|HostType      |`Workstation`
+|SnapshotName  |`Fuzzing`
+|Headless      |`false`
 |==========================================================
 
 ====================
@@ -111,8 +111,8 @@ This parameter example is from a setup that programmatically starts a VM.
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter     |Value
-|Vmx           |[ha-datacenter/datastore1] guest/guest.vmx
-|SnapshotName  |Fuzzing
+|Vmx           |`[ha-datacenter/datastore1] guest/guest.vmx`
+|SnapshotName  |`Fuzzing`
 |==========================================================
 ====================
 

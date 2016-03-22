@@ -41,15 +41,15 @@ This parameter example is from a setup that closes Notepad and Paint.
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
-|WindowNames  |Notepad,Calculator
-|Fault        |true
+|WindowNames  |`Notepad,Calculator`
+|Fault        |`true`
 |==========================================================
 ====================
 
-This example consists of a serires of steps that you can execute to watch Peach close the windows for
+This example consists of a series of steps that you can execute to watch Peach close the windows for
 the Notepad and Calculator applications. Because seeing PopupWatcher monitor in action is the point of the exercise,
 we can grab and run almost any Pit, then select the PopupWatcher as the monitor for the Pit, and watch
-it work. In this case, we're going to choose to fuzz an image file, a BMP, in the mspaint application.
+it work. In this case, we're going to choose to fuzz an image file, a BMP, in the +mspaint+ application.
 
 You can watch Peach close the Notepad and the Calculator applications by performing the following steps:
 
@@ -102,7 +102,7 @@ ifndef::peachug[]
 
 .Close Notepad
 ================
-For this example, you must first launch notepad.exe, then start Peach.
+For this example, you must first launch +notepad.exe+, then start Peach.
 
 [source,xml]
 ----

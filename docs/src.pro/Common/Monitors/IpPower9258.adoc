@@ -25,7 +25,7 @@ You can purchase "IP Power 9258" Remote Network (or Network AC) Power Controller
 
 ===============================
 
-TIP: For controlling power to a device by wiring throuh a relay, Peach provides a monitor for the xref:Monitors_CanaKitRelay[Cana Kit 4-Port USB Relay Controller].
+TIP: For controlling power to a device by wiring through a relay, Peach provides a monitor for the xref:Monitors_CanaKitRelay[Cana Kit 4-Port USB Relay Controller].
 
 === Parameters
 
@@ -42,12 +42,12 @@ PowerOnOffPause:: Pause in milliseconds between power off/power on, default is 5
 
 When::
 +
-Details on when to perform a specfied action. Specify one of the following values:
+Details on when to perform a specified action. Specify one of the following values:
 +
 [cols="1,2" options="header",halign="center"]
 |==========================================================
 |"When" Setting              |Description
-|DetectFault                 |Perform the action when checking for the faulting condition. Requires a regex expression in the +CheckValue+ parameter. Default mode of operation.
+|DetectFault                 |Perform the action when checking for the faulting condition. Requires a regular expression in the +CheckValue+ parameter. Default mode of operation.
 |OnStart                     |Run the command when fuzzing session starts. Command runs once per session.
 |OnEnd                       |Run the command when fuzzing session stops. Command runs run once per session.
 |OnIterationStart            |Run the command at start of each iteration.
@@ -72,12 +72,12 @@ This parameter example is from a setup that controls port 1 of a IP Power 9258 N
 
 [cols="2,4" options="header",halign="center"]
 |==========================================================
-|Parameter    |Value
-|Host                 |192.168.1.1:8080
-|User                 |peach
-|Password             |power
-|Port                 |1
-|ResetEveryIteration  |true
+|Parameter            |Value
+|Host                 |`192.168.1.1:8080`
+|User                 |`peach`
+|Password             |`power`
+|Port                 |`1`
+|ResetEveryIteration  |`true`
 |==========================================================
 
 

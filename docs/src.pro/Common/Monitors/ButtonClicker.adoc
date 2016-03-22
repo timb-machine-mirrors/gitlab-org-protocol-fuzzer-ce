@@ -77,8 +77,8 @@ The ButtonClicker monitor uses the following parameter settings to click the "Cl
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
-|WindowText   |for Updates
-|ButtonName   |Close
+|WindowText   |`for Updates`
+|ButtonName   |`Close`
 |==========================================================
 
 endif::peachug[]

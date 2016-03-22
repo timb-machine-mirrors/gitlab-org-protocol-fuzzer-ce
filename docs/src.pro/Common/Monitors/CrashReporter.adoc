@@ -43,7 +43,7 @@ This parameter example is from a setup that monitors a movie player for OS X.
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
-|ProcessName  |mplayer
+|ProcessName  |`mplayer`
 |==========================================================
 ====================
 

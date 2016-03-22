@@ -5,7 +5,7 @@
 *Monitor Categories*: *Automation*, *Fault detection*
 
 The _Android_ monitor examines both targeted Android applications and the state of the
-Android OS. Peach supports Andorid OS verions 4.0 to 5.1, inclusively.
+Android OS. Peach supports Android OS versions 4.0 to 5.1, inclusively.
 
 Two expected use cases are:
 
@@ -23,8 +23,8 @@ The Android monitor watches the message logs and the device, and can generate fa
 
 * A logging message matches the fault search criteria, Peach logs a fault.
 * A logging message matches the fault search criteria, Peach logs a fault and stops fuzzing.
-* A physical device becomes nonresponsive.
-* A virtual device beocmes nonresponsive or lost.
+* A physical device becomes non-responsive.
+* A virtual device becomes non-responsive or lost.
 
 After detecting a fault, this monitor collects data from the device log files and crash dumps.
 
@@ -71,11 +71,11 @@ CommandTimeout:: Sets the maximum number of seconds to wait for the adb command 
 ConnectTimeout:: Sets the maximum number of seconds to wait to establish an adb connection, defaults to 5 seconds.
 DeviceMonitor:: Identifies the Android monitor that supplies the device serial number, defaults to "". Used when monitoring a virtual device.
 DeviceSerial:: The serial number of the device to monitor, defaults to "". Used when monitoring a physical device.
-FaultRegex:: Specifies a regex; when matched from a log entry, triggers a fault. The default regeex
+FaultRegex:: Specifies a regular expression; when matched from a log entry, triggers a fault. The default pattern
 is '(\^E/ActivityMonitor)|(^E/AndroidRuntime)|(^F/.*)'.
 FaultWaitTime:: Sets the time period, in milliseconds, to wait when checking for a fault, defaults to 0 ms.
-IgnoreRegex:: Specifies a regex; when matched, the monitor ignores potential false positive faults, defaults to "".
-MustStopRegex:: Specifies a regex; when a match occurs, the monitor triggers a fault and stops fuzzing, defaults to "".
+IgnoreRegex:: Specifies a regular expression; when matched, the monitor ignores potential false positive faults, defaults to "".
+MustStopRegex:: Specifies a regular expression; when a match occurs, the monitor triggers a fault and stops fuzzing, defaults to "".
 ReadyTimeout:: Sets the maximum number of seconds to wait for the device to reach readiness--able to respond to inputs, defaults to 600 seconds.
 RebootEveryN:: Specifies the number of iterations between successive device reboots, defaults to 0.
 RebootOnFault:: Reboots the device when a fault occurs, defaults to false.
@@ -98,10 +98,10 @@ This parameter example is from a setup that the BadBehaviorActivity, sending ran
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter        |Value
-|ApplicationName  |com.android.development
-|ActivityName     |.BadBehaviorActivity
-|AdbPath          |C:\adt-bundle-windows-x86_64-20131030\sdk\platform-tools
-|DeviceSerial     |emulator-5554
+|ApplicationName  |`com.android.development`
+|ActivityName     |`.BadBehaviorActivity`
+|AdbPath          |`C:\adt-bundle-windows-x86_64-20131030\sdk\platform-tools`
+|DeviceSerial     |`emulator-5554`
 |==========================================================
 
 ====================
@@ -110,7 +110,7 @@ This parameter example is from a setup that the BadBehaviorActivity, sending ran
 .Basic Usage with a Virtual Device +
 ====================
 
-This parameter example is from a setup that the BadBehaviorActivity, sending random taps to generate different types of exceptions and crashes. The setup is for a virtual Android device, and uses the Android monitor, as well as the Andtroid Emulator monitor.
+This parameter example is from a setup that the BadBehaviorActivity, sending random taps to generate different types of exceptions and crashes. The setup is for a virtual Android device, and uses the Android monitor, as well as the Android Emulator monitor.
 
 If you want to run the Android emulator, set your AdbPath to the directory containing the adb (Android Debug Bridge)
 platform-tools directory and point the EmulatorPath in the Android Emulator Monitor to the adb tools directory.
@@ -126,18 +126,18 @@ _Android Emulator (Emu) Monitor Parameters_
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter        |Value
-|Avd              |Nexus4
-|EmulatorPath     |C:\adt-bundle-windows-x86_64-20131030\sdk\tools
+|Avd              |`Nexus4`
+|EmulatorPath     |`C:\adt-bundle-windows-x86_64-20131030\sdk\tools`
 |==========================================================
 
 _Android Monitor (App) Parameters_
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter        |Value
-|ApplicationName  |com.android.development
-|ActivityName     |.BadBehaviorActivity
-|AdbPath          |C:\adt-bundle-windows-x86_64-20131030\sdk\platform-tools
-|DeviceMonitor    |Emu
+|ApplicationName  |`com.android.development`
+|ActivityName     |`.BadBehaviorActivity`
+|AdbPath          |`C:\adt-bundle-windows-x86_64-20131030\sdk\platform-tools`
+|DeviceMonitor    |`Emu`
 |==========================================================
 
 ====================

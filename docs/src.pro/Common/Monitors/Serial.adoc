@@ -11,7 +11,7 @@ The default usage of  _serial port_ monitor is data collection. The data receive
 via the serial port typically is logged when a fault occurs.
 
 To perform fault detection, specify a regular expression using the +FaultRegex+
-parameter. When the regex matches, Peach detects a fault.
+parameter. When the regular expression matches, Peach detects a fault.
 
 For automation tasks, the +WaitForRegex+ and +WaitWhen+ parameters can be used.
 The automation parameters cause Peach to wait for matching input before continuing.
@@ -29,7 +29,7 @@ Additionally, Peach supports multiple _serial port_ monitors in a pit, monitorin
 
 _Required:_
 
-Port:: The port to use (for example, COM1 or /dev/ttyS0)
+Port:: The port to use (for example, +COM1+ or +/dev/ttyS0+)
 
 _Optional:_
 
@@ -66,7 +66,7 @@ RequestToSendXOnXOff;;
 XOnXOff;;
 
 FaultRegex:: Fault when regular expression matches.
-WaitRegex:: Wait until regex matches received data.
+WaitRegex:: Wait until the specified regular expression matches received data.
 WaitOnCall:: Wait for message, WaitWhen must be set to OnCall.
 WaitWhen::
 +
@@ -99,7 +99,7 @@ This parameter example is from a setup that uses the default settings for the Se
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter   |Value
-|Port        |COM1
+|Port        |`COM1`
 |==========================================================
 ====================
 
@@ -114,8 +114,8 @@ In addition to normal data collection, this setup generates a fault when the tex
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter   |Value
-|Port        |COM1
-|FaultRegex  |ERROR
+|Port        |`COM1`
+|FaultRegex  |`ERROR`
 |==========================================================
 
 ====================
@@ -130,10 +130,10 @@ This example might be used when fuzzing a network device such as a router. Peach
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter   |Value
-|Port        |COM1
-|FaultRegex  |ERROR
-|WaitRegex   |Boot up completed
-|WaitWhen    |OnIterationAfterFault
+|Port        |`COM1`
+|FaultRegex  |`ERROR`
+|WaitRegex   |`Boot up completed`
+|WaitWhen    |`OnIterationAfterFault`
 |==========================================================
 
 ====================
@@ -152,31 +152,31 @@ This example might be used when fuzzing a network device such as a router. The c
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter   |Value
-|Name        |Console_Port
-|Port        |COM1
-|WaitRegex   |Boot up completed
+|Name        |`Console_Port`
+|Port        |`COM1`
+|WaitRegex   |`Boot up completed`
 |==========================================================
 
 *Serial Monitor (2) - Detect Errors and Restart*
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter   |Value
-|Name        |Debug_Port
-|Port        |COM1
-|FaultRegex  |ERROR
-|WaitRegex   |Boot up completed
-|WaitWhen    |OnIterationAfterFault
+|Name        |`Debug_Port`
+|Port        |`COM1`
+|FaultRegex  |`ERROR`
+|WaitRegex   |`Boot up completed`
+|WaitWhen    |`OnIterationAfterFault`
 |==========================================================
 
 *xref:Monitors_IpPower9258[IpPower9258 Monitor]--Reboot the Test Target*
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter   |Value
-|Name        |PowerBox_IpPower9258
-|Host        |10.1.1.1
-|User        |guest
-|Password    |guest123
-|Port        |1
+|Name        |`PowerBox_IpPower9258`
+|Host        |`10.1.1.1`
+|User        |`guest`
+|Password    |`guest123`
+|Port        |`1`
 |==========================================================
 
 =========================
@@ -191,19 +191,19 @@ This example hooks up to a console port and also a debug port on a device. The m
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter   |Value
-|Name        |Console_Port
-|Port        |COM1
-|FaultRegex  |ERROR
-|WaitRegex   |Boot up completed
-|WaitWhen    |OnIterationAfterFault
+|Name        |`Console_Port`
+|Port        |`COM1`
+|FaultRegex  |`ERROR`
+|WaitRegex   |`Boot up completed`
+|WaitWhen    |`OnIterationAfterFault`
 |==========================================================
 
 *Debug Port*
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter   |Value
-|Name        |Debug_Port
-|Port        |COM2
+|Name        |`Debug_Port`
+|Port        |`COM2`
 |==========================================================
 
 =========================

@@ -12,16 +12,16 @@ such as advanced configurations, building custom fuzzing definitions, and extend
 the various areas of Peach.
 
 As a User Guide, this book provides support for the user in daily issues that can otherwise
-impede tasks associated with fuzzing. It is not theoritical in nature. Nor is it designed
+impede tasks associated with fuzzing. It is not theoretical in nature. Nor is it designed
 to tackle advanced configurations, such as those used to fuzz embedded hardware or
 kernel drivers.
 
 The primary audience for this guide is a daily user who is not a developer.
-The user is also not knowledgable about XML.
+The user is also not knowledgeable about XML.
 
 Peach Fuzzer has been in active development through three major revisions since 2004. Until 2014,
 no complete documentation existed. This is the first edition of the User Guide, bearing witness
-that documenting Peach is an on-going effort. The majority of effort focusses on documenting the
+that documenting Peach is an on-going effort. The majority of effort focuses on documenting the
 most common uses of {product}.
 
 include::01_WhatIsPeach.adoc[]

@@ -13,7 +13,7 @@ The monitor provides the following functionality:
 * Start a virtual device at the start of a fuzzing run.
 * Start a virtual device at the start of each test iteration.
 * Start a virtual device when called from the state model.
-* Start a virutal device at the beginning of an iteration that immediately follows a fault.
+* Start a virtual device at the beginning of an iteration that immediately follows a fault.
 * Shuts down at the end of a fuzzing session.
 * Logs timeout messages when querying the emulator for the device serial number.
 * Logs timeout messages when shutting down the emulator.
@@ -26,7 +26,7 @@ This monitor requires the following items to run:
 * The http://developer.android.com/tools/help/emulator.html[Android Emulator]
 * The http://developer.android.com/sdk/index.html[Android Platform Tools].
 
-The fuzzing configuration for a virtual or emulated device follows. For a configuration using a phsycial device, see the xref:Monitors_Android[Android Monitor].
+The fuzzing configuration for a virtual or emulated device follows. For a configuration using a physical device, see the xref:Monitors_Android[Android Monitor].
 
 image::{images}/Common/Monitors/AndroidEmulator.png[scalewidth="75%"]
 
@@ -68,18 +68,18 @@ In the Android monitor, set the AdbPath to the platform-tools directory containi
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter        |Value
-|Avd              |Nexus4
-|EmulatorPath     |C:\adt-bundle-windows-x86_64-20131030\sdk\tools
+|Avd              |`Nexus4`
+|EmulatorPath     |`C:\adt-bundle-windows-x86_64-20131030\sdk\tools`
 |==========================================================
 
 +Android Monitor (App) Parameters+
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter        |Value
-|ApplicationName  |com.android.development
-|ActivityName     |.BadBehaviorActivity
-|AdbPath          |C:\adt-bundle-windows-x86_64-20131030\sdk\platform-tools
-|DeviceMonitor    |Emu
+|ApplicationName  |`com.android.development`
+|ActivityName     |`.BadBehaviorActivity`
+|AdbPath          |`C:\adt-bundle-windows-x86_64-20131030\sdk\platform-tools`
+|DeviceMonitor    |`Emu`
 |==========================================================
 ====================
 

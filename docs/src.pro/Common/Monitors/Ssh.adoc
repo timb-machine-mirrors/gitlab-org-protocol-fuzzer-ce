@@ -41,46 +41,35 @@ This monitor can run commands on remote machines to perform automation tasks. In
 _Required:_
 
 Host:: Remote Host for the SSH connection; the connection target.
+
 Username:: Username for ssh.
+
 Command:: Command to check for fault.
 
 _Optional:_
 
 Password:: Password for SSH account, defaults to "".
-KeyPath:: Path to SSH key, defaults to "".
-CheckValue:: Regex to match the command response, defaults to "".
 
-//FaultOnMatch:: Trigger a fault if the CheckValue regex matches, defaults to true.
-FaultOnMatch:: Trigger a fault if the CheckValue regex matches, defaults to false. +
-FaultOnMatch triggers a fault in a second case--when FaultOnMatch is false and Peach does not find a match for the CheckValue regex.
+KeyPath:: Path to SSH key, defaults to "".
+
+CheckValue:: A regular expression to match the command response, defaults to "".
+
+FaultOnMatch:: Trigger a fault if the CheckValue regular expression matches, defaults to false.
 
 StartOnCall:: Run when signaled by the state machine.
 
-When::
-+
-Period when the command should be run. Defaults to +DetectFault+.
-+
-// [horizontal]   - commented out because labels and descriptions overlap on some entries.
-// DetectFault::: Run command to check for faulting condition. Requires regex be set. Original and default mode of operation.
-// OnCall::: Trigger command to run from state model. Command runs when the _StartOnCall_ message is received.
-// OnStart::: Run command when fuzzing session starts. Command runs once per session.
-// OnEnd::: Run command when fuzzing session stops. Command runs run once per session.
-// OnIterationStart::: Run command at start of each iteration.
-// OnIterationEnd::: Run command at end of each iteration.
-// OnFault::: Run command when a fault occurs.
-// OnIterationStartAfterFault::: Run command at start of the iteration that follows a fault detection.
-+
+When:: Period when the command should be run. Defaults to +DetectFault+. +
 [cols="1,2" options="header",halign="center"]
 |==========================================================
-|"When" Setting              |Description
-|DetectFault                 |Run the command to check for the faulting condition. Requires a regex expression in the +CheckValue+ parameter. Default mode of operation.
-|OnStart                     |Run the command when fuzzing session starts. Command runs once per session.
-|OnEnd                       |Run the command when fuzzing session stops. Command runs run once per session.
-|OnIterationStart            |Run the command at start of each iteration.
-|OnIterationEnd              |Run the command at end of each iteration.
-|OnFault                     |Run the command when Peach detects a fault.
-|OnIterationStartAfterFault  |Run the command at start of an iteration that immediately follows a fault detection.
-|OnCall                      |Trigger the command to run from the state model. The command runs when the _StartOnCall_ message is received.
+|'When' Value                 |Description
+|+DetectFault+                |Run the command to check for the faulting condition. Requires a regular expression in the +CheckValue+ parameter. Default mode of operation.
+|+OnStart+                    |Run the command when fuzzing session starts. Command runs once per session.
+|+OnEnd+                      |Run the command when fuzzing session stops. Command runs run once per session.
+|+OnIterationStart+           |Run the command at start of each iteration.
+|+OnIterationEnd+             |Run the command at end of each iteration.
+|+OnFault+                    |Run the command when Peach detects a fault.
+|+OnIterationStartAfterFault+ |Run the command at start of an iteration that immediately follows a fault detection.
+|+OnCall+                     |Trigger the command to run from the state model. The command runs when the _StartOnCall_ message is received.
 |==========================================================
 +
 .When Choices for Running a Command
@@ -101,12 +90,12 @@ To run this example, specify a valid Host, Username, and Password.
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter     |Value
-|Host          |my.target.com
-|Username      |tester
-|Password      |Password!
-|Command       |ls /var/cores/*.core
-|CheckValue    |target.*?.core
-|FaultOnMatch  |true
+|Host          |`my.target.com`
+|Username      |`tester`
+|Password      |`Password!`
+|Command       |`ls /var/cores/*.core`
+|CheckValue    |`target.*?.core`
+|FaultOnMatch  |`true`
 |==========================================================
 ====================
 
