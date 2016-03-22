@@ -65,16 +65,6 @@ ulimit -Sc unlimited
 The hard and soft limits can be added to `/etc/sysctl.conf`.
 Then, whenever this file loads, appropriate core file limits are specified.
 
-////////////////////////////
-Restrictions exist on ulimit.
-run in shell.
-run ulimit and then target in the same command shell (login session).
-
-If doing sysctrl, what values does user need to add?
-- reboot, or
-- reload the sysctrl command (which loads the file).
-////////////////////////////
-
 * gdb must be installed to analyze the resulting core files.
 For information on installing gdb, see the xref:Monitors_Gdb[gdb] monitor.
 
@@ -104,7 +94,7 @@ This parameter example is from a setup that monitors a movie player in Linux.
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
-|ProcessName  |MPlayer
+|ProcessName  |`MPlayer`
 |==========================================================
 ====================
 

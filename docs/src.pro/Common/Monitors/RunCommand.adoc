@@ -83,9 +83,9 @@ This parameter example is from a setup that outputs the string ERROR_NO_FAULT.
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter     |Value
-|Command       |cmd.exe
-|Arguments     |echo ERROR_NO_FAULT
-|FaultOnRegex  |NO_FAULT
+|Command       |`cmd.exe`
+|Arguments     |`echo ERROR_NO_FAULT`
+|FaultOnRegex  |`NO_FAULT`
 |==========================================================
 ====================
 
@@ -99,45 +99,45 @@ Trigger the command to execute when the State Model "calls ScoobySnacks".
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter     |Value
-|Command       |cmd.exe
-|Arguments     |echo RUN COMMAND
-|StartOnCall   |ScoobySnacks
+|Command       |`cmd.exe`
+|Arguments     |`echo RUN COMMAND`
+|StartOnCall   |`ScoobySnacks`
 |==========================================================
 
 Run the Command at the start of a fuzzing session.
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter     |Value
-|Command       |cmd.exe
-|Arguments     |/c echo RUN COMMAND
-|When          |OnStart
+|Command       |`cmd.exe`
+|Arguments     |`/c echo RUN COMMAND`
+|When          |`OnStart`
 |==========================================================
 
 Run the Command at the end of a fuzzing session.
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter     |Value
-|Command       |cmd.exe
-|Arguments     |/c echo RUN COMMAND
-|When          |OnEnd
+|Command       |`cmd.exe`
+|Arguments     |`/c echo RUN COMMAND`
+|When          |`OnEnd`
 |==========================================================
 
 Run the Command at the start of each iteration.
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter     |Value
-|Command       |cmd.exe
-|Arguments     |/c echo RUN COMMAND
-|When          |OnIterationStart
+|Command       |`cmd.exe`
+|Arguments     |`/c echo RUN COMMAND`
+|When          |`OnIterationStart`
 |==========================================================
 
 Run the Command at the end of each iteration.
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter     |Value
-|Command       |cmd.exe
-|Arguments     |/c echo RUN COMMAND
-|When          |OnIterationEnd
+|Command       |`cmd.exe`
+|Arguments     |`/c echo RUN COMMAND`
+|When          |`OnIterationEnd`
 |==========================================================
 
 ====================

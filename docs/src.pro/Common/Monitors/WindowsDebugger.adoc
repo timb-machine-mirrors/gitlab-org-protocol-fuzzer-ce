@@ -26,7 +26,7 @@ data collected on faults. For more information on bucketing provided by this mon
 _Exactly one of the three required parameters is needed for each instance of this monitor.
 The other two required parameters are not used._
 
-Executable:: Executable to launch via the debugger. If the executable has command-line arguments,  specify these in the "Arguments" paramter.
+Executable:: Executable to launch via the debugger. If the executable has command-line arguments,  specify these in the "Arguments" parameter.
 ProcessName:: Name of the process that the debugger attaches.
 Service:: Name of the Windows process or service to  attach to the debugger. If the service
 crashes or is stopped, this monitor will restart the service.
@@ -38,7 +38,7 @@ Arguments:: Command-line arguments for the executable file specified with the "E
 SymbolsPath:: Path to the debugging symbol files. The default value is Microsoft public
 symbols server,SRV*http://msdl.microsoft.com/download/symbols.
 
-WinDbgPath:: Path to the windbg installation. If undeclared, Peach attempts to locate a local installation of the debugger.
+WinDbgPath:: Path to the Windows Debugger installation. If undeclared, Peach attempts to locate a local installation of the debugger.
 
 StartOnCall:: Defers launching the target until the state model issues a call to the monitor
 to begin. Upon receiving the call, the debugger attaches to the process, or starts the process
@@ -74,14 +74,14 @@ call fails to occur within an acceptable  waiting period, issue a fault and then
 WaitForExitTimeout parameter specifies the waiting period.
 
 WaitForExitTimeout:: Specifies the WaitForExitOnCall timeout value, expressed in milliseconds,
-defaults to 10000 ms (10 sec). The value -1 specifies an infiniate waiting period.
+defaults to 10000 ms (10 sec). The value -1 specifies an infinite waiting period.
 
 
 === Examples
 
 ifdef::peachug[]
 
-.Commandline Configuration +
+.Command Line Configuration +
 
 This parameter example is from a setup that launches an application with command-line arguments from the Windows Debugger. The setup also supplies the path where the Windows Debugger resides.
 
@@ -90,9 +90,9 @@ This parameter example is from a setup that launches an application with command
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
-|Executable   |CrashableServer.exe
-|Arguments    |127.0.0.1 4244
-|WinDbgPath   |C:\Program Files (x86)\Debugging Tools for Windows (x86)
+|Executable   |`CrashableServer.exe`
+|Arguments    |`127.0.0.1 4244`
+|WinDbgPath   |`C:\Program Files (x86)\Debugging Tools for Windows (x86)`
 
 |==========================================================
 
@@ -107,7 +107,7 @@ This parameter example attaches the debugger to a service.
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter  |Value
-|Service    |WinDefend
+|Service    |`WinDefend`
 |==========================================================
 
 ==========================
@@ -121,7 +121,7 @@ This parameter example attaches the debugger to a process name.
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
-|ProcessName  |CrashableServer.exe
+|ProcessName  |`CrashableServer.exe`
 |==========================================================
 
 ==========================
@@ -135,9 +135,9 @@ This parameter example uses the debugger to launch an application with command-l
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
-|Executable   |CrashableServer.exe
-|Arguments    |127.0.0.1 4244
-|StartOnCall  |launchProgram
+|Executable   |`CrashableServer.exe`
+|Arguments    |`127.0.0.1 4244`
+|StartOnCall  |`launchProgram`
 |==========================================================
 
 ==========================
@@ -151,11 +151,11 @@ This parameter example uses the debugger to launch an application with command-l
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter           |Value
-|Executable          |CrashableServer.exe
-|Arguments           |127.0.0.1 4244
-|NoCpuKill           |true
-|FaultOnEarlyExit    |false
-|WaitForExitTimeout  |250
+|Executable          |`CrashableServer.exe`
+|Arguments           |`127.0.0.1 4244`
+|NoCpuKill           |`true`
+|FaultOnEarlyExit    |`false`
+|WaitForExitTimeout  |`250`
 |==========================================================
 
 ==========================
@@ -169,9 +169,9 @@ This parameter example uses the debugger to launch an application with command-l
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter          |Value
-|Executable         |CrashableServer.exe
-|Arguments          |127.0.0.1 4244
-|WaitForExitOnCall  |exitProgram
+|Executable         |`CrashableServer.exe`
+|Arguments          |`127.0.0.1 4244`
+|WaitForExitOnCall  |`exitProgram`
 |==========================================================
 
 ==========================
@@ -182,7 +182,7 @@ endif::peachug[]
 ifndef::peachug[]
 
 
-.Commandline Configuration
+.Command Line Configuration
 ==========================
 [source,xml]
 ----

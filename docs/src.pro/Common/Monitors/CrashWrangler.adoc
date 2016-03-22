@@ -18,7 +18,7 @@ After detecting a fault, _CrashWrangler_ monitor collects a stack trace, data fr
 the device log files, and crash dumps. Additionally, the monitor logs exceptions, and
 updates fault bucket information. For bucketing, Peach uses the text from the fault to
 determine the major bucket level. The minor bucket level is not used. The risk
-evaluation provides the following levels: exploitable, not exmploitable, or unknown.
+evaluation provides the following levels: exploitable, not exploitable, or unknown.
 
 [TIP]
 ====
@@ -71,12 +71,12 @@ This parameter example is from a setup that fuzzes the Safari browser on OS X.
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter        |Value
-|Executable       |/Applications/Safari.app/Contents/MacOS/Safari
-|Arguments        |fuzzed.bin
-|UseDebugMalloc   |true
-|ExploitableReads |true
-|ExecHandler      |./exc_handler
-|StartOnCall      |ScoobySnacks
+|Executable       |`/Applications/Safari.app/Contents/MacOS/Safari`
+|Arguments        |`fuzzed.bin`
+|UseDebugMalloc   |`true`
+|ExploitableReads |`true`
+|ExecHandler      |`./exc_handler`
+|StartOnCall      |`ScoobySnacks`
 |==========================================================
 
 ====================

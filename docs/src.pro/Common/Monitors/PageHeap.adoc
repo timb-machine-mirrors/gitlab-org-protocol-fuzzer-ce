@@ -16,7 +16,7 @@ Executable:: Executable name (no path)
 
 _Optional:_
 
-WinDbgPath:: Path to windbg install. If not provided, Peach attempts to locate the directory.
+WinDbgPath:: Path to the Windows Debugger installation. If not provided, Peach attempts to locate the directory.
 
 === Examples
 
@@ -33,16 +33,16 @@ _PageHeap Monitor Parameters_
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
-|Executable   |notepad.exe
+|Executable   |`notepad.exe`
 |==========================================================
 
 _Windows Debugger Monitor Parameters_
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
-|Executable   |notepad.exe
-|Arguments    |fuzzed.txt
-|StartOnCall  |launchProgram
+|Executable   |`notepad.exe`
+|Arguments    |`fuzzed.txt`
+|StartOnCall  |`launchProgram`
 |==========================================================
 
 ====================

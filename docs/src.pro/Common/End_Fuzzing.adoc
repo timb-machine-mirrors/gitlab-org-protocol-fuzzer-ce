@@ -14,7 +14,7 @@ As soon as both requirements occur, fuzzing can stop.
 
 For example, when fuzzing a new product, the release criteria might be set to 250,000 total fuzzing test cases on the product and yield 150,000 consecutive clean test cases.
 
-The following diagram shows one way of meeting this criteria and focuses on the number of test cases performed, test case failures, and the number of consecutive clean test casees.
+The following diagram shows one way of meeting this criteria and focuses on the number of test cases performed, test case failures, and the number of consecutive clean test cases.
 
 image::{images}/Common/Fuzzing_Exit_Criteria_Case1_3_8.png[]
 

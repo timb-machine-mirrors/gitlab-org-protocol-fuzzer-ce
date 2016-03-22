@@ -8,7 +8,7 @@ The _CleanupRegistry_ monitor provides automated cleanup of Windows registry
 entries created during a fuzzing session. Cleanup occurs before every iteration.
 
 This monitor uses a specified registry key (a parent key) as a reference point
-and deletes all child keys or descendents of the parent key. All child keys at
+and deletes all child keys or descendants of the parent key. All child keys at
 all levels beneath the parent key are removed. Values attached to child keys are
 removed as well.
 
@@ -88,8 +88,8 @@ Key::
 _Optional:_
 
 ChildrenOnly:: If true, omits the parent key from the purge, thereby deleting
-all descendents (subkeys) of the specified key. +
-If false, the parent key and all descendents are deleted. Defaults to false.
+all descendants (sub-keys) of the specified key. +
+If false, the parent key and all descendants are deleted. Defaults to false.
 
 === Examples
 
@@ -103,7 +103,7 @@ This parameter example is from a setup that uses the CleanupRegistry monitor to 
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
-|Key   |HKLM\SOFTWARE\Office13\Recovery
+|Key          |`HKLM\SOFTWARE\Office13\Recovery`
 |==========================================================
 
 The following image shows the portion of the registry that contains the key to delete.

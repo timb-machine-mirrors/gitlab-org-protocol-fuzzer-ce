@@ -13,7 +13,7 @@ The reported metrics for this monitor occur at the end of test iterations and in
 * *Private memory size* - Number of bytes allocated for the process. An approximate number of
 bytes a process is using.
 * *Working set memory* - Total physical memory used by the process, consisting of in-memory private
-bytes plus memory-mapped files, such as dlls.
+bytes plus memory-mapped files, such as DLLs.
 * *Peak working set* - Largest working set used by the process.
 * *Virtual memory size* - Total address space occupied by the entire process, including the working
 set plus paged private bytes and the standby list.
@@ -47,8 +47,8 @@ fault on the test iteration.
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
-|MemoryLimit  |10000000
-|ProcessName  |Notepad
+|MemoryLimit  |`10000000`
+|ProcessName  |`Notepad`
 |==========================================================
 ====================
 

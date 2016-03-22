@@ -9,14 +9,14 @@ Descriptions of the new Pits follow:
 
 ==== DICOM File
 
-Digitial Image and Communications in Medical (DICOM) is an image
+Digital Image and Communications in Medical (DICOM) is an image
 format based on formerly the NEMA medical industry standard. It is
 commonly used for medical images in a large variety of medical
 equipment.
 
 ==== DICOM Network
 
-Digitial Image and Communications in Medical (DICOM) is an image
+Digital Image and Communications in Medical (DICOM) is an image
 format based on formerly the NEMA medical industry standard. It is
 commonly used for medical images in a large variety of medical
 equipment.
@@ -29,7 +29,7 @@ operation are included.
 
 ==== DTLS Server (SSL)
 
-DTLS is a derivation of SSL protocol. It provides the same security services (integrity, authentification and confidentiality) but under the UDP protocol. This pit is available as part of SSL.
+DTLS is a derivation of SSL protocol. It provides the same security services (integrity, authentication and confidentiality) but under the UDP protocol. This pit is available as part of SSL.
 
 ==== iSCSI
 
@@ -41,7 +41,7 @@ Descriptions of new features and improvements for Professional and Enterprise fo
 
 ==== Tuning Weights UI
 
-A new configuration option has been added to allow tuning the messages and fields being fuzzed. Options include increasing or decreasin the focus of testing and also excluding testing altogether.  The feature is available from the configuration screen menu as "Tuning".
+A new configuration option has been added to allow tuning the messages and fields being fuzzed. Options include increasing or decreasing the focus of testing and also excluding testing altogether.  The feature is available from the configuration screen menu as "Tuning".
 
 ==== Library UI Improvements
 
@@ -49,18 +49,18 @@ The Library screen in the Peach application has several changes to improve usabi
 
 ==== New Configuration Format
 
-This quarter we are introdcuing a new configuration file with an extension of +.peach+.  Going forward the Web UI will create and save these +.peach+ files.  From the command line you have the option of directly running a Pit (+.xml+ files) or running a +.peach+ configuration.
+This quarter we are introducing a new configuration file with an extension of +.peach+.  Going forward the Web UI will create and save these +.peach+ files.  From the command line you have the option of directly running a Pit (+.xml+ files) or running a +.peach+ configuration.
 
 Existing users will notice the Library page will list any existing configurations in a "Legecy" section.  Clicking on a legacy configuration will prompt a conversion workflow to generate a new +.peach+ file.
 
 ==== Fault Details UI Changes
 
-Some minor changes have been made to the fault detail page.  The field and mutation algorithms in used whent he fualt
-occured are now displayed.
+Some minor changes have been made to the fault detail page.  The field and mutation algorithms used when the fault
+occurred are now displayed.
 
 ==== Updates to minset Tool
 
-The minset tool has been updated to use an improved minsetting algorithm.  Additionally several bugs have been fixed that caused minset to use incorrectly calculated addresses.
+The minset tool has been updated to use an improved minimization-set algorithm.  Additionally several bugs have been fixed that caused minset to use incorrectly calculated addresses.
 
 ==== New +duration+ Command Line Switch
 
@@ -68,7 +68,7 @@ A new command line argument +--duration+ has been added in this release to make 
 
 ==== Address Sanitizer
 
-Several changes to support for Address Sanitizer compile time instrumentation has occured:
+Several changes to support for Address Sanitizer compile time instrumentation has occurred:
 
 * SSH Command monitor now supports ASAN
 * ASAN is now enabled by default for SSH Command, Process, and Run Command monitors.
@@ -103,9 +103,9 @@ Support for the Application-Layer Protocol Negotiation Extension (ALPN) has been
 
 The REST publisher has been updated to support Web APIs that require XML instead of JSON content types. Additionally, the content type can now be customized, allowing support for non-standard payloads, binary data, etc.
 
-==== New Json Elements
+==== New JSON Elements
 
-New JSON elements have been added in an effort to improve JSON support in Peach.  These elements are now recommended over the older Json element.
+New JSON elements have been added in an effort to improve JSON support in Peach.  These elements are now recommended over the older JSON element.
 
 The following new data elements are available for modeling JSON documents:
 

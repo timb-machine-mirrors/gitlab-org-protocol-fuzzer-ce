@@ -30,7 +30,7 @@ None.
 
 ifdef::peachug[]
 
-.Terminate the Notepad and mspaint processes whenever they run. +
+.Terminate the +notepad+ and +mspaint+ processes whenever they run. +
 ====================
 
 This parameter example is from a setup that terminates the notepad and the paint processes whenever they run.
@@ -38,7 +38,7 @@ This parameter example is from a setup that terminates the notepad and the paint
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter     |Value
-|ProcessNames  |notepad,mspaint
+|ProcessNames  |`notepad,mspaint`
 |==========================================================
 ====================
 
@@ -50,7 +50,7 @@ ifndef::peachug[]
 
 .Terminate two processes
 ========================
-Before running this example, open notepad.exe.
+Before running this example, open +notepad.exe+.
 
 [source,xml]
 ----

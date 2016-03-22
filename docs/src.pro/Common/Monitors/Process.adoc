@@ -49,7 +49,7 @@ when the timeout period expires. Defaults to 10000 ms. Use -1 for infinite, no t
 
 ifdef::peachug[]
 
-The following parameter examples are from different uses of the _Process_ monitor. While not exhaustive, the examples  provide a good base for comparing and contrasting paramter settings for the various uses of this monitor.
+The following parameter examples are from different uses of the _Process_ monitor. While not exhaustive, the examples  provide a good base for comparing and contrasting parameter settings for the various uses of this monitor.
 
 .Start a Process at the Start of a Session
 ====================
@@ -59,8 +59,8 @@ The following parameter example is from a setup that starts a process at the beg
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
-|Executable   |notepad.exe
-|Arguments    |fuzzed.txt
+|Executable   |`notepad.exe`
+|Arguments    |`fuzzed.txt`
 |==========================================================
 ====================
 
@@ -73,9 +73,9 @@ The following parameter example is from a setup that starts a process at the beg
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter          |Value
-|Executable         |notepad.exe
-|Arguments          |fuzzed.txt
-|RestartOnEachTest  |true
+|Executable         |`notepad.exe`
+|Arguments          |`fuzzed.txt`
+|RestartOnEachTest  |`true`
 |==========================================================
 
 ====================
@@ -84,14 +84,14 @@ The following parameter example is from a setup that starts a process at the beg
 .Start a Process When Called from the State Model (Delayed Start)
 ====================
 
-The following parameter example is from a setup that starts a process when caled from the state model, amid a test iteration.
+The following parameter example is from a setup that starts a process when called from the state model, amid a test iteration.
 
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter     |Value
-|Executable    |notepad.exe
-|Arguments     |fuzzed.txt
-|StartOnCall   |ScoobySnacks
+|Executable    |`notepad.exe`
+|Arguments     |`fuzzed.txt`
+|StartOnCall   |`ScoobySnacks`
 |==========================================================
 
 ====================
@@ -105,9 +105,9 @@ The following parameter example is from a setup that interrupts fuzzing and wait
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter          |Value
-|Executable         |notepad.exe
-|Arguments          |fuzzed.txt
-|WaitForExitOnCall  |UriahSnacks
+|Executable         |`notepad.exe`
+|Arguments          |`fuzzed.txt`
+|WaitForExitOnCall  |`UriahSnacks`
 |==========================================================
 
 ====================

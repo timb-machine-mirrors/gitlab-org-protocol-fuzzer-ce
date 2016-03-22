@@ -82,9 +82,9 @@ This parameter example is from a setup that causes Peach to wait until the remot
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
-|Host         |192.168.133.4
-|Port         |502
-|WaitOnCall   |WaitForPort
+|Host         |`192.168.133.4`
+|Port         |`502`
+|WaitOnCall   |`WaitForPort`
 |==========================================================
 ====================
 
@@ -98,10 +98,10 @@ Peach will wait forever.
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
-|Host         |192.168.133.4
-|Port         |502
-|State        |Closed
-|WaitOnCall   |WaitForPort
+|Host         |`192.168.133.4`
+|Port         |`502`
+|State        |`Closed`
+|WaitOnCall   |`WaitForPort`
 |==========================================================
 ====================
 
@@ -115,10 +115,10 @@ at the end of an iteration, Peach generates a fault.
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
-|Host         |192.168.133.4
-|Port         |502
-|Action       |Fault
-|State        |Closed
+|Host         |`192.168.133.4`
+|Port         |`502`
+|Action       |`Fault`
+|State        |`Closed`
 |==========================================================
 ====================
 
@@ -133,9 +133,9 @@ state of the port when the fault occurs.
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
-|Host         |192.168.133.4
-|Port         |502
-|Action       |Data
+|Host         |`192.168.133.4`
+|Port         |`502`
+|Action       |`Data`
 |==========================================================
 ====================
 

@@ -25,7 +25,7 @@ possible duplicate, issues in a "bucket". Bucketing is typically done at a major
 * Major differences are generally distinct issues. The bucket for a major issue might associate
 with a specific processor family, operating system, or monitor name.
 * Minor differences that generate faults mean that the issues might be identical, or are
-probably similare; yet, issues in minor buckets are worth reviewing to ensure the issues
+probably similar; yet, issues in minor buckets are worth reviewing to ensure the issues
 have the same root cause.
 
 Along with buckets, initial risk analysis allows you to direct your attention first on higher risk faults before spending time on lower risk issues. Risk analysis is not always possible, but is useful when it can be performed.

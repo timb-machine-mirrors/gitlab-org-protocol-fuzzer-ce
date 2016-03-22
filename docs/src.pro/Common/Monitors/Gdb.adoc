@@ -8,9 +8,9 @@ The _Gdb_ monitor uses GDB to launch an executable and monitors the executing pr
 
 When a fault or exception occurs, _Gdb_ collects and logs the appropriate information, including messages from stdout and stderr, stack traces, and the gdb log. Fault detection includes the conditions of 1) the early exit of a process, as well as 2) a process that does not exit.
 
-_Gdb_ supports bucketing of crashes, and basic risk ranking that is based on
-exploitability of the fault. Bucketing uses categories for major and minor issuess.
-Exploitability evaluation is similar to the !exploitable debugging extension for .NET.
+_Gdb_ supports bucketing of crashes and basic risk ranking that is based on the
+exploitability of the fault. Bucketing uses categories for major and minor issues.
+The exploitability evaluation is similar to the !exploitable debugging extension for .NET.
 
 NOTE: The _Gdb_ monitor requires a recent version of GDB.
 
@@ -36,7 +36,7 @@ WaitForExitTimeout:: WaitForExitOnCall timeout value, expressed in milliseconds.
 
 === Gdb Installation
 
-Installing gdb on Linux consists of using the package manager to download and install the gdb degugger and the needed support files and libraries.
+Installing gdb on Linux consists of using the package manager to download and install the gdb debugger and the needed support files and libraries.
 
 * For Ubuntu systems, run the following command install gdb:
 +
@@ -70,9 +70,9 @@ This parameter example is from a typical setup where a state model call triggers
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
-|Executable   |/usr/bin/curl
-|Arguments    |http://localhost
-|StartOnCall  |ScoobySnacks
+|Executable   |`/usr/bin/curl`
+|Arguments    |`http://localhost`
+|StartOnCall  |`ScoobySnacks`
 |==========================================================
 ====================
 

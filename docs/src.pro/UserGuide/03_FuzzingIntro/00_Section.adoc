@@ -21,7 +21,7 @@ image::{images}/DevGuide/FuzzingIntro/struct_with_hex.png[]
 
 The data is parsed by the data consumer into the structure. The data and structure are color coded to show which parts of the data are loaded into each member of the structure _Header_. Following the structure, two lines of code occur that use the _Header_ structure. Looking at that code, we can identify several issues that could likely lead to crashing our program that we could trigger by changing our input data.
 
-The first thing we could do is change the _len_ in our data from 0x0021 to 0x0001. This would cause the memory allocation to return a smaller amount of memory than what is needed for copying data using the _strcpy_ function. Once _strcpy_ executes, we will have written past the end of _msg_data_, possibly causing the target process to crash.
+The first thing we could do is change the _len_ in our data from `0x0021` to `0x0001`. This would cause the memory allocation to return a smaller amount of memory than what is needed for copying data using the _strcpy_ function. Once _strcpy_ executes, we will have written past the end of _msg_data_, possibly causing the target process to crash.
 
 image::{images}/DevGuide/FuzzingIntro/struct_with_hex_len.png[]
 
