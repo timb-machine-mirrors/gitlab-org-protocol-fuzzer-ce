@@ -52,6 +52,12 @@ NOTE: Peach Fuzzer, LLC, recommends using Mono .NET runtime version 4 from the m
 
 The following steps provide the needed details:
 
+. Install yum-utils using the following command:
++
+----
+sudo yum install yum-utils
+----
+
 . Install the Extra Packets for Enterprise Linux package (EPEL) using the following command:
 +
 ----
@@ -70,10 +76,10 @@ sudo rpm --import "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3FA7E0
 sudo yum-config-manager --add-repo http://download.mono-project.com/repo/centos/
 ----
 
-.	Install the mono-complete project version 3.12:
+.	Install the latest version of Mono using the following command:
 +
 ----
-sudo yum install mono-complete-3.12.1-0
+sudo yum install mono-complete
 ----
 
 . Unzip the Peach distribution to the appropriate folder. +
@@ -96,11 +102,20 @@ To install Peach on a SUSE Enterprise Linux platform, use the 1-click SUSE mono-
 
 NOTE: Peach Fuzzer, LLC, recommends using Mono .NET runtime version 4 from the mono project. The mono project has apt packages for SLES implementations.
 
-.	Install Mono 3.12 using 1-click install
+.	Install Mono using One-Click install file
++
+From a web browser on SLES, browse to:
 +
 ----
 http://download.mono-project.com/repo/mono-complete.ymp
 ----
++
+Or, from the command line run:
++
+----
+/sbin/OCICLI http://download.mono-project.com/repo/mono-complete.ymp
+----
++
 . Optionally, install the GNU Debugger (GDB) for debugging local processes.
 . Unzip the Peach binary distribution to the appropriate folder. +
 The file is a zip file with the extension ".zip". The filename begins with "peach-pro"
@@ -108,14 +123,11 @@ and lists the operating system in the name, such as
 "peach-pro-{BUILDTAG}-linux_x86_release.zip".
 
 
-
-
 ==== Other Linux Implementations
 
 For other Linux versions, the installation steps are a checklist, not specific commands. The checklist follows:
 
-. Install libpcap.
-. Install Mono runtime v3.2 through v3.12.  v3.12 is recommended.
+. Install the latest Mono runtime.  Version 4 or greater is recommended.
 . Unzip the Peach distribution to an appropriate folder. +
 The file is a zip file with the extension ".zip". The filename begins with "peach-pro"
 and lists the operating system in the name, such as
