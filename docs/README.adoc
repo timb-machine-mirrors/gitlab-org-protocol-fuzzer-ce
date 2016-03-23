@@ -1,0 +1,35 @@
+= Docs Readme
+
+== Workflow
+
+. Start +preview+ tool
+. Start browser with LivePreview enabled
+. Edit documents in editor of choice
+. Verify correct formatting of documents
+
+NOTE: When editing an adoc file, verify the content AFTER the adoc to make sure it's still correctly formatted.
+
+== preview
+
+The preview tool will rebuild the dev and user gude when adoc files are changed.
+
+The Preview script requires:
+
+. Ruby (recent version)
+. Ruby bundle gem:  +gem install bundle+
+. LiveReload browser extension
+.. Configured to "Allow access to file URLs"
+
+Other dependencies are isntalled when the +preview+ script is run.
+
+Usage:
+
+. Start preview 
++
+----
+cd docs
+preview
+----
+
+. Load user guide or dev guide into browser
+. Enable LivePreview for files
