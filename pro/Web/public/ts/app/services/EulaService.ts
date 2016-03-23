@@ -32,7 +32,28 @@ namespace Peach {
 			return StripHttpPromise(this.$q, promise);
 		}
 
-		private VerifyLicense(license: ILicense) : ng.IPromise<ILicense> {
+		private VerifyLicense(license: ILicense): ng.IPromise<ILicense> {
+			if (!license.isValid) {
+				let title: string;
+
+				if (license.isInvalid) {
+					title = 'Invalid License Detected';
+				} else if (license.isMissing) {
+					title = 'Missing License Detected';
+				} else if (license.isExpired) {
+					title = 'Exipred License Detected';
+				} else {
+					title = 'License Error Detected';
+				}
+
+				return this.LicenseError({
+					Title: title,
+					Body: license.errorText.split('\n')
+				}).then(() => {
+					return this.Verify();
+				});
+			}
+
 			if (license.eulaAccepted) {
 				const ret = this.$q.defer<ILicense>();
 				ret.resolve(license);
@@ -87,6 +108,7 @@ namespace Peach {
 				templateUrl: url,
 				controller: EulaController,
 				controllerAs: C.ViewModel,
+				backdrop: 'static',
 				size: 'lg'
 			}).result;
 		}
@@ -102,6 +124,17 @@ namespace Peach {
 				}
 			});
 			return StripHttpPromise(this.$q, promise);
+		}
+
+		private LicenseError(options: ILicenseOptions) : ng.IPromise<any>
+		{
+			return this.$modal.open({
+				templateUrl: C.Templates.Modal.License,
+				controller: LicenseController,
+				controllerAs: C.ViewModel,
+				backdrop: 'static',
+				resolve: { Options: () => options }
+			}).result;
 		}
 	}
 }
