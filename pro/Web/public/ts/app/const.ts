@@ -162,6 +162,7 @@ namespace Peach.C {
 			export const MigratePit = 'html/modal/MigratePit.html';
 			export const NewVar = 'html/modal/NewVar.html';
 			export const PitLibrary = 'html/modal/PitLibrary.html';
+			export const License = 'html/modal/License.html';
 			export const StartJob = 'html/modal/StartJob.html';
 			export const AddMonitor = 'html/modal/AddMonitor.html';
 		}

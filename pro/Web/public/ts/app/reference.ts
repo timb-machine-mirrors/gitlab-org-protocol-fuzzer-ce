@@ -19,6 +19,7 @@
 /// <reference path="controllers/JobMetricsCtrl.ts" />
 /// <reference path="controllers/JobsCtrl.ts" />
 /// <reference path="controllers/LibraryCtrl.ts" />
+/// <reference path="controllers/LicenseCtrl.ts" />
 /// <reference path="controllers/MainCtrl.ts" />
 /// <reference path="controllers/MigratePitCtrl.ts" />
 /// <reference path="controllers/NewConfigCtrl.ts" />
