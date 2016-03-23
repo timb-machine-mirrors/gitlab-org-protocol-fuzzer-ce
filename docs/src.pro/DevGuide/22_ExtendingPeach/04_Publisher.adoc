@@ -15,7 +15,7 @@ calls the protected OnOpen function only when the publisher is not open.
 When developers implement custom publishers, they override the protected functions.
 The default implementation of these protected functions is to throw a NotImplementedException().
 
-The list of user overridable functions are:
+The list of functions that users may override are:
 
  * OnStart()
  * OnStop()
@@ -40,8 +40,8 @@ The data is provided in a stream, and it is best to write the data to the resour
 If the underlying resource only consumes data in a single contiguous buffer, it is best to have a configurable maximum size and truncate data that exceeds it.
 
 The OnInput function tells the publisher to read data from the underlying resource.
-The data is then stored internally in a seekable stream and used by Peach for cracking the data model.
-If the underlying resource already provides a seekable stream (eg: a file stream) then OnInput doesn't have to do anything.
+The data is then stored internally in a seek-able stream and used by Peach for cracking the data model.
+If the underlying resource already provides a seek-able stream (eg: a file stream) then OnInput doesn't have to do anything.
 However, for publishers like Udp, the OnInput function causes the next packet to be received.
 When implementing the OnInput function for publishers that block, it is best to expose a user configurable input timeout.
 If no data is received from the underlying resource after the timeout interval, a SoftException() should be thrown to
@@ -52,7 +52,7 @@ Both of these classes make it easy to quickly write publishers for IO interfaces
 
 * StreamPublisher is used when the underlying stream supports the Seek() function (eg: file streams). To use the StreamPublisher, the developer only needs to override OnOpen() and set the 'this.stream' property.
 
-* BufferedStreamPublisher is used when the underlying stream does not support the Seek() function (eg: TCP Streams, SerialPort). The BufferedStreamPublisher automatically performs asynchronous reads on the underlying stream, and buffers the accumulated data in a seekable stream.
+* BufferedStreamPublisher is used when the underlying stream does not support the Seek() function (eg: TCP Streams, SerialPort). The BufferedStreamPublisher automatically performs asynchronous reads on the underlying stream, and buffers the accumulated data in a seek-able stream.
 +
 To use the BufferedStreamPublisher, the developer needs to do two things.
 

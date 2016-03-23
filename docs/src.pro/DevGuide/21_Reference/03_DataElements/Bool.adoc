@@ -2,7 +2,7 @@
 [[Bool]]
 == Bool
 
-The _Bool_ element defines a Boolean value (values 0 or 1) that represents either true or false. The intended use of _Bool_ is in JSON strings, where the values `true` and `false` are assigned to variables upon parsing with the JSON analzyer. 
+The _Bool_ element defines a Boolean value (values 0 or 1) that represents either true or false. The intended use of _Bool_ is in JSON strings, where the values `true` and `false` are assigned to variables upon parsing with the JSON analyzer.
 
 When not used in JSON strings, _Bool_ is a one-bit number with a value of 0 or 1.
 

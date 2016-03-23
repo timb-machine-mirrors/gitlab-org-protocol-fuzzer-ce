@@ -4,7 +4,7 @@
 
 Represents a JSON string Unicode characters.
 
-All strings are encoded prior to output acording to the JSON specification.
+All strings are encoded prior to output according to the JSON specification.
 
 Strings can hold numbers that are stored in a string format. When strings contain a number, Peach additionally uses  numerical mutators to mutate the strings.
 
@@ -34,7 +34,7 @@ xref:name[name]::
 
 propertyName::
     Property name for element when child of xref:JsonObject[JsonObject].
-    
+
 isNull::
     Is this elements value null. Json output will be +null+ instead of +""+ or value.
 

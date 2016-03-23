@@ -32,14 +32,14 @@ _Optional:_
   3::: Private class.
 [vertical]
 xref:constraint[constraint]:: Scripting expression that evaluates to true or false, default is "".
-*forceMultiByteIdentifier*:: If "true", use multiple identifier octets to contain the identifer of the Asn.1 element. +
+*forceMultiByteIdentifier*:: If "true", use multiple identifier octets to contain the identifier of the Asn.1 element. +
 If "false", store the entire tag in the last 5-bits of the first octet. The value of the tag must be 30 or less. +
 The default is "false".
 *indefiniteLength*:: If "true", use the indefinite encoding form of the Asn.1 element. The indefinite
 form requires an end-of-content block. +
 If "false", use definite encoding form, where the number of content octets is known and the octets are available. +
 The default is "false".
-*longLength*:: If "true", always use the long encoding form (that is, mulitple length octects) to express the length of the Asn.1 element. +
+*longLength*:: If "true", always use the long encoding form (that is, multiple length octects) to express the length of the Asn.1 element. +
 If "false", also allow the short encoding form where the number of content octets is expressed in 7 bits (127 or less). +
 The default is "false".
 xref:mutable[mutable]:: Is this element mutable, default is "true".
@@ -82,9 +82,6 @@ In short, Peach does not fuzz the Asn1Type, Asn1Tag, or Asn1Length elements.
 [[Asn1Type_Examples]]
 === Examples
 
+// TODO
 
-asdaf
-
-
-
-
+// end

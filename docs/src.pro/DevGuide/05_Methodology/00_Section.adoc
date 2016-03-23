@@ -19,7 +19,7 @@ What is the risk of issues found in the target?::
 If issues are identified in this target, are they important to fix? Would they be seen as a high priority? Ideally, a target should be picked because the resulting issues would have a high diagnosis priority.
 --
 
-Does the development of the target pre-daet a secure development lifecycle (SDL) being in place?::
+Does the development of the target pre-date a secure development lifecycle (SDL) being in place?::
 +
 --
 Targets developed prior to an SDL process are more likely to contain security issues.

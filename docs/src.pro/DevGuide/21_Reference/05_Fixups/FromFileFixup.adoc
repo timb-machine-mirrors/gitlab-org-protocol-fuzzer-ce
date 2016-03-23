@@ -6,13 +6,13 @@
 //  - 12/30/2015: Seth & Rich: Outlined
 // Show example of output
 
-The _FromFile_ is used to fill a BLOB data element with the contents of the specified file. The entire file is transferred, replacing the content of the BLOB. 
-The fixup supports reading of unencoded or PEM-encoded data files.
+The _FromFile_ is used to fill a BLOB data element with the contents of the specified file. The entire file is transferred, replacing the content of the BLOB.
+The fixup supports reading of raw or PEM-encoded data files.
 
 The main use case is to access cryptographic keys stored in files instead of exposing the key values in Pits or configuration files. In this use case, Peach pulls keys from .pem files in fuzzing cryptographic protocols.
 
 //Pulling keys from PEM files for fuzzing cryptographic protocols.
-//Have user spec file name that contains key. 
+//Have user spec file name that contains key.
 
 === Parent Elements
 
@@ -21,15 +21,15 @@ xref:Blob[Blob]
 === Parameters
 
 Filename:: Filename that contains the data to load into the BLOB.
-Encoding:: Encoding scheme used on the data in the file. Values are 
+Encoding:: Encoding scheme used on the data in the file. Values are
 +
-* Raw - Unencoded. This is the default value.
+* Raw - This is the default value.
 * Pem - Base-64 X.509 encoding.
 
 === Examples
 
 
-// NOTE: The example needs to be changed! It's for the FillValue fixup. 
+// NOTE: The example needs to be changed! It's for the FillValue fixup.
 
 /////////////
 
