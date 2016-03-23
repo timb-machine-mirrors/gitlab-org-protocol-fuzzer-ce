@@ -38,8 +38,8 @@ Avd:: Android virtual device.
 
 _Optional:_
 
-EmulatorPath:: Directory containing the Android emulator. If not provided, Peach searches the
-directories in the PATH variable for the installed emulator.
+EmulatorPath:: Directory containing the Android emulator.
+If not provided, Peach searches the directories in the PATH variable for the installed emulator.
 Headless:: If true, runs the emulator *without a display*. Defaults to false.
 RestartAfterFault:: Restart emulator after a fault. Defaults to true.
 RestartEveryIteration:: Restart emulator on every iteration. Defaults to false.
@@ -106,107 +106,13 @@ executes the monitors in the order that they are listed in the fuzzing definitio
 
 [source,xml]
 ----
-<?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
-
-	<DataModel name="TheDataModel">
-		<Number size='32' signed="false" value="31337" />
-	</DataModel>
-
-	<DataModel name="X">
-		<Number size='32' signed="false" value="100" />
-	</DataModel>
-
-	<DataModel name="Y">
-		<Number size='32' signed="false" value="0" />
-	</DataModel>
-
-	<StateModel name="State" initialState="Initial" >
-		<State name="Initial"  >
-			<Action type="call" method="tap">
-				<Param>
-					<DataModel ref="X"/>
-				</Param>
-				<Param>
-					<DataModel ref="Y"/>
-				</Param>
-			</Action>
-		</State>
-	</StateModel>
-
-	<Agent name="TheAgent">
-		<Monitor name="Emu" class="AndroidEmulator">
-			<Param name="Avd" value="Nexus4" />
-			<Param name="EmulatorPath" value="C:\adt-bundle-windows-x86_64-20130717\sdk\tools"/>
-		</Monitor>
-
-		<Monitor name="App" class="Android">
-			<Param name="ApplicationName" value="com.android.development" />
-			<Param name="ActivityName" value=".BadBehaviorActivity" />
-			<Param name="AdbPath" value="C:\adt-bundle-windows-x86_64-20130717\sdk\platform-tools"/>
-			<Param name="DeviceMonitor" value="Emu" />
-		</Monitor>
-	</Agent>
-
-	<Test name="Default">
-		<StateModel ref="State"/>
-		<Agent ref="TheAgent" />
-
-		<Publisher class="AndroidMonkey">
-			<Param name="DeviceMonitor" value="App"/>
-		</Publisher>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
-	</Test>
-</Peach>
+include::AndroidEmulator_Example.xml[]
 ----
 
 Output for this example.
 
 ----
->peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
-[*] Test 'Default' starting with random seed 3054.
-Peach.Core.Agent.Agent StartMonitor: Emu AndroidEmulator
-Peach.Core.Agent.Agent StartMonitor: App Android
-Peach.Core.Agent.Agent SessionStarting: Emu
-Peach.Enterprise.Agent.Monitors.AndroidEmulator Starting android emulator
-Peach.Enterprise.Agent.Monitors.AndroidEmulator Resolved emulator instance to android device 'emulator-5554'
-Peach.Enterprise.Agent.Monitors.AndroidEmulator Android emulator 'emulator-5554' successfully started
-Peach.Core.Agent.Agent SessionStarting: App
-Peach.Enterprise.AndroidBridge Initializing android debug bridge.
-Peach.Enterprise.AndroidBridge Android debug bridge initialized.
-Peach.Enterprise.Agent.Monitors.AndroidMonitor Resolved device 'emulator-5554' from monitor 'Emu'.
-Peach.Enterprise.AndroidDevice Waiting for device 'emulator-5554' to become ready
-Peach.Enterprise.AndroidDevice Device 'emulator-5554' is now ready
-Peach.Enterprise.AndroidDevice Executing command on 'emulator-5554': am start -W -S -n com.android.development/.BadBehaviorActivity
-
-[R1,-,-] Performing iteration
-Peach.Core.Engine runTest: Performing recording iteration.
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
-Peach.Core.Dom.Action ActionType.Call
-Peach.Enterprise.Publishers.AndroidMonkeyPublisher start()
-Peach.Enterprise.Publishers.AndroidMonkeyPublisher call(tap, System.Collections.Generic.List`1[Peach.Core.Dom.ActionParameter])
-Peach.Core.Agent.AgentManager Message: App => DeviceSerial
-Peach.Enterprise.Publishers.AndroidMonkeyPublisher Resolved device 'emulator-5554' from monitor 'App'.
-Peach.Enterprise.AndroidDevice Executing command on 'emulator-5554': input tap 100 0
-Peach.Core.Engine runTest: context.config.singleIteration == true
-Peach.Enterprise.Publishers.AndroidMonkeyPublisher stop()
-Peach.Core.Agent.Agent SessionFinished: App
-Peach.Enterprise.AndroidBridge Terminating android debug bridge.
-Peach.Core.Agent.Agent SessionFinished: Emu
-Peach.Enterprise.Agent.Monitors.AndroidEmulator Sending stop command to emulator 'emulator-5554'
-Peach.Enterprise.Agent.Monitors.AndroidEmulator Waiting for emulator 'emulator-5554' to exit
-Peach.Enterprise.Agent.Monitors.AndroidEmulator Emulator 'emulator-5554' exited with code: 0
-Peach.Enterprise.Agent.Monitors.AndroidEmulator Emulator 'emulator-5554' exited
-
-[*] Test 'Default' finished.
+include::AndroidEmulator_Example.log[]
 ----
 =======================
 
