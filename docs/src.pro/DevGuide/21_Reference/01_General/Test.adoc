@@ -17,15 +17,15 @@
 // * Use of multiple tests in a pit file
 
 // Reviewed 04/07/2014: Lynn
-// Major edits 
+// Major edits
 
 The Test element defines the tests that Peach runs during this fuzzing session. Peach requires at least one Test element for fuzzing to occur.
 
 Test configures a specific fuzzing occurrence that combines a StateModel with a Publisher and other configuration options (such as including/excluding elements from being mutated, Agents, and fuzzing strategies).
 
-One pit can contain multiple Test elements; simply provide the test element names on the Peach command line. 
+One pit can contain multiple Test elements; simply provide the test element names on the Peach command line.
 
-NOTE: If the command-line for launching Peach does not inlcude a test name, Peach uses the Test element named "Default" for the fuzzing session.
+NOTE: If the command-line for launching Peach does not include a test name, Peach uses the Test element named "Default" for the fuzzing session.
 
 === Syntax
 
@@ -41,7 +41,7 @@ NOTE: If the command-line for launching Peach does not inlcude a test name, Peac
   <Agent ref="LocalWindowsAgent" platform="windows" />
   <Agent ref="LocalOsxAgent" platform="osx" />
   <Agent ref="LocalLinuxAgent" platform="linux" />
-  
+
   <Agent ref="RemoteAgent" />
 
   <!-- Indicate which state model to use (required) -->
@@ -55,7 +55,7 @@ NOTE: If the command-line for launching Peach does not inlcude a test name, Peac
 
   <!-- Use a different fuzzing strategy -->
   <Strategy class="Random" />
-  
+
   <!-- Log output to disk -->
   <Logger class="File">
     <Param name="Path" value="logs" />
@@ -67,7 +67,7 @@ NOTE: If the command-line for launching Peach does not inlcude a test name, Peac
 
 _Required:_
 
-xref:name[name]:: Name of the test, use "Default" for the default test. 
+xref:name[name]:: Name of the test, use "Default" for the default test.
 
 _Optional:_
 
@@ -81,7 +81,7 @@ targetLifetime:: Specifies when the target restarts to a known, stable state. +
 
 maxBackSearch::
 +
-Sets the maximum number of iterations to include in the search to reproduce a fault. This attribute is used when _targetLifeTime_ is "session". The default value is 80. 
+Sets the maximum number of iterations to include in the search to reproduce a fault. This attribute is used when _targetLifeTime_ is "session". The default value is 80.
 +
 For example, if the default value is used, the search potentially re-runs the 80 iterations that precede the most recent fault.
 
@@ -94,9 +94,9 @@ When using Publishers that have a maximum output size, such as UDP, it's recomme
 nonDeterministicActions::
 +
 If true, checks actions in the state model flow for exceptions. +
-If false, checks actions in the state model flow for exceptions and fully analyzes 
-the state model for consistency. The value false specifies legacy behavior and is the 
-default. 
+If false, checks actions in the state model flow for exceptions and fully analyzes
+the state model for consistency. The value false specifies legacy behavior and is the
+default.
 
 === Child Elements
 
@@ -113,4 +113,4 @@ _Optional:_
  * xref:MutationStrategies[Strategy]
  * xref:Logger[Logger]
  * xref:Test_Mutators[Mutators]
- 
+

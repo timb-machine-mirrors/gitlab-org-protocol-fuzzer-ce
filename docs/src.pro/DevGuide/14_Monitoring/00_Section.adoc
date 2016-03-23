@@ -14,7 +14,7 @@ Remote channels are used for both remote agents and remote publishers. Remote ch
 
 * Install Peach on the remote device. Remote agents and remote publishers can run and exchange data with the controlling Peach process.
 
-* Install a small remote agent on the target machine that can receive and send communications to Peach. This implementation is necessary when it is not possible for Peach to run on the target machine. The remote agent implementation allows Peach to detect crashes more intelligently, thereby increasing the usefullness of fuzzing.
+* Install a small remote agent on the target machine that can receive and send communications to Peach. This implementation is necessary when it is not possible for Peach to run on the target machine. The remote agent implementation allows Peach to detect crashes more intelligently, thereby increasing the usefulness of fuzzing.
 
 Remote publishers run publishers on a remote machine. This is useful when running OS specific publishers (such as xref:Publishers_Com[Com], which only runs on Windows).
 
@@ -65,11 +65,11 @@ One example is fuzzing an iPhone application. In some cases, gathering the actua
 
 ==== Memory debuggers
 
-A memory debugger monitors the memory at the boundary of each memory allocation to detect when a program attempts to access memory past what was allocated and forces the application to crash instead of allowing it to handle the error. The use of a memory debugger while fuzzing will greatly increase Peach's ability to detect and reproduce faults
+A memory debugger monitors the memory at the boundary of each memory allocation to detect when a program attempts to access memory past what was allocated and forces the application to crash instead of allowing it to handle the error. The use of a memory debugger while fuzzing will greatly increase Peach's ability to detect and reproduce faults.
 
 //TODO
 
-All the memory debuggers make detecting faults much easier. There are many commonly used memory debuggers [including eFence, DUMA, Page Heap (Windows), and Guard Malloc (OS X)] and they are used in a variety of ways. Page Heap on Windows can be enabled via the GFlags tool for any Windows executable. Guard Malloc on OS X is a debug option in Xcode for both Mac and iOS apps running in the simulator. DUMA (a forked version of eFence)is a cross-platform library that needs to be linked into the target's code when it's compiled.
+All the memory debuggers make detecting faults much easier. There are many commonly used memory debuggers [including eFence, DUMA, Page Heap (Windows), and Guard Malloc (OS X)] and they are used in a variety of ways. Page Heap on Windows can be enabled via the GFlags tool for any Windows executable. Guard Malloc on OS X is a debug option in Xcode for both Mac and iOS apps running in the simulator. DUMA (a forked version of eFence) is a cross-platform library that needs to be linked into the target's code when it's compiled.
 
 //////////////////
 TODO

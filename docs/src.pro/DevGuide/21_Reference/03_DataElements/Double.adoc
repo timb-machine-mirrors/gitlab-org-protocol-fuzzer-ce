@@ -304,10 +304,10 @@ Peach.Core.Publishers.ConsolePublisher stop()
 
 [*] Test 'Default' finished.
 ----
-<1> Big endian outputs the bytes in the order 
-<2> Little endian outputs the bytes in the order 
+<1> Big endian outputs the bytes in the order
+<2> Little endian outputs the bytes in the order
 
-Note, however, that endianness doesn't have any impact on output if the `valueType`
+Note, however, that endian-ness doesn't have any impact on output if the `valueType`
 is `"hex"`:
 
 [source,xml]
@@ -359,26 +359,26 @@ Output from this example.
 [[ Peach Pro v3.0.0
 [[ Copyright (c) Peach Fuzzer LLC
 
-[*] Test 'Default' starting with random seed 53121.                         
-                                                                            
-[R1,-,-] Performing iteration                                               
-Peach.Core.Engine runTest: Performing recording iteration.                  
-Peach.Core.Dom.StateModel Run(): Changing to state "Initial".               
-Peach.Core.Dom.Action Run(Action): Output                                   
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted 
-Peach.Core.Publishers.ConsolePublisher start()                              
-Peach.Core.Publishers.ConsolePublisher open()                               
-Peach.Core.Publishers.ConsolePublisher output(8 bytes)                      
-00000000   AB CD EF 01 AB CD EF 01                            ........   <1>   
-Peach.Core.Dom.Action Run(Action_1): Output                                 
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted 
-Peach.Core.Publishers.ConsolePublisher output(8 bytes)                      
-00000000   AB CD EF 01 AB CD EF 01                            ........   <2>   
-Peach.Core.Publishers.ConsolePublisher close()                              
-Peach.Core.Engine runTest: context.config.singleIteration == true           
-Peach.Core.Publishers.ConsolePublisher stop()                               
-                                                                            
-[*] Test 'Default' finished.                                                
+[*] Test 'Default' starting with random seed 53121.
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.StateModel Run(): Changing to state "Initial".
+Peach.Core.Dom.Action Run(Action): Output
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Publishers.ConsolePublisher start()
+Peach.Core.Publishers.ConsolePublisher open()
+Peach.Core.Publishers.ConsolePublisher output(8 bytes)
+00000000   AB CD EF 01 AB CD EF 01                            ........   <1>
+Peach.Core.Dom.Action Run(Action_1): Output
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Publishers.ConsolePublisher output(8 bytes)
+00000000   AB CD EF 01 AB CD EF 01                            ........   <2>
+Peach.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.ConsolePublisher stop()
+
+[*] Test 'Default' finished.
 ----
 <1> For little we see the expected output
 <2> For big endian, nothing changes

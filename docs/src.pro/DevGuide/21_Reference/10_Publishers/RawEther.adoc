@@ -15,7 +15,7 @@
 // Added full enum list for Ethernet protocol
 // Added short description about fuzzing mtu
 
-The _RawEther_ publisher allows sending raw ethernet packets.
+The _RawEther_ publisher allows sending raw Ethernet packets.
 
 NOTE: This publisher requires administrative privileges.
 

@@ -113,7 +113,7 @@ In Peach v3.x, the Test element block identifies the Agent, StateModel (and, by 
 +
 NOTE: In the example, the name for the Test element is `Default`. This is the default name for the Test element. At runtime, Peach v3.x automatically looks for and runs the default Test, unless you specify a Test name on the command line.
 
-* The parameter names for Monitors and Publishers now use CamelCasing. In the previous example, the parameter names `"Host"` and `"Port"` for the publisher have changed slightly due to CamelCasing. You can use the Peach DOM reference or the developer's guide to check parameters that fail validation. Use the following command to genereate the DOM reference.
+* The parameter names for Monitors and Publishers now use CamelCasing. In the previous example, the parameter names `"Host"` and `"Port"` for the publisher have changed slightly due to CamelCasing. You can use the Peach DOM reference or the developer's guide to check parameters that fail validation. Use the following command to generate the DOM reference.
 +
 -----------------------------------
 peach --showenv
@@ -169,7 +169,7 @@ that must be specified with each number instance.
 This xml element has one attribute, import, that names the python file containing
 code. Note the `.py` postfix is not used.
 +
-In v3.x, you must specify each python file you want to use. Wildcard characters (*)
+In v3.x, you must specify each python file you want to use. Wild card characters (*)
 are not supported.
 +
 The from attribute is now a top-level element named <PythonPath> that specifies
@@ -189,7 +189,7 @@ A multiple-bit Flag that uses the value parameter accepts a value expressed as a
 _value_ Attribute +
 When specifying a value for a number, you can use an integer value, a hexadecimal integer value or a sequence of hexadecimal digits.
 A value expressed as a sequence of hexadecimal digits (where valueType="hex") must match lengthwise with the allocated size of the number or a validation error occurs.
-For example, initially setting a 64-bit number to one can be specified as seven digits of zeroes and one digit of one:
+For example, initially setting a 64-bit number to one can be specified as seven digits of zeros and one digit of one:
 +
 [source,xml]
 -----------------------------------
@@ -259,9 +259,9 @@ The target address and port are common values to define.
       description="The IPv4 address of the target machine or device." />
 -----------------------------------
 +
-NOTE: On Windows, run 'ipconfig' and look for the 'IPv4 Address' field. +
-On Linux, run 'ifconfig' and look for the 'inet addr' field. +
-On OS X, run 'ifconfig' and look for the 'inet' field." />
+NOTE: On Windows, run `ipconfig` and look for the 'IPv4 Address' field. +
+On Linux, run `ifconfig` and look for the 'inet addr' field. +
+On OS X, run `ifconfig` and look for the 'inet' field." />
 +
 [source,xml]
 -----------------------------------
@@ -287,7 +287,7 @@ These values are ready for use in the pit as `##TargetIPv4##` and `##TargetPort#
 You can specify the agent and the monitoring options using the web UI.
  
 . *Create a folder to hold the converted pits.* +
-Create a subfolder in the pits folder, such as peach/pits/converted.
+Create a sub-folder in the pits folder, such as peach/pits/converted.
 
 . *Place the converted pits and associated configuration files in the newly created folder.* +
 For example, after placing, the XXX pit and configuration file in the converted folder, the file locations would be as follows:
