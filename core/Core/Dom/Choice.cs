@@ -63,7 +63,7 @@ namespace Peach.Core.Dom
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		public NamedCollection<DataElement> choiceElements = new NamedCollection<DataElement>();
 		DataElement _selectedElement = null;
-		readonly NamedCollection<DataElement> maskedElements = new NamedCollection<DataElement>();
+		readonly HashSet<string> maskedElements = new HashSet<string>();
 
 		public Choice()
 		{
@@ -383,7 +383,7 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		internal NamedCollection<DataElement> MaskedElements { get { return maskedElements; } }
+		internal HashSet<string> MaskedElements { get { return maskedElements; } }
 
 		protected override bool InScope(DataElement child)
 		{
@@ -395,7 +395,7 @@ namespace Peach.Core.Dom
 			if (forDisplay)
 			{
 				if (maskedElements.Any())
-					return maskedElements;
+					return choiceElements.Where(e => maskedElements.Contains(e.Name));
 				return choiceElements;
 			}
 

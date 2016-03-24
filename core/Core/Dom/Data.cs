@@ -83,8 +83,8 @@ namespace Peach.Core.Dom
 			foreach (var elem in DataField.EnumerateElements(action, model, Name, true))
 			{
 				var choice = parent as Choice;
-				if (choice != null && !choice.MaskedElements.ContainsKey(elem.Name))
-					choice.MaskedElements.Add(elem);
+				if (choice != null)
+					choice.MaskedElements.Add(elem.Name);
 
 				parent = elem;
 			}
