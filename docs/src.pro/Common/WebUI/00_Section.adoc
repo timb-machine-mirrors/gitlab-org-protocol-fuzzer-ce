@@ -123,10 +123,15 @@ Peach has user forums that serve as a knowledge base of user questions, and as a
 image::{images}/Common/WebUI/H6_PeachForums.png[]
 
 include::01_Wizard.adoc[]
+
 include::02_Config_Variables.adoc[]
+
 include::03_Config_Monitors.adoc[]
+
 include::04_Config_Tuning.adoc[]
+
 include::05_Config_Test.adoc[]
+
 include::06_Job.adoc[]
 
 // end

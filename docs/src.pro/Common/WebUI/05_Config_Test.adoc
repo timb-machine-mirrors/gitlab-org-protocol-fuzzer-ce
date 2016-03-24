@@ -1,4 +1,3 @@
-
 ==== Test
 
 In the Test section, Peach performs a test on the selected Pit configuration using settings provided for variables, agents, and monitors. Peach identifies the readiness of the Pit configuration for testing by tracking and reporting the progress of completing settings for the variables, agents, and monitors.
