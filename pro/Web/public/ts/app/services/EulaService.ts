@@ -41,7 +41,7 @@ namespace Peach {
 				} else if (license.isMissing) {
 					title = 'Missing License Detected';
 				} else if (license.isExpired) {
-					title = 'Exipred License Detected';
+					title = 'Expired License Detected';
 				} else {
 					title = 'License Error Detected';
 				}

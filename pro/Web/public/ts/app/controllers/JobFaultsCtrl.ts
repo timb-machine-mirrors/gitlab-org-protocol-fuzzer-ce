@@ -40,7 +40,7 @@ namespace Peach {
 			$scope.FaultSummaryTitle = FaultsTitle($state.params['bucket']);
 
 			const id = $state.params['id'];
-			$scope.FaultDetailTitle = 'Iteration: ' + id;
+			$scope.FaultDetailTitle = 'Test Case: ' + id;
 			const promise = jobService.LoadFaultDetail(id);
 			promise.then((detail: IFaultDetail) => {
 				this.Fault = detail;
