@@ -14,6 +14,7 @@ The following list identifies the support applications included with Peach Fuzze
 |xref:Program_PeachFuzzBang[Fuzz Bang]         |PeachFuzzBang.exe       | Graphical tool to perform dumb fuzzing
 |xref:Program_PeachXmlGenerator[XML Generator] |PeachXmlGenerator.exe   | Tool to produce XML sample files based on DTD
 |xref:Program_PeachSampleNinja[Sample Ninja]   |PeachSampleNinja.exe    | Creates the sample ninja database
+|xref:Program_PeachMultiNodeCli[Peach Multi-Node CLI Tool]   |sdk\tools\peachcli    | Control and co-ordinate multiple Peach instances
 |=======================
 
 TIP: The other executables have specialized purposes.
@@ -45,5 +46,9 @@ include::06_XmlGenerator.adoc[]
 :leveloffset: 1
 <<<
 include::07_SampleNinja.adoc[]
+
+:leveloffset: 1
+<<<
+include::08_PeachCli.adoc[]
 
 // end
