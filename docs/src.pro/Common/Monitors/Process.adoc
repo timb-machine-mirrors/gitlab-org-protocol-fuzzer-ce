@@ -24,6 +24,8 @@ The _Process_ monitor provides the following functionality:
 The _Process_ monitor detects faults for a process that exits prematurely or fails to
 exit. These faults generate bucket information with values for major hash set to "FailedToExit" and "ExitedEarly". Neither the minor hash nor the risk level is used for these faults.
 
+This monitor will also automatically detect link:https://github.com/google/sanitizers/wiki/AddressSanitizer[AddressSanitizer] crash information and generate a fault if found.
+
 === Parameters
 
 _Required:_

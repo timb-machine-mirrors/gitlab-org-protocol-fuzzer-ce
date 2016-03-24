@@ -19,6 +19,7 @@ timeout duration.
 
 This monitor provides bucketing for faults generated from the address sanitizer messages. Major hash, minor hash, and risk values are provide for these faults.
 
+This monitor will also automatically detect link:https://github.com/google/sanitizers/wiki/AddressSanitizer[AddressSanitizer] crash information and generate a fault if found.
 
 === Parameters
 
