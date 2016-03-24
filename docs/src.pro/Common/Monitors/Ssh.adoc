@@ -21,6 +21,8 @@ a regular expression. Set the +FaultOnMatch+ parameter to +true+ (this is the de
 the original use of this monitor), then provide a regular expression to match the
 +CheckValue+ parameter to enable the fault detection.
 
+This monitor will also automatically detect link:https://github.com/google/sanitizers/wiki/AddressSanitizer[AddressSanitizer] crash information and generate a fault if found.
+
 *Data Collection*
 
 The monitor always collects the output from the executed command and reports it for logging

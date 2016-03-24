@@ -47,7 +47,7 @@ External Python files can be included into a pit so that predefined functions ma
 
 === Importing External Files
 
-When importing Python files into the Peach name space, define both the xref:PythonPath[PythonPath] and the xref:Import[Import] elements. The _PythonPath_ element defines where to find the Python files. The _Import_ element specifies the file to import; the .py filename extention is not used in the declaration, as it is implied. Multiple files can be imported.
+When importing Python files into the Peach name space, define both the xref:PythonPath[PythonPath] and the xref:Import[Import] elements. The _PythonPath_ element defines where to find the Python files. The _Import_ element specifies the file to import; the .py filename extension is not used in the declaration, as it is implied. Multiple files can be imported.
 
 [source,xml]
 ----

@@ -1,9 +1,11 @@
 [[JsonBlob]]
 == JsonBlob
 
-A JsonBlob footnote:[Blob stands for "binary large object" a term used by databases to represent a column of binary data.] is used to represent binary json data (array of bytes). JsonBlobs are base64 encoded.
+A JsonBlob footnote:[Blob stands for "binary large object" a term used by databases to represent a column of binary data.] is used to represent binary JSON data (array of bytes).
+JsonBlobs are base64 encoded.
 
-By definition, the internal contents of a JsonBlob is unknown. Consequently, Blobs are dumb fuzzed, as the list of applicable mutators below indicates.
+By definition, the internal contents of a JsonBlob is unknown.
+Consequently, Blobs are dumb fuzzed, as the list of applicable mutators below indicates.
 
 === Syntax
 
@@ -26,7 +28,7 @@ _Optional:_
 
 xref:name[name]:: Element name
 isNull::
-    Is this elements value null. Json output will be +null+ instead of value.
+    Is this elements value null. JSON output will be +null+ instead of value.
 
 xref:value[value]:: Default value.
 xref:valueType[valueType]:: Format of value attribute.
@@ -115,31 +117,32 @@ Output from this example.
 ----
 >peach -1 --debug example.xml
 
-                                                                                                              
-[[ Peach Pro v0.0.0.1                                                                                         
-[[ Copyright (c) 2016 Peach Fuzzer, LLC                                                                       
-                                                                                                              
-[*] Web site running at: http://10.0.1.57:8888/                                                               
-                                                                                                              
-[*] Test 'Default' starting with random seed 4555.                                                            
+
+[[ Peach Pro v0.0.0.1
+[[ Copyright (c) 2016 Peach Fuzzer, LLC
+
+[*] Web site running at: http://10.0.1.57:8888/
+
+[*] Test 'Default' starting with random seed 4555.
 Peach.Pro.Core.Loggers.JobLogger Writing debug.log to: c:\peach\Logs\example.xml_20160223173145\debug.log
-                                                                                                              
-[R1,-,-] Performing iteration                                                                                 
-Peach.Core.Engine runTest: Performing recording iteration.                                                    
-Peach.Core.Dom.StateModel Run(): Changing to state "initial".                                                 
-Peach.Core.Dom.Action Run(Action): Output                                                                     
-Peach.Pro.Core.Publishers.ConsolePublisher start()                                                            
-Peach.Pro.Core.Publishers.ConsolePublisher open()                                                             
-Peach.Pro.Core.Publishers.ConsolePublisher output(22 bytes)                                                   
-00000000   7B 22 72 61 77 44 61 74  61 22 3A 22 71 72 76 4D   {"rawData":"qrvM                                
-00000010   33 51 3D 3D 22 7D                                  3Q=="}                                          
-Peach.Pro.Core.Publishers.ConsolePublisher close()                                                            
-Peach.Core.Engine runTest: context.config.singleIteration == true                                             
-Peach.Pro.Core.Publishers.ConsolePublisher stop()                                                             
-Peach.Core.Engine EndTest: Stopping all agents and monitors                                                   
-                                                                                                              
-[*] Test 'Default' finished.                                                                                  
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.StateModel Run(): Changing to state "initial".
+Peach.Core.Dom.Action Run(Action): Output
+Peach.Pro.Core.Publishers.ConsolePublisher start()
+Peach.Pro.Core.Publishers.ConsolePublisher open()
+Peach.Pro.Core.Publishers.ConsolePublisher output(22 bytes)
+00000000   7B 22 72 61 77 44 61 74  61 22 3A 22 71 72 76 4D   {"rawData":"qrvM
+00000010   33 51 3D 3D 22 7D                                  3Q=="}
+Peach.Pro.Core.Publishers.ConsolePublisher close()
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Pro.Core.Publishers.ConsolePublisher stop()
+Peach.Core.Engine EndTest: Stopping all agents and monitors
+
+[*] Test 'Default' finished.
 ----
 
 ==========================
 
+// end

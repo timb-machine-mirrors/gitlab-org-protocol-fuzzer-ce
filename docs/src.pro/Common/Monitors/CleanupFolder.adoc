@@ -67,77 +67,13 @@ During each iteration, the file +fuzzed.txt+ is created by the File publisher. A
 
 [source,xml]
 ----
-<?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
-
-  <DataModel name="TheDataModel">
-    <Number size="32" signed="false" value="31337" />
-  </DataModel>
-
-  <StateModel name="State" initialState="Initial" >
-    <State name="Initial">
-      <Action type="output">
-          <DataModel ref="TheDataModel"/>
-      </Action>
-
-      <Action type="output" publisher="FilePub">
-          <DataModel ref="TheDataModel"/>
-      </Action>
-
-    </State>
-  </StateModel>
-
-  <Agent name="TheAgent">
-    <Monitor class="CleanupFolder">
-      <Param name="Folder" value="C:\\cleanme"/>
-    </Monitor>
-  </Agent>
-
-  <Test name="Default">
-    <StateModel ref="State"/>
-
-    <Agent ref="TheAgent" />
-
-    <Publisher class="ConsoleHex"/>
-
-    <Publisher name="FilePub" class="File">
-      <Param name="FileName" value="fuzzed.txt"/>
-    </Publisher>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
-  </Test>
-</Peach>
+include::CleanupFolder_Example.xml[]
 ----
 
 Output from this example.
 
 ----
->peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
-[*] Test 'Default' starting with random seed 43073.
-Peach.Core.Agent.Agent StartMonitor: Monitor CleanupFolder
-Peach.Core.Agent.Agent SessionStarting: Monitor
-
-[R1,-,-] Performing iteration
-Peach.Core.Engine runTest: Performing recording iteration.
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
-Peach.Core.Dom.Action ActionType.Output
-Peach.Core.Publishers.ConsolePublisher start()
-Peach.Core.Publishers.ConsolePublisher open()
-Peach.Core.Publishers.ConsolePublisher output(4 bytes)
-00000000   69 7A 00 00                                        iz??
-Peach.Core.Publishers.ConsolePublisher close()
-Peach.Core.Engine runTest: context.config.singleIteration == true
-Peach.Core.Publishers.ConsolePublisher stop()
-Peach.Core.Agent.Agent SessionFinished: Monitor
-
-[*] Test 'Default' finished.
+include::CleanupFolder_Example.log[]
 ----
 ==============================
 

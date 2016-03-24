@@ -2,12 +2,13 @@
 [[JsonArray]]
 == JsonArray
 
-_JsonArray_ is used to represent a json array.  It's similar in operation to xref:Sequence[Sequence].
+_JsonArray_ is used to represent a JSON array.
+It's similar in operation to xref:Sequence[Sequence].
 
-A _JsonArray_ element is used to construct an array with all its elements predefined. 
-A _JsonArray_ is able to contain multiple data types at once. Unlike regular arrays 
-in Peach, the size of the array is determined by the number of elements within 
-the array.
+A _JsonArray_ element is used to construct an array with all its elements predefined.
+A _JsonArray_ is able to contain multiple data types at once.
+Unlike regular arrays in Peach,
+the size of the array is determined by the number of elements within the array.
 
 === Syntax
 
@@ -47,13 +48,13 @@ xref:Analyzers[Analyzer]:: Analyze current element post cracking, can dynamicall
 xref:Fixup[Fixup]:: Dynamic transformations such as checksums and CRCs.
 xref:Hint[Hint]:: Provide information to mutators.
 
-xref:JsonArray[JsonArray]:: Json array
-xref:JsonBool[JsonBool]:: Json boolean
-xref:JsonBlob[JsonBlob]:: Json blob
-xref:JsonDouble[JsonDouble]:: Json double/float
-xref:JsonInteger[JsonInteger]:: Json integer
-xref:JsonObject[JsonObject]:: Json object
-xref:JsonString[JsonString]:: Json string
+xref:JsonArray[JsonArray]:: JSON array
+xref:JsonBool[JsonBool]:: JSON boolean
+xref:JsonBlob[JsonBlob]:: JSON BLOB
+xref:JsonDouble[JsonDouble]:: JSON double/float
+xref:JsonInteger[JsonInteger]:: JSON integer
+xref:JsonObject[JsonObject]:: JSON object
+xref:JsonString[JsonString]:: JSON string
 
 xref:Placement[Placement]:: Relocate an element after it has been cracked.
 xref:Transformer[Transformer]:: Static transformations such as compression or encoding.
@@ -88,7 +89,7 @@ xref:Mutators_SizedVariance[SizedVariance]:: This mutator will change both sides
 
 .Simple Example
 ==========================
-Simple example of a json array with two elements.
+Simple example of a JSON array with two elements.
 
 [source,xml]
 ----
@@ -156,3 +157,4 @@ Peach.Core.Engine EndTest: Stopping all agents and monitors
 ----
 ==========================
 
+// end

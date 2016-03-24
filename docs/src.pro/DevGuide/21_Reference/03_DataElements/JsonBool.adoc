@@ -2,7 +2,7 @@
 [[JsonBool]]
 == JsonBool
 
-The _JsonBool_ element defines a Boolean value (values 0 or 1) that represents either true or false. 
+The _JsonBool_ element defines a Boolean value (values 0 or 1) that represents either true or false.
 
 === Syntax
 
@@ -124,3 +124,4 @@ Peach.Core.Engine EndTest: Stopping all agents and monitors
 ----
 ==========================
 
+// end

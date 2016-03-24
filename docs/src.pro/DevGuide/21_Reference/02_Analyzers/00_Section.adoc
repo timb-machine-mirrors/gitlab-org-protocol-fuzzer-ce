@@ -7,7 +7,7 @@
 //  * Can custom analyzers be written?
 //  * What analyzers does Peach Fuzzer Pro have?
 
-_Analyzers_ are classes that deconstruct some form of data and build a Peach Document Object Model (DOM) or a partial _DataModel_.  Examples of data that can be easily deconstructed are XML, and ASN.1.
+_Analyzers_ are classes that parse some form of data and build a Peach Document Object Model (DOM) or a partial _DataModel_.  Examples of data that can be easily parsed are XML and ASN.1.
 
 Using an _Analyzer_ can incredibly reduce the time needed to begin smart fuzzing since the time spent creating a precise _DataModel_ can be avoided.
 

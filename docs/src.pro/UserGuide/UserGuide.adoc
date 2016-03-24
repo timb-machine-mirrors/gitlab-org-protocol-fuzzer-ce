@@ -31,7 +31,7 @@ endif::[]
 // can otherwise impede tasks associated with fuzzing.
 //
 // It is not theoretical, nor designed to tackle advanced configurations.
-// The primary audience is a daily user, not a developer and not knowledgable about XML.
+// The primary audience is a daily user, not a developer and not knowledgeable about XML.
 
 // NOTE: This book documents the commercial version of Peach
 
@@ -57,7 +57,7 @@ include::05_WhatsNew/00_Section.adoc[]
 
 :leveloffset: 0
 <<<
-include::06_WebUI/00_Section.adoc[]
+include::06_RunningPeach/00_Section.adoc[]
 
 :leveloffset: 0
 <<<

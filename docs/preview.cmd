@@ -1,4 +1,4 @@
 @ECHO OFF
 
-bundle install
+call bundle install
 bundle exec guard

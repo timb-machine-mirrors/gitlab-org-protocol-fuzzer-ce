@@ -45,7 +45,7 @@ Regex::
 
 === Examples
 
-.Simple HTTP GET Url Example
+.Simple HTTP GET URL Example
 ==========================
 This example uses the string tokenizer on an inline value.
 

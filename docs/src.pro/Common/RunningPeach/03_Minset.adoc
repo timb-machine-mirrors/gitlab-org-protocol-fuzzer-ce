@@ -1,6 +1,8 @@
 [[Program_PeachMinset]]
 == Minset
 
+This tool is used when adding additional samples to an existing Pit or creating a custom file fuzzing Pit.
+
 Peach Minset is used to locate the minimum set of sample data with the best code coverage metrics to use while fuzzing.
 This process can be distributed across multiple machines to decrease the run time.
 

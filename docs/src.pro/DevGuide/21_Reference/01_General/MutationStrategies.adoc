@@ -19,9 +19,9 @@
 // * Mutators get random numbers from strategies
 
 
-Peach has pluggable mutation strategies to deal with two common situations: 
+Peach has pluggable mutation strategies to deal with two common situations:
 
-* Peach usually fuzzes DataModels using a top-down, sequential method.  While this guarantees that every data element is fuzzed with each test case, this may not be the best solution for larger, complex systems that can produce millions of test case variations.  
+* Peach usually fuzzes DataModels using a top-down, sequential method.  While this guarantees that every data element is fuzzed with each test case, this may not be the best solution for larger, complex systems that can produce millions of test case variations.
 
 * Peach needs a simple mechanism to allow you to change how fuzzing is performed. This helps you determine the best fuzzing methods and strategies for your situation.
 
@@ -37,20 +37,20 @@ Peach supplies three user-extensible mutation strategies:
 * Sequential
 * RandomDeterministic
 
-=== Random 
+=== Random
 
-Random is the default fuzzing strategy.  
+Random is the default fuzzing strategy.
 
-This strategy selects one or more elements to mutate at a time. For each selected element, Peach randomly selects a mutator appropriate for that element. 
+This strategy selects one or more elements to mutate at a time. For each selected element, Peach randomly selects a mutator appropriate for that element.
 The _MaxFieldsToMutate_ sets the maximum number of elements that simultaneously receive mutations.
 
-NOTE: Peach derives the randomness of these selections from a randomly-generated seed. 
+NOTE: Peach derives the randomness of these selections from a randomly-generated seed.
 
 You can repeat a test a test run using identical values and mutations in sequence by passing the same *seed* value with the Peach _--seed_ command line option.  This option is useful for replaying fuzzing iterations to reproduce a previous Fault.
 
 This strategy is most useful for larger data models or for use after performing a sequential fuzzing run.
 
-IMPORTANT: The random strategy can have an infinite number of fuzzing iterations; it can run forever. 
+IMPORTANT: The random strategy can have an infinite number of fuzzing iterations; it can run forever.
 
 
 ==== Parameters
@@ -64,7 +64,7 @@ SwitchCount:: Number of iterations to perform before switching xref:Data[Data] s
 ----
 <Test name="Default">
 	<StateModel ref="TheStateModel"/>
-    
+
 	<Publisher name="writer" class="File">
 		<Param name="FileName" value="fuzzed.tmp"/>
 	</Publisher>
@@ -78,9 +78,9 @@ SwitchCount:: Number of iterations to perform before switching xref:Data[Data] s
 
 === Sequential
 
-If you select the sequential strategy, Peach fuzzes each element in the DataModel in order, one at a time. Peach starts from the top of the DataModel and applies all valid mutations to each data element until all possible mutations have been used.  
+If you select the sequential strategy, Peach fuzzes each element in the DataModel in order, one at a time. Peach starts from the top of the DataModel and applies all valid mutations to each data element until all possible mutations have been used.
 
-The sequential strategy has a finite number of fuzzing iterations.  
+The sequential strategy has a finite number of fuzzing iterations.
 
 TIP: The seed for this strategy is not configurable and is always 31337.
 
@@ -98,4 +98,4 @@ TIP: The seed for this strategy is not configurable and is always 31337.
 
 This fuzzing strategy is deterministic (has a start and end).  It is similar to the Sequential strategy in that Peach systematically works through the DataModel from top to bottom, and for each data element, Peach applies all valid mutations before moving to the next data element. Unlike the Sequential strategy, the RandomDeterministic strategy shuffles the order of mutations for each element.
 
-The RandomDeterministic strategy provides consistent repeatability using a seed value that is usefule for repeating a previous fuzzing session with identical fuzzing.
+The RandomDeterministic strategy provides consistent repeatability using a seed value that is useful for repeating a previous fuzzing session with identical fuzzing.

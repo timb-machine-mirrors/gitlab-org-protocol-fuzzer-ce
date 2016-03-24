@@ -105,7 +105,7 @@ The REST publisher has been updated to support Web APIs that require XML instead
 
 ==== New JSON Elements
 
-New JSON elements have been added in an effort to improve JSON support in Peach.  These elements are now recommended over the older JSON element.
+New JSON elements have been added in an effort to improve JSON support in Peach.  These elements are now recommended over the older Json element.
 
 The following new data elements are available for modeling JSON documents:
 
