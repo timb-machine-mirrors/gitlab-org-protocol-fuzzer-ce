@@ -224,8 +224,7 @@ image::{images}/Common/WebUI/metrics_buckets.png[]
 
 ==== Accessing Raw Metrics Data
 
-The raw data is collected in a SQLite database that is stored in the logs folder.
+Each job has it's own SQLite database that that contains metrics and other information about the job. The database is stored with other log assets under the logs folder in the peach application folder.  Each job will have it's own folder of assets.  While we don't document the database schema, advanced users are welcome to mine the database to utalize the metrics data in different ways.  The database format may change between versions, though typically changes are small.
 
-IMPORTANT: Let the fuzzing job complete as well as writes to the database. Once these complete, then you can access the database without the risk of establishing a lock that could interfere with the data storage process.
 
 // end
