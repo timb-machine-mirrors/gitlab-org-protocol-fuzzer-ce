@@ -88,7 +88,7 @@ xref:JsonObject[]::
 +
 The _JsonObject_ element is used to model link:http://www.json.org/[JavaScript Object Notation (JSON)] objects.
 +
-_JsonObject_ elements are containers that JSON elements in a logical structure.
+_JsonObject_ elements are containers that group JSON elements in a logical structure.
 For example,
 a _JsonString_ element,
 a _JsonInteger_ element,
