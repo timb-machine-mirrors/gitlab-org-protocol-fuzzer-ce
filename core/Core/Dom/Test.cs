@@ -252,10 +252,10 @@ namespace Peach.Core.Dom
 
 		#endregion
 
-		[OnCloning]
+		[ShouldClone]
 		// ReSharper disable once UnusedMember.Local
 		// ReSharper disable once UnusedParameter.Local
-		private bool OnCloning(object context)
+		private bool ShouldClone(object context)
 		{
 			// We should not ever get here.  This means
 			// some other object is being cloned and has a member

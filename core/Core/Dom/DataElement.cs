@@ -1901,8 +1901,8 @@ namespace Peach.Core.Dom
 			return MoveTo(parent, offset);
 		}
 
-		[OnCloning]
-		private bool OnCloning(object context)
+		[ShouldClone]
+		private bool ShouldClone(object context)
 		{
 			var ctx = context as CloneContext;
 

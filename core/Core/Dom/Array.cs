@@ -357,7 +357,7 @@ namespace Peach.Core.Dom
 		}
 
 		[OnCloning]
-		private bool OnCloning(object context)
+		private void OnCloning(object context)
 		{
 			CloneContext ctx = context as CloneContext;
 
@@ -368,8 +368,6 @@ namespace Peach.Core.Dom
 				if (ctx.rename.Contains(this) && OriginalElement != null)
 					ctx.rename.Add(OriginalElement);
 			}
-
-			return true;
 		}
 
 		/// <summary>
