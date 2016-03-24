@@ -1,7 +1,10 @@
 [[Program_PeachSampleNinja]]
 == Sample Ninja
 
-Sample Ninja reads sample files used in fuzzing, runs them through the Peach data crackers (which applies the sample files to the data models), and places them into a database. During fuzzing, a sample ninja mutator mixes-and-matches file sections to create a new file.
+This tool is used when adding additional samples to an existing Pit or creating a custom file fuzzing Pit.
+
+Sample Ninja reads sample files used in fuzzing, runs them through the Peach data crackers (which applies the sample files to the data models), and places them into a database. 
+During fuzzing, a sample ninja mutator mixes-and-matches file sections to create a new file.
 
 IMPORTANT: Sample Ninja is not available in the Peach Community version.
 

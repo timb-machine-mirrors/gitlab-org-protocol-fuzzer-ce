@@ -57,7 +57,7 @@ include::05_WhatsNew/00_Section.adoc[]
 
 :leveloffset: 0
 <<<
-include::06_WebUI/00_Section.adoc[]
+include::06_RunningPeach/00_Section.adoc[]
 
 :leveloffset: 0
 <<<
