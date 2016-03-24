@@ -224,7 +224,6 @@ image::{images}/Common/WebUI/metrics_buckets.png[]
 
 ==== Accessing Raw Metrics Data
 
-Each job has it's own SQLite database that that contains metrics and other information about the job. The database is stored with other log assets under the logs folder in the peach application folder.  Each job will have it's own folder of assets.  While we don't document the database schema, advanced users are welcome to mine the database to utalize the metrics data in different ways.  The database format may change between versions, though typically changes are small.
-
+Each job has its own SQLite database that that contains metrics and other information about the job. The database is stored with other log assets under the logs folder in the peach application folder.  Each job will have its own folder of assets.  While we don't document the database schema, advanced users are welcome to mine the database to utilize the metrics data in different ways.  The database format may change between versions, though typically changes are small.
 
 // end
