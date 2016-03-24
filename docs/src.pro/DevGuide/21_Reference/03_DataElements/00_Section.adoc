@@ -145,8 +145,6 @@ xref:XmlElement[]::
 _XmlElement_ defines an XML element.
 
 :leveloffset: 2
-include::Asn1Length.adoc[]
-include::Asn1Tag.adoc[]
 include::Asn1Type.adoc[]
 include::Blob.adoc[]
 include::Block.adoc[]
