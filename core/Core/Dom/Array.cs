@@ -351,7 +351,7 @@ namespace Peach.Core.Dom
 		{
 			var clone = OriginalElement;
 
-			clone = clone.Clone("{0}_{1}".Fmt(clone.Name, index));
+			clone = clone.ShallowClone("{0}_{1}".Fmt(clone.Name, index));
 
 			return clone;
 		}
