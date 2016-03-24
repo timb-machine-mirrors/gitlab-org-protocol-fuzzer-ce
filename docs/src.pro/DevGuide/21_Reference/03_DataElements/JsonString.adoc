@@ -2,13 +2,21 @@
 [[JsonString]]
 == JsonString
 
-Represents a JSON string Unicode characters.
+Represents a JSON string of Unicode characters.
 
 All strings are encoded prior to output according to the JSON specification.
 
-Strings can hold numbers that are stored in a string format. When strings contain a number, Peach additionally uses  numerical mutators to mutate the strings.
+Strings can hold numbers that are stored in a string format.
+When strings contain a number,
+Peach additionally uses numerical mutators to mutate the strings.
 
-The JsonDouble element is a child element of xref:DataModel[DataModel], xref:Block[Block], xref:Sequence[Sequence], xref:JsonObject[JsonObject], xref:JsonArray[JsonArray] or xref:Choice[Choice].
+The JsonString element is a child element of
+xref:DataModel[DataModel],
+xref:Block[Block],
+xref:Sequence[Sequence],
+xref:JsonObject[JsonObject],
+xref:JsonArray[JsonArray],
+or xref:Choice[Choice].
 
 === Syntax
 
@@ -292,3 +300,4 @@ Peach.Core.Engine EndTest: Stopping all agents and monitors
 ----
 ====================
 
+// end

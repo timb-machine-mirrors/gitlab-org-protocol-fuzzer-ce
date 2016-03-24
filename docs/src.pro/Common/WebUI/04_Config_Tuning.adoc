@@ -2,7 +2,7 @@
 
 Tuning allows control of how testing is performed on a field-by-field basis.
 
-Fields are shown hierarchically below. A search feature is provided to quickly find fields of interest. Each field, or set of fields, can be excluded from testing or have its testing focus turned up or down. As a field’s focus is turned up (High or Highest), test cases will be generated more often for that field. If a field is turned down (Low, Lowest), fewer test cases will be generated for that field. Fields that are excluded will not have any test cases generated.
+Fields are shown hierarchically below. A search feature is provided to quickly find fields of interest. Each field, or set of fields, can be excluded from testing or have its testing focus turned up or down. As a field's focus is turned up (High or Highest), test cases will be generated more often for that field. If a field is turned down (Low, Lowest), fewer test cases will be generated for that field. Fields that are excluded will not have any test cases generated.
 
 Excluding fields from testing should be used judiciously as it can lead to undiscovered faults.
 
@@ -36,18 +36,25 @@ Exclude::
 +
 Don't perform any testing of this field.
 +
-CAUTION: Excluding fields from testing should be used judiciously as it can lead to undiscovered faults. It's our recommendation that all fields get tested.  Instead of excluding fields, consider marking tuning them to lower or lowest.
+CAUTION: Excluding fields from testing should be used judiciously as it can lead to undiscovered faults. It's our recommendation that all fields get tested.
+Instead of excluding fields, consider tuning them to lower or lowest.
 
-Lowest:: Produce the least number of test cases for this field.  When selected, the field will still receive some testing, but much less than fields marked as normal.
+Lowest:: Produce the least number of test cases for this field.
+When selected, the field will still receive some testing, but much less than fields marked as normal.
 
-Low:: Produce fiewer test cases for this field.  Fields tuned to low will still be tested, but fewer test cases will be generated compared to fields marked as normal.
+Low:: Produce fewer test cases for this field.
+Fields tuned to low will still be tested, but fewer test cases will be generated compared to fields marked as normal.
 
-Normal:: No changes to how this field is tested. Peach will decide how often to generate test cases for fields marked as normal.  This is the recommended setting for all fields.
+Normal:: No changes to how this field is tested.
+Peach will decide how often to generate test cases for fields marked as normal.
+This is the recommended setting for all fields.
 
-High:: Produce more test cases for this field.  Fields tuned to high will receive more testing than those marked as normal.
+High:: Produce more test cases for this field.
+Fields tuned to high will receive more testing than those marked as normal.
 
-Highest:: Produce even more test cases for this field.  Fields tuned ot highest will receive more testing than those marked as high.
+Highest:: Produce even more test cases for this field.
+Fields tuned to highest will receive more testing than those marked as high.
 
-Once you have complated tuning the fields, click the Save button in the upper right of the screen.
+Once you have completed tuning the fields, click the Save button in the upper right of the screen.
 
 // end
