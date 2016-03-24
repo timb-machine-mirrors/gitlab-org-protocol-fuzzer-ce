@@ -17,22 +17,103 @@ peach -t peach_xml_file
 === Parameters
 
 -1:: Perform a single iteration. Used in debugging and validation. The iteration performed does not have any mutations.
--a --agent _channel_:: Launch Peach as an agent process using specified _channel_ protocol. This parameter requires a value for _channel_. If -a is not specified, channel 9001 is used.
--c --count _pit_:: For deterministic strategies, this returns a total iteration count.
--t --test _pit_:: Perform XML validation of pit
--p --parallel _M_,_N_:: Setup for parallel fuzzing. This is only useful for deterministic strategies. _M_ is the total number of running instances. _N_ is the current instance.
---debug:: Enable debug messages. This is used to validate cracking and debugging of pit files.
---trace:: Enable verbose trace messages. Primarily used when reporting potential bugs in Peach.
---seed _SEED_:: Use a specific seed for fuzzing run. This should only be used when reproducing results.
---parseonly:: Perform a simple parsing of the pit file, then exit.
---makexsd:: Generate XML Schema file (peach.xsd). This file is used for pit file validation and also intelliSense in XML editors. The XSD only needs to be generated if custom extensions are added to Peach.
---showenv:: Display a list of all elements found along with parameters and basic documentation.
---showdevices:: Show a list of network devices found on the system.
---analyzer:: Run an analyzer from command line (if supported by analyzer)
---skipto _N_:: Skip to a specific iteration number. _N_ is the iteration to skip to.
---range _START_,_STOP_:: Perform a specific range of iterations. _START_ is starting iteration, _STOP_ is iteration to stop at.
--D --define=_KEY_=_VALUE_:: Define a config value that is replaced in the pit. This overrides values loaded from the default config file (.config).
+-a --agent _CHANNEL_::
++
+Launch Peach as an agent process using specified _CHANNEL_ protocol.  
+In most cases the channel protocol should be +tcp+.
+By default the +tcp+ channel will start listening on port 9001.
+
+--analyzer _ANALYZER_::
++
+Run an analyzer from command line (if supported by analyzer).
++
+.XML Analyzer Example
+====
+peach --analyzer Json example.json generated_pit.xml
+====
+
+-c --count _pit_:: 
++
+For deterministic strategies, this returns a total iteration count.
++
+NOTE: This argument will not work with the default strategy.
+
+-D --define=_KEY_=_VALUE_::
++
+Define a config value that is replaced in the pit. This overrides values loaded from the configuration file.
++
+.Define example
+====
+peach HTTP_Server.xml -DTargetIPv4=192.168.48.128 -DTargetPort=8080
+====
+
+--debug::
++
+Enable debug messages.
+This is used to debug or verify pit files.
++
+See also the +--trace+ argument.
+
+--duration _DURATION_::
++
+Duration of fuzzing run.  Peach will run for _DURATION_ length of time.  Commonly integrating Peach into an automated test cycle or continuous integration environment. Argument format is +DD.HH:MM:SS+.
++
+.Duration of 12 days
+=====
+--duration 12
+=====
++
+.Duration of 20 minutes
+=====
+--duration 0:20
+=====
++
+.Duration of 5 hours
+=====
+--duration 5:00
+=====
++
+.Duration of 1 day, 5 hours
+=====
+--duration 1.5:00
+=====
+
 --config=_CONFIG_:: Specify a configuration file to use. _CONFIG_ is the configuration file.
+--makexsd::
++
+Generate XML Schema file (peach.xsd).
+This file is used for pit file validation and also intelliSense in XML editors.
+The XSD only needs to be generated if custom extensions are added to Peach.
+
+-p --parallel _M_,_N_::
++
+Setup for parallel fuzzing.
+This is only useful for deterministic strategies.
+_M_ is the total number of running instances.
+_N_ is the current instance.
++
+NOTE: When using the default fuzzing strategy, this argument is not useful.
+
+--parseonly:: Perform a simple parsing of the pit file, then exit.
+
+--range _START_,_STOP_:: Perform a specific range of iterations. _START_ is starting iteration, _STOP_ is iteration to stop at.
+
+--seed _SEED_:: Use a specific seed for fuzzing run. This should only be used when reproducing results.
+
+--showenv:: Display a list of all elements found along with parameters and basic documentation.
+
+--showdevices:: Show a list of network devices found on the system.
+
+--skipto _N_:: Skip to a specific iteration number. _N_ is the iteration to skip to.
+
+-t --test _pit_:: Perform XML validation of pit
+
+--trace::
++
+Enable verbose trace messages.
+Primarily used when reporting potential bugs in Peach.
++
+See also +--debug+.
 
 === Examples
 
