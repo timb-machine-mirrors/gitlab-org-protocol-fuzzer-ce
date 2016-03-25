@@ -109,6 +109,7 @@ namespace Peach {
 				controller: EulaController,
 				controllerAs: C.ViewModel,
 				backdrop: 'static',
+				keyboard: false,
 				size: 'lg'
 			}).result;
 		}
@@ -133,6 +134,7 @@ namespace Peach {
 				controller: LicenseController,
 				controllerAs: C.ViewModel,
 				backdrop: 'static',
+				keyboard: false,
 				resolve: { Options: () => options }
 			}).result;
 		}
