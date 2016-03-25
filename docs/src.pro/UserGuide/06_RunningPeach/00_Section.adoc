@@ -25,18 +25,18 @@ include::../../Common/WebUI/00_Section.adoc[]
 
 :leveloffset: 1
 <<<
-include::02_Peach.adoc[]
+include::../../Common/RunningPeach/Peach.adoc[]
 
 :leveloffset: 1
 <<<
-include::../../Common/RunningPeach/03_Minset.adoc[]
+include::../../Common/RunningPeach/Minset.adoc[]
 
 :leveloffset: 1
 <<<
-include::../../Common/RunningPeach/07_SampleNinja.adoc[]
+include::../../Common/RunningPeach/SampleNinja.adoc[]
 
 :leveloffset: 1
 <<<
-include::../../Common/RunningPeach/08_PeachCli.adoc[]
+include::../../Common/RunningPeach/PeachCli.adoc[]
 
 // end
