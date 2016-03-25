@@ -629,6 +629,7 @@ namespace Peach.Pro.Core.WebServices
 				Directory.CreateDirectory(xmlDir);
 
 			var cfgFile = MakeUniquePath(cfgDir, legacyName, ".peach");
+			var cfgName = Path.GetFileNameWithoutExtension(cfgFile);
 			var xmlFile = MakeUniquePath(xmlDir, legacyName, ".xml");
 			var xmlConfigFile = MakeUniquePath(xmlDir, legacyName, ".xml.config");
 
@@ -659,7 +660,7 @@ namespace Peach.Pro.Core.WebServices
 			var guid = MakeGuid(GetRelativePath(cfgFile));
 			var pitConfig = new PitConfig {
 				Id = guid,
-				Name = legacyName,
+				Name = cfgName,
 				Description = contents.Description,
 				OriginalPit = originalPitPath,
 				Config = cfg,
