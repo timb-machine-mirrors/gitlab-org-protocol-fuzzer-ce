@@ -45,13 +45,13 @@ xref:constraint[constraint]:: Scripting expression that evaluates to true or fal
 
 *indefiniteLength*::
 +
-If "true", use the indefinite encoding form of the Asn.1 element. 
+If "true", use the indefinite encoding form of the ASN.1 element.
 If "false", use definite encoding form.
 The default is "false".
 
-*longLength*:: 
+*longLength*::
 +
-If "true", always use the long encoding form (that is, multiple length octects) to express the length of the Asn.1 element.
+If "true", always use the long encoding form (that is, multiple length octets) to express the length of the ASN.1 element.
 If "false", also allow the short encoding form where the number of content octets is expressed in 7 bits (127 or less).
 The default is "false".
 
@@ -89,7 +89,7 @@ xref:Analyzers[Analyzer]:: Analyzes current element post cracking, can dynamical
 
 === Mutators
 
-This data element is a container element with several hidden internal elements of Number type, plus any value for the asn.1 field.  This data element will get fuzzed with all mutators from Block and Number.
+This data element is a container element with several hidden internal elements of Number type, plus any value for the ASN.1 field.  This data element will get fuzzed with all mutators from Block and Number.
 
 {nbsp}
 [[Asn1Type_Examples]]
