@@ -2,21 +2,37 @@
 [[Monitors_MemoryMonitor]]
 == Memory Monitor
 
-*Monitor Category*: *Fault detection*
+*Monitor Category*:  *Data collection*, *Fault detection*
 
-The _Memory_ monitor checks the process memory usage and initiates a fault when the memory
-usage exceeds a specified limit.  This monitor can detect non-crashing extraneous memory
-usage and whether a process exits early.
+The _Memory_ monitor provides two modes of operation:
 
-The reported metrics for this monitor occur at the end of test iterations and include the following items:
+. Data collection
++
+When the 'MemoryLimit' is `0`,
+the monitor will collect memory metrics at the end of each iteration.
+If a fault is triggered by another monitor,
+the collected memory metrics will be stored as `Usage.txt` in the fault's data bundle.
+. Fault detection
++
+When the 'MemoryLimit' is > `0`,
+the monitor will initiate a fault when the memory usage for the process being monitored exceeds the specified limit.
 
-* *Private memory size* - Number of bytes allocated for the process. An approximate number of
-bytes a process is using.
-* *Working set memory* - Total physical memory used by the process, consisting of in-memory private
-bytes plus memory-mapped files, such as DLLs.
-* *Peak working set* - Largest working set used by the process.
-* *Virtual memory size* - Total address space occupied by the entire process, including the working
-set plus paged private bytes and the standby list.
+The reported metrics for this monitor include the following items:
+
+* *Private memory size* -
+Number of bytes allocated for the process.
+An approximate number of bytes a process is using.
+
+* *Working set memory* -
+Total physical memory used by the process, consisting of in-memory private bytes plus memory-mapped files,
+such as DLLs.
+
+* *Peak working set* -
+Largest working set used by the process.
+
+* *Virtual memory size* -
+Total address space occupied by the entire process,
+including the working set plus paged private bytes and the standby list.
 
 NOTE: This monitor requires that you set a memory limit and identify a process to monitor,
 specifying the process by name or by process id.
@@ -25,14 +41,34 @@ specifying the process by name or by process id.
 
 _Required:_
 
-MemoryLimit:: Fault when memory usage surpasses limit expressed in bytes, defaults to 0 bytes.
-Pid:: Process ID to monitor.
-ProcessName:: Name of the process to monitor.
+Either one of 'Pid' or 'ProcessName' is required.
+It is an error to specify both.
+
+Pid::
+Process ID to monitor.
+
+ProcessName::
+Name of the process to monitor.
 
 
 _Optional:_
 
-StopOnFault:: Stop fuzzing if a fault is triggered, defaults to false.
+MemoryLimit::
+A value specified in bytes.
++
+When `0` is specified,
+enable data collection mode,
+which causes memory metrics to be collected
+at the end of every iteration.
++
+When a value greater than `0` is specified,
+enable fault detection mode,
+which causes a fault to occur if the memory usage of the monitored process exceeds the specified limit.
++
+Defaults to `0`.
+
+StopOnFault::
+Stop fuzzing if a fault is triggered, defaults to `false`.
 
 === Examples
 
@@ -41,8 +77,8 @@ ifdef::peachug[]
 .Monitor memory usage of Notepad
 ====================
 
-This parameter example is from a setup that monitors memory usage of Notepad. It generates a
-fault on the test iteration.
+This parameter example is from a setup that monitors memory usage of Notepad.
+It is configured to generate a fault if memory usage exceeds 10MB.
 
 [cols="2,4" options="header",halign="center"]
 |==========================================================
@@ -61,68 +97,13 @@ ifndef::peachug[]
 ========================
 [source,xml]
 ----
-<?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
-
-  <DataModel name="TheDataModel">
-    <Number size="32" signed="false" value="31337" />
-  </DataModel>
-
-  <StateModel name="State" initialState="Initial" >
-    <State name="Initial">
-      <Action type="output">
-          <DataModel ref="TheDataModel"/>
-      </Action>
-    </State>
-  </StateModel>
-
-  <Agent name="Local">
-    <Monitor class="Memory">
-      <Param name="ProcessName" value="Notepad"/>
-      <Param name="MemoryLimit" value="10000000" />
-    </Monitor>
-  </Agent>
-
-  <Test name="Default">
-    <StateModel ref="State"/>
-
-    <Agent ref="Local" />
-
-    <Publisher class="ConsoleHex"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
-  </Test>
-</Peach>
+include::MemoryMonitor_Example.xml[]
 ----
 
 Output from example.
 
 ----
->peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
-[*] Test 'Default' starting with random seed 54974.
-Peach.Core.Agent.Agent StartMonitor: Monitor Memory
-Peach.Core.Agent.Agent SessionStarting: Monitor
-
-[R1,-,-] Performing iteration
-Peach.Core.Engine runTest: Performing recording iteration.
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
-Peach.Core.Dom.Action ActionType.Output
-Peach.Core.Publishers.ConsolePublisher start()
-Peach.Core.Publishers.ConsolePublisher open()
-Peach.Core.Publishers.ConsolePublisher output(4 bytes)
-00000000   69 7A 00 00                                        iz??
-Peach.Core.Publishers.ConsolePublisher close()
-Peach.Core.Engine runTest: context.config.singleIteration == true
-Peach.Core.Publishers.ConsolePublisher stop()
-Peach.Core.Agent.Agent SessionFinished: Monitor
-
-[*] Test 'Default' finished.
+include::MemoryMonitor_Example.log[]
 ----
 ========================
 
