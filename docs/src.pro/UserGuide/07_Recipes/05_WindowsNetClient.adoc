@@ -93,7 +93,7 @@ Peach offers two types of agents to manage monitors and I/O publishers: local an
 * Local agents reside inside Peach. +
 The local agent in this recipe addresses automation involving the VM and
 data collection that captures network packets. The local agent houses the
-xref:Monitors_Vmware[VMware] and the xref:Monitors_Pcap[NetworkCapture] monitors.
+xref:Monitors_Vmware[VMware] and the xref:Monitors_NetworkCapture[NetworkCapture] monitors.
 +
 The VMware monitor starts a snapshot VM environment at the beginning of the
 fuzzing job, as well as restarting the same VM snapshot after a fault occurs.
@@ -205,7 +205,7 @@ Snapshot Name:: Identifies the snapshot to use for the specific image.
 
 ===== Network Capture (InterestingPackets)
 
-The xref:Monitors_Pcap[Netowrk Capture Monitor] (InterestingPackets) captures network packets
+The xref:Monitors_NetworkCapture[Netowrk Capture Monitor] (InterestingPackets) captures network packets
 sent and received from the test target. When a fault occurs, Peach stores the packets immediately surrounding the fault in the log of the test case.
 
 image::{images}/UserGuide/Recipes/WindowsNetClient_NetworkCapture.png[scale="50"]

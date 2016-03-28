@@ -2,7 +2,7 @@
 [[Monitors_PageHeap]]
 == PageHeap Monitor (Windows)
 
-*Monitor Category*: *Fault detection*
+*Monitor Category*: *Automation*
 
 The _PageHeap_ monitor enables heap allocation monitoring for an executable through the Windows debugger. Peach sets and clears the parameters used for monitoring heap allocation at the beginning and end of the fuzzing session.
 

@@ -75,7 +75,7 @@ Both monitors run on the remote machine with the test target.
 
 5. Collect data surrounding each fault as it happens.
 +
-Peach sends and receives network packets to the service. When a fault occurs, the packets involved with the fault are interesting. Peach captures the packets using the xref:Monitors_Pcap[NetworkCapture] monitor. This monitor resides on the local machine with Peach Fuzzer.
+Peach sends and receives network packets to the service. When a fault occurs, the packets involved with the fault are interesting. Peach captures the packets using the xref:Monitors_NetworkCapture[NetworkCapture] monitor. This monitor resides on the local machine with Peach Fuzzer.
 
 6. Resume fuzzing.
 +
@@ -88,7 +88,7 @@ Peach offers two types of agents to manage monitors and I/O publishers: local an
 * Local agents reside inside Peach. +
 The local agent in this recipe addresses automation involving the VM and data collection
 that captures network packets. The local agent houses the xref:Monitors_Vmware[VMware]
- and the xref:Monitors_Pcap[NetworkCapture] monitors.
+ and the xref:Monitors_NetworkCapture[NetworkCapture] monitors.
 +
 The VMware monitor starts a snapshot VM environment at the beginning of the fuzzing job,
 as well as restarting the same VM snapshot after a fault occurs.
@@ -202,7 +202,7 @@ TIP: When specifying a backslash (\) in the Peach Web user interface, double the
 
 ====== NetworkCapture Monitor
 
-The xref:Monitors_Pcap[Netowrk Capture Monitor (InterestingPackets)] monitor captures network packets when a fault occurs and stores them in the log for the test case that generates the fault.
+The xref:Monitors_NetworkCapture[Netowrk Capture Monitor (InterestingPackets)] monitor captures network packets when a fault occurs and stores them in the log for the test case that generates the fault.
 
 image::{images}/UserGuide/Recipes/WindowsNetService_NetworkCapture.png[scale="50"]
 

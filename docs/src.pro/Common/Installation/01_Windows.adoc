@@ -13,7 +13,7 @@ The only required software is the Microsoft.NET v4 Runtime. For the most robust 
 ** The most recent versions of the Debugging Tools are distributed as part of the Microsoft Windows SDK.
 ** Download the installer from http://msdn.microsoft.com/en-us/library/windows/hardware/ff551063(v=vs.85).aspx[Debugging Tools for Windows].
 . Install Wireshark (optional).
-** This component is used by the xref:Monitors_Pcap[NetworkCapture] monitor when taking a network capture.
+** This component is used by the xref:Monitors_NetworkCapture[NetworkCapture] monitor when taking a network capture.
 ** Download the installer from http://wireshark.org[Wireshark] or http://www.winpcap.org/[Winpcap].
 . Unzip the Peach binary distribution to a working folder.
 ** Install Peach to the appropriate folder, such as +C:\peach+.

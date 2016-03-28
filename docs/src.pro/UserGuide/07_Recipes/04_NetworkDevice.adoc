@@ -219,7 +219,7 @@ The *State* parameter specifies the fault condition. The value `Closed` indicate
 fault occurs when the communication channel changes to `Closed`.
 
 ===== NetworkCapture (InterestingPackets)
-The xref:Monitors_Pcap[NetworkCapture Monitor] captures network traffic (packets) sent and
+The xref:Monitors_NetworkCapture[NetworkCapture Monitor] captures network traffic (packets) sent and
 received from the test target.
 
 image::{images}/UserGuide/Recipes/NetworkDevice_NetworkCapture.png[scale="50"]
