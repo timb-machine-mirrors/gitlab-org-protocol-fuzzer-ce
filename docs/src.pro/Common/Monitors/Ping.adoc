@@ -5,49 +5,71 @@
 *Monitor Category*: *Fault detection*
 
 The _Ping_ monitor verifies whether a device is functioning by sending a packet to a target location,
-and waiting for a response from the device. _Ping_ continues to monitor until either a _Timeout_ occurs
-or a response from the target device reaches the _Ping_ monitor. Ping runs at the end of each iteration.
+and waiting for a response from the device.
+_Ping_ continues to monitor until either a _Timeout_ occurs or a response from the target device reaches the _Ping_ monitor.
+Ping runs at the end of each iteration.
 
 image::{images}/Common/Monitors/Ping.png[scalewidth="50%"]
 
-In the first scenario (left), Ping successfully interacts with the test target.
+In the first scenario (left),
+Ping successfully interacts with the test target.
 
 . At the end of each iteration, the Ping monitor sends a message to the test target.
 . In this case, the target receives the message and sends a response.
-. The monitor waits a specified time period for a response. In this case, the response
-within the time period, and gives the "OK" response. The Ping Monitor resets for the
-sequence to repeat at the end of the next iteration.
+. The monitor waits a specified time period for a response.
+In this case,
+the response within the time period,
+and gives the "OK" response.
+The Ping Monitor resets for the sequence to repeat at the end of the next iteration.
 
-In the second scenario (right), the test target is non-responsive.
+In the second scenario (right),
+the test target is non-responsive.
 
 . At the end of the iteration, the Ping monitor sends a message to the test target.
 . (2B) In this case, the target is non-responsive or no longer exists. No response is sent.
-. (3B) The monitor waits a specified time period for a response. In this case, a timeout
-occurs. The Ping monitor issues a fault and collects data around the fault. Ping resets
-for the next iteration.
+. (3B) The monitor waits a specified time period for a response.
+In this case, a timeout occurs.
+The Ping monitor issues a fault and collects data around the fault.
+Ping resets for the next iteration.
 
-_Ping_ can validate that a target is still up or is waiting to restart. This is useful when fuzzing
-embedded devices that crash surreptitiously.
+_Ping_ can validate that a target is still up or is waiting to restart.
+This is useful when fuzzing embedded devices that crash surreptitiously.
 
-Additionally, by using the FaultOnSuccess parameter, _Ping_ can help you to verify whether
-or not a new device at a specific address becomes available, or that a non-functioning device
-starts to function. For example, if you are fuzzing a device that programmatically turns
-other computers on, you can use _Ping_ with *FaultOnSuccess=true* to determine whether the
-computers are off (an uninteresting result) or on (an interesting result).
+Additionally,
+by using the 'FaultOnSuccess' parameter,
+_Ping_ can help you to verify whether or not a new device at a specific address becomes available,
+or that a non-functioning device starts to function.
+For example,
+if you are fuzzing a device that programmatically turns other computers on,
+you can use _Ping_ with 'FaultOnSuccess' set to `true` to determine whether the computers are off (an uninteresting result) or on (an interesting result).
 
-NOTE: When running Mono (for Linux and OS X systems), Ping needs administrative or root privileges. In addition, the output string for Mono is limited to 100 bytes, including 28 bytes needed for the IP and ICMP.
+[NOTE]
+====
+When running under Unix, the following restrictions apply:
+
+* Root privileges are required
+* 'Data' parameter is limited to 72 bytes
+====
 
 === Parameters
 
 _Required:_
 
-Host:: Host name or IP address to ping.
+Host::
+Host name or IP address to ping.
 
 _Optional:_
 
-Data:: Data to send in the ping packet.
-FaultOnSuccess:: Fault if ping is successful, defaults to false.
-Timeout:: Timeout value expressed in milliseconds, defaults to 1,000.
+Data::
+Data to send in the ping packet payload.
+If this value is left blank,
+the OS will use default data to send.
+
+FaultOnSuccess::
+Fault if ping is successful, defaults to `false`.
+
+Timeout::
+Timeout value expressed in milliseconds, defaults to `1000`.
 
 
 === Examples
@@ -76,171 +98,16 @@ ifndef::peachug[]
 ==============
 [source,xml]
 ----
-<?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
-
-  <DataModel name="TheDataModel">
-    <Number size="32" signed="false" value="31337" />
-  </DataModel>
-
-  <StateModel name="State" initialState="Initial" >
-    <State name="Initial">
-      <Action type="output">
-          <DataModel ref="TheDataModel"/>
-      </Action>
-    </State>
-  </StateModel>
-
-  <Agent name="Local">
-    <Monitor class="Ping">
-      <Param name="Host" value="www.peachfuzzer.com" />
-      <Param name="Timeout" value="10000"/>
-    </Monitor>
-  </Agent>
-
-  <Test name="Default">
-    <StateModel ref="State"/>
-
-    <Agent ref="Local" />
-
-    <Publisher class="TcpClient">
-      <Param name="Host" value="www.peachfuzzer.com"/>
-      <Param name="Port" value="80"/>
-    </Publisher>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
-  </Test>
-</Peach>
+include::Ping_Example.xml[]
 ----
 
 Output from this example.
 
 ----
->peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
-[*] Test 'Default' starting with random seed 26777.
-Peach.Core.Agent.Agent StartMonitor: Monitor Ping
-Peach.Core.Agent.Agent SessionStarting: Monitor
-
-[R1,-,-] Performing iteration
-Peach.Core.Engine runTest: Performing recording iteration.
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
-Peach.Core.Dom.Action ActionType.Output
-Peach.Core.Publishers.TcpClientPublisher start()
-Peach.Core.Publishers.TcpClientPublisher open()
-Peach.Core.Publishers.TcpClientPublisher output(4 bytes)
-Peach.Core.Publishers.TcpClientPublisher
-
-00000000   69 7A 00 00                                        iz··
-
-Peach.Core.Publishers.TcpClientPublisher close()
-Peach.Core.Publishers.TcpClientPublisher Shutting down connection to 198.185.159.135:80
-Peach.Core.Publishers.TcpClientPublisher Read 0 bytes from 198.185.159.135:80, closing client connection.
-Peach.Core.Publishers.TcpClientPublisher Closing connection to 198.185.159.135:80
-Peach.Core.Agent.Monitors.PingMonitor DetectedFault(): www.peachfuzzer.com replied after 10000ms
-Peach.Core.Engine runTest: context.config.singleIteration == true
-Peach.Core.Publishers.TcpClientPublisher stop()
-Peach.Core.Agent.Agent SessionFinished: Monitor
-
-[*] Test 'Default' finished.
+include::Ping_Example.log[]
 ----
 ==============
 
 endif::peachug[]
 
-=== Return codes
-
-If a ping is successful, the _Ping_ monitor records IPStatus.Success. Other return values indicate a failure. The following list identifies and describes the possible return codes.
-
-IPStatus.Success::
-  Reply from <device>+++::+++ bytes=<count> time=<elapsed time>ms TTL=<time remaining>.
-
-IPStatus.Unknown::
-  The ICMP echo request failed for an unknown reason.
-
-IPStatus.DestinationNetworkUnreachable::
-  The ICMP echo request failed because the network that contains the destination computer is not reachable.
-
-IPStatus.DestinationHostUnreachable::
-  The ICMP echo request failed because the destination computer is not reachable.
-
-IPStatus.DestinationProhibited::
-  The ICMP echo request failed because contact with the destination computer is administratively prohibited.
-
-IPStatus.DestinationPortUnreachable::
-  The ICMP echo request failed because the port on the destination computer is not available.
-
-IPStatus.NoResources::
-  The ICMP echo request failed because of insufficient network resources.
-
-IPStatus.BadOption::
-  The ICMP echo request failed because it contains an invalid option.
-
-IPStatus.HardwareError::
-  The ICMP echo request failed because of a hardware error.
-
-IPStatus.PacketTooBig::
-  The ICMP echo request failed because the packet containing the request is larger than
-the maximum transmission unit (MTU) of a node (router or gateway) located between the
-source and destination. The MTU defines the maximum size of a transmittable packet.
-
-IPStatus.TimedOut::
-  The ICMP echo reply was not received within the allotted time.
-
-IPStatus.BadRoute::
-  The ICMP echo request failed because there is no valid route between the source and
-destination computers.
-
-IPStatus.TtlExpired::
-  The ICMP echo request failed because its Time to Live (TTL) value reached zero, causing
-the forwarding node (router or gateway) to discard the packet.
-
-IPStatus.TtlReassemblyTimeExceeded::
-  The ICMP echo request failed because the packet was divided into fragments for transmission
-and all of the fragments were not received within the time allotted for reassembly.
-
-IPStatus.ParameterProblem::
-  The ICMP echo request failed because a node (router or gateway) encountered problems while
-processing the packet header.
-
-IPStatus.SourceQuench::
-  The ICMP echo request failed because the packet was discarded. This occurs when the source
-computer's output queue has insufficient storage space, or when packets arrive at the
-destination too quickly to be processed.
-
-IPStatus.BadDestination::
-  The ICMP echo request failed because the destination IP address cannot receive ICMP echo
-requests or should never appear in the destination address field of any IP datagram.
-
-IPStatus.DestinationUnreachable::
-  The ICMP echo request failed because the destination computer that is specified in an ICMP
-echo message is not reachable; the exact cause of problem is unknown.
-
-IPStatus.TimeExceeded::
-  The ICMP echo request failed because its Time to Live (TTL) value reached zero, causing the
-forwarding node (router or gateway) to discard the packet.
-
-IPStatus.BadHeader::
-  The ICMP echo request failed because the header is invalid.
-
-IPStatus.UnrecognizedNextHeader::
-  The ICMP echo request failed because the Next Header field does not contain a recognized
-value. The Next Header field indicates the extension header type (if present) or the protocol
-above the IP layer, for example, TCP or UDP.
-
-IPStatus.IcmpError::
-  The ICMP echo request failed because of an ICMP protocol error.
-
-IPStatus.DestinationScopeMismatch::
-  The ICMP echo request failed because the source address and destination address that are
-specified in an ICMP echo message are not in the same scope. This is typically caused by
-a router forwarding a packet using an interface that is outside the scope of the source
-address. Address scopes (link-local, site-local, and global scope) determine where on
-the network an address is valid.
-
+// end
