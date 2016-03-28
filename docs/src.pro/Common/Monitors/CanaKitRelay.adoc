@@ -46,8 +46,10 @@ the monitor can trigger the relay at the following times:
 
 * At the start or end of a fuzzing run
 * At the start or end of each test iteration
+* During the detection of a fault
 * After detecting a fault
 * At the start of an iteration that immediately follows a fault
+* When a specified call is received from the state model
 
 
 The following diagram shows a sample configuration that controls power through Relay 1.
@@ -115,12 +117,11 @@ Toggle power when the specified call is received from the state model.
 This value is used only when the 'When' parameter is set to `OnCall`.
 
 ToggleDelay::
-Pause in milliseconds between off/on, defaults to 500ms--1/2 second.
+Pause in milliseconds between off/on, defaults to `500`.
 Formerly named OnOffPause.
 
 When::
-Specifies when the CanaKit should be toggled.
-Specify one of the following values:
+Specify one of the following values to determine when a relay should be toggled:
 +
 [cols="1,2" options="header",halign="center"]
 |==========================================================
