@@ -151,7 +151,7 @@ when peach should enter a waiting state. The value `OnStart` identifies that the
 period is when the test target goes through the boot process at the beginning of
 the fuzzing session. The *Wait Regex* identifies the message text that the monitor looks
 to match. Here, the value is `Bootup Completed`. Peach waits until this message appears
-to begin fuzzing the target. For more information, see <<Monitor Parameters When and Wait When>>.
+to begin fuzzing the target.
 
 NOTE: The regular expressions used with this monitor are used to identify faults
 that have occurred in the device. You will need to construct the regular expression

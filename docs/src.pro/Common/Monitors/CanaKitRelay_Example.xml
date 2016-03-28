@@ -16,10 +16,9 @@
 
 	<Agent name="TheAgent">
 		<Monitor class="CanaKitRelay">
-		<Param name="SerialPort" value="COM5" />
-		<Param name="RelayNumber" value="1" />
-		<Param name="ResetEveryIteration" value="false"/>
-	</Monitor>
+			<Param name="SerialPort" value="COM5" />
+			<Param name="RelayNumber" value="1" />
+		</Monitor>
 	</Agent>
 
 	<Test name="Default">

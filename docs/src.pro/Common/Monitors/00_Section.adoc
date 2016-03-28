@@ -13,7 +13,7 @@ The following table lists each monitor by name, function type (Fault detection, 
 .Monitors
 [cols="3,1,1,2,3" options="header",halign="center"]
 |==========================================================
-|Monitor    |Detect Fault  |Collect Data  |Automate  |Operating Systems footnote:[When an operating system is listed, the monitor is available only for the listed operating system. A blank entry indicates the monitor is available for Windows, Linux, and OS X operating systems.]
+|Monitor    |Fault Detection  |Data Collection  |Automation  |Operating Systems footnote:[When an operating system is listed, the monitor is available only for the listed operating system. A blank entry indicates the monitor is available for Windows, Linux, and OS X operating systems.]
 |xref:Monitors_Android[Android]                  |X   |    |X   |
 |xref:Monitors_AndroidEmulator[Android Emulator] |X   |    |X   |
 |xref:Monitors_ButtonClicker[ButtonClicker]      |    |    |X   |Windows
