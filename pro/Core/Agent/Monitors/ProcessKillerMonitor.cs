@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
@@ -10,7 +9,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 {
 	[Monitor("ProcessKiller")]
 	[Description("Terminates the specified processes after each iteration")]
-	[Parameter("ProcessNames", typeof(string[]), "Comma seperated list of process to kill.")]
+	[Parameter("ProcessNames", typeof(string[]), "Comma separated list of process to kill.")]
 	public class ProcessKillerMonitor : Monitor
 	{
 		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
