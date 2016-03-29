@@ -9,7 +9,7 @@
   <StateModel name="State" initialState="Initial" >
     <State name="Initial">
       <Action type="output">
-          <DataModel ref="TheDataModel"/>
+        <DataModel ref="TheDataModel"/>
       </Action>
     </State>
   </StateModel>
@@ -25,13 +25,7 @@
 
   <Test name="Default">
     <StateModel ref="State"/>
-
     <Agent ref="Local" />
-
     <Publisher class="ConsoleHex"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>

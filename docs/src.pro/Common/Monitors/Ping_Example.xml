@@ -10,7 +10,7 @@
   <StateModel name="State" initialState="Initial" >
     <State name="Initial">
       <Action type="output">
-          <DataModel ref="TheDataModel"/>
+        <DataModel ref="TheDataModel"/>
       </Action>
     </State>
   </StateModel>
@@ -31,9 +31,5 @@
       <Param name="Host" value="www.peachfuzzer.com"/>
       <Param name="Port" value="80"/>
     </Publisher>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>

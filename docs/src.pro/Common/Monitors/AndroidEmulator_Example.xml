@@ -48,9 +48,5 @@
 		<Publisher class="AndroidMonkey">
 			<Param name="DeviceMonitor" value="App"/>
 		</Publisher>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>

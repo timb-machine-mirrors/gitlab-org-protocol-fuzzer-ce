@@ -10,7 +10,7 @@
   <StateModel name="State" initialState="Initial" >
     <State name="Initial">
       <Action type="output">
-          <DataModel ref="TheDataModel"/>
+        <DataModel ref="TheDataModel"/>
       </Action>
       <Action type="close"/>
       <Action type="call" method="launchProgram" publisher="Peach.Agent"/>
@@ -23,6 +23,7 @@
         <Param name="Arguments" value="fuzzed.txt"/>
         <Param name="StartOnCall" value="launchProgram"/>
     </Monitor>
+   
     <Monitor class="PageHeap">
       <Param name="Executable" value="notepad.exe" />
     </Monitor>
@@ -34,8 +35,5 @@
     <Publisher class="File">
       <Param name="FileName" value="fuzzed.txt"/>
     </Publisher>
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>

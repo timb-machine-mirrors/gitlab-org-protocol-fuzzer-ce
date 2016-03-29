@@ -9,7 +9,7 @@
   <StateModel name="State" initialState="Initial" >
     <State name="Initial">
       <Action type="output">
-          <DataModel ref="TheDataModel"/>
+        <DataModel ref="TheDataModel"/>
       </Action>
       <Action type="close"/>
       <Action type="call" method="ScoobySnacks" publisher="Peach.Agent"/>
@@ -35,9 +35,5 @@
       <Param name="Host" value="127.0.0.1" />
       <Param name="Port" value="4244" />
     </Publisher>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
