@@ -4,572 +4,195 @@
 
 *Monitor Categories*: *Automation*, *Data collection*, *Fault detection*
 
-The _RunCommand_ monitor launches a specified command to perform a utility function. The user, through the parameters, can control when the command runs: at the start or end of the fuzzing session, at the start or end of an iteration, in the middle of an iteration, after detecting a fault, and at the start of an iteration immediately following a fault.
+The _RunCommand_ monitor can be used to launch a command at various points in time during a fuzzing session:
 
-The utility command can send an email message reporting a count, set an environment variable, start a timer, append an external log file, and more.
+* At the start or end of a fuzzing run
+* At the start or end of each test iteration
+* After detecting a fault
+* At the start of an iteration that immediately follows a fault
+* When a specified call is received from the state model
 
-If a fault occurs, the monitor captures and logs the console output from standard out and standard error. Additionally, this monitor can detect faults for the following conditions:
+If a fault occurs,
+the monitor captures and logs the console output from `stdout` and `stderr`.
+Additionally,
+this monitor can initiate a fault under the following conditions (in-order of evaluation):
 
-* The utility command takes longer than the allotted time to complete--longer than the
-timeout duration.
-* The utility command exits with a nonzero exit code.
-* The utility command exits with a specified exit code.
-* The monitor matches a specified text string with messages in standard out and standard error.
-* The address sanitizer is enabled and an error message from it appears in the standard error log.
-
-This monitor provides bucketing for faults generated from the address sanitizer messages. Major hash, minor hash, and risk values are provide for these faults.
-
-This monitor will also automatically detect link:https://github.com/google/sanitizers/wiki/AddressSanitizer[AddressSanitizer] crash information and generate a fault if found.
+. An link:https://github.com/google/sanitizers/wiki/AddressSanitizer[Address Sanitizer] message appears in `stderr`.
+. The specified regular expression matches messages in `stdout` or `stderr`.
+. The command takes longer to finish than the specified timeout duration.
+. The command exits with a specified exit code.
+. The command exits with a nonzero exit code.
 
 === Parameters
 
 _Required:_
 
-Command:: The command or application to launch.
+Command::
+The command or application to launch.
 
 _Optional:_
 
-Arguments:: Optional command line arguments
+Arguments::
+Command line arguments
+
+FaultOnNonZeroExit::
+When this value is set to `true`,
+generate a fault if the exit code is non-zero.
+The default value is `false`.
+
+FaultOnExitCode::
+When this value is set to `true`,
+generate a fault if the exit code matches the specified 'FaultExitCode' parameter.
+The default value is `false`.
+
+FaultExitCode::
+When 'FaultOnExitCode' is set to `true`, generate a fault if the specified exit code occurs.
+The default value is `1`.
+
+StartOnCall::
+Launch the command when the monitor receives the specified message from the state machine.
+This value is used only when the 'When' parameter is set to `OnCall`.
+
+FaultOnRegex::
+If this value is specified,
+generate a fault if the specified regular expression matches the command output.
+The default value is unspecified.
+
+Timeout::
+Maximum time period, in seconds, for the process to run.
+Generate a fault if the command runs longer than the specified value.
+This feature is disabled by specifying `-1` for the time period.
+The default value is `-1`.
+
+WorkingDirectory::
+Set the current working directory for the command launched by this monitor.
+The default value is the Peach current working directory.
+The current working directory for the command is valid until the command changes the directory or ends.
+
 When::
-+
-Details on when to launch the command. Specify one of the following launch triggers:
-+
-// [horizontal]  Yanked. Labels are too long for spacing.
-// OnCall::: Specifies that the command launches from the state model when the monitor receives the _StartOnCall_ message. This is the default setting.
-// OnStart::: Launch the command when the fuzzing session starts. The command launches once per session.
-// OnEnd::: Launch the command when the fuzzing session stops. The command launches once per session.
-// OnIterationStart::: Launch the command at start of each iteration.
-// OnIterationEnd::: Launch the command at end of each iteration.
-// OnFault::: Launch the command when a fault occurs.
-// OnIterationStartAfterFault::: Monitoring occurs following a fault. Note that after the fault occurs, the current iteration completes. Then, at the start of the next iteration, the command launches.
+Specify one of the following values to determine when to launch the command:
 +
 [cols="1,2" options="header",halign="center"]
 |==========================================================
 |"When" Setting              |Description
-|OnStart                     |Waits at the start of the fuzzing session, default value.
-|OnEnd                       |Waits at the end of the fuzzing session.
-|OnIterationStart            |Waits at the start of each iteration.
-|OnIterationEnd              |Waits at the end of each iteration.
-|OnFault                     |Waits when Peach detects a fault.
-|OnIterationStartAfterFault  |Waits at the start of the iteration that immediately follows a fault.
-|OnCall                      |Waits upon receipt of a call from the state model.
+|OnStart                     |
+Run command when the fuzzing session starts.
+This occurs once per session.
+|OnEnd                       |
+Run command when the fuzzing session stops.
+This occurs once per session.
+|OnIterationStart            |
+Run command at the start of each iteration.
+|OnIterationEnd              |
+Run command at the end of each iteration.
+|OnFault                     |
+Run command when any monitor detects a fault.
+|OnIterationStartAfterFault  |
+Run command at the start of an iteration that immediately follows a fault detection.
+|OnCall                      |
+Run command when the call specified by the 'StartOnCall' parameter is received from the state model.
+This is the default setting.
 |==========================================================
 +
-.WaitWhen Choices
+.When Choices
 image::{images}/Common/Monitors/Timings_All.png[scalewidth="75%"]
-
-FaultExitCode:: Exit code value of interest. If the specified exit code occurs, the monitor generates a fault. The default exit code value is 1.
-FaultOnExitCode:: Generate a fault when the FaultExitCode matches the exit code of the launched command. The default value is false.
-StartOnCall:: Launch the command when the monitor receives a specified message from  the state machine.
-FaultOnNonZeroExit:: Generate a fault if the exit code is non-zero. The default value is false.
-FaultOnRegex:: Generate a fault if the regular expression matches the command output. This feature
-is turned off by default. To use this feature, provide a valid regular expression using the Microsoft
-.NET syntax.
-Timeout:: Maximum time period, in seconds, for the process to run. Generate a fault if process runs
-longer than the specified value. You can turn off this feature by specifying -1 for the time period.
-The default value also is -1.
-WorkingDirectory:: Set the current working directory for the command or application launched by
-this monitor. The default value is the Peach current working directory. The current working directory for the command is valid until the command changes the directory or ends.
 
 === Examples
 
 ifdef::peachug[]
 
+.Using _RunCommand_ for Fault Detection
+====================
+This parameter example detects a fault by checking for any lines that begin with `ERROR_`.
 
-.Generate a fault when the command output is "NO_FAULT" +
+[cols="2,4" options="header",halign="center"]
+|==========================================================
+|Parameter         |Value
+|Command           |`python`
+|Arguments         |`check_for_fault.py`
+|WorkingDirectory  |`C:\MyScripts`
+|FaultOnRegex      |`^ERROR_`
+|When              |`OnIterationEnd`
+|==========================================================
 ====================
 
-This parameter example is from a setup that outputs the string ERROR_NO_FAULT.
+.Using _RunCommand_ for Data Collection
+====================
+This parameter example captures `stderr` and `stdout` for data collection when another monitor detects a fault.
 
 [cols="2,4" options="header",halign="center"]
 |==========================================================
-|Parameter     |Value
-|Command       |`cmd.exe`
-|Arguments     |`echo ERROR_NO_FAULT`
-|FaultOnRegex  |`NO_FAULT`
+|Parameter         |Value
+|Command           |`python`
+|Arguments         |`collect_log.py`
+|WorkingDirectory  |`C:\MyScripts`
+|When              |`OnFault`
 |==========================================================
 ====================
 
-
-.Comparison of Automation Parameters +
+.Using _RunCommand_ for Automation
 ====================
+This parameter example runs the `copy_files.py` python script when the `DoCopyFiles` call is received from the state model.
 
-This shows some of the variations for the When parameter.
-
-Trigger the command to execute when the State Model "calls ScoobySnacks".
 [cols="2,4" options="header",halign="center"]
 |==========================================================
-|Parameter     |Value
-|Command       |`cmd.exe`
-|Arguments     |`echo RUN COMMAND`
-|StartOnCall   |`ScoobySnacks`
+|Parameter         |Value
+|Command           |`python`
+|Arguments         |`clear_state.py`
+|WorkingDirectory  |`C:\MyScripts`
+|When              |`OnIterationStartAfterFault`
 |==========================================================
-
-Run the Command at the start of a fuzzing session.
-[cols="2,4" options="header",halign="center"]
-|==========================================================
-|Parameter     |Value
-|Command       |`cmd.exe`
-|Arguments     |`/c echo RUN COMMAND`
-|When          |`OnStart`
-|==========================================================
-
-Run the Command at the end of a fuzzing session.
-[cols="2,4" options="header",halign="center"]
-|==========================================================
-|Parameter     |Value
-|Command       |`cmd.exe`
-|Arguments     |`/c echo RUN COMMAND`
-|When          |`OnEnd`
-|==========================================================
-
-Run the Command at the start of each iteration.
-[cols="2,4" options="header",halign="center"]
-|==========================================================
-|Parameter     |Value
-|Command       |`cmd.exe`
-|Arguments     |`/c echo RUN COMMAND`
-|When          |`OnIterationStart`
-|==========================================================
-
-Run the Command at the end of each iteration.
-[cols="2,4" options="header",halign="center"]
-|==========================================================
-|Parameter     |Value
-|Command       |`cmd.exe`
-|Arguments     |`/c echo RUN COMMAND`
-|When          |`OnIterationEnd`
-|==========================================================
-
 ====================
 
 endif::peachug[]
-
-
 ifndef::peachug[]
 
-.Triggering _RunCommand_ from State Model
+.Using _RunCommand_ for Fault Detection
 =========================================
 _RunCommand_ monitor launches a command when the _call_ action sends a message from the state model.
 
 [source,xml]
 ----
-<?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
-
-	<DataModel name="TheDataModel">
-		<String value="Hello World!" />
-	</DataModel>
-
-	<StateModel name="TheStateModel" initialState="InitialState">
-		<State name="InitialState">
-
-			<Action type="output">
-				<DataModel ref="TheDataModel" />
-			</Action>
-
-			<Action type="call" method="ScoobySnacks" publisher="Peach.Agent" /> <!--1-->
-
-//          Original. Above version is a test.
-//			<Action type="call" method="ScoobySnacks" publisher="Peach.Agent" /> <1>
-
-
-		</State>
-
-	</StateModel>
-
-	<Agent name="TheAgent">
-		<Monitor class="RunCommand">
-			<Param name="Command" value="cmd.exe"/>
-			<Param name="Arguments" value="/c echo RUN COMMAND" />
-			<Param name="StartOnCall" value="ScoobySnacks" />  <2>
-		</Monitor>
-	</Agent>
-
-	<Test name="Default">
-		<Agent ref="TheAgent"/>
-		<StateModel ref="TheStateModel" />
-		<Publisher class="ConsoleHex"/>
-	</Test>
-</Peach>
-----
-NOTES
-<1> The _method_ attribute must match the _StartOnCall_ parameter.
-<2> The _StartOnCall_ parameter.
-
-The preceding XML source produces the following output:
-
-----
-> peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
-[*] Test 'Default' starting with random seed 48150.
-Peach.Core.Agent.Agent StartMonitor: Monitor RunCommand
-Peach.Core.Agent.Agent SessionStarting: Monitor
-
-[R1,-,-] Performing iteration
-Peach.Core.Engine runTest: Performing recording iteration.
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
-Peach.Core.Dom.Action ActionType.Output
-Peach.Core.Publishers.ConsolePublisher start()
-Peach.Core.Publishers.ConsolePublisher open()
-Peach.Core.Publishers.ConsolePublisher output(12 bytes)
-00000000   48 65 6C 6C 6F 20 57 6F  72 6C 64 21               Hello World!
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
-Peach.Core.Dom.Action ActionType.Call
-Peach.Core.Agent.AgentManager Message: Action.Call => ScoobySnacks
-Peach.Core.Agent.Monitors.RunCommand _Start(): Running command cmd.exe with arguments /c echo RUN COMMAND <1>
-Peach.Core.Publishers.ConsolePublisher close()
-Peach.Core.Engine runTest: context.config.singleIteration == true
-Peach.Core.Publishers.ConsolePublisher stop()
-Peach.Core.Agent.Agent SessionFinished: Monitor
-
-[*] Test 'Default' finished.
-----
-NOTE:
-<1> Command triggered by action _call_.
-=========================================
-
-.OnStart Example
-=========================================
-_RunCommand_ monitor launches a command using a _when_ value of +OnStart+.
-
-[source,xml]
-----
-<?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
-
-	<DataModel name="TheDataModel">
-		<String value="Hello World!" />
-	</DataModel>
-
-	<StateModel name="TheStateModel" initialState="InitialState">
-		<State name="InitialState">
-
-			<Action type="output">
-				<DataModel ref="TheDataModel" />
-			</Action>
-
-		</State>
-
-	</StateModel>
-
-	<Agent name="TheAgent">
-		<Monitor class="RunCommand">
-			<Param name="Command" value="cmd.exe"/>
-			<Param name="Arguments" value="/c echo RUN COMMAND" />
-			<Param name="When" value="OnStart" />
-		</Monitor>
-	</Agent>
-
-	<Test name="Default">
-		<Agent ref="TheAgent"/>
-		<StateModel ref="TheStateModel" />
-		<Publisher class="ConsoleHex"/>
-	</Test>
-</Peach>
+include::RunCommand_Example_FaultDetection.xml[]
 ----
 
 The preceding XML source produces the following output:
 
 ----
-> peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-Peach.Core.Engine runTest: context.config.range == true, start: 1, stop: 1
-
-[*] Test 'Default' starting with random seed 46690.
-Peach.Core.Agent.Agent StartMonitor: Monitor RunCommand
-Peach.Core.Agent.Agent SessionStarting: Monitor
-Peach.Core.Agent.Monitors.RunCommand _Start(): Running command cmd.exe with arguments /c echo RUN COMMAND <1>
-
-[R1,-,-] Performing iteration
-Peach.Core.Engine runTest: Performing recording iteration.
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecutedPeach.Core.Dom.Action ActionType.Output
-Peach.Core.Publishers.ConsolePublisher start()
-Peach.Core.Publishers.ConsolePublisher open()
-Peach.Core.Publishers.ConsolePublisher output(12 bytes)
-00000000   48 65 6C 6C 6F 20 57 6F  72 6C 64 21               Hello World!
-Peach.Core.Publishers.ConsolePublisher close()
-
-[1,1,0:00:00.386] Performing iteration
-[*] Fuzzing: TheDataModel.DataElement_0
-[*] Mutator: DataElementSwapNearNodesMutator
-Peach.Core.MutationStrategies.RandomStrategy Action_Starting: Fuzzing: TheDataModel.DataElement_0
-Peach.Core.MutationStrategies.RandomStrategy Action_Starting: Mutator: DataElementSwapNearNodesMutator
-Peach.Core.Dom.Action ActionType.Output
-Peach.Core.Publishers.ConsolePublisher open()
-Peach.Core.Publishers.ConsolePublisher output(12 bytes)
-00000000   48 65 6C 6C 6F 20 57 6F  72 6C 64 21               Hello World!
-Peach.Core.Publishers.ConsolePublisher close()
-Peach.Core.Publishers.ConsolePublisher stop()
-Peach.Core.Agent.Agent SessionFinished: Monitor
-
-[*] Test 'Default' finished.
+include::RunCommand_Example_FaultDetection.log[]
 ----
-NOTE:
-<1> Command executed.
-
 =========================================
 
-.OnEnd Example
+.Using _RunCommand_ for Data Collection
 =========================================
-_RunCommand_ monitor launches a command using a _when_ value of +OnEnd+.
+_RunCommand_ monitor launches a command using a _When_ value of `OnStart`.
 
 [source,xml]
 ----
-<?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
-
-	<DataModel name="TheDataModel">
-		<String value="Hello World!" />
-	</DataModel>
-
-	<StateModel name="TheStateModel" initialState="InitialState">
-		<State name="InitialState">
-
-			<Action type="output">
-				<DataModel ref="TheDataModel" />
-			</Action>
-
-		</State>
-
-	</StateModel>
-
-	<Agent name="TheAgent">
-		<Monitor class="RunCommand">
-			<Param name="Command" value="cmd.exe"/>
-			<Param name="Arguments" value="/c echo RUN COMMAND" />
-			<Param name="When" value="OnEnd" />
-		</Monitor>
-	</Agent>
-
-	<Test name="Default">
-		<Agent ref="TheAgent"/>
-		<StateModel ref="TheStateModel" />
-		<Publisher class="ConsoleHex"/>
-	</Test>
-</Peach>
-----
-
-The preceding XML produces the following output:
-
-----
-> peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-Peach.Core.Engine runTest: context.config.range == true, start: 1, stop: 1
-
-[*] Test 'Default' starting with random seed 16446.
-Peach.Core.Agent.Agent StartMonitor: Monitor RunCommand
-Peach.Core.Agent.Agent SessionStarting: Monitor
-
-[R1,-,-] Performing iteration
-Peach.Core.Engine runTest: Performing recording iteration.
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecutedPeach.Core.Dom.Action ActionType.Output
-Peach.Core.Publishers.ConsolePublisher start()
-Peach.Core.Publishers.ConsolePublisher open()
-Peach.Core.Publishers.ConsolePublisher output(12 bytes)
-00000000   48 65 6C 6C 6F 20 57 6F  72 6C 64 21               Hello World!
-Peach.Core.Publishers.ConsolePublisher close()
-
-[1,1,0:00:00.384] Performing iteration
-[*] Fuzzing: TheDataModel.DataElement_0
-[*] Mutator: DataElementSwapNearNodesMutator
-Peach.Core.MutationStrategies.RandomStrategy Action_Starting: Fuzzing: TheDataModel.DataElement_0
-Peach.Core.MutationStrategies.RandomStrategy Action_Starting: Mutator: DataElementSwapNearNodesMutator
-Peach.Core.Dom.Action ActionType.Output
-Peach.Core.Publishers.ConsolePublisher open()
-Peach.Core.Publishers.ConsolePublisher output(12 bytes)
-00000000   48 65 6C 6C 6F 20 57 6F  72 6C 64 21               Hello World!
-Peach.Core.Publishers.ConsolePublisher close()
-Peach.Core.Publishers.ConsolePublisher stop()
-Peach.Core.Agent.Agent SessionFinished: Monitor
-Peach.Core.Agent.Monitors.RunCommand _Start(): Running command cmd.exe with arguments /c echo RUN COMMAND <1>
-
-[*] Test 'Default' finished.
-----
-NOTE:
-<1> Command executed.
-=========================================
-
-.OnIterationStart Example
-=========================================
-_RunCommand_ monitor launches a command using a _when_ value of +OnIterationStart+.
-
-[source,xml]
-----
-<?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
-
-	<DataModel name="TheDataModel">
-		<String value="Hello World!" />
-	</DataModel>
-
-	<StateModel name="TheStateModel" initialState="InitialState">
-		<State name="InitialState">
-
-			<Action type="output">
-				<DataModel ref="TheDataModel" />
-			</Action>
-
-		</State>
-
-	</StateModel>
-
-	<Agent name="TheAgent">
-		<Monitor class="RunCommand">
-			<Param name="Command" value="cmd.exe"/>
-			<Param name="Arguments" value="/c echo RUN COMMAND" />
-			<Param name="When" value="OnIterationStart" />
-		</Monitor>
-	</Agent>
-
-	<Test name="Default">
-		<Agent ref="TheAgent"/>
-		<StateModel ref="TheStateModel" />
-		<Publisher class="ConsoleHex"/>
-	</Test>
-</Peach>
-----
-
-The preceding XML produces the following output:
-
-----
-> peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-Peach.Core.Engine runTest: context.config.range == true, start: 1, stop: 1
-
-[*] Test 'Default' starting with random seed 11594.
-Peach.Core.Agent.Agent StartMonitor: Monitor RunCommand
-Peach.Core.Agent.Agent SessionStarting: Monitor
-
-[R1,-,-] Performing iteration
-Peach.Core.Engine runTest: Performing recording iteration.
-Peach.Core.Agent.Monitors.RunCommand _Start(): Running command cmd.exe with arguments /c echo RUN COMMAND <1>
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
-Peach.Core.Dom.Action ActionType.Output
-Peach.Core.Publishers.ConsolePublisher start()
-Peach.Core.Publishers.ConsolePublisher open()
-Peach.Core.Publishers.ConsolePublisher output(12 bytes)
-00000000   48 65 6C 6C 6F 20 57 6F  72 6C 64 21               Hello World!
-Peach.Core.Publishers.ConsolePublisher close()
-
-[1,1,0:00:00.406] Performing iteration
-Peach.Core.Agent.Monitors.RunCommand _Start(): Running command cmd.exe with arguments /c echo RUN COMMAND <2>
-[*] Fuzzing: TheDataModel.DataElement_0
-[*] Mutator: DataElementDuplicateMutator
-Peach.Core.MutationStrategies.RandomStrategy Action_Starting: Fuzzing: TheDataModel.DataElement_0
-Peach.Core.MutationStrategies.RandomStrategy Action_Starting: Mutator: DataElementDuplicateMutator
-Peach.Core.Dom.Action ActionType.Output
-Peach.Core.Publishers.ConsolePublisher open()
-Peach.Core.Publishers.ConsolePublisher output(12 bytes)
-00000000   48 65 6C 6C 6F 20 57 6F  72 6C 64 21               Hello World!
-Peach.Core.Publishers.ConsolePublisher close()
-Peach.Core.Publishers.ConsolePublisher stop()
-Peach.Core.Agent.Agent SessionFinished: Monitor
-
-[*] Test 'Default' finished.
-----
-NOTES:
-<1> Command executed.
-<2> Command executed.
-=========================================
-
-.OnIterationEnd Example
-=========================================
-_RunCommand_ monitor launches a command using a _when_ value of +OnIterationEnd+.
-
-[source,xml]
-----
-<?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			 xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
-
-	<DataModel name="TheDataModel">
-		<String value="Hello World!" />
-	</DataModel>
-
-	<StateModel name="TheStateModel" initialState="InitialState">
-		<State name="InitialState">
-
-			<Action type="output">
-				<DataModel ref="TheDataModel" />
-			</Action>
-
-		</State>
-
-	</StateModel>
-
-	<Agent name="TheAgent">
-		<Monitor class="RunCommand">
-			<Param name="Command" value="cmd.exe"/>
-			<Param name="Arguments" value="/c echo RUN COMMAND" />
-			<Param name="When" value="OnIterationEnd" />
-		</Monitor>
-	</Agent>
-
-	<Test name="Default">
-		<Agent ref="TheAgent"/>
-		<StateModel ref="TheStateModel" />
-		<Publisher class="ConsoleHex"/>
-	</Test>
-</Peach>
+include::RunCommand_Example_DataCollection.xml[]
 ----
 
 The preceding XML source produces the following output:
 
 ----
-> peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-Peach.Core.Engine runTest: context.config.range == true, start: 1, stop: 1
-
-[*] Test 'Default' starting with random seed 18641.
-Peach.Core.Agent.Agent StartMonitor: Monitor RunCommand
-Peach.Core.Agent.Agent SessionStarting: Monitor
-
-[R1,-,-] Performing iteration
-Peach.Core.Engine runTest: Performing recording iteration.
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
-Peach.Core.Dom.Action ActionType.Output
-Peach.Core.Publishers.ConsolePublisher start()
-Peach.Core.Publishers.ConsolePublisher open()
-Peach.Core.Publishers.ConsolePublisher output(12 bytes)
-00000000   48 65 6C 6C 6F 20 57 6F  72 6C 64 21               Hello World!
-Peach.Core.Publishers.ConsolePublisher close()
-Peach.Core.Agent.Monitors.RunCommand _Start(): Running command cmd.exe with arguments /c echo RUN COMMAND <1>
-
-[1,1,0:00:00.41] Performing iteration
-[*] Fuzzing: TheDataModel.DataElement_0
-[*] Mutator: StringCaseMutator
-Peach.Core.MutationStrategies.RandomStrategy Action_Starting: Fuzzing: TheDataModel.DataElement_0
-Peach.Core.MutationStrategies.RandomStrategy Action_Starting: Mutator: StringCaseMutator
-Peach.Core.Dom.Action ActionType.Output
-Peach.Core.Publishers.ConsolePublisher open()
-Peach.Core.Publishers.ConsolePublisher output(12 bytes)
-00000000   68 65 6C 6C 6F 20 77 6F  72 6C 64 21               hello world!
-Peach.Core.Publishers.ConsolePublisher close()
-Peach.Core.Agent.Monitors.RunCommand _Start(): Running command cmd.exe with arguments /c echo RUN COMMAND <2>
-Peach.Core.Publishers.ConsolePublisher stop()
-Peach.Core.Agent.Agent SessionFinished: Monitor
-
-[*] Test 'Default' finished.
+include::RunCommand_Example_DataCollection.log[]
 ----
-NOTES:
-<1> Command executed.
-<2> Command executed.
+=========================================
+
+.Using _RunCommand_ for Automation
+=========================================
+_RunCommand_ monitor launches a command using a _When_ value of `OnStart`.
+
+[source,xml]
+----
+include::RunCommand_Example_Automation.xml[]
+----
+
+The preceding XML source produces the following output:
+
+----
+include::RunCommand_Example_Automation.log[]
+----
 =========================================
 
 endif::peachug[]
