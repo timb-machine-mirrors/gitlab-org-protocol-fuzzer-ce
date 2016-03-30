@@ -156,12 +156,6 @@ This example detects a fault by checking for any lines that begin with `ERROR_`.
 ----
 include::RunCommand_Example_FaultDetection.xml[]
 ----
-
-The preceding XML source produces the following output:
-
-----
-include::RunCommand_Example_FaultDetection.log[]
-----
 =========================================
 
 .Using _RunCommand_ for Data Collection
@@ -171,12 +165,6 @@ This example captures `stderr` and `stdout` for data collection when another mon
 [source,xml]
 ----
 include::RunCommand_Example_DataCollection.xml[]
-----
-
-The preceding XML source produces the following output:
-
-----
-include::RunCommand_Example_DataCollection.log[]
 ----
 =========================================
 
@@ -188,12 +176,6 @@ This can be used to get the target back into a working state so that fuzzing can
 [source,xml]
 ----
 include::RunCommand_Example_Automation.xml[]
-----
-
-The preceding XML source produces the following output:
-
-----
-include::RunCommand_Example_Automation.log[]
 ----
 =========================================
 
