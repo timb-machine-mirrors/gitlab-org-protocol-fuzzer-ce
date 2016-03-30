@@ -65,6 +65,13 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 			try
 			{
+				if (!string.IsNullOrEmpty(WorkingDirectory) && !Directory.Exists(WorkingDirectory))
+				{
+					throw new PeachException(
+						"Specified WorkingDirectory does not exist: '{0}'".Fmt(WorkingDirectory)
+					);
+				}
+				
 				var result = ProcessHelper.Run(Command, Arguments, null, WorkingDirectory, Timeout);
 
 				var stdout = result.StdOut.ToString();
@@ -153,7 +160,12 @@ namespace Peach.Pro.Core.Agent.Monitors
 			}
 			catch (Exception ex)
 			{
-				throw new PeachException("Could not run command '" + Command + "'.  " + ex.Message + ".", ex);
+				throw new PeachException("RunCommand ({0}) failed to run command: '{1} {2}'. {3}.".Fmt(
+					Name,
+					Command, 
+					Arguments,
+					ex.Message
+				), ex);
 			}
 		}
 
