@@ -905,14 +905,41 @@ namespace Peach.Core.Analyzers
 				// Prevent dots from being in the name for element construction, they get resolved afterwards
 				var childName = child.getAttr("name", string.Empty);
 				var nameParts = new string[0];
+				var parent = element;
 
 				if (element.isReference && !string.IsNullOrEmpty(childName))
 				{
 					nameParts = childName.Split('.');
 					child.Attributes["name"].InnerText = nameParts[nameParts.Length - 1];
+
+					for (var i = 0; i < nameParts.Length - 1; ++i)
+					{
+						DataElement newParent;
+
+						var choice = parent as Choice;
+						if (choice != null)
+							choice.choiceElements.TryGetValue(nameParts[i], out newParent);
+						else
+							parent.TryGetValue(nameParts[i], out newParent);
+
+						if (newParent == null)
+							throw new PeachException(
+								"Error parsing {0} named '{1}', {2} has no child element named '{3}'.".Fmt(
+									child.Name, childName, parent.debugName, nameParts[i]));
+
+						var asArray = newParent as Dom.Array;
+						if (asArray != null)
+							newParent = asArray.OriginalElement;
+
+						parent = newParent as DataElementContainer;
+						if (parent == null)
+							throw new PeachException(
+								"Error parsing {0} named '{1}', {2} is not a container element.".Fmt(
+									child.Name, childName, newParent.debugName));
+					}
 				}
 
-				elem = delegateAction(this, child, element);
+				elem = delegateAction(this, child, parent);
 
 				if (elem == null)
 					throw new PeachException("Error, type failed to parse provided XML: " + dataElementType.FullName);
@@ -953,34 +980,6 @@ namespace Peach.Core.Analyzers
 				// notation.
 				if (element.isReference && !string.IsNullOrEmpty(childName))
 				{
-					var parent = element;
-
-					for (var i = 0; i < nameParts.Length - 1; ++i)
-					{
-						DataElement newParent;
-
-						var choice = parent as Choice;
-						if (choice != null)
-							choice.choiceElements.TryGetValue(nameParts[i], out newParent);
-						else
-							parent.TryGetValue(nameParts[i], out newParent);
-
-						if (newParent == null)
-							throw new PeachException(
-								"Error parsing {0} named '{1}', {2} has no child element named '{3}'.".Fmt(
-									elem.elementType, childName, parent.debugName, nameParts[i]));
-
-						var asArray = newParent as Dom.Array;
-						if (asArray != null)
-							newParent = asArray.OriginalElement;
-
-						parent = newParent as DataElementContainer;
-						if (parent == null)
-							throw new PeachException(
-								"Error parsing {0} named '{1}', {2} is not a container element.".Fmt(
-									elem.elementType, childName, newParent.debugName));
-					}
-
 					parent.ApplyReference(elem);
 				}
 				else

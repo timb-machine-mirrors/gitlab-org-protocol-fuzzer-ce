@@ -28,13 +28,14 @@
 
 using System;
 using System.Xml;
+using System.Linq;
 
 using Peach.Core.Analyzers;
 
 namespace Peach.Core.Dom
 {
+	[PitParsable("Flag")]
 	[DataElement("Flag", DataElementTypes.NonDataElements)]
-	[DataElementParentSupported("Flags")]
 	[Parameter("name", typeof(string), "Element name", "")]
 	[Parameter("fieldId", typeof(string), "Element field ID", "")]
 	[Parameter("position", typeof(int), "Bit position of flag")]
@@ -80,10 +81,12 @@ namespace Peach.Core.Dom
 			return false;
 		}
 
-		public static DataElement PitParser(PitParser context, XmlNode node, Flags parent)
+		public new static DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
 		{
-			if (node.Name == "Flags")
-				return null;
+			var flags = parent as Flags;
+
+			if (flags == null)
+				throw new PeachException("Error, {0} has unsupported child element '{1}'.".Fmt(parent.debugName, node.Name));
 
 			var flag = DataElement.Generate<Flag>(node, parent);
 
@@ -93,12 +96,12 @@ namespace Peach.Core.Dom
 			if (position < 0 || size < 0 || (position + size) > parent.lengthAsBits)
 				throw new PeachException("Error, " + flag.debugName + " is placed outside its parent.");
 
-			if (parent.LittleEndian)
+			if (flags.LittleEndian)
 				position = (int)parent.lengthAsBits - size - position;
 
-			foreach (Flag other in parent)
+			foreach (var other in parent.OfType<Flag>())
 			{
-				if (other.Overlapps(position, size))
+				if (flag.Name != other.Name && other.Overlapps(position, size))
 					throw new PeachException("Error, " + flag.debugName + " overlapps with " + other.debugName + ".");
 			}
 
