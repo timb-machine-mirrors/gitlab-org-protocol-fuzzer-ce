@@ -132,7 +132,8 @@ This parameter example captures `stderr` and `stdout` for data collection when a
 
 .Using _RunCommand_ for Automation
 ====================
-This parameter example runs the `copy_files.py` python script when the `DoCopyFiles` call is received from the state model.
+This parameter example runs the `clear_state.py` python script on the next iteration start after a fault is detected.
+This can be used to get the target back into a working state so that fuzzing can continue.
 
 [cols="2,4" options="header",halign="center"]
 |==========================================================
@@ -149,7 +150,7 @@ ifndef::peachug[]
 
 .Using _RunCommand_ for Fault Detection
 =========================================
-_RunCommand_ monitor launches a command when the _call_ action sends a message from the state model.
+This example detects a fault by checking for any lines that begin with `ERROR_`.
 
 [source,xml]
 ----
@@ -165,7 +166,7 @@ include::RunCommand_Example_FaultDetection.log[]
 
 .Using _RunCommand_ for Data Collection
 =========================================
-_RunCommand_ monitor launches a command using a _When_ value of `OnStart`.
+This example captures `stderr` and `stdout` for data collection when another monitor detects a fault.
 
 [source,xml]
 ----
@@ -181,7 +182,8 @@ include::RunCommand_Example_DataCollection.log[]
 
 .Using _RunCommand_ for Automation
 =========================================
-_RunCommand_ monitor launches a command using a _When_ value of `OnStart`.
+This example runs the `clear_state.py` python script on the next iteration start after a fault is detected.
+This can be used to get the target back into a working state so that fuzzing can continue.
 
 [source,xml]
 ----
