@@ -1,7 +1,7 @@
 [[InstallOnWindows]]
 === Windows
 
-Peach is supported on Windows(R) Operating Systems, version XP and newer, including server editions. Peach may run on pre-XP versions of Windows, but are not officially supported.
+Peach is supported on Windows(R) Operating Systems, version XP and newer, including server editions. Peach may run on pre-XP versions of Windows, but are not officially supported. This section provides instructions for installing Peach on supported Windows systems. 
 
 The only required software is the Microsoft.NET v4 Runtime. For the most robust results, install Windows Debugging Tools and Wireshark. This allows Peach to attach a debugger to the target and to take network captures.
 
