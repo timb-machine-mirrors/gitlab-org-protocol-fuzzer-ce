@@ -26,7 +26,7 @@ The Android monitor watches the message logs and the device, and can generate fa
 * A physical device becomes non-responsive.
 * A virtual device becomes non-responsive or lost.
 
-After detecting a fault, this monitor collects data from the device log files and crash dumps.
+After detecting a fault, the monitor collects data from the device log files and crash dumps.
 
 Additionally, the monitor logs exceptions, and updates fault bucket information. For bucketing,
 Peach uses the text from the fault to determine the major bucket level. The minor bucket level
