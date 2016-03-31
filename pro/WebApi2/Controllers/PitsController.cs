@@ -7,9 +7,11 @@ using System.Web.Http.Description;
 using Peach.Pro.Core.WebServices.Models;
 using Swashbuckle.Swagger.Annotations;
 using Peach.Pro.Core.WebServices;
+using Peach.Pro.WebApi2.Utility;
 
 namespace Peach.Pro.WebApi2.Controllers
 {
+	[RestrictedApi]
 	[RoutePrefix(Prefix)]
 	public class PitsController : BaseController
 	{

@@ -318,7 +318,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			foreach (var elem in choice.PreOrderTraverse())
 				Assert.False(elem.isMutable, "{0} should not be mutable".Fmt(elem.debugName));
 
-			choice.SelectedElement = choice.choiceElements[1];
+			choice.SelectElement(choice.choiceElements[1]);
 
 			// Because block2 was not selected, its mutability should be not effected
 			Assert.True(dm.mutable("TheDataModel.ExcludeMe.block2"));

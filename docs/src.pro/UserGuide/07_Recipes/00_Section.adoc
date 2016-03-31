@@ -24,8 +24,8 @@ This step focuses on the monitoring needs and the agents that house the monitors
 * All software modules needed to perform the fuzzing job are available for use.
 =======
 
-*What’s left to do?* +
-When you finish developing a recipe, it’s time to fill out and test the
+*What's left to do?* +
+When you finish developing a recipe, it's time to fill out and test the
 configuration, then run the fuzzing job.
 
 * See the xref:JumpStart[Getting Started with the Peach Fuzzer Platform] for the workflow to run a fuzzing job.

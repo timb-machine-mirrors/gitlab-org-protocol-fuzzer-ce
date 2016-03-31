@@ -36,7 +36,7 @@ This parameter example is from a minimal setup that monitors the Internet Inform
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter  |Value
-|Service    |World Wide Web Publishing Service
+|Service    |`World Wide Web Publishing Service`
 |==========================================================
 
 ====================

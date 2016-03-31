@@ -2,37 +2,40 @@
 [[JsonObject]]
 == JsonObject
 
-_JsonObject_ are container elements that group data elements in a logical structure. For example, a _string_ element, a _number_ element, and a _blob_ element can exist in the same _block_. _Blocks_ can contain other blocks, or nest, as deeply as needed.
+The _JsonObject_ element is used to model link:http://www.json.org/[JavaScript Object Notation (JSON)] objects.
 
-_JsonObject_ and xref:DataModel[DataModels] are very similar; both can be used as the template for other Blocks or xref:DataModel[DataModels]. The only difference is the positioning of these elements.
+_JsonObject_ elements are containers that group JSON elements in a logical structure.
+For example,
+a _JsonString_ element,
+a _JsonInteger_ element,
+and a _JsonBlob_ element can exist in the same _JsonObject_.
+A _JsonObject_ can contain other _JsonObjects_, or nest, as deeply as needed.
 
-* A _DataModel_ is a top level element 
-* A _Block_ is a child element of xref:DataModel[DataModel] 
 
 === Syntax
 
 [source,xml]
 ----
 <JsonObject name="ServiceRequest">
-  
+
   <JsonString propertyName="id" value="3fcbbc99-bb05-432d-8ce5-9df4fab91ae6" />
-  
+
   <JsonArray propertyName="items">
-  
+
     <JsonObject>
         <JsonString propertyName="id" value="5813200e-96db-4dd0-bc2a-fec6d19a7242" />
         <JsonDouble propertyName="price" value="1.99" />
         <JsonInteger propertyName="amount" value="10" />
     </JsonObject>
-    
+
     <JsonObject>
         <JsonString propertyName="id" value="a921833c-5e3f-4199-a143-3ae60b6815ef" />
         <JsonDouble propertyName="price" value="2.99" />
         <JsonInteger propertyName="amount" value="1" />
     </JsonObject>
-  
+
   </JsonArray>
-  
+
 </JsonObject>
 ----
 
@@ -47,7 +50,7 @@ _Optional:_
 xref:name[name]:: Name of the block.
 isNull::
     Is this elements value null. Json output will be +null+ instead of value.
-xref:ref[ref]:: Reference to a xref:DataModel[DataModel] to use as a template.
+xref:ref[ref]:: Reference to a xref:DataModel[] to use as a template.
 xref:mutable[mutable]:: Is data element changeable (should it be mutated), defaults to false.
 
 === Child Elements
@@ -180,3 +183,4 @@ Peach.Core.Engine EndTest: Stopping all agents and monitors
 ----
 ==========================
 
+// end

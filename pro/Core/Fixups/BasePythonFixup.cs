@@ -16,8 +16,8 @@ namespace Peach.Pro.Core.Fixups
 		{
 		}
 
-		[OnCloning]
-		private bool OnCloning(object context)
+		[ShouldClone]
+		private bool ShouldClone(object context)
 		{
 			return false;
 		}

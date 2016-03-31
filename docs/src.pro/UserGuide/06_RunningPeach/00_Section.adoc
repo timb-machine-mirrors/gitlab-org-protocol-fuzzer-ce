@@ -1,0 +1,42 @@
+== Running Peach
+
+Peach Fuzzer Professional includes a number of executable files. 
+In most instances, using the web interface will meet your needs.
+Peach can also be used from the command line.
+This includes using the Peach Web Interface, that launches by running Peach from the command line without any parameters or switches.
+
+The following list identifies the support applications included with Peach Fuzzer Professional.
+
+[options="header"]
+|=======================
+|Program                                       |Executable           | Description
+|xref:Program_PeachWebIF[Peach Web Interface]  |Peach.exe            | The {peachweb} for Peach Fuzzer.
+|xref:Program_Peach[Peach Command Line]        |Peach.exe            | The {peachcomd} for Peach Fuzzer.
+|xref:Program_PeachMinset[Minset]              |PeachMinset.exe      | Perform code coverage to find minimum set of sample files for use during fuzzing.
+|xref:Program_PeachSampleNinja[Sample Ninja]   |PeachSampleNinja.exe | Creates the sample ninja database
+|xref:Program_PeachMultiNodeCli[Peach Multi-Node CLI Tool]   |sdk\tools\peachcli    | Control and co-ordinate multiple Peach instances
+|=======================
+
+TIP: The other executables have specialized purposes.
+
+:leveloffset: 1
+<<<
+include::../../Common/WebUI/00_Section.adoc[]
+
+:leveloffset: 1
+<<<
+include::../../Common/RunningPeach/Peach.adoc[]
+
+:leveloffset: 1
+<<<
+include::../../Common/RunningPeach/Minset.adoc[]
+
+:leveloffset: 1
+<<<
+include::../../Common/RunningPeach/SampleNinja.adoc[]
+
+:leveloffset: 1
+<<<
+include::../../Common/RunningPeach/PeachCli.adoc[]
+
+// end

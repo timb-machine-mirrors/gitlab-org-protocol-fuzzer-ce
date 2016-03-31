@@ -56,6 +56,7 @@ namespace Peach.C {
 	}
 
 	export namespace Services {
+		export const Eula = 'EulaService';
 		export const Pit = 'PitService';
 		export const Unique = 'UniqueService';
 		export const HttpError = 'HttpErrorService';
@@ -161,8 +162,16 @@ namespace Peach.C {
 			export const MigratePit = 'html/modal/MigratePit.html';
 			export const NewVar = 'html/modal/NewVar.html';
 			export const PitLibrary = 'html/modal/PitLibrary.html';
+			export const License = 'html/modal/License.html';
 			export const StartJob = 'html/modal/StartJob.html';
 			export const AddMonitor = 'html/modal/AddMonitor.html';
+		}
+		export namespace Eula {
+			export const Acedemic = 'html/eula/Acedemic.html';
+			export const Developer = 'html/eula/Developer.html';
+			export const Enterprise = 'html/eula/Enterprise.html';
+			export const Professional = 'html/eula/Professional.html';
+			export const Trial = 'html/eula/Trial.html';
 		}
 		export namespace Directives {
 			export const Agent = 'html/directives/agent.html';

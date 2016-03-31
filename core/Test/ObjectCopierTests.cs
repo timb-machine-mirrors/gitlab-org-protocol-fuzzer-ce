@@ -252,13 +252,23 @@ namespace Peach.Core.Test
 			}
 
 			[OnCloning]
-			bool OnCloning(object ctx)
+			void OnCloning(object ctx)
+			{
+			}
+
+			[OnCloning]
+			void OnCloning2(object ctx)
+			{
+			}
+
+			[ShouldClone]
+			bool ShouldClone(object ctx)
 			{
 				return true;
 			}
 
-			[OnCloning]
-			bool OnCloning2(object ctx)
+			[ShouldClone]
+			bool ShouldClone2(object ctx)
 			{
 				return true;
 			}
@@ -269,8 +279,8 @@ namespace Peach.Core.Test
 		{
 			public object member = new object();
 
-			[OnCloning]
-			bool OnCloning(object ctx)
+			[ShouldClone]
+			bool ShouldClone(object ctx)
 			{
 				return false;
 			}

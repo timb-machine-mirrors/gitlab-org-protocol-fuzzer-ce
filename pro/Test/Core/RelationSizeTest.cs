@@ -863,10 +863,10 @@ namespace Peach.Pro.Test.Core
 			array.Add(array.OriginalElement.Clone("two"));
 
 			var c1 = array[0] as Choice;
-			c1.SelectedElement = c1.choiceElements[0];
+			c1.SelectElement(c1.choiceElements[0]);
 
 			var c2 = array[1] as Choice;
-			c2.SelectedElement = c2.choiceElements[1];
+			c2.SelectElement(c2.choiceElements[1]);
 
 			var final = copy.Value.ToArray();
 			var exp = Encoding.ASCII.GetBytes("\x40One\x03Two");

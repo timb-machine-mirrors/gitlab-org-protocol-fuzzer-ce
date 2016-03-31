@@ -39,7 +39,7 @@ and up on command. In step 4a of the workflow, Peach sends the power cycling com
 to the IpPower 9258 to perform this task.
 
 Now for setting up the monitors, consisting of detecting faults, collecting data, and
-automating the test environmennt.
+automating the test environment.
 
 The first item in detecting faults is to ensure the service is still listening
 for incoming connections. With more sophisticated devices, a service can stop,
@@ -60,7 +60,7 @@ leading up to the fault.
 Finally, we want to automatically reset the device after a fault occurs by cycling
 the power off, then on again. The IpPower9258 monitor provides control over outlets.
 A second aspect of automation is that the system must wait for the device reboot
-to complete before resuming fuzzing activiites. The Serial monitor performs this
+to complete before resuming fuzzing activities. The Serial monitor performs this
 task by watching logging messages for a message that indicates the boot process
 completed.
 
@@ -83,7 +83,7 @@ Begin each monitor with a name or descriptive text. This helps identify one moni
 another, and is especially evident with the two serial monitors.
 
 Next, fill in the critical parameters for each monitor. These parameters have callouts in
-the settings diagram of each monitor. Details for these paramters are given in the text
+the settings diagram of each monitor. Details for these parameters are given in the text
 that follows.
 
 NOTE: The order of the monitors listed in the agent is significant. Peach processes
@@ -108,7 +108,7 @@ The xref:Monitors_IpPower9258[IpPower 9258 Monitor] controls the IpPower 9258 de
 image::{images}/UserGuide/Recipes/NetworkDevice_IpPower9258_Boot.png[scale="50"]
 h
 The *Port* parameter identifies the receptacle of the IpPower9258 device. Numbers range
-from 1 to 4. Receptacle 1 is the leftmost recepticle.
+from 1 to 4. Receptacle 1 is the leftmost receptacle.
 
 image::{images}/UserGuide/Recipes/NetworkDevice_IpPower9258_RearPanel.png[scale="50"]
 
@@ -121,7 +121,7 @@ The second xref:Monitors_IpPower9258[IpPower 9258 Monitor] controls the IpPower 
 
 image::{images}/UserGuide/Recipes/NetworkDevice_IpPower9258_Reboot.png[scale="50"]
 
-The *Port* parameter identifies the receptacle of the IpPower9258 device. Numbers range from 1 to 4. Receptacle 1 is the leftmost recepticle.
+The *Port* parameter identifies the receptacle of the IpPower9258 device. Numbers range from 1 to 4. Receptacle 1 is the leftmost receptacle.
 
 The *When* parameter "OnIterationStartAfterFault" identifies that the the power cycle occurs at the start of the test case that immediately follows a fault.
 
@@ -151,7 +151,7 @@ when peach should enter a waiting state. The value `OnStart` identifies that the
 period is when the test target goes through the boot process at the beginning of
 the fuzzing session. The *Wait Regex* identifies the message text that the monitor looks
 to match. Here, the value is `Bootup Completed`. Peach waits until this message appears
-to begin fuzzing the target. For more information, see <<Monitor Parameters When and Wait When>>.
+to begin fuzzing the target.
 
 NOTE: The regular expressions used with this monitor are used to identify faults
 that have occurred in the device. You will need to construct the regular expression
@@ -219,7 +219,7 @@ The *State* parameter specifies the fault condition. The value `Closed` indicate
 fault occurs when the communication channel changes to `Closed`.
 
 ===== NetworkCapture (InterestingPackets)
-The xref:Monitors_Pcap[NetworkCapture Monitor] captures network traffic (packets) sent and
+The xref:Monitors_NetworkCapture[NetworkCapture Monitor] captures network traffic (packets) sent and
 received from the test target.
 
 image::{images}/UserGuide/Recipes/NetworkDevice_NetworkCapture.png[scale="50"]
@@ -227,7 +227,7 @@ image::{images}/UserGuide/Recipes/NetworkDevice_NetworkCapture.png[scale="50"]
 The *Device* parameter specifies the hostname of the target or the IPv4 address of the
 target. The value given is `eth0`.
 
-The *Filter* parameter is a capture filter (Berkely Packet Syntax filter used by
+The *Filter* parameter is a capture filter (Berkeley Packet Syntax filter used by
 Libpcap) that limits the network packets under consideration to those packets that
 match the specified filter. The packets that match the filter are captured from the
 wire as they arrive or leave the test target.

@@ -16,8 +16,8 @@ namespace Peach.Pro.Core.Transformers
 		{
 		}
 
-		[OnCloning]
-		private bool OnCloning(object context)
+		[ShouldClone]
+		private bool ShouldClone(object context)
 		{
 			return false;
 		}

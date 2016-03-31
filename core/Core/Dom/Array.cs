@@ -351,13 +351,13 @@ namespace Peach.Core.Dom
 		{
 			var clone = OriginalElement;
 
-			clone = clone.Clone("{0}_{1}".Fmt(clone.Name, index));
+			clone = clone.ShallowClone("{0}_{1}".Fmt(clone.Name, index));
 
 			return clone;
 		}
 
 		[OnCloning]
-		private bool OnCloning(object context)
+		private void OnCloning(object context)
 		{
 			CloneContext ctx = context as CloneContext;
 
@@ -368,8 +368,6 @@ namespace Peach.Core.Dom
 				if (ctx.rename.Contains(this) && OriginalElement != null)
 					ctx.rename.Add(OriginalElement);
 			}
-
-			return true;
 		}
 
 		/// <summary>

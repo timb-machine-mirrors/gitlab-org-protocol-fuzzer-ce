@@ -68,7 +68,7 @@ namespace Peach.Pro.Core.Mutators
 			var asChoice = (Choice)obj;
 			var selection = options[idx];
 
-			asChoice.SelectedElement = asChoice.choiceElements[selection];
+			asChoice.SelectElement(asChoice.choiceElements[selection]);
 			obj.mutationFlags = MutateOverride.Default;
 		}
 	}

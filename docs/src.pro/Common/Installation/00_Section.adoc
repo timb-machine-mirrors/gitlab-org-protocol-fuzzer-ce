@@ -30,7 +30,7 @@ NOTE: If you wish to use the alternate folder, you will need to create it.
 
 === Downloading the Peach Fuzzer Distribution Files
 
-The first step of the installation is to download the Peach Fuzzer distribution files from the Peach download site. Once the bits are local, you can use instructions for your specific operating system platform found in the following secitons.
+The first step of the installation is to download the Peach Fuzzer distribution files from the Peach download site. Once the bits are local, you can use instructions for your specific operating system platform found in the following sections.
 
 NOTE: You need a copy of your Peach Fuzzer license on your system to perform the download.
 
@@ -46,11 +46,11 @@ image::{images}/Common/Installation/LicenseUpload.png[scalewidth="60%"]
    c. Select the license (Peach.license)
    d. Click `Open` to return to the download home page.
 
-2. Upon return to the Peach Fuzzer download home page, click `Upload Licence`. The page listing the available images displays:
+2. Upon return to the Peach Fuzzer download home page, click `Upload License`. The page listing the available images displays:
 +
 image::{images}/Common/Installation/Image_Choices.png[scalewidth="70%"]
 
-3. On the dowloads page, select the Peach release version and operating system to install.
+3. On the downloads page, select the Peach release version and operating system to install.
 
    * Choose a release version from the list along the left edge of the window; the newest offering is atop the list.
    * Choose an appropriate OS for the release: OS X, Linux (32- or 64-bit), or Windows (32- or 64-bit).

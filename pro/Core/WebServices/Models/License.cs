@@ -39,5 +39,10 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// The features associated with this license.
 		/// </summary>
 		public Lic.Feature Version { get; set; }
+
+		/// <summary>
+		/// Has the eula been accepted.
+		/// </summary>
+		public bool EulaAccepted { get; set; }
 	}
 }

@@ -25,8 +25,8 @@ namespace Peach.Pro.Core.Analyzers
 		{
 		}
 
-		[OnCloning]
-		private bool OnCloning(object context)
+		[ShouldClone]
+		private bool ShouldClone(object context)
 		{
 			return false;
 		}

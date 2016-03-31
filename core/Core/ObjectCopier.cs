@@ -15,6 +15,10 @@ using ExprList = System.Collections.Generic.List<System.Linq.Expressions.Express
 namespace Peach.Core
 {
 	[AttributeUsage(AttributeTargets.Method, Inherited = false)]
+	public class ShouldCloneAttribute : Attribute
+	{
+	}
+	[AttributeUsage(AttributeTargets.Method, Inherited = false)]
 	public class OnCloningAttribute : Attribute
 	{
 	}
@@ -232,13 +236,14 @@ namespace Peach.Core
 			 * 
 			 * if (clone == null)
 			 * {
-			 *   if (!obj.OnCloning(ctx))
+			 *   if (!obj.ShouldClone(ctx))
 			 *   {
 			 *     clone = obj;
 			 *     table[obj] = obj;
 			 *   }
 			 *   else
 			 *   {
+			 *     obj.OnCloning(ctx);
 			 *     clone = GetUninitializedObject();
 			 *     table[obj] = clone;
 			 *     // Copy Fields
@@ -254,6 +259,7 @@ namespace Peach.Core
 				throw new NotSupportedException("Can not clone '{0}', it is not marked as serializable.".Fmt(type.FullName));
 
 			// Get functions decorated with callback attributes
+			var shouldClone = GetMethodsWithAttribute(typeof(ShouldCloneAttribute), type);
 			var onCloning = GetMethodsWithAttribute(typeof(OnCloningAttribute), type);
 			var onCloned = GetMethodsWithAttribute(typeof(OnClonedAttribute), type);
 
@@ -270,8 +276,16 @@ namespace Peach.Core
 			var typed = Downcast(type, obj, vars, exprs);
 
 			// Build expression list for actually copying the object
-			ExprList copy = new ExprList() {
+			ExprList copy = new ExprList();
 
+			// Call OnCloning functions
+			foreach (var item in onCloning)
+			{
+				// obj.OnCloning(ctx);
+				copy.Add(Expression.Call(typed, item, ctx));
+			}
+
+			copy.AddRange(new Expression[] {
 				// clone = (tyoe)FormatterServices.GetUninitializedObject(type)
 				Expression.Assign(
 					clone,
@@ -290,7 +304,7 @@ namespace Peach.Core
 					obj,
 					clone
 				),
-			};
+			});
 
 			// Transfer all feilds
 			CopyComplexType(type, typed, clone, copy);
@@ -305,7 +319,7 @@ namespace Peach.Core
 			Expression expr = Expression.Block(copy);
 
 			// Filter 'copy object' based on OnCloning functions
-			foreach (var item in onCloning)
+			foreach (var item in shouldClone)
 			{
 				//if (obj.OnCloning(ctx)) { copyObject(); } else { clone = obj; tbl[obj] = clone; }
 				expr = Expression.IfThenElse(

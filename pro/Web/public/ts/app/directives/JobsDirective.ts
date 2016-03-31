@@ -85,9 +85,8 @@ namespace Peach {
 				}
 				this.pendingDelete = undefined;
 			});
-			promise.catch((error: IError) => {
+			promise.catch(() => {
 				this.pendingDelete = undefined;
-				this.$state.go(C.States.MainError, { message: error.errorMessage });
 			});
 		}
 		

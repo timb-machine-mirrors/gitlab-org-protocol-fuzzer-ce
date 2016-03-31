@@ -199,6 +199,7 @@ namespace Peach.Pro.Core.WebServices
 	[Serializable]
 	public class PitDetail : INamed
 	{
+		public string Id { get; set; }
 		public string Path { get; set; }
 		public string PitUrl { get; set; }
 		public List<Tag> Tags { get; set; }
@@ -414,7 +415,7 @@ namespace Peach.Pro.Core.WebServices
 			_entries.Add(absDetail);
 
 			lib.Library.Versions[0].Pits.Add(new LibraryPit {
-				Id = detail.PitConfig.Id,
+				Id = detail.Id,
 				PitUrl = detail.PitUrl,
 				Name = detail.PitConfig.Name,
 				Description = detail.PitConfig.Description,
@@ -452,9 +453,7 @@ namespace Peach.Pro.Core.WebServices
 			if (locked)
 			{
 				pitConfig = new PitConfig {
-					Id = guid,
 					OriginalPit = relativePath,
-					Name = Path.GetFileNameWithoutExtension(fileName),
 					Description = "", // TODO: get actual description
 					Config = new List<Param>(),
 					Agents = new List<Models.Agent>(),
@@ -466,7 +465,10 @@ namespace Peach.Pro.Core.WebServices
 				pitConfig = LoadPitConfig(fileName);
 			}
 
+			pitConfig.Name = Path.GetFileNameWithoutExtension(fileName);
+
 			return new PitDetail {
+				Id = guid,
 				Path = fileName,
 				PitUrl = PitServicePrefix + "/" + guid,
 				Tags = new List<Tag> { tag },
@@ -490,7 +492,7 @@ namespace Peach.Pro.Core.WebServices
 			get
 			{
 				return _entries.Select(x => new LibraryPit {
-					Id = x.PitConfig.Id,
+					Id = x.Id,
 					PitUrl = x.PitUrl,
 					Name = x.PitConfig.Name,
 					Description = x.PitConfig.Description,
@@ -578,9 +580,7 @@ namespace Peach.Pro.Core.WebServices
 			if (File.Exists(dstFile))
 				throw new ArgumentException("A pit already exists with the specified name.");
 
-			var guid = MakeGuid(GetRelativePath(dstFile));
 			var pitConfig = new PitConfig {
-				Id = guid,
 				Name = name,
 				Description = description,
 				OriginalPit = srcPit.PitConfig.OriginalPit,
@@ -629,6 +629,7 @@ namespace Peach.Pro.Core.WebServices
 				Directory.CreateDirectory(xmlDir);
 
 			var cfgFile = MakeUniquePath(cfgDir, legacyName, ".peach");
+			var cfgName = Path.GetFileNameWithoutExtension(cfgFile);
 			var xmlFile = MakeUniquePath(xmlDir, legacyName, ".xml");
 			var xmlConfigFile = MakeUniquePath(xmlDir, legacyName, ".xml.config");
 
@@ -656,10 +657,8 @@ namespace Peach.Pro.Core.WebServices
 			var agents = contents.Children.OfType<PeachElement.AgentElement>();
 
 			// 5. Write new .peach
-			var guid = MakeGuid(GetRelativePath(cfgFile));
 			var pitConfig = new PitConfig {
-				Id = guid,
-				Name = legacyName,
+				Name = cfgName,
 				Description = contents.Description,
 				OriginalPit = originalPitPath,
 				Config = cfg,
@@ -703,7 +702,7 @@ namespace Peach.Pro.Core.WebServices
 		{
 			PitDetail pit;
 			_entries.TryGetValue(url, out pit);
-			return UpdatePitById(pit.PitConfig.Id, data);
+			return UpdatePitById(pit.Id, data);
 		}
 
 		private PitDetail GetPitDetailById(string guid)
@@ -750,7 +749,7 @@ namespace Peach.Pro.Core.WebServices
 				calls = metadata.Calls;
 
 			var pit = new Pit {
-				Id = detail.PitConfig.Id,
+				Id = detail.Id,
 				PitUrl = detail.PitUrl,
 				Name = detail.PitConfig.Name,
 				Description = detail.PitConfig.Description,

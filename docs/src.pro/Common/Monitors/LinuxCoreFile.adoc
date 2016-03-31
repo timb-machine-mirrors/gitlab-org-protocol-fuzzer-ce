@@ -6,35 +6,48 @@
 
 [IMPORTANT]
 ====
-The gdb debugger and xref:Monitors_Gdb[gdb] monitor are the preferred tools to detect crashes and to collect core files on Linux.
+The `gdb` debugger and xref:Monitors_Gdb[Gdb Monitor] are the preferred tools to detect crashes and to collect core files on Linux.
 
-This monitor runs only on Linux systems. Use this monitor when gdb is not an option, such as when anti-debugging mechanisms are used on the test target.
+This monitor runs only on Linux systems.
+Use this monitor when `gdb` is not an option,
+such as when anti-debugging mechanisms are used on the test target.
 ====
 
-The _LinuxCoreFile_ monitor detects when a process crashes, and collects and logs core dump information. The monitoring scope can focus on a single executable, specified by setting the *Executable* parameter. Or, the monitoring scope can include  all processes. By default, all processes are monitored.
+The _LinuxCoreFile_ monitor detects when a process crashes and collects the resulting core file.
+The monitoring scope can focus on a single executable,
+specified by setting the *Executable* parameter.
+Or,
+the monitoring scope can include all processes.
+By default,
+all processes are monitored.
 
-This monitor runs for the entire fuzzing session, and uses the Linux crash recording facility. When a crash occurs, the _LinuxCoreFile_ monitor pulls the logging information and available core files, and sets the bucketing information. The major bucket is category CORE, and the minor category is the name of the crashed executable.
+This monitor runs for the entire fuzzing session and uses the Linux crash recording facility.
+When a crash occurs,
+the _LinuxCoreFile_ monitor pulls the logging information and available core files,
+and sets the bucketing information.
+The major bucket is based on the name of the crashed executable,
+and the minor bucket is a constant value based on the string "CORE".
 
-At the end of the session, _LinuxCoreFile_ restores the saved state and removes the logging folder.
+At the end of the session,
+_LinuxCoreFile_ restores the saved state and removes the logging folder.
 
 .*Setup Requirements*
-This monitor has the following setup requirements: +
+This monitor has the following setup requirements:
 
 * _LinuxCoreFile_ requires root or equivalent privileges to run.
 The _LinuxCoreFile_ monitor registers a script with the kernel to catch core dumps of faulting processes.
 
-* Core files must be enabled. If the maximum core file size in the system is zero, no core files are created.
+* Core files must be enabled.
+If the maximum core file size in the system is zero, no core files are created.
 You can enable core file generation using the following process:
 
-. Start a shell, such as Bourne shell.
-+
-----
-/bin/sh
-----
-
 . Find the current core file hard and soft limits in use by the operating system.
-The hard limit is an absolute maximum that, once set, cannot be increased during a session. The soft limit is the current maximum file size that you can adjust up to the value of the hard limit.
-If the hard limit or the soft limit is set to zero, core files are disabled.
+The hard limit is an absolute maximum that,
+once set,
+cannot be increased during a session.
+The soft limit is the current maximum file size that you can adjust up to the value of the hard limit.
+If the hard limit or the soft limit is set to zero,
+core files are disabled.
 +
 ** You can display the core file hard limit using the following command:
 +
@@ -65,20 +78,8 @@ ulimit -Sc unlimited
 The hard and soft limits can be added to `/etc/sysctl.conf`.
 Then, whenever this file loads, appropriate core file limits are specified.
 
-////////////////////////////
-Restrictions exist on ulimit.
-run in shell.
-run ulimit and then target in the same command shell (login session).
-
-If doing sysctrl, what values does user need to add?
-- reboot, or
-- reload the sysctrl command (which loads the file).
-////////////////////////////
-
-* gdb must be installed to analyze the resulting core files.
-For information on installing gdb, see the xref:Monitors_Gdb[gdb] monitor.
-
-//====
+* `gdb` must be installed to analyze the resulting core files.
+For information on installing `gdb`, see the xref:Monitors_Gdb[Gdb Monitor].
 
 === Parameters
 
@@ -88,9 +89,18 @@ None.
 
 _Optional:_
 
-Executable:: Target executable process, used to filter crashes, defaults to all processes.
-LogFolder:: Folder with log files, defaults to `/var/peachcrash`.
-Mono:: Full path an executable for mono runtime, defaults to `/usr/bin/mono`.
+Executable::
+Target executable process,
+used to filter crashes,
+defaults to all processes.
+
+LogFolder::
+Folder with log files,
+defaults to `/var/peachcrash`.
+
+Mono::
+Full path an executable for mono runtime,
+defaults to `/usr/bin/mono`.
 
 === Examples
 
@@ -104,7 +114,7 @@ This parameter example is from a setup that monitors a movie player in Linux.
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
-|ProcessName  |MPlayer
+|Executable   |`mplayer`
 |==========================================================
 ====================
 
@@ -119,180 +129,13 @@ This example produces a fault on the first iteration to show how the LinuxCoreFi
 
 [source,xml]
 ----
-<?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
-
-  <DataModel name="TheDataModel">
-    <String name="TheString" value="Hello World!" />
-  </DataModel>
-
-  <StateModel name="State" initialState="Initial" >
-    <State name="Initial">
-      <Action type="output">
-          <DataModel ref="TheDataModel"/>
-      </Action>
-      <Action type="close"/>
-      <Action type="call" method="ScoobySnacks" publisher="Peach.Agent"/>
-    </State>
-  </StateModel>
-
-  <Agent name="Local">
-    <Monitor class="LinuxCoreFile"/>
-
-    <Monitor class="Process">
-      <Param name="Executable" value="CrashableServer" />
-      <Param name="Arguments" value="127.0.0.1 4244" />
-    </Monitor>
-  </Agent>
-
- <Test name="Default">
-    <StateModel ref="State"/>
-    <Agent ref="Local" />
-
-    <Publisher class="Tcp">
-      <Param name="Host" value="127.0.0.1" />
-      <Param name="Port" value="4244" />
-    </Publisher>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
-  </Test>
-</Peach>
+include::LinuxCoreFile_Example.xml[]
 ----
 
 Output from this example.
 
 ----
-$ peach --debug --seed=1 --range=1,1 example.xml
-
-[[ Peach Pro v0.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-Peach.Core.Engine runTest: context.config.range == true, start: 1, stop: 1
-
-[*] Test 'Default' starting with random seed 1.
-Peach.Core.Agent.Agent StartMonitor: Monitor LinuxCoreF
-Peach.Core.Agent.Agent StartMonitor: Monitor_1 Process
-Peach.Core.Agent.Agent SessionStarting: Monitor
-Peach.Core.Agent.Agent SessionStarting: Monitor_1
-Peach.Core.Agent.Monitors.Process _Start(): Starting process
-Establishing the listener...
-
-[R1,-,-] Performing iteration
-Peach.Core.Engine runTest: Performing recording iteration.
-Waiting for a connection...
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
-Peach.Core.Dom.Action ActionType.Output
-Peach.Core.Publishers.TcpClientPublisher start()
-Peach.Core.Publishers.TcpClientPublisher open()
-Accepted connection from 127.0.0.1:35321.
-Peach.Core.Publishers.TcpClientPublisher output(12 bytes)
-Peach.Core.Publishers.TcpClientPublisher
-
-00000000   48 65 6C 6C 6F 20 57 6F  72 6C 64 21               Hello World!
-
-Received 12 bytes from client.
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
-Peach.Core.Dom.Action ActionType.Close
-Peach.Core.Publishers.TcpClientPublisher close()
-Peach.Core.Publishers.TcpClientPublisher Shutting down connection to 127.0.0.1:4244
-Connection closed by peer.
-Shutting connection down...
-Connection is down.
-Waiting for a connection...
-Peach.Core.Publishers.TcpClientPublisher Read 0 bytes from 127.0.0.1:4244, closing client connection.
-Peach.Core.Publishers.TcpClientPublisher Closing connection to 127.0.0.1:4244
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
-Peach.Core.Dom.Action ActionType.Call
-Peach.Core.Agent.AgentManager Message: Action.Call => ScoobySnacks
-
-[1,1,0:00:00.347] Performing iteration
-[*] Fuzzing: TheDataModel.TheString
-[*] Mutator: UnicodeBomMutator
-Peach.Core.MutationStrategies.RandomStrategy Action_Starting: Fuzzing: TheDataModel.TheString
-Peach.Core.MutationStrategies.RandomStrategy Action_Starting: Mutator: UnicodeBomMutator
-Peach.Core.Dom.Action ActionType.Output
-Peach.Core.Publishers.TcpClientPublisher open()
-Accepted connection from 127.0.0.1:48111.
-Peach.Core.Publishers.TcpClientPublisher output(1354 bytes)
-Peach.Core.Publishers.TcpClientPublisher
-
-00000000   FE FF FF FE FE FF FE BB  BF FE FF FF FE FE FF FE   ????????????????
-00000010   BB BF FF FE FF FE FF FE  FF FE FF FE FF FE FF FE   ????????????????
-00000020   FF FE FF FE FE FF FE FF  FE FF FE BB BF FE FF FE   ????????????????
-00000030   BB BF FF FE FE FF FE FF  FE BB BF FE FF FE FF FE   ????????????????
-...
-
-Received 1024 bytes from client.
-
-In CrashMe()
-Peach.Core.Dom.Action ActionType.Close
-Peach.Core.Publishers.TcpClientPublisher close()
-Peach.Core.Publishers.TcpClientPublisher Shutting down connection to 127.0.0.1:4244
-Peach.Core.Publishers.TcpClientPublisher Unable to complete reading data from 127.0.0.1:4244.  Connection reset by peer
-Peach.Core.Publishers.TcpClientPublisher Closing connection to 127.0.0.1:4244
-Peach.Core.Dom.Action ActionType.Call
-Peach.Core.Agent.AgentManager Message: Action.Call => ScoobySnacks
-Peach.Core.Agent.AgentManager Fault detected.  Collecting monitor data.
-Peach.Core.Engine runTest: detected fault on iteration 1
-
- -- Caught fault at iteration 1, trying to reproduce --
-
-Peach.Core.Loggers.FileLogger Found core fault [] <1>
-Peach.Core.Loggers.FileLogger Saving action: 1.Initial.Action.bin
-Peach.Core.Loggers.FileLogger Saving fault: <2>
-Peach.Core.Engine runTest: Attempting to reproduce fault.
-Peach.Core.Engine runTest: replaying iteration 1
-
-[1,1,0:00:02.673] Performing iteration
-Peach.Core.Agent.Monitors.Process _Start(): Starting process
-[*] Fuzzing: TheDataModel.TheString
-[*] Mutator: UnicodeBomMutator
-Peach.Core.MutationStrategies.RandomStrategy Action_Starting: Fuzzing: TheDataModel.TheString
-Peach.Core.MutationStrategies.RandomStrategy Action_Starting: Mutator: UnicodeBomMutator
-Peach.Core.Dom.Action ActionType.Output
-Peach.Core.Publishers.TcpClientPublisher open()
-Establishing the listener...
-Peach.Core.Publishers.TcpClientPublisher open: Warn, Unable to connect to remote host 127.0.0.1 on port 4244.  Trying again in 1ms...
-Waiting for a connection...
-Peach.Core.Publishers.TcpClientPublisher output(1354 bytes)
-Peach.Core.Publishers.TcpClientPublisher
-
-00000000   FE FF FF FE FE FF FE BB  BF FE FF FF FE FE FF FE   ????????????????
-00000010   BB BF FF FE FF FE FF FE  FF FE FF FE FF FE FF FE   ????????????????
-00000020   FF FE FF FE FE FF FE FF  FE FF FE BB BF FE FF FE   ????????????????
-00000030   BB BF FF FE FE FF FE FF  FE BB BF FE FF FE FF FE   ????????????????
-...
-
-Accepted connection from 127.0.0.1:40387.
-Received 1024 bytes from client.
-
-In CrashMe()
-Peach.Core.Dom.Action ActionType.Close
-Peach.Core.Publishers.TcpClientPublisher close()
-Peach.Core.Publishers.TcpClientPublisher Shutting down connection to 127.0.0.1:4244
-Peach.Core.Publishers.TcpClientPublisher Unable to complete reading data from 127.0.0.1:4244.  Connection reset by peer
-Peach.Core.Publishers.TcpClientPublisher Closing connection to 127.0.0.1:4244
-Peach.Core.Dom.Action ActionType.Call
-Peach.Core.Agent.AgentManager Message: Action.Call => ScoobySnacks
-Peach.Core.Agent.AgentManager Fault detected.  Collecting monitor data.
-Peach.Core.Engine runTest: detected fault on iteration 1
-Peach.Core.Engine >> OnFault
-
- -- Reproduced fault at iteration 1 --
-
-Peach.Core.Loggers.FileLogger Found core fault []
-Peach.Core.Loggers.FileLogger Saving action: 1.Initial.Action.bin
-Peach.Core.Loggers.FileLogger Saving fault:
-Peach.Core.Engine << OnFault
-Peach.Core.Engine runTest: Reproduced fault, continuing fuzzing at iteration 1
-Peach.Core.Publishers.TcpClientPublisher stop()
-Peach.Core.Agent.Agent SessionFinished: Monitor_1
-Peach.Core.Agent.Monitors.Process _Stop(): Closing process handle
-Peach.Core.Agent.Agent SessionFinished: Monitor
-
-[*] Test 'Default' finished.
+include::LinuxCoreFile_Example.log[]
 ----
 
 <1> When the program crashes, a core dump is produced and captured by the LinuxCoreFile monitor.

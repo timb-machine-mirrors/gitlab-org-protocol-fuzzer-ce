@@ -37,17 +37,17 @@
 // 03/05/2014: Lynn:
 //  Rewrote definition text
 
-Slurp moves data between two DataModels. The Slurp Action copies a data value from one non-container element in one DataModel to another non-container element in a separate DataModel. 
+Slurp moves data between two DataModels. The Slurp Action copies a data value from one non-container element in one DataModel to another non-container element in a separate DataModel.
 
 A non-container element is an element that does not contain other elements. Number, string, and blob are types of non-container elements. In contrast, array, xref:Block[Block], xref:Choice[Choice], and xref:DataModel[DataModel]) are types of container elements.
 
 * The xref:xpath[valueXpath] attribute defines the input element. The data model and the element in valueXpath were previously referenced by a prior input action.
 
-* The xref:xpath[setXpath] attribute defines the output element.  The data model and the element in setXpath will be referenced by a future action. 
+* The xref:xpath[setXpath] attribute defines the output element.  The data model and the element in setXpath will be referenced by a future action.
 
 The XML Path (XPath) language is used by valueXpath and setXpath to specify the data to move. XPath targets a specific element for the xref:xpath[valueXpath] and xref:xpath[setXpath] parameters. This allows a variety of ways to access these elements in the Document Object Model (DOM).
 
-A common use for slurp is during a protocol sequence where a sequence id or a challenge id needs to roundtrip from the server to the client and back to the server (see the Challenge Response example below). The _slurp_ Action copies the data received from the server (valueXpath attribute) into the response packet (setXpath attribute). When the response packet is populated, it is sent back to the server using another Action.
+A common use for slurp is during a protocol sequence where a sequence id or a challenge id needs to round-trip from the server to the client and back to the server (see the Challenge Response example below). The _slurp_ Action copies the data received from the server (valueXpath attribute) into the response packet (setXpath attribute). When the response packet is populated, it is sent back to the server using another Action.
 
 Potential Slurp errors include the following:
 
@@ -294,7 +294,7 @@ This example copies a value to multiple elements at once.
 
 .Challenge Response
 ==========================
-This example shows how to use slurp for roundtripping a challenge id just issued by a server in the next response packet to the server.
+This example shows how to use slurp for round-tripping a challenge id just issued by a server in the next response packet to the server.
 
 [source,xml]
 ----

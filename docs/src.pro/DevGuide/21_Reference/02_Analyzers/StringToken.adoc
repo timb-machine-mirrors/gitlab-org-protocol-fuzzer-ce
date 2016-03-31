@@ -40,7 +40,7 @@ Tokens:: List of characters to pass to the StringToken analyzer.
 
 === Examples
 
-.Simple HTTP GET Url Example
+.Simple HTTP GET URL Example
 ==========================
 This example uses the string tokenizer on an inline value.
 

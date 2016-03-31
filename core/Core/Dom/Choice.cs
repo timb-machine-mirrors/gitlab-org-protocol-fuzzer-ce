@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Xml;
 
@@ -63,7 +64,11 @@ namespace Peach.Core.Dom
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		public NamedCollection<DataElement> choiceElements = new NamedCollection<DataElement>();
 		DataElement _selectedElement = null;
-		readonly NamedCollection<DataElement> maskedElements = new NamedCollection<DataElement>();
+		readonly HashSet<string> maskedElements = new HashSet<string>();
+
+		// Used to squirrel away choiceElements during cloning in order to make shallow copies
+		[NonSerialized]
+		private NamedCollection<DataElement> tmpChoiceElements;
 
 		public Choice()
 		{
@@ -212,7 +217,12 @@ namespace Peach.Core.Dom
 			{
 				if (TokenCheck(sizedData, item.Value, startPosition))
 				{
-					var child = choiceElements[item.Key];
+					var child = choiceElements[item.Key].ShallowClone();
+
+					// Need to update the parent prior to cracking because
+					// it could be an array's OriginalElement due to the shallow
+					// copies of Arrays.
+					child.parent = this;
 
 					try
 					{
@@ -221,8 +231,7 @@ namespace Peach.Core.Dom
 
 						sizedData.SeekBits(startPosition, System.IO.SeekOrigin.Begin);
 						context.CrackData(child, sizedData);
-						CrackSuccess(child);
-						//SelectedElement = child;
+						SelectedElement = child;
 
 						logger.Trace("handleChoice: Keeping child: {0}", child.debugName);
 						return;
@@ -246,25 +255,33 @@ namespace Peach.Core.Dom
 			}
 
 			// Now try it the slow way
-			foreach (DataElement child in choiceElements)
+			foreach (DataElement item in choiceElements)
 			{
 				// Skip any cache entries, already tried them
 				// Except if our cache choice failed to parse. Then 
 				// try all options except the one we already tried.
-				if (isTryAfterFailure == null && _choiceCache.ContainsKey(child.Name))
+				if (isTryAfterFailure == null && _choiceCache.ContainsKey(item.Name))
 					continue;
 
-				if (isTryAfterFailure == child.Name)
+				if (isTryAfterFailure == item.Name)
 					continue;
+
+				// Create a copy to actually try and crack into
+				var child = item.ShallowClone();
+
+				// Need to update the parent prior to cracking because
+				// it could be an array's OriginalElement due to the shallow
+				// copies of Arrays.
+				child.parent = this;
 
 				try
 				{
+
 					logger.Trace("handleChoice: Trying child: {0}", child.debugName);
 
 					sizedData.SeekBits(startPosition, System.IO.SeekOrigin.Begin);
 					context.CrackData(child, sizedData);
-					CrackSuccess(child);
-					//SelectedElement = child;
+					SelectedElement = child;
 
 					logger.Trace("handleChoice: Keeping child: {0}", child.debugName);
 					return;
@@ -301,9 +318,10 @@ namespace Peach.Core.Dom
 
 		public void SelectDefault()
 		{
-			Clear();
-			this.Add(choiceElements[0]);
-			_selectedElement = this[0];
+			if (choiceElements.Count == 0)
+				throw new InvalidOperationException();
+
+			SelectedElement = choiceElements[0];
 		}
 
 		public static DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
@@ -337,12 +355,10 @@ namespace Peach.Core.Dom
 			if (index != 0 || Count != 1)
 				throw new ArgumentOutOfRangeException("index");
 
-			// Call clear so that we don't reset the parent
-			// of our chosen element.
-			// Also reset our selected element so GetChildren()
-			// will return our choices.
+			Debug.Assert(_selectedElement != null);
 			_selectedElement = null;
-			Clear();
+
+			base.RemoveAt(0, cleanup);
 
 			if (this.Count == 0)
 				parent.Remove(this, cleanup);
@@ -365,25 +381,39 @@ namespace Peach.Core.Dom
 			newElem.parent = this;
 		}
 
+		public void SelectElement(DataElement elem)
+		{
+			Debug.Assert(choiceElements.ContainsKey(elem.Name));
+			Debug.Assert(choiceElements[elem.Name] == elem);
+
+			if (SelectedElement != null && SelectedElement.Name == elem.Name)
+				return;
+
+			SelectedElement = elem.ShallowClone();
+		}
+
 		public DataElement SelectedElement
 		{
 			get
 			{
 				return _selectedElement;
 			}
-			set
+			private set
 			{
-				if (!choiceElements.Contains(value))
-					throw new KeyNotFoundException("value was not found");
+				while (Count > 0)
+				{
+					// Must use base here, our RemoveAt will
+					// remove us from our parent!
+					base.RemoveAt(0, true);
+				}
 
-				Clear();
-				this.Add(value);
+				Add(value);
 				_selectedElement = value;
 				Invalidate();
 			}
 		}
 
-		internal NamedCollection<DataElement> MaskedElements { get { return maskedElements; } }
+		internal HashSet<string> MaskedElements { get { return maskedElements; } }
 
 		protected override bool InScope(DataElement child)
 		{
@@ -395,7 +425,7 @@ namespace Peach.Core.Dom
 			if (forDisplay)
 			{
 				if (maskedElements.Any())
-					return maskedElements;
+					return choiceElements.Where(e => maskedElements.Contains(e.Name));
 				return choiceElements;
 			}
 
@@ -412,7 +442,10 @@ namespace Peach.Core.Dom
 		/// <returns></returns>
 		public override IList<DataElement> XPathChildren()
 		{
-			return choiceElements;
+			if (SelectedElement == null)
+				return choiceElements;
+
+			return new List<DataElement>(new[] { SelectedElement }.Concat(choiceElements));
 		}
 
 		protected override DataElement GetChild(string name)
@@ -433,41 +466,45 @@ namespace Peach.Core.Dom
 			return new Variant(new BitStreamList(new[] { SelectedElement.Value }));
 		}
 
-		private void CrackSuccess(DataElement child)
+		[OnCloning]
+		private void OnCloning(object context)
 		{
-			var dm = root as DataModel;
-			if (dm != null && dm.actionData != null && dm.actionData.IsOutput && IntPtr.Size == 8)
-			{
-				// If this is an output action on a 64-bit machine,
-				// we will do normal selection and remember our alternative choices
-				SelectedElement = child;
+			var ctx = context as CloneContext;
+
+			if (ctx == null || !ctx.Shallow)
 				return;
-			}
 
-			try
-			{
-				// Remove all references to all non-chosen choice children
-				BeginUpdate();
+			// Squirrel away choiceElements so it doesn't get copied
+			Debug.Assert(choiceElements != null);
+			Debug.Assert(tmpChoiceElements == null);
 
-				Clear();
+			tmpChoiceElements = choiceElements;
+			choiceElements = null;
+		}
 
-				foreach (var item in choiceElements.Where(i => i != child))
-				{
-					Add(item);
-					base.RemoveAt(0, true);
-				}
+		[OnCloned]
+		private void OnCloned(DataElement original, object context)
+		{
+			var ctx = context as CloneContext;
 
-				Add(child);
+			if (ctx == null || !ctx.Shallow)
+				return;
 
-				_choiceCache.Clear();
-				choiceElements.Clear();
-				choiceElements.Add(child);
-				_selectedElement = child;
-			}
-			finally
-			{
-				EndUpdate();
-			}
+			var orig = (Choice)original;
+
+			Debug.Assert(orig.choiceElements == null);
+			Debug.Assert(orig.tmpChoiceElements != null);
+			Debug.Assert(choiceElements == null);
+			Debug.Assert(tmpChoiceElements == null);
+
+			// Restore choiceElements so that the clone uses
+			// the same instance as the original.  At usage time
+			// the individual choice elements will get cloned
+			// from the single shared collection
+
+			orig.choiceElements = orig.tmpChoiceElements;
+			orig.tmpChoiceElements = null;
+			choiceElements = orig.choiceElements;
 		}
 	}
 }

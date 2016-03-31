@@ -4,9 +4,9 @@
 
 The _Rest_ Publisher  is an I/O adapter that communicates using the Representational State Transfer (REST) architecture. This publisher communicates using HTTP as the underlying transport.
 
-This publisher shupports sending body data as:
+This publisher supports sending body data as:
 
- * JSON when models contain Json elements (JsonString, JsonObject, etc.) or the depricated Json element.
+ * JSON when models contain Json elements (JsonString, JsonObject, etc.) or the deprecated Json element.
  * XML when models contain XmlElement
  * As raw binary data when a custom content type is provided
 
@@ -51,9 +51,9 @@ xref:Action_call[call]::
 Call actions are used to perform REST calls.
 
 The method attribute contains both the HTTP method (GET, POST, etc.) and the URL.
-The URL portion of the method attribute can contain parameter substitution tokens. 
-These tokens are replaced with the parameters provided. 
-One additional parameter can be provided that is used for the body of the request. 
+The URL portion of the method attribute can contain parameter substitution tokens.
+These tokens are replaced with the parameters provided.
+One additional parameter can be provided that is used for the body of the request.
 
 * The format of the method attribute is: +METHOD URL+
 * This example places a call that expects to receive a single parameter: +GET /product/{0}+
@@ -101,7 +101,7 @@ The following example provides three fragments using the GET and POST methods.
     <Param name="Id">
         <DataModel ref="Id" />
     </Param>
-    
+
     <!-- POST Body -->
     <Param name="PostData">
         <DataModel ref="PostData" />
@@ -136,7 +136,7 @@ The following example provides three fragments using the GET and POST methods.
     <Param name="Id">
         <DataModel ref="Id" />
     </Param>
-    
+
     <!-- POST Body -->
     <Param name="PostData">
         <DataModel ref="PostData" />
@@ -161,7 +161,7 @@ The following example provides three fragments using the GET and POST methods.
     <Param name="Id">
         <DataModel ref="Id" />
     </Param>
-    
+
     <!-- POST Body -->
     <Param name="PostData">
         <DataModel ref="PostData" />

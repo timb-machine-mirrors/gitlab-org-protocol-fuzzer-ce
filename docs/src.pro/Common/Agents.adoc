@@ -24,7 +24,7 @@ LocalAgent (local)::
 	The agent is hosted in the current Peach process. This is the default channel.
 
 TCP REMOTING (tcp)::
-	The external Peach agent communicates using REST api calls over TCP. Peach can run as a TCP remoting agent using the +-a tcp+ argument.
+	The external Peach agent communicates using REST API calls over TCP. Peach can run as a TCP remoting agent using the +-a tcp+ argument.
 
 ifdef::peachug[]
 

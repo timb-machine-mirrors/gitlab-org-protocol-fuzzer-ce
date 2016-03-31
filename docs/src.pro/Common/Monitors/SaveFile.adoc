@@ -33,7 +33,7 @@ This parameter example is from a setup that writes out a file. Potentially, you 
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
-|ProcessName  |C:\temp\DataLog.txt
+|ProcessName  |`C:\temp\DataLog.txt`
 |==========================================================
 ====================
 

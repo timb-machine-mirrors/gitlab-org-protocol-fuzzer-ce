@@ -8,7 +8,7 @@ The _CleanupRegistry_ monitor provides automated cleanup of Windows registry
 entries created during a fuzzing session. Cleanup occurs before every iteration.
 
 This monitor uses a specified registry key (a parent key) as a reference point
-and deletes all child keys or descendents of the parent key. All child keys at
+and deletes all child keys or descendants of the parent key. All child keys at
 all levels beneath the parent key are removed. Values attached to child keys are
 removed as well.
 
@@ -88,8 +88,8 @@ Key::
 _Optional:_
 
 ChildrenOnly:: If true, omits the parent key from the purge, thereby deleting
-all descendents (subkeys) of the specified key. +
-If false, the parent key and all descendents are deleted. Defaults to false.
+all descendants (sub-keys) of the specified key. +
+If false, the parent key and all descendants are deleted. Defaults to false.
 
 === Examples
 
@@ -103,7 +103,7 @@ This parameter example is from a setup that uses the CleanupRegistry monitor to 
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
-|Key   |HKLM\SOFTWARE\Office13\Recovery
+|Key          |`HKLM\SOFTWARE\Office13\Recovery`
 |==========================================================
 
 The following image shows the portion of the registry that contains the key to delete.
@@ -128,69 +128,13 @@ This uses the CleanupRegistry monitor to remove a specified key from the Windows
 ========================
 [source,xml]
 ----
-<?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
-
-  <DataModel name="TheDataModel">
-    <Number size="32" signed="false" value="31337" />
-  </DataModel>
-
-  <StateModel name="State" initialState="Initial" >
-    <State name="Initial">
-      <Action type="output">
-          <DataModel ref="TheDataModel"/>
-      </Action>
-    </State>
-  </StateModel>
-
-  <Agent name="TheAgent">
-	<Monitor class="CleanupRegistry">
-		<Param name="Key" value="HKLM\SOFTWARE\Office13\Recovery" />
-	</Monitor>
- </Agent>
-
-  <Test name="Default">
-    <StateModel ref="State"/>
-
-    <Agent ref="TheAgent" />
-
-    <Publisher class="ConsoleHex"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
-  </Test>
-</Peach>
+include::CleanupRegistry_Example.xml[]
 ----
 
 Output for this example.
 
 ----
->peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
-[*] Test 'Default' starting with random seed 28078.
-Peach.Core.Agent.Agent StartMonitor: Monitor CleanupRegistry
-Peach.Core.Agent.Agent SessionStarting: Monitor
-
-[R1,-,-] Performing iteration
-Peach.Core.Engine runTest: Performing recording iteration.
-Peach.Core.OS.Windows.Agent.Monitors.CleanupRegistry Removing key: SOFTWARE\Office13\Recovery <1>
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
-Peach.Core.Dom.Action ActionType.Output
-Peach.Core.Publishers.ConsolePublisher start()
-Peach.Core.Publishers.ConsolePublisher open()
-Peach.Core.Publishers.ConsolePublisher output(4 bytes)
-00000000   69 7A 00 00                                        iz??
-Peach.Core.Publishers.ConsolePublisher close()
-Peach.Core.Engine runTest: context.config.singleIteration == true
-Peach.Core.Publishers.ConsolePublisher stop()
-Peach.Core.Agent.Agent SessionFinished: Monitor
-
-[*] Test 'Default' finished.
+include::CleanupRegistry_Example.log[]
 ----
 
 <1> Deleting the registry key

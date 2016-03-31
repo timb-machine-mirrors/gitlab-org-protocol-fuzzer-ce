@@ -4,7 +4,7 @@
 
 Use the _CAN_ Publisher to read and write bytes directly to and from a CAN bus.
 
-_CAN_ is designed to interface with the TotalPhase Komodo CAN SOLO or DUO (USB) Host Adapter. 
+_CAN_ is designed to interface with the TotalPhase Komodo CAN SOLO or DUO (USB) Host Adapter.
 
 === Syntax
 
@@ -19,7 +19,7 @@ _CAN_ is designed to interface with the TotalPhase Komodo CAN SOLO or DUO (USB) 
 
 _Required:_
 
-ID:: The CAN identifier used for for transmision and reception
+ID:: The CAN identifier used for for transmission and reception
 
 _Optional:_
 
@@ -61,7 +61,7 @@ xref:Action_input[input]:: Data received via input is read from the CAN bus.
       </Action>
     </State>
   </StateModel>
-  
+
   <Test name='Default'>
     <StateModel ref='SM' />
     <Publisher class='CAN'>

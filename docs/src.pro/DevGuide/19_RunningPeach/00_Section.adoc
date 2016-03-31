@@ -8,19 +8,15 @@ The following list identifies the support applications included with Peach Fuzze
 |=======================
 |Program                                    |Executable             | Description
 |xref:Program_PeachWebIF[Peach Web Interface]  |Peach.exe               | the {peachweb} for Peach Fuzzer.
-|xref:Program_Peach[Peach]                     |Peach.exe with pitname  | the {peachcomd} for Peach Fuzzer.
+|xref:Program_Peach[Peach]                     |Peach.exe               | the {peachcomd} for Peach Fuzzer.
 |xref:Program_PeachMinset[Minset]              |PeachMinset.exe         | Perform code coverage to find minimum set of sample files for use during fuzzing.
 |xref:Program_PeachValidator[Validator]        |PeachValidator.exe      | Graphical tool for debugging pit files. Provides a graphical view of the data model graph before and after cracking a file.
-|xref:Program_PeachFuzzBang[Fuzz Bang]         |PeachFuzzBang.exe       | Graphical tool to perform dumb fuzzing
 |xref:Program_PeachXmlGenerator[XML Generator] |PeachXmlGenerator.exe   | Tool to produce XML sample files based on DTD
 |xref:Program_PeachSampleNinja[Sample Ninja]   |PeachSampleNinja.exe    | Creates the sample ninja database
+|xref:Program_PeachMultiNodeCli[Peach Multi-Node CLI Tool]   |sdk\tools\peachcli    | Control and co-ordinate multiple Peach instances
 |=======================
 
 TIP: The other executables have specialized purposes.
-
-:leveloffset: 1
-<<<
-include::01_Peach.adoc[]
 
 :leveloffset: 1
 <<<
@@ -28,22 +24,26 @@ include::../../Common/WebUI/00_Section.adoc[]
 
 :leveloffset: 1
 <<<
-include::03_Minset.adoc[]
+include::../../Common/RunningPeach/Peach.adoc[]
 
 :leveloffset: 1
 <<<
-include::04_Validator.adoc[]
+include::../../Common/RunningPeach/Minset.adoc[]
 
 :leveloffset: 1
 <<<
-include::05_Fuzzbang.adoc[]
+include::../../Common/RunningPeach/Validator.adoc[]
 
 :leveloffset: 1
 <<<
-include::06_XmlGenerator.adoc[]
+include::../../Common/RunningPeach/XmlGenerator.adoc[]
 
 :leveloffset: 1
 <<<
-include::07_SampleNinja.adoc[]
+include::../../Common/RunningPeach/SampleNinja.adoc[]
+
+:leveloffset: 1
+<<<
+include::../../Common/RunningPeach/PeachCli.adoc[]
 
 // end

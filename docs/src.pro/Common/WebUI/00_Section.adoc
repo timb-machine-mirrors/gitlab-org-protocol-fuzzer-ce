@@ -8,7 +8,7 @@ The {peachweb} works with Pits from the included Pit Library. With a little conf
 The {peachweb} provides support for two work styles:
 
 * The Quick Start Wizard leads users through the process of configuring a pit using a question/answer style.
-* An advanced Configuration section includes forms for variables and monitors that the user can fill out without the question/answer dialogue.
+* An advanced Configuration section includes forms for variables and monitors that the user can fill out without the question/answer dialog.
 
 Both work styles provide a configuration test, so that you know the pit is configured in a reasonable manner before its use.
 
@@ -76,13 +76,13 @@ Located above the menu entries, the menu icons are always present and do not cha
 
 * Home Page
 * Your Pit Library
-* Your Fuzing Job Historical Results
+* Your Fuzzing Job Historical Results
 * Peach User's Guide (HTML Help)
 
 Click a menu icon to move there.
 
 ===== 4. Breadcrumb menu
-The breadcrumb menu is above the Page Title. The breadcrumb menu identifies your position in the Peach Web UI menus. For example, when you Start the QuickStart wizard with the JPG_Test1 configuration (a sample configuration), the breadcrumb menu displays +
+The breadcrumb menu is above the Page Title. The breadcrumb menu identifies your position in the Peach Web UI menus. For example, when you Start the QuickStart wizard with the `JPG_Test1` configuration (a sample configuration), the breadcrumb menu displays +
 `Home / Library / JPG_Test1 / Quick Start`.
 
 image::{images}/Common/WebUI/QS01_QuickStart.png[]
@@ -102,17 +102,17 @@ image::{images}/Common/WebUI/H2_Library.png[]
 
 ===== Jobs
 
-The _Jobs_ menu provides access to your fuzzing job results. Click on an entry to see the report status, summary, metrics, and drill down detail of individual findings. Hmmm, no reports are avaialbe yet. It looks like a good time to start fuzzing.
+The _Jobs_ menu provides access to your fuzzing job results. Click on an entry to see the report status, summary, metrics, and drill down detail of individual findings.
 
 image::{images}/Common/WebUI/H3_Jobs.png[]
 
 ===== Help
 
-The _Help_ Menu provides access to the HTML form of the Peach User Guide. This instructional piece provides workflows for installing Peach, recipies for setting up and running various configurations, and descriptions of the Peach monitors for detecting faults (issues), collecting data, and automating the test environment.
+The _Help_ Menu provides access to the online Peach User Guide. This instructional piece provides workflows for installing Peach, recipes for setting up and running various configurations, and descriptions of the Peach monitors for detecting faults (issues), collecting data, and automating the test environment.
 
 image::{images}/Common/WebUI/H4_HTMLHelp.png[]
 
-NOTE: Additionally, the User's Guide is provided as a pdf file.
+NOTE: Additionally, the 'User Guide' is available in PDF format.
 
 image::{images}/Common/WebUI/H5_PdfHelp.png[]
 
@@ -122,8 +122,16 @@ Peach has user forums that serve as a knowledge base of user questions, and as a
 
 image::{images}/Common/WebUI/H6_PeachForums.png[]
 
-include::01_QuickStartWizard.adoc[]
-include::02_AdvancedConfig_Variables.adoc[]
-include::03_AdvancedConfig_Monitors.adoc[]
-include::04_TestConfiguration.adoc[]
-include::05_FuzzJob.adoc[]
+include::01_Wizard.adoc[]
+
+include::02_Config_Variables.adoc[]
+
+include::03_Config_Monitors.adoc[]
+
+include::04_Config_Tuning.adoc[]
+
+include::05_Config_Test.adoc[]
+
+include::06_Job.adoc[]
+
+// end

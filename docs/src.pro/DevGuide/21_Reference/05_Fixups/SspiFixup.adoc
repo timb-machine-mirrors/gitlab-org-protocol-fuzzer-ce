@@ -24,7 +24,7 @@ See the examples section of this fixup for an example of how this might be model
 .NOTES
 ========
 The CIFS_Server Pit is a working example of this process. By default, this fixup uses
-two iteration state store keys during it’s operation:
+two iteration state store keys during it's operation:
 
 * Peach.SspiSecurityBuffer - Stores messages received from the server. In response to
 this message, the fixup consumes this data and produces the next message in the series.
@@ -50,13 +50,13 @@ _Optional:_
 Domain:: Domain in which the authorizing account resides. Default is `""`.
 ContinueNeeded:: Reference to a key for connection-oriented use in NTLM.
 The value is the name of the field in the state bag that indicates whether
-authrentication continues (as in a connection).
+authentication continues (as in a connection).
 
 === Examples
 
 .Sspi Fixup Example
 
-This example consists ot two code fragments:
+This example consists of two code fragments:
 
 * A few lines of Python code takes the received message from the server and places
 it into the Peach state store. The fixup then processes the message text next time

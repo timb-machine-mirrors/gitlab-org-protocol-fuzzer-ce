@@ -1,7 +1,7 @@
 [[ReproducingFaults]]
 == Reproducing Faults
 
-A fault that occurs in a fuzzing session needs to be reproduceible so that it can be investigated, understood, and  mitigated.
+A fault that occurs in a fuzzing session needs to be reproducible so that it can be investigated, understood, and  mitigated.
 
 Peach has the following features that aid in recreating faults that occur during fuzzing:
 

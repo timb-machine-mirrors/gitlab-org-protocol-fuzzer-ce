@@ -2,9 +2,15 @@
 [[JsonDouble]]
 == JsonDouble
 
-The _JsonDouble_ element defines a JSON floating-point number of upto 64 bits.
+The _JsonDouble_ element defines a JSON floating-point number of up to 64-bits.
 
-The JsonDouble element is a child element of xref:DataModel[DataModel], xref:Block[Block], xref:Sequence[Sequence], xref:JsonObject[JsonObject], xref:JsonArray[JsonArray] or xref:Choice[Choice].
+The JsonDouble element is a child element of
+xref:DataModel[DataModel],
+xref:Block[Block],
+xref:Sequence[Sequence],
+xref:JsonObject[JsonObject],
+xref:JsonArray[JsonArray],
+or xref:Choice[Choice].
 
 === Syntax
 
@@ -276,3 +282,4 @@ Peach.Core.Engine EndTest: Stopping all agents and monitors
 ----
 ====================
 
+// end

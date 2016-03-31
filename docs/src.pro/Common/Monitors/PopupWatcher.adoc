@@ -4,96 +4,54 @@
 
 *Monitor Categories*: *Automation*, *Fault detection*
 
-The _PopupWatcher_ monitor closes pop-up windows based on title. _PopupWatcher_ monitors
-the test target for a list of windows. When a window opens whose name is in the list,
-_PopupWatcher_ closes the pop-up window, and, if specified in the configuration, can
-issue a fault.
+The _PopupWatcher_ monitor closes pop-up windows based on a window title.
+_PopupWatcher_ monitors the test target for a list of windows.
+When a window opens whose name is in the list,
+_PopupWatcher_ closes the pop-up window,
+and if specified in the configuration,
+initiates a fault.
 
 This monitor starts at the beginning of the session and runs to the session end.
 
-NOTE: Some applications re-use a pop-up window for many purposes. The window has one title,
-but the main area of the window can display several different messages depending on the
-context in the application. If you're interested in monitoring a pop-up window based on
-content rather than the window title, consider using the
-xref:Monitors_ButtonClicker[ButtonClicker] monitor.
+[NOTE]
+====
+Some applications re-use a pop-up window for many purposes.
+The window has one title,
+but the main area of the window can display several different messages depending on the context of the application.
+If you're interested in monitoring a pop-up window based on content rather than the window title,
+consider using the xref:Monitors_ButtonClicker[ButtonClicker Monitor].
+====
 
 === Parameters
 
 _Required:_
 
-WindowNames:: One or more Window names separated by commas.
+WindowNames::
+One or more Window names separated by commas.
 
-TIP: The comma-delimited list should not contain any white space characters.
+TIP: The comma-delimited list should not contain any white-space characters.
 
 _Optional:_
 
-Fault:: Trigger a fault when a window is found, default false.
+Fault::
+Trigger a fault when a pop-up window is found, default `false`.
 
 === Examples
 
 ifdef::peachug[]
 
-.Close Notepad
+.Fault on Assert
 ====================
 
-This parameter example is from a setup that closes Notepad and Paint.
+This parameter example is from a setup that initiates a fault when a window titled `Assertion` is found.
 
 [cols="2,4" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
-|WindowNames  |Notepad,Calculator
-|Fault        |true
+|WindowNames  |`Assertion`
+|Fault        |`true`
 |==========================================================
 ====================
-
-This example consists of a serires of steps that you can execute to watch Peach close the windows for
-the Notepad and Calculator applications. Because seeing PopupWatcher monitor in action is the point of the exercise,
-we can grab and run almost any Pit, then select the PopupWatcher as the monitor for the Pit, and watch
-it work. In this case, we're going to choose to fuzz an image file, a BMP, in the mspaint application.
-
-You can watch Peach close the Notepad and the Calculator applications by performing the following steps:
-
-*Step 1*: Start the Notepad and the Calculator applications. +
-
-. From the Windows menu, launch the Notepad and the Calculator applications. They are both Windows Accessories.
-
-*Step 2*: Start the Peach Web interface. +
-
-. From the Windows menu, right-click on command prompt, then click "Run as Administrator"
-  from the shortcut menu. +
-. In the command-line window, navigate to the Peach directory. +
-. Type "peach" and press RETURN to start the Peach Web interface.
-
-*Step 3*: Select the Pit using the Peach Web Interface.
-
-. Select the BMP pit from the Peach Pro Library, the Images group.
-. Name the copy of the BMP pit, such as 12_BMP.
-
-*Step 4*: Name the sample file and its path.
-
-. From the Configuration menu on the left of the panel, click "Variables".
-. Name the Seed File. For simplicity, select a file in your Pictures folder.
-. Name the path of your Pictures folder.
-. Save the variables.
-
-*Step 5*: Add the agent and monitor.
-
-. From the Configuration menu on the left of the panel, click "Monitoring".
-. Click "Add Agent".
-. Supply the agent name, "LocalAgent".
-
-. click "Add a monitor ..."
-. Select "PopupWatcher" from the list.
-. Name the monitor, such as "MyPopup".
-. Supply the window title to watch, "Notepad,Calculator".
-. click "Save".
-
-*Step 6*: Run the Pit +
-
-. Click the Dashboard menu.
-. From the Web dashboard, click Start.
-
-*Result*: The PopupMonitor closes Notepad and Calculator, causing the application windows to disappear.
 
 endif::peachug[]
 
@@ -102,72 +60,17 @@ ifndef::peachug[]
 
 .Close Notepad
 ================
-For this example, you must first launch notepad.exe, then start Peach.
+For this example, you must first launch `notepad.exe`, then start Peach.
 
 [source,xml]
 ----
-<?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
-
-  <DataModel name="TheDataModel">
-    <Number size="32" signed="false" value="31337" />
-  </DataModel>
-
-  <StateModel name="State" initialState="Initial" >
-    <State name="Initial">
-      <Action type="output">
-          <DataModel ref="TheDataModel"/>
-      </Action>
-    </State>
-  </StateModel>
-
-  <Agent name="Local">
-	<Monitor class="PopupWatcher">
-		<Param name="WindowNames" value="Notepad" />
-	</Monitor>
-  </Agent>
-
-  <Test name="Default">
-    <StateModel ref="State"/>S
-
-    <Agent ref="Local" />
-
-    <Publisher class="ConsoleHex"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
-  </Test>
-</Peach>
+include::PopupWatcher_Example.xml[]
 ----
 
 Output for this example.
 
 ----
->peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
-[*] Test 'Default' starting with random seed 18897.
-Peach.Core.Agent.Agent StartMonitor: Monitor PopupWatcher
-Peach.Core.Agent.Agent SessionStarting: Monitor
-
-[R1,-,-] Performing iteration
-Peach.Core.Engine runTest: Performing recording iteration.
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
-Peach.Core.Dom.Action ActionType.Output
-Peach.Core.Publishers.ConsolePublisher start()
-Peach.Core.Publishers.ConsolePublisher open()
-Peach.Core.Publishers.ConsolePublisher output(4 bytes)
-00000000   69 7A 00 00                                        iz??
-Peach.Core.Publishers.ConsolePublisher close()
-Peach.Core.Engine runTest: context.config.singleIteration == true
-Peach.Core.Publishers.ConsolePublisher stop()
-Peach.Core.Agent.Agent SessionFinished: Monitor
-
-[*] Test 'Default' finished.
+include::PopupWatcher_Example.log[]
 ----
 ================
 
@@ -175,69 +78,13 @@ Peach.Core.Agent.Agent SessionFinished: Monitor
 ================
 [source,xml]
 ----
-<?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
-
-  <DataModel name="TheDataModel">
-    <Number size="32" signed="false" value="31337" />
-  </DataModel>
-
-  <StateModel name="State" initialState="Initial" >
-    <State name="Initial">
-      <Action type="output">
-          <DataModel ref="TheDataModel"/>
-      </Action>
-    </State>
-  </StateModel>
-
-  <Agent name="Local">
-  <Monitor class="PopupWatcher">
-    <Param name="WindowNames" value="Assert" />
-    <Param name="Fault" value="True" />
-  </Monitor>
- </Agent>
-
-  <Test name="Default">
-    <StateModel ref="State"/>
-
-    <Agent ref="Local" />
-
-    <Publisher class="ConsoleHex"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
-  </Test>
-</Peach>
+include::PopupWatcher_Example_Fault.xml[]
 ----
 
 Output for this example.
 
 ----
->peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
-[*] Test 'Default' starting with random seed 55395.
-Peach.Core.Agent.Agent StartMonitor: Monitor PopupWatcher
-Peach.Core.Agent.Agent SessionStarting: Monitor
-
-[R1,-,-] Performing iteration
-Peach.Core.Engine runTest: Performing recording iteration.
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
-Peach.Core.Dom.Action ActionType.Output
-Peach.Core.Publishers.ConsolePublisher start()
-Peach.Core.Publishers.ConsolePublisher open()
-Peach.Core.Publishers.ConsolePublisher output(4 bytes)
-00000000   69 7A 00 00                                        iz??
-Peach.Core.Publishers.ConsolePublisher close()
-Peach.Core.Engine runTest: context.config.singleIteration == true
-Peach.Core.Publishers.ConsolePublisher stop()
-Peach.Core.Agent.Agent SessionFinished: Monitor
-
-[*] Test 'Default' finished.
+include::PopupWatcher_Example_Fault.log[]
 ----
 ================
 

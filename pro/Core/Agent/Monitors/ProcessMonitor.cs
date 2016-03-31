@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Text;
-using System.Threading;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
@@ -32,7 +30,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
 		StringBuilder _asanResult;
-		Process _process;
+		readonly Process _process;
 		MonitorData _data;
 		bool _messageExit;
 
@@ -134,6 +132,17 @@ namespace Peach.Pro.Core.Agent.Monitors
 			};
 		}
 
+		public override void SessionStarting()
+		{
+			if (StartOnCall == null && !RestartOnEachTest)
+				_Start();
+		}
+
+		public override void SessionFinished()
+		{
+			_process.Stop(WaitForExitTimeout);
+		}
+
 		public override void IterationStarting(IterationStartingArgs args)
 		{
 			_data = null;
@@ -156,17 +165,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 		public override MonitorData GetMonitorData()
 		{
 			return _data;
-		}
-
-		public override void SessionStarting()
-		{
-			if (StartOnCall == null && !RestartOnEachTest)
-				_Start();
-		}
-
-		public override void SessionFinished()
-		{
-			_process.Stop(WaitForExitTimeout);
 		}
 
 		public override void IterationFinished()

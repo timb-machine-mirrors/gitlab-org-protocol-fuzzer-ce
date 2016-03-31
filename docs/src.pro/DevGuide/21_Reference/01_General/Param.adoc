@@ -16,7 +16,7 @@
 
 The _Param_ child element specifies a configuration setting for its parent element. The structure of a _Param_ is a key-value parameter pair. _Params_ are common elements used by xref:AgentsMonitors[Monitors], xref:Publisher[Publishers], and xref:Fixup[Fixups].
 
-NOTE: A second usage of Param is with the Action_Call statment. This usage follows the attribute descriptions.
+NOTE: A second usage of Param is with the Action_Call statement. This usage follows the attribute descriptions.
 
 [source,xml]
 ----
@@ -50,7 +50,7 @@ xref:valueType[valueType]:: Format of value attribute.
 
 None.
 
-=== _Param_ and the Call Action 
+=== _Param_ and the Call Action
 
 _Param_ can also be an argument to the xref:Action_call[call] Action. Call actions can have an array of parameters (defined by Param) used in different ways by the Publisher.
 
