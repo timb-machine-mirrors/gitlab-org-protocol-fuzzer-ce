@@ -223,7 +223,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			var ent = _db.Entries.First(x => x.Path == _originalPitPath);
 			var lib = _db.Libraries.ElementAt(1);
-			var pit = _db.GetPitById(ent.PitConfig.Id);
+			var pit = _db.GetPitById(ent.Id);
 
 			var newName = "IMG Copy";
 			var newDesc = "My copy of the img pit";

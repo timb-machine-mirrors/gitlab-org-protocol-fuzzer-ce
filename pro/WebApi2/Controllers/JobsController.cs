@@ -560,6 +560,15 @@ namespace Peach.Pro.WebApi2.Controllers
 				Fields = MakeUrl(id, "metrics", "fields"),
 			};
 
+			// If the job points to a non-existant pit, remove the pitUrl from the job record
+			// so that the client can disable the Edit Configuration and Replay Job buttons.
+			if (!string.IsNullOrEmpty(job.PitUrl))
+			{
+				var pit = PitDatabase.GetPitDetailByUrl(job.PitUrl);
+				if (pit == null)
+					job.PitUrl = null;
+			}
+
 			return job;
 		}
 
