@@ -181,7 +181,7 @@ namespace Peach.Pro.WebApi2.Controllers
 
 				var events = db.GetTestEventsByJob(id).ToList();
 
-				var isActive = events.Any(x => x.Status == TestStatus.Active);
+				var isActive = (events.Count == 0) || events.Any(x => x.Status == TestStatus.Active);
 				var isFail = events.Any(x => x.Status == TestStatus.Fail);
 
 				var sb = new StringBuilder();
