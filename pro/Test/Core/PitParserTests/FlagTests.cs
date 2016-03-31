@@ -372,5 +372,64 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 		}
 
+		[Test]
+		public void OverrideFlags()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM1'>
+		<Block name='B'>
+			<Flags name='F' size='8'>
+				<Flag name='F0' position='0' size='1'/>
+				<Flag name='F1' position='1' size='1'/>
+				<Flag name='F2' position='2' size='1'/>
+				<Flag name='F3' position='3' size='1'/>
+				<Flag name='F4' position='4' size='1'/>
+				<Flag name='F5' position='5' size='1'/>
+				<Flag name='F6' position='6' size='1'/>
+				<Flag name='F7' position='7' size='1'/>
+			</Flags>
+		</Block>
+	</DataModel>
+
+	<DataModel name='DM2' ref='DM1'>
+		<Flag name='B.F.F4' position='4' size='1' value='1' />
+	</DataModel>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+
+			Assert.AreEqual(new byte[] { 0x00 }, dom.dataModels[0].Value.ToArray());
+			Assert.AreEqual(new byte[] { 0x10 }, dom.dataModels[1].Value.ToArray());
+		}
+
+		[Test]
+		public void BadOverrideFlags()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM1'>
+		<Block name='B'>
+			<Flags name='F' size='8'>
+				<Flag name='F0' position='0' size='1'/>
+				<Flag name='F1' position='1' size='1'/>
+				<Flag name='F2' position='2' size='1'/>
+				<Flag name='F3' position='3' size='1'/>
+				<Flag name='F4' position='4' size='1'/>
+				<Flag name='F5' position='5' size='1'/>
+				<Flag name='F6' position='6' size='1'/>
+				<Flag name='F7' position='7' size='1'/>
+			</Flags>
+		</Block>
+	</DataModel>
+
+	<DataModel name='DM2' ref='DM1'>
+		<Flag name='B.F4' position='4' size='1' value='1' />
+	</DataModel>
+</Peach>";
+
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, Block 'DM2.B' has unsupported child element 'Flag'.", ex.Message);
+		}
 	}
 }

@@ -207,27 +207,35 @@ namespace Peach.Pro.Core.Publishers
 
 				try
 				{
-					iface = GetInterface(local);
-					if (iface == null)
-						throw new PeachException("Could not resolve interface name for local IP '{0}'.".Fmt(local));
-
-					ifaceName = iface.Name;
-
-					try
+					if (IPAddress.Any.Equals(local) || IPAddress.IPv6Any.Equals(local))
 					{
-						using (var cfg = NetworkAdapter.CreateInstance(ifaceName))
-						{
-							mtu = cfg.MTU;
-						}
-					}
-					catch (Exception ex)
-					{
-						var msg = ex.Message;
-						if (ex is TypeInitializationException || ex is TargetInvocationException)
-							msg = ex.InnerException.Message;
-
+						ifaceName = local.ToString();
 						mtu = null;
-						Logger.Debug("Could not query the MTU of '{0}'. {1}", ifaceName, msg);
+					}
+					else
+					{
+						iface = GetInterface(local);
+						if (iface == null)
+							throw new PeachException("Could not resolve interface name for local IP '{0}'.".Fmt(local));
+
+						ifaceName = iface.Name;
+
+						try
+						{
+							using (var cfg = NetworkAdapter.CreateInstance(ifaceName))
+							{
+								mtu = cfg.MTU;
+							}
+						}
+						catch (Exception ex)
+						{
+							var msg = ex.Message;
+							if (ex is TypeInitializationException || ex is TargetInvocationException)
+								msg = ex.InnerException.Message;
+
+							mtu = null;
+							Logger.Debug("Could not query the MTU of '{0}'. {1}", ifaceName, msg);
+						}
 					}
 				}
 				catch (Exception ex)
