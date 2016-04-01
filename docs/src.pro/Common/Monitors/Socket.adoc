@@ -2,13 +2,22 @@
 [[Monitors_Socket]]
 == Socket Monitor
 
-*Monitor Category*: *Fault detection*
+*Monitor Category*: *Data collection*, *Fault detection*
 
-The _Socket_ monitor waits for an incoming TCP or UDP connection. This monitor accepts
-a point-to-point connection to a single host or a multicast connection where the host broadcasts to
-one or more clients. Multicast connections are not supported when using the TCP protocol.
+The _Socket_ monitor waits for an incoming TCP or UDP connection at the end of a test iteration.
+This monitor accepts a point-to-point connection to a single host or a multicast connection where the host broadcasts to one or more clients.
+Multicast connections are not supported when using the TCP protocol.
 
-If a connection is accepted, _Socket_ raises a fault if the +FaultOnSuccess+ parameter is specified.
+The monitor can be configured to be used for data collection or fault detection depending on the 'FaultOnSuccess' parameter value and whether or not data is received within the specified timeout.
+The following table provides the available options:
+[options="header",halign="center"]
+|==========================================================
+|FaultOnSuccess    | Data Received   | Behavior
+|`true`            | yes             | Data collection
+|`true`            | no              | Fault detection
+|`false`           | yes             | Fault detection
+|`false`           | no              | Data collection
+|==========================================================
 
 === Parameters
 
@@ -18,23 +27,43 @@ None.
 
 _Optional:_
 
-Host:: IP address of remote host, defaults to "".
-Interface:: IP address of interface to listen on, defaults to 0.0.0.0.
-Port:: Port to listen on, defaults to 8080.
-Protocol:: Protocol type to listen for, defaults to tcp.
-Timeout:: Length of time to wait for incoming connection, defaults to 1000 ms.
-FaultOnSuccess:: Fault if no connection is recorded, defaults to false.
+Host::
+IP address of the remote host to receive data from.
+Defaults to `""`,
+which means accept data from any host.
+
+Interface::
+IP address of the interface to listen on.
+Defaults to `0.0.0.0`,
+which means listen to all interfaces on the host.
+
+Port::
+Port to listen on.
+Defaults to `8080`.
+
+Protocol::
+Protocol type to listen for.
+Defaults to `tcp`.
+Available options for this parameter are `tcp` and `udp`.
+
+Timeout::
+Length of time in milliseconds to wait for an incoming connection.
+Defaults to `1000`.
+
+FaultOnSuccess::
+Generate a fault if no data is received.
+Defaults to `false`.
 
 === Examples
 
 ifdef::peachug[]
 
-.Listen for Incoming Connection
+.Fault Detection example
 ====================
 
-This parameter example is from a setup that listens for a connection request on port 53.
+This example generates a fault if data from a tcp connection on port `53` is received at the end of a test iteration.
 
-[cols="2,4" options="header",halign="center"]
+[cols="1,2" options="header",halign="center"]
 |==========================================================
 |Parameter    |Value
 |Port         |`53`
@@ -43,89 +72,16 @@ This parameter example is from a setup that listens for a connection request on 
 
 endif::peachug[]
 
-
 ifndef::peachug[]
 
-
-.Listen for Incoming Connection
+.Fault Detection example
 ===============================
-
-This example listens for a connection request on port 53.
-
-NOTE: If you want to run this example and generate a fault after starting Peach, you can use NetCat or a similar application to  generate a fault.
+This example generates a fault if data from a tcp connection on port `53` is received at the end of a test iteration.
 
 [source,xml]
 ----
-<?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
-
-  <DataModel name="TheDataModel">
-    <Number size="32" signed="false" value="31337" />
-  </DataModel>
-
-  <StateModel name="State" initialState="Initial" >
-    <State name="Initial">
-      <Action type="output">
-          <DataModel ref="TheDataModel"/>
-      </Action>
-    </State>
-  </StateModel>
-
-  <Agent name="Local">
-	<Monitor class="Socket">
-		<Param name="Port" value="53" />
-	</Monitor>
-  </Agent>
-
-
-  <Test name="Default">
-    <StateModel ref="State"/>
-
-    <Agent ref="Local" />
-
-    <Publisher class="ConsoleHex"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
-  </Test>
-</Peach>
+include::Socket_Example.xml[]
 ----
-
-Output for this example.
-
-----
->peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
-[*] Test 'Default' starting with random seed 20168.
-Peach.Core.Agent.Agent StartMonitor: Monitor Socket
-Peach.Core.Agent.Agent SessionStarting: Monitor
-
-[R1,-,-] Performing iteration
-Peach.Core.Engine runTest: Performing recording iteration.
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
-Peach.Core.Dom.Action ActionType.Output
-Peach.Core.Publishers.ConsolePublisher start()
-Peach.Core.Publishers.ConsolePublisher open()
-Peach.Core.Publishers.ConsolePublisher output(4 bytes)
-00000000   69 7A 00 00                                        iz??
-Peach.Core.Publishers.ConsolePublisher close()
-Peach.Core.Engine runTest: context.config.singleIteration == true
-Peach.Core.Publishers.ConsolePublisher stop()
-Peach.Core.Agent.Agent SessionFinished: Monitor
-
-[*] Test 'Default' finished.
-----
-
-To stimulate this monitor to cause a fault, run the following command after starting Peach:
-
-----
-nc -vv 127.0.0.1 53
-----
-
 ===============================
 
 endif::peachug[]

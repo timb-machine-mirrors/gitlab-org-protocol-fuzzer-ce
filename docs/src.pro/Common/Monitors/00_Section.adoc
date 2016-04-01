@@ -1,14 +1,16 @@
 [[Monitors]]
 == Monitors
 
-xref:Agent[Agents] are special Peach processes that can be run locally or remotely. These processes host one or more Monitors that can perform such actions as attaching debuggers, watching memory consumption, and detecting faults.
+xref:Agent[Agents] are special Peach processes that can be run locally or remotely.
+These processes host one or more Monitors that can perform such actions as attaching debuggers,
+watching memory consumption,
+or detecting faults.
 
-The following table lists each monitor by name, function type (Fault detection, Data collection, Automation), and by the operating systems that support the monitor. If the operating systems column is blank for an entry, that monitor is available in all supported operating systems.
-
-// Table categories:
-//    * Monitor Name
-//    * Monitor functions (Fault detection, Data collection, Automation)
-//    * Operating systems (Linux, OS X, Windows)
+The following table lists each monitor by name,
+function type (Fault detection, Data collection, Automation),
+and by the operating systems that support the monitor.
+If the operating systems column is blank for an entry,
+that monitor is available in all supported operating systems.
 
 .Monitors
 [cols="3,1,1,2,3" options="header",halign="center"]
@@ -35,7 +37,7 @@ The following table lists each monitor by name, function type (Fault detection, 
 |xref:Monitors_RunCommand[Run Command]           |X   |X   |X   |
 |xref:Monitors_SaveFile[Save File]               |    |X   |    |
 |xref:Monitors_Serial[Serial Port]               |X   |X   |X   |
-|xref:Monitors_Socket[Socket Listener]           |X   |    |    |
+|xref:Monitors_Socket[Socket Listener]           |X   |X   |    |
 |xref:Monitors_SshCommand[SSH Command]           |X   |X   |X   |
 |xref:Monitors_SshDownloader[SSH Downloader]     |    |X   |X   |
 |xref:Monitors_Syslog[Syslog]                    |X   |X   |    |
