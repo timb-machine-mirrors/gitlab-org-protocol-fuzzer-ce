@@ -16,7 +16,7 @@ to the end of the session.
 The following example uses an FTP client, FileZilla, that sometimes opens a popup window
 asking whether to install an update. Here, _ButtonClicker_ monitor provides a mouse
 click to the "Close" button to close the popup window. With the popup window out of
-the way, fuzzing continues with no real distraction.
+the way, fuzzing continues without delay.
 
 image::{images}/Common/Monitors/ButtonClicker_FTP.png[scalewidth="40%"]
 
@@ -33,9 +33,6 @@ click. The text string can be part or all of the window title.
 ButtonName:: Text label of the button to click. The label is displayed to the user,
 and is on or near the button that will receive the click.
 
-_Optional:_
-
-None.
 
 [TIP]
 ====
