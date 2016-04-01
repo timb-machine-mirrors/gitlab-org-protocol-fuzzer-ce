@@ -58,7 +58,7 @@ The requirements used in the previous example are reasonable for a first release
 |==========================================================
 
 
-NOTE: What was once the Software Develop Life Cycle (SDLC) has evolved into
+NOTE: What was once the Software Development Life Cycle (SDLC) has evolved into
 the Secure Development Lifecycle (SDL) to protect corporate assets from zero-day
 attacks. Fuzzing is part of the SDL, specifically in the security push and the
 Verification Phase. Peach Fuzzer can operate on non-executable file formats,
