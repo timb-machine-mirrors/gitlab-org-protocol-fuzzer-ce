@@ -33,7 +33,7 @@ The following table lists each monitor by name, function type (Fault detection, 
 |xref:Monitors_Process[Process Launcher]         |X   |    |X   |
 |xref:Monitors_ProcessKiller[Process Killer]     |    |    |X   |
 |xref:Monitors_RunCommand[Run Command]           |X   |X   |X   |
-|xref:Monitors_SaveFile[Save File]               |    |X   |X   |
+|xref:Monitors_SaveFile[Save File]               |    |X   |    |
 |xref:Monitors_Serial[Serial Port]               |X   |X   |X   |
 |xref:Monitors_Socket[Socket Listener]           |X   |    |    |
 |xref:Monitors_SshCommand[SSH Command]           |X   |X   |X   |

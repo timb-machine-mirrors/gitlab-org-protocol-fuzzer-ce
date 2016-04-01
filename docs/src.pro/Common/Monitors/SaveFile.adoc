@@ -7,8 +7,6 @@
 The _SaveFile_ monitor saves a specified file as part of the logged data when a fault occurs.
 A copy of the file is placed in the log folder.
 
-_SaveFile_ can collect application-specific logs.
-
 === Parameters
 
 _Required:_
