@@ -33,6 +33,9 @@ click. The text string can be part or all of the window title.
 ButtonName:: Text label of the button to click. The label is displayed to the user,
 and is on or near the button that will receive the click.
 
+_Optional:_
+
+None.
 
 [TIP]
 ====
