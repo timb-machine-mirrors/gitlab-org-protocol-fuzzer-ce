@@ -14,7 +14,7 @@ mechanisms are used on the test target.
 _CrashWrangler_ monitor detects crashes, exceptions, access violations, and faults.
 This monitor can generate faults for an application that exits early or that fails to exit.
 
-After detecting a fault, _CrashWrangler_ monitor collects a stack trace, data from
+After detecting a fault, the  _CrashWrangler_ monitor collects a stack trace, data from
 the device log files, and crash dumps. Additionally, the monitor logs exceptions, and
 updates fault bucket information. For bucketing, Peach uses the text from the fault to
 determine the major bucket level. The minor bucket level is not used. The risk
