@@ -14,8 +14,15 @@
   </StateModel>
 
   <Agent name="Local">
-    <Monitor class="SaveFile">
-      <Param name="Filename" value="c:\temp\output.log" />
+    <Monitor class="Process">
+      <Param name="Executable" value="/usr/sbin/nginx" />
+      <Param name="FaultOnEarlyExit" value="true" />
+    </Monitor>
+    <Monitor name="Save access.log" class="SaveFile">
+      <Param name="Filename" value="/var/log/nginx/access.log" />
+    </Monitor>
+    <Monitor name="Save error.log" class="SaveFile">
+      <Param name="Filename" value="/var/log/nginx/error.log" />
     </Monitor>
   </Agent>
 
