@@ -1,7 +1,7 @@
 [[Monitors]]
 == Monitors
 
-xref:Agent[Agents] are special Peach processes that can be run locally or remote. These processes host one or more Monitors that can perform such actions as attaching debuggers, watching memory consumption, and detecting faults.
+xref:Agent[Agents] are special Peach processes that can be run locally or remotely. These processes host one or more Monitors that can perform such actions as attaching debuggers, watching memory consumption, and detecting faults.
 
 The following table lists each monitor by name, function type (Fault detection, Data collection, Automation), and by the operating systems that support the monitor. If the operating systems column is blank for an entry, that monitor is available in all supported operating systems.
 

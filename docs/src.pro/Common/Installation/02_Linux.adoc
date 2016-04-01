@@ -1,7 +1,7 @@
 [[InstallOnLinux]]
 === Linux
 
-Peach is supported on three implementations of Linux; Peach might run on other Linux implementations, although not officially supported. This section provides instructions for installing Peach on the following supported Linux systems, and includes a checklist for installing Peach on other Linux systems:
+Peach is supported on three implementations of Linux; Peach may run on other Linux implementations, but are not officially supported. This section provides instructions for installing Peach on the following supported Linux systems, and includes a checklist for installing Peach on other Linux systems:
 
 * Ubuntu/Debian Linux
 * Redhat Enterprise Linux (RHEL and CentOS)
@@ -10,7 +10,7 @@ Peach is supported on three implementations of Linux; Peach might run on other L
 
 ==== Ubuntu/Debian Linux
 
-When installing Peach on a Ubuntu or Debian Linux system, the operating system is ready for Peach without modification. So, the installation starts with the Mono .NET runtime, then Peach. If you want to attach a debugger to a target process, install GDB when the Mono installation completes.
+When installing Peach on an Ubuntu or Debian Linux system, the operating system is ready for Peach without modification. The installation starts with the Mono .NET runtime, then Peach. If you want to attach a debugger to a target process, install GDB when the Mono installation completes.
 
 [NOTE]
 ====
@@ -23,7 +23,7 @@ Version 14.04 LTS might require that you update the Linux kernel. If so, perform
 The Peach installer checks for compatibility and alerts the user if an incompatibility has been detected.
 ====
 
-The following steps provide a clean, quick sequence of actions to have Peach ready to run:
+The following steps will prepare Peach to run properly:
 
 . Install the latest mono-complete package.
 +
@@ -45,7 +45,7 @@ and lists the operating system in the name, such as
 
 ==== Redhat Enterprise Linux (RHEL and CentOS)
 
-Installing Peach on a RHEL CentOS platform requires an addition to the operating system. Here, the installation begins by installing the Extra Packets for Enterprise Linux (EPEL) package, then progresses by adding the Mono package and Peach.
+Installing Peach on a RHEL CentOS platform requires additional steps. Begin by installing the Extra Packets for Enterprise Linux (EPEL) package, followed by the Mono package and Peach.
 
 NOTE: Peach Fuzzer, LLC, recommends using Mono .NET runtime version 4 from the mono project. The mono project has apt packages for RHEL and CentOS implementations.
 

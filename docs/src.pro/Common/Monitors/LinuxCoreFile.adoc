@@ -14,12 +14,7 @@ such as when anti-debugging mechanisms are used on the test target.
 ====
 
 The _LinuxCoreFile_ monitor detects when a process crashes and collects the resulting core file.
-The monitoring scope can focus on a single executable,
-specified by setting the *Executable* parameter.
-Or,
-the monitoring scope can include all processes.
-By default,
-all processes are monitored.
+The monitoring scope includes all processes by default, but can focus on a single executable.
 
 This monitor runs for the entire fuzzing session and uses the Linux crash recording facility.
 When a crash occurs,
