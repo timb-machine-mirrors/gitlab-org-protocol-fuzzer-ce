@@ -14,11 +14,11 @@ The default usage of the _Serial Port_ monitor is data collection.
 The data received via the serial port is logged when a fault occurs.
 
 To perform fault detection,
-specify a regular expression using the `FaultRegex` parameter.
+specify a regular expression using the 'FaultRegex' parameter.
 When the regular expression matches,
 Peach generates a fault.
 
-For automation tasks, use the `WaitForRegex` and `WaitWhen` parameters.
+For automation tasks, use the 'WaitForRegex' and 'WaitWhen' parameters.
 These automation parameters cause Peach to wait for matching input before continuing.
 The _Serial Port_ monitor can wait at various points in time during a fuzzing session:
 
@@ -32,7 +32,9 @@ Additionally,
 Peach supports multiple _Serial Port_ monitors in a pit,
 allowing for more complex configurations.
 This can be used to monitor multiple serial ports.
-Multiple monitors may also be configured to use the same port to allow for fault detection, automation, and/or data collection to occur on a single port.
+Multiple monitors may also be configured to use the same port to allow for fault detection,
+automation,
+and/or data collection to occur on a single port.
 
 === Parameters
 
@@ -99,7 +101,7 @@ Maximum amount of serial data to store in bytes.
 Defaults to `1048576`.
 
 FaultRegex::
-Fault when the specified regular expression matches received data.
+Generate a fault when the specified regular expression matches received data.
 This causes the _Serial Port_ monitor to be used for fault detection.
 
 WaitRegex::
