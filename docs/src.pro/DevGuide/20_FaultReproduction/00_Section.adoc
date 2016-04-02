@@ -13,7 +13,7 @@ Peach has the following features that aid in recreating faults that occur during
 This legacy behavior is present in the current edition of Peach Pro. It's primary use is for a developer to investigate a fault and to understand what is happening in the fault.
 You need the following items to implement this approach:
 
-* The exact version of peach
+* The exact version of Peach
 * The pit used in the fuzzing session (the DataModel and the StateModel must be identical to those used in the fuzzing session)
 * The seed value used in the fuzzing session
 * The iteration that caused the fault
