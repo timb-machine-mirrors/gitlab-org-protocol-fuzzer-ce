@@ -39,7 +39,7 @@ that monitor is available in all supported operating systems.
 |xref:Monitors_Serial[Serial Port]               |X   |X   |X   |
 |xref:Monitors_Socket[Socket Listener]           |X   |X   |    |
 |xref:Monitors_SshCommand[SSH Command]           |X   |X   |X   |
-|xref:Monitors_SshDownloader[SSH Downloader]     |    |X   |X   |
+|xref:Monitors_SshDownloader[SSH Downloader]     |    |X   |    |
 |xref:Monitors_Syslog[Syslog]                    |X   |X   |    |
 |xref:Monitors_TcpPort[TcpPort]                  |X   |X   |X   |
 |xref:Monitors_Vmware[Vmware Control]            |X   |    |X   |

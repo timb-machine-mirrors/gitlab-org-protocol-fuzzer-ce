@@ -11,7 +11,8 @@ The output from the process is logged when a fault is detected.
 This monitor can operate as a fault detector,
 data collector,
 and automation module depending on configuration.
-All major forms of SSH authentication are supported.
+
+_SshCommand_ supports password, keyboard, and private key authentication methods.
 
 To increase the speed of operation,
 the monitor holds open the SSH connection to the remote machine across test iterations.
