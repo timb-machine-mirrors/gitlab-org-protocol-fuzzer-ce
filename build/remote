@@ -9,7 +9,7 @@ HOST=$1
 SELF=`hostname`
 LOCAL="`pwd`"
 PROJ="`basename "$LOCAL"`"
-REMOTE="jobs/${SELF}/${PROJ// /\\ }"
+REMOTE="jobs/${SELF}/peach-pro/${PROJ// /\\ }"
 
 shift
 
