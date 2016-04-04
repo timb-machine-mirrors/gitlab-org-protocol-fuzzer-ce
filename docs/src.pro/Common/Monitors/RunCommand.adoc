@@ -50,7 +50,7 @@ When 'FaultOnExitCode' is set to `true`, generate a fault if the specified exit 
 The default value is `1`.
 
 StartOnCall::
-Launch the command when the monitor receives the specified message from the state machine.
+Launch the command when the monitor receives the specified call from the state machine.
 This value is used only when the 'When' parameter is set to `OnCall`.
 
 FaultOnRegex::

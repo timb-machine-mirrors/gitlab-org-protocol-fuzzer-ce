@@ -1,22 +1,30 @@
 [[InstallOnOSX]]
 === OS X
 
-To install on OS X, first install the latest stable Mono .NET runtime, then Peach. To enable support for the xref:Monitors_CrashWrangler[CrashWrangler] monitor, install CrashWrangler and Xcode. Note that installing CrashWrangler is optional; it is only needed when running the target locally.
+To install on OS X, first install the latest stable Mono .NET runtime, then Peach.
+To enable support for the xref:Monitors_CrashWrangler[CrashWrangler] monitor,
+install CrashWrangler and Xcode.
+Note that installing CrashWrangler is optional;
+it is only needed when running the target locally.
 
-1. Install the http://www.go-mono.com/mono-downloads/download.html[Mono packages].
+. Install the http://www.go-mono.com/mono-downloads/download.html[Mono package].
 +
-Peach Fuzzer, LLC, recommends using Mono .NET runtime version 4 from the mono project. The mono project has apt packages for many Linux implementations.
+Peach Fuzzer, LLC,
+recommends using Mono .NET runtime version 4 from the mono project.
 
-2. Unzip the Peach distribution to an appropriate folder. +
-The file is a zip file with the extension ".zip". The filename begins with "peach-pro"
-and lists the operating system in the name, such as "peach-pro-{BUILDTAG}-osx_release.zip".
+. Unzip the Peach distribution to an appropriate folder.
+The file is a zip file with the extension `.zip`.
+Use the filename that begins with `peach-pro` and contains the appropriate architecture for your system,
+such as `peach-pro-{BUILDTAG}-osx_release.zip`.
 
-3. Install CrashWrangler.
+. Install CrashWrangler.
 +
-CrashWrangler *MUST* be compiled on each OS X machine. Peach includes the CrashWrangler source files in the peach distribution. Here are instructions to install and compile CrashWrangler from the peach zip.
+CrashWrangler *MUST* be compiled on each OS X machine.
+Peach includes the CrashWrangler source files in the peach distribution.
+Here are instructions to install and compile CrashWrangler from the peach zip.
 
 .. Ensure XCode is installed.
-.. Open Terminal.app.
+.. Open `Terminal.app`.
 .. Navigate to the folder where you extracted peach-pro-{BUILDTAG}-osx_release.zip.
 .. Finish installing CrashWrangler using the following commands.
 +

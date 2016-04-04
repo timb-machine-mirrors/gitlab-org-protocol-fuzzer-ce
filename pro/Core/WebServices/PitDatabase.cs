@@ -719,20 +719,16 @@ namespace Peach.Pro.Core.WebServices
 
 		public static PitConfig LoadPitConfig(string path)
 		{
-			var serializer = new JsonSerializer();
 			using (var stream = new StreamReader(path))
 			using (var reader = new JsonTextReader(stream))
-				return serializer.Deserialize<PitConfig>(reader);
+				return JsonUtilties.CreateSerializer().Deserialize<PitConfig>(reader);
 		}
 
 		public static void SavePitConfig(string path, PitConfig pit)
 		{
-			var serializer = new JsonSerializer {
-				Formatting = Newtonsoft.Json.Formatting.Indented
-			};
 			using (var stream = new StreamWriter(path))
 			using (var writer = new JsonTextWriter(stream))
-				serializer.Serialize(writer, pit);
+				JsonUtilties.CreateSerializer().Serialize(writer, pit);
 		}
 
 		#region Pit Config/Agents/Metadata

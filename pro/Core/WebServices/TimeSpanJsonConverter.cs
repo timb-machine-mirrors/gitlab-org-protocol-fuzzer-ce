@@ -1,7 +1,7 @@
 using System;
 using Newtonsoft.Json;
 
-namespace Peach.Pro.WebApi2.Utility
+namespace Peach.Pro.Core.WebServices
 {
 	internal class TimeSpanJsonConverter : JsonConverter
 	{
