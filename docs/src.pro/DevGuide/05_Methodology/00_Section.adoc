@@ -1,6 +1,6 @@
 == Methodology
 
-The following sections introduce a basic methodology for fuzzing. Our goal is to find previously unknown vulnerabilities with a high return on investment (ROI). We approach this by picking our targets smartly and finding a balance between the amount of human power required to build and maintain our fuzzers versus the number of faults we will find. To accomplish this goal, we need to do the following:
+The following sections introduce a basic methodology for fuzzing. Our goal is to find previously unknown vulnerabilities with a high return on investment (ROI). We approach this by intelligently picking our targets and finding a balance between the amount of human power required to build and maintain our fuzzers versus the number of faults we will find. To accomplish this goal, we need to do the following:
 
 * Select the correct targets
 * Develop adequate fuzzers that achieve good coverage
@@ -9,7 +9,7 @@ The following sections introduce a basic methodology for fuzzing. Our goal is to
 
 === Selecting Fuzzing Targets
 
-Selecting good fuzzing targets is critical to success. For teams just starting down the fuzzing road, it is important to get good early results to prove the program and to build confidence in the technology and process. Once the program proves itself and the team reaches confidence in the process and tools, then selecting harder and more complex targets and formats is in order. When picking a fuzzing target, a number of factors play into the choice.
+Selecting good fuzzing targets is critical to success. For teams just starting down the fuzzing road, it is important to get good early results to prove the program and to build confidence in the technology and process. Once the team becomes confident with the process and tools, they should chose more complex targets. When picking a fuzzing target, a number of factors play into the choice.
 
 For each possible target, consider and evaluate the following things:
 
@@ -75,7 +75,7 @@ For information on building custom components, see xref:Extending[Extending Peac
 
 === Secure Development Lifecycle
 
-A robust secure development lifecycle (SDL) program should include requirements for fuzzing. Using the Microsoft SDL as an example, fuzzing typically integrates into the validation phase. After the first iteration with fuzzing integrated, the project team should decide if fuzzing can be started earlier on the next revision of the deliverable. *Fuzzers are most effective when the target is reasonably stable and fully featured.* If the target is unstable or not usable, basic stability issues limit the ability to identify security issues. For example, if the data formats or features are in flux, the amount of human effort to maintain the fuzzers will increase. That, in turn, can lower the return on investment.
+A robust secure development lifecycle (SDL) program should include requirements for fuzzing. Using the Microsoft SDL as an example, fuzzing typically integrates into the validation phase. After the first iteration with fuzzing is integrated, the project team should decide if fuzzing can be started earlier on the next revision of the deliverable. *Fuzzers are most effective when the target is reasonably stable and fully featured.* If the target is unstable or not usable, basic stability issues limit the ability to identify security issues. For example, if the data formats or features are in flux, the amount of human effort to maintain the fuzzers will increase. That, in turn, can lower the return on investment.
 
 As a team gains experience with fuzzing, they become better equipped to identify the best time to start fuzzing. Typically, more mature products can fuzz earlier in the development cycle than newer products.
 

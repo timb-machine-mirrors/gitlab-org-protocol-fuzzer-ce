@@ -27,7 +27,7 @@ The active Peach Pit configuration can be changed in the {peachweb} by clicking 
 
 ==== Variables
 
-The variables data entry screen lists the information needed by the selected pit, as in the following illustration. Some information is pit specific, such as file names used to fuzz file formats and port addresses used to fuzz network protocols. Other information applies to the Peach environment; two examples are the Peach Installation Directory and the Pit Library Path.
+The variables data entry screen lists the information needed by the selected pit, as in the following illustration. Some information is pit-specific, such as file names used to fuzz file formats and port addresses used to fuzz network protocols. Other information applies to the Peach environment; two examples are the Peach Installation Directory and the Pit Library Path.
 
 image::{images}/Common/WebUI/AC01_Variables_Init.png[]
 
@@ -35,9 +35,9 @@ image::{images}/Common/WebUI/AC01_Variables_Init.png[]
 
 In the illustration, three variables are specific to the `BMP` Pit. Because the variables have default values, you can use the supplied values during the fuzzing job.
 
-* If a variable is labeled optional or has a default value, you need not supply a value to enable the configuration to run.
-
 * If a variable lacks a default value and is not marked optional, you need to supply a value for the variable before you can fuzz the target.
+
+* If a variable is labeled optional or has a default value, you need not supply a value to enable the configuration to run.
 
 When entering a data value, type the value into the appropriate text box of the form.
 If you'd like to use the value of another variable, type `##`, the name of the

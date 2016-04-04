@@ -105,8 +105,6 @@ Main uses of specifying start and/or stop test case numbers in a fuzzing job are
 to confirm that an issue reliably occurs, to assist in tracking down an issue, or
 to verify that an issue is fixed.
 
-If the issue reliably occurs, then when fixed, the effectiveness of the correction is simple to confirm.
-
 If the issue does not reproduce, the issue will be more difficult to solve and might be a HEAP-related memory issue in which the addressable memory layout can have a large impact on the bug occurrence. In short, tracking down the root cause and verifying a fix for an issue will require running Peach for a long time to see whether the issue recurs.
 There is no easy way to guarantee an effective fix in this case.
 
