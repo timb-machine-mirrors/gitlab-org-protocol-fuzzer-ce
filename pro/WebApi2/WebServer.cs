@@ -14,6 +14,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using Peach.Core;
+using Peach.Pro.Core;
 using Peach.Pro.Core.Runtime;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.WebApi2.Utility;
@@ -159,19 +160,7 @@ namespace Peach.Pro.WebApi2
 		{
 			var cfg = new HttpConfiguration();
 
-			var json = cfg.Formatters.JsonFormatter.SerializerSettings;
-
-			json.ContractResolver = new CamelCasePropertyNamesContractResolver
-			{
-				IgnoreSerializableAttribute = true
-			};
-
-			json.NullValueHandling = NullValueHandling.Ignore;
-			json.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
-			// NOTE: Don't ignore default values so integers and booleans get included in json
-
-			json.Converters.Insert(0, new StringEnumConverter { CamelCaseText = true });
-			json.Converters.Insert(0, new TimeSpanJsonConverter());
+			cfg.Formatters.JsonFormatter.SerializerSettings = JsonUtilties.GetSettings();
 
 			cfg.MapHttpAttributeRoutes();
 

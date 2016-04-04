@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System;
+using Newtonsoft.Json;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
@@ -10,6 +11,7 @@ namespace Peach.Pro.Core.WebServices.Models
 
 		public string Description { get; set; }
 
+		[JsonConverter(typeof(JsonPathConverter))]
 		public string OriginalPit { get; set; }
 
 		public List<Param> Config { get; set; }
