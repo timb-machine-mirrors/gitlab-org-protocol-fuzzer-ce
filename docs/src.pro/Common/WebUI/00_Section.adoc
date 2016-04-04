@@ -30,9 +30,9 @@ NOTE: Other browsers might work; however, they are not officially supported
 [[Start_Peach_Web]]
 === Starting the {peachweb}
 
-You can start the {peachweb} using the GUI File Manager or from the command line. Neither method is preferred over the other. So, use the method you prefer.
+You can start the {peachweb} using the GUI File Manager or from the command line. Both methods include the same functionality, use the method you prefer.
 
-We recommend running Peach with heightened or administrative privileges, even though Peach Fuzzer does not need the heightened access. Some applications that provide monitoring functions, such as debuggers, need heightened access to run.
+We recommend running Peach with heightened or administrative privileges. Some applications that provide monitoring functions, such as debuggers, need heightened access to run.
 
 You can start Peach from a command line with two actions:
 
@@ -50,7 +50,7 @@ On the first launch of Peach, a licensing page displays.
 +
 image::{images}/Common/WebUI/P2_EULA_Details.png[]
 +
-When you are ready to proceed, click 'Accept'.
+When you have read and understood the End User License Agreement, click 'Accept'.
 
 . Displays the Peach Home Page
 
@@ -67,9 +67,9 @@ image::{images}/Common/WebUI/H1_Annotated.png[]
 The Page title identifies the page you are on and establishes the context of your current task.
 
 ===== 2. Menu Entries
-Located along the left edge of the browser window, the menu entries identify the functionality immediately at your disposal. Whether you want to explore your Pit Library, investigate a completed fuzzing job, or get some assistance from Help or the Forums, the menu is there for you.
+Menu entries are located along the left edge of the browser window. These buttons identify the functionality immediately at your disposal. Whether you want to explore your Pit Library, investigate a completed fuzzing job, or get some assistance from Help or the Forums, the menu is there for you.
 
-Additionally, the entries in the menu change according to the work context. For example, when you start working with a Pit, the menu entries change to accommodate editing a Pit definition. Click an entry in the menu to start working on that item.
+The entries in the menu change according to the work context. For example, when you start working with a Pit, the menu entries change to accommodate editing a Pit definition. Click an entry in the menu to start working on that item. There is also an option to collapse the menu. 
 
 ===== 3. Menu Icons
 Located above the menu entries, the menu icons are always present and do not change. The icons are always:

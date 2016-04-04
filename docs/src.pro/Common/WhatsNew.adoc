@@ -58,7 +58,7 @@ The Pits are now displayed in a column view and a search/filter feature has been
 ==== New Configuration Format
 
 This quarter we are introducing a new configuration file with an extension of +.peach+.
-Going forward the Web UI will create and save these +.peach+ files.
+Going forward, the Web UI will create and save these +.peach+ files.
 From the command line you have the option of directly running a Pit (+.xml+ files) or running a +.peach+ configuration.
 
 Existing users will notice the Library page will list any existing configurations in a "Legecy" section.
@@ -110,7 +110,7 @@ The following features require a developer license and are intended for advanced
 
 ==== Interactive REST API Documentation
 
-Interactive REST API documentation has been added into Peach using the Swagger system.
+Interactive REST API documentation has been added to Peach using the Swagger system.
 The interactive REST API documentation provides forms to call the APIs and also show any available documentation.
 The documentation is available from a running Peach instance at +/swagger+.
 Example: +http://127.0.0.1:8888/swagger+.
