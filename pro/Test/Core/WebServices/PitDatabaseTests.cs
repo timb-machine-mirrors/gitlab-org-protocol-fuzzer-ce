@@ -160,8 +160,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.NotNull(_root);
 			Assert.NotNull(_db);
 
-			// Number of entries is double for backwards compatible absolute pitUrls
-			Assert.AreEqual(2, _db.Entries.Count());
+			Assert.AreEqual(1, _db.Entries.Count());
 			Assert.AreEqual(3, _db.Libraries.Count());
 
 			var libs = _db.Libraries.ToList();
@@ -202,8 +201,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			_db.Load(_root.Path);
 
 			var ent = _db.Entries.ToList();
-			// Number of entries is double for backwards compatible absolute pitUrls
-			Assert.AreEqual(4, ent.Count);
+			Assert.AreEqual(2, ent.Count);
 
 			var img = ent.First(e => e.PitConfig.Name == "IMG");
 
@@ -232,8 +230,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.NotNull(tuple.Item1);
 			Assert.NotNull(tuple.Item2);
 
-			// Number of entries is double for backwards compatible absolute pitUrls
-			Assert.AreEqual(4, _db.Entries.Count());
+			Assert.AreEqual(2, _db.Entries.Count());
 			Assert.AreEqual(1, lib.Versions[0].Pits.Count);
 
 			Assert.NotNull(_db.GetPitDetailByUrl(tuple.Item1.PitUrl));
@@ -544,15 +541,14 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void AddRemovePit()
 		{
-			// Number of entries is double for backwards compatible absolute pitUrls
-			Assert.AreEqual(2, _db.Entries.Count());
+			Assert.AreEqual(1, _db.Entries.Count());
 			Assert.AreEqual(3, _db.Libraries.Count());
 
 			var path = Path.Combine(_root.Path, "Image", "My.xml");
 			File.WriteAllText(path, pitNoConfig);
 
 			_db.Load(_root.Path);
-			Assert.AreEqual(4, _db.Entries.Count());
+			Assert.AreEqual(2, _db.Entries.Count());
 
 			var file = _db.Entries.FirstOrDefault(e => e.PitConfig.Name == "My");
 			Assert.NotNull(file);
@@ -563,7 +559,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			File.Delete(path);
 
 			_db.Load(_root.Path);
-			Assert.AreEqual(2, _db.Entries.Count());
+			Assert.AreEqual(1, _db.Entries.Count());
 
 			Assert.Null(_db.Entries.FirstOrDefault(e => e.PitConfig.Name == "My"));
 		}
@@ -634,8 +630,8 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			_db.Load(_root.Path);
 
-			// Number of entries is double for backwards compatible absolute pitUrls
-			Assert.AreEqual(4, _db.Entries.Count());
+			// Number of legacy entries is double for backwards compatible absolute pitUrls
+			Assert.AreEqual(3, _db.Entries.Count());
 			Assert.AreEqual(3, _db.Libraries.Count());
 
 			var libs = _db.Libraries.ToList();
@@ -693,8 +689,8 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			_db.Load(_root.Path);
 
-			// Number of entries is double for backwards compatible absolute pitUrls
-			Assert.AreEqual(4, _db.Entries.Count());
+			// Number of legacy entries is double for backwards compatible absolute pitUrls
+			Assert.AreEqual(3, _db.Entries.Count());
 			Assert.AreEqual(3, _db.Libraries.Count());
 
 			var libs = _db.Libraries.ToList();
@@ -764,8 +760,8 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			_db.Load(_root.Path);
 
-			// Number of entries is double for backwards compatible absolute pitUrls
-			Assert.AreEqual(4, _db.Entries.Count());
+			// Number of legacy entries is double for backwards compatible absolute pitUrls
+			Assert.AreEqual(3, _db.Entries.Count());
 			Assert.AreEqual(3, _db.Libraries.Count());
 
 			var libs = _db.Libraries.ToList();

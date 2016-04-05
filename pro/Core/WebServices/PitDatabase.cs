@@ -408,10 +408,13 @@ namespace Peach.Pro.Core.WebServices
 			_entries.Add(detail);
 
 			// To maintain compatibility with older jobs, we need to continue
-			// to map absolute paths to PitDetails
-			var absDetail = ObjectCopier.Clone(detail);
-			absDetail.PitUrl = PitServicePrefix + "/" + MakeGuid(fileName);
-			_entries.Add(absDetail);
+			// to map absolute paths to PitDetails, but only for legacy pit configs
+			if (lib.Library.Versions[0].Version == 1)
+			{
+				var absDetail = ObjectCopier.Clone(detail);
+				absDetail.PitUrl = PitServicePrefix + "/" + MakeGuid(fileName);
+				_entries.Add(absDetail);
+			}
 
 			lib.Library.Versions[0].Pits.Add(new LibraryPit {
 				Id = detail.PitConfig.Id,
