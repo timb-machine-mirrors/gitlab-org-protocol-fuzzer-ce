@@ -194,10 +194,6 @@ namespace Peach.Pro.WebApi2
 
 			// TODO: Replace this with dependency injection
 			cfg.Properties["WebContext"] = _context;
-
-			// TODO: Do we need to redirect / to /{version}/ to fix caching issues still?
-			// TODO: For /version/index.html response, verify caching. With NancyFX we needed to:
-			// TODO: Ensure Response.Headers["Cache-Control"] = "no-cache, must-revalidate";
 		}
 
 		private static void AddStaticContent(IAppBuilder app, string requestPath, string fileSystem)
@@ -207,13 +203,26 @@ namespace Peach.Pro.WebApi2
 			if (!Directory.Exists(fullPath))
 				return;
 
-			app.UseFileServer(new FileServerOptions
+			var opts = new FileServerOptions
 			{
 				RequestPath = new PathString(requestPath),
 				FileSystem = new PhysicalFileSystem(fullPath),
 				EnableDefaultFiles = true,
 				EnableDirectoryBrowsing = false,
-			});
+			};
+
+			// We want to tell the client to always revalidate all static assets.
+			// This should work now that ETags are being properly generated.
+			// The client should get a 304 if nothing has changed, otherwise they get new content.
+			// This prevents stale assets from being invalidated when new server content is available,
+			// like when a new version of Peach Fuzzer is installed.
+
+			opts.StaticFileOptions.OnPrepareResponse = ctx =>
+			{
+				ctx.OwinContext.Response.Headers.Add("Cache-Control", new[] { "no-cache" });
+			};
+
+			app.UseFileServer(opts);
 		}
 
 		private static string GetLocalIp()

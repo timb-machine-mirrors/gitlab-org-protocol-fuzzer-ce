@@ -5,9 +5,14 @@ using Lic = Peach.Pro.Core.License;
 namespace Peach.Pro.WebApi2.Controllers
 {
 	[RoutePrefix(Prefix)]
-	public class LicenseController : ApiController
+	public class LicenseController : BaseController
 	{
 		public const string Prefix = "p/license";
+
+		public LicenseController()
+			: base(null)
+		{
+		}
 
 		/// <summary>
 		/// Gets information about the current peach license.
