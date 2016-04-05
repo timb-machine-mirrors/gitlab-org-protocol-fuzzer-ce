@@ -217,7 +217,7 @@ namespace Peach.Core.Dom
 			{
 				if (TokenCheck(sizedData, item.Value, startPosition))
 				{
-					var child = choiceElements[item.Key].ShallowClone();
+					var child = choiceElements[item.Key].Clone();
 
 					// Need to update the parent prior to cracking because
 					// it could be an array's OriginalElement due to the shallow
@@ -267,7 +267,7 @@ namespace Peach.Core.Dom
 					continue;
 
 				// Create a copy to actually try and crack into
-				var child = item.ShallowClone();
+				var child = item.Clone();
 
 				// Need to update the parent prior to cracking because
 				// it could be an array's OriginalElement due to the shallow
@@ -389,7 +389,7 @@ namespace Peach.Core.Dom
 			if (SelectedElement != null && SelectedElement.Name == elem.Name)
 				return;
 
-			SelectedElement = elem.ShallowClone();
+			SelectedElement = elem.Clone();
 		}
 
 		public DataElement SelectedElement

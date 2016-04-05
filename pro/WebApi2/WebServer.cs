@@ -10,9 +10,6 @@ using Microsoft.Owin;
 using Microsoft.Owin.Hosting;
 using Microsoft.Owin.StaticFiles;
 using Microsoft.Owin.FileSystems;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
 using Peach.Core;
 using Peach.Pro.Core;
 using Peach.Pro.Core.Runtime;
@@ -183,7 +180,6 @@ namespace Peach.Pro.WebApi2
 				c.OperationFilter<CommonResponseFilter>();
 				c.SchemaFilter<RequiredParameterFilter>();
 				c.MapType<TimeSpan>(() => new Schema { type = "integer", format = "int64" });
-
 			}).EnableSwaggerUi();
 
 			app.UseWebApi(cfg);
@@ -193,7 +189,8 @@ namespace Peach.Pro.WebApi2
 
 			AddStaticContent(app, "", "public");
 
-			AddStaticContent(app, "/docs", "docs/webhelp");
+			AddStaticContent(app, "/docs/user", "docs/webhelp");
+			AddStaticContent(app, "/docs/dev", "sdk/docs/webhelp");
 
 			// TODO: Replace this with dependency injection
 			cfg.Properties["WebContext"] = _context;
