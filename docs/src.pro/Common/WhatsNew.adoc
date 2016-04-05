@@ -1,7 +1,7 @@
 [[Brand_new_items]]
 == What's new in Peach Platform v3.9 (2016 Q1)
 
-This is our first release of 2016 with a good mix of new features,
+This is our first release of 2016. It includes a good mix of new features,
 improvements,
 and new Pits.
 The new Pits are available for licensing singularly or as part of a Pit Pack.
@@ -46,7 +46,7 @@ Descriptions of new features and improvements for Professional and Enterprise fo
 
 ==== Tuning Weights UI
 
-A new configuration option has been added to allow tuning the messages and fields being fuzzed.
+A new configuration option has been added to allow tuning of the messages and fields being fuzzed.
 Options include increasing or decreasing the focus of testing and also excluding testing altogether.
 The feature is available from the configuration screen menu as "Tuning".
 

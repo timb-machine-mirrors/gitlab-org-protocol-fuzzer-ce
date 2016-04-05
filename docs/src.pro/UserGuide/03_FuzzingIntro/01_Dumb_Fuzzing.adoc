@@ -1,6 +1,6 @@
 === Dumb Fuzzing
 
-Several types of fuzzing technology exist; one of the most common technologies is dumb fuzzing. Dumb fuzzers are a class of fuzzers that operate with limited or no information or understanding of the target. Nor do they understand about the data being consumed.
+Several types of fuzzing technology exist; one of the most common technologies is dumb fuzzing. Dumb fuzzers are a class of fuzzers that operate with limited or no information or understanding of the target or data being consumed.
 
 Dumb fuzzers are popular because they take very little effort to get running and can produce good results with certain targets. Since they lack any knowledge of the data being consumed, they have limited practical use.
 
