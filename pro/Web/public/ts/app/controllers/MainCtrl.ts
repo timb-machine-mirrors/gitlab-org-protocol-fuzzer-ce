@@ -84,7 +84,8 @@ namespace Peach {
 		private subMenus = [
 			{ state: C.States.JobMetrics, collapsed: true },
 			{ state: C.States.PitWizard, collapsed: true },
-			{ state: C.States.PitAdvanced, collapsed: true }
+			{ state: C.States.PitAdvanced, collapsed: true },
+			{ state: 'help', collapsed: true }
 		];
 
 		public IsCollapsed(state): boolean {
