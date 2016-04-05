@@ -1,9 +1,9 @@
 [[JumpStart]]
 == Getting Started with the Peach Fuzzer Platform
 
-This section provides a workflow that identify the steps involved in setting up and running a fuzzing session. Stepping through the Peach fuzzing workflow is the quickest way to begin fuzzing.
+This section provides a workflow that identifies the steps involved in setting up and running a fuzzing session. Stepping through the Peach fuzzing workflow is the quickest way to begin fuzzing.
 
-The workflow in this section is conceptual. It tells you what needs to be done; not how to do it. Yet,  when we can, we refer to the appropriate section of the Peach User Guide to perform that part of the workflow.
+The workflow in this section is conceptual. It tells you what needs to be done; not how to do it. Yet, when we can, we refer to the appropriate section of the Peach User Guide to perform that part of the workflow.
 
 [NOTE]
 =======
@@ -90,7 +90,7 @@ Several monitoring recipes are included to provide base monitor configurations f
 [[WF6_RunFuzzJob]]
 === Running the Fuzzing Job
 
-Peach Fuzzer runs thousands and millions of test cases. In each fuzzing job, Peach generates test cases randomly with fresh data values. The Peach platform weights the mutations used to generate the most faults.
+Peach Fuzzer typically runs hundreds of thousands of test cases. The Peach Fuzzer engine will generate an unlimited number of test cases, though this is not typically the most efficient use of resources. For more information, see xref:Fuzzing_ExitCriteria[When to Stop Fuzzing]. In each fuzzing job, Peach generates test cases randomly with fresh data values. The Peach platform weights the mutations used to generate the most faults.
 
 Once your configuration is complete, or if you selected an existing configuration, you can start a fuzzing job by clicking Start at the bottom of the configuration page. For more information on starting and re-running fuzzing jobs, see the xref:Start_Fuzzing[Fuzzing Session] section for more information.
 
@@ -106,7 +106,7 @@ When the fuzzing job completes, Peach provides two sets of results:
 
 The report provides an overall status of the job and provides many views of the fuzzing job by focusing on the metrics used in fuzzing. The report is available by locating the appropriate fuzzing job entry, then clicking on the document in the Action column at the right side of the entry.
 
-Look at the overall metrics and the buckets/categories of faults that occur. You should be able to see what worked well and where the issues are. After that, you'll need to investigate the faults, find the root cause of the fault, and then deal with it accordingly.
+Review the overall metrics and the buckets/categories of faults that occur. You should be able to see what worked well and where the issues were. After that, you'll need to investigate the faults, find the root cause of the fault, and then deal with it accordingly.
 
 The online results focus on the faults that occurred during the fuzzing job. The faults are where you need to focus, and where Peach Fuzzer adds value to the SDL. You can access faults from the Dashboard page or from the home page, where you can access all of the stored fuzzing job results.
 
@@ -116,7 +116,7 @@ for a description of how Peach Fuzzer provides meaningful views into the fuzzing
 [[WF8_FixIssuesAndRerun]]
 === Fixing Issues and Re-running Test Cases
 
-The last step is to address the faults/issues uncovered during fuzzing, and verifying the fixes.
+The last step is to address the faults/issues uncovered during fuzzing, and to verify the fixes.
 
 * Address the faults +
 This item is for the developer, who needs to edit the code where the fault occurred. Use your normal debugging practices here.
