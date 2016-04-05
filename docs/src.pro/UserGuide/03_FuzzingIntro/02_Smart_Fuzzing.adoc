@@ -19,8 +19,8 @@ At this level, understanding the data structures and data types allows the fuzze
 Smart fuzzers can control and monitor the fuzzing environment. Environment and instrumentation controls start all the components of the system so they are ready to fuzz. On a faulting condition, they reset the environment to a known, good state. Smart fuzzers can detect a faulting condition and collect any interesting data in the system at the time of the fault (including output from a debugger, a network capture, or files on the file system), and log the data for later review. High-quality smart fuzzers can run unattended for long periods of time and capture enough information to allow a resource to reasonably reproduce and investigate the faults that occurred.
 
 Smart fuzzers also perform bug bucketing and basic risk analysis. Fuzzing commonly finds the same
-issue multiple times during a long run. Bucketing is an industry term for cataloging similar, and
-possible duplicate, issues in a "bucket". Bucketing is typically done at a major and minor level.
+issue multiple times during a long test session. Bucketing is an industry term for cataloging similar, and
+possible duplicate, issues into a "bucket". Bucketing is typically done at a major and minor level.
 
 * Major differences are generally distinct issues. The bucket for a major issue might associate
 with a specific processor family, operating system, or monitor name.
