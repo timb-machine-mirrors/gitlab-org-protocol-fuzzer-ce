@@ -2,42 +2,79 @@
 [[Monitors_Vmware]]
 == Vmware Monitor
 
-*Monitor Categories*: *Automation*, *Fault detection*
+*Monitor Categories*: *Automation*
 
-The _Vmware_ monitor can control a VMware virtual machine (VM). This monitor works with a
-snapshot of the VM that provides a consistent VM environment throughout a fuzzing session.
-_Vmware_ can start a VM snapshot and, optionally, reset the VM to a snapshot configuration
-each iteration.
+The _Vmware_ monitor can control a VMware virtual machine (VM).
+This monitor works with a snapshot of the VM that provides a consistent VM environment throughout a fuzzing session.
+The _Vmware_ monitor can start a VM snapshot and,
+optionally,
+reset the VM to a snapshot configuration each iteration.
 
-The _Vmware_ monitor is primarily an automation monitor that manages the VM environment;
-yet, the monitor includes in its log, the non-OK result codes and exceptions reported from
-the VM environment.
-
-When a fault occurs, _Vmware_ resets the VM to the specified snapshot.  Fault detection is
-not bucketed for this monitor.
-
-In the VMWare product, you can create, review, and manage the VM snapshots using the VM menu.
-The following illustration shows the VMWare Snapshot Manager that shows the snapshots
-created for a specific VM.
+The following illustration shows the VMWare Snapshot Manager,
+which is used for managing snapshots for a particular VM.
 
 image::{images}/Common/Monitors/Vmware_SnapshotManager.png[scale="60"]
-
-TIP: When using with vSphere/ESXi, prefix the VM image name with the storage location in brackets.  For example, +[ha-datacenter/datastore1] guest/guest.vmx+
 
 
 === Parameters
 
 _Required:_
 
-Vmx:: Path to the virtual machine.
-SnapshotName:: VM Snapshot name.
+Vmx::
+Path to the virtual machine.
++
+[TIP]
+====
+When using with vSphere/ESXi,
+prefix the VM image name with the storage location in brackets.
+For example, `[ha-datacenter/datastore1] guest/guest.vmx`.
+====
 
 _Optional:_
 
-Host:: Name of the host machine.
+SnapshotName::
+VM snapshot name.
++
+Either 'SnapshotName' or 'SnapshotIndex' must be specified,
+but it is an error to specify both.
+
+SnapshotIndex::
+VM snapshot index specification.
++
+Either 'SnapshotName' or 'SnapshotIndex' must be specified,
+but it is an error to specify both.
++
+The index specification is a list of zero-based index values delimited by a period (`.`).
+The specification resolves which leaf in a tree of snapshots should be used.
++
+For example,
+in the following tree of snapshots,
+the snapshot named `Snapshot 1.2.1` would be used when `0.1.0` is specifed.
++
+* Snapshot 1
+** Snapshot 1.1
+** Snapshot 1.2
+*** *Snapshot 1.2.1*
+*** Snapshot 1.2.2
+* Snapshot 2
+** Snapshot 2.1
+** Snapshot 2.2
+
+Host::
+Hostname or IP address the VMware host.
+
+HostPort::
+TCP/IP port of the VMware host.
+
+Login::
+Username for authentication with the VMware host.
+
+Password::
+Password for authentication with the VMware host.
+
 HostType::
 +
-Type of remote host, defaults to _Default_
+Type of remote host, defaults to `Default`
 +
 [cols="1,2" options="header",halign="center"]
 |==========================================================
@@ -50,41 +87,41 @@ Type of remote host, defaults to _Default_
 |*Default*            |Default
 |==========================================================
 
-Login:: Username for authentication on the remote machine.
-Password:: Password for authentication on the remote machine.
-HostPort:: TCP/IP port on the remote host.
-ResetOnFaultBeforeCollection:: Reset VM after we detect a Fault during data collection. Defaults to false.
-StopOnFaultBeforeCollection:: Stop VM after we detect a Fault and before data collection
-starts. Defaults to false.
-WaitForToolsInGuest:: Wait for tools to start in guest. Defaults to true.
-WaitTimeout:: How many seconds to wait for guest tools. Defaults to 600.
-When::
-+
-Details on when to perform a specified action. Specify one of the following values:
-+
-[cols="1,2" options="header",halign="center"]
-|==========================================================
-|"When" Setting              |Description
-|DetectFault                 |Perform the action when checking for the faulting condition. Requires a regular expression in the +CheckValue+ parameter. Default mode of operation.
-|OnStart                     |Run the command when fuzzing session starts. Command runs once per session.
-|OnEnd                       |Run the command when fuzzing session stops. Command runs run once per session.
-|OnIterationStart            |Run the command at start of each iteration.
-|OnIterationEnd              |Run the command at end of each iteration.
-|OnFault                     |Run the command when Peach detects a fault.
-|OnIterationStartAfterFault  |Run the command at start of an iteration that immediately follows a fault detection.
-|OnCall                      |Trigger the command to run from the state model. The command runs when the _StartOnCall_ message is received.
-|==========================================================
-+
-.When Choices for Performing an Action
-image::{images}/Common/Monitors/Timings_SSH.png[scalewidth="75%"]
+ResetEveryIteration::
+If `true` is specified,
+reset the VM on every iteration.
+Defaults to `false`.
+
+ResetOnFaultBeforeCollection::
+If `true` is specified,
+reset the VM after a fault is detected by any other monitor.
+Defaults to `false`.
+
+StopOnFaultBeforeCollection::
+If `true` is specified,
+stop the VM after a fault is detected by any other monitor.
+Defaults to `false`.
+
+WaitForToolsInGuest::
+If `true` is specified,
+wait for VMware tools to start within the guest whenever a VM is restarted.
+Defaults to `true`.
+
+WaitTimeout::
+The number of seconds to wait for VMware tools to start within a guest.
+Defaults to `600`.
+
+Headless::
+Run a VM without a GUI.
+Using this parameter can improve performance but may cause issues if the target interacts with the desktop.
+Defaults to `true`.
 
 === Examples
 
 ifdef::peachug[]
 
-.Start Virtual Machine  +
+.Start Virtual Machine
 ====================
-
 This parameter example is from a setup that programmatically starts a VM.
 
 * The monitor requires both the physical filename with path of the VM and the +SnapshotName+ of the VM.
@@ -99,13 +136,10 @@ This parameter example is from a setup that programmatically starts a VM.
 |SnapshotName  |`Fuzzing`
 |Headless      |`false`
 |==========================================================
-
 ====================
 
-
-.Start Virtual Machine hosted on ESXi  +
+.Start Virtual Machine hosted on ESXi
 ====================
-
 This parameter example is from a setup that programmatically starts a VM.
 
 [cols="2,4" options="header",halign="center"]
@@ -118,9 +152,7 @@ This parameter example is from a setup that programmatically starts a VM.
 
 endif::peachug[]
 
-
 ifndef::peachug[]
-
 
 .Start Virtual Machine
 ======================

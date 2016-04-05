@@ -42,7 +42,7 @@ that monitor is available in all supported operating systems.
 |xref:Monitors_SshDownloader[SSH Downloader]     |    |X   |    |
 |xref:Monitors_Syslog[Syslog]                    |X   |X   |X   |
 |xref:Monitors_TcpPort[TcpPort]                  |X   |X   |X   |
-|xref:Monitors_Vmware[Vmware Control]            |X   |    |X   |
+|xref:Monitors_Vmware[Vmware Control]            |    |    |X   |
 |xref:Monitors_WindowsDebugger[Windows Debugger] |X   |X   |X   |Windows
 |xref:Monitors_WindowsService[Windows Service]   |X   |    |X   |Windows
 |==========================================================
