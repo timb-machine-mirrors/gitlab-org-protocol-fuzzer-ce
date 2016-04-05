@@ -214,11 +214,12 @@ namespace Peach.Core.Dom
 
 		public class CloneContext
 		{
-			public CloneContext(DataElement root, string name, bool shallow)
+			public CloneContext(DataElement root, DataElementContainer parent, string name, bool shallow)
 			{
 				this.root = root;
 				this.name = name;
 
+				Parent = parent;
 				Shallow = shallow;
 
 				rename = new List<DataElement>();
@@ -246,6 +247,12 @@ namespace Peach.Core.Dom
 			}
 
 			public bool Shallow
+			{
+				get;
+				private set;
+			}
+
+			public DataElementContainer Parent
 			{
 				get;
 				private set;
@@ -293,10 +300,11 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// Creates a deep copy of the DataElement, and updates the appropriate Relations.
 		/// </summary>
+		/// <param name="newParent">The new parent of the cloned element</param>
 		/// <returns>Returns a copy of the DataElement.</returns>
-		public DataElement ShallowClone()
+		public DataElement ShallowClone(DataElementContainer newParent)
 		{
-			return DoClone(Name, true);
+			return DoClone(newParent, Name, true);
 		}
 
 		/// <summary>
@@ -306,22 +314,23 @@ namespace Peach.Core.Dom
 		/// <returns>Returns a copy of the DataElement.</returns>
 		public DataElement Clone(string newName)
 		{
-			return DoClone(newName, false);
+			return DoClone(parent, newName, false);
 		}
 
 		/// <summary>
 		/// Creates a deep copy of the DataElement, and updates the appropriate Relations.
 		/// </summary>
+		/// <param name="newParent">The new parent of the cloned element</param>
 		/// <param name="newName">What name to set on the cloned DataElement</param>
 		/// <returns>Returns a copy of the DataElement.</returns>
-		public DataElement ShallowClone(string newName)
+		public DataElement ShallowClone(DataElementContainer newParent, string newName)
 		{
-			return DoClone(newName, true);
+			return DoClone(newParent, newName, true);
 		}
 
-		private DataElement DoClone(string newName, bool shallow)
+		private DataElement DoClone(DataElementContainer newParent, string newName, bool shallow)
 		{
-			var ret = ObjectCopier.Clone(this, new CloneContext(this, newName, shallow));
+			var ret = ObjectCopier.Clone(this, new CloneContext(this, newParent, newName, shallow));
 
 			if (Name != newName)
 			{
@@ -333,6 +342,8 @@ namespace Peach.Core.Dom
 				foreach (var item in ret.PreOrderTraverse().Skip(1))
 					item.fullName = item.parent.fullName + "." + item.Name;
 			}
+
+			ret.parent = newParent;
 
 			return ret;
 		}

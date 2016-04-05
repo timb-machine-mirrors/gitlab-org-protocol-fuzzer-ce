@@ -347,11 +347,23 @@ namespace Peach.Core.Dom
 			return array;
 		}
 
+		private bool CanShallowCopy()
+		{
+			if (OriginalElement is Choice)
+				return true;
+
+			var block = OriginalElement as Block;
+
+			return block != null && block.Count == 1 && block[0] is Choice;
+		}
+
 		private DataElement MakeElement(int index)
 		{
 			var clone = OriginalElement;
 
-			clone = clone.ShallowClone("{0}_{1}".Fmt(clone.Name, index));
+			clone = CanShallowCopy()
+				? clone.ShallowClone(this, "{0}_{1}".Fmt(clone.Name, index))
+				: clone.Clone("{0}_{1}".Fmt(clone.Name, index));
 
 			return clone;
 		}

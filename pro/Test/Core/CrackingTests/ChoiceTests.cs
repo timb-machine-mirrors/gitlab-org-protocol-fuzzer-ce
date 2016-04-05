@@ -1232,6 +1232,79 @@ namespace Peach.Pro.Test.Core.CrackingTests
 
 			Assert.AreEqual(expected, actual);
 		}
+
+		[Test]
+		public void TestRelationMaintained()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Block name='Items' minOccurs='0'>
+			<Number name='Type' size='8' />
+			<Choice name='Kind'>
+				<Number name='L8' size='8' constraint='int(Type)==1)'>
+					<Relation type='size' of='Value' />
+				</Number>
+				<Number name='L16' size='8'>
+					<Relation type='size' of='Value' />
+				</Number>
+			</Choice>
+			<Blob name='Value' />
+		</Block>
+	</DataModel>
+</Peach>
+";
+
+			var dom = DataModelCollector.ParsePit(xml);
+
+			Assert.NotNull(dom);
+
+			var array = (Array)dom.dataModels[0][0];
+
+			array.ExpandTo(1);
+
+			var block = (Block)array[0];
+
+			// Thge 0th blob should have two relations
+			Assert.AreEqual(2, block[2].relations.Count);
+
+			// The relations should point to the choice in the 0th element
+			Assert.AreEqual("DM.Items.Items_0.Kind.L8", block[2].relations[0].From.fullName);
+			Assert.AreEqual("DM.Items.Items_0.Kind.L16", block[2].relations[1].From.fullName);
+		}
+
+		[Test]
+		public void TestShallowCopy()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Block name='Items' minOccurs='0'>
+			<Choice name='Kind'>
+				<Blob name='B1' />
+			</Choice>
+		</Block>
+	</DataModel>
+</Peach>
+";
+
+			var dom = DataModelCollector.ParsePit(xml);
+
+			Assert.NotNull(dom);
+
+			var array = (Array)dom.dataModels[0][0];
+			var ch = ((Choice)((Block)array.OriginalElement)[0]).choiceElements[0];
+			array.ExpandTo(5);
+
+			Assert.AreEqual(5, array.Count);
+
+			foreach (var item in array.Cast<Block>())
+			{
+				var choice = (Choice)item[0];
+
+				Assert.True(choice.choiceElements[0].GetHashCode() == ch.GetHashCode());
+			}
+		}
 	}
 }
 
